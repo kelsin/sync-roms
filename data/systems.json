@@ -1,0 +1,1769 @@
+[
+  {
+    "name": "Multiple Arcade Machine Emulator",
+    "bucket": "mame",
+    "folders": {
+      "esde": "mame",
+      "knulli": "mame",
+      "onion": "ARCADE"
+    },
+    "bios": {
+      "files": [],
+      "note": "MAME-style romsets: BIOS/device zips go in the same folder as the game zips (ES-DE guide). zips."
+    }
+  },
+  {
+    "name": "Atari 2600",
+    "bucket": "atari2600",
+    "folders": {
+      "esde": "atari2600",
+      "knulli": "atari2600",
+      "onion": "ATARI"
+    },
+    "bios": {
+      "files": [],
+      "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
+    }
+  },
+  {
+    "name": "Atari 5200",
+    "bucket": "atari5200",
+    "folders": {
+      "esde": "atari5200",
+      "knulli": "atari5200",
+      "onion": "FIFTYTWOHUNDRED"
+    },
+    "bios": {
+      "files": [
+        "5200.rom"
+      ],
+      "libretro_cores": [
+        "a5200"
+      ]
+    }
+  },
+  {
+    "name": "Atari 7800 ProSystem",
+    "bucket": "atari7800",
+    "folders": {
+      "esde": "atari7800",
+      "knulli": "atari7800",
+      "onion": "SEVENTYEIGHTHUNDRED"
+    },
+    "bios": {
+      "files": [
+        "7800 BIOS (U).rom"
+      ],
+      "libretro_cores": [
+        "prosystem"
+      ]
+    }
+  },
+  {
+    "name": "Atari 800",
+    "bucket": "atari800",
+    "folders": {
+      "esde": "atari800",
+      "knulli": "atari800",
+      "onion": null
+    },
+    "bios": {
+      "files": [
+        "5200.rom",
+        "ATARIBAS.ROM",
+        "ATARIOSA.ROM",
+        "ATARIOSB.ROM",
+        "ATARIXL.ROM"
+      ],
+      "libretro_cores": [
+        "atari800"
+      ]
+    }
+  },
+  {
+    "name": "Atari Lynx",
+    "bucket": "atarilynx",
+    "folders": {
+      "esde": "atarilynx",
+      "knulli": "lynx",
+      "onion": "LYNX"
+    },
+    "bios": {
+      "files": [
+        "lynxboot.img"
+      ],
+      "libretro_cores": [
+        "handy"
+      ]
+    }
+  },
+  {
+    "name": "Atari ST",
+    "bucket": "atarist",
+    "folders": {
+      "esde": "atarist",
+      "knulli": "atarist",
+      "onion": null
+    },
+    "bios": {
+      "files": [
+        "tos.img"
+      ],
+      "libretro_cores": [
+        "hatari"
+      ]
+    }
+  },
+  {
+    "name": "Coleco ColecoVision",
+    "bucket": "colecovision",
+    "folders": {
+      "esde": "colecovision",
+      "knulli": "colecovision",
+      "onion": "COLECO"
+    },
+    "bios": {
+      "files": [
+        "Databases/msxromdb.xml",
+        "Machines/COL - ColecoVision/coleco.rom",
+        "Machines/COL - ColecoVision/config.ini",
+        "colecovision.rom",
+        "coleco.rom",
+        "BIOS.col",
+        "Databases/colecodb.xml"
+      ],
+      "libretro_cores": [
+        "bluemsx",
+        "gearcoleco"
+      ],
+      "note": "bluemsx (default) needs Databases/ and Machines/COL - ColecoVision/; colecovision.rom is only for the optional gearcoleco core"
+    }
+  },
+  {
+    "name": "Nintendo Famicom Disk System",
+    "bucket": "fds",
+    "folders": {
+      "esde": "fds",
+      "knulli": "fds",
+      "onion": "FDS"
+    },
+    "bios": {
+      "files": [
+        "disksys.rom"
+      ],
+      "libretro_cores": [
+        "mesen"
+      ]
+    }
+  },
+  {
+    "name": "Nintendo Game Boy Advance",
+    "bucket": "gba",
+    "folders": {
+      "esde": "gba",
+      "knulli": "gba",
+      "onion": "GBA"
+    },
+    "bios": {
+      "files": [
+        "gba_bios.bin",
+        "gb_bios.bin",
+        "gbc_bios.bin",
+        "sgb_bios.bin"
+      ],
+      "libretro_cores": [
+        "mgba"
+      ]
+    }
+  },
+  {
+    "name": "Nintendo Game Boy Color",
+    "bucket": "gbc",
+    "folders": {
+      "esde": "gbc",
+      "knulli": "gbc",
+      "onion": "GBC"
+    },
+    "bios": {
+      "files": [
+        "gb_bios.bin",
+        "gbc_bios.bin",
+        "cgb_bios.bin",
+        "dmg_rom.bin",
+        "dmg_boot.bin",
+        "cgb_boot.bin"
+      ],
+      "libretro_cores": [
+        "gambatte"
+      ]
+    }
+  },
+  {
+    "name": "Nintendo Game Boy",
+    "bucket": "gb",
+    "folders": {
+      "esde": "gb",
+      "knulli": "gb",
+      "onion": "GB"
+    },
+    "bios": {
+      "files": [
+        "gb_bios.bin",
+        "gbc_bios.bin",
+        "cgb_bios.bin",
+        "dmg_rom.bin",
+        "dmg_boot.bin",
+        "cgb_boot.bin"
+      ],
+      "libretro_cores": [
+        "gambatte"
+      ]
+    }
+  },
+  {
+    "name": "Mattel Electronics Intellivision",
+    "bucket": "intellivision",
+    "folders": {
+      "esde": "intellivision",
+      "knulli": "intellivision",
+      "onion": "INTELLIVISION"
+    },
+    "bios": {
+      "files": [
+        "exec.bin",
+        "grom.bin",
+        "ecs.bin",
+        "ivoice.bin"
+      ],
+      "libretro_cores": [
+        "freeintv"
+      ],
+      "note": "exec.bin and grom.bin are the base BIOS; ecs.bin (Entertainment Computer System) and ivoice.bin (Intellivoice) are only needed by games that use those peripherals"
+    }
+  },
+  {
+    "name": "SNK Neo Geo Pocket",
+    "bucket": "ngp",
+    "folders": {
+      "esde": "ngp",
+      "knulli": "ngp",
+      "onion": "NGP"
+    },
+    "bios": {
+      "files": [],
+      "libretro_cores": [
+        "mednafen_ngp"
+      ]
+    }
+  },
+  {
+    "name": "SNK Neo Geo",
+    "bucket": "neogeo",
+    "folders": {
+      "esde": "neogeo",
+      "knulli": "neogeo",
+      "onion": "NEOGEO"
+    },
+    "bios": {
+      "files": [
+        "neogeo.zip",
+        "fbneo/neogeo.zip",
+        "fbneo/neocdz.zip",
+        "fbneo/decocass.zip",
+        "fbneo/isgsm.zip",
+        "fbneo/midssio.zip",
+        "fbneo/nmk004.zip",
+        "fbneo/pgm.zip",
+        "fbneo/skns.zip",
+        "fbneo/ym2608.zip",
+        "fbneo/cchip.zip",
+        "fbneo/bubsys.zip",
+        "fbneo/namcoc69.zip",
+        "fbneo/namcoc70.zip",
+        "fbneo/namcoc75.zip",
+        "fbneo/coleco.zip",
+        "fbneo/fdsbios.zip",
+        "fbneo/msx.zip",
+        "fbneo/ngp.zip",
+        "fbneo/spectrum.zip",
+        "fbneo/spec128.zip",
+        "fbneo/spec1282a.zip",
+        "fbneo/channelf.zip",
+        "fbneo/hiscore.dat"
+      ],
+      "libretro_cores": [
+        "fbneo"
+      ]
+    }
+  },
+  {
+    "name": "Nintendo Entertainment System",
+    "bucket": "nes",
+    "folders": {
+      "esde": "nes",
+      "knulli": "nes",
+      "onion": "FC"
+    },
+    "bios": {
+      "files": [],
+      "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
+    }
+  },
+  {
+    "name": "Nintendo 64",
+    "bucket": "n64",
+    "folders": {
+      "esde": "n64",
+      "knulli": "n64",
+      "onion": null
+    },
+    "bios": {
+      "files": [],
+      "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
+    }
+  },
+  {
+    "name": "Nintendo DS",
+    "bucket": "nds",
+    "folders": {
+      "esde": "nds",
+      "knulli": "nds",
+      "onion": "NDS"
+    },
+    "bios": {
+      "files": [
+        "firmware.bin",
+        "bios7.bin",
+        "bios9.bin",
+        "dsi_firmware.bin",
+        "dsi_bios7.bin",
+        "dsi_bios9.bin",
+        "dsi_nand.bin",
+        "nds7.bin",
+        "nds9.bin"
+      ],
+      "libretro_cores": [
+        "melondsds"
+      ]
+    }
+  },
+  {
+    "name": "Magnavox Odyssey 2",
+    "bucket": "odyssey2",
+    "folders": {
+      "esde": "odyssey2",
+      "knulli": "odyssey2",
+      "onion": "ODYSSEY"
+    },
+    "bios": {
+      "files": [
+        "o2rom.bin",
+        "c52.bin",
+        "g7400.bin",
+        "jopac.bin"
+      ],
+      "libretro_cores": [
+        "o2em"
+      ],
+      "note": "o2rom.bin is the standard G7000 BIOS; c52.bin, g7400.bin and jopac.bin are the French / Videopac+ variants (all four are listed in the libretro o2em info)"
+    }
+  },
+  {
+    "name": "NEC PC-FX",
+    "bucket": "pcfx",
+    "folders": {
+      "esde": "pcfx",
+      "knulli": "pcfx",
+      "onion": null
+    },
+    "bios": {
+      "files": [
+        "pcfx.rom"
+      ],
+      "libretro_cores": [
+        "mednafen_pcfx"
+      ]
+    }
+  },
+  {
+    "name": "Sega Mega Drive 32X",
+    "bucket": "sega32x",
+    "folders": {
+      "esde": "sega32x",
+      "knulli": "sega32x",
+      "onion": "THIRTYTWOX"
+    },
+    "bios": {
+      "files": [
+        "32X_G_BIOS.BIN",
+        "32X_M_BIOS.BIN",
+        "32X_S_BIOS.BIN",
+        "bios_CD_E.bin",
+        "bios_CD_U.bin",
+        "bios_CD_J.bin"
+      ],
+      "libretro_cores": [
+        "picodrive"
+      ]
+    }
+  },
+  {
+    "name": "Sega CD",
+    "bucket": "segacd",
+    "folders": {
+      "esde": "segacd",
+      "knulli": "megacd",
+      "onion": "SEGACD"
+    },
+    "bios": {
+      "files": [
+        "bios_MD.bin",
+        "bios_CD_E.bin",
+        "bios_CD_U.bin",
+        "bios_CD_J.bin",
+        "bios_E.sms",
+        "bios_U.sms",
+        "bios_J.sms",
+        "bios.gg",
+        "sk.bin",
+        "sk2chip.bin",
+        "areplay.bin",
+        "ggenie.bin",
+        "bios.sms"
+      ],
+      "libretro_cores": [
+        "genesis_plus_gx"
+      ]
+    }
+  },
+  {
+    "name": "Sega Dreamcast",
+    "bucket": "dreamcast",
+    "folders": {
+      "esde": "dreamcast",
+      "knulli": "dreamcast",
+      "onion": null
+    },
+    "bios": {
+      "files": [
+        "dc/dc_boot.bin",
+        "dc/naomi.zip",
+        "dc/naomi2.zip",
+        "dc/hod2bios.zip",
+        "dc/f355dlx.zip",
+        "dc/f355bios.zip",
+        "dc/airlbios.zip",
+        "dc/awbios.zip",
+        "dc/boot.bin",
+        "dc/flash.bin"
+      ],
+      "libretro_cores": [
+        "flycast"
+      ]
+    }
+  },
+  {
+    "name": "Sega Game Gear",
+    "bucket": "gamegear",
+    "folders": {
+      "esde": "gamegear",
+      "knulli": "gamegear",
+      "onion": "GG"
+    },
+    "bios": {
+      "files": [
+        "bios_MD.bin",
+        "bios_CD_E.bin",
+        "bios_CD_U.bin",
+        "bios_CD_J.bin",
+        "bios_E.sms",
+        "bios_U.sms",
+        "bios_J.sms",
+        "bios.gg",
+        "sk.bin",
+        "sk2chip.bin",
+        "areplay.bin",
+        "ggenie.bin",
+        "bios.sms"
+      ],
+      "libretro_cores": [
+        "genesis_plus_gx"
+      ]
+    }
+  },
+  {
+    "name": "Sega Genesis",
+    "bucket": "genesis",
+    "folders": {
+      "esde": "genesis",
+      "knulli": "megadrive",
+      "onion": "MD"
+    },
+    "bios": {
+      "files": [
+        "bios_MD.bin",
+        "bios_CD_E.bin",
+        "bios_CD_U.bin",
+        "bios_CD_J.bin",
+        "bios_E.sms",
+        "bios_U.sms",
+        "bios_J.sms",
+        "bios.gg",
+        "sk.bin",
+        "sk2chip.bin",
+        "areplay.bin",
+        "ggenie.bin",
+        "bios.sms"
+      ],
+      "libretro_cores": [
+        "genesis_plus_gx"
+      ]
+    }
+  },
+  {
+    "name": "Sega Master System",
+    "bucket": "mastersystem",
+    "folders": {
+      "esde": "mastersystem",
+      "knulli": "mastersystem",
+      "onion": "MS"
+    },
+    "bios": {
+      "files": [
+        "bios_MD.bin",
+        "bios_CD_E.bin",
+        "bios_CD_U.bin",
+        "bios_CD_J.bin",
+        "bios_E.sms",
+        "bios_U.sms",
+        "bios_J.sms",
+        "bios.gg",
+        "sk.bin",
+        "sk2chip.bin",
+        "areplay.bin",
+        "ggenie.bin",
+        "bios.sms"
+      ],
+      "libretro_cores": [
+        "genesis_plus_gx"
+      ]
+    }
+  },
+  {
+    "name": "Sega SG-1000",
+    "bucket": "sg-1000",
+    "folders": {
+      "esde": "sg-1000",
+      "knulli": "sg1000",
+      "onion": "SEGASGONE"
+    },
+    "bios": {
+      "files": [
+        "bios_MD.bin",
+        "bios_CD_E.bin",
+        "bios_CD_U.bin",
+        "bios_CD_J.bin",
+        "bios_E.sms",
+        "bios_U.sms",
+        "bios_J.sms",
+        "bios.gg",
+        "sk.bin",
+        "sk2chip.bin",
+        "areplay.bin",
+        "ggenie.bin",
+        "bios.sms",
+        "Databases/msxromdb.xml",
+        "Databases/segadb.xml",
+        "Machines/SEGA - SG-1000/config.ini"
+      ],
+      "libretro_cores": [
+        "genesis_plus_gx",
+        "bluemsx"
+      ]
+    }
+  },
+  {
+    "name": "Sega Saturn",
+    "bucket": "saturn",
+    "folders": {
+      "esde": "saturn",
+      "knulli": "saturn",
+      "onion": null
+    },
+    "bios": {
+      "files": [
+        "sega_101.bin",
+        "mpr-17933.bin",
+        "mpr-18811-mx.ic1",
+        "mpr-19367-mx.ic1",
+        "stvbios.zip",
+        "saturn_bios.bin",
+        "kronos/saturn_bios.bin"
+      ],
+      "libretro_cores": [
+        "mednafen_saturn"
+      ]
+    }
+  },
+  {
+    "name": "Nintendo SNES (Super Nintendo)",
+    "bucket": "snes",
+    "folders": {
+      "esde": "snes",
+      "knulli": "snes",
+      "onion": "SFC"
+    },
+    "bios": {
+      "files": [
+        "BS-X.bin",
+        "STBIOS.bin",
+        "dsp1.data.rom",
+        "dsp1.program.rom",
+        "dsp1b.data.rom",
+        "dsp1b.program.rom",
+        "dsp2.data.rom",
+        "dsp2.program.rom",
+        "dsp3.data.rom",
+        "dsp3.program.rom",
+        "dsp4.data.rom",
+        "dsp4.program.rom",
+        "st010.data.rom",
+        "st010.program.rom",
+        "st011.data.rom",
+        "st011.program.rom",
+        "st018.data.rom",
+        "st018.program.rom",
+        "cx4.data.rom",
+        "sgb.boot.rom"
+      ],
+      "libretro_cores": [
+        "snes9x"
+      ]
+    }
+  },
+  {
+    "name": "NEC TurboGrafx-16",
+    "bucket": "tg16",
+    "folders": {
+      "esde": "tg16",
+      "knulli": "pcengine",
+      "onion": "PCE"
+    },
+    "bios": {
+      "files": [
+        "syscard3.pce",
+        "syscard2.pce",
+        "syscard1.pce",
+        "gexpress.pce"
+      ],
+      "libretro_cores": [
+        "mednafen_pce_fast"
+      ]
+    }
+  },
+  {
+    "name": "NEC TurboGrafx-CD",
+    "bucket": "tg-cd",
+    "folders": {
+      "esde": "tg-cd",
+      "knulli": "pcenginecd",
+      "onion": "PCECD"
+    },
+    "bios": {
+      "files": [
+        "syscard3.pce",
+        "syscard2.pce",
+        "syscard1.pce",
+        "gexpress.pce"
+      ],
+      "libretro_cores": [
+        "mednafen_pce_fast"
+      ]
+    }
+  },
+  {
+    "name": "GCE Vectrex",
+    "bucket": "vectrex",
+    "folders": {
+      "esde": "vectrex",
+      "knulli": "vectrex",
+      "onion": "VECTREX"
+    },
+    "bios": {
+      "files": [],
+      "libretro_cores": [
+        "vecx"
+      ]
+    }
+  },
+  {
+    "name": "Nintendo Virtual Boy",
+    "bucket": "virtualboy",
+    "folders": {
+      "esde": "virtualboy",
+      "knulli": "virtualboy",
+      "onion": "VB"
+    },
+    "bios": {
+      "files": [],
+      "libretro_cores": [
+        "mednafen_vb"
+      ]
+    }
+  },
+  {
+    "name": "Bandai WonderSwan",
+    "bucket": "wonderswan",
+    "folders": {
+      "esde": "wonderswan",
+      "knulli": "wswan",
+      "onion": "WS"
+    },
+    "bios": {
+      "files": [],
+      "libretro_cores": [
+        "mednafen_wswan"
+      ]
+    }
+  },
+  {
+    "name": "Bandai WonderSwan Color",
+    "bucket": "wonderswancolor",
+    "folders": {
+      "esde": "wonderswancolor",
+      "knulli": "wswanc",
+      "onion": "WS"
+    },
+    "bios": {
+      "files": [],
+      "libretro_cores": [
+        "mednafen_wswan"
+      ]
+    }
+  },
+  {
+    "name": "AdvanceMAME",
+    "bucket": "mame-advmame",
+    "folders": {
+      "esde": "mame-advmame",
+      "knulli": "advmame",
+      "onion": null
+    },
+    "bios": {
+      "files": [],
+      "note": "MAME-style romsets: BIOS/device zips go in the same folder as the game zips (ES-DE guide). zips."
+    }
+  },
+  {
+    "name": "Arcade",
+    "bucket": "arcade",
+    "folders": {
+      "esde": "arcade",
+      "knulli": null,
+      "onion": null
+    },
+    "bios": {
+      "files": [],
+      "note": "MAME-style romsets: BIOS/device zips go in the same folder as the game zips (ES-DE guide). zips."
+    }
+  },
+  {
+    "name": "Arduboy Miniature Game System",
+    "bucket": "arduboy",
+    "folders": {
+      "esde": "arduboy",
+      "knulli": "arduboy",
+      "onion": null
+    },
+    "bios": {
+      "files": [],
+      "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
+    }
+  },
+  {
+    "name": "Sammy Corporation Atomiswave",
+    "bucket": "atomiswave",
+    "folders": {
+      "esde": "atomiswave",
+      "knulli": "atomiswave",
+      "onion": null
+    },
+    "bios": {
+      "files": [
+        "dc/dc_boot.bin",
+        "dc/naomi.zip",
+        "dc/naomi2.zip",
+        "dc/hod2bios.zip",
+        "dc/f355dlx.zip",
+        "dc/f355bios.zip",
+        "dc/airlbios.zip",
+        "dc/awbios.zip"
+      ],
+      "libretro_cores": [
+        "flycast"
+      ]
+    }
+  },
+  {
+    "name": "ChaiLove Game Engine",
+    "bucket": "chailove",
+    "folders": {
+      "esde": "chailove",
+      "knulli": null,
+      "onion": null
+    },
+    "bios": {
+      "files": [],
+      "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
+    }
+  },
+  {
+    "name": "Fairchild Channel F",
+    "bucket": "channelf",
+    "folders": {
+      "esde": "channelf",
+      "knulli": "channelf",
+      "onion": "FAIRCHILD"
+    },
+    "bios": {
+      "files": [
+        "sl31253.bin",
+        "sl31254.bin",
+        "sl90025.bin"
+      ],
+      "libretro_cores": [
+        "freechaf"
+      ]
+    }
+  },
+  {
+    "name": "Capcom Play System I",
+    "bucket": "cps1",
+    "folders": {
+      "esde": "cps1",
+      "knulli": "cps1",
+      "onion": "CPS1"
+    },
+    "bios": {
+      "files": [],
+      "note": "MAME-style romsets: BIOS/device zips go in the same folder as the game zips (ES-DE guide). zips."
+    }
+  },
+  {
+    "name": "Capcom Play System II",
+    "bucket": "cps2",
+    "folders": {
+      "esde": "cps2",
+      "knulli": "cps2",
+      "onion": "CPS2"
+    },
+    "bios": {
+      "files": [],
+      "note": "MAME-style romsets: BIOS/device zips go in the same folder as the game zips (ES-DE guide). zips."
+    }
+  },
+  {
+    "name": "Capcom Play System III",
+    "bucket": "cps3",
+    "folders": {
+      "esde": "cps3",
+      "knulli": "cps3",
+      "onion": "CPS3"
+    },
+    "bios": {
+      "files": [],
+      "note": "MAME-style romsets: BIOS/device zips go in the same folder as the game zips (ES-DE guide). zips."
+    }
+  },
+  {
+    "name": "Daphne Arcade LaserDisc Emulator",
+    "bucket": "daphne",
+    "folders": {
+      "esde": "daphne",
+      "knulli": "daphne",
+      "onion": null
+    },
+    "bios": {
+      "files": [],
+      "note": "BIOS file names not verified (MAME romset or core-specific); see ES-DE guide / core docs"
+    }
+  },
+  {
+    "name": "Doom",
+    "bucket": "doom",
+    "folders": {
+      "esde": "doom",
+      "knulli": null,
+      "onion": null
+    },
+    "bios": {
+      "files": [],
+      "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
+    }
+  },
+  {
+    "name": "EasyRPG Game Engine",
+    "bucket": "easyrpg",
+    "folders": {
+      "esde": "easyrpg",
+      "knulli": "easyrpg",
+      "onion": null
+    },
+    "bios": {
+      "files": [],
+      "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
+    }
+  },
+  {
+    "name": "FinalBurn Neo",
+    "bucket": "fbneo",
+    "folders": {
+      "esde": "fbneo",
+      "knulli": "fbneo",
+      "onion": null
+    },
+    "bios": {
+      "files": [
+        "fbneo/neogeo.zip",
+        "fbneo/neocdz.zip",
+        "fbneo/decocass.zip",
+        "fbneo/isgsm.zip",
+        "fbneo/midssio.zip",
+        "fbneo/nmk004.zip",
+        "fbneo/pgm.zip",
+        "fbneo/skns.zip",
+        "fbneo/ym2608.zip",
+        "fbneo/cchip.zip",
+        "fbneo/bubsys.zip",
+        "fbneo/namcoc69.zip",
+        "fbneo/namcoc70.zip",
+        "fbneo/namcoc75.zip",
+        "fbneo/coleco.zip",
+        "fbneo/fdsbios.zip",
+        "fbneo/msx.zip",
+        "fbneo/ngp.zip",
+        "fbneo/spectrum.zip",
+        "fbneo/spec128.zip",
+        "fbneo/spec1282a.zip",
+        "fbneo/channelf.zip",
+        "fbneo/hiscore.dat"
+      ],
+      "libretro_cores": [
+        "fbneo"
+      ]
+    }
+  },
+  {
+    "name": "LowRes NX Fantasy Console",
+    "bucket": "lowresnx",
+    "folders": {
+      "esde": "lowresnx",
+      "knulli": "lowresnx",
+      "onion": null
+    },
+    "bios": {
+      "files": [],
+      "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
+    }
+  },
+  {
+    "name": "Lutro Game Engine",
+    "bucket": "lutro",
+    "folders": {
+      "esde": "lutro",
+      "knulli": "lutro",
+      "onion": null
+    },
+    "bios": {
+      "files": [],
+      "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
+    }
+  },
+  {
+    "name": "Creatronic Mega Duck",
+    "bucket": "megaduck",
+    "folders": {
+      "esde": "megaduck",
+      "knulli": "megaduck",
+      "onion": "MEGADUCK"
+    },
+    "bios": {
+      "files": [],
+      "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
+    }
+  },
+  {
+    "name": "Nintendo 64DD",
+    "bucket": "n64dd",
+    "folders": {
+      "esde": "n64dd",
+      "knulli": "n64dd",
+      "onion": null
+    },
+    "bios": {
+      "files": [
+        "64DD_IPL.bin",
+        "Mupen64plus/IPL.n64"
+      ],
+      "libretro_cores": [
+        "parallel_n64",
+        "mupen64plus_next"
+      ]
+    }
+  },
+  {
+    "name": "Sega NAOMI",
+    "bucket": "naomi",
+    "folders": {
+      "esde": "naomi",
+      "knulli": "naomi",
+      "onion": null
+    },
+    "bios": {
+      "files": [
+        "dc/dc_boot.bin",
+        "dc/naomi.zip",
+        "dc/naomi2.zip",
+        "dc/hod2bios.zip",
+        "dc/f355dlx.zip",
+        "dc/f355bios.zip",
+        "dc/airlbios.zip",
+        "dc/awbios.zip"
+      ],
+      "libretro_cores": [
+        "flycast"
+      ]
+    }
+  },
+  {
+    "name": "SNK Neo Geo CD",
+    "bucket": "neogeocd",
+    "folders": {
+      "esde": "neogeocd",
+      "knulli": "neogeocd",
+      "onion": "NEOCD"
+    },
+    "bios": {
+      "files": [
+        "neocd/neocd_f.rom",
+        "neocd/neocd_sf.rom",
+        "neocd/front-sp1.bin",
+        "neocd/neocd_t.rom",
+        "neocd/neocd_st.rom",
+        "neocd/top-sp1.bin",
+        "neocd/neocd_z.rom",
+        "neocd/neocd_sz.rom",
+        "neocd/neocd.bin",
+        "neocd/ng-lo.rom",
+        "neocd/000-lo.lo",
+        "neocd/uni-bioscd.rom"
+      ],
+      "libretro_cores": [
+        "neocd"
+      ]
+    }
+  },
+  {
+    "name": "SNK Neo Geo Pocket Color",
+    "bucket": "ngpc",
+    "folders": {
+      "esde": "ngpc",
+      "knulli": "ngpc",
+      "onion": "NGP"
+    },
+    "bios": {
+      "files": [],
+      "libretro_cores": [
+        "mednafen_ngp"
+      ]
+    }
+  },
+  {
+    "name": "OpenBOR Game Engine",
+    "bucket": "openbor",
+    "folders": {
+      "esde": "openbor",
+      "knulli": "openbor",
+      "onion": null
+    },
+    "bios": {
+      "files": [],
+      "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
+    }
+  },
+  {
+    "name": "3DO Interactive Multiplayer",
+    "bucket": "3do",
+    "folders": {
+      "esde": "3do",
+      "knulli": "3do",
+      "onion": null
+    },
+    "bios": {
+      "files": [
+        "panafz1.bin",
+        "panafz10.bin",
+        "panafz10-norsa.bin",
+        "panafz10e-anvil.bin",
+        "panafz10e-anvil-norsa.bin",
+        "goldstar.bin",
+        "sanyotry.bin",
+        "3do_arcade_saot.bin",
+        "panafz1-kanji.bin",
+        "panafz10ja-anvil-kanji.bin",
+        "panafz1j.bin",
+        "panafz1j-norsa.bin",
+        "panafz1j-kanji.bin"
+      ],
+      "libretro_cores": [
+        "opera"
+      ],
+      "note": "Any one of the listed BIOS files is enough"
+    }
+  },
+  {
+    "name": "PICO-8 Fantasy Console",
+    "bucket": "pico8",
+    "folders": {
+      "esde": "pico8",
+      "knulli": "pico8",
+      "onion": "PICO"
+    },
+    "bios": {
+      "files": [],
+      "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
+    }
+  },
+  {
+    "name": "Nintendo Pokémon Mini",
+    "bucket": "pokemini",
+    "folders": {
+      "esde": "pokemini",
+      "knulli": "pokemini",
+      "onion": "POKE"
+    },
+    "bios": {
+      "files": [],
+      "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
+    }
+  },
+  {
+    "name": "Ports",
+    "bucket": "ports",
+    "folders": {
+      "esde": "ports",
+      "knulli": "ports",
+      "onion": "PORTS"
+    },
+    "bios": {
+      "files": [],
+      "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
+    }
+  },
+  {
+    "name": "Sony PlayStation",
+    "bucket": "psx",
+    "folders": {
+      "esde": "psx",
+      "knulli": "psx",
+      "onion": "PS"
+    },
+    "bios": {
+      "files": [
+        "scph5500.bin",
+        "scph5501.bin",
+        "scph5502.bin",
+        "psxonpsp660.bin",
+        "ps1_rom.bin",
+        "scph1001.bin",
+        "scph101.bin",
+        "scph7001.bin"
+      ],
+      "libretro_cores": [
+        "mednafen_psx_hw"
+      ]
+    }
+  },
+  {
+    "name": "Sony PlayStation Portable",
+    "bucket": "psp",
+    "folders": {
+      "esde": "psp",
+      "knulli": "psp",
+      "onion": null
+    },
+    "bios": {
+      "files": [],
+      "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
+    }
+  },
+  {
+    "name": "Nintendo Satellaview",
+    "bucket": "satellaview",
+    "folders": {
+      "esde": "satellaview",
+      "knulli": "satellaview",
+      "onion": "SATELLAVIEW"
+    },
+    "bios": {
+      "files": [
+        "BS-X.bin",
+        "STBIOS.bin",
+        "dsp1.data.rom",
+        "dsp1.program.rom",
+        "dsp1b.data.rom",
+        "dsp1b.program.rom",
+        "dsp2.data.rom",
+        "dsp2.program.rom",
+        "dsp3.data.rom",
+        "dsp3.program.rom",
+        "dsp4.data.rom",
+        "dsp4.program.rom",
+        "st010.data.rom",
+        "st010.program.rom",
+        "st011.data.rom",
+        "st011.program.rom",
+        "st018.data.rom",
+        "st018.program.rom",
+        "cx4.data.rom",
+        "sgb.boot.rom"
+      ],
+      "libretro_cores": [
+        "snes9x"
+      ]
+    }
+  },
+  {
+    "name": "ScummVM Game Engine",
+    "bucket": "scummvm",
+    "folders": {
+      "esde": "scummvm",
+      "knulli": "scummvm",
+      "onion": "SCUMMVM"
+    },
+    "bios": {
+      "files": [],
+      "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
+    }
+  },
+  {
+    "name": "NEC SuperGrafx",
+    "bucket": "supergrafx",
+    "folders": {
+      "esde": "supergrafx",
+      "knulli": "supergrafx",
+      "onion": "SGFX"
+    },
+    "bios": {
+      "files": [
+        "syscard3.pce",
+        "syscard2.pce",
+        "syscard1.pce",
+        "gexpress.pce"
+      ],
+      "libretro_cores": [
+        "mednafen_supergrafx"
+      ]
+    }
+  },
+  {
+    "name": "Nintendo Super Game Boy",
+    "bucket": "sgb",
+    "folders": {
+      "esde": "sgb",
+      "knulli": "sgb",
+      "onion": "SGB"
+    },
+    "bios": {
+      "files": [
+        "dsp1.data.rom",
+        "dsp1.program.rom",
+        "dsp1b.data.rom",
+        "dsp1b.program.rom",
+        "dsp2.data.rom",
+        "dsp2.program.rom",
+        "dsp3.data.rom",
+        "dsp3.program.rom",
+        "dsp4.data.rom",
+        "dsp4.program.rom",
+        "st010.data.rom",
+        "st010.program.rom",
+        "st011.data.rom",
+        "st011.program.rom",
+        "dmg_boot.bin",
+        "cgb_boot.bin",
+        "sgb_boot.bin",
+        "sgb2_boot.bin",
+        "SGB1.sfc",
+        "SGB2.sfc",
+        "BS-X.bin",
+        "st018.data.rom",
+        "st018.program.rom",
+        "cx4.data.rom",
+        "sgb.boot.rom"
+      ],
+      "libretro_cores": [
+        "mesen-s"
+      ]
+    }
+  },
+  {
+    "name": "Bandai SuFami Turbo",
+    "bucket": "sufami",
+    "folders": {
+      "esde": "sufami",
+      "knulli": "sufami",
+      "onion": "SUFAMI"
+    },
+    "bios": {
+      "files": [
+        "BS-X.bin",
+        "STBIOS.bin",
+        "dsp1.data.rom",
+        "dsp1.program.rom",
+        "dsp1b.data.rom",
+        "dsp1b.program.rom",
+        "dsp2.data.rom",
+        "dsp2.program.rom",
+        "dsp3.data.rom",
+        "dsp3.program.rom",
+        "dsp4.data.rom",
+        "dsp4.program.rom",
+        "st010.data.rom",
+        "st010.program.rom",
+        "st011.data.rom",
+        "st011.program.rom",
+        "st018.data.rom",
+        "st018.program.rom",
+        "cx4.data.rom",
+        "sgb.boot.rom"
+      ],
+      "libretro_cores": [
+        "snes9x"
+      ]
+    }
+  },
+  {
+    "name": "Watara Supervision",
+    "bucket": "supervision",
+    "folders": {
+      "esde": "supervision",
+      "knulli": "supervision",
+      "onion": "SUPERVISION"
+    },
+    "bios": {
+      "files": [],
+      "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
+    }
+  },
+  {
+    "name": "TIC-80 Fantasy Computer",
+    "bucket": "tic80",
+    "folders": {
+      "esde": "tic80",
+      "knulli": "tic80",
+      "onion": "TIC"
+    },
+    "bios": {
+      "files": [],
+      "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
+    }
+  },
+  {
+    "name": "Quake",
+    "bucket": "quake",
+    "folders": {
+      "esde": "quake",
+      "knulli": "quake",
+      "onion": null
+    },
+    "bios": {
+      "files": [],
+      "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
+    }
+  },
+  {
+    "name": "Uzebox Open Source Console",
+    "bucket": "uzebox",
+    "folders": {
+      "esde": "uzebox",
+      "knulli": "uzebox",
+      "onion": null
+    },
+    "bios": {
+      "files": [],
+      "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
+    }
+  },
+  {
+    "name": "Atari Jaguar",
+    "bucket": "atarijaguar",
+    "folders": {
+      "esde": "atarijaguar",
+      "knulli": "jaguar",
+      "onion": null
+    },
+    "bios": {
+      "files": [],
+      "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
+    }
+  },
+  {
+    "name": "Atari Jaguar CD",
+    "bucket": "atarijaguarcd",
+    "folders": {
+      "esde": "atarijaguarcd",
+      "knulli": "jaguarcd",
+      "onion": null
+    },
+    "bios": {
+      "files": [],
+      "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
+    }
+  },
+  {
+    "name": "Philips CD-i",
+    "bucket": "cdimono1",
+    "folders": {
+      "esde": "cdimono1",
+      "knulli": "cdi",
+      "onion": null
+    },
+    "bios": {
+      "files": [
+        "same_cdi/bios/cdimono1.zip",
+        "same_cdi/bios/cdimono2.zip",
+        "same_cdi/bios/cdibios.zip"
+      ],
+      "libretro_cores": [
+        "same_cdi"
+      ]
+    }
+  },
+  {
+    "name": "Nintendo GameCube",
+    "bucket": "gc",
+    "folders": {
+      "esde": "gc",
+      "knulli": "gamecube",
+      "onion": null
+    },
+    "bios": {
+      "files": [
+        "dolphin-emu/Sys/codehandler.bin",
+        "dolphin-emu/Sys/GC/JAP/IPL.bin",
+        "dolphin-emu/Sys/GC/USA/IPL.bin",
+        "dolphin-emu/Sys/GC/EUR/IPL.bin"
+      ],
+      "libretro_cores": [
+        "dolphin"
+      ],
+      "note": "Per libretro info files live under system/dolphin-emu/Sys/"
+    }
+  },
+  {
+    "name": "Sega Mark III",
+    "bucket": "mark3",
+    "folders": {
+      "esde": "mark3",
+      "knulli": null,
+      "onion": null
+    },
+    "bios": {
+      "files": [
+        "bios_MD.bin",
+        "bios_CD_E.bin",
+        "bios_CD_U.bin",
+        "bios_CD_J.bin",
+        "bios_E.sms",
+        "bios_U.sms",
+        "bios_J.sms",
+        "bios.gg",
+        "sk.bin",
+        "sk2chip.bin",
+        "areplay.bin",
+        "ggenie.bin",
+        "bios.sms"
+      ],
+      "libretro_cores": [
+        "genesis_plus_gx"
+      ]
+    }
+  },
+  {
+    "name": "Sega Model 2",
+    "bucket": "model2",
+    "folders": {
+      "esde": "model2",
+      "knulli": "model2",
+      "onion": null
+    },
+    "bios": {
+      "files": [],
+      "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
+    }
+  },
+  {
+    "name": "Sega Model 3",
+    "bucket": "model3",
+    "folders": {
+      "esde": "model3",
+      "knulli": "model3",
+      "onion": null
+    },
+    "bios": {
+      "files": [],
+      "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
+    }
+  },
+  {
+    "name": "Nintendo 3DS",
+    "bucket": "n3ds",
+    "folders": {
+      "esde": "n3ds",
+      "knulli": "3ds",
+      "onion": null
+    },
+    "bios": {
+      "files": [],
+      "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
+    }
+  },
+  {
+    "name": "Sega NAOMI 2",
+    "bucket": "naomi2",
+    "folders": {
+      "esde": "naomi2",
+      "knulli": "naomi2",
+      "onion": null
+    },
+    "bios": {
+      "files": [
+        "dc/dc_boot.bin",
+        "dc/naomi.zip",
+        "dc/naomi2.zip",
+        "dc/hod2bios.zip",
+        "dc/f355dlx.zip",
+        "dc/f355bios.zip",
+        "dc/airlbios.zip",
+        "dc/awbios.zip"
+      ],
+      "libretro_cores": [
+        "flycast"
+      ]
+    }
+  },
+  {
+    "name": "Sega NAOMI GD-ROM",
+    "bucket": "naomigd",
+    "folders": {
+      "esde": "naomigd",
+      "knulli": null,
+      "onion": null
+    },
+    "bios": {
+      "files": [
+        "dc/dc_boot.bin",
+        "dc/naomi.zip",
+        "dc/naomi2.zip",
+        "dc/hod2bios.zip",
+        "dc/f355dlx.zip",
+        "dc/f355bios.zip",
+        "dc/airlbios.zip",
+        "dc/awbios.zip"
+      ],
+      "libretro_cores": [
+        "flycast"
+      ]
+    }
+  },
+  {
+    "name": "Sony PlayStation 2",
+    "bucket": "ps2",
+    "folders": {
+      "esde": "ps2",
+      "knulli": "ps2",
+      "onion": null
+    },
+    "bios": {
+      "files": [
+        "pcsx2/bios/ps2-0230a-20080220.bin",
+        "pcsx2/bios/ps2-0230e-20080220.bin",
+        "pcsx2/bios/ps2-0230j-20080220.bin"
+      ],
+      "libretro_cores": [
+        "pcee2"
+      ],
+      "note": "Any valid PS2 BIOS dump in system/pcsx2/bios/ works"
+    }
+  },
+  {
+    "name": "Sony PlayStation 3",
+    "bucket": "ps3",
+    "folders": {
+      "esde": "ps3",
+      "knulli": "ps3",
+      "onion": null
+    },
+    "bios": {
+      "files": [],
+      "note": "Needs PS3UPDAT.PUP firmware"
+    }
+  },
+  {
+    "name": "Sony PlayStation 4",
+    "bucket": "ps4",
+    "folders": {
+      "esde": "ps4",
+      "knulli": "ps4",
+      "onion": null
+    },
+    "bios": {
+      "files": [],
+      "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
+    }
+  },
+  {
+    "name": "Sony PlayStation Vita",
+    "bucket": "psvita",
+    "folders": {
+      "esde": "psvita",
+      "knulli": "psvita",
+      "onion": null
+    },
+    "bios": {
+      "files": [],
+      "note": "Needs Vita firmware"
+    }
+  },
+  {
+    "name": "Sega Titan Video Game System",
+    "bucket": "stv",
+    "folders": {
+      "esde": "stv",
+      "knulli": null,
+      "onion": null
+    },
+    "bios": {
+      "files": [],
+      "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
+    }
+  },
+  {
+    "name": "Nintendo Switch",
+    "bucket": "switch",
+    "folders": {
+      "esde": "switch",
+      "knulli": null,
+      "onion": null
+    },
+    "bios": {
+      "files": [],
+      "note": "Needs prod.keys and firmware"
+    }
+  },
+  {
+    "name": "Namco-Sega-Nintendo Triforce",
+    "bucket": "triforce",
+    "folders": {
+      "esde": "triforce",
+      "knulli": "triforce",
+      "onion": null
+    },
+    "bios": {
+      "files": [],
+      "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
+    }
+  },
+  {
+    "name": "Taito Type X",
+    "bucket": "type-x",
+    "folders": {
+      "esde": "type-x",
+      "knulli": null,
+      "onion": null
+    },
+    "bios": {
+      "files": [],
+      "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
+    }
+  },
+  {
+    "name": "Nintendo Wii",
+    "bucket": "wii",
+    "folders": {
+      "esde": "wii",
+      "knulli": "wii",
+      "onion": null
+    },
+    "bios": {
+      "files": [],
+      "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
+    }
+  },
+  {
+    "name": "Nintendo Wii U",
+    "bucket": "wiiu",
+    "folders": {
+      "esde": "wiiu",
+      "knulli": "wiiu",
+      "onion": null
+    },
+    "bios": {
+      "files": [],
+      "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
+    }
+  },
+  {
+    "name": "Microsoft Xbox",
+    "bucket": "xbox",
+    "folders": {
+      "esde": "xbox",
+      "knulli": "xbox",
+      "onion": null
+    },
+    "bios": {
+      "files": [
+        "xbox/mcpx_1.0.bin",
+        "xbox/mcpx_1.1.bin",
+        "xbox/xbox-3944.bin",
+        "xbox/xbox-4034.bin",
+        "xbox/xbox-4134.bin.bin",
+        "xbox/xbox-4627_debug.bin",
+        "xbox/xbox-4817.bin",
+        "xbox/xbox-5101.bin",
+        "xbox/xbox-5530.bin",
+        "xbox/xbox-5713.bin",
+        "xbox/xbox-5838.bin",
+        "xbox/xbox-3944_256k.bin"
+      ],
+      "note": "xemu is standalone (not libretro); point xemu at these. It also needs a flash BIOS (e.g. Complex_4627.bin) and HDD image"
+    }
+  },
+  {
+    "name": "Microsoft Xbox 360",
+    "bucket": "xbox360",
+    "folders": {
+      "esde": "xbox360",
+      "knulli": "xbox360",
+      "onion": null
+    },
+    "bios": {
+      "files": [],
+      "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
+    }
+  },
+  {
+    "name": "Microsoft Xbox One",
+    "bucket": "xboxone",
+    "folders": {
+      "esde": "xboxone",
+      "knulli": null,
+      "onion": null
+    },
+    "bios": {
+      "files": [],
+      "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
+    }
+  }
+]

@@ -1,0 +1,68 @@
+[
+  {
+    "id": "miyoo-flip-v2",
+    "name": "Miyoo Flip V2",
+    "soc": "Rockchip RK3566",
+    "layout": "knulli"
+  },
+  {
+    "id": "anbernic-rg-cube",
+    "name": "Anbernic RG Cube",
+    "soc": "UNISOC Tiger T820",
+    "layout": "esde"
+  },
+  {
+    "id": "retroid-pocket-classic",
+    "name": "Retroid Pocket Classic",
+    "soc": "Snapdragon G1 Gen 2",
+    "layout": "esde"
+  },
+  {
+    "id": "retroid-pocket-6",
+    "name": "Retroid Pocket 6",
+    "soc": "Snapdragon 8 Gen 2",
+    "layout": "esde"
+  },
+  {
+    "id": "retroid-pocket-nova",
+    "name": "Retroid Pocket Nova",
+    "soc": "Qualcomm QCS8550 (Snapdragon 8 Gen 2)",
+    "layout": "esde"
+  },
+  {
+    "id": "retroid-flip-2",
+    "name": "Retroid Pocket Flip 2",
+    "soc": "Snapdragon 865",
+    "layout": "esde"
+  },
+  {
+    "id": "anbernic-rg-cubexx",
+    "name": "Anbernic RG CubeXX",
+    "soc": "Allwinner H700",
+    "layout": "knulli"
+  },
+  {
+    "id": "miyoo-mini-flip",
+    "name": "Miyoo Mini Flip",
+    "soc": "SigmaStar SSD202D",
+    "layout": "onion"
+  },
+  {
+    "id": "anbernic-rg40xxv",
+    "name": "Anbernic RG40XX V",
+    "soc": "Allwinner H700",
+    "layout": "knulli"
+  },
+  {
+    "id": "anbernic-rg35xxh",
+    "name": "Anbernic RG35XX H",
+    "soc": "Allwinner H700",
+    "layout": "knulli"
+  },
+  {
+    "id": "anbernic-rg-sp",
+    "name": "Anbernic RG SP",
+    "soc": "Allwinner H700",
+    "layout": "knulli"
+  }
+]
