@@ -16,11 +16,9 @@ from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
 from xml.sax.saxutils import escape, unescape
 
-try:  # optional: downloads in-process instead of one `aws` process per file
-    import boto3
-    from botocore.config import Config
-except ImportError:
-    boto3 = None
+import boto3
+from botocore.config import Config
+from botocore.exceptions import BotoCoreError, ClientError, ProfileNotFound
 
 BUCKET = None  # set by ensure_bucket() from settings.json
 PROFILE = os.environ.get("ROMS_PROFILE", "roms-readonly")
@@ -113,11 +111,6 @@ def help_text():
      bucket. Optional ~/.sync-roms/device-systems.json adjusts a device's recommended systems:
      {{"miyoo-flip-v2": {{"add": ["psx"], "remove": ["gba"]}}}}
 """
-
-
-def aws(*args, profile=None):
-    cmd = ["aws", "--profile", profile or PROFILE, *args]
-    return subprocess.run(cmd, check=True, capture_output=True, text=True).stdout
 
 
 REPO_DATA = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
@@ -219,9 +212,8 @@ def local_sizes(root, prefix=""):
 def list_sizes(prefix):
     if _mirror_root:
         return local_sizes(_mirror_root, prefix)
-    out = aws("s3api", "list-objects-v2", "--bucket", BUCKET, "--prefix", prefix,
-              "--query", "Contents[].[Key,Size]", "--output", "json")
-    return {k: s for k, s in (json.loads(out) or [])}
+    pages = s3_client().get_paginator("list_objects_v2").paginate(Bucket=BUCKET, Prefix=prefix)
+    return {o["Key"]: o["Size"] for page in pages for o in page.get("Contents", [])}
 
 
 def pick_device(devices, cursor=0):
@@ -595,15 +587,15 @@ _s3 = {}
 
 
 def s3_client(profile=None):
-    """Shared boto3 S3 client for a profile, or None if boto3 or the profile isn't usable (use the aws CLI)."""
+    """Shared boto3 S3 client for a profile. Exits if the profile isn't configured."""
     profile = profile or PROFILE
     if profile not in _s3:
         try:
-            _s3[profile] = boto3.Session(profile_name=profile).client(
-                "s3", config=Config(max_pool_connections=WORKERS)) if boto3 else False
-        except Exception:
-            _s3[profile] = False
-    return _s3[profile] or None
+            session = boto3.Session(profile_name=profile)
+        except ProfileNotFound:
+            raise SystemExit(red(f"❌ AWS profile '{profile}' not found; set it up with `aws configure --profile {profile}`"))
+        _s3[profile] = session.client("s3", config=Config(max_pool_connections=WORKERS))
+    return _s3[profile]
 
 
 def download(job):
@@ -613,11 +605,7 @@ def download(job):
         shutil.copyfile(os.path.join(_mirror_root, key), path + ".part")
         os.replace(path + ".part", path)
         return
-    client = s3_client()
-    if client:
-        client.download_file(BUCKET, key, path)
-    else:
-        aws("s3", "cp", f"s3://{BUCKET}/{key}", path, "--only-show-errors")
+    s3_client().download_file(BUCKET, key, path)
 
 
 def human_size(n):
@@ -955,7 +943,7 @@ def get_text(key):
     if _mirror_root:
         with open(os.path.join(_mirror_root, key), encoding="utf-8") as f:
             return f.read()
-    return aws("s3", "cp", f"s3://{BUCKET}/{key}", "-")
+    return s3_client().get_object(Bucket=BUCKET, Key=key)["Body"].read().decode("utf-8")
 
 
 def fetch_texts(keys):
@@ -965,21 +953,12 @@ def fetch_texts(keys):
 
 
 def put_text(key, text):
-    client = s3_client(WRITE_PROFILE)
-    if client:
-        client.put_object(Bucket=BUCKET, Key=key, Body=text.encode("utf-8"))
-    else:
-        subprocess.run(["aws", "--profile", WRITE_PROFILE, "s3", "cp", "-", f"s3://{BUCKET}/{key}",
-                        "--only-show-errors"], input=text.encode("utf-8"), check=True, capture_output=True)
+    s3_client(WRITE_PROFILE).put_object(Bucket=BUCKET, Key=key, Body=text.encode("utf-8"))
 
 
 def put_file(key, path):
-    client = s3_client(WRITE_PROFILE)
-    if client:
-        client.upload_file(path, BUCKET, key, ExtraArgs={
-            "ContentType": mimetypes.guess_type(path)[0] or "application/octet-stream"})
-    else:
-        aws("s3", "cp", path, f"s3://{BUCKET}/{key}", "--only-show-errors", profile=WRITE_PROFILE)
+    s3_client(WRITE_PROFILE).upload_file(path, BUCKET, key, ExtraArgs={
+        "ContentType": mimetypes.guess_type(path)[0] or "application/octet-stream"})
 
 
 def upload(job):
@@ -1147,8 +1126,8 @@ def upload_scrapes(args):
         remote_texts = fetch_texts(text_keys(existing))
         print("🔎 Comparing...")
         plan = plan_upload(es_dir, roms, existing, remote_texts)
-    except subprocess.CalledProcessError as e:
-        raise SystemExit(red(f"❌ {e.stderr.strip()}"))
+    except (ClientError, BotoCoreError) as e:
+        raise SystemExit(red(f"❌ {e}"))
     for w in plan["warnings"]:
         print(yellow(f"  ⚠️  {w}"))
     files, texts, derived = plan["files"], plan["texts"], plan["derived"]
@@ -1230,14 +1209,9 @@ def delete_keys(keys):
     errors = []
     for i in range(0, len(keys), 1000):
         batch = keys[i:i + 1000]
-        with tempfile.NamedTemporaryFile("w", suffix=".json", delete=False) as f:
-            json.dump({"Objects": [{"Key": k} for k in batch], "Quiet": True}, f)
-        try:
-            out = aws("s3api", "delete-objects", "--bucket", BUCKET, "--delete", f"file://{f.name}",
-                      "--output", "json", profile=WRITE_PROFILE)
-            errors += (json.loads(out) if out.strip() else {}).get("Errors", [])
-        finally:
-            os.unlink(f.name)
+        out = s3_client(WRITE_PROFILE).delete_objects(
+            Bucket=BUCKET, Delete={"Objects": [{"Key": k} for k in batch], "Quiet": True})
+        errors += out.get("Errors", [])
         print(dim(f"  deleted {min(i + 1000, len(keys))}/{len(keys)}"))
     return errors
 
@@ -1252,8 +1226,8 @@ def clean_scrapes(args):
         print("☁️  Listing scrapes/...")
         existing = list_sizes(SCRAPES + "/")
         remote_texts = fetch_texts([k for k in text_keys(existing) if k.endswith("/metadata.json")])
-    except subprocess.CalledProcessError as e:
-        raise SystemExit(red(f"❌ {e.stderr.strip()}"))
+    except (ClientError, BotoCoreError) as e:
+        raise SystemExit(red(f"❌ {e}"))
     delete, rewrites, per, warnings = plan_clean(existing, roms, remote_texts)
     for w in warnings:
         print(yellow(f"  ⚠️  {w}"))
@@ -1279,8 +1253,8 @@ def clean_scrapes(args):
         for key, text in rewrites:
             put_text(key, text)
         failed = len(delete_keys(delete)) if delete else 0
-    except subprocess.CalledProcessError as e:
-        raise SystemExit(red(f"❌ {e.stderr.strip()}"))
+    except (ClientError, BotoCoreError) as e:
+        raise SystemExit(red(f"❌ {e}"))
     print(green("\n🎉 Done!") if not failed else red(f"\n⚠️  Done with {failed} failure(s)"))
     return 1 if failed else 0
 
@@ -1701,8 +1675,8 @@ def use_mirror(root, dry_run):
     print(bold(f"🪞 Local mirror {cyan(root)}"))
     try:
         refresh_mirror(root, dry_run)
-    except (subprocess.CalledProcessError, OSError, SystemExit) as e:  # aws failed, or the folder isn't a mirror
-        print(yellow(f"  ⚠️  Couldn't refresh the mirror ({getattr(e, 'stderr', None) or e}); using what it has"))
+    except (ClientError, BotoCoreError, OSError, SystemExit) as e:  # S3 failed, or the folder isn't a mirror
+        print(yellow(f"  ⚠️  Couldn't refresh the mirror ({e}); using what it has"))
     _mirror_root = root
 
 
