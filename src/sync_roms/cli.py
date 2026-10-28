@@ -543,8 +543,7 @@ def edit_manifest():
         for key, on in zip(keys, state):
             if on and key not in listed:
                 name = key.split("/", 1)[1]
-                s["games"].append({"file": name, "title": os.path.splitext(name)[0],
-                                   "bucket": key})
+                s["games"].append({"title": os.path.splitext(name)[0], "bucket": key})
             elif not on and key in listed:
                 s["games"] = [g for g in s["games"] if g.get("bucket") != key]
         listed = None
