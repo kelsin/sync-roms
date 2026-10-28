@@ -237,7 +237,7 @@ No system is a full system by default. `--edit` skips full systems and keeps the
   the bucket. `games.json` is copied there from the package's starter version on first run. An optional
   `~/.sync-roms/device-systems.json` adjusts a device's recommended systems:
   `{"miyoo-flip-v2": {"add": ["psx"], "remove": ["gba"]}}` (system ids as in `systems.json`; the package's
-  order is kept and notes always come from the package). BIOS files are always `BIOS/<file>` in the bucket.
+  order is kept and notes always come from the package). An old full-copy `device-systems.json` from before the overlay does nothing; delete it. BIOS files are always `BIOS/<file>` in the bucket.
 - Bucket folders use the ES-DE system name (e.g. `gba/`, `dreamcast/`).
 - Lists each chosen system's bucket folder once and compares file sizes, so only
   missing or changed files are downloaded (for `full_system` systems, every file in the folder) (8 in parallel, via boto3).
