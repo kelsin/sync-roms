@@ -9,14 +9,10 @@ size) are skipped, so re-running it only fetches what's new or missing. It can a
 ## Install
 
 ```bash
-brew install kelsin/tap/sync-roms
-```
-
-or with pipx:
-
-```bash
 pipx install git+https://github.com/kelsin/sync-roms
 ```
+
+A Homebrew install (`brew install kelsin/tap/sync-roms`) is coming once the tap exists.
 
 ## Requirements
 
