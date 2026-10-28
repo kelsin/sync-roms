@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.2](https://github.com/kelsin/sync-roms/compare/v0.2.1...v0.2.2) (2026-10-28)
+
+
+### Bug Fixes
+
+* **release:** find the tap bump pr by branch name ([3561d0c](https://github.com/kelsin/sync-roms/commit/3561d0ce9bf04da54695e3f25d3e6322049c0219))
+
 ## [0.2.1](https://github.com/kelsin/sync-roms/compare/v0.2.0...v0.2.1) (2026-10-28)
 
 
