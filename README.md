@@ -8,11 +8,38 @@ size) are skipped, so re-running it only fetches what's new or missing. It can a
 
 ## Install
 
+With Homebrew (macOS and Linux):
+
+```bash
+brew install kelsin/tap/sync-roms
+```
+
+Or with pipx:
+
 ```bash
 pipx install git+https://github.com/kelsin/sync-roms
 ```
 
-A Homebrew install (`brew install kelsin/tap/sync-roms`) is coming once the tap exists.
+Then run `sync-roms --help`. The first run asks for your bucket name and saves it.
+
+### Upgrade
+
+```bash
+brew update && brew upgrade sync-roms     # Homebrew
+pipx upgrade sync-roms                    # pipx
+```
+
+Your settings and lists in `~/.sync-roms/` are never touched by an install or upgrade.
+
+### Releasing (maintainers)
+
+Commits and PR titles on `main` use [Conventional Commits](https://www.conventionalcommits.org) and PRs are squash-merged, so the PR title becomes the commit. release-please keeps a release PR open; merging it tags `vX.Y.Z` and attaches the sdist. To publish that version to Homebrew, in a checkout of [kelsin/homebrew-tap](https://github.com/kelsin/homebrew-tap):
+
+```bash
+brew bump-formula-pr --version X.Y.Z --url https://github.com/kelsin/sync-roms/releases/download/vX.Y.Z/sync_roms-X.Y.Z.tar.gz kelsin/tap/sync-roms
+```
+
+If the Python dependencies changed, run `brew update-python-resources kelsin/tap/sync-roms` first, then `brew test` and `brew audit --strict kelsin/tap/sync-roms`.
 
 ## Requirements
 
