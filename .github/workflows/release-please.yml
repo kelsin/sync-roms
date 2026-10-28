@@ -16,6 +16,7 @@ jobs:
     outputs:
       release_created: ${{ steps.rp.outputs.release_created }}
       tag_name: ${{ steps.rp.outputs.tag_name }}
+      version: ${{ steps.rp.outputs.version }}
     steps:
       - id: rp
         uses: googleapis/release-please-action@v4
@@ -42,3 +43,22 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           TAG: ${{ needs.release-please.outputs.tag_name }}
+
+  bump-tap:
+    needs: [release-please, build-assets]
+    if: ${{ needs.release-please.outputs.release_created }}
+    runs-on: macos-latest
+    steps:
+      - run: |
+          brew tap kelsin/tap
+          brew trust kelsin/tap
+          brew bump-formula-pr --no-fork --no-browse --version "$VERSION" \
+            --url "https://github.com/kelsin/sync-roms/releases/download/$TAG/sync_roms-$VERSION.tar.gz" \
+            kelsin/tap/sync-roms
+          pr=$(gh pr list --repo kelsin/homebrew-tap --state open --search "sync-roms $VERSION" --json number --jq '.[0].number')
+          gh pr merge "$pr" --repo kelsin/homebrew-tap --squash
+        env:
+          HOMEBREW_GITHUB_API_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          GH_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          TAG: ${{ needs.release-please.outputs.tag_name }}
+          VERSION: ${{ needs.release-please.outputs.version }}
