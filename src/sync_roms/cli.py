@@ -593,7 +593,7 @@ def s3_client(profile=None):
         try:
             session = boto3.Session(profile_name=profile)
         except ProfileNotFound:
-            raise SystemExit(red(f"❌ AWS profile '{profile}' not found; set it up with `aws configure --profile {profile}`"))
+            raise SystemExit(red(f"❌ AWS profile '{profile}' not found; define it in ~/.aws/config and ~/.aws/credentials"))
         _s3[profile] = session.client("s3", config=Config(max_pool_connections=WORKERS))
     return _s3[profile]
 
