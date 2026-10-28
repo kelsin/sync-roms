@@ -111,7 +111,7 @@ def help_text():
      gamelist.xml and images/ videos/ manuals/ folders, Onion miyoogamelist.xml and Imgs/, Thumbs.db.
   📄 games.json lives in ~/.sync-roms/ (copied from the repo's version on first run) and is never read from the
      bucket. Optional ~/.sync-roms/device-systems.json adjusts a device's recommended systems:
-     {"miyoo-flip-v2": {"add": ["psx"], "remove": ["gba"]}}
+     {{"miyoo-flip-v2": {{"add": ["psx"], "remove": ["gba"]}}}}
 """
 
 
