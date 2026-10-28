@@ -403,11 +403,13 @@ def save_card(name, device, layout):
     update_card(name, device=device["id"] if device else "full", layout=layout)
 
 
-def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0):
+def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, extras=None):
     """Type-to-filter list. Every space-separated term must appear in a label (case-insensitive).
 
     Single mode returns the chosen index. Multi mode (Tab toggles) returns the list of
     on/off states. Both return None on Esc. cursor: index the highlight starts on.
+    extras: per label, a list of (text, color) drawn after it (color: green, red, cyan or dim);
+    they are not matched by the filter.
     """
     os.environ.setdefault("ESCDELAY", "25")
     lowered = [l.lower() for l in labels]
@@ -423,6 +425,7 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0):
             curses.init_pair(2, curses.COLOR_RED, -1)
             curses.init_pair(3, curses.COLOR_CYAN, -1)
             green_a, red_a, cyan_a = (curses.color_pair(n) for n in (1, 2, 3))
+        colors = {"green": green_a, "red": red_a, "cyan": cyan_a, "dim": curses.A_DIM}
         state = list(start)
         query = ""
         vis = list(range(len(labels)))
@@ -456,6 +459,12 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0):
                 else:
                     line = labels[i]
                 stdscr.addnstr(pos - top + 3, 0, line, w - 1, attr)
+                x = len(line)
+                for text, color in (extras[i] if extras else []):
+                    if x >= w - 1:
+                        break
+                    stdscr.addnstr(pos - top + 3, x, text, w - 1 - x, attr | colors[color])
+                    x += len(text)
             added = sum(1 for a, b in zip(state, start) if a and not b)
             removed = sum(1 for a, b in zip(state, start) if b and not a)
             status = f"{len(vis)}/{len(labels)} shown"
@@ -513,17 +522,31 @@ def edit_manifest():
     games = personal_json("games.json")
     data = {"systems": apply_games(repo_json("systems"), games)}
     original = snapshot(data)
-    systems = sorted(data["systems"], key=lambda s: s["name"].lower())
+    print(dim(f"📡 Listing s3://{BUCKET}/ ..."))
+    with ThreadPoolExecutor(WORKERS) as ex:
+        listings = ex.map(lambda s: {k for k in list_sizes(s["bucket"] + "/") if not k.endswith("/")},
+                          data["systems"])
+        bucket_keys = {s["bucket"]: keys for s, keys in zip(data["systems"], listings)}
+    systems = sorted((s for s in data["systems"] if bucket_keys[s["bucket"]]),
+                     key=lambda s: s["name"].lower())
 
     while True:
         now = snapshot(data)
-        labels = []
+        width = max((len(s["name"]) for s in systems), default=0)
+        labels, extras = [], []
         for s in systems:
             changed = now[s["bucket"]] ^ original[s["bucket"]]
-            pending = f"  ✏️ {len(changed)} change(s)" if changed else ""
-            count = "full system" if s.get("full_system") else f"{len(now[s['bucket']])} games"
-            labels.append(f"{s['name']}  ({count}){pending}")
-        i = filter_list("✏️  Pick a system to edit (Esc = finish)", labels)
+            total = len(bucket_keys[s["bucket"]])
+            have = total if s.get("full_system") else len(now[s["bucket"]] & bucket_keys[s["bucket"]])
+            missing = 0 if s.get("full_system") else len(now[s["bucket"]] - bucket_keys[s["bucket"]])
+            labels.append(s["name"].ljust(width))
+            row = [(f"  {have}", "green"), (f" / {total}", "dim")]
+            if missing:
+                row.append((f"  {missing} not in bucket", "red"))
+            if changed:
+                row.append((f"  {len(changed)} change(s)", "cyan"))
+            extras.append(row)
+        i = filter_list("✏️  Pick a system to edit (Esc = finish)", labels, extras=extras)
         if i is None:
             break
         s = systems[i]
@@ -531,8 +554,7 @@ def edit_manifest():
             print(yellow(f"ℹ️  {s['name']} is a full system: every file in its bucket folder is "
                          "downloaded, so there is no game list to edit."))
             continue
-        print(dim(f"📡 Listing s3://{BUCKET}/{s['bucket']}/ ..."))
-        in_bucket = {k for k in list_sizes(s["bucket"] + "/") if not k.endswith("/")}
+        in_bucket = bucket_keys[s["bucket"]]
         listed = {g["bucket"] for g in s["games"] if g.get("bucket")}
         keys = sorted(in_bucket | listed, key=str.lower)
         labels = [k.split("/", 1)[1] + ("" if k in in_bucket else "  ⚠️ not in bucket") for k in keys]
