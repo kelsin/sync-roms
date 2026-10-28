@@ -55,7 +55,7 @@ jobs:
           brew bump-formula-pr --no-fork --no-browse --version "$VERSION" \
             --url "https://github.com/kelsin/sync-roms/releases/download/$TAG/sync_roms-$VERSION.tar.gz" \
             kelsin/tap/sync-roms
-          pr=$(gh pr list --repo kelsin/homebrew-tap --state open --search "sync-roms $VERSION" --json number --jq '.[0].number')
+          pr=$(gh pr list --repo kelsin/homebrew-tap --head "bump-sync-roms-$VERSION" --json number --jq '.[0].number')
           gh pr merge "$pr" --repo kelsin/homebrew-tap --squash
         env:
           HOMEBREW_GITHUB_API_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
