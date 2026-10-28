@@ -62,8 +62,8 @@ same name if they should share settings.
 Then:
 
 1. **Pick a device and a layout** — type to filter, `↑/↓` to move, `Enter` to continue,
-   `Esc` to go back. Each device knows the systems that run well on it (`systems` in your
-   `device-systems.json`; only those are listed) and its default layout (`layout` in
+   `Esc` to go back. Each device knows the systems that run well on it (`systems` in
+   `data/device-systems.json`, adjustable with your own overlay; only those are listed) and its default layout (`layout` in
    `data/devices.json`, see `layouts`), which is highlighted in the layout list. Or choose Full (every system) and any layout. Systems with no
    folder in the chosen layout are skipped.
 2. **Toggle systems** — for a device, its recommended systems that have ROMs start on.
@@ -234,9 +234,12 @@ No system is a full system by default. `--edit` skips full systems and keeps the
 
 ## How it works
 
-- Reads the systems, layouts, devices and BIOS requirements from `data/` in the repo, and your games and
-  each device's recommended systems (`games.json`, `device-systems.json`) from `~/.sync-roms/`, never from
-  the bucket. Those two files are copied there from the repo's versions on first run. BIOS files are always `BIOS/<file>` in the bucket.
+- Reads the systems, layouts, devices and BIOS requirements from `data/` in the repo, each device's
+  recommended systems (`device-systems.json`) too, and your games (`games.json`) from `~/.sync-roms/`, never from
+  the bucket. `games.json` is copied there from the repo's version on first run. An optional
+  `~/.sync-roms/device-systems.json` adjusts a device's recommended systems:
+  `{"miyoo-flip-v2": {"add": ["psx"], "remove": ["gba"]}}` (system ids as in `systems.json`; the repo's
+  order is kept and notes always come from the repo). BIOS files are always `BIOS/<file>` in the bucket.
 - Bucket folders use the ES-DE system name (e.g. `gba/`, `dreamcast/`).
 - Lists each chosen system's bucket folder once and compares file sizes, so only
   missing or changed files are downloaded (for `full_system` systems, every file in the folder) (8 in parallel, via boto3 if installed,

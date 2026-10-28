@@ -82,7 +82,7 @@ def help_text():
   {dim('If dot_clean fails, Spotlight is turned off for BASE_DIR with sudo mdutil (asks for your password) and dot_clean is retried.')}
 
 {bold('FLOW')}
-  1️⃣  Pick a device (its recommended systems come from device-systems.json), or {bold('Full')} (every system),
+  1️⃣  Pick a device (its recommended systems come from the repo's device-systems.json, plus your add/remove overlay), or {bold('Full')} (every system),
       then a folder layout (the device's default is highlighted). Type to filter, enter continues, esc goes back.
       The choice is remembered per BASE_DIR folder name (in the user data folder) and used without asking next
       time. With --ask it is confirmed first; answer n to pick again.
@@ -109,8 +109,9 @@ def help_text():
      confirm (default no), deleted. Other systems' folders and BIOS are never touched.
      Frontend files are ignored: dotfiles, ES-DE systeminfo.txt/noload.txt, Knulli _info.txt,
      gamelist.xml and images/ videos/ manuals/ folders, Onion miyoogamelist.xml and Imgs/, Thumbs.db.
-  📄 games.json and device-systems.json live in ~/.sync-roms/ (copied from the repo's
-     versions on first run) and are never read from the bucket.
+  📄 games.json lives in ~/.sync-roms/ (copied from the repo's version on first run) and is never read from the
+     bucket. Optional ~/.sync-roms/device-systems.json adjusts a device's recommended systems:
+     {"miyoo-flip-v2": {"add": ["psx"], "remove": ["gba"]}}
 """
 
 
@@ -120,7 +121,7 @@ def aws(*args, profile=None):
 
 
 REPO_DATA = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
-PERSONAL_FILES = ("games.json", "device-systems.json")  # per-user, in data_dir(); never read from the bucket
+PERSONAL_FILES = ("games.json",)  # per-user, in data_dir(); never read from the bucket
 
 
 def repo_json(name):
@@ -152,14 +153,41 @@ def apply_games(systems, games):
     return systems
 
 
+def apply_device_overlay(devices, systems, overlay):
+    """Set each device's systems/note from the repo defaults, adjusted by the user's add/remove overlay.
+
+    overlay: {device id: {"add": [system ids], "remove": [system ids]}}. Unknown ids warn and are skipped.
+    """
+    defaults = repo_json("device-systems")
+    known = {s["bucket"] for s in systems}
+    for d in devices:
+        base = defaults.get(d["id"], {"systems": [], "note": ""})
+        d["systems"], d["note"] = list(base["systems"]), base["note"]
+    by_id = {d["id"]: d for d in devices}
+    for dev_id, change in overlay.items():
+        if dev_id not in by_id:
+            print(f"warning: device-systems.json: unknown device {dev_id!r}, skipped", file=sys.stderr)
+            continue
+        if not isinstance(change, dict):
+            continue
+        for key in ("add", "remove"):
+            for sid in change.get(key, []):
+                if sid not in known:
+                    print(f"warning: device-systems.json: {dev_id}: unknown system {sid!r}, skipped", file=sys.stderr)
+        remove = set(change.get("remove", []))
+        d = by_id[dev_id]
+        d["systems"] = [x for x in d["systems"] if x not in remove]
+        d["systems"] += [x for x in dict.fromkeys(change.get("add", [])) if x in known and x not in d["systems"]]
+
+
 def load_manifest():
-    """Systems, devices and layouts from the repo, joined with the personal games and device picks."""
+    """Systems, devices and layouts from the repo, joined with the personal games and device-system overlay."""
     seed_personal_files()
     manifest = {name: repo_json(name) for name in ("layouts", "systems", "devices")}
-    games, picks = personal_json("games.json"), personal_json("device-systems.json")
-    apply_games(manifest["systems"], games)
-    for d in manifest["devices"]:
-        d.update(picks.get(d["id"], {"systems": [], "note": ""}))
+    apply_games(manifest["systems"], personal_json("games.json"))
+    overlay_path = os.path.join(data_dir(), "device-systems.json")
+    overlay = personal_json("device-systems.json") if os.path.exists(overlay_path) else {}
+    apply_device_overlay(manifest["devices"], manifest["systems"], overlay)
     return manifest
 
 
