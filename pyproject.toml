@@ -1,0 +1,23 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "sync-roms"
+dynamic = ["version"]
+description = "Download ROMs and BIOS files from the roms bucket onto a handheld's SD card."
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = ["boto3"]
+
+[project.optional-dependencies]
+images = ["Pillow"]
+
+[project.scripts]
+sync-roms = "sync_roms.cli:main"
+
+[tool.hatch.version]
+path = "src/sync_roms/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/sync_roms"]
