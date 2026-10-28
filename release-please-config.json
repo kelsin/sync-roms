@@ -5,6 +5,7 @@
       "release-type": "python",
       "package-name": "sync-roms",
       "include-v-in-tag": true,
+      "include-component-in-tag": false,
       "extra-files": ["src/sync_roms/__init__.py"]
     }
   }
