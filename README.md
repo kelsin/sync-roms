@@ -11,8 +11,12 @@ size) are skipped, so re-running it only fetches what's new or missing. It can a
 With Homebrew (macOS and Linux):
 
 ```bash
-brew install kelsin/tap/sync-roms
+brew tap kelsin/tap
+brew trust kelsin/tap
+brew install sync-roms
 ```
+
+Recent Homebrew versions refuse to load formulae from a tap you haven't trusted (`Refusing to load formula ... from untrusted tap`), so `brew trust` is needed once per machine. Trusting is your call: it lets Homebrew run this tap's formulae, so read [the formula](https://github.com/kelsin/homebrew-tap/blob/main/Formula/sync-roms.rb) first if you like.
 
 Or with pipx:
 
