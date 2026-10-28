@@ -24,7 +24,7 @@ aws --profile roms-readonly s3 ls s3://YOUR-BUCKET/ | head
 
 ## Usage
 
-The examples call the script `sync-roms`. From a clone of the repo, run `python3 sync-roms.py` in its place.
+The examples call the script `sync-roms`. From a clone of the repo, run `python3 -m sync_roms` (with `src/` on `PYTHONPATH`) in its place.
 
 Give the root folder of the card (or any folder to sync into):
 
@@ -39,7 +39,7 @@ Or give no folder at all. The current directory is used as `BASE_DIR`, so you ca
 sync-roms
 ```
 
-The ROMs and BIOS folders inside `BASE_DIR` come from the layout you pick (the `layouts` entry in `data/layouts.json`):
+The ROMs and BIOS folders inside `BASE_DIR` come from the layout you pick (the `layouts` entry in `src/sync_roms/data/layouts.json`):
 
 | Layout | ROMs / BIOS folders | Default for |
 | --- | --- | --- |
@@ -63,8 +63,8 @@ Then:
 
 1. **Pick a device and a layout** — type to filter, `↑/↓` to move, `Enter` to continue,
    `Esc` to go back. Each device knows the systems that run well on it (`systems` in
-   `data/device-systems.json`, adjustable with your own overlay; only those are listed) and its default layout (`layout` in
-   `data/devices.json`, see `layouts`), which is highlighted in the layout list. Or choose Full (every system) and any layout. Systems with no
+   `src/sync_roms/data/device-systems.json`, adjustable with your own overlay; only those are listed) and its default layout (`layout` in
+   `src/sync_roms/data/devices.json`, see `layouts`), which is highlighted in the layout list. Or choose Full (every system) and any layout. Systems with no
    folder in the chosen layout are skipped.
 2. **Toggle systems** — for a device, its recommended systems that have ROMs start on.
    Otherwise systems whose local folder already has files start on
@@ -116,7 +116,7 @@ Then:
    (only those keys are set in `es_settings.xml`; close ES-DE first, it rewrites the file when it exits).
 6. Finally, media on the card for ROMs the card doesn't have is removed, with no confirmation. It looks at
    every system in the layout, not only the ones you synced, and leaves systems whose ROM folder doesn't
-   exist, and folders that aren't systems in `data/systems.json` (like ES-DE's `androidapps`), alone.
+   exist, and folders that aren't systems in `src/sync_roms/data/systems.json` (like ES-DE's `androidapps`), alone.
 7. For the `esde` (Android) layout, files in the card's Android media folders (`Alarms`, `Audiobooks`, `DCIM`,
    `Documents`, `Download`, `Movies`, `Music`, `Notifications`, `Pictures`, `Podcasts`, `Recordings`,
    `Ringtones`) are removed and an empty `.nomedia` is put in each of those folders that exists, so Android
@@ -234,7 +234,7 @@ No system is a full system by default. `--edit` skips full systems and keeps the
 
 ## How it works
 
-- Reads the systems, layouts, devices and BIOS requirements from `data/` in the repo, each device's
+- Reads the systems, layouts, devices and BIOS requirements from `src/sync_roms/data/` in the repo, each device's
   recommended systems (`device-systems.json`) too, and your games (`games.json`) from `~/.sync-roms/`, never from
   the bucket. `games.json` is copied there from the repo's version on first run. An optional
   `~/.sync-roms/device-systems.json` adjusts a device's recommended systems:

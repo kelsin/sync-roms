@@ -1,15 +1,14 @@
 import contextlib
-import importlib.util
 import io
 import json
 import os
+import sys
 import tempfile
 import unittest
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-spec = importlib.util.spec_from_file_location("sync_roms", os.path.join(ROOT, "sync-roms.py"))
-sync_roms = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(sync_roms)
+sys.path.insert(0, os.path.join(ROOT, "src"))
+from sync_roms import cli as sync_roms  # noqa: E402
 
 
 def load(overlay=None):

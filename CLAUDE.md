@@ -56,10 +56,10 @@ The old single `roms.json` is split by whether the data is personal. Nothing her
 
 | Where | Files | Holds |
 |---|---|---|
-| Repo, `data/` | `layouts.json`, `systems.json`, `devices.json`, `device-systems.json` | Frontend folder layouts; systems (name, id, folder per layout, required BIOS filenames, libretro cores); device hardware (id, name, SoC, default layout); each device's recommended systems and a short note on why. Same for everyone. |
-| `~/.sync-roms/` | `games.json` (starter in repo `data/`), `device-systems.json` (optional overlay) | The games to sync per system (with their notes). `--edit` edits the local `games.json`. A system's `games.json` entry may be `{"full_system": true}` instead of a list to sync its whole bucket folder; no default or personal list uses it. The overlay is `{device id: {\"add\": [...], \"remove\": [...]}}` of system ids, applied to the repo defaults; notes always come from the defaults. |
+| Repo, `src/sync_roms/data/` | `layouts.json`, `systems.json`, `devices.json`, `device-systems.json` | Frontend folder layouts; systems (name, id, folder per layout, required BIOS filenames, libretro cores); device hardware (id, name, SoC, default layout); each device's recommended systems and a short note on why. Same for everyone. |
+| `~/.sync-roms/` | `games.json` (starter in repo `src/sync_roms/data/`), `device-systems.json` (optional overlay) | The games to sync per system (with their notes). `--edit` edits the local `games.json`. A system's `games.json` entry may be `{"full_system": true}` instead of a list to sync its whole bucket folder; no default or personal list uses it. The overlay is `{device id: {"add": [...], "remove": [...]}}` of system ids, applied to the repo defaults; notes always come from the defaults. |
 
-The repo ships a starter `games.json` in `data/` (`{}`, no games); the script copies it to `~/.sync-roms/` when missing, so each user owns their copy. `device-systems.json` is a shared default read from the repo (never copied); users adjust it with the optional add/remove overlay. Never put a real game list in the repo's `games.json`.
+The repo ships a starter `games.json` in `src/sync_roms/data/` (`{}`, no games); the script copies it to `~/.sync-roms/` when missing, so each user owns their copy. `device-systems.json` is a shared default read from the repo (never copied); users adjust it with the optional add/remove overlay. Never put a real game list in the repo's `games.json`.
 
 Repo files must not contain notes about the bucket's contents ("not in the bucket", "bucket has..."). Device notes say only why the systems were chosen, concisely.
 

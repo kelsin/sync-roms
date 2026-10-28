@@ -50,7 +50,7 @@ def help_text():
 {bold('🎮 sync-roms')} — download ROMs and BIOS files from your S3 bucket
 
 {bold('USAGE')}
-  {green('sync-roms.py')} [{yellow('--dry-run')}] [{cyan('BASE_DIR')}]   {dim('(no folder: BASE_DIR is the current directory)')}
+  {green('sync-roms')} [{yellow('--dry-run')}] [{cyan('BASE_DIR')}]   {dim('(no folder: BASE_DIR is the current directory)')}
 
 {bold('ARGUMENTS')}
   {cyan('BASE_DIR')}   📦 the card or folder root. The chosen layout decides the folders inside it
