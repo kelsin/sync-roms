@@ -108,6 +108,12 @@
     "layout": "knulli"
   },
   {
+    "id": "anbernic-rg35xx-sp",
+    "name": "Anbernic RG35XX SP",
+    "soc": "Allwinner H700",
+    "layout": "knulli"
+  },
+  {
     "id": "anbernic-rg405m",
     "name": "Anbernic RG405M",
     "soc": "UNISOC T618",

@@ -63,6 +63,10 @@ The repo ships starter versions of the two personal files in `data/`: `games.jso
 
 Repo files must not contain notes about the bucket's contents ("not in the bucket", "bucket has..."). Device notes say only why the systems were chosen, concisely.
 
+## Devices
+
+`anbernic-rg-sp` ("Anbernic RG SP") is Anbernic's newer, separate device. It is not the RG35XX SP or the RG34XX SP, which are their own entries.
+
 ## Notes
 
 - Use `--dryrun` before any `sync` to the bucket; add `--delete` only when explicitly asked.
