@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.1](https://github.com/kelsin/sync-roms/compare/v0.2.0...v0.2.1) (2026-10-28)
+
+
+### Documentation
+
+* add brew tap and trust steps to install ([ff120df](https://github.com/kelsin/sync-roms/commit/ff120df2e15720cf949fa47fd1d0414339a32630))
+* document brew install, upgrade and release steps ([98655c2](https://github.com/kelsin/sync-roms/commit/98655c2da4faa34e289d88c2339012827dd0a240))
+
 ## [0.2.0](https://github.com/kelsin/sync-roms/compare/v0.1.0...v0.2.0) (2026-10-28)
 
 
