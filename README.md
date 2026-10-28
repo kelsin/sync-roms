@@ -6,21 +6,23 @@ name as `bucket` in `settings.json` in the user data folder. Files you already h
 size) are skipped, so re-running it only fetches what's new or missing. It can also keep a
 [local mirror](#local-mirror---mirror---use-mirror---clear-mirror) of the bucket and sync from that.
 
-## Requirements
-
-- **aws CLI** (v2) — `brew install awscli`
-- **python3** (3.8+)
-- *Optional:* **boto3** (`pip3 install boto3`) — downloads run in-process instead of
-  starting one `aws` process per file, which is faster for many small files. If it's
-  not installed (or can't use the profile), the script uses the `aws` CLI as before.
-- An AWS profile named **`roms-readonly`** with read access to the bucket
-  (set `ROMS_PROFILE` to use a different profile name)
-
-Check access:
+## Install
 
 ```bash
-aws --profile roms-readonly s3 ls s3://YOUR-BUCKET/ | head
+brew install kelsin/tap/sync-roms
 ```
+
+or with pipx:
+
+```bash
+pipx install git+https://github.com/kelsin/sync-roms
+```
+
+## Requirements
+
+- **python3** (3.9+); boto3 is installed with the package
+- An AWS profile named **`roms-readonly`** with read access to the bucket
+  (set `ROMS_PROFILE` to use a different profile name), defined in `~/.aws/config` and `~/.aws/credentials`
 
 ## Usage
 
@@ -234,16 +236,15 @@ No system is a full system by default. `--edit` skips full systems and keeps the
 
 ## How it works
 
-- Reads the systems, layouts, devices and BIOS requirements from `src/sync_roms/data/` in the repo, each device's
+- Reads the systems, layouts, devices and BIOS requirements from `src/sync_roms/data/` in the package, each device's
   recommended systems (`device-systems.json`) too, and your games (`games.json`) from `~/.sync-roms/`, never from
-  the bucket. `games.json` is copied there from the repo's version on first run. An optional
+  the bucket. `games.json` is copied there from the package's starter version on first run. An optional
   `~/.sync-roms/device-systems.json` adjusts a device's recommended systems:
-  `{"miyoo-flip-v2": {"add": ["psx"], "remove": ["gba"]}}` (system ids as in `systems.json`; the repo's
-  order is kept and notes always come from the repo). BIOS files are always `BIOS/<file>` in the bucket.
+  `{"miyoo-flip-v2": {"add": ["psx"], "remove": ["gba"]}}` (system ids as in `systems.json`; the package's
+  order is kept and notes always come from the package). BIOS files are always `BIOS/<file>` in the bucket.
 - Bucket folders use the ES-DE system name (e.g. `gba/`, `dreamcast/`).
 - Lists each chosen system's bucket folder once and compares file sizes, so only
-  missing or changed files are downloaded (for `full_system` systems, every file in the folder) (8 in parallel, via boto3 if installed,
-  otherwise one `aws s3 cp` per file).
+  missing or changed files are downloaded (for `full_system` systems, every file in the folder) (8 in parallel, via boto3).
 - Local files in a chosen system's folder that are no longer in its `games.json` list
   are listed and deleted only after you confirm (default **no**; `--dry-run` shows them).
   Folders of systems you didn't pick, BIOS files and dotfiles are never touched.
@@ -262,6 +263,6 @@ No system is a full system by default. `--edit` skips full systems and keeps the
 
 | Symptom | Fix |
 | --- | --- |
-| `AccessDenied` / `Unable to locate credentials` | Configure the `roms-readonly` profile (`aws configure --profile roms-readonly`) |
+| `AccessDenied` / `Unable to locate credentials` | Define the `roms-readonly` profile in `~/.aws/config` and `~/.aws/credentials` |
 | "listed in manifest but not in bucket" warnings | A game in your `games.json` (or a required BIOS file) isn't in the bucket; it is skipped |
 | A system shows `(0 roms)` | Your `games.json` has no games for that system, or none of them are in the bucket (BIOS is still fetched if selected). Add games with `--edit` |
