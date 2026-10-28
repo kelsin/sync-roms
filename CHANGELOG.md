@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/kelsin/sync-roms/compare/v0.2.2...v0.3.0) (2026-10-28)
+
+
+### Features
+
+* **edit:** show selected, missing and available counts per system an… ([#4](https://github.com/kelsin/sync-roms/issues/4)) ([ec47bfd](https://github.com/kelsin/sync-roms/commit/ec47bfd6d9b35d174a2252d584e743830d1419a3))
+
 ## [0.2.2](https://github.com/kelsin/sync-roms/compare/v0.2.1...v0.2.2) (2026-10-28)
 
 
