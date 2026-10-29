@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.9.0](https://github.com/kelsin/sync-roms/compare/v0.8.0...v0.9.0) (2026-10-29)
+
+
+### Features
+
+* **upload:** add --upload to send a folder of roms to a system and speed up uploads with a shared transfer pool ([#22](https://github.com/kelsin/sync-roms/issues/22)) ([bfbc4ba](https://github.com/kelsin/sync-roms/commit/bfbc4ba15344ad2811f59d715ab9443aa65f649f))
+
+
+### Documentation
+
+* **readme:** document aws profile setup and s3 transfer speed settings ([#20](https://github.com/kelsin/sync-roms/issues/20)) ([61e78a2](https://github.com/kelsin/sync-roms/commit/61e78a2b6bdccae144c58c04a22b9b747ef3233d))
+
 ## [0.8.0](https://github.com/kelsin/sync-roms/compare/v0.7.0...v0.8.0) (2026-10-29)
 
 
