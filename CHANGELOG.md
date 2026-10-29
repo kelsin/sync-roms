@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.0](https://github.com/kelsin/sync-roms/compare/v0.5.0...v0.6.0) (2026-10-29)
+
+
+### Features
+
+* **sets:** add metroid and shmups sets, split run and gun, add ps2 games ([#11](https://github.com/kelsin/sync-roms/issues/11)) ([b8e5043](https://github.com/kelsin/sync-roms/commit/b8e5043c669e2810d773211e6fcfa2150c25ab7c))
+
 ## [0.5.0](https://github.com/kelsin/sync-roms/compare/v0.4.0...v0.5.0) (2026-10-29)
 
 
