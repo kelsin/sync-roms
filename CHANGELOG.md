@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.0](https://github.com/kelsin/sync-roms/compare/v0.7.0...v0.8.0) (2026-10-29)
+
+
+### Features
+
+* **chd:** convert in parallel with a progress bar, make interrupts safe and always fix playlists ([#17](https://github.com/kelsin/sync-roms/issues/17)) ([2657147](https://github.com/kelsin/sync-roms/commit/2657147d6a21b293de91bd5a4f0a385a0f33f650))
+
 ## [0.7.0](https://github.com/kelsin/sync-roms/compare/v0.6.0...v0.7.0) (2026-10-29)
 
 
