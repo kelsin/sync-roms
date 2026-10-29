@@ -50,6 +50,7 @@ If the Python dependencies changed, run `brew update-python-resources kelsin/tap
 - **python3** (3.9+); boto3 is installed with the package
 - An AWS profile named **`roms-readonly`** with read access to the bucket
   (set `ROMS_PROFILE` to use a different profile name), defined in `~/.aws/config` and `~/.aws/credentials`
+- Only for `--chd`: **7z** and **chdman** (`sync-roms --install-tools` installs them with Homebrew)
 
 ## Usage
 
@@ -169,6 +170,8 @@ Then:
 | `-u`, `--upload-scrapes` | Upload `BASE_DIR/ES-DE` scraped data to the bucket (see below) |
 | `-c`, `--clean-scrapes` | Remove scraped data in the bucket for ROMs that aren't available (see below) |
 | `--m3u [DIR]` | Create or fix the `.m3u` playlist of every multi-disc game (`Name (Disc 1) (Extra).chd`, `Name (Disc 2).chd`) in `DIR` and its subfolders (default: current directory). The playlist is named after the title without `(Disc N)` or tags the discs don't share (`Name (Sega CD).m3u`). Playlists with the wrong discs are rewritten, ones with some missing files lose those lines, ones with no files left are deleted after asking, and ones listing exactly a game's discs under another name are renamed. Local only; `--dry-run` previews |
+| `--chd [DIR]` | Unzip (7z) every `.zip`/`.7z` and convert each disc image (`.cue`, `.gdi`, `.toc`, `.iso`) to a `.chd` with `chdman`, one file at a time, per the `chd` setting in `systems.json` for the system whose folder it is in (`DIR` is one system folder or a folder of them, default: current directory). The chd is verified before the archive and image files are removed, a failure keeps them, and the `.m3u` playlists are fixed afterwards. Mode `cd` uses `createcd`; `dvd` (PS2, PSP) uses `createdvd` for `.iso` files with the system's `args`; `extract` (GameCube, Wii) only unzips and leaves the `.rvz` files. `"m3u": false` skips playlists (3DO). Local only; `--dry-run` previews |
+| `--install-tools` | `brew install` the 7z (`sevenzip`) and chdman (`rom-tools`) that `--chd` needs, whichever are missing |
 | `--mirror [DIR]` | Make or refresh a local mirror of the bucket (see below). No `DIR`: the saved mirror |
 | `--use-mirror DIR` | Same as `--mirror DIR`, then save `DIR` as the local mirror |
 | `--clear-mirror` | Forget the saved mirror (its files are left alone) |
@@ -267,6 +270,30 @@ instead of a list:
 ```
 
 No system is a full system by default. `--edit` skips full systems and keeps their entry.
+
+## Converting to CHD (`--chd`)
+
+Run it on a card or a single system folder after syncing:
+
+```bash
+sync-roms --install-tools                # once: brew install sevenzip rom-tools
+sync-roms --chd --dry-run /Volumes/SD/ROMs
+sync-roms --chd /Volumes/SD/ROMs/psx
+```
+
+Each system's behaviour is the `chd` setting in `src/sync_roms/data/systems.json`:
+
+| `mode` | Systems | What happens |
+|---|---|---|
+| `cd` | Sega CD, Saturn, TurboGrafx-CD, PC-FX, Neo Geo CD, PS1, 3DO, Dreamcast | `chdman createcd` from the `.cue`/`.gdi`/`.toc` (or `.iso`) |
+| `dvd` | PS2, PSP | `chdman createdvd` for `.iso` files plus the system's `args` (PS2 `-c zlib`, PSP `-hs 2048`); bin/cue games use `createcd` |
+| `extract` | GameCube, Wii | archives are unzipped and the files (e.g. `.rvz`) left as they are; nothing is converted |
+
+`"m3u": false` (3DO) skips the playlist step, since Opera can't load `.m3u` files. Systems without a `chd` setting are ignored.
+
+Every `.chd` is verified with `chdman verify` before its archive, `.cue`, `.bin` and `.iso` files are deleted; on any failure the originals are kept. A rerun picks up where it stopped.
+
+It is meant for preparing a downloaded rom pack before you upload it to the bucket, so the bucket holds the `.chd` and `.m3u` files and `games.json` lists those names. Running it on a card synced from a bucket that still has the `.zip` files makes the next `sync-roms` run list the `.chd` files as files not in your game list (it asks before deleting, default no) and download the zips again.
 
 ## How it works
 
