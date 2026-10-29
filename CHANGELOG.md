@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.4.0](https://github.com/kelsin/sync-roms/compare/v0.3.0...v0.4.0) (2026-10-29)
+
+
+### Features
+
+* **devices:** add ayaneo android pocket handhelds ([#6](https://github.com/kelsin/sync-roms/issues/6)) ([1860ef7](https://github.com/kelsin/sync-roms/commit/1860ef7ec5b876b660fc4fce9f7d8ca7aa2550ac))
+* **edit:** add game sets and keep changes on esc ([#8](https://github.com/kelsin/sync-roms/issues/8)) ([a935bfd](https://github.com/kelsin/sync-roms/commit/a935bfde6a99934090c1d6172680926db53c584b))
+
 ## [0.3.0](https://github.com/kelsin/sync-roms/compare/v0.2.2...v0.3.0) (2026-10-28)
 
 
