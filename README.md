@@ -238,14 +238,18 @@ read-only profile is enough. No folders are needed:
 sync-roms --edit
 ```
 
-1. Type to filter the system list (every word you type must match), `Enter` to pick
-   one, `Esc` when you're done with all systems.
-2. For the chosen system you see every file in its bucket folder. `✅` is already in
-   `games.json`, `⬜` is only in the bucket. Type to filter, `Tab` toggles the game
-   under the cursor, `^A` toggles everything currently shown, `Enter` applies,
-   `Esc` cancels that system. Pending changes show as `➕` / `➖`.
-3. When you finish, you get a summary of additions and removals and a confirmation
-   prompt. On yes, `~/.sync-roms/games.json` is saved. Nothing is uploaded.
+1. Pick **By system** or **By set**, then type to filter the list (every word you type must
+   match) and `Enter` to pick one. `Esc` goes back; `Esc` at the first menu finishes.
+2. For a system you see every file in its bucket folder. For a set (a curated list in the
+   package's `data/sets/*.json`) you see its games from every system, sorted by system then title.
+   `✅` is already in `games.json`, `⬜` is not. Type to filter, `Tab` toggles the game
+   under the cursor, `^A` toggles everything currently shown, `Enter` or `Esc` keeps your changes.
+   Pending changes show as `➕` / `➖`. `games.json` doesn't record sets: a game is on if it's listed.
+3. When you finish, you get a summary of additions and removals per system and a confirmation
+   prompt. On yes, `~/.sync-roms/games.json` is saved; on no, nothing is. Nothing is uploaded.
+
+A set file is `{"name": ..., "description": ..., "games": [{"title": ..., "system": "gba", "bucket": "gba/Game.zip"}]}`.
+Entries for an unknown system are skipped with a warning. Games of a full system show greyed out with a 🔒: they are always synced and can't be toggled.
 
 Removing a game only drops it from `games.json`; the file stays in the bucket.
 
