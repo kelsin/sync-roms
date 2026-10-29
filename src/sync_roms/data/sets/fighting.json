@@ -126,6 +126,71 @@
       "title": "Super Smash Bros.",
       "system": "n64",
       "bucket": "n64/Super Smash Bros. (USA) (LodgeNet).zip"
+    },
+    {
+      "title": "Soulcalibur II",
+      "system": "ps2",
+      "bucket": "ps2/Soulcalibur II (USA).chd"
+    },
+    {
+      "title": "Soulcalibur III",
+      "system": "ps2",
+      "bucket": "ps2/Soulcalibur III (USA).chd"
+    },
+    {
+      "title": "Tekken 4",
+      "system": "ps2",
+      "bucket": "ps2/Tekken 4 (USA).chd"
+    },
+    {
+      "title": "Tekken 5",
+      "system": "ps2",
+      "bucket": "ps2/Tekken 5 (USA).chd"
+    },
+    {
+      "title": "Tekken Tag Tournament",
+      "system": "ps2",
+      "bucket": "ps2/Tekken Tag Tournament (USA) (v2.00).chd"
+    },
+    {
+      "title": "Virtua Fighter 4: Evolution",
+      "system": "ps2",
+      "bucket": "ps2/Virtua Fighter 4 - Evolution (USA).chd"
+    },
+    {
+      "title": "Guilty Gear X2",
+      "system": "ps2",
+      "bucket": "ps2/Guilty Gear X2 (USA).chd"
+    },
+    {
+      "title": "Guilty Gear XX Accent Core Plus",
+      "system": "ps2",
+      "bucket": "ps2/Guilty Gear XX Accent Core Plus (USA).chd"
+    },
+    {
+      "title": "Capcom vs. SNK 2",
+      "system": "ps2",
+      "bucket": "ps2/Capcom vs. SNK 2 - Mark of the Millennium 2001 (USA).chd"
+    },
+    {
+      "title": "The King of Fighters '98 Ultimate Match",
+      "system": "ps2",
+      "bucket": "ps2/King of Fighters '98, The - Ultimate Match (USA).chd"
+    },
+    {
+      "title": "The King of Fighters 2002 Challenge to Ultimate Battle",
+      "system": "ps2",
+      "bucket": "ps2/King of Fighters 2002, The - Challenge to Ultimate Battle (USA).chd"
+    },
+    {
+      "title": "The King of Fighters XI",
+      "system": "ps2",
+      "bucket": "ps2/King of Fighters XI, The (USA, Canada).chd"
+    },
+    {
+      "title": "Art of Fighting Anthology",
+      "system": "ps2",
+      "bucket": "ps2/Art of Fighting Anthology (USA).chd"
     }
   ]
 }

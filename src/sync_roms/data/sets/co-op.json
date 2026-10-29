@@ -121,6 +121,16 @@
       "title": "Mario Party 2",
       "system": "n64",
       "bucket": "n64/Mario Party 2 (USA).zip"
+    },
+    {
+      "title": "Baldur's Gate: Dark Alliance",
+      "system": "ps2",
+      "bucket": "ps2/Baldur's Gate - Dark Alliance (USA).chd"
+    },
+    {
+      "title": "Alien Hominid",
+      "system": "ps2",
+      "bucket": "ps2/Alien Hominid (USA).chd"
     }
   ]
 }

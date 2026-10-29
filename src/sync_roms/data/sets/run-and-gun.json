@@ -1,0 +1,66 @@
+{
+  "name": "Run & Gun",
+  "description": "Side-scrolling run-and-gun shooters.",
+  "games": [
+    {
+      "title": "Contra",
+      "system": "nes",
+      "bucket": "nes/Contra (USA).zip"
+    },
+    {
+      "title": "Super C",
+      "system": "nes",
+      "bucket": "nes/Super C (USA).zip"
+    },
+    {
+      "title": "Contra III - The Alien Wars",
+      "system": "snes",
+      "bucket": "snes/Contra III - The Alien Wars (USA).zip"
+    },
+    {
+      "title": "Super Turrican",
+      "system": "snes",
+      "bucket": "snes/Super Turrican (USA).zip"
+    },
+    {
+      "title": "Super Probotector - Alien Rebels",
+      "system": "snes",
+      "bucket": "snes/Super Probotector - Alien Rebels (Europe).zip"
+    },
+    {
+      "title": "Gunstar Heroes",
+      "system": "genesis",
+      "bucket": "genesis/Gunstar Heroes (USA).zip"
+    },
+    {
+      "title": "Gunstar Super Heroes",
+      "system": "gba",
+      "bucket": "gba/Gunstar Super Heroes (USA).zip"
+    },
+    {
+      "title": "Alien Soldier",
+      "system": "genesis",
+      "bucket": "genesis/Alien Soldier (Europe).zip"
+    },
+    {
+      "title": "Mega Turrican",
+      "system": "genesis",
+      "bucket": "genesis/Mega Turrican (USA).zip"
+    },
+    {
+      "title": "Operation C",
+      "system": "gb",
+      "bucket": "gb/Operation C (USA).zip"
+    },
+    {
+      "title": "Metal Slug",
+      "system": "neogeo",
+      "bucket": "neogeo/mslug.zip"
+    },
+    {
+      "title": "Alien Hominid",
+      "system": "ps2",
+      "bucket": "ps2/Alien Hominid (USA).chd"
+    }
+  ]
+}

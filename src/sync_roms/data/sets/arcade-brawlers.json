@@ -111,6 +111,16 @@
       "title": "Batman Returns",
       "system": "snes",
       "bucket": "snes/Batman Returns (USA).zip"
+    },
+    {
+      "title": "Capcom Classics Collection Vol. 1",
+      "system": "ps2",
+      "bucket": "ps2/Capcom Classics Collection Vol. 1 (USA).chd"
+    },
+    {
+      "title": "Capcom Classics Collection Vol. 2",
+      "system": "ps2",
+      "bucket": "ps2/Capcom Classics Collection Vol. 2 (USA).chd"
     }
   ]
 }

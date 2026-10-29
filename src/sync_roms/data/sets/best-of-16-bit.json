@@ -15,7 +15,7 @@
     {
       "title": "Super Metroid (En,Fr,De)",
       "system": "snes",
-      "bucket": "snes/Super Metroid (Europe) (En,Fr,De).zip"
+      "bucket": "snes/Super Metroid (Japan, USA) (En,Ja).zip"
     },
     {
       "title": "Chrono Trigger",
@@ -296,6 +296,11 @@
       "title": "Dungeon Explorer",
       "system": "tg16",
       "bucket": "tg16/Dungeon Explorer (USA).zip"
+    },
+    {
+      "title": "Castlevania: Rondo of Blood (Akumajou Dracula X)",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Akumajou Dracula X - Chi no Rondo (Japan) (FABT, FACT).chd"
     }
   ]
 }

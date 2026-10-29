@@ -281,6 +281,16 @@
       "title": "Metal Slug",
       "system": "neogeo",
       "bucket": "neogeo/mslug.zip"
+    },
+    {
+      "title": "Taito Legends",
+      "system": "ps2",
+      "bucket": "ps2/Taito Legends (USA).chd"
+    },
+    {
+      "title": "Taito Legends 2",
+      "system": "ps2",
+      "bucket": "ps2/Taito Legends 2 (USA).chd"
     }
   ]
 }

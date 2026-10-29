@@ -96,6 +96,16 @@
       "title": "Castlevania - Legacy of Darkness",
       "system": "n64",
       "bucket": "n64/Castlevania - Legacy of Darkness (USA).zip"
+    },
+    {
+      "title": "Castlevania: Lament of Innocence",
+      "system": "ps2",
+      "bucket": "ps2/Castlevania - Lament of Innocence (USA).chd"
+    },
+    {
+      "title": "Castlevania: Curse of Darkness",
+      "system": "ps2",
+      "bucket": "ps2/Castlevania - Curse of Darkness (USA).chd"
     }
   ]
 }

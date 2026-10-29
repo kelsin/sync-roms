@@ -211,6 +211,11 @@
       "title": "Galactic Pinball (En)",
       "system": "virtualboy",
       "bucket": "virtualboy/Galactic Pinball (Japan, USA) (En).zip"
+    },
+    {
+      "title": "Rockman & Forte (WonderSwan)",
+      "system": "wonderswan",
+      "bucket": "wonderswan/Rockman & Forte - Mirai Kara no Chousensha (Japan).zip"
     }
   ]
 }
