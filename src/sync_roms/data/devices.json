@@ -198,6 +198,102 @@
     "layout": "esde"
   },
   {
+    "id": "ayaneo-konkr-pocket-fit",
+    "name": "AYANEO KONKR Pocket Fit",
+    "soc": "Snapdragon G3 Gen 3",
+    "layout": "esde"
+  },
+  {
+    "id": "ayaneo-pocket-ace",
+    "name": "AYANEO Pocket ACE",
+    "soc": "Snapdragon G3x Gen 2",
+    "layout": "esde"
+  },
+  {
+    "id": "ayaneo-pocket-advance",
+    "name": "AYANEO KONKR Pocket Advance",
+    "soc": "MediaTek Helio G90T",
+    "layout": "esde"
+  },
+  {
+    "id": "ayaneo-pocket-air",
+    "name": "AYANEO Pocket Air",
+    "soc": "MediaTek Dimensity 1200",
+    "layout": "esde"
+  },
+  {
+    "id": "ayaneo-pocket-air-mini",
+    "name": "AYANEO Pocket Air Mini",
+    "soc": "MediaTek Helio G90T",
+    "layout": "esde"
+  },
+  {
+    "id": "ayaneo-pocket-dmg",
+    "name": "AYANEO Pocket DMG",
+    "soc": "Snapdragon G3x Gen 2",
+    "layout": "esde"
+  },
+  {
+    "id": "ayaneo-pocket-ds",
+    "name": "AYANEO Pocket DS",
+    "soc": "Snapdragon G3x Gen 2",
+    "layout": "esde"
+  },
+  {
+    "id": "ayaneo-pocket-evo",
+    "name": "AYANEO Pocket EVO",
+    "soc": "Snapdragon G3x Gen 2",
+    "layout": "esde"
+  },
+  {
+    "id": "ayaneo-pocket-micro",
+    "name": "AYANEO Pocket Micro",
+    "soc": "MediaTek Helio G99",
+    "layout": "esde"
+  },
+  {
+    "id": "ayaneo-pocket-micro-2",
+    "name": "AYANEO Pocket Micro 2",
+    "soc": "Snapdragon 865",
+    "layout": "esde"
+  },
+  {
+    "id": "ayaneo-pocket-micro-classic",
+    "name": "AYANEO Pocket Micro Classic",
+    "soc": "MediaTek Helio G99",
+    "layout": "esde"
+  },
+  {
+    "id": "ayaneo-pocket-s",
+    "name": "AYANEO Pocket S",
+    "soc": "Snapdragon G3x Gen 2",
+    "layout": "esde"
+  },
+  {
+    "id": "ayaneo-pocket-s-mini",
+    "name": "AYANEO Pocket S Mini",
+    "soc": "Snapdragon G3x Gen 2",
+    "layout": "esde"
+  },
+  {
+    "id": "ayaneo-pocket-s2",
+    "name": "AYANEO Pocket S2",
+    "soc": "Snapdragon G3 Gen 3",
+    "layout": "esde"
+  },
+  {
+    "id": "ayaneo-pocket-s2-pro",
+    "name": "AYANEO Pocket S2 Pro",
+    "soc": "Snapdragon G3 Gen 3",
+    "layout": "esde"
+  },
+  {
+    "id": "ayaneo-pocket-vert",
+    "name": "AYANEO Pocket Vert",
+    "soc": "Snapdragon 8+ Gen 1",
+    "layout": "esde"
+  },
+  {
     "id": "ayn-odin",
     "name": "AYN Odin",
     "soc": "Snapdragon 845",
