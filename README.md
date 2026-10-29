@@ -52,6 +52,37 @@ If the Python dependencies changed, run `brew update-python-resources kelsin/tap
   (set `ROMS_PROFILE` to use a different profile name), defined in `~/.aws/config` and `~/.aws/credentials`
 - Only for `--chd`: **7z** and **chdman** (`sync-roms --install-tools` installs them with Homebrew)
 
+### AWS profiles
+
+Create the read-only profile (used for everything that only reads) and, if you upload
+scrapes, the write profile. Each asks for an access key, secret, and region (`us-east-1`):
+
+```bash
+aws configure --profile roms-readonly
+aws configure --profile roms
+```
+
+#### Transfer speed (AWS CLI only)
+
+These `s3` settings are read by the `aws s3 cp`/`sync` commands, not by `sync-roms`
+itself (which uses boto3 and its own worker pool). Set them if you also move files with
+the AWS CLI. The defaults are 10 concurrent requests and 8MB multipart chunks.
+
+```bash
+for p in roms-readonly roms; do
+  aws configure set s3.max_concurrent_requests 32 --profile $p
+  aws configure set s3.max_queue_size 2000 --profile $p
+  aws configure set s3.multipart_threshold 64MB --profile $p
+  aws configure set s3.multipart_chunksize 32MB --profile $p
+done
+```
+
+The threshold and chunk size apply in both directions: large files move as parallel
+32MB ranges on download and 32MB parts on upload.
+
+Concurrency is the setting that matters most for many small files. Lower it if your
+router or uplink starts timing out.
+
 ## Usage
 
 The examples call the script `sync-roms`. From a clone of the repo, run `python3 -m sync_roms` (with `src/` on `PYTHONPATH`) in its place.
