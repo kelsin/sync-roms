@@ -1,0 +1,286 @@
+{
+  "name": "Road Trip & Short Sessions",
+  "description": "Games that suit quick sessions: arcade-style, self-contained or easy to pause.",
+  "games": [
+    {
+      "title": "Tetris (Rev 1)",
+      "system": "gb",
+      "bucket": "gb/Tetris (World) (Rev 1).zip"
+    },
+    {
+      "title": "Kirby's Dream Land",
+      "system": "gb",
+      "bucket": "gb/Kirby's Dream Land (USA, Europe).zip"
+    },
+    {
+      "title": "Dr. Mario (Rev 1)",
+      "system": "gb",
+      "bucket": "gb/Dr. Mario (World) (Rev 1).zip"
+    },
+    {
+      "title": "Super Mario Land (Rev 1)",
+      "system": "gb",
+      "bucket": "gb/Super Mario Land (World) (Rev 1).zip"
+    },
+    {
+      "title": "Wario Land II (SGB Enhanced)",
+      "system": "gb",
+      "bucket": "gb/Wario Land II (USA, Europe) (SGB Enhanced).zip"
+    },
+    {
+      "title": "Bomberman GB (SGB Enhanced)",
+      "system": "gb",
+      "bucket": "gb/Bomberman GB (USA, Europe) (SGB Enhanced).zip"
+    },
+    {
+      "title": "Dragon Warrior Monsters (SGB Enhanced) (GB Compatible)",
+      "system": "gbc",
+      "bucket": "gbc/Dragon Warrior Monsters (USA, Europe) (SGB Enhanced) (GB Compatible).zip"
+    },
+    {
+      "title": "Wario Land 3 (En,Ja)",
+      "system": "gbc",
+      "bucket": "gbc/Wario Land 3 (World) (En,Ja).zip"
+    },
+    {
+      "title": "Advance Wars (Rev 1)",
+      "system": "gba",
+      "bucket": "gba/Advance Wars (USA) (Rev 1).zip"
+    },
+    {
+      "title": "WarioWare, Inc. - Mega Microgame$!",
+      "system": "gba",
+      "bucket": "gba/WarioWare, Inc. - Mega Microgame$! (USA).zip"
+    },
+    {
+      "title": "Drill Dozer",
+      "system": "gba",
+      "bucket": "gba/Drill Dozer (USA).zip"
+    },
+    {
+      "title": "Kuru Kuru Kururin",
+      "system": "gba",
+      "bucket": "gba/Kurukuru Kururin (Europe).zip"
+    },
+    {
+      "title": "Mr. Driller 2",
+      "system": "gba",
+      "bucket": "gba/Mr. Driller 2 (USA).zip"
+    },
+    {
+      "title": "Tony Hawk's Pro Skater 2",
+      "system": "gba",
+      "bucket": "gba/Tony Hawk's Pro Skater 2 (USA, Europe).zip"
+    },
+    {
+      "title": "Super Mario Advance 4 - Super Mario Bros. 3",
+      "system": "gba",
+      "bucket": "gba/Super Mario Advance 4 - Super Mario Bros. 3 (USA).zip"
+    },
+    {
+      "title": "Mario Kart - Super Circuit",
+      "system": "gba",
+      "bucket": "gba/Mario Kart - Super Circuit (USA).zip"
+    },
+    {
+      "title": "F-Zero - Maximum Velocity",
+      "system": "gba",
+      "bucket": "gba/F-Zero - Maximum Velocity (USA, Europe).zip"
+    },
+    {
+      "title": "Pac-Man Collection",
+      "system": "gba",
+      "bucket": "gba/Pac-Man Collection (USA).zip"
+    },
+    {
+      "title": "Namco Museum",
+      "system": "gba",
+      "bucket": "gba/Namco Museum (USA).zip"
+    },
+    {
+      "title": "Sonic Advance",
+      "system": "gba",
+      "bucket": "gba/Sonic Advance (USA) (En,Ja).zip"
+    },
+    {
+      "title": "Mario Kart DS",
+      "system": "nds",
+      "bucket": "nds/Mario Kart DS.zip"
+    },
+    {
+      "title": "Tetris DS",
+      "system": "nds",
+      "bucket": "nds/Tetris DS.zip"
+    },
+    {
+      "title": "Meteos",
+      "system": "nds",
+      "bucket": "nds/Meteos.zip"
+    },
+    {
+      "title": "WarioWare - Touched",
+      "system": "nds",
+      "bucket": "nds/WarioWare - Touched.zip"
+    },
+    {
+      "title": "Picross DS",
+      "system": "nds",
+      "bucket": "nds/Picross DS.zip"
+    },
+    {
+      "title": "Elite Beat Agents",
+      "system": "nds",
+      "bucket": "nds/Elite Beat Agents.zip"
+    },
+    {
+      "title": "Brain Age - Train Your Brain in Minutes a Day!",
+      "system": "nds",
+      "bucket": "nds/Brain Age - Train Your Brain in Minutes a Day!.zip"
+    },
+    {
+      "title": "Professor Layton and the Curious Village",
+      "system": "nds",
+      "bucket": "nds/Professor Layton and the Curious Village.zip"
+    },
+    {
+      "title": "Advance Wars - Dual Strike",
+      "system": "nds",
+      "bucket": "nds/Advance Wars - Dual Strike.zip"
+    },
+    {
+      "title": "New Super Mario Bros.",
+      "system": "nds",
+      "bucket": "nds/New Super Mario Bros..zip"
+    },
+    {
+      "title": "Super Mario World",
+      "system": "snes",
+      "bucket": "snes/Super Mario World (USA).zip"
+    },
+    {
+      "title": "F-Zero",
+      "system": "snes",
+      "bucket": "snes/F-Zero (USA).zip"
+    },
+    {
+      "title": "Kirby's Avalanche",
+      "system": "snes",
+      "bucket": "snes/Kirby's Avalanche (USA).zip"
+    },
+    {
+      "title": "Tetris Attack (En,Ja)",
+      "system": "snes",
+      "bucket": "snes/Tetris Attack (USA) (En,Ja).zip"
+    },
+    {
+      "title": "Super Mario Kart",
+      "system": "snes",
+      "bucket": "snes/Super Mario Kart (USA).zip"
+    },
+    {
+      "title": "Super Bomberman",
+      "system": "snes",
+      "bucket": "snes/Super Bomberman (USA).zip"
+    },
+    {
+      "title": "Sonic The Hedgehog",
+      "system": "genesis",
+      "bucket": "genesis/Sonic The Hedgehog (USA, Europe).zip"
+    },
+    {
+      "title": "Columns (1990-06-21) (Sega Channel)",
+      "system": "genesis",
+      "bucket": "genesis/Columns (USA, Europe) (1990-06-21) (Sega Channel).zip"
+    },
+    {
+      "title": "Ristar",
+      "system": "genesis",
+      "bucket": "genesis/Ristar (USA, Europe).zip"
+    },
+    {
+      "title": "Comix Zone (Sega Smash Pack 2)",
+      "system": "genesis",
+      "bucket": "genesis/Comix Zone (USA) (Sega Smash Pack 2).zip"
+    },
+    {
+      "title": "Super Hang-On (Sega Smash Pack 2)",
+      "system": "genesis",
+      "bucket": "genesis/Super Hang-On (World) (Sega Smash Pack 2).zip"
+    },
+    {
+      "title": "Streets of Rage 2",
+      "system": "genesis",
+      "bucket": "genesis/Streets of Rage 2 (USA).zip"
+    },
+    {
+      "title": "Bonk's Adventure",
+      "system": "tg16",
+      "bucket": "tg16/Bonk's Adventure (USA).zip"
+    },
+    {
+      "title": "Tetris",
+      "system": "nes",
+      "bucket": "nes/Tetris (USA).zip"
+    },
+    {
+      "title": "Super Mario Bros.",
+      "system": "nes",
+      "bucket": "nes/Super Mario Bros. (World).zip"
+    },
+    {
+      "title": "Mega Man 2 (Capcom Town)",
+      "system": "nes",
+      "bucket": "nes/Mega Man 2 (USA) (Capcom Town).zip"
+    },
+    {
+      "title": "Kirby's Adventure (Rev 1)",
+      "system": "nes",
+      "bucket": "nes/Kirby's Adventure (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Punch-Out!!",
+      "system": "nes",
+      "bucket": "nes/Punch-Out!! (USA).zip"
+    },
+    {
+      "title": "Dr. Mario",
+      "system": "nes",
+      "bucket": "nes/Dr. Mario (Europe).zip"
+    },
+    {
+      "title": "Duck Hunt",
+      "system": "nes",
+      "bucket": "nes/Duck Hunt (World).zip"
+    },
+    {
+      "title": "Pac-Man",
+      "system": "mame",
+      "bucket": "mame/pacman.zip"
+    },
+    {
+      "title": "Galaga",
+      "system": "mame",
+      "bucket": "mame/galaga.zip"
+    },
+    {
+      "title": "Dig Dug",
+      "system": "mame",
+      "bucket": "mame/digdug.zip"
+    },
+    {
+      "title": "1942",
+      "system": "mame",
+      "bucket": "mame/1942.zip"
+    },
+    {
+      "title": "Frogger",
+      "system": "mame",
+      "bucket": "mame/frogger.zip"
+    },
+    {
+      "title": "Metal Slug",
+      "system": "neogeo",
+      "bucket": "neogeo/mslug.zip"
+    }
+  ]
+}

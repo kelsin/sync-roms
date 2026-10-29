@@ -1,0 +1,131 @@
+{
+  "name": "Fighting Games",
+  "description": "Versus fighters across arcade, console and handheld.",
+  "games": [
+    {
+      "title": "Street Fighter II: The World Warrior",
+      "system": "mame",
+      "bucket": "mame/sf2.zip"
+    },
+    {
+      "title": "Super Street Fighter II Turbo",
+      "system": "mame",
+      "bucket": "mame/ssf2t.zip"
+    },
+    {
+      "title": "Street Fighter Alpha 3",
+      "system": "mame",
+      "bucket": "mame/sfa3.zip"
+    },
+    {
+      "title": "Mortal Kombat II",
+      "system": "mame",
+      "bucket": "mame/mk2.zip"
+    },
+    {
+      "title": "Vampire Savior",
+      "system": "mame",
+      "bucket": "mame/vsavu.zip"
+    },
+    {
+      "title": "X-Men vs. Street Fighter",
+      "system": "mame",
+      "bucket": "mame/xmvsfur1.zip"
+    },
+    {
+      "title": "The King of Fighters '98",
+      "system": "neogeo",
+      "bucket": "neogeo/kof98.zip"
+    },
+    {
+      "title": "The King of Fighters 2002",
+      "system": "neogeo",
+      "bucket": "neogeo/kof2002.zip"
+    },
+    {
+      "title": "The King of Fighters 2000",
+      "system": "neogeo",
+      "bucket": "neogeo/kof2000.zip"
+    },
+    {
+      "title": "Samurai Shodown II",
+      "system": "neogeo",
+      "bucket": "neogeo/samsho2.zip"
+    },
+    {
+      "title": "Real Bout Fatal Fury 2",
+      "system": "neogeo",
+      "bucket": "neogeo/rbff2.zip"
+    },
+    {
+      "title": "Garou: Mark of the Wolves",
+      "system": "neogeo",
+      "bucket": "neogeo/garou.zip"
+    },
+    {
+      "title": "The Last Blade",
+      "system": "neogeo",
+      "bucket": "neogeo/lastblad.zip"
+    },
+    {
+      "title": "Super Street Fighter II - The New Challengers",
+      "system": "snes",
+      "bucket": "snes/Super Street Fighter II - The New Challengers (Japan).zip"
+    },
+    {
+      "title": "Street Fighter Alpha 2",
+      "system": "snes",
+      "bucket": "snes/Street Fighter Alpha 2 (USA).zip"
+    },
+    {
+      "title": "Mortal Kombat II (Rev 1)",
+      "system": "snes",
+      "bucket": "snes/Mortal Kombat II (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Killer Instinct (Rev 1)",
+      "system": "snes",
+      "bucket": "snes/Killer Instinct (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Mortal Kombat 3",
+      "system": "genesis",
+      "bucket": "genesis/Mortal Kombat 3 (USA).zip"
+    },
+    {
+      "title": "Street Fighter II' - Special Champion Edition",
+      "system": "genesis",
+      "bucket": "genesis/Street Fighter II' - Special Champion Edition (USA).zip"
+    },
+    {
+      "title": "Soulcalibur",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Soulcalibur (USA).chd"
+    },
+    {
+      "title": "Marvel vs. Capcom 2",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Marvel vs. Capcom 2 (USA).chd"
+    },
+    {
+      "title": "Tekken 3",
+      "system": "psx",
+      "bucket": "psx/Tekken 3 (USA).chd"
+    },
+    {
+      "title": "Street Fighter Alpha 3",
+      "system": "psx",
+      "bucket": "psx/Street Fighter Alpha 3 (USA).chd"
+    },
+    {
+      "title": "Bushido Blade",
+      "system": "psx",
+      "bucket": "psx/Bushido Blade (USA).chd"
+    },
+    {
+      "title": "Super Smash Bros.",
+      "system": "n64",
+      "bucket": "n64/Super Smash Bros. (USA) (LodgeNet).zip"
+    }
+  ]
+}

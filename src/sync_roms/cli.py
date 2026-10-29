@@ -526,7 +526,8 @@ def snapshot(data):
 def load_sets():
     """Game sets from the repo's data/sets/*.json, sorted by name.
 
-    Each file is {"name", "description" (optional), "games": [{"title", "system", "bucket"}]}.
+    Each file is {"name", "description" (optional), "games": [{"title", "system", "bucket", "files" (optional)}]}.
+    "files" are extra bucket keys (e.g. the discs of a multi-disc game) toggled together with "bucket".
     """
     folder = os.path.join(REPO_DATA, "sets")
     sets = []
@@ -539,8 +540,10 @@ def load_sets():
     return sorted(sets, key=lambda x: x["name"].lower())
 
 
-def toggle_games(title, rows):
+def toggle_games(title, rows, extras=None):
     """Multi-select over rows of (system, bucket key, game title, label); adds/removes games in each system in place.
+
+    extras: {bucket key: [more bucket keys]} added or removed together with that row's key.
 
     Rows of a full system are shown on and locked: its whole bucket folder is synced.
     """
@@ -551,10 +554,14 @@ def toggle_games(title, rows):
     for (s, key, name, _), on, was, lock in zip(rows, state, initial, locked):
         if lock:
             continue
+        keys = [key] + list((extras or {}).get(key, []))
         if on and not was:
-            s["games"].append({"title": name, "bucket": key})
+            for k in keys:
+                if not any(g.get("bucket") == k for g in s["games"]):
+                    s["games"].append({"title": name if k == key else os.path.splitext(k.split("/", 1)[-1])[0],
+                                       "bucket": k})
         elif was and not on:
-            s["games"] = [g for g in s["games"] if g.get("bucket") != key]
+            s["games"] = [g for g in s["games"] if g.get("bucket") not in keys]
 
 
 def set_rows(game_set, by_bucket, bucket_keys):
@@ -567,7 +574,9 @@ def set_rows(game_set, by_bucket, bucket_keys):
             continue
         seen.add(key)
         title = g.get("title") or os.path.splitext(key.split("/", 1)[-1])[0]
-        warn = "" if s.get("full_system") or key in bucket_keys(s) else "  ⚠️ not in bucket"
+        have = bucket_keys(s)
+        warn = "" if s.get("full_system") or all(k in have for k in [key] + list(g.get("files", []))) \
+            else "  ⚠️ not in bucket"
         rows.append((s, key, title, f"{s['name']} — {title}{warn}"))
     return sorted(rows, key=lambda r: (r[0]["name"].lower(), r[2].lower()))
 
@@ -643,7 +652,8 @@ def edit_manifest():
             return False
         rows = set_rows(sets[i], by_bucket, lambda s: bucket_keys[s["bucket"]])
         if rows:
-            toggle_games(f"✏️  {sets[i]['name']} — ✅ in games.json, ⬜ not", rows)
+            extras = {g["bucket"]: g["files"] for g in sets[i]["games"] if g.get("bucket") and g.get("files")}
+            toggle_games(f"✏️  {sets[i]['name']} — ✅ in games.json, ⬜ not", rows, extras)
         else:
             print(yellow(f"ℹ️  {sets[i]['name']} has no games to toggle."))
         return True

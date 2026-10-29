@@ -1,0 +1,171 @@
+{
+  "name": "Run & Gun and Shmups",
+  "description": "Twitchy action: shooters, scrolling blasters and bullet hell.",
+  "games": [
+    {
+      "title": "Contra",
+      "system": "nes",
+      "bucket": "nes/Contra (USA).zip"
+    },
+    {
+      "title": "Gradius",
+      "system": "nes",
+      "bucket": "nes/Gradius (USA).zip"
+    },
+    {
+      "title": "Life Force",
+      "system": "nes",
+      "bucket": "nes/Life Force (USA).zip"
+    },
+    {
+      "title": "Super C",
+      "system": "nes",
+      "bucket": "nes/Super C (USA).zip"
+    },
+    {
+      "title": "Contra III - The Alien Wars",
+      "system": "snes",
+      "bucket": "snes/Contra III - The Alien Wars (USA).zip"
+    },
+    {
+      "title": "Super R-Type",
+      "system": "snes",
+      "bucket": "snes/Super R-Type (USA).zip"
+    },
+    {
+      "title": "Gradius III",
+      "system": "snes",
+      "bucket": "snes/Gradius III (USA).zip"
+    },
+    {
+      "title": "Axelay",
+      "system": "snes",
+      "bucket": "snes/Axelay (USA).zip"
+    },
+    {
+      "title": "Super Turrican",
+      "system": "snes",
+      "bucket": "snes/Super Turrican (USA).zip"
+    },
+    {
+      "title": "Super Probotector - Alien Rebels",
+      "system": "snes",
+      "bucket": "snes/Super Probotector - Alien Rebels (Europe).zip"
+    },
+    {
+      "title": "Gunstar Heroes",
+      "system": "genesis",
+      "bucket": "genesis/Gunstar Heroes (USA).zip"
+    },
+    {
+      "title": "Thunder Force III (En)",
+      "system": "genesis",
+      "bucket": "genesis/Thunder Force III (Japan, USA) (En).zip"
+    },
+    {
+      "title": "Thunder Force IV",
+      "system": "genesis",
+      "bucket": "genesis/Thunder Force IV (Europe).zip"
+    },
+    {
+      "title": "Contra - Hard Corps (Genesis Mini)",
+      "system": "genesis",
+      "bucket": "genesis/Contra - Hard Corps (USA) (Genesis Mini).zip"
+    },
+    {
+      "title": "Eliminate Down",
+      "system": "genesis",
+      "bucket": "genesis/Eliminate Down (Japan).zip"
+    },
+    {
+      "title": "Zero Wing (Retro-Bit)",
+      "system": "genesis",
+      "bucket": "genesis/Zero Wing (World) (Retro-Bit).zip"
+    },
+    {
+      "title": "Truxton (Arcade Audio) (Mega Drive Mini 2, Genesis Mini 2)",
+      "system": "genesis",
+      "bucket": "genesis/Truxton (World) (Arcade Audio) (Mega Drive Mini 2, Genesis Mini 2).zip"
+    },
+    {
+      "title": "R-Type",
+      "system": "tg16",
+      "bucket": "tg16/R-Type (USA).zip"
+    },
+    {
+      "title": "Blazing Lazers",
+      "system": "tg16",
+      "bucket": "tg16/Blazing Lazers (USA).zip"
+    },
+    {
+      "title": "Gunhed (En)",
+      "system": "tg16",
+      "bucket": "tg16/Gunhed (Japan) (En).zip"
+    },
+    {
+      "title": "Soldier Blade",
+      "system": "tg16",
+      "bucket": "tg16/Soldier Blade (USA).zip"
+    },
+    {
+      "title": "R-Type",
+      "system": "gb",
+      "bucket": "gb/R-Type (USA, Europe).zip"
+    },
+    {
+      "title": "DoDonPachi",
+      "system": "saturn",
+      "bucket": "saturn/DoDonPachi (Japan).chd"
+    },
+    {
+      "title": "1942",
+      "system": "mame",
+      "bucket": "mame/1942.zip"
+    },
+    {
+      "title": "1943",
+      "system": "mame",
+      "bucket": "mame/1943.zip"
+    },
+    {
+      "title": "1944: The Loop Master",
+      "system": "mame",
+      "bucket": "mame/1944.zip"
+    },
+    {
+      "title": "R-Type",
+      "system": "mame",
+      "bucket": "mame/rtypeu.zip"
+    },
+    {
+      "title": "R-Type II",
+      "system": "mame",
+      "bucket": "mame/rtype2.zip"
+    },
+    {
+      "title": "Gradius",
+      "system": "mame",
+      "bucket": "mame/gradius.zip"
+    },
+    {
+      "title": "Armed Police Batrider",
+      "system": "mame",
+      "bucket": "mame/batrider.zip"
+    },
+    {
+      "title": "Metal Slug",
+      "system": "neogeo",
+      "bucket": "neogeo/mslug.zip"
+    },
+    {
+      "title": "Blazing Star",
+      "system": "neogeo",
+      "bucket": "neogeo/blazstar.zip"
+    },
+    {
+      "title": "Gunstar Super Heroes",
+      "system": "gba",
+      "bucket": "gba/Gunstar Super Heroes (USA).zip"
+    }
+  ]
+}

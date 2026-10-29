@@ -1,0 +1,101 @@
+{
+  "name": "Castlevania",
+  "description": "The Belmont and Metroidvania-era Castlevania games.",
+  "games": [
+    {
+      "title": "Castlevania (Rev 1)",
+      "system": "nes",
+      "bucket": "nes/Castlevania (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Castlevania II - Simon's Quest",
+      "system": "nes",
+      "bucket": "nes/Castlevania II - Simon's Quest (USA).zip"
+    },
+    {
+      "title": "Castlevania III - Dracula's Curse",
+      "system": "nes",
+      "bucket": "nes/Castlevania III - Dracula's Curse (USA).zip"
+    },
+    {
+      "title": "Super Castlevania IV",
+      "system": "snes",
+      "bucket": "snes/Super Castlevania IV (USA).zip"
+    },
+    {
+      "title": "Castlevania - Dracula X",
+      "system": "snes",
+      "bucket": "snes/Castlevania - Dracula X (USA).zip"
+    },
+    {
+      "title": "Castlevania - Bloodlines",
+      "system": "genesis",
+      "bucket": "genesis/Castlevania - Bloodlines (USA).zip"
+    },
+    {
+      "title": "Castlevania - The Adventure",
+      "system": "gb",
+      "bucket": "gb/Castlevania - The Adventure (USA).zip"
+    },
+    {
+      "title": "Castlevania II - Belmont's Revenge",
+      "system": "gb",
+      "bucket": "gb/Castlevania II - Belmont's Revenge (USA, Europe).zip"
+    },
+    {
+      "title": "Castlevania Legends (SGB Enhanced)",
+      "system": "gb",
+      "bucket": "gb/Castlevania Legends (USA, Europe) (SGB Enhanced).zip"
+    },
+    {
+      "title": "Castlevania - Dawn of Sorrow",
+      "system": "nds",
+      "bucket": "nds/Castlevania - Dawn of Sorrow.zip"
+    },
+    {
+      "title": "Castlevania - Portrait of Ruin",
+      "system": "nds",
+      "bucket": "nds/Castlevania - Portrait of Ruin.zip"
+    },
+    {
+      "title": "Castlevania - Order of Ecclesia",
+      "system": "nds",
+      "bucket": "nds/Castlevania - Order of Ecclesia.zip"
+    },
+    {
+      "title": "Castlevania - Symphony of the Night",
+      "system": "psx",
+      "bucket": "psx/Castlevania - Symphony of the Night (USA).chd"
+    },
+    {
+      "title": "Akumajou Dracula X - Chi no Rondo (FABT, FACT)",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Akumajou Dracula X - Chi no Rondo (Japan) (FABT, FACT).chd"
+    },
+    {
+      "title": "Castlevania - Circle of the Moon",
+      "system": "gba",
+      "bucket": "gba/Castlevania - Circle of the Moon (USA).zip"
+    },
+    {
+      "title": "Castlevania - Harmony of Dissonance",
+      "system": "gba",
+      "bucket": "gba/Castlevania - Harmony of Dissonance (USA).zip"
+    },
+    {
+      "title": "Castlevania - Aria of Sorrow",
+      "system": "gba",
+      "bucket": "gba/Castlevania - Aria of Sorrow (USA).zip"
+    },
+    {
+      "title": "Castlevania",
+      "system": "n64",
+      "bucket": "n64/Castlevania (USA) (Rev 2).zip"
+    },
+    {
+      "title": "Castlevania - Legacy of Darkness",
+      "system": "n64",
+      "bucket": "n64/Castlevania - Legacy of Darkness (USA).zip"
+    }
+  ]
+}

@@ -249,6 +249,8 @@ sync-roms --edit
    prompt. On yes, `~/.sync-roms/games.json` is saved; on no, nothing is. Nothing is uploaded.
 
 A set file is `{"name": ..., "description": ..., "games": [{"title": ..., "system": "gba", "bucket": "gba/Game.zip"}]}`.
+A multi-disc game adds `"files": [...]` with its other bucket keys (the discs); `bucket` is the playlist (`.m3u`) or disc 1.
+Toggling the game adds or removes every file, one `games.json` entry each.
 Entries for an unknown system are skipped with a warning. Games of a full system show greyed out with a 🔒: they are always synced and can't be toggled.
 
 Removing a game only drops it from `games.json`; the file stays in the bucket.
