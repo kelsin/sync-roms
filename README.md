@@ -66,7 +66,8 @@ aws configure --profile roms
 
 These `s3` settings are read by the `aws s3 cp`/`sync` commands, not by `sync-roms`
 itself (which uses boto3 and its own worker pool). Set them if you also move files with
-the AWS CLI. The defaults are 10 concurrent requests and 8MB multipart chunks.
+the AWS CLI. The defaults are 10 concurrent requests and 8MB multipart chunks. `--upload` and
+`--upload-scrapes` size their own parallelism from your CPU cores and don't need them.
 
 ```bash
 for p in roms-readonly roms; do
@@ -199,6 +200,7 @@ Then:
 | `-e`, `--edit` | Add/remove games in your local `games.json`, then save it (see below) |
 | `-a`, `--ask` | Confirm saved settings (device and layout, Android media folders) instead of using them silently. Answering no asks the question again and saves the new answer |
 | `-u`, `--upload-scrapes` | Upload `BASE_DIR/ES-DE` scraped data to the bucket (see below) |
+| `--upload [DIR]` | Upload the ROMs in `DIR` and its subfolders (default: current directory) to the bucket folder of a system you pick; the system is guessed from the folder name (see below) |
 | `-c`, `--clean-scrapes` | Remove scraped data in the bucket for ROMs that aren't available (see below) |
 | `--m3u [DIR]` | Create or fix the `.m3u` playlist of every multi-disc game (`Name (Disc 1) (Extra).chd`, `Name (Disc 2).chd`) in `DIR` and its subfolders (default: current directory). The playlist is named after the title without `(Disc N)` or tags the discs don't share (`Name (Sega CD).m3u`). Playlists with the wrong discs are rewritten, ones with some missing files lose those lines, ones with no files left are deleted after asking, and ones listing exactly a game's discs under another name are renamed. Local only; `--dry-run` previews |
 | `--chd [DIR]` | Unzip (7z) every `.zip`/`.7z` and convert each disc image (`.cue`, `.gdi`, `.toc`, `.iso`) to a `.chd` with `chdman`, in parallel (up to one file per CPU core; with fewer files than cores each `chdman` gets the spare cores), per the `chd` setting in `systems.json` for the system whose folder it is in (`DIR` is one system folder or a folder of them, default: current directory). The chd is verified before the archive and image files are removed, a failure keeps them, and the `.m3u` playlists of every system folder are fixed afterwards, even when there was nothing to convert (also shown by `--dry-run`). A progress bar (files done and overall percent, from `chdman`'s own progress) shows in a terminal. Mode `cd` uses `createcd`; `dvd` (PS2, PSP) uses `createdvd` for `.iso` files with the system's `args`; `extract` (GameCube, Wii) only unzips and leaves the `.rvz` files. `"m3u": false` skips playlists (3DO). Local only; `--dry-run` previews |
@@ -212,8 +214,25 @@ Then:
 | Environment variable | Description |
 | --- | --- |
 | `ROMS_PROFILE` | AWS profile to use (default `roms-readonly`) |
-| `ROMS_WRITE_PROFILE` | AWS profile used to upload in `--upload-scrapes` and `--clean-scrapes` modes (default `roms`) |
+| `ROMS_WRITE_PROFILE` | AWS profile used to upload in `--upload`, `--upload-scrapes` and `--clean-scrapes` modes (default `roms`) |
 | `NO_COLOR` | Disable colors |
+
+## Uploading ROMs (`--upload`)
+
+`sync-roms --upload [DIR]` uploads the ROMs in `DIR` (default: the current directory) and its subfolders to the
+bucket folder of one system, keeping the relative paths (`DIR/Disc/a.chd` becomes `<system>/Disc/a.chd`). It asks
+which system with the same type-to-filter list as the other pickers, with the cursor already on a guess: the system
+whose bucket folder or frontend folder name (`gba`, `megadrive`, `ARCADE`...) is the name of `DIR`. With no match
+the cursor starts at the top of the list. Esc cancels.
+
+- Files that already exist with the same size are skipped; a file with a different size overwrites the one in the
+  bucket. Both counts are shown first, the overwrites are listed, and nothing uploads until you confirm (default no).
+  `--dry-run` shows the plan and uploads nothing.
+- Dotfiles and frontend leftovers (`gamelist.xml`, `images/`, `Thumbs.db`...) are never uploaded.
+- It uploads with the `ROMS_WRITE_PROFILE` profile (default `roms`) through one shared pool of requests, four per CPU
+  core (at most 64), so many small files and the parts of big ones (64MB and up go as 32MB parts) all keep the
+  connection busy. The biggest files start first. `--upload-scrapes` uses the same pool for its media, and
+  resizes Onion box art on every CPU core while the other files upload.
 
 ## Scraped data (`--upload-scrapes`, `--clean-scrapes`)
 
@@ -257,10 +276,10 @@ bucket) is deleted. `--dry-run` shows the plan. A non-empty folder that isn't al
 folder (next to `cards.json`). From then on every sync refreshes the mirror from the bucket first
 (if the bucket can't be reached it warns and uses what the mirror has), then does its usual job
 with files copied from the mirror instead of downloaded. If `DIR` is missing (an unplugged drive)
-it uses the bucket. `--upload-scrapes` and `--clean-scrapes` always work on the bucket itself, and `--edit` lists it;
-when one finishes successfully (not with `--dry-run`) the saved mirror is refreshed afterwards, so it picks up the change.
+it uses the bucket. `--upload`, `--upload-scrapes` and `--clean-scrapes` always work on the bucket itself, and `--edit` lists it;
+when `--edit`, `--upload-scrapes` or `--clean-scrapes` finishes successfully (not with `--dry-run`) the saved mirror is refreshed afterwards, so it picks up the change.
 `sync-roms --clear-mirror` removes the setting (the mirror's files stay); `sync-roms --mirror` alone
-refreshes the saved mirror. Each flag is its own mode and can't be combined with `--edit`, `--upload-scrapes`
+refreshes the saved mirror. Each flag is its own mode and can't be combined with `--edit`, `--upload`, `--upload-scrapes`
 or `--clean-scrapes`.
 
 ## Editing the game list (`--edit`)
