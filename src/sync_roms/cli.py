@@ -11,9 +11,11 @@ import signal
 import subprocess
 import sys
 import tempfile
+import threading
 import xml.etree.ElementTree as ET
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import TimeoutError as FutureTimeout
 from types import SimpleNamespace
 from xml.sax.saxutils import escape, unescape
 
@@ -73,7 +75,7 @@ def help_text():
                       ones with the wrong or some missing discs are rewritten, and ones with the right discs under another name are renamed {dim('(local only; works with --dry-run)')}
   {yellow('--chd')} [{cyan('DIR')}]   📀 unzip (7z) every .zip/.7z and convert each disc image (.cue, .gdi, .toc, .iso) to a verified .chd, per the chd setting of the
                       system whose folder it is in (DIR can be one system folder or hold several; no DIR: the current directory); archives and
-                      images are removed once their chd verifies, then the .m3u playlists are fixed. GameCube and Wii archives are only unzipped
+                      images are removed once their chd verifies, then the .m3u playlists are fixed (always, even with nothing to convert); files convert in parallel, up to one per CPU core, with a progress bar. GameCube and Wii archives are only unzipped
                       {dim('(needs 7z and chdman, see --install-tools; works with --dry-run)')}
   {yellow('--install-tools')}   🍺 brew install the 7z (sevenzip) and chdman (rom-tools) that --chd needs, whichever are missing
   {yellow('--mirror')} [{cyan('DIR')}]   🪞 make or refresh a local copy of everything the game lists reference (ROMs, BIOS, scraped data); files that are
@@ -974,35 +976,81 @@ def plan_chd(root, folders):
     return jobs
 
 
-def run_tool(cmd):
-    """None on success, else the last line the tool printed."""
-    done = subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True)
-    if done.returncode:
-        lines = done.stderr.replace("\r", "\n").strip().splitlines()
-        return lines[-1] if lines else f"exit code {done.returncode}"
+_tool_procs = set()  # running tools, so an interrupt can stop them
+_tool_lock = threading.Lock()
+_tools_stopped = False
 
 
-def chd_command_line(chdman, cfg, image, out):
+def stop_tools():
+    """Terminate the running tools; run_tool starts no new ones afterwards."""
+    global _tools_stopped
+    with _tool_lock:
+        _tools_stopped = True
+        for proc in _tool_procs:
+            proc.terminate()
+
+
+PERCENT_RE = re.compile(r"(\d+(?:\.\d+)?)% complete")
+
+
+def run_tool(cmd, progress=None):
+    """None on success, else the last line the tool printed; progress(percent) is called as chdman reports it."""
+    with _tool_lock:
+        if _tools_stopped:
+            return "interrupted"
+        proc = subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True)
+        _tool_procs.add(proc)
+    last = ""
+    try:
+        for line in proc.stderr:  # chdman ends its progress updates with \r, which text mode reads as a line end
+            match = PERCENT_RE.search(line)
+            if match and progress:
+                progress(float(match.group(1)))
+            elif line.strip():
+                last = line.strip()
+        proc.wait()
+    finally:
+        with _tool_lock:
+            _tool_procs.discard(proc)
+    if proc.returncode:
+        return last or f"exit code {proc.returncode}"
+
+
+def chd_command_line(chdman, cfg, image, out, np):
     dvd = cfg["mode"] == "dvd" and image.lower().endswith(".iso")
-    return [chdman, "createdvd" if dvd else "createcd", "-i", image, "-o", out] + (cfg.get("args", []) if dvd else [])
+    return [chdman, "createdvd" if dvd else "createcd", "-i", image, "-o", out, "-np", str(np)] + (cfg.get("args", []) if dvd else [])
 
 
-def make_chd(chdman, cfg, image, out):
-    """Create out from image (an existing out is only verified); None on success, else the error."""
-    if not os.path.exists(out):
-        error = run_tool(chd_command_line(chdman, cfg, image, out))
+_chd_locks = defaultdict(threading.Lock)  # one per output path: two jobs for the same disc take turns
+
+
+def make_chd(tools, cfg, image, out, report=None):
+    """Create out from image (an existing out is only verified); None on success, else the error.
+
+    The chd is built under a hidden .part name and renamed once it verifies, so out is never half written.
+    report(fraction) gets 0-1 progress: creating is the first 90%, verifying the last 10%.
+    """
+    chdman = tools["chdman"]
+
+    def stage(start, width):
+        return (lambda percent: report(start + percent / 100 * width)) if report else None
+
+    part = os.path.join(os.path.dirname(out), "." + os.path.basename(out) + ".part")
+    with _chd_locks[out]:
+        if os.path.exists(out):
+            return run_tool([chdman, "verify", "-i", out], stage(0, 1))
+        if os.path.exists(part):  # left by a run that was killed
+            os.remove(part)
+        error = (run_tool(chd_command_line(chdman, cfg, image, part, tools["np"]), stage(0, 0.9))
+                 or run_tool([chdman, "verify", "-i", part], stage(0.9, 0.1)))
         if error:
-            if os.path.exists(out):
-                os.remove(out)
+            if os.path.exists(part):
+                os.remove(part)
             return error
-        error = run_tool([chdman, "verify", "-i", out])
-        if error and os.path.exists(out):
-            os.remove(out)
-        return error
-    return run_tool([chdman, "verify", "-i", out])
+        os.replace(part, out)
 
 
-def chd_archive(tools, cfg, path):
+def chd_archive(tools, cfg, path, report=None):
     """Extract an archive next to itself, then convert its discs (or, for extract-only systems, move its files out).
     The archive goes only once everything is done; None on success, else the error."""
     folder = os.path.dirname(path)
@@ -1024,7 +1072,7 @@ def chd_archive(tools, cfg, path):
             if not images:
                 return "no disc image in the archive"
             for image, _ in images:
-                error = make_chd(tools["chdman"], cfg, image, os.path.join(folder, os.path.splitext(os.path.basename(image))[0] + ".chd"))
+                error = make_chd(tools, cfg, image, os.path.join(folder, os.path.splitext(os.path.basename(image))[0] + ".chd"), report)
                 if error:
                     return error
         os.remove(path)
@@ -1032,9 +1080,9 @@ def chd_archive(tools, cfg, path):
         shutil.rmtree(tmp, ignore_errors=True)
 
 
-def chd_image(tools, cfg, image, owned):
+def chd_image(tools, cfg, image, owned, report=None):
     """Convert one loose disc image and remove its files once the chd verifies; None on success, else the error."""
-    error = make_chd(tools["chdman"], cfg, image, os.path.splitext(image)[0] + ".chd")
+    error = make_chd(tools, cfg, image, os.path.splitext(image)[0] + ".chd", report)
     if not error:
         for f in owned:
             if os.path.exists(f):
@@ -1042,38 +1090,128 @@ def chd_image(tools, cfg, image, owned):
     return error
 
 
+def remove_stale_chd_temp(root):
+    """Delete the .chd-* extraction folders a killed run left behind."""
+    for dirpath, dirs, _ in os.walk(root):
+        for d in [d for d in dirs if d.startswith(".chd-")]:
+            shutil.rmtree(os.path.join(dirpath, d), ignore_errors=True)
+            dirs.remove(d)
+
+
+def chd_roots(root, folders):
+    """{system folder: system} for every system folder under root: where the m3u playlists get fixed."""
+    roots = {}
+    for dirpath, dirs, _ in os.walk(root):
+        dirs[:] = sorted(d for d in dirs if not d.startswith("."))
+        system, sysroot = chd_system(root, dirpath, folders)
+        if system:
+            roots[sysroot] = system
+    return roots
+
+
+def fix_playlists(roots, dry_run):
+    """Run the --m3u pass on each system folder that has playlists."""
+    for sysroot, system in roots.items():
+        if system["chd"]["mode"] != "extract" and system["chd"].get("m3u", True):
+            m3u_command(SimpleNamespace(m3u=sysroot, dry_run=dry_run))
+
+
 def chd_command(args):
     root = os.path.abspath(os.path.expanduser(args.chd or os.getcwd()))
     if not os.path.isdir(root):
         raise SystemExit(red(f"❌ {root} is not a folder"))
     print(bold("💿 chd") + dim(f"  {root}"))
-    jobs = plan_chd(root, chd_folders(repo_json("systems")))
+    folders = chd_folders(repo_json("systems"))
+    roots = chd_roots(root, folders)
+    jobs = plan_chd(root, folders)
     if not jobs:
         print(green("✅ Nothing to convert"))
-        return 0
     for system, _, path, owned in jobs:
         what = "extract" if system["chd"]["mode"] == "extract" else "convert"
         print(f"  {'📦' if owned is None else '💿'} {what} {os.path.relpath(path, root)}")
     if args.dry_run:
+        fix_playlists(roots, True)
         print(yellow("\n🧪 Dry run — nothing changed"))
+        return 0
+    if not jobs:
+        fix_playlists(roots, False)
         return 0
     tools = {}
     for tool, needed in (("7z", any(j[3] is None for j in jobs)), ("chdman", any(j[0]["chd"]["mode"] != "extract" for j in jobs))):
         tools[tool] = find_tool(tool)
         if needed and not tools[tool]:
             raise SystemExit(red(f"❌ {tool} not found; run sync-roms --install-tools"))
-    converted, failed = [], 0
-    for system, sysroot, path, owned in jobs:
-        print(f"  ⏳ {os.path.relpath(path, root)}")
-        error = chd_image(tools, system["chd"], path, owned) if owned else chd_archive(tools, system["chd"], path)
-        if error:
-            failed += 1
-            print(red(f"  ❌ {os.path.relpath(path, root)}: {error}") + dim(" (kept)"))
-        else:
-            converted.append((system, sysroot))
-    for sysroot in dict.fromkeys(r for s, r in converted if s["chd"]["mode"] != "extract" and s["chd"].get("m3u", True)):
-        m3u_command(SimpleNamespace(m3u=sysroot, dry_run=False))
-    print((red if failed else green)(f"🎉 Done: {len(converted)} converted, {failed} failed"))
+    remove_stale_chd_temp(root)
+    cpus = os.cpu_count() or 1
+    workers = min(cpus, len(jobs))
+    tools["np"] = max(1, cpus // workers)  # cores left for each chdman once the jobs share them
+    print(dim(f"  {workers} at a time, {tools['np']} core(s) each"))
+
+    progress = [0.0] * len(jobs)  # each job's 0-1 progress; the bar is their mean
+
+    def convert(i):
+        system, _, path, owned = jobs[i]
+
+        def report(fraction):
+            progress[i] = max(progress[i], fraction)
+
+        try:
+            if owned:
+                return chd_image(tools, system["chd"], path, owned, report)
+            return chd_archive(tools, system["chd"], path, report)
+        finally:
+            progress[i] = 1.0
+
+    show_bar = sys.stdout.isatty()
+
+    def say(line):
+        print(("\r\033[K" if show_bar else "") + line)
+
+    def draw_bar():
+        if show_bar:
+            fraction = sum(progress) / len(jobs)
+            filled = int(fraction * 24)
+            done = sum(1 for p in progress if p >= 1)
+            sys.stdout.write(f"\r\033[K  {cyan('█' * filled)}{dim('░' * (24 - filled))} {done}/{len(jobs)} files  {fraction:4.0%}")
+            sys.stdout.flush()
+
+    converted, failed = 0, 0
+    pool = ThreadPoolExecutor(workers)
+    futures = [pool.submit(convert, i) for i in range(len(jobs))]
+    try:
+        for job, future in zip(jobs, futures):
+            while True:
+                try:
+                    error = future.result(timeout=0.25)
+                    break
+                except FutureTimeout:
+                    draw_bar()
+            name = os.path.relpath(job[2], root)
+            if error:
+                failed += 1
+                say(red(f"  ❌ {name}: {error}") + dim(" (kept)"))
+            else:
+                converted += 1
+                say(f"  ✅ {name}")
+            draw_bar()
+    except KeyboardInterrupt:
+        say(yellow("🛑 Interrupted, stopping and cleaning up..."))
+        for future in futures:
+            future.cancel()
+        while True:  # the running jobs remove their partial files as the tools stop
+            stop_tools()
+            try:
+                pool.shutdown(wait=True)
+                break
+            except KeyboardInterrupt:
+                pass
+        print(yellow(f"  {converted} done, nothing half-converted; run --chd again to continue"))
+        return 130
+    pool.shutdown()
+    if show_bar:
+        sys.stdout.write("\r\033[K")
+    fix_playlists(roots, False)
+    print((red if failed else green)(f"🎉 Done: {converted} converted, {failed} failed"))
     return 1 if failed else 0
 
 
