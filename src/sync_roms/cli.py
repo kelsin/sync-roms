@@ -67,6 +67,9 @@ def help_text():
                       settings) to the bucket's scrapes/ folder, merging with what's there
                       {dim('(only the safe-to-share metadata fields are kept; uploads with the ROMS_WRITE_PROFILE profile)')}
   {yellow('-c, --clean-scrapes')}   🧹 remove scrapes/ media and metadata for ROMs that aren't in the bucket at all (asks first, no folder needed)
+  {yellow('--m3u')} [{cyan('DIR')}]   💿 create or fix the .m3u playlist of every multi-disc game ("Name (Disc 1) (Extra).chd", "Name (Disc 2).chd") in DIR
+                      and its subfolders (no DIR: the current directory); playlists whose files are all missing are deleted (asks first),
+                      ones with the wrong or some missing discs are rewritten, and ones with the right discs under another name are renamed {dim('(local only; works with --dry-run)')}
   {yellow('--mirror')} [{cyan('DIR')}]   🪞 make or refresh a local copy of everything the game lists reference (ROMs, BIOS, scraped data); files that are
                       no longer referenced are deleted, a rerun with nothing changed downloads nothing (no DIR: the saved mirror)
   {yellow('--use-mirror')} {cyan('DIR')}   🪞 --mirror DIR, then save DIR so every sync refreshes it first and copies from it instead of the bucket
@@ -799,6 +802,107 @@ def find_extras(dest, wanted_keys):
             if os.path.normpath(os.path.relpath(path, dest)) not in expected:
                 extras.append(path)
     return extras
+
+
+DISC_RE = re.compile(r" \(Disc (\d+)\)")
+DISC_EXTS = {".chd", ".cue", ".iso", ".pbp", ".gdi", ".cso", ".ccd"}
+
+
+def disc_groups(files):
+    """{m3u name: disc files in order} for the multi-disc games among one folder's files.
+
+    "Name (Disc 1) (Key Disc) (Sega CD).chd" and "Name (Disc 2) (Sega CD).chd" are one game; the playlist is named
+    after the title with "(Disc N)" and any tags the discs don't all share removed: "Name (Sega CD).m3u".
+    """
+    games = defaultdict(list)
+    for f in files:
+        stem, ext = os.path.splitext(f)
+        m = DISC_RE.search(stem)
+        if m and ext.lower() in DISC_EXTS:
+            games[(stem[:m.start()], ext.lower())].append((int(m.group(1)), re.findall(r"\([^)]*\)", stem[m.end():]), f))
+    groups = {}
+    for (title, _), discs in games.items():
+        discs.sort()
+        if len(discs) < 2 or len({n for n, _, _ in discs}) < len(discs):
+            continue
+        shared = [t for t in discs[0][1] if all(t in tags for _, tags, _ in discs)]
+        groups[title + "".join(f" {t}" for t in shared) + ".m3u"] = [f for _, _, f in discs]
+    return groups
+
+
+def m3u_entries(path):
+    with open(path, encoding="utf-8", errors="replace") as f:
+        return [line.strip() for line in f if line.strip() and not line.lstrip().startswith("#")]
+
+
+def plan_m3u(root):
+    """[(action, path, lines)] to make every multi-disc game under root have a correct .m3u.
+
+    create: a game with none. rewrite: a playlist whose discs differ from the game's, or one with some missing files.
+    delete: a playlist whose files are all missing. rename: a playlist under another name that lists exactly a game's
+    discs (lines is the new path). A playlist that matches no game is kept if all its files exist.
+    """
+    plan = []
+    for dirpath, dirs, files in os.walk(root):
+        dirs[:] = sorted(d for d in dirs if not d.startswith("."))
+        files = sorted(f for f in files if not f.startswith("."))
+        groups = disc_groups(files)
+        covered = {}
+        for f in files:
+            if not f.lower().endswith(".m3u") or f in groups:
+                continue
+            path = os.path.join(dirpath, f)
+            entries = m3u_entries(path)
+            valid = [e for e in entries if os.path.exists(os.path.join(dirpath, e))]
+            if not valid:
+                plan.append(("delete", path, []))
+            elif len(valid) < len(entries):
+                plan.append(("rewrite", path, valid))
+            covered.setdefault(tuple(sorted(valid)), path)
+        for name, discs in groups.items():
+            path = os.path.join(dirpath, name)
+            if name in files:
+                if m3u_entries(path) != discs:
+                    plan.append(("rewrite", path, discs))
+            elif tuple(sorted(discs)) in covered:
+                plan.append(("rename", covered[tuple(sorted(discs))], path))
+            else:
+                plan.append(("create", path, discs))
+    return plan
+
+
+def m3u_command(args):
+    root = os.path.abspath(os.path.expanduser(args.m3u or os.getcwd()))
+    if not os.path.isdir(root):
+        raise SystemExit(red(f"❌ {root} is not a folder"))
+    print(bold("💿 m3u playlists") + dim(f"  {root}"))
+    plan = plan_m3u(root)
+    if not plan:
+        print(green("✅ All multi-disc playlists are correct"))
+        return 0
+    icons = {"create": "➕", "rewrite": "✏️ ", "delete": "🗑️ ", "rename": "🏷️ "}
+    for action, path, lines in plan:
+        to = f" {dim('→')} {os.path.basename(lines)}" if action == "rename" else ""
+        print(f"  {icons[action]} {action} {os.path.relpath(path, root)}{to}")
+    if args.dry_run:
+        print(yellow("\n🧪 Dry run — nothing changed"))
+        return 0
+    deletes = [path for action, path, _ in plan if action == "delete"]
+    kept = 0
+    if deletes and not confirm(f"🗑️  Delete {len(deletes)} playlist(s) whose files are all missing?", default=False):
+        print(yellow("  ↩️  Keeping them"))
+        kept, deletes = len(deletes), []
+    for action, path, lines in plan:
+        if action == "delete":
+            if path in deletes:
+                os.remove(path)
+        elif action == "rename":
+            os.rename(path, lines)
+        else:
+            with open(path, "w", encoding="utf-8", newline="\n") as f:
+                f.write("".join(line + "\n" for line in lines))
+    print(green(f"🎉 Done: {len(plan) - kept} change(s)"))
+    return 0
 
 
 def report_missing(keys, what):
@@ -1847,6 +1951,7 @@ def sync():
     ap.add_argument("-a", "--ask", action="store_true")
     ap.add_argument("-u", "--upload-scrapes", action="store_true")
     ap.add_argument("-c", "--clean-scrapes", action="store_true")
+    ap.add_argument("--m3u", nargs="?", const="")
     ap.add_argument("--mirror", nargs="?", const="")
     ap.add_argument("--use-mirror")
     ap.add_argument("--clear-mirror", action="store_true")
@@ -1858,6 +1963,10 @@ def sync():
         return 0
     if args.devices:
         return list_devices()
+    if args.m3u is not None:
+        if args.edit or args.upload_scrapes or args.clean_scrapes or args.mirror is not None or args.use_mirror or args.clear_mirror:
+            raise SystemExit(red("❌ --m3u can't be combined with other modes"))
+        return m3u_command(args)
     ensure_bucket()
     mirror_mode = args.mirror is not None or bool(args.use_mirror) or args.clear_mirror
     if args.edit + args.upload_scrapes + args.clean_scrapes + mirror_mode > 1:
