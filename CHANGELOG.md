@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.0](https://github.com/kelsin/sync-roms/compare/v0.4.0...v0.5.0) (2026-10-29)
+
+
+### Features
+
+* **sets:** add curated game sets with multi-disc support ([#9](https://github.com/kelsin/sync-roms/issues/9)) ([1950d20](https://github.com/kelsin/sync-roms/commit/1950d200e7440a565f1cabdd055a3d7885c9c6d1))
+
 ## [0.4.0](https://github.com/kelsin/sync-roms/compare/v0.3.0...v0.4.0) (2026-10-29)
 
 
