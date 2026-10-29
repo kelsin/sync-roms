@@ -128,6 +128,31 @@
         "psx/Final Fantasy IX (USA) (Disc 3) (Rev 1).chd",
         "psx/Final Fantasy IX (USA) (Disc 4) (Rev 1).chd"
       ]
+    },
+    {
+      "title": "Final Fantasy I & II - Dawn of Souls",
+      "system": "gba",
+      "bucket": "gba/Final Fantasy I & II - Dawn of Souls (USA).zip"
+    },
+    {
+      "title": "Final Fantasy IV Advance",
+      "system": "gba",
+      "bucket": "gba/Final Fantasy IV Advance (USA).zip"
+    },
+    {
+      "title": "Final Fantasy V Advance",
+      "system": "gba",
+      "bucket": "gba/Final Fantasy V Advance (USA).zip"
+    },
+    {
+      "title": "Final Fantasy VI Advance",
+      "system": "gba",
+      "bucket": "gba/Final Fantasy VI Advance (USA).zip"
+    },
+    {
+      "title": "Final Fantasy Tactics Advance",
+      "system": "gba",
+      "bucket": "gba/Final Fantasy Tactics Advance (USA).zip"
     }
   ]
 }

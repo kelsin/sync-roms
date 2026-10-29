@@ -121,6 +121,11 @@
       "title": "Bushido Blade",
       "system": "psx",
       "bucket": "psx/Bushido Blade (USA).chd"
+    },
+    {
+      "title": "Super Smash Bros.",
+      "system": "n64",
+      "bucket": "n64/Super Smash Bros. (USA) (LodgeNet).zip"
     }
   ]
 }

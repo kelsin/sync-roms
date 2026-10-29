@@ -243,6 +243,26 @@
         "saturn/Panzer Dragoon Saga (USA) (Disc 3).chd",
         "saturn/Panzer Dragoon Saga (USA) (Disc 4).chd"
       ]
+    },
+    {
+      "title": "Final Fantasy VI Advance",
+      "system": "gba",
+      "bucket": "gba/Final Fantasy VI Advance (USA).zip"
+    },
+    {
+      "title": "Golden Sun",
+      "system": "gba",
+      "bucket": "gba/Golden Sun (USA, Europe).zip"
+    },
+    {
+      "title": "Golden Sun - The Lost Age",
+      "system": "gba",
+      "bucket": "gba/Golden Sun - The Lost Age (USA, Europe).zip"
+    },
+    {
+      "title": "Final Fantasy Tactics Advance",
+      "system": "gba",
+      "bucket": "gba/Final Fantasy Tactics Advance (USA).zip"
     }
   ]
 }

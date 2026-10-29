@@ -71,6 +71,31 @@
       "title": "Akumajou Dracula X - Chi no Rondo (FABT, FACT)",
       "system": "tg-cd",
       "bucket": "tg-cd/Akumajou Dracula X - Chi no Rondo (Japan) (FABT, FACT).chd"
+    },
+    {
+      "title": "Castlevania - Circle of the Moon",
+      "system": "gba",
+      "bucket": "gba/Castlevania - Circle of the Moon (USA).zip"
+    },
+    {
+      "title": "Castlevania - Harmony of Dissonance",
+      "system": "gba",
+      "bucket": "gba/Castlevania - Harmony of Dissonance (USA).zip"
+    },
+    {
+      "title": "Castlevania - Aria of Sorrow",
+      "system": "gba",
+      "bucket": "gba/Castlevania - Aria of Sorrow (USA).zip"
+    },
+    {
+      "title": "Castlevania",
+      "system": "n64",
+      "bucket": "n64/Castlevania (USA) (Rev 2).zip"
+    },
+    {
+      "title": "Castlevania - Legacy of Darkness",
+      "system": "n64",
+      "bucket": "n64/Castlevania - Legacy of Darkness (USA).zip"
     }
   ]
 }

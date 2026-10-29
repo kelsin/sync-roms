@@ -78,6 +78,71 @@
       "bucket": "gba/Advance Wars 2 - Black Hole Rising (USA).zip"
     },
     {
+      "title": "Metroid Fusion",
+      "system": "gba",
+      "bucket": "gba/Metroid Fusion (USA).zip"
+    },
+    {
+      "title": "Metroid - Zero Mission",
+      "system": "gba",
+      "bucket": "gba/Metroid - Zero Mission (USA).zip"
+    },
+    {
+      "title": "Castlevania - Aria of Sorrow",
+      "system": "gba",
+      "bucket": "gba/Castlevania - Aria of Sorrow (USA).zip"
+    },
+    {
+      "title": "Fire Emblem",
+      "system": "gba",
+      "bucket": "gba/Fire Emblem (Europe) (En,Es,It).zip"
+    },
+    {
+      "title": "Golden Sun",
+      "system": "gba",
+      "bucket": "gba/Golden Sun (USA, Europe).zip"
+    },
+    {
+      "title": "Kirby & The Amazing Mirror",
+      "system": "gba",
+      "bucket": "gba/Kirby & The Amazing Mirror (USA).zip"
+    },
+    {
+      "title": "Legend of Zelda, The - The Minish Cap",
+      "system": "gba",
+      "bucket": "gba/Legend of Zelda, The - The Minish Cap (USA).zip"
+    },
+    {
+      "title": "Pokemon - Emerald Version",
+      "system": "gba",
+      "bucket": "gba/Pokemon - Emerald Version (USA, Europe).zip"
+    },
+    {
+      "title": "Super Mario Advance 4 - Super Mario Bros. 3",
+      "system": "gba",
+      "bucket": "gba/Super Mario Advance 4 - Super Mario Bros. 3 (USA).zip"
+    },
+    {
+      "title": "Wario Land 4",
+      "system": "gba",
+      "bucket": "gba/Wario Land 4 (USA, Europe).zip"
+    },
+    {
+      "title": "WarioWare, Inc. - Mega Microgame$!",
+      "system": "gba",
+      "bucket": "gba/WarioWare, Inc. - Mega Microgame$! (USA).zip"
+    },
+    {
+      "title": "Mario & Luigi - Superstar Saga",
+      "system": "gba",
+      "bucket": "gba/Mario & Luigi - Superstar Saga (USA).zip"
+    },
+    {
+      "title": "Mega Man Zero 3",
+      "system": "gba",
+      "bucket": "gba/Megaman Zero 3 (USA).zip"
+    },
+    {
       "title": "Sonic The Hedgehog 2 (Auto Demo)",
       "system": "gamegear",
       "bucket": "gamegear/Sonic The Hedgehog 2 (World) (Auto Demo).zip"

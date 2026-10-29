@@ -76,6 +76,36 @@
       "title": "Pocky & Rocky 2",
       "system": "snes",
       "bucket": "snes/Pocky & Rocky 2 (USA).zip"
+    },
+    {
+      "title": "Metroid Fusion",
+      "system": "gba",
+      "bucket": "gba/Metroid Fusion (USA).zip"
+    },
+    {
+      "title": "Metroid - Zero Mission",
+      "system": "gba",
+      "bucket": "gba/Metroid - Zero Mission (USA).zip"
+    },
+    {
+      "title": "Castlevania - Aria of Sorrow",
+      "system": "gba",
+      "bucket": "gba/Castlevania - Aria of Sorrow (USA).zip"
+    },
+    {
+      "title": "Castlevania - Circle of the Moon",
+      "system": "gba",
+      "bucket": "gba/Castlevania - Circle of the Moon (USA).zip"
+    },
+    {
+      "title": "Castlevania - Harmony of Dissonance",
+      "system": "gba",
+      "bucket": "gba/Castlevania - Harmony of Dissonance (USA).zip"
+    },
+    {
+      "title": "Wario Land 4",
+      "system": "gba",
+      "bucket": "gba/Wario Land 4 (USA, Europe).zip"
     }
   ]
 }

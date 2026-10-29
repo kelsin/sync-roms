@@ -101,6 +101,26 @@
       "title": "Teenage Mutant Ninja Turtles (2 Players)",
       "system": "mame",
       "bucket": "mame/tmnt22p.zip"
+    },
+    {
+      "title": "Mario Kart 64",
+      "system": "n64",
+      "bucket": "n64/Mario Kart 64 (USA) (LodgeNet).zip"
+    },
+    {
+      "title": "Super Smash Bros.",
+      "system": "n64",
+      "bucket": "n64/Super Smash Bros. (USA) (LodgeNet).zip"
+    },
+    {
+      "title": "GoldenEye 007",
+      "system": "n64",
+      "bucket": "n64/GoldenEye 007 (USA).zip"
+    },
+    {
+      "title": "Mario Party 2",
+      "system": "n64",
+      "bucket": "n64/Mario Party 2 (USA).zip"
     }
   ]
 }

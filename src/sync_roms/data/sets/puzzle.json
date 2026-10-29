@@ -131,6 +131,21 @@
       "title": "Puzzle De Pon!",
       "system": "neogeo",
       "bucket": "neogeo/puzzledp.zip"
+    },
+    {
+      "title": "Puyo Pop",
+      "system": "gba",
+      "bucket": "gba/Puyo Pop (USA) (En,Ja).zip"
+    },
+    {
+      "title": "Kuru Kuru Kururin",
+      "system": "gba",
+      "bucket": "gba/Kurukuru Kururin (Europe).zip"
+    },
+    {
+      "title": "Mr. Driller 2",
+      "system": "gba",
+      "bucket": "gba/Mr. Driller 2 (USA).zip"
     }
   ]
 }

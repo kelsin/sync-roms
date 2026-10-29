@@ -126,6 +126,51 @@
       "title": "Mega Man Legends",
       "system": "psx",
       "bucket": "psx/Mega Man Legends (USA).chd"
+    },
+    {
+      "title": "Mega Man Zero",
+      "system": "gba",
+      "bucket": "gba/Megaman Zero (USA, Europe).zip"
+    },
+    {
+      "title": "Mega Man Zero 2",
+      "system": "gba",
+      "bucket": "gba/Megaman Zero 2 (USA).zip"
+    },
+    {
+      "title": "Mega Man Zero 3",
+      "system": "gba",
+      "bucket": "gba/Megaman Zero 3 (USA).zip"
+    },
+    {
+      "title": "Mega Man Zero 4",
+      "system": "gba",
+      "bucket": "gba/Megaman Zero 4 (USA).zip"
+    },
+    {
+      "title": "Mega Man & Bass",
+      "system": "gba",
+      "bucket": "gba/Megaman & Bass (USA).zip"
+    },
+    {
+      "title": "Mega Man Battle Network",
+      "system": "gba",
+      "bucket": "gba/Megaman - Battle Network (USA).zip"
+    },
+    {
+      "title": "Mega Man Battle Network 2",
+      "system": "gba",
+      "bucket": "gba/Megaman - Battle Network 2 (USA) (Debug Version).zip"
+    },
+    {
+      "title": "Mega Man Battle Network 3 - Blue Version",
+      "system": "gba",
+      "bucket": "gba/Megaman - Battle Network 3 - Blue Version (USA).zip"
+    },
+    {
+      "title": "Mega Man Battle Network 5: Team Protoman",
+      "system": "gba",
+      "bucket": "gba/Megaman - Battle Network 5 - Team Protoman (USA).zip"
     }
   ]
 }

@@ -356,6 +356,46 @@
         "psx/Legend of Dragoon, The (USA) (Disc 3).chd",
         "psx/Legend of Dragoon, The (USA) (Disc 4).chd"
       ]
+    },
+    {
+      "title": "Drill Dozer",
+      "system": "gba",
+      "bucket": "gba/Drill Dozer (USA).zip"
+    },
+    {
+      "title": "Mother 3",
+      "system": "gba",
+      "bucket": "gba/Mother 3 (Japan).zip"
+    },
+    {
+      "title": "Astro Boy - Omega Factor",
+      "system": "gba",
+      "bucket": "gba/Astro Boy - Omega Factor (USA) (En,Ja,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Riviera - The Promised Land",
+      "system": "gba",
+      "bucket": "gba/Riviera - The Promised Land (USA).zip"
+    },
+    {
+      "title": "Gunstar Super Heroes",
+      "system": "gba",
+      "bucket": "gba/Gunstar Super Heroes (USA).zip"
+    },
+    {
+      "title": "Mr. Driller 2",
+      "system": "gba",
+      "bucket": "gba/Mr. Driller 2 (USA).zip"
+    },
+    {
+      "title": "Rhythm Tengoku",
+      "system": "gba",
+      "bucket": "gba/Rhythm Tengoku (Japan) (Rev 1).zip"
+    },
+    {
+      "title": "Ninja Five-0",
+      "system": "gba",
+      "bucket": "gba/Ninja Five-0 (USA).zip"
     }
   ]
 }

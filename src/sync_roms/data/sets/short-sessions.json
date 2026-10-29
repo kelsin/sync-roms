@@ -48,6 +48,61 @@
       "bucket": "gba/Advance Wars (USA) (Rev 1).zip"
     },
     {
+      "title": "WarioWare, Inc. - Mega Microgame$!",
+      "system": "gba",
+      "bucket": "gba/WarioWare, Inc. - Mega Microgame$! (USA).zip"
+    },
+    {
+      "title": "Drill Dozer",
+      "system": "gba",
+      "bucket": "gba/Drill Dozer (USA).zip"
+    },
+    {
+      "title": "Kuru Kuru Kururin",
+      "system": "gba",
+      "bucket": "gba/Kurukuru Kururin (Europe).zip"
+    },
+    {
+      "title": "Mr. Driller 2",
+      "system": "gba",
+      "bucket": "gba/Mr. Driller 2 (USA).zip"
+    },
+    {
+      "title": "Tony Hawk's Pro Skater 2",
+      "system": "gba",
+      "bucket": "gba/Tony Hawk's Pro Skater 2 (USA, Europe).zip"
+    },
+    {
+      "title": "Super Mario Advance 4 - Super Mario Bros. 3",
+      "system": "gba",
+      "bucket": "gba/Super Mario Advance 4 - Super Mario Bros. 3 (USA).zip"
+    },
+    {
+      "title": "Mario Kart - Super Circuit",
+      "system": "gba",
+      "bucket": "gba/Mario Kart - Super Circuit (USA).zip"
+    },
+    {
+      "title": "F-Zero - Maximum Velocity",
+      "system": "gba",
+      "bucket": "gba/F-Zero - Maximum Velocity (USA, Europe).zip"
+    },
+    {
+      "title": "Pac-Man Collection",
+      "system": "gba",
+      "bucket": "gba/Pac-Man Collection (USA).zip"
+    },
+    {
+      "title": "Namco Museum",
+      "system": "gba",
+      "bucket": "gba/Namco Museum (USA).zip"
+    },
+    {
+      "title": "Sonic Advance",
+      "system": "gba",
+      "bucket": "gba/Sonic Advance (USA) (En,Ja).zip"
+    },
+    {
       "title": "Mario Kart DS",
       "system": "nds",
       "bucket": "nds/Mario Kart DS.zip"

@@ -91,6 +91,56 @@
       "title": "Pokemon Ranger",
       "system": "nds",
       "bucket": "nds/Pokemon Ranger.zip"
+    },
+    {
+      "title": "Pokemon - Ruby Version",
+      "system": "gba",
+      "bucket": "gba/Pokemon - Ruby Version (USA, Europe) (Rev 2).zip"
+    },
+    {
+      "title": "Pokemon - Sapphire Version",
+      "system": "gba",
+      "bucket": "gba/Pokemon - Sapphire Version (USA, Europe) (Rev 2).zip"
+    },
+    {
+      "title": "Pokemon - Emerald Version",
+      "system": "gba",
+      "bucket": "gba/Pokemon - Emerald Version (USA, Europe).zip"
+    },
+    {
+      "title": "Pokemon - FireRed Version",
+      "system": "gba",
+      "bucket": "gba/Pokemon - FireRed Version (USA, Europe) (Rev 1).zip"
+    },
+    {
+      "title": "Pokemon - LeafGreen Version",
+      "system": "gba",
+      "bucket": "gba/Pokemon - LeafGreen Version (USA, Europe) (Rev 1).zip"
+    },
+    {
+      "title": "Pokemon Pinball - Ruby & Sapphire",
+      "system": "gba",
+      "bucket": "gba/Pokemon Pinball - Ruby & Sapphire (USA).zip"
+    },
+    {
+      "title": "Pokemon Mystery Dungeon - Red Rescue Team",
+      "system": "gba",
+      "bucket": "gba/Pokemon Mystery Dungeon - Red Rescue Team (Europe) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Pokemon Snap",
+      "system": "n64",
+      "bucket": "n64/Pokemon Snap (USA) (LodgeNet).zip"
+    },
+    {
+      "title": "Pokemon Stadium",
+      "system": "n64",
+      "bucket": "n64/Pokemon Stadium (USA) (Rev 2).zip"
+    },
+    {
+      "title": "Pokemon Stadium 2",
+      "system": "n64",
+      "bucket": "n64/Pokemon Stadium 2 (USA).zip"
     }
   ]
 }

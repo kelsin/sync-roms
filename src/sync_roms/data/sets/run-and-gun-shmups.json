@@ -161,6 +161,11 @@
       "title": "Blazing Star",
       "system": "neogeo",
       "bucket": "neogeo/blazstar.zip"
+    },
+    {
+      "title": "Gunstar Super Heroes",
+      "system": "gba",
+      "bucket": "gba/Gunstar Super Heroes (USA).zip"
     }
   ]
 }

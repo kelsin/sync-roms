@@ -81,6 +81,16 @@
       "title": "Street Fighter III - 3rd Strike",
       "system": "dreamcast",
       "bucket": "dreamcast/Street Fighter III - 3rd Strike (USA).chd"
+    },
+    {
+      "title": "Super Street Fighter II Turbo - Revival",
+      "system": "gba",
+      "bucket": "gba/Super Street Fighter II Turbo - Revival (USA).zip"
+    },
+    {
+      "title": "Street Fighter Alpha 3",
+      "system": "gba",
+      "bucket": "gba/Street Fighter Alpha 3 (USA).zip"
     }
   ]
 }

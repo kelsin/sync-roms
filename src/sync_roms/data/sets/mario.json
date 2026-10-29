@@ -116,6 +116,101 @@
       "title": "Mario Clash (En)",
       "system": "virtualboy",
       "bucket": "virtualboy/Mario Clash (Japan, USA) (En).zip"
+    },
+    {
+      "title": "Super Mario Advance",
+      "system": "gba",
+      "bucket": "gba/Super Mario Advance (USA, Europe).zip"
+    },
+    {
+      "title": "Super Mario Advance 2 - Super Mario World",
+      "system": "gba",
+      "bucket": "gba/Super Mario Advance 2 - Super Mario World (Europe) (En,Fr,De,Es).zip"
+    },
+    {
+      "title": "Super Mario Advance 3 - Yoshi's Island",
+      "system": "gba",
+      "bucket": "gba/Super Mario Advance 3 - Yoshi's Island (USA).zip"
+    },
+    {
+      "title": "Super Mario Advance 4 - Super Mario Bros. 3",
+      "system": "gba",
+      "bucket": "gba/Super Mario Advance 4 - Super Mario Bros. 3 (USA).zip"
+    },
+    {
+      "title": "Mario Kart - Super Circuit",
+      "system": "gba",
+      "bucket": "gba/Mario Kart - Super Circuit (USA).zip"
+    },
+    {
+      "title": "Mario & Luigi - Superstar Saga",
+      "system": "gba",
+      "bucket": "gba/Mario & Luigi - Superstar Saga (USA).zip"
+    },
+    {
+      "title": "Mario Golf - Advance Tour",
+      "system": "gba",
+      "bucket": "gba/Mario Golf - Advance Tour (USA).zip"
+    },
+    {
+      "title": "Mario Tennis - Power Tour",
+      "system": "gba",
+      "bucket": "gba/Mario Tennis - Power Tour (USA, Australia) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Wario Land 4",
+      "system": "gba",
+      "bucket": "gba/Wario Land 4 (USA, Europe).zip"
+    },
+    {
+      "title": "WarioWare, Inc. - Mega Microgame$!",
+      "system": "gba",
+      "bucket": "gba/WarioWare, Inc. - Mega Microgame$! (USA).zip"
+    },
+    {
+      "title": "Super Mario 64",
+      "system": "n64",
+      "bucket": "n64/Super Mario 64 (USA) (LodgeNet).zip"
+    },
+    {
+      "title": "Mario Kart 64",
+      "system": "n64",
+      "bucket": "n64/Mario Kart 64 (USA) (LodgeNet).zip"
+    },
+    {
+      "title": "Paper Mario",
+      "system": "n64",
+      "bucket": "n64/Paper Mario (USA) (LodgeNet).zip"
+    },
+    {
+      "title": "Mario Party",
+      "system": "n64",
+      "bucket": "n64/Mario Party (USA).zip"
+    },
+    {
+      "title": "Mario Party 2",
+      "system": "n64",
+      "bucket": "n64/Mario Party 2 (USA).zip"
+    },
+    {
+      "title": "Mario Party 3",
+      "system": "n64",
+      "bucket": "n64/Mario Party 3 (USA) (LodgeNet).zip"
+    },
+    {
+      "title": "Mario Golf",
+      "system": "n64",
+      "bucket": "n64/Mario Golf (USA) (LodgeNet).zip"
+    },
+    {
+      "title": "Mario Tennis",
+      "system": "n64",
+      "bucket": "n64/Mario Tennis (USA) (LodgeNet).zip"
+    },
+    {
+      "title": "Dr. Mario 64",
+      "system": "n64",
+      "bucket": "n64/Dr. Mario 64 (USA) (LodgeNet).zip"
     }
   ]
 }

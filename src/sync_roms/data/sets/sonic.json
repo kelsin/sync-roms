@@ -136,6 +136,26 @@
       "title": "Sonic Rush Adventure",
       "system": "nds",
       "bucket": "nds/Sonic Rush Adventure.zip"
+    },
+    {
+      "title": "Sonic Advance",
+      "system": "gba",
+      "bucket": "gba/Sonic Advance (USA) (En,Ja).zip"
+    },
+    {
+      "title": "Sonic Advance 2",
+      "system": "gba",
+      "bucket": "gba/Sonic Advance 2 (USA) (En,Ja,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Sonic Advance 3",
+      "system": "gba",
+      "bucket": "gba/Sonic Advance 3 (USA) (En,Ja,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Sonic Battle",
+      "system": "gba",
+      "bucket": "gba/Sonic Battle (USA) (En,Ja,Fr,De,Es,It).zip"
     }
   ]
 }
