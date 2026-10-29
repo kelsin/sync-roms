@@ -33,16 +33,6 @@
       "bucket": "snes/Super Mario RPG - Legend of the Seven Stars (USA).zip"
     },
     {
-      "title": "Dragon Quest I & II",
-      "system": "snes",
-      "bucket": "snes/Dragon Quest I & II (Japan).zip"
-    },
-    {
-      "title": "Terranigma",
-      "system": "snes",
-      "bucket": "snes/Terranigma (Europe).zip"
-    },
-    {
       "title": "Lufia II - Rise of the Sinistrals",
       "system": "snes",
       "bucket": "snes/Lufia II - Rise of the Sinistrals (USA).zip"
@@ -78,14 +68,14 @@
       "bucket": "nes/Dragon Warrior III (USA).zip"
     },
     {
-      "title": "Phantasy Star IV (Genesis Mini)",
+      "title": "Phantasy Star IV",
       "system": "genesis",
-      "bucket": "genesis/Phantasy Star IV (USA) (Genesis Mini).zip"
+      "bucket": "genesis/Phantasy Star IV (USA).zip"
     },
     {
-      "title": "Shining Force (Genesis Mini)",
+      "title": "Shining Force",
       "system": "genesis",
-      "bucket": "genesis/Shining Force (USA) (Genesis Mini).zip"
+      "bucket": "genesis/Shining Force (USA).zip"
     },
     {
       "title": "Shining Force II",
@@ -121,16 +111,6 @@
       "title": "Breath of Fire IV",
       "system": "psx",
       "bucket": "psx/Breath of Fire IV (USA).chd"
-    },
-    {
-      "title": "Dragon Quest IX - Sentinels of the Starry Skies",
-      "system": "nds",
-      "bucket": "nds/Dragon Quest IX - Sentinels of the Starry Skies.zip"
-    },
-    {
-      "title": "Chrono Trigger",
-      "system": "nds",
-      "bucket": "nds/Chrono Trigger.zip"
     },
     {
       "title": "Dragon Force",
@@ -224,14 +204,6 @@
         "psx/Legend of Dragoon, The (USA) (Disc 2).chd",
         "psx/Legend of Dragoon, The (USA) (Disc 3).chd",
         "psx/Legend of Dragoon, The (USA) (Disc 4).chd"
-      ]
-    },
-    {
-      "title": "Skies of Arcadia",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Skies of Arcadia (USA) (Disc 1).chd",
-      "files": [
-        "dreamcast/Skies of Arcadia (USA) (Disc 2).chd"
       ]
     },
     {

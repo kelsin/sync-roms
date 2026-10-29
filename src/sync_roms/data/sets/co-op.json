@@ -58,9 +58,9 @@
       "bucket": "snes/Donkey Kong Country 2 - Diddy's Kong Quest (USA) (En,Fr) (Rev 1).zip"
     },
     {
-      "title": "Super Mario All-Stars",
+      "title": "Super Mario All-Stars + Super Mario World",
       "system": "snes",
-      "bucket": "snes/Super Mario All-Stars (USA).zip"
+      "bucket": "snes/Super Mario All-Stars + Super Mario World (USA).zip"
     },
     {
       "title": "Streets of Rage 2",
@@ -83,19 +83,14 @@
       "bucket": "genesis/Sonic The Hedgehog 2 (World) (Rev B).zip"
     },
     {
-      "title": "ToeJam & Earl (En) (Rev A)",
+      "title": "Golden Axe (Rev A)",
       "system": "genesis",
-      "bucket": "genesis/ToeJam & Earl (Japan, Europe) (En) (Rev A).zip"
+      "bucket": "genesis/Golden Axe (World) (Rev A).zip"
     },
     {
-      "title": "Golden Axe (Rev B) (Sega Smash Pack)",
+      "title": "Contra - Hard Corps",
       "system": "genesis",
-      "bucket": "genesis/Golden Axe (World) (Rev B) (Sega Smash Pack).zip"
-    },
-    {
-      "title": "Contra - Hard Corps (Genesis Mini)",
-      "system": "genesis",
-      "bucket": "genesis/Contra - Hard Corps (USA) (Genesis Mini).zip"
+      "bucket": "genesis/Contra - Hard Corps (USA, Korea) (En).zip"
     },
     {
       "title": "Teenage Mutant Ninja Turtles (2 Players)",
@@ -103,14 +98,49 @@
       "bucket": "mame/tmnt22p.zip"
     },
     {
+      "title": "Teenage Mutant Ninja Turtles",
+      "system": "mame",
+      "bucket": "mame/tmntu.zip"
+    },
+    {
+      "title": "The Simpsons",
+      "system": "mame",
+      "bucket": "mame/simpsons.zip"
+    },
+    {
+      "title": "Sunset Riders",
+      "system": "mame",
+      "bucket": "mame/ssriders.zip"
+    },
+    {
+      "title": "Warriors of Fate",
+      "system": "mame",
+      "bucket": "mame/wofu.zip"
+    },
+    {
+      "title": "Captain Commando",
+      "system": "mame",
+      "bucket": "mame/captcomu.zip"
+    },
+    {
+      "title": "Alien vs. Predator",
+      "system": "mame",
+      "bucket": "mame/avsp.zip"
+    },
+    {
+      "title": "X-Men",
+      "system": "mame",
+      "bucket": "mame/xmen.zip"
+    },
+    {
       "title": "Mario Kart 64",
       "system": "n64",
-      "bucket": "n64/Mario Kart 64 (USA) (LodgeNet).zip"
+      "bucket": "n64/Mario Kart 64 (USA).zip"
     },
     {
       "title": "Super Smash Bros.",
       "system": "n64",
-      "bucket": "n64/Super Smash Bros. (USA) (LodgeNet).zip"
+      "bucket": "n64/Super Smash Bros. (USA).zip"
     },
     {
       "title": "GoldenEye 007",

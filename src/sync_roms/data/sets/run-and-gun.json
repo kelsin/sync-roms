@@ -23,11 +23,6 @@
       "bucket": "snes/Super Turrican (USA).zip"
     },
     {
-      "title": "Super Probotector - Alien Rebels",
-      "system": "snes",
-      "bucket": "snes/Super Probotector - Alien Rebels (Europe).zip"
-    },
-    {
       "title": "Gunstar Heroes",
       "system": "genesis",
       "bucket": "genesis/Gunstar Heroes (USA).zip"
@@ -36,11 +31,6 @@
       "title": "Gunstar Super Heroes",
       "system": "gba",
       "bucket": "gba/Gunstar Super Heroes (USA).zip"
-    },
-    {
-      "title": "Alien Soldier",
-      "system": "genesis",
-      "bucket": "genesis/Alien Soldier (Europe).zip"
     },
     {
       "title": "Mega Turrican",
@@ -56,6 +46,46 @@
       "title": "Metal Slug",
       "system": "neogeo",
       "bucket": "neogeo/mslug.zip"
+    },
+    {
+      "title": "Metal Slug 2",
+      "system": "neogeo",
+      "bucket": "neogeo/mslug2.zip"
+    },
+    {
+      "title": "Metal Slug 3",
+      "system": "neogeo",
+      "bucket": "neogeo/mslug3.zip"
+    },
+    {
+      "title": "Metal Slug X",
+      "system": "neogeo",
+      "bucket": "neogeo/mslugx.zip"
+    },
+    {
+      "title": "Metal Slug 5",
+      "system": "neogeo",
+      "bucket": "neogeo/mslug5.zip"
+    },
+    {
+      "title": "Contra",
+      "system": "mame",
+      "bucket": "mame/contra.zip"
+    },
+    {
+      "title": "Shock Troopers",
+      "system": "neogeo",
+      "bucket": "neogeo/shocktro.zip"
+    },
+    {
+      "title": "Cabal",
+      "system": "mame",
+      "bucket": "mame/cabal.zip"
+    },
+    {
+      "title": "Rolling Thunder",
+      "system": "mame",
+      "bucket": "mame/rthunder.zip"
     },
     {
       "title": "Alien Hominid",

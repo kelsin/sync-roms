@@ -30,22 +30,12 @@
     {
       "title": "Legend of Zelda, The - Oracle of Ages (En,Fr,De,Es,It)",
       "system": "gbc",
-      "bucket": "gbc/Legend of Zelda, The - Oracle of Ages (Europe) (En,Fr,De,Es,It).zip"
+      "bucket": "gbc/Legend of Zelda, The - Oracle of Ages (USA, Australia).zip"
     },
     {
       "title": "Legend of Zelda, The - Oracle of Seasons (En,Fr,De,Es,It)",
       "system": "gbc",
-      "bucket": "gbc/Legend of Zelda, The - Oracle of Seasons (Europe) (En,Fr,De,Es,It).zip"
-    },
-    {
-      "title": "Legend of Zelda, The - Phantom Hourglass",
-      "system": "nds",
-      "bucket": "nds/Legend of Zelda, The - Phantom Hourglass.zip"
-    },
-    {
-      "title": "Legend of Zelda, The - Spirit Tracks",
-      "system": "nds",
-      "bucket": "nds/Legend of Zelda, The - Spirit Tracks.zip"
+      "bucket": "gbc/Legend of Zelda, The - Oracle of Seasons (USA, Australia).zip"
     },
     {
       "title": "Legend of Zelda, The - A Link to the Past & Four Swords",
@@ -65,7 +55,7 @@
     {
       "title": "Legend of Zelda, The - Majora's Mask",
       "system": "n64",
-      "bucket": "n64/Legend of Zelda, The - Majora's Mask (USA) (LodgeNet).zip"
+      "bucket": "n64/Legend of Zelda, The - Majora's Mask (USA).zip"
     }
   ]
 }

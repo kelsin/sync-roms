@@ -43,9 +43,9 @@
       "bucket": "gb/Wario Land II (USA, Europe) (SGB Enhanced).zip"
     },
     {
-      "title": "Pokemon - Crystal Version",
+      "title": "Pokemon - Crystal Version (Rev 1)",
       "system": "gbc",
-      "bucket": "gbc/Pokemon - Crystal Version (USA).zip"
+      "bucket": "gbc/Pokemon - Crystal Version (USA, Europe) (Rev 1).zip"
     },
     {
       "title": "Legend of Zelda, The - Link's Awakening DX (Rev 2) (SGB Enhanced) (GB Compatible)",
@@ -55,12 +55,12 @@
     {
       "title": "Legend of Zelda, The - Oracle of Seasons (En,Fr,De,Es,It)",
       "system": "gbc",
-      "bucket": "gbc/Legend of Zelda, The - Oracle of Seasons (Europe) (En,Fr,De,Es,It).zip"
+      "bucket": "gbc/Legend of Zelda, The - Oracle of Seasons (USA, Australia).zip"
     },
     {
       "title": "Legend of Zelda, The - Oracle of Ages (En,Fr,De,Es,It)",
       "system": "gbc",
-      "bucket": "gbc/Legend of Zelda, The - Oracle of Ages (Europe) (En,Fr,De,Es,It).zip"
+      "bucket": "gbc/Legend of Zelda, The - Oracle of Ages (USA, Australia).zip"
     },
     {
       "title": "Wario Land 3 (En,Ja)",
@@ -95,7 +95,7 @@
     {
       "title": "Fire Emblem",
       "system": "gba",
-      "bucket": "gba/Fire Emblem (Europe) (En,Es,It).zip"
+      "bucket": "gba/Fire Emblem (USA, Australia).zip"
     },
     {
       "title": "Golden Sun",
@@ -118,9 +118,9 @@
       "bucket": "gba/Pokemon - Emerald Version (USA, Europe).zip"
     },
     {
-      "title": "Super Mario Advance 4 - Super Mario Bros. 3",
+      "title": "Super Mario Advance 4 - Super Mario Bros. 3 (Rev 1)",
       "system": "gba",
-      "bucket": "gba/Super Mario Advance 4 - Super Mario Bros. 3 (USA).zip"
+      "bucket": "gba/Super Mario Advance 4 - Super Mario Bros. 3 (USA, Australia) (Rev 1).zip"
     },
     {
       "title": "Wario Land 4",
@@ -143,9 +143,9 @@
       "bucket": "gba/Megaman Zero 3 (USA).zip"
     },
     {
-      "title": "Sonic The Hedgehog 2 (Auto Demo)",
+      "title": "Sonic The Hedgehog 2",
       "system": "gamegear",
-      "bucket": "gamegear/Sonic The Hedgehog 2 (World) (Auto Demo).zip"
+      "bucket": "gamegear/Sonic The Hedgehog 2 (World).zip"
     },
     {
       "title": "Shinobi II - The Silent Fury",
@@ -153,24 +153,19 @@
       "bucket": "gamegear/Shinobi II - The Silent Fury (World).zip"
     },
     {
-      "title": "Columns (En) (Rev 1)",
-      "system": "gamegear",
-      "bucket": "gamegear/Columns (Japan) (En) (Rev 1).zip"
-    },
-    {
       "title": "Blue Lightning",
       "system": "atarilynx",
-      "bucket": "atarilynx/Blue Lightning (1989).lnx"
+      "bucket": "atarilynx/Blue Lightning (World).zip"
     },
     {
       "title": "California Games",
       "system": "atarilynx",
-      "bucket": "atarilynx/California Games (1991).lnx"
+      "bucket": "atarilynx/California Games (World).zip"
     },
     {
       "title": "Chip's Challenge",
       "system": "atarilynx",
-      "bucket": "atarilynx/Chip's Challenge (1989).lnx"
+      "bucket": "atarilynx/Chip's Challenge (World).zip"
     },
     {
       "title": "SNK vs. Capcom - Card Fighters' Clash - SNK Version",
@@ -193,11 +188,6 @@
       "bucket": "ngpc/Sonic The Hedgehog - Pocket Adventure (World) (En,Ja).zip"
     },
     {
-      "title": "Final Fantasy",
-      "system": "wonderswancolor",
-      "bucket": "wonderswancolor/Final Fantasy (Japan).zip"
-    },
-    {
       "title": "Virtual Boy Wario Land (En)",
       "system": "virtualboy",
       "bucket": "virtualboy/Virtual Boy Wario Land (Japan, USA) (En).zip"
@@ -211,11 +201,6 @@
       "title": "Galactic Pinball (En)",
       "system": "virtualboy",
       "bucket": "virtualboy/Galactic Pinball (Japan, USA) (En).zip"
-    },
-    {
-      "title": "Rockman & Forte (WonderSwan)",
-      "system": "wonderswan",
-      "bucket": "wonderswan/Rockman & Forte - Mirai Kara no Chousensha (Japan).zip"
     }
   ]
 }

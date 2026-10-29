@@ -5,7 +5,7 @@
     {
       "title": "Sonic The Hedgehog",
       "system": "genesis",
-      "bucket": "genesis/Sonic The Hedgehog (USA, Europe).zip"
+      "bucket": "genesis/Sonic The Hedgehog (Japan, Europe, Korea) (En).zip"
     },
     {
       "title": "Sonic The Hedgehog 2 (Rev B)",
@@ -13,9 +13,9 @@
       "bucket": "genesis/Sonic The Hedgehog 2 (World) (Rev B).zip"
     },
     {
-      "title": "Sonic The Hedgehog 3 (1993-11-20) (Sega Channel)",
+      "title": "Sonic The Hedgehog 3",
       "system": "genesis",
-      "bucket": "genesis/Sonic The Hedgehog 3 (USA) (1993-11-20) (Sega Channel).zip"
+      "bucket": "genesis/Sonic The Hedgehog 3 (USA).zip"
     },
     {
       "title": "Sonic & Knuckles",
@@ -28,9 +28,9 @@
       "bucket": "genesis/Sonic 3D Blast (USA, Europe, Korea) (En).zip"
     },
     {
-      "title": "Sonic Spinball (1993-09-22) (Sega Channel)",
+      "title": "Sonic Spinball",
       "system": "genesis",
-      "bucket": "genesis/Sonic Spinball (USA) (1993-09-22) (Sega Channel).zip"
+      "bucket": "genesis/Sonic Spinball (USA).zip"
     },
     {
       "title": "Dr. Robotnik's Mean Bean Machine",
@@ -45,7 +45,7 @@
     {
       "title": "Knuckles' Chaotix",
       "system": "sega32x",
-      "bucket": "sega32x/Knuckles' Chaotix (Europe).zip"
+      "bucket": "sega32x/Knuckles' Chaotix (Japan, USA) (En).zip"
     },
     {
       "title": "Sonic The Hedgehog (En)",
@@ -53,34 +53,14 @@
       "bucket": "mastersystem/Sonic The Hedgehog (USA, Europe, Brazil) (En).zip"
     },
     {
-      "title": "Sonic The Hedgehog 2 (En) (Rev 1)",
-      "system": "mastersystem",
-      "bucket": "mastersystem/Sonic The Hedgehog 2 (Europe, Brazil) (En) (Rev 1).zip"
-    },
-    {
-      "title": "Sonic Chaos (En)",
-      "system": "mastersystem",
-      "bucket": "mastersystem/Sonic Chaos (Europe, Brazil) (En).zip"
-    },
-    {
-      "title": "Sonic Blast (Brazil) (En)",
-      "system": "mastersystem",
-      "bucket": "mastersystem/Sonic Blast (Brazil) (En).zip"
-    },
-    {
-      "title": "Sonic Spinball (En)",
-      "system": "mastersystem",
-      "bucket": "mastersystem/Sonic Spinball (Europe, Brazil) (En).zip"
-    },
-    {
-      "title": "Sonic The Hedgehog (Rev 1)",
+      "title": "Sonic The Hedgehog",
       "system": "gamegear",
-      "bucket": "gamegear/Sonic The Hedgehog (World) (Rev 1).zip"
+      "bucket": "gamegear/Sonic The Hedgehog (Japan, USA) (En).zip"
     },
     {
-      "title": "Sonic The Hedgehog 2 (Auto Demo)",
+      "title": "Sonic The Hedgehog 2",
       "system": "gamegear",
-      "bucket": "gamegear/Sonic The Hedgehog 2 (World) (Auto Demo).zip"
+      "bucket": "gamegear/Sonic The Hedgehog 2 (World).zip"
     },
     {
       "title": "Sonic Chaos (En)",
@@ -108,34 +88,9 @@
       "bucket": "gamegear/Sonic Blast (World).zip"
     },
     {
-      "title": "Sonic R",
-      "system": "saturn",
-      "bucket": "saturn/Sonic R (Europe).chd"
-    },
-    {
       "title": "Sonic Jam",
       "system": "saturn",
       "bucket": "saturn/Sonic Jam (USA).chd"
-    },
-    {
-      "title": "Sonic Adventure (En,Ja,Fr,De,Es) (Rev A)",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Sonic Adventure (USA) (En,Ja,Fr,De,Es) (Rev A).chd"
-    },
-    {
-      "title": "Sonic Adventure 2 (En,Ja,Fr,De,Es)",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Sonic Adventure 2 (USA) (En,Ja,Fr,De,Es).chd"
-    },
-    {
-      "title": "Sonic Rush",
-      "system": "nds",
-      "bucket": "nds/Sonic Rush.zip"
-    },
-    {
-      "title": "Sonic Rush Adventure",
-      "system": "nds",
-      "bucket": "nds/Sonic Rush Adventure.zip"
     },
     {
       "title": "Sonic Advance",

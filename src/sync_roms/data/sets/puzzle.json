@@ -15,7 +15,7 @@
     {
       "title": "Dr. Mario",
       "system": "nes",
-      "bucket": "nes/Dr. Mario (Europe).zip"
+      "bucket": "nes/Dr. Mario (Japan, USA) (En) (Rev 1).zip"
     },
     {
       "title": "Dr. Mario (Rev 1)",
@@ -28,11 +28,6 @@
       "bucket": "snes/Tetris & Dr. Mario (USA).zip"
     },
     {
-      "title": "Super Puyo Puyo (Rev 2)",
-      "system": "snes",
-      "bucket": "snes/Super Puyo Puyo (Japan) (Rev 2).zip"
-    },
-    {
       "title": "Tetris Attack (En,Ja)",
       "system": "snes",
       "bucket": "snes/Tetris Attack (USA) (En,Ja).zip"
@@ -43,9 +38,9 @@
       "bucket": "snes/Super Bomberman (USA).zip"
     },
     {
-      "title": "Columns (1990-06-21) (Sega Channel)",
+      "title": "Columns",
       "system": "genesis",
-      "bucket": "genesis/Columns (USA, Europe) (1990-06-21) (Sega Channel).zip"
+      "bucket": "genesis/Columns (USA, Europe).zip"
     },
     {
       "title": "Dr. Robotnik's Mean Bean Machine",
@@ -53,19 +48,9 @@
       "bucket": "genesis/Dr. Robotnik's Mean Bean Machine (USA).zip"
     },
     {
-      "title": "Puyo Puyo Tsuu (Rev A)",
-      "system": "genesis",
-      "bucket": "genesis/Puyo Puyo Tsuu (Japan) (Rev A).zip"
-    },
-    {
       "title": "Bomberman '93",
       "system": "tg16",
       "bucket": "tg16/Bomberman '93 (USA).zip"
-    },
-    {
-      "title": "Bomberman '94",
-      "system": "tg16",
-      "bucket": "tg16/Bomberman '94 (Japan).zip"
     },
     {
       "title": "Tetris DX (SGB Enhanced) (GB Compatible)",
@@ -93,9 +78,9 @@
       "bucket": "gb/Kirby's Block Ball (USA, Europe) (SGB Enhanced).zip"
     },
     {
-      "title": "Boxxle",
+      "title": "Boxxle (Rev 1)",
       "system": "gb",
-      "bucket": "gb/Boxxle (USA).zip"
+      "bucket": "gb/Boxxle (USA, Europe) (Rev 1).zip"
     },
     {
       "title": "Wario Blast Featuring Bomberman! (SGB Enhanced)",
@@ -103,44 +88,39 @@
       "bucket": "gb/Wario Blast Featuring Bomberman! (USA, Europe) (SGB Enhanced).zip"
     },
     {
-      "title": "Puzzle Quest - Challenge of the Warlords",
-      "system": "nds",
-      "bucket": "nds/Puzzle Quest - Challenge of the Warlords.zip"
-    },
-    {
-      "title": "Meteos",
-      "system": "nds",
-      "bucket": "nds/Meteos.zip"
-    },
-    {
-      "title": "Professor Layton and the Curious Village",
-      "system": "nds",
-      "bucket": "nds/Professor Layton and the Curious Village.zip"
-    },
-    {
-      "title": "Tetris DS",
-      "system": "nds",
-      "bucket": "nds/Tetris DS.zip"
-    },
-    {
-      "title": "Zoo Keeper",
-      "system": "nds",
-      "bucket": "nds/Zoo Keeper.zip"
-    },
-    {
       "title": "Puzzle De Pon!",
       "system": "neogeo",
       "bucket": "neogeo/puzzledp.zip"
     },
     {
+      "title": "Puzzle Bobble",
+      "system": "mame",
+      "bucket": "mame/pbobble.zip"
+    },
+    {
+      "title": "Puzzle Bobble 2",
+      "system": "mame",
+      "bucket": "mame/pbobble2.zip"
+    },
+    {
+      "title": "Puzzle Loop",
+      "system": "mame",
+      "bucket": "mame/puzzloop.zip"
+    },
+    {
+      "title": "Magical Drop II",
+      "system": "neogeo",
+      "bucket": "neogeo/magdrop2.zip"
+    },
+    {
+      "title": "Magical Drop III",
+      "system": "neogeo",
+      "bucket": "neogeo/magdrop3.zip"
+    },
+    {
       "title": "Puyo Pop",
       "system": "gba",
       "bucket": "gba/Puyo Pop (USA) (En,Ja).zip"
-    },
-    {
-      "title": "Kuru Kuru Kururin",
-      "system": "gba",
-      "bucket": "gba/Kurukuru Kururin (Europe).zip"
     },
     {
       "title": "Mr. Driller 2",

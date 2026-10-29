@@ -28,74 +28,19 @@
       "bucket": "gbc/Pokemon - Silver Version (USA, Europe) (SGB Enhanced) (GB Compatible).zip"
     },
     {
-      "title": "Pokemon - Crystal Version",
+      "title": "Pokemon - Crystal Version (Rev 1)",
       "system": "gbc",
-      "bucket": "gbc/Pokemon - Crystal Version (USA).zip"
+      "bucket": "gbc/Pokemon - Crystal Version (USA, Europe) (Rev 1).zip"
     },
     {
       "title": "Pokemon Trading Card Game (En,Es,It) (Rev 1) (SGB Enhanced) (GB Compatible)",
       "system": "gbc",
-      "bucket": "gbc/Pokemon Trading Card Game (Europe) (En,Es,It) (Rev 1) (SGB Enhanced) (GB Compatible).zip"
+      "bucket": "gbc/Pokemon Trading Card Game (USA, Australia) (SGB Enhanced) (GB Compatible).zip"
     },
     {
       "title": "Pokemon Pinball (En,Fr,De,Es,It) (Rumble Version) (SGB Enhanced) (GB Compatible)",
       "system": "gbc",
       "bucket": "gbc/Pokemon Pinball (USA, Australia) (Rumble Version) (SGB Enhanced) (GB Compatible).zip"
-    },
-    {
-      "title": "Pokemon Diamond Version",
-      "system": "nds",
-      "bucket": "nds/Pokemon Diamond Version.zip"
-    },
-    {
-      "title": "Pokemon Pearl Version",
-      "system": "nds",
-      "bucket": "nds/Pokemon Pearl Version.zip"
-    },
-    {
-      "title": "Pokemon Platinum Version",
-      "system": "nds",
-      "bucket": "nds/Pokemon Platinum Version.zip"
-    },
-    {
-      "title": "Pokemon HeartGold Version",
-      "system": "nds",
-      "bucket": "nds/Pokemon HeartGold Version.zip"
-    },
-    {
-      "title": "Pokemon SoulSilver Version",
-      "system": "nds",
-      "bucket": "nds/Pokemon SoulSilver Version.zip"
-    },
-    {
-      "title": "Pokemon Black Version (DSi Enhanced)",
-      "system": "nds",
-      "bucket": "nds/Pokemon Black Version (DSi Enhanced).zip"
-    },
-    {
-      "title": "Pokemon White Version (DSi Enhanced)",
-      "system": "nds",
-      "bucket": "nds/Pokemon White Version (DSi Enhanced).zip"
-    },
-    {
-      "title": "Pokemon Black Version 2 (DSi Enhanced)",
-      "system": "nds",
-      "bucket": "nds/Pokemon Black Version 2 (DSi Enhanced).zip"
-    },
-    {
-      "title": "Pokemon White Version 2 (DSi Enhanced)",
-      "system": "nds",
-      "bucket": "nds/Pokemon White Version 2 (DSi Enhanced).zip"
-    },
-    {
-      "title": "Pokemon Mystery Dungeon - Explorers of Sky",
-      "system": "nds",
-      "bucket": "nds/Pokemon Mystery Dungeon - Explorers of Sky.zip"
-    },
-    {
-      "title": "Pokemon Ranger",
-      "system": "nds",
-      "bucket": "nds/Pokemon Ranger.zip"
     },
     {
       "title": "Pokemon - Ruby Version",
@@ -130,12 +75,12 @@
     {
       "title": "Pokemon Mystery Dungeon - Red Rescue Team",
       "system": "gba",
-      "bucket": "gba/Pokemon Mystery Dungeon - Red Rescue Team (Europe) (En,Fr,De,Es,It).zip"
+      "bucket": "gba/Pokemon Mystery Dungeon - Red Rescue Team (USA, Australia).zip"
     },
     {
       "title": "Pokemon Snap",
       "system": "n64",
-      "bucket": "n64/Pokemon Snap (USA) (LodgeNet).zip"
+      "bucket": "n64/Pokemon Snap (USA).zip"
     },
     {
       "title": "Pokemon Stadium",

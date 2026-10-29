@@ -48,11 +48,6 @@
       "bucket": "neogeo/kof2000.zip"
     },
     {
-      "title": "Samurai Shodown II",
-      "system": "neogeo",
-      "bucket": "neogeo/samsho2.zip"
-    },
-    {
       "title": "Real Bout Fatal Fury 2",
       "system": "neogeo",
       "bucket": "neogeo/rbff2.zip"
@@ -68,9 +63,139 @@
       "bucket": "neogeo/lastblad.zip"
     },
     {
-      "title": "Super Street Fighter II - The New Challengers",
-      "system": "snes",
-      "bucket": "snes/Super Street Fighter II - The New Challengers (Japan).zip"
+      "title": "Street Fighter II': Champion Edition",
+      "system": "mame",
+      "bucket": "mame/sf2ceua.zip"
+    },
+    {
+      "title": "Street Fighter II': Hyper Fighting",
+      "system": "neogeo",
+      "bucket": "neogeo/sf2hfu.zip"
+    },
+    {
+      "title": "Super Street Fighter II",
+      "system": "mame",
+      "bucket": "mame/ssf2u.zip"
+    },
+    {
+      "title": "Street Fighter Alpha",
+      "system": "mame",
+      "bucket": "mame/sfau.zip"
+    },
+    {
+      "title": "Street Fighter III: 3rd Strike",
+      "system": "neogeo",
+      "bucket": "neogeo/sfiii3u.zip"
+    },
+    {
+      "title": "Killer Instinct",
+      "system": "mame",
+      "bucket": "mame/kinst.zip"
+    },
+    {
+      "title": "Killer Instinct 2",
+      "system": "mame",
+      "bucket": "mame/kinst2.zip"
+    },
+    {
+      "title": "Mortal Kombat",
+      "system": "mame",
+      "bucket": "mame/mk.zip"
+    },
+    {
+      "title": "Mortal Kombat 3",
+      "system": "mame",
+      "bucket": "mame/mk3.zip"
+    },
+    {
+      "title": "Ultimate Mortal Kombat 3",
+      "system": "mame",
+      "bucket": "mame/umk3.zip"
+    },
+    {
+      "title": "Marvel Super Heroes",
+      "system": "mame",
+      "bucket": "mame/mshu.zip"
+    },
+    {
+      "title": "The King of Fighters '95",
+      "system": "neogeo",
+      "bucket": "neogeo/kof95.zip"
+    },
+    {
+      "title": "The King of Fighters '96",
+      "system": "neogeo",
+      "bucket": "neogeo/kof96.zip"
+    },
+    {
+      "title": "The King of Fighters '97",
+      "system": "neogeo",
+      "bucket": "neogeo/kof97.zip"
+    },
+    {
+      "title": "The King of Fighters '99",
+      "system": "neogeo",
+      "bucket": "neogeo/kof99.zip"
+    },
+    {
+      "title": "The King of Fighters 2001",
+      "system": "neogeo",
+      "bucket": "neogeo/kof2001.zip"
+    },
+    {
+      "title": "The King of Fighters 2003",
+      "system": "neogeo",
+      "bucket": "neogeo/kof2003.zip"
+    },
+    {
+      "title": "Samurai Shodown",
+      "system": "neogeo",
+      "bucket": "neogeo/samsho.zip"
+    },
+    {
+      "title": "Samurai Shodown III",
+      "system": "neogeo",
+      "bucket": "neogeo/samsho3.zip"
+    },
+    {
+      "title": "Samurai Shodown V",
+      "system": "neogeo",
+      "bucket": "neogeo/samsho5.zip"
+    },
+    {
+      "title": "Art of Fighting 2",
+      "system": "neogeo",
+      "bucket": "neogeo/aof2.zip"
+    },
+    {
+      "title": "Fatal Fury 2",
+      "system": "neogeo",
+      "bucket": "neogeo/fatfury2.zip"
+    },
+    {
+      "title": "Fatal Fury 3",
+      "system": "neogeo",
+      "bucket": "neogeo/fatfury3.zip"
+    },
+    {
+      "title": "Real Bout Fatal Fury",
+      "system": "neogeo",
+      "bucket": "neogeo/rbff1.zip"
+    },
+    {
+      "title": "World Heroes",
+      "system": "neogeo",
+      "bucket": "neogeo/wh1.zip"
+    },
+    {
+      "title": "World Heroes 2",
+      "system": "neogeo",
+      "bucket": "neogeo/wh2.zip"
+    },
+    {
+      "title": "Windjammers",
+      "system": "neogeo",
+      "bucket": "neogeo/wjammers.zip"
     },
     {
       "title": "Street Fighter Alpha 2",
@@ -98,16 +223,6 @@
       "bucket": "genesis/Street Fighter II' - Special Champion Edition (USA).zip"
     },
     {
-      "title": "Soulcalibur",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Soulcalibur (USA).chd"
-    },
-    {
-      "title": "Marvel vs. Capcom 2",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Marvel vs. Capcom 2 (USA).chd"
-    },
-    {
       "title": "Tekken 3",
       "system": "psx",
       "bucket": "psx/Tekken 3 (USA).chd"
@@ -125,7 +240,7 @@
     {
       "title": "Super Smash Bros.",
       "system": "n64",
-      "bucket": "n64/Super Smash Bros. (USA) (LodgeNet).zip"
+      "bucket": "n64/Super Smash Bros. (USA).zip"
     },
     {
       "title": "Soulcalibur II",

@@ -20,22 +20,17 @@
     {
       "title": "Dr. Mario",
       "system": "nes",
-      "bucket": "nes/Dr. Mario (Europe).zip"
+      "bucket": "nes/Dr. Mario (Japan, USA) (En) (Rev 1).zip"
     },
     {
-      "title": "Super Mario World",
+      "title": "Super Mario All-Stars + Super Mario World",
       "system": "snes",
-      "bucket": "snes/Super Mario World (USA).zip"
+      "bucket": "snes/Super Mario All-Stars + Super Mario World (USA).zip"
     },
     {
       "title": "Super Mario World 2 - Yoshi's Island (Rev 1)",
       "system": "snes",
       "bucket": "snes/Super Mario World 2 - Yoshi's Island (USA) (Rev 1).zip"
-    },
-    {
-      "title": "Super Mario All-Stars",
-      "system": "snes",
-      "bucket": "snes/Super Mario All-Stars (USA).zip"
     },
     {
       "title": "Super Mario Kart",
@@ -78,36 +73,6 @@
       "bucket": "gbc/Wario Land 3 (World) (En,Ja).zip"
     },
     {
-      "title": "New Super Mario Bros.",
-      "system": "nds",
-      "bucket": "nds/New Super Mario Bros..zip"
-    },
-    {
-      "title": "Super Mario 64 DS",
-      "system": "nds",
-      "bucket": "nds/Super Mario 64 DS.zip"
-    },
-    {
-      "title": "Mario Kart DS",
-      "system": "nds",
-      "bucket": "nds/Mario Kart DS.zip"
-    },
-    {
-      "title": "Mario & Luigi - Partners in Time",
-      "system": "nds",
-      "bucket": "nds/Mario & Luigi - Partners in Time.zip"
-    },
-    {
-      "title": "Mario & Luigi - Bowser's Inside Story",
-      "system": "nds",
-      "bucket": "nds/Mario & Luigi - Bowser's Inside Story.zip"
-    },
-    {
-      "title": "Mario Party DS",
-      "system": "nds",
-      "bucket": "nds/Mario Party DS.zip"
-    },
-    {
       "title": "Mario's Tennis (En)",
       "system": "virtualboy",
       "bucket": "virtualboy/Mario's Tennis (Japan, USA) (En).zip"
@@ -125,7 +90,7 @@
     {
       "title": "Super Mario Advance 2 - Super Mario World",
       "system": "gba",
-      "bucket": "gba/Super Mario Advance 2 - Super Mario World (Europe) (En,Fr,De,Es).zip"
+      "bucket": "gba/Super Mario Advance 2 - Super Mario World (USA, Australia).zip"
     },
     {
       "title": "Super Mario Advance 3 - Yoshi's Island",
@@ -133,9 +98,9 @@
       "bucket": "gba/Super Mario Advance 3 - Yoshi's Island (USA).zip"
     },
     {
-      "title": "Super Mario Advance 4 - Super Mario Bros. 3",
+      "title": "Super Mario Advance 4 - Super Mario Bros. 3 (Rev 1)",
       "system": "gba",
-      "bucket": "gba/Super Mario Advance 4 - Super Mario Bros. 3 (USA).zip"
+      "bucket": "gba/Super Mario Advance 4 - Super Mario Bros. 3 (USA, Australia) (Rev 1).zip"
     },
     {
       "title": "Mario Kart - Super Circuit",
@@ -170,17 +135,17 @@
     {
       "title": "Super Mario 64",
       "system": "n64",
-      "bucket": "n64/Super Mario 64 (USA) (LodgeNet).zip"
+      "bucket": "n64/Super Mario 64 (USA).zip"
     },
     {
       "title": "Mario Kart 64",
       "system": "n64",
-      "bucket": "n64/Mario Kart 64 (USA) (LodgeNet).zip"
+      "bucket": "n64/Mario Kart 64 (USA).zip"
     },
     {
       "title": "Paper Mario",
       "system": "n64",
-      "bucket": "n64/Paper Mario (USA) (LodgeNet).zip"
+      "bucket": "n64/Paper Mario (USA).zip"
     },
     {
       "title": "Mario Party",
@@ -195,22 +160,22 @@
     {
       "title": "Mario Party 3",
       "system": "n64",
-      "bucket": "n64/Mario Party 3 (USA) (LodgeNet).zip"
+      "bucket": "n64/Mario Party 3 (USA).zip"
     },
     {
       "title": "Mario Golf",
       "system": "n64",
-      "bucket": "n64/Mario Golf (USA) (LodgeNet).zip"
+      "bucket": "n64/Mario Golf (USA).zip"
     },
     {
       "title": "Mario Tennis",
       "system": "n64",
-      "bucket": "n64/Mario Tennis (USA) (LodgeNet).zip"
+      "bucket": "n64/Mario Tennis (USA).zip"
     },
     {
       "title": "Dr. Mario 64",
       "system": "n64",
-      "bucket": "n64/Dr. Mario 64 (USA) (LodgeNet).zip"
+      "bucket": "n64/Dr. Mario 64 (USA).zip"
     }
   ]
 }

@@ -3,14 +3,14 @@
   "description": "Mega Man and Mega Man X across consoles and handhelds.",
   "games": [
     {
-      "title": "Mega Man (Capcom Town)",
+      "title": "Mega Man",
       "system": "nes",
-      "bucket": "nes/Mega Man (USA) (Capcom Town).zip"
+      "bucket": "nes/Mega Man (USA).zip"
     },
     {
-      "title": "Mega Man 2 (Capcom Town)",
+      "title": "Mega Man 2",
       "system": "nes",
-      "bucket": "nes/Mega Man 2 (USA) (Capcom Town).zip"
+      "bucket": "nes/Mega Man 2 (USA).zip"
     },
     {
       "title": "Mega Man 3",
@@ -53,14 +53,9 @@
       "bucket": "snes/Mega Man 7 (USA).zip"
     },
     {
-      "title": "Mega Man & Bass (Rockman & Forte)",
-      "system": "snes",
-      "bucket": "snes/Rockman & Forte (Japan).zip"
-    },
-    {
-      "title": "Mega Man - The Wily Wars (Genesis Mini)",
+      "title": "Mega Man - The Wily Wars",
       "system": "genesis",
-      "bucket": "genesis/Mega Man - The Wily Wars (USA) (Genesis Mini).zip"
+      "bucket": "genesis/Mega Man - The Wily Wars (Europe).zip"
     },
     {
       "title": "Mega Man - Dr. Wily's Revenge",
@@ -96,16 +91,6 @@
       "title": "Mega Man Xtreme 2",
       "system": "gbc",
       "bucket": "gbc/Mega Man Xtreme 2 (USA, Europe).zip"
-    },
-    {
-      "title": "Mega Man ZX",
-      "system": "nds",
-      "bucket": "nds/Mega Man ZX.zip"
-    },
-    {
-      "title": "Mega Man ZX Advent",
-      "system": "nds",
-      "bucket": "nds/Mega Man ZX Advent.zip"
     },
     {
       "title": "Mega Man X4",
@@ -163,9 +148,9 @@
       "bucket": "gba/Megaman - Battle Network (USA).zip"
     },
     {
-      "title": "Mega Man Battle Network 2",
+      "title": "Megaman - Battle Network 2",
       "system": "gba",
-      "bucket": "gba/Megaman - Battle Network 2 (USA) (Debug Version).zip"
+      "bucket": "gba/Megaman - Battle Network 2 (USA).zip"
     },
     {
       "title": "Mega Man Battle Network 3 - Blue Version",
