@@ -1,0 +1,96 @@
+{
+  "name": "Pokemon",
+  "description": "Core Pokemon games and spin-offs.",
+  "games": [
+    {
+      "title": "Pokemon - Red Version (SGB Enhanced)",
+      "system": "gb",
+      "bucket": "gb/Pokemon - Red Version (USA, Europe) (SGB Enhanced).zip"
+    },
+    {
+      "title": "Pokemon - Blue Version (SGB Enhanced)",
+      "system": "gb",
+      "bucket": "gb/Pokemon - Blue Version (USA, Europe) (SGB Enhanced).zip"
+    },
+    {
+      "title": "Pokemon - Gold Version (SGB Enhanced) (GB Compatible)",
+      "system": "gbc",
+      "bucket": "gbc/Pokemon - Gold Version (USA, Europe) (SGB Enhanced) (GB Compatible).zip"
+    },
+    {
+      "title": "Pokemon - Silver Version (SGB Enhanced) (GB Compatible)",
+      "system": "gbc",
+      "bucket": "gbc/Pokemon - Silver Version (USA, Europe) (SGB Enhanced) (GB Compatible).zip"
+    },
+    {
+      "title": "Pokemon - Crystal Version",
+      "system": "gbc",
+      "bucket": "gbc/Pokemon - Crystal Version (USA).zip"
+    },
+    {
+      "title": "Pokemon Trading Card Game (En,Es,It) (Rev 1) (SGB Enhanced) (GB Compatible)",
+      "system": "gbc",
+      "bucket": "gbc/Pokemon Trading Card Game (Europe) (En,Es,It) (Rev 1) (SGB Enhanced) (GB Compatible).zip"
+    },
+    {
+      "title": "Pokemon Pinball (En,Fr,De,Es,It) (Rumble Version) (SGB Enhanced) (GB Compatible)",
+      "system": "gbc",
+      "bucket": "gbc/Pokemon Pinball (Europe) (En,Fr,De,Es,It) (Rumble Version) (SGB Enhanced) (GB Compatible).zip"
+    },
+    {
+      "title": "Pokemon Diamond Version",
+      "system": "nds",
+      "bucket": "nds/Pokemon Diamond Version.zip"
+    },
+    {
+      "title": "Pokemon Pearl Version",
+      "system": "nds",
+      "bucket": "nds/Pokemon Pearl Version.zip"
+    },
+    {
+      "title": "Pokemon Platinum Version",
+      "system": "nds",
+      "bucket": "nds/Pokemon Platinum Version.zip"
+    },
+    {
+      "title": "Pokemon HeartGold Version",
+      "system": "nds",
+      "bucket": "nds/Pokemon HeartGold Version.zip"
+    },
+    {
+      "title": "Pokemon SoulSilver Version",
+      "system": "nds",
+      "bucket": "nds/Pokemon SoulSilver Version.zip"
+    },
+    {
+      "title": "Pokemon Black Version (DSi Enhanced)",
+      "system": "nds",
+      "bucket": "nds/Pokemon Black Version (DSi Enhanced).zip"
+    },
+    {
+      "title": "Pokemon White Version (DSi Enhanced)",
+      "system": "nds",
+      "bucket": "nds/Pokemon White Version (DSi Enhanced).zip"
+    },
+    {
+      "title": "Pokemon Black Version 2 (DSi Enhanced)",
+      "system": "nds",
+      "bucket": "nds/Pokemon Black Version 2 (DSi Enhanced).zip"
+    },
+    {
+      "title": "Pokemon White Version 2 (DSi Enhanced)",
+      "system": "nds",
+      "bucket": "nds/Pokemon White Version 2 (DSi Enhanced).zip"
+    },
+    {
+      "title": "Pokemon Mystery Dungeon - Explorers of Sky",
+      "system": "nds",
+      "bucket": "nds/Pokemon Mystery Dungeon - Explorers of Sky.zip"
+    },
+    {
+      "title": "Pokemon Ranger",
+      "system": "nds",
+      "bucket": "nds/Pokemon Ranger.zip"
+    }
+  ]
+}

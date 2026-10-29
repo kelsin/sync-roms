@@ -56,6 +56,21 @@ class SetsTest(unittest.TestCase):
         self.assertEqual([g["bucket"] for g in by["gba"]["games"]], ["gba/Gone.zip"])
         self.assertEqual([g["bucket"] for g in by["gen"]["games"]], ["gen/Zed.zip"])
 
+    def test_toggle_extra_files(self):
+        by = systems()
+        game_set = {"name": "M", "games": [{"title": "Multi", "system": "gen", "bucket": "gen/M.m3u",
+                                            "files": ["gen/M (Disc 1).chd", "gen/M (Disc 2).chd"]}]}
+        rows = sync_roms.set_rows(game_set, by, lambda s: {"gen/M.m3u", "gen/M (Disc 1).chd"})
+        self.assertIn("not in bucket", rows[0][3])
+        extras = {"gen/M.m3u": game_set["games"][0]["files"]}
+        with mock.patch.object(sync_roms, "filter_list", return_value=[True]):
+            sync_roms.toggle_games("t", rows, extras)
+        self.assertEqual([g["bucket"] for g in by["gen"]["games"]],
+                         ["gen/M.m3u", "gen/M (Disc 1).chd", "gen/M (Disc 2).chd"])
+        with mock.patch.object(sync_roms, "filter_list", return_value=[False]):
+            sync_roms.toggle_games("t", rows, extras)
+        self.assertEqual(by["gen"]["games"], [])
+
     def test_locked_rows_cannot_toggle(self):
         keys = iter(["\t", "\x01", "\x1b"])
         state = self.run_list(keys, locked=[True, False])

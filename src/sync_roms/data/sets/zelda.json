@@ -1,0 +1,51 @@
+{
+  "name": "The Legend of Zelda",
+  "description": "Every Zelda game on the systems in the collection.",
+  "games": [
+    {
+      "title": "Legend of Zelda, The (Rev 1)",
+      "system": "nes",
+      "bucket": "nes/Legend of Zelda, The (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Zelda II - The Adventure of Link",
+      "system": "nes",
+      "bucket": "nes/Zelda II - The Adventure of Link (USA).zip"
+    },
+    {
+      "title": "Legend of Zelda, The - A Link to the Past",
+      "system": "snes",
+      "bucket": "snes/Legend of Zelda, The - A Link to the Past (USA).zip"
+    },
+    {
+      "title": "Legend of Zelda, The - Link's Awakening (Rev 2)",
+      "system": "gb",
+      "bucket": "gb/Legend of Zelda, The - Link's Awakening (USA, Europe) (Rev 2).zip"
+    },
+    {
+      "title": "Legend of Zelda, The - Link's Awakening DX (Rev 2) (SGB Enhanced) (GB Compatible)",
+      "system": "gbc",
+      "bucket": "gbc/Legend of Zelda, The - Link's Awakening DX (USA, Europe) (Rev 2) (SGB Enhanced) (GB Compatible).zip"
+    },
+    {
+      "title": "Legend of Zelda, The - Oracle of Ages (En,Fr,De,Es,It)",
+      "system": "gbc",
+      "bucket": "gbc/Legend of Zelda, The - Oracle of Ages (Europe) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Legend of Zelda, The - Oracle of Seasons (En,Fr,De,Es,It)",
+      "system": "gbc",
+      "bucket": "gbc/Legend of Zelda, The - Oracle of Seasons (Europe) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Legend of Zelda, The - Phantom Hourglass",
+      "system": "nds",
+      "bucket": "nds/Legend of Zelda, The - Phantom Hourglass.zip"
+    },
+    {
+      "title": "Legend of Zelda, The - Spirit Tracks",
+      "system": "nds",
+      "bucket": "nds/Legend of Zelda, The - Spirit Tracks.zip"
+    }
+  ]
+}

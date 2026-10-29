@@ -1,0 +1,131 @@
+{
+  "name": "Mega Man",
+  "description": "Mega Man and Mega Man X across consoles and handhelds.",
+  "games": [
+    {
+      "title": "Mega Man (Capcom Town)",
+      "system": "nes",
+      "bucket": "nes/Mega Man (USA) (Capcom Town).zip"
+    },
+    {
+      "title": "Mega Man 2 (Capcom Town)",
+      "system": "nes",
+      "bucket": "nes/Mega Man 2 (USA) (Capcom Town).zip"
+    },
+    {
+      "title": "Mega Man 3",
+      "system": "nes",
+      "bucket": "nes/Mega Man 3 (USA).zip"
+    },
+    {
+      "title": "Mega Man 4 (Rev 1)",
+      "system": "nes",
+      "bucket": "nes/Mega Man 4 (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Mega Man 5",
+      "system": "nes",
+      "bucket": "nes/Mega Man 5 (USA).zip"
+    },
+    {
+      "title": "Mega Man 6",
+      "system": "nes",
+      "bucket": "nes/Mega Man 6 (USA).zip"
+    },
+    {
+      "title": "Mega Man X (Rev 1)",
+      "system": "snes",
+      "bucket": "snes/Mega Man X (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Mega Man X2",
+      "system": "snes",
+      "bucket": "snes/Mega Man X2 (USA).zip"
+    },
+    {
+      "title": "Mega Man X3",
+      "system": "snes",
+      "bucket": "snes/Mega Man X3 (USA).zip"
+    },
+    {
+      "title": "Mega Man 7",
+      "system": "snes",
+      "bucket": "snes/Mega Man 7 (USA).zip"
+    },
+    {
+      "title": "Mega Man - The Wily Wars (Genesis Mini)",
+      "system": "genesis",
+      "bucket": "genesis/Mega Man - The Wily Wars (USA) (Genesis Mini).zip"
+    },
+    {
+      "title": "Mega Man - Dr. Wily's Revenge",
+      "system": "gb",
+      "bucket": "gb/Mega Man - Dr. Wily's Revenge (USA).zip"
+    },
+    {
+      "title": "Mega Man II",
+      "system": "gb",
+      "bucket": "gb/Mega Man II (USA).zip"
+    },
+    {
+      "title": "Mega Man III",
+      "system": "gb",
+      "bucket": "gb/Mega Man III (USA).zip"
+    },
+    {
+      "title": "Mega Man IV",
+      "system": "gb",
+      "bucket": "gb/Mega Man IV (USA).zip"
+    },
+    {
+      "title": "Mega Man V (SGB Enhanced)",
+      "system": "gb",
+      "bucket": "gb/Mega Man V (USA) (SGB Enhanced).zip"
+    },
+    {
+      "title": "Mega Man Xtreme (GB Compatible)",
+      "system": "gbc",
+      "bucket": "gbc/Mega Man Xtreme (USA, Europe) (GB Compatible).zip"
+    },
+    {
+      "title": "Mega Man Xtreme 2",
+      "system": "gbc",
+      "bucket": "gbc/Mega Man Xtreme 2 (USA, Europe).zip"
+    },
+    {
+      "title": "Mega Man ZX",
+      "system": "nds",
+      "bucket": "nds/Mega Man ZX.zip"
+    },
+    {
+      "title": "Mega Man ZX Advent",
+      "system": "nds",
+      "bucket": "nds/Mega Man ZX Advent.zip"
+    },
+    {
+      "title": "Mega Man X4",
+      "system": "psx",
+      "bucket": "psx/Mega Man X4 (USA).chd"
+    },
+    {
+      "title": "Mega Man X5",
+      "system": "psx",
+      "bucket": "psx/Mega Man X5 (USA).chd"
+    },
+    {
+      "title": "Mega Man X6 (Rev 1)",
+      "system": "psx",
+      "bucket": "psx/Mega Man X6 (USA) (Rev 1).chd"
+    },
+    {
+      "title": "Mega Man 8",
+      "system": "psx",
+      "bucket": "psx/Mega Man 8 (USA).chd"
+    },
+    {
+      "title": "Mega Man Legends",
+      "system": "psx",
+      "bucket": "psx/Mega Man Legends (USA).chd"
+    }
+  ]
+}

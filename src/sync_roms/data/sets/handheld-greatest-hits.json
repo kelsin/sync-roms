@@ -1,0 +1,151 @@
+{
+  "name": "Handheld Greatest Hits",
+  "description": "A small, high-quality starter pack across the handhelds.",
+  "games": [
+    {
+      "title": "Tetris (Rev 1)",
+      "system": "gb",
+      "bucket": "gb/Tetris (World) (Rev 1).zip"
+    },
+    {
+      "title": "Pokemon - Red Version (SGB Enhanced)",
+      "system": "gb",
+      "bucket": "gb/Pokemon - Red Version (USA, Europe) (SGB Enhanced).zip"
+    },
+    {
+      "title": "Pokemon - Blue Version (SGB Enhanced)",
+      "system": "gb",
+      "bucket": "gb/Pokemon - Blue Version (USA, Europe) (SGB Enhanced).zip"
+    },
+    {
+      "title": "Super Mario Land 2 - 6 Golden Coins (Rev 2)",
+      "system": "gb",
+      "bucket": "gb/Super Mario Land 2 - 6 Golden Coins (USA, Europe) (Rev 2).zip"
+    },
+    {
+      "title": "Legend of Zelda, The - Link's Awakening (Rev 2)",
+      "system": "gb",
+      "bucket": "gb/Legend of Zelda, The - Link's Awakening (USA, Europe) (Rev 2).zip"
+    },
+    {
+      "title": "Kirby's Dream Land 2 (SGB Enhanced)",
+      "system": "gb",
+      "bucket": "gb/Kirby's Dream Land 2 (USA, Europe) (SGB Enhanced).zip"
+    },
+    {
+      "title": "Metroid II - Return of Samus",
+      "system": "gb",
+      "bucket": "gb/Metroid II - Return of Samus (World).zip"
+    },
+    {
+      "title": "Wario Land II (SGB Enhanced)",
+      "system": "gb",
+      "bucket": "gb/Wario Land II (USA, Europe) (SGB Enhanced).zip"
+    },
+    {
+      "title": "Pokemon - Crystal Version",
+      "system": "gbc",
+      "bucket": "gbc/Pokemon - Crystal Version (USA).zip"
+    },
+    {
+      "title": "Legend of Zelda, The - Link's Awakening DX (Rev 2) (SGB Enhanced) (GB Compatible)",
+      "system": "gbc",
+      "bucket": "gbc/Legend of Zelda, The - Link's Awakening DX (USA, Europe) (Rev 2) (SGB Enhanced) (GB Compatible).zip"
+    },
+    {
+      "title": "Legend of Zelda, The - Oracle of Seasons (En,Fr,De,Es,It)",
+      "system": "gbc",
+      "bucket": "gbc/Legend of Zelda, The - Oracle of Seasons (Europe) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Legend of Zelda, The - Oracle of Ages (En,Fr,De,Es,It)",
+      "system": "gbc",
+      "bucket": "gbc/Legend of Zelda, The - Oracle of Ages (Europe) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Wario Land 3 (En,Ja)",
+      "system": "gbc",
+      "bucket": "gbc/Wario Land 3 (World) (En,Ja).zip"
+    },
+    {
+      "title": "Advance Wars (Rev 1)",
+      "system": "gba",
+      "bucket": "gba/Advance Wars (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Advance Wars 2 - Black Hole Rising",
+      "system": "gba",
+      "bucket": "gba/Advance Wars 2 - Black Hole Rising (USA).zip"
+    },
+    {
+      "title": "Sonic The Hedgehog 2 (Auto Demo)",
+      "system": "gamegear",
+      "bucket": "gamegear/Sonic The Hedgehog 2 (World) (Auto Demo).zip"
+    },
+    {
+      "title": "Shinobi II - The Silent Fury",
+      "system": "gamegear",
+      "bucket": "gamegear/Shinobi II - The Silent Fury (World).zip"
+    },
+    {
+      "title": "Columns (En) (Rev 1)",
+      "system": "gamegear",
+      "bucket": "gamegear/Columns (Japan) (En) (Rev 1).zip"
+    },
+    {
+      "title": "Blue Lightning",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Blue Lightning (1989).lnx"
+    },
+    {
+      "title": "California Games",
+      "system": "atarilynx",
+      "bucket": "atarilynx/California Games (1991).lnx"
+    },
+    {
+      "title": "Chip's Challenge",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Chip's Challenge (1989).lnx"
+    },
+    {
+      "title": "SNK vs. Capcom - Card Fighters' Clash - SNK Version",
+      "system": "ngpc",
+      "bucket": "ngpc/SNK vs. Capcom - Card Fighters' Clash - SNK Version (USA, Europe).zip"
+    },
+    {
+      "title": "King of Fighters R-2 - Pocket Fighting Series (En,Ja)",
+      "system": "ngpc",
+      "bucket": "ngpc/King of Fighters R-2 - Pocket Fighting Series (World) (En,Ja).zip"
+    },
+    {
+      "title": "Metal Slug - 1st Mission (En,Ja)",
+      "system": "ngpc",
+      "bucket": "ngpc/Metal Slug - 1st Mission (World) (En,Ja).zip"
+    },
+    {
+      "title": "Sonic The Hedgehog - Pocket Adventure (En,Ja)",
+      "system": "ngpc",
+      "bucket": "ngpc/Sonic The Hedgehog - Pocket Adventure (World) (En,Ja).zip"
+    },
+    {
+      "title": "Final Fantasy",
+      "system": "wonderswancolor",
+      "bucket": "wonderswancolor/Final Fantasy (Japan).zip"
+    },
+    {
+      "title": "Virtual Boy Wario Land (En)",
+      "system": "virtualboy",
+      "bucket": "virtualboy/Virtual Boy Wario Land (Japan, USA) (En).zip"
+    },
+    {
+      "title": "Red Alarm",
+      "system": "virtualboy",
+      "bucket": "virtualboy/Red Alarm (USA).zip"
+    },
+    {
+      "title": "Galactic Pinball (En)",
+      "system": "virtualboy",
+      "bucket": "virtualboy/Galactic Pinball (Japan, USA) (En).zip"
+    }
+  ]
+}

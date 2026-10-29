@@ -1,0 +1,301 @@
+{
+  "name": "Best of 16-Bit",
+  "description": "Landmark SNES, Genesis and TurboGrafx-16 games.",
+  "games": [
+    {
+      "title": "Super Mario World",
+      "system": "snes",
+      "bucket": "snes/Super Mario World (USA).zip"
+    },
+    {
+      "title": "Legend of Zelda, The - A Link to the Past",
+      "system": "snes",
+      "bucket": "snes/Legend of Zelda, The - A Link to the Past (USA).zip"
+    },
+    {
+      "title": "Super Metroid (En,Fr,De)",
+      "system": "snes",
+      "bucket": "snes/Super Metroid (Europe) (En,Fr,De).zip"
+    },
+    {
+      "title": "Chrono Trigger",
+      "system": "snes",
+      "bucket": "snes/Chrono Trigger (USA).zip"
+    },
+    {
+      "title": "Donkey Kong Country (Rev 2)",
+      "system": "snes",
+      "bucket": "snes/Donkey Kong Country (USA) (Rev 2).zip"
+    },
+    {
+      "title": "Donkey Kong Country 2 - Diddy's Kong Quest (En,Fr) (Rev 1)",
+      "system": "snes",
+      "bucket": "snes/Donkey Kong Country 2 - Diddy's Kong Quest (USA) (En,Fr) (Rev 1).zip"
+    },
+    {
+      "title": "EarthBound",
+      "system": "snes",
+      "bucket": "snes/EarthBound (USA).zip"
+    },
+    {
+      "title": "Final Fantasy III (Rev 1)",
+      "system": "snes",
+      "bucket": "snes/Final Fantasy III (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Super Mario World 2 - Yoshi's Island (Rev 1)",
+      "system": "snes",
+      "bucket": "snes/Super Mario World 2 - Yoshi's Island (USA) (Rev 1).zip"
+    },
+    {
+      "title": "F-Zero",
+      "system": "snes",
+      "bucket": "snes/F-Zero (USA).zip"
+    },
+    {
+      "title": "Super Mario Kart",
+      "system": "snes",
+      "bucket": "snes/Super Mario Kart (USA).zip"
+    },
+    {
+      "title": "Star Fox (Rev 2)",
+      "system": "snes",
+      "bucket": "snes/Star Fox (USA) (Rev 2).zip"
+    },
+    {
+      "title": "Secret of Mana",
+      "system": "snes",
+      "bucket": "snes/Secret of Mana (USA).zip"
+    },
+    {
+      "title": "Mega Man X (Rev 1)",
+      "system": "snes",
+      "bucket": "snes/Mega Man X (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Contra III - The Alien Wars",
+      "system": "snes",
+      "bucket": "snes/Contra III - The Alien Wars (USA).zip"
+    },
+    {
+      "title": "Super Castlevania IV",
+      "system": "snes",
+      "bucket": "snes/Super Castlevania IV (USA).zip"
+    },
+    {
+      "title": "Kirby Super Star",
+      "system": "snes",
+      "bucket": "snes/Kirby Super Star (USA).zip"
+    },
+    {
+      "title": "Street Fighter II Turbo (Rev 1)",
+      "system": "snes",
+      "bucket": "snes/Street Fighter II Turbo (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Super Punch-Out!!",
+      "system": "snes",
+      "bucket": "snes/Super Punch-Out!! (USA).zip"
+    },
+    {
+      "title": "Super Ghouls 'N Ghosts",
+      "system": "snes",
+      "bucket": "snes/Super Ghouls 'N Ghosts (USA).zip"
+    },
+    {
+      "title": "ActRaiser (Arcade)",
+      "system": "snes",
+      "bucket": "snes/ActRaiser (USA) (Arcade).zip"
+    },
+    {
+      "title": "Illusion of Gaia",
+      "system": "snes",
+      "bucket": "snes/Illusion of Gaia (USA).zip"
+    },
+    {
+      "title": "Super Mario RPG - Legend of the Seven Stars",
+      "system": "snes",
+      "bucket": "snes/Super Mario RPG - Legend of the Seven Stars (USA).zip"
+    },
+    {
+      "title": "Mario Paint",
+      "system": "snes",
+      "bucket": "snes/Mario Paint (Europe).zip"
+    },
+    {
+      "title": "Pilotwings",
+      "system": "snes",
+      "bucket": "snes/Pilotwings (USA).zip"
+    },
+    {
+      "title": "Zombies Ate My Neighbors",
+      "system": "snes",
+      "bucket": "snes/Zombies Ate My Neighbors (USA).zip"
+    },
+    {
+      "title": "Super Mario All-Stars",
+      "system": "snes",
+      "bucket": "snes/Super Mario All-Stars (USA).zip"
+    },
+    {
+      "title": "Secret of Evermore",
+      "system": "snes",
+      "bucket": "snes/Secret of Evermore (USA).zip"
+    },
+    {
+      "title": "Tetris Attack (En,Ja)",
+      "system": "snes",
+      "bucket": "snes/Tetris Attack (USA) (En,Ja).zip"
+    },
+    {
+      "title": "Terranigma",
+      "system": "snes",
+      "bucket": "snes/Terranigma (Europe).zip"
+    },
+    {
+      "title": "Earthworm Jim",
+      "system": "snes",
+      "bucket": "snes/Earthworm Jim (USA).zip"
+    },
+    {
+      "title": "Sonic The Hedgehog 2 (Rev B)",
+      "system": "genesis",
+      "bucket": "genesis/Sonic The Hedgehog 2 (World) (Rev B).zip"
+    },
+    {
+      "title": "Sonic The Hedgehog 3 (1993-11-20) (Sega Channel)",
+      "system": "genesis",
+      "bucket": "genesis/Sonic The Hedgehog 3 (USA) (1993-11-20) (Sega Channel).zip"
+    },
+    {
+      "title": "Sonic & Knuckles",
+      "system": "genesis",
+      "bucket": "genesis/Sonic & Knuckles (World).zip"
+    },
+    {
+      "title": "Streets of Rage 2",
+      "system": "genesis",
+      "bucket": "genesis/Streets of Rage 2 (USA).zip"
+    },
+    {
+      "title": "Gunstar Heroes",
+      "system": "genesis",
+      "bucket": "genesis/Gunstar Heroes (USA).zip"
+    },
+    {
+      "title": "Phantasy Star IV (Genesis Mini)",
+      "system": "genesis",
+      "bucket": "genesis/Phantasy Star IV (USA) (Genesis Mini).zip"
+    },
+    {
+      "title": "Shining Force II",
+      "system": "genesis",
+      "bucket": "genesis/Shining Force II (USA).zip"
+    },
+    {
+      "title": "Ecco the Dolphin",
+      "system": "genesis",
+      "bucket": "genesis/Ecco the Dolphin (Japan).zip"
+    },
+    {
+      "title": "Castlevania - Bloodlines",
+      "system": "genesis",
+      "bucket": "genesis/Castlevania - Bloodlines (USA).zip"
+    },
+    {
+      "title": "Vectorman (Genesis Mini)",
+      "system": "genesis",
+      "bucket": "genesis/Vectorman (USA) (Genesis Mini).zip"
+    },
+    {
+      "title": "Comix Zone (Sega Smash Pack 2)",
+      "system": "genesis",
+      "bucket": "genesis/Comix Zone (USA) (Sega Smash Pack 2).zip"
+    },
+    {
+      "title": "Altered Beast",
+      "system": "genesis",
+      "bucket": "genesis/Altered Beast (USA, Europe).zip"
+    },
+    {
+      "title": "Golden Axe (Rev B) (Sega Smash Pack)",
+      "system": "genesis",
+      "bucket": "genesis/Golden Axe (World) (Rev B) (Sega Smash Pack).zip"
+    },
+    {
+      "title": "ToeJam & Earl (En) (Rev A)",
+      "system": "genesis",
+      "bucket": "genesis/ToeJam & Earl (Japan, Europe) (En) (Rev A).zip"
+    },
+    {
+      "title": "Shinobi III - Return of the Ninja Master (Genesis Mini)",
+      "system": "genesis",
+      "bucket": "genesis/Shinobi III - Return of the Ninja Master (USA) (Genesis Mini).zip"
+    },
+    {
+      "title": "Revenge of Shinobi, The (Rev B)",
+      "system": "genesis",
+      "bucket": "genesis/Revenge of Shinobi, The (USA, Europe) (Rev B).zip"
+    },
+    {
+      "title": "Landstalker (1993-07-13) (Sega Channel)",
+      "system": "genesis",
+      "bucket": "genesis/Landstalker (USA) (1993-07-13) (Sega Channel).zip"
+    },
+    {
+      "title": "Beyond Oasis",
+      "system": "genesis",
+      "bucket": "genesis/Beyond Oasis (USA).zip"
+    },
+    {
+      "title": "Streets of Rage 3",
+      "system": "genesis",
+      "bucket": "genesis/Streets of Rage 3 (USA).zip"
+    },
+    {
+      "title": "Aladdin (Final Cut)",
+      "system": "genesis",
+      "bucket": "genesis/Aladdin (USA) (Final Cut).zip"
+    },
+    {
+      "title": "Earthworm Jim",
+      "system": "genesis",
+      "bucket": "genesis/Earthworm Jim (USA).zip"
+    },
+    {
+      "title": "Road Rash II (Genesis Mini)",
+      "system": "genesis",
+      "bucket": "genesis/Road Rash II (USA) (Genesis Mini).zip"
+    },
+    {
+      "title": "Thunder Force IV",
+      "system": "genesis",
+      "bucket": "genesis/Thunder Force IV (Europe).zip"
+    },
+    {
+      "title": "Contra - Hard Corps (Genesis Mini)",
+      "system": "genesis",
+      "bucket": "genesis/Contra - Hard Corps (USA) (Genesis Mini).zip"
+    },
+    {
+      "title": "Bonk's Adventure",
+      "system": "tg16",
+      "bucket": "tg16/Bonk's Adventure (USA).zip"
+    },
+    {
+      "title": "Blazing Lazers",
+      "system": "tg16",
+      "bucket": "tg16/Blazing Lazers (USA).zip"
+    },
+    {
+      "title": "R-Type",
+      "system": "tg16",
+      "bucket": "tg16/R-Type (USA).zip"
+    },
+    {
+      "title": "Dungeon Explorer",
+      "system": "tg16",
+      "bucket": "tg16/Dungeon Explorer (USA).zip"
+    }
+  ]
+}

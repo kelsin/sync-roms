@@ -1,0 +1,248 @@
+{
+  "name": "JRPG Essentials",
+  "description": "The classic console role-playing games worth a full playthrough.",
+  "games": [
+    {
+      "title": "Chrono Trigger",
+      "system": "snes",
+      "bucket": "snes/Chrono Trigger (USA).zip"
+    },
+    {
+      "title": "Final Fantasy II (Rev 1)",
+      "system": "snes",
+      "bucket": "snes/Final Fantasy II (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Final Fantasy III (Rev 1)",
+      "system": "snes",
+      "bucket": "snes/Final Fantasy III (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Secret of Mana",
+      "system": "snes",
+      "bucket": "snes/Secret of Mana (USA).zip"
+    },
+    {
+      "title": "EarthBound",
+      "system": "snes",
+      "bucket": "snes/EarthBound (USA).zip"
+    },
+    {
+      "title": "Super Mario RPG - Legend of the Seven Stars",
+      "system": "snes",
+      "bucket": "snes/Super Mario RPG - Legend of the Seven Stars (USA).zip"
+    },
+    {
+      "title": "Dragon Quest I & II",
+      "system": "snes",
+      "bucket": "snes/Dragon Quest I & II (Japan).zip"
+    },
+    {
+      "title": "Terranigma",
+      "system": "snes",
+      "bucket": "snes/Terranigma (Europe).zip"
+    },
+    {
+      "title": "Lufia II - Rise of the Sinistrals",
+      "system": "snes",
+      "bucket": "snes/Lufia II - Rise of the Sinistrals (USA).zip"
+    },
+    {
+      "title": "Breath of Fire II",
+      "system": "snes",
+      "bucket": "snes/Breath of Fire II (USA).zip"
+    },
+    {
+      "title": "Final Fantasy - Mystic Quest (Rev 1)",
+      "system": "snes",
+      "bucket": "snes/Final Fantasy - Mystic Quest (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Final Fantasy",
+      "system": "nes",
+      "bucket": "nes/Final Fantasy (USA).zip"
+    },
+    {
+      "title": "Dragon Warrior (Rev 1)",
+      "system": "nes",
+      "bucket": "nes/Dragon Warrior (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Dragon Warrior IV",
+      "system": "nes",
+      "bucket": "nes/Dragon Warrior IV (USA).zip"
+    },
+    {
+      "title": "Dragon Warrior III",
+      "system": "nes",
+      "bucket": "nes/Dragon Warrior III (USA).zip"
+    },
+    {
+      "title": "Phantasy Star IV (Genesis Mini)",
+      "system": "genesis",
+      "bucket": "genesis/Phantasy Star IV (USA) (Genesis Mini).zip"
+    },
+    {
+      "title": "Shining Force (Genesis Mini)",
+      "system": "genesis",
+      "bucket": "genesis/Shining Force (USA) (Genesis Mini).zip"
+    },
+    {
+      "title": "Shining Force II",
+      "system": "genesis",
+      "bucket": "genesis/Shining Force II (USA).zip"
+    },
+    {
+      "title": "Phantasy Star (Rev A)",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Phantasy Star (USA, Europe) (Rev A).zip"
+    },
+    {
+      "title": "Suikoden (Rev 1)",
+      "system": "psx",
+      "bucket": "psx/Suikoden (USA) (Rev 1).chd"
+    },
+    {
+      "title": "Suikoden II",
+      "system": "psx",
+      "bucket": "psx/Suikoden II (USA).chd"
+    },
+    {
+      "title": "Wild Arms",
+      "system": "psx",
+      "bucket": "psx/Wild Arms (USA).chd"
+    },
+    {
+      "title": "Vagrant Story",
+      "system": "psx",
+      "bucket": "psx/Vagrant Story (USA).chd"
+    },
+    {
+      "title": "Breath of Fire IV",
+      "system": "psx",
+      "bucket": "psx/Breath of Fire IV (USA).chd"
+    },
+    {
+      "title": "Dragon Quest IX - Sentinels of the Starry Skies",
+      "system": "nds",
+      "bucket": "nds/Dragon Quest IX - Sentinels of the Starry Skies.zip"
+    },
+    {
+      "title": "Chrono Trigger",
+      "system": "nds",
+      "bucket": "nds/Chrono Trigger.zip"
+    },
+    {
+      "title": "Dragon Force",
+      "system": "saturn",
+      "bucket": "saturn/Dragon Force (USA).chd"
+    },
+    {
+      "title": "Final Fantasy VII",
+      "system": "psx",
+      "bucket": "psx/Final Fantasy VII (USA).m3u",
+      "files": [
+        "psx/Final Fantasy VII (USA) (Disc 1).chd",
+        "psx/Final Fantasy VII (USA) (Disc 2).chd",
+        "psx/Final Fantasy VII (USA) (Disc 3).chd"
+      ]
+    },
+    {
+      "title": "Final Fantasy VIII",
+      "system": "psx",
+      "bucket": "psx/Final Fantasy VIII (USA).m3u",
+      "files": [
+        "psx/Final Fantasy VIII (USA) (Disc 1).chd",
+        "psx/Final Fantasy VIII (USA) (Disc 2).chd",
+        "psx/Final Fantasy VIII (USA) (Disc 3).chd",
+        "psx/Final Fantasy VIII (USA) (Disc 4).chd"
+      ]
+    },
+    {
+      "title": "Final Fantasy IX",
+      "system": "psx",
+      "bucket": "psx/Final Fantasy IX (USA) (Rev 1).m3u",
+      "files": [
+        "psx/Final Fantasy IX (USA) (Disc 1) (Rev 1).chd",
+        "psx/Final Fantasy IX (USA) (Disc 2) (Rev 1).chd",
+        "psx/Final Fantasy IX (USA) (Disc 3) (Rev 1).chd",
+        "psx/Final Fantasy IX (USA) (Disc 4) (Rev 1).chd"
+      ]
+    },
+    {
+      "title": "Chrono Cross",
+      "system": "psx",
+      "bucket": "psx/Chrono Cross (USA).m3u",
+      "files": [
+        "psx/Chrono Cross (USA) (Disc 1).chd",
+        "psx/Chrono Cross (USA) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "Xenogears",
+      "system": "psx",
+      "bucket": "psx/Xenogears (USA).m3u",
+      "files": [
+        "psx/Xenogears (USA) (Disc 1).chd",
+        "psx/Xenogears (USA) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "Grandia",
+      "system": "psx",
+      "bucket": "psx/Grandia (USA).m3u",
+      "files": [
+        "psx/Grandia (USA) (Disc 1).chd",
+        "psx/Grandia (USA) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "Lunar: Silver Star Story Complete",
+      "system": "psx",
+      "bucket": "psx/Lunar - Silver Star Story Complete (USA).m3u",
+      "files": [
+        "psx/Lunar - Silver Star Story Complete (USA) (Disc 1).chd",
+        "psx/Lunar - Silver Star Story Complete (USA) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "Lunar 2: Eternal Blue Complete",
+      "system": "psx",
+      "bucket": "psx/Lunar 2 - Eternal Blue Complete (USA).m3u",
+      "files": [
+        "psx/Lunar 2 - Eternal Blue Complete (USA) (Disc 1).chd",
+        "psx/Lunar 2 - Eternal Blue Complete (USA) (Disc 2).chd",
+        "psx/Lunar 2 - Eternal Blue Complete (USA) (Disc 3).chd"
+      ]
+    },
+    {
+      "title": "The Legend of Dragoon",
+      "system": "psx",
+      "bucket": "psx/Legend of Dragoon, The (USA).m3u",
+      "files": [
+        "psx/Legend of Dragoon, The (USA) (Disc 1).chd",
+        "psx/Legend of Dragoon, The (USA) (Disc 2).chd",
+        "psx/Legend of Dragoon, The (USA) (Disc 3).chd",
+        "psx/Legend of Dragoon, The (USA) (Disc 4).chd"
+      ]
+    },
+    {
+      "title": "Skies of Arcadia",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Skies of Arcadia (USA) (Disc 1).chd",
+      "files": [
+        "dreamcast/Skies of Arcadia (USA) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "Panzer Dragoon Saga",
+      "system": "saturn",
+      "bucket": "saturn/Panzer Dragoon Saga (USA) (Disc 1).chd",
+      "files": [
+        "saturn/Panzer Dragoon Saga (USA) (Disc 2).chd",
+        "saturn/Panzer Dragoon Saga (USA) (Disc 3).chd",
+        "saturn/Panzer Dragoon Saga (USA) (Disc 4).chd"
+      ]
+    }
+  ]
+}

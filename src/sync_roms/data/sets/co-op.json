@@ -1,0 +1,106 @@
+{
+  "name": "Co-op & Local Multiplayer",
+  "description": "Games built for playing with a friend on the couch.",
+  "games": [
+    {
+      "title": "Contra",
+      "system": "nes",
+      "bucket": "nes/Contra (USA).zip"
+    },
+    {
+      "title": "Teenage Mutant Ninja Turtles II - The Arcade Game",
+      "system": "nes",
+      "bucket": "nes/Teenage Mutant Ninja Turtles II - The Arcade Game (USA).zip"
+    },
+    {
+      "title": "Double Dragon II - The Revenge (Rev 1)",
+      "system": "nes",
+      "bucket": "nes/Double Dragon II - The Revenge (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Super Mario Bros. 3 (Rev 1)",
+      "system": "nes",
+      "bucket": "nes/Super Mario Bros. 3 (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Bubble Bobble",
+      "system": "nes",
+      "bucket": "nes/Bubble Bobble (USA).zip"
+    },
+    {
+      "title": "Contra III - The Alien Wars",
+      "system": "snes",
+      "bucket": "snes/Contra III - The Alien Wars (USA).zip"
+    },
+    {
+      "title": "Super Mario Kart",
+      "system": "snes",
+      "bucket": "snes/Super Mario Kart (USA).zip"
+    },
+    {
+      "title": "Super Bomberman 2",
+      "system": "snes",
+      "bucket": "snes/Super Bomberman 2 (USA).zip"
+    },
+    {
+      "title": "Teenage Mutant Ninja Turtles IV - Turtles in Time",
+      "system": "snes",
+      "bucket": "snes/Teenage Mutant Ninja Turtles IV - Turtles in Time (USA).zip"
+    },
+    {
+      "title": "Secret of Mana",
+      "system": "snes",
+      "bucket": "snes/Secret of Mana (USA).zip"
+    },
+    {
+      "title": "Donkey Kong Country 2 - Diddy's Kong Quest (En,Fr) (Rev 1)",
+      "system": "snes",
+      "bucket": "snes/Donkey Kong Country 2 - Diddy's Kong Quest (USA) (En,Fr) (Rev 1).zip"
+    },
+    {
+      "title": "Super Mario All-Stars",
+      "system": "snes",
+      "bucket": "snes/Super Mario All-Stars (USA).zip"
+    },
+    {
+      "title": "Streets of Rage 2",
+      "system": "genesis",
+      "bucket": "genesis/Streets of Rage 2 (USA).zip"
+    },
+    {
+      "title": "Streets of Rage 3",
+      "system": "genesis",
+      "bucket": "genesis/Streets of Rage 3 (USA).zip"
+    },
+    {
+      "title": "Gunstar Heroes",
+      "system": "genesis",
+      "bucket": "genesis/Gunstar Heroes (USA).zip"
+    },
+    {
+      "title": "Sonic The Hedgehog 2 (Rev B)",
+      "system": "genesis",
+      "bucket": "genesis/Sonic The Hedgehog 2 (World) (Rev B).zip"
+    },
+    {
+      "title": "ToeJam & Earl (En) (Rev A)",
+      "system": "genesis",
+      "bucket": "genesis/ToeJam & Earl (Japan, Europe) (En) (Rev A).zip"
+    },
+    {
+      "title": "Golden Axe (Rev B) (Sega Smash Pack)",
+      "system": "genesis",
+      "bucket": "genesis/Golden Axe (World) (Rev B) (Sega Smash Pack).zip"
+    },
+    {
+      "title": "Contra - Hard Corps (Genesis Mini)",
+      "system": "genesis",
+      "bucket": "genesis/Contra - Hard Corps (USA) (Genesis Mini).zip"
+    },
+    {
+      "title": "Teenage Mutant Ninja Turtles (2 Players)",
+      "system": "mame",
+      "bucket": "mame/tmnt22p.zip"
+    }
+  ]
+}

@@ -1,0 +1,136 @@
+{
+  "name": "Puzzle & Pick-Up-and-Play",
+  "description": "Quick-to-learn puzzlers for short sessions.",
+  "games": [
+    {
+      "title": "Tetris (Rev 1)",
+      "system": "gb",
+      "bucket": "gb/Tetris (World) (Rev 1).zip"
+    },
+    {
+      "title": "Tetris",
+      "system": "nes",
+      "bucket": "nes/Tetris (USA).zip"
+    },
+    {
+      "title": "Dr. Mario",
+      "system": "nes",
+      "bucket": "nes/Dr. Mario (Europe).zip"
+    },
+    {
+      "title": "Dr. Mario (Rev 1)",
+      "system": "gb",
+      "bucket": "gb/Dr. Mario (World) (Rev 1).zip"
+    },
+    {
+      "title": "Tetris & Dr. Mario",
+      "system": "snes",
+      "bucket": "snes/Tetris & Dr. Mario (USA).zip"
+    },
+    {
+      "title": "Super Puyo Puyo (Rev 2)",
+      "system": "snes",
+      "bucket": "snes/Super Puyo Puyo (Japan) (Rev 2).zip"
+    },
+    {
+      "title": "Tetris Attack (En,Ja)",
+      "system": "snes",
+      "bucket": "snes/Tetris Attack (USA) (En,Ja).zip"
+    },
+    {
+      "title": "Super Bomberman",
+      "system": "snes",
+      "bucket": "snes/Super Bomberman (USA).zip"
+    },
+    {
+      "title": "Columns (1990-06-21) (Sega Channel)",
+      "system": "genesis",
+      "bucket": "genesis/Columns (USA, Europe) (1990-06-21) (Sega Channel).zip"
+    },
+    {
+      "title": "Dr. Robotnik's Mean Bean Machine",
+      "system": "genesis",
+      "bucket": "genesis/Dr. Robotnik's Mean Bean Machine (USA).zip"
+    },
+    {
+      "title": "Puyo Puyo Tsuu (Rev A)",
+      "system": "genesis",
+      "bucket": "genesis/Puyo Puyo Tsuu (Japan) (Rev A).zip"
+    },
+    {
+      "title": "Bomberman '93",
+      "system": "tg16",
+      "bucket": "tg16/Bomberman '93 (USA).zip"
+    },
+    {
+      "title": "Bomberman '94",
+      "system": "tg16",
+      "bucket": "tg16/Bomberman '94 (Japan).zip"
+    },
+    {
+      "title": "Tetris DX (SGB Enhanced) (GB Compatible)",
+      "system": "gbc",
+      "bucket": "gbc/Tetris DX (World) (SGB Enhanced) (GB Compatible).zip"
+    },
+    {
+      "title": "Wario Land II (SGB Enhanced) (GB Compatible)",
+      "system": "gbc",
+      "bucket": "gbc/Wario Land II (USA, Europe) (SGB Enhanced) (GB Compatible).zip"
+    },
+    {
+      "title": "Kirby's Dream Land 2 (SGB Enhanced)",
+      "system": "gb",
+      "bucket": "gb/Kirby's Dream Land 2 (USA, Europe) (SGB Enhanced).zip"
+    },
+    {
+      "title": "Kirby's Star Stacker (SGB Enhanced)",
+      "system": "gb",
+      "bucket": "gb/Kirby's Star Stacker (USA, Europe) (SGB Enhanced).zip"
+    },
+    {
+      "title": "Kirby's Block Ball (SGB Enhanced)",
+      "system": "gb",
+      "bucket": "gb/Kirby's Block Ball (USA, Europe) (SGB Enhanced).zip"
+    },
+    {
+      "title": "Boxxle",
+      "system": "gb",
+      "bucket": "gb/Boxxle (USA).zip"
+    },
+    {
+      "title": "Wario Blast Featuring Bomberman! (SGB Enhanced)",
+      "system": "gb",
+      "bucket": "gb/Wario Blast Featuring Bomberman! (USA, Europe) (SGB Enhanced).zip"
+    },
+    {
+      "title": "Puzzle Quest - Challenge of the Warlords",
+      "system": "nds",
+      "bucket": "nds/Puzzle Quest - Challenge of the Warlords.zip"
+    },
+    {
+      "title": "Meteos",
+      "system": "nds",
+      "bucket": "nds/Meteos.zip"
+    },
+    {
+      "title": "Professor Layton and the Curious Village",
+      "system": "nds",
+      "bucket": "nds/Professor Layton and the Curious Village.zip"
+    },
+    {
+      "title": "Tetris DS",
+      "system": "nds",
+      "bucket": "nds/Tetris DS.zip"
+    },
+    {
+      "title": "Zoo Keeper",
+      "system": "nds",
+      "bucket": "nds/Zoo Keeper.zip"
+    },
+    {
+      "title": "Puzzle De Pon!",
+      "system": "neogeo",
+      "bucket": "neogeo/puzzledp.zip"
+    }
+  ]
+}

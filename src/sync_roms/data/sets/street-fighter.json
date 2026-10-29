@@ -1,0 +1,86 @@
+{
+  "name": "Street Fighter",
+  "description": "Street Fighter and Capcom Vs. fighters.",
+  "games": [
+    {
+      "title": "Street Fighter II: The World Warrior",
+      "system": "mame",
+      "bucket": "mame/sf2.zip"
+    },
+    {
+      "title": "Super Street Fighter II Turbo",
+      "system": "mame",
+      "bucket": "mame/ssf2t.zip"
+    },
+    {
+      "title": "Street Fighter Alpha 2",
+      "system": "mame",
+      "bucket": "mame/sfa2.zip"
+    },
+    {
+      "title": "Street Fighter Alpha 3",
+      "system": "mame",
+      "bucket": "mame/sfa3.zip"
+    },
+    {
+      "title": "X-Men vs. Street Fighter",
+      "system": "mame",
+      "bucket": "mame/xmvsfur1.zip"
+    },
+    {
+      "title": "Marvel Super Heroes vs. Street Fighter",
+      "system": "mame",
+      "bucket": "mame/mshvsfj.zip"
+    },
+    {
+      "title": "Cyberbots",
+      "system": "mame",
+      "bucket": "mame/cybots.zip"
+    },
+    {
+      "title": "Street Fighter II Turbo (Rev 1)",
+      "system": "snes",
+      "bucket": "snes/Street Fighter II Turbo (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Super Street Fighter II - The New Challengers",
+      "system": "snes",
+      "bucket": "snes/Super Street Fighter II - The New Challengers (Japan).zip"
+    },
+    {
+      "title": "Street Fighter Alpha 2",
+      "system": "snes",
+      "bucket": "snes/Street Fighter Alpha 2 (USA).zip"
+    },
+    {
+      "title": "Street Fighter II' - Special Champion Edition",
+      "system": "genesis",
+      "bucket": "genesis/Street Fighter II' - Special Champion Edition (USA).zip"
+    },
+    {
+      "title": "Super Street Fighter II",
+      "system": "genesis",
+      "bucket": "genesis/Super Street Fighter II (USA).zip"
+    },
+    {
+      "title": "Street Fighter Alpha 3",
+      "system": "psx",
+      "bucket": "psx/Street Fighter Alpha 3 (USA).chd"
+    },
+    {
+      "title": "Street Fighter Alpha 2",
+      "system": "saturn",
+      "bucket": "saturn/Street Fighter Alpha 2 (USA).chd"
+    },
+    {
+      "title": "Marvel vs. Capcom 2",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Marvel vs. Capcom 2 (USA).chd"
+    },
+    {
+      "title": "Street Fighter III - 3rd Strike",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Street Fighter III - 3rd Strike (USA).chd"
+    }
+  ]
+}

@@ -1,0 +1,81 @@
+{
+  "name": "Metroidvanias",
+  "description": "Exploration platformers with ability-gated maps.",
+  "games": [
+    {
+      "title": "Super Metroid (En,Fr,De)",
+      "system": "snes",
+      "bucket": "snes/Super Metroid (Europe) (En,Fr,De).zip"
+    },
+    {
+      "title": "Metroid",
+      "system": "nes",
+      "bucket": "nes/Metroid (USA).zip"
+    },
+    {
+      "title": "Castlevania II - Simon's Quest",
+      "system": "nes",
+      "bucket": "nes/Castlevania II - Simon's Quest (USA).zip"
+    },
+    {
+      "title": "Faxanadu (Rev 1)",
+      "system": "nes",
+      "bucket": "nes/Faxanadu (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Metroid II - Return of Samus",
+      "system": "gb",
+      "bucket": "gb/Metroid II - Return of Samus (World).zip"
+    },
+    {
+      "title": "Castlevania - Dawn of Sorrow",
+      "system": "nds",
+      "bucket": "nds/Castlevania - Dawn of Sorrow.zip"
+    },
+    {
+      "title": "Castlevania - Portrait of Ruin",
+      "system": "nds",
+      "bucket": "nds/Castlevania - Portrait of Ruin.zip"
+    },
+    {
+      "title": "Castlevania - Order of Ecclesia",
+      "system": "nds",
+      "bucket": "nds/Castlevania - Order of Ecclesia.zip"
+    },
+    {
+      "title": "Castlevania - Symphony of the Night",
+      "system": "psx",
+      "bucket": "psx/Castlevania - Symphony of the Night (USA).chd"
+    },
+    {
+      "title": "Wonder Boy in Monster World",
+      "system": "genesis",
+      "bucket": "genesis/Wonder Boy in Monster World (USA, Europe).zip"
+    },
+    {
+      "title": "Wonder Boy III - The Dragon's Trap",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Wonder Boy III - The Dragon's Trap (USA, Europe).zip"
+    },
+    {
+      "title": "Super Castlevania IV",
+      "system": "snes",
+      "bucket": "snes/Super Castlevania IV (USA).zip"
+    },
+    {
+      "title": "Legend of Zelda, The - A Link to the Past",
+      "system": "snes",
+      "bucket": "snes/Legend of Zelda, The - A Link to the Past (USA).zip"
+    },
+    {
+      "title": "Wario Land 3 (En,Ja)",
+      "system": "gbc",
+      "bucket": "gbc/Wario Land 3 (World) (En,Ja).zip"
+    },
+    {
+      "title": "Pocky & Rocky 2",
+      "system": "snes",
+      "bucket": "snes/Pocky & Rocky 2 (USA).zip"
+    }
+  ]
+}

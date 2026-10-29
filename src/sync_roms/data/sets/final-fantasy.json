@@ -1,0 +1,133 @@
+{
+  "name": "Final Fantasy",
+  "description": "Mainline and spin-off Final Fantasy games, single-disc builds only.",
+  "games": [
+    {
+      "title": "Final Fantasy",
+      "system": "nes",
+      "bucket": "nes/Final Fantasy (USA).zip"
+    },
+    {
+      "title": "Final Fantasy II (Rev 1)",
+      "system": "snes",
+      "bucket": "snes/Final Fantasy II (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Final Fantasy III (Rev 1)",
+      "system": "snes",
+      "bucket": "snes/Final Fantasy III (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Final Fantasy - Mystic Quest (Rev 1)",
+      "system": "snes",
+      "bucket": "snes/Final Fantasy - Mystic Quest (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Final Fantasy Legend, The",
+      "system": "gb",
+      "bucket": "gb/Final Fantasy Legend, The (USA).zip"
+    },
+    {
+      "title": "Final Fantasy Legend II",
+      "system": "gb",
+      "bucket": "gb/Final Fantasy Legend II (USA).zip"
+    },
+    {
+      "title": "Final Fantasy Legend III",
+      "system": "gb",
+      "bucket": "gb/Final Fantasy Legend III (USA).zip"
+    },
+    {
+      "title": "Final Fantasy Adventure",
+      "system": "gb",
+      "bucket": "gb/Final Fantasy Adventure (USA).zip"
+    },
+    {
+      "title": "Final Fantasy Origins (Rev 1)",
+      "system": "psx",
+      "bucket": "psx/Final Fantasy Origins (USA) (Rev 1).chd"
+    },
+    {
+      "title": "Final Fantasy Anthology - Final Fantasy V (Rev 1)",
+      "system": "psx",
+      "bucket": "psx/Final Fantasy Anthology - Final Fantasy V (USA) (Rev 1).chd"
+    },
+    {
+      "title": "Final Fantasy Anthology - Final Fantasy VI (Rev 1)",
+      "system": "psx",
+      "bucket": "psx/Final Fantasy Anthology - Final Fantasy VI (USA) (Rev 1).chd"
+    },
+    {
+      "title": "Final Fantasy III",
+      "system": "nds",
+      "bucket": "nds/Final Fantasy III.zip"
+    },
+    {
+      "title": "Final Fantasy IV",
+      "system": "nds",
+      "bucket": "nds/Final Fantasy IV.zip"
+    },
+    {
+      "title": "Final Fantasy Tactics A2 - Grimoire of the Rift",
+      "system": "nds",
+      "bucket": "nds/Final Fantasy Tactics A2 - Grimoire of the Rift.zip"
+    },
+    {
+      "title": "Final Fantasy Crystal Chronicles - Ring of Fates",
+      "system": "nds",
+      "bucket": "nds/Final Fantasy Crystal Chronicles - Ring of Fates.zip"
+    },
+    {
+      "title": "Final Fantasy Tactics - The War of the Lions.iso",
+      "system": "psp",
+      "bucket": "psp/Final Fantasy Tactics - The War of the Lions (USA).iso"
+    },
+    {
+      "title": "Crisis Core - Final Fantasy VII.iso",
+      "system": "psp",
+      "bucket": "psp/Crisis Core - Final Fantasy VII (USA).iso"
+    },
+    {
+      "title": "Final Fantasy - 20th Anniversary Edition (En,Ja) (FW6.00).iso",
+      "system": "psp",
+      "bucket": "psp/Final Fantasy - 20th Anniversary Edition (USA) (En,Ja) (FW6.00).iso"
+    },
+    {
+      "title": "Dissidia 012 - Duodecim Final Fantasy (En,Fr,De,Es,It).iso",
+      "system": "psp",
+      "bucket": "psp/Dissidia 012 - Duodecim Final Fantasy (USA) (En,Fr,De,Es,It).iso"
+    },
+    {
+      "title": "Final Fantasy VII",
+      "system": "psx",
+      "bucket": "psx/Final Fantasy VII (USA).m3u",
+      "files": [
+        "psx/Final Fantasy VII (USA) (Disc 1).chd",
+        "psx/Final Fantasy VII (USA) (Disc 2).chd",
+        "psx/Final Fantasy VII (USA) (Disc 3).chd"
+      ]
+    },
+    {
+      "title": "Final Fantasy VIII",
+      "system": "psx",
+      "bucket": "psx/Final Fantasy VIII (USA).m3u",
+      "files": [
+        "psx/Final Fantasy VIII (USA) (Disc 1).chd",
+        "psx/Final Fantasy VIII (USA) (Disc 2).chd",
+        "psx/Final Fantasy VIII (USA) (Disc 3).chd",
+        "psx/Final Fantasy VIII (USA) (Disc 4).chd"
+      ]
+    },
+    {
+      "title": "Final Fantasy IX",
+      "system": "psx",
+      "bucket": "psx/Final Fantasy IX (USA) (Rev 1).m3u",
+      "files": [
+        "psx/Final Fantasy IX (USA) (Disc 1) (Rev 1).chd",
+        "psx/Final Fantasy IX (USA) (Disc 2) (Rev 1).chd",
+        "psx/Final Fantasy IX (USA) (Disc 3) (Rev 1).chd",
+        "psx/Final Fantasy IX (USA) (Disc 4) (Rev 1).chd"
+      ]
+    }
+  ]
+}

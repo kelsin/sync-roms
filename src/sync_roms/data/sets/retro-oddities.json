@@ -1,0 +1,386 @@
+{
+  "name": "Pre-NES & Retro Oddities",
+  "description": "Atari, Intellivision, Colecovision, Vectrex and other early-era systems.",
+  "games": [
+    {
+      "title": "Adventure",
+      "system": "atari2600",
+      "bucket": "atari2600/Adventure (USA).zip"
+    },
+    {
+      "title": "Pitfall! - Pitfall Harry's Jungle Adventure",
+      "system": "atari2600",
+      "bucket": "atari2600/Pitfall! - Pitfall Harry's Jungle Adventure (USA).zip"
+    },
+    {
+      "title": "River Raid",
+      "system": "atari2600",
+      "bucket": "atari2600/River Raid (USA).zip"
+    },
+    {
+      "title": "Space Invaders",
+      "system": "atari2600",
+      "bucket": "atari2600/Space Invaders (USA).zip"
+    },
+    {
+      "title": "Combat (Atari Anthology)",
+      "system": "atari2600",
+      "bucket": "atari2600/Combat (USA, Europe) (Atari Anthology).zip"
+    },
+    {
+      "title": "Missile Command",
+      "system": "atari2600",
+      "bucket": "atari2600/Missile Command (USA).zip"
+    },
+    {
+      "title": "Yars' Revenge",
+      "system": "atari2600",
+      "bucket": "atari2600/Yars' Revenge (USA).zip"
+    },
+    {
+      "title": "Frogger",
+      "system": "atari2600",
+      "bucket": "atari2600/Frogger (USA).zip"
+    },
+    {
+      "title": "Dig Dug",
+      "system": "atari2600",
+      "bucket": "atari2600/Dig Dug (USA).zip"
+    },
+    {
+      "title": "Ms. Pac-Man",
+      "system": "atari2600",
+      "bucket": "atari2600/Ms. Pac-Man (USA).zip"
+    },
+    {
+      "title": "Donkey Kong",
+      "system": "atari2600",
+      "bucket": "atari2600/Donkey Kong (USA).zip"
+    },
+    {
+      "title": "Kaboom!",
+      "system": "atari2600",
+      "bucket": "atari2600/Kaboom! (USA).zip"
+    },
+    {
+      "title": "H.E.R.O.",
+      "system": "atari2600",
+      "bucket": "atari2600/H.E.R.O. (USA).zip"
+    },
+    {
+      "title": "Pole Position",
+      "system": "atari2600",
+      "bucket": "atari2600/Pole Position (USA).zip"
+    },
+    {
+      "title": "Centipede",
+      "system": "atari5200",
+      "bucket": "atari5200/Centipede (USA).zip"
+    },
+    {
+      "title": "Missile Command",
+      "system": "atari5200",
+      "bucket": "atari5200/Missile Command (USA).zip"
+    },
+    {
+      "title": "Pac-Man",
+      "system": "atari5200",
+      "bucket": "atari5200/Pac-Man (USA).zip"
+    },
+    {
+      "title": "Galaxian",
+      "system": "atari5200",
+      "bucket": "atari5200/Galaxian (USA).zip"
+    },
+    {
+      "title": "Space Invaders",
+      "system": "atari5200",
+      "bucket": "atari5200/Space Invaders (USA).zip"
+    },
+    {
+      "title": "Ms. Pac-Man",
+      "system": "atari7800",
+      "bucket": "atari7800/Ms. Pac-Man (USA).7z"
+    },
+    {
+      "title": "Donkey Kong",
+      "system": "atari7800",
+      "bucket": "atari7800/Donkey Kong (USA).7z"
+    },
+    {
+      "title": "Asteroids",
+      "system": "atari7800",
+      "bucket": "atari7800/Asteroids (USA).7z"
+    },
+    {
+      "title": "Centipede",
+      "system": "atari7800",
+      "bucket": "atari7800/Centipede (USA).7z"
+    },
+    {
+      "title": "Food Fight",
+      "system": "atari7800",
+      "bucket": "atari7800/Food Fight (USA).7z"
+    },
+    {
+      "title": "Ninja Golf",
+      "system": "atari7800",
+      "bucket": "atari7800/Ninja Golf (USA).7z"
+    },
+    {
+      "title": "Joust",
+      "system": "atari7800",
+      "bucket": "atari7800/Joust (USA).7z"
+    },
+    {
+      "title": "Galaga",
+      "system": "atari7800",
+      "bucket": "atari7800/Galaga (USA).7z"
+    },
+    {
+      "title": "Blue Lightning",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Blue Lightning (1989).lnx"
+    },
+    {
+      "title": "California Games",
+      "system": "atarilynx",
+      "bucket": "atarilynx/California Games (1991).lnx"
+    },
+    {
+      "title": "Chip's Challenge",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Chip's Challenge (1989).lnx"
+    },
+    {
+      "title": "Gauntlet: The Third Encounter",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Gauntlet - The Third Encounter (1990).lnx"
+    },
+    {
+      "title": "Klax",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Klax (1990).lnx"
+    },
+    {
+      "title": "Rampage",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Rampage (1991).lnx"
+    },
+    {
+      "title": "Tempest 2000",
+      "system": "atarijaguar",
+      "bucket": "atarijaguar/Tempest 2000 (World).zip"
+    },
+    {
+      "title": "Alien vs Predator",
+      "system": "atarijaguar",
+      "bucket": "atarijaguar/Alien vs Predator (World).zip"
+    },
+    {
+      "title": "Doom",
+      "system": "atarijaguar",
+      "bucket": "atarijaguar/Doom (World).zip"
+    },
+    {
+      "title": "Rayman",
+      "system": "atarijaguar",
+      "bucket": "atarijaguar/Rayman (World).zip"
+    },
+    {
+      "title": "Cybermorph (Rev B)",
+      "system": "atarijaguar",
+      "bucket": "atarijaguar/Cybermorph (World) (Rev B).zip"
+    },
+    {
+      "title": "Iron Soldier",
+      "system": "atarijaguar",
+      "bucket": "atarijaguar/Iron Soldier (World).zip"
+    },
+    {
+      "title": "Donkey Kong",
+      "system": "colecovision",
+      "bucket": "colecovision/Donkey Kong (USA).zip"
+    },
+    {
+      "title": "Zaxxon",
+      "system": "colecovision",
+      "bucket": "colecovision/Zaxxon (USA, Europe).zip"
+    },
+    {
+      "title": "Smurf - Rescue in Gargamel's Castle",
+      "system": "colecovision",
+      "bucket": "colecovision/Smurf - Rescue in Gargamel's Castle (USA, Europe).zip"
+    },
+    {
+      "title": "Mr. Do!",
+      "system": "colecovision",
+      "bucket": "colecovision/Mr. Do! (USA, Europe).zip"
+    },
+    {
+      "title": "Frogger",
+      "system": "colecovision",
+      "bucket": "colecovision/Frogger (USA).zip"
+    },
+    {
+      "title": "Pitfall!",
+      "system": "colecovision",
+      "bucket": "colecovision/Pitfall! (USA).zip"
+    },
+    {
+      "title": "Space Fury",
+      "system": "colecovision",
+      "bucket": "colecovision/Space Fury (USA, Europe).zip"
+    },
+    {
+      "title": "Astrosmash",
+      "system": "intellivision",
+      "bucket": "intellivision/Astrosmash (USA, Europe).zip"
+    },
+    {
+      "title": "Utopia",
+      "system": "intellivision",
+      "bucket": "intellivision/Utopia (USA, Europe).zip"
+    },
+    {
+      "title": "Advanced Dungeons & Dragons",
+      "system": "intellivision",
+      "bucket": "intellivision/Advanced Dungeons & Dragons (USA, Europe).zip"
+    },
+    {
+      "title": "Night Stalker",
+      "system": "intellivision",
+      "bucket": "intellivision/Night Stalker (World).zip"
+    },
+    {
+      "title": "BurgerTime",
+      "system": "intellivision",
+      "bucket": "intellivision/BurgerTime (USA, Europe).zip"
+    },
+    {
+      "title": "Lock 'N' Chase (v1.1)",
+      "system": "intellivision",
+      "bucket": "intellivision/Lock 'N' Chase (USA, Europe) (v1.1).zip"
+    },
+    {
+      "title": "TRON Deadly Discs",
+      "system": "intellivision",
+      "bucket": "intellivision/TRON Deadly Discs (USA, Europe).zip"
+    },
+    {
+      "title": "Pick Axe Pete",
+      "system": "odyssey2",
+      "bucket": "odyssey2/Pick Axe Pete (USA, Europe).zip"
+    },
+    {
+      "title": "K.C. Munchkin",
+      "system": "odyssey2",
+      "bucket": "odyssey2/K.C. Munchkin (USA).zip"
+    },
+    {
+      "title": "Quest for the Rings",
+      "system": "odyssey2",
+      "bucket": "odyssey2/Quest for the Rings (USA, Europe).zip"
+    },
+    {
+      "title": "Mine Storm (1982).vec",
+      "system": "vectrex",
+      "bucket": "vectrex/Mine Storm (1982).vec"
+    },
+    {
+      "title": "Scramble (1982).vec",
+      "system": "vectrex",
+      "bucket": "vectrex/Scramble (1982).vec"
+    },
+    {
+      "title": "Star Castle (1983).vec",
+      "system": "vectrex",
+      "bucket": "vectrex/Star Castle (1983).vec"
+    },
+    {
+      "title": "Armor Attack (1982).vec",
+      "system": "vectrex",
+      "bucket": "vectrex/Armor Attack (1982).vec"
+    },
+    {
+      "title": "Spike (1983).vec",
+      "system": "vectrex",
+      "bucket": "vectrex/Spike (1983).vec"
+    },
+    {
+      "title": "Berzerk (1982).vec",
+      "system": "vectrex",
+      "bucket": "vectrex/Berzerk (1982).vec"
+    },
+    {
+      "title": "Congo Bongo",
+      "system": "sg-1000",
+      "bucket": "sg-1000/Congo Bongo (Japan).zip"
+    },
+    {
+      "title": "Gulkave",
+      "system": "sg-1000",
+      "bucket": "sg-1000/Gulkave (Japan).zip"
+    },
+    {
+      "title": "Girl's Garden (Ja)",
+      "system": "sg-1000",
+      "bucket": "sg-1000/Girl's Garden (Japan, Australia) (Ja).zip"
+    },
+    {
+      "title": "Zelda no Densetsu - The Hyrule Fantasy (Rev 1)",
+      "system": "fds",
+      "bucket": "fds/Zelda no Densetsu - The Hyrule Fantasy (Japan) (Rev 1).zip"
+    },
+    {
+      "title": "Metroid (Rev 3)",
+      "system": "fds",
+      "bucket": "fds/Metroid (Japan) (Rev 3).zip"
+    },
+    {
+      "title": "Super Mario Bros. 2 (En) (DV 2)",
+      "system": "fds",
+      "bucket": "fds/Super Mario Bros. 2 (Japan) (En) (DV 2).zip"
+    },
+    {
+      "title": "Virtual Boy Wario Land (En)",
+      "system": "virtualboy",
+      "bucket": "virtualboy/Virtual Boy Wario Land (Japan, USA) (En).zip"
+    },
+    {
+      "title": "Red Alarm",
+      "system": "virtualboy",
+      "bucket": "virtualboy/Red Alarm (USA).zip"
+    },
+    {
+      "title": "Teleroboxer (En)",
+      "system": "virtualboy",
+      "bucket": "virtualboy/Teleroboxer (Japan, USA) (En).zip"
+    },
+    {
+      "title": "Galactic Pinball (En)",
+      "system": "virtualboy",
+      "bucket": "virtualboy/Galactic Pinball (Japan, USA) (En).zip"
+    },
+    {
+      "title": "Mario Clash (En)",
+      "system": "virtualboy",
+      "bucket": "virtualboy/Mario Clash (Japan, USA) (En).zip"
+    },
+    {
+      "title": "Jack Bros.",
+      "system": "virtualboy",
+      "bucket": "virtualboy/Jack Bros. (USA).zip"
+    },
+    {
+      "title": "Space Squash",
+      "system": "virtualboy",
+      "bucket": "virtualboy/Space Squash (Japan).zip"
+    },
+    {
+      "title": "GunPey",
+      "system": "wonderswan",
+      "bucket": "wonderswan/GunPey (Japan).zip"
+    }
+  ]
+}

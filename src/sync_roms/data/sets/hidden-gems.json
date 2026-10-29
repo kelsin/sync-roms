@@ -1,0 +1,361 @@
+{
+  "name": "Hidden Gems",
+  "description": "Cult classics and underrated picks that are easy to miss.",
+  "games": [
+    {
+      "title": "Terranigma",
+      "system": "snes",
+      "bucket": "snes/Terranigma (Europe).zip"
+    },
+    {
+      "title": "Lufia II - Rise of the Sinistrals",
+      "system": "snes",
+      "bucket": "snes/Lufia II - Rise of the Sinistrals (USA).zip"
+    },
+    {
+      "title": "Pocky & Rocky 2",
+      "system": "snes",
+      "bucket": "snes/Pocky & Rocky 2 (USA).zip"
+    },
+    {
+      "title": "Wild Guns",
+      "system": "snes",
+      "bucket": "snes/Wild Guns (USA).zip"
+    },
+    {
+      "title": "Demon's Crest",
+      "system": "snes",
+      "bucket": "snes/Demon's Crest (USA).zip"
+    },
+    {
+      "title": "GunForce",
+      "system": "snes",
+      "bucket": "snes/GunForce (USA).zip"
+    },
+    {
+      "title": "Metal Warriors",
+      "system": "snes",
+      "bucket": "snes/Metal Warriors (USA).zip"
+    },
+    {
+      "title": "Cybernator",
+      "system": "snes",
+      "bucket": "snes/Cybernator (USA).zip"
+    },
+    {
+      "title": "Rival Turf!",
+      "system": "snes",
+      "bucket": "snes/Rival Turf! (USA).zip"
+    },
+    {
+      "title": "E.V.O. - Search for Eden",
+      "system": "snes",
+      "bucket": "snes/E.V.O. - Search for Eden (USA).zip"
+    },
+    {
+      "title": "ActRaiser 2",
+      "system": "snes",
+      "bucket": "snes/ActRaiser 2 (USA).zip"
+    },
+    {
+      "title": "Soul Blazer",
+      "system": "snes",
+      "bucket": "snes/Soul Blazer (USA).zip"
+    },
+    {
+      "title": "Brain Lord",
+      "system": "snes",
+      "bucket": "snes/Brain Lord (USA).zip"
+    },
+    {
+      "title": "Uniracers",
+      "system": "snes",
+      "bucket": "snes/Uniracers (USA).zip"
+    },
+    {
+      "title": "Pop'n TwinBee",
+      "system": "snes",
+      "bucket": "snes/Pop'n TwinBee (Europe).zip"
+    },
+    {
+      "title": "Pulseman",
+      "system": "genesis",
+      "bucket": "genesis/Pulseman (Japan).zip"
+    },
+    {
+      "title": "Rolling Thunder 2",
+      "system": "genesis",
+      "bucket": "genesis/Rolling Thunder 2 (USA).zip"
+    },
+    {
+      "title": "Ranger X",
+      "system": "genesis",
+      "bucket": "genesis/Ranger X (USA).zip"
+    },
+    {
+      "title": "Alisia Dragoon (Genesis Mini)",
+      "system": "genesis",
+      "bucket": "genesis/Alisia Dragoon (USA) (Genesis Mini).zip"
+    },
+    {
+      "title": "Beyond Oasis",
+      "system": "genesis",
+      "bucket": "genesis/Beyond Oasis (USA).zip"
+    },
+    {
+      "title": "Panorama Cotton",
+      "system": "genesis",
+      "bucket": "genesis/Panorama Cotton (Japan).zip"
+    },
+    {
+      "title": "Dynamite Headdy",
+      "system": "genesis",
+      "bucket": "genesis/Dynamite Headdy (USA, Europe).zip"
+    },
+    {
+      "title": "Mega Turrican",
+      "system": "genesis",
+      "bucket": "genesis/Mega Turrican (USA).zip"
+    },
+    {
+      "title": "Gynoug",
+      "system": "genesis",
+      "bucket": "genesis/Gynoug (Europe).zip"
+    },
+    {
+      "title": "Rocket Knight Adventures",
+      "system": "genesis",
+      "bucket": "genesis/Rocket Knight Adventures (USA).zip"
+    },
+    {
+      "title": "Dungeon Explorer",
+      "system": "tg16",
+      "bucket": "tg16/Dungeon Explorer (USA).zip"
+    },
+    {
+      "title": "Neutopia",
+      "system": "tg16",
+      "bucket": "tg16/Neutopia (USA).zip"
+    },
+    {
+      "title": "Cadash",
+      "system": "tg16",
+      "bucket": "tg16/Cadash (USA).zip"
+    },
+    {
+      "title": "Ys Book I & II (Rev 2)",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Ys Book I & II (USA) (Rev 2).chd"
+    },
+    {
+      "title": "Guardian Heroes",
+      "system": "saturn",
+      "bucket": "saturn/Guardian Heroes (USA).chd"
+    },
+    {
+      "title": "Dragon Force",
+      "system": "saturn",
+      "bucket": "saturn/Dragon Force (USA).chd"
+    },
+    {
+      "title": "Sega Rally Championship",
+      "system": "saturn",
+      "bucket": "saturn/Sega Rally Championship (USA).chd"
+    },
+    {
+      "title": "Shining Force III",
+      "system": "saturn",
+      "bucket": "saturn/Shining Force III (USA).chd"
+    },
+    {
+      "title": "NiGHTS into Dreams... (with 3D Control Pad) (RE)",
+      "system": "saturn",
+      "bucket": "saturn/NiGHTS into Dreams... (USA) (with 3D Control Pad) (RE).chd"
+    },
+    {
+      "title": "Space Channel 5",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Space Channel 5 (USA).chd"
+    },
+    {
+      "title": "Rez (En,Ja,Fr,De,Es,It)",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Rez (Europe) (En,Ja,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "Crazy Taxi",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Crazy Taxi (USA).chd"
+    },
+    {
+      "title": "Power Stone 2",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Power Stone 2 (USA).chd"
+    },
+    {
+      "title": "Bangai-O",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Bangai-O (USA).chd"
+    },
+    {
+      "title": "Border Down",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Border Down (Japan).chd"
+    },
+    {
+      "title": "Ikaruga",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Ikaruga (Japan).chd"
+    },
+    {
+      "title": "Advance Wars - Dual Strike",
+      "system": "nds",
+      "bucket": "nds/Advance Wars - Dual Strike.zip"
+    },
+    {
+      "title": "Contra 4",
+      "system": "nds",
+      "bucket": "nds/Contra 4.zip"
+    },
+    {
+      "title": "World Ends with You, The",
+      "system": "nds",
+      "bucket": "nds/World Ends with You, The.zip"
+    },
+    {
+      "title": "Elite Beat Agents",
+      "system": "nds",
+      "bucket": "nds/Elite Beat Agents.zip"
+    },
+    {
+      "title": "Henry Hatsworth in the Puzzling Adventure",
+      "system": "nds",
+      "bucket": "nds/Henry Hatsworth in the Puzzling Adventure.zip"
+    },
+    {
+      "title": "Trauma Center - Under the Knife",
+      "system": "nds",
+      "bucket": "nds/Trauma Center - Under the Knife.zip"
+    },
+    {
+      "title": "Radiant Historia",
+      "system": "nds",
+      "bucket": "nds/Radiant Historia.zip"
+    },
+    {
+      "title": "Ghost Trick - Phantom Detective",
+      "system": "nds",
+      "bucket": "nds/Ghost Trick - Phantom Detective.zip"
+    },
+    {
+      "title": "Vagrant Story",
+      "system": "psx",
+      "bucket": "psx/Vagrant Story (USA).chd"
+    },
+    {
+      "title": "Suikoden II",
+      "system": "psx",
+      "bucket": "psx/Suikoden II (USA).chd"
+    },
+    {
+      "title": "Klonoa - Door to Phantomile",
+      "system": "psx",
+      "bucket": "psx/Klonoa - Door to Phantomile (USA).chd"
+    },
+    {
+      "title": "Tobal No. 1",
+      "system": "psx",
+      "bucket": "psx/Tobal No. 1 (USA).chd"
+    },
+    {
+      "title": "Patapon.iso",
+      "system": "psp",
+      "bucket": "psp/Patapon (USA).iso"
+    },
+    {
+      "title": "Lumines - Puzzle Fusion (En,Ja).iso",
+      "system": "psp",
+      "bucket": "psp/Lumines - Puzzle Fusion (USA) (En,Ja).iso"
+    },
+    {
+      "title": "Gran Turismo (En,Fr,Es) (v2.00).iso",
+      "system": "psp",
+      "bucket": "psp/Gran Turismo (USA) (En,Fr,Es) (v2.00).iso"
+    },
+    {
+      "title": "Shin Megami Tensei - Persona 3 Portable.iso",
+      "system": "psp",
+      "bucket": "psp/Shin Megami Tensei - Persona 3 Portable (USA).iso"
+    },
+    {
+      "title": "Valkyria Chronicles II.iso",
+      "system": "psp",
+      "bucket": "psp/Valkyria Chronicles II (USA).iso"
+    },
+    {
+      "title": "Parasite Eve",
+      "system": "psx",
+      "bucket": "psx/Parasite Eve (USA).m3u",
+      "files": [
+        "psx/Parasite Eve (USA) (Disc 1).chd",
+        "psx/Parasite Eve (USA) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "Parasite Eve II",
+      "system": "psx",
+      "bucket": "psx/Parasite Eve II (USA).m3u",
+      "files": [
+        "psx/Parasite Eve II (USA) (Disc 1).chd",
+        "psx/Parasite Eve II (USA) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "Shenmue",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Shenmue (USA) (Disc 1).chd",
+      "files": [
+        "dreamcast/Shenmue (USA) (Disc 2).chd",
+        "dreamcast/Shenmue (USA) (Disc 3).chd"
+      ]
+    },
+    {
+      "title": "Skies of Arcadia",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Skies of Arcadia (USA) (Disc 1).chd",
+      "files": [
+        "dreamcast/Skies of Arcadia (USA) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "Panzer Dragoon Saga",
+      "system": "saturn",
+      "bucket": "saturn/Panzer Dragoon Saga (USA) (Disc 1).chd",
+      "files": [
+        "saturn/Panzer Dragoon Saga (USA) (Disc 2).chd",
+        "saturn/Panzer Dragoon Saga (USA) (Disc 3).chd",
+        "saturn/Panzer Dragoon Saga (USA) (Disc 4).chd"
+      ]
+    },
+    {
+      "title": "Xenogears",
+      "system": "psx",
+      "bucket": "psx/Xenogears (USA).m3u",
+      "files": [
+        "psx/Xenogears (USA) (Disc 1).chd",
+        "psx/Xenogears (USA) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "The Legend of Dragoon",
+      "system": "psx",
+      "bucket": "psx/Legend of Dragoon, The (USA).m3u",
+      "files": [
+        "psx/Legend of Dragoon, The (USA) (Disc 1).chd",
+        "psx/Legend of Dragoon, The (USA) (Disc 2).chd",
+        "psx/Legend of Dragoon, The (USA) (Disc 3).chd",
+        "psx/Legend of Dragoon, The (USA) (Disc 4).chd"
+      ]
+    }
+  ]
+}
