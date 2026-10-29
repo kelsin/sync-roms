@@ -1,0 +1,491 @@
+{
+  "name": "Shmups",
+  "description": "Scrolling shooters, favouring the Saturn, PlayStation, Dreamcast and PC Engine.",
+  "games": [
+    {
+      "title": "Darius Gaiden",
+      "system": "saturn",
+      "bucket": "saturn/Darius Gaiden (USA).chd"
+    },
+    {
+      "title": "DoDonPachi",
+      "system": "saturn",
+      "bucket": "saturn/DoDonPachi (Japan).chd"
+    },
+    {
+      "title": "DonPachi",
+      "system": "saturn",
+      "bucket": "saturn/DonPachi (Japan).chd"
+    },
+    {
+      "title": "Battle Garegga",
+      "system": "saturn",
+      "bucket": "saturn/Battle Garegga (Japan).chd"
+    },
+    {
+      "title": "Batsugun",
+      "system": "saturn",
+      "bucket": "saturn/Batsugun (Japan).chd"
+    },
+    {
+      "title": "Gunbird",
+      "system": "saturn",
+      "bucket": "saturn/Gunbird (Japan).chd"
+    },
+    {
+      "title": "Galactic Attack (Layer Section)",
+      "system": "saturn",
+      "bucket": "saturn/Galactic Attack (USA).chd"
+    },
+    {
+      "title": "Blast Wind",
+      "system": "saturn",
+      "bucket": "saturn/Blast Wind (Japan).chd"
+    },
+    {
+      "title": "Hyper Duel",
+      "system": "saturn",
+      "bucket": "saturn/Hyper Duel (Japan).chd"
+    },
+    {
+      "title": "Gradius Deluxe Pack",
+      "system": "saturn",
+      "bucket": "saturn/Gradius Deluxe Pack (Japan).chd"
+    },
+    {
+      "title": "Gokujou Parodius Da! Deluxe Pack",
+      "system": "saturn",
+      "bucket": "saturn/Gokujou Parodius Da! Deluxe Pack (Japan) (Rev A).chd"
+    },
+    {
+      "title": "Parodius Deluxe Pack",
+      "system": "saturn",
+      "bucket": "saturn/Parodius (Europe).chd"
+    },
+    {
+      "title": "Detana Twinbee Yahoo! Deluxe Pack",
+      "system": "saturn",
+      "bucket": "saturn/Detana Twinbee Yahoo! Deluxe Pack (Japan) (3M).chd"
+    },
+    {
+      "title": "Darius II",
+      "system": "saturn",
+      "bucket": "saturn/Darius II (Europe).chd"
+    },
+    {
+      "title": "Panzer Dragoon",
+      "system": "saturn",
+      "bucket": "saturn/Panzer Dragoon (USA) (1S).chd"
+    },
+    {
+      "title": "Panzer Dragoon II Zwei",
+      "system": "saturn",
+      "bucket": "saturn/Panzer Dragoon II Zwei (USA).chd"
+    },
+    {
+      "title": "Thunder Force V - Perfect System",
+      "system": "psx",
+      "bucket": "psx/Thunder Force V - Perfect System (USA).chd"
+    },
+    {
+      "title": "Einhander",
+      "system": "psx",
+      "bucket": "psx/Einhaender (USA).chd"
+    },
+    {
+      "title": "R-Type Delta",
+      "system": "psx",
+      "bucket": "psx/R-Type Delta (USA).chd"
+    },
+    {
+      "title": "G. Darius",
+      "system": "psx",
+      "bucket": "psx/G. Darius (USA).chd"
+    },
+    {
+      "title": "Gradius Gaiden",
+      "system": "psx",
+      "bucket": "psx/Gradius Gaiden (Japan) (Rev 1).chd"
+    },
+    {
+      "title": "Sexy Parodius",
+      "system": "psx",
+      "bucket": "psx/Sexy Parodius (Japan).chd"
+    },
+    {
+      "title": "Xevious 3D-G+",
+      "system": "psx",
+      "bucket": "psx/Xevious 3D-G+ (USA).chd"
+    },
+    {
+      "title": "Ikaruga",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Ikaruga (Japan).chd"
+    },
+    {
+      "title": "Under Defeat",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Under Defeat (Japan).chd"
+    },
+    {
+      "title": "Border Down",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Border Down (Japan).chd"
+    },
+    {
+      "title": "Mars Matrix",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Mars Matrix (USA).chd"
+    },
+    {
+      "title": "GigaWing",
+      "system": "dreamcast",
+      "bucket": "dreamcast/GigaWing (USA).chd"
+    },
+    {
+      "title": "GigaWing 2",
+      "system": "dreamcast",
+      "bucket": "dreamcast/GigaWing 2 (USA).chd"
+    },
+    {
+      "title": "Rez",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Rez (Europe) (En,Ja,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "Thunder Force III",
+      "system": "genesis",
+      "bucket": "genesis/Thunder Force III (Japan, USA) (En).zip"
+    },
+    {
+      "title": "Thunder Force IV",
+      "system": "genesis",
+      "bucket": "genesis/Thunder Force IV (Europe).zip"
+    },
+    {
+      "title": "Gynoug",
+      "system": "genesis",
+      "bucket": "genesis/Gynoug (Europe).zip"
+    },
+    {
+      "title": "Hellfire",
+      "system": "genesis",
+      "bucket": "genesis/Hellfire (USA).zip"
+    },
+    {
+      "title": "MUSHA",
+      "system": "genesis",
+      "bucket": "genesis/MUSHA - Metallic Uniframe Super Hybrid Armor (USA).zip"
+    },
+    {
+      "title": "Musha Aleste",
+      "system": "genesis",
+      "bucket": "genesis/Musha Aleste - Full Metal Fighter Ellinor (Japan).zip"
+    },
+    {
+      "title": "Fire Shark",
+      "system": "genesis",
+      "bucket": "genesis/Fire Shark (USA).zip"
+    },
+    {
+      "title": "Air Buster",
+      "system": "genesis",
+      "bucket": "genesis/Air Buster (USA).zip"
+    },
+    {
+      "title": "Gley Lancer",
+      "system": "genesis",
+      "bucket": "genesis/Advanced Busterhawk Gley Lancer (Japan).zip"
+    },
+    {
+      "title": "Steel Empire",
+      "system": "genesis",
+      "bucket": "genesis/Empire of Steel (Europe).zip"
+    },
+    {
+      "title": "Eliminate Down",
+      "system": "genesis",
+      "bucket": "genesis/Eliminate Down (Japan).zip"
+    },
+    {
+      "title": "Zero Wing",
+      "system": "genesis",
+      "bucket": "genesis/Zero Wing (World) (Retro-Bit).zip"
+    },
+    {
+      "title": "Truxton",
+      "system": "genesis",
+      "bucket": "genesis/Truxton (World) (Arcade Audio) (Mega Drive Mini 2, Genesis Mini 2).zip"
+    },
+    {
+      "title": "Raiden Trad",
+      "system": "genesis",
+      "bucket": "genesis/Raiden Trad (Japan, USA) (En).zip"
+    },
+    {
+      "title": "Aero Blasters",
+      "system": "genesis",
+      "bucket": "genesis/Aero Blasters (Japan).zip"
+    },
+    {
+      "title": "Darius II",
+      "system": "genesis",
+      "bucket": "genesis/Darius II (Japan).zip"
+    },
+    {
+      "title": "Axelay",
+      "system": "snes",
+      "bucket": "snes/Axelay (USA).zip"
+    },
+    {
+      "title": "Gradius III",
+      "system": "snes",
+      "bucket": "snes/Gradius III (USA).zip"
+    },
+    {
+      "title": "Super R-Type",
+      "system": "snes",
+      "bucket": "snes/Super R-Type (USA).zip"
+    },
+    {
+      "title": "Super Aleste",
+      "system": "snes",
+      "bucket": "snes/Super Aleste (Europe).zip"
+    },
+    {
+      "title": "Darius Twin",
+      "system": "snes",
+      "bucket": "snes/Darius Twin (USA).zip"
+    },
+    {
+      "title": "Gokujou Parodius",
+      "system": "snes",
+      "bucket": "snes/Gokujou Parodius (Japan).zip"
+    },
+    {
+      "title": "Pop'n TwinBee",
+      "system": "snes",
+      "bucket": "snes/Pop'n TwinBee (Europe).zip"
+    },
+    {
+      "title": "R-Type",
+      "system": "tg16",
+      "bucket": "tg16/R-Type (USA).zip"
+    },
+    {
+      "title": "Blazing Lazers",
+      "system": "tg16",
+      "bucket": "tg16/Blazing Lazers (USA).zip"
+    },
+    {
+      "title": "Gunhed",
+      "system": "tg16",
+      "bucket": "tg16/Gunhed (Japan) (En).zip"
+    },
+    {
+      "title": "Soldier Blade",
+      "system": "tg16",
+      "bucket": "tg16/Soldier Blade (USA).zip"
+    },
+    {
+      "title": "Super Star Soldier",
+      "system": "tg16",
+      "bucket": "tg16/Super Star Soldier (USA).zip"
+    },
+    {
+      "title": "Aero Blasters",
+      "system": "tg16",
+      "bucket": "tg16/Aero Blasters (USA).zip"
+    },
+    {
+      "title": "Raiden",
+      "system": "tg16",
+      "bucket": "tg16/Raiden (USA).zip"
+    },
+    {
+      "title": "Final Soldier",
+      "system": "tg16",
+      "bucket": "tg16/Final Soldier (Japan) (En).zip"
+    },
+    {
+      "title": "Salamander",
+      "system": "tg16",
+      "bucket": "tg16/Salamander (Japan) (En).zip"
+    },
+    {
+      "title": "Gradius",
+      "system": "tg16",
+      "bucket": "tg16/Gradius (Japan) (En).zip"
+    },
+    {
+      "title": "Gate of Thunder",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Gate of Thunder (Japan) (FACT, FADT).chd"
+    },
+    {
+      "title": "Lords of Thunder",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Lords of Thunder (USA).chd"
+    },
+    {
+      "title": "Super Darius",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Super Darius (Japan).chd"
+    },
+    {
+      "title": "Gradius II",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Gradius II - Gofer no Yabou (Japan).chd"
+    },
+    {
+      "title": "R-Type Complete CD",
+      "system": "tg-cd",
+      "bucket": "tg-cd/R-Type Complete CD (Japan) (Rev 1).chd"
+    },
+    {
+      "title": "Cotton",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Fantastic Night Dreams - Cotton (USA).chd"
+    },
+    {
+      "title": "Silpheed",
+      "system": "segacd",
+      "bucket": "segacd/Silpheed (USA).chd"
+    },
+    {
+      "title": "Gradius",
+      "system": "nes",
+      "bucket": "nes/Gradius (USA).zip"
+    },
+    {
+      "title": "Life Force",
+      "system": "nes",
+      "bucket": "nes/Life Force (USA).zip"
+    },
+    {
+      "title": "Gradius II",
+      "system": "nes",
+      "bucket": "nes/Gradius II (Japan) (En).zip"
+    },
+    {
+      "title": "Abadox",
+      "system": "nes",
+      "bucket": "nes/Abadox (Japan).zip"
+    },
+    {
+      "title": "Crisis Force",
+      "system": "nes",
+      "bucket": "nes/Crisis Force (Japan).zip"
+    },
+    {
+      "title": "Nemesis",
+      "system": "gb",
+      "bucket": "gb/Nemesis (USA).zip"
+    },
+    {
+      "title": "Nemesis II",
+      "system": "gb",
+      "bucket": "gb/Nemesis II - The Return of the Hero (Europe).zip"
+    },
+    {
+      "title": "R-Type DX",
+      "system": "gbc",
+      "bucket": "gbc/R-Type DX (USA, Europe) (GB Compatible).zip"
+    },
+    {
+      "title": "Gradius Galaxies",
+      "system": "gba",
+      "bucket": "gba/Gradius Galaxies (USA).zip"
+    },
+    {
+      "title": "Gradius Advance",
+      "system": "gba",
+      "bucket": "gba/Gradius Advance (Europe).zip"
+    },
+    {
+      "title": "R-Type III",
+      "system": "gba",
+      "bucket": "gba/R-Type III - The Third Lightning (USA).zip"
+    },
+    {
+      "title": "Darius R",
+      "system": "gba",
+      "bucket": "gba/Darius R (Japan) (En).zip"
+    },
+    {
+      "title": "Gradius Generation",
+      "system": "gba",
+      "bucket": "gba/Gradius Generation (Japan).zip"
+    },
+    {
+      "title": "1942",
+      "system": "mame",
+      "bucket": "mame/1942.zip"
+    },
+    {
+      "title": "1943",
+      "system": "mame",
+      "bucket": "mame/1943.zip"
+    },
+    {
+      "title": "1944: The Loop Master",
+      "system": "mame",
+      "bucket": "mame/1944.zip"
+    },
+    {
+      "title": "R-Type",
+      "system": "mame",
+      "bucket": "mame/rtypeu.zip"
+    },
+    {
+      "title": "R-Type II",
+      "system": "mame",
+      "bucket": "mame/rtype2.zip"
+    },
+    {
+      "title": "Gradius",
+      "system": "mame",
+      "bucket": "mame/gradius.zip"
+    },
+    {
+      "title": "Armed Police Batrider",
+      "system": "mame",
+      "bucket": "mame/batrider.zip"
+    },
+    {
+      "title": "Blazing Star",
+      "system": "neogeo",
+      "bucket": "neogeo/blazstar.zip"
+    },
+    {
+      "title": "Gradius III and IV",
+      "system": "ps2",
+      "bucket": "ps2/Gradius III and IV (USA).chd"
+    },
+    {
+      "title": "Gradius V",
+      "system": "ps2",
+      "bucket": "ps2/Gradius V (USA).chd"
+    },
+    {
+      "title": "R-Type Final",
+      "system": "ps2",
+      "bucket": "ps2/R-Type Final (USA).chd"
+    },
+    {
+      "title": "Raiden III",
+      "system": "ps2",
+      "bucket": "ps2/Raiden III (USA).chd"
+    },
+    {
+      "title": "Castle Shikigami 2",
+      "system": "ps2",
+      "bucket": "ps2/Castle Shikigami 2 (USA).chd"
+    },
+    {
+      "title": "Mobile Light Force 2",
+      "system": "ps2",
+      "bucket": "ps2/Mobile Light Force 2 (USA).chd"
+    }
+  ]
+}

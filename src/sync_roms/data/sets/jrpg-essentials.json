@@ -263,6 +263,133 @@
       "title": "Final Fantasy Tactics Advance",
       "system": "gba",
       "bucket": "gba/Final Fantasy Tactics Advance (USA).zip"
+    },
+    {
+      "title": "Final Fantasy X",
+      "system": "ps2",
+      "bucket": "ps2/Final Fantasy X.chd"
+    },
+    {
+      "title": "Final Fantasy XII",
+      "system": "ps2",
+      "bucket": "ps2/Final Fantasy XII.chd"
+    },
+    {
+      "title": "Dragon Quest VIII",
+      "system": "ps2",
+      "bucket": "ps2/Dragon Quest VIII - Journey of the Cursed King (USA).chd"
+    },
+    {
+      "title": "Dark Cloud 2",
+      "system": "ps2",
+      "bucket": "ps2/Dark Cloud 2 (USA) (v2.00).chd"
+    },
+    {
+      "title": "Persona 3 FES",
+      "system": "ps2",
+      "bucket": "ps2/Shin Megami Tensei - Persona 3 FES (USA).chd"
+    },
+    {
+      "title": "Persona 4",
+      "system": "ps2",
+      "bucket": "ps2/Shin Megami Tensei - Persona 4 (USA).chd"
+    },
+    {
+      "title": "Shin Megami Tensei: Nocturne",
+      "system": "ps2",
+      "bucket": "ps2/Shin Megami Tensei - Nocturne (USA).chd"
+    },
+    {
+      "title": "Digital Devil Saga",
+      "system": "ps2",
+      "bucket": "ps2/Shin Megami Tensei - Digital Devil Saga (USA).chd"
+    },
+    {
+      "title": "Disgaea: Hour of Darkness",
+      "system": "ps2",
+      "bucket": "ps2/Disgaea - Hour of Darkness (USA).chd"
+    },
+    {
+      "title": "Odin Sphere",
+      "system": "ps2",
+      "bucket": "ps2/Odin Sphere (USA).chd"
+    },
+    {
+      "title": "Rogue Galaxy",
+      "system": "ps2",
+      "bucket": "ps2/Rogue Galaxy (USA).chd"
+    },
+    {
+      "title": "Xenosaga Episode I",
+      "system": "ps2",
+      "bucket": "ps2/Xenosaga Episode I - Der Wille zur Macht (USA).chd"
+    },
+    {
+      "title": "Xenosaga Episode II",
+      "system": "ps2",
+      "bucket": "ps2/Xenosaga Episode II - Jenseits von Gut und Boese (USA) (Disc 1).chd",
+      "files": [
+        "ps2/Xenosaga Episode II - Jenseits von Gut und Boese (USA) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "Xenosaga Episode III",
+      "system": "ps2",
+      "bucket": "ps2/Xenosaga Episode III - Also sprach Zarathustra (USA) (Disc 1).chd",
+      "files": [
+        "ps2/Xenosaga Episode III - Also sprach Zarathustra (USA) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "Star Ocean: Till the End of Time",
+      "system": "ps2",
+      "bucket": "ps2/Star Ocean - Till the End of Time (USA) (Disc 1).chd",
+      "files": [
+        "ps2/Star Ocean - Till the End of Time (USA) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "Suikoden III",
+      "system": "ps2",
+      "bucket": "ps2/Suikoden III (USA).chd"
+    },
+    {
+      "title": "Suikoden V",
+      "system": "ps2",
+      "bucket": "ps2/Suikoden V (USA).chd"
+    },
+    {
+      "title": "Tales of the Abyss",
+      "system": "ps2",
+      "bucket": "ps2/Tales of the Abyss (USA).chd"
+    },
+    {
+      "title": "Valkyrie Profile 2: Silmeria",
+      "system": "ps2",
+      "bucket": "ps2/Valkyrie Profile 2 - Silmeria (USA).chd"
+    },
+    {
+      "title": "Grandia II",
+      "system": "ps2",
+      "bucket": "ps2/Grandia II (USA).chd"
+    },
+    {
+      "title": "Grandia III",
+      "system": "ps2",
+      "bucket": "ps2/Grandia III (USA) (Disc 1).chd",
+      "files": [
+        "ps2/Grandia III (USA) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "Kingdom Hearts",
+      "system": "ps2",
+      "bucket": "ps2/Kingdom Hearts (USA).chd"
+    },
+    {
+      "title": "Kingdom Hearts II",
+      "system": "ps2",
+      "bucket": "ps2/Kingdom Hearts II (USA).chd"
     }
   ]
 }

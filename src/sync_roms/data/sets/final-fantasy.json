@@ -78,6 +78,11 @@
       "bucket": "nds/Final Fantasy Crystal Chronicles - Ring of Fates.zip"
     },
     {
+      "title": "Final Fantasy Fables: Chocobo Tales",
+      "system": "nds",
+      "bucket": "nds/Final Fantasy Fables - Chocobo Tales.zip"
+    },
+    {
       "title": "Final Fantasy Tactics - The War of the Lions.iso",
       "system": "psp",
       "bucket": "psp/Final Fantasy Tactics - The War of the Lions (USA).iso"
@@ -153,6 +158,21 @@
       "title": "Final Fantasy Tactics Advance",
       "system": "gba",
       "bucket": "gba/Final Fantasy Tactics Advance (USA).zip"
+    },
+    {
+      "title": "Final Fantasy X",
+      "system": "ps2",
+      "bucket": "ps2/Final Fantasy X.chd"
+    },
+    {
+      "title": "Final Fantasy X-2",
+      "system": "ps2",
+      "bucket": "ps2/Final Fantasy X-2 (USA, Canada).chd"
+    },
+    {
+      "title": "Final Fantasy XII",
+      "system": "ps2",
+      "bucket": "ps2/Final Fantasy XII.chd"
     }
   ]
 }

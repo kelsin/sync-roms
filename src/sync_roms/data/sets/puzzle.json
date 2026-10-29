@@ -146,6 +146,31 @@
       "title": "Mr. Driller 2",
       "system": "gba",
       "bucket": "gba/Mr. Driller 2 (USA).zip"
+    },
+    {
+      "title": "Super Bust-A-Move",
+      "system": "gba",
+      "bucket": "gba/Super Bust-A-Move (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Katamari Damacy",
+      "system": "ps2",
+      "bucket": "ps2/Katamari Damacy (USA).chd"
+    },
+    {
+      "title": "We Love Katamari",
+      "system": "ps2",
+      "bucket": "ps2/We Love Katamari (USA).chd"
+    },
+    {
+      "title": "Frequency",
+      "system": "ps2",
+      "bucket": "ps2/Frequency (USA).chd"
+    },
+    {
+      "title": "Amplitude",
+      "system": "ps2",
+      "bucket": "ps2/Amplitude (USA).chd"
     }
   ]
 }

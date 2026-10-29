@@ -53,6 +53,11 @@
       "bucket": "snes/Mega Man 7 (USA).zip"
     },
     {
+      "title": "Mega Man & Bass (Rockman & Forte)",
+      "system": "snes",
+      "bucket": "snes/Rockman & Forte (Japan).zip"
+    },
+    {
       "title": "Mega Man - The Wily Wars (Genesis Mini)",
       "system": "genesis",
       "bucket": "genesis/Mega Man - The Wily Wars (USA) (Genesis Mini).zip"

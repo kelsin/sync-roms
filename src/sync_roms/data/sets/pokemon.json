@@ -13,6 +13,11 @@
       "bucket": "gb/Pokemon - Blue Version (USA, Europe) (SGB Enhanced).zip"
     },
     {
+      "title": "Pokemon - Yellow Version",
+      "system": "gb",
+      "bucket": "gb/Pokemon - Yellow Version - Special Pikachu Edition (USA, Europe) (CGB+SGB Enhanced).zip"
+    },
+    {
       "title": "Pokemon - Gold Version (SGB Enhanced) (GB Compatible)",
       "system": "gbc",
       "bucket": "gbc/Pokemon - Gold Version (USA, Europe) (SGB Enhanced) (GB Compatible).zip"
@@ -35,7 +40,7 @@
     {
       "title": "Pokemon Pinball (En,Fr,De,Es,It) (Rumble Version) (SGB Enhanced) (GB Compatible)",
       "system": "gbc",
-      "bucket": "gbc/Pokemon Pinball (Europe) (En,Fr,De,Es,It) (Rumble Version) (SGB Enhanced) (GB Compatible).zip"
+      "bucket": "gbc/Pokemon Pinball (USA, Australia) (Rumble Version) (SGB Enhanced) (GB Compatible).zip"
     },
     {
       "title": "Pokemon Diamond Version",

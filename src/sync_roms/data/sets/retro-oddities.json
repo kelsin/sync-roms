@@ -5,97 +5,97 @@
     {
       "title": "Adventure",
       "system": "atari2600",
-      "bucket": "atari2600/Adventure (USA).zip"
+      "bucket": "atari2600/Adventure (USA).7z"
     },
     {
       "title": "Pitfall! - Pitfall Harry's Jungle Adventure",
       "system": "atari2600",
-      "bucket": "atari2600/Pitfall! - Pitfall Harry's Jungle Adventure (USA).zip"
+      "bucket": "atari2600/Pitfall! - Pitfall Harry's Jungle Adventure (USA).7z"
     },
     {
       "title": "River Raid",
       "system": "atari2600",
-      "bucket": "atari2600/River Raid (USA).zip"
+      "bucket": "atari2600/River Raid (USA).7z"
     },
     {
       "title": "Space Invaders",
       "system": "atari2600",
-      "bucket": "atari2600/Space Invaders (USA).zip"
+      "bucket": "atari2600/Space Invaders (USA).7z"
     },
     {
       "title": "Combat (Atari Anthology)",
       "system": "atari2600",
-      "bucket": "atari2600/Combat (USA, Europe) (Atari Anthology).zip"
+      "bucket": "atari2600/Combat (USA, Europe) (Atari Anthology).7z"
     },
     {
       "title": "Missile Command",
       "system": "atari2600",
-      "bucket": "atari2600/Missile Command (USA).zip"
+      "bucket": "atari2600/Missile Command (USA).7z"
     },
     {
       "title": "Yars' Revenge",
       "system": "atari2600",
-      "bucket": "atari2600/Yars' Revenge (USA).zip"
+      "bucket": "atari2600/Yars' Revenge (USA).7z"
     },
     {
       "title": "Frogger",
       "system": "atari2600",
-      "bucket": "atari2600/Frogger (USA).zip"
+      "bucket": "atari2600/Frogger (USA).7z"
     },
     {
       "title": "Dig Dug",
       "system": "atari2600",
-      "bucket": "atari2600/Dig Dug (USA).zip"
+      "bucket": "atari2600/Dig Dug (USA).7z"
     },
     {
       "title": "Ms. Pac-Man",
       "system": "atari2600",
-      "bucket": "atari2600/Ms. Pac-Man (USA).zip"
+      "bucket": "atari2600/Ms. Pac-Man (USA).7z"
     },
     {
       "title": "Donkey Kong",
       "system": "atari2600",
-      "bucket": "atari2600/Donkey Kong (USA).zip"
+      "bucket": "atari2600/Donkey Kong (USA).7z"
     },
     {
       "title": "Kaboom!",
       "system": "atari2600",
-      "bucket": "atari2600/Kaboom! (USA).zip"
+      "bucket": "atari2600/Kaboom! (USA).7z"
     },
     {
       "title": "H.E.R.O.",
       "system": "atari2600",
-      "bucket": "atari2600/H.E.R.O. (USA).zip"
+      "bucket": "atari2600/H.E.R.O. (USA).7z"
     },
     {
       "title": "Pole Position",
       "system": "atari2600",
-      "bucket": "atari2600/Pole Position (USA).zip"
+      "bucket": "atari2600/Pole Position (USA).7z"
     },
     {
       "title": "Centipede",
       "system": "atari5200",
-      "bucket": "atari5200/Centipede (USA).zip"
+      "bucket": "atari5200/Centipede (USA).7z"
     },
     {
       "title": "Missile Command",
       "system": "atari5200",
-      "bucket": "atari5200/Missile Command (USA).zip"
+      "bucket": "atari5200/Missile Command (USA).7z"
     },
     {
       "title": "Pac-Man",
       "system": "atari5200",
-      "bucket": "atari5200/Pac-Man (USA).zip"
+      "bucket": "atari5200/Pac-Man (USA).7z"
     },
     {
       "title": "Galaxian",
       "system": "atari5200",
-      "bucket": "atari5200/Galaxian (USA).zip"
+      "bucket": "atari5200/Galaxian (USA).7z"
     },
     {
       "title": "Space Invaders",
       "system": "atari5200",
-      "bucket": "atari5200/Space Invaders (USA).zip"
+      "bucket": "atari5200/Space Invaders (USA).7z"
     },
     {
       "title": "Ms. Pac-Man",
@@ -341,6 +341,11 @@
       "title": "Super Mario Bros. 2 (En) (DV 2)",
       "system": "fds",
       "bucket": "fds/Super Mario Bros. 2 (Japan) (En) (DV 2).zip"
+    },
+    {
+      "title": "Kid Icarus (Hikari Shinwa - Palthena no Kagami)",
+      "system": "fds",
+      "bucket": "fds/Hikari Shinwa - Palthena no Kagami (Japan) (Rev 1).zip"
     },
     {
       "title": "Virtual Boy Wario Land (En)",

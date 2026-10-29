@@ -53,6 +53,11 @@
       "bucket": "snes/Street Fighter Alpha 2 (USA).zip"
     },
     {
+      "title": "Street Fighter II",
+      "system": "snes",
+      "bucket": "snes/Street Fighter II (USA) (Capcom Town).zip"
+    },
+    {
       "title": "Street Fighter II' - Special Champion Edition",
       "system": "genesis",
       "bucket": "genesis/Street Fighter II' - Special Champion Edition (USA).zip"
@@ -73,6 +78,11 @@
       "bucket": "saturn/Street Fighter Alpha 2 (USA).chd"
     },
     {
+      "title": "Street Fighter Alpha: Warriors' Dreams",
+      "system": "saturn",
+      "bucket": "saturn/Street Fighter Alpha - Warriors' Dreams (USA).chd"
+    },
+    {
       "title": "Marvel vs. Capcom 2",
       "system": "dreamcast",
       "bucket": "dreamcast/Marvel vs. Capcom 2 (USA).chd"
@@ -91,6 +101,26 @@
       "title": "Street Fighter Alpha 3",
       "system": "gba",
       "bucket": "gba/Street Fighter Alpha 3 (USA).zip"
+    },
+    {
+      "title": "Street Fighter Alpha Anthology",
+      "system": "ps2",
+      "bucket": "ps2/Street Fighter Alpha Anthology (USA).chd"
+    },
+    {
+      "title": "Street Fighter Anniversary Collection",
+      "system": "ps2",
+      "bucket": "ps2/Street Fighter Anniversary Collection (USA).chd"
+    },
+    {
+      "title": "Street Fighter EX3",
+      "system": "ps2",
+      "bucket": "ps2/Street Fighter EX3 (USA).chd"
+    },
+    {
+      "title": "Capcom vs. SNK 2",
+      "system": "ps2",
+      "bucket": "ps2/Capcom vs. SNK 2 - Mark of the Millennium 2001 (USA).chd"
     }
   ]
 }

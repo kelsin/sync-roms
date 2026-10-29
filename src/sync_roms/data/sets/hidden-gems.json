@@ -328,6 +328,11 @@
       ]
     },
     {
+      "title": "Jet Set Radio (Jet Grind Radio)",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Jet Grind Radio (USA).chd"
+    },
+    {
       "title": "Panzer Dragoon Saga",
       "system": "saturn",
       "bucket": "saturn/Panzer Dragoon Saga (USA) (Disc 1).chd",
@@ -396,6 +401,46 @@
       "title": "Ninja Five-0",
       "system": "gba",
       "bucket": "gba/Ninja Five-0 (USA).zip"
+    },
+    {
+      "title": "Shadow of the Colossus",
+      "system": "ps2",
+      "bucket": "ps2/Shadow of the Colossus.chd"
+    },
+    {
+      "title": "ICO",
+      "system": "ps2",
+      "bucket": "ps2/ICO.chd"
+    },
+    {
+      "title": "Katamari Damacy",
+      "system": "ps2",
+      "bucket": "ps2/Katamari Damacy (USA).chd"
+    },
+    {
+      "title": "Viewtiful Joe",
+      "system": "ps2",
+      "bucket": "ps2/Viewtiful Joe (USA).chd"
+    },
+    {
+      "title": "Odin Sphere",
+      "system": "ps2",
+      "bucket": "ps2/Odin Sphere (USA).chd"
+    },
+    {
+      "title": "GrimGrimoire",
+      "system": "ps2",
+      "bucket": "ps2/GrimGrimoire (USA) (En,Ja).chd"
+    },
+    {
+      "title": "Radiata Stories",
+      "system": "ps2",
+      "bucket": "ps2/Radiata Stories (USA).chd"
+    },
+    {
+      "title": "Dark Cloud 2",
+      "system": "ps2",
+      "bucket": "ps2/Dark Cloud 2 (USA) (v2.00).chd"
     }
   ]
 }
