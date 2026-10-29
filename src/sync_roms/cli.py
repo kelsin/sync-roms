@@ -5,6 +5,7 @@ import curses
 import json
 import mimetypes
 import os
+import queue
 import re
 import shutil
 import signal
@@ -20,8 +21,10 @@ from types import SimpleNamespace
 from xml.sax.saxutils import escape, unescape
 
 import boto3
+from boto3.s3.transfer import TransferConfig, create_transfer_manager
 from botocore.config import Config
 from botocore.exceptions import BotoCoreError, ClientError, ProfileNotFound
+from s3transfer.subscribers import BaseSubscriber
 
 BUCKET = None  # set by ensure_bucket() from settings.json
 PROFILE = os.environ.get("ROMS_PROFILE", "roms-readonly")
@@ -69,6 +72,9 @@ def help_text():
   {yellow('-u, --upload-scrapes')} [{cyan('BASE_DIR')}]   ☁️  upload BASE_DIR/ES-DE scraped data (metadata, media, themes, collections,
                       settings) to the bucket's scrapes/ folder, merging with what's there
                       {dim('(only the safe-to-share metadata fields are kept; uploads with the ROMS_WRITE_PROFILE profile)')}
+  {yellow('--upload')} [{cyan('DIR')}]   ☁️  upload the ROMs in DIR (no DIR: the current directory) and its subfolders to the bucket folder of a system you pick
+                      {dim('(the system is guessed from the folder name; files with the same size are skipped, a different size overwrites after you confirm;')}
+                      {dim('uploads in parallel, several requests per CPU core, with the ROMS_WRITE_PROFILE profile; works with --dry-run)')}
   {yellow('-c, --clean-scrapes')}   🧹 remove scrapes/ media and metadata for ROMs that aren't in the bucket at all (asks first, no folder needed)
   {yellow('--m3u')} [{cyan('DIR')}]   💿 create or fix the .m3u playlist of every multi-disc game ("Name (Disc 1) (Extra).chd", "Name (Disc 2).chd") in DIR
                       and its subfolders (no DIR: the current directory); playlists whose files are all missing are deleted (asks first),
@@ -713,16 +719,17 @@ def plan_downloads(jobs):
 _s3 = {}
 
 
-def s3_client(profile=None):
-    """Shared boto3 S3 client for a profile. Exits if the profile isn't configured."""
+def s3_client(profile=None, connections=WORKERS):
+    """Shared boto3 S3 client for a profile (one per connection pool size). Exits if the profile isn't configured."""
     profile = profile or PROFILE
-    if profile not in _s3:
+    key = profile if connections == WORKERS else (profile, connections)
+    if key not in _s3:
         try:
             session = boto3.Session(profile_name=profile)
         except ProfileNotFound:
             raise SystemExit(red(f"❌ AWS profile '{profile}' not found; define it in ~/.aws/config and ~/.aws/credentials"))
-        _s3[profile] = session.client("s3", config=Config(max_pool_connections=WORKERS))
-    return _s3[profile]
+        _s3[key] = session.client("s3", config=Config(max_pool_connections=connections))
+    return _s3[key]
 
 
 def download(job):
@@ -1498,21 +1505,6 @@ def put_text(key, text):
     s3_client(WRITE_PROFILE).put_object(Bucket=BUCKET, Key=key, Body=text.encode("utf-8"))
 
 
-def put_file(key, path):
-    s3_client(WRITE_PROFILE).upload_file(path, BUCKET, key, ExtraArgs={
-        "ContentType": mimetypes.guess_type(path)[0] or "application/octet-stream"})
-
-
-def upload(job):
-    key, path, _, *derive = job  # an optional 4th element means: upload path shrunk to Onion's box art size
-    if not derive:
-        return put_file(key, path)
-    with tempfile.TemporaryDirectory() as tmp:
-        art = os.path.join(tmp, "art.png")
-        shrink_png(path, art)
-        put_file(key, art)
-
-
 def walk_files(root, skip_top=()):
     """(relative path with /, full path) of every non-hidden file under root."""
     for dp, dns, fns in os.walk(root):
@@ -1626,28 +1618,6 @@ def text_keys(existing):
             or k == f"{SCRAPES}/esde/settings.json"]
 
 
-def run_uploads(todo):
-    print(bold(f"\n☁️  Uploading {len(todo)} file(s)"))
-    failed = 0
-    ex = ThreadPoolExecutor(WORKERS)
-    try:
-        futs = [(j, ex.submit(upload, j)) for j in todo]
-        for i, (j, f) in enumerate(futs, 1):
-            prog = dim(f"[{i}/{len(todo)}]")
-            try:
-                f.result()
-                print(f"  {prog} ✅ {j[0]}")
-            except Exception as e:
-                failed += 1
-                print(f"  {prog} ❌ {red(j[0])}: {(getattr(e, 'stderr', None) or str(e)).strip()}")
-    except KeyboardInterrupt:
-        print(yellow("\n🛑 Interrupted — dropping queued uploads, finishing the ones in flight..."))
-        raise
-    finally:
-        ex.shutdown(wait=True, cancel_futures=True)
-    return failed
-
-
 def upload_scrapes(args):
     """Upload BASE_DIR/ES-DE scraped data to the bucket's scrapes/ folder, merging with what's there."""
     base = os.path.abspath(os.path.expanduser(args.base_dir or os.getcwd()))
@@ -1698,14 +1668,168 @@ def upload_scrapes(args):
         print(yellow("👋 Cancelled."))
         return 0
     failed = 0
-    for key, text, label in texts:
-        try:
-            put_text(key, text)
-            print(f"  ✅ {label}")
-        except Exception as e:
-            failed += 1
-            print(f"  ❌ {red(label)}: {(getattr(e, 'stderr', None) or str(e)).strip()}")
+    with ThreadPoolExecutor(WORKERS) as ex:
+        for label, f in [(label, ex.submit(put_text, key, text)) for key, text, label in texts]:
+            try:
+                f.result()
+                print(f"  ✅ {label}")
+            except Exception as e:
+                failed += 1
+                print(f"  ❌ {red(label)}: {(getattr(e, 'stderr', None) or str(e)).strip()}")
     failed += run_uploads(files + derived) if files or derived else 0
+    print(green("\n🎉 Done!") if not failed else red(f"\n⚠️  Done with {failed} failure(s)"))
+    return 1 if failed else 0
+
+
+UPLOAD_MULTIPART_AT = 64 * 1024 * 1024  # files this big go up as parallel parts
+UPLOAD_PART = 32 * 1024 * 1024
+
+
+def upload_workers():
+    """Requests in flight at once. Uploads wait on the network, not the CPU, so run several per core."""
+    return min(64, 4 * (os.cpu_count() or 4))
+
+
+def guess_system(systems, folder):
+    """Index of the system whose bucket id (first) or frontend folder name is the folder's name, else None."""
+    name = os.path.basename(os.path.normpath(folder)).lower()
+    for i, s in enumerate(systems):
+        if s["bucket"].lower() == name:
+            return i
+    for i, s in enumerate(systems):
+        if name in (f.lower() for f in s["folders"].values() if f):
+            return i
+    return None
+
+
+def plan_rom_upload(root, bucket, existing):
+    """(new, changed, same) lists of (key, path, size) for the ROM files under root, keyed bucket/relative path.
+
+    existing: {key: size} listing of the bucket folder; a file whose size matches is the same.
+    """
+    new, changed, same = [], [], []
+    for dirpath, files in walk_roms(root):
+        for f in sorted(files):
+            path = os.path.join(dirpath, f)
+            key = f"{bucket}/{os.path.relpath(path, root).replace(os.sep, '/')}"
+            size = os.path.getsize(path)
+            if key not in existing:
+                new.append((key, path, size))
+            elif existing[key] == size:
+                same.append((key, path, size))
+            else:
+                changed.append((key, path, size))
+    return new, changed, same
+
+
+class QueueWhenDone(BaseSubscriber):
+    def __init__(self, done, job):
+        self.done, self.job = done, job
+
+    def on_done(self, future, **kwargs):
+        self.done.put((self.job, future))
+
+
+class FailedUpload:
+    """Stands in for a finished transfer of a job that failed before it could be queued."""
+    def __init__(self, error):
+        self.error = error
+
+    def result(self):
+        raise self.error
+
+
+def run_uploads(todo):
+    """Upload (key, path, size[, shrink]) jobs through one shared pool of requests, so small files and the parts of
+    big ones all keep the connection busy. Biggest files start first so a long one never trails at the end.
+    A 4th element means: upload path shrunk to Onion's box art size, shrunk on every core while the others upload."""
+    workers = upload_workers()
+    print(bold(f"\n☁️  Uploading {len(todo)} file(s)") + dim(f"  {workers} requests at once"))
+    config = TransferConfig(max_concurrency=workers, multipart_threshold=UPLOAD_MULTIPART_AT,
+                            multipart_chunksize=UPLOAD_PART)
+    done, failed = queue.Queue(), 0
+    try:
+        with tempfile.TemporaryDirectory() as tmp, ThreadPoolExecutor(os.cpu_count() or 4) as shrinkers, \
+                create_transfer_manager(s3_client(WRITE_PROFILE, connections=workers), config) as manager:
+            def send(job, path):
+                manager.upload(path, BUCKET, job[0],
+                               {"ContentType": mimetypes.guess_type(path)[0] or "application/octet-stream"},
+                               [QueueWhenDone(done, job)])
+
+            def shrink_and_send(job, n):
+                try:
+                    art = os.path.join(tmp, f"{n}.png")
+                    shrink_png(job[1], art)
+                    send(job, art)
+                except Exception as e:
+                    done.put((job, FailedUpload(e)))
+
+            try:
+                for n, job in enumerate(sorted(todo, key=lambda j: -j[2])):
+                    if len(job) > 3:
+                        shrinkers.submit(shrink_and_send, job, n)
+                    else:
+                        send(job, job[1])
+                for i in range(1, len(todo) + 1):
+                    job, future = done.get()
+                    prog = dim(f"[{i}/{len(todo)}]")
+                    try:
+                        future.result()
+                        print(f"  {prog} ✅ {job[0]}")
+                    except Exception as e:
+                        failed += 1
+                        print(f"  {prog} ❌ {red(job[0])}: {str(e).strip()}")
+            except KeyboardInterrupt:
+                shrinkers.shutdown(wait=False, cancel_futures=True)
+                raise
+    except KeyboardInterrupt:
+        print(yellow("\n🛑 Interrupted — dropping queued uploads, finishing the ones in flight..."))
+        raise
+    return failed
+
+
+def upload_command(args):
+    """Upload the ROMs in one folder (default: the current directory) to the bucket folder of a system you pick."""
+    folder = os.path.abspath(os.path.expanduser(args.upload or os.getcwd()))
+    if not os.path.isdir(folder):
+        raise SystemExit(red(f"❌ {folder} is not a folder"))
+    systems = sorted(load_manifest()["systems"], key=lambda s: s["name"].lower())
+    guess = guess_system(systems, folder)
+    i = filter_list("☁️  Which system are you uploading?", [f"{s['name']}  ({s['bucket']}/)" for s in systems],
+                    cursor=guess or 0, hint="type to filter · ↑/↓ move · Enter continue · Esc cancel")
+    if i is None:
+        print(yellow("👋 Cancelled."))
+        return 0
+    bucket = systems[i]["bucket"]
+    print(bold(f"☁️  Upload {systems[i]['name']}") + dim(f"  read={PROFILE}  write={WRITE_PROFILE}  {folder} → s3://{BUCKET}/{bucket}/"))
+    try:
+        print("☁️  Listing what's already there...")
+        existing = list_sizes(bucket + "/")
+    except (ClientError, BotoCoreError) as e:
+        raise SystemExit(red(f"❌ {e}"))
+    new, changed, same = plan_rom_upload(folder, bucket, existing)
+    print(f"\n💿 New: {bold(str(len(new)))} ({human_size(sum(f[2] for f in new))})")
+    print(f"♻️  Different size, would overwrite: {bold(str(len(changed)))} ({human_size(sum(f[2] for f in changed))})")
+    print(f"⚡ Already there: {len(same)}")
+    todo = new + changed
+    if not todo:
+        print(green("Nothing to upload ✨"))
+        return 0
+    for key, _, size in changed[:10]:
+        print(yellow(f"     overwrite {key} {dim(human_size(size))}"))
+    if len(changed) > 10:
+        print(yellow(f"     … and {len(changed) - 10} more"))
+    if args.dry_run:
+        print(yellow("\n🧪 Dry run — nothing uploaded"))
+        for key, _, size in new[:20]:
+            print(f"  {key} {dim(human_size(size))}")
+        if len(new) > 20:
+            print(dim(f"  … and {len(new) - 20} more"))
+        return 0
+    if not confirm(f"☁️  Upload {len(todo)} file(s) to s3://{BUCKET}/{bucket}/" + (f", overwriting {len(changed)}" if changed else "") + "?", default=False):
+        print(yellow("👋 Cancelled."))
+        return 0
+    failed = run_uploads(todo)
     print(green("\n🎉 Done!") if not failed else red(f"\n⚠️  Done with {failed} failure(s)"))
     return 1 if failed else 0
 
@@ -2273,6 +2397,7 @@ def sync():
     ap.add_argument("-a", "--ask", action="store_true")
     ap.add_argument("-u", "--upload-scrapes", action="store_true")
     ap.add_argument("-c", "--clean-scrapes", action="store_true")
+    ap.add_argument("--upload", nargs="?", const="")
     ap.add_argument("--m3u", nargs="?", const="")
     ap.add_argument("--chd", nargs="?", const="")
     ap.add_argument("--install-tools", action="store_true")
@@ -2289,16 +2414,18 @@ def sync():
         return list_devices()
     local = [m for m, on in (("--m3u", args.m3u is not None), ("--chd", args.chd is not None), ("--install-tools", args.install_tools)) if on]
     if local:
-        if len(local) > 1 or args.edit or args.upload_scrapes or args.clean_scrapes or args.mirror is not None or args.use_mirror or args.clear_mirror:
+        if len(local) > 1 or args.edit or args.upload is not None or args.upload_scrapes or args.clean_scrapes or args.mirror is not None or args.use_mirror or args.clear_mirror:
             raise SystemExit(red(f"❌ {local[0]} can't be combined with other modes"))
         if args.install_tools:
             return install_tools_command()
         return chd_command(args) if args.chd is not None else m3u_command(args)
     ensure_bucket()
     mirror_mode = args.mirror is not None or bool(args.use_mirror) or args.clear_mirror
-    if args.edit + args.upload_scrapes + args.clean_scrapes + mirror_mode > 1:
-        raise SystemExit(red("❌ Use only one of --edit, --upload-scrapes, --clean-scrapes, --mirror, "
+    if args.edit + args.upload_scrapes + args.clean_scrapes + (args.upload is not None) + mirror_mode > 1:
+        raise SystemExit(red("❌ Use only one of --edit, --upload, --upload-scrapes, --clean-scrapes, --mirror, "
                              "--use-mirror and --clear-mirror"))
+    if args.upload is not None:
+        return upload_command(args)
     if mirror_mode:
         return mirror_command(args)
     if args.edit or args.upload_scrapes or args.clean_scrapes:

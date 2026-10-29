@@ -66,16 +66,6 @@ class S3Test(unittest.TestCase):
         self.ws.add_response("put_object", {}, {"Bucket": BUCKET, "Key": "k", "Body": "é".encode("utf-8")})
         cli.put_text("k", "é")
 
-    def test_put_file_sets_content_type(self):
-        client = mock.Mock()
-        with mock.patch.dict(cli._s3, {cli.WRITE_PROFILE: client}):
-            cli.put_file("scrapes/a.png", "/x/a.png")
-            cli.put_file("scrapes/a.weird", "/x/a.weird")
-        self.assertEqual(client.upload_file.call_args_list, [
-            mock.call("/x/a.png", BUCKET, "scrapes/a.png", ExtraArgs={"ContentType": "image/png"}),
-            mock.call("/x/a.weird", BUCKET, "scrapes/a.weird", ExtraArgs={"ContentType": "application/octet-stream"}),
-        ])
-
     def test_download(self):
         client = mock.Mock()
         with tempfile.TemporaryDirectory() as tmp, mock.patch.dict(cli._s3, {cli.PROFILE: client}):
