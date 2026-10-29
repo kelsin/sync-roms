@@ -58,9 +58,69 @@
       "bucket": "neogeo/mslugx.zip"
     },
     {
-      "title": "Sengoku",
+      "title": "Captain Commando",
+      "system": "mame",
+      "bucket": "mame/captcomu.zip"
+    },
+    {
+      "title": "The Punisher",
       "system": "neogeo",
-      "bucket": "neogeo/sengoku.zip"
+      "bucket": "neogeo/punisheru.zip"
+    },
+    {
+      "title": "The Simpsons",
+      "system": "mame",
+      "bucket": "mame/simpsons.zip"
+    },
+    {
+      "title": "Sunset Riders",
+      "system": "mame",
+      "bucket": "mame/ssriders.zip"
+    },
+    {
+      "title": "Teenage Mutant Ninja Turtles",
+      "system": "mame",
+      "bucket": "mame/tmntu.zip"
+    },
+    {
+      "title": "Warriors of Fate",
+      "system": "mame",
+      "bucket": "mame/wofu.zip"
+    },
+    {
+      "title": "Double Dragon II: The Revenge",
+      "system": "mame",
+      "bucket": "mame/ddragon2.zip"
+    },
+    {
+      "title": "Golden Axe",
+      "system": "mame",
+      "bucket": "mame/goldnaxe.zip"
+    },
+    {
+      "title": "Vendetta",
+      "system": "mame",
+      "bucket": "mame/vendetta.zip"
+    },
+    {
+      "title": "Crime Fighters",
+      "system": "mame",
+      "bucket": "mame/crimfght.zip"
+    },
+    {
+      "title": "Alien vs. Predator",
+      "system": "mame",
+      "bucket": "mame/avsp.zip"
+    },
+    {
+      "title": "X-Men",
+      "system": "mame",
+      "bucket": "mame/xmen.zip"
+    },
+    {
+      "title": "Armored Warriors",
+      "system": "mame",
+      "bucket": "mame/armwar.zip"
     },
     {
       "title": "Streets of Rage (Rev A)",
@@ -78,19 +138,14 @@
       "bucket": "genesis/Streets of Rage 3 (USA).zip"
     },
     {
-      "title": "Golden Axe (Rev B) (Sega Smash Pack)",
+      "title": "Golden Axe (Rev A)",
       "system": "genesis",
-      "bucket": "genesis/Golden Axe (World) (Rev B) (Sega Smash Pack).zip"
+      "bucket": "genesis/Golden Axe (World) (Rev A).zip"
     },
     {
       "title": "Golden Axe II",
       "system": "genesis",
       "bucket": "genesis/Golden Axe II (World).zip"
-    },
-    {
-      "title": "Golden Axe III (En)",
-      "system": "genesis",
-      "bucket": "genesis/Golden Axe III (Japan) (En).zip"
     },
     {
       "title": "Final Fight 2",

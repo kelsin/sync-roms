@@ -3,9 +3,9 @@
   "description": "Landmark SNES, Genesis and TurboGrafx-16 games.",
   "games": [
     {
-      "title": "Super Mario World",
+      "title": "Super Mario All-Stars + Super Mario World",
       "system": "snes",
-      "bucket": "snes/Super Mario World (USA).zip"
+      "bucket": "snes/Super Mario All-Stars + Super Mario World (USA).zip"
     },
     {
       "title": "Legend of Zelda, The - A Link to the Past",
@@ -103,9 +103,9 @@
       "bucket": "snes/Super Ghouls 'N Ghosts (USA).zip"
     },
     {
-      "title": "ActRaiser (Arcade)",
+      "title": "ActRaiser",
       "system": "snes",
-      "bucket": "snes/ActRaiser (USA) (Arcade).zip"
+      "bucket": "snes/ActRaiser (USA).zip"
     },
     {
       "title": "Illusion of Gaia",
@@ -120,7 +120,7 @@
     {
       "title": "Mario Paint",
       "system": "snes",
-      "bucket": "snes/Mario Paint (Europe).zip"
+      "bucket": "snes/Mario Paint (Japan, USA) (En).zip"
     },
     {
       "title": "Pilotwings",
@@ -133,11 +133,6 @@
       "bucket": "snes/Zombies Ate My Neighbors (USA).zip"
     },
     {
-      "title": "Super Mario All-Stars",
-      "system": "snes",
-      "bucket": "snes/Super Mario All-Stars (USA).zip"
-    },
-    {
       "title": "Secret of Evermore",
       "system": "snes",
       "bucket": "snes/Secret of Evermore (USA).zip"
@@ -146,11 +141,6 @@
       "title": "Tetris Attack (En,Ja)",
       "system": "snes",
       "bucket": "snes/Tetris Attack (USA) (En,Ja).zip"
-    },
-    {
-      "title": "Terranigma",
-      "system": "snes",
-      "bucket": "snes/Terranigma (Europe).zip"
     },
     {
       "title": "Earthworm Jim",
@@ -163,9 +153,9 @@
       "bucket": "genesis/Sonic The Hedgehog 2 (World) (Rev B).zip"
     },
     {
-      "title": "Sonic The Hedgehog 3 (1993-11-20) (Sega Channel)",
+      "title": "Sonic The Hedgehog 3",
       "system": "genesis",
-      "bucket": "genesis/Sonic The Hedgehog 3 (USA) (1993-11-20) (Sega Channel).zip"
+      "bucket": "genesis/Sonic The Hedgehog 3 (USA).zip"
     },
     {
       "title": "Sonic & Knuckles",
@@ -183,9 +173,9 @@
       "bucket": "genesis/Gunstar Heroes (USA).zip"
     },
     {
-      "title": "Phantasy Star IV (Genesis Mini)",
+      "title": "Phantasy Star IV",
       "system": "genesis",
-      "bucket": "genesis/Phantasy Star IV (USA) (Genesis Mini).zip"
+      "bucket": "genesis/Phantasy Star IV (USA).zip"
     },
     {
       "title": "Shining Force II",
@@ -193,44 +183,34 @@
       "bucket": "genesis/Shining Force II (USA).zip"
     },
     {
-      "title": "Ecco the Dolphin",
-      "system": "genesis",
-      "bucket": "genesis/Ecco the Dolphin (Japan).zip"
-    },
-    {
       "title": "Castlevania - Bloodlines",
       "system": "genesis",
       "bucket": "genesis/Castlevania - Bloodlines (USA).zip"
     },
     {
-      "title": "Vectorman (Genesis Mini)",
+      "title": "Vectorman",
       "system": "genesis",
-      "bucket": "genesis/Vectorman (USA) (Genesis Mini).zip"
+      "bucket": "genesis/Vectorman (USA, Europe).zip"
     },
     {
-      "title": "Comix Zone (Sega Smash Pack 2)",
+      "title": "Comix Zone",
       "system": "genesis",
-      "bucket": "genesis/Comix Zone (USA) (Sega Smash Pack 2).zip"
+      "bucket": "genesis/Comix Zone (USA).zip"
     },
     {
-      "title": "Altered Beast",
+      "title": "Altered Beast (Rev A)",
       "system": "genesis",
-      "bucket": "genesis/Altered Beast (USA, Europe).zip"
+      "bucket": "genesis/Altered Beast (Japan, USA) (En) (Rev A).zip"
     },
     {
-      "title": "Golden Axe (Rev B) (Sega Smash Pack)",
+      "title": "Golden Axe (Rev A)",
       "system": "genesis",
-      "bucket": "genesis/Golden Axe (World) (Rev B) (Sega Smash Pack).zip"
+      "bucket": "genesis/Golden Axe (World) (Rev A).zip"
     },
     {
-      "title": "ToeJam & Earl (En) (Rev A)",
+      "title": "Shinobi III - Return of the Ninja Master",
       "system": "genesis",
-      "bucket": "genesis/ToeJam & Earl (Japan, Europe) (En) (Rev A).zip"
-    },
-    {
-      "title": "Shinobi III - Return of the Ninja Master (Genesis Mini)",
-      "system": "genesis",
-      "bucket": "genesis/Shinobi III - Return of the Ninja Master (USA) (Genesis Mini).zip"
+      "bucket": "genesis/Shinobi III - Return of the Ninja Master (USA).zip"
     },
     {
       "title": "Revenge of Shinobi, The (Rev B)",
@@ -238,9 +218,9 @@
       "bucket": "genesis/Revenge of Shinobi, The (USA, Europe) (Rev B).zip"
     },
     {
-      "title": "Landstalker (1993-07-13) (Sega Channel)",
+      "title": "Landstalker",
       "system": "genesis",
-      "bucket": "genesis/Landstalker (USA) (1993-07-13) (Sega Channel).zip"
+      "bucket": "genesis/Landstalker (USA).zip"
     },
     {
       "title": "Beyond Oasis",
@@ -253,9 +233,9 @@
       "bucket": "genesis/Streets of Rage 3 (USA).zip"
     },
     {
-      "title": "Aladdin (Final Cut)",
+      "title": "Aladdin",
       "system": "genesis",
-      "bucket": "genesis/Aladdin (USA) (Final Cut).zip"
+      "bucket": "genesis/Aladdin (USA).zip"
     },
     {
       "title": "Earthworm Jim",
@@ -263,19 +243,14 @@
       "bucket": "genesis/Earthworm Jim (USA).zip"
     },
     {
-      "title": "Road Rash II (Genesis Mini)",
+      "title": "Road Rash II (RR206)",
       "system": "genesis",
-      "bucket": "genesis/Road Rash II (USA) (Genesis Mini).zip"
+      "bucket": "genesis/Road Rash II (USA, Europe) (RR206).zip"
     },
     {
-      "title": "Thunder Force IV",
+      "title": "Contra - Hard Corps",
       "system": "genesis",
-      "bucket": "genesis/Thunder Force IV (Europe).zip"
-    },
-    {
-      "title": "Contra - Hard Corps (Genesis Mini)",
-      "system": "genesis",
-      "bucket": "genesis/Contra - Hard Corps (USA) (Genesis Mini).zip"
+      "bucket": "genesis/Contra - Hard Corps (USA, Korea) (En).zip"
     },
     {
       "title": "Bonk's Adventure",
@@ -296,11 +271,6 @@
       "title": "Dungeon Explorer",
       "system": "tg16",
       "bucket": "tg16/Dungeon Explorer (USA).zip"
-    },
-    {
-      "title": "Castlevania: Rondo of Blood (Akumajou Dracula X)",
-      "system": "tg-cd",
-      "bucket": "tg-cd/Akumajou Dracula X - Chi no Rondo (Japan) (FABT, FACT).chd"
     }
   ]
 }

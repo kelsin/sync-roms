@@ -38,14 +38,44 @@
       "bucket": "mame/cybots.zip"
     },
     {
+      "title": "Street Fighter II': Champion Edition",
+      "system": "mame",
+      "bucket": "mame/sf2ceua.zip"
+    },
+    {
+      "title": "Street Fighter II': Hyper Fighting",
+      "system": "neogeo",
+      "bucket": "neogeo/sf2hfu.zip"
+    },
+    {
+      "title": "Super Street Fighter II",
+      "system": "mame",
+      "bucket": "mame/ssf2u.zip"
+    },
+    {
+      "title": "Street Fighter Alpha",
+      "system": "mame",
+      "bucket": "mame/sfau.zip"
+    },
+    {
+      "title": "Street Fighter III: 3rd Strike",
+      "system": "neogeo",
+      "bucket": "neogeo/sfiii3u.zip"
+    },
+    {
+      "title": "Street Fighter EX Plus",
+      "system": "mame",
+      "bucket": "mame/sfexp.zip"
+    },
+    {
+      "title": "Marvel Super Heroes",
+      "system": "mame",
+      "bucket": "mame/mshu.zip"
+    },
+    {
       "title": "Street Fighter II Turbo (Rev 1)",
       "system": "snes",
       "bucket": "snes/Street Fighter II Turbo (USA) (Rev 1).zip"
-    },
-    {
-      "title": "Super Street Fighter II - The New Challengers",
-      "system": "snes",
-      "bucket": "snes/Super Street Fighter II - The New Challengers (Japan).zip"
     },
     {
       "title": "Street Fighter Alpha 2",
@@ -55,7 +85,7 @@
     {
       "title": "Street Fighter II",
       "system": "snes",
-      "bucket": "snes/Street Fighter II (USA) (Capcom Town).zip"
+      "bucket": "snes/Street Fighter II (USA).zip"
     },
     {
       "title": "Street Fighter II' - Special Champion Edition",
@@ -81,16 +111,6 @@
       "title": "Street Fighter Alpha: Warriors' Dreams",
       "system": "saturn",
       "bucket": "saturn/Street Fighter Alpha - Warriors' Dreams (USA).chd"
-    },
-    {
-      "title": "Marvel vs. Capcom 2",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Marvel vs. Capcom 2 (USA).chd"
-    },
-    {
-      "title": "Street Fighter III - 3rd Strike",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Street Fighter III - 3rd Strike (USA).chd"
     },
     {
       "title": "Super Street Fighter II Turbo - Revival",

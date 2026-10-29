@@ -8,11 +8,6 @@
       "bucket": "nes/Metroid (USA).zip"
     },
     {
-      "title": "Metroid (Famicom Disk System)",
-      "system": "fds",
-      "bucket": "fds/Metroid (Japan) (Rev 3).zip"
-    },
-    {
       "title": "Metroid II - Return of Samus",
       "system": "gb",
       "bucket": "gb/Metroid II - Return of Samus (World).zip"
@@ -31,16 +26,6 @@
       "title": "Metroid - Zero Mission",
       "system": "gba",
       "bucket": "gba/Metroid - Zero Mission (USA).zip"
-    },
-    {
-      "title": "Metroid Prime Hunters",
-      "system": "nds",
-      "bucket": "nds/Metroid Prime Hunters.zip"
-    },
-    {
-      "title": "Metroid Prime Pinball",
-      "system": "nds",
-      "bucket": "nds/Metroid Prime Pinball.zip"
     },
     {
       "title": "Metroid (Classic NES Series)",

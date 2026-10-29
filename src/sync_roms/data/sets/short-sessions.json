@@ -58,11 +58,6 @@
       "bucket": "gba/Drill Dozer (USA).zip"
     },
     {
-      "title": "Kuru Kuru Kururin",
-      "system": "gba",
-      "bucket": "gba/Kurukuru Kururin (Europe).zip"
-    },
-    {
       "title": "Mr. Driller 2",
       "system": "gba",
       "bucket": "gba/Mr. Driller 2 (USA).zip"
@@ -73,9 +68,9 @@
       "bucket": "gba/Tony Hawk's Pro Skater 2 (USA, Europe).zip"
     },
     {
-      "title": "Super Mario Advance 4 - Super Mario Bros. 3",
+      "title": "Super Mario Advance 4 - Super Mario Bros. 3 (Rev 1)",
       "system": "gba",
-      "bucket": "gba/Super Mario Advance 4 - Super Mario Bros. 3 (USA).zip"
+      "bucket": "gba/Super Mario Advance 4 - Super Mario Bros. 3 (USA, Australia) (Rev 1).zip"
     },
     {
       "title": "Mario Kart - Super Circuit",
@@ -103,59 +98,9 @@
       "bucket": "gba/Sonic Advance (USA) (En,Ja).zip"
     },
     {
-      "title": "Mario Kart DS",
-      "system": "nds",
-      "bucket": "nds/Mario Kart DS.zip"
-    },
-    {
-      "title": "Tetris DS",
-      "system": "nds",
-      "bucket": "nds/Tetris DS.zip"
-    },
-    {
-      "title": "Meteos",
-      "system": "nds",
-      "bucket": "nds/Meteos.zip"
-    },
-    {
-      "title": "WarioWare - Touched",
-      "system": "nds",
-      "bucket": "nds/WarioWare - Touched.zip"
-    },
-    {
-      "title": "Picross DS",
-      "system": "nds",
-      "bucket": "nds/Picross DS.zip"
-    },
-    {
-      "title": "Elite Beat Agents",
-      "system": "nds",
-      "bucket": "nds/Elite Beat Agents.zip"
-    },
-    {
-      "title": "Brain Age - Train Your Brain in Minutes a Day!",
-      "system": "nds",
-      "bucket": "nds/Brain Age - Train Your Brain in Minutes a Day!.zip"
-    },
-    {
-      "title": "Professor Layton and the Curious Village",
-      "system": "nds",
-      "bucket": "nds/Professor Layton and the Curious Village.zip"
-    },
-    {
-      "title": "Advance Wars - Dual Strike",
-      "system": "nds",
-      "bucket": "nds/Advance Wars - Dual Strike.zip"
-    },
-    {
-      "title": "New Super Mario Bros.",
-      "system": "nds",
-      "bucket": "nds/New Super Mario Bros..zip"
-    },
-    {
-      "title": "Super Mario World",
+      "title": "Super Mario All-Stars + Super Mario World",
       "system": "snes",
-      "bucket": "snes/Super Mario World (USA).zip"
+      "bucket": "snes/Super Mario All-Stars + Super Mario World (USA).zip"
     },
     {
       "title": "F-Zero",
@@ -185,12 +130,12 @@
     {
       "title": "Sonic The Hedgehog",
       "system": "genesis",
-      "bucket": "genesis/Sonic The Hedgehog (USA, Europe).zip"
+      "bucket": "genesis/Sonic The Hedgehog (Japan, Europe, Korea) (En).zip"
     },
     {
-      "title": "Columns (1990-06-21) (Sega Channel)",
+      "title": "Columns",
       "system": "genesis",
-      "bucket": "genesis/Columns (USA, Europe) (1990-06-21) (Sega Channel).zip"
+      "bucket": "genesis/Columns (USA, Europe).zip"
     },
     {
       "title": "Ristar",
@@ -198,14 +143,14 @@
       "bucket": "genesis/Ristar (USA, Europe).zip"
     },
     {
-      "title": "Comix Zone (Sega Smash Pack 2)",
+      "title": "Comix Zone",
       "system": "genesis",
-      "bucket": "genesis/Comix Zone (USA) (Sega Smash Pack 2).zip"
+      "bucket": "genesis/Comix Zone (USA).zip"
     },
     {
-      "title": "Super Hang-On (Sega Smash Pack 2)",
+      "title": "Super Hang-On",
       "system": "genesis",
-      "bucket": "genesis/Super Hang-On (World) (Sega Smash Pack 2).zip"
+      "bucket": "genesis/Super Hang-On (Japan, USA) (En,Ja).zip"
     },
     {
       "title": "Streets of Rage 2",
@@ -228,9 +173,9 @@
       "bucket": "nes/Super Mario Bros. (World).zip"
     },
     {
-      "title": "Mega Man 2 (Capcom Town)",
+      "title": "Mega Man 2",
       "system": "nes",
-      "bucket": "nes/Mega Man 2 (USA) (Capcom Town).zip"
+      "bucket": "nes/Mega Man 2 (USA).zip"
     },
     {
       "title": "Kirby's Adventure (Rev 1)",
@@ -238,14 +183,14 @@
       "bucket": "nes/Kirby's Adventure (USA) (Rev 1).zip"
     },
     {
-      "title": "Punch-Out!!",
+      "title": "Mike Tyson's Punch-Out!!",
       "system": "nes",
-      "bucket": "nes/Punch-Out!! (USA).zip"
+      "bucket": "nes/Mike Tyson's Punch-Out!! (Japan, USA) (En) (Rev 1).zip"
     },
     {
       "title": "Dr. Mario",
       "system": "nes",
-      "bucket": "nes/Dr. Mario (Europe).zip"
+      "bucket": "nes/Dr. Mario (Japan, USA) (En) (Rev 1).zip"
     },
     {
       "title": "Duck Hunt",
@@ -281,6 +226,46 @@
       "title": "Metal Slug",
       "system": "neogeo",
       "bucket": "neogeo/mslug.zip"
+    },
+    {
+      "title": "Donkey Kong",
+      "system": "mame",
+      "bucket": "mame/dkong.zip"
+    },
+    {
+      "title": "Donkey Kong Jr.",
+      "system": "mame",
+      "bucket": "mame/dkongjr.zip"
+    },
+    {
+      "title": "Ms. Pac-Man",
+      "system": "mame",
+      "bucket": "mame/mspacman.zip"
+    },
+    {
+      "title": "Galaxian",
+      "system": "mame",
+      "bucket": "mame/galaxian.zip"
+    },
+    {
+      "title": "Joust",
+      "system": "mame",
+      "bucket": "mame/joust.zip"
+    },
+    {
+      "title": "Defender",
+      "system": "mame",
+      "bucket": "mame/defender.zip"
+    },
+    {
+      "title": "Robotron: 2084",
+      "system": "mame",
+      "bucket": "mame/robotron.zip"
+    },
+    {
+      "title": "Bubble Bobble",
+      "system": "mame",
+      "bucket": "mame/bublbobl.zip"
     },
     {
       "title": "Taito Legends",

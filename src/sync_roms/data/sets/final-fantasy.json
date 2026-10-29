@@ -58,31 +58,6 @@
       "bucket": "psx/Final Fantasy Anthology - Final Fantasy VI (USA) (Rev 1).chd"
     },
     {
-      "title": "Final Fantasy III",
-      "system": "nds",
-      "bucket": "nds/Final Fantasy III.zip"
-    },
-    {
-      "title": "Final Fantasy IV",
-      "system": "nds",
-      "bucket": "nds/Final Fantasy IV.zip"
-    },
-    {
-      "title": "Final Fantasy Tactics A2 - Grimoire of the Rift",
-      "system": "nds",
-      "bucket": "nds/Final Fantasy Tactics A2 - Grimoire of the Rift.zip"
-    },
-    {
-      "title": "Final Fantasy Crystal Chronicles - Ring of Fates",
-      "system": "nds",
-      "bucket": "nds/Final Fantasy Crystal Chronicles - Ring of Fates.zip"
-    },
-    {
-      "title": "Final Fantasy Fables: Chocobo Tales",
-      "system": "nds",
-      "bucket": "nds/Final Fantasy Fables - Chocobo Tales.zip"
-    },
-    {
       "title": "Final Fantasy Tactics - The War of the Lions.iso",
       "system": "psp",
       "bucket": "psp/Final Fantasy Tactics - The War of the Lions (USA).iso"

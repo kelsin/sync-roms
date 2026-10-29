@@ -140,23 +140,6 @@
     }
   },
   {
-    "name": "Nintendo Famicom Disk System",
-    "bucket": "fds",
-    "folders": {
-      "esde": "fds",
-      "knulli": "fds",
-      "onion": "FDS"
-    },
-    "bios": {
-      "files": [
-        "disksys.rom"
-      ],
-      "libretro_cores": [
-        "mesen"
-      ]
-    }
-  },
-  {
     "name": "Nintendo Game Boy Advance",
     "bucket": "gba",
     "folders": {
@@ -239,21 +222,6 @@
         "freeintv"
       ],
       "note": "exec.bin and grom.bin are the base BIOS; ecs.bin (Entertainment Computer System) and ivoice.bin (Intellivoice) are only needed by games that use those peripherals"
-    }
-  },
-  {
-    "name": "SNK Neo Geo Pocket",
-    "bucket": "ngp",
-    "folders": {
-      "esde": "ngp",
-      "knulli": "ngp",
-      "onion": "NGP"
-    },
-    "bios": {
-      "files": [],
-      "libretro_cores": [
-        "mednafen_ngp"
-      ]
     }
   },
   {
@@ -546,39 +514,6 @@
       ],
       "libretro_cores": [
         "genesis_plus_gx"
-      ]
-    }
-  },
-  {
-    "name": "Sega SG-1000",
-    "bucket": "sg-1000",
-    "folders": {
-      "esde": "sg-1000",
-      "knulli": "sg1000",
-      "onion": "SEGASGONE"
-    },
-    "bios": {
-      "files": [
-        "bios_MD.bin",
-        "bios_CD_E.bin",
-        "bios_CD_U.bin",
-        "bios_CD_J.bin",
-        "bios_E.sms",
-        "bios_U.sms",
-        "bios_J.sms",
-        "bios.gg",
-        "sk.bin",
-        "sk2chip.bin",
-        "areplay.bin",
-        "ggenie.bin",
-        "bios.sms",
-        "Databases/msxromdb.xml",
-        "Databases/segadb.xml",
-        "Machines/SEGA - SG-1000/config.ini"
-      ],
-      "libretro_cores": [
-        "genesis_plus_gx",
-        "bluemsx"
       ]
     }
   },
