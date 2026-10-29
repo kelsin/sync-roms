@@ -14,6 +14,7 @@ import tempfile
 import xml.etree.ElementTree as ET
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
+from types import SimpleNamespace
 from xml.sax.saxutils import escape, unescape
 
 import boto3
@@ -70,6 +71,11 @@ def help_text():
   {yellow('--m3u')} [{cyan('DIR')}]   💿 create or fix the .m3u playlist of every multi-disc game ("Name (Disc 1) (Extra).chd", "Name (Disc 2).chd") in DIR
                       and its subfolders (no DIR: the current directory); playlists whose files are all missing are deleted (asks first),
                       ones with the wrong or some missing discs are rewritten, and ones with the right discs under another name are renamed {dim('(local only; works with --dry-run)')}
+  {yellow('--chd')} [{cyan('DIR')}]   📀 unzip (7z) every .zip/.7z and convert each disc image (.cue, .gdi, .toc, .iso) to a verified .chd, per the chd setting of the
+                      system whose folder it is in (DIR can be one system folder or hold several; no DIR: the current directory); archives and
+                      images are removed once their chd verifies, then the .m3u playlists are fixed. GameCube and Wii archives are only unzipped
+                      {dim('(needs 7z and chdman, see --install-tools; works with --dry-run)')}
+  {yellow('--install-tools')}   🍺 brew install the 7z (sevenzip) and chdman (rom-tools) that --chd needs, whichever are missing
   {yellow('--mirror')} [{cyan('DIR')}]   🪞 make or refresh a local copy of everything the game lists reference (ROMs, BIOS, scraped data); files that are
                       no longer referenced are deleted, a rerun with nothing changed downloads nothing (no DIR: the saved mirror)
   {yellow('--use-mirror')} {cyan('DIR')}   🪞 --mirror DIR, then save DIR so every sync refreshes it first and copies from it instead of the bucket
@@ -903,6 +909,184 @@ def m3u_command(args):
                 f.write("".join(line + "\n" for line in lines))
     print(green(f"🎉 Done: {len(plan) - kept} change(s)"))
     return 0
+
+
+ARCHIVE_EXTS = (".zip", ".7z")
+SHEET_EXTS = (".cue", ".gdi", ".toc")  # chdman reads these; the sheet names the track files
+TOOL_FORMULAE = {"7z": "sevenzip", "chdman": "rom-tools"}  # Homebrew formula that provides each tool
+TOOL_NAMES = {"7z": ("7zz", "7z", "7za"), "chdman": ("chdman",)}
+
+
+def find_tool(tool):
+    return next((p for p in map(shutil.which, TOOL_NAMES[tool]) if p), None)
+
+
+def chd_folders(systems):
+    """{lowercase folder name: system} for the systems with a chd setting, over every layout's folder name."""
+    return {f.lower(): s for s in systems if s.get("chd") for f in s["folders"].values() if f}
+
+
+def sheet_tracks(path):
+    """Names of the track files a .cue/.gdi/.toc sheet points at."""
+    with open(path, encoding="utf-8", errors="replace") as f:
+        text = f.read()
+    if path.lower().endswith(".gdi"):
+        names = re.findall(r'^[ \t]*\d+[ \t]+\d+[ \t]+\d+[ \t]+\d+[ \t]+("[^"]+"|\S+)', text, re.M)
+        return [n.strip('"') for n in names]
+    return re.findall(r'(?:FILE|DATAFILE|AUDIOFILE)\s+"([^"]+)"', text, re.I)
+
+
+def disc_images(paths):
+    """[(image, files it owns)]: each cue/gdi/toc sheet with its tracks, then each .iso no sheet uses."""
+    images, used = [], set()
+    for p in sorted(paths):
+        if p.lower().endswith(SHEET_EXTS):
+            tracks = [os.path.join(os.path.dirname(p), t) for t in sheet_tracks(p)]
+            images.append((p, [p] + tracks))
+            used.update(tracks)
+    return images + [(p, [p]) for p in sorted(paths) if p.lower().endswith(".iso") and p not in used]
+
+
+def chd_system(root, dirpath, folders):
+    """(system, its outermost folder) for a folder under root: the first path part that names a chd system."""
+    rel = os.path.relpath(dirpath, root)
+    path = os.path.dirname(root)
+    for part in [os.path.basename(root)] + ([] if rel == "." else rel.split(os.sep)):
+        path = os.path.join(path, part)
+        if part.lower() in folders:
+            return folders[part.lower()], path
+    return None, None
+
+
+def plan_chd(root, folders):
+    """[(system, system folder, file, owned)] to convert under root: owned is None for an archive, else the
+    loose disc image's files (sheet and tracks, or the iso). Extract-only systems have archives only."""
+    jobs = []
+    for dirpath, dirs, files in os.walk(root):
+        dirs[:] = sorted(d for d in dirs if not d.startswith("."))
+        system, sysroot = chd_system(root, dirpath, folders)
+        if not system:
+            continue
+        files = [os.path.join(dirpath, f) for f in sorted(files) if not f.startswith(".")]
+        jobs += [(system, sysroot, f, None) for f in files if f.lower().endswith(ARCHIVE_EXTS)]
+        if system["chd"]["mode"] != "extract":
+            jobs += [(system, sysroot, img, owned) for img, owned in disc_images(files)]
+    return jobs
+
+
+def run_tool(cmd):
+    """None on success, else the last line the tool printed."""
+    done = subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True)
+    if done.returncode:
+        lines = done.stderr.replace("\r", "\n").strip().splitlines()
+        return lines[-1] if lines else f"exit code {done.returncode}"
+
+
+def chd_command_line(chdman, cfg, image, out):
+    dvd = cfg["mode"] == "dvd" and image.lower().endswith(".iso")
+    return [chdman, "createdvd" if dvd else "createcd", "-i", image, "-o", out] + (cfg.get("args", []) if dvd else [])
+
+
+def make_chd(chdman, cfg, image, out):
+    """Create out from image (an existing out is only verified); None on success, else the error."""
+    if not os.path.exists(out):
+        error = run_tool(chd_command_line(chdman, cfg, image, out))
+        if error:
+            if os.path.exists(out):
+                os.remove(out)
+            return error
+        error = run_tool([chdman, "verify", "-i", out])
+        if error and os.path.exists(out):
+            os.remove(out)
+        return error
+    return run_tool([chdman, "verify", "-i", out])
+
+
+def chd_archive(tools, cfg, path):
+    """Extract an archive next to itself, then convert its discs (or, for extract-only systems, move its files out).
+    The archive goes only once everything is done; None on success, else the error."""
+    folder = os.path.dirname(path)
+    tmp = tempfile.mkdtemp(prefix=".chd-", dir=folder)
+    try:
+        error = run_tool([tools["7z"], "x", "-y", "-bso0", "-bsp0", f"-o{tmp}", path])
+        if error:
+            return error
+        extracted = [os.path.join(dp, f) for dp, _, fns in os.walk(tmp) for f in sorted(fns)]
+        if cfg["mode"] == "extract":
+            names = [os.path.join(folder, os.path.basename(f)) for f in extracted]
+            clash = next((n for n in names if os.path.exists(n)), None)
+            if clash:
+                return f"{os.path.basename(clash)} already exists"
+            for f, n in zip(extracted, names):
+                shutil.move(f, n)
+        else:
+            images = disc_images(extracted)
+            if not images:
+                return "no disc image in the archive"
+            for image, _ in images:
+                error = make_chd(tools["chdman"], cfg, image, os.path.join(folder, os.path.splitext(os.path.basename(image))[0] + ".chd"))
+                if error:
+                    return error
+        os.remove(path)
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+
+
+def chd_image(tools, cfg, image, owned):
+    """Convert one loose disc image and remove its files once the chd verifies; None on success, else the error."""
+    error = make_chd(tools["chdman"], cfg, image, os.path.splitext(image)[0] + ".chd")
+    if not error:
+        for f in owned:
+            if os.path.exists(f):
+                os.remove(f)
+    return error
+
+
+def chd_command(args):
+    root = os.path.abspath(os.path.expanduser(args.chd or os.getcwd()))
+    if not os.path.isdir(root):
+        raise SystemExit(red(f"❌ {root} is not a folder"))
+    print(bold("💿 chd") + dim(f"  {root}"))
+    jobs = plan_chd(root, chd_folders(repo_json("systems")))
+    if not jobs:
+        print(green("✅ Nothing to convert"))
+        return 0
+    for system, _, path, owned in jobs:
+        what = "extract" if system["chd"]["mode"] == "extract" else "convert"
+        print(f"  {'📦' if owned is None else '💿'} {what} {os.path.relpath(path, root)}")
+    if args.dry_run:
+        print(yellow("\n🧪 Dry run — nothing changed"))
+        return 0
+    tools = {}
+    for tool, needed in (("7z", any(j[3] is None for j in jobs)), ("chdman", any(j[0]["chd"]["mode"] != "extract" for j in jobs))):
+        tools[tool] = find_tool(tool)
+        if needed and not tools[tool]:
+            raise SystemExit(red(f"❌ {tool} not found; run sync-roms --install-tools"))
+    converted, failed = [], 0
+    for system, sysroot, path, owned in jobs:
+        print(f"  ⏳ {os.path.relpath(path, root)}")
+        error = chd_image(tools, system["chd"], path, owned) if owned else chd_archive(tools, system["chd"], path)
+        if error:
+            failed += 1
+            print(red(f"  ❌ {os.path.relpath(path, root)}: {error}") + dim(" (kept)"))
+        else:
+            converted.append((system, sysroot))
+    for sysroot in dict.fromkeys(r for s, r in converted if s["chd"]["mode"] != "extract" and s["chd"].get("m3u", True)):
+        m3u_command(SimpleNamespace(m3u=sysroot, dry_run=False))
+    print((red if failed else green)(f"🎉 Done: {len(converted)} converted, {failed} failed"))
+    return 1 if failed else 0
+
+
+def install_tools_command():
+    brew = shutil.which("brew")
+    if not brew:
+        raise SystemExit(red("❌ Homebrew (brew) not found; install it from https://brew.sh"))
+    wanted = [formula for tool, formula in TOOL_FORMULAE.items() if not find_tool(tool)]
+    if not wanted:
+        print(green("✅ 7z and chdman are already installed"))
+        return 0
+    print(bold("🍺 brew install ") + " ".join(wanted))
+    return subprocess.run([brew, "install", *wanted]).returncode
 
 
 def report_missing(keys, what):
@@ -1952,6 +2136,8 @@ def sync():
     ap.add_argument("-u", "--upload-scrapes", action="store_true")
     ap.add_argument("-c", "--clean-scrapes", action="store_true")
     ap.add_argument("--m3u", nargs="?", const="")
+    ap.add_argument("--chd", nargs="?", const="")
+    ap.add_argument("--install-tools", action="store_true")
     ap.add_argument("--mirror", nargs="?", const="")
     ap.add_argument("--use-mirror")
     ap.add_argument("--clear-mirror", action="store_true")
@@ -1963,10 +2149,13 @@ def sync():
         return 0
     if args.devices:
         return list_devices()
-    if args.m3u is not None:
-        if args.edit or args.upload_scrapes or args.clean_scrapes or args.mirror is not None or args.use_mirror or args.clear_mirror:
-            raise SystemExit(red("❌ --m3u can't be combined with other modes"))
-        return m3u_command(args)
+    local = [m for m, on in (("--m3u", args.m3u is not None), ("--chd", args.chd is not None), ("--install-tools", args.install_tools)) if on]
+    if local:
+        if len(local) > 1 or args.edit or args.upload_scrapes or args.clean_scrapes or args.mirror is not None or args.use_mirror or args.clear_mirror:
+            raise SystemExit(red(f"❌ {local[0]} can't be combined with other modes"))
+        if args.install_tools:
+            return install_tools_command()
+        return chd_command(args) if args.chd is not None else m3u_command(args)
     ensure_bucket()
     mirror_mode = args.mirror is not None or bool(args.use_mirror) or args.clear_mirror
     if args.edit + args.upload_scrapes + args.clean_scrapes + mirror_mode > 1:

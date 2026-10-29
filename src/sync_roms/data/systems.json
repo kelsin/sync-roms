@@ -351,6 +351,9 @@
       "libretro_cores": [
         "mednafen_pcfx"
       ]
+    },
+    "chd": {
+      "mode": "cd"
     }
   },
   {
@@ -402,6 +405,9 @@
       "libretro_cores": [
         "genesis_plus_gx"
       ]
+    },
+    "chd": {
+      "mode": "cd"
     }
   },
   {
@@ -428,6 +434,9 @@
       "libretro_cores": [
         "flycast"
       ]
+    },
+    "chd": {
+      "mode": "cd"
     }
   },
   {
@@ -538,6 +547,9 @@
       "libretro_cores": [
         "mednafen_saturn"
       ]
+    },
+    "chd": {
+      "mode": "cd"
     }
   },
   {
@@ -614,6 +626,9 @@
       "libretro_cores": [
         "mednafen_pce_fast"
       ]
+    },
+    "chd": {
+      "mode": "cd"
     }
   },
   {
@@ -996,6 +1011,9 @@
       "libretro_cores": [
         "neocd"
       ]
+    },
+    "chd": {
+      "mode": "cd"
     }
   },
   {
@@ -1054,6 +1072,10 @@
         "opera"
       ],
       "note": "Any one of the listed BIOS files is enough"
+    },
+    "chd": {
+      "mode": "cd",
+      "m3u": false
     }
   },
   {
@@ -1117,6 +1139,9 @@
       "libretro_cores": [
         "mednafen_psx_hw"
       ]
+    },
+    "chd": {
+      "mode": "cd"
     }
   },
   {
@@ -1130,6 +1155,13 @@
     "bios": {
       "files": [],
       "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
+    },
+    "chd": {
+      "mode": "dvd",
+      "args": [
+        "-hs",
+        "2048"
+      ]
     }
   },
   {
@@ -1394,6 +1426,9 @@
         "dolphin"
       ],
       "note": "Per libretro info files live under system/dolphin-emu/Sys/"
+    },
+    "chd": {
+      "mode": "extract"
     }
   },
   {
@@ -1530,6 +1565,13 @@
         "pcee2"
       ],
       "note": "Any valid PS2 BIOS dump in system/pcsx2/bios/ works"
+    },
+    "chd": {
+      "mode": "dvd",
+      "args": [
+        "-c",
+        "zlib"
+      ]
     }
   },
   {
@@ -1634,6 +1676,9 @@
     "bios": {
       "files": [],
       "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
+    },
+    "chd": {
+      "mode": "extract"
     }
   },
   {
