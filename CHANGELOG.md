@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.7.0](https://github.com/kelsin/sync-roms/compare/v0.6.0...v0.7.0) (2026-10-29)
+
+
+### Features
+
+* **chd:** add --chd to convert disc archives to verified chd and --install-tools ([#16](https://github.com/kelsin/sync-roms/issues/16)) ([2877599](https://github.com/kelsin/sync-roms/commit/28775990214aca95e9083af0028a0e246be8152f))
+* **m3u:** add --m3u to create and fix multi-disc playlists ([#15](https://github.com/kelsin/sync-roms/issues/15)) ([c8ee65f](https://github.com/kelsin/sync-roms/commit/c8ee65f337bf20188ead5eaaa8f569746af02102))
+* **sets:** add mame and neogeo games, refresh for 1g1r bucket, drop ngp, sg-1000 and fds ([#13](https://github.com/kelsin/sync-roms/issues/13)) ([ba43ece](https://github.com/kelsin/sync-roms/commit/ba43ece5f388fa40a2049253ce6c5d037048106d))
+
 ## [0.6.0](https://github.com/kelsin/sync-roms/compare/v0.5.0...v0.6.0) (2026-10-29)
 
 
