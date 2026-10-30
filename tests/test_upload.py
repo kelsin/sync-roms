@@ -156,6 +156,31 @@ class S3ClientPoolTest(unittest.TestCase):
             self.assertIs(big, cli.s3_client("p", connections=40))
         self.assertEqual((small.pool, big.pool), (cli.WORKERS, 40))
 
+    def test_custom_endpoint_uses_path_style(self):
+        with mock.patch.dict(cli._s3, {}, clear=True), mock.patch.object(cli.boto3, "Session") as session, \
+                mock.patch.object(cli, "ENDPOINT", "http://minio:9000"):
+            cli.s3_client("p")
+        kwargs = session.return_value.client.call_args.kwargs
+        self.assertEqual(kwargs["endpoint_url"], "http://minio:9000")
+        self.assertEqual(kwargs["config"].s3, {"addressing_style": "path"})
+
+    def test_bucket_and_endpoint_env_override_settings(self):
+        settings = {"bucket": "b", "endpoint": "http://saved"}
+        env = {"ROMS_BUCKET": "eb", "ROMS_ENDPOINT": "http://env"}
+        with mock.patch.object(cli, "load_settings", return_value=settings), \
+                mock.patch.dict(cli.os.environ, env), \
+                mock.patch.object(cli, "BUCKET"), mock.patch.object(cli, "ENDPOINT"):
+            cli.ensure_bucket()
+            self.assertEqual((cli.BUCKET, cli.ENDPOINT), ("eb", "http://env"))
+
+    def test_profiles_from_settings_with_env_override(self):
+        settings = {"bucket": "b", "profile": "r", "write_profile": "w"}
+        with mock.patch.object(cli, "load_settings", return_value=settings), \
+                mock.patch.dict(cli.os.environ, {"ROMS_PROFILE": "env"}), \
+                mock.patch.object(cli, "PROFILE"), mock.patch.object(cli, "WRITE_PROFILE"):
+            cli.ensure_bucket()
+            self.assertEqual((cli.PROFILE, cli.WRITE_PROFILE), ("env", "w"))
+
 
 if __name__ == "__main__":
     unittest.main()

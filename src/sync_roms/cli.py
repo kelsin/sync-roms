@@ -27,6 +27,7 @@ from botocore.exceptions import BotoCoreError, ClientError, ProfileNotFound
 from s3transfer.subscribers import BaseSubscriber
 
 BUCKET = None  # set by ensure_bucket() from settings.json
+ENDPOINT = None  # custom S3 endpoint URL from settings.json; None means AWS
 PROFILE = os.environ.get("ROMS_PROFILE", "roms-readonly")
 WRITE_PROFILE = os.environ.get("ROMS_WRITE_PROFILE", "roms")
 WORKERS = 8
@@ -114,8 +115,10 @@ def help_text():
   {yellow('enter')} confirm   {yellow('q')} quit
 
 {bold('ENVIRONMENT')}
-  {yellow('ROMS_PROFILE')}   aws profile to use (default: roms-readonly)
-  {yellow('ROMS_WRITE_PROFILE')}   aws profile used to upload and clean scrapes (default: roms)
+  {yellow('ROMS_BUCKET')}    S3 bucket name (overrides settings.json "bucket")
+  {yellow('ROMS_ENDPOINT')}  custom S3 endpoint URL (overrides settings.json "endpoint"; default: AWS)
+  {yellow('ROMS_PROFILE')}   aws profile to use (overrides settings.json "profile"; default: roms-readonly)
+  {yellow('ROMS_WRITE_PROFILE')}   aws profile used to upload and clean scrapes (overrides "write_profile"; default: roms)
   {yellow('NO_COLOR')}       disable colors
 
 {bold('NOTES')}
@@ -728,7 +731,8 @@ def s3_client(profile=None, connections=WORKERS):
             session = boto3.Session(profile_name=profile)
         except ProfileNotFound:
             raise SystemExit(red(f"❌ AWS profile '{profile}' not found; define it in ~/.aws/config and ~/.aws/credentials"))
-        _s3[key] = session.client("s3", config=Config(max_pool_connections=connections))
+        config = Config(max_pool_connections=connections, **({"s3": {"addressing_style": "path"}} if ENDPOINT else {}))
+        _s3[key] = session.client("s3", endpoint_url=ENDPOINT, config=config)
     return _s3[key]
 
 
@@ -2245,7 +2249,7 @@ def stale_media(layout_name, systems, roms_dir, es_dir):
 # --- Local mirror ---------------------------------------------------------------------------------
 
 def load_settings():
-    """Saved global settings: {"bucket": S3 bucket name, "mirror": folder of the local mirror}."""
+    """Saved global settings: {"bucket": S3 bucket name, "endpoint": custom S3 endpoint URL, "profile"/"write_profile": aws profiles, "mirror": folder of the local mirror}."""
     try:
         with open(os.path.join(data_dir(), "settings.json")) as f:
             settings = json.load(f)
@@ -2270,9 +2274,13 @@ def save_setting(name, value):
 
 
 def ensure_bucket():
-    """Set BUCKET from the saved settings, asking for it (and saving it) on first run."""
-    global BUCKET
-    BUCKET = load_settings().get("bucket")
+    """Set BUCKET and ENDPOINT from the saved settings, asking for the bucket (and an optional endpoint) on first run."""
+    global BUCKET, ENDPOINT, PROFILE, WRITE_PROFILE
+    settings = load_settings()
+    PROFILE = os.environ.get("ROMS_PROFILE") or settings.get("profile") or "roms-readonly"
+    WRITE_PROFILE = os.environ.get("ROMS_WRITE_PROFILE") or settings.get("write_profile") or "roms"
+    BUCKET = os.environ.get("ROMS_BUCKET") or settings.get("bucket")
+    ENDPOINT = os.environ.get("ROMS_ENDPOINT") or settings.get("endpoint") or None
     while not BUCKET:
         try:
             name = input("🪣 Which S3 bucket holds your ROMs? ").strip()
@@ -2282,6 +2290,13 @@ def ensure_bucket():
         if name:
             save_setting("bucket", name)
             BUCKET = name
+            try:
+                url = input("🔗 Custom S3 endpoint URL (blank for AWS): ").strip()
+            except EOFError:
+                url = ""
+            if url:
+                save_setting("endpoint", url)
+                ENDPOINT = url
 
 
 def mirror_wanted(manifest):

@@ -2,7 +2,9 @@
 
 Interactive script that downloads ROMs and the BIOS files they need from your
 S3 bucket into local folders. On first run it asks which bucket to use and saves the
-name as `bucket` in `settings.json` in the user data folder. Files you already have (same
+name as `bucket` in `settings.json` in the user data folder. It also asks for an optional custom S3
+endpoint URL (blank for AWS), saved as `endpoint`, for S3-compatible storage such as MinIO or Cloudflare R2
+(requests then use path-style addressing). Files you already have (same
 size) are skipped, so re-running it only fetches what's new or missing. It can also keep a
 [local mirror](#local-mirror---mirror---use-mirror---clear-mirror) of the bucket and sync from that.
 
@@ -213,8 +215,10 @@ Then:
 
 | Environment variable | Description |
 | --- | --- |
-| `ROMS_PROFILE` | AWS profile to use (default `roms-readonly`) |
-| `ROMS_WRITE_PROFILE` | AWS profile used to upload in `--upload`, `--upload-scrapes` and `--clean-scrapes` modes (default `roms`) |
+| `ROMS_BUCKET` | S3 bucket name. Overrides `bucket` in `settings.json`; when set, the first-run prompt is skipped |
+| `ROMS_ENDPOINT` | Custom S3 endpoint URL. Overrides `endpoint` in `settings.json` (default: AWS) |
+| `ROMS_PROFILE` | AWS profile to use. Overrides `profile` in `settings.json` (default `roms-readonly`) |
+| `ROMS_WRITE_PROFILE` | AWS profile used to upload in `--upload`, `--upload-scrapes` and `--clean-scrapes` modes. Overrides `write_profile` in `settings.json` (default `roms`) |
 | `NO_COLOR` | Disable colors |
 
 ## Uploading ROMs (`--upload`)
