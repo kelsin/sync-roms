@@ -514,14 +514,17 @@ def save_card(name, device, layout):
     update_card(name, device=device["id"] if device else "full", layout=layout)
 
 
-def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, extras=None, locked=None, locked_note=""):
+def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, extras=None, locked=None, locked_note="",
+                hotkeys=()):
     """Type-to-filter list. Every space-separated term must appear in a label (case-insensitive).
 
     Single mode returns the chosen index, or None on Esc. Multi mode (Tab toggles) returns the list of
     on/off states on both Enter and Esc (Esc keeps the changes). cursor: index the highlight starts on.
     extras: per label, a list of (text, color) drawn after it (color: green, red, cyan or dim);
     they are not matched by the filter.
-    locked: optional per-label flags; those rows are greyed out, can't be toggled, and show locked_note.
+    locked: optional per-label flags; those rows are greyed out, can't be toggled, and show locked_note
+    (one string, or one per label).
+    hotkeys: control keys that, in single mode, return (key, label index) for the highlighted row instead of an index.
     """
     os.environ.setdefault("ESCDELAY", "25")
     lowered = [l.lower() for l in labels]
@@ -587,7 +590,7 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
             if multi:
                 status += f" · +{added} −{removed} pending"
             if vis and locked[vis[cur]]:
-                status = f"🔒 {locked_note}"
+                status = f"🔒 {locked_note[vis[cur]] if isinstance(locked_note, list) else locked_note}"
             stdscr.addnstr(h - 1, 0, status, w - 1, curses.A_BOLD)
             stdscr.move(1, min(w - 1, 3 + len(query)))
             try:
@@ -623,6 +626,8 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
                 target = not all(state[i] for i in free)
                 for i in free:
                     state[i] = target
+            elif k in hotkeys and not multi and vis:
+                return k, vis[cur]
             elif isinstance(k, str) and k.isprintable():
                 query += k
                 cur = top = 0
@@ -651,17 +656,24 @@ def load_sets():
     return sorted(sets, key=lambda x: x["name"].lower())
 
 
-def toggle_games(title, rows, extras=None):
+FULL_SYSTEM_NOTE = "Full system: every file in its folder is synced, so it can't be toggled"
+
+
+def toggle_games(title, rows, extras=None, covered=None):
     """Multi-select over rows of (system, bucket key, game title, label); adds/removes games in each system in place.
 
     extras: {bucket key: [more bucket keys]} added or removed together with that row's key.
 
     Rows of a full system are shown on and locked: its whole bucket folder is synced.
+    covered: optional callable (system, bucket key) -> note or None; rows with a note are shown on and locked
+    with that note (e.g. games a set reference or core already syncs).
     """
-    locked = [bool(s.get("full_system")) for s, *_ in rows]
+    notes = [FULL_SYSTEM_NOTE if s.get("full_system") else covered(s, key) if covered else None
+             for s, key, _, _ in rows]
+    locked = [bool(n) for n in notes]
     initial = [l or any(g.get("bucket") == key for g in s["games"]) for l, (s, key, _, _) in zip(locked, rows)]
     state = filter_list(title, [label for *_, label in rows], multi=True, initial=initial, locked=locked,
-                        locked_note="Full system: every file in its folder is synced, so it can't be toggled")
+                        locked_note=[n or "" for n in notes])
     for (s, key, name, _), on, was, lock in zip(rows, state, initial, locked):
         if lock:
             continue
