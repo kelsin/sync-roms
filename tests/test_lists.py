@@ -67,6 +67,20 @@ class MergeLists(unittest.TestCase):
             self.assertEqual(by["ps2"]["games"], [])
 
 
+class OddEntries(unittest.TestCase):
+    def test_apply_games_drops_non_dict_entries(self):
+        out = sync_roms.apply_games([{"bucket": "gba"}], {"gba": ["x", None, game("gba/A.zip")]})
+        self.assertEqual(out[0]["games"], [game("gba/A.zip")])
+
+    def test_bad_sets_warning_printed_once(self):
+        sync_roms._warned.clear()
+        err = io.StringIO()
+        with contextlib.redirect_stderr(err):
+            for _ in range(3):
+                self.assertEqual(sync_roms.list_sets({"sets": "mario"}), [])
+        self.assertEqual(err.getvalue().count("must be a list"), 1)
+
+
 class CardLists(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()

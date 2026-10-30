@@ -163,7 +163,7 @@ def apply_games(systems, games):
     marks a system whose every bucket file is synced."""
     for s in systems:
         entry = games.get(s["bucket"], [])
-        s["games"] = entry if isinstance(entry, list) else []
+        s["games"] = [g for g in entry if isinstance(g, dict)] if isinstance(entry, list) else []
         s["full_system"] = isinstance(entry, dict) and bool(entry.get("full_system"))
     return systems
 
@@ -196,6 +196,7 @@ def apply_device_overlay(devices, systems, overlay):
 
 
 SETS_KEY = "sets"  # reserved key in a games list: ids of whole game sets to sync
+_warned = set()  # warnings already printed this run, so a menu redraw doesn't repeat them
 
 
 def card_games(card):
@@ -213,7 +214,10 @@ def list_sets(games):
     """The set ids a games list references; anything that isn't a list of strings is ignored."""
     ids = games.get(SETS_KEY, [])
     if not isinstance(ids, list) or not all(isinstance(i, str) for i in ids):
-        print(f"warning: games: {SETS_KEY!r} must be a list of set ids, ignored", file=sys.stderr)
+        if SETS_KEY not in _warned:
+            _warned.add(SETS_KEY)
+            print(f"warning: games: {SETS_KEY!r} must be a list of set ids, ignored (saving that list drops it)",
+                  file=sys.stderr)
         return [i for i in ids if isinstance(i, str)] if isinstance(ids, list) else []
     return ids
 
