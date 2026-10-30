@@ -2,6 +2,8 @@
 """Download ROMs and BIOS files from the roms bucket."""
 import argparse
 import curses
+import hashlib
+import io
 import json
 import mimetypes
 import os
@@ -77,6 +79,8 @@ def help_text():
   {yellow('--upload')} [{cyan('DIR')}]   ☁️  upload the ROMs in DIR (no DIR: the current directory) and its subfolders to the bucket folder of a system you pick
                       {dim('(the system is guessed from the folder name; files with the same size are skipped, a different size overwrites after you confirm;')}
                       {dim('uploads in parallel, several requests per CPU core, with the ROMS_WRITE_PROFILE profile; works with --dry-run)')}
+  {yellow('--diff')} [{cyan('DIR')}]   🔍 list the ROMs in only one of DIR (no DIR: the current directory) and the bucket folder of a system you pick, ignoring renames
+                      {dim('(same path and size is the same file; the rest are matched by content: the CRCs inside zips, read from the zip index of just those files)')}
   {yellow('-c, --clean-scrapes')}   🧹 remove scrapes/ media and metadata for ROMs that aren't in the bucket at all (asks first, no folder needed)
   {yellow('--m3u')} [{cyan('DIR')}]   💿 create or fix the .m3u playlist of every multi-disc game ("Name (Disc 1) (Extra).chd", "Name (Disc 2).chd") in DIR
                       and its subfolders (no DIR: the current directory); playlists whose files are all missing are deleted (asks first),
@@ -2267,6 +2271,140 @@ def upload_command(args):
     return 1 if failed else 0
 
 
+class RangeReader(io.RawIOBase):
+    """Read-only file over a bucket object, fetching byte ranges; the tail is cached since a zip's index is there."""
+    TAIL = 65536
+
+    def __init__(self, key, size):
+        self.key, self.size, self.pos = key, size, 0
+        self.tail_at = max(0, size - self.TAIL)
+        self.tail = self.fetch(self.tail_at, size) if size else b""
+
+    def fetch(self, start, end):
+        if end <= start:
+            return b""
+        r = s3_client().get_object(Bucket=BUCKET, Key=self.key, Range=f"bytes={start}-{end - 1}")
+        return r["Body"].read()
+
+    def readable(self): return True
+    def seekable(self): return True
+    def tell(self): return self.pos
+
+    def seek(self, offset, whence=os.SEEK_SET):
+        self.pos = offset if whence == os.SEEK_SET else self.pos + offset if whence == os.SEEK_CUR else self.size + offset
+        return self.pos
+
+    def read(self, n=-1):
+        end = self.size if n is None or n < 0 else min(self.size, self.pos + n)
+        if self.pos >= self.tail_at:
+            data = self.tail[self.pos - self.tail_at:end - self.tail_at]
+        else:
+            data = self.fetch(self.pos, end)
+        self.pos += len(data)
+        return data
+
+
+def zip_fingerprint(fileobj):
+    """The (size, crc32) of every file inside a zip, from its index alone, so the name and compression don't matter."""
+    with zipfile.ZipFile(fileobj) as z:
+        return ("zip", tuple(sorted((i.file_size, i.CRC) for i in z.infolist() if not i.is_dir())))
+
+
+def file_md5(path):
+    h = hashlib.md5()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def local_fingerprint(path):
+    try:
+        return zip_fingerprint(path)
+    except zipfile.BadZipFile:
+        return ("raw", os.path.getsize(path), file_md5(path))
+
+
+def bucket_fingerprint(key, size, etag):
+    try:
+        return zip_fingerprint(RangeReader(key, size))
+    except (zipfile.BadZipFile, ClientError, BotoCoreError):
+        etag = etag.strip('"')
+        return ("raw", size, None if "-" in etag else etag)  # a multipart upload's ETag isn't an md5
+
+
+def same_content(a, b):
+    if a[0] != b[0]:
+        return False
+    return a == b if a[0] == "zip" else a[1] == b[1] and (a[2] is None or b[2] is None or a[2] == b[2])
+
+
+def list_with_etags(prefix):
+    pages = s3_client().get_paginator("list_objects_v2").paginate(Bucket=BUCKET, Prefix=prefix)
+    return {o["Key"][len(prefix):]: (o["Size"], o["ETag"]) for page in pages for o in page.get("Contents", [])
+            if not o["Key"].endswith("/")}
+
+
+def plan_diff(local, remote, local_print, remote_print):
+    """(only local, only bucket) lists of relative paths, ignoring renames.
+
+    local: {path: size}; remote: {path: (size, etag)}. A file with the same path and size on both sides is the same
+    without reading it; the rest are matched by content. local_print(path) / remote_print(path, size, etag)
+    return a fingerprint, and are only called for the files left over.
+    """
+    left_local = sorted(p for p, size in local.items() if p not in remote or remote[p][0] != size)
+    left_remote = sorted(p for p, (size, _) in remote.items() if p not in local or local[p] != size)
+    with ThreadPoolExecutor(WORKERS) as ex:
+        local_prints = list(ex.map(local_print, left_local))
+        remote_prints = list(ex.map(lambda p: remote_print(p, *remote[p]), left_remote))
+    unmatched = list(zip(left_remote, remote_prints))
+    only_local = []
+    for path, fp in zip(left_local, local_prints):
+        for i, (_, other) in enumerate(unmatched):
+            if same_content(fp, other):
+                del unmatched[i]
+                break
+        else:
+            only_local.append(path)
+    return only_local, [p for p, _ in unmatched]
+
+
+def diff_command(args):
+    """Show the ROMs that are in only one of a local folder (default: the current directory) and a bucket folder."""
+    folder = os.path.abspath(os.path.expanduser(args.diff or os.getcwd()))
+    if not os.path.isdir(folder):
+        raise SystemExit(red(f"❌ {folder} is not a folder"))
+    systems = sorted(load_manifest()["systems"], key=lambda s: s["name"].lower())
+    guess = guess_system(systems, folder)
+    i = filter_list("🔍 Which system is this folder compared with?", [f"{s['name']}  ({s['bucket']}/)" for s in systems],
+                    cursor=guess or 0, hint="type to filter · ↑/↓ move · Enter continue · Esc cancel")
+    if i is None:
+        print(yellow("👋 Cancelled."))
+        return 0
+    bucket = systems[i]["bucket"]
+    print(bold(f"🔍 Compare {systems[i]['name']}") + dim(f"  {folder} ↔ s3://{BUCKET}/{bucket}/"))
+    local = {}
+    for dirpath, files in walk_roms(folder, keep_dotfiles=True):
+        for f in files:
+            path = os.path.join(dirpath, f)
+            local[os.path.relpath(path, folder).replace(os.sep, "/")] = os.path.getsize(path)
+    try:
+        remote = list_with_etags(bucket + "/")
+        only_local, only_bucket = plan_diff(
+            local, remote, lambda p: local_fingerprint(os.path.join(folder, *p.split("/"))),
+            lambda p, size, etag: bucket_fingerprint(f"{bucket}/{p}", size, etag))
+    except (ClientError, BotoCoreError) as e:
+        raise SystemExit(red(f"❌ {e}"))
+    for title, paths, sizes, paint in (("Only in the folder", only_local, {p: local[p] for p in only_local}, green),
+                                       ("Only in the bucket", only_bucket, {p: remote[p][0] for p in only_bucket}, yellow)):
+        print(f"\n{bold(title)}: {len(paths)} ({human_size(sum(sizes.values()))})")
+        for p in paths:
+            print(paint(f"  {p} ") + dim(human_size(sizes[p])))
+    if not only_local and not only_bucket:
+        print(green("\nSame games on both sides ✨"))
+    return 0
+
+
 def plan_clean(existing, roms, remote_texts):
     """What in scrapes/ no longer matches an available ROM.
 
@@ -2911,6 +3049,7 @@ def sync():
     ap.add_argument("-u", "--upload-scrapes", action="store_true")
     ap.add_argument("-c", "--clean-scrapes", action="store_true")
     ap.add_argument("--upload", nargs="?", const="")
+    ap.add_argument("--diff", nargs="?", const="")
     ap.add_argument("--m3u", nargs="?", const="")
     ap.add_argument("--chd", nargs="?", const="")
     ap.add_argument("--install-tools", action="store_true")
@@ -2927,18 +3066,20 @@ def sync():
         return list_devices()
     local = [m for m, on in (("--m3u", args.m3u is not None), ("--chd", args.chd is not None), ("--install-tools", args.install_tools)) if on]
     if local:
-        if len(local) > 1 or args.edit or args.upload is not None or args.upload_scrapes or args.clean_scrapes or args.mirror is not None or args.use_mirror or args.clear_mirror:
+        if len(local) > 1 or args.edit or args.upload is not None or args.diff is not None or args.upload_scrapes or args.clean_scrapes or args.mirror is not None or args.use_mirror or args.clear_mirror:
             raise SystemExit(red(f"❌ {local[0]} can't be combined with other modes"))
         if args.install_tools:
             return install_tools_command()
         return chd_command(args) if args.chd is not None else m3u_command(args)
     ensure_bucket()
     mirror_mode = args.mirror is not None or bool(args.use_mirror) or args.clear_mirror
-    if args.edit + args.upload_scrapes + args.clean_scrapes + (args.upload is not None) + mirror_mode > 1:
-        raise SystemExit(red("❌ Use only one of --edit, --upload, --upload-scrapes, --clean-scrapes, --mirror, "
+    if args.edit + args.upload_scrapes + args.clean_scrapes + (args.upload is not None) + (args.diff is not None) + mirror_mode > 1:
+        raise SystemExit(red("❌ Use only one of --edit, --upload, --diff, --upload-scrapes, --clean-scrapes, --mirror, "
                              "--use-mirror and --clear-mirror"))
     if args.upload is not None:
         return upload_command(args)
+    if args.diff is not None:
+        return diff_command(args)
     if mirror_mode:
         return mirror_command(args)
     if args.edit or args.upload_scrapes or args.clean_scrapes:
