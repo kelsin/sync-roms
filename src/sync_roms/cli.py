@@ -1052,8 +1052,9 @@ def human_size(n):
 
 class ProgressBar:
     """One line under the log: say() prints a line above it, draw() refreshes it. Does nothing but print on a non-tty."""
-    def __init__(self, count, fraction):
+    def __init__(self, count, fraction, total_bytes=None):
         self.count, self.fraction = count, fraction  # fraction() is the 0-1 progress of the whole run
+        self.of = f" of {human_size(total_bytes)}" if total_bytes else ""  # the bar is by size, the count is by file
         self.shown = sys.stdout.isatty()
 
     def say(self, line):
@@ -1063,7 +1064,7 @@ class ProgressBar:
         if self.shown:
             fraction = self.fraction()
             filled = int(fraction * 24)
-            sys.stdout.write(f"\r\033[K  {cyan('█' * filled)}{dim('░' * (24 - filled))} {done}/{self.count} files  {fraction:4.0%}")
+            sys.stdout.write(f"\r\033[K  {cyan('█' * filled)}{dim('░' * (24 - filled))} {done}/{self.count} files done  {fraction:4.0%}{self.of}")
             sys.stdout.flush()
 
     def clear(self):
@@ -1099,7 +1100,7 @@ def run_downloads(todo, label, icon, base):
     failed = 0
     ex = ThreadPoolExecutor(WORKERS)
     moved = ByteProgress([j[2] for j in todo])
-    bar = ProgressBar(len(todo), moved.fraction)
+    bar = ProgressBar(len(todo), moved.fraction, sum(moved.size))
     try:
         futs = [(j, ex.submit(download, j, lambda n, i=i: moved.add(i, n))) for i, j in enumerate(todo)]
         for i, (j, f) in enumerate(futs, 1):
@@ -2163,7 +2164,7 @@ def run_uploads(todo):
     done, failed = queue.Queue(), 0
     order = sorted(todo, key=lambda j: -j[2])
     moved = ByteProgress([j[2] for j in order])
-    bar = ProgressBar(len(todo), moved.fraction)
+    bar = ProgressBar(len(todo), moved.fraction, sum(moved.size))
     try:
         with tempfile.TemporaryDirectory() as tmp, ThreadPoolExecutor(os.cpu_count() or 4) as shrinkers, \
                 create_transfer_manager(s3_client(WRITE_PROFILE, connections=workers), config) as manager:
