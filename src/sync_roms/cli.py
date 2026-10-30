@@ -1133,6 +1133,9 @@ def chd_command(args):
     jobs = plan_chd(root, folders)
     if not jobs:
         print(green("✅ Nothing to convert"))
+        if not roots:
+            print(yellow("⚠️  No folder here is named after a system with a chd setting, so every file was skipped."))
+            print(dim(f"   --chd only looks inside folders named: {', '.join(sorted(folders))}"))
     for system, _, path, owned in jobs:
         what = "extract" if system["chd"]["mode"] == "extract" else "convert"
         print(f"  {'📦' if owned is None else '💿'} {what} {os.path.relpath(path, root)}")
