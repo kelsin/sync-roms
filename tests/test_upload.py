@@ -54,9 +54,12 @@ class PlanRomUploadTest(unittest.TestCase):
             touch(root, "gamelist.xml")
             touch(root, "images/a.png")
             touch(root, ".DS_Store")
+            touch(root, "._a.gba")
+            touch(root, ".Trashes/x.gba")
+            touch(root, ".hack.gba", 50)
             existing = {"gba/b.gba": 20, "gba/c.gba": 99, "gba/other.gba": 5}
             new, changed, same = cli.plan_rom_upload(root, "gba", existing)
-        self.assertEqual(sorted((k, s) for k, _, s in new), [("gba/Disc/d.chd", 40), ("gba/a.gba", 10)])
+        self.assertEqual(sorted((k, s) for k, _, s in new), [("gba/.hack.gba", 50), ("gba/Disc/d.chd", 40), ("gba/a.gba", 10)])
         self.assertEqual([(k, s) for k, _, s in changed], [("gba/c.gba", 30)])
         self.assertEqual([(k, s) for k, _, s in same], [("gba/b.gba", 20)])
 
