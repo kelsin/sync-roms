@@ -5,7 +5,9 @@
     "folders": {
       "esde": "mame",
       "knulli": "mame",
-      "onion": "ARCADE"
+      "onion": "ARCADE",
+      "muos": "mame",
+      "slot": null
     },
     "bios": {
       "files": [],
@@ -18,7 +20,9 @@
     "folders": {
       "esde": "atari2600",
       "knulli": "atari2600",
-      "onion": "ATARI"
+      "onion": "ATARI",
+      "muos": "atari2600",
+      "slot": null
     },
     "bios": {
       "files": [],
@@ -31,7 +35,9 @@
     "folders": {
       "esde": "atari5200",
       "knulli": "atari5200",
-      "onion": "FIFTYTWOHUNDRED"
+      "onion": "FIFTYTWOHUNDRED",
+      "muos": "atari5200",
+      "slot": null
     },
     "bios": {
       "files": [
@@ -48,7 +54,9 @@
     "folders": {
       "esde": "atari7800",
       "knulli": "atari7800",
-      "onion": "SEVENTYEIGHTHUNDRED"
+      "onion": "SEVENTYEIGHTHUNDRED",
+      "muos": "atari7800",
+      "slot": null
     },
     "bios": {
       "files": [
@@ -65,7 +73,9 @@
     "folders": {
       "esde": "atari800",
       "knulli": "atari800",
-      "onion": null
+      "onion": null,
+      "muos": "atari800",
+      "slot": null
     },
     "bios": {
       "files": [
@@ -86,7 +96,9 @@
     "folders": {
       "esde": "atarilynx",
       "knulli": "lynx",
-      "onion": "LYNX"
+      "onion": "LYNX",
+      "muos": "lynx",
+      "slot": null
     },
     "bios": {
       "files": [
@@ -103,7 +115,9 @@
     "folders": {
       "esde": "atarist",
       "knulli": "atarist",
-      "onion": null
+      "onion": null,
+      "muos": "atarist",
+      "slot": null
     },
     "bios": {
       "files": [
@@ -120,7 +134,9 @@
     "folders": {
       "esde": "colecovision",
       "knulli": "colecovision",
-      "onion": "COLECO"
+      "onion": "COLECO",
+      "muos": "colecovision",
+      "slot": null
     },
     "bios": {
       "files": [
@@ -145,7 +161,9 @@
     "folders": {
       "esde": "gba",
       "knulli": "gba",
-      "onion": "GBA"
+      "onion": "GBA",
+      "muos": "gba",
+      "slot": "GBA"
     },
     "bios": {
       "files": [
@@ -165,7 +183,9 @@
     "folders": {
       "esde": "gbc",
       "knulli": "gbc",
-      "onion": "GBC"
+      "onion": "GBC",
+      "muos": "gbc",
+      "slot": "GBC"
     },
     "bios": {
       "files": [
@@ -187,7 +207,9 @@
     "folders": {
       "esde": "gb",
       "knulli": "gb",
-      "onion": "GB"
+      "onion": "GB",
+      "muos": "gb",
+      "slot": "GB"
     },
     "bios": {
       "files": [
@@ -209,7 +231,9 @@
     "folders": {
       "esde": "intellivision",
       "knulli": "intellivision",
-      "onion": "INTELLIVISION"
+      "onion": "INTELLIVISION",
+      "muos": "intellivision",
+      "slot": null
     },
     "bios": {
       "files": [
@@ -230,7 +254,9 @@
     "folders": {
       "esde": "neogeo",
       "knulli": "neogeo",
-      "onion": "NEOGEO"
+      "onion": "NEOGEO",
+      "muos": "neogeo",
+      "slot": null
     },
     "bios": {
       "files": [
@@ -270,7 +296,9 @@
     "folders": {
       "esde": "nes",
       "knulli": "nes",
-      "onion": "FC"
+      "onion": "FC",
+      "muos": "nes",
+      "slot": null
     },
     "bios": {
       "files": [],
@@ -283,7 +311,9 @@
     "folders": {
       "esde": "n64",
       "knulli": "n64",
-      "onion": null
+      "onion": null,
+      "muos": "n64",
+      "slot": null
     },
     "bios": {
       "files": [],
@@ -296,7 +326,9 @@
     "folders": {
       "esde": "nds",
       "knulli": "nds",
-      "onion": "NDS"
+      "onion": "NDS",
+      "muos": "nds",
+      "slot": null
     },
     "bios": {
       "files": [
@@ -321,7 +353,9 @@
     "folders": {
       "esde": "odyssey2",
       "knulli": "odyssey2",
-      "onion": "ODYSSEY"
+      "onion": "ODYSSEY",
+      "muos": "odyssey2",
+      "slot": null
     },
     "bios": {
       "files": [
@@ -342,7 +376,9 @@
     "folders": {
       "esde": "pcfx",
       "knulli": "pcfx",
-      "onion": null
+      "onion": null,
+      "muos": "pcfx",
+      "slot": null
     },
     "bios": {
       "files": [
@@ -362,7 +398,9 @@
     "folders": {
       "esde": "sega32x",
       "knulli": "sega32x",
-      "onion": "THIRTYTWOX"
+      "onion": "THIRTYTWOX",
+      "muos": "sega32x",
+      "slot": null
     },
     "bios": {
       "files": [
@@ -384,7 +422,9 @@
     "folders": {
       "esde": "segacd",
       "knulli": "megacd",
-      "onion": "SEGACD"
+      "onion": "SEGACD",
+      "muos": "megacd",
+      "slot": null
     },
     "bios": {
       "files": [
@@ -416,7 +456,9 @@
     "folders": {
       "esde": "dreamcast",
       "knulli": "dreamcast",
-      "onion": null
+      "onion": null,
+      "muos": "dreamcast",
+      "slot": null
     },
     "bios": {
       "files": [
@@ -445,7 +487,9 @@
     "folders": {
       "esde": "gamegear",
       "knulli": "gamegear",
-      "onion": "GG"
+      "onion": "GG",
+      "muos": "gamegear",
+      "slot": null
     },
     "bios": {
       "files": [
@@ -474,7 +518,9 @@
     "folders": {
       "esde": "genesis",
       "knulli": "megadrive",
-      "onion": "MD"
+      "onion": "MD",
+      "muos": "megadrive",
+      "slot": null
     },
     "bios": {
       "files": [
@@ -503,7 +549,9 @@
     "folders": {
       "esde": "mastersystem",
       "knulli": "mastersystem",
-      "onion": "MS"
+      "onion": "MS",
+      "muos": "mastersystem",
+      "slot": null
     },
     "bios": {
       "files": [
@@ -532,7 +580,9 @@
     "folders": {
       "esde": "saturn",
       "knulli": "saturn",
-      "onion": null
+      "onion": null,
+      "muos": "saturn",
+      "slot": null
     },
     "bios": {
       "files": [
@@ -558,7 +608,9 @@
     "folders": {
       "esde": "snes",
       "knulli": "snes",
-      "onion": "SFC"
+      "onion": "SFC",
+      "muos": "snes",
+      "slot": null
     },
     "bios": {
       "files": [
@@ -594,7 +646,9 @@
     "folders": {
       "esde": "tg16",
       "knulli": "pcengine",
-      "onion": "PCE"
+      "onion": "PCE",
+      "muos": "pcengine",
+      "slot": null
     },
     "bios": {
       "files": [
@@ -614,7 +668,9 @@
     "folders": {
       "esde": "tg-cd",
       "knulli": "pcenginecd",
-      "onion": "PCECD"
+      "onion": "PCECD",
+      "muos": "pcenginecd",
+      "slot": null
     },
     "bios": {
       "files": [
@@ -637,7 +693,9 @@
     "folders": {
       "esde": "vectrex",
       "knulli": "vectrex",
-      "onion": "VECTREX"
+      "onion": "VECTREX",
+      "muos": "vectrex",
+      "slot": null
     },
     "bios": {
       "files": [],
@@ -652,7 +710,9 @@
     "folders": {
       "esde": "virtualboy",
       "knulli": "virtualboy",
-      "onion": "VB"
+      "onion": "VB",
+      "muos": "virtualboy",
+      "slot": null
     },
     "bios": {
       "files": [],
@@ -667,7 +727,9 @@
     "folders": {
       "esde": "wonderswan",
       "knulli": "wswan",
-      "onion": "WS"
+      "onion": "WS",
+      "muos": "wonderswan",
+      "slot": null
     },
     "bios": {
       "files": [],
@@ -682,7 +744,9 @@
     "folders": {
       "esde": "wonderswancolor",
       "knulli": "wswanc",
-      "onion": "WS"
+      "onion": "WS",
+      "muos": "wonderswancolor",
+      "slot": null
     },
     "bios": {
       "files": [],
@@ -697,7 +761,9 @@
     "folders": {
       "esde": "mame-advmame",
       "knulli": "advmame",
-      "onion": null
+      "onion": null,
+      "muos": null,
+      "slot": null
     },
     "bios": {
       "files": [],
@@ -710,7 +776,9 @@
     "folders": {
       "esde": "arcade",
       "knulli": null,
-      "onion": null
+      "onion": null,
+      "muos": "arcade",
+      "slot": null
     },
     "bios": {
       "files": [],
@@ -723,7 +791,9 @@
     "folders": {
       "esde": "arduboy",
       "knulli": "arduboy",
-      "onion": null
+      "onion": null,
+      "muos": "arduboy",
+      "slot": null
     },
     "bios": {
       "files": [],
@@ -736,7 +806,9 @@
     "folders": {
       "esde": "atomiswave",
       "knulli": "atomiswave",
-      "onion": null
+      "onion": null,
+      "muos": "atomiswave",
+      "slot": null
     },
     "bios": {
       "files": [
@@ -760,7 +832,9 @@
     "folders": {
       "esde": "chailove",
       "knulli": null,
-      "onion": null
+      "onion": null,
+      "muos": "chailove",
+      "slot": null
     },
     "bios": {
       "files": [],
@@ -773,7 +847,9 @@
     "folders": {
       "esde": "channelf",
       "knulli": "channelf",
-      "onion": "FAIRCHILD"
+      "onion": "FAIRCHILD",
+      "muos": "channelf",
+      "slot": null
     },
     "bios": {
       "files": [
@@ -792,7 +868,9 @@
     "folders": {
       "esde": "cps1",
       "knulli": "cps1",
-      "onion": "CPS1"
+      "onion": "CPS1",
+      "muos": "cps1",
+      "slot": null
     },
     "bios": {
       "files": [],
@@ -805,7 +883,9 @@
     "folders": {
       "esde": "cps2",
       "knulli": "cps2",
-      "onion": "CPS2"
+      "onion": "CPS2",
+      "muos": "cps2",
+      "slot": null
     },
     "bios": {
       "files": [],
@@ -818,7 +898,9 @@
     "folders": {
       "esde": "cps3",
       "knulli": "cps3",
-      "onion": "CPS3"
+      "onion": "CPS3",
+      "muos": "cps3",
+      "slot": null
     },
     "bios": {
       "files": [],
@@ -831,7 +913,9 @@
     "folders": {
       "esde": "daphne",
       "knulli": "daphne",
-      "onion": null
+      "onion": null,
+      "muos": null,
+      "slot": null
     },
     "bios": {
       "files": [],
@@ -844,7 +928,9 @@
     "folders": {
       "esde": "doom",
       "knulli": null,
-      "onion": null
+      "onion": null,
+      "muos": "doom",
+      "slot": null
     },
     "bios": {
       "files": [],
@@ -857,7 +943,9 @@
     "folders": {
       "esde": "easyrpg",
       "knulli": "easyrpg",
-      "onion": null
+      "onion": null,
+      "muos": "easyrpg",
+      "slot": null
     },
     "bios": {
       "files": [],
@@ -870,7 +958,9 @@
     "folders": {
       "esde": "fbneo",
       "knulli": "fbneo",
-      "onion": null
+      "onion": null,
+      "muos": "fbneo",
+      "slot": null
     },
     "bios": {
       "files": [
@@ -909,7 +999,9 @@
     "folders": {
       "esde": "lowresnx",
       "knulli": "lowresnx",
-      "onion": null
+      "onion": null,
+      "muos": "lowresnx",
+      "slot": null
     },
     "bios": {
       "files": [],
@@ -922,7 +1014,9 @@
     "folders": {
       "esde": "lutro",
       "knulli": "lutro",
-      "onion": null
+      "onion": null,
+      "muos": null,
+      "slot": null
     },
     "bios": {
       "files": [],
@@ -935,7 +1029,9 @@
     "folders": {
       "esde": "megaduck",
       "knulli": "megaduck",
-      "onion": "MEGADUCK"
+      "onion": "MEGADUCK",
+      "muos": "megaduck",
+      "slot": null
     },
     "bios": {
       "files": [],
@@ -948,7 +1044,9 @@
     "folders": {
       "esde": "n64dd",
       "knulli": "n64dd",
-      "onion": null
+      "onion": null,
+      "muos": "n64dd",
+      "slot": null
     },
     "bios": {
       "files": [
@@ -967,7 +1065,9 @@
     "folders": {
       "esde": "naomi",
       "knulli": "naomi",
-      "onion": null
+      "onion": null,
+      "muos": "naomi",
+      "slot": null
     },
     "bios": {
       "files": [
@@ -991,7 +1091,9 @@
     "folders": {
       "esde": "neogeocd",
       "knulli": "neogeocd",
-      "onion": "NEOCD"
+      "onion": "NEOCD",
+      "muos": "neogeocd",
+      "slot": null
     },
     "bios": {
       "files": [
@@ -1022,7 +1124,9 @@
     "folders": {
       "esde": "ngpc",
       "knulli": "ngpc",
-      "onion": "NGP"
+      "onion": "NGP",
+      "muos": "ngpc",
+      "slot": null
     },
     "bios": {
       "files": [],
@@ -1037,7 +1141,9 @@
     "folders": {
       "esde": "openbor",
       "knulli": "openbor",
-      "onion": null
+      "onion": null,
+      "muos": "openbor",
+      "slot": null
     },
     "bios": {
       "files": [],
@@ -1050,7 +1156,9 @@
     "folders": {
       "esde": "3do",
       "knulli": "3do",
-      "onion": null
+      "onion": null,
+      "muos": "3do",
+      "slot": null
     },
     "bios": {
       "files": [
@@ -1084,7 +1192,9 @@
     "folders": {
       "esde": "pico8",
       "knulli": "pico8",
-      "onion": "PICO"
+      "onion": "PICO",
+      "muos": "pico8",
+      "slot": null
     },
     "bios": {
       "files": [],
@@ -1097,7 +1207,9 @@
     "folders": {
       "esde": "pokemini",
       "knulli": "pokemini",
-      "onion": "POKE"
+      "onion": "POKE",
+      "muos": "pokemini",
+      "slot": null
     },
     "bios": {
       "files": [],
@@ -1110,7 +1222,9 @@
     "folders": {
       "esde": "ports",
       "knulli": "ports",
-      "onion": "PORTS"
+      "onion": "PORTS",
+      "muos": null,
+      "slot": null
     },
     "bios": {
       "files": [],
@@ -1123,7 +1237,9 @@
     "folders": {
       "esde": "psx",
       "knulli": "psx",
-      "onion": "PS"
+      "onion": "PS",
+      "muos": "psx",
+      "slot": null
     },
     "bios": {
       "files": [
@@ -1150,7 +1266,9 @@
     "folders": {
       "esde": "psp",
       "knulli": "psp",
-      "onion": null
+      "onion": null,
+      "muos": "psp",
+      "slot": null
     },
     "bios": {
       "files": [],
@@ -1170,7 +1288,9 @@
     "folders": {
       "esde": "satellaview",
       "knulli": "satellaview",
-      "onion": "SATELLAVIEW"
+      "onion": "SATELLAVIEW",
+      "muos": "satellaview",
+      "slot": null
     },
     "bios": {
       "files": [
@@ -1206,7 +1326,9 @@
     "folders": {
       "esde": "scummvm",
       "knulli": "scummvm",
-      "onion": "SCUMMVM"
+      "onion": "SCUMMVM",
+      "muos": "scummvm",
+      "slot": null
     },
     "bios": {
       "files": [],
@@ -1219,7 +1341,9 @@
     "folders": {
       "esde": "supergrafx",
       "knulli": "supergrafx",
-      "onion": "SGFX"
+      "onion": "SGFX",
+      "muos": "supergrafx",
+      "slot": null
     },
     "bios": {
       "files": [
@@ -1239,7 +1363,9 @@
     "folders": {
       "esde": "sgb",
       "knulli": "sgb",
-      "onion": "SGB"
+      "onion": "SGB",
+      "muos": null,
+      "slot": null
     },
     "bios": {
       "files": [
@@ -1280,7 +1406,9 @@
     "folders": {
       "esde": "sufami",
       "knulli": "sufami",
-      "onion": "SUFAMI"
+      "onion": "SUFAMI",
+      "muos": "sufami",
+      "slot": null
     },
     "bios": {
       "files": [
@@ -1316,7 +1444,9 @@
     "folders": {
       "esde": "supervision",
       "knulli": "supervision",
-      "onion": "SUPERVISION"
+      "onion": "SUPERVISION",
+      "muos": "supervision",
+      "slot": null
     },
     "bios": {
       "files": [],
@@ -1329,7 +1459,9 @@
     "folders": {
       "esde": "tic80",
       "knulli": "tic80",
-      "onion": "TIC"
+      "onion": "TIC",
+      "muos": "tic80",
+      "slot": null
     },
     "bios": {
       "files": [],
@@ -1342,7 +1474,9 @@
     "folders": {
       "esde": "quake",
       "knulli": "quake",
-      "onion": null
+      "onion": null,
+      "muos": "quake",
+      "slot": null
     },
     "bios": {
       "files": [],
@@ -1355,7 +1489,9 @@
     "folders": {
       "esde": "uzebox",
       "knulli": "uzebox",
-      "onion": null
+      "onion": null,
+      "muos": "uzebox",
+      "slot": null
     },
     "bios": {
       "files": [],
@@ -1368,7 +1504,9 @@
     "folders": {
       "esde": "atarijaguar",
       "knulli": "jaguar",
-      "onion": null
+      "onion": null,
+      "muos": "jaguar",
+      "slot": null
     },
     "bios": {
       "files": [],
@@ -1381,7 +1519,9 @@
     "folders": {
       "esde": "atarijaguarcd",
       "knulli": "jaguarcd",
-      "onion": null
+      "onion": null,
+      "muos": null,
+      "slot": null
     },
     "bios": {
       "files": [],
@@ -1394,7 +1534,9 @@
     "folders": {
       "esde": "cdimono1",
       "knulli": "cdi",
-      "onion": null
+      "onion": null,
+      "muos": "cdi",
+      "slot": null
     },
     "bios": {
       "files": [
@@ -1413,7 +1555,9 @@
     "folders": {
       "esde": "gc",
       "knulli": "gamecube",
-      "onion": null
+      "onion": null,
+      "muos": null,
+      "slot": null
     },
     "bios": {
       "files": [
@@ -1437,7 +1581,9 @@
     "folders": {
       "esde": "mark3",
       "knulli": null,
-      "onion": null
+      "onion": null,
+      "muos": null,
+      "slot": null
     },
     "bios": {
       "files": [
@@ -1466,7 +1612,9 @@
     "folders": {
       "esde": "model2",
       "knulli": "model2",
-      "onion": null
+      "onion": null,
+      "muos": null,
+      "slot": null
     },
     "bios": {
       "files": [],
@@ -1479,7 +1627,9 @@
     "folders": {
       "esde": "model3",
       "knulli": "model3",
-      "onion": null
+      "onion": null,
+      "muos": null,
+      "slot": null
     },
     "bios": {
       "files": [],
@@ -1492,7 +1642,9 @@
     "folders": {
       "esde": "n3ds",
       "knulli": "3ds",
-      "onion": null
+      "onion": null,
+      "muos": "3ds",
+      "slot": null
     },
     "bios": {
       "files": [],
@@ -1505,7 +1657,9 @@
     "folders": {
       "esde": "naomi2",
       "knulli": "naomi2",
-      "onion": null
+      "onion": null,
+      "muos": null,
+      "slot": null
     },
     "bios": {
       "files": [
@@ -1529,7 +1683,9 @@
     "folders": {
       "esde": "naomigd",
       "knulli": null,
-      "onion": null
+      "onion": null,
+      "muos": null,
+      "slot": null
     },
     "bios": {
       "files": [
@@ -1553,7 +1709,9 @@
     "folders": {
       "esde": "ps2",
       "knulli": "ps2",
-      "onion": null
+      "onion": null,
+      "muos": null,
+      "slot": null
     },
     "bios": {
       "files": [
@@ -1580,7 +1738,9 @@
     "folders": {
       "esde": "ps3",
       "knulli": "ps3",
-      "onion": null
+      "onion": null,
+      "muos": null,
+      "slot": null
     },
     "bios": {
       "files": [],
@@ -1593,7 +1753,9 @@
     "folders": {
       "esde": "ps4",
       "knulli": "ps4",
-      "onion": null
+      "onion": null,
+      "muos": null,
+      "slot": null
     },
     "bios": {
       "files": [],
@@ -1606,7 +1768,9 @@
     "folders": {
       "esde": "psvita",
       "knulli": "psvita",
-      "onion": null
+      "onion": null,
+      "muos": null,
+      "slot": null
     },
     "bios": {
       "files": [],
@@ -1619,7 +1783,9 @@
     "folders": {
       "esde": "stv",
       "knulli": null,
-      "onion": null
+      "onion": null,
+      "muos": null,
+      "slot": null
     },
     "bios": {
       "files": [],
@@ -1632,7 +1798,9 @@
     "folders": {
       "esde": "switch",
       "knulli": null,
-      "onion": null
+      "onion": null,
+      "muos": null,
+      "slot": null
     },
     "bios": {
       "files": [],
@@ -1645,7 +1813,9 @@
     "folders": {
       "esde": "triforce",
       "knulli": "triforce",
-      "onion": null
+      "onion": null,
+      "muos": null,
+      "slot": null
     },
     "bios": {
       "files": [],
@@ -1658,7 +1828,9 @@
     "folders": {
       "esde": "type-x",
       "knulli": null,
-      "onion": null
+      "onion": null,
+      "muos": null,
+      "slot": null
     },
     "bios": {
       "files": [],
@@ -1671,7 +1843,9 @@
     "folders": {
       "esde": "wii",
       "knulli": "wii",
-      "onion": null
+      "onion": null,
+      "muos": null,
+      "slot": null
     },
     "bios": {
       "files": [],
@@ -1687,7 +1861,9 @@
     "folders": {
       "esde": "wiiu",
       "knulli": "wiiu",
-      "onion": null
+      "onion": null,
+      "muos": null,
+      "slot": null
     },
     "bios": {
       "files": [],
@@ -1700,7 +1876,9 @@
     "folders": {
       "esde": "xbox",
       "knulli": "xbox",
-      "onion": null
+      "onion": null,
+      "muos": null,
+      "slot": null
     },
     "bios": {
       "files": [
@@ -1726,7 +1904,9 @@
     "folders": {
       "esde": "xbox360",
       "knulli": "xbox360",
-      "onion": null
+      "onion": null,
+      "muos": null,
+      "slot": null
     },
     "bios": {
       "files": [],
@@ -1739,7 +1919,9 @@
     "folders": {
       "esde": "xboxone",
       "knulli": null,
-      "onion": null
+      "onion": null,
+      "muos": null,
+      "slot": null
     },
     "bios": {
       "files": [],

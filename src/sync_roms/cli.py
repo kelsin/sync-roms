@@ -14,6 +14,7 @@ import sys
 import tempfile
 import threading
 import xml.etree.ElementTree as ET
+import zipfile
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures import TimeoutError as FutureTimeout
@@ -99,14 +100,14 @@ def help_text():
 
 {bold('FLOW')}
   1️⃣  Pick a device (its recommended systems come from the repo's device-systems.json, plus your add/remove overlay), or {bold('Full')} (every system),
-      then a folder layout (the device's default is highlighted). Type to filter, enter continues, esc goes back.
+      then its firmware (ES-DE, Knulli, muOS, Onion or Slot; the firmware decides the folder layout, and a device with one firmware isn't asked). Type to filter, enter continues, esc goes back.
       The choice is remembered per BASE_DIR folder name (in the user data folder) and used without asking next
       time. With --ask it is confirmed first; answer n to pick again.
   2️⃣  Toggle systems on/off (for a device, its recommended systems start on; otherwise systems whose folder already has files start on, the rest off; systems with no ROMs are hidden, press e shows them last)
   3️⃣  ROMs download, then BIOS for the chosen systems
   4️⃣  Scraped data (media, descriptions...) for the chosen systems' games is installed from the bucket's scrapes/ folder
-      for the layout: ES-DE (ES-DE/ folder), Knulli (images/videos/manuals and gamelist.xml) or Onion (Imgs/ and
-      miyoogamelist.xml). ES-DE also gets its themes, collections and the shared settings every time.
+      for the firmware: ES-DE (ES-DE/ folder), Knulli (images/videos/manuals and gamelist.xml) or Onion (Imgs/ and
+      miyoogamelist.xml); muOS and Slot get none yet. ES-DE also gets its themes, collections and the shared settings every time.
       Then media on the card for ROMs the card doesn't have is removed, for every system, no questions asked.
 
 {bold('PICKER KEYS')}
@@ -245,25 +246,42 @@ def pick_device(devices, cursor=0):
 
 
 def pick_layout(layouts, default):
-    """Returns a layout name, or None on Esc. default: layout name the cursor starts on."""
+    """Returns a layout (firmware) name, or None on Esc. default: layout name the cursor starts on."""
     names = list(layouts)
     labels = [f"{l['label']}  ({l['roms_dir']}/ {l['bios_dir']}/)" for l in layouts.values()]
-    i = filter_list("🗂️  Which folder layout?", labels, cursor=names.index(default) if default in names else 0,
+    i = filter_list("🗂️  Which firmware?", labels, cursor=names.index(default) if default in names else 0,
                     hint="type to filter · ↑/↓ move · Enter continue · Esc back")
     return None if i is None else names[i]
 
 
+def device_layouts(device, layouts):
+    """The layouts (firmwares) a device can run, in its own order: the first is its default."""
+    return {name: layouts[name] for name in device["firmwares"]}
+
+
+def saved_setup(saved, devices, layouts):
+    """(device dict or None for Full, layout name) from a card's saved entry, or None if it no longer applies."""
+    if not isinstance(saved, dict) or saved.get("layout") not in layouts:
+        return None
+    if saved.get("device") == "full":
+        return None, saved["layout"]
+    device = next((d for d in devices if d["id"] == saved.get("device")), None)
+    return (device, saved["layout"]) if device and saved["layout"] in device["firmwares"] else None
+
+
 def choose_setup(manifest):
-    """Ask for the device, then the layout (Esc steps back). Returns (device dict or None for Full, layout name)."""
+    """Ask for the device, then its firmware (Esc steps back; a single firmware isn't asked).
+    Returns (device dict or None for Full, layout name)."""
     devices, layouts = manifest["devices"], manifest["layouts"]
-    device = None
     while True:
         choice = pick_device(devices)
         if choice is None:
             raise SystemExit(yellow("👋 Cancelled."))
         device = choice if isinstance(choice, dict) else None
-        default = device["layout"] if device else next(iter(layouts))
-        layout = pick_layout(layouts, default)
+        offered = device_layouts(device, layouts) if device else layouts
+        if len(offered) == 1:
+            return device, next(iter(offered))
+        layout = pick_layout(offered, next(iter(offered)))
         if layout is not None:
             return device, layout
 
@@ -713,10 +731,27 @@ def edit_manifest():
     return 0
 
 
-def plan_downloads(jobs):
-    """jobs: list of (s3_key, local_path, expected_size). Drops files already present."""
+def rom_rel(key, flat):
+    """A ROM's path inside its system folder: the bucket key without its system, or just the file name if flat."""
+    rel = key.split("/", 1)[1]
+    return os.path.basename(rel) if flat else rel
+
+
+def archive_extracted(path):
+    """Whether an archive's ROM is already beside it: a file with the archive's name and another extension."""
+    stem, ext = os.path.splitext(os.path.basename(path))
+    folder = os.path.dirname(path)
+    if ext.lower() not in ARCHIVE_EXTS or not os.path.isdir(folder):
+        return False
+    return any(os.path.splitext(f)[0] == stem and not f.lower().endswith(ARCHIVE_EXTS) for f in os.listdir(folder))
+
+
+def plan_downloads(jobs, unzip=False):
+    """jobs: list of (s3_key, local_path, expected_size). Drops files already present, and with unzip the
+    archives whose ROM was already extracted."""
     return [(k, p, s) for k, p, s in jobs
-            if not (s is not None and os.path.exists(p) and os.path.getsize(p) == s)]
+            if not (s is not None and os.path.exists(p) and os.path.getsize(p) == s)
+            and not (unzip and archive_extracted(p))]
 
 
 _s3 = {}
@@ -875,14 +910,20 @@ def has_local_files(dest):
     return any(files for _, files in walk_roms(dest))
 
 
-def find_extras(dest, wanted_keys):
-    """Local files under dest that aren't in the system's ROM list (frontend files and dotfiles are ignored)."""
-    expected = {os.path.normpath(k.split("/", 1)[1]) for k in wanted_keys}
+def find_extras(dest, wanted_keys, unzip=False):
+    """Local files under dest that aren't in the system's ROM list (frontend files and dotfiles are ignored).
+
+    unzip: the layout extracts archives flat, so a listed archive's extracted ROM isn't an extra.
+    """
+    rels = [rom_rel(k, unzip) for k in wanted_keys]
+    expected = {os.path.normpath(r) for r in rels}
+    stems = {os.path.splitext(r)[0] for r in rels if r.lower().endswith(ARCHIVE_EXTS)} if unzip else set()
     extras = []
     for root, files in walk_roms(dest):
         for f in files:
             path = os.path.join(root, f)
-            if os.path.normpath(os.path.relpath(path, dest)) not in expected:
+            rel = os.path.normpath(os.path.relpath(path, dest))
+            if rel not in expected and os.path.splitext(rel)[0] not in stems:
                 extras.append(path)
     return extras
 
@@ -1163,6 +1204,42 @@ def chd_image(tools, cfg, image, owned, report=None):
             if os.path.exists(f):
                 os.remove(f)
     return error
+
+
+def unzip_archive(path):
+    """Extract an archive's files next to it, without subfolders, and delete it. None on success, else the error."""
+    folder = os.path.dirname(path)
+    tmp = tempfile.mkdtemp(prefix=".unzip-", dir=folder)
+    try:
+        if path.lower().endswith(".zip"):
+            with zipfile.ZipFile(path) as z:
+                z.extractall(tmp)
+        else:
+            tool = next((t for name in TOOL_NAMES["7z"] for t in [shutil.which(name)] if t), None)
+            if not tool:
+                return "needs 7z to extract (see --install-tools)"
+            error = run_tool([tool, "x", "-y", "-bso0", "-bsp0", f"-o{tmp}", path])
+            if error:
+                return error
+        for dirpath, _, names in os.walk(tmp):
+            for name in sorted(names):
+                shutil.move(os.path.join(dirpath, name), os.path.join(folder, name))
+        os.remove(path)
+    except (OSError, zipfile.BadZipFile) as e:
+        return str(e)
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+
+
+def unzip_roms(paths):
+    """Extract the archives among the downloaded paths. Returns [(path, error)] for the ones that failed."""
+    failures = []
+    for path in paths:
+        if path.lower().endswith(ARCHIVE_EXTS) and os.path.exists(path):
+            error = unzip_archive(path)
+            if error:
+                failures.append((path, error))
+    return failures
 
 
 def remove_stale_chd_temp(root):
@@ -2544,14 +2621,13 @@ def sync():
     card = os.path.basename(base) or base
     saved = load_cards().get(card)
     dirs = None
-    if isinstance(saved, dict) and saved.get("layout") in layouts:
-        device = next((d for d in devices if d["id"] == saved.get("device")), None)
-        if device or saved.get("device") == "full":
-            layout_name = saved["layout"]
-            print(bold(f"💾 Remembered {cyan(card)}: ")
-                  + f"{device['name'] if device else 'Full'} · {layouts[layout_name]['label']}")
-            if not args.ask or confirm("Use this saved setup?"):
-                dirs = prepare_dirs(base, layouts[layout_name], args.dry_run, ask=False)
+    setup = saved_setup(saved, devices, layouts)
+    if setup:
+        device, layout_name = setup
+        print(bold(f"💾 Remembered {cyan(card)}: ")
+              + f"{device['name'] if device else 'Full'} · {layouts[layout_name]['label']}")
+        if not args.ask or confirm("Use this saved setup?"):
+            dirs = prepare_dirs(base, layouts[layout_name], args.dry_run, ask=False)
     if dirs is None:
         device, layout_name = choose_setup(manifest)
         dirs = prepare_dirs(base, layouts[layout_name], args.dry_run)
@@ -2560,6 +2636,7 @@ def sync():
         if not args.dry_run:
             save_card(card, device, layout_name)
     layout = layouts[layout_name]
+    unzip = layout.get("unzip", False)  # ROMs go in flat and unzipped (Slot)
     roms_dir, bios_dir = dirs
     if not args.dry_run:
         _clean_root = base
@@ -2589,7 +2666,7 @@ def sync():
         for k in available(s):
             size = have.get(k, 0)
             total += size
-            if plan_downloads([(k, os.path.join(roms_dir, s["folders"][layout_name], k.split("/", 1)[1]), size)]):
+            if plan_downloads([(k, os.path.join(roms_dir, s["folders"][layout_name], rom_rel(k, unzip)), size)], unzip):
                 need += size
         return need, total
 
@@ -2615,13 +2692,13 @@ def sync():
         dest = dest_of(s)
         for key in wanted:
             if key in have:
-                rom_jobs.append((key, os.path.join(dest, key.split("/", 1)[1]), have[key]))
+                rom_jobs.append((key, os.path.join(dest, rom_rel(key, unzip)), have[key]))
             else:
                 missing.append(key)
     report_missing(missing, "ROM(s)")
     # systems can share a folder (Onion: WS, NGP), so a folder's expected files are the union over all of them
     for dest in sorted({dest_of(s) for s in chosen if available(s)}):
-        extras += find_extras(dest, [k for t in systems if dest_of(t) == dest for k in available(t)])
+        extras += find_extras(dest, [k for t in systems if dest_of(t) == dest for k in available(t)], unzip)
 
     bios_keys = sorted({"BIOS/" + f for s in chosen for f in s["bios"]["files"]})
     bios_have = list_sizes("BIOS/") if bios_keys else {}
@@ -2629,7 +2706,7 @@ def sync():
                  for k in bios_keys if k in bios_have]
     report_missing([k for k in bios_keys if k not in bios_have], "BIOS file(s)")
 
-    rom_todo, bios_todo = plan_downloads(rom_jobs), plan_downloads(bios_jobs)
+    rom_todo, bios_todo = plan_downloads(rom_jobs, unzip), plan_downloads(bios_jobs)
     print(f"\n💿 ROMs: {bold(str(len(rom_todo)))} to download "
           f"({human_size(sum(j[2] or 0 for j in rom_todo))}), "
           f"{len(rom_jobs) - len(rom_todo)} already present")
@@ -2639,6 +2716,7 @@ def sync():
     if extras:
         print(f"🗑️  Local ROMs no longer in the selection: {bold(str(len(extras)))}")
     es_dir = os.path.join(base, "ES-DE")
+    scrapes = layout_name in GAMELIST_FILES  # muOS and Slot have no scraped data support yet
     scraped = {}
 
     def scrape_plan(present):
@@ -2655,8 +2733,9 @@ def sync():
             print(f"  {key} {dim('→')} {path}")
         for path in extras:
             print(f"  {red('would delete')} {path}")
-        describe_scrape_plan(scrape_plan(lambda path: True))
-        print(f"🧹 Media on the card for ROMs it doesn't have: {len(stale_media(layout_name, manifest['systems'], roms_dir, es_dir))} file(s) to remove")
+        if scrapes:
+            describe_scrape_plan(scrape_plan(lambda path: True))
+            print(f"🧹 Media on the card for ROMs it doesn't have: {len(stale_media(layout_name, manifest['systems'], roms_dir, es_dir))} file(s) to remove")
         if layout_name == "esde":
             clean_android_media(base, card, True, args.ask)
         return 0
@@ -2674,10 +2753,16 @@ def sync():
             print(yellow("  ↩️  Keeping them"))
 
     failed = run_downloads(rom_todo, "ROMs", "💿", roms_dir) + run_downloads(bios_todo, "BIOS", "🧠", bios_dir)
-    plan = scrape_plan(os.path.exists)
-    describe_scrape_plan(plan)
-    failed += apply_scrape_plan(plan, base)
-    stale = stale_media(layout_name, manifest["systems"], roms_dir, es_dir)
+    if unzip:
+        for path, error in unzip_roms([j[1] for j in rom_todo]):
+            failed += 1
+            print(red(f"  ❌ {os.path.relpath(path, roms_dir)}: {error}"))
+    stale = []
+    if scrapes:
+        plan = scrape_plan(os.path.exists)
+        describe_scrape_plan(plan)
+        failed += apply_scrape_plan(plan, base)
+        stale = stale_media(layout_name, manifest["systems"], roms_dir, es_dir)
     for path in stale:
         try:
             os.remove(path)

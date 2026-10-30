@@ -3,450 +3,620 @@
     "id": "anbernic-rg-cube",
     "name": "Anbernic RG Cube",
     "soc": "UNISOC Tiger T820",
-    "layout": "esde"
+    "firmwares": [
+      "esde"
+    ]
   },
   {
     "id": "anbernic-rg-cubexx",
     "name": "Anbernic RG CubeXX",
     "soc": "Allwinner H700",
-    "layout": "knulli"
+    "firmwares": [
+      "knulli",
+      "muos"
+    ]
   },
   {
     "id": "anbernic-rg-ds",
     "name": "Anbernic RG DS",
     "soc": "Rockchip RK3568",
-    "layout": "esde"
+    "firmwares": [
+      "esde"
+    ]
   },
   {
     "id": "anbernic-rg-ds-plus",
     "name": "Anbernic RG DS Plus",
     "soc": "Rockchip RK3568",
-    "layout": "knulli"
+    "firmwares": [
+      "knulli"
+    ]
   },
   {
     "id": "anbernic-rg-rotate",
     "name": "Anbernic RG Rotate",
     "soc": "UNISOC T618",
-    "layout": "esde"
+    "firmwares": [
+      "esde"
+    ]
   },
   {
     "id": "anbernic-rg-sp",
     "name": "Anbernic RG SP",
     "soc": "Allwinner H700",
-    "layout": "knulli"
+    "firmwares": [
+      "knulli",
+      "muos",
+      "slot"
+    ]
   },
   {
     "id": "anbernic-rg-slide",
     "name": "Anbernic RG Slide",
     "soc": "UNISOC Tiger T820",
-    "layout": "esde"
+    "firmwares": [
+      "esde"
+    ]
   },
   {
     "id": "anbernic-rg-vita",
     "name": "Anbernic RG Vita",
     "soc": "UNISOC T618",
-    "layout": "esde"
+    "firmwares": [
+      "esde"
+    ]
   },
   {
     "id": "anbernic-rg-vita-pro",
     "name": "Anbernic RG Vita Pro",
     "soc": "Rockchip RK3576",
-    "layout": "knulli"
+    "firmwares": [
+      "knulli",
+      "muos"
+    ]
   },
   {
     "id": "anbernic-rg28xx",
     "name": "Anbernic RG28XX",
     "soc": "Allwinner H700",
-    "layout": "knulli"
+    "firmwares": [
+      "knulli",
+      "muos",
+      "slot"
+    ]
   },
   {
     "id": "anbernic-rg34xx",
     "name": "Anbernic RG34XX",
     "soc": "Allwinner H700",
-    "layout": "knulli"
+    "firmwares": [
+      "knulli",
+      "muos",
+      "slot"
+    ]
   },
   {
     "id": "anbernic-rg34xx-sp",
     "name": "Anbernic RG34XX SP",
     "soc": "Allwinner H700",
-    "layout": "knulli"
+    "firmwares": [
+      "knulli",
+      "muos",
+      "slot"
+    ]
   },
   {
     "id": "anbernic-rg353ps",
     "name": "Anbernic RG353PS",
     "soc": "Rockchip RK3566",
-    "layout": "knulli"
+    "firmwares": [
+      "knulli"
+    ]
   },
   {
     "id": "anbernic-rg353vs",
     "name": "Anbernic RG353VS",
     "soc": "Rockchip RK3566",
-    "layout": "knulli"
+    "firmwares": [
+      "knulli"
+    ]
   },
   {
     "id": "anbernic-rg35xx-2024",
     "name": "Anbernic RG35XX 2024",
     "soc": "Allwinner H700",
-    "layout": "knulli"
+    "firmwares": [
+      "knulli",
+      "muos"
+    ]
   },
   {
     "id": "anbernic-rg35xxh",
     "name": "Anbernic RG35XX H",
     "soc": "Allwinner H700",
-    "layout": "knulli"
+    "firmwares": [
+      "knulli",
+      "muos",
+      "slot"
+    ]
   },
   {
     "id": "anbernic-rg35xx-plus",
     "name": "Anbernic RG35XX Plus",
     "soc": "Allwinner H700",
-    "layout": "knulli"
+    "firmwares": [
+      "knulli",
+      "muos",
+      "slot"
+    ]
   },
   {
     "id": "anbernic-rg35xx-pro",
     "name": "Anbernic RG35XX Pro",
     "soc": "Allwinner H700",
-    "layout": "knulli"
+    "firmwares": [
+      "knulli",
+      "muos"
+    ]
   },
   {
     "id": "anbernic-rg35xx-sp",
     "name": "Anbernic RG35XX SP",
     "soc": "Allwinner H700",
-    "layout": "knulli"
+    "firmwares": [
+      "knulli",
+      "muos",
+      "slot"
+    ]
   },
   {
     "id": "anbernic-rg405m",
     "name": "Anbernic RG405M",
     "soc": "UNISOC T618",
-    "layout": "esde"
+    "firmwares": [
+      "esde"
+    ]
   },
   {
     "id": "anbernic-rg405v",
     "name": "Anbernic RG405V",
     "soc": "UNISOC T618",
-    "layout": "esde"
+    "firmwares": [
+      "esde"
+    ]
   },
   {
     "id": "anbernic-rg406h",
     "name": "Anbernic RG406H",
     "soc": "UNISOC Tiger T820",
-    "layout": "esde"
+    "firmwares": [
+      "esde"
+    ]
   },
   {
     "id": "anbernic-rg406v",
     "name": "Anbernic RG406V",
     "soc": "UNISOC Tiger T820",
-    "layout": "esde"
+    "firmwares": [
+      "esde"
+    ]
   },
   {
     "id": "anbernic-rg40xxh",
     "name": "Anbernic RG40XX H",
     "soc": "Allwinner H700",
-    "layout": "knulli"
+    "firmwares": [
+      "knulli",
+      "muos"
+    ]
   },
   {
     "id": "anbernic-rg40xxv",
     "name": "Anbernic RG40XX V",
     "soc": "Allwinner H700",
-    "layout": "knulli"
+    "firmwares": [
+      "knulli",
+      "muos"
+    ]
   },
   {
     "id": "anbernic-rg476h",
     "name": "Anbernic RG476H",
     "soc": "UNISOC Tiger T820",
-    "layout": "esde"
+    "firmwares": [
+      "esde"
+    ]
   },
   {
     "id": "anbernic-rg477m",
     "name": "Anbernic RG477M",
     "soc": "MediaTek Dimensity 8300",
-    "layout": "esde"
+    "firmwares": [
+      "esde"
+    ]
   },
   {
     "id": "anbernic-rg477v",
     "name": "Anbernic RG477V",
     "soc": "MediaTek Dimensity 8300",
-    "layout": "esde"
+    "firmwares": [
+      "esde"
+    ]
   },
   {
     "id": "anbernic-rg503",
     "name": "Anbernic RG503",
     "soc": "Rockchip RK3566",
-    "layout": "knulli"
+    "firmwares": [
+      "knulli"
+    ]
   },
   {
     "id": "anbernic-rg505",
     "name": "Anbernic RG505",
     "soc": "UNISOC T618",
-    "layout": "esde"
+    "firmwares": [
+      "esde"
+    ]
   },
   {
     "id": "anbernic-rg556",
     "name": "Anbernic RG556",
     "soc": "UNISOC Tiger T820",
-    "layout": "esde"
+    "firmwares": [
+      "esde"
+    ]
   },
   {
     "id": "anbernic-rg557",
     "name": "Anbernic RG557",
     "soc": "MediaTek Dimensity 8300",
-    "layout": "esde"
+    "firmwares": [
+      "esde"
+    ]
   },
   {
     "id": "anbernic-rg55g1",
     "name": "Anbernic RG55G1",
     "soc": "Snapdragon G1 Gen 2",
-    "layout": "esde"
+    "firmwares": [
+      "esde"
+    ]
   },
   {
     "id": "ayaneo-konkr-pocket-fit",
     "name": "AYANEO KONKR Pocket Fit",
     "soc": "Snapdragon G3 Gen 3",
-    "layout": "esde"
+    "firmwares": [
+      "esde"
+    ]
   },
   {
     "id": "ayaneo-pocket-ace",
     "name": "AYANEO Pocket ACE",
     "soc": "Snapdragon G3x Gen 2",
-    "layout": "esde"
+    "firmwares": [
+      "esde"
+    ]
   },
   {
     "id": "ayaneo-pocket-advance",
     "name": "AYANEO KONKR Pocket Advance",
     "soc": "MediaTek Helio G90T",
-    "layout": "esde"
+    "firmwares": [
+      "esde"
+    ]
   },
   {
     "id": "ayaneo-pocket-air",
     "name": "AYANEO Pocket Air",
     "soc": "MediaTek Dimensity 1200",
-    "layout": "esde"
+    "firmwares": [
+      "esde"
+    ]
   },
   {
     "id": "ayaneo-pocket-air-mini",
     "name": "AYANEO Pocket Air Mini",
     "soc": "MediaTek Helio G90T",
-    "layout": "esde"
+    "firmwares": [
+      "esde"
+    ]
   },
   {
     "id": "ayaneo-pocket-dmg",
     "name": "AYANEO Pocket DMG",
     "soc": "Snapdragon G3x Gen 2",
-    "layout": "esde"
+    "firmwares": [
+      "esde"
+    ]
   },
   {
     "id": "ayaneo-pocket-ds",
     "name": "AYANEO Pocket DS",
     "soc": "Snapdragon G3x Gen 2",
-    "layout": "esde"
+    "firmwares": [
+      "esde"
+    ]
   },
   {
     "id": "ayaneo-pocket-evo",
     "name": "AYANEO Pocket EVO",
     "soc": "Snapdragon G3x Gen 2",
-    "layout": "esde"
+    "firmwares": [
+      "esde"
+    ]
   },
   {
     "id": "ayaneo-pocket-micro",
     "name": "AYANEO Pocket Micro",
     "soc": "MediaTek Helio G99",
-    "layout": "esde"
+    "firmwares": [
+      "esde"
+    ]
   },
   {
     "id": "ayaneo-pocket-micro-2",
     "name": "AYANEO Pocket Micro 2",
     "soc": "Snapdragon 865",
-    "layout": "esde"
+    "firmwares": [
+      "esde"
+    ]
   },
   {
     "id": "ayaneo-pocket-micro-classic",
     "name": "AYANEO Pocket Micro Classic",
     "soc": "MediaTek Helio G99",
-    "layout": "esde"
+    "firmwares": [
+      "esde"
+    ]
   },
   {
     "id": "ayaneo-pocket-s",
     "name": "AYANEO Pocket S",
     "soc": "Snapdragon G3x Gen 2",
-    "layout": "esde"
+    "firmwares": [
+      "esde"
+    ]
   },
   {
     "id": "ayaneo-pocket-s-mini",
     "name": "AYANEO Pocket S Mini",
     "soc": "Snapdragon G3x Gen 2",
-    "layout": "esde"
+    "firmwares": [
+      "esde"
+    ]
   },
   {
     "id": "ayaneo-pocket-s2",
     "name": "AYANEO Pocket S2",
     "soc": "Snapdragon G3 Gen 3",
-    "layout": "esde"
+    "firmwares": [
+      "esde"
+    ]
   },
   {
     "id": "ayaneo-pocket-s2-pro",
     "name": "AYANEO Pocket S2 Pro",
     "soc": "Snapdragon G3 Gen 3",
-    "layout": "esde"
+    "firmwares": [
+      "esde"
+    ]
   },
   {
     "id": "ayaneo-pocket-vert",
     "name": "AYANEO Pocket Vert",
     "soc": "Snapdragon 8+ Gen 1",
-    "layout": "esde"
+    "firmwares": [
+      "esde"
+    ]
   },
   {
     "id": "ayn-odin",
     "name": "AYN Odin",
     "soc": "Snapdragon 845",
-    "layout": "esde"
+    "firmwares": [
+      "esde"
+    ]
   },
   {
     "id": "ayn-odin-2",
     "name": "AYN Odin 2",
     "soc": "Snapdragon 8 Gen 2",
-    "layout": "esde"
+    "firmwares": [
+      "esde"
+    ]
   },
   {
     "id": "ayn-odin-2-mini",
     "name": "AYN Odin 2 Mini",
     "soc": "Snapdragon 8 Gen 2",
-    "layout": "esde"
+    "firmwares": [
+      "esde"
+    ]
   },
   {
     "id": "ayn-odin-2-portal",
     "name": "AYN Odin 2 Portal",
     "soc": "Snapdragon 8 Gen 2",
-    "layout": "esde"
+    "firmwares": [
+      "esde"
+    ]
   },
   {
     "id": "ayn-odin-3",
     "name": "AYN Odin 3",
     "soc": "Snapdragon 8 Elite",
-    "layout": "esde"
+    "firmwares": [
+      "esde"
+    ]
   },
   {
     "id": "ayn-odin-lite",
     "name": "AYN Odin Lite",
     "soc": "MediaTek Dimensity 900",
-    "layout": "esde"
+    "firmwares": [
+      "esde"
+    ]
   },
   {
     "id": "ayn-thor",
     "name": "AYN Thor",
     "soc": "Snapdragon 8 Gen 2",
-    "layout": "esde"
+    "firmwares": [
+      "esde"
+    ]
   },
   {
     "id": "miyoo-flip-v2",
     "name": "Miyoo Flip V2",
     "soc": "Rockchip RK3566",
-    "layout": "knulli"
+    "firmwares": [
+      "knulli"
+    ]
   },
   {
     "id": "miyoo-mini-flip",
     "name": "Miyoo Mini Flip",
     "soc": "SigmaStar SSD202D",
-    "layout": "onion"
+    "firmwares": [
+      "onion"
+    ]
   },
   {
     "id": "retroid-pocket-2s",
     "name": "Retroid Pocket 2S",
     "soc": "UNISOC T610",
-    "layout": "esde"
+    "firmwares": [
+      "esde"
+    ]
   },
   {
     "id": "retroid-pocket-3",
     "name": "Retroid Pocket 3",
     "soc": "UNISOC T310",
-    "layout": "esde"
+    "firmwares": [
+      "esde"
+    ]
   },
   {
     "id": "retroid-pocket-3-plus",
     "name": "Retroid Pocket 3 Plus",
     "soc": "UNISOC T618",
-    "layout": "esde"
+    "firmwares": [
+      "esde"
+    ]
   },
   {
     "id": "retroid-pocket-4",
     "name": "Retroid Pocket 4",
     "soc": "MediaTek Dimensity 900",
-    "layout": "esde"
+    "firmwares": [
+      "esde"
+    ]
   },
   {
     "id": "retroid-pocket-4-pro",
     "name": "Retroid Pocket 4 Pro",
     "soc": "MediaTek Dimensity 1100",
-    "layout": "esde"
+    "firmwares": [
+      "esde"
+    ]
   },
   {
     "id": "retroid-pocket-5",
     "name": "Retroid Pocket 5",
     "soc": "Snapdragon 865",
-    "layout": "esde"
+    "firmwares": [
+      "esde"
+    ]
   },
   {
     "id": "retroid-pocket-6",
     "name": "Retroid Pocket 6",
     "soc": "Snapdragon 8 Gen 2",
-    "layout": "esde"
+    "firmwares": [
+      "esde"
+    ]
   },
   {
     "id": "retroid-pocket-classic",
     "name": "Retroid Pocket Classic",
     "soc": "Snapdragon G1 Gen 2",
-    "layout": "esde"
+    "firmwares": [
+      "esde"
+    ]
   },
   {
     "id": "retroid-pocket-duo",
     "name": "Retroid Pocket Duo",
     "soc": "Snapdragon 7 Gen 4",
-    "layout": "esde"
+    "firmwares": [
+      "esde"
+    ]
   },
   {
     "id": "retroid-pocket-duo-lite",
     "name": "Retroid Pocket Duo Lite",
     "soc": "Snapdragon 665",
-    "layout": "esde"
+    "firmwares": [
+      "esde"
+    ]
   },
   {
     "id": "retroid-pocket-duo-lite-plus",
     "name": "Retroid Pocket Duo Lite Plus",
     "soc": "Snapdragon 7 Gen 4",
-    "layout": "esde"
+    "firmwares": [
+      "esde"
+    ]
   },
   {
     "id": "retroid-pocket-flip",
     "name": "Retroid Pocket Flip",
     "soc": "UNISOC T618",
-    "layout": "esde"
+    "firmwares": [
+      "esde"
+    ]
   },
   {
     "id": "retroid-pocket-flip-2",
     "name": "Retroid Pocket Flip 2",
     "soc": "Snapdragon 865",
-    "layout": "esde"
+    "firmwares": [
+      "esde"
+    ]
   },
   {
     "id": "retroid-pocket-g2",
     "name": "Retroid Pocket G2",
     "soc": "Snapdragon G2 Gen 2",
-    "layout": "esde"
+    "firmwares": [
+      "esde"
+    ]
   },
   {
     "id": "retroid-pocket-mini",
     "name": "Retroid Pocket Mini",
     "soc": "Snapdragon 865",
-    "layout": "esde"
+    "firmwares": [
+      "esde"
+    ]
   },
   {
     "id": "retroid-pocket-mini-v2",
     "name": "Retroid Pocket Mini V2",
     "soc": "Snapdragon 865",
-    "layout": "esde"
+    "firmwares": [
+      "esde"
+    ]
   },
   {
     "id": "retroid-pocket-nova",
     "name": "Retroid Pocket Nova",
     "soc": "Qualcomm QCS8550 (Snapdragon 8 Gen 2)",
-    "layout": "esde"
+    "firmwares": [
+      "esde"
+    ]
   }
 ]
