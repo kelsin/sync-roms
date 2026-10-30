@@ -194,11 +194,84 @@ def apply_device_overlay(devices, systems, overlay):
         d["systems"] += [x for x in dict.fromkeys(change.get("add", [])) if x in known and x not in d["systems"]]
 
 
-def load_manifest():
-    """Systems, devices and layouts from the repo, joined with the personal games and device-system overlay."""
+SETS_KEY = "sets"  # reserved key in a games list: ids of whole game sets to sync
+
+
+def card_games(card):
+    """The extra games list saved for a card in cards.json ({} when it has none)."""
+    entry = load_cards().get(card)
+    games = entry.get("games") if isinstance(entry, dict) else None
+    return games if isinstance(games, dict) else {}
+
+
+def all_card_names():
+    return sorted(load_cards())
+
+
+def list_sets(games):
+    """The set ids a games list references; anything that isn't a list of strings is ignored."""
+    ids = games.get(SETS_KEY, [])
+    if not isinstance(ids, list) or not all(isinstance(i, str) for i in ids):
+        print(f"warning: games: {SETS_KEY!r} must be a list of set ids, ignored", file=sys.stderr)
+        return [i for i in ids if isinstance(i, str)] if isinstance(ids, list) else []
+    return ids
+
+
+def set_games(game_set):
+    """A set's games as {"title", "bucket", "system"} entries, with each game's extra files as entries of their own."""
+    out, seen = [], set()
+    for g in game_set["games"]:
+        for key in [g.get("bucket")] + list(g.get("files", [])):
+            if key and key not in seen:
+                seen.add(key)
+                title = g.get("title") if key == g.get("bucket") and g.get("title") \
+                    else os.path.splitext(key.split("/", 1)[-1])[0]
+                out.append({"title": title, "bucket": key, "system": g.get("system")})
+    return out
+
+
+def merge_lists(systems, lists, sets):
+    """Set each system's games/full_system to the union of the games lists and the sets they reference.
+
+    A list is {system bucket: [games] | {"full_system": true}, "sets": [set ids]}. Games go in the order
+    lists come, direct games before set games, deduplicated by bucket key.
+    """
+    by_id = {x["id"]: x for x in sets}
+    for s in systems:
+        s["games"], s["full_system"] = [], False
+    by_bucket = {s["bucket"]: s for s in systems}
+
+    def add(s, g):
+        if g.get("bucket") and not any(x.get("bucket") == g["bucket"] for x in s["games"]):
+            s["games"].append({k: v for k, v in g.items() if k != "system"})
+
+    for raw in lists:
+        for s in systems:
+            entry = raw.get(s["bucket"])
+            if isinstance(entry, dict):
+                s["full_system"] = s["full_system"] or bool(entry.get("full_system"))
+            elif isinstance(entry, list):
+                for g in entry:
+                    if isinstance(g, dict):
+                        add(s, g)
+    for raw in lists:
+        for set_id in list_sets(raw):
+            if set_id not in by_id:
+                print(f"warning: games: unknown set {set_id!r}, skipped", file=sys.stderr)
+                continue
+            for g in set_games(by_id[set_id]):
+                if g["system"] in by_bucket:
+                    add(by_bucket[g["system"]], g)
+    return systems
+
+
+def load_manifest(card_names=()):
+    """Systems, devices and layouts from the repo, joined with the personal games (plus the extras of the
+    named cards) and device-system overlay."""
     seed_personal_files()
     manifest = {name: repo_json(name) for name in ("layouts", "systems", "devices")}
-    apply_games(manifest["systems"], personal_json("games.json"))
+    lists = [personal_json("games.json")] + [card_games(n) for n in card_names]
+    merge_lists(manifest["systems"], lists, load_sets())
     overlay_path = os.path.join(data_dir(), "device-systems.json")
     overlay = personal_json("device-systems.json") if os.path.exists(overlay_path) else {}
     apply_device_overlay(manifest["devices"], manifest["systems"], overlay)
