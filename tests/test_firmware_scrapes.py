@@ -89,18 +89,74 @@ class SlotPlanTest(unittest.TestCase):
     def test_media_root_is_labels_by_slot_folder(self):
         self.assertEqual(cli.media_root_of("slot", GBA, "/card", "/card/ES-DE"), os.path.join("/card", "Labels", "GBA"))
 
-    def test_stale_media_is_left_alone(self):
-        with tempfile.TemporaryDirectory() as base:
-            os.makedirs(os.path.join(base, "Labels", "GBA"))
-            open(os.path.join(base, "Labels", "GBA", "Gone.png"), "w").close()
-            os.makedirs(os.path.join(base, "Games", "GBA"))
-            self.assertEqual(cli.stale_media("slot", [GBA], os.path.join(base, "Games"), ""), [])
-
-
 def touch(path):
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, "wb") as f:
-        f.write(b"png")
+        f.write(b"x")
+
+
+def sysdef(bucket, muos=None, catalogue=None, slot=None):
+    return {"bucket": bucket, "folders": {"muos": muos, "slot": slot}, **({"muos_catalogue": catalogue} if catalogue else {})}
+
+
+class StaleMediaTest(unittest.TestCase):
+    def run_stale(self, layout, systems, files, roms):
+        """Paths (relative to the card) stale_media wants removed, given card files and ROM files."""
+        with tempfile.TemporaryDirectory() as base:
+            for rel in files + roms:
+                touch(os.path.join(base, rel))
+            roms_dir = os.path.join(base, "ROMS" if layout == "muos" else "Games")
+            stale = cli.stale_media(layout, systems, roms_dir, os.path.join(base, "ES-DE"), base)
+            return sorted(os.path.relpath(p, base) for p in stale)
+
+    CAT = os.path.join("MUOS", "info", "catalogue")
+
+    def test_muos_removes_art_for_roms_that_are_gone(self):
+        cat = os.path.join(self.CAT, "Nintendo Game Boy Advance")
+        stale = self.run_stale("muos", [sysdef("gba", "gba", "Nintendo Game Boy Advance")],
+                               [f"{cat}/box/Keep.png", f"{cat}/box/Gone.png", f"{cat}/preview/Gone.jpg", f"{cat}/text/Gone.txt",
+                                f"{cat}/text/Keep.txt"],
+                               ["ROMS/gba/Keep.zip"])
+        self.assertEqual(stale, [f"{cat}/box/Gone.png", f"{cat}/preview/Gone.jpg", f"{cat}/text/Gone.txt"])
+
+    def test_muos_matches_names_ignoring_case(self):
+        cat = os.path.join(self.CAT, "Nintendo Game Boy Advance")
+        self.assertEqual(self.run_stale("muos", [sysdef("gba", "gba", "Nintendo Game Boy Advance")],
+                                        [f"{cat}/box/keep.png"], ["ROMS/gba/KEEP.gba"]), [])
+
+    def test_muos_only_touches_box_preview_and_text(self):
+        cat = os.path.join(self.CAT, "Nintendo Game Boy Advance")
+        files = [f"{cat}/grid/Gone.png", f"{cat}/manual/Gone.txt", f"{cat}/overlay/base/Gone.png",
+                 os.path.join(self.CAT, "Folder", "Gone.png"), os.path.join(self.CAT, "Theme", "Gone.png")]
+        self.assertEqual(self.run_stale("muos", [sysdef("gba", "gba", "Nintendo Game Boy Advance")], files,
+                                        ["ROMS/gba/Keep.gba"]), [])
+
+    def test_muos_systems_sharing_a_catalogue_keep_each_others_art(self):
+        cat = os.path.join(self.CAT, "Arcade")
+        systems = [sysdef("mame", "mame", "Arcade"), sysdef("cps1", "cps1", "Arcade")]
+        stale = self.run_stale("muos", systems, [f"{cat}/box/sf2.png", f"{cat}/box/pacman.png", f"{cat}/box/gone.png"],
+                               ["ROMS/mame/pacman.zip", "ROMS/cps1/sf2.zip"])
+        self.assertEqual(stale, [f"{cat}/box/gone.png"])
+
+    def test_muos_leaves_a_system_with_no_roms_alone(self):
+        cat = os.path.join(self.CAT, "Nintendo Game Boy Advance")
+        self.assertEqual(self.run_stale("muos", [sysdef("gba", "gba", "Nintendo Game Boy Advance")],
+                                        [f"{cat}/box/Other.png"], ["ROMS/gba/.keep"]), [])
+
+    def test_slot_removes_labels_for_roms_that_are_gone(self):
+        stale = self.run_stale("slot", [sysdef("gba", slot="GBA")], ["Labels/GBA/Keep.png", "Labels/GBA/Gone.png"],
+                               ["Games/GBA/Keep.gba"])
+        self.assertEqual(stale, [os.path.join("Labels", "GBA", "Gone.png")])
+
+    def test_slot_matches_names_like_slot_does(self):
+        files = ["Labels/GBA/metroid fusion.png", "Labels/GBA/Metroid Fusion (USA, Europe).png"]
+        self.assertEqual(self.run_stale("slot", [sysdef("gba", slot="GBA")], files,
+                                        ["Games/GBA/Metroid Fusion (USA) [!].gba"]), [])
+
+    def test_slot_leaves_other_label_files_and_folders_alone(self):
+        files = ["Labels/cart_shell.txt", "Labels/GBAV/Gone.png", "Labels/GBC/Gone.png"]
+        self.assertEqual(self.run_stale("slot", [sysdef("gba", slot="GBA"), sysdef("gbc", slot="GBC")], files,
+                                        ["Games/GBA/Keep.gba"]), [])
 
 
 class DerivedUploadTest(unittest.TestCase):
