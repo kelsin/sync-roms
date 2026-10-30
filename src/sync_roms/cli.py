@@ -788,16 +788,27 @@ IGNORED_ROOT_FILES = {
 IGNORED_ROOT_DIRS = {"images", "videos", "manuals",                # Batocera / Knulli scraped media
                      "imgs"}                                       # Onion scraped box art
 IGNORED_FILES = {"thumbs.db", "desktop.ini"}                       # Windows
+# Dotfiles/folders that are OS litter; walk_roms(keep_dotfiles=True) drops only these (and "._*" AppleDouble files).
+SYSTEM_DOT_NAMES = {".ds_store", ".localized", ".nomedia", ".appledouble", ".spotlight-v100", ".trashes",
+                    ".fseventsd", ".temporaryitems", ".documentrevisions-v100", ".volumeicon.icns"}
 
 
-def walk_roms(dest):
-    """os.walk over dest that yields only real ROM-folder content (no frontend/OS leftovers)."""
+def walk_roms(dest, keep_dotfiles=False):
+    """os.walk over dest that yields only real ROM-folder content (no frontend/OS leftovers).
+
+    keep_dotfiles: keep dotfiles that are real content, dropping only OS litter (.DS_Store, ._*, ...).
+    """
+    def hidden(name):
+        if not name.startswith("."):
+            return False
+        return not keep_dotfiles or name.lower() in SYSTEM_DOT_NAMES or name.startswith("._")
+
     for root, dirs, files in os.walk(dest):
         at_root = os.path.normpath(root) == os.path.normpath(dest)
         dirs[:] = [d for d in dirs
-                   if not d.startswith(".") and not (at_root and d.lower() in IGNORED_ROOT_DIRS)]
+                   if not hidden(d) and not (at_root and d.lower() in IGNORED_ROOT_DIRS)]
         files = [f for f in files
-                 if not f.startswith(".") and f.lower() not in IGNORED_FILES
+                 if not hidden(f) and f.lower() not in IGNORED_FILES
                  and not (at_root and f.lower() in IGNORED_ROOT_FILES)]
         yield root, files
 
@@ -1711,7 +1722,7 @@ def plan_rom_upload(root, bucket, existing):
     existing: {key: size} listing of the bucket folder; a file whose size matches is the same.
     """
     new, changed, same = [], [], []
-    for dirpath, files in walk_roms(root):
+    for dirpath, files in walk_roms(root, keep_dotfiles=True):
         for f in sorted(files):
             path = os.path.join(dirpath, f)
             key = f"{bucket}/{os.path.relpath(path, root).replace(os.sep, '/')}"
