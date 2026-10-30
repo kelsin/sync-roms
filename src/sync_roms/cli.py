@@ -67,8 +67,8 @@ def help_text():
 
 {bold('OPTIONS')}
   {yellow('-n, --dry-run')}   show what would be downloaded, download nothing
-  {yellow('-e, --edit')}      ✏️  add/remove games in your local games.json by system or set (type to filter), then save it
-                      {dim('(no folders needed; saves ~/.sync-roms/games.json)')}
+  {yellow('-e, --edit')}      ✏️  add/remove games in the core list (every card) or a card's extras, by system or set (type to filter);
+                      {yellow('^F')} toggles a whole set or system. {dim('(no folders needed; saves ~/.sync-roms/games.json and cards.json)')}
   {yellow('-a, --ask')}           ❓ confirm the saved settings (device and layout, Android media folders) instead of using them silently;
                       answering no asks the question again and saves the new answer
   {yellow('-u, --upload-scrapes')} [{cyan('BASE_DIR')}]   ☁️  upload BASE_DIR/ES-DE scraped data (metadata, media, themes, collections,
@@ -129,7 +129,8 @@ def help_text():
      Frontend files are ignored: dotfiles, ES-DE systeminfo.txt/noload.txt, Knulli _info.txt,
      gamelist.xml and images/ videos/ manuals/ folders, Onion miyoogamelist.xml and Imgs/, Thumbs.db.
   📄 games.json lives in ~/.sync-roms/ (copied from the repo's version on first run) and is never read from the
-     bucket. Optional ~/.sync-roms/device-systems.json adjusts a device's recommended systems:
+     bucket. It is the core list every card gets; a card's own extra games are saved in cards.json and add to it.
+     A list can also name whole sets: "sets": ["mario", "zelda"]. Optional ~/.sync-roms/device-systems.json adjusts a device's recommended systems:
      {{"miyoo-flip-v2": {{"add": ["psx"], "remove": ["gba"]}}}}
 """
 
