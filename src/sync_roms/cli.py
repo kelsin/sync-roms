@@ -736,14 +736,15 @@ def s3_client(profile=None, connections=WORKERS):
     return _s3[key]
 
 
-def download(job):
+def download(job, callback=None):
+    """callback(bytes) is called as data arrives (not for a mirror copy, which finishes in one step)."""
     key, path, _ = job
     os.makedirs(os.path.dirname(path), exist_ok=True)
     if _mirror_root:
         shutil.copyfile(os.path.join(_mirror_root, key), path + ".part")
         os.replace(path + ".part", path)
         return
-    s3_client().download_file(BUCKET, key, path)
+    s3_client().download_file(BUCKET, key, path, Callback=callback)
 
 
 def human_size(n):
@@ -754,6 +755,47 @@ def human_size(n):
     return f"{n:.1f} TB"
 
 
+class ProgressBar:
+    """One line under the log: say() prints a line above it, draw() refreshes it. Does nothing but print on a non-tty."""
+    def __init__(self, count, fraction):
+        self.count, self.fraction = count, fraction  # fraction() is the 0-1 progress of the whole run
+        self.shown = sys.stdout.isatty()
+
+    def say(self, line):
+        print(("\r\033[K" if self.shown else "") + line)
+
+    def draw(self, done):
+        if self.shown:
+            fraction = self.fraction()
+            filled = int(fraction * 24)
+            sys.stdout.write(f"\r\033[K  {cyan('█' * filled)}{dim('░' * (24 - filled))} {done}/{self.count} files  {fraction:4.0%}")
+            sys.stdout.flush()
+
+    def clear(self):
+        if self.shown:
+            sys.stdout.write("\r\033[K")
+            sys.stdout.flush()
+
+
+class ByteProgress:
+    """Bytes moved per job (weighted by size, at least 1 so empty files count); fraction() is the overall 0-1."""
+    def __init__(self, sizes):
+        self.size = [max(1, s or 0) for s in sizes]
+        self.moved = [0] * len(sizes)
+        self.lock = threading.Lock()
+
+    def add(self, i, n):
+        with self.lock:
+            self.moved[i] = min(self.size[i], self.moved[i] + n)
+
+    def finish(self, i):
+        with self.lock:
+            self.moved[i] = self.size[i]
+
+    def fraction(self):
+        return sum(self.moved) / sum(self.size)
+
+
 def run_downloads(todo, label, icon, base):
     if not todo:
         print(green(f"{icon} {label}: nothing to download ✨"))
@@ -761,24 +803,35 @@ def run_downloads(todo, label, icon, base):
     print(bold(f"\n{icon} {label}: downloading {len(todo)} file(s)"))
     failed = 0
     ex = ThreadPoolExecutor(WORKERS)
+    moved = ByteProgress([j[2] for j in todo])
+    bar = ProgressBar(len(todo), moved.fraction)
     try:
-        futs = [(j, ex.submit(download, j)) for j in todo]
+        futs = [(j, ex.submit(download, j, lambda n, i=i: moved.add(i, n))) for i, j in enumerate(todo)]
         for i, (j, f) in enumerate(futs, 1):
             prog = dim(f"[{i}/{len(todo)}]")
             try:
-                f.result()
+                while True:
+                    try:
+                        f.result(timeout=0.25)
+                        break
+                    except FutureTimeout:
+                        bar.draw(i - 1)
+                moved.finish(i - 1)
                 src = j[0].split("/", 1)[0]
                 rel = os.path.relpath(j[1], base)
                 shown = j[0] if rel.split(os.sep, 1)[0] == src else f"{src} → {rel}"
-                print(f"  {prog} ✅ {shown}")
+                bar.say(f"  {prog} ✅ {shown}")
             except Exception as e:
                 failed += 1
-                print(f"  {prog} ❌ {red(j[0])}: {(getattr(e, 'stderr', None) or str(e)).strip()}")
+                moved.finish(i - 1)
+                bar.say(f"  {prog} ❌ {red(j[0])}: {(getattr(e, 'stderr', None) or str(e)).strip()}")
+            bar.draw(i)
     except KeyboardInterrupt:
-        print(yellow("\n🛑 Interrupted — dropping queued downloads, finishing the ones in flight..."))
+        bar.say(yellow("🛑 Interrupted — dropping queued downloads, finishing the ones in flight..."))
         raise
     finally:
         ex.shutdown(wait=True, cancel_futures=True)
+        bar.clear()
     return failed
 
 
@@ -1187,18 +1240,11 @@ def chd_command(args):
         finally:
             progress[i] = 1.0
 
-    show_bar = sys.stdout.isatty()
-
-    def say(line):
-        print(("\r\033[K" if show_bar else "") + line)
+    bar = ProgressBar(len(jobs), lambda: sum(progress) / len(jobs))
+    say = bar.say
 
     def draw_bar():
-        if show_bar:
-            fraction = sum(progress) / len(jobs)
-            filled = int(fraction * 24)
-            done = sum(1 for p in progress if p >= 1)
-            sys.stdout.write(f"\r\033[K  {cyan('█' * filled)}{dim('░' * (24 - filled))} {done}/{len(jobs)} files  {fraction:4.0%}")
-            sys.stdout.flush()
+        bar.draw(sum(1 for p in progress if p >= 1))
 
     converted, failed = 0, 0
     pool = ThreadPoolExecutor(workers)
@@ -1233,8 +1279,7 @@ def chd_command(args):
         print(yellow(f"  {converted} done, nothing half-converted; run --chd again to continue"))
         return 130
     pool.shutdown()
-    if show_bar:
-        sys.stdout.write("\r\033[K")
+    bar.clear()
     fix_playlists(roots, False)
     print((red if failed else green)(f"🎉 Done: {converted} converted, {failed} failed"))
     return 1 if failed else 0
@@ -1741,8 +1786,12 @@ def plan_rom_upload(root, bucket, existing):
 
 
 class QueueWhenDone(BaseSubscriber):
-    def __init__(self, done, job):
-        self.done, self.job = done, job
+    def __init__(self, done, job, moved=None):
+        self.done, self.job, self.moved = done, job, moved  # moved(bytes) is called as parts go up
+
+    def on_progress(self, future, bytes_transferred, **kwargs):
+        if self.moved:
+            self.moved(bytes_transferred)
 
     def on_done(self, future, **kwargs):
         self.done.put((self.job, future))
@@ -1766,43 +1815,56 @@ def run_uploads(todo):
     config = TransferConfig(max_concurrency=workers, multipart_threshold=UPLOAD_MULTIPART_AT,
                             multipart_chunksize=UPLOAD_PART)
     done, failed = queue.Queue(), 0
+    order = sorted(todo, key=lambda j: -j[2])
+    moved = ByteProgress([j[2] for j in order])
+    bar = ProgressBar(len(todo), moved.fraction)
     try:
         with tempfile.TemporaryDirectory() as tmp, ThreadPoolExecutor(os.cpu_count() or 4) as shrinkers, \
                 create_transfer_manager(s3_client(WRITE_PROFILE, connections=workers), config) as manager:
-            def send(job, path):
+            def send(job, path, n):
                 manager.upload(path, BUCKET, job[0],
                                {"ContentType": mimetypes.guess_type(path)[0] or "application/octet-stream"},
-                               [QueueWhenDone(done, job)])
+                               [QueueWhenDone(done, job, lambda b: moved.add(n, b))])
 
             def shrink_and_send(job, n):
                 try:
                     art = os.path.join(tmp, f"{n}.png")
                     shrink_png(job[1], art)
-                    send(job, art)
+                    send(job, art, n)
                 except Exception as e:
                     done.put((job, FailedUpload(e)))
 
             try:
-                for n, job in enumerate(sorted(todo, key=lambda j: -j[2])):
+                for n, job in enumerate(order):
                     if len(job) > 3:
                         shrinkers.submit(shrink_and_send, job, n)
                     else:
-                        send(job, job[1])
+                        send(job, job[1], n)
+                index = {id(job): n for n, job in enumerate(order)}
                 for i in range(1, len(todo) + 1):
-                    job, future = done.get()
+                    while True:
+                        try:
+                            job, future = done.get(timeout=0.25)
+                            break
+                        except queue.Empty:
+                            bar.draw(i - 1)
+                    moved.finish(index[id(job)])
                     prog = dim(f"[{i}/{len(todo)}]")
                     try:
                         future.result()
-                        print(f"  {prog} ✅ {job[0]}")
+                        bar.say(f"  {prog} ✅ {job[0]}")
                     except Exception as e:
                         failed += 1
-                        print(f"  {prog} ❌ {red(job[0])}: {str(e).strip()}")
+                        bar.say(f"  {prog} ❌ {red(job[0])}: {str(e).strip()}")
+                    bar.draw(i)
             except KeyboardInterrupt:
                 shrinkers.shutdown(wait=False, cancel_futures=True)
                 raise
     except KeyboardInterrupt:
-        print(yellow("\n🛑 Interrupted — dropping queued uploads, finishing the ones in flight..."))
+        bar.say(yellow("🛑 Interrupted — dropping queued uploads, finishing the ones in flight..."))
         raise
+    finally:
+        bar.clear()
     return failed
 
 
