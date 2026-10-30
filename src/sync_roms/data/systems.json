@@ -9,6 +9,7 @@
       "muos": "mame",
       "slot": null
     },
+    "muos_catalogue": "Arcade",
     "bios": {
       "files": [],
       "note": "MAME-style romsets: BIOS/device zips go in the same folder as the game zips (ES-DE guide). zips."
@@ -24,6 +25,7 @@
       "muos": "atari2600",
       "slot": null
     },
+    "muos_catalogue": "Atari 2600",
     "bios": {
       "files": [],
       "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
@@ -39,6 +41,7 @@
       "muos": "atari5200",
       "slot": null
     },
+    "muos_catalogue": "Atari 5200",
     "bios": {
       "files": [
         "5200.rom"
@@ -58,6 +61,7 @@
       "muos": "atari7800",
       "slot": null
     },
+    "muos_catalogue": "Atari 7800",
     "bios": {
       "files": [
         "7800 BIOS (U).rom"
@@ -77,6 +81,7 @@
       "muos": "atari800",
       "slot": null
     },
+    "muos_catalogue": "Atari 800",
     "bios": {
       "files": [
         "5200.rom",
@@ -100,6 +105,7 @@
       "muos": "lynx",
       "slot": null
     },
+    "muos_catalogue": "Atari Lynx",
     "bios": {
       "files": [
         "lynxboot.img"
@@ -119,6 +125,7 @@
       "muos": "atarist",
       "slot": null
     },
+    "muos_catalogue": "Atari ST-STE-TT-Falcon",
     "bios": {
       "files": [
         "tos.img"
@@ -138,6 +145,7 @@
       "muos": "colecovision",
       "slot": null
     },
+    "muos_catalogue": "ColecoVision",
     "bios": {
       "files": [
         "Databases/msxromdb.xml",
@@ -165,6 +173,7 @@
       "muos": "gba",
       "slot": "GBA"
     },
+    "muos_catalogue": "Nintendo Game Boy Advance",
     "bios": {
       "files": [
         "gba_bios.bin",
@@ -187,6 +196,7 @@
       "muos": "gbc",
       "slot": "GBC"
     },
+    "muos_catalogue": "Nintendo Game Boy Color",
     "bios": {
       "files": [
         "gb_bios.bin",
@@ -211,6 +221,7 @@
       "muos": "gb",
       "slot": "GB"
     },
+    "muos_catalogue": "Nintendo Game Boy",
     "bios": {
       "files": [
         "gb_bios.bin",
@@ -235,6 +246,7 @@
       "muos": "intellivision",
       "slot": null
     },
+    "muos_catalogue": "Mattel Intellivision",
     "bios": {
       "files": [
         "exec.bin",
@@ -258,6 +270,7 @@
       "muos": "neogeo",
       "slot": null
     },
+    "muos_catalogue": "SNK Neo Geo",
     "bios": {
       "files": [
         "neogeo.zip",
@@ -300,6 +313,7 @@
       "muos": "nes",
       "slot": null
     },
+    "muos_catalogue": "Nintendo NES - Famicom",
     "bios": {
       "files": [],
       "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
@@ -315,6 +329,7 @@
       "muos": "n64",
       "slot": null
     },
+    "muos_catalogue": "Nintendo N64",
     "bios": {
       "files": [],
       "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
@@ -330,6 +345,7 @@
       "muos": "nds",
       "slot": null
     },
+    "muos_catalogue": "Nintendo DS",
     "bios": {
       "files": [
         "firmware.bin",
@@ -357,6 +373,7 @@
       "muos": "odyssey2",
       "slot": null
     },
+    "muos_catalogue": "Magnavox Odyssey - VideoPac",
     "bios": {
       "files": [
         "o2rom.bin",
@@ -380,6 +397,7 @@
       "muos": "pcfx",
       "slot": null
     },
+    "muos_catalogue": "NEC PC-FX",
     "bios": {
       "files": [
         "pcfx.rom"
@@ -402,6 +420,7 @@
       "muos": "sega32x",
       "slot": null
     },
+    "muos_catalogue": "Sega 32X",
     "bios": {
       "files": [
         "32X_G_BIOS.BIN",
@@ -426,6 +445,7 @@
       "muos": "megacd",
       "slot": null
     },
+    "muos_catalogue": "Sega Mega CD - Sega CD",
     "bios": {
       "files": [
         "bios_MD.bin",
@@ -460,6 +480,7 @@
       "muos": "dreamcast",
       "slot": null
     },
+    "muos_catalogue": "Sega Dreamcast",
     "bios": {
       "files": [
         "dc/dc_boot.bin",
@@ -491,6 +512,7 @@
       "muos": "gamegear",
       "slot": null
     },
+    "muos_catalogue": "Sega Game Gear",
     "bios": {
       "files": [
         "bios_MD.bin",
@@ -522,6 +544,7 @@
       "muos": "megadrive",
       "slot": null
     },
+    "muos_catalogue": "Sega Mega Drive - Genesis",
     "bios": {
       "files": [
         "bios_MD.bin",
@@ -553,6 +576,7 @@
       "muos": "mastersystem",
       "slot": null
     },
+    "muos_catalogue": "Sega Master System",
     "bios": {
       "files": [
         "bios_MD.bin",
@@ -584,6 +608,7 @@
       "muos": "saturn",
       "slot": null
     },
+    "muos_catalogue": "Sega Saturn",
     "bios": {
       "files": [
         "sega_101.bin",
@@ -612,6 +637,7 @@
       "muos": "snes",
       "slot": null
     },
+    "muos_catalogue": "Nintendo SNES - SFC",
     "bios": {
       "files": [
         "BS-X.bin",
@@ -650,6 +676,7 @@
       "muos": "pcengine",
       "slot": null
     },
+    "muos_catalogue": "NEC PC Engine",
     "bios": {
       "files": [
         "syscard3.pce",
@@ -672,6 +699,7 @@
       "muos": "pcenginecd",
       "slot": null
     },
+    "muos_catalogue": "NEC PC Engine CD",
     "bios": {
       "files": [
         "syscard3.pce",
@@ -697,6 +725,7 @@
       "muos": "vectrex",
       "slot": null
     },
+    "muos_catalogue": "GCE Vectrex",
     "bios": {
       "files": [],
       "libretro_cores": [
@@ -714,6 +743,7 @@
       "muos": "virtualboy",
       "slot": null
     },
+    "muos_catalogue": "Nintendo Virtual Boy",
     "bios": {
       "files": [],
       "libretro_cores": [
@@ -731,6 +761,7 @@
       "muos": "wonderswan",
       "slot": null
     },
+    "muos_catalogue": "Bandai WonderSwan Color",
     "bios": {
       "files": [],
       "libretro_cores": [
@@ -748,6 +779,7 @@
       "muos": "wonderswancolor",
       "slot": null
     },
+    "muos_catalogue": "Bandai WonderSwan Color",
     "bios": {
       "files": [],
       "libretro_cores": [
@@ -780,6 +812,7 @@
       "muos": "arcade",
       "slot": null
     },
+    "muos_catalogue": "Arcade",
     "bios": {
       "files": [],
       "note": "MAME-style romsets: BIOS/device zips go in the same folder as the game zips (ES-DE guide). zips."
@@ -795,6 +828,7 @@
       "muos": "arduboy",
       "slot": null
     },
+    "muos_catalogue": "Arduboy",
     "bios": {
       "files": [],
       "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
@@ -810,6 +844,7 @@
       "muos": "atomiswave",
       "slot": null
     },
+    "muos_catalogue": "Sega Atomiswave Naomi",
     "bios": {
       "files": [
         "dc/dc_boot.bin",
@@ -836,6 +871,7 @@
       "muos": "chailove",
       "slot": null
     },
+    "muos_catalogue": "ChaiLove",
     "bios": {
       "files": [],
       "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
@@ -851,6 +887,7 @@
       "muos": "channelf",
       "slot": null
     },
+    "muos_catalogue": "Fairchild Channel F",
     "bios": {
       "files": [
         "sl31253.bin",
@@ -872,6 +909,7 @@
       "muos": "cps1",
       "slot": null
     },
+    "muos_catalogue": "Arcade",
     "bios": {
       "files": [],
       "note": "MAME-style romsets: BIOS/device zips go in the same folder as the game zips (ES-DE guide). zips."
@@ -887,6 +925,7 @@
       "muos": "cps2",
       "slot": null
     },
+    "muos_catalogue": "Arcade",
     "bios": {
       "files": [],
       "note": "MAME-style romsets: BIOS/device zips go in the same folder as the game zips (ES-DE guide). zips."
@@ -902,6 +941,7 @@
       "muos": "cps3",
       "slot": null
     },
+    "muos_catalogue": "Arcade",
     "bios": {
       "files": [],
       "note": "MAME-style romsets: BIOS/device zips go in the same folder as the game zips (ES-DE guide). zips."
@@ -932,6 +972,7 @@
       "muos": "doom",
       "slot": null
     },
+    "muos_catalogue": "Doom",
     "bios": {
       "files": [],
       "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
@@ -947,6 +988,7 @@
       "muos": "easyrpg",
       "slot": null
     },
+    "muos_catalogue": "RPG Maker 2000 - 2003",
     "bios": {
       "files": [],
       "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
@@ -962,6 +1004,7 @@
       "muos": "fbneo",
       "slot": null
     },
+    "muos_catalogue": "Arcade",
     "bios": {
       "files": [
         "fbneo/neogeo.zip",
@@ -1003,6 +1046,7 @@
       "muos": "lowresnx",
       "slot": null
     },
+    "muos_catalogue": "LowRes NX",
     "bios": {
       "files": [],
       "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
@@ -1033,6 +1077,7 @@
       "muos": "megaduck",
       "slot": null
     },
+    "muos_catalogue": "Mega Duck - Cougar Boy",
     "bios": {
       "files": [],
       "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
@@ -1048,6 +1093,7 @@
       "muos": "n64dd",
       "slot": null
     },
+    "muos_catalogue": "Nintendo N64",
     "bios": {
       "files": [
         "64DD_IPL.bin",
@@ -1069,6 +1115,7 @@
       "muos": "naomi",
       "slot": null
     },
+    "muos_catalogue": "Sega Atomiswave Naomi",
     "bios": {
       "files": [
         "dc/dc_boot.bin",
@@ -1095,6 +1142,7 @@
       "muos": "neogeocd",
       "slot": null
     },
+    "muos_catalogue": "SNK Neo Geo CD",
     "bios": {
       "files": [
         "neocd/neocd_f.rom",
@@ -1128,6 +1176,7 @@
       "muos": "ngpc",
       "slot": null
     },
+    "muos_catalogue": "SNK Neo Geo Pocket - Color",
     "bios": {
       "files": [],
       "libretro_cores": [
@@ -1145,6 +1194,7 @@
       "muos": "openbor",
       "slot": null
     },
+    "muos_catalogue": "OpenBOR",
     "bios": {
       "files": [],
       "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
@@ -1160,6 +1210,7 @@
       "muos": "3do",
       "slot": null
     },
+    "muos_catalogue": "The 3DO Company - 3DO",
     "bios": {
       "files": [
         "panafz1.bin",
@@ -1196,6 +1247,7 @@
       "muos": "pico8",
       "slot": null
     },
+    "muos_catalogue": "PICO-8",
     "bios": {
       "files": [],
       "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
@@ -1211,6 +1263,7 @@
       "muos": "pokemini",
       "slot": null
     },
+    "muos_catalogue": "Nintendo Pokemon Mini",
     "bios": {
       "files": [],
       "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
@@ -1241,6 +1294,7 @@
       "muos": "psx",
       "slot": null
     },
+    "muos_catalogue": "Sony PlayStation",
     "bios": {
       "files": [
         "scph5500.bin",
@@ -1270,6 +1324,7 @@
       "muos": "psp",
       "slot": null
     },
+    "muos_catalogue": "Sony PlayStation Portable",
     "bios": {
       "files": [],
       "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
@@ -1292,6 +1347,7 @@
       "muos": "satellaview",
       "slot": null
     },
+    "muos_catalogue": "Nintendo SNES - SFC",
     "bios": {
       "files": [
         "BS-X.bin",
@@ -1330,6 +1386,7 @@
       "muos": "scummvm",
       "slot": null
     },
+    "muos_catalogue": "ScummVM",
     "bios": {
       "files": [],
       "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
@@ -1345,6 +1402,7 @@
       "muos": "supergrafx",
       "slot": null
     },
+    "muos_catalogue": "NEC PC Engine SuperGrafx",
     "bios": {
       "files": [
         "syscard3.pce",
@@ -1410,6 +1468,7 @@
       "muos": "sufami",
       "slot": null
     },
+    "muos_catalogue": "Nintendo SNES - SFC",
     "bios": {
       "files": [
         "BS-X.bin",
@@ -1448,6 +1507,7 @@
       "muos": "supervision",
       "slot": null
     },
+    "muos_catalogue": "Watara Supervision",
     "bios": {
       "files": [],
       "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
@@ -1463,6 +1523,7 @@
       "muos": "tic80",
       "slot": null
     },
+    "muos_catalogue": "TIC-80",
     "bios": {
       "files": [],
       "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
@@ -1478,6 +1539,7 @@
       "muos": "quake",
       "slot": null
     },
+    "muos_catalogue": "Quake",
     "bios": {
       "files": [],
       "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
@@ -1493,6 +1555,7 @@
       "muos": "uzebox",
       "slot": null
     },
+    "muos_catalogue": "Uzebox",
     "bios": {
       "files": [],
       "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
@@ -1508,6 +1571,7 @@
       "muos": "jaguar",
       "slot": null
     },
+    "muos_catalogue": "Atari Jaguar",
     "bios": {
       "files": [],
       "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
@@ -1538,6 +1602,7 @@
       "muos": "cdi",
       "slot": null
     },
+    "muos_catalogue": "Philips CDi",
     "bios": {
       "files": [
         "same_cdi/bios/cdimono1.zip",
@@ -1646,6 +1711,7 @@
       "muos": "3ds",
       "slot": null
     },
+    "muos_catalogue": "Nintendo 3DS",
     "bios": {
       "files": [],
       "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
