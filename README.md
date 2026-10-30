@@ -170,9 +170,8 @@ Then:
    | `muos` | `MUOS/info/catalogue/<system>/box/Game.png` (cover, then 3D box) and `preview/Game.png` (screenshot, then title screen), as uploaded | `text/Game.txt` with the description |
    | `slot` | `Labels/<system>/Game.png`, the cart label prepared at upload | none |
 
-   muOS and Slot keep their media in folders of their own, flat even for ROMs in subfolders, and the final
-   cleanup (step 6) never touches them, since both may hold art you added yourself. An existing `.txt` is
-   rewritten only when the description differs.
+   muOS and Slot keep their media in folders of their own, flat even for ROMs in subfolders. An existing
+   `.txt` is rewritten only when the description differs.
 
    Knulli's main image is the miximage, or the screenshot if there is none. Onion's picture is made
    when the data is uploaded: `--upload-scrapes` resizes the cover (then the 3D box, then the
@@ -191,6 +190,13 @@ Then:
 6. Finally, media on the card for ROMs the card doesn't have is removed, with no confirmation. It looks at
    every system in the layout, not only the ones you synced, and leaves systems whose ROM folder doesn't
    exist, and folders that aren't systems in `src/sync_roms/data/systems.json` (like ES-DE's `androidapps`), alone.
+   This assumes the card's art comes from this app: on muOS it removes `box`, `preview` and `text` files in
+   `MUOS/info/catalogue/<system>/` (names compared ignoring case; systems that share a catalogue folder, like
+   the arcade ones, are judged together; `grid`, `manual`, `overlay` and the other catalogue areas are left
+   alone), and on Slot the labels in `Labels/GBA`, `GB` and `GBC` (names compared the way Slot does, ignoring
+   case and bracketed tags). A muOS or Slot folder whose ROM folders hold no ROMs is skipped, so art isn't
+   wiped from a card whose ROMs are elsewhere (muOS can keep them on SD2). Art you add by hand or install
+   from a `.muxcat` set for ROMs that aren't on the card is removed too.
 7. For the `esde` (Android) layout, files in the card's Android media folders (`Alarms`, `Audiobooks`, `DCIM`,
    `Documents`, `Download`, `Movies`, `Music`, `Notifications`, `Pictures`, `Podcasts`, `Recordings`,
    `Ringtones`) are removed and an empty `.nomedia` is put in each of those folders that exists, so Android

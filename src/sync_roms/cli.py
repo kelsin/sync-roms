@@ -2407,12 +2407,41 @@ def card_stems(rom_dir, flat):
     return stems
 
 
-def stale_media(layout_name, systems, roms_dir, es_dir):
+def media_name(layout_name, name):
+    """How a firmware compares art names with ROM names: muOS ignores case, Slot also ignores bracketed tags."""
+    if layout_name == "slot":
+        name = re.sub(r"\s*[(\[][^)\]]*[)\]]", "", name)
+    return name.strip().lower()
+
+
+def stale_firmware_media(layout_name, systems, roms_dir, base):
+    """Art files in muOS's catalogue (box, preview and text) or Slot's Labels folders whose ROM isn't on the card.
+
+    Systems that share a catalogue folder are judged together. A folder whose ROM folders hold no ROMs is left alone.
+    """
+    groups = defaultdict(list)
+    for s in systems:
+        if s["folders"].get(layout_name):
+            groups[media_root_of(layout_name, s, base, "")].append(os.path.join(roms_dir, s["folders"][layout_name]))
+    stale = []
+    for root, rom_dirs in sorted(groups.items()):
+        stems = {media_name(layout_name, stem) for d in set(rom_dirs) if os.path.isdir(d) for stem in card_stems(d, True)}
+        if not stems:
+            continue
+        for sub in ("box", "preview", "text") if layout_name == "muos" else (".",):
+            folder = os.path.normpath(os.path.join(root, sub))
+            for rel, full in walk_files(folder) if os.path.isdir(folder) else []:
+                if media_name(layout_name, os.path.splitext(os.path.basename(rel))[0]) not in stems:
+                    stale.append(full)
+    return stale
+
+
+def stale_media(layout_name, systems, roms_dir, es_dir, base=None):
     """Media files on the card whose ROM isn't in the system's ROM folder, for every system in the
     layout (not just the ones being synced). Systems with no ROM folder are left alone."""
     stale, seen = [], set()
-    if layout_name not in ("esde", "knulli", "onion"):  # muOS's catalogue and Slot's labels may hold art made elsewhere
-        return stale
+    if layout_name in ("muos", "slot"):
+        return stale_firmware_media(layout_name, systems, roms_dir, base)
     for s in systems:
         folder = s["folders"].get(layout_name)
         rom_dir = os.path.join(roms_dir, folder) if folder else None
@@ -2786,7 +2815,7 @@ def sync():
             print(f"  {red('would delete')} {path}")
         if scrapes:
             describe_scrape_plan(scrape_plan(lambda path: True))
-            print(f"🧹 Media on the card for ROMs it doesn't have: {len(stale_media(layout_name, manifest['systems'], roms_dir, es_dir))} file(s) to remove")
+            print(f"🧹 Media on the card for ROMs it doesn't have: {len(stale_media(layout_name, manifest['systems'], roms_dir, es_dir, base))} file(s) to remove")
         if layout_name == "esde":
             clean_android_media(base, card, True, args.ask)
         return 0
@@ -2813,7 +2842,7 @@ def sync():
         plan = scrape_plan(os.path.exists)
         describe_scrape_plan(plan)
         failed += apply_scrape_plan(plan, base)
-        stale = stale_media(layout_name, manifest["systems"], roms_dir, es_dir)
+        stale = stale_media(layout_name, manifest["systems"], roms_dir, es_dir, base)
     for path in stale:
         try:
             os.remove(path)
