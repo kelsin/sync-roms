@@ -1835,12 +1835,18 @@ def run_uploads(todo):
                     done.put((job, FailedUpload(e)))
 
             try:
-                for n, job in enumerate(order):
-                    if len(job) > 3:
-                        shrinkers.submit(shrink_and_send, job, n)
-                    else:
-                        send(job, job[1], n)
+                def submit_all():  # queueing blocks once the transfer queue is full, so it can't hold up the output
+                    for n, job in enumerate(order):
+                        try:
+                            if len(job) > 3:
+                                shrinkers.submit(shrink_and_send, job, n)
+                            else:
+                                send(job, job[1], n)
+                        except Exception as e:
+                            done.put((job, FailedUpload(e)))
+
                 index = {id(job): n for n, job in enumerate(order)}
+                threading.Thread(target=submit_all, daemon=True).start()
                 for i in range(1, len(todo) + 1):
                     while True:
                         try:
