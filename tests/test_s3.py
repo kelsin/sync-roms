@@ -72,7 +72,7 @@ class S3Test(unittest.TestCase):
             path = os.path.join(tmp, "sub", "a.zip")
             cli.download(("gba/a.zip", path, 1))
             self.assertTrue(os.path.isdir(os.path.dirname(path)))
-        client.download_file.assert_called_once_with(BUCKET, "gba/a.zip", path)
+        client.download_file.assert_called_once_with(BUCKET, "gba/a.zip", path, Callback=None)
 
     def test_delete_keys_batches_and_returns_errors(self):
         keys = [f"k{i}" for i in range(1001)]
