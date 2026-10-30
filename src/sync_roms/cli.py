@@ -817,11 +817,11 @@ def edit_manifest():
             if g.get("system") not in names:
                 print(yellow(f"⚠️  Set {game_set['name']}: unknown system {g.get('system')!r}, skipped"), file=sys.stderr)
 
-    targets = {}  # "core" or a card name -> editing state
+    targets = {}  # None (the core list) or a card name -> editing state
 
     def core_now():
         """The core list as it stands in this session."""
-        core = targets.get("core")
+        core = targets.get(None)
         return dump_list(core["data"]["systems"], core["sets_on"]) if core else core_raw
 
     def edit_target(t, is_card):
@@ -887,13 +887,13 @@ def edit_manifest():
             if not sets:
                 print(yellow("ℹ️  No game sets found."))
                 return False
-            _, keys = cover()
+            full, keys = cover()
             labels, extras = [], []
             for game_set in sets:
                 entries = [(g.get("system"), g.get("bucket")) for g in game_set["games"]]
                 on = sum(1 for sid, key in entries if sid in by_bucket and (by_bucket[sid].get("full_system")
                          or any(g.get("bucket") == key for g in by_bucket[sid]["games"])
-                         or key in keys))
+                         or sid in full or key in keys))
                 desc = f" — {game_set['description']}" if game_set["description"] else ""
                 labels.append(f"{game_set['name']}  ({on}/{len(entries)} on){desc}")
                 extras.append([("  📦 full set", "green")] if game_set["id"] in t["sets_on"] else [])
@@ -910,7 +910,7 @@ def edit_manifest():
             if rows:
                 files = {g["bucket"]: g["files"] for g in sets[i]["games"] if g.get("bucket") and g.get("files")}
                 toggle_games(f"✏️  {sets[i]['name']} — ✅ in {where}, ⬜ not", rows, files,
-                             covered=lambda _s, key: keys.get(key))
+                             covered=lambda s, key: full.get(s["bucket"]) or keys.get(key))
             else:
                 print(yellow(f"ℹ️  {sets[i]['name']} has no games to toggle."))
             return True
@@ -924,7 +924,7 @@ def edit_manifest():
 
     def open_target(key, label, is_card):
         if key not in targets:
-            raw = core_raw if key == "core" else card_games(key)
+            raw = core_raw if key is None else card_games(key)
             targets[key] = new_target(label, raw)
         edit_target(targets[key], is_card)
 
@@ -946,13 +946,13 @@ def edit_manifest():
         edit_target(targets[name], True)
 
     while True:
-        cards = sorted(set(load_cards()) | {k for k in targets if k != "core"})
+        cards = sorted(set(load_cards()) | {k for k in targets if k is not None})
         options = ["🏠 Core (every card)"] + [f"💳 {name}" for name in cards] + ["➕ New card"]
         i = filter_list("✏️  What do you want to edit? (Esc = finish)", options)
         if i is None:
             break
         if i == 0:
-            open_target("core", "🏠 Core", False)
+            open_target(None, "🏠 Core", False)
         elif i == len(options) - 1:
             add_card()
         else:
@@ -981,8 +981,8 @@ def edit_manifest():
     for key, t in changed.items():
         if t["setup"]:
             save_card(key, *t["setup"])
-    save_lists(dump_list(targets["core"]["data"]["systems"], targets["core"]["sets_on"]) if "core" in changed else None,
-               {k: dump_list(t["data"]["systems"], t["sets_on"]) for k, t in changed.items() if k != "core"})
+    save_lists(dump_list(targets[None]["data"]["systems"], targets[None]["sets_on"]) if None in changed else None,
+               {k: dump_list(t["data"]["systems"], t["sets_on"]) for k, t in changed.items() if k is not None})
     print(green("🎉 Saved"))
     return 0
 

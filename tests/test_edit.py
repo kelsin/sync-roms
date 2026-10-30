@@ -152,6 +152,24 @@ class FullToggles(EditFlow):
         note = tracked[0][1]["covered"](rows[0][0], rows[0][1])
         self.assertEqual(note, "Full set: Mario")
 
+    def test_card_named_core_leaves_core_list_alone(self):
+        self.write_json("games.json", {"gba": [{"title": "A", "bucket": "gba/A.zip"}]})
+        self.write_json("cards.json", {"core": {"layout": "esde", "device": "full"}})
+        self.run_with([1, 1, (sync_roms.FULL_KEY, 0), None, None, None], confirmed=True)
+        self.assertEqual(self.read("games.json"), {"gba": [{"title": "A", "bucket": "gba/A.zip"}]})
+
+    def test_by_set_locks_systems_full_in_core(self):
+        self.write_json("games.json", {"nes": {"full_system": True}})
+        self.write_json("cards.json", {"c": {"layout": "esde", "device": "full"}})
+        tracked = []
+        nes_set = next(x["id"] for x in sync_roms.load_sets() if any(g["system"] == "nes" for g in x["games"]))
+        ids = [x["id"] for x in sync_roms.load_sets()]
+        with mock.patch.object(sync_roms, "toggle_games", side_effect=lambda *a, **k: tracked.append((a, k))):
+            self.run_with([1, 1, ids.index(nes_set), None, None, None])
+        rows, covered = tracked[0][0][1], tracked[0][1]["covered"]
+        nes_row = next(r for r in rows if r[0]["bucket"] == "nes")
+        self.assertTrue(covered(nes_row[0], nes_row[1]))
+
     def write_json(self, name, data):
         with open(self.path(name), "w") as f:
             json.dump(data, f)
