@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.11.0](https://github.com/kelsin/sync-roms/compare/v0.10.1...v0.11.0) (2026-10-30)
+
+
+### Features
+
+* **firmware:** add muOS and Slot, picked per device ([#30](https://github.com/kelsin/sync-roms/issues/30)) ([72ec8db](https://github.com/kelsin/sync-roms/commit/72ec8dbab40ffde87539ee235ecffbb9eed33cf0))
+* **games:** per-card game lists and full-set references ([#34](https://github.com/kelsin/sync-roms/issues/34)) ([fe8fe85](https://github.com/kelsin/sync-roms/commit/fe8fe85b4e5505a98580443a90d726ab5b008317))
+* **scrapes:** clean up stale muOS catalogue art and Slot labels ([#33](https://github.com/kelsin/sync-roms/issues/33)) ([5aa584a](https://github.com/kelsin/sync-roms/commit/5aa584a5e41cbdc1785d23ae7cca171192fcb467))
+* **scrapes:** install scraped data for muOS and Slot ([#32](https://github.com/kelsin/sync-roms/issues/32)) ([5bd786a](https://github.com/kelsin/sync-roms/commit/5bd786ac713f9d69999e95e54583a3e50802786d))
+
+
+### Bug Fixes
+
+* **progress:** label the file count as done and the percent as a share of total size ([#35](https://github.com/kelsin/sync-roms/issues/35)) ([a3410c9](https://github.com/kelsin/sync-roms/commit/a3410c969a61e1ddb7d91fdced00c976da1c3090))
+
 ## [0.10.1](https://github.com/kelsin/sync-roms/compare/v0.10.0...v0.10.1) (2026-10-30)
 
 
