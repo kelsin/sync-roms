@@ -67,8 +67,8 @@ def help_text():
 
 {bold('OPTIONS')}
   {yellow('-n, --dry-run')}   show what would be downloaded, download nothing
-  {yellow('-e, --edit')}      ✏️  add/remove games in your local games.json by system or set (type to filter), then save it
-                      {dim('(no folders needed; saves ~/.sync-roms/games.json)')}
+  {yellow('-e, --edit')}      ✏️  add/remove games in the core list (every card) or a card's extras, by system or set (type to filter);
+                      {yellow('^F')} toggles a whole set or system. {dim('(no folders needed; saves ~/.sync-roms/games.json and cards.json)')}
   {yellow('-a, --ask')}           ❓ confirm the saved settings (device and layout, Android media folders) instead of using them silently;
                       answering no asks the question again and saves the new answer
   {yellow('-u, --upload-scrapes')} [{cyan('BASE_DIR')}]   ☁️  upload BASE_DIR/ES-DE scraped data (metadata, media, themes, collections,
@@ -129,7 +129,8 @@ def help_text():
      Frontend files are ignored: dotfiles, ES-DE systeminfo.txt/noload.txt, Knulli _info.txt,
      gamelist.xml and images/ videos/ manuals/ folders, Onion miyoogamelist.xml and Imgs/, Thumbs.db.
   📄 games.json lives in ~/.sync-roms/ (copied from the repo's version on first run) and is never read from the
-     bucket. Optional ~/.sync-roms/device-systems.json adjusts a device's recommended systems:
+     bucket. It is the core list every card gets; a card's own extra games are saved in cards.json and add to it.
+     A list can also name whole sets: "sets": ["mario", "zelda"]. Optional ~/.sync-roms/device-systems.json adjusts a device's recommended systems:
      {{"miyoo-flip-v2": {{"add": ["psx"], "remove": ["gba"]}}}}
 """
 
@@ -162,7 +163,7 @@ def apply_games(systems, games):
     marks a system whose every bucket file is synced."""
     for s in systems:
         entry = games.get(s["bucket"], [])
-        s["games"] = entry if isinstance(entry, list) else []
+        s["games"] = [g for g in entry if isinstance(g, dict)] if isinstance(entry, list) else []
         s["full_system"] = isinstance(entry, dict) and bool(entry.get("full_system"))
     return systems
 
@@ -194,11 +195,88 @@ def apply_device_overlay(devices, systems, overlay):
         d["systems"] += [x for x in dict.fromkeys(change.get("add", [])) if x in known and x not in d["systems"]]
 
 
-def load_manifest():
-    """Systems, devices and layouts from the repo, joined with the personal games and device-system overlay."""
+SETS_KEY = "sets"  # reserved key in a games list: ids of whole game sets to sync
+_warned = set()  # warnings already printed this run, so a menu redraw doesn't repeat them
+
+
+def card_games(card):
+    """The extra games list saved for a card in cards.json ({} when it has none)."""
+    entry = load_cards().get(card)
+    games = entry.get("games") if isinstance(entry, dict) else None
+    return games if isinstance(games, dict) else {}
+
+
+def all_card_names():
+    return sorted(load_cards())
+
+
+def list_sets(games):
+    """The set ids a games list references; anything that isn't a list of strings is ignored."""
+    ids = games.get(SETS_KEY, [])
+    if not isinstance(ids, list) or not all(isinstance(i, str) for i in ids):
+        if SETS_KEY not in _warned:
+            _warned.add(SETS_KEY)
+            print(f"warning: games: {SETS_KEY!r} must be a list of set ids, ignored (saving that list drops it)",
+                  file=sys.stderr)
+        return [i for i in ids if isinstance(i, str)] if isinstance(ids, list) else []
+    return ids
+
+
+def set_games(game_set):
+    """A set's games as {"title", "bucket", "system"} entries, with each game's extra files as entries of their own."""
+    out, seen = [], set()
+    for g in game_set["games"]:
+        for key in [g.get("bucket")] + list(g.get("files", [])):
+            if key and key not in seen:
+                seen.add(key)
+                title = g.get("title") if key == g.get("bucket") and g.get("title") \
+                    else os.path.splitext(key.split("/", 1)[-1])[0]
+                out.append({"title": title, "bucket": key, "system": g.get("system")})
+    return out
+
+
+def merge_lists(systems, lists, sets):
+    """Set each system's games/full_system to the union of the games lists and the sets they reference.
+
+    A list is {system bucket: [games] | {"full_system": true}, "sets": [set ids]}. Games go in the order
+    lists come, direct games before set games, deduplicated by bucket key.
+    """
+    by_id = {x["id"]: x for x in sets}
+    for s in systems:
+        s["games"], s["full_system"] = [], False
+    by_bucket = {s["bucket"]: s for s in systems}
+
+    def add(s, g):
+        if g.get("bucket") and not any(x.get("bucket") == g["bucket"] for x in s["games"]):
+            s["games"].append({k: v for k, v in g.items() if k != "system"})
+
+    for raw in lists:
+        for s in systems:
+            entry = raw.get(s["bucket"])
+            if isinstance(entry, dict):
+                s["full_system"] = s["full_system"] or bool(entry.get("full_system"))
+            elif isinstance(entry, list):
+                for g in entry:
+                    if isinstance(g, dict):
+                        add(s, g)
+    for raw in lists:
+        for set_id in list_sets(raw):
+            if set_id not in by_id:
+                print(f"warning: games: unknown set {set_id!r}, skipped", file=sys.stderr)
+                continue
+            for g in set_games(by_id[set_id]):
+                if g["system"] in by_bucket:
+                    add(by_bucket[g["system"]], g)
+    return systems
+
+
+def load_manifest(card_names=()):
+    """Systems, devices and layouts from the repo, joined with the personal games (plus the extras of the
+    named cards) and device-system overlay."""
     seed_personal_files()
     manifest = {name: repo_json(name) for name in ("layouts", "systems", "devices")}
-    apply_games(manifest["systems"], personal_json("games.json"))
+    lists = [personal_json("games.json")] + [card_games(n) for n in card_names]
+    merge_lists(manifest["systems"], lists, load_sets())
     overlay_path = os.path.join(data_dir(), "device-systems.json")
     overlay = personal_json("device-systems.json") if os.path.exists(overlay_path) else {}
     apply_device_overlay(manifest["devices"], manifest["systems"], overlay)
@@ -441,14 +519,17 @@ def save_card(name, device, layout):
     update_card(name, device=device["id"] if device else "full", layout=layout)
 
 
-def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, extras=None, locked=None, locked_note=""):
+def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, extras=None, locked=None, locked_note="",
+                hotkeys=()):
     """Type-to-filter list. Every space-separated term must appear in a label (case-insensitive).
 
     Single mode returns the chosen index, or None on Esc. Multi mode (Tab toggles) returns the list of
     on/off states on both Enter and Esc (Esc keeps the changes). cursor: index the highlight starts on.
     extras: per label, a list of (text, color) drawn after it (color: green, red, cyan or dim);
     they are not matched by the filter.
-    locked: optional per-label flags; those rows are greyed out, can't be toggled, and show locked_note.
+    locked: optional per-label flags; those rows are greyed out, can't be toggled, and show locked_note
+    (one string, or one per label).
+    hotkeys: control keys that, in single mode, return (key, label index) for the highlighted row instead of an index.
     """
     os.environ.setdefault("ESCDELAY", "25")
     lowered = [l.lower() for l in labels]
@@ -514,7 +595,7 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
             if multi:
                 status += f" · +{added} −{removed} pending"
             if vis and locked[vis[cur]]:
-                status = f"🔒 {locked_note}"
+                status = f"🔒 {locked_note[vis[cur]] if isinstance(locked_note, list) else locked_note}"
             stdscr.addnstr(h - 1, 0, status, w - 1, curses.A_BOLD)
             stdscr.move(1, min(w - 1, 3 + len(query)))
             try:
@@ -550,6 +631,8 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
                 target = not all(state[i] for i in free)
                 for i in free:
                     state[i] = target
+            elif k in hotkeys and not multi and vis:
+                return k, vis[cur]
             elif isinstance(k, str) and k.isprintable():
                 query += k
                 cur = top = 0
@@ -578,17 +661,24 @@ def load_sets():
     return sorted(sets, key=lambda x: x["name"].lower())
 
 
-def toggle_games(title, rows, extras=None):
+FULL_SYSTEM_NOTE = "Full system: every file in its folder is synced, so it can't be toggled"
+
+
+def toggle_games(title, rows, extras=None, covered=None):
     """Multi-select over rows of (system, bucket key, game title, label); adds/removes games in each system in place.
 
     extras: {bucket key: [more bucket keys]} added or removed together with that row's key.
 
     Rows of a full system are shown on and locked: its whole bucket folder is synced.
+    covered: optional callable (system, bucket key) -> note or None; rows with a note are shown on and locked
+    with that note (e.g. games a set reference or core already syncs).
     """
-    locked = [bool(s.get("full_system")) for s, *_ in rows]
+    notes = [FULL_SYSTEM_NOTE if s.get("full_system") else covered(s, key) if covered else None
+             for s, key, _, _ in rows]
+    locked = [bool(n) for n in notes]
     initial = [l or any(g.get("bucket") == key for g in s["games"]) for l, (s, key, _, _) in zip(locked, rows)]
     state = filter_list(title, [label for *_, label in rows], multi=True, initial=initial, locked=locked,
-                        locked_note="Full system: every file in its folder is synced, so it can't be toggled")
+                        locked_note=[n or "" for n in notes])
     for (s, key, name, _), on, was, lock in zip(rows, state, initial, locked):
         if lock:
             continue
@@ -619,115 +709,285 @@ def set_rows(game_set, by_bucket, bucket_keys):
     return sorted(rows, key=lambda r: (r[0]["name"].lower(), r[2].lower()))
 
 
+def valid_card_name(name, existing):
+    """Why name can't be a new card's folder name, or None if it can."""
+    if not name.strip():
+        return "A card needs a name."
+    if "/" in name or os.sep in name:
+        return "A card name is a folder name, so it can't contain a slash."
+    if name in existing:
+        return f"There is already a card named {name}."
+    return None
+
+
+def dump_list(systems, sets_on):
+    """A games list as saved to games.json or a card's cards.json entry."""
+    out = {s["bucket"]: {"full_system": True} if s["full_system"] else s["games"]
+           for s in systems if s["full_system"] or s["games"]}
+    if sets_on:
+        out[SETS_KEY] = list(sets_on)
+    return out
+
+
+def save_lists(core, cards):
+    """Write the core list (when given) to games.json and each card's list into its cards.json entry."""
+    if core is not None:
+        path = os.path.join(data_dir(), "games.json")
+        with open(path + ".tmp", "w") as f:
+            json.dump(core, f, indent=2, ensure_ascii=False)
+            f.write("\n")
+        os.replace(path + ".tmp", path)
+    for name, games in cards.items():
+        update_card(name, games=games)
+
+
+def cover_notes(sets_by_id, own_set_ids, core=None):
+    """Why games are synced without being in the list being edited.
+
+    Returns ({system bucket: note} for whole systems, {bucket key: note} for single games). The notes come from
+    the list's own set references and, when editing a card, from the core list (a raw games list).
+    """
+    full, keys = {}, {}
+    if core is not None:
+        for bucket, entry in core.items():
+            if isinstance(entry, dict) and entry.get("full_system"):
+                full[bucket] = "From core: full system"
+            elif isinstance(entry, list):
+                for g in entry:
+                    if isinstance(g, dict) and g.get("bucket"):
+                        keys.setdefault(g["bucket"], "From core")
+        for sid in list_sets(core):
+            for g in set_games(sets_by_id[sid]) if sid in sets_by_id else []:
+                keys.setdefault(g["bucket"], f"From core: {sets_by_id[sid]['name']}")
+    for sid in own_set_ids:
+        for g in set_games(sets_by_id[sid]) if sid in sets_by_id else []:
+            keys.setdefault(g["bucket"], f"Full set: {sets_by_id[sid]['name']}")
+    return full, keys
+
+
+def toggle_set_ref(sets_on, set_id):
+    """The set ids with set_id switched on or off."""
+    return [i for i in sets_on if i != set_id] if set_id in sets_on else sets_on + [set_id]
+
+
+def toggle_full_system(s):
+    s["full_system"] = not s["full_system"]
+
+
+FULL_KEY = "\x06"  # ^F
+FULL_HINT = "type to filter · ↑/↓ move · Enter open · ^F toggle {what} · Esc back"
+
+
+def new_target(label, raw, setup=None):
+    """The editing state of one games list: its systems, set references and what they were when opened."""
+    data = {"systems": apply_games(repo_json("systems"), raw)}
+    sets_on = list_sets(raw)
+    return {"label": label, "data": data, "sets_on": sets_on, "setup": setup, "was": snapshot(data),
+            "was_full": {s["bucket"]: s["full_system"] for s in data["systems"]}, "was_sets": list(sets_on)}
+
+
+def target_changes(t):
+    """(added, removed) as {label: [text]} for a target; (new card's setup counts as a change on its own)."""
+    now = snapshot(t["data"])
+    added = {e: sorted(now[e] - t["was"][e]) for e in now if now[e] - t["was"][e]}
+    removed = {e: sorted(t["was"][e] - now[e]) for e in now if t["was"][e] - now[e]}
+    for s in t["data"]["systems"]:
+        if s["full_system"] != t["was_full"][s["bucket"]]:
+            (added if s["full_system"] else removed)[s["bucket"]] = ["(full system)"]
+    on, was = set(t["sets_on"]), set(t["was_sets"])
+    if on - was:
+        added[SETS_KEY] = sorted(on - was)
+    if was - on:
+        removed[SETS_KEY] = sorted(was - on)
+    return added, removed
+
+
 def edit_manifest():
-    """Add/remove games in the local games.json (browsing by system or by set), then save it."""
+    """Add/remove games in the core list or a card's extras (browsing by system or by set), then save them."""
     print(bold("✏️  Edit mode") + dim(f"  read={PROFILE}"))
-    seed_personal_files()
-    path = os.path.join(data_dir(), "games.json")
-    games = personal_json("games.json")
-    data = {"systems": apply_games(repo_json("systems"), games)}
-    original = snapshot(data)
+    manifest = load_manifest()  # also seeds games.json
+    core_raw = personal_json("games.json")
+    repo_systems = repo_json("systems")
     print(dim(f"📡 Listing s3://{BUCKET}/ ..."))
     with ThreadPoolExecutor(WORKERS) as ex:
-        listings = ex.map(lambda s: {k for k in list_sizes(s["bucket"] + "/") if not k.endswith("/")},
-                          data["systems"])
-        bucket_keys = {s["bucket"]: keys for s, keys in zip(data["systems"], listings)}
-    systems = sorted((s for s in data["systems"] if bucket_keys[s["bucket"]]),
-                     key=lambda s: s["name"].lower())
-    by_bucket = {s["bucket"]: s for s in data["systems"]}
+        listings = ex.map(lambda s: {k for k in list_sizes(s["bucket"] + "/") if not k.endswith("/")}, repo_systems)
+        bucket_keys = {s["bucket"]: keys for s, keys in zip(repo_systems, listings)}
+    names = {s["bucket"] for s in repo_systems}
     sets = load_sets()
+    sets_by_id = {x["id"]: x for x in sets}
 
     for game_set in sets:
         for g in game_set["games"]:
-            if g.get("system") not in by_bucket:
+            if g.get("system") not in names:
                 print(yellow(f"⚠️  Set {game_set['name']}: unknown system {g.get('system')!r}, skipped"), file=sys.stderr)
 
-    def edit_system():
-        now = snapshot(data)
-        width = max((len(s["name"]) for s in systems), default=0)
-        labels, extras = [], []
-        for s in systems:
-            changed = now[s["bucket"]] ^ original[s["bucket"]]
-            total = len(bucket_keys[s["bucket"]])
-            have = total if s.get("full_system") else len(now[s["bucket"]] & bucket_keys[s["bucket"]])
-            missing = 0 if s.get("full_system") else len(now[s["bucket"]] - bucket_keys[s["bucket"]])
-            labels.append(s["name"].ljust(width))
-            row = [(f"  {have}", "green"), (f" / {total}", "dim")]
-            if missing:
-                row.append((f"  {missing} not in bucket", "red"))
-            if changed:
-                row.append((f"  {len(changed)} change(s)", "cyan"))
-            extras.append(row)
-        i = filter_list("✏️  Pick a system to edit (Esc = back)", labels, extras=extras)
-        if i is None:
-            return False
-        s = systems[i]
-        if s.get("full_system"):
-            print(yellow(f"ℹ️  {s['name']} is a full system: every file in its bucket folder is "
-                         "downloaded, so there is no game list to edit."))
-            return True
-        in_bucket = bucket_keys[s["bucket"]]
-        listed = {g["bucket"] for g in s["games"] if g.get("bucket")}
-        rows = [(s, k, os.path.splitext(k.split("/", 1)[1])[0],
-                 k.split("/", 1)[1] + ("" if k in in_bucket else "  ⚠️ not in bucket"))
-                for k in sorted(in_bucket | listed, key=str.lower)]
-        toggle_games(f"✏️  {s['name']} — ✅ in games.json, ⬜ in bucket only", rows)
-        return True
+    targets = {}  # None (the core list) or a card name -> editing state
 
-    def edit_set():
-        if not sets:
-            print(yellow("ℹ️  No game sets found."))
-            return False
-        labels = []
-        for game_set in sets:
-            keys = [(g.get("system"), g.get("bucket")) for g in game_set["games"]]
-            on = sum(1 for sid, key in keys if sid in by_bucket and (by_bucket[sid].get("full_system")
-                     or any(g.get("bucket") == key for g in by_bucket[sid]["games"])))
-            desc = f" — {game_set['description']}" if game_set["description"] else ""
-            labels.append(f"{game_set['name']}  ({on}/{len(keys)} on){desc}")
-        i = filter_list("✏️  Pick a set to edit (Esc = back)", labels)
-        if i is None:
-            return False
-        rows = set_rows(sets[i], by_bucket, lambda s: bucket_keys[s["bucket"]])
-        if rows:
-            extras = {g["bucket"]: g["files"] for g in sets[i]["games"] if g.get("bucket") and g.get("files")}
-            toggle_games(f"✏️  {sets[i]['name']} — ✅ in games.json, ⬜ not", rows, extras)
-        else:
-            print(yellow(f"ℹ️  {sets[i]['name']} has no games to toggle."))
-        return True
+    def core_now():
+        """The core list as it stands in this session."""
+        core = targets.get(None)
+        return dump_list(core["data"]["systems"], core["sets_on"]) if core else core_raw
+
+    def edit_target(t, is_card):
+        systems_all = t["data"]["systems"]
+        by_bucket = {s["bucket"]: s for s in systems_all}
+        systems = sorted((s for s in systems_all if bucket_keys[s["bucket"]]), key=lambda s: s["name"].lower())
+        where = "games.json" if not is_card else f"{t['label']}'s extras"
+        pos = {"system": 0, "set": 0}
+
+        def cover():
+            return cover_notes(sets_by_id, t["sets_on"], core_now() if is_card else None)
+
+        def edit_system():
+            now = snapshot(t["data"])
+            full, keys = cover()
+            width = max((len(s["name"]) for s in systems), default=0)
+            labels, extras = [], []
+            for s in systems:
+                b = s["bucket"]
+                changed = now[b] ^ t["was"][b]
+                total = len(bucket_keys[b])
+                whole = s.get("full_system") or b in full
+                covered = {k for k in keys if k.split("/", 1)[0] == b}
+                have = total if whole else len((now[b] | covered) & bucket_keys[b])
+                missing = 0 if whole else len(now[b] - bucket_keys[b])
+                labels.append(s["name"].ljust(width))
+                row = [(f"  {have}", "green"), (f" / {total}", "dim")]
+                if whole:
+                    row.append(("  🗂️  full system", "cyan"))
+                if missing:
+                    row.append((f"  {missing} not in bucket", "red"))
+                if changed:
+                    row.append((f"  {len(changed)} change(s)", "cyan"))
+                extras.append(row)
+            i = filter_list("✏️  Pick a system to edit (Esc = back)", labels, extras=extras,
+                            hint=FULL_HINT.format(what="full system"), cursor=pos["system"], hotkeys=(FULL_KEY,))
+            if i is None:
+                return False
+            if isinstance(i, tuple):
+                pos["system"] = i[1]
+                s = systems[i[1]]
+                if s["bucket"] in full:
+                    print(yellow(f"ℹ️  {s['name']} is a full system in core, so it can't be changed here."))
+                else:
+                    toggle_full_system(s)
+                return True
+            pos["system"] = i
+            s = systems[i]
+            if s.get("full_system") or s["bucket"] in full:
+                print(yellow(f"ℹ️  {s['name']} is a full system: every file in its bucket folder is "
+                             "downloaded, so there is no game list to edit."))
+                return True
+            in_bucket = bucket_keys[s["bucket"]]
+            listed = {g["bucket"] for g in s["games"] if g.get("bucket")}
+            rows = [(s, k, os.path.splitext(k.split("/", 1)[1])[0],
+                     k.split("/", 1)[1] + ("" if k in in_bucket else "  ⚠️ not in bucket"))
+                    for k in sorted(in_bucket | listed, key=str.lower)]
+            toggle_games(f"✏️  {s['name']} — ✅ in {where}, ⬜ in bucket only", rows,
+                         covered=lambda _s, key: keys.get(key))
+            return True
+
+        def edit_set():
+            if not sets:
+                print(yellow("ℹ️  No game sets found."))
+                return False
+            full, keys = cover()
+            labels, extras = [], []
+            for game_set in sets:
+                entries = [(g.get("system"), g.get("bucket")) for g in game_set["games"]]
+                on = sum(1 for sid, key in entries if sid in by_bucket and (by_bucket[sid].get("full_system")
+                         or any(g.get("bucket") == key for g in by_bucket[sid]["games"])
+                         or sid in full or key in keys))
+                desc = f" — {game_set['description']}" if game_set["description"] else ""
+                labels.append(f"{game_set['name']}  ({on}/{len(entries)} on){desc}")
+                extras.append([("  📦 full set", "green")] if game_set["id"] in t["sets_on"] else [])
+            i = filter_list("✏️  Pick a set to edit (Esc = back)", labels, extras=extras,
+                            hint=FULL_HINT.format(what="full set"), cursor=pos["set"], hotkeys=(FULL_KEY,))
+            if i is None:
+                return False
+            if isinstance(i, tuple):
+                pos["set"] = i[1]
+                t["sets_on"] = toggle_set_ref(t["sets_on"], sets[i[1]]["id"])
+                return True
+            pos["set"] = i
+            rows = set_rows(sets[i], by_bucket, lambda s: bucket_keys[s["bucket"]])
+            if rows:
+                files = {g["bucket"]: g["files"] for g in sets[i]["games"] if g.get("bucket") and g.get("files")}
+                toggle_games(f"✏️  {sets[i]['name']} — ✅ in {where}, ⬜ not", rows, files,
+                             covered=lambda s, key: full.get(s["bucket"]) or keys.get(key))
+            else:
+                print(yellow(f"ℹ️  {sets[i]['name']} has no games to toggle."))
+            return True
+
+        while True:
+            i = filter_list(f"✏️  Edit {t['label']} (Esc = back)", ["By system", "By set"])
+            if i is None:
+                break
+            while (edit_system, edit_set)[i]():
+                pass
+
+    def open_target(key, label, is_card):
+        if key not in targets:
+            raw = core_raw if key is None else card_games(key)
+            targets[key] = new_target(label, raw)
+        edit_target(targets[key], is_card)
+
+    def add_card():
+        existing = set(load_cards()) | set(targets)
+        while True:
+            name = input("➕ New card name (its folder name, empty to cancel): ").strip()
+            if not name:
+                return
+            problem = valid_card_name(name, existing)
+            if not problem:
+                break
+            print(yellow(f"  {problem}"))
+        try:
+            setup = choose_setup(manifest)
+        except SystemExit:
+            return
+        targets[name] = new_target(name, {}, setup)
+        edit_target(targets[name], True)
 
     while True:
-        i = filter_list("✏️  Edit games (Esc = finish)", ["By system", "By set"])
+        cards = sorted(set(load_cards()) | {k for k in targets if k is not None})
+        options = ["🏠 Core (every card)"] + [f"💳 {name}" for name in cards] + ["➕ New card"]
+        i = filter_list("✏️  What do you want to edit? (Esc = finish)", options)
         if i is None:
             break
-        while (edit_system, edit_set)[i]():
-            pass
+        if i == 0:
+            open_target(None, "🏠 Core", False)
+        elif i == len(options) - 1:
+            add_card()
+        else:
+            open_target(cards[i - 1], f"💳 {cards[i - 1]}", True)
 
-    now = snapshot(data)
-    added = {e: sorted(now[e] - original[e]) for e in now if now[e] - original[e]}
-    removed = {e: sorted(original[e] - now[e]) for e in now if original[e] - now[e]}
-    if not added and not removed:
+    changed = {k: t for k, t in targets.items() if t["setup"] or any(target_changes(t))}
+    if not changed:
         print(yellow("👋 No changes, nothing saved."))
         return 0
     print(bold("\n📝 Changes"))
-    for label, group, sign, col in (("Added", added, "➕", green), ("Removed", removed, "➖", red)):
-        for esde, ks in group.items():
-            print(col(f"  {sign} {esde}: {len(ks)} {label.lower()}"))
-            for k in ks[:MAX_MISSING_SHOWN]:
-                print(dim(f"       {k.split('/', 1)[1]}"))
-            if len(ks) > MAX_MISSING_SHOWN:
-                print(dim(f"       … and {len(ks) - MAX_MISSING_SHOWN} more"))
-    print(dim("  (Removing only drops a game from games.json; the file stays in the bucket.)"))
+    for t in changed.values():
+        added, removed = target_changes(t)
+        print(bold(f"  {t['label']}") + (dim("  (new card)") if t["setup"] else ""))
+        for label, group, sign, col in (("added", added, "➕", green), ("removed", removed, "➖", red)):
+            for esde, ks in group.items():
+                print(col(f"  {sign} {esde}: {len(ks)} {label}"))
+                for k in ks[:MAX_MISSING_SHOWN]:
+                    print(dim(f"       {k.split('/', 1)[1] if '/' in k else k}"))
+                if len(ks) > MAX_MISSING_SHOWN:
+                    print(dim(f"       … and {len(ks) - MAX_MISSING_SHOWN} more"))
+    print(dim("  (Removing only drops a game from the list; the file stays in the bucket.)"))
 
-    if not confirm(f"💾 Save games.json to {path}?"):
+    if not confirm("💾 Save these changes?"):
         print(yellow("👋 Not saved."))
         return 0
-    with open(path + ".tmp", "w") as f:
-        json.dump({s["bucket"]: {"full_system": True} if s["full_system"] else s["games"]
-                   for s in data["systems"] if s["full_system"] or s["games"]}, f, indent=2, ensure_ascii=False)
-        f.write("\n")
-    os.replace(path + ".tmp", path)
-    print(green("🎉 Saved games.json"))
+    for key, t in changed.items():
+        if t["setup"]:
+            save_card(key, *t["setup"])
+    save_lists(dump_list(targets[None]["data"]["systems"], targets[None]["sets_on"]) if None in changed else None,
+               {k: dump_list(t["data"]["systems"], t["sets_on"]) for k, t in changed.items() if k is not None})
+    print(green("🎉 Saved"))
     return 0
 
 
@@ -1779,7 +2039,7 @@ def upload_scrapes(args):
 
     print(bold("☁️  Upload scrapes") + dim(f"  read={PROFILE}  write={WRITE_PROFILE}  from {es_dir}"))
     try:
-        manifest = load_manifest()
+        manifest = load_manifest([os.path.basename(base) or base])
         print("📏 Listing the ROMs available in the bucket...")
         roms = bucket_roms(manifest["systems"])
         print("☁️  Listing what's already in scrapes/...")
@@ -2559,7 +2819,7 @@ def refresh_mirror(root, dry_run=False):
             os.makedirs(root, exist_ok=True)
             open(os.path.join(root, MIRROR_MARKER), "w").close()
     print("📄 Fetching manifests...")
-    manifest = load_manifest()
+    manifest = load_manifest(all_card_names())
     print("📏 Listing the bucket...")
     wanted = mirror_wanted(manifest)
     have = {k: s for k, s in local_sizes(root).items() if k != MIRROR_MARKER}
@@ -2693,10 +2953,10 @@ def sync():
     if load_settings().get("mirror"):
         use_mirror(load_settings()["mirror"], args.dry_run)
     print("📄 Fetching manifests...")
-    manifest = load_manifest()
+    card = os.path.basename(base) or base
+    manifest = load_manifest([card])
     systems = manifest["systems"]
     devices, layouts = manifest["devices"], manifest["layouts"]
-    card = os.path.basename(base) or base
     saved = load_cards().get(card)
     dirs = None
     setup = saved_setup(saved, devices, layouts)

@@ -79,7 +79,24 @@ class SetsTest(unittest.TestCase):
     def test_multi_esc_keeps_state(self):
         self.assertEqual(self.run_list(iter(["\t", "\x1b"])), [True, False])
 
-    def run_list(self, keys, locked=None):
+    def test_hotkey_returns_pair(self):
+        self.assertEqual(self.run_list(iter(["\x06"]), multi=False, hotkeys=("\x06",)), ("\x06", 0))
+        self.assertEqual(self.run_list(iter(["y", "\x06"]), multi=False, hotkeys=("\x06",)), ("\x06", 1))
+
+    def test_hotkey_ignored_without_rows(self):
+        self.assertIsNone(self.run_list(iter(["z", "\x06", "\x1b"]), multi=False, hotkeys=("\x06",)))
+
+    def test_covered_rows_locked_with_note(self):
+        by = systems()
+        rows = sync_roms.set_rows(SET, by, lambda s: set())
+        covered = lambda s, key: "Full set: x" if key == "gba/Gone.zip" else None  # noqa: E731
+        with mock.patch.object(sync_roms, "filter_list", return_value=[True, True, True, True]) as fl:
+            sync_roms.toggle_games("t", rows, covered=covered)
+        self.assertEqual(fl.call_args.kwargs["locked"], [True, False, True, False])
+        self.assertEqual(fl.call_args.kwargs["locked_note"][2], "Full set: x")
+        self.assertNotIn("gba/Gone.zip", [g["bucket"] for g in by["gba"]["games"]])
+
+    def run_list(self, keys, locked=None, multi=True, hotkeys=()):
         screen = mock.MagicMock()
         screen.getmaxyx.return_value = (24, 80)
         screen.get_wch.side_effect = lambda: next(keys)
@@ -87,7 +104,7 @@ class SetsTest(unittest.TestCase):
                 mock.patch.object(sync_roms.curses, "curs_set"), \
                 mock.patch.object(sync_roms.curses, "use_default_colors"), \
                 mock.patch.object(sync_roms.curses, "has_colors", return_value=False):
-            return sync_roms.filter_list("t", ["x", "y"], multi=True, locked=locked)
+            return sync_roms.filter_list("t", ["x", "y"], multi=multi, locked=locked, hotkeys=hotkeys)
 
 
 if __name__ == "__main__":

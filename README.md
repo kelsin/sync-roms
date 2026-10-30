@@ -215,7 +215,7 @@ Then:
 | Flag | Description |
 | --- | --- |
 | `-n`, `--dry-run` | Show what would be downloaded (with total sizes), download nothing. With `--mirror`/`--use-mirror`, show what the mirror would download and delete |
-| `-e`, `--edit` | Add/remove games in your local `games.json`, then save it (see below) |
+| `-e`, `--edit` | Add/remove games in the core list (`games.json`) or a card's extras, then save (see below) |
 | `-a`, `--ask` | Confirm saved settings (device and layout, Android media folders) instead of using them silently. Answering no asks the question again and saves the new answer |
 | `-u`, `--upload-scrapes` | Upload `BASE_DIR/ES-DE` scraped data to the bucket (see below) |
 | `--upload [DIR]` | Upload the ROMs in `DIR` and its subfolders (default: current directory) to the bucket folder of a system you pick; the system is guessed from the folder name (see below) |
@@ -305,23 +305,28 @@ or `--clean-scrapes`.
 
 ## Editing the game list (`--edit`)
 
-Edits `~/.sync-roms/games.json`, the list of games you sync. A fresh install starts with no games, so
-every system shows 0 ROMs until you add some here. The bucket is only read to show what is in it, so the
-read-only profile is enough. No folders are needed:
+There are two kinds of list. The **core** list, `~/.sync-roms/games.json`, goes to every card (for the
+systems that card has enabled). A card can also have **extras**, saved in `cards.json` under the card's folder
+name next to its device and layout; a card syncs core plus its own extras, and extras only add games.
+A fresh install starts with no games, so every system shows 0 ROMs until you add some here. The bucket is only
+read to show what is in it, so the read-only profile is enough. No folders are needed:
 
 ```bash
 sync-roms --edit
 ```
 
+0. Pick **🏠 Core**, one of your cards, or **➕ New card** (asks for its folder name, then its device and
+   firmware, like the first sync does). Games a card already gets from core show greyed out with a 🔒.
 1. Pick **By system** or **By set**, then type to filter the list (every word you type must
    match) and `Enter` to pick one. `Esc` goes back; `Esc` at the first menu finishes.
 2. For a system you see every file in its bucket folder. For a set (a curated list in the
    package's `data/sets/*.json`) you see its games from every system, sorted by system then title.
-   `✅` is already in `games.json`, `⬜` is not. Type to filter, `Tab` toggles the game
+   `✅` is already in the list, `⬜` is not. Type to filter, `Tab` toggles the game
    under the cursor, `^A` toggles everything currently shown, `Enter` or `Esc` keeps your changes.
-   Pending changes show as `➕` / `➖`. `games.json` doesn't record sets: a game is on if it's listed.
+   Pending changes show as `➕` / `➖`.
 3. When you finish, you get a summary of additions and removals per system and a confirmation
-   prompt. On yes, `~/.sync-roms/games.json` is saved; on no, nothing is. Nothing is uploaded.
+   prompt. On yes, the changed lists are saved (`games.json` and/or the cards' entries in `cards.json`); on no,
+   nothing is. Nothing is uploaded.
 
 A set file is `{"name": ..., "description": ..., "games": [{"title": ..., "system": "gba", "bucket": "gba/Game.zip"}]}`.
 A multi-disc game adds `"files": [...]` with its other bucket keys (the discs); `bucket` is the playlist (`.m3u`) or disc 1.
@@ -340,7 +345,33 @@ instead of a list:
 { "gb": { "full_system": true } }
 ```
 
-No system is a full system by default. `--edit` skips full systems and keeps their entry.
+No system is a full system by default. In `--edit`, press `^F` on a system in the **By system** list to
+toggle it (🗂️). A full system's games can't be toggled one by one; a card can't turn off a system that core
+has as full.
+
+### Full sets
+
+A list can sync every game of a set (from `data/sets/*.json`) without listing the games, with a `"sets"` key
+holding the set file names without `.json`:
+
+```json
+{ "sets": ["mario", "zelda"], "gba": [ { "title": "Game", "bucket": "gba/Game.zip" } ] }
+```
+
+It works in `games.json` and in a card's `games` entry in `cards.json`. A set reference is live: games added
+to the set in a later release are synced too, for the systems the card has enabled. In `--edit`, press `^F`
+on a set in the **By set** list (it shows 📦) to toggle it without opening it; inside a referenced set the
+games show greyed out. Unknown set names are skipped with a warning.
+
+### A card's extras in `cards.json`
+
+```json
+{ "RGSP": { "device": "anbernic-rg-sp", "layout": "muos", "games": { "gba": { "full_system": true } } } }
+```
+
+`games` has the same shape as `games.json`, including `"sets"`. A card is identified by its folder name, so
+renaming the folder makes it a new card. The local mirror (`--mirror`) holds the core list plus every card's
+extras.
 
 ## Converting to CHD (`--chd`)
 
