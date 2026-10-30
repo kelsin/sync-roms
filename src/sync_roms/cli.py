@@ -760,6 +760,19 @@ def cover_notes(sets_by_id, own_set_ids, core=None):
     return full, keys
 
 
+def toggle_set_ref(sets_on, set_id):
+    """The set ids with set_id switched on or off."""
+    return [i for i in sets_on if i != set_id] if set_id in sets_on else sets_on + [set_id]
+
+
+def toggle_full_system(s):
+    s["full_system"] = not s["full_system"]
+
+
+FULL_KEY = "\x06"  # ^F
+FULL_HINT = "type to filter · ↑/↓ move · Enter open · ^F toggle {what} · Esc back"
+
+
 def new_target(label, raw, setup=None):
     """The editing state of one games list: its systems, set references and what they were when opened."""
     data = {"systems": apply_games(repo_json("systems"), raw)}
@@ -815,6 +828,7 @@ def edit_manifest():
         by_bucket = {s["bucket"]: s for s in systems_all}
         systems = sorted((s for s in systems_all if bucket_keys[s["bucket"]]), key=lambda s: s["name"].lower())
         where = "games.json" if not is_card else f"{t['label']}'s extras"
+        pos = {"system": 0, "set": 0}
 
         def cover():
             return cover_notes(sets_by_id, t["sets_on"], core_now() if is_card else None)
@@ -834,14 +848,26 @@ def edit_manifest():
                 missing = 0 if whole else len(now[b] - bucket_keys[b])
                 labels.append(s["name"].ljust(width))
                 row = [(f"  {have}", "green"), (f" / {total}", "dim")]
+                if whole:
+                    row.append(("  🗂️  full system", "cyan"))
                 if missing:
                     row.append((f"  {missing} not in bucket", "red"))
                 if changed:
                     row.append((f"  {len(changed)} change(s)", "cyan"))
                 extras.append(row)
-            i = filter_list("✏️  Pick a system to edit (Esc = back)", labels, extras=extras)
+            i = filter_list("✏️  Pick a system to edit (Esc = back)", labels, extras=extras,
+                            hint=FULL_HINT.format(what="full system"), cursor=pos["system"], hotkeys=(FULL_KEY,))
             if i is None:
                 return False
+            if isinstance(i, tuple):
+                pos["system"] = i[1]
+                s = systems[i[1]]
+                if s["bucket"] in full:
+                    print(yellow(f"ℹ️  {s['name']} is a full system in core, so it can't be changed here."))
+                else:
+                    toggle_full_system(s)
+                return True
+            pos["system"] = i
             s = systems[i]
             if s.get("full_system") or s["bucket"] in full:
                 print(yellow(f"ℹ️  {s['name']} is a full system: every file in its bucket folder is "
@@ -861,7 +887,7 @@ def edit_manifest():
                 print(yellow("ℹ️  No game sets found."))
                 return False
             _, keys = cover()
-            labels = []
+            labels, extras = [], []
             for game_set in sets:
                 entries = [(g.get("system"), g.get("bucket")) for g in game_set["games"]]
                 on = sum(1 for sid, key in entries if sid in by_bucket and (by_bucket[sid].get("full_system")
@@ -869,9 +895,16 @@ def edit_manifest():
                          or key in keys))
                 desc = f" — {game_set['description']}" if game_set["description"] else ""
                 labels.append(f"{game_set['name']}  ({on}/{len(entries)} on){desc}")
-            i = filter_list("✏️  Pick a set to edit (Esc = back)", labels)
+                extras.append([("  📦 full set", "green")] if game_set["id"] in t["sets_on"] else [])
+            i = filter_list("✏️  Pick a set to edit (Esc = back)", labels, extras=extras,
+                            hint=FULL_HINT.format(what="full set"), cursor=pos["set"], hotkeys=(FULL_KEY,))
             if i is None:
                 return False
+            if isinstance(i, tuple):
+                pos["set"] = i[1]
+                t["sets_on"] = toggle_set_ref(t["sets_on"], sets[i[1]]["id"])
+                return True
+            pos["set"] = i
             rows = set_rows(sets[i], by_bucket, lambda s: bucket_keys[s["bucket"]])
             if rows:
                 files = {g["bucket"]: g["files"] for g in sets[i]["games"] if g.get("bucket") and g.get("files")}

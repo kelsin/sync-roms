@@ -97,5 +97,65 @@ class EditFlow(DataDir):
         self.assertFalse(os.path.exists(self.path("cards.json")))
 
 
+class FullToggles(EditFlow):
+    def run_with(self, picks, bucket_files=None, confirmed=True):
+        picks, calls = iter(picks), []
+
+        def fake(*a, **k):
+            calls.append(k)
+            return next(picks)
+        files = bucket_files or {}
+        with mock.patch.object(sync_roms, "BUCKET", "b", create=True), \
+                mock.patch.object(sync_roms, "list_sizes", side_effect=lambda prefix: files.get(prefix, {})), \
+                mock.patch.object(sync_roms, "filter_list", side_effect=fake), \
+                mock.patch.object(sync_roms, "confirm", return_value=confirmed), \
+                contextlib.redirect_stdout(io.StringIO()):
+            sync_roms.edit_manifest()
+        return calls
+
+    def test_toggle_set_ref(self):
+        self.assertEqual(sync_roms.toggle_set_ref(["a"], "b"), ["a", "b"])
+        self.assertEqual(sync_roms.toggle_set_ref(["a", "b"], "a"), ["b"])
+
+    def test_toggle_full_system_keeps_games(self):
+        s = {"full_system": False, "games": [{"bucket": "gba/A.zip"}]}
+        sync_roms.toggle_full_system(s)
+        self.assertTrue(s["full_system"])
+        self.assertEqual(len(s["games"]), 1)
+
+    def test_set_menu_hotkey_toggles_and_redraws(self):
+        first = sync_roms.load_sets()[1]["id"]
+        calls = self.run_with([0, 1, (sync_roms.FULL_KEY, 1), None, None, None])
+        self.assertEqual(self.read("games.json"), {"sets": [first]})
+        self.assertEqual(calls[3]["cursor"], 1)
+        self.assertEqual(calls[3]["extras"][1], [("  📦 full set", "green")])
+        self.assertIn(sync_roms.FULL_KEY, calls[2]["hotkeys"])
+
+    def test_system_hotkey_toggles_full_system(self):
+        self.run_with([0, 0, (sync_roms.FULL_KEY, 0), None, None, None], {"gba/": {"gba/A.zip": 1}})
+        self.assertEqual(self.read("games.json"), {"gba": {"full_system": True}})
+
+    def test_core_full_system_blocks_card_toggle(self):
+        self.write_json("games.json", {"gba": {"full_system": True}})
+        self.write_json("cards.json", {"c": {"layout": "esde", "device": "full"}})
+        self.run_with([1, 0, (sync_roms.FULL_KEY, 0), None, None, None], {"gba/": {"gba/A.zip": 1}})
+        self.assertNotIn("games", self.read("cards.json")["c"])
+
+    def test_set_ref_rows_locked(self):
+        self.write_json("games.json", {"sets": ["mario"]})
+        tracked = []
+        with mock.patch.object(sync_roms, "toggle_games",
+                               side_effect=lambda *a, **k: tracked.append((a, k))):
+            ids = [x["id"] for x in sync_roms.load_sets()]
+            self.run_with([0, 1, ids.index("mario"), None, None, None])
+        rows = tracked[0][0][1]
+        note = tracked[0][1]["covered"](rows[0][0], rows[0][1])
+        self.assertEqual(note, "Full set: Mario")
+
+    def write_json(self, name, data):
+        with open(self.path(name), "w") as f:
+            json.dump(data, f)
+
+
 if __name__ == "__main__":
     unittest.main()
