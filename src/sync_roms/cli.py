@@ -1852,7 +1852,7 @@ def upload_scrapes(args):
 
     print(bold("☁️  Upload scrapes") + dim(f"  read={PROFILE}  write={WRITE_PROFILE}  from {es_dir}"))
     try:
-        manifest = load_manifest()
+        manifest = load_manifest([os.path.basename(base) or base])
         print("📏 Listing the ROMs available in the bucket...")
         roms = bucket_roms(manifest["systems"])
         print("☁️  Listing what's already in scrapes/...")
@@ -2632,7 +2632,7 @@ def refresh_mirror(root, dry_run=False):
             os.makedirs(root, exist_ok=True)
             open(os.path.join(root, MIRROR_MARKER), "w").close()
     print("📄 Fetching manifests...")
-    manifest = load_manifest()
+    manifest = load_manifest(all_card_names())
     print("📏 Listing the bucket...")
     wanted = mirror_wanted(manifest)
     have = {k: s for k, s in local_sizes(root).items() if k != MIRROR_MARKER}
@@ -2766,10 +2766,10 @@ def sync():
     if load_settings().get("mirror"):
         use_mirror(load_settings()["mirror"], args.dry_run)
     print("📄 Fetching manifests...")
-    manifest = load_manifest()
+    card = os.path.basename(base) or base
+    manifest = load_manifest([card])
     systems = manifest["systems"]
     devices, layouts = manifest["devices"], manifest["layouts"]
-    card = os.path.basename(base) or base
     saved = load_cards().get(card)
     dirs = None
     setup = saved_setup(saved, devices, layouts)

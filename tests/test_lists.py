@@ -103,5 +103,22 @@ class CardLists(unittest.TestCase):
         self.assertEqual(sync_roms.all_card_names(), ["a", "b"])
 
 
+class Wiring(unittest.TestCase):
+    def test_saved_setup_without_layout_or_device(self):
+        layouts = {"esde": {}}
+        for saved in ({"games": {}}, {"device": "x"}, {"android_media": "never"}, None):
+            self.assertIsNone(sync_roms.saved_setup(saved, [], layouts))
+
+    def test_mirror_unions_all_cards(self):
+        with tempfile.TemporaryDirectory() as root, \
+                mock.patch.object(sync_roms, "all_card_names", return_value=["a", "b"]), \
+                mock.patch.object(sync_roms, "load_manifest", return_value={"systems": []}) as lm, \
+                mock.patch.object(sync_roms, "mirror_wanted", return_value={}), \
+                contextlib.redirect_stdout(io.StringIO()):
+            open(os.path.join(root, sync_roms.MIRROR_MARKER), "w").close()
+            sync_roms.refresh_mirror(root, dry_run=True)
+        lm.assert_called_once_with(["a", "b"])
+
+
 if __name__ == "__main__":
     unittest.main()
