@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.10.1](https://github.com/kelsin/sync-roms/compare/v0.10.0...v0.10.1) (2026-10-30)
+
+
+### Bug Fixes
+
+* **upload:** show progress right away by queuing uploads off the main thread ([#28](https://github.com/kelsin/sync-roms/issues/28)) ([90adeac](https://github.com/kelsin/sync-roms/commit/90adeacd3cd40377f98086ad07664b2419a35cfd))
+
 ## [0.10.0](https://github.com/kelsin/sync-roms/compare/v0.9.0...v0.10.0) (2026-10-30)
 
 
