@@ -167,8 +167,12 @@ Then:
    | `esde` | `ES-DE/downloaded_media/<system>/<type>/…` (every type) | `ES-DE/gamelists/<system>/gamelist.xml` |
    | `knulli` | `<system>/images`, `videos`, `manuals`, named `Game-image.png`, `-thumb`, `-marquee`, `-fanart`, `-boxback`, `-titleshot`, `-video`, `-manual` | `<system>/gamelist.xml` with name, description, rating, date and the media tags |
    | `onion` | `<system>/Imgs/Game.png`, the 250x360 box art prepared at upload | `<system>/miyoogamelist.xml` with name and image |
+   | `muos` | `MUOS/info/catalogue/<system>/box/Game.png` (cover, then 3D box) and `preview/Game.png` (screenshot, then title screen), as uploaded | `text/Game.txt` with the description |
+   | `slot` | `Labels/<system>/Game.png`, the cart label prepared at upload | none |
 
-   muOS and Slot get no scraped data yet.
+   muOS and Slot keep their media in folders of their own, flat even for ROMs in subfolders, and the final
+   cleanup (step 6) never touches them, since both may hold art you added yourself. An existing `.txt` is
+   rewritten only when the description differs.
 
    Knulli's main image is the miximage, or the screenshot if there is none. Onion's picture is made
    when the data is uploaded: `--upload-scrapes` resizes the cover (then the 3D box, then the
@@ -177,7 +181,9 @@ Then:
    uploaded earlier. Resizing needs Pillow or macOS `sips` on the machine that uploads. Existing
    gamelists are updated in place: only these tags are set, so favorites, play counts and an
    `<alternativeEmulator>` block stay. Existing files with the same size aren't downloaded again.
-   ROMs in subfolders get no Onion art.
+   ROMs in subfolders get no Onion art. Slot's labels are made the same way (cover, then 3D box, then
+   screenshot) as a PNG that fits the cart's label: 1280x661 for Game Boy Advance, 1024x914 for Game Boy
+   and Game Boy Color, stored as `scrapes/<system>/slot/<ROM>.png`.
 
    For the `esde` layout every sync also brings the shared extras from `scrapes/esde/`: new or changed
    theme files, collection lines you don't have yet (added to your `.cfg` files), and the shared settings
@@ -240,7 +246,7 @@ the cursor starts at the top of the list. Esc cancels.
 - It uploads with the `ROMS_WRITE_PROFILE` profile (default `roms`) through one shared pool of requests, four per CPU
   core (at most 64), so many small files and the parts of big ones (64MB and up go as 32MB parts) all keep the
   connection busy. The biggest files start first. `--upload-scrapes` uses the same pool for its media, and
-  resizes Onion box art on every CPU core while the other files upload.
+  resizes Onion box art and Slot labels on every CPU core while the other files upload.
 
 ## Scraped data (`--upload-scrapes`, `--clean-scrapes`)
 
@@ -256,6 +262,7 @@ What goes up, and how it is stored:
 | `gamelists/<system>/gamelist.xml` | `scrapes/<system>/metadata.json` | JSON keyed by ROM path. Only `name`, `desc`, `rating` (0-1), `releasedate` (ISO), `developer`, `publisher`, `genre`, `players`. Favorites, play counts, emulator choices and media tags are dropped. Merged with the bucket's file: local values win, entries only in the bucket stay |
 | `downloaded_media/<system>/<type>/…` | `scrapes/<system>/<type>/…` | Only files whose ROM name matches an available ROM. `._` files, dotfiles and `CLEANUP/` are skipped. Uploaded when new or a different size |
 | (made from the cover, 3D box or screenshot) | `scrapes/<system>/onion/<ROM>.png` | Onion box art, a PNG that fits 250x360. Created whenever it is missing from the bucket, even if its source image was already uploaded. Not made for ROMs in subfolders. Needs Pillow or `sips` |
+| (made from the cover, 3D box or screenshot) | `scrapes/<system>/slot/<ROM>.png` | Slot cart label for the Game Boy systems, a PNG that fits 1280x661 (GBA) or 1024x914 (GB, GBC). Created whenever it is missing, subfolders included. Needs Pillow or `sips` |
 | `themes/…` | `scrapes/esde/themes/…` | Per file, same size check. `themes-list` is skipped |
 | `collections/*.cfg` | `scrapes/esde/collections/*.cfg` | Union of the lines in both versions |
 | `settings/es_settings.xml` | `scrapes/esde/settings.json` | Allowlisted keys only: scraper behavior, miximage generation, theme (not aspect ratio) and gamelist/UI behavior. Credentials are never included. Merged with the bucket's file, local wins |

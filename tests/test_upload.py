@@ -122,17 +122,18 @@ class RunRomUploadsTest(unittest.TestCase):
         self.assertIn("denied", out)
 
     def test_derived_jobs_upload_the_shrunk_copy(self):
-        def shrink(src, dst):
+        def shrink(src, dst, box):
             with open(dst, "wb") as f:
                 f.write(b"small")
 
         manager = FakeManager()
-        todo = [("scrapes/onion/a.png", "/x/a.png", 500, "shrink"), ("scrapes/b.png", "/x/b.png", 1)]
+        todo = [("scrapes/onion/a.png", "/x/a.png", 500, (250, 360)), ("scrapes/b.png", "/x/b.png", 1)]
         with mock.patch.object(cli, "shrink_png", side_effect=shrink) as shrunk:
             failed, _, _, _ = self.run_uploads(todo, manager)
         self.assertEqual(failed, 0)
         shrunk.assert_called_once()
         self.assertEqual(shrunk.call_args[0][0], "/x/a.png")
+        self.assertEqual(shrunk.call_args[0][2], (250, 360))
         self.assertEqual(sorted(u[2] for u in manager.uploads), ["scrapes/b.png", "scrapes/onion/a.png"])
         art = next(u for u in manager.uploads if u[2] == "scrapes/onion/a.png")
         self.assertNotEqual(art[0], "/x/a.png")
@@ -141,7 +142,7 @@ class RunRomUploadsTest(unittest.TestCase):
     def test_failed_shrink_is_reported_not_uploaded(self):
         manager = FakeManager()
         with mock.patch.object(cli, "shrink_png", side_effect=RuntimeError("bad png")):
-            failed, out, _, _ = self.run_uploads([("scrapes/onion/a.png", "/x/a.png", 5, "shrink")], manager)
+            failed, out, _, _ = self.run_uploads([("scrapes/onion/a.png", "/x/a.png", 5, (250, 360))], manager)
         self.assertEqual(failed, 1)
         self.assertIn("bad png", out)
         self.assertEqual(manager.uploads, [])

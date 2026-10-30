@@ -106,8 +106,8 @@ def help_text():
   2️⃣  Toggle systems on/off (for a device, its recommended systems start on; otherwise systems whose folder already has files start on, the rest off; systems with no ROMs are hidden, press e shows them last)
   3️⃣  ROMs download, then BIOS for the chosen systems
   4️⃣  Scraped data (media, descriptions...) for the chosen systems' games is installed from the bucket's scrapes/ folder
-      for the firmware: ES-DE (ES-DE/ folder), Knulli (images/videos/manuals and gamelist.xml) or Onion (Imgs/ and
-      miyoogamelist.xml); muOS and Slot get none yet. ES-DE also gets its themes, collections and the shared settings every time.
+      for the firmware: ES-DE (ES-DE/ folder), Knulli (images/videos/manuals and gamelist.xml), Onion (Imgs/ and
+      miyoogamelist.xml), muOS (catalogue box/preview/text) or Slot (cart labels). ES-DE also gets its themes, collections and the shared settings every time.
       Then media on the card for ROMs the card doesn't have is removed, for every system, no questions asked.
 
 {bold('PICKER KEYS')}
@@ -1517,7 +1517,12 @@ MEDIA_TYPES = {"3dboxes", "backcovers", "covers", "custom", "fanart", "manuals",
 ONION_TYPE = "onion"
 ONION_ART = ("covers", "3dboxes", "screenshots")
 ONION_MAX = (250, 360)
-BUCKET_MEDIA = MEDIA_TYPES | {ONION_TYPE}
+# Slot's cart labels are made the same way (PNG fitting the cart's label size), by system, stored as
+# scrapes/<system>/slot/<ROM name>.png.
+SLOT_TYPE = "slot"
+SLOT_ART = ("covers", "3dboxes", "screenshots")
+SLOT_LABEL_MAX = {"gba": (1280, 661), "gb": (1024, 914), "gbc": (1024, 914)}
+BUCKET_MEDIA = MEDIA_TYPES | {ONION_TYPE, SLOT_TYPE}
 TEXT_FIELDS = ("name", "desc", "developer", "publisher", "genre", "players")
 UNKNOWN_FIELDS = {"developer", "publisher", "genre", "players"}  # ES-DE writes "unknown" for these
 SETTING_PREFIXES = ("Scrape", "Miximage", "Theme")  # Scrape covers Scrape* and Scraper*
@@ -1662,9 +1667,9 @@ def plan_upload(es_dir, roms, existing, remote_texts):
     roms: {system: available ROM paths}; existing: {key: size} under scrapes/;
     remote_texts: {key: text} of the bucket's text files. Returns a dict with
     files [(key, path, size)], texts [(key, text, label)], present (files already in the bucket),
-    derived [(key, source path, source size, "onion")] (Onion box art the bucket doesn't have yet,
-    made from the local image even when that image itself was already uploaded), derived_present
-    and warnings.
+    derived [(key, source path, source size, (max width, max height))] (Onion box art and Slot labels the
+    bucket doesn't have yet, made from the local image even when that image itself was already uploaded),
+    derived_present and warnings.
     """
     stems = rom_stems(roms)
     plan = {"files": [], "texts": [], "present": 0, "derived": [], "derived_present": 0, "warnings": []}
@@ -1704,7 +1709,7 @@ def plan_upload(es_dir, roms, existing, remote_texts):
             plan["texts"].append((key, dump_json(merged), f"{system} metadata (+{new} new, {len(local) - new} checked)"))
 
     media = os.path.join(es_dir, "downloaded_media")
-    art = defaultdict(dict)  # (system, ROM name) -> {media type: local path} for Onion box art
+    art = defaultdict(dict)  # (system, ROM name) -> {media type: local path} for Onion box art and Slot labels
     for system in sorted(os.listdir(media)) if os.path.isdir(media) else []:
         if not stems.get(system):
             continue
@@ -1714,15 +1719,19 @@ def plan_upload(es_dir, roms, existing, remote_texts):
                 stem = os.path.splitext(rel)[0]
                 if stem in stems[system]:
                     want_file(f"{SCRAPES}/{system}/{mtype}/{rel}", full)
-                    if mtype in ONION_ART and "/" not in stem:  # Onion's Imgs folder is flat
+                    if mtype in ONION_ART + SLOT_ART:
                         art[(system, stem)][mtype] = full
     for (system, stem), found in sorted(art.items()):
-        key = f"{SCRAPES}/{system}/{ONION_TYPE}/{stem}.png"
-        if key in existing:
-            plan["derived_present"] += 1
-        else:
-            source = found[next(t for t in ONION_ART if t in found)]
-            plan["derived"].append((key, source, os.path.getsize(source), ONION_TYPE))
+        wanted = [(ONION_TYPE, ONION_ART, ONION_MAX)] if "/" not in stem else []  # Onion's Imgs folder is flat
+        if system in SLOT_LABEL_MAX:
+            wanted.append((SLOT_TYPE, SLOT_ART, SLOT_LABEL_MAX[system]))
+        for kind, order, box in wanted:
+            key = f"{SCRAPES}/{system}/{kind}/{stem}.png"
+            source = next((found[t] for t in order if t in found), None)
+            if key in existing:
+                plan["derived_present"] += 1
+            elif source:
+                plan["derived"].append((key, source, os.path.getsize(source), box))
 
     themes = os.path.join(es_dir, "themes")
     for rel, full in walk_files(themes, skip_top=("themes-list",)) if os.path.isdir(themes) else []:
@@ -1784,7 +1793,7 @@ def upload_scrapes(args):
         print(yellow(f"  ⚠️  {w}"))
     files, texts, derived = plan["files"], plan["texts"], plan["derived"]
     if derived and not can_shrink():
-        print(yellow(f"  ⚠️  Onion box art needs Pillow or macOS sips to resize images; skipping {len(derived)} file(s)"))
+        print(yellow(f"  ⚠️  Onion box art and Slot labels need Pillow or macOS sips to resize images; skipping {len(derived)} file(s)"))
         derived = []
     print(f"\n📝 Text files to write: {bold(str(len(texts)))}")
     for _, _, label in texts[:15]:
@@ -1793,7 +1802,7 @@ def upload_scrapes(args):
         print(dim(f"     … and {len(texts) - 15} more"))
     print(f"🖼️  Files to upload (media, themes): {bold(str(len(files)))} "
           f"({human_size(sum(f[2] for f in files))}), {plan['present']} already there")
-    print(f"🧅 Onion box art to create from local images: {bold(str(len(derived)))}, {plan['derived_present']} already there")
+    print(f"🧅 Onion box art and Slot labels to create from local images: {bold(str(len(derived)))}, {plan['derived_present']} already there")
     if not files and not texts and not derived:
         print(green("Nothing to upload ✨"))
         return 0
@@ -1886,7 +1895,7 @@ class FailedUpload:
 def run_uploads(todo):
     """Upload (key, path, size[, shrink]) jobs through one shared pool of requests, so small files and the parts of
     big ones all keep the connection busy. Biggest files start first so a long one never trails at the end.
-    A 4th element means: upload path shrunk to Onion's box art size, shrunk on every core while the others upload."""
+    A 4th element (max width, max height) means: upload path shrunk to fit it, shrunk on every core while the others upload."""
     workers = upload_workers()
     print(bold(f"\n☁️  Uploading {len(todo)} file(s)") + dim(f"  {workers} requests at once"))
     config = TransferConfig(max_concurrency=workers, multipart_threshold=UPLOAD_MULTIPART_AT,
@@ -1906,7 +1915,7 @@ def run_uploads(todo):
             def shrink_and_send(job, n):
                 try:
                     art = os.path.join(tmp, f"{n}.png")
-                    shrink_png(job[1], art)
+                    shrink_png(job[1], art, job[3])
                     send(job, art, n)
                 except Exception as e:
                     done.put((job, FailedUpload(e)))
@@ -2106,6 +2115,9 @@ KNULLI_MEDIA = (
 KNULLI_SUFFIXES = {"image", "thumb", "marquee", "fanart", "boxback", "titleshot", "bezel", "boxart",
                    "cartridge", "mix", "wheel", "map", "video", "manual", "magazine", "music"}
 GAMELIST_FILES = {"esde": "gamelist.xml", "knulli": "gamelist.xml", "onion": "miyoogamelist.xml"}
+# muOS catalogue art, MUOS/info/catalogue/<system's muos_catalogue>/<folder>/<ROM name>.<ext>, and the media types that fill it
+MUOS_MEDIA = (("box", ("covers", "3dboxes")), ("preview", ("screenshots", "titlescreens")))
+SCRAPE_LAYOUTS = set(GAMELIST_FILES) | {"muos", "slot"}
 
 
 def gamelist_fields(meta):
@@ -2129,14 +2141,15 @@ def scrape_index(listing):
 
 
 def plan_scrapes(layout_name, rom_rels, listing, meta, media_root, rom_dir, present):
-    """Media downloads and gamelist entries for one system's ROMs.
+    """Media downloads, gamelist entries and text files for one system's ROMs.
 
-    rom_rels: ROM paths in the system folder; media_root: the esde media folder of the system;
-    rom_dir: the system's ROM folder on the card; present(rom): is that ROM (going to be) on the card.
-    Returns (jobs [(key, local path, size)], entries {ROM path: {gamelist tag: text}}).
+    rom_rels: ROM paths in the system folder; media_root: the system's media folder (esde's downloaded_media
+    folder, muOS's catalogue folder or Slot's Labels folder); rom_dir: the system's ROM folder on the card;
+    present(rom): is that ROM (going to be) on the card.
+    Returns (jobs [(key, local path, size)], entries {ROM path: {gamelist tag: text}}, texts [(local path, text)]).
     """
     index = scrape_index(listing)
-    jobs, entries = [], {}
+    jobs, entries, texts = [], {}, []
     for rom in sorted(rom_rels):
         if not present(rom):
             continue
@@ -2144,6 +2157,20 @@ def plan_scrapes(layout_name, rom_rels, listing, meta, media_root, rom_dir, pres
         found = index.get(stem, {})
         tags = gamelist_fields(meta.get(rom, {}))
         base = os.path.basename(stem)
+        if layout_name == "muos":  # the catalogue is flat, even when the ROM is in a subfolder
+            for folder, types in MUOS_MEDIA:
+                mtype = next((t for t in types if t in found), None)
+                if mtype:
+                    key, size = found[mtype]
+                    jobs.append((key, os.path.join(media_root, folder, base + os.path.splitext(key)[1]), size))
+            if meta.get(rom, {}).get("desc"):
+                texts.append((os.path.join(media_root, "text", base + ".txt"), meta[rom]["desc"] + "\n"))
+            continue
+        if layout_name == "slot":
+            if SLOT_TYPE in found:
+                key, size = found[SLOT_TYPE]
+                jobs.append((key, os.path.join(media_root, base + ".png"), size))
+            continue
         if layout_name == "esde":
             for mtype, (key, size) in found.items():
                 if mtype in MEDIA_TYPES:  # not the Onion-only art
@@ -2166,7 +2193,7 @@ def plan_scrapes(layout_name, rom_rels, listing, meta, media_root, rom_dir, pres
                 tags["image"] = f"./Imgs/{base}.png"
         if tags:
             entries[rom] = tags
-    return jobs, entries
+    return jobs, entries, texts
 
 
 def can_shrink():
@@ -2309,16 +2336,36 @@ def load_scrape_data(systems, esde):
     return data, extra, {k: v for k, v in texts.items() if k.startswith(f"{SCRAPES}/esde/")}
 
 
-def build_scrape_plan(layout_name, systems, data, extra, extra_texts, rom_rels, dest_of, es_dir, present):
-    """Everything a sync installs from scrapes/: media jobs, gamelist entries per file, ES-DE extras."""
+def read_text(path):
+    with open(path, encoding="utf-8", newline="") as f:
+        return f.read()
+
+
+def media_root_of(layout_name, system, base, es_dir):
+    """The folder a system's scraped media goes in, for layouts that keep it apart from the ROMs."""
+    if layout_name == "muos":
+        return os.path.join(base, "MUOS", "info", "catalogue", system["muos_catalogue"])
+    if layout_name == "slot":
+        return os.path.join(base, "Labels", system["folders"]["slot"])
+    return os.path.join(es_dir, "downloaded_media", system["bucket"])
+
+
+def build_scrape_plan(layout_name, systems, data, extra, extra_texts, rom_rels, dest_of, es_dir, present, base):
+    """Everything a sync installs from scrapes/: media jobs, gamelist entries per file, text files, ES-DE extras."""
     plan = {"jobs": [], "gamelists": defaultdict(dict), "extras": [], "writes": []}
     for s in systems:
         listing, meta = data[s["bucket"]]
         rom_dir = dest_of(s)
-        media_root = os.path.join(es_dir, "downloaded_media", s["bucket"])
-        jobs, entries = plan_scrapes(layout_name, rom_rels.get(s["bucket"], ()), listing, meta, media_root, rom_dir,
-                                     lambda rom, d=rom_dir: present(os.path.join(d, rom)))
+        media_root = media_root_of(layout_name, s, base, es_dir)
+        jobs, entries, texts = plan_scrapes(layout_name, rom_rels.get(s["bucket"], ()), listing, meta, media_root,
+                                            rom_dir,
+                                            # Slot takes ROMs flat, whatever folder they are in in the bucket
+                                            lambda rom, d=rom_dir: present(os.path.join(
+                                                d, os.path.basename(rom) if layout_name == "slot" else rom)))
         plan["jobs"] += plan_downloads(jobs)
+        for path, text in texts:  # only the ones that would change
+            if not os.path.exists(path) or read_text(path) != text:
+                plan["writes"].append((path, text))
         if entries:
             gl = (os.path.join(es_dir, "gamelists", s["bucket"]) if layout_name == "esde" else rom_dir)
             plan["gamelists"][os.path.join(gl, GAMELIST_FILES[layout_name])].update(entries)
@@ -2331,7 +2378,7 @@ def describe_scrape_plan(plan):
     jobs = plan["jobs"] + plan["extras"]
     print(f"🖼️  Scraped data: {bold(str(len(jobs)))} file(s) to download "
           f"({human_size(sum(j[2] or 0 for j in jobs))}), {len(plan['gamelists'])} gamelist file(s) to update"
-          + (f", {len(plan['writes'])} collection/settings file(s)" if plan["writes"] else ""))
+          + (f", {len(plan['writes'])} text/collection/settings file(s)" if plan["writes"] else ""))
 
 
 def apply_scrape_plan(plan, base):
@@ -2364,6 +2411,8 @@ def stale_media(layout_name, systems, roms_dir, es_dir):
     """Media files on the card whose ROM isn't in the system's ROM folder, for every system in the
     layout (not just the ones being synced). Systems with no ROM folder are left alone."""
     stale, seen = [], set()
+    if layout_name not in ("esde", "knulli", "onion"):  # muOS's catalogue and Slot's labels may hold art made elsewhere
+        return stale
     for s in systems:
         folder = s["folders"].get(layout_name)
         rom_dir = os.path.join(roms_dir, folder) if folder else None
@@ -2384,7 +2433,7 @@ def stale_media(layout_name, systems, roms_dir, es_dir):
                     if name not in stems and not any(name.endswith("-" + x) and name[:-len(x) - 1] in stems
                                                      for x in KNULLI_SUFFIXES):
                         stale.append(full)
-        else:
+        elif layout_name == "onion":
             base = os.path.join(rom_dir, "Imgs")
             stale += [full for rel, full in walk_files(base) if os.path.splitext(os.path.basename(rel))[0] not in stems] \
                 if os.path.isdir(base) else []
@@ -2716,7 +2765,7 @@ def sync():
     if extras:
         print(f"🗑️  Local ROMs no longer in the selection: {bold(str(len(extras)))}")
     es_dir = os.path.join(base, "ES-DE")
-    scrapes = layout_name in GAMELIST_FILES  # muOS and Slot have no scraped data support yet
+    scrapes = layout_name in SCRAPE_LAYOUTS
     scraped = {}
 
     def scrape_plan(present):
@@ -2725,7 +2774,9 @@ def sync():
             scraped["data"] = load_scrape_data(chosen, layout_name == "esde")
             scraped["rels"] = {s["bucket"]: [k.split("/", 1)[1] for k in available(s) if k in listings[s["bucket"]]]
                                for s in chosen}
-        return build_scrape_plan(layout_name, chosen, *scraped["data"], scraped["rels"], dest_of, es_dir, present)
+        if unzip:  # a ROM that's extracted from its archive is on the card under another extension
+            present = lambda path, exists=present: exists(path) or archive_extracted(path)  # noqa: E731
+        return build_scrape_plan(layout_name, chosen, *scraped["data"], scraped["rels"], dest_of, es_dir, present, base)
 
     if args.dry_run:
         print(yellow("\n🧪 Dry run — nothing downloaded or deleted"))
