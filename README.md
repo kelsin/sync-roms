@@ -103,19 +103,21 @@ Or give no folder at all. The current directory is used as `BASE_DIR`, so you ca
 sync-roms
 ```
 
-The ROMs and BIOS folders inside `BASE_DIR` come from the layout you pick (the `layouts` entry in `src/sync_roms/data/layouts.json`):
+You pick a device, then the firmware it runs (a device with only one isn't asked). The firmware decides the ROMs and BIOS folders inside `BASE_DIR` (the `layouts` entry in `src/sync_roms/data/layouts.json`), and each device lists its firmwares in `devices.json`, the first being the default:
 
-| Layout | ROMs / BIOS folders | Default for |
+| Firmware | ROMs / BIOS folders | Notes |
 | --- | --- | --- |
-| `esde` | `ROMs/` `BIOS/` | Anbernic RG Cube, Retroid Pocket Classic, Retroid Pocket 6, Retroid Pocket Nova, Retroid Pocket Flip 2 |
-| `knulli` | `roms/` `bios/` (SD card SHARE partition, `/userdata`) | Miyoo Flip V2, Anbernic RG CubeXX, RG40XX V, RG35XX H, RG SP |
+| `esde` | `ROMs/` `BIOS/` | Android devices with ES-DE |
+| `knulli` | `roms/` `bios/` (SD card SHARE partition, `/userdata`) | Default for the Anbernic H700, RG Vita Pro and Miyoo Flip V2 handhelds |
+| `muos` | `ROMS/` `MUOS/bios/` | [muOS](https://muos.dev/) on the Anbernic H700 handhelds, RG CubeXX and RG Vita Pro. Folder names are matched ignoring case and separators |
+| `slot` | `Games/` `BIOS/` | [slot](https://slot-cfw.fyi) on the RG SP, RG34XX, RG34XX SP, RG35XX SP, RG35XX Plus, RG28XX and RG35XX H. Game Boy, Game Boy Color and Game Boy Advance only. ROMs are extracted from their archives and go straight into the system folder, never subfolders |
 | `onion` | `Roms/` `BIOS/` | Miyoo Mini Flip |
 
 Folder names are case-sensitive. Folders that don't exist are shown as
 "will be created" and are created after you confirm. If they can't be created
 (no permission), the script stops before asking.
 
-The device and layout you pick are remembered by the name of `BASE_DIR`
+The device and firmware you pick are remembered by the name of `BASE_DIR`
 (e.g. `SHARE`) in `cards.json` in your user data folder
 (`$XDG_DATA_HOME/sync-roms` if set, otherwise `~/.sync-roms`, on macOS and Linux;
 `%APPDATA%\sync-roms` on Windows). Next time you
@@ -125,11 +127,11 @@ same name if they should share settings.
 
 Then:
 
-1. **Pick a device and a layout** — type to filter, `↑/↓` to move, `Enter` to continue,
+1. **Pick a device and a firmware** — type to filter, `↑/↓` to move, `Enter` to continue,
    `Esc` to go back. Each device knows the systems that run well on it (`systems` in
-   `src/sync_roms/data/device-systems.json`, adjustable with your own overlay; only those are listed) and its default layout (`layout` in
-   `src/sync_roms/data/devices.json`, see `layouts`), which is highlighted in the layout list. Or choose Full (every system) and any layout. Systems with no
-   folder in the chosen layout are skipped.
+   `src/sync_roms/data/device-systems.json`, adjustable with your own overlay; only those are listed) and its firmwares (`firmwares` in
+   `src/sync_roms/data/devices.json`, see `layouts`; the first is highlighted). Or choose Full (every system) and any firmware. Systems with no
+   folder in the chosen firmware are skipped.
 2. **Toggle systems** — for a device, its recommended systems that have ROMs start on.
    Otherwise systems whose local folder already has files start on
    (dotfiles ignored), everything else starts off. Systems with no downloadable
@@ -160,11 +162,13 @@ Then:
 5. Scraped data for the chosen systems' games is installed from the bucket's `scrapes/` folder (see
    [Scraped data](#scraped-data---upload-scrapes---clean-scrapes)), converted for the layout:
 
-   | Layout | Media | Metadata |
+   | Firmware | Media | Metadata |
    | --- | --- | --- |
    | `esde` | `ES-DE/downloaded_media/<system>/<type>/…` (every type) | `ES-DE/gamelists/<system>/gamelist.xml` |
    | `knulli` | `<system>/images`, `videos`, `manuals`, named `Game-image.png`, `-thumb`, `-marquee`, `-fanart`, `-boxback`, `-titleshot`, `-video`, `-manual` | `<system>/gamelist.xml` with name, description, rating, date and the media tags |
    | `onion` | `<system>/Imgs/Game.png`, the 250x360 box art prepared at upload | `<system>/miyoogamelist.xml` with name and image |
+
+   muOS and Slot get no scraped data yet.
 
    Knulli's main image is the miximage, or the screenshot if there is none. Onion's picture is made
    when the data is uploaded: `--upload-scrapes` resizes the cover (then the 3D box, then the
@@ -370,6 +374,7 @@ It is meant for preparing a downloaded rom pack before you upload it to the buck
 - Some systems share a local folder on a device (Onion: `WS` = WonderSwan + Color,
   `NGP` = Neo Geo Pocket + Color). A folder's expected files are the
   union of all those systems' lists, so syncing one never offers the other's ROMs for deletion.
+- Slot can't read archives or subfolders, so a Slot sync extracts each downloaded `.zip` (and `.7z`, which needs `7z`, see `--install-tools`) into the system folder and deletes the archive. It assumes the archive is named like the ROM inside; an archive whose ROM has another name is downloaded again each sync.
 - Every BIOS file listed for a chosen system is downloaded; there is no required/optional distinction.
   BIOS lists come from the ES-DE default libretro cores, so they may not match what Knulli
   or Onion use; on Knulli check Game Settings > Missing Bios Check.

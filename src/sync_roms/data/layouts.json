@@ -16,5 +16,18 @@
     "roms_dir": "Roms",
     "bios_dir": "BIOS",
     "note": "Miyoo Mini family (SigmaStar SSD202D). Card root is the FAT32 SD card; Onion creates missing Roms/ folders on first install. Folder names are case sensitive, differ from the stock Miyoo card, and are not ES-DE or Batocera names. Subfolders work only one level deep (e.g. Roms/GB/Hacks). BIOS files go in the root BIOS/ folder unless a system says otherwise. Systems with onion = null have no verified Onion folder. Source: https://onionui.github.io/docs/emulators/folders"
+  },
+  "muos": {
+    "label": "muOS",
+    "roms_dir": "ROMS",
+    "bios_dir": "MUOS/bios",
+    "note": "MustardOS on Anbernic H700 handhelds (and the RG Vita Pro). Card root is the games partition (exFAT or FAT32). muOS matches folder names to systems ignoring case, spaces, hyphens and underscores, so the names here are the Knulli ones where muOS knows them. Systems with muos = null have no muOS system. Source: https://muos.dev/systems/cores"
+  },
+  "slot": {
+    "label": "Slot",
+    "roms_dir": "Games",
+    "bios_dir": "BIOS",
+    "unzip": true,
+    "note": "slot, a Game Boy-centric frontend (GB, GBC and GBA only) for the Anbernic RG SP and other H700 handhelds. Card root is the SD card slot runs from. ROMs must be unzipped and sit directly in their system folder, so a sync extracts archives and ignores subfolders. Source: https://slot-cfw.fyi"
   }
 }
