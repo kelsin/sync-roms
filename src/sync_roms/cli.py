@@ -79,6 +79,8 @@ def help_text():
   {yellow('--upload')} [{cyan('DIR')}]   ☁️  upload the ROMs in DIR (no DIR: the current directory) and its subfolders to the bucket folder of a system you pick
                       {dim('(the system is guessed from the folder name; files with the same size are skipped, a different size overwrites after you confirm;')}
                       {dim('uploads in parallel, several requests per CPU core, with the ROMS_WRITE_PROFILE profile; works with --dry-run)')}
+  {yellow('--replace')}   {dim('with --upload: make the bucket folder match DIR — renamed files are moved in the bucket by content, new and changed ones uploaded,')}
+                      {dim('and the bucket files left over (not renames) are listed so you pick which to delete and which to keep')}
   {yellow('--diff')} [{cyan('DIR')}]   🔍 list the ROMs in only one of DIR (no DIR: the current directory) and the bucket folder of a system you pick, ignoring renames
                       {dim('(same path and size is the same file; the rest are matched by content: the CRCs inside zips, read from the zip index of just those files)')}
   {yellow('-c, --clean-scrapes')}   🧹 remove scrapes/ media and metadata for ROMs that aren't in the bucket at all (asks first, no folder needed)
@@ -2238,7 +2240,9 @@ def upload_command(args):
         print(yellow("👋 Cancelled."))
         return 0
     bucket = systems[i]["bucket"]
-    print(bold(f"☁️  Upload {systems[i]['name']}") + dim(f"  read={PROFILE}  write={WRITE_PROFILE}  {folder} → s3://{BUCKET}/{bucket}/"))
+    print(bold(f"☁️  {'Replace' if args.replace else 'Upload'} {systems[i]['name']}") + dim(f"  read={PROFILE}  write={WRITE_PROFILE}  {folder} → s3://{BUCKET}/{bucket}/"))
+    if args.replace:
+        return replace_command(args, folder, systems[i])
     try:
         print("☁️  Listing what's already there...")
         existing = list_sizes(bucket + "/")
@@ -2345,28 +2349,158 @@ def list_with_etags(prefix):
             if not o["Key"].endswith("/")}
 
 
-def plan_diff(local, remote, local_print, remote_print):
-    """(only local, only bucket) lists of relative paths, ignoring renames.
+def match_content(local, remote, local_print, remote_print, differs=None):
+    """([(local path, bucket path)] with the same content, only local, only bucket) lists, ignoring names.
 
     local: {path: size}; remote: {path: (size, etag)}. A file with the same path and size on both sides is the same
-    without reading it; the rest are matched by content. local_print(path) / remote_print(path, size, etag)
-    return a fingerprint, and are only called for the files left over.
+    without reading it; the rest are matched by content, a file with the same path first. local_print(path) /
+    remote_print(path, size, etag) return a fingerprint, and are only called for the files left over.
+    differs(path, etag), if given, is asked about same-path same-size files and returns True when their bytes are
+    known to differ; those are then matched by content too.
     """
-    left_local = sorted(p for p, size in local.items() if p not in remote or remote[p][0] != size)
-    left_remote = sorted(p for p, (size, _) in remote.items() if p not in local or local[p] != size)
     with ThreadPoolExecutor(WORKERS) as ex:
+        same = [p for p, size in local.items() if p in remote and remote[p][0] == size]
+        suspect = {p for p, d in zip(same, ex.map(lambda p: differs(p, remote[p][1]), same)) if d} if differs else set()
+        left_local = sorted(p for p, size in local.items() if p not in remote or remote[p][0] != size or p in suspect)
+        left_remote = sorted(p for p, (size, _) in remote.items() if p not in local or local[p] != size or p in suspect)
         local_prints = list(ex.map(local_print, left_local))
         remote_prints = list(ex.map(lambda p: remote_print(p, *remote[p]), left_remote))
     unmatched = list(zip(left_remote, remote_prints))
-    only_local = []
+    matched, only_local = [], []
     for path, fp in zip(left_local, local_prints):
-        for i, (_, other) in enumerate(unmatched):
-            if same_content(fp, other):
-                del unmatched[i]
+        candidates = sorted(range(len(unmatched)), key=lambda i: unmatched[i][0] != path)
+        for i in candidates:
+            if same_content(fp, unmatched[i][1]):
+                matched.append((path, unmatched.pop(i)[0]))
                 break
         else:
             only_local.append(path)
-    return only_local, [p for p, _ in unmatched]
+    return matched, only_local, [p for p, _ in unmatched]
+
+
+def plan_diff(local, remote, local_print, remote_print):
+    """(only local, only bucket) lists of relative paths, ignoring renames. Arguments as in match_content."""
+    _, only_local, only_bucket = match_content(local, remote, local_print, remote_print)
+    return only_local, only_bucket
+
+
+def plan_replace(local, remote, local_print, remote_print, differs=None):
+    """(renames, new, changed, only bucket) for making the bucket folder match the local one.
+
+    renames: [(bucket path, local path)] with the same content under another name. changed: paths on both sides
+    with different content. Arguments as in match_content.
+    """
+    matched, only_local, only_bucket = match_content(local, remote, local_print, remote_print, differs)
+    renames = [(r, l) for l, r in matched if l != r]
+    targets = {l for _, l in renames}
+    changed = [p for p in only_local if p in remote]
+    new = [p for p in only_local if p not in remote]
+    # an unmatched bucket file under a rename's new name or a changed file's name is overwritten, not left behind
+    only_bucket = [p for p in only_bucket if p not in targets and p not in local]
+    return renames, new, changed, only_bucket
+
+
+def local_sizes(folder):
+    """{relative path: size} of the ROM files under folder."""
+    sizes = {}
+    for dirpath, files in walk_roms(folder, keep_dotfiles=True):
+        for f in files:
+            path = os.path.join(dirpath, f)
+            sizes[os.path.relpath(path, folder).replace(os.sep, "/")] = os.path.getsize(path)
+    return sizes
+
+
+def move_keys(moves):
+    """Move bucket objects server-side: copy each (old key, new key), then delete the old one. Returns the failure count."""
+    client = s3_client(WRITE_PROFILE)
+
+    def move(job):
+        old, new = job
+        try:
+            client.copy({"Bucket": BUCKET, "Key": old}, BUCKET, new)
+            client.delete_object(Bucket=BUCKET, Key=old)
+            return job, None
+        except (ClientError, BotoCoreError) as e:
+            return job, e
+
+    failed = 0
+    print(bold(f"\n🚚 Moving {len(moves)} renamed file(s)"))
+    with ThreadPoolExecutor(WORKERS) as ex:
+        for i, (job, error) in enumerate(ex.map(move, moves), 1):
+            prog = dim(f"[{i}/{len(moves)}]")
+            if error is None:
+                print(f"  {prog} ✅ {job[0]} → {job[1]}")
+            else:
+                failed += 1
+                print(f"  {prog} ❌ {red(job[0])}: {str(error).strip()}")
+    return failed
+
+
+def replace_command(args, folder, system):
+    """Make a bucket folder match a local one: move renamed files, upload new and changed ones, and delete the rest
+    that you pick."""
+    bucket = system["bucket"]
+    local = local_sizes(folder)
+    try:
+        print("☁️  Listing what's already there...")
+        remote = list_with_etags(bucket + "/")
+        print("🔍 Matching files by content...")
+        renames, new, changed, only_bucket = plan_replace(
+            local, remote, lambda p: local_fingerprint(os.path.join(folder, *p.split("/"))),
+            lambda p, size, etag: bucket_fingerprint(f"{bucket}/{p}", size, etag),
+            lambda p, etag: "-" not in etag and file_md5(os.path.join(folder, *p.split("/"))) != etag.strip('"'))
+    except (ClientError, BotoCoreError) as e:
+        raise SystemExit(red(f"❌ {e}"))
+    print(f"\n💿 New: {bold(str(len(new)))} ({human_size(sum(local[p] for p in new))})")
+    print(f"♻️  Different content, would overwrite: {bold(str(len(changed)))} ({human_size(sum(local[p] for p in changed))})")
+    print(f"🚚 Renamed, would move in the bucket: {bold(str(len(renames)))}")
+    print(f"🗑️  Only in the bucket, not renames: {bold(str(len(only_bucket)))} ({human_size(sum(remote[p][0] for p in only_bucket))})")
+    for old, newname in renames[:10]:
+        print(dim(f"     {old} → {newname}"))
+    if len(renames) > 10:
+        print(dim(f"     … and {len(renames) - 10} more"))
+    for p in changed[:10]:
+        print(yellow(f"     overwrite {bucket}/{p} {dim(human_size(local[p]))}"))
+    if len(changed) > 10:
+        print(yellow(f"     … and {len(changed) - 10} more"))
+    if args.dry_run:
+        print(yellow("\n🧪 Dry run — nothing changed"))
+        for p in new[:20]:
+            print(f"  {bucket}/{p} {dim(human_size(local[p]))}")
+        if len(new) > 20:
+            print(dim(f"  … and {len(new) - 20} more"))
+        for p in only_bucket[:20]:
+            print(red(f"  would ask about deleting {bucket}/{p} ") + dim(human_size(remote[p][0])))
+        if len(only_bucket) > 20:
+            print(dim(f"  … and {len(only_bucket) - 20} more"))
+        return 0
+    delete = []
+    if only_bucket:
+        picked = filter_list(f"🗑️  Delete from s3://{BUCKET}/{bucket}/ (they match no local file) — untick to keep",
+                             only_bucket, multi=True, initial=[True] * len(only_bucket),
+                             extras=[[(human_size(remote[p][0]), "dim")] for p in only_bucket],
+                             hint="type to filter · ↑/↓ move · Tab toggle · ^A toggle all shown · Enter done")
+        delete = [f"{bucket}/{p}" for p, on in zip(only_bucket, picked) if on]
+    uploads = [(f"{bucket}/{p}", os.path.join(folder, *p.split("/")), local[p]) for p in new + changed]
+    if not (renames or uploads or delete):
+        print(green("\nNothing to do ✨"))
+        return 0
+    print(f"\nThis will move {len(renames)}, upload {len(uploads)} ({len(changed)} overwriting), "
+          f"delete {len(delete)} and keep {len(only_bucket) - len(delete)} in s3://{BUCKET}/{bucket}/")
+    if not confirm("☁️  Go ahead?", default=False):
+        print(yellow("👋 Cancelled."))
+        return 0
+    failed = move_keys([(f"{bucket}/{old}", f"{bucket}/{n}") for old, n in renames]) if renames else 0
+    failed += run_uploads(uploads) if uploads else 0
+    if delete and failed:
+        print(yellow(f"\n⚠️  {failed} failure(s) above, so nothing was deleted; run it again once they are sorted"))
+    elif delete:
+        errors = delete_keys(delete)
+        failed += len(errors)
+        for e in errors:
+            print(red(f"  ❌ {e.get('Key')}: {e.get('Message')}"))
+    print(green("\n🎉 Done!") if not failed else red(f"\n⚠️  Done with {failed} failure(s)"))
+    return 1 if failed else 0
 
 
 def diff_command(args):
@@ -2383,11 +2517,7 @@ def diff_command(args):
         return 0
     bucket = systems[i]["bucket"]
     print(bold(f"🔍 Compare {systems[i]['name']}") + dim(f"  {folder} ↔ s3://{BUCKET}/{bucket}/"))
-    local = {}
-    for dirpath, files in walk_roms(folder, keep_dotfiles=True):
-        for f in files:
-            path = os.path.join(dirpath, f)
-            local[os.path.relpath(path, folder).replace(os.sep, "/")] = os.path.getsize(path)
+    local = local_sizes(folder)
     try:
         remote = list_with_etags(bucket + "/")
         only_local, only_bucket = plan_diff(
@@ -3049,6 +3179,7 @@ def sync():
     ap.add_argument("-u", "--upload-scrapes", action="store_true")
     ap.add_argument("-c", "--clean-scrapes", action="store_true")
     ap.add_argument("--upload", nargs="?", const="")
+    ap.add_argument("--replace", action="store_true")
     ap.add_argument("--diff", nargs="?", const="")
     ap.add_argument("--m3u", nargs="?", const="")
     ap.add_argument("--chd", nargs="?", const="")
@@ -3071,6 +3202,8 @@ def sync():
         if args.install_tools:
             return install_tools_command()
         return chd_command(args) if args.chd is not None else m3u_command(args)
+    if args.replace and args.upload is None:
+        raise SystemExit(red("❌ --replace only works together with --upload"))
     ensure_bucket()
     mirror_mode = args.mirror is not None or bool(args.use_mirror) or args.clear_mirror
     if args.edit + args.upload_scrapes + args.clean_scrapes + (args.upload is not None) + (args.diff is not None) + mirror_mode > 1:
