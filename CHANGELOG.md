@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.10.0](https://github.com/kelsin/sync-roms/compare/v0.9.0...v0.10.0) (2026-10-30)
+
+
+### Features
+
+* **chd:** warn when no folder is named after a chd system ([#23](https://github.com/kelsin/sync-roms/issues/23)) ([e4447e3](https://github.com/kelsin/sync-roms/commit/e4447e3fdfc0760145bd13b2f636891f2a2cbb33))
+* **progress:** show the chd progress bar for uploads and downloads ([#27](https://github.com/kelsin/sync-roms/issues/27)) ([e96272e](https://github.com/kelsin/sync-roms/commit/e96272e529cf894cb22e0af10f4daa7620afb6b7))
+* **s3:** support a custom s3 endpoint and settings/env overrides ([#26](https://github.com/kelsin/sync-roms/issues/26)) ([7de206d](https://github.com/kelsin/sync-roms/commit/7de206d497faaa3af876114314310215843a2c7b))
+
+
+### Bug Fixes
+
+* **upload:** skip system files like .DS_Store but keep dot-named roms ([#25](https://github.com/kelsin/sync-roms/issues/25)) ([9c4273c](https://github.com/kelsin/sync-roms/commit/9c4273cd74e1a8da9cfec07bcc4405144abdb676))
+
 ## [0.9.0](https://github.com/kelsin/sync-roms/compare/v0.8.0...v0.9.0) (2026-10-29)
 
 
