@@ -237,7 +237,7 @@ def chd_roots(root, folders):
 def fix_playlists(roots, dry_run):
     """Run the --m3u pass on each system folder that has playlists."""
     for sysroot, system in roots.items():
-        if system["chd"]["mode"] != "extract" and system["chd"].get("m3u", True):
+        if system["chd"].get("m3u", True):
             m3u.m3u_command(SimpleNamespace(m3u=sysroot, dry_run=dry_run))
 
 
