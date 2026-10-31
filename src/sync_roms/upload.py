@@ -18,8 +18,9 @@ UPLOAD_PART = 32 * 1024 * 1024
 
 
 def upload_workers():
-    """Requests in flight at once. Uploads wait on the network, not the CPU, so run several per core."""
-    return min(64, 4 * (os.cpu_count() or 4))
+    """Requests in flight at once. Uploads wait on the network, not the CPU, so run several per core.
+    Capped low: dozens of simultaneous fresh TLS handshakes have crashed OpenSSL's certificate check."""
+    return min(16, 4 * (os.cpu_count() or 4))
 
 
 def plan_rom_upload(root, bucket, existing):
@@ -68,6 +69,11 @@ def run_uploads(todo):
     big ones all keep the connection busy. Biggest files start first so a long one never trails at the end.
     A 4th element (max width, max height) means: upload path shrunk to fit it, shrunk on every core while the others upload."""
     workers = upload_workers()
+    client = s3.s3_client(runtime.WRITE_PROFILE, connections=workers)
+    try:
+        client.head_bucket(Bucket=runtime.BUCKET)  # load the CA store and open one connection before the parallel handshakes
+    except (ClientError, BotoCoreError):
+        pass
     print(ui.bold(f"\n☁️  Uploading {len(todo)} file(s)") + ui.dim(f"  {workers} requests at once"))
     config = TransferConfig(max_concurrency=workers, multipart_threshold=UPLOAD_MULTIPART_AT,
                             multipart_chunksize=UPLOAD_PART)
@@ -77,7 +83,7 @@ def run_uploads(todo):
     bar = ui.ProgressBar(len(todo), moved.fraction, sum(moved.size))
     try:
         with tempfile.TemporaryDirectory() as tmp, ThreadPoolExecutor(os.cpu_count() or 4) as shrinkers, \
-                create_transfer_manager(s3.s3_client(runtime.WRITE_PROFILE, connections=workers), config) as manager:
+                create_transfer_manager(client, config) as manager:
             def send(job, path, n):
                 manager.upload(path, runtime.BUCKET, job[0],
                                {"ContentType": mimetypes.guess_type(path)[0] or "application/octet-stream"},

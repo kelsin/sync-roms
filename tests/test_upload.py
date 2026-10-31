@@ -66,7 +66,7 @@ class PlanRomUploadTest(unittest.TestCase):
 
 class UploadWorkersTest(unittest.TestCase):
     def test_scales_with_cores_and_is_capped(self):
-        for cores, expected in ((2, 8), (10, 40), (64, 64), (None, 16)):
+        for cores, expected in ((2, 8), (10, 16), (64, 16), (None, 16)):
             with mock.patch.object(os, "cpu_count", return_value=cores):
                 self.assertEqual(upload.upload_workers(), expected)
 
@@ -109,6 +109,7 @@ class RunRomUploadsTest(unittest.TestCase):
             ("/x/a.zip", "test-bucket", "gba/a.zip", {"ContentType": "application/zip"}),
         ])
         client.assert_called_once_with(runtime.WRITE_PROFILE, connections=upload.upload_workers())
+        client.return_value.head_bucket.assert_called_once_with(Bucket="test-bucket")
         config = create.call_args[0][1]
         self.assertEqual(config.max_request_concurrency, upload.upload_workers())
         self.assertEqual(config.multipart_threshold, upload.UPLOAD_MULTIPART_AT)
