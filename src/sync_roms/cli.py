@@ -353,19 +353,28 @@ def saved_setup(saved, devices, layouts):
     return (device, saved["layout"]) if device and saved["layout"] in device["firmwares"] else None
 
 
-def choose_setup(manifest):
+def system_applies(system, device, layout_name):
+    """Whether a system is synced for a device (None for Full) and layout: the device runs it and the layout has a folder for it."""
+    return bool(system["folders"].get(layout_name)) and (device is None or system["bucket"] in device["systems"])
+
+
+def choose_setup(manifest, current=None):
     """Ask for the device, then its firmware (Esc steps back; a single firmware isn't asked).
+    current: a (device dict or None for Full, layout name) the cursors start on.
     Returns (device dict or None for Full, layout name)."""
     devices, layouts = manifest["devices"], manifest["layouts"]
     while True:
-        choice = pick_device(devices)
+        cursor = 0
+        if current:
+            cursor = next((i for i, d in enumerate(devices) if d is current[0]), len(devices))
+        choice = pick_device(devices, cursor)
         if choice is None:
             raise SystemExit(yellow("👋 Cancelled."))
         device = choice if isinstance(choice, dict) else None
         offered = device_layouts(device, layouts) if device else layouts
         if len(offered) == 1:
             return device, next(iter(offered))
-        layout = pick_layout(offered, next(iter(offered)))
+        layout = pick_layout(offered, current[1] if current else next(iter(offered)))
         if layout is not None:
             return device, layout
 
@@ -781,6 +790,7 @@ def toggle_full_system(s):
 
 
 FULL_KEY = "\x06"  # ^F
+SETUP_KEY = "\x04"  # ^D
 FULL_HINT = "type to filter · ↑/↓ move · Enter open · ^F toggle {what} · Esc back"
 
 
@@ -828,6 +838,7 @@ def edit_manifest():
                 print(yellow(f"⚠️  Set {game_set['name']}: unknown system {g.get('system')!r}, skipped"), file=sys.stderr)
 
     targets = {}  # None (the core list) or a card name -> editing state
+    new_cards = set()  # cards made in this session
 
     def core_now():
         """The core list as it stands in this session."""
@@ -953,14 +964,46 @@ def edit_manifest():
         except SystemExit:
             return
         targets[name] = new_target(name, {}, setup)
+        new_cards.add(name)
         edit_target(targets[name], True)
+
+    def change_setup(name):
+        """Pick a different device and firmware for a card; saved with the other changes."""
+        t = targets.get(name)
+        saved = t["setup"] if t and t["setup"] else saved_setup(load_cards().get(name), manifest["devices"], manifest["layouts"])
+        try:
+            setup = choose_setup(manifest, saved)
+        except SystemExit:
+            return
+        if name not in targets:
+            targets[name] = new_target(f"💳 {name}", card_games(name))
+        targets[name]["setup"] = setup
+        for sys_ in targets[name]["data"]["systems"]:
+            if not system_applies(sys_, *setup):
+                sys_["games"], sys_["full_system"] = [], False
+
+    def setup_extra(name):
+        """The card's device and firmware as a row suffix; a pending change in cyan."""
+        t = targets.get(name)
+        pending = bool(t and t["setup"])
+        setup = t["setup"] if pending else saved_setup(load_cards().get(name), manifest["devices"], manifest["layouts"])
+        if not setup:
+            return [("  ⚠️  no device set", "red")]
+        return [(f"  {setup[0]['name'] if setup[0] else 'Full'} · {manifest['layouts'][setup[1]]['label']}",
+                 "cyan" if pending else "dim")]
 
     while True:
         cards = sorted(set(load_cards()) | {k for k in targets if k is not None})
         options = ["🏠 Core (every card)"] + [f"💳 {name}" for name in cards] + ["➕ New card"]
-        i = filter_list("✏️  What do you want to edit? (Esc = finish)", options)
+        extras = [[]] + [setup_extra(name) for name in cards] + [[]]
+        i = filter_list("✏️  What do you want to edit? (Esc = finish)", options, extras=extras, hotkeys=(SETUP_KEY,),
+                        hint="type to filter · ↑/↓ move · Enter open · ^D change a card's device/firmware · Esc finish")
         if i is None:
             break
+        if isinstance(i, tuple):
+            if 0 < i[1] < len(options) - 1:
+                change_setup(cards[i[1] - 1])
+            continue
         if i == 0:
             open_target(None, "🏠 Core", False)
         elif i == len(options) - 1:
@@ -973,9 +1016,9 @@ def edit_manifest():
         print(yellow("👋 No changes, nothing saved."))
         return 0
     print(bold("\n📝 Changes"))
-    for t in changed.values():
+    for key, t in changed.items():
         added, removed = target_changes(t)
-        print(bold(f"  {t['label']}") + (dim("  (new card)") if t["setup"] else ""))
+        print(bold(f"  {t['label']}") + (dim("  (new card)") if key in new_cards else dim("  (device/firmware)") if t["setup"] else ""))
         for label, group, sign, col in (("added", added, "➕", green), ("removed", removed, "➖", red)):
             for esde, ks in group.items():
                 print(col(f"  {sign} {esde}: {len(ks)} {label}"))
