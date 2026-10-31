@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.12.0](https://github.com/kelsin/sync-roms/compare/v0.11.0...v0.12.0) (2026-10-31)
+
+
+### Features
+
+* **diff:** compare a local folder with its bucket folder by content, ignoring renames ([#36](https://github.com/kelsin/sync-roms/issues/36)) ([36f7169](https://github.com/kelsin/sync-roms/commit/36f7169a9d512aec3f26d245e394da2d2fd62a60))
+* **upload:** add --replace to make a bucket folder match a local one ([#38](https://github.com/kelsin/sync-roms/issues/38)) ([5a6430a](https://github.com/kelsin/sync-roms/commit/5a6430a2d243e38d7979949fd1902a7ab67841a0))
+
 ## [0.11.0](https://github.com/kelsin/sync-roms/compare/v0.10.1...v0.11.0) (2026-10-30)
 
 
