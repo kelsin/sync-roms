@@ -121,7 +121,7 @@ class MirrorListTest(unittest.TestCase):
 
 class SafeJoinTest(unittest.TestCase):
     def test_rejects_keys_that_escape_the_base(self):
-        for rel in ("../x", "a/../../x", "/etc/passwd", ""):
+        for rel in ("../x", "a/../../x", "/etc/passwd", "", "a\\..\\..\\x"):
             with self.assertRaises(ValueError, msg=rel):
                 s3.safe_join("/base", rel)
 

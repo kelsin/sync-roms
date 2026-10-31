@@ -330,7 +330,7 @@ def sync():
     scrapes = layout_name in scrape_plan.SCRAPE_LAYOUTS
     scraped = {}
 
-    def scrape_plan(present):
+    def build_plan(present):
         if not scraped:
             print("🖼️  Reading scraped data...")
             scraped["data"] = scrape_plan.load_scrape_data(chosen, layout_name == "esde")
@@ -350,7 +350,7 @@ def sync():
         for path in extras:
             print(f"  {ui.red('would delete')} {path}")
         if scrapes:
-            scrape_plan.describe_scrape_plan(scrape_plan(lambda path: True))
+            scrape_plan.describe_scrape_plan(build_plan(lambda path: True))
             print(f"🧹 Media on the card for ROMs it doesn't have: {len(scrape_plan.stale_media(layout_name, manifest['systems'], roms_dir, es_dir, base))} file(s) to remove")
         if layout_name == "esde":
             clean.clean_android_media(base, card, True, args.ask)
@@ -377,7 +377,7 @@ def sync():
             print(ui.red(f"  ❌ {os.path.relpath(path, roms_dir)}: {error}"))
     stale = []
     if scrapes:
-        plan = scrape_plan(os.path.exists)
+        plan = build_plan(os.path.exists)
         scrape_plan.describe_scrape_plan(plan)
         failed += scrape_plan.apply_scrape_plan(plan, base)
         stale = scrape_plan.stale_media(layout_name, manifest["systems"], roms_dir, es_dir, base)

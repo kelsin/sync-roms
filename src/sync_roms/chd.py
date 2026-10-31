@@ -32,7 +32,10 @@ def disc_images(paths):
     images, used = [], set()
     for p in sorted(paths):
         if p.lower().endswith(external.SHEET_EXTS):
-            tracks = [os.path.join(os.path.dirname(p), t) for t in sheet_tracks(p)]
+            names = [t.replace("\\", "/") for t in sheet_tracks(p)]
+            if any(n != os.path.basename(n) or n in ("", ".", "..") for n in names):
+                continue  # a track outside the sheet's folder: don't convert it, and never own (delete) it
+            tracks = [os.path.join(os.path.dirname(p), t) for t in names]
             images.append((p, [p] + tracks))
             used.update(tracks)
     return images + [(p, [p]) for p in sorted(paths) if p.lower().endswith(".iso") and p not in used]
@@ -99,6 +102,21 @@ def make_chd(tools, cfg, image, out, report=None):
         os.replace(part, out)
 
 
+def plan_moves(pairs):
+    """([(src, dst)] still to move, error): a dst that already holds a file of the same size is a leftover of an
+    interrupted run and is skipped; a duplicate dst or one holding something else is an error."""
+    seen, moves = set(), []
+    for src, dst in pairs:
+        if dst in seen:
+            return None, f"{os.path.basename(dst)} appears more than once in the archive"
+        seen.add(dst)
+        if not os.path.lexists(dst):
+            moves.append((src, dst))
+        elif os.path.islink(dst) or not os.path.isfile(dst) or os.path.getsize(dst) != os.path.getsize(src):
+            return None, f"{os.path.basename(dst)} already exists"
+    return moves, None
+
+
 def chd_archive(tools, cfg, path, report=None):
     """Extract an archive next to itself, then convert its discs (or, for extract-only systems, move its files out).
     The archive goes only once everything is done; None on success, else the error."""
@@ -108,14 +126,14 @@ def chd_archive(tools, cfg, path, report=None):
         error = external.run_tool([tools["7z"], "x", "-y", "-bso0", "-bsp0", f"-o{tmp}", "--", path])
         if error:
             return error
-        extracted = [os.path.join(dp, f) for dp, _, fns in os.walk(tmp) for f in sorted(fns)]
+        extracted = [os.path.join(dp, f) for dp, _, fns in os.walk(tmp) for f in sorted(fns)
+                     if not os.path.islink(os.path.join(dp, f))]
         if cfg["mode"] == "extract":
-            names = [os.path.join(folder, os.path.basename(f)) for f in extracted]
-            clash = next((n for n in names if os.path.exists(n)), None)
-            if clash:
-                return f"{os.path.basename(clash)} already exists"
-            for f, n in zip(extracted, names):
-                shutil.move(f, n)
+            moves, error = plan_moves([(f, os.path.join(folder, os.path.basename(f))) for f in extracted])
+            if error:
+                return error
+            for src, dst in moves:
+                shutil.move(src, dst)
         else:
             images = disc_images(extracted)
             if not images:
@@ -154,11 +172,10 @@ def unzip_archive(path):
             error = external.run_tool([tool, "x", "-y", "-bso0", "-bsp0", f"-o{tmp}", "--", path])
             if error:
                 return error
-        moves = [(os.path.join(dp, n), os.path.join(folder, n)) for dp, _, ns in os.walk(tmp) for n in sorted(ns)
-                 if not os.path.islink(os.path.join(dp, n))]
-        clash = next((dst for _, dst in moves if os.path.lexists(dst)), None)
-        if clash:
-            return f"{os.path.basename(clash)} already exists"
+        moves, error = plan_moves([(os.path.join(dp, n), os.path.join(folder, n)) for dp, _, ns in os.walk(tmp)
+                                   for n in sorted(ns) if not os.path.islink(os.path.join(dp, n))])
+        if error:
+            return error
         for src, dst in moves:
             shutil.move(src, dst)
         os.remove(path)

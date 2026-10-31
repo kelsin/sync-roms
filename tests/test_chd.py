@@ -180,6 +180,43 @@ class ChdTest(unittest.TestCase):
         self.assertIsNone(error)
         self.assertEqual(self.files(), ["Game.rvz"])
 
+    def extract_with(self, files, links=()):
+        def fake(cmd, progress=None):
+            out = next(a for a in cmd if a.startswith("-o"))[2:]
+            for name in files:
+                os.makedirs(os.path.dirname(os.path.join(out, name)), exist_ok=True)
+                with open(os.path.join(out, name), "w") as f:
+                    f.write("x")
+            for name in links:
+                os.symlink(os.path.join(out, files[0]), os.path.join(out, name))
+        return mock.patch.object(external, "run_tool", fake)
+
+    def test_extract_mode_fails_on_duplicate_basenames(self):
+        self.touch("Game.7z")
+        with self.extract_with(["a/G.rvz", "b/G.rvz"]):
+            error = chd.chd_archive(self.tools, EXTRACT["chd"], os.path.join(self.dir, "Game.7z"))
+        self.assertEqual(error, "G.rvz appears more than once in the archive")
+        self.assertEqual(self.files(), ["Game.7z"])
+
+    def test_extract_mode_skips_symlinks_and_clashes_with_dangling_links(self):
+        self.touch("Game.7z")
+        with self.extract_with(["G.rvz"], links=["link.rvz"]):
+            self.assertIsNone(chd.chd_archive(self.tools, EXTRACT["chd"], os.path.join(self.dir, "Game.7z")))
+        self.assertEqual(self.files(), ["G.rvz"])
+        self.touch("Game.7z")
+        os.symlink(os.path.join(self.dir, "missing"), os.path.join(self.dir, "H.rvz"))
+        with self.extract_with(["H.rvz"]):
+            error = chd.chd_archive(self.tools, EXTRACT["chd"], os.path.join(self.dir, "Game.7z"))
+        self.assertEqual(error, "H.rvz already exists")
+
+    def test_sheets_naming_tracks_outside_their_folder_are_skipped(self):
+        evil = 'FILE "../secret.bin" BINARY\n'
+        for i, text in enumerate((evil, 'FILE "/etc/hosts" BINARY\n', 'FILE "a\\..\\b.bin" BINARY\n', 'FILE "sub/t.bin" BINARY\n')):
+            self.touch(f"s{i}.cue", text=text)
+        self.touch("ok.cue", text=CUE)
+        images = chd.disc_images([os.path.join(self.dir, f) for f in sorted(os.listdir(self.dir))])
+        self.assertEqual([os.path.basename(i) for i, _ in images], ["ok.cue"])
+
     def test_shipped_chd_settings(self):
         systems = {s["bucket"]: s for s in store.repo_json("systems")}
         self.assertEqual(systems["psx"]["chd"], {"mode": "cd"})
@@ -295,12 +332,37 @@ class UnzipArchiveTest(unittest.TestCase):
 
     def test_existing_file_is_not_overwritten(self):
         path = self.make_zip(**{"G.iso": "new"})
-        self.touch("G.iso", "old")
+        self.touch("G.iso", "older")
         self.assertEqual(chd.unzip_archive(path), "G.iso already exists")
         with open(os.path.join(self.dir, "G.iso")) as f:
-            self.assertEqual(f.read(), "old")
+            self.assertEqual(f.read(), "older")
         self.assertTrue(os.path.exists(path))
 
+    def test_leftover_archive_is_removed_when_already_extracted(self):
+        path = self.make_zip(**{"G.iso": "same"})
+        self.touch("G.iso", "same")
+        self.assertIsNone(chd.unzip_archive(path))
+        self.assertFalse(os.path.exists(path))
+        self.assertEqual(os.listdir(self.dir), ["G.iso"])
+
+    def test_duplicate_basenames_in_an_archive_fail(self):
+        path = self.make_zip(**{"a/G.iso": "1", "b/G.iso": "2"})
+        self.assertEqual(chd.unzip_archive(path), "G.iso appears more than once in the archive")
+        self.assertTrue(os.path.exists(path))
+        self.assertEqual(os.listdir(self.dir), ["a.zip"])
+
+    def test_symlinks_in_an_archive_are_skipped(self):
+        path = os.path.join(self.dir, "a.7z")
+        open(path, "w").close()
+
+        def fake(cmd, progress=None):
+            out = next(a for a in cmd if a.startswith("-o"))[2:]
+            with open(os.path.join(out, "G.iso"), "w") as f:
+                f.write("x")
+            os.symlink(os.path.join(out, "G.iso"), os.path.join(out, "link.iso"))
+        with mock.patch.object(external, "find_tool", return_value="7z"), mock.patch.object(external, "run_tool", fake):
+            self.assertIsNone(chd.unzip_archive(path))
+        self.assertEqual(sorted(os.listdir(self.dir)), ["G.iso"])
 
 if __name__ == "__main__":
     unittest.main()
