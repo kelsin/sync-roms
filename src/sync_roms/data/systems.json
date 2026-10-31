@@ -2070,6 +2070,10 @@
         "xbox/xbox-3944_256k.bin"
       ],
       "note": "xemu is standalone (not libretro); point xemu at these. It also needs a flash BIOS (e.g. Complex_4627.bin) and HDD image"
+    },
+    "chd": {
+      "mode": "xiso",
+      "m3u": false
     }
   },
   {

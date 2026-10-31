@@ -1,4 +1,4 @@
-"""CHD conversion and archive extraction."""
+"""CHD and xiso conversion and archive extraction."""
 import filecmp
 import os
 import re
@@ -45,6 +45,18 @@ def disc_images(paths, strict=True, skipped=None):
     return images + [(p, [p]) for p in sorted(paths) if p.lower().endswith(".iso") and p not in used]
 
 
+XISO_TAG_OFFSET, XISO_TAG = 31337, b"in!xiso"  # extract-xiso marks the images it has optimized
+
+
+def is_optimized_xiso(path):
+    try:
+        with open(path, "rb") as f:
+            f.seek(XISO_TAG_OFFSET)
+            return f.read(len(XISO_TAG)) == XISO_TAG
+    except OSError:
+        return False
+
+
 def chd_system(root, dirpath, folders):
     """(system, its outermost folder) for a folder under root: the first path part that names a chd system."""
     rel = os.path.relpath(dirpath, root)
@@ -68,7 +80,9 @@ def plan_chd(root, folders, skipped=None):
             continue
         files = [os.path.join(dirpath, f) for f in sorted(files) if not external.own_temp(f)]
         jobs += [(system, sysroot, f, None) for f in files if f.lower().endswith(external.ARCHIVE_EXTS)]
-        if system["chd"]["mode"] != "extract":
+        if system["chd"]["mode"] == "xiso":
+            jobs += [(system, sysroot, f, [f]) for f in files if f.lower().endswith(".iso") and not is_optimized_xiso(f)]
+        elif system["chd"]["mode"] != "extract":
             jobs += [(system, sysroot, img, owned) for img, owned in disc_images(files, True, skipped)]
     return jobs
 
@@ -107,6 +121,32 @@ def make_chd(tools, cfg, image, out, report=None):
         os.replace(part, out)
 
 
+def make_xiso(tools, image, out, report=None):
+    """Write image as an optimized xiso at out; None on success, else the error.
+
+    extract-xiso rewrites a hidden copy, which replaces out only once it lists cleanly, so out (the image itself
+    when converting in place) is never half written.
+    """
+    xiso = tools["extract-xiso"]
+    work = tempfile.mkdtemp(prefix=".xiso-", dir=os.path.dirname(out))
+    try:
+        copy = os.path.join(work, os.path.basename(out))
+        shutil.copyfile(image, copy)
+        if report:
+            report(0.2)
+        error = external.run_tool([xiso, "-Q", "-r", copy])
+        if report:
+            report(0.8)
+        error = error or external.run_tool([xiso, "-Q", "-l", copy])
+        if not error:
+            os.replace(copy, out)
+        return error
+    except OSError as e:
+        return str(e)
+    finally:
+        shutil.rmtree(work, ignore_errors=True)
+
+
 def plan_moves(pairs):
     """([(src, dst)] still to move, error): a dst that already holds a file of the same content is a leftover of an
     interrupted run and is skipped; a duplicate dst or one holding something else is an error."""
@@ -140,6 +180,20 @@ def chd_archive(tools, cfg, path, report=None):
                 return error
             for src, dst in moves:
                 shutil.move(src, dst)
+        elif cfg["mode"] == "xiso":
+            images = [f for f in extracted if f.lower().endswith(".iso")]
+            if not images:
+                return "no iso in the archive"
+            outs = [os.path.join(folder, os.path.basename(image)) for image in images]
+            if len({os.path.normcase(o).lower() for o in outs}) < len(outs):
+                return "two isos in the archive would make the same file"
+            for out in outs:
+                if os.path.lexists(out):
+                    return f"{os.path.basename(out)} already exists"
+            for image, out in zip(images, outs):
+                error = make_xiso(tools, image, out, report)
+                if error:
+                    return error
         else:
             images = disc_images(extracted, strict=False)
             if not images:
@@ -157,7 +211,10 @@ def chd_archive(tools, cfg, path, report=None):
 
 
 def chd_image(tools, cfg, image, owned, report=None):
-    """Convert one loose disc image and remove its files once the chd verifies; None on success, else the error."""
+    """Convert one loose disc image and remove its files once the chd verifies; None on success, else the error.
+    An xiso system's iso is rewritten in place instead."""
+    if cfg["mode"] == "xiso":
+        return make_xiso(tools, image, image, report)
     out = os.path.splitext(image)[0] + ".chd"
     error = make_chd(tools, cfg, image, out, report)
     if not error:
@@ -216,9 +273,9 @@ def unzip_roms(paths):
 
 
 def remove_stale_chd_temp(root):
-    """Delete the .chd-* extraction folders a killed run left behind."""
+    """Delete the .chd-* and .xiso-* working folders a killed run left behind."""
     for dirpath, dirs, _ in os.walk(root):
-        for d in [d for d in dirs if d.startswith(".chd-")]:
+        for d in [d for d in dirs if d.startswith((".chd-", ".xiso-"))]:
             shutil.rmtree(os.path.join(dirpath, d), ignore_errors=True)
             dirs.remove(d)
 
@@ -245,7 +302,7 @@ def chd_command(args):
     root = os.path.abspath(os.path.expanduser(args.chd or os.getcwd()))
     if not os.path.isdir(root):
         raise SystemExit(ui.red(f"❌ {root} is not a folder"))
-    print(ui.bold("💿 chd") + ui.dim(f"  {root}"))
+    print(ui.bold("💿 cd") + ui.dim(f"  {root}"))
     folders = chd_folders(store.repo_json("systems"))
     roots = chd_roots(root, folders)
     skipped = []
@@ -256,7 +313,7 @@ def chd_command(args):
         print(ui.green("✅ Nothing to convert"))
         if not roots:
             print(ui.yellow("⚠️  No folder here is named after a system with a chd setting, so every file was skipped."))
-            print(ui.dim(f"   --chd only looks inside folders named: {', '.join(sorted(folders))}"))
+            print(ui.dim(f"   --cd only looks inside folders named: {', '.join(sorted(folders))}"))
     for system, _, path, owned in jobs:
         what = "extract" if system["chd"]["mode"] == "extract" else "convert"
         print(f"  {'📦' if owned is None else '💿'} {what} {os.path.relpath(path, root)}")
@@ -268,10 +325,12 @@ def chd_command(args):
         fix_playlists(roots, False)
         return 0
     tools = {}
-    for tool, needed in (("7z", any(j[3] is None for j in jobs)), ("chdman", any(j[0]["chd"]["mode"] != "extract" for j in jobs))):
+    modes = {j[0]["chd"]["mode"] for j in jobs}
+    for tool, needed in (("7z", any(j[3] is None for j in jobs)), ("chdman", bool(modes - {"extract", "xiso"})),
+                         ("extract-xiso", "xiso" in modes)):
         tools[tool] = external.find_tool(tool)
         if needed and not tools[tool]:
-            raise SystemExit(ui.red(f"❌ {tool} not found; run sync-roms --install-tools"))
+            raise SystemExit(ui.red(f"❌ {tool} not found; " + (f"{external.MANUAL_TOOLS[tool]}" if tool in external.MANUAL_TOOLS else "run sync-roms --install-tools")))
     remove_stale_chd_temp(root)
     cpus = os.cpu_count() or 1
     workers = min(cpus, len(jobs))
@@ -329,7 +388,7 @@ def chd_command(args):
                 break
             except KeyboardInterrupt:
                 pass
-        print(ui.yellow(f"  {converted} done, nothing half-converted; run --chd again to continue"))
+        print(ui.yellow(f"  {converted} done, nothing half-converted; run --cd again to continue"))
         return 130
     pool.shutdown()
     bar.clear()

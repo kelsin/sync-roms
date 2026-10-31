@@ -41,11 +41,11 @@ def help_text():
   {ui.yellow('--m3u')} [{ui.cyan('DIR')}]   💿 create or fix the .m3u playlist of every multi-disc game ("Name (Disc 1) (Extra).chd", "Name (Disc 2).chd") in DIR
                       and its subfolders (no DIR: the current directory); playlists whose files are all missing are deleted (asks first),
                       ones with the wrong or some missing discs are rewritten, and ones with the right discs under another name are renamed {ui.dim('(local only; works with --dry-run)')}
-  {ui.yellow('--chd')} [{ui.cyan('DIR')}]   📀 unzip (7z) every .zip/.7z and convert each disc image (.cue, .gdi, .toc, .iso) to a verified .chd, per the chd setting of the
+  {ui.yellow('--cd')} [{ui.cyan('DIR')}]   📀 unzip (7z) every .zip/.7z and convert each disc image (.cue, .gdi, .toc, .iso) to a verified .chd (Xbox .iso files to xiso), per the chd setting of the
                       system whose folder it is in (DIR can be one system folder or hold several; no DIR: the current directory); archives and
                       images are removed once their chd verifies, then the .m3u playlists are fixed (always, even with nothing to convert); files convert in parallel, up to one per CPU core, with a progress bar. GameCube and Wii archives are only unzipped
-                      {ui.dim('(needs 7z and chdman, see --install-tools; works with --dry-run)')}
-  {ui.yellow('--install-tools')}   🍺 brew install the 7z (sevenzip) and chdman (rom-tools) that --chd needs, whichever are missing
+                      {ui.dim('(needs 7z, chdman and, for Xbox, extract-xiso, see --install-tools; works with --dry-run; --chd is the old name)')}
+  {ui.yellow('--install-tools')}   🍺 brew install the 7z (sevenzip) and chdman (rom-tools) that --cd needs, whichever are missing, and say how to build extract-xiso
   {ui.yellow('--mirror')} [{ui.cyan('DIR')}]   🪞 make or refresh a local copy of everything the game lists reference (ROMs, BIOS, scraped data); files that are
                       no longer referenced are deleted, a rerun with nothing changed downloads nothing (no DIR: the saved mirror)
   {ui.yellow('--use-mirror')} {ui.cyan('DIR')}   🪞 --mirror DIR, then save DIR so every sync refreshes it first and copies from it instead of the bucket
@@ -168,7 +168,7 @@ def sync():
     ap.add_argument("--replace", action="store_true")
     ap.add_argument("--diff", nargs="?", const="")
     ap.add_argument("--m3u", nargs="?", const="")
-    ap.add_argument("--chd", nargs="?", const="")
+    ap.add_argument("--cd", "--chd", dest="chd", nargs="?", const="")
     ap.add_argument("--install-tools", action="store_true")
     ap.add_argument("--mirror", nargs="?", const="")
     ap.add_argument("--use-mirror")
@@ -181,7 +181,7 @@ def sync():
         return 0
     if args.devices:
         return list_devices()
-    local = [m for m, on in (("--m3u", args.m3u is not None), ("--chd", args.chd is not None), ("--install-tools", args.install_tools)) if on]
+    local = [m for m, on in (("--m3u", args.m3u is not None), ("--cd", args.chd is not None), ("--install-tools", args.install_tools)) if on]
     if local:
         if len(local) > 1 or args.edit or args.upload is not None or args.diff is not None or args.upload_scrapes or args.clean_scrapes or args.mirror is not None or args.use_mirror or args.clear_mirror:
             raise SystemExit(ui.red(f"❌ {local[0]} can't be combined with other modes"))
