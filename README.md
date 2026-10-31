@@ -52,7 +52,7 @@ If the Python dependencies changed, run `brew update-python-resources kelsin/tap
 - **python3** (3.9+); boto3 is installed with the package
 - An AWS profile named **`roms-readonly`** with read access to the bucket
   (set `ROMS_PROFILE` to use a different profile name), defined in `~/.aws/config` and `~/.aws/credentials`
-- Only for `--chd`: **7z** and **chdman** (`sync-roms --install-tools` installs them with Homebrew)
+- Only for `--cd`: **7z** and **chdman** (`sync-roms --install-tools` installs them with Homebrew), plus **extract-xiso** for Xbox (no Homebrew formula: build it from [XboxDev/extract-xiso](https://github.com/XboxDev/extract-xiso) with `cmake -B build && cmake --build build`)
 
 ### AWS profiles
 
@@ -225,8 +225,8 @@ Then:
 | `--upload [DIR]` | Upload the ROMs in `DIR` and its subfolders (default: current directory) to the bucket folder of a system you pick; the system is guessed from the folder name (see below) |
 | `-c`, `--clean-scrapes` | Remove scraped data in the bucket for ROMs that aren't available (see below) |
 | `--m3u [DIR]` | Create or fix the `.m3u` playlist of every multi-disc game (`Name (Disc 1) (Extra).chd`, `Name (Disc 2).chd`) in `DIR` and its subfolders (default: current directory). The playlist is named after the title without `(Disc N)` or tags the discs don't share (`Name (Sega CD).m3u`). Playlists with the wrong discs are rewritten, ones with some missing files lose those lines, ones with no files left are deleted after asking, and ones listing exactly a game's discs under another name are renamed. Local only; `--dry-run` previews |
-| `--chd [DIR]` | Unzip (7z) every `.zip`/`.7z` and convert each disc image (`.cue`, `.gdi`, `.toc`, `.iso`) to a `.chd` with `chdman`, in parallel (up to one file per CPU core; with fewer files than cores each `chdman` gets the spare cores), per the `chd` setting in `systems.json` for the system whose folder it is in (`DIR` is one system folder or a folder of them, default: current directory). The chd is verified before the archive and image files are removed, a failure keeps them, and the `.m3u` playlists of every system folder are fixed afterwards, even when there was nothing to convert (also shown by `--dry-run`). A progress bar (files done and overall percent, from `chdman`'s own progress) shows in a terminal. Mode `cd` uses `createcd`; `dvd` (PS2, PSP) uses `createdvd` for `.iso` files with the system's `args`; `extract` (GameCube, Wii) only unzips and leaves the `.rvz` files. `"m3u": false` skips playlists (3DO). Local only; `--dry-run` previews |
-| `--install-tools` | `brew install` the 7z (`sevenzip`) and chdman (`rom-tools`) that `--chd` needs, whichever are missing |
+| `--cd [DIR]` | (`--chd` still works) Unzip (7z) every `.zip`/`.7z` and convert each disc image (`.cue`, `.gdi`, `.toc`, `.iso`) to a `.chd` with `chdman`, in parallel (up to one file per CPU core; with fewer files than cores each `chdman` gets the spare cores), per the `chd` setting in `systems.json` for the system whose folder it is in (`DIR` is one system folder or a folder of them, default: current directory). The chd is verified before the archive and image files are removed, a failure keeps them, and the `.m3u` playlists of every system folder are fixed afterwards, even when there was nothing to convert (also shown by `--dry-run`). A progress bar (files done and overall percent, from `chdman`'s own progress) shows in a terminal. Mode `cd` uses `createcd`; `dvd` (PS2, PSP) uses `createdvd` for `.iso` files with the system's `args`; `extract` (GameCube, Wii) only unzips and leaves the `.rvz` files; `xiso` (Xbox) rewrites each `.iso` that isn't already an xiso with `extract-xiso -r` and checks it with `-l`. `"m3u": false` skips playlists (3DO). Local only; `--dry-run` previews |
+| `--install-tools` | `brew install` the 7z (`sevenzip`) and chdman (`rom-tools`) that `--cd` needs, whichever are missing, and say how to build extract-xiso |
 | `--mirror [DIR]` | Make or refresh a local mirror of the bucket (see below). No `DIR`: the saved mirror |
 | `--use-mirror DIR` | Same as `--mirror DIR`, then save `DIR` as the local mirror |
 | `--clear-mirror` | Forget the saved mirror (its files are left alone) |
@@ -377,14 +377,14 @@ games show greyed out. Unknown set names are skipped with a warning.
 renaming the folder makes it a new card. The local mirror (`--mirror`) holds the core list plus every card's
 extras.
 
-## Converting to CHD (`--chd`)
+## Converting to CHD and xiso (`--cd`, formerly `--chd`)
 
 Run it on a card or a single system folder after syncing:
 
 ```bash
 sync-roms --install-tools                # once: brew install sevenzip rom-tools
-sync-roms --chd --dry-run /Volumes/SD/ROMs
-sync-roms --chd /Volumes/SD/ROMs/psx
+sync-roms --cd --dry-run /Volumes/SD/ROMs
+sync-roms --cd /Volumes/SD/ROMs/psx
 ```
 
 Each system's behaviour is the `chd` setting in `src/sync_roms/data/systems.json`:
@@ -394,6 +394,7 @@ Each system's behaviour is the `chd` setting in `src/sync_roms/data/systems.json
 | `cd` | Sega CD, Saturn, TurboGrafx-CD, PC-FX, Neo Geo CD, PS1, 3DO, Dreamcast | `chdman createcd` from the `.cue`/`.gdi`/`.toc` (or `.iso`) |
 | `dvd` | PS2, PSP | `chdman createdvd` for `.iso` files plus the system's `args` (PS2 `-c zlib`, PSP `-hs 2048`); bin/cue games use `createcd` |
 | `extract` | GameCube, Wii | archives are unzipped and the files (e.g. `.rvz`) left as they are; nothing is converted |
+| `xiso` | Xbox | archives are unzipped, then each `.iso` is rewritten as an optimized xiso with `extract-xiso -r` on a hidden copy that replaces the original only once `extract-xiso -l` lists it cleanly; isos already in xiso format are left alone |
 
 `"m3u": false` (3DO) skips the playlist step, since Opera can't load `.m3u` files. Systems without a `chd` setting are ignored.
 

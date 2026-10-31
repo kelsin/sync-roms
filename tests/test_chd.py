@@ -17,6 +17,8 @@ from sync_roms import chd, external, m3u, store  # noqa: E402
 CD = {"chd": {"mode": "cd"}}
 DVD = {"chd": {"mode": "dvd", "args": ["-c", "zlib"]}}
 EXTRACT = {"chd": {"mode": "extract"}}
+XISO = {"chd": {"mode": "xiso", "m3u": False}}
+XISO_TAG = b"\0" * 31337 + b"in!xiso!2.7.1"
 CUE = 'FILE "Game (Track 1).bin" BINARY\n  TRACK 01 MODE2/2352\nFILE "Game (Track 2).bin" BINARY\n'
 GDI = '3\n1 0 4 2352 track01.bin 0\n2 600 0 2352 "track 02.raw" 0\n3 45000 4 2352 track03.bin 0\n'
 
@@ -34,6 +36,12 @@ class FakeTools:
             for name in self.archive:
                 with open(os.path.join(out, name), "w") as f:
                     f.write(CUE if name.endswith(".cue") else "x")
+        elif cmd[0] == "extract-xiso":
+            if cmd[2] == "-r":  # like the real tool: the rewritten image replaces the file, the original goes to .old
+                os.rename(cmd[3], cmd[3] + ".old")
+                with open(cmd[3], "wb") as f:
+                    f.write(XISO_TAG)
+            return "xiso failed" if cmd[2] in self.fail else None
         elif cmd[1].startswith("create"):
             open(cmd[cmd.index("-o") + 1], "w").close()
         return f"{cmd[1]} failed" if cmd[1] in self.fail else None
@@ -44,7 +52,7 @@ class ChdTest(unittest.TestCase):
         self._tmp = tempfile.TemporaryDirectory()
         self.dir = os.path.realpath(self._tmp.name)
         self.addCleanup(self._tmp.cleanup)
-        self.tools = {"7z": "7z", "chdman": "chdman", "np": 1}
+        self.tools = {"7z": "7z", "chdman": "chdman", "extract-xiso": "extract-xiso", "np": 1}
 
     def touch(self, *names, text=""):
         for n in names:
@@ -250,11 +258,55 @@ class ChdTest(unittest.TestCase):
                           [os.path.join(self.dir, n) for n in ("Game.cue", "Game.chd")])
         self.assertEqual(self.files(), ["Game.chd"])
 
+    def test_xiso_plan_skips_optimized_isos_and_other_files(self):
+        self.touch("xbox/A.iso", "xbox/B.zip", "xbox/C.cue")
+        with open(os.path.join(self.dir, "xbox", "Done.iso"), "wb") as f:
+            f.write(XISO_TAG)
+        jobs = chd.plan_chd(self.dir, {"xbox": XISO})
+        self.assertEqual([(os.path.basename(p), owned is None) for _, _, p, owned in jobs], [("B.zip", True), ("A.iso", False)])
+
+    def test_loose_iso_is_rewritten_in_place(self):
+        self.touch("Game.iso", text="redump")
+        fake = FakeTools()
+        with mock.patch.object(external, "run_tool", fake):
+            error = chd.chd_image(self.tools, XISO["chd"], os.path.join(self.dir, "Game.iso"), [os.path.join(self.dir, "Game.iso")])
+        self.assertIsNone(error)
+        self.assertEqual(self.files(), ["Game.iso"])
+        self.assertTrue(chd.is_optimized_xiso(os.path.join(self.dir, "Game.iso")))
+        self.assertEqual([c[2] for c in fake.calls], ["-r", "-l"])
+
+    def test_failed_xiso_rewrite_leaves_the_iso_untouched(self):
+        self.touch("Game.iso", text="redump")
+        with mock.patch.object(external, "run_tool", FakeTools(fail=("-l",))):
+            error = chd.chd_image(self.tools, XISO["chd"], os.path.join(self.dir, "Game.iso"), [os.path.join(self.dir, "Game.iso")])
+        self.assertEqual(error, "xiso failed")
+        self.assertEqual(self.files(), ["Game.iso"])
+        with open(os.path.join(self.dir, "Game.iso")) as f:
+            self.assertEqual(f.read(), "redump")
+
+    def test_archive_of_an_iso_is_converted_and_removed(self):
+        self.touch("Game.zip")
+        with mock.patch.object(external, "run_tool", FakeTools(archive=["Game.iso", "readme.txt"])):
+            error = chd.chd_archive(self.tools, XISO["chd"], os.path.join(self.dir, "Game.zip"))
+        self.assertIsNone(error)
+        self.assertEqual(self.files(), ["Game.iso"])
+        self.assertTrue(chd.is_optimized_xiso(os.path.join(self.dir, "Game.iso")))
+
+    def test_archive_without_an_iso_or_onto_an_existing_one_is_kept(self):
+        self.touch("Game.zip")
+        with mock.patch.object(external, "run_tool", FakeTools(archive=["readme.txt"])):
+            self.assertEqual(chd.chd_archive(self.tools, XISO["chd"], os.path.join(self.dir, "Game.zip")), "no iso in the archive")
+        self.touch("Game.iso")
+        with mock.patch.object(external, "run_tool", FakeTools(archive=["Game.iso"])):
+            self.assertEqual(chd.chd_archive(self.tools, XISO["chd"], os.path.join(self.dir, "Game.zip")), "Game.iso already exists")
+        self.assertEqual(self.files(), ["Game.iso", "Game.zip"])
+
     def test_shipped_chd_settings(self):
         systems = {s["bucket"]: s for s in store.repo_json("systems")}
         self.assertEqual(systems["psx"]["chd"], {"mode": "cd"})
         self.assertEqual(systems["wii"]["chd"], {"mode": "extract"})
         self.assertFalse(systems["3do"]["chd"]["m3u"])
+        self.assertEqual(systems["xbox"]["chd"], {"mode": "xiso", "m3u": False})
         self.assertNotIn("chd", systems["gba"])
         folders = chd.chd_folders(systems.values())
         self.assertIs(folders["megacd"], systems["segacd"])

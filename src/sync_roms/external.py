@@ -1,4 +1,4 @@
-"""External tools (7z, chdman): lookup, running and install."""
+"""External tools (7z, chdman, extract-xiso): lookup, running and install."""
 import re
 import shutil
 import subprocess
@@ -10,7 +10,8 @@ from . import ui
 ARCHIVE_EXTS = (".zip", ".7z")
 SHEET_EXTS = (".cue", ".gdi", ".toc")  # chdman reads these; the sheet names the track files
 TOOL_FORMULAE = {"7z": "sevenzip", "chdman": "rom-tools"}  # Homebrew formula that provides each tool
-TOOL_NAMES = {"7z": ("7zz", "7z", "7za"), "chdman": ("chdman",)}
+MANUAL_TOOLS = {"extract-xiso": "build it from https://github.com/XboxDev/extract-xiso (git clone, cmake -B build, cmake --build build) and put the binary on your PATH"}  # no Homebrew formula
+TOOL_NAMES = {"7z": ("7zz", "7z", "7za"), "chdman": ("chdman",), "extract-xiso": ("extract-xiso",)}
 
 
 def find_tool(tool):
@@ -19,7 +20,7 @@ def find_tool(tool):
 
 def own_temp(name):
     """True for what --chd itself leaves hidden (extraction folders, .part files) and macOS ._ junk; other dot names are real."""
-    return name.startswith((".chd-", ".unzip-", "._")) or name.endswith(".part")
+    return name.startswith((".chd-", ".xiso-", ".unzip-", "._")) or name.endswith(".part")
 
 
 _tool_procs = set()  # running tools, so an interrupt can stop them
@@ -67,8 +68,13 @@ def install_tools_command():
     if not brew:
         raise SystemExit(ui.red("❌ Homebrew (brew) not found; install it from https://brew.sh"))
     wanted = [formula for tool, formula in TOOL_FORMULAE.items() if not find_tool(tool)]
-    if not wanted:
-        print(ui.green("✅ 7z and chdman are already installed"))
-        return 0
-    print(ui.bold("🍺 brew install ") + " ".join(wanted))
-    return subprocess.run([brew, "install", *wanted]).returncode
+    code = 0
+    if wanted:
+        print(ui.bold("🍺 brew install ") + " ".join(wanted))
+        code = subprocess.run([brew, "install", *wanted]).returncode
+    manual = [tool for tool in MANUAL_TOOLS if not find_tool(tool)]
+    for tool in manual:
+        print(ui.yellow(f"⚠️  {tool} has no Homebrew formula: {MANUAL_TOOLS[tool]}"))
+    if not wanted and not manual:
+        print(ui.green("✅ 7z, chdman and extract-xiso are already installed"))
+    return code
