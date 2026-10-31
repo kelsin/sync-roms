@@ -93,11 +93,6 @@
       "bucket": "genesis/Dynamite Headdy (USA, Europe).zip"
     },
     {
-      "title": "Mega Turrican",
-      "system": "genesis",
-      "bucket": "genesis/Mega Turrican (USA).zip"
-    },
-    {
       "title": "Rocket Knight Adventures",
       "system": "genesis",
       "bucket": "genesis/Rocket Knight Adventures (USA).zip"
@@ -120,7 +115,7 @@
     {
       "title": "Ys Book I & II (Rev 2)",
       "system": "tg-cd",
-      "bucket": "tg-cd/Ys Book I & II (USA) (Rev 2).chd"
+      "bucket": "tg-cd/Ys Book I & II (USA).chd"
     },
     {
       "title": "Guardian Heroes",
@@ -133,9 +128,9 @@
       "bucket": "saturn/Dragon Force (USA).chd"
     },
     {
-      "title": "Sega Rally Championship",
+      "title": "Sega Rally Championship Plus Netlink Edition",
       "system": "saturn",
-      "bucket": "saturn/Sega Rally Championship (USA).chd"
+      "bucket": "saturn/Sega Rally Championship Plus Netlink Edition (USA).chd"
     },
     {
       "title": "Shining Force III",
@@ -268,7 +263,7 @@
     {
       "title": "Ninja Five-0",
       "system": "gba",
-      "bucket": "gba/Ninja Five-0 (USA).zip"
+      "bucket": "gba/Ninja Five-O (USA).zip"
     },
     {
       "title": "Shadow of the Colossus",
@@ -359,6 +354,174 @@
       "title": "3 Count Bout",
       "system": "neogeo",
       "bucket": "neogeo/3countb.zip"
+    },
+    {
+      "title": "Killer7 (Rev 1)",
+      "system": "gc",
+      "bucket": "gc/Killer7 (USA) (Disc 1) (Rev 1).rvz",
+      "files": [
+        "gc/Killer7 (USA) (Disc 2) (Rev 1).rvz"
+      ]
+    },
+    {
+      "title": "Chibi-Robo! Plug into Adventure!",
+      "system": "gc",
+      "bucket": "gc/Chibi-Robo! Plug into Adventure! (USA).rvz"
+    },
+    {
+      "title": "Eternal Darkness - Sanity's Requiem",
+      "system": "gc",
+      "bucket": "gc/Eternal Darkness - Sanity's Requiem (USA).rvz"
+    },
+    {
+      "title": "Cubivore",
+      "system": "gc",
+      "bucket": "gc/Cubivore (USA).rvz"
+    },
+    {
+      "title": "Ikaruga",
+      "system": "gc",
+      "bucket": "gc/Ikaruga (USA).rvz"
+    },
+    {
+      "title": "Lost Kingdoms",
+      "system": "gc",
+      "bucket": "gc/Lost Kingdoms (USA).rvz"
+    },
+    {
+      "title": "Beyond Good & Evil",
+      "system": "gc",
+      "bucket": "gc/Beyond Good & Evil (USA) (En,Es).rvz"
+    },
+    {
+      "title": "Viewtiful Joe",
+      "system": "gc",
+      "bucket": "gc/Viewtiful Joe (USA).rvz"
+    },
+    {
+      "title": "Viewtiful Joe 2",
+      "system": "gc",
+      "bucket": "gc/Viewtiful Joe 2 (USA).rvz"
+    },
+    {
+      "title": "Custom Robo",
+      "system": "gc",
+      "bucket": "gc/Custom Robo (USA).rvz"
+    },
+    {
+      "title": "Odama (Rev 1)",
+      "system": "gc",
+      "bucket": "gc/Odama (USA) (Rev 1).rvz"
+    },
+    {
+      "title": "Gotcha Force",
+      "system": "gc",
+      "bucket": "gc/Gotcha Force (USA).rvz"
+    },
+    {
+      "title": "Elite Beat Agents",
+      "system": "nds",
+      "bucket": "nds/Elite Beat Agents (USA).zip"
+    },
+    {
+      "title": "Henry Hatsworth in the Puzzling Adventure",
+      "system": "nds",
+      "bucket": "nds/Henry Hatsworth in the Puzzling Adventure (USA) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Retro Game Challenge",
+      "system": "nds",
+      "bucket": "nds/Retro Game Challenge (USA).zip"
+    },
+    {
+      "title": "Contra 4",
+      "system": "nds",
+      "bucket": "nds/Contra 4 (USA).zip"
+    },
+    {
+      "title": "Ghost Trick - Phantom Detective",
+      "system": "nds",
+      "bucket": "nds/Ghost Trick - Phantom Detective (USA) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Radiant Historia",
+      "system": "nds",
+      "bucket": "nds/Radiant Historia (USA).zip"
+    },
+    {
+      "title": "Okamiden",
+      "system": "nds",
+      "bucket": "nds/Okamiden (USA).zip"
+    },
+    {
+      "title": "Bangai-O Spirits",
+      "system": "nds",
+      "bucket": "nds/Bangai-O Spirits (USA).zip"
+    },
+    {
+      "title": "Knights in the Nightmare",
+      "system": "nds",
+      "bucket": "nds/Knights in the Nightmare (USA).zip"
+    },
+    {
+      "title": "Hotel Dusk - Room 215",
+      "system": "nds",
+      "bucket": "nds/Hotel Dusk - Room 215 (USA).zip"
+    },
+    {
+      "title": "Dementium - The Ward",
+      "system": "nds",
+      "bucket": "nds/Dementium - The Ward (USA).zip"
+    },
+    {
+      "title": "Izuna - Legend of the Unemployed Ninja",
+      "system": "nds",
+      "bucket": "nds/Izuna - Legend of the Unemployed Ninja (USA).zip"
+    },
+    {
+      "title": "Glory of Heracles",
+      "system": "nds",
+      "bucket": "nds/Glory of Heracles (USA).zip"
+    },
+    {
+      "title": "Infinite Space",
+      "system": "nds",
+      "bucket": "nds/Infinite Space (USA).zip"
+    },
+    {
+      "title": "Solatorobo - Red the Hunter",
+      "system": "nds",
+      "bucket": "nds/Solatorobo - Red the Hunter (USA) (En,Fr,De,Es,It) (NDSi Enhanced).zip"
+    },
+    {
+      "title": "Viewtiful Joe 2",
+      "system": "ps2",
+      "bucket": "ps2/Viewtiful Joe 2 (USA).chd"
+    },
+    {
+      "title": "Shin Megami Tensei - Devil Summoner - Raidou Kuzunoha vs. the Soulless Army",
+      "system": "ps2",
+      "bucket": "ps2/Shin Megami Tensei - Devil Summoner - Raidou Kuzunoha vs. the Soulless Army (USA).chd"
+    },
+    {
+      "title": "Shin Megami Tensei - Devil Summoner 2 - Raidou Kuzunoha vs. King Abaddon",
+      "system": "ps2",
+      "bucket": "ps2/Shin Megami Tensei - Devil Summoner 2 - Raidou Kuzunoha vs. King Abaddon (USA).chd"
+    },
+    {
+      "title": "Drakengard",
+      "system": "ps2",
+      "bucket": "ps2/Drakengard (USA).chd"
+    },
+    {
+      "title": "Chaos Legion",
+      "system": "ps2",
+      "bucket": "ps2/Chaos Legion (USA) (En,Ja,Fr,Es).chd"
+    },
+    {
+      "title": "World Ends with You, The",
+      "system": "nds",
+      "bucket": "nds/World Ends with You, The (USA).zip"
     }
   ]
 }

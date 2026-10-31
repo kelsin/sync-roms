@@ -176,6 +176,201 @@
       "title": "Dr. Mario 64",
       "system": "n64",
       "bucket": "n64/Dr. Mario 64 (USA).zip"
+    },
+    {
+      "title": "Super Mario Sunshine",
+      "system": "gc",
+      "bucket": "gc/Super Mario Sunshine (USA).rvz"
+    },
+    {
+      "title": "Mario Kart - Double Dash!!",
+      "system": "gc",
+      "bucket": "gc/Mario Kart - Double Dash!! (USA).rvz"
+    },
+    {
+      "title": "Luigi's Mansion",
+      "system": "gc",
+      "bucket": "gc/Luigi's Mansion (USA).rvz"
+    },
+    {
+      "title": "Mario Power Tennis (Rev 1)",
+      "system": "gc",
+      "bucket": "gc/Mario Power Tennis (USA) (Rev 1).rvz"
+    },
+    {
+      "title": "Mario Golf - Toadstool Tour",
+      "system": "gc",
+      "bucket": "gc/Mario Golf - Toadstool Tour (USA).rvz"
+    },
+    {
+      "title": "Super Mario Strikers",
+      "system": "gc",
+      "bucket": "gc/Super Mario Strikers (USA).rvz"
+    },
+    {
+      "title": "Mario Superstar Baseball",
+      "system": "gc",
+      "bucket": "gc/Mario Superstar Baseball (USA).rvz"
+    },
+    {
+      "title": "Wario World",
+      "system": "gc",
+      "bucket": "gc/Wario World (USA).rvz"
+    },
+    {
+      "title": "Mario Party 4 (Rev 1)",
+      "system": "gc",
+      "bucket": "gc/Mario Party 4 (USA) (Rev 1).rvz"
+    },
+    {
+      "title": "Mario Party 5",
+      "system": "gc",
+      "bucket": "gc/Mario Party 5 (USA).rvz"
+    },
+    {
+      "title": "Mario Party 6",
+      "system": "gc",
+      "bucket": "gc/Mario Party 6 (USA).rvz"
+    },
+    {
+      "title": "Mario Party 7 (Rev 1)",
+      "system": "gc",
+      "bucket": "gc/Mario Party 7 (USA) (Rev 1).rvz"
+    },
+    {
+      "title": "New Super Mario Bros.",
+      "system": "nds",
+      "bucket": "nds/New Super Mario Bros. (USA, Australia).zip"
+    },
+    {
+      "title": "Super Mario 64 DS (Rev 1)",
+      "system": "nds",
+      "bucket": "nds/Super Mario 64 DS (USA, Australia) (Rev 1).zip"
+    },
+    {
+      "title": "Mario Kart DS",
+      "system": "nds",
+      "bucket": "nds/Mario Kart DS (USA, Australia) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Mario & Luigi - Partners in Time (Rev 1)",
+      "system": "nds",
+      "bucket": "nds/Mario & Luigi - Partners in Time (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Mario & Luigi - Bowser's Inside Story",
+      "system": "nds",
+      "bucket": "nds/Mario & Luigi - Bowser's Inside Story (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Yoshi's Island DS (Rev 1)",
+      "system": "nds",
+      "bucket": "nds/Yoshi's Island DS (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Mario vs. Donkey Kong 2 - March of the Minis",
+      "system": "nds",
+      "bucket": "nds/Mario vs. Donkey Kong 2 - March of the Minis (USA).zip"
+    },
+    {
+      "title": "Mario Party DS (Rev 2)",
+      "system": "nds",
+      "bucket": "nds/Mario Party DS (USA) (Rev 2).zip"
+    },
+    {
+      "title": "WarioWare - Touched!",
+      "system": "nds",
+      "bucket": "nds/WarioWare - Touched! (USA).zip"
+    },
+    {
+      "title": "WarioWare - D.I.Y.",
+      "system": "nds",
+      "bucket": "nds/WarioWare - D.I.Y. (USA).zip"
+    },
+    {
+      "title": "Wario - Master of Disguise",
+      "system": "nds",
+      "bucket": "nds/Wario - Master of Disguise (USA).zip"
+    },
+    {
+      "title": "Yoshi Touch & Go",
+      "system": "nds",
+      "bucket": "nds/Yoshi Touch & Go (USA, Australia).zip"
+    },
+    {
+      "title": "Dr. Mario (Rev 1)",
+      "system": "gb",
+      "bucket": "gb/Dr. Mario (World) (Rev 1).zip"
+    },
+    {
+      "title": "Wario Land II",
+      "system": "gb",
+      "bucket": "gb/Wario Land II (USA, Europe) (SGB Enhanced).zip"
+    },
+    {
+      "title": "Mario Tennis",
+      "system": "gbc",
+      "bucket": "gbc/Mario Tennis (USA).zip"
+    },
+    {
+      "title": "Mario Golf",
+      "system": "gbc",
+      "bucket": "gbc/Mario Golf (USA).zip"
+    },
+    {
+      "title": "Super Mario Bros. Deluxe (Rev 1)",
+      "system": "gbc",
+      "bucket": "gbc/Super Mario Bros. Deluxe (USA, Europe) (Rev 1).zip"
+    },
+    {
+      "title": "Mario vs. Donkey Kong",
+      "system": "gba",
+      "bucket": "gba/Mario vs. Donkey Kong (USA, Australia).zip"
+    },
+    {
+      "title": "Mario Pinball Land",
+      "system": "gba",
+      "bucket": "gba/Mario Pinball Land (USA, Australia).zip"
+    },
+    {
+      "title": "WarioWare - Twisted!",
+      "system": "gba",
+      "bucket": "gba/WarioWare - Twisted! (USA, Australia).zip"
+    },
+    {
+      "title": "Mario Party Advance",
+      "system": "gba",
+      "bucket": "gba/Mario Party Advance (USA).zip"
+    },
+    {
+      "title": "Yoshi's Story",
+      "system": "n64",
+      "bucket": "n64/Yoshi's Story (USA) (En,Ja).zip"
+    },
+    {
+      "title": "Mario Paint (Japan, USA)",
+      "system": "snes",
+      "bucket": "snes/Mario Paint (Japan, USA) (En).zip"
+    },
+    {
+      "title": "Yoshi's Safari",
+      "system": "snes",
+      "bucket": "snes/Yoshi's Safari (USA).zip"
+    },
+    {
+      "title": "Wario's Woods",
+      "system": "snes",
+      "bucket": "snes/Wario's Woods (USA).zip"
+    },
+    {
+      "title": "Virtual Boy Wario Land (Japan, USA)",
+      "system": "virtualboy",
+      "bucket": "virtualboy/Virtual Boy Wario Land (Japan, USA) (En).zip"
+    },
+    {
+      "title": "Yoshi",
+      "system": "nes",
+      "bucket": "nes/Yoshi (USA).zip"
     }
   ]
 }

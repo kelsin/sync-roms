@@ -15,7 +15,7 @@
     {
       "title": "Panzer Dragoon",
       "system": "saturn",
-      "bucket": "saturn/Panzer Dragoon (USA) (1S).chd"
+      "bucket": "saturn/Panzer Dragoon (USA) (5S).chd"
     },
     {
       "title": "Panzer Dragoon II Zwei",
@@ -406,6 +406,21 @@
       "title": "Mobile Light Force 2",
       "system": "ps2",
       "bucket": "ps2/Mobile Light Force 2 (USA).chd"
+    },
+    {
+      "title": "Ikaruga",
+      "system": "gc",
+      "bucket": "gc/Ikaruga (USA).rvz"
+    },
+    {
+      "title": "Geometry Wars - Galaxies",
+      "system": "nds",
+      "bucket": "nds/Geometry Wars - Galaxies (USA).zip"
+    },
+    {
+      "title": "Space Invaders Extreme",
+      "system": "nds",
+      "bucket": "nds/Space Invaders Extreme (USA) (En,Ja,Fr,De,Es,It).zip"
     }
   ]
 }

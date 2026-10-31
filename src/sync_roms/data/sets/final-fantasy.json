@@ -148,6 +148,51 @@
       "title": "Final Fantasy XII",
       "system": "ps2",
       "bucket": "ps2/Final Fantasy XII.chd"
+    },
+    {
+      "title": "Final Fantasy III",
+      "system": "nds",
+      "bucket": "nds/Final Fantasy III (USA).zip"
+    },
+    {
+      "title": "Final Fantasy IV",
+      "system": "nds",
+      "bucket": "nds/Final Fantasy IV (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Final Fantasy - The 4 Heroes of Light",
+      "system": "nds",
+      "bucket": "nds/Final Fantasy - The 4 Heroes of Light (USA).zip"
+    },
+    {
+      "title": "Final Fantasy Tactics A2 - Grimoire of the Rift",
+      "system": "nds",
+      "bucket": "nds/Final Fantasy Tactics A2 - Grimoire of the Rift (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Final Fantasy XII - Revenant Wings",
+      "system": "nds",
+      "bucket": "nds/Final Fantasy XII - Revenant Wings (USA).zip"
+    },
+    {
+      "title": "Final Fantasy Crystal Chronicles - Ring of Fates",
+      "system": "nds",
+      "bucket": "nds/Final Fantasy Crystal Chronicles - Ring of Fates (USA) (En,Es).zip"
+    },
+    {
+      "title": "Final Fantasy Crystal Chronicles - Echoes of Time",
+      "system": "nds",
+      "bucket": "nds/Final Fantasy Crystal Chronicles - Echoes of Time (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Final Fantasy Fables - Chocobo Tales",
+      "system": "nds",
+      "bucket": "nds/Final Fantasy Fables - Chocobo Tales (USA).zip"
+    },
+    {
+      "title": "Final Fantasy - Crystal Chronicles",
+      "system": "gc",
+      "bucket": "gc/Final Fantasy - Crystal Chronicles (USA).rvz"
     }
   ]
 }

@@ -78,11 +78,6 @@
       "bucket": "genesis/Gunstar Heroes (USA).zip"
     },
     {
-      "title": "Sonic The Hedgehog 2 (Rev B)",
-      "system": "genesis",
-      "bucket": "genesis/Sonic The Hedgehog 2 (World) (Rev B).zip"
-    },
-    {
       "title": "Golden Axe (Rev A)",
       "system": "genesis",
       "bucket": "genesis/Golden Axe (World) (Rev A).zip"
@@ -161,6 +156,86 @@
       "title": "Alien Hominid",
       "system": "ps2",
       "bucket": "ps2/Alien Hominid (USA).chd"
+    },
+    {
+      "title": "Super Smash Bros. Melee (Rev 2)",
+      "system": "gc",
+      "bucket": "gc/Super Smash Bros. Melee (USA) (En,Ja) (Rev 2).rvz"
+    },
+    {
+      "title": "Mario Kart - Double Dash!!",
+      "system": "gc",
+      "bucket": "gc/Mario Kart - Double Dash!! (USA).rvz"
+    },
+    {
+      "title": "Mario Party 5",
+      "system": "gc",
+      "bucket": "gc/Mario Party 5 (USA).rvz"
+    },
+    {
+      "title": "Legend of Zelda, The - Four Swords Adventures",
+      "system": "gc",
+      "bucket": "gc/Legend of Zelda, The - Four Swords Adventures (USA).rvz"
+    },
+    {
+      "title": "Kirby Air Ride",
+      "system": "gc",
+      "bucket": "gc/Kirby Air Ride (USA).rvz"
+    },
+    {
+      "title": "Super Monkey Ball 2",
+      "system": "gc",
+      "bucket": "gc/Super Monkey Ball 2 (USA).rvz"
+    },
+    {
+      "title": "Gauntlet - Dark Legacy",
+      "system": "gc",
+      "bucket": "gc/Gauntlet - Dark Legacy (USA).rvz"
+    },
+    {
+      "title": "LEGO Star Wars II - The Original Trilogy",
+      "system": "gc",
+      "bucket": "gc/LEGO Star Wars II - The Original Trilogy (USA).rvz"
+    },
+    {
+      "title": "TimeSplitters 2",
+      "system": "gc",
+      "bucket": "gc/TimeSplitters 2 (USA).rvz"
+    },
+    {
+      "title": "TMNT - Mutant Melee",
+      "system": "gc",
+      "bucket": "gc/TMNT - Mutant Melee (USA).rvz"
+    },
+    {
+      "title": "Crazy Taxi",
+      "system": "gc",
+      "bucket": "gc/Crazy Taxi (USA).rvz"
+    },
+    {
+      "title": "Pac-Man Vs.",
+      "system": "gc",
+      "bucket": "gc/Pac-Man Vs. (USA).rvz"
+    },
+    {
+      "title": "New Super Mario Bros.",
+      "system": "nds",
+      "bucket": "nds/New Super Mario Bros. (USA, Australia).zip"
+    },
+    {
+      "title": "Mario Kart DS",
+      "system": "nds",
+      "bucket": "nds/Mario Kart DS (USA, Australia) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "LEGO Star Wars - The Complete Saga",
+      "system": "nds",
+      "bucket": "nds/LEGO Star Wars - The Complete Saga (USA).zip"
+    },
+    {
+      "title": "Contra 4",
+      "system": "nds",
+      "bucket": "nds/Contra 4 (USA).zip"
     }
   ]
 }

@@ -130,7 +130,7 @@
     {
       "title": "Sonic The Hedgehog",
       "system": "genesis",
-      "bucket": "genesis/Sonic The Hedgehog (Japan, Europe, Korea) (En).zip"
+      "bucket": "genesis/Sonic The Hedgehog (Japan, Europe, Korea) (En) (Rev A).zip"
     },
     {
       "title": "Columns",
@@ -146,11 +146,6 @@
       "title": "Comix Zone",
       "system": "genesis",
       "bucket": "genesis/Comix Zone (USA).zip"
-    },
-    {
-      "title": "Super Hang-On",
-      "system": "genesis",
-      "bucket": "genesis/Super Hang-On (Japan, USA) (En,Ja).zip"
     },
     {
       "title": "Streets of Rage 2",
@@ -276,6 +271,66 @@
       "title": "Taito Legends 2",
       "system": "ps2",
       "bucket": "ps2/Taito Legends 2 (USA).chd"
+    },
+    {
+      "title": "Namco Museum 50th Anniversary",
+      "system": "gc",
+      "bucket": "gc/Namco Museum 50th Anniversary (USA).rvz"
+    },
+    {
+      "title": "Midway Arcade Treasures",
+      "system": "gc",
+      "bucket": "gc/Midway Arcade Treasures (USA).rvz"
+    },
+    {
+      "title": "Midway Arcade Treasures 2",
+      "system": "gc",
+      "bucket": "gc/Midway Arcade Treasures 2 (USA).rvz"
+    },
+    {
+      "title": "Sonic Mega Collection",
+      "system": "gc",
+      "bucket": "gc/Sonic Mega Collection (USA).rvz"
+    },
+    {
+      "title": "Pac-Man Vs.",
+      "system": "gc",
+      "bucket": "gc/Pac-Man Vs. (USA).rvz"
+    },
+    {
+      "title": "WarioWare - Touched!",
+      "system": "nds",
+      "bucket": "nds/WarioWare - Touched! (USA).zip"
+    },
+    {
+      "title": "Tetris DS",
+      "system": "nds",
+      "bucket": "nds/Tetris DS (USA, Australia).zip"
+    },
+    {
+      "title": "Meteos",
+      "system": "nds",
+      "bucket": "nds/Meteos (USA).zip"
+    },
+    {
+      "title": "Namco Museum DS",
+      "system": "nds",
+      "bucket": "nds/Namco Museum DS (USA).zip"
+    },
+    {
+      "title": "Bejeweled Twist",
+      "system": "nds",
+      "bucket": "nds/Bejeweled Twist (USA) (NDSi Enhanced).zip"
+    },
+    {
+      "title": "Clubhouse Games (Rev 1)",
+      "system": "nds",
+      "bucket": "nds/Clubhouse Games (USA) (En,Fr,De,Es,It) (Rev 1).zip"
+    },
+    {
+      "title": "Retro Game Challenge",
+      "system": "nds",
+      "bucket": "nds/Retro Game Challenge (USA).zip"
     }
   ]
 }

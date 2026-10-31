@@ -141,6 +141,45 @@
       "title": "Capcom vs. SNK 2",
       "system": "ps2",
       "bucket": "ps2/Capcom vs. SNK 2 - Mark of the Millennium 2001 (USA).chd"
+    },
+    {
+      "title": "Super Street Fighter II (Rev 1)",
+      "system": "snes",
+      "bucket": "snes/Super Street Fighter II (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Street Fighter II (Rev 1)",
+      "system": "gb",
+      "bucket": "gb/Street Fighter II (USA, Europe) (Rev 1) (SGB Enhanced).zip"
+    },
+    {
+      "title": "Street Fighter Alpha - Warriors' Dreams",
+      "system": "gbc",
+      "bucket": "gbc/Street Fighter Alpha - Warriors' Dreams (USA).zip"
+    },
+    {
+      "title": "Street Fighter Collection",
+      "system": "saturn",
+      "bucket": "saturn/Street Fighter Collection (USA).m3u",
+      "files": [
+        "saturn/Street Fighter Collection (USA) (Disc 1).chd",
+        "saturn/Street Fighter Collection (USA) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "Night Warriors - Darkstalkers' Revenge",
+      "system": "saturn",
+      "bucket": "saturn/Night Warriors - Darkstalkers' Revenge (USA).chd"
+    },
+    {
+      "title": "Street Fighter - The Movie",
+      "system": "saturn",
+      "bucket": "saturn/Street Fighter - The Movie (USA).chd"
+    },
+    {
+      "title": "Capcom vs. SNK 2 EO",
+      "system": "gc",
+      "bucket": "gc/Capcom vs. SNK 2 EO (USA).rvz"
     }
   ]
 }

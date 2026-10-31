@@ -86,6 +86,31 @@
       "title": "Castlevania: Curse of Darkness",
       "system": "ps2",
       "bucket": "ps2/Castlevania - Curse of Darkness (USA).chd"
+    },
+    {
+      "title": "Castlevania - Dawn of Sorrow",
+      "system": "nds",
+      "bucket": "nds/Castlevania - Dawn of Sorrow (USA).zip"
+    },
+    {
+      "title": "Castlevania - Portrait of Ruin",
+      "system": "nds",
+      "bucket": "nds/Castlevania - Portrait of Ruin (USA).zip"
+    },
+    {
+      "title": "Castlevania - Order of Ecclesia",
+      "system": "nds",
+      "bucket": "nds/Castlevania - Order of Ecclesia (USA) (En,Fr).zip"
+    },
+    {
+      "title": "Classic NES Series - Castlevania",
+      "system": "gba",
+      "bucket": "gba/Classic NES Series - Castlevania (USA).zip"
+    },
+    {
+      "title": "Kid Dracula",
+      "system": "gb",
+      "bucket": "gb/Kid Dracula (USA, Europe).zip"
     }
   ]
 }

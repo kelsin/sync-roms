@@ -5,12 +5,7 @@
     {
       "title": "Sonic The Hedgehog",
       "system": "genesis",
-      "bucket": "genesis/Sonic The Hedgehog (Japan, Europe, Korea) (En).zip"
-    },
-    {
-      "title": "Sonic The Hedgehog 2 (Rev B)",
-      "system": "genesis",
-      "bucket": "genesis/Sonic The Hedgehog 2 (World) (Rev B).zip"
+      "bucket": "genesis/Sonic The Hedgehog (Japan, Europe, Korea) (En) (Rev A).zip"
     },
     {
       "title": "Sonic The Hedgehog 3",
@@ -111,6 +106,106 @@
       "title": "Sonic Battle",
       "system": "gba",
       "bucket": "gba/Sonic Battle (USA) (En,Ja,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Sonic Adventure 2 - Battle",
+      "system": "gc",
+      "bucket": "gc/Sonic Adventure 2 - Battle (USA) (En,Ja,Fr,De,Es).rvz"
+    },
+    {
+      "title": "Sonic Adventure DX - Director's Cut",
+      "system": "gc",
+      "bucket": "gc/Sonic Adventure DX - Director's Cut (USA) (En,Ja,Fr,De,Es).rvz"
+    },
+    {
+      "title": "Sonic Heroes",
+      "system": "gc",
+      "bucket": "gc/Sonic Heroes (USA) (En,Ja,Fr,De,Es,It).rvz"
+    },
+    {
+      "title": "Sonic Mega Collection",
+      "system": "gc",
+      "bucket": "gc/Sonic Mega Collection (USA).rvz"
+    },
+    {
+      "title": "Sonic Gems Collection",
+      "system": "gc",
+      "bucket": "gc/Sonic Gems Collection (USA).rvz"
+    },
+    {
+      "title": "Sonic Riders",
+      "system": "gc",
+      "bucket": "gc/Sonic Riders (USA) (En,Ja,Fr,De,Es,It).rvz"
+    },
+    {
+      "title": "Shadow the Hedgehog",
+      "system": "gc",
+      "bucket": "gc/Shadow the Hedgehog (USA) (En,Ja,Fr,De,Es,It).rvz"
+    },
+    {
+      "title": "Sonic Rush",
+      "system": "nds",
+      "bucket": "nds/Sonic Rush (USA) (En,Ja,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Sonic Rush Adventure",
+      "system": "nds",
+      "bucket": "nds/Sonic Rush Adventure (USA) (En,Ja,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Sonic Chronicles - The Dark Brotherhood",
+      "system": "nds",
+      "bucket": "nds/Sonic Chronicles - The Dark Brotherhood (USA) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Sonic Classic Collection",
+      "system": "nds",
+      "bucket": "nds/Sonic Classic Collection (USA) (En,Fr,Es) (NDSi Enhanced).zip"
+    },
+    {
+      "title": "Sonic Colors",
+      "system": "nds",
+      "bucket": "nds/Sonic Colors (USA) (En,Ja,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Sonic 3D Blast",
+      "system": "saturn",
+      "bucket": "saturn/Sonic 3D Blast (USA).chd"
+    },
+    {
+      "title": "Sonic R",
+      "system": "saturn",
+      "bucket": "saturn/Sonic R (USA, Brazil).chd"
+    },
+    {
+      "title": "Sonic Spinball",
+      "system": "gamegear",
+      "bucket": "gamegear/Sonic Spinball (USA, Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Sonic Pinball Party",
+      "system": "gba",
+      "bucket": "gba/Sonic Pinball Party (USA) (En,Ja,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Sonic The Hedgehog - Genesis",
+      "system": "gba",
+      "bucket": "gba/Sonic The Hedgehog - Genesis (USA).zip"
+    },
+    {
+      "title": "Sonic & Knuckles + Sonic The Hedgehog 3 (Lock-On)",
+      "system": "genesis",
+      "bucket": "genesis/Sonic & Knuckles + Sonic The Hedgehog 3 (USA) (Lock-On).zip"
+    },
+    {
+      "title": "Sonic & Knuckles + Sonic The Hedgehog 2 (Rev A) (Lock-On)",
+      "system": "genesis",
+      "bucket": "genesis/Sonic & Knuckles + Sonic The Hedgehog 2 (World) (Rev A) (Lock-On).zip"
+    },
+    {
+      "title": "Sonic The Hedgehog - Pocket Adventure",
+      "system": "ngpc",
+      "bucket": "ngpc/Sonic The Hedgehog - Pocket Adventure (World) (En,Ja).zip"
     }
   ]
 }
