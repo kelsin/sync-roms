@@ -2400,6 +2400,22 @@ def list_with_etags(prefix):
             if not o["Key"].endswith("/")}
 
 
+def counted(fn, label, total):
+    """fn wrapped to show a "label done/total" counter on a terminal as it is called from the worker threads."""
+    if not total or not sys.stdout.isatty():
+        return fn
+    lock, done = threading.Lock(), [0]
+
+    def run(*a):
+        result = fn(*a)
+        with lock:
+            done[0] += 1
+            sys.stdout.write(f"\r\033[K  {dim(f'{label} {done[0]}/{total}')}" + ("\r\033[K" if done[0] == total else ""))
+            sys.stdout.flush()
+        return result
+    return run
+
+
 def match_content(local, remote, local_print, remote_print, differs=None):
     """([(local path, bucket path)] with the same content, only local, only bucket) lists, ignoring names.
 
@@ -2411,11 +2427,12 @@ def match_content(local, remote, local_print, remote_print, differs=None):
     """
     with ThreadPoolExecutor(WORKERS) as ex:
         same = [p for p, size in local.items() if p in remote and remote[p][0] == size]
-        suspect = {p for p, d in zip(same, ex.map(lambda p: differs(p, remote[p][1]), same)) if d} if differs else set()
+        suspect = {p for p, d in zip(same, ex.map(counted(lambda p: differs(p, remote[p][1]), "Checking same-size files", len(same)), same)) if d} if differs else set()
         left_local = sorted(p for p, size in local.items() if p not in remote or remote[p][0] != size or p in suspect)
         left_remote = sorted(p for p, (size, _) in remote.items() if p not in local or local[p] != size or p in suspect)
-        local_prints = list(ex.map(local_print, left_local))
-        remote_prints = list(ex.map(lambda p: remote_print(p, *remote[p]), left_remote))
+        local_prints = list(ex.map(counted(local_print, "Reading local files", len(left_local)), left_local))
+        remote_prints = list(ex.map(counted(lambda p: remote_print(p, *remote[p]), "Reading bucket files", len(left_remote)),
+                                    left_remote))
     unmatched = list(zip(left_remote, remote_prints))
     matched, only_local = [], []
     for path, fp in zip(left_local, local_prints):
