@@ -151,6 +151,86 @@
       "title": "Amplitude",
       "system": "ps2",
       "bucket": "ps2/Amplitude (USA).chd"
+    },
+    {
+      "title": "Puyo Pop Fever",
+      "system": "gc",
+      "bucket": "gc/Puyo Pop Fever (USA) (En,Ja,Fr,De,Es,It).rvz"
+    },
+    {
+      "title": "Super Monkey Ball",
+      "system": "gc",
+      "bucket": "gc/Super Monkey Ball (USA).rvz"
+    },
+    {
+      "title": "Tetris Worlds",
+      "system": "gc",
+      "bucket": "gc/Tetris Worlds (USA).rvz"
+    },
+    {
+      "title": "Tetris DS",
+      "system": "nds",
+      "bucket": "nds/Tetris DS (USA, Australia).zip"
+    },
+    {
+      "title": "Meteos",
+      "system": "nds",
+      "bucket": "nds/Meteos (USA).zip"
+    },
+    {
+      "title": "Planet Puzzle League",
+      "system": "nds",
+      "bucket": "nds/Planet Puzzle League (USA).zip"
+    },
+    {
+      "title": "Bejeweled Twist",
+      "system": "nds",
+      "bucket": "nds/Bejeweled Twist (USA) (NDSi Enhanced).zip"
+    },
+    {
+      "title": "Polarium",
+      "system": "nds",
+      "bucket": "nds/Polarium (USA, Australia).zip"
+    },
+    {
+      "title": "Magnetica",
+      "system": "nds",
+      "bucket": "nds/Magnetica (USA).zip"
+    },
+    {
+      "title": "Mr. Driller - Drill Spirits",
+      "system": "nds",
+      "bucket": "nds/Mr. Driller - Drill Spirits (USA).zip"
+    },
+    {
+      "title": "Picross 3D",
+      "system": "nds",
+      "bucket": "nds/Picross 3D (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Professor Layton and the Curious Village",
+      "system": "nds",
+      "bucket": "nds/Professor Layton and the Curious Village (USA, Australia).zip"
+    },
+    {
+      "title": "Puyo Pop Fever",
+      "system": "nds",
+      "bucket": "nds/Puyo Pop Fever (USA) (En,Ja).zip"
+    },
+    {
+      "title": "Pokemon Puzzle Challenge",
+      "system": "gbc",
+      "bucket": "gbc/Pokemon Puzzle Challenge (USA, Australia).zip"
+    },
+    {
+      "title": "Pokemon Puzzle League",
+      "system": "n64",
+      "bucket": "n64/Pokemon Puzzle League (USA).zip"
+    },
+    {
+      "title": "Puzzle Quest - Challenge of the Warlords",
+      "system": "nds",
+      "bucket": "nds/Puzzle Quest - Challenge of the Warlords (USA).zip"
     }
   ]
 }

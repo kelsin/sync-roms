@@ -306,6 +306,95 @@
       "title": "Art of Fighting Anthology",
       "system": "ps2",
       "bucket": "ps2/Art of Fighting Anthology (USA).chd"
+    },
+    {
+      "title": "Capcom vs. SNK 2 EO",
+      "system": "gc",
+      "bucket": "gc/Capcom vs. SNK 2 EO (USA).rvz"
+    },
+    {
+      "title": "Soulcalibur II",
+      "system": "gc",
+      "bucket": "gc/Soulcalibur II (USA).rvz"
+    },
+    {
+      "title": "Super Smash Bros. Melee (Rev 2)",
+      "system": "gc",
+      "bucket": "gc/Super Smash Bros. Melee (USA) (En,Ja) (Rev 2).rvz"
+    },
+    {
+      "title": "Def Jam - Fight for NY",
+      "system": "gc",
+      "bucket": "gc/Def Jam - Fight for NY (USA).rvz"
+    },
+    {
+      "title": "Mortal Kombat - Deception",
+      "system": "gc",
+      "bucket": "gc/Mortal Kombat - Deception (USA).rvz"
+    },
+    {
+      "title": "Dragon Ball Z - Budokai 2",
+      "system": "gc",
+      "bucket": "gc/Dragon Ball Z - Budokai 2 (USA).rvz"
+    },
+    {
+      "title": "Naruto - Clash of Ninja 2",
+      "system": "gc",
+      "bucket": "gc/Naruto - Clash of Ninja 2 (USA).rvz"
+    },
+    {
+      "title": "King of Fighters 2000, The",
+      "system": "ps2",
+      "bucket": "ps2/King of Fighters 2000, The (USA).chd"
+    },
+    {
+      "title": "King of Fighters 2001, The",
+      "system": "ps2",
+      "bucket": "ps2/King of Fighters 2001, The (USA).chd"
+    },
+    {
+      "title": "King of Fighters 2003, The",
+      "system": "ps2",
+      "bucket": "ps2/King of Fighters 2003, The (USA).chd"
+    },
+    {
+      "title": "King of Fighters Collection, The - The Orochi Saga",
+      "system": "ps2",
+      "bucket": "ps2/King of Fighters Collection, The - The Orochi Saga (USA).chd"
+    },
+    {
+      "title": "Guilty Gear X",
+      "system": "ps2",
+      "bucket": "ps2/Guilty Gear X (USA).chd"
+    },
+    {
+      "title": "Guilty Gear XX Accent Core",
+      "system": "ps2",
+      "bucket": "ps2/Guilty Gear XX Accent Core (USA).chd"
+    },
+    {
+      "title": "Virtua Fighter 4",
+      "system": "ps2",
+      "bucket": "ps2/Virtua Fighter 4 (USA).chd"
+    },
+    {
+      "title": "Guilty Gear - Dust Strikers",
+      "system": "nds",
+      "bucket": "nds/Guilty Gear - Dust Strikers (USA).zip"
+    },
+    {
+      "title": "Night Warriors - Darkstalkers' Revenge",
+      "system": "saturn",
+      "bucket": "saturn/Night Warriors - Darkstalkers' Revenge (USA).chd"
+    },
+    {
+      "title": "Street Fighter Collection",
+      "system": "saturn",
+      "bucket": "saturn/Street Fighter Collection (USA).m3u",
+      "files": [
+        "saturn/Street Fighter Collection (USA) (Disc 1).chd",
+        "saturn/Street Fighter Collection (USA) (Disc 2).chd"
+      ]
     }
   ]
 }

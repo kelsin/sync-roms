@@ -13,11 +13,6 @@
       "bucket": "gb/Metroid II - Return of Samus (World).zip"
     },
     {
-      "title": "Super Metroid",
-      "system": "snes",
-      "bucket": "snes/Super Metroid (Japan, USA) (En,Ja).zip"
-    },
-    {
       "title": "Metroid Fusion",
       "system": "gba",
       "bucket": "gba/Metroid Fusion (USA).zip"
@@ -25,12 +20,32 @@
     {
       "title": "Metroid - Zero Mission",
       "system": "gba",
-      "bucket": "gba/Metroid - Zero Mission (USA).zip"
+      "bucket": "gba/Metroid - Zero Mission (USA, Australia).zip"
     },
     {
       "title": "Metroid (Classic NES Series)",
       "system": "gba",
       "bucket": "gba/Classic NES Series - Metroid (USA, Europe).zip"
+    },
+    {
+      "title": "Metroid Prime (Rev 2)",
+      "system": "gc",
+      "bucket": "gc/Metroid Prime (USA) (Rev 2).rvz"
+    },
+    {
+      "title": "Metroid Prime 2 - Echoes",
+      "system": "gc",
+      "bucket": "gc/Metroid Prime 2 - Echoes (USA).rvz"
+    },
+    {
+      "title": "Metroid Prime - Hunters (Rev 1)",
+      "system": "nds",
+      "bucket": "nds/Metroid Prime - Hunters (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Metroid Prime Pinball",
+      "system": "nds",
+      "bucket": "nds/Metroid Prime Pinball (USA).zip"
     }
   ]
 }

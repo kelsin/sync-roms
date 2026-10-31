@@ -85,7 +85,7 @@
     {
       "title": "Metroid - Zero Mission",
       "system": "gba",
-      "bucket": "gba/Metroid - Zero Mission (USA).zip"
+      "bucket": "gba/Metroid - Zero Mission (USA, Australia).zip"
     },
     {
       "title": "Castlevania - Aria of Sorrow",
@@ -140,7 +140,7 @@
     {
       "title": "Mega Man Zero 3",
       "system": "gba",
-      "bucket": "gba/Megaman Zero 3 (USA).zip"
+      "bucket": "gba/Mega Man Zero 3 (USA).zip"
     },
     {
       "title": "Sonic The Hedgehog 2",
@@ -201,6 +201,81 @@
       "title": "Galactic Pinball (En)",
       "system": "virtualboy",
       "bucket": "virtualboy/Galactic Pinball (Japan, USA) (En).zip"
+    },
+    {
+      "title": "New Super Mario Bros.",
+      "system": "nds",
+      "bucket": "nds/New Super Mario Bros. (USA, Australia).zip"
+    },
+    {
+      "title": "Mario Kart DS",
+      "system": "nds",
+      "bucket": "nds/Mario Kart DS (USA, Australia) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Pokemon - HeartGold Version",
+      "system": "nds",
+      "bucket": "nds/Pokemon - HeartGold Version (USA).zip"
+    },
+    {
+      "title": "Legend of Zelda, The - Phantom Hourglass",
+      "system": "nds",
+      "bucket": "nds/Legend of Zelda, The - Phantom Hourglass (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Castlevania - Dawn of Sorrow",
+      "system": "nds",
+      "bucket": "nds/Castlevania - Dawn of Sorrow (USA).zip"
+    },
+    {
+      "title": "Kirby Super Star Ultra",
+      "system": "nds",
+      "bucket": "nds/Kirby Super Star Ultra (USA).zip"
+    },
+    {
+      "title": "Metroid Prime - Hunters (Rev 1)",
+      "system": "nds",
+      "bucket": "nds/Metroid Prime - Hunters (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Chrono Trigger",
+      "system": "nds",
+      "bucket": "nds/Chrono Trigger (USA) (En,Fr).zip"
+    },
+    {
+      "title": "Advance Wars - Dual Strike",
+      "system": "nds",
+      "bucket": "nds/Advance Wars - Dual Strike (USA, Australia).zip"
+    },
+    {
+      "title": "Professor Layton and the Curious Village",
+      "system": "nds",
+      "bucket": "nds/Professor Layton and the Curious Village (USA, Australia).zip"
+    },
+    {
+      "title": "Contra 4",
+      "system": "nds",
+      "bucket": "nds/Contra 4 (USA).zip"
+    },
+    {
+      "title": "Ghost Trick - Phantom Detective",
+      "system": "nds",
+      "bucket": "nds/Ghost Trick - Phantom Detective (USA) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Elite Beat Agents",
+      "system": "nds",
+      "bucket": "nds/Elite Beat Agents (USA).zip"
+    },
+    {
+      "title": "Fire Emblem - Shadow Dragon",
+      "system": "nds",
+      "bucket": "nds/Fire Emblem - Shadow Dragon (USA).zip"
+    },
+    {
+      "title": "World Ends with You, The",
+      "system": "nds",
+      "bucket": "nds/World Ends with You, The (USA).zip"
     }
   ]
 }

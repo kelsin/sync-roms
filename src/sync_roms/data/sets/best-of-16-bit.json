@@ -13,11 +13,6 @@
       "bucket": "snes/Legend of Zelda, The - A Link to the Past (USA).zip"
     },
     {
-      "title": "Super Metroid (En,Fr,De)",
-      "system": "snes",
-      "bucket": "snes/Super Metroid (Japan, USA) (En,Ja).zip"
-    },
-    {
       "title": "Chrono Trigger",
       "system": "snes",
       "bucket": "snes/Chrono Trigger (USA).zip"
@@ -148,11 +143,6 @@
       "bucket": "snes/Earthworm Jim (USA).zip"
     },
     {
-      "title": "Sonic The Hedgehog 2 (Rev B)",
-      "system": "genesis",
-      "bucket": "genesis/Sonic The Hedgehog 2 (World) (Rev B).zip"
-    },
-    {
       "title": "Sonic The Hedgehog 3",
       "system": "genesis",
       "bucket": "genesis/Sonic The Hedgehog 3 (USA).zip"
@@ -198,11 +188,6 @@
       "bucket": "genesis/Comix Zone (USA).zip"
     },
     {
-      "title": "Altered Beast (Rev A)",
-      "system": "genesis",
-      "bucket": "genesis/Altered Beast (Japan, USA) (En) (Rev A).zip"
-    },
-    {
       "title": "Golden Axe (Rev A)",
       "system": "genesis",
       "bucket": "genesis/Golden Axe (World) (Rev A).zip"
@@ -245,7 +230,7 @@
     {
       "title": "Road Rash II (RR206)",
       "system": "genesis",
-      "bucket": "genesis/Road Rash II (USA, Europe) (RR206).zip"
+      "bucket": "genesis/Road Rash II (USA, Europe) (Rev 1).zip"
     },
     {
       "title": "Contra - Hard Corps",

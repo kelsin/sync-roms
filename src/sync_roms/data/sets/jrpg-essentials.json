@@ -362,6 +362,132 @@
       "title": "Kingdom Hearts II",
       "system": "ps2",
       "bucket": "ps2/Kingdom Hearts II (USA).chd"
+    },
+    {
+      "title": "Tales of Symphonia",
+      "system": "gc",
+      "bucket": "gc/Tales of Symphonia (USA) (Disc 1).rvz",
+      "files": [
+        "gc/Tales of Symphonia (USA) (Disc 2).rvz"
+      ]
+    },
+    {
+      "title": "Skies of Arcadia Legends",
+      "system": "gc",
+      "bucket": "gc/Skies of Arcadia Legends (USA).rvz"
+    },
+    {
+      "title": "Baten Kaitos - Eternal Wings and the Lost Ocean",
+      "system": "gc",
+      "bucket": "gc/Baten Kaitos - Eternal Wings and the Lost Ocean (USA) (Disc 1).rvz",
+      "files": [
+        "gc/Baten Kaitos - Eternal Wings and the Lost Ocean (USA) (Disc 2).rvz"
+      ]
+    },
+    {
+      "title": "Chrono Trigger",
+      "system": "nds",
+      "bucket": "nds/Chrono Trigger (USA) (En,Fr).zip"
+    },
+    {
+      "title": "Dragon Quest IV - Chapters of the Chosen",
+      "system": "nds",
+      "bucket": "nds/Dragon Quest IV - Chapters of the Chosen (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Dragon Quest VI - Realms of Revelation",
+      "system": "nds",
+      "bucket": "nds/Dragon Quest VI - Realms of Revelation (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Dragon Quest IX - Sentinels of the Starry Skies",
+      "system": "nds",
+      "bucket": "nds/Dragon Quest IX - Sentinels of the Starry Skies (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Etrian Odyssey",
+      "system": "nds",
+      "bucket": "nds/Etrian Odyssey (USA).zip"
+    },
+    {
+      "title": "Etrian Odyssey III - The Drowned City",
+      "system": "nds",
+      "bucket": "nds/Etrian Odyssey III - The Drowned City (USA).zip"
+    },
+    {
+      "title": "Lufia - Curse of the Sinistrals",
+      "system": "nds",
+      "bucket": "nds/Lufia - Curse of the Sinistrals (USA).zip"
+    },
+    {
+      "title": "Lunar Knights",
+      "system": "nds",
+      "bucket": "nds/Lunar Knights (USA) (En,Es).zip"
+    },
+    {
+      "title": "Golden Sun - Dark Dawn",
+      "system": "nds",
+      "bucket": "nds/Golden Sun - Dark Dawn (USA, Australia) (En,Es).zip"
+    },
+    {
+      "title": "Radiant Historia",
+      "system": "nds",
+      "bucket": "nds/Radiant Historia (USA).zip"
+    },
+    {
+      "title": "Shin Megami Tensei - Devil Survivor",
+      "system": "nds",
+      "bucket": "nds/Shin Megami Tensei - Devil Survivor (USA).zip"
+    },
+    {
+      "title": "Shin Megami Tensei - Strange Journey",
+      "system": "nds",
+      "bucket": "nds/Shin Megami Tensei - Strange Journey (USA).zip"
+    },
+    {
+      "title": "Final Fantasy Tactics A2 - Grimoire of the Rift",
+      "system": "nds",
+      "bucket": "nds/Final Fantasy Tactics A2 - Grimoire of the Rift (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Dark Cloud",
+      "system": "ps2",
+      "bucket": "ps2/Dark Cloud (USA).chd"
+    },
+    {
+      "title": "Shin Megami Tensei - Digital Devil Saga 2",
+      "system": "ps2",
+      "bucket": "ps2/Shin Megami Tensei - Digital Devil Saga 2 (USA).chd"
+    },
+    {
+      "title": "Suikoden IV",
+      "system": "ps2",
+      "bucket": "ps2/Suikoden IV (USA).chd"
+    },
+    {
+      "title": "Atelier Iris - Eternal Mana",
+      "system": "ps2",
+      "bucket": "ps2/Atelier Iris - Eternal Mana (USA).chd"
+    },
+    {
+      "title": "Ar tonelico - Melody of Elemia",
+      "system": "ps2",
+      "bucket": "ps2/Ar tonelico - Melody of Elemia (USA).chd"
+    },
+    {
+      "title": "Tales of Legendia",
+      "system": "ps2",
+      "bucket": "ps2/Tales of Legendia (USA).chd"
+    },
+    {
+      "title": "Shin Megami Tensei - Persona 3",
+      "system": "ps2",
+      "bucket": "ps2/Shin Megami Tensei - Persona 3 (USA).chd"
+    },
+    {
+      "title": "Dragon Quest V - Hand of the Heavenly Bride",
+      "system": "nds",
+      "bucket": "nds/Dragon Quest V - Hand of the Heavenly Bride (USA) (En,Fr,Es).zip"
     }
   ]
 }

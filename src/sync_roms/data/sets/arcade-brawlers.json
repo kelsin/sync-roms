@@ -125,7 +125,7 @@
     {
       "title": "Streets of Rage (Rev A)",
       "system": "genesis",
-      "bucket": "genesis/Streets of Rage (World) (Rev A).zip"
+      "bucket": "genesis/Streets of Rage (World) (En,Ja) (Rev A).zip"
     },
     {
       "title": "Streets of Rage 2",
@@ -176,6 +176,34 @@
       "title": "Capcom Classics Collection Vol. 2",
       "system": "ps2",
       "bucket": "ps2/Capcom Classics Collection Vol. 2 (USA).chd"
+    },
+    {
+      "title": "Teenage Mutant Ninja Turtles",
+      "system": "gc",
+      "bucket": "gc/Teenage Mutant Ninja Turtles (USA).rvz"
+    },
+    {
+      "title": "TMNT - Mutant Melee",
+      "system": "gc",
+      "bucket": "gc/TMNT - Mutant Melee (USA).rvz"
+    },
+    {
+      "title": "Teenage Mutant Ninja Turtles 3 - Mutant Nightmare",
+      "system": "gc",
+      "bucket": "gc/Teenage Mutant Ninja Turtles 3 - Mutant Nightmare (USA) (Disc 1).rvz",
+      "files": [
+        "gc/Teenage Mutant Ninja Turtles 3 - Mutant Nightmare (USA) (Disc 2).rvz"
+      ]
+    },
+    {
+      "title": "Midway Arcade Treasures",
+      "system": "gc",
+      "bucket": "gc/Midway Arcade Treasures (USA).rvz"
+    },
+    {
+      "title": "Contra 4",
+      "system": "nds",
+      "bucket": "nds/Contra 4 (USA).zip"
     }
   ]
 }

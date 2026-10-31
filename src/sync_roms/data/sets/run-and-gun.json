@@ -18,9 +18,9 @@
       "bucket": "snes/Contra III - The Alien Wars (USA).zip"
     },
     {
-      "title": "Super Turrican",
+      "title": "Super Turrican Collection",
       "system": "snes",
-      "bucket": "snes/Super Turrican (USA).zip"
+      "bucket": "snes/Super Turrican Collection (USA) (Strictly Limited Games).zip"
     },
     {
       "title": "Gunstar Heroes",
@@ -31,11 +31,6 @@
       "title": "Gunstar Super Heroes",
       "system": "gba",
       "bucket": "gba/Gunstar Super Heroes (USA).zip"
-    },
-    {
-      "title": "Mega Turrican",
-      "system": "genesis",
-      "bucket": "genesis/Mega Turrican (USA).zip"
     },
     {
       "title": "Operation C",
@@ -91,6 +86,31 @@
       "title": "Alien Hominid",
       "system": "ps2",
       "bucket": "ps2/Alien Hominid (USA).chd"
+    },
+    {
+      "title": "Contra 4",
+      "system": "nds",
+      "bucket": "nds/Contra 4 (USA).zip"
+    },
+    {
+      "title": "Metal Slug 7",
+      "system": "nds",
+      "bucket": "nds/Metal Slug 7 (USA).zip"
+    },
+    {
+      "title": "Mega Man ZX",
+      "system": "nds",
+      "bucket": "nds/Mega Man ZX (USA).zip"
+    },
+    {
+      "title": "TimeSplitters 2",
+      "system": "gc",
+      "bucket": "gc/TimeSplitters 2 (USA).rvz"
+    },
+    {
+      "title": "Freedom Fighters",
+      "system": "gc",
+      "bucket": "gc/Freedom Fighters (USA).rvz"
     }
   ]
 }

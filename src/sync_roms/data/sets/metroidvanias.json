@@ -3,11 +3,6 @@
   "description": "Exploration platformers with ability-gated maps.",
   "games": [
     {
-      "title": "Super Metroid (En,Fr,De)",
-      "system": "snes",
-      "bucket": "snes/Super Metroid (Japan, USA) (En,Ja).zip"
-    },
-    {
       "title": "Metroid",
       "system": "nes",
       "bucket": "nes/Metroid (USA).zip"
@@ -70,7 +65,7 @@
     {
       "title": "Metroid - Zero Mission",
       "system": "gba",
-      "bucket": "gba/Metroid - Zero Mission (USA).zip"
+      "bucket": "gba/Metroid - Zero Mission (USA, Australia).zip"
     },
     {
       "title": "Castlevania - Aria of Sorrow",
@@ -91,6 +86,51 @@
       "title": "Wario Land 4",
       "system": "gba",
       "bucket": "gba/Wario Land 4 (USA, Europe).zip"
+    },
+    {
+      "title": "Metroid Prime (Rev 2)",
+      "system": "gc",
+      "bucket": "gc/Metroid Prime (USA) (Rev 2).rvz"
+    },
+    {
+      "title": "Metroid Prime 2 - Echoes",
+      "system": "gc",
+      "bucket": "gc/Metroid Prime 2 - Echoes (USA).rvz"
+    },
+    {
+      "title": "Castlevania - Dawn of Sorrow",
+      "system": "nds",
+      "bucket": "nds/Castlevania - Dawn of Sorrow (USA).zip"
+    },
+    {
+      "title": "Castlevania - Portrait of Ruin",
+      "system": "nds",
+      "bucket": "nds/Castlevania - Portrait of Ruin (USA).zip"
+    },
+    {
+      "title": "Castlevania - Order of Ecclesia",
+      "system": "nds",
+      "bucket": "nds/Castlevania - Order of Ecclesia (USA) (En,Fr).zip"
+    },
+    {
+      "title": "Mega Man ZX",
+      "system": "nds",
+      "bucket": "nds/Mega Man ZX (USA).zip"
+    },
+    {
+      "title": "Mega Man ZX - Advent",
+      "system": "nds",
+      "bucket": "nds/Mega Man ZX - Advent (USA).zip"
+    },
+    {
+      "title": "Metroid Prime - Hunters (Rev 1)",
+      "system": "nds",
+      "bucket": "nds/Metroid Prime - Hunters (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Classic NES Series - Metroid",
+      "system": "gba",
+      "bucket": "gba/Classic NES Series - Metroid (USA, Europe).zip"
     }
   ]
 }

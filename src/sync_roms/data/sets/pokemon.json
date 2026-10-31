@@ -91,6 +91,111 @@
       "title": "Pokemon Stadium 2",
       "system": "n64",
       "bucket": "n64/Pokemon Stadium 2 (USA).zip"
+    },
+    {
+      "title": "Pokemon - HeartGold Version",
+      "system": "nds",
+      "bucket": "nds/Pokemon - HeartGold Version (USA).zip"
+    },
+    {
+      "title": "Pokemon - SoulSilver Version",
+      "system": "nds",
+      "bucket": "nds/Pokemon - SoulSilver Version (USA, Australia).zip"
+    },
+    {
+      "title": "Pokemon - Pearl Version (Rev 5)",
+      "system": "nds",
+      "bucket": "nds/Pokemon - Pearl Version (USA) (Rev 5).zip"
+    },
+    {
+      "title": "Pokemon - Black Version",
+      "system": "nds",
+      "bucket": "nds/Pokemon - Black Version (USA, Europe) (NDSi Enhanced).zip"
+    },
+    {
+      "title": "Pokemon - White Version",
+      "system": "nds",
+      "bucket": "nds/Pokemon - White Version (USA, Europe) (NDSi Enhanced).zip"
+    },
+    {
+      "title": "Pokemon - Black Version 2",
+      "system": "nds",
+      "bucket": "nds/Pokemon - Black Version 2 (USA, Europe) (NDSi Enhanced).zip"
+    },
+    {
+      "title": "Pokemon - White Version 2",
+      "system": "nds",
+      "bucket": "nds/Pokemon - White Version 2 (USA, Europe) (NDSi Enhanced).zip"
+    },
+    {
+      "title": "Pokemon Mystery Dungeon - Blue Rescue Team",
+      "system": "nds",
+      "bucket": "nds/Pokemon Mystery Dungeon - Blue Rescue Team (USA, Australia).zip"
+    },
+    {
+      "title": "Pokemon Mystery Dungeon - Explorers of Sky",
+      "system": "nds",
+      "bucket": "nds/Pokemon Mystery Dungeon - Explorers of Sky (USA).zip"
+    },
+    {
+      "title": "Pokemon Ranger",
+      "system": "nds",
+      "bucket": "nds/Pokemon Ranger (USA).zip"
+    },
+    {
+      "title": "Pokemon Ranger - Guardian Signs",
+      "system": "nds",
+      "bucket": "nds/Pokemon Ranger - Guardian Signs (USA, Australia).zip"
+    },
+    {
+      "title": "Pokemon Ranger - Shadows of Almia",
+      "system": "nds",
+      "bucket": "nds/Pokemon Ranger - Shadows of Almia (USA).zip"
+    },
+    {
+      "title": "Pokemon Trozei!",
+      "system": "nds",
+      "bucket": "nds/Pokemon Trozei! (USA).zip"
+    },
+    {
+      "title": "Pokemon Colosseum",
+      "system": "gc",
+      "bucket": "gc/Pokemon Colosseum (USA).rvz"
+    },
+    {
+      "title": "Pokemon XD - Gale of Darkness",
+      "system": "gc",
+      "bucket": "gc/Pokemon XD - Gale of Darkness (USA).rvz"
+    },
+    {
+      "title": "Pokemon Channel",
+      "system": "gc",
+      "bucket": "gc/Pokemon Channel (USA).rvz"
+    },
+    {
+      "title": "Pokemon Puzzle League",
+      "system": "n64",
+      "bucket": "n64/Pokemon Puzzle League (USA).zip"
+    },
+    {
+      "title": "Pokemon Puzzle Challenge",
+      "system": "gbc",
+      "bucket": "gbc/Pokemon Puzzle Challenge (USA, Australia).zip"
+    },
+    {
+      "title": "Pokemon - Diamond Version (Rev 5)",
+      "system": "nds",
+      "bucket": "nds/Pokemon - Diamond Version (USA) (Rev 5).zip"
+    },
+    {
+      "title": "Pokemon - Platinum Version (Rev 1)",
+      "system": "nds",
+      "bucket": "nds/Pokemon - Platinum Version (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Pokemon Conquest (Rev 1)",
+      "system": "nds",
+      "bucket": "nds/Pokemon Conquest (USA, Australia) (Rev 1) (NDSi Enhanced).zip"
     }
   ]
 }
