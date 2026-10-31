@@ -316,7 +316,7 @@ sync-roms --edit
 ```
 
 0. Pick **🏠 Core**, one of your cards, or **➕ New card** (asks for its folder name, then its device and
-   firmware, like the first sync does). Games a card already gets from core show greyed out with a 🔒.
+   firmware, like the first sync does). On a card, `^D` changes its device and firmware instead of opening it (saved with the other changes) and unticks the card's extra games for systems the new device or firmware doesn't use. Each card's row shows its current device and firmware. Games a card already gets from core show greyed out with a 🔒.
 1. Pick **By system** or **By set**, then type to filter the list (every word you type must
    match) and `Enter` to pick one. `Esc` goes back; `Esc` at the first menu finishes.
 2. For a system you see every file in its bucket folder. For a set (a curated list in the
