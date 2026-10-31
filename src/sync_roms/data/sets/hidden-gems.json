@@ -717,6 +717,16 @@
       "title": "Valkyria Chronicles 3 (English v1.0.8)",
       "system": "psp",
       "bucket": "psp/Valkyria Chronicles 3 (English v1.0.8).chd"
+    },
+    {
+      "title": "Danganronpa (English Patched)",
+      "system": "psp",
+      "bucket": "psp/Danganronpa (English Patched).chd"
+    },
+    {
+      "title": "Fate Extra CCC (English v1.0)",
+      "system": "psp",
+      "bucket": "psp/Fate Extra CCC (English v1.0).chd"
     }
   ]
 }
