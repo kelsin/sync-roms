@@ -353,11 +353,6 @@
       "bucket": "mame/dragnblz.zip"
     },
     {
-      "title": "1945 III",
-      "system": "mame",
-      "bucket": "mame/1945kiii.zip"
-    },
-    {
       "title": "19XX",
       "system": "mame",
       "bucket": "mame/19xx.zip"
@@ -421,6 +416,166 @@
       "title": "Space Invaders Extreme",
       "system": "nds",
       "bucket": "nds/Space Invaders Extreme (USA) (En,Ja,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Gradius - The Interstellar Assault",
+      "system": "gb",
+      "bucket": "gb/Gradius - The Interstellar Assault (USA).zip"
+    },
+    {
+      "title": "R-Type",
+      "system": "gb",
+      "bucket": "gb/R-Type (USA, Europe).zip"
+    },
+    {
+      "title": "1943 - The Battle of Midway",
+      "system": "nes",
+      "bucket": "nes/1943 - The Battle of Midway (USA).zip"
+    },
+    {
+      "title": "Zanac",
+      "system": "nes",
+      "bucket": "nes/Zanac (USA).zip"
+    },
+    {
+      "title": "Star Soldier",
+      "system": "nes",
+      "bucket": "nes/Star Soldier (USA).zip"
+    },
+    {
+      "title": "Xevious - The Avenger",
+      "system": "nes",
+      "bucket": "nes/Xevious - The Avenger (USA).zip"
+    },
+    {
+      "title": "Fantasy Zone",
+      "system": "gamegear",
+      "bucket": "gamegear/Fantasy Zone (USA, Brazil) (En).zip"
+    },
+    {
+      "title": "Space Harrier",
+      "system": "gamegear",
+      "bucket": "gamegear/Space Harrier (World).zip"
+    },
+    {
+      "title": "After Burner II",
+      "system": "genesis",
+      "bucket": "genesis/After Burner II (USA, Europe).zip"
+    },
+    {
+      "title": "Fantasy Zone",
+      "system": "genesis",
+      "bucket": "genesis/Fantasy Zone (World) (Mega Drive Mini 2, Genesis Mini 2).zip"
+    },
+    {
+      "title": "Forgotten Worlds (Rev A)",
+      "system": "genesis",
+      "bucket": "genesis/Forgotten Worlds (World) (Rev A).zip"
+    },
+    {
+      "title": "Space Harrier II",
+      "system": "genesis",
+      "bucket": "genesis/Space Harrier II (World).zip"
+    },
+    {
+      "title": "Thunder Force II",
+      "system": "genesis",
+      "bucket": "genesis/Thunder Force II (USA, Europe).zip"
+    },
+    {
+      "title": "Darius",
+      "system": "genesis",
+      "bucket": "genesis/Darius (World) (Genesis Mini, Mega Drive Mini).zip"
+    },
+    {
+      "title": "Fantasy Zone",
+      "system": "tg16",
+      "bucket": "tg16/Fantasy Zone (USA).zip"
+    },
+    {
+      "title": "Galaga '90",
+      "system": "tg16",
+      "bucket": "tg16/Galaga '90 (USA).zip"
+    },
+    {
+      "title": "Space Harrier",
+      "system": "tg16",
+      "bucket": "tg16/Space Harrier (USA).zip"
+    },
+    {
+      "title": "Aero Fighters",
+      "system": "snes",
+      "bucket": "snes/Aero Fighters (USA).zip"
+    },
+    {
+      "title": "R-Type III",
+      "system": "snes",
+      "bucket": "snes/R-Type III (USA).zip"
+    },
+    {
+      "title": "Raiden Trad",
+      "system": "snes",
+      "bucket": "snes/Raiden Trad (USA).zip"
+    },
+    {
+      "title": "Star Fox (Rev 2)",
+      "system": "snes",
+      "bucket": "snes/Star Fox (USA) (Rev 2).zip"
+    },
+    {
+      "title": "Star Fox 64 (Rev 1)",
+      "system": "n64",
+      "bucket": "n64/Star Fox 64 (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Star Soldier - Vanishing Earth",
+      "system": "n64",
+      "bucket": "n64/Star Soldier - Vanishing Earth (USA).zip"
+    },
+    {
+      "title": "AeroFighters Assault",
+      "system": "n64",
+      "bucket": "n64/AeroFighters Assault (USA).zip"
+    },
+    {
+      "title": "Space Harrier (Japan, USA)",
+      "system": "sega32x",
+      "bucket": "sega32x/Space Harrier (Japan, USA) (En).zip"
+    },
+    {
+      "title": "After Burner Complete (Japan, USA)",
+      "system": "sega32x",
+      "bucket": "sega32x/After Burner Complete (Japan, USA) (En).zip"
+    },
+    {
+      "title": "R-Type",
+      "system": "mastersystem",
+      "bucket": "mastersystem/R-Type (World).zip"
+    },
+    {
+      "title": "Space Harrier (Japan, USA)",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Space Harrier (Japan, USA) (En).zip"
+    },
+    {
+      "title": "1942",
+      "system": "gbc",
+      "bucket": "gbc/1942 (USA, Europe).zip"
+    },
+    {
+      "title": "Classic NES Series - Xevious",
+      "system": "gba",
+      "bucket": "gba/Classic NES Series - Xevious (USA, Europe).zip"
+    },
+    {
+      "title": "Xevious",
+      "system": "atari7800",
+      "bucket": "atari7800/Xevious (USA).zip"
+    },
+    {
+      "title": "Raiden (Rev A)",
+      "system": "atarijaguar",
+      "bucket": "atarijaguar/Raiden (World) (Rev A).zip"
     }
   ]
 }

@@ -125,7 +125,7 @@
     {
       "title": "Streets of Rage (Rev A)",
       "system": "genesis",
-      "bucket": "genesis/Streets of Rage (World) (En,Ja) (Rev A).zip"
+      "bucket": "genesis/Streets of Rage (World) (Rev A).zip"
     },
     {
       "title": "Streets of Rage 2",
@@ -204,6 +204,81 @@
       "title": "Contra 4",
       "system": "nds",
       "bucket": "nds/Contra 4 (USA).zip"
+    },
+    {
+      "title": "Final Fight One",
+      "system": "gba",
+      "bucket": "gba/Final Fight One (USA).zip"
+    },
+    {
+      "title": "Double Dragon Advance",
+      "system": "gba",
+      "bucket": "gba/Double Dragon Advance (USA).zip"
+    },
+    {
+      "title": "River City Ransom EX",
+      "system": "gba",
+      "bucket": "gba/River City Ransom EX (USA).zip"
+    },
+    {
+      "title": "Teenage Mutant Ninja Turtles",
+      "system": "gba",
+      "bucket": "gba/Teenage Mutant Ninja Turtles (USA).zip"
+    },
+    {
+      "title": "Sunset Riders",
+      "system": "genesis",
+      "bucket": "genesis/Sunset Riders (USA).zip"
+    },
+    {
+      "title": "Punisher, The",
+      "system": "genesis",
+      "bucket": "genesis/Punisher, The (USA).zip"
+    },
+    {
+      "title": "Battletoads-Double Dragon",
+      "system": "genesis",
+      "bucket": "genesis/Battletoads-Double Dragon (USA).zip"
+    },
+    {
+      "title": "Double Dragon 3 - The Arcade Game",
+      "system": "genesis",
+      "bucket": "genesis/Double Dragon 3 - The Arcade Game (USA, Europe).zip"
+    },
+    {
+      "title": "Spider-Man . Venom - Maximum Carnage",
+      "system": "genesis",
+      "bucket": "genesis/Spider-Man . Venom - Maximum Carnage (World).zip"
+    },
+    {
+      "title": "Captain Commando",
+      "system": "snes",
+      "bucket": "snes/Captain Commando (USA).zip"
+    },
+    {
+      "title": "Combatribes, The",
+      "system": "snes",
+      "bucket": "snes/Combatribes, The (USA).zip"
+    },
+    {
+      "title": "Streets of Rage",
+      "system": "gamegear",
+      "bucket": "gamegear/Streets of Rage (World).zip"
+    },
+    {
+      "title": "Streets of Rage 2",
+      "system": "gamegear",
+      "bucket": "gamegear/Streets of Rage 2 (World).zip"
+    },
+    {
+      "title": "Battletoads-Double Dragon",
+      "system": "gb",
+      "bucket": "gb/Battletoads-Double Dragon (USA).zip"
+    },
+    {
+      "title": "Teenage Mutant Ninja Turtles III - Radical Rescue",
+      "system": "gb",
+      "bucket": "gb/Teenage Mutant Ninja Turtles III - Radical Rescue (USA).zip"
     }
   ]
 }

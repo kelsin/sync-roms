@@ -236,6 +236,81 @@
       "title": "Contra 4",
       "system": "nds",
       "bucket": "nds/Contra 4 (USA).zip"
+    },
+    {
+      "title": "Sonic The Hedgehog 2 (Rev B)",
+      "system": "genesis",
+      "bucket": "genesis/Sonic The Hedgehog 2 (World) (Rev B).zip"
+    },
+    {
+      "title": "Kirby & The Amazing Mirror",
+      "system": "gba",
+      "bucket": "gba/Kirby & The Amazing Mirror (USA).zip"
+    },
+    {
+      "title": "Legend of Zelda, The - A Link to the Past & Four Swords",
+      "system": "gba",
+      "bucket": "gba/Legend of Zelda, The - A Link to the Past & Four Swords (USA).zip"
+    },
+    {
+      "title": "Mario Kart - Super Circuit",
+      "system": "gba",
+      "bucket": "gba/Mario Kart - Super Circuit (USA).zip"
+    },
+    {
+      "title": "Bomberman Tournament",
+      "system": "gba",
+      "bucket": "gba/Bomberman Tournament (USA, Europe).zip"
+    },
+    {
+      "title": "Double Dragon Advance",
+      "system": "gba",
+      "bucket": "gba/Double Dragon Advance (USA).zip"
+    },
+    {
+      "title": "River City Ransom EX",
+      "system": "gba",
+      "bucket": "gba/River City Ransom EX (USA).zip"
+    },
+    {
+      "title": "Teenage Mutant Ninja Turtles",
+      "system": "gba",
+      "bucket": "gba/Teenage Mutant Ninja Turtles (USA).zip"
+    },
+    {
+      "title": "Battletoads-Double Dragon",
+      "system": "gb",
+      "bucket": "gb/Battletoads-Double Dragon (USA).zip"
+    },
+    {
+      "title": "Battletoads-Double Dragon",
+      "system": "genesis",
+      "bucket": "genesis/Battletoads-Double Dragon (USA).zip"
+    },
+    {
+      "title": "Double Dragon 3 - The Arcade Game",
+      "system": "genesis",
+      "bucket": "genesis/Double Dragon 3 - The Arcade Game (USA, Europe).zip"
+    },
+    {
+      "title": "Sunset Riders",
+      "system": "genesis",
+      "bucket": "genesis/Sunset Riders (USA).zip"
+    },
+    {
+      "title": "Punisher, The",
+      "system": "genesis",
+      "bucket": "genesis/Punisher, The (USA).zip"
+    },
+    {
+      "title": "Streets of Rage",
+      "system": "gamegear",
+      "bucket": "gamegear/Streets of Rage (World).zip"
+    },
+    {
+      "title": "Captain Commando",
+      "system": "snes",
+      "bucket": "snes/Captain Commando (USA).zip"
     }
   ]
 }

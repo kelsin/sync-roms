@@ -23,7 +23,7 @@
       "bucket": "gb/Legend of Zelda, The - Link's Awakening (USA, Europe) (Rev 2).zip"
     },
     {
-      "title": "Legend of Zelda, The - Link's Awakening DX (Rev 2) (SGB Enhanced) (GB Compatible)",
+      "title": "Legend of Zelda, The - Link's Awakening DX (Rev 2) (SGB Enhanced)",
       "system": "gbc",
       "bucket": "gbc/Legend of Zelda, The - Link's Awakening DX (USA, Europe) (Rev 2) (SGB Enhanced) (GB Compatible).zip"
     },
@@ -101,6 +101,11 @@
       "title": "Classic NES Series - Zelda II - The Adventure of Link",
       "system": "gba",
       "bucket": "gba/Classic NES Series - Zelda II - The Adventure of Link (USA, Europe).zip"
+    },
+    {
+      "title": "Legend of Zelda, The - Ocarina of Time - Master Quest",
+      "system": "n64",
+      "bucket": "n64/Legend of Zelda, The - Ocarina of Time - Master Quest (USA) (GameCube).zip"
     }
   ]
 }
