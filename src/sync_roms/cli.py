@@ -846,7 +846,10 @@ def edit_manifest():
         return dump_list(core["data"]["systems"], core["sets_on"]) if core else core_raw
 
     def edit_target(t, is_card):
-        systems_all = t["data"]["systems"]
+        name = next((k for k, v in targets.items() if v is t), None)
+        setup = (t["setup"] or saved_setup(load_cards().get(name), manifest["devices"], manifest["layouts"])
+                 if is_card else None)
+        systems_all = [s for s in t["data"]["systems"] if not setup or system_applies(s, *setup)]
         by_bucket = {s["bucket"]: s for s in systems_all}
         systems = sorted((s for s in systems_all if bucket_keys[s["bucket"]]), key=lambda s: s["name"].lower())
         where = "games.json" if not is_card else f"{t['label']}'s extras"
