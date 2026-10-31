@@ -29,5 +29,11 @@
     "bios_dir": "BIOS",
     "unzip": true,
     "note": "slot, a Game Boy-centric frontend (GB, GBC and GBA only) for the Anbernic RG SP and other H700 handhelds. Card root is the SD card slot runs from. ROMs must be unzipped and sit directly in their system folder, so a sync extracts archives and ignores subfolders. Source: https://slot-cfw.fyi"
+  },
+  "emudeck": {
+    "label": "EmuDeck",
+    "roms_dir": "Emulation/roms",
+    "bios_dir": "Emulation/bios",
+    "note": "EmuDeck on the Steam Deck and Steam Machine (SteamOS). Card root holds Emulation/; emulators install to the internal SSD. System folders use the ES-DE names, except Wii U, Xbox 360 and Model 2, which keep their ROMs in a roms/ subfolder. BIOS files go in Emulation/bios, with subfolders only where an emulator expects one. Source: https://emudeck.github.io/cheat-sheet/"
   }
 }

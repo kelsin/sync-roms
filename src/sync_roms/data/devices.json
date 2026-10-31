@@ -618,5 +618,21 @@
     "firmwares": [
       "esde"
     ]
+  },
+  {
+    "id": "steam-deck",
+    "name": "Steam Deck",
+    "soc": "AMD Custom APU (Van Gogh)",
+    "firmwares": [
+      "emudeck"
+    ]
+  },
+  {
+    "id": "steam-machine",
+    "name": "Steam Machine",
+    "soc": "AMD Zen 4 + RDNA 3",
+    "firmwares": [
+      "emudeck"
+    ]
   }
 ]
