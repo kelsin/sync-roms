@@ -137,10 +137,76 @@ def text_keys(existing):
             or k == f"{scrape_plan.SCRAPES}/esde/settings.json"]
 
 
+def plan_slot_upload(labels_dir, systems, roms, existing):
+    """What to upload from a Slot card's Labels folder: its PNGs named after a ROM in the bucket (any, not just the listed games).
+
+    systems: the manifest's systems; roms: {system: available ROM paths}; existing: {key: size} under scrapes/.
+    Returns (files [(key, path, size)] that are new or a different size, number already there, unmatched label paths).
+    """
+    stems = rom_stems(roms)
+    files, present, unmatched = [], 0, []
+    for s in systems:
+        folder = s["folders"].get("slot")
+        base = os.path.join(labels_dir, folder) if folder else ""
+        for f in sorted(os.listdir(base)) if base and os.path.isdir(base) else []:
+            stem, ext = os.path.splitext(f)
+            if ext.lower() != ".png" or f.startswith("."):
+                continue
+            path = os.path.join(base, f)
+            if stem not in stems.get(s["bucket"], ()):
+                unmatched.append(path)
+                continue
+            key = f"{scrape_plan.SCRAPES}/{s['bucket']}/{scrape_plan.SLOT_TYPE}/{stem}.png"
+            size = os.path.getsize(path)
+            if existing.get(key) == size:
+                present += 1
+            else:
+                files.append((key, path, size))
+    return files, present, unmatched
+
+
+def upload_slot_labels(args, labels_dir):
+    """Upload a Slot card's Labels folder to scrapes/<system>/slot/, replacing labels that differ."""
+    print(ui.bold("☁️  Upload Slot labels") + ui.dim(f"  read={runtime.PROFILE}  write={runtime.WRITE_PROFILE}  from {labels_dir}"))
+    try:
+        manifest = store.load_manifest()
+        print("📏 Listing the ROMs available in the bucket...")
+        roms = bucket_roms(manifest["systems"], all_files=True)
+        print("☁️  Listing what's already in scrapes/...")
+        existing = s3.list_sizes(scrape_plan.SCRAPES + "/")
+    except (ClientError, BotoCoreError) as e:
+        raise SystemExit(ui.red(f"❌ {e}"))
+    files, present, unmatched = plan_slot_upload(labels_dir, manifest["systems"], roms, existing)
+    replaced = sum(1 for key, _, _ in files if key in existing)
+    print(f"🏷️  Labels to upload: {ui.bold(str(len(files)))} ({ui.human_size(sum(f[2] for f in files))}, "
+          f"{replaced} replacing a different one), {present} already there")
+    if unmatched:
+        print(ui.yellow(f"  ⚠️  {len(unmatched)} label(s) match no ROM in the bucket, skipped"))
+        for path in unmatched[:10]:
+            print(ui.dim(f"     {os.path.relpath(path, labels_dir)}"))
+    if not files:
+        print(ui.green("Nothing to upload ✨"))
+        return 0
+    if args.dry_run:
+        print(ui.yellow("\n🧪 Dry run — nothing uploaded"))
+        for key, _, size in files[:20]:
+            print(f"  {key} {ui.dim(ui.human_size(size))}")
+        return 0
+    if not ui.confirm(f"☁️  Upload to s3://{runtime.BUCKET}/{scrape_plan.SCRAPES}/ ?", default=False):
+        print(ui.yellow("👋 Cancelled."))
+        return 0
+    failed = upload.run_uploads(files)
+    print(ui.green("\n🎉 Done!") if not failed else ui.red(f"\n⚠️  Done with {failed} failure(s)"))
+    return 1 if failed else 0
+
+
 def upload_scrapes(args):
-    """Upload BASE_DIR/ES-DE scraped data to the bucket's scrapes/ folder, merging with what's there."""
+    """Upload BASE_DIR/ES-DE scraped data (or a Slot card's Labels) to the bucket's scrapes/ folder, merging with what's there."""
     base = os.path.abspath(os.path.expanduser(args.base_dir or os.getcwd()))
     es_dir = os.path.join(base, "ES-DE")
+    labels_dir = os.path.join(base, "Labels")
+    if not os.path.isdir(es_dir) and os.path.isdir(labels_dir):
+        return upload_slot_labels(args, labels_dir)
     if not os.path.isdir(es_dir):
         raise SystemExit(ui.red(f"❌ No ES-DE folder in {base}"))
     saved = store.load_cards().get(os.path.basename(base) or base)

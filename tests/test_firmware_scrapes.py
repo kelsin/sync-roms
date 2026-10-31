@@ -161,6 +161,28 @@ class StaleMediaTest(unittest.TestCase):
                                         ["Games/GBA/Keep.gba"]), [])
 
 
+class SlotLabelUploadTest(unittest.TestCase):
+    SYSTEMS = [sysdef("gba", slot="GBA"), sysdef("gb", slot="GB")]
+
+    def plan(self, files, roms, existing=None):
+        with tempfile.TemporaryDirectory() as labels:
+            for f in files:
+                touch(os.path.join(labels, f))
+            files, present, unmatched = scrape_files.plan_slot_upload(labels, self.SYSTEMS, roms, existing or {})
+            return [k for k, *_ in files], present, [os.path.relpath(u, labels) for u in unmatched]
+
+    def test_labels_named_after_a_rom_go_to_the_slot_folder(self):
+        keys, present, unmatched = self.plan(["GBA/A.png", "GB/B.png", "GBA/Nope.png", "GBA/A.txt"],
+                                             {"gba": {"A.zip"}, "gb": {"B.gb"}})
+        self.assertEqual(sorted(keys), ["scrapes/gb/slot/B.png", "scrapes/gba/slot/A.png"])
+        self.assertEqual((present, unmatched), (0, ["GBA/Nope.png"]))
+
+    def test_same_size_is_present_and_a_different_size_is_replaced(self):
+        keys, present, _ = self.plan(["GBA/A.png", "GBA/B.png"], {"gba": {"A.zip", "B.zip"}},
+                                     {"scrapes/gba/slot/A.png": 1, "scrapes/gba/slot/B.png": 99})
+        self.assertEqual((keys, present), (["scrapes/gba/slot/B.png"], 1))
+
+
 class DerivedUploadTest(unittest.TestCase):
     def derived(self, files, system="gba", roms=("A.zip", "hacks/B.zip"), existing=None):
         with tempfile.TemporaryDirectory() as es:
@@ -178,7 +200,7 @@ class DerivedUploadTest(unittest.TestCase):
         for system in ("gb", "gbc"):
             plan = self.derived(["covers/A.png"], system, ("A.gb",))
             slot = [d for d in plan["derived"] if "/slot/" in d[0]]
-            self.assertEqual([d[3] for d in slot], [(1024, 914)])
+            self.assertEqual([d[3] for d in slot], [(1024, 901)])
 
     def test_a_rom_in_a_subfolder_gets_slot_art_only(self):
         plan = self.derived(["covers/hacks/B.png"])

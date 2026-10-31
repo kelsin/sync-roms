@@ -27,7 +27,7 @@ ONION_MAX = (250, 360)
 # scrapes/<system>/slot/<ROM name>.png.
 SLOT_TYPE = "slot"
 SLOT_ART = ("covers", "3dboxes", "screenshots")
-SLOT_LABEL_MAX = {"gba": (1280, 661), "gb": (1024, 914), "gbc": (1024, 914)}
+SLOT_LABEL_MAX = {"gba": (1280, 661), "gb": (1024, 901), "gbc": (1024, 901)}
 BUCKET_MEDIA = MEDIA_TYPES | {ONION_TYPE, SLOT_TYPE}
 TEXT_FIELDS = ("name", "desc", "developer", "publisher", "genre", "players")
 UNKNOWN_FIELDS = {"developer", "publisher", "genre", "players"}  # ES-DE writes "unknown" for these
