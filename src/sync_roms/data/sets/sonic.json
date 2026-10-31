@@ -5,7 +5,7 @@
     {
       "title": "Sonic The Hedgehog",
       "system": "genesis",
-      "bucket": "genesis/Sonic The Hedgehog (Japan, Europe, Korea) (En) (Rev A).zip"
+      "bucket": "genesis/Sonic The Hedgehog (Japan, Europe, Korea) (En).zip"
     },
     {
       "title": "Sonic The Hedgehog 3",
@@ -195,17 +195,27 @@
     {
       "title": "Sonic & Knuckles + Sonic The Hedgehog 3 (Lock-On)",
       "system": "genesis",
-      "bucket": "genesis/Sonic & Knuckles + Sonic The Hedgehog 3 (USA) (Lock-On).zip"
+      "bucket": "genesis/Sonic & Knuckles + Sonic The Hedgehog 3 (USA) (Lock-on Combination).zip"
     },
     {
       "title": "Sonic & Knuckles + Sonic The Hedgehog 2 (Rev A) (Lock-On)",
       "system": "genesis",
-      "bucket": "genesis/Sonic & Knuckles + Sonic The Hedgehog 2 (World) (Rev A) (Lock-On).zip"
+      "bucket": "genesis/Sonic & Knuckles + Sonic The Hedgehog 2 (World) (Rev A) (Lock-on Combination).zip"
     },
     {
       "title": "Sonic The Hedgehog - Pocket Adventure",
       "system": "ngpc",
       "bucket": "ngpc/Sonic The Hedgehog - Pocket Adventure (World) (En,Ja).zip"
+    },
+    {
+      "title": "Sonic The Hedgehog 2 (Rev B)",
+      "system": "genesis",
+      "bucket": "genesis/Sonic The Hedgehog 2 (World) (Rev B).zip"
+    },
+    {
+      "title": "Sonic & Knuckles + Sonic The Hedgehog",
+      "system": "genesis",
+      "bucket": "genesis/Sonic & Knuckles + Sonic The Hedgehog (USA, Europe) (Lock-on Combination).zip"
     }
   ]
 }

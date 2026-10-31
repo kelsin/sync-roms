@@ -20,7 +20,7 @@
     {
       "title": "Metroid - Zero Mission",
       "system": "gba",
-      "bucket": "gba/Metroid - Zero Mission (USA, Australia).zip"
+      "bucket": "gba/Metroid - Zero Mission (USA).zip"
     },
     {
       "title": "Metroid (Classic NES Series)",
@@ -46,6 +46,11 @@
       "title": "Metroid Prime Pinball",
       "system": "nds",
       "bucket": "nds/Metroid Prime Pinball (USA).zip"
+    },
+    {
+      "title": "Super Metroid",
+      "system": "snes",
+      "bucket": "snes/Super Metroid (Japan, USA) (En,Ja).zip"
     }
   ]
 }

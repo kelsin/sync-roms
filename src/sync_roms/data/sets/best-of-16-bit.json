@@ -230,7 +230,7 @@
     {
       "title": "Road Rash II (RR206)",
       "system": "genesis",
-      "bucket": "genesis/Road Rash II (USA, Europe) (Rev 1).zip"
+      "bucket": "genesis/Road Rash II (USA, Europe) (RR206).zip"
     },
     {
       "title": "Contra - Hard Corps",
@@ -256,6 +256,21 @@
       "title": "Dungeon Explorer",
       "system": "tg16",
       "bucket": "tg16/Dungeon Explorer (USA).zip"
+    },
+    {
+      "title": "Super Metroid (En,Fr,De)",
+      "system": "snes",
+      "bucket": "snes/Super Metroid (Japan, USA) (En,Ja).zip"
+    },
+    {
+      "title": "Sonic The Hedgehog 2 (Rev B)",
+      "system": "genesis",
+      "bucket": "genesis/Sonic The Hedgehog 2 (World) (Rev B).zip"
+    },
+    {
+      "title": "Altered Beast (Rev A)",
+      "system": "genesis",
+      "bucket": "genesis/Altered Beast (Japan, USA) (En) (Rev A).zip"
     }
   ]
 }

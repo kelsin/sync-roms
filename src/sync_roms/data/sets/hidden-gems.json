@@ -261,11 +261,6 @@
       "bucket": "gba/Mr. Driller 2 (USA).zip"
     },
     {
-      "title": "Ninja Five-0",
-      "system": "gba",
-      "bucket": "gba/Ninja Five-O (USA).zip"
-    },
-    {
       "title": "Shadow of the Colossus",
       "system": "ps2",
       "bucket": "ps2/Shadow of the Colossus.chd"
@@ -522,6 +517,156 @@
       "title": "World Ends with You, The",
       "system": "nds",
       "bucket": "nds/World Ends with You, The (USA).zip"
+    },
+    {
+      "title": "Mega Turrican",
+      "system": "genesis",
+      "bucket": "genesis/Mega Turrican (USA).zip"
+    },
+    {
+      "title": "Ninja Five-0",
+      "system": "gba",
+      "bucket": "gba/Ninja Five-0 (USA).zip"
+    },
+    {
+      "title": "Kirby's Dream Land",
+      "system": "gb",
+      "bucket": "gb/Kirby's Dream Land (USA, Europe).zip"
+    },
+    {
+      "title": "Kirby's Dream Land 2",
+      "system": "gb",
+      "bucket": "gb/Kirby's Dream Land 2 (USA, Europe) (SGB Enhanced).zip"
+    },
+    {
+      "title": "Wario Land - Super Mario Land 3",
+      "system": "gb",
+      "bucket": "gb/Wario Land - Super Mario Land 3 (World).zip"
+    },
+    {
+      "title": "Bonk's Adventure",
+      "system": "gb",
+      "bucket": "gb/Bonk's Adventure (USA).zip"
+    },
+    {
+      "title": "Bonk's Revenge",
+      "system": "gb",
+      "bucket": "gb/Bonk's Revenge (USA) (SGB Enhanced).zip"
+    },
+    {
+      "title": "DuckTales",
+      "system": "gb",
+      "bucket": "gb/DuckTales (USA).zip"
+    },
+    {
+      "title": "DuckTales 2",
+      "system": "gb",
+      "bucket": "gb/DuckTales 2 (USA).zip"
+    },
+    {
+      "title": "Batman - Return of the Joker",
+      "system": "gb",
+      "bucket": "gb/Batman - Return of the Joker (USA, Europe).zip"
+    },
+    {
+      "title": "Kirby & The Amazing Mirror",
+      "system": "gba",
+      "bucket": "gba/Kirby & The Amazing Mirror (USA).zip"
+    },
+    {
+      "title": "Kirby - Nightmare in Dream Land",
+      "system": "gba",
+      "bucket": "gba/Kirby - Nightmare in Dream Land (USA).zip"
+    },
+    {
+      "title": "Wario Land 4",
+      "system": "gba",
+      "bucket": "gba/Wario Land 4 (USA, Europe).zip"
+    },
+    {
+      "title": "Pocky & Rocky with Becky",
+      "system": "gba",
+      "bucket": "gba/Pocky & Rocky with Becky (USA).zip"
+    },
+    {
+      "title": "Earthworm Jim 2",
+      "system": "gba",
+      "bucket": "gba/Earthworm Jim 2 (USA).zip"
+    },
+    {
+      "title": "Super Ghouls'n Ghosts",
+      "system": "gba",
+      "bucket": "gba/Super Ghouls'n Ghosts (USA, Europe).zip"
+    },
+    {
+      "title": "Shantae",
+      "system": "gbc",
+      "bucket": "gbc/Shantae (USA).zip"
+    },
+    {
+      "title": "Wario Land 3",
+      "system": "gbc",
+      "bucket": "gbc/Wario Land 3 (World) (En,Ja).zip"
+    },
+    {
+      "title": "Kirby - Tilt 'n' Tumble",
+      "system": "gbc",
+      "bucket": "gbc/Kirby - Tilt 'n' Tumble (USA).zip"
+    },
+    {
+      "title": "Gunstar Heroes",
+      "system": "genesis",
+      "bucket": "genesis/Gunstar Heroes (USA).zip"
+    },
+    {
+      "title": "Comix Zone",
+      "system": "genesis",
+      "bucket": "genesis/Comix Zone (USA).zip"
+    },
+    {
+      "title": "Ristar",
+      "system": "genesis",
+      "bucket": "genesis/Ristar (USA, Europe).zip"
+    },
+    {
+      "title": "Kid Chameleon",
+      "system": "genesis",
+      "bucket": "genesis/Kid Chameleon (USA, Europe).zip"
+    },
+    {
+      "title": "Sparkster",
+      "system": "genesis",
+      "bucket": "genesis/Sparkster (USA).zip"
+    },
+    {
+      "title": "Rock n' Roll Racing",
+      "system": "genesis",
+      "bucket": "genesis/Rock n' Roll Racing (USA).zip"
+    },
+    {
+      "title": "Earthworm Jim 2",
+      "system": "genesis",
+      "bucket": "genesis/Earthworm Jim 2 (USA).zip"
+    },
+    {
+      "title": "Batman - Revenge of the Joker",
+      "system": "genesis",
+      "bucket": "genesis/Batman - Revenge of the Joker (USA).zip"
+    },
+    {
+      "title": "Sunset Riders",
+      "system": "genesis",
+      "bucket": "genesis/Sunset Riders (USA).zip"
+    },
+    {
+      "title": "Chiki Chiki Boys",
+      "system": "genesis",
+      "bucket": "genesis/Chiki Chiki Boys (USA, Europe).zip"
+    },
+    {
+      "title": "Vectorman 2",
+      "system": "genesis",
+      "bucket": "genesis/Vectorman 2 (USA).zip"
     }
   ]
 }

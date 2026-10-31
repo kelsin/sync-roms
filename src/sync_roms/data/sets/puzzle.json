@@ -53,12 +53,12 @@
       "bucket": "tg16/Bomberman '93 (USA).zip"
     },
     {
-      "title": "Tetris DX (SGB Enhanced) (GB Compatible)",
+      "title": "Tetris DX (SGB Enhanced)",
       "system": "gbc",
       "bucket": "gbc/Tetris DX (World) (SGB Enhanced) (GB Compatible).zip"
     },
     {
-      "title": "Wario Land II (SGB Enhanced) (GB Compatible)",
+      "title": "Wario Land II (SGB Enhanced)",
       "system": "gbc",
       "bucket": "gbc/Wario Land II (USA, Europe) (SGB Enhanced) (GB Compatible).zip"
     },
@@ -231,6 +231,116 @@
       "title": "Puzzle Quest - Challenge of the Warlords",
       "system": "nds",
       "bucket": "nds/Puzzle Quest - Challenge of the Warlords (USA).zip"
+    },
+    {
+      "title": "Tetris 2 (Rev 1)",
+      "system": "gb",
+      "bucket": "gb/Tetris 2 (USA, Europe) (Rev 1) (SGB Enhanced).zip"
+    },
+    {
+      "title": "Tetris Attack (Rev 1)",
+      "system": "gb",
+      "bucket": "gb/Tetris Attack (USA, Europe) (Rev 1) (SGB Enhanced).zip"
+    },
+    {
+      "title": "Tetris Blast",
+      "system": "gb",
+      "bucket": "gb/Tetris Blast (USA, Europe) (SGB Enhanced).zip"
+    },
+    {
+      "title": "Kwirk - He's A-maze-ing!",
+      "system": "gb",
+      "bucket": "gb/Kwirk - He's A-maze-ing! (USA, Europe).zip"
+    },
+    {
+      "title": "Bubble Bobble",
+      "system": "gb",
+      "bucket": "gb/Bubble Bobble (USA, Europe).zip"
+    },
+    {
+      "title": "Bust-A-Move 2 - Arcade Edition",
+      "system": "gb",
+      "bucket": "gb/Bust-A-Move 2 - Arcade Edition (USA, Europe).zip"
+    },
+    {
+      "title": "Pipe Dream",
+      "system": "gb",
+      "bucket": "gb/Pipe Dream (USA).zip"
+    },
+    {
+      "title": "Lemmings",
+      "system": "gb",
+      "bucket": "gb/Lemmings (USA).zip"
+    },
+    {
+      "title": "Klax (Mindscape)",
+      "system": "gb",
+      "bucket": "gb/Klax (USA) (Mindscape).zip"
+    },
+    {
+      "title": "Boxxle II",
+      "system": "gb",
+      "bucket": "gb/Boxxle II (USA, Europe).zip"
+    },
+    {
+      "title": "Hyper Lode Runner (Rev 1)",
+      "system": "gb",
+      "bucket": "gb/Hyper Lode Runner (World) (Rev 1).zip"
+    },
+    {
+      "title": "Mario's Picross",
+      "system": "gb",
+      "bucket": "gb/Mario's Picross (USA, Europe) (SGB Enhanced).zip"
+    },
+    {
+      "title": "Yoshi's Cookie",
+      "system": "gb",
+      "bucket": "gb/Yoshi's Cookie (USA, Europe).zip"
+    },
+    {
+      "title": "Columns Crown",
+      "system": "gba",
+      "bucket": "gba/Columns Crown (USA).zip"
+    },
+    {
+      "title": "Super Puzzle Fighter II (Rev 1)",
+      "system": "gba",
+      "bucket": "gba/Super Puzzle Fighter II (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Tetris Worlds",
+      "system": "gba",
+      "bucket": "gba/Tetris Worlds (USA).zip"
+    },
+    {
+      "title": "Bubble Bobble - Old & New",
+      "system": "gba",
+      "bucket": "gba/Bubble Bobble - Old & New (USA).zip"
+    },
+    {
+      "title": "Classic NES Series - Dr. Mario",
+      "system": "gba",
+      "bucket": "gba/Classic NES Series - Dr. Mario (USA, Europe).zip"
+    },
+    {
+      "title": "Bust-A-Move",
+      "system": "gamegear",
+      "bucket": "gamegear/Bust-A-Move (USA).zip"
+    },
+    {
+      "title": "Lemmings",
+      "system": "gamegear",
+      "bucket": "gamegear/Lemmings (World).zip"
+    },
+    {
+      "title": "KLAX",
+      "system": "gamegear",
+      "bucket": "gamegear/KLAX (USA, Europe).zip"
+    },
+    {
+      "title": "Super Columns",
+      "system": "gamegear",
+      "bucket": "gamegear/Super Columns (USA, Europe).zip"
     }
   ]
 }

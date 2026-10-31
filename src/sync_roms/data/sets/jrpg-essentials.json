@@ -488,6 +488,91 @@
       "title": "Dragon Quest V - Hand of the Heavenly Bride",
       "system": "nds",
       "bucket": "nds/Dragon Quest V - Hand of the Heavenly Bride (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Advance Wars (Rev 1)",
+      "system": "gba",
+      "bucket": "gba/Advance Wars (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Advance Wars 2 - Black Hole Rising",
+      "system": "gba",
+      "bucket": "gba/Advance Wars 2 - Black Hole Rising (USA).zip"
+    },
+    {
+      "title": "Fire Emblem",
+      "system": "gba",
+      "bucket": "gba/Fire Emblem (USA, Australia).zip"
+    },
+    {
+      "title": "Fire Emblem - The Sacred Stones",
+      "system": "gba",
+      "bucket": "gba/Fire Emblem - The Sacred Stones (USA, Australia).zip"
+    },
+    {
+      "title": "Tactics Ogre - The Knight of Lodis",
+      "system": "gba",
+      "bucket": "gba/Tactics Ogre - The Knight of Lodis (USA).zip"
+    },
+    {
+      "title": "Breath of Fire",
+      "system": "gba",
+      "bucket": "gba/Breath of Fire (USA).zip"
+    },
+    {
+      "title": "Breath of Fire II",
+      "system": "gba",
+      "bucket": "gba/Breath of Fire II (USA).zip"
+    },
+    {
+      "title": "Lufia - The Ruins of Lore",
+      "system": "gba",
+      "bucket": "gba/Lufia - The Ruins of Lore (USA).zip"
+    },
+    {
+      "title": "Lunar Legend",
+      "system": "gba",
+      "bucket": "gba/Lunar Legend (USA).zip"
+    },
+    {
+      "title": "Shining Force - Resurrection of the Dark Dragon",
+      "system": "gba",
+      "bucket": "gba/Shining Force - Resurrection of the Dark Dragon (USA).zip"
+    },
+    {
+      "title": "Tales of Phantasia",
+      "system": "gba",
+      "bucket": "gba/Tales of Phantasia (USA, Australia).zip"
+    },
+    {
+      "title": "Dragon Warrior I & II",
+      "system": "gbc",
+      "bucket": "gbc/Dragon Warrior I & II (USA) (SGB Enhanced) (GB Compatible).zip"
+    },
+    {
+      "title": "Dragon Warrior III",
+      "system": "gbc",
+      "bucket": "gbc/Dragon Warrior III (USA).zip"
+    },
+    {
+      "title": "Crystalis",
+      "system": "gbc",
+      "bucket": "gbc/Crystalis (USA).zip"
+    },
+    {
+      "title": "Lufia - The Legend Returns",
+      "system": "gbc",
+      "bucket": "gbc/Lufia - The Legend Returns (USA).zip"
+    },
+    {
+      "title": "Shining Force - The Sword of Hajya",
+      "system": "gamegear",
+      "bucket": "gamegear/Shining Force - The Sword of Hajya (USA).zip"
+    },
+    {
+      "title": "Trials of Mana (Rev 1)",
+      "system": "snes",
+      "bucket": "snes/Trials of Mana (World) (Rev 1) (Collection of Mana).zip"
     }
   ]
 }
