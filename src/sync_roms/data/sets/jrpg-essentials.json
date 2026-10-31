@@ -209,8 +209,9 @@
     {
       "title": "Panzer Dragoon Saga",
       "system": "saturn",
-      "bucket": "saturn/Panzer Dragoon Saga (USA) (Disc 1).chd",
+      "bucket": "saturn/Panzer Dragoon Saga (USA).m3u",
       "files": [
+        "saturn/Panzer Dragoon Saga (USA) (Disc 1).chd",
         "saturn/Panzer Dragoon Saga (USA) (Disc 2).chd",
         "saturn/Panzer Dragoon Saga (USA) (Disc 3).chd",
         "saturn/Panzer Dragoon Saga (USA) (Disc 4).chd"
@@ -299,24 +300,27 @@
     {
       "title": "Xenosaga Episode II",
       "system": "ps2",
-      "bucket": "ps2/Xenosaga Episode II - Jenseits von Gut und Boese (USA) (Disc 1).chd",
+      "bucket": "ps2/Xenosaga Episode II - Jenseits von Gut und Boese (USA).m3u",
       "files": [
+        "ps2/Xenosaga Episode II - Jenseits von Gut und Boese (USA) (Disc 1).chd",
         "ps2/Xenosaga Episode II - Jenseits von Gut und Boese (USA) (Disc 2).chd"
       ]
     },
     {
       "title": "Xenosaga Episode III",
       "system": "ps2",
-      "bucket": "ps2/Xenosaga Episode III - Also sprach Zarathustra (USA) (Disc 1).chd",
+      "bucket": "ps2/Xenosaga Episode III - Also sprach Zarathustra (USA).m3u",
       "files": [
+        "ps2/Xenosaga Episode III - Also sprach Zarathustra (USA) (Disc 1).chd",
         "ps2/Xenosaga Episode III - Also sprach Zarathustra (USA) (Disc 2).chd"
       ]
     },
     {
       "title": "Star Ocean: Till the End of Time",
       "system": "ps2",
-      "bucket": "ps2/Star Ocean - Till the End of Time (USA) (Disc 1).chd",
+      "bucket": "ps2/Star Ocean - Till the End of Time (USA).m3u",
       "files": [
+        "ps2/Star Ocean - Till the End of Time (USA) (Disc 1).chd",
         "ps2/Star Ocean - Till the End of Time (USA) (Disc 2).chd"
       ]
     },
@@ -348,8 +352,9 @@
     {
       "title": "Grandia III",
       "system": "ps2",
-      "bucket": "ps2/Grandia III (USA) (Disc 1).chd",
+      "bucket": "ps2/Grandia III (USA).m3u",
       "files": [
+        "ps2/Grandia III (USA) (Disc 1).chd",
         "ps2/Grandia III (USA) (Disc 2).chd"
       ]
     },
@@ -366,8 +371,9 @@
     {
       "title": "Tales of Symphonia",
       "system": "gc",
-      "bucket": "gc/Tales of Symphonia (USA) (Disc 1).rvz",
+      "bucket": "gc/Tales of Symphonia (USA).m3u",
       "files": [
+        "gc/Tales of Symphonia (USA) (Disc 1).rvz",
         "gc/Tales of Symphonia (USA) (Disc 2).rvz"
       ]
     },
@@ -379,8 +385,9 @@
     {
       "title": "Baten Kaitos - Eternal Wings and the Lost Ocean",
       "system": "gc",
-      "bucket": "gc/Baten Kaitos - Eternal Wings and the Lost Ocean (USA) (Disc 1).rvz",
+      "bucket": "gc/Baten Kaitos - Eternal Wings and the Lost Ocean (USA).m3u",
       "files": [
+        "gc/Baten Kaitos - Eternal Wings and the Lost Ocean (USA) (Disc 1).rvz",
         "gc/Baten Kaitos - Eternal Wings and the Lost Ocean (USA) (Disc 2).rvz"
       ]
     },
@@ -392,8 +399,9 @@
     {
       "title": "Baten Kaitos Origins",
       "system": "gc",
-      "bucket": "gc/Baten Kaitos Origins (USA) (Disc 1).rvz",
+      "bucket": "gc/Baten Kaitos Origins (USA).m3u",
       "files": [
+        "gc/Baten Kaitos Origins (USA) (Disc 1).rvz",
         "gc/Baten Kaitos Origins (USA) (Disc 2).rvz"
       ]
     },

@@ -190,8 +190,9 @@
     {
       "title": "Teenage Mutant Ninja Turtles 3 - Mutant Nightmare",
       "system": "gc",
-      "bucket": "gc/Teenage Mutant Ninja Turtles 3 - Mutant Nightmare (USA) (Disc 1).rvz",
+      "bucket": "gc/Teenage Mutant Ninja Turtles 3 - Mutant Nightmare (USA).m3u",
       "files": [
+        "gc/Teenage Mutant Ninja Turtles 3 - Mutant Nightmare (USA) (Disc 1).rvz",
         "gc/Teenage Mutant Ninja Turtles 3 - Mutant Nightmare (USA) (Disc 2).rvz"
       ]
     },
@@ -203,8 +204,9 @@
     {
       "title": "Teenage Mutant Ninja Turtles 2 - Battle Nexus",
       "system": "gc",
-      "bucket": "gc/Teenage Mutant Ninja Turtles 2 - Battle Nexus (USA) (Disc 1).rvz",
+      "bucket": "gc/Teenage Mutant Ninja Turtles 2 - Battle Nexus (USA).m3u",
       "files": [
+        "gc/Teenage Mutant Ninja Turtles 2 - Battle Nexus (USA) (Disc 1).rvz",
         "gc/Teenage Mutant Ninja Turtles 2 - Battle Nexus (USA) (Disc 2).rvz"
       ]
     },
