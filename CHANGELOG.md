@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.14.3](https://github.com/kelsin/sync-roms/compare/v0.14.2...v0.14.3) (2026-10-31)
+
+
+### Bug Fixes
+
+* **replace:** show progress while matching files by content ([#51](https://github.com/kelsin/sync-roms/issues/51)) ([3f9f699](https://github.com/kelsin/sync-roms/commit/3f9f6998a29f36f963a71b171998dc86a719d02d))
+
 ## [0.14.2](https://github.com/kelsin/sync-roms/compare/v0.14.1...v0.14.2) (2026-10-31)
 
 
