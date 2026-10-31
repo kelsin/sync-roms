@@ -217,6 +217,39 @@ class ChdTest(unittest.TestCase):
         images = chd.disc_images([os.path.join(self.dir, f) for f in sorted(os.listdir(self.dir))])
         self.assertEqual([os.path.basename(i) for i, _ in images], ["ok.cue"])
 
+    def test_skipped_sheets_are_reported_and_archives_allow_subfolder_tracks(self):
+        self.touch("s.cue", text='FILE "sub/t.bin" BINARY\n')
+        path = os.path.join(self.dir, "s.cue")
+        skipped = []
+        self.assertEqual(chd.disc_images([path], skipped=skipped), [])
+        self.assertEqual(skipped, [path])
+        self.assertEqual([i for i, _ in chd.disc_images([path], strict=False)], [path])
+
+    def test_extract_mode_compares_contents_and_case_insensitive_names(self):
+        self.touch("Game.7z")
+        self.touch("G.rvz", text="y")  # same size as the extracted "x", different content
+        with self.extract_with(["G.rvz"]):
+            error = chd.chd_archive(self.tools, EXTRACT["chd"], os.path.join(self.dir, "Game.7z"))
+        self.assertEqual(error, "G.rvz already exists")
+        os.remove(os.path.join(self.dir, "G.rvz"))
+        with self.extract_with(["a/G.rvz", "b/g.RVZ"]):
+            error = chd.chd_archive(self.tools, EXTRACT["chd"], os.path.join(self.dir, "Game.7z"))
+        self.assertIn("appears more than once", error)
+
+    def test_archive_fails_when_two_discs_map_to_one_chd(self):
+        self.touch("Game.zip")
+        with self.extract_with(["a/G.iso", "b/g.ISO"]):
+            error = chd.chd_archive(self.tools, DVD["chd"], os.path.join(self.dir, "Game.zip"))
+        self.assertEqual(error, "two discs in the archive would make the same .chd")
+        self.assertEqual(self.files(), ["Game.zip"])
+
+    def test_chd_image_never_deletes_its_own_output(self):
+        self.touch("Game.cue", "Game.chd")
+        with mock.patch.object(external, "run_tool", FakeTools()):
+            chd.chd_image(self.tools, CD["chd"], os.path.join(self.dir, "Game.cue"),
+                          [os.path.join(self.dir, n) for n in ("Game.cue", "Game.chd")])
+        self.assertEqual(self.files(), ["Game.chd"])
+
     def test_shipped_chd_settings(self):
         systems = {s["bucket"]: s for s in store.repo_json("systems")}
         self.assertEqual(systems["psx"]["chd"], {"mode": "cd"})

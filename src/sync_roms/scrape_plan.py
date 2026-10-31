@@ -99,6 +99,8 @@ def merge_lines(remote, local):
 
 
 def share_setting(name):
+    if not re.fullmatch(r"[A-Za-z0-9_]+", name):
+        return False
     if re.search(r"password|username|passkey", name, re.I) or name in SETTING_EXCLUDE:
         return False
     return name.startswith(SETTING_PREFIXES) or name in SETTING_UI

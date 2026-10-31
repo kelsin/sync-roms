@@ -206,5 +206,12 @@ class UnsafeKeyTest(unittest.TestCase):
         self.assertEqual([k for k, _, _ in jobs], ["scrapes/esde/themes/ok/a.xml"])
 
 
+class ShareSettingTest(unittest.TestCase):
+    def test_names_must_be_plain_identifiers(self):
+        self.assertTrue(scrape_plan.share_setting("ScraperFoo_1"))
+        self.assertFalse(scrape_plan.share_setting('Scrape" evil="1'))
+        self.assertFalse(scrape_plan.share_setting("Scrape Foo"))
+
+
 if __name__ == "__main__":
     unittest.main()

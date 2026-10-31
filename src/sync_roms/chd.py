@@ -1,4 +1,5 @@
 """CHD conversion and archive extraction."""
+import filecmp
 import os
 import re
 import shutil
@@ -27,13 +28,16 @@ def sheet_tracks(path):
     return re.findall(r'(?:FILE|DATAFILE|AUDIOFILE)\s+"([^"]+)"', text, re.I)
 
 
-def disc_images(paths):
-    """[(image, files it owns)]: each cue/gdi/toc sheet with its tracks, then each .iso no sheet uses."""
+def disc_images(paths, strict=True, skipped=None):
+    """[(image, files it owns)]: each cue/gdi/toc sheet with its tracks, then each .iso no sheet uses.
+    strict skips (and appends to skipped) sheets naming tracks outside their folder, since the owned files get deleted."""
     images, used = [], set()
     for p in sorted(paths):
         if p.lower().endswith(external.SHEET_EXTS):
             names = [t.replace("\\", "/") for t in sheet_tracks(p)]
-            if any(n != os.path.basename(n) or n in ("", ".", "..") for n in names):
+            if strict and any(n != os.path.basename(n) or n in ("", ".", "..") for n in names):
+                if skipped is not None:
+                    skipped.append(p)
                 continue  # a track outside the sheet's folder: don't convert it, and never own (delete) it
             tracks = [os.path.join(os.path.dirname(p), t) for t in names]
             images.append((p, [p] + tracks))
@@ -52,9 +56,10 @@ def chd_system(root, dirpath, folders):
     return None, None
 
 
-def plan_chd(root, folders):
+def plan_chd(root, folders, skipped=None):
     """[(system, system folder, file, owned)] to convert under root: owned is None for an archive, else the
-    loose disc image's files (sheet and tracks, or the iso). Extract-only systems have archives only."""
+    loose disc image's files (sheet and tracks, or the iso). Extract-only systems have archives only.
+    Sheets skipped for naming tracks outside their folder are appended to skipped."""
     jobs = []
     for dirpath, dirs, files in os.walk(root):
         dirs[:] = sorted(d for d in dirs if not external.own_temp(d))
@@ -64,7 +69,7 @@ def plan_chd(root, folders):
         files = [os.path.join(dirpath, f) for f in sorted(files) if not external.own_temp(f)]
         jobs += [(system, sysroot, f, None) for f in files if f.lower().endswith(external.ARCHIVE_EXTS)]
         if system["chd"]["mode"] != "extract":
-            jobs += [(system, sysroot, img, owned) for img, owned in disc_images(files)]
+            jobs += [(system, sysroot, img, owned) for img, owned in disc_images(files, True, skipped)]
     return jobs
 
 
@@ -103,16 +108,17 @@ def make_chd(tools, cfg, image, out, report=None):
 
 
 def plan_moves(pairs):
-    """([(src, dst)] still to move, error): a dst that already holds a file of the same size is a leftover of an
+    """([(src, dst)] still to move, error): a dst that already holds a file of the same content is a leftover of an
     interrupted run and is skipped; a duplicate dst or one holding something else is an error."""
     seen, moves = set(), []
     for src, dst in pairs:
-        if dst in seen:
+        key = os.path.normcase(dst).lower()
+        if key in seen:
             return None, f"{os.path.basename(dst)} appears more than once in the archive"
-        seen.add(dst)
+        seen.add(key)
         if not os.path.lexists(dst):
             moves.append((src, dst))
-        elif os.path.islink(dst) or not os.path.isfile(dst) or os.path.getsize(dst) != os.path.getsize(src):
+        elif os.path.islink(dst) or not os.path.isfile(dst) or not filecmp.cmp(src, dst, shallow=False):
             return None, f"{os.path.basename(dst)} already exists"
     return moves, None
 
@@ -135,11 +141,14 @@ def chd_archive(tools, cfg, path, report=None):
             for src, dst in moves:
                 shutil.move(src, dst)
         else:
-            images = disc_images(extracted)
+            images = disc_images(extracted, strict=False)
             if not images:
                 return "no disc image in the archive"
-            for image, _ in images:
-                error = make_chd(tools, cfg, image, os.path.join(folder, os.path.splitext(os.path.basename(image))[0] + ".chd"), report)
+            outs = [os.path.join(folder, os.path.splitext(os.path.basename(image))[0] + ".chd") for image, _ in images]
+            if len({os.path.normcase(o).lower() for o in outs}) < len(outs):
+                return "two discs in the archive would make the same .chd"
+            for (image, _), out in zip(images, outs):
+                error = make_chd(tools, cfg, image, out, report)
                 if error:
                     return error
         os.remove(path)
@@ -149,10 +158,11 @@ def chd_archive(tools, cfg, path, report=None):
 
 def chd_image(tools, cfg, image, owned, report=None):
     """Convert one loose disc image and remove its files once the chd verifies; None on success, else the error."""
-    error = make_chd(tools, cfg, image, os.path.splitext(image)[0] + ".chd", report)
+    out = os.path.splitext(image)[0] + ".chd"
+    error = make_chd(tools, cfg, image, out, report)
     if not error:
         for f in owned:
-            if os.path.exists(f):
+            if os.path.normcase(f).lower() != os.path.normcase(out).lower() and os.path.exists(f):
                 os.remove(f)
     return error
 
@@ -238,7 +248,10 @@ def chd_command(args):
     print(ui.bold("💿 chd") + ui.dim(f"  {root}"))
     folders = chd_folders(store.repo_json("systems"))
     roots = chd_roots(root, folders)
-    jobs = plan_chd(root, folders)
+    skipped = []
+    jobs = plan_chd(root, folders, skipped)
+    for sheet in skipped:
+        print(ui.yellow(f"  ⚠️  skipped {os.path.relpath(sheet, root)}: it names tracks outside its own folder"))
     if not jobs:
         print(ui.green("✅ Nothing to convert"))
         if not roots:

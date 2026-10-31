@@ -33,6 +33,7 @@ class SyncSmokeTest(unittest.TestCase):
                         (cli.clean, {"clean_android_media": lambda *a: None})):
                     for name, value in kw.items():
                         st.enter_context(mock.patch.object(target, name, value))
+                st.enter_context(mock.patch.object(cli.clean, "_clean_root", None))
                 st.enter_context(contextlib.redirect_stdout(io.StringIO()))
                 return cli.sync()
 
