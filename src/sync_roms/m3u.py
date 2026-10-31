@@ -7,7 +7,7 @@ from . import external, ui
 
 
 DISC_RE = re.compile(r" \(Disc (\d+)\)")
-DISC_EXTS = {".chd", ".cue", ".iso", ".pbp", ".gdi", ".cso", ".ccd"}
+DISC_EXTS = {".chd", ".rvz",".cue", ".iso", ".pbp", ".gdi", ".cso", ".ccd"}
 
 
 def disc_groups(files):

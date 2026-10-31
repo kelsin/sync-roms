@@ -48,6 +48,12 @@ class M3uTest(unittest.TestCase):
         self.run_cmd()
         self.assertEqual(self.read("Fahrenheit (USA) (Sega CD).m3u"), "\n".join(FAH) + "\n")
 
+    def test_creates_for_rvz(self):
+        discs = ["Game (USA) (Disc 1).rvz", "Game (USA) (Disc 2).rvz"]
+        self.touch(*discs)
+        self.run_cmd()
+        self.assertEqual(self.read("Game (USA).m3u"), "\n".join(discs) + "\n")
+
     def test_rewrites_wrong_and_partial(self):
         self.touch(*FAH)
         self.touch("Fahrenheit (USA) (Sega CD).m3u", text=FAH[1] + "\n")
