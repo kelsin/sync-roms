@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.14.2](https://github.com/kelsin/sync-roms/compare/v0.14.1...v0.14.2) (2026-10-31)
+
+
+### Bug Fixes
+
+* **sync:** extract leftover archives and show extraction progress ([#49](https://github.com/kelsin/sync-roms/issues/49)) ([a444a3d](https://github.com/kelsin/sync-roms/commit/a444a3dfe2ee7ebea9540597a65742229aa85dab))
+
 ## [0.14.1](https://github.com/kelsin/sync-roms/compare/v0.14.0...v0.14.1) (2026-10-31)
 
 
