@@ -181,8 +181,11 @@ Then:
    gamelists are updated in place: only these tags are set, so favorites, play counts and an
    `<alternativeEmulator>` block stay. Existing files with the same size aren't downloaded again.
    ROMs in subfolders get no Onion art. Slot's labels are made the same way (cover, then 3D box, then
-   screenshot) as a PNG that fits the cart's label: 1280x661 for Game Boy Advance, 1024x914 for Game Boy
-   and Game Boy Color, stored as `scrapes/<system>/slot/<ROM>.png`.
+   screenshot) as a PNG that fits the cart's label: 1280x661 for Game Boy Advance, 1024x901 for Game Boy
+   and Game Boy Color, stored as `scrapes/<system>/slot/<ROM>.png`. Labels made in Cart Studio can be uploaded
+   straight from a Slot card with `--upload-scrapes CARD`: its `Labels/GB`, `GBC` and `GBA` PNGs named after a ROM
+   in the bucket go to the same place as they are, replacing a label of a different size (the derived one is only
+   made when none exists). `--mirror` and a Slot sync pick them up like any other label.
 
    For the `esde` layout every sync also brings the shared extras from `scrapes/esde/`: new or changed
    theme files, collection lines you don't have yet (added to your `.cfg` files), and the shared settings
@@ -268,7 +271,7 @@ What goes up, and how it is stored:
 | `gamelists/<system>/gamelist.xml` | `scrapes/<system>/metadata.json` | JSON keyed by ROM path. Only `name`, `desc`, `rating` (0-1), `releasedate` (ISO), `developer`, `publisher`, `genre`, `players`. Favorites, play counts, emulator choices and media tags are dropped. Merged with the bucket's file: local values win, entries only in the bucket stay |
 | `downloaded_media/<system>/<type>/…` | `scrapes/<system>/<type>/…` | Only files whose ROM name matches an available ROM. `._` files, dotfiles and `CLEANUP/` are skipped. Uploaded when new or a different size |
 | (made from the cover, 3D box or screenshot) | `scrapes/<system>/onion/<ROM>.png` | Onion box art, a PNG that fits 250x360. Created whenever it is missing from the bucket, even if its source image was already uploaded. Not made for ROMs in subfolders. Needs Pillow or `sips` |
-| (made from the cover, 3D box or screenshot) | `scrapes/<system>/slot/<ROM>.png` | Slot cart label for the Game Boy systems, a PNG that fits 1280x661 (GBA) or 1024x914 (GB, GBC). Created whenever it is missing, subfolders included. Needs Pillow or `sips` |
+| (a Slot card's `Labels/`, or made from the cover, 3D box or screenshot) | `scrapes/<system>/slot/<ROM>.png` | Slot cart label for the Game Boy systems, a PNG that fits 1280x661 (GBA) or 1024x901 (GB, GBC). A card's label is uploaded as is and replaces one of a different size; a derived one is created only when none exists, subfolders included, and needs Pillow or `sips` |
 | `themes/…` | `scrapes/esde/themes/…` | Per file, same size check. `themes-list` is skipped |
 | `collections/*.cfg` | `scrapes/esde/collections/*.cfg` | Union of the lines in both versions |
 | `settings/es_settings.xml` | `scrapes/esde/settings.json` | Allowlisted keys only: scraper behavior, miximage generation, theme (not aspect ratio) and gamelist/UI behavior. Credentials are never included. Merged with the bucket's file, local wins |

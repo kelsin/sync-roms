@@ -5,6 +5,7 @@ import os
 import sys
 import tempfile
 import unittest
+from unittest import mock
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "src", "sync_roms", "data")
@@ -161,6 +162,67 @@ class StaleMediaTest(unittest.TestCase):
                                         ["Games/GBA/Keep.gba"]), [])
 
 
+class SlotLabelUploadTest(unittest.TestCase):
+    SYSTEMS = [sysdef("gba", slot="GBA"), sysdef("gb", slot="GB")]
+
+    def plan(self, files, roms, existing=None):
+        with tempfile.TemporaryDirectory() as labels:
+            for f in files:
+                touch(os.path.join(labels, f))
+            files, present, unmatched = scrape_files.plan_slot_upload(labels, self.SYSTEMS, roms, existing or {})
+            return [k for k, *_ in files], present, [os.path.relpath(u, labels) for u in unmatched]
+
+    def test_labels_named_after_a_rom_go_to_the_slot_folder(self):
+        keys, present, unmatched = self.plan(["GBA/A.png", "GB/B.png", "GBA/Nope.png", "GBA/A.txt"],
+                                             {"gba": {"A.zip"}, "gb": {"B.gb"}})
+        self.assertEqual(sorted(keys), ["scrapes/gb/slot/B.png", "scrapes/gba/slot/A.png"])
+        self.assertEqual((present, unmatched), (0, ["GBA/Nope.png"]))
+
+    def test_same_size_is_present_and_a_different_size_is_replaced(self):
+        keys, present, _ = self.plan(["GBA/A.png", "GBA/B.png"], {"gba": {"A.zip", "B.zip"}},
+                                     {"scrapes/gba/slot/A.png": 1, "scrapes/gba/slot/B.png": 99})
+        self.assertEqual((keys, present), (["scrapes/gba/slot/B.png"], 1))
+
+
+class SlotLabelCommandTest(unittest.TestCase):
+    SYSTEMS = [sysdef("gba", slot="GBA"), sysdef("genesis")]
+
+    def run_upload(self, files, folders=("Labels",), dry_run=False, confirm=True):
+        with tempfile.TemporaryDirectory() as card:
+            for f in files:
+                touch(os.path.join(card, f))
+            args = mock.Mock(base_dir=card, dry_run=dry_run)
+            with mock.patch.object(scrape_files.store, "load_manifest", return_value={"systems": self.SYSTEMS}), \
+                    mock.patch.object(scrape_files, "bucket_roms", return_value={"gba": {"A.zip"}}) as roms, \
+                    mock.patch.object(scrape_files.s3, "list_sizes", return_value={}), \
+                    mock.patch.object(scrape_files.ui, "confirm", return_value=confirm), \
+                    mock.patch.object(scrape_files.upload, "run_uploads", return_value=0) as run, \
+                    contextlib.redirect_stdout(io.StringIO()):
+                code = scrape_files.upload_scrapes(args)
+        return code, roms, run
+
+    def test_uploads_the_labels_of_slot_systems_only(self):
+        code, roms, run = self.run_upload(["Labels/GBA/A.png"])
+        self.assertEqual(code, 0)
+        self.assertEqual([s["bucket"] for s in roms.call_args[0][0]], ["gba"])
+        self.assertEqual([j[0] for j in run.call_args[0][0]], ["scrapes/gba/slot/A.png"])
+
+    def test_dry_run_and_cancel_upload_nothing(self):
+        self.assertFalse(self.run_upload(["Labels/GBA/A.png"], dry_run=True)[2].called)
+        self.assertFalse(self.run_upload(["Labels/GBA/A.png"], confirm=False)[2].called)
+
+    def test_an_es_de_folder_takes_the_scrape_path(self):
+        with tempfile.TemporaryDirectory() as card:
+            touch(os.path.join(card, "ES-DE", "gamelists", "x"))
+            touch(os.path.join(card, "Labels", "GBA", "A.png"))
+            with mock.patch.object(scrape_files, "upload_slot_labels") as slot, \
+                    mock.patch.object(scrape_files.store, "load_cards", return_value={}), \
+                    mock.patch.object(scrape_files.store, "load_manifest", side_effect=SystemExit("scrape path")):
+                with self.assertRaises(SystemExit):
+                    scrape_files.upload_scrapes(mock.Mock(base_dir=card, dry_run=True))
+            slot.assert_not_called()
+
+
 class DerivedUploadTest(unittest.TestCase):
     def derived(self, files, system="gba", roms=("A.zip", "hacks/B.zip"), existing=None):
         with tempfile.TemporaryDirectory() as es:
@@ -178,7 +240,7 @@ class DerivedUploadTest(unittest.TestCase):
         for system in ("gb", "gbc"):
             plan = self.derived(["covers/A.png"], system, ("A.gb",))
             slot = [d for d in plan["derived"] if "/slot/" in d[0]]
-            self.assertEqual([d[3] for d in slot], [(1024, 914)])
+            self.assertEqual([d[3] for d in slot], [(1024, 901)])
 
     def test_a_rom_in_a_subfolder_gets_slot_art_only(self):
         plan = self.derived(["covers/hacks/B.png"])
