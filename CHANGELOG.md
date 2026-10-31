@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.16.0](https://github.com/kelsin/sync-roms/compare/v0.15.0...v0.16.0) (2026-10-31)
+
+
+### Features
+
+* **data:** add emudeck layout with steam deck and steam machine ([#56](https://github.com/kelsin/sync-roms/issues/56)) ([21aaefc](https://github.com/kelsin/sync-roms/commit/21aaefccb67a09ba6815a2d7eae6ef117fe37164))
+
 ## [0.15.0](https://github.com/kelsin/sync-roms/compare/v0.14.3...v0.15.0) (2026-10-31)
 
 
