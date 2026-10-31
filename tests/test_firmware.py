@@ -143,6 +143,14 @@ class UnzipTest(unittest.TestCase):
             with open(os.path.join(tmp, "A.gba"), "rb") as f:
                 self.assertEqual(f.read(), b"rom")
 
+    def test_card_archives_finds_leftover_archives(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            touch(os.path.join(tmp, "A.zip"))
+            touch(os.path.join(tmp, "B.gba"))
+            touch(os.path.join(tmp, "C.7z"))
+            found = sync_roms.card_archives([tmp, os.path.join(tmp, "missing")])
+            self.assertEqual(sorted(os.path.basename(p) for p in found), ["A.zip", "C.7z"])
+
     def test_unzip_roms_keeps_a_bad_archive_and_reports_it(self):
         with tempfile.TemporaryDirectory() as tmp:
             path = os.path.join(tmp, "A.zip")
