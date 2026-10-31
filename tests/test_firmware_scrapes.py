@@ -7,7 +7,7 @@ import unittest
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "src", "sync_roms", "data")
 sys.path.insert(0, os.path.join(ROOT, "src"))
-from sync_roms import cli  # noqa: E402
+from sync_roms import scrape_files, scrape_plan  # noqa: E402
 
 GBA = {"name": "Game Boy Advance", "bucket": "gba",
        "folders": {"esde": "gba", "muos": "gba", "slot": "GBA"}, "muos_catalogue": "Nintendo Game Boy Advance"}
@@ -31,7 +31,7 @@ class DataTest(unittest.TestCase):
 
 class MuosPlanTest(unittest.TestCase):
     def plan(self, rels, root, **kw):
-        return cli.plan_scrapes("muos", rels, LISTING, kw.get("meta", META), root, "/card/ROMS/gba", lambda rom: True)
+        return scrape_plan.plan_scrapes("muos", rels, LISTING, kw.get("meta", META), root, "/card/ROMS/gba", lambda rom: True)
 
     def test_box_preview_and_text_go_in_the_catalogue(self):
         with tempfile.TemporaryDirectory() as root:
@@ -50,7 +50,7 @@ class MuosPlanTest(unittest.TestCase):
 
     def test_only_roms_on_the_card_are_planned(self):
         with tempfile.TemporaryDirectory() as root:
-            jobs, _, texts = cli.plan_scrapes("muos", ["A.zip"], LISTING, META, root, "/x", lambda rom: False)
+            jobs, _, texts = scrape_plan.plan_scrapes("muos", ["A.zip"], LISTING, META, root, "/x", lambda rom: False)
         self.assertEqual((jobs, texts), ([], []))
 
     def test_build_plan_uses_the_catalogue_folder_and_skips_unchanged_text(self):
@@ -58,19 +58,19 @@ class MuosPlanTest(unittest.TestCase):
             data = {"gba": (LISTING, META)}
             args = ("muos", [GBA], data, {}, {}, {"gba": ["A.zip"]}, lambda s: "/x", os.path.join(base, "ES-DE"),
                     lambda p: True, base)
-            plan = cli.build_scrape_plan(*args)
+            plan = scrape_plan.build_scrape_plan(*args)
             catalogue = os.path.join(base, "MUOS", "info", "catalogue", "Nintendo Game Boy Advance")
             self.assertEqual(sorted(j[1] for j in plan["jobs"]),
                              sorted([os.path.join(catalogue, "box", "A.png"), os.path.join(catalogue, "preview", "A.jpg")]))
             self.assertEqual(len(plan["writes"]), 1)
-            cli.apply_scrape_plan({"jobs": [], "extras": [], "gamelists": {}, "writes": plan["writes"]}, base)
-            self.assertEqual(cli.build_scrape_plan(*args)["writes"], [])
+            scrape_plan.apply_scrape_plan({"jobs": [], "extras": [], "gamelists": {}, "writes": plan["writes"]}, base)
+            self.assertEqual(scrape_plan.build_scrape_plan(*args)["writes"], [])
 
 
 class SlotPlanTest(unittest.TestCase):
     def test_label_goes_in_labels_named_after_the_rom(self):
         with tempfile.TemporaryDirectory() as root:
-            jobs, entries, texts = cli.plan_scrapes("slot", ["A.zip", "hacks/B.zip", "C.zip"], LISTING, META, root,
+            jobs, entries, texts = scrape_plan.plan_scrapes("slot", ["A.zip", "hacks/B.zip", "C.zip"], LISTING, META, root,
                                                     "/x", lambda rom: True)
         self.assertEqual(sorted((k, os.path.relpath(p, root)) for k, p, _ in jobs),
                          [("scrapes/gba/slot/A.png", "A.png"), ("scrapes/gba/slot/hacks/B.png", "B.png")])
@@ -81,13 +81,13 @@ class SlotPlanTest(unittest.TestCase):
             card = os.path.join(base, "Games", "GBA")
             data = {"gba": (LISTING, META)}
             asked = []
-            plan = cli.build_scrape_plan("slot", [GBA], data, {}, {}, {"gba": ["hacks/B.zip"]}, lambda s: card,
+            plan = scrape_plan.build_scrape_plan("slot", [GBA], data, {}, {}, {"gba": ["hacks/B.zip"]}, lambda s: card,
                                          os.path.join(base, "ES-DE"), lambda p: asked.append(p) or True, base)
         self.assertEqual(asked, [os.path.join(card, "B.zip")])
         self.assertEqual([j[1] for j in plan["jobs"]], [os.path.join(base, "Labels", "GBA", "B.png")])
 
     def test_media_root_is_labels_by_slot_folder(self):
-        self.assertEqual(cli.media_root_of("slot", GBA, "/card", "/card/ES-DE"), os.path.join("/card", "Labels", "GBA"))
+        self.assertEqual(scrape_plan.media_root_of("slot", GBA, "/card", "/card/ES-DE"), os.path.join("/card", "Labels", "GBA"))
 
 def touch(path):
     os.makedirs(os.path.dirname(path), exist_ok=True)
@@ -106,7 +106,7 @@ class StaleMediaTest(unittest.TestCase):
             for rel in files + roms:
                 touch(os.path.join(base, rel))
             roms_dir = os.path.join(base, "ROMS" if layout == "muos" else "Games")
-            stale = cli.stale_media(layout, systems, roms_dir, os.path.join(base, "ES-DE"), base)
+            stale = scrape_plan.stale_media(layout, systems, roms_dir, os.path.join(base, "ES-DE"), base)
             return sorted(os.path.relpath(p, base) for p in stale)
 
     CAT = os.path.join("MUOS", "info", "catalogue")
@@ -164,7 +164,7 @@ class DerivedUploadTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as es:
             for f in files:
                 touch(os.path.join(es, "downloaded_media", system, f))
-            plan = cli.plan_upload(es, {system: set(roms)}, existing or {}, {})
+            plan = scrape_files.plan_upload(es, {system: set(roms)}, existing or {}, {})
         return plan
 
     def test_game_boy_art_makes_onion_and_slot_art(self):

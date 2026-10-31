@@ -12,6 +12,7 @@ from unittest import mock
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "src"))
 from sync_roms import cli  # noqa: E402
+from sync_roms import chd, external, m3u, store  # noqa: E402
 
 CD = {"chd": {"mode": "cd"}}
 DVD = {"chd": {"mode": "dvd", "args": ["-c", "zlib"]}}
@@ -58,46 +59,46 @@ class ChdTest(unittest.TestCase):
     def test_sheet_tracks(self):
         self.touch("a.cue", text=CUE)
         self.touch("a.gdi", text=GDI)
-        self.assertEqual(cli.sheet_tracks(os.path.join(self.dir, "a.cue")), ["Game (Track 1).bin", "Game (Track 2).bin"])
-        self.assertEqual(cli.sheet_tracks(os.path.join(self.dir, "a.gdi")), ["track01.bin", "track 02.raw", "track03.bin"])
+        self.assertEqual(chd.sheet_tracks(os.path.join(self.dir, "a.cue")), ["Game (Track 1).bin", "Game (Track 2).bin"])
+        self.assertEqual(chd.sheet_tracks(os.path.join(self.dir, "a.gdi")), ["track01.bin", "track 02.raw", "track03.bin"])
 
     def test_plan_finds_system_from_folder_names(self):
         folders = {"psx": CD, "gc": EXTRACT}
         self.touch("roms/psx/A.zip", "roms/psx/B.cue", "roms/psx/B (Track 1).bin", "roms/gc/C.7z", "roms/gc/D.iso",
                    "roms/gba/E.zip", "roms/psx/.dot.zip", "roms/psx/._A.zip", "roms/psx/.chd-x/F.iso", text=CUE)
-        jobs = cli.plan_chd(os.path.join(self.dir, "roms"), folders)
+        jobs = chd.plan_chd(os.path.join(self.dir, "roms"), folders)
         self.assertEqual([(os.path.basename(p), owned is None) for _, _, p, owned in jobs],
                          [("C.7z", True), (".dot.zip", True), ("A.zip", True), ("B.cue", False)])
 
     def test_dot_prefixed_discs_and_playlists_are_handled(self):
         self.touch(".G (Disc 1).chd", ".G (Disc 2).chd", ".G (Disc 2).chd.part")
-        plan = cli.plan_m3u(self.dir)
+        plan = m3u.plan_m3u(self.dir)
         self.assertEqual([(a, os.path.basename(p)) for a, p, _ in plan], [("create", ".G.m3u")])
 
     def test_plan_in_the_system_folder_itself(self):
         folder = os.path.join(self.dir, "PS")
         os.makedirs(folder)
         open(os.path.join(folder, "A.zip"), "w").close()
-        jobs = cli.plan_chd(folder, {"ps": CD})
+        jobs = chd.plan_chd(folder, {"ps": CD})
         self.assertEqual([(s, r) for s, r, _, _ in jobs], [(CD, folder)])
 
     def test_iso_used_by_a_sheet_is_not_converted_twice(self):
         self.touch("A.cue", text='FILE "A.iso" BINARY\n')
         self.touch("A.iso", "B.iso")
-        images = cli.disc_images([os.path.join(self.dir, n) for n in ("A.cue", "A.iso", "B.iso")])
+        images = chd.disc_images([os.path.join(self.dir, n) for n in ("A.cue", "A.iso", "B.iso")])
         self.assertEqual([os.path.basename(i) for i, _ in images], ["A.cue", "B.iso"])
 
     def test_dvd_systems_use_createdvd_for_iso_and_createcd_for_sheets(self):
-        self.assertEqual(cli.chd_command_line("c", DVD["chd"], "g.iso", "g.chd", 4),
+        self.assertEqual(chd.chd_command_line("c", DVD["chd"], "g.iso", "g.chd", 4),
                          ["c", "createdvd", "-i", "g.iso", "-o", "g.chd", "-np", "4", "-c", "zlib"])
-        self.assertEqual(cli.chd_command_line("c", DVD["chd"], "g.cue", "g.chd", 4), ["c", "createcd", "-i", "g.cue", "-o", "g.chd", "-np", "4"])
+        self.assertEqual(chd.chd_command_line("c", DVD["chd"], "g.cue", "g.chd", 4), ["c", "createcd", "-i", "g.cue", "-o", "g.chd", "-np", "4"])
 
     def test_loose_image_is_converted_verified_and_cleaned_up(self):
         self.touch("Game.cue", text=CUE)
         self.touch("Game (Track 1).bin", "Game (Track 2).bin", "Other.bin")
         fake = FakeTools()
-        with mock.patch.object(cli, "run_tool", fake):
-            error = cli.chd_image(self.tools, CD["chd"], os.path.join(self.dir, "Game.cue"),
+        with mock.patch.object(external, "run_tool", fake):
+            error = chd.chd_image(self.tools, CD["chd"], os.path.join(self.dir, "Game.cue"),
                                   [os.path.join(self.dir, n) for n in ("Game.cue", "Game (Track 1).bin", "Game (Track 2).bin")])
         self.assertIsNone(error)
         self.assertEqual(self.files(), ["Game.chd", "Other.bin"])
@@ -113,79 +114,79 @@ class ChdTest(unittest.TestCase):
             elif cmd[1].startswith("create"):
                 open(cmd[cmd.index("-o") + 1], "w").close()
 
-        with mock.patch.object(cli, "run_tool", fake):
-            self.assertIsNone(cli.make_chd(self.tools, CD["chd"], os.path.join(self.dir, "Game.iso"), os.path.join(self.dir, "Game.chd")))
+        with mock.patch.object(external, "run_tool", fake):
+            self.assertIsNone(chd.make_chd(self.tools, CD["chd"], os.path.join(self.dir, "Game.iso"), os.path.join(self.dir, "Game.chd")))
         self.assertEqual(seen, [[".Game.chd.part", "Game.iso"]])
         self.assertEqual(self.files(), ["Game.chd", "Game.iso"])
 
     def test_stale_part_file_from_a_killed_run_is_replaced(self):
         self.touch("Game.iso", ".Game.chd.part", text="half")
-        with mock.patch.object(cli, "run_tool", FakeTools()):
-            self.assertIsNone(cli.make_chd(self.tools, CD["chd"], os.path.join(self.dir, "Game.iso"), os.path.join(self.dir, "Game.chd")))
+        with mock.patch.object(external, "run_tool", FakeTools()):
+            self.assertIsNone(chd.make_chd(self.tools, CD["chd"], os.path.join(self.dir, "Game.iso"), os.path.join(self.dir, "Game.chd")))
         self.assertEqual(sorted(os.listdir(self.dir)), ["Game.chd", "Game.iso"])
         self.assertEqual(os.path.getsize(os.path.join(self.dir, "Game.chd")), 0)
 
     def test_stale_extraction_folders_are_removed(self):
         self.touch("psx/.chd-abc123/Game.bin", "psx/Game.zip")
-        cli.remove_stale_chd_temp(self.dir)
+        chd.remove_stale_chd_temp(self.dir)
         self.assertEqual(os.listdir(os.path.join(self.dir, "psx")), ["Game.zip"])
 
     def test_stop_tools_ends_a_running_tool_and_blocks_new_ones(self):
-        self.addCleanup(setattr, cli, "_tools_stopped", False)
+        self.addCleanup(setattr, external, "_tools_stopped", False)
         result = []
-        thread = threading.Thread(target=lambda: result.append(cli.run_tool(["sleep", "30"])))
+        thread = threading.Thread(target=lambda: result.append(external.run_tool(["sleep", "30"])))
         thread.start()
-        while not cli._tool_procs:
+        while not external._tool_procs:
             time.sleep(0.01)
-        cli.stop_tools()
+        external.stop_tools()
         thread.join(5)
         self.assertFalse(thread.is_alive())
         self.assertTrue(result[0])
-        self.assertEqual(cli.run_tool(["true"]), "interrupted")
+        self.assertEqual(external.run_tool(["true"]), "interrupted")
 
     def test_failed_verify_keeps_the_originals_and_drops_the_chd(self):
         self.touch("Game.iso")
-        with mock.patch.object(cli, "run_tool", FakeTools(fail=("verify",))):
-            error = cli.chd_image(self.tools, DVD["chd"], os.path.join(self.dir, "Game.iso"), [os.path.join(self.dir, "Game.iso")])
+        with mock.patch.object(external, "run_tool", FakeTools(fail=("verify",))):
+            error = chd.chd_image(self.tools, DVD["chd"], os.path.join(self.dir, "Game.iso"), [os.path.join(self.dir, "Game.iso")])
         self.assertEqual(error, "verify failed")
         self.assertEqual(self.files(), ["Game.iso"])
 
     def test_archive_is_converted_and_removed(self):
         self.touch("Game.zip")
         fake = FakeTools(archive=["Game.cue", "Game (Track 1).bin", "Game (Track 2).bin"])
-        with mock.patch.object(cli, "run_tool", fake):
-            error = cli.chd_archive(self.tools, CD["chd"], os.path.join(self.dir, "Game.zip"))
+        with mock.patch.object(external, "run_tool", fake):
+            error = chd.chd_archive(self.tools, CD["chd"], os.path.join(self.dir, "Game.zip"))
         self.assertIsNone(error)
         self.assertEqual(self.files(), ["Game.chd"])
 
     def test_failed_archive_is_kept_and_leaves_no_temp_folder(self):
         self.touch("Game.zip")
-        with mock.patch.object(cli, "run_tool", FakeTools(archive=["Game.iso"], fail=("createdvd",))):
-            error = cli.chd_archive(self.tools, DVD["chd"], os.path.join(self.dir, "Game.zip"))
+        with mock.patch.object(external, "run_tool", FakeTools(archive=["Game.iso"], fail=("createdvd",))):
+            error = chd.chd_archive(self.tools, DVD["chd"], os.path.join(self.dir, "Game.zip"))
         self.assertEqual(error, "createdvd failed")
         self.assertEqual(self.files(), ["Game.zip"])
 
     def test_archive_without_a_disc_image_is_kept(self):
         self.touch("Game.zip")
-        with mock.patch.object(cli, "run_tool", FakeTools(archive=["readme.txt"])):
-            error = cli.chd_archive(self.tools, CD["chd"], os.path.join(self.dir, "Game.zip"))
+        with mock.patch.object(external, "run_tool", FakeTools(archive=["readme.txt"])):
+            error = chd.chd_archive(self.tools, CD["chd"], os.path.join(self.dir, "Game.zip"))
         self.assertEqual(error, "no disc image in the archive")
         self.assertEqual(self.files(), ["Game.zip"])
 
     def test_extract_only_systems_keep_their_files_as_extracted(self):
         self.touch("Game.7z")
-        with mock.patch.object(cli, "run_tool", FakeTools(archive=["Game.rvz"])):
-            error = cli.chd_archive(self.tools, EXTRACT["chd"], os.path.join(self.dir, "Game.7z"))
+        with mock.patch.object(external, "run_tool", FakeTools(archive=["Game.rvz"])):
+            error = chd.chd_archive(self.tools, EXTRACT["chd"], os.path.join(self.dir, "Game.7z"))
         self.assertIsNone(error)
         self.assertEqual(self.files(), ["Game.rvz"])
 
     def test_shipped_chd_settings(self):
-        systems = {s["bucket"]: s for s in cli.repo_json("systems")}
+        systems = {s["bucket"]: s for s in store.repo_json("systems")}
         self.assertEqual(systems["psx"]["chd"], {"mode": "cd"})
         self.assertEqual(systems["wii"]["chd"], {"mode": "extract"})
         self.assertFalse(systems["3do"]["chd"]["m3u"])
         self.assertNotIn("chd", systems["gba"])
-        folders = cli.chd_folders(systems.values())
+        folders = chd.chd_folders(systems.values())
         self.assertIs(folders["megacd"], systems["segacd"])
         self.assertIs(folders["ps"], systems["psx"])
 
@@ -202,8 +203,8 @@ class ChdTest(unittest.TestCase):
             return fake(cmd, progress)
 
         args = SimpleNamespace(chd=os.path.join(self.dir, "psx"), dry_run=False)
-        with mock.patch.object(cli, "run_tool", fake_run), mock.patch.object(cli, "find_tool", lambda t: t):
-            self.assertEqual(cli.chd_command(args), 0)
+        with mock.patch.object(external, "run_tool", fake_run), mock.patch.object(external, "find_tool", lambda t: t):
+            self.assertEqual(chd.chd_command(args), 0)
         self.assertEqual(sorted(os.listdir(os.path.join(self.dir, "psx"))), ["Game (Disc 1).chd", "Game (Disc 2).chd", "Game.m3u"])
 
     def test_jobs_share_the_cores(self):
@@ -219,35 +220,35 @@ class ChdTest(unittest.TestCase):
                 open(cmd[cmd.index("-o") + 1], "w").close()
 
         args = SimpleNamespace(chd=self.dir, dry_run=False)
-        with mock.patch.object(cli, "run_tool", fake_run), mock.patch.object(cli, "find_tool", lambda t: t), \
+        with mock.patch.object(external, "run_tool", fake_run), mock.patch.object(external, "find_tool", lambda t: t), \
                 mock.patch.object(cli.os, "cpu_count", return_value=6):
-            self.assertEqual(cli.chd_command(args), 0)
+            self.assertEqual(chd.chd_command(args), 0)
         self.assertEqual(sorted(os.listdir(os.path.join(self.dir, "psx"))), ["A.chd", "B.chd", "C.chd"])
         self.assertEqual({c[c.index("-np") + 1] for c in calls if c[1:2] == ["createcd"]}, {"2"})
 
     def test_playlists_are_fixed_even_when_nothing_converts(self):
         self.touch("psx/Game (Disc 1).chd", "psx/Game (Disc 2).chd", "gc/Wii.rvz")
         args = SimpleNamespace(chd=self.dir, dry_run=False)
-        self.assertEqual(cli.chd_command(args), 0)
+        self.assertEqual(chd.chd_command(args), 0)
         self.assertEqual(sorted(os.listdir(os.path.join(self.dir, "psx"))), ["Game (Disc 1).chd", "Game (Disc 2).chd", "Game.m3u"])
 
     def test_dry_run_previews_playlists_without_writing_them(self):
         self.touch("psx/Game (Disc 1).chd", "psx/Game (Disc 2).chd")
         out = io.StringIO()
         with contextlib.redirect_stdout(out):
-            self.assertEqual(cli.chd_command(SimpleNamespace(chd=self.dir, dry_run=True)), 0)
+            self.assertEqual(chd.chd_command(SimpleNamespace(chd=self.dir, dry_run=True)), 0)
         self.assertIn("create Game.m3u", out.getvalue())
         self.assertEqual(len(os.listdir(os.path.join(self.dir, "psx"))), 2)
 
     def test_no_playlists_for_3do_or_extract_only_systems(self):
         self.touch("3do/Game (Disc 1).chd", "3do/Game (Disc 2).chd")
-        self.assertEqual(cli.chd_command(SimpleNamespace(chd=self.dir, dry_run=False)), 0)
+        self.assertEqual(chd.chd_command(SimpleNamespace(chd=self.dir, dry_run=False)), 0)
         self.assertEqual(len(os.listdir(os.path.join(self.dir, "3do"))), 2)
 
     def test_run_tool_reports_chdman_percentages_and_the_error_line(self):
         code = "import sys; sys.stderr.write('Compressing, 12.5% complete... \\rCompressing, 50.0% complete... \\rbad input\\n'); sys.exit(1)"
         seen = []
-        self.assertEqual(cli.run_tool([sys.executable, "-c", code], seen.append), "bad input")
+        self.assertEqual(external.run_tool([sys.executable, "-c", code], seen.append), "bad input")
         self.assertEqual(seen, [12.5, 50.0])
 
     def test_make_chd_reports_create_then_verify_progress(self):
@@ -261,8 +262,8 @@ class ChdTest(unittest.TestCase):
             else:
                 progress(50)
 
-        with mock.patch.object(cli, "run_tool", fake):
-            cli.make_chd(self.tools, CD["chd"], os.path.join(self.dir, "Game.iso"), os.path.join(self.dir, "Game.chd"), seen.append)
+        with mock.patch.object(external, "run_tool", fake):
+            chd.make_chd(self.tools, CD["chd"], os.path.join(self.dir, "Game.iso"), os.path.join(self.dir, "Game.chd"), seen.append)
         self.assertEqual(len(seen), 2)
         self.assertAlmostEqual(seen[0], 0.45)
         self.assertAlmostEqual(seen[1], 0.95)
@@ -270,8 +271,8 @@ class ChdTest(unittest.TestCase):
     def test_dry_run_changes_nothing_and_needs_no_tools(self):
         self.touch("psx/Game.zip")
         args = SimpleNamespace(chd=self.dir, dry_run=True)
-        with mock.patch.object(cli, "find_tool", lambda t: None):
-            self.assertEqual(cli.chd_command(args), 0)
+        with mock.patch.object(external, "find_tool", lambda t: None):
+            self.assertEqual(chd.chd_command(args), 0)
         self.assertEqual(os.listdir(os.path.join(self.dir, "psx")), ["Game.zip"])
 
 

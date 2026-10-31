@@ -9,6 +9,7 @@ from unittest import mock
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "src"))
 from sync_roms import cli  # noqa: E402
+from sync_roms import runtime, s3, scrape_plan, store, upload, usersettings  # noqa: E402
 
 SYSTEMS = [
     {"name": "Game Boy Advance", "bucket": "gba", "folders": {"esde": "gba", "onion": "GBA"}},
@@ -27,7 +28,7 @@ def touch(root, rel, size=1):
 
 class GuessSystemTest(unittest.TestCase):
     def guess(self, folder):
-        i = cli.guess_system(SYSTEMS, folder)
+        i = store.guess_system(SYSTEMS, folder)
         return None if i is None else SYSTEMS[i]["bucket"]
 
     def test_bucket_id(self):
@@ -58,7 +59,7 @@ class PlanRomUploadTest(unittest.TestCase):
             touch(root, ".Trashes/x.gba")
             touch(root, ".hack.gba", 50)
             existing = {"gba/b.gba": 20, "gba/c.gba": 99, "gba/other.gba": 5}
-            new, changed, same = cli.plan_rom_upload(root, "gba", existing)
+            new, changed, same = upload.plan_rom_upload(root, "gba", existing)
         self.assertEqual(sorted((k, s) for k, _, s in new), [("gba/.hack.gba", 50), ("gba/Disc/d.chd", 40), ("gba/a.gba", 10)])
         self.assertEqual([(k, s) for k, _, s in changed], [("gba/c.gba", 30)])
         self.assertEqual([(k, s) for k, _, s in same], [("gba/b.gba", 20)])
@@ -68,7 +69,7 @@ class UploadWorkersTest(unittest.TestCase):
     def test_scales_with_cores_and_is_capped(self):
         for cores, expected in ((2, 8), (10, 40), (64, 64), (None, 16)):
             with mock.patch.object(cli.os, "cpu_count", return_value=cores):
-                self.assertEqual(cli.upload_workers(), expected)
+                self.assertEqual(upload.upload_workers(), expected)
 
 
 class FakeManager:
@@ -92,11 +93,11 @@ class FakeManager:
 
 class RunRomUploadsTest(unittest.TestCase):
     def run_uploads(self, todo, manager):
-        with mock.patch.object(cli, "BUCKET", "test-bucket"), \
-                mock.patch.object(cli, "create_transfer_manager", return_value=manager) as create, \
-                mock.patch.object(cli, "s3_client") as client, \
+        with mock.patch.object(runtime, "BUCKET", "test-bucket"), \
+                mock.patch.object(upload, "create_transfer_manager", return_value=manager) as create, \
+                mock.patch.object(s3, "s3_client") as client, \
                 contextlib.redirect_stdout(io.StringIO()) as out:
-            failed = cli.run_uploads(todo)
+            failed = upload.run_uploads(todo)
         return failed, out.getvalue(), create, client
 
     def test_biggest_first_with_content_type_on_the_write_profile(self):
@@ -108,11 +109,11 @@ class RunRomUploadsTest(unittest.TestCase):
             ("/x/b.bin", "test-bucket", "gba/b.bin", {"ContentType": "application/octet-stream"}),
             ("/x/a.zip", "test-bucket", "gba/a.zip", {"ContentType": "application/zip"}),
         ])
-        client.assert_called_once_with(cli.WRITE_PROFILE, connections=cli.upload_workers())
+        client.assert_called_once_with(runtime.WRITE_PROFILE, connections=upload.upload_workers())
         config = create.call_args[0][1]
-        self.assertEqual(config.max_request_concurrency, cli.upload_workers())
-        self.assertEqual(config.multipart_threshold, cli.UPLOAD_MULTIPART_AT)
-        self.assertEqual(config.multipart_chunksize, cli.UPLOAD_PART)
+        self.assertEqual(config.max_request_concurrency, upload.upload_workers())
+        self.assertEqual(config.multipart_threshold, upload.UPLOAD_MULTIPART_AT)
+        self.assertEqual(config.multipart_chunksize, upload.UPLOAD_PART)
         self.assertIn("[2/2]", out)
 
     def test_failures_are_counted_and_shown(self):
@@ -128,7 +129,7 @@ class RunRomUploadsTest(unittest.TestCase):
 
         manager = FakeManager()
         todo = [("scrapes/onion/a.png", "/x/a.png", 500, (250, 360)), ("scrapes/b.png", "/x/b.png", 1)]
-        with mock.patch.object(cli, "shrink_png", side_effect=shrink) as shrunk:
+        with mock.patch.object(scrape_plan, "shrink_png", side_effect=shrink) as shrunk:
             failed, _, _, _ = self.run_uploads(todo, manager)
         self.assertEqual(failed, 0)
         shrunk.assert_called_once()
@@ -141,7 +142,7 @@ class RunRomUploadsTest(unittest.TestCase):
 
     def test_failed_shrink_is_reported_not_uploaded(self):
         manager = FakeManager()
-        with mock.patch.object(cli, "shrink_png", side_effect=RuntimeError("bad png")):
+        with mock.patch.object(scrape_plan, "shrink_png", side_effect=RuntimeError("bad png")):
             failed, out, _, _ = self.run_uploads([("scrapes/onion/a.png", "/x/a.png", 5, (250, 360))], manager)
         self.assertEqual(failed, 1)
         self.assertIn("bad png", out)
@@ -150,17 +151,17 @@ class RunRomUploadsTest(unittest.TestCase):
 
 class S3ClientPoolTest(unittest.TestCase):
     def test_pool_size_gets_its_own_client(self):
-        with mock.patch.dict(cli._s3, {}, clear=True), mock.patch.object(cli.boto3, "Session") as session:
+        with mock.patch.dict(s3._s3, {}, clear=True), mock.patch.object(s3.boto3, "Session") as session:
             session.return_value.client.side_effect = lambda *a, **k: mock.Mock(pool=k["config"].max_pool_connections)
-            small, big = cli.s3_client("p"), cli.s3_client("p", connections=40)
-            self.assertIs(small, cli.s3_client("p"))
-            self.assertIs(big, cli.s3_client("p", connections=40))
-        self.assertEqual((small.pool, big.pool), (cli.WORKERS, 40))
+            small, big = s3.s3_client("p"), s3.s3_client("p", connections=40)
+            self.assertIs(small, s3.s3_client("p"))
+            self.assertIs(big, s3.s3_client("p", connections=40))
+        self.assertEqual((small.pool, big.pool), (runtime.WORKERS, 40))
 
     def test_custom_endpoint_uses_path_style(self):
-        with mock.patch.dict(cli._s3, {}, clear=True), mock.patch.object(cli.boto3, "Session") as session, \
-                mock.patch.object(cli, "ENDPOINT", "http://minio:9000"):
-            cli.s3_client("p")
+        with mock.patch.dict(s3._s3, {}, clear=True), mock.patch.object(s3.boto3, "Session") as session, \
+                mock.patch.object(runtime, "ENDPOINT", "http://minio:9000"):
+            s3.s3_client("p")
         kwargs = session.return_value.client.call_args.kwargs
         self.assertEqual(kwargs["endpoint_url"], "http://minio:9000")
         self.assertEqual(kwargs["config"].s3, {"addressing_style": "path"})
@@ -168,19 +169,19 @@ class S3ClientPoolTest(unittest.TestCase):
     def test_bucket_and_endpoint_env_override_settings(self):
         settings = {"bucket": "b", "endpoint": "http://saved"}
         env = {"ROMS_BUCKET": "eb", "ROMS_ENDPOINT": "http://env"}
-        with mock.patch.object(cli, "load_settings", return_value=settings), \
+        with mock.patch.object(usersettings, "load_settings", return_value=settings), \
                 mock.patch.dict(cli.os.environ, env), \
-                mock.patch.object(cli, "BUCKET"), mock.patch.object(cli, "ENDPOINT"):
-            cli.ensure_bucket()
-            self.assertEqual((cli.BUCKET, cli.ENDPOINT), ("eb", "http://env"))
+                mock.patch.object(runtime, "BUCKET"), mock.patch.object(runtime, "ENDPOINT"):
+            usersettings.ensure_bucket()
+            self.assertEqual((runtime.BUCKET, runtime.ENDPOINT), ("eb", "http://env"))
 
     def test_profiles_from_settings_with_env_override(self):
         settings = {"bucket": "b", "profile": "r", "write_profile": "w"}
-        with mock.patch.object(cli, "load_settings", return_value=settings), \
+        with mock.patch.object(usersettings, "load_settings", return_value=settings), \
                 mock.patch.dict(cli.os.environ, {"ROMS_PROFILE": "env"}), \
-                mock.patch.object(cli, "PROFILE"), mock.patch.object(cli, "WRITE_PROFILE"):
-            cli.ensure_bucket()
-            self.assertEqual((cli.PROFILE, cli.WRITE_PROFILE), ("env", "w"))
+                mock.patch.object(runtime, "PROFILE"), mock.patch.object(runtime, "WRITE_PROFILE"):
+            usersettings.ensure_bucket()
+            self.assertEqual((runtime.PROFILE, runtime.WRITE_PROFILE), ("env", "w"))
 
 
 if __name__ == "__main__":
