@@ -218,6 +218,36 @@
       "bucket": "gc/Pac-Man Vs. (USA).rvz"
     },
     {
+      "title": "Super Mario Strikers",
+      "system": "gc",
+      "bucket": "gc/Super Mario Strikers (USA).rvz"
+    },
+    {
+      "title": "Mario Power Tennis (Rev 1)",
+      "system": "gc",
+      "bucket": "gc/Mario Power Tennis (USA) (Rev 1).rvz"
+    },
+    {
+      "title": "Mario Party 6",
+      "system": "gc",
+      "bucket": "gc/Mario Party 6 (USA).rvz"
+    },
+    {
+      "title": "Mario Party 7 (Rev 1)",
+      "system": "gc",
+      "bucket": "gc/Mario Party 7 (USA) (Rev 1).rvz"
+    },
+    {
+      "title": "LEGO Star Wars - The Video Game",
+      "system": "gc",
+      "bucket": "gc/LEGO Star Wars - The Video Game (USA).rvz"
+    },
+    {
+      "title": "Rampage - Total Destruction",
+      "system": "gc",
+      "bucket": "gc/Rampage - Total Destruction (USA).rvz"
+    },
+    {
       "title": "New Super Mario Bros.",
       "system": "nds",
       "bucket": "nds/New Super Mario Bros. (USA, Australia).zip"

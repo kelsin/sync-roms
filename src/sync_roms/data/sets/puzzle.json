@@ -168,6 +168,16 @@
       "bucket": "gc/Tetris Worlds (USA).rvz"
     },
     {
+      "title": "Bust-A-Move 3000",
+      "system": "gc",
+      "bucket": "gc/Bust-A-Move 3000 (USA).rvz"
+    },
+    {
+      "title": "Nintendo Puzzle Collection",
+      "system": "gc",
+      "bucket": "gc/Nintendo Puzzle Collection (Japan).rvz"
+    },
+    {
       "title": "Tetris DS",
       "system": "nds",
       "bucket": "nds/Tetris DS (USA, Australia).zip"

@@ -1,0 +1,91 @@
+{
+  "name": "Resident Evil",
+  "description": "The Resident Evil games and spin-offs across every system in the collection.",
+  "games": [
+    {
+      "title": "Resident Evil",
+      "system": "saturn",
+      "bucket": "saturn/Resident Evil (USA).chd"
+    },
+    {
+      "title": "Resident Evil 2 - Dual Shock Ver.",
+      "system": "psx",
+      "bucket": "psx/Resident Evil 2 - Dual Shock Ver. (USA) (Disc 1).chd",
+      "files": [
+        "psx/Resident Evil 2 - Dual Shock Ver. (USA) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "Resident Evil 3 - Nemesis",
+      "system": "psx",
+      "bucket": "psx/Resident Evil 3 - Nemesis (USA).chd"
+    },
+    {
+      "title": "Resident Evil - Director's Cut - Dual Shock Ver.",
+      "system": "psx",
+      "bucket": "psx/Resident Evil - Director's Cut - Dual Shock Ver. (USA).chd"
+    },
+    {
+      "title": "Resident Evil - Survivor",
+      "system": "psx",
+      "bucket": "psx/Resident Evil - Survivor (USA).chd"
+    },
+    {
+      "title": "Resident Evil 2 (Rev 1)",
+      "system": "n64",
+      "bucket": "n64/Resident Evil 2 (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Resident Evil Gaiden",
+      "system": "gbc",
+      "bucket": "gbc/Resident Evil Gaiden (USA).zip"
+    },
+    {
+      "title": "Resident Evil - Deadly Silence",
+      "system": "nds",
+      "bucket": "nds/Resident Evil - Deadly Silence (USA).zip"
+    },
+    {
+      "title": "Resident Evil",
+      "system": "gc",
+      "bucket": "gc/Resident Evil (USA) (Disc 1).rvz",
+      "files": [
+        "gc/Resident Evil (USA) (Disc 2).rvz"
+      ]
+    },
+    {
+      "title": "Resident Evil Zero",
+      "system": "gc",
+      "bucket": "gc/Resident Evil Zero (USA) (Disc 1).rvz",
+      "files": [
+        "gc/Resident Evil Zero (USA) (Disc 2).rvz"
+      ]
+    },
+    {
+      "title": "Resident Evil 2",
+      "system": "gc",
+      "bucket": "gc/Resident Evil 2 (USA).rvz"
+    },
+    {
+      "title": "Resident Evil 3 - Nemesis",
+      "system": "gc",
+      "bucket": "gc/Resident Evil 3 - Nemesis (USA).rvz"
+    },
+    {
+      "title": "Resident Evil - Code - Veronica X",
+      "system": "gc",
+      "bucket": "gc/Resident Evil - Code - Veronica X (USA) (Disc 1).rvz",
+      "files": [
+        "gc/Resident Evil - Code - Veronica X (USA) (Disc 2).rvz"
+      ]
+    },
+    {
+      "title": "Resident Evil 4",
+      "system": "gc",
+      "bucket": "gc/Resident Evil 4 (USA) (Disc 1).rvz",
+      "files": [
+        "gc/Resident Evil 4 (USA) (Disc 2).rvz"
+      ]
+    }
+  ]
+}

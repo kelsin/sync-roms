@@ -238,6 +238,16 @@
       "bucket": "gc/Mario Party 7 (USA) (Rev 1).rvz"
     },
     {
+      "title": "Paper Mario - The Thousand-Year Door",
+      "system": "gc",
+      "bucket": "gc/Paper Mario - The Thousand-Year Door (USA).rvz"
+    },
+    {
+      "title": "Dance Dance Revolution - Mario Mix",
+      "system": "gc",
+      "bucket": "gc/Dance Dance Revolution - Mario Mix (USA).rvz"
+    },
+    {
       "title": "New Super Mario Bros.",
       "system": "nds",
       "bucket": "nds/New Super Mario Bros. (USA, Australia).zip"
