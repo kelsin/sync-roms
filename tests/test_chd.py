@@ -37,11 +37,13 @@ class FakeTools:
                 with open(os.path.join(out, name), "w") as f:
                     f.write(CUE if name.endswith(".cue") else "x")
         elif cmd[0] == "extract-xiso":
-            if cmd[2] == "-r":  # like the real tool: the rewritten image replaces the file, the original goes to .old
-                os.rename(cmd[3], cmd[3] + ".old")
-                with open(cmd[3], "wb") as f:
+            mode = cmd[-2]
+            if mode == "-r":  # like the real tool: the rewritten image is written into -d, -D deletes the original
+                out = os.path.join(cmd[cmd.index("-d") + 1], os.path.basename(cmd[-1]))
+                os.remove(cmd[-1])
+                with open(out, "wb") as f:
                     f.write(XISO_TAG)
-            return "xiso failed" if cmd[2] in self.fail else None
+            return "xiso failed" if mode in self.fail else None
         elif cmd[1].startswith("create"):
             open(cmd[cmd.index("-o") + 1], "w").close()
         return f"{cmd[1]} failed" if cmd[1] in self.fail else None
@@ -273,7 +275,7 @@ class ChdTest(unittest.TestCase):
         self.assertIsNone(error)
         self.assertEqual(self.files(), ["Game.iso"])
         self.assertTrue(chd.is_optimized_xiso(os.path.join(self.dir, "Game.iso")))
-        self.assertEqual([c[2] for c in fake.calls], ["-r", "-l"])
+        self.assertEqual([c[-2] for c in fake.calls], ["-r", "-l"])
 
     def test_failed_xiso_rewrite_leaves_the_iso_untouched(self):
         self.touch("Game.iso", text="redump")

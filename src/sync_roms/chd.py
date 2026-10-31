@@ -134,10 +134,10 @@ def make_xiso(tools, image, out, report=None):
         shutil.copyfile(image, copy)
         if report:
             report(0.2)
-        error = external.run_tool([xiso, "-Q", "-r", copy])
+        error = external.run_tool([xiso, "-q", "-D", "-d", work, "-r", copy])
         if report:
             report(0.8)
-        error = error or external.run_tool([xiso, "-Q", "-l", copy])
+        error = error or external.run_tool([xiso, "-q", "-l", copy])
         if not error:
             os.replace(copy, out)
         return error
