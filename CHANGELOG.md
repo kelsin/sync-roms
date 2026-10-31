@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.17.0](https://github.com/kelsin/sync-roms/compare/v0.16.1...v0.17.0) (2026-10-31)
+
+
+### Features
+
+* **sets:** add english-patched psp games to jrpg essentials and hidden gems ([#62](https://github.com/kelsin/sync-roms/issues/62)) ([2baa524](https://github.com/kelsin/sync-roms/commit/2baa5249e7bfe0e2e66699b7169b3fbd6f3da062))
+* **sets:** add resident evil and star wars sets and fill in gc games ([#63](https://github.com/kelsin/sync-roms/issues/63)) ([0c1907f](https://github.com/kelsin/sync-roms/commit/0c1907fcfd93593145d0b58c717bc091d2c099f4))
+
+
+### Bug Fixes
+
+* **sets:** relink psp games to chd files and add more psp titles ([#60](https://github.com/kelsin/sync-roms/issues/60)) ([550d7ef](https://github.com/kelsin/sync-roms/commit/550d7ef03311babd7d6ea2bd34bf18dd3cab9ca5))
+
 ## [0.16.1](https://github.com/kelsin/sync-roms/compare/v0.16.0...v0.16.1) (2026-10-31)
 
 
