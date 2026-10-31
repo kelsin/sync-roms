@@ -163,7 +163,7 @@ def edit_manifest():
         name = next((k for k, v in targets.items() if v is t), None)
         setup = (t["setup"] or picker.saved_setup(store.load_cards().get(name), manifest["devices"], manifest["layouts"])
                  if is_card else None)
-        systems_all = [s for s in t["data"]["systems"] if not setup or picker.system_applies(s, *setup)]
+        systems_all = [s for s in t["data"]["systems"] if not setup or store.system_applies(s, *setup)]
         by_bucket = {s["bucket"]: s for s in systems_all}
         systems = sorted((s for s in systems_all if bucket_keys[s["bucket"]]), key=lambda s: s["name"].lower())
         where = "games.json" if not is_card else f"{t['label']}'s extras"
@@ -296,7 +296,7 @@ def edit_manifest():
             targets[name] = new_target(f"💳 {name}", store.card_games(name))
         targets[name]["setup"] = setup
         for sys_ in targets[name]["data"]["systems"]:
-            if not picker.system_applies(sys_, *setup):
+            if not store.system_applies(sys_, *setup):
                 sys_["games"], sys_["full_system"] = [], False
 
     def setup_extra(name):

@@ -11,7 +11,7 @@ from unittest import mock
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "src", "sync_roms", "data")
 sys.path.insert(0, os.path.join(ROOT, "src"))
-from sync_roms import cli as sync_roms  # noqa: E402
+from sync_roms import cli  # noqa: E402
 from sync_roms import chd, downloads, picker  # noqa: E402
 
 
@@ -95,7 +95,7 @@ class PrepareDirsTest(unittest.TestCase):
     def test_creates_the_nested_muos_bios_folder(self):
         layout = repo("layouts.json")["muos"]
         with tempfile.TemporaryDirectory() as tmp, contextlib.redirect_stdout(io.StringIO()):
-            roms, bios = sync_roms.prepare_dirs(tmp, layout, False, ask=False)
+            roms, bios = cli.prepare_dirs(tmp, layout, False, ask=False)
             self.assertTrue(os.path.isdir(os.path.join(tmp, "ROMS")))
             self.assertTrue(os.path.isdir(os.path.join(tmp, "MUOS", "bios")))
             self.assertEqual(bios, os.path.join(tmp, "MUOS", "bios"))

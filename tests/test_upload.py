@@ -8,7 +8,6 @@ from unittest import mock
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "src"))
-from sync_roms import cli  # noqa: E402
 from sync_roms import runtime, s3, scrape_plan, store, upload, usersettings  # noqa: E402
 
 SYSTEMS = [
@@ -68,7 +67,7 @@ class PlanRomUploadTest(unittest.TestCase):
 class UploadWorkersTest(unittest.TestCase):
     def test_scales_with_cores_and_is_capped(self):
         for cores, expected in ((2, 8), (10, 40), (64, 64), (None, 16)):
-            with mock.patch.object(cli.os, "cpu_count", return_value=cores):
+            with mock.patch.object(os, "cpu_count", return_value=cores):
                 self.assertEqual(upload.upload_workers(), expected)
 
 
@@ -170,7 +169,7 @@ class S3ClientPoolTest(unittest.TestCase):
         settings = {"bucket": "b", "endpoint": "http://saved"}
         env = {"ROMS_BUCKET": "eb", "ROMS_ENDPOINT": "http://env"}
         with mock.patch.object(usersettings, "load_settings", return_value=settings), \
-                mock.patch.dict(cli.os.environ, env), \
+                mock.patch.dict(os.environ, env), \
                 mock.patch.object(runtime, "BUCKET"), mock.patch.object(runtime, "ENDPOINT"):
             usersettings.ensure_bucket()
             self.assertEqual((runtime.BUCKET, runtime.ENDPOINT), ("eb", "http://env"))
@@ -178,7 +177,7 @@ class S3ClientPoolTest(unittest.TestCase):
     def test_profiles_from_settings_with_env_override(self):
         settings = {"bucket": "b", "profile": "r", "write_profile": "w"}
         with mock.patch.object(usersettings, "load_settings", return_value=settings), \
-                mock.patch.dict(cli.os.environ, {"ROMS_PROFILE": "env"}), \
+                mock.patch.dict(os.environ, {"ROMS_PROFILE": "env"}), \
                 mock.patch.object(runtime, "PROFILE"), mock.patch.object(runtime, "WRITE_PROFILE"):
             usersettings.ensure_bucket()
             self.assertEqual((runtime.PROFILE, runtime.WRITE_PROFILE), ("env", "w"))

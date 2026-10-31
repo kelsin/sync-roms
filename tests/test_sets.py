@@ -7,7 +7,6 @@ from unittest import mock
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "src"))
-from sync_roms import cli as sync_roms  # noqa: E402
 from sync_roms import edit, picker, store  # noqa: E402
 
 

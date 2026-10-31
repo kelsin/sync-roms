@@ -1,3 +1,5 @@
+import contextlib
+import io
 import json
 import os
 import sys
@@ -194,6 +196,14 @@ class DerivedUploadTest(unittest.TestCase):
     def test_cover_is_preferred_over_a_screenshot(self):
         plan = self.derived(["screenshots/A.png", "covers/A.png"])
         self.assertTrue(all(src.endswith(os.path.join("covers", "A.png")) for _, src, _, _ in plan["derived"]))
+
+
+class UnsafeKeyTest(unittest.TestCase):
+    def test_theme_key_with_dotdot_is_skipped(self):
+        listing = {"scrapes/esde/themes/ok/a.xml": 1, "scrapes/esde/themes/../../evil": 2}
+        with tempfile.TemporaryDirectory() as root, contextlib.redirect_stdout(io.StringIO()):
+            jobs, _ = scrape_plan.plan_esde_extras(root, listing, {})
+        self.assertEqual([k for k, _, _ in jobs], ["scrapes/esde/themes/ok/a.xml"])
 
 
 if __name__ == "__main__":

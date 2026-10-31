@@ -119,5 +119,15 @@ class MirrorListTest(unittest.TestCase):
                 self.assertEqual(s3.list_sizes("gba/"), {"gba/a.zip": 3})
 
 
+class SafeJoinTest(unittest.TestCase):
+    def test_rejects_keys_that_escape_the_base(self):
+        for rel in ("../x", "a/../../x", "/etc/passwd", ""):
+            with self.assertRaises(ValueError, msg=rel):
+                s3.safe_join("/base", rel)
+
+    def test_joins_normal_keys(self):
+        self.assertEqual(s3.safe_join("/base", "a/b.zip"), os.path.join("/base", "a/b.zip"))
+
+
 if __name__ == "__main__":
     unittest.main()

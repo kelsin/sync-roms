@@ -1,4 +1,4 @@
-"""Process-wide settings read as `config.NAME` so reassignment is seen everywhere."""
+"""Process-wide settings read as `runtime.NAME` so reassignment is seen everywhere."""
 import os
 
 

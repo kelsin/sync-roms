@@ -253,3 +253,8 @@ def guess_system(systems, folder):
         if name in (f.lower() for f in s["folders"].values() if f):
             return i
     return None
+
+
+def system_applies(system, device, layout_name):
+    """Whether a system is synced for a device (None for Full) and layout: the device runs it and the layout has a folder for it."""
+    return bool(system["folders"].get(layout_name)) and (device is None or system["bucket"] in device["systems"])

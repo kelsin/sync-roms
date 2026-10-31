@@ -1,9 +1,7 @@
-#!/usr/bin/env python3
 """Download ROMs and BIOS files from the roms bucket."""
 import argparse
 import os
 import signal
-import sys
 from concurrent.futures import ThreadPoolExecutor
 
 from . import chd, clean, diff, downloads, edit, external, m3u, mirroring, picker, runtime, s3, scrape_files, scrape_plan, store, ui, upload, usersettings
@@ -212,7 +210,7 @@ def sync():
         return code
     base = os.path.abspath(os.path.expanduser(args.base_dir or os.getcwd()))
 
-    print(ui.bold(f"🎮 sync-roms") + ui.dim(f"  s3://{runtime.BUCKET}  profile={runtime.PROFILE}"))
+    print(ui.bold("🎮 sync-roms") + ui.dim(f"  s3://{runtime.BUCKET}  profile={runtime.PROFILE}"))
     if usersettings.load_settings().get("mirror"):
         mirroring.use_mirror(usersettings.load_settings()["mirror"], args.dry_run)
     print("📄 Fetching manifests...")
@@ -266,8 +264,12 @@ def sync():
         have, need, total = listings[s["bucket"]], 0, 0
         for k in available(s):
             size = have.get(k, 0)
+            try:
+                path = s3.safe_join(os.path.join(roms_dir, s["folders"][layout_name]), downloads.rom_rel(k, unzip))
+            except ValueError:
+                continue
             total += size
-            if downloads.plan_downloads([(k, os.path.join(roms_dir, s["folders"][layout_name], downloads.rom_rel(k, unzip)), size)], unzip):
+            if downloads.plan_downloads([(k, path, size)], unzip):
                 need += size
         return need, total
 
@@ -293,7 +295,10 @@ def sync():
         dest = dest_of(s)
         for key in wanted:
             if key in have:
-                rom_jobs.append((key, os.path.join(dest, downloads.rom_rel(key, unzip)), have[key]))
+                try:
+                    rom_jobs.append((key, s3.safe_join(dest, downloads.rom_rel(key, unzip)), have[key]))
+                except ValueError as e:
+                    print(ui.yellow(f"  ⚠️  skipping {e}"))
             else:
                 missing.append(key)
     ui.report_missing(missing, "ROM(s)")
@@ -303,8 +308,13 @@ def sync():
 
     bios_keys = sorted({"BIOS/" + f for s in chosen for f in s["bios"]["files"]})
     bios_have = s3.list_sizes("BIOS/") if bios_keys else {}
-    bios_jobs = [(k, os.path.join(bios_dir, k[len("BIOS/"):]), bios_have[k])
-                 for k in bios_keys if k in bios_have]
+    bios_jobs = []
+    for k in bios_keys:
+        if k in bios_have:
+            try:
+                bios_jobs.append((k, s3.safe_join(bios_dir, k[len("BIOS/"):]), bios_have[k]))
+            except ValueError as e:
+                print(ui.yellow(f"  ⚠️  skipping {e}"))
     ui.report_missing([k for k in bios_keys if k not in bios_have], "BIOS file(s)")
 
     rom_todo, bios_todo = downloads.plan_downloads(rom_jobs, unzip), downloads.plan_downloads(bios_jobs)
@@ -383,6 +393,3 @@ def sync():
     print(ui.green("\n🎉 Done!") if not failed else ui.red(f"\n⚠️  Done with {failed} failure(s)"))
     return 1 if failed else 0
 
-
-if __name__ == "__main__":
-    sys.exit(main())

@@ -182,6 +182,12 @@ def plan_scrapes(layout_name, rom_rels, listing, meta, media_root, rom_dir, pres
     """
     index = scrape_index(listing)
     jobs, entries, texts = [], {}, []
+
+    def add(key, root, rel, size):
+        try:
+            jobs.append((key, s3.safe_join(root, rel), size))
+        except ValueError as e:
+            print(ui.yellow(f"  ⚠️  skipping {e}"))
     for rom in sorted(rom_rels):
         if not present(rom):
             continue
@@ -194,26 +200,26 @@ def plan_scrapes(layout_name, rom_rels, listing, meta, media_root, rom_dir, pres
                 mtype = next((t for t in types if t in found), None)
                 if mtype:
                     key, size = found[mtype]
-                    jobs.append((key, os.path.join(media_root, folder, base + os.path.splitext(key)[1]), size))
+                    add(key, media_root, f"{folder}/{base}{os.path.splitext(key)[1]}", size)
             if meta.get(rom, {}).get("desc"):
                 texts.append((os.path.join(media_root, "text", base + ".txt"), meta[rom]["desc"] + "\n"))
             continue
         if layout_name == "slot":
             if SLOT_TYPE in found:
                 key, size = found[SLOT_TYPE]
-                jobs.append((key, os.path.join(media_root, base + ".png"), size))
+                add(key, media_root, base + ".png", size)
             continue
         if layout_name == "esde":
             for mtype, (key, size) in found.items():
                 if mtype in MEDIA_TYPES:  # not the Onion-only art
-                    jobs.append((key, os.path.join(media_root, mtype, key.split("/", 3)[3]), size))
+                    add(key, media_root, f"{mtype}/{key.split('/', 3)[3]}", size)
         elif layout_name == "knulli":
             for tag, folder, suffix, types in KNULLI_MEDIA:
                 mtype = next((t for t in types if t in found), None)
                 if mtype:
                     key, size = found[mtype]
                     name = f"{base}-{suffix}{os.path.splitext(key)[1]}"
-                    jobs.append((key, os.path.join(rom_dir, folder, name), size))
+                    add(key, rom_dir, f"{folder}/{name}", size)
                     tags[tag] = f"./{folder}/{name}"
         elif layout_name == "onion":
             if "/" in rom:  # Onion's Imgs folder is flat and its gamelist ignores subfolders
@@ -221,7 +227,7 @@ def plan_scrapes(layout_name, rom_rels, listing, meta, media_root, rom_dir, pres
             tags = {"name": tags["name"]} if "name" in tags else {}
             if ONION_TYPE in found:
                 key, size = found[ONION_TYPE]
-                jobs.append((key, os.path.join(rom_dir, "Imgs", base + ".png"), size))
+                add(key, rom_dir, f"Imgs/{base}.png", size)
                 tags["image"] = f"./Imgs/{base}.png"
         if tags:
             entries[rom] = tags
@@ -320,12 +326,21 @@ def plan_esde_extras(es_dir, listing, texts):
     Returns (download jobs, [(path, text)] to write).
     """
     prefix = f"{SCRAPES}/esde/"
-    jobs = [(key, os.path.join(es_dir, "themes", key[len(prefix + "themes/"):]), size)
-            for key, size in sorted(listing.items()) if key.startswith(prefix + "themes/") and not key.endswith("/")]
+    jobs = []
+    for key, size in sorted(listing.items()):
+        if key.startswith(prefix + "themes/") and not key.endswith("/"):
+            try:
+                jobs.append((key, s3.safe_join(es_dir, "themes/" + key[len(prefix + "themes/"):]), size))
+            except ValueError as e:
+                print(ui.yellow(f"  ⚠️  skipping {e}"))
     writes = []
     for key, text in sorted(texts.items()):
         if key.startswith(prefix + "collections/") and key.endswith(".cfg"):
-            path = os.path.join(es_dir, "collections", key[len(prefix + "collections/"):])
+            try:
+                path = s3.safe_join(es_dir, "collections/" + key[len(prefix + "collections/"):])
+            except ValueError as e:
+                print(ui.yellow(f"  ⚠️  skipping {e}"))
+                continue
         elif key == prefix + "settings.json":
             path = os.path.join(es_dir, "settings", "es_settings.xml")
         else:

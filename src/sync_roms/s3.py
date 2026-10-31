@@ -10,6 +10,17 @@ from botocore.exceptions import BotoCoreError, ClientError, ProfileNotFound
 from . import runtime, ui
 
 
+def safe_join(base, rel):
+    """base/rel, or ValueError if rel (a bucket key or part of one) is empty, absolute or climbs out of base."""
+    parts = rel.replace("\\", "/").split("/")
+    if not rel or rel.startswith("/") or ".." in parts:
+        raise ValueError(f"unsafe path: {rel!r}")
+    path = os.path.join(base, rel)
+    if os.path.commonpath([os.path.abspath(base), os.path.abspath(path)]) != os.path.abspath(base):
+        raise ValueError(f"unsafe path: {rel!r}")
+    return path
+
+
 def mirror_sizes(root, prefix=""):
     """{key: size} of the files under root whose key starts with prefix (a folder, ending in /)."""
     out = {}
@@ -49,7 +60,7 @@ def download(job, callback=None):
     key, path, _ = job
     os.makedirs(os.path.dirname(path), exist_ok=True)
     if runtime._mirror_root:
-        shutil.copyfile(os.path.join(runtime._mirror_root, key), path + ".part")
+        shutil.copyfile(safe_join(runtime._mirror_root, key), path + ".part")
         os.replace(path + ".part", path)
         return
     s3_client().download_file(runtime.BUCKET, key, path, Callback=callback)
@@ -57,7 +68,7 @@ def download(job, callback=None):
 
 def get_text(key):
     if runtime._mirror_root:
-        with open(os.path.join(runtime._mirror_root, key), encoding="utf-8") as f:
+        with open(safe_join(runtime._mirror_root, key), encoding="utf-8") as f:
             return f.read()
     return s3_client().get_object(Bucket=runtime.BUCKET, Key=key)["Body"].read().decode("utf-8")
 

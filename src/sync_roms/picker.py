@@ -37,11 +37,6 @@ def saved_setup(saved, devices, layouts):
     return (device, saved["layout"]) if device and saved["layout"] in device["firmwares"] else None
 
 
-def system_applies(system, device, layout_name):
-    """Whether a system is synced for a device (None for Full) and layout: the device runs it and the layout has a folder for it."""
-    return bool(system["folders"].get(layout_name)) and (device is None or system["bucket"] in device["systems"])
-
-
 def choose_setup(manifest, current=None):
     """Ask for the device, then its firmware (Esc steps back; a single firmware isn't asked).
     current: a (device dict or None for Full, layout name) the cursors start on.

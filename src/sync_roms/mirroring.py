@@ -48,7 +48,13 @@ def refresh_mirror(root, dry_run=False):
     print("📏 Listing the bucket...")
     wanted = mirror_wanted(manifest)
     have = {k: s for k, s in s3.mirror_sizes(root).items() if k != runtime.MIRROR_MARKER}
-    todo = downloads.plan_downloads([(k, os.path.join(root, *k.split("/")), s) for k, s in wanted.items()])
+    jobs = []
+    for k, s in wanted.items():
+        try:
+            jobs.append((k, s3.safe_join(root, k), s))
+        except ValueError as e:
+            print(ui.yellow(f"  ⚠️  skipping {e}"))
+    todo = downloads.plan_downloads(jobs)
     stale = sorted(set(have) - set(wanted))
     print(f"🪞 Mirror: {ui.bold(str(len(todo)))} to download ({ui.human_size(sum(j[2] for j in todo))}), "
           f"{len(wanted) - len(todo)} up to date, {ui.bold(str(len(stale)))} to delete")
@@ -60,7 +66,7 @@ def refresh_mirror(root, dry_run=False):
         return 0
     failed = downloads.run_downloads(todo, "Mirror", "🪞", root)
     for key in stale:
-        os.remove(os.path.join(root, *key.split("/")))
+        os.remove(s3.safe_join(root, key))
     for folder, _, _ in os.walk(root, topdown=False):
         if folder != root and not os.listdir(folder):
             os.rmdir(folder)

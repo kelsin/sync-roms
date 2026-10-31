@@ -6,12 +6,12 @@ import tempfile
 import threading
 import time
 import unittest
+import zipfile
 from types import SimpleNamespace
 from unittest import mock
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "src"))
-from sync_roms import cli  # noqa: E402
 from sync_roms import chd, external, m3u, store  # noqa: E402
 
 CD = {"chd": {"mode": "cd"}}
@@ -221,7 +221,7 @@ class ChdTest(unittest.TestCase):
 
         args = SimpleNamespace(chd=self.dir, dry_run=False)
         with mock.patch.object(external, "run_tool", fake_run), mock.patch.object(external, "find_tool", lambda t: t), \
-                mock.patch.object(cli.os, "cpu_count", return_value=6):
+                mock.patch.object(os, "cpu_count", return_value=6):
             self.assertEqual(chd.chd_command(args), 0)
         self.assertEqual(sorted(os.listdir(os.path.join(self.dir, "psx"))), ["A.chd", "B.chd", "C.chd"])
         self.assertEqual({c[c.index("-np") + 1] for c in calls if c[1:2] == ["createcd"]}, {"2"})
@@ -274,6 +274,32 @@ class ChdTest(unittest.TestCase):
         with mock.patch.object(external, "find_tool", lambda t: None):
             self.assertEqual(chd.chd_command(args), 0)
         self.assertEqual(os.listdir(os.path.join(self.dir, "psx")), ["Game.zip"])
+
+
+class UnzipArchiveTest(unittest.TestCase):
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.dir = os.path.realpath(self._tmp.name)
+        self.addCleanup(self._tmp.cleanup)
+
+    def touch(self, name, text=""):
+        with open(os.path.join(self.dir, name), "w") as f:
+            f.write(text)
+
+    def make_zip(self, **files):
+        path = os.path.join(self.dir, "a.zip")
+        with zipfile.ZipFile(path, "w") as z:
+            for name, data in files.items():
+                z.writestr(name, data)
+        return path
+
+    def test_existing_file_is_not_overwritten(self):
+        path = self.make_zip(**{"G.iso": "new"})
+        self.touch("G.iso", "old")
+        self.assertEqual(chd.unzip_archive(path), "G.iso already exists")
+        with open(os.path.join(self.dir, "G.iso")) as f:
+            self.assertEqual(f.read(), "old")
+        self.assertTrue(os.path.exists(path))
 
 
 if __name__ == "__main__":

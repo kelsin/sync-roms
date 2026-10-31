@@ -5,6 +5,7 @@ import os
 import sys
 import tempfile
 import unittest
+from unittest import mock
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "src"))
@@ -17,9 +18,8 @@ def load(overlay=None):
         if overlay is not None:
             with open(os.path.join(tmp, "device-systems.json"), "w") as f:
                 json.dump(overlay, f)
-        store.data_dir = lambda: tmp
         err = io.StringIO()
-        with contextlib.redirect_stderr(err):
+        with mock.patch.object(store, "data_dir", lambda: tmp), contextlib.redirect_stderr(err):
             manifest = store.load_manifest()
     return manifest, err.getvalue()
 

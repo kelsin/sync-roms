@@ -105,7 +105,7 @@ def chd_archive(tools, cfg, path, report=None):
     folder = os.path.dirname(path)
     tmp = tempfile.mkdtemp(prefix=".chd-", dir=folder)
     try:
-        error = external.run_tool([tools["7z"], "x", "-y", "-bso0", "-bsp0", f"-o{tmp}", path])
+        error = external.run_tool([tools["7z"], "x", "-y", "-bso0", "-bsp0", f"-o{tmp}", "--", path])
         if error:
             return error
         extracted = [os.path.join(dp, f) for dp, _, fns in os.walk(tmp) for f in sorted(fns)]
@@ -148,15 +148,19 @@ def unzip_archive(path):
             with zipfile.ZipFile(path) as z:
                 z.extractall(tmp)
         else:
-            tool = next((t for name in external.TOOL_NAMES["7z"] for t in [shutil.which(name)] if t), None)
+            tool = external.find_tool("7z")
             if not tool:
                 return "needs 7z to extract (see --install-tools)"
-            error = external.run_tool([tool, "x", "-y", "-bso0", "-bsp0", f"-o{tmp}", path])
+            error = external.run_tool([tool, "x", "-y", "-bso0", "-bsp0", f"-o{tmp}", "--", path])
             if error:
                 return error
-        for dirpath, _, names in os.walk(tmp):
-            for name in sorted(names):
-                shutil.move(os.path.join(dirpath, name), os.path.join(folder, name))
+        moves = [(os.path.join(dp, n), os.path.join(folder, n)) for dp, _, ns in os.walk(tmp) for n in sorted(ns)
+                 if not os.path.islink(os.path.join(dp, n))]
+        clash = next((dst for _, dst in moves if os.path.lexists(dst)), None)
+        if clash:
+            return f"{os.path.basename(clash)} already exists"
+        for src, dst in moves:
+            shutil.move(src, dst)
         os.remove(path)
     except (OSError, zipfile.BadZipFile) as e:
         return str(e)
