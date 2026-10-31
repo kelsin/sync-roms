@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.13.0](https://github.com/kelsin/sync-roms/compare/v0.12.0...v0.13.0) (2026-10-31)
+
+
+### Features
+
+* **systems:** add SNK Neo Geo Pocket ([#39](https://github.com/kelsin/sync-roms/issues/39)) ([9f95cb5](https://github.com/kelsin/sync-roms/commit/9f95cb5ca5caace636271d35aa33062dd76b4e43))
+
+
+### Bug Fixes
+
+* **chd:** convert files and archives whose names start with a dot ([#41](https://github.com/kelsin/sync-roms/issues/41)) ([56a9c40](https://github.com/kelsin/sync-roms/commit/56a9c407ede399b79c2a729781494fdf392c56ad))
+
 ## [0.12.0](https://github.com/kelsin/sync-roms/compare/v0.11.0...v0.12.0) (2026-10-31)
 
 
