@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.14.1](https://github.com/kelsin/sync-roms/compare/v0.14.0...v0.14.1) (2026-10-31)
+
+
+### Bug Fixes
+
+* **mirror:** rename mirror size listing that shadowed local_sizes ([#47](https://github.com/kelsin/sync-roms/issues/47)) ([7786579](https://github.com/kelsin/sync-roms/commit/77865795793732f5f6a6b0a6eece79eef14e3237))
+
 ## [0.14.0](https://github.com/kelsin/sync-roms/compare/v0.13.0...v0.14.0) (2026-10-31)
 
 
