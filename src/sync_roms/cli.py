@@ -1432,7 +1432,7 @@ def run_tool(cmd, progress=None):
     with _tool_lock:
         if _tools_stopped:
             return "interrupted"
-        proc = subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True)
+        proc = subprocess.Popen(cmd, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True)
         _tool_procs.add(proc)
     last = ""
     try:
@@ -1549,12 +1549,21 @@ def unzip_archive(path):
         shutil.rmtree(tmp, ignore_errors=True)
 
 
+def card_archives(dests):
+    """Archives still sitting in the given ROM folders, e.g. left by an interrupted run."""
+    return [os.path.join(root, f) for dest in dests if os.path.isdir(dest)
+            for root, files in walk_roms(dest) for f in files if f.lower().endswith(ARCHIVE_EXTS)]
+
+
 def unzip_roms(paths):
-    """Extract the archives among the downloaded paths. Returns [(path, error)] for the ones that failed."""
+    """Extract the archives among the downloaded paths, a few at a time. Returns [(path, error)] for the ones that failed."""
+    archives = [p for p in paths if p.lower().endswith(ARCHIVE_EXTS) and os.path.exists(p)]
     failures = []
-    for path in paths:
-        if path.lower().endswith(ARCHIVE_EXTS) and os.path.exists(path):
-            error = unzip_archive(path)
+    if archives:
+        print(bold(f"\n📦 Extracting {len(archives)} archive(s)"), flush=True)
+    with ThreadPoolExecutor(min(4, len(archives) or 1)) as ex:
+        for i, (path, error) in enumerate(zip(archives, ex.map(unzip_archive, archives)), 1):
+            print(f"  {dim(f'[{i}/{len(archives)}]')} {red('❌') if error else '✅'} {os.path.basename(path)}", flush=True)
             if error:
                 failures.append((path, error))
     return failures
@@ -3397,6 +3406,9 @@ def sync():
         print(yellow("\n🧪 Dry run — nothing downloaded or deleted"))
         for key, path, _ in rom_todo + bios_todo:
             print(f"  {key} {dim('→')} {path}")
+        if unzip:
+            pending = {j[1] for j in rom_todo} | set(card_archives({dest_of(s) for s in chosen}))
+            print(f"📦 Archives to extract: {len([p for p in pending if p.lower().endswith(ARCHIVE_EXTS)])}")
         for path in extras:
             print(f"  {red('would delete')} {path}")
         if scrapes:
@@ -3420,7 +3432,9 @@ def sync():
 
     failed = run_downloads(rom_todo, "ROMs", "💿", roms_dir) + run_downloads(bios_todo, "BIOS", "🧠", bios_dir)
     if unzip:
-        for path, error in unzip_roms([j[1] for j in rom_todo]):
+        # also archives already on the card (not just new downloads), e.g. from an interrupted run
+        archives = sorted({j[1] for j in rom_todo} | set(card_archives({dest_of(s) for s in chosen})))
+        for path, error in unzip_roms(archives):
             failed += 1
             print(red(f"  ❌ {os.path.relpath(path, roms_dir)}: {error}"))
     stale = []
