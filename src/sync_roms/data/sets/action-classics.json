@@ -124,7 +124,10 @@
       "title": "Metal Gear Solid",
       "system": "psx",
       "bucket": "psx/Metal Gear Solid (USA) (Rev 1).m3u",
-      "files": []
+      "files": [
+        "psx/Metal Gear Solid (USA) (Disc 1) (Rev 1).chd",
+        "psx/Metal Gear Solid (USA) (Disc 2) (Rev 1).chd"
+      ]
     },
     {
       "title": "Legacy of Kain: Soul Reaver",
