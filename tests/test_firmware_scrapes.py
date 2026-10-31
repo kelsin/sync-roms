@@ -5,6 +5,7 @@ import os
 import sys
 import tempfile
 import unittest
+from unittest import mock
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA = os.path.join(ROOT, "src", "sync_roms", "data")
@@ -181,6 +182,45 @@ class SlotLabelUploadTest(unittest.TestCase):
         keys, present, _ = self.plan(["GBA/A.png", "GBA/B.png"], {"gba": {"A.zip", "B.zip"}},
                                      {"scrapes/gba/slot/A.png": 1, "scrapes/gba/slot/B.png": 99})
         self.assertEqual((keys, present), (["scrapes/gba/slot/B.png"], 1))
+
+
+class SlotLabelCommandTest(unittest.TestCase):
+    SYSTEMS = [sysdef("gba", slot="GBA"), sysdef("genesis")]
+
+    def run_upload(self, files, folders=("Labels",), dry_run=False, confirm=True):
+        with tempfile.TemporaryDirectory() as card:
+            for f in files:
+                touch(os.path.join(card, f))
+            args = mock.Mock(base_dir=card, dry_run=dry_run)
+            with mock.patch.object(scrape_files.store, "load_manifest", return_value={"systems": self.SYSTEMS}), \
+                    mock.patch.object(scrape_files, "bucket_roms", return_value={"gba": {"A.zip"}}) as roms, \
+                    mock.patch.object(scrape_files.s3, "list_sizes", return_value={}), \
+                    mock.patch.object(scrape_files.ui, "confirm", return_value=confirm), \
+                    mock.patch.object(scrape_files.upload, "run_uploads", return_value=0) as run, \
+                    contextlib.redirect_stdout(io.StringIO()):
+                code = scrape_files.upload_scrapes(args)
+        return code, roms, run
+
+    def test_uploads_the_labels_of_slot_systems_only(self):
+        code, roms, run = self.run_upload(["Labels/GBA/A.png"])
+        self.assertEqual(code, 0)
+        self.assertEqual([s["bucket"] for s in roms.call_args[0][0]], ["gba"])
+        self.assertEqual([j[0] for j in run.call_args[0][0]], ["scrapes/gba/slot/A.png"])
+
+    def test_dry_run_and_cancel_upload_nothing(self):
+        self.assertFalse(self.run_upload(["Labels/GBA/A.png"], dry_run=True)[2].called)
+        self.assertFalse(self.run_upload(["Labels/GBA/A.png"], confirm=False)[2].called)
+
+    def test_an_es_de_folder_takes_the_scrape_path(self):
+        with tempfile.TemporaryDirectory() as card:
+            touch(os.path.join(card, "ES-DE", "gamelists", "x"))
+            touch(os.path.join(card, "Labels", "GBA", "A.png"))
+            with mock.patch.object(scrape_files, "upload_slot_labels") as slot, \
+                    mock.patch.object(scrape_files.store, "load_cards", return_value={}), \
+                    mock.patch.object(scrape_files.store, "load_manifest", side_effect=SystemExit("scrape path")):
+                with self.assertRaises(SystemExit):
+                    scrape_files.upload_scrapes(mock.Mock(base_dir=card, dry_run=True))
+            slot.assert_not_called()
 
 
 class DerivedUploadTest(unittest.TestCase):

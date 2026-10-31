@@ -171,12 +171,13 @@ def upload_slot_labels(args, labels_dir):
     try:
         manifest = store.load_manifest()
         print("📏 Listing the ROMs available in the bucket...")
-        roms = bucket_roms(manifest["systems"], all_files=True)
+        systems = [s for s in manifest["systems"] if s["folders"].get("slot")]
+        roms = bucket_roms(systems, all_files=True)
         print("☁️  Listing what's already in scrapes/...")
         existing = s3.list_sizes(scrape_plan.SCRAPES + "/")
     except (ClientError, BotoCoreError) as e:
         raise SystemExit(ui.red(f"❌ {e}"))
-    files, present, unmatched = plan_slot_upload(labels_dir, manifest["systems"], roms, existing)
+    files, present, unmatched = plan_slot_upload(labels_dir, systems, roms, existing)
     replaced = sum(1 for key, _, _ in files if key in existing)
     print(f"🏷️  Labels to upload: {ui.bold(str(len(files)))} ({ui.human_size(sum(f[2] for f in files))}, "
           f"{replaced} replacing a different one), {present} already there")
