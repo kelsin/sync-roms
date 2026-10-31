@@ -395,6 +395,61 @@
         "saturn/Street Fighter Collection (USA) (Disc 1).chd",
         "saturn/Street Fighter Collection (USA) (Disc 2).chd"
       ]
+    },
+    {
+      "title": "Tekken - Dark Resurrection (En,Fr,De,Es,It)",
+      "system": "psp",
+      "bucket": "psp/Tekken - Dark Resurrection (USA) (En,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "Tekken 6 (En,Ja,Fr,De,Es,It,Ko,Ru)",
+      "system": "psp",
+      "bucket": "psp/Tekken 6 (USA) (En,Ja,Fr,De,Es,It,Ko,Ru).chd"
+    },
+    {
+      "title": "Soulcalibur - Broken Destiny (En,Ja,Fr,De,Es,It,Ru)",
+      "system": "psp",
+      "bucket": "psp/Soulcalibur - Broken Destiny (USA) (En,Ja,Fr,De,Es,It,Ru).chd"
+    },
+    {
+      "title": "Darkstalkers Chronicle - The Chaos Tower",
+      "system": "psp",
+      "bucket": "psp/Darkstalkers Chronicle - The Chaos Tower (USA).chd"
+    },
+    {
+      "title": "BlazBlue - Calamity Trigger (En,Ja,Zh,Ko)",
+      "system": "psp",
+      "bucket": "psp/BlazBlue - Calamity Trigger (USA) (En,Ja,Zh,Ko).chd"
+    },
+    {
+      "title": "BlazBlue - Continuum Shift II (En,Ja,Zh,Ko)",
+      "system": "psp",
+      "bucket": "psp/BlazBlue - Continuum Shift II (USA) (En,Ja,Zh,Ko).chd"
+    },
+    {
+      "title": "Dragon Ball Z - Shin Budokai",
+      "system": "psp",
+      "bucket": "psp/Dragon Ball Z - Shin Budokai (USA).chd"
+    },
+    {
+      "title": "Dragon Ball Z - Shin Budokai - Another Road",
+      "system": "psp",
+      "bucket": "psp/Dragon Ball Z - Shin Budokai - Another Road (USA).chd"
+    },
+    {
+      "title": "Samurai Shodown Anthology",
+      "system": "psp",
+      "bucket": "psp/Samurai Shodown Anthology (Europe).chd"
+    },
+    {
+      "title": "Mortal Kombat - Unchained",
+      "system": "psp",
+      "bucket": "psp/Mortal Kombat - Unchained (USA).chd"
+    },
+    {
+      "title": "Power Stone Collection",
+      "system": "psp",
+      "bucket": "psp/Power Stone Collection (USA).chd"
     }
   ]
 }

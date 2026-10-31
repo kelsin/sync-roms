@@ -573,6 +573,116 @@
       "title": "Trials of Mana (Rev 1)",
       "system": "snes",
       "bucket": "snes/Trials of Mana (World) (Rev 1) (Collection of Mana).zip"
+    },
+    {
+      "title": "Tactics Ogre - Let Us Cling Together",
+      "system": "psp",
+      "bucket": "psp/Tactics Ogre - Let Us Cling Together (USA).chd"
+    },
+    {
+      "title": "Jeanne d'Arc",
+      "system": "psp",
+      "bucket": "psp/Jeanne d'Arc (USA).chd"
+    },
+    {
+      "title": "Valkyrie Profile - Lenneth",
+      "system": "psp",
+      "bucket": "psp/Valkyrie Profile - Lenneth (USA).chd"
+    },
+    {
+      "title": "Star Ocean - First Departure",
+      "system": "psp",
+      "bucket": "psp/Star Ocean - First Departure (USA).chd"
+    },
+    {
+      "title": "Star Ocean - Second Evolution",
+      "system": "psp",
+      "bucket": "psp/Star Ocean - Second Evolution (USA).chd"
+    },
+    {
+      "title": "Legend of Heroes, The - Trails in the Sky",
+      "system": "psp",
+      "bucket": "psp/Legend of Heroes, The - Trails in the Sky (USA).chd"
+    },
+    {
+      "title": "Ys - The Oath in Felghana",
+      "system": "psp",
+      "bucket": "psp/Ys - The Oath in Felghana (USA).chd"
+    },
+    {
+      "title": "Ys Seven",
+      "system": "psp",
+      "bucket": "psp/Ys Seven (USA).chd"
+    },
+    {
+      "title": "Ys I & II Chronicles",
+      "system": "psp",
+      "bucket": "psp/Ys I & II Chronicles (USA).chd"
+    },
+    {
+      "title": "Lunar - Silver Star Harmony",
+      "system": "psp",
+      "bucket": "psp/Lunar - Silver Star Harmony (USA).chd"
+    },
+    {
+      "title": "Shin Megami Tensei - Persona",
+      "system": "psp",
+      "bucket": "psp/Shin Megami Tensei - Persona (USA).chd"
+    },
+    {
+      "title": "Shin Megami Tensei - Persona 2 - Innocent Sin",
+      "system": "psp",
+      "bucket": "psp/Shin Megami Tensei - Persona 2 - Innocent Sin (USA).chd"
+    },
+    {
+      "title": "Disgaea - Afternoon of Darkness",
+      "system": "psp",
+      "bucket": "psp/Disgaea - Afternoon of Darkness (USA).chd"
+    },
+    {
+      "title": "Disgaea 2 - Dark Hero Days",
+      "system": "psp",
+      "bucket": "psp/Disgaea 2 - Dark Hero Days (USA).chd"
+    },
+    {
+      "title": "Kingdom Hearts - Birth by Sleep (En,Fr,Es)",
+      "system": "psp",
+      "bucket": "psp/Kingdom Hearts - Birth by Sleep (USA) (En,Fr,Es).chd"
+    },
+    {
+      "title": "Riviera - The Promised Land",
+      "system": "psp",
+      "bucket": "psp/Riviera - The Promised Land (USA).chd"
+    },
+    {
+      "title": "Wild Arms XF",
+      "system": "psp",
+      "bucket": "psp/Wild Arms XF (USA).chd"
+    },
+    {
+      "title": "Breath of Fire III",
+      "system": "psp",
+      "bucket": "psp/Breath of Fire III (Europe).chd"
+    },
+    {
+      "title": "Tales of Eternia (v2.02)",
+      "system": "psp",
+      "bucket": "psp/Tales of Eternia (Europe) (v2.02).chd"
+    },
+    {
+      "title": "Tales of the World - Radiant Mythology",
+      "system": "psp",
+      "bucket": "psp/Tales of the World - Radiant Mythology (USA).chd"
+    },
+    {
+      "title": "Monster Hunter Freedom Unite (En,Fr,De,Es,It)",
+      "system": "psp",
+      "bucket": "psp/Monster Hunter Freedom Unite (USA) (En,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "Phantasy Star Portable 2",
+      "system": "psp",
+      "bucket": "psp/Phantasy Star Portable 2 (USA).chd"
     }
   ]
 }

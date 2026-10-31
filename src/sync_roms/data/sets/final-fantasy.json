@@ -58,26 +58,6 @@
       "bucket": "psx/Final Fantasy Anthology - Final Fantasy VI (USA) (Rev 1).chd"
     },
     {
-      "title": "Final Fantasy Tactics - The War of the Lions.iso",
-      "system": "psp",
-      "bucket": "psp/Final Fantasy Tactics - The War of the Lions (USA).iso"
-    },
-    {
-      "title": "Crisis Core - Final Fantasy VII.iso",
-      "system": "psp",
-      "bucket": "psp/Crisis Core - Final Fantasy VII (USA).iso"
-    },
-    {
-      "title": "Final Fantasy - 20th Anniversary Edition (En,Ja) (FW6.00).iso",
-      "system": "psp",
-      "bucket": "psp/Final Fantasy - 20th Anniversary Edition (USA) (En,Ja) (FW6.00).iso"
-    },
-    {
-      "title": "Dissidia 012 - Duodecim Final Fantasy (En,Fr,De,Es,It).iso",
-      "system": "psp",
-      "bucket": "psp/Dissidia 012 - Duodecim Final Fantasy (USA) (En,Fr,De,Es,It).iso"
-    },
-    {
       "title": "Final Fantasy VII",
       "system": "psx",
       "bucket": "psx/Final Fantasy VII (USA).m3u",
@@ -193,6 +173,46 @@
       "title": "Final Fantasy - Crystal Chronicles",
       "system": "gc",
       "bucket": "gc/Final Fantasy - Crystal Chronicles (USA).rvz"
+    },
+    {
+      "title": "Final Fantasy Tactics - The War of the Lions",
+      "system": "psp",
+      "bucket": "psp/Final Fantasy Tactics - The War of the Lions (USA).chd"
+    },
+    {
+      "title": "Crisis Core - Final Fantasy VII",
+      "system": "psp",
+      "bucket": "psp/Crisis Core - Final Fantasy VII (USA).chd"
+    },
+    {
+      "title": "Final Fantasy - 20th Anniversary Edition (En,Ja) (FW6.00)",
+      "system": "psp",
+      "bucket": "psp/Final Fantasy - 20th Anniversary Edition (USA) (En,Ja) (FW6.00).chd"
+    },
+    {
+      "title": "Dissidia 012 - Duodecim Final Fantasy (En,Fr,De,Es,It)",
+      "system": "psp",
+      "bucket": "psp/Dissidia 012 - Duodecim Final Fantasy (USA) (En,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "Final Fantasy II (En,Ja)",
+      "system": "psp",
+      "bucket": "psp/Final Fantasy II (USA, Canada) (En,Ja).chd"
+    },
+    {
+      "title": "Final Fantasy IV - The Complete Collection (En,Ja,Fr)",
+      "system": "psp",
+      "bucket": "psp/Final Fantasy IV - The Complete Collection (USA) (En,Ja,Fr).chd"
+    },
+    {
+      "title": "Dissidia Final Fantasy",
+      "system": "psp",
+      "bucket": "psp/Dissidia Final Fantasy (USA).chd"
+    },
+    {
+      "title": "Final Fantasy Type-0 (English Patched v2)",
+      "system": "psp",
+      "bucket": "psp/Final Fantasy Type-0 (English Patched v2).chd"
     }
   ]
 }

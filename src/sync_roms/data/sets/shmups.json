@@ -576,6 +576,46 @@
       "title": "Raiden (Rev A)",
       "system": "atarijaguar",
       "bucket": "atarijaguar/Raiden (World) (Rev A).zip"
+    },
+    {
+      "title": "Gradius Collection",
+      "system": "psp",
+      "bucket": "psp/Gradius Collection (USA).chd"
+    },
+    {
+      "title": "Space Invaders Extreme (En,Fr,De,Es,It)",
+      "system": "psp",
+      "bucket": "psp/Space Invaders Extreme (USA) (En,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "Every Extend Extra",
+      "system": "psp",
+      "bucket": "psp/Every Extend Extra (USA).chd"
+    },
+    {
+      "title": "Dariusburst (En,Ja)",
+      "system": "psp",
+      "bucket": "psp/Dariusburst (Japan) (En,Ja).chd"
+    },
+    {
+      "title": "Sengoku Cannon - Sengoku Ace Episode III (En,Ja)",
+      "system": "psp",
+      "bucket": "psp/Sengoku Cannon - Sengoku Ace Episode III (Japan, Asia) (En,Ja).chd"
+    },
+    {
+      "title": "Star Soldier (En,Ja)",
+      "system": "psp",
+      "bucket": "psp/Star Soldier (Japan) (En,Ja).chd"
+    },
+    {
+      "title": "Parodius Portable",
+      "system": "psp",
+      "bucket": "psp/Parodius Portable (Japan).chd"
+    },
+    {
+      "title": "TwinBee Portable",
+      "system": "psp",
+      "bucket": "psp/TwinBee Portable (Japan).chd"
     }
   ]
 }

@@ -216,6 +216,16 @@
       "title": "Sonic & Knuckles + Sonic The Hedgehog",
       "system": "genesis",
       "bucket": "genesis/Sonic & Knuckles + Sonic The Hedgehog (USA, Europe) (Lock-on Combination).zip"
+    },
+    {
+      "title": "Sonic Rivals",
+      "system": "psp",
+      "bucket": "psp/Sonic Rivals (USA).chd"
+    },
+    {
+      "title": "Sonic Rivals 2",
+      "system": "psp",
+      "bucket": "psp/Sonic Rivals 2 (USA).chd"
     }
   ]
 }
