@@ -706,6 +706,16 @@
       "title": "Viewpoint",
       "system": "neogeocd",
       "bucket": "neogeocd/Viewpoint (Japan).chd"
+    },
+    {
+      "title": "Rez",
+      "system": "ps2",
+      "bucket": "ps2/Rez (USA) (En,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "Sin & Punishment: Star Successor",
+      "system": "wii",
+      "bucket": "wii/Sin & Punishment - Star Successor (USA).rvz"
     }
   ]
 }

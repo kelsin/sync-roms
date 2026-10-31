@@ -506,6 +506,41 @@
       "title": "Donkey Kong 64",
       "system": "n64",
       "bucket": "n64/Donkey Kong 64 (USA).zip"
+    },
+    {
+      "title": "Donkey Kong Country Returns",
+      "system": "wii",
+      "bucket": "wii/Donkey Kong Country Returns (USA) (En,Fr,Es).rvz"
+    },
+    {
+      "title": "Mario Kart Wii",
+      "system": "wii",
+      "bucket": "wii/Mario Kart Wii (USA) (En,Fr,Es).rvz"
+    },
+    {
+      "title": "Mario Strikers Charged",
+      "system": "wii",
+      "bucket": "wii/Mario Strikers Charged (USA) (En,Fr,Es) (Rev 1).rvz"
+    },
+    {
+      "title": "New Super Mario Bros. Wii",
+      "system": "wii",
+      "bucket": "wii/New Super Mario Bros. Wii (USA) (En,Fr,Es) (Rev 2).rvz"
+    },
+    {
+      "title": "Super Mario Galaxy",
+      "system": "wii",
+      "bucket": "wii/Super Mario Galaxy (USA) (En,Fr,Es).rvz"
+    },
+    {
+      "title": "Super Mario Galaxy 2",
+      "system": "wii",
+      "bucket": "wii/Super Mario Galaxy 2 (USA) (En,Fr,Es).rvz"
+    },
+    {
+      "title": "Super Paper Mario",
+      "system": "wii",
+      "bucket": "wii/Super Paper Mario (USA) (Rev 2).rvz"
     }
   ]
 }

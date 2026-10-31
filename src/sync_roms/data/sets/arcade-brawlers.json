@@ -354,6 +354,16 @@
       "title": "Sengoku 2",
       "system": "neogeocd",
       "bucket": "neogeocd/Sengoku Denshou 2 ~ Sengoku 2 (Japan) (En,Ja).chd"
+    },
+    {
+      "title": "Gauntlet: Dark Legacy",
+      "system": "ps2",
+      "bucket": "ps2/Gauntlet - Dark Legacy (USA).chd"
+    },
+    {
+      "title": "God Hand",
+      "system": "ps2",
+      "bucket": "ps2/God Hand (USA).chd"
     }
   ]
 }

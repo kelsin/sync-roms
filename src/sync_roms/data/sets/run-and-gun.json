@@ -296,6 +296,11 @@
       "title": "Nam-1975",
       "system": "neogeocd",
       "bucket": "neogeocd/Nam-1975 (Japan) (En,Ja).chd"
+    },
+    {
+      "title": "Sin & Punishment: Star Successor",
+      "system": "wii",
+      "bucket": "wii/Sin & Punishment - Star Successor (USA).rvz"
     }
   ]
 }

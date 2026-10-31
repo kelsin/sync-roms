@@ -1,0 +1,61 @@
+{
+  "name": "3D Platformers",
+  "description": "Jak and Daxter, Ratchet & Clank, Sly Cooper and Super Mario Galaxy.",
+  "games": [
+    {
+      "title": "Jak and Daxter: The Precursor Legacy",
+      "system": "ps2",
+      "bucket": "ps2/Jak and Daxter - The Precursor Legacy (USA) (En,Fr,De,Es,It) (Rev 1).chd"
+    },
+    {
+      "title": "Jak II",
+      "system": "ps2",
+      "bucket": "ps2/Jak II (USA) (En,Ja,Fr,De,Es,It,Ko) (v2.01).chd"
+    },
+    {
+      "title": "Jak 3",
+      "system": "ps2",
+      "bucket": "ps2/Jak 3 (USA) (En,Fr,De,Es,It,Pt,Ru).chd"
+    },
+    {
+      "title": "Ratchet & Clank",
+      "system": "ps2",
+      "bucket": "ps2/Ratchet & Clank (USA) (En,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "Ratchet & Clank: Going Commando",
+      "system": "ps2",
+      "bucket": "ps2/Ratchet & Clank - Going Commando (USA) (v2.00).chd"
+    },
+    {
+      "title": "Ratchet & Clank: Up Your Arsenal",
+      "system": "ps2",
+      "bucket": "ps2/Ratchet & Clank - Up Your Arsenal (USA) (En,Fr,Es).chd"
+    },
+    {
+      "title": "Sly Cooper and the Thievius Raccoonus",
+      "system": "ps2",
+      "bucket": "ps2/Sly Cooper and the Thievius Raccoonus (USA).chd"
+    },
+    {
+      "title": "Sly 2: Band of Thieves",
+      "system": "ps2",
+      "bucket": "ps2/Sly 2 - Band of Thieves (USA).chd"
+    },
+    {
+      "title": "Sly 3: Honor Among Thieves",
+      "system": "ps2",
+      "bucket": "ps2/Sly 3 - Honor Among Thieves (USA).chd"
+    },
+    {
+      "title": "Super Mario Galaxy",
+      "system": "wii",
+      "bucket": "wii/Super Mario Galaxy (USA) (En,Fr,Es).rvz"
+    },
+    {
+      "title": "Super Mario Galaxy 2",
+      "system": "wii",
+      "bucket": "wii/Super Mario Galaxy 2 (USA) (En,Fr,Es).rvz"
+    }
+  ]
+}

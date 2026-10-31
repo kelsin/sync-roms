@@ -709,6 +709,41 @@
       "title": "Aggressors of Dark Kombat",
       "system": "neogeocd",
       "bucket": "neogeocd/Tsuukai Gangan Koushinkyoku ~ Aggressors of Dark Kombat (World) (En,Ja).chd"
+    },
+    {
+      "title": "Dead or Alive 2",
+      "system": "ps2",
+      "bucket": "ps2/Dead or Alive 2 (Europe) (En,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "Dragon Ball Z: Budokai 3",
+      "system": "ps2",
+      "bucket": "ps2/Dragon Ball Z - Budokai 3 (USA).chd"
+    },
+    {
+      "title": "Marvel vs. Capcom 2",
+      "system": "ps2",
+      "bucket": "ps2/Marvel vs. Capcom 2 - New Age of Heroes (USA).chd"
+    },
+    {
+      "title": "Mortal Kombat: Armageddon",
+      "system": "ps2",
+      "bucket": "ps2/Mortal Kombat - Armageddon (USA).chd"
+    },
+    {
+      "title": "Samurai Shodown Anthology",
+      "system": "ps2",
+      "bucket": "ps2/Samurai Shodown Anthology (USA, Canada).chd"
+    },
+    {
+      "title": "Super Smash Bros. Brawl",
+      "system": "wii",
+      "bucket": "wii/Super Smash Bros. Brawl (USA) (Rev 2).rvz"
+    },
+    {
+      "title": "Tatsunoko vs. Capcom: Ultimate All-Stars",
+      "system": "wii",
+      "bucket": "wii/Tatsunoko vs. Capcom - Ultimate All-Stars (USA).rvz"
     }
   ]
 }

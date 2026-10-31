@@ -254,6 +254,16 @@
       "title": "Pocket Fighter",
       "system": "psx",
       "bucket": "psx/Pocket Fighter (USA).chd"
+    },
+    {
+      "title": "Marvel vs. Capcom 2",
+      "system": "ps2",
+      "bucket": "ps2/Marvel vs. Capcom 2 - New Age of Heroes (USA).chd"
+    },
+    {
+      "title": "Tatsunoko vs. Capcom: Ultimate All-Stars",
+      "system": "wii",
+      "bucket": "wii/Tatsunoko vs. Capcom - Ultimate All-Stars (USA).rvz"
     }
   ]
 }

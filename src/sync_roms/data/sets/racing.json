@@ -245,6 +245,26 @@
       "title": "OverTop",
       "system": "neogeocd",
       "bucket": "neogeocd/OverTop (Japan) (En,Ja).chd"
+    },
+    {
+      "title": "Burnout 3: Takedown",
+      "system": "ps2",
+      "bucket": "ps2/Burnout 3 - Takedown (USA).chd"
+    },
+    {
+      "title": "Gran Turismo 4",
+      "system": "ps2",
+      "bucket": "ps2/Gran Turismo 4 (USA) (v2.00).chd"
+    },
+    {
+      "title": "Mario Kart Wii",
+      "system": "wii",
+      "bucket": "wii/Mario Kart Wii (USA) (En,Fr,Es).rvz"
+    },
+    {
+      "title": "Sonic & Sega All-Stars Racing",
+      "system": "wii",
+      "bucket": "wii/Sonic & Sega All-Stars Racing (USA) (En,Fr,Es).rvz"
     }
   ]
 }

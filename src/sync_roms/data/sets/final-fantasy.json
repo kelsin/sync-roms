@@ -238,6 +238,11 @@
       "title": "Final Fantasy Chronicles - Chrono Trigger",
       "system": "psx",
       "bucket": "psx/Final Fantasy Chronicles - Chrono Trigger (USA) (Rev 1).chd"
+    },
+    {
+      "title": "Dirge of Cerberus: Final Fantasy VII",
+      "system": "ps2",
+      "bucket": "ps2/Dirge of Cerberus - Final Fantasy VII (USA).chd"
     }
   ]
 }

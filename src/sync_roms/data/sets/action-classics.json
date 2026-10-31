@@ -1,0 +1,442 @@
+{
+  "name": "Action Classics",
+  "description": "Hack-and-slash, ninja, stealth and action-adventure classics from every era.",
+  "games": [
+    {
+      "title": "God of War",
+      "system": "ps2",
+      "bucket": "ps2/God of War (USA).chd"
+    },
+    {
+      "title": "God of War II",
+      "system": "ps2",
+      "bucket": "ps2/God of War II (USA).chd"
+    },
+    {
+      "title": "God Hand",
+      "system": "ps2",
+      "bucket": "ps2/God Hand (USA).chd"
+    },
+    {
+      "title": "Devil May Cry",
+      "system": "ps2",
+      "bucket": "ps2/Devil May Cry (USA).chd"
+    },
+    {
+      "title": "Devil May Cry 2",
+      "system": "ps2",
+      "bucket": "ps2/Devil May Cry 2 (USA).m3u",
+      "files": [
+        "ps2/Devil May Cry 2 (USA) (Disc 1).chd",
+        "ps2/Devil May Cry 2 (USA) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "Devil May Cry 3: Dante's Awakening Special Edition",
+      "system": "ps2",
+      "bucket": "ps2/Devil May Cry 3 - Dante's Awakening (USA) (En,Ja) (Special Edition).chd"
+    },
+    {
+      "title": "Bayonetta",
+      "system": "ps2",
+      "bucket": "ps2/Bayonetta (USA).chd"
+    },
+    {
+      "title": "Viewtiful Joe",
+      "system": "ps2",
+      "bucket": "ps2/Viewtiful Joe (USA).chd"
+    },
+    {
+      "title": "Viewtiful Joe 2",
+      "system": "ps2",
+      "bucket": "ps2/Viewtiful Joe 2 (USA).chd"
+    },
+    {
+      "title": "Ookami",
+      "system": "ps2",
+      "bucket": "ps2/Ookami (USA).chd"
+    },
+    {
+      "title": "Ookami",
+      "system": "wii",
+      "bucket": "wii/Ookami (USA).rvz"
+    },
+    {
+      "title": "Muramasa: The Demon Blade",
+      "system": "wii",
+      "bucket": "wii/Muramasa - The Demon Blade (USA).rvz"
+    },
+    {
+      "title": "Metal Gear Solid 2: Substance",
+      "system": "ps2",
+      "bucket": "ps2/Metal Gear Solid 2 - Substance (USA).chd"
+    },
+    {
+      "title": "Metal Gear Solid 3: Subsistence",
+      "system": "ps2",
+      "bucket": "ps2/Metal Gear Solid 3 - Subsistence (USA) (En,Es).m3u",
+      "files": [
+        "ps2/Metal Gear Solid 3 - Subsistence (USA) (En,Es) (Disc 1) (Subsistence Disc).chd",
+        "ps2/Metal Gear Solid 3 - Subsistence (USA) (En,Es) (Disc 2) (Persistence).chd",
+        "ps2/Metal Gear Solid 3 - Subsistence (USA) (En,Es) (Disc 3) (Existence) (Limited Edition).chd"
+      ]
+    },
+    {
+      "title": "Onimusha: Warlords",
+      "system": "ps2",
+      "bucket": "ps2/Onimusha - Warlords (USA).chd"
+    },
+    {
+      "title": "Viewtiful Joe",
+      "system": "gc",
+      "bucket": "gc/Viewtiful Joe (USA).rvz"
+    },
+    {
+      "title": "Prince of Persia: The Sands of Time",
+      "system": "gc",
+      "bucket": "gc/Prince of Persia - The Sands of Time (USA) (En,Fr,Es) (Rev 1).rvz"
+    },
+    {
+      "title": "Prince of Persia: Warrior Within",
+      "system": "gc",
+      "bucket": "gc/Prince of Persia - Warrior Within (USA) (En,Fr,Es).rvz"
+    },
+    {
+      "title": "Prince of Persia: The Two Thrones",
+      "system": "gc",
+      "bucket": "gc/Prince of Persia - The Two Thrones (USA) (En,Fr,Es).rvz"
+    },
+    {
+      "title": "Metal Gear Solid: The Twin Snakes",
+      "system": "gc",
+      "bucket": "gc/Metal Gear Solid - The Twin Snakes (USA).m3u",
+      "files": [
+        "gc/Metal Gear Solid - The Twin Snakes (USA) (Disc 1).rvz",
+        "gc/Metal Gear Solid - The Twin Snakes (USA) (Disc 2).rvz"
+      ]
+    },
+    {
+      "title": "Spartan: Total Warrior",
+      "system": "gc",
+      "bucket": "gc/Spartan - Total Warrior (USA).rvz"
+    },
+    {
+      "title": "Metal Gear Solid",
+      "system": "psx",
+      "bucket": "psx/Metal Gear Solid (USA) (Rev 1).m3u",
+      "files": [
+        "psx/Metal Gear Solid (USA) (Disc 1) (Rev 1).chd",
+        "psx/Metal Gear Solid (USA) (Disc 2) (Rev 1).chd"
+      ]
+    },
+    {
+      "title": "Legacy of Kain: Soul Reaver",
+      "system": "psx",
+      "bucket": "psx/Legacy of Kain - Soul Reaver (USA).chd"
+    },
+    {
+      "title": "Blood Omen: Legacy of Kain",
+      "system": "psx",
+      "bucket": "psx/Blood Omen - Legacy of Kain (USA).chd"
+    },
+    {
+      "title": "MediEvil",
+      "system": "psx",
+      "bucket": "psx/MediEvil (USA).chd"
+    },
+    {
+      "title": "MediEvil II",
+      "system": "psx",
+      "bucket": "psx/MediEvil II (USA).chd"
+    },
+    {
+      "title": "Strider",
+      "system": "psx",
+      "bucket": "psx/Strider (USA).chd"
+    },
+    {
+      "title": "Strider 2",
+      "system": "psx",
+      "bucket": "psx/Strider 2 (USA).chd"
+    },
+    {
+      "title": "Tenchu 2: Birth of the Stealth Assassins",
+      "system": "psx",
+      "bucket": "psx/Tenchu 2 - Birth of the Stealth Assassins (USA).chd"
+    },
+    {
+      "title": "Syphon Filter",
+      "system": "psx",
+      "bucket": "psx/Syphon Filter (USA) (Rev 1).chd"
+    },
+    {
+      "title": "Syphon Filter 2",
+      "system": "psx",
+      "bucket": "psx/Syphon Filter 2 (USA).m3u",
+      "files": [
+        "psx/Syphon Filter 2 (USA) (Disc 1).chd",
+        "psx/Syphon Filter 2 (USA) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "Tomb Raider",
+      "system": "psx",
+      "bucket": "psx/Tomb Raider (USA) (Rev 6).chd"
+    },
+    {
+      "title": "Tomb Raider II",
+      "system": "psx",
+      "bucket": "psx/Tomb Raider II - Starring Lara Croft (USA) (Rev 3).chd"
+    },
+    {
+      "title": "MediEvil: Resurrection",
+      "system": "psp",
+      "bucket": "psp/MediEvil - Resurrection (USA).chd"
+    },
+    {
+      "title": "Metal Gear Solid: Peace Walker",
+      "system": "psp",
+      "bucket": "psp/Metal Gear Solid - Peace Walker (USA) (En,Fr,Es) (v2.00).chd"
+    },
+    {
+      "title": "Tenchu: Shadow Assassins",
+      "system": "psp",
+      "bucket": "psp/Tenchu - Shadow Assassins (USA).chd"
+    },
+    {
+      "title": "Ninja Gaiden: Dragon Sword",
+      "system": "nds",
+      "bucket": "nds/Ninja Gaiden - Dragon Sword (USA).zip"
+    },
+    {
+      "title": "Okamiden",
+      "system": "nds",
+      "bucket": "nds/Okamiden (USA).zip"
+    },
+    {
+      "title": "Viewtiful Joe: Double Trouble!",
+      "system": "nds",
+      "bucket": "nds/Viewtiful Joe - Double Trouble! (USA).zip"
+    },
+    {
+      "title": "Tenchu: Dark Secret",
+      "system": "nds",
+      "bucket": "nds/Tenchu - Dark Secret (USA).zip"
+    },
+    {
+      "title": "Shinobi Legions",
+      "system": "saturn",
+      "bucket": "saturn/Shinobi Legions (USA).chd"
+    },
+    {
+      "title": "Mystical Ninja Starring Goemon",
+      "system": "n64",
+      "bucket": "n64/Mystical Ninja Starring Goemon (USA).zip"
+    },
+    {
+      "title": "Goemon's Great Adventure",
+      "system": "n64",
+      "bucket": "n64/Goemon's Great Adventure (USA).zip"
+    },
+    {
+      "title": "Ninja Gaiden",
+      "system": "nes",
+      "bucket": "nes/Ninja Gaiden (USA).zip"
+    },
+    {
+      "title": "Ninja Gaiden II: The Dark Sword of Chaos",
+      "system": "nes",
+      "bucket": "nes/Ninja Gaiden II - The Dark Sword of Chaos (USA).zip"
+    },
+    {
+      "title": "Ninja Gaiden III: The Ancient Ship of Doom",
+      "system": "nes",
+      "bucket": "nes/Ninja Gaiden III - The Ancient Ship of Doom (USA).zip"
+    },
+    {
+      "title": "Bionic Commando",
+      "system": "nes",
+      "bucket": "nes/Bionic Commando (USA).zip"
+    },
+    {
+      "title": "Rygar",
+      "system": "nes",
+      "bucket": "nes/Rygar (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Shadow of the Ninja",
+      "system": "nes",
+      "bucket": "nes/Shadow of the Ninja (USA).zip"
+    },
+    {
+      "title": "Strider",
+      "system": "nes",
+      "bucket": "nes/Strider (USA).zip"
+    },
+    {
+      "title": "Kid Icarus",
+      "system": "nes",
+      "bucket": "nes/Kid Icarus (USA, Europe) (Rev 1).zip"
+    },
+    {
+      "title": "Metal Gear",
+      "system": "nes",
+      "bucket": "nes/Metal Gear (USA).zip"
+    },
+    {
+      "title": "Shatterhand",
+      "system": "nes",
+      "bucket": "nes/Shatterhand (USA).zip"
+    },
+    {
+      "title": "Power Blade",
+      "system": "nes",
+      "bucket": "nes/Power Blade (USA).zip"
+    },
+    {
+      "title": "Ghosts'n Goblins",
+      "system": "nes",
+      "bucket": "nes/Ghosts'n Goblins (USA).zip"
+    },
+    {
+      "title": "Gargoyle's Quest II",
+      "system": "nes",
+      "bucket": "nes/Gargoyle's Quest II (USA).zip"
+    },
+    {
+      "title": "Prince of Persia",
+      "system": "nes",
+      "bucket": "nes/Prince of Persia (USA).zip"
+    },
+    {
+      "title": "Ninja Gaiden Trilogy",
+      "system": "snes",
+      "bucket": "snes/Ninja Gaiden Trilogy (USA).zip"
+    },
+    {
+      "title": "Super Ghouls 'N Ghosts",
+      "system": "snes",
+      "bucket": "snes/Super Ghouls 'N Ghosts (USA).zip"
+    },
+    {
+      "title": "ActRaiser",
+      "system": "snes",
+      "bucket": "snes/ActRaiser (USA).zip"
+    },
+    {
+      "title": "Soul Blazer",
+      "system": "snes",
+      "bucket": "snes/Soul Blazer (USA).zip"
+    },
+    {
+      "title": "Prince of Persia",
+      "system": "snes",
+      "bucket": "snes/Prince of Persia (USA).zip"
+    },
+    {
+      "title": "Prince of Persia 2",
+      "system": "snes",
+      "bucket": "snes/Prince of Persia 2 (USA).zip"
+    },
+    {
+      "title": "Wild Guns",
+      "system": "snes",
+      "bucket": "snes/Wild Guns (USA).zip"
+    },
+    {
+      "title": "Magic Sword",
+      "system": "snes",
+      "bucket": "snes/Magic Sword (USA).zip"
+    },
+    {
+      "title": "Joe & Mac",
+      "system": "snes",
+      "bucket": "snes/Joe & Mac (USA).zip"
+    },
+    {
+      "title": "The Revenge of Shinobi",
+      "system": "genesis",
+      "bucket": "genesis/Revenge of Shinobi, The (USA, Europe) (Rev B).zip"
+    },
+    {
+      "title": "Shinobi III: Return of the Ninja Master",
+      "system": "genesis",
+      "bucket": "genesis/Shinobi III - Return of the Ninja Master (USA).zip"
+    },
+    {
+      "title": "Shadow Dancer: The Secret of Shinobi",
+      "system": "genesis",
+      "bucket": "genesis/Shadow Dancer - The Secret of Shinobi (World).zip"
+    },
+    {
+      "title": "Strider",
+      "system": "genesis",
+      "bucket": "genesis/Strider (USA, Europe).zip"
+    },
+    {
+      "title": "Ghouls'n Ghosts",
+      "system": "genesis",
+      "bucket": "genesis/Ghouls'n Ghosts (Japan, USA) (En).zip"
+    },
+    {
+      "title": "Rocket Knight Adventures",
+      "system": "genesis",
+      "bucket": "genesis/Rocket Knight Adventures (USA).zip"
+    },
+    {
+      "title": "Beyond Oasis",
+      "system": "genesis",
+      "bucket": "genesis/Beyond Oasis (USA).zip"
+    },
+    {
+      "title": "Landstalker",
+      "system": "genesis",
+      "bucket": "genesis/Landstalker (USA).zip"
+    },
+    {
+      "title": "Kid Chameleon",
+      "system": "genesis",
+      "bucket": "genesis/Kid Chameleon (USA, Europe).zip"
+    },
+    {
+      "title": "Blades of Vengeance",
+      "system": "genesis",
+      "bucket": "genesis/Blades of Vengeance (USA, Europe).zip"
+    },
+    {
+      "title": "The Revenge of Shinobi",
+      "system": "gba",
+      "bucket": "gba/Revenge of Shinobi, The (USA).zip"
+    },
+    {
+      "title": "Super Ghouls'n Ghosts",
+      "system": "gba",
+      "bucket": "gba/Super Ghouls'n Ghosts (USA, Europe).zip"
+    },
+    {
+      "title": "Ninja Five-0",
+      "system": "gba",
+      "bucket": "gba/Ninja Five-0 (USA).zip"
+    },
+    {
+      "title": "Prince of Persia: The Sands of Time",
+      "system": "gba",
+      "bucket": "gba/Prince of Persia - The Sands of Time (USA) (En,Fr,Es) (Rev 1).zip"
+    },
+    {
+      "title": "Gargoyle's Quest",
+      "system": "gb",
+      "bucket": "gb/Gargoyle's Quest (USA, Europe).zip"
+    },
+    {
+      "title": "Shinobi",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Shinobi (USA, Europe, Brazil) (En) (Rev 1).zip"
+    },
+    {
+      "title": "Shinobi II: The Silent Fury",
+      "system": "gamegear",
+      "bucket": "gamegear/Shinobi II - The Silent Fury (World).zip"
+    }
+  ]
+}

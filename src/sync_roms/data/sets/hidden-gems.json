@@ -969,6 +969,90 @@
       "title": "Crossed Swords",
       "system": "neogeocd",
       "bucket": "neogeocd/Crossed Swords (Japan).chd"
+    },
+    {
+      "title": "Beyond Good & Evil",
+      "system": "ps2",
+      "bucket": "ps2/Beyond Good & Evil (USA) (En,Fr,Es).chd"
+    },
+    {
+      "title": "Bully",
+      "system": "ps2",
+      "bucket": "ps2/Bully (USA).chd"
+    },
+    {
+      "title": "Gitaroo Man",
+      "system": "ps2",
+      "bucket": "ps2/Gitaroo Man (USA).chd"
+    },
+    {
+      "title": "God Hand",
+      "system": "ps2",
+      "bucket": "ps2/God Hand (USA).chd"
+    },
+    {
+      "title": "Okage: Shadow King",
+      "system": "ps2",
+      "bucket": "ps2/Okage - Shadow King (USA).chd"
+    },
+    {
+      "title": "Ookami",
+      "system": "ps2",
+      "bucket": "ps2/Ookami (USA).chd"
+    },
+    {
+      "title": "PaRappa the Rapper 2",
+      "system": "ps2",
+      "bucket": "ps2/PaRappa the Rapper 2 (USA) (En,Ja).chd"
+    },
+    {
+      "title": "Psychonauts",
+      "system": "ps2",
+      "bucket": "ps2/Psychonauts (USA).chd"
+    },
+    {
+      "title": "Rez",
+      "system": "ps2",
+      "bucket": "ps2/Rez (USA) (En,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "Space Channel 5: Special Edition",
+      "system": "ps2",
+      "bucket": "ps2/Space Channel 5 - Special Edition (USA).m3u",
+      "files": [
+        "ps2/Space Channel 5 - Special Edition (USA) (Disc 1).chd",
+        "ps2/Space Channel 5 - Special Edition (USA) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "Space Channel 5: Part 2",
+      "system": "ps2",
+      "bucket": "ps2/Space Channel 5 Part 2 (Europe) (En,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "Kirby's Epic Yarn",
+      "system": "wii",
+      "bucket": "wii/Kirby's Epic Yarn (USA) (En,Fr,Es).rvz"
+    },
+    {
+      "title": "Little King's Story",
+      "system": "wii",
+      "bucket": "wii/Little King's Story (USA) (En,Fr,Es).rvz"
+    },
+    {
+      "title": "Muramasa: The Demon Blade",
+      "system": "wii",
+      "bucket": "wii/Muramasa - The Demon Blade (USA).rvz"
+    },
+    {
+      "title": "Ookami",
+      "system": "wii",
+      "bucket": "wii/Ookami (USA).rvz"
+    },
+    {
+      "title": "Pandora's Tower",
+      "system": "wii",
+      "bucket": "wii/Pandora's Tower (USA) (En,Fr,Es).rvz"
     }
   ]
 }

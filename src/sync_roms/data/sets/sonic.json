@@ -226,6 +226,56 @@
       "title": "Sonic Rivals 2",
       "system": "psp",
       "bucket": "psp/Sonic Rivals 2 (USA).chd"
+    },
+    {
+      "title": "Sonic Heroes",
+      "system": "ps2",
+      "bucket": "ps2/Sonic Heroes (USA) (En,Ja,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "Sonic Mega Collection Plus",
+      "system": "ps2",
+      "bucket": "ps2/Sonic Mega Collection Plus (USA).chd"
+    },
+    {
+      "title": "Sonic Riders",
+      "system": "ps2",
+      "bucket": "ps2/Sonic Riders (USA) (En,Ja,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "Sonic Gems Collection",
+      "system": "ps2",
+      "bucket": "ps2/Sonic Gems Collection (Europe, Australia) (En,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "Sonic & Sega All-Stars Racing",
+      "system": "wii",
+      "bucket": "wii/Sonic & Sega All-Stars Racing (USA) (En,Fr,Es).rvz"
+    },
+    {
+      "title": "Sonic and the Black Knight",
+      "system": "wii",
+      "bucket": "wii/Sonic and the Black Knight (USA) (En,Ja,Fr,De,Es,It).rvz"
+    },
+    {
+      "title": "Sonic and the Secret Rings",
+      "system": "wii",
+      "bucket": "wii/Sonic and the Secret Rings (USA) (En,Ja,Fr,De,Es,It).rvz"
+    },
+    {
+      "title": "Sonic Colors",
+      "system": "wii",
+      "bucket": "wii/Sonic Colors (USA) (En,Ja,Fr,De,Es,It).rvz"
+    },
+    {
+      "title": "Sonic Riders: Zero Gravity",
+      "system": "wii",
+      "bucket": "wii/Sonic Riders - Zero Gravity (USA) (En,Ja,Fr,De,Es,It).rvz"
+    },
+    {
+      "title": "Sonic Unleashed",
+      "system": "wii",
+      "bucket": "wii/Sonic Unleashed (USA) (En,Ja,Fr,De,Es,It).rvz"
     }
   ]
 }

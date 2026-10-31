@@ -286,6 +286,26 @@
       "title": "The Misadventures of Tron Bonne",
       "system": "psx",
       "bucket": "psx/Misadventures of Tron Bonne, The (USA).chd"
+    },
+    {
+      "title": "Mega Man Anniversary Collection",
+      "system": "ps2",
+      "bucket": "ps2/Mega Man Anniversary Collection (USA).chd"
+    },
+    {
+      "title": "Mega Man X Collection",
+      "system": "ps2",
+      "bucket": "ps2/Mega Man X Collection (USA).chd"
+    },
+    {
+      "title": "Mega Man X7",
+      "system": "ps2",
+      "bucket": "ps2/Mega Man X7 (USA).chd"
+    },
+    {
+      "title": "Mega Man X8",
+      "system": "ps2",
+      "bucket": "ps2/Mega Man X8 (USA).chd"
     }
   ]
 }

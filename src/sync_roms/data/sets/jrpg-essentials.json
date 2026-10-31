@@ -873,6 +873,70 @@
       "title": "Alundra",
       "system": "psx",
       "bucket": "psx/Alundra (USA) (Rev 1).chd"
+    },
+    {
+      "title": "Okage: Shadow King",
+      "system": "ps2",
+      "bucket": "ps2/Okage - Shadow King (USA).chd"
+    },
+    {
+      "title": "Legaia 2: Duel Saga",
+      "system": "ps2",
+      "bucket": "ps2/Legaia 2 - Duel Saga (USA).chd"
+    },
+    {
+      "title": "Shadow Hearts",
+      "system": "ps2",
+      "bucket": "ps2/Shadow Hearts (USA).chd"
+    },
+    {
+      "title": "Shadow Hearts: Covenant",
+      "system": "ps2",
+      "bucket": "ps2/Shadow Hearts - Covenant (USA).m3u",
+      "files": [
+        "ps2/Shadow Hearts - Covenant (USA) (Disc 1).chd",
+        "ps2/Shadow Hearts - Covenant (USA) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "Shadow Hearts: From the New World",
+      "system": "ps2",
+      "bucket": "ps2/Shadow Hearts - From the New World (USA).chd"
+    },
+    {
+      "title": "Wild Arms: Alter Code F",
+      "system": "ps2",
+      "bucket": "ps2/Wild Arms - Alter Code - F (USA).chd"
+    },
+    {
+      "title": "Wild Arms 3",
+      "system": "ps2",
+      "bucket": "ps2/Wild Arms 3 (USA).chd"
+    },
+    {
+      "title": "Wild Arms 4",
+      "system": "ps2",
+      "bucket": "ps2/Wild Arms 4 (USA).chd"
+    },
+    {
+      "title": "Wild Arms 5",
+      "system": "ps2",
+      "bucket": "ps2/Wild Arms 5 (USA).chd"
+    },
+    {
+      "title": "The Last Story",
+      "system": "wii",
+      "bucket": "wii/Last Story, The (USA) (En,Fr,Es).rvz"
+    },
+    {
+      "title": "Pandora's Tower",
+      "system": "wii",
+      "bucket": "wii/Pandora's Tower (USA) (En,Fr,Es).rvz"
+    },
+    {
+      "title": "Xenoblade Chronicles",
+      "system": "wii",
+      "bucket": "wii/Xenoblade Chronicles (USA, Asia) (En,Fr,Es).rvz"
     }
   ]
 }
