@@ -266,6 +266,16 @@
       "title": "Mega Man Soccer",
       "system": "snes",
       "bucket": "snes/Mega Man Soccer (USA).zip"
+    },
+    {
+      "title": "Mega Man - Maverick Hunter X",
+      "system": "psp",
+      "bucket": "psp/Mega Man - Maverick Hunter X (USA).chd"
+    },
+    {
+      "title": "Mega Man - Powered Up",
+      "system": "psp",
+      "bucket": "psp/Mega Man - Powered Up (USA).chd"
     }
   ]
 }

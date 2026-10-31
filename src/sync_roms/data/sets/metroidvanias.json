@@ -136,6 +136,11 @@
       "title": "Super Metroid (En,Fr,De)",
       "system": "snes",
       "bucket": "snes/Super Metroid (Japan, USA) (En,Ja).zip"
+    },
+    {
+      "title": "Castlevania - The Dracula X Chronicles",
+      "system": "psp",
+      "bucket": "psp/Castlevania - The Dracula X Chronicles (USA).chd"
     }
   ]
 }

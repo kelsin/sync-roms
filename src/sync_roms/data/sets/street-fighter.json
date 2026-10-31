@@ -180,6 +180,11 @@
       "title": "Capcom vs. SNK 2 EO",
       "system": "gc",
       "bucket": "gc/Capcom vs. SNK 2 EO (USA).rvz"
+    },
+    {
+      "title": "Street Fighter Alpha 3 Max",
+      "system": "psp",
+      "bucket": "psp/Street Fighter Alpha 3 Max (USA).chd"
     }
   ]
 }

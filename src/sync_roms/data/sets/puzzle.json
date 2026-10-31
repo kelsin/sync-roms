@@ -341,6 +341,86 @@
       "title": "Super Columns",
       "system": "gamegear",
       "bucket": "gamegear/Super Columns (USA, Europe).zip"
+    },
+    {
+      "title": "Lumines II",
+      "system": "psp",
+      "bucket": "psp/Lumines II (USA).chd"
+    },
+    {
+      "title": "Echochrome (En,Fr,De,Es,It,Nl,Pt,Ru)",
+      "system": "psp",
+      "bucket": "psp/Echochrome (Europe, Australia) (En,Fr,De,Es,It,Nl,Pt,Ru).chd"
+    },
+    {
+      "title": "Echoshift (En,Fr,De,Es,It,Nl,Pt,Ru) (v2.00)",
+      "system": "psp",
+      "bucket": "psp/Echoshift (Europe) (En,Fr,De,Es,It,Nl,Pt,Ru) (v2.00).chd"
+    },
+    {
+      "title": "Gunpey",
+      "system": "psp",
+      "bucket": "psp/Gunpey (USA).chd"
+    },
+    {
+      "title": "Every Extend Extra",
+      "system": "psp",
+      "bucket": "psp/Every Extend Extra (USA).chd"
+    },
+    {
+      "title": "Exit",
+      "system": "psp",
+      "bucket": "psp/Exit (USA).chd"
+    },
+    {
+      "title": "Exit 2 (En,Fr,De,Es,It)",
+      "system": "psp",
+      "bucket": "psp/Exit 2 (Europe) (En,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "N Plus",
+      "system": "psp",
+      "bucket": "psp/N Plus (USA).chd"
+    },
+    {
+      "title": "Mercury Meltdown (En,Fr,Es)",
+      "system": "psp",
+      "bucket": "psp/Mercury Meltdown (USA) (En,Fr,Es).chd"
+    },
+    {
+      "title": "Archer Maclean's Mercury",
+      "system": "psp",
+      "bucket": "psp/Archer Maclean's Mercury (USA).chd"
+    },
+    {
+      "title": "Bust-A-Move - Deluxe",
+      "system": "psp",
+      "bucket": "psp/Bust-A-Move - Deluxe (USA).chd"
+    },
+    {
+      "title": "Puyo Pop Fever",
+      "system": "psp",
+      "bucket": "psp/Puyo Pop Fever (Europe).chd"
+    },
+    {
+      "title": "Capcom Puzzle World",
+      "system": "psp",
+      "bucket": "psp/Capcom Puzzle World (USA).chd"
+    },
+    {
+      "title": "Lemmings",
+      "system": "psp",
+      "bucket": "psp/Lemmings (USA).chd"
+    },
+    {
+      "title": "Crush (En,Fr,Es)",
+      "system": "psp",
+      "bucket": "psp/Crush (USA) (En,Fr,Es).chd"
+    },
+    {
+      "title": "Pipe Mania (En,Fr)",
+      "system": "psp",
+      "bucket": "psp/Pipe Mania (USA) (En,Fr).chd"
     }
   ]
 }

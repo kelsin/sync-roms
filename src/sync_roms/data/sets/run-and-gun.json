@@ -251,6 +251,16 @@
       "title": "Turrican",
       "system": "tg16",
       "bucket": "tg16/Turrican (USA).zip"
+    },
+    {
+      "title": "Metal Slug Anthology",
+      "system": "psp",
+      "bucket": "psp/Metal Slug Anthology (USA).chd"
+    },
+    {
+      "title": "Metal Slug XX",
+      "system": "psp",
+      "bucket": "psp/Metal Slug XX (USA).chd"
     }
   ]
 }

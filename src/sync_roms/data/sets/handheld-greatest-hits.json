@@ -301,6 +301,56 @@
       "title": "Shantae",
       "system": "gbc",
       "bucket": "gbc/Shantae (USA).zip"
+    },
+    {
+      "title": "Patapon",
+      "system": "psp",
+      "bucket": "psp/Patapon (USA).chd"
+    },
+    {
+      "title": "LocoRoco (En,Ja,Fr,De,Es,It,Nl,Pt,Sv,No,Da,Fi,Zh,Ko,Ru)",
+      "system": "psp",
+      "bucket": "psp/LocoRoco (USA) (En,Ja,Fr,De,Es,It,Nl,Pt,Sv,No,Da,Fi,Zh,Ko,Ru).chd"
+    },
+    {
+      "title": "Lumines - Puzzle Fusion (En,Ja)",
+      "system": "psp",
+      "bucket": "psp/Lumines - Puzzle Fusion (USA) (En,Ja).chd"
+    },
+    {
+      "title": "God of War - Chains of Olympus",
+      "system": "psp",
+      "bucket": "psp/God of War - Chains of Olympus (USA).chd"
+    },
+    {
+      "title": "Crisis Core - Final Fantasy VII",
+      "system": "psp",
+      "bucket": "psp/Crisis Core - Final Fantasy VII (USA).chd"
+    },
+    {
+      "title": "Shin Megami Tensei - Persona 3 Portable",
+      "system": "psp",
+      "bucket": "psp/Shin Megami Tensei - Persona 3 Portable (USA).chd"
+    },
+    {
+      "title": "Monster Hunter Freedom Unite (En,Fr,De,Es,It)",
+      "system": "psp",
+      "bucket": "psp/Monster Hunter Freedom Unite (USA) (En,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "Metal Gear Solid - Peace Walker (En,Fr,Es) (v2.00)",
+      "system": "psp",
+      "bucket": "psp/Metal Gear Solid - Peace Walker (USA) (En,Fr,Es) (v2.00).chd"
+    },
+    {
+      "title": "Daxter (En,Fr,De,Es,It)",
+      "system": "psp",
+      "bucket": "psp/Daxter (USA) (En,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "Tekken - Dark Resurrection (En,Fr,De,Es,It)",
+      "system": "psp",
+      "bucket": "psp/Tekken - Dark Resurrection (USA) (En,Fr,De,Es,It).chd"
     }
   ]
 }

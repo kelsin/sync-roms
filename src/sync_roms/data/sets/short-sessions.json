@@ -336,6 +336,26 @@
       "title": "Super Hang-On",
       "system": "genesis",
       "bucket": "genesis/Super Hang-On (Japan, USA) (En,Ja).zip"
+    },
+    {
+      "title": "Lumines II",
+      "system": "psp",
+      "bucket": "psp/Lumines II (USA).chd"
+    },
+    {
+      "title": "Hot Shots Golf - Open Tee 2 (FW3.96)",
+      "system": "psp",
+      "bucket": "psp/Hot Shots Golf - Open Tee 2 (USA) (FW3.96).chd"
+    },
+    {
+      "title": "Space Invaders Extreme (En,Fr,De,Es,It)",
+      "system": "psp",
+      "bucket": "psp/Space Invaders Extreme (USA) (En,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "Every Extend Extra",
+      "system": "psp",
+      "bucket": "psp/Every Extend Extra (USA).chd"
     }
   ]
 }

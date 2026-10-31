@@ -111,6 +111,11 @@
       "title": "Kid Dracula",
       "system": "gb",
       "bucket": "gb/Kid Dracula (USA, Europe).zip"
+    },
+    {
+      "title": "Castlevania - The Dracula X Chronicles",
+      "system": "psp",
+      "bucket": "psp/Castlevania - The Dracula X Chronicles (USA).chd"
     }
   ]
 }

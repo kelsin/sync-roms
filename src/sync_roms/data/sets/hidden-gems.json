@@ -163,31 +163,6 @@
       "bucket": "psx/Tobal No. 1 (USA).chd"
     },
     {
-      "title": "Patapon.iso",
-      "system": "psp",
-      "bucket": "psp/Patapon (USA).iso"
-    },
-    {
-      "title": "Lumines - Puzzle Fusion (En,Ja).iso",
-      "system": "psp",
-      "bucket": "psp/Lumines - Puzzle Fusion (USA) (En,Ja).iso"
-    },
-    {
-      "title": "Gran Turismo (En,Fr,Es) (v2.00).iso",
-      "system": "psp",
-      "bucket": "psp/Gran Turismo (USA) (En,Fr,Es) (v2.00).iso"
-    },
-    {
-      "title": "Shin Megami Tensei - Persona 3 Portable.iso",
-      "system": "psp",
-      "bucket": "psp/Shin Megami Tensei - Persona 3 Portable (USA).iso"
-    },
-    {
-      "title": "Valkyria Chronicles II.iso",
-      "system": "psp",
-      "bucket": "psp/Valkyria Chronicles II (USA).iso"
-    },
-    {
       "title": "Parasite Eve",
       "system": "psx",
       "bucket": "psx/Parasite Eve (USA).m3u",
@@ -667,6 +642,81 @@
       "title": "Vectorman 2",
       "system": "genesis",
       "bucket": "genesis/Vectorman 2 (USA).zip"
+    },
+    {
+      "title": "Patapon",
+      "system": "psp",
+      "bucket": "psp/Patapon (USA).chd"
+    },
+    {
+      "title": "Lumines - Puzzle Fusion (En,Ja)",
+      "system": "psp",
+      "bucket": "psp/Lumines - Puzzle Fusion (USA) (En,Ja).chd"
+    },
+    {
+      "title": "Gran Turismo (En,Fr,Es) (v2.00)",
+      "system": "psp",
+      "bucket": "psp/Gran Turismo (USA) (En,Fr,Es) (v2.00).chd"
+    },
+    {
+      "title": "Shin Megami Tensei - Persona 3 Portable",
+      "system": "psp",
+      "bucket": "psp/Shin Megami Tensei - Persona 3 Portable (USA).chd"
+    },
+    {
+      "title": "Valkyria Chronicles II",
+      "system": "psp",
+      "bucket": "psp/Valkyria Chronicles II (USA).chd"
+    },
+    {
+      "title": "Patapon 2 (En,Fr,Es)",
+      "system": "psp",
+      "bucket": "psp/Patapon 2 (USA) (En,Fr,Es).chd"
+    },
+    {
+      "title": "LocoRoco (En,Ja,Fr,De,Es,It,Nl,Pt,Sv,No,Da,Fi,Zh,Ko,Ru)",
+      "system": "psp",
+      "bucket": "psp/LocoRoco (USA) (En,Ja,Fr,De,Es,It,Nl,Pt,Sv,No,Da,Fi,Zh,Ko,Ru).chd"
+    },
+    {
+      "title": "LocoRoco 2 (En,Ja,Fr,De,Es,It,Nl,Pt,Sv,No,Da,Fi,Ko,Ru)",
+      "system": "psp",
+      "bucket": "psp/LocoRoco 2 (USA) (En,Ja,Fr,De,Es,It,Nl,Pt,Sv,No,Da,Fi,Ko,Ru).chd"
+    },
+    {
+      "title": "PixelJunk Monsters - Deluxe",
+      "system": "psp",
+      "bucket": "psp/PixelJunk Monsters - Deluxe (USA).chd"
+    },
+    {
+      "title": "Gitaroo Man Lives!",
+      "system": "psp",
+      "bucket": "psp/Gitaroo Man Lives! (USA).chd"
+    },
+    {
+      "title": "Gurumin - A Monstrous Adventure",
+      "system": "psp",
+      "bucket": "psp/Gurumin - A Monstrous Adventure (USA).chd"
+    },
+    {
+      "title": "Half-Minute Hero",
+      "system": "psp",
+      "bucket": "psp/Half-Minute Hero (USA).chd"
+    },
+    {
+      "title": "Daxter (En,Fr,De,Es,It)",
+      "system": "psp",
+      "bucket": "psp/Daxter (USA) (En,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "Knights in the Nightmare",
+      "system": "psp",
+      "bucket": "psp/Knights in the Nightmare (USA).chd"
+    },
+    {
+      "title": "Valkyria Chronicles 3 (English v1.0.8)",
+      "system": "psp",
+      "bucket": "psp/Valkyria Chronicles 3 (English v1.0.8).chd"
     }
   ]
 }
