@@ -304,7 +304,7 @@ def available_keys(s, have):
     return listed(s)
 
 
-def local_sizes(root, prefix=""):
+def mirror_sizes(root, prefix=""):
     """{key: size} of the files under root whose key starts with prefix (a folder, ending in /)."""
     out = {}
     for folder, _, files in os.walk(os.path.join(root, prefix)):
@@ -316,7 +316,7 @@ def local_sizes(root, prefix=""):
 
 def list_sizes(prefix):
     if _mirror_root:
-        return local_sizes(_mirror_root, prefix)
+        return mirror_sizes(_mirror_root, prefix)
     pages = s3_client().get_paginator("list_objects_v2").paginate(Bucket=BUCKET, Prefix=prefix)
     return {o["Key"]: o["Size"] for page in pages for o in page.get("Contents", [])}
 
@@ -3142,7 +3142,7 @@ def refresh_mirror(root, dry_run=False):
     manifest = load_manifest(all_card_names())
     print("📏 Listing the bucket...")
     wanted = mirror_wanted(manifest)
-    have = {k: s for k, s in local_sizes(root).items() if k != MIRROR_MARKER}
+    have = {k: s for k, s in mirror_sizes(root).items() if k != MIRROR_MARKER}
     todo = plan_downloads([(k, os.path.join(root, *k.split("/")), s) for k, s in wanted.items()])
     stale = sorted(set(have) - set(wanted))
     print(f"🪞 Mirror: {bold(str(len(todo)))} to download ({human_size(sum(j[2] for j in todo))}), "
