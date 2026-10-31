@@ -239,6 +239,21 @@
       "title": "Capcom vs. SNK Pro",
       "system": "psx",
       "bucket": "psx/Capcom vs. SNK Pro (USA).chd"
+    },
+    {
+      "title": "Street Fighter Collection 2",
+      "system": "psx",
+      "bucket": "psx/Street Fighter Collection 2 (USA).chd"
+    },
+    {
+      "title": "Street Fighter: The Movie",
+      "system": "psx",
+      "bucket": "psx/Street Fighter - The Movie (USA).chd"
+    },
+    {
+      "title": "Pocket Fighter",
+      "system": "psx",
+      "bucket": "psx/Pocket Fighter (USA).chd"
     }
   ]
 }

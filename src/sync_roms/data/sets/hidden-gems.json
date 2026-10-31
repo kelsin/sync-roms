@@ -815,6 +815,160 @@
       "title": "Threads of Fate",
       "system": "psx",
       "bucket": "psx/Threads of Fate (USA).chd"
+    },
+    {
+      "title": "Azure Dreams",
+      "system": "psx",
+      "bucket": "psx/Azure Dreams (USA).chd"
+    },
+    {
+      "title": "Beyond the Beyond",
+      "system": "psx",
+      "bucket": "psx/Beyond the Beyond (USA).chd"
+    },
+    {
+      "title": "Brave Fencer Musashi",
+      "system": "psx",
+      "bucket": "psx/Brave Fencer Musashi (USA).chd"
+    },
+    {
+      "title": "The Granstream Saga",
+      "system": "psx",
+      "bucket": "psx/Granstream Saga, The (USA).chd"
+    },
+    {
+      "title": "Hoshigami: Ruining Blue Earth",
+      "system": "psx",
+      "bucket": "psx/Hoshigami - Ruining Blue Earth (USA).chd"
+    },
+    {
+      "title": "Kartia: The Word of Fate",
+      "system": "psx",
+      "bucket": "psx/Kartia - The Word of Fate (USA).chd"
+    },
+    {
+      "title": "Ogre Battle",
+      "system": "psx",
+      "bucket": "psx/Ogre Battle - Limited Edition (USA).chd"
+    },
+    {
+      "title": "Vandal Hearts",
+      "system": "psx",
+      "bucket": "psx/Vandal Hearts (USA).chd"
+    },
+    {
+      "title": "Vandal Hearts II",
+      "system": "psx",
+      "bucket": "psx/Vandal Hearts II (USA).chd"
+    },
+    {
+      "title": "Tecmo's Deception: Invitation to Darkness",
+      "system": "psx",
+      "bucket": "psx/Tecmo's Deception - Invitation to Darkness (USA).chd"
+    },
+    {
+      "title": "Skullmonkeys",
+      "system": "psx",
+      "bucket": "psx/Skullmonkeys (USA).chd"
+    },
+    {
+      "title": "Heart of Darkness",
+      "system": "psx",
+      "bucket": "psx/Heart of Darkness (USA).m3u",
+      "files": [
+        "psx/Heart of Darkness (USA) (Disc 1).chd",
+        "psx/Heart of Darkness (USA) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "Silent Bomber",
+      "system": "psx",
+      "bucket": "psx/Silent Bomber (USA).chd"
+    },
+    {
+      "title": "MediEvil",
+      "system": "psx",
+      "bucket": "psx/MediEvil (USA).chd"
+    },
+    {
+      "title": "Blood Omen: Legacy of Kain",
+      "system": "psx",
+      "bucket": "psx/Blood Omen - Legacy of Kain (USA).chd"
+    },
+    {
+      "title": "Jumping Flash!",
+      "system": "psx",
+      "bucket": "psx/Jumping Flash! (USA).chd"
+    },
+    {
+      "title": "Ape Escape",
+      "system": "psx",
+      "bucket": "psx/Ape Escape (USA).chd"
+    },
+    {
+      "title": "Sol Divide",
+      "system": "psx",
+      "bucket": "psx/Sol Divide (USA).chd"
+    },
+    {
+      "title": "Carnage Heart",
+      "system": "psx",
+      "bucket": "psx/Carnage Heart (USA).chd"
+    },
+    {
+      "title": "Rhapsody: A Musical Adventure",
+      "system": "psx",
+      "bucket": "psx/Rhapsody - A Musical Adventure (USA).chd"
+    },
+    {
+      "title": "Last Resort",
+      "system": "neogeocd",
+      "bucket": "neogeocd/Last Resort (Japan) (En,Ja).chd"
+    },
+    {
+      "title": "Viewpoint",
+      "system": "neogeocd",
+      "bucket": "neogeocd/Viewpoint (Japan).chd"
+    },
+    {
+      "title": "Top Hunter",
+      "system": "neogeocd",
+      "bucket": "neogeocd/Top Hunter - Roddy & Cathy (World) (En,Ja).chd"
+    },
+    {
+      "title": "Magician Lord",
+      "system": "neogeocd",
+      "bucket": "neogeocd/Magician Lord (Japan) (En,Ja).chd"
+    },
+    {
+      "title": "Raguy",
+      "system": "neogeocd",
+      "bucket": "neogeocd/Raguy ~ Blue's Journey (Japan) (En,Ja).chd"
+    },
+    {
+      "title": "Joy Joy Kid",
+      "system": "neogeocd",
+      "bucket": "neogeocd/Joy Joy Kid ~ Puzzled (World) (En,Ja).chd"
+    },
+    {
+      "title": "Robo Army",
+      "system": "neogeocd",
+      "bucket": "neogeocd/Robo Army (Japan) (En,Ja).chd"
+    },
+    {
+      "title": "The Super Spy",
+      "system": "neogeocd",
+      "bucket": "neogeocd/Super Spy, The (Japan) (En,Ja).chd"
+    },
+    {
+      "title": "Windjammers",
+      "system": "neogeocd",
+      "bucket": "neogeocd/Flying Power Disc ~ Windjammers (Japan) (En,Ja).chd"
+    },
+    {
+      "title": "Crossed Swords",
+      "system": "neogeocd",
+      "bucket": "neogeocd/Crossed Swords (Japan).chd"
     }
   ]
 }

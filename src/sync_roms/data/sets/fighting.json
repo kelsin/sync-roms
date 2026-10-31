@@ -514,6 +514,201 @@
       "title": "Capcom vs. SNK Pro",
       "system": "psx",
       "bucket": "psx/Capcom vs. SNK Pro (USA).chd"
+    },
+    {
+      "title": "Tekken",
+      "system": "psx",
+      "bucket": "psx/Tekken (USA).chd"
+    },
+    {
+      "title": "Bushido Blade 2",
+      "system": "psx",
+      "bucket": "psx/Bushido Blade 2 (USA).chd"
+    },
+    {
+      "title": "Dead or Alive",
+      "system": "psx",
+      "bucket": "psx/Dead or Alive (USA).chd"
+    },
+    {
+      "title": "Ehrgeiz",
+      "system": "psx",
+      "bucket": "psx/Ehrgeiz - God Bless the Ring (USA).chd"
+    },
+    {
+      "title": "Battle Arena Toshinden",
+      "system": "psx",
+      "bucket": "psx/Battle Arena Toshinden (USA).chd"
+    },
+    {
+      "title": "Battle Arena Toshinden 2",
+      "system": "psx",
+      "bucket": "psx/Battle Arena Toshinden 2 (USA).chd"
+    },
+    {
+      "title": "Battle Arena Toshinden 3",
+      "system": "psx",
+      "bucket": "psx/Battle Arena Toshinden 3 (USA) (En,Ja).chd"
+    },
+    {
+      "title": "Darkstalkers: The Night Warriors",
+      "system": "psx",
+      "bucket": "psx/Darkstalkers - The Night Warriors (USA).chd"
+    },
+    {
+      "title": "Marvel Super Heroes",
+      "system": "psx",
+      "bucket": "psx/Marvel Super Heroes (USA).chd"
+    },
+    {
+      "title": "X-Men: Children of the Atom",
+      "system": "psx",
+      "bucket": "psx/X-Men - Children of the Atom (USA).chd"
+    },
+    {
+      "title": "The King of Fighters '95",
+      "system": "psx",
+      "bucket": "psx/King of Fighters '95, The (USA).chd"
+    },
+    {
+      "title": "The King of Fighters '99",
+      "system": "psx",
+      "bucket": "psx/King of Fighters '99, The (USA).chd"
+    },
+    {
+      "title": "Samurai Shodown III",
+      "system": "psx",
+      "bucket": "psx/Samurai Shodown III - Blades of Blood (USA).chd"
+    },
+    {
+      "title": "Fatal Fury: Wild Ambition",
+      "system": "psx",
+      "bucket": "psx/Fatal Fury - Wild Ambition (USA).chd"
+    },
+    {
+      "title": "Mortal Kombat Trilogy",
+      "system": "psx",
+      "bucket": "psx/Mortal Kombat Trilogy (USA) (Rev 1).chd"
+    },
+    {
+      "title": "Pocket Fighter",
+      "system": "psx",
+      "bucket": "psx/Pocket Fighter (USA).chd"
+    },
+    {
+      "title": "Star Gladiator",
+      "system": "psx",
+      "bucket": "psx/Star Gladiator - Episode I - Final Crusade (USA).chd"
+    },
+    {
+      "title": "Psychic Force",
+      "system": "psx",
+      "bucket": "psx/Psychic Force (USA).chd"
+    },
+    {
+      "title": "Zero Divide",
+      "system": "psx",
+      "bucket": "psx/Zero Divide (USA).chd"
+    },
+    {
+      "title": "Gundam Battle Assault 2",
+      "system": "psx",
+      "bucket": "psx/Gundam Battle Assault 2 (USA).chd"
+    },
+    {
+      "title": "The King of Fighters '94",
+      "system": "neogeocd",
+      "bucket": "neogeocd/King of Fighters '94, The (World) (En,Ja) (Rev 1).chd"
+    },
+    {
+      "title": "Art of Fighting",
+      "system": "neogeocd",
+      "bucket": "neogeocd/Ryuuko no Ken ~ Art of Fighting (World) (En,Ja,Es).chd"
+    },
+    {
+      "title": "Art of Fighting 3",
+      "system": "neogeocd",
+      "bucket": "neogeocd/Art of Fighting - Ryuuko no Ken Gaiden ~ The Path of the Warrior - Art of Fighting 3 (World) (En,Ja,Es,Pt).chd"
+    },
+    {
+      "title": "Fatal Fury",
+      "system": "neogeocd",
+      "bucket": "neogeocd/Garou Densetsu - Shukumei no Tatakai ~ Fatal Fury - King of Fighters (Japan) (En,Ja).chd"
+    },
+    {
+      "title": "Fatal Fury Special",
+      "system": "neogeocd",
+      "bucket": "neogeocd/Garou Densetsu Special ~ Fatal Fury Special (World) (En,Ja) (Rev 1).chd"
+    },
+    {
+      "title": "Real Bout Fatal Fury Special",
+      "system": "neogeocd",
+      "bucket": "neogeocd/Real Bout Garou Densetsu Special ~ Real Bout Fatal Fury Special (World) (En,Ja,Es,Pt).chd"
+    },
+    {
+      "title": "Samurai Shodown II",
+      "system": "neogeocd",
+      "bucket": "neogeocd/Shin Samurai Spirits - Haoumaru Jigokuhen ~ Samurai Shodown II (World) (En,Ja).chd"
+    },
+    {
+      "title": "Samurai Shodown IV",
+      "system": "neogeocd",
+      "bucket": "neogeocd/Samurai Spirits - Amakusa Kourin ~ Samurai Shodown IV - Amakusa's Revenge (World) (En,Ja,Es,Pt).chd"
+    },
+    {
+      "title": "The Last Blade 2",
+      "system": "neogeocd",
+      "bucket": "neogeocd/Bakumatsu Roman Daini Maku - Gekka no Kenshi - Tsuki ni Saku Hana, Chiri Yuku Hana ~ The Last Blade 2 (Japan) (En,Ja,Es,Pt).chd"
+    },
+    {
+      "title": "World Heroes 2 Jet",
+      "system": "neogeocd",
+      "bucket": "neogeocd/World Heroes 2 Jet (Japan) (En,Ja).chd"
+    },
+    {
+      "title": "Savage Reign",
+      "system": "neogeocd",
+      "bucket": "neogeocd/Fuuun Mokushiroku - Kakutou Sousei ~ Savage Reign (World) (En,Ja,Es,Pt) (Rev 1).chd"
+    },
+    {
+      "title": "Kabuki Klash",
+      "system": "neogeocd",
+      "bucket": "neogeocd/Far East of Eden - Tengai Makyou Shinden ~ Far East of Eden - Kabuki Klash (Japan) (En,Ja).chd"
+    },
+    {
+      "title": "Galaxy Fight",
+      "system": "neogeocd",
+      "bucket": "neogeocd/Galaxy Fight - Universal Warriors (Japan) (En,Ja,Es).chd"
+    },
+    {
+      "title": "Gowcaizer",
+      "system": "neogeocd",
+      "bucket": "neogeocd/Choujin Gakuen - Gowcaizer ~ Voltage Fighter - Gowcaizer (World) (En,Ja).chd"
+    },
+    {
+      "title": "Fighter's History Dynamite",
+      "system": "neogeocd",
+      "bucket": "neogeocd/Fighter's History Dynamite ~ Karnov's Revenge (World) (En,Ja).chd"
+    },
+    {
+      "title": "Breakers",
+      "system": "neogeocd",
+      "bucket": "neogeocd/Breakers (Japan) (En,Ja).chd"
+    },
+    {
+      "title": "Double Dragon",
+      "system": "neogeocd",
+      "bucket": "neogeocd/ダブル・ドラゴン (Export) (En,Ja).chd"
+    },
+    {
+      "title": "Ninja Master's",
+      "system": "neogeocd",
+      "bucket": "neogeocd/Ninja Master's - Haou Ninpou Chou (Japan) (En,Ja).chd"
+    },
+    {
+      "title": "Aggressors of Dark Kombat",
+      "system": "neogeocd",
+      "bucket": "neogeocd/Tsuukai Gangan Koushinkyoku ~ Aggressors of Dark Kombat (World) (En,Ja).chd"
     }
   ]
 }

@@ -108,6 +108,61 @@
         "psx/Alone in the Dark - The New Nightmare (USA) (Disc 1).chd",
         "psx/Alone in the Dark - The New Nightmare (USA) (Disc 2).chd"
       ]
+    },
+    {
+      "title": "Alone in the Dark: One-Eyed Jack's Revenge",
+      "system": "psx",
+      "bucket": "psx/Alone in the Dark - One-Eyed Jack's Revenge (USA).chd"
+    },
+    {
+      "title": "Clock Tower II: The Struggle Within",
+      "system": "psx",
+      "bucket": "psx/Clock Tower II - The Struggle Within (USA).chd"
+    },
+    {
+      "title": "Fear Effect 2: Retro Helix",
+      "system": "psx",
+      "bucket": "psx/Fear Effect 2 - Retro Helix (USA) (Rev 1).m3u",
+      "files": [
+        "psx/Fear Effect 2 - Retro Helix (USA) (Disc 1) (Rev 1).chd",
+        "psx/Fear Effect 2 - Retro Helix (USA) (Disc 2) (Rev 1).chd",
+        "psx/Fear Effect 2 - Retro Helix (USA) (Disc 3) (Rev 1).chd",
+        "psx/Fear Effect 2 - Retro Helix (USA) (Disc 4) (Rev 1).chd"
+      ]
+    },
+    {
+      "title": "Evil Dead: Hail to the King",
+      "system": "psx",
+      "bucket": "psx/Evil Dead - Hail to the King (USA).m3u",
+      "files": [
+        "psx/Evil Dead - Hail to the King (USA) (Disc 1).chd",
+        "psx/Evil Dead - Hail to the King (USA) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "Nightmare Creatures",
+      "system": "psx",
+      "bucket": "psx/Nightmare Creatures (USA).chd"
+    },
+    {
+      "title": "Nightmare Creatures II",
+      "system": "psx",
+      "bucket": "psx/Nightmare Creatures II (USA).chd"
+    },
+    {
+      "title": "Alien Resurrection",
+      "system": "psx",
+      "bucket": "psx/Alien Resurrection (USA).chd"
+    },
+    {
+      "title": "Alien Trilogy",
+      "system": "psx",
+      "bucket": "psx/Alien Trilogy (USA).chd"
+    },
+    {
+      "title": "Resident Evil: Survivor",
+      "system": "psx",
+      "bucket": "psx/Resident Evil - Survivor (USA).chd"
     }
   ]
 }

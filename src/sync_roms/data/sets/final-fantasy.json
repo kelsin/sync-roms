@@ -233,6 +233,11 @@
       "title": "Chocobo's Dungeon 2",
       "system": "psx",
       "bucket": "psx/Chocobo's Dungeon 2 (USA).chd"
+    },
+    {
+      "title": "Final Fantasy Chronicles - Chrono Trigger",
+      "system": "psx",
+      "bucket": "psx/Final Fantasy Chronicles - Chrono Trigger (USA) (Rev 1).chd"
     }
   ]
 }

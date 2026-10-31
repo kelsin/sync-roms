@@ -271,6 +271,31 @@
       "title": "Strider 2",
       "system": "psx",
       "bucket": "psx/Strider 2 (USA).chd"
+    },
+    {
+      "title": "Strider",
+      "system": "psx",
+      "bucket": "psx/Strider (USA).chd"
+    },
+    {
+      "title": "Contra: Legacy of War",
+      "system": "psx",
+      "bucket": "psx/Contra - Legacy of War (USA).chd"
+    },
+    {
+      "title": "C: The Contra Adventure",
+      "system": "psx",
+      "bucket": "psx/C - The Contra Adventure (USA).chd"
+    },
+    {
+      "title": "Cyber-Lip",
+      "system": "neogeocd",
+      "bucket": "neogeocd/Cyber-Lip (Japan) (En,Ja).chd"
+    },
+    {
+      "title": "Nam-1975",
+      "system": "neogeocd",
+      "bucket": "neogeocd/Nam-1975 (Japan) (En,Ja).chd"
     }
   ]
 }

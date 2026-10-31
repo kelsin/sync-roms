@@ -319,6 +319,41 @@
       "title": "Fighting Force",
       "system": "psx",
       "bucket": "psx/Fighting Force (USA) (Rev 2).chd"
+    },
+    {
+      "title": "Burning Fight",
+      "system": "neogeocd",
+      "bucket": "neogeocd/Burning Fight (Japan) (En,Ja).chd"
+    },
+    {
+      "title": "Mutation Nation",
+      "system": "neogeocd",
+      "bucket": "neogeocd/Mutation Nation (Japan) (En,Ja).chd"
+    },
+    {
+      "title": "Ninja Commando",
+      "system": "neogeocd",
+      "bucket": "neogeocd/Ninja Commando (Japan) (En,Ja).chd"
+    },
+    {
+      "title": "Robo Army",
+      "system": "neogeocd",
+      "bucket": "neogeocd/Robo Army (Japan) (En,Ja).chd"
+    },
+    {
+      "title": "Ninja Combat",
+      "system": "neogeocd",
+      "bucket": "neogeocd/Ninja Combat (Japan) (En,Ja).chd"
+    },
+    {
+      "title": "Sengoku",
+      "system": "neogeocd",
+      "bucket": "neogeocd/Sengoku Denshou ~ Sengoku (Japan) (En,Ja).chd"
+    },
+    {
+      "title": "Sengoku 2",
+      "system": "neogeocd",
+      "bucket": "neogeocd/Sengoku Denshou 2 ~ Sengoku 2 (Japan) (En,Ja).chd"
     }
   ]
 }

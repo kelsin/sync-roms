@@ -81,6 +81,170 @@
       "title": "Jet Moto",
       "system": "psx",
       "bucket": "psx/Jet Moto (USA).chd"
+    },
+    {
+      "title": "Destruction Derby",
+      "system": "psx",
+      "bucket": "psx/Destruction Derby (USA).chd"
+    },
+    {
+      "title": "Need for Speed II",
+      "system": "psx",
+      "bucket": "psx/Need for Speed II (USA).chd"
+    },
+    {
+      "title": "Need for Speed III: Hot Pursuit",
+      "system": "psx",
+      "bucket": "psx/Need for Speed III - Hot Pursuit (USA).chd"
+    },
+    {
+      "title": "Need for Speed: High Stakes",
+      "system": "psx",
+      "bucket": "psx/Need for Speed - High Stakes (USA).chd"
+    },
+    {
+      "title": "Need for Speed: Porsche Unleashed",
+      "system": "psx",
+      "bucket": "psx/Need for Speed - Porsche Unleashed (USA).chd"
+    },
+    {
+      "title": "V-Rally",
+      "system": "psx",
+      "bucket": "psx/Need for Speed - V-Rally (USA).chd"
+    },
+    {
+      "title": "V-Rally 2",
+      "system": "psx",
+      "bucket": "psx/Need for Speed - V-Rally 2 (USA).chd"
+    },
+    {
+      "title": "Driver",
+      "system": "psx",
+      "bucket": "psx/Driver - You Are the Wheelman (USA) (Rev 1).chd"
+    },
+    {
+      "title": "Driver 2",
+      "system": "psx",
+      "bucket": "psx/Driver 2 (USA) (Rev 1).m3u",
+      "files": [
+        "psx/Driver 2 (USA) (Disc 1) (Rev 1).chd",
+        "psx/Driver 2 (USA) (Disc 2) (Rev 1).chd"
+      ]
+    },
+    {
+      "title": "Jet Moto 2",
+      "system": "psx",
+      "bucket": "psx/Jet Moto 2 - Championship Edition (USA).chd"
+    },
+    {
+      "title": "Jet Moto 3",
+      "system": "psx",
+      "bucket": "psx/Jet Moto 3 (USA).chd"
+    },
+    {
+      "title": "Moto Racer",
+      "system": "psx",
+      "bucket": "psx/Moto Racer (USA).chd"
+    },
+    {
+      "title": "Moto Racer 2",
+      "system": "psx",
+      "bucket": "psx/Moto Racer 2 (USA).chd"
+    },
+    {
+      "title": "Rollcage Stage II",
+      "system": "psx",
+      "bucket": "psx/Rollcage Stage II (USA).chd"
+    },
+    {
+      "title": "Re-Volt",
+      "system": "psx",
+      "bucket": "psx/Re-Volt (USA).chd"
+    },
+    {
+      "title": "Sled Storm",
+      "system": "psx",
+      "bucket": "psx/Sled Storm (USA).chd"
+    },
+    {
+      "title": "Twisted Metal",
+      "system": "psx",
+      "bucket": "psx/Twisted Metal (USA).chd"
+    },
+    {
+      "title": "Twisted Metal III",
+      "system": "psx",
+      "bucket": "psx/Twisted Metal III (USA) (Rev 1).chd"
+    },
+    {
+      "title": "Twisted Metal 4",
+      "system": "psx",
+      "bucket": "psx/Twisted Metal 4 (USA) (Rev 1).chd"
+    },
+    {
+      "title": "Vigilante 8",
+      "system": "psx",
+      "bucket": "psx/Vigilante 8 (USA) (Rev 1).chd"
+    },
+    {
+      "title": "Vigilante 8: 2nd Offense",
+      "system": "psx",
+      "bucket": "psx/Vigilante 8 - 2nd Offense (USA).chd"
+    },
+    {
+      "title": "Colin McRae Rally 2.0",
+      "system": "psx",
+      "bucket": "psx/Colin McRae Rally 2.0 (USA) (En,Fr,Es).chd"
+    },
+    {
+      "title": "Hydro Thunder",
+      "system": "psx",
+      "bucket": "psx/Hydro Thunder (USA).chd"
+    },
+    {
+      "title": "Speed Punks",
+      "system": "psx",
+      "bucket": "psx/Speed Punks (USA).chd"
+    },
+    {
+      "title": "San Francisco Rush: Extreme Racing",
+      "system": "psx",
+      "bucket": "psx/San Francisco Rush - Extreme Racing (USA).chd"
+    },
+    {
+      "title": "Cool Boarders 2",
+      "system": "psx",
+      "bucket": "psx/Cool Boarders 2 (USA).chd"
+    },
+    {
+      "title": "Cool Boarders 3",
+      "system": "psx",
+      "bucket": "psx/Cool Boarders 3 (USA).chd"
+    },
+    {
+      "title": "Street Racer",
+      "system": "psx",
+      "bucket": "psx/Street Racer (USA).chd"
+    },
+    {
+      "title": "Neo Drift Out",
+      "system": "neogeocd",
+      "bucket": "neogeocd/Neo Drift Out - New Technology (Japan).chd"
+    },
+    {
+      "title": "Riding Hero",
+      "system": "neogeocd",
+      "bucket": "neogeocd/Riding Hero (Japan) (En,Ja).chd"
+    },
+    {
+      "title": "Rally Chase",
+      "system": "neogeocd",
+      "bucket": "neogeocd/Rally Chase (Japan) (En,Ja).chd"
+    },
+    {
+      "title": "OverTop",
+      "system": "neogeocd",
+      "bucket": "neogeocd/OverTop (Japan) (En,Ja).chd"
     }
   ]
 }
