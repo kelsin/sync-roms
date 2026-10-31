@@ -219,8 +219,8 @@
     },
     {
       "title": "Metal Slug",
-      "system": "neogeo",
-      "bucket": "neogeo/mslug.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/mslug.zip"
     },
     {
       "title": "Donkey Kong",

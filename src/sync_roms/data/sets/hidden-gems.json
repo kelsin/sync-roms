@@ -278,53 +278,53 @@
     },
     {
       "title": "Nightmare in the Dark",
-      "system": "neogeo",
-      "bucket": "neogeo/nitd.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/nitd.zip"
     },
     {
       "title": "Pulstar",
-      "system": "neogeo",
-      "bucket": "neogeo/pulstar.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/pulstar.zip"
     },
     {
       "title": "Twinkle Star Sprites",
-      "system": "neogeo",
-      "bucket": "neogeo/twinspri.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/twinspri.zip"
     },
     {
       "title": "Ragnagard",
-      "system": "neogeo",
-      "bucket": "neogeo/ragnagrd.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/ragnagrd.zip"
     },
     {
       "title": "Aero Fighters 2",
-      "system": "neogeo",
-      "bucket": "neogeo/sonicwi2.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/sonicwi2.zip"
     },
     {
       "title": "Zupapa!",
-      "system": "neogeo",
-      "bucket": "neogeo/zupapa.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/zupapa.zip"
     },
     {
       "title": "Captain Tomaday",
-      "system": "neogeo",
-      "bucket": "neogeo/ctomaday.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/ctomaday.zip"
     },
     {
       "title": "King of the Monsters",
-      "system": "neogeo",
-      "bucket": "neogeo/kotm.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/kotm.zip"
     },
     {
       "title": "Mutation Nation",
-      "system": "neogeo",
-      "bucket": "neogeo/mutnat.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/mutnat.zip"
     },
     {
       "title": "3 Count Bout",
-      "system": "neogeo",
-      "bucket": "neogeo/3countb.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/3countb.zip"
     },
     {
       "title": "Killer7 (Rev 1)",

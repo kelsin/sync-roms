@@ -219,8 +219,8 @@
     },
     {
       "title": "Blazing Star",
-      "system": "neogeo",
-      "bucket": "neogeo/blazstar.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/blazstar.zip"
     },
     {
       "title": "DoDonPachi",
@@ -254,8 +254,8 @@
     },
     {
       "title": "Battle Garegga",
-      "system": "neogeo",
-      "bucket": "neogeo/bgaregga.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/bgaregga.zip"
     },
     {
       "title": "Raiden",
@@ -269,8 +269,8 @@
     },
     {
       "title": "Raiden DX",
-      "system": "neogeo",
-      "bucket": "neogeo/raidendx.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/raidendx.zip"
     },
     {
       "title": "Vulcan Venture (Gradius II)",
@@ -369,8 +369,8 @@
     },
     {
       "title": "Mushihimesama",
-      "system": "neogeo",
-      "bucket": "neogeo/mushisam.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/mushisam.zip"
     },
     {
       "title": "Gradius III and IV",
