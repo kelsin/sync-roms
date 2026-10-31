@@ -1,6 +1,6 @@
 {
   "name": "Final Fantasy",
-  "description": "Mainline and spin-off Final Fantasy games, single-disc builds only.",
+  "description": "Mainline and spin-off Final Fantasy games.",
   "games": [
     {
       "title": "Final Fantasy",
@@ -81,12 +81,12 @@
     {
       "title": "Final Fantasy IX",
       "system": "psx",
-      "bucket": "psx/Final Fantasy IX (USA) (Rev 1).m3u",
+      "bucket": "psx/Final Fantasy IX (USA, Canada) (Rev 1).m3u",
       "files": [
-        "psx/Final Fantasy IX (USA) (Disc 1) (Rev 1).chd",
-        "psx/Final Fantasy IX (USA) (Disc 2) (Rev 1).chd",
-        "psx/Final Fantasy IX (USA) (Disc 3) (Rev 1).chd",
-        "psx/Final Fantasy IX (USA) (Disc 4) (Rev 1).chd"
+        "psx/Final Fantasy IX (USA, Canada) (Disc 1) (Rev 1).chd",
+        "psx/Final Fantasy IX (USA, Canada) (Disc 2) (Rev 1).chd",
+        "psx/Final Fantasy IX (USA, Canada) (Disc 3) (Rev 1).chd",
+        "psx/Final Fantasy IX (USA, Canada) (Disc 4) (Rev 1).chd"
       ]
     },
     {
@@ -213,6 +213,26 @@
       "title": "Final Fantasy Type-0 (English Patched v2)",
       "system": "psp",
       "bucket": "psp/Final Fantasy Type-0 (English Patched v2).chd"
+    },
+    {
+      "title": "Final Fantasy Tactics",
+      "system": "psx",
+      "bucket": "psx/Final Fantasy Tactics (USA).chd"
+    },
+    {
+      "title": "Final Fantasy Chronicles - Final Fantasy IV (Rev 1)",
+      "system": "psx",
+      "bucket": "psx/Final Fantasy Chronicles - Final Fantasy IV (USA) (Rev 1).chd"
+    },
+    {
+      "title": "Chocobo Racing",
+      "system": "psx",
+      "bucket": "psx/Chocobo Racing (USA).chd"
+    },
+    {
+      "title": "Chocobo's Dungeon 2",
+      "system": "psx",
+      "bucket": "psx/Chocobo's Dungeon 2 (USA).chd"
     }
   ]
 }

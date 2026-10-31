@@ -1,6 +1,6 @@
 {
   "name": "Mega Man",
-  "description": "Mega Man and Mega Man X across consoles and handhelds.",
+  "description": "Mega Man, Mega Man X and Legends across consoles and handhelds.",
   "games": [
     {
       "title": "Mega Man",
@@ -276,6 +276,16 @@
       "title": "Mega Man - Powered Up",
       "system": "psp",
       "bucket": "psp/Mega Man - Powered Up (USA).chd"
+    },
+    {
+      "title": "Mega Man Legends 2",
+      "system": "psx",
+      "bucket": "psx/Mega Man Legends 2 (USA).chd"
+    },
+    {
+      "title": "The Misadventures of Tron Bonne",
+      "system": "psx",
+      "bucket": "psx/Misadventures of Tron Bonne, The (USA).chd"
     }
   ]
 }

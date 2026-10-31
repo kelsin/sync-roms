@@ -1,6 +1,6 @@
 {
   "name": "Shmups",
-  "description": "Scrolling shooters, favouring the Saturn, PlayStation, Dreamcast and PC Engine.",
+  "description": "Scrolling shooters, favouring the Saturn, PlayStation and PC Engine.",
   "games": [
     {
       "title": "Darius Gaiden",
@@ -626,6 +626,41 @@
       "title": "TwinBee Portable",
       "system": "psp",
       "bucket": "psp/TwinBee Portable (Japan).chd"
+    },
+    {
+      "title": "The Raiden Project",
+      "system": "psx",
+      "bucket": "psx/Raiden Project, The (USA).chd"
+    },
+    {
+      "title": "Strikers 1945",
+      "system": "psx",
+      "bucket": "psx/Strikers 1945 (USA).chd"
+    },
+    {
+      "title": "RayStorm",
+      "system": "psx",
+      "bucket": "psx/RayStorm (USA).chd"
+    },
+    {
+      "title": "RayCrisis",
+      "system": "psx",
+      "bucket": "psx/RayCrisis - Series Termination (USA).chd"
+    },
+    {
+      "title": "Gekioh: Shooting King",
+      "system": "psx",
+      "bucket": "psx/Gekioh - Shooting King (USA).chd"
+    },
+    {
+      "title": "Philosoma",
+      "system": "psx",
+      "bucket": "psx/Philosoma (USA).chd"
+    },
+    {
+      "title": "Omega Boost",
+      "system": "psx",
+      "bucket": "psx/Omega Boost (USA).chd"
     }
   ]
 }

@@ -1,6 +1,6 @@
 {
   "name": "Pre-NES & Retro Oddities",
-  "description": "Atari, Intellivision, Colecovision, Vectrex and other early-era systems.",
+  "description": "Atari, Intellivision, Colecovision, Vectrex and other early-era systems, plus classic compilations.",
   "games": [
     {
       "title": "Adventure",
@@ -371,6 +371,26 @@
       "title": "Advanced Dungeons & Dragons",
       "system": "intellivision",
       "bucket": "intellivision/Advanced Dungeons & Dragons (USA, Europe).zip"
+    },
+    {
+      "title": "Activision Classics",
+      "system": "psx",
+      "bucket": "psx/Activision Classics (USA).chd"
+    },
+    {
+      "title": "Atari Anniversary Edition Redux",
+      "system": "psx",
+      "bucket": "psx/Atari Anniversary Edition Redux (USA).chd"
+    },
+    {
+      "title": "Arcade's Greatest Hits: The Atari Collection 1",
+      "system": "psx",
+      "bucket": "psx/Arcade's Greatest Hits - The Atari Collection 1 (USA).chd"
+    },
+    {
+      "title": "Intellivision Classic Games",
+      "system": "psx",
+      "bucket": "psx/Intellivision Classic Games (USA).chd"
     }
   ]
 }

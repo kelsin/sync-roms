@@ -261,6 +261,16 @@
       "title": "Metal Slug XX",
       "system": "psp",
       "bucket": "psp/Metal Slug XX (USA).chd"
+    },
+    {
+      "title": "Metal Slug X",
+      "system": "psx",
+      "bucket": "psx/Metal Slug X (USA).chd"
+    },
+    {
+      "title": "Strider 2",
+      "system": "psx",
+      "bucket": "psx/Strider 2 (USA).chd"
     }
   ]
 }

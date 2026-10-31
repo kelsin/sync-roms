@@ -116,6 +116,11 @@
       "title": "Castlevania - The Dracula X Chronicles",
       "system": "psp",
       "bucket": "psp/Castlevania - The Dracula X Chronicles (USA).chd"
+    },
+    {
+      "title": "Castlevania Chronicles",
+      "system": "psx",
+      "bucket": "psx/Castlevania Chronicles (USA).chd"
     }
   ]
 }
