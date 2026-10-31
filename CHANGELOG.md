@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.15.0](https://github.com/kelsin/sync-roms/compare/v0.14.3...v0.15.0) (2026-10-31)
+
+
+### Features
+
+* **scrapes:** upload Slot labels from a Slot card ([#54](https://github.com/kelsin/sync-roms/issues/54)) ([41a33b3](https://github.com/kelsin/sync-roms/commit/41a33b3972b3e51abffdd86b4426eaa517ce85fe))
+
 ## [0.14.3](https://github.com/kelsin/sync-roms/compare/v0.14.2...v0.14.3) (2026-10-31)
 
 
