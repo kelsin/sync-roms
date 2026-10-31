@@ -12,7 +12,7 @@ from botocore.stub import Stubber
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "src"))
-from sync_roms import cli  # noqa: E402
+from sync_roms import runtime, s3, scrape_files, store  # noqa: E402
 
 BUCKET = "test-bucket"
 
@@ -29,8 +29,8 @@ class S3Test(unittest.TestCase):
         self.rs, self.ws = Stubber(self.read), Stubber(self.write)
         self.rs.activate()
         self.ws.activate()
-        patches = [mock.patch.object(cli, "BUCKET", BUCKET), mock.patch.object(cli, "_mirror_root", None),
-                   mock.patch.dict(cli._s3, {cli.PROFILE: self.read, cli.WRITE_PROFILE: self.write}, clear=True)]
+        patches = [mock.patch.object(runtime, "BUCKET", BUCKET), mock.patch.object(runtime, "_mirror_root", None),
+                   mock.patch.dict(s3._s3, {runtime.PROFILE: self.read, runtime.WRITE_PROFILE: self.write}, clear=True)]
         for p in patches:
             p.start()
             self.addCleanup(p.stop)
@@ -46,31 +46,31 @@ class S3Test(unittest.TestCase):
                              {"Bucket": BUCKET, "Prefix": "gba/"})
         self.rs.add_response("list_objects_v2", {"Contents": [{"Key": "gba/b.zip", "Size": 2}], "IsTruncated": False},
                              {"Bucket": BUCKET, "Prefix": "gba/", "ContinuationToken": "t"})
-        self.assertEqual(cli.list_sizes("gba/"), {"gba/a.zip": 1, "gba/": 0, "gba/b.zip": 2})
+        self.assertEqual(s3.list_sizes("gba/"), {"gba/a.zip": 1, "gba/": 0, "gba/b.zip": 2})
 
     def test_list_sizes_empty(self):
         self.rs.add_response("list_objects_v2", {"IsTruncated": False}, {"Bucket": BUCKET, "Prefix": "none/"})
-        self.assertEqual(cli.list_sizes("none/"), {})
+        self.assertEqual(s3.list_sizes("none/"), {})
 
     def test_get_text(self):
         self.rs.add_response("get_object", {"Body": io.BytesIO("héllo".encode("utf-8"))},
                              {"Bucket": BUCKET, "Key": "scrapes/x/metadata.json"})
-        self.assertEqual(cli.get_text("scrapes/x/metadata.json"), "héllo")
+        self.assertEqual(s3.get_text("scrapes/x/metadata.json"), "héllo")
 
     def test_get_text_missing_key_raises_client_error(self):
         self.rs.add_client_error("get_object", "NoSuchKey", http_status_code=404)
         with self.assertRaises(ClientError):
-            cli.get_text("nope")
+            s3.get_text("nope")
 
     def test_put_text_uses_write_profile(self):
         self.ws.add_response("put_object", {}, {"Bucket": BUCKET, "Key": "k", "Body": "é".encode("utf-8")})
-        cli.put_text("k", "é")
+        s3.put_text("k", "é")
 
     def test_download(self):
         client = mock.Mock()
-        with tempfile.TemporaryDirectory() as tmp, mock.patch.dict(cli._s3, {cli.PROFILE: client}):
+        with tempfile.TemporaryDirectory() as tmp, mock.patch.dict(s3._s3, {runtime.PROFILE: client}):
             path = os.path.join(tmp, "sub", "a.zip")
-            cli.download(("gba/a.zip", path, 1))
+            s3.download(("gba/a.zip", path, 1))
             self.assertTrue(os.path.isdir(os.path.dirname(path)))
         client.download_file.assert_called_once_with(BUCKET, "gba/a.zip", path, Callback=None)
 
@@ -83,17 +83,17 @@ class S3Test(unittest.TestCase):
                              {"Bucket": BUCKET, "Delete": {"Objects": [{"Key": "k1000"}], "Quiet": True}})
         out = io.StringIO()
         with contextlib.redirect_stdout(out):
-            self.assertEqual(cli.delete_keys(keys), [err])
+            self.assertEqual(s3.delete_keys(keys), [err])
         self.assertIn("deleted 1000/1001", out.getvalue())
         self.assertIn("deleted 1001/1001", out.getvalue())
 
     def test_clean_scrapes_client_error_exits(self):
         self.rs.add_client_error("list_objects_v2", "AccessDenied", "Access Denied")
-        with mock.patch.object(cli, "load_manifest", return_value={"systems": []}), \
-                mock.patch.object(cli, "bucket_roms", return_value={}), \
+        with mock.patch.object(store, "load_manifest", return_value={"systems": []}), \
+                mock.patch.object(scrape_files, "bucket_roms", return_value={}), \
                 contextlib.redirect_stdout(io.StringIO()):
             with self.assertRaises(SystemExit) as cm:
-                cli.clean_scrapes(mock.Mock(dry_run=True))
+                scrape_files.clean_scrapes(mock.Mock(dry_run=True))
         self.assertIn("AccessDenied", str(cm.exception.code))
 
 
@@ -103,9 +103,9 @@ class ProfileTest(unittest.TestCase):
             empty = os.path.join(tmp, "empty")
             open(empty, "w").close()
             env = {"HOME": tmp, "AWS_CONFIG_FILE": empty, "AWS_SHARED_CREDENTIALS_FILE": empty}
-            with mock.patch.dict(os.environ, env), mock.patch.dict(cli._s3, {}, clear=True):
+            with mock.patch.dict(os.environ, env), mock.patch.dict(s3._s3, {}, clear=True):
                 with self.assertRaises(SystemExit) as cm:
-                    cli.s3_client("no-such-profile")
+                    s3.s3_client("no-such-profile")
         self.assertIn("no-such-profile", str(cm.exception.code))
 
 
@@ -115,8 +115,18 @@ class MirrorListTest(unittest.TestCase):
             os.makedirs(os.path.join(tmp, "gba"))
             with open(os.path.join(tmp, "gba", "a.zip"), "w") as f:
                 f.write("xyz")
-            with mock.patch.object(cli, "_mirror_root", tmp):
-                self.assertEqual(cli.list_sizes("gba/"), {"gba/a.zip": 3})
+            with mock.patch.object(runtime, "_mirror_root", tmp):
+                self.assertEqual(s3.list_sizes("gba/"), {"gba/a.zip": 3})
+
+
+class SafeJoinTest(unittest.TestCase):
+    def test_rejects_keys_that_escape_the_base(self):
+        for rel in ("../x", "a/../../x", "/etc/passwd", "", "a\\..\\..\\x"):
+            with self.assertRaises(ValueError, msg=rel):
+                s3.safe_join("/base", rel)
+
+    def test_joins_normal_keys(self):
+        self.assertEqual(s3.safe_join("/base", "a/b.zip"), os.path.join("/base", "a/b.zip"))
 
 
 if __name__ == "__main__":

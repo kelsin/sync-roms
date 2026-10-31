@@ -5,10 +5,11 @@ import os
 import sys
 import tempfile
 import unittest
+from unittest import mock
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "src"))
-from sync_roms import cli as sync_roms  # noqa: E402
+from sync_roms import store  # noqa: E402
 
 
 def load(overlay=None):
@@ -17,10 +18,9 @@ def load(overlay=None):
         if overlay is not None:
             with open(os.path.join(tmp, "device-systems.json"), "w") as f:
                 json.dump(overlay, f)
-        sync_roms.data_dir = lambda: tmp
         err = io.StringIO()
-        with contextlib.redirect_stderr(err):
-            manifest = sync_roms.load_manifest()
+        with mock.patch.object(store, "data_dir", lambda: tmp), contextlib.redirect_stderr(err):
+            manifest = store.load_manifest()
     return manifest, err.getvalue()
 
 
@@ -30,7 +30,7 @@ def by_id(manifest):
 
 class OverlayTest(unittest.TestCase):
     def setUp(self):
-        self.defaults = sync_roms.repo_json("device-systems")
+        self.defaults = store.repo_json("device-systems")
         self.dev = next(i for i, v in self.defaults.items() if "gba" in v["systems"] and "psx" in v["systems"])
 
     def test_no_overlay_equals_defaults(self):

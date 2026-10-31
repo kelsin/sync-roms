@@ -9,7 +9,7 @@ from unittest import mock
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "src"))
-from sync_roms import cli as sync_roms  # noqa: E402
+from sync_roms import mirroring, picker, runtime, store  # noqa: E402
 
 
 def game(bucket):
@@ -23,7 +23,7 @@ def systems():
 def merged(lists, sets=()):
     err = io.StringIO()
     with contextlib.redirect_stderr(err):
-        out = sync_roms.merge_lists(systems(), lists, list(sets))
+        out = store.merge_lists(systems(), lists, list(sets))
     return {s["bucket"]: s for s in out}, err.getvalue()
 
 
@@ -69,15 +69,15 @@ class MergeLists(unittest.TestCase):
 
 class OddEntries(unittest.TestCase):
     def test_apply_games_drops_non_dict_entries(self):
-        out = sync_roms.apply_games([{"bucket": "gba"}], {"gba": ["x", None, game("gba/A.zip")]})
+        out = store.apply_games([{"bucket": "gba"}], {"gba": ["x", None, game("gba/A.zip")]})
         self.assertEqual(out[0]["games"], [game("gba/A.zip")])
 
     def test_bad_sets_warning_printed_once(self):
-        sync_roms._warned.clear()
+        store._warned.clear()
         err = io.StringIO()
         with contextlib.redirect_stderr(err):
             for _ in range(3):
-                self.assertEqual(sync_roms.list_sets({"sets": "mario"}), [])
+                self.assertEqual(store.list_sets({"sets": "mario"}), [])
         self.assertEqual(err.getvalue().count("must be a list"), 1)
 
 
@@ -85,7 +85,7 @@ class CardLists(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)
-        patch = mock.patch.object(sync_roms, "data_dir", lambda: self.tmp.name)
+        patch = mock.patch.object(store, "data_dir", lambda: self.tmp.name)
         patch.start()
         self.addCleanup(patch.stop)
 
@@ -95,42 +95,42 @@ class CardLists(unittest.TestCase):
 
     def test_card_games_bad_shapes(self):
         self.write("cards.json", {"a": {"games": None}, "b": {"games": []}, "c": "x", "d": {"games": {"gba": []}}})
-        self.assertEqual([sync_roms.card_games(n) for n in "abcz"], [{}, {}, {}, {}])
-        self.assertEqual(sync_roms.card_games("d"), {"gba": []})
+        self.assertEqual([store.card_games(n) for n in "abcz"], [{}, {}, {}, {}])
+        self.assertEqual(store.card_games("d"), {"gba": []})
 
     def test_cards_json_games_roundtrip(self):
         self.write("cards.json", {"c": {"games": {"gba": []}, "layout": "esde"}})
-        sync_roms.update_card("c", device="x")
-        self.assertEqual(sync_roms.load_cards()["c"], {"games": {"gba": []}, "layout": "esde", "device": "x"})
+        store.update_card("c", device="x")
+        self.assertEqual(store.load_cards()["c"], {"games": {"gba": []}, "layout": "esde", "device": "x"})
 
     def test_load_manifest_merges_named_cards(self):
         self.write("games.json", {"gba": [game("gba/A.zip")]})
         self.write("cards.json", {"c": {"games": {"gba": [game("gba/B.zip")]}}, "d": {"games": {"gb": [game("gb/Z.zip")]}}})
-        by = {s["bucket"]: s for s in sync_roms.load_manifest(["c"])["systems"]}
+        by = {s["bucket"]: s for s in store.load_manifest(["c"])["systems"]}
         self.assertEqual([g["bucket"] for g in by["gba"]["games"]], ["gba/A.zip", "gba/B.zip"])
         self.assertEqual(by["gb"]["games"], [])
-        by = {s["bucket"]: s for s in sync_roms.load_manifest()["systems"]}
+        by = {s["bucket"]: s for s in store.load_manifest()["systems"]}
         self.assertEqual([g["bucket"] for g in by["gba"]["games"]], ["gba/A.zip"])
 
     def test_all_card_names(self):
         self.write("cards.json", {"b": {}, "a": {}})
-        self.assertEqual(sync_roms.all_card_names(), ["a", "b"])
+        self.assertEqual(store.all_card_names(), ["a", "b"])
 
 
 class Wiring(unittest.TestCase):
     def test_saved_setup_without_layout_or_device(self):
         layouts = {"esde": {}}
         for saved in ({"games": {}}, {"device": "x"}, {"android_media": "never"}, None):
-            self.assertIsNone(sync_roms.saved_setup(saved, [], layouts))
+            self.assertIsNone(picker.saved_setup(saved, [], layouts))
 
     def test_mirror_unions_all_cards(self):
         with tempfile.TemporaryDirectory() as root, \
-                mock.patch.object(sync_roms, "all_card_names", return_value=["a", "b"]), \
-                mock.patch.object(sync_roms, "load_manifest", return_value={"systems": []}) as lm, \
-                mock.patch.object(sync_roms, "mirror_wanted", return_value={}), \
+                mock.patch.object(store, "all_card_names", return_value=["a", "b"]), \
+                mock.patch.object(store, "load_manifest", return_value={"systems": []}) as lm, \
+                mock.patch.object(mirroring, "mirror_wanted", return_value={}), \
                 contextlib.redirect_stdout(io.StringIO()):
-            open(os.path.join(root, sync_roms.MIRROR_MARKER), "w").close()
-            sync_roms.refresh_mirror(root, dry_run=True)
+            open(os.path.join(root, runtime.MIRROR_MARKER), "w").close()
+            mirroring.refresh_mirror(root, dry_run=True)
         lm.assert_called_once_with(["a", "b"])
 
 

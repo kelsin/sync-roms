@@ -9,7 +9,7 @@ from unittest import mock
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "src"))
-from sync_roms import cli  # noqa: E402
+from sync_roms import m3u, ui  # noqa: E402
 
 FAH = ["Fahrenheit (USA) (Disc 1) (Key Disc) (Sega CD).chd", "Fahrenheit (USA) (Disc 2) (Sega CD).chd"]
 
@@ -31,14 +31,14 @@ class M3uTest(unittest.TestCase):
 
     def run_cmd(self, dry_run=False, answer=False):
         out = io.StringIO()
-        with contextlib.redirect_stdout(out), mock.patch.object(cli, "confirm", return_value=answer):
-            cli.m3u_command(SimpleNamespace(m3u=self.dir, dry_run=dry_run))
+        with contextlib.redirect_stdout(out), mock.patch.object(ui, "confirm", return_value=answer):
+            m3u.m3u_command(SimpleNamespace(m3u=self.dir, dry_run=dry_run))
         return out.getvalue()
 
     def test_groups(self):
         files = FAH + ["Chrono Cross (USA) (Disc 1).chd", "Chrono Cross (USA) (Disc 2).chd",
                        "FF IX (USA) (Disc 1) (Rev 1).chd", "FF IX (USA) (Disc 2) (Rev 1).chd", "Solo (USA) (Disc 1).chd"]
-        self.assertEqual(cli.disc_groups(files), {
+        self.assertEqual(m3u.disc_groups(files), {
             "Fahrenheit (USA) (Sega CD).m3u": FAH,
             "Chrono Cross (USA).m3u": ["Chrono Cross (USA) (Disc 1).chd", "Chrono Cross (USA) (Disc 2).chd"],
             "FF IX (USA) (Rev 1).m3u": ["FF IX (USA) (Disc 1) (Rev 1).chd", "FF IX (USA) (Disc 2) (Rev 1).chd"]})
