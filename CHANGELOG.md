@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.18.0](https://github.com/kelsin/sync-roms/compare/v0.17.0...v0.18.0) (2026-10-31)
+
+
+### Features
+
+* **cd:** add --cd with xiso conversion for xbox isos ([#71](https://github.com/kelsin/sync-roms/issues/71)) ([ebbd129](https://github.com/kelsin/sync-roms/commit/ebbd1294cd57cb9c7997430c686e0d40b08c3008))
+* **sets:** add ps2 and wii games to sets and add 3d platformers set ([#70](https://github.com/kelsin/sync-roms/issues/70)) ([e187212](https://github.com/kelsin/sync-roms/commit/e18721223f98496197bc179052a4364d7cfa3bb5))
+* **sets:** add psx and neogeocd games to existing sets ([#68](https://github.com/kelsin/sync-roms/issues/68)) ([d63d0f8](https://github.com/kelsin/sync-roms/commit/d63d0f8ddeed48a545a4b8ea8957eac1a45b167a))
+* **sets:** add psx games to sets and add survival horror and racing sets ([#64](https://github.com/kelsin/sync-roms/issues/64)) ([61f0a7e](https://github.com/kelsin/sync-roms/commit/61f0a7e63ad59516300b669a3c4c75d6d52d95b4))
+
+
+### Bug Fixes
+
+* **m3u:** generate playlists for rvz discs and after --chd on extract systems ([#66](https://github.com/kelsin/sync-roms/issues/66)) ([b4b2656](https://github.com/kelsin/sync-roms/commit/b4b26568275c5a2ea321e41732ecc64b125dec16))
+* **sets:** link multi-disc games to their m3u playlists ([#67](https://github.com/kelsin/sync-roms/issues/67)) ([d00ad05](https://github.com/kelsin/sync-roms/commit/d00ad0503cd6d66cf8c9eb3984163484f56dff53))
+* **sets:** point arcade set entries at the fbneo bucket folder ([#69](https://github.com/kelsin/sync-roms/issues/69)) ([dd83ed5](https://github.com/kelsin/sync-roms/commit/dd83ed58940c445d3608a1162f0edb6ac38b0f4c))
+
 ## [0.17.0](https://github.com/kelsin/sync-roms/compare/v0.16.1...v0.17.0) (2026-10-31)
 
 
