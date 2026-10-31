@@ -1,6 +1,6 @@
 {
   "name": "Survival Horror",
-  "description": "PlayStation survival horror, from the Resident Evil era onward.",
+  "description": "PlayStation and PlayStation 2 survival horror, from the Resident Evil era onward.",
   "games": [
     {
       "title": "Resident Evil (Director's Cut)",
@@ -163,6 +163,86 @@
       "title": "Resident Evil: Survivor",
       "system": "psx",
       "bucket": "psx/Resident Evil - Survivor (USA).chd"
+    },
+    {
+      "title": "Fatal Frame",
+      "system": "ps2",
+      "bucket": "ps2/Fatal Frame (USA).chd"
+    },
+    {
+      "title": "Fatal Frame II: Crimson Butterfly",
+      "system": "ps2",
+      "bucket": "ps2/Fatal Frame II - Crimson Butterfly (USA).chd"
+    },
+    {
+      "title": "Fatal Frame III: The Tormented",
+      "system": "ps2",
+      "bucket": "ps2/Fatal Frame III - The Tormented (USA).chd"
+    },
+    {
+      "title": "Silent Hill 2",
+      "system": "ps2",
+      "bucket": "ps2/Silent Hill 2 (USA) (En,Ja,Fr,De,Es,It) (v2.01).chd"
+    },
+    {
+      "title": "Silent Hill 3",
+      "system": "ps2",
+      "bucket": "ps2/Silent Hill 3 (USA) (En,Ja,Fr,De,Es,It,Ko).chd"
+    },
+    {
+      "title": "Silent Hill 4: The Room",
+      "system": "ps2",
+      "bucket": "ps2/Silent Hill 4 - The Room (USA) (En,Ja).chd"
+    },
+    {
+      "title": "Silent Hill Origins",
+      "system": "ps2",
+      "bucket": "ps2/Silent Hill Origins (USA) (En,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "Silent Hill: Shattered Memories",
+      "system": "ps2",
+      "bucket": "ps2/Silent Hill - Shattered Memories (USA) (En,Fr,Es).chd"
+    },
+    {
+      "title": "Onimusha: Warlords",
+      "system": "ps2",
+      "bucket": "ps2/Onimusha - Warlords (USA).chd"
+    },
+    {
+      "title": "Onimusha 2: Samurai's Destiny",
+      "system": "ps2",
+      "bucket": "ps2/Onimusha 2 - Samurai's Destiny (USA).chd"
+    },
+    {
+      "title": "Onimusha 3: Demon Siege",
+      "system": "ps2",
+      "bucket": "ps2/Onimusha 3 - Demon Siege (USA).chd"
+    },
+    {
+      "title": "Resident Evil - Code: Veronica X",
+      "system": "ps2",
+      "bucket": "ps2/Resident Evil - Code - Veronica X (USA).chd"
+    },
+    {
+      "title": "Resident Evil - Dead Aim",
+      "system": "ps2",
+      "bucket": "ps2/Resident Evil - Dead Aim (USA).chd"
+    },
+    {
+      "title": "Resident Evil - Outbreak",
+      "system": "ps2",
+      "bucket": "ps2/Resident Evil - Outbreak (USA) (v2.00).chd"
+    },
+    {
+      "title": "Resident Evil - Outbreak File #2",
+      "system": "ps2",
+      "bucket": "ps2/Resident Evil - Outbreak - File 2 (USA).chd"
+    },
+    {
+      "title": "Resident Evil 4",
+      "system": "ps2",
+      "bucket": "ps2/Resident Evil 4 (USA).chd"
     }
   ]
 }

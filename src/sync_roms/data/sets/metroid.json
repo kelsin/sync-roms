@@ -1,6 +1,6 @@
 {
   "name": "Metroid",
-  "description": "Samus Aran's side-scrolling adventures plus the DS spin-offs.",
+  "description": "Samus Aran's side-scrolling adventures plus the DS spin-offs and the Wii games.",
   "games": [
     {
       "title": "Metroid",
@@ -51,6 +51,16 @@
       "title": "Super Metroid",
       "system": "snes",
       "bucket": "snes/Super Metroid (Japan, USA) (En,Ja).zip"
+    },
+    {
+      "title": "Metroid: Other M",
+      "system": "wii",
+      "bucket": "wii/Metroid - Other M (USA) (En,Fr,Es).rvz"
+    },
+    {
+      "title": "Metroid Prime Trilogy",
+      "system": "wii",
+      "bucket": "wii/Metroid Prime Trilogy (USA).rvz"
     }
   ]
 }

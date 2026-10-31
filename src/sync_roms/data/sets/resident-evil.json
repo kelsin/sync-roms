@@ -91,6 +91,31 @@
         "gc/Resident Evil 4 (USA) (Disc 1).rvz",
         "gc/Resident Evil 4 (USA) (Disc 2).rvz"
       ]
+    },
+    {
+      "title": "Resident Evil - Code: Veronica X",
+      "system": "ps2",
+      "bucket": "ps2/Resident Evil - Code - Veronica X (USA).chd"
+    },
+    {
+      "title": "Resident Evil - Dead Aim",
+      "system": "ps2",
+      "bucket": "ps2/Resident Evil - Dead Aim (USA).chd"
+    },
+    {
+      "title": "Resident Evil - Outbreak",
+      "system": "ps2",
+      "bucket": "ps2/Resident Evil - Outbreak (USA) (v2.00).chd"
+    },
+    {
+      "title": "Resident Evil - Outbreak File #2",
+      "system": "ps2",
+      "bucket": "ps2/Resident Evil - Outbreak - File 2 (USA).chd"
+    },
+    {
+      "title": "Resident Evil 4",
+      "system": "ps2",
+      "bucket": "ps2/Resident Evil 4 (USA).chd"
     }
   ]
 }

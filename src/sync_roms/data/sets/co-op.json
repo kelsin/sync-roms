@@ -476,6 +476,61 @@
       "title": "Ninja Commando",
       "system": "neogeocd",
       "bucket": "neogeocd/Ninja Commando (Japan) (En,Ja).chd"
+    },
+    {
+      "title": "Gauntlet: Dark Legacy",
+      "system": "ps2",
+      "bucket": "ps2/Gauntlet - Dark Legacy (USA).chd"
+    },
+    {
+      "title": "Phantasy Star Universe",
+      "system": "ps2",
+      "bucket": "ps2/Phantasy Star Universe (USA).chd"
+    },
+    {
+      "title": "Donkey Kong Country Returns",
+      "system": "wii",
+      "bucket": "wii/Donkey Kong Country Returns (USA) (En,Fr,Es).rvz"
+    },
+    {
+      "title": "Kirby's Epic Yarn",
+      "system": "wii",
+      "bucket": "wii/Kirby's Epic Yarn (USA) (En,Fr,Es).rvz"
+    },
+    {
+      "title": "Kirby's Return to Dream Land",
+      "system": "wii",
+      "bucket": "wii/Kirby's Return to Dream Land (USA) (En,Fr,Es).rvz"
+    },
+    {
+      "title": "Mario Kart Wii",
+      "system": "wii",
+      "bucket": "wii/Mario Kart Wii (USA) (En,Fr,Es).rvz"
+    },
+    {
+      "title": "Mario Strikers Charged",
+      "system": "wii",
+      "bucket": "wii/Mario Strikers Charged (USA) (En,Fr,Es) (Rev 1).rvz"
+    },
+    {
+      "title": "New Super Mario Bros. Wii",
+      "system": "wii",
+      "bucket": "wii/New Super Mario Bros. Wii (USA) (En,Fr,Es) (Rev 2).rvz"
+    },
+    {
+      "title": "Monster Hunter Tri",
+      "system": "wii",
+      "bucket": "wii/Monster Hunter Tri (USA) (En,Fr,Es).rvz"
+    },
+    {
+      "title": "Rayman Origins",
+      "system": "wii",
+      "bucket": "wii/Rayman Origins (USA) (En,Fr,Es).rvz"
+    },
+    {
+      "title": "Super Smash Bros. Brawl",
+      "system": "wii",
+      "bucket": "wii/Super Smash Bros. Brawl (USA) (Rev 2).rvz"
     }
   ]
 }
