@@ -89,8 +89,8 @@
     },
     {
       "title": "Puzzle De Pon!",
-      "system": "neogeo",
-      "bucket": "neogeo/puzzledp.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/puzzledp.zip"
     },
     {
       "title": "Puzzle Bobble",
@@ -109,13 +109,13 @@
     },
     {
       "title": "Magical Drop II",
-      "system": "neogeo",
-      "bucket": "neogeo/magdrop2.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/magdrop2.zip"
     },
     {
       "title": "Magical Drop III",
-      "system": "neogeo",
-      "bucket": "neogeo/magdrop3.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/magdrop3.zip"
     },
     {
       "title": "Puyo Pop",

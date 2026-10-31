@@ -34,33 +34,33 @@
     },
     {
       "title": "The King of Fighters '98",
-      "system": "neogeo",
-      "bucket": "neogeo/kof98.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/kof98.zip"
     },
     {
       "title": "The King of Fighters 2002",
-      "system": "neogeo",
-      "bucket": "neogeo/kof2002.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/kof2002.zip"
     },
     {
       "title": "The King of Fighters 2000",
-      "system": "neogeo",
-      "bucket": "neogeo/kof2000.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/kof2000.zip"
     },
     {
       "title": "Real Bout Fatal Fury 2",
-      "system": "neogeo",
-      "bucket": "neogeo/rbff2.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/rbff2.zip"
     },
     {
       "title": "Garou: Mark of the Wolves",
-      "system": "neogeo",
-      "bucket": "neogeo/garou.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/garou.zip"
     },
     {
       "title": "The Last Blade",
-      "system": "neogeo",
-      "bucket": "neogeo/lastblad.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/lastblad.zip"
     },
     {
       "title": "Street Fighter II': Champion Edition",
@@ -69,8 +69,8 @@
     },
     {
       "title": "Street Fighter II': Hyper Fighting",
-      "system": "neogeo",
-      "bucket": "neogeo/sf2hfu.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/sf2hfu.zip"
     },
     {
       "title": "Super Street Fighter II",
@@ -84,8 +84,8 @@
     },
     {
       "title": "Street Fighter III: 3rd Strike",
-      "system": "neogeo",
-      "bucket": "neogeo/sfiii3u.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/sfiii3u.zip"
     },
     {
       "title": "Killer Instinct",
@@ -119,83 +119,83 @@
     },
     {
       "title": "The King of Fighters '95",
-      "system": "neogeo",
-      "bucket": "neogeo/kof95.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/kof95.zip"
     },
     {
       "title": "The King of Fighters '96",
-      "system": "neogeo",
-      "bucket": "neogeo/kof96.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/kof96.zip"
     },
     {
       "title": "The King of Fighters '97",
-      "system": "neogeo",
-      "bucket": "neogeo/kof97.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/kof97.zip"
     },
     {
       "title": "The King of Fighters '99",
-      "system": "neogeo",
-      "bucket": "neogeo/kof99.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/kof99.zip"
     },
     {
       "title": "The King of Fighters 2001",
-      "system": "neogeo",
-      "bucket": "neogeo/kof2001.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/kof2001.zip"
     },
     {
       "title": "The King of Fighters 2003",
-      "system": "neogeo",
-      "bucket": "neogeo/kof2003.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/kof2003.zip"
     },
     {
       "title": "Samurai Shodown",
-      "system": "neogeo",
-      "bucket": "neogeo/samsho.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/samsho.zip"
     },
     {
       "title": "Samurai Shodown III",
-      "system": "neogeo",
-      "bucket": "neogeo/samsho3.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/samsho3.zip"
     },
     {
       "title": "Samurai Shodown V",
-      "system": "neogeo",
-      "bucket": "neogeo/samsho5.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/samsho5.zip"
     },
     {
       "title": "Art of Fighting 2",
-      "system": "neogeo",
-      "bucket": "neogeo/aof2.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/aof2.zip"
     },
     {
       "title": "Fatal Fury 2",
-      "system": "neogeo",
-      "bucket": "neogeo/fatfury2.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/fatfury2.zip"
     },
     {
       "title": "Fatal Fury 3",
-      "system": "neogeo",
-      "bucket": "neogeo/fatfury3.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/fatfury3.zip"
     },
     {
       "title": "Real Bout Fatal Fury",
-      "system": "neogeo",
-      "bucket": "neogeo/rbff1.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/rbff1.zip"
     },
     {
       "title": "World Heroes",
-      "system": "neogeo",
-      "bucket": "neogeo/wh1.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/wh1.zip"
     },
     {
       "title": "World Heroes 2",
-      "system": "neogeo",
-      "bucket": "neogeo/wh2.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/wh2.zip"
     },
     {
       "title": "Windjammers",
-      "system": "neogeo",
-      "bucket": "neogeo/wjammers.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/wjammers.zip"
     },
     {
       "title": "Street Fighter Alpha 2",

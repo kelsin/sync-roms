@@ -44,8 +44,8 @@
     },
     {
       "title": "Street Fighter II': Hyper Fighting",
-      "system": "neogeo",
-      "bucket": "neogeo/sf2hfu.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/sf2hfu.zip"
     },
     {
       "title": "Super Street Fighter II",
@@ -59,8 +59,8 @@
     },
     {
       "title": "Street Fighter III: 3rd Strike",
-      "system": "neogeo",
-      "bucket": "neogeo/sfiii3u.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/sfiii3u.zip"
     },
     {
       "title": "Street Fighter EX Plus",
