@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.14.0](https://github.com/kelsin/sync-roms/compare/v0.13.0...v0.14.0) (2026-10-31)
+
+
+### Features
+
+* **edit:** change a card's device and firmware with ^D ([#44](https://github.com/kelsin/sync-roms/issues/44)) ([6131337](https://github.com/kelsin/sync-roms/commit/6131337a6a6947e3dc9fa083e63483a6aaf163ff))
+
+
+### Bug Fixes
+
+* **edit:** list only systems a card's firmware supports ([#45](https://github.com/kelsin/sync-roms/issues/45)) ([ea452d2](https://github.com/kelsin/sync-roms/commit/ea452d284e4aefd27b11a5c3e3c7cf09fa9f5ac7))
+* **sets:** relink games to current bucket files and add gc, nds and ps2 titles ([#42](https://github.com/kelsin/sync-roms/issues/42)) ([657821e](https://github.com/kelsin/sync-roms/commit/657821e9300ac614003824869cb551ef7a0bafb8))
+* **sets:** relink to re-uploaded cartridge files and add more cartridge games ([#46](https://github.com/kelsin/sync-roms/issues/46)) ([392603d](https://github.com/kelsin/sync-roms/commit/392603dd9759a8fb0ea55cd555932b38570a8bb6))
+
 ## [0.13.0](https://github.com/kelsin/sync-roms/compare/v0.12.0...v0.13.0) (2026-10-31)
 
 
