@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.16.1](https://github.com/kelsin/sync-roms/compare/v0.16.0...v0.16.1) (2026-10-31)
+
+
+### Bug Fixes
+
+* **upload:** cap concurrency and warm up TLS to avoid OpenSSL segfault ([#58](https://github.com/kelsin/sync-roms/issues/58)) ([16b03cc](https://github.com/kelsin/sync-roms/commit/16b03cce9ea6e4e128dbff02d6e3647575a4719e))
+
 ## [0.16.0](https://github.com/kelsin/sync-roms/compare/v0.15.0...v0.16.0) (2026-10-31)
 
 
