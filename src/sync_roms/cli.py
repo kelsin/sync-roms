@@ -1235,8 +1235,8 @@ def plan_m3u(root):
     """
     plan = []
     for dirpath, dirs, files in os.walk(root):
-        dirs[:] = sorted(d for d in dirs if not d.startswith("."))
-        files = sorted(f for f in files if not f.startswith("."))
+        dirs[:] = sorted(d for d in dirs if not own_temp(d))
+        files = sorted(f for f in files if not own_temp(f))
         groups = disc_groups(files)
         covered = {}
         for f in files:
@@ -1306,6 +1306,11 @@ def find_tool(tool):
     return next((p for p in map(shutil.which, TOOL_NAMES[tool]) if p), None)
 
 
+def own_temp(name):
+    """True for what --chd itself leaves hidden (extraction folders, .part files) and macOS ._ junk; other dot names are real."""
+    return name.startswith((".chd-", ".unzip-", "._")) or name.endswith(".part")
+
+
 def chd_folders(systems):
     """{lowercase folder name: system} for the systems with a chd setting, over every layout's folder name."""
     return {f.lower(): s for s in systems if s.get("chd") for f in s["folders"].values() if f}
@@ -1348,11 +1353,11 @@ def plan_chd(root, folders):
     loose disc image's files (sheet and tracks, or the iso). Extract-only systems have archives only."""
     jobs = []
     for dirpath, dirs, files in os.walk(root):
-        dirs[:] = sorted(d for d in dirs if not d.startswith("."))
+        dirs[:] = sorted(d for d in dirs if not own_temp(d))
         system, sysroot = chd_system(root, dirpath, folders)
         if not system:
             continue
-        files = [os.path.join(dirpath, f) for f in sorted(files) if not f.startswith(".")]
+        files = [os.path.join(dirpath, f) for f in sorted(files) if not own_temp(f)]
         jobs += [(system, sysroot, f, None) for f in files if f.lower().endswith(ARCHIVE_EXTS)]
         if system["chd"]["mode"] != "extract":
             jobs += [(system, sysroot, img, owned) for img, owned in disc_images(files)]
@@ -1521,7 +1526,7 @@ def chd_roots(root, folders):
     """{system folder: system} for every system folder under root: where the m3u playlists get fixed."""
     roots = {}
     for dirpath, dirs, _ in os.walk(root):
-        dirs[:] = sorted(d for d in dirs if not d.startswith("."))
+        dirs[:] = sorted(d for d in dirs if not own_temp(d))
         system, sysroot = chd_system(root, dirpath, folders)
         if system:
             roots[sysroot] = system

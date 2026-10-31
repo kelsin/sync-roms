@@ -64,10 +64,15 @@ class ChdTest(unittest.TestCase):
     def test_plan_finds_system_from_folder_names(self):
         folders = {"psx": CD, "gc": EXTRACT}
         self.touch("roms/psx/A.zip", "roms/psx/B.cue", "roms/psx/B (Track 1).bin", "roms/gc/C.7z", "roms/gc/D.iso",
-                   "roms/gba/E.zip", "roms/psx/.hidden.zip", text=CUE)
+                   "roms/gba/E.zip", "roms/psx/.dot.zip", "roms/psx/._A.zip", "roms/psx/.chd-x/F.iso", text=CUE)
         jobs = cli.plan_chd(os.path.join(self.dir, "roms"), folders)
         self.assertEqual([(os.path.basename(p), owned is None) for _, _, p, owned in jobs],
-                         [("C.7z", True), ("A.zip", True), ("B.cue", False)])
+                         [("C.7z", True), (".dot.zip", True), ("A.zip", True), ("B.cue", False)])
+
+    def test_dot_prefixed_discs_and_playlists_are_handled(self):
+        self.touch(".G (Disc 1).chd", ".G (Disc 2).chd", ".G (Disc 2).chd.part")
+        plan = cli.plan_m3u(self.dir)
+        self.assertEqual([(a, os.path.basename(p)) for a, p, _ in plan], [("create", ".G.m3u")])
 
     def test_plan_in_the_system_folder_itself(self):
         folder = os.path.join(self.dir, "PS")
