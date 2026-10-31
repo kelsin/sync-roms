@@ -25,7 +25,7 @@
     {
       "title": "Combat (Atari Anthology)",
       "system": "atari2600",
-      "bucket": "atari2600/Combat ~ Tank-Plus (Japan, USA) (En).zip"
+      "bucket": "atari2600/Combat ~ Tank-Plus (USA).zip"
     },
     {
       "title": "Missile Command",
@@ -243,11 +243,6 @@
       "bucket": "intellivision/Utopia (USA, Europe).zip"
     },
     {
-      "title": "Advanced Dungeons & Dragons",
-      "system": "intellivision",
-      "bucket": "intellivision/Advanced Dungeons & Dragons - Treasure of Tarmin (USA, Europe).zip"
-    },
-    {
       "title": "Night Stalker",
       "system": "intellivision",
       "bucket": "intellivision/Night Stalker (World).zip"
@@ -260,7 +255,7 @@
     {
       "title": "Lock 'N' Chase (v1.1)",
       "system": "intellivision",
-      "bucket": "intellivision/Lock 'N' Chase (1982) (Mattel).zip"
+      "bucket": "intellivision/Lock 'N' Chase (USA, Europe) (v1.1).zip"
     },
     {
       "title": "TRON Deadly Discs",
@@ -290,7 +285,7 @@
     {
       "title": "Scramble",
       "system": "vectrex",
-      "bucket": "vectrex/Scramble (World).zip"
+      "bucket": "vectrex/Scramble (USA, Europe).zip"
     },
     {
       "title": "Star Castle",
@@ -305,7 +300,7 @@
     {
       "title": "Spike",
       "system": "vectrex",
-      "bucket": "vectrex/Spike (World).zip"
+      "bucket": "vectrex/Spike (USA, Europe).zip"
     },
     {
       "title": "Berzerk",
@@ -356,6 +351,11 @@
       "title": "Namco Museum",
       "system": "gc",
       "bucket": "gc/Namco Museum (USA).rvz"
+    },
+    {
+      "title": "Advanced Dungeons & Dragons",
+      "system": "intellivision",
+      "bucket": "intellivision/Advanced Dungeons & Dragons (USA, Europe).zip"
     }
   ]
 }

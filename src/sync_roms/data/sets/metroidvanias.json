@@ -65,7 +65,7 @@
     {
       "title": "Metroid - Zero Mission",
       "system": "gba",
-      "bucket": "gba/Metroid - Zero Mission (USA, Australia).zip"
+      "bucket": "gba/Metroid - Zero Mission (USA).zip"
     },
     {
       "title": "Castlevania - Aria of Sorrow",
@@ -131,6 +131,11 @@
       "title": "Classic NES Series - Metroid",
       "system": "gba",
       "bucket": "gba/Classic NES Series - Metroid (USA, Europe).zip"
+    },
+    {
+      "title": "Super Metroid (En,Fr,De)",
+      "system": "snes",
+      "bucket": "snes/Super Metroid (Japan, USA) (En,Ja).zip"
     }
   ]
 }

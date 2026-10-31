@@ -33,7 +33,7 @@
       "bucket": "gb/Bomberman GB (USA, Europe) (SGB Enhanced).zip"
     },
     {
-      "title": "Dragon Warrior Monsters (SGB Enhanced) (GB Compatible)",
+      "title": "Dragon Warrior Monsters (SGB Enhanced)",
       "system": "gbc",
       "bucket": "gbc/Dragon Warrior Monsters (USA, Europe) (SGB Enhanced) (GB Compatible).zip"
     },
@@ -130,7 +130,7 @@
     {
       "title": "Sonic The Hedgehog",
       "system": "genesis",
-      "bucket": "genesis/Sonic The Hedgehog (Japan, Europe, Korea) (En) (Rev A).zip"
+      "bucket": "genesis/Sonic The Hedgehog (Japan, Europe, Korea) (En).zip"
     },
     {
       "title": "Columns",
@@ -331,6 +331,11 @@
       "title": "Retro Game Challenge",
       "system": "nds",
       "bucket": "nds/Retro Game Challenge (USA).zip"
+    },
+    {
+      "title": "Super Hang-On",
+      "system": "genesis",
+      "bucket": "genesis/Super Hang-On (Japan, USA) (En,Ja).zip"
     }
   ]
 }

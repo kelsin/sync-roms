@@ -63,7 +63,7 @@
       "bucket": "gb/Wario Land - Super Mario Land 3 (World).zip"
     },
     {
-      "title": "Wario Land II (SGB Enhanced) (GB Compatible)",
+      "title": "Wario Land II (SGB Enhanced)",
       "system": "gbc",
       "bucket": "gbc/Wario Land II (USA, Europe) (SGB Enhanced) (GB Compatible).zip"
     },
@@ -371,6 +371,131 @@
       "title": "Yoshi",
       "system": "nes",
       "bucket": "nes/Yoshi (USA).zip"
+    },
+    {
+      "title": "Donkey Kong (Rev 1)",
+      "system": "nes",
+      "bucket": "nes/Donkey Kong (World) (Rev 1).zip"
+    },
+    {
+      "title": "Donkey Kong Jr. (Rev 1)",
+      "system": "nes",
+      "bucket": "nes/Donkey Kong Jr. (World) (Rev 1).zip"
+    },
+    {
+      "title": "Donkey Kong 3",
+      "system": "nes",
+      "bucket": "nes/Donkey Kong 3 (World).zip"
+    },
+    {
+      "title": "Mario Bros.",
+      "system": "nes",
+      "bucket": "nes/Mario Bros. (World).zip"
+    },
+    {
+      "title": "Wario's Woods",
+      "system": "nes",
+      "bucket": "nes/Wario's Woods (USA).zip"
+    },
+    {
+      "title": "Yoshi's Cookie",
+      "system": "nes",
+      "bucket": "nes/Yoshi's Cookie (USA).zip"
+    },
+    {
+      "title": "Donkey Kong (Japan, USA)",
+      "system": "gb",
+      "bucket": "gb/Donkey Kong (Japan, USA) (En) (SGB Enhanced).zip"
+    },
+    {
+      "title": "Donkey Kong Land",
+      "system": "gb",
+      "bucket": "gb/Donkey Kong Land (USA, Europe) (SGB Enhanced).zip"
+    },
+    {
+      "title": "Donkey Kong Land 2",
+      "system": "gb",
+      "bucket": "gb/Donkey Kong Land 2 (USA, Europe) (SGB Enhanced).zip"
+    },
+    {
+      "title": "Donkey Kong Land III (Rev 1)",
+      "system": "gb",
+      "bucket": "gb/Donkey Kong Land III (USA, Europe) (Rev 1) (SGB Enhanced).zip"
+    },
+    {
+      "title": "Mario's Picross",
+      "system": "gb",
+      "bucket": "gb/Mario's Picross (USA, Europe) (SGB Enhanced).zip"
+    },
+    {
+      "title": "Yoshi",
+      "system": "gb",
+      "bucket": "gb/Yoshi (USA).zip"
+    },
+    {
+      "title": "Yoshi's Cookie",
+      "system": "gb",
+      "bucket": "gb/Yoshi's Cookie (USA, Europe).zip"
+    },
+    {
+      "title": "Classic NES Series - Super Mario Bros.",
+      "system": "gba",
+      "bucket": "gba/Classic NES Series - Super Mario Bros. (USA, Europe).zip"
+    },
+    {
+      "title": "Classic NES Series - Dr. Mario",
+      "system": "gba",
+      "bucket": "gba/Classic NES Series - Dr. Mario (USA, Europe).zip"
+    },
+    {
+      "title": "Yoshi Topsy-Turvy",
+      "system": "gba",
+      "bucket": "gba/Yoshi Topsy-Turvy (USA).zip"
+    },
+    {
+      "title": "Donkey Kong Country",
+      "system": "gba",
+      "bucket": "gba/Donkey Kong Country (USA).zip"
+    },
+    {
+      "title": "Donkey Kong Country 2",
+      "system": "gba",
+      "bucket": "gba/Donkey Kong Country 2 (USA).zip"
+    },
+    {
+      "title": "Donkey Kong Country 3",
+      "system": "gba",
+      "bucket": "gba/Donkey Kong Country 3 (USA).zip"
+    },
+    {
+      "title": "Classic NES Series - Donkey Kong",
+      "system": "gba",
+      "bucket": "gba/Classic NES Series - Donkey Kong (USA, Europe).zip"
+    },
+    {
+      "title": "Donkey Kong Country (Rev 2)",
+      "system": "snes",
+      "bucket": "snes/Donkey Kong Country (USA) (Rev 2).zip"
+    },
+    {
+      "title": "Donkey Kong Country 2 - Diddy's Kong Quest (Rev 1)",
+      "system": "snes",
+      "bucket": "snes/Donkey Kong Country 2 - Diddy's Kong Quest (USA) (En,Fr) (Rev 1).zip"
+    },
+    {
+      "title": "Donkey Kong Country 3 - Dixie Kong's Double Trouble!",
+      "system": "snes",
+      "bucket": "snes/Donkey Kong Country 3 - Dixie Kong's Double Trouble! (USA) (En,Fr).zip"
+    },
+    {
+      "title": "Tetris & Dr. Mario",
+      "system": "snes",
+      "bucket": "snes/Tetris & Dr. Mario (USA).zip"
+    },
+    {
+      "title": "Donkey Kong 64",
+      "system": "n64",
+      "bucket": "n64/Donkey Kong 64 (USA).zip"
     }
   ]
 }

@@ -48,7 +48,7 @@
       "bucket": "gbc/Pokemon - Crystal Version (USA, Europe) (Rev 1).zip"
     },
     {
-      "title": "Legend of Zelda, The - Link's Awakening DX (Rev 2) (SGB Enhanced) (GB Compatible)",
+      "title": "Legend of Zelda, The - Link's Awakening DX (Rev 2) (SGB Enhanced)",
       "system": "gbc",
       "bucket": "gbc/Legend of Zelda, The - Link's Awakening DX (USA, Europe) (Rev 2) (SGB Enhanced) (GB Compatible).zip"
     },
@@ -85,7 +85,7 @@
     {
       "title": "Metroid - Zero Mission",
       "system": "gba",
-      "bucket": "gba/Metroid - Zero Mission (USA, Australia).zip"
+      "bucket": "gba/Metroid - Zero Mission (USA).zip"
     },
     {
       "title": "Castlevania - Aria of Sorrow",
@@ -140,7 +140,7 @@
     {
       "title": "Mega Man Zero 3",
       "system": "gba",
-      "bucket": "gba/Mega Man Zero 3 (USA).zip"
+      "bucket": "gba/Megaman Zero 3 (USA).zip"
     },
     {
       "title": "Sonic The Hedgehog 2",
@@ -276,6 +276,31 @@
       "title": "World Ends with You, The",
       "system": "nds",
       "bucket": "nds/World Ends with You, The (USA).zip"
+    },
+    {
+      "title": "Legend of Zelda, The - A Link to the Past & Four Swords",
+      "system": "gba",
+      "bucket": "gba/Legend of Zelda, The - A Link to the Past & Four Swords (USA).zip"
+    },
+    {
+      "title": "Mario Kart - Super Circuit",
+      "system": "gba",
+      "bucket": "gba/Mario Kart - Super Circuit (USA).zip"
+    },
+    {
+      "title": "Fire Emblem - The Sacred Stones",
+      "system": "gba",
+      "bucket": "gba/Fire Emblem - The Sacred Stones (USA, Australia).zip"
+    },
+    {
+      "title": "Golden Sun - The Lost Age",
+      "system": "gba",
+      "bucket": "gba/Golden Sun - The Lost Age (USA, Europe).zip"
+    },
+    {
+      "title": "Shantae",
+      "system": "gbc",
+      "bucket": "gbc/Shantae (USA).zip"
     }
   ]
 }

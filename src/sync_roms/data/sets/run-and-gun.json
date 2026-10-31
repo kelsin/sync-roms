@@ -18,11 +18,6 @@
       "bucket": "snes/Contra III - The Alien Wars (USA).zip"
     },
     {
-      "title": "Super Turrican Collection",
-      "system": "snes",
-      "bucket": "snes/Super Turrican Collection (USA) (Strictly Limited Games).zip"
-    },
-    {
       "title": "Gunstar Heroes",
       "system": "genesis",
       "bucket": "genesis/Gunstar Heroes (USA).zip"
@@ -111,6 +106,151 @@
       "title": "Freedom Fighters",
       "system": "gc",
       "bucket": "gc/Freedom Fighters (USA).rvz"
+    },
+    {
+      "title": "Super Turrican",
+      "system": "snes",
+      "bucket": "snes/Super Turrican (USA).zip"
+    },
+    {
+      "title": "Mega Turrican",
+      "system": "genesis",
+      "bucket": "genesis/Mega Turrican (USA).zip"
+    },
+    {
+      "title": "Contra - Hard Corps",
+      "system": "genesis",
+      "bucket": "genesis/Contra - Hard Corps (USA, Korea) (En).zip"
+    },
+    {
+      "title": "Rolling Thunder 2",
+      "system": "genesis",
+      "bucket": "genesis/Rolling Thunder 2 (USA).zip"
+    },
+    {
+      "title": "Rolling Thunder 3",
+      "system": "genesis",
+      "bucket": "genesis/Rolling Thunder 3 (USA).zip"
+    },
+    {
+      "title": "Strider",
+      "system": "genesis",
+      "bucket": "genesis/Strider (USA, Europe).zip"
+    },
+    {
+      "title": "Mercs",
+      "system": "genesis",
+      "bucket": "genesis/Mercs (World).zip"
+    },
+    {
+      "title": "Contra Force",
+      "system": "nes",
+      "bucket": "nes/Contra Force (USA).zip"
+    },
+    {
+      "title": "Jackal",
+      "system": "nes",
+      "bucket": "nes/Jackal (USA).zip"
+    },
+    {
+      "title": "Cabal",
+      "system": "nes",
+      "bucket": "nes/Cabal (USA).zip"
+    },
+    {
+      "title": "Bionic Commando",
+      "system": "nes",
+      "bucket": "nes/Bionic Commando (USA).zip"
+    },
+    {
+      "title": "Blaster Master",
+      "system": "nes",
+      "bucket": "nes/Blaster Master (USA).zip"
+    },
+    {
+      "title": "Shatterhand",
+      "system": "nes",
+      "bucket": "nes/Shatterhand (USA).zip"
+    },
+    {
+      "title": "Ninja Gaiden",
+      "system": "nes",
+      "bucket": "nes/Ninja Gaiden (USA).zip"
+    },
+    {
+      "title": "Ninja Gaiden III - The Ancient Ship of Doom",
+      "system": "nes",
+      "bucket": "nes/Ninja Gaiden III - The Ancient Ship of Doom (USA).zip"
+    },
+    {
+      "title": "Ikari Warriors (Rev 1)",
+      "system": "nes",
+      "bucket": "nes/Ikari Warriors (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Vice - Project Doom",
+      "system": "nes",
+      "bucket": "nes/Vice - Project Doom (USA).zip"
+    },
+    {
+      "title": "Super Turrican 2",
+      "system": "snes",
+      "bucket": "snes/Super Turrican 2 (USA).zip"
+    },
+    {
+      "title": "Ninja Gaiden Trilogy",
+      "system": "snes",
+      "bucket": "snes/Ninja Gaiden Trilogy (USA).zip"
+    },
+    {
+      "title": "Contra - The Alien Wars",
+      "system": "gb",
+      "bucket": "gb/Contra - The Alien Wars (USA) (SGB Enhanced).zip"
+    },
+    {
+      "title": "Bionic Commando",
+      "system": "gb",
+      "bucket": "gb/Bionic Commando (USA).zip"
+    },
+    {
+      "title": "Turrican",
+      "system": "gb",
+      "bucket": "gb/Turrican (USA, Europe).zip"
+    },
+    {
+      "title": "Ninja Gaiden Shadow",
+      "system": "gb",
+      "bucket": "gb/Ninja Gaiden Shadow (USA).zip"
+    },
+    {
+      "title": "Contra Advance - The Alien Wars EX",
+      "system": "gba",
+      "bucket": "gba/Contra Advance - The Alien Wars EX (USA).zip"
+    },
+    {
+      "title": "Metal Slug Advance",
+      "system": "gba",
+      "bucket": "gba/Metal Slug Advance (USA).zip"
+    },
+    {
+      "title": "Metal Slug - 1st Mission",
+      "system": "ngpc",
+      "bucket": "ngpc/Metal Slug - 1st Mission (World) (En,Ja).zip"
+    },
+    {
+      "title": "Metal Slug - 2nd Mission",
+      "system": "ngpc",
+      "bucket": "ngpc/Metal Slug - 2nd Mission (World) (En,Ja).zip"
+    },
+    {
+      "title": "Bionic Commando - Elite Forces",
+      "system": "gbc",
+      "bucket": "gbc/Bionic Commando - Elite Forces (USA, Australia).zip"
+    },
+    {
+      "title": "Turrican",
+      "system": "tg16",
+      "bucket": "tg16/Turrican (USA).zip"
     }
   ]
 }
