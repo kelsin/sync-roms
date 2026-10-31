@@ -183,8 +183,9 @@
     {
       "title": "Panzer Dragoon Saga",
       "system": "saturn",
-      "bucket": "saturn/Panzer Dragoon Saga (USA) (Disc 1).chd",
+      "bucket": "saturn/Panzer Dragoon Saga (USA).m3u",
       "files": [
+        "saturn/Panzer Dragoon Saga (USA) (Disc 1).chd",
         "saturn/Panzer Dragoon Saga (USA) (Disc 2).chd",
         "saturn/Panzer Dragoon Saga (USA) (Disc 3).chd",
         "saturn/Panzer Dragoon Saga (USA) (Disc 4).chd"
@@ -328,8 +329,9 @@
     {
       "title": "Killer7 (Rev 1)",
       "system": "gc",
-      "bucket": "gc/Killer7 (USA) (Disc 1) (Rev 1).rvz",
+      "bucket": "gc/Killer7 (USA) (Rev 1).m3u",
       "files": [
+        "gc/Killer7 (USA) (Disc 1) (Rev 1).rvz",
         "gc/Killer7 (USA) (Disc 2) (Rev 1).rvz"
       ]
     },

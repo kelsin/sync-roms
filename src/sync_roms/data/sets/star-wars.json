@@ -180,8 +180,9 @@
     {
       "title": "Star Wars - Rebel Assault II - The Hidden Empire",
       "system": "psx",
-      "bucket": "psx/Star Wars - Rebel Assault II - The Hidden Empire (USA) (Disc 1).chd",
+      "bucket": "psx/Star Wars - Rebel Assault II - The Hidden Empire (USA).m3u",
       "files": [
+        "psx/Star Wars - Rebel Assault II - The Hidden Empire (USA) (Disc 1).chd",
         "psx/Star Wars - Rebel Assault II - The Hidden Empire (USA) (Disc 2).chd"
       ]
     },
