@@ -353,6 +353,21 @@
       "bucket": "gc/Namco Museum (USA).rvz"
     },
     {
+      "title": "Namco Museum 50th Anniversary",
+      "system": "gc",
+      "bucket": "gc/Namco Museum 50th Anniversary (USA).rvz"
+    },
+    {
+      "title": "Midway Arcade Treasures 2",
+      "system": "gc",
+      "bucket": "gc/Midway Arcade Treasures 2 (USA).rvz"
+    },
+    {
+      "title": "Midway Arcade Treasures 3",
+      "system": "gc",
+      "bucket": "gc/Midway Arcade Treasures 3 (USA).rvz"
+    },
+    {
       "title": "Advanced Dungeons & Dragons",
       "system": "intellivision",
       "bucket": "intellivision/Advanced Dungeons & Dragons (USA, Europe).zip"

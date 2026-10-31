@@ -201,6 +201,34 @@
       "bucket": "gc/Midway Arcade Treasures (USA).rvz"
     },
     {
+      "title": "Teenage Mutant Ninja Turtles 2 - Battle Nexus",
+      "system": "gc",
+      "bucket": "gc/Teenage Mutant Ninja Turtles 2 - Battle Nexus (USA) (Disc 1).rvz",
+      "files": [
+        "gc/Teenage Mutant Ninja Turtles 2 - Battle Nexus (USA) (Disc 2).rvz"
+      ]
+    },
+    {
+      "title": "Lord of the Rings, The - The Two Towers",
+      "system": "gc",
+      "bucket": "gc/Lord of the Rings, The - The Two Towers (USA).rvz"
+    },
+    {
+      "title": "Lord of the Rings, The - The Return of the King",
+      "system": "gc",
+      "bucket": "gc/Lord of the Rings, The - The Return of the King (USA).rvz"
+    },
+    {
+      "title": "Baldur's Gate - Dark Alliance",
+      "system": "gc",
+      "bucket": "gc/Baldur's Gate - Dark Alliance (USA).rvz"
+    },
+    {
+      "title": "X-Men Legends",
+      "system": "gc",
+      "bucket": "gc/X-Men Legends (USA).rvz"
+    },
+    {
       "title": "Contra 4",
       "system": "nds",
       "bucket": "nds/Contra 4 (USA).zip"

@@ -1,0 +1,319 @@
+{
+  "name": "Star Wars",
+  "description": "Star Wars games from the 8-bit era through the GameCube, DS and PSP.",
+  "games": [
+    {
+      "title": "Star Wars (Arcade)",
+      "system": "mame",
+      "bucket": "mame/starwars.zip"
+    },
+    {
+      "title": "Star Wars - The Empire Strikes Back (Arcade)",
+      "system": "mame",
+      "bucket": "mame/esb.zip"
+    },
+    {
+      "title": "Star Wars - Return of the Jedi (Arcade)",
+      "system": "mame",
+      "bucket": "mame/jedi.zip"
+    },
+    {
+      "title": "Star Wars",
+      "system": "nes",
+      "bucket": "nes/Star Wars (USA).zip"
+    },
+    {
+      "title": "Star Wars - The Empire Strikes Back",
+      "system": "nes",
+      "bucket": "nes/Star Wars - The Empire Strikes Back (USA).zip"
+    },
+    {
+      "title": "Super Star Wars (Rev 1)",
+      "system": "snes",
+      "bucket": "snes/Super Star Wars (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Super Star Wars - The Empire Strikes Back (Rev 1)",
+      "system": "snes",
+      "bucket": "snes/Super Star Wars - The Empire Strikes Back (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Super Star Wars - Return of the Jedi (Rev 1)",
+      "system": "snes",
+      "bucket": "snes/Super Star Wars - Return of the Jedi (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Star Wars (En)",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Star Wars (Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Star Wars",
+      "system": "gamegear",
+      "bucket": "gamegear/Star Wars (USA, Europe).zip"
+    },
+    {
+      "title": "Super Star Wars - Return of the Jedi",
+      "system": "gamegear",
+      "bucket": "gamegear/Super Star Wars - Return of the Jedi (USA, Europe).zip"
+    },
+    {
+      "title": "Star Wars (Rev 1)",
+      "system": "gb",
+      "bucket": "gb/Star Wars (USA, Europe) (Rev 1).zip"
+    },
+    {
+      "title": "Star Wars - The Empire Strikes Back",
+      "system": "gb",
+      "bucket": "gb/Star Wars - The Empire Strikes Back (USA, Europe).zip"
+    },
+    {
+      "title": "Super Star Wars - Return of the Jedi",
+      "system": "gb",
+      "bucket": "gb/Super Star Wars - Return of the Jedi (USA, Europe) (SGB Enhanced).zip"
+    },
+    {
+      "title": "Star Wars - Yoda Stories",
+      "system": "gbc",
+      "bucket": "gbc/Star Wars - Yoda Stories (USA, Europe) (GB Compatible).zip"
+    },
+    {
+      "title": "Star Wars Episode I - Obi-Wan's Adventures",
+      "system": "gbc",
+      "bucket": "gbc/Star Wars Episode I - Obi-Wan's Adventures (USA).zip"
+    },
+    {
+      "title": "Star Wars Episode I - Racer",
+      "system": "gbc",
+      "bucket": "gbc/Star Wars Episode I - Racer (USA, Europe) (Rumble Version).zip"
+    },
+    {
+      "title": "Star Wars Arcade",
+      "system": "sega32x",
+      "bucket": "sega32x/Star Wars Arcade (USA).zip"
+    },
+    {
+      "title": "Star Wars - Rebel Assault",
+      "system": "segacd",
+      "bucket": "segacd/Star Wars - Rebel Assault (USA).chd"
+    },
+    {
+      "title": "Star Wars - Rogue Squadron (Rev 1)",
+      "system": "n64",
+      "bucket": "n64/Star Wars - Rogue Squadron (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Star Wars - Shadows of the Empire (Rev 2)",
+      "system": "n64",
+      "bucket": "n64/Star Wars - Shadows of the Empire (USA) (Rev 2).zip"
+    },
+    {
+      "title": "Star Wars Episode I - Battle for Naboo",
+      "system": "n64",
+      "bucket": "n64/Star Wars Episode I - Battle for Naboo (USA).zip"
+    },
+    {
+      "title": "Star Wars Episode I - Racer",
+      "system": "n64",
+      "bucket": "n64/Star Wars Episode I - Racer (USA).zip"
+    },
+    {
+      "title": "Star Wars - Dark Forces",
+      "system": "psx",
+      "bucket": "psx/Star Wars - Dark Forces (USA).chd"
+    },
+    {
+      "title": "Star Wars - Demolition",
+      "system": "psx",
+      "bucket": "psx/Star Wars - Demolition (USA).chd"
+    },
+    {
+      "title": "Star Wars - Episode I - The Phantom Menace (Rev 1)",
+      "system": "psx",
+      "bucket": "psx/Star Wars - Episode I - The Phantom Menace (USA) (Rev 1).chd"
+    },
+    {
+      "title": "Star Wars - Episode II - Attack of the Clones",
+      "system": "gba",
+      "bucket": "gba/Star Wars - Episode II - Attack of the Clones (USA).zip"
+    },
+    {
+      "title": "Star Wars - Episode III - Revenge of the Sith",
+      "system": "gba",
+      "bucket": "gba/Star Wars - Episode III - Revenge of the Sith (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Star Wars - Flight of the Falcon",
+      "system": "gba",
+      "bucket": "gba/Star Wars - Flight of the Falcon (USA).zip"
+    },
+    {
+      "title": "Star Wars - Jedi Power Battles",
+      "system": "gba",
+      "bucket": "gba/Star Wars - Jedi Power Battles (USA).zip"
+    },
+    {
+      "title": "Star Wars - The New Droid Army",
+      "system": "gba",
+      "bucket": "gba/Star Wars - The New Droid Army (USA).zip"
+    },
+    {
+      "title": "Star Wars Trilogy - Apprentice of the Force",
+      "system": "gba",
+      "bucket": "gba/Star Wars Trilogy - Apprentice of the Force (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "LEGO Star Wars - The Video Game",
+      "system": "gba",
+      "bucket": "gba/LEGO Star Wars - The Video Game (USA, Europe) (En,Fr,De,Es,It,Nl,Da).zip"
+    },
+    {
+      "title": "LEGO Star Wars II - The Original Trilogy",
+      "system": "gba",
+      "bucket": "gba/LEGO Star Wars II - The Original Trilogy (USA).zip"
+    },
+    {
+      "title": "Software Toolworks' Star Wars Chess, The",
+      "system": "segacd",
+      "bucket": "segacd/Software Toolworks' Star Wars Chess, The (USA).chd"
+    },
+    {
+      "title": "Star Wars - Rebel Assault II - The Hidden Empire",
+      "system": "psx",
+      "bucket": "psx/Star Wars - Rebel Assault II - The Hidden Empire (USA) (Disc 1).chd",
+      "files": [
+        "psx/Star Wars - Rebel Assault II - The Hidden Empire (USA) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "Star Wars - Episode I - Jedi Power Battles",
+      "system": "psx",
+      "bucket": "psx/Star Wars - Episode I - Jedi Power Battles (USA).chd"
+    },
+    {
+      "title": "Star Wars - Masters of Teras Kasi",
+      "system": "psx",
+      "bucket": "psx/Star Wars - Masters of Teras Kasi (USA).chd"
+    },
+    {
+      "title": "Star Wars - Rogue Squadron II - Rogue Leader",
+      "system": "gc",
+      "bucket": "gc/Star Wars - Rogue Squadron II - Rogue Leader (USA).rvz"
+    },
+    {
+      "title": "Star Wars - Rogue Squadron III - Rebel Strike",
+      "system": "gc",
+      "bucket": "gc/Star Wars - Rogue Squadron III - Rebel Strike (USA).rvz"
+    },
+    {
+      "title": "Star Wars - Jedi Knight II - Jedi Outcast",
+      "system": "gc",
+      "bucket": "gc/Star Wars - Jedi Knight II - Jedi Outcast (USA).rvz"
+    },
+    {
+      "title": "Star Wars - Bounty Hunter",
+      "system": "gc",
+      "bucket": "gc/Star Wars - Bounty Hunter (USA).rvz"
+    },
+    {
+      "title": "Star Wars - The Clone Wars",
+      "system": "gc",
+      "bucket": "gc/Star Wars - The Clone Wars (USA).rvz"
+    },
+    {
+      "title": "LEGO Star Wars - The Video Game",
+      "system": "gc",
+      "bucket": "gc/LEGO Star Wars - The Video Game (USA).rvz"
+    },
+    {
+      "title": "LEGO Star Wars II - The Original Trilogy",
+      "system": "gc",
+      "bucket": "gc/LEGO Star Wars II - The Original Trilogy (USA).rvz"
+    },
+    {
+      "title": "LEGO Star Wars - The Complete Saga",
+      "system": "nds",
+      "bucket": "nds/LEGO Star Wars - The Complete Saga (USA).zip"
+    },
+    {
+      "title": "LEGO Star Wars II - The Original Trilogy (Rev 1)",
+      "system": "nds",
+      "bucket": "nds/LEGO Star Wars II - The Original Trilogy (USA) (Rev 1).zip"
+    },
+    {
+      "title": "LEGO Star Wars III - The Clone Wars",
+      "system": "nds",
+      "bucket": "nds/LEGO Star Wars III - The Clone Wars (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Star Wars - Battlefront - Elite Squadron",
+      "system": "nds",
+      "bucket": "nds/Star Wars - Battlefront - Elite Squadron (USA) (En,Fr).zip"
+    },
+    {
+      "title": "Star Wars - Episode III - Revenge of the Sith",
+      "system": "nds",
+      "bucket": "nds/Star Wars - Episode III - Revenge of the Sith (USA) (En,Fr,De,Es,It,Nl).zip"
+    },
+    {
+      "title": "Star Wars - Lethal Alliance",
+      "system": "nds",
+      "bucket": "nds/Star Wars - Lethal Alliance (USA) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Star Wars - The Clone Wars - Jedi Alliance",
+      "system": "nds",
+      "bucket": "nds/Star Wars - The Clone Wars - Jedi Alliance (USA) (En,Fr,De,Es).zip"
+    },
+    {
+      "title": "Star Wars - The Clone Wars - Republic Heroes",
+      "system": "nds",
+      "bucket": "nds/Star Wars - The Clone Wars - Republic Heroes (USA) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Star Wars - The Force Unleashed",
+      "system": "nds",
+      "bucket": "nds/Star Wars - The Force Unleashed (USA) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Star Wars - The Force Unleashed II",
+      "system": "nds",
+      "bucket": "nds/Star Wars - The Force Unleashed II (USA) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "LEGO Star Wars II - The Original Trilogy",
+      "system": "psp",
+      "bucket": "psp/LEGO Star Wars II - The Original Trilogy (USA).chd"
+    },
+    {
+      "title": "LEGO Star Wars III - The Clone Wars",
+      "system": "psp",
+      "bucket": "psp/LEGO Star Wars III - The Clone Wars (USA) (En,Fr,Es).chd"
+    },
+    {
+      "title": "Star Wars - Battlefront - Renegade Squadron",
+      "system": "psp",
+      "bucket": "psp/Star Wars - Battlefront - Renegade Squadron (USA).chd"
+    },
+    {
+      "title": "Star Wars - Battlefront II",
+      "system": "psp",
+      "bucket": "psp/Star Wars - Battlefront II (USA).chd"
+    },
+    {
+      "title": "Star Wars - Lethal Alliance",
+      "system": "psp",
+      "bucket": "psp/Star Wars - Lethal Alliance (USA) (En,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "Star Wars - The Clone Wars - Republic Heroes",
+      "system": "psp",
+      "bucket": "psp/Star Wars - The Clone Wars - Republic Heroes (USA) (En,Fr,Es).chd"
+    },
+    {
+      "title": "Star Wars - The Force Unleashed",
+      "system": "psp",
+      "bucket": "psp/Star Wars - The Force Unleashed (USA) (En,Fr).chd"
+    }
+  ]
+}

@@ -385,6 +385,29 @@
       ]
     },
     {
+      "title": "Paper Mario - The Thousand-Year Door",
+      "system": "gc",
+      "bucket": "gc/Paper Mario - The Thousand-Year Door (USA).rvz"
+    },
+    {
+      "title": "Baten Kaitos Origins",
+      "system": "gc",
+      "bucket": "gc/Baten Kaitos Origins (USA) (Disc 1).rvz",
+      "files": [
+        "gc/Baten Kaitos Origins (USA) (Disc 2).rvz"
+      ]
+    },
+    {
+      "title": "Fire Emblem - Path of Radiance",
+      "system": "gc",
+      "bucket": "gc/Fire Emblem - Path of Radiance (USA).rvz"
+    },
+    {
+      "title": "Mega Man X - Command Mission",
+      "system": "gc",
+      "bucket": "gc/Mega Man X - Command Mission (USA).rvz"
+    },
+    {
       "title": "Chrono Trigger",
       "system": "nds",
       "bucket": "nds/Chrono Trigger (USA) (En,Fr).zip"
