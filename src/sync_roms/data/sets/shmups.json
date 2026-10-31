@@ -661,6 +661,51 @@
       "title": "Omega Boost",
       "system": "psx",
       "bucket": "psx/Omega Boost (USA).chd"
+    },
+    {
+      "title": "R-Types",
+      "system": "psx",
+      "bucket": "psx/R-Types (USA).chd"
+    },
+    {
+      "title": "Sol Divide",
+      "system": "psx",
+      "bucket": "psx/Sol Divide (USA).chd"
+    },
+    {
+      "title": "Galaga: Destination Earth",
+      "system": "psx",
+      "bucket": "psx/Galaga - Destination Earth (USA).chd"
+    },
+    {
+      "title": "Last Resort",
+      "system": "neogeocd",
+      "bucket": "neogeocd/Last Resort (Japan) (En,Ja).chd"
+    },
+    {
+      "title": "Pulstar",
+      "system": "neogeocd",
+      "bucket": "neogeocd/Pulstar (Japan) (En,Ja).chd"
+    },
+    {
+      "title": "Twinkle Star Sprites",
+      "system": "neogeocd",
+      "bucket": "neogeocd/Twinkle Star Sprites (Japan) (En,Ja).chd"
+    },
+    {
+      "title": "Aero Fighters 2",
+      "system": "neogeocd",
+      "bucket": "neogeocd/Sonic Wings 2 ~ Aero Fighters 2 (World) (En,Ja).chd"
+    },
+    {
+      "title": "Aero Fighters 3",
+      "system": "neogeocd",
+      "bucket": "neogeocd/Sonic Wings 3 ~ Aero Fighters 3 (Japan) (En,Ja).chd"
+    },
+    {
+      "title": "Viewpoint",
+      "system": "neogeocd",
+      "bucket": "neogeocd/Viewpoint (Japan).chd"
     }
   ]
 }

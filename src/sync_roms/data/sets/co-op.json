@@ -366,6 +366,116 @@
       "title": "Gauntlet Legends",
       "system": "psx",
       "bucket": "psx/Gauntlet Legends (USA).chd"
+    },
+    {
+      "title": "Bomberman Party Edition",
+      "system": "psx",
+      "bucket": "psx/Bomberman - Party Edition (USA).chd"
+    },
+    {
+      "title": "Rampage World Tour",
+      "system": "psx",
+      "bucket": "psx/Rampage - World Tour (USA).chd"
+    },
+    {
+      "title": "Rampage: Through Time",
+      "system": "psx",
+      "bucket": "psx/Rampage - Through Time (USA).chd"
+    },
+    {
+      "title": "Rampage 2: Universal Tour",
+      "system": "psx",
+      "bucket": "psx/Rampage 2 - Universal Tour (USA).chd"
+    },
+    {
+      "title": "Diablo",
+      "system": "psx",
+      "bucket": "psx/Diablo (USA) (En,Fr,De,Sv).chd"
+    },
+    {
+      "title": "NBA Jam Tournament Edition",
+      "system": "psx",
+      "bucket": "psx/NBA Jam - Tournament Edition (USA).chd"
+    },
+    {
+      "title": "NFL Blitz",
+      "system": "psx",
+      "bucket": "psx/NFL Blitz (USA).chd"
+    },
+    {
+      "title": "Time Crisis",
+      "system": "psx",
+      "bucket": "psx/Time Crisis (USA).chd"
+    },
+    {
+      "title": "Point Blank 2",
+      "system": "psx",
+      "bucket": "psx/Point Blank 2 (USA).chd"
+    },
+    {
+      "title": "Point Blank 3",
+      "system": "psx",
+      "bucket": "psx/Point Blank 3 (USA).chd"
+    },
+    {
+      "title": "Hot Shots Golf",
+      "system": "psx",
+      "bucket": "psx/Hot Shots Golf (USA).chd"
+    },
+    {
+      "title": "Windjammers",
+      "system": "neogeocd",
+      "bucket": "neogeocd/Flying Power Disc ~ Windjammers (Japan) (En,Ja).chd"
+    },
+    {
+      "title": "Super Sidekicks",
+      "system": "neogeocd",
+      "bucket": "neogeocd/Super Sidekicks - Tokuten-ou (Japan) (En,Ja).chd"
+    },
+    {
+      "title": "Super Sidekicks 2",
+      "system": "neogeocd",
+      "bucket": "neogeocd/Tokuten-ou 2 ~ Super Sidekicks 2 - The World Championship (Japan) (En,Ja,Es).chd"
+    },
+    {
+      "title": "Super Sidekicks 3",
+      "system": "neogeocd",
+      "bucket": "neogeocd/Tokuten-ou 3 - Eikou e no Chousen ~ Super Sidekicks 3 - The Next Glory (World) (En,Ja,Fr,Es,It,Pt).chd"
+    },
+    {
+      "title": "Soccer Brawl",
+      "system": "neogeocd",
+      "bucket": "neogeocd/Soccer Brawl (World).chd"
+    },
+    {
+      "title": "Baseball Stars 2",
+      "system": "neogeocd",
+      "bucket": "neogeocd/Baseball Stars 2 (Japan) (En,Ja).chd"
+    },
+    {
+      "title": "Football Frenzy",
+      "system": "neogeocd",
+      "bucket": "neogeocd/Football Frenzy (Japan) (En,Ja).chd"
+    },
+    {
+      "title": "Street Hoop",
+      "system": "neogeocd",
+      "bucket": "neogeocd/Dunk Dream ~ Street Slam ~ Street Hoop (World).chd"
+    },
+    {
+      "title": "Power Spikes II",
+      "system": "neogeocd",
+      "bucket": "neogeocd/Power Spikes II (Japan) (En,Ja).chd"
+    },
+    {
+      "title": "Burning Fight",
+      "system": "neogeocd",
+      "bucket": "neogeocd/Burning Fight (Japan) (En,Ja).chd"
+    },
+    {
+      "title": "Ninja Commando",
+      "system": "neogeocd",
+      "bucket": "neogeocd/Ninja Commando (Japan) (En,Ja).chd"
     }
   ]
 }

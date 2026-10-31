@@ -471,6 +471,46 @@
       "title": "Lemmings & Oh No! More Lemmings",
       "system": "psx",
       "bucket": "psx/Lemmings & Oh No! More Lemmings (USA).chd"
+    },
+    {
+      "title": "Bust-A-Move '99",
+      "system": "psx",
+      "bucket": "psx/Bust-A-Move '99 (USA).chd"
+    },
+    {
+      "title": "Bust-A-Move 2: Arcade Edition",
+      "system": "psx",
+      "bucket": "psx/Bust-A-Move 2 - Arcade Edition (USA).chd"
+    },
+    {
+      "title": "Buster Bros. Collection",
+      "system": "psx",
+      "bucket": "psx/Buster Bros. Collection (USA).chd"
+    },
+    {
+      "title": "The Next Tetris",
+      "system": "psx",
+      "bucket": "psx/Next Tetris, The (USA).chd"
+    },
+    {
+      "title": "Zoop",
+      "system": "psx",
+      "bucket": "psx/Zoop - America's Largest Killer of Time! (USA).chd"
+    },
+    {
+      "title": "3D Lemmings",
+      "system": "psx",
+      "bucket": "psx/3D Lemmings (USA).chd"
+    },
+    {
+      "title": "Puzzle Bobble",
+      "system": "neogeocd",
+      "bucket": "neogeocd/Puzzle Bobble ~ Bust-A-Move (Japan) (En,Ja).chd"
+    },
+    {
+      "title": "Joy Joy Kid",
+      "system": "neogeocd",
+      "bucket": "neogeocd/Joy Joy Kid ~ Puzzled (World) (En,Ja).chd"
     }
   ]
 }

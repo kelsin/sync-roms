@@ -386,6 +386,106 @@
       "title": "Point Blank",
       "system": "psx",
       "bucket": "psx/Point Blank (USA).chd"
+    },
+    {
+      "title": "Namco Museum Vol. 3",
+      "system": "psx",
+      "bucket": "psx/Namco Museum Vol. 3 (USA).chd"
+    },
+    {
+      "title": "Namco Museum Vol. 4",
+      "system": "psx",
+      "bucket": "psx/Namco Museum Vol. 4 (USA).chd"
+    },
+    {
+      "title": "Namco Museum Vol. 5",
+      "system": "psx",
+      "bucket": "psx/Namco Museum Vol. 5 (USA).chd"
+    },
+    {
+      "title": "Point Blank 2",
+      "system": "psx",
+      "bucket": "psx/Point Blank 2 (USA).chd"
+    },
+    {
+      "title": "Point Blank 3",
+      "system": "psx",
+      "bucket": "psx/Point Blank 3 (USA).chd"
+    },
+    {
+      "title": "Bust-A-Move '99",
+      "system": "psx",
+      "bucket": "psx/Bust-A-Move '99 (USA).chd"
+    },
+    {
+      "title": "Bust-A-Move 2: Arcade Edition",
+      "system": "psx",
+      "bucket": "psx/Bust-A-Move 2 - Arcade Edition (USA).chd"
+    },
+    {
+      "title": "The Next Tetris",
+      "system": "psx",
+      "bucket": "psx/Next Tetris, The (USA).chd"
+    },
+    {
+      "title": "Asteroids",
+      "system": "psx",
+      "bucket": "psx/Asteroids (USA).chd"
+    },
+    {
+      "title": "Missile Command",
+      "system": "psx",
+      "bucket": "psx/Missile Command (USA).chd"
+    },
+    {
+      "title": "Space Invaders",
+      "system": "psx",
+      "bucket": "psx/Space Invaders (USA).chd"
+    },
+    {
+      "title": "Tempest X3",
+      "system": "psx",
+      "bucket": "psx/Tempest X3 (USA).chd"
+    },
+    {
+      "title": "Robotron X",
+      "system": "psx",
+      "bucket": "psx/Robotron X (USA).chd"
+    },
+    {
+      "title": "Um Jammer Lammy",
+      "system": "psx",
+      "bucket": "psx/Um Jammer Lammy (USA).chd"
+    },
+    {
+      "title": "Pro Pinball: Timeshock!",
+      "system": "psx",
+      "bucket": "psx/Pro Pinball - Timeshock! (USA).chd"
+    },
+    {
+      "title": "Windjammers",
+      "system": "neogeocd",
+      "bucket": "neogeocd/Flying Power Disc ~ Windjammers (Japan) (En,Ja).chd"
+    },
+    {
+      "title": "Puzzle Bobble",
+      "system": "neogeocd",
+      "bucket": "neogeocd/Puzzle Bobble ~ Bust-A-Move (Japan) (En,Ja).chd"
+    },
+    {
+      "title": "Magical Drop II",
+      "system": "neogeocd",
+      "bucket": "neogeocd/Magical Drop 2 (Japan) (En,Ja).chd"
+    },
+    {
+      "title": "Joy Joy Kid",
+      "system": "neogeocd",
+      "bucket": "neogeocd/Joy Joy Kid ~ Puzzled (World) (En,Ja).chd"
+    },
+    {
+      "title": "Neo Turf Masters",
+      "system": "neogeocd",
+      "bucket": "neogeocd/Big Tournament Golf ~ Neo Turf Masters (Japan) (En,Ja).chd"
     }
   ]
 }

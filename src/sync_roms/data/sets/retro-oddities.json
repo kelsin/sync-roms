@@ -391,6 +391,91 @@
       "title": "Intellivision Classic Games",
       "system": "psx",
       "bucket": "psx/Intellivision Classic Games (USA).chd"
+    },
+    {
+      "title": "Namco Museum Vol. 1",
+      "system": "psx",
+      "bucket": "psx/Namco Museum Vol. 1 (USA) (Rev 1).chd"
+    },
+    {
+      "title": "Namco Museum Vol. 2",
+      "system": "psx",
+      "bucket": "psx/Namco Museum Vol. 2 (USA).chd"
+    },
+    {
+      "title": "Namco Museum Vol. 3",
+      "system": "psx",
+      "bucket": "psx/Namco Museum Vol. 3 (USA).chd"
+    },
+    {
+      "title": "Namco Museum Vol. 4",
+      "system": "psx",
+      "bucket": "psx/Namco Museum Vol. 4 (USA).chd"
+    },
+    {
+      "title": "Namco Museum Vol. 5",
+      "system": "psx",
+      "bucket": "psx/Namco Museum Vol. 5 (USA).chd"
+    },
+    {
+      "title": "Arcade's Greatest Hits: The Atari Collection 2",
+      "system": "psx",
+      "bucket": "psx/Arcade's Greatest Hits - The Atari Collection 2 (USA).chd"
+    },
+    {
+      "title": "Arcade's Greatest Hits: The Midway Collection 2",
+      "system": "psx",
+      "bucket": "psx/Arcade's Greatest Hits - The Midway Collection 2 (USA).chd"
+    },
+    {
+      "title": "Konami Arcade Classics",
+      "system": "psx",
+      "bucket": "psx/Konami Arcade Classics (USA).chd"
+    },
+    {
+      "title": "Asteroids",
+      "system": "psx",
+      "bucket": "psx/Asteroids (USA).chd"
+    },
+    {
+      "title": "Breakout",
+      "system": "psx",
+      "bucket": "psx/Breakout (USA).chd"
+    },
+    {
+      "title": "Centipede",
+      "system": "psx",
+      "bucket": "psx/Centipede (USA).chd"
+    },
+    {
+      "title": "Missile Command",
+      "system": "psx",
+      "bucket": "psx/Missile Command (USA).chd"
+    },
+    {
+      "title": "Space Invaders",
+      "system": "psx",
+      "bucket": "psx/Space Invaders (USA).chd"
+    },
+    {
+      "title": "Tempest X3",
+      "system": "psx",
+      "bucket": "psx/Tempest X3 (USA).chd"
+    },
+    {
+      "title": "Robotron X",
+      "system": "psx",
+      "bucket": "psx/Robotron X (USA).chd"
+    },
+    {
+      "title": "Pong: The Next Level",
+      "system": "psx",
+      "bucket": "psx/Pong - The Next Level (USA).chd"
+    },
+    {
+      "title": "Buster Bros. Collection",
+      "system": "psx",
+      "bucket": "psx/Buster Bros. Collection (USA).chd"
     }
   ]
 }

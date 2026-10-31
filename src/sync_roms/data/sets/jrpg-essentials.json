@@ -800,6 +800,79 @@
         "psx/Dragon Warrior VII (USA) (Disc 1).chd",
         "psx/Dragon Warrior VII (USA) (Disc 2).chd"
       ]
+    },
+    {
+      "title": "Final Fantasy Chronicles - Chrono Trigger",
+      "system": "psx",
+      "bucket": "psx/Final Fantasy Chronicles - Chrono Trigger (USA) (Rev 1).chd"
+    },
+    {
+      "title": "SaGa Frontier",
+      "system": "psx",
+      "bucket": "psx/SaGa Frontier (USA).chd"
+    },
+    {
+      "title": "SaGa Frontier 2",
+      "system": "psx",
+      "bucket": "psx/SaGa Frontier 2 (USA).chd"
+    },
+    {
+      "title": "Tales of Destiny",
+      "system": "psx",
+      "bucket": "psx/Tales of Destiny (USA).chd"
+    },
+    {
+      "title": "Tales of Destiny II",
+      "system": "psx",
+      "bucket": "psx/Tales of Destiny II (USA).m3u",
+      "files": [
+        "psx/Tales of Destiny II (USA) (Disc 1).chd",
+        "psx/Tales of Destiny II (USA) (Disc 2).chd",
+        "psx/Tales of Destiny II (USA) (Disc 3).chd"
+      ]
+    },
+    {
+      "title": "Arc the Lad",
+      "system": "psx",
+      "bucket": "psx/Arc the Lad Collection - Arc the Lad (USA).chd"
+    },
+    {
+      "title": "Arc the Lad II",
+      "system": "psx",
+      "bucket": "psx/Arc the Lad Collection - Arc the Lad II (USA).chd"
+    },
+    {
+      "title": "Arc the Lad III",
+      "system": "psx",
+      "bucket": "psx/Arc the Lad Collection - Arc the Lad III (USA).m3u",
+      "files": [
+        "psx/Arc the Lad Collection - Arc the Lad III (USA) (Disc 1).chd",
+        "psx/Arc the Lad Collection - Arc the Lad III (USA) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "Brave Fencer Musashi",
+      "system": "psx",
+      "bucket": "psx/Brave Fencer Musashi (USA).chd"
+    },
+    {
+      "title": "Rhapsody: A Musical Adventure",
+      "system": "psx",
+      "bucket": "psx/Rhapsody - A Musical Adventure (USA).chd"
+    },
+    {
+      "title": "Thousand Arms",
+      "system": "psx",
+      "bucket": "psx/Thousand Arms (USA).m3u",
+      "files": [
+        "psx/Thousand Arms (USA) (Disc 1).chd",
+        "psx/Thousand Arms (USA) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "Alundra",
+      "system": "psx",
+      "bucket": "psx/Alundra (USA) (Rev 1).chd"
     }
   ]
 }
