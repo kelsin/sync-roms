@@ -1,0 +1,113 @@
+{
+  "name": "Survival Horror",
+  "description": "PlayStation survival horror, from the Resident Evil era onward.",
+  "games": [
+    {
+      "title": "Resident Evil (Director's Cut)",
+      "system": "psx",
+      "bucket": "psx/Resident Evil - Director's Cut - Dual Shock Ver. (USA).chd"
+    },
+    {
+      "title": "Resident Evil 2",
+      "system": "psx",
+      "bucket": "psx/Resident Evil 2 - Dual Shock Ver. (USA).m3u",
+      "files": [
+        "psx/Resident Evil 2 - Dual Shock Ver. (USA) (Disc 1).chd",
+        "psx/Resident Evil 2 - Dual Shock Ver. (USA) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "Resident Evil 3: Nemesis",
+      "system": "psx",
+      "bucket": "psx/Resident Evil 3 - Nemesis (USA).chd"
+    },
+    {
+      "title": "Silent Hill",
+      "system": "psx",
+      "bucket": "psx/Silent Hill (USA).chd"
+    },
+    {
+      "title": "Dino Crisis",
+      "system": "psx",
+      "bucket": "psx/Dino Crisis (USA) (Rev 1).chd"
+    },
+    {
+      "title": "Dino Crisis 2",
+      "system": "psx",
+      "bucket": "psx/Dino Crisis 2 (USA).chd"
+    },
+    {
+      "title": "Parasite Eve",
+      "system": "psx",
+      "bucket": "psx/Parasite Eve (USA).m3u",
+      "files": [
+        "psx/Parasite Eve (USA) (Disc 1).chd",
+        "psx/Parasite Eve (USA) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "Parasite Eve II",
+      "system": "psx",
+      "bucket": "psx/Parasite Eve II (USA, Canada).m3u",
+      "files": [
+        "psx/Parasite Eve II (USA, Canada) (Disc 1).chd",
+        "psx/Parasite Eve II (USA, Canada) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "Clock Tower",
+      "system": "psx",
+      "bucket": "psx/Clock Tower (USA).chd"
+    },
+    {
+      "title": "Fear Effect",
+      "system": "psx",
+      "bucket": "psx/Fear Effect (USA).m3u",
+      "files": [
+        "psx/Fear Effect (USA) (Disc 1).chd",
+        "psx/Fear Effect (USA) (Disc 2).chd",
+        "psx/Fear Effect (USA) (Disc 3).chd",
+        "psx/Fear Effect (USA) (Disc 4).chd"
+      ]
+    },
+    {
+      "title": "Galerians",
+      "system": "psx",
+      "bucket": "psx/Galerians (USA).m3u",
+      "files": [
+        "psx/Galerians (USA) (Disc 1).chd",
+        "psx/Galerians (USA) (Disc 2).chd",
+        "psx/Galerians (USA) (Disc 3).chd"
+      ]
+    },
+    {
+      "title": "Koudelka",
+      "system": "psx",
+      "bucket": "psx/Koudelka (USA).m3u",
+      "files": [
+        "psx/Koudelka (USA) (Disc 1).chd",
+        "psx/Koudelka (USA) (Disc 2).chd",
+        "psx/Koudelka (USA) (Disc 3).chd",
+        "psx/Koudelka (USA) (Disc 4).chd"
+      ]
+    },
+    {
+      "title": "Countdown Vampires",
+      "system": "psx",
+      "bucket": "psx/Countdown Vampires (USA).m3u",
+      "files": [
+        "psx/Countdown Vampires (USA) (Disc 1).chd",
+        "psx/Countdown Vampires (USA) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "Alone in the Dark: The New Nightmare",
+      "system": "psx",
+      "bucket": "psx/Alone in the Dark - The New Nightmare (USA).m3u",
+      "files": [
+        "psx/Alone in the Dark - The New Nightmare (USA) (Disc 1).chd",
+        "psx/Alone in the Dark - The New Nightmare (USA) (Disc 2).chd"
+      ]
+    }
+  ]
+}

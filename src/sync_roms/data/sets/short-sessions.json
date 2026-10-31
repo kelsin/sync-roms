@@ -366,6 +366,26 @@
       "title": "Every Extend Extra",
       "system": "psp",
       "bucket": "psp/Every Extend Extra (USA).chd"
+    },
+    {
+      "title": "Namco Museum Vol. 1",
+      "system": "psx",
+      "bucket": "psx/Namco Museum Vol. 1 (USA) (Rev 1).chd"
+    },
+    {
+      "title": "Namco Museum Vol. 2",
+      "system": "psx",
+      "bucket": "psx/Namco Museum Vol. 2 (USA).chd"
+    },
+    {
+      "title": "Williams Arcade's Greatest Hits",
+      "system": "psx",
+      "bucket": "psx/Williams Arcade's Greatest Hits (USA).chd"
+    },
+    {
+      "title": "Point Blank",
+      "system": "psx",
+      "bucket": "psx/Point Blank (USA).chd"
     }
   ]
 }

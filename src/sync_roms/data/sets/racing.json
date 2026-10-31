@@ -1,0 +1,86 @@
+{
+  "name": "Racing",
+  "description": "Arcade and simulation racers.",
+  "games": [
+    {
+      "title": "Ridge Racer",
+      "system": "psx",
+      "bucket": "psx/Ridge Racer (USA).chd"
+    },
+    {
+      "title": "Ridge Racer Revolution",
+      "system": "psx",
+      "bucket": "psx/Ridge Racer Revolution (USA).chd"
+    },
+    {
+      "title": "Rage Racer",
+      "system": "psx",
+      "bucket": "psx/Rage Racer (USA).chd"
+    },
+    {
+      "title": "R4: Ridge Racer Type 4",
+      "system": "psx",
+      "bucket": "psx/R4 - Ridge Racer Type 4 (USA).chd"
+    },
+    {
+      "title": "Gran Turismo",
+      "system": "psx",
+      "bucket": "psx/Gran Turismo (USA) (Rev 1).chd"
+    },
+    {
+      "title": "Gran Turismo 2",
+      "system": "psx",
+      "bucket": "psx/Gran Turismo 2 (USA) (Simulation Mode) (Rev 2).chd"
+    },
+    {
+      "title": "WipEout",
+      "system": "psx",
+      "bucket": "psx/WipEout (USA).chd"
+    },
+    {
+      "title": "Wipeout XL",
+      "system": "psx",
+      "bucket": "psx/Wipeout XL (USA).chd"
+    },
+    {
+      "title": "WipEout 3",
+      "system": "psx",
+      "bucket": "psx/WipEout 3 (USA).chd"
+    },
+    {
+      "title": "CTR: Crash Team Racing",
+      "system": "psx",
+      "bucket": "psx/CTR - Crash Team Racing (USA).chd"
+    },
+    {
+      "title": "Colin McRae Rally",
+      "system": "psx",
+      "bucket": "psx/Colin McRae Rally (USA).chd"
+    },
+    {
+      "title": "Rollcage",
+      "system": "psx",
+      "bucket": "psx/Rollcage (USA).chd"
+    },
+    {
+      "title": "Destruction Derby 2",
+      "system": "psx",
+      "bucket": "psx/Destruction Derby 2 (USA).chd"
+    },
+    {
+      "title": "Twisted Metal 2",
+      "system": "psx",
+      "bucket": "psx/Twisted Metal 2 (USA).chd"
+    },
+    {
+      "title": "Motor Toon Grand Prix",
+      "system": "psx",
+      "bucket": "psx/Motor Toon Grand Prix (USA).chd"
+    },
+    {
+      "title": "Jet Moto",
+      "system": "psx",
+      "bucket": "psx/Jet Moto (USA).chd"
+    }
+  ]
+}

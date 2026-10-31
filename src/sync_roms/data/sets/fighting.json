@@ -470,6 +470,50 @@
       "title": "Power Stone Collection",
       "system": "psp",
       "bucket": "psp/Power Stone Collection (USA).chd"
+    },
+    {
+      "title": "Tekken 2",
+      "system": "psx",
+      "bucket": "psx/Tekken 2 (USA) (Rev 1).chd"
+    },
+    {
+      "title": "Soul Blade",
+      "system": "psx",
+      "bucket": "psx/Soul Blade (USA) (Rev 1).chd"
+    },
+    {
+      "title": "Marvel vs. Capcom: Clash of Super Heroes",
+      "system": "psx",
+      "bucket": "psx/Marvel vs. Capcom - Clash of Super Heroes (USA).chd"
+    },
+    {
+      "title": "Darkstalkers 3",
+      "system": "psx",
+      "bucket": "psx/Darkstalkers 3 (USA).chd"
+    },
+    {
+      "title": "Rival Schools: United by Fate",
+      "system": "psx",
+      "bucket": "psx/Rival Schools - United by Fate (USA).m3u",
+      "files": [
+        "psx/Rival Schools - United by Fate (USA) (Disc 1) (Arcade Disc).chd",
+        "psx/Rival Schools - United by Fate (USA) (Disc 2) (Evolution Disc).chd"
+      ]
+    },
+    {
+      "title": "Guilty Gear",
+      "system": "psx",
+      "bucket": "psx/Guilty Gear (USA) (Rev 1).chd"
+    },
+    {
+      "title": "Bloody Roar II",
+      "system": "psx",
+      "bucket": "psx/Bloody Roar II (USA).chd"
+    },
+    {
+      "title": "Capcom vs. SNK Pro",
+      "system": "psx",
+      "bucket": "psx/Capcom vs. SNK Pro (USA).chd"
     }
   ]
 }

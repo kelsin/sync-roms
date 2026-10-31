@@ -185,6 +185,60 @@
       "title": "Street Fighter Alpha 3 Max",
       "system": "psp",
       "bucket": "psp/Street Fighter Alpha 3 Max (USA).chd"
+    },
+    {
+      "title": "Street Fighter Alpha: Warriors' Dreams",
+      "system": "psx",
+      "bucket": "psx/Street Fighter Alpha - Warriors' Dreams (USA).chd"
+    },
+    {
+      "title": "Street Fighter Alpha 2",
+      "system": "psx",
+      "bucket": "psx/Street Fighter Alpha 2 (USA) (Rev 1).chd"
+    },
+    {
+      "title": "Street Fighter EX Plus Alpha",
+      "system": "psx",
+      "bucket": "psx/Street Fighter EX Plus Alpha (USA).chd"
+    },
+    {
+      "title": "Street Fighter EX2 Plus",
+      "system": "psx",
+      "bucket": "psx/Street Fighter EX2 Plus (USA).chd"
+    },
+    {
+      "title": "Marvel vs. Capcom: Clash of Super Heroes",
+      "system": "psx",
+      "bucket": "psx/Marvel vs. Capcom - Clash of Super Heroes (USA).chd"
+    },
+    {
+      "title": "X-Men vs. Street Fighter",
+      "system": "psx",
+      "bucket": "psx/X-Men vs. Street Fighter (USA).chd"
+    },
+    {
+      "title": "Marvel Super Heroes vs. Street Fighter",
+      "system": "psx",
+      "bucket": "psx/Marvel Super Heroes vs. Street Fighter (USA).chd"
+    },
+    {
+      "title": "Street Fighter Collection",
+      "system": "psx",
+      "bucket": "psx/Street Fighter Collection (USA) (Rev 1).m3u",
+      "files": [
+        "psx/Street Fighter Collection (USA) (Disc 1) (Rev 1).chd",
+        "psx/Street Fighter Collection (USA) (Disc 2) (Rev 1).chd"
+      ]
+    },
+    {
+      "title": "Super Puzzle Fighter II Turbo",
+      "system": "psx",
+      "bucket": "psx/Super Puzzle Fighter II Turbo (USA).chd"
+    },
+    {
+      "title": "Capcom vs. SNK Pro",
+      "system": "psx",
+      "bucket": "psx/Capcom vs. SNK Pro (USA).chd"
     }
   ]
 }
