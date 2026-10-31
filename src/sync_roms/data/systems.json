@@ -1167,6 +1167,24 @@
     }
   },
   {
+    "name": "SNK Neo Geo Pocket",
+    "bucket": "ngp",
+    "folders": {
+      "esde": "ngp",
+      "knulli": "ngp",
+      "onion": "NGP",
+      "muos": "ngp",
+      "slot": null
+    },
+    "muos_catalogue": "SNK Neo Geo Pocket",
+    "bios": {
+      "files": [],
+      "libretro_cores": [
+        "mednafen_ngp"
+      ]
+    }
+  },
+  {
     "name": "SNK Neo Geo Pocket Color",
     "bucket": "ngpc",
     "folders": {
