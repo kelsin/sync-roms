@@ -109,5 +109,15 @@ class ProfileTest(unittest.TestCase):
         self.assertIn("no-such-profile", str(cm.exception.code))
 
 
+class MirrorListTest(unittest.TestCase):
+    def test_list_sizes_reads_the_mirror(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            os.makedirs(os.path.join(tmp, "gba"))
+            with open(os.path.join(tmp, "gba", "a.zip"), "w") as f:
+                f.write("xyz")
+            with mock.patch.object(cli, "_mirror_root", tmp):
+                self.assertEqual(cli.list_sizes("gba/"), {"gba/a.zip": 3})
+
+
 if __name__ == "__main__":
     unittest.main()
