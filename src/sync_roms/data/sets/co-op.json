@@ -311,6 +311,31 @@
       "title": "Captain Commando",
       "system": "snes",
       "bucket": "snes/Captain Commando (USA).zip"
+    },
+    {
+      "title": "Crash Bash",
+      "system": "psx",
+      "bucket": "psx/Crash Bash (USA).chd"
+    },
+    {
+      "title": "Poy Poy",
+      "system": "psx",
+      "bucket": "psx/Poy Poy (USA).chd"
+    },
+    {
+      "title": "Micro Machines V3",
+      "system": "psx",
+      "bucket": "psx/Micro Machines V3 (USA).chd"
+    },
+    {
+      "title": "Worms Armageddon",
+      "system": "psx",
+      "bucket": "psx/Worms Armageddon (USA).chd"
+    },
+    {
+      "title": "Gauntlet Legends",
+      "system": "psx",
+      "bucket": "psx/Gauntlet Legends (USA).chd"
     }
   ]
 }

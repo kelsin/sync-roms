@@ -174,10 +174,10 @@
     {
       "title": "Parasite Eve II",
       "system": "psx",
-      "bucket": "psx/Parasite Eve II (USA).m3u",
+      "bucket": "psx/Parasite Eve II (USA, Canada).m3u",
       "files": [
-        "psx/Parasite Eve II (USA) (Disc 1).chd",
-        "psx/Parasite Eve II (USA) (Disc 2).chd"
+        "psx/Parasite Eve II (USA, Canada) (Disc 1).chd",
+        "psx/Parasite Eve II (USA, Canada) (Disc 2).chd"
       ]
     },
     {
@@ -727,6 +727,72 @@
       "title": "Fate Extra CCC (English v1.0)",
       "system": "psp",
       "bucket": "psp/Fate Extra CCC (English v1.0).chd"
+    },
+    {
+      "title": "Tactics Ogre",
+      "system": "psx",
+      "bucket": "psx/Tactics Ogre (USA).chd"
+    },
+    {
+      "title": "Koudelka",
+      "system": "psx",
+      "bucket": "psx/Koudelka (USA).m3u",
+      "files": [
+        "psx/Koudelka (USA) (Disc 1).chd",
+        "psx/Koudelka (USA) (Disc 2).chd",
+        "psx/Koudelka (USA) (Disc 3).chd",
+        "psx/Koudelka (USA) (Disc 4).chd"
+      ]
+    },
+    {
+      "title": "Brigandine: The Legend of Forsena",
+      "system": "psx",
+      "bucket": "psx/Brigandine - The Legend of Forsena (USA).chd"
+    },
+    {
+      "title": "Alundra",
+      "system": "psx",
+      "bucket": "psx/Alundra (USA) (Rev 1).chd"
+    },
+    {
+      "title": "Front Mission 3",
+      "system": "psx",
+      "bucket": "psx/Front Mission 3 (USA).chd"
+    },
+    {
+      "title": "Tomba!",
+      "system": "psx",
+      "bucket": "psx/Tomba! (USA).chd"
+    },
+    {
+      "title": "Tomba! 2: The Evil Swine Return",
+      "system": "psx",
+      "bucket": "psx/Tomba! 2 - The Evil Swine Return (USA).chd"
+    },
+    {
+      "title": "Jade Cocoon: Story of the Tamamayu",
+      "system": "psx",
+      "bucket": "psx/Jade Cocoon - Story of the Tamamayu (USA).chd"
+    },
+    {
+      "title": "King's Field",
+      "system": "psx",
+      "bucket": "psx/King's Field (USA).chd"
+    },
+    {
+      "title": "Devil Dice",
+      "system": "psx",
+      "bucket": "psx/Devil Dice (USA).chd"
+    },
+    {
+      "title": "PaRappa the Rapper",
+      "system": "psx",
+      "bucket": "psx/PaRappa the Rapper (USA) (En,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "Threads of Fate",
+      "system": "psx",
+      "bucket": "psx/Threads of Fate (USA).chd"
     }
   ]
 }

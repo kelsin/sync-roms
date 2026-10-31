@@ -279,6 +279,16 @@
       "title": "Teenage Mutant Ninja Turtles III - Radical Rescue",
       "system": "gb",
       "bucket": "gb/Teenage Mutant Ninja Turtles III - Radical Rescue (USA).zip"
+    },
+    {
+      "title": "Gauntlet Legends",
+      "system": "psx",
+      "bucket": "psx/Gauntlet Legends (USA).chd"
+    },
+    {
+      "title": "Fighting Force",
+      "system": "psx",
+      "bucket": "psx/Fighting Force (USA) (Rev 2).chd"
     }
   ]
 }

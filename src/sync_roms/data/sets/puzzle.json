@@ -421,6 +421,46 @@
       "title": "Pipe Mania (En,Fr)",
       "system": "psp",
       "bucket": "psp/Pipe Mania (USA) (En,Fr).chd"
+    },
+    {
+      "title": "Super Puzzle Fighter II Turbo",
+      "system": "psx",
+      "bucket": "psx/Super Puzzle Fighter II Turbo (USA).chd"
+    },
+    {
+      "title": "Devil Dice",
+      "system": "psx",
+      "bucket": "psx/Devil Dice (USA).chd"
+    },
+    {
+      "title": "Tetris Plus",
+      "system": "psx",
+      "bucket": "psx/Tetris Plus (USA).chd"
+    },
+    {
+      "title": "Intelligent Qube",
+      "system": "psx",
+      "bucket": "psx/I.Q - Intelligent Qube (USA).chd"
+    },
+    {
+      "title": "Bust-A-Move 4",
+      "system": "psx",
+      "bucket": "psx/Bust-A-Move 4 (USA).chd"
+    },
+    {
+      "title": "Mr. Driller",
+      "system": "psx",
+      "bucket": "psx/Mr. Driller (USA).chd"
+    },
+    {
+      "title": "Puzznic",
+      "system": "psx",
+      "bucket": "psx/Puzznic (USA).chd"
+    },
+    {
+      "title": "Lemmings & Oh No! More Lemmings",
+      "system": "psx",
+      "bucket": "psx/Lemmings & Oh No! More Lemmings (USA).chd"
     }
   ]
 }
