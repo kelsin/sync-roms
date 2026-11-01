@@ -334,6 +334,31 @@
     }
   },
   {
+    "name": "Nintendo Famicom Disk System",
+    "bucket": "fds",
+    "folders": {
+      "esde": "fds",
+      "knulli": "fds",
+      "onion": "FDS",
+      "muos": "fds",
+      "slot": null,
+      "emudeck": "fds"
+    },
+    "muos_catalogue": "Nintendo Family Computer Disk System",
+    "bios": {
+      "files": [
+        "disksys.rom",
+        "fbneo/fdsbios.zip"
+      ],
+      "libretro_cores": [
+        "mesen",
+        "nestopia",
+        "fceumm",
+        "fbneo"
+      ]
+    }
+  },
+  {
     "name": "Nintendo 64",
     "bucket": "n64",
     "folders": {

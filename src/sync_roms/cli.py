@@ -43,7 +43,7 @@ TOPICS = {
    3. Totals and free space are shown and you confirm; ROMs download, then BIOS.
    4. Scraped data for the chosen systems' games is installed from the bucket's scrapes/ folder, then media on the
       card for ROMs it doesn't have is removed.
-   5. Local ROMs no longer in a chosen system's list are listed and, after you confirm (default no), deleted.
+   5. Local ROMs no longer in a chosen system's list, or in a system with no games listed, are listed and, after you confirm (default no), deleted.
       Other systems' folders and BIOS are never touched.
 
   --dry-run   show what would be downloaded and deleted, change nothing
@@ -602,7 +602,9 @@ def run(argv):
                 missing.append(key)
     ui.report_missing(missing, "ROM(s)")
     # systems can share a folder (Onion: WS, NGP), so a folder's expected files are the union over all of them
-    for dest in sorted({dest_of(s) for s in chosen if available(s)}):
+    # a system with nothing to sync is always scanned, selected or not: whatever it has on the card is unwanted
+    chosen_ids = {s["bucket"] for s in chosen}
+    for dest in sorted({dest_of(s) for s in systems if s["bucket"] in chosen_ids or not available(s)}):
         extras += downloads.find_extras(dest, [k for t in systems if dest_of(t) == dest for k in available(t)], unzip, layout_name == "onion")
 
     bios_keys = sorted({"BIOS/" + f for s in chosen for f in s["bios"]["files"]})

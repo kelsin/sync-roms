@@ -81,6 +81,23 @@ class SyncSmokeTest(unittest.TestCase):
         self.assertTrue(any("Delete" in q and "first" in q for q in asked), asked)
         self.assertFalse(any("Try anyway" in q for q in asked), asked)
 
+    def test_roms_of_systems_with_nothing_to_sync_are_extras(self):
+        """A system with no games listed, selected or not, keeps no ROMs on the card."""
+        empty = {"name": "GCE Vectrex", "bucket": "vectrex", "folders": {"esde": "vectrex"}, "bios": {"files": []}, "games": []}
+        manifest = {**MANIFEST, "systems": [SYSTEM, empty]}
+
+        def prepare(card):
+            for rel in ("gba/Game.zip", "vectrex/Old.zip"):
+                os.makedirs(os.path.join(card, "ROMs", os.path.dirname(rel)), exist_ok=True)
+                open(os.path.join(card, "ROMs", rel), "w").close()
+        for picked in ([0], [0, 1]):
+            with self.subTest(picked=picked):
+                asked = []
+                patches = ((store, {"load_manifest": lambda names=(): manifest}),
+                           (cli.ui, {"choose": lambda q, *a, **k: asked.append(q) or "n"}))
+                self.run_sync(False, lambda rows, present, state, editable: picked, prepare=prepare, patches=patches)
+                self.assertEqual([q for q in asked if q.startswith("Delete these")], ["Delete these 1 local file(s)?"])
+
     def test_declining_the_space_prompt_exits_0(self):
         patches = ((cli, {"free_space": lambda path: 3}), (cli.ui, {"confirm": lambda q, default=True: False}))
         self.assertEqual(self.run_sync(False, patches=patches), 0)
