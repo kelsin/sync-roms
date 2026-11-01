@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.25.1](https://github.com/kelsin/sync-roms/compare/v0.25.0...v0.25.1) (2026-11-01)
+
+
+### Bug Fixes
+
+* **scrape:** skip empty placeholder art when making Onion and Slot images ([#96](https://github.com/kelsin/sync-roms/issues/96)) ([057447d](https://github.com/kelsin/sync-roms/commit/057447d6d473657501744219779039117ee2191f))
+
 ## [0.25.0](https://github.com/kelsin/sync-roms/compare/v0.24.0...v0.25.0) (2026-11-01)
 
 
