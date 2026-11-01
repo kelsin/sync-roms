@@ -490,8 +490,8 @@ It is meant for preparing a downloaded rom pack before you upload it to the buck
   Folders of systems you didn't pick, BIOS files and dotfiles are never touched.
   Files frontends add to ROM folders are ignored too (never counted as "already has files",
   never deleted): ES-DE `systeminfo.txt` / `noload.txt`, Knulli/Batocera `_info.txt`,
-  `gamelist.xml` and the `images/`, `videos/`, `manuals/` folders, Onion `miyoogamelist.xml`
-  and `Imgs/` (top level of a system folder only), and Windows `Thumbs.db` / `desktop.ini`.
+  `gamelist.xml` and the `images/`, `videos/`, `manuals/` folders, Onion `miyoogamelist.xml`,
+  `*.db` ROM list caches (on Onion cards only) and `Imgs/` (top level of a system folder only), and Windows `Thumbs.db` / `desktop.ini`.
 - Some systems share a local folder on a device (Onion: `WS` = WonderSwan + Color,
   `NGP` = Neo Geo Pocket + Color). A folder's expected files are the
   union of all those systems' lists, so syncing one never offers the other's ROMs for deletion.
