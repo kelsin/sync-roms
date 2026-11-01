@@ -2092,8 +2092,7 @@
       "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
     },
     "chd": {
-      "mode": "xiso",
-      "m3u": false
+      "mode": "extract"
     }
   },
   {
