@@ -257,7 +257,10 @@ def shrink_png(src, dst, box=ONION_MAX):
         return
     out = subprocess.run(["sips", "-g", "pixelWidth", "-g", "pixelHeight", src],
                          check=True, capture_output=True, text=True).stdout
-    w, h = (int(re.search(rf"{k}: (\d+)", out).group(1)) for k in ("pixelWidth", "pixelHeight"))
+    dims = [re.search(rf"{k}: (\d+)", out) for k in ("pixelWidth", "pixelHeight")]  # sips exits 0 for a file it can't read
+    if not all(dims):
+        raise ValueError(f"not a readable image: {src}")
+    w, h = (int(m.group(1)) for m in dims)
     scale = min(1, box[0] / w, box[1] / h)
     subprocess.run(["sips", "-s", "format", "png", "-z", str(max(1, round(h * scale))), str(max(1, round(w * scale))),
                     src, "--out", dst], check=True, capture_output=True)

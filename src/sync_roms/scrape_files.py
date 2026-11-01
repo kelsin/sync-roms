@@ -46,6 +46,8 @@ def plan_upload(es_dir, roms, existing, remote_texts):
 
     def want_file(key, path):
         size = os.path.getsize(path)
+        if not size:  # ES-DE leaves empty placeholders for media it didn't find
+            return
         if existing.get(key) == size:
             plan["present"] += 1
         else:
@@ -87,7 +89,7 @@ def plan_upload(es_dir, roms, existing, remote_texts):
             base = os.path.join(media, system, mtype)
             for rel, full in scrape_plan.walk_files(base) if os.path.isdir(base) else []:
                 stem = os.path.splitext(rel)[0]
-                if stem in stems[system]:
+                if stem in stems[system] and os.path.getsize(full):
                     want_file(f"{scrape_plan.SCRAPES}/{system}/{mtype}/{rel}", full)
                     if mtype in scrape_plan.ONION_ART + scrape_plan.SLOT_ART:
                         art[(system, stem)][mtype] = full
