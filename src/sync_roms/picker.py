@@ -274,7 +274,10 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
                 stdscr.addnstr(h - 1, 0, " " * (w - 1), w - 1)
                 stdscr.addnstr(h - 1, 0, f"Keep +{added} −{removed} pending change(s)?  y/Enter keep · r revert · any other key keeps editing",
                                w - 1, curses.A_BOLD | red_a)
-                answer = stdscr.get_wch()
+                try:
+                    answer = stdscr.get_wch()
+                except curses.error:
+                    continue
                 if answer in ("y", "Y", "\n", "\r", curses.KEY_ENTER):
                     return state
                 if answer in ("r", "R"):

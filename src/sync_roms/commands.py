@@ -1,8 +1,8 @@
 """Scriptable subcommands: games, cards, config, doctor, check and completion; plus helpers the sync flow uses."""
 import argparse
-import fnmatch
 import json
 import os
+import re
 import shutil
 import sys
 
@@ -105,18 +105,27 @@ def need_system(system):
         ui.fail(f"Unknown system {system!r}. Known: {', '.join(system_ids())}", 2)
 
 
+def glob_match(key, pattern):
+    """Whether the file part of a bucket key matches a pattern where only * and ? are wildcards ([ is literal)."""
+    regex = "".join(".*" if c == "*" else "." if c == "?" else re.escape(c) for c in pattern.lower())
+    return re.fullmatch(regex, key.split("/", 1)[1].lower(), re.S) is not None
+
+
 def resolve_keys(system, patterns):
     """Bucket keys for file names, SYSTEM/file keys or globs. Globs match against the bucket's listing."""
     keys, listing = [], None
     for pat in patterns:
         name = pat[len(system) + 1:] if pat.startswith(system + "/") else pat
-        if not any(c in name for c in "*?["):
+        if not any(c in name for c in "*?"):
             keys.append(f"{system}/{name}")
             continue
         if listing is None:
             usersettings.ensure_bucket()
             listing = [k for k in s3.list_sizes(system + "/") if not k.endswith("/")]
-        hits = [k for k in listing if fnmatch.fnmatch(k.split("/", 1)[1].lower(), name.lower())]
+        if f"{system}/{name}" in listing:  # a real name that happens to contain * or ?
+            keys.append(f"{system}/{name}")
+            continue
+        hits = [k for k in listing if glob_match(k, name)]
         if not hits:
             ui.warn(f"{pat!r} matches nothing in {system}/")
         keys += hits
@@ -202,8 +211,19 @@ def games_add(args):
 def games_remove(args):
     need_system(args.system)
     raw, save = load_target(args.card)
-    keys = set(resolve_keys(args.system, args.keys)) if any(c in k for k in args.keys for c in "*?[") else \
-        {f"{args.system}/{k[len(args.system) + 1:] if k.startswith(args.system + '/') else k}" for k in args.keys}
+    listed = [g["bucket"] for g in raw.get(args.system, []) if isinstance(raw.get(args.system), list) and isinstance(g, dict)
+              and isinstance(g.get("bucket"), str)]
+    keys = set()
+    for k in args.keys:
+        name = k[len(args.system) + 1:] if k.startswith(args.system + "/") else k
+        key = f"{args.system}/{name}"
+        if key not in listed and any(c in name for c in "*?"):
+            hits = [x for x in listed if glob_match(x, name)]
+            if not hits:
+                ui.warn(f"{k!r} matches nothing in the list")
+            keys.update(hits)
+        else:
+            keys.add(key)
     changes = remove_games(raw, args.system, keys)
     for k in sorted(keys - {c[1] for c in changes}):
         ui.warn(f"{k} isn't in the list")
@@ -308,6 +328,8 @@ def cards_save_setup(args, create):
         ui.fail(f"No card named {args.name!r}. Cards: {', '.join(sorted(cards)) or '(none yet)'}", 2)
     if "/" in args.name or not args.name.strip():
         ui.fail("A card name is a folder name: no slashes, not empty", 2)
+    if not store.cards_readable():
+        ui.fail(f"{os.path.join(store.data_dir(), 'cards.json')} isn't valid JSON, so the card can't be saved. Fix or move it first.", 3)
     manifest = store.load_manifest()
     current = picker.saved_setup(cards.get(args.name), manifest["devices"], manifest["layouts"])
     if create and not (args.device and args.layout):
@@ -316,7 +338,8 @@ def cards_save_setup(args, create):
     if args.dry_run:
         print(ui.yellow(f"🧪 Would save {args.name}: {device['id'] if device else 'full'} · {layout}"))
         return 0
-    store.save_card(args.name, device, layout)
+    if not store.update_card(args.name, device=device["id"] if device else "full", layout=layout):
+        return 3
     print(ui.green(f"💾 {args.name}: {device['id'] if device else 'full'} · {layout}"))
     return 0
 
@@ -413,6 +436,8 @@ def check_data():
                 for g in entry:
                     if not isinstance(g, dict) or not g.get("bucket"):
                         problems.append(f"{where}: {key}: entry without a bucket key: {g!r}")
+                    elif not isinstance(g["bucket"], str):
+                        problems.append(f"{where}: {key}: bucket key must be a string: {g['bucket']!r}")
                     elif not g["bucket"].startswith(key + "/"):
                         problems.append(f"{where}: {key}: {g['bucket']!r} isn't under {key}/")
             elif not (isinstance(entry, dict) and "full_system" in entry):
@@ -422,6 +447,9 @@ def check_data():
     if core is not None:
         check_list("games.json", core)
     cards = load("cards.json")
+    if cards is not None and not isinstance(cards, dict):
+        problems.append("cards.json: must be an object")
+        cards = {}
     for name, entry in (cards or {}).items():
         if not isinstance(entry, dict):
             problems.append(f"cards.json: {name}: must be an object")
@@ -433,6 +461,9 @@ def check_data():
         if "games" in entry:
             check_list(f"cards.json: {name}", entry["games"])
     overlay = load("device-systems.json")
+    if overlay is not None and not isinstance(overlay, dict):
+        problems.append("device-systems.json: must be an object")
+        overlay = {}
     for dev, change in (overlay or {}).items():
         if dev not in devices:
             problems.append(f"device-systems.json: unknown device {dev!r}")
@@ -440,8 +471,12 @@ def check_data():
             problems.append(f"device-systems.json: {dev}: must be an object with add/remove")
         else:
             for key in ("add", "remove"):
-                for sid in change.get(key, []) if isinstance(change.get(key, []), list) else []:
-                    if sid not in systems:
+                ids = change.get(key, [])
+                if not isinstance(ids, list):
+                    problems.append(f"device-systems.json: {dev}.{key}: must be a list of system ids")
+                    continue
+                for sid in ids:
+                    if not isinstance(sid, str) or sid not in systems:
                         problems.append(f"device-systems.json: {dev}.{key}: unknown system {sid!r}")
     return problems
 
@@ -577,10 +612,10 @@ def build_parser():
     p = csub.add_parser("rename", allow_abbrev=False); common(p, card=False); p.add_argument("old"); p.add_argument("new"); p.set_defaults(fn=cards_rename)
     p = csub.add_parser("delete", allow_abbrev=False); common(p, card=False); p.add_argument("name"); p.set_defaults(fn=cards_delete)
 
-    p = sub.add_parser("config", allow_abbrev=False); p.add_argument("action", choices=["show", "path"], nargs="?", default="show"); p.set_defaults(fn=config_cmd)
-    p = sub.add_parser("doctor", allow_abbrev=False); p.set_defaults(fn=doctor_cmd)
-    p = sub.add_parser("check", allow_abbrev=False); p.set_defaults(fn=check_cmd)
-    p = sub.add_parser("completion", allow_abbrev=False); p.add_argument("shell", choices=["bash", "zsh", "fish", "list"])
+    p = sub.add_parser("config", allow_abbrev=False); common(p, card=False); p.add_argument("action", choices=["show", "path"], nargs="?", default="show"); p.set_defaults(fn=config_cmd)
+    p = sub.add_parser("doctor", allow_abbrev=False); common(p, card=False); p.set_defaults(fn=doctor_cmd)
+    p = sub.add_parser("check", allow_abbrev=False); common(p, card=False); p.set_defaults(fn=check_cmd)
+    p = sub.add_parser("completion", allow_abbrev=False); common(p, card=False); p.add_argument("shell", choices=["bash", "zsh", "fish", "list"])
     p.add_argument("what", nargs="?"); p.set_defaults(fn=completion_cmd)
     return ap
 

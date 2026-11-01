@@ -275,6 +275,7 @@ LEGACY = {
     ("games", "edit"): ["--edit"],
 }
 BOOL_FLAGS = {"-n", "--dry-run", "-y", "--yes", "-a", "--ask"}
+PLAIN_FLAGS = BOOL_FLAGS | {"--replace", "--json", "--no-clean"}
 
 
 def translate(argv):
@@ -290,8 +291,14 @@ def translate(argv):
         if words[0] == name and tuple(rest[:len(words) - 1]) == words[1:]:
             tail = rest[len(words) - 1:]
             flags = LEGACY[words]
-            if name == "devices" and tail and not tail[0].startswith("-"):
-                return head + flags + ["--device-id", tail[0]] + tail[1:]
+            if not flags:
+                return head + tail
+            n = 0  # plain flags before the mode's value (`diff -n /x`) move behind it
+            while n < len(tail) and tail[n] in PLAIN_FLAGS:
+                n += 1
+            if n < len(tail) and not tail[n].startswith("-"):
+                value = ["--device-id", tail[n]] if name == "devices" else [tail[n]]
+                return head + flags + value + tail[:n] + tail[n + 1:]
             return head + flags + tail
     if name == "upload" or name == "clean" or name == "tools":
         ui.fail(f"'{name}' needs a subcommand: " + ", ".join(
@@ -348,6 +355,8 @@ def check_modes(args):
         ui.fail(f"--ask only applies to syncing a card, not {mode}", 2)
     if (args.device or args.layout or args.systems or args.no_clean) and mode:
         ui.fail(f"--device, --layout, --systems and --no-clean only apply to syncing a card, not {mode}", 2)
+    if args.base_dir and mode not in (None, "--upload-scrapes", "--clean-scrapes"):
+        ui.fail(f"{mode} doesn't take a card folder ({args.base_dir!r}); give the directory right after the command", 2)
     if (args.json or args.device_id) and mode != "--devices":
         ui.fail("--json and a device id only apply to `devices`", 2)
     return mode
@@ -355,11 +364,15 @@ def check_modes(args):
 
 def sync():
     argv = sys.argv[1:]
-    if argv and argv[0] in commands.COMMANDS and argv[:2] != ["games", "edit"]:
-        if "-h" in argv[1:] or "--help" in argv[1:]:
-            print(help_text(argv[0]))
+    lead = 0
+    while lead < len(argv) and argv[lead] in BOOL_FLAGS:
+        lead += 1
+    if lead < len(argv) and argv[lead] in commands.COMMANDS and argv[lead:lead + 2] != ["games", "edit"]:
+        cmd = argv[lead:] + argv[:lead]  # leading global flags go after the command, where its parser reads them
+        if "-h" in cmd or "--help" in cmd:
+            print(help_text(cmd[0]))
             return 0
-        return commands.run(argv)
+        return commands.run(cmd)
     if argv and argv[0] == "help":
         print(help_text(argv[1] if len(argv) > 1 else None))
         return 0

@@ -182,6 +182,9 @@ def target_changes(t):
 def edit_manifest():
     """Add/remove games in the core list or a card's extras (browsing by system or by set), then save them."""
     print(ui.bold("✏️  Edit mode") + ui.dim(f"  read={runtime.PROFILE}"))
+    if not store.cards_readable():
+        ui.fail(f"{os.path.join(store.data_dir(), 'cards.json')} isn't valid JSON, so nothing could be saved. "
+                "Fix or move it first.", 3)
     manifest = store.load_manifest()  # also seeds games.json
     core_raw = store.personal_json("games.json")
     repo_systems = store.repo_json("systems")
@@ -416,10 +419,14 @@ def edit_manifest():
                                    initial=[x in d["systems"] for x in ids])
         now = {x for x, on in zip(ids, state) if on}
         add, remove = sorted(now - set(base)), sorted(set(base) - now)
-        if add or remove:
-            overlay_pending[d["id"]] = (add, remove)
-        else:
-            overlay_pending.pop(d["id"], None)
+        overlay_file = os.path.join(store.data_dir(), "device-systems.json")
+        saved_all = store.personal_json("device-systems.json") if os.path.exists(overlay_file) else {}
+        saved_overlay = saved_all.get(d["id"]) if isinstance(saved_all, dict) else None
+        saved_overlay = saved_overlay if isinstance(saved_overlay, dict) else {}
+        if (add, remove) == (sorted(saved_overlay.get("add", [])), sorted(saved_overlay.get("remove", []))):
+            overlay_pending.pop(d["id"], None)  # nothing changed from what is saved
+        elif add or remove or saved_overlay:
+            overlay_pending[d["id"]] = (add, remove)  # ([], []) drops the saved entry
         d["systems"] = [x for x in base if x in now] + [x for x in ids if x in now and x not in base]
         return True
 
@@ -504,9 +511,12 @@ def edit_manifest():
     for key, t in changed.items():
         if t["setup"]:
             store.save_card(key, *t["setup"])
-    store.save_lists(store.dump_list(targets[None]["data"]["systems"], targets[None]["sets_on"]) if None in changed else None,
+    saved = store.save_lists(store.dump_list(targets[None]["data"]["systems"], targets[None]["sets_on"]) if None in changed else None,
                {k: store.dump_list(t["data"]["systems"], t["sets_on"]) for k, t in changed.items() if k is not None})
     if overlay_pending:
         store.save_overlay(overlay_pending)
+    if not saved:
+        print(ui.red("❌ Some changes were not saved (see above)."))
+        return 3
     print(ui.green("🎉 Saved") + ui.dim(f"  ({store.data_dir()}; previous versions kept as .bak)"))
     return 0

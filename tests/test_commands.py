@@ -75,6 +75,22 @@ class GamesTest(Cmd):
             json.dump(cards, f)
 
 
+class BracketKeysTest(Cmd):
+    NAME = "[BIOS] Nintendo Game Boy Boot ROM (World).zip"
+
+    def test_bracketed_names_are_literal(self):
+        self.assertEqual(self.run_cmd("games", "add", "gba", self.NAME)[0], 0)
+        self.assertEqual([g["bucket"] for g in self.read("games.json")["gba"]], [f"gba/{self.NAME}"])
+        self.assertEqual(self.run_cmd("games", "remove", "gba", self.NAME)[0], 0)
+        self.assertNotIn("gba", self.read("games.json"))
+
+    def test_remove_globs_against_the_list_without_s3(self):
+        self.run_cmd("games", "add", "gba", "A1.zip", "A2.zip", "B.zip")
+        with mock.patch.object(commands.s3, "list_sizes", side_effect=AssertionError("no S3 for remove")):
+            self.assertEqual(self.run_cmd("games", "remove", "gba", "A*.zip")[0], 0)
+        self.assertEqual([g["bucket"] for g in self.read("games.json")["gba"]], ["gba/B.zip"])
+
+
 class CardsTest(Cmd):
     def test_new_set_rename_delete(self):
         self.assertEqual(self.run_cmd("cards", "new", "SD", "--device", "full", "--layout", "esde")[0], 0)
@@ -101,6 +117,15 @@ class DataSafetyTest(Cmd):
         with open(self.path("cards.json")) as f:
             self.assertEqual(f.read(), "{oops")
 
+    def test_save_reports_failure_and_commands_refuse(self):
+        with open(self.path("cards.json"), "w") as f:
+            f.write("{oops")
+        with contextlib.redirect_stderr(io.StringIO()):
+            self.assertFalse(store.update_card("SD", device="full", layout="esde"))
+            self.assertFalse(store.save_lists(None, {"SD": {}}))
+        code, _, _ = self.run_cmd("cards", "new", "SD", "--device", "full", "--layout", "esde")
+        self.assertNotEqual(code, 0)
+
     def test_saves_keep_a_backup(self):
         store.save_lists({"gba": []}, {})
         store.save_lists({"nes": []}, {})
@@ -121,6 +146,24 @@ class DataSafetyTest(Cmd):
         self.assertEqual(self.read("device-systems.json"), {})
 
 
+class CheckShapesTest(Cmd):
+    def write(self, name, data):
+        with open(self.path(name), "w") as f:
+            json.dump(data, f)
+
+    def test_wrong_shapes_are_reported_not_raised(self):
+        dev = store.repo_json("devices")[0]["id"]
+        for name, data in (("cards.json", []), ("device-systems.json", []), ("games.json", [])):
+            with self.subTest(name=name):
+                self.write(name, data)
+                self.assertTrue(commands.check_data())
+                os.remove(self.path(name))
+        self.write("games.json", {"gba": [{"bucket": 5}]})
+        self.write("cards.json", {"c": {"device": "full", "layout": "esde", "games": []}})
+        self.write("device-systems.json", {dev: {"add": "gba", "remove": 3}, "x": []})
+        self.assertGreaterEqual(len(commands.check_data()), 4)
+
+
 class CliTest(unittest.TestCase):
     def test_translate_maps_subcommands_to_flags(self):
         t = cli.translate
@@ -132,6 +175,28 @@ class CliTest(unittest.TestCase):
         self.assertEqual(t(["devices", "steam-deck", "--json"]), ["--devices", "--device-id", "steam-deck", "--json"])
         self.assertEqual(t(["/Volumes/SD", "-n"]), ["/Volumes/SD", "-n"])
         self.assertEqual(t(["sync", "/x"]), ["/x"])
+
+    def test_flag_between_a_mode_and_its_directory(self):
+        t = cli.translate
+        self.assertEqual(t(["diff", "-n", "/x"]), ["--diff", "/x", "-n"])
+        self.assertEqual(t(["playlist", "-y", "/Volumes/SD"]), ["--m3u", "/Volumes/SD", "-y"])
+        self.assertEqual(t(["mirror", "-y", "/new"]), ["--mirror", "/new", "-y"])
+        self.assertEqual(t(["devices", "-y", "rg35xx"]), ["--devices", "--device-id", "rg35xx", "-y"])
+
+    def test_mode_with_a_stray_directory_exits_2(self):
+        args = cli.build_parser().parse_args(["--diff", "-n", "/x"])
+        with contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit) as cm:
+            cli.check_modes(args)
+        self.assertEqual(cm.exception.code, 2)
+        cli.check_modes(cli.build_parser().parse_args(["--upload-scrapes", "/card"]))
+
+    def test_commands_after_global_flags_route_to_commands_run(self):
+        for argv, expect in ((["-y", "check"], ["check", "-y"]), (["-n", "doctor"], ["doctor", "-n"]),
+                             (["-y", "games", "list"], ["games", "list", "-y"])):
+            with self.subTest(argv=argv), mock.patch.object(sys, "argv", ["sync-roms"] + argv), \
+                    mock.patch.object(commands, "run", return_value=0) as run:
+                self.assertEqual(cli.sync(), 0)
+            run.assert_called_once_with(expect)
 
     def test_conflicting_or_ignored_flags_exit_2(self):
         parse = lambda *a: cli.check_modes(cli.build_parser().parse_args(list(a)))  # noqa: E731

@@ -70,6 +70,33 @@ class Saving(DataDir):
         self.assertFalse(os.path.exists(self.path("games.json")))
 
 
+class EscPrompt(unittest.TestCase):
+    def test_curses_error_at_the_keep_or_revert_prompt_keeps_editing(self):
+        import curses
+
+        class Screen:
+            def __init__(self, keys):
+                self.keys = iter(keys)
+
+            def getmaxyx(self):
+                return 24, 80
+
+            def get_wch(self):
+                k = next(self.keys)
+                if isinstance(k, Exception):
+                    raise k
+                return k
+
+            def __getattr__(self, name):
+                return lambda *a, **k: None
+        screen = Screen(["\t", "\x1b", curses.error("no input"), "\n"])
+        with mock.patch.object(picker.ui, "require_terminal", create=True), \
+                mock.patch.object(curses, "curs_set"), mock.patch.object(curses, "use_default_colors"), \
+                mock.patch.object(curses, "has_colors", return_value=False), \
+                mock.patch.object(curses, "wrapper", side_effect=lambda f: f(screen)):
+            self.assertEqual(picker.filter_list("t", ["a", "b"], multi=True), [True, False])
+
+
 class EditFlow(DataDir):
     def run_edit(self, picks, confirmed, name="newcard"):
         picks = iter(picks)
@@ -97,6 +124,77 @@ class EditFlow(DataDir):
     def test_no_changes_nothing_saved(self):
         self.assertEqual(self.run_edit([0, None, None], confirmed=True), 0)
         self.assertFalse(os.path.exists(self.path("cards.json")))
+
+
+class MenuActions(EditFlow):
+    def write_json(self, name, data):
+        with open(self.path(name), "w") as f:
+            json.dump(data, f)
+
+    def run_menu(self, picks, confirm=True, inputs=("renamed",), multi=None):
+        picks, inputs = iter(picks), iter(inputs)
+
+        def fake(*a, **k):
+            if k.get("multi") and multi:
+                return multi(k["initial"], a[1])
+            return next(picks)
+        with mock.patch.object(runtime, "BUCKET", "b", create=True), \
+                mock.patch.object(s3, "list_sizes", return_value={}), \
+                mock.patch.object(picker, "filter_list", side_effect=fake), \
+                mock.patch("builtins.input", side_effect=lambda *a: next(inputs)), \
+                mock.patch.object(ui, "confirm", return_value=confirm), \
+                mock.patch.object(ui, "choose", side_effect=lambda *a, **k: "s"), \
+                mock.patch.object(edit, "note"), \
+                contextlib.redirect_stdout(io.StringIO()):
+            return edit.edit_manifest()
+
+    def test_rename_a_saved_card(self):
+        self.write_json("cards.json", {"c": {"layout": "esde", "device": "full"}})
+        self.run_menu([(edit.RENAME_KEY, 1), 4])
+        self.assertEqual(list(self.read("cards.json")), ["renamed"])
+
+    def test_delete_a_saved_card(self):
+        self.write_json("cards.json", {"c": {"layout": "esde", "device": "full"}})
+        self.run_menu([(edit.DELETE_KEY, 1), 4])
+        self.assertEqual(self.read("cards.json"), {})
+
+    def test_declined_delete_keeps_the_card(self):
+        self.write_json("cards.json", {"c": {"layout": "esde", "device": "full"}})
+        self.run_menu([(edit.DELETE_KEY, 1), 4], confirm=False)
+        self.assertIn("c", self.read("cards.json"))
+
+    def test_done_with_no_changes_saves_nothing(self):
+        self.assertEqual(self.run_menu([3]), 0)
+        self.assertFalse(os.path.exists(self.path("cards.json")))
+
+    def device_case(self):
+        dev = store.load_manifest()["devices"][0]
+        base = store.repo_json("device-systems")[dev["id"]]["systems"]
+        names = {s["bucket"]: s["name"] for s in store.load_manifest()["systems"]}
+        ids = sorted(names, key=lambda x: names[x].lower())
+        return dev, base, ids
+
+    def test_returning_to_the_defaults_drops_the_overlay_entry(self):
+        dev, base, ids = self.device_case()
+        extra = next(x for x in ids if x not in base)
+        self.write_json("device-systems.json", {dev["id"]: {"add": [extra]}})
+        self.run_menu([2, 0, None, 3], multi=lambda initial, labels: [x in base for x in ids])
+        self.assertEqual(self.read("device-systems.json"), {})
+
+    def test_opening_a_device_and_changing_nothing_is_not_an_edit(self):
+        dev, base, ids = self.device_case()
+        extra = next(x for x in ids if x not in base)
+        self.write_json("device-systems.json", {dev["id"]: {"add": [extra]}})
+        self.run_menu([2, 0, None, 3], multi=lambda initial, labels: list(initial))
+        self.assertEqual(self.read("device-systems.json"), {dev["id"]: {"add": [extra]}})
+        self.assertFalse(os.path.exists(self.path("device-systems.json.bak")))
+
+    def test_unwritable_cards_json_refuses_to_edit(self):
+        with open(self.path("cards.json"), "w") as f:
+            f.write("{oops")
+        with contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit) as cm:
+            self.run_menu([3])
+        self.assertNotEqual(cm.exception.code, 0)
 
 
 class FullToggles(EditFlow):

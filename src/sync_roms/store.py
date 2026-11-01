@@ -220,7 +220,7 @@ def update_card(name, **values):
     cards = load_cards()
     entry = cards.get(name)
     cards[name] = {**(entry if isinstance(entry, dict) else {}), **values}
-    write_cards(cards)
+    return write_cards(cards)
 
 
 def write_cards(cards):
@@ -288,8 +288,10 @@ def save_lists(core, cards):
             json.dump(core, f, indent=2, ensure_ascii=False)
             f.write("\n")
         os.replace(path + ".tmp", path)
+    ok = True
     for name, games in cards.items():
-        update_card(name, games=games)
+        ok = update_card(name, games=games) and ok
+    return ok
 
 
 def save_overlay(changes):
