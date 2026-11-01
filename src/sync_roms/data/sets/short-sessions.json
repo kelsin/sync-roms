@@ -486,6 +486,41 @@
       "title": "Neo Turf Masters",
       "system": "neogeocd",
       "bucket": "neogeocd/Big Tournament Golf ~ Neo Turf Masters (Japan) (En,Ja).chd"
+    },
+    {
+      "title": "Midway's Greatest Arcade Hits: Volume 1",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Midway's Greatest Arcade Hits - Volume 1 (USA).chd"
+    },
+    {
+      "title": "Midway's Greatest Arcade Hits: Volume 2",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Midway's Greatest Arcade Hits - Volume 2 (USA).chd"
+    },
+    {
+      "title": "Namco Museum",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Namco Museum (USA).chd"
+    },
+    {
+      "title": "Atari Anniversary Edition",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Atari Anniversary Edition (USA).chd"
+    },
+    {
+      "title": "Sega Smash Pack: Volume 1",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Sega Smash Pack - Volume 1 (USA).chd"
+    },
+    {
+      "title": "Ms. Pac-Man Maze Madness",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Ms. Pac-Man Maze Madness (USA).chd"
+    },
+    {
+      "title": "Centipede",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Centipede (USA).chd"
     }
   ]
 }

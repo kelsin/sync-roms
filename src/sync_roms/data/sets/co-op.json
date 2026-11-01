@@ -531,6 +531,86 @@
       "title": "Super Smash Bros. Brawl",
       "system": "wii",
       "bucket": "wii/Super Smash Bros. Brawl (USA) (Rev 2).rvz"
+    },
+    {
+      "title": "Power Stone",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Power Stone (USA).chd"
+    },
+    {
+      "title": "Power Stone 2",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Power Stone 2 (USA).chd"
+    },
+    {
+      "title": "Samba de Amigo",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Samba de Amigo (USA).chd"
+    },
+    {
+      "title": "Sonic Shuffle",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Sonic Shuffle (USA).chd"
+    },
+    {
+      "title": "Bomberman Online",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Bomberman Online (USA).chd"
+    },
+    {
+      "title": "Worms World Party",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Worms World Party (USA) (En,Fr,De,Es,It,Nl,Sv,Da).chd"
+    },
+    {
+      "title": "ChuChu Rocket!",
+      "system": "dreamcast",
+      "bucket": "dreamcast/ChuChu Rocket! (USA) (En,Ja,Fr,De,Es).chd"
+    },
+    {
+      "title": "Virtua Tennis",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Virtua Tennis (USA).chd"
+    },
+    {
+      "title": "Sega Bass Fishing",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Sega Bass Fishing (USA).chd"
+    },
+    {
+      "title": "The Typing of the Dead",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Typing of the Dead, The (USA).chd"
+    },
+    {
+      "title": "Gauntlet Legends",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Gauntlet Legends (USA).chd"
+    },
+    {
+      "title": "Halo: Combat Evolved",
+      "system": "xbox",
+      "bucket": "xbox/Halo - Combat Evolved (USA) (Rev 2).iso"
+    },
+    {
+      "title": "Halo 2",
+      "system": "xbox",
+      "bucket": "xbox/Halo 2 (USA, Europe) (En,Ja,Fr,De,Es,It,Zh,Ko).iso"
+    },
+    {
+      "title": "Fuzion Frenzy",
+      "system": "xbox",
+      "bucket": "xbox/Fuzion Frenzy (USA).iso"
+    },
+    {
+      "title": "MechAssault",
+      "system": "xbox",
+      "bucket": "xbox/MechAssault (USA) (En,Fr,De) (Rev 1).iso"
+    },
+    {
+      "title": "Dead or Alive Xtreme Beach Volleyball",
+      "system": "xbox",
+      "bucket": "xbox/Dead or Alive Xtreme Beach Volleyball (USA) (En,Ja).iso"
     }
   ]
 }

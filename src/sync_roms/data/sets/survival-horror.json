@@ -1,6 +1,6 @@
 {
   "name": "Survival Horror",
-  "description": "PlayStation and PlayStation 2 survival horror, from the Resident Evil era onward.",
+  "description": "PlayStation, PlayStation 2 and Dreamcast survival horror, from the Resident Evil era onward.",
   "games": [
     {
       "title": "Resident Evil (Director's Cut)",
@@ -243,6 +243,89 @@
       "title": "Resident Evil 4",
       "system": "ps2",
       "bucket": "ps2/Resident Evil 4 (USA).chd"
+    },
+    {
+      "title": "Resident Evil: Code: Veronica",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Resident Evil - Code - Veronica (USA).m3u",
+      "files": [
+        "dreamcast/Resident Evil - Code - Veronica (USA) (Disc 1).chd",
+        "dreamcast/Resident Evil - Code - Veronica (USA) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "Resident Evil 2",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Resident Evil 2 (USA).m3u",
+      "files": [
+        "dreamcast/Resident Evil 2 (USA) (Disc 1).chd",
+        "dreamcast/Resident Evil 2 (USA) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "Resident Evil 3: Nemesis",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Resident Evil 3 - Nemesis (USA).chd"
+    },
+    {
+      "title": "Dino Crisis",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Dino Crisis (USA).chd"
+    },
+    {
+      "title": "Alone in the Dark: The New Nightmare",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Alone in the Dark - The New Nightmare (USA).m3u",
+      "files": [
+        "dreamcast/Alone in the Dark - The New Nightmare (USA) (Disc 1).chd",
+        "dreamcast/Alone in the Dark - The New Nightmare (USA) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "D2",
+      "system": "dreamcast",
+      "bucket": "dreamcast/D2 (USA).m3u",
+      "files": [
+        "dreamcast/D2 (USA) (Disc 1).chd",
+        "dreamcast/D2 (USA) (Disc 2).chd",
+        "dreamcast/D2 (USA) (Disc 3).chd",
+        "dreamcast/D2 (USA) (Disc 4).chd"
+      ]
+    },
+    {
+      "title": "Illbleed",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Illbleed (USA).chd"
+    },
+    {
+      "title": "Blue Stinger",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Blue Stinger (USA).chd"
+    },
+    {
+      "title": "Carrier",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Carrier (USA).chd"
+    },
+    {
+      "title": "Nightmare Creatures II",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Nightmare Creatures II (USA).chd"
+    },
+    {
+      "title": "Silver",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Silver (USA).chd"
+    },
+    {
+      "title": "Seventh Cross Evolution",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Seventh Cross Evolution (USA).chd"
+    },
+    {
+      "title": "The Typing of the Dead",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Typing of the Dead, The (USA).chd"
     }
   ]
 }

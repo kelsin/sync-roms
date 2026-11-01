@@ -744,6 +744,136 @@
       "title": "Tatsunoko vs. Capcom: Ultimate All-Stars",
       "system": "wii",
       "bucket": "wii/Tatsunoko vs. Capcom - Ultimate All-Stars (USA).rvz"
+    },
+    {
+      "title": "Soulcalibur",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Soulcalibur (USA).chd"
+    },
+    {
+      "title": "Marvel vs. Capcom 2",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Marvel vs. Capcom 2 (USA).chd"
+    },
+    {
+      "title": "Marvel vs. Capcom: Clash of Super Heroes",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Marvel vs. Capcom - Clash of Super Heroes (USA).chd"
+    },
+    {
+      "title": "Capcom vs. SNK",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Capcom vs. SNK (USA).chd"
+    },
+    {
+      "title": "Capcom vs. SNK 2: Millionaire Fighting 2001",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Capcom vs. SNK 2 - Millionaire Fighting 2001 (Japan).chd"
+    },
+    {
+      "title": "Project Justice",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Project Justice (USA).chd"
+    },
+    {
+      "title": "Dead or Alive 2",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Dead or Alive 2 (USA).chd"
+    },
+    {
+      "title": "Power Stone",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Power Stone (USA).chd"
+    },
+    {
+      "title": "Power Stone 2",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Power Stone 2 (USA).chd"
+    },
+    {
+      "title": "Fatal Fury: Mark of the Wolves",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Fatal Fury - Mark of the Wolves (USA).chd"
+    },
+    {
+      "title": "The Last Blade 2: Heart of the Samurai",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Last Blade 2, The - Heart of the Samurai (USA).chd"
+    },
+    {
+      "title": "The King of Fighters: Dream Match 1999",
+      "system": "dreamcast",
+      "bucket": "dreamcast/King of Fighters, The - Dream Match 1999 (USA) (En,Ja,Es,Pt).chd"
+    },
+    {
+      "title": "The King of Fighters: Evolution",
+      "system": "dreamcast",
+      "bucket": "dreamcast/King of Fighters, The - Evolution (USA) (En,Ja,Es,Pt).chd"
+    },
+    {
+      "title": "The King of Fighters 2000",
+      "system": "dreamcast",
+      "bucket": "dreamcast/King of Fighters 2000, The (Japan).chd"
+    },
+    {
+      "title": "The King of Fighters 2001",
+      "system": "dreamcast",
+      "bucket": "dreamcast/King of Fighters 2001, The (Japan).chd"
+    },
+    {
+      "title": "The King of Fighters 2002",
+      "system": "dreamcast",
+      "bucket": "dreamcast/King of Fighters 2002, The (Japan) (En,Ja).chd"
+    },
+    {
+      "title": "Guilty Gear X",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Guilty Gear X (Japan) (Rev A).chd"
+    },
+    {
+      "title": "Virtua Fighter 3tb",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Virtua Fighter 3tb (USA).chd"
+    },
+    {
+      "title": "JoJo's Bizarre Adventure",
+      "system": "dreamcast",
+      "bucket": "dreamcast/JoJo's Bizarre Adventure (USA).chd"
+    },
+    {
+      "title": "Psychic Force 2012",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Psychic Force 2012 (USA).chd"
+    },
+    {
+      "title": "Plasma Sword: Nightmare of Bilstein",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Plasma Sword - Nightmare of Bilstein (USA).chd"
+    },
+    {
+      "title": "Mortal Kombat Gold",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Mortal Kombat Gold (USA) (Rev 1).chd"
+    },
+    {
+      "title": "Ultimate Fighting Championship",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Ultimate Fighting Championship (USA).chd"
+    },
+    {
+      "title": "Dead or Alive 1 Ultimate",
+      "system": "xbox",
+      "bucket": "xbox/Dead or Alive 1 Ultimate (USA, Japan) (En,Ja).iso"
+    },
+    {
+      "title": "Dead or Alive 2 Ultimate",
+      "system": "xbox",
+      "bucket": "xbox/Dead or Alive 2 Ultimate (USA, Japan) (En,Ja).iso"
+    },
+    {
+      "title": "Dead or Alive 3",
+      "system": "xbox",
+      "bucket": "xbox/Dead or Alive 3 (USA) (En,Ja).iso"
     }
   ]
 }

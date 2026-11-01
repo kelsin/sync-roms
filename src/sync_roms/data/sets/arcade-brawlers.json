@@ -364,6 +364,26 @@
       "title": "God Hand",
       "system": "ps2",
       "bucket": "ps2/God Hand (USA).chd"
+    },
+    {
+      "title": "Dynamite Cop!",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Dynamite Cop! (USA).chd"
+    },
+    {
+      "title": "Soul Fighter",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Soul Fighter (USA).chd"
+    },
+    {
+      "title": "Gauntlet Legends",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Gauntlet Legends (USA).chd"
+    },
+    {
+      "title": "Spawn: In the Demon's Hand",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Spawn - In the Demon's Hand (USA).chd"
     }
   ]
 }

@@ -511,6 +511,66 @@
       "title": "Joy Joy Kid",
       "system": "neogeocd",
       "bucket": "neogeocd/Joy Joy Kid ~ Puzzled (World) (En,Ja).chd"
+    },
+    {
+      "title": "Puyo Puyo Fever",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Puyo Puyo Fever (Japan) (En,Ja).chd"
+    },
+    {
+      "title": "Puyo Puyo Da! Featuring Ellena System",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Puyo Puyo Da! Featuring Ellena System (Japan).chd"
+    },
+    {
+      "title": "Bust-A-Move 4",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Bust-A-Move 4 (USA).chd"
+    },
+    {
+      "title": "ChuChu Rocket!",
+      "system": "dreamcast",
+      "bucket": "dreamcast/ChuChu Rocket! (USA) (En,Ja,Fr,De,Es).chd"
+    },
+    {
+      "title": "Mr. Driller",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Mr. Driller (USA).chd"
+    },
+    {
+      "title": "Wetrix+",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Wetrix+ (USA).chd"
+    },
+    {
+      "title": "The Next Tetris: On-Line Edition",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Next Tetris, The - On-Line Edition (USA).chd"
+    },
+    {
+      "title": "Tetris 4D",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Tetris 4D (Japan).chd"
+    },
+    {
+      "title": "Sega Tetris",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Sega Tetris (Japan) (Rev A).chd"
+    },
+    {
+      "title": "Q-bert",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Q-bert (USA).chd"
+    },
+    {
+      "title": "Worms Armageddon",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Worms Armageddon (USA) (En,Fr,De,Nl,Sv,No,Da).chd"
+    },
+    {
+      "title": "Worms World Party",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Worms World Party (USA) (En,Fr,De,Es,It,Nl,Sv,Da).chd"
     }
   ]
 }

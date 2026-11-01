@@ -276,6 +276,26 @@
       "title": "Sonic Unleashed",
       "system": "wii",
       "bucket": "wii/Sonic Unleashed (USA) (En,Ja,Fr,De,Es,It).rvz"
+    },
+    {
+      "title": "Sonic Adventure 2",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Sonic Adventure 2 (USA) (En,Ja,Fr,De,Es).chd"
+    },
+    {
+      "title": "Sonic Adventure International",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Sonic Adventure International (Japan) (En,Ja,Fr,De,Es).chd"
+    },
+    {
+      "title": "Sonic Shuffle",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Sonic Shuffle (USA).chd"
+    },
+    {
+      "title": "ChuChu Rocket!",
+      "system": "dreamcast",
+      "bucket": "dreamcast/ChuChu Rocket! (USA) (En,Ja,Fr,De,Es).chd"
     }
   ]
 }
