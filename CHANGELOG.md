@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.19.1](https://github.com/kelsin/sync-roms/compare/v0.19.0...v0.19.1) (2026-11-01)
+
+
+### Bug Fixes
+
+* **cd:** extract xbox 360 isos without converting to xiso ([#75](https://github.com/kelsin/sync-roms/issues/75)) ([9f04731](https://github.com/kelsin/sync-roms/commit/9f04731d95a24a351072cf746257c2c31e252d34))
+
 ## [0.19.0](https://github.com/kelsin/sync-roms/compare/v0.18.0...v0.19.0) (2026-11-01)
 
 
