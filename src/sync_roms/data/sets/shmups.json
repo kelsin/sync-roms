@@ -183,6 +183,16 @@
       "bucket": "gba/R-Type III - The Third Lightning (USA).zip"
     },
     {
+      "title": "Iridion 3D",
+      "system": "gba",
+      "bucket": "gba/Iridion 3D (USA, Europe).zip"
+    },
+    {
+      "title": "Iridion II",
+      "system": "gba",
+      "bucket": "gba/Iridion II (USA).zip"
+    },
+    {
       "title": "1942",
       "system": "mame",
       "bucket": "mame/1942.zip"
