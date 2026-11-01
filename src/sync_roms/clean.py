@@ -3,6 +3,7 @@ import os
 import shutil
 import signal
 import subprocess
+import sys
 
 from . import store, ui
 
@@ -99,9 +100,20 @@ def quiet_fseventsd(root):
 
 
 def clean_dirs():
-    """Mark the root folder as not to be indexed, then merge/remove macOS AppleDouble (._*) files under it (macOS only)."""
+    """Mark the root folder as not to be indexed, then merge/remove macOS AppleDouble (._*) files under it (macOS only).
+
+    ^C skips the rest of the cleaning (it can be done by running sync again).
+    """
     if not _clean_root:
         return
+    print(ui.bold(f"\n🏁 Finalizing card {_clean_root} (^C skips this)..."))
+    try:
+        _clean_card()
+    except KeyboardInterrupt:
+        print(ui.yellow("\n↩️  Skipped the rest of the card cleaning"))
+
+
+def _clean_card():
     try:  # on any OS: it keeps Spotlight from indexing the card when it is next used on a Mac
         open(os.path.join(_clean_root, ".metadata_never_index"), "a").close()
     except OSError as e:
@@ -112,15 +124,19 @@ def clean_dirs():
     print(ui.bold("\n🧼 Running dot_clean..."))
     ok, left = dot_clean(_clean_root)
     if not ok or left:
-        print(ui.bold(f"\n🔍 dot_clean couldn't clean everything, turning Spotlight indexing off for {_clean_root} (sudo may ask for your password)..."))
-        # sudo needs ^C to work at its password prompt, but main() ignores SIGINT for dot_clean
-        default_sigint = lambda: signal.signal(signal.SIGINT, signal.SIG_DFL)
-        for args in (["-i", "off"], ["-X"]):
-            r = subprocess.run(["sudo", "mdutil", *args, _clean_root], preexec_fn=default_sigint)
-            if r.returncode != 0:
-                print(ui.red(f"  ❌ sudo mdutil {' '.join(args)} failed ({r.returncode})"))
-        print(ui.bold("\n🧼 Retrying dot_clean..."))
-        _, left = dot_clean(_clean_root)
+        cmd = f"sudo mdutil -i off {_clean_root} && sudo mdutil -X {_clean_root}"
+        print(ui.bold(f"\n🔍 dot_clean couldn't clean everything. Turning Spotlight indexing off for the card needs: {cmd}"))
+        if ui.ASSUME_YES or not sys.stdin.isatty():
+            print(ui.yellow("  ↩️  Not asking for sudo's password here: run that command yourself if you want it"))
+        elif ui.confirm("Run it now? (sudo asks for your password)"):
+            # sudo needs ^C to work at its password prompt
+            default_sigint = lambda: signal.signal(signal.SIGINT, signal.SIG_DFL)
+            for args in (["-i", "off"], ["-X"]):
+                r = subprocess.run(["sudo", "mdutil", *args, _clean_root], preexec_fn=default_sigint)
+                if r.returncode != 0:
+                    print(ui.red(f"  ❌ sudo mdutil {' '.join(args)} failed ({r.returncode})"))
+            print(ui.bold("\n🧼 Retrying dot_clean..."))
+            _, left = dot_clean(_clean_root)
     if left:
         print(ui.red(f"\n⚠️  {len(left)} ._ file(s) are still there after dot_clean:"))
         for path in left[:10]:

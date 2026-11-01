@@ -2,7 +2,6 @@
 import argparse
 import os
 import shutil
-import signal
 import sys
 from concurrent.futures import ThreadPoolExecutor
 
@@ -218,7 +217,7 @@ def prepare_dirs(base, layout, dry_run, ask=True):
     print(ui.bold(f"📁 {layout['label']} layout in {base}:"))
     for icon, name, path in (("💿", "ROMs", roms), ("🧠", "BIOS", bios)):
         print(f"  {icon} {name} → {ui.cyan(path)}" + (ui.dim("  (will be created)") if path in missing else ""))
-    if ask and not ui.confirm("Continue with these folders?"):
+    if ask and not dry_run and not ui.confirm("Continue with these folders?"):
         return None
     for path in sorted(missing):
         if dry_run:
@@ -229,6 +228,8 @@ def prepare_dirs(base, layout, dry_run, ask=True):
 
 
 def main():
+    if not sys.stdout.isatty():  # logs and pipes get plain text
+        sys.stdout = ui.PlainOut(sys.stdout)
     try:
         return sync()
     except KeyboardInterrupt:
@@ -250,7 +251,6 @@ def main():
     except BotoCoreError as e:
         ui.fail(f"Couldn't reach S3: {e}\n   → check your network, ROMS_ENDPOINT, and `aws sts get-caller-identity --profile {runtime.PROFILE}`", 3)
     finally:
-        signal.signal(signal.SIGINT, signal.SIG_IGN)  # dot_clean inherits this, so a second ^C can't cut it short
         clean.clean_dirs()
 
 
@@ -445,8 +445,7 @@ def sync():
     layout = layouts[layout_name]
     unzip = layout.get("unzip", False)  # ROMs go in flat and unzipped (Slot)
     roms_dir, bios_dir = dirs
-    if not args.dry_run and not args.no_clean:
-        clean._clean_root = base
+    clean_card = not args.dry_run and not args.no_clean
     if device:
         wanted_ids = set(device["systems"])
         systems = [s for s in systems if s["bucket"] in wanted_ids]
@@ -497,8 +496,14 @@ def sync():
         if args.systems:
             chosen = commands.systems_from_flag(args.systems, systems, available)
             break
-        chosen = picker.pick_systems(rows, present, state, editable=not args.dry_run)
+        saved_idx = [i for i, s in enumerate(systems) if s["bucket"] in (saved or {}).get("systems", ())]
+        if args.yes and saved_idx and not state:  # --yes with a saved selection: no picker
+            chosen = saved_idx
+            break
+        chosen = picker.pick_systems(rows, saved_idx if saved_idx and not state else present, state, editable=not args.dry_run)
         if not isinstance(chosen, tuple):
+            if chosen and not args.dry_run:
+                store.update_card(card, systems=[systems[i]["bucket"] for i in chosen])
             break
         action, row = chosen
         if action == "games":  # the same list --edit changes for this card
@@ -608,6 +613,8 @@ def sync():
             print(ui.yellow("👋 Cancelled."))
             return 0
 
+    if clean_card and todo_all:  # nothing downloaded means nothing to finalize
+        clean._clean_root = base
     failures = []
     failed = downloads.run_downloads(rom_todo, "ROMs", "💿", roms_dir, failures) + downloads.run_downloads(bios_todo, "BIOS", "🧠", bios_dir, failures)
     if unzip:
@@ -642,8 +649,16 @@ def sync():
     if scrapes:
         plan = build_plan(os.path.exists)
         scrape_plan.describe_scrape_plan(plan)
+        if clean_card and (plan["jobs"] or plan["extras"] or plan["writes"] or plan["gamelists"]):
+            clean._clean_root = base
         failed += scrape_plan.apply_scrape_plan(plan, base)
         stale = scrape_plan.stale_media(layout_name, manifest["systems"], roms_dir, es_dir, base)
+    if stale:
+        print(ui.bold(f"\n🧹 Removing {len(stale)} media file(s) for ROMs that aren't on this card"))
+        for path in stale[:5]:
+            print(ui.dim(f"     {path}"))
+        if len(stale) > 5:
+            print(ui.dim(f"     … and {len(stale) - 5} more"))
     for path in stale:
         try:
             os.remove(path)

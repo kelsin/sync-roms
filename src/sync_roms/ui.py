@@ -1,5 +1,6 @@
 """Terminal colors, prompts and progress output."""
 import os
+import re
 import sys
 import threading
 import time
@@ -7,6 +8,7 @@ import time
 from . import runtime
 
 
+PLAIN_INTERVAL = 30  # seconds between progress lines when stdout is not a terminal
 ASSUME_YES = False  # --yes: prompts take their default answer (a default-no prompt stays no)
 
 
@@ -37,6 +39,29 @@ def fail(text, code=3):
     """Exit with an error on stderr: code 3 for config/credential/tool problems, 2 for usage, 1 for failures."""
     print(err_color("31", f"❌ {text}"), file=sys.stderr)
     raise SystemExit(code)
+
+
+_PLAIN_WORDS = {"✅": "ok", "❌": "failed", "⚠": "warning:"}
+_EMOJI = re.compile("[\U0001F000-\U0001FFFF\u2600-\u27BF\u2B00-\u2BFF\uFE0F\u200D]+ *")
+
+
+def plain(text):
+    """text without emoji, for output that isn't a terminal (✅/❌/⚠️ become ok/failed/warning:)."""
+    for emoji, word in _PLAIN_WORDS.items():
+        text = re.sub(f"{emoji}\uFE0F? *", word + " ", text)
+    return _EMOJI.sub("", text)
+
+
+class PlainOut:
+    """Wraps a non-terminal stdout so everything printed through it comes out without emoji."""
+    def __init__(self, stream):
+        self._stream = stream
+
+    def write(self, text):
+        return self._stream.write(plain(text))
+
+    def __getattr__(self, name):
+        return getattr(self._stream, name)
 
 
 def bold(t): return c("1", t)
@@ -111,11 +136,17 @@ class ProgressBar:
         self.shown = sys.stdout.isatty()
         self.total = total_bytes or 0
         self.started = time.monotonic()
+        self.last_line = self.started
 
     def say(self, line):
         print(("\r\033[K" if self.shown else "") + line)
 
     def draw(self, done):
+        if not self.shown:  # no terminal to redraw on: a plain line every PLAIN_INTERVAL seconds
+            now = time.monotonic()
+            if now - self.last_line >= PLAIN_INTERVAL:
+                self.last_line = now
+                print(f"progress: {done}/{self.count} files done, {self.fraction():.0%}{self.of}")
         if self.shown:
             fraction = self.fraction()
             filled = int(fraction * 24)

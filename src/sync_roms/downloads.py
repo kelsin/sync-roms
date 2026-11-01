@@ -1,6 +1,7 @@
 """Download planning, running and local ROM scanning."""
 import os
 import re
+import time
 from concurrent.futures import ThreadPoolExecutor, TimeoutError as FutureTimeout
 
 from . import external, runtime, s3, ui
@@ -43,6 +44,11 @@ def failure_hint(error):
     return ""
 
 
+def hard_exit():
+    """Leave at once, without waiting for in-flight downloads (a second ^C)."""
+    os._exit(130)
+
+
 def run_downloads(todo, label, icon, base, failures=None):
     """Download the jobs; returns the number that failed. failures, if given, collects (key, reason) for each."""
     if not todo:
@@ -50,11 +56,12 @@ def run_downloads(todo, label, icon, base, failures=None):
         return 0
     print(ui.bold(f"\n{icon} {label}: downloading {len(todo)} file(s)"))
     failed = 0
+    futs = []
     ex = ThreadPoolExecutor(runtime.WORKERS)
     moved = ui.ByteProgress([j[2] for j in todo])
     bar = ui.ProgressBar(len(todo), moved.fraction, sum(moved.size))
     try:
-        futs = [(j, ex.submit(s3.download, j, lambda n, i=i: moved.add(i, n))) for i, j in enumerate(todo)]
+        futs += [(j, ex.submit(s3.download, j, lambda n, i=i: moved.add(i, n))) for i, j in enumerate(todo)]
         for i, (j, f) in enumerate(futs, 1):
             prog = ui.dim(f"[{i}/{len(todo)}]")
             try:
@@ -78,7 +85,17 @@ def run_downloads(todo, label, icon, base, failures=None):
                 bar.say(f"  {prog} ❌ {ui.red(j[0])}: {reason}")
             bar.draw(i)
     except KeyboardInterrupt:
-        bar.say(ui.yellow("🛑 Interrupted — dropping queued downloads, finishing the ones in flight (partly downloaded files restart on the next run)..."))
+        ex.shutdown(wait=False, cancel_futures=True)
+        running = [f for _, f in futs if f.running()]
+        bar.say(ui.yellow(f"🛑 Interrupted — finishing {len(running)} download(s) in flight (partly downloaded files restart on the next run). ^C again to abort now."))
+        try:
+            while any(f.running() for f in running):
+                bar.draw(sum(f.done() for _, f in futs))
+                time.sleep(0.25)
+        except KeyboardInterrupt:
+            bar.clear()
+            print(ui.red("🛑 Aborted"))
+            hard_exit()
         raise
     finally:
         ex.shutdown(wait=True, cancel_futures=True)

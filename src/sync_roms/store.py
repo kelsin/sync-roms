@@ -189,7 +189,7 @@ def data_dir():
 
 
 def load_cards():
-    """Saved {root folder name: {"device": device id or "full", "layout": layout name, "android_media": "always" or "never"}}."""
+    """Saved {root folder name: {"device": device id or "full", "layout": layout name, "android_media": "always" or "never", "systems": [system ids last picked]}}."""
     try:
         with open(os.path.join(data_dir(), "cards.json")) as f:
             cards = json.load(f)
