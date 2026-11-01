@@ -20,8 +20,10 @@ def list_sizes(prefix):
 
 
 class SyncSmokeTest(unittest.TestCase):
-    def run_sync(self, dry_run, picks=lambda rows, present, state, editable: [0], edit_card_system=None):
+    def run_sync(self, dry_run, picks=lambda rows, present, state, editable: [0], edit_card_system=None, prepare=None, patches=()):
         with tempfile.TemporaryDirectory() as card:
+            if prepare:
+                prepare(card)
             argv = ["sync-roms", card, "--yes"] + (["--dry-run"] if dry_run else [])
             with contextlib.ExitStack() as st:
                 for target, kw in (
@@ -31,7 +33,7 @@ class SyncSmokeTest(unittest.TestCase):
                         (s3, {"list_sizes": list_sizes, "fetch_texts": lambda keys: {}}),
                         (cli.picker, {"saved_setup": lambda *a: (None, "esde"), "pick_systems": picks}),
                         (cli.downloads, {"run_downloads": lambda *a: 0}),
-                        (cli.clean, {"clean_android_media": lambda *a: None})):
+                        (cli.clean, {"clean_android_media": lambda *a: None})) + tuple(patches):
                     for name, value in kw.items():
                         st.enter_context(mock.patch.object(target, name, value))
                 st.enter_context(mock.patch.object(cli.clean, "_clean_root", None))
@@ -62,6 +64,26 @@ class SyncSmokeTest(unittest.TestCase):
         flags = []
         self.run_sync(True, lambda rows, present, state, editable: flags.append(editable) or [0])
         self.assertEqual(flags, [False])
+
+    def old_rom(self, size):
+        def prepare(card):
+            os.makedirs(os.path.join(card, "ROMs", "gba"))
+            with open(os.path.join(card, "ROMs", "gba", "Old.zip"), "wb") as f:
+                f.write(b"x" * size)
+        return prepare
+
+    def test_space_check_counts_the_unwanted_roms_that_can_be_deleted(self):
+        asked = []
+        patches = ((cli, {"free_space": lambda path: 3}),
+                   (cli.ui, {"confirm": lambda q, default=True: asked.append(q) or True,
+                             "choose": lambda *a, **k: "y"}))
+        self.assertEqual(self.run_sync(False, prepare=self.old_rom(100), patches=patches), 0)
+        self.assertTrue(any("Delete" in q and "first" in q for q in asked), asked)
+        self.assertFalse(any("Try anyway" in q for q in asked), asked)
+
+    def test_declining_the_space_prompt_exits_0(self):
+        patches = ((cli, {"free_space": lambda path: 3}), (cli.ui, {"confirm": lambda q, default=True: False}))
+        self.assertEqual(self.run_sync(False, patches=patches), 0)
 
 
 if __name__ == "__main__":

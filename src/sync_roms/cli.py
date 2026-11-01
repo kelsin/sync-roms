@@ -675,8 +675,22 @@ def run(argv):
         print(f"💾 Free on the card: {ui.human_size(free)}")
         if need > free:
             print(ui.red(f"❌ Not enough space: {ui.human_size(need)} to download, {ui.human_size(free)} free"))
-            if not ui.confirm("Try anyway?", default=False):
-                return 1
+            freed = sum(os.path.getsize(p) for p in extras)
+            if extras and need <= free + freed:  # the downloads only fit once the unwanted ROMs are gone
+                if ui.confirm(f"Delete the {len(extras)} local ROM(s) no longer in the selection first "
+                              f"(frees {ui.human_size(freed)})?", default=False):
+                    for path in extras:
+                        os.remove(path)
+                    print(ui.green(f"  🧹 Deleted {len(extras)} file(s)"))
+                    extras = []
+                    free = free_space(base)
+                    print(f"💾 Free on the card: {ui.human_size(free)}")
+                elif not ui.confirm("Try anyway?", default=False):
+                    print(ui.yellow("👋 Cancelled."))
+                    return 0
+            elif not ui.confirm("Try anyway?", default=False):
+                print(ui.yellow("👋 Cancelled."))
+                return 0
         if not ui.confirm(f"⬇️  Download {len(todo_all)} file(s) ({ui.human_size(need)})?"):
             print(ui.yellow("👋 Cancelled."))
             return 0
