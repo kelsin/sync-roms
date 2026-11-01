@@ -165,8 +165,16 @@ def diff_command(args):
         ui.fail(f"{folder} is not a folder", 2)
     systems = sorted(store.load_manifest()["systems"], key=lambda s: s["name"].lower())
     guess = store.guess_system(systems, folder)
-    i = picker.filter_list("🔍 Which system is this folder compared with?", [f"{s['name']}  ({s['bucket']}/)" for s in systems],
-                    cursor=guess or 0, hint="type to filter · ↑/↓ move · Enter continue · Esc cancel")
+    if args.system or args.json:  # no picker: scripts name the system (or it's guessed from the folder name)
+        names = [s["bucket"] for s in systems]
+        if args.system and args.system not in names:
+            ui.fail(f"Unknown system {args.system!r}. Known: {', '.join(names[:8])}, … (see systems.json)", 2)
+        if not args.system and guess is None:
+            ui.fail("Can't tell which system this folder is: pass --system ID", 2)
+        i = names.index(args.system) if args.system else guess
+    else:
+        i = picker.filter_list("🔍 Which system is this folder compared with?", [f"{s['name']}  ({s['bucket']}/)" for s in systems],
+                        cursor=guess or 0, hint="type to filter · ↑/↓ move · Enter continue · Esc cancel")
     if i is None:
         print(ui.yellow("👋 Cancelled."))
         return 0
@@ -180,6 +188,11 @@ def diff_command(args):
             lambda p, size, etag: bucket_fingerprint(f"{bucket}/{p}", size, etag))
     except (ClientError, BotoCoreError) as e:
         ui.fail(f"{e}", 3)
+    if args.json:
+        ui.emit_json({"system": bucket,
+                      "only_local": [{"path": p, "size": local[p]} for p in only_local],
+                      "only_bucket": [{"path": p, "size": remote[p][0]} for p in only_bucket]})
+        return 0
     for title, paths, sizes, paint in (("Only in the folder", only_local, {p: local[p] for p in only_local}, ui.green),
                                        ("Only in the bucket", only_bucket, {p: remote[p][0] for p in only_bucket}, ui.yellow)):
         print(f"\n{ui.bold(title)}: {len(paths)} ({ui.human_size(sum(sizes.values()))})")

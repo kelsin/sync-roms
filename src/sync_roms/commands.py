@@ -34,7 +34,7 @@ def show_devices(devices, systems, device_id=None, as_json=False):
             unknown_device(device_id, [x["id"] for x in devices])
         names = {s["bucket"]: s["name"] for s in systems}
         if as_json:
-            print(json.dumps({**d, "system_names": [names.get(i, i) for i in d["systems"]]}, indent=2))
+            ui.emit_json({**d, "system_names": [names.get(i, i) for i in d["systems"]]})
             return 0
         print(ui.bold(f"📟 {d['name']}") + ui.dim(f"  ({d['id']}, {d['soc']})"))
         print(f"  firmwares: {', '.join(d['firmwares'])}  (first is the default)")
@@ -44,8 +44,8 @@ def show_devices(devices, systems, device_id=None, as_json=False):
             print(f"  {i:<14} {names.get(i, '')}")
         return 0
     if as_json:
-        print(json.dumps([{"id": d["id"], "name": d["name"], "soc": d["soc"], "systems": len(d["systems"]),
-                           "firmwares": d["firmwares"]} for d in devices], indent=2))
+        ui.emit_json([{"id": d["id"], "name": d["name"], "soc": d["soc"], "systems": len(d["systems"]),
+                       "firmwares": d["firmwares"]} for d in devices])
         return 0
     rows = [(d["name"], d["soc"], str(len(d["systems"])), d["id"]) for d in devices]
     head = ("Device", "Chip", "Systems", "Id")
@@ -154,8 +154,8 @@ def games_list(args):
     sets = store.list_sets(raw)
     entries = game_entries(raw)
     if args.json:
-        print(json.dumps({"full_systems": full, "sets": sets,
-                          "games": [{"system": s, "bucket": k, "title": t} for s, k, t in entries]}, indent=2))
+        ui.emit_json({"full_systems": full, "sets": sets,
+                      "games": [{"system": s, "bucket": k, "title": t} for s, k, t in entries]})
         return 0
     for system in full:
         print(f"{system}\t*\t(full system)")
@@ -320,7 +320,7 @@ def cards_list(args):
         rows.append({"name": name, "device": (setup[0]["id"] if setup[0] else "full") if setup else None,
                      "layout": setup[1] if setup else None, "extras": extras})
     if args.json:
-        print(json.dumps(rows, indent=2))
+        ui.emit_json(rows)
         return 0
     for r in rows:
         print(f"{r['name']}\t{r['device'] or '(no device set)'}\t{r['layout'] or ''}\t{r['extras']} extra entries")
@@ -385,17 +385,9 @@ def cards_delete(args):
 
 def effective_settings():
     """[(name, value, source)] for the settings sync-roms reads."""
-    saved = usersettings.load_settings()
-    out = []
-    for name, env, default in (("bucket", "ROMS_BUCKET", None), ("endpoint", "ROMS_ENDPOINT", None),
-                               ("profile", "ROMS_PROFILE", "roms-readonly"), ("write_profile", "ROMS_WRITE_PROFILE", "roms"),
-                               ("mirror", None, None)):
-        if env and os.environ.get(env):
-            out.append((name, os.environ[env], f"env {env}"))
-        elif saved.get(name):
-            out.append((name, saved[name], "settings.json"))
-        else:
-            out.append((name, default, "default" if default else "unset"))
+    out = [(name, value, source) for name, (value, source) in usersettings.resolve_settings().items()]
+    mirror = usersettings.load_settings().get("mirror")
+    out.append(("mirror", mirror, "settings.json" if mirror else "unset"))
     return out
 
 
@@ -507,8 +499,7 @@ def doctor_cmd(args):
 
     settings = dict((n, v) for n, v, _ in effective_settings())
     line(bool(settings["bucket"]), f"bucket: {settings['bucket'] or 'not set'}", "run any sync-roms command to be asked, or set ROMS_BUCKET")
-    runtime.PROFILE, runtime.WRITE_PROFILE = settings["profile"], settings["write_profile"]
-    runtime.BUCKET, runtime.ENDPOINT = settings["bucket"], settings["endpoint"]
+    usersettings.apply_settings()
     try:
         import boto3
         from botocore.exceptions import BotoCoreError, ClientError, ProfileNotFound

@@ -274,7 +274,11 @@ Before downloading, the sync shows the totals and free space on the card and ask
 | `-y`, `--yes` | Answer prompts with their default |
 | `--device ID\|full`, `--layout NAME`, `--systems IDS\|all` | Sync: choose the setup and systems without the pickers (the setup is saved for the card) |
 | `--no-clean` | Sync: skip the end-of-run card tidy |
-| `--json` | `devices`, `games list`, `cards list`: machine-readable output |
+| `--json` | `devices`, `games list`, `cards list`, `diff` and `sync --dry-run`: one JSON document on stdout, nothing else (pass `--device`/`--layout`/`--systems` so no picker is needed; `diff` also needs `--system ID` unless the folder is named after a system) |
+| `--system ID` | `diff`: the bucket system to compare with, instead of the picker |
+| `--quiet` | Print only errors, warnings and `--json` data; prompts are asked on stderr |
+| `--verbose` | Also print the effective settings and where each came from, on stderr |
+| `--profile P`, `--write-profile P`, `--bucket B`, `--endpoint URL` | Override those settings for this run. Precedence: flag, then environment variable, then `settings.json`, then the default |
 | `--version` | Print the version |
 | `-h`, `--help` | Show the help screen (`sync-roms COMMAND --help` for one command) |
 

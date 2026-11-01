@@ -1,4 +1,5 @@
 """Terminal colors, prompts and progress output."""
+import json
 import os
 import re
 import sys
@@ -10,6 +11,9 @@ from . import runtime
 
 PLAIN_INTERVAL = 30  # seconds between progress lines when stdout is not a terminal
 ASSUME_YES = False  # --yes: prompts take their default answer (a default-no prompt stays no)
+QUIET = False  # --quiet: stdout is discarded except emit_json(); prompts are asked on stderr
+VERBOSE = False  # --verbose: debug() lines go to stderr
+_real_stdout = None  # the stdout that --quiet replaced
 
 
 def _use_color(stream):
@@ -72,10 +76,55 @@ def yellow(t): return c("33", t)
 def cyan(t): return c("36", t)
 
 
+class _Discard:
+    def write(self, text):
+        return len(text)
+
+    def flush(self):
+        pass
+
+    def isatty(self):
+        return False
+
+
+def set_output(quiet, verbose):
+    """Apply --quiet and --verbose. reset() undoes it."""
+    global QUIET, VERBOSE, _real_stdout
+    QUIET, VERBOSE = quiet, verbose
+    if quiet and _real_stdout is None:
+        _real_stdout, sys.stdout = sys.stdout, _Discard()
+
+
+def reset():
+    global QUIET, VERBOSE, _real_stdout
+    if _real_stdout is not None:
+        sys.stdout = _real_stdout
+    QUIET = VERBOSE = False
+    _real_stdout = None
+
+
+def emit_json(data):
+    """Print data as JSON on stdout, even under --quiet."""
+    (_real_stdout or sys.stdout).write(json.dumps(data, indent=2) + "\n")
+
+
+def debug(text):
+    if VERBOSE:
+        print(dim(text), file=sys.stderr)
+
+
+def _input(prompt):
+    if QUIET:  # stdout is discarded, so the question goes where a person (or log) can still see it
+        sys.stderr.write(prompt)
+        sys.stderr.flush()
+        return input()
+    return input(prompt)
+
+
 def ask(prompt):
     """input() that gives "" at end of input instead of raising, so a prompt with an empty answer means cancel."""
     try:
-        return input(prompt)
+        return _input(prompt)
     except EOFError:
         print()
         return ""
@@ -88,7 +137,7 @@ def confirm(question, default=True):
         return default
     while True:
         try:
-            a = input(f"{question} {suffix} ").strip().lower()
+            a = _input(f"{question} {suffix} ").strip().lower()
         except EOFError:  # no terminal to answer on: take the default
             print()
             return default
@@ -114,7 +163,7 @@ def choose(question, letters, default, legend=""):
         return default
     while True:
         try:
-            a = input(f"{question} [{suffix}]{' (' + legend + ')' if legend else ''} ").strip().lower()
+            a = _input(f"{question} [{suffix}]{' (' + legend + ')' if legend else ''} ").strip().lower()
         except EOFError:
             print()
             return default

@@ -168,12 +168,15 @@ def help_text(topic=None):
 {ui.bold('GLOBAL OPTIONS')}
   {ui.yellow('-n, --dry-run')}   show what would happen, change nothing (commands that can't honor it refuse it)
   {ui.yellow('-y, --yes')}       answer prompts with their default (deleting stays "no")
+  {ui.yellow('--quiet')}         print only errors, warnings and --json data (prompts go to stderr)      {ui.yellow('--verbose')}   also print the effective settings
+  {ui.yellow('--json')}          machine-readable output for devices, diff and `sync --dry-run` (use --systems with --device/--layout to skip the pickers)
+  {ui.yellow('--profile P')} {ui.yellow('--write-profile P')} {ui.yellow('--bucket B')} {ui.yellow('--endpoint URL')}   override those settings for this run
   {ui.yellow('-a, --ask')}       sync: confirm the saved device/firmware and Android media choice instead of using it silently
   {ui.yellow('--version')}       print the version      {ui.yellow('-h, --help')}   this screen
 
 {ui.bold('ENVIRONMENT')}
   {ui.yellow('ROMS_BUCKET')}  {ui.yellow('ROMS_ENDPOINT')}  {ui.yellow('ROMS_PROFILE')} (default roms-readonly)  {ui.yellow('ROMS_WRITE_PROFILE')} (default roms)
-  override settings.json "bucket", "endpoint", "profile", "write_profile". {ui.yellow('NO_COLOR')} / {ui.yellow('FORCE_COLOR')} control colors.
+  override settings.json "bucket", "endpoint", "profile", "write_profile"; the flags above override these. {ui.yellow('NO_COLOR')} / {ui.yellow('FORCE_COLOR')} control colors.
 
 {ui.bold('EXIT CODES')}
   0 done (or nothing to do, or you declined)   1 some files failed   2 bad usage   3 setup problem (credentials, bucket, tools, bad data file)   130 interrupted
@@ -327,6 +330,7 @@ def build_parser():
     ap.add_argument("--devices", action="store_true")
     ap.add_argument("--device-id")
     ap.add_argument("--json", action="store_true")
+    ap.add_argument("--system")
     ap.add_argument("--device")
     ap.add_argument("--layout")
     ap.add_argument("--systems")
@@ -357,13 +361,63 @@ def check_modes(args):
         ui.fail(f"--device, --layout, --systems and --no-clean only apply to syncing a card, not {mode}", 2)
     if args.base_dir and mode not in (None, "--upload-scrapes", "--clean-scrapes"):
         ui.fail(f"{mode} doesn't take a card folder ({args.base_dir!r}); give the directory right after the command", 2)
-    if (args.json or args.device_id) and mode != "--devices":
-        ui.fail("--json and a device id only apply to `devices`", 2)
+    if args.device_id and mode != "--devices":
+        ui.fail("a device id only applies to `devices`", 2)
+    if args.json and not (mode in ("--devices", "--diff") or (mode is None and args.dry_run)):
+        ui.fail("--json only applies to `devices`, `diff` and `sync --dry-run`", 2)
+    if args.system and mode != "--diff":
+        ui.fail("--system only applies to `diff`", 2)
     return mode
 
 
+GLOBAL_VALUE_FLAGS = {"--profile": "profile", "--write-profile": "write_profile", "--bucket": "bucket", "--endpoint": "endpoint"}
+DATA_COMMANDS = {("devices",), ("completion",), ("games", "list"), ("games", "export"), ("cards", "list"), ("config", "path")}
+
+
+def extract_globals(argv):
+    """Remove --profile/--write-profile/--bucket/--endpoint (set in runtime.OVERRIDES) and --quiet/--verbose from argv.
+    Returns (the rest of argv, quiet, verbose)."""
+    runtime.OVERRIDES.clear()
+    rest, flags, i = [], set(), 0
+    while i < len(argv):
+        arg = argv[i]
+        name, eq, value = arg.partition("=")
+        if name in GLOBAL_VALUE_FLAGS:
+            if not eq:
+                if i + 1 >= len(argv):
+                    ui.fail(f"{name} needs a value", 2)
+                i += 1
+                value = argv[i]
+            runtime.OVERRIDES[GLOBAL_VALUE_FLAGS[name]] = value
+        elif arg in ("--quiet", "--verbose"):
+            flags.add(arg)
+        else:
+            rest.append(arg)
+        i += 1
+    if len(flags) == 2:
+        ui.fail("--quiet and --verbose can't be combined", 2)
+    return rest, "--quiet" in flags, "--verbose" in flags
+
+
+def is_data_command(argv):
+    """Whether the command's stdout is its result (so --quiet must not discard it)."""
+    words = tuple(a for a in argv if not a.startswith("-"))
+    return "--devices" in argv or any(words[:len(d)] == d for d in DATA_COMMANDS)
+
+
 def sync():
-    argv = sys.argv[1:]
+    argv, quiet, verbose = extract_globals(sys.argv[1:])
+    ui.set_output(quiet and not is_data_command(argv), verbose)
+    try:
+        usersettings.apply_settings()
+        for name, (value, source) in usersettings.resolve_settings().items():
+            ui.debug(f"{name} = {value} ({source})")
+        return run(argv)
+    finally:
+        ui.reset()
+
+
+def run(argv):
     if "-u" in argv:
         ui.warn("-u is deprecated: it means --upload-scrapes, not --upload. Use `sync-roms upload scrapes` instead.")
     lead = 0
@@ -389,6 +443,8 @@ def sync():
         return 0
     ui.ASSUME_YES = args.yes
     mode = check_modes(args)
+    if args.json and mode in (None, "--diff"):  # the JSON document is all that reaches stdout
+        ui.set_output(True, ui.VERBOSE)
     if args.devices:
         return list_devices(args)
     if mode in ("--m3u", "--cd", "--install-tools"):
@@ -583,6 +639,10 @@ def sync():
 
     if args.dry_run:
         print(ui.yellow("\n🧪 Dry run — nothing downloaded or deleted"))
+        plan_json = {
+            "downloads": [{"kind": kind, "key": key, "path": path, "size": size or 0}
+                          for kind, todo in (("rom", rom_todo), ("bios", bios_todo)) for key, path, size in todo],
+            "delete": list(extras), "missing": {"roms": missing, "bios": [k for k in bios_keys if k not in bios_have]}}
         for key, path, _ in rom_todo + bios_todo:
             print(f"  {key} {ui.dim('→')} {path}")
         if unzip:
@@ -598,6 +658,11 @@ def sync():
         if layout_name == "esde":
             clean.clean_android_media(base, card, True, args.ask)
         todo_all = rom_todo + bios_todo
+        plan_json["stale_media"] = stale_count
+        plan_json["totals"] = {"files": len(todo_all), "bytes": sum(j[2] or 0 for j in todo_all), "delete": len(extras),
+                               "stale_media": stale_count, "missing": len(missing)}
+        if args.json:
+            ui.emit_json(plan_json)
         print(ui.bold(f"\n🧪 Would download {len(todo_all)} file(s) ({ui.human_size(sum(j[2] or 0 for j in todo_all))}), "
                       f"delete {len(extras)} local ROM(s) and {stale_count} media file(s); {len(missing)} listed ROM(s) not in the bucket"))
         return 0
