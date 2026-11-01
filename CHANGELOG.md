@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.23.0](https://github.com/kelsin/sync-roms/compare/v0.22.0...v0.23.0) (2026-11-01)
+
+
+### Features
+
+* **sets:** use fbneo for CAVE games in shmups set ([#87](https://github.com/kelsin/sync-roms/issues/87)) ([35092b7](https://github.com/kelsin/sync-roms/commit/35092b73660f1aa49ccc293a447c8b3bf29231f9))
+
 ## [0.22.0](https://github.com/kelsin/sync-roms/compare/v0.21.0...v0.22.0) (2026-11-01)
 
 
