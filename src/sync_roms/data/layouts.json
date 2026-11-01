@@ -12,10 +12,10 @@
     "note": "Card root is the SHARE partition (/userdata). Folder names are case-sensitive and use Batocera system names; Knulli only scans subfolders of roms/. Systems with knulli = null have no Knulli system."
   },
   "onion": {
-    "label": "Onion",
+    "label": "Onion / Allium",
     "roms_dir": "Roms",
     "bios_dir": "BIOS",
-    "note": "Miyoo Mini family (SigmaStar SSD202D). Card root is the FAT32 SD card; Onion creates missing Roms/ folders on first install. Folder names are case sensitive, differ from the stock Miyoo card, and are not ES-DE or Batocera names. Subfolders work only one level deep (e.g. Roms/GB/Hacks). BIOS files go in the root BIOS/ folder unless a system says otherwise. Systems with onion = null have no verified Onion folder. Source: https://onionui.github.io/docs/emulators/folders"
+    "note": "Miyoo Mini family (SigmaStar SSD202D) running Onion or Allium, which reads the Onion card layout and matches systems by file extension first, so these folders work for both. Card root is the FAT32 SD card; Onion creates missing Roms/ folders on first install. Folder names are case sensitive, differ from the stock Miyoo card, and are not ES-DE or Batocera names. Subfolders work only one level deep (e.g. Roms/GB/Hacks). BIOS files go in the root BIOS/ folder unless a system says otherwise. Systems with onion = null have no verified Onion folder. Sources: https://onionui.github.io/docs/emulators/folders, https://github.com/goweiwen/Allium/wiki/2.-Add-your-Games!"
   },
   "muos": {
     "label": "muOS",
