@@ -634,5 +634,13 @@
     "firmwares": [
       "emudeck"
     ]
+  },
+  {
+    "id": "windows-pc",
+    "name": "Windows PC (RetroBat)",
+    "soc": "x86-64",
+    "firmwares": [
+      "esde"
+    ]
   }
 ]
