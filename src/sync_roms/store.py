@@ -17,8 +17,18 @@ def repo_json(name):
 
 
 def personal_json(name):
-    with open(os.path.join(data_dir(), name)) as f:
-        return json.load(f)
+    path = os.path.join(data_dir(), name)
+    try:
+        with open(path) as f:
+            return json.load(f)
+    except ValueError as e:
+        ui.fail(f"{path} isn't valid JSON ({e}). Fix it, or move it aside to start fresh.")
+
+
+def backup(path):
+    """Keep the file's previous contents next to it as <name>.bak (local only) before it is rewritten."""
+    if os.path.exists(path):
+        shutil.copyfile(path, path + ".bak")
 
 
 def seed_personal_files():
@@ -183,9 +193,26 @@ def load_cards():
     try:
         with open(os.path.join(data_dir(), "cards.json")) as f:
             cards = json.load(f)
-    except (OSError, ValueError):
+    except OSError:
+        return {}
+    except ValueError as e:
+        if "cards" not in _warned:
+            _warned.add("cards")
+            ui.warn(f"cards.json isn't valid JSON ({e}); ignoring it and leaving it untouched")
         return {}
     return cards if isinstance(cards, dict) else {}
+
+
+def cards_readable():
+    """False when cards.json exists but can't be parsed, so it must not be overwritten."""
+    path = os.path.join(data_dir(), "cards.json")
+    if not os.path.exists(path):
+        return True
+    try:
+        with open(path) as f:
+            return isinstance(json.load(f), dict)
+    except (OSError, ValueError):
+        return False
 
 
 def update_card(name, **values):
@@ -193,12 +220,33 @@ def update_card(name, **values):
     cards = load_cards()
     entry = cards.get(name)
     cards[name] = {**(entry if isinstance(entry, dict) else {}), **values}
+    write_cards(cards)
+
+
+def write_cards(cards):
+    """Write cards.json (keeping the old one as cards.json.bak), unless the existing file can't be parsed."""
+    path = os.path.join(data_dir(), "cards.json")
+    if not cards_readable():
+        ui.warn(f"Not saving: {path} isn't valid JSON and would be overwritten. Fix or move it first.")
+        return False
     try:
         os.makedirs(data_dir(), exist_ok=True)
-        with open(os.path.join(data_dir(), "cards.json"), "w") as f:
+        backup(path)
+        with open(path + ".tmp", "w") as f:
             json.dump(cards, f, indent=2, sort_keys=True)
+        os.replace(path + ".tmp", path)
     except OSError as e:
         print(ui.yellow(f"  ⚠️  Couldn't remember this setting: {e}"))
+        return False
+    return True
+
+
+def delete_card(name):
+    cards = load_cards()
+    if name in cards:
+        del cards[name]
+        return write_cards(cards)
+    return False
 
 
 def save_card(name, device, layout):
@@ -235,12 +283,31 @@ def save_lists(core, cards):
     """Write the core list (when given) to games.json and each card's list into its cards.json entry."""
     if core is not None:
         path = os.path.join(data_dir(), "games.json")
+        backup(path)
         with open(path + ".tmp", "w") as f:
             json.dump(core, f, indent=2, ensure_ascii=False)
             f.write("\n")
         os.replace(path + ".tmp", path)
     for name, games in cards.items():
         update_card(name, games=games)
+
+
+def save_overlay(changes):
+    """Write device-systems.json: {device id: (added system ids, removed system ids)} replaces those devices' entries
+    (an entry with nothing in it is dropped). The previous file is kept as .bak."""
+    path = os.path.join(data_dir(), "device-systems.json")
+    overlay = personal_json("device-systems.json") if os.path.exists(path) else {}
+    for dev_id, (add, remove) in changes.items():
+        entry = {k: v for k, v in (("add", add), ("remove", remove)) if v}
+        if entry:
+            overlay[dev_id] = entry
+        else:
+            overlay.pop(dev_id, None)
+    backup(path)
+    with open(path + ".tmp", "w") as f:
+        json.dump(overlay, f, indent=2, ensure_ascii=False)
+        f.write("\n")
+    os.replace(path + ".tmp", path)
 
 
 def guess_system(systems, folder):

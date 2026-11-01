@@ -79,6 +79,8 @@ class EditFlow(DataDir):
                 mock.patch("builtins.input", return_value=name), \
                 mock.patch.object(picker, "choose_setup", return_value=(None, "esde")), \
                 mock.patch.object(ui, "confirm", return_value=confirmed), \
+                mock.patch.object(ui, "choose", side_effect=lambda *a, **k: "s" if confirmed else "d"), \
+                mock.patch.object(edit, "note"), \
                 contextlib.redirect_stdout(io.StringIO()):
             return edit.edit_manifest()
 
@@ -109,6 +111,8 @@ class FullToggles(EditFlow):
                 mock.patch.object(s3, "list_sizes", side_effect=lambda prefix: files.get(prefix, {})), \
                 mock.patch.object(picker, "filter_list", side_effect=fake), \
                 mock.patch.object(ui, "confirm", return_value=confirmed), \
+                mock.patch.object(ui, "choose", side_effect=lambda *a, **k: "s" if confirmed else "d"), \
+                mock.patch.object(edit, "note"), \
                 contextlib.redirect_stdout(io.StringIO()):
             edit.edit_manifest()
         return calls

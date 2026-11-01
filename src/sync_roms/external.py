@@ -19,7 +19,7 @@ def find_tool(tool):
 
 
 def own_temp(name):
-    """True for what --chd itself leaves hidden (extraction folders, .part files) and macOS ._ junk; other dot names are real."""
+    """True for what --cd itself leaves hidden (extraction folders, .part files) and macOS ._ junk; other dot names are real."""
     return name.startswith((".chd-", ".xiso-", ".unzip-", "._")) or name.endswith(".part")
 
 

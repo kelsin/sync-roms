@@ -22,7 +22,7 @@ def list_sizes(prefix):
 class SyncSmokeTest(unittest.TestCase):
     def run_sync(self, dry_run, picks=lambda rows, present, state, editable: [0], edit_card_system=None):
         with tempfile.TemporaryDirectory() as card:
-            argv = ["sync-roms", card] + (["--dry-run"] if dry_run else [])
+            argv = ["sync-roms", card, "--yes"] + (["--dry-run"] if dry_run else [])
             with contextlib.ExitStack() as st:
                 for target, kw in (
                         (sys, {"argv": argv}),

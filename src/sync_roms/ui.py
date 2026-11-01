@@ -2,15 +2,41 @@
 import os
 import sys
 import threading
+import time
 
 from . import runtime
 
 
-_COLOR = sys.stdout.isatty() and "NO_COLOR" not in os.environ
+ASSUME_YES = False  # --yes: prompts take their default answer (a default-no prompt stays no)
+
+
+def _use_color(stream):
+    env = os.environ
+    if "NO_COLOR" in env or env.get("TERM") == "dumb":
+        return False
+    return bool(env.get("FORCE_COLOR") or env.get("CLICOLOR_FORCE")) or stream.isatty()
+
+
+_COLOR = _use_color(sys.stdout)
 
 
 def c(code, text):
     return f"\033[{code}m{text}\033[0m" if _COLOR else text
+
+
+def err_color(code, text):
+    """Like c(), but decided by stderr, for text that goes there."""
+    return f"\033[{code}m{text}\033[0m" if _use_color(sys.stderr) else text
+
+
+def warn(text):
+    print(err_color("33", f"⚠️  {text}"), file=sys.stderr)
+
+
+def fail(text, code=3):
+    """Exit with an error on stderr: code 3 for config/credential/tool problems, 2 for usage, 1 for failures."""
+    print(err_color("31", f"❌ {text}"), file=sys.stderr)
+    raise SystemExit(code)
 
 
 def bold(t): return c("1", t)
@@ -23,14 +49,45 @@ def cyan(t): return c("36", t)
 
 def confirm(question, default=True):
     suffix = "[Y/n]" if default else "[y/N]"
+    if ASSUME_YES:
+        print(f"{question} {suffix} {'y' if default else 'n'} (--yes)")
+        return default
     while True:
-        a = input(f"{question} {suffix} ").strip().lower()
+        try:
+            a = input(f"{question} {suffix} ").strip().lower()
+        except EOFError:  # no terminal to answer on: take the default
+            print()
+            return default
         if not a:
             return default
         if a in ("y", "yes"):
             return True
         if a in ("n", "no"):
             return False
+
+
+def require_terminal(what, flag):
+    """Fail with the flag to use when a step needs an interactive terminal and there isn't one."""
+    if not (sys.stdin.isatty() and sys.stdout.isatty()):
+        fail(f"Can't {what} without a terminal: pass {flag}", 2)
+
+
+def choose(question, letters, default, legend=""):
+    """Ask for one of `letters` (a string of single characters); Enter, --yes and EOF give `default`."""
+    suffix = "/".join(l.upper() if l == default else l for l in letters)
+    if ASSUME_YES:
+        print(f"{question} [{suffix}] {default} (--yes)")
+        return default
+    while True:
+        try:
+            a = input(f"{question} [{suffix}]{' (' + legend + ')' if legend else ''} ").strip().lower()
+        except EOFError:
+            print()
+            return default
+        if not a:
+            return default
+        if a[0] in letters:
+            return a[0]
 
 
 def human_size(n):
@@ -41,12 +98,19 @@ def human_size(n):
     return f"{n:.1f} TB"
 
 
+def eta(seconds):
+    seconds = int(seconds)
+    return f"{seconds // 3600}h{seconds % 3600 // 60:02d}m" if seconds >= 3600 else f"{seconds // 60}m{seconds % 60:02d}s"
+
+
 class ProgressBar:
     """One line under the log: say() prints a line above it, draw() refreshes it. Does nothing but print on a non-tty."""
     def __init__(self, count, fraction, total_bytes=None):
         self.count, self.fraction = count, fraction  # fraction() is the 0-1 progress of the whole run
         self.of = f" of {human_size(total_bytes)}" if total_bytes else ""  # the bar is by size, the count is by file
         self.shown = sys.stdout.isatty()
+        self.total = total_bytes or 0
+        self.started = time.monotonic()
 
     def say(self, line):
         print(("\r\033[K" if self.shown else "") + line)
@@ -55,7 +119,11 @@ class ProgressBar:
         if self.shown:
             fraction = self.fraction()
             filled = int(fraction * 24)
-            sys.stdout.write(f"\r\033[K  {cyan('█' * filled)}{dim('░' * (24 - filled))} {done}/{self.count} files done  {fraction:4.0%}{self.of}")
+            elapsed = time.monotonic() - self.started
+            speed = ""
+            if self.total and fraction > 0.01 and elapsed > 2:
+                speed = f"  {human_size(self.total * fraction / elapsed)}/s, {eta(elapsed * (1 - fraction) / fraction)} left"
+            sys.stdout.write(f"\r\033[K  {cyan('█' * filled)}{dim('░' * (24 - filled))} {done}/{self.count} files done  {fraction:4.0%}{self.of}{speed}")
             sys.stdout.flush()
 
     def clear(self):

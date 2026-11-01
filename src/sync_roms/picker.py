@@ -8,6 +8,7 @@ from . import ui
 
 def pick_device(devices, cursor=0):
     """Returns a device dict, "full", or None on Esc."""
+    ui.require_terminal("pick a device and firmware", "--device ID --layout NAME")
     options = [(f"📟 {d['name']}", d) for d in devices] + [("🌍 Full (every system)", "full")]
     i = filter_list("🎯 Which device?", [label for label, _ in options], cursor=cursor,
                     hint="type to filter · ↑/↓ move · Enter continue · Esc quit")
@@ -68,6 +69,8 @@ def pick_systems(rows, initial=None, state=None, editable=False):
     close the picker and return ("games", row index) or ("clear", None); the caller reopens it with the same state.
     """
     state = {} if state is None else state
+    ui.require_terminal("pick systems", "--systems a,b (or --systems all)")
+    os.environ.setdefault("ESCDELAY", "25")
 
     def run(stdscr):
         curses.curs_set(0)
@@ -99,7 +102,7 @@ def pick_systems(rows, initial=None, state=None, editable=False):
             stdscr.addnstr(0, 0, "🕹  Pick systems", w - 1, head | curses.A_BOLD)
             keys = ("↑/↓ move · space/tab toggle · a all on · n all off · "
                     "e show/hide 0-ROM systems" + (" · g games · x clear card's games" if editable else "")
-                    + " · enter go · q quit")
+                    + " · enter go · esc/q cancel")
             stdscr.addnstr(1, 0, keys, w - 1, curses.A_DIM)
             view = h - 4
             if cur < top:
@@ -143,7 +146,7 @@ def pick_systems(rows, initial=None, state=None, editable=False):
                 return "clear", None
             elif k in (10, 13, curses.KEY_ENTER):
                 return [i for i, s in enumerate(sel) if s]
-            elif k == ord("q"):
+            elif k in (ord("q"), 27):
                 return None
     return curses.wrapper(run)
 
@@ -157,8 +160,9 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
                 hotkeys=()):
     """Type-to-filter list. Every space-separated term must appear in a label (case-insensitive).
 
-    Single mode returns the chosen index, or None on Esc. Multi mode (Tab toggles) returns the list of
-    on/off states on both Enter and Esc (Esc keeps the changes). cursor: index the highlight starts on.
+    Single mode returns the chosen index, or None on Esc. Multi mode (Tab toggles, or Space with no filter typed)
+    returns the list of on/off states on Enter; Esc asks whether to keep or revert pending changes, ^R reverts
+    them and ^O cycles the view (all / on / changed). cursor: index the highlight starts on.
     extras: per label, a list of (text, color) drawn after it (color: green, red, cyan or dim);
     they are not matched by the filter.
     locked: optional per-label flags; those rows are greyed out, can't be toggled, and show locked_note
@@ -185,9 +189,12 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
         query = ""
         vis = list(range(len(labels)))
         cur, top = cursor, 0
+        view_mode = 0  # multi: 0 all rows, 1 only rows that are on, 2 only rows changed in this session
+        notice = ""
         while True:
             terms = query.lower().split()
-            vis = [i for i, l in enumerate(lowered) if all(t in l for t in terms)]
+            vis = [i for i, l in enumerate(lowered) if all(t in l for t in terms)
+                   and (view_mode == 0 or (state[i] if view_mode == 1 else state[i] != start[i]))]
             cur = max(0, min(cur, len(vis) - 1))
             h, w = stdscr.getmaxyx()
             view = max(1, h - 4)
@@ -198,8 +205,8 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
             stdscr.erase()
             stdscr.addnstr(0, 0, title, w - 1, cyan_a | curses.A_BOLD)
             stdscr.addnstr(1, 0, "🔎 " + query, w - 1)
-            keys = ("↑/↓ move · Tab toggle · ^A toggle all shown · Enter/Esc done"
-                    if multi else "↑/↓ move · Enter select · Esc finish")
+            keys = ("Tab/Space toggle · Enter done · Esc done/revert · ^R revert · ^A all shown · ^O view"
+                    if multi else "↑/↓ move · Enter select · Esc back")
             stdscr.addnstr(2, 0, hint or keys, w - 1, curses.A_DIM)
             for pos in range(top, min(len(vis), top + view)):
                 i = vis[pos]
@@ -227,9 +234,14 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
             removed = sum(1 for a, b in zip(state, start) if b and not a)
             status = f"{len(vis)}/{len(labels)} shown"
             if multi:
-                status += f" · +{added} −{removed} pending"
+                status += f" · +{added} −{removed} pending · view: {('all', 'on only', 'changed only')[view_mode]}"
             if vis and locked[vis[cur]]:
                 status = f"🔒 {locked_note[vis[cur]] if isinstance(locked_note, list) else locked_note}"
+            stdscr.addnstr(h - 1, 0, status, w - 1, curses.A_BOLD)
+            if notice:
+                status = notice
+                notice = ""
+            stdscr.addnstr(h - 1, 0, " " * (w - 1), w - 1)
             stdscr.addnstr(h - 1, 0, status, w - 1, curses.A_BOLD)
             stdscr.move(1, min(w - 1, 3 + len(query)))
             try:
@@ -250,14 +262,35 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
             elif k == "\x15":  # ^U clears the filter
                 query = ""
                 cur = top = 0
+            elif k == curses.KEY_HOME:
+                cur = 0
+            elif k == curses.KEY_END:
+                cur = len(vis) - 1
             elif k == "\x1b":
-                return state if multi else None
+                if not multi:
+                    return None
+                if state == start:
+                    return state
+                stdscr.addnstr(h - 1, 0, " " * (w - 1), w - 1)
+                stdscr.addnstr(h - 1, 0, f"Keep +{added} −{removed} pending change(s)?  y/Enter keep · r revert · any other key keeps editing",
+                               w - 1, curses.A_BOLD | red_a)
+                answer = stdscr.get_wch()
+                if answer in ("y", "Y", "\n", "\r", curses.KEY_ENTER):
+                    return state
+                if answer in ("r", "R"):
+                    return list(start)
             elif k in ("\n", "\r", curses.KEY_ENTER):
                 if multi:
                     return state
                 if vis:
                     return vis[cur]
-            elif k == "\t" and multi and vis:
+            elif k == "\x12" and multi:  # ^R
+                state = list(start)
+                notice = "Reverted this list to how it was when opened"
+            elif k == "\x0f" and multi:  # ^O
+                view_mode = (view_mode + 1) % 3
+                cur = top = 0
+            elif k in ("\t", " ") and multi and vis and (k == "\t" or not query):
                 if not locked[vis[cur]]:
                     state[vis[cur]] = not state[vis[cur]]
             elif k == "\x01" and multi and vis:

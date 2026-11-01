@@ -214,6 +214,46 @@ Then:
    Every sync also creates `.metadata_never_index` in the card root, empties `.fseventsd` and puts a
    `.fseventsd/no_log` file in it (on any OS), so macOS doesn't index or log the card.
 
+### Commands
+
+Every mode is a command (`sync-roms COMMAND --help` explains one; plain `sync-roms [CARD]` syncs a card):
+
+| Command | Does | Old flag |
+| --- | --- | --- |
+| `sync [CARD]` | download ROMs, BIOS and scraped data to a card | (default) |
+| `games edit` | interactive list editor | `--edit` |
+| `games list\|add\|remove\|full\|sets\|export\|import` | edit lists from scripts, see below | |
+| `cards list\|new\|set\|rename\|delete` | manage cards | |
+| `devices [ID]` | list devices, or one device's systems (`--json`) | `--devices` |
+| `upload roms [DIR]` / `upload scrapes [CARD]` | upload to the bucket | `--upload`, `--upload-scrapes` |
+| `diff [DIR]` | compare a folder with the bucket | `--diff` |
+| `clean scrapes` | remove scrapes of ROMs not in the bucket | `--clean-scrapes` |
+| `playlist [DIR]` | fix `.m3u` playlists | `--m3u` |
+| `convert [DIR]` | convert disc images to CHD | `--cd`, `--chd` |
+| `tools install` | install 7z and chdman | `--install-tools` |
+| `mirror [DIR]` / `mirror use DIR` / `mirror clear` | local mirror | `--mirror`, `--use-mirror`, `--clear-mirror` |
+| `config show\|path` | effective settings and where each came from | |
+| `doctor` | check AWS profile, bucket, tools and data files | |
+| `check` | validate your JSON data files | |
+| `completion bash\|zsh\|fish` | shell completion script | |
+
+The old flags keep working. Flags that make no sense for a command (`--dry-run` with `games edit`, `--replace` without `upload roms`) are refused rather than ignored, and abbreviations like `--up` are not accepted. A card folder named like a command: write `./edit`.
+
+### Unattended use
+
+`--yes` answers every prompt with its default (deleting local files stays "no"). A first sync can skip both pickers:
+
+```bash
+sync-roms sync /Volumes/SD --device rg35xx-sp --layout knulli --systems all --yes
+sync-roms sync /Volumes/SD --systems gba,snes --dry-run     # preview a saved card
+```
+
+Without a terminal and without those flags the pickers fail with the flag to use. Prompts read from a closed stdin take their default.
+
+Exit codes: `0` done (or nothing to do, or you declined), `1` some files failed, `2` bad usage, `3` setup problem (credentials, bucket, missing tool, unreadable data file), `130` interrupted. Errors go to stderr; `NO_COLOR` and `FORCE_COLOR` control colors.
+
+Before downloading, the sync shows the totals and free space on the card and asks. Local ROMs no longer in the selection are deleted only after the downloads succeeded.
+
 ### Options
 
 | Flag | Description |
@@ -231,7 +271,12 @@ Then:
 | `--use-mirror DIR` | Same as `--mirror DIR`, then save `DIR` as the local mirror |
 | `--clear-mirror` | Forget the saved mirror (its files are left alone) |
 | `--devices` | List the supported devices with their chip and the number of systems each one gets, then exit |
-| `-h`, `--help` | Show the help screen |
+| `-y`, `--yes` | Answer prompts with their default |
+| `--device ID\|full`, `--layout NAME`, `--systems IDS\|all` | Sync: choose the setup and systems without the pickers (the setup is saved for the card) |
+| `--no-clean` | Sync: skip the end-of-run card tidy |
+| `--json` | `devices`, `games list`, `cards list`: machine-readable output |
+| `--version` | Print the version |
+| `-h`, `--help` | Show the help screen (`sync-roms COMMAND --help` for one command) |
 
 | Environment variable | Description |
 | --- | --- |
@@ -322,15 +367,30 @@ sync-roms --edit
 0. Pick **🏠 Core**, one of your cards, or **➕ New card** (asks for its folder name, then its device and
    firmware, like the first sync does). On a card, `^D` changes its device and firmware instead of opening it (saved with the other changes) and unticks the card's extra games for systems the new device or firmware doesn't use. Each card's row shows its current device and firmware. Games a card already gets from core show greyed out with a 🔒.
 1. Pick **By system** or **By set**, then type to filter the list (every word you type must
-   match) and `Enter` to pick one. `Esc` goes back; `Esc` at the first menu finishes.
+   match) and `Enter` to pick one. `Esc` goes back; `Esc` at the first menu goes to the review (the menu also has **Done** and **Quit without saving** rows). `Ctrl-C` keeps your pending changes and goes to the review.
 2. For a system you see every file in its bucket folder. For a set (a curated list in the
    package's `data/sets/*.json`) you see its games from every system, sorted by system then title.
    `✅` is already in the list, `⬜` is not. Type to filter, `Tab` toggles the game
-   under the cursor, `^A` toggles everything currently shown, `Enter` or `Esc` keeps your changes.
+   under the cursor (so does `Space` while the filter is empty), `^A` toggles everything currently shown, `^R` reverts the list to how it was when opened, `^O` cycles the view between all rows, only those that are on, and only those you changed. `Enter` keeps your changes; `Esc` asks whether to keep or revert them if there are any.
    Pending changes show as `➕` / `➖`.
-3. When you finish, you get a summary of additions and removals per system and a confirmation
-   prompt. On yes, the changed lists are saved (`games.json` and/or the cards' entries in `cards.json`); on no,
-   nothing is. Nothing is uploaded.
+3. When you finish, you get a summary of additions and removals per system, then **save**, **keep editing**, **discard**, or **list every change**. Saving writes `games.json` and/or the cards' entries in `cards.json`, keeping the previous files as `.bak` next to them. Nothing is uploaded.
+
+On the top menu, `^D` changes a card's device and firmware, `^R` renames a card and `^X` deletes one (both ask first, and act at once). **🧩 Device systems** edits which systems a device recommends: it is saved as the `add`/`remove` overlay in `device-systems.json`, relative to the repo defaults. A file that isn't valid JSON is never overwritten: sync-roms says so and leaves it for you to fix (`sync-roms check` lists the problems).
+
+### Editing from scripts
+
+`--card NAME` picks a card's extras instead of the core list; every command takes `--dry-run` and prints what it changed.
+
+```bash
+sync-roms games add gba 'Metroid*' --card SD      # a name, SYSTEM/name, or a glob matched against the bucket
+sync-roms games remove gba 'Metroid Fusion.zip'
+sync-roms games full psx on                        # sync a whole system
+sync-roms games sets add pinball
+sync-roms games list --json
+sync-roms games export > list.txt                  # SYSTEM/file per line, SYSTEM/* for a full system
+sync-roms games import list.txt --card SD
+sync-roms cards new SD --device rg35xx-sp --layout knulli
+```
 
 A set file is `{"name": ..., "description": ..., "games": [{"title": ..., "system": "gba", "bucket": "gba/Game.zip"}]}`.
 A multi-disc game adds `"files": [...]` with its other bucket keys (the discs); `bucket` is the playlist (`.m3u`) or disc 1.
@@ -432,6 +492,7 @@ It is meant for preparing a downloaded rom pack before you upload it to the buck
 
 | Symptom | Fix |
 | --- | --- |
-| `AccessDenied` / `Unable to locate credentials` | Define the `roms-readonly` profile in `~/.aws/config` and `~/.aws/credentials` |
+| `AccessDenied` / `Unable to locate credentials` | Define the `roms-readonly` profile in `~/.aws/config` and `~/.aws/credentials`; `sync-roms doctor` checks the profile, bucket and tools |
+| `cards.json isn't valid JSON` | Fix the file (the last good copy is `cards.json.bak`); sync-roms refuses to overwrite it. `sync-roms check` finds the problem |
 | "listed in manifest but not in bucket" warnings | A game in your `games.json` (or a required BIOS file) isn't in the bucket; it is skipped |
 | A system shows `(0 roms)` | Your `games.json` has no games for that system, or none of them are in the bucket (BIOS is still fetched if selected). Add games with `--edit` |
