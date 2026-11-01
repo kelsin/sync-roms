@@ -119,10 +119,11 @@ SYSTEM_DOT_NAMES = {".ds_store", ".localized", ".nomedia", ".appledouble", ".spo
                     ".fseventsd", ".temporaryitems", ".documentrevisions-v100", ".volumeicon.icns"}
 
 
-def walk_roms(dest, keep_dotfiles=False):
+def walk_roms(dest, keep_dotfiles=False, skip_db=False):
     """os.walk over dest that yields only real ROM-folder content (no frontend/OS leftovers).
 
     keep_dotfiles: keep dotfiles that are real content, dropping only OS litter (.DS_Store, ._*, ...).
+    skip_db: drop *.db files (Onion's ROM list caches, named like _cache2.db or cache6.db).
     """
     def hidden(name):
         if not name.startswith("."):
@@ -134,17 +135,17 @@ def walk_roms(dest, keep_dotfiles=False):
         dirs[:] = [d for d in dirs
                    if not hidden(d) and not (at_root and d.lower() in IGNORED_ROOT_DIRS)]
         files = [f for f in files
-                 if not hidden(f) and f.lower() not in IGNORED_FILES and not TEMP_DOWNLOAD.search(f)
+                 if not hidden(f) and f.lower() not in IGNORED_FILES and not (skip_db and f.lower().endswith(".db")) and not TEMP_DOWNLOAD.search(f)
                  and not (at_root and f.lower() in IGNORED_ROOT_FILES)]
         yield root, files
 
 
-def has_local_files(dest):
+def has_local_files(dest, skip_db=False):
     """True if dest has any ROM file (frontend files and dotfiles are ignored)."""
-    return any(files for _, files in walk_roms(dest))
+    return any(files for _, files in walk_roms(dest, skip_db=skip_db))
 
 
-def find_extras(dest, wanted_keys, unzip=False):
+def find_extras(dest, wanted_keys, unzip=False, skip_db=False):
     """Local files under dest that aren't in the system's ROM list (frontend files and dotfiles are ignored).
 
     unzip: the layout extracts archives flat, so a listed archive's extracted ROM isn't an extra.
@@ -153,7 +154,7 @@ def find_extras(dest, wanted_keys, unzip=False):
     expected = {os.path.normpath(r) for r in rels}
     stems = {os.path.splitext(r)[0] for r in rels if r.lower().endswith(external.ARCHIVE_EXTS)} if unzip else set()
     extras = []
-    for root, files in walk_roms(dest):
+    for root, files in walk_roms(dest, skip_db=skip_db):
         for f in files:
             path = os.path.join(root, f)
             rel = os.path.normpath(os.path.relpath(path, dest))

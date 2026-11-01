@@ -111,7 +111,7 @@ You pick a device, then the firmware it runs (a device with only one isn't asked
 | `knulli` | `roms/` `bios/` (SD card SHARE partition, `/userdata`) | Default for the Anbernic H700, RG Vita Pro and Miyoo Flip V2 handhelds |
 | `muos` | `ROMS/` `MUOS/bios/` | [muOS](https://muos.dev/) on the Anbernic H700 handhelds, RG CubeXX and RG Vita Pro. Folder names are matched ignoring case and separators |
 | `slot` | `Games/` `BIOS/` | [slot](https://slot-cfw.fyi) on the RG SP, RG34XX, RG34XX SP, RG35XX SP, RG35XX Plus, RG28XX and RG35XX H. Game Boy, Game Boy Color and Game Boy Advance only. ROMs are extracted from their archives and go straight into the system folder, never subfolders |
-| `onion` | `Roms/` `BIOS/` | Miyoo Mini Flip |
+| `onion` | `Roms/` `BIOS/` | Miyoo Mini Flip, on [Onion](https://onionui.github.io/) or [Allium](https://github.com/goweiwen/Allium) (Allium reads the Onion card layout). The `Imgs/` box art is shared; Allium's own `gameslist.xml` isn't written |
 | `emudeck` | `Emulation/roms/` `Emulation/bios/` | [EmuDeck](https://emudeck.github.io/) on the Steam Deck and Steam Machine. Wii U, Xbox 360 and Model 2 ROMs go in a `roms/` subfolder of their system folder. No scrapes |
 
 Folder names are case-sensitive. Folders that don't exist are shown as
@@ -490,8 +490,8 @@ It is meant for preparing a downloaded rom pack before you upload it to the buck
   Folders of systems you didn't pick, BIOS files and dotfiles are never touched.
   Files frontends add to ROM folders are ignored too (never counted as "already has files",
   never deleted): ES-DE `systeminfo.txt` / `noload.txt`, Knulli/Batocera `_info.txt`,
-  `gamelist.xml` and the `images/`, `videos/`, `manuals/` folders, Onion `miyoogamelist.xml`
-  and `Imgs/` (top level of a system folder only), and Windows `Thumbs.db` / `desktop.ini`.
+  `gamelist.xml` and the `images/`, `videos/`, `manuals/` folders, Onion `miyoogamelist.xml`,
+  `*.db` ROM list caches (on Onion cards only) and `Imgs/` (top level of a system folder only), and Windows `Thumbs.db` / `desktop.ini`.
 - Some systems share a local folder on a device (Onion: `WS` = WonderSwan + Color,
   `NGP` = Neo Geo Pocket + Color). A folder's expected files are the
   union of all those systems' lists, so syncing one never offers the other's ROMs for deletion.

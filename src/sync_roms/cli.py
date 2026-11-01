@@ -552,7 +552,7 @@ def run(argv):
                                        if s.get("full_system") or store.listed(s) else {}, todo)))
         rows = [(f"{s['name']}  ({len(available(s))} roms)", bool(available(s)), *sizes(s)) for s in systems]
         present = [i for i, s in enumerate(systems)
-                   if available(s) and (device or downloads.has_local_files(os.path.join(roms_dir, s["folders"][layout_name])))]
+                   if available(s) and (device or downloads.has_local_files(os.path.join(roms_dir, s["folders"][layout_name]), layout_name == "onion"))]
         if args.systems:
             chosen = commands.systems_from_flag(args.systems, systems, available)
             break
@@ -605,7 +605,7 @@ def run(argv):
     # a system with nothing to sync is always scanned, selected or not: whatever it has on the card is unwanted
     chosen_ids = {s["bucket"] for s in chosen}
     for dest in sorted({dest_of(s) for s in systems if s["bucket"] in chosen_ids or not available(s)}):
-        extras += downloads.find_extras(dest, [k for t in systems if dest_of(t) == dest for k in available(t)], unzip)
+        extras += downloads.find_extras(dest, [k for t in systems if dest_of(t) == dest for k in available(t)], unzip, layout_name == "onion")
 
     bios_keys = sorted({"BIOS/" + f for s in chosen for f in s["bios"]["files"]})
     bios_have = s3.list_sizes("BIOS/") if bios_keys else {}
