@@ -937,6 +937,75 @@
       "title": "Xenoblade Chronicles",
       "system": "wii",
       "bucket": "wii/Xenoblade Chronicles (USA, Asia) (En,Fr,Es).rvz"
+    },
+    {
+      "title": "Skies of Arcadia",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Skies of Arcadia (USA).m3u",
+      "files": [
+        "dreamcast/Skies of Arcadia (USA) (Disc 1).chd",
+        "dreamcast/Skies of Arcadia (USA) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "Grandia II",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Grandia II (USA).chd"
+    },
+    {
+      "title": "Phantasy Star Online Ver. 2",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Phantasy Star Online Ver. 2 (USA) (En,Ja,Fr,De,Es).chd"
+    },
+    {
+      "title": "Evolution: The World of Sacred Device",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Evolution - The World of Sacred Device (USA).chd"
+    },
+    {
+      "title": "Evolution 2: Far Off Promise",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Evolution 2 - Far Off Promise (USA).chd"
+    },
+    {
+      "title": "Time Stalkers",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Time Stalkers (USA).chd"
+    },
+    {
+      "title": "Record of Lodoss War",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Record of Lodoss War (USA).chd"
+    },
+    {
+      "title": "Star Wars: Knights of the Old Republic",
+      "system": "xbox",
+      "bucket": "xbox/Star Wars - Knights of the Old Republic (USA) (Rev 1).iso"
+    },
+    {
+      "title": "Star Wars: Knights of the Old Republic II: The Sith Lords",
+      "system": "xbox",
+      "bucket": "xbox/Star Wars - Knights of the Old Republic II - The Sith Lords (USA).iso"
+    },
+    {
+      "title": "Jade Empire",
+      "system": "xbox",
+      "bucket": "xbox/Jade Empire (USA, Europe) (En,Es,It).iso"
+    },
+    {
+      "title": "The Elder Scrolls III: Morrowind",
+      "system": "xbox",
+      "bucket": "xbox/Elder Scrolls III, The - Morrowind (USA).iso"
+    },
+    {
+      "title": "Fable: The Lost Chapters",
+      "system": "xbox",
+      "bucket": "xbox/Fable - The Lost Chapters (USA) (En,Es).iso"
+    },
+    {
+      "title": "Sudeki",
+      "system": "xbox",
+      "bucket": "xbox/Sudeki (World) (En,Fr,De,Es,It).iso"
     }
   ]
 }

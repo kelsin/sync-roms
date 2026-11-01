@@ -315,6 +315,41 @@
       "title": "Star Wars - The Force Unleashed",
       "system": "psp",
       "bucket": "psp/Star Wars - The Force Unleashed (USA) (En,Fr).chd"
+    },
+    {
+      "title": "Star Wars: Episode I: Jedi Power Battles",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Star Wars - Episode I - Jedi Power Battles (USA).chd"
+    },
+    {
+      "title": "Star Wars: Episode I: Racer",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Star Wars - Episode I - Racer (USA).chd"
+    },
+    {
+      "title": "Star Wars: Knights of the Old Republic",
+      "system": "xbox",
+      "bucket": "xbox/Star Wars - Knights of the Old Republic (USA) (Rev 1).iso"
+    },
+    {
+      "title": "Star Wars: Knights of the Old Republic II: The Sith Lords",
+      "system": "xbox",
+      "bucket": "xbox/Star Wars - Knights of the Old Republic II - The Sith Lords (USA).iso"
+    },
+    {
+      "title": "Star Wars: Jedi Knight II: Jedi Outcast",
+      "system": "xbox",
+      "bucket": "xbox/Star Wars - Jedi Knight II - Jedi Outcast (USA).iso"
+    },
+    {
+      "title": "Star Wars: Jedi Knight: Jedi Academy",
+      "system": "xbox",
+      "bucket": "xbox/Star Wars - Jedi Knight - Jedi Academy (USA) (En,Fr,De).iso"
+    },
+    {
+      "title": "Star Wars: Demolition",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Star Wars - Demolition (USA).chd"
     }
   ]
 }

@@ -437,6 +437,41 @@
       "title": "Shinobi II: The Silent Fury",
       "system": "gamegear",
       "bucket": "gamegear/Shinobi II - The Silent Fury (World).zip"
+    },
+    {
+      "title": "Ninja Gaiden",
+      "system": "xbox",
+      "bucket": "xbox/Ninja Gaiden (USA, Asia) (En,Ja).iso"
+    },
+    {
+      "title": "Ninja Gaiden Black",
+      "system": "xbox",
+      "bucket": "xbox/Ninja Gaiden Black (USA) (En,Ja).iso"
+    },
+    {
+      "title": "Otogi 2: Immortal Warriors",
+      "system": "xbox",
+      "bucket": "xbox/Otogi 2 - Immortal Warriors (USA).iso"
+    },
+    {
+      "title": "Brute Force",
+      "system": "xbox",
+      "bucket": "xbox/Brute Force (USA) (En,Fr,De,Es,It).iso"
+    },
+    {
+      "title": "Conker: Live & Reloaded",
+      "system": "xbox",
+      "bucket": "xbox/Conker - Live & Reloaded (USA) (En,Ja,Fr,De,Es,It).iso"
+    },
+    {
+      "title": "Fable: The Lost Chapters",
+      "system": "xbox",
+      "bucket": "xbox/Fable - The Lost Chapters (USA) (En,Es).iso"
+    },
+    {
+      "title": "Otogi: Myth of Demons",
+      "system": "xbox",
+      "bucket": "xbox/Otogi - Myth of Demons (USA).iso"
     }
   ]
 }

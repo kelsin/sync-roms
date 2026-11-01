@@ -56,6 +56,26 @@
       "title": "Super Mario Galaxy 2",
       "system": "wii",
       "bucket": "wii/Super Mario Galaxy 2 (USA) (En,Fr,Es).rvz"
+    },
+    {
+      "title": "Conker: Live & Reloaded",
+      "system": "xbox",
+      "bucket": "xbox/Conker - Live & Reloaded (USA) (En,Ja,Fr,De,Es,It).iso"
+    },
+    {
+      "title": "Blinx: The Time Sweeper",
+      "system": "xbox",
+      "bucket": "xbox/Blinx - The Time Sweeper (USA) (En,Ja) (Rev 1).iso"
+    },
+    {
+      "title": "Oddworld: Munch's Oddysee",
+      "system": "xbox",
+      "bucket": "xbox/Oddworld - Munch's Oddysee (USA).iso"
+    },
+    {
+      "title": "Oddworld: Stranger's Wrath",
+      "system": "xbox",
+      "bucket": "xbox/Oddworld - Stranger's Wrath (USA).iso"
     }
   ]
 }

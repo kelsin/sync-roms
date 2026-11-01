@@ -116,6 +116,29 @@
       "title": "Resident Evil 4",
       "system": "ps2",
       "bucket": "ps2/Resident Evil 4 (USA).chd"
+    },
+    {
+      "title": "Resident Evil: Code: Veronica",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Resident Evil - Code - Veronica (USA).m3u",
+      "files": [
+        "dreamcast/Resident Evil - Code - Veronica (USA) (Disc 1).chd",
+        "dreamcast/Resident Evil - Code - Veronica (USA) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "Resident Evil 2",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Resident Evil 2 (USA).m3u",
+      "files": [
+        "dreamcast/Resident Evil 2 (USA) (Disc 1).chd",
+        "dreamcast/Resident Evil 2 (USA) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "Resident Evil 3: Nemesis",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Resident Evil 3 - Nemesis (USA).chd"
     }
   ]
 }

@@ -716,6 +716,111 @@
       "title": "Sin & Punishment: Star Successor",
       "system": "wii",
       "bucket": "wii/Sin & Punishment - Star Successor (USA).rvz"
+    },
+    {
+      "title": "Ikaruga",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Ikaruga (Japan).chd"
+    },
+    {
+      "title": "Rez",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Rez (Europe) (En,Ja,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "Radirgy",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Radirgy (Japan).chd"
+    },
+    {
+      "title": "Trizeal",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Trizeal (Japan).chd"
+    },
+    {
+      "title": "Triggerheart Exelica",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Triggerheart Exelica (Japan).chd"
+    },
+    {
+      "title": "Zero Gunner 2",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Zero Gunner 2 (Japan).chd"
+    },
+    {
+      "title": "Under Defeat",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Under Defeat (Japan).chd"
+    },
+    {
+      "title": "Psyvariar 2: The Will to Fabricate",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Psyvariar 2 - The Will to Fabricate (Japan).chd"
+    },
+    {
+      "title": "Border Down",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Border Down (Japan).chd"
+    },
+    {
+      "title": "Mars Matrix",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Mars Matrix (USA).chd"
+    },
+    {
+      "title": "GigaWing",
+      "system": "dreamcast",
+      "bucket": "dreamcast/GigaWing (USA).chd"
+    },
+    {
+      "title": "GigaWing 2",
+      "system": "dreamcast",
+      "bucket": "dreamcast/GigaWing 2 (USA).chd"
+    },
+    {
+      "title": "Gunbird 2",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Gunbird 2 (USA).chd"
+    },
+    {
+      "title": "Twinkle Star Sprites",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Twinkle Star Sprites (Japan) (En,Ja,Es).chd"
+    },
+    {
+      "title": "Chaos Field",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Chaos Field (Japan).chd"
+    },
+    {
+      "title": "Karous",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Karous (Japan).chd"
+    },
+    {
+      "title": "Rainbow Cotton",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Rainbow Cotton (Japan).chd"
+    },
+    {
+      "title": "Bangai-O",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Bangai-O (USA).chd"
+    },
+    {
+      "title": "Shikigami no Shiro II",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Shikigami no Shiro II (Japan).chd"
+    },
+    {
+      "title": "Cannon Spike",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Cannon Spike (USA).chd"
+    },
+    {
+      "title": "Panzer Dragoon Orta",
+      "system": "xbox",
+      "bucket": "xbox/Panzer Dragoon Orta (USA).iso"
     }
   ]
 }

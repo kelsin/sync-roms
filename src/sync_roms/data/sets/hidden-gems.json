@@ -1053,6 +1053,157 @@
       "title": "Pandora's Tower",
       "system": "wii",
       "bucket": "wii/Pandora's Tower (USA) (En,Fr,Es).rvz"
+    },
+    {
+      "title": "Shenmue",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Shenmue (USA).m3u",
+      "files": [
+        "dreamcast/Shenmue (USA) (Disc 1).chd",
+        "dreamcast/Shenmue (USA) (Disc 2).chd",
+        "dreamcast/Shenmue (USA) (Disc 3).chd"
+      ]
+    },
+    {
+      "title": "Shenmue II",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Shenmue II (Europe) (En,Fr,De,Es).m3u",
+      "files": [
+        "dreamcast/Shenmue II (Europe) (En,Fr,De,Es) (Disc 1).chd",
+        "dreamcast/Shenmue II (Europe) (En,Fr,De,Es) (Disc 2).chd",
+        "dreamcast/Shenmue II (Europe) (En,Fr,De,Es) (Disc 3).chd",
+        "dreamcast/Shenmue II (Europe) (En,Fr,De,Es) (Disc 4).chd"
+      ]
+    },
+    {
+      "title": "Space Channel 5",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Space Channel 5 (USA).chd"
+    },
+    {
+      "title": "Space Channel 5 Part 2",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Space Channel 5 Part 2 (Japan).chd"
+    },
+    {
+      "title": "Jet Set Radio",
+      "system": "dreamcast",
+      "bucket": "dreamcast/De La Jet Set Radio (Japan) (En,Ja,Fr,De,Es).chd"
+    },
+    {
+      "title": "Seaman",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Seaman (USA).chd"
+    },
+    {
+      "title": "Samba de Amigo",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Samba de Amigo (USA).chd"
+    },
+    {
+      "title": "Metal Wolf",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Metal Wolf (Japan).chd"
+    },
+    {
+      "title": "Segagaga",
+      "system": "dreamcast",
+      "bucket": "dreamcast/SGGG - Segagaga (Japan) (Rev A).chd"
+    },
+    {
+      "title": "Napple Tale: Arsia in Daydream",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Napple Tale - Arsia in Daydream (Japan).chd"
+    },
+    {
+      "title": "Maken X",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Maken X (USA).chd"
+    },
+    {
+      "title": "Floigan Bros.: Episode 1",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Floigan Bros. - Episode 1 (USA).chd"
+    },
+    {
+      "title": "Toy Commander",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Toy Commander (USA) (En,Fr,De,Es).chd"
+    },
+    {
+      "title": "Cleopatra Fortune",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Cleopatra Fortune (Japan) (Rev A).chd"
+    },
+    {
+      "title": "Elemental Gimmick Gear",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Elemental Gimmick Gear (USA).chd"
+    },
+    {
+      "title": "Cool Cool Toon",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Cool Cool Toon (Japan).chd"
+    },
+    {
+      "title": "MDK2",
+      "system": "dreamcast",
+      "bucket": "dreamcast/MDK2 (USA).chd"
+    },
+    {
+      "title": "Typing of the Date",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Typing of the Date (Japan).chd"
+    },
+    {
+      "title": "JSRF: Jet Set Radio Future",
+      "system": "xbox",
+      "bucket": "xbox/JSRF - Jet Set Radio Future (USA).iso"
+    },
+    {
+      "title": "Panzer Dragoon Orta",
+      "system": "xbox",
+      "bucket": "xbox/Panzer Dragoon Orta (USA).iso"
+    },
+    {
+      "title": "Steel Battalion",
+      "system": "xbox",
+      "bucket": "xbox/Steel Battalion (USA).iso"
+    },
+    {
+      "title": "Gun Valkyrie",
+      "system": "xbox",
+      "bucket": "xbox/Gun Valkyrie (USA) (En,Ja).iso"
+    },
+    {
+      "title": "Blinx: The Time Sweeper",
+      "system": "xbox",
+      "bucket": "xbox/Blinx - The Time Sweeper (USA) (En,Ja) (Rev 1).iso"
+    },
+    {
+      "title": "Oddworld: Munch's Oddysee",
+      "system": "xbox",
+      "bucket": "xbox/Oddworld - Munch's Oddysee (USA).iso"
+    },
+    {
+      "title": "Oddworld: Stranger's Wrath",
+      "system": "xbox",
+      "bucket": "xbox/Oddworld - Stranger's Wrath (USA).iso"
+    },
+    {
+      "title": "Crimson Skies: High Road to Revenge",
+      "system": "xbox",
+      "bucket": "xbox/Crimson Skies - High Road to Revenge (USA) (En,Fr,De,Zh,Ko).iso"
+    },
+    {
+      "title": "MechAssault",
+      "system": "xbox",
+      "bucket": "xbox/MechAssault (USA) (En,Fr,De) (Rev 1).iso"
+    },
+    {
+      "title": "Fuzion Frenzy",
+      "system": "xbox",
+      "bucket": "xbox/Fuzion Frenzy (USA).iso"
     }
   ]
 }

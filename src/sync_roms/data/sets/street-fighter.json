@@ -264,6 +264,51 @@
       "title": "Tatsunoko vs. Capcom: Ultimate All-Stars",
       "system": "wii",
       "bucket": "wii/Tatsunoko vs. Capcom - Ultimate All-Stars (USA).rvz"
+    },
+    {
+      "title": "Street Fighter Alpha 3",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Street Fighter Alpha 3 (USA).chd"
+    },
+    {
+      "title": "Street Fighter III: 3rd Strike",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Street Fighter III - 3rd Strike (USA).chd"
+    },
+    {
+      "title": "Street Fighter III: Double Impact",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Street Fighter III - Double Impact (USA).chd"
+    },
+    {
+      "title": "Marvel vs. Capcom: Clash of Super Heroes",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Marvel vs. Capcom - Clash of Super Heroes (USA).chd"
+    },
+    {
+      "title": "Marvel vs. Capcom 2",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Marvel vs. Capcom 2 (USA).chd"
+    },
+    {
+      "title": "Capcom vs. SNK",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Capcom vs. SNK (USA).chd"
+    },
+    {
+      "title": "Capcom vs. SNK 2: Millionaire Fighting 2001",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Capcom vs. SNK 2 - Millionaire Fighting 2001 (Japan).chd"
+    },
+    {
+      "title": "Super Puzzle Fighter II X for Matching Service",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Super Puzzle Fighter II X for Matching Service (Japan).chd"
+    },
+    {
+      "title": "Super Street Fighter II X for Matching Service",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Super Street Fighter II X for Matching Service (Japan).chd"
     }
   ]
 }

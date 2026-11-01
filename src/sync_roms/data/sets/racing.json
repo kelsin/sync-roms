@@ -265,6 +265,141 @@
       "title": "Sonic & Sega All-Stars Racing",
       "system": "wii",
       "bucket": "wii/Sonic & Sega All-Stars Racing (USA) (En,Fr,Es).rvz"
+    },
+    {
+      "title": "Crazy Taxi",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Crazy Taxi (USA).chd"
+    },
+    {
+      "title": "Crazy Taxi 2",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Crazy Taxi 2 (USA).chd"
+    },
+    {
+      "title": "MSR: Metropolis Street Racer",
+      "system": "dreamcast",
+      "bucket": "dreamcast/MSR - Metropolis Street Racer (USA) (Rev A).chd"
+    },
+    {
+      "title": "Sega GT",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Sega GT (USA).chd"
+    },
+    {
+      "title": "Sega Rally 2",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Sega Rally 2 (USA).chd"
+    },
+    {
+      "title": "F355 Challenge: Passione Rossa",
+      "system": "dreamcast",
+      "bucket": "dreamcast/F355 Challenge - Passione Rossa (USA).chd"
+    },
+    {
+      "title": "Daytona USA",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Daytona USA (USA).chd"
+    },
+    {
+      "title": "San Francisco Rush 2049",
+      "system": "dreamcast",
+      "bucket": "dreamcast/San Francisco Rush 2049 (USA) (En,Fr,De,Es,It,Nl).chd"
+    },
+    {
+      "title": "Re-Volt",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Re-Volt (USA).chd"
+    },
+    {
+      "title": "Hydro Thunder",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Hydro Thunder (USA) (Rev 1).chd"
+    },
+    {
+      "title": "Tokyo Xtreme Racer",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Tokyo Xtreme Racer (USA).chd"
+    },
+    {
+      "title": "Tokyo Xtreme Racer 2",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Tokyo Xtreme Racer 2 (USA).chd"
+    },
+    {
+      "title": "POD: Speedzone",
+      "system": "dreamcast",
+      "bucket": "dreamcast/POD - Speedzone (USA).chd"
+    },
+    {
+      "title": "Ducati World: Racing Challenge",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Ducati World - Racing Challenge (USA).chd"
+    },
+    {
+      "title": "Test Drive Le Mans",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Test Drive Le Mans (USA) (En,Fr,Es).chd"
+    },
+    {
+      "title": "Star Wars: Episode I: Racer",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Star Wars - Episode I - Racer (USA).chd"
+    },
+    {
+      "title": "Stunt GP",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Stunt GP (Europe) (En,Fr,De,Es,It,Nl,Sv).chd"
+    },
+    {
+      "title": "Vanishing Point",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Vanishing Point (USA).chd"
+    },
+    {
+      "title": "Wacky Races",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Wacky Races (USA).chd"
+    },
+    {
+      "title": "Speed Devils",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Speed Devils (USA).chd"
+    },
+    {
+      "title": "Spirit of Speed 1937",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Spirit of Speed 1937 (USA) (En,Fr,De,Es).chd"
+    },
+    {
+      "title": "Project Gotham Racing",
+      "system": "xbox",
+      "bucket": "xbox/Project Gotham Racing (USA).iso"
+    },
+    {
+      "title": "Project Gotham Racing 2",
+      "system": "xbox",
+      "bucket": "xbox/Project Gotham Racing 2 (USA, Japan) (En,Ja,Fr,De,Es,It,Zh,Ko).iso"
+    },
+    {
+      "title": "RalliSport Challenge",
+      "system": "xbox",
+      "bucket": "xbox/RalliSport Challenge (USA) (Rev 1).iso"
+    },
+    {
+      "title": "RalliSport Challenge 2",
+      "system": "xbox",
+      "bucket": "xbox/RalliSport Challenge 2 (World) (En,Ja,Fr,De,Es,It).iso"
+    },
+    {
+      "title": "Forza Motorsport + Xbox Live Arcade",
+      "system": "xbox",
+      "bucket": "xbox/Forza Motorsport + Xbox Live Arcade (USA) (En,Ja,Fr,De,Es,It,Zh,Ko).iso"
+    },
+    {
+      "title": "Sega GT 2002",
+      "system": "xbox",
+      "bucket": "xbox/Sega GT 2002 (USA) (En,Ja).iso"
     }
   ]
 }
