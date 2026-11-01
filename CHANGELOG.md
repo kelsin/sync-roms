@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.25.0](https://github.com/kelsin/sync-roms/compare/v0.24.0...v0.25.0) (2026-11-01)
+
+
+### Features
+
+* **layouts:** support Allium through the Onion layout ([#93](https://github.com/kelsin/sync-roms/issues/93)) ([e7edfd0](https://github.com/kelsin/sync-roms/commit/e7edfd0837c032dc5ca0e727d0606b85584a771f))
+
+
+### Bug Fixes
+
+* **onion:** ignore .db cache files in rom folders ([#92](https://github.com/kelsin/sync-roms/issues/92)) ([d2304a2](https://github.com/kelsin/sync-roms/commit/d2304a2e953612ffa743bd0b155cbfe7a090206b))
+* **sync:** remove ROMs of systems with no games listed and re-add fds ([#95](https://github.com/kelsin/sync-roms/issues/95)) ([9a30bc0](https://github.com/kelsin/sync-roms/commit/9a30bc0247b87344293b0055d1a0c34e1bf03373))
+
 ## [0.24.0](https://github.com/kelsin/sync-roms/compare/v0.23.0...v0.24.0) (2026-11-01)
 
 
