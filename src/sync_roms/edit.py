@@ -421,7 +421,7 @@ def edit_manifest():
         drop_inapplicable(targets[name], setup)
 
     def delete_card(name):
-        if not ui.confirm(f"🗑️  Delete card {name} and its extra games now? (cards.json.bak keeps the old file)", default=False):
+        if not ui.confirm(f"🗑️  Delete card {name} and its extra games now? (cards.json.bak keeps the copy from before this run)", default=False):
             return
         if name in store.load_cards():
             store.delete_card(name)
@@ -583,5 +583,5 @@ def edit_manifest():
     if not saved:
         print(ui.red("❌ Some changes were not saved (see above)."))
         return 3
-    print(ui.green("🎉 Saved") + ui.dim(f"  ({store.data_dir()}; previous versions kept as .bak)"))
+    print(ui.green("🎉 Saved") + ui.dim(f"  ({store.data_dir()}; versions from before this run kept as .bak)"))
     return 0

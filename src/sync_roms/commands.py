@@ -176,7 +176,8 @@ def finish(args, raw, save, changes):
     if args.dry_run:
         print(ui.yellow("🧪 Dry run — nothing saved"))
         return 0
-    save(raw)
+    if save(raw) is False:
+        return 3
     print(ui.green(f"💾 Saved {len(changes)} change(s)") + ui.dim(f" ({'card ' + args.card if args.card else 'core list'})"))
     return 0
 
@@ -376,7 +377,8 @@ def cards_delete(args):
     if not args.yes and not ui.confirm(f"Delete card {args.name} and its extra games? (cards.json.bak keeps the old file)", default=False):
         print(ui.yellow("↩️  Kept"))
         return 0
-    store.delete_card(args.name)
+    if not store.delete_card(args.name):
+        return 3
     print(ui.green(f"🗑️  Deleted card {args.name}"))
     return 0
 

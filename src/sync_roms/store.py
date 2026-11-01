@@ -26,9 +26,14 @@ def personal_json(name):
         ui.fail(f"{path} isn't valid JSON ({e}). Fix it, or move it aside to start fresh.")
 
 
+_backed_up = set()
+
+
 def backup(path):
-    """Keep the file's previous contents next to it as <name>.bak (local only) before it is rewritten."""
-    if os.path.exists(path):
+    """Keep the file's contents from before this run next to it as <name>.bak (local only) before it is first rewritten.
+    Later writes in the same run leave the .bak alone, so it stays a recovery copy."""
+    if path not in _backed_up and os.path.exists(path):
+        _backed_up.add(path)
         shutil.copyfile(path, path + ".bak")
 
 
@@ -225,7 +230,7 @@ def update_card(name, **values):
 
 
 def write_cards(cards):
-    """Write cards.json (keeping the old one as cards.json.bak), unless the existing file can't be parsed."""
+    """Write cards.json (keeping the one from before this run as cards.json.bak), unless the existing file can't be parsed."""
     path = os.path.join(data_dir(), "cards.json")
     if not cards_readable():
         ui.warn(f"Not saving: {path} isn't valid JSON and would be overwritten. Fix or move it first.")

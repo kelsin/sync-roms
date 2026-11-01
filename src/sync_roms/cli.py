@@ -280,12 +280,13 @@ LEGACY = {
 }
 BOOL_FLAGS = {"-n", "--dry-run", "-y", "--yes", "-a", "--ask"}
 PLAIN_FLAGS = BOOL_FLAGS | {"--replace", "--json", "--no-clean"}
+VALUE_FLAGS = {"--system", "--device", "--layout", "--systems", "--device-id"}
 
 
 def translate(argv):
     """Rewrite `sync-roms COMMAND ...` into the flag form the rest of the code reads. Global flags may come first."""
     i = 0
-    while i < len(argv) and argv[i] in BOOL_FLAGS:
+    while i < len(argv) and argv[i] in BOOL_FLAGS | {"--json"}:
         i += 1
     if i >= len(argv) or argv[i] not in SUBCOMMANDS:
         return argv
@@ -297,9 +298,9 @@ def translate(argv):
             flags = LEGACY[words]
             if not flags:
                 return head + tail
-            n = 0  # plain flags before the mode's value (`diff -n /x`) move behind it
-            while n < len(tail) and tail[n] in PLAIN_FLAGS:
-                n += 1
+            n = 0  # flags (and the values of value flags) before the mode's value (`diff -n /x`) move behind it
+            while n < len(tail) and (tail[n] in PLAIN_FLAGS or tail[n] in VALUE_FLAGS):
+                n += 1 if tail[n] in PLAIN_FLAGS else 2
             if n < len(tail) and not tail[n].startswith("-"):
                 value = ["--device-id", tail[n]] if name == "devices" else [tail[n]]
                 return head + flags + value + tail[:n] + tail[n + 1:]

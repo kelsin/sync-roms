@@ -183,6 +183,12 @@ class CliTest(unittest.TestCase):
         self.assertEqual(t(["mirror", "-y", "/new"]), ["--mirror", "/new", "-y"])
         self.assertEqual(t(["devices", "-y", "rg35xx"]), ["--devices", "--device-id", "rg35xx", "-y"])
 
+    def test_value_flags_between_a_mode_and_its_directory(self):
+        t = cli.translate
+        self.assertEqual(t(["diff", "--system", "gba", "/tmp"]), ["--diff", "/tmp", "--system", "gba"])
+        self.assertEqual(t(["-n", "diff", "--json", "--system", "gba", "/tmp"]), ["-n", "--diff", "/tmp", "--json", "--system", "gba"])
+        self.assertEqual(t(["--json", "devices"]), ["--json", "--devices"])
+
     def test_mode_with_a_stray_directory_exits_2(self):
         args = cli.build_parser().parse_args(["--diff", "-n", "/x"])
         with contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit) as cm:
@@ -225,6 +231,36 @@ class UiTest(unittest.TestCase):
     def test_choose_reads_the_first_letter(self):
         with mock.patch("builtins.input", side_effect=["x", "List"]), contextlib.redirect_stdout(io.StringIO()):
             self.assertEqual(ui.choose("q", "ynl", "n"), "l")
+
+    def test_require_terminal_looks_through_quiet_to_the_real_stdout(self):
+        tty = mock.Mock()
+        tty.isatty.return_value = True
+        with mock.patch.object(sys, "stdout", tty), mock.patch.object(sys.stdin, "isatty", lambda: True):
+            ui.set_output(True, False)
+            try:
+                ui.require_terminal("pick", "--x")
+            finally:
+                ui.reset()
+
+
+class BackupTest(DataDir):
+    def test_cards_bak_keeps_the_copy_from_before_this_run(self):
+        store._backed_up.clear()
+        self.assertTrue(store.write_cards({"a": {}}))
+        self.assertTrue(store.write_cards({"a": {}, "b": {}}))
+        self.assertTrue(store.write_cards({"c": {}}))
+        self.assertEqual(self.read("cards.json.bak"), {"a": {}})
+
+
+class FailedSaveTest(Cmd):
+    def test_games_save_failure_exits_3(self):
+        with mock.patch.object(store, "save_lists", return_value=False):
+            self.assertEqual(self.run_cmd("games", "add", "gba", "A.zip")[0], 3)
+
+    def test_card_delete_failure_exits_3(self):
+        self.run_cmd("cards", "new", "SD", "--device", "full", "--layout", "esde")
+        with mock.patch.object(store, "delete_card", return_value=False):
+            self.assertEqual(self.run_cmd("cards", "delete", "SD", "--yes")[0], 3)
 
 
 class DownloadsTest(unittest.TestCase):
