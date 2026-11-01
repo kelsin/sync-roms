@@ -1,6 +1,7 @@
 """Interactive curses pickers."""
 import curses
 import os
+import unicodedata
 
 from . import ui
 
@@ -147,6 +148,11 @@ def pick_systems(rows, initial=None, state=None, editable=False):
     return curses.wrapper(run)
 
 
+def cell_width(text):
+    """Terminal cells text takes up (emoji and CJK are two wide)."""
+    return sum(2 if unicodedata.east_asian_width(c) in "WF" else 1 for c in text)
+
+
 def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, extras=None, locked=None, locked_note="",
                 hotkeys=()):
     """Type-to-filter list. Every space-separated term must appear in a label (case-insensitive).
@@ -211,12 +217,12 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
                 else:
                     line = labels[i]
                 stdscr.addnstr(pos - top + 3, 0, line, w - 1, attr)
-                x = len(line)
+                x = cell_width(line)
                 for text, color in (extras[i] if extras else []):
                     if x >= w - 1:
                         break
                     stdscr.addnstr(pos - top + 3, x, text, w - 1 - x, attr | colors[color])
-                    x += len(text)
+                    x += cell_width(text)
             added = sum(1 for a, b in zip(state, start) if a and not b)
             removed = sum(1 for a, b in zip(state, start) if b and not a)
             status = f"{len(vis)}/{len(labels)} shown"
