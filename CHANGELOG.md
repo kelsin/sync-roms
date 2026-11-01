@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.24.0](https://github.com/kelsin/sync-roms/compare/v0.23.0...v0.24.0) (2026-11-01)
+
+
+### Features
+
+* **cli:** add subcommands, scripting flags and safer edit and sync flows ([#91](https://github.com/kelsin/sync-roms/issues/91)) ([8f2ecc5](https://github.com/kelsin/sync-roms/commit/8f2ecc552451ed5941949eaae2e09f9a505aeba5))
+* **sets:** add iridion games to shmups set ([#89](https://github.com/kelsin/sync-roms/issues/89)) ([e7af6b1](https://github.com/kelsin/sync-roms/commit/e7af6b153fa988c531bfb6b6bd738fa73de0912c))
+
 ## [0.23.0](https://github.com/kelsin/sync-roms/compare/v0.22.0...v0.23.0) (2026-11-01)
 
 
