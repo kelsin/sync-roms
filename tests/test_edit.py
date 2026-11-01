@@ -170,6 +170,42 @@ class FullToggles(EditFlow):
         nes_row = next(r for r in rows if r[0]["bucket"] == "nes")
         self.assertTrue(covered(nes_row[0], nes_row[1]))
 
+    def device_and_unsupported(self):
+        """A device and a system bucket id (with a esde folder) it doesn't run."""
+        systems = store.repo_json("systems")
+        for d in store.load_manifest()["devices"]:
+            if "esde" in d["firmwares"]:
+                other = next((x["bucket"] for x in systems if x["bucket"] not in d["systems"] and x["folders"].get("esde")), None)
+                if other:
+                    return d, other
+        self.fail("no device with an unsupported system")
+
+    def test_opening_a_card_drops_games_of_unsupported_systems(self):
+        device, other = self.device_and_unsupported()
+        self.write_json("cards.json", {"c": {"layout": "esde", "device": device["id"],
+                                             "games": {other: [{"title": "X", "bucket": f"{other}/X.zip"}]}}})
+        self.run_with([1, None, None])
+        self.assertEqual(self.read("cards.json")["c"]["games"], {})
+
+    def test_set_counts_only_count_supported_systems(self):
+        device, other = self.device_and_unsupported()
+        self.write_json("cards.json", {"c": {"layout": "esde", "device": device["id"]}})
+        game_set = {"id": "t", "name": "T", "description": "", "games": [
+            {"system": other, "bucket": f"{other}/X.zip"}, {"system": device["systems"][0], "bucket": "a/Y.zip"}]}
+        labels = []
+        picks = iter([1, 1, None, None, None])
+
+        def fake(title, items, **k):
+            labels.append(items)
+            return next(picks)
+        with mock.patch.object(store, "load_sets", return_value=[game_set]), \
+                mock.patch.object(picker, "filter_list", side_effect=fake), \
+                mock.patch.object(s3, "list_sizes", return_value={}), \
+                mock.patch.object(runtime, "BUCKET", "b", create=True), \
+                contextlib.redirect_stdout(io.StringIO()):
+            edit.edit_manifest()
+        self.assertIn("(0/1 on)", labels[2][0])
+
     def write_json(self, name, data):
         with open(self.path(name), "w") as f:
             json.dump(data, f)
