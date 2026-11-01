@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.21.0](https://github.com/kelsin/sync-roms/compare/v0.20.1...v0.21.0) (2026-11-01)
+
+
+### Features
+
+* **sync:** edit a card's games from the sync picker ([#81](https://github.com/kelsin/sync-roms/issues/81)) ([1124c46](https://github.com/kelsin/sync-roms/commit/1124c463199c7b1879ca95f06065f570b5a1c39f))
+
 ## [0.20.1](https://github.com/kelsin/sync-roms/compare/v0.20.0...v0.20.1) (2026-11-01)
 
 
