@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.22.0](https://github.com/kelsin/sync-roms/compare/v0.21.0...v0.22.0) (2026-11-01)
+
+
+### Features
+
+* **sets:** add dreamcast and xbox games to sets ([#86](https://github.com/kelsin/sync-roms/issues/86)) ([34f06b1](https://github.com/kelsin/sync-roms/commit/34f06b18f2901f05546c8eb21d2b6a00b5098e99))
+* **sets:** add pinball set ([#84](https://github.com/kelsin/sync-roms/issues/84)) ([bf182b2](https://github.com/kelsin/sync-roms/commit/bf182b23b4c13ae06dc2465528fdc79d88228b32))
+
+
+### Bug Fixes
+
+* **edit:** keep the last letter of card names in the edit menu ([#83](https://github.com/kelsin/sync-roms/issues/83)) ([c58e278](https://github.com/kelsin/sync-roms/commit/c58e278ee1354a639d3a5ffef292be3321632da2))
+
 ## [0.21.0](https://github.com/kelsin/sync-roms/compare/v0.20.1...v0.21.0) (2026-11-01)
 
 
