@@ -309,7 +309,7 @@ class ChdTest(unittest.TestCase):
         self.assertEqual(systems["wii"]["chd"], {"mode": "extract"})
         self.assertFalse(systems["3do"]["chd"]["m3u"])
         self.assertEqual(systems["xbox"]["chd"], {"mode": "xiso", "m3u": False})
-        self.assertEqual(systems["xbox360"]["chd"], {"mode": "extract"})
+        self.assertEqual(systems["xbox360"]["chd"], {"mode": "extract", "m3u": False})
         self.assertNotIn("chd", systems["gba"])
         folders = chd.chd_folders(systems.values())
         self.assertIs(folders["megacd"], systems["segacd"])
