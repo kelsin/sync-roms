@@ -401,13 +401,63 @@ def config_cmd(args):
     return 0
 
 
-def check_data():
-    """Problems found in the user's data files, as strings."""
+def check_sets(problems):
+    """Check every set file (repo and personal) and return the keys each one lists as {set id: [(system, key)]}."""
+    systems = {s["bucket"] for s in store.repo_json("systems")}
+    keys = {}
+    folders = [(store.REPO_DATA + "/sets", ""), (store.personal_sets_dir(), "sets/")]
+    for folder, prefix in folders:
+        for name in sorted(os.listdir(folder)) if os.path.isdir(folder) else []:
+            if not name.endswith(".json"):
+                continue
+            where = f"{prefix}{name}"
+            try:
+                with open(os.path.join(folder, name)) as f:
+                    data = json.load(f)
+            except (OSError, ValueError) as e:
+                problems.append(f"{where}: not valid JSON ({e})")
+                continue
+            games = data.get("games") if isinstance(data, dict) else None
+            if not isinstance(games, list):
+                problems.append(f"{where}: must be an object with a 'games' list")
+                continue
+            if not isinstance(data.get("name"), str) or not data["name"]:
+                problems.append(f"{where}: missing 'name'")
+            listed = keys.setdefault(where, [])
+            for g in games:
+                if not isinstance(g, dict) or not isinstance(g.get("bucket"), str) or not g["bucket"]:
+                    problems.append(f"{where}: entry without a bucket key: {g!r}")
+                    continue
+                system = g.get("system")
+                if system not in systems:
+                    problems.append(f"{where}: {g['bucket']}: unknown system {system!r}")
+                    continue
+                if not g.get("title"):
+                    problems.append(f"{where}: {g['bucket']}: missing 'title'")
+                files = g.get("files", [])
+                if not isinstance(files, list) or not all(isinstance(k, str) for k in files):
+                    problems.append(f"{where}: {g['bucket']}: 'files' must be a list of bucket keys")
+                    files = []
+                for k in [g["bucket"]] + files:
+                    if not k.startswith(system + "/"):
+                        problems.append(f"{where}: {k!r} isn't under {system}/")
+                    else:
+                        listed.append((system, k))
+    return keys
+
+
+def check_data(list_keys=None):
+    """Problems found in the user's data files, as strings.
+
+    list_keys: optional callable(system id) -> set of bucket keys in that system's folder; when given, every
+    key the lists and sets name must be among them."""
     problems = []
+    wanted = {}  # where -> [(system, key)] for the bucket check
     systems = {s["bucket"] for s in store.repo_json("systems")}
     devices = {d["id"] for d in store.repo_json("devices")}
     layouts = set(store.repo_json("layouts"))
     sets = {x["id"] for x in store.load_sets()}
+    wanted.update(check_sets(problems))
 
     def load(name):
         path = os.path.join(store.data_dir(), name)
@@ -439,6 +489,8 @@ def check_data():
                         problems.append(f"{where}: {key}: bucket key must be a string: {g['bucket']!r}")
                     elif not g["bucket"].startswith(key + "/"):
                         problems.append(f"{where}: {key}: {g['bucket']!r} isn't under {key}/")
+                    else:
+                        wanted.setdefault(where, []).append((key, g["bucket"]))
             elif not (isinstance(entry, dict) and "full_system" in entry):
                 problems.append(f"{where}: {key}: must be a list of games or {{\"full_system\": true}}")
 
@@ -457,6 +509,12 @@ def check_data():
             problems.append(f"cards.json: {name}: unknown device {entry.get('device')!r}")
         if entry.get("layout") not in layouts | {None}:
             problems.append(f"cards.json: {name}: unknown layout {entry.get('layout')!r}")
+        ids = entry.get("systems", [])
+        if not isinstance(ids, list):
+            problems.append(f"cards.json: {name}: 'systems' must be a list of system ids")
+        else:
+            problems.extend(f"cards.json: {name}: unknown system {sid!r}"
+                            for sid in ids if not isinstance(sid, str) or sid not in systems)
         if "games" in entry:
             check_list(f"cards.json: {name}", entry["games"])
     overlay = load("device-systems.json")
@@ -477,11 +535,27 @@ def check_data():
                 for sid in ids:
                     if not isinstance(sid, str) or sid not in systems:
                         problems.append(f"device-systems.json: {dev}.{key}: unknown system {sid!r}")
+    if list_keys:
+        have = {}
+        for where, pairs in wanted.items():
+            for system, key in pairs:
+                if system not in have:
+                    have[system] = list_keys(system)
+                if key not in have[system]:
+                    problems.append(f"{where}: {key!r} isn't in the bucket")
     return problems
 
 
+def bucket_lister():
+    """A callable(system id) -> bucket keys, using the read-only profile (refuses the write profile)."""
+    if runtime.PROFILE == runtime.WRITE_PROFILE:
+        ui.fail(f"--bucket-keys only reads the bucket; use the read-only profile, not {runtime.WRITE_PROFILE!r} "
+                "(--profile / ROMS_PROFILE)", 2)
+    return lambda system: {k for k in s3.list_sizes(system + "/") if not k.endswith("/")}
+
+
 def check_cmd(args):
-    problems = check_data()
+    problems = check_data(bucket_lister() if args.bucket_keys else None)
     for p in problems:
         print(ui.red(f"❌ {p}"))
     if not problems:
@@ -612,7 +686,7 @@ def build_parser():
 
     p = sub.add_parser("config", allow_abbrev=False); common(p, card=False); p.add_argument("action", choices=["show", "path"], nargs="?", default="show"); p.set_defaults(fn=config_cmd)
     p = sub.add_parser("doctor", allow_abbrev=False); common(p, card=False); p.set_defaults(fn=doctor_cmd)
-    p = sub.add_parser("check", allow_abbrev=False); common(p, card=False); p.set_defaults(fn=check_cmd)
+    p = sub.add_parser("check", allow_abbrev=False); common(p, card=False); p.add_argument("--bucket-keys", action="store_true"); p.set_defaults(fn=check_cmd)
     p = sub.add_parser("completion", allow_abbrev=False); common(p, card=False); p.add_argument("shell", choices=["bash", "zsh", "fish", "list"])
     p.add_argument("what", nargs="?"); p.set_defaults(fn=completion_cmd)
     return ap

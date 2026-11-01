@@ -1,0 +1,30 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "sync-roms games list (games.json, or the \"games\" of a card in cards.json)",
+  "type": "object",
+  "properties": {
+    "sets": {
+      "description": "Ids of whole game sets to sync",
+      "type": "array",
+      "items": {"type": "string"}
+    }
+  },
+  "additionalProperties": {
+    "description": "A system id: its games, or its whole bucket folder",
+    "oneOf": [
+      {"type": "array", "items": {"$ref": "#/definitions/game"}},
+      {"type": "object", "properties": {"full_system": {"type": "boolean"}}, "required": ["full_system"]}
+    ]
+  },
+  "definitions": {
+    "game": {
+      "type": "object",
+      "properties": {
+        "title": {"type": "string"},
+        "bucket": {"type": "string", "minLength": 1, "description": "Bucket key, under the system's folder"},
+        "note": {"type": "string"}
+      },
+      "required": ["bucket"]
+    }
+  }
+}

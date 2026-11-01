@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "sync-roms cards (cards.json): one entry per card, keyed by its folder name",
+  "type": "object",
+  "additionalProperties": {
+    "type": "object",
+    "properties": {
+      "device": {"type": "string", "description": "A device id, or \"full\" for every system"},
+      "layout": {"type": "string", "description": "A layout (firmware) name"},
+      "android_media": {"enum": ["always", "never"]},
+      "systems": {
+        "description": "System ids last picked for this card",
+        "type": "array",
+        "items": {"type": "string"}
+      },
+      "games": {"$ref": "games.schema.json", "description": "The card's extra games"}
+    }
+  }
+}

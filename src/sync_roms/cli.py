@@ -137,10 +137,11 @@ TOPICS = {
   Checks the AWS profile and bucket access, the tools `convert` needs, and that your data files parse.
 """,
     "check": """
-  sync-roms check
+  sync-roms check [--bucket-keys]
 
-  Validates games.json, cards.json, device-systems.json and the sets: bad JSON, unknown systems, devices and sets.
-  Exits 1 if anything is wrong.
+  Validates games.json, cards.json, device-systems.json and the sets (built-in and ~/.sync-roms/sets): bad JSON,
+  unknown systems, devices and sets. Exits 1 if anything is wrong.
+  --bucket-keys also lists the bucket (read-only profile) and reports every game or set file it doesn't have.
 """,
     "completion": """
   sync-roms completion bash|zsh|fish
