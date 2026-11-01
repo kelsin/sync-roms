@@ -1,6 +1,7 @@
 """Repo and personal data files: games lists, sets, cards, device overlay."""
 import json
 import os
+import re
 import shutil
 import sys
 
@@ -253,21 +254,92 @@ def save_card(name, device, layout):
     update_card(name, device=device["id"] if device else "full", layout=layout)
 
 
+def personal_sets_dir():
+    """Where the user's own set files live: <data dir>/sets/."""
+    return os.path.join(data_dir(), "sets")
+
+
+def read_set_file(path, set_id):
+    with open(path) as f:
+        data = json.load(f)
+    return {"id": set_id, "name": data.get("name", set_id),
+            "description": data.get("description", ""), "games": data.get("games", [])}
+
+
 def load_sets():
-    """Game sets from the repo's data/sets/*.json, sorted by name.
+    """Game sets from the repo's data/sets/*.json and the user's ~/.sync-roms/sets/*.json, sorted by name.
 
     Each file is {"name", "description" (optional), "games": [{"title", "system", "bucket", "files" (optional)}]}.
     "files" are extra bucket keys (e.g. the discs of a multi-disc game) toggled together with "bucket".
+    A personal file with a repo set's id, or that isn't valid JSON, is skipped with a warning.
     """
-    folder = os.path.join(REPO_DATA, "sets")
     sets = []
+    folder = os.path.join(REPO_DATA, "sets")
     for name in sorted(os.listdir(folder)) if os.path.isdir(folder) else []:
         if name.endswith(".json"):
-            with open(os.path.join(folder, name)) as f:
-                data = json.load(f)
-            sets.append({"id": name[:-5], "name": data.get("name", name[:-5]),
-                         "description": data.get("description", ""), "games": data.get("games", [])})
+            sets.append(read_set_file(os.path.join(folder, name), name[:-5]))
+    taken = {x["id"] for x in sets}
+    mine = personal_sets_dir()
+    for name in sorted(os.listdir(mine)) if os.path.isdir(mine) else []:
+        if not name.endswith(".json"):
+            continue
+        if name[:-5] in taken:
+            ui.warn(f"sets/{name}: a built-in set already has the id {name[:-5]!r}, skipped")
+            continue
+        try:
+            sets.append(read_set_file(os.path.join(mine, name), name[:-5]))
+        except (OSError, ValueError, AttributeError) as e:
+            ui.warn(f"sets/{name}: couldn't be read ({e}), skipped")
     return sorted(sets, key=lambda x: x["name"].lower())
+
+
+def set_slug(name):
+    return re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")
+
+
+def personal_set_problem(name):
+    """Why name can't be a new personal set's name, or None if it can (its id must be new, also among repo sets)."""
+    set_id = set_slug(name)
+    if not set_id:
+        return "A set needs a name with letters or digits."
+    if any(x["id"] == set_id for x in load_sets()):
+        return f"There is already a set with the id {set_id}."
+    return None
+
+
+def save_personal_set(name, systems):
+    """Write ~/.sync-roms/sets/<id>.json from the games of the given systems (sorted); returns the set id."""
+    problem = personal_set_problem(name)
+    if problem:
+        raise ValueError(problem)
+    games = [{"title": g.get("title") or os.path.splitext(g["bucket"].split("/", 1)[-1])[0], "system": s["bucket"],
+              **{k: v for k, v in g.items() if k in ("bucket", "note")}}
+             for s in sorted(systems, key=lambda x: x["bucket"]) for g in sort_games(s["games"]) if g.get("bucket")]
+    set_id = set_slug(name)
+    os.makedirs(personal_sets_dir(), exist_ok=True)
+    path = os.path.join(personal_sets_dir(), set_id + ".json")
+    with open(path + ".tmp", "w") as f:
+        json.dump({"name": name.strip(), "games": games}, f, indent=2, ensure_ascii=False)
+        f.write("\n")
+    os.replace(path + ".tmp", path)
+    return set_id
+
+
+def sort_games(games):
+    return sorted(games, key=lambda g: (str(g.get("bucket", "")).lower(), str(g.get("bucket", ""))))
+
+
+def sorted_list(raw):
+    """A games list with systems sorted ("sets" last), each system's games by bucket key and set ids alphabetical."""
+    out = {}
+    for key in sorted(raw, key=lambda k: (k == SETS_KEY, k)):
+        entry = raw[key]
+        if key == SETS_KEY and isinstance(entry, list):
+            entry = sorted(entry, key=str)
+        elif isinstance(entry, list) and all(isinstance(g, dict) for g in entry):
+            entry = sort_games(entry)
+        out[key] = entry
+    return out
 
 
 def dump_list(systems, sets_on):
@@ -285,12 +357,12 @@ def save_lists(core, cards):
         path = os.path.join(data_dir(), "games.json")
         backup(path)
         with open(path + ".tmp", "w") as f:
-            json.dump(core, f, indent=2, ensure_ascii=False)
+            json.dump(sorted_list(core), f, indent=2, ensure_ascii=False)
             f.write("\n")
         os.replace(path + ".tmp", path)
     ok = True
     for name, games in cards.items():
-        ok = update_card(name, games=games) and ok
+        ok = update_card(name, games=sorted_list(games)) and ok
     return ok
 
 

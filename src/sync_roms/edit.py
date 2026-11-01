@@ -20,6 +20,22 @@ def snapshot(data):
             for s in data["systems"]}
 
 
+def notes_snapshot(data):
+    return {g["bucket"]: g.get("note") for s in data["systems"] for g in s.get("games", []) if g.get("bucket")}
+
+
+def set_note(s, key, text):
+    """Set (or, with empty text, clear) the note of the game listed under key in system s. False if it isn't listed."""
+    game = next((g for g in s["games"] if g.get("bucket") == key), None)
+    if game is None:
+        return False
+    if text:
+        game["note"] = text
+    else:
+        game.pop("note", None)
+    return True
+
+
 FULL_SYSTEM_NOTE = "Full system: every file in its folder is synced, so it can't be toggled"
 
 
@@ -36,8 +52,18 @@ def toggle_games(title, rows, extras=None, covered=None):
              for s, key, _, _ in rows]
     locked = [bool(n) for n in notes]
     initial = [l or any(g.get("bucket") == key for g in s["games"]) for l, (s, key, _, _) in zip(locked, rows)]
+    def note_text(i):
+        game = next((g for g in rows[i][0]["games"] if g.get("bucket") == rows[i][1]), None)
+        return game.get("note", "") if game else ""
+
+    def on_note(i, text):
+        s, key = rows[i][:2]
+        if not set_note(s, key, text):
+            return "Switch the game on and press Enter first, then add its note"
+        return "Note saved" if text else "Note cleared"
+
     state = picker.filter_list(title, [label for *_, label in rows], multi=True, initial=initial, locked=locked,
-                        locked_note=[n or "" for n in notes])
+                               locked_note=[n or "" for n in notes], hint=GAMES_HINT, note_text=note_text, on_note=on_note)
     for (s, key, name, _), on, was, lock in zip(rows, state, initial, locked):
         if lock:
             continue
@@ -145,7 +171,9 @@ FULL_KEY = "\x06"  # ^F
 SETUP_KEY = "\x04"  # ^D
 DELETE_KEY = "\x18"  # ^X
 RENAME_KEY = "\x12"  # ^R
-FULL_HINT = "type to filter · ↑/↓ move · Enter open · ^F toggle {what} · Esc back"
+FULL_HINT = "Enter open · ^F {what} · Esc back · type to filter"
+MENU_HINT = "Enter open · Esc save · ^D device · ^R rename · ^X delete"
+GAMES_HINT = "Space toggle · Enter done · Esc back · ^N note · ^A all · ^O view"
 
 
 def new_target(label, raw, setup=None):
@@ -153,7 +181,8 @@ def new_target(label, raw, setup=None):
     data = {"systems": store.apply_games(store.repo_json("systems"), raw)}
     sets_on = store.list_sets(raw)
     return {"label": label, "data": data, "sets_on": sets_on, "setup": setup, "was": snapshot(data),
-            "was_full": {s["bucket"]: s["full_system"] for s in data["systems"]}, "was_sets": list(sets_on)}
+            "was_full": {s["bucket"]: s["full_system"] for s in data["systems"]}, "was_sets": list(sets_on),
+            "was_notes": notes_snapshot(data)}
 
 
 def drop_inapplicable(t, setup):
@@ -171,12 +200,44 @@ def target_changes(t):
     for s in t["data"]["systems"]:
         if s["full_system"] != t["was_full"][s["bucket"]]:
             (added if s["full_system"] else removed)[s["bucket"]] = ["(full system)"]
+    notes = notes_snapshot(t["data"])
+    for s in t["data"]["systems"]:
+        for g in s["games"]:
+            key = g.get("bucket")
+            if key in t["was_notes"] and notes[key] != t["was_notes"][key]:
+                added.setdefault(s["bucket"], []).append(f"{key} (note)")
     on, was = set(t["sets_on"]), set(t["was_sets"])
     if on - was:
         added[store.SETS_KEY] = sorted(on - was)
     if was - on:
         removed[store.SETS_KEY] = sorted(was - on)
     return added, removed
+
+
+def make_set_from_extras(t, sets, sets_by_id):
+    """Save the games in a card target's extras as a personal set and add it to the open set lists.
+
+    Returns the new set's id, or None when cancelled or there is nothing to save."""
+    systems = [s for s in t["data"]["systems"] if s["games"]]
+    if not systems:
+        note(ui.yellow("ℹ️  This card has no extra games to make a set from."))
+        return None
+    while True:
+        name = ui.ask(f"📦 Name for the new set of {sum(len(s['games']) for s in systems)} game(s) "
+                      "(empty to cancel): ").strip()
+        if not name:
+            return None
+        problem = store.personal_set_problem(name)
+        if not problem:
+            break
+        print(ui.yellow(f"  {problem}"))
+    set_id = store.save_personal_set(name, systems)
+    new = store.read_set_file(os.path.join(store.personal_sets_dir(), set_id + ".json"), set_id)
+    sets.append(new)
+    sets.sort(key=lambda x: x["name"].lower())
+    sets_by_id[set_id] = new
+    print(ui.green(f"📦 Saved set {name}") + ui.dim(f"  ({store.personal_sets_dir()}); find it under By set"))
+    return set_id
 
 
 def edit_manifest():
@@ -302,9 +363,13 @@ def edit_manifest():
             return True
 
         while True:
-            i = picker.filter_list(f"✏️  Edit {t['label']} (Esc = back)", ["By system", "By set"])
+            i = picker.filter_list(f"✏️  Edit {t['label']} (Esc = back)",
+                                   ["By system", "By set"] + (["📦 Make a set from these extras"] if is_card else []))
             if i is None:
                 break
+            if i == 2:
+                make_set_from_extras(t, sets, sets_by_id)
+                continue
             while (edit_system, edit_set)[i]():
                 pass
 
@@ -408,7 +473,7 @@ def edit_manifest():
         devices = manifest["devices"]
         extras = [[("  edited", "cyan")] if d["id"] in overlay_pending else [] for d in devices]
         i = picker.filter_list("🧩 Which device's recommended systems?", [d["name"] for d in devices], extras=extras,
-                               hint="type to filter · ↑/↓ move · Enter open · Esc back")
+                               hint="Enter open · Esc back · type to filter")
         if i is None:
             return False
         d = devices[i]
@@ -442,7 +507,7 @@ def edit_manifest():
                           + [[], [("  " + str(len(overlay_pending)) + " edited", "cyan")] if overlay_pending else [], [], []])
                 i = picker.filter_list("✏️  What do you want to edit?  (Esc = review & save)", options, extras=extras,
                                        hotkeys=(SETUP_KEY, DELETE_KEY, RENAME_KEY),
-                                       hint="type to filter · Enter open · on a card: ^D device/firmware · ^R rename · ^X delete · Esc review & save")
+                                       hint=MENU_HINT)
                 if i is None or i == n + 3:
                     return True
                 if isinstance(i, tuple):
