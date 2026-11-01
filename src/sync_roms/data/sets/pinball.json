@@ -1,0 +1,281 @@
+{
+  "name": "Pinball",
+  "description": "Pinball tables and pinball-style games across systems.",
+  "games": [
+    {
+      "title": "Pinball",
+      "system": "nes",
+      "bucket": "nes/Pinball (Japan, USA) (En).zip"
+    },
+    {
+      "title": "Pinball Quest",
+      "system": "nes",
+      "bucket": "nes/Pinball Quest (USA).zip"
+    },
+    {
+      "title": "Pinball Dreams",
+      "system": "snes",
+      "bucket": "snes/Pinball Dreams (USA).zip"
+    },
+    {
+      "title": "Pinball Fantasies",
+      "system": "snes",
+      "bucket": "snes/Pinball Fantasies (USA).zip"
+    },
+    {
+      "title": "Super Pinball: Behind the Mask",
+      "system": "snes",
+      "bucket": "snes/Super Pinball - Behind the Mask (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Sonic Spinball",
+      "system": "genesis",
+      "bucket": "genesis/Sonic Spinball (USA).zip"
+    },
+    {
+      "title": "Crüe Ball: Heavy Metal Pinball",
+      "system": "genesis",
+      "bucket": "genesis/Crue Ball - Heavy Metal Pinball (USA, Europe).zip"
+    },
+    {
+      "title": "Dragon's Fury",
+      "system": "genesis",
+      "bucket": "genesis/Dragon's Fury (USA, Europe).zip"
+    },
+    {
+      "title": "Virtual Pinball",
+      "system": "genesis",
+      "bucket": "genesis/Virtual Pinball (USA, Europe).zip"
+    },
+    {
+      "title": "Sonic Spinball",
+      "system": "gamegear",
+      "bucket": "gamegear/Sonic Spinball (USA, Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Pinball Dreams",
+      "system": "gamegear",
+      "bucket": "gamegear/Pinball Dreams (USA).zip"
+    },
+    {
+      "title": "Alien Crush",
+      "system": "tg16",
+      "bucket": "tg16/Alien Crush (USA).zip"
+    },
+    {
+      "title": "Devil's Crush",
+      "system": "tg16",
+      "bucket": "tg16/Devil's Crush (USA).zip"
+    },
+    {
+      "title": "Pinball: Revenge of the 'Gator",
+      "system": "gb",
+      "bucket": "gb/Pinball - Revenge of the 'Gator (USA, Europe).zip"
+    },
+    {
+      "title": "Kirby's Pinball Land",
+      "system": "gb",
+      "bucket": "gb/Kirby's Pinball Land (USA, Europe).zip"
+    },
+    {
+      "title": "Pinball Dreams",
+      "system": "gb",
+      "bucket": "gb/Pinball Dreams (USA, Europe).zip"
+    },
+    {
+      "title": "Pinball Fantasies",
+      "system": "gb",
+      "bucket": "gb/Pinball Fantasies (USA, Europe).zip"
+    },
+    {
+      "title": "Pokémon Pinball",
+      "system": "gbc",
+      "bucket": "gbc/Pokemon Pinball (USA, Australia) (Rumble Version) (SGB Enhanced) (GB Compatible).zip"
+    },
+    {
+      "title": "3-D Ultra Pinball: Thrillride",
+      "system": "gbc",
+      "bucket": "gbc/3-D Ultra Pinball - Thrillride (USA) (Rumble Version).zip"
+    },
+    {
+      "title": "Microsoft Pinball Arcade",
+      "system": "gbc",
+      "bucket": "gbc/Microsoft Pinball Arcade (USA).zip"
+    },
+    {
+      "title": "The Little Mermaid II: Pinball Frenzy",
+      "system": "gbc",
+      "bucket": "gbc/Little Mermaid II, The - Pinball Frenzy (USA) (En,Fr,De,Es,It) (Rumble Version).zip"
+    },
+    {
+      "title": "Mario Pinball Land",
+      "system": "gba",
+      "bucket": "gba/Mario Pinball Land (USA, Australia).zip"
+    },
+    {
+      "title": "Sonic Pinball Party",
+      "system": "gba",
+      "bucket": "gba/Sonic Pinball Party (USA) (En,Ja,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Pokémon Pinball: Ruby & Sapphire",
+      "system": "gba",
+      "bucket": "gba/Pokemon Pinball - Ruby & Sapphire (USA).zip"
+    },
+    {
+      "title": "Pac-Man Pinball Advance",
+      "system": "gba",
+      "bucket": "gba/Pac-Man Pinball Advance (USA).zip"
+    },
+    {
+      "title": "Hardcore Pinball",
+      "system": "gba",
+      "bucket": "gba/Hardcore Pinball (USA, Europe).zip"
+    },
+    {
+      "title": "Muppet Pinball Mayhem",
+      "system": "gba",
+      "bucket": "gba/Muppet Pinball Mayhem (USA).zip"
+    },
+    {
+      "title": "Pinball Tycoon",
+      "system": "gba",
+      "bucket": "gba/Pinball Tycoon (USA).zip"
+    },
+    {
+      "title": "The Pinball of the Dead",
+      "system": "gba",
+      "bucket": "gba/Pinball of the Dead, The (USA).zip"
+    },
+    {
+      "title": "Metroid Prime Pinball",
+      "system": "nds",
+      "bucket": "nds/Metroid Prime Pinball (USA).zip"
+    },
+    {
+      "title": "Dream Pinball 3D",
+      "system": "nds",
+      "bucket": "nds/Dream Pinball 3D (USA) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Flipper Critters",
+      "system": "nds",
+      "bucket": "nds/Flipper Critters (USA) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Galactic Pinball",
+      "system": "virtualboy",
+      "bucket": "virtualboy/Galactic Pinball (Japan, USA) (En).zip"
+    },
+    {
+      "title": "Video Pinball",
+      "system": "atari2600",
+      "bucket": "atari2600/Video Pinball ~ Arcade Pinball (USA).zip"
+    },
+    {
+      "title": "Pinball Jam",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Pinball Jam (USA, Europe).zip"
+    },
+    {
+      "title": "Pinball Fantasies",
+      "system": "atarijaguar",
+      "bucket": "atarijaguar/Pinball Fantasies (World).zip"
+    },
+    {
+      "title": "Ruiner Pinball",
+      "system": "atarijaguar",
+      "bucket": "atarijaguar/Ruiner Pinball (USA, Europe).zip"
+    },
+    {
+      "title": "Flipper Slipper",
+      "system": "colecovision",
+      "bucket": "colecovision/Flipper Slipper (USA, Europe).zip"
+    },
+    {
+      "title": "Hyper 3-D Pinball",
+      "system": "saturn",
+      "bucket": "saturn/Hyper 3-D Pinball (USA).chd"
+    },
+    {
+      "title": "Last Gladiators: Digital Pinball",
+      "system": "saturn",
+      "bucket": "saturn/Last Gladiators - Digital Pinball (USA) (4S).chd"
+    },
+    {
+      "title": "Pro Pinball",
+      "system": "saturn",
+      "bucket": "saturn/Pro-Pinball (USA).chd"
+    },
+    {
+      "title": "True Pinball",
+      "system": "saturn",
+      "bucket": "saturn/True Pinball (USA).chd"
+    },
+    {
+      "title": "Pro Pinball",
+      "system": "psx",
+      "bucket": "psx/Pro-Pinball (USA).chd"
+    },
+    {
+      "title": "Pro Pinball: Timeshock!",
+      "system": "psx",
+      "bucket": "psx/Pro Pinball - Timeshock! (USA).chd"
+    },
+    {
+      "title": "Pro Pinball: Big Race USA",
+      "system": "psx",
+      "bucket": "psx/Pro Pinball - Big Race USA (USA).chd"
+    },
+    {
+      "title": "Pro Pinball: Fantastic Journey",
+      "system": "psx",
+      "bucket": "psx/Pro Pinball - Fantastic Journey (USA).chd"
+    },
+    {
+      "title": "True Pinball",
+      "system": "psx",
+      "bucket": "psx/True Pinball (USA).chd"
+    },
+    {
+      "title": "Extreme Pinball",
+      "system": "psx",
+      "bucket": "psx/Extreme Pinball (USA).chd"
+    },
+    {
+      "title": "Austin Powers Pinball",
+      "system": "psx",
+      "bucket": "psx/Austin Powers Pinball (USA).chd"
+    },
+    {
+      "title": "KISS Pinball",
+      "system": "psx",
+      "bucket": "psx/KISS Pinball (USA).chd"
+    },
+    {
+      "title": "Patriotic Pinball",
+      "system": "psx",
+      "bucket": "psx/Patriotic Pinball (USA).chd"
+    },
+    {
+      "title": "Power Rangers Zeo: Full Tilt Battle Pinball",
+      "system": "psx",
+      "bucket": "psx/Saban's Power Rangers Zeo - Full Tilt Battle Pinball (USA).chd"
+    },
+    {
+      "title": "Pinball Hall of Fame: The Gottlieb Collection",
+      "system": "gc",
+      "bucket": "gc/Pinball Hall of Fame - The Gottlieb Collection (USA).rvz"
+    },
+    {
+      "title": "Pinball Hall of Fame: The Gottlieb Collection",
+      "system": "psp",
+      "bucket": "psp/Pinball Hall of Fame - The Gottlieb Collection (USA).chd"
+    },
+    {
+      "title": "Pinball Hall of Fame: The Williams Collection",
+      "system": "psp",
+      "bucket": "psp/Pinball Hall of Fame - The Williams Collection (USA).chd"
+    }
+  ]
+}
