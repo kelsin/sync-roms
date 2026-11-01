@@ -141,7 +141,7 @@ def upload_command(args):
     """Upload the ROMs in one folder (default: the current directory) to the bucket folder of a system you pick."""
     folder = os.path.abspath(os.path.expanduser(args.upload or os.getcwd()))
     if not os.path.isdir(folder):
-        raise SystemExit(ui.red(f"❌ {folder} is not a folder"))
+        ui.fail(f"{folder} is not a folder", 2)
     systems = sorted(store.load_manifest()["systems"], key=lambda s: s["name"].lower())
     guess = store.guess_system(systems, folder)
     i = picker.filter_list("☁️  Which system are you uploading?", [f"{s['name']}  ({s['bucket']}/)" for s in systems],
@@ -157,7 +157,7 @@ def upload_command(args):
         print("☁️  Listing what's already there...")
         existing = s3.list_sizes(bucket + "/")
     except (ClientError, BotoCoreError) as e:
-        raise SystemExit(ui.red(f"❌ {e}"))
+        ui.fail(f"{e}", 3)
     new, changed, same = plan_rom_upload(folder, bucket, existing)
     print(f"\n💿 New: {ui.bold(str(len(new)))} ({ui.human_size(sum(f[2] for f in new))})")
     print(f"♻️  Different size, would overwrite: {ui.bold(str(len(changed)))} ({ui.human_size(sum(f[2] for f in changed))})")
@@ -199,7 +199,7 @@ def replace_command(args, folder, system):
             lambda p, size, etag: diff.bucket_fingerprint(f"{bucket}/{p}", size, etag),
             lambda p, etag: "-" not in etag and diff.file_md5(os.path.join(folder, *p.split("/"))) != etag.strip('"'))
     except (ClientError, BotoCoreError) as e:
-        raise SystemExit(ui.red(f"❌ {e}"))
+        ui.fail(f"{e}", 3)
     print(f"\n💿 New: {ui.bold(str(len(new)))} ({ui.human_size(sum(local[p] for p in new))})")
     print(f"♻️  Different content, would overwrite: {ui.bold(str(len(changed)))} ({ui.human_size(sum(local[p] for p in changed))})")
     print(f"🚚 Renamed, would move in the bucket: {ui.bold(str(len(renames)))}")

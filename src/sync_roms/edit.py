@@ -6,9 +6,34 @@ from concurrent.futures import ThreadPoolExecutor
 from . import picker, runtime, s3, store, ui
 
 
+def note(text):
+    """Say something outside the curses screen and wait, so the next redraw doesn't erase it."""
+    print(text)
+    try:
+        input(ui.dim("   Press Enter to continue "))
+    except EOFError:
+        pass
+
+
 def snapshot(data):
     return {s["bucket"]: {g["bucket"] for g in s.get("games", []) if g.get("bucket")}
             for s in data["systems"]}
+
+
+def notes_snapshot(data):
+    return {g["bucket"]: g.get("note") for s in data["systems"] for g in s.get("games", []) if g.get("bucket")}
+
+
+def set_note(s, key, text):
+    """Set (or, with empty text, clear) the note of the game listed under key in system s. False if it isn't listed."""
+    game = next((g for g in s["games"] if g.get("bucket") == key), None)
+    if game is None:
+        return False
+    if text:
+        game["note"] = text
+    else:
+        game.pop("note", None)
+    return True
 
 
 FULL_SYSTEM_NOTE = "Full system: every file in its folder is synced, so it can't be toggled"
@@ -27,8 +52,18 @@ def toggle_games(title, rows, extras=None, covered=None):
              for s, key, _, _ in rows]
     locked = [bool(n) for n in notes]
     initial = [l or any(g.get("bucket") == key for g in s["games"]) for l, (s, key, _, _) in zip(locked, rows)]
+    def note_text(i):
+        game = next((g for g in rows[i][0]["games"] if g.get("bucket") == rows[i][1]), None)
+        return game.get("note", "") if game else ""
+
+    def on_note(i, text):
+        s, key = rows[i][:2]
+        if not set_note(s, key, text):
+            return "Switch the game on and press Enter first, then add its note"
+        return "Note saved" if text else "Note cleared"
+
     state = picker.filter_list(title, [label for *_, label in rows], multi=True, initial=initial, locked=locked,
-                        locked_note=[n or "" for n in notes])
+                               locked_note=[n or "" for n in notes], hint=GAMES_HINT, note_text=note_text, on_note=on_note)
     for (s, key, name, _), on, was, lock in zip(rows, state, initial, locked):
         if lock:
             continue
@@ -59,8 +94,8 @@ def edit_card_system(card, bucket, setup):
     s = next(x for x in t["data"]["systems"] if x["bucket"] == bucket)
     full, keys = cover_notes({x["id"]: x for x in store.load_sets()}, t["sets_on"], store.personal_json("games.json"))
     if s.get("full_system") or bucket in full:
-        print(ui.yellow(f"ℹ️  {s['name']} is a full system: every file in its bucket folder is downloaded, "
-                        "so there is no game list to edit."))
+        note(ui.yellow(f"ℹ️  {s['name']} is a full system: every file in its bucket folder is downloaded, "
+                       "so there is no game list to edit."))
         return False
     in_bucket = {k for k in s3.list_sizes(bucket + "/") if not k.endswith("/")}
     toggle_games(f"✏️  {s['name']} — ✅ in {card}'s extras, ⬜ in bucket only", system_rows(s, in_bucket),
@@ -134,7 +169,11 @@ def toggle_full_system(s):
 
 FULL_KEY = "\x06"  # ^F
 SETUP_KEY = "\x04"  # ^D
-FULL_HINT = "type to filter · ↑/↓ move · Enter open · ^F toggle {what} · Esc back"
+DELETE_KEY = "\x18"  # ^X
+RENAME_KEY = "\x12"  # ^R
+FULL_HINT = "Enter open · ^F {what} · Esc back · type to filter"
+MENU_HINT = "Enter open · Esc save · ^D device · ^R rename · ^X delete"
+GAMES_HINT = "Space toggle · Enter done · Esc back · ^N note · ^A all · ^O view"
 
 
 def new_target(label, raw, setup=None):
@@ -142,7 +181,8 @@ def new_target(label, raw, setup=None):
     data = {"systems": store.apply_games(store.repo_json("systems"), raw)}
     sets_on = store.list_sets(raw)
     return {"label": label, "data": data, "sets_on": sets_on, "setup": setup, "was": snapshot(data),
-            "was_full": {s["bucket"]: s["full_system"] for s in data["systems"]}, "was_sets": list(sets_on)}
+            "was_full": {s["bucket"]: s["full_system"] for s in data["systems"]}, "was_sets": list(sets_on),
+            "was_notes": notes_snapshot(data)}
 
 
 def drop_inapplicable(t, setup):
@@ -160,6 +200,12 @@ def target_changes(t):
     for s in t["data"]["systems"]:
         if s["full_system"] != t["was_full"][s["bucket"]]:
             (added if s["full_system"] else removed)[s["bucket"]] = ["(full system)"]
+    notes = notes_snapshot(t["data"])
+    for s in t["data"]["systems"]:
+        for g in s["games"]:
+            key = g.get("bucket")
+            if key in t["was_notes"] and notes[key] != t["was_notes"][key]:
+                added.setdefault(s["bucket"], []).append(f"{key} (note)")
     on, was = set(t["sets_on"]), set(t["was_sets"])
     if on - was:
         added[store.SETS_KEY] = sorted(on - was)
@@ -168,9 +214,38 @@ def target_changes(t):
     return added, removed
 
 
+def make_set_from_extras(t, sets, sets_by_id):
+    """Save the games in a card target's extras as a personal set and add it to the open set lists.
+
+    Returns the new set's id, or None when cancelled or there is nothing to save."""
+    systems = [s for s in t["data"]["systems"] if s["games"]]
+    if not systems:
+        note(ui.yellow("ℹ️  This card has no extra games to make a set from."))
+        return None
+    while True:
+        name = ui.ask(f"📦 Name for the new set of {sum(len(s['games']) for s in systems)} game(s) "
+                      "(empty to cancel): ").strip()
+        if not name:
+            return None
+        problem = store.personal_set_problem(name)
+        if not problem:
+            break
+        print(ui.yellow(f"  {problem}"))
+    set_id = store.save_personal_set(name, systems)
+    new = store.read_set_file(os.path.join(store.personal_sets_dir(), set_id + ".json"), set_id)
+    sets.append(new)
+    sets.sort(key=lambda x: x["name"].lower())
+    sets_by_id[set_id] = new
+    print(ui.green(f"📦 Saved set {name}") + ui.dim(f"  ({store.personal_sets_dir()}); find it under By set"))
+    return set_id
+
+
 def edit_manifest():
     """Add/remove games in the core list or a card's extras (browsing by system or by set), then save them."""
     print(ui.bold("✏️  Edit mode") + ui.dim(f"  read={runtime.PROFILE}"))
+    if not store.cards_readable():
+        ui.fail(f"{os.path.join(store.data_dir(), 'cards.json')} isn't valid JSON, so nothing could be saved. "
+                "Fix or move it first.", 3)
     manifest = store.load_manifest()  # also seeds games.json
     core_raw = store.personal_json("games.json")
     repo_systems = store.repo_json("systems")
@@ -201,7 +276,8 @@ def edit_manifest():
                  if is_card else None)
         systems_all = [s for s in t["data"]["systems"] if not setup or store.system_applies(s, *setup)]
         by_bucket = {s["bucket"]: s for s in systems_all}
-        systems = sorted((s for s in systems_all if bucket_keys[s["bucket"]]), key=lambda s: s["name"].lower())
+        systems = sorted((s for s in systems_all if bucket_keys[s["bucket"]] or s["games"] or s.get("full_system")),
+                         key=lambda s: s["name"].lower())
         where = "games.json" if not is_card else f"{t['label']}'s extras"
         pos = {"system": 0, "set": 0}
 
@@ -238,15 +314,15 @@ def edit_manifest():
                 pos["system"] = i[1]
                 s = systems[i[1]]
                 if s["bucket"] in full:
-                    print(ui.yellow(f"ℹ️  {s['name']} is a full system in core, so it can't be changed here."))
+                    note(ui.yellow(f"ℹ️  {s['name']} is a full system in core, so it can't be changed here."))
                 else:
                     toggle_full_system(s)
                 return True
             pos["system"] = i
             s = systems[i]
             if s.get("full_system") or s["bucket"] in full:
-                print(ui.yellow(f"ℹ️  {s['name']} is a full system: every file in its bucket folder is "
-                             "downloaded, so there is no game list to edit."))
+                note(ui.yellow(f"ℹ️  {s['name']} is a full system: every file in its bucket folder is "
+                               "downloaded, so there is no game list to edit."))
                 return True
             toggle_games(f"✏️  {s['name']} — ✅ in {where}, ⬜ in bucket only",
                          system_rows(s, bucket_keys[s["bucket"]]),
@@ -255,7 +331,7 @@ def edit_manifest():
 
         def edit_set():
             if not sets:
-                print(ui.yellow("ℹ️  No game sets found."))
+                note(ui.yellow("ℹ️  No game sets found."))
                 return False
             full, keys = cover()
             labels, extras = [], []
@@ -279,16 +355,21 @@ def edit_manifest():
             rows = set_rows(sets[i], by_bucket, lambda s: bucket_keys[s["bucket"]])
             if rows:
                 files = {g["bucket"]: g["files"] for g in sets[i]["games"] if g.get("bucket") and g.get("files")}
-                toggle_games(f"✏️  {sets[i]['name']} — ✅ in {where}, ⬜ not", rows, files,
+                ref = "  📦 full set (^F on the set list to stop syncing all of it)" if sets[i]["id"] in t["sets_on"] else ""
+                toggle_games(f"✏️  {sets[i]['name']} — ✅ in {where}, ⬜ not{ref}", rows, files,
                              covered=lambda s, key: full.get(s["bucket"]) or keys.get(key))
             else:
-                print(ui.yellow(f"ℹ️  {sets[i]['name']} has no games to toggle."))
+                note(ui.yellow(f"ℹ️  {sets[i]['name']} has no games to toggle."))
             return True
 
         while True:
-            i = picker.filter_list(f"✏️  Edit {t['label']} (Esc = back)", ["By system", "By set"])
+            i = picker.filter_list(f"✏️  Edit {t['label']} (Esc = back)",
+                                   ["By system", "By set"] + (["📦 Make a set from these extras"] if is_card else []))
             if i is None:
                 break
+            if i == 2:
+                make_set_from_extras(t, sets, sets_by_id)
+                continue
             while (edit_system, edit_set)[i]():
                 pass
 
@@ -304,13 +385,16 @@ def edit_manifest():
     def add_card():
         existing = set(store.load_cards()) | set(targets)
         while True:
-            name = input("➕ New card name (its folder name, empty to cancel): ").strip()
+            name = ui.ask("➕ New card: its folder name, e.g. RGSP (a path works too; empty to cancel): ").strip()
             if not name:
                 return
+            if "/" in name:
+                name = os.path.basename(os.path.normpath(name))
             problem = valid_card_name(name, existing)
             if not problem:
                 break
             print(ui.yellow(f"  {problem}"))
+        print(ui.dim("  Next: pick the device, then its firmware (Esc steps back or cancels)."))
         try:
             setup = picker.choose_setup(manifest)
         except SystemExit:
@@ -318,6 +402,10 @@ def edit_manifest():
         targets[name] = new_target(name, {}, setup)
         new_cards.add(name)
         edit_target(targets[name], True)
+        if not any(target_changes(targets[name])) and not ui.confirm(
+                f"Keep new card {name} with no extra games? (it saves just the device and firmware)"):
+            del targets[name]
+            new_cards.discard(name)
 
     def change_setup(name):
         """Pick a different device and firmware for a card; saved with the other changes."""
@@ -332,6 +420,32 @@ def edit_manifest():
         targets[name]["setup"] = setup
         drop_inapplicable(targets[name], setup)
 
+    def delete_card(name):
+        if not ui.confirm(f"🗑️  Delete card {name} and its extra games now? (cards.json.bak keeps the copy from before this run)", default=False):
+            return
+        if name in store.load_cards():
+            store.delete_card(name)
+        targets.pop(name, None)
+        new_cards.discard(name)
+
+    def rename_card(name):
+        if name not in store.load_cards():
+            note(ui.yellow("ℹ️  Save this new card first, then rename it."))
+            return
+        new = ui.ask(f"✏️  New folder name for {name} (empty to cancel): ").strip()
+        if not new:
+            return
+        problem = valid_card_name(new, set(store.load_cards()) | set(targets))
+        if problem:
+            note(ui.yellow(f"  {problem}"))
+            return
+        cards = store.load_cards()
+        cards[new] = cards.pop(name)
+        if store.write_cards(cards) and name in targets:
+            t = targets.pop(name)
+            t["label"] = f"💳 {new}"
+            targets[new] = t
+
     def setup_extra(name):
         """The card's device and firmware as a row suffix; a pending change in cyan."""
         t = targets.get(name)
@@ -342,49 +456,132 @@ def edit_manifest():
         return [(f"  {setup[0]['name'] if setup[0] else 'Full'} · {manifest['layouts'][setup[1]]['label']}",
                  "cyan" if pending else "dim")]
 
-    while True:
-        cards = sorted(set(store.load_cards()) | {k for k in targets if k is not None})
-        options = ["🏠 Core (every card)"] + [f"💳 {name}" for name in cards] + ["➕ New card"]
-        extras = [[]] + [setup_extra(name) for name in cards] + [[]]
-        i = picker.filter_list("✏️  What do you want to edit? (Esc = finish)", options, extras=extras, hotkeys=(SETUP_KEY,),
-                        hint="type to filter · ↑/↓ move · Enter open · ^D change a card's device/firmware · Esc finish")
+    def pending_count(key):
+        t = targets.get(key)
+        return sum(len(v) for part in target_changes(t) for v in part.values()) if t else 0
+
+    def pending_extra(key):
+        n = pending_count(key)
+        return [(f"  {n} change(s)", "cyan")] if n else []
+
+    overlay_pending = {}  # device id -> (system ids added, system ids removed) relative to the repo defaults
+
+    def edit_device_systems():
+        """Pick a device, then toggle which systems it recommends; saved as the add/remove overlay."""
+        defaults = store.repo_json("device-systems")
+        names = {s["bucket"]: s["name"] for s in manifest["systems"]}
+        devices = manifest["devices"]
+        extras = [[("  edited", "cyan")] if d["id"] in overlay_pending else [] for d in devices]
+        i = picker.filter_list("🧩 Which device's recommended systems?", [d["name"] for d in devices], extras=extras,
+                               hint="Enter open · Esc back · type to filter")
         if i is None:
-            break
-        if isinstance(i, tuple):
-            if 0 < i[1] < len(options) - 1:
-                change_setup(cards[i[1] - 1])
+            return False
+        d = devices[i]
+        base = defaults.get(d["id"], {}).get("systems", [])
+        ids = sorted(names, key=lambda x: names[x].lower())
+        labels = [f"{names[x]}" + ("" if x in base else "  (not in the default)") for x in ids]
+        state = picker.filter_list(f"🧩 {d['name']} — ✅ synced for this device", labels, multi=True,
+                                   initial=[x in d["systems"] for x in ids])
+        now = {x for x, on in zip(ids, state) if on}
+        add, remove = sorted(now - set(base)), sorted(set(base) - now)
+        overlay_file = os.path.join(store.data_dir(), "device-systems.json")
+        saved_all = store.personal_json("device-systems.json") if os.path.exists(overlay_file) else {}
+        saved_overlay = saved_all.get(d["id"]) if isinstance(saved_all, dict) else None
+        saved_overlay = saved_overlay if isinstance(saved_overlay, dict) else {}
+        if (add, remove) == (sorted(saved_overlay.get("add", [])), sorted(saved_overlay.get("remove", []))):
+            overlay_pending.pop(d["id"], None)  # nothing changed from what is saved
+        elif add or remove or saved_overlay:
+            overlay_pending[d["id"]] = (add, remove)  # ([], []) drops the saved entry
+        d["systems"] = [x for x in base if x in now] + [x for x in ids if x in now and x not in base]
+        return True
+
+    def menu():
+        """The top menu. Returns True to review and save, False to quit without saving."""
+        try:
+            while True:
+                cards = sorted(set(store.load_cards()) | {k for k in targets if k is not None})
+                n = len(cards)
+                options = (["🏠 Core (every card)"] + [f"💳 {name}" for name in cards]
+                           + ["➕ New card", "🧩 Device systems", "✅ Done (review & save)", "🚪 Quit without saving"])
+                extras = ([pending_extra(None)] + [setup_extra(name) + pending_extra(name) for name in cards]
+                          + [[], [("  " + str(len(overlay_pending)) + " edited", "cyan")] if overlay_pending else [], [], []])
+                i = picker.filter_list("✏️  What do you want to edit?  (Esc = review & save)", options, extras=extras,
+                                       hotkeys=(SETUP_KEY, DELETE_KEY, RENAME_KEY),
+                                       hint=MENU_HINT)
+                if i is None or i == n + 3:
+                    return True
+                if isinstance(i, tuple):
+                    if 0 < i[1] <= n:
+                        {SETUP_KEY: change_setup, DELETE_KEY: delete_card, RENAME_KEY: rename_card}[i[0]](cards[i[1] - 1])
+                    continue
+                if i == 0:
+                    open_target(None, "🏠 Core", False)
+                elif i <= n:
+                    open_target(cards[i - 1], f"💳 {cards[i - 1]}", True)
+                elif i == n + 1:
+                    add_card()
+                elif i == n + 2:
+                    while edit_device_systems():
+                        pass
+                else:
+                    if not changed_targets() and not overlay_pending or ui.confirm("Discard your pending changes and quit?", default=False):
+                        return False
+        except KeyboardInterrupt:
+            print(ui.yellow("\n🛑 Interrupted — your pending changes are kept; review them below."))
+            return True
+
+    def changed_targets():
+        return {k: t for k, t in targets.items() if t["setup"] or any(target_changes(t))}
+
+    def print_changes(changed, cap):
+        print(ui.bold("\n📝 Changes"))
+        for key, t in changed.items():
+            added, removed = target_changes(t)
+            print(ui.bold(f"  {t['label']}") + (ui.dim("  (new card)") if key in new_cards else ui.dim("  (device/firmware)") if t["setup"] else ""))
+            for label, group, sign, col in (("added", added, "➕", ui.green), ("removed", removed, "➖", ui.red)):
+                for esde, ks in group.items():
+                    print(col(f"  {sign} {esde}: {len(ks)} {label}"))
+                    for k in ks[:cap]:
+                        print(ui.dim(f"       {k.split('/', 1)[1] if '/' in k else k}"))
+                    if len(ks) > cap:
+                        print(ui.dim(f"       … and {len(ks) - cap} more"))
+        for dev_id, (add, remove) in overlay_pending.items():
+            dev = next(d for d in manifest["devices"] if d["id"] == dev_id)
+            print(ui.bold(f"  🧩 {dev['name']} (device-systems.json)"))
+            for sid in add:
+                print(ui.green(f"  ➕ {sid}"))
+            for sid in remove:
+                print(ui.red(f"  ➖ {sid}"))
+        print(ui.dim("  (Removing only drops a game from the list; the file stays in the bucket.)"))
+
+    while True:
+        if not menu():
+            print(ui.yellow("👋 Quit without saving."))
+            return 0
+        changed = changed_targets()
+        if not changed and not overlay_pending:
+            print(ui.yellow("👋 No changes, nothing saved."))
+            return 0
+        print_changes(changed, runtime.MAX_MISSING_SHOWN)
+        answer = ui.choose("💾 Save these changes?", "sedl", "s", "s save · e keep editing · d discard · l list every change")
+        while answer == "l":
+            print_changes(changed, 10 ** 6)
+            answer = ui.choose("💾 Save these changes?", "sed", "s", "s save · e keep editing · d discard")
+        if answer == "e":
             continue
-        if i == 0:
-            open_target(None, "🏠 Core", False)
-        elif i == len(options) - 1:
-            add_card()
-        else:
-            open_target(cards[i - 1], f"💳 {cards[i - 1]}", True)
-
-    changed = {k: t for k, t in targets.items() if t["setup"] or any(target_changes(t))}
-    if not changed:
-        print(ui.yellow("👋 No changes, nothing saved."))
-        return 0
-    print(ui.bold("\n📝 Changes"))
-    for key, t in changed.items():
-        added, removed = target_changes(t)
-        print(ui.bold(f"  {t['label']}") + (ui.dim("  (new card)") if key in new_cards else ui.dim("  (device/firmware)") if t["setup"] else ""))
-        for label, group, sign, col in (("added", added, "➕", ui.green), ("removed", removed, "➖", ui.red)):
-            for esde, ks in group.items():
-                print(col(f"  {sign} {esde}: {len(ks)} {label}"))
-                for k in ks[:runtime.MAX_MISSING_SHOWN]:
-                    print(ui.dim(f"       {k.split('/', 1)[1] if '/' in k else k}"))
-                if len(ks) > runtime.MAX_MISSING_SHOWN:
-                    print(ui.dim(f"       … and {len(ks) - runtime.MAX_MISSING_SHOWN} more"))
-    print(ui.dim("  (Removing only drops a game from the list; the file stays in the bucket.)"))
-
-    if not ui.confirm("💾 Save these changes?"):
-        print(ui.yellow("👋 Not saved."))
-        return 0
+        if answer == "d":
+            print(ui.yellow("👋 Not saved."))
+            return 0
+        break
     for key, t in changed.items():
         if t["setup"]:
             store.save_card(key, *t["setup"])
-    store.save_lists(store.dump_list(targets[None]["data"]["systems"], targets[None]["sets_on"]) if None in changed else None,
+    saved = store.save_lists(store.dump_list(targets[None]["data"]["systems"], targets[None]["sets_on"]) if None in changed else None,
                {k: store.dump_list(t["data"]["systems"], t["sets_on"]) for k, t in changed.items() if k is not None})
-    print(ui.green("🎉 Saved"))
+    if overlay_pending:
+        store.save_overlay(overlay_pending)
+    if not saved:
+        print(ui.red("❌ Some changes were not saved (see above)."))
+        return 3
+    print(ui.green("🎉 Saved") + ui.dim(f"  ({store.data_dir()}; versions from before this run kept as .bak)"))
     return 0

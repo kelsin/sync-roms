@@ -6,6 +6,7 @@ BUCKET = None  # set by ensure_bucket() from settings.json
 ENDPOINT = None  # custom S3 endpoint URL from settings.json; None means AWS
 PROFILE = os.environ.get("ROMS_PROFILE", "roms-readonly")
 WRITE_PROFILE = os.environ.get("ROMS_WRITE_PROFILE", "roms")
+OVERRIDES = {}  # settings given as command-line flags (bucket, endpoint, profile, write_profile); see usersettings.resolve_settings
 WORKERS = 8
 MAX_MISSING_SHOWN = 5
 MIRROR_MARKER = ".sync-roms-mirror"  # only folders holding this file are ever written to or pruned as a mirror

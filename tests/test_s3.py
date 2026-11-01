@@ -94,7 +94,7 @@ class S3Test(unittest.TestCase):
                 contextlib.redirect_stdout(io.StringIO()):
             with self.assertRaises(SystemExit) as cm:
                 scrape_files.clean_scrapes(mock.Mock(dry_run=True))
-        self.assertIn("AccessDenied", str(cm.exception.code))
+        self.assertEqual(cm.exception.code, 3)
 
 
 class ProfileTest(unittest.TestCase):
@@ -106,7 +106,7 @@ class ProfileTest(unittest.TestCase):
             with mock.patch.dict(os.environ, env), mock.patch.dict(s3._s3, {}, clear=True):
                 with self.assertRaises(SystemExit) as cm:
                     s3.s3_client("no-such-profile")
-        self.assertIn("no-such-profile", str(cm.exception.code))
+        self.assertEqual(cm.exception.code, 3)
 
 
 class MirrorListTest(unittest.TestCase):

@@ -1,5 +1,7 @@
 """Download planning, running and local ROM scanning."""
 import os
+import re
+import time
 from concurrent.futures import ThreadPoolExecutor, TimeoutError as FutureTimeout
 
 from . import external, runtime, s3, ui
@@ -28,17 +30,38 @@ def plan_downloads(jobs, unzip=False):
             and not (unzip and archive_extracted(p))]
 
 
-def run_downloads(todo, label, icon, base):
+def failure_hint(error):
+    """A short pointer for the common S3 failures; empty when there's nothing useful to add."""
+    text = str(error)
+    if "403" in text or "AccessDenied" in text or "Forbidden" in text:
+        return " (access denied: check the profile can read this bucket)"
+    if "404" in text or "NoSuchKey" in text or "Not Found" in text:
+        return " (not in the bucket any more)"
+    if "No space left" in text:
+        return " (the card is full)"
+    if "timed out" in text.lower() or "Could not connect" in text:
+        return " (network problem: re-run to retry)"
+    return ""
+
+
+def hard_exit():
+    """Leave at once, without waiting for in-flight downloads (a second ^C)."""
+    os._exit(130)
+
+
+def run_downloads(todo, label, icon, base, failures=None):
+    """Download the jobs; returns the number that failed. failures, if given, collects (key, reason) for each."""
     if not todo:
         print(ui.green(f"{icon} {label}: nothing to download ✨"))
         return 0
     print(ui.bold(f"\n{icon} {label}: downloading {len(todo)} file(s)"))
     failed = 0
+    futs = []
     ex = ThreadPoolExecutor(runtime.WORKERS)
     moved = ui.ByteProgress([j[2] for j in todo])
     bar = ui.ProgressBar(len(todo), moved.fraction, sum(moved.size))
     try:
-        futs = [(j, ex.submit(s3.download, j, lambda n, i=i: moved.add(i, n))) for i, j in enumerate(todo)]
+        futs += [(j, ex.submit(s3.download, j, lambda n, i=i: moved.add(i, n))) for i, j in enumerate(todo)]
         for i, (j, f) in enumerate(futs, 1):
             prog = ui.dim(f"[{i}/{len(todo)}]")
             try:
@@ -56,10 +79,23 @@ def run_downloads(todo, label, icon, base):
             except Exception as e:
                 failed += 1
                 moved.finish(i - 1)
-                bar.say(f"  {prog} ❌ {ui.red(j[0])}: {(getattr(e, 'stderr', None) or str(e)).strip()}")
+                reason = (getattr(e, 'stderr', None) or str(e)).strip() + failure_hint(e)
+                if failures is not None:
+                    failures.append((j[0], reason))
+                bar.say(f"  {prog} ❌ {ui.red(j[0])}: {reason}")
             bar.draw(i)
     except KeyboardInterrupt:
-        bar.say(ui.yellow("🛑 Interrupted — dropping queued downloads, finishing the ones in flight..."))
+        ex.shutdown(wait=False, cancel_futures=True)
+        running = [f for _, f in futs if f.running()]
+        bar.say(ui.yellow(f"🛑 Interrupted — finishing {len(running)} download(s) in flight (partly downloaded files restart on the next run). ^C again to abort now."))
+        try:
+            while any(f.running() for f in running):
+                bar.draw(sum(f.done() for _, f in futs))
+                time.sleep(0.25)
+        except KeyboardInterrupt:
+            bar.clear()
+            print(ui.red("🛑 Aborted"))
+            hard_exit()
         raise
     finally:
         ex.shutdown(wait=True, cancel_futures=True)
@@ -77,6 +113,7 @@ IGNORED_ROOT_FILES = {
 IGNORED_ROOT_DIRS = {"images", "videos", "manuals",                # Batocera / Knulli scraped media
                      "imgs"}                                       # Onion scraped box art
 IGNORED_FILES = {"thumbs.db", "desktop.ini"}                       # Windows
+TEMP_DOWNLOAD = re.compile(r"\.(?:part|[0-9a-fA-F]{8})$")             # a download in progress or cut short (boto3 temp name)
 # Dotfiles/folders that are OS litter; walk_roms(keep_dotfiles=True) drops only these (and "._*" AppleDouble files).
 SYSTEM_DOT_NAMES = {".ds_store", ".localized", ".nomedia", ".appledouble", ".spotlight-v100", ".trashes",
                     ".fseventsd", ".temporaryitems", ".documentrevisions-v100", ".volumeicon.icns"}
@@ -97,7 +134,7 @@ def walk_roms(dest, keep_dotfiles=False):
         dirs[:] = [d for d in dirs
                    if not hidden(d) and not (at_root and d.lower() in IGNORED_ROOT_DIRS)]
         files = [f for f in files
-                 if not hidden(f) and f.lower() not in IGNORED_FILES
+                 if not hidden(f) and f.lower() not in IGNORED_FILES and not TEMP_DOWNLOAD.search(f)
                  and not (at_root and f.lower() in IGNORED_ROOT_FILES)]
         yield root, files
 

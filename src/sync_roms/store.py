@@ -1,6 +1,7 @@
 """Repo and personal data files: games lists, sets, cards, device overlay."""
 import json
 import os
+import re
 import shutil
 import sys
 
@@ -17,8 +18,23 @@ def repo_json(name):
 
 
 def personal_json(name):
-    with open(os.path.join(data_dir(), name)) as f:
-        return json.load(f)
+    path = os.path.join(data_dir(), name)
+    try:
+        with open(path) as f:
+            return json.load(f)
+    except ValueError as e:
+        ui.fail(f"{path} isn't valid JSON ({e}). Fix it, or move it aside to start fresh.")
+
+
+_backed_up = set()
+
+
+def backup(path):
+    """Keep the file's contents from before this run next to it as <name>.bak (local only) before it is first rewritten.
+    Later writes in the same run leave the .bak alone, so it stays a recovery copy."""
+    if path not in _backed_up and os.path.exists(path):
+        _backed_up.add(path)
+        shutil.copyfile(path, path + ".bak")
 
 
 def seed_personal_files():
@@ -171,7 +187,7 @@ def available_keys(s, have):
 
 
 def data_dir():
-    """Per-user data folder for this script."""
+    """Per-user data folder for sync-roms."""
     if sys.platform == "win32":
         return os.path.join(os.environ.get("APPDATA") or os.path.expanduser("~"), "sync-roms")
     xdg = os.environ.get("XDG_DATA_HOME")
@@ -179,13 +195,30 @@ def data_dir():
 
 
 def load_cards():
-    """Saved {root folder name: {"device": device id or "full", "layout": layout name, "android_media": "always" or "never"}}."""
+    """Saved {root folder name: {"device": device id or "full", "layout": layout name, "android_media": "always" or "never", "systems": [system ids last picked]}}."""
     try:
         with open(os.path.join(data_dir(), "cards.json")) as f:
             cards = json.load(f)
-    except (OSError, ValueError):
+    except OSError:
+        return {}
+    except ValueError as e:
+        if "cards" not in _warned:
+            _warned.add("cards")
+            ui.warn(f"cards.json isn't valid JSON ({e}); ignoring it and leaving it untouched")
         return {}
     return cards if isinstance(cards, dict) else {}
+
+
+def cards_readable():
+    """False when cards.json exists but can't be parsed, so it must not be overwritten."""
+    path = os.path.join(data_dir(), "cards.json")
+    if not os.path.exists(path):
+        return True
+    try:
+        with open(path) as f:
+            return isinstance(json.load(f), dict)
+    except (OSError, ValueError):
+        return False
 
 
 def update_card(name, **values):
@@ -193,33 +226,125 @@ def update_card(name, **values):
     cards = load_cards()
     entry = cards.get(name)
     cards[name] = {**(entry if isinstance(entry, dict) else {}), **values}
+    return write_cards(cards)
+
+
+def write_cards(cards):
+    """Write cards.json (keeping the one from before this run as cards.json.bak), unless the existing file can't be parsed."""
+    path = os.path.join(data_dir(), "cards.json")
+    if not cards_readable():
+        ui.warn(f"Not saving: {path} isn't valid JSON and would be overwritten. Fix or move it first.")
+        return False
     try:
         os.makedirs(data_dir(), exist_ok=True)
-        with open(os.path.join(data_dir(), "cards.json"), "w") as f:
+        backup(path)
+        with open(path + ".tmp", "w") as f:
             json.dump(cards, f, indent=2, sort_keys=True)
+        os.replace(path + ".tmp", path)
     except OSError as e:
         print(ui.yellow(f"  ⚠️  Couldn't remember this setting: {e}"))
+        return False
+    return True
+
+
+def delete_card(name):
+    cards = load_cards()
+    if name in cards:
+        del cards[name]
+        return write_cards(cards)
+    return False
 
 
 def save_card(name, device, layout):
     update_card(name, device=device["id"] if device else "full", layout=layout)
 
 
+def personal_sets_dir():
+    """Where the user's own set files live: <data dir>/sets/."""
+    return os.path.join(data_dir(), "sets")
+
+
+def read_set_file(path, set_id):
+    with open(path) as f:
+        data = json.load(f)
+    return {"id": set_id, "name": data.get("name", set_id),
+            "description": data.get("description", ""), "games": data.get("games", [])}
+
+
 def load_sets():
-    """Game sets from the repo's data/sets/*.json, sorted by name.
+    """Game sets from the repo's data/sets/*.json and the user's ~/.sync-roms/sets/*.json, sorted by name.
 
     Each file is {"name", "description" (optional), "games": [{"title", "system", "bucket", "files" (optional)}]}.
     "files" are extra bucket keys (e.g. the discs of a multi-disc game) toggled together with "bucket".
+    A personal file with a repo set's id, or that isn't valid JSON, is skipped with a warning.
     """
-    folder = os.path.join(REPO_DATA, "sets")
     sets = []
+    folder = os.path.join(REPO_DATA, "sets")
     for name in sorted(os.listdir(folder)) if os.path.isdir(folder) else []:
         if name.endswith(".json"):
-            with open(os.path.join(folder, name)) as f:
-                data = json.load(f)
-            sets.append({"id": name[:-5], "name": data.get("name", name[:-5]),
-                         "description": data.get("description", ""), "games": data.get("games", [])})
+            sets.append(read_set_file(os.path.join(folder, name), name[:-5]))
+    taken = {x["id"] for x in sets}
+    mine = personal_sets_dir()
+    for name in sorted(os.listdir(mine)) if os.path.isdir(mine) else []:
+        if not name.endswith(".json"):
+            continue
+        if name[:-5] in taken:
+            ui.warn(f"sets/{name}: a built-in set already has the id {name[:-5]!r}, skipped")
+            continue
+        try:
+            sets.append(read_set_file(os.path.join(mine, name), name[:-5]))
+        except (OSError, ValueError, AttributeError) as e:
+            ui.warn(f"sets/{name}: couldn't be read ({e}), skipped")
     return sorted(sets, key=lambda x: x["name"].lower())
+
+
+def set_slug(name):
+    return re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")
+
+
+def personal_set_problem(name):
+    """Why name can't be a new personal set's name, or None if it can (its id must be new, also among repo sets)."""
+    set_id = set_slug(name)
+    if not set_id:
+        return "A set needs a name with letters or digits."
+    if any(x["id"] == set_id for x in load_sets()):
+        return f"There is already a set with the id {set_id}."
+    return None
+
+
+def save_personal_set(name, systems):
+    """Write ~/.sync-roms/sets/<id>.json from the games of the given systems (sorted); returns the set id."""
+    problem = personal_set_problem(name)
+    if problem:
+        raise ValueError(problem)
+    games = [{"title": g.get("title") or os.path.splitext(g["bucket"].split("/", 1)[-1])[0], "system": s["bucket"],
+              **{k: v for k, v in g.items() if k in ("bucket", "note")}}
+             for s in sorted(systems, key=lambda x: x["bucket"]) for g in sort_games(s["games"]) if g.get("bucket")]
+    set_id = set_slug(name)
+    os.makedirs(personal_sets_dir(), exist_ok=True)
+    path = os.path.join(personal_sets_dir(), set_id + ".json")
+    with open(path + ".tmp", "w") as f:
+        json.dump({"name": name.strip(), "games": games}, f, indent=2, ensure_ascii=False)
+        f.write("\n")
+    os.replace(path + ".tmp", path)
+    return set_id
+
+
+def sort_games(games):
+    return sorted(games, key=lambda g: (str(g.get("bucket", "")).lower(), str(g.get("bucket", ""))))
+
+
+def sorted_list(raw):
+    """A games list with systems sorted ("sets" last), each system's games by bucket key and set ids alphabetical."""
+    out = {}
+    for key in sorted(raw, key=lambda k: (k == SETS_KEY, k)):
+        entry = raw[key]
+        if key == SETS_KEY and isinstance(entry, list):
+            entry = sorted(entry, key=str)
+        elif isinstance(entry, list) and all(isinstance(g, dict) for g in entry):
+            entry = sort_games(entry)
+        out[key] = entry
+    return out
 
 
 def dump_list(systems, sets_on):
@@ -235,12 +360,33 @@ def save_lists(core, cards):
     """Write the core list (when given) to games.json and each card's list into its cards.json entry."""
     if core is not None:
         path = os.path.join(data_dir(), "games.json")
+        backup(path)
         with open(path + ".tmp", "w") as f:
-            json.dump(core, f, indent=2, ensure_ascii=False)
+            json.dump(sorted_list(core), f, indent=2, ensure_ascii=False)
             f.write("\n")
         os.replace(path + ".tmp", path)
+    ok = True
     for name, games in cards.items():
-        update_card(name, games=games)
+        ok = update_card(name, games=sorted_list(games)) and ok
+    return ok
+
+
+def save_overlay(changes):
+    """Write device-systems.json: {device id: (added system ids, removed system ids)} replaces those devices' entries
+    (an entry with nothing in it is dropped). The previous file is kept as .bak."""
+    path = os.path.join(data_dir(), "device-systems.json")
+    overlay = personal_json("device-systems.json") if os.path.exists(path) else {}
+    for dev_id, (add, remove) in changes.items():
+        entry = {k: v for k, v in (("add", add), ("remove", remove)) if v}
+        if entry:
+            overlay[dev_id] = entry
+        else:
+            overlay.pop(dev_id, None)
+    backup(path)
+    with open(path + ".tmp", "w") as f:
+        json.dump(overlay, f, indent=2, ensure_ascii=False)
+        f.write("\n")
+    os.replace(path + ".tmp", path)
 
 
 def guess_system(systems, folder):

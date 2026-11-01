@@ -30,21 +30,44 @@ def save_setting(name, value):
         with open(os.path.join(store.data_dir(), "settings.json"), "w") as f:
             json.dump(settings, f, indent=2, sort_keys=True)
     except OSError as e:
-        raise SystemExit(ui.red(f"❌ Couldn't save the setting: {e}"))
+        ui.fail(f"Couldn't save the setting: {e}", 3)
+
+
+SETTINGS = (("bucket", "ROMS_BUCKET", None), ("endpoint", "ROMS_ENDPOINT", None),
+            ("profile", "ROMS_PROFILE", "roms-readonly"), ("write_profile", "ROMS_WRITE_PROFILE", "roms"))
+
+
+def resolve_settings():
+    """{name: (value, source)} for bucket, endpoint, profile and write_profile: flag, then environment, then settings.json, then default."""
+    saved = load_settings()
+    out = {}
+    for name, env, default in SETTINGS:
+        if runtime.OVERRIDES.get(name):
+            out[name] = (runtime.OVERRIDES[name], "--" + name.replace("_", "-"))
+        elif os.environ.get(env):
+            out[name] = (os.environ[env], f"env {env}")
+        elif saved.get(name):
+            out[name] = (saved[name], "settings.json")
+        else:
+            out[name] = (default, "default" if default else "unset")
+    return out
+
+
+def apply_settings():
+    """Set runtime.BUCKET, ENDPOINT, PROFILE and WRITE_PROFILE from resolve_settings(); never prompts."""
+    resolved = {name: value for name, (value, _) in resolve_settings().items()}
+    runtime.PROFILE, runtime.WRITE_PROFILE = resolved["profile"], resolved["write_profile"]
+    runtime.BUCKET, runtime.ENDPOINT = resolved["bucket"], resolved["endpoint"] or None
 
 
 def ensure_bucket():
-    """Set BUCKET and ENDPOINT from the saved settings, asking for the bucket (and an optional endpoint) on first run."""
-    settings = load_settings()
-    runtime.PROFILE = os.environ.get("ROMS_PROFILE") or settings.get("profile") or "roms-readonly"
-    runtime.WRITE_PROFILE = os.environ.get("ROMS_WRITE_PROFILE") or settings.get("write_profile") or "roms"
-    runtime.BUCKET = os.environ.get("ROMS_BUCKET") or settings.get("bucket")
-    runtime.ENDPOINT = os.environ.get("ROMS_ENDPOINT") or settings.get("endpoint") or None
+    """Apply the settings, asking for the bucket (and an optional endpoint) on first run."""
+    apply_settings()
     while not runtime.BUCKET:
         try:
             name = input("🪣 Which S3 bucket holds your ROMs? ").strip()
         except EOFError:
-            raise SystemExit(ui.red("❌ No bucket given"))
+            ui.fail("No bucket given", 3)
         name = re.sub(r"^s3://", "", name).strip("/")
         if name:
             save_setting("bucket", name)

@@ -72,12 +72,32 @@ class SetsTest(unittest.TestCase):
         self.assertEqual(by["gen"]["games"], [])
 
     def test_locked_rows_cannot_toggle(self):
-        keys = iter(["\t", "\x01", "\x1b"])
+        keys = iter(["\t", "\x01", "\x1b", "y"])
         state = self.run_list(keys, locked=[True, False])
         self.assertEqual(state, [False, True])
 
     def test_multi_esc_keeps_state(self):
-        self.assertEqual(self.run_list(iter(["\t", "\x1b"])), [True, False])
+        self.assertEqual(self.run_list(iter(["\t", "\x1b", "y"])), [True, False])
+
+    def test_multi_esc_without_changes_just_leaves(self):
+        self.assertEqual(self.run_list(iter(["\x1b"])), [False, False])
+
+    def test_multi_esc_can_revert(self):
+        self.assertEqual(self.run_list(iter(["\t", "\x1b", "r"])), [False, False])
+
+    def test_multi_esc_any_other_key_keeps_editing(self):
+        self.assertEqual(self.run_list(iter(["\t", "\x1b", "z", "\n"])), [True, False])
+
+    def test_ctrl_r_reverts_the_list(self):
+        self.assertEqual(self.run_list(iter(["\t", "\x12", "\n"])), [False, False])
+
+    def test_space_toggles_only_with_an_empty_filter(self):
+        self.assertEqual(self.run_list(iter([" ", "\n"])), [True, False])
+        self.assertEqual(self.run_list(iter(["x", " ", "\n"])), [False, False])
+
+    def test_view_cycle_shows_only_changed_rows(self):
+        # toggle row 0, then ^O twice: "changed only" lists just it, and Tab then toggles that row back
+        self.assertEqual(self.run_list(iter(["\t", "\x0f", "\x0f", "\t", "\n"])), [False, False])
 
     def test_hotkey_returns_pair(self):
         self.assertEqual(self.run_list(iter(["\x06"]), multi=False, hotkeys=("\x06",)), ("\x06", 0))

@@ -7,6 +7,9 @@ from botocore.exceptions import BotoCoreError, ClientError
 from . import downloads, runtime, s3, scrape_plan, store, ui, usersettings
 
 
+MIRROR_PRUNE_ASK = 25  # delete more unreferenced mirror files than this (or over a tenth of it) only after confirming
+
+
 def mirror_wanted(manifest):
     """{bucket key: size} of everything the game lists and BIOS requirements reference that is in the bucket: the ROMs a sync
     installs, every system's BIOS files, the scraped data of those ROMs, and all of scrapes/esde/."""
@@ -65,6 +68,18 @@ def refresh_mirror(root, dry_run=False):
             print(f"  {ui.red('would delete')} {key}")
         return 0
     failed = downloads.run_downloads(todo, "Mirror", "🪞", root)
+    if stale and failed:
+        print(ui.yellow(f"  ⚠️  Not deleting the {len(stale)} unreferenced file(s): {failed} download(s) failed, so the list may be incomplete"))
+        stale = []
+    elif stale and (len(stale) > MIRROR_PRUNE_ASK or len(stale) * 10 > len(have)):
+        # a lot of the mirror going at once is more likely a listing glitch or a trimmed list than intent
+        for key in stale[:10]:
+            print(ui.dim(f"     {key}"))
+        if len(stale) > 10:
+            print(ui.dim(f"     … and {len(stale) - 10} more"))
+        if not ui.confirm(f"🗑️  Delete these {len(stale)} file(s) no longer referenced?", default=False):
+            print(ui.yellow("  ↩️  Keeping them"))
+            stale = []
     for key in stale:
         os.remove(s3.safe_join(root, key))
     for folder, _, _ in os.walk(root, topdown=False):
@@ -82,9 +97,13 @@ def use_mirror(root, dry_run):
         return
     print(ui.bold(f"🪞 Local mirror {ui.cyan(root)}"))
     try:
-        refresh_mirror(root, dry_run)
+        failed = refresh_mirror(root, dry_run)
+        if failed:
+            ui.warn(f"{failed} mirror download(s) failed; files missing from the mirror will fail to copy. Re-run to retry")
     except (ClientError, BotoCoreError, OSError, SystemExit) as e:  # S3 failed, or the folder isn't a mirror
-        print(ui.yellow(f"  ⚠️  Couldn't refresh the mirror ({e}); using what it has"))
+        ui.warn(f"Couldn't refresh the mirror ({e}); using what it has")
+    if dry_run:
+        print(ui.dim("  (dry run: the mirror was not refreshed, so this plan reads what it already has)"))
     runtime._mirror_root = root
 
 
@@ -96,7 +115,7 @@ def mirror_command(args):
     given = args.use_mirror or args.mirror
     root = given or usersettings.load_settings().get("mirror")
     if not root:
-        raise SystemExit(ui.red("❌ No mirror folder: give one (--mirror DIR) or save one with --use-mirror DIR"))
+        ui.fail("No mirror folder: give one (--mirror DIR) or save one with --use-mirror DIR", 2)
     root = os.path.abspath(os.path.expanduser(root))
     print(ui.bold(f"🪞 Mirror {ui.cyan(root)}") + ui.dim(f"  s3://{runtime.BUCKET}  profile={runtime.PROFILE}"))
     failed = refresh_mirror(root, args.dry_run)
