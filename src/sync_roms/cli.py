@@ -364,6 +364,8 @@ def check_modes(args):
 
 def sync():
     argv = sys.argv[1:]
+    if "-u" in argv:
+        ui.warn("-u is deprecated: it means --upload-scrapes, not --upload. Use `sync-roms upload scrapes` instead.")
     lead = 0
     while lead < len(argv) and argv[lead] in BOOL_FLAGS:
         lead += 1

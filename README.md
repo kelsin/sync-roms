@@ -261,7 +261,7 @@ Before downloading, the sync shows the totals and free space on the card and ask
 | `-n`, `--dry-run` | Show what would be downloaded (with total sizes), download nothing. With `--mirror`/`--use-mirror`, show what the mirror would download and delete |
 | `-e`, `--edit` | Add/remove games in the core list (`games.json`) or a card's extras, then save (see below) |
 | `-a`, `--ask` | Confirm saved settings (device and layout, Android media folders) instead of using them silently. Answering no asks the question again and saves the new answer |
-| `-u`, `--upload-scrapes` | Upload `BASE_DIR/ES-DE` scraped data to the bucket (see below) |
+| `--upload-scrapes` | (`-u` still works but is deprecated: it is not `--upload`) Upload `BASE_DIR/ES-DE` scraped data to the bucket (see below) |
 | `--upload [DIR]` | Upload the ROMs in `DIR` and its subfolders (default: current directory) to the bucket folder of a system you pick; the system is guessed from the folder name (see below) |
 | `-c`, `--clean-scrapes` | Remove scraped data in the bucket for ROMs that aren't available (see below) |
 | `--m3u [DIR]` | Create or fix the `.m3u` playlist of every multi-disc game (`Name (Disc 1) (Extra).chd`, `Name (Disc 2).chd`) in `DIR` and its subfolders (default: current directory). The playlist is named after the title without `(Disc N)` or tags the discs don't share (`Name (Sega CD).m3u`). Playlists with the wrong discs are rewritten, ones with some missing files lose those lines, ones with no files left are deleted after asking, and ones listing exactly a game's discs under another name are renamed. Local only; `--dry-run` previews |

@@ -9,6 +9,7 @@ import sys
 from . import external, picker, runtime, s3, store, ui, usersettings
 
 
+UNKNOWN_SHOWN = 8  # device ids named in an "unknown device" error
 COMMANDS = {"games", "cards", "config", "doctor", "check", "completion"}
 
 
@@ -19,12 +20,18 @@ class Parser(argparse.ArgumentParser):
 
 # --- Helpers the sync flow uses ----------------------------------------------------------------------
 
+def unknown_device(device_id, ids):
+    """Exit 2 for a device id that doesn't exist, naming a few real ones instead of all of them."""
+    shown = ", ".join(ids[:UNKNOWN_SHOWN]) + (f", … ({len(ids) - UNKNOWN_SHOWN} more)" if len(ids) > UNKNOWN_SHOWN else "")
+    ui.fail(f"Unknown device {device_id!r}. Known: {shown}\n   `sync-roms devices` lists them all.", 2)
+
+
 def show_devices(devices, systems, device_id=None, as_json=False):
     """Print the device table, or one device's details."""
     if device_id:
         d = next((x for x in devices if x["id"] == device_id), None)
         if not d:
-            ui.fail(f"Unknown device {device_id!r}. Known: {', '.join(x['id'] for x in devices)}", 2)
+            unknown_device(device_id, [x["id"] for x in devices])
         names = {s["bucket"]: s["name"] for s in systems}
         if as_json:
             print(json.dumps({**d, "system_names": [names.get(i, i) for i in d["systems"]]}, indent=2))
@@ -59,7 +66,7 @@ def setup_from_flags(manifest, current, device_id, layout):
         else:
             device = next((d for d in devices if d["id"] == device_id), None)
             if not device:
-                ui.fail(f"Unknown device {device_id!r}. Known: full, {', '.join(d['id'] for d in devices)}", 2)
+                unknown_device(device_id, ["full"] + [d["id"] for d in devices])
     elif current:
         device = current[0]
     else:

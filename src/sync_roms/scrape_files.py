@@ -176,7 +176,7 @@ def upload_slot_labels(args, labels_dir):
         print("☁️  Listing what's already in scrapes/...")
         existing = s3.list_sizes(scrape_plan.SCRAPES + "/")
     except (ClientError, BotoCoreError) as e:
-        raise SystemExit(ui.red(f"❌ {e}"))
+        ui.fail(f"{e}", 3)
     files, present, unmatched = plan_slot_upload(labels_dir, systems, roms, existing)
     replaced = sum(1 for key, _, _ in files if key in existing)
     print(f"🏷️  Labels to upload: {ui.bold(str(len(files)))} ({ui.human_size(sum(f[2] for f in files))}, "
@@ -209,10 +209,10 @@ def upload_scrapes(args):
     if not os.path.isdir(es_dir) and os.path.isdir(labels_dir):
         return upload_slot_labels(args, labels_dir)
     if not os.path.isdir(es_dir):
-        raise SystemExit(ui.red(f"❌ No ES-DE folder in {base}"))
+        ui.fail(f"No ES-DE folder in {base}", 2)
     saved = store.load_cards().get(os.path.basename(base) or base)
     if isinstance(saved, dict) and saved.get("layout") not in (None, "esde"):
-        raise SystemExit(ui.red(f"❌ {base} is set up as a {saved['layout']} card; scraped data is only uploaded from the esde layout"))
+        ui.fail(f"{base} is set up as a {saved['layout']} card; scraped data is only uploaded from the esde layout", 2)
 
     print(ui.bold("☁️  Upload scrapes") + ui.dim(f"  read={runtime.PROFILE}  write={runtime.WRITE_PROFILE}  from {es_dir}"))
     try:
@@ -225,7 +225,7 @@ def upload_scrapes(args):
         print("🔎 Comparing...")
         plan = plan_upload(es_dir, roms, existing, remote_texts)
     except (ClientError, BotoCoreError) as e:
-        raise SystemExit(ui.red(f"❌ {e}"))
+        ui.fail(f"{e}", 3)
     for w in plan["warnings"]:
         print(ui.yellow(f"  ⚠️  {w}"))
     files, texts, derived = plan["files"], plan["texts"], plan["derived"]
@@ -314,7 +314,7 @@ def clean_scrapes(args):
         existing = s3.list_sizes(scrape_plan.SCRAPES + "/")
         remote_texts = s3.fetch_texts([k for k in text_keys(existing) if k.endswith("/metadata.json")])
     except (ClientError, BotoCoreError) as e:
-        raise SystemExit(ui.red(f"❌ {e}"))
+        ui.fail(f"{e}", 3)
     delete, rewrites, per, warnings = plan_clean(existing, roms, remote_texts)
     for w in warnings:
         print(ui.yellow(f"  ⚠️  {w}"))
@@ -341,6 +341,6 @@ def clean_scrapes(args):
             s3.put_text(key, text)
         failed = len(s3.delete_keys(delete)) if delete else 0
     except (ClientError, BotoCoreError) as e:
-        raise SystemExit(ui.red(f"❌ {e}"))
+        ui.fail(f"{e}", 3)
     print(ui.green("\n🎉 Done!") if not failed else ui.red(f"\n⚠️  Done with {failed} failure(s)"))
     return 1 if failed else 0

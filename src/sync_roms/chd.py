@@ -301,7 +301,7 @@ def fix_playlists(roots, dry_run):
 def chd_command(args):
     root = os.path.abspath(os.path.expanduser(args.chd or os.getcwd()))
     if not os.path.isdir(root):
-        raise SystemExit(ui.red(f"❌ {root} is not a folder"))
+        ui.fail(f"{root} is not a folder", 2)
     print(ui.bold("💿 cd") + ui.dim(f"  {root}"))
     folders = chd_folders(store.repo_json("systems"))
     roots = chd_roots(root, folders)
@@ -330,7 +330,7 @@ def chd_command(args):
                          ("extract-xiso", "xiso" in modes)):
         tools[tool] = external.find_tool(tool)
         if needed and not tools[tool]:
-            raise SystemExit(ui.red(f"❌ {tool} not found; " + (f"{external.MANUAL_TOOLS[tool]}" if tool in external.MANUAL_TOOLS else "run sync-roms --install-tools")))
+            ui.fail(f"{tool} not found; " + (f"{external.MANUAL_TOOLS[tool]}" if tool in external.MANUAL_TOOLS else "run sync-roms --install-tools"), 3)
     remove_stale_chd_temp(root)
     cpus = os.cpu_count() or 1
     workers = min(cpus, len(jobs))

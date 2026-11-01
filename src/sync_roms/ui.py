@@ -72,6 +72,15 @@ def yellow(t): return c("33", t)
 def cyan(t): return c("36", t)
 
 
+def ask(prompt):
+    """input() that gives "" at end of input instead of raising, so a prompt with an empty answer means cancel."""
+    try:
+        return input(prompt)
+    except EOFError:
+        print()
+        return ""
+
+
 def confirm(question, default=True):
     suffix = "[Y/n]" if default else "[y/N]"
     if ASSUME_YES:

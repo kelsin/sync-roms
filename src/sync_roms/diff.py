@@ -162,7 +162,7 @@ def diff_command(args):
     """Show the ROMs that are in only one of a local folder (default: the current directory) and a bucket folder."""
     folder = os.path.abspath(os.path.expanduser(args.diff or os.getcwd()))
     if not os.path.isdir(folder):
-        raise SystemExit(ui.red(f"❌ {folder} is not a folder"))
+        ui.fail(f"{folder} is not a folder", 2)
     systems = sorted(store.load_manifest()["systems"], key=lambda s: s["name"].lower())
     guess = store.guess_system(systems, folder)
     i = picker.filter_list("🔍 Which system is this folder compared with?", [f"{s['name']}  ({s['bucket']}/)" for s in systems],
@@ -179,7 +179,7 @@ def diff_command(args):
             local, remote, lambda p: local_fingerprint(os.path.join(folder, *p.split("/"))),
             lambda p, size, etag: bucket_fingerprint(f"{bucket}/{p}", size, etag))
     except (ClientError, BotoCoreError) as e:
-        raise SystemExit(ui.red(f"❌ {e}"))
+        ui.fail(f"{e}", 3)
     for title, paths, sizes, paint in (("Only in the folder", only_local, {p: local[p] for p in only_local}, ui.green),
                                        ("Only in the bucket", only_bucket, {p: remote[p][0] for p in only_bucket}, ui.yellow)):
         print(f"\n{ui.bold(title)}: {len(paths)} ({ui.human_size(sum(sizes.values()))})")

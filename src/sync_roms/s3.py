@@ -49,7 +49,7 @@ def s3_client(profile=None, connections=runtime.WORKERS):
         try:
             session = boto3.Session(profile_name=profile)
         except ProfileNotFound:
-            raise SystemExit(ui.red(f"❌ AWS profile '{profile}' not found; define it in ~/.aws/config and ~/.aws/credentials"))
+            ui.fail(f"AWS profile '{profile}' not found; define it in ~/.aws/config and ~/.aws/credentials", 3)
         config = Config(max_pool_connections=connections, **({"s3": {"addressing_style": "path"}} if runtime.ENDPOINT else {}))
         _s3[key] = session.client("s3", endpoint_url=runtime.ENDPOINT, config=config)
     return _s3[key]

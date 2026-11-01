@@ -50,7 +50,8 @@ def choose_setup(manifest, current=None):
             cursor = next((i for i, d in enumerate(devices) if d is current[0]), len(devices))
         choice = pick_device(devices, cursor)
         if choice is None:
-            raise SystemExit(ui.yellow("👋 Cancelled."))
+            print(ui.yellow("👋 Cancelled."))
+            raise SystemExit(0)
         device = choice if isinstance(choice, dict) else None
         offered = device_layouts(device, layouts) if device else layouts
         if len(offered) == 1:

@@ -115,7 +115,7 @@ def mirror_command(args):
     given = args.use_mirror or args.mirror
     root = given or usersettings.load_settings().get("mirror")
     if not root:
-        raise SystemExit(ui.red("❌ No mirror folder: give one (--mirror DIR) or save one with --use-mirror DIR"))
+        ui.fail("No mirror folder: give one (--mirror DIR) or save one with --use-mirror DIR", 2)
     root = os.path.abspath(os.path.expanduser(root))
     print(ui.bold(f"🪞 Mirror {ui.cyan(root)}") + ui.dim(f"  s3://{runtime.BUCKET}  profile={runtime.PROFILE}"))
     failed = refresh_mirror(root, args.dry_run)

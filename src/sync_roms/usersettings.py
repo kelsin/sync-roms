@@ -30,7 +30,7 @@ def save_setting(name, value):
         with open(os.path.join(store.data_dir(), "settings.json"), "w") as f:
             json.dump(settings, f, indent=2, sort_keys=True)
     except OSError as e:
-        raise SystemExit(ui.red(f"❌ Couldn't save the setting: {e}"))
+        ui.fail(f"Couldn't save the setting: {e}", 3)
 
 
 def ensure_bucket():
@@ -44,7 +44,7 @@ def ensure_bucket():
         try:
             name = input("🪣 Which S3 bucket holds your ROMs? ").strip()
         except EOFError:
-            raise SystemExit(ui.red("❌ No bucket given"))
+            ui.fail("No bucket given", 3)
         name = re.sub(r"^s3://", "", name).strip("/")
         if name:
             save_setting("bucket", name)

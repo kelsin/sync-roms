@@ -66,7 +66,7 @@ def run_tool(cmd, progress=None):
 def install_tools_command():
     brew = shutil.which("brew")
     if not brew:
-        raise SystemExit(ui.red("❌ Homebrew (brew) not found; install it from https://brew.sh"))
+        ui.fail("Homebrew (brew) not found; install it from https://brew.sh", 3)
     wanted = [formula for tool, formula in TOOL_FORMULAE.items() if not find_tool(tool)]
     code = 0
     if wanted:

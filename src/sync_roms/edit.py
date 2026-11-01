@@ -320,7 +320,7 @@ def edit_manifest():
     def add_card():
         existing = set(store.load_cards()) | set(targets)
         while True:
-            name = input("➕ New card: its folder name, e.g. RGSP (a path works too; empty to cancel): ").strip()
+            name = ui.ask("➕ New card: its folder name, e.g. RGSP (a path works too; empty to cancel): ").strip()
             if not name:
                 return
             if "/" in name:
@@ -367,7 +367,7 @@ def edit_manifest():
         if name not in store.load_cards():
             note(ui.yellow("ℹ️  Save this new card first, then rename it."))
             return
-        new = input(f"✏️  New folder name for {name} (empty to cancel): ").strip()
+        new = ui.ask(f"✏️  New folder name for {name} (empty to cancel): ").strip()
         if not new:
             return
         problem = valid_card_name(new, set(store.load_cards()) | set(targets))
