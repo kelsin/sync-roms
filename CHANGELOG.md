@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.20.0](https://github.com/kelsin/sync-roms/compare/v0.19.1...v0.20.0) (2026-11-01)
+
+
+### Features
+
+* **devices:** add windows pc (retrobat) on the es-de layout ([#77](https://github.com/kelsin/sync-roms/issues/77)) ([2defd30](https://github.com/kelsin/sync-roms/commit/2defd301988e8cd05e6ba5557dcd9e154ee96f45))
+
 ## [0.19.1](https://github.com/kelsin/sync-roms/compare/v0.19.0...v0.19.1) (2026-11-01)
 
 
