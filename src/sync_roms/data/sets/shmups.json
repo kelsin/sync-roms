@@ -224,33 +224,33 @@
     },
     {
       "title": "DoDonPachi",
-      "system": "mame",
-      "bucket": "mame/ddonpach.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/ddonpach.zip"
     },
     {
       "title": "DonPachi",
-      "system": "mame",
-      "bucket": "mame/donpachi.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/donpachi.zip"
     },
     {
       "title": "Dangun Feveron",
-      "system": "mame",
-      "bucket": "mame/dfeveron.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/dfeveron.zip"
     },
     {
       "title": "Ketsui",
-      "system": "mame",
-      "bucket": "mame/ket.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/ket.zip"
     },
     {
       "title": "ESP Ra.De.",
-      "system": "mame",
-      "bucket": "mame/esprade.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/esprade.zip"
     },
     {
       "title": "Guwange",
-      "system": "mame",
-      "bucket": "mame/guwange.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/guwange.zip"
     },
     {
       "title": "Battle Garegga",
@@ -364,8 +364,8 @@
     },
     {
       "title": "Espgaluda",
-      "system": "mame",
-      "bucket": "mame/espgal.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/espgal.zip"
     },
     {
       "title": "Mushihimesama",
@@ -821,6 +821,71 @@
       "title": "Panzer Dragoon Orta",
       "system": "xbox",
       "bucket": "xbox/Panzer Dragoon Orta (USA).iso"
+    },
+    {
+      "title": "DoDonPachi II: Bee Storm",
+      "system": "fbneo",
+      "bucket": "fbneo/ddp2.zip"
+    },
+    {
+      "title": "DoDonPachi DaiOuJou",
+      "system": "fbneo",
+      "bucket": "fbneo/ddp3.zip"
+    },
+    {
+      "title": "Espgaluda II",
+      "system": "fbneo",
+      "bucket": "fbneo/espgal2.zip"
+    },
+    {
+      "title": "Uo Poko",
+      "system": "fbneo",
+      "bucket": "fbneo/uopoko.zip"
+    },
+    {
+      "title": "Progear",
+      "system": "fbneo",
+      "bucket": "fbneo/progear.zip"
+    },
+    {
+      "title": "Mushihimesama Futari 1.5",
+      "system": "fbneo",
+      "bucket": "fbneo/futari15.zip"
+    },
+    {
+      "title": "Ibara",
+      "system": "fbneo",
+      "bucket": "fbneo/ibara.zip"
+    },
+    {
+      "title": "Pink Sweets",
+      "system": "fbneo",
+      "bucket": "fbneo/pinkswts.zip"
+    },
+    {
+      "title": "Death Smiles",
+      "system": "fbneo",
+      "bucket": "fbneo/deathsml.zip"
+    },
+    {
+      "title": "Muchi Muchi Pork!",
+      "system": "fbneo",
+      "bucket": "fbneo/mmpork.zip"
+    },
+    {
+      "title": "Battle Bakraid",
+      "system": "fbneo",
+      "bucket": "fbneo/bbakraid.zip"
+    },
+    {
+      "title": "Air Gallet",
+      "system": "fbneo",
+      "bucket": "fbneo/agallet.zip"
+    },
+    {
+      "title": "Tengai",
+      "system": "fbneo",
+      "bucket": "fbneo/tengai.zip"
     }
   ]
 }
