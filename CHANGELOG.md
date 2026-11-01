@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.19.0](https://github.com/kelsin/sync-roms/compare/v0.18.0...v0.19.0) (2026-11-01)
+
+
+### Features
+
+* **cd:** convert xbox 360 isos to xiso ([#74](https://github.com/kelsin/sync-roms/issues/74)) ([708aa33](https://github.com/kelsin/sync-roms/commit/708aa3384524c5e6cdad10ae5460fc3417f65c27))
+
+
+### Bug Fixes
+
+* **cd:** write the rewritten xiso into the work folder ([#72](https://github.com/kelsin/sync-roms/issues/72)) ([8beddef](https://github.com/kelsin/sync-roms/commit/8beddefaade0836e478c33c1a4d55bb0b622eb0e))
+
 ## [0.18.0](https://github.com/kelsin/sync-roms/compare/v0.17.0...v0.18.0) (2026-10-31)
 
 
