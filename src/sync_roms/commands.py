@@ -615,40 +615,85 @@ def completion_lists(what):
     return []
 
 
+def all_flags():
+    """Every option string the CLI accepts (flag parser, subcommand parsers and global flags), sorted."""
+    from . import cli
+    found = set(cli.GLOBAL_VALUE_FLAGS) | {"--quiet", "--verbose"}
+
+    def walk(parser):
+        for action in parser._actions:
+            found.update(action.option_strings)
+            if isinstance(action, argparse._SubParsersAction):
+                for child in action.choices.values():
+                    walk(child)
+    walk(cli.build_parser())
+    walk(build_parser())
+    return sorted(found - {"--device-id"})  # --device-id is set by `devices ID`, not typed
+
+
+def second_words():
+    """{command: the words that can follow it} for the commands that have subcommands."""
+    from . import cli
+    words = {}
+    for key in cli.LEGACY:
+        if len(key) > 1:
+            words.setdefault(key[0], []).append(key[1])
+    words["games"] = sorted(set(words.get("games", [])) | {"list", "add", "remove", "full", "sets", "export", "import"})
+    words["cards"] = ["list", "new", "set", "rename", "delete"]
+    words["config"] = ["show", "path"]
+    words["completion"] = ["bash", "zsh", "fish"]
+    return words
+
+
 def completion_cmd(args):
     if args.shell == "list":
         print("\n".join(completion_lists(args.what or "")))
         return 0
     from .cli import SUBCOMMANDS
     subs = " ".join(SUBCOMMANDS)
-    flags = "--dry-run --yes --ask --device --layout --systems --card --no-clean --json --version --help"
+    flags = " ".join(all_flags())
+    second = second_words()
     if args.shell in ("bash", "zsh"):
+        cases = "\n".join(f"      {name}) COMPREPLY=($(compgen -W \"{' '.join(w)}\" -- \"$cur\")); return;;" for name, w in second.items())
         script = f'''_sync_roms() {{
-  local cur="${{COMP_WORDS[COMP_CWORD]}}" prev="${{COMP_WORDS[COMP_CWORD-1]}}"
+  local cur="${{COMP_WORDS[COMP_CWORD]}}" prev="${{COMP_WORDS[COMP_CWORD-1]}}" cmd="${{COMP_WORDS[1]}}"
   case "$prev" in
     --card) COMPREPLY=($(compgen -W "$(sync-roms completion list cards)" -- "$cur")); return;;
     --device) COMPREPLY=($(compgen -W "$(sync-roms completion list devices)" -- "$cur")); return;;
     --layout) COMPREPLY=($(compgen -W "$(sync-roms completion list layouts)" -- "$cur")); return;;
-    --systems) COMPREPLY=($(compgen -W "all $(sync-roms completion list systems)" -- "$cur")); return;;
+    --systems)  # a comma separated list: complete the part after the last comma
+      COMPREPLY=($(compgen -P "${{cur%"${{cur##*,}}"}}" -W "all $(sync-roms completion list systems)" -- "${{cur##*,}}")); compopt -o nospace 2>/dev/null; return;;
+    --system) COMPREPLY=($(compgen -W "$(sync-roms completion list systems)" -- "$cur")); return;;
+    --profile|--write-profile|--bucket|--endpoint) return;;
   esac
-  if [ "$COMP_CWORD" -eq 1 ]; then COMPREPLY=($(compgen -W "{subs} {flags}" -- "$cur") $(compgen -d -- "$cur"))
-  elif [[ "$cur" == -* ]]; then COMPREPLY=($(compgen -W "{flags}" -- "$cur"))
-  else COMPREPLY=($(compgen -f -- "$cur")); fi
+  if [[ "$cur" == -* ]]; then COMPREPLY=($(compgen -W "{flags}" -- "$cur")); return; fi
+  if [ "$COMP_CWORD" -eq 1 ]; then COMPREPLY=($(compgen -W "{subs}" -- "$cur") $(compgen -d -- "$cur")); return; fi
+  if [ "$COMP_CWORD" -eq 2 ]; then
+    case "$cmd" in
+{cases}
+    esac
+  fi
+  if [ "$COMP_CWORD" -eq 3 ] && [ "$cmd" = games ]; then
+    case "${{COMP_WORDS[2]}}" in add|remove|full) COMPREPLY=($(compgen -W "$(sync-roms completion list systems)" -- "$cur")); return;; esac
+  fi
+  COMPREPLY=($(compgen -f -- "$cur"))
 }}
 complete -o filenames -F _sync_roms sync-roms
 '''
         print(("autoload -U +X bashcompinit && bashcompinit\n" if args.shell == "zsh" else "") + script, end="")
     else:
-        print(f'''complete -c sync-roms -f -n __fish_use_subcommand -a "{subs}"
-complete -c sync-roms -l card -x -a "(sync-roms completion list cards)"
-complete -c sync-roms -l device -x -a "(sync-roms completion list devices)"
-complete -c sync-roms -l layout -x -a "(sync-roms completion list layouts)"
-complete -c sync-roms -l systems -x -a "all (sync-roms completion list systems)"
-complete -c sync-roms -s n -l dry-run -d "change nothing"
-complete -c sync-roms -s y -l yes -d "answer prompts with their default"
-complete -c sync-roms -l json -d "machine-readable output"
-complete -c sync-roms -l no-clean -d "skip the end-of-run card tidy"
-complete -c sync-roms -l version''')
+        lines = [f'complete -c sync-roms -f -n __fish_use_subcommand -a "{subs}"']
+        for name, w in second.items():
+            lines.append(f'complete -c sync-roms -f -n "__fish_seen_subcommand_from {name}; and not __fish_seen_subcommand_from {" ".join(w)}" -a "{" ".join(w)}"')
+        values = {"card": "cards", "device": "devices", "layout": "layouts", "system": "systems", "systems": "systems"}
+        for flag in (f for f in all_flags() if f.startswith("--")):
+            name = flag[2:]
+            if name in values:
+                extra = "all " if name == "systems" else ""
+                lines.append(f'complete -c sync-roms -l {name} -x -a "{extra}(sync-roms completion list {values[name]})"')
+            else:
+                lines.append(f"complete -c sync-roms -l {name}")
+        print("\n".join(lines))
     return 0
 
 
