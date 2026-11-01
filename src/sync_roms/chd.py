@@ -14,7 +14,7 @@ from . import downloads, external, m3u, store, ui
 
 
 def chd_folders(systems):
-    """{lowercase folder name: system} for the systems with a chd setting, over every layout's folder name."""
+    """{lowercase folder name: system} for the systems with a `chd` key in systems.json, over every layout's folder name."""
     return {f.lower(): s for s in systems if s.get("chd") for f in s["folders"].values() if f}
 
 
@@ -312,7 +312,7 @@ def chd_command(args):
     if not jobs:
         print(ui.green("✅ Nothing to convert"))
         if not roots:
-            print(ui.yellow("⚠️  No folder here is named after a system with a chd setting, so every file was skipped."))
+            print(ui.yellow("⚠️  No folder here is named after a system that converts to CHD, so every file was skipped."))
             print(ui.dim(f"   --cd only looks inside folders named: {', '.join(sorted(folders))}"))
     for system, _, path, owned in jobs:
         what = "extract" if system["chd"]["mode"] == "extract" else "convert"

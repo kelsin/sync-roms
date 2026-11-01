@@ -53,7 +53,7 @@ TOPICS = {
   A finished run (not --dry-run) creates .metadata_never_index in CARD, empties its .fseventsd, and on a Mac runs
   dot_clean (falling back to sudo mdutil, which asks for your password). ES-DE: files in the Android media folders
   are removed and a .nomedia added after asking once per card name (the answer is remembered; --ask confirms it).
-  Picker keys: ↑/↓ j/k move, space/tab toggle, a all on, n all off, e show 0-ROM systems, g edit games, enter go, esc/q cancel.
+  Picker keys: ↑/↓ j/k move, space/tab toggle, a all on, n all off, e show 0-ROM systems, g edit games, x clear the card's own games, enter go, esc/q cancel.
 """,
     "games": """
   sync-roms games edit                        interactive editor (core list, card extras, device systems)
@@ -112,7 +112,7 @@ TOPICS = {
   sync-roms convert [DIR] [--dry-run]
 
   Unzips (7z) every .zip/.7z and converts each disc image (.cue, .gdi, .toc, .iso) to a verified .chd (Xbox .iso to xiso),
-  per the chd setting of the system whose folder it is in. Archives and images are removed once their chd verifies,
+  per the `chd` key in systems.json of the system whose folder it is in. Archives and images are removed once their chd verifies,
   then the .m3u playlists are fixed. Needs 7z, chdman and, for Xbox, extract-xiso (see `tools install`). (Old names: --cd, --chd)
 """,
     "tools": """

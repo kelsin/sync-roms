@@ -88,7 +88,7 @@ router or uplink starts timing out.
 
 ## Usage
 
-The examples call the script `sync-roms`. From a clone of the repo, run `python3 -m sync_roms` (with `src/` on `PYTHONPATH`) in its place.
+The examples call `sync-roms`. From a clone of the repo, run `python3 -m sync_roms` (with `src/` on `PYTHONPATH`) in its place.
 
 Give the root folder of the card (or any folder to sync into):
 
@@ -116,7 +116,7 @@ You pick a device, then the firmware it runs (a device with only one isn't asked
 
 Folder names are case-sensitive. Folders that don't exist are shown as
 "will be created" and are created after you confirm. If they can't be created
-(no permission), the script stops before asking.
+(no permission), sync-roms stops before asking.
 
 The device and firmware you pick are remembered by the name of `BASE_DIR`
 (e.g. `SHARE`) in `cards.json` in your user data folder
@@ -150,6 +150,8 @@ Then:
    | `a` | all on (visible systems) |
    | `n` | all off |
    | `e` | show/hide systems with 0 ROMs |
+   | `g` | edit the highlighted system's games for this card (same list as `games edit`), then return here. Not shown with `--dry-run` |
+   | `x` | clear this card's own extra games after asking (the core list stays) |
    | `enter` | start downloading |
    | `q` | quit |
 
@@ -261,21 +263,25 @@ Before downloading, the sync shows the totals and free space on the card and ask
 | `-n`, `--dry-run` | Show what would be downloaded (with total sizes), download nothing. With `--mirror`/`--use-mirror`, show what the mirror would download and delete |
 | `-e`, `--edit` | Add/remove games in the core list (`games.json`) or a card's extras, then save (see below) |
 | `-a`, `--ask` | Confirm saved settings (device and layout, Android media folders) instead of using them silently. Answering no asks the question again and saves the new answer |
-| `--upload-scrapes` | (`-u` still works but is deprecated: it is not `--upload`) Upload `BASE_DIR/ES-DE` scraped data to the bucket (see below) |
+| `-u`, `--upload-scrapes` | (`-u` is deprecated: it is not `--upload`) Upload `BASE_DIR/ES-DE` scraped data to the bucket (see below) |
 | `--upload [DIR]` | Upload the ROMs in `DIR` and its subfolders (default: current directory) to the bucket folder of a system you pick; the system is guessed from the folder name (see below) |
 | `-c`, `--clean-scrapes` | Remove scraped data in the bucket for ROMs that aren't available (see below) |
 | `--m3u [DIR]` | Create or fix the `.m3u` playlist of every multi-disc game (`Name (Disc 1) (Extra).chd`, `Name (Disc 2).chd`) in `DIR` and its subfolders (default: current directory). The playlist is named after the title without `(Disc N)` or tags the discs don't share (`Name (Sega CD).m3u`). Playlists with the wrong discs are rewritten, ones with some missing files lose those lines, ones with no files left are deleted after asking, and ones listing exactly a game's discs under another name are renamed. Local only; `--dry-run` previews |
-| `--cd [DIR]` | (`--chd` still works) Unzip (7z) every `.zip`/`.7z` and convert each disc image (`.cue`, `.gdi`, `.toc`, `.iso`) to a `.chd` with `chdman`, in parallel (up to one file per CPU core; with fewer files than cores each `chdman` gets the spare cores), per the `chd` setting in `systems.json` for the system whose folder it is in (`DIR` is one system folder or a folder of them, default: current directory). The chd is verified before the archive and image files are removed, a failure keeps them, and the `.m3u` playlists of every system folder are fixed afterwards, even when there was nothing to convert (also shown by `--dry-run`). A progress bar (files done and overall percent, from `chdman`'s own progress) shows in a terminal. Mode `cd` uses `createcd`; `dvd` (PS2, PSP) uses `createdvd` for `.iso` files with the system's `args`; `extract` (GameCube, Wii, Xbox 360) only unzips and leaves the `.rvz`/`.iso` files; `xiso` (Xbox) rewrites each `.iso` that isn't already an xiso with `extract-xiso -r` and checks it with `-l`. `"m3u": false` skips playlists (3DO). Local only; `--dry-run` previews |
+| `--cd [DIR]`, `--chd [DIR]` | (`--chd` is the old name) Unzip (7z) every `.zip`/`.7z` and convert each disc image (`.cue`, `.gdi`, `.toc`, `.iso`) to a `.chd` with `chdman`, in parallel (up to one file per CPU core; with fewer files than cores each `chdman` gets the spare cores), per the `chd` setting in `systems.json` for the system whose folder it is in (`DIR` is one system folder or a folder of them, default: current directory). The chd is verified before the archive and image files are removed, a failure keeps them, and the `.m3u` playlists of every system folder are fixed afterwards, even when there was nothing to convert (also shown by `--dry-run`). A progress bar (files done and overall percent, from `chdman`'s own progress) shows in a terminal. Mode `cd` uses `createcd`; `dvd` (PS2, PSP) uses `createdvd` for `.iso` files with the system's `args`; `extract` (GameCube, Wii, Xbox 360) only unzips and leaves the `.rvz`/`.iso` files; `xiso` (Xbox) rewrites each `.iso` that isn't already an xiso with `extract-xiso -r` and checks it with `-l`. `"m3u": false` skips playlists (3DO). Local only; `--dry-run` previews |
 | `--install-tools` | `brew install` the 7z (`sevenzip`) and chdman (`rom-tools`) that `--cd` needs, whichever are missing, and say how to build extract-xiso |
 | `--mirror [DIR]` | Make or refresh a local mirror of the bucket (see below). No `DIR`: the saved mirror |
 | `--use-mirror DIR` | Same as `--mirror DIR`, then save `DIR` as the local mirror |
 | `--clear-mirror` | Forget the saved mirror (its files are left alone) |
+| `--diff [DIR]` | Compare a folder with a bucket system's folder (the old form of `diff`; see `--system`) |
+| `--replace` | `upload roms` only: make the bucket folder match `DIR`. Renamed files are moved by content and left-over bucket files are listed so you pick which to delete |
 | `--devices` | List the supported devices with their chip and the number of systems each one gets, then exit |
 | `-y`, `--yes` | Answer prompts with their default |
 | `--device ID\|full`, `--layout NAME`, `--systems IDS\|all` | Sync: choose the setup and systems without the pickers (the setup is saved for the card) |
 | `--no-clean` | Sync: skip the end-of-run card tidy |
 | `--json` | `devices`, `games list`, `cards list`, `diff` and `sync --dry-run`: one JSON document on stdout, nothing else (pass `--device`/`--layout`/`--systems` so no picker is needed; `diff` also needs `--system ID` unless the folder is named after a system) |
+| `--card NAME` | `games` commands: work on that card's extras instead of the core list (see Editing from scripts) |
 | `--system ID` | `diff`: the bucket system to compare with, instead of the picker |
+| `--bucket-keys` | `check`: also verify with the read-only profile that every game key in your lists and sets exists in the bucket |
 | `--quiet` | Print only errors, warnings and `--json` data; prompts are asked on stderr |
 | `--verbose` | Also print the effective settings and where each came from, on stderr |
 | `--profile P`, `--write-profile P`, `--bucket B`, `--endpoint URL` | Override those settings for this run. Precedence: flag, then environment variable, then `settings.json`, then the default |
@@ -376,8 +382,10 @@ sync-roms --edit
    package's `data/sets/*.json`) you see its games from every system, sorted by system then title.
    `✅` is already in the list, `⬜` is not. Type to filter, `Tab` toggles the game
    under the cursor (so does `Space` while the filter is empty), `^A` toggles everything currently shown, `^R` reverts the list to how it was when opened, `^O` cycles the view between all rows, only those that are on, and only those you changed. `Enter` keeps your changes; `Esc` asks whether to keep or revert them if there are any.
-   Pending changes show as `➕` / `➖`.
+   Pending changes show as `➕` / `➖`. `^N` writes a note on the game under the cursor (empty clears it); notes are shown when a game is locked and are kept when the game is saved into a set.
 3. When you finish, you get a summary of additions and removals per system, then **save**, **keep editing**, **discard**, or **list every change**. Saving writes `games.json` and/or the cards' entries in `cards.json`, keeping the previous files as `.bak` next to them. Nothing is uploaded.
+
+On a card, **📦 Make a set from these extras** saves the card's extra games as a personal set. Personal sets are files in `~/.sync-roms/sets/<id>.json` (same format as the package's sets, below), appear next to the built-in ones under **By set** and can be referenced like them; an id already used by a built-in set is refused. You can also write them by hand, and `sync-roms check` validates them.
 
 On the top menu, `^D` changes a card's device and firmware, `^R` renames a card and `^X` deletes one (both ask first, and act at once). **🧩 Device systems** edits which systems a device recommends: it is saved as the `add`/`remove` overlay in `device-systems.json`, relative to the repo defaults. A file that isn't valid JSON is never overwritten: sync-roms says so and leaves it for you to fix (`sync-roms check` lists the problems).
 
@@ -396,7 +404,7 @@ sync-roms games import list.txt --card SD
 sync-roms cards new SD --device rg35xx-sp --layout knulli
 ```
 
-A set file is `{"name": ..., "description": ..., "games": [{"title": ..., "system": "gba", "bucket": "gba/Game.zip"}]}`.
+A set file (in the package's `data/sets/` or your `~/.sync-roms/sets/`) is `{"name": ..., "description": ..., "games": [{"title": ..., "system": "gba", "bucket": "gba/Game.zip"}]}`.
 A multi-disc game adds `"files": [...]` with its other bucket keys (the discs); `bucket` is the playlist (`.m3u`) or disc 1.
 Toggling the game adds or removes every file, one `games.json` entry each.
 Entries for an unknown system are skipped with a warning. Games of a full system show greyed out with a 🔒: they are always synced and can't be toggled.

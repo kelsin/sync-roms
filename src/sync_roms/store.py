@@ -182,7 +182,7 @@ def available_keys(s, have):
 
 
 def data_dir():
-    """Per-user data folder for this script."""
+    """Per-user data folder for sync-roms."""
     if sys.platform == "win32":
         return os.path.join(os.environ.get("APPDATA") or os.path.expanduser("~"), "sync-roms")
     xdg = os.environ.get("XDG_DATA_HOME")
