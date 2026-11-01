@@ -250,11 +250,15 @@ def sync():
         print(ui.dim(f"  {len(unsupported)} system(s) have no {layout['label']} folder and are skipped"))
     systems.sort(key=lambda s: s["name"].lower())
 
+    def reload_systems():
+        """The systems this card syncs, with the card's games as they are saved now."""
+        fresh = store.load_manifest([card])["systems"]
+        if device:
+            fresh = [s for s in fresh if s["bucket"] in wanted_ids]
+        return sorted((s for s in fresh if s["folders"].get(layout_name)), key=lambda s: s["name"].lower())
+
     print("📏 Reading ROM sizes...")
-    with ThreadPoolExecutor(runtime.WORKERS) as ex:
-        listings = dict(zip((s["bucket"] for s in systems),
-                            ex.map(lambda s: s3.list_sizes(s["bucket"] + "/")
-                                   if s.get("full_system") or store.listed(s) else {}, systems)))
+    listings, state = {}, {}
 
     def available(s):
         return store.available_keys(s, listings[s["bucket"]])
@@ -273,10 +277,26 @@ def sync():
                 need += size
         return need, total
 
-    rows = [(f"{s['name']}  ({len(available(s))} roms)", bool(available(s)), *sizes(s)) for s in systems]
-    present = [i for i, s in enumerate(systems)
-               if available(s) and (device or downloads.has_local_files(os.path.join(roms_dir, s["folders"][layout_name])))]
-    chosen = picker.pick_systems(rows, present)
+    while True:
+        todo = [s for s in systems if not listings.get(s["bucket"])]
+        with ThreadPoolExecutor(runtime.WORKERS) as ex:
+            listings.update(zip((s["bucket"] for s in todo),
+                                ex.map(lambda s: s3.list_sizes(s["bucket"] + "/")
+                                       if s.get("full_system") or store.listed(s) else {}, todo)))
+        rows = [(f"{s['name']}  ({len(available(s))} roms)", bool(available(s)), *sizes(s)) for s in systems]
+        present = [i for i, s in enumerate(systems)
+                   if available(s) and (device or downloads.has_local_files(os.path.join(roms_dir, s["folders"][layout_name])))]
+        chosen = picker.pick_systems(rows, present, state, editable=not args.dry_run)
+        if not isinstance(chosen, tuple):
+            break
+        action, row = chosen
+        if action == "games":  # the same list --edit changes for this card
+            if edit.edit_card_system(card, systems[row]["bucket"], (device, layout_name)):
+                state["sel"][row] = True
+        elif ui.confirm(f"🧹 Clear {card}'s own games? (the core list stays)", default=False):
+            store.update_card(card, games={})
+            state["sel"] = [False] * len(systems)
+        systems = reload_systems()
     if not chosen:
         print(ui.yellow("👋 Nothing selected."))
         return 0

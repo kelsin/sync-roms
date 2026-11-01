@@ -58,8 +58,16 @@ def choose_setup(manifest, current=None):
             return device, layout
 
 
-def pick_systems(rows, initial=None):
-    """rows: list of (label, has_roms, need_bytes, total_bytes); initial: indexes toggled on at start. Returns selected indexes, or None if quit."""
+def pick_systems(rows, initial=None, state=None, editable=False):
+    """rows: list of (label, has_roms, need_bytes, total_bytes); initial: indexes toggled on at start.
+    Returns selected indexes, or None if quit.
+
+    state: a dict kept by the caller so the selection, cursor and shown/hidden 0-ROM systems survive
+    reopening the picker. editable: g (edit the highlighted system's games) and x (clear the card's games)
+    close the picker and return ("games", row index) or ("clear", None); the caller reopens it with the same state.
+    """
+    state = {} if state is None else state
+
     def run(stdscr):
         curses.curs_set(0)
         curses.use_default_colors()
@@ -70,21 +78,28 @@ def pick_systems(rows, initial=None):
             curses.init_pair(2, curses.COLOR_CYAN, -1)
             curses.init_pair(3, curses.COLOR_YELLOW, -1)
             on, head, off = curses.color_pair(1), curses.color_pair(2), curses.color_pair(3)
-        sel = [i in (initial or ()) for i in range(len(rows))]
-        show_empty = False
+        sel = state["sel"] if "sel" in state else [i in (initial or ()) for i in range(len(rows))]
+        show_empty = state.get("show_empty", False)
         cur = top = 0
+        restore = state.get("row")
         while True:
             # systems with ROMs first, then (when shown) the empty ones; stable within each group
             order = [i for i, r in enumerate(rows) if r[1]]
             if show_empty:
                 order += [i for i, r in enumerate(rows) if not r[1]]
+            if restore in order:
+                cur = order.index(restore)
+            restore = None
             cur = min(cur, len(order) - 1)
+            state.update(sel=sel, show_empty=show_empty, row=order[cur] if order else None)
             stdscr.erase()
             h, w = stdscr.getmaxyx()
             hidden = len(rows) - len(order)
             stdscr.addnstr(0, 0, "🕹  Pick systems", w - 1, head | curses.A_BOLD)
-            stdscr.addnstr(1, 0, "↑/↓ move · space/tab toggle · a all on · n all off · "
-                           "e show/hide 0-ROM systems · enter go · q quit", w - 1, curses.A_DIM)
+            keys = ("↑/↓ move · space/tab toggle · a all on · n all off · "
+                    "e show/hide 0-ROM systems" + (" · g games · x clear card's games" if editable else "")
+                    + " · enter go · q quit")
+            stdscr.addnstr(1, 0, keys, w - 1, curses.A_DIM)
             view = h - 4
             if cur < top:
                 top = cur
@@ -121,6 +136,10 @@ def pick_systems(rows, initial=None):
                 sel = [False] * len(rows)
             elif k == ord("e"):
                 show_empty = not show_empty
+            elif k == ord("g") and editable and order:
+                return "games", order[cur]
+            elif k == ord("x") and editable:
+                return "clear", None
             elif k in (10, 13, curses.KEY_ENTER):
                 return [i for i, s in enumerate(sel) if s]
             elif k == ord("q"):
