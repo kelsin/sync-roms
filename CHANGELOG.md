@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.20.1](https://github.com/kelsin/sync-roms/compare/v0.20.0...v0.20.1) (2026-11-01)
+
+
+### Bug Fixes
+
+* **cd:** skip m3u playlists for xbox 360 ([#79](https://github.com/kelsin/sync-roms/issues/79)) ([b4e7e89](https://github.com/kelsin/sync-roms/commit/b4e7e89f3e45bedabc84259e969d2e3e5c93a1d0))
+
 ## [0.20.0](https://github.com/kelsin/sync-roms/compare/v0.19.1...v0.20.0) (2026-11-01)
 
 
