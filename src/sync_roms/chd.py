@@ -71,7 +71,9 @@ def chd_system(root, dirpath, folders):
 def plan_chd(root, folders, skipped=None):
     """[(system, system folder, file, owned)] to convert under root: owned is None for an archive, else the
     loose disc image's files (sheet and tracks, or the iso). Extract-only systems have archives only.
+    A .chd not using its system's `codec` is a job too, owning only itself (it gets recompressed).
     Sheets skipped for naming tracks outside their folder are appended to skipped."""
+    chdman = external.find_tool("chdman")
     jobs = []
     for dirpath, dirs, files in os.walk(root):
         dirs[:] = sorted(d for d in dirs if not external.own_temp(d))
@@ -84,12 +86,33 @@ def plan_chd(root, folders, skipped=None):
             jobs += [(system, sysroot, f, [f]) for f in files if f.lower().endswith(".iso") and not is_optimized_xiso(f)]
         elif system["chd"]["mode"] != "extract":
             jobs += [(system, sysroot, img, owned) for img, owned in disc_images(files, True, skipped)]
+            if system["chd"].get("codec") and chdman:
+                jobs += [(system, sysroot, f, [f]) for f in files if f.lower().endswith(".chd") and wrong_codec(chdman, system["chd"], f)]
     return jobs
+
+
+def codec_for(cfg, cd):
+    """The codec a system's chds must use: its `codec`, which CD chds spell cdzl for zlib; None when unset."""
+    codec = cfg.get("codec")
+    return "cdzl" if codec == "zlib" and cd else codec
 
 
 def chd_command_line(chdman, cfg, image, out, np):
     dvd = cfg["mode"] == "dvd" and image.lower().endswith(".iso")
-    return [chdman, "createdvd" if dvd else "createcd", "-i", image, "-o", out, "-np", str(np)] + (cfg.get("args", []) if dvd else [])
+    codec = codec_for(cfg, not dvd)
+    return ([chdman, "createdvd" if dvd else "createcd", "-i", image, "-o", out, "-np", str(np)]
+            + (cfg.get("args", []) if dvd else []) + (["-c", codec] if codec else []))
+
+
+def wrong_codec(chdman, cfg, path):
+    """The codec to recompress an existing chd to, or None when it already uses only the system's `codec`."""
+    info = external.tool_output([chdman, "info", "-i", path])
+    match = re.search(r"^Compression:\s*(.+)$", info or "", re.M)
+    if not match:
+        return None
+    used = [c.split()[0] for c in match.group(1).split(",")]
+    wanted = codec_for(cfg, "Tag='CH" in info)
+    return wanted if wanted and used != [wanted] else None
 
 
 _chd_locks = defaultdict(threading.Lock)  # one per output path: two jobs for the same disc take turns
@@ -108,11 +131,16 @@ def make_chd(tools, cfg, image, out, report=None):
 
     part = os.path.join(os.path.dirname(out), "." + os.path.basename(out) + ".part")
     with _chd_locks[out]:
-        if os.path.exists(out):
-            return external.run_tool([chdman, "verify", "-i", out], stage(0, 1))
         if os.path.exists(part):  # left by a run that was killed
             os.remove(part)
-        error = (external.run_tool(chd_command_line(chdman, cfg, image, part, tools["np"]), stage(0, 0.9))
+        if os.path.exists(out):
+            codec = wrong_codec(chdman, cfg, out) if cfg.get("codec") else None
+            if not codec:
+                return external.run_tool([chdman, "verify", "-i", out], stage(0, 1))
+            command = [chdman, "copy", "-i", out, "-o", part, "-c", codec, "-np", str(tools["np"])]
+        else:
+            command = chd_command_line(chdman, cfg, image, part, tools["np"])
+        error = (external.run_tool(command, stage(0, 0.9))
                  or external.run_tool([chdman, "verify", "-i", part], stage(0.9, 0.1)))
         if error:
             if os.path.exists(part):
