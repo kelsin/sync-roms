@@ -63,6 +63,15 @@ def run_tool(cmd, progress=None):
         return last or f"exit code {proc.returncode}"
 
 
+def tool_output(cmd):
+    """The tool's stdout, or None when it can't run or fails."""
+    try:
+        done = subprocess.run(cmd, stdin=subprocess.DEVNULL, capture_output=True, text=True)
+    except OSError:
+        return None
+    return done.stdout if done.returncode == 0 else None
+
+
 def install_tools_command():
     brew = shutil.which("brew")
     if not brew:

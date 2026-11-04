@@ -1915,10 +1915,7 @@
     },
     "chd": {
       "mode": "dvd",
-      "args": [
-        "-c",
-        "zlib"
-      ]
+      "codec": "zlib"
     }
   },
   {
