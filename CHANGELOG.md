@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.26.0](https://github.com/kelsin/sync-roms/compare/v0.25.1...v0.26.0) (2026-11-06)
+
+
+### Features
+
+* **chd:** use zlib for ps2 chds and recompress other codecs ([#98](https://github.com/kelsin/sync-roms/issues/98)) ([4d686cb](https://github.com/kelsin/sync-roms/commit/4d686cb11df509ba2f74031b89529c93d5a800aa))
+* support a folder (e.g. a network share) instead of an S3 bucket ([#100](https://github.com/kelsin/sync-roms/issues/100)) ([01d6699](https://github.com/kelsin/sync-roms/commit/01d669955bd3e864fec2c80d8f439358e5d17e53))
+* **systems:** add NEC PC-98 with np2kai bios and zip extraction ([#101](https://github.com/kelsin/sync-roms/issues/101)) ([4d0e535](https://github.com/kelsin/sync-roms/commit/4d0e535d316dd6eedfe6e6db2c8bef1a4a103ec7))
+
 ## [0.25.1](https://github.com/kelsin/sync-roms/compare/v0.25.0...v0.25.1) (2026-11-01)
 
 
