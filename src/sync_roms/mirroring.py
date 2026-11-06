@@ -2,7 +2,6 @@
 import os
 from concurrent.futures import ThreadPoolExecutor
 
-from botocore.exceptions import BotoCoreError, ClientError
 
 from . import downloads, runtime, s3, scrape_plan, store, ui, usersettings
 
@@ -100,7 +99,7 @@ def use_mirror(root, dry_run):
         failed = refresh_mirror(root, dry_run)
         if failed:
             ui.warn(f"{failed} mirror download(s) failed; files missing from the mirror will fail to copy. Re-run to retry")
-    except (ClientError, BotoCoreError, OSError, SystemExit) as e:  # S3 failed, or the folder isn't a mirror
+    except (*s3.ERRORS, SystemExit) as e:  # S3 failed, or the folder isn't a mirror
         ui.warn(f"Couldn't refresh the mirror ({e}); using what it has")
     if dry_run:
         print(ui.dim("  (dry run: the mirror was not refreshed, so this plan reads what it already has)"))
@@ -117,7 +116,7 @@ def mirror_command(args):
     if not root:
         ui.fail("No mirror folder: give one (--mirror DIR) or save one with --use-mirror DIR", 2)
     root = os.path.abspath(os.path.expanduser(root))
-    print(ui.bold(f"🪞 Mirror {ui.cyan(root)}") + ui.dim(f"  s3://{runtime.BUCKET}  profile={runtime.PROFILE}"))
+    print(ui.bold(f"🪞 Mirror {ui.cyan(root)}") + ui.dim(f"  {s3.access()}"))
     failed = refresh_mirror(root, args.dry_run)
     if args.use_mirror and not args.dry_run:
         usersettings.save_setting("mirror", root)
