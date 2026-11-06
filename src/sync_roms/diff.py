@@ -7,8 +7,6 @@ import threading
 import zipfile
 from concurrent.futures import ThreadPoolExecutor
 
-from botocore.exceptions import BotoCoreError, ClientError
-
 from . import downloads, picker, runtime, s3, store, ui
 
 
@@ -24,8 +22,7 @@ class RangeReader(io.RawIOBase):
     def fetch(self, start, end):
         if end <= start:
             return b""
-        r = s3.s3_client().get_object(Bucket=runtime.BUCKET, Key=self.key, Range=f"bytes={start}-{end - 1}")
-        return r["Body"].read()
+        return s3.read_range(self.key, start, end)
 
     def readable(self): return True
     def seekable(self): return True
@@ -69,7 +66,7 @@ def local_fingerprint(path):
 def bucket_fingerprint(key, size, etag):
     try:
         return zip_fingerprint(RangeReader(key, size))
-    except (zipfile.BadZipFile, ClientError, BotoCoreError):
+    except (zipfile.BadZipFile, *s3.ERRORS):
         etag = etag.strip('"')
         return ("raw", size, None if "-" in etag else etag)  # a multipart upload's ETag isn't an md5
 
@@ -179,14 +176,14 @@ def diff_command(args):
         print(ui.yellow("👋 Cancelled."))
         return 0
     bucket = systems[i]["bucket"]
-    print(ui.bold(f"🔍 Compare {systems[i]['name']}") + ui.dim(f"  {folder} ↔ s3://{runtime.BUCKET}/{bucket}/"))
+    print(ui.bold(f"🔍 Compare {systems[i]['name']}") + ui.dim(f"  {folder} ↔ {s3.location()}/{bucket}/"))
     local = local_sizes(folder)
     try:
         remote = s3.list_with_etags(bucket + "/")
         only_local, only_bucket = plan_diff(
             local, remote, lambda p: local_fingerprint(os.path.join(folder, *p.split("/"))),
             lambda p, size, etag: bucket_fingerprint(f"{bucket}/{p}", size, etag))
-    except (ClientError, BotoCoreError) as e:
+    except s3.ERRORS as e:
         ui.fail(f"{e}", 3)
     if args.json:
         ui.emit_json({"system": bucket,

@@ -550,7 +550,7 @@ def check_data(list_keys=None):
 
 def bucket_lister():
     """A callable(system id) -> bucket keys, using the read-only profile (refuses the write profile)."""
-    if runtime.PROFILE == runtime.WRITE_PROFILE:
+    if not runtime.ROOT and runtime.PROFILE == runtime.WRITE_PROFILE:
         ui.fail(f"--bucket-keys only reads the bucket; use the read-only profile, not {runtime.WRITE_PROFILE!r} "
                 "(--profile / ROMS_PROFILE)", 2)
     return lambda system: {k for k in s3.list_sizes(system + "/") if not k.endswith("/")}
@@ -574,26 +574,35 @@ def doctor_cmd(args):
         print(f"{'✅' if ok else '⚠️ ' if ok is None else '❌'} {text}" + (ui.dim(f"  → {hint}") if hint and not ok else ""))
 
     settings = dict((n, v) for n, v, _ in effective_settings())
-    line(bool(settings["bucket"]), f"bucket: {settings['bucket'] or 'not set'}", "run any sync-roms command to be asked, or set ROMS_BUCKET")
     usersettings.apply_settings()
-    try:
-        import boto3
-        from botocore.exceptions import BotoCoreError, ClientError, ProfileNotFound
-        session = boto3.Session(profile_name=runtime.PROFILE)
-        line(session.get_credentials() is not None, f"AWS profile {runtime.PROFILE}", f"aws configure --profile {runtime.PROFILE}")
-        if settings["bucket"] and session.get_credentials() is not None:
+    if runtime.ROOT:
+        line(os.path.isdir(runtime.ROOT), f"storage folder: {runtime.ROOT}", "is the network share mounted?")
+        if os.path.isdir(runtime.ROOT):
             try:
-                s3.s3_client().list_objects_v2(Bucket=runtime.BUCKET, MaxKeys=1)
-                line(True, f"can list s3://{runtime.BUCKET}")
-            except (ClientError, BotoCoreError) as e:
-                line(False, f"can't list s3://{runtime.BUCKET}: {e}", f"aws sso login --profile {runtime.PROFILE}, or check the bucket name")
-    except ProfileNotFound:
-        line(False, f"AWS profile {runtime.PROFILE} not found", f"aws configure --profile {runtime.PROFILE}")
-    try:
-        boto3.Session(profile_name=runtime.WRITE_PROFILE)
-        line(True, f"write profile {runtime.WRITE_PROFILE} exists")
-    except ProfileNotFound:
-        line(None, f"write profile {runtime.WRITE_PROFILE} not found", "only needed for upload and clean")
+                os.listdir(runtime.ROOT)
+                line(True, f"can list {runtime.ROOT}")
+            except OSError as e:
+                line(False, f"can't list {runtime.ROOT}: {e}", "check the share's permissions")
+    else:
+        line(bool(settings["bucket"]), f"bucket: {settings['bucket'] or 'not set'}", "run any sync-roms command to be asked, or set ROMS_BUCKET")
+        try:
+            import boto3
+            from botocore.exceptions import BotoCoreError, ClientError, ProfileNotFound
+            session = boto3.Session(profile_name=runtime.PROFILE)
+            line(session.get_credentials() is not None, f"AWS profile {runtime.PROFILE}", f"aws configure --profile {runtime.PROFILE}")
+            if settings["bucket"] and session.get_credentials() is not None:
+                try:
+                    s3.s3_client().list_objects_v2(Bucket=runtime.BUCKET, MaxKeys=1)
+                    line(True, f"can list s3://{runtime.BUCKET}")
+                except (ClientError, BotoCoreError) as e:
+                    line(False, f"can't list s3://{runtime.BUCKET}: {e}", f"aws sso login --profile {runtime.PROFILE}, or check the bucket name")
+        except ProfileNotFound:
+            line(False, f"AWS profile {runtime.PROFILE} not found", f"aws configure --profile {runtime.PROFILE}")
+        try:
+            boto3.Session(profile_name=runtime.WRITE_PROFILE)
+            line(True, f"write profile {runtime.WRITE_PROFILE} exists")
+        except ProfileNotFound:
+            line(None, f"write profile {runtime.WRITE_PROFILE} not found", "only needed for upload and clean")
     for tool in ("7z", "chdman", "extract-xiso"):
         found = external.find_tool(tool)
         line(True if found else None, f"{tool}: {found or 'not installed'}",
@@ -666,7 +675,7 @@ def completion_cmd(args):
     --systems)  # a comma separated list: complete the part after the last comma
       COMPREPLY=($(compgen -P "${{cur%"${{cur##*,}}"}}" -W "all $(sync-roms completion list systems)" -- "${{cur##*,}}")); compopt -o nospace 2>/dev/null; return;;
     --system) COMPREPLY=($(compgen -W "$(sync-roms completion list systems)" -- "$cur")); return;;
-    --profile|--write-profile|--bucket|--endpoint) return;;
+    --profile|--write-profile|--bucket|--root|--endpoint) return;;
   esac
   if [[ "$cur" == -* ]]; then COMPREPLY=($(compgen -W "{flags}" -- "$cur")); return; fi
   if [ "$COMP_CWORD" -eq 1 ]; then COMPREPLY=($(compgen -W "{subs}" -- "$cur") $(compgen -d -- "$cur")); return; fi

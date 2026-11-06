@@ -5,7 +5,6 @@ import xml.etree.ElementTree as ET
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
 
-from botocore.exceptions import BotoCoreError, ClientError
 
 from . import runtime, s3, scrape_plan, store, ui, upload
 
@@ -169,7 +168,7 @@ def plan_slot_upload(labels_dir, systems, roms, existing):
 
 def upload_slot_labels(args, labels_dir):
     """Upload a Slot card's Labels folder to scrapes/<system>/slot/, replacing labels that differ."""
-    print(ui.bold("☁️  Upload Slot labels") + ui.dim(f"  read={runtime.PROFILE}  write={runtime.WRITE_PROFILE}  from {labels_dir}"))
+    print(ui.bold("☁️  Upload Slot labels") + ui.dim(f"  {s3.access(True)}  from {labels_dir}"))
     try:
         manifest = store.load_manifest()
         print("📏 Listing the ROMs available in the bucket...")
@@ -177,7 +176,7 @@ def upload_slot_labels(args, labels_dir):
         roms = bucket_roms(systems, all_files=True)
         print("☁️  Listing what's already in scrapes/...")
         existing = s3.list_sizes(scrape_plan.SCRAPES + "/")
-    except (ClientError, BotoCoreError) as e:
+    except s3.ERRORS as e:
         ui.fail(f"{e}", 3)
     files, present, unmatched = plan_slot_upload(labels_dir, systems, roms, existing)
     replaced = sum(1 for key, _, _ in files if key in existing)
@@ -195,7 +194,7 @@ def upload_slot_labels(args, labels_dir):
         for key, _, size in files[:20]:
             print(f"  {key} {ui.dim(ui.human_size(size))}")
         return 0
-    if not ui.confirm(f"☁️  Upload to s3://{runtime.BUCKET}/{scrape_plan.SCRAPES}/ ?", default=False):
+    if not ui.confirm(f"☁️  Upload to {s3.location()}/{scrape_plan.SCRAPES}/ ?", default=False):
         print(ui.yellow("👋 Cancelled."))
         return 0
     failed = upload.run_uploads(files)
@@ -216,7 +215,7 @@ def upload_scrapes(args):
     if isinstance(saved, dict) and saved.get("layout") not in (None, "esde"):
         ui.fail(f"{base} is set up as a {saved['layout']} card; scraped data is only uploaded from the esde layout", 2)
 
-    print(ui.bold("☁️  Upload scrapes") + ui.dim(f"  read={runtime.PROFILE}  write={runtime.WRITE_PROFILE}  from {es_dir}"))
+    print(ui.bold("☁️  Upload scrapes") + ui.dim(f"  {s3.access(True)}  from {es_dir}"))
     try:
         manifest = store.load_manifest([os.path.basename(base) or base])
         print("📏 Listing the ROMs available in the bucket...")
@@ -226,7 +225,7 @@ def upload_scrapes(args):
         remote_texts = s3.fetch_texts(text_keys(existing))
         print("🔎 Comparing...")
         plan = plan_upload(es_dir, roms, existing, remote_texts)
-    except (ClientError, BotoCoreError) as e:
+    except s3.ERRORS as e:
         ui.fail(f"{e}", 3)
     for w in plan["warnings"]:
         print(ui.yellow(f"  ⚠️  {w}"))
@@ -252,7 +251,7 @@ def upload_scrapes(args):
         if len(files) + len(derived) > 20:
             print(ui.dim(f"  … and {len(files) + len(derived) - 20} more"))
         return 0
-    if not ui.confirm(f"☁️  Upload to s3://{runtime.BUCKET}/{scrape_plan.SCRAPES}/ ?", default=False):
+    if not ui.confirm(f"☁️  Upload to {s3.location()}/{scrape_plan.SCRAPES}/ ?", default=False):
         print(ui.yellow("👋 Cancelled."))
         return 0
     failed = 0
@@ -307,7 +306,7 @@ def plan_clean(existing, roms, remote_texts):
 
 def clean_scrapes(args):
     """Remove scrapes/ media and metadata for ROMs that aren't in the bucket (any ROM file, listed in games.json or not)."""
-    print(ui.bold("🧹 Clean scrapes") + ui.dim(f"  read={runtime.PROFILE}  write={runtime.WRITE_PROFILE}"))
+    print(ui.bold("🧹 Clean scrapes") + ui.dim(f"  {s3.access(True)}"))
     try:
         manifest = store.load_manifest()
         print("📏 Listing every ROM in the bucket...")
@@ -315,7 +314,7 @@ def clean_scrapes(args):
         print("☁️  Listing scrapes/...")
         existing = s3.list_sizes(scrape_plan.SCRAPES + "/")
         remote_texts = s3.fetch_texts([k for k in text_keys(existing) if k.endswith("/metadata.json")])
-    except (ClientError, BotoCoreError) as e:
+    except s3.ERRORS as e:
         ui.fail(f"{e}", 3)
     delete, rewrites, per, warnings = plan_clean(existing, roms, remote_texts)
     for w in warnings:
@@ -342,7 +341,7 @@ def clean_scrapes(args):
         for key, text in rewrites:
             s3.put_text(key, text)
         failed = len(s3.delete_keys(delete)) if delete else 0
-    except (ClientError, BotoCoreError) as e:
+    except s3.ERRORS as e:
         ui.fail(f"{e}", 3)
     print(ui.green("\n🎉 Done!") if not failed else ui.red(f"\n⚠️  Done with {failed} failure(s)"))
     return 1 if failed else 0
