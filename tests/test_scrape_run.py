@@ -31,10 +31,16 @@ class FakeClient:
         self.quota_at = quota_at  # ROM file name whose lookup hits the daily quota
         self.fail_urls = set(fail_urls)
         self.errors = errors or {}  # ROM file name -> list of exceptions raised by its lookups, in order
-        self.lookups, self.downloads, self.games_asked = [], [], []
+        self.download_errors = {}  # URL -> exception its download raises
+        self.quota_errors = []
+        self.threads = 2
+        self.lookups, self.downloads, self.games_asked, self.quota_calls = [], [], [], 0
 
     def quota(self):
-        return screenscraper.Quota(2, 0, 1000)
+        self.quota_calls += 1
+        if self.quota_errors:
+            raise self.quota_errors.pop(0)
+        return screenscraper.Quota(self.threads, 0, 1000)
 
     def lookup(self, system_id, rom_name, size, md5=None, sha1=None, crc=None):
         self.lookups.append(rom_name)
@@ -57,6 +63,8 @@ class FakeClient:
         self.downloads.append(url)
         if url in self.fail_urls:
             raise screenscraper.ApiError("ScreenScraper request failed (HTTP 500)")
+        if url in self.download_errors:
+            raise self.download_errors[url]
         with open(dest, "wb") as f:
             f.write(PNG)
 
@@ -257,6 +265,87 @@ class ScrapeRunTest(RunBase):
         self.assertIn("scrape --set-credentials", err)
         self.assertNotIn("hunter2", err + self.out.getvalue())
         self.assertEqual(self.stored(), set())
+
+
+class FixRoundOneTest(RunBase):
+    def test_unknown_error_text_never_printed(self):
+        self.put("gba/a.zip")
+        url = "http://media/1/ss?ssid=me&sspassword=hunter2&devpassword=devpw"
+        self.client.games["a.zip"]["medias"][1]["url"] = url
+        self.client.download_errors[url] = ValueError("bad URL " + url)
+        self.assertEqual(self.run_scrape(), 1)
+        printed = self.out.getvalue() + self.err.getvalue()
+        self.assertIn("a.zip", printed)
+        self.assertIn("ValueError", printed)
+        self.assertNotIn("hunter2", printed)
+        self.assertNotIn("devpw", printed)
+        self.assertEqual(self.metadata(), {})
+
+    def test_manual_match_overrides_unknown_ledger(self):
+        self.put("gba/a.zip")
+        scrape_state.mark_unknown("gba", "a.zip")
+        self.assertEqual(self.run_scrape(dry_run=True), 0)
+        self.assertIn("Nothing to scrape", self.out.getvalue())
+        scrape_state.save_match("gba", "a.zip", 1)
+        self.assertEqual(self.run_scrape(), 0)
+        self.assertEqual(self.metadata(), {"a.zip": {"name": "Alpha"}})
+        self.assertFalse(scrape_state.is_unknown("gba", "a.zip"))
+
+    def test_scraped_rom_leaves_unknown_ledger(self):
+        self.put("gba/a.zip")
+        self.put("gba/zzz.zip")
+        scrape_state.mark_unknown("gba", "a.zip")
+        scrape_state.mark_unknown("gba", "zzz.zip")
+        self.assertEqual(self.run_scrape(retry=True), 0)
+        self.assertFalse(scrape_state.is_unknown("gba", "a.zip"))
+        self.assertTrue(scrape_state.is_unknown("gba", "zzz.zip"))
+
+    def test_failed_upload_leaves_no_metadata_entry(self):
+        self.put("gba/a.zip")
+        self.put("gba/b.zip")
+        real = upload.run_copies
+
+        def run_copies(todo):
+            bad = [j for j in todo if "/a." in j[0]]
+            return real([j for j in todo if j not in bad]) + len(bad)
+        with mock.patch.object(upload, "run_copies", side_effect=run_copies):
+            self.assertEqual(self.run_scrape(), 1)
+        self.assertEqual(set(self.metadata()), {"b.zip"})
+        self.assertIn("a.zip", self.out.getvalue())
+
+    def test_ctrl_c_stops_queued_roms(self):
+        for r in "abcdef":
+            self.put(f"gba/{r}.zip")
+            self.client.games.setdefault(f"{r}.zip", game(ord(r), r))
+        self.client.threads = 1
+        self.client.errors = {"a.zip": [KeyboardInterrupt()]}
+        with self.assertRaises(KeyboardInterrupt):
+            self.run_scrape()
+        self.assertEqual(self.client.lookups, ["a.zip"])
+
+    def test_quota_call_retried_when_rate_limited(self):
+        self.put("gba/a.zip")
+        self.client.quota_errors = [screenscraper.RateLimited("429"), screenscraper.RateLimited("429")]
+        self.assertEqual(self.run_scrape(), 0)
+        self.assertEqual(self.client.quota_calls, 3)
+        self.assertEqual(set(self.metadata()), {"a.zip"})
+
+    def test_storage_error_fails_cleanly_and_keeps_earlier_batches(self):
+        self.put("gba/a.zip")
+        self.put("gba/b.zip")
+        real, calls = upload.run_copies, []
+
+        def run_copies(todo):
+            calls.append(todo)
+            if len(calls) == 2:
+                raise OSError("disk gone ?sspassword=hunter2")
+            return real(todo)
+        with mock.patch.object(scrape_online, "BATCH", 1), \
+                mock.patch.object(upload, "run_copies", side_effect=run_copies), self.assertRaises(SystemExit) as cm:
+            self.run_scrape()
+        self.assertEqual(cm.exception.code, 3)
+        self.assertEqual(set(self.metadata()), {"a.zip"})
+        self.assertNotIn("hunter2", self.out.getvalue() + self.err.getvalue())
 
 
 class SystemsTest(RunBase):

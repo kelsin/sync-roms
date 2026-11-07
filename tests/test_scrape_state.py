@@ -49,6 +49,13 @@ class ScrapeStateTest(unittest.TestCase):
         scrape_state.clear_unknown()
         self.assertFalse(scrape_state.is_unknown("nes", "b.zip"))
 
+    def test_clear_unknown_one_rom_only(self):
+        scrape_state.mark_unknown("gba", "a.zip")
+        scrape_state.mark_unknown("gba", "b.zip")
+        scrape_state.clear_unknown("gba", "a.zip")
+        self.assertFalse(scrape_state.is_unknown("gba", "a.zip"))
+        self.assertTrue(scrape_state.is_unknown("gba", "b.zip"))
+
     def test_corrupt_file_reads_as_empty(self):
         for name in ("scrape-hashes.json", "scrape-matches.json", "scrape-unknown.json"):
             with open(os.path.join(self.tmp.name, name), "w") as f:

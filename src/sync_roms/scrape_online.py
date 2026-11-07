@@ -18,13 +18,15 @@ CHUNK = 8 << 20
 
 
 def find_candidates(systems, roms, metadata, retry=False):
-    """{system folder: sorted ROM paths} with no entry in that system's metadata.json (and, unless retry, not marked unknown)."""
+    """{system folder: sorted ROM paths} with no entry in that system's metadata.json (and, unless retry, not marked
+    unknown; a saved manual match overrides the unknown mark)."""
     out = {}
     for s in systems:
         system = s["bucket"]
         have = metadata.get(system, {})
         out[system] = sorted(r for r in roms.get(system, ())
-                             if r not in have and (retry or not scrape_state.is_unknown(system, r)))
+                             if r not in have and (retry or scrape_state.manual_match(system, r) is not None
+                                                      or not scrape_state.is_unknown(system, r)))
     return out
 
 
@@ -227,13 +229,24 @@ def scrape_rom(client, system, item, tmp, skip, stop):
     except screenscraper.NotFound:
         return "unknown", None
     except ROM_ERRORS as e:
-        return "failed", str(e) or type(e).__name__
+        return "failed", _reason(e)
     return "done", (how, meta, files)
+
+
+def _reason(e):
+    """Printable text for a ROM's failure: our own ApiError messages (which never hold a URL), else only the error's type,
+    since other errors' text can quote a media URL and the credentials in its query."""
+    return str(e) if type(e) in (screenscraper.ApiError, screenscraper.RateLimited) and str(e) else type(e).__name__
 
 
 def _uploaded(jobs, have):
     """Whether every upload job is in storage: same size for files, present for shrunk images."""
     return all(j[0] in have and (len(j) > 3 or have[j[0]] == j[2]) for j in jobs)
+
+
+def _storage_fail(what, e):
+    ui.fail(f"{what} failed ({type(e).__name__}). ROMs recorded in earlier batches are complete; "
+            "run `sync-roms scrape` again to continue.", 3)
 
 
 def run_batch(client, system, batch, skip, threads, shrink, outcomes):
@@ -242,8 +255,15 @@ def run_batch(client, system, batch, skip, threads, shrink, outcomes):
     stop = threading.Event()
     failed = 0
     with tempfile.TemporaryDirectory() as tmp:
-        with ThreadPoolExecutor(threads) as ex:
-            results = list(ex.map(lambda item: scrape_rom(client, system, item, tmp, skip, stop), batch))
+        ex = ThreadPoolExecutor(threads)
+        try:
+            futures = [ex.submit(scrape_rom, client, system, item, tmp, skip, stop) for item in batch]
+            results = [f.result() for f in futures]
+        except KeyboardInterrupt:
+            stop.set()
+            ex.shutdown(wait=False, cancel_futures=True)
+            raise
+        ex.shutdown()
         quota_hit = any(status == "quota" for status, _ in results)
         jobs = {}  # ROM -> its upload jobs
         done = {}
@@ -265,8 +285,12 @@ def run_batch(client, system, batch, skip, threads, shrink, outcomes):
                                  for key, src, box in scrape_files.derived_art(name, stem, files) if src]
                 jobs[rom], done[rom] = rom_jobs, (how, meta)
         todo = [j for js in jobs.values() for j in js]
-        if todo and upload.run_uploads(todo):
-            have = s3.list_sizes(f"{scrape_plan.SCRAPES}/{name}/")
+        try:
+            upload_failed = upload.run_uploads(todo) if todo else 0
+            have = s3.list_sizes(f"{scrape_plan.SCRAPES}/{name}/") if upload_failed else {}
+        except s3.ERRORS as e:
+            _storage_fail(f"Uploading {name} media", e)
+        if upload_failed:
             for rom in [r for r in done if not _uploaded(jobs[r], have)]:
                 failed += 1
                 del done[rom]
@@ -279,9 +303,11 @@ def run_batch(client, system, batch, skip, threads, shrink, outcomes):
             print(ui.yellow(f"  ⚠️  {e}; {len(done)} ROM(s) not recorded"))
             return failed + len(done), quota_hit
         except s3.ERRORS as e:
-            ui.fail(f"Couldn't write {metadata_key(name)}: {e}", 3)
+            _storage_fail(f"Writing {metadata_key(name)}", e)
         for rom, (how, _) in done.items():
             outcomes[rom] = how
+            if scrape_state.is_unknown(name, rom):  # found after all (a retry, or a manual match)
+                scrape_state.clear_unknown(name, rom)
         print(ui.green(f"  ✅ {name}: {len(done)} ROM(s) scraped"))
     return failed, quota_hit
 
@@ -294,7 +320,7 @@ def run_scrape(client, systems, todo, skip):
         print(ui.yellow("👋 Cancelled."))
         return 0
     try:
-        quota = client.quota()
+        quota = _retry(client.quota)
     except screenscraper.QuotaExceeded:
         print(ui.yellow("⏳ ScreenScraper's daily quota is used up; run this again tomorrow."))
         return 1
