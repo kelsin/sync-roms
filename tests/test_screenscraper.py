@@ -94,6 +94,13 @@ class ClientTests(unittest.TestCase):
             with self.assertRaises(ss.QuotaExceeded):
                 client(opener).lookup(12, "g.gba", 1)
 
+    def test_rate_limit_raises_rate_limited_api_error(self):
+        def opener(req, timeout=None):
+            raise http_error(429)
+        with self.assertRaises(ss.RateLimited) as cm:
+            client(opener).lookup(12, "g.gba", 1)
+        self.assertIsInstance(cm.exception, ss.ApiError)
+
     def test_quota_parse(self):
         q = client(lambda req, timeout=None: fixture("ssuserinfos.json")).quota()
         self.assertEqual(q, ss.Quota(max_threads=1, used_today=123, max_today=20000))

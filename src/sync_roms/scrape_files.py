@@ -30,6 +30,19 @@ def rom_stems(roms):
     return {system: {os.path.splitext(r)[0] for r in paths} for system, paths in roms.items()}
 
 
+def derived_art(system, stem, found):
+    """[(key, source path or None, (max width, max height))] of the Onion box art and Slot label a ROM gets.
+
+    found: {media type: local path} of the ROM's art. Onion's Imgs folder is flat, so ROMs in subfolders get
+    none; Slot labels are only made for the systems in SLOT_LABEL_MAX.
+    """
+    wanted = [(scrape_plan.ONION_TYPE, scrape_plan.ONION_ART, scrape_plan.ONION_MAX)] if "/" not in stem else []
+    if system in scrape_plan.SLOT_LABEL_MAX:
+        wanted.append((scrape_plan.SLOT_TYPE, scrape_plan.SLOT_ART, scrape_plan.SLOT_LABEL_MAX[system]))
+    return [(f"{scrape_plan.SCRAPES}/{system}/{kind}/{stem}.png", next((found[t] for t in order if t in found), None), box)
+            for kind, order, box in wanted]
+
+
 def plan_upload(es_dir, roms, existing, remote_texts):
     """What to upload from an ES-DE data folder.
 
@@ -93,12 +106,7 @@ def plan_upload(es_dir, roms, existing, remote_texts):
                     if mtype in scrape_plan.ONION_ART + scrape_plan.SLOT_ART:
                         art[(system, stem)][mtype] = full
     for (system, stem), found in sorted(art.items()):
-        wanted = [(scrape_plan.ONION_TYPE, scrape_plan.ONION_ART, scrape_plan.ONION_MAX)] if "/" not in stem else []  # Onion's Imgs folder is flat
-        if system in scrape_plan.SLOT_LABEL_MAX:
-            wanted.append((scrape_plan.SLOT_TYPE, scrape_plan.SLOT_ART, scrape_plan.SLOT_LABEL_MAX[system]))
-        for kind, order, box in wanted:
-            key = f"{scrape_plan.SCRAPES}/{system}/{kind}/{stem}.png"
-            source = next((found[t] for t in order if t in found), None)
+        for key, source, box in derived_art(system, stem, found):
             if key in existing:
                 plan["derived_present"] += 1
             elif source:
