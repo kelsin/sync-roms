@@ -7,7 +7,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 from botocore.exceptions import BotoCoreError, ClientError, NoCredentialsError
 
-from . import __version__, chd, clean, commands, diff, downloads, edit, external, m3u, mirroring, picker, runtime, s3, scrape_files, scrape_plan, store, ui, upload, usersettings
+from . import __version__, chd, clean, commands, diff, downloads, edit, external, m3u, mirroring, picker, runtime, s3, scrape_files, scrape_online, scrape_plan, store, ui, upload, usersettings
 
 
 SUBCOMMANDS = {  # name -> (usage, one-line summary)
@@ -17,6 +17,7 @@ SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "devices": ("[ID]", "list the supported devices, or one device's systems"),
     "upload": ("roms [DIR] | scrapes [CARD]", "upload ROMs or a card's scraped data to the bucket"),
     "diff": ("[DIR]", "list the ROMs in only DIR or only the bucket, ignoring renames"),
+    "scrape": ("[match SYSTEM ROM GAME]", "scrape the ROMs that have no metadata from ScreenScraper into the bucket's scrapes/ folder"),
     "clean": ("scrapes", "remove scrapes/ media and metadata for ROMs that aren't in the bucket"),
     "playlist": ("[DIR]", "create or fix the .m3u playlist of every multi-disc game"),
     "convert": ("[DIR]", "unzip archives and convert disc images to verified .chd"),
@@ -96,6 +97,22 @@ TOPICS = {
 
   Lists the ROMs in only one of DIR and the bucket folder of a system you pick. Same path and size is the same file;
   the rest are matched by content (the CRCs inside zips).
+""",
+    "scrape": """
+  sync-roms scrape [--system ID] [--retry] [--skip-media TYPES] [--dry-run]
+  sync-roms scrape match SYSTEM ROM GAME_ID_OR_NAME [--skip-media TYPES] [--dry-run]
+  sync-roms scrape --set-credentials
+
+  Looks up every available ROM with no entry in scrapes/<system>/metadata.json on ScreenScraper and writes its
+  metadata and media (and the Onion/Slot images) to the bucket or storage folder. The ROMs and how each will be
+  looked up are listed first. ROMs ScreenScraper doesn't know are remembered and skipped until --retry.
+  --system ID        only that bucket folder (e.g. gba)
+  --skip-media TYPES comma-separated media folders not to download (covers, 3dboxes, backcovers, custom, fanart,
+                     manuals, marquees, ...); other values are refused with the list
+  match              say which ScreenScraper game a ROM is (a game id, or a name to search and pick from), then scrape it
+  --set-credentials  ask for your ScreenScraper login and the developer id and password (saved in settings.json,
+                     readable only by you; blank keeps the current value)
+  When ScreenScraper's daily quota runs out the run stops cleanly; run it again tomorrow. Writes use the write profile.
 """,
     "clean": """
   sync-roms clean scrapes [--dry-run]
@@ -274,13 +291,14 @@ class Parser(argparse.ArgumentParser):
 LEGACY = {
     ("sync",): [], ("devices",): ["--devices"], ("diff",): ["--diff"], ("playlist",): ["--m3u"], ("convert",): ["--cd"],
     ("tools", "install"): ["--install-tools"], ("clean", "scrapes"): ["--clean-scrapes"],
+    ("scrape", "match"): ["--scrape-match"], ("scrape",): ["--scrape"],
     ("upload", "roms"): ["--upload"], ("upload", "scrapes"): ["--upload-scrapes"],
     ("mirror", "use"): ["--use-mirror"], ("mirror", "clear"): ["--clear-mirror"], ("mirror",): ["--mirror"],
     ("games", "edit"): ["--edit"],
 }
 BOOL_FLAGS = {"-n", "--dry-run", "-y", "--yes", "-a", "--ask"}
-PLAIN_FLAGS = BOOL_FLAGS | {"--replace", "--json", "--no-clean"}
-VALUE_FLAGS = {"--system", "--device", "--layout", "--systems", "--device-id"}
+PLAIN_FLAGS = BOOL_FLAGS | {"--replace", "--json", "--no-clean", "--retry", "--set-credentials"}
+VALUE_FLAGS = {"--system", "--device", "--layout", "--systems", "--device-id", "--skip-media"}
 
 
 def translate(argv):
@@ -298,6 +316,19 @@ def translate(argv):
             flags = LEGACY[words]
             if not flags:
                 return head + tail
+            if words == ("scrape", "match"):  # three values that must stay together, behind the flag
+                values, others, n = [], [], 0
+                while n < len(tail):
+                    if tail[n] in VALUE_FLAGS and n + 1 < len(tail):
+                        others += tail[n:n + 2]
+                        n += 2
+                    elif len(values) < 3 and not tail[n].startswith("-"):
+                        values.append(tail[n])
+                        n += 1
+                    else:
+                        others.append(tail[n])
+                        n += 1
+                return head + flags + values + others
             n = 0  # flags (and the values of value flags) before the mode's value (`diff -n /x`) move behind it
             while n < len(tail) and (tail[n] in PLAIN_FLAGS or tail[n] in VALUE_FLAGS):
                 n += 1 if tail[n] in PLAIN_FLAGS else 2
@@ -322,6 +353,11 @@ def build_parser():
     ap.add_argument("-c", "--clean-scrapes", action="store_true")
     ap.add_argument("--upload", nargs="?", const="")
     ap.add_argument("--replace", action="store_true")
+    ap.add_argument("--scrape", action="store_true")
+    ap.add_argument("--scrape-match", nargs=3, metavar=("SYSTEM", "ROM", "GAME"))
+    ap.add_argument("--retry", action="store_true")
+    ap.add_argument("--skip-media")
+    ap.add_argument("--set-credentials", action="store_true")
     ap.add_argument("--diff", nargs="?", const="")
     ap.add_argument("--m3u", nargs="?", const="")
     ap.add_argument("--cd", "--chd", dest="chd", nargs="?", const="")
@@ -347,6 +383,7 @@ def check_modes(args):
     modes = [name for name, on in (
         ("--edit", args.edit), ("--upload", args.upload is not None), ("--diff", args.diff is not None),
         ("--upload-scrapes", args.upload_scrapes), ("--clean-scrapes", args.clean_scrapes),
+        ("--scrape", args.scrape), ("--scrape-match", args.scrape_match is not None),
         ("--mirror", args.mirror is not None), ("--use-mirror", bool(args.use_mirror)), ("--clear-mirror", args.clear_mirror),
         ("--m3u", args.m3u is not None), ("--cd", args.chd is not None), ("--install-tools", args.install_tools),
         ("--devices", args.devices)) if on]
@@ -367,8 +404,17 @@ def check_modes(args):
         ui.fail("a device id only applies to `devices`", 2)
     if args.json and not (mode in ("--devices", "--diff") or (mode is None and args.dry_run)):
         ui.fail("--json only applies to `devices`, `diff` and `sync --dry-run`", 2)
-    if args.system and mode != "--diff":
-        ui.fail("--system only applies to `diff`", 2)
+    if args.system and mode not in ("--diff", "--scrape"):
+        ui.fail("--system only applies to `diff` and `scrape`", 2)
+    if args.retry and mode != "--scrape":
+        ui.fail("--retry only applies to `scrape`", 2)
+    if args.set_credentials and (mode != "--scrape" or args.system or args.retry or args.skip_media or args.dry_run):
+        ui.fail("--set-credentials only goes with `scrape`, on its own", 2)
+    if args.skip_media is not None:
+        if mode not in ("--scrape", "--scrape-match"):
+            ui.fail("--skip-media only applies to `scrape`", 2)
+        args.skip_media = [t.strip() for t in args.skip_media.split(",") if t.strip()]
+        scrape_online._check_skip(args.skip_media)
     return mode
 
 
@@ -453,7 +499,14 @@ def run(argv):
         if args.install_tools:
             return external.install_tools_command()
         return chd.chd_command(args) if args.chd is not None else m3u.m3u_command(args)
+    if args.set_credentials:
+        return scrape_online.set_credentials()
     usersettings.ensure_bucket()
+    if args.scrape:
+        return scrape_online.scrape_command(args)
+    if args.scrape_match:
+        args.system, args.rom, args.game = args.scrape_match
+        return scrape_online.match_command(args)
     if args.upload is not None:
         return upload.upload_command(args)
     if args.diff is not None:

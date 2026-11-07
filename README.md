@@ -231,6 +231,7 @@ Every mode is a command (`sync-roms COMMAND --help` explains one; plain `sync-ro
 | `devices [ID]` | list devices, or one device's systems (`--json`) | `--devices` |
 | `upload roms [DIR]` / `upload scrapes [CARD]` | upload to the bucket | `--upload`, `--upload-scrapes` |
 | `diff [DIR]` | compare a folder with the bucket | `--diff` |
+| `scrape [match SYSTEM ROM GAME]` / `scrape --set-credentials` | scrape ROMs with no metadata from ScreenScraper | `--scrape`, `--scrape-match` |
 | `clean scrapes` | remove scrapes of ROMs not in the bucket | `--clean-scrapes` |
 | `playlist [DIR]` | fix `.m3u` playlists | `--m3u` |
 | `convert [DIR]` | convert disc images to CHD | `--cd`, `--chd` |
@@ -282,7 +283,12 @@ Before downloading, the sync shows the totals and free space on the card and ask
 | `--no-clean` | Sync: skip the end-of-run card tidy |
 | `--json` | `devices`, `games list`, `cards list`, `diff` and `sync --dry-run`: one JSON document on stdout, nothing else (pass `--device`/`--layout`/`--systems` so no picker is needed; `diff` also needs `--system ID` unless the folder is named after a system) |
 | `--card NAME` | `games` commands: work on that card's extras instead of the core list (see Editing from scripts) |
-| `--system ID` | `diff`: the bucket system to compare with, instead of the picker |
+| `--system ID` | `diff`: the bucket system to compare with, instead of the picker. `scrape`: only that bucket folder |
+| `--scrape` | Scrape the ROMs that have no metadata from ScreenScraper (the old form of `scrape`; see Scraping from ScreenScraper) |
+| `--scrape-match SYSTEM ROM GAME` | Tell the scraper which ScreenScraper game a ROM is, then scrape it (the old form of `scrape match`) |
+| `--retry` | `scrape`: also try the ROMs ScreenScraper didn't know before |
+| `--skip-media TYPES` | `scrape`, `scrape match`: comma-separated media folders not to download (e.g. `manuals,fanart`) |
+| `--set-credentials` | `scrape`: ask for the ScreenScraper login and developer credentials and save them in `settings.json` |
 | `--bucket-keys` | `check`: also verify with the read-only profile that every game key in your lists and sets exists in the bucket |
 | `--quiet` | Print only errors, warnings and `--json` data; prompts are asked on stderr |
 | `--verbose` | Also print the effective settings and where each came from, on stderr |
@@ -344,6 +350,40 @@ is skipped with a warning.
 listed in `games.json`), lists what no longer matches (including whole systems with no folder in the
 bucket), and after you confirm (default no) deletes the media and rewrites the metadata files. `--dry-run` only lists. Themes, collections and settings are never
 touched.
+
+## Scraping from ScreenScraper (`scrape`)
+
+`sync-roms scrape` looks up the available ROMs that have no entry in `scrapes/<system>/metadata.json` on
+[ScreenScraper](https://www.screenscraper.fr) and writes what it finds to the storage (bucket or folder). It uses the write profile.
+
+**Credentials.** ScreenScraper needs your user account and also developer credentials (a developer id and password) for the
+software making the calls; ScreenScraper issues those on request through its forum, and sync-roms ships none. Run
+`sync-roms scrape --set-credentials` to enter all four (the passwords aren't echoed, a blank answer keeps the saved value).
+They are stored in `settings.json` as `screenscraper_user`, `screenscraper_password`, `screenscraper_devid` and
+`screenscraper_devpassword`; the file is kept readable by you only (mode 600) and `config show` never prints them.
+
+**Report.** Before looking anything up, the run lists the ROMs with no metadata and how each will be matched first.
+`--dry-run` stops there; `--system ID` limits it to one bucket folder.
+
+**Matching.** A ROM saved with `scrape match` is used as is. Otherwise, in a storage folder the file is hashed in place
+(hashes are remembered while its size and modification time stay the same), then looked up by name and size. In S3 the object's
+MD5 is used when the bucket has one, then name and size. ROMs are never downloaded from S3 to be hashed. A match by name and
+size is trusted without further checks.
+
+**Manual match.** `sync-roms scrape match SYSTEM ROM GAME`, e.g. `scrape match gba "Game (USA).zip" 12345`. `GAME` is a
+ScreenScraper game id, or a name to search for and pick from. The choice is saved, then the ROM is scraped.
+
+**Unknown ROMs.** A ROM ScreenScraper doesn't know is remembered and skipped on later runs. `--retry` tries them again.
+
+**Quota.** ScreenScraper limits requests per day. When it is used up the run stops cleanly with what it finished already
+saved; run it again the next day.
+
+**What is written** under `scrapes/<system>/`: the entry in `metadata.json` (merged with what is there) and one folder per media
+type (`3dboxes`, `backcovers`, `covers`, `custom`, `fanart`, `manuals`, `marquees`, `miximages`, `physicalmedia`, `screenshots`, `titlescreens`, `videos`), plus the Onion and Slot images made the
+same way as when uploading. `--skip-media TYPES` takes a comma-separated list of those folder names and downloads none of them.
+
+**Local state** in the data folder (`~/.sync-roms/`): `scrape-hashes.json` (file hashes), `scrape-matches.json` (your manual
+matches) and `scrape-unknown.json` (the ROMs ScreenScraper didn't know). Delete one to forget it.
 
 ## Local mirror (`--mirror`, `--use-mirror`, `--clear-mirror`)
 
