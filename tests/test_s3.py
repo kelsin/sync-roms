@@ -72,7 +72,8 @@ class S3Test(unittest.TestCase):
             path = os.path.join(tmp, "sub", "a.zip")
             s3.download(("gba/a.zip", path, 1))
             self.assertTrue(os.path.isdir(os.path.dirname(path)))
-        client.download_file.assert_called_once_with(BUCKET, "gba/a.zip", path, Callback=None)
+        self.assertEqual(client.download_fileobj.call_args.args[:2], (BUCKET, "gba/a.zip"))
+        self.assertEqual(client.download_fileobj.call_args.kwargs, {"Callback": None})
 
     def test_delete_keys_batches_and_returns_errors(self):
         keys = [f"k{i}" for i in range(1001)]
@@ -130,6 +131,37 @@ class CopyFileTest(unittest.TestCase):
                 self.assertEqual(f.read(), b"x" * (2 * 1024 * 1024 + 5))
             self.assertEqual(sum(seen), 2 * 1024 * 1024 + 5)
             self.assertEqual(len(seen), 3)
+
+
+class DownloadTest(unittest.TestCase):
+    def test_reports_written_bytes_and_replaces_part_file(self):
+        with tempfile.TemporaryDirectory() as d:
+            path, wrote = os.path.join(d, "g.zip"), []
+
+            def fake_download(bucket, key, fileobj, Callback=None):
+                fileobj.seek(0)
+                fileobj.write(b"abc")
+                Callback(3)
+
+            client = mock.Mock(download_fileobj=fake_download)
+            with mock.patch.object(s3, "s3_client", return_value=client), mock.patch.object(s3, "read_root", return_value=None):
+                s3.download(("gba/g.zip", path, 3), lambda n: None, wrote.append)
+            self.assertEqual(wrote, [3])
+            self.assertEqual(open(path, "rb").read(), b"abc")
+            self.assertFalse(os.path.exists(path + ".part"))
+
+    def test_failed_download_leaves_no_part_file(self):
+        with tempfile.TemporaryDirectory() as d:
+            path = os.path.join(d, "g.zip")
+
+            def fail(bucket, key, fileobj, Callback=None):
+                fileobj.write(b"ab")
+                raise OSError("boom")
+
+            with mock.patch.object(s3, "s3_client", return_value=mock.Mock(download_fileobj=fail)), \
+                    mock.patch.object(s3, "read_root", return_value=None), self.assertRaises(OSError):
+                s3.download(("gba/g.zip", path, 3))
+            self.assertEqual(os.listdir(d), [])
 
 
 class SafeJoinTest(unittest.TestCase):

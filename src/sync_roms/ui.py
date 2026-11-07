@@ -11,6 +11,7 @@ from . import runtime
 
 
 SPEED_WINDOW = 5  # seconds the current speed is averaged over
+BACKLOG = 64 * 1024 * 1024  # bytes received but not yet written before the disk counts as the bottleneck
 PLAIN_INTERVAL = 30  # seconds between progress lines when stdout is not a terminal
 ASSUME_YES = False  # --yes: prompts take their default answer (a default-no prompt stays no)
 QUIET = False  # --quiet: stdout is discarded except emit_json(); prompts are asked on stderr
@@ -190,14 +191,15 @@ def eta(seconds):
 
 class ProgressBar:
     """One line under the log: say() prints a line above it, draw() refreshes it. Does nothing but print on a non-tty."""
-    def __init__(self, count, fraction, total_bytes=None):
+    def __init__(self, count, fraction, total_bytes=None, io=None):
+        self.io = io  # a ByteProgress that also counts bytes written, to tell a slow network from a slow disk
         self.count, self.fraction = count, fraction  # fraction() is the 0-1 progress of the whole run
         self.of = f" of {human_size(total_bytes)}" if total_bytes else ""  # the bar is by size, the count is by file
         self.shown = sys.stdout.isatty()
         self.total = total_bytes or 0
         self.started = time.monotonic()
         self.last_line = self.started
-        self.samples = collections.deque()  # (time, bytes moved) over the last SPEED_WINDOW seconds
+        self.samples = collections.deque()  # (time, bytes moved, bytes written) over the last SPEED_WINDOW seconds
 
     def say(self, line):
         print(("\r\033[K" if self.shown else "") + line)
@@ -212,7 +214,7 @@ class ProgressBar:
             fraction = self.fraction()
             filled = int(fraction * 24)
             now = time.monotonic()
-            self.samples.append((now, self.total * fraction))
+            self.samples.append((now, self.total * fraction, self.io.written if self.io else 0))
             while len(self.samples) > 1 and now - self.samples[0][0] > SPEED_WINDOW:
                 self.samples.popleft()
             speed = ""
@@ -220,8 +222,13 @@ class ProgressBar:
             if self.total and span >= 1:
                 rate = (self.samples[-1][1] - self.samples[0][1]) / span  # current speed, not the run's average
                 speed = f"  {human_size(rate)}/s"
+                if self.io and self.io.written:
+                    disk = (self.samples[-1][2] - self.samples[0][2]) / span
+                    speed = f"  net {human_size(rate)}/s · disk {human_size(disk)}/s"
                 if rate > 0:
                     speed += f", {eta(self.total * (1 - fraction) / rate)} left"
+                if self.io and self.io.written:
+                    speed += " · waiting on " + ("disk" if self.io.received - self.io.written > BACKLOG else "network")
             sys.stdout.write(f"\r\033[K  {cyan('█' * filled)}{dim('░' * (24 - filled))} {done}/{self.count} files done  {fraction:4.0%}{self.of}{speed}")
             sys.stdout.flush()
 
@@ -236,11 +243,17 @@ class ByteProgress:
     def __init__(self, sizes):
         self.size = [max(1, s or 0) for s in sizes]
         self.moved = [0] * len(sizes)
+        self.received = self.written = 0  # totals across all jobs; written stays 0 unless the job reports it
         self.lock = threading.Lock()
 
     def add(self, i, n):
         with self.lock:
             self.moved[i] = min(self.size[i], self.moved[i] + n)
+            self.received += n
+
+    def wrote(self, n):
+        with self.lock:
+            self.written += n
 
     def finish(self, i):
         with self.lock:

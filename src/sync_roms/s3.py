@@ -1,4 +1,5 @@
 """Storage plumbing: the S3 bucket, or a folder (e.g. a network share) in its place."""
+import contextlib
 import os
 import shutil
 from concurrent.futures import ThreadPoolExecutor
@@ -91,24 +92,53 @@ def s3_client(profile=None, connections=runtime.WORKERS):
     return _s3[key]
 
 
-def copy_file(src, dst, callback=None):
-    """Copy src to dst, calling callback(bytes) after each chunk."""
+def copy_file(src, dst, callback=None, wrote=None):
+    """Copy src to dst. callback(bytes) is called after each chunk is read, wrote(bytes) after it is written."""
     with open(src, "rb") as fin, open(dst, "wb") as fout:
         while chunk := fin.read(1024 * 1024):
-            fout.write(chunk)
             if callback:
                 callback(len(chunk))
+            fout.write(chunk)
+            if wrote:
+                wrote(len(chunk))
 
 
-def download(job, callback=None):
-    """callback(bytes) is called as data arrives."""
+class CountingWriter:
+    """A seekable file wrapper that reports each write to on_write(bytes), so downloads can still write ranges in parallel."""
+    def __init__(self, f, on_write):
+        self.f, self.on_write = f, on_write
+
+    def write(self, data):
+        n = self.f.write(data)
+        self.on_write(len(data))
+        return n
+
+    def seek(self, *args):
+        return self.f.seek(*args)
+
+    def tell(self):
+        return self.f.tell()
+
+    def seekable(self):
+        return True
+
+
+def download(job, callback=None, wrote=None):
+    """callback(bytes) is called as data arrives, wrote(bytes) as it is written to disk."""
     key, path, _ = job
     os.makedirs(os.path.dirname(path), exist_ok=True)
     if read_root():
-        copy_file(safe_join(read_root(), key), path + ".part", callback)
+        copy_file(safe_join(read_root(), key), path + ".part", callback, wrote)
         os.replace(path + ".part", path)
         return
-    s3_client().download_file(runtime.BUCKET, key, path, Callback=callback)
+    try:
+        with open(path + ".part", "wb") as f:
+            s3_client().download_fileobj(runtime.BUCKET, key, CountingWriter(f, wrote) if wrote else f, Callback=callback)
+        os.replace(path + ".part", path)
+    except BaseException:
+        with contextlib.suppress(OSError):
+            os.remove(path + ".part")
+        raise
 
 
 def get_text(key):

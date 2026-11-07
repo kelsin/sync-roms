@@ -38,5 +38,34 @@ class SpeedWindowTest(unittest.TestCase):
         self.assertNotIn("left", line)
 
 
+class BottleneckTest(unittest.TestCase):
+    def line(self, received, written):
+        io_ = ui.ByteProgress([10 ** 9])
+        io_.add(0, received)
+        io_.wrote(written)
+        with mock.patch.object(ui.time, "monotonic", return_value=0):
+            bar = ui.ProgressBar(1, io_.fraction, 10 ** 9, io=io_)
+        out = io.StringIO()
+        bar.shown = True
+        with contextlib.redirect_stdout(out):
+            with mock.patch.object(ui.time, "monotonic", return_value=0):
+                bar.draw(0)
+            io_.add(0, 20 * 1024 * 1024)
+            io_.wrote(5 * 1024 * 1024)
+            with mock.patch.object(ui.time, "monotonic", return_value=2):
+                bar.draw(0)
+        return out.getvalue()
+
+    def test_shows_both_rates(self):
+        line = self.line(1024, 1024)
+        self.assertIn("net 10.0 MB/s · disk 2.5 MB/s", line)
+
+    def test_big_backlog_blames_the_disk(self):
+        self.assertIn("waiting on disk", self.line(200 * 1024 * 1024, 1024))
+
+    def test_small_backlog_blames_the_network(self):
+        self.assertIn("waiting on network", self.line(1024, 1024))
+
+
 if __name__ == "__main__":
     unittest.main()

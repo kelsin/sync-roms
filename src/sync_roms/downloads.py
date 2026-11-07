@@ -89,9 +89,9 @@ def run_downloads(todo, label, icon, base, failures=None):
     futs = []
     ex = ThreadPoolExecutor(runtime.WORKERS)
     moved = ui.ByteProgress([j[2] for j in todo])
-    bar = ui.ProgressBar(len(todo), moved.fraction, sum(moved.size))
+    bar = ui.ProgressBar(len(todo), moved.fraction, sum(moved.size), io=moved)
     try:
-        futs += [(j, ex.submit(s3.download, j, lambda n, i=i: moved.add(i, n))) for i, j in enumerate(todo)]
+        futs += [(j, ex.submit(s3.download, j, lambda n, i=i: moved.add(i, n), moved.wrote)) for i, j in enumerate(todo)]
         for i, (j, f) in enumerate(futs, 1):
             prog = ui.dim(f"[{i}/{len(todo)}]")
             try:
