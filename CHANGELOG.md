@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.28.0](https://github.com/kelsin/sync-roms/compare/v0.27.0...v0.28.0) (2026-11-07)
+
+
+### Features
+
+* **onion:** keep multi-disc discs in a hidden .multi-disc folder ([#106](https://github.com/kelsin/sync-roms/issues/106)) ([1447201](https://github.com/kelsin/sync-roms/commit/1447201bc42a995e3821953ade771ce744b1bcde))
+* **onion:** sync fbneo to Onion's FBNEO folder on the mini flip ([#108](https://github.com/kelsin/sync-roms/issues/108)) ([819cdb9](https://github.com/kelsin/sync-roms/commit/819cdb94a9126329c836ec8a3c92dfab68b4ef69))
+
 ## [0.27.0](https://github.com/kelsin/sync-roms/compare/v0.26.0...v0.27.0) (2026-11-07)
 
 
