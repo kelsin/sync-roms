@@ -6,13 +6,16 @@ from unittest import mock
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "src"))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from realdir_guard import RealDataDirGuard  # noqa: E402
 from sync_roms import scrape_state, store  # noqa: E402
 
 H = {"md5": "a", "sha1": "b", "crc": "c"}
 
 
-class ScrapeStateTest(unittest.TestCase):
+class ScrapeStateTest(RealDataDirGuard):
     def setUp(self):
+        super().setUp()
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)
         p = mock.patch.object(store, "data_dir", return_value=self.tmp.name)

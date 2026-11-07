@@ -12,6 +12,8 @@ from unittest import mock
 sys.path.insert(0, os.path.dirname(__file__))
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from realdir_guard import RealDataDirGuard  # noqa: E402
 from sync_roms import cli, scrape_online, store, usersettings  # noqa: E402
 from test_completion import script_for  # noqa: E402
 from test_scripting import Isolated  # noqa: E402
@@ -117,8 +119,9 @@ class Dispatch(Isolated):
         ensure.assert_not_called()
 
 
-class SetCredentials(unittest.TestCase):
+class SetCredentials(RealDataDirGuard):
     def setUp(self):
+        super().setUp()
         tmp = tempfile.TemporaryDirectory()
         self.addCleanup(tmp.cleanup)
         self.dir = tmp.name
