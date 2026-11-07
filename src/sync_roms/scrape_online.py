@@ -61,7 +61,7 @@ def match(client, system, rom, size, etag):
     elif "-" not in (tag := etag.strip('"')):  # a multipart upload's ETag is not the file's MD5
         hashes = {"md5": tag}
     game = client.lookup(system["screenscraper"], os.path.basename(rom), size, **hashes)
-    return screenscraper._int(game.get("id")), "hash" if hashes else "name+size"
+    return screenscraper.to_int(game.get("id")), "hash" if hashes else "name+size"
 
 
 def resolve_manual(client, system, query):
