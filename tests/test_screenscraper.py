@@ -4,6 +4,7 @@ import json
 import os
 import sys
 import tempfile
+import threading
 import unittest
 import urllib.error
 import urllib.request
@@ -169,6 +170,30 @@ class ClientTests(unittest.TestCase):
                 client(lambda r, timeout=None: Resp(b"x" * 300)).download(url, dest, limit=1000)
             self.assertEqual(os.listdir(d), ["a.png"])
 
+    def test_refused_media_is_its_own_error(self):
+        with tempfile.TemporaryDirectory() as d, mock.patch.object(ss, "MEDIA_MAX", 10):
+            dest = os.path.join(d, "a.png")
+            with self.assertRaises(ss.MediaRefused):
+                client(lambda r, timeout=None: Resp(b"x" * 30)).download("https://neoclone.screenscraper.fr/a.png", dest)
+            with self.assertRaises(ss.MediaRefused):
+                client(lambda r, timeout=None: Resp(b"x")).download("https://evil.example/a.png", dest)
+        with self.assertRaises(ss.ApiError) as cm, mock.patch.object(ss, "API_MAX", 10):
+            client(lambda r, timeout=None: Resp(b"{" + b" " * 30 + b"}")).quota()
+        self.assertNotIsInstance(cm.exception, ss.MediaRefused)
+
+    def test_download_stops_between_chunks(self):
+        stop = threading.Event()
+
+        class Slow(Resp):
+            def read(self, n=-1):
+                stop.set()
+                return super().read(4)
+        with tempfile.TemporaryDirectory() as d:
+            dest = os.path.join(d, "a.png")
+            with self.assertRaises(ss.Stopped):
+                client(lambda r, timeout=None: Slow(b"x" * 100)).download("https://neoclone.screenscraper.fr/a.png", dest, stop=stop)
+            self.assertEqual(os.listdir(d), [])
+
     def test_media_urls_must_be_https_screenscraper(self):
         ok = []
         opener = lambda r, timeout=None: ok.append(r.full_url) or Resp(b"x")  # noqa: E731
@@ -189,11 +214,17 @@ class ClientTests(unittest.TestCase):
         handler = ss.SafeRedirect()
         req = urllib.request.Request("https://neoclone.screenscraper.fr/a.png?sspassword=" + PASSWORD)
         for url in ("http://neoclone.screenscraper.fr/b.png", "https://evil.example/b.png"):
+            fp = io.BytesIO(b"body")
             with self.subTest(url=url), self.assertRaises(urllib.error.HTTPError) as cm:
-                handler.redirect_request(req, io.BytesIO(), 302, "Found", {}, url)
+                handler.redirect_request(req, fp, 302, "Found", {}, url)
+            self.assertTrue(fp.closed)
             self.assertNotIn("evil", str(cm.exception))
             self.assertNotIn(PASSWORD, str(cm.exception))
         self.assertIsNotNone(handler.redirect_request(req, io.BytesIO(), 302, "Found", {}, "https://www.screenscraper.fr/b.png"))
+        def refused(r, timeout=None):
+            raise urllib.error.HTTPError("", 302, "redirect refused", {}, None)
+        with tempfile.TemporaryDirectory() as d, self.assertRaises(ss.MediaRefused):
+            client(refused).download("https://neoclone.screenscraper.fr/a.png", os.path.join(d, "a.png"))
         default = ss.Client("u", "p", DEV)._opener
         self.assertTrue(any(isinstance(h, ss.SafeRedirect) for h in default.__self__.handlers))
 

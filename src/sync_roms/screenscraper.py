@@ -38,6 +38,7 @@ LANGUAGES = ("en",)
 NOTGAME = "ZZZ(NOTGAME)"
 RATING_MAX = 20
 TIMEOUT = 60
+REDIRECT_REFUSED = "redirect refused"
 HOST = "screenscraper.fr"  # every request and redirect goes to it or a subdomain, over https
 API_MAX = 16 << 20  # bytes an API response may have
 MEDIA_MAX = 50 << 20  # bytes a media file may have
@@ -69,6 +70,14 @@ class ApiError(Exception):
 
 class RateLimited(ApiError):
     pass
+
+
+class MediaRefused(ApiError):
+    """A media file that is too large or not on https screenscraper.fr: skip that one file."""
+
+
+class Stopped(Exception):
+    """The run was stopped (Ctrl-C or quota) while reading."""
 
 
 def to_int(v, default=0):
@@ -206,7 +215,9 @@ class SafeRedirect(urllib.request.HTTPRedirectHandler):
 
     def redirect_request(self, req, fp, code, msg, headers, newurl):
         if not _allowed(newurl):
-            raise urllib.error.HTTPError("", code, "redirect refused", headers, fp)
+            if fp is not None:
+                fp.close()
+            raise urllib.error.HTTPError("", code, REDIRECT_REFUSED, headers, None)
         return super().redirect_request(req, fp, code, msg, headers, newurl)
 
 
@@ -223,10 +234,12 @@ class Client:
             if any(c <= " " or c == "\x7f" for c in url):
                 raise ValueError("bad URL")
             if not _allowed(url):
-                raise ApiError(f"ScreenScraper gave a URL that isn't https on {HOST}")
+                raise MediaRefused(f"ScreenScraper gave a URL that isn't https on {HOST}")
             req = urllib.request.Request(url, headers={"User-Agent": f"sync-roms/{__version__}"})
             return self._opener(req, timeout=TIMEOUT)
         except urllib.error.HTTPError as e:
+            if e.msg == REDIRECT_REFUSED:
+                raise MediaRefused(f"ScreenScraper redirected outside https {HOST}") from None
             if e.code == HTTP_NOT_FOUND:
                 raise NotFound("not found") from None
             if e.code == HTTP_UNRECOGNIZED:
@@ -290,22 +303,24 @@ class Client:
                 out.append((to_int(g["id"]), title))
         return out
 
-    def download(self, url, dest, limit=None):
-        """Save a media file of at most limit (default MEDIA_MAX) bytes at dest. Raises NotFound when ScreenScraper answers with its
-        not-found text, ApiError when the file is bigger."""
+    def download(self, url, dest, limit=None, stop=None):
+        """Save a media file of at most limit (default MEDIA_MAX) bytes at dest. Raises NotFound when ScreenScraper answers
+        with its not-found text, MediaRefused when the file is bigger, Stopped when the stop event is set between chunks."""
         limit = limit or MEDIA_MAX
         part = dest + ".part"
         try:
             with self._open(url) as resp, open(part, "wb") as f:
                 if _too_large(resp, limit):
-                    raise ApiError("ScreenScraper media too large")
+                    raise MediaRefused("ScreenScraper media too large")
                 chunk, total = resp.read(1 << 16), 0
                 if chunk.lstrip().startswith(NOT_FOUND_PREFIX.encode()):
                     raise NotFound("not found")
                 while chunk:
+                    if stop is not None and stop.is_set():
+                        raise Stopped()
                     total += len(chunk)
                     if total > limit:
-                        raise ApiError("ScreenScraper media too large")
+                        raise MediaRefused("ScreenScraper media too large")
                     f.write(chunk)
                     chunk = resp.read(1 << 16)
             os.replace(part, dest)
