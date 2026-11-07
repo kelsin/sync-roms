@@ -1,8 +1,11 @@
+import contextlib
+import io
 import json
 import os
 import sys
 import tempfile
 import unittest
+from types import SimpleNamespace
 from unittest import mock
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -148,6 +151,26 @@ class HashAndMatchTest(MatchBase):
         with mock.patch.object(s3, "read_root", return_value=None), \
                 mock.patch.object(s3, "read_range", side_effect=AssertionError("hashed on S3")):
             scrape_online.match(FakeClient(), SYSTEM, "a.zip", 3, '"abc-2"')
+
+
+class CheckNoticeTest(unittest.TestCase):
+    def test_check_notes_systems_without_screenscraper_id_but_passes(self):
+        real = store.repo_json
+
+        def fake(name):
+            data = real(name)
+            if name == "systems":
+                data = [{k: v for k, v in data[0].items() if k != "screenscraper"}] + data[1:]
+            return data
+        out = io.StringIO()
+        with mock.patch.object(store, "repo_json", side_effect=fake), \
+                mock.patch.object(store, "data_dir", return_value=tempfile.gettempdir() + "/nonexistent-sync-roms"), \
+                contextlib.redirect_stdout(out), contextlib.redirect_stderr(out):
+            code = commands.check_cmd(SimpleNamespace(bucket_keys=False))
+        self.assertEqual(code, 0)
+        first = real("systems")[0]["bucket"]
+        self.assertIn("no ScreenScraper system id", out.getvalue())
+        self.assertRegex(out.getvalue(), rf"\b{first}\b")
 
 
 class ResolveManualTest(unittest.TestCase):
