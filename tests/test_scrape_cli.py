@@ -84,6 +84,17 @@ class Modes(unittest.TestCase):
         self.assertIn("bogus", err.getvalue())
         self.assertIn("manuals", err.getvalue())
 
+    def test_skip_media_only_scraper_types(self):
+        with mock.patch("sys.stderr", io.StringIO()) as err, self.assertRaises(SystemExit):
+            self.modes("scrape", "--skip-media", "custom")
+        self.assertIn("custom", err.getvalue())
+
+    def test_help_explains_dry_run_and_replace(self):
+        text = cli.help_text("scrape")
+        self.assertNotIn("custom", text)
+        self.assertIn("--dry-run", text)
+        self.assertIn("replacing", text)
+
     def test_skip_media_becomes_a_list(self):
         args = cli.build_parser().parse_args(cli.translate(["scrape", "--skip-media", "covers, manuals"]))
         cli.check_modes(args)
