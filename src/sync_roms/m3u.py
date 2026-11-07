@@ -1,5 +1,6 @@
 """Multi-disc .m3u playlist generation."""
 import os
+import posixpath
 import re
 from collections import defaultdict
 
@@ -32,6 +33,31 @@ def disc_groups(files):
     return groups
 
 
+def disc_keys(keys):
+    """The bucket keys that are discs of a multi-disc game (the files its playlist lists)."""
+    folders = defaultdict(list)
+    for k in keys:
+        folders[posixpath.dirname(k)].append(posixpath.basename(k))
+    return {posixpath.join(d, f) for d, names in folders.items() for discs in disc_groups(names).values() for f in discs}
+
+
+def prefix_playlists(dest, disc_dir):
+    """Point the playlists directly in dest at their discs in dest/disc_dir. Returns how many it rewrote."""
+    rewritten = 0
+    for name in sorted(os.listdir(dest)):
+        path = os.path.join(dest, name)
+        if not name.lower().endswith(".m3u") or not os.path.isfile(path):
+            continue
+        entries = m3u_entries(path)
+        fixed = [posixpath.join(disc_dir, e) if "/" not in e and os.path.exists(os.path.join(dest, disc_dir, e)) else e
+                 for e in entries]
+        if fixed != entries:
+            with open(path, "w", encoding="utf-8", newline="\n") as f:
+                f.write("".join(line + "\n" for line in fixed))
+            rewritten += 1
+    return rewritten
+
+
 def m3u_entries(path):
     with open(path, encoding="utf-8", errors="replace") as f:
         return [line.strip() for line in f if line.strip() and not line.lstrip().startswith("#")]
@@ -46,7 +72,7 @@ def plan_m3u(root):
     """
     plan = []
     for dirpath, dirs, files in os.walk(root):
-        dirs[:] = sorted(d for d in dirs if not external.own_temp(d))
+        dirs[:] = sorted(d for d in dirs if not external.own_temp(d) and not d.startswith("."))
         files = sorted(f for f in files if not external.own_temp(f))
         groups = disc_groups(files)
         covered = {}

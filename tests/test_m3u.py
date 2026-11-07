@@ -9,7 +9,7 @@ from unittest import mock
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "src"))
-from sync_roms import m3u, ui  # noqa: E402
+from sync_roms import downloads, m3u, ui  # noqa: E402
 
 FAH = ["Fahrenheit (USA) (Disc 1) (Key Disc) (Sega CD).chd", "Fahrenheit (USA) (Disc 2) (Sega CD).chd"]
 
@@ -80,6 +80,73 @@ class M3uTest(unittest.TestCase):
         self.touch(*FAH)
         self.run_cmd(dry_run=True)
         self.assertEqual(sorted(os.listdir(self.dir)), sorted(FAH))
+
+
+class HiddenDiscsTest(unittest.TestCase):
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.dir = self._tmp.name
+        self.addCleanup(self._tmp.cleanup)
+
+    def touch(self, *names, text=""):
+        for n in names:
+            with open(os.path.join(self.dir, n), "w") as f:
+                f.write(text)
+
+    def read(self, name):
+        with open(os.path.join(self.dir, name)) as f:
+            return f.read()
+
+    def disc_folder(self):
+        os.mkdir(os.path.join(self.dir, ".multi-disc"))
+        for f in FAH:
+            open(os.path.join(self.dir, ".multi-disc", f), "w").close()
+
+    def test_disc_keys_are_only_multi_disc_games(self):
+        keys = ["psx/" + f for f in FAH] + ["psx/Single (USA).chd", "psx/Lone (USA) (Disc 1).chd"]
+        self.assertEqual(m3u.disc_keys(keys), {"psx/" + f for f in FAH})
+
+    def test_rom_rel_puts_discs_in_the_disc_folder(self):
+        discs = {"psx/" + f for f in FAH}
+        self.assertEqual(downloads.rom_rel("psx/" + FAH[0], False, ".multi-disc", discs), ".multi-disc/" + FAH[0])
+        self.assertEqual(downloads.rom_rel("psx/Fahrenheit.m3u", False, ".multi-disc", discs), "Fahrenheit.m3u")
+        self.assertEqual(downloads.rom_rel("psx/" + FAH[0], False), FAH[0])
+
+    def test_hide_discs_moves_loose_discs(self):
+        self.touch(*FAH)
+        discs = {"psx/" + f for f in FAH}
+        self.assertEqual(len(downloads.hide_discs(self.dir, ".multi-disc", discs, dry_run=True)), 2)
+        self.assertEqual(sorted(os.listdir(self.dir)), sorted(FAH))
+        downloads.hide_discs(self.dir, ".multi-disc", discs)
+        self.assertEqual(os.listdir(self.dir), [".multi-disc"])
+        self.assertEqual(sorted(os.listdir(os.path.join(self.dir, ".multi-disc"))), sorted(FAH))
+
+    def test_prefix_playlists_points_at_the_discs_and_still_counts_as_current(self):
+        self.disc_folder()
+        original = "\n".join(FAH) + "\n"
+        self.touch("Fahrenheit.m3u", text=original)
+        self.assertEqual(m3u.prefix_playlists(self.dir, ".multi-disc"), 1)
+        self.assertEqual(self.read("Fahrenheit.m3u"), "".join(f".multi-disc/{f}\n" for f in FAH))
+        self.assertEqual(m3u.prefix_playlists(self.dir, ".multi-disc"), 0)
+        path, size = os.path.join(self.dir, "Fahrenheit.m3u"), len(original.encode())
+        self.assertTrue(downloads.is_current(path, size, ".multi-disc"))
+        self.assertFalse(downloads.is_current(path, size + 1, ".multi-disc"))
+        self.assertFalse(downloads.is_current(path, size))
+
+    def test_find_extras_looks_in_the_disc_folder(self):
+        self.disc_folder()
+        self.touch("Fahrenheit.m3u", "Gone.m3u")
+        keys = ["psx/" + f for f in FAH] + ["psx/Fahrenheit.m3u"]
+        discs = {"psx/" + f for f in FAH}
+        self.assertEqual(downloads.find_extras(self.dir, keys, False, ".multi-disc", discs),
+                         [os.path.join(self.dir, "Gone.m3u")])
+        self.assertEqual(downloads.find_extras(self.dir, keys[1:], False, ".multi-disc", {keys[1]}),
+                         [os.path.join(self.dir, "Gone.m3u"), os.path.join(self.dir, ".multi-disc", FAH[0])])
+
+    def test_playlist_pass_leaves_the_disc_folder_alone(self):
+        self.disc_folder()
+        self.touch("Fahrenheit.m3u", text="".join(f".multi-disc/{f}\n" for f in FAH))
+        self.assertEqual(m3u.plan_m3u(self.dir), [])
 
 
 if __name__ == "__main__":

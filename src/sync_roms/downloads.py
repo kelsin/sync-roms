@@ -7,9 +7,14 @@ from concurrent.futures import ThreadPoolExecutor, TimeoutError as FutureTimeout
 from . import external, runtime, s3, ui
 
 
-def rom_rel(key, flat):
-    """A ROM's path inside its system folder: the bucket key without its system, or just the file name if flat."""
+def rom_rel(key, flat, disc_dir=None, discs=()):
+    """A ROM's path inside its system folder: the bucket key without its system, or just the file name if flat.
+
+    disc_dir: the folder the layout keeps multi-disc games' discs in (those keys are in discs) beside their playlist.
+    """
     rel = key.split("/", 1)[1]
+    if disc_dir and key in discs and "/" not in rel:
+        return disc_dir + "/" + rel
     return os.path.basename(rel) if flat else rel
 
 
@@ -22,12 +27,37 @@ def archive_extracted(path):
     return any(os.path.splitext(f)[0] == stem and not f.lower().endswith(external.ARCHIVE_EXTS) for f in os.listdir(folder))
 
 
-def plan_downloads(jobs, unzip=False):
+def is_current(path, size, disc_dir=None):
+    """Whether path is already the bucket's file; a playlist pointing into disc_dir is the bucket's with that prefix added."""
+    if size is None or not os.path.exists(path):
+        return False
+    if os.path.getsize(path) == size:
+        return True
+    if disc_dir and path.lower().endswith(".m3u"):
+        with open(path, "rb") as f:
+            return len(f.read().replace(disc_dir.encode() + b"/", b"")) == size
+    return False
+
+
+def plan_downloads(jobs, unzip=False, disc_dir=None):
     """jobs: list of (s3_key, local_path, expected_size). Drops files already present, and with unzip the
     archives whose ROM was already extracted."""
     return [(k, p, s) for k, p, s in jobs
-            if not (s is not None and os.path.exists(p) and os.path.getsize(p) == s)
-            and not (unzip and archive_extracted(p))]
+            if not is_current(p, s, disc_dir) and not (unzip and archive_extracted(p))]
+
+
+def hide_discs(dest, disc_dir, discs, dry_run=False):
+    """Move multi-disc games' discs already loose in dest into dest/disc_dir; returns their new paths."""
+    moved = []
+    for key in sorted(discs):
+        name = os.path.basename(key)
+        old, new = os.path.join(dest, name), os.path.join(dest, disc_dir, name)
+        if os.path.isfile(old) and not os.path.exists(new):
+            if not dry_run:
+                os.makedirs(os.path.dirname(new), exist_ok=True)
+                os.replace(old, new)
+            moved.append(new)
+    return moved
 
 
 def failure_hint(error):
@@ -144,16 +174,20 @@ def has_local_files(dest):
     return any(files for _, files in walk_roms(dest))
 
 
-def find_extras(dest, wanted_keys, unzip=False):
+def find_extras(dest, wanted_keys, unzip=False, disc_dir=None, discs=()):
     """Local files under dest that aren't in the system's ROM list (frontend files and dotfiles are ignored).
 
     unzip: the layout extracts archives flat, so a listed archive's extracted ROM isn't an extra.
+    disc_dir: the layout's folder for multi-disc games' discs (discs: their keys); its files are checked too.
     """
-    rels = [rom_rel(k, unzip) for k in wanted_keys]
+    rels = [rom_rel(k, unzip, disc_dir, discs) for k in wanted_keys]
     expected = {os.path.normpath(r) for r in rels}
     stems = {os.path.splitext(r)[0] for r in rels if r.lower().endswith(external.ARCHIVE_EXTS)} if unzip else set()
     extras = []
-    for root, files in walk_roms(dest):
+    walks = list(walk_roms(dest))
+    if disc_dir:  # walk_roms skips dot folders, but the discs live in one
+        walks += walk_roms(os.path.join(dest, disc_dir))
+    for root, files in walks:
         for f in files:
             path = os.path.join(root, f)
             rel = os.path.normpath(os.path.relpath(path, dest))
