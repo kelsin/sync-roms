@@ -62,7 +62,7 @@ class DownloadInterruptTest(unittest.TestCase):
     def run_interrupted(self, draws_that_interrupt):
         release, n = threading.Event(), []
 
-        def download(job, cb):
+        def download(job, cb, wrote=None):
             release.wait(5)
 
         def draw(self_, done):
