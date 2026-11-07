@@ -408,7 +408,8 @@ type (`3dboxes`, `backcovers`, `covers`, `fanart`, `manuals`, `marquees`, `mixim
 confirm says how many files are kept. Onion and Slot images are made only from art downloaded in the same run, from the
 first of covers, 3D boxes and screenshots the ROM has; when that art is already in storage, or the ROM already has the
 Onion or Slot image, none is made. Media is downloaded only over https from screenscraper.fr, and only images and PDF manuals
-(up to 50 MiB each) and MP4 videos (up to 512 MiB) are stored. `--skip-media TYPES` takes a comma-separated list of those
+(up to 50 MiB each) and MP4 videos (up to 512 MiB) are stored; a file over its limit or outside screenscraper.fr is
+skipped with a warning and the ROM keeps its other media. `--skip-media TYPES` takes a comma-separated list of those
 folder names and downloads none of them.
 
 **Local state** in the data folder (`~/.sync-roms/`): `scrape-hashes.json` (file hashes), `scrape-matches.json` (your manual

@@ -82,6 +82,17 @@ class HashAndMatchTest(MatchBase):
         with mock.patch.object(s3, "read_range", side_effect=AssertionError("read again")):
             self.assertEqual(scrape_online.hash_file("gba", "a.zip", 3, 5), h)
 
+    def test_hashing_stops_between_chunks(self):
+        self.put("gba/a.zip", b"abcdef")
+        stop = scrape_online.threading.Event()
+        real = s3.read_range
+        with mock.patch.object(scrape_online, "CHUNK", 2), \
+                mock.patch.object(s3, "read_range", side_effect=lambda *a: stop.set() or real(*a)) as rr:
+            with self.assertRaises(screenscraper.Stopped):
+                scrape_online.hash_file("gba", "a.zip", 6, 5, stop)
+        self.assertEqual(rr.call_count, 1)
+        self.assertIsNone(scrape_state.cached_hashes("gba", "a.zip", 6, 5))
+
     def test_hash_reads_in_chunks(self):
         self.put("gba/a.zip", b"abc")
         with mock.patch.object(scrape_online, "CHUNK", 2), mock.patch.object(s3, "read_range", wraps=s3.read_range) as rr:
