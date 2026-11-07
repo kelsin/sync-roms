@@ -7,7 +7,7 @@ Sources: official page https://api.screenscraper.fr/webapi2.php (fetched via a s
 - **[documented]** Every call carries developer credentials `devid`, `devpassword`, `softname` in addition to the user's `ssid`/`sspassword`. The page says the API may only be integrated into fully free, distributed applications; other uses need prior authorization. A bad dev login returns 403.
 - **[documented]** To obtain them: present the software on the ScreenScraper forum (developer section); the team validates it and issues devid/devpassword.
 - **[documented]** HTTP 426 means the scraping software is blacklisted (non-compliant/obsolete), so an unregistered or abused softname can be blocked.
-- **Consequence for Task 2:** the user must request dev credentials from ScreenScraper (forum thread), then settings need `devid`, `devpassword`, `softname` plus user `ssid`, `sspassword`. Dev credentials must never be committed to the repo. Open question for the user: ship the project's own devid (requires approval) or have each user supply their own. Task 2's settings names depend on this answer.
+- **Consequence for Task 2:** the user must request dev credentials from ScreenScraper (forum thread), then settings need `devid`, `devpassword`, `softname` plus user `ssid`, `sspassword`. Dev credentials must never be committed to the repo. Open question for the user: ship the project's own devid (requires approval) or have each user supply their own. Task 2's settings names depend on this answer. **Resolved:** each user supplies their own developer credentials, registered for the softname `sync-roms` (settings `screenscraper_devid`, `screenscraper_devpassword`).
 
 ## Base URL and auth
 
@@ -16,7 +16,7 @@ Sources: official page https://api.screenscraper.fr/webapi2.php (fetched via a s
 ## jeuInfos.php lookup parameters
 
 - **[documented]** `systemeid` (numeric, from systemesListe.php), `romnom` (filename with extension, no path; a path gives 400), `romtaille` (bytes), `romtype` (`rom`|`iso`|folder), `crc`, `md5`, `sha1` (give at least one, ideally all three plus romtaille), `serialnum` (force lookup by serial), `gameid` (force lookup by numeric game id; no ROM info returned in that case).
-- Hash matched for zip/CHD: **not documented** on the page read. [memory/unverified] ScreenScraper matches the hash of the file as given (so for a zip, the zip's own md5/sha1/crc, unlike No-Intro DATs that hash contents); for CHD, the whole CHD file. Task design should send `romnom` + `romtaille` + hashes of the file itself and fall back to name-only (`romnom`) lookup when no hash match.
+- Hash matched for zip/CHD: **not documented** on the page read. [memory/unverified] ScreenScraper matches the hash of the file as given (so for a zip, the zip's own md5/sha1/crc, unlike No-Intro DATs that hash contents); for CHD, the whole CHD file. Task design should send `romnom` + `romtaille` + hashes of the file itself and fall back to name-only (`romnom`) lookup when no hash match. As built, one lookup sends the hashes, `romnom` and `romtaille` together, so ScreenScraper itself falls back to the name; the result is labelled a hash match only when the matched ROM's hashes (`jeu.rom`/`jeu.roms`) include one that was sent.
 - Unknown hash/name still can match by `romnom`+`systemeid`. [memory/unverified]
 
 ## jeuInfos.php response fields
