@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.29.1](https://github.com/kelsin/sync-roms/compare/v0.29.0...v0.29.1) (2026-11-07)
+
+
+### Bug Fixes
+
+* **ui:** keep the download line within the terminal width ([#112](https://github.com/kelsin/sync-roms/issues/112)) ([e788e1b](https://github.com/kelsin/sync-roms/commit/e788e1bbdc5e0a874730ae4ac2aef86600f8131f))
+
 ## [0.29.0](https://github.com/kelsin/sync-roms/compare/v0.28.0...v0.29.0) (2026-11-07)
 
 
