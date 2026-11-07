@@ -71,7 +71,9 @@ def resolve_manual(client, system, query):
     """A game id: the query itself when it is an integer, else the user's pick from a ScreenScraper search."""
     query = query.strip()
     if query.isdigit():
-        return int(query)
+        if int(query) > 0:
+            return int(query)
+        raise screenscraper.NotFound(f"no game {query}")
     results = client.search(system["screenscraper"], query)
     if not results:
         raise screenscraper.NotFound(f"no results for {query!r}")

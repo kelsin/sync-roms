@@ -3,9 +3,11 @@ import json
 import os
 import threading
 
-from . import scrape_plan, store
+from . import scrape_plan, store, ui
 
 _lock = threading.RLock()  # scrape runs match ROMs on several threads; each save is a read-modify-write
+_warned = set()  # paths of corrupt files already warned about
+MATCHES = "scrape-matches.json"  # the only one holding what the user typed, so the only one worth a warning
 
 
 def _path(name):
@@ -16,9 +18,17 @@ def _load(name):
     try:
         with open(_path(name)) as f:
             data = json.load(f)
-    except (OSError, ValueError):
+    except OSError:
         return {}
-    return data if isinstance(data, dict) else {}
+    except ValueError:
+        data = None
+    if not isinstance(data, dict):
+        if name == MATCHES and _path(name) not in _warned:
+            _warned.add(_path(name))
+            ui.warn(f"{_path(name)} isn't a valid JSON object; its manual matches are ignored, "
+                    "and the next `scrape match` replaces it")
+        return {}
+    return data
 
 
 def _save(name, data):
@@ -49,16 +59,22 @@ def save_hashes(system, rom, size, mtime, hashes):
         _save("scrape-hashes.json", data)
 
 
+def _game_id(v):
+    return type(v) is int and v > 0
+
+
 def manual_match(system, rom):
-    game_id = _load("scrape-matches.json").get(_key(system, rom))
-    return game_id if isinstance(game_id, int) else None
+    game_id = _load(MATCHES).get(_key(system, rom))
+    return game_id if _game_id(game_id) else None
 
 
 def save_match(system, rom, game_id):
+    if not _game_id(game_id):
+        raise ValueError(f"not a ScreenScraper game id: {game_id!r}")
     with _lock:
-        data = _load("scrape-matches.json")
+        data = _load(MATCHES)
         data[_key(system, rom)] = game_id
-        _save("scrape-matches.json", data)
+        _save(MATCHES, data)
 
 
 def is_unknown(system, rom):

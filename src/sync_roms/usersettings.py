@@ -44,6 +44,8 @@ def save_setting(name, value):
         os.makedirs(store.data_dir(), exist_ok=True)
         path = os.path.join(store.data_dir(), "settings.json")
         with os.fdopen(os.open(path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600), "w") as f:
+            if sys.platform != "win32":  # an existing file keeps its mode through os.open: tighten it before writing
+                os.fchmod(f.fileno(), 0o600)
             json.dump(settings, f, indent=2, sort_keys=True)
         _private(path)
     except OSError as e:
