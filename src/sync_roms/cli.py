@@ -107,9 +107,12 @@ TOPICS = {
   metadata and media (and the Onion/Slot images) to the bucket or storage folder. The ROMs and how each will be
   looked up are listed first. ROMs ScreenScraper doesn't know are remembered and skipped until --retry.
   --system ID        only that bucket folder (e.g. gba)
-  --skip-media TYPES comma-separated media folders not to download (covers, 3dboxes, backcovers, custom, fanart,
-                     manuals, marquees, ...); other values are refused with the list
-  match              say which ScreenScraper game a ROM is (a game id, or a name to search and pick from), then scrape it
+  --skip-media TYPES comma-separated media folders not to download (covers, 3dboxes, backcovers, fanart, manuals,
+                     marquees, ...); other values are refused with the list
+  --dry-run          list the ROMs and the metadata and media folders that would be written; no ScreenScraper
+                     credentials or requests (scrape match --dry-run does look the game up)
+  match              say which ScreenScraper game a ROM is (a game id, or a name to search and pick from), then scrape it;
+                     for a ROM that already has metadata it asks before replacing the entry and deleting its old media
   --set-credentials  ask for your ScreenScraper login and the developer id and password (saved in settings.json,
                      readable only by you; blank keeps the current value)
   When ScreenScraper's daily quota runs out the run stops cleanly; run it again tomorrow. Writes use the write profile.
