@@ -8,6 +8,7 @@ import http.client
 import json
 import math
 import os
+import re
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -20,7 +21,8 @@ BASE_URL = "https://api.screenscraper.fr/api2/"
 SOFTNAME = "sync-roms"
 EP_GAME, EP_QUOTA, EP_SEARCH = "jeuInfos.php", "ssuserInfos.php", "jeuRecherche.php"
 HTTP_NOT_FOUND = 404
-HTTP_QUOTA = (430, 431)  # daily scrape quota, too many unrecognized ROMs
+HTTP_QUOTA = 430  # daily scrape quota
+HTTP_UNRECOGNIZED = 431  # too many unrecognized ROMs today
 HTTP_RATE_LIMIT = 429  # too many requests at once: worth retrying after a pause
 NOT_FOUND_PREFIX = "Erreur : Rom"  # plain-text body of a miss (may come with HTTP 200)
 # ScreenScraper media type -> scrape_plan.MEDIA_TYPES name. box-3D, support-2D, mixrbv1/2 are unverified.
@@ -36,6 +38,10 @@ LANGUAGES = ("en",)
 NOTGAME = "ZZZ(NOTGAME)"
 RATING_MAX = 20
 TIMEOUT = 60
+HOST = "screenscraper.fr"  # every request and redirect goes to it or a subdomain, over https
+API_MAX = 16 << 20  # bytes an API response may have
+MEDIA_MAX = 50 << 20  # bytes a media file may have
+VIDEO_MAX = 512 << 20  # bytes a video may have
 # -----------------------------------------------------------------------------------------------------
 
 
@@ -50,6 +56,10 @@ class NotFound(Exception):
 
 
 class QuotaExceeded(Exception):
+    pass
+
+
+class TooManyUnrecognized(QuotaExceeded):
     pass
 
 
@@ -70,10 +80,14 @@ def to_int(v, default=0):
         return default
 
 
+_XML_INVALID = re.compile("[\x00-\x08\x0b\x0c\x0e-\x1f\ufffe\uffff]")
+
+
 def _text(v):
+    """Stripped text of a value or of its "text" key, without characters XML can't hold."""
     if isinstance(v, dict):
         v = v.get("text")
-    return v.strip() if isinstance(v, str) else ""
+    return _XML_INVALID.sub("", v).strip() if isinstance(v, str) else ""
 
 
 def _dicts(v):
@@ -172,24 +186,52 @@ def parse_game(raw, regions):
     return meta, {f: u for f, (_, u) in best.items()}
 
 
+def _allowed(url):
+    """Whether a URL is https on screenscraper.fr or one of its subdomains."""
+    try:
+        parts = urllib.parse.urlsplit(url)
+        host = parts.hostname or ""
+    except ValueError:
+        return False
+    return parts.scheme == "https" and (host == HOST or host.endswith("." + HOST))
+
+
+def _too_large(resp, limit):
+    length = getattr(resp, "headers", None)
+    return to_int(length.get("Content-Length") if length is not None else None) > limit
+
+
+class SafeRedirect(urllib.request.HTTPRedirectHandler):
+    """Follows only redirects to https screenscraper.fr; the refusal's text never holds a URL."""
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        if not _allowed(newurl):
+            raise urllib.error.HTTPError("", code, "redirect refused", headers, fp)
+        return super().redirect_request(req, fp, code, msg, headers, newurl)
+
+
 class Client:
-    def __init__(self, user, password, dev, opener=urllib.request.urlopen):
+    def __init__(self, user, password, dev, opener=None):
         self._auth = {"devid": dev["devid"], "devpassword": dev["devpassword"], "softname": SOFTNAME,
                       "ssid": user, "sspassword": password}
-        self._opener = opener
+        self._opener = opener or urllib.request.build_opener(SafeRedirect).open
 
     def _open(self, url):
         """The response for a URL. Every error is turned into one of ours whose text never holds the URL (its query
         carries the credentials)."""
         try:
-            if urllib.parse.urlsplit(url).scheme not in ("http", "https") or any(c <= " " or c == "\x7f" for c in url):
+            if any(c <= " " or c == "\x7f" for c in url):
                 raise ValueError("bad URL")
+            if not _allowed(url):
+                raise ApiError(f"ScreenScraper gave a URL that isn't https on {HOST}")
             req = urllib.request.Request(url, headers={"User-Agent": f"sync-roms/{__version__}"})
             return self._opener(req, timeout=TIMEOUT)
         except urllib.error.HTTPError as e:
             if e.code == HTTP_NOT_FOUND:
                 raise NotFound("not found") from None
-            if e.code in HTTP_QUOTA:
+            if e.code == HTTP_UNRECOGNIZED:
+                raise TooManyUnrecognized(f"ScreenScraper's limit of unrecognized ROMs for today is reached (HTTP {e.code})") from None
+            if e.code == HTTP_QUOTA:
                 raise QuotaExceeded(f"ScreenScraper quota exceeded (HTTP {e.code})") from None
             if e.code == HTTP_RATE_LIMIT:
                 raise RateLimited(f"ScreenScraper is rate limiting requests (HTTP {e.code})") from None
@@ -203,14 +245,19 @@ class Client:
         query = urllib.parse.urlencode({**self._auth, "output": "json", **params})
         try:
             with self._open(f"{BASE_URL}{endpoint}?{query}") as resp:
-                body = resp.read().decode("utf-8", "replace")
+                if _too_large(resp, API_MAX):
+                    raise ApiError("ScreenScraper response too large")
+                body = resp.read(API_MAX + 1)
         except (OSError, http.client.HTTPException) as e:  # cut short or timed out while reading
             raise ApiError(f"ScreenScraper request failed ({type(e).__name__})") from None
+        if len(body) > API_MAX:
+            raise ApiError("ScreenScraper response too large")
+        body = body.decode("utf-8", "replace")
         if body.lstrip().startswith(NOT_FOUND_PREFIX):
             raise NotFound("not found")
         try:
             return json.loads(body)
-        except ValueError:
+        except (ValueError, RecursionError):
             raise ApiError("ScreenScraper returned an unreadable response") from None
 
     def quota(self):
@@ -243,15 +290,22 @@ class Client:
                 out.append((to_int(g["id"]), title))
         return out
 
-    def download(self, url, dest):
-        """Save a media file at dest. Raises NotFound when ScreenScraper answers with its not-found text."""
+    def download(self, url, dest, limit=None):
+        """Save a media file of at most limit (default MEDIA_MAX) bytes at dest. Raises NotFound when ScreenScraper answers with its
+        not-found text, ApiError when the file is bigger."""
+        limit = limit or MEDIA_MAX
         part = dest + ".part"
         try:
             with self._open(url) as resp, open(part, "wb") as f:
-                chunk = resp.read(1 << 16)
+                if _too_large(resp, limit):
+                    raise ApiError("ScreenScraper media too large")
+                chunk, total = resp.read(1 << 16), 0
                 if chunk.lstrip().startswith(NOT_FOUND_PREFIX.encode()):
                     raise NotFound("not found")
                 while chunk:
+                    total += len(chunk)
+                    if total > limit:
+                        raise ApiError("ScreenScraper media too large")
                     f.write(chunk)
                     chunk = resp.read(1 << 16)
             os.replace(part, dest)
