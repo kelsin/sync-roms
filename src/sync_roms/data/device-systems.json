@@ -3126,6 +3126,7 @@
   "miyoo-mini-flip": {
     "systems": [
       "mame",
+      "fbneo",
       "neogeo",
       "cps1",
       "cps2",
@@ -3165,7 +3166,7 @@
       "supervision",
       "megaduck"
     ],
-    "note": "Stable through PS1. NDS and Neo Geo CD are too heavy for 128MB RAM, so left off. FBNeo has no Onion folder."
+    "note": "Stable through PS1. NDS and Neo Geo CD are too heavy for 128MB RAM, so left off. FBNeo is Onion's experimental arcade alternative."
   },
   "retroid-pocket-2s": {
     "systems": [
