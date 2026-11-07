@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.30.0](https://github.com/kelsin/sync-roms/compare/v0.29.1...v0.30.0) (2026-11-07)
+
+
+### Features
+
+* **emudeck:** install scraped media ([#116](https://github.com/kelsin/sync-roms/issues/116)) ([eeb7d71](https://github.com/kelsin/sync-roms/commit/eeb7d71761a4fdce2d6fbb592b70c7885644034a))
+* **scrape:** name mame and fbneo clones after their variant ([#117](https://github.com/kelsin/sync-roms/issues/117)) ([c01c811](https://github.com/kelsin/sync-roms/commit/c01c811d36e631b6752efd0816acb902a1a741a8))
+* **sync:** delete unselected roms before checking free space ([#114](https://github.com/kelsin/sync-roms/issues/114)) ([acd47df](https://github.com/kelsin/sync-roms/commit/acd47df06de844c98082ca648b380233853a0fb1))
+
 ## [0.29.1](https://github.com/kelsin/sync-roms/compare/v0.29.0...v0.29.1) (2026-11-07)
 
 
