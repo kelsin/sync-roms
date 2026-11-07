@@ -554,7 +554,8 @@ def run(argv):
             listings.update(zip((s["bucket"] for s in todo),
                                 ex.map(lambda s: s3.list_sizes(s["bucket"] + "/")
                                        if s.get("full_system") or store.listed(s) else {}, todo)))
-        rows = [(f"{s['name']}  ({len(available(s))} roms)", bool(available(s)), *sizes(s)) for s in systems]
+        rows = [(f"{s['name']}  ({len(available(s))} roms, {ui.human_size(total)})", bool(available(s)), need, total)
+                for s in systems for need, total in [sizes(s)]]
         present = [i for i, s in enumerate(systems)
                    if available(s) and (device or downloads.has_local_files(os.path.join(roms_dir, s["folders"][layout_name]), layout_name == "onion"))]
         if args.systems:
