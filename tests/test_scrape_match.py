@@ -154,6 +154,10 @@ class ResolveManualTest(unittest.TestCase):
     def test_integer_is_game_id(self):
         self.assertEqual(scrape_online.resolve_manual(FakeClient(), SYSTEM, " 123 "), 123)
 
+    def test_zero_is_no_game(self):
+        with self.assertRaises(screenscraper.NotFound):
+            scrape_online.resolve_manual(FakeClient(), SYSTEM, "0")
+
     def test_search_pick(self):
         client = mock.Mock()
         client.search.return_value = [(1, "One"), (2, "Two")]

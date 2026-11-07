@@ -41,13 +41,49 @@ class ScrapeStateTest(unittest.TestCase):
         self.assertTrue(scrape_state.is_unknown("gba", "a.zip"))
 
     def test_clear_unknown_one_system_only(self):
-        scrape_state.mark_unknown("gba", "a.zip")
-        scrape_state.mark_unknown("nes", "b.zip")
-        scrape_state.clear_unknown("gba")
-        self.assertFalse(scrape_state.is_unknown("gba", "a.zip"))
-        self.assertTrue(scrape_state.is_unknown("nes", "b.zip"))
+        scrape_state.mark_unknown("gb", "a.zip")
+        scrape_state.mark_unknown("gba", "b.zip")
+        scrape_state.mark_unknown("nes", "c.zip")
+        scrape_state.clear_unknown("gb")
+        self.assertFalse(scrape_state.is_unknown("gb", "a.zip"))
+        self.assertTrue(scrape_state.is_unknown("gba", "b.zip"))
+        self.assertTrue(scrape_state.is_unknown("nes", "c.zip"))
         scrape_state.clear_unknown()
-        self.assertFalse(scrape_state.is_unknown("nes", "b.zip"))
+        self.assertFalse(scrape_state.is_unknown("gba", "b.zip"))
+        self.assertFalse(scrape_state.is_unknown("nes", "c.zip"))
+
+    def test_second_save_keeps_the_first(self):
+        scrape_state.save_match("gba", "a.zip", 1)
+        scrape_state.save_match("gba", "b.zip", 2)
+        self.assertEqual((scrape_state.manual_match("gba", "a.zip"), scrape_state.manual_match("gba", "b.zip")), (1, 2))
+        scrape_state.save_hashes("gba", "a.zip", 1, 1, H)
+        scrape_state.save_hashes("gba", "b.zip", 2, 2, H)
+        self.assertEqual(scrape_state.cached_hashes("gba", "a.zip", 1, 1), H)
+        scrape_state.mark_unknown("gba", "a.zip")
+        scrape_state.mark_unknown("gba", "b.zip")
+        self.assertTrue(scrape_state.is_unknown("gba", "a.zip"))
+
+    def test_bool_is_not_a_game_id(self):
+        with open(os.path.join(self.tmp.name, "scrape-matches.json"), "w") as f:
+            f.write('{"gba/a.zip": true}')
+        self.assertIsNone(scrape_state.manual_match("gba", "a.zip"))
+        for bad in (True, False, "7", 0, -1):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                scrape_state.save_match("gba", "a.zip", bad)
+
+    def test_corrupt_matches_file_warns_once(self):
+        with open(os.path.join(self.tmp.name, "scrape-matches.json"), "w") as f:
+            f.write("{nope")
+        with mock.patch.object(scrape_state.ui, "warn") as warn:
+            scrape_state.manual_match("gba", "a.zip")
+            scrape_state.manual_match("gba", "b.zip")
+        warn.assert_called_once()
+        self.assertIn("scrape-matches.json", warn.call_args.args[0])
+        with open(os.path.join(self.tmp.name, "scrape-unknown.json"), "w") as f:
+            f.write("{nope")
+        with mock.patch.object(scrape_state.ui, "warn") as warn:
+            scrape_state.is_unknown("gba", "a.zip")
+        warn.assert_not_called()
 
     def test_clear_unknown_one_rom_only(self):
         scrape_state.mark_unknown("gba", "a.zip")
@@ -61,7 +97,8 @@ class ScrapeStateTest(unittest.TestCase):
             with open(os.path.join(self.tmp.name, name), "w") as f:
                 f.write("{nope")
         self.assertIsNone(scrape_state.cached_hashes("gba", "a.zip", 1, 1))
-        self.assertIsNone(scrape_state.manual_match("gba", "a.zip"))
+        with mock.patch.object(scrape_state.ui, "warn"):
+            self.assertIsNone(scrape_state.manual_match("gba", "a.zip"))
         self.assertFalse(scrape_state.is_unknown("gba", "a.zip"))
         scrape_state.save_match("gba", "a.zip", 1)
         self.assertEqual(scrape_state.manual_match("gba", "a.zip"), 1)

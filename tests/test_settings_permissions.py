@@ -46,6 +46,28 @@ class SettingsPermissionsTest(unittest.TestCase):
         usersettings.save_setting("bucket", "b")
         self.assertEqual(self.mode(), 0o600)
 
+    def test_save_over_loose_invalid_file_is_never_written_loose(self):
+        with open(self.path, "w") as f:
+            f.write("{not json")
+        os.chmod(self.path, 0o644)
+        modes = []
+        real = usersettings.json.dump
+
+        def dump(obj, f, **kw):
+            modes.append(stat.S_IMODE(os.fstat(f.fileno()).st_mode))
+            return real(obj, f, **kw)
+        with mock.patch.object(usersettings.json, "dump", side_effect=dump):
+            usersettings.save_setting("screenscraper_password", "p-secret")
+        self.assertEqual(modes, [0o600])
+        self.assertEqual(self.mode(), 0o600)
+
+    def test_save_skips_fchmod_on_windows(self):
+        with mock.patch.object(usersettings.sys, "platform", "win32"), \
+                mock.patch.object(usersettings.os, "fchmod", create=True) as fchmod:
+            usersettings.save_setting("bucket", "b")
+        fchmod.assert_not_called()
+        self.assertEqual(usersettings.load_settings(), {"bucket": "b"})
+
     def test_load_missing_or_bad_json_is_empty_and_does_not_create_file(self):
         self.assertEqual(usersettings.load_settings(), {})
         self.assertFalse(os.path.exists(self.path))
