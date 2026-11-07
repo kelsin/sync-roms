@@ -119,7 +119,9 @@ class Dispatch(Isolated):
 
 class SetCredentials(unittest.TestCase):
     def setUp(self):
-        self.dir = tempfile.mkdtemp()
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        self.dir = tmp.name
         p = mock.patch.object(store, "data_dir", lambda: self.dir)
         p.start()
         self.addCleanup(p.stop)
@@ -156,6 +158,13 @@ class SetCredentials(unittest.TestCase):
         self.assertEqual(now, dict(saved, screenscraper_devid="newdev"))
         for value in list(saved.values()) + ["newdev"]:
             self.assertNotIn(value, out)
+
+    def test_credentials_saved_in_one_write(self):
+        with mock.patch.object(usersettings, "save_settings", wraps=usersettings.save_settings) as save, \
+                mock.patch.object(usersettings, "save_setting", side_effect=AssertionError("one key at a time")):
+            code, _ = self.run_it(["me", "dev1"], ["s3cret", "devs3cret"])
+        self.assertEqual(code, 0)
+        save.assert_called_once()
 
     def test_all_blank_says_nothing_changed(self):
         saved = {"screenscraper_user": "me"}

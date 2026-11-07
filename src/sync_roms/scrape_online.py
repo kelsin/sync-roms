@@ -164,8 +164,7 @@ def set_credentials():
     if not answers:
         print(ui.yellow("Nothing changed"))
         return 0
-    for key, value in answers.items():
-        usersettings.save_setting(key, value)
+    usersettings.save_settings({**usersettings.load_settings(), **answers})
     print(ui.green("✅ Saved ScreenScraper credentials to " + os.path.join(store.data_dir(), "settings.json")))
     return 0
 

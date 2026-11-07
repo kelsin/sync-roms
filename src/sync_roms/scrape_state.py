@@ -1,6 +1,7 @@
 """Personal scrape state under the user data folder: hash cache, manual matches, unknown ledger."""
 import json
 import os
+import tempfile
 import threading
 
 from . import scrape_plan, store, ui
@@ -33,10 +34,14 @@ def _load(name):
 
 def _save(name, data):
     os.makedirs(store.data_dir(), exist_ok=True)
-    tmp = _path(name) + ".tmp"
-    with open(tmp, "w") as f:
-        f.write(scrape_plan.dump_json(data))
-    os.replace(tmp, _path(name))
+    fd, tmp = tempfile.mkstemp(dir=store.data_dir(), prefix=f".{name}-", suffix=".tmp")
+    try:
+        with os.fdopen(fd, "w") as f:
+            f.write(scrape_plan.dump_json(data))
+        os.replace(tmp, _path(name))
+    finally:
+        if os.path.exists(tmp):
+            os.remove(tmp)
 
 
 def _key(system, rom):
