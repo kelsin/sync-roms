@@ -19,6 +19,7 @@ SOFTNAME = "sync-roms"
 EP_GAME, EP_QUOTA, EP_SEARCH = "jeuInfos.php", "ssuserInfos.php", "jeuRecherche.php"
 HTTP_NOT_FOUND = 404
 HTTP_QUOTA = (430, 431)  # daily scrape quota, too many unrecognized ROMs
+HTTP_RATE_LIMIT = 429  # too many requests at once: worth retrying after a pause
 NOT_FOUND_PREFIX = "Erreur : Rom"  # plain-text body of a miss (may come with HTTP 200)
 # ScreenScraper media type -> scrape_plan.MEDIA_TYPES name. box-3D, support-2D, mixrbv1/2 are unverified.
 MEDIA_MAP = {"box-2D": "covers", "box-3D": "3dboxes", "box-2D-back": "backcovers", "ss": "screenshots",
@@ -50,6 +51,10 @@ class QuotaExceeded(Exception):
 
 
 class ApiError(Exception):
+    pass
+
+
+class RateLimited(ApiError):
     pass
 
 
@@ -154,6 +159,8 @@ class Client:
                 raise NotFound("not found") from None
             if e.code in HTTP_QUOTA:
                 raise QuotaExceeded(f"ScreenScraper quota exceeded (HTTP {e.code})") from None
+            if e.code == HTTP_RATE_LIMIT:
+                raise RateLimited(f"ScreenScraper is rate limiting requests (HTTP {e.code})") from None
             raise ApiError(f"ScreenScraper request failed (HTTP {e.code})") from None
         except (urllib.error.URLError, OSError) as e:
             raise ApiError(f"ScreenScraper request failed ({type(e).__name__})") from None

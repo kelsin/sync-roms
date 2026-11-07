@@ -1,8 +1,11 @@
 """Personal scrape state under the user data folder: hash cache, manual matches, unknown ledger."""
 import json
 import os
+import threading
 
 from . import scrape_plan, store
+
+_lock = threading.RLock()  # scrape runs match ROMs on several threads; each save is a read-modify-write
 
 
 def _path(name):
@@ -40,9 +43,10 @@ def cached_hashes(system, rom, size, mtime):
 
 
 def save_hashes(system, rom, size, mtime, hashes):
-    data = _load("scrape-hashes.json")
-    data[_key(system, rom)] = {"size": size, "mtime": mtime, "hashes": hashes}
-    _save("scrape-hashes.json", data)
+    with _lock:
+        data = _load("scrape-hashes.json")
+        data[_key(system, rom)] = {"size": size, "mtime": mtime, "hashes": hashes}
+        _save("scrape-hashes.json", data)
 
 
 def manual_match(system, rom):
@@ -51,9 +55,10 @@ def manual_match(system, rom):
 
 
 def save_match(system, rom, game_id):
-    data = _load("scrape-matches.json")
-    data[_key(system, rom)] = game_id
-    _save("scrape-matches.json", data)
+    with _lock:
+        data = _load("scrape-matches.json")
+        data[_key(system, rom)] = game_id
+        _save("scrape-matches.json", data)
 
 
 def is_unknown(system, rom):
@@ -61,16 +66,18 @@ def is_unknown(system, rom):
 
 
 def mark_unknown(system, rom):
-    data = _load("scrape-unknown.json")
-    data[_key(system, rom)] = True
-    _save("scrape-unknown.json", data)
+    with _lock:
+        data = _load("scrape-unknown.json")
+        data[_key(system, rom)] = True
+        _save("scrape-unknown.json", data)
 
 
 def clear_unknown(system=None):
     """Forget the unknown ROMs of one system, or of every system."""
-    data = _load("scrape-unknown.json")
-    if system is not None:
-        data = {k: v for k, v in data.items() if not k.startswith(system + "/")}
-    else:
-        data = {}
-    _save("scrape-unknown.json", data)
+    with _lock:
+        data = _load("scrape-unknown.json")
+        if system is not None:
+            data = {k: v for k, v in data.items() if not k.startswith(system + "/")}
+        else:
+            data = {}
+        _save("scrape-unknown.json", data)
