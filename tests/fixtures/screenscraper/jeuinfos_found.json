@@ -26,12 +26,12 @@
       "editeur": {"id": "2", "text": "Example Pub"},
       "systeme": {"id": "12", "text": "Game Boy Advance"},
       "medias": [
-        {"type": "box-2D", "parent": "jeu", "region": "us", "format": "png", "url": "https://screenscraper.example/media/box2d.png"},
-        {"type": "box-2D", "parent": "jeu", "region": "wor", "format": "png", "url": "https://screenscraper.example/media/box2d-wor.png"},
-        {"type": "ss", "parent": "jeu", "format": "png", "url": "https://screenscraper.example/media/ss.png"},
-        {"type": "sstitle", "parent": "jeu", "format": "png", "url": "https://screenscraper.example/media/title.png"},
-        {"type": "video", "parent": "jeu", "format": "mp4", "url": "https://screenscraper.example/media/video.mp4"},
-        {"type": "manuel", "parent": "jeu", "region": "us", "format": "pdf", "url": "https://screenscraper.example/media/manual.pdf"}
+        {"type": "box-2D", "parent": "jeu", "region": "us", "format": "png", "url": "https://neoclone.screenscraper.fr/media/box2d.png"},
+        {"type": "box-2D", "parent": "jeu", "region": "wor", "format": "png", "url": "https://neoclone.screenscraper.fr/media/box2d-wor.png"},
+        {"type": "ss", "parent": "jeu", "format": "png", "url": "https://neoclone.screenscraper.fr/media/ss.png"},
+        {"type": "sstitle", "parent": "jeu", "format": "png", "url": "https://neoclone.screenscraper.fr/media/title.png"},
+        {"type": "video", "parent": "jeu", "format": "mp4", "url": "https://neoclone.screenscraper.fr/media/video.mp4"},
+        {"type": "manuel", "parent": "jeu", "region": "us", "format": "pdf", "url": "https://neoclone.screenscraper.fr/media/manual.pdf"}
       ]
     }
   }
