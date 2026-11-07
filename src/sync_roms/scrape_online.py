@@ -93,8 +93,7 @@ CREDENTIALS = ("screenscraper_user", "screenscraper_password", "screenscraper_de
 # What one ROM's lookup and downloads can raise besides NotFound and QuotaExceeded: the client's own errors and
 # those it doesn't wrap (a read cut short, a timeout, a malformed media URL, an unsafe ROM path).
 ROM_ERRORS = (screenscraper.ApiError, OSError, ValueError, http.client.HTTPException)
-MAGIC = ((b"\x89PNG", ".png"), (b"\xff\xd8\xff", ".jpg"), (b"GIF8", ".gif"), (b"%PDF", ".pdf"))
-DEFAULT_EXT = {"videos": ".mp4", "manuals": ".pdf"}
+IMAGE_MAGIC = ((b"\x89PNG", ".png"), (b"\xff\xd8\xff", ".jpg"), (b"GIF8", ".gif"))
 SHOWN = 10
 
 
@@ -217,17 +216,20 @@ def report(systems_candidates, matches):
 
 
 def _media_ext(path, mtype):
+    """The file extension for a downloaded media file, or None when it isn't one (an error page, "NOMEDIA", empty):
+    manuals must be PDFs, videos MP4-family files (an ftyp box), everything else a PNG, JPEG or GIF."""
     with open(path, "rb") as f:
         head = f.read(12)
-    for magic, ext in MAGIC:
-        if head.startswith(magic):
-            return ext
-    return ".mp4" if head[4:8] == b"ftyp" else DEFAULT_EXT.get(mtype, ".png")
+    if mtype == "manuals":
+        return ".pdf" if head.startswith(b"%PDF") else None
+    if mtype == "videos":
+        return ".mp4" if head[4:8] == b"ftyp" else None
+    return next((ext for magic, ext in IMAGE_MAGIC if head.startswith(magic)), None)
 
 
 def scrape_rom(client, system, item, tmp, skip, stop):
     """("done", (how, metadata, {media type: local file})), ("unknown", None), ("failed", reason), ("quota", None)
-    or ("skipped", None) when the quota ran out before this ROM started."""
+    or ("skipped", None) when the run stopped (quota or Ctrl-C) before this ROM finished."""
     rom, size, etag = item
     if stop.is_set():
         return "skipped", None
@@ -235,20 +237,28 @@ def scrape_rom(client, system, item, tmp, skip, stop):
     try:
         game_id, how = match(rc, system, rom, size, etag)
         raw = rc.found if rc.found is not None else rc.game(game_id)
+        if screenscraper.is_notgame(raw):
+            raise screenscraper.NotFound("not a game")
         meta, media = screenscraper.parse_game(raw, ())
+        if not meta:
+            raise screenscraper.ApiError("ScreenScraper returned no data for it")
         stem = os.path.splitext(rom)[0]
+        rom_tmp = tempfile.mkdtemp(dir=tmp)  # ROMs with the same stem (Game.zip, Game.7z) never share a file
         files = {}
         for mtype, url in sorted(media.items()):
             if mtype in skip:
                 continue
-            dest = s3.safe_join(tmp, f"{system['bucket']}/{mtype}/{stem}")
+            if stop.is_set():
+                return "skipped", None
+            dest = s3.safe_join(rom_tmp, f"{mtype}/{stem}")
             os.makedirs(os.path.dirname(dest), exist_ok=True)
             try:
                 rc.download(url, dest)
             except screenscraper.NotFound:  # ScreenScraper has no such file: not a failure
                 continue
-            if os.path.getsize(dest):
-                files[mtype] = dest + _media_ext(dest, mtype)
+            ext = _media_ext(dest, mtype)
+            if ext:
+                files[mtype] = dest + ext
                 os.replace(dest, files[mtype])
     except screenscraper.QuotaExceeded:
         stop.set()
@@ -276,15 +286,34 @@ def _storage_fail(what, e):
             "run `sync-roms scrape` again to continue.", 3)
 
 
-def run_batch(client, system, batch, skip, threads, shrink, outcomes):
-    """Scrape, upload and record one batch of a system's ROMs. Returns (failures, quota hit)."""
+def _media_keys(listing, system, stem):
+    """{key: media type} of every media file (Onion and Slot images included) a ROM stem has in a scrapes/<system>/
+    listing."""
+    out = {}
+    for key in listing:
+        parts = key.split("/", 3)
+        if len(parts) == 4 and parts[1] == system and parts[2] in scrape_plan.BUCKET_MEDIA \
+                and os.path.splitext(parts[3])[0] == stem:
+            out[key] = parts[2]
+    return out
+
+
+def run_batch(client, system, batch, skip, threads, shrink, outcomes, listing, replace=False):
+    """Scrape, upload and record one batch of a system's ROMs. Returns (failures, quota hit).
+
+    listing: {key: size} of scrapes/<system>/, kept up to date with what this batch uploads. Media types a ROM already
+    has there are neither downloaded nor overwritten, unless replace: then the ROMs' metadata entries are replaced
+    (not merged) and their old media files are overwritten or deleted.
+    """
     name = system["bucket"]
     stop = threading.Event()
     failed = 0
+    index = scrape_plan.scrape_index(listing)
+    kept = {rom: set() if replace else set(index.get(os.path.splitext(rom)[0], ())) for rom, _, _ in batch}
     with tempfile.TemporaryDirectory() as tmp:
         ex = ThreadPoolExecutor(threads)
         try:
-            futures = [ex.submit(scrape_rom, client, system, item, tmp, skip, stop) for item in batch]
+            futures = [ex.submit(scrape_rom, client, system, item, tmp, skip | kept[item[0]], stop) for item in batch]
             results = [f.result() for f in futures]
         except KeyboardInterrupt:
             stop.set()
@@ -307,9 +336,11 @@ def run_batch(client, system, batch, skip, threads, shrink, outcomes):
                 stem = os.path.splitext(rom)[0]
                 rom_jobs = [(f"{scrape_plan.SCRAPES}/{name}/{mtype}/{stem}{os.path.splitext(path)[1]}", path, os.path.getsize(path))
                             for mtype, path in sorted(files.items())]
-                if shrink:
+                if shrink:  # a type already in storage counts as found, so art is never made from a lesser image
+                    found = {**{t: None for t in kept[rom]}, **files}
                     rom_jobs += [(key, src, os.path.getsize(src), box)
-                                 for key, src, box in scrape_files.derived_art(name, stem, files) if src]
+                                 for key, src, box in scrape_files.derived_art(name, stem, found)
+                                 if src and (replace or key not in listing)]
                 jobs[rom], done[rom] = rom_jobs, (how, meta)
         todo = [j for js in jobs.values() for j in js]
         try:
@@ -322,9 +353,25 @@ def run_batch(client, system, batch, skip, threads, shrink, outcomes):
                 failed += 1
                 del done[rom]
                 print(ui.yellow(f"  ⚠️  {name}/{rom}: its media didn't all upload; skipped"))
+        for rom in done:
+            listing.update((j[0], j[2]) for j in jobs[rom])
+    if replace and done:
+        stale = [k for rom in done for k in _media_keys(listing, name, os.path.splitext(rom)[0])
+                 if k not in {j[0] for j in jobs[rom]}]
+        try:
+            errors = s3.delete_keys(stale) if stale else []
+        except s3.ERRORS as e:
+            _storage_fail(f"Deleting old {name} media", e)
+        for k in stale:
+            listing.pop(k, None)
+        for e in errors:
+            print(ui.yellow(f"  ⚠️  {e.get('Key')}: couldn't delete the old file"))
     if done:
         try:
-            merged = scrape_plan.merge_metadata(load_metadata(name), {rom: meta for rom, (_, meta) in done.items()})
+            merged = scrape_plan.merge_metadata(load_metadata(name), {} if replace else
+                                                {rom: meta for rom, (_, meta) in done.items()})
+            if replace:
+                merged.update((rom, dict(meta)) for rom, (_, meta) in done.items())
             s3.put_text(metadata_key(name), scrape_plan.dump_json(merged))
         except ValueError as e:
             print(ui.yellow(f"  ⚠️  {e}; {len(done)} ROM(s) not recorded"))
@@ -339,11 +386,19 @@ def run_batch(client, system, batch, skip, threads, shrink, outcomes):
     return failed, quota_hit
 
 
-def run_scrape(client, systems, todo, skip):
-    """Confirm, then scrape todo ({system: [(ROM, size, etag)]}) in batches. Returns the exit code."""
+def run_scrape(client, systems, todo, skip, ask=True, replace=False):
+    """Confirm (unless not ask), then scrape todo ({system: [(ROM, size, etag)]}) in batches. Returns the exit code.
+    replace: the ROMs' metadata entries and media are replaced (see run_batch)."""
     count = sum(len(v) for v in todo.values())
-    if not ui.confirm(f"🖼️  Scrape {count} ROM(s) from ScreenScraper and write their media and metadata to "
-                      f"{s3.location()}/{scrape_plan.SCRAPES}/ ?", default=False):
+    try:
+        listings = {name: s3.list_sizes(f"{scrape_plan.SCRAPES}/{name}/") for name in todo}
+    except s3.ERRORS as e:
+        ui.fail(f"{e}", 3)
+    kept = 0 if replace else sum(len(scrape_plan.scrape_index(listings[name]).get(os.path.splitext(r)[0], ()))
+                                 for name, items in todo.items() for r, _, _ in items)
+    note = f"; the {kept} media file(s) already there are kept" if kept else ""
+    if ask and not ui.confirm(f"🖼️  Scrape {count} ROM(s) from ScreenScraper and write their media and metadata to "
+                              f"{s3.location()}/{scrape_plan.SCRAPES}/{note} ?", default=False):
         print(ui.yellow("👋 Cancelled."))
         return 0
     try:
@@ -364,7 +419,7 @@ def run_scrape(client, systems, todo, skip):
         for i in range(0, len(items), BATCH):
             print(ui.bold(f"\n🔎 {name}: ROMs {i + 1}-{min(i + BATCH, len(items))} of {len(items)}"))
             n, quota_hit = run_batch(client, systems[name], items[i:i + BATCH], skip, max(1, quota.max_threads),
-                                     shrink, outcomes[name])
+                                     shrink, outcomes[name], listings[name], replace)
             failed += n
             if quota_hit:
                 break
@@ -479,7 +534,20 @@ def match_command(args):
     if getattr(args, "dry_run", False):
         print(ui.yellow(f"🧪 Dry run — would match {name}/{args.rom} to ScreenScraper game {game_id} and scrape it"))
         return 0
+    try:
+        replace = args.rom in load_metadata(name)
+    except ValueError:
+        ui.fail(f"{metadata_key(name)} isn't valid JSON", 3)
+    except s3.ERRORS as e:
+        ui.fail(f"{e}", 3)
+    question = (f"🔁 Replace the metadata and media of {name}/{args.rom} with ScreenScraper game {game_id}? "
+                "Its old media files are overwritten or deleted." if replace else
+                f"🖼️  Scrape {name}/{args.rom} as ScreenScraper game {game_id} and write its media and metadata to "
+                f"{s3.location()}/{scrape_plan.SCRAPES}/ ?")
+    if not ui.confirm(question, default=False):
+        print(ui.yellow("👋 Cancelled."))
+        return 0
     scrape_state.save_match(name, args.rom, game_id)
     print(f"🔗 {name}/{args.rom} → ScreenScraper game {game_id}")
     size, etag = listing[args.rom]
-    return run_scrape(client, {name: system}, {name: [(args.rom, size, etag)]}, skip)
+    return run_scrape(client, {name: system}, {name: [(args.rom, size, etag)]}, skip, ask=False, replace=replace)
