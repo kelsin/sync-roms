@@ -504,6 +504,7 @@ def run(argv):
             store.save_card(card, device, layout_name)
     layout = layouts[layout_name]
     unzip = layout.get("unzip", False)  # ROMs go in flat and unzipped (Slot)
+    disc_dir = layout.get("disc_dir")  # multi-disc games' discs go in this hidden folder, their playlist beside it (Onion)
     roms_dir, bios_dir = dirs
     clean_card = not args.dry_run and not args.no_clean
     if device:
@@ -530,17 +531,20 @@ def run(argv):
     def available(s):
         return store.available_keys(s, listings[s["bucket"]])
 
+    def discs_of(s):
+        return m3u.disc_keys(available(s)) if disc_dir else ()
+
     def sizes(s):
         """(bytes still to download, total bytes) for a system's ROMs."""
-        have, need, total = listings[s["bucket"]], 0, 0
+        have, need, total, discs = listings[s["bucket"]], 0, 0, discs_of(s)
         for k in available(s):
             size = have.get(k, 0)
             try:
-                path = s3.safe_join(os.path.join(roms_dir, s["folders"][layout_name]), downloads.rom_rel(k, unzip))
+                path = s3.safe_join(os.path.join(roms_dir, s["folders"][layout_name]), downloads.rom_rel(k, unzip, disc_dir, discs))
             except ValueError:
                 continue
             total += size
-            if downloads.plan_downloads([(k, path, size)], unzip):
+            if downloads.plan_downloads([(k, path, size)], unzip, disc_dir):
                 need += size
         return need, total
 
@@ -585,17 +589,20 @@ def run(argv):
     def dest_of(s):
         return os.path.join(roms_dir, s["folders"][layout_name])
 
-    rom_jobs, missing, extras = [], [], []
+    rom_jobs, missing, extras, moved = [], [], [], set()
     for s in chosen:
         wanted = available(s)
         if not wanted:
             continue
         have = listings[s["bucket"]]
         dest = dest_of(s)
+        discs = discs_of(s)
+        if discs:  # discs a past sync left loose go where they belong rather than being downloaded again
+            moved.update(downloads.hide_discs(dest, disc_dir, discs, args.dry_run))
         for key in wanted:
             if key in have:
                 try:
-                    rom_jobs.append((key, s3.safe_join(dest, downloads.rom_rel(key, unzip)), have[key]))
+                    rom_jobs.append((key, s3.safe_join(dest, downloads.rom_rel(key, unzip, disc_dir, discs)), have[key]))
                 except ValueError as e:
                     print(ui.yellow(f"  ⚠️  skipping {e}"))
             else:
@@ -605,7 +612,8 @@ def run(argv):
     # a system with nothing to sync is always scanned, selected or not: whatever it has on the card is unwanted
     chosen_ids = {s["bucket"] for s in chosen}
     for dest in sorted({dest_of(s) for s in systems if s["bucket"] in chosen_ids or not available(s)}):
-        extras += downloads.find_extras(dest, [k for t in systems if dest_of(t) == dest for k in available(t)], unzip, layout_name == "onion")
+        extras += downloads.find_extras(dest, [k for t in systems if dest_of(t) == dest for k in available(t)], unzip,
+                                        layout_name == "onion", disc_dir, {k for t in systems if dest_of(t) == dest for k in discs_of(t)})
 
     bios_keys = sorted({"BIOS/" + f for s in chosen for f in s["bios"]["files"]})
     bios_have = s3.list_sizes("BIOS/") if bios_keys else {}
@@ -618,7 +626,11 @@ def run(argv):
                 print(ui.yellow(f"  ⚠️  skipping {e}"))
     ui.report_missing([k for k in bios_keys if k not in bios_have], "BIOS file(s)")
 
-    rom_todo, bios_todo = downloads.plan_downloads(rom_jobs, unzip), downloads.plan_downloads(bios_jobs)
+    rom_todo, bios_todo = downloads.plan_downloads(rom_jobs, unzip, disc_dir), downloads.plan_downloads(bios_jobs)
+    if args.dry_run:  # the real run moves these first, so they are already there
+        rom_todo = [j for j in rom_todo if j[1] not in moved]
+    elif moved:
+        print(ui.dim(f"  📦 Moved {len(moved)} loose disc file(s) into {disc_dir}/"))
     print(f"\n💿 ROMs: {ui.bold(str(len(rom_todo)))} to download "
           f"({ui.human_size(sum(j[2] or 0 for j in rom_todo))}), "
           f"{len(rom_jobs) - len(rom_todo)} already present")
@@ -702,6 +714,9 @@ def run(argv):
         clean._clean_root = base
     failures = []
     failed = downloads.run_downloads(rom_todo, "ROMs", "💿", roms_dir, failures) + downloads.run_downloads(bios_todo, "BIOS", "🧠", bios_dir, failures)
+    for s in chosen:
+        if disc_dir and available(s):
+            m3u.prefix_playlists(dest_of(s), disc_dir)
     if unzip:
         # also archives already on the card (not just new downloads), e.g. from an interrupted run
         archives = sorted({j[1] for j in rom_todo} | set(chd.card_archives({dest_of(s) for s in chosen})))
