@@ -560,10 +560,19 @@ def bucket_lister():
     return lambda system: {k for k in s3.list_sizes(system + "/") if not k.endswith("/")}
 
 
+def check_notices():
+    """Things worth knowing about the data that don't make `check` fail, as strings."""
+    missing = [s["bucket"] for s in store.repo_json("systems") if s.get("screenscraper") is None]
+    return [f"systems.json: {len(missing)} system(s) have no ScreenScraper system id, so `scrape` skips them: "
+            + ", ".join(missing)] if missing else []
+
+
 def check_cmd(args):
     problems = check_data(bucket_lister() if args.bucket_keys else None)
     for p in problems:
         print(ui.red(f"❌ {p}"))
+    for n in check_notices():
+        print(ui.yellow(f"⚠️  {n}"))
     if not problems:
         print(ui.green("✅ games.json, cards.json, device-systems.json and the sets look fine"))
     return 1 if problems else 0
