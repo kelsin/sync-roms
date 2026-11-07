@@ -348,6 +348,133 @@ class FixRoundOneTest(RunBase):
         self.assertNotIn("hunter2", self.out.getvalue() + self.err.getvalue())
 
 
+class FinalReviewTest(RunBase):
+    def read(self, key):
+        with open(os.path.join(self.root, key), "rb") as f:
+            return f.read()
+
+    def test_notgame_result_is_unknown_and_writes_nothing(self):
+        self.put("gba/a.zip")
+        self.client.games["a.zip"] = dict(game(1, screenscraper.NOTGAME), id=1)
+        self.assertEqual(self.run_scrape(), 0)
+        self.assertTrue(scrape_state.is_unknown("gba", "a.zip"))
+        self.assertEqual(self.metadata(), {})
+        self.assertEqual(self.client.downloads, [])
+        self.assertEqual(self.stored(), set())
+
+    def test_game_with_no_data_fails_and_writes_no_empty_entry(self):
+        self.put("gba/a.zip")
+        self.put("gba/b.zip")
+        self.client.games["a.zip"] = {"id": 1}
+        self.assertEqual(self.run_scrape(), 1)
+        self.assertEqual(set(self.metadata()), {"b.zip"})
+        self.assertFalse(scrape_state.is_unknown("gba", "a.zip"))
+        self.assertIn("a.zip", self.out.getvalue())
+
+    def test_existing_media_and_derived_art_kept(self):
+        self.put("gba/a.zip")
+        self.put("scrapes/gba/covers/a.jpg", b"old cover")
+        self.put("scrapes/gba/onion/a.png", b"old onion")
+        self.put("scrapes/gba/slot/a.png", b"old slot")
+        self.assertEqual(self.run_scrape(), 0)
+        self.assertNotIn("http://media/1/box-2D", self.client.downloads)
+        self.assertIn("http://media/1/ss", self.client.downloads)
+        self.assertEqual(self.read("scrapes/gba/covers/a.jpg"), b"old cover")
+        self.assertEqual(self.read("scrapes/gba/onion/a.png"), b"old onion")
+        self.assertEqual(self.read("scrapes/gba/slot/a.png"), b"old slot")
+        self.assertNotIn("scrapes/gba/covers/a.png", self.stored())
+        self.assertIn("scrapes/gba/screenshots/a.png", self.stored())
+        self.assertEqual(self.metadata(), {"a.zip": {"name": "Alpha"}})
+        self.assertIn("3 media file(s) already there are kept", self.confirm.call_args.args[0])
+
+    def test_derived_art_not_made_from_a_lesser_image_when_the_cover_exists(self):
+        self.put("gba/a.zip")
+        self.put("scrapes/gba/covers/a.png", b"old cover")
+        self.assertEqual(self.run_scrape(), 0)
+        self.assertFalse(any("/onion/" in k or "/slot/" in k for k in self.stored()))
+
+    def test_bodies_that_are_not_media_are_not_stored(self):
+        self.put("gba/a.zip")
+        self.client.games["a.zip"] = game(1, "Alpha", media=("box-2D", "ss", "video", "manuel"))
+        bodies = {"http://media/1/box-2D": b"<html>error</html>", "http://media/1/ss": b"NOMEDIA",
+                  "http://media/1/video": PNG, "http://media/1/manuel": PNG}
+        real = self.client.download
+
+        def download(url, dest):
+            real(url, dest)
+            with open(dest, "wb") as f:
+                f.write(bodies[url])
+        self.client.download = download
+        self.assertEqual(self.run_scrape(), 0)
+        self.assertEqual(self.stored(), {"scrapes/gba/metadata.json"})
+        self.assertEqual(self.metadata(), {"a.zip": {"name": "Alpha"}})
+
+    def test_real_video_and_manual_kept(self):
+        self.put("gba/a.zip")
+        self.client.games["a.zip"] = game(1, "Alpha", media=("video", "manuel"))
+        bodies = {"http://media/1/video": b"\x00\x00\x00\x18ftypmp42" + b"x" * 8, "http://media/1/manuel": b"%PDF-1.4 x"}
+        self.client.download = lambda url, dest: open(dest, "wb").write(bodies[url])
+        self.assertEqual(self.run_scrape(), 0)
+        self.assertLessEqual({"scrapes/gba/videos/a.mp4", "scrapes/gba/manuals/a.pdf"}, self.stored())
+
+    def test_stop_checked_before_each_download(self):
+        self.put("gba/a.zip")
+        stop = scrape_online.threading.Event()
+        self.client.games["a.zip"] = game(1, "Alpha", media=("box-2D", "ss", "sstitle"))
+        real = self.client.download
+        self.client.download = lambda url, dest: real(url, dest) or stop.set()
+        with tempfile.TemporaryDirectory() as tmp:
+            status, _ = scrape_online.scrape_rom(self.client, GBA, ("a.zip", 3, '"x-1"'), tmp, set(), stop)
+        self.assertEqual(status, "skipped")
+        self.assertEqual(len(self.client.downloads), 1)
+
+    def test_same_stem_roms_get_their_own_temp_files(self):
+        self.put("gba/Game.zip")
+        self.put("gba/Game.7z")
+        self.client.games["Game.zip"] = game(1, "One")
+        self.client.games["Game.7z"] = game(2, "Two")
+        with tempfile.TemporaryDirectory() as tmp:
+            stop = scrape_online.threading.Event()
+            _, (_, _, one) = scrape_online.scrape_rom(self.client, GBA, ("Game.zip", 3, '"x-1"'), tmp, set(), stop)
+            _, (_, _, two) = scrape_online.scrape_rom(self.client, GBA, ("Game.7z", 3, '"x-1"'), tmp, set(), stop)
+            self.assertTrue(set(one.values()).isdisjoint(two.values()))
+            self.assertTrue(all(os.path.exists(p) for p in list(one.values()) + list(two.values())))
+
+
+class MatchReplaceTest(RunBase):
+    def run_match(self, rom="a.zip", game_q="7"):
+        args = SimpleNamespace(system="gba", rom=rom, game=game_q, skip_media=[], dry_run=False)
+        with contextlib.redirect_stdout(self.out), contextlib.redirect_stderr(self.err):
+            return scrape_online.match_command(args)
+
+    def test_declining_saves_no_match(self):
+        self.put("gba/a.zip")
+        self.client.games["x"] = game(7, "Seven")
+        self.confirm.return_value = False
+        self.assertEqual(self.run_match(), 0)
+        self.assertIsNone(scrape_state.manual_match("gba", "a.zip"))
+        self.assertEqual(self.stored(), set())
+
+    def test_existing_entry_is_replaced_not_merged(self):
+        self.put("gba/a.zip")
+        self.put("gba/b.zip")
+        self.put("scrapes/gba/metadata.json", json.dumps({"a.zip": {"name": "Wrong", "desc": "wrong game"},
+                                                         "b.zip": {"name": "Beta"}}).encode())
+        self.put("scrapes/gba/covers/a.jpg", b"wrong cover")
+        self.put("scrapes/gba/fanart/a.png", b"wrong fanart")
+        self.put("scrapes/gba/covers/b.png", b"b cover")
+        self.client.games["x"] = game(7, "Seven")
+        self.assertEqual(self.run_match(), 0)
+        self.assertIn("Replace", self.confirm.call_args.args[0])
+        self.assertEqual(self.metadata(), {"a.zip": {"name": "Seven"}, "b.zip": {"name": "Beta"}})
+        have = self.stored()
+        self.assertIn("scrapes/gba/covers/a.png", have)
+        self.assertNotIn("scrapes/gba/covers/a.jpg", have)
+        self.assertNotIn("scrapes/gba/fanart/a.png", have)
+        self.assertIn("scrapes/gba/covers/b.png", have)
+        self.assertEqual(scrape_state.manual_match("gba", "a.zip"), 7)
+
+
 class SystemsTest(RunBase):
     systems = [GBA, NES, {"name": "No Id", "bucket": "noid", "full_system": True, "folders": {}}]
 
