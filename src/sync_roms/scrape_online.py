@@ -49,7 +49,10 @@ def hash_file(system, rom, size, mtime):
 
 
 def match(client, system, rom, size, etag):
-    """(game id, how) for a ROM; how is "manual", "hash" or "name+size". Raises screenscraper.NotFound."""
+    """(game id, how) for a ROM; how is "manual", "hash" or "name+size". Raises screenscraper.NotFound.
+
+    One lookup sends the hashes, name and size together; it counts as "hash" only when the ROM ScreenScraper
+    matched carries one of the hashes sent."""
     name = system["bucket"]
     saved = scrape_state.manual_match(name, rom)
     if saved is not None:
@@ -61,7 +64,7 @@ def match(client, system, rom, size, etag):
     elif "-" not in (tag := etag.strip('"')):  # a multipart upload's ETag is not the file's MD5
         hashes = {"md5": tag}
     game = client.lookup(system["screenscraper"], os.path.basename(rom), size, **hashes)
-    return screenscraper.to_int(game.get("id")), "hash" if hashes else "name+size"
+    return screenscraper.to_int(game.get("id")), "hash" if screenscraper.rom_hash_matches(game, hashes) else "name+size"
 
 
 def resolve_manual(client, system, query):

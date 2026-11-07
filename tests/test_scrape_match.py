@@ -13,15 +13,18 @@ SYSTEM = {"bucket": "gba", "screenscraper": 12}
 
 
 class FakeClient:
-    def __init__(self, found=True):
+    def __init__(self, found=True, hash_hit=True):
         self.calls = []
         self.found = found
+        self.hash_hit = hash_hit  # the response's matched ROM carries the hashes sent
 
     def lookup(self, system_id, rom_name, size, md5=None, sha1=None, crc=None):
         self.calls.append(dict(system_id=system_id, rom_name=rom_name, size=size, md5=md5, sha1=sha1, crc=crc))
         if not self.found:
             raise screenscraper.NotFound("not found")
-        return {"id": 77}
+        if self.hash_hit:
+            return {"id": 77, "rom": {"rommd5": md5 or "", "romsha1": sha1 or "", "romcrc": crc or ""}}
+        return {"id": 77, "rom": {"rommd5": "0" * 32}}
 
 
 class MatchBase(unittest.TestCase):
@@ -84,6 +87,18 @@ class HashAndMatchTest(MatchBase):
         with mock.patch.object(runtime, "ROOT", None), mock.patch.object(s3, "read_root", return_value=None):
             self.assertEqual(scrape_online.match(client, SYSTEM, "a.zip", 3, '"900150983cd24fb0d6963f7d28e17f72"'), (77, "hash"))
         self.assertEqual(client.calls[0]["md5"], "900150983cd24fb0d6963f7d28e17f72")
+
+    def test_hashes_sent_but_not_matched_is_name_size(self):
+        client = FakeClient(hash_hit=False)
+        with mock.patch.object(s3, "read_root", return_value=None):
+            self.assertEqual(scrape_online.match(client, SYSTEM, "a.zip", 3, '"900150983cd24fb0d6963f7d28e17f72"'), (77, "name+size"))
+        self.assertEqual(client.calls[0]["md5"], "900150983cd24fb0d6963f7d28e17f72")
+        self.put("gba/a.zip", b"abc")
+        self.assertEqual(scrape_online.match(client, SYSTEM, "a.zip", 3, "5-3"), (77, "name+size"))
+
+    def test_folder_hash_match_is_labelled_hash(self):
+        self.put("gba/a.zip", b"abc")
+        self.assertEqual(scrape_online.match(FakeClient(), SYSTEM, "a.zip", 3, "5-3"), (77, "hash"))
 
     def test_s3_multipart_etag_falls_back_to_name_size(self):
         client = FakeClient()
