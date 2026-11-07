@@ -1,4 +1,5 @@
 """Terminal colors, prompts and progress output."""
+import collections
 import json
 import os
 import re
@@ -9,6 +10,7 @@ import time
 from . import runtime
 
 
+SPEED_WINDOW = 5  # seconds the current speed is averaged over
 PLAIN_INTERVAL = 30  # seconds between progress lines when stdout is not a terminal
 ASSUME_YES = False  # --yes: prompts take their default answer (a default-no prompt stays no)
 QUIET = False  # --quiet: stdout is discarded except emit_json(); prompts are asked on stderr
@@ -195,6 +197,7 @@ class ProgressBar:
         self.total = total_bytes or 0
         self.started = time.monotonic()
         self.last_line = self.started
+        self.samples = collections.deque()  # (time, bytes moved) over the last SPEED_WINDOW seconds
 
     def say(self, line):
         print(("\r\033[K" if self.shown else "") + line)
@@ -208,10 +211,17 @@ class ProgressBar:
         if self.shown:
             fraction = self.fraction()
             filled = int(fraction * 24)
-            elapsed = time.monotonic() - self.started
+            now = time.monotonic()
+            self.samples.append((now, self.total * fraction))
+            while len(self.samples) > 1 and now - self.samples[0][0] > SPEED_WINDOW:
+                self.samples.popleft()
             speed = ""
-            if self.total and fraction > 0.01 and elapsed > 2:
-                speed = f"  {human_size(self.total * fraction / elapsed)}/s, {eta(elapsed * (1 - fraction) / fraction)} left"
+            span = now - self.samples[0][0]
+            if self.total and span >= 1:
+                rate = (self.samples[-1][1] - self.samples[0][1]) / span  # current speed, not the run's average
+                speed = f"  {human_size(rate)}/s"
+                if rate > 0:
+                    speed += f", {eta(self.total * (1 - fraction) / rate)} left"
             sys.stdout.write(f"\r\033[K  {cyan('█' * filled)}{dim('░' * (24 - filled))} {done}/{self.count} files done  {fraction:4.0%}{self.of}{speed}")
             sys.stdout.flush()
 

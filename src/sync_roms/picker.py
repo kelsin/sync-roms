@@ -107,7 +107,7 @@ def pick_systems(rows, initial=None, state=None, editable=False):
             if restore in order:
                 cur = order.index(restore)
             restore = None
-            cur = min(cur, len(order) - 1)
+            cur = max(0, min(cur, len(order) - 1))
             state.update(sel=sel, show_empty=show_empty, row=order[cur] if order else None)
             stdscr.erase()
             h, w = stdscr.getmaxyx()

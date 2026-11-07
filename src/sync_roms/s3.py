@@ -91,12 +91,21 @@ def s3_client(profile=None, connections=runtime.WORKERS):
     return _s3[key]
 
 
+def copy_file(src, dst, callback=None):
+    """Copy src to dst, calling callback(bytes) after each chunk."""
+    with open(src, "rb") as fin, open(dst, "wb") as fout:
+        while chunk := fin.read(1024 * 1024):
+            fout.write(chunk)
+            if callback:
+                callback(len(chunk))
+
+
 def download(job, callback=None):
-    """callback(bytes) is called as data arrives (not for a mirror copy, which finishes in one step)."""
+    """callback(bytes) is called as data arrives."""
     key, path, _ = job
     os.makedirs(os.path.dirname(path), exist_ok=True)
     if read_root():
-        shutil.copyfile(safe_join(read_root(), key), path + ".part")
+        copy_file(safe_join(read_root(), key), path + ".part", callback)
         os.replace(path + ".part", path)
         return
     s3_client().download_file(runtime.BUCKET, key, path, Callback=callback)
