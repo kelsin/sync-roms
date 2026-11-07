@@ -2,19 +2,34 @@
 import json
 import os
 import re
+import stat
+import sys
 
 from . import runtime, store, ui
 
 
 # --- Local mirror ---------------------------------------------------------------------------------
 
-def load_settings():
-    """Saved global settings: {"bucket": S3 bucket name, "root": folder used instead of a bucket, "endpoint": custom S3 endpoint URL, "profile"/"write_profile": aws profiles, "mirror": folder of the local mirror}."""
+def _private(path):
+    """Make settings.json readable by the owner only (it can hold the ScreenScraper credentials)."""
+    if sys.platform == "win32":
+        return
     try:
-        with open(os.path.join(store.data_dir(), "settings.json")) as f:
+        if stat.S_IMODE(os.stat(path).st_mode) != 0o600:
+            os.chmod(path, 0o600)
+    except OSError:
+        pass
+
+
+def load_settings():
+    """Saved global settings: {"bucket": S3 bucket name, "root": folder used instead of a bucket, "endpoint": custom S3 endpoint URL, "profile"/"write_profile": aws profiles, "mirror": folder of the local mirror, "screenscraper_user"/"screenscraper_password"/"screenscraper_devid"/"screenscraper_devpassword": ScreenScraper credentials (never shown by config show)}."""
+    path = os.path.join(store.data_dir(), "settings.json")
+    try:
+        with open(path) as f:
             settings = json.load(f)
     except (OSError, ValueError):
         return {}
+    _private(path)
     return settings if isinstance(settings, dict) else {}
 
 
@@ -27,8 +42,10 @@ def save_setting(name, value):
         settings[name] = value
     try:
         os.makedirs(store.data_dir(), exist_ok=True)
-        with open(os.path.join(store.data_dir(), "settings.json"), "w") as f:
+        path = os.path.join(store.data_dir(), "settings.json")
+        with os.fdopen(os.open(path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600), "w") as f:
             json.dump(settings, f, indent=2, sort_keys=True)
+        _private(path)
     except OSError as e:
         ui.fail(f"Couldn't save the setting: {e}", 3)
 
