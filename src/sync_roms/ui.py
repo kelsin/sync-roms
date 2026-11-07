@@ -3,6 +3,7 @@ import collections
 import json
 import os
 import re
+import shutil
 import sys
 import threading
 import time
@@ -217,19 +218,21 @@ class ProgressBar:
             self.samples.append((now, self.total * fraction, self.io.written if self.io else 0))
             while len(self.samples) > 1 and now - self.samples[0][0] > SPEED_WINDOW:
                 self.samples.popleft()
-            speed = ""
+            tiers = [""]  # speed text, fullest first; the line drops detail until it fits the terminal
             span = now - self.samples[0][0]
             if self.total and span >= 1:
                 rate = (self.samples[-1][1] - self.samples[0][1]) / span  # current speed, not the run's average
-                speed = f"  {human_size(rate)}/s"
+                left = f", {eta(self.total * (1 - fraction) / rate)} left" if rate > 0 else ""
+                tiers = [f"  {human_size(rate)}/s{left}"]
                 if self.io and self.io.written:
                     disk = (self.samples[-1][2] - self.samples[0][2]) / span
-                    speed = f"  net {human_size(rate)}/s · disk {human_size(disk)}/s"
-                if rate > 0:
-                    speed += f", {eta(self.total * (1 - fraction) / rate)} left"
-                if self.io and self.io.written:
-                    speed += " · waiting on " + ("disk" if self.io.received - self.io.written > BACKLOG else "network")
-            sys.stdout.write(f"\r\033[K  {cyan('█' * filled)}{dim('░' * (24 - filled))} {done}/{self.count} files done  {fraction:4.0%}{self.of}{speed}")
+                    net = f"  net {human_size(rate)}/s · disk {human_size(disk)}/s{left}"
+                    waiting = " · waiting on " + ("disk" if self.io.received - self.io.written > BACKLOG else "network")
+                    tiers = [net + waiting, net] + tiers
+            head = f"{done}/{self.count} files done  {fraction:4.0%}{self.of}"
+            room = shutil.get_terminal_size().columns - 1 - 2 - 24 - 1 - len(head)  # one column spare so the line never wraps
+            speed = next((t for t in tiers if len(t) <= room), "")
+            sys.stdout.write(f"\r\033[K  {cyan('█' * filled)}{dim('░' * (24 - filled))} {head}{speed}")
             sys.stdout.flush()
 
     def clear(self):

@@ -14,7 +14,8 @@ class SpeedWindowTest(unittest.TestCase):
     def draw_at(self, bar, now, fraction):
         out = io.StringIO()
         bar.fraction = lambda: fraction
-        with mock.patch.object(ui.time, "monotonic", return_value=now), contextlib.redirect_stdout(out):
+        with mock.patch.object(ui.time, "monotonic", return_value=now), contextlib.redirect_stdout(out), \
+                mock.patch.object(ui.shutil, "get_terminal_size", return_value=os.terminal_size((200, 24))):
             bar.shown = True
             bar.draw(0)
         return out.getvalue()
@@ -39,7 +40,7 @@ class SpeedWindowTest(unittest.TestCase):
 
 
 class BottleneckTest(unittest.TestCase):
-    def line(self, received, written):
+    def line(self, received, written, columns=200):
         io_ = ui.ByteProgress([10 ** 9])
         io_.add(0, received)
         io_.wrote(written)
@@ -47,7 +48,7 @@ class BottleneckTest(unittest.TestCase):
             bar = ui.ProgressBar(1, io_.fraction, 10 ** 9, io=io_)
         out = io.StringIO()
         bar.shown = True
-        with contextlib.redirect_stdout(out):
+        with contextlib.redirect_stdout(out), mock.patch.object(ui.shutil, "get_terminal_size", return_value=os.terminal_size((columns, 24))):
             with mock.patch.object(ui.time, "monotonic", return_value=0):
                 bar.draw(0)
             io_.add(0, 20 * 1024 * 1024)
@@ -65,6 +66,22 @@ class BottleneckTest(unittest.TestCase):
 
     def test_small_backlog_blames_the_network(self):
         self.assertIn("waiting on network", self.line(1024, 1024))
+
+    def test_narrow_terminal_drops_waiting_on_first(self):
+        line = self.line(1024, 1024, columns=120)
+        self.assertNotIn("waiting", line)
+        self.assertIn("disk 2.5 MB/s", line)
+
+    def test_narrower_terminal_drops_disk_too(self):
+        line = self.line(1024, 1024, columns=100)
+        self.assertNotIn("disk", line)
+        self.assertIn("10.0 MB/s", line)
+
+    def test_line_never_reaches_the_terminal_width(self):
+        for columns in (70, 100, 120, 140):
+            last = self.line(1024, 1024, columns=columns).split("\r\033[K")[-1]
+            plain = ui.re.sub(r"\033\[[0-9;]*m", "", last)
+            self.assertLess(len(plain), columns)
 
 
 if __name__ == "__main__":
