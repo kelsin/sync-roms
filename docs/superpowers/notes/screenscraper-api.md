@@ -34,7 +34,7 @@ JSON shape is [memory/unverified]; XML shape is [ES-DE source] (the JSON mirrors
 | rating | `note` (out of 20; ES-DE divides by 20 into stars) | `jeu.note.text` |
 | developer / publisher | `developpeur`, `editeur` | `jeu.developpeur.text`, `jeu.editeur.text` |
 | system | `systeme@id`, `@parentid` | `jeu.systeme` |
-| matched rom | `rom/rommd5` | `jeu.rom` / `jeu.roms` |
+| matched rom | `rom/rommd5` | `jeu.rom` / `jeu.roms` (`rommd5`, `romsha1`, `romcrc`); sync-roms labels a match "hash" only when one of these equals a hash it sent |
 | media | `medias/media@type,@region,@format` | `jeu.medias[] = {type, parent, url, region, crc, md5, sha1, size, format}` |
 
 - Placeholder/non-game results are named `ZZZ(NOTGAME)` [ES-DE source]; discard them.
@@ -70,6 +70,12 @@ All [ES-DE source] (ES-DE's practice, not an API rule):
 - Media (except video, fanart): user region, then `wor`, `us`, `eu`, `jp`, `cus`.
 - Video: first entry.
 Region short codes come from regionsListe.php (`nomcourt`), language codes from languesListe.php [documented].
+
+## jeuRecherche.php (search)
+
+**[memory/unverified]** Not on the official page read. Assumed parameters `systemeid`, `recherche` (the name to search), and
+response `response.jeux[]` of game dicts shaped like `jeu` (`id`, `noms[]`). Used only by `scrape match` with a name;
+verify live.
 
 ## ssuserInfos.php (quota)
 
