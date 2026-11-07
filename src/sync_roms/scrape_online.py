@@ -157,9 +157,15 @@ def set_credentials():
             answers[key] = ask(f"{label}{note}: ").strip()
     except EOFError:
         ui.fail("Credentials not saved", 2)
+    except KeyboardInterrupt:
+        print(ui.yellow("\n👋 Credentials not saved"))
+        return 130
+    answers = {k: v for k, v in answers.items() if v}
+    if not answers:
+        print(ui.yellow("Nothing changed"))
+        return 0
     for key, value in answers.items():
-        if value:
-            usersettings.save_setting(key, value)
+        usersettings.save_setting(key, value)
     print(ui.green("✅ Saved ScreenScraper credentials to " + os.path.join(store.data_dir(), "settings.json")))
     return 0
 
