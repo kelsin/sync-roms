@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.29.0](https://github.com/kelsin/sync-roms/compare/v0.28.0...v0.29.0) (2026-11-07)
+
+
+### Features
+
+* **ui:** show network versus disk speed while downloading ([#110](https://github.com/kelsin/sync-roms/issues/110)) ([71e8153](https://github.com/kelsin/sync-roms/commit/71e81531fb5d42252b7ae8d50fd1fd7b944f7236))
+* **ui:** show system sizes in the picker and current transfer speed ([#109](https://github.com/kelsin/sync-roms/issues/109)) ([708e3f6](https://github.com/kelsin/sync-roms/commit/708e3f6dcb7cec783782887f43bb33deb86ad250))
+
 ## [0.28.0](https://github.com/kelsin/sync-roms/compare/v0.27.0...v0.28.0) (2026-11-07)
 
 
