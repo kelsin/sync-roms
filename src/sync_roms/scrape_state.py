@@ -82,6 +82,13 @@ def save_match(system, rom, game_id):
         _save(MATCHES, data)
 
 
+def forget_match(system, rom):
+    with _lock:
+        data = _load(MATCHES)
+        if data.pop(_key(system, rom), None) is not None:
+            _save(MATCHES, data)
+
+
 def is_unknown(system, rom):
     return _key(system, rom) in _load("scrape-unknown.json")
 

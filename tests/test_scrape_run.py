@@ -5,12 +5,15 @@ import os
 import shutil
 import sys
 import tempfile
+import threading
 import unittest
 from types import SimpleNamespace
 from unittest import mock
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "src"))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from realdir_guard import RealDataDirGuard  # noqa: E402
 from sync_roms import runtime, s3, scrape_online, scrape_plan, scrape_state, screenscraper, store, ui, upload, usersettings  # noqa: E402
 
 GBA = {"name": "Game Boy Advance", "bucket": "gba", "screenscraper": 12, "full_system": True, "folders": {}}
@@ -59,7 +62,7 @@ class FakeClient:
                 return g
         raise screenscraper.NotFound("not found")
 
-    def download(self, url, dest):
+    def download(self, url, dest, limit=None):
         self.downloads.append(url)
         if url in self.fail_urls:
             raise screenscraper.ApiError("ScreenScraper request failed (HTTP 500)")
@@ -69,10 +72,11 @@ class FakeClient:
             f.write(PNG)
 
 
-class RunBase(unittest.TestCase):
+class RunBase(RealDataDirGuard):
     systems = [GBA]
 
     def setUp(self):
+        super().setUp()
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)
         self.root = os.path.join(self.tmp.name, "storage")
@@ -95,6 +99,14 @@ class RunBase(unittest.TestCase):
                   mock.patch.object(scrape_online, "RETRY_WAIT", 0)):
             p.start()
             self.addCleanup(p.stop)
+        threads = set(threading.enumerate())
+        self.addCleanup(self.join_threads, threads)  # runs before the patches stop
+
+    def join_threads(self, before):
+        """No worker thread may outlive the test (it would run unpatched)."""
+        for t in set(threading.enumerate()) - before:
+            t.join(5)
+            self.assertFalse(t.is_alive(), f"thread {t.name} outlived the test")
 
     def put(self, key, data=b"abc"):
         path = os.path.join(self.root, key)
@@ -318,10 +330,16 @@ class FixRoundOneTest(RunBase):
             self.put(f"gba/{r}.zip")
             self.client.games.setdefault(f"{r}.zip", game(ord(r), r))
         self.client.threads = 1
+        self.put("scrapes/gba/metadata.json", b'{"old.zip": {"name": "Old"}}')
         self.client.errors = {"a.zip": [KeyboardInterrupt()]}
         with self.assertRaises(KeyboardInterrupt):
             self.run_scrape()
-        self.assertEqual(self.client.lookups, ["a.zip"])
+        # the one worker may have taken b.zip before the stop was set; nothing queued after it starts
+        self.assertEqual(self.client.lookups[0], "a.zip")
+        self.assertLessEqual(set(self.client.lookups), {"a.zip", "b.zip"})
+        self.assertEqual(threading.active_count(), 1)  # the workers were joined before the error left the run
+        self.assertEqual(self.metadata(), {"old.zip": {"name": "Old"}})
+        self.assertFalse(any("/a." in k for k in self.stored()))
 
     def test_quota_call_retried_when_rate_limited(self):
         self.put("gba/a.zip")
@@ -400,7 +418,7 @@ class FinalReviewTest(RunBase):
                   "http://media/1/video": PNG, "http://media/1/manuel": PNG}
         real = self.client.download
 
-        def download(url, dest):
+        def download(url, dest, limit=None):
             real(url, dest)
             with open(dest, "wb") as f:
                 f.write(bodies[url])
@@ -413,7 +431,7 @@ class FinalReviewTest(RunBase):
         self.put("gba/a.zip")
         self.client.games["a.zip"] = game(1, "Alpha", media=("video", "manuel"))
         bodies = {"http://media/1/video": b"\x00\x00\x00\x18ftypmp42" + b"x" * 8, "http://media/1/manuel": b"%PDF-1.4 x"}
-        self.client.download = lambda url, dest: open(dest, "wb").write(bodies[url])
+        self.client.download = lambda url, dest, limit=None: open(dest, "wb").write(bodies[url])
         self.assertEqual(self.run_scrape(), 0)
         self.assertLessEqual({"scrapes/gba/videos/a.mp4", "scrapes/gba/manuals/a.pdf"}, self.stored())
 
@@ -422,7 +440,7 @@ class FinalReviewTest(RunBase):
         stop = scrape_online.threading.Event()
         self.client.games["a.zip"] = game(1, "Alpha", media=("box-2D", "ss", "sstitle"))
         real = self.client.download
-        self.client.download = lambda url, dest: real(url, dest) or stop.set()
+        self.client.download = lambda url, dest, limit=None: real(url, dest) or stop.set()
         with tempfile.TemporaryDirectory() as tmp:
             status, _ = scrape_online.scrape_rom(self.client, GBA, ("a.zip", 3, '"x-1"'), tmp, set(), stop)
         self.assertEqual(status, "skipped")
@@ -473,6 +491,204 @@ class MatchReplaceTest(RunBase):
         self.assertNotIn("scrapes/gba/fanart/a.png", have)
         self.assertIn("scrapes/gba/covers/b.png", have)
         self.assertEqual(scrape_state.manual_match("gba", "a.zip"), 7)
+
+
+class RoundTwoRunTest(RunBase):
+    def test_same_stem_roms_never_share_a_batch(self):
+        for r in ("Game.zip", "Game.7z", "Other.zip"):
+            self.put(f"gba/{r}")
+            self.client.games[r] = game(len(self.client.games) + 10, r)
+        batches = []
+        real = scrape_online.run_batch
+        with mock.patch.object(scrape_online, "run_batch",
+                               side_effect=lambda c, s, batch, *a, **k: batches.append([r for r, _, _ in batch]) or real(c, s, batch, *a, **k)):
+            self.assertEqual(self.run_scrape(), 0)
+        self.assertEqual(len(batches), 2)
+        for b in batches:
+            stems = [os.path.splitext(r)[0] for r in b]
+            self.assertEqual(len(stems), len(set(stems)))
+        self.assertEqual(set(self.metadata()), {"Game.zip", "Game.7z", "Other.zip"})
+
+    def test_non_object_metadata_entry_stops_that_system(self):
+        self.put("gba/a.zip")
+        self.put("gba/b.zip")
+        self.put("scrapes/gba/metadata.json", b'{"old.zip": null}')
+        with mock.patch.object(scrape_online, "BATCH", 1):
+            self.assertEqual(self.run_scrape(), 1)
+        self.assertEqual(self.client.lookups, ["a.zip"])
+        self.assertEqual(self.metadata(), {"old.zip": None})
+        self.assertIn("metadata.json", self.out.getvalue())
+
+    def test_saved_match_to_a_missing_game_is_forgotten(self):
+        self.put("gba/a.zip")
+        scrape_state.save_match("gba", "a.zip", 999)
+        self.assertEqual(self.run_scrape(), 0)
+        self.assertIsNone(scrape_state.manual_match("gba", "a.zip"))
+        self.assertTrue(scrape_state.is_unknown("gba", "a.zip"))
+        self.assertIn("999", self.out.getvalue())
+        self.assertEqual(self.metadata(), {})
+
+    def test_quota_from_the_first_quota_call(self):
+        self.put("gba/a.zip")
+        self.client.quota_errors = [screenscraper.QuotaExceeded("quota")]
+        self.assertEqual(self.run_scrape(), 1)
+        self.assertEqual(self.client.lookups, [])
+        self.assertIn("tomorrow", self.out.getvalue())
+
+    def test_quota_from_a_download(self):
+        self.put("gba/a.zip")
+        self.client.download_errors["http://media/1/box-2D"] = screenscraper.QuotaExceeded("quota")
+        self.assertEqual(self.run_scrape(), 1)
+        self.assertEqual(self.metadata(), {})
+        self.assertIn("quota", self.out.getvalue())
+        self.assertFalse(scrape_state.is_unknown("gba", "a.zip"))
+
+    def test_431_reported_as_its_own_condition(self):
+        self.put("gba/a.zip")
+        self.client.quota_at = None
+        self.client.errors = {"a.zip": [screenscraper.TooManyUnrecognized("431")]}
+        self.assertEqual(self.run_scrape(), 1)
+        self.assertIn("unrecognized", self.out.getvalue())
+        self.assertNotIn("daily quota", self.out.getvalue())
+
+    def test_quota_stops_a_sibling_roms_downloads(self):
+        self.put("gba/a.zip")
+        self.put("gba/b.zip")
+        self.client.games["a.zip"] = game(1, "Alpha", media=("box-2D", "ss", "sstitle"))
+        raised = threading.Event()
+        events = []
+        real_event = threading.Event
+        real_lookup = self.client.lookup
+
+        def lookup(system_id, rom_name, *a, **k):
+            if rom_name == "b.zip":
+                raised.set()
+                raise screenscraper.QuotaExceeded("quota")
+            return real_lookup(system_id, rom_name, *a, **k)
+        real_download = self.client.download
+
+        def download(url, dest, limit=None):
+            real_download(url, dest)
+            raised.wait(5)
+            events[0].wait(5)  # the run's stop event, set once b.zip's quota error is seen
+        self.client.lookup, self.client.download = lookup, download
+        with mock.patch.object(scrape_online.threading, "Event", side_effect=lambda: events.append(real_event()) or events[-1]):
+            self.assertEqual(self.run_scrape(), 1)
+        self.assertEqual(self.client.downloads, ["http://media/1/box-2D"])
+        self.assertEqual(self.metadata(), {})
+
+    def test_dotted_and_subfolder_rom_keys(self):
+        self.put("gba/Game v1.1 (USA).zip")
+        self.put("gba/Disc 1/Saga.zip")
+        self.client.games["Game v1.1 (USA).zip"] = game(1, "Dotted")
+        self.client.games["Saga.zip"] = game(2, "Saga")
+        self.assertEqual(self.run_scrape(), 0)
+        self.assertEqual(self.metadata(), {"Game v1.1 (USA).zip": {"name": "Dotted"}, "Disc 1/Saga.zip": {"name": "Saga"}})
+        have = self.stored()
+        self.assertLessEqual({"scrapes/gba/covers/Game v1.1 (USA).png", "scrapes/gba/screenshots/Disc 1/Saga.png",
+                              "scrapes/gba/onion/Game v1.1 (USA).png", "scrapes/gba/slot/Disc 1/Saga.png"}, have)
+        self.assertNotIn("scrapes/gba/onion/Disc 1/Saga.png", have)
+
+    def test_videos_get_the_video_size_limit(self):
+        self.put("gba/a.zip")
+        self.client.games["a.zip"] = game(1, "Alpha", media=("box-2D", "video"))
+        limits = {}
+        self.client.download = lambda url, dest, limit=None: limits.update({url: limit}) or open(dest, "wb").write(PNG)
+        self.run_scrape()
+        self.assertEqual(limits, {"http://media/1/box-2D": None, "http://media/1/video": screenscraper.VIDEO_MAX})
+
+
+class MatchRoundTwoTest(RunBase):
+    def run_match(self, rom="a.zip", game_q="7", skip=()):
+        args = SimpleNamespace(system="gba", rom=rom, game=game_q, skip_media=list(skip), dry_run=False)
+        with contextlib.redirect_stdout(self.out), contextlib.redirect_stderr(self.err):
+            return scrape_online.match_command(args)
+
+    def existing(self):
+        self.put("gba/a.zip")
+        self.put("scrapes/gba/metadata.json", json.dumps({"a.zip": {"name": "Wrong", "desc": "old"}}).encode())
+        for key in ("covers/a.png", "fanart/a.png", "custom/a.png", "onion/a.png", "slot/a.png"):
+            self.put(f"scrapes/gba/{key}", b"old " + key.encode())
+        self.client.games["x"] = game(7, "Seven")
+
+    def read(self, key):
+        with open(os.path.join(self.root, key), "rb") as f:
+            return f.read()
+
+    def test_replace_keeps_custom_and_overwrites_onion_and_slot(self):
+        self.existing()
+        self.assertEqual(self.run_match(), 0)
+        have = self.stored()
+        self.assertEqual(self.read("scrapes/gba/custom/a.png"), b"old custom/a.png")
+        self.assertNotIn("scrapes/gba/fanart/a.png", have)
+        self.assertNotEqual(self.read("scrapes/gba/onion/a.png"), b"old onion/a.png")
+        self.assertNotEqual(self.read("scrapes/gba/slot/a.png"), b"old slot/a.png")
+        self.assertEqual(self.metadata(), {"a.zip": {"name": "Seven"}})
+
+    def test_replace_leaves_skipped_types(self):
+        self.existing()
+        self.assertEqual(self.run_match(skip=["fanart"]), 0)
+        self.assertEqual(self.read("scrapes/gba/fanart/a.png"), b"old fanart/a.png")
+        self.assertIn("left as they are", self.confirm.call_args.args[0])
+
+    def test_replace_prompt_lists_files_and_destination(self):
+        self.existing()
+        self.run_match()
+        question = self.confirm.call_args.args[0]
+        self.assertIn(f"{self.root}/scrapes/", question)
+        self.assertIn("4 file(s)", question)
+        self.assertIn("scrapes/gba/fanart/a.png", self.out.getvalue())
+        self.assertNotIn("scrapes/gba/custom/a.png", self.out.getvalue())
+
+    def test_match_without_entry_says_existing_media_is_kept(self):
+        self.put("gba/a.zip")
+        self.put("scrapes/gba/covers/a.png", b"cover")
+        self.client.games["x"] = game(7, "Seven")
+        self.run_match()
+        self.assertIn("1 media file(s) already there are kept", self.confirm.call_args.args[0])
+
+    def test_replace_warns_about_same_stem_roms(self):
+        self.existing()
+        self.put("gba/a.7z")
+        self.run_match()
+        self.assertIn("a.7z", self.out.getvalue())
+
+    def test_metadata_write_failure_deletes_nothing_and_names_the_match_rerun(self):
+        self.existing()
+        with mock.patch.object(s3, "put_text", side_effect=OSError("disk gone")), self.assertRaises(SystemExit):
+            self.run_match()
+        self.assertIn("scrapes/gba/fanart/a.png", self.stored())
+        self.assertIn("sync-roms scrape match gba a.zip 7", self.err.getvalue())
+        self.assertIsNone(scrape_state.manual_match("gba", "a.zip"))
+
+    def test_replace_with_unknown_game_keeps_old_entry_and_media(self):
+        self.existing()
+        self.assertEqual(self.run_match(game_q="999"), 1)
+        self.assertEqual(self.metadata(), {"a.zip": {"name": "Wrong", "desc": "old"}})
+        self.assertIn("scrapes/gba/fanart/a.png", self.stored())
+        self.assertIn("no game 999", self.out.getvalue() + self.err.getvalue())
+
+    def test_replace_with_failed_scrape_keeps_old_entry_and_media(self):
+        self.existing()
+        self.client.fail_urls = {"http://media/7/ss"}
+        self.assertEqual(self.run_match(), 1)
+        self.assertEqual(self.metadata(), {"a.zip": {"name": "Wrong", "desc": "old"}})
+        self.assertEqual(self.read("scrapes/gba/fanart/a.png"), b"old fanart/a.png")
+        self.assertIsNone(scrape_state.manual_match("gba", "a.zip"))
+        self.assertIn("sync-roms scrape match gba a.zip 7", self.out.getvalue())
+
+    def test_unknown_game_id_is_not_saved_or_retried(self):
+        self.put("gba/a.zip")
+        self.assertEqual(self.run_match(game_q="999"), 1)
+        self.assertIsNone(scrape_state.manual_match("gba", "a.zip"))
+        self.assertFalse(scrape_state.is_unknown("gba", "a.zip"))
+        self.assertIn("ScreenScraper has no game 999", self.out.getvalue() + self.err.getvalue())
+
+    def test_quota_while_searching_is_guided(self):
+        self.put("gba/a.zip")
+        self.client.search = mock.Mock(side_effect=screenscraper.QuotaExceeded("quota"))
+        self.assertEqual(self.run_match(game_q="Some Name"), 1)
+        self.assertIn("tomorrow", self.out.getvalue())
 
 
 class SystemsTest(RunBase):

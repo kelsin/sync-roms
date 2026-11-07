@@ -4,6 +4,8 @@ import hashlib
 import http.client
 import json
 import os
+import shlex
+import shutil
 import tempfile
 import threading
 import time
@@ -48,11 +50,13 @@ def hash_file(system, rom, size, mtime):
     return hashes
 
 
-def match(client, system, rom, size, etag):
+def match(client, system, rom, size, etag, game_id=None):
     """(game id, how) for a ROM; how is "manual", "hash" or "name+size". Raises screenscraper.NotFound.
 
     One lookup sends the hashes, name and size together; it counts as "hash" only when the ROM ScreenScraper
-    matched carries one of the hashes sent."""
+    matched carries one of the hashes sent. game_id: a match given for this run only (`scrape match`)."""
+    if game_id:
+        return game_id, "manual"
     name = system["bucket"]
     saved = scrape_state.manual_match(name, rom)
     if saved is not None:
@@ -97,6 +101,7 @@ CREDENTIALS = ("screenscraper_user", "screenscraper_password", "screenscraper_de
 ROM_ERRORS = (screenscraper.ApiError, OSError, ValueError, http.client.HTTPException)
 IMAGE_MAGIC = ((b"\x89PNG", ".png"), (b"\xff\xd8\xff", ".jpg"), (b"GIF8", ".gif"))
 SHOWN = 10
+SCRAPER_TYPES = set(screenscraper.MEDIA_MAP.values()) | {scrape_plan.ONION_TYPE, scrape_plan.SLOT_TYPE}  # never custom/
 
 
 class _RomClient:
@@ -115,8 +120,8 @@ class _RomClient:
     def search(self, system_id, name):
         return _retry(self.client.search, system_id, name)
 
-    def download(self, url, dest):
-        return _retry(self.client.download, url, dest)
+    def download(self, url, dest, **kwargs):
+        return _retry(self.client.download, url, dest, **kwargs)
 
 
 def _retry(call, *args, **kwargs):
@@ -234,15 +239,17 @@ def _media_ext(path, mtype):
     return next((ext for magic, ext in IMAGE_MAGIC if head.startswith(magic)), None)
 
 
-def scrape_rom(client, system, item, tmp, skip, stop):
-    """("done", (how, metadata, {media type: local file})), ("unknown", None), ("failed", reason), ("quota", None)
-    or ("skipped", None) when the run stopped (quota or Ctrl-C) before this ROM finished."""
+def scrape_rom(client, system, item, tmp, skip, stop, game_id=None):
+    """("done", (how, metadata, {media type: local file})), ("unknown", how: "manual" when the matched game id doesn't
+    exist), ("failed", reason), ("quota", the QuotaExceeded) or ("skipped", None) when the run stopped (quota or Ctrl-C)
+    before this ROM finished. game_id: see match()."""
     rom, size, etag = item
     if stop.is_set():
         return "skipped", None
     rc = _RomClient(client)
+    how = None
     try:
-        game_id, how = match(rc, system, rom, size, etag)
+        game_id, how = match(rc, system, rom, size, etag, game_id)
         raw = rc.found if rc.found is not None else rc.game(game_id)
         if screenscraper.is_notgame(raw):
             raise screenscraper.NotFound("not a game")
@@ -260,18 +267,18 @@ def scrape_rom(client, system, item, tmp, skip, stop):
             dest = s3.safe_join(rom_tmp, f"{mtype}/{stem}")
             os.makedirs(os.path.dirname(dest), exist_ok=True)
             try:
-                rc.download(url, dest)
+                rc.download(url, dest, **({"limit": screenscraper.VIDEO_MAX} if mtype == "videos" else {}))
             except screenscraper.NotFound:  # ScreenScraper has no such file: not a failure
                 continue
             ext = _media_ext(dest, mtype)
             if ext:
                 files[mtype] = dest + ext
                 os.replace(dest, files[mtype])
-    except screenscraper.QuotaExceeded:
+    except screenscraper.QuotaExceeded as e:
         stop.set()
-        return "quota", None
+        return "quota", e
     except screenscraper.NotFound:
-        return "unknown", None
+        return "unknown", how
     except ROM_ERRORS as e:
         return "failed", _reason(e)
     return "done", (how, meta, files)
@@ -288,9 +295,36 @@ def _uploaded(jobs, have):
     return all(j[0] in have and (len(j) > 3 or have[j[0]] == j[2]) for j in jobs)
 
 
-def _storage_fail(what, e):
+RERUN = "sync-roms scrape"
+
+
+def _storage_fail(what, e, rerun):
     ui.fail(f"{what} failed ({type(e).__name__}). ROMs recorded in earlier batches are complete; "
-            "run `sync-roms scrape` again to continue.", 3)
+            f"run `{rerun}` again to continue.", 3)
+
+
+def _quota_message(e, rerun):
+    if isinstance(e, screenscraper.TooManyUnrecognized):
+        why = "ScreenScraper takes no more unrecognized ROMs from you today (HTTP 431)"
+    else:
+        why = "ScreenScraper's daily quota is used up"
+    return f"⏳ {why}. Everything scraped so far is saved; run `{rerun}` again tomorrow to continue where it stopped."
+
+
+def _batches(items):
+    """items in batches of at most BATCH with no two ROMs of the same stem (they share media files) in one batch."""
+    pending = list(items)
+    while pending:
+        batch, stems, rest = [], set(), []
+        for item in pending:
+            stem = os.path.splitext(item[0])[0]
+            if len(batch) < BATCH and stem not in stems:
+                batch.append(item)
+                stems.add(stem)
+            else:
+                rest.append(item)
+        yield batch
+        pending = rest
 
 
 def _media_keys(listing, system, stem):
@@ -305,33 +339,45 @@ def _media_keys(listing, system, stem):
     return out
 
 
-def run_batch(client, system, batch, skip, threads, shrink, outcomes, listing, replace=False):
-    """Scrape, upload and record one batch of a system's ROMs. Returns (failures, quota hit).
+def run_batch(client, system, batch, skip, threads, shrink, outcomes, listing, replace=False, forced=None, rerun=RERUN):
+    """Scrape, upload and record one batch of a system's ROMs. Returns (failures, the QuotaExceeded hit or None,
+    whether the system's remaining batches must be skipped).
 
     listing: {key: size} of scrapes/<system>/, kept up to date with what this batch uploads. Media types a ROM already
     has there are neither downloaded nor overwritten, unless replace: then the ROMs' metadata entries are replaced
-    (not merged) and their old media files are overwritten or deleted.
+    (not merged) and their old scraper media (never custom/ or skipped types) is overwritten, or deleted after the
+    entry is written. forced: {ROM: game id} matches given for this run only; rerun: the command that continues it.
     """
     name = system["bucket"]
+    forced = forced or {}
     stop = threading.Event()
     failed = 0
     index = scrape_plan.scrape_index(listing)
     kept = {rom: set() if replace else set(index.get(os.path.splitext(rom)[0], ())) for rom, _, _ in batch}
-    with tempfile.TemporaryDirectory() as tmp:
+    tmp = tempfile.mkdtemp()
+    try:
         ex = ThreadPoolExecutor(threads)
         try:
-            futures = [ex.submit(scrape_rom, client, system, item, tmp, skip | kept[item[0]], stop) for item in batch]
+            futures = [ex.submit(scrape_rom, client, system, item, tmp, skip | kept[item[0]], stop, forced.get(item[0]))
+                       for item in batch]
             results = [f.result() for f in futures]
         except KeyboardInterrupt:
             stop.set()
-            ex.shutdown(wait=False, cancel_futures=True)
+            ex.shutdown(wait=True, cancel_futures=True)  # the workers stop at their next request
             raise
         ex.shutdown()
-        quota_hit = any(status == "quota" for status, _ in results)
+        quota = next((payload for status, payload in results if status == "quota"), None)
         jobs = {}  # ROM -> its upload jobs
         done = {}
         for (rom, _, _), (status, payload) in zip(batch, results):
-            if status == "unknown":
+            if status == "unknown" and rom in forced:
+                outcomes[rom] = None
+                print(ui.red(f"  ❌ ScreenScraper has no game {forced[rom]}"))
+            elif status == "unknown":
+                if payload == "manual":  # the saved match's game is gone: don't retry it on every run
+                    print(ui.yellow(f"  ⚠️  {name}/{rom}: ScreenScraper has no game {scrape_state.manual_match(name, rom)}; "
+                                    "forgot that saved match"))
+                    scrape_state.forget_match(name, rom)
                 scrape_state.mark_unknown(name, rom)
                 outcomes[rom] = None
                 print(ui.dim(f"     ❔ {name}/{rom}: not on ScreenScraper"))
@@ -354,48 +400,52 @@ def run_batch(client, system, batch, skip, threads, shrink, outcomes, listing, r
             upload_failed = upload.run_uploads(todo) if todo else 0
             have = s3.list_sizes(f"{scrape_plan.SCRAPES}/{name}/") if upload_failed else {}
         except s3.ERRORS as e:
-            _storage_fail(f"Uploading {name} media", e)
+            _storage_fail(f"Uploading {name} media", e, rerun)
         if upload_failed:
             for rom in [r for r in done if not _uploaded(jobs[r], have)]:
                 failed += 1
                 del done[rom]
                 print(ui.yellow(f"  ⚠️  {name}/{rom}: its media didn't all upload; skipped"))
-        for rom in done:
-            listing.update((j[0], j[2]) for j in jobs[rom])
-    if replace and done:
-        stale = [k for rom in done for k in _media_keys(listing, name, os.path.splitext(rom)[0])
-                 if k not in {j[0] for j in jobs[rom]}]
-        try:
-            errors = s3.delete_keys(stale) if stale else []
-        except s3.ERRORS as e:
-            _storage_fail(f"Deleting old {name} media", e)
-        for k in stale:
-            listing.pop(k, None)
-        for e in errors:
-            print(ui.yellow(f"  ⚠️  {e.get('Key')}: couldn't delete the old file"))
-    if done:
-        try:
-            merged = scrape_plan.merge_metadata(load_metadata(name), {} if replace else
-                                                {rom: meta for rom, (_, meta) in done.items()})
-            if replace:
-                merged.update((rom, dict(meta)) for rom, (_, meta) in done.items())
-            s3.put_text(metadata_key(name), scrape_plan.dump_json(merged))
-        except ValueError as e:
-            print(ui.yellow(f"  ⚠️  {e}; {len(done)} ROM(s) not recorded"))
-            return failed + len(done), quota_hit
-        except s3.ERRORS as e:
-            _storage_fail(f"Writing {metadata_key(name)}", e)
-        for rom, (how, _) in done.items():
-            outcomes[rom] = how
-            if scrape_state.is_unknown(name, rom):  # found after all (a retry, or a manual match)
-                scrape_state.clear_unknown(name, rom)
-        print(ui.green(f"  ✅ {name}: {len(done)} ROM(s) scraped"))
-    return failed, quota_hit
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+    if not done:
+        return failed, quota, False
+    try:
+        merged = scrape_plan.merge_metadata(load_metadata(name), {} if replace else
+                                            {rom: meta for rom, (_, meta) in done.items()})
+        if replace:
+            merged.update((rom, dict(meta)) for rom, (_, meta) in done.items())
+        s3.put_text(metadata_key(name), scrape_plan.dump_json(merged))
+    except (ValueError, TypeError) as e:
+        why = e if isinstance(e, ValueError) else f"{metadata_key(name)} has an entry that isn't an object"
+        print(ui.yellow(f"  ⚠️  {why}; {len(done)} ROM(s) not recorded, skipping the rest of {name}"))
+        return failed + len(done), quota, True
+    except s3.ERRORS as e:
+        _storage_fail(f"Writing {metadata_key(name)}", e, rerun)
+    for rom, (how, _) in done.items():
+        uploaded = {j[0] for j in jobs[rom]}
+        listing.update((j[0], j[2]) for j in jobs[rom])
+        if replace:  # the new entry is written: the old game's other scraper media goes (a failed delete only orphans it)
+            stale = [k for k, t in _media_keys(listing, name, os.path.splitext(rom)[0]).items()
+                     if t in SCRAPER_TYPES - skip and k not in uploaded]
+            try:
+                errors = s3.delete_keys(stale) if stale else []
+            except s3.ERRORS as e:
+                _storage_fail(f"Deleting old {name} media", e, rerun)
+            for k in stale:
+                listing.pop(k, None)
+            for e in errors:
+                print(ui.yellow(f"  ⚠️  {e.get('Key')}: couldn't delete the old file"))
+        outcomes[rom] = how
+        if scrape_state.is_unknown(name, rom):  # found after all (a retry, or a manual match)
+            scrape_state.clear_unknown(name, rom)
+    print(ui.green(f"  ✅ {name}: {len(done)} ROM(s) scraped"))
+    return failed, quota, False
 
 
-def run_scrape(client, systems, todo, skip, ask=True, replace=False):
+def run_scrape(client, systems, todo, skip, ask=True, replace=False, forced=None, rerun=RERUN, outcomes=None):
     """Confirm (unless not ask), then scrape todo ({system: [(ROM, size, etag)]}) in batches. Returns the exit code.
-    replace: the ROMs' metadata entries and media are replaced (see run_batch)."""
+    replace, forced, rerun: see run_batch. outcomes: filled with {system: {ROM: how, or None when unknown}}."""
     count = sum(len(v) for v in todo.values())
     try:
         listings = {name: s3.list_sizes(f"{scrape_plan.SCRAPES}/{name}/") for name in todo}
@@ -410,8 +460,8 @@ def run_scrape(client, systems, todo, skip, ask=True, replace=False):
         return 0
     try:
         quota = _retry(client.quota)
-    except screenscraper.QuotaExceeded:
-        print(ui.yellow("⏳ ScreenScraper's daily quota is used up; run this again tomorrow."))
+    except screenscraper.QuotaExceeded as e:
+        print(ui.yellow(_quota_message(e, rerun)))
         return 1
     except screenscraper.ApiError as e:
         ui.fail(f"{e}", 3)
@@ -420,33 +470,36 @@ def run_scrape(client, systems, todo, skip, ask=True, replace=False):
     shrink = scrape_plan.can_shrink()
     if not shrink:
         print(ui.yellow("  ⚠️  Onion box art and Slot labels need Pillow or macOS sips to resize images; not making them"))
-    outcomes, failed, quota_hit = {}, 0, False
+    outcomes = {} if outcomes is None else outcomes
+    failed, quota_hit = 0, None
     for name, items in sorted(todo.items()):
         outcomes[name] = {}
-        for i in range(0, len(items), BATCH):
-            print(ui.bold(f"\n🔎 {name}: ROMs {i + 1}-{min(i + BATCH, len(items))} of {len(items)}"))
-            n, quota_hit = run_batch(client, systems[name], items[i:i + BATCH], skip, max(1, quota.max_threads),
-                                     shrink, outcomes[name], listings[name], replace)
+        started = 0
+        for batch in _batches(items):
+            print(ui.bold(f"\n🔎 {name}: ROMs {started + 1}-{started + len(batch)} of {len(items)}"))
+            started += len(batch)
+            n, quota_hit, halt = run_batch(client, systems[name], batch, skip, max(1, quota.max_threads), shrink,
+                                           outcomes[name], listings[name], replace, forced, rerun)
             failed += n
-            if quota_hit:
+            if quota_hit or halt:
                 break
         if quota_hit:
             break
     print(ui.bold("\n📋 Results"))
     print(report({name: [r for r, _, _ in items] for name, items in todo.items()}, outcomes))
     if quota_hit:
-        print(ui.yellow("\n⏳ ScreenScraper's daily quota is used up. Everything scraped so far is saved; "
-                        "run `sync-roms scrape` again tomorrow to continue where it stopped."))
+        print(ui.yellow("\n" + _quota_message(quota_hit, rerun)))
         return 1
-    print(ui.green("\n🎉 Done!") if not failed else ui.red(f"\n⚠️  Done with {failed} failure(s)"))
+    print(ui.green("\n🎉 Done!") if not failed else ui.red(f"\n⚠️  Done with {failed} failure(s); run `{rerun}` to try again"))
     return 1 if failed else 0
 
 
 def _check_skip(skip):
     skip = set(skip or ())
-    bad = skip - scrape_plan.MEDIA_TYPES
+    types = set(screenscraper.MEDIA_MAP.values())
+    bad = skip - types
     if bad:
-        ui.fail(f"Unknown media type(s): {', '.join(sorted(bad))}; choose from {', '.join(sorted(scrape_plan.MEDIA_TYPES))}", 2)
+        ui.fail(f"Unknown media type(s): {', '.join(sorted(bad))}; choose from {', '.join(sorted(types))}", 2)
     return skip
 
 
@@ -529,6 +582,7 @@ def match_command(args):
     if args.rom not in listing:
         ui.fail(f"No {name}/{args.rom} in {s3.location()}", 2)
     client = make_client()
+    rerun = "sync-roms scrape match " + shlex.join([name, args.rom, args.game])
     try:
         game_id = resolve_manual(_RomClient(client), system, args.game)
     except screenscraper.NotFound as e:
@@ -536,25 +590,51 @@ def match_command(args):
             print(ui.yellow("👋 Cancelled."))
             return 0
         ui.fail(f"ScreenScraper has no game for {args.game!r}", 1)
-    except (screenscraper.ApiError, screenscraper.QuotaExceeded) as e:
+    except screenscraper.QuotaExceeded as e:
+        print(ui.yellow(_quota_message(e, rerun)))
+        return 1
+    except screenscraper.ApiError as e:
         ui.fail(f"{e}", 3)
+    rerun = "sync-roms scrape match " + shlex.join([name, args.rom, str(game_id)])
     if getattr(args, "dry_run", False):
         print(ui.yellow(f"🧪 Dry run — would match {name}/{args.rom} to ScreenScraper game {game_id} and scrape it"))
         return 0
+    stem = os.path.splitext(args.rom)[0]
     try:
         replace = args.rom in load_metadata(name)
+        media = s3.list_sizes(f"{scrape_plan.SCRAPES}/{name}/")
     except ValueError:
         ui.fail(f"{metadata_key(name)} isn't valid JSON", 3)
     except s3.ERRORS as e:
         ui.fail(f"{e}", 3)
-    question = (f"🔁 Replace the metadata and media of {name}/{args.rom} with ScreenScraper game {game_id}? "
-                "Its old media files are overwritten or deleted." if replace else
-                f"🖼️  Scrape {name}/{args.rom} as ScreenScraper game {game_id} and write its media and metadata to "
-                f"{s3.location()}/{scrape_plan.SCRAPES}/ ?")
+    where = f"{s3.location()}/{scrape_plan.SCRAPES}/"
+    shared = sorted(r for r in listing if r != args.rom and os.path.splitext(r)[0] == stem)
+    if shared:
+        print(ui.yellow(f"⚠️  {name}/{args.rom} shares its media files with {', '.join(shared)}"))
+    if replace:
+        old = sorted(k for k, t in _media_keys(media, name, stem).items() if t in SCRAPER_TYPES - skip)
+        for k in old[:SHOWN]:
+            print(ui.dim(f"     {k}"))
+        if len(old) > SHOWN:
+            print(ui.dim(f"     … and {len(old) - SHOWN} more"))
+        left = "custom/" + (f" and the skipped types ({', '.join(sorted(skip))})" if skip else "")
+        question = (f"🔁 Replace the metadata entry and media of {name}/{args.rom} in {where} with ScreenScraper game "
+                    f"{game_id}? {len(old)} file(s) listed above are overwritten or deleted; {left} left as they are.")
+    else:
+        kept = len(scrape_plan.scrape_index(media).get(stem, ()))
+        note = f"; the {kept} media file(s) already there are kept" if kept else ""
+        question = (f"🖼️  Scrape {name}/{args.rom} as ScreenScraper game {game_id} and write its media and metadata to "
+                    f"{where}{note} ?")
     if not ui.confirm(question, default=False):
         print(ui.yellow("👋 Cancelled."))
         return 0
-    scrape_state.save_match(name, args.rom, game_id)
     print(f"🔗 {name}/{args.rom} → ScreenScraper game {game_id}")
     size, etag = listing[args.rom]
-    return run_scrape(client, {name: system}, {name: [(args.rom, size, etag)]}, skip, ask=False, replace=replace)
+    outcomes = {}
+    code = run_scrape(client, {name: system}, {name: [(args.rom, size, etag)]}, skip, ask=False, replace=replace,
+                      forced={args.rom: game_id}, rerun=rerun, outcomes=outcomes)
+    how = outcomes.get(name, {}).get(args.rom, "")
+    if how == "manual":  # saved only once the ROM is scraped as that game
+        scrape_state.save_match(name, args.rom, game_id)
+        return code
+    return code or 1
