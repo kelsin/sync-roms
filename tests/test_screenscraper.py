@@ -66,6 +66,52 @@ class ParseGameTests(unittest.TestCase):
         raw = {"dates": [{"region": "jp", "text": "1998"}]}
         self.assertEqual(ss.parse_game(raw, ("jp",))[0]["releasedate"], "1998-01-01")
 
+    def test_response_without_a_game_parses_to_nothing(self):
+        raw = {"response": {"serveurs": {"x": {"text": "1"}}, "ssuser": {"id": "me"}, "noms": [{"region": "wor", "text": "No"}]}}
+        self.assertEqual(ss.parse_game(raw, ()), ({}, {}))
+
+    def test_notgame_placeholder_parses_to_nothing(self):
+        raw = {"id": "9", "noms": [{"region": "wor", "text": ss.NOTGAME}],
+               "medias": [{"type": "ss", "region": "wor", "url": "https://m.example/ss.png"}]}
+        self.assertEqual(ss.parse_game(raw, ()), ({}, {}))
+        self.assertTrue(ss.is_notgame(raw))
+        self.assertFalse(ss.is_notgame(self.raw()))
+
+    def test_malformed_media_entries_skipped(self):
+        raw = {"medias": [{"type": ["ss"], "url": "u"}, {"type": {"a": 1}, "url": "u"},
+                          {"type": "ss", "region": ["wor"], "url": "https://m.example/ss.png"}]}
+        self.assertEqual(ss.parse_game(raw, ())[1], {"screenshots": "https://m.example/ss.png"})
+
+    def test_rating_clamped_and_finite(self):
+        for note, want in (("40", 1.0), ("-5", None), ("nan", None), ("inf", None), ("10", 0.5)):
+            with self.subTest(note=note):
+                self.assertEqual(ss.parse_game({"note": {"text": note}}, ())[0].get("rating"), want)
+
+    def test_video_prefers_region(self):
+        raw = {"medias": [{"type": "video", "region": "jp", "url": "https://m.example/jp.mp4"},
+                          {"type": "video", "region": "us", "url": "https://m.example/us.mp4"}]}
+        self.assertEqual(ss.parse_game(raw, ("us",))[1]["videos"], "https://m.example/us.mp4")
+
+    def test_marquee_prefers_wheel_hd_then_wheel_then_marquee(self):
+        def media(*types):
+            return {"medias": [{"type": t, "region": "wor", "url": f"https://m.example/{t}.png"} for t in types]}
+        self.assertEqual(ss.parse_game(media("marquee", "wheel", "wheel-hd"), ())[1]["marquees"], "https://m.example/wheel-hd.png")
+        self.assertEqual(ss.parse_game(media("marquee", "wheel"), ())[1]["marquees"], "https://m.example/wheel.png")
+        self.assertEqual(ss.parse_game(media("wheel", "marquee"), ())[1]["marquees"], "https://m.example/wheel.png")
+
+    def test_to_int_is_public(self):
+        self.assertEqual((ss.to_int(" 7 "), ss.to_int("x"), ss.to_int(None, 1)), (7, 0, 1))
+
+    def test_rom_hash_matches(self):
+        sent = {"md5": "abcdef", "sha1": "0123", "crc": "0000BEEF"}
+        self.assertTrue(ss.rom_hash_matches({"rom": {"rommd5": "ABCDEF"}}, sent))
+        self.assertTrue(ss.rom_hash_matches({"roms": [{"romcrc": "beef"}]}, sent))
+        self.assertTrue(ss.rom_hash_matches({"rom": {"romsha1": {"text": "0123"}}}, sent))
+        self.assertFalse(ss.rom_hash_matches({"rom": {"rommd5": "999"}}, sent))
+        self.assertFalse(ss.rom_hash_matches({"id": "1"}, sent))
+        self.assertFalse(ss.rom_hash_matches({"rom": {"rommd5": "abcdef"}}, {}))
+        self.assertFalse(ss.rom_hash_matches({"rom": ["junk"], "roms": "junk"}, sent))
+
 
 class ClientTests(unittest.TestCase):
     def test_lookup_returns_game(self):
@@ -150,6 +196,35 @@ class ClientTests(unittest.TestCase):
         body = json.dumps({"response": {"jeux": [{"id": "5", "noms": [{"region": "us", "text": "Foo"}]}, {"x": 1}]}})
         self.assertEqual(client(lambda r, timeout=None: Resp(body.encode())).search(12, "foo"), [(5, "Foo")])
         self.assertEqual(client(lambda r, timeout=None: fixture("jeuinfos_found.json")).game(12345)["id"], "12345")
+
+    def test_response_without_game_or_id_is_an_error(self):
+        for body in ({"response": {"serveurs": {}, "ssuser": {"id": "me"}}},
+                     {"response": {"jeu": {"noms": [{"region": "wor", "text": "No id"}]}}},
+                     {"response": {"jeu": {"id": "0", "noms": [{"region": "wor", "text": "Zero"}]}}},
+                     {"response": {"jeu": {"id": True}}}):
+            opener = lambda r, timeout=None, body=body: Resp(json.dumps(body).encode())  # noqa: E731
+            with self.subTest(body=body):
+                with self.assertRaises(ss.ApiError):
+                    client(opener).lookup(12, "g.gba", 1)
+                with self.assertRaises(ss.ApiError):
+                    client(opener).game(5)
+
+    def test_malformed_bodies_raise_api_error_or_parse_empty(self):
+        for body in ([1, 2], {"response": [1]}, {"response": {"jeu": [1]}}, {"response": {"ssuser": [1], "jeux": {"a": 1}}}, "text"):
+            opener = lambda r, timeout=None, body=body: Resp(json.dumps(body).encode())  # noqa: E731
+            with self.subTest(body=body):
+                with self.assertRaises(ss.ApiError):
+                    client(opener).lookup(12, "g.gba", 1)
+                self.assertEqual(client(opener).quota(), ss.Quota(1, 0, 0))
+                self.assertEqual(client(opener).search(12, "x"), [])
+
+    def test_download_not_found_text_raises_not_found(self):
+        with tempfile.TemporaryDirectory() as d:
+            dest = os.path.join(d, "a.png")
+            with self.assertRaises(ss.NotFound):
+                client(lambda r, timeout=None: fixture("jeuinfos_not_found.txt")).download("https://m.example/a.png", dest)
+            self.assertFalse(os.path.exists(dest))
+            self.assertFalse(os.path.exists(dest + ".part"))
 
     def test_download_writes_atomically(self):
         with tempfile.TemporaryDirectory() as d:

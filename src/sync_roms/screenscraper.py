@@ -6,6 +6,7 @@ parsing skips anything missing instead of failing.
 """
 import http.client
 import json
+import math
 import os
 import urllib.error
 import urllib.parse
@@ -29,8 +30,9 @@ MEDIA_MAP = {"box-2D": "covers", "box-3D": "3dboxes", "box-2D-back": "backcovers
              "mixrbv1": "miximages", "mixrbv2": "miximages"}
 FALLBACK_NAME_REGIONS = ("wor", "us", "ss", "eu", "jp")
 FALLBACK_MEDIA_REGIONS = ("wor", "us", "eu", "jp", "cus")
+TYPE_PREFERENCE = ("wheel-hd", "wheel", "marquee")  # several types fill marquees: in a region tie, the first listed wins
+ROM_HASHES = (("md5", "rommd5"), ("sha1", "romsha1"), ("crc", "romcrc"))  # what we send -> the matched ROM's field
 LANGUAGES = ("en",)
-VIDEO_TYPE = "videos"
 NOTGAME = "ZZZ(NOTGAME)"
 RATING_MAX = 20
 TIMEOUT = 60
@@ -59,7 +61,9 @@ class RateLimited(ApiError):
     pass
 
 
-def _int(v, default=0):
+def to_int(v, default=0):
+    if isinstance(v, bool):
+        return default
     try:
         return int(str(v).strip())
     except (TypeError, ValueError):
@@ -76,12 +80,32 @@ def _dicts(v):
     return [x for x in v if isinstance(x, dict)] if isinstance(v, list) else []
 
 
+def _dict(v):
+    return v if isinstance(v, dict) else {}
+
+
 def _unwrap(data):
-    """The game dict from a whole response, or from the game dict itself."""
-    if isinstance(data, dict):
-        data = data.get("response", data)
-        data = data.get("jeu", data) if isinstance(data, dict) else data
-    return data if isinstance(data, dict) else {}
+    """The game dict from a whole response ({} when it holds none), or from the game dict itself."""
+    data = _dict(data)
+    if "response" in data:
+        return _dict(_dict(data["response"]).get("jeu"))
+    return _dict(data["jeu"]) if "jeu" in data else data
+
+
+def is_notgame(raw):
+    """Whether a game dict is ScreenScraper's ZZZ(NOTGAME) placeholder."""
+    return NOTGAME in (_text(n) for n in _dicts(_unwrap(raw).get("noms")))
+
+
+def rom_hash_matches(raw, hashes):
+    """Whether the ROM a lookup matched (jeu.rom, or one of jeu.roms) has one of the hashes we sent."""
+    raw = _unwrap(raw)
+    roms = ([raw["rom"]] if isinstance(raw.get("rom"), dict) else []) + _dicts(raw.get("roms"))
+    for ours, theirs in ROM_HASHES:
+        sent = str(hashes.get(ours) or "").lower().lstrip("0")
+        if sent and any(_text(r.get(theirs)).lower().lstrip("0") == sent for r in roms):
+            return True
+    return False
 
 
 def _pick(items, key, prefs, fallback=True):
@@ -105,10 +129,12 @@ def _release_date(text):
 def parse_game(raw, regions):
     """(metadata fields as parse_gamelist makes them, {ES-DE media folder: url}) from a game dict."""
     raw = _unwrap(raw)
+    if is_notgame(raw):
+        return {}, {}
     prefs = tuple(regions) + FALLBACK_NAME_REGIONS
     meta = {}
     name = _pick(raw.get("noms"), "region", prefs)
-    if name and name != NOTGAME:
+    if name:
         meta["name"] = name
     desc = _pick(raw.get("synopsis"), "langue", LANGUAGES + ("wor",))
     if desc:
@@ -122,9 +148,9 @@ def parse_game(raw, regions):
             meta["genre"] = genre
             break
     try:
-        rating = round(float(_text(raw.get("note"))) / RATING_MAX, 2)
-        if rating > 0:
-            meta["rating"] = rating
+        rating = float(_text(raw.get("note"))) / RATING_MAX
+        if math.isfinite(rating) and rating > 0:
+            meta["rating"] = round(min(rating, 1.0), 2)
     except ValueError:
         pass
     date = _release_date(_pick(raw.get("dates"), "region", prefs))
@@ -132,15 +158,16 @@ def parse_game(raw, regions):
         meta["releasedate"] = date
 
     media_prefs = tuple(regions) + FALLBACK_MEDIA_REGIONS
-    best = {}  # folder -> (rank, url)
+    best = {}  # folder -> ((region rank, type rank), url)
     for m in _dicts(raw.get("medias")):
-        folder = MEDIA_MAP.get(m.get("type"))
-        url = m.get("url")
+        mtype, url, region = m.get("type"), m.get("url"), m.get("region")
+        folder = MEDIA_MAP.get(mtype) if isinstance(mtype, str) else None
         if not folder or not isinstance(url, str) or not url:
             continue
-        region = m.get("region")
-        rank = media_prefs.index(region) if region in media_prefs else len(media_prefs) + (region is not None)
-        if folder not in best or (folder != VIDEO_TYPE and rank < best[folder][0]):
+        region = region if isinstance(region, str) else None
+        rank = (media_prefs.index(region) if region in media_prefs else len(media_prefs) + (region is not None),
+                TYPE_PREFERENCE.index(mtype) if mtype in TYPE_PREFERENCE else 0)
+        if folder not in best or rank < best[folder][0]:
             best[folder] = (rank, url)
     return meta, {f: u for f, (_, u) in best.items()}
 
@@ -187,42 +214,46 @@ class Client:
             raise ApiError("ScreenScraper returned an unreadable response") from None
 
     def quota(self):
-        data = self._get(EP_QUOTA)
-        user = data.get("response", {}).get("ssuser", {}) if isinstance(data, dict) else {}
-        user = user if isinstance(user, dict) else {}
-        return Quota(_int(user.get("maxthreads"), 1), _int(user.get("requeststoday")),
-                     _int(user.get("maxrequestsperday")))
+        user = _dict(_dict(_dict(self._get(EP_QUOTA)).get("response")).get("ssuser"))
+        return Quota(to_int(user.get("maxthreads"), 1), to_int(user.get("requeststoday")),
+                     to_int(user.get("maxrequestsperday")))
+
+    @staticmethod
+    def _game(data):
+        """The game in a jeuInfos response; ApiError when it holds no game with a positive id."""
+        game = _unwrap(data)
+        if to_int(game.get("id")) <= 0:
+            raise ApiError("ScreenScraper returned no game")
+        return game
 
     def lookup(self, system_id, rom_name, size, md5=None, sha1=None, crc=None):
         params = {"systemeid": system_id, "romnom": rom_name, "romtaille": size}
         params.update({k: v for k, v in (("md5", md5), ("sha1", sha1), ("crc", crc)) if v})
-        game = _unwrap(self._get(EP_GAME, **params))
-        if not game:
-            raise NotFound("not found")
-        return game
+        return self._game(self._get(EP_GAME, **params))
 
     def game(self, game_id):
-        game = _unwrap(self._get(EP_GAME, gameid=game_id))
-        if not game:
-            raise NotFound("not found")
-        return game
+        return self._game(self._get(EP_GAME, gameid=game_id))
 
     def search(self, system_id, name):
-        data = self._get(EP_SEARCH, systemeid=system_id, recherche=name)
-        games = data.get("response", {}).get("jeux", []) if isinstance(data, dict) else []
+        games = _dict(_dict(self._get(EP_SEARCH, systemeid=system_id, recherche=name)).get("response")).get("jeux")
         out = []
         for g in _dicts(games):
             title = _pick(g.get("noms"), "region", FALLBACK_NAME_REGIONS)
-            if g.get("id") and title and title != NOTGAME:
-                out.append((_int(g["id"]), title))
+            if to_int(g.get("id")) > 0 and title and title != NOTGAME:
+                out.append((to_int(g["id"]), title))
         return out
 
     def download(self, url, dest):
+        """Save a media file at dest. Raises NotFound when ScreenScraper answers with its not-found text."""
         part = dest + ".part"
         try:
             with self._open(url) as resp, open(part, "wb") as f:
-                while chunk := resp.read(1 << 16):
+                chunk = resp.read(1 << 16)
+                if chunk.lstrip().startswith(NOT_FOUND_PREFIX.encode()):
+                    raise NotFound("not found")
+                while chunk:
                     f.write(chunk)
+                    chunk = resp.read(1 << 16)
             os.replace(part, dest)
         except (OSError, http.client.HTTPException) as e:  # cut short or timed out while reading, or a local write
             raise ApiError(f"ScreenScraper download failed ({type(e).__name__})") from None
