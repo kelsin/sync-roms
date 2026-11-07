@@ -1039,7 +1039,6 @@
   {
     "name": "Capcom Play System I",
     "bucket": "cps1",
-    "screenscraper": 6,
     "folders": {
       "esde": "cps1",
       "knulli": "cps1",
@@ -1057,7 +1056,6 @@
   {
     "name": "Capcom Play System II",
     "bucket": "cps2",
-    "screenscraper": 7,
     "folders": {
       "esde": "cps2",
       "knulli": "cps2",
@@ -1075,7 +1073,6 @@
   {
     "name": "Capcom Play System III",
     "bucket": "cps3",
-    "screenscraper": 8,
     "folders": {
       "esde": "cps3",
       "knulli": "cps3",
@@ -1239,7 +1236,6 @@
   {
     "name": "Nintendo 64DD",
     "bucket": "n64dd",
-    "screenscraper": 122,
     "folders": {
       "esde": "n64dd",
       "knulli": "n64dd",
@@ -1889,7 +1885,6 @@
   {
     "name": "Sega Model 2",
     "bucket": "model2",
-    "screenscraper": 54,
     "folders": {
       "esde": "model2",
       "knulli": "model2",
@@ -1906,7 +1901,6 @@
   {
     "name": "Sega Model 3",
     "bucket": "model3",
-    "screenscraper": 55,
     "folders": {
       "esde": "model3",
       "knulli": "model3",

@@ -98,6 +98,19 @@ class HashAndMatchTest(MatchBase):
         self.assertEqual(client.calls[0]["md5"], "900150983cd24fb0d6963f7d28e17f72")
         self.assertNotEqual(client.calls[0]["md5"], "5-3")
 
+    def test_mirror_hashes_with_real_etag_and_invalidates_on_mtime(self):
+        path = self.put("gba/a.zip", b"abc")
+        os.utime(path, (1000, 1000))
+        client = FakeClient()
+        with mock.patch.object(runtime, "ROOT", None), mock.patch.object(runtime, "_mirror_root", self.root):
+            scrape_online.match(client, SYSTEM, "a.zip", 3, '"d41d8cd98f00b204e9800998ecf8427e"')
+            self.assertEqual(client.calls[0]["md5"], "900150983cd24fb0d6963f7d28e17f72")
+            with open(path, "wb") as f:
+                f.write(b"xyz")
+            os.utime(path, (2000, 2000))
+            scrape_online.match(client, SYSTEM, "a.zip", 3, '"d41d8cd98f00b204e9800998ecf8427e"')
+        self.assertNotEqual(client.calls[1]["md5"], client.calls[0]["md5"])
+
     def test_manual_match_wins(self):
         scrape_state.save_match("gba", "a.zip", 999)
         client = FakeClient()

@@ -44,10 +44,7 @@ def match(client, system, rom, size, etag):
         return saved, "manual"
     hashes = {}
     if s3.read_root():  # a folder's ETag is a fake "mtime-size" tag; hash the file instead
-        try:
-            mtime = int(etag.split("-")[0])
-        except ValueError:
-            mtime = 0
+        mtime = int(os.path.getmtime(s3.safe_join(s3.read_root(), f"{name}/{rom}")))
         hashes = hash_file(name, rom, size, mtime)
     elif "-" not in (tag := etag.strip('"')):  # a multipart upload's ETag is not the file's MD5
         hashes = {"md5": tag}
