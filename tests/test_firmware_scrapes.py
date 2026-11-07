@@ -255,6 +255,16 @@ class DerivedUploadTest(unittest.TestCase):
         self.assertEqual([k for k, *_ in plan["derived"]], ["scrapes/gba/onion/A.png"])
         self.assertEqual(plan["derived_present"], 1)
 
+    def test_empty_placeholder_art_is_skipped(self):
+        with tempfile.TemporaryDirectory() as es:
+            touch(os.path.join(es, "downloaded_media", "snes", "screenshots", "A.png"))
+            empty = os.path.join(es, "downloaded_media", "snes", "covers", "A.png")
+            os.makedirs(os.path.dirname(empty))
+            open(empty, "wb").close()
+            plan = scrape_files.plan_upload(es, {"snes": {"A.sfc"}}, {}, {})
+        self.assertEqual([k for k, *_ in plan["files"]], ["scrapes/snes/screenshots/A.png"])
+        self.assertTrue(all(src.endswith(os.path.join("screenshots", "A.png")) for _, src, _, _ in plan["derived"]))
+
     def test_cover_is_preferred_over_a_screenshot(self):
         plan = self.derived(["screenshots/A.png", "covers/A.png"])
         self.assertTrue(all(src.endswith(os.path.join("covers", "A.png")) for _, src, _, _ in plan["derived"]))

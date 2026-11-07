@@ -148,6 +148,11 @@
       "bucket": "tg-cd/Fantastic Night Dreams - Cotton (USA).chd"
     },
     {
+      "title": "Spriggan Mark 2",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Spriggan Mark 2 - Re Terraform Project (Japan) [T-En].chd"
+    },
+    {
       "title": "Silpheed",
       "system": "segacd",
       "bucket": "segacd/Silpheed (USA).chd"

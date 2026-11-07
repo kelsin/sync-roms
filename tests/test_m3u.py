@@ -138,9 +138,9 @@ class HiddenDiscsTest(unittest.TestCase):
         self.touch("Fahrenheit.m3u", "Gone.m3u")
         keys = ["psx/" + f for f in FAH] + ["psx/Fahrenheit.m3u"]
         discs = {"psx/" + f for f in FAH}
-        self.assertEqual(downloads.find_extras(self.dir, keys, False, ".multi-disc", discs),
+        self.assertEqual(downloads.find_extras(self.dir, keys, disc_dir=".multi-disc", discs=discs),
                          [os.path.join(self.dir, "Gone.m3u")])
-        self.assertEqual(downloads.find_extras(self.dir, keys[1:], False, ".multi-disc", {keys[1]}),
+        self.assertEqual(downloads.find_extras(self.dir, keys[1:], disc_dir=".multi-disc", discs={keys[1]}),
                          [os.path.join(self.dir, "Gone.m3u"), os.path.join(self.dir, ".multi-disc", FAH[0])])
 
     def test_playlist_pass_leaves_the_disc_folder_alone(self):

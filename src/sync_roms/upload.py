@@ -1,7 +1,8 @@
-"""Uploading ROMs to the bucket."""
+"""Uploading ROMs to the bucket (or the storage folder)."""
 import mimetypes
 import os
 import queue
+import shutil
 import tempfile
 import threading
 from concurrent.futures import ThreadPoolExecutor
@@ -64,10 +65,40 @@ class FailedUpload:
         raise self.error
 
 
+def run_copies(todo):
+    """run_uploads for a storage folder: copy (key, path, size[, shrink]) jobs into it. Returns the failure count."""
+    print(ui.bold(f"\n📁 Copying {len(todo)} file(s)") + ui.dim(f"  to {runtime.ROOT}"))
+
+    def copy(job):
+        try:
+            def write(tmp):
+                if len(job) > 3:
+                    scrape_plan.shrink_png(job[1], tmp, job[3])
+                else:
+                    shutil.copyfile(job[1], tmp)
+            s3.write_file(job[0], write)
+            return job, None
+        except Exception as e:
+            return job, e
+
+    failed = 0
+    with ThreadPoolExecutor(runtime.WORKERS) as ex:
+        for i, (job, error) in enumerate(ex.map(copy, sorted(todo, key=lambda j: -j[2])), 1):
+            prog = ui.dim(f"[{i}/{len(todo)}]")
+            if error is None:
+                print(f"  {prog} ✅ {job[0]}")
+            else:
+                failed += 1
+                print(f"  {prog} ❌ {ui.red(job[0])}: {str(error).strip()}")
+    return failed
+
+
 def run_uploads(todo):
     """Upload (key, path, size[, shrink]) jobs through one shared pool of requests, so small files and the parts of
     big ones all keep the connection busy. Biggest files start first so a long one never trails at the end.
     A 4th element (max width, max height) means: upload path shrunk to fit it, shrunk on every core while the others upload."""
+    if runtime.ROOT:
+        return run_copies(todo)
     workers = upload_workers()
     client = s3.s3_client(runtime.WRITE_PROFILE, connections=workers)
     try:
@@ -150,13 +181,13 @@ def upload_command(args):
         print(ui.yellow("👋 Cancelled."))
         return 0
     bucket = systems[i]["bucket"]
-    print(ui.bold(f"☁️  {'Replace' if args.replace else 'Upload'} {systems[i]['name']}") + ui.dim(f"  read={runtime.PROFILE}  write={runtime.WRITE_PROFILE}  {folder} → s3://{runtime.BUCKET}/{bucket}/"))
+    print(ui.bold(f"☁️  {'Replace' if args.replace else 'Upload'} {systems[i]['name']}") + ui.dim(f"  {s3.access(True)}  {folder} → {s3.location()}/{bucket}/"))
     if args.replace:
         return replace_command(args, folder, systems[i])
     try:
         print("☁️  Listing what's already there...")
         existing = s3.list_sizes(bucket + "/")
-    except (ClientError, BotoCoreError) as e:
+    except s3.ERRORS as e:
         ui.fail(f"{e}", 3)
     new, changed, same = plan_rom_upload(folder, bucket, existing)
     print(f"\n💿 New: {ui.bold(str(len(new)))} ({ui.human_size(sum(f[2] for f in new))})")
@@ -177,7 +208,7 @@ def upload_command(args):
         if len(new) > 20:
             print(ui.dim(f"  … and {len(new) - 20} more"))
         return 0
-    if not ui.confirm(f"☁️  Upload {len(todo)} file(s) to s3://{runtime.BUCKET}/{bucket}/" + (f", overwriting {len(changed)}" if changed else "") + "?", default=False):
+    if not ui.confirm(f"☁️  Upload {len(todo)} file(s) to {s3.location()}/{bucket}/" + (f", overwriting {len(changed)}" if changed else "") + "?", default=False):
         print(ui.yellow("👋 Cancelled."))
         return 0
     failed = run_uploads(todo)
@@ -198,7 +229,7 @@ def replace_command(args, folder, system):
             local, remote, lambda p: diff.local_fingerprint(os.path.join(folder, *p.split("/"))),
             lambda p, size, etag: diff.bucket_fingerprint(f"{bucket}/{p}", size, etag),
             lambda p, etag: "-" not in etag and diff.file_md5(os.path.join(folder, *p.split("/"))) != etag.strip('"'))
-    except (ClientError, BotoCoreError) as e:
+    except s3.ERRORS as e:
         ui.fail(f"{e}", 3)
     print(f"\n💿 New: {ui.bold(str(len(new)))} ({ui.human_size(sum(local[p] for p in new))})")
     print(f"♻️  Different content, would overwrite: {ui.bold(str(len(changed)))} ({ui.human_size(sum(local[p] for p in changed))})")
@@ -225,7 +256,7 @@ def replace_command(args, folder, system):
         return 0
     delete = []
     if only_bucket:
-        picked = picker.filter_list(f"🗑️  Delete from s3://{runtime.BUCKET}/{bucket}/ (they match no local file) — untick to keep",
+        picked = picker.filter_list(f"🗑️  Delete from {s3.location()}/{bucket}/ (they match no local file) — untick to keep",
                              only_bucket, multi=True, initial=[True] * len(only_bucket),
                              extras=[[(ui.human_size(remote[p][0]), "dim")] for p in only_bucket],
                              hint="type to filter · ↑/↓ move · Tab toggle · ^A toggle all shown · Enter done")
@@ -235,7 +266,7 @@ def replace_command(args, folder, system):
         print(ui.green("\nNothing to do ✨"))
         return 0
     print(f"\nThis will move {len(renames)}, upload {len(uploads)} ({len(changed)} overwriting), "
-          f"delete {len(delete)} and keep {len(only_bucket) - len(delete)} in s3://{runtime.BUCKET}/{bucket}/")
+          f"delete {len(delete)} and keep {len(only_bucket) - len(delete)} in {s3.location()}/{bucket}/")
     if not ui.confirm("☁️  Go ahead?", default=False):
         print(ui.yellow("👋 Cancelled."))
         return 0

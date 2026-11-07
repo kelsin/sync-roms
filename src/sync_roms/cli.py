@@ -43,7 +43,7 @@ TOPICS = {
    3. Totals and free space are shown and you confirm; ROMs download, then BIOS.
    4. Scraped data for the chosen systems' games is installed from the bucket's scrapes/ folder, then media on the
       card for ROMs it doesn't have is removed.
-   5. Local ROMs no longer in a chosen system's list are listed and, after you confirm (default no), deleted.
+   5. Local ROMs no longer in a chosen system's list, or in a system with no games listed, are listed and, after you confirm (default no), deleted.
       Other systems' folders and BIOS are never touched.
 
   --dry-run   show what would be downloaded and deleted, change nothing
@@ -171,13 +171,13 @@ def help_text(topic=None):
   {ui.yellow('-y, --yes')}       answer prompts with their default (deleting stays "no")
   {ui.yellow('--quiet')}         print only errors, warnings and --json data (prompts go to stderr)      {ui.yellow('--verbose')}   also print the effective settings
   {ui.yellow('--json')}          machine-readable output for devices, diff and `sync --dry-run` (use --systems with --device/--layout to skip the pickers)
-  {ui.yellow('--profile P')} {ui.yellow('--write-profile P')} {ui.yellow('--bucket B')} {ui.yellow('--endpoint URL')}   override those settings for this run
+  {ui.yellow('--profile P')} {ui.yellow('--write-profile P')} {ui.yellow('--bucket B')} {ui.yellow('--root DIR')} {ui.yellow('--endpoint URL')}   override those settings for this run
   {ui.yellow('-a, --ask')}       sync: confirm the saved device/firmware and Android media choice instead of using it silently
   {ui.yellow('--version')}       print the version      {ui.yellow('-h, --help')}   this screen
 
 {ui.bold('ENVIRONMENT')}
-  {ui.yellow('ROMS_BUCKET')}  {ui.yellow('ROMS_ENDPOINT')}  {ui.yellow('ROMS_PROFILE')} (default roms-readonly)  {ui.yellow('ROMS_WRITE_PROFILE')} (default roms)
-  override settings.json "bucket", "endpoint", "profile", "write_profile"; the flags above override these. {ui.yellow('NO_COLOR')} / {ui.yellow('FORCE_COLOR')} control colors.
+  {ui.yellow('ROMS_BUCKET')}  {ui.yellow('ROMS_ROOT')}  {ui.yellow('ROMS_ENDPOINT')}  {ui.yellow('ROMS_PROFILE')} (default roms-readonly)  {ui.yellow('ROMS_WRITE_PROFILE')} (default roms)
+  override settings.json "bucket", "root" (a folder, e.g. a mounted network share, used instead of the bucket), "endpoint", "profile", "write_profile"; the flags above override these. {ui.yellow('NO_COLOR')} / {ui.yellow('FORCE_COLOR')} control colors.
 
 {ui.bold('EXIT CODES')}
   0 done (or nothing to do, or you declined)   1 some files failed   2 bad usage   3 setup problem (credentials, bucket, tools, bad data file)   130 interrupted
@@ -372,12 +372,12 @@ def check_modes(args):
     return mode
 
 
-GLOBAL_VALUE_FLAGS = {"--profile": "profile", "--write-profile": "write_profile", "--bucket": "bucket", "--endpoint": "endpoint"}
+GLOBAL_VALUE_FLAGS = {"--profile": "profile", "--write-profile": "write_profile", "--bucket": "bucket", "--root": "root", "--endpoint": "endpoint"}
 DATA_COMMANDS = {("devices",), ("completion",), ("games", "list"), ("games", "export"), ("cards", "list"), ("config", "path")}
 
 
 def extract_globals(argv):
-    """Remove --profile/--write-profile/--bucket/--endpoint (set in runtime.OVERRIDES) and --quiet/--verbose from argv.
+    """Remove --profile/--write-profile/--bucket/--root/--endpoint (set in runtime.OVERRIDES) and --quiet/--verbose from argv.
     Returns (the rest of argv, quiet, verbose)."""
     runtime.OVERRIDES.clear()
     rest, flags, i = [], set(), 0
@@ -469,7 +469,7 @@ def run(argv):
         return code
     base = os.path.abspath(os.path.expanduser(args.base_dir or os.getcwd()))
 
-    print(ui.bold("🎮 sync-roms") + ui.dim(f"  s3://{runtime.BUCKET}  profile={runtime.PROFILE}"))
+    print(ui.bold("🎮 sync-roms") + ui.dim(f"  {s3.access()}"))
     if usersettings.load_settings().get("mirror"):
         mirroring.use_mirror(usersettings.load_settings()["mirror"], args.dry_run)
     print("📄 Fetching manifests...")
@@ -556,7 +556,7 @@ def run(argv):
                                        if s.get("full_system") or store.listed(s) else {}, todo)))
         rows = [(f"{s['name']}  ({len(available(s))} roms)", bool(available(s)), *sizes(s)) for s in systems]
         present = [i for i, s in enumerate(systems)
-                   if available(s) and (device or downloads.has_local_files(os.path.join(roms_dir, s["folders"][layout_name])))]
+                   if available(s) and (device or downloads.has_local_files(os.path.join(roms_dir, s["folders"][layout_name]), layout_name == "onion"))]
         if args.systems:
             chosen = commands.systems_from_flag(args.systems, systems, available)
             break
@@ -609,9 +609,11 @@ def run(argv):
                 missing.append(key)
     ui.report_missing(missing, "ROM(s)")
     # systems can share a folder (Onion: WS, NGP), so a folder's expected files are the union over all of them
-    for dest in sorted({dest_of(s) for s in chosen if available(s)}):
+    # a system with nothing to sync is always scanned, selected or not: whatever it has on the card is unwanted
+    chosen_ids = {s["bucket"] for s in chosen}
+    for dest in sorted({dest_of(s) for s in systems if s["bucket"] in chosen_ids or not available(s)}):
         extras += downloads.find_extras(dest, [k for t in systems if dest_of(t) == dest for k in available(t)], unzip,
-                                        disc_dir, {k for t in systems if dest_of(t) == dest for k in discs_of(t)})
+                                        layout_name == "onion", disc_dir, {k for t in systems if dest_of(t) == dest for k in discs_of(t)})
 
     bios_keys = sorted({"BIOS/" + f for s in chosen for f in s["bios"]["files"]})
     bios_have = s3.list_sizes("BIOS/") if bios_keys else {}

@@ -133,6 +133,14 @@ class UnzipTest(unittest.TestCase):
             touch(os.path.join(tmp, "A.gba"))
             self.assertEqual(len(downloads.find_extras(tmp, ["gba/A.zip"])), 1)
 
+    def test_db_caches_are_ignored_only_when_asked(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            touch(os.path.join(tmp, "cache6.db"))
+            self.assertEqual(len(downloads.find_extras(tmp, [])), 1)
+            self.assertEqual(downloads.find_extras(tmp, [], skip_db=True), [])
+            self.assertTrue(downloads.has_local_files(tmp))
+            self.assertFalse(downloads.has_local_files(tmp, skip_db=True))
+
     def test_unzip_roms_extracts_flat_and_removes_the_archive(self):
         with tempfile.TemporaryDirectory() as tmp:
             path = os.path.join(tmp, "A.zip")

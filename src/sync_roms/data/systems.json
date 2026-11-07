@@ -334,6 +334,31 @@
     }
   },
   {
+    "name": "Nintendo Famicom Disk System",
+    "bucket": "fds",
+    "folders": {
+      "esde": "fds",
+      "knulli": "fds",
+      "onion": "FDS",
+      "muos": "fds",
+      "slot": null,
+      "emudeck": "fds"
+    },
+    "muos_catalogue": "Nintendo Family Computer Disk System",
+    "bios": {
+      "files": [
+        "disksys.rom",
+        "fbneo/fdsbios.zip"
+      ],
+      "libretro_cores": [
+        "mesen",
+        "nestopia",
+        "fceumm",
+        "fbneo"
+      ]
+    }
+  },
+  {
     "name": "Nintendo 64",
     "bucket": "n64",
     "folders": {
@@ -426,6 +451,42 @@
     },
     "chd": {
       "mode": "cd"
+    }
+  },
+  {
+    "name": "NEC PC-98",
+    "bucket": "pc98",
+    "folders": {
+      "esde": "pc98",
+      "knulli": "pc98",
+      "onion": null,
+      "muos": null,
+      "slot": null,
+      "emudeck": "pc98"
+    },
+    "bios": {
+      "files": [
+        "np2kai/font.bmp",
+        "np2kai/FONT.ROM",
+        "np2kai/bios.rom",
+        "np2kai/itf.rom",
+        "np2kai/sound.rom",
+        "np2kai/bios9821.rom",
+        "np2kai/d8000.rom",
+        "np2kai/2608_BD.WAV",
+        "np2kai/2608_SD.WAV",
+        "np2kai/2608_TOP.WAV",
+        "np2kai/2608_HH.WAV",
+        "np2kai/2608_TOM.WAV",
+        "np2kai/2608_RIM.WAV"
+      ],
+      "libretro_cores": [
+        "np2kai"
+      ]
+    },
+    "chd": {
+      "mode": "extract",
+      "m3u": false
     }
   },
   {
@@ -1890,10 +1951,7 @@
     },
     "chd": {
       "mode": "dvd",
-      "args": [
-        "-c",
-        "zlib"
-      ]
+      "codec": "zlib"
     }
   },
   {

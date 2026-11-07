@@ -9,7 +9,7 @@ from . import runtime, store, ui
 # --- Local mirror ---------------------------------------------------------------------------------
 
 def load_settings():
-    """Saved global settings: {"bucket": S3 bucket name, "endpoint": custom S3 endpoint URL, "profile"/"write_profile": aws profiles, "mirror": folder of the local mirror}."""
+    """Saved global settings: {"bucket": S3 bucket name, "root": folder used instead of a bucket, "endpoint": custom S3 endpoint URL, "profile"/"write_profile": aws profiles, "mirror": folder of the local mirror}."""
     try:
         with open(os.path.join(store.data_dir(), "settings.json")) as f:
             settings = json.load(f)
@@ -33,12 +33,12 @@ def save_setting(name, value):
         ui.fail(f"Couldn't save the setting: {e}", 3)
 
 
-SETTINGS = (("bucket", "ROMS_BUCKET", None), ("endpoint", "ROMS_ENDPOINT", None),
+SETTINGS = (("bucket", "ROMS_BUCKET", None), ("root", "ROMS_ROOT", None), ("endpoint", "ROMS_ENDPOINT", None),
             ("profile", "ROMS_PROFILE", "roms-readonly"), ("write_profile", "ROMS_WRITE_PROFILE", "roms"))
 
 
 def resolve_settings():
-    """{name: (value, source)} for bucket, endpoint, profile and write_profile: flag, then environment, then settings.json, then default."""
+    """{name: (value, source)} for bucket, root, endpoint, profile and write_profile: flag, then environment, then settings.json, then default."""
     saved = load_settings()
     out = {}
     for name, env, default in SETTINGS:
@@ -54,20 +54,31 @@ def resolve_settings():
 
 
 def apply_settings():
-    """Set runtime.BUCKET, ENDPOINT, PROFILE and WRITE_PROFILE from resolve_settings(); never prompts."""
+    """Set runtime.BUCKET, ROOT, ENDPOINT, PROFILE and WRITE_PROFILE from resolve_settings(); never prompts."""
     resolved = {name: value for name, (value, _) in resolve_settings().items()}
     runtime.PROFILE, runtime.WRITE_PROFILE = resolved["profile"], resolved["write_profile"]
     runtime.BUCKET, runtime.ENDPOINT = resolved["bucket"], resolved["endpoint"] or None
+    runtime.ROOT = os.path.abspath(os.path.expanduser(resolved["root"])) if resolved["root"] else None  # a root wins over a bucket
 
 
 def ensure_bucket():
-    """Apply the settings, asking for the bucket (and an optional endpoint) on first run."""
+    """Apply the settings, asking for the bucket (and an optional endpoint) or a storage folder on first run."""
     apply_settings()
-    while not runtime.BUCKET:
+    while not (runtime.BUCKET or runtime.ROOT):
         try:
-            name = input("🪣 Which S3 bucket holds your ROMs? ").strip()
+            name = input("🪣 Which S3 bucket holds your ROMs? (or a folder path, e.g. /Volumes/roms) ").strip()
         except EOFError:
             ui.fail("No bucket given", 3)
+        if name.startswith(("/", "~", ".")):  # a bucket name can't start with these
+            root = os.path.abspath(os.path.expanduser(name))
+            if not os.path.isdir(root):
+                print(ui.red(f"❌ {root} is not a folder"))
+                continue
+            save_setting("root", root)
+            save_setting("bucket", None)
+            save_setting("endpoint", None)
+            runtime.ROOT = root
+            continue
         name = re.sub(r"^s3://", "", name).strip("/")
         if name:
             save_setting("bucket", name)

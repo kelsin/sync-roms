@@ -257,7 +257,10 @@ def shrink_png(src, dst, box=ONION_MAX):
         return
     out = subprocess.run(["sips", "-g", "pixelWidth", "-g", "pixelHeight", src],
                          check=True, capture_output=True, text=True).stdout
-    w, h = (int(re.search(rf"{k}: (\d+)", out).group(1)) for k in ("pixelWidth", "pixelHeight"))
+    dims = [re.search(rf"{k}: (\d+)", out) for k in ("pixelWidth", "pixelHeight")]  # sips exits 0 for a file it can't read
+    if not all(dims):
+        raise ValueError(f"not a readable image: {src}")
+    w, h = (int(m.group(1)) for m in dims)
     scale = min(1, box[0] / w, box[1] / h)
     subprocess.run(["sips", "-s", "format", "png", "-z", str(max(1, round(h * scale))), str(max(1, round(w * scale))),
                     src, "--out", dst], check=True, capture_output=True)
@@ -446,10 +449,10 @@ def apply_scrape_plan(plan, base):
     return failed
 
 
-def card_stems(rom_dir, flat):
+def card_stems(rom_dir, flat, skip_db=False):
     """ROM names without extension in a system's ROM folder (base names only if flat)."""
     stems = set()
-    for root, files in downloads.walk_roms(rom_dir):
+    for root, files in downloads.walk_roms(rom_dir, skip_db=skip_db):
         for f in files:
             rel = os.path.relpath(os.path.join(root, f), rom_dir).replace(os.sep, "/")
             stems.add(os.path.splitext(os.path.basename(rel) if flat else rel)[0])
@@ -474,7 +477,7 @@ def stale_firmware_media(layout_name, systems, roms_dir, base):
             groups[media_root_of(layout_name, s, base, "")].append(os.path.join(roms_dir, s["folders"][layout_name]))
     stale = []
     for root, rom_dirs in sorted(groups.items()):
-        stems = {media_name(layout_name, stem) for d in set(rom_dirs) if os.path.isdir(d) for stem in card_stems(d, True)}
+        stems = {media_name(layout_name, stem) for d in set(rom_dirs) if os.path.isdir(d) for stem in card_stems(d, True, layout_name == "onion")}
         if not stems:
             continue
         for sub in ("box", "preview", "text") if layout_name == "muos" else (".",):
@@ -497,7 +500,7 @@ def stale_media(layout_name, systems, roms_dir, es_dir, base=None):
         if not rom_dir or rom_dir in seen or not os.path.isdir(rom_dir):
             continue
         seen.add(rom_dir)
-        stems = card_stems(rom_dir, layout_name != "esde")
+        stems = card_stems(rom_dir, layout_name != "esde", layout_name == "onion")
         if layout_name == "esde":
             for mtype in sorted(MEDIA_TYPES):
                 base = os.path.join(es_dir, "downloaded_media", folder, mtype)

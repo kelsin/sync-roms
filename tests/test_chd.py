@@ -15,7 +15,7 @@ sys.path.insert(0, os.path.join(ROOT, "src"))
 from sync_roms import chd, external, m3u, store  # noqa: E402
 
 CD = {"chd": {"mode": "cd"}}
-DVD = {"chd": {"mode": "dvd", "args": ["-c", "zlib"]}}
+DVD = {"chd": {"mode": "dvd", "codec": "zlib"}}
 EXTRACT = {"chd": {"mode": "extract"}}
 XISO = {"chd": {"mode": "xiso", "m3u": False}}
 XISO_TAG = b"\0" * 31337 + b"in!xiso!2.7.1"
@@ -44,7 +44,7 @@ class FakeTools:
                 with open(out, "wb") as f:
                     f.write(XISO_TAG)
             return "xiso failed" if mode in self.fail else None
-        elif cmd[1].startswith("create"):
+        elif cmd[1].startswith("create") or cmd[1] == "copy":
             open(cmd[cmd.index("-o") + 1], "w").close()
         return f"{cmd[1]} failed" if cmd[1] in self.fail else None
 
@@ -101,7 +101,25 @@ class ChdTest(unittest.TestCase):
     def test_dvd_systems_use_createdvd_for_iso_and_createcd_for_sheets(self):
         self.assertEqual(chd.chd_command_line("c", DVD["chd"], "g.iso", "g.chd", 4),
                          ["c", "createdvd", "-i", "g.iso", "-o", "g.chd", "-np", "4", "-c", "zlib"])
-        self.assertEqual(chd.chd_command_line("c", DVD["chd"], "g.cue", "g.chd", 4), ["c", "createcd", "-i", "g.cue", "-o", "g.chd", "-np", "4"])
+        self.assertEqual(chd.chd_command_line("c", DVD["chd"], "g.cue", "g.chd", 4), ["c", "createcd", "-i", "g.cue", "-o", "g.chd", "-np", "4", "-c", "cdzl"])
+        self.assertEqual(chd.chd_command_line("c", CD["chd"], "g.cue", "g.chd", 4), ["c", "createcd", "-i", "g.cue", "-o", "g.chd", "-np", "4"])
+
+    def test_chd_with_another_codec_is_recompressed_to_zlib(self):
+        self.touch("Game.chd")
+        path = os.path.join(self.dir, "Game.chd")
+        info = {"dvd": "Compression:   lzma (LZMA), zlib (Deflate)\nMetadata Tag='DVD '", "cd": "Compression:   cdlz (CD LZMA)\nMetadata Tag='CHT2'",
+                "zlib": "Compression:   zlib (Deflate)\nMetadata Tag='DVD '", "cdzl": "Compression:   cdzl (CD Deflate)\nMetadata Tag='CHT2'"}
+        for kind, wanted in (("dvd", "zlib"), ("cd", "cdzl"), ("zlib", None), ("cdzl", None)):
+            with mock.patch.object(external, "tool_output", return_value=info[kind]):
+                self.assertEqual(chd.wrong_codec("chdman", DVD["chd"], path), wanted)
+        fake = FakeTools()
+        with mock.patch.object(external, "tool_output", return_value=info["cd"]), mock.patch.object(external, "run_tool", fake):
+            self.assertIsNone(chd.chd_image(self.tools, DVD["chd"], path, [path]))
+            self.assertEqual([c[1] for c in fake.calls], ["copy", "verify"])
+            self.assertEqual(fake.calls[0][fake.calls[0].index("-c") + 1], "cdzl")
+            self.assertEqual(self.files(), ["Game.chd"])
+            jobs = chd.plan_chd(self.dir, {os.path.basename(self.dir).lower(): DVD})
+        self.assertEqual([j[2] for j in jobs], [path])
 
     def test_loose_image_is_converted_verified_and_cleaned_up(self):
         self.touch("Game.cue", text=CUE)
@@ -307,9 +325,11 @@ class ChdTest(unittest.TestCase):
         systems = {s["bucket"]: s for s in store.repo_json("systems")}
         self.assertEqual(systems["psx"]["chd"], {"mode": "cd"})
         self.assertEqual(systems["wii"]["chd"], {"mode": "extract"})
+        self.assertEqual(systems["ps2"]["chd"], {"mode": "dvd", "codec": "zlib"})
         self.assertFalse(systems["3do"]["chd"]["m3u"])
         self.assertEqual(systems["xbox"]["chd"], {"mode": "xiso", "m3u": False})
         self.assertEqual(systems["xbox360"]["chd"], {"mode": "extract", "m3u": False})
+        self.assertEqual(systems["pc98"]["chd"], {"mode": "extract", "m3u": False})
         self.assertNotIn("chd", systems["gba"])
         folders = chd.chd_folders(systems.values())
         self.assertIs(folders["megacd"], systems["segacd"])

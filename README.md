@@ -4,7 +4,9 @@ Interactive script that downloads ROMs and the BIOS files they need from your
 S3 bucket into local folders. On first run it asks which bucket to use and saves the
 name as `bucket` in `settings.json` in the user data folder. It also asks for an optional custom S3
 endpoint URL (blank for AWS), saved as `endpoint`, for S3-compatible storage such as MinIO or Cloudflare R2
-(requests then use path-style addressing). Files you already have (same
+(requests then use path-style addressing). Instead of a bucket you can give a folder path (for example a mounted
+network share, `/Volumes/roms`); it is saved as `root` and replaces the bucket and AWS entirely, with the same
+layout (`<system>/…`, `BIOS/…`, `scrapes/…`). Files you already have (same
 size) are skipped, so re-running it only fetches what's new or missing. It can also keep a
 [local mirror](#local-mirror---mirror---use-mirror---clear-mirror) of the bucket and sync from that.
 
@@ -50,7 +52,7 @@ If the Python dependencies changed, run `brew update-python-resources kelsin/tap
 ## Requirements
 
 - **python3** (3.9+); boto3 is installed with the package
-- An AWS profile named **`roms-readonly`** with read access to the bucket
+- An AWS profile named **`roms-readonly`** with read access to the bucket (not needed with a storage folder)
   (set `ROMS_PROFILE` to use a different profile name), defined in `~/.aws/config` and `~/.aws/credentials`
 - Only for `--cd`: **7z** and **chdman** (`sync-roms --install-tools` installs them with Homebrew), plus **extract-xiso** for Xbox (no Homebrew formula: build it from [XboxDev/extract-xiso](https://github.com/XboxDev/extract-xiso) with `cmake -B build && cmake --build build`)
 
@@ -111,7 +113,7 @@ You pick a device, then the firmware it runs (a device with only one isn't asked
 | `knulli` | `roms/` `bios/` (SD card SHARE partition, `/userdata`) | Default for the Anbernic H700, RG Vita Pro and Miyoo Flip V2 handhelds |
 | `muos` | `ROMS/` `MUOS/bios/` | [muOS](https://muos.dev/) on the Anbernic H700 handhelds, RG CubeXX and RG Vita Pro. Folder names are matched ignoring case and separators |
 | `slot` | `Games/` `BIOS/` | [slot](https://slot-cfw.fyi) on the RG SP, RG34XX, RG34XX SP, RG35XX SP, RG35XX Plus, RG28XX and RG35XX H. Game Boy, Game Boy Color and Game Boy Advance only. ROMs are extracted from their archives and go straight into the system folder, never subfolders |
-| `onion` | `Roms/` `BIOS/` | Miyoo Mini Flip |
+| `onion` | `Roms/` `BIOS/` | Miyoo Mini Flip, on [Onion](https://onionui.github.io/) or [Allium](https://github.com/goweiwen/Allium) (Allium reads the Onion card layout). The `Imgs/` box art is shared; Allium's own `gameslist.xml` isn't written |
 | `emudeck` | `Emulation/roms/` `Emulation/bios/` | [EmuDeck](https://emudeck.github.io/) on the Steam Deck and Steam Machine. Wii U, Xbox 360 and Model 2 ROMs go in a `roms/` subfolder of their system folder. No scrapes |
 
 Folder names are case-sensitive. Folders that don't exist are shown as
@@ -284,13 +286,14 @@ Before downloading, the sync shows the totals and free space on the card and ask
 | `--bucket-keys` | `check`: also verify with the read-only profile that every game key in your lists and sets exists in the bucket |
 | `--quiet` | Print only errors, warnings and `--json` data; prompts are asked on stderr |
 | `--verbose` | Also print the effective settings and where each came from, on stderr |
-| `--profile P`, `--write-profile P`, `--bucket B`, `--endpoint URL` | Override those settings for this run. Precedence: flag, then environment variable, then `settings.json`, then the default |
+| `--profile P`, `--write-profile P`, `--bucket B`, `--root DIR`, `--endpoint URL` | Override those settings for this run. Precedence: flag, then environment variable, then `settings.json`, then the default |
 | `--version` | Print the version |
 | `-h`, `--help` | Show the help screen (`sync-roms COMMAND --help` for one command) |
 
 | Environment variable | Description |
 | --- | --- |
 | `ROMS_BUCKET` | S3 bucket name. Overrides `bucket` in `settings.json`; when set, the first-run prompt is skipped |
+| `ROMS_ROOT` | Folder (e.g. a mounted network share) used instead of the bucket. Overrides `root` in `settings.json`; wins over a bucket. Needs no AWS profile |
 | `ROMS_ENDPOINT` | Custom S3 endpoint URL. Overrides `endpoint` in `settings.json` (default: AWS) |
 | `ROMS_PROFILE` | AWS profile to use. Overrides `profile` in `settings.json` (default `roms-readonly`) |
 | `ROMS_WRITE_PROFILE` | AWS profile used to upload in `--upload`, `--upload-scrapes` and `--clean-scrapes` modes. Overrides `write_profile` in `settings.json` (default `roms`) |
@@ -490,8 +493,8 @@ It is meant for preparing a downloaded rom pack before you upload it to the buck
   Folders of systems you didn't pick, BIOS files and dotfiles are never touched.
   Files frontends add to ROM folders are ignored too (never counted as "already has files",
   never deleted): ES-DE `systeminfo.txt` / `noload.txt`, Knulli/Batocera `_info.txt`,
-  `gamelist.xml` and the `images/`, `videos/`, `manuals/` folders, Onion `miyoogamelist.xml`
-  and `Imgs/` (top level of a system folder only), and Windows `Thumbs.db` / `desktop.ini`.
+  `gamelist.xml` and the `images/`, `videos/`, `manuals/` folders, Onion `miyoogamelist.xml`,
+  `*.db` ROM list caches (on Onion cards only) and `Imgs/` (top level of a system folder only), and Windows `Thumbs.db` / `desktop.ini`.
 - Some systems share a local folder on a device (Onion: `WS` = WonderSwan + Color,
   `NGP` = Neo Geo Pocket + Color). A folder's expected files are the
   union of all those systems' lists, so syncing one never offers the other's ROMs for deletion.

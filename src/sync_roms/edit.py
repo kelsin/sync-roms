@@ -242,14 +242,14 @@ def make_set_from_extras(t, sets, sets_by_id):
 
 def edit_manifest():
     """Add/remove games in the core list or a card's extras (browsing by system or by set), then save them."""
-    print(ui.bold("✏️  Edit mode") + ui.dim(f"  read={runtime.PROFILE}"))
+    print(ui.bold("✏️  Edit mode") + ui.dim(f"  {s3.access()}"))
     if not store.cards_readable():
         ui.fail(f"{os.path.join(store.data_dir(), 'cards.json')} isn't valid JSON, so nothing could be saved. "
                 "Fix or move it first.", 3)
     manifest = store.load_manifest()  # also seeds games.json
     core_raw = store.personal_json("games.json")
     repo_systems = store.repo_json("systems")
-    print(ui.dim(f"📡 Listing s3://{runtime.BUCKET}/ ..."))
+    print(ui.dim(f"📡 Listing {s3.location()}/ ..."))
     with ThreadPoolExecutor(runtime.WORKERS) as ex:
         listings = ex.map(lambda s: {k for k in s3.list_sizes(s["bucket"] + "/") if not k.endswith("/")}, repo_systems)
         bucket_keys = {s["bucket"]: keys for s, keys in zip(repo_systems, listings)}
