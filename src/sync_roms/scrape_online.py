@@ -1,4 +1,5 @@
 """Online scraping: which ROMs need metadata, which ScreenScraper game each one is, and the scrape run."""
+import getpass
 import hashlib
 import http.client
 import json
@@ -134,6 +135,29 @@ def make_client():
                 "(your ScreenScraper login, and the developer id and password ScreenScraper gives on request)", 3)
     return screenscraper.Client(settings["screenscraper_user"], settings["screenscraper_password"],
                                 {"devid": settings["screenscraper_devid"], "devpassword": settings["screenscraper_devpassword"]})
+
+
+PROMPTS = (("screenscraper_user", "ScreenScraper username", False), ("screenscraper_password", "ScreenScraper password", True),
+           ("screenscraper_devid", "ScreenScraper developer id", False), ("screenscraper_devpassword", "ScreenScraper developer password", True))
+
+
+def set_credentials():
+    """Ask for the four ScreenScraper credentials and save them in settings.json. A blank answer keeps the saved value;
+    passwords are read without echo and no value is ever printed."""
+    saved = usersettings.load_settings()
+    answers = {}
+    try:
+        for key, label, secret in PROMPTS:
+            note = " [Enter keeps the saved value]" if saved.get(key) else ""
+            ask = getpass.getpass if secret else input
+            answers[key] = ask(f"{label}{note}: ").strip()
+    except EOFError:
+        ui.fail("Credentials not saved", 2)
+    for key, value in answers.items():
+        if value:
+            usersettings.save_setting(key, value)
+    print(ui.green("✅ Saved ScreenScraper credentials to " + os.path.join(store.data_dir(), "settings.json")))
+    return 0
 
 
 def metadata_key(system):
