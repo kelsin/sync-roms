@@ -2,20 +2,57 @@
 import json
 import os
 import re
+import stat
+import sys
+import tempfile
 
 from . import runtime, store, ui
 
 
 # --- Local mirror ---------------------------------------------------------------------------------
 
-def load_settings():
-    """Saved global settings: {"bucket": S3 bucket name, "root": folder used instead of a bucket, "endpoint": custom S3 endpoint URL, "profile"/"write_profile": aws profiles, "mirror": folder of the local mirror}."""
+def _private(path):
+    """Make settings.json readable by the owner only (it can hold the ScreenScraper credentials)."""
+    if sys.platform == "win32":
+        return
     try:
-        with open(os.path.join(store.data_dir(), "settings.json")) as f:
+        if stat.S_IMODE(os.stat(path).st_mode) != 0o600:
+            os.chmod(path, 0o600)
+    except OSError:
+        pass
+
+
+def load_settings():
+    """Saved global settings: {"bucket": S3 bucket name, "root": folder used instead of a bucket, "endpoint": custom S3 endpoint URL, "profile"/"write_profile": aws profiles, "mirror": folder of the local mirror, "screenscraper_user"/"screenscraper_password"/"screenscraper_devid"/"screenscraper_devpassword": ScreenScraper credentials (never shown by config show)}."""
+    path = os.path.join(store.data_dir(), "settings.json")
+    try:
+        with open(path) as f:
             settings = json.load(f)
     except (OSError, ValueError):
         return {}
+    _private(path)
     return settings if isinstance(settings, dict) else {}
+
+
+def save_settings(settings):
+    """Replace settings.json with settings in one atomic write: a mode 600 temp file in the same folder, then a rename."""
+    tmp = None
+    try:
+        os.makedirs(store.data_dir(), exist_ok=True)
+        path = os.path.join(store.data_dir(), "settings.json")
+        fd, tmp = tempfile.mkstemp(dir=store.data_dir(), prefix=".settings-", suffix=".tmp")  # created mode 600
+        with os.fdopen(fd, "w") as f:
+            json.dump(settings, f, indent=2, sort_keys=True)
+            f.flush()
+            os.fsync(f.fileno())
+        os.replace(tmp, path)
+        tmp = None
+        _private(path)
+    except OSError as e:
+        ui.fail(f"Couldn't save the setting: {e}", 3)
+    finally:
+        if tmp and os.path.exists(tmp):
+            os.remove(tmp)
 
 
 def save_setting(name, value):
@@ -25,12 +62,7 @@ def save_setting(name, value):
         settings.pop(name, None)
     else:
         settings[name] = value
-    try:
-        os.makedirs(store.data_dir(), exist_ok=True)
-        with open(os.path.join(store.data_dir(), "settings.json"), "w") as f:
-            json.dump(settings, f, indent=2, sort_keys=True)
-    except OSError as e:
-        ui.fail(f"Couldn't save the setting: {e}", 3)
+    save_settings(settings)
 
 
 SETTINGS = (("bucket", "ROMS_BUCKET", None), ("root", "ROMS_ROOT", None), ("endpoint", "ROMS_ENDPOINT", None),

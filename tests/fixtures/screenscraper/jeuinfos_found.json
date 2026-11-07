@@ -1,0 +1,38 @@
+{
+  "header": {"APIversion": "2.0", "success": "true"},
+  "response": {
+    "ssuser": {"id": "testuser", "niveau": "1", "requeststoday": "10", "maxrequestsperday": "20000"},
+    "jeu": {
+      "id": "12345",
+      "romid": "67890",
+      "noms": [
+        {"region": "wor", "text": "Example Quest"},
+        {"region": "jp", "text": "Eguzanpuru Kuesuto"}
+      ],
+      "synopsis": [
+        {"langue": "en", "text": "An example adventure."},
+        {"langue": "fr", "text": "Une aventure d'exemple."}
+      ],
+      "dates": [
+        {"region": "us", "text": "1999-05-01"},
+        {"region": "jp", "text": "1998"}
+      ],
+      "genres": [
+        {"id": "1", "noms": [{"langue": "en", "text": "Platform"}, {"langue": "fr", "text": "Plateforme"}]}
+      ],
+      "joueurs": {"text": "1-2"},
+      "note": {"text": "16"},
+      "developpeur": {"id": "1", "text": "Example Dev"},
+      "editeur": {"id": "2", "text": "Example Pub"},
+      "systeme": {"id": "12", "text": "Game Boy Advance"},
+      "medias": [
+        {"type": "box-2D", "parent": "jeu", "region": "us", "format": "png", "url": "https://neoclone.screenscraper.fr/media/box2d.png"},
+        {"type": "box-2D", "parent": "jeu", "region": "wor", "format": "png", "url": "https://neoclone.screenscraper.fr/media/box2d-wor.png"},
+        {"type": "ss", "parent": "jeu", "format": "png", "url": "https://neoclone.screenscraper.fr/media/ss.png"},
+        {"type": "sstitle", "parent": "jeu", "format": "png", "url": "https://neoclone.screenscraper.fr/media/title.png"},
+        {"type": "video", "parent": "jeu", "format": "mp4", "url": "https://neoclone.screenscraper.fr/media/video.mp4"},
+        {"type": "manuel", "parent": "jeu", "region": "us", "format": "pdf", "url": "https://neoclone.screenscraper.fr/media/manual.pdf"}
+      ]
+    }
+  }
+}
