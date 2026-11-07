@@ -9,7 +9,7 @@ from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
 from xml.sax.saxutils import escape, unescape
 
-from . import downloads, runtime, s3, ui
+from . import downloads, runtime, s3, store, ui
 
 
 # --- Scraped data (media, metadata, themes, collections, settings) --------------------------------
@@ -176,12 +176,29 @@ def scrape_index(listing):
     return index
 
 
-def plan_scrapes(layout_name, rom_rels, listing, meta, media_root, rom_dir, present):
+def variant_tags(layout_name, family, stem):
+    """name (and, for ES-DE, sortname) tags that identify a MAME/FBNeo set by its variant, from the clones.json
+    {"parents": {...}, "clones": {...}} of its system. Parents sort first, then their clones, so a family stays together."""
+    if layout_name not in ("esde", "knulli"):
+        return {}
+    if stem in family["clones"]:
+        parent, title = family["clones"][stem]
+        base = re.sub(r"\s*\([^()]*\)$", "", family["parents"][parent])
+        sort = f"{base} - {title}"
+    elif stem in family["parents"]:
+        title = family["parents"][stem]
+        sort = re.sub(r"\s*\([^()]*\)$", "", title)
+    else:
+        return {}
+    return {"name": title, "sortname": sort} if layout_name == "esde" else {"name": title}
+
+
+def plan_scrapes(layout_name, rom_rels, listing, meta, media_root, rom_dir, present, family=None):
     """Media downloads, gamelist entries and text files for one system's ROMs.
 
     rom_rels: ROM paths in the system folder; media_root: the system's media folder (esde's downloaded_media
     folder, muOS's catalogue folder or Slot's Labels folder); rom_dir: the system's ROM folder on the card;
-    present(rom): is that ROM (going to be) on the card.
+    present(rom): is that ROM (going to be) on the card; family: the system's clones.json entry, if it has one.
     Returns (jobs [(key, local path, size)], entries {ROM path: {gamelist tag: text}}, texts [(local path, text)]).
     """
     index = scrape_index(listing)
@@ -199,6 +216,8 @@ def plan_scrapes(layout_name, rom_rels, listing, meta, media_root, rom_dir, pres
         found = index.get(stem, {})
         tags = gamelist_fields(meta.get(rom, {}))
         base = os.path.basename(stem)
+        if family:
+            tags.update(variant_tags(layout_name, family, base))
         if layout_name == "muos":  # the catalogue is flat, even when the ROM is in a subfolder
             for folder, types in MUOS_MEDIA:
                 mtype = next((t for t in types if t in found), None)
@@ -411,6 +430,7 @@ def media_root_of(layout_name, system, base, es_dir):
 def build_scrape_plan(layout_name, systems, data, extra, extra_texts, rom_rels, dest_of, es_dir, present, base):
     """Everything a sync installs from scrapes/: media jobs, gamelist entries per file, text files, ES-DE extras."""
     plan = {"jobs": [], "gamelists": defaultdict(dict), "extras": [], "writes": []}
+    clones = store.repo_json("clones")
     for s in systems:
         listing, meta = data[s["bucket"]]
         rom_dir = dest_of(s)
@@ -419,7 +439,8 @@ def build_scrape_plan(layout_name, systems, data, extra, extra_texts, rom_rels, 
                                             rom_dir,
                                             # Slot takes ROMs flat, whatever folder they are in in the bucket
                                             lambda rom, d=rom_dir: present(os.path.join(
-                                                d, os.path.basename(rom) if layout_name == "slot" else rom)))
+                                                d, os.path.basename(rom) if layout_name == "slot" else rom)),
+                                            clones.get(s["bucket"]))
         plan["jobs"] += downloads.plan_downloads(jobs)
         for path, text in texts:  # only the ones that would change
             if not os.path.exists(path) or read_text(path) != text:

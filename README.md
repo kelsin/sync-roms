@@ -193,6 +193,12 @@ Then:
    in the bucket go to the same place as they are, replacing a label of a different size (the derived one is only
    made when none exists). `--mirror` and a Slot sync pick them up like any other label.
 
+   On `esde` and `knulli`, `mame` and `fbneo` clones are named after their variant, e.g. `1942 (Revision A)`,
+   from `src/sync_roms/data/clones.json` (MAME and FBNeo parent/clone data), replacing the scraped name. On `esde` a
+   `sortname` also keeps each parent followed by its clones. ES-DE's "strip extra MAME info" option hides the variant
+   in parentheses. Regenerate the file with `tools/gen_clones.py MAME.xml FBNEO.dat` (MAME's `-listxml` output and
+   FBNeo's arcade DAT).
+
    For the `esde` layout every sync also brings the shared extras from `scrapes/esde/`: new or changed
    theme files, collection lines you don't have yet (added to your `.cfg` files), and the shared settings
    (only those keys are set in `es_settings.xml`; close ES-DE first, it rewrites the file when it exits).
