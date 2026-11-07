@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.27.0](https://github.com/kelsin/sync-roms/compare/v0.26.0...v0.27.0) (2026-11-07)
+
+
+### Features
+
+* **sets:** add cave, psikyo and touhou shmup sets ([#102](https://github.com/kelsin/sync-roms/issues/102)) ([3e2455b](https://github.com/kelsin/sync-roms/commit/3e2455b3cbb5c07dd44bd28e78f61b34d54656aa))
+* **sets:** add spriggan mark 2 to shmups set ([#104](https://github.com/kelsin/sync-roms/issues/104)) ([40a478a](https://github.com/kelsin/sync-roms/commit/40a478a71a738643bde1d3168fb3b0986c0f2b02))
+
 ## [0.26.0](https://github.com/kelsin/sync-roms/compare/v0.25.1...v0.26.0) (2026-11-06)
 
 
