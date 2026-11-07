@@ -2,6 +2,7 @@
   {
     "name": "Multiple Arcade Machine Emulator",
     "bucket": "mame",
+    "screenscraper": 75,
     "folders": {
       "esde": "mame",
       "knulli": "mame",
@@ -19,6 +20,7 @@
   {
     "name": "Atari 2600",
     "bucket": "atari2600",
+    "screenscraper": 26,
     "folders": {
       "esde": "atari2600",
       "knulli": "atari2600",
@@ -36,6 +38,7 @@
   {
     "name": "Atari 5200",
     "bucket": "atari5200",
+    "screenscraper": 40,
     "folders": {
       "esde": "atari5200",
       "knulli": "atari5200",
@@ -57,6 +60,7 @@
   {
     "name": "Atari 7800 ProSystem",
     "bucket": "atari7800",
+    "screenscraper": 41,
     "folders": {
       "esde": "atari7800",
       "knulli": "atari7800",
@@ -78,6 +82,7 @@
   {
     "name": "Atari 800",
     "bucket": "atari800",
+    "screenscraper": 43,
     "folders": {
       "esde": "atari800",
       "knulli": "atari800",
@@ -103,6 +108,7 @@
   {
     "name": "Atari Lynx",
     "bucket": "atarilynx",
+    "screenscraper": 28,
     "folders": {
       "esde": "atarilynx",
       "knulli": "lynx",
@@ -124,6 +130,7 @@
   {
     "name": "Atari ST",
     "bucket": "atarist",
+    "screenscraper": 42,
     "folders": {
       "esde": "atarist",
       "knulli": "atarist",
@@ -145,6 +152,7 @@
   {
     "name": "Coleco ColecoVision",
     "bucket": "colecovision",
+    "screenscraper": 48,
     "folders": {
       "esde": "colecovision",
       "knulli": "colecovision",
@@ -174,6 +182,7 @@
   {
     "name": "Nintendo Game Boy Advance",
     "bucket": "gba",
+    "screenscraper": 12,
     "folders": {
       "esde": "gba",
       "knulli": "gba",
@@ -198,6 +207,7 @@
   {
     "name": "Nintendo Game Boy Color",
     "bucket": "gbc",
+    "screenscraper": 10,
     "folders": {
       "esde": "gbc",
       "knulli": "gbc",
@@ -224,6 +234,7 @@
   {
     "name": "Nintendo Game Boy",
     "bucket": "gb",
+    "screenscraper": 9,
     "folders": {
       "esde": "gb",
       "knulli": "gb",
@@ -250,6 +261,7 @@
   {
     "name": "Mattel Electronics Intellivision",
     "bucket": "intellivision",
+    "screenscraper": 115,
     "folders": {
       "esde": "intellivision",
       "knulli": "intellivision",
@@ -275,6 +287,7 @@
   {
     "name": "SNK Neo Geo",
     "bucket": "neogeo",
+    "screenscraper": 142,
     "folders": {
       "esde": "neogeo",
       "knulli": "neogeo",
@@ -319,6 +332,7 @@
   {
     "name": "Nintendo Entertainment System",
     "bucket": "nes",
+    "screenscraper": 3,
     "folders": {
       "esde": "nes",
       "knulli": "nes",
@@ -336,6 +350,7 @@
   {
     "name": "Nintendo Famicom Disk System",
     "bucket": "fds",
+    "screenscraper": 106,
     "folders": {
       "esde": "fds",
       "knulli": "fds",
@@ -361,6 +376,7 @@
   {
     "name": "Nintendo 64",
     "bucket": "n64",
+    "screenscraper": 14,
     "folders": {
       "esde": "n64",
       "knulli": "n64",
@@ -378,6 +394,7 @@
   {
     "name": "Nintendo DS",
     "bucket": "nds",
+    "screenscraper": 15,
     "folders": {
       "esde": "nds",
       "knulli": "nds",
@@ -407,6 +424,7 @@
   {
     "name": "Magnavox Odyssey 2",
     "bucket": "odyssey2",
+    "screenscraper": 104,
     "folders": {
       "esde": "odyssey2",
       "knulli": "odyssey2",
@@ -432,6 +450,7 @@
   {
     "name": "NEC PC-FX",
     "bucket": "pcfx",
+    "screenscraper": 72,
     "folders": {
       "esde": "pcfx",
       "knulli": "pcfx",
@@ -456,6 +475,7 @@
   {
     "name": "NEC PC-98",
     "bucket": "pc98",
+    "screenscraper": 208,
     "folders": {
       "esde": "pc98",
       "knulli": "pc98",
@@ -492,6 +512,7 @@
   {
     "name": "Sega Mega Drive 32X",
     "bucket": "sega32x",
+    "screenscraper": 19,
     "folders": {
       "esde": "sega32x",
       "knulli": "sega32x",
@@ -518,6 +539,7 @@
   {
     "name": "Sega CD",
     "bucket": "segacd",
+    "screenscraper": 20,
     "folders": {
       "esde": "segacd",
       "knulli": "megacd",
@@ -554,6 +576,7 @@
   {
     "name": "Sega Dreamcast",
     "bucket": "dreamcast",
+    "screenscraper": 23,
     "folders": {
       "esde": "dreamcast",
       "knulli": "dreamcast",
@@ -587,6 +610,7 @@
   {
     "name": "Sega Game Gear",
     "bucket": "gamegear",
+    "screenscraper": 21,
     "folders": {
       "esde": "gamegear",
       "knulli": "gamegear",
@@ -620,6 +644,7 @@
   {
     "name": "Sega Genesis",
     "bucket": "genesis",
+    "screenscraper": 1,
     "folders": {
       "esde": "genesis",
       "knulli": "megadrive",
@@ -653,6 +678,7 @@
   {
     "name": "Sega Master System",
     "bucket": "mastersystem",
+    "screenscraper": 2,
     "folders": {
       "esde": "mastersystem",
       "knulli": "mastersystem",
@@ -686,6 +712,7 @@
   {
     "name": "Sega Saturn",
     "bucket": "saturn",
+    "screenscraper": 22,
     "folders": {
       "esde": "saturn",
       "knulli": "saturn",
@@ -716,6 +743,7 @@
   {
     "name": "Nintendo SNES (Super Nintendo)",
     "bucket": "snes",
+    "screenscraper": 4,
     "folders": {
       "esde": "snes",
       "knulli": "snes",
@@ -756,6 +784,7 @@
   {
     "name": "NEC TurboGrafx-16",
     "bucket": "tg16",
+    "screenscraper": 31,
     "folders": {
       "esde": "tg16",
       "knulli": "pcengine",
@@ -780,6 +809,7 @@
   {
     "name": "NEC TurboGrafx-CD",
     "bucket": "tg-cd",
+    "screenscraper": 114,
     "folders": {
       "esde": "tg-cd",
       "knulli": "pcenginecd",
@@ -807,6 +837,7 @@
   {
     "name": "GCE Vectrex",
     "bucket": "vectrex",
+    "screenscraper": 102,
     "folders": {
       "esde": "vectrex",
       "knulli": "vectrex",
@@ -826,6 +857,7 @@
   {
     "name": "Nintendo Virtual Boy",
     "bucket": "virtualboy",
+    "screenscraper": 11,
     "folders": {
       "esde": "virtualboy",
       "knulli": "virtualboy",
@@ -845,6 +877,7 @@
   {
     "name": "Bandai WonderSwan",
     "bucket": "wonderswan",
+    "screenscraper": 45,
     "folders": {
       "esde": "wonderswan",
       "knulli": "wswan",
@@ -864,6 +897,7 @@
   {
     "name": "Bandai WonderSwan Color",
     "bucket": "wonderswancolor",
+    "screenscraper": 46,
     "folders": {
       "esde": "wonderswancolor",
       "knulli": "wswanc",
@@ -883,6 +917,7 @@
   {
     "name": "AdvanceMAME",
     "bucket": "mame-advmame",
+    "screenscraper": 75,
     "folders": {
       "esde": "mame-advmame",
       "knulli": "advmame",
@@ -899,6 +934,7 @@
   {
     "name": "Arcade",
     "bucket": "arcade",
+    "screenscraper": 75,
     "folders": {
       "esde": "arcade",
       "knulli": null,
@@ -933,6 +969,7 @@
   {
     "name": "Sammy Corporation Atomiswave",
     "bucket": "atomiswave",
+    "screenscraper": 53,
     "folders": {
       "esde": "atomiswave",
       "knulli": "atomiswave",
@@ -978,6 +1015,7 @@
   {
     "name": "Fairchild Channel F",
     "bucket": "channelf",
+    "screenscraper": 80,
     "folders": {
       "esde": "channelf",
       "knulli": "channelf",
@@ -1001,6 +1039,7 @@
   {
     "name": "Capcom Play System I",
     "bucket": "cps1",
+    "screenscraper": 6,
     "folders": {
       "esde": "cps1",
       "knulli": "cps1",
@@ -1018,6 +1057,7 @@
   {
     "name": "Capcom Play System II",
     "bucket": "cps2",
+    "screenscraper": 7,
     "folders": {
       "esde": "cps2",
       "knulli": "cps2",
@@ -1035,6 +1075,7 @@
   {
     "name": "Capcom Play System III",
     "bucket": "cps3",
+    "screenscraper": 8,
     "folders": {
       "esde": "cps3",
       "knulli": "cps3",
@@ -1052,6 +1093,7 @@
   {
     "name": "Daphne Arcade LaserDisc Emulator",
     "bucket": "daphne",
+    "screenscraper": 49,
     "folders": {
       "esde": "daphne",
       "knulli": "daphne",
@@ -1102,6 +1144,7 @@
   {
     "name": "FinalBurn Neo",
     "bucket": "fbneo",
+    "screenscraper": 75,
     "folders": {
       "esde": "fbneo",
       "knulli": "fbneo",
@@ -1178,6 +1221,7 @@
   {
     "name": "Creatronic Mega Duck",
     "bucket": "megaduck",
+    "screenscraper": 90,
     "folders": {
       "esde": "megaduck",
       "knulli": "megaduck",
@@ -1195,6 +1239,7 @@
   {
     "name": "Nintendo 64DD",
     "bucket": "n64dd",
+    "screenscraper": 122,
     "folders": {
       "esde": "n64dd",
       "knulli": "n64dd",
@@ -1218,6 +1263,7 @@
   {
     "name": "Sega NAOMI",
     "bucket": "naomi",
+    "screenscraper": 56,
     "folders": {
       "esde": "naomi",
       "knulli": "naomi",
@@ -1246,6 +1292,7 @@
   {
     "name": "SNK Neo Geo CD",
     "bucket": "neogeocd",
+    "screenscraper": 70,
     "folders": {
       "esde": "neogeocd",
       "knulli": "neogeocd",
@@ -1281,6 +1328,7 @@
   {
     "name": "SNK Neo Geo Pocket",
     "bucket": "ngp",
+    "screenscraper": 25,
     "folders": {
       "esde": "ngp",
       "knulli": "ngp",
@@ -1300,6 +1348,7 @@
   {
     "name": "SNK Neo Geo Pocket Color",
     "bucket": "ngpc",
+    "screenscraper": 82,
     "folders": {
       "esde": "ngpc",
       "knulli": "ngpc",
@@ -1336,6 +1385,7 @@
   {
     "name": "3DO Interactive Multiplayer",
     "bucket": "3do",
+    "screenscraper": 29,
     "folders": {
       "esde": "3do",
       "knulli": "3do",
@@ -1374,6 +1424,7 @@
   {
     "name": "PICO-8 Fantasy Console",
     "bucket": "pico8",
+    "screenscraper": 234,
     "folders": {
       "esde": "pico8",
       "knulli": "pico8",
@@ -1391,6 +1442,7 @@
   {
     "name": "Nintendo Pokémon Mini",
     "bucket": "pokemini",
+    "screenscraper": 211,
     "folders": {
       "esde": "pokemini",
       "knulli": "pokemini",
@@ -1424,6 +1476,7 @@
   {
     "name": "Sony PlayStation",
     "bucket": "psx",
+    "screenscraper": 57,
     "folders": {
       "esde": "psx",
       "knulli": "psx",
@@ -1455,6 +1508,7 @@
   {
     "name": "Sony PlayStation Portable",
     "bucket": "psp",
+    "screenscraper": 61,
     "folders": {
       "esde": "psp",
       "knulli": "psp",
@@ -1479,6 +1533,7 @@
   {
     "name": "Nintendo Satellaview",
     "bucket": "satellaview",
+    "screenscraper": 107,
     "folders": {
       "esde": "satellaview",
       "knulli": "satellaview",
@@ -1519,6 +1574,7 @@
   {
     "name": "ScummVM Game Engine",
     "bucket": "scummvm",
+    "screenscraper": 123,
     "folders": {
       "esde": "scummvm",
       "knulli": "scummvm",
@@ -1644,6 +1700,7 @@
   {
     "name": "Watara Supervision",
     "bucket": "supervision",
+    "screenscraper": 207,
     "folders": {
       "esde": "supervision",
       "knulli": "supervision",
@@ -1661,6 +1718,7 @@
   {
     "name": "TIC-80 Fantasy Computer",
     "bucket": "tic80",
+    "screenscraper": 222,
     "folders": {
       "esde": "tic80",
       "knulli": "tic80",
@@ -1712,6 +1770,7 @@
   {
     "name": "Atari Jaguar",
     "bucket": "atarijaguar",
+    "screenscraper": 27,
     "folders": {
       "esde": "atarijaguar",
       "knulli": "jaguar",
@@ -1729,6 +1788,7 @@
   {
     "name": "Atari Jaguar CD",
     "bucket": "atarijaguarcd",
+    "screenscraper": 171,
     "folders": {
       "esde": "atarijaguarcd",
       "knulli": "jaguarcd",
@@ -1745,6 +1805,7 @@
   {
     "name": "Philips CD-i",
     "bucket": "cdimono1",
+    "screenscraper": 133,
     "folders": {
       "esde": "cdimono1",
       "knulli": "cdi",
@@ -1768,6 +1829,7 @@
   {
     "name": "Nintendo GameCube",
     "bucket": "gc",
+    "screenscraper": 13,
     "folders": {
       "esde": "gc",
       "knulli": "gamecube",
@@ -1827,6 +1889,7 @@
   {
     "name": "Sega Model 2",
     "bucket": "model2",
+    "screenscraper": 54,
     "folders": {
       "esde": "model2",
       "knulli": "model2",
@@ -1843,6 +1906,7 @@
   {
     "name": "Sega Model 3",
     "bucket": "model3",
+    "screenscraper": 55,
     "folders": {
       "esde": "model3",
       "knulli": "model3",
@@ -1859,6 +1923,7 @@
   {
     "name": "Nintendo 3DS",
     "bucket": "n3ds",
+    "screenscraper": 17,
     "folders": {
       "esde": "n3ds",
       "knulli": "3ds",
@@ -1930,6 +1995,7 @@
   {
     "name": "Sony PlayStation 2",
     "bucket": "ps2",
+    "screenscraper": 58,
     "folders": {
       "esde": "ps2",
       "knulli": "ps2",
@@ -1957,6 +2023,7 @@
   {
     "name": "Sony PlayStation 3",
     "bucket": "ps3",
+    "screenscraper": 59,
     "folders": {
       "esde": "ps3",
       "knulli": "ps3",
@@ -1989,6 +2056,7 @@
   {
     "name": "Sony PlayStation Vita",
     "bucket": "psvita",
+    "screenscraper": 62,
     "folders": {
       "esde": "psvita",
       "knulli": "psvita",
@@ -2021,6 +2089,7 @@
   {
     "name": "Nintendo Switch",
     "bucket": "switch",
+    "screenscraper": 225,
     "folders": {
       "esde": "switch",
       "knulli": null,
@@ -2069,6 +2138,7 @@
   {
     "name": "Nintendo Wii",
     "bucket": "wii",
+    "screenscraper": 16,
     "folders": {
       "esde": "wii",
       "knulli": "wii",
@@ -2088,6 +2158,7 @@
   {
     "name": "Nintendo Wii U",
     "bucket": "wiiu",
+    "screenscraper": 18,
     "folders": {
       "esde": "wiiu",
       "knulli": "wiiu",
@@ -2104,6 +2175,7 @@
   {
     "name": "Microsoft Xbox",
     "bucket": "xbox",
+    "screenscraper": 32,
     "folders": {
       "esde": "xbox",
       "knulli": "xbox",
@@ -2137,6 +2209,7 @@
   {
     "name": "Microsoft Xbox 360",
     "bucket": "xbox360",
+    "screenscraper": 33,
     "folders": {
       "esde": "xbox360",
       "knulli": "xbox360",

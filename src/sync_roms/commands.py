@@ -456,6 +456,10 @@ def check_data(list_keys=None):
     list_keys: optional callable(system id) -> set of bucket keys in that system's folder; when given, every
     key the lists and sets name must be among them."""
     problems = []
+    for s in store.repo_json("systems"):
+        sid = s.get("screenscraper")
+        if sid is not None and (not isinstance(sid, int) or isinstance(sid, bool)):
+            problems.append(f"systems.json: {s['bucket']}: screenscraper must be an integer")
     wanted = {}  # where -> [(system, key)] for the bucket check
     systems = {s["bucket"] for s in store.repo_json("systems")}
     devices = {d["id"] for d in store.repo_json("devices")}
