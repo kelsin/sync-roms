@@ -114,7 +114,7 @@ You pick a device, then the firmware it runs (a device with only one isn't asked
 | `muos` | `ROMS/` `MUOS/bios/` | [muOS](https://muos.dev/) on the Anbernic H700 handhelds, RG CubeXX and RG Vita Pro. Folder names are matched ignoring case and separators |
 | `slot` | `Games/` `BIOS/` | [slot](https://slot-cfw.fyi) on the RG SP, RG34XX, RG34XX SP, RG35XX SP, RG35XX Plus, RG28XX and RG35XX H. Game Boy, Game Boy Color and Game Boy Advance only. ROMs are extracted from their archives and go straight into the system folder, never subfolders |
 | `onion` | `Roms/` `BIOS/` | Miyoo Mini Flip, on [Onion](https://onionui.github.io/) or [Allium](https://github.com/goweiwen/Allium) (Allium reads the Onion card layout). The `Imgs/` box art is shared; Allium's own `gameslist.xml` isn't written |
-| `emudeck` | `Emulation/roms/` `Emulation/bios/` | [EmuDeck](https://emudeck.github.io/) on the Steam Deck and Steam Machine. Wii U, Xbox 360 and Model 2 ROMs go in a `roms/` subfolder of their system folder. No scrapes |
+| `emudeck` | `Emulation/roms/` `Emulation/bios/` | [EmuDeck](https://emudeck.github.io/) on the Steam Deck and Steam Machine. Wii U, Xbox 360 and Model 2 ROMs go in a `roms/` subfolder of their system folder. Scraped media only, no gamelists |
 
 Folder names are case-sensitive. Folders that don't exist are shown as
 "will be created" and are created after you confirm. If they can't be created
@@ -174,6 +174,7 @@ Then:
    | `onion` | `<system>/Imgs/Game.png`, the 250x360 box art prepared at upload | `<system>/miyoogamelist.xml` with name and image |
    | `muos` | `MUOS/info/catalogue/<system>/box/Game.png` (cover, then 3D box) and `preview/Game.png` (screenshot, then title screen), as uploaded | `text/Game.txt` with the description |
    | `slot` | `Labels/<system>/Game.png`, the cart label prepared at upload | none |
+   | `emudeck` | `Emulation/tools/downloaded_media/<system>/<type>/…` (every type) | none: ES-DE keeps gamelists in `~/ES-DE`, off the card |
 
    muOS and Slot keep their media in folders of their own, flat even for ROMs in subfolders. An existing
    `.txt` is rewritten only when the description differs.

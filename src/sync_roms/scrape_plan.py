@@ -151,7 +151,9 @@ KNULLI_SUFFIXES = {"image", "thumb", "marquee", "fanart", "boxback", "titleshot"
 GAMELIST_FILES = {"esde": "gamelist.xml", "knulli": "gamelist.xml", "onion": "miyoogamelist.xml"}
 # muOS catalogue art, MUOS/info/catalogue/<system's muos_catalogue>/<folder>/<ROM name>.<ext>, and the media types that fill it
 MUOS_MEDIA = (("box", ("covers", "3dboxes")), ("preview", ("screenshots", "titlescreens")))
-SCRAPE_LAYOUTS = set(GAMELIST_FILES) | {"muos", "slot"}
+# EmuDeck gets media only: ES-DE keeps its gamelists in the home folder, which is not on the card
+SCRAPE_LAYOUTS = set(GAMELIST_FILES) | {"muos", "slot", "emudeck"}
+EMUDECK_MEDIA = os.path.join("Emulation", "tools", "downloaded_media")
 
 
 def gamelist_fields(meta):
@@ -211,10 +213,12 @@ def plan_scrapes(layout_name, rom_rels, listing, meta, media_root, rom_dir, pres
                 key, size = found[SLOT_TYPE]
                 add(key, media_root, base + ".png", size)
             continue
-        if layout_name == "esde":
+        if layout_name in ("esde", "emudeck"):
             for mtype, (key, size) in found.items():
                 if mtype in MEDIA_TYPES:  # not the Onion-only art
                     add(key, media_root, f"{mtype}/{key.split('/', 3)[3]}", size)
+            if layout_name == "emudeck":
+                tags = {}
         elif layout_name == "knulli":
             for tag, folder, suffix, types in KNULLI_MEDIA:
                 mtype = next((t for t in types if t in found), None)
@@ -399,6 +403,8 @@ def media_root_of(layout_name, system, base, es_dir):
         return os.path.join(base, "MUOS", "info", "catalogue", system["muos_catalogue"])
     if layout_name == "slot":
         return os.path.join(base, "Labels", system["folders"]["slot"])
+    if layout_name == "emudeck":
+        return os.path.join(base, EMUDECK_MEDIA, system["bucket"])
     return os.path.join(es_dir, "downloaded_media", system["bucket"])
 
 
@@ -500,12 +506,12 @@ def stale_media(layout_name, systems, roms_dir, es_dir, base=None):
         if not rom_dir or rom_dir in seen or not os.path.isdir(rom_dir):
             continue
         seen.add(rom_dir)
-        stems = card_stems(rom_dir, layout_name != "esde", layout_name == "onion")
-        if layout_name == "esde":
+        stems = card_stems(rom_dir, layout_name not in ("esde", "emudeck"), layout_name == "onion")
+        if layout_name in ("esde", "emudeck"):
             for mtype in sorted(MEDIA_TYPES):
-                base = os.path.join(es_dir, "downloaded_media", folder, mtype)
-                stale += [full for rel, full in walk_files(base) if os.path.splitext(rel)[0] not in stems] \
-                    if os.path.isdir(base) else []
+                media = os.path.join(media_root_of(layout_name, s, base, es_dir), mtype)
+                stale += [full for rel, full in walk_files(media) if os.path.splitext(rel)[0] not in stems] \
+                    if os.path.isdir(media) else []
         elif layout_name == "knulli":
             for sub in ("images", "videos", "manuals"):
                 base = os.path.join(rom_dir, sub)

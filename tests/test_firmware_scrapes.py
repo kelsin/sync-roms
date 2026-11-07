@@ -70,6 +70,30 @@ class MuosPlanTest(unittest.TestCase):
             self.assertEqual(scrape_plan.build_scrape_plan(*args)["writes"], [])
 
 
+class EmudeckPlanTest(unittest.TestCase):
+    def test_media_goes_in_emulation_tools_with_no_gamelist(self):
+        with tempfile.TemporaryDirectory() as base:
+            data = {"gba": (LISTING, META)}
+            plan = scrape_plan.build_scrape_plan("emudeck", [GBA], data, {}, {}, {"gba": ["A.zip"]}, lambda s: "/x",
+                                                 os.path.join(base, "ES-DE"), lambda p: True, base)
+            media = os.path.join(base, "Emulation", "tools", "downloaded_media", "gba")
+            self.assertEqual(sorted(j[1] for j in plan["jobs"]),
+                             sorted([os.path.join(media, "covers", "A.png"), os.path.join(media, "screenshots", "A.jpg"),
+                                     os.path.join(media, "3dboxes", "A.png")]))
+        self.assertEqual((plan["gamelists"], plan["extras"], plan["writes"]), ({}, [], []))
+
+    def test_stale_media_is_found_in_the_emudeck_media_folder(self):
+        with tempfile.TemporaryDirectory() as base:
+            media = os.path.join(base, "Emulation", "tools", "downloaded_media", "wiiu", "covers")
+            touch(os.path.join(media, "Keep.png"))
+            touch(os.path.join(media, "Gone.png"))
+            touch(os.path.join(base, "Emulation", "roms", "wiiu", "roms", "Keep.rpx"))
+            system = {"bucket": "wiiu", "folders": {"emudeck": "wiiu/roms"}}
+            stale = scrape_plan.stale_media("emudeck", [system], os.path.join(base, "Emulation", "roms"),
+                                            os.path.join(base, "ES-DE"), base)
+        self.assertEqual([os.path.basename(p) for p in stale], ["Gone.png"])
+
+
 class SlotPlanTest(unittest.TestCase):
     def test_label_goes_in_labels_named_after_the_rom(self):
         with tempfile.TemporaryDirectory() as root:
