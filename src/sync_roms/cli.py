@@ -40,11 +40,11 @@ TOPICS = {
       firmware. Remembered per card folder name and used without asking next time; --ask confirms it first.
       --device/--layout set it without the picker (and save it).
    2. Toggle systems (--systems a,b or --systems all skips the picker).
-   3. Totals and free space are shown and you confirm; ROMs download, then BIOS.
+   3. Local ROMs no longer in a chosen system's list, or in a system with no games listed, are listed and, after you confirm (default no), deleted first so the free space shown is accurate.
+      Then totals and free space are shown and you confirm; ROMs download, then BIOS.
    4. Scraped data for the chosen systems' games is installed from the bucket's scrapes/ folder, then media on the
       card for ROMs it doesn't have is removed.
-   5. Local ROMs no longer in a chosen system's list, or in a system with no games listed, are listed and, after you confirm (default no), deleted.
-      Other systems' folders and BIOS are never touched.
+   5. Other systems' folders and BIOS are never touched.
 
   --dry-run   show what would be downloaded and deleted, change nothing
   --yes       answer every prompt with its default (a default-no prompt, like deleting files, stays no)
@@ -125,7 +125,7 @@ TOPICS = {
   sync-roms mirror use DIR               refresh DIR, then save it so every sync refreshes it first and copies from it
   sync-roms mirror clear                 forget the saved mirror (its files stay)
 
-  Files no longer referenced are deleted (after confirming when it is a lot); nothing is deleted if a download failed.
+  Files no longer referenced are deleted (after confirming when it is a lot).
 """,
     "config": """
   sync-roms config show      the effective bucket, endpoint, profiles and mirror, and where each came from
@@ -684,6 +684,24 @@ def run(argv):
                       f"delete {len(extras)} local ROM(s) and {stale_count} media file(s); {len(missing)} listed ROM(s) not in the bucket"))
         return 0
 
+    if extras:  # cleared first so the free space shown below is what the downloads really get
+        print(ui.bold(f"\n🗑️  {len(extras)} local ROM(s) are no longer in the selection"))
+        for path in extras[:10]:
+            print(ui.dim(f"     {path}"))
+        if len(extras) > 10:
+            print(ui.dim(f"     … and {len(extras) - 10} more"))
+        answer = ui.choose(f"Delete these {len(extras)} local file(s) ({ui.human_size(sum(os.path.getsize(p) for p in extras))})?", "ynl", "n", "y yes · n no · l list all")
+        while answer == "l":
+            for path in extras:
+                print(ui.dim(f"     {path}"))
+            answer = ui.choose(f"Delete these {len(extras)} local file(s)?", "yn", "n")
+        if answer == "y":
+            for path in extras:
+                os.remove(path)
+            print(ui.green(f"  🧹 Deleted {len(extras)} file(s)"))
+        else:
+            print(ui.yellow("  ↩️  Keeping them"))
+
     todo_all = rom_todo + bios_todo
     if todo_all:
         need = sum(j[2] or 0 for j in todo_all)
@@ -691,20 +709,7 @@ def run(argv):
         print(f"💾 Free on the card: {ui.human_size(free)}")
         if need > free:
             print(ui.red(f"❌ Not enough space: {ui.human_size(need)} to download, {ui.human_size(free)} free"))
-            freed = sum(os.path.getsize(p) for p in extras)
-            if extras and need <= free + freed:  # the downloads only fit once the unwanted ROMs are gone
-                if ui.confirm(f"Delete the {len(extras)} local ROM(s) no longer in the selection first "
-                              f"(frees {ui.human_size(freed)})?", default=False):
-                    for path in extras:
-                        os.remove(path)
-                    print(ui.green(f"  🧹 Deleted {len(extras)} file(s)"))
-                    extras = []
-                    free = free_space(base)
-                    print(f"💾 Free on the card: {ui.human_size(free)}")
-                elif not ui.confirm("Try anyway?", default=False):
-                    print(ui.yellow("👋 Cancelled."))
-                    return 0
-            elif not ui.confirm("Try anyway?", default=False):
+            if not ui.confirm("Try anyway?", default=False):
                 print(ui.yellow("👋 Cancelled."))
                 return 0
         if not ui.confirm(f"⬇️  Download {len(todo_all)} file(s) ({ui.human_size(need)})?"):
@@ -725,26 +730,6 @@ def run(argv):
             failed += 1
             failures.append((os.path.relpath(path, roms_dir), error))
             print(ui.red(f"  ❌ {os.path.relpath(path, roms_dir)}: {error}"))
-
-    if extras and failed:
-        print(ui.yellow(f"\n⚠️  Keeping the {len(extras)} local ROM(s) no longer in the selection: {failed} download(s) failed"))
-    elif extras:  # only after the downloads worked, so a failed run never leaves the card with fewer games
-        print(ui.bold(f"\n🗑️  {len(extras)} local ROM(s) are no longer in the selection"))
-        for path in extras[:10]:
-            print(ui.dim(f"     {path}"))
-        if len(extras) > 10:
-            print(ui.dim(f"     … and {len(extras) - 10} more"))
-        answer = ui.choose(f"Delete these {len(extras)} local file(s)?", "ynl", "n", "y yes · n no · l list all")
-        while answer == "l":
-            for path in extras:
-                print(ui.dim(f"     {path}"))
-            answer = ui.choose(f"Delete these {len(extras)} local file(s)?", "yn", "n")
-        if answer == "y":
-            for path in extras:
-                os.remove(path)
-            print(ui.green(f"  🧹 Deleted {len(extras)} file(s)"))
-        else:
-            print(ui.yellow("  ↩️  Keeping them"))
 
     stale = []
     if scrapes:

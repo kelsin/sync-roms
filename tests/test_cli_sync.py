@@ -72,13 +72,18 @@ class SyncSmokeTest(unittest.TestCase):
                 f.write(b"x" * size)
         return prepare
 
-    def test_space_check_counts_the_unwanted_roms_that_can_be_deleted(self):
-        asked = []
-        patches = ((cli, {"free_space": lambda path: 3}),
+    def test_unwanted_roms_are_deleted_before_the_space_check(self):
+        asked, old = [], []
+
+        def prepare(card):
+            self.old_rom(100)(card)
+            old.append(os.path.join(card, "ROMs", "gba", "Old.zip"))
+
+        patches = ((cli, {"free_space": lambda path: 1000 if old and not os.path.exists(old[0]) else 3}),
                    (cli.ui, {"confirm": lambda q, default=True: asked.append(q) or True,
                              "choose": lambda *a, **k: "y"}))
-        self.assertEqual(self.run_sync(False, prepare=self.old_rom(100), patches=patches), 0)
-        self.assertTrue(any("Delete" in q and "first" in q for q in asked), asked)
+        self.assertEqual(self.run_sync(False, prepare=prepare, patches=patches), 0)
+        self.assertFalse(os.path.exists(old[0]))
         self.assertFalse(any("Try anyway" in q for q in asked), asked)
 
     def test_roms_of_systems_with_nothing_to_sync_are_extras(self):
@@ -96,7 +101,7 @@ class SyncSmokeTest(unittest.TestCase):
                 patches = ((store, {"load_manifest": lambda names=(): manifest}),
                            (cli.ui, {"choose": lambda q, *a, **k: asked.append(q) or "n"}))
                 self.run_sync(False, lambda rows, present, state, editable: picked, prepare=prepare, patches=patches)
-                self.assertEqual([q for q in asked if q.startswith("Delete these")], ["Delete these 1 local file(s)?"])
+                self.assertEqual([q for q in asked if q.startswith("Delete these")], ["Delete these 1 local file(s) (0 B)?"])
 
     def test_declining_the_space_prompt_exits_0(self):
         patches = ((cli, {"free_space": lambda path: 3}), (cli.ui, {"confirm": lambda q, default=True: False}))

@@ -256,7 +256,7 @@ Without a terminal and without those flags the pickers fail with the flag to use
 
 Exit codes: `0` done (or nothing to do, or you declined), `1` some files failed, `2` bad usage, `3` setup problem (credentials, bucket, missing tool, unreadable data file), `130` interrupted. Errors go to stderr; `NO_COLOR` and `FORCE_COLOR` control colors.
 
-Before downloading, the sync shows the totals and free space on the card and asks. Local ROMs no longer in the selection are deleted only after the downloads succeeded.
+Before downloading, the sync shows the totals and free space on the card and asks. Local ROMs no longer in the selection are listed and deleted first (after you confirm), so the free space shown is accurate.
 
 ### Options
 
