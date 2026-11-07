@@ -2,10 +2,9 @@
 import mimetypes
 import os
 import queue
-import shutil
 import tempfile
 import threading
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, TimeoutError as FutureTimeout
 
 from boto3.s3.transfer import TransferConfig, create_transfer_manager
 from botocore.exceptions import BotoCoreError, ClientError
@@ -69,27 +68,44 @@ def run_copies(todo):
     """run_uploads for a storage folder: copy (key, path, size[, shrink]) jobs into it. Returns the failure count."""
     print(ui.bold(f"\n📁 Copying {len(todo)} file(s)") + ui.dim(f"  to {runtime.ROOT}"))
 
-    def copy(job):
+    order = sorted(todo, key=lambda j: -j[2])
+    moved = ui.ByteProgress([j[2] for j in order])
+    bar = ui.ProgressBar(len(todo), moved.fraction, sum(moved.size))
+
+    def copy(n):
+        job = order[n]
         try:
             def write(tmp):
                 if len(job) > 3:
                     scrape_plan.shrink_png(job[1], tmp, job[3])
                 else:
-                    shutil.copyfile(job[1], tmp)
+                    s3.copy_file(job[1], tmp, lambda b: moved.add(n, b))
             s3.write_file(job[0], write)
             return job, None
         except Exception as e:
             return job, e
 
     failed = 0
-    with ThreadPoolExecutor(runtime.WORKERS) as ex:
-        for i, (job, error) in enumerate(ex.map(copy, sorted(todo, key=lambda j: -j[2])), 1):
-            prog = ui.dim(f"[{i}/{len(todo)}]")
-            if error is None:
-                print(f"  {prog} ✅ {job[0]}")
-            else:
-                failed += 1
-                print(f"  {prog} ❌ {ui.red(job[0])}: {str(error).strip()}")
+    try:
+        with ThreadPoolExecutor(runtime.WORKERS) as ex:
+            futs = [ex.submit(copy, n) for n in range(len(order))]
+            for i, f in enumerate(futs, 1):
+                while True:
+                    try:
+                        job, error = f.result(timeout=0.25)
+                        break
+                    except FutureTimeout:
+                        bar.draw(i - 1)
+                moved.finish(i - 1)
+                prog = ui.dim(f"[{i}/{len(todo)}]")
+                if error is None:
+                    bar.say(f"  {prog} ✅ {job[0]}")
+                else:
+                    failed += 1
+                    bar.say(f"  {prog} ❌ {ui.red(job[0])}: {str(error).strip()}")
+                bar.draw(i)
+    finally:
+        bar.clear()
     return failed
 
 

@@ -1,0 +1,42 @@
+import contextlib
+import io
+import os
+import sys
+import unittest
+from unittest import mock
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.join(ROOT, "src"))
+from sync_roms import ui  # noqa: E402
+
+
+class SpeedWindowTest(unittest.TestCase):
+    def draw_at(self, bar, now, fraction):
+        out = io.StringIO()
+        bar.fraction = lambda: fraction
+        with mock.patch.object(ui.time, "monotonic", return_value=now), contextlib.redirect_stdout(out):
+            bar.shown = True
+            bar.draw(0)
+        return out.getvalue()
+
+    def test_speed_is_the_recent_rate_not_the_run_average(self):
+        with mock.patch.object(ui.time, "monotonic", return_value=0):
+            bar = ui.ProgressBar(1, lambda: 0, 1000 * 1024 * 1024)
+        self.draw_at(bar, 0, 0.0)
+        self.draw_at(bar, 10, 0.5)  # slow start would average to 50 MB/s over 10s
+        line = self.draw_at(bar, 12, 0.6)  # but the last window moved 100 MB in 2s
+        self.assertIn("50.0 MB/s", line)
+        line = self.draw_at(bar, 14, 0.8)  # window now spans 10s..14s: 300 MB in 4s
+        self.assertIn("75.0 MB/s", line)
+
+    def test_stalled_transfer_shows_no_eta(self):
+        with mock.patch.object(ui.time, "monotonic", return_value=0):
+            bar = ui.ProgressBar(1, lambda: 0, 1024)
+        self.draw_at(bar, 0, 0.5)
+        line = self.draw_at(bar, 3, 0.5)
+        self.assertIn("0 B/s", line)
+        self.assertNotIn("left", line)
+
+
+if __name__ == "__main__":
+    unittest.main()

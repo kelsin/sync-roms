@@ -119,6 +119,19 @@ class MirrorListTest(unittest.TestCase):
                 self.assertEqual(s3.list_sizes("gba/"), {"gba/a.zip": 3})
 
 
+class CopyFileTest(unittest.TestCase):
+    def test_copies_and_reports_every_byte(self):
+        with tempfile.TemporaryDirectory() as d:
+            src, dst, seen = os.path.join(d, "a"), os.path.join(d, "b"), []
+            with open(src, "wb") as f:
+                f.write(b"x" * (2 * 1024 * 1024 + 5))
+            s3.copy_file(src, dst, seen.append)
+            with open(dst, "rb") as f:
+                self.assertEqual(f.read(), b"x" * (2 * 1024 * 1024 + 5))
+            self.assertEqual(sum(seen), 2 * 1024 * 1024 + 5)
+            self.assertEqual(len(seen), 3)
+
+
 class SafeJoinTest(unittest.TestCase):
     def test_rejects_keys_that_escape_the_base(self):
         for rel in ("../x", "a/../../x", "/etc/passwd", "", "a\\..\\..\\x"):
