@@ -2,6 +2,7 @@ import getpass
 import io
 import json
 import os
+import re
 import stat
 import sys
 import tempfile
@@ -27,6 +28,18 @@ class Translate(unittest.TestCase):
         self.assertEqual(cli.translate(["scrape", "match", "gba", "a.zip", "123"]), ["--scrape-match", "gba", "a.zip", "123"])
         self.assertEqual(cli.translate(["scrape", "match", "-n", "gba", "a b.zip", "Metroid Fusion"]),
                          ["--scrape-match", "gba", "a b.zip", "Metroid Fusion", "-n"])
+
+    def test_match_values_starting_with_a_dash(self):
+        self.assertEqual(cli.translate(["scrape", "match", "gba", "a.zip", "-1"]), ["--scrape-match", "gba", "a.zip", "-1"])
+        self.assertEqual(cli.translate(["scrape", "match", "gba", "-x.zip", "-Foo", "-n"]),
+                         ["--scrape-match", "gba", "-x.zip", "-Foo", "-n"])
+        self.assertEqual(cli.translate(["scrape", "match", "gba", "-x.zip", "Foo"]), ["--scrape-match", "gba", "-x.zip", "Foo"])
+        for argv, want in ((["scrape", "match", "gba", "a.zip", "-1"], ["gba", "a.zip", "-1"]),
+                           (["scrape", "match", "-n", "gba", "-x.zip", "-Foo"], ["gba", "-x.zip", "-Foo"])):
+            with self.subTest(argv=argv):
+                args = cli.build_parser().parse_args(cli.translate(argv))
+                self.assertEqual(args.scrape_match, want)
+                self.assertEqual(cli.check_modes(args), "--scrape-match")
 
     def test_parses(self):
         args = cli.build_parser().parse_args(cli.translate(["scrape", "match", "-n", "gba", "a.zip", "123"]))
@@ -144,6 +157,23 @@ class SetCredentials(unittest.TestCase):
         for value in list(saved.values()) + ["newdev"]:
             self.assertNotIn(value, out)
 
+    def test_all_blank_says_nothing_changed(self):
+        saved = {"screenscraper_user": "me"}
+        code, out = self.run_it(["", ""], ["", ""], saved)
+        self.assertEqual(code, 0)
+        self.assertNotIn("Saved", out)
+        self.assertIn("Nothing changed", out)
+
+    def test_ctrl_c_saves_nothing(self):
+        out = io.StringIO()
+        with mock.patch("builtins.input", side_effect=["me", "dev1"]), \
+                mock.patch.object(getpass, "getpass", side_effect=KeyboardInterrupt), \
+                mock.patch("sys.stdout", out), mock.patch("sys.stderr", out):
+            code = scrape_online.set_credentials()
+        self.assertEqual(code, 130)
+        self.assertFalse(os.path.exists(self.path))
+        self.assertIn("not saved", out.getvalue())
+
     def test_eof_saves_nothing_more(self):
         with mock.patch("builtins.input", side_effect=EOFError), mock.patch("sys.stdout", io.StringIO()), mock.patch("sys.stderr", io.StringIO()):
             with self.assertRaises(SystemExit):
@@ -154,7 +184,10 @@ class SetCredentials(unittest.TestCase):
 class Completion(unittest.TestCase):
     def test_lists_scrape_and_flags(self):
         text = script_for("bash")
-        for word in ("scrape", "match", "--retry", "--skip-media", "--set-credentials"):
+        commands_line = re.search(r'-eq 1 \].*?compgen -W "([^"]*)"', text).group(1).split()
+        self.assertIn("scrape", commands_line)
+        self.assertIn('scrape) COMPREPLY=($(compgen -W "match"', text)
+        for word in ("--retry", "--skip-media", "--set-credentials"):
             self.assertIn(word, text)
 
 

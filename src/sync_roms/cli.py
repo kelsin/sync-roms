@@ -292,8 +292,20 @@ def list_devices(args=None):
 
 
 class Parser(argparse.ArgumentParser):
+    literal = frozenset()  # the values after --scrape-match that start with a dash: values, never options
+
     def error(self, message):
         ui.fail(f"{message}\n   Try 'sync-roms --help'.", 2)
+
+    def parse_known_args(self, args=None, namespace=None):
+        args = list(sys.argv[1:] if args is None else args)
+        if "--scrape-match" in args:
+            i = args.index("--scrape-match")
+            self.literal = frozenset(a for a in args[i + 1:i + 4] if a.startswith("-"))
+        return super().parse_known_args(args, namespace)
+
+    def _parse_optional(self, arg_string):
+        return None if arg_string in self.literal else super()._parse_optional(arg_string)
 
 
 # subcommand -> the legacy flags it stands for. {rest} are its remaining arguments.
@@ -326,18 +338,10 @@ def translate(argv):
             if not flags:
                 return head + tail
             if words == ("scrape", "match"):  # three values that must stay together, behind the flag
-                values, others, n = [], [], 0
-                while n < len(tail):
-                    if tail[n] in VALUE_FLAGS and n + 1 < len(tail):
-                        others += tail[n:n + 2]
-                        n += 2
-                    elif len(values) < 3 and not tail[n].startswith("-"):
-                        values.append(tail[n])
-                        n += 1
-                    else:
-                        others.append(tail[n])
-                        n += 1
-                return head + flags + values + others
+                n = 0  # flags may come first; from the first value on, the next three words are the values
+                while n < len(tail) and tail[n].startswith("-"):
+                    n += 2 if tail[n] in VALUE_FLAGS else 1
+                return head + flags + tail[n:n + 3] + tail[:n] + tail[n + 3:]
             n = 0  # flags (and the values of value flags) before the mode's value (`diff -n /x`) move behind it
             while n < len(tail) and (tail[n] in PLAIN_FLAGS or tail[n] in VALUE_FLAGS):
                 n += 1 if tail[n] in PLAIN_FLAGS else 2
