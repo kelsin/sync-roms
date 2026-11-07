@@ -10,14 +10,17 @@ from unittest import mock
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "src"))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from realdir_guard import RealDataDirGuard  # noqa: E402
 from sync_roms import commands, store, usersettings  # noqa: E402
 
 CREDENTIALS = {"screenscraper_user": "u-secret", "screenscraper_password": "p-secret",
                "screenscraper_devid": "d-secret", "screenscraper_devpassword": "dp-secret"}
 
 
-class SettingsPermissionsTest(unittest.TestCase):
+class SettingsPermissionsTest(RealDataDirGuard):
     def setUp(self):
+        super().setUp()
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)
         p = mock.patch.object(store, "data_dir", lambda: self.tmp.name)

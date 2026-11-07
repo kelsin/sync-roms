@@ -10,6 +10,8 @@ from unittest import mock
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "src"))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from realdir_guard import RealDataDirGuard  # noqa: E402
 from sync_roms import commands, runtime, s3, scrape_online, scrape_state, screenscraper, store  # noqa: E402
 
 SYSTEM = {"bucket": "gba", "screenscraper": 12}
@@ -30,8 +32,9 @@ class FakeClient:
         return {"id": 77, "rom": {"rommd5": "0" * 32}}
 
 
-class MatchBase(unittest.TestCase):
+class MatchBase(RealDataDirGuard):
     def setUp(self):
+        super().setUp()
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)
         self.root = os.path.join(self.tmp.name, "storage")
@@ -153,7 +156,7 @@ class HashAndMatchTest(MatchBase):
             scrape_online.match(FakeClient(), SYSTEM, "a.zip", 3, '"abc-2"')
 
 
-class CheckNoticeTest(unittest.TestCase):
+class CheckNoticeTest(RealDataDirGuard):
     def test_check_notes_systems_without_screenscraper_id_but_passes(self):
         real = store.repo_json
 
