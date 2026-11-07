@@ -1,3 +1,4 @@
+import http.client
 import io
 import json
 import os
@@ -120,6 +121,30 @@ class ClientTests(unittest.TestCase):
             client(boom).lookup(12, "g.gba", 1)
         self.assertNotIn(PASSWORD, str(cm.exception))
         self.assertNotIn("DEVSECRET", str(cm.exception))
+
+        def invalid(req, timeout=None):
+            raise http.client.InvalidURL("bad " + req.full_url)
+        with self.assertRaises(ss.ApiError) as cm:
+            client(invalid).lookup(12, "g.gba", 1)
+        self.assertNotIn(PASSWORD, str(cm.exception))
+        self.assertNotIn("DEVSECRET", str(cm.exception))
+
+        def truncated(req, timeout=None):
+            class Cut(Resp):
+                def read(self, n=-1):
+                    raise http.client.IncompleteRead(req.full_url.encode())
+            return Cut(b"")
+        secret = f"?ssid=me&sspassword={PASSWORD}&devpassword=DEVSECRET"
+        with tempfile.TemporaryDirectory() as d:
+            for url, opener in ((f"https://m.example/a b{secret}", lambda r, timeout=None: Resp(b"x")),
+                                (f"https://m.example/a\x01{secret}", lambda r, timeout=None: Resp(b"x")),
+                                (f"file:///etc/passwd{secret}", lambda r, timeout=None: Resp(b"x")),
+                                (f"https://m.example/a{secret}", truncated)):
+                with self.subTest(url=url[:30]), self.assertRaises(ss.ApiError) as cm:
+                    client(opener).download(url, os.path.join(d, "a.png"))
+                self.assertNotIn(PASSWORD, str(cm.exception))
+                self.assertNotIn("DEVSECRET", str(cm.exception))
+                self.assertFalse(os.path.exists(os.path.join(d, "a.png.part")))
 
     def test_search_and_game(self):
         body = json.dumps({"response": {"jeux": [{"id": "5", "noms": [{"region": "us", "text": "Foo"}]}, {"x": 1}]}})

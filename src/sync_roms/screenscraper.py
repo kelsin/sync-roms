@@ -4,6 +4,7 @@ Every ScreenScraper-specific string (endpoints, JSON keys, media types, HTTP cod
 CONSTANTS block below. The JSON nesting is from memory and unverified against live responses, so
 parsing skips anything missing instead of failing.
 """
+import http.client
 import json
 import os
 import urllib.error
@@ -151,8 +152,12 @@ class Client:
         self._opener = opener
 
     def _open(self, url):
-        req = urllib.request.Request(url, headers={"User-Agent": f"sync-roms/{__version__}"})
+        """The response for a URL. Every error is turned into one of ours whose text never holds the URL (its query
+        carries the credentials)."""
         try:
+            if urllib.parse.urlsplit(url).scheme not in ("http", "https") or any(c <= " " or c == "\x7f" for c in url):
+                raise ValueError("bad URL")
+            req = urllib.request.Request(url, headers={"User-Agent": f"sync-roms/{__version__}"})
             return self._opener(req, timeout=TIMEOUT)
         except urllib.error.HTTPError as e:
             if e.code == HTTP_NOT_FOUND:
@@ -162,13 +167,18 @@ class Client:
             if e.code == HTTP_RATE_LIMIT:
                 raise RateLimited(f"ScreenScraper is rate limiting requests (HTTP {e.code})") from None
             raise ApiError(f"ScreenScraper request failed (HTTP {e.code})") from None
-        except (urllib.error.URLError, OSError) as e:
+        except (urllib.error.URLError, OSError, http.client.HTTPException) as e:
             raise ApiError(f"ScreenScraper request failed ({type(e).__name__})") from None
+        except ValueError:  # a malformed URL (http.client.InvalidURL is an HTTPException, caught above)
+            raise ApiError("ScreenScraper returned a bad URL") from None
 
     def _get(self, endpoint, **params):
         query = urllib.parse.urlencode({**self._auth, "output": "json", **params})
-        with self._open(f"{BASE_URL}{endpoint}?{query}") as resp:
-            body = resp.read().decode("utf-8", "replace")
+        try:
+            with self._open(f"{BASE_URL}{endpoint}?{query}") as resp:
+                body = resp.read().decode("utf-8", "replace")
+        except (OSError, http.client.HTTPException) as e:  # cut short or timed out while reading
+            raise ApiError(f"ScreenScraper request failed ({type(e).__name__})") from None
         if body.lstrip().startswith(NOT_FOUND_PREFIX):
             raise NotFound("not found")
         try:
@@ -214,6 +224,8 @@ class Client:
                 while chunk := resp.read(1 << 16):
                     f.write(chunk)
             os.replace(part, dest)
+        except (OSError, http.client.HTTPException) as e:  # cut short or timed out while reading, or a local write
+            raise ApiError(f"ScreenScraper download failed ({type(e).__name__})") from None
         finally:
             if os.path.exists(part):
                 os.remove(part)

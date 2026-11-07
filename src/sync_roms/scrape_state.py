@@ -72,11 +72,13 @@ def mark_unknown(system, rom):
         _save("scrape-unknown.json", data)
 
 
-def clear_unknown(system=None):
-    """Forget the unknown ROMs of one system, or of every system."""
+def clear_unknown(system=None, rom=None):
+    """Forget one unknown ROM, the unknown ROMs of one system, or those of every system."""
     with _lock:
         data = _load("scrape-unknown.json")
-        if system is not None:
+        if rom is not None:
+            data.pop(_key(system, rom), None)
+        elif system is not None:
             data = {k: v for k, v in data.items() if not k.startswith(system + "/")}
         else:
             data = {}
