@@ -4,6 +4,7 @@ import os
 import re
 import stat
 import sys
+import tempfile
 
 from . import runtime, store, ui
 
@@ -33,6 +34,27 @@ def load_settings():
     return settings if isinstance(settings, dict) else {}
 
 
+def save_settings(settings):
+    """Replace settings.json with settings in one atomic write: a mode 600 temp file in the same folder, then a rename."""
+    tmp = None
+    try:
+        os.makedirs(store.data_dir(), exist_ok=True)
+        path = os.path.join(store.data_dir(), "settings.json")
+        fd, tmp = tempfile.mkstemp(dir=store.data_dir(), prefix=".settings-", suffix=".tmp")  # created mode 600
+        with os.fdopen(fd, "w") as f:
+            json.dump(settings, f, indent=2, sort_keys=True)
+            f.flush()
+            os.fsync(f.fileno())
+        os.replace(tmp, path)
+        tmp = None
+        _private(path)
+    except OSError as e:
+        ui.fail(f"Couldn't save the setting: {e}", 3)
+    finally:
+        if tmp and os.path.exists(tmp):
+            os.remove(tmp)
+
+
 def save_setting(name, value):
     """Set a global setting, or remove it when value is None."""
     settings = load_settings()
@@ -40,16 +62,7 @@ def save_setting(name, value):
         settings.pop(name, None)
     else:
         settings[name] = value
-    try:
-        os.makedirs(store.data_dir(), exist_ok=True)
-        path = os.path.join(store.data_dir(), "settings.json")
-        with os.fdopen(os.open(path, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600), "w") as f:
-            if sys.platform != "win32":  # an existing file keeps its mode through os.open: tighten it before writing
-                os.fchmod(f.fileno(), 0o600)
-            json.dump(settings, f, indent=2, sort_keys=True)
-        _private(path)
-    except OSError as e:
-        ui.fail(f"Couldn't save the setting: {e}", 3)
+    save_settings(settings)
 
 
 SETTINGS = (("bucket", "ROMS_BUCKET", None), ("root", "ROMS_ROOT", None), ("endpoint", "ROMS_ENDPOINT", None),

@@ -61,12 +61,40 @@ class SettingsPermissionsTest(unittest.TestCase):
         self.assertEqual(modes, [0o600])
         self.assertEqual(self.mode(), 0o600)
 
-    def test_save_skips_fchmod_on_windows(self):
+    def test_save_skips_chmod_on_windows(self):
         with mock.patch.object(usersettings.sys, "platform", "win32"), \
-                mock.patch.object(usersettings.os, "fchmod", create=True) as fchmod:
+                mock.patch.object(usersettings.os, "chmod") as chmod:
             usersettings.save_setting("bucket", "b")
-        fchmod.assert_not_called()
-        self.assertEqual(usersettings.load_settings(), {"bucket": "b"})
+            self.assertEqual(usersettings.load_settings(), {"bucket": "b"})
+        chmod.assert_not_called()
+
+    def test_save_is_atomic(self):
+        usersettings.save_setting("bucket", "old")
+        with mock.patch.object(usersettings.os, "replace", side_effect=OSError("disk full")), \
+                mock.patch("sys.stderr", io.StringIO()), self.assertRaises(SystemExit):
+            usersettings.save_setting("bucket", "new")
+        self.assertEqual(usersettings.load_settings(), {"bucket": "old"})
+        self.assertEqual(os.listdir(self.tmp.name), ["settings.json"])
+
+    def test_save_settings_writes_many_keys_once(self):
+        with mock.patch.object(usersettings.os, "replace", wraps=os.replace) as rep:
+            usersettings.save_settings({"bucket": "b", "root": "/r"})
+        self.assertEqual(rep.call_count, 1)
+        self.assertEqual(usersettings.load_settings(), {"bucket": "b", "root": "/r"})
+        self.assertEqual(self.mode(), 0o600)
+
+    def test_valid_json_not_an_object_loads_empty(self):
+        with open(self.path, "w") as f:
+            f.write("[1, 2]")
+        self.assertEqual(usersettings.load_settings(), {})
+
+    @unittest.skipIf(os.name != "posix" or os.geteuid() == 0, "needs a non-root POSIX user")
+    def test_unreadable_file_loads_empty(self):
+        with open(self.path, "w") as f:
+            f.write('{"bucket": "b"}')
+        os.chmod(self.path, 0)
+        self.addCleanup(os.chmod, self.path, 0o600)
+        self.assertEqual(usersettings.load_settings(), {})
 
     def test_load_missing_or_bad_json_is_empty_and_does_not_create_file(self):
         self.assertEqual(usersettings.load_settings(), {})

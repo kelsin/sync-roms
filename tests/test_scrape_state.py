@@ -92,6 +92,12 @@ class ScrapeStateTest(unittest.TestCase):
         self.assertFalse(scrape_state.is_unknown("gba", "a.zip"))
         self.assertTrue(scrape_state.is_unknown("gba", "b.zip"))
 
+    def test_save_uses_a_unique_temp_file(self):
+        os.makedirs(os.path.join(self.tmp.name, "scrape-matches.json.tmp"))  # a fixed temp name would be blocked
+        scrape_state.save_match("gba", "a.zip", 1)
+        self.assertEqual(scrape_state.manual_match("gba", "a.zip"), 1)
+        self.assertEqual(sorted(os.listdir(self.tmp.name)), ["scrape-matches.json", "scrape-matches.json.tmp"])
+
     def test_corrupt_file_reads_as_empty(self):
         for name in ("scrape-hashes.json", "scrape-matches.json", "scrape-unknown.json"):
             with open(os.path.join(self.tmp.name, name), "w") as f:
