@@ -234,6 +234,7 @@ Every mode is a command (`sync-roms COMMAND --help` explains one; plain `sync-ro
 | `sync [CARD]` | download ROMs, BIOS and scraped data to a card | (default) |
 | `games edit` | interactive list editor | `--edit` |
 | `games list\|add\|remove\|full\|sets\|export\|import` | edit lists from scripts, see below | |
+| `sets edit` | edit the repo's game sets by hand and open a PR (needs `git` and a logged-in `gh`) | |
 | `cards list\|new\|set\|rename\|delete` | manage cards | |
 | `devices [ID]` | list devices, or one device's systems (`--json`) | `--devices` |
 | `upload roms [DIR]` / `upload scrapes [CARD]` | upload to the bucket | `--upload`, `--upload-scrapes` |
@@ -420,6 +421,10 @@ Toggling the game adds or removes every file, one `games.json` entry each.
 Entries for an unknown system are skipped with a warning. Games of a full system show greyed out with a 🔒: they are always synced and can't be toggled.
 
 Removing a game only drops it from `games.json`; the file stays in the bucket.
+
+### Editing the built-in sets
+
+`sync-roms sets edit` edits the sets in this repo's `data/sets/` and opens a PR with the changes, so it works from any install. Pick a set to switch games off, add games from a system (you're asked for a category; existing ones are listed), change a game's category, or rename it. **➕ New set** creates a set and `^X` deletes the highlighted one (it warns if your `games.json` or a card still references it). Esc shows the changes; confirming clones `kelsin/sync-roms` to a temporary folder, writes the changed set files, pushes a branch and runs `gh pr create`. It needs `git` and a logged-in `gh`, and writes nothing to the bucket or to `~/.sync-roms`.
 
 ### Full systems
 
