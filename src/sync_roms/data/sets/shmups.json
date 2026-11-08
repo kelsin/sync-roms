@@ -515,44 +515,44 @@
     {
       "title": "1942",
       "category": "Other",
-      "system": "mame",
-      "bucket": "mame/1942.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/1942.zip"
     },
     {
       "title": "1943",
       "category": "Other",
-      "system": "mame",
-      "bucket": "mame/1943.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/1943.zip"
     },
     {
       "title": "1944: The Loop Master",
       "category": "Other",
-      "system": "mame",
-      "bucket": "mame/1944.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/1944.zip"
     },
     {
       "title": "R-Type",
       "category": "Other",
-      "system": "mame",
-      "bucket": "mame/rtypeu.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/rtypeu.zip"
     },
     {
       "title": "R-Type II",
       "category": "Other",
-      "system": "mame",
-      "bucket": "mame/rtype2.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/rtype2.zip"
     },
     {
       "title": "Gradius",
       "category": "Other",
-      "system": "mame",
-      "bucket": "mame/gradius.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/gradius.zip"
     },
     {
       "title": "Armed Police Batrider",
       "category": "Other",
-      "system": "mame",
-      "bucket": "mame/batrider.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/batrider.zip"
     },
     {
       "title": "Blazing Star",
@@ -569,14 +569,14 @@
     {
       "title": "Raiden",
       "category": "Other",
-      "system": "mame",
-      "bucket": "mame/raiden.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/raiden.zip"
     },
     {
       "title": "Raiden II",
       "category": "Other",
-      "system": "mame",
-      "bucket": "mame/raiden2.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/raiden2.zip"
     },
     {
       "title": "Raiden DX",
@@ -587,104 +587,86 @@
     {
       "title": "Vulcan Venture (Gradius II)",
       "category": "Other",
-      "system": "mame",
-      "bucket": "mame/vulcan.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/vulcan.zip"
     },
     {
       "title": "Gradius III",
       "category": "Other",
-      "system": "mame",
-      "bucket": "mame/gradius3.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/gradius3.zip"
     },
     {
       "title": "Life Force",
       "category": "Other",
-      "system": "mame",
-      "bucket": "mame/lifefrce.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/lifefrce.zip"
     },
     {
       "title": "TwinBee",
       "category": "Other",
-      "system": "mame",
-      "bucket": "mame/twinbee.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/twinbee.zip"
     },
     {
       "title": "Xexex",
       "category": "Other",
-      "system": "mame",
-      "bucket": "mame/xexex.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/xexex.zip"
     },
     {
       "title": "Darius",
       "category": "Other",
-      "system": "mame",
-      "bucket": "mame/darius.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/darius.zip"
     },
     {
       "title": "Darius II",
       "category": "Other",
-      "system": "mame",
-      "bucket": "mame/darius2.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/darius2.zip"
     },
     {
       "title": "Image Fight",
       "category": "Other",
-      "system": "mame",
-      "bucket": "mame/imgfight.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/imgfight.zip"
     },
     {
       "title": "Sorcer Striker",
       "category": "Other",
-      "system": "mame",
-      "bucket": "mame/sstriker.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/sstriker.zip"
     },
     {
       "title": "Truxton II",
       "category": "Other",
-      "system": "mame",
-      "bucket": "mame/truxton2.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/truxton2.zip"
     },
     {
       "title": "Batsugun",
       "category": "Other",
-      "system": "mame",
-      "bucket": "mame/batsugun.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/batsugun.zip"
     },
     {
       "title": "Flying Shark",
       "category": "Other",
-      "system": "mame",
-      "bucket": "mame/fshark.zip"
-    },
-    {
-      "title": "Gunbird",
-      "category": "Other",
-      "system": "mame",
-      "bucket": "mame/gunbird.zip"
-    },
-    {
-      "title": "Gunbird 2",
-      "category": "Other",
-      "system": "mame",
-      "bucket": "mame/gunbird2.zip"
-    },
-    {
-      "title": "Dragon Blaze",
-      "category": "Other",
-      "system": "mame",
-      "bucket": "mame/dragnblz.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/fshark.zip"
     },
     {
       "title": "19XX",
       "category": "Other",
-      "system": "mame",
-      "bucket": "mame/19xx.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/19xx.zip"
     },
     {
       "title": "Mars Matrix",
       "category": "Other",
-      "system": "mame",
-      "bucket": "mame/mmatrix.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/mmatrix.zip"
     },
     {
       "title": "Gradius III and IV",
@@ -939,12 +921,6 @@
       "bucket": "atari7800/Xevious (USA).zip"
     },
     {
-      "title": "Raiden (Rev A)",
-      "category": "Other",
-      "system": "atarijaguar",
-      "bucket": "atarijaguar/Raiden (World) (Rev A).zip"
-    },
-    {
       "title": "Gradius Collection",
       "category": "Other",
       "system": "psp",
@@ -997,12 +973,6 @@
       "category": "Other",
       "system": "psx",
       "bucket": "psx/Raiden Project, The (USA).chd"
-    },
-    {
-      "title": "Strikers 1945",
-      "category": "Other",
-      "system": "psx",
-      "bucket": "psx/Strikers 1945 (USA).chd"
     },
     {
       "title": "RayStorm",
@@ -1065,12 +1035,6 @@
       "bucket": "neogeocd/Pulstar (Japan) (En,Ja).chd"
     },
     {
-      "title": "Twinkle Star Sprites",
-      "category": "Other",
-      "system": "neogeocd",
-      "bucket": "neogeocd/Twinkle Star Sprites (Japan) (En,Ja).chd"
-    },
-    {
       "title": "Aero Fighters 2",
       "category": "Other",
       "system": "neogeocd",
@@ -1099,12 +1063,6 @@
       "category": "Other",
       "system": "wii",
       "bucket": "wii/Sin & Punishment - Star Successor (USA).rvz"
-    },
-    {
-      "title": "Ikaruga",
-      "category": "Other",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Ikaruga (Japan).chd"
     },
     {
       "title": "Rez",
@@ -1155,12 +1113,6 @@
       "bucket": "dreamcast/Border Down (Japan).chd"
     },
     {
-      "title": "Mars Matrix",
-      "category": "Other",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Mars Matrix (USA).chd"
-    },
-    {
       "title": "GigaWing",
       "category": "Other",
       "system": "dreamcast",
@@ -1185,12 +1137,6 @@
       "bucket": "dreamcast/Twinkle Star Sprites (Japan) (En,Ja,Es).chd"
     },
     {
-      "title": "Chaos Field",
-      "category": "Other",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Chaos Field (Japan).chd"
-    },
-    {
       "title": "Karous",
       "category": "Other",
       "system": "dreamcast",
@@ -1207,12 +1153,6 @@
       "category": "Other",
       "system": "dreamcast",
       "bucket": "dreamcast/Bangai-O (USA).chd"
-    },
-    {
-      "title": "Shikigami no Shiro II",
-      "category": "Other",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Shikigami no Shiro II (Japan).chd"
     },
     {
       "title": "Cannon Spike",

@@ -4,43 +4,43 @@
   "games": [
     {
       "title": "Street Fighter II: The World Warrior",
-      "system": "mame",
-      "bucket": "mame/sf2.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/sf2.zip"
     },
     {
       "title": "Super Street Fighter II Turbo",
-      "system": "mame",
-      "bucket": "mame/ssf2t.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/ssf2t.zip"
     },
     {
       "title": "Street Fighter Alpha 2",
-      "system": "mame",
-      "bucket": "mame/sfa2.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/sfa2.zip"
     },
     {
       "title": "Street Fighter Alpha 3",
-      "system": "mame",
-      "bucket": "mame/sfa3.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/sfa3.zip"
     },
     {
       "title": "X-Men vs. Street Fighter",
-      "system": "mame",
-      "bucket": "mame/xmvsfur1.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/xmvsfur1.zip"
     },
     {
       "title": "Marvel Super Heroes Vs. Street Fighter (USA)",
-      "system": "mame",
-      "bucket": "mame/mshvsfu1.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/mshvsfu1.zip"
     },
     {
       "title": "Cyberbots",
-      "system": "mame",
-      "bucket": "mame/cybots.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/cybots.zip"
     },
     {
       "title": "Street Fighter II': Champion Edition",
-      "system": "mame",
-      "bucket": "mame/sf2ceua.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/sf2ceua.zip"
     },
     {
       "title": "Street Fighter II': Hyper Fighting",
@@ -49,13 +49,13 @@
     },
     {
       "title": "Super Street Fighter II",
-      "system": "mame",
-      "bucket": "mame/ssf2u.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/ssf2u.zip"
     },
     {
       "title": "Street Fighter Alpha",
-      "system": "mame",
-      "bucket": "mame/sfau.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/sfau.zip"
     },
     {
       "title": "Street Fighter III: 3rd Strike",
@@ -69,8 +69,8 @@
     },
     {
       "title": "Marvel Super Heroes",
-      "system": "mame",
-      "bucket": "mame/mshu.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/mshu.zip"
     },
     {
       "title": "Street Fighter II Turbo (Rev 1)",
@@ -96,21 +96,6 @@
       "title": "Super Street Fighter II",
       "system": "genesis",
       "bucket": "genesis/Super Street Fighter II (USA).zip"
-    },
-    {
-      "title": "Street Fighter Alpha 3",
-      "system": "psx",
-      "bucket": "psx/Street Fighter Alpha 3 (USA).chd"
-    },
-    {
-      "title": "Street Fighter Alpha 2",
-      "system": "saturn",
-      "bucket": "saturn/Street Fighter Alpha 2 (USA).chd"
-    },
-    {
-      "title": "Street Fighter Alpha: Warriors' Dreams",
-      "system": "saturn",
-      "bucket": "saturn/Street Fighter Alpha - Warriors' Dreams (USA).chd"
     },
     {
       "title": "Super Street Fighter II Turbo - Revival",
@@ -158,23 +143,9 @@
       "bucket": "gbc/Street Fighter Alpha - Warriors' Dreams (USA).zip"
     },
     {
-      "title": "Street Fighter Collection",
-      "system": "saturn",
-      "bucket": "saturn/Street Fighter Collection (USA).m3u",
-      "files": [
-        "saturn/Street Fighter Collection (USA) (Disc 1).chd",
-        "saturn/Street Fighter Collection (USA) (Disc 2).chd"
-      ]
-    },
-    {
       "title": "Night Warriors - Darkstalkers' Revenge",
       "system": "saturn",
       "bucket": "saturn/Night Warriors - Darkstalkers' Revenge (USA).chd"
-    },
-    {
-      "title": "Street Fighter - The Movie",
-      "system": "saturn",
-      "bucket": "saturn/Street Fighter - The Movie (USA).chd"
     },
     {
       "title": "Capcom vs. SNK 2 EO",
@@ -187,16 +158,6 @@
       "bucket": "psp/Street Fighter Alpha 3 Max (USA).chd"
     },
     {
-      "title": "Street Fighter Alpha: Warriors' Dreams",
-      "system": "psx",
-      "bucket": "psx/Street Fighter Alpha - Warriors' Dreams (USA).chd"
-    },
-    {
-      "title": "Street Fighter Alpha 2",
-      "system": "psx",
-      "bucket": "psx/Street Fighter Alpha 2 (USA) (Rev 1).chd"
-    },
-    {
       "title": "Street Fighter EX Plus Alpha",
       "system": "psx",
       "bucket": "psx/Street Fighter EX Plus Alpha (USA).chd"
@@ -205,21 +166,6 @@
       "title": "Street Fighter EX2 Plus",
       "system": "psx",
       "bucket": "psx/Street Fighter EX2 Plus (USA).chd"
-    },
-    {
-      "title": "Marvel vs. Capcom: Clash of Super Heroes",
-      "system": "psx",
-      "bucket": "psx/Marvel vs. Capcom - Clash of Super Heroes (USA).chd"
-    },
-    {
-      "title": "X-Men vs. Street Fighter",
-      "system": "psx",
-      "bucket": "psx/X-Men vs. Street Fighter (USA).chd"
-    },
-    {
-      "title": "Marvel Super Heroes vs. Street Fighter",
-      "system": "psx",
-      "bucket": "psx/Marvel Super Heroes vs. Street Fighter (USA).chd"
     },
     {
       "title": "Street Fighter Collection",
@@ -256,11 +202,6 @@
       "bucket": "psx/Pocket Fighter (USA).chd"
     },
     {
-      "title": "Marvel vs. Capcom 2",
-      "system": "ps2",
-      "bucket": "ps2/Marvel vs. Capcom 2 - New Age of Heroes (USA).chd"
-    },
-    {
       "title": "Tatsunoko vs. Capcom: Ultimate All-Stars",
       "system": "wii",
       "bucket": "wii/Tatsunoko vs. Capcom - Ultimate All-Stars (USA).rvz"
@@ -269,11 +210,6 @@
       "title": "Street Fighter Alpha 3",
       "system": "dreamcast",
       "bucket": "dreamcast/Street Fighter Alpha 3 (USA).chd"
-    },
-    {
-      "title": "Street Fighter III: 3rd Strike",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Street Fighter III - 3rd Strike (USA).chd"
     },
     {
       "title": "Street Fighter III: Double Impact",

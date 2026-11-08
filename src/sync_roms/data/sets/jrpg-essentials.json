@@ -345,11 +345,6 @@
       "bucket": "ps2/Valkyrie Profile 2 - Silmeria (USA).chd"
     },
     {
-      "title": "Grandia II",
-      "system": "ps2",
-      "bucket": "ps2/Grandia II (USA).chd"
-    },
-    {
       "title": "Grandia III",
       "system": "ps2",
       "bucket": "ps2/Grandia III (USA).m3u",
@@ -551,11 +546,6 @@
       "bucket": "gba/Breath of Fire (USA).zip"
     },
     {
-      "title": "Breath of Fire II",
-      "system": "gba",
-      "bucket": "gba/Breath of Fire II (USA).zip"
-    },
-    {
       "title": "Lufia - The Ruins of Lore",
       "system": "gba",
       "bucket": "gba/Lufia - The Ruins of Lore (USA).zip"
@@ -689,11 +679,6 @@
       "title": "Wild Arms XF",
       "system": "psp",
       "bucket": "psp/Wild Arms XF (USA).chd"
-    },
-    {
-      "title": "Breath of Fire III",
-      "system": "psp",
-      "bucket": "psp/Breath of Fire III (Europe).chd"
     },
     {
       "title": "Tales of Eternia (v2.02)",

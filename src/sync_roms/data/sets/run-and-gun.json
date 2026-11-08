@@ -59,8 +59,8 @@
     },
     {
       "title": "Contra",
-      "system": "mame",
-      "bucket": "mame/contra.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/contra.zip"
     },
     {
       "title": "Shock Troopers",
@@ -69,13 +69,13 @@
     },
     {
       "title": "Cabal",
-      "system": "mame",
-      "bucket": "mame/cabal.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/cabal.zip"
     },
     {
       "title": "Rolling Thunder",
-      "system": "mame",
-      "bucket": "mame/rthunder.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/rthunder.zip"
     },
     {
       "title": "Alien Hominid",
@@ -261,11 +261,6 @@
       "title": "Metal Slug XX",
       "system": "psp",
       "bucket": "psp/Metal Slug XX (USA).chd"
-    },
-    {
-      "title": "Metal Slug X",
-      "system": "psx",
-      "bucket": "psx/Metal Slug X (USA).chd"
     },
     {
       "title": "Strider 2",

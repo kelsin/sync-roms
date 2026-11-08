@@ -94,18 +94,18 @@
     },
     {
       "title": "Puzzle Bobble",
-      "system": "mame",
-      "bucket": "mame/pbobble.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/pbobble.zip"
     },
     {
       "title": "Puzzle Bobble 2",
-      "system": "mame",
-      "bucket": "mame/pbobble2.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/pbobble2.zip"
     },
     {
       "title": "Puzzle Loop",
-      "system": "mame",
-      "bucket": "mame/puzzloop.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/puzzloop.zip"
     },
     {
       "title": "Magical Drop II",
@@ -318,11 +318,6 @@
       "bucket": "gba/Super Puzzle Fighter II (USA) (Rev 1).zip"
     },
     {
-      "title": "Tetris Worlds",
-      "system": "gba",
-      "bucket": "gba/Tetris Worlds (USA).zip"
-    },
-    {
       "title": "Bubble Bobble - Old & New",
       "system": "gba",
       "bucket": "gba/Bubble Bobble - Old & New (USA).zip"
@@ -403,11 +398,6 @@
       "bucket": "psp/Bust-A-Move - Deluxe (USA).chd"
     },
     {
-      "title": "Puyo Pop Fever",
-      "system": "psp",
-      "bucket": "psp/Puyo Pop Fever (Europe).chd"
-    },
-    {
       "title": "Capcom Puzzle World",
       "system": "psp",
       "bucket": "psp/Capcom Puzzle World (USA).chd"
@@ -448,16 +438,6 @@
       "bucket": "psx/I.Q - Intelligent Qube (USA).chd"
     },
     {
-      "title": "Bust-A-Move 4",
-      "system": "psx",
-      "bucket": "psx/Bust-A-Move 4 (USA).chd"
-    },
-    {
-      "title": "Mr. Driller",
-      "system": "psx",
-      "bucket": "psx/Mr. Driller (USA).chd"
-    },
-    {
       "title": "Puzznic",
       "system": "psx",
       "bucket": "psx/Puzznic (USA).chd"
@@ -496,11 +476,6 @@
       "title": "3D Lemmings",
       "system": "psx",
       "bucket": "psx/3D Lemmings (USA).chd"
-    },
-    {
-      "title": "Puzzle Bobble",
-      "system": "neogeocd",
-      "bucket": "neogeocd/Puzzle Bobble ~ Bust-A-Move (Japan) (En,Ja).chd"
     },
     {
       "title": "Joy Joy Kid",

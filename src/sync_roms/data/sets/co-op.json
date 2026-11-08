@@ -89,43 +89,43 @@
     },
     {
       "title": "Teenage Mutant Ninja Turtles (2 Players)",
-      "system": "mame",
-      "bucket": "mame/tmnt22p.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/tmnt22pu.zip"
     },
     {
       "title": "Teenage Mutant Ninja Turtles",
-      "system": "mame",
-      "bucket": "mame/tmntu.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/tmntu.zip"
     },
     {
       "title": "The Simpsons",
-      "system": "mame",
-      "bucket": "mame/simpsons.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/simpsons.zip"
     },
     {
       "title": "Sunset Riders",
-      "system": "mame",
-      "bucket": "mame/ssriders.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/ssriders.zip"
     },
     {
       "title": "Warriors of Fate",
-      "system": "mame",
-      "bucket": "mame/wofu.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/wofu.zip"
     },
     {
       "title": "Captain Commando",
-      "system": "mame",
-      "bucket": "mame/captcomu.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/captcommu.zip"
     },
     {
       "title": "Alien vs. Predator",
-      "system": "mame",
-      "bucket": "mame/avsp.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/avsp.zip"
     },
     {
       "title": "X-Men",
-      "system": "mame",
-      "bucket": "mame/xmen.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/xmen.zip"
     },
     {
       "title": "Mario Kart 64",
@@ -361,11 +361,6 @@
       "title": "Worms Armageddon",
       "system": "psx",
       "bucket": "psx/Worms Armageddon (USA).chd"
-    },
-    {
-      "title": "Gauntlet Legends",
-      "system": "psx",
-      "bucket": "psx/Gauntlet Legends (USA).chd"
     },
     {
       "title": "Bomberman Party Edition",
