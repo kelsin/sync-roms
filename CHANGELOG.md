@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.34.0](https://github.com/kelsin/sync-roms/compare/v0.33.0...v0.34.0) (2026-11-08)
+
+
+### Features
+
+* **sync:** copy the bucket's APKs folder to Android cards ([#130](https://github.com/kelsin/sync-roms/issues/130)) ([5584572](https://github.com/kelsin/sync-roms/commit/5584572b7c27b1e1a8210972d49a130cfa6ee683))
+
+
+### Bug Fixes
+
+* **sets:** prefer fbneo over mame and drop duplicate ports ([#132](https://github.com/kelsin/sync-roms/issues/132)) ([6a6f869](https://github.com/kelsin/sync-roms/commit/6a6f86944a5b4652c94da78ba402a649277295b0))
+
 ## [0.33.0](https://github.com/kelsin/sync-roms/compare/v0.32.0...v0.33.0) (2026-11-08)
 
 
