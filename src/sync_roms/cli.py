@@ -12,9 +12,10 @@ from . import __version__, chd, clean, commands, diff, downloads, edit, external
 
 SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "sync": ("[CARD]", "download the ROMs, BIOS and scraped data for a card (this is what plain `sync-roms CARD` does)"),
+    "edit": ("", "interactive editor for the core list, card extras and device systems (same as `games edit`)"),
     "games": ("edit|list|add|remove|full|sets|export|import", "edit the core game list or a card's extras, interactively or from scripts"),
     "sets": ("edit", "edit the repo's game sets by hand and open a PR with the changes"),
-    "cards": ("list|new|set|rename|delete", "list and manage the cards you've synced"),
+    "cards": ("edit|list|new|set|rename|delete", "list and manage the cards you've synced"),
     "devices": ("[ID]", "list the supported devices, or one device's systems"),
     "upload": ("roms [DIR] | scrapes [CARD]", "upload ROMs or a card's scraped data to the bucket"),
     "diff": ("[DIR]", "list the ROMs in only DIR or only the bucket, ignoring renames"),
@@ -79,7 +80,11 @@ TOPICS = {
   Pick a set to switch games off, add games from a system (you're asked for a category), change a game's category or
   rename it. ➕ New set creates one; d deletes the highlighted one. Esc reviews the changes before the PR is opened.
 """,
+    "edit": """
+  sync-roms edit                              same as `games edit`
+""",
     "cards": """
+  sync-roms cards edit                        same as `games edit`
   sync-roms cards list [--json]
   sync-roms cards new NAME --device ID|full --layout NAME
   sync-roms cards set NAME [--device ID|full] [--layout NAME]
@@ -318,7 +323,7 @@ LEGACY = {
     ("scrape", "match"): ["--scrape-match"], ("scrape",): ["--scrape"],
     ("upload", "roms"): ["--upload"], ("upload", "scrapes"): ["--upload-scrapes"],
     ("mirror", "use"): ["--use-mirror"], ("mirror", "clear"): ["--clear-mirror"], ("mirror",): ["--mirror"],
-    ("games", "edit"): ["--edit"],
+    ("games", "edit"): ["--edit"], ("cards", "edit"): ["--edit"], ("edit",): ["--edit"],
 }
 BOOL_FLAGS = {"-n", "--dry-run", "-y", "--yes", "-a", "--ask"}
 PLAIN_FLAGS = BOOL_FLAGS | {"--replace", "--json", "--no-clean", "--retry", "--set-credentials"}
@@ -487,7 +492,7 @@ def run(argv):
     lead = 0
     while lead < len(argv) and argv[lead] in BOOL_FLAGS:
         lead += 1
-    if lead < len(argv) and argv[lead] in commands.COMMANDS and argv[lead:lead + 2] != ["games", "edit"]:
+    if lead < len(argv) and argv[lead] in commands.COMMANDS and argv[lead:lead + 2] not in (["games", "edit"], ["cards", "edit"]):
         cmd = argv[lead:] + argv[:lead]  # leading global flags go after the command, where its parser reads them
         if "-h" in cmd or "--help" in cmd:
             print(help_text(cmd[0]))

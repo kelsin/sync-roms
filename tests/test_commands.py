@@ -172,6 +172,8 @@ class CliTest(unittest.TestCase):
         self.assertEqual(t(["mirror", "d"]), ["--mirror", "d"])
         self.assertEqual(t(["convert"]), ["--cd"])
         self.assertEqual(t(["games", "edit"]), ["--edit"])
+        self.assertEqual(t(["cards", "edit"]), ["--edit"])
+        self.assertEqual(t(["edit"]), ["--edit"])
         self.assertEqual(t(["devices", "steam-deck", "--json"]), ["--devices", "--device-id", "steam-deck", "--json"])
         self.assertEqual(t(["/Volumes/SD", "-n"]), ["/Volumes/SD", "-n"])
         self.assertEqual(t(["sync", "/x"]), ["/x"])

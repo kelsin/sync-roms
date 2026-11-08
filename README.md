@@ -255,7 +255,7 @@ Every mode is a command (`sync-roms COMMAND --help` explains one; plain `sync-ro
 | Command | Does | Old flag |
 | --- | --- | --- |
 | `sync [CARD]` | download ROMs, BIOS and scraped data to a card | (default) |
-| `games edit` | interactive list editor | `--edit` |
+| `edit`, `games edit`, `cards edit` | interactive list editor | `--edit` |
 | `games list\|add\|remove\|full\|sets\|export\|import` | edit lists from scripts, see below | |
 | `sets edit` | edit the repo's game sets by hand and open a PR (needs `git` and a logged-in `gh`) | |
 | `cards list\|new\|set\|rename\|delete` | manage cards | |
