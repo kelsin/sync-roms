@@ -61,5 +61,5 @@ Scraping media on a handheld is slow: the card has to be pulled and put back to 
 
 ## Open calls (builder's guess; flagged for review)
 
-- Developer credentials (devid/devpassword/softname): the user has only a ScreenScraper account login. As far as I know the API also needs software developer credentials, which ScreenScraper issues on request; verify in their docs. If needed, the user requests them and enters them in settings (mode 600 like the account login); they are never put in the repo. The plan must start with this check, since it blocks the first real API call.
+- Developer credentials (devid/devpassword/softname): the user has only a ScreenScraper account login. As far as I know the API also needs software developer credentials, which ScreenScraper issues on request; verify in their docs. Resolved: sync-roms ships its own developer credentials as constants in `screenscraper.py` (as ES-DE does); users enter only their login in settings (mode 600). The plan must start with this check, since it blocks the first real API call.
 - The ScreenScraper API details here (hash and file-name-plus-size lookups, quota fields) come from general knowledge and must be checked against their current documentation before building.

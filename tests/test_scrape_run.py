@@ -19,8 +19,7 @@ from sync_roms import runtime, s3, scrape_online, scrape_plan, scrape_state, scr
 GBA = {"name": "Game Boy Advance", "bucket": "gba", "screenscraper": 12, "full_system": True, "folders": {}}
 NES = {"name": "NES", "bucket": "nes", "screenscraper": 3, "full_system": True, "folders": {}}
 PNG = b"\x89PNG\r\n\x1a\n" + b"x" * 8
-CREDS = {"screenscraper_user": "me", "screenscraper_password": "hunter2",
-         "screenscraper_devid": "dev", "screenscraper_devpassword": "devpw"}
+CREDS = {"screenscraper_user": "me", "screenscraper_password": "hunter2"}
 
 
 def game(gid, name, media=("box-2D", "ss")):
@@ -268,12 +267,12 @@ class ScrapeRunTest(RunBase):
 
     def test_credentials_missing_fails_with_how_to_set_them(self):
         self.put("gba/a.zip")
-        self.settings = {"screenscraper_user": "me", "screenscraper_password": "hunter2"}
+        self.settings = {"screenscraper_user": "me"}
         with self.assertRaises(SystemExit) as cm:
             self.run_scrape()
         self.assertEqual(cm.exception.code, 3)
         err = self.err.getvalue()
-        self.assertIn("screenscraper_devid", err)
+        self.assertIn("screenscraper_password", err)
         self.assertIn("scrape --set-credentials", err)
         self.assertNotIn("hunter2", err + self.out.getvalue())
         self.assertEqual(self.stored(), set())

@@ -14,8 +14,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from realdir_guard import RealDataDirGuard  # noqa: E402
 from sync_roms import commands, store, usersettings  # noqa: E402
 
-CREDENTIALS = {"screenscraper_user": "u-secret", "screenscraper_password": "p-secret",
-               "screenscraper_devid": "d-secret", "screenscraper_devpassword": "dp-secret"}
+CREDENTIALS = {"screenscraper_user": "u-secret", "screenscraper_password": "p-secret"}
 
 
 class SettingsPermissionsTest(RealDataDirGuard):

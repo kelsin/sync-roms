@@ -122,7 +122,7 @@ TOPICS = {
                      credentials or requests (scrape match --dry-run does look the game up)
   match              say which ScreenScraper game a ROM is (a game id, or a name to search and pick from), then scrape it;
                      for a ROM that already has metadata it asks before replacing the entry and deleting its old media
-  --set-credentials  ask for your ScreenScraper login and the developer id and password (saved in settings.json,
+  --set-credentials  ask for your ScreenScraper username and password (saved in settings.json,
                      readable only by you; blank keeps the current value)
   When ScreenScraper's daily quota runs out the run stops cleanly; run it again tomorrow. Writes use the write profile.
 """,

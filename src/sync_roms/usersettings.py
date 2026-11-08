@@ -23,7 +23,7 @@ def _private(path):
 
 
 def load_settings():
-    """Saved global settings: {"bucket": S3 bucket name, "root": folder used instead of a bucket, "endpoint": custom S3 endpoint URL, "profile"/"write_profile": aws profiles, "mirror": folder of the local mirror, "screenscraper_user"/"screenscraper_password"/"screenscraper_devid"/"screenscraper_devpassword": ScreenScraper credentials (never shown by config show)}."""
+    """Saved global settings: {"bucket": S3 bucket name, "root": folder used instead of a bucket, "endpoint": custom S3 endpoint URL, "profile"/"write_profile": aws profiles, "mirror": folder of the local mirror, "screenscraper_user"/"screenscraper_password": ScreenScraper login (never shown by config show)}."""
     path = os.path.join(store.data_dir(), "settings.json")
     try:
         with open(path) as f:

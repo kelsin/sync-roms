@@ -98,7 +98,7 @@ def resolve_manual(client, system, query):
 BATCH = 25  # ROMs scraped, uploaded and written to metadata.json together
 RETRIES = 3  # times a rate-limited request is tried again
 RETRY_WAIT = 2  # seconds before the first retry, doubled each time
-CREDENTIALS = ("screenscraper_user", "screenscraper_password", "screenscraper_devid", "screenscraper_devpassword")
+CREDENTIALS = ("screenscraper_user", "screenscraper_password")
 # What one ROM's lookup and downloads can raise besides NotFound and QuotaExceeded: the client's own errors and
 # those it doesn't wrap (a read cut short, a timeout, a malformed media URL, an unsafe ROM path).
 ROM_ERRORS = (screenscraper.ApiError, OSError, ValueError, http.client.HTTPException)
@@ -144,17 +144,16 @@ def make_client():
     if missing:
         ui.fail(f"ScreenScraper credentials missing: {', '.join(missing)}. Set them with `sync-roms scrape --set-credentials`, "
                 f"or add {', '.join(CREDENTIALS)} to {os.path.join(store.data_dir(), 'settings.json')} "
-                "(your ScreenScraper login, and the developer id and password ScreenScraper gives on request)", 3)
+                "(your ScreenScraper login)", 3)
     return screenscraper.Client(settings["screenscraper_user"], settings["screenscraper_password"],
-                                {"devid": settings["screenscraper_devid"], "devpassword": settings["screenscraper_devpassword"]})
+                                {"devid": screenscraper.DEV_ID, "devpassword": screenscraper.DEV_PASSWORD})
 
 
-PROMPTS = (("screenscraper_user", "ScreenScraper username", False), ("screenscraper_password", "ScreenScraper password", True),
-           ("screenscraper_devid", "ScreenScraper developer id", False), ("screenscraper_devpassword", "ScreenScraper developer password", True))
+PROMPTS = (("screenscraper_user", "ScreenScraper username", False), ("screenscraper_password", "ScreenScraper password", True))
 
 
 def set_credentials():
-    """Ask for the four ScreenScraper credentials and save them in settings.json. A blank answer keeps the saved value;
+    """Ask for the ScreenScraper login and save them in settings.json. A blank answer keeps the saved value;
     passwords are read without echo and no value is ever printed."""
     saved = usersettings.load_settings()
     answers = {}

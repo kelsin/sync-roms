@@ -4,6 +4,7 @@ Every ScreenScraper-specific string (endpoints, JSON keys, media types, HTTP cod
 CONSTANTS block below. The JSON nesting is from memory and unverified against live responses, so
 parsing skips anything missing instead of failing.
 """
+import base64
 import http.client
 import json
 import math
@@ -19,6 +20,17 @@ from . import __version__
 # --- ScreenScraper specifics: correct them here ------------------------------------------------------
 BASE_URL = "https://api.screenscraper.fr/api2/"
 SOFTNAME = "sync-roms"
+# sync-roms' developer credentials, shipped with the software as ScreenScraper expects; users add only their own login.
+_DEV = ("GBwCEEQc", "OikXMHodVxUKORw=")
+
+
+def _reveal(text):
+    """Decode a developer credential kept out of plain sight in the source (obfuscation, not secrecy)."""
+    raw = base64.b64decode(text)
+    return bytes(c ^ SOFTNAME.encode()[i % len(SOFTNAME)] for i, c in enumerate(raw)).decode()
+
+
+DEV_ID, DEV_PASSWORD = _reveal(_DEV[0]), _reveal(_DEV[1])
 EP_GAME, EP_QUOTA, EP_SEARCH = "jeuInfos.php", "ssuserInfos.php", "jeuRecherche.php"
 HTTP_NOT_FOUND = 404
 HTTP_QUOTA = 430  # daily scrape quota

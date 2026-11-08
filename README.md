@@ -366,12 +366,10 @@ touched.
 [ScreenScraper](https://www.screenscraper.fr) and writes what it finds to the storage (bucket or folder). Reads use the
 read profile and writes the write profile.
 
-**Credentials.** ScreenScraper needs your user account and also developer credentials (a developer id and password) for the
-software making the calls. sync-roms identifies itself with the software name (`softname`) `sync-roms`, so the developer
-credentials you request from ScreenScraper (through its forum) must be registered for that name; sync-roms ships none. Run
-`sync-roms scrape --set-credentials` to enter all four (the passwords aren't echoed, a blank answer keeps the saved value).
-They are stored in `settings.json` as `screenscraper_user`, `screenscraper_password`, `screenscraper_devid` and
-`screenscraper_devpassword`; the file is kept readable by you only (mode 600) and `config show` never prints them.
+**Credentials.** You need a [ScreenScraper](https://www.screenscraper.fr) account; sync-roms carries its own developer
+credentials for the API. Run `sync-roms scrape --set-credentials` to enter your username and password (the password isn't
+echoed, a blank answer keeps the saved value). They are stored in `settings.json` as `screenscraper_user` and
+`screenscraper_password`; the file is kept readable by you only (mode 600) and `config show` never prints them.
 
 **Report.** Before looking anything up, the run lists the ROMs with no metadata and how each will be matched first.
 `--dry-run` stops there, printing the metadata entries and media folders it would write; it needs no ScreenScraper

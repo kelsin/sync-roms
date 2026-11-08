@@ -152,44 +152,42 @@ class SetCredentials(RealDataDirGuard):
         return code, out.getvalue()
 
     def test_saves_without_printing_values(self):
-        code, out = self.run_it(["me", "dev1"], ["s3cret", "devs3cret"])
+        code, out = self.run_it(["me"], ["s3cret"])
         self.assertEqual(code, 0)
         with open(self.path) as f:
             saved = json.load(f)
-        self.assertEqual(saved, {"screenscraper_user": "me", "screenscraper_password": "s3cret",
-                                 "screenscraper_devid": "dev1", "screenscraper_devpassword": "devs3cret"})
+        self.assertEqual(saved, {"screenscraper_user": "me", "screenscraper_password": "s3cret"})
         for value in saved.values():
             self.assertNotIn(value, out)
         self.assertEqual(stat.S_IMODE(os.stat(self.path).st_mode), 0o600)
 
     def test_blank_keeps_existing(self):
-        saved = {"screenscraper_user": "me", "screenscraper_password": "s3cret",
-                 "screenscraper_devid": "dev1", "screenscraper_devpassword": "devs3cret"}
-        code, out = self.run_it(["", "newdev"], ["", ""], saved)
+        saved = {"screenscraper_user": "me", "screenscraper_password": "s3cret"}
+        code, out = self.run_it(["newme"], [""], saved)
         self.assertEqual(code, 0)
         with open(self.path) as f:
             now = json.load(f)
-        self.assertEqual(now, dict(saved, screenscraper_devid="newdev"))
-        for value in list(saved.values()) + ["newdev"]:
+        self.assertEqual(now, dict(saved, screenscraper_user="newme"))
+        for value in list(saved.values()) + ["newme"]:
             self.assertNotIn(value, out)
 
     def test_credentials_saved_in_one_write(self):
         with mock.patch.object(usersettings, "save_settings", wraps=usersettings.save_settings) as save, \
                 mock.patch.object(usersettings, "save_setting", side_effect=AssertionError("one key at a time")):
-            code, _ = self.run_it(["me", "dev1"], ["s3cret", "devs3cret"])
+            code, _ = self.run_it(["me"], ["s3cret"])
         self.assertEqual(code, 0)
         save.assert_called_once()
 
     def test_all_blank_says_nothing_changed(self):
         saved = {"screenscraper_user": "me"}
-        code, out = self.run_it(["", ""], ["", ""], saved)
+        code, out = self.run_it([""], [""], saved)
         self.assertEqual(code, 0)
         self.assertNotIn("Saved", out)
         self.assertIn("Nothing changed", out)
 
     def test_ctrl_c_saves_nothing(self):
         out = io.StringIO()
-        with mock.patch("builtins.input", side_effect=["me", "dev1"]), \
+        with mock.patch("builtins.input", side_effect=["me"]), \
                 mock.patch.object(getpass, "getpass", side_effect=KeyboardInterrupt), \
                 mock.patch("sys.stdout", out), mock.patch("sys.stderr", out):
             code = scrape_online.set_credentials()
