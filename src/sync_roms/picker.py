@@ -29,14 +29,25 @@ def device_layouts(device, layouts):
     return {name: layouts[name] for name in device["firmwares"]}
 
 
-def saved_setup(saved, devices, layouts):
-    """(device dict or None for Full, layout name) from a card's saved entry, or None if it no longer applies."""
-    if not isinstance(saved, dict) or saved.get("layout") not in layouts:
+def saved_setup(saved, devices, layouts, card=None):
+    """(device dict or None for Full, layout name) from a card's saved entry, or None if it no longer applies (with a warning saying why)."""
+    if not isinstance(saved, dict):
+        return None
+    who = f"Saved setup for {card!r}" if card else "Saved setup"
+    layout = saved.get("layout")
+    if layout not in layouts:
+        ui.warn(f"{who} ignored: its layout {layout!r} doesn't exist (known: {', '.join(layouts)})")
         return None
     if saved.get("device") == "full":
-        return None, saved["layout"]
+        return None, layout
     device = next((d for d in devices if d["id"] == saved.get("device")), None)
-    return (device, saved["layout"]) if device and saved["layout"] in device["firmwares"] else None
+    if not device:
+        ui.warn(f"{who} ignored: its device {saved.get('device')!r} doesn't exist")
+        return None
+    if layout not in device["firmwares"]:
+        ui.warn(f"{who} ignored: {device['id']} doesn't run the {layout!r} firmware (has: {', '.join(device['firmwares'])})")
+        return None
+    return device, layout
 
 
 def choose_setup(manifest, current=None):
