@@ -13,6 +13,7 @@ from . import __version__, chd, clean, commands, diff, downloads, edit, external
 SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "sync": ("[CARD]", "download the ROMs, BIOS and scraped data for a card (this is what plain `sync-roms CARD` does)"),
     "games": ("edit|list|add|remove|full|sets|export|import", "edit the core game list or a card's extras, interactively or from scripts"),
+    "sets": ("edit", "edit the repo's game sets by hand and open a PR with the changes"),
     "cards": ("list|new|set|rename|delete", "list and manage the cards you've synced"),
     "devices": ("[ID]", "list the supported devices, or one device's systems"),
     "upload": ("roms [DIR] | scrapes [CARD]", "upload ROMs or a card's scraped data to the bucket"),
@@ -68,6 +69,14 @@ TOPICS = {
   Without --card the core list (every card) is changed; with it, that card's extras. Lists are saved in ~/.sync-roms/
   (games.json, cards.json) with the previous version kept as .bak. Removing only drops a game from the list.
   In the editor: Tab toggles a row, ^A all shown, ^R reverts the list, ^O cycles all/on/changed, ^F toggles a whole set or system.
+""",
+    "sets": """
+  sync-roms sets edit                         edit the repo's sets (games, categories, new and deleted sets), then open a PR
+
+  Needs git and the GitHub CLI (gh, logged in). Your edits are written to a temporary clone of kelsin/sync-roms, pushed
+  as a branch and opened as a PR; nothing is written to the bucket or to ~/.sync-roms.
+  Pick a set to switch games off, add games from a system (you're asked for a category), change a game's category or
+  rename it. ➕ New set creates one; ^X deletes the highlighted one. Esc reviews the changes before the PR is opened.
 """,
     "cards": """
   sync-roms cards list [--json]

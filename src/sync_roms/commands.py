@@ -6,11 +6,11 @@ import re
 import shutil
 import sys
 
-from . import external, picker, runtime, s3, store, ui, usersettings
+from . import external, picker, runtime, s3, setedit, store, ui, usersettings
 
 
 UNKNOWN_SHOWN = 8  # device ids named in an "unknown device" error
-COMMANDS = {"games", "cards", "config", "doctor", "check", "completion"}
+COMMANDS = {"games", "sets", "cards", "config", "doctor", "check", "completion"}
 
 
 class Parser(argparse.ArgumentParser):
@@ -652,6 +652,7 @@ def second_words():
         if len(key) > 1:
             words.setdefault(key[0], []).append(key[1])
     words["games"] = sorted(set(words.get("games", [])) | {"list", "add", "remove", "full", "sets", "export", "import"})
+    words["sets"] = ["edit"]
     words["cards"] = ["list", "new", "set", "rename", "delete"]
     words["config"] = ["show", "path"]
     words["completion"] = ["bash", "zsh", "fish"]
@@ -732,6 +733,10 @@ def build_parser():
     p.add_argument("set_id", nargs="?"); p.set_defaults(fn=games_sets)
     p = gsub.add_parser("export", allow_abbrev=False); common(p); p.set_defaults(fn=games_export)
     p = gsub.add_parser("import", allow_abbrev=False); common(p); p.add_argument("file"); p.set_defaults(fn=games_import)
+
+    sets = sub.add_parser("sets", add_help=False, allow_abbrev=False)
+    ssub = sets.add_subparsers(dest="action", required=True)
+    p = ssub.add_parser("edit", allow_abbrev=False); p.set_defaults(fn=lambda a: setedit.edit_sets())
 
     cards = sub.add_parser("cards", add_help=False, allow_abbrev=False)
     csub = cards.add_subparsers(dest="action", required=True)
