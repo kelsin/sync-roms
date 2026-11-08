@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.35.0](https://github.com/kelsin/sync-roms/compare/v0.34.0...v0.35.0) (2026-11-08)
+
+
+### Features
+
+* **picker:** vim-style modal lists with emacs line editing ([#135](https://github.com/kelsin/sync-roms/issues/135)) ([2234242](https://github.com/kelsin/sync-roms/commit/22342424baad5339c7ff9f5b95885ce95463b3a1))
+
+
+### Bug Fixes
+
+* **tests:** keep the sync smoke test out of the real data folder ([#133](https://github.com/kelsin/sync-roms/issues/133)) ([d8750b0](https://github.com/kelsin/sync-roms/commit/d8750b0d733438ab3a577427fd031b7a10e337d1))
+
 ## [0.34.0](https://github.com/kelsin/sync-roms/compare/v0.33.0...v0.34.0) (2026-11-08)
 
 
