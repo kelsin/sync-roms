@@ -8,11 +8,6 @@
       "bucket": "fbneo/akatana.zip"
     },
     {
-      "title": "Dangun Feveron",
-      "system": "fbneo",
-      "bucket": "fbneo/dfeveron.zip"
-    },
-    {
       "title": "Deathsmiles",
       "system": "fbneo",
       "bucket": "fbneo/deathsml.zip"
@@ -23,12 +18,7 @@
       "bucket": "fbneo/dsmbl.zip"
     },
     {
-      "title": "DoDonPachi [ddonpachj]",
-      "system": "fbneo",
-      "bucket": "fbneo/ddonpachj.zip"
-    },
-    {
-      "title": "DoDonPachi [ddonpach]",
+      "title": "DoDonPachi",
       "system": "fbneo",
       "bucket": "fbneo/ddonpach.zip"
     },
@@ -48,54 +38,14 @@
       "bucket": "fbneo/ddpdfk.zip"
     },
     {
-      "title": "DoDonPachi Dai-Ou-Jou [ddpdojb]",
-      "system": "fbneo",
-      "bucket": "fbneo/ddpdojb.zip"
-    },
-    {
-      "title": "DoDonPachi Dai-Ou-Jou [ddpdojp]",
-      "system": "fbneo",
-      "bucket": "fbneo/ddpdojp.zip"
-    },
-    {
-      "title": "DoDonPachi Dai-Ou-Jou [ddpdoja]",
-      "system": "fbneo",
-      "bucket": "fbneo/ddpdoja.zip"
-    },
-    {
-      "title": "DoDonPachi Dai-Ou-Jou [ddpdoj]",
-      "system": "fbneo",
-      "bucket": "fbneo/ddpdoj.zip"
-    },
-    {
-      "title": "DoDonPachi Dai-Ou-Jou Black Label [ddpdojblkb]",
-      "system": "fbneo",
-      "bucket": "fbneo/ddpdojblkb.zip"
-    },
-    {
-      "title": "DoDonPachi Dai-Ou-Jou Black Label [ddpdojblk]",
+      "title": "DoDonPachi Dai-Ou-Jou Black Label",
       "system": "fbneo",
       "bucket": "fbneo/ddpdojblk.zip"
     },
     {
-      "title": "DoDonPachi Dai-Ou-Jou Black Label [ddpdojblka]",
+      "title": "DoDonPachi II: Bee Storm",
       "system": "fbneo",
-      "bucket": "fbneo/ddpdojblka.zip"
-    },
-    {
-      "title": "DoDonPachi II (Japan, ver. 100)",
-      "system": "fbneo",
-      "bucket": "fbneo/ddp2100j.zip"
-    },
-    {
-      "title": "DoDonPachi II (Japan, ver. 101)",
-      "system": "fbneo",
-      "bucket": "fbneo/ddp2101j.zip"
-    },
-    {
-      "title": "DoDonPachi II (Japan, ver. 102)",
-      "system": "fbneo",
-      "bucket": "fbneo/ddp2j.zip"
+      "bucket": "fbneo/ddp2.zip"
     },
     {
       "title": "DoDonPachi III",
@@ -108,39 +58,9 @@
       "bucket": "fbneo/ddpsdoj.zip"
     },
     {
-      "title": "DonPachi (Hong Kong, ver. 1.10, 95/05/17)",
-      "system": "fbneo",
-      "bucket": "fbneo/donpachihk.zip"
-    },
-    {
-      "title": "DonPachi (Japan, ver. 1.01, 95/05/11 Satsuei)",
-      "system": "fbneo",
-      "bucket": "fbneo/donpachijs.zip"
-    },
-    {
-      "title": "DonPachi (Japan, ver. 1.01, 95/05/11)",
-      "system": "fbneo",
-      "bucket": "fbneo/donpachij.zip"
-    },
-    {
-      "title": "DonPachi (Korea, ver. 1.12, 95/05/2x)",
-      "system": "fbneo",
-      "bucket": "fbneo/donpachikr.zip"
-    },
-    {
-      "title": "DonPachi (USA, ver. 1.12, 95/05/2x)",
+      "title": "DonPachi",
       "system": "fbneo",
       "bucket": "fbneo/donpachi.zip"
-    },
-    {
-      "title": "ESP Ra.De. [espradejo]",
-      "system": "fbneo",
-      "bucket": "fbneo/espradejo.zip"
-    },
-    {
-      "title": "ESP Ra.De. [espradej]",
-      "system": "fbneo",
-      "bucket": "fbneo/espradej.zip"
     },
     {
       "title": "ESP Ra.De. - A.D.2018 Tokyo",
@@ -153,17 +73,7 @@
       "bucket": "fbneo/espgal.zip"
     },
     {
-      "title": "Espgaluda II [espgal2a]",
-      "system": "fbneo",
-      "bucket": "fbneo/espgal2a.zip"
-    },
-    {
-      "title": "Espgaluda II [espgal2b]",
-      "system": "fbneo",
-      "bucket": "fbneo/espgal2b.zip"
-    },
-    {
-      "title": "Espgaluda II [espgal2]",
+      "title": "Espgaluda II",
       "system": "fbneo",
       "bucket": "fbneo/espgal2.zip"
     },
@@ -173,54 +83,29 @@
       "bucket": "fbneo/feversos.zip"
     },
     {
-      "title": "Guwange [guwange]",
+      "title": "Guwange",
       "system": "fbneo",
       "bucket": "fbneo/guwange.zip"
     },
     {
-      "title": "Guwange [guwanges]",
+      "title": "Guwange Special Ver",
       "system": "fbneo",
       "bucket": "fbneo/guwanges.zip"
     },
     {
-      "title": "Ibara [ibarao]",
-      "system": "fbneo",
-      "bucket": "fbneo/ibarao.zip"
-    },
-    {
-      "title": "Ibara [ibara]",
+      "title": "Ibara",
       "system": "fbneo",
       "bucket": "fbneo/ibara.zip"
     },
     {
-      "title": "Ibara Kuro Black Label [ibarablka]",
-      "system": "fbneo",
-      "bucket": "fbneo/ibarablka.zip"
-    },
-    {
-      "title": "Ibara Kuro Black Label [ibarablk]",
+      "title": "Ibara Kuro Black Label",
       "system": "fbneo",
       "bucket": "fbneo/ibarablk.zip"
     },
     {
-      "title": "Ketsui: Kizuna Jigoku Tachi [ketb]",
-      "system": "fbneo",
-      "bucket": "fbneo/ketb.zip"
-    },
-    {
-      "title": "Ketsui: Kizuna Jigoku Tachi [keta]",
-      "system": "fbneo",
-      "bucket": "fbneo/keta.zip"
-    },
-    {
-      "title": "Ketsui: Kizuna Jigoku Tachi [ket]",
+      "title": "Ketsui: Kizuna Jigoku Tachi",
       "system": "fbneo",
       "bucket": "fbneo/ket.zip"
-    },
-    {
-      "title": "Ketsui: Kizuna Jigoku Tachi (alt rom fill)",
-      "system": "fbneo",
-      "bucket": "fbneo/ket1.zip"
     },
     {
       "title": "Muchi Muchi Pork!",
@@ -228,17 +113,7 @@
       "bucket": "fbneo/mmpork.zip"
     },
     {
-      "title": "Mushihime-Sama [mushisamb]",
-      "system": "fbneo",
-      "bucket": "fbneo/mushisamb.zip"
-    },
-    {
-      "title": "Mushihime-Sama [mushisama]",
-      "system": "fbneo",
-      "bucket": "fbneo/mushisama.zip"
-    },
-    {
-      "title": "Mushihime-Sama [mushisam]",
+      "title": "Mushihime-Sama",
       "system": "fbneo",
       "bucket": "fbneo/mushisam.zip"
     },
@@ -258,49 +133,19 @@
       "bucket": "fbneo/futari10.zip"
     },
     {
-      "title": "Mushihime-Sama Futari Ver 1.5 [futari15a]",
-      "system": "fbneo",
-      "bucket": "fbneo/futari15a.zip"
-    },
-    {
-      "title": "Mushihime-Sama Futari Ver 1.5 [futari15]",
+      "title": "Mushihime-Sama Futari Ver 1.5",
       "system": "fbneo",
       "bucket": "fbneo/futari15.zip"
     },
     {
-      "title": "Pink Sweets: Ibara Sorekara [pinkswtsb]",
-      "system": "fbneo",
-      "bucket": "fbneo/pinkswtsb.zip"
-    },
-    {
-      "title": "Pink Sweets: Ibara Sorekara [pinkswtsa]",
-      "system": "fbneo",
-      "bucket": "fbneo/pinkswtsa.zip"
-    },
-    {
-      "title": "Pink Sweets: Ibara Sorekara [pinkswts]",
+      "title": "Pink Sweets: Ibara Sorekara",
       "system": "fbneo",
       "bucket": "fbneo/pinkswts.zip"
     },
     {
-      "title": "Pink Sweets: Ibara Sorekara [pinkswtsx]",
-      "system": "fbneo",
-      "bucket": "fbneo/pinkswtsx.zip"
-    },
-    {
-      "title": "Progear (Asia 010117)",
-      "system": "fbneo",
-      "bucket": "fbneo/progeara.zip"
-    },
-    {
-      "title": "Progear (Europe 010117)",
+      "title": "Progear",
       "system": "fbneo",
       "bucket": "fbneo/progear.zip"
-    },
-    {
-      "title": "Progear no Arashi (Japan 010117)",
-      "system": "fbneo",
-      "bucket": "fbneo/progearj.zip"
     }
   ]
 }
