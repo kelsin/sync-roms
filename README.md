@@ -113,7 +113,7 @@ You pick a device, then the firmware it runs (a device with only one isn't asked
 | `knulli` | `roms/` `bios/` (SD card SHARE partition, `/userdata`) | Default for the Anbernic H700, RG Vita Pro and Miyoo Flip V2 handhelds |
 | `muos` | `ROMS/` `MUOS/bios/` | [muOS](https://muos.dev/) on the Anbernic H700 handhelds, RG CubeXX and RG Vita Pro. Folder names are matched ignoring case and separators |
 | `slot` | `Games/` `BIOS/` | [slot](https://slot-cfw.fyi) on the RG SP, RG34XX, RG34XX SP, RG35XX SP, RG35XX Plus, RG28XX and RG35XX H. Game Boy, Game Boy Color and Game Boy Advance only. ROMs are extracted from their archives and go straight into the system folder, never subfolders |
-| `onion` | `Roms/` `BIOS/` | Miyoo Mini Flip, on [Onion](https://onionui.github.io/) or [Allium](https://github.com/goweiwen/Allium) (Allium reads the Onion card layout). The `Imgs/` box art is shared; Allium's own `gameslist.xml` isn't written |
+| `onion` | `Roms/` `BIOS/` | Miyoo Mini Flip, on [Onion](https://onionui.github.io/) or [Allium](https://github.com/goweiwen/Allium) (Allium reads the Onion card layout). The `Imgs/` box art is shared; Allium reads the `miyoogamelist.xml` when a folder has no `gamelist.xml` |
 | `emudeck` | `Emulation/roms/` `Emulation/bios/` | [EmuDeck](https://emudeck.github.io/) on the Steam Deck and Steam Machine. Wii U, Xbox 360 and Model 2 ROMs go in a `roms/` subfolder of their system folder. Scraped media only, no gamelists |
 
 Folder names are case-sensitive. Folders that don't exist are shown as
@@ -194,7 +194,7 @@ Then:
    in the bucket go to the same place as they are, replacing a label of a different size (the derived one is only
    made when none exists). `--mirror` and a Slot sync pick them up like any other label.
 
-   On `esde` and `knulli`, `mame` and `fbneo` clones are named after their variant, e.g. `1942 (Revision A)`,
+   On `esde`, `knulli` and `onion`, `mame` and `fbneo` clones are named after their variant, e.g. `1942 (Revision A)`,
    from `src/sync_roms/data/clones.json` (MAME and FBNeo parent/clone data), replacing the scraped name. On `esde` a
    `sortname` also keeps each parent followed by its clones. ES-DE's "strip extra MAME info" option hides the variant
    in parentheses. Regenerate the file with `tools/gen_clones.py MAME.xml FBNEO.dat` (MAME's `-listxml` output and
