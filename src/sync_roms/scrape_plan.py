@@ -179,7 +179,7 @@ def scrape_index(listing):
 def variant_tags(layout_name, family, stem):
     """name (and, for ES-DE, sortname) tags that identify a MAME/FBNeo set by its variant, from the clones.json
     {"parents": {...}, "clones": {...}} of its system. Parents sort first, then their clones, so a family stays together."""
-    if layout_name not in ("esde", "knulli"):
+    if layout_name not in ("esde", "knulli", "onion"):
         return {}
     if stem in family["clones"]:
         parent, title = family["clones"][stem]
