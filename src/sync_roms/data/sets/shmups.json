@@ -248,9 +248,9 @@
       "bucket": "fbneo/donpachi.zip"
     },
     {
-      "title": "Dangun Feveron",
+      "title": "Fever SOS",
       "system": "fbneo",
-      "bucket": "fbneo/dfeveron.zip"
+      "bucket": "fbneo/feversos.zip"
     },
     {
       "title": "Ketsui",
@@ -296,11 +296,6 @@
       "title": "Gradius III",
       "system": "mame",
       "bucket": "mame/gradius3.zip"
-    },
-    {
-      "title": "Salamander",
-      "system": "mame",
-      "bucket": "mame/salamand.zip"
     },
     {
       "title": "Life Force",
