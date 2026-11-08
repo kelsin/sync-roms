@@ -666,7 +666,7 @@ def second_words():
             words.setdefault(key[0], []).append(key[1])
     words["games"] = sorted(set(words.get("games", [])) | {"list", "add", "remove", "full", "sets", "export", "import"})
     words["sets"] = ["edit"]
-    words["cards"] = ["list", "new", "set", "rename", "delete"]
+    words["cards"] = ["edit", "list", "new", "set", "rename", "delete"]
     words["config"] = ["show", "path"]
     words["completion"] = ["bash", "zsh", "fish"]
     return words
