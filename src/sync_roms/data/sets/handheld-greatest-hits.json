@@ -153,21 +153,6 @@
       "bucket": "gamegear/Shinobi II - The Silent Fury (World).zip"
     },
     {
-      "title": "Blue Lightning",
-      "system": "atarilynx",
-      "bucket": "atarilynx/Blue Lightning (World).zip"
-    },
-    {
-      "title": "California Games",
-      "system": "atarilynx",
-      "bucket": "atarilynx/California Games (World).zip"
-    },
-    {
-      "title": "Chip's Challenge",
-      "system": "atarilynx",
-      "bucket": "atarilynx/Chip's Challenge (World).zip"
-    },
-    {
       "title": "SNK vs. Capcom - Card Fighters' Clash - SNK Version",
       "system": "ngpc",
       "bucket": "ngpc/SNK vs. Capcom - Card Fighters' Clash - SNK Version (USA, Europe).zip"
@@ -186,21 +171,6 @@
       "title": "Sonic The Hedgehog - Pocket Adventure (En,Ja)",
       "system": "ngpc",
       "bucket": "ngpc/Sonic The Hedgehog - Pocket Adventure (World) (En,Ja).zip"
-    },
-    {
-      "title": "Virtual Boy Wario Land (En)",
-      "system": "virtualboy",
-      "bucket": "virtualboy/Virtual Boy Wario Land (Japan, USA) (En).zip"
-    },
-    {
-      "title": "Red Alarm",
-      "system": "virtualboy",
-      "bucket": "virtualboy/Red Alarm (USA).zip"
-    },
-    {
-      "title": "Galactic Pinball (En)",
-      "system": "virtualboy",
-      "bucket": "virtualboy/Galactic Pinball (Japan, USA) (En).zip"
     },
     {
       "title": "New Super Mario Bros.",

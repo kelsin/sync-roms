@@ -23,11 +23,6 @@
       "bucket": "gba/Metroid - Zero Mission (USA).zip"
     },
     {
-      "title": "Metroid (Classic NES Series)",
-      "system": "gba",
-      "bucket": "gba/Classic NES Series - Metroid (USA, Europe).zip"
-    },
-    {
       "title": "Metroid Prime (Rev 2)",
       "system": "gc",
       "bucket": "gc/Metroid Prime (USA) (Rev 2).rvz"

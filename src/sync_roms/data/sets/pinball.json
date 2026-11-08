@@ -163,36 +163,6 @@
       "bucket": "nds/Flipper Critters (USA) (En,Fr,De,Es,It).zip"
     },
     {
-      "title": "Galactic Pinball",
-      "system": "virtualboy",
-      "bucket": "virtualboy/Galactic Pinball (Japan, USA) (En).zip"
-    },
-    {
-      "title": "Video Pinball",
-      "system": "atari2600",
-      "bucket": "atari2600/Video Pinball ~ Arcade Pinball (USA).zip"
-    },
-    {
-      "title": "Pinball Jam",
-      "system": "atarilynx",
-      "bucket": "atarilynx/Pinball Jam (USA, Europe).zip"
-    },
-    {
-      "title": "Pinball Fantasies",
-      "system": "atarijaguar",
-      "bucket": "atarijaguar/Pinball Fantasies (World).zip"
-    },
-    {
-      "title": "Ruiner Pinball",
-      "system": "atarijaguar",
-      "bucket": "atarijaguar/Ruiner Pinball (USA, Europe).zip"
-    },
-    {
-      "title": "Flipper Slipper",
-      "system": "colecovision",
-      "bucket": "colecovision/Flipper Slipper (USA, Europe).zip"
-    },
-    {
       "title": "Hyper 3-D Pinball",
       "system": "saturn",
       "bucket": "saturn/Hyper 3-D Pinball (USA).chd"
