@@ -4,33 +4,33 @@
   "games": [
     {
       "title": "Street Fighter II: The World Warrior",
-      "system": "mame",
-      "bucket": "mame/sf2.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/sf2.zip"
     },
     {
       "title": "Super Street Fighter II Turbo",
-      "system": "mame",
-      "bucket": "mame/ssf2t.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/ssf2t.zip"
     },
     {
       "title": "Street Fighter Alpha 3",
-      "system": "mame",
-      "bucket": "mame/sfa3.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/sfa3.zip"
     },
     {
       "title": "Mortal Kombat II",
-      "system": "mame",
-      "bucket": "mame/mk2.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/mk2.zip"
     },
     {
       "title": "Vampire Savior",
-      "system": "mame",
-      "bucket": "mame/vsavu.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/vsavu.zip"
     },
     {
       "title": "X-Men vs. Street Fighter",
-      "system": "mame",
-      "bucket": "mame/xmvsfur1.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/xmvsfur1.zip"
     },
     {
       "title": "The King of Fighters '98",
@@ -64,8 +64,8 @@
     },
     {
       "title": "Street Fighter II': Champion Edition",
-      "system": "mame",
-      "bucket": "mame/sf2ceua.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/sf2ceua.zip"
     },
     {
       "title": "Street Fighter II': Hyper Fighting",
@@ -74,13 +74,13 @@
     },
     {
       "title": "Super Street Fighter II",
-      "system": "mame",
-      "bucket": "mame/ssf2u.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/ssf2u.zip"
     },
     {
       "title": "Street Fighter Alpha",
-      "system": "mame",
-      "bucket": "mame/sfau.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/sfau.zip"
     },
     {
       "title": "Street Fighter III: 3rd Strike",
@@ -99,23 +99,23 @@
     },
     {
       "title": "Mortal Kombat",
-      "system": "mame",
-      "bucket": "mame/mk.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/mk.zip"
     },
     {
       "title": "Mortal Kombat 3",
-      "system": "mame",
-      "bucket": "mame/mk3.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/mk3.zip"
     },
     {
       "title": "Ultimate Mortal Kombat 3",
-      "system": "mame",
-      "bucket": "mame/umk3.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/umk3.zip"
     },
     {
       "title": "Marvel Super Heroes",
-      "system": "mame",
-      "bucket": "mame/mshu.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/mshu.zip"
     },
     {
       "title": "The King of Fighters '95",
@@ -228,11 +228,6 @@
       "bucket": "psx/Tekken 3 (USA).chd"
     },
     {
-      "title": "Street Fighter Alpha 3",
-      "system": "psx",
-      "bucket": "psx/Street Fighter Alpha 3 (USA).chd"
-    },
-    {
       "title": "Bushido Blade",
       "system": "psx",
       "bucket": "psx/Bushido Blade (USA).chd"
@@ -241,11 +236,6 @@
       "title": "Super Smash Bros.",
       "system": "n64",
       "bucket": "n64/Super Smash Bros. (USA).zip"
-    },
-    {
-      "title": "Soulcalibur II",
-      "system": "ps2",
-      "bucket": "ps2/Soulcalibur II (USA).chd"
     },
     {
       "title": "Soulcalibur III",
@@ -333,29 +323,9 @@
       "bucket": "gc/Mortal Kombat - Deadly Alliance (USA) (Rev 1).rvz"
     },
     {
-      "title": "King of Fighters 2000, The",
-      "system": "ps2",
-      "bucket": "ps2/King of Fighters 2000, The (USA).chd"
-    },
-    {
-      "title": "King of Fighters 2001, The",
-      "system": "ps2",
-      "bucket": "ps2/King of Fighters 2001, The (USA).chd"
-    },
-    {
-      "title": "King of Fighters 2003, The",
-      "system": "ps2",
-      "bucket": "ps2/King of Fighters 2003, The (USA).chd"
-    },
-    {
       "title": "King of Fighters Collection, The - The Orochi Saga",
       "system": "ps2",
       "bucket": "ps2/King of Fighters Collection, The - The Orochi Saga (USA).chd"
-    },
-    {
-      "title": "Guilty Gear X",
-      "system": "ps2",
-      "bucket": "ps2/Guilty Gear X (USA).chd"
     },
     {
       "title": "Guilty Gear XX Accent Core",
@@ -442,11 +412,6 @@
       "bucket": "psx/Soul Blade (USA) (Rev 1).chd"
     },
     {
-      "title": "Marvel vs. Capcom: Clash of Super Heroes",
-      "system": "psx",
-      "bucket": "psx/Marvel vs. Capcom - Clash of Super Heroes (USA).chd"
-    },
-    {
       "title": "Darkstalkers 3",
       "system": "psx",
       "bucket": "psx/Darkstalkers 3 (USA).chd"
@@ -516,29 +481,9 @@
       "bucket": "psx/Darkstalkers - The Night Warriors (USA).chd"
     },
     {
-      "title": "Marvel Super Heroes",
-      "system": "psx",
-      "bucket": "psx/Marvel Super Heroes (USA).chd"
-    },
-    {
       "title": "X-Men: Children of the Atom",
       "system": "psx",
       "bucket": "psx/X-Men - Children of the Atom (USA).chd"
-    },
-    {
-      "title": "The King of Fighters '95",
-      "system": "psx",
-      "bucket": "psx/King of Fighters '95, The (USA).chd"
-    },
-    {
-      "title": "The King of Fighters '99",
-      "system": "psx",
-      "bucket": "psx/King of Fighters '99, The (USA).chd"
-    },
-    {
-      "title": "Samurai Shodown III",
-      "system": "psx",
-      "bucket": "psx/Samurai Shodown III - Blades of Blood (USA).chd"
     },
     {
       "title": "Fatal Fury: Wild Ambition",
@@ -681,11 +626,6 @@
       "bucket": "ps2/Dragon Ball Z - Budokai 3 (USA).chd"
     },
     {
-      "title": "Marvel vs. Capcom 2",
-      "system": "ps2",
-      "bucket": "ps2/Marvel vs. Capcom 2 - New Age of Heroes (USA).chd"
-    },
-    {
       "title": "Mortal Kombat: Armageddon",
       "system": "ps2",
       "bucket": "ps2/Mortal Kombat - Armageddon (USA).chd"
@@ -769,21 +709,6 @@
       "title": "The King of Fighters: Evolution",
       "system": "dreamcast",
       "bucket": "dreamcast/King of Fighters, The - Evolution (USA) (En,Ja,Es,Pt).chd"
-    },
-    {
-      "title": "The King of Fighters 2000",
-      "system": "dreamcast",
-      "bucket": "dreamcast/King of Fighters 2000, The (Japan).chd"
-    },
-    {
-      "title": "The King of Fighters 2001",
-      "system": "dreamcast",
-      "bucket": "dreamcast/King of Fighters 2001, The (Japan).chd"
-    },
-    {
-      "title": "The King of Fighters 2002",
-      "system": "dreamcast",
-      "bucket": "dreamcast/King of Fighters 2002, The (Japan) (En,Ja).chd"
     },
     {
       "title": "Guilty Gear X",

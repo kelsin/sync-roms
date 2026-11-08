@@ -194,28 +194,28 @@
     },
     {
       "title": "Pac-Man",
-      "system": "mame",
-      "bucket": "mame/pacman.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/pacman.zip"
     },
     {
       "title": "Galaga",
-      "system": "mame",
-      "bucket": "mame/galaga.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/galaga.zip"
     },
     {
       "title": "Dig Dug",
-      "system": "mame",
-      "bucket": "mame/digdug.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/digdug.zip"
     },
     {
       "title": "1942",
-      "system": "mame",
-      "bucket": "mame/1942.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/1942.zip"
     },
     {
       "title": "Frogger",
-      "system": "mame",
-      "bucket": "mame/frogger.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/frogger.zip"
     },
     {
       "title": "Metal Slug",
@@ -224,43 +224,43 @@
     },
     {
       "title": "Donkey Kong",
-      "system": "mame",
-      "bucket": "mame/dkong.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/dkong.zip"
     },
     {
       "title": "Donkey Kong Jr.",
-      "system": "mame",
-      "bucket": "mame/dkongjr.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/dkongjr.zip"
     },
     {
       "title": "Ms. Pac-Man",
-      "system": "mame",
-      "bucket": "mame/mspacman.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/mspacman.zip"
     },
     {
       "title": "Galaxian",
-      "system": "mame",
-      "bucket": "mame/galaxian.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/galaxian.zip"
     },
     {
       "title": "Joust",
-      "system": "mame",
-      "bucket": "mame/joust.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/joust.zip"
     },
     {
       "title": "Defender",
-      "system": "mame",
-      "bucket": "mame/defender.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/defender.zip"
     },
     {
       "title": "Robotron: 2084",
-      "system": "mame",
-      "bucket": "mame/robotron.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/robotron.zip"
     },
     {
       "title": "Bubble Bobble",
-      "system": "mame",
-      "bucket": "mame/bublbobl.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/bublbobl.zip"
     },
     {
       "title": "Taito Legends",

@@ -4,38 +4,38 @@
   "games": [
     {
       "title": "Final Fight",
-      "system": "mame",
-      "bucket": "mame/ffightu.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/ffightu.zip"
     },
     {
       "title": "Cadillacs and Dinosaurs",
-      "system": "mame",
-      "bucket": "mame/dinou.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/dinou.zip"
     },
     {
       "title": "Knights of the Round",
-      "system": "mame",
-      "bucket": "mame/knightsu.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/knightsu.zip"
     },
     {
       "title": "The King of Dragons",
-      "system": "mame",
-      "bucket": "mame/kodu.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/kodu.zip"
     },
     {
       "title": "Aliens",
-      "system": "mame",
-      "bucket": "mame/aliensu.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/aliensu.zip"
     },
     {
       "title": "Double Dragon",
-      "system": "mame",
-      "bucket": "mame/ddragonu.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/ddragonu.zip"
     },
     {
       "title": "Teenage Mutant Ninja Turtles (2 Players)",
-      "system": "mame",
-      "bucket": "mame/tmnt22p.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/tmnt22pu.zip"
     },
     {
       "title": "Metal Slug",
@@ -59,8 +59,8 @@
     },
     {
       "title": "Captain Commando",
-      "system": "mame",
-      "bucket": "mame/captcomu.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/captcommu.zip"
     },
     {
       "title": "The Punisher",
@@ -69,58 +69,58 @@
     },
     {
       "title": "The Simpsons",
-      "system": "mame",
-      "bucket": "mame/simpsons.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/simpsons.zip"
     },
     {
       "title": "Sunset Riders",
-      "system": "mame",
-      "bucket": "mame/ssriders.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/ssriders.zip"
     },
     {
       "title": "Teenage Mutant Ninja Turtles",
-      "system": "mame",
-      "bucket": "mame/tmntu.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/tmntu.zip"
     },
     {
       "title": "Warriors of Fate",
-      "system": "mame",
-      "bucket": "mame/wofu.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/wofu.zip"
     },
     {
       "title": "Double Dragon II: The Revenge",
-      "system": "mame",
-      "bucket": "mame/ddragon2.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/ddragon2.zip"
     },
     {
       "title": "Golden Axe",
-      "system": "mame",
-      "bucket": "mame/goldnaxe.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/goldnaxe.zip"
     },
     {
       "title": "Vendetta",
-      "system": "mame",
-      "bucket": "mame/vendetta.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/vendetta.zip"
     },
     {
       "title": "Crime Fighters",
-      "system": "mame",
-      "bucket": "mame/crimfght.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/crimfght.zip"
     },
     {
       "title": "Alien vs. Predator",
-      "system": "mame",
-      "bucket": "mame/avsp.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/avsp.zip"
     },
     {
       "title": "X-Men",
-      "system": "mame",
-      "bucket": "mame/xmen.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/xmen.zip"
     },
     {
       "title": "Armored Warriors",
-      "system": "mame",
-      "bucket": "mame/armwar.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/armwar.zip"
     },
     {
       "title": "Streets of Rage (Rev A)",
@@ -309,11 +309,6 @@
       "title": "Teenage Mutant Ninja Turtles III - Radical Rescue",
       "system": "gb",
       "bucket": "gb/Teenage Mutant Ninja Turtles III - Radical Rescue (USA).zip"
-    },
-    {
-      "title": "Gauntlet Legends",
-      "system": "psx",
-      "bucket": "psx/Gauntlet Legends (USA).chd"
     },
     {
       "title": "Fighting Force",

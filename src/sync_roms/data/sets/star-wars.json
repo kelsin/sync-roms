@@ -4,18 +4,18 @@
   "games": [
     {
       "title": "Star Wars (Arcade)",
-      "system": "mame",
-      "bucket": "mame/starwars.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/starwars.zip"
     },
     {
       "title": "Star Wars - The Empire Strikes Back (Arcade)",
-      "system": "mame",
-      "bucket": "mame/esb.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/esb.zip"
     },
     {
       "title": "Star Wars - Return of the Jedi (Arcade)",
-      "system": "mame",
-      "bucket": "mame/jedi.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/jedi.zip"
     },
     {
       "title": "Star Wars",

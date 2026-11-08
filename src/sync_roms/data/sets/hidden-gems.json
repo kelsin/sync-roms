@@ -252,11 +252,6 @@
       "bucket": "ps2/Katamari Damacy (USA).chd"
     },
     {
-      "title": "Viewtiful Joe",
-      "system": "ps2",
-      "bucket": "ps2/Viewtiful Joe (USA).chd"
-    },
-    {
       "title": "Odin Sphere",
       "system": "ps2",
       "bucket": "ps2/Odin Sphere (USA).chd"
@@ -484,11 +479,6 @@
       "title": "Solatorobo - Red the Hunter",
       "system": "nds",
       "bucket": "nds/Solatorobo - Red the Hunter (USA) (En,Fr,De,Es,It) (NDSi Enhanced).zip"
-    },
-    {
-      "title": "Viewtiful Joe 2",
-      "system": "ps2",
-      "bucket": "ps2/Viewtiful Joe 2 (USA).chd"
     },
     {
       "title": "Shin Megami Tensei - Devil Summoner - Raidou Kuzunoha vs. the Soulless Army",
@@ -971,11 +961,6 @@
       "bucket": "neogeocd/Crossed Swords (Japan).chd"
     },
     {
-      "title": "Beyond Good & Evil",
-      "system": "ps2",
-      "bucket": "ps2/Beyond Good & Evil (USA) (En,Fr,Es).chd"
-    },
-    {
       "title": "Bully",
       "system": "ps2",
       "bucket": "ps2/Bully (USA).chd"
@@ -994,11 +979,6 @@
       "title": "Okage: Shadow King",
       "system": "ps2",
       "bucket": "ps2/Okage - Shadow King (USA).chd"
-    },
-    {
-      "title": "Ookami",
-      "system": "ps2",
-      "bucket": "ps2/Ookami (USA).chd"
     },
     {
       "title": "PaRappa the Rapper 2",
@@ -1023,11 +1003,6 @@
         "ps2/Space Channel 5 - Special Edition (USA) (Disc 1).chd",
         "ps2/Space Channel 5 - Special Edition (USA) (Disc 2).chd"
       ]
-    },
-    {
-      "title": "Space Channel 5: Part 2",
-      "system": "ps2",
-      "bucket": "ps2/Space Channel 5 Part 2 (Europe) (En,Fr,De,Es,It).chd"
     },
     {
       "title": "Kirby's Epic Yarn",
