@@ -45,7 +45,7 @@ TOPICS = {
       Then totals and free space are shown and you confirm; ROMs download, then BIOS.
    4. Scraped data for the chosen systems' games is installed from the bucket's scrapes/ folder, then media on the
       card for ROMs it doesn't have is removed.
-   5. Other systems' folders and BIOS are never touched.
+   5. BIOS for every system with ROMs on the card is installed, chosen or not. Other systems' ROM folders are never touched.
 
   --dry-run   show what would be downloaded and deleted, change nothing
   --yes       answer every prompt with its default (a default-no prompt, like deleting files, stays no)
@@ -625,7 +625,10 @@ def run(argv):
         extras += downloads.find_extras(dest, [k for t in systems if dest_of(t) == dest for k in available(t)], unzip,
                                         layout_name == "onion", disc_dir, {k for t in systems if dest_of(t) == dest for k in discs_of(t)})
 
-    bios_keys = sorted({"BIOS/" + f for s in chosen for f in s["bios"]["files"]})
+    # BIOS for every system with ROMs already on the card too, even when this sync doesn't touch that system
+    bios_systems = chosen + [s for s in systems if s["bucket"] not in chosen_ids
+                             and downloads.has_local_files(dest_of(s), layout_name == "onion")]
+    bios_keys = sorted({"BIOS/" + f for s in bios_systems for f in s["bios"]["files"]})
     bios_have = s3.list_sizes("BIOS/") if bios_keys else {}
     bios_jobs = []
     for k in bios_keys:
