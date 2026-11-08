@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.37.0](https://github.com/kelsin/sync-roms/compare/v0.36.0...v0.37.0) (2026-11-08)
+
+
+### Features
+
+* **sets:** add radiant silvergun to shmups ([#140](https://github.com/kelsin/sync-roms/issues/140)) ([d91a403](https://github.com/kelsin/sync-roms/commit/d91a403101e42e269fe07438d1f1e4c33fa9b36c))
+* **skills:** add build-card skill ([#138](https://github.com/kelsin/sync-roms/issues/138)) ([1e0f86e](https://github.com/kelsin/sync-roms/commit/1e0f86ea45ebdc26c46ae4b1b490e5b055bad19c))
+
 ## [0.36.0](https://github.com/kelsin/sync-roms/compare/v0.35.0...v0.36.0) (2026-11-08)
 
 
