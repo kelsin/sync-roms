@@ -1,0 +1,16 @@
+{
+  "header": {"APIversion": "2.0", "success": "true"},
+  "response": {
+    "ssuser": {
+      "id": "testuser",
+      "niveau": "1",
+      "maxthreads": "1",
+      "maxrequestspermin": "20000",
+      "maxrequestsperday": "20000",
+      "maxrequestskoperday": "2000",
+      "requeststoday": "123",
+      "requestskotoday": "4",
+      "maxdownloadspeed": "128"
+    }
+  }
+}
