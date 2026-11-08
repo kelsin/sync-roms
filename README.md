@@ -131,7 +131,7 @@ same name if they should share settings.
 
 Then:
 
-1. **Pick a device and a firmware** — type to filter, `↑/↓` to move, `Enter` to continue,
+1. **Pick a device and a firmware** — `/` to filter, `j`/`k` to move, `Enter` to continue,
    `Esc` to go back. Each device knows the systems that run well on it (`systems` in
    `src/sync_roms/data/device-systems.json`, adjustable with your own overlay; only those are listed) and its firmwares (`firmwares` in
    `src/sync_roms/data/devices.json`, see `layouts`; the first is highlighted). Or choose Full (every system) and any firmware. Systems with no
@@ -139,7 +139,7 @@ Then:
 2. **Toggle systems** — for a device, its recommended systems that have ROMs start on.
    Otherwise systems whose local folder already has files start on
    (dotfiles ignored), everything else starts off. Systems with no downloadable
-   ROMs are hidden and never pre-selected; press `e` to show them (sorted last, dimmed). BIOS files still
+   ROMs are hidden and never pre-selected; press `z` to show them (sorted last, dimmed). BIOS files still
    download for any system you select. The status bar shows a running total for the
    selected systems: how much is still left to download (files you already have
    are skipped) and the full size, e.g. `18 selected · 12.3 GB to download (86.1 GB total)`.
@@ -147,17 +147,36 @@ Then:
 
    | Key | Action |
    | --- | --- |
-   | `↑` `↓` / `j` `k` | move |
-   | `PgUp` `PgDn` | page |
+   | `↑` `↓` / `j` `k` / `^N` `^P` | move |
+   | `g` `G` / `Home` `End` | top / bottom |
+   | `PgUp` `PgDn` / `^V` | page |
+   | `/` | filter by name (`Enter` keeps it, `Esc` clears it); see [List keys](#list-keys) |
    | `space` `tab` | toggle system |
-   | `a` | all on (visible systems) |
-   | `n` | all off |
-   | `o` | show only the selected systems |
-   | `e` | show/hide systems with 0 ROMs |
-   | `g` | edit the highlighted system's games for this card (same list as `games edit`), then return here. Not shown with `--dry-run` |
-   | `x` | clear this card's own extra games after asking (the core list stays) |
+   | `a` | all on, or all off if they already are (visible systems) |
+   | `o` | cycle the view: all / only selected / only changed |
+   | `z` | show/hide systems with 0 ROMs |
+   | `e` | edit the highlighted system's games for this card (same list as `games edit`), then return here. Not shown with `--dry-run` |
+   | `D` | clear this card's own extra games after asking (the core list stays) |
    | `enter` | start downloading |
-   | `q` | quit |
+   | `q` / `Esc` | quit |
+
+### List keys
+
+Every list works the same way, vim-style with Emacs line editing:
+
+| Key | Action |
+| --- | --- |
+| `j` `k` `↑` `↓` `^N` `^P` | move |
+| `g` `G` | top / bottom |
+| `^D` `^U` | half page |
+| `^F` `^B` `PgUp` `PgDn` `^V` | page |
+| `/` | filter: type words that must all match |
+| `Enter` (while filtering) | keep the filter and go back to moving |
+| `Esc` / `^G` | clear the filter, then go back / cancel |
+| `Space` `Tab` | toggle (lists with checkboxes) |
+| `a` `o` `u` | all or none shown / cycle view / revert (lists with checkboxes) |
+
+While typing a filter (or a note, which `w` opens in the game list): `^A` `^E` start/end of line, `^B` `^F` left/right, `^D` delete a character, `^K` kill to end, `^U` kill to start, `^W` kill a word.
 
 3. Before downloading, a summary shows how many files will be fetched and their
    total size (e.g. `💿 ROMs: 120 to download (3.4 GB), 5 already present`).
@@ -448,19 +467,19 @@ sync-roms --edit
 ```
 
 0. Pick **🏠 Core**, one of your cards, or **➕ New card** (asks for its folder name, then its device and
-   firmware, like the first sync does). On a card, `^D` changes its device and firmware instead of opening it (saved with the other changes) and unticks the card's extra games for systems the new device or firmware doesn't use. Each card's row shows its current device and firmware. Games a card already gets from core show greyed out with a 🔒.
-1. Pick **By system** or **By set**, then type to filter the list (every word you type must
+   firmware, like the first sync does). On a card, `v` changes its device and firmware instead of opening it (saved with the other changes) and unticks the card's extra games for systems the new device or firmware doesn't use. Each card's row shows its current device and firmware. Games a card already gets from core show greyed out with a 🔒.
+1. Pick **By system** or **By set**, then `/` to filter the list (every word you type must
    match) and `Enter` to pick one. `Esc` goes back; `Esc` at the first menu goes to the review (the menu also has **Done** and **Quit without saving** rows). `Ctrl-C` keeps your pending changes and goes to the review.
 2. For a system you see every file in its bucket folder. For a set (a curated list in the
    package's `data/sets/*.json`) you see its games from every system, sorted by system then title.
-   `✅` is already in the list, `⬜` is not. Type to filter, `Tab` toggles the game
-   under the cursor (so does `Space` while the filter is empty), `^A` toggles everything currently shown, `^R` reverts the list to how it was when opened, `^O` cycles the view between all rows, only those that are on, and only those you changed. `Enter` keeps your changes; `Esc` asks whether to keep or revert them if there are any.
-   Pending changes show as `➕` / `➖`. `^N` writes a note on the game under the cursor (empty clears it); notes are shown when a game is locked and are kept when the game is saved into a set.
+   `✅` is already in the list, `⬜` is not. `/` filters, `Space` (or `Tab`) toggles the game
+   under the cursor, `a` toggles everything currently shown, `u` reverts the list to how it was when opened, `o` cycles the view between all rows, only those that are on, and only those you changed. `Enter` keeps your changes; `Esc` asks whether to keep or revert them if there are any.
+   Pending changes show as `➕` / `➖`. `w` writes a note on the game under the cursor (empty clears it); notes are shown when a game is locked and are kept when the game is saved into a set.
 3. When you finish, you get a summary of additions and removals per system, then **save**, **keep editing**, **discard**, or **list every change**. Saving writes `games.json` and/or the cards' entries in `cards.json`, keeping the previous files as `.bak` next to them. Nothing is uploaded.
 
 On a card, **📦 Make a set from these extras** saves the card's extra games as a personal set. Personal sets are files in `~/.sync-roms/sets/<id>.json` (same format as the package's sets, below), appear next to the built-in ones under **By set** and can be referenced like them; an id already used by a built-in set is refused. You can also write them by hand, and `sync-roms check` validates them.
 
-On the top menu, `^D` changes a card's device and firmware, `^R` renames a card and `^X` deletes one (both ask first, and act at once). **🧩 Device systems** edits which systems a device recommends: it is saved as the `add`/`remove` overlay in `device-systems.json`, relative to the repo defaults. A file that isn't valid JSON is never overwritten: sync-roms says so and leaves it for you to fix (`sync-roms check` lists the problems).
+On the top menu, `v` changes a card's device and firmware, `r` renames a card and `d` deletes one (both ask first, and act at once). **🧩 Device systems** edits which systems a device recommends: it is saved as the `add`/`remove` overlay in `device-systems.json`, relative to the repo defaults. A file that isn't valid JSON is never overwritten: sync-roms says so and leaves it for you to fix (`sync-roms check` lists the problems).
 
 ### Editing from scripts
 
@@ -486,7 +505,7 @@ Removing a game only drops it from `games.json`; the file stays in the bucket.
 
 ### Editing the built-in sets
 
-`sync-roms sets edit` edits the sets in this repo's `data/sets/` and opens a PR with the changes, so it works from any install. Pick a set to switch games off, add games from a system (you're asked for a category; existing ones are listed), change a game's category, or rename it. **➕ New set** creates a set and `^X` deletes the highlighted one (it warns if your `games.json` or a card still references it). Esc shows the changes; confirming clones `kelsin/sync-roms` to a temporary folder, writes the changed set files, pushes a branch and runs `gh pr create`. It needs `git` and a logged-in `gh`, and writes nothing to the bucket or to `~/.sync-roms`.
+`sync-roms sets edit` edits the sets in this repo's `data/sets/` and opens a PR with the changes, so it works from any install. Pick a set to switch games off, add games from a system (you're asked for a category; existing ones are listed), change a game's category, or rename it. **➕ New set** creates a set and `d` deletes the highlighted one (it warns if your `games.json` or a card still references it). Esc shows the changes; confirming clones `kelsin/sync-roms` to a temporary folder, writes the changed set files, pushes a branch and runs `gh pr create`. It needs `git` and a logged-in `gh`, and writes nothing to the bucket or to `~/.sync-roms`.
 
 ### Full systems
 
@@ -498,7 +517,7 @@ instead of a list:
 { "gb": { "full_system": true } }
 ```
 
-No system is a full system by default. In `--edit`, press `^F` on a system in the **By system** list to
+No system is a full system by default. In `--edit`, press `f` on a system in the **By system** list to
 toggle it (🗂️). A full system's games can't be toggled one by one; a card can't turn off a system that core
 has as full.
 
@@ -512,7 +531,7 @@ holding the set file names without `.json`:
 ```
 
 It works in `games.json` and in a card's `games` entry in `cards.json`. A set reference is live: games added
-to the set in a later release are synced too, for the systems the card has enabled. In `--edit`, press `^F`
+to the set in a later release are synced too, for the systems the card has enabled. In `--edit`, press `f`
 on a set in the **By set** list (it shows 📦) to toggle it without opening it; inside a referenced set the
 games show greyed out. Unknown set names are skipped with a warning.
 
@@ -526,7 +545,7 @@ games show greyed out. Unknown set names are skipped with a warning.
 renaming the folder makes it a new card. The local mirror (`--mirror`) holds the core list plus every card's
 extras.
 
-`excluded` (`{"gba": ["gba/A.zip"]}`) lists core or set games this card opts out of. Press `g` on a system in the
+`excluded` (`{"gba": ["gba/A.zip"]}`) lists core or set games this card opts out of. Press `e` on a system in the
 picker: games the core list or sets sync show as on and can be switched off (and back on); the choice is saved
 for that card only. In the systems picker, `o` shows only the selected systems.
 

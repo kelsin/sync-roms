@@ -315,3 +315,76 @@ class FullToggles(EditFlow):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class Screen:
+    """A fake curses screen that feeds scripted keys."""
+    def __init__(self, keys):
+        self.keys = iter(keys)
+
+    def getmaxyx(self):
+        return 24, 80
+
+    def get_wch(self):
+        return next(self.keys)
+
+    def __getattr__(self, name):
+        return lambda *a, **k: None
+
+
+def run_list(keys, *args, **kwargs):
+    import curses
+    with mock.patch.object(curses, "curs_set"), mock.patch.object(curses, "use_default_colors"), \
+            mock.patch.object(curses, "has_colors", return_value=False), \
+            mock.patch.object(curses, "wrapper", side_effect=lambda f: f(Screen(keys))):
+        return picker.filter_list("t", *args, **kwargs)
+
+
+class Keys(unittest.TestCase):
+    LABELS = ["alpha", "beta", "gamma", "delta"]
+
+    def test_vim_and_emacs_movement(self):
+        self.assertEqual(run_list(["j", "j", "\n"], self.LABELS), 2)
+        self.assertEqual(run_list(["\x0e", "\x0e", "\x10", "\n"], self.LABELS), 1)
+        self.assertEqual(run_list(["G", "k", "\n"], self.LABELS), 2)
+        self.assertEqual(run_list(["G", "g", "\n"], self.LABELS), 0)
+
+    def test_letters_only_filter_after_slash(self):
+        self.assertEqual(run_list(["b", "\n"], self.LABELS), 0)
+        self.assertEqual(run_list(["/", "g", "a", "m", "\n", "\n"], self.LABELS), 2)
+
+    def test_esc_clears_filter_before_going_back(self):
+        self.assertEqual(run_list(["/", "b", "\n", "\x1b", "\n"], self.LABELS), 0)
+        self.assertIsNone(run_list(["/", "b", "\n", "\x1b", "\x1b"], self.LABELS))
+
+    def test_filter_line_editing(self):
+        self.assertEqual(run_list(["/", "x", "y", "\x15", "d", "e", "\n", "\n"], self.LABELS), 3)  # ^U clears
+        self.assertEqual(run_list(["/", "g", "a", " ", "x", "\x17", "\x17", "d", "\n", "\n"], self.LABELS), 3)  # ^W kills words
+
+    def test_line_key(self):
+        self.assertEqual(picker.line_key("abc def", 7, "\x17"), ("abc ", 4))
+        self.assertEqual(picker.line_key("abc", 3, "\x01"), ("abc", 0))
+        self.assertEqual(picker.line_key("abc", 1, "\x0b"), ("a", 1))
+        self.assertEqual(picker.line_key("abc", 1, "\x04"), ("ac", 1))
+        self.assertEqual(picker.line_key("ac", 1, "b"), ("abc", 2))
+        self.assertIsNone(picker.line_key("ac", 1, "\x0e"))
+
+    def test_multi_toggle_all_none_and_hotkeys(self):
+        self.assertEqual(run_list([" ", "j", "\t", "\n"], self.LABELS, multi=True), [True, True, False, False])
+        self.assertEqual(run_list(["a", "a", "j", " ", "\n"], self.LABELS, multi=True), [False, True, False, False])
+        self.assertEqual(run_list(["j", "f"], self.LABELS, hotkeys=("f",)), ("f", 1))
+
+    def test_hidden_rows_until_e(self):
+        got = run_list(["z", "G", " ", "\n"], self.LABELS, multi=True, hidden=[False, False, False, True])
+        self.assertEqual(got, [False, False, False, True])
+        self.assertEqual(run_list(["G", " ", "\n"], self.LABELS, multi=True, hidden=[False, False, False, True]),
+                         [False, False, True, False])
+
+    def test_pick_systems_returns_indexes_and_actions(self):
+        rows = [("a", True, 1, 2), ("b", False, 0, 0), ("c", True, 1, 2)]
+        import curses
+        for keys, want in ((["j", " ", "\n"], [2]), (["j", "e"], ("games", 2)), (["D"], ("clear", None)), (["q"], None)):
+            with mock.patch.object(picker.ui, "require_terminal"), mock.patch.object(curses, "curs_set"), \
+                    mock.patch.object(curses, "use_default_colors"), mock.patch.object(curses, "has_colors", return_value=False), \
+                    mock.patch.object(curses, "wrapper", side_effect=lambda f, k=keys: f(Screen(k))):
+                self.assertEqual(picker.pick_systems(rows, editable=True), want)

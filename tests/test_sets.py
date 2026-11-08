@@ -109,28 +109,29 @@ class SetsTest(unittest.TestCase):
         self.assertEqual(self.run_list(iter(["\x1b"])), [False, False])
 
     def test_multi_esc_can_revert(self):
-        self.assertEqual(self.run_list(iter(["\t", "\x1b", "r"])), [False, False])
+        self.assertEqual(self.run_list(iter(["\t", "\x1b", "u"])), [False, False])
 
     def test_multi_esc_any_other_key_keeps_editing(self):
         self.assertEqual(self.run_list(iter(["\t", "\x1b", "z", "\n"])), [True, False])
 
     def test_ctrl_r_reverts_the_list(self):
-        self.assertEqual(self.run_list(iter(["\t", "\x12", "\n"])), [False, False])
+        self.assertEqual(self.run_list(iter(["\t", "u", "\n"])), [False, False])
 
-    def test_space_toggles_only_with_an_empty_filter(self):
+    def test_space_toggles_in_normal_mode_and_is_text_while_typing(self):
         self.assertEqual(self.run_list(iter([" ", "\n"])), [True, False])
-        self.assertEqual(self.run_list(iter(["x", " ", "\n"])), [False, False])
+        self.assertEqual(self.run_list(iter(["/", "y", "\n", " ", "\n"])), [False, True])
+        self.assertEqual(self.run_list(iter(["/", "x", " ", "y", "\n", "\x1b", " ", "\n"])), [True, False])  # "x y" matches nothing; Esc clears it
 
     def test_view_cycle_shows_only_changed_rows(self):
         # toggle row 0, then ^O twice: "changed only" lists just it, and Tab then toggles that row back
         self.assertEqual(self.run_list(iter(["\t", "\x0f", "\x0f", "\t", "\n"])), [False, False])
 
     def test_hotkey_returns_pair(self):
-        self.assertEqual(self.run_list(iter(["\x06"]), multi=False, hotkeys=("\x06",)), ("\x06", 0))
-        self.assertEqual(self.run_list(iter(["y", "\x06"]), multi=False, hotkeys=("\x06",)), ("\x06", 1))
+        self.assertEqual(self.run_list(iter(["f"]), multi=False, hotkeys=("f",)), ("f", 0))
+        self.assertEqual(self.run_list(iter(["j", "f"]), multi=False, hotkeys=("f",)), ("f", 1))
 
     def test_hotkey_ignored_without_rows(self):
-        self.assertIsNone(self.run_list(iter(["z", "\x06", "\x1b"]), multi=False, hotkeys=("\x06",)))
+        self.assertIsNone(self.run_list(iter(["/", "z", "\n", "f", "\x1b", "\x1b"]), multi=False, hotkeys=("f",)))
 
     def test_covered_rows_locked_with_note(self):
         by = systems()

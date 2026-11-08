@@ -187,13 +187,13 @@ def toggle_full_system(s):
     s["full_system"] = not s["full_system"]
 
 
-FULL_KEY = "\x06"  # ^F
-SETUP_KEY = "\x04"  # ^D
-DELETE_KEY = "\x18"  # ^X
-RENAME_KEY = "\x12"  # ^R
-FULL_HINT = "Enter open · ^F {what} · Esc back · type to filter"
-MENU_HINT = "Enter open · Esc save · ^D device · ^R rename · ^X delete"
-GAMES_HINT = "Space toggle · Enter done · Esc back · ^N note · ^A all · ^O view"
+FULL_KEY = "f"
+SETUP_KEY = "v"
+DELETE_KEY = "d"
+RENAME_KEY = "r"
+FULL_HINT = "Enter open · f {what} · Esc back · / filter"
+MENU_HINT = "Enter open · Esc save · v device · r rename · d delete"
+GAMES_HINT = "Space toggle · Enter done · Esc back · / filter · w note · a all · o view"
 
 
 def new_target(label, raw, setup=None):
@@ -375,7 +375,7 @@ def edit_manifest():
             rows = set_rows(sets[i], by_bucket, lambda s: bucket_keys[s["bucket"]])
             if rows:
                 files = {g["bucket"]: g["files"] for g in sets[i]["games"] if g.get("bucket") and g.get("files")}
-                ref = "  📦 full set (^F on the set list to stop syncing all of it)" if sets[i]["id"] in t["sets_on"] else ""
+                ref = "  📦 full set (f on the set list to stop syncing all of it)" if sets[i]["id"] in t["sets_on"] else ""
                 toggle_games(f"✏️  {sets[i]['name']} — ✅ in {where}, ⬜ not{ref}", rows, files,
                              covered=lambda s, key: full.get(s["bucket"]) or keys.get(key))
             else:
@@ -493,7 +493,7 @@ def edit_manifest():
         devices = manifest["devices"]
         extras = [[("  edited", "cyan")] if d["id"] in overlay_pending else [] for d in devices]
         i = picker.filter_list("🧩 Which device's recommended systems?", [d["name"] for d in devices], extras=extras,
-                               hint="Enter open · Esc back · type to filter")
+                               hint="/ filter · Enter open · Esc back")
         if i is None:
             return False
         d = devices[i]

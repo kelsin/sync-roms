@@ -11,7 +11,7 @@ def pick_device(devices, cursor=0):
     ui.require_terminal("pick a device and firmware", "--device ID --layout NAME")
     options = [(f"📟 {d['name']}", d) for d in devices] + [("🌍 Full (every system)", "full")]
     i = filter_list("🎯 Which device?", [label for label, _ in options], cursor=cursor,
-                    hint="type to filter · ↑/↓ move · Enter continue · Esc quit")
+                    hint="/ filter · j/k move · Enter continue · Esc quit")
     return None if i is None else options[i][1]
 
 
@@ -20,7 +20,7 @@ def pick_layout(layouts, default):
     names = list(layouts)
     labels = [f"{l['label']}  ({l['roms_dir']}/ {l['bios_dir']}/)" for l in layouts.values()]
     i = filter_list("🗂️  Which firmware?", labels, cursor=names.index(default) if default in names else 0,
-                    hint="type to filter · ↑/↓ move · Enter continue · Esc back")
+                    hint="/ filter · j/k move · Enter continue · Esc back")
     return None if i is None else names[i]
 
 
@@ -72,16 +72,17 @@ def choose_setup(manifest, current=None):
             return device, layout
 
 
-SYSTEMS_HINT = "Space toggle · Enter go · Esc cancel · a/n all/none · o on · e 0-ROM"
-SINGLE_HINT = "Enter select · Esc back · ↑/↓ move"
-MULTI_HINT = "Space toggle · Enter done · Esc back · ^A all · ^O view · ^R revert"
+SINGLE_HINT = "Enter select · Esc back · j/k ^N/^P move · / filter"
+MULTI_HINT = "Space toggle · Enter done · Esc back · / filter · a all · o view · u revert"
+TYPING_HINT = "Enter keep filter · Esc clear · ^N/^P move · ^A/^E ^B/^F ^K ^W ^U edit"
+SYSTEMS_HINT = "Space toggle · Enter go · Esc cancel · / filter · a all/none · o view · z 0-ROM"
 
 
 def systems_hint(editable):
     """Key hints for pick_systems, most important first so a narrow terminal cuts only the extras."""
     if not editable:
         return SYSTEMS_HINT
-    return "Space toggle · Enter go · Esc quit · g games · x clear · a/n · o on · e 0-ROM"
+    return "Space toggle · Enter go · Esc quit · e games · D clear · / filter · z 0-ROM"
 
 
 def pick_systems(rows, initial=None, state=None, editable=False):
@@ -89,99 +90,26 @@ def pick_systems(rows, initial=None, state=None, editable=False):
     Returns selected indexes, or None if quit.
 
     state: a dict kept by the caller so the selection, cursor and shown/hidden 0-ROM systems survive
-    reopening the picker. editable: g (edit the highlighted system's games) and x (clear the card's games)
+    reopening the picker. editable: e (edit the highlighted system's games) and D (clear the card's games)
     close the picker and return ("games", row index) or ("clear", None); the caller reopens it with the same state.
     """
     state = {} if state is None else state
     ui.require_terminal("pick systems", "--systems a,b (or --systems all)")
-    os.environ.setdefault("ESCDELAY", "25")
 
-    def run(stdscr):
-        curses.curs_set(0)
-        curses.use_default_colors()
-        on = off = head = 0
-        if curses.has_colors():
-            curses.start_color()
-            curses.init_pair(1, curses.COLOR_GREEN, -1)
-            curses.init_pair(2, curses.COLOR_CYAN, -1)
-            curses.init_pair(3, curses.COLOR_YELLOW, -1)
-            on, head, off = curses.color_pair(1), curses.color_pair(2), curses.color_pair(3)
-        sel = state["sel"] if "sel" in state else [i in (initial or ()) for i in range(len(rows))]
-        show_empty = state.get("show_empty", False)
-        only_on = state.get("only_on", False)
-        cur = top = 0
-        restore = state.get("row")
-        while True:
-            # systems with ROMs first, then (when shown) the empty ones; stable within each group
-            order = [i for i, r in enumerate(rows) if r[1]]
-            if show_empty:
-                order += [i for i, r in enumerate(rows) if not r[1]]
-            if only_on:
-                order = [i for i in order if sel[i]]
-            if restore in order:
-                cur = order.index(restore)
-            restore = None
-            cur = max(0, min(cur, len(order) - 1))
-            state.update(sel=sel, show_empty=show_empty, only_on=only_on, row=order[cur] if order else None)
-            stdscr.erase()
-            h, w = stdscr.getmaxyx()
-            hidden = sum(1 for r in rows if not r[1]) if not show_empty else 0
-            stdscr.addnstr(0, 0, "🕹  Pick systems", w - 1, head | curses.A_BOLD)
-            keys = systems_hint(editable)
-            stdscr.addnstr(1, 0, keys, w - 1, curses.A_DIM)
-            view = h - 4
-            if cur < top:
-                top = cur
-            elif cur >= top + view:
-                top = cur - view + 1
-            for pos in range(top, min(len(order), top + view)):
-                i = order[pos]
-                mark = "✅" if sel[i] else "⬜"
-                attr = (on if sel[i] else 0) | (curses.A_REVERSE if pos == cur else 0)
-                if not rows[i][1]:
-                    attr |= curses.A_DIM
-                stdscr.addnstr(pos - top + 2, 0, f"{mark} {rows[i][0]}", w - 1, attr)
-            need = sum(r[2] for r, on_ in zip(rows, sel) if on_)
-            total = sum(r[3] for r, on_ in zip(rows, sel) if on_)
-            status = f"{sum(sel)} selected · {ui.human_size(need)} to download ({ui.human_size(total)} total)"
-            if only_on:
-                status += " · selected only (press o)"
-            if hidden:
-                status += f" · {hidden} systems with 0 ROMs hidden (press e)"
-            stdscr.addnstr(h - 1, 0, status, w - 1, off | curses.A_BOLD)
-            k = stdscr.getch()
-            if k in (curses.KEY_UP, ord("k")):
-                cur = max(0, cur - 1)
-            elif k in (curses.KEY_DOWN, ord("j")):
-                cur = min(len(order) - 1, cur + 1)
-            elif k == curses.KEY_PPAGE:
-                cur = max(0, cur - view)
-            elif k == curses.KEY_NPAGE:
-                cur = min(len(order) - 1, cur + view)
-            elif k == curses.KEY_HOME:
-                cur = 0
-            elif k == curses.KEY_END:
-                cur = max(0, len(order) - 1)
-            elif k in (ord(" "), 9) and order:
-                sel[order[cur]] = not sel[order[cur]]
-            elif k == ord("a"):
-                for i in order:
-                    sel[i] = True
-            elif k == ord("n"):
-                sel = [False] * len(rows)
-            elif k == ord("o"):
-                only_on = not only_on
-            elif k == ord("e"):
-                show_empty = not show_empty
-            elif k == ord("g") and editable and order:
-                return "games", order[cur]
-            elif k == ord("x") and editable:
-                return "clear", None
-            elif k in (10, 13, curses.KEY_ENTER):
-                return [i for i, s in enumerate(sel) if s]
-            elif k in (ord("q"), 27):
-                return None
-    return curses.wrapper(run)
+    def status(sel):
+        need = sum(r[2] for r, on in zip(rows, sel) if on)
+        total = sum(r[3] for r, on in zip(rows, sel) if on)
+        return f"{sum(sel)} selected · {ui.human_size(need)} to download ({ui.human_size(total)} total)"
+
+    result = filter_list("🕹  Pick systems", [r[0] for r in rows], multi=True,
+                         initial=[i in (initial or ()) for i in range(len(rows))], hint=systems_hint(editable),
+                         hotkeys=("e", "D") if editable else (), esc_asks=False, hidden=[not r[1] for r in rows],
+                         status=status, diff_marks=False, session=state)
+    if result is None:
+        return None
+    if isinstance(result, tuple):
+        return ("games", result[1]) if result[0] == "e" else ("clear", None)
+    return [i for i, on in enumerate(result) if on]
 
 
 def cell_width(text):
@@ -189,50 +117,104 @@ def cell_width(text):
     return sum(2 if unicodedata.east_asian_width(c) in "WF" else 1 for c in text)
 
 
+def line_key(text, pos, k):
+    """Emacs-style single-line editing. Returns (text, cursor position), or None if k isn't an editing key.
+    ^A/^E start/end · ^B/^F left/right · ^D delete char · ^K kill to end · ^U kill to start · ^W kill word."""
+    if k in ("\x01", curses.KEY_HOME):
+        return text, 0
+    if k in ("\x05", curses.KEY_END):
+        return text, len(text)
+    if k in ("\x02", curses.KEY_LEFT):
+        return text, max(0, pos - 1)
+    if k in ("\x06", curses.KEY_RIGHT):
+        return text, min(len(text), pos + 1)
+    if k in ("\x04", curses.KEY_DC):
+        return text[:pos] + text[pos + 1:], pos
+    if k in (curses.KEY_BACKSPACE, "\x7f", "\b"):
+        return (text[:pos - 1] + text[pos:], pos - 1) if pos else (text, pos)
+    if k == "\x0b":
+        return text[:pos], pos
+    if k == "\x15":
+        return text[pos:], 0
+    if k == "\x17":
+        start = text.rfind(" ", 0, len(text[:pos].rstrip())) + 1
+        return text[:start] + text[pos:], start
+    if isinstance(k, str) and k.isprintable():
+        return text[:pos] + k + text[pos:], pos + 1
+    return None
+
+
+def move_key(k, cur, last, view):
+    """The new cursor row for a movement key (arrows, ^N/^P, PgUp/PgDn/^V, Home/End), or None if k isn't one."""
+    if k in (curses.KEY_UP, "\x10"):
+        return max(0, cur - 1)
+    if k in (curses.KEY_DOWN, "\x0e"):
+        return min(last, cur + 1)
+    if k == curses.KEY_PPAGE:
+        return max(0, cur - view)
+    if k in (curses.KEY_NPAGE, "\x16"):
+        return min(last, cur + view)
+    if k == curses.KEY_HOME:
+        return 0
+    if k == curses.KEY_END:
+        return max(0, last)
+    return None
+
+
 def read_line(stdscr, prompt, text=""):
-    """Edit one line on the bottom row. Returns the text on Enter, or None on Esc."""
+    """Edit one line on the bottom row (see line_key). Returns the text on Enter, or None on Esc or ^G."""
+    pos = len(text)
+    curses.curs_set(1)
     while True:
         h, w = stdscr.getmaxyx()
         stdscr.addnstr(h - 1, 0, " " * (w - 1), w - 1)
         stdscr.addnstr(h - 1, 0, prompt + text, w - 1, curses.A_BOLD)
+        stdscr.move(h - 1, min(w - 1, cell_width(prompt + text[:pos])))
         try:
             k = stdscr.get_wch()
         except curses.error:
             continue
         if k in ("\n", "\r", curses.KEY_ENTER):
             return text
-        if k == "\x1b":
+        if k in ("\x1b", "\x07"):
             return None
-        if k in (curses.KEY_BACKSPACE, "\x7f", "\b"):
-            text = text[:-1]
-        elif k == "\x15":
-            text = ""
-        elif isinstance(k, str) and k.isprintable():
-            text += k
+        edited = line_key(text, pos, k)
+        if edited:
+            text, pos = edited
 
 
 def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, extras=None, locked=None, locked_note="",
-                hotkeys=(), note_text=None, on_note=None):
-    """Type-to-filter list. Every space-separated term must appear in a label (case-insensitive).
+                hotkeys=(), note_text=None, on_note=None, esc_asks=True, hidden=None, status=None, diff_marks=True,
+                session=None):
+    """Modal list: vim keys for moving and acting, Emacs keys for editing the filter.
 
-    Single mode returns the chosen index, or None on Esc. Multi mode (Tab toggles, or Space with no filter typed)
-    returns the list of on/off states on Enter; Esc asks whether to keep or revert pending changes, ^R reverts
-    them and ^O cycles the view (all / on / changed). cursor: index the highlight starts on.
+    Normal mode: j/k ↑/↓ ^N/^P move · g/G top/bottom · ^D/^U half page · ^F/^B/PgUp/PgDn/^V page · / filter ·
+    Enter picks · Esc/q/^G clears the filter, then goes back. Multi mode adds Space/Tab toggle · a all/none shown ·
+    o view (all / on / changed) · u revert · w note. After `/`, typed text filters (every
+    space-separated term must appear in a label, case-insensitive); Enter keeps the filter, Esc clears it.
+
+    Single mode returns the chosen index, or None on Esc. Multi mode returns the list of on/off states on Enter;
+    Esc asks whether to keep or revert pending changes (esc_asks=False: it just returns None).
+    cursor: index the highlight starts on.
     extras: per label, a list of (text, color) drawn after it (color: green, red, cyan or dim);
     they are not matched by the filter.
     locked: optional per-label flags; those rows are greyed out, can't be toggled, and show locked_note
     (one string, or one per label).
-    on_note: optional callable(label index, text) -> message, called with a line typed after ^N on a row (multi mode);
+    on_note: optional callable(label index, text) -> message, called with a line typed after `w` on a row (multi mode);
     note_text(label index) gives the text to start from.
-    hotkeys: control keys that, in single mode, return (key, label index) for the highlighted row instead of an index.
+    hotkeys: normal-mode keys that return (key, label index) for the highlighted row instead of acting.
+    hidden: optional per-label flags; those rows are left out (and drawn dim) until `z` reveals them.
+    status(states) -> text: replaces the "N/M shown" status. diff_marks: show ➕/➖ against `initial` (else ✅/⬜ only).
+    session: a dict the caller keeps so selection, view, revealed rows and cursor survive reopening the list.
     """
     os.environ.setdefault("ESCDELAY", "25")
     lowered = [l.lower() for l in labels]
     start = list(initial) if initial is not None else [False] * len(labels)
     locked = locked or [False] * len(labels)
+    hidden = hidden or [False] * len(labels)
+    session = {} if session is None else session
 
     def run(stdscr):
-        curses.curs_set(1)
         curses.use_default_colors()
         green_a = red_a = cyan_a = 0
         if curses.has_colors():
@@ -242,28 +224,34 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
             curses.init_pair(3, curses.COLOR_CYAN, -1)
             green_a, red_a, cyan_a = (curses.color_pair(n) for n in (1, 2, 3))
         colors = {"green": green_a, "red": red_a, "cyan": cyan_a, "dim": curses.A_DIM}
-        state = list(start)
-        query = ""
-        vis = list(range(len(labels)))
+        state = list(session["sel"]) if "sel" in session else list(start)
+        view_mode = session.get("view_mode", 0)  # multi: 0 all rows, 1 only rows that are on, 2 only rows changed
+        revealed = session.get("revealed", False)
+        restore = session.get("row")
+        query, qpos, typing = "", 0, False
         cur, top = cursor, 0
-        view_mode = 0  # multi: 0 all rows, 1 only rows that are on, 2 only rows changed in this session
         notice = ""
         while True:
             terms = query.lower().split()
-            vis = [i for i, l in enumerate(lowered) if all(t in l for t in terms)
+            vis = [i for i, l in enumerate(lowered) if (revealed or not hidden[i]) and all(t in l for t in terms)
                    and (view_mode == 0 or (state[i] if view_mode == 1 else state[i] != start[i]))]
+            vis.sort(key=lambda i: hidden[i])  # revealed rows go last; stable within each group
+            if restore in vis:
+                cur = vis.index(restore)
+            restore = None
             cur = max(0, min(cur, len(vis) - 1))
+            session.update(sel=state, view_mode=view_mode, revealed=revealed, row=vis[cur] if vis else None)
             h, w = stdscr.getmaxyx()
             view = max(1, h - 4)
             if cur < top:
                 top = cur
             elif cur >= top + view:
                 top = cur - view + 1
+            curses.curs_set(1 if typing else 0)
             stdscr.erase()
             stdscr.addnstr(0, 0, title, w - 1, cyan_a | curses.A_BOLD)
             stdscr.addnstr(1, 0, "🔎 " + query, w - 1)
-            keys = MULTI_HINT if multi else SINGLE_HINT
-            stdscr.addnstr(2, 0, hint or keys, w - 1, curses.A_DIM)
+            stdscr.addnstr(2, 0, TYPING_HINT if typing else hint or (MULTI_HINT if multi else SINGLE_HINT), w - 1, curses.A_DIM)
             for pos in range(top, min(len(vis), top + view)):
                 i = vis[pos]
                 attr = curses.A_REVERSE if pos == cur else 0
@@ -271,14 +259,17 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
                     line = f"🔒 {labels[i]}"
                     attr |= curses.A_DIM
                 elif multi:
-                    if state[i] == start[i]:
+                    if not diff_marks or state[i] == start[i]:
                         mark = "✅" if state[i] else "⬜"
+                        attr |= green_a if state[i] and not diff_marks else 0
                     else:
                         mark = "➕" if state[i] else "➖"
                         attr |= green_a if state[i] else red_a
                     line = f"{mark} {labels[i]}"
                 else:
                     line = labels[i]
+                if hidden[i]:
+                    attr |= curses.A_DIM
                 stdscr.addnstr(pos - top + 3, 0, line, w - 1, attr)
                 x = cell_width(line)
                 for text, color in (extras[i] if extras else []):
@@ -288,47 +279,75 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
                     x += cell_width(text)
             added = sum(1 for a, b in zip(state, start) if a and not b)
             removed = sum(1 for a, b in zip(state, start) if b and not a)
-            status = f"{len(vis)}/{len(labels)} shown"
-            if multi:
-                status += f" · +{added} −{removed} pending · view: {('all', 'on only', 'changed only')[view_mode]}"
+            line = status(state) if status else f"{len(vis)}/{len(labels)} shown"
+            if multi and diff_marks:
+                line += f" · +{added} −{removed} pending"
+            if multi and (diff_marks or view_mode):
+                line += f" · view: {('all', 'on only', 'changed only')[view_mode]}"
+            if not revealed and any(hidden):
+                line += f" · {sum(hidden)} hidden (press z)"
             if vis and locked[vis[cur]]:
-                status = f"🔒 {locked_note[vis[cur]] if isinstance(locked_note, list) else locked_note}"
-            stdscr.addnstr(h - 1, 0, status, w - 1, curses.A_BOLD)
+                line = f"🔒 {locked_note[vis[cur]] if isinstance(locked_note, list) else locked_note}"
             if notice:
-                status = notice
+                line = notice
                 notice = ""
             stdscr.addnstr(h - 1, 0, " " * (w - 1), w - 1)
-            stdscr.addnstr(h - 1, 0, status, w - 1, curses.A_BOLD)
-            stdscr.move(1, min(w - 1, 3 + len(query)))
+            stdscr.addnstr(h - 1, 0, line, w - 1, curses.A_BOLD)
+            if typing:
+                stdscr.move(1, min(w - 1, 3 + cell_width(query[:qpos])))
             try:
                 k = stdscr.get_wch()
             except curses.error:
                 continue
-            if k == curses.KEY_UP:
-                cur = max(0, cur - 1)
-            elif k == curses.KEY_DOWN:
+            if typing:
+                edited = line_key(query, qpos, k)
+                if k in ("\n", "\r", curses.KEY_ENTER):
+                    typing = False
+                elif k in ("\x1b", "\x07"):
+                    query, qpos, typing = "", 0, False
+                    cur = top = 0
+                elif edited:
+                    if edited[0] != query:
+                        cur = top = 0
+                    query, qpos = edited
+                else:
+                    moved = move_key(k, cur, len(vis) - 1, view)
+                    cur = cur if moved is None else moved
+                continue
+            moved = move_key(k, cur, len(vis) - 1, view)
+            if k in hotkeys and (vis or multi):
+                return k, (vis[cur] if vis else None)
+            if moved is not None:
+                cur = moved
+            elif k == "/":
+                typing, qpos = True, len(query)
+            elif k == "j":
                 cur = min(len(vis) - 1, cur + 1)
-            elif k == curses.KEY_PPAGE:
-                cur = max(0, cur - view)
-            elif k == curses.KEY_NPAGE:
-                cur = min(len(vis) - 1, cur + view)
-            elif k in (curses.KEY_BACKSPACE, "\x7f", "\b"):
-                query = query[:-1]
-                cur = top = 0
-            elif k == "\x15":  # ^U clears the filter
-                query = ""
-                cur = top = 0
-            elif k == curses.KEY_HOME:
+            elif k == "k":
+                cur = max(0, cur - 1)
+            elif k == "g":
                 cur = 0
-            elif k == curses.KEY_END:
+            elif k == "G":
                 cur = len(vis) - 1
-            elif k == "\x1b":
-                if not multi:
+            elif k == "\x04":
+                cur = min(len(vis) - 1, cur + max(1, view // 2))
+            elif k == "\x15":
+                cur = max(0, cur - max(1, view // 2))
+            elif k == "\x06":
+                cur = min(len(vis) - 1, cur + view)
+            elif k == "\x02":
+                cur = max(0, cur - view)
+            elif k in ("\x1b", "q", "\x07"):
+                if query:
+                    query, qpos = "", 0
+                    cur = top = 0
+                    continue
+                if not multi or not esc_asks:
                     return None
                 if state == start:
                     return state
                 stdscr.addnstr(h - 1, 0, " " * (w - 1), w - 1)
-                stdscr.addnstr(h - 1, 0, f"Keep +{added} −{removed} pending change(s)?  y/Enter keep · r revert · any other key keeps editing",
+                stdscr.addnstr(h - 1, 0, f"Keep +{added} −{removed} pending change(s)?  y/Enter keep · u revert · any other key keeps editing",
                                w - 1, curses.A_BOLD | red_a)
                 try:
                     answer = stdscr.get_wch()
@@ -336,34 +355,33 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
                     continue
                 if answer in ("y", "Y", "\n", "\r", curses.KEY_ENTER):
                     return state
-                if answer in ("r", "R"):
+                if answer in ("u", "U"):
                     return list(start)
             elif k in ("\n", "\r", curses.KEY_ENTER):
                 if multi:
                     return state
                 if vis:
                     return vis[cur]
-            elif k == "\x12" and multi:  # ^R
+            elif k == "z" and any(hidden):
+                revealed = not revealed
+            elif not multi:
+                continue
+            elif k == "u":
                 state = list(start)
                 notice = "Reverted this list to how it was when opened"
-            elif k == "\x0f" and multi:  # ^O
+            elif k in ("o", "\x0f"):
                 view_mode = (view_mode + 1) % 3
                 cur = top = 0
-            elif k in ("\t", " ") and multi and vis and (k == "\t" or not query):
+            elif k in ("\t", " ") and vis:
                 if not locked[vis[cur]]:
                     state[vis[cur]] = not state[vis[cur]]
-            elif k == "\x0e" and multi and vis and on_note and not locked[vis[cur]]:  # ^N
+            elif k == "w" and vis and on_note and not locked[vis[cur]]:
                 text = read_line(stdscr, "Note (empty clears, Esc cancels): ", note_text(vis[cur]) if note_text else "")
                 if text is not None:
                     notice = on_note(vis[cur], text.strip())
-            elif k == "\x01" and multi and vis:
+            elif k in ("a", "\x01") and vis:
                 free = [i for i in vis if not locked[i]]
                 target = not all(state[i] for i in free)
                 for i in free:
                     state[i] = target
-            elif k in hotkeys and not multi and vis:
-                return k, vis[cur]
-            elif isinstance(k, str) and k.isprintable():
-                query += k
-                cur = top = 0
     return curses.wrapper(run)
