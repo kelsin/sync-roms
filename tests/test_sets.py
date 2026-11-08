@@ -45,6 +45,32 @@ class SetsTest(unittest.TestCase):
         self.assertIn("not in bucket", rows[2][3])
         self.assertNotIn("not in bucket", rows[1][3])
 
+    def test_rows_grouped_by_category_in_file_order(self):
+        game_set = {"games": [{"title": "Z", "system": "gba", "bucket": "gba/Z.zip", "category": "First"},
+                              {"title": "A", "system": "gba", "bucket": "gba/A.zip", "category": "Second"},
+                              {"title": "B", "system": "gba", "bucket": "gba/B.zip", "category": "First"}]}
+        rows = edit.set_rows(game_set, systems(), lambda s: set())
+        self.assertEqual([r[1] for r in rows], ["gba/B.zip", "gba/Z.zip", "gba/A.zip"])
+        self.assertTrue(rows[0][3].startswith("First — "))
+
+    def test_prune_unknown_sets_from_core_and_cards(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            data = os.path.join(tmp, "data")
+            os.makedirs(data)
+            core = {"gba": [{"title": "A", "bucket": "gba/A.zip"}], "sets": ["mix", "old"]}
+            cards = {"a": {"device": "full", "games": {"sets": ["old"]}}, "b": {"device": "full", "games": {"sets": ["mix"]}}}
+            json.dump(core, open(os.path.join(data, "games.json"), "w"))
+            json.dump(cards, open(os.path.join(data, "cards.json"), "w"))
+            with mock.patch.object(store, "data_dir", return_value=data), mock.patch.object(store, "backup"):
+                store.prune_unknown_sets([{"id": "mix"}])
+                saved_core = json.load(open(os.path.join(data, "games.json")))
+                saved_cards = json.load(open(os.path.join(data, "cards.json")))
+        self.assertEqual(saved_core["sets"], ["mix"])
+        self.assertIn("gba", saved_core)
+        self.assertEqual(saved_cards["a"]["games"], {})
+        self.assertEqual(saved_cards["a"]["device"], "full")
+        self.assertEqual(saved_cards["b"]["games"], {"sets": ["mix"]})
+
     def test_toggle_adds_and_removes(self):
         by = systems()
         rows = edit.set_rows(SET, by, lambda s: set())
