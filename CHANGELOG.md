@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.33.0](https://github.com/kelsin/sync-roms/compare/v0.32.0...v0.33.0) (2026-11-08)
+
+
+### Features
+
+* **sets:** update 9 sets ([#128](https://github.com/kelsin/sync-roms/issues/128)) ([6dbbd1d](https://github.com/kelsin/sync-roms/commit/6dbbd1d44e46ce94ffe541e0a666a7a6ef5693ad))
+
 ## [0.32.0](https://github.com/kelsin/sync-roms/compare/v0.31.0...v0.32.0) (2026-11-08)
 
 
