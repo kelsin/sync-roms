@@ -61,7 +61,7 @@ def choose_setup(manifest, current=None):
             return device, layout
 
 
-SYSTEMS_HINT = "Space toggle · Enter go · Esc cancel · a/n all/none · e 0-ROM · Home/End"
+SYSTEMS_HINT = "Space toggle · Enter go · Esc cancel · a/n all/none · o on · e 0-ROM"
 SINGLE_HINT = "Enter select · Esc back · ↑/↓ move"
 MULTI_HINT = "Space toggle · Enter done · Esc back · ^A all · ^O view · ^R revert"
 
@@ -70,7 +70,7 @@ def systems_hint(editable):
     """Key hints for pick_systems, most important first so a narrow terminal cuts only the extras."""
     if not editable:
         return SYSTEMS_HINT
-    return "Space toggle · Enter go · Esc quit · g games · x clear · a/n all/none · e 0-ROM"
+    return "Space toggle · Enter go · Esc quit · g games · x clear · a/n · o on · e 0-ROM"
 
 
 def pick_systems(rows, initial=None, state=None, editable=False):
@@ -97,6 +97,7 @@ def pick_systems(rows, initial=None, state=None, editable=False):
             on, head, off = curses.color_pair(1), curses.color_pair(2), curses.color_pair(3)
         sel = state["sel"] if "sel" in state else [i in (initial or ()) for i in range(len(rows))]
         show_empty = state.get("show_empty", False)
+        only_on = state.get("only_on", False)
         cur = top = 0
         restore = state.get("row")
         while True:
@@ -104,14 +105,16 @@ def pick_systems(rows, initial=None, state=None, editable=False):
             order = [i for i, r in enumerate(rows) if r[1]]
             if show_empty:
                 order += [i for i, r in enumerate(rows) if not r[1]]
+            if only_on:
+                order = [i for i in order if sel[i]]
             if restore in order:
                 cur = order.index(restore)
             restore = None
             cur = max(0, min(cur, len(order) - 1))
-            state.update(sel=sel, show_empty=show_empty, row=order[cur] if order else None)
+            state.update(sel=sel, show_empty=show_empty, only_on=only_on, row=order[cur] if order else None)
             stdscr.erase()
             h, w = stdscr.getmaxyx()
-            hidden = len(rows) - len(order)
+            hidden = sum(1 for r in rows if not r[1]) if not show_empty else 0
             stdscr.addnstr(0, 0, "🕹  Pick systems", w - 1, head | curses.A_BOLD)
             keys = systems_hint(editable)
             stdscr.addnstr(1, 0, keys, w - 1, curses.A_DIM)
@@ -130,6 +133,8 @@ def pick_systems(rows, initial=None, state=None, editable=False):
             need = sum(r[2] for r, on_ in zip(rows, sel) if on_)
             total = sum(r[3] for r, on_ in zip(rows, sel) if on_)
             status = f"{sum(sel)} selected · {ui.human_size(need)} to download ({ui.human_size(total)} total)"
+            if only_on:
+                status += " · selected only (press o)"
             if hidden:
                 status += f" · {hidden} systems with 0 ROMs hidden (press e)"
             stdscr.addnstr(h - 1, 0, status, w - 1, off | curses.A_BOLD)
@@ -153,6 +158,8 @@ def pick_systems(rows, initial=None, state=None, editable=False):
                     sel[i] = True
             elif k == ord("n"):
                 sel = [False] * len(rows)
+            elif k == ord("o"):
+                only_on = not only_on
             elif k == ord("e"):
                 show_empty = not show_empty
             elif k == ord("g") and editable and order:

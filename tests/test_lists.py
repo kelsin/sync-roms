@@ -112,6 +112,14 @@ class CardLists(unittest.TestCase):
         by = {s["bucket"]: s for s in store.load_manifest()["systems"]}
         self.assertEqual([g["bucket"] for g in by["gba"]["games"]], ["gba/A.zip"])
 
+    def test_card_excluded_games_are_dropped_for_that_card_only(self):
+        self.write("games.json", {"gba": [game("gba/A.zip"), game("gba/B.zip")]})
+        self.write("cards.json", {"c": {"excluded": {"gba": ["gba/A.zip"]}}})
+        by = {s["bucket"]: s for s in store.load_manifest(["c"])["systems"]}
+        self.assertEqual([g["bucket"] for g in by["gba"]["games"]], ["gba/B.zip"])
+        by = {s["bucket"]: s for s in store.load_manifest()["systems"]}
+        self.assertEqual([g["bucket"] for g in by["gba"]["games"]], ["gba/A.zip", "gba/B.zip"])
+
     def test_all_card_names(self):
         self.write("cards.json", {"b": {}, "a": {}})
         self.assertEqual(store.all_card_names(), ["a", "b"])

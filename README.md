@@ -151,6 +151,7 @@ Then:
    | `space` `tab` | toggle system |
    | `a` | all on (visible systems) |
    | `n` | all off |
+   | `o` | show only the selected systems |
    | `e` | show/hide systems with 0 ROMs |
    | `g` | edit the highlighted system's games for this card (same list as `games edit`), then return here. Not shown with `--dry-run` |
    | `x` | clear this card's own extra games after asking (the core list stays) |
@@ -458,6 +459,10 @@ games show greyed out. Unknown set names are skipped with a warning.
 `games` has the same shape as `games.json`, including `"sets"`. A card is identified by its folder name, so
 renaming the folder makes it a new card. The local mirror (`--mirror`) holds the core list plus every card's
 extras.
+
+`excluded` (`{"gba": ["gba/A.zip"]}`) lists core or set games this card opts out of. Press `g` on a system in the
+picker: games the core list or sets sync show as on and can be switched off (and back on); the choice is saved
+for that card only. In the systems picker, `o` shows only the selected systems.
 
 ## Converting to CHD and xiso (`--cd`, formerly `--chd`)
 

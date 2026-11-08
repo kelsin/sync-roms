@@ -222,6 +222,12 @@ class SystemsPickerKeys(unittest.TestCase):
         self.assertEqual(self.run_keys([curses.KEY_END, ord(" "), 10]), [2])
         self.assertEqual(self.run_keys([curses.KEY_END, curses.KEY_HOME, ord(" "), 10]), [0])
 
+    def test_o_shows_only_selected_systems(self):
+        import curses
+        # select a and c, press o: b is hidden, so Down from a lands on c; space unselects it
+        keys = [ord(" "), curses.KEY_END, ord(" "), ord("o"), curses.KEY_HOME, curses.KEY_DOWN, ord(" "), 10]
+        self.assertEqual(self.run_keys(keys), [0])
+
 
 if __name__ == "__main__":
     unittest.main()

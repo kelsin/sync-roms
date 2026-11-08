@@ -116,6 +116,23 @@ class SetsTest(unittest.TestCase):
         self.assertEqual(fl.call_args.kwargs["locked_note"][2], "Full set: x")
         self.assertNotIn("gba/Gone.zip", [g["bucket"] for g in by["gba"]["games"]])
 
+    def test_excluded_unlocks_covered_rows_and_records_off_ones(self):
+        by = systems()
+        rows = edit.set_rows(SET, by, lambda s: set())
+        covered = lambda s, key: "From core" if key in ("gba/Gone.zip", "gba/A.zip") else None  # noqa: E731
+        excluded = {"gba": ["gba/A.zip"]}
+        with mock.patch.object(picker, "filter_list") as fl:
+            fl.side_effect = lambda *a, **k: [not x for x in k["initial"]]
+            edit.toggle_games("t", rows, covered=covered, excluded=excluded)
+        kw = fl.call_args.kwargs
+        keys = [r[1] for r in rows]
+        for key in ("gba/A.zip", "gba/Gone.zip"):
+            self.assertFalse(kw["locked"][keys.index(key)])
+        self.assertTrue(kw["locked"][keys.index("ful/Skip.zip")])  # full systems stay locked
+        self.assertFalse(kw["initial"][keys.index("gba/A.zip")])  # excluded starts off
+        self.assertTrue(kw["initial"][keys.index("gba/Gone.zip")])
+        self.assertEqual(excluded["gba"], ["gba/Gone.zip"])  # A switched on, Gone switched off
+
     def run_list(self, keys, locked=None, multi=True, hotkeys=()):
         screen = mock.MagicMock()
         screen.getmaxyx.return_value = (24, 80)
