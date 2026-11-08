@@ -7,7 +7,9 @@ import unittest
 from unittest import mock
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
+from realdir_guard import RealDataDirGuard  # noqa: E402
 from sync_roms import cli, s3, store, usersettings  # noqa: E402
 
 SYSTEM = {"name": "Game Boy Advance", "bucket": "gba", "folders": {"esde": "gba"}, "bios": {"files": []},
@@ -19,7 +21,15 @@ def list_sizes(prefix):
     return {"gba/Game.zip": 5} if prefix == "gba/" else {}
 
 
-class SyncSmokeTest(unittest.TestCase):
+class SyncSmokeTest(RealDataDirGuard):
+    def setUp(self):
+        super().setUp()
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        patch = mock.patch.object(store, "data_dir", lambda: tmp.name)
+        patch.start()
+        self.addCleanup(patch.stop)
+
     def run_sync(self, dry_run, picks=lambda rows, present, state, editable: [0], edit_card_system=None, prepare=None, patches=()):
         with tempfile.TemporaryDirectory() as card:
             if prepare:
