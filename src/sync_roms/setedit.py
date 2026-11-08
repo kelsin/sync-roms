@@ -276,7 +276,7 @@ def edit_sets():
                   + ["➕ New set", "✅ Done (review & open PR)", "🚪 Quit without saving"])
         extras = [[("  " + ("new" if x not in before else "edited"), "cyan")] if x in edited else [] for x in ids] + [[], [], []]
         i = picker.filter_list("✏️  Which set?  (Esc = review & open PR)", labels, extras=extras,
-                               hotkeys=(edit.DELETE_KEY,), hint="Enter open · ^X delete · Esc review · type to filter")
+                               hotkeys=(edit.DELETE_KEY,), hint="/ filter · Enter open · d delete · Esc review")
         if isinstance(i, tuple):
             if i[1] < n:
                 sid = ids[i[1]]

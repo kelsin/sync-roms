@@ -55,7 +55,7 @@ TOPICS = {
   A finished run (not --dry-run) creates .metadata_never_index in CARD, empties its .fseventsd, and on a Mac runs
   dot_clean (falling back to sudo mdutil, which asks for your password). ES-DE: files in the Android media folders
   are removed and a .nomedia added after asking once per card name (the answer is remembered; --ask confirms it).
-  Picker keys: ↑/↓ j/k move, space/tab toggle, a all on, n all off, e show 0-ROM systems, g edit games, x clear the card's own games, enter go, esc/q cancel.
+  Picker keys: ↑/↓ j/k ^N/^P move, / filter, space/tab toggle, a all/none, z show 0-ROM systems, e edit games, D clear the card's own games, enter go, esc/q cancel.
 """,
     "games": """
   sync-roms games edit                        interactive editor (core list, card extras, device systems)
@@ -69,7 +69,7 @@ TOPICS = {
 
   Without --card the core list (every card) is changed; with it, that card's extras. Lists are saved in ~/.sync-roms/
   (games.json, cards.json) with the previous version kept as .bak. Removing only drops a game from the list.
-  In the editor: Tab toggles a row, ^A all shown, ^R reverts the list, ^O cycles all/on/changed, ^F toggles a whole set or system.
+  In the editor: / filters, Space toggles a row, a all/none shown, u reverts the list, o cycles all/on/changed, f toggles a whole set or system.
 """,
     "sets": """
   sync-roms sets edit                         edit the repo's sets (games, categories, new and deleted sets), then open a PR
@@ -77,7 +77,7 @@ TOPICS = {
   Needs git and the GitHub CLI (gh, logged in). Your edits are written to a temporary clone of kelsin/sync-roms, pushed
   as a branch and opened as a PR; nothing is written to the bucket or to ~/.sync-roms.
   Pick a set to switch games off, add games from a system (you're asked for a category), change a game's category or
-  rename it. ➕ New set creates one; ^X deletes the highlighted one. Esc reviews the changes before the PR is opened.
+  rename it. ➕ New set creates one; d deletes the highlighted one. Esc reviews the changes before the PR is opened.
 """,
     "cards": """
   sync-roms cards list [--json]

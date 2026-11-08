@@ -192,7 +192,7 @@ def upload_command(args):
     systems = sorted(store.load_manifest()["systems"], key=lambda s: s["name"].lower())
     guess = store.guess_system(systems, folder)
     i = picker.filter_list("☁️  Which system are you uploading?", [f"{s['name']}  ({s['bucket']}/)" for s in systems],
-                    cursor=guess or 0, hint="type to filter · ↑/↓ move · Enter continue · Esc cancel")
+                    cursor=guess or 0, hint="/ filter · j/k move · Enter continue · Esc cancel")
     if i is None:
         print(ui.yellow("👋 Cancelled."))
         return 0
@@ -275,7 +275,7 @@ def replace_command(args, folder, system):
         picked = picker.filter_list(f"🗑️  Delete from {s3.location()}/{bucket}/ (they match no local file) — untick to keep",
                              only_bucket, multi=True, initial=[True] * len(only_bucket),
                              extras=[[(ui.human_size(remote[p][0]), "dim")] for p in only_bucket],
-                             hint="type to filter · ↑/↓ move · Tab toggle · ^A toggle all shown · Enter done")
+                             hint="/ filter · j/k move · Space toggle · a toggle all shown · Enter done")
         delete = [f"{bucket}/{p}" for p, on in zip(only_bucket, picked) if on]
     uploads = [(f"{bucket}/{p}", os.path.join(folder, *p.split("/")), local[p]) for p in new + changed]
     if not (renames or uploads or delete):

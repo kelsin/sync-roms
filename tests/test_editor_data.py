@@ -205,7 +205,7 @@ class SystemsPickerKeys(unittest.TestCase):
             def getmaxyx(self):
                 return 24, 80
 
-            def getch(self):
+            def get_wch(self):
                 return next(self.keys)
 
             def __getattr__(self, name):
@@ -219,13 +219,13 @@ class SystemsPickerKeys(unittest.TestCase):
 
     def test_home_and_end_move_the_cursor(self):
         import curses
-        self.assertEqual(self.run_keys([curses.KEY_END, ord(" "), 10]), [2])
-        self.assertEqual(self.run_keys([curses.KEY_END, curses.KEY_HOME, ord(" "), 10]), [0])
+        self.assertEqual(self.run_keys([curses.KEY_END, " ", "\n"]), [2])
+        self.assertEqual(self.run_keys([curses.KEY_END, curses.KEY_HOME, " ", "\n"]), [0])
 
     def test_o_shows_only_selected_systems(self):
         import curses
         # select a and c, press o: b is hidden, so Down from a lands on c; space unselects it
-        keys = [ord(" "), curses.KEY_END, ord(" "), ord("o"), curses.KEY_HOME, curses.KEY_DOWN, ord(" "), 10]
+        keys = [" ", curses.KEY_END, " ", "o", curses.KEY_HOME, curses.KEY_DOWN, " ", "\n"]
         self.assertEqual(self.run_keys(keys), [0])
 
 
