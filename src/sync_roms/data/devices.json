@@ -480,7 +480,8 @@
     "name": "Miyoo Mini Flip",
     "soc": "SigmaStar SSD202D",
     "firmwares": [
-      "onion"
+      "onion",
+      "allium"
     ]
   },
   {

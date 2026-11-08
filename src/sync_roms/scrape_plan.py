@@ -148,7 +148,8 @@ KNULLI_MEDIA = (
 )
 KNULLI_SUFFIXES = {"image", "thumb", "marquee", "fanart", "boxback", "titleshot", "bezel", "boxart",
                    "cartridge", "mix", "wheel", "map", "video", "manual", "magazine", "music"}
-GAMELIST_FILES = {"esde": "gamelist.xml", "knulli": "gamelist.xml", "onion": "miyoogamelist.xml"}
+GAMELIST_FILES = {"esde": "gamelist.xml", "knulli": "gamelist.xml", "onion": "miyoogamelist.xml", "allium": "gamelist.xml"}
+ONION_LAYOUTS = ("onion", "allium")  # both keep box art in a flat Imgs/ folder
 # muOS catalogue art, MUOS/info/catalogue/<system's muos_catalogue>/<folder>/<ROM name>.<ext>, and the media types that fill it
 MUOS_MEDIA = (("box", ("covers", "3dboxes")), ("preview", ("screenshots", "titlescreens")))
 # EmuDeck gets media only: ES-DE keeps its gamelists in the home folder, which is not on the card
@@ -179,7 +180,7 @@ def scrape_index(listing):
 def variant_tags(layout_name, family, stem):
     """name (and, for ES-DE, sortname) tags that identify a MAME/FBNeo set by its variant, from the clones.json
     {"parents": {...}, "clones": {...}} of its system. Parents sort first, then their clones, so a family stays together."""
-    if layout_name not in ("esde", "knulli", "onion"):
+    if layout_name not in ("esde", "knulli", *ONION_LAYOUTS):
         return {}
     if stem in family["clones"]:
         parent, title = family["clones"][stem]
@@ -246,10 +247,14 @@ def plan_scrapes(layout_name, rom_rels, listing, meta, media_root, rom_dir, pres
                     name = f"{base}-{suffix}{os.path.splitext(key)[1]}"
                     add(key, rom_dir, f"{folder}/{name}", size)
                     tags[tag] = f"./{folder}/{name}"
-        elif layout_name == "onion":
-            if "/" in rom:  # Onion's Imgs folder is flat and its gamelist ignores subfolders
+        elif layout_name in ONION_LAYOUTS:
+            if "/" in rom:  # Imgs is flat and the gamelist only lists the folder's own files
                 continue
-            tags = {"name": tags["name"]} if "name" in tags else {}
+            # Onion's miyoogamelist.xml takes name and image only; Allium's gamelist.xml also reads the rest
+            keep = ("name",) if layout_name == "onion" else ("name", "developer", "publisher", "genre", "rating", "releasedate")
+            tags = {k: v for k, v in tags.items() if k in keep}
+            if layout_name == "allium":  # Allium fails to parse the whole list if a <game> has no <name>
+                tags.setdefault("name", base)
             if ONION_TYPE in found:
                 key, size = found[ONION_TYPE]
                 add(key, rom_dir, f"Imgs/{base}.png", size)
@@ -504,7 +509,7 @@ def stale_firmware_media(layout_name, systems, roms_dir, base):
             groups[media_root_of(layout_name, s, base, "")].append(os.path.join(roms_dir, s["folders"][layout_name]))
     stale = []
     for root, rom_dirs in sorted(groups.items()):
-        stems = {media_name(layout_name, stem) for d in set(rom_dirs) if os.path.isdir(d) for stem in card_stems(d, True, layout_name == "onion")}
+        stems = {media_name(layout_name, stem) for d in set(rom_dirs) if os.path.isdir(d) for stem in card_stems(d, True, layout_name in ONION_LAYOUTS)}
         if not stems:
             continue
         for sub in ("box", "preview", "text") if layout_name == "muos" else (".",):
@@ -527,7 +532,7 @@ def stale_media(layout_name, systems, roms_dir, es_dir, base=None):
         if not rom_dir or rom_dir in seen or not os.path.isdir(rom_dir):
             continue
         seen.add(rom_dir)
-        stems = card_stems(rom_dir, layout_name not in ("esde", "emudeck"), layout_name == "onion")
+        stems = card_stems(rom_dir, layout_name not in ("esde", "emudeck"), layout_name in ONION_LAYOUTS)
         if layout_name in ("esde", "emudeck"):
             for mtype in sorted(MEDIA_TYPES):
                 media = os.path.join(media_root_of(layout_name, s, base, es_dir), mtype)
@@ -541,7 +546,7 @@ def stale_media(layout_name, systems, roms_dir, es_dir, base=None):
                     if name not in stems and not any(name.endswith("-" + x) and name[:-len(x) - 1] in stems
                                                      for x in KNULLI_SUFFIXES):
                         stale.append(full)
-        elif layout_name == "onion":
+        elif layout_name in ONION_LAYOUTS:
             base = os.path.join(rom_dir, "Imgs")
             stale += [full for rel, full in walk_files(base) if os.path.splitext(os.path.basename(rel))[0] not in stems] \
                 if os.path.isdir(base) else []
