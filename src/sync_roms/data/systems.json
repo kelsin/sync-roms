@@ -6,6 +6,7 @@
       "esde": "mame",
       "knulli": "mame",
       "onion": "ARCADE",
+      "allium": "ARCADE",
       "muos": "mame",
       "slot": null,
       "emudeck": "mame"
@@ -23,6 +24,7 @@
       "esde": "atari2600",
       "knulli": "atari2600",
       "onion": "ATARI",
+      "allium": "ATARI",
       "muos": "atari2600",
       "slot": null,
       "emudeck": "atari2600"
@@ -40,6 +42,7 @@
       "esde": "atari5200",
       "knulli": "atari5200",
       "onion": "FIFTYTWOHUNDRED",
+      "allium": "FIFTYTWOHUNDRED",
       "muos": "atari5200",
       "slot": null,
       "emudeck": "atari5200"
@@ -61,6 +64,7 @@
       "esde": "atari7800",
       "knulli": "atari7800",
       "onion": "SEVENTYEIGHTHUNDRED",
+      "allium": "SEVENTYEIGHTHUNDRED",
       "muos": "atari7800",
       "slot": null,
       "emudeck": "atari7800"
@@ -82,6 +86,7 @@
       "esde": "atari800",
       "knulli": "atari800",
       "onion": null,
+      "allium": null,
       "muos": "atari800",
       "slot": null,
       "emudeck": "atari800"
@@ -107,6 +112,7 @@
       "esde": "atarilynx",
       "knulli": "lynx",
       "onion": "LYNX",
+      "allium": "LYNX",
       "muos": "lynx",
       "slot": null,
       "emudeck": "atarilynx"
@@ -128,6 +134,7 @@
       "esde": "atarist",
       "knulli": "atarist",
       "onion": null,
+      "allium": null,
       "muos": "atarist",
       "slot": null,
       "emudeck": "atarist"
@@ -149,6 +156,7 @@
       "esde": "colecovision",
       "knulli": "colecovision",
       "onion": "COLECO",
+      "allium": "COLECO",
       "muos": "colecovision",
       "slot": null,
       "emudeck": "colecovision"
@@ -178,6 +186,7 @@
       "esde": "gba",
       "knulli": "gba",
       "onion": "GBA",
+      "allium": "GBA",
       "muos": "gba",
       "slot": "GBA",
       "emudeck": "gba"
@@ -202,6 +211,7 @@
       "esde": "gbc",
       "knulli": "gbc",
       "onion": "GBC",
+      "allium": "GBC",
       "muos": "gbc",
       "slot": "GBC",
       "emudeck": "gbc"
@@ -228,6 +238,7 @@
       "esde": "gb",
       "knulli": "gb",
       "onion": "GB",
+      "allium": "GB",
       "muos": "gb",
       "slot": "GB",
       "emudeck": "gb"
@@ -254,6 +265,7 @@
       "esde": "intellivision",
       "knulli": "intellivision",
       "onion": "INTELLIVISION",
+      "allium": "INTELLIVISION",
       "muos": "intellivision",
       "slot": null,
       "emudeck": "intellivision"
@@ -279,6 +291,7 @@
       "esde": "neogeo",
       "knulli": "neogeo",
       "onion": "NEOGEO",
+      "allium": "NEOGEO",
       "muos": "neogeo",
       "slot": null,
       "emudeck": "neogeo"
@@ -323,6 +336,7 @@
       "esde": "nes",
       "knulli": "nes",
       "onion": "FC",
+      "allium": "FC",
       "muos": "nes",
       "slot": null,
       "emudeck": "nes"
@@ -340,6 +354,7 @@
       "esde": "fds",
       "knulli": "fds",
       "onion": "FDS",
+      "allium": "FDS",
       "muos": "fds",
       "slot": null,
       "emudeck": "fds"
@@ -365,6 +380,7 @@
       "esde": "n64",
       "knulli": "n64",
       "onion": null,
+      "allium": null,
       "muos": "n64",
       "slot": null,
       "emudeck": "n64"
@@ -382,6 +398,7 @@
       "esde": "nds",
       "knulli": "nds",
       "onion": "NDS",
+      "allium": "NDS",
       "muos": "nds",
       "slot": null,
       "emudeck": "nds"
@@ -411,6 +428,7 @@
       "esde": "odyssey2",
       "knulli": "odyssey2",
       "onion": "ODYSSEY",
+      "allium": "ODYSSEY",
       "muos": "odyssey2",
       "slot": null,
       "emudeck": "odyssey2"
@@ -436,6 +454,7 @@
       "esde": "pcfx",
       "knulli": "pcfx",
       "onion": null,
+      "allium": null,
       "muos": "pcfx",
       "slot": null,
       "emudeck": "pcfx"
@@ -460,6 +479,7 @@
       "esde": "pc98",
       "knulli": "pc98",
       "onion": null,
+      "allium": null,
       "muos": null,
       "slot": null,
       "emudeck": "pc98"
@@ -496,6 +516,7 @@
       "esde": "sega32x",
       "knulli": "sega32x",
       "onion": "THIRTYTWOX",
+      "allium": "THIRTYTWOX",
       "muos": "sega32x",
       "slot": null,
       "emudeck": "sega32x"
@@ -522,6 +543,7 @@
       "esde": "segacd",
       "knulli": "megacd",
       "onion": "SEGACD",
+      "allium": "SEGACD",
       "muos": "megacd",
       "slot": null,
       "emudeck": "segacd"
@@ -558,6 +580,7 @@
       "esde": "dreamcast",
       "knulli": "dreamcast",
       "onion": null,
+      "allium": null,
       "muos": "dreamcast",
       "slot": null,
       "emudeck": "dreamcast"
@@ -591,6 +614,7 @@
       "esde": "gamegear",
       "knulli": "gamegear",
       "onion": "GG",
+      "allium": "GG",
       "muos": "gamegear",
       "slot": null,
       "emudeck": "gamegear"
@@ -624,6 +648,7 @@
       "esde": "genesis",
       "knulli": "megadrive",
       "onion": "MD",
+      "allium": "MD",
       "muos": "megadrive",
       "slot": null,
       "emudeck": "genesis"
@@ -657,6 +682,7 @@
       "esde": "mastersystem",
       "knulli": "mastersystem",
       "onion": "MS",
+      "allium": "MS",
       "muos": "mastersystem",
       "slot": null,
       "emudeck": "mastersystem"
@@ -690,6 +716,7 @@
       "esde": "saturn",
       "knulli": "saturn",
       "onion": null,
+      "allium": null,
       "muos": "saturn",
       "slot": null,
       "emudeck": "saturn"
@@ -720,6 +747,7 @@
       "esde": "snes",
       "knulli": "snes",
       "onion": "SFC",
+      "allium": "SFC",
       "muos": "snes",
       "slot": null,
       "emudeck": "snes"
@@ -760,6 +788,7 @@
       "esde": "tg16",
       "knulli": "pcengine",
       "onion": "PCE",
+      "allium": "PCE",
       "muos": "pcengine",
       "slot": null,
       "emudeck": "tg16"
@@ -784,6 +813,7 @@
       "esde": "tg-cd",
       "knulli": "pcenginecd",
       "onion": "PCECD",
+      "allium": "PCECD",
       "muos": "pcenginecd",
       "slot": null,
       "emudeck": "tg-cd"
@@ -811,6 +841,7 @@
       "esde": "vectrex",
       "knulli": "vectrex",
       "onion": "VECTREX",
+      "allium": "VECTREX",
       "muos": "vectrex",
       "slot": null,
       "emudeck": "vectrex"
@@ -830,6 +861,7 @@
       "esde": "virtualboy",
       "knulli": "virtualboy",
       "onion": "VB",
+      "allium": "VB",
       "muos": "virtualboy",
       "slot": null,
       "emudeck": "virtualboy"
@@ -849,6 +881,7 @@
       "esde": "wonderswan",
       "knulli": "wswan",
       "onion": "WS",
+      "allium": "WS",
       "muos": "wonderswan",
       "slot": null,
       "emudeck": "wonderswan"
@@ -868,6 +901,7 @@
       "esde": "wonderswancolor",
       "knulli": "wswanc",
       "onion": "WS",
+      "allium": "WS",
       "muos": "wonderswancolor",
       "slot": null,
       "emudeck": "wonderswancolor"
@@ -887,6 +921,7 @@
       "esde": "mame-advmame",
       "knulli": "advmame",
       "onion": null,
+      "allium": null,
       "muos": null,
       "slot": null,
       "emudeck": "mame-advmame"
@@ -903,6 +938,7 @@
       "esde": "arcade",
       "knulli": null,
       "onion": null,
+      "allium": null,
       "muos": "arcade",
       "slot": null,
       "emudeck": "arcade"
@@ -920,6 +956,7 @@
       "esde": "arduboy",
       "knulli": "arduboy",
       "onion": null,
+      "allium": null,
       "muos": "arduboy",
       "slot": null,
       "emudeck": "arduboy"
@@ -937,6 +974,7 @@
       "esde": "atomiswave",
       "knulli": "atomiswave",
       "onion": null,
+      "allium": null,
       "muos": "atomiswave",
       "slot": null,
       "emudeck": "atomiswave"
@@ -965,6 +1003,7 @@
       "esde": "chailove",
       "knulli": null,
       "onion": null,
+      "allium": null,
       "muos": "chailove",
       "slot": null,
       "emudeck": "chailove"
@@ -982,6 +1021,7 @@
       "esde": "channelf",
       "knulli": "channelf",
       "onion": "FAIRCHILD",
+      "allium": "FAIRCHILD",
       "muos": "channelf",
       "slot": null,
       "emudeck": "channelf"
@@ -1005,6 +1045,7 @@
       "esde": "cps1",
       "knulli": "cps1",
       "onion": "CPS1",
+      "allium": "CPS1",
       "muos": "cps1",
       "slot": null,
       "emudeck": "cps1"
@@ -1022,6 +1063,7 @@
       "esde": "cps2",
       "knulli": "cps2",
       "onion": "CPS2",
+      "allium": "CPS2",
       "muos": "cps2",
       "slot": null,
       "emudeck": "cps2"
@@ -1039,6 +1081,7 @@
       "esde": "cps3",
       "knulli": "cps3",
       "onion": "CPS3",
+      "allium": "CPS3",
       "muos": "cps3",
       "slot": null,
       "emudeck": "cps3"
@@ -1056,6 +1099,7 @@
       "esde": "daphne",
       "knulli": "daphne",
       "onion": null,
+      "allium": null,
       "muos": null,
       "slot": null,
       "emudeck": "daphne"
@@ -1072,6 +1116,7 @@
       "esde": "doom",
       "knulli": null,
       "onion": null,
+      "allium": null,
       "muos": "doom",
       "slot": null,
       "emudeck": "doom"
@@ -1089,6 +1134,7 @@
       "esde": "easyrpg",
       "knulli": "easyrpg",
       "onion": null,
+      "allium": null,
       "muos": "easyrpg",
       "slot": null,
       "emudeck": "easyrpg"
@@ -1106,6 +1152,7 @@
       "esde": "fbneo",
       "knulli": "fbneo",
       "onion": "FBNEO",
+      "allium": "FBNEO",
       "muos": "fbneo",
       "slot": null,
       "emudeck": "fbneo"
@@ -1149,6 +1196,7 @@
       "esde": "lowresnx",
       "knulli": "lowresnx",
       "onion": null,
+      "allium": null,
       "muos": "lowresnx",
       "slot": null,
       "emudeck": "lowresnx"
@@ -1166,6 +1214,7 @@
       "esde": "lutro",
       "knulli": "lutro",
       "onion": null,
+      "allium": null,
       "muos": null,
       "slot": null,
       "emudeck": "lutro"
@@ -1182,6 +1231,7 @@
       "esde": "megaduck",
       "knulli": "megaduck",
       "onion": "MEGADUCK",
+      "allium": "MEGADUCK",
       "muos": "megaduck",
       "slot": null,
       "emudeck": "megaduck"
@@ -1199,6 +1249,7 @@
       "esde": "n64dd",
       "knulli": "n64dd",
       "onion": null,
+      "allium": null,
       "muos": "n64dd",
       "slot": null,
       "emudeck": "n64dd"
@@ -1222,6 +1273,7 @@
       "esde": "naomi",
       "knulli": "naomi",
       "onion": null,
+      "allium": null,
       "muos": "naomi",
       "slot": null,
       "emudeck": "naomi"
@@ -1250,6 +1302,7 @@
       "esde": "neogeocd",
       "knulli": "neogeocd",
       "onion": "NEOCD",
+      "allium": "NEOCD",
       "muos": "neogeocd",
       "slot": null,
       "emudeck": "neogeocd"
@@ -1285,6 +1338,7 @@
       "esde": "ngp",
       "knulli": "ngp",
       "onion": "NGP",
+      "allium": "NGP",
       "muos": "ngp",
       "slot": null,
       "emudeck": "ngp"
@@ -1304,6 +1358,7 @@
       "esde": "ngpc",
       "knulli": "ngpc",
       "onion": "NGP",
+      "allium": "NGP",
       "muos": "ngpc",
       "slot": null,
       "emudeck": "ngpc"
@@ -1323,6 +1378,7 @@
       "esde": "openbor",
       "knulli": "openbor",
       "onion": null,
+      "allium": null,
       "muos": "openbor",
       "slot": null,
       "emudeck": "openbor"
@@ -1340,6 +1396,7 @@
       "esde": "3do",
       "knulli": "3do",
       "onion": null,
+      "allium": null,
       "muos": "3do",
       "slot": null,
       "emudeck": "3do"
@@ -1378,6 +1435,7 @@
       "esde": "pico8",
       "knulli": "pico8",
       "onion": "PICO",
+      "allium": "PICO",
       "muos": "pico8",
       "slot": null,
       "emudeck": "pico8"
@@ -1395,6 +1453,7 @@
       "esde": "pokemini",
       "knulli": "pokemini",
       "onion": "POKE",
+      "allium": "POKE",
       "muos": "pokemini",
       "slot": null,
       "emudeck": "pokemini"
@@ -1412,6 +1471,7 @@
       "esde": "ports",
       "knulli": "ports",
       "onion": "PORTS",
+      "allium": "PORTS",
       "muos": null,
       "slot": null,
       "emudeck": "ports"
@@ -1428,6 +1488,7 @@
       "esde": "psx",
       "knulli": "psx",
       "onion": "PS",
+      "allium": "PS",
       "muos": "psx",
       "slot": null,
       "emudeck": "psx"
@@ -1459,6 +1520,7 @@
       "esde": "psp",
       "knulli": "psp",
       "onion": null,
+      "allium": null,
       "muos": "psp",
       "slot": null,
       "emudeck": "psp"
@@ -1483,6 +1545,7 @@
       "esde": "satellaview",
       "knulli": "satellaview",
       "onion": "SATELLAVIEW",
+      "allium": "SATELLAVIEW",
       "muos": "satellaview",
       "slot": null,
       "emudeck": "satellaview"
@@ -1523,6 +1586,7 @@
       "esde": "scummvm",
       "knulli": "scummvm",
       "onion": "SCUMMVM",
+      "allium": "SCUMMVM",
       "muos": "scummvm",
       "slot": null,
       "emudeck": "scummvm"
@@ -1540,6 +1604,7 @@
       "esde": "supergrafx",
       "knulli": "supergrafx",
       "onion": "SGFX",
+      "allium": "SGFX",
       "muos": "supergrafx",
       "slot": null,
       "emudeck": "supergrafx"
@@ -1564,6 +1629,7 @@
       "esde": "sgb",
       "knulli": "sgb",
       "onion": "SGB",
+      "allium": "SGB",
       "muos": null,
       "slot": null,
       "emudeck": "sgb"
@@ -1608,6 +1674,7 @@
       "esde": "sufami",
       "knulli": "sufami",
       "onion": "SUFAMI",
+      "allium": "SUFAMI",
       "muos": "sufami",
       "slot": null,
       "emudeck": "sufami"
@@ -1648,6 +1715,7 @@
       "esde": "supervision",
       "knulli": "supervision",
       "onion": "SUPERVISION",
+      "allium": "SUPERVISION",
       "muos": "supervision",
       "slot": null,
       "emudeck": "supervision"
@@ -1665,6 +1733,7 @@
       "esde": "tic80",
       "knulli": "tic80",
       "onion": "TIC",
+      "allium": "TIC",
       "muos": "tic80",
       "slot": null,
       "emudeck": "tic80"
@@ -1682,6 +1751,7 @@
       "esde": "quake",
       "knulli": "quake",
       "onion": null,
+      "allium": null,
       "muos": "quake",
       "slot": null,
       "emudeck": "quake"
@@ -1699,6 +1769,7 @@
       "esde": "uzebox",
       "knulli": "uzebox",
       "onion": null,
+      "allium": null,
       "muos": "uzebox",
       "slot": null,
       "emudeck": "uzebox"
@@ -1716,6 +1787,7 @@
       "esde": "atarijaguar",
       "knulli": "jaguar",
       "onion": null,
+      "allium": null,
       "muos": "jaguar",
       "slot": null,
       "emudeck": "atarijaguar"
@@ -1733,6 +1805,7 @@
       "esde": "atarijaguarcd",
       "knulli": "jaguarcd",
       "onion": null,
+      "allium": null,
       "muos": null,
       "slot": null,
       "emudeck": "atarijaguarcd"
@@ -1749,6 +1822,7 @@
       "esde": "cdimono1",
       "knulli": "cdi",
       "onion": null,
+      "allium": null,
       "muos": "cdi",
       "slot": null,
       "emudeck": "cdimono1"
@@ -1772,6 +1846,7 @@
       "esde": "gc",
       "knulli": "gamecube",
       "onion": null,
+      "allium": null,
       "muos": null,
       "slot": null,
       "emudeck": "gc"
@@ -1799,6 +1874,7 @@
       "esde": "mark3",
       "knulli": null,
       "onion": null,
+      "allium": null,
       "muos": null,
       "slot": null,
       "emudeck": "mark3"
@@ -1831,6 +1907,7 @@
       "esde": "model2",
       "knulli": "model2",
       "onion": null,
+      "allium": null,
       "muos": null,
       "slot": null,
       "emudeck": "model2/roms"
@@ -1847,6 +1924,7 @@
       "esde": "model3",
       "knulli": "model3",
       "onion": null,
+      "allium": null,
       "muos": null,
       "slot": null,
       "emudeck": "model3"
@@ -1863,6 +1941,7 @@
       "esde": "n3ds",
       "knulli": "3ds",
       "onion": null,
+      "allium": null,
       "muos": "3ds",
       "slot": null,
       "emudeck": "n3ds"
@@ -1880,6 +1959,7 @@
       "esde": "naomi2",
       "knulli": "naomi2",
       "onion": null,
+      "allium": null,
       "muos": null,
       "slot": null,
       "emudeck": "naomi2"
@@ -1907,6 +1987,7 @@
       "esde": "naomigd",
       "knulli": null,
       "onion": null,
+      "allium": null,
       "muos": null,
       "slot": null,
       "emudeck": "naomigd"
@@ -1934,6 +2015,7 @@
       "esde": "ps2",
       "knulli": "ps2",
       "onion": null,
+      "allium": null,
       "muos": null,
       "slot": null,
       "emudeck": "ps2"
@@ -1961,6 +2043,7 @@
       "esde": "ps3",
       "knulli": "ps3",
       "onion": null,
+      "allium": null,
       "muos": null,
       "slot": null,
       "emudeck": "ps3"
@@ -1977,6 +2060,7 @@
       "esde": "ps4",
       "knulli": "ps4",
       "onion": null,
+      "allium": null,
       "muos": null,
       "slot": null,
       "emudeck": null
@@ -1993,6 +2077,7 @@
       "esde": "psvita",
       "knulli": "psvita",
       "onion": null,
+      "allium": null,
       "muos": null,
       "slot": null,
       "emudeck": "psvita"
@@ -2009,6 +2094,7 @@
       "esde": "stv",
       "knulli": null,
       "onion": null,
+      "allium": null,
       "muos": null,
       "slot": null,
       "emudeck": "stv"
@@ -2025,6 +2111,7 @@
       "esde": "switch",
       "knulli": null,
       "onion": null,
+      "allium": null,
       "muos": null,
       "slot": null,
       "emudeck": "switch"
@@ -2041,6 +2128,7 @@
       "esde": "triforce",
       "knulli": "triforce",
       "onion": null,
+      "allium": null,
       "muos": null,
       "slot": null,
       "emudeck": "triforce"
@@ -2057,6 +2145,7 @@
       "esde": "type-x",
       "knulli": null,
       "onion": null,
+      "allium": null,
       "muos": null,
       "slot": null,
       "emudeck": "type-x"
@@ -2073,6 +2162,7 @@
       "esde": "wii",
       "knulli": "wii",
       "onion": null,
+      "allium": null,
       "muos": null,
       "slot": null,
       "emudeck": "wii"
@@ -2092,6 +2182,7 @@
       "esde": "wiiu",
       "knulli": "wiiu",
       "onion": null,
+      "allium": null,
       "muos": null,
       "slot": null,
       "emudeck": "wiiu/roms"
@@ -2108,6 +2199,7 @@
       "esde": "xbox",
       "knulli": "xbox",
       "onion": null,
+      "allium": null,
       "muos": null,
       "slot": null,
       "emudeck": "xbox"
@@ -2141,6 +2233,7 @@
       "esde": "xbox360",
       "knulli": "xbox360",
       "onion": null,
+      "allium": null,
       "muos": null,
       "slot": null,
       "emudeck": "xbox360/roms"
@@ -2161,6 +2254,7 @@
       "esde": "xboxone",
       "knulli": null,
       "onion": null,
+      "allium": null,
       "muos": null,
       "slot": null,
       "emudeck": null

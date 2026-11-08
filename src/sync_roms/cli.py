@@ -566,7 +566,7 @@ def run(argv):
         rows = [(f"{s['name']}  ({len(available(s))} roms, {ui.human_size(total)})", bool(available(s)), need, total)
                 for s in systems for need, total in [sizes(s)]]
         present = [i for i, s in enumerate(systems)
-                   if available(s) and (device or downloads.has_local_files(os.path.join(roms_dir, s["folders"][layout_name]), layout_name == "onion"))]
+                   if available(s) and (device or downloads.has_local_files(os.path.join(roms_dir, s["folders"][layout_name]), layout_name in scrape_plan.ONION_LAYOUTS))]
         if args.systems:
             chosen = commands.systems_from_flag(args.systems, systems, available)
             break
@@ -623,11 +623,11 @@ def run(argv):
     chosen_ids = {s["bucket"] for s in chosen}
     for dest in sorted({dest_of(s) for s in systems if s["bucket"] in chosen_ids or not available(s)}):
         extras += downloads.find_extras(dest, [k for t in systems if dest_of(t) == dest for k in available(t)], unzip,
-                                        layout_name == "onion", disc_dir, {k for t in systems if dest_of(t) == dest for k in discs_of(t)})
+                                        layout_name in scrape_plan.ONION_LAYOUTS, disc_dir, {k for t in systems if dest_of(t) == dest for k in discs_of(t)})
 
     # BIOS for every system with ROMs already on the card too, even when this sync doesn't touch that system
     bios_systems = chosen + [s for s in systems if s["bucket"] not in chosen_ids
-                             and downloads.has_local_files(dest_of(s), layout_name == "onion")]
+                             and downloads.has_local_files(dest_of(s), layout_name in scrape_plan.ONION_LAYOUTS)]
     bios_keys = sorted({"BIOS/" + f for s in bios_systems for f in s["bios"]["files"]})
     bios_have = s3.list_sizes("BIOS/") if bios_keys else {}
     bios_jobs = []

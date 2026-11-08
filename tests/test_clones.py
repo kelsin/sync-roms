@@ -39,6 +39,15 @@ class VariantTags(unittest.TestCase):
                                                  lambda rom: True, FAMILY)
         self.assertEqual(entries, {"1942a.zip": {"name": "1942 (Revision A)"}})
 
+    def test_allium_writes_a_gamelist_xml_with_names_and_metadata(self):
+        meta = {"a.zip": {"name": "A", "developer": "Dev", "rating": 0.8, "desc": "d"}}
+        listing = {"scrapes/gba/onion/a.png": 5}
+        jobs, entries, _ = scrape_plan.plan_scrapes("allium", ["a.zip", "b.zip", "sub/c.zip"], listing, meta, "/m", "/r",
+                                                    lambda rom: True)
+        self.assertEqual(entries, {"a.zip": {"name": "A", "developer": "Dev", "rating": "0.8", "image": "./Imgs/a.png"},
+                                   "b.zip": {"name": "b"}})
+        self.assertEqual(scrape_plan.GAMELIST_FILES["allium"], "gamelist.xml")
+
     def test_shipped_data(self):
         data = store.repo_json("clones")
         for system in ("mame", "fbneo"):
