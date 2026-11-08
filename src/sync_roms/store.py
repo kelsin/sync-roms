@@ -94,6 +94,13 @@ def card_games(card):
     return games if isinstance(games, dict) else {}
 
 
+def card_excluded(card):
+    """Games a card opted out of, {system bucket: [bucket keys]}: dropped from what the core list and sets sync there."""
+    entry = load_cards().get(card)
+    excluded = entry.get("excluded") if isinstance(entry, dict) else None
+    return excluded if isinstance(excluded, dict) else {}
+
+
 def all_card_names():
     return sorted(load_cards())
 
@@ -191,6 +198,10 @@ def load_manifest(card_names=()):
     manifest = {name: repo_json(name) for name in ("layouts", "systems", "devices")}
     lists = [personal_json("games.json")] + [card_games(n) for n in card_names]
     merge_lists(manifest["systems"], lists, sets)
+    if len(card_names) == 1:
+        for s in manifest["systems"]:
+            skip = card_excluded(card_names[0]).get(s["bucket"], ())
+            s["games"] = [g for g in s["games"] if g.get("bucket") not in skip]
     overlay_path = os.path.join(data_dir(), "device-systems.json")
     overlay = personal_json("device-systems.json") if os.path.exists(overlay_path) else {}
     apply_device_overlay(manifest["devices"], manifest["systems"], overlay)

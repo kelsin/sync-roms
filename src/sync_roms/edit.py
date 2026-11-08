@@ -39,7 +39,7 @@ def set_note(s, key, text):
 FULL_SYSTEM_NOTE = "Full system: every file in its folder is synced, so it can't be toggled"
 
 
-def toggle_games(title, rows, extras=None, covered=None):
+def toggle_games(title, rows, extras=None, covered=None, excluded=None):
     """Multi-select over rows of (system, bucket key, game title, label); adds/removes games in each system in place.
 
     extras: {bucket key: [more bucket keys]} added or removed together with that row's key.
@@ -47,11 +47,16 @@ def toggle_games(title, rows, extras=None, covered=None):
     Rows of a full system are shown on and locked: its whole bucket folder is synced.
     covered: optional callable (system, bucket key) -> note or None; rows with a note are shown on and locked
     with that note (e.g. games a set reference or core already syncs).
+    excluded: {system bucket: [keys]}, updated in place. When given, covered rows can be switched off (they start on
+    unless listed) and the off ones are recorded there; only full systems stay locked.
     """
     notes = [FULL_SYSTEM_NOTE if s.get("full_system") else covered(s, key) if covered else None
              for s, key, _, _ in rows]
-    locked = [bool(n) for n in notes]
-    initial = [l or any(g.get("bucket") == key for g in s["games"]) for l, (s, key, _, _) in zip(locked, rows)]
+    optional = [bool(n) and excluded is not None and not s.get("full_system") for n, (s, *_) in zip(notes, rows)]
+    locked = [bool(n) and not o for n, o in zip(notes, optional)]
+    initial = [(key not in excluded.get(s["bucket"], ())) if o else
+               l or any(g.get("bucket") == key for g in s["games"])
+               for o, l, (s, key, _, _) in zip(optional, locked, rows)]
     def note_text(i):
         game = next((g for g in rows[i][0]["games"] if g.get("bucket") == rows[i][1]), None)
         return game.get("note", "") if game else ""
@@ -64,8 +69,13 @@ def toggle_games(title, rows, extras=None, covered=None):
 
     state = picker.filter_list(title, [label for *_, label in rows], multi=True, initial=initial, locked=locked,
                                locked_note=[n or "" for n in notes], hint=GAMES_HINT, note_text=note_text, on_note=on_note)
-    for (s, key, name, _), on, was, lock in zip(rows, state, initial, locked):
+    for (s, key, name, _), on, was, lock, opt in zip(rows, state, initial, locked, optional):
         if lock:
+            continue
+        if opt:
+            if on != was:
+                keys = set(excluded.get(s["bucket"], ())) ^ {key}
+                excluded[s["bucket"]] = sorted(keys)
             continue
         keys = [key] + list((extras or {}).get(key, []))
         if on and not was:
@@ -98,10 +108,15 @@ def edit_card_system(card, bucket, setup):
                        "so there is no game list to edit."))
         return False
     in_bucket = {k for k in s3.list_sizes(bucket + "/") if not k.endswith("/")}
-    toggle_games(f"✏️  {s['name']} — ✅ in {card}'s extras, ⬜ in bucket only", system_rows(s, in_bucket),
-                 covered=lambda _s, key: keys.get(key))
+    excluded = {b: list(k) for b, k in store.card_excluded(card).items()}
+    toggle_games(f"✏️  {s['name']} — ✅ synced to {card}, ⬜ not (core and set games can be switched off here)",
+                 system_rows(s, in_bucket), covered=lambda _s, key: keys.get(key), excluded=excluded)
+    excluded = {b: k for b, k in excluded.items() if k}
+    changed = excluded != store.card_excluded(card)
+    if changed:
+        store.update_card(card, excluded=excluded)
     if not any(target_changes(t)):
-        return False
+        return changed
     store.save_lists(None, {card: store.dump_list(t["data"]["systems"], t["sets_on"])})
     return True
 
