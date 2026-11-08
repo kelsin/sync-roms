@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.32.0](https://github.com/kelsin/sync-roms/compare/v0.31.0...v0.32.0) (2026-11-08)
+
+
+### Features
+
+* **scrape:** scrape missing roms from screenscraper into the bucket ([#105](https://github.com/kelsin/sync-roms/issues/105)) ([73181f8](https://github.com/kelsin/sync-roms/commit/73181f80c0bf433f2835185b48ddeb4cd52639a3))
+* **sync:** give Allium its own layout with a full gamelist.xml ([#127](https://github.com/kelsin/sync-roms/issues/127)) ([2f33ff4](https://github.com/kelsin/sync-roms/commit/2f33ff4ce72c71659ca4be542ba51e28d0eb926c))
+
 ## [0.31.0](https://github.com/kelsin/sync-roms/compare/v0.30.0...v0.31.0) (2026-11-08)
 
 
