@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.31.0](https://github.com/kelsin/sync-roms/compare/v0.30.0...v0.31.0) (2026-11-08)
+
+
+### Features
+
+* **sets:** add sets edit command that opens a PR with set changes ([#123](https://github.com/kelsin/sync-roms/issues/123)) ([7ae6cff](https://github.com/kelsin/sync-roms/commit/7ae6cffbf35cfb8a198542c0bd77b6bb383a5ea5))
+* **sets:** merge shmup sets into one with categories ([#121](https://github.com/kelsin/sync-roms/issues/121)) ([4edfcba](https://github.com/kelsin/sync-roms/commit/4edfcbab50bcd6b6530fbf499ac83a10bfdd500e))
+* **sync:** install BIOS for every system with ROMs on the card ([#125](https://github.com/kelsin/sync-roms/issues/125)) ([17fffc0](https://github.com/kelsin/sync-roms/commit/17fffc001a128d9d02aeed698e754afe778a1b90))
+* **sync:** selected-only systems view and per-card game exclusions ([#122](https://github.com/kelsin/sync-roms/issues/122)) ([dd38f2d](https://github.com/kelsin/sync-roms/commit/dd38f2dc061542aedd69de48d3e80d0588c82cdf))
+
+
+### Bug Fixes
+
+* **cards:** warn when a saved card setup is ignored ([#120](https://github.com/kelsin/sync-roms/issues/120)) ([6d36274](https://github.com/kelsin/sync-roms/commit/6d362749393c2e0cd64a9dc0378d2ef49e83831d))
+* **sets:** make mame and fbneo entries 1g1r, preferring US over Japan ([#118](https://github.com/kelsin/sync-roms/issues/118)) ([2040e8c](https://github.com/kelsin/sync-roms/commit/2040e8cca79e19dc1afdd493a0117d7fca3501d0))
+* **sync:** name MAME and FBNeo clones in the Onion/Allium gamelist ([#124](https://github.com/kelsin/sync-roms/issues/124)) ([c2a2385](https://github.com/kelsin/sync-roms/commit/c2a23857514955eeee0873466f59ad4685c7a904))
+
 ## [0.30.0](https://github.com/kelsin/sync-roms/compare/v0.29.1...v0.30.0) (2026-11-07)
 
 
