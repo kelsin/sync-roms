@@ -128,11 +128,6 @@
       "bucket": "nds/Metroid Prime - Hunters (USA) (Rev 1).zip"
     },
     {
-      "title": "Classic NES Series - Metroid",
-      "system": "gba",
-      "bucket": "gba/Classic NES Series - Metroid (USA, Europe).zip"
-    },
-    {
       "title": "Super Metroid (En,Fr,De)",
       "system": "snes",
       "bucket": "snes/Super Metroid (Japan, USA) (En,Ja).zip"
