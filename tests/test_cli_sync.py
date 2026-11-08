@@ -103,6 +103,23 @@ class SyncSmokeTest(unittest.TestCase):
                 self.run_sync(False, lambda rows, present, state, editable: picked, prepare=prepare, patches=patches)
                 self.assertEqual([q for q in asked if q.startswith("Delete these")], ["Delete these 1 local file(s) (0 B)?"])
 
+    def test_bios_of_unchosen_systems_with_roms_on_the_card_is_synced(self):
+        """BIOS is added for a system whose ROMs are on the card even when this sync doesn't pick it."""
+        psx = {"name": "PlayStation", "bucket": "psx", "folders": {"esde": "psx"}, "bios": {"files": ["scph1001.bin"]}, "games": []}
+        manifest = {**MANIFEST, "systems": [SYSTEM, psx]}
+
+        def prepare(card):
+            os.makedirs(os.path.join(card, "ROMs", "psx"), exist_ok=True)
+            open(os.path.join(card, "ROMs", "psx", "Old.cue"), "w").close()
+        bios = []
+        patches = ((store, {"load_manifest": lambda names=(): manifest}),
+                   (cli, {"free_space": lambda path: 10**9}),
+                   (cli.downloads, {"run_downloads": lambda todo, label, *a: (bios.extend(todo) if label == "BIOS" else None) or 0}),
+                   (cli.s3, {"list_sizes": lambda prefix: {"BIOS/scph1001.bin": 5} if prefix == "BIOS/" else list_sizes(prefix)}),
+                   (cli.ui, {"choose": lambda q, *a, **k: "n"}))
+        self.run_sync(False, lambda rows, present, state, editable: [0], prepare=prepare, patches=patches)
+        self.assertEqual([j[0] for j in bios], ["BIOS/scph1001.bin"])
+
     def test_declining_the_space_prompt_exits_0(self):
         patches = ((cli, {"free_space": lambda path: 3}), (cli.ui, {"confirm": lambda q, default=True: False}))
         self.assertEqual(self.run_sync(False, patches=patches), 0)
