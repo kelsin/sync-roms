@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.36.0](https://github.com/kelsin/sync-roms/compare/v0.35.0...v0.36.0) (2026-11-08)
+
+
+### Features
+
+* **cli:** add edit and cards edit as aliases for games edit ([#136](https://github.com/kelsin/sync-roms/issues/136)) ([e223594](https://github.com/kelsin/sync-roms/commit/e2235948d91417616fa1c41abd66a5d2b9f46f5c))
+
 ## [0.35.0](https://github.com/kelsin/sync-roms/compare/v0.34.0...v0.35.0) (2026-11-08)
 
 
