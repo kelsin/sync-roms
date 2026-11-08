@@ -479,7 +479,7 @@ def run(argv):
     devices, layouts = manifest["devices"], manifest["layouts"]
     saved = store.load_cards().get(card)
     dirs = None
-    setup = picker.saved_setup(saved, devices, layouts)
+    setup = picker.saved_setup(saved, devices, layouts, card)
     if args.device or args.layout:
         setup = commands.setup_from_flags(manifest, setup, args.device, args.layout)
         print(ui.bold(f"🎛️  {ui.cyan(card)}: ") + f"{setup[0]['name'] if setup[0] else 'Full'} · {layouts[setup[1]]['label']}")
