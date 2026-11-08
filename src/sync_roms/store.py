@@ -158,13 +158,39 @@ def merge_lists(systems, lists, sets):
     return systems
 
 
+def prune_unknown_sets(sets):
+    """Drop set ids that no longer exist from games.json and every card's extras, rewriting only files that change."""
+    known = {x["id"] for x in sets}
+
+    def pruned(raw):
+        ids = raw.get(SETS_KEY) if isinstance(raw, dict) else None
+        if not isinstance(ids, list) or all(i in known for i in ids if isinstance(i, str)):
+            return None
+        gone = [i for i in ids if isinstance(i, str) and i not in known]
+        out = {k: v for k, v in raw.items() if k != SETS_KEY}
+        keep = [i for i in ids if not isinstance(i, str) or i in known]
+        if keep:
+            out[SETS_KEY] = keep
+        return out, gone
+
+    core = pruned(personal_json("games.json"))
+    cards = {n: p for n in all_card_names() if (p := pruned(card_games(n)))}
+    for where, p in [("games.json", core)] + [(f"card {n}", p) for n, p in cards.items()]:
+        if p:
+            ui.warn(f"{where}: removed sets that no longer exist: {', '.join(p[1])}")
+    if core or cards:
+        save_lists(core[0] if core else None, {n: p[0] for n, p in cards.items()})
+
+
 def load_manifest(card_names=()):
     """Systems, devices and layouts from the repo, joined with the personal games (plus the extras of the
     named cards) and device-system overlay."""
     seed_personal_files()
+    sets = load_sets()
+    prune_unknown_sets(sets)
     manifest = {name: repo_json(name) for name in ("layouts", "systems", "devices")}
     lists = [personal_json("games.json")] + [card_games(n) for n in card_names]
-    merge_lists(manifest["systems"], lists, load_sets())
+    merge_lists(manifest["systems"], lists, sets)
     overlay_path = os.path.join(data_dir(), "device-systems.json")
     overlay = personal_json("device-systems.json") if os.path.exists(overlay_path) else {}
     apply_device_overlay(manifest["devices"], manifest["systems"], overlay)
@@ -275,6 +301,7 @@ def load_sets():
     """Game sets from the repo's data/sets/*.json and the user's ~/.sync-roms/sets/*.json, sorted by name.
 
     Each file is {"name", "description" (optional), "games": [{"title", "system", "bucket", "files" (optional)}]}.
+    "category" (optional) groups games in the set editor.
     "files" are extra bucket keys (e.g. the discs of a multi-disc game) toggled together with "bucket".
     A personal file with a repo set's id, or that isn't valid JSON, is skipped with a warning.
     """

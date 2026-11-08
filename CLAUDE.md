@@ -61,6 +61,8 @@ The old single `roms.json` is split by whether the data is personal. Nothing her
 
 The repo ships a starter `games.json` in `src/sync_roms/data/` (`{}`, no games); sync-roms copies it to `~/.sync-roms/` when missing, so each user owns their copy. `device-systems.json` is a shared default read from the repo (never copied); users adjust it with the optional add/remove overlay. Never put a real game list in the repo's `games.json`.
 
+Games in a set file may have an optional `category` string; the set editor groups rows by it (in file order). Prefer one set with categories over several related top-level sets (e.g. `shmups.json`: Touhou, Psikyo, Cave, Other).
+
 Repo files must not contain notes about the bucket's contents ("not in the bucket", "bucket has..."). Device notes say only why the systems were chosen, concisely.
 
 ## Devices

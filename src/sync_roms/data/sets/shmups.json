@@ -1,906 +1,1524 @@
 {
   "name": "Shmups",
-  "description": "Scrolling shooters, favouring the Saturn, PlayStation and PC Engine.",
+  "description": "Scrolling shooters in Touhou, Psikyo, Cave and Other categories; Other favours the Saturn, PlayStation and PC Engine.",
   "games": [
     {
+      "title": "Touhou Reiiden - The Highly Responsive to Prayers",
+      "category": "Touhou",
+      "system": "pc98",
+      "bucket": "pc98/Touhou Reiiden - The Highly Responsive to Prayers (Japan).hdi"
+    },
+    {
+      "title": "Touhou Fuumaroku - The Story of Eastern Wonderland",
+      "category": "Touhou",
+      "system": "pc98",
+      "bucket": "pc98/Touhou Fuumaroku - The Story of Eastern Wonderland (Japan).hdi"
+    },
+    {
+      "title": "Touhou Yumejikuu - Phantasmagoria of Dim. Dream",
+      "category": "Touhou",
+      "system": "pc98",
+      "bucket": "pc98/Touhou Yumejikuu - Phantasmagoria of Dim. Dream (Japan).hdi"
+    },
+    {
+      "title": "Touhou Gensoukyou - Lotus Land Story",
+      "category": "Touhou",
+      "system": "pc98",
+      "bucket": "pc98/Touhou Gensoukyou - Lotus Land Story (Japan).hdi"
+    },
+    {
+      "title": "Touhou Kaikidan - Mystic Square",
+      "category": "Touhou",
+      "system": "pc98",
+      "bucket": "pc98/Touhou Kaikidan - Mystic Square (Japan).hdi"
+    },
+    {
+      "title": "Dragon Blaze",
+      "category": "Psikyo",
+      "system": "fbneo",
+      "bucket": "fbneo/dragnblz.zip"
+    },
+    {
+      "title": "Gunbird (Japan)",
+      "category": "Psikyo",
+      "system": "fbneo",
+      "bucket": "fbneo/gunbirdj.zip"
+    },
+    {
+      "title": "Gunbird (Korea)",
+      "category": "Psikyo",
+      "system": "fbneo",
+      "bucket": "fbneo/gunbirdk.zip"
+    },
+    {
+      "title": "Gunbird (World)",
+      "category": "Psikyo",
+      "system": "fbneo",
+      "bucket": "fbneo/gunbird.zip"
+    },
+    {
+      "title": "Gunbird 2 (set 1)",
+      "category": "Psikyo",
+      "system": "fbneo",
+      "bucket": "fbneo/gunbird2.zip"
+    },
+    {
+      "title": "Gunbird 2 (set 2)",
+      "category": "Psikyo",
+      "system": "fbneo",
+      "bucket": "fbneo/gunbird2a.zip"
+    },
+    {
+      "title": "Samurai Aces (World)",
+      "category": "Psikyo",
+      "system": "fbneo",
+      "bucket": "fbneo/samuraia.zip"
+    },
+    {
+      "title": "Sengoku Ace (Japan, set 1)",
+      "category": "Psikyo",
+      "system": "fbneo",
+      "bucket": "fbneo/sngkace.zip"
+    },
+    {
+      "title": "Sengoku Ace (Japan, set 2)",
+      "category": "Psikyo",
+      "system": "fbneo",
+      "bucket": "fbneo/sngkacea.zip"
+    },
+    {
+      "title": "Sengoku Blade: Sengoku Ace Episode II (Japan) / Tengai (World)",
+      "category": "Psikyo",
+      "system": "fbneo",
+      "bucket": "fbneo/tengaij.zip"
+    },
+    {
+      "title": "Sol Divide: Sword Of Darkness",
+      "category": "Psikyo",
+      "system": "fbneo",
+      "bucket": "fbneo/soldivid.zip"
+    },
+    {
+      "title": "Sol Divide: Sword Of Darkness (Korea)",
+      "category": "Psikyo",
+      "system": "fbneo",
+      "bucket": "fbneo/soldividk.zip"
+    },
+    {
+      "title": "Space Bomber",
+      "category": "Psikyo",
+      "system": "fbneo",
+      "bucket": "fbneo/sbombera.zip"
+    },
+    {
+      "title": "Space Bomber (ver. B)",
+      "category": "Psikyo",
+      "system": "fbneo",
+      "bucket": "fbneo/sbomber.zip"
+    },
+    {
+      "title": "Strikers 1945 (Japan / World)",
+      "category": "Psikyo",
+      "system": "fbneo",
+      "bucket": "fbneo/s1945a.zip"
+    },
+    {
+      "title": "Strikers 1945 (Japan)",
+      "category": "Psikyo",
+      "system": "fbneo",
+      "bucket": "fbneo/s1945j.zip"
+    },
+    {
+      "title": "Strikers 1945 (Japan, unprotected)",
+      "category": "Psikyo",
+      "system": "fbneo",
+      "bucket": "fbneo/s1945nj.zip"
+    },
+    {
+      "title": "Strikers 1945 (Korea)",
+      "category": "Psikyo",
+      "system": "fbneo",
+      "bucket": "fbneo/s1945k.zip"
+    },
+    {
+      "title": "Strikers 1945 (World)",
+      "category": "Psikyo",
+      "system": "fbneo",
+      "bucket": "fbneo/s1945.zip"
+    },
+    {
+      "title": "Strikers 1945 (World, unprotected)",
+      "category": "Psikyo",
+      "system": "fbneo",
+      "bucket": "fbneo/s1945n.zip"
+    },
+    {
+      "title": "Strikers 1945 II",
+      "category": "Psikyo",
+      "system": "fbneo",
+      "bucket": "fbneo/s1945ii.zip"
+    },
+    {
+      "title": "Strikers 1945 III (World) / Strikers 1999 (Japan)",
+      "category": "Psikyo",
+      "system": "fbneo",
+      "bucket": "fbneo/s1945iii.zip"
+    },
+    {
+      "title": "Strikers 1945 Plus",
+      "category": "Psikyo",
+      "system": "fbneo",
+      "bucket": "fbneo/s1945p.zip"
+    },
+    {
+      "title": "Tengai (World)",
+      "category": "Psikyo",
+      "system": "fbneo",
+      "bucket": "fbneo/tengai.zip"
+    },
+    {
+      "title": "The Fallen Angels (World) / Daraku Tenshi: The Fallen Angels (Japan)",
+      "category": "Psikyo",
+      "system": "fbneo",
+      "bucket": "fbneo/daraku.zip"
+    },
+    {
+      "title": "Akai Katana",
+      "category": "Cave",
+      "system": "fbneo",
+      "bucket": "fbneo/akatana.zip"
+    },
+    {
+      "title": "Dangun Feveron",
+      "category": "Cave",
+      "system": "fbneo",
+      "bucket": "fbneo/dfeveron.zip"
+    },
+    {
+      "title": "Deathsmiles",
+      "category": "Cave",
+      "system": "fbneo",
+      "bucket": "fbneo/deathsml.zip"
+    },
+    {
+      "title": "Deathsmiles MegaBlack Label",
+      "category": "Cave",
+      "system": "fbneo",
+      "bucket": "fbneo/dsmbl.zip"
+    },
+    {
+      "title": "DoDonPachi [ddonpachj]",
+      "category": "Cave",
+      "system": "fbneo",
+      "bucket": "fbneo/ddonpachj.zip"
+    },
+    {
+      "title": "DoDonPachi [ddonpach]",
+      "category": "Cave",
+      "system": "fbneo",
+      "bucket": "fbneo/ddonpach.zip"
+    },
+    {
+      "title": "DoDonPachi Dai-Fukkatsu Black Label",
+      "category": "Cave",
+      "system": "fbneo",
+      "bucket": "fbneo/dfkbl.zip"
+    },
+    {
+      "title": "DoDonPachi Dai-Fukkatsu Ver 1.0",
+      "category": "Cave",
+      "system": "fbneo",
+      "bucket": "fbneo/ddpdfk10.zip"
+    },
+    {
+      "title": "DoDonPachi Dai-Fukkatsu Ver 1.5",
+      "category": "Cave",
+      "system": "fbneo",
+      "bucket": "fbneo/ddpdfk.zip"
+    },
+    {
+      "title": "DoDonPachi Dai-Ou-Jou [ddpdojb]",
+      "category": "Cave",
+      "system": "fbneo",
+      "bucket": "fbneo/ddpdojb.zip"
+    },
+    {
+      "title": "DoDonPachi Dai-Ou-Jou [ddpdojp]",
+      "category": "Cave",
+      "system": "fbneo",
+      "bucket": "fbneo/ddpdojp.zip"
+    },
+    {
+      "title": "DoDonPachi Dai-Ou-Jou [ddpdoja]",
+      "category": "Cave",
+      "system": "fbneo",
+      "bucket": "fbneo/ddpdoja.zip"
+    },
+    {
+      "title": "DoDonPachi Dai-Ou-Jou [ddpdoj]",
+      "category": "Cave",
+      "system": "fbneo",
+      "bucket": "fbneo/ddpdoj.zip"
+    },
+    {
+      "title": "DoDonPachi Dai-Ou-Jou Black Label [ddpdojblkb]",
+      "category": "Cave",
+      "system": "fbneo",
+      "bucket": "fbneo/ddpdojblkb.zip"
+    },
+    {
+      "title": "DoDonPachi Dai-Ou-Jou Black Label [ddpdojblk]",
+      "category": "Cave",
+      "system": "fbneo",
+      "bucket": "fbneo/ddpdojblk.zip"
+    },
+    {
+      "title": "DoDonPachi Dai-Ou-Jou Black Label [ddpdojblka]",
+      "category": "Cave",
+      "system": "fbneo",
+      "bucket": "fbneo/ddpdojblka.zip"
+    },
+    {
+      "title": "DoDonPachi II (Japan, ver. 100)",
+      "category": "Cave",
+      "system": "fbneo",
+      "bucket": "fbneo/ddp2100j.zip"
+    },
+    {
+      "title": "DoDonPachi II (Japan, ver. 101)",
+      "category": "Cave",
+      "system": "fbneo",
+      "bucket": "fbneo/ddp2101j.zip"
+    },
+    {
+      "title": "DoDonPachi II (Japan, ver. 102)",
+      "category": "Cave",
+      "system": "fbneo",
+      "bucket": "fbneo/ddp2j.zip"
+    },
+    {
+      "title": "DoDonPachi III",
+      "category": "Cave",
+      "system": "fbneo",
+      "bucket": "fbneo/ddp3.zip"
+    },
+    {
+      "title": "DoDonPachi SaiDaiOuJou",
+      "category": "Cave",
+      "system": "fbneo",
+      "bucket": "fbneo/ddpsdoj.zip"
+    },
+    {
+      "title": "DonPachi (Hong Kong, ver. 1.10, 95/05/17)",
+      "category": "Cave",
+      "system": "fbneo",
+      "bucket": "fbneo/donpachihk.zip"
+    },
+    {
+      "title": "DonPachi (Japan, ver. 1.01, 95/05/11 Satsuei)",
+      "category": "Cave",
+      "system": "fbneo",
+      "bucket": "fbneo/donpachijs.zip"
+    },
+    {
+      "title": "DonPachi (Japan, ver. 1.01, 95/05/11)",
+      "category": "Cave",
+      "system": "fbneo",
+      "bucket": "fbneo/donpachij.zip"
+    },
+    {
+      "title": "DonPachi (Korea, ver. 1.12, 95/05/2x)",
+      "category": "Cave",
+      "system": "fbneo",
+      "bucket": "fbneo/donpachikr.zip"
+    },
+    {
+      "title": "DonPachi (USA, ver. 1.12, 95/05/2x)",
+      "category": "Cave",
+      "system": "fbneo",
+      "bucket": "fbneo/donpachi.zip"
+    },
+    {
+      "title": "ESP Ra.De. [espradejo]",
+      "category": "Cave",
+      "system": "fbneo",
+      "bucket": "fbneo/espradejo.zip"
+    },
+    {
+      "title": "ESP Ra.De. [espradej]",
+      "category": "Cave",
+      "system": "fbneo",
+      "bucket": "fbneo/espradej.zip"
+    },
+    {
+      "title": "ESP Ra.De. - A.D.2018 Tokyo",
+      "category": "Cave",
+      "system": "fbneo",
+      "bucket": "fbneo/esprade.zip"
+    },
+    {
+      "title": "Espgaluda",
+      "category": "Cave",
+      "system": "fbneo",
+      "bucket": "fbneo/espgal.zip"
+    },
+    {
+      "title": "Espgaluda II [espgal2a]",
+      "category": "Cave",
+      "system": "fbneo",
+      "bucket": "fbneo/espgal2a.zip"
+    },
+    {
+      "title": "Espgaluda II [espgal2b]",
+      "category": "Cave",
+      "system": "fbneo",
+      "bucket": "fbneo/espgal2b.zip"
+    },
+    {
+      "title": "Espgaluda II [espgal2]",
+      "category": "Cave",
+      "system": "fbneo",
+      "bucket": "fbneo/espgal2.zip"
+    },
+    {
+      "title": "Fever SOS",
+      "category": "Cave",
+      "system": "fbneo",
+      "bucket": "fbneo/feversos.zip"
+    },
+    {
+      "title": "Guwange [guwange]",
+      "category": "Cave",
+      "system": "fbneo",
+      "bucket": "fbneo/guwange.zip"
+    },
+    {
+      "title": "Guwange [guwanges]",
+      "category": "Cave",
+      "system": "fbneo",
+      "bucket": "fbneo/guwanges.zip"
+    },
+    {
+      "title": "Ibara [ibarao]",
+      "category": "Cave",
+      "system": "fbneo",
+      "bucket": "fbneo/ibarao.zip"
+    },
+    {
+      "title": "Ibara [ibara]",
+      "category": "Cave",
+      "system": "fbneo",
+      "bucket": "fbneo/ibara.zip"
+    },
+    {
+      "title": "Ibara Kuro Black Label [ibarablka]",
+      "category": "Cave",
+      "system": "fbneo",
+      "bucket": "fbneo/ibarablka.zip"
+    },
+    {
+      "title": "Ibara Kuro Black Label [ibarablk]",
+      "category": "Cave",
+      "system": "fbneo",
+      "bucket": "fbneo/ibarablk.zip"
+    },
+    {
+      "title": "Ketsui: Kizuna Jigoku Tachi [ketb]",
+      "category": "Cave",
+      "system": "fbneo",
+      "bucket": "fbneo/ketb.zip"
+    },
+    {
+      "title": "Ketsui: Kizuna Jigoku Tachi [keta]",
+      "category": "Cave",
+      "system": "fbneo",
+      "bucket": "fbneo/keta.zip"
+    },
+    {
+      "title": "Ketsui: Kizuna Jigoku Tachi [ket]",
+      "category": "Cave",
+      "system": "fbneo",
+      "bucket": "fbneo/ket.zip"
+    },
+    {
+      "title": "Ketsui: Kizuna Jigoku Tachi (alt rom fill)",
+      "category": "Cave",
+      "system": "fbneo",
+      "bucket": "fbneo/ket1.zip"
+    },
+    {
+      "title": "Muchi Muchi Pork!",
+      "category": "Cave",
+      "system": "fbneo",
+      "bucket": "fbneo/mmpork.zip"
+    },
+    {
+      "title": "Mushihime-Sama [mushisamb]",
+      "category": "Cave",
+      "system": "fbneo",
+      "bucket": "fbneo/mushisamb.zip"
+    },
+    {
+      "title": "Mushihime-Sama [mushisama]",
+      "category": "Cave",
+      "system": "fbneo",
+      "bucket": "fbneo/mushisama.zip"
+    },
+    {
+      "title": "Mushihime-Sama [mushisam]",
+      "category": "Cave",
+      "system": "fbneo",
+      "bucket": "fbneo/mushisam.zip"
+    },
+    {
+      "title": "Mushihime-Sama Futari Black Label",
+      "category": "Cave",
+      "system": "fbneo",
+      "bucket": "fbneo/futariblj.zip"
+    },
+    {
+      "title": "Mushihime-Sama Futari Black Label - Another Ver",
+      "category": "Cave",
+      "system": "fbneo",
+      "bucket": "fbneo/futaribl.zip"
+    },
+    {
+      "title": "Mushihime-Sama Futari Ver 1.0",
+      "category": "Cave",
+      "system": "fbneo",
+      "bucket": "fbneo/futari10.zip"
+    },
+    {
+      "title": "Mushihime-Sama Futari Ver 1.5 [futari15a]",
+      "category": "Cave",
+      "system": "fbneo",
+      "bucket": "fbneo/futari15a.zip"
+    },
+    {
+      "title": "Mushihime-Sama Futari Ver 1.5 [futari15]",
+      "category": "Cave",
+      "system": "fbneo",
+      "bucket": "fbneo/futari15.zip"
+    },
+    {
+      "title": "Pink Sweets: Ibara Sorekara [pinkswtsb]",
+      "category": "Cave",
+      "system": "fbneo",
+      "bucket": "fbneo/pinkswtsb.zip"
+    },
+    {
+      "title": "Pink Sweets: Ibara Sorekara [pinkswtsa]",
+      "category": "Cave",
+      "system": "fbneo",
+      "bucket": "fbneo/pinkswtsa.zip"
+    },
+    {
+      "title": "Pink Sweets: Ibara Sorekara [pinkswts]",
+      "category": "Cave",
+      "system": "fbneo",
+      "bucket": "fbneo/pinkswts.zip"
+    },
+    {
+      "title": "Pink Sweets: Ibara Sorekara [pinkswtsx]",
+      "category": "Cave",
+      "system": "fbneo",
+      "bucket": "fbneo/pinkswtsx.zip"
+    },
+    {
+      "title": "Progear (Asia 010117)",
+      "category": "Cave",
+      "system": "fbneo",
+      "bucket": "fbneo/progeara.zip"
+    },
+    {
+      "title": "Progear (Europe 010117)",
+      "category": "Cave",
+      "system": "fbneo",
+      "bucket": "fbneo/progear.zip"
+    },
+    {
+      "title": "Progear no Arashi (Japan 010117)",
+      "category": "Cave",
+      "system": "fbneo",
+      "bucket": "fbneo/progearj.zip"
+    },
+    {
       "title": "Darius Gaiden",
+      "category": "Other",
       "system": "saturn",
       "bucket": "saturn/Darius Gaiden (USA).chd"
     },
     {
       "title": "Galactic Attack (Layer Section)",
+      "category": "Other",
       "system": "saturn",
       "bucket": "saturn/Galactic Attack (USA).chd"
     },
     {
       "title": "Panzer Dragoon",
+      "category": "Other",
       "system": "saturn",
       "bucket": "saturn/Panzer Dragoon (USA) (5S).chd"
     },
     {
       "title": "Panzer Dragoon II Zwei",
+      "category": "Other",
       "system": "saturn",
       "bucket": "saturn/Panzer Dragoon II Zwei (USA).chd"
     },
     {
       "title": "Thunder Force V - Perfect System",
+      "category": "Other",
       "system": "psx",
       "bucket": "psx/Thunder Force V - Perfect System (USA).chd"
     },
     {
       "title": "Einhander",
+      "category": "Other",
       "system": "psx",
       "bucket": "psx/Einhaender (USA).chd"
     },
     {
       "title": "R-Type Delta",
+      "category": "Other",
       "system": "psx",
       "bucket": "psx/R-Type Delta (USA).chd"
     },
     {
       "title": "G. Darius",
+      "category": "Other",
       "system": "psx",
       "bucket": "psx/G. Darius (USA).chd"
     },
     {
       "title": "Xevious 3D-G+",
+      "category": "Other",
       "system": "psx",
       "bucket": "psx/Xevious 3D-G+ (USA).chd"
     },
     {
       "title": "Thunder Force III",
+      "category": "Other",
       "system": "genesis",
       "bucket": "genesis/Thunder Force III (Japan, USA) (En).zip"
     },
     {
       "title": "Hellfire",
+      "category": "Other",
       "system": "genesis",
       "bucket": "genesis/Hellfire (USA).zip"
     },
     {
       "title": "MUSHA",
+      "category": "Other",
       "system": "genesis",
       "bucket": "genesis/MUSHA - Metallic Uniframe Super Hybrid Armor (USA).zip"
     },
     {
       "title": "Fire Shark",
+      "category": "Other",
       "system": "genesis",
       "bucket": "genesis/Fire Shark (USA).zip"
     },
     {
       "title": "Air Buster",
+      "category": "Other",
       "system": "genesis",
       "bucket": "genesis/Air Buster (USA).zip"
     },
     {
       "title": "Zero Wing",
+      "category": "Other",
       "system": "genesis",
       "bucket": "genesis/Zero Wing (Europe).zip"
     },
     {
       "title": "Truxton",
+      "category": "Other",
       "system": "genesis",
       "bucket": "genesis/Truxton (World).zip"
     },
     {
       "title": "Raiden Trad",
+      "category": "Other",
       "system": "genesis",
       "bucket": "genesis/Raiden Trad (Japan, USA) (En).zip"
     },
     {
       "title": "Axelay",
+      "category": "Other",
       "system": "snes",
       "bucket": "snes/Axelay (USA).zip"
     },
     {
       "title": "Gradius III",
+      "category": "Other",
       "system": "snes",
       "bucket": "snes/Gradius III (USA).zip"
     },
     {
       "title": "Super R-Type",
+      "category": "Other",
       "system": "snes",
       "bucket": "snes/Super R-Type (USA).zip"
     },
     {
       "title": "Darius Twin",
+      "category": "Other",
       "system": "snes",
       "bucket": "snes/Darius Twin (USA).zip"
     },
     {
       "title": "R-Type",
+      "category": "Other",
       "system": "tg16",
       "bucket": "tg16/R-Type (USA).zip"
     },
     {
       "title": "Blazing Lazers",
+      "category": "Other",
       "system": "tg16",
       "bucket": "tg16/Blazing Lazers (USA).zip"
     },
     {
       "title": "Soldier Blade",
+      "category": "Other",
       "system": "tg16",
       "bucket": "tg16/Soldier Blade (USA).zip"
     },
     {
       "title": "Super Star Soldier",
+      "category": "Other",
       "system": "tg16",
       "bucket": "tg16/Super Star Soldier (USA).zip"
     },
     {
       "title": "Aero Blasters",
+      "category": "Other",
       "system": "tg16",
       "bucket": "tg16/Aero Blasters (USA).zip"
     },
     {
       "title": "Raiden",
+      "category": "Other",
       "system": "tg16",
       "bucket": "tg16/Raiden (USA).zip"
     },
     {
       "title": "Lords of Thunder",
+      "category": "Other",
       "system": "tg-cd",
       "bucket": "tg-cd/Lords of Thunder (USA).chd"
     },
     {
       "title": "Cotton",
+      "category": "Other",
       "system": "tg-cd",
       "bucket": "tg-cd/Fantastic Night Dreams - Cotton (USA).chd"
     },
     {
       "title": "Spriggan Mark 2",
+      "category": "Other",
       "system": "tg-cd",
       "bucket": "tg-cd/Spriggan Mark 2 - Re Terraform Project (Japan) [T-En].chd"
     },
     {
       "title": "Silpheed",
+      "category": "Other",
       "system": "segacd",
       "bucket": "segacd/Silpheed (USA).chd"
     },
     {
       "title": "Gradius",
+      "category": "Other",
       "system": "nes",
       "bucket": "nes/Gradius (USA).zip"
     },
     {
       "title": "Life Force",
+      "category": "Other",
       "system": "nes",
       "bucket": "nes/Life Force (USA).zip"
     },
     {
       "title": "Nemesis",
+      "category": "Other",
       "system": "gb",
       "bucket": "gb/Nemesis (USA).zip"
     },
     {
       "title": "R-Type DX",
+      "category": "Other",
       "system": "gbc",
       "bucket": "gbc/R-Type DX (USA, Europe) (GB Compatible).zip"
     },
     {
       "title": "Gradius Galaxies",
+      "category": "Other",
       "system": "gba",
       "bucket": "gba/Gradius Galaxies (USA).zip"
     },
     {
       "title": "R-Type III",
+      "category": "Other",
       "system": "gba",
       "bucket": "gba/R-Type III - The Third Lightning (USA).zip"
     },
     {
       "title": "Iridion 3D",
+      "category": "Other",
       "system": "gba",
       "bucket": "gba/Iridion 3D (USA, Europe).zip"
     },
     {
       "title": "Iridion II",
+      "category": "Other",
       "system": "gba",
       "bucket": "gba/Iridion II (USA).zip"
     },
     {
       "title": "1942",
+      "category": "Other",
       "system": "mame",
       "bucket": "mame/1942.zip"
     },
     {
       "title": "1943",
+      "category": "Other",
       "system": "mame",
       "bucket": "mame/1943.zip"
     },
     {
       "title": "1944: The Loop Master",
+      "category": "Other",
       "system": "mame",
       "bucket": "mame/1944.zip"
     },
     {
       "title": "R-Type",
+      "category": "Other",
       "system": "mame",
       "bucket": "mame/rtypeu.zip"
     },
     {
       "title": "R-Type II",
+      "category": "Other",
       "system": "mame",
       "bucket": "mame/rtype2.zip"
     },
     {
       "title": "Gradius",
+      "category": "Other",
       "system": "mame",
       "bucket": "mame/gradius.zip"
     },
     {
       "title": "Armed Police Batrider",
+      "category": "Other",
       "system": "mame",
       "bucket": "mame/batrider.zip"
     },
     {
       "title": "Blazing Star",
+      "category": "Other",
       "system": "fbneo",
       "bucket": "fbneo/blazstar.zip"
     },
     {
-      "title": "DoDonPachi",
-      "system": "fbneo",
-      "bucket": "fbneo/ddonpach.zip"
-    },
-    {
-      "title": "DonPachi",
-      "system": "fbneo",
-      "bucket": "fbneo/donpachi.zip"
-    },
-    {
-      "title": "Dangun Feveron",
-      "system": "fbneo",
-      "bucket": "fbneo/dfeveron.zip"
-    },
-    {
-      "title": "Ketsui",
-      "system": "fbneo",
-      "bucket": "fbneo/ket.zip"
-    },
-    {
-      "title": "ESP Ra.De.",
-      "system": "fbneo",
-      "bucket": "fbneo/esprade.zip"
-    },
-    {
-      "title": "Guwange",
-      "system": "fbneo",
-      "bucket": "fbneo/guwange.zip"
-    },
-    {
       "title": "Battle Garegga",
+      "category": "Other",
       "system": "fbneo",
       "bucket": "fbneo/bgaregga.zip"
     },
     {
       "title": "Raiden",
+      "category": "Other",
       "system": "mame",
       "bucket": "mame/raiden.zip"
     },
     {
       "title": "Raiden II",
+      "category": "Other",
       "system": "mame",
       "bucket": "mame/raiden2.zip"
     },
     {
       "title": "Raiden DX",
+      "category": "Other",
       "system": "fbneo",
       "bucket": "fbneo/raidendx.zip"
     },
     {
       "title": "Vulcan Venture (Gradius II)",
+      "category": "Other",
       "system": "mame",
       "bucket": "mame/vulcan.zip"
     },
     {
       "title": "Gradius III",
+      "category": "Other",
       "system": "mame",
       "bucket": "mame/gradius3.zip"
     },
     {
       "title": "Salamander",
+      "category": "Other",
       "system": "mame",
       "bucket": "mame/salamand.zip"
     },
     {
       "title": "Life Force",
+      "category": "Other",
       "system": "mame",
       "bucket": "mame/lifefrce.zip"
     },
     {
       "title": "TwinBee",
+      "category": "Other",
       "system": "mame",
       "bucket": "mame/twinbee.zip"
     },
     {
       "title": "Xexex",
+      "category": "Other",
       "system": "mame",
       "bucket": "mame/xexex.zip"
     },
     {
       "title": "Darius",
+      "category": "Other",
       "system": "mame",
       "bucket": "mame/darius.zip"
     },
     {
       "title": "Darius II",
+      "category": "Other",
       "system": "mame",
       "bucket": "mame/darius2.zip"
     },
     {
       "title": "Image Fight",
+      "category": "Other",
       "system": "mame",
       "bucket": "mame/imgfight.zip"
     },
     {
       "title": "Sorcer Striker",
+      "category": "Other",
       "system": "mame",
       "bucket": "mame/sstriker.zip"
     },
     {
       "title": "Truxton II",
+      "category": "Other",
       "system": "mame",
       "bucket": "mame/truxton2.zip"
     },
     {
       "title": "Batsugun",
+      "category": "Other",
       "system": "mame",
       "bucket": "mame/batsugun.zip"
     },
     {
       "title": "Flying Shark",
+      "category": "Other",
       "system": "mame",
       "bucket": "mame/fshark.zip"
     },
     {
       "title": "Gunbird",
+      "category": "Other",
       "system": "mame",
       "bucket": "mame/gunbird.zip"
     },
     {
       "title": "Gunbird 2",
+      "category": "Other",
       "system": "mame",
       "bucket": "mame/gunbird2.zip"
     },
     {
       "title": "Dragon Blaze",
+      "category": "Other",
       "system": "mame",
       "bucket": "mame/dragnblz.zip"
     },
     {
       "title": "19XX",
+      "category": "Other",
       "system": "mame",
       "bucket": "mame/19xx.zip"
     },
     {
       "title": "Mars Matrix",
+      "category": "Other",
       "system": "mame",
       "bucket": "mame/mmatrix.zip"
     },
     {
-      "title": "Espgaluda",
-      "system": "fbneo",
-      "bucket": "fbneo/espgal.zip"
-    },
-    {
-      "title": "Mushihimesama",
-      "system": "fbneo",
-      "bucket": "fbneo/mushisam.zip"
-    },
-    {
       "title": "Gradius III and IV",
+      "category": "Other",
       "system": "ps2",
       "bucket": "ps2/Gradius III and IV (USA).chd"
     },
     {
       "title": "Gradius V",
+      "category": "Other",
       "system": "ps2",
       "bucket": "ps2/Gradius V (USA).chd"
     },
     {
       "title": "R-Type Final",
+      "category": "Other",
       "system": "ps2",
       "bucket": "ps2/R-Type Final (USA).chd"
     },
     {
       "title": "Raiden III",
+      "category": "Other",
       "system": "ps2",
       "bucket": "ps2/Raiden III (USA).chd"
     },
     {
       "title": "Castle Shikigami 2",
+      "category": "Other",
       "system": "ps2",
       "bucket": "ps2/Castle Shikigami 2 (USA).chd"
     },
     {
       "title": "Mobile Light Force 2",
+      "category": "Other",
       "system": "ps2",
       "bucket": "ps2/Mobile Light Force 2 (USA).chd"
     },
     {
       "title": "Ikaruga",
+      "category": "Other",
       "system": "gc",
       "bucket": "gc/Ikaruga (USA).rvz"
     },
     {
       "title": "Chaos Field",
+      "category": "Other",
       "system": "gc",
       "bucket": "gc/Chaos Field (USA).rvz"
     },
     {
       "title": "Shikigami no Shiro II",
+      "category": "Other",
       "system": "gc",
       "bucket": "gc/Shikigami no Shiro II (Japan).rvz"
     },
     {
       "title": "Geometry Wars - Galaxies",
+      "category": "Other",
       "system": "nds",
       "bucket": "nds/Geometry Wars - Galaxies (USA).zip"
     },
     {
       "title": "Space Invaders Extreme",
+      "category": "Other",
       "system": "nds",
       "bucket": "nds/Space Invaders Extreme (USA) (En,Ja,Fr,De,Es,It).zip"
     },
     {
       "title": "Gradius - The Interstellar Assault",
+      "category": "Other",
       "system": "gb",
       "bucket": "gb/Gradius - The Interstellar Assault (USA).zip"
     },
     {
       "title": "R-Type",
+      "category": "Other",
       "system": "gb",
       "bucket": "gb/R-Type (USA, Europe).zip"
     },
     {
       "title": "1943 - The Battle of Midway",
+      "category": "Other",
       "system": "nes",
       "bucket": "nes/1943 - The Battle of Midway (USA).zip"
     },
     {
       "title": "Zanac",
+      "category": "Other",
       "system": "nes",
       "bucket": "nes/Zanac (USA).zip"
     },
     {
       "title": "Star Soldier",
+      "category": "Other",
       "system": "nes",
       "bucket": "nes/Star Soldier (USA).zip"
     },
     {
       "title": "Xevious - The Avenger",
+      "category": "Other",
       "system": "nes",
       "bucket": "nes/Xevious - The Avenger (USA).zip"
     },
     {
       "title": "Fantasy Zone",
+      "category": "Other",
       "system": "gamegear",
       "bucket": "gamegear/Fantasy Zone (USA, Brazil) (En).zip"
     },
     {
       "title": "Space Harrier",
+      "category": "Other",
       "system": "gamegear",
       "bucket": "gamegear/Space Harrier (World).zip"
     },
     {
       "title": "After Burner II",
+      "category": "Other",
       "system": "genesis",
       "bucket": "genesis/After Burner II (USA, Europe).zip"
     },
     {
       "title": "Fantasy Zone",
+      "category": "Other",
       "system": "genesis",
       "bucket": "genesis/Fantasy Zone (World) (Mega Drive Mini 2, Genesis Mini 2).zip"
     },
     {
       "title": "Forgotten Worlds (Rev A)",
+      "category": "Other",
       "system": "genesis",
       "bucket": "genesis/Forgotten Worlds (World) (Rev A).zip"
     },
     {
       "title": "Space Harrier II",
+      "category": "Other",
       "system": "genesis",
       "bucket": "genesis/Space Harrier II (World).zip"
     },
     {
       "title": "Thunder Force II",
+      "category": "Other",
       "system": "genesis",
       "bucket": "genesis/Thunder Force II (USA, Europe).zip"
     },
     {
       "title": "Darius",
+      "category": "Other",
       "system": "genesis",
       "bucket": "genesis/Darius (World) (Genesis Mini, Mega Drive Mini).zip"
     },
     {
       "title": "Fantasy Zone",
+      "category": "Other",
       "system": "tg16",
       "bucket": "tg16/Fantasy Zone (USA).zip"
     },
     {
       "title": "Galaga '90",
+      "category": "Other",
       "system": "tg16",
       "bucket": "tg16/Galaga '90 (USA).zip"
     },
     {
       "title": "Space Harrier",
+      "category": "Other",
       "system": "tg16",
       "bucket": "tg16/Space Harrier (USA).zip"
     },
     {
       "title": "Aero Fighters",
+      "category": "Other",
       "system": "snes",
       "bucket": "snes/Aero Fighters (USA).zip"
     },
     {
       "title": "R-Type III",
+      "category": "Other",
       "system": "snes",
       "bucket": "snes/R-Type III (USA).zip"
     },
     {
       "title": "Raiden Trad",
+      "category": "Other",
       "system": "snes",
       "bucket": "snes/Raiden Trad (USA).zip"
     },
     {
       "title": "Star Fox (Rev 2)",
+      "category": "Other",
       "system": "snes",
       "bucket": "snes/Star Fox (USA) (Rev 2).zip"
     },
     {
       "title": "Star Fox 64 (Rev 1)",
+      "category": "Other",
       "system": "n64",
       "bucket": "n64/Star Fox 64 (USA) (Rev 1).zip"
     },
     {
       "title": "Star Soldier - Vanishing Earth",
+      "category": "Other",
       "system": "n64",
       "bucket": "n64/Star Soldier - Vanishing Earth (USA).zip"
     },
     {
       "title": "AeroFighters Assault",
+      "category": "Other",
       "system": "n64",
       "bucket": "n64/AeroFighters Assault (USA).zip"
     },
     {
       "title": "Space Harrier (Japan, USA)",
+      "category": "Other",
       "system": "sega32x",
       "bucket": "sega32x/Space Harrier (Japan, USA) (En).zip"
     },
     {
       "title": "After Burner Complete (Japan, USA)",
+      "category": "Other",
       "system": "sega32x",
       "bucket": "sega32x/After Burner Complete (Japan, USA) (En).zip"
     },
     {
       "title": "R-Type",
+      "category": "Other",
       "system": "mastersystem",
       "bucket": "mastersystem/R-Type (World).zip"
     },
     {
       "title": "Space Harrier (Japan, USA)",
+      "category": "Other",
       "system": "mastersystem",
       "bucket": "mastersystem/Space Harrier (Japan, USA) (En).zip"
     },
     {
       "title": "1942",
+      "category": "Other",
       "system": "gbc",
       "bucket": "gbc/1942 (USA, Europe).zip"
     },
     {
       "title": "Classic NES Series - Xevious",
+      "category": "Other",
       "system": "gba",
       "bucket": "gba/Classic NES Series - Xevious (USA, Europe).zip"
     },
     {
       "title": "Xevious",
+      "category": "Other",
       "system": "atari7800",
       "bucket": "atari7800/Xevious (USA).zip"
     },
     {
       "title": "Raiden (Rev A)",
+      "category": "Other",
       "system": "atarijaguar",
       "bucket": "atarijaguar/Raiden (World) (Rev A).zip"
     },
     {
       "title": "Gradius Collection",
+      "category": "Other",
       "system": "psp",
       "bucket": "psp/Gradius Collection (USA).chd"
     },
     {
       "title": "Space Invaders Extreme (En,Fr,De,Es,It)",
+      "category": "Other",
       "system": "psp",
       "bucket": "psp/Space Invaders Extreme (USA) (En,Fr,De,Es,It).chd"
     },
     {
       "title": "Every Extend Extra",
+      "category": "Other",
       "system": "psp",
       "bucket": "psp/Every Extend Extra (USA).chd"
     },
     {
       "title": "Dariusburst (En,Ja)",
+      "category": "Other",
       "system": "psp",
       "bucket": "psp/Dariusburst (Japan) (En,Ja).chd"
     },
     {
       "title": "Sengoku Cannon - Sengoku Ace Episode III (En,Ja)",
+      "category": "Other",
       "system": "psp",
       "bucket": "psp/Sengoku Cannon - Sengoku Ace Episode III (Japan, Asia) (En,Ja).chd"
     },
     {
       "title": "Star Soldier (En,Ja)",
+      "category": "Other",
       "system": "psp",
       "bucket": "psp/Star Soldier (Japan) (En,Ja).chd"
     },
     {
       "title": "Parodius Portable",
+      "category": "Other",
       "system": "psp",
       "bucket": "psp/Parodius Portable (Japan).chd"
     },
     {
       "title": "TwinBee Portable",
+      "category": "Other",
       "system": "psp",
       "bucket": "psp/TwinBee Portable (Japan).chd"
     },
     {
       "title": "The Raiden Project",
+      "category": "Other",
       "system": "psx",
       "bucket": "psx/Raiden Project, The (USA).chd"
     },
     {
       "title": "Strikers 1945",
+      "category": "Other",
       "system": "psx",
       "bucket": "psx/Strikers 1945 (USA).chd"
     },
     {
       "title": "RayStorm",
+      "category": "Other",
       "system": "psx",
       "bucket": "psx/RayStorm (USA).chd"
     },
     {
       "title": "RayCrisis",
+      "category": "Other",
       "system": "psx",
       "bucket": "psx/RayCrisis - Series Termination (USA).chd"
     },
     {
       "title": "Gekioh: Shooting King",
+      "category": "Other",
       "system": "psx",
       "bucket": "psx/Gekioh - Shooting King (USA).chd"
     },
     {
       "title": "Philosoma",
+      "category": "Other",
       "system": "psx",
       "bucket": "psx/Philosoma (USA).chd"
     },
     {
       "title": "Omega Boost",
+      "category": "Other",
       "system": "psx",
       "bucket": "psx/Omega Boost (USA).chd"
     },
     {
       "title": "R-Types",
+      "category": "Other",
       "system": "psx",
       "bucket": "psx/R-Types (USA).chd"
     },
     {
       "title": "Sol Divide",
+      "category": "Other",
       "system": "psx",
       "bucket": "psx/Sol Divide (USA).chd"
     },
     {
       "title": "Galaga: Destination Earth",
+      "category": "Other",
       "system": "psx",
       "bucket": "psx/Galaga - Destination Earth (USA).chd"
     },
     {
       "title": "Last Resort",
+      "category": "Other",
       "system": "neogeocd",
       "bucket": "neogeocd/Last Resort (Japan) (En,Ja).chd"
     },
     {
       "title": "Pulstar",
+      "category": "Other",
       "system": "neogeocd",
       "bucket": "neogeocd/Pulstar (Japan) (En,Ja).chd"
     },
     {
       "title": "Twinkle Star Sprites",
+      "category": "Other",
       "system": "neogeocd",
       "bucket": "neogeocd/Twinkle Star Sprites (Japan) (En,Ja).chd"
     },
     {
       "title": "Aero Fighters 2",
+      "category": "Other",
       "system": "neogeocd",
       "bucket": "neogeocd/Sonic Wings 2 ~ Aero Fighters 2 (World) (En,Ja).chd"
     },
     {
       "title": "Aero Fighters 3",
+      "category": "Other",
       "system": "neogeocd",
       "bucket": "neogeocd/Sonic Wings 3 ~ Aero Fighters 3 (Japan) (En,Ja).chd"
     },
     {
       "title": "Viewpoint",
+      "category": "Other",
       "system": "neogeocd",
       "bucket": "neogeocd/Viewpoint (Japan).chd"
     },
     {
       "title": "Rez",
+      "category": "Other",
       "system": "ps2",
       "bucket": "ps2/Rez (USA) (En,Fr,De,Es,It).chd"
     },
     {
       "title": "Sin & Punishment: Star Successor",
+      "category": "Other",
       "system": "wii",
       "bucket": "wii/Sin & Punishment - Star Successor (USA).rvz"
     },
     {
       "title": "Ikaruga",
+      "category": "Other",
       "system": "dreamcast",
       "bucket": "dreamcast/Ikaruga (Japan).chd"
     },
     {
       "title": "Rez",
+      "category": "Other",
       "system": "dreamcast",
       "bucket": "dreamcast/Rez (Europe) (En,Ja,Fr,De,Es,It).chd"
     },
     {
       "title": "Radirgy",
+      "category": "Other",
       "system": "dreamcast",
       "bucket": "dreamcast/Radirgy (Japan).chd"
     },
     {
       "title": "Trizeal",
+      "category": "Other",
       "system": "dreamcast",
       "bucket": "dreamcast/Trizeal (Japan).chd"
     },
     {
       "title": "Triggerheart Exelica",
+      "category": "Other",
       "system": "dreamcast",
       "bucket": "dreamcast/Triggerheart Exelica (Japan).chd"
     },
     {
       "title": "Zero Gunner 2",
+      "category": "Other",
       "system": "dreamcast",
       "bucket": "dreamcast/Zero Gunner 2 (Japan).chd"
     },
     {
       "title": "Under Defeat",
+      "category": "Other",
       "system": "dreamcast",
       "bucket": "dreamcast/Under Defeat (Japan).chd"
     },
     {
       "title": "Psyvariar 2: The Will to Fabricate",
+      "category": "Other",
       "system": "dreamcast",
       "bucket": "dreamcast/Psyvariar 2 - The Will to Fabricate (Japan).chd"
     },
     {
       "title": "Border Down",
+      "category": "Other",
       "system": "dreamcast",
       "bucket": "dreamcast/Border Down (Japan).chd"
     },
     {
       "title": "Mars Matrix",
+      "category": "Other",
       "system": "dreamcast",
       "bucket": "dreamcast/Mars Matrix (USA).chd"
     },
     {
       "title": "GigaWing",
+      "category": "Other",
       "system": "dreamcast",
       "bucket": "dreamcast/GigaWing (USA).chd"
     },
     {
       "title": "GigaWing 2",
+      "category": "Other",
       "system": "dreamcast",
       "bucket": "dreamcast/GigaWing 2 (USA).chd"
     },
     {
       "title": "Gunbird 2",
+      "category": "Other",
       "system": "dreamcast",
       "bucket": "dreamcast/Gunbird 2 (USA).chd"
     },
     {
       "title": "Twinkle Star Sprites",
+      "category": "Other",
       "system": "dreamcast",
       "bucket": "dreamcast/Twinkle Star Sprites (Japan) (En,Ja,Es).chd"
     },
     {
       "title": "Chaos Field",
+      "category": "Other",
       "system": "dreamcast",
       "bucket": "dreamcast/Chaos Field (Japan).chd"
     },
     {
       "title": "Karous",
+      "category": "Other",
       "system": "dreamcast",
       "bucket": "dreamcast/Karous (Japan).chd"
     },
     {
       "title": "Rainbow Cotton",
+      "category": "Other",
       "system": "dreamcast",
       "bucket": "dreamcast/Rainbow Cotton (Japan).chd"
     },
     {
       "title": "Bangai-O",
+      "category": "Other",
       "system": "dreamcast",
       "bucket": "dreamcast/Bangai-O (USA).chd"
     },
     {
       "title": "Shikigami no Shiro II",
+      "category": "Other",
       "system": "dreamcast",
       "bucket": "dreamcast/Shikigami no Shiro II (Japan).chd"
     },
     {
       "title": "Cannon Spike",
+      "category": "Other",
       "system": "dreamcast",
       "bucket": "dreamcast/Cannon Spike (USA).chd"
     },
     {
       "title": "Panzer Dragoon Orta",
+      "category": "Other",
       "system": "xbox",
       "bucket": "xbox/Panzer Dragoon Orta (USA).iso"
     },
     {
       "title": "DoDonPachi II: Bee Storm",
+      "category": "Other",
       "system": "fbneo",
       "bucket": "fbneo/ddp2.zip"
     },
     {
-      "title": "DoDonPachi DaiOuJou",
-      "system": "fbneo",
-      "bucket": "fbneo/ddp3.zip"
-    },
-    {
-      "title": "Espgaluda II",
-      "system": "fbneo",
-      "bucket": "fbneo/espgal2.zip"
-    },
-    {
       "title": "Uo Poko",
+      "category": "Other",
       "system": "fbneo",
       "bucket": "fbneo/uopoko.zip"
     },
     {
-      "title": "Progear",
-      "system": "fbneo",
-      "bucket": "fbneo/progear.zip"
-    },
-    {
-      "title": "Mushihimesama Futari 1.5",
-      "system": "fbneo",
-      "bucket": "fbneo/futari15.zip"
-    },
-    {
-      "title": "Ibara",
-      "system": "fbneo",
-      "bucket": "fbneo/ibara.zip"
-    },
-    {
-      "title": "Pink Sweets",
-      "system": "fbneo",
-      "bucket": "fbneo/pinkswts.zip"
-    },
-    {
-      "title": "Death Smiles",
-      "system": "fbneo",
-      "bucket": "fbneo/deathsml.zip"
-    },
-    {
-      "title": "Muchi Muchi Pork!",
-      "system": "fbneo",
-      "bucket": "fbneo/mmpork.zip"
-    },
-    {
       "title": "Battle Bakraid",
+      "category": "Other",
       "system": "fbneo",
       "bucket": "fbneo/bbakraid.zip"
     },
     {
       "title": "Air Gallet",
+      "category": "Other",
       "system": "fbneo",
       "bucket": "fbneo/agallet.zip"
-    },
-    {
-      "title": "Tengai",
-      "system": "fbneo",
-      "bucket": "fbneo/tengai.zip"
     }
   ]
 }

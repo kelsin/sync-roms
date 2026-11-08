@@ -107,8 +107,11 @@ def edit_card_system(card, bucket, setup):
 
 
 def set_rows(game_set, by_bucket, bucket_keys):
-    """Rows for one set, sorted by system then title. Entries for unknown systems are skipped."""
+    """Rows for one set, grouped by category (in file order) then sorted by system and title.
+
+    Entries for unknown systems are skipped."""
     rows, seen = [], set()
+    order = {}
     for g in game_set["games"]:
         s = by_bucket.get(g.get("system"))
         key = g.get("bucket")
@@ -119,8 +122,10 @@ def set_rows(game_set, by_bucket, bucket_keys):
         have = bucket_keys(s)
         warn = "" if s.get("full_system") or all(k in have for k in [key] + list(g.get("files", []))) \
             else "  ⚠️ not in bucket"
-        rows.append((s, key, title, f"{s['name']} — {title}{warn}"))
-    return sorted(rows, key=lambda r: (r[0]["name"].lower(), r[2].lower()))
+        cat = g.get("category") or ""
+        order.setdefault(cat, len(order))
+        rows.append((cat, (s, key, title, f"{cat + ' — ' if cat else ''}{s['name']} — {title}{warn}")))
+    return [r for _, r in sorted(rows, key=lambda c: (order[c[0]], c[1][0]["name"].lower(), c[1][2].lower()))]
 
 
 def valid_card_name(name, existing):

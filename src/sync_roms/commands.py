@@ -436,6 +436,8 @@ def check_sets(problems):
                     continue
                 if not g.get("title"):
                     problems.append(f"{where}: {g['bucket']}: missing 'title'")
+                if not isinstance(g.get("category", ""), str):
+                    problems.append(f"{where}: {g['bucket']}: 'category' must be a string")
                 files = g.get("files", [])
                 if not isinstance(files, list) or not all(isinstance(k, str) for k in files):
                     problems.append(f"{where}: {g['bucket']}: 'files' must be a list of bucket keys")
