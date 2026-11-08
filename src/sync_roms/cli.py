@@ -698,8 +698,13 @@ def run(argv):
             except ValueError as e:
                 print(ui.yellow(f"  ⚠️  skipping {e}"))
     ui.report_missing([k for k in bios_keys if k not in bios_have], "BIOS file(s)")
+    # Android cards also get the bucket's APKs/ files (APKs, the Obtainium app list) in an APKs/ folder to install from
+    apk_dir = os.path.join(base, "APKs")
+    apk_jobs = ([(k, os.path.join(apk_dir, k[len("APKs/"):]), size) for k, size in sorted(s3.list_sizes("APKs/").items())
+                 if not k.endswith("/")] if layout_name == "esde" else [])
 
     rom_todo, bios_todo = downloads.plan_downloads(rom_jobs, unzip, disc_dir), downloads.plan_downloads(bios_jobs)
+    apk_todo = downloads.plan_downloads(apk_jobs)
     if args.dry_run:  # the real run moves these first, so they are already there
         rom_todo = [j for j in rom_todo if j[1] not in moved]
     elif moved:
@@ -710,6 +715,10 @@ def run(argv):
     print(f"🧠 BIOS: {ui.bold(str(len(bios_todo)))} to download "
           f"({ui.human_size(sum(j[2] or 0 for j in bios_todo))}), "
           f"{len(bios_jobs) - len(bios_todo)} already present")
+    if apk_jobs:
+        print(f"🤖 Android: {ui.bold(str(len(apk_todo)))} to download "
+              f"({ui.human_size(sum(j[2] or 0 for j in apk_todo))}), "
+              f"{len(apk_jobs) - len(apk_todo)} already present")
     if extras:
         print(f"🗑️  Local ROMs no longer in the selection: {ui.bold(str(len(extras)))}")
     es_dir = os.path.join(base, "ES-DE")
@@ -730,9 +739,9 @@ def run(argv):
         print(ui.yellow("\n🧪 Dry run — nothing downloaded or deleted"))
         plan_json = {
             "downloads": [{"kind": kind, "key": key, "path": path, "size": size or 0}
-                          for kind, todo in (("rom", rom_todo), ("bios", bios_todo)) for key, path, size in todo],
+                          for kind, todo in (("rom", rom_todo), ("bios", bios_todo), ("android", apk_todo)) for key, path, size in todo],
             "delete": list(extras), "missing": {"roms": missing, "bios": [k for k in bios_keys if k not in bios_have]}}
-        for key, path, _ in rom_todo + bios_todo:
+        for key, path, _ in rom_todo + bios_todo + apk_todo:
             print(f"  {key} {ui.dim('→')} {path}")
         if unzip:
             pending = {j[1] for j in rom_todo} | set(chd.card_archives({dest_of(s) for s in chosen}))
@@ -746,7 +755,7 @@ def run(argv):
             print(f"🧹 Media on the card for ROMs it doesn't have: {stale_count} file(s) to remove")
         if layout_name == "esde":
             clean.clean_android_media(base, card, True, args.ask)
-        todo_all = rom_todo + bios_todo
+        todo_all = rom_todo + bios_todo + apk_todo
         plan_json["stale_media"] = stale_count
         plan_json["totals"] = {"files": len(todo_all), "bytes": sum(j[2] or 0 for j in todo_all), "delete": len(extras),
                                "stale_media": stale_count, "missing": len(missing)}
@@ -774,7 +783,7 @@ def run(argv):
         else:
             print(ui.yellow("  ↩️  Keeping them"))
 
-    todo_all = rom_todo + bios_todo
+    todo_all = rom_todo + bios_todo + apk_todo
     if todo_all:
         need = sum(j[2] or 0 for j in todo_all)
         free = free_space(base)
@@ -792,6 +801,7 @@ def run(argv):
         clean._clean_root = base
     failures = []
     failed = downloads.run_downloads(rom_todo, "ROMs", "💿", roms_dir, failures) + downloads.run_downloads(bios_todo, "BIOS", "🧠", bios_dir, failures)
+    failed += downloads.run_downloads(apk_todo, "Android", "🤖", apk_dir, failures)
     for s in chosen:
         if disc_dir and available(s):
             m3u.prefix_playlists(dest_of(s), disc_dir)

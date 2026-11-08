@@ -215,7 +215,8 @@ Then:
    case and bracketed tags). A muOS or Slot folder whose ROM folders hold no ROMs is skipped, so art isn't
    wiped from a card whose ROMs are elsewhere (muOS can keep them on SD2). Art you add by hand or install
    from a `.muxcat` set for ROMs that aren't on the card is removed too.
-7. For the `esde` (Android) layout, files in the card's Android media folders (`Alarms`, `Audiobooks`, `DCIM`,
+7. For the `esde` (Android) layout, everything in the bucket's `APKs/` folder (APKs, the Obtainium app list) is
+   copied to an `APKs/` folder on the card so the apps can be installed from the device. Also, files in the card's Android media folders (`Alarms`, `Audiobooks`, `DCIM`,
    `Documents`, `Download`, `Movies`, `Music`, `Notifications`, `Pictures`, `Podcasts`, `Recordings`,
    `Ringtones`) are removed and an empty `.nomedia` is put in each of those folders that exists, so Android
    stops indexing them. Missing folders are not created, and `.nomedia` files don't count as files. The first
