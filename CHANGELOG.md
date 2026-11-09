@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.39.0](https://github.com/kelsin/sync-roms/compare/v0.38.1...v0.39.0) (2026-11-09)
+
+
+### Features
+
+* **scrape:** remove the other Onion-family gamelist once the layout's own exists ([#150](https://github.com/kelsin/sync-roms/issues/150)) ([ac30d79](https://github.com/kelsin/sync-roms/commit/ac30d795b505d4384cb37c229028d4087522484b))
+
+
+### Bug Fixes
+
+* **cli:** size table columns to their content ([#148](https://github.com/kelsin/sync-roms/issues/148)) ([508b100](https://github.com/kelsin/sync-roms/commit/508b10026e24ba6ed7243829130f897c88d9e3c1))
+
 ## [0.38.1](https://github.com/kelsin/sync-roms/compare/v0.38.0...v0.38.1) (2026-11-09)
 
 
