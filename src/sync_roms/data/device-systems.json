@@ -3125,11 +3125,6 @@
   },
   "miyoo-mini-flip": {
     "systems": [
-      "mame",
-      "fbneo",
-      "neogeo",
-      "cps1",
-      "cps2",
       "atari2600",
       "atari5200",
       "atari7800",
@@ -3166,7 +3161,7 @@
       "supervision",
       "megaduck"
     ],
-    "note": "Stable through PS1. NDS and Neo Geo CD are too heavy for 128MB RAM, so left off. FBNeo is Onion's experimental arcade alternative."
+    "note": "Stable through PS1. NDS and Neo Geo CD are too heavy for 128MB RAM, so left off."
   },
   "retroid-pocket-2s": {
     "systems": [
