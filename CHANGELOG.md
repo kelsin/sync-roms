@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.43.0](https://github.com/kelsin/sync-roms/compare/v0.42.0...v0.43.0) (2026-11-09)
+
+
+### Features
+
+* **convert:** compress xbox 360 isos to zar with iso2zar ([#164](https://github.com/kelsin/sync-roms/issues/164)) ([9e634d5](https://github.com/kelsin/sync-roms/commit/9e634d5039aaa4b583d3bd680ab9922905a89056))
+
 ## [0.42.0](https://github.com/kelsin/sync-roms/compare/v0.41.0...v0.42.0) (2026-11-09)
 
 
