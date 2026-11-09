@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.38.0](https://github.com/kelsin/sync-roms/compare/v0.37.0...v0.38.0) (2026-11-09)
+
+
+### Features
+
+* **onion:** install bucket themes onto the card ([#145](https://github.com/kelsin/sync-roms/issues/145)) ([eb4f8fe](https://github.com/kelsin/sync-roms/commit/eb4f8fea570b9c0606cca056af006a48d2a1408e))
+* **sets:** add arcade 1g1r set ([#144](https://github.com/kelsin/sync-roms/issues/144)) ([4180f66](https://github.com/kelsin/sync-roms/commit/4180f663a0e667ed6562392859af4ef1e1b28604))
+
+
+### Bug Fixes
+
+* **devices:** remove arcade systems from miyoo mini flip ([#141](https://github.com/kelsin/sync-roms/issues/141)) ([78dd1c6](https://github.com/kelsin/sync-roms/commit/78dd1c6ac53def5c75646d4f2a0b9e15e3b45658))
+* **sync:** tolerate already-missing files when deleting extras ([#143](https://github.com/kelsin/sync-roms/issues/143)) ([888d244](https://github.com/kelsin/sync-roms/commit/888d2444225fe4c46d2a8f5e2556f2f279950557))
+
 ## [0.37.0](https://github.com/kelsin/sync-roms/compare/v0.36.0...v0.37.0) (2026-11-08)
 
 
