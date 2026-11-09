@@ -48,11 +48,7 @@ def show_devices(devices, systems, device_id=None, as_json=False):
                        "firmwares": d["firmwares"]} for d in devices])
         return 0
     rows = [(d["name"], d["soc"], str(len(d["systems"])), d["id"]) for d in devices]
-    head = ("Device", "Chip", "Systems", "Id")
-    widths = [max(len(r[i]) for r in rows + [head]) for i in range(4)]
-    print(ui.bold(f"{head[0]:<{widths[0]}}  {head[1]:<{widths[1]}}  {head[2]:>{widths[2]}}  {head[3]}"))
-    for name, soc, count, ident in rows:
-        print(f"{name:<{widths[0]}}  {soc:<{widths[1]}}  {count:>{widths[2]}}  {ident}")
+    ui.table(rows, ("Device", "Chip", "Systems", "Id"), right=(2,))
     return 0
 
 
@@ -157,12 +153,8 @@ def games_list(args):
         ui.emit_json({"full_systems": full, "sets": sets,
                       "games": [{"system": s, "bucket": k, "title": t} for s, k, t in entries]})
         return 0
-    for system in full:
-        print(f"{system}\t*\t(full system)")
-    for set_id in sets:
-        print(f"sets\t{set_id}\t(whole set)")
-    for system, key, title in entries:
-        print(f"{system}\t{key}\t{title}")
+    ui.table([(s, "*", "(full system)") for s in full] + [("sets", i, "(whole set)") for i in sets]
+             + [(s, k, t) for s, k, t in entries])
     return 0
 
 
@@ -256,8 +248,7 @@ def games_sets(args):
     known = {x["id"]: x for x in store.load_sets()}
     if args.verb == "list":
         on = store.list_sets(raw)
-        for set_id, x in known.items():
-            print(f"{'✅' if set_id in on else '⬜'} {set_id}\t{x['name']}")
+        ui.table([(f"{'✅' if set_id in on else '⬜'} {set_id}", x["name"]) for set_id, x in known.items()])
         return 0
     if not args.set_id:
         ui.fail(f"sets {args.verb} needs a set id. Known: {', '.join(known)}", 2)
@@ -323,8 +314,7 @@ def cards_list(args):
     if args.json:
         ui.emit_json(rows)
         return 0
-    for r in rows:
-        print(f"{r['name']}\t{r['device'] or '(no device set)'}\t{r['layout'] or ''}\t{r['extras']} extra entries")
+    ui.table([(r["name"], r["device"] or "(no device set)", r["layout"] or "", f"{r['extras']} extra entries") for r in rows])
     return 0
 
 
