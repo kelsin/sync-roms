@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.42.0](https://github.com/kelsin/sync-roms/compare/v0.41.0...v0.42.0) (2026-11-09)
+
+
+### Features
+
+* **devices:** add magicx zero 40 ([#162](https://github.com/kelsin/sync-roms/issues/162)) ([021212b](https://github.com/kelsin/sync-roms/commit/021212b8b0271b15958db4d3b5e122874a5d1db6))
+
 ## [0.41.0](https://github.com/kelsin/sync-roms/compare/v0.40.2...v0.41.0) (2026-11-09)
 
 
