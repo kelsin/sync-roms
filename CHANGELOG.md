@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.40.2](https://github.com/kelsin/sync-roms/compare/v0.40.1...v0.40.2) (2026-11-09)
+
+
+### Bug Fixes
+
+* **release:** include refactors in releases ([#158](https://github.com/kelsin/sync-roms/issues/158)) ([fba33dc](https://github.com/kelsin/sync-roms/commit/fba33dcf1380f192b0a8a3574ea45254a1c65c04))
+
+
+### Code Refactoring
+
+* **sets:** drop arcade-1g1r and repoint sets at 1g1r fbneo/mame ([#156](https://github.com/kelsin/sync-roms/issues/156)) ([4c993d5](https://github.com/kelsin/sync-roms/commit/4c993d59502e1e71224b34e65c2b45cb8c7cef1c))
+
 ## [0.40.1](https://github.com/kelsin/sync-roms/compare/v0.40.0...v0.40.1) (2026-11-09)
 
 
