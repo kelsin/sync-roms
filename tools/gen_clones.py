@@ -25,7 +25,7 @@ def is_arcade(el):
 def read(path, tag, keep):
     titles, parent_of = {}, {}
     for _, el in ET.iterparse(path):
-        if el.tag != tag:
+        if el.tag not in tag:
             continue
         if keep(el):
             titles[el.get("name")] = (el.findtext("description") or "").strip()
@@ -42,8 +42,8 @@ def build(titles, parent_of):
 
 
 def main(mame_xml, fbneo_dat):
-    data = {"mame": build(*read(mame_xml, "machine", is_arcade)),
-            "fbneo": build(*read(fbneo_dat, "game", lambda el: True))}
+    data = {"mame": build(*read(mame_xml, ("machine", "game"), is_arcade)),
+            "fbneo": build(*read(fbneo_dat, ("game",), lambda el: True))}
     with open(OUT, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, separators=(",", ":"), sort_keys=True)
         f.write("\n")
