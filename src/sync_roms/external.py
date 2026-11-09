@@ -1,4 +1,6 @@
 """External tools (7z, chdman, extract-xiso, iso2zar): lookup, running and install."""
+import os
+import pty
 import re
 import shutil
 import subprocess
@@ -41,12 +43,20 @@ def stop_tools():
 PERCENT_RE = re.compile(r"(\d+(?:\.\d+)?)% complete")
 
 
-def run_tool(cmd, progress=None):
-    """None on success, else the last line the tool printed; progress(percent) is called as chdman reports it."""
+def run_tool(cmd, progress=None, tty=False):
+    """None on success, else the last line the tool printed; progress(percent) is called as chdman reports it.
+    tty gives the tool a terminal as stdin, for iso2zar, which opens its GUI when it has none."""
     with _tool_lock:
         if _tools_stopped:
             return "interrupted"
-        proc = subprocess.Popen(cmd, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True)
+        master, slave = pty.openpty() if tty else (None, None)
+        try:
+            proc = subprocess.Popen(cmd, stdin=subprocess.DEVNULL if slave is None else slave,
+                                    stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, text=True)
+        finally:
+            for fd in (master, slave):
+                if fd is not None:
+                    os.close(fd)
         _tool_procs.add(proc)
     last = ""
     try:
