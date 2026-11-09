@@ -151,9 +151,42 @@ class StaleMediaTest(unittest.TestCase):
     def test_allium_keeps_onions_gamelist_until_its_own_exists(self):
         self.assertEqual(self.run_onion("allium", ["Roms/GBA/miyoogamelist.xml"]), [])
 
+    def test_allium_removes_onions_recent_and_favorite_lists_from_the_roms_root(self):
+        files = ["Roms/recentlist-hidden.json", "Roms/favorite.json"]
+        self.assertEqual(self.run_onion("allium", files), sorted(files))
+        self.assertEqual(self.run_onion("onion", files), [])
+
     def test_onion_removes_alliums_gamelist_once_its_own_exists(self):
         self.assertEqual(self.run_onion("onion", ["Roms/GBA/gamelist.xml", "Roms/GBA/miyoogamelist.xml"]),
                          ["Roms/GBA/gamelist.xml"])
+
+    def run_empty_onion(self, layout):
+        with tempfile.TemporaryDirectory() as base:
+            files = ["Roms/GBA/gamelist.xml", "Roms/GBA/miyoogamelist.xml", "Roms/GBA/Imgs/Old.png", "Roms/GBA/cache6.db"]
+            for rel in files:
+                touch(os.path.join(base, rel))
+            roms_dir = os.path.join(base, "Roms")
+            systems = [{"bucket": "gba", "folders": {layout: "GBA"}}]
+            stale = scrape_plan.stale_media(layout, systems, roms_dir, os.path.join(base, "ES-DE"), base)
+            for p in stale:
+                os.remove(p)
+            removed = scrape_plan.prune_empty_systems(layout, systems, roms_dir)
+            return sorted(os.path.relpath(p, base) for p in stale), removed, os.path.exists(os.path.join(roms_dir, "GBA"))
+
+    def test_onion_family_clears_an_empty_system_and_its_folder(self):
+        for layout in ("onion", "allium"):
+            stale, removed, exists = self.run_empty_onion(layout)
+            self.assertEqual(stale, ["Roms/GBA/Imgs/Old.png", "Roms/GBA/cache6.db", "Roms/GBA/gamelist.xml",
+                                     "Roms/GBA/miyoogamelist.xml"], layout)
+            self.assertEqual((len(removed), exists), (1, False), layout)
+
+    def test_a_system_with_roms_keeps_its_folder_and_gamelists(self):
+        self.assertEqual(self.run_onion("allium", ["Roms/GBA/gamelist.xml"]), [])
+        with tempfile.TemporaryDirectory() as base:
+            touch(os.path.join(base, "Roms/GBA/Game.zip"))
+            system = {"bucket": "gba", "folders": {"allium": "GBA"}}
+            self.assertEqual(scrape_plan.prune_empty_systems("allium", [system], os.path.join(base, "Roms")), [])
+            self.assertTrue(os.path.exists(os.path.join(base, "Roms/GBA/Game.zip")))
 
     CAT = os.path.join("MUOS", "info", "catalogue")
 
