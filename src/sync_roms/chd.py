@@ -188,7 +188,7 @@ def make_zar(tools, image, out, report=None):
         try:
             if os.path.exists(part):  # left by a run that was killed
                 os.remove(part)
-            error = external.run_tool([tools["iso2zar"], image, part])
+            error = external.run_tool([tools["iso2zar"], image, part], tty=True)
             if not error and (not os.path.exists(part) or os.path.getsize(part) == 0):
                 error = "iso2zar wrote nothing"
             if error:
