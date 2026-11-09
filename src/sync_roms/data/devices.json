@@ -468,6 +468,14 @@
     ]
   },
   {
+    "id": "magicx-zero40",
+    "name": "MagicX Zero 40",
+    "soc": "Allwinner A133P",
+    "firmwares": [
+      "esde"
+    ]
+  },
+  {
     "id": "miyoo-flip-v2",
     "name": "Miyoo Flip V2",
     "soc": "Rockchip RK3566",
