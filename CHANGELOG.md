@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.40.0](https://github.com/kelsin/sync-roms/compare/v0.39.0...v0.40.0) (2026-11-09)
+
+
+### Features
+
+* **sync:** remove empty Onion and Allium systems and their folders ([#151](https://github.com/kelsin/sync-roms/issues/151)) ([e2d30cc](https://github.com/kelsin/sync-roms/commit/e2d30cc4140e9958747388bbec23f7c872256d1f))
+
 ## [0.39.0](https://github.com/kelsin/sync-roms/compare/v0.38.1...v0.39.0) (2026-11-09)
 
 
