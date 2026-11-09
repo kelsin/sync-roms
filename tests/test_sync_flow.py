@@ -21,12 +21,14 @@ def captured(fn, *a, **kw):
 
 
 class CleanDirsTest(unittest.TestCase):
-    def run_clean(self, dot_clean, tty=False, yes=True):
+    def run_clean(self, dot_clean, tty=False, yes=True, spotlight=True):
         calls = []
         with tempfile.TemporaryDirectory() as root, contextlib.ExitStack() as st:
             st.enter_context(mock.patch.object(clean, "_clean_root", root))
             st.enter_context(mock.patch.object(clean.shutil, "which", lambda n: "/usr/bin/dot_clean"))
             st.enter_context(mock.patch.object(clean, "dot_clean", dot_clean))
+            st.enter_context(mock.patch.object(clean, "spotlight_active", lambda p: spotlight))
+            st.enter_context(mock.patch.object(clean.time, "sleep", lambda s: None))
             st.enter_context(mock.patch.object(clean.subprocess, "run", lambda *a, **k: calls.append(a[0]) or mock.Mock(returncode=0)))
             st.enter_context(mock.patch.object(clean.sys.stdin, "isatty", lambda: tty))
             st.enter_context(mock.patch.object(ui, "ASSUME_YES", yes))
@@ -43,6 +45,16 @@ class CleanDirsTest(unittest.TestCase):
             raise KeyboardInterrupt
         _, out = self.run_clean(boom)
         self.assertIn("Skipped", out)
+
+    def test_retries_dot_clean(self):
+        results = iter([(True, ["/x/._a"]), (True, [])])
+        _, out = self.run_clean(lambda p: next(results))
+        self.assertIn("Retrying dot_clean", out)
+
+    def test_sudo_is_skipped_when_spotlight_is_off(self):
+        calls, out = self.run_clean(lambda p: (True, []), tty=True, yes=False, spotlight=False)
+        self.assertFalse([c for c in calls if c[0] == "sudo"])
+        self.assertNotIn("sudo mdutil", out)
 
     def test_sudo_is_not_run_without_a_terminal(self):
         calls, out = self.run_clean(lambda p: (False, ["/x/._a"]))
