@@ -30,7 +30,7 @@ class FakeTools:
     def __init__(self, archive=(), fail=()):
         self.calls, self.archive, self.fail = [], archive, fail
 
-    def __call__(self, cmd, progress=None):
+    def __call__(self, cmd, progress=None, tty=False):
         self.calls.append(cmd)
         if cmd[0] == "7z":
             out = next(a for a in cmd if a.startswith("-o"))[2:]
