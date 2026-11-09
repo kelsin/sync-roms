@@ -7,7 +7,7 @@ name = "sync-roms"
 dynamic = ["version"]
 description = "Download ROMs and BIOS files from the roms bucket onto a handheld's SD card."
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.11"
 dependencies = ["boto3"]
 
 [project.optional-dependencies]

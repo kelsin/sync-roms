@@ -555,12 +555,14 @@ class RoundTwoRunTest(RunBase):
         self.put("gba/b.zip")
         self.client.games["a.zip"] = game(1, "Alpha", media=("box-2D", "ss", "sstitle"))
         raised = threading.Event()
+        downloading = threading.Event()
         events = []
         real_event = threading.Event
         real_lookup = self.client.lookup
 
         def lookup(system_id, rom_name, *a, **k):
             if rom_name == "b.zip":
+                downloading.wait(5)  # let a.zip's download start before the quota error
                 raised.set()
                 raise screenscraper.QuotaExceeded("quota")
             return real_lookup(system_id, rom_name, *a, **k)
@@ -568,6 +570,7 @@ class RoundTwoRunTest(RunBase):
 
         def download(url, dest, limit=None, stop=None):
             real_download(url, dest)
+            downloading.set()
             raised.wait(5)
             events[0].wait(5)  # the run's stop event, set once b.zip's quota error is seen
         self.client.lookup, self.client.download = lookup, download

@@ -113,7 +113,8 @@ class ChdTest(unittest.TestCase):
             with mock.patch.object(external, "tool_output", return_value=info[kind]):
                 self.assertEqual(chd.wrong_codec("chdman", DVD["chd"], path), wanted)
         fake = FakeTools()
-        with mock.patch.object(external, "tool_output", return_value=info["cd"]), mock.patch.object(external, "run_tool", fake):
+        with mock.patch.object(external, "tool_output", return_value=info["cd"]), mock.patch.object(external, "run_tool", fake), \
+                mock.patch.object(external, "find_tool", return_value="chdman"):
             self.assertIsNone(chd.chd_image(self.tools, DVD["chd"], path, [path]))
             self.assertEqual([c[1] for c in fake.calls], ["copy", "verify"])
             self.assertEqual(fake.calls[0][fake.calls[0].index("-c") + 1], "cdzl")
