@@ -5,7 +5,7 @@
     {
       "title": "Final Fight",
       "system": "fbneo",
-      "bucket": "fbneo/ffightu.zip"
+      "bucket": "fbneo/ffightuc.zip"
     },
     {
       "title": "Cadillacs and Dinosaurs",
@@ -35,7 +35,7 @@
     {
       "title": "Teenage Mutant Ninja Turtles (2 Players)",
       "system": "fbneo",
-      "bucket": "fbneo/tmnt22pu.zip"
+      "bucket": "fbneo/tmnt2.zip"
     },
     {
       "title": "Metal Slug",
@@ -90,7 +90,7 @@
     {
       "title": "Double Dragon II: The Revenge",
       "system": "fbneo",
-      "bucket": "fbneo/ddragon2.zip"
+      "bucket": "fbneo/ddragon2u.zip"
     },
     {
       "title": "Golden Axe",
@@ -100,17 +100,17 @@
     {
       "title": "Vendetta",
       "system": "fbneo",
-      "bucket": "fbneo/vendetta.zip"
+      "bucket": "fbneo/vendettar.zip"
     },
     {
       "title": "Crime Fighters",
       "system": "fbneo",
-      "bucket": "fbneo/crimfght.zip"
+      "bucket": "fbneo/crimfghtu.zip"
     },
     {
       "title": "Alien vs. Predator",
       "system": "fbneo",
-      "bucket": "fbneo/avsp.zip"
+      "bucket": "fbneo/avspu.zip"
     },
     {
       "title": "X-Men",
@@ -120,7 +120,7 @@
     {
       "title": "Armored Warriors",
       "system": "fbneo",
-      "bucket": "fbneo/armwar.zip"
+      "bucket": "fbneo/armwaru.zip"
     },
     {
       "title": "Streets of Rage (Rev A)",
