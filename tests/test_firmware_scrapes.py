@@ -151,6 +151,11 @@ class StaleMediaTest(unittest.TestCase):
     def test_allium_keeps_onions_gamelist_until_its_own_exists(self):
         self.assertEqual(self.run_onion("allium", ["Roms/GBA/miyoogamelist.xml"]), [])
 
+    def test_allium_removes_onions_recent_and_favorite_lists_from_the_roms_root(self):
+        files = ["Roms/recentlist-hidden.json", "Roms/favorite.json"]
+        self.assertEqual(self.run_onion("allium", files), sorted(files))
+        self.assertEqual(self.run_onion("onion", files), [])
+
     def test_onion_removes_alliums_gamelist_once_its_own_exists(self):
         self.assertEqual(self.run_onion("onion", ["Roms/GBA/gamelist.xml", "Roms/GBA/miyoogamelist.xml"]),
                          ["Roms/GBA/gamelist.xml"])

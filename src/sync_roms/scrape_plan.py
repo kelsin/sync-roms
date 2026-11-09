@@ -149,6 +149,7 @@ KNULLI_MEDIA = (
 KNULLI_SUFFIXES = {"image", "thumb", "marquee", "fanart", "boxback", "titleshot", "bezel", "boxart",
                    "cartridge", "mix", "wheel", "map", "video", "manual", "magazine", "music"}
 GAMELIST_FILES = {"esde": "gamelist.xml", "knulli": "gamelist.xml", "onion": "miyoogamelist.xml", "allium": "gamelist.xml"}
+ONION_ONLY_LISTS = ("recentlist-hidden.json", "favorite.json")  # in the root of Onion's roms folder
 ONION_LAYOUTS = ("onion", "allium")  # both keep box art in a flat Imgs/ folder
 # muOS catalogue art, MUOS/info/catalogue/<system's muos_catalogue>/<folder>/<ROM name>.<ext>, and the media types that fill it
 MUOS_MEDIA = (("box", ("covers", "3dboxes")), ("preview", ("screenshots", "titlescreens")))
@@ -558,6 +559,8 @@ def stale_media(layout_name, systems, roms_dir, es_dir, base=None):
             if not stems:  # an empty system: its gamelists and ROM list caches go too, so the firmware doesn't show it
                 stale += [os.path.join(rom_dir, f) for f in sorted(os.listdir(rom_dir))
                           if f in GAMELIST_FILES.values() or f.lower().endswith(".db")]
+    if layout_name == "allium":  # Onion OS's lists of recent and favourite games, which Allium doesn't use
+        stale += [path for f in ONION_ONLY_LISTS if os.path.isfile(path := os.path.join(roms_dir, f))]
     return list(dict.fromkeys(stale))
 
 
