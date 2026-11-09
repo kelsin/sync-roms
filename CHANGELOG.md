@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.43.1](https://github.com/kelsin/sync-roms/compare/v0.43.0...v0.43.1) (2026-11-09)
+
+
+### Bug Fixes
+
+* **convert:** run iso2zar with a terminal so it stays in cli mode ([#167](https://github.com/kelsin/sync-roms/issues/167)) ([762a6fe](https://github.com/kelsin/sync-roms/commit/762a6fe0d9e6a60feebccf8681216b2934f58e20))
+
 ## [0.43.0](https://github.com/kelsin/sync-roms/compare/v0.42.0...v0.43.0) (2026-11-09)
 
 
