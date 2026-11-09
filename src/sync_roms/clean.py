@@ -4,16 +4,18 @@ import shutil
 import signal
 import subprocess
 import sys
+import time
 
 from . import store, ui
 
 
 _clean_root = None
+DOT_CLEAN_RETRIES = 2
 
 
 def dot_clean(path):
-    """Run dot_clean -m on path, which should delete every ._* file. Returns (exit ok, ._* files still there)."""
-    r = subprocess.run(["dot_clean", "-m", path], capture_output=True, text=True)
+    """Run dot_clean on path (always delete ._ files, even orphans, without merging their attributes), which should delete every ._* file. Returns (exit ok, ._* files still there)."""
+    r = subprocess.run(["dot_clean", "-mn", "--keep=native", path], capture_output=True, text=True)
     # dot_clean exits 0 even when a merge fails, so also look for ._* files it left behind
     left = [os.path.join(root, f) for root, _, files in os.walk(path) for f in files if f.startswith("._")]
     ok = r.returncode == 0 and not left
@@ -113,6 +115,31 @@ def clean_dirs():
         print(ui.yellow("\n↩️  Skipped the rest of the card cleaning"))
 
 
+def spotlight_active(path):
+    """True when Spotlight is indexing path or has left an index on it (macOS creates ._ files while it does)."""
+    if os.path.exists(os.path.join(path, ".Spotlight-V100")):
+        return True
+    r = subprocess.run(["mdutil", "-s", path], capture_output=True, text=True)
+    return "Indexing enabled" in r.stdout
+
+
+def _stop_indexing(root):
+    """Turn Spotlight indexing off for the card and delete its index, if it is on (needs sudo, so asks first)."""
+    if not shutil.which("mdutil") or not spotlight_active(root):
+        return
+    cmd = f"sudo mdutil -i off {root} && sudo mdutil -X {root}"
+    print(ui.bold(f"\n🔍 Spotlight is indexing the card, which keeps recreating ._ files. Turning it off needs: {cmd}"))
+    if ui.ASSUME_YES or not sys.stdin.isatty():
+        print(ui.yellow("  ↩️  Not asking for sudo's password here: run that command yourself if you want it"))
+    elif ui.confirm("Run it now? (sudo asks for your password)"):
+        # sudo needs ^C to work at its password prompt
+        default_sigint = lambda: signal.signal(signal.SIGINT, signal.SIG_DFL)
+        for args in (["-i", "off"], ["-X"]):
+            r = subprocess.run(["sudo", "mdutil", *args, root], preexec_fn=default_sigint)
+            if r.returncode != 0:
+                print(ui.red(f"  ❌ sudo mdutil {' '.join(args)} failed ({r.returncode})"))
+
+
 def _clean_card():
     try:  # on any OS: it keeps Spotlight from indexing the card when it is next used on a Mac
         open(os.path.join(_clean_root, ".metadata_never_index"), "a").close()
@@ -121,22 +148,17 @@ def _clean_card():
     quiet_fseventsd(_clean_root)
     if not shutil.which("dot_clean"):
         return
+    _stop_indexing(_clean_root)
     print(ui.bold("\n🧼 Running dot_clean..."))
     ok, left = dot_clean(_clean_root)
-    if not ok or left:
-        cmd = f"sudo mdutil -i off {_clean_root} && sudo mdutil -X {_clean_root}"
-        print(ui.bold(f"\n🔍 dot_clean couldn't clean everything. Turning Spotlight indexing off for the card needs: {cmd}"))
-        if ui.ASSUME_YES or not sys.stdin.isatty():
-            print(ui.yellow("  ↩️  Not asking for sudo's password here: run that command yourself if you want it"))
-        elif ui.confirm("Run it now? (sudo asks for your password)"):
-            # sudo needs ^C to work at its password prompt
-            default_sigint = lambda: signal.signal(signal.SIGINT, signal.SIG_DFL)
-            for args in (["-i", "off"], ["-X"]):
-                r = subprocess.run(["sudo", "mdutil", *args, _clean_root], preexec_fn=default_sigint)
-                if r.returncode != 0:
-                    print(ui.red(f"  ❌ sudo mdutil {' '.join(args)} failed ({r.returncode})"))
-            print(ui.bold("\n🧼 Retrying dot_clean..."))
-            _, left = dot_clean(_clean_root)
+    # A first pass often leaves files behind (the card is still settling); another pass usually finishes
+    # the job.
+    for _ in range(DOT_CLEAN_RETRIES):
+        if ok and not left:
+            break
+        time.sleep(2)
+        print(ui.bold("\n🧼 Retrying dot_clean..."))
+        ok, left = dot_clean(_clean_root)
     if left:
         print(ui.red(f"\n⚠️  {len(left)} ._ file(s) are still there after dot_clean:"))
         for path in left[:10]:
