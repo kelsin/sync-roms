@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.40.1](https://github.com/kelsin/sync-roms/compare/v0.40.0...v0.40.1) (2026-11-09)
+
+
+### Bug Fixes
+
+* **clean:** stop Spotlight before dot_clean and retry it ([#153](https://github.com/kelsin/sync-roms/issues/153)) ([e0ecce5](https://github.com/kelsin/sync-roms/commit/e0ecce57417e2b4960f494dcac5410fb71b4aed1))
+
 ## [0.40.0](https://github.com/kelsin/sync-roms/compare/v0.39.0...v0.40.0) (2026-11-09)
 
 
