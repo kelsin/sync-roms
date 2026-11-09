@@ -782,9 +782,16 @@ def run(argv):
                 print(ui.dim(f"     {path}"))
             answer = ui.choose(f"Delete these {len(extras)} local file(s)?", "yn", "n")
         if answer == "y":
-            for path in extras:
-                os.remove(path)
-            print(ui.green(f"  🧹 Deleted {len(extras)} file(s)"))
+            deleted = 0
+            for path in dict.fromkeys(extras):
+                try:
+                    os.remove(path)
+                    deleted += 1
+                except FileNotFoundError:  # already gone (a duplicate entry, or removed meanwhile)
+                    pass
+                except OSError as e:
+                    print(ui.red(f"  ❌ {path}: {e}"))
+            print(ui.green(f"  🧹 Deleted {deleted} file(s)"))
         else:
             print(ui.yellow("  ↩️  Keeping them"))
 
