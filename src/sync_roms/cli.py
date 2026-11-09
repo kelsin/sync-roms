@@ -869,6 +869,8 @@ def run(argv):
             print(ui.red(f"  ❌ {path}: {e}"))
     if stale:
         print(ui.green(f"🧹 Removed {len(stale)} media file(s) for ROMs that aren't on this card"))
+    for folder in scrape_plan.prune_empty_systems(layout_name, manifest["systems"], roms_dir):
+        print(ui.green(f"🧹 Removed empty system folder {os.path.relpath(folder, base)}"))
     if layout_name == "esde":  # only Android cards have these folders; a Knulli card's "music" must stay
         clean.clean_android_media(base, card, False, args.ask)
     if failures:

@@ -555,4 +555,29 @@ def stale_media(layout_name, systems, roms_dir, es_dir, base=None):
             if os.path.exists(os.path.join(rom_dir, GAMELIST_FILES[layout_name])) \
                     and os.path.exists(os.path.join(rom_dir, other)):
                 stale.append(os.path.join(rom_dir, other))
-    return stale
+            if not stems:  # an empty system: its gamelists and ROM list caches go too, so the firmware doesn't show it
+                stale += [os.path.join(rom_dir, f) for f in sorted(os.listdir(rom_dir))
+                          if f in GAMELIST_FILES.values() or f.lower().endswith(".db")]
+    return list(dict.fromkeys(stale))
+
+
+def prune_empty_systems(layout_name, systems, roms_dir):
+    """Remove the Onion-family ROM folders (and their Imgs) that hold no ROMs and nothing else. Returns the folders removed."""
+    removed = []
+    if layout_name not in ONION_LAYOUTS:
+        return removed
+    for rom_dir in sorted({os.path.join(roms_dir, s["folders"][layout_name]) for s in systems if s["folders"].get(layout_name)}):
+        if not os.path.isdir(rom_dir) or card_stems(rom_dir, False, True):
+            continue
+        imgs = os.path.join(rom_dir, "Imgs")
+        for dp, _, _ in sorted(os.walk(imgs), reverse=True):  # deepest first
+            try:
+                os.rmdir(dp)
+            except OSError:
+                pass
+        try:
+            os.rmdir(rom_dir)
+            removed.append(rom_dir)
+        except OSError:  # something else lives there
+            pass
+    return removed
