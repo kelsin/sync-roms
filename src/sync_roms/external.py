@@ -1,4 +1,4 @@
-"""External tools (7z, chdman, extract-xiso): lookup, running and install."""
+"""External tools (7z, chdman, extract-xiso, iso2zar): lookup, running and install."""
 import re
 import shutil
 import subprocess
@@ -10,8 +10,9 @@ from . import ui
 ARCHIVE_EXTS = (".zip", ".7z")
 SHEET_EXTS = (".cue", ".gdi", ".toc")  # chdman reads these; the sheet names the track files
 TOOL_FORMULAE = {"7z": "sevenzip", "chdman": "rom-tools"}  # Homebrew formula that provides each tool
-MANUAL_TOOLS = {"extract-xiso": "build it from https://github.com/XboxDev/extract-xiso (git clone, cmake -B build, cmake --build build) and put the binary on your PATH"}  # no Homebrew formula
-TOOL_NAMES = {"7z": ("7zz", "7z", "7za"), "chdman": ("chdman",), "extract-xiso": ("extract-xiso",)}
+MANUAL_TOOLS = {"extract-xiso": "build it from https://github.com/XboxDev/extract-xiso (git clone, cmake -B build, cmake --build build) and put the binary on your PATH",
+                "iso2zar": "build it from https://codeberg.org/NeverAnswers/iso2zar (git clone, cargo build --release) and put target/release/iso2zar on your PATH"}  # no Homebrew formula
+TOOL_NAMES = {"7z": ("7zz", "7z", "7za"), "chdman": ("chdman",), "extract-xiso": ("extract-xiso",), "iso2zar": ("iso2zar",)}
 
 
 def find_tool(tool):
@@ -85,5 +86,5 @@ def install_tools_command():
     for tool in manual:
         print(ui.yellow(f"⚠️  {tool} has no Homebrew formula: {MANUAL_TOOLS[tool]}"))
     if not wanted and not manual:
-        print(ui.green("✅ 7z, chdman and extract-xiso are already installed"))
+        print(ui.green("✅ 7z, chdman, extract-xiso and iso2zar are already installed"))
     return code

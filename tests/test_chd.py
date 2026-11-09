@@ -18,6 +18,7 @@ CD = {"chd": {"mode": "cd"}}
 DVD = {"chd": {"mode": "dvd", "codec": "zlib"}}
 EXTRACT = {"chd": {"mode": "extract"}}
 XISO = {"chd": {"mode": "xiso", "m3u": False}}
+ZAR = {"chd": {"mode": "zar", "m3u": False}}
 XISO_TAG = b"\0" * 31337 + b"in!xiso!2.7.1"
 CUE = 'FILE "Game (Track 1).bin" BINARY\n  TRACK 01 MODE2/2352\nFILE "Game (Track 2).bin" BINARY\n'
 GDI = '3\n1 0 4 2352 track01.bin 0\n2 600 0 2352 "track 02.raw" 0\n3 45000 4 2352 track03.bin 0\n'
@@ -36,6 +37,12 @@ class FakeTools:
             for name in self.archive:
                 with open(os.path.join(out, name), "w") as f:
                     f.write(CUE if name.endswith(".cue") else "x")
+        elif cmd[0] == "iso2zar":
+            if "zar" in self.fail:
+                return "zar failed"
+            if "empty" not in self.fail:
+                with open(cmd[2], "wb") as f:
+                    f.write(b"zar")
         elif cmd[0] == "extract-xiso":
             mode = cmd[-2]
             if mode == "-r":  # like the real tool: the rewritten image is written into -d, -D deletes the original
@@ -54,7 +61,7 @@ class ChdTest(unittest.TestCase):
         self._tmp = tempfile.TemporaryDirectory()
         self.dir = os.path.realpath(self._tmp.name)
         self.addCleanup(self._tmp.cleanup)
-        self.tools = {"7z": "7z", "chdman": "chdman", "extract-xiso": "extract-xiso", "np": 1}
+        self.tools = {"7z": "7z", "chdman": "chdman", "extract-xiso": "extract-xiso", "iso2zar": "iso2zar", "np": 1}
 
     def touch(self, *names, text=""):
         for n in names:
@@ -322,6 +329,42 @@ class ChdTest(unittest.TestCase):
             self.assertEqual(chd.chd_archive(self.tools, XISO["chd"], os.path.join(self.dir, "Game.zip")), "Game.iso already exists")
         self.assertEqual(self.files(), ["Game.iso", "Game.zip"])
 
+    def test_zar_plan_takes_every_iso(self):
+        self.touch("xbox360/A.iso", "xbox360/B.zip", "xbox360/C.zar")
+        jobs = chd.plan_chd(self.dir, {"xbox360": ZAR})
+        self.assertEqual([(os.path.basename(p), owned is None) for _, _, p, owned in jobs], [("B.zip", True), ("A.iso", False)])
+
+    def test_loose_iso_becomes_a_zar_and_is_removed(self):
+        self.touch("Game.iso", text="redump")
+        with mock.patch.object(external, "run_tool", FakeTools()):
+            error = chd.chd_image(self.tools, ZAR["chd"], os.path.join(self.dir, "Game.iso"), [os.path.join(self.dir, "Game.iso")])
+        self.assertIsNone(error)
+        self.assertEqual(self.files(), ["Game.zar"])
+
+    def test_failed_or_empty_zar_keeps_the_iso(self):
+        for fail, message in (("zar", "zar failed"), ("empty", "iso2zar wrote nothing")):
+            self.touch("Game.iso", text="redump")
+            with mock.patch.object(external, "run_tool", FakeTools(fail=(fail,))):
+                error = chd.chd_image(self.tools, ZAR["chd"], os.path.join(self.dir, "Game.iso"), [os.path.join(self.dir, "Game.iso")])
+            self.assertEqual(error, message)
+            self.assertEqual(self.files(), ["Game.iso"])
+
+    def test_archive_of_an_iso_becomes_a_zar(self):
+        self.touch("Game.zip")
+        with mock.patch.object(external, "run_tool", FakeTools(archive=["Game.iso", "readme.txt"])):
+            error = chd.chd_archive(self.tools, ZAR["chd"], os.path.join(self.dir, "Game.zip"))
+        self.assertIsNone(error)
+        self.assertEqual(self.files(), ["Game.zar"])
+
+    def test_zar_archive_without_an_iso_or_onto_an_existing_zar_is_kept(self):
+        self.touch("Game.zip")
+        with mock.patch.object(external, "run_tool", FakeTools(archive=["readme.txt"])):
+            self.assertEqual(chd.chd_archive(self.tools, ZAR["chd"], os.path.join(self.dir, "Game.zip")), "no iso in the archive")
+        self.touch("Game.zar")
+        with mock.patch.object(external, "run_tool", FakeTools(archive=["Game.iso"])):
+            self.assertEqual(chd.chd_archive(self.tools, ZAR["chd"], os.path.join(self.dir, "Game.zip")), "Game.zar already exists")
+        self.assertEqual(self.files(), ["Game.zar", "Game.zip"])
+
     def test_shipped_chd_settings(self):
         systems = {s["bucket"]: s for s in store.repo_json("systems")}
         self.assertEqual(systems["psx"]["chd"], {"mode": "cd"})
@@ -329,7 +372,7 @@ class ChdTest(unittest.TestCase):
         self.assertEqual(systems["ps2"]["chd"], {"mode": "dvd", "codec": "zlib"})
         self.assertFalse(systems["3do"]["chd"]["m3u"])
         self.assertEqual(systems["xbox"]["chd"], {"mode": "xiso", "m3u": False})
-        self.assertEqual(systems["xbox360"]["chd"], {"mode": "extract", "m3u": False})
+        self.assertEqual(systems["xbox360"]["chd"], {"mode": "zar", "m3u": False})
         self.assertEqual(systems["pc98"]["chd"], {"mode": "extract", "m3u": False})
         self.assertNotIn("chd", systems["gba"])
         folders = chd.chd_folders(systems.values())

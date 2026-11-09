@@ -1,4 +1,4 @@
-"""CHD and xiso conversion and archive extraction."""
+"""CHD, xiso and zar conversion and archive extraction."""
 import filecmp
 import os
 import re
@@ -84,6 +84,8 @@ def plan_chd(root, folders, skipped=None):
         jobs += [(system, sysroot, f, None) for f in files if f.lower().endswith(external.ARCHIVE_EXTS)]
         if system["chd"]["mode"] == "xiso":
             jobs += [(system, sysroot, f, [f]) for f in files if f.lower().endswith(".iso") and not is_optimized_xiso(f)]
+        elif system["chd"]["mode"] == "zar":
+            jobs += [(system, sysroot, f, [f]) for f in files if f.lower().endswith(".iso")]
         elif system["chd"]["mode"] != "extract":
             jobs += [(system, sysroot, img, owned) for img, owned in disc_images(files, True, skipped)]
             if system["chd"].get("codec") and chdman:
@@ -175,6 +177,31 @@ def make_xiso(tools, image, out, report=None):
         shutil.rmtree(work, ignore_errors=True)
 
 
+def make_zar(tools, image, out, report=None):
+    """Compress image into the ZArchive out; None on success, else the error.
+
+    iso2zar writes a hidden .part file, renamed once the tool succeeds and the file is not empty,
+    so out is never half written. The tool has no verify option or progress output.
+    """
+    part = os.path.join(os.path.dirname(out), "." + os.path.basename(out) + ".part")
+    with _chd_locks[out]:
+        try:
+            if os.path.exists(part):  # left by a run that was killed
+                os.remove(part)
+            error = external.run_tool([tools["iso2zar"], image, part])
+            if not error and (not os.path.exists(part) or os.path.getsize(part) == 0):
+                error = "iso2zar wrote nothing"
+            if error:
+                if os.path.exists(part):
+                    os.remove(part)
+                return error
+            if report:
+                report(0.9)
+            os.replace(part, out)
+        except OSError as e:
+            return str(e)
+
+
 def plan_moves(pairs):
     """([(src, dst)] still to move, error): a dst that already holds a file of the same content is a leftover of an
     interrupted run and is skipped; a duplicate dst or one holding something else is an error."""
@@ -222,6 +249,20 @@ def chd_archive(tools, cfg, path, report=None):
                 error = make_xiso(tools, image, out, report)
                 if error:
                     return error
+        elif cfg["mode"] == "zar":
+            images = [f for f in extracted if f.lower().endswith(".iso")]
+            if not images:
+                return "no iso in the archive"
+            outs = [os.path.join(folder, os.path.splitext(os.path.basename(image))[0] + ".zar") for image in images]
+            if len({os.path.normcase(o).lower() for o in outs}) < len(outs):
+                return "two isos in the archive would make the same .zar"
+            for out in outs:
+                if os.path.lexists(out):
+                    return f"{os.path.basename(out)} already exists"
+            for image, out in zip(images, outs):
+                error = make_zar(tools, image, out, report)
+                if error:
+                    return error
         else:
             images = disc_images(extracted, strict=False)
             if not images:
@@ -240,9 +281,17 @@ def chd_archive(tools, cfg, path, report=None):
 
 def chd_image(tools, cfg, image, owned, report=None):
     """Convert one loose disc image and remove its files once the chd verifies; None on success, else the error.
-    An xiso system's iso is rewritten in place instead."""
+    An xiso system's iso is rewritten in place instead, and a zar system's iso becomes a .zar."""
     if cfg["mode"] == "xiso":
         return make_xiso(tools, image, image, report)
+    if cfg["mode"] == "zar":
+        out = os.path.splitext(image)[0] + ".zar"
+        if os.path.lexists(out):
+            return f"{os.path.basename(out)} already exists"
+        error = make_zar(tools, image, out, report)
+        if not error:
+            os.remove(image)
+        return error
     out = os.path.splitext(image)[0] + ".chd"
     error = make_chd(tools, cfg, image, out, report)
     if not error:
@@ -354,8 +403,8 @@ def chd_command(args):
         return 0
     tools = {}
     modes = {j[0]["chd"]["mode"] for j in jobs}
-    for tool, needed in (("7z", any(j[3] is None for j in jobs)), ("chdman", bool(modes - {"extract", "xiso"})),
-                         ("extract-xiso", "xiso" in modes)):
+    for tool, needed in (("7z", any(j[3] is None for j in jobs)), ("chdman", bool(modes - {"extract", "xiso", "zar"})),
+                         ("extract-xiso", "xiso" in modes), ("iso2zar", "zar" in modes)):
         tools[tool] = external.find_tool(tool)
         if needed and not tools[tool]:
             ui.fail(f"{tool} not found; " + (f"{external.MANUAL_TOOLS[tool]}" if tool in external.MANUAL_TOOLS else "run sync-roms --install-tools"), 3)
