@@ -1,6 +1,6 @@
 {
   "name": "Shmups",
-  "description": "Scrolling shooters in Touhou, Psikyo, Cave and Other categories; Other favours the Saturn, PlayStation and PC Engine.",
+  "description": "Scrolling shooters in Touhou, Psikyo, Cave, Toaplan, Raizing, Treasure, Irem, Taito and Konami categories; Other favours the Saturn, PlayStation and PC Engine.",
   "games": [
     {
       "title": "Touhou Reiiden - The Highly Responsive to Prayers",
@@ -249,22 +249,940 @@
       "bucket": "fbneo/progear.zip"
     },
     {
+      "title": "Hellfire",
+      "category": "Toaplan",
+      "system": "genesis",
+      "bucket": "genesis/Hellfire (USA).zip"
+    },
+    {
+      "title": "Fire Shark",
+      "category": "Toaplan",
+      "system": "genesis",
+      "bucket": "genesis/Fire Shark (USA).zip"
+    },
+    {
+      "title": "Zero Wing",
+      "category": "Toaplan",
+      "system": "genesis",
+      "bucket": "genesis/Zero Wing (Europe).zip"
+    },
+    {
+      "title": "Truxton",
+      "category": "Toaplan",
+      "system": "genesis",
+      "bucket": "genesis/Truxton (World).zip"
+    },
+    {
+      "title": "Truxton II",
+      "category": "Toaplan",
+      "system": "fbneo",
+      "bucket": "fbneo/truxton2.zip"
+    },
+    {
+      "title": "Batsugun",
+      "category": "Toaplan",
+      "system": "fbneo",
+      "bucket": "fbneo/batsugun.zip"
+    },
+    {
+      "title": "Flying Shark",
+      "category": "Toaplan",
+      "system": "fbneo",
+      "bucket": "fbneo/skyshark.zip"
+    },
+    {
+      "title": "Tiger-Heli",
+      "category": "Toaplan",
+      "system": "fbneo",
+      "bucket": "fbneo/tigerh.zip"
+    },
+    {
+      "title": "Twin Cobra",
+      "category": "Toaplan",
+      "system": "fbneo",
+      "bucket": "fbneo/twincobru.zip"
+    },
+    {
+      "title": "Twin Hawk",
+      "category": "Toaplan",
+      "system": "fbneo",
+      "bucket": "fbneo/twinhawku.zip"
+    },
+    {
+      "title": "Hellfire",
+      "category": "Toaplan",
+      "system": "fbneo",
+      "bucket": "fbneo/hellfire.zip"
+    },
+    {
+      "title": "Zero Wing",
+      "category": "Toaplan",
+      "system": "fbneo",
+      "bucket": "fbneo/zerowing.zip"
+    },
+    {
+      "title": "Fire Shark",
+      "category": "Toaplan",
+      "system": "fbneo",
+      "bucket": "fbneo/fireshrk.zip"
+    },
+    {
+      "title": "Out Zone",
+      "category": "Toaplan",
+      "system": "fbneo",
+      "bucket": "fbneo/outzone.zip"
+    },
+    {
+      "title": "Vimana",
+      "category": "Toaplan",
+      "system": "fbneo",
+      "bucket": "fbneo/vimana.zip"
+    },
+    {
+      "title": "Grind Stormer",
+      "category": "Toaplan",
+      "system": "fbneo",
+      "bucket": "fbneo/grindstm.zip"
+    },
+    {
+      "title": "Dogyuun",
+      "category": "Toaplan",
+      "system": "fbneo",
+      "bucket": "fbneo/dogyuun.zip"
+    },
+    {
+      "title": "FixEight",
+      "category": "Toaplan",
+      "system": "fbneo",
+      "bucket": "fbneo/fixeightu.zip"
+    },
+    {
+      "title": "Truxton",
+      "category": "Toaplan",
+      "system": "fbneo",
+      "bucket": "fbneo/truxton.zip"
+    },
+    {
+      "title": "Batsugun",
+      "category": "Toaplan",
+      "system": "saturn",
+      "bucket": "saturn/Batsugun (Japan).chd"
+    },
+    {
+      "title": "Slap Fight MD",
+      "category": "Toaplan",
+      "system": "genesis",
+      "bucket": "genesis/Slap Fight MD (Japan).zip"
+    },
+    {
+      "title": "Twin Cobra",
+      "category": "Toaplan",
+      "system": "genesis",
+      "bucket": "genesis/Twin Cobra - Desert Attack Helicopter (USA).zip"
+    },
+    {
+      "title": "Twin Hawk",
+      "category": "Toaplan",
+      "system": "genesis",
+      "bucket": "genesis/Twin Hawk (Japan, Europe) (En).zip"
+    },
+    {
+      "title": "Tatsujin",
+      "category": "Toaplan",
+      "system": "tg16",
+      "bucket": "tg16/Tatsujin (Japan).zip"
+    },
+    {
+      "title": "Hellfire S",
+      "category": "Toaplan",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Hellfire S - The Another Story (Japan).chd"
+    },
+    {
+      "title": "Zero Wing",
+      "category": "Toaplan",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Zero Wing (Japan).chd"
+    },
+    {
+      "title": "Sky Shark",
+      "category": "Toaplan",
+      "system": "nes",
+      "bucket": "nes/Sky Shark (USA).zip"
+    },
+    {
+      "title": "Tiger-Heli",
+      "category": "Toaplan",
+      "system": "nes",
+      "bucket": "nes/Tiger-Heli (USA).zip"
+    },
+    {
+      "title": "Twin Cobra",
+      "category": "Toaplan",
+      "system": "nes",
+      "bucket": "nes/Twin Cobra (USA).zip"
+    },
+    {
+      "title": "Armed Police Batrider",
+      "category": "Raizing",
+      "system": "fbneo",
+      "bucket": "fbneo/batrideru.zip"
+    },
+    {
+      "title": "Battle Garegga",
+      "category": "Raizing",
+      "system": "fbneo",
+      "bucket": "fbneo/bgaregga.zip"
+    },
+    {
+      "title": "Sorcer Striker",
+      "category": "Raizing",
+      "system": "fbneo",
+      "bucket": "fbneo/sstriker.zip"
+    },
+    {
+      "title": "Battle Bakraid",
+      "category": "Raizing",
+      "system": "fbneo",
+      "bucket": "fbneo/bbakraid.zip"
+    },
+    {
+      "title": "Kingdom Grandprix",
+      "category": "Raizing",
+      "system": "fbneo",
+      "bucket": "fbneo/kingdmgp.zip"
+    },
+    {
+      "title": "Dimahoo",
+      "category": "Raizing",
+      "system": "fbneo",
+      "bucket": "fbneo/dimahoou.zip"
+    },
+    {
+      "title": "Soukyugurentai",
+      "category": "Raizing",
+      "system": "mame",
+      "bucket": "mame/sokyugrt.zip"
+    },
+    {
+      "title": "Brave Blade",
+      "category": "Raizing",
+      "system": "mame",
+      "bucket": "mame/brvblade.zip"
+    },
+    {
+      "title": "Battle Garegga",
+      "category": "Raizing",
+      "system": "saturn",
+      "bucket": "saturn/Battle Garegga (Japan).chd"
+    },
+    {
+      "title": "Shippuu Mahou Daisakusen - Kingdom-Grandprix",
+      "category": "Raizing",
+      "system": "saturn",
+      "bucket": "saturn/Shippuu Mahou Daisakusen - Kingdom-Grandprix (Japan).chd"
+    },
+    {
+      "title": "Soukyuu Gurentai",
+      "category": "Raizing",
+      "system": "saturn",
+      "bucket": "saturn/Soukyuu Gurentai (Japan) (Rev A).chd"
+    },
+    {
+      "title": "Radiant Silvergun",
+      "category": "Treasure",
+      "system": "saturn",
+      "bucket": "saturn/Radiant Silvergun (Japan).chd"
+    },
+    {
+      "title": "Ikaruga",
+      "category": "Treasure",
+      "system": "gc",
+      "bucket": "gc/Ikaruga (USA).rvz"
+    },
+    {
+      "title": "Sin & Punishment: Star Successor",
+      "category": "Treasure",
+      "system": "wii",
+      "bucket": "wii/Sin & Punishment - Star Successor (USA).rvz"
+    },
+    {
+      "title": "Bangai-O",
+      "category": "Treasure",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Bangai-O (USA).chd"
+    },
+    {
+      "title": "Ikaruga",
+      "category": "Treasure",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Ikaruga (Japan).chd"
+    },
+    {
+      "title": "Bakuretsu Muteki Bangaioh",
+      "category": "Treasure",
+      "system": "n64",
+      "bucket": "n64/Bakuretsu Muteki Bangaioh (Japan).zip"
+    },
+    {
+      "title": "Sin & Punishment (Tsumi to Batsu)",
+      "category": "Treasure",
+      "system": "n64",
+      "bucket": "n64/Tsumi to Batsu - Hoshi no Keishousha (Japan).zip"
+    },
+    {
+      "title": "Bangai-O Spirits",
+      "category": "Treasure",
+      "system": "nds",
+      "bucket": "nds/Bangai-O Spirits (USA).zip"
+    },
+    {
+      "title": "R-Type Delta",
+      "category": "Irem",
+      "system": "psx",
+      "bucket": "psx/R-Type Delta (USA).chd"
+    },
+    {
+      "title": "Super R-Type",
+      "category": "Irem",
+      "system": "snes",
+      "bucket": "snes/Super R-Type (USA).zip"
+    },
+    {
+      "title": "R-Type",
+      "category": "Irem",
+      "system": "tg16",
+      "bucket": "tg16/R-Type (USA).zip"
+    },
+    {
+      "title": "R-Type DX",
+      "category": "Irem",
+      "system": "gbc",
+      "bucket": "gbc/R-Type DX (USA, Europe) (GB Compatible).zip"
+    },
+    {
+      "title": "R-Type III",
+      "category": "Irem",
+      "system": "gba",
+      "bucket": "gba/R-Type III - The Third Lightning (USA).zip"
+    },
+    {
+      "title": "R-Type",
+      "category": "Irem",
+      "system": "fbneo",
+      "bucket": "fbneo/rtypeu.zip"
+    },
+    {
+      "title": "R-Type II",
+      "category": "Irem",
+      "system": "fbneo",
+      "bucket": "fbneo/rtype2.zip"
+    },
+    {
+      "title": "Image Fight",
+      "category": "Irem",
+      "system": "fbneo",
+      "bucket": "fbneo/imgfight.zip"
+    },
+    {
+      "title": "R-Type Final",
+      "category": "Irem",
+      "system": "ps2",
+      "bucket": "ps2/R-Type Final (USA).chd"
+    },
+    {
+      "title": "R-Type",
+      "category": "Irem",
+      "system": "gb",
+      "bucket": "gb/R-Type (USA, Europe).zip"
+    },
+    {
+      "title": "R-Type III",
+      "category": "Irem",
+      "system": "snes",
+      "bucket": "snes/R-Type III (USA).zip"
+    },
+    {
+      "title": "R-Type",
+      "category": "Irem",
+      "system": "mastersystem",
+      "bucket": "mastersystem/R-Type (World).zip"
+    },
+    {
+      "title": "R-Types",
+      "category": "Irem",
+      "system": "psx",
+      "bucket": "psx/R-Types (USA).chd"
+    },
+    {
+      "title": "R-Type Leo",
+      "category": "Irem",
+      "system": "fbneo",
+      "bucket": "fbneo/rtypeleo.zip"
+    },
+    {
+      "title": "X Multiply",
+      "category": "Irem",
+      "system": "fbneo",
+      "bucket": "fbneo/xmultipl.zip"
+    },
+    {
+      "title": "In The Hunt",
+      "category": "Irem",
+      "system": "fbneo",
+      "bucket": "fbneo/inthuntu.zip"
+    },
+    {
+      "title": "Air Duel",
+      "category": "Irem",
+      "system": "fbneo",
+      "bucket": "fbneo/airduel.zip"
+    },
+    {
+      "title": "Dragon Breed",
+      "category": "Irem",
+      "system": "fbneo",
+      "bucket": "fbneo/dbreed.zip"
+    },
+    {
+      "title": "Battle Chopper",
+      "category": "Irem",
+      "system": "fbneo",
+      "bucket": "fbneo/bchopper.zip"
+    },
+    {
+      "title": "Moon Patrol",
+      "category": "Irem",
+      "system": "fbneo",
+      "bucket": "fbneo/mpatrol.zip"
+    },
+    {
+      "title": "In the Hunt",
+      "category": "Irem",
+      "system": "saturn",
+      "bucket": "saturn/In the Hunt (USA).chd"
+    },
+    {
+      "title": "In the Hunt",
+      "category": "Irem",
+      "system": "psx",
+      "bucket": "psx/In the Hunt (USA).chd"
+    },
+    {
+      "title": "R-Type II",
+      "category": "Irem",
+      "system": "gb",
+      "bucket": "gb/R-Type II (Europe).zip"
+    },
+    {
+      "title": "R-Type Complete CD",
+      "category": "Irem",
+      "system": "tg-cd",
+      "bucket": "tg-cd/R-Type Complete CD (Japan).chd"
+    },
+    {
       "title": "Darius Gaiden",
-      "category": "Other",
+      "category": "Taito",
       "system": "saturn",
       "bucket": "saturn/Darius Gaiden (USA).chd"
     },
     {
       "title": "Galactic Attack (Layer Section)",
-      "category": "Other",
+      "category": "Taito",
       "system": "saturn",
       "bucket": "saturn/Galactic Attack (USA).chd"
     },
     {
-      "title": "Radiant Silvergun",
-      "category": "Other",
+      "title": "G. Darius",
+      "category": "Taito",
+      "system": "psx",
+      "bucket": "psx/G. Darius (USA).chd"
+    },
+    {
+      "title": "Darius Twin",
+      "category": "Taito",
+      "system": "snes",
+      "bucket": "snes/Darius Twin (USA).zip"
+    },
+    {
+      "title": "Darius",
+      "category": "Taito",
+      "system": "fbneo",
+      "bucket": "fbneo/dariusu.zip"
+    },
+    {
+      "title": "Darius II",
+      "category": "Taito",
+      "system": "fbneo",
+      "bucket": "fbneo/sagaia.zip"
+    },
+    {
+      "title": "Space Invaders Extreme",
+      "category": "Taito",
+      "system": "nds",
+      "bucket": "nds/Space Invaders Extreme (USA) (En,Ja,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Darius",
+      "category": "Taito",
+      "system": "genesis",
+      "bucket": "genesis/Darius (World) (Genesis Mini, Mega Drive Mini).zip"
+    },
+    {
+      "title": "Space Invaders Extreme (En,Fr,De,Es,It)",
+      "category": "Taito",
+      "system": "psp",
+      "bucket": "psp/Space Invaders Extreme (USA) (En,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "Dariusburst (En,Ja)",
+      "category": "Taito",
+      "system": "psp",
+      "bucket": "psp/Dariusburst (Japan) (En,Ja).chd"
+    },
+    {
+      "title": "RayStorm",
+      "category": "Taito",
+      "system": "psx",
+      "bucket": "psx/RayStorm (USA).chd"
+    },
+    {
+      "title": "RayCrisis",
+      "category": "Taito",
+      "system": "psx",
+      "bucket": "psx/RayCrisis - Series Termination (USA).chd"
+    },
+    {
+      "title": "Darius Gaiden - Silver Hawk",
+      "category": "Taito",
+      "system": "fbneo",
+      "bucket": "fbneo/dariusg.zip"
+    },
+    {
+      "title": "Rayforce (Gunlock)",
+      "category": "Taito",
+      "system": "fbneo",
+      "bucket": "fbneo/gunlock.zip"
+    },
+    {
+      "title": "Metal Black",
+      "category": "Taito",
+      "system": "fbneo",
+      "bucket": "fbneo/metalb.zip"
+    },
+    {
+      "title": "Gekirindan",
+      "category": "Taito",
+      "system": "fbneo",
+      "bucket": "fbneo/gekiridn.zip"
+    },
+    {
+      "title": "Night Striker",
+      "category": "Taito",
+      "system": "fbneo",
+      "bucket": "fbneo/nightstru.zip"
+    },
+    {
+      "title": "Ashura Blaster",
+      "category": "Taito",
+      "system": "fbneo",
+      "bucket": "fbneo/ashurau.zip"
+    },
+    {
+      "title": "Master of Weapon",
+      "category": "Taito",
+      "system": "fbneo",
+      "bucket": "fbneo/masterwu.zip"
+    },
+    {
+      "title": "G-Darius Ver.2",
+      "category": "Taito",
+      "system": "mame",
+      "bucket": "mame/gdarius2.zip"
+    },
+    {
+      "title": "RayStorm",
+      "category": "Taito",
+      "system": "mame",
+      "bucket": "mame/raystorm.zip"
+    },
+    {
+      "title": "Darius II",
+      "category": "Taito",
       "system": "saturn",
-      "bucket": "saturn/Radiant Silvergun (Japan).chd"
+      "bucket": "saturn/Darius II (Europe).chd"
+    },
+    {
+      "title": "Metal Black",
+      "category": "Taito",
+      "system": "saturn",
+      "bucket": "saturn/Metal Black (Japan) (3M).chd"
+    },
+    {
+      "title": "Layer Section II",
+      "category": "Taito",
+      "system": "saturn",
+      "bucket": "saturn/Layer Section II (Japan).chd"
+    },
+    {
+      "title": "Night Striker S",
+      "category": "Taito",
+      "system": "saturn",
+      "bucket": "saturn/Night Striker S (Japan).chd"
+    },
+    {
+      "title": "Gun Frontier",
+      "category": "Taito",
+      "system": "saturn",
+      "bucket": "saturn/Arcade Gears Vol. 2 - Gun Frontier (Japan).chd"
+    },
+    {
+      "title": "Night Striker",
+      "category": "Taito",
+      "system": "segacd",
+      "bucket": "segacd/Night Striker (Japan, Korea).chd"
+    },
+    {
+      "title": "Darius Alpha",
+      "category": "Taito",
+      "system": "tg16",
+      "bucket": "tg16/Darius Alpha (World) (SG Enhanced) (Darius Cozmic Collection).zip"
+    },
+    {
+      "title": "Darius Plus",
+      "category": "Taito",
+      "system": "tg16",
+      "bucket": "tg16/Darius Plus (Japan) (SG Enhanced).zip"
+    },
+    {
+      "title": "Super Darius",
+      "category": "Taito",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Super Darius (Japan).chd"
+    },
+    {
+      "title": "Super Darius II",
+      "category": "Taito",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Super Darius II (Japan).chd"
+    },
+    {
+      "title": "Darius R",
+      "category": "Taito",
+      "system": "gba",
+      "bucket": "gba/Darius R (Japan) (En).zip"
+    },
+    {
+      "title": "Axelay",
+      "category": "Konami",
+      "system": "snes",
+      "bucket": "snes/Axelay (USA).zip"
+    },
+    {
+      "title": "Gradius III",
+      "category": "Konami",
+      "system": "snes",
+      "bucket": "snes/Gradius III (USA).zip"
+    },
+    {
+      "title": "Gradius",
+      "category": "Konami",
+      "system": "nes",
+      "bucket": "nes/Gradius (USA).zip"
+    },
+    {
+      "title": "Life Force",
+      "category": "Konami",
+      "system": "nes",
+      "bucket": "nes/Life Force (USA).zip"
+    },
+    {
+      "title": "Nemesis",
+      "category": "Konami",
+      "system": "gb",
+      "bucket": "gb/Nemesis (USA).zip"
+    },
+    {
+      "title": "Gradius Galaxies",
+      "category": "Konami",
+      "system": "gba",
+      "bucket": "gba/Gradius Galaxies (USA).zip"
+    },
+    {
+      "title": "Gradius",
+      "category": "Konami",
+      "system": "fbneo",
+      "bucket": "fbneo/nemesisuk.zip"
+    },
+    {
+      "title": "Vulcan Venture (Gradius II)",
+      "category": "Konami",
+      "system": "fbneo",
+      "bucket": "fbneo/vulcan.zip"
+    },
+    {
+      "title": "Gradius III",
+      "category": "Konami",
+      "system": "fbneo",
+      "bucket": "fbneo/gradius3.zip"
+    },
+    {
+      "title": "Life Force",
+      "category": "Konami",
+      "system": "fbneo",
+      "bucket": "fbneo/lifefrce.zip"
+    },
+    {
+      "title": "TwinBee",
+      "category": "Konami",
+      "system": "fbneo",
+      "bucket": "fbneo/twinbee.zip"
+    },
+    {
+      "title": "Xexex",
+      "category": "Konami",
+      "system": "fbneo",
+      "bucket": "fbneo/xexex.zip"
+    },
+    {
+      "title": "Gradius III and IV",
+      "category": "Konami",
+      "system": "ps2",
+      "bucket": "ps2/Gradius III and IV (USA).chd"
+    },
+    {
+      "title": "Gradius V",
+      "category": "Konami",
+      "system": "ps2",
+      "bucket": "ps2/Gradius V (USA).chd"
+    },
+    {
+      "title": "Gradius - The Interstellar Assault",
+      "category": "Konami",
+      "system": "gb",
+      "bucket": "gb/Gradius - The Interstellar Assault (USA).zip"
+    },
+    {
+      "title": "Gradius Collection",
+      "category": "Konami",
+      "system": "psp",
+      "bucket": "psp/Gradius Collection (USA).chd"
+    },
+    {
+      "title": "Parodius Portable",
+      "category": "Konami",
+      "system": "psp",
+      "bucket": "psp/Parodius Portable (Japan).chd"
+    },
+    {
+      "title": "TwinBee Portable",
+      "category": "Konami",
+      "system": "psp",
+      "bucket": "psp/TwinBee Portable (Japan).chd"
+    },
+    {
+      "title": "Thunder Cross",
+      "category": "Konami",
+      "system": "fbneo",
+      "bucket": "fbneo/thunderx.zip"
+    },
+    {
+      "title": "Thunder Cross II",
+      "category": "Konami",
+      "system": "fbneo",
+      "bucket": "fbneo/thndrx2.zip"
+    },
+    {
+      "title": "Parodius Da!",
+      "category": "Konami",
+      "system": "fbneo",
+      "bucket": "fbneo/parodius.zip"
+    },
+    {
+      "title": "Scramble",
+      "category": "Konami",
+      "system": "fbneo",
+      "bucket": "fbneo/scramble.zip"
+    },
+    {
+      "title": "Super Cobra",
+      "category": "Konami",
+      "system": "fbneo",
+      "bucket": "fbneo/scobra.zip"
+    },
+    {
+      "title": "Time Pilot",
+      "category": "Konami",
+      "system": "fbneo",
+      "bucket": "fbneo/timeplt.zip"
+    },
+    {
+      "title": "Time Pilot '84",
+      "category": "Konami",
+      "system": "fbneo",
+      "bucket": "fbneo/tp84.zip"
+    },
+    {
+      "title": "Gyruss",
+      "category": "Konami",
+      "system": "fbneo",
+      "bucket": "fbneo/gyruss.zip"
+    },
+    {
+      "title": "Juno First",
+      "category": "Konami",
+      "system": "fbneo",
+      "bucket": "fbneo/junofrst.zip"
+    },
+    {
+      "title": "Sexy Parodius",
+      "category": "Konami",
+      "system": "mame",
+      "bucket": "mame/sexyparo.zip"
+    },
+    {
+      "title": "Gokujyou Parodius",
+      "category": "Konami",
+      "system": "mame",
+      "bucket": "mame/gokuparo.zip"
+    },
+    {
+      "title": "Gradius Deluxe Pack",
+      "category": "Konami",
+      "system": "saturn",
+      "bucket": "saturn/Gradius Deluxe Pack (Japan).chd"
+    },
+    {
+      "title": "Salamander Deluxe Pack Plus",
+      "category": "Konami",
+      "system": "saturn",
+      "bucket": "saturn/Salamander Deluxe Pack Plus (Japan).chd"
+    },
+    {
+      "title": "Detana Twinbee Yahoo! Deluxe Pack",
+      "category": "Konami",
+      "system": "saturn",
+      "bucket": "saturn/Detana Twinbee Yahoo! Deluxe Pack (Japan) (3M).chd"
+    },
+    {
+      "title": "Sexy Parodius",
+      "category": "Konami",
+      "system": "saturn",
+      "bucket": "saturn/Sexy Parodius (Japan).chd"
+    },
+    {
+      "title": "Jikkyou Oshaberi Parodius",
+      "category": "Konami",
+      "system": "saturn",
+      "bucket": "saturn/Jikkyou Oshaberi Parodius - Forever with Me (Japan).chd"
+    },
+    {
+      "title": "Parodius",
+      "category": "Konami",
+      "system": "saturn",
+      "bucket": "saturn/Parodius (Europe).chd"
+    },
+    {
+      "title": "Gokujou Parodius",
+      "category": "Konami",
+      "system": "snes",
+      "bucket": "snes/Gokujou Parodius (Japan).zip"
+    },
+    {
+      "title": "Jikkyou Oshaberi Parodius",
+      "category": "Konami",
+      "system": "snes",
+      "bucket": "snes/Jikkyou Oshaberi Parodius (Japan).zip"
+    },
+    {
+      "title": "Parodius",
+      "category": "Konami",
+      "system": "snes",
+      "bucket": "snes/Parodius (Europe).zip"
+    },
+    {
+      "title": "Pop'n TwinBee",
+      "category": "Konami",
+      "system": "snes",
+      "bucket": "snes/Pop'n TwinBee (Europe).zip"
+    },
+    {
+      "title": "Gradius",
+      "category": "Konami",
+      "system": "tg16",
+      "bucket": "tg16/Gradius (World) (Wii U Virtual Console).zip"
+    },
+    {
+      "title": "Salamander",
+      "category": "Konami",
+      "system": "tg16",
+      "bucket": "tg16/Salamander (World) (Wii U Virtual Console).zip"
+    },
+    {
+      "title": "Detana!! TwinBee",
+      "category": "Konami",
+      "system": "tg16",
+      "bucket": "tg16/Detana!! TwinBee (Japan).zip"
+    },
+    {
+      "title": "Parodius Da!",
+      "category": "Konami",
+      "system": "tg16",
+      "bucket": "tg16/Parodius Da! - Shinwa kara Owarai e (Japan).zip"
+    },
+    {
+      "title": "Gradius II - Gofer no Yabou",
+      "category": "Konami",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Gradius II - Gofer no Yabou (Japan).chd"
+    },
+    {
+      "title": "Gradius II",
+      "category": "Konami",
+      "system": "nes",
+      "bucket": "nes/Gradius II (Japan) (En).zip"
+    },
+    {
+      "title": "Crisis Force",
+      "category": "Konami",
+      "system": "nes",
+      "bucket": "nes/Crisis Force (Japan).zip"
+    },
+    {
+      "title": "Parodius",
+      "category": "Konami",
+      "system": "nes",
+      "bucket": "nes/Parodius (Europe).zip"
+    },
+    {
+      "title": "TwinBee",
+      "category": "Konami",
+      "system": "nes",
+      "bucket": "nes/TwinBee (Japan).zip"
+    },
+    {
+      "title": "Stinger",
+      "category": "Konami",
+      "system": "nes",
+      "bucket": "nes/Stinger (USA).zip"
+    },
+    {
+      "title": "TwinBee 3 - Poko Poko Daimaou",
+      "category": "Konami",
+      "system": "nes",
+      "bucket": "nes/TwinBee 3 - Poko Poko Daimaou (Japan).zip"
+    },
+    {
+      "title": "Parodius",
+      "category": "Konami",
+      "system": "gb",
+      "bucket": "gb/Parodius (Europe).zip"
+    },
+    {
+      "title": "Pop'n TwinBee",
+      "category": "Konami",
+      "system": "gb",
+      "bucket": "gb/Pop'n TwinBee (Europe).zip"
     },
     {
       "title": "Panzer Dragoon",
@@ -291,18 +1209,6 @@
       "bucket": "psx/Einhaender (USA).chd"
     },
     {
-      "title": "R-Type Delta",
-      "category": "Other",
-      "system": "psx",
-      "bucket": "psx/R-Type Delta (USA).chd"
-    },
-    {
-      "title": "G. Darius",
-      "category": "Other",
-      "system": "psx",
-      "bucket": "psx/G. Darius (USA).chd"
-    },
-    {
       "title": "Xevious 3D-G+",
       "category": "Other",
       "system": "psx",
@@ -315,22 +1221,10 @@
       "bucket": "genesis/Thunder Force III (Japan, USA) (En).zip"
     },
     {
-      "title": "Hellfire",
-      "category": "Other",
-      "system": "genesis",
-      "bucket": "genesis/Hellfire (USA).zip"
-    },
-    {
       "title": "MUSHA",
       "category": "Other",
       "system": "genesis",
       "bucket": "genesis/MUSHA - Metallic Uniframe Super Hybrid Armor (USA).zip"
-    },
-    {
-      "title": "Fire Shark",
-      "category": "Other",
-      "system": "genesis",
-      "bucket": "genesis/Fire Shark (USA).zip"
     },
     {
       "title": "Air Buster",
@@ -339,52 +1233,10 @@
       "bucket": "genesis/Air Buster (USA).zip"
     },
     {
-      "title": "Zero Wing",
-      "category": "Other",
-      "system": "genesis",
-      "bucket": "genesis/Zero Wing (Europe).zip"
-    },
-    {
-      "title": "Truxton",
-      "category": "Other",
-      "system": "genesis",
-      "bucket": "genesis/Truxton (World).zip"
-    },
-    {
       "title": "Raiden Trad",
       "category": "Other",
       "system": "genesis",
       "bucket": "genesis/Raiden Trad (Japan, USA) (En).zip"
-    },
-    {
-      "title": "Axelay",
-      "category": "Other",
-      "system": "snes",
-      "bucket": "snes/Axelay (USA).zip"
-    },
-    {
-      "title": "Gradius III",
-      "category": "Other",
-      "system": "snes",
-      "bucket": "snes/Gradius III (USA).zip"
-    },
-    {
-      "title": "Super R-Type",
-      "category": "Other",
-      "system": "snes",
-      "bucket": "snes/Super R-Type (USA).zip"
-    },
-    {
-      "title": "Darius Twin",
-      "category": "Other",
-      "system": "snes",
-      "bucket": "snes/Darius Twin (USA).zip"
-    },
-    {
-      "title": "R-Type",
-      "category": "Other",
-      "system": "tg16",
-      "bucket": "tg16/R-Type (USA).zip"
     },
     {
       "title": "Blazing Lazers",
@@ -441,42 +1293,6 @@
       "bucket": "segacd/Silpheed (USA).chd"
     },
     {
-      "title": "Gradius",
-      "category": "Other",
-      "system": "nes",
-      "bucket": "nes/Gradius (USA).zip"
-    },
-    {
-      "title": "Life Force",
-      "category": "Other",
-      "system": "nes",
-      "bucket": "nes/Life Force (USA).zip"
-    },
-    {
-      "title": "Nemesis",
-      "category": "Other",
-      "system": "gb",
-      "bucket": "gb/Nemesis (USA).zip"
-    },
-    {
-      "title": "R-Type DX",
-      "category": "Other",
-      "system": "gbc",
-      "bucket": "gbc/R-Type DX (USA, Europe) (GB Compatible).zip"
-    },
-    {
-      "title": "Gradius Galaxies",
-      "category": "Other",
-      "system": "gba",
-      "bucket": "gba/Gradius Galaxies (USA).zip"
-    },
-    {
-      "title": "R-Type III",
-      "category": "Other",
-      "system": "gba",
-      "bucket": "gba/R-Type III - The Third Lightning (USA).zip"
-    },
-    {
       "title": "Iridion 3D",
       "category": "Other",
       "system": "gba",
@@ -507,40 +1323,10 @@
       "bucket": "fbneo/1944u.zip"
     },
     {
-      "title": "R-Type",
-      "category": "Other",
-      "system": "fbneo",
-      "bucket": "fbneo/rtypeu.zip"
-    },
-    {
-      "title": "R-Type II",
-      "category": "Other",
-      "system": "fbneo",
-      "bucket": "fbneo/rtype2.zip"
-    },
-    {
-      "title": "Gradius",
-      "category": "Other",
-      "system": "fbneo",
-      "bucket": "fbneo/nemesisuk.zip"
-    },
-    {
-      "title": "Armed Police Batrider",
-      "category": "Other",
-      "system": "fbneo",
-      "bucket": "fbneo/batrideru.zip"
-    },
-    {
       "title": "Blazing Star",
       "category": "Other",
       "system": "fbneo",
       "bucket": "fbneo/blazstar.zip"
-    },
-    {
-      "title": "Battle Garegga",
-      "category": "Other",
-      "system": "fbneo",
-      "bucket": "fbneo/bgaregga.zip"
     },
     {
       "title": "Raiden",
@@ -561,78 +1347,6 @@
       "bucket": "fbneo/raidendxu.zip"
     },
     {
-      "title": "Vulcan Venture (Gradius II)",
-      "category": "Other",
-      "system": "fbneo",
-      "bucket": "fbneo/vulcan.zip"
-    },
-    {
-      "title": "Gradius III",
-      "category": "Other",
-      "system": "fbneo",
-      "bucket": "fbneo/gradius3.zip"
-    },
-    {
-      "title": "Life Force",
-      "category": "Other",
-      "system": "fbneo",
-      "bucket": "fbneo/lifefrce.zip"
-    },
-    {
-      "title": "TwinBee",
-      "category": "Other",
-      "system": "fbneo",
-      "bucket": "fbneo/twinbee.zip"
-    },
-    {
-      "title": "Xexex",
-      "category": "Other",
-      "system": "fbneo",
-      "bucket": "fbneo/xexex.zip"
-    },
-    {
-      "title": "Darius",
-      "category": "Other",
-      "system": "fbneo",
-      "bucket": "fbneo/dariusu.zip"
-    },
-    {
-      "title": "Darius II",
-      "category": "Other",
-      "system": "fbneo",
-      "bucket": "fbneo/sagaia.zip"
-    },
-    {
-      "title": "Image Fight",
-      "category": "Other",
-      "system": "fbneo",
-      "bucket": "fbneo/imgfight.zip"
-    },
-    {
-      "title": "Sorcer Striker",
-      "category": "Other",
-      "system": "fbneo",
-      "bucket": "fbneo/sstriker.zip"
-    },
-    {
-      "title": "Truxton II",
-      "category": "Other",
-      "system": "fbneo",
-      "bucket": "fbneo/truxton2.zip"
-    },
-    {
-      "title": "Batsugun",
-      "category": "Other",
-      "system": "fbneo",
-      "bucket": "fbneo/batsugun.zip"
-    },
-    {
-      "title": "Flying Shark",
-      "category": "Other",
-      "system": "fbneo",
-      "bucket": "fbneo/skyshark.zip"
-    },
-    {
       "title": "19XX",
       "category": "Other",
       "system": "fbneo",
@@ -643,24 +1357,6 @@
       "category": "Other",
       "system": "fbneo",
       "bucket": "fbneo/mmatrix.zip"
-    },
-    {
-      "title": "Gradius III and IV",
-      "category": "Other",
-      "system": "ps2",
-      "bucket": "ps2/Gradius III and IV (USA).chd"
-    },
-    {
-      "title": "Gradius V",
-      "category": "Other",
-      "system": "ps2",
-      "bucket": "ps2/Gradius V (USA).chd"
-    },
-    {
-      "title": "R-Type Final",
-      "category": "Other",
-      "system": "ps2",
-      "bucket": "ps2/R-Type Final (USA).chd"
     },
     {
       "title": "Raiden III",
@@ -681,12 +1377,6 @@
       "bucket": "ps2/Mobile Light Force 2 (USA).chd"
     },
     {
-      "title": "Ikaruga",
-      "category": "Other",
-      "system": "gc",
-      "bucket": "gc/Ikaruga (USA).rvz"
-    },
-    {
       "title": "Chaos Field",
       "category": "Other",
       "system": "gc",
@@ -703,24 +1393,6 @@
       "category": "Other",
       "system": "nds",
       "bucket": "nds/Geometry Wars - Galaxies (USA).zip"
-    },
-    {
-      "title": "Space Invaders Extreme",
-      "category": "Other",
-      "system": "nds",
-      "bucket": "nds/Space Invaders Extreme (USA) (En,Ja,Fr,De,Es,It).zip"
-    },
-    {
-      "title": "Gradius - The Interstellar Assault",
-      "category": "Other",
-      "system": "gb",
-      "bucket": "gb/Gradius - The Interstellar Assault (USA).zip"
-    },
-    {
-      "title": "R-Type",
-      "category": "Other",
-      "system": "gb",
-      "bucket": "gb/R-Type (USA, Europe).zip"
     },
     {
       "title": "1943 - The Battle of Midway",
@@ -789,12 +1461,6 @@
       "bucket": "genesis/Thunder Force II (USA, Europe).zip"
     },
     {
-      "title": "Darius",
-      "category": "Other",
-      "system": "genesis",
-      "bucket": "genesis/Darius (World) (Genesis Mini, Mega Drive Mini).zip"
-    },
-    {
       "title": "Fantasy Zone",
       "category": "Other",
       "system": "tg16",
@@ -817,12 +1483,6 @@
       "category": "Other",
       "system": "snes",
       "bucket": "snes/Aero Fighters (USA).zip"
-    },
-    {
-      "title": "R-Type III",
-      "category": "Other",
-      "system": "snes",
-      "bucket": "snes/R-Type III (USA).zip"
     },
     {
       "title": "Raiden Trad",
@@ -867,12 +1527,6 @@
       "bucket": "sega32x/After Burner Complete (Japan, USA) (En).zip"
     },
     {
-      "title": "R-Type",
-      "category": "Other",
-      "system": "mastersystem",
-      "bucket": "mastersystem/R-Type (World).zip"
-    },
-    {
       "title": "Space Harrier (Japan, USA)",
       "category": "Other",
       "system": "mastersystem",
@@ -897,28 +1551,10 @@
       "bucket": "atari7800/Xevious (USA).zip"
     },
     {
-      "title": "Gradius Collection",
-      "category": "Other",
-      "system": "psp",
-      "bucket": "psp/Gradius Collection (USA).chd"
-    },
-    {
-      "title": "Space Invaders Extreme (En,Fr,De,Es,It)",
-      "category": "Other",
-      "system": "psp",
-      "bucket": "psp/Space Invaders Extreme (USA) (En,Fr,De,Es,It).chd"
-    },
-    {
       "title": "Every Extend Extra",
       "category": "Other",
       "system": "psp",
       "bucket": "psp/Every Extend Extra (USA).chd"
-    },
-    {
-      "title": "Dariusburst (En,Ja)",
-      "category": "Other",
-      "system": "psp",
-      "bucket": "psp/Dariusburst (Japan) (En,Ja).chd"
     },
     {
       "title": "Sengoku Cannon - Sengoku Ace Episode III (En,Ja)",
@@ -933,34 +1569,10 @@
       "bucket": "psp/Star Soldier (Japan) (En,Ja).chd"
     },
     {
-      "title": "Parodius Portable",
-      "category": "Other",
-      "system": "psp",
-      "bucket": "psp/Parodius Portable (Japan).chd"
-    },
-    {
-      "title": "TwinBee Portable",
-      "category": "Other",
-      "system": "psp",
-      "bucket": "psp/TwinBee Portable (Japan).chd"
-    },
-    {
       "title": "The Raiden Project",
       "category": "Other",
       "system": "psx",
       "bucket": "psx/Raiden Project, The (USA).chd"
-    },
-    {
-      "title": "RayStorm",
-      "category": "Other",
-      "system": "psx",
-      "bucket": "psx/RayStorm (USA).chd"
-    },
-    {
-      "title": "RayCrisis",
-      "category": "Other",
-      "system": "psx",
-      "bucket": "psx/RayCrisis - Series Termination (USA).chd"
     },
     {
       "title": "Gekioh: Shooting King",
@@ -979,12 +1591,6 @@
       "category": "Other",
       "system": "psx",
       "bucket": "psx/Omega Boost (USA).chd"
-    },
-    {
-      "title": "R-Types",
-      "category": "Other",
-      "system": "psx",
-      "bucket": "psx/R-Types (USA).chd"
     },
     {
       "title": "Sol Divide",
@@ -1033,12 +1639,6 @@
       "category": "Other",
       "system": "ps2",
       "bucket": "ps2/Rez (USA) (En,Fr,De,Es,It).chd"
-    },
-    {
-      "title": "Sin & Punishment: Star Successor",
-      "category": "Other",
-      "system": "wii",
-      "bucket": "wii/Sin & Punishment - Star Successor (USA).rvz"
     },
     {
       "title": "Rez",
@@ -1125,12 +1725,6 @@
       "bucket": "dreamcast/Rainbow Cotton (Japan).chd"
     },
     {
-      "title": "Bangai-O",
-      "category": "Other",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Bangai-O (USA).chd"
-    },
-    {
       "title": "Cannon Spike",
       "category": "Other",
       "system": "dreamcast",
@@ -1147,12 +1741,6 @@
       "category": "Other",
       "system": "fbneo",
       "bucket": "fbneo/uopoko.zip"
-    },
-    {
-      "title": "Battle Bakraid",
-      "category": "Other",
-      "system": "fbneo",
-      "bucket": "fbneo/bbakraid.zip"
     },
     {
       "title": "Air Gallet",
