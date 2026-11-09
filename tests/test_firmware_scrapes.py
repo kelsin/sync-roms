@@ -136,6 +136,25 @@ class StaleMediaTest(unittest.TestCase):
             stale = scrape_plan.stale_media(layout, systems, roms_dir, os.path.join(base, "ES-DE"), base)
             return sorted(os.path.relpath(p, base) for p in stale)
 
+    def run_onion(self, layout, files):
+        with tempfile.TemporaryDirectory() as base:
+            for rel in files + ["Roms/GBA/Game.zip"]:
+                touch(os.path.join(base, rel))
+            system = {"bucket": "gba", "folders": {layout: "GBA"}}
+            stale = scrape_plan.stale_media(layout, [system], os.path.join(base, "Roms"), os.path.join(base, "ES-DE"), base)
+            return sorted(os.path.relpath(p, base) for p in stale)
+
+    def test_allium_removes_onions_gamelist_once_its_own_exists(self):
+        self.assertEqual(self.run_onion("allium", ["Roms/GBA/gamelist.xml", "Roms/GBA/miyoogamelist.xml"]),
+                         ["Roms/GBA/miyoogamelist.xml"])
+
+    def test_allium_keeps_onions_gamelist_until_its_own_exists(self):
+        self.assertEqual(self.run_onion("allium", ["Roms/GBA/miyoogamelist.xml"]), [])
+
+    def test_onion_removes_alliums_gamelist_once_its_own_exists(self):
+        self.assertEqual(self.run_onion("onion", ["Roms/GBA/gamelist.xml", "Roms/GBA/miyoogamelist.xml"]),
+                         ["Roms/GBA/gamelist.xml"])
+
     CAT = os.path.join("MUOS", "info", "catalogue")
 
     def test_muos_removes_art_for_roms_that_are_gone(self):

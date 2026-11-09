@@ -550,4 +550,9 @@ def stale_media(layout_name, systems, roms_dir, es_dir, base=None):
             base = os.path.join(rom_dir, "Imgs")
             stale += [full for rel, full in walk_files(base) if os.path.splitext(os.path.basename(rel))[0] not in stems] \
                 if os.path.isdir(base) else []
+            # the other Onion-family firmware's gamelist, once this layout's own has replaced it
+            other = GAMELIST_FILES["allium" if layout_name == "onion" else "onion"]
+            if os.path.exists(os.path.join(rom_dir, GAMELIST_FILES[layout_name])) \
+                    and os.path.exists(os.path.join(rom_dir, other)):
+                stale.append(os.path.join(rom_dir, other))
     return stale
