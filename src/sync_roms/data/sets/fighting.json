@@ -5,17 +5,17 @@
     {
       "title": "Street Fighter II: The World Warrior",
       "system": "fbneo",
-      "bucket": "fbneo/sf2.zip"
+      "bucket": "fbneo/sf2um.zip"
     },
     {
       "title": "Super Street Fighter II Turbo",
       "system": "fbneo",
-      "bucket": "fbneo/ssf2t.zip"
+      "bucket": "fbneo/ssf2tu.zip"
     },
     {
       "title": "Street Fighter Alpha 3",
       "system": "fbneo",
-      "bucket": "fbneo/sfa3.zip"
+      "bucket": "fbneo/sfa3u.zip"
     },
     {
       "title": "Mortal Kombat II",
@@ -30,7 +30,7 @@
     {
       "title": "X-Men vs. Street Fighter",
       "system": "fbneo",
-      "bucket": "fbneo/xmvsfur1.zip"
+      "bucket": "fbneo/xmvsfu.zip"
     },
     {
       "title": "The King of Fighters '98",
@@ -65,7 +65,7 @@
     {
       "title": "Street Fighter II': Champion Edition",
       "system": "fbneo",
-      "bucket": "fbneo/sf2ceua.zip"
+      "bucket": "fbneo/sf2ceuc.zip"
     },
     {
       "title": "Street Fighter II': Hyper Fighting",

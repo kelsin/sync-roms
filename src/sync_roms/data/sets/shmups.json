@@ -138,31 +138,19 @@
       "title": "DoDonPachi Dai-Fukkatsu Ver 1.0",
       "category": "Cave",
       "system": "fbneo",
-      "bucket": "fbneo/ddpdfk10.zip"
-    },
-    {
-      "title": "DoDonPachi Dai-Fukkatsu Ver 1.5",
-      "category": "Cave",
-      "system": "fbneo",
       "bucket": "fbneo/ddpdfk.zip"
     },
     {
       "title": "DoDonPachi Dai-Ou-Jou Black Label",
       "category": "Cave",
       "system": "fbneo",
-      "bucket": "fbneo/ddpdojblk.zip"
+      "bucket": "fbneo/ddp3.zip"
     },
     {
       "title": "DoDonPachi II: Bee Storm",
       "category": "Cave",
       "system": "fbneo",
       "bucket": "fbneo/ddp2.zip"
-    },
-    {
-      "title": "DoDonPachi III",
-      "category": "Cave",
-      "system": "fbneo",
-      "bucket": "fbneo/ddp3.zip"
     },
     {
       "title": "DoDonPachi SaiDaiOuJou",
@@ -207,12 +195,6 @@
       "bucket": "fbneo/guwange.zip"
     },
     {
-      "title": "Guwange Special Ver",
-      "category": "Cave",
-      "system": "fbneo",
-      "bucket": "fbneo/guwanges.zip"
-    },
-    {
       "title": "Ibara",
       "category": "Cave",
       "system": "fbneo",
@@ -246,22 +228,10 @@
       "title": "Mushihime-Sama Futari Black Label",
       "category": "Cave",
       "system": "fbneo",
-      "bucket": "fbneo/futariblj.zip"
-    },
-    {
-      "title": "Mushihime-Sama Futari Black Label - Another Ver",
-      "category": "Cave",
-      "system": "fbneo",
       "bucket": "fbneo/futaribl.zip"
     },
     {
       "title": "Mushihime-Sama Futari Ver 1.0",
-      "category": "Cave",
-      "system": "fbneo",
-      "bucket": "fbneo/futari10.zip"
-    },
-    {
-      "title": "Mushihime-Sama Futari Ver 1.5",
       "category": "Cave",
       "system": "fbneo",
       "bucket": "fbneo/futari15.zip"
@@ -528,13 +498,13 @@
       "title": "1943",
       "category": "Other",
       "system": "fbneo",
-      "bucket": "fbneo/1943.zip"
+      "bucket": "fbneo/1943u.zip"
     },
     {
       "title": "1944: The Loop Master",
       "category": "Other",
       "system": "fbneo",
-      "bucket": "fbneo/1944.zip"
+      "bucket": "fbneo/1944u.zip"
     },
     {
       "title": "R-Type",
@@ -552,13 +522,13 @@
       "title": "Gradius",
       "category": "Other",
       "system": "fbneo",
-      "bucket": "fbneo/gradius.zip"
+      "bucket": "fbneo/nemesisuk.zip"
     },
     {
       "title": "Armed Police Batrider",
       "category": "Other",
       "system": "fbneo",
-      "bucket": "fbneo/batrider.zip"
+      "bucket": "fbneo/batrideru.zip"
     },
     {
       "title": "Blazing Star",
@@ -576,7 +546,7 @@
       "title": "Raiden",
       "category": "Other",
       "system": "fbneo",
-      "bucket": "fbneo/raiden.zip"
+      "bucket": "fbneo/raidenu.zip"
     },
     {
       "title": "Raiden II",
@@ -588,7 +558,7 @@
       "title": "Raiden DX",
       "category": "Other",
       "system": "fbneo",
-      "bucket": "fbneo/raidendx.zip"
+      "bucket": "fbneo/raidendxu.zip"
     },
     {
       "title": "Vulcan Venture (Gradius II)",
@@ -624,13 +594,13 @@
       "title": "Darius",
       "category": "Other",
       "system": "fbneo",
-      "bucket": "fbneo/darius.zip"
+      "bucket": "fbneo/dariusu.zip"
     },
     {
       "title": "Darius II",
       "category": "Other",
       "system": "fbneo",
-      "bucket": "fbneo/darius2.zip"
+      "bucket": "fbneo/sagaia.zip"
     },
     {
       "title": "Image Fight",
@@ -660,13 +630,13 @@
       "title": "Flying Shark",
       "category": "Other",
       "system": "fbneo",
-      "bucket": "fbneo/fshark.zip"
+      "bucket": "fbneo/skyshark.zip"
     },
     {
       "title": "19XX",
       "category": "Other",
       "system": "fbneo",
-      "bucket": "fbneo/19xx.zip"
+      "bucket": "fbneo/19xxu.zip"
     },
     {
       "title": "Mars Matrix",
@@ -1188,7 +1158,7 @@
       "title": "Air Gallet",
       "category": "Other",
       "system": "fbneo",
-      "bucket": "fbneo/agallet.zip"
+      "bucket": "fbneo/agalletu.zip"
     }
   ]
 }
