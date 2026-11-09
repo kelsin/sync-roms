@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.41.0](https://github.com/kelsin/sync-roms/compare/v0.40.2...v0.41.0) (2026-11-09)
+
+
+### Features
+
+* **sets:** add publisher categories to shmups ([#160](https://github.com/kelsin/sync-roms/issues/160)) ([66e8a6a](https://github.com/kelsin/sync-roms/commit/66e8a6a59254361a8332ba944db5d896ecc3badf))
+
 ## [0.40.2](https://github.com/kelsin/sync-roms/compare/v0.40.1...v0.40.2) (2026-11-09)
 
 
