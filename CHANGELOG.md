@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.38.1](https://github.com/kelsin/sync-roms/compare/v0.38.0...v0.38.1) (2026-11-09)
+
+
+### Bug Fixes
+
+* **sync:** clean up ROMs of systems the device no longer lists ([#146](https://github.com/kelsin/sync-roms/issues/146)) ([d21e909](https://github.com/kelsin/sync-roms/commit/d21e909db10eb12293e3292c0dbfd28f9c434b63))
+
 ## [0.38.0](https://github.com/kelsin/sync-roms/compare/v0.37.0...v0.38.0) (2026-11-09)
 
 
