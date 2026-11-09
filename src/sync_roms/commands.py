@@ -608,7 +608,7 @@ def doctor_cmd(args):
             line(True, f"write profile {runtime.WRITE_PROFILE} exists")
         except ProfileNotFound:
             line(None, f"write profile {runtime.WRITE_PROFILE} not found", "only needed for upload and clean")
-    for tool in ("7z", "chdman", "extract-xiso"):
+    for tool in ("7z", "chdman", "extract-xiso", "iso2zar"):
         found = external.find_tool(tool)
         line(True if found else None, f"{tool}: {found or 'not installed'}",
              "sync-roms tools install" if tool in external.TOOL_FORMULAE else external.MANUAL_TOOLS[tool])

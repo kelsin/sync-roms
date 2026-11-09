@@ -145,14 +145,14 @@ TOPICS = {
     "convert": """
   sync-roms convert [DIR] [--dry-run]
 
-  Unzips (7z) every .zip/.7z and converts each disc image (.cue, .gdi, .toc, .iso) to a verified .chd (Xbox .iso to xiso),
+  Unzips (7z) every .zip/.7z and converts each disc image (.cue, .gdi, .toc, .iso) to a verified .chd (Xbox .iso to xiso, Xbox 360 .iso to .zar),
   per the `chd` key in systems.json of the system whose folder it is in. Archives and images are removed once their chd verifies,
-  then the .m3u playlists are fixed. Needs 7z, chdman and, for Xbox, extract-xiso (see `tools install`). (Old names: --cd, --chd)
+  then the .m3u playlists are fixed. Needs 7z, chdman and, for Xbox, extract-xiso and, for Xbox 360, iso2zar (see `tools install`). (Old names: --cd, --chd)
 """,
     "tools": """
   sync-roms tools install
 
-  brew install the 7z (sevenzip) and chdman (rom-tools) that `convert` needs, and say how to build extract-xiso.
+  brew install the 7z (sevenzip) and chdman (rom-tools) that `convert` needs, and say how to build extract-xiso and iso2zar.
 """,
     "mirror": """
   sync-roms mirror [DIR] [--dry-run]     make or refresh a local copy of everything the lists reference (no DIR: the saved mirror)
