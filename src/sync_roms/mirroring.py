@@ -32,6 +32,7 @@ def mirror_wanted(manifest):
         for f in s["bios"]["files"]:
             if "BIOS/" + f in bios:
                 wanted["BIOS/" + f] = bios["BIOS/" + f]
+    wanted.update((k, v) for k, v in s3.list_sizes(runtime.THEMES_PREFIX).items() if not k.endswith("/"))
     wanted.update((k, v) for k, v in s3.list_sizes(f"{scrape_plan.SCRAPES}/esde/").items() if not k.endswith("/"))
     return wanted
 

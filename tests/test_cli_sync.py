@@ -140,6 +140,27 @@ class SyncSmokeTest(RealDataDirGuard):
         self.assertEqual([k for k, _ in got], ["APKs/Obtainium.apk"])
         self.assertEqual(os.path.basename(os.path.dirname(got[0][1])), "APKs")
 
+    def test_themes_are_copied_to_themes_on_onion_cards_only(self):
+        listing = lambda prefix: ({"os/onion/Themes/": 0, "os/onion/Themes/A/config.json": 5, "os/onion/Themes/A/.DS_Store": 1}
+                                  if prefix == "os/onion/Themes/" else list_sizes(prefix))
+        for layout, expected in (("onion", ["os/onion/Themes/A/config.json"]), ("allium", []), ("esde", [])):
+            with self.subTest(layout=layout):
+                got = []
+                layouts = {"esde": MANIFEST["layouts"]["esde"],
+                           "onion": {"label": "Onion", "roms_dir": "Roms", "bios_dir": "BIOS", "themes_dir": "Themes"},
+                           "allium": {"label": "Allium", "roms_dir": "Roms", "bios_dir": "BIOS"}}
+                manifest = {**MANIFEST, "layouts": layouts, "systems": [{**SYSTEM, "folders": {layout: "GBA"}}]}
+                patches = ((cli, {"free_space": lambda path: 10**9}),
+                           (store, {"load_manifest": lambda names=(), manifest=manifest: manifest}),
+                           (cli.picker, {"saved_setup": lambda *a, layout=layout: (None, layout)}),
+                           (cli.downloads, {"run_downloads": lambda todo, label, icon, base, *a: (got.extend((j[0], j[1]) for j in todo) if label == "Themes" else None) or 0}),
+                           (cli.s3, {"list_sizes": listing}),
+                           (cli.ui, {"choose": lambda q, *a, **k: "n"}))
+                self.run_sync(False, patches=patches)
+                self.assertEqual([k for k, _ in got], expected)
+                if expected:
+                    self.assertTrue(got[0][1].endswith(os.path.join("Themes", "A", "config.json")))
+
     def test_declining_the_space_prompt_exits_0(self):
         patches = ((cli, {"free_space": lambda path: 3}), (cli.ui, {"confirm": lambda q, default=True: False}))
         self.assertEqual(self.run_sync(False, patches=patches), 0)

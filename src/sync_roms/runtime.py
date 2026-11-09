@@ -11,4 +11,5 @@ OVERRIDES = {}  # settings given as command-line flags (bucket, root, endpoint, 
 WORKERS = 8
 MAX_MISSING_SHOWN = 5
 MIRROR_MARKER = ".sync-roms-mirror"  # only folders holding this file are ever written to or pruned as a mirror
+THEMES_PREFIX = "os/onion/Themes/"  # Onion themes in the bucket, copied to the card's Themes/
 _mirror_root = None  # set once a sync reads from the local mirror instead of the bucket

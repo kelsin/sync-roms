@@ -16,6 +16,7 @@
     "roms_dir": "Roms",
     "bios_dir": "BIOS",
     "disc_dir": ".multi-disc",
+    "themes_dir": "Themes",
     "note": "Miyoo Mini family (SigmaStar SSD202D) running Onion. Card root is the FAT32 SD card; Onion creates missing Roms/ folders on first install. Folder names are case sensitive, differ from the stock Miyoo card, and are not ES-DE or Batocera names. Subfolders work only one level deep (e.g. Roms/GB/Hacks). The discs of multi-disc games go in a hidden .multi-disc subfolder with the .m3u beside it, so the list shows each game once. BIOS files go in the root BIOS/ folder unless a system says otherwise. Systems with onion = null have no verified Onion folder. Source: https://onionui.github.io/docs/emulators/folders"
   },
   "allium": {
