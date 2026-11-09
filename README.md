@@ -235,7 +235,9 @@ While typing a filter (or a note, which `w` opens in the game list): `^A` `^E` s
    wiped from a card whose ROMs are elsewhere (muOS can keep them on SD2). Art you add by hand or install
    from a `.muxcat` set for ROMs that aren't on the card is removed too.
 7. For the `esde` (Android) layout, everything in the bucket's `APKs/` folder (APKs, the Obtainium app list) is
-   copied to an `APKs/` folder on the card so the apps can be installed from the device. Also, files in the card's Android media folders (`Alarms`, `Audiobooks`, `DCIM`,
+   copied to an `APKs/` folder on the card so the apps can be installed from the device. For the `onion` layout
+   (not Allium), everything under the bucket's `os/onion/Themes/` is copied to the card's `Themes/` the same way,
+   skipping files already there with the same size and never deleting anything. Also, files in the card's Android media folders (`Alarms`, `Audiobooks`, `DCIM`,
    `Documents`, `Download`, `Movies`, `Music`, `Notifications`, `Pictures`, `Podcasts`, `Recordings`,
    `Ringtones`) are removed and an empty `.nomedia` is put in each of those folders that exists, so Android
    stops indexing them. Missing folders are not created, and `.nomedia` files don't count as files. The first
