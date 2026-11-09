@@ -43,7 +43,7 @@ TOPICS = {
       firmware. Remembered per card folder name and used without asking next time; --ask confirms it first.
       --device/--layout set it without the picker (and save it).
    2. Toggle systems (--systems a,b or --systems all skips the picker).
-   3. Local ROMs no longer in a chosen system's list, or in a system with no games listed, are listed and, after you confirm (default no), deleted first so the free space shown is accurate.
+   3. Local ROMs no longer in a chosen system's list, in a system with no games listed, or in a system the card's device no longer lists, are listed and, after you confirm (default no), deleted first so the free space shown is accurate.
       Then totals and free space are shown and you confirm; ROMs download, then BIOS.
    4. Scraped data for the chosen systems' games is installed from the bucket's scrapes/ folder, then media on the
       card for ROMs it doesn't have is removed.
@@ -581,8 +581,10 @@ def run(argv):
     disc_dir = layout.get("disc_dir")  # multi-disc games' discs go in this hidden folder, their playlist beside it (Onion)
     roms_dir, bios_dir = dirs
     clean_card = not args.dry_run and not args.no_clean
+    dropped = []  # systems the device no longer lists: whatever they left on the card is unwanted
     if device:
         wanted_ids = set(device["systems"])
+        dropped = [s for s in systems if s["bucket"] not in wanted_ids]
         systems = [s for s in systems if s["bucket"] in wanted_ids]
         if device["note"]:
             print(ui.dim(f"  {device['name']}: {device['note']}"))
@@ -686,7 +688,8 @@ def run(argv):
     # systems can share a folder (Onion: WS, NGP), so a folder's expected files are the union over all of them
     # a system with nothing to sync is always scanned, selected or not: whatever it has on the card is unwanted
     chosen_ids = {s["bucket"] for s in chosen}
-    for dest in sorted({dest_of(s) for s in systems if s["bucket"] in chosen_ids or not available(s)}):
+    dropped_dests = {os.path.join(roms_dir, s["folders"][layout_name]) for s in dropped if s["folders"].get(layout_name)}
+    for dest in sorted({dest_of(s) for s in systems if s["bucket"] in chosen_ids or not available(s)} | dropped_dests):
         extras += downloads.find_extras(dest, [k for t in systems if dest_of(t) == dest for k in available(t)], unzip,
                                         layout_name in scrape_plan.ONION_LAYOUTS, disc_dir, {k for t in systems if dest_of(t) == dest for k in discs_of(t)})
 
