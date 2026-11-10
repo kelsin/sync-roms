@@ -988,6 +988,7 @@
   {
     "name": "Arduboy Miniature Game System",
     "bucket": "arduboy",
+    "screenscraper": 263,
     "folders": {
       "esde": "arduboy",
       "knulli": "arduboy",
@@ -1723,6 +1724,7 @@
   {
     "name": "Bandai SuFami Turbo",
     "bucket": "sufami",
+    "screenscraper": 108,
     "folders": {
       "esde": "sufami",
       "knulli": "sufami",
@@ -2423,6 +2425,7 @@
   {
     "name": "Emerson Arcadia 2001",
     "bucket": "arcadia",
+    "screenscraper": 94,
     "folders": {
       "esde": "arcadia",
       "knulli": "arcadia",
@@ -2442,6 +2445,7 @@
   {
     "name": "Bit Corporation Gamate",
     "bucket": "gamate",
+    "screenscraper": 266,
     "folders": {
       "esde": "gamate",
       "knulli": "gamate",
