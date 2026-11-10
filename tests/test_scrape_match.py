@@ -4,7 +4,9 @@ import json
 import os
 import sys
 import tempfile
+import threading
 import unittest
+from concurrent.futures import ThreadPoolExecutor
 from types import SimpleNamespace
 from unittest import mock
 
@@ -99,6 +101,26 @@ class HashAndMatchTest(MatchBase):
                              "sha1": "a9993e364706816aba3e25717850c26c9cd0d89d", "crc": "352441C2"})
         with mock.patch.object(s3, "read_range", side_effect=AssertionError("read again")):
             self.assertEqual(scrape_online.hash_file("gba", "a.zip", 3, 5), h)
+
+    def test_prefetched_hash_is_used_by_the_lookup(self):
+        path = self.put("gba/a.zip", b"abc")
+        stop = threading.Event()
+        with ThreadPoolExecutor(1) as pool, mock.patch.object(s3, "read_range", wraps=s3.read_range) as rr:
+            scrape_online.prefetch_hash(pool, "gba", "a.zip", 3, stop)
+            scrape_online.prefetch_hash(pool, "gba", "a.zip", 3, stop)  # already being hashed: not queued twice
+            h = scrape_online._hashes("gba", "a.zip", 3, stop)
+            pool.shutdown(wait=True)
+            self.assertEqual(rr.call_count, 1)
+        self.assertEqual(h["crc"], "352441C2")
+        self.assertEqual(scrape_state.cached_hashes("gba", "a.zip", 3, int(os.path.getmtime(path))), h)
+        self.assertEqual(scrape_online._hashing, {})
+
+    def test_prefetch_skips_roms_already_hashed(self):
+        self.put("gba/a.zip", b"abc")
+        scrape_online.hash_file("gba", "a.zip", 3, int(os.path.getmtime(os.path.join(self.root, "gba/a.zip"))))
+        pool = mock.Mock()
+        scrape_online.prefetch_hash(pool, "gba", "a.zip", 3, threading.Event())
+        pool.submit.assert_not_called()
 
     def test_hashing_stops_between_chunks(self):
         self.put("gba/a.zip", b"abcdef")

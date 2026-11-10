@@ -7,6 +7,10 @@ import threading
 from . import scrape_plan, store, ui
 
 _lock = threading.RLock()  # scrape runs match ROMs on several threads; each save is a read-modify-write
+_cache = {}  # file path -> ((mtime_ns, size), data): a file nobody changed since we last read or wrote it is not parsed again
+_unsaved = {}  # hash file path -> hashes saved in memory but not yet written
+HASH_FLUSH = 50  # hashes saved in memory before the hash file is written
+HASHES = "scrape-hashes.json"
 _warned = set()  # paths of corrupt files already warned about
 MATCHES = "scrape-matches.json"  # the only one holding what the user typed, so the only one worth a warning
 
@@ -15,7 +19,31 @@ def _path(name):
     return os.path.join(store.data_dir(), name)
 
 
+def _sig(path):
+    st = os.stat(path)
+    return st.st_mtime_ns, st.st_size
+
+
 def _load(name):
+    """The file's data. The same dict comes back while the file is unchanged, so callers change it only under _lock and
+    then _save it."""
+    path = _path(name)
+    try:
+        sig = _sig(path)
+    except OSError:
+        _cache.pop(path, None)
+        return {}
+    with _lock:
+        hit = _cache.get(path)
+        if hit and hit[0] == sig:
+            return hit[1]
+        data = _read(name)
+        if data:
+            _cache[path] = (sig, data)
+        return data
+
+
+def _read(name):
     try:
         with open(_path(name)) as f:
             data = json.load(f)
@@ -39,6 +67,7 @@ def _save(name, data):
         with os.fdopen(fd, "w") as f:
             f.write(scrape_plan.dump_json(data))
         os.replace(tmp, _path(name))
+        _cache[_path(name)] = (_sig(_path(name)), data)
     finally:
         if os.path.exists(tmp):
             os.remove(tmp)
@@ -50,7 +79,7 @@ def _key(system, rom):
 
 def cached_hashes(system, rom, size, mtime):
     """{"md5","sha1","crc"} saved for this ROM, or None when absent or its size/mtime changed."""
-    entry = _load("scrape-hashes.json").get(_key(system, rom))
+    entry = _unsaved.get(_path(HASHES), {}).get(_key(system, rom)) or _load(HASHES).get(_key(system, rom))
     if not isinstance(entry, dict) or entry.get("size") != size or entry.get("mtime") != mtime:
         return None
     hashes = entry.get("hashes")
@@ -58,10 +87,20 @@ def cached_hashes(system, rom, size, mtime):
 
 
 def save_hashes(system, rom, size, mtime, hashes):
+    """Remember a ROM's hashes; the file is written every HASH_FLUSH hashes and by flush_hashes."""
     with _lock:
-        data = _load("scrape-hashes.json")
-        data[_key(system, rom)] = {"size": size, "mtime": mtime, "hashes": hashes}
-        _save("scrape-hashes.json", data)
+        pending = _unsaved.setdefault(_path(HASHES), {})
+        pending[_key(system, rom)] = {"size": size, "mtime": mtime, "hashes": hashes}
+        if len(pending) >= HASH_FLUSH:
+            flush_hashes()
+
+
+def flush_hashes():
+    """Write the hashes saved so far."""
+    with _lock:
+        pending = _unsaved.pop(_path(HASHES), None)
+        if pending:
+            _save(HASHES, {**_load(HASHES), **pending})
 
 
 def _game_id(v):
