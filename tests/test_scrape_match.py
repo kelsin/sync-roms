@@ -87,7 +87,7 @@ class HashAndMatchTest(MatchBase):
     def test_prefetched_hash_is_used_by_the_lookup(self):
         path = self.put("gba/a.zip", b"abc")
         stop = threading.Event()
-        with ThreadPoolExecutor(1) as pool, mock.patch.object(scrape_online, "hash_file", wraps=scrape_online.hash_file) as rr:
+        with ThreadPoolExecutor(1) as pool, mock.patch.object(scrape_state, "save_hashes", wraps=scrape_state.save_hashes) as rr:  # once per real read
             scrape_online.prefetch_hash(pool, "gba", "a.zip", 3, stop)
             scrape_online.prefetch_hash(pool, "gba", "a.zip", 3, stop)  # already being hashed: not queued twice
             h = scrape_online._hashes("gba", "a.zip", 3, stop)
