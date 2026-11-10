@@ -212,23 +212,8 @@ class ClientTests(unittest.TestCase):
                 client(opener).download(url, dest)
         self.assertEqual(len(ok), 2)
 
-    def test_redirects_must_stay_https_screenscraper(self):
-        handler = ss.SafeRedirect()
-        req = urllib.request.Request("https://neoclone.screenscraper.fr/a.png?sspassword=" + PASSWORD)
-        for url in ("http://neoclone.screenscraper.fr/b.png", "https://evil.example/b.png"):
-            fp = io.BytesIO(b"body")
-            with self.subTest(url=url), self.assertRaises(urllib.error.HTTPError) as cm:
-                handler.redirect_request(req, fp, 302, "Found", {}, url)
-            self.assertTrue(fp.closed)
-            self.assertNotIn("evil", str(cm.exception))
-            self.assertNotIn(PASSWORD, str(cm.exception))
-        self.assertIsNotNone(handler.redirect_request(req, io.BytesIO(), 302, "Found", {}, "https://www.screenscraper.fr/b.png"))
-        def refused(r, timeout=None):
-            raise urllib.error.HTTPError("", 302, "redirect refused", {}, None)
-        with tempfile.TemporaryDirectory() as d, self.assertRaises(ss.MediaRefused):
-            client(refused).download("https://neoclone.screenscraper.fr/a.png", os.path.join(d, "a.png"))
-        default = ss.Client("u", "p", DEV)._opener
-        self.assertTrue(any(isinstance(h, ss.SafeRedirect) for h in default.__self__.handlers))
+    def test_default_opener_keeps_connections_alive(self):
+        self.assertIsInstance(ss.Client("u", "p", DEV)._opener, ss.KeepAlive)
 
     def test_lookup_returns_game(self):
         seen = []
@@ -348,6 +333,148 @@ class ClientTests(unittest.TestCase):
             client(lambda r, timeout=None: Resp(b"data")).download("https://neoclone.screenscraper.fr/a.png", dest)
             self.assertEqual(Path(dest).read_bytes(), b"data")
             self.assertFalse(os.path.exists(dest + ".part"))
+
+
+
+class FakeResp:
+    def __init__(self, status=200, body=b"", headers=None):
+        self.status, self.reason, self.headers = status, "msg", headers or {}
+        self._body = io.BytesIO(body)
+        self._size = len(body)
+
+    def getheader(self, name):
+        return self.headers.get(name)
+
+    def read(self, amt=None):
+        return self._body.read() if amt is None else self._body.read(amt)
+
+    def isclosed(self):
+        return self._body.tell() >= self._size
+
+    def close(self):
+        pass
+
+
+class FakeConn:
+    def __init__(self, net, host, port, timeout):
+        self.net, self.host, self.timeout, self.sock, self.paths = net, host, timeout, None, []
+
+    def connect(self):
+        self.net.connects += 1
+        if self.net.fail_connects:
+            self.net.fail_connects -= 1
+            raise TimeoutError()
+        self.sock = mock.Mock()
+
+    def request(self, method, path, headers=None):
+        if self.sock is None:
+            self.connect()
+        self.paths.append(path)
+
+    def getresponse(self):
+        out = self.net.script.pop(0)
+        if isinstance(out, Exception):
+            raise out
+        return out
+
+    def close(self):
+        self.sock = None
+
+
+class FakeNet:
+    """Stands in for http.client.HTTPSConnection: counts connections and answers requests from a script."""
+
+    def __init__(self, *script):
+        self.script, self.conns, self.connects, self.fail_connects = list(script), [], 0, 0
+
+    def __call__(self, host, port, timeout=None):
+        self.conns.append(FakeConn(self, host, port, timeout))
+        return self.conns[-1]
+
+
+class KeepAliveTests(unittest.TestCase):
+    URL = "https://neoclone.screenscraper.fr/a.png?sspassword=" + PASSWORD
+
+    def open(self, net, url=None, opener=None):
+        opener = opener or ss.KeepAlive()
+        with mock.patch.object(http.client, "HTTPSConnection", net):
+            return opener(urllib.request.Request(url or self.URL), timeout=5)
+
+    def test_a_threads_requests_share_one_connection(self):
+        net, opener = FakeNet(FakeResp(body=b"a"), FakeResp(body=b"b")), ss.KeepAlive()
+        for want in (b"a", b"b"):
+            with self.open(net, opener=opener) as resp:
+                self.assertEqual(resp.read(), want)
+        self.assertEqual((len(net.conns), net.connects), (1, 1))
+        self.assertEqual(net.conns[0].paths, ["/a.png?sspassword=" + PASSWORD] * 2)
+
+    def test_each_thread_has_its_own_connection(self):
+        net, opener = FakeNet(FakeResp(body=b"a"), FakeResp(body=b"b")), ss.KeepAlive()
+        self.open(net, opener=opener).read()
+        t = threading.Thread(target=lambda: self.open(net, opener=opener).read())
+        t.start()
+        t.join()
+        self.assertEqual(len(net.conns), 2)
+
+    def test_a_half_read_body_drops_the_connection(self):
+        net, opener = FakeNet(FakeResp(body=b"abcd"), FakeResp(body=b"b")), ss.KeepAlive()
+        with self.open(net, opener=opener) as resp:
+            resp.read(2)
+        self.open(net, opener=opener).read()
+        self.assertEqual(len(net.conns), 2)
+
+    def test_a_connection_the_server_closed_is_replaced_once(self):
+        net, opener = FakeNet(FakeResp(body=b"a"), http.client.RemoteDisconnected(), FakeResp(body=b"b")), ss.KeepAlive()
+        self.open(net, opener=opener).read()
+        self.assertEqual(self.open(net, opener=opener).read(), b"b")
+        self.assertEqual(len(net.conns), 2)
+
+    def test_a_fresh_connection_that_fails_is_not_retried(self):
+        net = FakeNet(http.client.RemoteDisconnected(), FakeResp())
+        with self.assertRaises(http.client.RemoteDisconnected):
+            self.open(net)
+        self.assertEqual(len(net.script), 1)
+
+    def test_opening_a_connection_is_retried(self):
+        net = FakeNet(FakeResp(body=b"a"))
+        net.fail_connects = ss.CONNECT_TRIES - 1
+        self.assertEqual(self.open(net).read(), b"a")
+        net = FakeNet(FakeResp())
+        net.fail_connects = ss.CONNECT_TRIES
+        with self.assertRaises(OSError):
+            self.open(net)
+        self.assertEqual(net.connects, ss.CONNECT_TRIES)
+
+    def test_the_connect_timeout_is_short_and_reads_get_the_long_one(self):
+        net = FakeNet(FakeResp())
+        self.open(net)
+        self.assertEqual(net.conns[0].timeout, ss.CONNECT_TIMEOUT)
+        net.conns[0].sock.settimeout.assert_called_with(5)
+
+    def test_error_statuses_raise_http_errors_without_the_url(self):
+        with self.assertRaises(urllib.error.HTTPError) as cm:
+            self.open(FakeNet(FakeResp(status=404)))
+        self.assertEqual(cm.exception.code, 404)
+        self.assertNotIn(PASSWORD, str(cm.exception))
+
+    def test_redirects_must_stay_https_screenscraper(self):
+        ok = FakeNet(FakeResp(302, headers={"Location": "https://www.screenscraper.fr/b.png"}), FakeResp(body=b"b"))
+        self.assertEqual(self.open(ok).read(), b"b")
+        self.assertEqual([c.host for c in ok.conns], ["neoclone.screenscraper.fr", "www.screenscraper.fr"])
+        for url in ("http://neoclone.screenscraper.fr/b.png", "https://evil.example/b.png"):
+            with self.subTest(url=url), self.assertRaises(urllib.error.HTTPError) as cm:
+                self.open(FakeNet(FakeResp(302, headers={"Location": url})))
+            self.assertEqual(cm.exception.msg, ss.REDIRECT_REFUSED)
+            self.assertNotIn("evil", str(cm.exception))
+            self.assertNotIn(PASSWORD, str(cm.exception))
+        with self.assertRaises(urllib.error.HTTPError):
+            self.open(FakeNet(*[FakeResp(302, headers={"Location": "/c.png"}) for _ in range(ss.REDIRECTS + 1)]))
+
+    def test_a_refused_redirect_is_media_refused(self):
+        def refused(r, timeout=None):
+            raise urllib.error.HTTPError("", 302, ss.REDIRECT_REFUSED, {}, None)
+        with tempfile.TemporaryDirectory() as d, self.assertRaises(ss.MediaRefused):
+            client(refused).download("https://neoclone.screenscraper.fr/a.png", os.path.join(d, "a.png"))
 
 
 if __name__ == "__main__":

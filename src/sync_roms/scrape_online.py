@@ -1,4 +1,5 @@
 """Online scraping: which ROMs need metadata, which ScreenScraper game each one is, and the scrape run."""
+import contextlib
 import getpass
 import hashlib
 import http.client
@@ -10,7 +11,7 @@ import tempfile
 import threading
 import time
 import zlib
-from collections import Counter
+from collections import Counter, deque, namedtuple
 from concurrent.futures import ThreadPoolExecutor
 
 from botocore.exceptions import ClientError
@@ -102,7 +103,9 @@ def resolve_manual(client, system, query):
 
 
 # --- The scrape run ---------------------------------------------------------------------------------
-BATCH = 25  # ROMs scraped, uploaded and written to metadata.json together
+BATCH = 25  # ROMs scraped and uploaded together
+LOOKAHEAD = 2  # batches in the pool at once: the next one is scraped while the last uploads
+METADATA_EVERY = 100  # ROMs whose entries are written to metadata.json together
 RETRIES = 3  # times a rate-limited request is tried again
 RETRY_WAIT = 2  # seconds before the first retry, doubled each time
 CREDENTIALS = ("screenscraper_user", "screenscraper_password")
@@ -352,34 +355,37 @@ def _media_keys(listing, system, stem):
     return out
 
 
-def run_batch(client, system, batch, skip, threads, shrink, outcomes, listing, replace=False, forced=None, rerun=RERUN, fill=False):
-    """Scrape, upload and record one batch of a system's ROMs. Returns (failures, the QuotaExceeded hit or None,
-    whether the system's remaining batches must be skipped).
+Started = namedtuple("Started", "futures kept tmp")  # a batch handed to the pool: its futures, the media types storage already has per ROM, its temp folder
 
-    listing: {key: size} of scrapes/<system>/, kept up to date with what this batch uploads. Media types a ROM already
-    has there are neither downloaded nor overwritten, unless replace: then the ROMs' metadata entries are replaced
-    (not merged) and their old scraper media (never custom/ or skipped types) is overwritten, or deleted after the
-    entry is written. forced: {ROM: game id} matches given for this run only; rerun: the command that continues it.
-    fill: ROMs that already have an entry keep its fields; ScreenScraper's only add the missing ones.
-    """
-    name = system["bucket"]
+
+def start_batch(ex, client, system, batch, skip, stop, listing, replace=False, forced=None):
+    """Hand a batch's ROMs to the pool and return at once; run_batch takes what they scraped. Media types a ROM already
+    has in listing ({key: size} of scrapes/<system>/) are not downloaded, unless replace. forced: {ROM: game id} matches
+    given for this run only."""
     forced = forced or {}
-    stop = threading.Event()
-    failed = 0
     index = scrape_plan.scrape_index(listing)
     kept = {rom: set() if replace else set(index.get(os.path.splitext(rom)[0], ())) for rom, _, _ in batch}
     tmp = tempfile.mkdtemp()
+    futures = [ex.submit(scrape_rom, client, system, item, tmp, skip | kept[item[0]], stop, forced.get(item[0]))
+               for item in batch]
+    return Started(futures, kept, tmp)
+
+
+def run_batch(client, system, batch, started, skip, shrink, outcomes, listing, replace=False, forced=None, rerun=RERUN,
+              fill=False, pending=None):
+    """Wait for a started batch's ROMs, upload their media and queue their entries in pending ({ROM: (how, metadata,
+    upload jobs)}, written to metadata.json by record). Returns (failures, the QuotaExceeded hit or None).
+
+    listing: {key: size} of scrapes/<system>/, kept up to date with what this batch uploads. replace: the ROMs'
+    metadata entries are replaced (not merged) and their old scraper media (never custom/ or skipped types) is
+    overwritten. forced: see start_batch; rerun: the command that continues the run.
+    """
+    name = system["bucket"]
+    forced = forced or {}
+    failed = 0
+    kept = started.kept
     try:
-        ex = ThreadPoolExecutor(threads)
-        try:
-            futures = [ex.submit(scrape_rom, client, system, item, tmp, skip | kept[item[0]], stop, forced.get(item[0]))
-                       for item in batch]
-            results = [f.result() for f in futures]
-        except KeyboardInterrupt:
-            stop.set()
-            ex.shutdown(wait=True, cancel_futures=True)  # queued ROMs never start; running ones stop at their next stop check (between requests and read chunks)
-            raise
-        ex.shutdown()
+        results = [f.result() for f in started.futures]
         quota = next((payload for status, payload in results if status == "quota"), None)
         jobs = {}  # ROM -> its upload jobs
         done = {}
@@ -423,29 +429,50 @@ def run_batch(client, system, batch, skip, threads, shrink, outcomes, listing, r
                 del done[rom]
                 print(ui.yellow(f"  ⚠️  {name}/{rom}: its media didn't all upload; skipped"))
     finally:
-        shutil.rmtree(tmp, ignore_errors=True)
-    if not done:
-        return failed, quota, False
+        shutil.rmtree(started.tmp, ignore_errors=True)
+    for rom, (how, meta) in done.items():
+        listing.update((j[0], j[2]) for j in jobs[rom])
+        pending[rom] = (how, meta, jobs[rom])
+    return failed, quota
+
+
+def _read_metadata(name, rerun):
+    """(a system's metadata.json from storage, None), or (None, why it can't be used)."""
     try:
         remote = load_metadata(name)
-        new = {rom: ({**meta, **remote.get(rom, {})} if fill else meta) for rom, (_, meta) in done.items()}
-        merged = scrape_plan.merge_metadata(remote, {} if replace else new)
+        scrape_plan.merge_metadata(remote, {})
     except (ValueError, TypeError) as e:
-        why = e if isinstance(e, ValueError) else f"{metadata_key(name)} has an entry that isn't an object"
-        print(ui.yellow(f"  ⚠️  {why}; {len(done)} ROM(s) not recorded, skipping the rest of {name}"))
-        return failed + len(done), quota, True
+        return None, e if isinstance(e, ValueError) else f"{metadata_key(name)} has an entry that isn't an object"
     except s3.ERRORS as e:
         _storage_fail(f"Reading {metadata_key(name)}", e, rerun)
+    return remote, None
+
+
+def record(system, pending, outcomes, listing, skip, replace=False, rerun=RERUN, fill=False):
+    """Write pending's entries (see run_batch) to the system's metadata.json, one read and one write for all of them,
+    and empty pending. With replace the entries replace the old ones and the old scraper media they leave behind is
+    deleted. fill: ROMs that already have an entry keep its fields; ScreenScraper's only add the missing ones.
+    Returns (failures, whether the system's remaining ROMs must be skipped)."""
+    name = system["bucket"]
+    if not pending:
+        return 0, False
+    done = dict(pending)
+    pending.clear()
+    remote, why = _read_metadata(name, rerun)
+    if why:
+        print(ui.yellow(f"  ⚠️  {why}; {len(done)} ROM(s) not recorded, skipping the rest of {name}"))
+        return len(done), True
+    new = {rom: ({**meta, **remote.get(rom, {})} if fill else meta) for rom, (_, meta, _) in done.items()}
+    merged = scrape_plan.merge_metadata(remote, {} if replace else new)
     if replace:
-        merged.update((rom, dict(meta)) for rom, (_, meta) in done.items())
+        merged.update((rom, dict(meta)) for rom, (_, meta, _) in done.items())
     try:
         s3.put_text(metadata_key(name), scrape_plan.dump_json(merged))
     except s3.ERRORS as e:
         _storage_fail(f"Writing {metadata_key(name)}", e, rerun)
-    for rom, (how, _) in done.items():
-        uploaded = {j[0] for j in jobs[rom]}
-        listing.update((j[0], j[2]) for j in jobs[rom])
+    for rom, (how, _, jobs) in done.items():
         if replace:  # the new entry is written: the old game's other scraper media goes (a failed delete only orphans it)
+            uploaded = {j[0] for j in jobs}
             stale = [k for k, t in _media_keys(listing, name, os.path.splitext(rom)[0]).items()
                      if t in SCRAPER_TYPES - skip and k not in uploaded]
             try:
@@ -460,12 +487,63 @@ def run_batch(client, system, batch, skip, threads, shrink, outcomes, listing, r
         if scrape_state.is_unknown(name, rom):  # found after all (a retry, or a manual match)
             scrape_state.clear_unknown(name, rom)
     print(ui.green(f"  ✅ {name}: {len(done)} ROM(s) scraped"))
-    return failed, quota, False
+    return 0, False
+
+
+def _stems(batch):
+    return {os.path.splitext(rom)[0] for rom, _, _ in batch}
+
+
+def scrape_system(client, system, items, threads, skip, shrink, outcomes, listing, replace=False, forced=None,
+                  rerun=RERUN, fill=False):
+    """Scrape one system's ROMs on one pool of threads, in batches: the next batch is scraped while the last one uploads,
+    so no thread waits for a batch's slowest ROM. Entries are written to metadata.json every METADATA_EVERY ROMs, when the
+    system is done and when the run stops. Returns (failures, the QuotaExceeded hit or None). Arguments: see run_batch."""
+    name = system["bucket"]
+    _, why = _read_metadata(name, rerun)  # a metadata.json that can't be used fails before any quota is spent
+    if why:
+        print(ui.yellow(f"  ⚠️  {why}; skipping {name}"))
+        return len(items), None
+    batches, flight = list(_batches(items)), deque()
+    pending, stop, failed, quota_hit, started = {}, threading.Event(), 0, None, 0
+    ex = ThreadPoolExecutor(threads)
+    try:
+        while batches or flight:
+            while (batches and len(flight) < LOOKAHEAD and not stop.is_set()  # same-stem ROMs share media: wait for the earlier batch to upload
+                   and not any(_stems(batches[0]) & _stems(b) for b, _ in flight)):
+                batch = batches.pop(0)
+                flight.append((batch, start_batch(ex, client, system, batch, skip, stop, listing, replace, forced)))
+            if not flight:
+                break
+            batch, begun = flight.popleft()
+            print(ui.bold(f"\n🔎 {name}: ROMs {started + 1}-{started + len(batch)} of {len(items)}"))
+            started += len(batch)
+            n, hit = run_batch(client, system, batch, begun, skip, shrink, outcomes, listing, replace, forced, rerun, fill, pending)
+            failed += n
+            quota_hit = quota_hit or hit
+            if len(pending) >= METADATA_EVERY:
+                n, halt = record(system, pending, outcomes, listing, skip, replace, rerun, fill)
+                failed += n
+                if halt:
+                    return failed, quota_hit
+        n, _ = record(system, pending, outcomes, listing, skip, replace, rerun, fill)
+        return failed + n, quota_hit
+    except BaseException:  # Ctrl-C, a storage failure: queued ROMs never start, running ones stop at their next stop check
+        stop.set()
+        ex.shutdown(wait=True, cancel_futures=True)
+        with contextlib.suppress(SystemExit):  # what was uploaded still gets its entries
+            record(system, pending, outcomes, listing, skip, replace, rerun, fill)
+        raise
+    finally:
+        stop.set()
+        ex.shutdown(wait=True, cancel_futures=True)
+        for _, begun in flight:
+            shutil.rmtree(begun.tmp, ignore_errors=True)
 
 
 def run_scrape(client, systems, todo, skip, ask=True, replace=False, forced=None, rerun=RERUN, outcomes=None, fill=False):
     """Confirm (unless not ask), then scrape todo ({system: [(ROM, size, etag)]}) in batches. Returns the exit code.
-    replace, forced, rerun, fill: see run_batch. outcomes: filled with {system: {ROM: how, or None when unknown}}."""
+    replace, forced, rerun, fill: see run_batch and record. outcomes: filled with {system: {ROM: how, or None when unknown}}."""
     count = sum(len(v) for v in todo.values())
     try:
         listings = {name: s3.list_sizes(f"{scrape_plan.SCRAPES}/{name}/") for name in todo}
@@ -494,15 +572,9 @@ def run_scrape(client, systems, todo, skip, ask=True, replace=False, forced=None
     failed, quota_hit = 0, None
     for name, items in sorted(todo.items()):
         outcomes[name] = {}
-        started = 0
-        for batch in _batches(items):
-            print(ui.bold(f"\n🔎 {name}: ROMs {started + 1}-{started + len(batch)} of {len(items)}"))
-            started += len(batch)
-            n, quota_hit, halt = run_batch(client, systems[name], batch, skip, max(1, quota.max_threads), shrink,
-                                           outcomes[name], listings[name], replace, forced, rerun, fill)
-            failed += n
-            if quota_hit or halt:
-                break
+        n, quota_hit = scrape_system(client, systems[name], items, max(1, quota.max_threads), skip, shrink, outcomes[name],
+                                     listings[name], replace, forced, rerun, fill)
+        failed += n
         if quota_hit:
             break
     print(ui.bold("\n📋 Results"))
