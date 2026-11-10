@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.44.0](https://github.com/kelsin/sync-roms/compare/v0.43.1...v0.44.0) (2026-11-10)
+
+
+### Features
+
+* **sets:** add invader (gba) to shmups ([#169](https://github.com/kelsin/sync-roms/issues/169)) ([01402ed](https://github.com/kelsin/sync-roms/commit/01402edaaab7f6e5dd8d26fbae4d701fa09d4267))
+
 ## [0.43.1](https://github.com/kelsin/sync-roms/compare/v0.43.0...v0.43.1) (2026-11-09)
 
 
