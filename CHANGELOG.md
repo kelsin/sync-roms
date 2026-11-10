@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.47.0](https://github.com/kelsin/sync-roms/compare/v0.46.3...v0.47.0) (2026-11-10)
+
+
+### :video_game: Features
+
+* **cards:** save a readable card size and show it in cards list ([#192](https://github.com/kelsin/sync-roms/issues/192)) ([c718593](https://github.com/kelsin/sync-roms/commit/c7185931dcbf432bda07a7168dc24f3b3d55d85b))
+
 ## [0.46.3](https://github.com/kelsin/sync-roms/compare/v0.46.2...v0.46.3) (2026-11-10)
 
 
