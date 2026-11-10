@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.46.0](https://github.com/kelsin/sync-roms/compare/v0.45.0...v0.46.0) (2026-11-10)
+
+
+### Features
+
+* **scrape:** add --fill-media to scrape missing media for ROMs with metadata ([#177](https://github.com/kelsin/sync-roms/issues/177)) ([88c55df](https://github.com/kelsin/sync-roms/commit/88c55df55ad887249b3325f6d7bcf7b99d83c93b))
+* **systems:** add sg-1000, msx, msx2, c64, arcadia, gamate and game.com ([#179](https://github.com/kelsin/sync-roms/issues/179)) ([912df14](https://github.com/kelsin/sync-roms/commit/912df1432f3fe96225d45a3da61bf736c72c7182))
+
+
+### Bug Fixes
+
+* **devices:** move retroid pocket 2s and 4 pro up a tier ([#181](https://github.com/kelsin/sync-roms/issues/181)) ([1677816](https://github.com/kelsin/sync-roms/commit/167781678d1223d76fe79cebf8d8025f7bf4793e))
+* **systems:** add ScreenScraper id for SuperGrafx ([#176](https://github.com/kelsin/sync-roms/issues/176)) ([50b129c](https://github.com/kelsin/sync-roms/commit/50b129ca9cc03a29a43627a43fdd3c450419a39d))
+
+
+### Code Refactoring
+
+* **devices:** define device systems as a chain of tiers ([#180](https://github.com/kelsin/sync-roms/issues/180)) ([4e98104](https://github.com/kelsin/sync-roms/commit/4e981049b91ee8dd83b0d46e6c02e3d88e2e04db))
+
 ## [0.45.0](https://github.com/kelsin/sync-roms/compare/v0.44.0...v0.45.0) (2026-11-10)
 
 
