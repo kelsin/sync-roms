@@ -87,8 +87,8 @@ TOPICS = {
     "cards": """
   sync-roms cards edit                        same as `games edit`
   sync-roms cards list [--json]
-  sync-roms cards new NAME --device ID|full --layout NAME
-  sync-roms cards set NAME [--device ID|full] [--layout NAME]
+  sync-roms cards new NAME --device ID|full --layout NAME [--size 512GB]
+  sync-roms cards set NAME [--device ID|full] [--layout NAME] [--size 512GB]
   sync-roms cards rename OLD NEW
   sync-roms cards delete NAME [--yes]
 
@@ -927,7 +927,8 @@ def sync_card(args):
     if todo_all:
         need = total_bytes(todo_all)
         free = free_space(base)
-        print(f"💾 Free on the card: {ui.human_size(free)}")
+        size = (saved or {}).get("size")
+        print(f"💾 Free on the card: {ui.human_size(free)}" + (f" ({size} card)" if size else ""))
         if need > free:
             print(ui.red(f"❌ Not enough space: {ui.human_size(need)} to download, {ui.human_size(free)} free"))
             if not ui.confirm("Try anyway?", default=False):
