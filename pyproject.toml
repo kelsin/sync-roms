@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "sync-roms"
 dynamic = ["version"]
-description = "Download ROMs and BIOS files from the roms bucket onto a handheld's SD card."
+description = "Download ROMs and BIOS files from your ROM storage onto a handheld's SD card."
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = ["boto3"]

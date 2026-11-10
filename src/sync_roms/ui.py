@@ -283,7 +283,7 @@ class ByteProgress:
 def report_missing(keys, what):
     if not keys:
         return
-    print(yellow(f"  ⚠️  {len(keys)} {what} listed in manifest but not in bucket"))
+    print(yellow(f"  ⚠️  {len(keys)} {what} listed in manifest but not in storage"))
     for k in keys[:runtime.MAX_MISSING_SHOWN]:
         print(dim(f"       {k}"))
     if len(keys) > runtime.MAX_MISSING_SHOWN:

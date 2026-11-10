@@ -36,7 +36,7 @@ ERRORS = (ClientError, BotoCoreError, OSError)  # what a bucket or a folder can 
 
 
 def read_root():
-    """The folder reads come from (the local mirror, else the storage folder), or None when they come from the bucket."""
+    """The folder reads come from (the local mirror, else the storage folder), or None when they come from storage."""
     return runtime._mirror_root or runtime.ROOT
 
 
@@ -175,7 +175,7 @@ def list_with_etags(prefix):
 
 
 def move_keys(moves):
-    """Move bucket objects server-side: copy each (old key, new key), then delete the old one. Returns the failure count."""
+    """Move storage objects server-side: copy each (old key, new key), then delete the old one. Returns the failure count."""
     client = None if runtime.ROOT else s3_client(runtime.WRITE_PROFILE)
 
     def move(job):
@@ -206,7 +206,7 @@ def move_keys(moves):
 
 
 def delete_keys(keys):
-    """Delete bucket objects (or storage folder files) in batches of 1000. Returns the errors reported."""
+    """Delete storage objects (or storage folder files) in batches of 1000. Returns the errors reported."""
     errors = []
     for i in range(0, len(keys), 1000):
         batch = keys[i:i + 1000]

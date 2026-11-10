@@ -42,8 +42,8 @@ class SetsTest(unittest.TestCase):
     def test_rows_sorted_by_system_skip_unknown(self):
         rows = edit.set_rows(SET, systems(), lambda s: {"gba/A.zip", "gen/Zed.zip"})
         self.assertEqual([r[1] for r in rows], ["ful/Skip.zip", "gba/A.zip", "gba/Gone.zip", "gen/Zed.zip"])
-        self.assertIn("not in bucket", rows[2][3])
-        self.assertNotIn("not in bucket", rows[1][3])
+        self.assertIn("not in storage", rows[2][3])
+        self.assertNotIn("not in storage", rows[1][3])
 
     def test_rows_grouped_by_category_in_file_order(self):
         game_set = {"games": [{"title": "Z", "system": "gba", "bucket": "gba/Z.zip", "category": "First"},
@@ -87,7 +87,7 @@ class SetsTest(unittest.TestCase):
         game_set = {"name": "M", "games": [{"title": "Multi", "system": "gen", "bucket": "gen/M.m3u",
                                             "files": ["gen/M (Disc 1).chd", "gen/M (Disc 2).chd"]}]}
         rows = edit.set_rows(game_set, by, lambda s: {"gen/M.m3u", "gen/M (Disc 1).chd"})
-        self.assertIn("not in bucket", rows[0][3])
+        self.assertIn("not in storage", rows[0][3])
         extras = {"gen/M.m3u": game_set["games"][0]["files"]}
         with mock.patch.object(picker, "filter_list", return_value=[True]):
             edit.toggle_games("t", rows, extras)

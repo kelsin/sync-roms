@@ -28,7 +28,7 @@ def archive_extracted(path):
 
 
 def is_current(path, size, disc_dir=None):
-    """Whether path is already the bucket's file; a playlist pointing into disc_dir is the bucket's with that prefix added."""
+    """Whether path is already storage's file; a playlist pointing into disc_dir is storage's with that prefix added."""
     if size is None or not os.path.exists(path):
         return False
     if os.path.getsize(path) == size:
@@ -64,9 +64,9 @@ def failure_hint(error):
     """A short pointer for the common S3 failures; empty when there's nothing useful to add."""
     text = str(error)
     if "403" in text or "AccessDenied" in text or "Forbidden" in text:
-        return " (access denied: check the profile can read this bucket)"
+        return " (access denied: check the profile can read this storage)"
     if "404" in text or "NoSuchKey" in text or "Not Found" in text:
-        return " (not in the bucket any more)"
+        return " (not in storage any more)"
     if "No space left" in text:
         return " (the card is full)"
     if "timed out" in text.lower() or "Could not connect" in text:
