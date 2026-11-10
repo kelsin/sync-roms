@@ -73,6 +73,23 @@ class CandidatesTest(MatchBase):
         out = scrape_online.find_candidates([SYSTEM], roms, {})
         self.assertEqual(out["gba"], ["Disc 1/a.cue", "z.zip"])
 
+    def test_fill_media_adds_rom_with_metadata_missing_wanted_media(self):
+        roms = {"gba": {"a.zip", "b.zip", "c.zip"}}
+        meta = {"gba": {"a.zip": {}, "b.zip": {}, "c.zip": {}}}
+        wanted = {"covers", "screenshots"}
+        listing = {"gba": {"scrapes/gba/covers/a.png": 1, "scrapes/gba/screenshots/a.png": 1,
+                           "scrapes/gba/covers/b.png": 1}}
+        out = scrape_online.find_candidates([SYSTEM], roms, meta, fill=(wanted, listing))
+        self.assertEqual(out["gba"], ["b.zip", "c.zip"])  # a has everything wanted
+        out = scrape_online.find_candidates([SYSTEM], roms, meta, fill=({"covers"}, listing))
+        self.assertEqual(out["gba"], ["c.zip"])  # skipped types aren't wanted
+
+    def test_fill_media_still_skips_unknown(self):
+        scrape_state.mark_unknown("gba", "b.zip")
+        out = scrape_online.find_candidates([SYSTEM], {"gba": {"b.zip"}}, {"gba": {"b.zip": {}}},
+                                            fill=({"covers"}, {"gba": {}}))
+        self.assertEqual(out["gba"], [])
+
 
 class HashAndMatchTest(MatchBase):
     def test_folder_backend_hashes_file_and_caches(self):

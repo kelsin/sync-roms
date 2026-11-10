@@ -20,16 +20,23 @@ from . import s3, scrape_files, scrape_plan, scrape_state, screenscraper, store,
 CHUNK = 8 << 20
 
 
-def find_candidates(systems, roms, metadata, retry=False):
+def find_candidates(systems, roms, metadata, retry=False, fill=None):
     """{system folder: sorted ROM paths} with no entry in that system's metadata.json (and, unless retry, not marked
-    unknown; a saved manual match overrides the unknown mark)."""
+    unknown; a saved manual match overrides the unknown mark).
+
+    fill: (wanted media types, {system folder: scrapes/<system>/ listing}); also takes the ROMs that have an entry
+    but lack some wanted type in storage."""
     out = {}
     for s in systems:
         system = s["bucket"]
         have = metadata.get(system, {})
+        index = scrape_plan.scrape_index(fill[1].get(system, {})) if fill else {}
+
+        def wanted(r):
+            return r not in have or (fill and fill[0] - set(index.get(os.path.splitext(r)[0], ())))
         out[system] = sorted(r for r in roms.get(system, ())
-                             if r not in have and (retry or scrape_state.manual_match(system, r) is not None
-                                                      or not scrape_state.is_unknown(system, r)))
+                             if wanted(r) and (retry or scrape_state.manual_match(system, r) is not None
+                                               or not scrape_state.is_unknown(system, r)))
     return out
 
 
@@ -345,7 +352,7 @@ def _media_keys(listing, system, stem):
     return out
 
 
-def run_batch(client, system, batch, skip, threads, shrink, outcomes, listing, replace=False, forced=None, rerun=RERUN):
+def run_batch(client, system, batch, skip, threads, shrink, outcomes, listing, replace=False, forced=None, rerun=RERUN, fill=False):
     """Scrape, upload and record one batch of a system's ROMs. Returns (failures, the QuotaExceeded hit or None,
     whether the system's remaining batches must be skipped).
 
@@ -353,6 +360,7 @@ def run_batch(client, system, batch, skip, threads, shrink, outcomes, listing, r
     has there are neither downloaded nor overwritten, unless replace: then the ROMs' metadata entries are replaced
     (not merged) and their old scraper media (never custom/ or skipped types) is overwritten, or deleted after the
     entry is written. forced: {ROM: game id} matches given for this run only; rerun: the command that continues it.
+    fill: ROMs that already have an entry keep its fields; ScreenScraper's only add the missing ones.
     """
     name = system["bucket"]
     forced = forced or {}
@@ -420,7 +428,8 @@ def run_batch(client, system, batch, skip, threads, shrink, outcomes, listing, r
         return failed, quota, False
     try:
         remote = load_metadata(name)
-        merged = scrape_plan.merge_metadata(remote, {} if replace else {rom: meta for rom, (_, meta) in done.items()})
+        new = {rom: ({**meta, **remote.get(rom, {})} if fill else meta) for rom, (_, meta) in done.items()}
+        merged = scrape_plan.merge_metadata(remote, {} if replace else new)
     except (ValueError, TypeError) as e:
         why = e if isinstance(e, ValueError) else f"{metadata_key(name)} has an entry that isn't an object"
         print(ui.yellow(f"  ⚠️  {why}; {len(done)} ROM(s) not recorded, skipping the rest of {name}"))
@@ -454,9 +463,9 @@ def run_batch(client, system, batch, skip, threads, shrink, outcomes, listing, r
     return failed, quota, False
 
 
-def run_scrape(client, systems, todo, skip, ask=True, replace=False, forced=None, rerun=RERUN, outcomes=None):
+def run_scrape(client, systems, todo, skip, ask=True, replace=False, forced=None, rerun=RERUN, outcomes=None, fill=False):
     """Confirm (unless not ask), then scrape todo ({system: [(ROM, size, etag)]}) in batches. Returns the exit code.
-    replace, forced, rerun: see run_batch. outcomes: filled with {system: {ROM: how, or None when unknown}}."""
+    replace, forced, rerun, fill: see run_batch. outcomes: filled with {system: {ROM: how, or None when unknown}}."""
     count = sum(len(v) for v in todo.values())
     try:
         listings = {name: s3.list_sizes(f"{scrape_plan.SCRAPES}/{name}/") for name in todo}
@@ -490,7 +499,7 @@ def run_scrape(client, systems, todo, skip, ask=True, replace=False, forced=None
             print(ui.bold(f"\n🔎 {name}: ROMs {started + 1}-{started + len(batch)} of {len(items)}"))
             started += len(batch)
             n, quota_hit, halt = run_batch(client, systems[name], batch, skip, max(1, quota.max_threads), shrink,
-                                           outcomes[name], listings[name], replace, forced, rerun)
+                                           outcomes[name], listings[name], replace, forced, rerun, fill)
             failed += n
             if quota_hit or halt:
                 break
@@ -527,7 +536,8 @@ def scrape_command(args):
     """Scrape the available ROMs that have no metadata yet from ScreenScraper into scrapes/<system>/.
 
     args: system (storage folder name, or None for all), retry (also try ROMs marked unknown), skip_media (media type
-    folder names not to download), dry_run, and optionally all (every ROM in the storage, not just the listed games).
+    folder names not to download), dry_run, and optionally all (every ROM in the storage, not just the listed games) and
+    fill_media (also the ROMs with metadata that lack some media type in storage; their metadata is kept).
     """
     skip = _check_skip(args.skip_media)
     print(ui.bold("🖼️  Scrape from ScreenScraper") + ui.dim(f"  {s3.access(True)}"))
@@ -543,7 +553,11 @@ def scrape_command(args):
             except ValueError:
                 print(ui.yellow(f"  ⚠️  {metadata_key(s['bucket'])} isn't valid JSON; skipping {s['bucket']}"))
                 roms[s["bucket"]] = set()
-        candidates = find_candidates(listed, roms, metadata, retry=args.retry)
+        fill = None
+        if getattr(args, "fill_media", False):
+            have = {s["bucket"]: s3.list_sizes(f"{scrape_plan.SCRAPES}/{s['bucket']}/", sizes=False) for s in listed}
+            fill = (set(screenscraper.MEDIA_MAP.values()) - skip, have)
+        candidates = find_candidates(listed, roms, metadata, retry=args.retry, fill=fill)
         for s in listed:
             if candidates.get(s["bucket"]) and "screenscraper" not in s:
                 print(ui.yellow(f"  ⚠️  {s['bucket']} has no ScreenScraper system id; skipping its {len(candidates[s['bucket']])} ROM(s)"))
@@ -571,7 +585,7 @@ def scrape_command(args):
                 print(ui.dim(f"     … and {len(items) - SHOWN} more"))
         return 0
     client = make_client()
-    return run_scrape(client, {s["bucket"]: s for s in systems}, todo, skip)
+    return run_scrape(client, {s["bucket"]: s for s in systems}, todo, skip, fill=fill is not None)
 
 
 def match_command(args):
