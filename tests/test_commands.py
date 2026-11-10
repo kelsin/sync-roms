@@ -244,6 +244,19 @@ class BackupTest(DataDir):
         self.assertEqual(self.read("cards.json.bak"), {"a": {}})
 
 
+class CardSizeTest(Cmd):
+    def test_size_is_saved_normalized_and_listed(self):
+        self.run_cmd("cards", "new", "SD", "--device", "full", "--layout", "esde", "--size", "512gb")
+        self.run_cmd("cards", "new", "SD2", "--device", "full", "--layout", "esde", "--size", "1 tb")
+        rows = {r["name"]: r["size"] for r in json.loads(self.run_cmd("cards", "list", "--json")[1])}
+        self.assertEqual(rows, {"SD": "512 GB", "SD2": "1 TB"})
+        self.run_cmd("cards", "set", "SD", "--size", "256")
+        self.assertEqual(self.read("cards.json")["SD"]["size"], "256 GB")
+
+    def test_bad_size_exits_2(self):
+        self.assertEqual(self.run_cmd("cards", "new", "SD", "--device", "full", "--layout", "esde", "--size", "big")[0], 2)
+
+
 class FailedSaveTest(Cmd):
     def test_games_save_failure_exits_3(self):
         with mock.patch.object(store, "save_lists", return_value=False):

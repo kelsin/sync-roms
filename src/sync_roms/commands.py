@@ -292,6 +292,15 @@ def games_import(args):
 
 # --- Cards ------------------------------------------------------------------------------------------
 
+def parse_size(text):
+    """A card size as written to cards.json ("512 GB", "1 TB") from "512", "512gb", "1 TB"; None when it isn't one."""
+    m = re.fullmatch(r"\s*(\d+(?:\.\d+)?)\s*(GB|TB|G|T)?\s*", text, re.I)
+    if not m or float(m.group(1)) <= 0:
+        return None
+    number = m.group(1).rstrip("0").rstrip(".") if "." in m.group(1) else m.group(1)
+    return f"{number} {'TB' if (m.group(2) or 'GB').upper().startswith('T') else 'GB'}"
+
+
 def cards_list(args):
     cards = store.load_cards()
     manifest = store.load_catalog()
@@ -300,11 +309,12 @@ def cards_list(args):
         setup = picker.saved_setup(cards[name], manifest["devices"], manifest["layouts"])
         extras = sum(len(v) if isinstance(v, list) else 1 for v in store.card_games(name, cards).values())
         rows.append({"name": name, "device": (setup[0]["id"] if setup[0] else "full") if setup else None,
-                     "layout": setup[1] if setup else None, "extras": extras})
+                     "layout": setup[1] if setup else None, "size": cards[name].get("size") if isinstance(cards[name], dict) else None,
+                     "extras": extras})
     if args.json:
         ui.emit_json(rows)
         return 0
-    ui.table([(r["name"], r["device"] or "(no device set)", r["layout"] or "", f"{r['extras']} extra entries") for r in rows])
+    ui.table([(r["name"], r["device"] or "(no device set)", r["layout"] or "", r["size"] or "", f"{r['extras']} extra entries") for r in rows])
     return 0
 
 
@@ -323,12 +333,19 @@ def cards_save_setup(args, create):
     if create and not (args.device and args.layout):
         ui.fail("cards new needs --device and --layout", 2)
     device, layout = setup_from_flags(manifest, current, args.device, args.layout)
+    values = {"device": device["id"] if device else "full", "layout": layout}
+    if args.size:
+        size = parse_size(args.size)
+        if not size:
+            ui.fail(f"{args.size!r} isn't a card size. Use e.g. 256, 512GB or 1TB", 2)
+        values["size"] = size
+    shown = f"{values['device']} · {layout}" + (f" · {values['size']}" if "size" in values else "")
     if args.dry_run:
-        print(ui.yellow(f"🧪 Would save {args.name}: {device['id'] if device else 'full'} · {layout}"))
+        print(ui.yellow(f"🧪 Would save {args.name}: {shown}"))
         return 0
-    if not store.update_card(args.name, device=device["id"] if device else "full", layout=layout):
+    if not store.update_card(args.name, **values):
         return 3
-    print(ui.green(f"💾 {args.name}: {device['id'] if device else 'full'} · {layout}"))
+    print(ui.green(f"💾 {args.name}: {shown}"))
     return 0
 
 
@@ -741,7 +758,7 @@ def build_parser():
     p = csub.add_parser("list", allow_abbrev=False); p.add_argument("--json", action="store_true"); p.set_defaults(fn=cards_list)
     for name, create in (("new", True), ("set", False)):
         p = csub.add_parser(name, allow_abbrev=False); common(p, card=False); p.add_argument("name")
-        p.add_argument("--device"); p.add_argument("--layout"); p.set_defaults(fn=lambda a, c=create: cards_save_setup(a, c))
+        p.add_argument("--device"); p.add_argument("--layout"); p.add_argument("--size", help="the card's size, e.g. 256, 512GB, 1TB"); p.set_defaults(fn=lambda a, c=create: cards_save_setup(a, c))
     p = csub.add_parser("rename", allow_abbrev=False); common(p, card=False); p.add_argument("old"); p.add_argument("new"); p.set_defaults(fn=cards_rename)
     p = csub.add_parser("delete", allow_abbrev=False); common(p, card=False); p.add_argument("name"); p.set_defaults(fn=cards_delete)
 

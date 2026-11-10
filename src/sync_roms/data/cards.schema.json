@@ -7,6 +7,7 @@
     "properties": {
       "device": {"type": "string", "description": "A device id, or \"full\" for every system"},
       "layout": {"type": "string", "description": "A layout (firmware) name"},
+      "size": {"type": "string", "description": "The card's size as people read it, e.g. \"512 GB\" or \"1 TB\""},
       "android_media": {"enum": ["always", "never"]},
       "systems": {
         "description": "System ids last picked for this card",
