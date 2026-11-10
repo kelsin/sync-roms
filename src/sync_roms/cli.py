@@ -714,7 +714,7 @@ def run(argv):
     bios_systems = chosen + [s for s in systems if s["bucket"] not in chosen_ids
                              and downloads.has_local_files(dest_of(s), layout_name in scrape_plan.ONION_LAYOUTS)]
     bios_keys = sorted({"BIOS/" + f for s in bios_systems for f in s["bios"]["files"]})
-    bios_have = s3.list_sizes("BIOS/") if bios_keys else {}
+    bios_have = (s3.stat_sizes(bios_keys) if s3.read_root() else s3.list_sizes("BIOS/")) if bios_keys else {}
     bios_jobs = []
     for k in bios_keys:
         if k in bios_have:
@@ -725,14 +725,15 @@ def run(argv):
     ui.report_missing([k for k in bios_keys if k not in bios_have], "BIOS file(s)")
     # Android cards also get storage's APKs/ files (APKs, the Obtainium app list) in an APKs/ folder to install from
     apk_dir = os.path.join(base, "APKs")
-    apk_jobs = ([(k, os.path.join(apk_dir, k[len("APKs/"):]), size) for k, size in sorted(s3.list_sizes("APKs/").items())
+    apk_jobs = ([(k, os.path.join(apk_dir, k[len("APKs/"):]), size) for k, size in sorted(s3.list_sizes("APKs/", sizes=False).items())
                  if not k.endswith("/")] if layout_name == "esde" else [])
+    apk_jobs = downloads.with_sizes(apk_jobs)
 
     # Onion cards also get storage's os/onion/Themes/ folders in the card's Themes/
     themes_dir = layout.get("themes_dir")
     theme_jobs = []
     if themes_dir:
-        for k, size in sorted(s3.list_sizes(runtime.THEMES_PREFIX).items()):
+        for k, size in sorted(s3.list_sizes(runtime.THEMES_PREFIX, sizes=False).items()):
             rel = k[len(runtime.THEMES_PREFIX):]
             if k.endswith("/") or os.path.basename(rel) == ".DS_Store":
                 continue
@@ -740,6 +741,8 @@ def run(argv):
                 theme_jobs.append((k, s3.safe_join(os.path.join(base, themes_dir), rel), size))
             except ValueError as e:
                 print(ui.yellow(f"  ⚠️  skipping {e}"))
+
+    theme_jobs = downloads.with_sizes(theme_jobs)
 
     rom_todo, bios_todo = downloads.plan_downloads(rom_jobs, unzip, disc_dir), downloads.plan_downloads(bios_jobs)
     apk_todo = downloads.plan_downloads(apk_jobs)

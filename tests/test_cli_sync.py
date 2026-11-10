@@ -18,7 +18,7 @@ SYSTEM = {"name": "Game Boy Advance", "bucket": "gba", "folders": {"esde": "gba"
 MANIFEST = {"systems": [SYSTEM], "devices": [], "layouts": {"esde": {"label": "ES-DE", "roms_dir": "ROMs", "bios_dir": "BIOS"}}}
 
 
-def list_sizes(prefix):
+def list_sizes(prefix, sizes=True):
     return {"gba/Game.zip": 5} if prefix == "gba/" else {}
 
 
@@ -126,7 +126,7 @@ class SyncSmokeTest(RealDataDirGuard):
         patches = ((store, {"load_manifest": lambda names=(): manifest}),
                    (cli, {"free_space": lambda path: 10**9}),
                    (cli.downloads, {"run_downloads": lambda todo, label, *a: (bios.extend(todo) if label == "BIOS" else None) or 0}),
-                   (cli.s3, {"list_sizes": lambda prefix: {"BIOS/scph1001.bin": 5} if prefix == "BIOS/" else list_sizes(prefix)}),
+                   (cli.s3, {"list_sizes": lambda prefix, sizes=True: {"BIOS/scph1001.bin": 5} if prefix == "BIOS/" else list_sizes(prefix)}),
                    (cli.ui, {"choose": lambda q, *a, **k: "n"}))
         self.run_sync(False, lambda rows, present, state, editable: [0], prepare=prepare, patches=patches)
         self.assertEqual([j[0] for j in bios], ["BIOS/scph1001.bin"])
@@ -135,14 +135,14 @@ class SyncSmokeTest(RealDataDirGuard):
         got = []
         patches = ((cli, {"free_space": lambda path: 10**9}),
                    (cli.downloads, {"run_downloads": lambda todo, label, icon, base, *a: (got.extend((j[0], j[1]) for j in todo) if label == "Android" else None) or 0}),
-                   (cli.s3, {"list_sizes": lambda prefix: {"APKs/": 0, "APKs/Obtainium.apk": 5} if prefix == "APKs/" else list_sizes(prefix)}),
+                   (cli.s3, {"list_sizes": lambda prefix, sizes=True: {"APKs/": 0, "APKs/Obtainium.apk": 5} if prefix == "APKs/" else list_sizes(prefix)}),
                    (cli.ui, {"choose": lambda q, *a, **k: "n"}))
         self.run_sync(False, patches=patches)
         self.assertEqual([k for k, _ in got], ["APKs/Obtainium.apk"])
         self.assertEqual(os.path.basename(os.path.dirname(got[0][1])), "APKs")
 
     def test_themes_are_copied_to_themes_on_onion_cards_only(self):
-        listing = lambda prefix: ({"os/onion/Themes/": 0, "os/onion/Themes/A/config.json": 5, "os/onion/Themes/A/.DS_Store": 1}
+        listing = lambda prefix, sizes=True: ({"os/onion/Themes/": 0, "os/onion/Themes/A/config.json": 5, "os/onion/Themes/A/.DS_Store": 1}
                                   if prefix == "os/onion/Themes/" else list_sizes(prefix))
         for layout, expected in (("onion", ["os/onion/Themes/A/config.json"]), ("allium", []), ("esde", [])):
             with self.subTest(layout=layout):

@@ -2,6 +2,7 @@
 import contextlib
 import os
 import shutil
+import stat
 from concurrent.futures import ThreadPoolExecutor
 
 import boto3
@@ -25,13 +26,15 @@ def safe_join(base, rel):
 def mirror_sizes(root, prefix="", sizes=True):
     """{key: size} of the files under root whose key starts with prefix (a folder, ending in /).
     Without sizes the values are None: a network share answers a name listing fast but each size is a round trip."""
-    out = {}
-    for folder, _, files in os.walk(os.path.join(root, prefix)):
-        for name in files:
-            path = os.path.join(folder, name)
-            out[os.path.relpath(path, root).replace(os.sep, "/")] = os.path.getsize(path) if sizes else None
-    return out
+    paths = [os.path.join(folder, name) for folder, _, files in os.walk(os.path.join(root, prefix)) for name in files]
+    keys = [os.path.relpath(path, root).replace(os.sep, "/") for path in paths]
+    if not sizes:
+        return dict.fromkeys(keys)
+    with ThreadPoolExecutor(STAT_WORKERS) as ex:  # the stats wait on the network, so many at once
+        return dict(zip(keys, ex.map(os.path.getsize, paths)))
 
+
+STAT_WORKERS = 32  # parallel stats on a folder: each is a round trip on a network share
 
 ERRORS = (ClientError, BotoCoreError, OSError)  # what a bucket or a folder can raise
 
@@ -80,12 +83,12 @@ def stat_sizes(keys):
     """{key: size} of the keys that exist as files in the read folder, checked in parallel (one stat each, no folder walk)."""
     def size(key):
         try:
-            path = safe_join(read_root(), key)
-            return os.path.getsize(path) if os.path.isfile(path) else None
+            st = os.stat(safe_join(read_root(), key))
         except (OSError, ValueError):
             return None
+        return st.st_size if stat.S_ISREG(st.st_mode) else None
     keys = list(keys)
-    with ThreadPoolExecutor(runtime.WORKERS) as ex:
+    with ThreadPoolExecutor(STAT_WORKERS) as ex:
         return {k: n for k, n in zip(keys, ex.map(size, keys)) if n is not None}
 
 
