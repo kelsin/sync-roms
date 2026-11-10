@@ -10,6 +10,7 @@ import json
 import math
 import os
 import re
+import threading
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -49,7 +50,11 @@ ROM_HASHES = (("md5", "rommd5"), ("sha1", "romsha1"), ("crc", "romcrc"))  # what
 LANGUAGES = ("en",)
 NOTGAME = "ZZZ(NOTGAME)"
 RATING_MAX = 20
-TIMEOUT = 60
+TIMEOUT = 60  # seconds a connection may sit silent once open
+CONNECT_TIMEOUT = 10  # seconds to open a connection before trying again
+CONNECT_TRIES = 3
+REDIRECTS = 5
+REDIRECT_CODES = (301, 302, 303, 307, 308)
 REDIRECT_REFUSED = "redirect refused"
 HOST = "screenscraper.fr"  # every request and redirect goes to it or a subdomain, over https
 API_MAX = 16 << 20  # bytes an API response may have
@@ -222,22 +227,107 @@ def _too_large(resp, limit):
     return to_int(length.get("Content-Length") if length is not None else None) > limit
 
 
-class SafeRedirect(urllib.request.HTTPRedirectHandler):
-    """Follows only redirects to https screenscraper.fr; the refusal's text never holds a URL."""
+class _Body:
+    """A response body; its connection stays usable only when the body was read in full (unread bytes would answer the
+    thread's next request), so closing it half-read closes the connection."""
 
-    def redirect_request(self, req, fp, code, msg, headers, newurl):
-        if not _allowed(newurl):
-            if fp is not None:
-                fp.close()
-            raise urllib.error.HTTPError("", code, REDIRECT_REFUSED, headers, None)
-        return super().redirect_request(req, fp, code, msg, headers, newurl)
+    def __init__(self, resp, drop):
+        self._resp, self._drop, self.headers = resp, drop, resp.headers
+
+    def read(self, amt=None):
+        return self._resp.read(amt)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        self.close()
+
+    def close(self):
+        if not self._resp.isclosed():
+            self._drop()
+        self._resp.close()
+
+
+class KeepAlive:
+    """Opens a Request like urllib's opener, but keeps one HTTPS connection per host and thread, so a worker's requests
+    share one TCP and TLS handshake. A connection is retried a few times if it won't open quickly. Follows only
+    redirects to https screenscraper.fr; an error status or a refused redirect is raised as urllib.error.HTTPError."""
+
+    def __init__(self):
+        self._local = threading.local()
+
+    def __call__(self, req, timeout=None):
+        url = req.full_url
+        for _ in range(REDIRECTS + 1):
+            parts = urllib.parse.urlsplit(url)
+            key = (parts.hostname, parts.port or 443)
+            path = urllib.parse.urlunsplit(("", "", parts.path or "/", parts.query, ""))
+            resp = self._send(key, path, req.headers, timeout)
+            if resp.status in REDIRECT_CODES:
+                location = resp.getheader("Location") or ""
+                self._drop(key)
+                url = urllib.parse.urljoin(url, location)
+                if not _allowed(url):
+                    raise urllib.error.HTTPError("", resp.status, REDIRECT_REFUSED, resp.headers, None)
+                continue
+            if resp.status >= 400:
+                self._drop(key)
+                raise urllib.error.HTTPError("", resp.status, resp.reason, resp.headers, None)
+            return _Body(resp, lambda: self._drop(key))
+        raise urllib.error.HTTPError("", resp.status, "too many redirects", resp.headers, None)
+
+    def _conns(self):
+        if not hasattr(self._local, "conns"):
+            self._local.conns = {}
+        return self._local.conns
+
+    def _drop(self, key):
+        conn = self._conns().pop(key, None)
+        if conn is not None:
+            conn.close()
+
+    def _connection(self, key, timeout):
+        """(this thread's connection to the host, whether it was opened just now)."""
+        conns = self._conns()
+        if key not in conns:
+            conns[key] = http.client.HTTPSConnection(*key, timeout=CONNECT_TIMEOUT)
+        conn = conns[key]
+        fresh = conn.sock is None
+        if fresh:
+            for attempt in range(CONNECT_TRIES):
+                try:
+                    conn.connect()
+                    break
+                except OSError:
+                    conn.close()
+                    if attempt == CONNECT_TRIES - 1:
+                        self._drop(key)
+                        raise
+        conn.sock.settimeout(timeout)
+        return conn, fresh
+
+    def _send(self, key, path, headers, timeout):
+        """The response to a GET. A kept connection the server has since closed is replaced once."""
+        for retry in (True, False):
+            conn, fresh = self._connection(key, timeout)
+            try:
+                conn.request("GET", path, headers=headers)
+                return conn.getresponse()
+            except TimeoutError:
+                self._drop(key)
+                raise
+            except (OSError, http.client.HTTPException):
+                self._drop(key)
+                if fresh or not retry:
+                    raise
 
 
 class Client:
     def __init__(self, user, password, dev, opener=None):
         self._auth = {"devid": dev["devid"], "devpassword": dev["devpassword"], "softname": SOFTNAME,
                       "ssid": user, "sspassword": password}
-        self._opener = opener or urllib.request.build_opener(SafeRedirect).open
+        self._opener = opener or KeepAlive()
 
     def _open(self, url):
         """The response for a URL. Every error is turned into one of ours whose text never holds the URL (its query

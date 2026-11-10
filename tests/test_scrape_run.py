@@ -509,13 +509,43 @@ class RoundTwoRunTest(RunBase):
             self.assertEqual(len(stems), len(set(stems)))
         self.assertEqual(set(self.metadata()), {"Game.zip", "Game.7z", "Other.zip"})
 
+    def test_next_batch_is_scraped_while_the_last_one_uploads(self):
+        self.put("gba/a.zip")
+        self.put("gba/b.zip")
+        seen, real = [], upload.run_copies
+
+        def run_copies(todo):
+            if not seen:  # the first upload: the pool must already be on the second batch
+                for _ in range(100):
+                    if "b.zip" in self.client.lookups:
+                        break
+                    threading.Event().wait(0.05)
+                seen.append("b.zip" in self.client.lookups)
+            return real(todo)
+        with mock.patch.object(scrape_online, "BATCH", 1), mock.patch.object(upload, "run_copies", side_effect=run_copies):
+            self.assertEqual(self.run_scrape(), 0)
+        self.assertEqual(seen, [True])
+        self.assertEqual(set(self.metadata()), {"a.zip", "b.zip"})
+
+    def test_metadata_is_written_once_for_many_batches(self):
+        for r in ("a.zip", "b.zip", "c.zip", "d.zip"):
+            self.put(f"gba/{r}")
+        for every, writes in ((100, 1), (2, 2)):
+            with self.subTest(every=every), mock.patch.object(scrape_online, "BATCH", 1), \
+                    mock.patch.object(scrape_online, "METADATA_EVERY", every), \
+                    mock.patch.object(s3, "put_text", wraps=s3.put_text) as put:
+                self.assertEqual(self.run_scrape(retry=True), 0)
+                self.assertEqual([c.args[0] for c in put.call_args_list].count("scrapes/gba/metadata.json"), writes)
+                self.assertEqual(set(self.metadata()), {"a.zip", "b.zip", "c.zip", "d.zip"})
+            os.remove(os.path.join(self.root, "scrapes", "gba", "metadata.json"))
+
     def test_non_object_metadata_entry_stops_that_system(self):
         self.put("gba/a.zip")
         self.put("gba/b.zip")
         self.put("scrapes/gba/metadata.json", b'{"old.zip": null}')
         with mock.patch.object(scrape_online, "BATCH", 1):
             self.assertEqual(self.run_scrape(), 1)
-        self.assertEqual(self.client.lookups, ["a.zip"])
+        self.assertEqual(self.client.lookups, [])  # found out before any quota is spent
         self.assertEqual(self.metadata(), {"old.zip": None})
         self.assertIn("metadata.json", self.out.getvalue())
 
