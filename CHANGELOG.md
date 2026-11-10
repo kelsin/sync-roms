@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.46.2](https://github.com/kelsin/sync-roms/compare/v0.46.1...v0.46.2) (2026-11-10)
+
+
+### :bug: Bug Fixes
+
+* **data:** add screenscraper ids for arduboy, sufami, arcadia and gamate ([#187](https://github.com/kelsin/sync-roms/issues/187)) ([a95ff55](https://github.com/kelsin/sync-roms/commit/a95ff55fb2d4ee25504e08a1b6caf50e3e67d6a0))
+
+
+### :broom: Chores
+
+* **release:** include perf and chore sections in changelog ([#185](https://github.com/kelsin/sync-roms/issues/185)) ([5f375d8](https://github.com/kelsin/sync-roms/commit/5f375d8a9415f24842e026397d81df5530d08409))
+
 ## [0.46.1](https://github.com/kelsin/sync-roms/compare/v0.46.0...v0.46.1) (2026-11-10)
 
 
