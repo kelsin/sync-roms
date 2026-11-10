@@ -296,6 +296,31 @@
       "title": "Mega Man X8",
       "system": "ps2",
       "bucket": "ps2/Mega Man X8 (USA).chd"
+    },
+    {
+      "title": "Rockman: Battle & Fighters",
+      "system": "ngpc",
+      "bucket": "ngpc/Rockman - Battle & Fighters (Japan).zip"
+    },
+    {
+      "title": "Mega Man 9",
+      "system": "ps3",
+      "bucket": "ps3/Mega Man 9 PSN [NPUB-30036].rar"
+    },
+    {
+      "title": "Mega Man 10",
+      "system": "ps3",
+      "bucket": "ps3/Mega Man 10 PSN [NPUB-30114].rar"
+    },
+    {
+      "title": "Mega Man X4",
+      "system": "ps3",
+      "bucket": "ps3/Mega Man X4 PSN [NPUJ-00561].rar"
+    },
+    {
+      "title": "Mega Man X5",
+      "system": "ps3",
+      "bucket": "ps3/Mega Man X5 PSN [NPUJ-01334].rar"
     }
   ]
 }

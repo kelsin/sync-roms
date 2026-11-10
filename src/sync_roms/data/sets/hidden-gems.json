@@ -1179,6 +1179,211 @@
       "title": "Fuzion Frenzy",
       "system": "xbox",
       "bucket": "xbox/Fuzion Frenzy (USA).iso"
+    },
+    {
+      "title": "Zarlor Mercenary",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Zarlor Mercenary (World).zip"
+    },
+    {
+      "title": "Battle Wheels",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Battle Wheels (USA, Europe).zip"
+    },
+    {
+      "title": "Towers II - Plight of the Stargazer",
+      "system": "atarijaguar",
+      "bucket": "atarijaguar/Towers II - Plight of the Stargazer (USA, Europe).zip"
+    },
+    {
+      "title": "Baldies",
+      "system": "atarijaguarcd",
+      "bucket": "atarijaguarcd/Baldies (USA) (Rev 1).chd"
+    },
+    {
+      "title": "Midnight Mutants",
+      "system": "atari7800",
+      "bucket": "atari7800/Midnight Mutants (USA).zip"
+    },
+    {
+      "title": "Ninja Golf",
+      "system": "atari7800",
+      "bucket": "atari7800/Ninja Golf (USA).zip"
+    },
+    {
+      "title": "Spider Fighter",
+      "system": "atari2600",
+      "bucket": "atari2600/Spider Fighter (USA).zip"
+    },
+    {
+      "title": "Solaris",
+      "system": "atari2600",
+      "bucket": "atari2600/Solaris (USA).zip"
+    },
+    {
+      "title": "Cosmic Ark",
+      "system": "atari2600",
+      "bucket": "atari2600/Cosmic Ark (USA).zip"
+    },
+    {
+      "title": "Killer Bees",
+      "system": "odyssey2",
+      "bucket": "odyssey2/Killer Bees (USA).zip"
+    },
+    {
+      "title": "UFO",
+      "system": "odyssey2",
+      "bucket": "odyssey2/UFO (USA).zip"
+    },
+    {
+      "title": "Fortress of Narzod",
+      "system": "vectrex",
+      "bucket": "vectrex/Fortress of Narzod (USA, Europe).zip"
+    },
+    {
+      "title": "Knightmare II - The Maze of Galious",
+      "system": "msx",
+      "bucket": "msx/Knightmare II - The Maze of Galious (Japan).zip"
+    },
+    {
+      "title": "Penguin Adventure",
+      "system": "msx",
+      "bucket": "msx/Penguin Adventure (Japan, Europe) (En).zip"
+    },
+    {
+      "title": "The Treasure of Usas",
+      "system": "msx2",
+      "bucket": "msx2/Treasure of Usas, The (Japan, Europe) (En).zip"
+    },
+    {
+      "title": "Space Manbow",
+      "system": "msx2",
+      "bucket": "msx2/Space Manbow (Japan) (Wii U Virtual Console).zip"
+    },
+    {
+      "title": "Metal Gear 2 - Solid Snake",
+      "system": "msx2",
+      "bucket": "msx2/Metal Gear 2 - Solid Snake (Japan).zip"
+    },
+    {
+      "title": "Treasure Conflix",
+      "system": "satellaview",
+      "bucket": "satellaview/Treasure Conflix (Japan).zip"
+    },
+    {
+      "title": "Radical Dreamers",
+      "system": "satellaview",
+      "bucket": "satellaview/Radical Dreamers - Nusume Nai Houseki (Japan) (2-24).zip"
+    },
+    {
+      "title": "BS Zelda - Inishie no Sekiban",
+      "system": "satellaview",
+      "bucket": "satellaview/BS Zelda no Densetsu - Inishie no Sekiban - Dai-1-wa (Japan) (SoundLink).zip"
+    },
+    {
+      "title": "Mystic Balloon",
+      "system": "arduboy",
+      "bucket": "arduboy/Mystic Balloon (World) (v1.7).zip"
+    },
+    {
+      "title": "Catacombs of the Damned",
+      "system": "arduboy",
+      "bucket": "arduboy/Catacombs of the Damned (World) (v1.0).zip"
+    },
+    {
+      "title": "Rose Blood - Chi no Kawaki",
+      "system": "pc98",
+      "bucket": "pc98/Rose Blood - Chi no Kawaki (Japan).hdi"
+    },
+    {
+      "title": "Keio Flying Squadron",
+      "system": "segacd",
+      "bucket": "segacd/Keio Flying Squadron (USA).chd"
+    },
+    {
+      "title": "Android Assault",
+      "system": "segacd",
+      "bucket": "segacd/Android Assault - The Revenge of Bari-Arm (USA).chd"
+    },
+    {
+      "title": "Popful Mail",
+      "system": "segacd",
+      "bucket": "segacd/Popful Mail (USA) (RE).chd"
+    },
+    {
+      "title": "Vay",
+      "system": "segacd",
+      "bucket": "segacd/Vay (USA).chd"
+    },
+    {
+      "title": "Cosmic Fantasy 2",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Cosmic Fantasy 2 (USA).chd"
+    },
+    {
+      "title": "Kolibri",
+      "system": "sega32x",
+      "bucket": "sega32x/Kolibri (USA, Europe).zip"
+    },
+    {
+      "title": "Tempo",
+      "system": "sega32x",
+      "bucket": "sega32x/Tempo (Japan, USA) (En).zip"
+    },
+    {
+      "title": "Biomotor Unitron",
+      "system": "ngpc",
+      "bucket": "ngpc/Biomotor Unitron (USA, Europe).zip"
+    },
+    {
+      "title": "Cotton",
+      "system": "ngpc",
+      "bucket": "ngpc/Fantastic Night Dreams - Cotton (Europe).zip"
+    },
+    {
+      "title": "Twinkle Star Sprites",
+      "system": "neogeocd",
+      "bucket": "neogeocd/Twinkle Star Sprites (Japan) (En,Ja).chd"
+    },
+    {
+      "title": "Aldynes",
+      "system": "supergrafx",
+      "bucket": "supergrafx/Aldynes - The Misson Code for Rage Crisis (Japan).zip"
+    },
+    {
+      "title": "Klonoa: Moonlight Museum",
+      "system": "wonderswan",
+      "bucket": "wonderswan/Kaze no Klonoa - Moonlight Museum (Japan).zip"
+    },
+    {
+      "title": "Judgement Silversword",
+      "system": "wonderswancolor",
+      "bucket": "wonderswancolor/Judgement Silversword - Rebirth Edition (Japan) (Rev 5C21).zip"
+    },
+    {
+      "title": "The Wonderful 101",
+      "system": "wiiu",
+      "bucket": "wiiu/The Wonderful 101 (US) (v16).wua"
+    },
+    {
+      "title": "Alan Wake",
+      "system": "xbox360",
+      "bucket": "xbox360/Alan Wake (World) (En,Ja,Fr,De,Es,It,Zh,Ko,Pl,Ru).zar"
+    },
+    {
+      "title": "Vanquish",
+      "system": "xbox360",
+      "bucket": "xbox360/Vanquish (World) (En,Ja,Fr,De,Es,It).zar"
+    },
+    {
+      "title": "Tokyo Mirage Sessions #FE",
+      "system": "wiiu",
+      "bucket": "wiiu/Tokyo Mirage Sessions #FE (US) (v16).wua"
+    },
+    {
+      "title": "Kirby and the Rainbow Curse",
+      "system": "wiiu",
+      "bucket": "wiiu/Kirby and the Rainbow Curse (US) (v16).wua"
     }
   ]
 }

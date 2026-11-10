@@ -521,6 +521,91 @@
       "title": "Centipede",
       "system": "dreamcast",
       "bucket": "dreamcast/Centipede (USA).chd"
+    },
+    {
+      "title": "Block Out",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Block Out (USA, Europe).zip"
+    },
+    {
+      "title": "Chip's Challenge",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Chip's Challenge (World).zip"
+    },
+    {
+      "title": "California Games",
+      "system": "atarilynx",
+      "bucket": "atarilynx/California Games (World).zip"
+    },
+    {
+      "title": "Galaga",
+      "system": "atari7800",
+      "bucket": "atari7800/Galaga (USA).zip"
+    },
+    {
+      "title": "Joust",
+      "system": "atari7800",
+      "bucket": "atari7800/Joust (USA).zip"
+    },
+    {
+      "title": "River Raid",
+      "system": "atari2600",
+      "bucket": "atari2600/River Raid (USA).zip"
+    },
+    {
+      "title": "Gridrunner",
+      "system": "c64",
+      "bucket": "c64/Gridrunner (USA, Europe).zip"
+    },
+    {
+      "title": "Pole Position (C64)",
+      "system": "c64",
+      "bucket": "c64/Pole Position (USA, Europe).zip"
+    },
+    {
+      "title": "Moon Patrol (C64)",
+      "system": "c64",
+      "bucket": "c64/Moon Patrol (USA, Europe).zip"
+    },
+    {
+      "title": "Pang (C64)",
+      "system": "c64",
+      "bucket": "c64/Pang (Europe).zip"
+    },
+    {
+      "title": "Bomberman (MSX)",
+      "system": "msx",
+      "bucket": "msx/Bomberman (Japan).zip"
+    },
+    {
+      "title": "Arkanoid (MSX)",
+      "system": "msx",
+      "bucket": "msx/Arkanoid (Japan).zip"
+    },
+    {
+      "title": "Mystic Balloon",
+      "system": "arduboy",
+      "bucket": "arduboy/Mystic Balloon (World) (v1.7).zip"
+    },
+    {
+      "title": "Epic Crates of Mass Destruction",
+      "system": "arduboy",
+      "bucket": "arduboy/Epic Crates of Mass Destruction (World).zip"
+    },
+    {
+      "title": "Tetris (Arduboy)",
+      "system": "arduboy",
+      "bucket": "arduboy/Tetris (World) (Erwin's Collection).zip"
+    },
+    {
+      "title": "Kooky Kookies",
+      "system": "arduboy",
+      "bucket": "arduboy/Kooky Kookies (World) (v1.2).zip"
+    },
+    {
+      "title": "Star Soldier - 2 Minute Mode",
+      "system": "satellaview",
+      "bucket": "satellaview/Star Soldier - 2 Minute Mode (Japan) (En).zip"
     }
   ]
 }

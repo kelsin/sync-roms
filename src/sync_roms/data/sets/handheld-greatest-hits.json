@@ -321,6 +321,76 @@
       "title": "Tekken - Dark Resurrection (En,Fr,De,Es,It)",
       "system": "psp",
       "bucket": "psp/Tekken - Dark Resurrection (USA) (En,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "Rampage",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Rampage (World).zip"
+    },
+    {
+      "title": "S.T.U.N. Runner",
+      "system": "atarilynx",
+      "bucket": "atarilynx/S.T.U.N. Runner (USA, Europe).zip"
+    },
+    {
+      "title": "Blue Lightning",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Blue Lightning (World).zip"
+    },
+    {
+      "title": "Chip's Challenge",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Chip's Challenge (World).zip"
+    },
+    {
+      "title": "California Games",
+      "system": "atarilynx",
+      "bucket": "atarilynx/California Games (World).zip"
+    },
+    {
+      "title": "RoadBlasters",
+      "system": "atarilynx",
+      "bucket": "atarilynx/RoadBlasters (World).zip"
+    },
+    {
+      "title": "Ninja Gaiden III - The Ancient Ship of Doom",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Ninja Gaiden III - The Ancient Ship of Doom (USA, Europe).zip"
+    },
+    {
+      "title": "Rampart",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Rampart (USA, Europe).zip"
+    },
+    {
+      "title": "Rockman: Battle & Fighters",
+      "system": "ngpc",
+      "bucket": "ngpc/Rockman - Battle & Fighters (Japan).zip"
+    },
+    {
+      "title": "SNK vs. Capcom: The Match of the Millennium",
+      "system": "ngpc",
+      "bucket": "ngpc/SNK vs. Capcom - The Match of the Millennium (World) (En,Ja).zip"
+    },
+    {
+      "title": "Metal Slug: 2nd Mission",
+      "system": "ngpc",
+      "bucket": "ngpc/Metal Slug - 2nd Mission (World) (En,Ja).zip"
+    },
+    {
+      "title": "Virtual Boy Wario Land",
+      "system": "virtualboy",
+      "bucket": "virtualboy/Virtual Boy Wario Land (Japan, USA) (En).zip"
+    },
+    {
+      "title": "Mr. Driller",
+      "system": "wonderswancolor",
+      "bucket": "wonderswancolor/Mr. Driller (Japan).zip"
+    },
+    {
+      "title": "Xenoblade Chronicles 3D",
+      "system": "n3ds",
+      "bucket": "n3ds/Xenoblade Chronicles 3D (USA) (En,Fr,Es) (Rev 1).3ds"
     }
   ]
 }

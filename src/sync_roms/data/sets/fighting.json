@@ -759,6 +759,71 @@
       "title": "Dead or Alive 3",
       "system": "xbox",
       "bucket": "xbox/Dead or Alive 3 (USA) (En,Ja).iso"
+    },
+    {
+      "title": "The King of Fighters '96",
+      "system": "neogeocd",
+      "bucket": "neogeocd/King of Fighters '96, The (World) (En,Ja).chd"
+    },
+    {
+      "title": "The King of Fighters '98",
+      "system": "neogeocd",
+      "bucket": "neogeocd/King of Fighters '98, The - Dream Match Never Ends ~ The King of Fighters '98 - The Slugfest (Japan) (En,Ja).chd"
+    },
+    {
+      "title": "The Last Blade",
+      "system": "neogeocd",
+      "bucket": "neogeocd/Bakumatsu Roman - Gekka no Kenshi ~ The Last Blade (Japan) (En,Ja,Es,Pt).chd"
+    },
+    {
+      "title": "Samurai Shodown III",
+      "system": "neogeocd",
+      "bucket": "neogeocd/Samurai Spirits - Zankurou Musouken ~ Samurai Shodown III (World) (En,Ja,Es,Pt).chd"
+    },
+    {
+      "title": "Virtua Fighter",
+      "system": "sega32x",
+      "bucket": "sega32x/Virtua Fighter (Japan, USA) (En).zip"
+    },
+    {
+      "title": "Mortal Kombat II",
+      "system": "sega32x",
+      "bucket": "sega32x/Mortal Kombat II (Japan, USA) (En).zip"
+    },
+    {
+      "title": "SNK vs. Capcom: The Match of the Millennium",
+      "system": "ngpc",
+      "bucket": "ngpc/SNK vs. Capcom - The Match of the Millennium (World) (En,Ja).zip"
+    },
+    {
+      "title": "King of Fighters R-2",
+      "system": "ngpc",
+      "bucket": "ngpc/King of Fighters R-2 - Pocket Fighting Series (World) (En,Ja).zip"
+    },
+    {
+      "title": "Samurai Shodown! 2",
+      "system": "ngpc",
+      "bucket": "ngpc/Samurai Shodown! 2 - Pocket Fighting Series (World) (En,Ja).zip"
+    },
+    {
+      "title": "The Last Blade: Beyond the Destiny",
+      "system": "ngpc",
+      "bucket": "ngpc/Last Blade, The - Beyond the Destiny (USA, Europe).zip"
+    },
+    {
+      "title": "Super Smash Bros. for Wii U",
+      "system": "wiiu",
+      "bucket": "wiiu/Super Smash Bros. (US) (v304).wua"
+    },
+    {
+      "title": "Pokken Tournament",
+      "system": "wiiu",
+      "bucket": "wiiu/POKKÉN TOURNAMENT (US) (v64).wua"
+    },
+    {
+      "title": "Ultra Street Fighter IV",
+      "system": "xbox360",
+      "bucket": "xbox360/Ultimate Marvel vs. Capcom 3 (USA, Japan) (En,Ja,Fr,De,Es,It).zar"
     }
   ]
 }

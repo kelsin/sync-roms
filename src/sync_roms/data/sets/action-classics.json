@@ -462,6 +462,111 @@
       "title": "Otogi: Myth of Demons",
       "system": "xbox",
       "bucket": "xbox/Otogi - Myth of Demons (USA).iso"
+    },
+    {
+      "title": "Ninja Gaiden",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Ninja Gaiden (USA, Europe).zip"
+    },
+    {
+      "title": "Ninja Gaiden III - The Ancient Ship of Doom",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Ninja Gaiden III - The Ancient Ship of Doom (USA, Europe).zip"
+    },
+    {
+      "title": "Rygar",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Rygar (World).zip"
+    },
+    {
+      "title": "Karateka",
+      "system": "atari7800",
+      "bucket": "atari7800/Karateka (USA).zip"
+    },
+    {
+      "title": "Ninja Golf",
+      "system": "atari7800",
+      "bucket": "atari7800/Ninja Golf (USA).zip"
+    },
+    {
+      "title": "Adventure",
+      "system": "atari2600",
+      "bucket": "atari2600/Adventure (USA).zip"
+    },
+    {
+      "title": "Metal Gear (MSX2)",
+      "system": "msx2",
+      "bucket": "msx2/Metal Gear (Europe).zip"
+    },
+    {
+      "title": "Metal Gear 2 - Solid Snake",
+      "system": "msx2",
+      "bucket": "msx2/Metal Gear 2 - Solid Snake (Japan).zip"
+    },
+    {
+      "title": "Kung Fu Master (MSX)",
+      "system": "msx",
+      "bucket": "msx/Kung Fu Master (Japan).zip"
+    },
+    {
+      "title": "Knightmare II - The Maze of Galious",
+      "system": "msx",
+      "bucket": "msx/Knightmare II - The Maze of Galious (Japan).zip"
+    },
+    {
+      "title": "Yie Ar Kung-Fu II",
+      "system": "msx",
+      "bucket": "msx/Yie Ar Kung-Fu II - The Emperor Yie-Gah (Japan).zip"
+    },
+    {
+      "title": "Spy Hunter (C64)",
+      "system": "c64",
+      "bucket": "c64/Spy Hunter (USA, Europe).zip"
+    },
+    {
+      "title": "Shadow of the Beast (C64)",
+      "system": "c64",
+      "bucket": "c64/Shadow of the Beast (Europe).zip"
+    },
+    {
+      "title": "Kung-Fu Master (C64)",
+      "system": "c64",
+      "bucket": "c64/Kung-Fu Master (USA, Europe).zip"
+    },
+    {
+      "title": "Wild Guns",
+      "system": "satellaview",
+      "bucket": "satellaview/Wild Guns (Japan).zip"
+    },
+    {
+      "title": "Bayonetta",
+      "system": "wiiu",
+      "bucket": "wiiu/BAYONETTA (US).wua"
+    },
+    {
+      "title": "Bayonetta 2",
+      "system": "wiiu",
+      "bucket": "wiiu/BAYONETTA 2 (US).wua"
+    },
+    {
+      "title": "The Wonderful 101",
+      "system": "wiiu",
+      "bucket": "wiiu/The Wonderful 101 (US) (v16).wua"
+    },
+    {
+      "title": "Vanquish",
+      "system": "xbox360",
+      "bucket": "xbox360/Vanquish (World) (En,Ja,Fr,De,Es,It).zar"
+    },
+    {
+      "title": "Metal Gear Rising: Revengeance",
+      "system": "xbox360",
+      "bucket": "xbox360/Metal Gear Rising - Revengeance (USA, Europe) (En,Ja,Fr,De,Es,It,Pt).zar"
+    },
+    {
+      "title": "Ninja Gaiden II",
+      "system": "xbox360",
+      "bucket": "xbox360/Ninja Gaiden II (World) (En,Ja,Fr,De,Es,It,Zh,Ko,Pl,Ru).zar"
     }
   ]
 }

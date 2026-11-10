@@ -96,6 +96,26 @@
       "title": "Legend of Zelda, The - Ocarina of Time - Master Quest",
       "system": "n64",
       "bucket": "n64/Legend of Zelda, The - Ocarina of Time - Master Quest (USA) (GameCube).zip"
+    },
+    {
+      "title": "The Legend of Zelda: Breath of the Wild",
+      "system": "wiiu",
+      "bucket": "wiiu/Breath of the Wild (US) (v208).wua"
+    },
+    {
+      "title": "The Legend of Zelda: The Wind Waker HD",
+      "system": "wiiu",
+      "bucket": "wiiu/The Wind Waker HD (US).wua"
+    },
+    {
+      "title": "The Legend of Zelda: Twilight Princess HD",
+      "system": "wiiu",
+      "bucket": "wiiu/Twilight Princess HD (US) (v81).wua"
+    },
+    {
+      "title": "Hyrule Warriors",
+      "system": "wiiu",
+      "bucket": "wiiu/Hyrule Warriors (US) (v208).wua"
     }
   ]
 }

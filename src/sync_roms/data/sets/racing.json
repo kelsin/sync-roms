@@ -390,6 +390,101 @@
       "title": "Sega GT 2002",
       "system": "xbox",
       "bucket": "xbox/Sega GT 2002 (USA) (En,Ja).iso"
+    },
+    {
+      "title": "RoadBlasters",
+      "system": "atarilynx",
+      "bucket": "atarilynx/RoadBlasters (World).zip"
+    },
+    {
+      "title": "Atari Karts",
+      "system": "atarijaguar",
+      "bucket": "atarijaguar/Atari Karts (World).zip"
+    },
+    {
+      "title": "Super Burnout",
+      "system": "atarijaguar",
+      "bucket": "atarijaguar/Super Burnout (World).zip"
+    },
+    {
+      "title": "Power Drive Rally",
+      "system": "atarijaguar",
+      "bucket": "atarijaguar/Power Drive Rally (World).zip"
+    },
+    {
+      "title": "Enduro",
+      "system": "atari2600",
+      "bucket": "atari2600/Enduro (USA).zip"
+    },
+    {
+      "title": "Pole Position",
+      "system": "atari2600",
+      "bucket": "atari2600/Pole Position (USA).zip"
+    },
+    {
+      "title": "Pole Position II",
+      "system": "atari7800",
+      "bucket": "atari7800/Pole Position II (USA).zip"
+    },
+    {
+      "title": "Road Fighter",
+      "system": "msx",
+      "bucket": "msx/Road Fighter (Japan) (Alt).zip"
+    },
+    {
+      "title": "Hang-On (MSX)",
+      "system": "msx",
+      "bucket": "msx/Hang-On (Japan).zip"
+    },
+    {
+      "title": "F-1 Spirit",
+      "system": "msx",
+      "bucket": "msx/F-1 Spirit - The Way to Formula-1 (Japan).zip"
+    },
+    {
+      "title": "Out Run (MSX2)",
+      "system": "msx2",
+      "bucket": "msx2/Out Run (Japan).zip"
+    },
+    {
+      "title": "Pole Position (C64)",
+      "system": "c64",
+      "bucket": "c64/Pole Position (USA, Europe).zip"
+    },
+    {
+      "title": "Pitstop (C64)",
+      "system": "c64",
+      "bucket": "c64/Pitstop (USA, Europe).zip"
+    },
+    {
+      "title": "Chase H.Q. II (C64)",
+      "system": "c64",
+      "bucket": "c64/Chase H.Q. II - Special Criminal Investigation (Europe).zip"
+    },
+    {
+      "title": "Ardu-Racer",
+      "system": "arduboy",
+      "bucket": "arduboy/Ardu-Racer (World) (v1.3).zip"
+    },
+    {
+      "title": "Virtua Racing Deluxe",
+      "system": "sega32x",
+      "bucket": "sega32x/Virtua Racing Deluxe (USA).zip"
+    },
+    {
+      "title": "Mario Kart 8",
+      "system": "wiiu",
+      "bucket": "wiiu/MARIO KART 8 (US) (v81).wua"
+    },
+    {
+      "title": "Project Gotham Racing 4",
+      "system": "xbox360",
+      "bucket": "xbox360/Project Gotham Racing 4 (World) (En,Ja,Fr,De,Es,It,Zh,Ko,Pl,Ru,Cs,Hu).zar"
+    },
+    {
+      "title": "Burnout Paradise",
+      "system": "xbox360",
+      "bucket": "xbox360/Burnout Paradise (USA).zar"
     }
   ]
 }

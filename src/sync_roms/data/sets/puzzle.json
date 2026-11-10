@@ -541,6 +541,131 @@
       "title": "Worms World Party",
       "system": "dreamcast",
       "bucket": "dreamcast/Worms World Party (USA) (En,Fr,De,Es,It,Nl,Sv,Da).chd"
+    },
+    {
+      "title": "Chip's Challenge",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Chip's Challenge (World).zip"
+    },
+    {
+      "title": "Block Out",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Block Out (USA, Europe).zip"
+    },
+    {
+      "title": "Evolution - Dino Dudes",
+      "system": "atarijaguar",
+      "bucket": "atarijaguar/Evolution - Dino Dudes (World).zip"
+    },
+    {
+      "title": "QIX",
+      "system": "atari5200",
+      "bucket": "atari5200/QIX (USA).zip"
+    },
+    {
+      "title": "Eggerland Mystery",
+      "system": "msx",
+      "bucket": "msx/Eggerland Mystery (Japan).zip"
+    },
+    {
+      "title": "Quarth",
+      "system": "msx2",
+      "bucket": "msx2/Quarth (Japan) (Wii U Virtual Console).zip"
+    },
+    {
+      "title": "Shanghai",
+      "system": "msx2",
+      "bucket": "msx2/Shanghai (Japan).zip"
+    },
+    {
+      "title": "Tetris (MSX2)",
+      "system": "msx2",
+      "bucket": "msx2/Tetris (Japan).zip"
+    },
+    {
+      "title": "Lemmings (Satellaview)",
+      "system": "satellaview",
+      "bucket": "satellaview/Lemmings (Japan) (En).zip"
+    },
+    {
+      "title": "Sutte Hakkun BS Version 2",
+      "system": "satellaview",
+      "bucket": "satellaview/Sutte Hakkun - BS Version 2 (Japan) (10-8).zip"
+    },
+    {
+      "title": "Yoshi no Panepon BS",
+      "system": "satellaview",
+      "bucket": "satellaview/Yoshi no Panepon - BS Ban (Japan) (En,Ja) (7-5).zip"
+    },
+    {
+      "title": "Tamori no Picross",
+      "system": "satellaview",
+      "bucket": "satellaview/Tamori no Picross (Japan) (6-13).zip"
+    },
+    {
+      "title": "Super Puyo Puyo (Satellaview)",
+      "system": "satellaview",
+      "bucket": "satellaview/Super Puyo Puyo (Japan).zip"
+    },
+    {
+      "title": "Tetris (Arduboy)",
+      "system": "arduboy",
+      "bucket": "arduboy/Tetris (World) (Erwin's Collection).zip"
+    },
+    {
+      "title": "Jezzball",
+      "system": "arduboy",
+      "bucket": "arduboy/Jezzball (World) (Erwin's Collection).zip"
+    },
+    {
+      "title": "PiCross",
+      "system": "arduboy",
+      "bucket": "arduboy/PiCross (World) (Erwin's Collection).zip"
+    },
+    {
+      "title": "Puyo Pop",
+      "system": "ngpc",
+      "bucket": "ngpc/Puyo Pop (World) (En,Ja) (v06).zip"
+    },
+    {
+      "title": "Bust-A-Move Pocket",
+      "system": "ngpc",
+      "bucket": "ngpc/Bust-A-Move Pocket (USA).zip"
+    },
+    {
+      "title": "Puzzle Link 2",
+      "system": "ngpc",
+      "bucket": "ngpc/Puzzle Link 2 (USA, Europe).zip"
+    },
+    {
+      "title": "Magical Drop II",
+      "system": "neogeocd",
+      "bucket": "neogeocd/Magical Drop 2 (Japan) (En,Ja).chd"
+    },
+    {
+      "title": "Puzzle Bobble",
+      "system": "neogeocd",
+      "bucket": "neogeocd/Puzzle Bobble ~ Bust-A-Move (Japan) (En,Ja).chd"
+    },
+    {
+      "title": "GunPey",
+      "system": "wonderswan",
+      "bucket": "wonderswan/GunPey (Japan).zip"
+    },
+    {
+      "title": "Mr. Driller",
+      "system": "wonderswancolor",
+      "bucket": "wonderswancolor/Mr. Driller (Japan).zip"
+    },
+    {
+      "title": "Panic Bomber",
+      "system": "virtualboy",
+      "bucket": "virtualboy/Panic Bomber (USA).zip"
+    },
+    {
+      "title": "3-D Tetris",
+      "system": "virtualboy",
+      "bucket": "virtualboy/3-D Tetris (USA).zip"
     }
   ]
 }
