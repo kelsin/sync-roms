@@ -10,7 +10,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "src"))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
-from sync_roms import mirroring, runtime, s3, store, usersettings, upload  # noqa: E402
+from sync_roms import downloads, mirroring, runtime, s3, store, usersettings, upload  # noqa: E402
 
 
 class IsolationTest(unittest.TestCase):
@@ -47,6 +47,18 @@ class FolderStorageTest(unittest.TestCase):
         s3.put_text("gba/a.zip", "abc")
         with mock.patch.object(os.path, "getsize", side_effect=AssertionError("statted")):
             self.assertEqual(s3.list_sizes("gba/", sizes=False), {"gba/a.zip": None})
+
+    def test_with_sizes_reads_only_the_missing_sizes_and_drops_gone_files(self):
+        s3.put_text("gba/a.zip", "abc")
+        jobs = [("gba/a.zip", "/x/a", None), ("gba/gone.zip", "/x/g", None), ("gba/b.zip", "/x/b", 7)]
+        self.assertEqual(downloads.with_sizes(jobs), [("gba/a.zip", "/x/a", 3), ("gba/b.zip", "/x/b", 7)])
+        known = [("gba/b.zip", "/x/b", 7)]
+        with mock.patch.object(s3, "stat_sizes", side_effect=AssertionError("statted")):
+            self.assertIs(downloads.with_sizes(known), known)
+
+    def test_stat_sizes_ignores_folders(self):
+        s3.put_text("gba/a.zip", "abc")
+        self.assertEqual(s3.stat_sizes(["gba/a.zip", "gba"]), {"gba/a.zip": 3})
 
     def test_no_mirror_with_a_root(self):
         mirror = os.path.join(self.root, "mirror")

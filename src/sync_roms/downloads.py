@@ -39,6 +39,16 @@ def is_current(path, size, disc_dir=None):
     return False
 
 
+def with_sizes(jobs):
+    """jobs with any size left unread (None, from a folder listing without sizes) read now, in parallel; a file that
+    has gone is dropped. Bucket listings carry every size, so for them this changes nothing."""
+    todo = [k for k, _, size in jobs if size is None]
+    if not todo:
+        return jobs
+    have = s3.stat_sizes(todo)
+    return [(k, p, have[k] if size is None else size) for k, p, size in jobs if size is not None or k in have]
+
+
 def plan_downloads(jobs, unzip=False, disc_dir=None):
     """jobs: list of (s3_key, local_path, expected_size). Drops files already present, and with unzip the
     archives whose ROM was already extracted."""

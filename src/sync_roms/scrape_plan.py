@@ -394,15 +394,15 @@ def plan_esde_extras(es_dir, listing, texts):
             changed = new != old
         if changed:
             writes.append((path, new))
-    return downloads.plan_downloads(jobs), writes
+    return downloads.plan_downloads(downloads.with_sizes(jobs)), writes
 
 
 def load_scrape_data(systems, esde):
     """The storage's scrape data for the chosen systems: {storage folder: (listing, metadata)}, plus the
     shared scrapes/esde/ listing and texts when the layout is esde."""
     with ThreadPoolExecutor(runtime.WORKERS) as ex:
-        listings = list(ex.map(lambda s: s3.list_sizes(f"{SCRAPES}/{s['bucket']}/"), systems))
-    extra = s3.list_sizes(f"{SCRAPES}/esde/") if esde else {}
+        listings = list(ex.map(lambda s: s3.list_sizes(f"{SCRAPES}/{s['bucket']}/", sizes=False), systems))
+    extra = s3.list_sizes(f"{SCRAPES}/esde/", sizes=False) if esde else {}
     meta_keys = [f"{SCRAPES}/{s['bucket']}/metadata.json" for s, l in zip(systems, listings)
                  if f"{SCRAPES}/{s['bucket']}/metadata.json" in l]
     texts = s3.fetch_texts(meta_keys + [k for k in extra if k.endswith(".cfg") or k.endswith("/settings.json")])
@@ -447,7 +447,7 @@ def build_scrape_plan(layout_name, systems, data, extra, extra_texts, rom_rels, 
                                             lambda rom, d=rom_dir: present(os.path.join(
                                                 d, os.path.basename(rom) if layout_name == "slot" else rom)),
                                             clones.get(s["bucket"]))
-        plan["jobs"] += downloads.plan_downloads(jobs)
+        plan["jobs"] += downloads.plan_downloads(downloads.with_sizes(jobs))  # sizes only for media that could be installed
         for path, text in texts:  # only the ones that would change
             if not os.path.exists(path) or read_text(path) != text:
                 plan["writes"].append((path, text))
