@@ -12,47 +12,47 @@
       "changelog-sections": [
         {
           "type": "feat",
-          "section": "Features"
+          "section": ":video_game: Features"
         },
         {
           "type": "fix",
-          "section": "Bug Fixes"
+          "section": ":bug: Bug Fixes"
         },
         {
           "type": "perf",
-          "section": "Performance Improvements"
+          "section": ":zap: Performance Improvements"
         },
         {
           "type": "revert",
-          "section": "Reverts"
+          "section": ":rewind: Reverts"
         },
         {
           "type": "chore",
-          "section": "Chores"
+          "section": ":broom: Chores"
         },
         {
           "type": "docs",
-          "section": "Documentation"
+          "section": ":book: Documentation"
         },
         {
           "type": "style",
-          "section": "Styles"
+          "section": ":art: Styles"
         },
         {
           "type": "refactor",
-          "section": "Code Refactoring"
+          "section": ":hammer_and_wrench: Code Refactoring"
         },
         {
           "type": "test",
-          "section": "Tests"
+          "section": ":traffic_light: Tests"
         },
         {
           "type": "build",
-          "section": "Build System"
+          "section": ":package: Build System"
         },
         {
           "type": "ci",
-          "section": "Continuous Integration"
+          "section": ":gear: Continuous Integration"
         }
       ]
     }
