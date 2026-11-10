@@ -135,10 +135,10 @@ class SyncSmokeTest(RealDataDirGuard):
         got = []
         patches = ((cli, {"free_space": lambda path: 10**9}),
                    (cli.downloads, {"run_downloads": lambda todo, label, icon, base, *a: (got.extend((j[0], j[1]) for j in todo) if label == "Android" else None) or 0}),
-                   (cli.s3, {"list_sizes": lambda prefix, sizes=True: {"APKs/": 0, "APKs/Obtainium.apk": 5} if prefix == "APKs/" else list_sizes(prefix)}),
+                   (cli.s3, {"list_sizes": lambda prefix, sizes=True: {"os/android/APKs/": 0, "os/android/APKs/Obtainium.apk": 5} if prefix == "os/android/APKs/" else list_sizes(prefix)}),
                    (cli.ui, {"choose": lambda q, *a, **k: "n"}))
         self.run_sync(False, patches=patches)
-        self.assertEqual([k for k, _ in got], ["APKs/Obtainium.apk"])
+        self.assertEqual([k for k, _ in got], ["os/android/APKs/Obtainium.apk"])
         self.assertEqual(os.path.basename(os.path.dirname(got[0][1])), "APKs")
 
     def test_themes_are_copied_to_themes_on_onion_cards_only(self):

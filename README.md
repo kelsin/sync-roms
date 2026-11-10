@@ -234,7 +234,7 @@ While typing a filter (or a note, which `w` opens in the game list): `^A` `^E` s
    case and bracketed tags). A muOS or Slot folder whose ROM folders hold no ROMs is skipped, so art isn't
    wiped from a card whose ROMs are elsewhere (muOS can keep them on SD2). Art you add by hand or install
    from a `.muxcat` set for ROMs that aren't on the card is removed too.
-7. For the `esde` (Android) layout, everything in storage's `APKs/` folder (APKs, the Obtainium app list) is
+7. For the `esde` (Android) layout, everything in storage's `os/android/APKs/` folder (APKs, the Obtainium app list) is
    copied to an `APKs/` folder on the card so the apps can be installed from the device. For the `onion` layout
    (not Allium), everything under storage's `os/onion/Themes/` is copied to the card's `Themes/` the same way,
    skipping files already there with the same size and never deleting anything. Also, files in the card's Android media folders (`Alarms`, `Audiobooks`, `DCIM`,
