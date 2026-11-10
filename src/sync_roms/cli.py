@@ -8,7 +8,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 from botocore.exceptions import BotoCoreError, ClientError, NoCredentialsError
 
-from . import __version__, clean, commands, downloads, edit, external, m3u, picker, runtime, s3, scrape_plan, store, ui, usersettings
+from . import __version__, clean, commands, downloads, edit, external, m3u, picker, runtime, s3, scrape_plan, store, ui, usersettings, vita
 
 
 SUBCOMMANDS = {  # name -> (usage, one-line summary)
@@ -952,6 +952,12 @@ def sync_card(args):
         # also archives already on the card (not just new downloads), e.g. from an interrupted run
         archives = sorted({j[1] for j in rom_todo} | set(chd.card_archives({dest_of(s) for s in chosen})))
         for path, error in chd.unzip_roms(archives):
+            failed += 1
+            failures.append((os.path.relpath(path, roms_dir), error))
+            print(ui.red(f"  ❌ {os.path.relpath(path, roms_dir)}: {error}"))
+
+    if layout_name in ("esde", "emudeck"):  # ES-DE launches an installed Vita game through its .psvita file
+        for path, error in vita.add_psvita_files({dest_of(s) for s in chosen if s["bucket"] == "psvita"}):
             failed += 1
             failures.append((os.path.relpath(path, roms_dir), error))
             print(ui.red(f"  ❌ {os.path.relpath(path, roms_dir)}: {error}"))
