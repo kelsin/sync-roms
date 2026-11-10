@@ -13,7 +13,7 @@ from . import downloads, runtime, s3, store, ui
 
 
 # --- Scraped data (media, metadata, themes, collections, settings) --------------------------------
-# Lives in the bucket under scrapes/. Metadata is neutral JSON with only the fields that are safe
+# Lives in storage under scrapes/. Metadata is neutral JSON with only the fields that are safe
 # to share; media keeps ES-DE's media type folder names.
 SCRAPES = "scrapes"
 MEDIA_TYPES = {"3dboxes", "backcovers", "covers", "custom", "fanart", "manuals", "marquees",
@@ -80,7 +80,7 @@ def parse_gamelist(text):
 
 
 def merge_metadata(remote, local):
-    """Local values replace the bucket's; entries (and fields) only in the bucket are kept."""
+    """Local values replace storage's; entries (and fields) only in storage are kept."""
     merged = {k: dict(v) for k, v in remote.items()}
     for rom, fields in local.items():
         merged[rom] = {**merged.get(rom, {}), **fields}
@@ -132,7 +132,7 @@ def walk_files(root, skip_top=()):
 
 
 # --- Installing scraped data ------------------------------------------------------------------------
-# A sync places the bucket's scrapes/ data for the chosen systems on the card, converted for the layout:
+# A sync places storage's scrapes/ data for the chosen systems on the card, converted for the layout:
 # esde keeps ES-DE's media folders and gamelists, knulli gets images/videos/manuals and a gamelist.xml
 # with explicit media tags, onion gets the box art made for it at upload time in Imgs/ and a miyoogamelist.xml.
 # Knulli: (gamelist tag, folder, file suffix, ES-DE media types to take it from; first one found wins)
@@ -398,7 +398,7 @@ def plan_esde_extras(es_dir, listing, texts):
 
 
 def load_scrape_data(systems, esde):
-    """The bucket's scrape data for the chosen systems: {bucket folder: (listing, metadata)}, plus the
+    """The storage's scrape data for the chosen systems: {storage folder: (listing, metadata)}, plus the
     shared scrapes/esde/ listing and texts when the layout is esde."""
     with ThreadPoolExecutor(runtime.WORKERS) as ex:
         listings = list(ex.map(lambda s: s3.list_sizes(f"{SCRAPES}/{s['bucket']}/"), systems))
@@ -443,7 +443,7 @@ def build_scrape_plan(layout_name, systems, data, extra, extra_texts, rom_rels, 
         media_root = media_root_of(layout_name, s, base, es_dir)
         jobs, entries, texts = plan_scrapes(layout_name, rom_rels.get(s["bucket"], ()), listing, meta, media_root,
                                             rom_dir,
-                                            # Slot takes ROMs flat, whatever folder they are in in the bucket
+                                            # Slot takes ROMs flat, whatever folder they are in in storage
                                             lambda rom, d=rom_dir: present(os.path.join(
                                                 d, os.path.basename(rom) if layout_name == "slot" else rom)),
                                             clones.get(s["bucket"]))

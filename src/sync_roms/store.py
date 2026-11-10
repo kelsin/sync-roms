@@ -9,7 +9,7 @@ from . import ui
 
 
 REPO_DATA = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
-PERSONAL_FILES = ("games.json",)  # per-user, in data_dir(); never read from the bucket
+PERSONAL_FILES = ("games.json",)  # per-user, in data_dir(); never read from storage
 
 
 def repo_json(name):
@@ -216,7 +216,7 @@ def listed(s):
 def available_keys(s, have):
     """Bucket keys to download: every file in the folder for full systems, else the game list.
 
-    have: {key: size} listing of the system's bucket folder.
+    have: {key: size} listing of the system's storage folder.
     """
     if s.get("full_system"):
         return sorted(k for k in have if not k.endswith("/"))

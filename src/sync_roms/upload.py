@@ -1,4 +1,4 @@
-"""Uploading ROMs to the bucket (or the storage folder)."""
+"""Uploading ROMs to storage."""
 import mimetypes
 import os
 import queue
@@ -26,7 +26,7 @@ def upload_workers():
 def plan_rom_upload(root, bucket, existing):
     """(new, changed, same) lists of (key, path, size) for the ROM files under root, keyed bucket/relative path.
 
-    existing: {key: size} listing of the bucket folder; a file whose size matches is the same.
+    existing: {key: size} listing of storage folder; a file whose size matches is the same.
     """
     new, changed, same = [], [], []
     for dirpath, files in downloads.walk_roms(root, keep_dotfiles=True):
@@ -185,7 +185,7 @@ def run_uploads(todo):
 
 
 def upload_command(args):
-    """Upload the ROMs in one folder (default: the current directory) to the bucket folder of a system you pick."""
+    """Upload the ROMs in one folder (default: the current directory) to storage folder of a system you pick."""
     folder = os.path.abspath(os.path.expanduser(args.upload or os.getcwd()))
     if not os.path.isdir(folder):
         ui.fail(f"{folder} is not a folder", 2)
@@ -233,7 +233,7 @@ def upload_command(args):
 
 
 def replace_command(args, folder, system):
-    """Make a bucket folder match a local one: move renamed files, upload new and changed ones, and delete the rest
+    """Make a storage folder match a local one: move renamed files, upload new and changed ones, and delete the rest
     that you pick."""
     bucket = system["bucket"]
     local = diff.local_sizes(folder)
@@ -249,8 +249,8 @@ def replace_command(args, folder, system):
         ui.fail(f"{e}", 3)
     print(f"\n💿 New: {ui.bold(str(len(new)))} ({ui.human_size(sum(local[p] for p in new))})")
     print(f"♻️  Different content, would overwrite: {ui.bold(str(len(changed)))} ({ui.human_size(sum(local[p] for p in changed))})")
-    print(f"🚚 Renamed, would move in the bucket: {ui.bold(str(len(renames)))}")
-    print(f"🗑️  Only in the bucket, not renames: {ui.bold(str(len(only_bucket)))} ({ui.human_size(sum(remote[p][0] for p in only_bucket))})")
+    print(f"🚚 Renamed, would move in storage: {ui.bold(str(len(renames)))}")
+    print(f"🗑️  Only in storage, not renames: {ui.bold(str(len(only_bucket)))} ({ui.human_size(sum(remote[p][0] for p in only_bucket))})")
     for old, newname in renames[:10]:
         print(ui.dim(f"     {old} → {newname}"))
     if len(renames) > 10:

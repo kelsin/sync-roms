@@ -117,7 +117,7 @@ def edit_one(game_set, systems, keys_of):
                 continue
             s = shown[systems[j]["bucket"]]
             had = {g["bucket"] for g in s["games"]}
-            edit.toggle_games(f"✏️  {s['name']} — ✅ in {game_set['name']}, ⬜ in bucket only",
+            edit.toggle_games(f"✏️  {s['name']} — ✅ in {game_set['name']}, ⬜ in storage only",
                               edit.system_rows(s, keys_of(s["bucket"])))
             added = {g["bucket"] for g in s["games"]} - had
             category = ask_category(game_set["games"], f"{len(added)} new game(s)") if added else ""

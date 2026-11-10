@@ -1,4 +1,4 @@
-"""Download ROMs and BIOS files from the roms bucket."""
+"""Download ROMs and BIOS files from your ROM storage."""
 import argparse
 import os
 import shutil
@@ -17,16 +17,16 @@ SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "sets": ("edit", "edit the repo's game sets by hand and open a PR with the changes"),
     "cards": ("edit|list|new|set|rename|delete", "list and manage the cards you've synced"),
     "devices": ("[ID]", "list the supported devices, or one device's systems"),
-    "upload": ("roms [DIR] | scrapes [CARD]", "upload ROMs or a card's scraped data to the bucket"),
+    "upload": ("roms [DIR] | scrapes [CARD]", "upload ROMs or a card's scraped data to storage"),
     "diff": ("[DIR]", "list the ROMs in only DIR or only the bucket, ignoring renames"),
-    "scrape": ("[match SYSTEM ROM GAME]", "scrape the ROMs that have no metadata from ScreenScraper into the bucket's scrapes/ folder"),
-    "clean": ("scrapes", "remove scrapes/ media and metadata for ROMs that aren't in the bucket"),
+    "scrape": ("[match SYSTEM ROM GAME]", "scrape the ROMs that have no metadata from ScreenScraper into storage's scrapes/ folder"),
+    "clean": ("scrapes", "remove scrapes/ media and metadata for ROMs that aren't in storage"),
     "playlist": ("[DIR]", "create or fix the .m3u playlist of every multi-disc game"),
     "convert": ("[DIR]", "unzip archives and convert disc images to verified .chd"),
     "tools": ("install", "brew install the 7z and chdman that `convert` needs"),
     "mirror": ("[DIR] | use DIR | clear", "make or refresh a local copy of everything your lists reference"),
     "config": ("show|path", "show the effective settings and where each comes from"),
-    "doctor": ("", "check the AWS profile, bucket access, tools and your data files"),
+    "doctor": ("", "check the AWS profile, storage access, tools and your data files"),
     "check": ("", "validate games.json, cards.json, the device overlay and the sets"),
     "completion": ("bash|zsh|fish", "print a shell completion script"),
 }
@@ -45,7 +45,7 @@ TOPICS = {
    2. Toggle systems (--systems a,b or --systems all skips the picker).
    3. Local ROMs no longer in a chosen system's list, in a system with no games listed, or in a system the card's device no longer lists, are listed and, after you confirm (default no), deleted first so the free space shown is accurate.
       Then totals and free space are shown and you confirm; ROMs download, then BIOS.
-   4. Scraped data for the chosen systems' games is installed from the bucket's scrapes/ folder, then media on the
+   4. Scraped data for the chosen systems' games is installed from storage's scrapes/ folder, then media on the
       card for ROMs it doesn't have is removed.
    5. BIOS for every system with ROMs on the card is installed, chosen or not. Other systems' ROM folders are never touched.
 
@@ -76,7 +76,7 @@ TOPICS = {
   sync-roms sets edit                         edit the repo's sets (games, categories, new and deleted sets), then open a PR
 
   Needs git and the GitHub CLI (gh, logged in). Your edits are written to a temporary clone of kelsin/sync-roms, pushed
-  as a branch and opened as a PR; nothing is written to the bucket or to ~/.sync-roms.
+  as a branch and opened as a PR; nothing is written to storage or to ~/.sync-roms.
   Pick a set to switch games off, add games from a system (you're asked for a category), change a game's category or
   rename it. ➕ New set creates one; d deletes the highlighted one. Esc reviews the changes before the PR is opened.
 """,
@@ -99,17 +99,17 @@ TOPICS = {
   Without an ID: every device with its chip and system count. With one: its firmwares, note and systems.
 """,
     "upload": """
-  sync-roms upload roms [DIR] [--replace] [--dry-run]    upload the ROMs in DIR (default: current directory) to the bucket folder of a system you pick
-  sync-roms upload scrapes [CARD] [--dry-run]            upload CARD/ES-DE scraped data to the bucket's scrapes/ folder, merging with what's there
+  sync-roms upload roms [DIR] [--replace] [--dry-run]    upload the ROMs in DIR (default: current directory) to storage folder of a system you pick
+  sync-roms upload scrapes [CARD] [--dry-run]            upload CARD/ES-DE scraped data to storage's scrapes/ folder, merging with what's there
 
   The system is guessed from the folder name; same-size files are skipped, a different size overwrites after you confirm.
-  --replace makes the bucket folder match DIR: renamed files are moved by content, and left-over bucket files are listed
+  --replace makes the storage folder match DIR: renamed files are moved by content, and left-over storage files are listed
   so you pick which to delete. Uploads use the write profile (ROMS_WRITE_PROFILE, default 'roms').
 """,
     "diff": """
   sync-roms diff [DIR]
 
-  Lists the ROMs in only one of DIR and the bucket folder of a system you pick. Same path and size is the same file;
+  Lists the ROMs in only one of DIR and storage folder of a system you pick. Same path and size is the same file;
   the rest are matched by content (the CRCs inside zips).
 """,
     "scrape": """
@@ -118,9 +118,9 @@ TOPICS = {
   sync-roms scrape --set-credentials
 
   Looks up every available ROM with no entry in scrapes/<system>/metadata.json on ScreenScraper and writes its
-  metadata and media (and the Onion/Slot images) to the bucket or storage folder. The ROMs and how each will be
+  metadata and media (and the Onion/Slot images) to storage. The ROMs and how each will be
   looked up are listed first. ROMs ScreenScraper doesn't know are remembered and skipped until --retry.
-  --system ID        only that bucket folder (e.g. gba)
+  --system ID        only that storage folder (e.g. gba)
   --skip-media TYPES comma-separated media folders not to download (covers, 3dboxes, backcovers, fanart, manuals,
                      marquees, ...); other values are refused with the list
   --dry-run          list the ROMs and the metadata and media folders that would be written; no ScreenScraper
@@ -134,7 +134,7 @@ TOPICS = {
     "clean": """
   sync-roms clean scrapes [--dry-run]
 
-  Removes scrapes/ media and metadata for ROMs that aren't in the bucket at all (asks first).
+  Removes scrapes/ media and metadata for ROMs that aren't in storage at all (asks first).
 """,
     "playlist": """
   sync-roms playlist [DIR] [--dry-run]
@@ -168,14 +168,14 @@ TOPICS = {
     "doctor": """
   sync-roms doctor
 
-  Checks the AWS profile and bucket access, the tools `convert` needs, and that your data files parse.
+  Checks the AWS profile and storage access, the tools `convert` needs, and that your data files parse.
 """,
     "check": """
   sync-roms check [--bucket-keys]
 
   Validates games.json, cards.json, device-systems.json and the sets (built-in and ~/.sync-roms/sets): bad JSON,
   unknown systems, devices and sets. Exits 1 if anything is wrong.
-  --bucket-keys also lists the bucket (read-only profile) and reports every game or set file it doesn't have.
+  --bucket-keys also lists storage (read-only profile) and reports every game or set file it doesn't have.
 """,
     "completion": """
   sync-roms completion bash|zsh|fish
@@ -191,7 +191,7 @@ def help_text(topic=None):
     rows = "\n".join(f"  {ui.green(name):<{20 + len(ui.green(''))}} {ui.cyan(usage) if usage else ''}\n      {summary}"
                      for name, (usage, summary) in SUBCOMMANDS.items())
     return f"""
-{ui.bold('🎮 sync-roms')} — download ROMs and BIOS files from your S3 bucket
+{ui.bold('🎮 sync-roms')} — download ROMs and BIOS files from your ROM storage (an S3 bucket or a folder)
 
 {ui.bold('USAGE')}
   {ui.green('sync-roms')} [{ui.cyan('CARD')}]                 sync a card (same as `sync-roms sync CARD`)
@@ -211,7 +211,7 @@ def help_text(topic=None):
 
 {ui.bold('ENVIRONMENT')}
   {ui.yellow('ROMS_BUCKET')}  {ui.yellow('ROMS_ROOT')}  {ui.yellow('ROMS_ENDPOINT')}  {ui.yellow('ROMS_PROFILE')} (default roms-readonly)  {ui.yellow('ROMS_WRITE_PROFILE')} (default roms)
-  override settings.json "bucket", "root" (a folder, e.g. a mounted network share, used instead of the bucket), "endpoint", "profile", "write_profile"; the flags above override these. {ui.yellow('NO_COLOR')} / {ui.yellow('FORCE_COLOR')} control colors.
+  override settings.json "bucket", "root" (a folder, e.g. a mounted network share, used instead of storage), "endpoint", "profile", "write_profile"; the flags above override these. {ui.yellow('NO_COLOR')} / {ui.yellow('FORCE_COLOR')} control colors.
 
 {ui.bold('EXIT CODES')}
   0 done (or nothing to do, or you declined)   1 some files failed   2 bad usage   3 setup problem (credentials, bucket, tools, bad data file)   130 interrupted
@@ -220,7 +220,7 @@ def help_text(topic=None):
   sync-roms /Volumes/SD                          sync the card
   sync-roms sync /Volumes/SD --device rg35xx-sp --layout knulli --systems all --yes --dry-run
   sync-roms games add gba 'Metroid*' --card SD   add games to a card's extras
-  sync-roms upload roms ~/roms/gba               upload ROMs to the bucket
+  sync-roms upload roms ~/roms/gba               upload ROMs to storage
 
   {ui.dim('The old flags (--edit, --upload, --upload-scrapes, --clean-scrapes, --m3u, --cd, --install-tools, --mirror,')}
   {ui.dim('--use-mirror, --clear-mirror, --devices) still work. A card folder named like a command: write ./edit.')}
@@ -661,7 +661,7 @@ def run(argv):
         print(ui.yellow("👋 Nothing selected."))
         return 0
     chosen = [systems[i] for i in chosen]
-    print(ui.bold(f"\n🔎 Checking {len(chosen)} system(s) against the bucket..."))
+    print(ui.bold(f"\n🔎 Checking {len(chosen)} system(s) against storage..."))
 
     def dest_of(s):
         return os.path.join(roms_dir, s["folders"][layout_name])
@@ -706,12 +706,12 @@ def run(argv):
             except ValueError as e:
                 print(ui.yellow(f"  ⚠️  skipping {e}"))
     ui.report_missing([k for k in bios_keys if k not in bios_have], "BIOS file(s)")
-    # Android cards also get the bucket's APKs/ files (APKs, the Obtainium app list) in an APKs/ folder to install from
+    # Android cards also get storage's APKs/ files (APKs, the Obtainium app list) in an APKs/ folder to install from
     apk_dir = os.path.join(base, "APKs")
     apk_jobs = ([(k, os.path.join(apk_dir, k[len("APKs/"):]), size) for k, size in sorted(s3.list_sizes("APKs/").items())
                  if not k.endswith("/")] if layout_name == "esde" else [])
 
-    # Onion cards also get the bucket's os/onion/Themes/ folders in the card's Themes/
+    # Onion cards also get storage's os/onion/Themes/ folders in the card's Themes/
     themes_dir = layout.get("themes_dir")
     theme_jobs = []
     if themes_dir:
@@ -788,7 +788,7 @@ def run(argv):
         if args.json:
             ui.emit_json(plan_json)
         print(ui.bold(f"\n🧪 Would download {len(todo_all)} file(s) ({ui.human_size(sum(j[2] or 0 for j in todo_all))}), "
-                      f"delete {len(extras)} local ROM(s) and {stale_count} media file(s); {len(missing)} listed ROM(s) not in the bucket"))
+                      f"delete {len(extras)} local ROM(s) and {stale_count} media file(s); {len(missing)} listed ROM(s) not in storage"))
         return 0
 
     if extras:  # cleared first so the free space shown below is what the downloads really get
