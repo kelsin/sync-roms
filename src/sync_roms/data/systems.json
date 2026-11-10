@@ -2331,5 +2331,168 @@
       "files": [],
       "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
     }
+  },
+  {
+    "name": "Sega SG-1000",
+    "bucket": "sg1000",
+    "screenscraper": 109,
+    "folders": {
+      "esde": "sg-1000",
+      "knulli": "sg1000",
+      "onion": null,
+      "allium": null,
+      "muos": null,
+      "slot": null,
+      "emudeck": "sg-1000"
+    },
+    "bios": {
+      "files": [],
+      "libretro_cores": [
+        "genesis_plus_gx"
+      ]
+    }
+  },
+  {
+    "name": "MSX",
+    "bucket": "msx",
+    "screenscraper": 113,
+    "folders": {
+      "esde": "msx",
+      "knulli": "msx1",
+      "onion": null,
+      "allium": null,
+      "muos": null,
+      "slot": null,
+      "emudeck": "msx"
+    },
+    "bios": {
+      "files": [
+        "MSX.ROM",
+        "MSX2.ROM",
+        "MSX2EXT.ROM",
+        "MSX2P.ROM",
+        "MSX2PEXT.ROM",
+        "MSXDOS2.ROM",
+        "PAINTER.ROM",
+        "KANJI.ROM",
+        "FMPAC.ROM",
+        "DISK.ROM",
+        "RS232.ROM"
+      ],
+      "libretro_cores": [
+        "bluemsx",
+        "fmsx"
+      ],
+      "note": "blueMSX also needs its Machines/ and Databases/ folders in the BIOS folder"
+    }
+  },
+  {
+    "name": "MSX2",
+    "bucket": "msx2",
+    "screenscraper": 116,
+    "folders": {
+      "esde": "msx2",
+      "knulli": "msx2",
+      "onion": null,
+      "allium": null,
+      "muos": null,
+      "slot": null,
+      "emudeck": "msx2"
+    },
+    "bios": {
+      "files": [
+        "MSX.ROM",
+        "MSX2.ROM",
+        "MSX2EXT.ROM",
+        "MSX2P.ROM",
+        "MSX2PEXT.ROM",
+        "MSXDOS2.ROM",
+        "PAINTER.ROM",
+        "KANJI.ROM",
+        "FMPAC.ROM",
+        "DISK.ROM",
+        "RS232.ROM"
+      ],
+      "libretro_cores": [
+        "bluemsx",
+        "fmsx"
+      ],
+      "note": "blueMSX also needs its Machines/ and Databases/ folders in the BIOS folder"
+    }
+  },
+  {
+    "name": "Emerson Arcadia 2001",
+    "bucket": "arcadia",
+    "folders": {
+      "esde": "arcadia",
+      "knulli": "arcadia",
+      "onion": null,
+      "allium": null,
+      "muos": null,
+      "slot": null,
+      "emudeck": "arcadia"
+    },
+    "bios": {
+      "files": [],
+      "libretro_cores": [
+        "amiarcadia"
+      ]
+    }
+  },
+  {
+    "name": "Bit Corporation Gamate",
+    "bucket": "gamate",
+    "folders": {
+      "esde": "gamate",
+      "knulli": "gamate",
+      "onion": null,
+      "allium": null,
+      "muos": null,
+      "slot": null,
+      "emudeck": "gamate"
+    },
+    "bios": {
+      "files": [],
+      "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
+    }
+  },
+  {
+    "name": "Tiger Game.com",
+    "bucket": "gamecom",
+    "screenscraper": 121,
+    "folders": {
+      "esde": "gamecom",
+      "knulli": "gamecom",
+      "onion": null,
+      "allium": null,
+      "muos": null,
+      "slot": null,
+      "emudeck": "gamecom"
+    },
+    "bios": {
+      "files": [],
+      "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
+    }
+  },
+  {
+    "name": "Commodore 64",
+    "bucket": "c64",
+    "screenscraper": 66,
+    "folders": {
+      "esde": "c64",
+      "knulli": "c64",
+      "onion": null,
+      "allium": null,
+      "muos": null,
+      "slot": null,
+      "emudeck": "c64"
+    },
+    "bios": {
+      "files": [],
+      "libretro_cores": [
+        "vice_x64sc",
+        "vice_x64"
+      ]
+    }
   }
 ]

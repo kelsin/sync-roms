@@ -37,7 +37,9 @@
         "supergrafx",
         "sgb",
         "sufami",
-        "supervision"
+        "supervision",
+        "sg1000",
+        "arcadia"
       ],
       "note": "Stable through PS1. NDS and Neo Geo CD are too heavy for 128MB RAM, so left off."
     },
@@ -142,7 +144,12 @@
         "type-x",
         "wiiu",
         "xbox",
-        "xbox360"
+        "xbox360",
+        "c64",
+        "gamate",
+        "gamecom",
+        "msx",
+        "msx2"
       ],
       "note": "Everything through the 6th generation, plus Wii, 3DS, Switch, Vita and Wii U, runs on the Zen 2 / RDNA 2 APU. PS3 and Xbox 360 are game-dependent."
     },
