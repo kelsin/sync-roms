@@ -728,9 +728,9 @@ def run(argv):
             except ValueError as e:
                 print(ui.yellow(f"  ⚠️  skipping {e}"))
     ui.report_missing([k for k in bios_keys if k not in bios_have], "BIOS file(s)")
-    # Android cards also get storage's APKs/ files (APKs, the Obtainium app list) in an APKs/ folder to install from
+    # Android cards also get storage's os/android/APKs/ files (APKs, the Obtainium app list) in an APKs/ folder to install from
     apk_dir = os.path.join(base, "APKs")
-    apk_jobs = ([(k, os.path.join(apk_dir, k[len("APKs/"):]), size) for k, size in sorted(s3.list_sizes("APKs/", sizes=False).items())
+    apk_jobs = ([(k, os.path.join(apk_dir, k[len(runtime.APKS_PREFIX):]), size) for k, size in sorted(s3.list_sizes(runtime.APKS_PREFIX, sizes=False).items())
                  if not k.endswith("/")] if layout_name == "esde" else [])
     apk_jobs = downloads.with_sizes(apk_jobs)
 
