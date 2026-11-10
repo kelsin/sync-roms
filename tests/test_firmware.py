@@ -125,6 +125,13 @@ class UnzipTest(unittest.TestCase):
             extras = downloads.find_extras(tmp, ["gba/A.zip", "gba/sub/B.zip"], unzip=True)
             self.assertEqual([os.path.basename(p) for p in extras], ["Old.gba"])
 
+    def test_psvita_file_goes_with_its_zip(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            for name in ("A.zip", "A.psvita", "Gone.psvita", "Other.psvita", "Other.zip"):
+                touch(os.path.join(tmp, name))
+            extras = downloads.find_extras(tmp, ["psvita/A.zip"])
+            self.assertEqual(sorted(os.path.basename(p) for p in extras), ["Gone.psvita", "Other.psvita", "Other.zip"])
+
     def test_without_unzip_extracted_files_are_extras(self):
         with tempfile.TemporaryDirectory() as tmp:
             touch(os.path.join(tmp, "A.gba"))

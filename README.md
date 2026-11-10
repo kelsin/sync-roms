@@ -292,6 +292,8 @@ Exit codes: `0` done (or nothing to do, or you declined), `1` some files failed,
 
 Before downloading, the sync shows the totals and free space on the card and asks. Local ROMs no longer in the selection are listed and deleted first (after you confirm), so the free space shown is accurate.
 
+On `esde` and `emudeck` cards every Vita zip in `psvita/` gets a `.psvita` file beside it holding the game's title id (read from the zip's `param.sfo`), which is what ES-DE launches Vita3K with; the zip itself is left as it is for Vita3K to install. The `.psvita` file is kept while its zip is in the selection and deleted with the other unwanted files once it isn't.
+
 ### Options
 
 | Flag | Description |

@@ -191,7 +191,8 @@ def has_local_files(dest, skip_db=False):
 
 
 def find_extras(dest, wanted_keys, unzip=False, skip_db=False, disc_dir=None, discs=()):
-    """Local files under dest that aren't in the system's ROM list (frontend files and dotfiles are ignored).
+    """Local files under dest that aren't in the system's ROM list (frontend files and dotfiles are ignored;
+    a .psvita file is kept while its .zip is listed).
 
     unzip: the layout extracts archives flat, so a listed archive's extracted ROM isn't an extra.
     disc_dir: the layout's folder for multi-disc games' discs (discs: their keys); its files are checked too.
@@ -208,5 +209,7 @@ def find_extras(dest, wanted_keys, unzip=False, skip_db=False, disc_dir=None, di
             path = os.path.join(root, f)
             rel = os.path.normpath(os.path.relpath(path, dest))
             if rel not in expected and os.path.splitext(rel)[0] not in stems:
+                if rel.lower().endswith(".psvita") and os.path.splitext(rel)[0] + ".zip" in expected:
+                    continue  # a Vita game's title id file lives and dies with its zip
                 extras.append(path)
     return extras
