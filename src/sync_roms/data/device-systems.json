@@ -358,7 +358,7 @@
       "tier": "minimal"
     },
     "retroid-pocket-2s": {
-      "tier": "arcade"
+      "tier": "psp-n64-dc"
     },
     "retroid-pocket-3": {
       "tier": "arcade"
@@ -370,7 +370,7 @@
       "tier": "psp-n64-dc"
     },
     "retroid-pocket-4-pro": {
-      "tier": "saturn"
+      "tier": "gc-ps2"
     },
     "retroid-pocket-5": {
       "tier": "wii-3ds"
