@@ -43,6 +43,8 @@
       "channelf",
       "supervision",
       "megaduck",
+      "sg1000",
+      "arcadia",
       "n64",
       "dreamcast",
       "saturn",
@@ -102,7 +104,9 @@
       "odyssey2",
       "channelf",
       "supervision",
-      "megaduck"
+      "megaduck",
+      "sg1000",
+      "arcadia"
     ],
     "note": "Stable through PS1 and NDS. N64, Dreamcast, Saturn and PSP are inconsistent on the H700, so left off."
   },
@@ -150,7 +154,9 @@
       "odyssey2",
       "channelf",
       "supervision",
-      "megaduck"
+      "megaduck",
+      "sg1000",
+      "arcadia"
     ],
     "note": "Stable through PS1 and NDS. N64, Dreamcast, Saturn and PSP are inconsistent, so left off."
   },
@@ -198,7 +204,9 @@
       "odyssey2",
       "channelf",
       "supervision",
-      "megaduck"
+      "megaduck",
+      "sg1000",
+      "arcadia"
     ],
     "note": "Stable through PS1 and NDS. N64, Dreamcast, Saturn and PSP are inconsistent, so left off."
   },
@@ -247,6 +255,8 @@
       "channelf",
       "supervision",
       "megaduck",
+      "sg1000",
+      "arcadia",
       "n64",
       "dreamcast",
       "psp"
@@ -297,7 +307,9 @@
       "odyssey2",
       "channelf",
       "supervision",
-      "megaduck"
+      "megaduck",
+      "sg1000",
+      "arcadia"
     ],
     "note": "PS1 is solid and NDS works. N64, Dreamcast, Saturn and PSP are hit-and-miss on the H700, so left off."
   },
@@ -345,6 +357,8 @@
       "channelf",
       "supervision",
       "megaduck",
+      "sg1000",
+      "arcadia",
       "n64",
       "dreamcast",
       "saturn",
@@ -405,6 +419,8 @@
       "channelf",
       "supervision",
       "megaduck",
+      "sg1000",
+      "arcadia",
       "n64",
       "dreamcast",
       "psp"
@@ -455,7 +471,9 @@
       "odyssey2",
       "channelf",
       "supervision",
-      "megaduck"
+      "megaduck",
+      "sg1000",
+      "arcadia"
     ],
     "note": "Stable through PS1 and NDS. N64, Dreamcast, Saturn and PSP are inconsistent, so left off."
   },
@@ -503,7 +521,9 @@
       "odyssey2",
       "channelf",
       "supervision",
-      "megaduck"
+      "megaduck",
+      "sg1000",
+      "arcadia"
     ],
     "note": "Stable through PS1 and NDS. N64, Dreamcast, Saturn and PSP are inconsistent on the H700, so left off."
   },
@@ -551,7 +571,9 @@
       "odyssey2",
       "channelf",
       "supervision",
-      "megaduck"
+      "megaduck",
+      "sg1000",
+      "arcadia"
     ],
     "note": "Stable through PS1 and NDS. N64, Dreamcast, Saturn and PSP are inconsistent on the H700, so left off."
   },
@@ -599,7 +621,9 @@
       "odyssey2",
       "channelf",
       "supervision",
-      "megaduck"
+      "megaduck",
+      "sg1000",
+      "arcadia"
     ],
     "note": "Stable through PS1 and NDS. N64, Dreamcast, Saturn and PSP are inconsistent on the H700, so left off."
   },
@@ -647,7 +671,9 @@
       "odyssey2",
       "channelf",
       "supervision",
-      "megaduck"
+      "megaduck",
+      "sg1000",
+      "arcadia"
     ],
     "note": "Stable through PS1 and NDS. N64, Dreamcast, Saturn and PSP are inconsistent, so left off."
   },
@@ -695,7 +721,9 @@
       "odyssey2",
       "channelf",
       "supervision",
-      "megaduck"
+      "megaduck",
+      "sg1000",
+      "arcadia"
     ],
     "note": "Stable through PS1 and NDS. N64, Dreamcast, Saturn and PSP are inconsistent, so left off."
   },
@@ -743,7 +771,9 @@
       "odyssey2",
       "channelf",
       "supervision",
-      "megaduck"
+      "megaduck",
+      "sg1000",
+      "arcadia"
     ],
     "note": "Stable through PS1 and NDS. N64, Dreamcast, Saturn and PSP are inconsistent on the H700, so left off."
   },
@@ -791,7 +821,9 @@
       "odyssey2",
       "channelf",
       "supervision",
-      "megaduck"
+      "megaduck",
+      "sg1000",
+      "arcadia"
     ],
     "note": "Stable through PS1 and NDS. N64, Dreamcast, Saturn and PSP are inconsistent on the H700, so left off."
   },
@@ -839,7 +871,9 @@
       "odyssey2",
       "channelf",
       "supervision",
-      "megaduck"
+      "megaduck",
+      "sg1000",
+      "arcadia"
     ],
     "note": "Stable through PS1 and NDS. N64, Dreamcast, Saturn and PSP are inconsistent on the H700, so left off."
   },
@@ -887,7 +921,9 @@
       "odyssey2",
       "channelf",
       "supervision",
-      "megaduck"
+      "megaduck",
+      "sg1000",
+      "arcadia"
     ],
     "note": "Stable through PS1 and NDS. N64, Dreamcast, Saturn and PSP are inconsistent on the H700, so left off."
   },
@@ -935,7 +971,9 @@
       "odyssey2",
       "channelf",
       "supervision",
-      "megaduck"
+      "megaduck",
+      "sg1000",
+      "arcadia"
     ],
     "note": "Stable through PS1 and NDS. N64, Dreamcast, Saturn and PSP are inconsistent on the H700, so left off."
   },
@@ -984,6 +1022,8 @@
       "channelf",
       "supervision",
       "megaduck",
+      "sg1000",
+      "arcadia",
       "n64",
       "dreamcast",
       "psp"
@@ -1035,6 +1075,8 @@
       "channelf",
       "supervision",
       "megaduck",
+      "sg1000",
+      "arcadia",
       "n64",
       "dreamcast",
       "psp"
@@ -1085,6 +1127,8 @@
       "channelf",
       "supervision",
       "megaduck",
+      "sg1000",
+      "arcadia",
       "n64",
       "dreamcast",
       "saturn",
@@ -1144,6 +1188,8 @@
       "channelf",
       "supervision",
       "megaduck",
+      "sg1000",
+      "arcadia",
       "n64",
       "dreamcast",
       "saturn",
@@ -1203,7 +1249,9 @@
       "odyssey2",
       "channelf",
       "supervision",
-      "megaduck"
+      "megaduck",
+      "sg1000",
+      "arcadia"
     ],
     "note": "Stable through PS1 and NDS. N64, Dreamcast, Saturn and PSP are inconsistent on the H700, so left off."
   },
@@ -1251,7 +1299,9 @@
       "odyssey2",
       "channelf",
       "supervision",
-      "megaduck"
+      "megaduck",
+      "sg1000",
+      "arcadia"
     ],
     "note": "Stable through PS1 and NDS. N64, Dreamcast, Saturn and PSP are inconsistent on the H700, so left off."
   },
@@ -1299,6 +1349,8 @@
       "channelf",
       "supervision",
       "megaduck",
+      "sg1000",
+      "arcadia",
       "n64",
       "dreamcast",
       "saturn",
@@ -1358,6 +1410,8 @@
       "channelf",
       "supervision",
       "megaduck",
+      "sg1000",
+      "arcadia",
       "n64",
       "dreamcast",
       "saturn",
@@ -1420,6 +1474,8 @@
       "channelf",
       "supervision",
       "megaduck",
+      "sg1000",
+      "arcadia",
       "n64",
       "dreamcast",
       "saturn",
@@ -1482,7 +1538,9 @@
       "odyssey2",
       "channelf",
       "supervision",
-      "megaduck"
+      "megaduck",
+      "sg1000",
+      "arcadia"
     ],
     "note": "Stable through PS1 and NDS. N64, Dreamcast, Saturn and PSP are inconsistent, so left off."
   },
@@ -1531,6 +1589,8 @@
       "channelf",
       "supervision",
       "megaduck",
+      "sg1000",
+      "arcadia",
       "n64",
       "dreamcast",
       "psp"
@@ -1581,6 +1641,8 @@
       "channelf",
       "supervision",
       "megaduck",
+      "sg1000",
+      "arcadia",
       "n64",
       "dreamcast",
       "saturn",
@@ -1640,6 +1702,8 @@
       "channelf",
       "supervision",
       "megaduck",
+      "sg1000",
+      "arcadia",
       "n64",
       "dreamcast",
       "saturn",
@@ -1702,6 +1766,8 @@
       "channelf",
       "supervision",
       "megaduck",
+      "sg1000",
+      "arcadia",
       "n64",
       "dreamcast",
       "saturn",
@@ -1759,6 +1825,8 @@
       "channelf",
       "supervision",
       "megaduck",
+      "sg1000",
+      "arcadia",
       "n64",
       "dreamcast",
       "saturn",
@@ -1821,6 +1889,8 @@
       "channelf",
       "supervision",
       "megaduck",
+      "sg1000",
+      "arcadia",
       "n64",
       "dreamcast",
       "saturn",
@@ -1884,6 +1954,8 @@
       "channelf",
       "supervision",
       "megaduck",
+      "sg1000",
+      "arcadia",
       "n64",
       "dreamcast",
       "psp"
@@ -1934,6 +2006,8 @@
       "channelf",
       "supervision",
       "megaduck",
+      "sg1000",
+      "arcadia",
       "n64",
       "dreamcast",
       "saturn",
@@ -1992,6 +2066,8 @@
       "channelf",
       "supervision",
       "megaduck",
+      "sg1000",
+      "arcadia",
       "n64",
       "dreamcast",
       "psp"
@@ -2042,6 +2118,8 @@
       "channelf",
       "supervision",
       "megaduck",
+      "sg1000",
+      "arcadia",
       "n64",
       "dreamcast",
       "saturn",
@@ -2104,6 +2182,8 @@
       "channelf",
       "supervision",
       "megaduck",
+      "sg1000",
+      "arcadia",
       "n64",
       "dreamcast",
       "saturn",
@@ -2166,6 +2246,8 @@
       "channelf",
       "supervision",
       "megaduck",
+      "sg1000",
+      "arcadia",
       "n64",
       "dreamcast",
       "saturn",
@@ -2229,6 +2311,8 @@
       "channelf",
       "supervision",
       "megaduck",
+      "sg1000",
+      "arcadia",
       "n64",
       "dreamcast",
       "psp"
@@ -2279,6 +2363,8 @@
       "channelf",
       "supervision",
       "megaduck",
+      "sg1000",
+      "arcadia",
       "n64",
       "dreamcast",
       "saturn",
@@ -2341,6 +2427,8 @@
       "channelf",
       "supervision",
       "megaduck",
+      "sg1000",
+      "arcadia",
       "n64",
       "dreamcast",
       "psp"
@@ -2391,6 +2479,8 @@
       "channelf",
       "supervision",
       "megaduck",
+      "sg1000",
+      "arcadia",
       "n64",
       "dreamcast",
       "saturn",
@@ -2453,6 +2543,8 @@
       "channelf",
       "supervision",
       "megaduck",
+      "sg1000",
+      "arcadia",
       "n64",
       "dreamcast",
       "saturn",
@@ -2515,6 +2607,8 @@
       "channelf",
       "supervision",
       "megaduck",
+      "sg1000",
+      "arcadia",
       "n64",
       "dreamcast",
       "saturn",
@@ -2577,6 +2671,8 @@
       "channelf",
       "supervision",
       "megaduck",
+      "sg1000",
+      "arcadia",
       "n64",
       "dreamcast",
       "saturn",
@@ -2639,6 +2735,8 @@
       "channelf",
       "supervision",
       "megaduck",
+      "sg1000",
+      "arcadia",
       "n64",
       "dreamcast",
       "saturn",
@@ -2701,6 +2799,8 @@
       "channelf",
       "supervision",
       "megaduck",
+      "sg1000",
+      "arcadia",
       "n64",
       "dreamcast",
       "saturn",
@@ -2758,6 +2858,8 @@
       "channelf",
       "supervision",
       "megaduck",
+      "sg1000",
+      "arcadia",
       "n64",
       "dreamcast",
       "saturn",
@@ -2820,6 +2922,8 @@
       "channelf",
       "supervision",
       "megaduck",
+      "sg1000",
+      "arcadia",
       "n64",
       "dreamcast",
       "saturn",
@@ -2882,6 +2986,8 @@
       "channelf",
       "supervision",
       "megaduck",
+      "sg1000",
+      "arcadia",
       "n64",
       "dreamcast",
       "saturn",
@@ -2944,6 +3050,8 @@
       "channelf",
       "supervision",
       "megaduck",
+      "sg1000",
+      "arcadia",
       "n64",
       "dreamcast",
       "saturn",
@@ -3007,6 +3115,8 @@
       "channelf",
       "supervision",
       "megaduck",
+      "sg1000",
+      "arcadia",
       "n64",
       "dreamcast",
       "psp"
@@ -3057,6 +3167,8 @@
       "channelf",
       "supervision",
       "megaduck",
+      "sg1000",
+      "arcadia",
       "n64",
       "dreamcast",
       "saturn",
@@ -3119,7 +3231,9 @@
       "odyssey2",
       "channelf",
       "supervision",
-      "megaduck"
+      "megaduck",
+      "sg1000",
+      "arcadia"
     ],
     "note": "Portrait 4:3-friendly screen on a quad Cortex-A53: solid through PS1 and NDS, and its vertical shooters (TATE arcade) shine. N64, Dreamcast, Saturn and PSP are too slow, so left off."
   },
@@ -3167,7 +3281,9 @@
       "odyssey2",
       "channelf",
       "supervision",
-      "megaduck"
+      "megaduck",
+      "sg1000",
+      "arcadia"
     ],
     "note": "Stable through PS1 and NDS. N64, Dreamcast, Saturn and PSP are inconsistent, so left off."
   },
@@ -3207,7 +3323,9 @@
       "odyssey2",
       "channelf",
       "supervision",
-      "megaduck"
+      "megaduck",
+      "sg1000",
+      "arcadia"
     ],
     "note": "Stable through PS1. NDS and Neo Geo CD are too heavy for 128MB RAM, so left off."
   },
@@ -3253,7 +3371,9 @@
       "odyssey2",
       "channelf",
       "supervision",
-      "megaduck"
+      "megaduck",
+      "sg1000",
+      "arcadia"
     ],
     "note": "Stable through PS1. NDS and Neo Geo CD are too heavy for the entry-level chip, so left off along with N64, Dreamcast, Saturn and PSP."
   },
@@ -3299,7 +3419,9 @@
       "odyssey2",
       "channelf",
       "supervision",
-      "megaduck"
+      "megaduck",
+      "sg1000",
+      "arcadia"
     ],
     "note": "Stable through PS1. NDS and Neo Geo CD are too heavy for the entry-level chip, so left off along with N64, Dreamcast, Saturn and PSP."
   },
@@ -3348,6 +3470,8 @@
       "channelf",
       "supervision",
       "megaduck",
+      "sg1000",
+      "arcadia",
       "n64",
       "dreamcast",
       "psp"
@@ -3399,6 +3523,8 @@
       "channelf",
       "supervision",
       "megaduck",
+      "sg1000",
+      "arcadia",
       "n64",
       "dreamcast",
       "psp"
@@ -3449,6 +3575,8 @@
       "channelf",
       "supervision",
       "megaduck",
+      "sg1000",
+      "arcadia",
       "n64",
       "dreamcast",
       "saturn",
@@ -3506,6 +3634,8 @@
       "channelf",
       "supervision",
       "megaduck",
+      "sg1000",
+      "arcadia",
       "n64",
       "dreamcast",
       "saturn",
@@ -3567,6 +3697,8 @@
       "channelf",
       "supervision",
       "megaduck",
+      "sg1000",
+      "arcadia",
       "n64",
       "dreamcast",
       "saturn",
@@ -3629,6 +3761,8 @@
       "channelf",
       "supervision",
       "megaduck",
+      "sg1000",
+      "arcadia",
       "n64",
       "dreamcast",
       "saturn",
@@ -3686,6 +3820,8 @@
       "channelf",
       "supervision",
       "megaduck",
+      "sg1000",
+      "arcadia",
       "n64",
       "dreamcast",
       "saturn",
@@ -3748,6 +3884,8 @@
       "channelf",
       "supervision",
       "megaduck",
+      "sg1000",
+      "arcadia",
       "n64",
       "dreamcast",
       "psp"
@@ -3798,6 +3936,8 @@
       "channelf",
       "supervision",
       "megaduck",
+      "sg1000",
+      "arcadia",
       "n64",
       "dreamcast",
       "saturn",
@@ -3860,6 +4000,8 @@
       "channelf",
       "supervision",
       "megaduck",
+      "sg1000",
+      "arcadia",
       "n64",
       "dreamcast",
       "psp"
@@ -3910,6 +4052,8 @@
       "channelf",
       "supervision",
       "megaduck",
+      "sg1000",
+      "arcadia",
       "n64",
       "dreamcast",
       "saturn",
@@ -3971,6 +4115,8 @@
       "channelf",
       "supervision",
       "megaduck",
+      "sg1000",
+      "arcadia",
       "n64",
       "dreamcast",
       "saturn",
@@ -4032,6 +4178,8 @@
       "channelf",
       "supervision",
       "megaduck",
+      "sg1000",
+      "arcadia",
       "n64",
       "dreamcast",
       "saturn",
@@ -4093,6 +4241,8 @@
       "channelf",
       "supervision",
       "megaduck",
+      "sg1000",
+      "arcadia",
       "n64",
       "dreamcast",
       "saturn",
@@ -4154,6 +4304,8 @@
       "channelf",
       "supervision",
       "megaduck",
+      "sg1000",
+      "arcadia",
       "n64",
       "dreamcast",
       "saturn",
@@ -4211,6 +4363,13 @@
       "mame-advmame",
       "arcade",
       "arduboy",
+      "sg1000",
+      "arcadia",
+      "gamate",
+      "gamecom",
+      "msx",
+      "msx2",
+      "c64",
       "atomiswave",
       "chailove",
       "channelf",
@@ -4308,6 +4467,13 @@
       "mame-advmame",
       "arcade",
       "arduboy",
+      "sg1000",
+      "arcadia",
+      "gamate",
+      "gamecom",
+      "msx",
+      "msx2",
+      "c64",
       "atomiswave",
       "chailove",
       "channelf",
@@ -4405,6 +4571,13 @@
       "mame-advmame",
       "arcade",
       "arduboy",
+      "sg1000",
+      "arcadia",
+      "gamate",
+      "gamecom",
+      "msx",
+      "msx2",
+      "c64",
       "atomiswave",
       "chailove",
       "channelf",
