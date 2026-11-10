@@ -10,8 +10,6 @@ import zipfile
 from types import SimpleNamespace
 from unittest import mock
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, os.path.join(ROOT, "src"))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 from sync_roms import chd, external, m3u, store  # noqa: E402
@@ -166,7 +164,10 @@ class ChdTest(unittest.TestCase):
 
     def test_stale_extraction_folders_are_removed(self):
         self.touch("psx/.chd-abc123/Game.bin", "psx/Game.zip")
-        chd.remove_stale_chd_temp(self.dir)
+        stale = []
+        chd.plan_chd(self.dir, {}, stale=stale)
+        self.assertEqual(stale, [os.path.join(self.dir, "psx", ".chd-abc123")])
+        chd.remove_stale_chd_temp(stale)
         self.assertEqual(os.listdir(os.path.join(self.dir, "psx")), ["Game.zip"])
 
     def test_stop_tools_ends_a_running_tool_and_blocks_new_ones(self):
@@ -174,7 +175,10 @@ class ChdTest(unittest.TestCase):
         result = []
         thread = threading.Thread(target=lambda: result.append(external.run_tool(["sleep", "30"])))
         thread.start()
+        deadline = time.monotonic() + 5
         while not external._tool_procs:
+            if time.monotonic() > deadline:
+                self.fail("the tool never started")
             time.sleep(0.01)
         external.stop_tools()
         thread.join(5)

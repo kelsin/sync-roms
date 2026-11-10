@@ -214,6 +214,7 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
     start = list(initial) if initial is not None else [False] * len(labels)
     locked = locked or [False] * len(labels)
     hidden = hidden or [False] * len(labels)
+    hidden_count = sum(hidden)
     session = {} if session is None else session
 
     def run(stdscr):
@@ -238,8 +239,10 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
             vis = [i for i, l in enumerate(lowered) if (revealed or not hidden[i]) and all(t in l for t in terms)
                    and (view_mode == 0 or (state[i] if view_mode == 1 else state[i] != start[i]))]
             vis.sort(key=lambda i: hidden[i])  # revealed rows go last; stable within each group
-            if restore in vis:
+            try:
                 cur = vis.index(restore)
+            except ValueError:
+                pass
             restore = None
             cur = max(0, min(cur, len(vis) - 1))
             session.update(sel=state, view_mode=view_mode, revealed=revealed, row=vis[cur] if vis else None)
@@ -279,15 +282,15 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
                         break
                     stdscr.addnstr(pos - top + 3, x, text, w - 1 - x, attr | colors[color])
                     x += cell_width(text)
-            added = sum(1 for a, b in zip(state, start) if a and not b)
-            removed = sum(1 for a, b in zip(state, start) if b and not a)
             line = status(state) if status else f"{len(vis)}/{len(labels)} shown"
             if multi and diff_marks:
+                added = sum(1 for a, b in zip(state, start) if a and not b)
+                removed = sum(1 for a, b in zip(state, start) if b and not a)
                 line += f" · +{added} −{removed} pending"
             if multi and (diff_marks or view_mode):
                 line += f" · view: {('all', 'on only', 'changed only')[view_mode]}"
-            if not revealed and any(hidden):
-                line += f" · {sum(hidden)} hidden (press z)"
+            if not revealed and hidden_count:
+                line += f" · {hidden_count} hidden (press z)"
             if vis and locked[vis[cur]]:
                 line = f"🔒 {locked_note[vis[cur]] if isinstance(locked_note, list) else locked_note}"
             if notice:
@@ -364,7 +367,7 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
                     return state
                 if vis:
                     return vis[cur]
-            elif k == "z" and any(hidden):
+            elif k == "z" and hidden_count:
                 revealed = not revealed
             elif not multi:
                 continue

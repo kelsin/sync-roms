@@ -6,13 +6,10 @@ import sys
 import unittest
 from unittest import mock
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, os.path.join(ROOT, "src"))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 from sync_roms import commands, edit, picker, store  # noqa: E402
-from test_edit import DataDir  # noqa: E402
-from test_commands import Cmd  # noqa: E402
+from helpers import Cmd, DataDir  # noqa: E402
 
 
 def target(games):
@@ -129,21 +126,17 @@ class Schemas(unittest.TestCase):
 
 
 class CheckSystemsKey(Cmd):
-    def write(self, name, data):
-        with open(self.path(name), "w") as f:
-            json.dump(data, f)
-
     def test_card_systems_must_be_known_system_ids(self):
-        self.write("cards.json", {"c": {"device": "full", "layout": "esde", "systems": ["gba"]}})
+        self.write_json("cards.json", {"c": {"device": "full", "layout": "esde", "systems": ["gba"]}})
         self.assertEqual(commands.check_data(), [])
-        self.write("cards.json", {"c": {"device": "full", "layout": "esde", "systems": ["nope", 3]}})
+        self.write_json("cards.json", {"c": {"device": "full", "layout": "esde", "systems": ["nope", 3]}})
         self.assertEqual(len(commands.check_data()), 2)
-        self.write("cards.json", {"c": {"device": "full", "layout": "esde", "systems": "gba"}})
+        self.write_json("cards.json", {"c": {"device": "full", "layout": "esde", "systems": "gba"}})
         self.assertEqual(len(commands.check_data()), 1)
 
     def test_personal_set_files_are_checked(self):
         os.makedirs(self.path("sets"))
-        self.write("sets/mine.json", {"name": "Mine", "games": [
+        self.write_json("sets/mine.json", {"name": "Mine", "games": [
             {"title": "A", "system": "gba", "bucket": "gba/A.zip"},
             {"title": "B", "system": "nope", "bucket": "nope/B.zip"},
             {"system": "gba", "bucket": "nes/C.zip"}]})

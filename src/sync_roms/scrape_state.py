@@ -9,7 +9,9 @@ from . import scrape_plan, store, ui
 _lock = threading.RLock()  # scrape runs match ROMs on several threads; each save is a read-modify-write
 _cache = {}  # file path -> ((mtime_ns, size), data): a file nobody changed since we last read or wrote it is not parsed again
 _unsaved = {}  # hash file path -> hashes saved in memory but not yet written
-HASH_FLUSH = 50  # hashes saved in memory before the hash file is written
+_unknown_pending = {}  # unknown ledger path -> {key: True (marked) or False (cleared)} not yet written
+UNKNOWN = "scrape-unknown.json"
+HASH_FLUSH = 200  # hashes saved in memory before the hash file is written
 HASHES = "scrape-hashes.json"
 _warned = set()  # paths of corrupt files already warned about
 MATCHES = "scrape-matches.json"  # the only one holding what the user typed, so the only one worth a warning
@@ -100,7 +102,9 @@ def flush_hashes():
     with _lock:
         pending = _unsaved.pop(_path(HASHES), None)
         if pending:
-            _save(HASHES, {**_load(HASHES), **pending})
+            data = _load(HASHES)
+            data.update(pending)
+            _save(HASHES, data)
 
 
 def _game_id(v):
@@ -129,24 +133,67 @@ def forget_match(system, rom):
 
 
 def is_unknown(system, rom):
-    return _key(system, rom) in _load("scrape-unknown.json")
+    with _lock:
+        pending = _unknown_pending.get(_path(UNKNOWN), {}).get(_key(system, rom))
+        return pending if pending is not None else _key(system, rom) in _load(UNKNOWN)
 
 
 def mark_unknown(system, rom):
+    """Remember a ROM as unknown; the ledger is written by flush_unknown."""
     with _lock:
-        data = _load("scrape-unknown.json")
-        data[_key(system, rom)] = True
-        _save("scrape-unknown.json", data)
+        _unknown_pending.setdefault(_path(UNKNOWN), {})[_key(system, rom)] = True
 
 
 def clear_unknown(system=None, rom=None):
-    """Forget one unknown ROM, the unknown ROMs of one system, or those of every system."""
+    """Forget one unknown ROM (written by flush_unknown), the unknown ROMs of one system, or those of every system."""
     with _lock:
-        data = _load("scrape-unknown.json")
         if rom is not None:
-            data.pop(_key(system, rom), None)
-        elif system is not None:
+            _unknown_pending.setdefault(_path(UNKNOWN), {})[_key(system, rom)] = False
+            return
+        flush_unknown()
+        data = _load(UNKNOWN)
+        if system is not None:
             data = {k: v for k, v in data.items() if not k.startswith(system + "/")}
         else:
             data = {}
-        _save("scrape-unknown.json", data)
+        _save(UNKNOWN, data)
+
+
+def flush_unknown():
+    """Write the unknown marks and clears made so far."""
+    with _lock:
+        pending = _unknown_pending.pop(_path(UNKNOWN), None)
+        if not pending:
+            return
+        data = _load(UNKNOWN)
+        changed = False
+        for k, marked in pending.items():
+            if marked and data.get(k) is not True:
+                data[k] = True
+                changed = True
+            elif not marked and data.pop(k, None) is not None:
+                changed = True
+        if changed:
+            _save(UNKNOWN, data)
+
+
+class _Snapshot:
+    """manual_match and is_unknown over files read once, for checking many ROMs."""
+
+    def __init__(self):
+        with _lock:
+            self._matches = _load(MATCHES)
+            self._unknown = set(_load(UNKNOWN))
+            for k, marked in _unknown_pending.get(_path(UNKNOWN), {}).items():
+                (self._unknown.add if marked else self._unknown.discard)(k)
+
+    def manual_match(self, system, rom):
+        game_id = self._matches.get(_key(system, rom))
+        return game_id if _game_id(game_id) else None
+
+    def is_unknown(self, system, rom):
+        return _key(system, rom) in self._unknown
+
+
+def snapshot():
+    return _Snapshot()

@@ -7,6 +7,7 @@ import json
 import os
 import shlex
 import shutil
+import stat
 import tempfile
 import threading
 import time
@@ -27,7 +28,7 @@ def find_candidates(systems, roms, metadata, retry=False, fill=None):
 
     fill: (wanted media types, {system folder: scrapes/<system>/ listing}); also takes the ROMs that have an entry
     but lack some wanted type in storage."""
-    out = {}
+    out, state = {}, scrape_state.snapshot()
     for s in systems:
         system = s["bucket"]
         have = metadata.get(system, {})
@@ -36,26 +37,28 @@ def find_candidates(systems, roms, metadata, retry=False, fill=None):
         def wanted(r):
             return r not in have or (fill and fill[0] - set(index.get(os.path.splitext(r)[0], ())))
         out[system] = sorted(r for r in roms.get(system, ())
-                             if wanted(r) and (retry or scrape_state.manual_match(system, r) is not None
-                                               or not scrape_state.is_unknown(system, r)))
+                             if wanted(r) and (retry or state.manual_match(system, r) is not None
+                                               or not state.is_unknown(system, r)))
     return out
 
 
 def hash_file(system, rom, size, mtime, stop=None):
-    """{"md5","sha1","crc"} of a ROM read from the storage folder or mirror, cached by size and mtime. Raises
-    screenscraper.Stopped when the stop event is set between chunks."""
+    """{"md5","sha1","crc"} of a ROM read from the storage folder or mirror (one open file, one reused buffer), cached by
+    size and mtime. Raises screenscraper.Stopped when the stop event is set between chunks."""
     cached = scrape_state.cached_hashes(system, rom, size, mtime)
     if cached:
         return cached
     md5, sha1, crc = hashlib.md5(), hashlib.sha1(), 0
-    key = f"{system}/{rom}"
-    for start in range(0, size, CHUNK):
-        if stop is not None and stop.is_set():
-            raise screenscraper.Stopped()
-        chunk = s3.read_range(key, start, min(start + CHUNK, size))
-        md5.update(chunk)
-        sha1.update(chunk)
-        crc = zlib.crc32(chunk, crc)
+    buf = bytearray(min(CHUNK, size))
+    with open(s3.safe_join(s3.read_root(), f"{system}/{rom}"), "rb") as f:
+        for start in range(0, size, CHUNK):
+            if stop is not None and stop.is_set():
+                raise screenscraper.Stopped()
+            n = f.readinto(memoryview(buf)[:min(CHUNK, size - start)])
+            chunk = memoryview(buf)[:n]
+            md5.update(chunk)
+            sha1.update(chunk)
+            crc = zlib.crc32(chunk, crc)
     hashes = {"md5": md5.hexdigest(), "sha1": sha1.hexdigest(), "crc": f"{crc:08X}"}
     scrape_state.save_hashes(system, rom, size, mtime, hashes)
     return hashes
@@ -65,8 +68,47 @@ _hashing = {}  # (system, ROM) -> Future of a hash being computed ahead of its l
 _hashing_lock = threading.Lock()
 
 
+_mtimes = {}  # (system, ROM) -> mtime of a candidate, taken when the candidates were stat'ed
+
+
 def _mtime(name, rom):
+    if (name, rom) in _mtimes:
+        return _mtimes[name, rom]
     return int(os.path.getmtime(s3.safe_join(s3.read_root(), f"{name}/{rom}")))
+
+
+def _stat_roms(candidates):
+    """{system: {ROM: (size, mtime)}} of the candidate ROMs that are files in the read folder: one stat each, in
+    parallel, instead of walking the system's folder. The mtimes are kept for _mtime."""
+    jobs = [(name, rom) for name, roms in candidates.items() for rom in roms]
+
+    def stat_one(job):
+        try:
+            st = os.stat(s3.safe_join(s3.read_root(), f"{job[0]}/{job[1]}"))
+        except (OSError, ValueError):
+            return None
+        return (st.st_size, int(st.st_mtime)) if stat.S_ISREG(st.st_mode) else None
+    with ThreadPoolExecutor(s3.STAT_WORKERS) as ex:
+        stats = list(ex.map(stat_one, jobs))
+    out = {name: {} for name in candidates}
+    for (name, rom), st in zip(jobs, stats):
+        if st:
+            out[name][rom] = st
+            _mtimes[name, rom] = st[1]
+    return out
+
+
+def _candidate_etags(candidates):
+    """{system: {ROM: (size, etag)}} for the candidate ROMs. A storage folder has no ETags, so it is never listed: the
+    candidates are stat'ed and get the fake "mtime-size" tag; a bucket is listed (and a mirror's files stat'ed for hashing)."""
+    _mtimes.clear()
+    if runtime.ROOT:
+        return {name: {rom: (size, f"{mtime}-{size}") for rom, (size, mtime) in found.items()}
+                for name, found in _stat_roms(candidates).items()}
+    etags = _each(lambda name: s3.list_with_etags(name + "/"), candidates)
+    if s3.read_root():
+        _stat_roms({name: [r for r in roms if r in etags[name]] for name, roms in candidates.items()})
+    return etags
 
 
 def prefetch_hash(pool, name, rom, size, stop):
@@ -80,7 +122,7 @@ def prefetch_hash(pool, name, rom, size, stop):
     if scrape_state.cached_hashes(name, rom, size, mtime):
         return
     with _hashing_lock:
-        if key in _hashing:
+        if key in _hashing or scrape_state.cached_hashes(name, rom, size, mtime):  # finished since the check above
             return
         _hashing[key] = fut = pool.submit(hash_file, name, rom, size, mtime, stop)
     fut.add_done_callback(lambda _: _forget_hashing(key))
@@ -144,7 +186,7 @@ def resolve_manual(client, system, query):
 BATCH = 25  # ROMs scraped and uploaded together
 LOOKAHEAD = 2  # batches in the pool at once: the next one is scraped while the last uploads
 HASH_THREADS = 4  # ROMs hashed at once ahead of their lookups
-METADATA_EVERY = 100  # ROMs whose entries are written to metadata.json together
+METADATA_INTERVAL = 60  # seconds of scraped ROMs whose entries are written to metadata.json together
 RETRIES = 3  # times a rate-limited request is tried again
 RETRY_WAIT = 2  # seconds before the first retry, doubled each time
 CREDENTIALS = ("screenscraper_user", "screenscraper_password")
@@ -380,18 +422,21 @@ def _quota_message(e, rerun):
 
 def _batches(items):
     """items in batches of at most BATCH with no two ROMs of the same stem (they share media files) in one batch."""
-    pending = list(items)
-    while pending:
-        batch, stems, rest = [], set(), []
-        for item in pending:
-            stem = os.path.splitext(item[0])[0]
-            if len(batch) < BATCH and stem not in stems:
-                batch.append(item)
-                stems.add(stem)
-            else:
-                rest.append(item)
-        yield batch
-        pending = rest
+    batches, open_ = [], []  # open_: [(batch, its stems)] that aren't full yet
+    for item in items:
+        stem = os.path.splitext(item[0])[0]
+        for batch, stems in open_:
+            if stem not in stems:
+                break
+        else:
+            batch, stems = [], set()
+            batches.append(batch)
+            open_.append((batch, stems))
+        batch.append(item)
+        stems.add(stem)
+        if len(batch) == BATCH:
+            open_ = [o for o in open_ if o[0] is not batch]
+    return batches
 
 
 def _media_keys(listing, system, stem):
@@ -409,16 +454,15 @@ def _media_keys(listing, system, stem):
 Started = namedtuple("Started", "futures kept tmp")  # a batch handed to the pool: its futures, the media types storage already has per ROM, its temp folder
 
 
-def start_batch(ex, client, system, batch, skip, stop, listing, replace=False, forced=None, hasher=None):
+def start_batch(ex, client, system, batch, skip, stop, index, replace=False, forced=None, hasher=None):
     """Hand a batch's ROMs to the pool and return at once; run_batch takes what they scraped. Media types a ROM already
-    has in listing ({key: size} of scrapes/<system>/) are not downloaded, unless replace. forced: {ROM: game id} matches
+    has in index (scrape_plan.scrape_index of scrapes/<system>/) are not downloaded, unless replace. forced: {ROM: game id} matches
     given for this run only. hasher: a pool that hashes the batch's ROMs meanwhile (ROMs read from a folder)."""
     forced = forced or {}
     if hasher is not None and s3.read_root():
         for rom, size, _ in batch:
             if rom not in forced and scrape_state.manual_match(system["bucket"], rom) is None:
                 prefetch_hash(hasher, system["bucket"], rom, size, stop)
-    index = scrape_plan.scrape_index(listing)
     kept = {rom: set() if replace else set(index.get(os.path.splitext(rom)[0], ())) for rom, _, _ in batch}
     tmp = tempfile.mkdtemp()
     futures = [ex.submit(scrape_rom, client, system, item, tmp, skip | kept[item[0]], stop, forced.get(item[0]))
@@ -426,12 +470,12 @@ def start_batch(ex, client, system, batch, skip, stop, listing, replace=False, f
     return Started(futures, kept, tmp)
 
 
-def run_batch(client, system, batch, started, skip, shrink, outcomes, listing, replace=False, forced=None, rerun=RERUN,
-              fill=False, pending=None):
+def run_batch(system, batch, started, shrink, outcomes, listing, index, pending, replace=False, forced=None, rerun=RERUN):
     """Wait for a started batch's ROMs, upload their media and queue their entries in pending ({ROM: (how, metadata,
     upload jobs)}, written to metadata.json by record). Returns (failures, the QuotaExceeded hit or None).
 
-    listing: {key: size} of scrapes/<system>/, kept up to date with what this batch uploads. replace: the ROMs'
+    listing: {key: size} of scrapes/<system>/, and index: its scrape_index, both kept up to date with what this batch
+    uploads. replace: the ROMs'
     metadata entries are replaced (not merged) and their old scraper media (never custom/ or skipped types) is
     overwritten. forced: see start_batch; rerun: the command that continues the run.
     """
@@ -486,29 +530,39 @@ def run_batch(client, system, batch, started, skip, shrink, outcomes, listing, r
     finally:
         shutil.rmtree(started.tmp, ignore_errors=True)
     for rom, (how, meta) in done.items():
-        listing.update((j[0], j[2]) for j in jobs[rom])
+        for j in jobs[rom]:
+            listing[j[0]] = j[2]
+            scrape_plan.index_add(index, j[0], j[2])
         pending[rom] = (how, meta, jobs[rom])
     return failed, quota
+
+
+def _bad_entries(name, data):
+    """Why a loaded metadata.json can't be used (an entry that isn't an object), or None."""
+    if all(isinstance(v, dict) for v in data.values()):
+        return None
+    return f"{metadata_key(name)} has an entry that isn't an object"
 
 
 def _read_metadata(name, rerun):
     """(a system's metadata.json from storage, None), or (None, why it can't be used)."""
     try:
         remote = load_metadata(name)
-        scrape_plan.merge_metadata(remote, {})
-    except (ValueError, TypeError) as e:
-        return None, e if isinstance(e, ValueError) else f"{metadata_key(name)} has an entry that isn't an object"
+    except ValueError as e:
+        return None, e
     except s3.ERRORS as e:
         _storage_fail(f"Reading {metadata_key(name)}", e, rerun)
-    return remote, None
+    why = _bad_entries(name, remote)
+    return (None, why) if why else (remote, None)
 
 
-def record(system, pending, outcomes, listing, skip, replace=False, rerun=RERUN, fill=False):
+def record(system, pending, outcomes, listing, index, skip, replace=False, rerun=RERUN, fill=False):
     """Write pending's entries (see run_batch) to the system's metadata.json, one read and one write for all of them,
     and empty pending. With replace the entries replace the old ones and the old scraper media they leave behind is
     deleted. fill: ROMs that already have an entry keep its fields; ScreenScraper's only add the missing ones.
     Returns (failures, whether the system's remaining ROMs must be skipped)."""
     name = system["bucket"]
+    scrape_state.flush_unknown()
     if not pending:
         return 0, False
     done = dict(pending)
@@ -517,12 +571,11 @@ def record(system, pending, outcomes, listing, skip, replace=False, rerun=RERUN,
     if why:
         print(ui.yellow(f"  ⚠️  {why}; {len(done)} ROM(s) not recorded, skipping the rest of {name}"))
         return len(done), True
-    new = {rom: ({**meta, **remote.get(rom, {})} if fill else meta) for rom, (_, meta, _) in done.items()}
-    merged = scrape_plan.merge_metadata(remote, {} if replace else new)
-    if replace:
-        merged.update((rom, dict(meta)) for rom, (_, meta, _) in done.items())
+    for rom, (_, meta, _) in done.items():  # remote is ours: changed in place
+        old = remote.get(rom, {})
+        remote[rom] = dict(meta) if replace else {**old, **({**meta, **old} if fill else meta)}
     try:
-        s3.put_text(metadata_key(name), scrape_plan.dump_json(merged))
+        s3.put_text(metadata_key(name), scrape_plan.dump_json(remote))
     except s3.ERRORS as e:
         _storage_fail(f"Writing {metadata_key(name)}", e, rerun)
     for rom, (how, _, jobs) in done.items():
@@ -536,11 +589,12 @@ def record(system, pending, outcomes, listing, skip, replace=False, rerun=RERUN,
                 _storage_fail(f"Deleting old {name} media", e, rerun)
             for k in stale:
                 listing.pop(k, None)
+                scrape_plan.index_drop(index, k)
             for e in errors:
                 print(ui.yellow(f"  ⚠️  {e.get('Key')}: couldn't delete the old file"))
         outcomes[rom] = how
-        if scrape_state.is_unknown(name, rom):  # found after all (a retry, or a manual match)
-            scrape_state.clear_unknown(name, rom)
+        scrape_state.clear_unknown(name, rom)  # found after all, if it was a retry or a manual match
+    scrape_state.flush_unknown()
     print(ui.green(f"  ✅ {name}: {len(done)} ROM(s) scraped"))
     return 0, False
 
@@ -549,65 +603,75 @@ def _stems(batch):
     return {os.path.splitext(rom)[0] for rom, _, _ in batch}
 
 
-def scrape_system(client, system, items, threads, skip, shrink, outcomes, listing, replace=False, forced=None,
-                  rerun=RERUN, fill=False):
+def scrape_system(client, system, items, threads, skip, shrink, outcomes, listing, index, replace=False, forced=None,
+                  rerun=RERUN, fill=False, metadata=None):
     """Scrape one system's ROMs on one pool of threads, in batches: the next batch is scraped while the last one uploads,
-    so no thread waits for a batch's slowest ROM. Entries are written to metadata.json every METADATA_EVERY ROMs, when the
-    system is done and when the run stops. Returns (failures, the QuotaExceeded hit or None). Arguments: see run_batch."""
+    so no thread waits for a batch's slowest ROM. Entries are written to metadata.json every METADATA_INTERVAL seconds, when
+    the system is done and when the run stops. Returns (failures, the QuotaExceeded hit or None). Arguments: see run_batch;
+    index: scrape_plan.scrape_index(listing); metadata: the system's metadata.json if the caller already loaded it."""
     name = system["bucket"]
-    _, why = _read_metadata(name, rerun)  # a metadata.json that can't be used fails before any quota is spent
+    # a metadata.json that can't be used fails before any quota is spent
+    why = _read_metadata(name, rerun)[1] if metadata is None else _bad_entries(name, metadata)
     if why:
         print(ui.yellow(f"  ⚠️  {why}; skipping {name}"))
         return len(items), None
-    batches, flight = list(_batches(items)), deque()
+    batches, flight = deque(_batches(items)), deque()
     pending, stop, failed, quota_hit, started = {}, threading.Event(), 0, None, 0
+    last_write = time.monotonic()
     ex, hasher = ThreadPoolExecutor(threads), ThreadPoolExecutor(HASH_THREADS)
     try:
         while batches or flight:
             while (batches and len(flight) < LOOKAHEAD and not stop.is_set()  # same-stem ROMs share media: wait for the earlier batch to upload
                    and not any(_stems(batches[0]) & _stems(b) for b, _ in flight)):
-                batch = batches.pop(0)
-                flight.append((batch, start_batch(ex, client, system, batch, skip, stop, listing, replace, forced, hasher)))
+                batch = batches.popleft()
+                flight.append((batch, start_batch(ex, client, system, batch, skip, stop, index, replace, forced, hasher)))
             if not flight:
                 break
             batch, begun = flight.popleft()
             print(ui.bold(f"\n🔎 {name}: ROMs {started + 1}-{started + len(batch)} of {len(items)}"))
             started += len(batch)
-            n, hit = run_batch(client, system, batch, begun, skip, shrink, outcomes, listing, replace, forced, rerun, fill, pending)
+            n, hit = run_batch(system, batch, begun, shrink, outcomes, listing, index, pending, replace=replace, forced=forced,
+                               rerun=rerun)
             failed += n
             quota_hit = quota_hit or hit
-            if len(pending) >= METADATA_EVERY:
-                n, halt = record(system, pending, outcomes, listing, skip, replace, rerun, fill)
+            if pending and time.monotonic() - last_write >= METADATA_INTERVAL:
+                n, halt = record(system, pending, outcomes, listing, index, skip, replace, rerun, fill)
+                last_write = time.monotonic()
                 failed += n
                 if halt:
                     return failed, quota_hit
-        n, _ = record(system, pending, outcomes, listing, skip, replace, rerun, fill)
+        n, _ = record(system, pending, outcomes, listing, index, skip, replace, rerun, fill)
         return failed + n, quota_hit
     except BaseException:  # Ctrl-C, a storage failure: queued ROMs never start, running ones stop at their next stop check
         stop.set()
         ex.shutdown(wait=True, cancel_futures=True)
         hasher.shutdown(wait=True, cancel_futures=True)
         with contextlib.suppress(SystemExit):  # what was uploaded still gets its entries
-            record(system, pending, outcomes, listing, skip, replace, rerun, fill)
+            record(system, pending, outcomes, listing, index, skip, replace, rerun, fill)
         raise
     finally:
         stop.set()
         ex.shutdown(wait=True, cancel_futures=True)
         hasher.shutdown(wait=True, cancel_futures=True)
         scrape_state.flush_hashes()
+        scrape_state.flush_unknown()
         for _, begun in flight:
             shutil.rmtree(begun.tmp, ignore_errors=True)
 
 
-def run_scrape(client, systems, todo, skip, ask=True, replace=False, forced=None, rerun=RERUN, outcomes=None, fill=False):
+def run_scrape(client, systems, todo, skip, ask=True, replace=False, forced=None, rerun=RERUN, outcomes=None, fill=False,
+               listings=None, metadata=None):
     """Confirm (unless not ask), then scrape todo ({system: [(ROM, size, etag)]}) in batches. Returns the exit code.
-    replace, forced, rerun, fill: see run_batch and record. outcomes: filled with {system: {ROM: how, or None when unknown}}."""
+    replace, forced, rerun, fill: see run_batch and record. outcomes: filled with {system: {ROM: how, or None when unknown}}.
+    listings: {system: {key: size} of scrapes/<system>/} and metadata: {system: its metadata.json} the caller already has."""
     count = sum(len(v) for v in todo.values())
+    listings, metadata = dict(listings or {}), metadata or {}
     try:
-        listings = _each(lambda name: s3.list_sizes(f"{scrape_plan.SCRAPES}/{name}/"), todo)
+        listings.update(_each(lambda name: s3.list_sizes(f"{scrape_plan.SCRAPES}/{name}/"), [n for n in todo if n not in listings]))
     except s3.ERRORS as e:
         ui.fail(f"{e}", 3)
-    kept = 0 if replace else sum(len(scrape_plan.scrape_index(listings[name]).get(os.path.splitext(r)[0], ()))
+    indexes = {name: scrape_plan.scrape_index(listings[name]) for name in todo}
+    kept = 0 if replace else sum(len(indexes[name].get(os.path.splitext(r)[0], ()))
                                  for name, items in todo.items() for r, _, _ in items)
     note = f"; the {kept} media file(s) already there are kept" if kept else ""
     if ask and not ui.confirm(f"🖼️  Scrape {count} ROM(s) from ScreenScraper and write their media and metadata to "
@@ -625,13 +689,13 @@ def run_scrape(client, systems, todo, skip, ask=True, replace=False, forced=None
         print(ui.dim(f"ScreenScraper: {quota.used_today}/{quota.max_today} requests used today, {quota.max_threads} thread(s)"))
     shrink = scrape_plan.can_shrink()
     if not shrink:
-        print(ui.yellow("  ⚠️  Onion box art and Slot labels need Pillow or macOS sips to resize images; not making them"))
+        print(ui.yellow(f"  ⚠️  {scrape_plan.NO_SHRINK}; not making them"))
     outcomes = {} if outcomes is None else outcomes
     failed, quota_hit = 0, None
     for name, items in sorted(todo.items()):
         outcomes[name] = {}
         n, quota_hit = scrape_system(client, systems[name], items, max(1, quota.max_threads), skip, shrink, outcomes[name],
-                                     listings[name], replace, forced, rerun, fill)
+                                     listings[name], indexes[name], replace, forced, rerun, fill, metadata.get(name))
         failed += n
         if quota_hit:
             break
@@ -663,6 +727,13 @@ def _pick_systems(name):
 
 
 def scrape_command(args):
+    try:
+        return _scrape_command(args)
+    finally:
+        _mtimes.clear()
+
+
+def _scrape_command(args):
     """Scrape the available ROMs that have no metadata yet from ScreenScraper into scrapes/<system>/.
 
     args: system (storage folder name, or None for all), retry (also try ROMs marked unknown), skip_media (media type
@@ -690,7 +761,7 @@ def scrape_command(args):
                 metadata[name] = data
         fill = None
         if getattr(args, "fill_media", False):
-            have = _each(lambda name: s3.list_sizes(f"{scrape_plan.SCRAPES}/{name}/", sizes=False), [s["bucket"] for s in listed])
+            have = _each(lambda name: s3.list_sizes(f"{scrape_plan.SCRAPES}/{name}/"), [s["bucket"] for s in listed])
             fill = (set(screenscraper.MEDIA_MAP.values()) - skip, have)
         candidates = find_candidates(listed, roms, metadata, retry=args.retry, fill=fill)
         for s in listed:
@@ -698,7 +769,7 @@ def scrape_command(args):
                 print(ui.yellow(f"  ⚠️  {s['bucket']} has no ScreenScraper system id; skipping its {len(candidates[s['bucket']])} ROM(s)"))
                 del candidates[s["bucket"]]
         candidates = {k: v for k, v in candidates.items() if v}
-        etags = _each(lambda name: s3.list_with_etags(name + "/"), candidates)
+        etags = _candidate_etags(candidates)
     except s3.ERRORS as e:
         ui.fail(f"{e}", 3)
     todo = {name: [(r, *etags[name][r]) for r in roms_ if r in etags[name]] for name, roms_ in candidates.items()}
@@ -720,7 +791,8 @@ def scrape_command(args):
                 print(ui.dim(f"     … and {len(items) - SHOWN} more"))
         return 0
     client = make_client()
-    return run_scrape(client, {s["bucket"]: s for s in systems}, todo, skip, fill=fill is not None)
+    return run_scrape(client, {s["bucket"]: s for s in systems}, todo, skip, fill=fill is not None,
+                      listings=fill[1] if fill else None, metadata=metadata)
 
 
 def match_command(args):
@@ -761,7 +833,8 @@ def match_command(args):
         return 0
     stem = os.path.splitext(args.rom)[0]
     try:
-        replace = args.rom in load_metadata(name)
+        data = load_metadata(name)
+        replace = args.rom in data
         media = s3.list_sizes(f"{scrape_plan.SCRAPES}/{name}/")
     except ValueError:
         ui.fail(f"{metadata_key(name)} isn't valid JSON", 3)
@@ -792,7 +865,7 @@ def match_command(args):
     size, etag = listing[args.rom]
     outcomes = {}
     code = run_scrape(client, {name: system}, {name: [(args.rom, size, etag)]}, skip, ask=False, replace=replace,
-                      forced={args.rom: game_id}, rerun=rerun, outcomes=outcomes)
+                      forced={args.rom: game_id}, rerun=rerun, outcomes=outcomes, listings={name: media}, metadata={name: data})
     how = outcomes.get(name, {}).get(args.rom, "")
     if how == "manual":  # saved only once the ROM is scraped as that game
         scrape_state.save_match(name, args.rom, game_id)

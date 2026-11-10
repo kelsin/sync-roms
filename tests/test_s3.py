@@ -10,8 +10,6 @@ import boto3
 from botocore.exceptions import ClientError
 from botocore.stub import Stubber
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, os.path.join(ROOT, "src"))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 from sync_roms import runtime, s3, scrape_files, store  # noqa: E402
@@ -26,8 +24,11 @@ def fake_client():
 
 
 class S3Test(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.read, cls.write = fake_client(), fake_client()  # building a client is slow, so once; each test gets fresh Stubbers
+
     def setUp(self):
-        self.read, self.write = fake_client(), fake_client()
         self.rs, self.ws = Stubber(self.read), Stubber(self.write)
         self.rs.activate()
         self.ws.activate()
@@ -38,6 +39,8 @@ class S3Test(unittest.TestCase):
             self.addCleanup(p.stop)
 
     def tearDown(self):
+        self.rs.deactivate()
+        self.ws.deactivate()
         self.rs.assert_no_pending_responses()
         self.ws.assert_no_pending_responses()
 
@@ -75,7 +78,9 @@ class S3Test(unittest.TestCase):
             s3.download(("gba/a.zip", path, 1))
             self.assertTrue(os.path.isdir(os.path.dirname(path)))
         self.assertEqual(client.download_fileobj.call_args.args[:2], (BUCKET, "gba/a.zip"))
-        self.assertEqual(client.download_fileobj.call_args.kwargs, {"Callback": None})
+        kwargs = client.download_fileobj.call_args.kwargs
+        self.assertIsNone(kwargs["Callback"])
+        self.assertEqual(kwargs["Config"].max_concurrency, s3.DOWNLOAD_PARTS)
 
     def test_delete_keys_batches_and_returns_errors(self):
         keys = [f"k{i}" for i in range(1001)]
@@ -140,7 +145,7 @@ class DownloadTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             path, wrote = os.path.join(d, "g.zip"), []
 
-            def fake_download(bucket, key, fileobj, Callback=None):
+            def fake_download(bucket, key, fileobj, Callback=None, Config=None):
                 fileobj.seek(0)
                 fileobj.write(b"abc")
                 Callback(3)
@@ -156,7 +161,7 @@ class DownloadTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             path = os.path.join(d, "g.zip")
 
-            def fail(bucket, key, fileobj, Callback=None):
+            def fail(bucket, key, fileobj, Callback=None, Config=None):
                 fileobj.write(b"ab")
                 raise OSError("boom")
 

@@ -1,6 +1,5 @@
 import contextlib
 import io
-import json
 import os
 import sys
 import tempfile
@@ -8,18 +7,14 @@ import unittest
 import zipfile
 from unittest import mock
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DATA = os.path.join(ROOT, "src", "sync_roms", "data")
-sys.path.insert(0, os.path.join(ROOT, "src"))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 from sync_roms import cli  # noqa: E402
-from sync_roms import chd, downloads, picker  # noqa: E402
+from sync_roms import chd, downloads, picker, store  # noqa: E402
 
 
 def repo(name):
-    with open(os.path.join(DATA, name)) as f:
-        return json.load(f)
+    return store.repo_json(os.path.splitext(name)[0])
 
 
 LAYOUTS = {"esde": {"label": "ES-DE"}, "knulli": {"label": "Knulli"}, "muos": {"label": "muOS"}}

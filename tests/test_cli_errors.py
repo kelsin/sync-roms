@@ -12,7 +12,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 
 from sync_roms import chd, commands, diff, edit, m3u, picker, runtime, s3, scrape_files, store, ui, upload  # noqa: E402
-from test_edit import EditFlow  # noqa: E402
+from test_edit import EditBase  # noqa: E402
 from test_scripting import Isolated  # noqa: E402
 
 
@@ -79,7 +79,7 @@ class ExitCodeTest(Isolated):
                 self.assertEqual(self.code_of(chd.chd_command, mock.Mock(chd=tmp, dry_run=False)), 3)
 
 
-class EofTest(EditFlow):
+class EofTest(EditBase):
     def run_eof(self, picks):
         picks = iter(picks)
         with mock.patch.object(runtime, "BUCKET", "b", create=True), \

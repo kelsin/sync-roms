@@ -4,12 +4,9 @@ import os
 import re
 import stat
 import sys
-import tempfile
 
 from . import runtime, store, ui
 
-
-# --- Local mirror ---------------------------------------------------------------------------------
 
 def _private(path):
     """Make settings.json readable by the owner only (it can hold the ScreenScraper credentials)."""
@@ -36,23 +33,11 @@ def load_settings():
 
 def save_settings(settings):
     """Replace settings.json with settings in one atomic write: a mode 600 temp file in the same folder, then a rename."""
-    tmp = None
     try:
         os.makedirs(store.data_dir(), exist_ok=True)
-        path = os.path.join(store.data_dir(), "settings.json")
-        fd, tmp = tempfile.mkstemp(dir=store.data_dir(), prefix=".settings-", suffix=".tmp")  # created mode 600
-        with os.fdopen(fd, "w") as f:
-            json.dump(settings, f, indent=2, sort_keys=True)
-            f.flush()
-            os.fsync(f.fileno())
-        os.replace(tmp, path)
-        tmp = None
-        _private(path)
+        store.write_json(os.path.join(store.data_dir(), "settings.json"), settings, mode=0o600, indent=2, sort_keys=True)
     except OSError as e:
         ui.fail(f"Couldn't save the setting: {e}", 3)
-    finally:
-        if tmp and os.path.exists(tmp):
-            os.remove(tmp)
 
 
 def save_setting(name, value):
@@ -106,9 +91,8 @@ def ensure_bucket():
             if not os.path.isdir(root):
                 print(ui.red(f"❌ {root} is not a folder"))
                 continue
-            save_setting("root", root)
-            save_setting("bucket", None)
-            save_setting("endpoint", None)
+            settings = {k: v for k, v in load_settings().items() if k not in ("bucket", "endpoint")}
+            save_settings({**settings, "root": root})
             runtime.ROOT = root
             continue
         name = re.sub(r"^s3://", "", name).strip("/")

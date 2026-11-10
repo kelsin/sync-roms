@@ -7,12 +7,11 @@ import threading
 import unittest
 from unittest import mock
 
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 
 from sync_roms import cli, clean, downloads, s3, scrape_plan, store, ui, usersettings  # noqa: E402
-from test_cli_sync import MANIFEST, list_sizes  # noqa: E402
+from helpers import MANIFEST, list_sizes  # noqa: E402
 
 
 def captured(fn, *a, **kw):
@@ -98,6 +97,7 @@ class DownloadInterruptTest(unittest.TestCase):
             st.enter_context(mock.patch.object(ui.ProgressBar, "draw", draw))
             st.enter_context(mock.patch.object(downloads, "hard_exit", hard_exit))
             st.enter_context(mock.patch.object(downloads.time, "sleep", lambda s: None))
+            st.enter_context(mock.patch.object(ui, "POLL", 0.001))
             try:
                 captured(downloads.run_downloads, [("gba/a.zip", "/tmp/x/a.zip", 5)], "ROMs", "i", "/tmp/x")
             except (KeyboardInterrupt, SystemExit):

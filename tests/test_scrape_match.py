@@ -1,6 +1,6 @@
 import contextlib
+import hashlib
 import io
-import json
 import os
 import sys
 import tempfile
@@ -10,11 +10,10 @@ from concurrent.futures import ThreadPoolExecutor
 from types import SimpleNamespace
 from unittest import mock
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, os.path.join(ROOT, "src"))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 from realdir_guard import RealDataDirGuard  # noqa: E402
+from helpers import StorageDir  # noqa: E402
 from sync_roms import commands, runtime, s3, scrape_online, scrape_state, screenscraper, store  # noqa: E402
 
 SYSTEM = {"bucket": "gba", "screenscraper": 12}
@@ -35,25 +34,8 @@ class FakeClient:
         return {"id": 77, "rom": {"rommd5": "0" * 32}}
 
 
-class MatchBase(RealDataDirGuard):
-    def setUp(self):
-        super().setUp()
-        self.tmp = tempfile.TemporaryDirectory()
-        self.addCleanup(self.tmp.cleanup)
-        self.root = os.path.join(self.tmp.name, "storage")
-        self.data = os.path.join(self.tmp.name, "data")
-        os.makedirs(self.root)
-        for p in (mock.patch.object(runtime, "ROOT", self.root), mock.patch.object(runtime, "_mirror_root", None),
-                  mock.patch.object(store, "data_dir", return_value=self.data)):
-            p.start()
-            self.addCleanup(p.stop)
-
-    def put(self, key, data=b"abc"):
-        path = os.path.join(self.root, key)
-        os.makedirs(os.path.dirname(path), exist_ok=True)
-        with open(path, "wb") as f:
-            f.write(data)
-        return path
+class MatchBase(StorageDir):
+    pass
 
 
 class CandidatesTest(MatchBase):
@@ -99,13 +81,13 @@ class HashAndMatchTest(MatchBase):
         h = scrape_online.hash_file("gba", "a.zip", 3, 5)
         self.assertEqual(h, {"md5": "900150983cd24fb0d6963f7d28e17f72",
                              "sha1": "a9993e364706816aba3e25717850c26c9cd0d89d", "crc": "352441C2"})
-        with mock.patch.object(s3, "read_range", side_effect=AssertionError("read again")):
+        with mock.patch.object(s3, "safe_join", side_effect=AssertionError("read again")):
             self.assertEqual(scrape_online.hash_file("gba", "a.zip", 3, 5), h)
 
     def test_prefetched_hash_is_used_by_the_lookup(self):
         path = self.put("gba/a.zip", b"abc")
         stop = threading.Event()
-        with ThreadPoolExecutor(1) as pool, mock.patch.object(s3, "read_range", wraps=s3.read_range) as rr:
+        with ThreadPoolExecutor(1) as pool, mock.patch.object(scrape_online, "hash_file", wraps=scrape_online.hash_file) as rr:
             scrape_online.prefetch_hash(pool, "gba", "a.zip", 3, stop)
             scrape_online.prefetch_hash(pool, "gba", "a.zip", 3, stop)  # already being hashed: not queued twice
             h = scrape_online._hashes("gba", "a.zip", 3, stop)
@@ -124,20 +106,22 @@ class HashAndMatchTest(MatchBase):
 
     def test_hashing_stops_between_chunks(self):
         self.put("gba/a.zip", b"abcdef")
-        stop = scrape_online.threading.Event()
-        real = s3.read_range
-        with mock.patch.object(scrape_online, "CHUNK", 2), \
-                mock.patch.object(s3, "read_range", side_effect=lambda *a: stop.set() or real(*a)) as rr:
+        stop = mock.Mock()
+        stop.is_set.side_effect = [False, True]
+        with mock.patch.object(scrape_online, "CHUNK", 2):
             with self.assertRaises(screenscraper.Stopped):
                 scrape_online.hash_file("gba", "a.zip", 6, 5, stop)
-        self.assertEqual(rr.call_count, 1)
         self.assertIsNone(scrape_state.cached_hashes("gba", "a.zip", 6, 5))
 
-    def test_hash_reads_in_chunks(self):
-        self.put("gba/a.zip", b"abc")
-        with mock.patch.object(scrape_online, "CHUNK", 2), mock.patch.object(s3, "read_range", wraps=s3.read_range) as rr:
-            scrape_online.hash_file("gba", "a.zip", 3, 5)
-        self.assertEqual([c.args for c in rr.call_args_list], [("gba/a.zip", 0, 2), ("gba/a.zip", 2, 3)])
+    def test_hash_reads_in_chunks_from_one_open_file(self):
+        self.put("gba/a.zip", b"abcde")
+        stop = mock.Mock()
+        stop.is_set.return_value = False
+        with mock.patch.object(scrape_online, "CHUNK", 2), mock.patch("builtins.open", wraps=open) as op:
+            h = scrape_online.hash_file("gba", "a.zip", 5, 5, stop)
+        self.assertEqual(stop.is_set.call_count, 3)  # chunks of 2, 2 and 1
+        self.assertEqual(op.call_count, 1)
+        self.assertEqual(h["md5"], hashlib.md5(b"abcde").hexdigest())
 
     def test_s3_uses_etag_md5_only_when_single_part(self):
         client = FakeClient()
@@ -245,8 +229,7 @@ class ResolveManualTest(unittest.TestCase):
 
 class SystemIdTest(unittest.TestCase):
     def test_shipped_ids_are_integers(self):
-        with open(os.path.join(ROOT, "src", "sync_roms", "data", "systems.json")) as f:
-            systems = json.load(f)
+        systems = store.repo_json("systems")
         ids = [s["screenscraper"] for s in systems if "screenscraper" in s]
         self.assertTrue(ids)
         self.assertTrue(all(type(i) is int for i in ids))

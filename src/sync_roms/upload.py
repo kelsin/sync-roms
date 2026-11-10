@@ -1,14 +1,13 @@
 """Uploading ROMs to storage."""
+import functools
 import mimetypes
 import os
 import queue
 import tempfile
 import threading
-from concurrent.futures import ThreadPoolExecutor, TimeoutError as FutureTimeout
+from concurrent.futures import ThreadPoolExecutor
 
-from boto3.s3.transfer import TransferConfig, create_transfer_manager
 from botocore.exceptions import BotoCoreError, ClientError
-from s3transfer.subscribers import BaseSubscriber
 
 from . import diff, downloads, picker, runtime, s3, scrape_plan, store, ui
 
@@ -28,31 +27,38 @@ def plan_rom_upload(root, bucket, existing):
 
     existing: {key: size} listing of storage folder; a file whose size matches is the same.
     """
+    paths = [os.path.join(dirpath, f) for dirpath, files in downloads.walk_roms(root, keep_dotfiles=True) for f in sorted(files)]
+    with ThreadPoolExecutor(s3.STAT_WORKERS) as ex:  # the stats wait on the network when the folder is a share
+        sizes = list(ex.map(os.path.getsize, paths))
     new, changed, same = [], [], []
-    for dirpath, files in downloads.walk_roms(root, keep_dotfiles=True):
-        for f in sorted(files):
-            path = os.path.join(dirpath, f)
-            key = f"{bucket}/{os.path.relpath(path, root).replace(os.sep, '/')}"
-            size = os.path.getsize(path)
-            if key not in existing:
-                new.append((key, path, size))
-            elif existing[key] == size:
-                same.append((key, path, size))
-            else:
-                changed.append((key, path, size))
+    for path, size in zip(paths, sizes):
+        key = f"{bucket}/{os.path.relpath(path, root).replace(os.sep, '/')}"
+        if key not in existing:
+            new.append((key, path, size))
+        elif existing[key] == size:
+            same.append((key, path, size))
+        else:
+            changed.append((key, path, size))
     return new, changed, same
 
 
-class QueueWhenDone(BaseSubscriber):
-    def __init__(self, done, job, moved=None):
-        self.done, self.job, self.moved = done, job, moved  # moved(bytes) is called as parts go up
+@functools.lru_cache(maxsize=None)
+def queue_when_done_class():
+    """The s3transfer subscriber that queues (n, job, future) when job n's transfer ends; built on first use since boto3 is slow to import."""
+    from s3transfer.subscribers import BaseSubscriber
 
-    def on_progress(self, future, bytes_transferred, **kwargs):
-        if self.moved:
-            self.moved(bytes_transferred)
+    class QueueWhenDone(BaseSubscriber):
+        def __init__(self, done, n, job, moved=None):
+            self.done, self.n, self.job, self.moved = done, n, job, moved  # moved(bytes) is called as parts go up
 
-    def on_done(self, future, **kwargs):
-        self.done.put((self.job, future))
+        def on_progress(self, future, bytes_transferred, **kwargs):
+            if self.moved:
+                self.moved(bytes_transferred)
+
+        def on_done(self, future, **kwargs):
+            self.done.put((self.n, self.job, future))
+
+    return QueueWhenDone
 
 
 class FailedUpload:
@@ -70,7 +76,7 @@ def run_copies(todo):
 
     order = sorted(todo, key=lambda j: -j[2])
     moved = ui.ByteProgress([j[2] for j in order])
-    bar = ui.ProgressBar(len(todo), moved.fraction, sum(moved.size))
+    bar = ui.ProgressBar(len(todo), moved.fraction, moved.total)
 
     def copy(n):
         job = order[n]
@@ -90,12 +96,7 @@ def run_copies(todo):
         with ThreadPoolExecutor(runtime.WORKERS) as ex:
             futs = [ex.submit(copy, n) for n in range(len(order))]
             for i, f in enumerate(futs, 1):
-                while True:
-                    try:
-                        job, error = f.result(timeout=0.25)
-                        break
-                    except FutureTimeout:
-                        bar.draw(i - 1)
+                job, error = ui.wait_drawing(bar, i - 1, f.result)
                 moved.finish(i - 1)
                 prog = ui.dim(f"[{i}/{len(todo)}]")
                 if error is None:
@@ -122,19 +123,20 @@ def run_uploads(todo):
     except (ClientError, BotoCoreError):
         pass
     print(ui.bold(f"\n☁️  Uploading {len(todo)} file(s)") + ui.dim(f"  {workers} requests at once"))
+    from boto3.s3.transfer import TransferConfig, create_transfer_manager
     config = TransferConfig(max_concurrency=workers, multipart_threshold=UPLOAD_MULTIPART_AT,
                             multipart_chunksize=UPLOAD_PART)
     done, failed = queue.Queue(), 0
     order = sorted(todo, key=lambda j: -j[2])
     moved = ui.ByteProgress([j[2] for j in order])
-    bar = ui.ProgressBar(len(todo), moved.fraction, sum(moved.size))
+    bar = ui.ProgressBar(len(todo), moved.fraction, moved.total)
     try:
         with tempfile.TemporaryDirectory() as tmp, ThreadPoolExecutor(os.cpu_count() or 4) as shrinkers, \
                 create_transfer_manager(client, config) as manager:
             def send(job, path, n):
                 manager.upload(path, runtime.BUCKET, job[0],
                                {"ContentType": mimetypes.guess_type(path)[0] or "application/octet-stream"},
-                               [QueueWhenDone(done, job, lambda b: moved.add(n, b))])
+                               [queue_when_done_class()(done, n, job, lambda b: moved.add(n, b))])
 
             def shrink_and_send(job, n):
                 try:
@@ -142,7 +144,7 @@ def run_uploads(todo):
                     scrape_plan.shrink_png(job[1], art, job[3])
                     send(job, art, n)
                 except Exception as e:
-                    done.put((job, FailedUpload(e)))
+                    done.put((n, job, FailedUpload(e)))
 
             try:
                 def submit_all():  # queueing blocks once the transfer queue is full, so it can't hold up the output
@@ -153,18 +155,12 @@ def run_uploads(todo):
                             else:
                                 send(job, job[1], n)
                         except Exception as e:
-                            done.put((job, FailedUpload(e)))
+                            done.put((n, job, FailedUpload(e)))
 
-                index = {id(job): n for n, job in enumerate(order)}
                 threading.Thread(target=submit_all, daemon=True).start()
                 for i in range(1, len(todo) + 1):
-                    while True:
-                        try:
-                            job, future = done.get(timeout=0.25)
-                            break
-                        except queue.Empty:
-                            bar.draw(i - 1)
-                    moved.finish(index[id(job)])
+                    n, job, future = ui.wait_drawing(bar, i - 1, done.get)
+                    moved.finish(n)
                     prog = ui.dim(f"[{i}/{len(todo)}]")
                     try:
                         future.result()
@@ -237,6 +233,7 @@ def replace_command(args, folder, system):
     that you pick."""
     bucket = system["bucket"]
     local = diff.local_sizes(folder)
+    md5 = functools.lru_cache(maxsize=None)(lambda p: diff.file_md5(os.path.join(folder, *p.split("/"))))  # each file hashed once
     try:
         print("☁️  Listing what's already there...")
         remote = s3.list_with_etags(bucket + "/")
@@ -244,7 +241,7 @@ def replace_command(args, folder, system):
         renames, new, changed, only_bucket = diff.plan_replace(
             local, remote, lambda p: diff.local_fingerprint(os.path.join(folder, *p.split("/"))),
             lambda p, size, etag: diff.bucket_fingerprint(f"{bucket}/{p}", size, etag),
-            lambda p, etag: "-" not in etag and diff.file_md5(os.path.join(folder, *p.split("/"))) != etag.strip('"'))
+            lambda p, etag: "-" not in etag and md5(p) != etag.strip('"'), md5)
     except s3.ERRORS as e:
         ui.fail(f"{e}", 3)
     print(f"\n💿 New: {ui.bold(str(len(new)))} ({ui.human_size(sum(local[p] for p in new))})")

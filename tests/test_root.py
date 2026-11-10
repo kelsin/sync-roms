@@ -112,7 +112,7 @@ class RootSettingTest(unittest.TestCase):
         saved = {"bucket": "old", "endpoint": "http://x"}
         with tempfile.TemporaryDirectory() as d, \
                 mock.patch.object(usersettings, "load_settings", lambda: dict(saved)), \
-                mock.patch.object(usersettings, "save_setting", lambda k, v: saved.pop(k, None) if v is None else saved.__setitem__(k, v)), \
+                mock.patch.object(usersettings, "save_settings", lambda new: (saved.clear(), saved.update(new))), \
                 mock.patch.object(usersettings, "resolve_settings", lambda: {k: (None, "unset") for k in ("bucket", "root", "endpoint")} | {"profile": ("p", ""), "write_profile": ("w", "")}), \
                 mock.patch.object(runtime, "ROOT", None), mock.patch.object(runtime, "BUCKET", None), \
                 mock.patch("builtins.input", side_effect=["/no/such/folder", d]), \

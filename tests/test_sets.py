@@ -5,10 +5,9 @@ import tempfile
 import unittest
 from unittest import mock
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, os.path.join(ROOT, "src"))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
+from helpers import write_json  # noqa: E402
 from sync_roms import edit, picker, store  # noqa: E402
 
 
@@ -61,12 +60,14 @@ class SetsTest(unittest.TestCase):
             os.makedirs(data)
             core = {"gba": [{"title": "A", "bucket": "gba/A.zip"}], "sets": ["mix", "old"]}
             cards = {"a": {"device": "full", "games": {"sets": ["old"]}}, "b": {"device": "full", "games": {"sets": ["mix"]}}}
-            json.dump(core, open(os.path.join(data, "games.json"), "w"))
-            json.dump(cards, open(os.path.join(data, "cards.json"), "w"))
+            write_json(os.path.join(data, "games.json"), core)
+            write_json(os.path.join(data, "cards.json"), cards)
             with mock.patch.object(store, "data_dir", return_value=data), mock.patch.object(store, "backup"):
                 store.prune_unknown_sets([{"id": "mix"}])
-                saved_core = json.load(open(os.path.join(data, "games.json")))
-                saved_cards = json.load(open(os.path.join(data, "cards.json")))
+                with open(os.path.join(data, "games.json")) as f:
+                    saved_core = json.load(f)
+                with open(os.path.join(data, "cards.json")) as f:
+                    saved_cards = json.load(f)
         self.assertEqual(saved_core["sets"], ["mix"])
         self.assertIn("gba", saved_core)
         self.assertEqual(saved_cards["a"]["games"], {})

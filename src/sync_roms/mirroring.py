@@ -2,7 +2,6 @@
 import os
 from concurrent.futures import ThreadPoolExecutor
 
-
 from . import downloads, runtime, s3, scrape_plan, store, ui, usersettings
 
 
@@ -15,8 +14,10 @@ def mirror_wanted(manifest):
     systems = manifest["systems"]
     todo = [s for s in systems if s.get("full_system") or store.listed(s)]
     with ThreadPoolExecutor(runtime.WORKERS) as ex:
+        others = [ex.submit(s3.list_sizes, prefix) for prefix in ("BIOS/", runtime.THEMES_PREFIX, f"{scrape_plan.SCRAPES}/esde/")]
         roms = list(ex.map(store.list_system, todo))
         scrapes = list(ex.map(lambda s: s3.list_sizes(f"{scrape_plan.SCRAPES}/{s['bucket']}/"), todo))
+        bios, themes, esde = (f.result() for f in others)
     wanted = {}
     for s, have, scraped in zip(todo, roms, scrapes):
         keys = [k for k in store.available_keys(s, have) if k in have]
@@ -27,13 +28,12 @@ def mirror_wanted(manifest):
             if key == f"{scrape_plan.SCRAPES}/{s['bucket']}/metadata.json" or (
                     len(parts) > 3 and parts[2] in scrape_plan.BUCKET_MEDIA and os.path.splitext("/".join(parts[3:]))[0] in stems):
                 wanted[key] = size
-    bios = s3.list_sizes("BIOS/")
     for s in systems:
         for f in s["bios"]["files"]:
             if "BIOS/" + f in bios:
                 wanted["BIOS/" + f] = bios["BIOS/" + f]
-    wanted.update((k, v) for k, v in s3.list_sizes(runtime.THEMES_PREFIX).items() if not k.endswith("/"))
-    wanted.update((k, v) for k, v in s3.list_sizes(f"{scrape_plan.SCRAPES}/esde/").items() if not k.endswith("/"))
+    wanted.update((k, v) for k, v in themes.items() if not k.endswith("/"))
+    wanted.update((k, v) for k, v in esde.items() if not k.endswith("/"))
     return wanted
 
 
@@ -57,7 +57,7 @@ def refresh_mirror(root, dry_run=False):
             jobs.append((k, s3.safe_join(root, k), s))
         except ValueError as e:
             print(ui.yellow(f"  ⚠️  skipping {e}"))
-    todo = downloads.plan_downloads(jobs)
+    todo = [j for j in jobs if have.get(j[0]) != j[2]]  # the mirror listing already has every size
     stale = sorted(set(have) - set(wanted))
     print(f"🪞 Mirror: {ui.bold(str(len(todo)))} to download ({ui.human_size(sum(j[2] for j in todo))}), "
           f"{len(wanted) - len(todo)} up to date, {ui.bold(str(len(stale)))} to delete")
@@ -80,11 +80,15 @@ def refresh_mirror(root, dry_run=False):
         if not ui.confirm(f"🗑️  Delete these {len(stale)} file(s) no longer referenced?", default=False):
             print(ui.yellow("  ↩️  Keeping them"))
             stale = []
+    folders = set()
     for key in stale:
-        os.remove(s3.safe_join(root, key))
-    for folder, _, _ in os.walk(root, topdown=False):
-        if folder != root and not os.listdir(folder):
+        path = s3.safe_join(root, key)
+        os.remove(path)
+        folders.add(os.path.dirname(path))
+    for folder in sorted(folders, key=len, reverse=True):  # prune the folders the deletions emptied, up to root
+        while folder != root and os.path.isdir(folder) and not os.listdir(folder):
             os.rmdir(folder)
+            folder = os.path.dirname(folder)
     if stale:
         print(ui.green(f"  🧹 Deleted {len(stale)} file(s) no longer referenced"))
     return failed

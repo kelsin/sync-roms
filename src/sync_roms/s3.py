@@ -1,11 +1,9 @@
 """Storage plumbing: the S3 bucket, or a folder (e.g. a network share) in its place."""
 import contextlib
 import os
-import shutil
 import stat
 from concurrent.futures import ThreadPoolExecutor
 
-import boto3
 from botocore.config import Config
 from botocore.exceptions import BotoCoreError, ClientError, ProfileNotFound
 
@@ -100,6 +98,7 @@ def s3_client(profile=None, connections=runtime.WORKERS):
     profile = profile or runtime.PROFILE
     key = profile if connections == runtime.WORKERS else (profile, connections)
     if key not in _s3:
+        import boto3  # slow to import, and a folder or a mirror never needs it
         try:
             session = boto3.Session(profile_name=profile)
         except ProfileNotFound:
@@ -140,6 +139,9 @@ class CountingWriter:
         return True
 
 
+DOWNLOAD_PARTS = 2  # ranges of one file fetched at once: every download has its own pool, and the client's connections are shared
+
+
 def download(job, callback=None, wrote=None):
     """callback(bytes) is called as data arrives, wrote(bytes) as it is written to disk."""
     key, path, _ = job
@@ -148,9 +150,11 @@ def download(job, callback=None, wrote=None):
         copy_file(safe_join(read_root(), key), path + ".part", callback, wrote)
         os.replace(path + ".part", path)
         return
+    from boto3.s3.transfer import TransferConfig
     try:
         with open(path + ".part", "wb") as f:
-            s3_client().download_fileobj(runtime.BUCKET, key, CountingWriter(f, wrote) if wrote else f, Callback=callback)
+            s3_client().download_fileobj(runtime.BUCKET, key, CountingWriter(f, wrote) if wrote else f, Callback=callback,
+                                        Config=TransferConfig(max_concurrency=DOWNLOAD_PARTS))
         os.replace(path + ".part", path)
     except BaseException:
         with contextlib.suppress(OSError):
@@ -181,11 +185,10 @@ def put_text(key, text):
 
 
 def list_with_etags(prefix):
-    """{path under prefix: (size, etag)}. A folder has no ETags: its tag has a "-" (like a multipart upload's), so the
+    """{path under prefix: (size, etag)}. A folder has no ETags: its tag is "-" (like a multipart upload's has one), so the
     same path and size count as the same file and the rest is matched by content."""
     if runtime.ROOT:
-        return {k[len(prefix):]: (size, f"{int(os.path.getmtime(safe_join(runtime.ROOT, k)))}-{size}")
-                for k, size in mirror_sizes(runtime.ROOT, prefix).items() if not k.endswith("/")}
+        return {k[len(prefix):]: (size, "-") for k, size in mirror_sizes(runtime.ROOT, prefix).items()}
     pages = s3_client().get_paginator("list_objects_v2").paginate(Bucket=runtime.BUCKET, Prefix=prefix)
     return {o["Key"][len(prefix):]: (o["Size"], o["ETag"]) for page in pages for o in page.get("Contents", [])
             if not o["Key"].endswith("/")}

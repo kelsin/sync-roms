@@ -10,12 +10,10 @@ import unittest
 from types import SimpleNamespace
 from unittest import mock
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, os.path.join(ROOT, "src"))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
-from realdir_guard import RealDataDirGuard  # noqa: E402
-from sync_roms import runtime, s3, scrape_online, scrape_plan, scrape_state, screenscraper, store, ui, upload, usersettings  # noqa: E402
+from helpers import StorageDir  # noqa: E402
+from sync_roms import s3, scrape_online, scrape_plan, scrape_state, screenscraper, store, ui, upload, usersettings  # noqa: E402
 
 GBA = {"name": "Game Boy Advance", "bucket": "gba", "screenscraper": 12, "full_system": True, "folders": {}}
 NES = {"name": "NES", "bucket": "nes", "screenscraper": 3, "full_system": True, "folders": {}}
@@ -72,25 +70,18 @@ class FakeClient:
             f.write(PNG)
 
 
-class RunBase(RealDataDirGuard):
+class RunBase(StorageDir):
     systems = [GBA]
 
     def setUp(self):
         super().setUp()
-        self.tmp = tempfile.TemporaryDirectory()
-        self.addCleanup(self.tmp.cleanup)
-        self.root = os.path.join(self.tmp.name, "storage")
-        self.data = os.path.join(self.tmp.name, "data")
-        os.makedirs(self.root)
         self.client = FakeClient({"a.zip": game(1, "Alpha"), "b.zip": game(2, "Beta"), "c.zip": game(3, "Gamma"),
                                   "d.zip": game(4, "Delta")})
         self.settings = dict(CREDS)
         self.confirm = mock.Mock(return_value=True)
         self.out = io.StringIO()
         self.err = io.StringIO()
-        for p in (mock.patch.object(runtime, "ROOT", self.root), mock.patch.object(runtime, "_mirror_root", None),
-                  mock.patch.object(store, "data_dir", return_value=self.data),
-                  mock.patch.object(store, "load_manifest", side_effect=lambda *a: {"systems": self.systems}),
+        for p in (mock.patch.object(store, "load_manifest", side_effect=lambda *a: {"systems": self.systems}),
                   mock.patch.object(usersettings, "load_settings", side_effect=lambda: dict(self.settings)),
                   mock.patch.object(screenscraper, "Client", side_effect=lambda *a, **k: self.client),
                   mock.patch.object(ui, "confirm", self.confirm),
@@ -107,12 +98,6 @@ class RunBase(RealDataDirGuard):
         for t in set(threading.enumerate()) - before:
             t.join(5)
             self.assertFalse(t.is_alive(), f"thread {t.name} outlived the test")
-
-    def put(self, key, data=b"abc"):
-        path = os.path.join(self.root, key)
-        os.makedirs(os.path.dirname(path), exist_ok=True)
-        with open(path, "wb") as f:
-            f.write(data)
 
     def run_scrape(self, **kw):
         args = SimpleNamespace(**{"system": None, "retry": False, "skip_media": [], "dry_run": False, **kw})
@@ -501,7 +486,7 @@ class RoundTwoRunTest(RunBase):
         batches = []
         real = scrape_online.run_batch
         with mock.patch.object(scrape_online, "run_batch",
-                               side_effect=lambda c, s, batch, *a, **k: batches.append([r for r, _, _ in batch]) or real(c, s, batch, *a, **k)):
+                               side_effect=lambda s, batch, *a, **k: batches.append([r for r, _, _ in batch]) or real(s, batch, *a, **k)):
             self.assertEqual(self.run_scrape(), 0)
         self.assertEqual(len(batches), 2)
         for b in batches:
@@ -530,9 +515,9 @@ class RoundTwoRunTest(RunBase):
     def test_metadata_is_written_once_for_many_batches(self):
         for r in ("a.zip", "b.zip", "c.zip", "d.zip"):
             self.put(f"gba/{r}")
-        for every, writes in ((100, 1), (2, 2)):
-            with self.subTest(every=every), mock.patch.object(scrape_online, "BATCH", 1), \
-                    mock.patch.object(scrape_online, "METADATA_EVERY", every), \
+        for interval, writes in ((60, 1), (0, 4)):
+            with self.subTest(interval=interval), mock.patch.object(scrape_online, "BATCH", 1), \
+                    mock.patch.object(scrape_online, "METADATA_INTERVAL", interval), \
                     mock.patch.object(s3, "put_text", wraps=s3.put_text) as put:
                 self.assertEqual(self.run_scrape(retry=True), 0)
                 self.assertEqual([c.args[0] for c in put.call_args_list].count("scrapes/gba/metadata.json"), writes)

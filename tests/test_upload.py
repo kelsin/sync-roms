@@ -6,8 +6,6 @@ import tempfile
 import unittest
 from unittest import mock
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, os.path.join(ROOT, "src"))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 from sync_roms import runtime, s3, scrape_plan, store, upload, usersettings  # noqa: E402
@@ -95,7 +93,7 @@ class FakeManager:
 class RunRomUploadsTest(unittest.TestCase):
     def run_uploads(self, todo, manager):
         with mock.patch.object(runtime, "BUCKET", "test-bucket"), \
-                mock.patch.object(upload, "create_transfer_manager", return_value=manager) as create, \
+                mock.patch("boto3.s3.transfer.create_transfer_manager", return_value=manager) as create, \
                 mock.patch.object(s3, "s3_client") as client, \
                 contextlib.redirect_stdout(io.StringIO()) as out:
             failed = upload.run_uploads(todo)
@@ -153,7 +151,7 @@ class RunRomUploadsTest(unittest.TestCase):
 
 class S3ClientPoolTest(unittest.TestCase):
     def test_pool_size_gets_its_own_client(self):
-        with mock.patch.dict(s3._s3, {}, clear=True), mock.patch.object(s3.boto3, "Session") as session:
+        with mock.patch.dict(s3._s3, {}, clear=True), mock.patch("boto3.Session") as session:
             session.return_value.client.side_effect = lambda *a, **k: mock.Mock(pool=k["config"].max_pool_connections)
             small, big = s3.s3_client("p"), s3.s3_client("p", connections=40)
             self.assertIs(small, s3.s3_client("p"))
@@ -161,7 +159,7 @@ class S3ClientPoolTest(unittest.TestCase):
         self.assertEqual((small.pool, big.pool), (runtime.WORKERS, 40))
 
     def test_custom_endpoint_uses_path_style(self):
-        with mock.patch.dict(s3._s3, {}, clear=True), mock.patch.object(s3.boto3, "Session") as session, \
+        with mock.patch.dict(s3._s3, {}, clear=True), mock.patch("boto3.Session") as session, \
                 mock.patch.object(runtime, "ENDPOINT", "http://minio:9000"):
             s3.s3_client("p")
         kwargs = session.return_value.client.call_args.kwargs

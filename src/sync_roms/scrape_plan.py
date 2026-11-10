@@ -168,14 +168,34 @@ def gamelist_fields(meta):
     return out
 
 
+def _index_entry(key):
+    """(ROM stem, media type) of a scrapes/<system>/<type>/<ROM path>.<ext> key, or None for any other key."""
+    parts = key.split("/")
+    if len(parts) > 3 and parts[2] in BUCKET_MEDIA:
+        return os.path.splitext("/".join(parts[3:]))[0], parts[2]
+    return None
+
+
 def scrape_index(listing):
     """{ROM path without extension: {media type: (key, size)}} from a listing of scrapes/<system>/."""
     index = defaultdict(dict)
     for key, size in sorted(listing.items()):
-        parts = key.split("/")
-        if len(parts) > 3 and parts[2] in BUCKET_MEDIA:
-            index[os.path.splitext("/".join(parts[3:]))[0]].setdefault(parts[2], (key, size))
+        index_add(index, key, size)
     return index
+
+
+def index_add(index, key, size):
+    """Add one listing entry to a scrape_index (the first key of a stem and type stays)."""
+    entry = _index_entry(key)
+    if entry:
+        index[entry[0]].setdefault(entry[1], (key, size))
+
+
+def index_drop(index, key):
+    """Remove one listing entry from a scrape_index."""
+    entry = _index_entry(key)
+    if entry and index.get(entry[0], {}).get(entry[1], (None,))[0] == key:
+        del index[entry[0]][entry[1]]
 
 
 def variant_tags(layout_name, family, stem):
@@ -263,6 +283,9 @@ def plan_scrapes(layout_name, rom_rels, listing, meta, media_root, rom_dir, pres
         if tags:
             entries[rom] = tags
     return jobs, entries, texts
+
+
+NO_SHRINK = "Onion box art and Slot labels need Pillow or macOS sips to resize images"
 
 
 def can_shrink():
