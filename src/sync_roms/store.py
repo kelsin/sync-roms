@@ -47,7 +47,7 @@ def write_json(path, data, *, backup=False, mode=None, trailing_newline=False, *
     """Write data to path as JSON in one atomic step (temp file in the same folder, then a rename).
 
     backup: keep the file's contents from before this run as <name>.bak first. mode: permission bits for the file
-    (default: those of the existing file, else 0o644). dump_kw goes to json.dump. Raises OSError on failure."""
+    (default: those of the existing file, else 0o666 minus the umask). dump_kw goes to json.dump. Raises OSError on failure."""
     folder = os.path.dirname(path) or "."
     if backup:
         _keep_backup(path)
@@ -55,7 +55,9 @@ def write_json(path, data, *, backup=False, mode=None, trailing_newline=False, *
         try:
             mode = os.stat(path).st_mode & 0o777
         except OSError:
-            mode = 0o644
+            umask = os.umask(0)
+            os.umask(umask)
+            mode = 0o666 & ~umask
     fd, tmp = tempfile.mkstemp(dir=folder, prefix="." + os.path.basename(path) + "-", suffix=".tmp")
     try:
         with os.fdopen(fd, "w") as f:

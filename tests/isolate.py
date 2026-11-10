@@ -21,8 +21,9 @@ if not os.environ.get(TEST_HOME_VAR):
     _real_home = os.path.expanduser("~")
     _xdg = os.environ.get("XDG_DATA_HOME")
     _forbidden = [os.path.join(_xdg, "sync-roms") if _xdg else os.path.join(_real_home, ".sync-roms"),
-                  os.path.join(_real_home, ".sync-roms"), os.path.join(_real_home, ".aws"),
-                  os.path.join(os.environ.get("APPDATA") or _real_home, "sync-roms")]
+                  os.path.join(_real_home, ".sync-roms"), os.path.join(_real_home, ".aws")]
+    if sys.platform == "win32" and os.environ.get("APPDATA"):  # where store.data_dir() looks on Windows
+        _forbidden.append(os.path.join(os.environ["APPDATA"], "sync-roms"))
     os.environ[REAL_VAR] = os.pathsep.join(dict.fromkeys(_forbidden))
     _home = tempfile.mkdtemp(prefix="sync-roms-test-home-")
     atexit.register(shutil.rmtree, _home, ignore_errors=True)
@@ -43,6 +44,7 @@ TEST_HOME = os.environ[TEST_HOME_VAR]
 FORBIDDEN = [_norm(p) for p in os.environ[REAL_VAR].split(os.pathsep) if p]
 REAL_DATA_DIR = FORBIDDEN[0]  # the real data folder, as a path only
 
+_TWO_PATHS = {"os.rename", "os.symlink", "os.link", "shutil.copyfile", "shutil.copytree", "shutil.move"}
 _EVENTS = {"open", "os.listdir", "os.scandir", "os.mkdir", "os.rename", "os.remove", "os.rmdir", "os.chmod", "os.chdir",
            "os.truncate", "os.utime", "os.symlink", "os.link", "shutil.copyfile", "shutil.copytree", "shutil.move",
            "shutil.rmtree", "glob.glob", "os.walk"}
@@ -59,7 +61,8 @@ VIOLATIONS = []  # every blocked access, so a test that swallows the error still
 def _audit(event, args):
     if event not in _EVENTS:
         return
-    for a in args:
+    paths = args[:2] if event in _TWO_PATHS else args[:1]  # later args (an open mode, flags) aren't paths
+    for a in paths:
         if isinstance(a, (str, bytes, os.PathLike)) and _inside(os.fsdecode(a)):
             msg = f"test touched the real {os.fsdecode(a)} ({event}); tests must stay inside {TEST_HOME}"
             VIOLATIONS.append(msg)

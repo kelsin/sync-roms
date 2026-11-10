@@ -634,12 +634,14 @@ def scrape_system(client, system, items, threads, skip, shrink, outcomes, listin
                                rerun=rerun)
             failed += n
             quota_hit = quota_hit or hit
-            if pending and time.monotonic() - last_write >= METADATA_INTERVAL:
-                n, halt = record(system, pending, outcomes, listing, index, skip, replace, rerun, fill)
+            if time.monotonic() - last_write >= METADATA_INTERVAL:
+                scrape_state.flush_unknown()  # marks from a run that finds nothing must not wait for the final flush
                 last_write = time.monotonic()
-                failed += n
-                if halt:
-                    return failed, quota_hit
+                if pending:
+                    n, halt = record(system, pending, outcomes, listing, index, skip, replace, rerun, fill)
+                    failed += n
+                    if halt:
+                        return failed, quota_hit
         n, _ = record(system, pending, outcomes, listing, index, skip, replace, rerun, fill)
         return failed + n, quota_hit
     except BaseException:  # Ctrl-C, a storage failure: queued ROMs never start, running ones stop at their next stop check
@@ -761,7 +763,7 @@ def _scrape_command(args):
                 metadata[name] = data
         fill = None
         if getattr(args, "fill_media", False):
-            have = _each(lambda name: s3.list_sizes(f"{scrape_plan.SCRAPES}/{name}/"), [s["bucket"] for s in listed])
+            have = _each(lambda name: s3.list_sizes(f"{scrape_plan.SCRAPES}/{name}/", sizes=False), [s["bucket"] for s in listed])
             fill = (set(screenscraper.MEDIA_MAP.values()) - skip, have)
         candidates = find_candidates(listed, roms, metadata, retry=args.retry, fill=fill)
         for s in listed:

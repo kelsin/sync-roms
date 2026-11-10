@@ -138,8 +138,8 @@ def part_path(out):
     return os.path.join(os.path.dirname(out), "." + os.path.basename(out) + ".part")
 
 
-def make_chd(tools, cfg, image, out, report=None, codec=None):
-    """Create out from image (an existing out is only verified, or recompressed to codec if given or its codec is wrong);
+def make_chd(tools, cfg, image, out, report=None):
+    """Create out from image (an existing out is only verified, or recompressed if its codec is wrong);
     None on success, else the error.
 
     The chd is built under a hidden .part name and renamed once it verifies, so out is never half written.
@@ -155,7 +155,7 @@ def make_chd(tools, cfg, image, out, report=None, codec=None):
         if os.path.exists(part):  # left by a run that was killed
             os.remove(part)
         if os.path.exists(out):
-            codec = codec or (wrong_codec(chdman, cfg, out) if cfg.get("codec") else None)
+            codec = wrong_codec(chdman, cfg, out) if cfg.get("codec") else None
             if not codec:
                 return external.run_tool([chdman, "verify", "-i", out], stage(0, 1))
             command = [chdman, "copy", "-i", out, "-o", part, "-c", codec, "-np", str(tools["np"])]
@@ -246,14 +246,14 @@ def move_flat(pairs):
         shutil.move(src, dst)
 
 
-def convert_all(pairs, clash, make):
+def convert_all(pairs, clash, make, exists_ok=False):
     """make(image, out) for each (image, out), after checking no two outs are the same file (else the error clash) and
-    none exists yet; None on success, else the error."""
+    (unless exists_ok) none exists yet; None on success, else the error."""
     outs = [out for _, out in pairs]
     if len({os.path.normcase(o).lower() for o in outs}) < len(outs):
         return clash
     for out in outs:
-        if os.path.lexists(out):
+        if not exists_ok and os.path.lexists(out):
             return f"{os.path.basename(out)} already exists"
     for image, out in pairs:
         error = make(image, out)
@@ -292,7 +292,7 @@ def chd_archive(tools, cfg, path, report=None):
                 return "no disc image in the archive"
             pairs = [(image, os.path.join(folder, os.path.splitext(os.path.basename(image))[0] + ".chd")) for image, _ in images]
             error = convert_all(pairs, "two discs in the archive would make the same .chd",
-                                lambda image, out: make_chd(tools, cfg, image, out, report))
+                                lambda image, out: make_chd(tools, cfg, image, out, report), exists_ok=True)
         if error:
             return error
         os.remove(path)
@@ -300,7 +300,7 @@ def chd_archive(tools, cfg, path, report=None):
         shutil.rmtree(tmp, ignore_errors=True)
 
 
-def chd_image(tools, cfg, image, owned, report=None, codec=None):
+def chd_image(tools, cfg, image, owned, report=None):
     """Convert one loose disc image and remove its files once the chd verifies; None on success, else the error.
     An xiso system's iso is rewritten in place instead, and a zar system's iso becomes a .zar."""
     if cfg["mode"] == "xiso":
@@ -314,7 +314,7 @@ def chd_image(tools, cfg, image, owned, report=None, codec=None):
             os.remove(image)
         return error
     out = os.path.splitext(image)[0] + ".chd"
-    error = make_chd(tools, cfg, image, out, report, codec)
+    error = make_chd(tools, cfg, image, out, report)
     if not error:
         for f in owned:
             if os.path.normcase(f).lower() != os.path.normcase(out).lower() and os.path.exists(f):
@@ -422,14 +422,14 @@ def chd_command(args):
     progress = [0.0] * len(jobs)  # each job's 0-1 progress; the bar is their mean
 
     def convert(i):
-        system, _, path, owned, *rest = jobs[i]
+        system, _, path, owned, *_ = jobs[i]
 
         def report(fraction):
             progress[i] = max(progress[i], fraction)
 
         try:
             if owned:
-                return chd_image(tools, system["chd"], path, owned, report, *rest)
+                return chd_image(tools, system["chd"], path, owned, report)
             return chd_archive(tools, system["chd"], path, report)
         finally:
             progress[i] = 1.0

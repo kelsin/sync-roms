@@ -201,6 +201,15 @@ class ChdTest(unittest.TestCase):
         self.assertIsNone(error)
         self.assertEqual(self.files(), ["Game.chd"])
 
+    def test_archive_beside_its_existing_chd_is_verified_and_removed(self):
+        self.touch("Game.zip")
+        self.touch("Game.chd")
+        fake = FakeTools(archive=["Game.cue", "Game (Track 1).bin", "Game (Track 2).bin"])
+        with mock.patch.object(external, "run_tool", fake):
+            error = chd.chd_archive(self.tools, CD["chd"], os.path.join(self.dir, "Game.zip"))
+        self.assertIsNone(error)
+        self.assertEqual(self.files(), ["Game.chd"])
+
     def test_failed_archive_is_kept_and_leaves_no_temp_folder(self):
         self.touch("Game.zip")
         with mock.patch.object(external, "run_tool", FakeTools(archive=["Game.iso"], fail=("createdvd",))):

@@ -100,6 +100,17 @@ class SetsTest(unittest.TestCase):
             edit.toggle_games("t", rows, extras)
         self.assertEqual(by["gen"]["games"], [])
 
+    def test_overlapping_extras_never_duplicate_a_game(self):
+        by = {"gen": {"bucket": "gen", "games": [{"title": "A1", "bucket": "gen/A1.chd"},
+                                                 {"title": "A2", "bucket": "gen/A2.chd"}]}}
+        rows = [(by["gen"], "gen/A1.chd", "A", ""), (by["gen"], "gen/B1.chd", "B", "")]
+        extras = {"gen/A1.chd": ["gen/A2.chd"], "gen/B1.chd": ["gen/A2.chd"]}
+        with mock.patch.object(picker, "filter_list", return_value=[False, True]):
+            edit.toggle_games("t", rows, extras)
+        buckets = [g["bucket"] for g in by["gen"]["games"]]
+        self.assertEqual(sorted(buckets), sorted(set(buckets)))
+        self.assertIn("gen/A2.chd", buckets)
+
     def test_locked_rows_cannot_toggle(self):
         keys = iter(["\t", "\x01", "\x1b", "y"])
         state = self.run_list(keys, locked=[True, False])

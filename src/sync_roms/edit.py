@@ -96,7 +96,6 @@ def toggle_games(title, rows, extras=None, covered=None, excluded=None):
         elif was and not on:
             systems[s["bucket"]] = s
             removed[s["bucket"]].update(keys)
-            listed(s).difference_update(keys)
     for bucket, keys in removed.items():
         if keys and bucket in systems:
             systems[bucket]["games"] = [g for g in systems[bucket]["games"] if g.get("bucket") not in keys]
