@@ -85,7 +85,7 @@ def systems_hint(editable):
     return "Space toggle · Enter go · Esc quit · e games · D clear · / filter · z 0-ROM"
 
 
-def pick_systems(rows, initial=None, state=None, editable=False):
+def pick_systems(rows, initial=None, state=None, editable=False, sizes=True):
     """rows: list of (label, has_roms, need_bytes, total_bytes); initial: indexes toggled on at start.
     Returns selected indexes, or None if quit.
 
@@ -97,6 +97,8 @@ def pick_systems(rows, initial=None, state=None, editable=False):
     ui.require_terminal("pick systems", "--systems a,b (or --systems all)")
 
     def status(sel):
+        if not sizes:
+            return f"{sum(sel)} selected"
         need = sum(r[2] for r, on in zip(rows, sel) if on)
         total = sum(r[3] for r, on in zip(rows, sel) if on)
         return f"{sum(sel)} selected · {ui.human_size(need)} to download ({ui.human_size(total)} total)"

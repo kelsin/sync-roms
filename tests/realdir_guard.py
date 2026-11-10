@@ -5,9 +5,10 @@ import sys
 import unittest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
-from sync_roms import store  # noqa: E402
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import isolate  # noqa: E402
 
-REAL = store.data_dir()  # read at import, before any test patches it
+REAL = isolate.REAL_DATA_DIR  # the real folder, which no test should touch
 
 
 def snapshot():

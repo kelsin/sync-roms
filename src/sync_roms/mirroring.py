@@ -15,7 +15,7 @@ def mirror_wanted(manifest):
     systems = manifest["systems"]
     todo = [s for s in systems if s.get("full_system") or store.listed(s)]
     with ThreadPoolExecutor(runtime.WORKERS) as ex:
-        roms = list(ex.map(lambda s: s3.list_sizes(s["bucket"] + "/"), todo))
+        roms = list(ex.map(store.list_system, todo))
         scrapes = list(ex.map(lambda s: s3.list_sizes(f"{scrape_plan.SCRAPES}/{s['bucket']}/"), todo))
     wanted = {}
     for s, have, scraped in zip(todo, roms, scrapes):
@@ -91,7 +91,9 @@ def refresh_mirror(root, dry_run=False):
 
 
 def use_mirror(root, dry_run):
-    """Refresh the saved mirror from storage, then make this run read from it."""
+    """Refresh the saved mirror from storage, then make this run read from it. A root folder needs no mirror."""
+    if runtime.ROOT:
+        return
     if not os.path.exists(os.path.join(root, runtime.MIRROR_MARKER)):
         print(ui.yellow(f"  ⚠️  Mirror {root} not found; using storage"))
         return
@@ -108,6 +110,8 @@ def use_mirror(root, dry_run):
 
 
 def mirror_command(args):
+    if runtime.ROOT:
+        ui.fail("A mirror isn't used with a root folder: it already reads from a folder", 2)
     if args.clear_mirror:
         usersettings.save_setting("mirror", None)
         print(ui.green("🪞 Mirror setting cleared") + ui.dim(" (the mirror's files are left alone)"))
