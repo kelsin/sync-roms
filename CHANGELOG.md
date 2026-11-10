@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.46.1](https://github.com/kelsin/sync-roms/compare/v0.46.0...v0.46.1) (2026-11-10)
+
+
+### Code Refactoring
+
+* **sync:** read android apks from os/android/APKs/ ([#182](https://github.com/kelsin/sync-roms/issues/182)) ([7292dfe](https://github.com/kelsin/sync-roms/commit/7292dfe4e9c80947cbf2b891c81a719149cd7cd3))
+
 ## [0.46.0](https://github.com/kelsin/sync-roms/compare/v0.45.0...v0.46.0) (2026-11-10)
 
 
