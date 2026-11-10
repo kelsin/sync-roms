@@ -62,12 +62,15 @@ class Modes(unittest.TestCase):
         self.assertEqual(self.modes("scrape", "--system", "gba", "--retry", "--skip-media", "covers,manuals"), "--scrape")
         self.assertEqual(self.modes("scrape", "match", "gba", "a.zip", "1"), "--scrape-match")
         self.assertEqual(self.modes("scrape", "--set-credentials"), "--scrape")
+        self.assertEqual(self.modes("scrape", "--all", "--system", "gba"), "--scrape")
         self.assertEqual(self.modes("diff", "--system", "gba"), "--diff")
 
     def test_refusals(self):
         self.refused("--retry")
         self.refused("--skip-media", "covers")
         self.refused("--set-credentials")
+        self.refused("--all")
+        self.refused("scrape", "--set-credentials", "--all")
         self.refused("--system", "gba")
         self.refused("diff", "--retry")
         self.refused("--scrape", "--upload")
@@ -208,7 +211,7 @@ class Completion(unittest.TestCase):
         commands_line = re.search(r'-eq 1 \].*?compgen -W "([^"]*)"', text).group(1).split()
         self.assertIn("scrape", commands_line)
         self.assertIn('scrape) COMPREPLY=($(compgen -W "match"', text)
-        for word in ("--retry", "--skip-media", "--set-credentials"):
+        for word in ("--retry", "--all", "--skip-media", "--set-credentials"):
             self.assertIn(word, text)
 
 
