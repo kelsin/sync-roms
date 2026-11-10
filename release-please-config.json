@@ -12,15 +12,47 @@
       "changelog-sections": [
         {
           "type": "feat",
-          "section": "Features"
+          "section": ":video_game: Features"
         },
         {
           "type": "fix",
-          "section": "Bug Fixes"
+          "section": ":bug: Bug Fixes"
+        },
+        {
+          "type": "perf",
+          "section": ":zap: Performance Improvements"
+        },
+        {
+          "type": "revert",
+          "section": ":rewind: Reverts"
+        },
+        {
+          "type": "chore",
+          "section": ":broom: Chores"
+        },
+        {
+          "type": "docs",
+          "section": ":book: Documentation"
+        },
+        {
+          "type": "style",
+          "section": ":art: Styles"
         },
         {
           "type": "refactor",
-          "section": "Code Refactoring"
+          "section": ":hammer_and_wrench: Code Refactoring"
+        },
+        {
+          "type": "test",
+          "section": ":traffic_light: Tests"
+        },
+        {
+          "type": "build",
+          "section": ":package: Build System"
+        },
+        {
+          "type": "ci",
+          "section": ":gear: Continuous Integration"
         }
       ]
     }
