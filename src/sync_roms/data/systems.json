@@ -1652,6 +1652,7 @@
   {
     "name": "NEC SuperGrafx",
     "bucket": "supergrafx",
+    "screenscraper": 105,
     "folders": {
       "esde": "supergrafx",
       "knulli": "supergrafx",
