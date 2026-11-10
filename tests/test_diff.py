@@ -4,8 +4,6 @@ import sys
 import unittest
 import zipfile
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, os.path.join(ROOT, "src"))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 from sync_roms import diff  # noqa: E402
@@ -96,6 +94,28 @@ class PlanDiffTest(unittest.TestCase):
     def test_same_path_different_size_but_same_content(self):
         fp = ("zip", ((1, 1),))
         self.assertEqual(diff.plan_diff({"a.zip": 5}, {"a.zip": (6, '"x"')}, lambda p: fp, lambda p, s, e: fp), ([], []))
+
+    def test_local_raw_files_are_hashed_only_when_storage_has_a_md5_of_that_size(self):
+        local = {"a.bin": 5, "b.bin": 6, "c.bin": 7}
+        remote = {"x.bin": (5, '"m"'), "y.bin": (6, '"-"'), "z.bin": (7, '"m"')}
+        remote_prints = {"x.bin": ("raw", 5, "m"), "y.bin": ("raw", 6, None), "z.bin": ("raw", 7, "other")}
+        hashed = []
+
+        def md5(p):
+            hashed.append(p)
+            return "m"
+
+        matched, only_local, only_bucket = diff.match_content(
+            local, remote, lambda p: ("raw", local[p], None), lambda p, s, e: remote_prints[p], md5=md5)
+        self.assertEqual(sorted(hashed), ["a.bin", "c.bin"])
+        self.assertEqual(sorted(matched), [("a.bin", "x.bin"), ("b.bin", "y.bin")])
+        self.assertEqual((only_local, only_bucket), (["c.bin"], ["z.bin"]))
+
+    def test_same_path_is_matched_before_another_file_with_the_same_print(self):
+        fp = ("zip", ((1, 1),))
+        matched, _, _ = diff.match_content({"b.zip": 1, "a.zip": 2}, {"a.zip": (3, '"e"'), "b.zip": (4, '"e"')},
+                                           lambda p: fp, lambda p, s, e: fp)
+        self.assertEqual(sorted(matched), [("a.zip", "a.zip"), ("b.zip", "b.zip")])
 
     def test_raw_files_compare_md5_when_known(self):
         self.assertTrue(diff.same_content(("raw", 5, "x"), ("raw", 5, None)))

@@ -1,18 +1,14 @@
 import contextlib
 import io
-import json
 import os
 import sys
 import tempfile
 import unittest
 from unittest import mock
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DATA = os.path.join(ROOT, "src", "sync_roms", "data")
-sys.path.insert(0, os.path.join(ROOT, "src"))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
-from sync_roms import scrape_files, scrape_plan  # noqa: E402
+from sync_roms import scrape_files, scrape_plan, store  # noqa: E402
 
 GBA = {"name": "Game Boy Advance", "bucket": "gba",
        "folders": {"esde": "gba", "muos": "gba", "slot": "GBA"}, "muos_catalogue": "Nintendo Game Boy Advance"}
@@ -24,8 +20,7 @@ META = {"A.zip": {"name": "A", "desc": "An adventure."}}
 
 
 def systems():
-    with open(os.path.join(DATA, "systems.json")) as f:
-        return json.load(f)
+    return store.repo_json("systems")
 
 
 class DataTest(unittest.TestCase):

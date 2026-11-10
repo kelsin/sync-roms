@@ -2,17 +2,20 @@
 import collections
 import json
 import os
+import queue
 import re
 import shutil
 import sys
 import threading
 import time
+from concurrent.futures import TimeoutError as FutureTimeout
 
 from . import runtime
 
 
 SPEED_WINDOW = 5  # seconds the current speed is averaged over
 BACKLOG = 64 * 1024 * 1024  # bytes received but not yet written before the disk counts as the bottleneck
+POLL = 0.25  # seconds between redraws of the progress bar while waiting on a job
 PLAIN_INTERVAL = 30  # seconds between progress lines when stdout is not a terminal
 ASSUME_YES = False  # --yes: prompts take their default answer (a default-no prompt stays no)
 QUIET = False  # --quiet: stdout is discarded except emit_json(); prompts are asked on stderr
@@ -255,17 +258,29 @@ class ProgressBar:
             sys.stdout.flush()
 
 
+def wait_drawing(bar, done, get):
+    """get(timeout=...) once it returns (a future's result, a queue's get), redrawing the bar with `done` files done while waiting."""
+    while True:
+        try:
+            return get(timeout=POLL)
+        except (FutureTimeout, queue.Empty):
+            bar.draw(done)
+
+
 class ByteProgress:
     """Bytes moved per job (weighted by size, at least 1 so empty files count); fraction() is the overall 0-1."""
     def __init__(self, sizes):
         self.size = [max(1, s or 0) for s in sizes]
         self.moved = [0] * len(sizes)
+        self.total, self.done = sum(self.size), 0  # bytes in all jobs, and moved so far (kept as a running sum)
         self.received = self.written = 0  # totals across all jobs; written stays 0 unless the job reports it
         self.lock = threading.Lock()
 
     def add(self, i, n):
         with self.lock:
-            self.moved[i] = min(self.size[i], self.moved[i] + n)
+            step = min(self.size[i] - self.moved[i], n)
+            self.moved[i] += step
+            self.done += step
             self.received += n
 
     def wrote(self, n):
@@ -274,17 +289,23 @@ class ByteProgress:
 
     def finish(self, i):
         with self.lock:
+            self.done += self.size[i] - self.moved[i]
             self.moved[i] = self.size[i]
 
     def fraction(self):
-        return sum(self.moved) / sum(self.size)
+        return self.done / self.total
+
+
+def print_head(items, n, fmt=str):
+    """Print the first n items dimmed, one per line, then "… and M more" when there are others."""
+    for item in items[:n]:
+        print(dim(f"       {fmt(item)}"))
+    if len(items) > n:
+        print(dim(f"       … and {len(items) - n} more"))
 
 
 def report_missing(keys, what):
     if not keys:
         return
     print(yellow(f"  ⚠️  {len(keys)} {what} listed in manifest but not in storage"))
-    for k in keys[:runtime.MAX_MISSING_SHOWN]:
-        print(dim(f"       {k}"))
-    if len(keys) > runtime.MAX_MISSING_SHOWN:
-        print(dim(f"       … and {len(keys) - runtime.MAX_MISSING_SHOWN} more"))
+    print_head(keys, runtime.MAX_MISSING_SHOWN)

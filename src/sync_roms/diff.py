@@ -5,6 +5,7 @@ import os
 import sys
 import threading
 import zipfile
+from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
 
 from . import downloads, picker, runtime, s3, store, ui
@@ -57,10 +58,11 @@ def file_md5(path):
 
 
 def local_fingerprint(path):
+    """A local zip's fingerprint, else ("raw", size, None): match_content hashes a raw file only when a storage file could match it."""
     try:
         return zip_fingerprint(path)
     except zipfile.BadZipFile:
-        return ("raw", os.path.getsize(path), file_md5(path))
+        return ("raw", os.path.getsize(path), None)
 
 
 def bucket_fingerprint(key, size, etag):
@@ -93,7 +95,7 @@ def counted(fn, label, total):
     return run
 
 
-def match_content(local, remote, local_print, remote_print, differs=None):
+def match_content(local, remote, local_print, remote_print, differs=None, md5=None):
     """([(local path, bucket path)] with the same content, only local, only storage) lists, ignoring names.
 
     local: {path: size}; remote: {path: (size, etag)}. A file with the same path and size on both sides is the same
@@ -101,41 +103,64 @@ def match_content(local, remote, local_print, remote_print, differs=None):
     remote_print(path, size, etag) return a fingerprint, and are only called for the files left over.
     differs(path, etag), if given, is asked about same-path same-size files and returns True when their bytes are
     known to differ; those are then matched by content too.
+    md5(path), if given, hashes a local file whose print is ("raw", size, None), and is only called when a storage
+    file of that size has an md5 to compare it with.
     """
     with ThreadPoolExecutor(runtime.WORKERS) as ex:
         same = [p for p, size in local.items() if p in remote and remote[p][0] == size]
         suspect = {p for p, d in zip(same, ex.map(counted(lambda p: differs(p, remote[p][1]), "Checking same-size files", len(same)), same)) if d} if differs else set()
         left_local = sorted(p for p, size in local.items() if p not in remote or remote[p][0] != size or p in suspect)
         left_remote = sorted(p for p, (size, _) in remote.items() if p not in local or local[p] != size or p in suspect)
-        local_prints = list(ex.map(counted(local_print, "Reading local files", len(left_local)), left_local))
         remote_prints = list(ex.map(counted(lambda p: remote_print(p, *remote[p]), "Reading storage files", len(left_remote)),
                                     left_remote))
-    unmatched = list(zip(left_remote, remote_prints))
+        local_prints = list(ex.map(counted(local_print, "Reading local files", len(left_local)), left_local))
+        if md5:
+            sizes = {fp[1] for fp in remote_prints if fp[0] == "raw" and fp[2] is not None}
+            hashed = [i for i, fp in enumerate(local_prints) if fp[0] == "raw" and fp[2] is None and fp[1] in sizes]
+            for i, digest in zip(hashed, ex.map(counted(md5, "Hashing local files", len(hashed)), [left_local[i] for i in hashed])):
+                local_prints[i] = (*local_prints[i][:2], digest)
+    # unmatched storage files by path, and by what they can match: a zip's whole print, or a raw file's size
+    unmatched = dict(zip(left_remote, remote_prints))
+    by_zip, by_size = defaultdict(dict), defaultdict(dict)
+    for path, fp in unmatched.items():
+        if fp[0] == "raw":
+            by_size[fp[1]][path] = fp[2]
+        else:
+            by_zip[fp][path] = None
+
+    def find(path, fp):
+        if path in unmatched and same_content(fp, unmatched[path]):
+            return path
+        if fp[0] != "raw":
+            return next(iter(by_zip.get(fp, ())), None)
+        return next((p for p, digest in by_size.get(fp[1], {}).items()
+                     if fp[2] is None or digest is None or fp[2] == digest), None)
+
     matched, only_local = [], []
     for path, fp in zip(left_local, local_prints):
-        candidates = sorted(range(len(unmatched)), key=lambda i: unmatched[i][0] != path)
-        for i in candidates:
-            if same_content(fp, unmatched[i][1]):
-                matched.append((path, unmatched.pop(i)[0]))
-                break
-        else:
+        found = find(path, fp)
+        if found is None:
             only_local.append(path)
-    return matched, only_local, [p for p, _ in unmatched]
+            continue
+        old = unmatched.pop(found)
+        del (by_size[old[1]] if old[0] == "raw" else by_zip[old])[found]
+        matched.append((path, found))
+    return matched, only_local, list(unmatched)
 
 
-def plan_diff(local, remote, local_print, remote_print):
+def plan_diff(local, remote, local_print, remote_print, md5=None):
     """(only local, only storage) lists of relative paths, ignoring renames. Arguments as in match_content."""
-    _, only_local, only_bucket = match_content(local, remote, local_print, remote_print)
+    _, only_local, only_bucket = match_content(local, remote, local_print, remote_print, md5=md5)
     return only_local, only_bucket
 
 
-def plan_replace(local, remote, local_print, remote_print, differs=None):
+def plan_replace(local, remote, local_print, remote_print, differs=None, md5=None):
     """(renames, new, changed, only storage) for making the storage folder match the local one.
 
     renames: [(bucket path, local path)] with the same content under another name. changed: paths on both sides
     with different content. Arguments as in match_content.
     """
-    matched, only_local, only_bucket = match_content(local, remote, local_print, remote_print, differs)
+    matched, only_local, only_bucket = match_content(local, remote, local_print, remote_print, differs, md5)
     renames = [(r, l) for l, r in matched if l != r]
     targets = {l for _, l in renames}
     changed = [p for p in only_local if p in remote]
@@ -147,12 +172,9 @@ def plan_replace(local, remote, local_print, remote_print, differs=None):
 
 def local_sizes(folder):
     """{relative path: size} of the ROM files under folder."""
-    sizes = {}
-    for dirpath, files in downloads.walk_roms(folder, keep_dotfiles=True):
-        for f in files:
-            path = os.path.join(dirpath, f)
-            sizes[os.path.relpath(path, folder).replace(os.sep, "/")] = os.path.getsize(path)
-    return sizes
+    paths = [os.path.join(dirpath, f) for dirpath, files in downloads.walk_roms(folder, keep_dotfiles=True) for f in files]
+    with ThreadPoolExecutor(s3.STAT_WORKERS) as ex:  # the stats wait on the network when the folder is a share
+        return {os.path.relpath(p, folder).replace(os.sep, "/"): n for p, n in zip(paths, ex.map(os.path.getsize, paths))}
 
 
 def diff_command(args):
@@ -182,7 +204,8 @@ def diff_command(args):
         remote = s3.list_with_etags(bucket + "/")
         only_local, only_bucket = plan_diff(
             local, remote, lambda p: local_fingerprint(os.path.join(folder, *p.split("/"))),
-            lambda p, size, etag: bucket_fingerprint(f"{bucket}/{p}", size, etag))
+            lambda p, size, etag: bucket_fingerprint(f"{bucket}/{p}", size, etag),
+            md5=lambda p: file_md5(os.path.join(folder, *p.split("/"))))
     except s3.ERRORS as e:
         ui.fail(f"{e}", 3)
     if args.json:

@@ -3,11 +3,12 @@ import argparse
 import os
 import shutil
 import sys
+from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
 
 from botocore.exceptions import BotoCoreError, ClientError, NoCredentialsError
 
-from . import __version__, chd, clean, commands, diff, downloads, edit, external, m3u, mirroring, picker, runtime, s3, scrape_files, scrape_online, scrape_plan, store, ui, upload, usersettings
+from . import __version__, clean, commands, downloads, edit, external, m3u, picker, runtime, s3, scrape_plan, store, ui, usersettings
 
 
 SUBCOMMANDS = {  # name -> (usage, one-line summary)
@@ -297,9 +298,8 @@ def main():
 
 def list_devices(args=None):
     """Print a table of the devices (name, chip, number of recommended systems), or one device's details given its id."""
-    manifest = store.load_manifest()
-    devices = manifest["devices"]
-    return commands.show_devices(devices, manifest["systems"], getattr(args, "device_id", None), getattr(args, "json", False))
+    catalog = store.load_catalog()
+    return commands.show_devices(catalog["devices"], catalog["systems"], getattr(args, "device_id", None), getattr(args, "json", False))
 
 
 class Parser(argparse.ArgumentParser):
@@ -444,6 +444,7 @@ def check_modes(args):
         if mode not in ("--scrape", "--scrape-match"):
             ui.fail("--skip-media only applies to `scrape`", 2)
         args.skip_media = [t.strip() for t in args.skip_media.split(",") if t.strip()]
+        from . import scrape_online
         scrape_online._check_skip(args.skip_media)
     return mode
 
@@ -488,8 +489,9 @@ def sync():
     ui.set_output(quiet and not is_data_command(argv), verbose)
     try:
         usersettings.apply_settings()
-        for name, (value, source) in usersettings.resolve_settings().items():
-            ui.debug(f"{name} = {value} ({source})")
+        if ui.VERBOSE:
+            for name, (value, source) in usersettings.resolve_settings().items():
+                ui.debug(f"{name} = {value} ({source})")
         return run(argv)
     finally:
         ui.reset()
@@ -523,44 +525,62 @@ def run(argv):
     mode = check_modes(args)
     if args.json and mode in (None, "--diff"):  # the JSON document is all that reaches stdout
         ui.set_output(True, ui.VERBOSE)
+    handled, code = dispatch_mode(args, mode)
+    return code if handled else sync_card(args)
+
+
+def dispatch_mode(args, mode):
+    """Run the command a flag stands for. Returns (True, its exit code), or (False, None) for a plain sync.
+
+    The modules a command needs are imported here, so the other commands (and --help) don't pay for them."""
     if args.devices:
-        return list_devices(args)
+        return True, list_devices(args)
     if mode in ("--m3u", "--cd", "--install-tools"):
         if args.install_tools:
-            return external.install_tools_command()
-        return chd.chd_command(args) if args.chd is not None else m3u.m3u_command(args)
+            return True, external.install_tools_command()
+        if args.chd is not None:
+            from . import chd
+            return True, chd.chd_command(args)
+        return True, m3u.m3u_command(args)
     if args.set_credentials:
-        return scrape_online.set_credentials()
+        from . import scrape_online
+        return True, scrape_online.set_credentials()
     usersettings.ensure_bucket()
     if args.scrape:
-        return scrape_online.scrape_command(args)
+        from . import scrape_online
+        return True, scrape_online.scrape_command(args)
     if args.scrape_match:
+        from . import scrape_online
         args.system, args.rom, args.game = args.scrape_match
-        return scrape_online.match_command(args)
+        return True, scrape_online.match_command(args)
     if args.upload is not None:
-        return upload.upload_command(args)
+        from . import upload
+        return True, upload.upload_command(args)
     if args.diff is not None:
-        return diff.diff_command(args)
+        from . import diff
+        return True, diff.diff_command(args)
     if args.mirror is not None or args.use_mirror or args.clear_mirror:
-        return mirroring.mirror_command(args)
+        from . import mirroring
+        return True, mirroring.mirror_command(args)
     if args.edit or args.upload_scrapes or args.clean_scrapes:
-        code = edit.edit_manifest() if args.edit else scrape_files.upload_scrapes(args) if args.upload_scrapes else scrape_files.clean_scrapes(args)
+        if args.edit:
+            code = edit.edit_manifest()
+        else:
+            from . import scrape_files
+            code = scrape_files.upload_scrapes(args) if args.upload_scrapes else scrape_files.clean_scrapes(args)
         mirror = usersettings.load_settings().get("mirror")
         if mirror and not code and not args.dry_run:  # pick up the games just added
+            from . import mirroring
             print()
             mirroring.use_mirror(mirror, False)
-        return code
-    base = os.path.abspath(os.path.expanduser(args.base_dir or os.getcwd()))
+        return True, code
+    return False, None
 
-    print(ui.bold("🎮 sync-roms") + ui.dim(f"  {s3.access()}"))
-    if usersettings.load_settings().get("mirror"):
-        mirroring.use_mirror(usersettings.load_settings()["mirror"], args.dry_run)
-    print("📄 Fetching manifests...")
-    card = os.path.basename(base) or base
-    manifest = store.load_manifest([card])
-    systems = manifest["systems"]
+
+def choose_card_setup(args, base, card, manifest, saved):
+    """(device or None for Full, layout name, (roms dir, bios dir)) from --device/--layout, the saved setup or the picker.
+    None if the user cancelled."""
     devices, layouts = manifest["devices"], manifest["layouts"]
-    saved = store.load_cards().get(card)
     dirs = None
     setup = picker.saved_setup(saved, devices, layouts, card)
     if args.device or args.layout:
@@ -582,12 +602,91 @@ def run(argv):
         dirs = prepare_dirs(base, layouts[layout_name], args.dry_run)
         if dirs is None:
             print(ui.yellow("👋 Cancelled."))
-            return 0
+            return None
         if not args.dry_run:
             store.save_card(card, device, layout_name)
+    return device, layout_name, dirs
+
+
+def total_bytes(jobs):
+    return sum(j[2] or 0 for j in jobs)
+
+
+def delete_extras(extras):
+    """List the local ROMs that are no longer wanted and, after confirming, delete them."""
+    print(ui.bold(f"\n🗑️  {len(extras)} local ROM(s) are no longer in the selection"))
+    for path in extras[:10]:
+        print(ui.dim(f"     {path}"))
+    if len(extras) > 10:
+        print(ui.dim(f"     … and {len(extras) - 10} more"))
+    answer = ui.choose(f"Delete these {len(extras)} local file(s) ({ui.human_size(sum(os.path.getsize(p) for p in extras))})?", "ynl", "n", "y yes · n no · l list all")
+    while answer == "l":
+        for path in extras:
+            print(ui.dim(f"     {path}"))
+        answer = ui.choose(f"Delete these {len(extras)} local file(s)?", "yn", "n")
+    if answer == "y":
+        deleted = 0
+        for path in dict.fromkeys(extras):
+            try:
+                os.remove(path)
+                deleted += 1
+            except FileNotFoundError:  # already gone (a duplicate entry, or removed meanwhile)
+                pass
+            except OSError as e:
+                print(ui.red(f"  ❌ {path}: {e}"))
+        print(ui.green(f"  🧹 Deleted {deleted} file(s)"))
+    else:
+        print(ui.yellow("  ↩️  Keeping them"))
+
+
+def remove_stale_media(stale):
+    """Delete the media files left for ROMs that aren't on the card, saying so."""
+    if stale:
+        print(ui.bold(f"\n🧹 Removing {len(stale)} media file(s) for ROMs that aren't on this card"))
+        for path in stale[:5]:
+            print(ui.dim(f"     {path}"))
+        if len(stale) > 5:
+            print(ui.dim(f"     … and {len(stale) - 5} more"))
+    for path in stale:
+        try:
+            os.remove(path)
+        except OSError as e:
+            print(ui.red(f"  ❌ {path}: {e}"))
+    if stale:
+        print(ui.green(f"🧹 Removed {len(stale)} media file(s) for ROMs that aren't on this card"))
+
+
+def report_failures(failures):
+    print(ui.red(f"\n❌ {len(failures)} file(s) failed:"))
+    for key, reason in failures[:20]:
+        print(f"   {key}: {ui.dim(reason)}")
+    if len(failures) > 20:
+        print(ui.dim(f"   … and {len(failures) - 20} more"))
+    print(ui.dim("   Files already downloaded are skipped, so run the same command again to retry just these."))
+
+
+def sync_card(args):
+    from . import chd
+    base = os.path.abspath(os.path.expanduser(args.base_dir or os.getcwd()))
+
+    print(ui.bold("🎮 sync-roms") + ui.dim(f"  {s3.access()}"))
+    mirror = usersettings.load_settings().get("mirror")
+    if mirror:
+        from . import mirroring
+        mirroring.use_mirror(mirror, args.dry_run)
+    print("📄 Fetching manifests...")
+    card = os.path.basename(base) or base
+    manifest = store.load_manifest([card])
+    systems, layouts = manifest["systems"], manifest["layouts"]
+    saved = store.load_cards().get(card)
+    chosen_setup = choose_card_setup(args, base, card, manifest, saved)
+    if chosen_setup is None:
+        return 0
+    device, layout_name, dirs = chosen_setup
     layout = layouts[layout_name]
     unzip = layout.get("unzip", False)  # ROMs go in flat and unzipped (Slot)
     disc_dir = layout.get("disc_dir")  # multi-disc games' discs go in this hidden folder, their playlist beside it (Onion)
+    onion = layout_name in scrape_plan.ONION_LAYOUTS
     roms_dir, bios_dir = dirs
     clean_card = not args.dry_run and not args.no_clean
     dropped = []  # systems the device no longer lists: whatever they left on the card is unwanted
@@ -611,13 +710,14 @@ def run(argv):
         return sorted((s for s in fresh if s["folders"].get(layout_name)), key=lambda s: s["name"].lower())
 
     print("📏 Reading ROM sizes...")
-    listings, state = {}, {}
+    listings, state = {}, {}  # listings: {system id: {key: size}}, kept until the system's games change
+    avail, discs, size_cache = {}, {}, {}  # per system id: the keys to sync, their multi-disc keys, (bytes to download, total bytes)
 
     def available(s):
-        return store.available_keys(s, listings[s["bucket"]])
+        return avail[s["bucket"]]
 
     def discs_of(s):
-        return m3u.disc_keys(available(s)) if disc_dir else ()
+        return discs[s["bucket"]]
 
     def listing_of(s):
         """{key: size} of a system's bucket folder. From a root folder, names only (a share is slow to stat):
@@ -628,31 +728,36 @@ def run(argv):
 
     def sizes(s):
         """(bytes still to download, total bytes) for a system's ROMs."""
-        have, need, total, discs = listings[s["bucket"]], 0, 0, discs_of(s)
-        for k in available(s):
-            size = have.get(k, 0)
-            try:
-                path = s3.safe_join(os.path.join(roms_dir, s["folders"][layout_name]), downloads.rom_rel(k, unzip, disc_dir, discs))
-            except ValueError:
-                continue
-            total += size
-            if downloads.plan_downloads([(k, path, size)], unzip, disc_dir):
-                need += size
-        return need, total
+        bucket = s["bucket"]
+        if bucket not in size_cache:
+            have, total, jobs = listings[bucket], 0, []
+            for k in avail[bucket]:
+                size = have.get(k, 0)
+                try:
+                    path = s3.safe_join(os.path.join(roms_dir, s["folders"][layout_name]), downloads.rom_rel(k, unzip, disc_dir, discs[bucket]))
+                except ValueError:
+                    continue
+                total += size
+                jobs.append((k, path, size))
+            size_cache[bucket] = (total_bytes(downloads.plan_downloads(jobs, unzip, disc_dir)), total)
+        return size_cache[bucket]
 
     while True:
-        todo = [s for s in systems if not listings.get(s["bucket"])]
+        todo = [s for s in systems if s["bucket"] not in listings]
         with ThreadPoolExecutor(runtime.WORKERS) as ex:
             listings.update(zip((s["bucket"] for s in todo),
                                 ex.map(lambda s: listing_of(s)
                                        if s.get("full_system") or store.listed(s) else {}, todo)))
+        for s in systems:
+            avail[s["bucket"]] = store.available_keys(s, listings[s["bucket"]])
+            discs[s["bucket"]] = m3u.disc_keys(avail[s["bucket"]]) if disc_dir else ()
         if runtime.ROOT:
             rows = [(f"{s['name']}  ({len(available(s))} roms)", bool(available(s)), 0, 0) for s in systems]
         else:
             rows = [(f"{s['name']}  ({len(available(s))} roms, {ui.human_size(total)})", bool(available(s)), need, total)
                     for s in systems for need, total in [sizes(s)]]
         present = [i for i, s in enumerate(systems)
-                   if available(s) and (device or downloads.has_local_files(os.path.join(roms_dir, s["folders"][layout_name]), layout_name in scrape_plan.ONION_LAYOUTS))]
+                   if available(s) and (device or downloads.has_local_files(os.path.join(roms_dir, s["folders"][layout_name]), onion))]
         if args.systems:
             chosen = commands.systems_from_flag(args.systems, systems, available)
             break
@@ -668,11 +773,16 @@ def run(argv):
             break
         action, row = chosen
         if action == "games":  # the same list --edit changes for this card
-            if edit.edit_card_system(card, systems[row]["bucket"], (device, layout_name)):
+            edited = systems[row]["bucket"]
+            if edit.edit_card_system(card, edited, (device, layout_name)):
                 state["sel"][row] = True
+            listings.pop(edited, None)  # its games changed, so it is listed and sized again
+            size_cache.pop(edited, None)
         elif ui.confirm(f"🧹 Clear {card}'s own games? (the core list stays)", default=False):
             store.update_card(card, games={})
             state["sel"] = [False] * len(systems)
+            listings.clear()
+            size_cache.clear()
         systems = reload_systems()
     if chosen is None:
         print(ui.yellow("👋 Cancelled."))
@@ -695,13 +805,13 @@ def run(argv):
             listings[s["bucket"]] = s3.stat_sizes(wanted)
         have = listings[s["bucket"]]
         dest = dest_of(s)
-        discs = discs_of(s)
-        if discs:  # discs a past sync left loose go where they belong rather than being downloaded again
-            moved.update(downloads.hide_discs(dest, disc_dir, discs, args.dry_run))
+        disc_keys = discs_of(s)
+        if disc_keys:  # discs a past sync left loose go where they belong rather than being downloaded again
+            moved.update(downloads.hide_discs(dest, disc_dir, disc_keys, args.dry_run))
         for key in wanted:
             if key in have:
                 try:
-                    rom_jobs.append((key, s3.safe_join(dest, downloads.rom_rel(key, unzip, disc_dir, discs)), have[key]))
+                    rom_jobs.append((key, s3.safe_join(dest, downloads.rom_rel(key, unzip, disc_dir, disc_keys)), have[key]))
                 except ValueError as e:
                     print(ui.yellow(f"  ⚠️  skipping {e}"))
             else:
@@ -711,13 +821,16 @@ def run(argv):
     # a system with nothing to sync is always scanned, selected or not: whatever it has on the card is unwanted
     chosen_ids = {s["bucket"] for s in chosen}
     dropped_dests = {os.path.join(roms_dir, s["folders"][layout_name]) for s in dropped if s["folders"].get(layout_name)}
+    dest_keys, dest_discs = defaultdict(list), defaultdict(set)
+    for t in systems:
+        dest_keys[dest_of(t)] += available(t)
+        dest_discs[dest_of(t)].update(discs_of(t))
     for dest in sorted({dest_of(s) for s in systems if s["bucket"] in chosen_ids or not available(s)} | dropped_dests):
-        extras += downloads.find_extras(dest, [k for t in systems if dest_of(t) == dest for k in available(t)], unzip,
-                                        layout_name in scrape_plan.ONION_LAYOUTS, disc_dir, {k for t in systems if dest_of(t) == dest for k in discs_of(t)})
+        extras += downloads.find_extras(dest, dest_keys[dest], unzip, onion, disc_dir, dest_discs[dest])
 
     # BIOS for every system with ROMs already on the card too, even when this sync doesn't touch that system
     bios_systems = chosen + [s for s in systems if s["bucket"] not in chosen_ids
-                             and downloads.has_local_files(dest_of(s), layout_name in scrape_plan.ONION_LAYOUTS)]
+                             and downloads.has_local_files(dest_of(s), onion)]
     bios_keys = sorted({"BIOS/" + f for s in bios_systems for f in s["bios"]["files"]})
     bios_have = (s3.stat_sizes(bios_keys) if s3.read_root() else s3.list_sizes("BIOS/")) if bios_keys else {}
     bios_jobs = []
@@ -756,25 +869,18 @@ def run(argv):
         rom_todo = [j for j in rom_todo if j[1] not in moved]
     elif moved:
         print(ui.dim(f"  📦 Moved {len(moved)} loose disc file(s) into {disc_dir}/"))
-    print(f"\n💿 ROMs: {ui.bold(str(len(rom_todo)))} to download "
-          f"({ui.human_size(sum(j[2] or 0 for j in rom_todo))}), "
-          f"{len(rom_jobs) - len(rom_todo)} already present")
-    print(f"🧠 BIOS: {ui.bold(str(len(bios_todo)))} to download "
-          f"({ui.human_size(sum(j[2] or 0 for j in bios_todo))}), "
-          f"{len(bios_jobs) - len(bios_todo)} already present")
-    if apk_jobs:
-        print(f"🤖 Android: {ui.bold(str(len(apk_todo)))} to download "
-              f"({ui.human_size(sum(j[2] or 0 for j in apk_todo))}), "
-              f"{len(apk_jobs) - len(apk_todo)} already present")
-    if theme_jobs:
-        print(f"🎨 Themes: {ui.bold(str(len(theme_todo)))} to download "
-              f"({ui.human_size(sum(j[2] or 0 for j in theme_todo))}), "
-              f"{len(theme_jobs) - len(theme_todo)} already present")
+    summary = [f"{icon} {label}: {ui.bold(str(len(todo)))} to download ({ui.human_size(total_bytes(todo))}), "
+               f"{len(jobs) - len(todo)} already present"
+               for icon, label, todo, jobs, always in (("💿", "ROMs", rom_todo, rom_jobs, True), ("🧠", "BIOS", bios_todo, bios_jobs, True),
+                                                       ("🤖", "Android", apk_todo, apk_jobs, False), ("🎨", "Themes", theme_todo, theme_jobs, False))
+               if always or jobs]
+    print("\n" + "\n".join(summary))
     if extras:
         print(f"🗑️  Local ROMs no longer in the selection: {ui.bold(str(len(extras)))}")
     es_dir = os.path.join(base, "ES-DE")
     scrapes = layout_name in scrape_plan.SCRAPE_LAYOUTS
     scraped = {}
+    todo_all = rom_todo + bios_todo + apk_todo + theme_todo
 
     def build_plan(present):
         if not scraped:
@@ -792,7 +898,7 @@ def run(argv):
             "downloads": [{"kind": kind, "key": key, "path": path, "size": size or 0}
                           for kind, todo in (("rom", rom_todo), ("bios", bios_todo), ("android", apk_todo), ("theme", theme_todo)) for key, path, size in todo],
             "delete": list(extras), "missing": {"roms": missing, "bios": [k for k in bios_keys if k not in bios_have]}}
-        for key, path, _ in rom_todo + bios_todo + apk_todo + theme_todo:
+        for key, path, _ in todo_all:
             print(f"  {key} {ui.dim('→')} {path}")
         if unzip:
             pending = {j[1] for j in rom_todo} | set(chd.card_archives({dest_of(s) for s in chosen}))
@@ -806,44 +912,20 @@ def run(argv):
             print(f"🧹 Media on the card for ROMs it doesn't have: {stale_count} file(s) to remove")
         if layout_name == "esde":
             clean.clean_android_media(base, card, True, args.ask)
-        todo_all = rom_todo + bios_todo + apk_todo + theme_todo
         plan_json["stale_media"] = stale_count
-        plan_json["totals"] = {"files": len(todo_all), "bytes": sum(j[2] or 0 for j in todo_all), "delete": len(extras),
+        plan_json["totals"] = {"files": len(todo_all), "bytes": total_bytes(todo_all), "delete": len(extras),
                                "stale_media": stale_count, "missing": len(missing)}
         if args.json:
             ui.emit_json(plan_json)
-        print(ui.bold(f"\n🧪 Would download {len(todo_all)} file(s) ({ui.human_size(sum(j[2] or 0 for j in todo_all))}), "
+        print(ui.bold(f"\n🧪 Would download {len(todo_all)} file(s) ({ui.human_size(total_bytes(todo_all))}), "
                       f"delete {len(extras)} local ROM(s) and {stale_count} media file(s); {len(missing)} listed ROM(s) not in storage"))
         return 0
 
     if extras:  # cleared first so the free space shown below is what the downloads really get
-        print(ui.bold(f"\n🗑️  {len(extras)} local ROM(s) are no longer in the selection"))
-        for path in extras[:10]:
-            print(ui.dim(f"     {path}"))
-        if len(extras) > 10:
-            print(ui.dim(f"     … and {len(extras) - 10} more"))
-        answer = ui.choose(f"Delete these {len(extras)} local file(s) ({ui.human_size(sum(os.path.getsize(p) for p in extras))})?", "ynl", "n", "y yes · n no · l list all")
-        while answer == "l":
-            for path in extras:
-                print(ui.dim(f"     {path}"))
-            answer = ui.choose(f"Delete these {len(extras)} local file(s)?", "yn", "n")
-        if answer == "y":
-            deleted = 0
-            for path in dict.fromkeys(extras):
-                try:
-                    os.remove(path)
-                    deleted += 1
-                except FileNotFoundError:  # already gone (a duplicate entry, or removed meanwhile)
-                    pass
-                except OSError as e:
-                    print(ui.red(f"  ❌ {path}: {e}"))
-            print(ui.green(f"  🧹 Deleted {deleted} file(s)"))
-        else:
-            print(ui.yellow("  ↩️  Keeping them"))
+        delete_extras(extras)
 
-    todo_all = rom_todo + bios_todo + apk_todo + theme_todo
     if todo_all:
-        need = sum(j[2] or 0 for j in todo_all)
+        need = total_bytes(todo_all)
         free = free_space(base)
         print(f"💾 Free on the card: {ui.human_size(free)}")
         if need > free:
@@ -881,30 +963,13 @@ def run(argv):
             clean._clean_root = base
         failed += scrape_plan.apply_scrape_plan(plan, base)
         stale = scrape_plan.stale_media(layout_name, manifest["systems"], roms_dir, es_dir, base)
-    if stale:
-        print(ui.bold(f"\n🧹 Removing {len(stale)} media file(s) for ROMs that aren't on this card"))
-        for path in stale[:5]:
-            print(ui.dim(f"     {path}"))
-        if len(stale) > 5:
-            print(ui.dim(f"     … and {len(stale) - 5} more"))
-    for path in stale:
-        try:
-            os.remove(path)
-        except OSError as e:
-            print(ui.red(f"  ❌ {path}: {e}"))
-    if stale:
-        print(ui.green(f"🧹 Removed {len(stale)} media file(s) for ROMs that aren't on this card"))
+    remove_stale_media(stale)
     for folder in scrape_plan.prune_empty_systems(layout_name, manifest["systems"], roms_dir):
         print(ui.green(f"🧹 Removed empty system folder {os.path.relpath(folder, base)}"))
     if layout_name == "esde":  # only Android cards have these folders; a Knulli card's "music" must stay
         clean.clean_android_media(base, card, False, args.ask)
     if failures:
-        print(ui.red(f"\n❌ {len(failures)} file(s) failed:"))
-        for key, reason in failures[:20]:
-            print(f"   {key}: {ui.dim(reason)}")
-        if len(failures) > 20:
-            print(ui.dim(f"   … and {len(failures) - 20} more"))
-        print(ui.dim("   Files already downloaded are skipped, so run the same command again to retry just these."))
+        report_failures(failures)
     print(ui.green("\n🎉 Done!") if not failed else ui.red(f"\n⚠️  Done with {failed} failure(s)"))
     return 1 if failed else 0
 

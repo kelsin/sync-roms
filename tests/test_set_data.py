@@ -3,14 +3,15 @@ import os
 import sys
 import unittest
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DATA = os.path.join(ROOT, "src", "sync_roms", "data")
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import isolate  # noqa: E402,F401
+from sync_roms import store  # noqa: E402
 
 
 class SetDataTest(unittest.TestCase):
     def test_shipped_sets_are_well_formed(self):
-        systems = {s["bucket"] for s in json.load(open(os.path.join(DATA, "systems.json")))}
-        folder = os.path.join(DATA, "sets")
+        systems = {s["bucket"] for s in store.repo_json("systems")}
+        folder = os.path.join(store.REPO_DATA, "sets")
         names = [n for n in os.listdir(folder) if n.endswith(".json")]
         self.assertTrue(names)
         for name in names:

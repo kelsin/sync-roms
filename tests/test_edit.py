@@ -3,33 +3,14 @@ import io
 import json
 import os
 import sys
-import tempfile
 import unittest
 from unittest import mock
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, os.path.join(ROOT, "src"))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import isolate  # noqa: E402,F401
+from helpers import DataDir  # noqa: E402,F401  (re-exported: other test modules still import it from here)
 from sync_roms import edit, picker, runtime, s3, store, ui  # noqa: E402
 
 SETS = {"s": {"id": "s", "name": "Mix", "games": [{"system": "gba", "bucket": "gba/A.zip", "files": ["gba/A2.zip"]}]}}
-
-
-class DataDir(unittest.TestCase):
-    def setUp(self):
-        self.tmp = tempfile.TemporaryDirectory()
-        self.addCleanup(self.tmp.cleanup)
-        patch = mock.patch.object(store, "data_dir", lambda: self.tmp.name)
-        patch.start()
-        self.addCleanup(patch.stop)
-
-    def path(self, name):
-        return os.path.join(self.tmp.name, name)
-
-    def read(self, name):
-        with open(self.path(name)) as f:
-            return json.load(f)
 
 
 class Helpers(unittest.TestCase):
@@ -99,7 +80,9 @@ class EscPrompt(unittest.TestCase):
             self.assertEqual(picker.filter_list("t", ["a", "b"], multi=True), [True, False])
 
 
-class EditFlow(DataDir):
+class EditBase(DataDir):
+    """The edit_manifest() driver the flow tests build on; holds no tests, so subclasses don't rerun any."""
+
     def run_edit(self, picks, confirmed, name="newcard"):
         picks = iter(picks)
         with mock.patch.object(runtime, "BUCKET", "b", create=True), \
@@ -113,6 +96,8 @@ class EditFlow(DataDir):
                 contextlib.redirect_stdout(io.StringIO()):
             return edit.edit_manifest()
 
+
+class EditFlow(EditBase):
     def test_cancel_writes_nothing(self):
         # main menu: "New card" is the last option; inside the card menu Esc; then Esc to finish
         self.assertEqual(self.run_edit([1, None, None], confirmed=False), 0)
@@ -128,11 +113,7 @@ class EditFlow(DataDir):
         self.assertFalse(os.path.exists(self.path("cards.json")))
 
 
-class MenuActions(EditFlow):
-    def write_json(self, name, data):
-        with open(self.path(name), "w") as f:
-            json.dump(data, f)
-
+class MenuActions(EditBase):
     def run_menu(self, picks, confirm=True, inputs=("renamed",), multi=None):
         picks, inputs = iter(picks), iter(inputs)
 
@@ -199,7 +180,7 @@ class MenuActions(EditFlow):
         self.assertNotEqual(cm.exception.code, 0)
 
 
-class FullToggles(EditFlow):
+class FullToggles(EditBase):
     def run_with(self, picks, bucket_files=None, confirmed=True):
         picks, calls = iter(picks), []
 
@@ -309,10 +290,6 @@ class FullToggles(EditFlow):
                 contextlib.redirect_stdout(io.StringIO()):
             edit.edit_manifest()
         self.assertIn("(0/1 on)", labels[2][0])
-
-    def write_json(self, name, data):
-        with open(self.path(name), "w") as f:
-            json.dump(data, f)
 
 
 if __name__ == "__main__":

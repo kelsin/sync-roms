@@ -1,16 +1,14 @@
 import contextlib
 import io
-import json
 import os
 import sys
 import tempfile
 import unittest
 from unittest import mock
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, os.path.join(ROOT, "src"))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
+from helpers import write_json  # noqa: E402
 from sync_roms import store  # noqa: E402
 
 
@@ -18,8 +16,7 @@ def load(overlay=None):
     """Run load_manifest with a temp data dir; returns (manifest, stderr text)."""
     with tempfile.TemporaryDirectory() as tmp:
         if overlay is not None:
-            with open(os.path.join(tmp, "device-systems.json"), "w") as f:
-                json.dump(overlay, f)
+            write_json(os.path.join(tmp, "device-systems.json"), overlay)
         err = io.StringIO()
         with mock.patch.object(store, "data_dir", lambda: tmp), contextlib.redirect_stderr(err):
             manifest = store.load_manifest()

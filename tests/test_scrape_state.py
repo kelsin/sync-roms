@@ -1,28 +1,17 @@
 import os
 import sys
-import tempfile
 import unittest
 from unittest import mock
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, os.path.join(ROOT, "src"))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
-from realdir_guard import RealDataDirGuard  # noqa: E402
-from sync_roms import scrape_state, store  # noqa: E402
+from helpers import DataDir  # noqa: E402
+from sync_roms import scrape_state  # noqa: E402
 
 H = {"md5": "a", "sha1": "b", "crc": "c"}
 
 
-class ScrapeStateTest(RealDataDirGuard):
-    def setUp(self):
-        super().setUp()
-        self.tmp = tempfile.TemporaryDirectory()
-        self.addCleanup(self.tmp.cleanup)
-        p = mock.patch.object(store, "data_dir", return_value=self.tmp.name)
-        p.start()
-        self.addCleanup(p.stop)
-
+class ScrapeStateTest(DataDir):
     def test_hashes_round_trip(self):
         self.assertIsNone(scrape_state.cached_hashes("gba", "a.zip", 10, 5))
         scrape_state.save_hashes("gba", "a.zip", 10, 5, H)

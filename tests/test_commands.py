@@ -11,20 +11,8 @@ sys.path.insert(0, os.path.join(ROOT, "src"))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 from sync_roms import cli, commands, downloads, mirroring, store, ui  # noqa: E402
-from test_edit import DataDir  # noqa: E402
+from helpers import Cmd, DataDir  # noqa: E402,F401
 
-
-class Cmd(DataDir):
-    def run_cmd(self, *argv):
-        out, err = io.StringIO(), io.StringIO()
-        with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
-            try:
-                code = commands.run(list(argv))
-            except SystemExit as e:
-                code = e.code
-            finally:
-                ui.ASSUME_YES = False
-        return code, out.getvalue(), err.getvalue()
 
 
 class GamesTest(Cmd):

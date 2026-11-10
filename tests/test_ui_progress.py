@@ -5,11 +5,42 @@ import sys
 import unittest
 from unittest import mock
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, os.path.join(ROOT, "src"))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 from sync_roms import ui  # noqa: E402
+
+
+class ByteProgressTest(unittest.TestCase):
+    def test_fraction_is_a_running_total_capped_per_job(self):
+        moved = ui.ByteProgress([10, 0])  # an empty file counts as 1 byte
+        self.assertEqual(moved.total, 11)
+        moved.add(0, 4)
+        moved.add(0, 100)  # more than the job's size doesn't overshoot
+        self.assertEqual(moved.done, 10)
+        moved.finish(1)
+        moved.finish(0)
+        self.assertEqual((moved.done, moved.fraction()), (11, 1.0))
+
+
+class HelperTest(unittest.TestCase):
+    def test_print_head_shows_the_first_n_and_the_rest_counted(self):
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            ui.print_head([1, 2, 3], 2, lambda n: f"#{n}")
+        self.assertEqual(out.getvalue().split("\n")[:3], ["       #1", "       #2", "       … and 1 more"])
+
+    def test_wait_drawing_redraws_until_the_result_is_ready(self):
+        calls, drawn = [], []
+
+        def get(timeout):
+            calls.append(timeout)
+            if len(calls) < 3:
+                raise ui.FutureTimeout
+            return "done"
+
+        with mock.patch.object(ui, "POLL", 0.5):
+            self.assertEqual(ui.wait_drawing(mock.Mock(draw=drawn.append), 7, get), "done")
+        self.assertEqual((calls, drawn), ([0.5] * 3, [7, 7]))
 
 
 class SpeedWindowTest(unittest.TestCase):

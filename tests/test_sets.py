@@ -5,10 +5,9 @@ import tempfile
 import unittest
 from unittest import mock
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, os.path.join(ROOT, "src"))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
+from helpers import write_json  # noqa: E402
 from sync_roms import edit, picker, store  # noqa: E402
 
 
@@ -61,12 +60,14 @@ class SetsTest(unittest.TestCase):
             os.makedirs(data)
             core = {"gba": [{"title": "A", "bucket": "gba/A.zip"}], "sets": ["mix", "old"]}
             cards = {"a": {"device": "full", "games": {"sets": ["old"]}}, "b": {"device": "full", "games": {"sets": ["mix"]}}}
-            json.dump(core, open(os.path.join(data, "games.json"), "w"))
-            json.dump(cards, open(os.path.join(data, "cards.json"), "w"))
+            write_json(os.path.join(data, "games.json"), core)
+            write_json(os.path.join(data, "cards.json"), cards)
             with mock.patch.object(store, "data_dir", return_value=data), mock.patch.object(store, "backup"):
                 store.prune_unknown_sets([{"id": "mix"}])
-                saved_core = json.load(open(os.path.join(data, "games.json")))
-                saved_cards = json.load(open(os.path.join(data, "cards.json")))
+                with open(os.path.join(data, "games.json")) as f:
+                    saved_core = json.load(f)
+                with open(os.path.join(data, "cards.json")) as f:
+                    saved_cards = json.load(f)
         self.assertEqual(saved_core["sets"], ["mix"])
         self.assertIn("gba", saved_core)
         self.assertEqual(saved_cards["a"]["games"], {})
@@ -98,6 +99,17 @@ class SetsTest(unittest.TestCase):
         with mock.patch.object(picker, "filter_list", return_value=[False]):
             edit.toggle_games("t", rows, extras)
         self.assertEqual(by["gen"]["games"], [])
+
+    def test_overlapping_extras_never_duplicate_a_game(self):
+        by = {"gen": {"bucket": "gen", "games": [{"title": "A1", "bucket": "gen/A1.chd"},
+                                                 {"title": "A2", "bucket": "gen/A2.chd"}]}}
+        rows = [(by["gen"], "gen/A1.chd", "A", ""), (by["gen"], "gen/B1.chd", "B", "")]
+        extras = {"gen/A1.chd": ["gen/A2.chd"], "gen/B1.chd": ["gen/A2.chd"]}
+        with mock.patch.object(picker, "filter_list", return_value=[False, True]):
+            edit.toggle_games("t", rows, extras)
+        buckets = [g["bucket"] for g in by["gen"]["games"]]
+        self.assertEqual(sorted(buckets), sorted(set(buckets)))
+        self.assertIn("gen/A2.chd", buckets)
 
     def test_locked_rows_cannot_toggle(self):
         keys = iter(["\t", "\x01", "\x1b", "y"])

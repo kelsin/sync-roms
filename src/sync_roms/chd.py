@@ -68,18 +68,26 @@ def chd_system(root, dirpath, folders):
     return None, None
 
 
-def plan_chd(root, folders, skipped=None):
-    """[(system, system folder, file, owned)] to convert under root: owned is None for an archive, else the
+def plan_chd(root, folders, skipped=None, roots=None, stale=None):
+    """[(system, system folder, file, owned[, codec])] to convert under root: owned is None for an archive, else the
     loose disc image's files (sheet and tracks, or the iso). Extract-only systems have archives only.
-    A .chd not using its system's `codec` is a job too, owning only itself (it gets recompressed).
-    Sheets skipped for naming tracks outside their folder are appended to skipped."""
+    A .chd not using its system's `codec` is a job too, owning only itself, with the codec to recompress it to as a
+    5th item (the chds are inspected in parallel after the walk).
+    One walk also fills the out-parameters: skipped gets the sheets skipped for naming tracks outside their folder,
+    roots the {system folder: system} for every system folder (where the m3u playlists get fixed), and stale the
+    .chd-* and .xiso-* working folders a killed run left behind.
+    """
     chdman = external.find_tool("chdman")
     jobs = []
     for dirpath, dirs, files in os.walk(root):
+        if stale is not None:
+            stale += [os.path.join(dirpath, d) for d in dirs if d.startswith((".chd-", ".xiso-"))]
         dirs[:] = sorted(d for d in dirs if not external.own_temp(d))
         system, sysroot = chd_system(root, dirpath, folders)
         if not system:
             continue
+        if roots is not None:
+            roots[sysroot] = system
         files = [os.path.join(dirpath, f) for f in sorted(files) if not external.own_temp(f)]
         jobs += [(system, sysroot, f, None) for f in files if f.lower().endswith(external.ARCHIVE_EXTS)]
         if system["chd"]["mode"] == "xiso":
@@ -89,8 +97,13 @@ def plan_chd(root, folders, skipped=None):
         elif system["chd"]["mode"] != "extract":
             jobs += [(system, sysroot, img, owned) for img, owned in disc_images(files, True, skipped)]
             if system["chd"].get("codec") and chdman:
-                jobs += [(system, sysroot, f, [f]) for f in files if f.lower().endswith(".chd") and wrong_codec(chdman, system["chd"], f)]
-    return jobs
+                jobs += [(system, sysroot, f, [f], None) for f in files if f.lower().endswith(".chd")]  # codec filled in below
+    checking = [i for i, job in enumerate(jobs) if len(job) > 4]
+    with ThreadPoolExecutor(min(os.cpu_count() or 4, len(checking) or 1)) as ex:
+        codecs = ex.map(lambda i: wrong_codec(chdman, jobs[i][0]["chd"], jobs[i][2]), checking)
+        for i, codec in zip(checking, list(codecs)):
+            jobs[i] = (*jobs[i][:4], codec) if codec else None
+    return [job for job in jobs if job]
 
 
 def codec_for(cfg, cd):
@@ -120,8 +133,14 @@ def wrong_codec(chdman, cfg, path):
 _chd_locks = defaultdict(threading.Lock)  # one per output path: two jobs for the same disc take turns
 
 
+def part_path(out):
+    """The hidden name a file is written under until it is complete."""
+    return os.path.join(os.path.dirname(out), "." + os.path.basename(out) + ".part")
+
+
 def make_chd(tools, cfg, image, out, report=None):
-    """Create out from image (an existing out is only verified); None on success, else the error.
+    """Create out from image (an existing out is only verified, or recompressed if its codec is wrong);
+    None on success, else the error.
 
     The chd is built under a hidden .part name and renamed once it verifies, so out is never half written.
     report(fraction) gets 0-1 progress: creating is the first 90%, verifying the last 10%.
@@ -131,7 +150,7 @@ def make_chd(tools, cfg, image, out, report=None):
     def stage(start, width):
         return (lambda percent: report(start + percent / 100 * width)) if report else None
 
-    part = os.path.join(os.path.dirname(out), "." + os.path.basename(out) + ".part")
+    part = part_path(out)
     with _chd_locks[out]:
         if os.path.exists(part):  # left by a run that was killed
             os.remove(part)
@@ -183,7 +202,7 @@ def make_zar(tools, image, out, report=None):
     iso2zar writes a hidden .part file, renamed once the tool succeeds and the file is not empty,
     so out is never half written. The tool has no verify option or progress output.
     """
-    part = os.path.join(os.path.dirname(out), "." + os.path.basename(out) + ".part")
+    part = part_path(out)
     with _chd_locks[out]:
         try:
             if os.path.exists(part):  # left by a run that was killed
@@ -218,6 +237,30 @@ def plan_moves(pairs):
     return moves, None
 
 
+def move_flat(pairs):
+    """Move each (src, dst), skipping leftovers of an interrupted run (see plan_moves); None on success, else the error."""
+    moves, error = plan_moves(pairs)
+    if error:
+        return error
+    for src, dst in moves:
+        shutil.move(src, dst)
+
+
+def convert_all(pairs, clash, make, exists_ok=False):
+    """make(image, out) for each (image, out), after checking no two outs are the same file (else the error clash) and
+    (unless exists_ok) none exists yet; None on success, else the error."""
+    outs = [out for _, out in pairs]
+    if len({os.path.normcase(o).lower() for o in outs}) < len(outs):
+        return clash
+    for out in outs:
+        if not exists_ok and os.path.lexists(out):
+            return f"{os.path.basename(out)} already exists"
+    for image, out in pairs:
+        error = make(image, out)
+        if error:
+            return error
+
+
 def chd_archive(tools, cfg, path, report=None):
     """Extract an archive next to itself, then convert its discs (or, for extract-only systems, move its files out).
     The archive goes only once everything is done; None on success, else the error."""
@@ -230,50 +273,28 @@ def chd_archive(tools, cfg, path, report=None):
         extracted = [os.path.join(dp, f) for dp, _, fns in os.walk(tmp) for f in sorted(fns)
                      if not os.path.islink(os.path.join(dp, f))]
         if cfg["mode"] == "extract":
-            moves, error = plan_moves([(f, os.path.join(folder, os.path.basename(f))) for f in extracted])
-            if error:
-                return error
-            for src, dst in moves:
-                shutil.move(src, dst)
-        elif cfg["mode"] == "xiso":
+            error = move_flat([(f, os.path.join(folder, os.path.basename(f))) for f in extracted])
+        elif cfg["mode"] in ("xiso", "zar"):
             images = [f for f in extracted if f.lower().endswith(".iso")]
             if not images:
                 return "no iso in the archive"
-            outs = [os.path.join(folder, os.path.basename(image)) for image in images]
-            if len({os.path.normcase(o).lower() for o in outs}) < len(outs):
-                return "two isos in the archive would make the same file"
-            for out in outs:
-                if os.path.lexists(out):
-                    return f"{os.path.basename(out)} already exists"
-            for image, out in zip(images, outs):
-                error = make_xiso(tools, image, out, report)
-                if error:
-                    return error
-        elif cfg["mode"] == "zar":
-            images = [f for f in extracted if f.lower().endswith(".iso")]
-            if not images:
-                return "no iso in the archive"
-            outs = [os.path.join(folder, os.path.splitext(os.path.basename(image))[0] + ".zar") for image in images]
-            if len({os.path.normcase(o).lower() for o in outs}) < len(outs):
-                return "two isos in the archive would make the same .zar"
-            for out in outs:
-                if os.path.lexists(out):
-                    return f"{os.path.basename(out)} already exists"
-            for image, out in zip(images, outs):
-                error = make_zar(tools, image, out, report)
-                if error:
-                    return error
+            if cfg["mode"] == "xiso":
+                pairs = [(image, os.path.join(folder, os.path.basename(image))) for image in images]
+                error = convert_all(pairs, "two isos in the archive would make the same file",
+                                    lambda image, out: make_xiso(tools, image, out, report))
+            else:
+                pairs = [(image, os.path.join(folder, os.path.splitext(os.path.basename(image))[0] + ".zar")) for image in images]
+                error = convert_all(pairs, "two isos in the archive would make the same .zar",
+                                    lambda image, out: make_zar(tools, image, out, report))
         else:
             images = disc_images(extracted, strict=False)
             if not images:
                 return "no disc image in the archive"
-            outs = [os.path.join(folder, os.path.splitext(os.path.basename(image))[0] + ".chd") for image, _ in images]
-            if len({os.path.normcase(o).lower() for o in outs}) < len(outs):
-                return "two discs in the archive would make the same .chd"
-            for (image, _), out in zip(images, outs):
-                error = make_chd(tools, cfg, image, out, report)
-                if error:
-                    return error
+            pairs = [(image, os.path.join(folder, os.path.splitext(os.path.basename(image))[0] + ".chd")) for image, _ in images]
+            error = convert_all(pairs, "two discs in the archive would make the same .chd",
+                                lambda image, out: make_chd(tools, cfg, image, out, report), exists_ok=True)
+        if error:
+            return error
         os.remove(path)
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
@@ -316,12 +337,10 @@ def unzip_archive(path):
             error = external.run_tool([tool, "x", "-y", "-bso0", "-bsp0", f"-o{tmp}", "--", path])
             if error:
                 return error
-        moves, error = plan_moves([(os.path.join(dp, n), os.path.join(folder, n)) for dp, _, ns in os.walk(tmp)
-                                   for n in sorted(ns) if not os.path.islink(os.path.join(dp, n))])
+        error = move_flat([(os.path.join(dp, n), os.path.join(folder, n)) for dp, _, ns in os.walk(tmp)
+                           for n in sorted(ns) if not os.path.islink(os.path.join(dp, n))])
         if error:
             return error
-        for src, dst in moves:
-            shutil.move(src, dst)
         os.remove(path)
     except (OSError, zipfile.BadZipFile) as e:
         return str(e)
@@ -349,23 +368,10 @@ def unzip_roms(paths):
     return failures
 
 
-def remove_stale_chd_temp(root):
-    """Delete the .chd-* and .xiso-* working folders a killed run left behind."""
-    for dirpath, dirs, _ in os.walk(root):
-        for d in [d for d in dirs if d.startswith((".chd-", ".xiso-"))]:
-            shutil.rmtree(os.path.join(dirpath, d), ignore_errors=True)
-            dirs.remove(d)
-
-
-def chd_roots(root, folders):
-    """{system folder: system} for every system folder under root: where the m3u playlists get fixed."""
-    roots = {}
-    for dirpath, dirs, _ in os.walk(root):
-        dirs[:] = sorted(d for d in dirs if not external.own_temp(d))
-        system, sysroot = chd_system(root, dirpath, folders)
-        if system:
-            roots[sysroot] = system
-    return roots
+def remove_stale_chd_temp(folders):
+    """Delete the .chd-* and .xiso-* working folders a killed run left behind (as found by plan_chd)."""
+    for folder in folders:
+        shutil.rmtree(folder, ignore_errors=True)
 
 
 def fix_playlists(roots, dry_run):
@@ -381,9 +387,8 @@ def chd_command(args):
         ui.fail(f"{root} is not a folder", 2)
     print(ui.bold("💿 cd") + ui.dim(f"  {root}"))
     folders = chd_folders(store.repo_json("systems"))
-    roots = chd_roots(root, folders)
-    skipped = []
-    jobs = plan_chd(root, folders, skipped)
+    roots, skipped, stale = {}, [], []
+    jobs = plan_chd(root, folders, skipped, roots, stale)
     for sheet in skipped:
         print(ui.yellow(f"  ⚠️  skipped {os.path.relpath(sheet, root)}: it names tracks outside its own folder"))
     if not jobs:
@@ -391,7 +396,7 @@ def chd_command(args):
         if not roots:
             print(ui.yellow("⚠️  No folder here is named after a system that converts to CHD, so every file was skipped."))
             print(ui.dim(f"   --cd only looks inside folders named: {', '.join(sorted(folders))}"))
-    for system, _, path, owned in jobs:
+    for system, _, path, owned, *_ in jobs:
         what = "extract" if system["chd"]["mode"] == "extract" else "convert"
         print(f"  {'📦' if owned is None else '💿'} {what} {os.path.relpath(path, root)}")
     if args.dry_run:
@@ -408,7 +413,7 @@ def chd_command(args):
         tools[tool] = external.find_tool(tool)
         if needed and not tools[tool]:
             ui.fail(f"{tool} not found; " + (f"{external.MANUAL_TOOLS[tool]}" if tool in external.MANUAL_TOOLS else "run sync-roms --install-tools"), 3)
-    remove_stale_chd_temp(root)
+    remove_stale_chd_temp(stale)
     cpus = os.cpu_count() or 1
     workers = min(cpus, len(jobs))
     tools["np"] = max(1, cpus // workers)  # cores left for each chdman once the jobs share them
@@ -417,7 +422,7 @@ def chd_command(args):
     progress = [0.0] * len(jobs)  # each job's 0-1 progress; the bar is their mean
 
     def convert(i):
-        system, _, path, owned = jobs[i]
+        system, _, path, owned, *_ = jobs[i]
 
         def report(fraction):
             progress[i] = max(progress[i], fraction)
@@ -442,7 +447,7 @@ def chd_command(args):
         for job, future in zip(jobs, futures):
             while True:
                 try:
-                    error = future.result(timeout=0.25)
+                    error = future.result(timeout=ui.POLL)
                     break
                 except FutureTimeout:
                     draw_bar()

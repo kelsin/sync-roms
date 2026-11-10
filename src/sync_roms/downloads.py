@@ -2,7 +2,7 @@
 import os
 import re
 import time
-from concurrent.futures import ThreadPoolExecutor, TimeoutError as FutureTimeout
+from concurrent.futures import ThreadPoolExecutor
 
 from . import external, runtime, s3, ui
 
@@ -18,13 +18,22 @@ def rom_rel(key, flat, disc_dir=None, discs=()):
     return os.path.basename(rel) if flat else rel
 
 
-def archive_extracted(path):
-    """Whether an archive's ROM is already beside it: a file with the archive's name and another extension."""
+def archive_extracted(path, listings=None):
+    """Whether an archive's ROM is already beside it: a file with the archive's name and another extension.
+
+    listings: a dict a caller keeps across calls, so each folder is listed once.
+    """
     stem, ext = os.path.splitext(os.path.basename(path))
     folder = os.path.dirname(path)
-    if ext.lower() not in external.ARCHIVE_EXTS or not os.path.isdir(folder):
+    if ext.lower() not in external.ARCHIVE_EXTS:
         return False
-    return any(os.path.splitext(f)[0] == stem and not f.lower().endswith(external.ARCHIVE_EXTS) for f in os.listdir(folder))
+    stems = listings.get(folder) if listings is not None else None
+    if stems is None:
+        stems = ({os.path.splitext(f)[0] for f in os.listdir(folder) if not f.lower().endswith(external.ARCHIVE_EXTS)}
+                 if os.path.isdir(folder) else set())
+        if listings is not None:
+            listings[folder] = stems
+    return stem in stems
 
 
 def is_current(path, size, disc_dir=None):
@@ -52,8 +61,9 @@ def with_sizes(jobs):
 def plan_downloads(jobs, unzip=False, disc_dir=None):
     """jobs: list of (s3_key, local_path, expected_size). Drops files already present, and with unzip the
     archives whose ROM was already extracted."""
+    listings = {}
     return [(k, p, s) for k, p, s in jobs
-            if not is_current(p, s, disc_dir) and not (unzip and archive_extracted(p))]
+            if not is_current(p, s, disc_dir) and not (unzip and archive_extracted(p, listings))]
 
 
 def hide_discs(dest, disc_dir, discs, dry_run=False):
@@ -99,18 +109,13 @@ def run_downloads(todo, label, icon, base, failures=None):
     futs = []
     ex = ThreadPoolExecutor(runtime.WORKERS)
     moved = ui.ByteProgress([j[2] for j in todo])
-    bar = ui.ProgressBar(len(todo), moved.fraction, sum(moved.size), io=moved)
+    bar = ui.ProgressBar(len(todo), moved.fraction, moved.total, io=moved)
     try:
         futs += [(j, ex.submit(s3.download, j, lambda n, i=i: moved.add(i, n), moved.wrote)) for i, j in enumerate(todo)]
         for i, (j, f) in enumerate(futs, 1):
             prog = ui.dim(f"[{i}/{len(todo)}]")
             try:
-                while True:
-                    try:
-                        f.result(timeout=0.25)
-                        break
-                    except FutureTimeout:
-                        bar.draw(i - 1)
+                ui.wait_drawing(bar, i - 1, f.result)
                 moved.finish(i - 1)
                 src = j[0].split("/", 1)[0]
                 rel = os.path.relpath(j[1], base)
@@ -131,7 +136,7 @@ def run_downloads(todo, label, icon, base, failures=None):
         try:
             while any(f.running() for f in running):
                 bar.draw(sum(f.done() for _, f in futs))
-                time.sleep(0.25)
+                time.sleep(ui.POLL)
         except KeyboardInterrupt:
             bar.clear()
             print(ui.red("🛑 Aborted"))

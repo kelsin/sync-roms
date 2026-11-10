@@ -3,7 +3,6 @@ import argparse
 import json
 import os
 import re
-import shutil
 import sys
 
 from . import external, picker, runtime, s3, setedit, store, ui, usersettings
@@ -114,9 +113,10 @@ def glob_match(key, pattern):
     return re.fullmatch(regex, key.split("/", 1)[1].lower(), re.S) is not None
 
 
-def resolve_keys(system, patterns):
-    """Bucket keys for file names, SYSTEM/file keys or globs. Globs match against storage's listing."""
-    keys, listing = [], None
+def resolve_keys(system, patterns, listing=None):
+    """Bucket keys for file names, SYSTEM/file keys or globs. Globs match against listing (bucket keys), which is
+    storage's listing of the system when not given."""
+    keys, in_storage = [], listing is None
     for pat in patterns:
         name = pat[len(system) + 1:] if pat.startswith(system + "/") else pat
         if not any(c in name for c in "*?"):
@@ -130,7 +130,7 @@ def resolve_keys(system, patterns):
             continue
         hits = [k for k in listing if glob_match(k, name)]
         if not hits:
-            ui.warn(f"{pat!r} matches nothing in {system}/")
+            ui.warn(f"{pat!r} matches nothing in " + (f"{system}/" if in_storage else "the list"))
         keys += hits
     return list(dict.fromkeys(keys))
 
@@ -213,17 +213,7 @@ def games_remove(args):
     raw, save = load_target(args.card)
     listed = [g["bucket"] for g in raw.get(args.system, []) if isinstance(raw.get(args.system), list) and isinstance(g, dict)
               and isinstance(g.get("bucket"), str)]
-    keys = set()
-    for k in args.keys:
-        name = k[len(args.system) + 1:] if k.startswith(args.system + "/") else k
-        key = f"{args.system}/{name}"
-        if key not in listed and any(c in name for c in "*?"):
-            hits = [x for x in listed if glob_match(x, name)]
-            if not hits:
-                ui.warn(f"{k!r} matches nothing in the list")
-            keys.update(hits)
-        else:
-            keys.add(key)
+    keys = set(resolve_keys(args.system, args.keys, listed))
     changes = remove_games(raw, args.system, keys)
     for k in sorted(keys - {c[1] for c in changes}):
         ui.warn(f"{k} isn't in the list")
@@ -284,10 +274,10 @@ def games_import(args):
         lines = [l.strip() for l in (sys.stdin if args.file == "-" else open(args.file, encoding="utf-8")) if l.strip() and not l.startswith("#")]
     except OSError as e:
         ui.fail(f"Can't read {args.file}: {e}", 2)
-    changes, by_system = [], {}
+    changes, by_system, known = [], {}, set(system_ids())
     for line in lines:
         system, _, name = line.partition("/")
-        if system not in system_ids() or not name:
+        if system not in known or not name:
             ui.warn(f"skipping {line!r}: expected SYSTEM/file or SYSTEM/*")
         elif name == "*":
             if not isinstance(raw.get(system), dict):
@@ -304,11 +294,11 @@ def games_import(args):
 
 def cards_list(args):
     cards = store.load_cards()
-    manifest = store.load_manifest()
+    manifest = store.load_catalog()
     rows = []
     for name in sorted(cards):
         setup = picker.saved_setup(cards[name], manifest["devices"], manifest["layouts"])
-        extras = sum(len(v) if isinstance(v, list) else 1 for v in store.card_games(name).values())
+        extras = sum(len(v) if isinstance(v, list) else 1 for v in store.card_games(name, cards).values())
         rows.append({"name": name, "device": (setup[0]["id"] if setup[0] else "full") if setup else None,
                      "layout": setup[1] if setup else None, "extras": extras})
     if args.json:
@@ -328,7 +318,7 @@ def cards_save_setup(args, create):
         ui.fail("A card name is a folder name: no slashes, not empty", 2)
     if not store.cards_readable():
         ui.fail(f"{os.path.join(store.data_dir(), 'cards.json')} isn't valid JSON, so the card can't be saved. Fix or move it first.", 3)
-    manifest = store.load_manifest()
+    manifest = store.load_catalog()
     current = picker.saved_setup(cards.get(args.name), manifest["devices"], manifest["layouts"])
     if create and not (args.device and args.layout):
         ui.fail("cards new needs --device and --layout", 2)
@@ -393,9 +383,10 @@ def config_cmd(args):
     return 0
 
 
-def check_sets(problems):
-    """Check every set file (repo and personal) and return the keys each one lists as {set id: [(system, key)]}."""
-    systems = {s["bucket"] for s in store.repo_json("systems")}
+def check_sets(problems, systems):
+    """Check every set file (repo and personal) and return the keys each one lists as {set id: [(system, key)]}.
+
+    systems: the set of known system ids."""
     keys = {}
     folders = [(store.REPO_DATA + "/sets", ""), (store.personal_sets_dir(), "sets/")]
     for folder, prefix in folders:
@@ -440,22 +431,25 @@ def check_sets(problems):
     return keys
 
 
-def check_data(list_keys=None):
+def check_data(list_keys=None, repo_systems=None):
     """Problems found in the user's data files, as strings.
 
     list_keys: optional callable(system id) -> set of bucket keys in that system's folder; when given, every
-    key the lists and sets name must be among them."""
+    key the lists and sets name must be among them.
+    repo_systems: the repo's systems.json already loaded."""
     problems = []
-    for s in store.repo_json("systems"):
+    if repo_systems is None:
+        repo_systems = store.repo_json("systems")
+    for s in repo_systems:
         sid = s.get("screenscraper")
         if sid is not None and (not isinstance(sid, int) or isinstance(sid, bool)):
             problems.append(f"systems.json: {s['bucket']}: screenscraper must be an integer")
     wanted = {}  # where -> [(system, key)] for the bucket check
-    systems = {s["bucket"] for s in store.repo_json("systems")}
+    systems = {s["bucket"] for s in repo_systems}
     devices = {d["id"] for d in store.repo_json("devices")}
     layouts = set(store.repo_json("layouts"))
     sets = {x["id"] for x in store.load_sets()}
-    wanted.update(check_sets(problems))
+    wanted.update(check_sets(problems, systems))
 
     def load(name):
         path = os.path.join(store.data_dir(), name)
@@ -552,18 +546,19 @@ def bucket_lister():
     return lambda system: {k for k in s3.list_sizes(system + "/") if not k.endswith("/")}
 
 
-def check_notices():
-    """Things worth knowing about the data that don't make `check` fail, as strings."""
-    missing = [s["bucket"] for s in store.repo_json("systems") if s.get("screenscraper") is None]
+def check_notices(repo_systems):
+    """Things worth knowing about the data that don't make `check` fail, as strings. repo_systems: systems.json loaded."""
+    missing = [s["bucket"] for s in repo_systems if s.get("screenscraper") is None]
     return [f"systems.json: {len(missing)} system(s) have no ScreenScraper system id, so `scrape` skips them: "
             + ", ".join(missing)] if missing else []
 
 
 def check_cmd(args):
-    problems = check_data(bucket_lister() if args.bucket_keys else None)
+    repo_systems = store.repo_json("systems")
+    problems = check_data(bucket_lister() if args.bucket_keys else None, repo_systems)
     for p in problems:
         print(ui.red(f"❌ {p}"))
-    for n in check_notices():
+    for n in check_notices(repo_systems):
         print(ui.yellow(f"⚠️  {n}"))
     if not problems:
         print(ui.green("✅ games.json, cards.json, device-systems.json and the sets look fine"))
@@ -579,7 +574,6 @@ def doctor_cmd(args):
         print(f"{'✅' if ok else '⚠️ ' if ok is None else '❌'} {text}" + (ui.dim(f"  → {hint}") if hint and not ok else ""))
 
     settings = dict((n, v) for n, v, _ in effective_settings())
-    usersettings.apply_settings()
     if runtime.ROOT:
         line(os.path.isdir(runtime.ROOT), f"storage folder: {runtime.ROOT}", "is the network share mounted?")
         if os.path.isdir(runtime.ROOT):
@@ -668,7 +662,8 @@ def completion_cmd(args):
         return 0
     from .cli import SUBCOMMANDS
     subs = " ".join(SUBCOMMANDS)
-    flags = " ".join(all_flags())
+    flag_list = all_flags()
+    flags = " ".join(flag_list)
     second = second_words()
     if args.shell in ("bash", "zsh"):
         cases = "\n".join(f"      {name}) COMPREPLY=($(compgen -W \"{' '.join(w)}\" -- \"$cur\")); return;;" for name, w in second.items())
@@ -703,7 +698,7 @@ complete -o filenames -F _sync_roms sync-roms
         for name, w in second.items():
             lines.append(f'complete -c sync-roms -f -n "__fish_seen_subcommand_from {name}; and not __fish_seen_subcommand_from {" ".join(w)}" -a "{" ".join(w)}"')
         values = {"card": "cards", "device": "devices", "layout": "layouts", "system": "systems", "systems": "systems"}
-        for flag in (f for f in all_flags() if f.startswith("--")):
+        for flag in (f for f in flag_list if f.startswith("--")):
             name = flag[2:]
             if name in values:
                 extra = "all " if name == "systems" else ""

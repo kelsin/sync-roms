@@ -1,6 +1,5 @@
 """`sync-roms sets edit`: edit the repo's game sets by hand and open a PR with the changes."""
 import copy
-import json
 import os
 import shutil
 import subprocess
@@ -18,22 +17,10 @@ SETS_DIR = os.path.join("src", "sync_roms", "data", "sets")
 
 def repo_sets():
     """The repo's own sets as {id: {"name", "description", "games"}} (personal sets aren't included)."""
-    folder = os.path.join(store.REPO_DATA, "sets")
-    sets = {}
-    for name in sorted(os.listdir(folder)):
-        if name.endswith(".json"):
-            game_set = store.read_set_file(os.path.join(folder, name), name[:-5])
-            sets[game_set.pop("id")] = game_set
-    return sets
+    return {game_set.pop("id"): game_set for game_set in store.repo_set_files()}
 
 
-def set_text(game_set):
-    """A set as the text of its file, in the format the repo's set files already use."""
-    data = {"name": game_set["name"]}
-    if game_set.get("description"):
-        data["description"] = game_set["description"]
-    data["games"] = game_set["games"]
-    return json.dumps(data, indent=2, ensure_ascii=False) + "\n"
+set_text = store.set_text  # the format of a set's file lives in store, next to the personal-set writer
 
 
 # --- Editing the games of one set --------------------------------------------------------------------
@@ -89,14 +76,15 @@ def ask_category(games, what):
     return ui.ask(f"🏷️  Category for {what} (empty for none): ").strip()
 
 
-def game_label(game, systems):
-    names = {s["bucket"]: s["name"] for s in systems}
+def game_label(game, names):
+    """A game's row label; names: {system bucket: system name}."""
     return f"{game.get('category') + ' — ' if game.get('category') else ''}{names.get(game.get('system'), game.get('system'))}" \
            f" — {game.get('title') or game['bucket']}"
 
 
 def edit_one(game_set, systems, keys_of):
     """Edit one set: remove games, add games from a system, change categories, rename."""
+    names = {s["bucket"]: s["name"] for s in systems}
     while True:
         i = picker.filter_list(f"✏️  {game_set['name']} (Esc = back)",
                                [f"Games in this set ({len(game_set['games'])}): switch some off",
@@ -124,7 +112,7 @@ def edit_one(game_set, systems, keys_of):
             game_set["games"] = reconcile(game_set["games"], shown, category)
         elif i == 2:
             games = [g for g in game_set["games"] if g.get("bucket")]
-            j = picker.filter_list("✏️  Change which game's category?", [game_label(g, systems) for g in games])
+            j = picker.filter_list("✏️  Change which game's category?", [game_label(g, names) for g in games])
             if j is not None:
                 recategorize(game_set["games"], games[j], ask_category(game_set["games"], games[j].get("title", "it")))
         else:
@@ -265,13 +253,14 @@ def edit_sets():
     def keys_of(bucket):
         if bucket not in listed:
             print(ui.dim(f"📡 Listing {s3.location()}/{bucket}/ ..."))
-            listed[bucket] = {k for k in s3.list_sizes(bucket + "/") if not k.endswith("/")}
+            listed[bucket] = store.folder_keys(bucket)
         return listed[bucket]
 
     while True:
         ids = sorted(working, key=lambda x: working[x]["name"].lower())
         n = len(ids)
-        edited = {sid for _, sid, _ in diff_sets(before, working)}
+        found = diff_sets(before, working)
+        edited = {sid for _, sid, _ in found}
         labels = ([f"{working[x]['name']}  ({len(working[x]['games'])} games)" for x in ids]
                   + ["➕ New set", "✅ Done (review & open PR)", "🚪 Quit without saving"])
         extras = [[("  " + ("new" if x not in before else "edited"), "cyan")] if x in edited else [] for x in ids] + [[], [], []]
@@ -298,7 +287,6 @@ def edit_sets():
                 print(ui.yellow("👋 Quit without saving."))
                 return 0
             continue
-        found = diff_sets(before, working)
         if not found:
             print(ui.yellow("👋 No changes, nothing opened."))
             return 0

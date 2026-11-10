@@ -56,10 +56,7 @@ def plan_upload(es_dir, roms, existing, remote_texts):
     stems = rom_stems(roms)
     plan = {"files": [], "texts": [], "present": 0, "derived": [], "derived_present": 0, "warnings": []}
 
-    def want_file(key, path):
-        size = os.path.getsize(path)
-        if not size:  # ES-DE leaves empty placeholders for media it didn't find
-            return
+    def want_file(key, path, size):
         if existing.get(key) == size:
             plan["present"] += 1
         else:
@@ -88,12 +85,14 @@ def plan_upload(es_dir, roms, existing, remote_texts):
             plan["warnings"].append(f"{key} in storage isn't valid JSON, skipped")
             continue
         merged = scrape_plan.merge_metadata(remote, local)
-        if local and scrape_plan.dump_json(merged) != old:
+        text = scrape_plan.dump_json(merged) if local else old
+        if local and text != old:
             new = len(set(merged) - set(remote))
-            plan["texts"].append((key, scrape_plan.dump_json(merged), f"{system} metadata (+{new} new, {len(local) - new} checked)"))
+            plan["texts"].append((key, text, f"{system} metadata (+{new} new, {len(local) - new} checked)"))
 
     media = os.path.join(es_dir, "downloaded_media")
     art = defaultdict(dict)  # (system, ROM name) -> {media type: local path} for Onion box art and Slot labels
+    sizes = {}  # local path -> size of the art sources
     for system in sorted(os.listdir(media)) if os.path.isdir(media) else []:
         if not stems.get(system):
             continue
@@ -101,20 +100,24 @@ def plan_upload(es_dir, roms, existing, remote_texts):
             base = os.path.join(media, system, mtype)
             for rel, full in scrape_plan.walk_files(base) if os.path.isdir(base) else []:
                 stem = os.path.splitext(rel)[0]
-                if stem in stems[system] and os.path.getsize(full):
-                    want_file(f"{scrape_plan.SCRAPES}/{system}/{mtype}/{rel}", full)
+                size = os.path.getsize(full) if stem in stems[system] else 0
+                if size:  # ES-DE leaves empty placeholders for media it didn't find
+                    want_file(f"{scrape_plan.SCRAPES}/{system}/{mtype}/{rel}", full, size)
                     if mtype in scrape_plan.ONION_ART + scrape_plan.SLOT_ART:
                         art[(system, stem)][mtype] = full
+                        sizes[full] = size
     for (system, stem), found in sorted(art.items()):
         for key, source, box in derived_art(system, stem, found):
             if key in existing:
                 plan["derived_present"] += 1
             elif source:
-                plan["derived"].append((key, source, os.path.getsize(source), box))
+                plan["derived"].append((key, source, sizes[source], box))
 
     themes = os.path.join(es_dir, "themes")
     for rel, full in scrape_plan.walk_files(themes, skip_top=("themes-list",)) if os.path.isdir(themes) else []:
-        want_file(f"{scrape_plan.SCRAPES}/esde/themes/{rel}", full)
+        size = os.path.getsize(full)
+        if size:
+            want_file(f"{scrape_plan.SCRAPES}/esde/themes/{rel}", full, size)
 
     collections = os.path.join(es_dir, "collections")
     for name in sorted(os.listdir(collections)) if os.path.isdir(collections) else []:
@@ -135,8 +138,9 @@ def plan_upload(es_dir, roms, existing, remote_texts):
         except ValueError:
             plan["warnings"].append(f"{key} in storage isn't valid JSON, skipped")
             remote = None
-        if remote is not None and local and scrape_plan.dump_json({**remote, **local}) != old:
-            plan["texts"].append((key, scrape_plan.dump_json({**remote, **local}), f"settings (+{len(set(local) - set(remote))} new)"))
+        text = scrape_plan.dump_json({**remote, **local}) if remote is not None and local else old
+        if text != old:
+            plan["texts"].append((key, text, f"settings (+{len(set(local) - set(remote))} new)"))
     return plan
 
 
@@ -144,6 +148,13 @@ def text_keys(existing):
     """Keys under scrapes/ that are text files we merge into."""
     return [k for k in existing if k.endswith("/metadata.json") or "/esde/collections/" in k
             or k == f"{scrape_plan.SCRAPES}/esde/settings.json"]
+
+
+def _upload_text_keys(es_dir, existing, roms):
+    """text_keys(existing) without the metadata.json of systems the upload doesn't read: no ROMs, or no local gamelist.xml."""
+    wanted = {f"{scrape_plan.SCRAPES}/{system}/metadata.json" for system, paths in roms.items()
+              if paths and os.path.isfile(os.path.join(es_dir, "gamelists", system, "gamelist.xml"))}
+    return [k for k in text_keys(existing) if not k.endswith("/metadata.json") or k in wanted]
 
 
 def plan_slot_upload(labels_dir, systems, roms, existing):
@@ -230,7 +241,7 @@ def upload_scrapes(args):
         roms = bucket_roms(manifest["systems"])
         print("☁️  Listing what's already in scrapes/...")
         existing = s3.list_sizes(scrape_plan.SCRAPES + "/")
-        remote_texts = s3.fetch_texts(text_keys(existing))
+        remote_texts = s3.fetch_texts(_upload_text_keys(es_dir, existing, roms))
         print("🔎 Comparing...")
         plan = plan_upload(es_dir, roms, existing, remote_texts)
     except s3.ERRORS as e:
@@ -239,7 +250,7 @@ def upload_scrapes(args):
         print(ui.yellow(f"  ⚠️  {w}"))
     files, texts, derived = plan["files"], plan["texts"], plan["derived"]
     if derived and not scrape_plan.can_shrink():
-        print(ui.yellow(f"  ⚠️  Onion box art and Slot labels need Pillow or macOS sips to resize images; skipping {len(derived)} file(s)"))
+        print(ui.yellow(f"  ⚠️  {scrape_plan.NO_SHRINK}; skipping {len(derived)} file(s)"))
         derived = []
     print(f"\n📝 Text files to write: {ui.bold(str(len(texts)))}")
     for _, _, label in texts[:15]:

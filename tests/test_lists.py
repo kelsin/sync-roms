@@ -1,16 +1,14 @@
 import contextlib
 import io
-import json
 import os
 import sys
 import tempfile
 import unittest
 from unittest import mock
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, os.path.join(ROOT, "src"))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
+from helpers import DataDir  # noqa: E402
 from sync_roms import mirroring, picker, runtime, store  # noqa: E402
 
 
@@ -83,31 +81,20 @@ class OddEntries(unittest.TestCase):
         self.assertEqual(err.getvalue().count("must be a list"), 1)
 
 
-class CardLists(unittest.TestCase):
-    def setUp(self):
-        self.tmp = tempfile.TemporaryDirectory()
-        self.addCleanup(self.tmp.cleanup)
-        patch = mock.patch.object(store, "data_dir", lambda: self.tmp.name)
-        patch.start()
-        self.addCleanup(patch.stop)
-
-    def write(self, name, data):
-        with open(os.path.join(self.tmp.name, name), "w") as f:
-            json.dump(data, f)
-
+class CardLists(DataDir):
     def test_card_games_bad_shapes(self):
-        self.write("cards.json", {"a": {"games": None}, "b": {"games": []}, "c": "x", "d": {"games": {"gba": []}}})
+        self.write_json("cards.json", {"a": {"games": None}, "b": {"games": []}, "c": "x", "d": {"games": {"gba": []}}})
         self.assertEqual([store.card_games(n) for n in "abcz"], [{}, {}, {}, {}])
         self.assertEqual(store.card_games("d"), {"gba": []})
 
     def test_cards_json_games_roundtrip(self):
-        self.write("cards.json", {"c": {"games": {"gba": []}, "layout": "esde"}})
+        self.write_json("cards.json", {"c": {"games": {"gba": []}, "layout": "esde"}})
         store.update_card("c", device="x")
         self.assertEqual(store.load_cards()["c"], {"games": {"gba": []}, "layout": "esde", "device": "x"})
 
     def test_load_manifest_merges_named_cards(self):
-        self.write("games.json", {"gba": [game("gba/A.zip")]})
-        self.write("cards.json", {"c": {"games": {"gba": [game("gba/B.zip")]}}, "d": {"games": {"gb": [game("gb/Z.zip")]}}})
+        self.write_json("games.json", {"gba": [game("gba/A.zip")]})
+        self.write_json("cards.json", {"c": {"games": {"gba": [game("gba/B.zip")]}}, "d": {"games": {"gb": [game("gb/Z.zip")]}}})
         by = {s["bucket"]: s for s in store.load_manifest(["c"])["systems"]}
         self.assertEqual([g["bucket"] for g in by["gba"]["games"]], ["gba/A.zip", "gba/B.zip"])
         self.assertEqual(by["gb"]["games"], [])
@@ -115,15 +102,15 @@ class CardLists(unittest.TestCase):
         self.assertEqual([g["bucket"] for g in by["gba"]["games"]], ["gba/A.zip"])
 
     def test_card_excluded_games_are_dropped_for_that_card_only(self):
-        self.write("games.json", {"gba": [game("gba/A.zip"), game("gba/B.zip")]})
-        self.write("cards.json", {"c": {"excluded": {"gba": ["gba/A.zip"]}}})
+        self.write_json("games.json", {"gba": [game("gba/A.zip"), game("gba/B.zip")]})
+        self.write_json("cards.json", {"c": {"excluded": {"gba": ["gba/A.zip"]}}})
         by = {s["bucket"]: s for s in store.load_manifest(["c"])["systems"]}
         self.assertEqual([g["bucket"] for g in by["gba"]["games"]], ["gba/B.zip"])
         by = {s["bucket"]: s for s in store.load_manifest()["systems"]}
         self.assertEqual([g["bucket"] for g in by["gba"]["games"]], ["gba/A.zip", "gba/B.zip"])
 
     def test_all_card_names(self):
-        self.write("cards.json", {"b": {}, "a": {}})
+        self.write_json("cards.json", {"b": {}, "a": {}})
         self.assertEqual(store.all_card_names(), ["a", "b"])
 
 
