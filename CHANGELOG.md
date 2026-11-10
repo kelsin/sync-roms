@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.48.0](https://github.com/kelsin/sync-roms/compare/v0.47.1...v0.48.0) (2026-11-10)
+
+
+### :video_game: Features
+
+* **devices:** add screen aspect ratio to every device ([#198](https://github.com/kelsin/sync-roms/issues/198)) ([1bcb54b](https://github.com/kelsin/sync-roms/commit/1bcb54bad4861f6d339619672eff91a2aa686eb7))
+* **sets:** add picks from Atari, MSX, Sega CD, NEC, SNK, Bandai and modern consoles ([#196](https://github.com/kelsin/sync-roms/issues/196)) ([868aa75](https://github.com/kelsin/sync-roms/commit/868aa75b797e71d9dac88364c39382781fa4c3df))
+* **vita:** create .psvita title id files for Vita zips on sync ([#199](https://github.com/kelsin/sync-roms/issues/199)) ([8cd0318](https://github.com/kelsin/sync-roms/commit/8cd0318dbaa5cde4d1ff2764817ca446cbc9dd51))
+
 ## [0.47.1](https://github.com/kelsin/sync-roms/compare/v0.47.0...v0.47.1) (2026-11-10)
 
 
