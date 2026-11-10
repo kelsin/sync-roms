@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.45.0](https://github.com/kelsin/sync-roms/compare/v0.44.0...v0.45.0) (2026-11-10)
+
+
+### Features
+
+* **scrape:** add --all to scrape every ROM in the storage ([#172](https://github.com/kelsin/sync-roms/issues/172)) ([2eceac5](https://github.com/kelsin/sync-roms/commit/2eceac532d17f50cc86ddd15709b5370c9831560))
+
 ## [0.44.0](https://github.com/kelsin/sync-roms/compare/v0.43.1...v0.44.0) (2026-11-10)
 
 
