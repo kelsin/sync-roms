@@ -1545,6 +1545,12 @@
       "bucket": "gba/Classic NES Series - Xevious (USA, Europe).zip"
     },
     {
+      "title": "Invader",
+      "category": "Other",
+      "system": "gba",
+      "bucket": "gba/Invader (Europe).zip"
+    },
+    {
       "title": "Xevious",
       "category": "Other",
       "system": "atari7800",
