@@ -321,6 +321,7 @@ Before downloading, the sync shows the totals and free space on the card and ask
 | `--scrape-match SYSTEM ROM GAME` | Tell the scraper which ScreenScraper game a ROM is, then scrape it (the old form of `scrape match`) |
 | `--all` | `scrape`: every ROM in the storage, not only the games your lists and sets reference |
 | `--retry` | `scrape`: also try the ROMs ScreenScraper didn't know before |
+| `--fill-media` | `scrape`: also scrape ROMs that have metadata but lack some media type in storage; their metadata is kept. ScreenScraper is asked again for each such ROM, even if it has no such media |
 | `--skip-media TYPES` | `scrape`, `scrape match`: comma-separated media folders not to download (e.g. `manuals,fanart`) |
 | `--set-credentials` | `scrape`: ask for the ScreenScraper login and developer credentials and save them in `settings.json` |
 | `--bucket-keys` | `check`: also verify with the read-only profile that every game key in your lists and sets exists in storage |
