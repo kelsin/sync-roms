@@ -44,7 +44,7 @@ def toggle_games(title, rows, extras=None, covered=None, excluded=None):
 
     extras: {bucket key: [more bucket keys]} added or removed together with that row's key.
 
-    Rows of a full system are shown on and locked: its whole bucket folder is synced.
+    Rows of a full system are shown on and locked: its whole storage folder is synced.
     covered: optional callable (system, bucket key) -> note or None; rows with a note are shown on and locked
     with that note (e.g. games a set reference or core already syncs).
     excluded: {system bucket: [keys]}, updated in place. When given, covered rows can be switched off (they start on
@@ -88,10 +88,10 @@ def toggle_games(title, rows, extras=None, covered=None, excluded=None):
 
 
 def system_rows(s, in_bucket):
-    """Rows for toggle_games over every file of a system's bucket folder plus any listed game that isn't in it."""
+    """Rows for toggle_games over every file of a system's storage folder plus any listed game that isn't in it."""
     listed = {g["bucket"] for g in s["games"] if g.get("bucket")}
     return [(s, k, os.path.splitext(k.split("/", 1)[1])[0],
-             k.split("/", 1)[1] + ("" if k in in_bucket else "  ⚠️ not in bucket"))
+             k.split("/", 1)[1] + ("" if k in in_bucket else "  ⚠️ not in storage"))
             for k in sorted(in_bucket | listed, key=str.lower)]
 
 
@@ -104,7 +104,7 @@ def edit_card_system(card, bucket, setup):
     s = next(x for x in t["data"]["systems"] if x["bucket"] == bucket)
     full, keys = cover_notes({x["id"]: x for x in store.load_sets()}, t["sets_on"], store.personal_json("games.json"))
     if s.get("full_system") or bucket in full:
-        note(ui.yellow(f"ℹ️  {s['name']} is a full system: every file in its bucket folder is downloaded, "
+        note(ui.yellow(f"ℹ️  {s['name']} is a full system: every file in its storage folder is downloaded, "
                        "so there is no game list to edit."))
         return False
     in_bucket = {k for k in s3.list_sizes(bucket + "/") if not k.endswith("/")}
@@ -136,7 +136,7 @@ def set_rows(game_set, by_bucket, bucket_keys):
         title = g.get("title") or os.path.splitext(key.split("/", 1)[-1])[0]
         have = bucket_keys(s)
         warn = "" if s.get("full_system") or all(k in have for k in [key] + list(g.get("files", []))) \
-            else "  ⚠️ not in bucket"
+            else "  ⚠️ not in storage"
         cat = g.get("category") or ""
         order.setdefault(cat, len(order))
         rows.append((cat, (s, key, title, f"{cat + ' — ' if cat else ''}{s['name']} — {title}{warn}")))
@@ -322,7 +322,7 @@ def edit_manifest():
                 if whole:
                     row.append(("  🗂️  full system", "cyan"))
                 if missing:
-                    row.append((f"  {missing} not in bucket", "red"))
+                    row.append((f"  {missing} not in storage", "red"))
                 if changed:
                     row.append((f"  {len(changed)} change(s)", "cyan"))
                 extras.append(row)
@@ -341,10 +341,10 @@ def edit_manifest():
             pos["system"] = i
             s = systems[i]
             if s.get("full_system") or s["bucket"] in full:
-                note(ui.yellow(f"ℹ️  {s['name']} is a full system: every file in its bucket folder is "
+                note(ui.yellow(f"ℹ️  {s['name']} is a full system: every file in its storage folder is "
                                "downloaded, so there is no game list to edit."))
                 return True
-            toggle_games(f"✏️  {s['name']} — ✅ in {where}, ⬜ in bucket only",
+            toggle_games(f"✏️  {s['name']} — ✅ in {where}, ⬜ in storage only",
                          system_rows(s, bucket_keys[s["bucket"]]),
                          covered=lambda _s, key: keys.get(key))
             return True
@@ -572,7 +572,7 @@ def edit_manifest():
                 print(ui.green(f"  ➕ {sid}"))
             for sid in remove:
                 print(ui.red(f"  ➖ {sid}"))
-        print(ui.dim("  (Removing only drops a game from the list; the file stays in the bucket.)"))
+        print(ui.dim("  (Removing only drops a game from the list; the file stays in storage.)"))
 
     while True:
         if not menu():

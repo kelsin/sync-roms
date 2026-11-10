@@ -1,4 +1,4 @@
-"""Comparing and replacing local files against the bucket."""
+"""Comparing and replacing local files against storage."""
 import hashlib
 import io
 import os
@@ -94,7 +94,7 @@ def counted(fn, label, total):
 
 
 def match_content(local, remote, local_print, remote_print, differs=None):
-    """([(local path, bucket path)] with the same content, only local, only bucket) lists, ignoring names.
+    """([(local path, bucket path)] with the same content, only local, only storage) lists, ignoring names.
 
     local: {path: size}; remote: {path: (size, etag)}. A file with the same path and size on both sides is the same
     without reading it; the rest are matched by content, a file with the same path first. local_print(path) /
@@ -108,7 +108,7 @@ def match_content(local, remote, local_print, remote_print, differs=None):
         left_local = sorted(p for p, size in local.items() if p not in remote or remote[p][0] != size or p in suspect)
         left_remote = sorted(p for p, (size, _) in remote.items() if p not in local or local[p] != size or p in suspect)
         local_prints = list(ex.map(counted(local_print, "Reading local files", len(left_local)), left_local))
-        remote_prints = list(ex.map(counted(lambda p: remote_print(p, *remote[p]), "Reading bucket files", len(left_remote)),
+        remote_prints = list(ex.map(counted(lambda p: remote_print(p, *remote[p]), "Reading storage files", len(left_remote)),
                                     left_remote))
     unmatched = list(zip(left_remote, remote_prints))
     matched, only_local = [], []
@@ -124,13 +124,13 @@ def match_content(local, remote, local_print, remote_print, differs=None):
 
 
 def plan_diff(local, remote, local_print, remote_print):
-    """(only local, only bucket) lists of relative paths, ignoring renames. Arguments as in match_content."""
+    """(only local, only storage) lists of relative paths, ignoring renames. Arguments as in match_content."""
     _, only_local, only_bucket = match_content(local, remote, local_print, remote_print)
     return only_local, only_bucket
 
 
 def plan_replace(local, remote, local_print, remote_print, differs=None):
-    """(renames, new, changed, only bucket) for making the bucket folder match the local one.
+    """(renames, new, changed, only storage) for making the storage folder match the local one.
 
     renames: [(bucket path, local path)] with the same content under another name. changed: paths on both sides
     with different content. Arguments as in match_content.
@@ -156,7 +156,7 @@ def local_sizes(folder):
 
 
 def diff_command(args):
-    """Show the ROMs that are in only one of a local folder (default: the current directory) and a bucket folder."""
+    """Show the ROMs that are in only one of a local folder (default: the current directory) and a storage folder."""
     folder = os.path.abspath(os.path.expanduser(args.diff or os.getcwd()))
     if not os.path.isdir(folder):
         ui.fail(f"{folder} is not a folder", 2)
@@ -191,7 +191,7 @@ def diff_command(args):
                       "only_bucket": [{"path": p, "size": remote[p][0]} for p in only_bucket]})
         return 0
     for title, paths, sizes, paint in (("Only in the folder", only_local, {p: local[p] for p in only_local}, ui.green),
-                                       ("Only in the bucket", only_bucket, {p: remote[p][0] for p in only_bucket}, ui.yellow)):
+                                       ("Only in storage", only_bucket, {p: remote[p][0] for p in only_bucket}, ui.yellow)):
         print(f"\n{ui.bold(title)}: {len(paths)} ({ui.human_size(sum(sizes.values()))})")
         for p in paths:
             print(paint(f"  {p} ") + ui.dim(ui.human_size(sizes[p])))

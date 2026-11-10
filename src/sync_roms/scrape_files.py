@@ -10,10 +10,10 @@ from . import runtime, s3, scrape_plan, store, ui, upload
 
 
 def bucket_roms(systems, all_files=False):
-    """{bucket folder: set of ROM paths in it}, from the bucket's real contents.
+    """{storage folder: set of ROM paths in it}, from storage's real contents.
 
     By default only the ROMs a sync would install (the games games.json lists, or every file of a
-    full system). With all_files, every file in the system's bucket folder.
+    full system). With all_files, every file in the system's storage folder.
     """
     todo = systems if all_files else [s for s in systems if s.get("full_system") or store.listed(s)]
     with ThreadPoolExecutor(runtime.WORKERS) as ex:
@@ -47,10 +47,10 @@ def plan_upload(es_dir, roms, existing, remote_texts):
     """What to upload from an ES-DE data folder.
 
     roms: {system: available ROM paths}; existing: {key: size} under scrapes/;
-    remote_texts: {key: text} of the bucket's text files. Returns a dict with
-    files [(key, path, size)], texts [(key, text, label)], present (files already in the bucket),
+    remote_texts: {key: text} of storage's text files. Returns a dict with
+    files [(key, path, size)], texts [(key, text, label)], present (files already in storage),
     derived [(key, source path, source size, (max width, max height))] (Onion box art and Slot labels the
-    bucket doesn't have yet, made from the local image even when that image itself was already uploaded),
+    storage doesn't have yet, made from the local image even when that image itself was already uploaded),
     derived_present and warnings.
     """
     stems = rom_stems(roms)
@@ -85,7 +85,7 @@ def plan_upload(es_dir, roms, existing, remote_texts):
         try:
             remote = json.loads(old) if old else {}
         except ValueError:
-            plan["warnings"].append(f"{key} in the bucket isn't valid JSON, skipped")
+            plan["warnings"].append(f"{key} in storage isn't valid JSON, skipped")
             continue
         merged = scrape_plan.merge_metadata(remote, local)
         if local and scrape_plan.dump_json(merged) != old:
@@ -133,7 +133,7 @@ def plan_upload(es_dir, roms, existing, remote_texts):
         try:
             remote = json.loads(old) if old else {}
         except ValueError:
-            plan["warnings"].append(f"{key} in the bucket isn't valid JSON, skipped")
+            plan["warnings"].append(f"{key} in storage isn't valid JSON, skipped")
             remote = None
         if remote is not None and local and scrape_plan.dump_json({**remote, **local}) != old:
             plan["texts"].append((key, scrape_plan.dump_json({**remote, **local}), f"settings (+{len(set(local) - set(remote))} new)"))
@@ -147,7 +147,7 @@ def text_keys(existing):
 
 
 def plan_slot_upload(labels_dir, systems, roms, existing):
-    """What to upload from a Slot card's Labels folder: its PNGs named after a ROM in the bucket (any, not just the listed games).
+    """What to upload from a Slot card's Labels folder: its PNGs named after a ROM in storage (any, not just the listed games).
 
     systems: the manifest's systems; roms: {system: available ROM paths}; existing: {key: size} under scrapes/.
     Returns (files [(key, path, size)] that are new or a different size, number already there, unmatched label paths).
@@ -179,7 +179,7 @@ def upload_slot_labels(args, labels_dir):
     print(ui.bold("☁️  Upload Slot labels") + ui.dim(f"  {s3.access(True)}  from {labels_dir}"))
     try:
         manifest = store.load_manifest()
-        print("📏 Listing the ROMs available in the bucket...")
+        print("📏 Listing the ROMs available in storage...")
         systems = [s for s in manifest["systems"] if s["folders"].get("slot")]
         roms = bucket_roms(systems, all_files=True)
         print("☁️  Listing what's already in scrapes/...")
@@ -191,7 +191,7 @@ def upload_slot_labels(args, labels_dir):
     print(f"🏷️  Labels to upload: {ui.bold(str(len(files)))} ({ui.human_size(sum(f[2] for f in files))}, "
           f"{replaced} replacing a different one), {present} already there")
     if unmatched:
-        print(ui.yellow(f"  ⚠️  {len(unmatched)} label(s) match no ROM in the bucket, skipped"))
+        print(ui.yellow(f"  ⚠️  {len(unmatched)} label(s) match no ROM in storage, skipped"))
         for path in unmatched[:10]:
             print(ui.dim(f"     {os.path.relpath(path, labels_dir)}"))
     if not files:
@@ -211,7 +211,7 @@ def upload_slot_labels(args, labels_dir):
 
 
 def upload_scrapes(args):
-    """Upload BASE_DIR/ES-DE scraped data (or a Slot card's Labels) to the bucket's scrapes/ folder, merging with what's there."""
+    """Upload BASE_DIR/ES-DE scraped data (or a Slot card's Labels) to storage's scrapes/ folder, merging with what's there."""
     base = os.path.abspath(os.path.expanduser(args.base_dir or os.getcwd()))
     es_dir = os.path.join(base, "ES-DE")
     labels_dir = os.path.join(base, "Labels")
@@ -226,7 +226,7 @@ def upload_scrapes(args):
     print(ui.bold("☁️  Upload scrapes") + ui.dim(f"  {s3.access(True)}  from {es_dir}"))
     try:
         manifest = store.load_manifest([os.path.basename(base) or base])
-        print("📏 Listing the ROMs available in the bucket...")
+        print("📏 Listing the ROMs available in storage...")
         roms = bucket_roms(manifest["systems"])
         print("☁️  Listing what's already in scrapes/...")
         existing = s3.list_sizes(scrape_plan.SCRAPES + "/")
@@ -313,11 +313,11 @@ def plan_clean(existing, roms, remote_texts):
 
 
 def clean_scrapes(args):
-    """Remove scrapes/ media and metadata for ROMs that aren't in the bucket (any ROM file, listed in games.json or not)."""
+    """Remove scrapes/ media and metadata for ROMs that aren't in storage (any ROM file, listed in games.json or not)."""
     print(ui.bold("🧹 Clean scrapes") + ui.dim(f"  {s3.access(True)}"))
     try:
         manifest = store.load_manifest()
-        print("📏 Listing every ROM in the bucket...")
+        print("📏 Listing every ROM in storage...")
         roms = bucket_roms(manifest["systems"], all_files=True)
         print("☁️  Listing scrapes/...")
         existing = s3.list_sizes(scrape_plan.SCRAPES + "/")
@@ -330,7 +330,7 @@ def clean_scrapes(args):
     if not delete and not rewrites:
         print(ui.green("Nothing to clean ✨"))
         return 0
-    print(ui.bold("\nFor ROMs that aren't in the bucket:"))
+    print(ui.bold("\nFor ROMs that aren't in storage:"))
     for system in sorted(per):
         c = per[system]
         print(f"  {system}: {c['media']} media file(s) ({ui.human_size(c['bytes'])}), {c['entries']} metadata entr{'y' if c['entries'] == 1 else 'ies'}")

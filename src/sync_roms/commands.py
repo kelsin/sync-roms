@@ -115,7 +115,7 @@ def glob_match(key, pattern):
 
 
 def resolve_keys(system, patterns):
-    """Bucket keys for file names, SYSTEM/file keys or globs. Globs match against the bucket's listing."""
+    """Bucket keys for file names, SYSTEM/file keys or globs. Globs match against storage's listing."""
     keys, listing = [], None
     for pat in patterns:
         name = pat[len(system) + 1:] if pat.startswith(system + "/") else pat
@@ -540,14 +540,14 @@ def check_data(list_keys=None):
                 if system not in have:
                     have[system] = list_keys(system)
                 if key not in have[system]:
-                    problems.append(f"{where}: {key!r} isn't in the bucket")
+                    problems.append(f"{where}: {key!r} isn't in storage")
     return problems
 
 
 def bucket_lister():
     """A callable(system id) -> bucket keys, using the read-only profile (refuses the write profile)."""
     if not runtime.ROOT and runtime.PROFILE == runtime.WRITE_PROFILE:
-        ui.fail(f"--bucket-keys only reads the bucket; use the read-only profile, not {runtime.WRITE_PROFILE!r} "
+        ui.fail(f"--bucket-keys only reads storage; use the read-only profile, not {runtime.WRITE_PROFILE!r} "
                 "(--profile / ROMS_PROFILE)", 2)
     return lambda system: {k for k in s3.list_sizes(system + "/") if not k.endswith("/")}
 

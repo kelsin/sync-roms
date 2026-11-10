@@ -519,21 +519,21 @@ def _pick_systems(name):
     if name:
         systems = [s for s in systems if s["bucket"] == name]
         if not systems:
-            ui.fail(f"No system {name!r}; give its bucket folder name (e.g. gba)", 2)
+            ui.fail(f"No system {name!r}; give its storage folder name (e.g. gba)", 2)
     return systems
 
 
 def scrape_command(args):
     """Scrape the available ROMs that have no metadata yet from ScreenScraper into scrapes/<system>/.
 
-    args: system (bucket folder name, or None for all), retry (also try ROMs marked unknown), skip_media (media type
+    args: system (storage folder name, or None for all), retry (also try ROMs marked unknown), skip_media (media type
     folder names not to download), dry_run, and optionally all (every ROM in the storage, not just the listed games).
     """
     skip = _check_skip(args.skip_media)
     print(ui.bold("🖼️  Scrape from ScreenScraper") + ui.dim(f"  {s3.access(True)}"))
     systems = _pick_systems(args.system)
     try:
-        print("📏 Listing the ROMs available in the bucket...")
+        print("📏 Listing the ROMs available in storage...")
         roms = scrape_files.bucket_roms(systems, all_files=getattr(args, "all", False))
         listed = [s for s in systems if roms.get(s["bucket"])]
         metadata = {}
@@ -578,7 +578,7 @@ def match_command(args):
     """`scrape match SYSTEM ROM GAME`: save which ScreenScraper game a ROM is (GAME is a game id, or a name to search
     and pick from), then scrape that ROM.
 
-    args: system (bucket folder name), rom (ROM path in it, e.g. "Game (USA).zip"), game, and optionally skip_media
+    args: system (storage folder name), rom (ROM path in it, e.g. "Game (USA).zip"), game, and optionally skip_media
     and dry_run (resolve the game, save and write nothing).
     """
     skip = _check_skip(getattr(args, "skip_media", None))

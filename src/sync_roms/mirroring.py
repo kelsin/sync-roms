@@ -1,4 +1,4 @@
-"""Local mirror of the bucket."""
+"""Local mirror of storage."""
 import os
 from concurrent.futures import ThreadPoolExecutor
 
@@ -10,7 +10,7 @@ MIRROR_PRUNE_ASK = 25  # delete more unreferenced mirror files than this (or ove
 
 
 def mirror_wanted(manifest):
-    """{bucket key: size} of everything the game lists and BIOS requirements reference that is in the bucket: the ROMs a sync
+    """{bucket key: size} of everything the game lists and BIOS requirements reference that is in storage: the ROMs a sync
     installs, every system's BIOS files, the scraped data of those ROMs, and all of scrapes/esde/."""
     systems = manifest["systems"]
     todo = [s for s in systems if s.get("full_system") or store.listed(s)]
@@ -48,7 +48,7 @@ def refresh_mirror(root, dry_run=False):
             open(os.path.join(root, runtime.MIRROR_MARKER), "w").close()
     print("📄 Fetching manifests...")
     manifest = store.load_manifest(store.all_card_names())
-    print("📏 Listing the bucket...")
+    print("📏 Listing storage...")
     wanted = mirror_wanted(manifest)
     have = {k: s for k, s in s3.mirror_sizes(root).items() if k != runtime.MIRROR_MARKER}
     jobs = []
@@ -91,9 +91,9 @@ def refresh_mirror(root, dry_run=False):
 
 
 def use_mirror(root, dry_run):
-    """Refresh the saved mirror from the bucket, then make this run read from it."""
+    """Refresh the saved mirror from storage, then make this run read from it."""
     if not os.path.exists(os.path.join(root, runtime.MIRROR_MARKER)):
-        print(ui.yellow(f"  ⚠️  Mirror {root} not found; using the bucket"))
+        print(ui.yellow(f"  ⚠️  Mirror {root} not found; using storage"))
         return
     print(ui.bold(f"🪞 Local mirror {ui.cyan(root)}"))
     try:
