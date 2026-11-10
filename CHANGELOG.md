@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.46.3](https://github.com/kelsin/sync-roms/compare/v0.46.2...v0.46.3) (2026-11-10)
+
+
+### :bug: Bug Fixes
+
+* **test:** count real hash reads so the prefetch test isn't racy ([#191](https://github.com/kelsin/sync-roms/issues/191)) ([04e6e36](https://github.com/kelsin/sync-roms/commit/04e6e3640f7c97c0c1988290e2f87f1abee549b9))
+
+
+### :zap: Performance Improvements
+
+* cut redundant I/O and hashing, dedupe helpers, make tests hermetic ([#190](https://github.com/kelsin/sync-roms/issues/190)) ([736aef0](https://github.com/kelsin/sync-roms/commit/736aef0d57deba216eafdade3c9066caf4435801))
+* **scrape:** hash ahead of lookups, batch hash writes, list in parallel ([#188](https://github.com/kelsin/sync-roms/issues/188)) ([665066c](https://github.com/kelsin/sync-roms/commit/665066c901e94b180e38628895b0b32194f4b8aa))
+
 ## [0.46.2](https://github.com/kelsin/sync-roms/compare/v0.46.1...v0.46.2) (2026-11-10)
 
 
