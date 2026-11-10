@@ -32,7 +32,7 @@ def by_id(manifest):
 
 class OverlayTest(unittest.TestCase):
     def setUp(self):
-        self.defaults = store.repo_json("device-systems")
+        self.defaults = store.device_defaults()
         self.dev = next(i for i, v in self.defaults.items() if "gba" in v["systems"] and "psx" in v["systems"])
 
     def test_no_overlay_equals_defaults(self):

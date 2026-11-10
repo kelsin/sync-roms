@@ -11,7 +11,7 @@ Never put a real game list in the repo. The card lives only in `~/.sync-roms/car
 
 ## 1. Resolve the device
 - Find the device in `devices.json`; layout = its first firmware unless told otherwise.
-- Systems = `src/sync_roms/data/device-systems.json[device]["systems"]` (plus the optional `~/.sync-roms/device-systems.json` overlay). Read its `note` for systems that are unstable on the SoC and leave those out of any additions.
+- Systems = `store.device_defaults()[device]["systems"]` (resolved from the tiers in `src/sync_roms/data/device-systems.json`) (plus the optional `~/.sync-roms/device-systems.json` overlay). Read its `note` for systems that are unstable on the SoC and leave those out of any additions.
 - If the device or name is ambiguous (e.g. RG Cube vs CubeXX), ask.
 
 ## 2. Baseline size of the core
