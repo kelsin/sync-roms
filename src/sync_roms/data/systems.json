@@ -2323,9 +2323,11 @@
         "xbox/xbox-5713.bin",
         "xbox/xbox-5838.bin",
         "xbox/xbox-3944_256k.bin",
-        "mcpx_1.0.bin"
+        "mcpx_1.0.bin",
+        "Complex_4627.bin",
+        "xbox/Complex_4627.bin"
       ],
-      "note": "xemu is standalone (not libretro); point xemu at these. It also needs a flash BIOS (e.g. Complex_4627.bin) and HDD image"
+      "note": "xemu is standalone (not libretro); point xemu at these. Complex_4627.bin is its flash BIOS (kernel 4627); it also needs an HDD image"
     },
     "chd": {
       "mode": "xiso",
