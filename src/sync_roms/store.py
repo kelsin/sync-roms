@@ -5,7 +5,7 @@ import re
 import shutil
 import sys
 
-from . import ui
+from . import s3, ui
 
 
 REPO_DATA = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
@@ -221,6 +221,14 @@ def available_keys(s, have):
     if s.get("full_system"):
         return sorted(k for k in have if not k.endswith("/"))
     return listed(s)
+
+
+def list_system(s):
+    """{key: size} of what a sync needs from a system's bucket folder. Reading from a folder (e.g. a network share),
+    a system with a game list only stats those games instead of walking the whole folder."""
+    if not s.get("full_system") and s3.read_root():
+        return s3.stat_sizes(listed(s))
+    return s3.list_sizes(s["bucket"] + "/")
 
 
 def data_dir():

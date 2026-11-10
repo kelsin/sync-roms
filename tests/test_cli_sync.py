@@ -8,6 +8,7 @@ from unittest import mock
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import isolate  # noqa: E402,F401
 
 from realdir_guard import RealDataDirGuard  # noqa: E402
 from sync_roms import cli, s3, store, usersettings  # noqa: E402

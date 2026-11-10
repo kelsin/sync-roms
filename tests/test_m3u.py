@@ -9,6 +9,8 @@ from unittest import mock
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "src"))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import isolate  # noqa: E402,F401
 from sync_roms import downloads, m3u, ui  # noqa: E402
 
 FAH = ["Fahrenheit (USA) (Disc 1) (Key Disc) (Sega CD).chd", "Fahrenheit (USA) (Disc 2) (Sega CD).chd"]

@@ -22,13 +22,14 @@ def safe_join(base, rel):
     return path
 
 
-def mirror_sizes(root, prefix=""):
-    """{key: size} of the files under root whose key starts with prefix (a folder, ending in /)."""
+def mirror_sizes(root, prefix="", sizes=True):
+    """{key: size} of the files under root whose key starts with prefix (a folder, ending in /).
+    Without sizes the values are None: a network share answers a name listing fast but each size is a round trip."""
     out = {}
     for folder, _, files in os.walk(os.path.join(root, prefix)):
         for name in files:
             path = os.path.join(folder, name)
-            out[os.path.relpath(path, root).replace(os.sep, "/")] = os.path.getsize(path)
+            out[os.path.relpath(path, root).replace(os.sep, "/")] = os.path.getsize(path) if sizes else None
     return out
 
 
@@ -68,11 +69,24 @@ def read_range(key, start, end):
     return s3_client().get_object(Bucket=runtime.BUCKET, Key=key, Range=f"bytes={start}-{end - 1}")["Body"].read()
 
 
-def list_sizes(prefix):
+def list_sizes(prefix, sizes=True):
     if read_root():
-        return mirror_sizes(read_root(), prefix)
+        return mirror_sizes(read_root(), prefix, sizes)
     pages = s3_client().get_paginator("list_objects_v2").paginate(Bucket=runtime.BUCKET, Prefix=prefix)
     return {o["Key"]: o["Size"] for page in pages for o in page.get("Contents", [])}
+
+
+def stat_sizes(keys):
+    """{key: size} of the keys that exist as files in the read folder, checked in parallel (one stat each, no folder walk)."""
+    def size(key):
+        try:
+            path = safe_join(read_root(), key)
+            return os.path.getsize(path) if os.path.isfile(path) else None
+        except (OSError, ValueError):
+            return None
+    keys = list(keys)
+    with ThreadPoolExecutor(runtime.WORKERS) as ex:
+        return {k: n for k, n in zip(keys, ex.map(size, keys)) if n is not None}
 
 
 _s3 = {}

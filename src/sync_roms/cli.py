@@ -614,6 +614,13 @@ def run(argv):
     def discs_of(s):
         return m3u.disc_keys(available(s)) if disc_dir else ()
 
+    def listing_of(s):
+        """{key: size} of a system's bucket folder. From a root folder, names only (a share is slow to stat):
+        a full system's files are listed, a game list needs no listing, and sizes are read for what gets synced."""
+        if runtime.ROOT:
+            return s3.list_sizes(s["bucket"] + "/", sizes=False) if s.get("full_system") else {}
+        return store.list_system(s)
+
     def sizes(s):
         """(bytes still to download, total bytes) for a system's ROMs."""
         have, need, total, discs = listings[s["bucket"]], 0, 0, discs_of(s)
@@ -632,10 +639,13 @@ def run(argv):
         todo = [s for s in systems if not listings.get(s["bucket"])]
         with ThreadPoolExecutor(runtime.WORKERS) as ex:
             listings.update(zip((s["bucket"] for s in todo),
-                                ex.map(lambda s: s3.list_sizes(s["bucket"] + "/")
+                                ex.map(lambda s: listing_of(s)
                                        if s.get("full_system") or store.listed(s) else {}, todo)))
-        rows = [(f"{s['name']}  ({len(available(s))} roms, {ui.human_size(total)})", bool(available(s)), need, total)
-                for s in systems for need, total in [sizes(s)]]
+        if runtime.ROOT:
+            rows = [(f"{s['name']}  ({len(available(s))} roms)", bool(available(s)), 0, 0) for s in systems]
+        else:
+            rows = [(f"{s['name']}  ({len(available(s))} roms, {ui.human_size(total)})", bool(available(s)), need, total)
+                    for s in systems for need, total in [sizes(s)]]
         present = [i for i, s in enumerate(systems)
                    if available(s) and (device or downloads.has_local_files(os.path.join(roms_dir, s["folders"][layout_name]), layout_name in scrape_plan.ONION_LAYOUTS))]
         if args.systems:
@@ -645,7 +655,8 @@ def run(argv):
         if args.yes and saved_idx and not state:  # --yes with a saved selection: no picker
             chosen = saved_idx
             break
-        chosen = picker.pick_systems(rows, saved_idx if saved_idx and not state else present, state, editable=not args.dry_run)
+        chosen = picker.pick_systems(rows, saved_idx if saved_idx and not state else present, state, editable=not args.dry_run,
+                                     **({"sizes": False} if runtime.ROOT else {}))
         if not isinstance(chosen, tuple):
             if chosen and not args.dry_run:
                 store.update_card(card, systems=[systems[i]["bucket"] for i in chosen])
@@ -675,6 +686,8 @@ def run(argv):
         wanted = available(s)
         if not wanted:
             continue
+        if runtime.ROOT:  # sizes are read now, only for the ROMs being synced
+            listings[s["bucket"]] = s3.stat_sizes(wanted)
         have = listings[s["bucket"]]
         dest = dest_of(s)
         discs = discs_of(s)

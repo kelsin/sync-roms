@@ -17,7 +17,7 @@ def bucket_roms(systems, all_files=False):
     """
     todo = systems if all_files else [s for s in systems if s.get("full_system") or store.listed(s)]
     with ThreadPoolExecutor(runtime.WORKERS) as ex:
-        listings = list(ex.map(lambda s: s3.list_sizes(s["bucket"] + "/"), todo))
+        listings = list(ex.map(lambda s: s3.list_sizes(s["bucket"] + "/") if all_files else store.list_system(s), todo))
     roms = {s["bucket"]: set() for s in systems}
     for s, have in zip(todo, listings):
         keys = (k for k in have if not k.endswith("/")) if all_files else (k for k in store.available_keys(s, have) if k in have)

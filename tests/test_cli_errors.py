@@ -8,6 +8,8 @@ import unittest
 from unittest import mock
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import isolate  # noqa: E402,F401
 
 from sync_roms import chd, commands, diff, edit, m3u, picker, runtime, s3, scrape_files, store, ui, upload  # noqa: E402
 from test_edit import EditFlow  # noqa: E402

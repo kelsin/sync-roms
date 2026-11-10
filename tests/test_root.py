@@ -8,7 +8,16 @@ from unittest import mock
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "src"))
-from sync_roms import runtime, s3, usersettings, upload  # noqa: E402
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import isolate  # noqa: E402,F401
+from sync_roms import mirroring, runtime, s3, store, usersettings, upload  # noqa: E402
+
+
+class IsolationTest(unittest.TestCase):
+    def test_tests_never_see_the_real_data_folder_or_home(self):
+        self.assertNotEqual(store.data_dir(), isolate.REAL_DATA_DIR)
+        self.assertTrue(store.data_dir().startswith(os.environ["SYNC_ROMS_TEST_HOME"]))
+        self.assertEqual(os.path.expanduser("~"), os.environ["SYNC_ROMS_TEST_HOME"])
 
 
 class FolderStorageTest(unittest.TestCase):
@@ -25,6 +34,29 @@ class FolderStorageTest(unittest.TestCase):
         self.assertEqual(s3.get_text("scrapes/gba/metadata.json"), "héllo")
         self.assertEqual(s3.list_sizes("scrapes/"), {"scrapes/gba/metadata.json": 6})
         self.assertEqual(s3.read_range("scrapes/gba/metadata.json", 1, 3), "é".encode())
+
+    def test_list_system_stats_only_the_listed_games(self):
+        s3.put_text("gba/a.zip", "abc")
+        s3.put_text("gba/other.zip", "defg")
+        system = {"bucket": "gba", "games": [{"bucket": "gba/a.zip"}, {"bucket": "gba/missing.zip"}]}
+        with mock.patch.object(s3, "list_sizes", side_effect=AssertionError("walked the folder")):
+            self.assertEqual(store.list_system(system), {"gba/a.zip": 3})
+        self.assertEqual(set(store.list_system({"bucket": "gba", "full_system": True})), {"gba/a.zip", "gba/other.zip"})
+
+    def test_list_sizes_without_sizes_skips_the_stat(self):
+        s3.put_text("gba/a.zip", "abc")
+        with mock.patch.object(os.path, "getsize", side_effect=AssertionError("statted")):
+            self.assertEqual(s3.list_sizes("gba/", sizes=False), {"gba/a.zip": None})
+
+    def test_no_mirror_with_a_root(self):
+        mirror = os.path.join(self.root, "mirror")
+        os.makedirs(mirror)
+        open(os.path.join(mirror, runtime.MIRROR_MARKER), "w").close()
+        with mock.patch.object(mirroring, "refresh_mirror", side_effect=AssertionError("refreshed")):
+            mirroring.use_mirror(mirror, False)
+            with self.assertRaises(SystemExit):
+                mirroring.mirror_command(mock.Mock(clear_mirror=False, use_mirror=mirror, mirror=None))
+        self.assertIsNone(runtime._mirror_root)
 
     def test_list_with_etags_marks_folder_tags_as_not_md5(self):
         s3.put_text("gba/a.zip", "abc")

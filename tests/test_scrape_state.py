@@ -7,6 +7,7 @@ from unittest import mock
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "src"))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import isolate  # noqa: E402,F401
 from realdir_guard import RealDataDirGuard  # noqa: E402
 from sync_roms import scrape_state, store  # noqa: E402
 
