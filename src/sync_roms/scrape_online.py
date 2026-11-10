@@ -16,7 +16,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 from botocore.exceptions import ClientError
 
-from . import s3, scrape_files, scrape_plan, scrape_state, screenscraper, store, ui, upload, usersettings
+from . import runtime, s3, scrape_files, scrape_plan, scrape_state, screenscraper, store, ui, upload, usersettings
 
 CHUNK = 8 << 20
 
@@ -61,6 +61,45 @@ def hash_file(system, rom, size, mtime, stop=None):
     return hashes
 
 
+_hashing = {}  # (system, ROM) -> Future of a hash being computed ahead of its lookup
+_hashing_lock = threading.Lock()
+
+
+def _mtime(name, rom):
+    return int(os.path.getmtime(s3.safe_join(s3.read_root(), f"{name}/{rom}")))
+
+
+def prefetch_hash(pool, name, rom, size, stop):
+    """Hash a ROM on the pool so its lookup, on a ScreenScraper thread, finds the hashes ready instead of reading the
+    file itself. Only for ROMs read from a folder; a ROM already hashed or being hashed is left alone."""
+    key = (name, rom)
+    try:
+        mtime = _mtime(name, rom)
+    except (OSError, ValueError):
+        return  # the lookup reports it
+    if scrape_state.cached_hashes(name, rom, size, mtime):
+        return
+    with _hashing_lock:
+        if key in _hashing:
+            return
+        _hashing[key] = fut = pool.submit(hash_file, name, rom, size, mtime, stop)
+    fut.add_done_callback(lambda _: _forget_hashing(key))
+
+
+def _forget_hashing(key):
+    with _hashing_lock:
+        _hashing.pop(key, None)
+
+
+def _hashes(name, rom, size, stop):
+    """hash_file's result, waiting for a prefetch of the same ROM instead of hashing it twice."""
+    with _hashing_lock:
+        fut = _hashing.get((name, rom))
+    if fut is not None:
+        return fut.result()
+    return hash_file(name, rom, size, _mtime(name, rom), stop)
+
+
 def match(client, system, rom, size, etag, game_id=None, stop=None):
     """(game id, how) for a ROM; how is "manual", "hash" or "name+size". Raises screenscraper.NotFound.
 
@@ -74,8 +113,7 @@ def match(client, system, rom, size, etag, game_id=None, stop=None):
         return saved, "manual"
     hashes = {}
     if s3.read_root():  # a folder's ETag is a fake "mtime-size" tag; hash the file instead
-        mtime = int(os.path.getmtime(s3.safe_join(s3.read_root(), f"{name}/{rom}")))
-        hashes = hash_file(name, rom, size, mtime, stop)
+        hashes = _hashes(name, rom, size, stop)
     elif "-" not in (tag := etag.strip('"')):  # a multipart upload's ETag is not the file's MD5
         hashes = {"md5": tag}
     game = client.lookup(system["screenscraper"], os.path.basename(rom), size, **hashes)
@@ -105,6 +143,7 @@ def resolve_manual(client, system, query):
 # --- The scrape run ---------------------------------------------------------------------------------
 BATCH = 25  # ROMs scraped and uploaded together
 LOOKAHEAD = 2  # batches in the pool at once: the next one is scraped while the last uploads
+HASH_THREADS = 4  # ROMs hashed at once ahead of their lookups
 METADATA_EVERY = 100  # ROMs whose entries are written to metadata.json together
 RETRIES = 3  # times a rate-limited request is tried again
 RETRY_WAIT = 2  # seconds before the first retry, doubled each time
@@ -184,6 +223,15 @@ def set_credentials():
     usersettings.save_settings({**usersettings.load_settings(), **answers})
     print(ui.green("✅ Saved ScreenScraper credentials to " + os.path.join(store.data_dir(), "settings.json")))
     return 0
+
+
+def _each(fn, names):
+    """{name: fn(name)} for each name, run on several threads (each call waits on storage); the first error is raised."""
+    names = list(names)
+    if len(names) < 2:
+        return {n: fn(n) for n in names}
+    with ThreadPoolExecutor(min(len(names), runtime.WORKERS)) as ex:
+        return dict(zip(names, ex.map(fn, names)))
 
 
 def metadata_key(system):
@@ -297,6 +345,9 @@ def scrape_rom(client, system, item, tmp, skip, stop, game_id=None):
         return "skipped", None
     except ROM_ERRORS as e:
         return "failed", _reason(e)
+    except BaseException:  # stop the other workers at once, not when the run's thread notices
+        stop.set()
+        raise
     return "done", (how, meta, files)
 
 
@@ -358,11 +409,15 @@ def _media_keys(listing, system, stem):
 Started = namedtuple("Started", "futures kept tmp")  # a batch handed to the pool: its futures, the media types storage already has per ROM, its temp folder
 
 
-def start_batch(ex, client, system, batch, skip, stop, listing, replace=False, forced=None):
+def start_batch(ex, client, system, batch, skip, stop, listing, replace=False, forced=None, hasher=None):
     """Hand a batch's ROMs to the pool and return at once; run_batch takes what they scraped. Media types a ROM already
     has in listing ({key: size} of scrapes/<system>/) are not downloaded, unless replace. forced: {ROM: game id} matches
-    given for this run only."""
+    given for this run only. hasher: a pool that hashes the batch's ROMs meanwhile (ROMs read from a folder)."""
     forced = forced or {}
+    if hasher is not None and s3.read_root():
+        for rom, size, _ in batch:
+            if rom not in forced and scrape_state.manual_match(system["bucket"], rom) is None:
+                prefetch_hash(hasher, system["bucket"], rom, size, stop)
     index = scrape_plan.scrape_index(listing)
     kept = {rom: set() if replace else set(index.get(os.path.splitext(rom)[0], ())) for rom, _, _ in batch}
     tmp = tempfile.mkdtemp()
@@ -506,13 +561,13 @@ def scrape_system(client, system, items, threads, skip, shrink, outcomes, listin
         return len(items), None
     batches, flight = list(_batches(items)), deque()
     pending, stop, failed, quota_hit, started = {}, threading.Event(), 0, None, 0
-    ex = ThreadPoolExecutor(threads)
+    ex, hasher = ThreadPoolExecutor(threads), ThreadPoolExecutor(HASH_THREADS)
     try:
         while batches or flight:
             while (batches and len(flight) < LOOKAHEAD and not stop.is_set()  # same-stem ROMs share media: wait for the earlier batch to upload
                    and not any(_stems(batches[0]) & _stems(b) for b, _ in flight)):
                 batch = batches.pop(0)
-                flight.append((batch, start_batch(ex, client, system, batch, skip, stop, listing, replace, forced)))
+                flight.append((batch, start_batch(ex, client, system, batch, skip, stop, listing, replace, forced, hasher)))
             if not flight:
                 break
             batch, begun = flight.popleft()
@@ -531,12 +586,15 @@ def scrape_system(client, system, items, threads, skip, shrink, outcomes, listin
     except BaseException:  # Ctrl-C, a storage failure: queued ROMs never start, running ones stop at their next stop check
         stop.set()
         ex.shutdown(wait=True, cancel_futures=True)
+        hasher.shutdown(wait=True, cancel_futures=True)
         with contextlib.suppress(SystemExit):  # what was uploaded still gets its entries
             record(system, pending, outcomes, listing, skip, replace, rerun, fill)
         raise
     finally:
         stop.set()
         ex.shutdown(wait=True, cancel_futures=True)
+        hasher.shutdown(wait=True, cancel_futures=True)
+        scrape_state.flush_hashes()
         for _, begun in flight:
             shutil.rmtree(begun.tmp, ignore_errors=True)
 
@@ -546,7 +604,7 @@ def run_scrape(client, systems, todo, skip, ask=True, replace=False, forced=None
     replace, forced, rerun, fill: see run_batch and record. outcomes: filled with {system: {ROM: how, or None when unknown}}."""
     count = sum(len(v) for v in todo.values())
     try:
-        listings = {name: s3.list_sizes(f"{scrape_plan.SCRAPES}/{name}/") for name in todo}
+        listings = _each(lambda name: s3.list_sizes(f"{scrape_plan.SCRAPES}/{name}/"), todo)
     except s3.ERRORS as e:
         ui.fail(f"{e}", 3)
     kept = 0 if replace else sum(len(scrape_plan.scrape_index(listings[name]).get(os.path.splitext(r)[0], ()))
@@ -618,16 +676,21 @@ def scrape_command(args):
         print("📏 Listing the ROMs available in storage...")
         roms = scrape_files.bucket_roms(systems, all_files=getattr(args, "all", False))
         listed = [s for s in systems if roms.get(s["bucket"])]
-        metadata = {}
-        for s in listed:
+        def loaded(name):
             try:
-                metadata[s["bucket"]] = load_metadata(s["bucket"])
+                return load_metadata(name)
             except ValueError:
-                print(ui.yellow(f"  ⚠️  {metadata_key(s['bucket'])} isn't valid JSON; skipping {s['bucket']}"))
-                roms[s["bucket"]] = set()
+                return None
+        metadata = {}
+        for name, data in _each(loaded, [s["bucket"] for s in listed]).items():
+            if data is None:
+                print(ui.yellow(f"  ⚠️  {metadata_key(name)} isn't valid JSON; skipping {name}"))
+                roms[name] = set()
+            else:
+                metadata[name] = data
         fill = None
         if getattr(args, "fill_media", False):
-            have = {s["bucket"]: s3.list_sizes(f"{scrape_plan.SCRAPES}/{s['bucket']}/", sizes=False) for s in listed}
+            have = _each(lambda name: s3.list_sizes(f"{scrape_plan.SCRAPES}/{name}/", sizes=False), [s["bucket"] for s in listed])
             fill = (set(screenscraper.MEDIA_MAP.values()) - skip, have)
         candidates = find_candidates(listed, roms, metadata, retry=args.retry, fill=fill)
         for s in listed:
@@ -635,7 +698,7 @@ def scrape_command(args):
                 print(ui.yellow(f"  ⚠️  {s['bucket']} has no ScreenScraper system id; skipping its {len(candidates[s['bucket']])} ROM(s)"))
                 del candidates[s["bucket"]]
         candidates = {k: v for k, v in candidates.items() if v}
-        etags = {name: s3.list_with_etags(name + "/") for name in candidates}
+        etags = _each(lambda name: s3.list_with_etags(name + "/"), candidates)
     except s3.ERRORS as e:
         ui.fail(f"{e}", 3)
     todo = {name: [(r, *etags[name][r]) for r in roms_ if r in etags[name]] for name, roms_ in candidates.items()}

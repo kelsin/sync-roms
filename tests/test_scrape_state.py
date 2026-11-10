@@ -33,6 +33,25 @@ class ScrapeStateTest(RealDataDirGuard):
         self.assertIsNone(scrape_state.cached_hashes("gba", "a.zip", 11, 5))
         self.assertIsNone(scrape_state.cached_hashes("gba", "a.zip", 10, 6))
 
+    def test_hashes_are_written_in_groups_and_by_flush(self):
+        path = os.path.join(self.tmp.name, "scrape-hashes.json")
+        scrape_state.save_hashes("gba", "a.zip", 10, 5, H)
+        self.assertFalse(os.path.exists(path))
+        self.assertEqual(scrape_state.cached_hashes("gba", "a.zip", 10, 5), H)  # served from memory
+        scrape_state.flush_hashes()
+        self.assertTrue(os.path.exists(path))
+        with mock.patch.object(scrape_state, "HASH_FLUSH", 2):
+            scrape_state.save_hashes("gba", "b.zip", 1, 1, H)
+            mtime = os.stat(path).st_mtime_ns
+            scrape_state.save_hashes("gba", "c.zip", 1, 1, H)
+        self.assertNotEqual(os.stat(path).st_mtime_ns, mtime)
+        self.assertEqual(scrape_state.cached_hashes("gba", "a.zip", 10, 5), H)  # earlier ones are kept
+
+    def test_unchanged_file_is_not_parsed_again(self):
+        scrape_state.save_match("gba", "a.zip", 1)
+        with mock.patch.object(scrape_state, "_read", side_effect=AssertionError("parsed again")):
+            self.assertEqual(scrape_state.manual_match("gba", "a.zip"), 1)
+
     def test_match_round_trip(self):
         self.assertIsNone(scrape_state.manual_match("gba", "a.zip"))
         scrape_state.save_match("gba", "a.zip", 42)
