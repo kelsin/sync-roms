@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.47.1](https://github.com/kelsin/sync-roms/compare/v0.47.0...v0.47.1) (2026-11-10)
+
+
+### :bug: Bug Fixes
+
+* **bios:** audit bios lists against libretro, batocera and es-de ([#194](https://github.com/kelsin/sync-roms/issues/194)) ([88d7b80](https://github.com/kelsin/sync-roms/commit/88d7b805ef3c88e277f6d6c6bf337b577ab1aa92))
+
 ## [0.47.0](https://github.com/kelsin/sync-roms/compare/v0.46.3...v0.47.0) (2026-11-10)
 
 
