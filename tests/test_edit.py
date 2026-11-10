@@ -171,7 +171,7 @@ class MenuActions(EditFlow):
 
     def device_case(self):
         dev = store.load_manifest()["devices"][0]
-        base = store.repo_json("device-systems")[dev["id"]]["systems"]
+        base = store.device_defaults()[dev["id"]]["systems"]
         names = {s["bucket"]: s["name"] for s in store.load_manifest()["systems"]}
         ids = sorted(names, key=lambda x: names[x].lower())
         return dev, base, ids

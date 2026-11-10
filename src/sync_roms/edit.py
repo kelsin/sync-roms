@@ -488,7 +488,7 @@ def edit_manifest():
 
     def edit_device_systems():
         """Pick a device, then toggle which systems it recommends; saved as the add/remove overlay."""
-        defaults = store.repo_json("device-systems")
+        defaults = store.device_defaults()
         names = {s["bucket"]: s["name"] for s in manifest["systems"]}
         devices = manifest["devices"]
         extras = [[("  edited", "cyan")] if d["id"] in overlay_pending else [] for d in devices]

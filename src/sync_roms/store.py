@@ -17,6 +17,22 @@ def repo_json(name):
         return json.load(f)
 
 
+def device_defaults():
+    """{device id: {"systems": [...], "note": str}} resolved from device-systems.json.
+
+    Tiers form one ordered chain: the first lists its "systems", each later one "add"s to everything before it. A device
+    names its tier (and may override the tier's note). Systems come out in systems.json order.
+    """
+    data = repo_json("device-systems")
+    order = {s["bucket"]: i for i, s in enumerate(repo_json("systems"))}
+    tiers, have = {}, set()
+    for t in data["tiers"]:
+        have = have | set(t.get("systems", t.get("add", [])))
+        tiers[t["id"]] = {"systems": sorted(have, key=order.__getitem__), "note": t["note"]}
+    return {dev: {"systems": tiers[e["tier"]]["systems"], "note": e.get("note", tiers[e["tier"]]["note"])}
+            for dev, e in data["devices"].items()}
+
+
 def personal_json(name):
     path = os.path.join(data_dir(), name)
     try:
@@ -61,7 +77,7 @@ def apply_device_overlay(devices, systems, overlay):
 
     overlay: {device id: {"add": [system ids], "remove": [system ids]}}. Unknown ids warn and are skipped.
     """
-    defaults = repo_json("device-systems")
+    defaults = device_defaults()
     known = {s["bucket"] for s in systems}
     for d in devices:
         base = defaults.get(d["id"], {"systems": [], "note": ""})
