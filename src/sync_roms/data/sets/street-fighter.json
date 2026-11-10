@@ -245,6 +245,11 @@
       "title": "Super Street Fighter II X for Matching Service",
       "system": "dreamcast",
       "bucket": "dreamcast/Super Street Fighter II X for Matching Service (Japan).chd"
+    },
+    {
+      "title": "Ultra Street Fighter IV",
+      "system": "xbox360",
+      "bucket": "xbox360/Ultimate Marvel vs. Capcom 3 (USA, Japan) (En,Ja,Fr,De,Es,It).zar"
     }
   ]
 }

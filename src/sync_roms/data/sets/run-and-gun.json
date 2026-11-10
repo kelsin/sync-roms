@@ -296,6 +296,41 @@
       "title": "Sin & Punishment: Star Successor",
       "system": "wii",
       "bucket": "wii/Sin & Punishment - Star Successor (USA).rvz"
+    },
+    {
+      "title": "Ikari Warriors",
+      "system": "atari7800",
+      "bucket": "atari7800/Ikari Warriors (USA).zip"
+    },
+    {
+      "title": "Contra (MSX2)",
+      "system": "msx2",
+      "bucket": "msx2/Contra (Japan) (Wii U Virtual Console).zip"
+    },
+    {
+      "title": "Super Rambo Special",
+      "system": "msx2",
+      "bucket": "msx2/Super Rambo Special (Japan).zip"
+    },
+    {
+      "title": "Wild Guns",
+      "system": "satellaview",
+      "bucket": "satellaview/Wild Guns (Japan).zip"
+    },
+    {
+      "title": "Navy SEALs",
+      "system": "c64",
+      "bucket": "c64/Navy SEALs (Europe).zip"
+    },
+    {
+      "title": "Metal Slug",
+      "system": "neogeocd",
+      "bucket": "neogeocd/Metal Slug (Japan) (En,Ja).chd"
+    },
+    {
+      "title": "Metal Slug 2",
+      "system": "neogeocd",
+      "bucket": "neogeocd/Metal Slug 2 (World) (En,Ja).chd"
     }
   ]
 }

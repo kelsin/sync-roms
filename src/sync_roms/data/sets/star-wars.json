@@ -350,6 +350,11 @@
       "title": "Star Wars: Demolition",
       "system": "dreamcast",
       "bucket": "dreamcast/Star Wars - Demolition (USA).chd"
+    },
+    {
+      "title": "Star Wars - The Empire Strikes Back",
+      "system": "atari2600",
+      "bucket": "atari2600/Star Wars - The Empire Strikes Back (USA).zip"
     }
   ]
 }

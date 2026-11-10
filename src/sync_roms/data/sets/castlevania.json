@@ -116,6 +116,16 @@
       "title": "Castlevania Chronicles",
       "system": "psx",
       "bucket": "psx/Castlevania Chronicles (USA).chd"
+    },
+    {
+      "title": "Vampire Killer",
+      "system": "msx2",
+      "bucket": "msx2/Vampire Killer (Japan, Europe) (En).zip"
+    },
+    {
+      "title": "Akumajou Dracula X: Rondo of Blood",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Akumajou Dracula X - Chi no Rondo (Japan).chd"
     }
   ]
 }

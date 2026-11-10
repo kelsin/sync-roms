@@ -76,6 +76,16 @@
       "title": "Oddworld: Stranger's Wrath",
       "system": "xbox",
       "bucket": "xbox/Oddworld - Stranger's Wrath (USA).iso"
+    },
+    {
+      "title": "Super Mario 3D World",
+      "system": "wiiu",
+      "bucket": "wiiu/SUPER MARIO 3D WORLD (US).wua"
+    },
+    {
+      "title": "Captain Toad: Treasure Tracker",
+      "system": "wiiu",
+      "bucket": "wiiu/Captain Toad Treasure Tracker (US) (v16).wua"
     }
   ]
 }

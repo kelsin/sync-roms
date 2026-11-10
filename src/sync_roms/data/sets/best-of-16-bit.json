@@ -271,6 +271,26 @@
       "title": "Altered Beast (Rev A)",
       "system": "genesis",
       "bucket": "genesis/Altered Beast (Japan, USA) (En) (Rev A).zip"
+    },
+    {
+      "title": "Ys Book I & II",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Ys Book I & II (USA).chd"
+    },
+    {
+      "title": "Sonic CD",
+      "system": "segacd",
+      "bucket": "segacd/Sonic CD (USA) (RE125).chd"
+    },
+    {
+      "title": "Lunar: The Silver Star",
+      "system": "segacd",
+      "bucket": "segacd/Lunar - The Silver Star (USA) (RE).chd"
+    },
+    {
+      "title": "Snatcher",
+      "system": "segacd",
+      "bucket": "segacd/Snatcher (USA).chd"
     }
   ]
 }

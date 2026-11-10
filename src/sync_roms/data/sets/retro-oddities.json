@@ -506,6 +506,106 @@
       "title": "Centipede",
       "system": "dreamcast",
       "bucket": "dreamcast/Centipede (USA).chd"
+    },
+    {
+      "title": "Gridrunner",
+      "system": "c64",
+      "bucket": "c64/Gridrunner (USA, Europe).zip"
+    },
+    {
+      "title": "Miner 2049er",
+      "system": "c64",
+      "bucket": "c64/Miner 2049er Starring Bounty Bob (USA, Europe).zip"
+    },
+    {
+      "title": "Robotron 2084 (C64)",
+      "system": "c64",
+      "bucket": "c64/Robotron - 2084 (USA, Europe).zip"
+    },
+    {
+      "title": "H.E.R.O. (C64)",
+      "system": "c64",
+      "bucket": "c64/H.E.R.O. - Helicopter Emergency Rescue Operation (USA, Europe).zip"
+    },
+    {
+      "title": "Pitfall II - Lost Caverns (C64)",
+      "system": "c64",
+      "bucket": "c64/Pitfall II - Lost Caverns (USA, Europe).zip"
+    },
+    {
+      "title": "Mountain King",
+      "system": "c64",
+      "bucket": "c64/Mountain King (USA, Europe).zip"
+    },
+    {
+      "title": "Jumpman Junior",
+      "system": "c64",
+      "bucket": "c64/Jumpman Junior (USA, Europe).zip"
+    },
+    {
+      "title": "Lode Runner (C64)",
+      "system": "c64",
+      "bucket": "c64/Lode Runner (USA, Europe).zip"
+    },
+    {
+      "title": "Wizard of Wor (C64)",
+      "system": "c64",
+      "bucket": "c64/Wizard of Wor (USA, Europe).zip"
+    },
+    {
+      "title": "Battlezone (C64)",
+      "system": "c64",
+      "bucket": "c64/Battlezone (USA, Europe).zip"
+    },
+    {
+      "title": "Antarctic Adventure",
+      "system": "msx",
+      "bucket": "msx/Antarctic Adventure (Europe).zip"
+    },
+    {
+      "title": "Boulder Dash (MSX)",
+      "system": "msx",
+      "bucket": "msx/Boulder Dash (Japan).zip"
+    },
+    {
+      "title": "Knight Lore (MSX)",
+      "system": "msx",
+      "bucket": "msx/Knight Lore (Japan).zip"
+    },
+    {
+      "title": "Jet Set Willy (MSX)",
+      "system": "msx",
+      "bucket": "msx/Jet Set Willy (Japan).zip"
+    },
+    {
+      "title": "3-D Tetris",
+      "system": "virtualboy",
+      "bucket": "virtualboy/3-D Tetris (USA).zip"
+    },
+    {
+      "title": "Panic Bomber",
+      "system": "virtualboy",
+      "bucket": "virtualboy/Panic Bomber (USA).zip"
+    },
+    {
+      "title": "Innsmouth no Yakata",
+      "system": "virtualboy",
+      "bucket": "virtualboy/Insmouth no Yakata (Japan).zip"
+    },
+    {
+      "title": "Night Trap",
+      "system": "segacd",
+      "bucket": "segacd/Night Trap (USA) (Disc 1) (Sega CD 32X) (RE-1).chd"
+    },
+    {
+      "title": "Panic!",
+      "system": "segacd",
+      "bucket": "segacd/Panic! (USA) (RE).chd"
+    },
+    {
+      "title": "Road Avenger",
+      "system": "segacd",
+      "bucket": "segacd/Road Avenger (USA).chd"
     }
   ]
 }

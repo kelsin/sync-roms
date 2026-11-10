@@ -541,6 +541,36 @@
       "title": "Super Paper Mario",
       "system": "wii",
       "bucket": "wii/Super Paper Mario (USA) (Rev 2).rvz"
+    },
+    {
+      "title": "Super Mario 3D World",
+      "system": "wiiu",
+      "bucket": "wiiu/SUPER MARIO 3D WORLD (US).wua"
+    },
+    {
+      "title": "Super Mario Maker",
+      "system": "wiiu",
+      "bucket": "wiiu/Super Mario Maker (US) (v272).wua"
+    },
+    {
+      "title": "New Super Mario Bros. U",
+      "system": "wiiu",
+      "bucket": "wiiu/New SUPER MARIO BROS. U (US) (v64).wua"
+    },
+    {
+      "title": "Mario Kart 8",
+      "system": "wiiu",
+      "bucket": "wiiu/MARIO KART 8 (US) (v81).wua"
+    },
+    {
+      "title": "Paper Mario: Color Splash",
+      "system": "wiiu",
+      "bucket": "wiiu/PAPER MARIO Color Splash (US).wua"
+    },
+    {
+      "title": "Captain Toad: Treasure Tracker",
+      "system": "wiiu",
+      "bucket": "wiiu/Captain Toad Treasure Tracker (US) (v16).wua"
     }
   ]
 }

@@ -991,6 +991,71 @@
       "title": "Sudeki",
       "system": "xbox",
       "bucket": "xbox/Sudeki (World) (En,Fr,De,Es,It).iso"
+    },
+    {
+      "title": "Lunar: The Silver Star",
+      "system": "segacd",
+      "bucket": "segacd/Lunar - The Silver Star (USA) (RE).chd"
+    },
+    {
+      "title": "Lunar: Eternal Blue",
+      "system": "segacd",
+      "bucket": "segacd/Lunar - Eternal Blue (USA) (RE).chd"
+    },
+    {
+      "title": "Shining Force CD",
+      "system": "segacd",
+      "bucket": "segacd/Shining Force CD (USA) (5R, 6R).chd"
+    },
+    {
+      "title": "Popful Mail",
+      "system": "segacd",
+      "bucket": "segacd/Popful Mail (USA) (RE).chd"
+    },
+    {
+      "title": "Vay",
+      "system": "segacd",
+      "bucket": "segacd/Vay (USA).chd"
+    },
+    {
+      "title": "Dark Wizard",
+      "system": "segacd",
+      "bucket": "segacd/Dark Wizard (USA).chd"
+    },
+    {
+      "title": "Ys Book I & II",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Ys Book I & II (USA).chd"
+    },
+    {
+      "title": "Cosmic Fantasy 2",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Cosmic Fantasy 2 (USA).chd"
+    },
+    {
+      "title": "Dragon Slayer: The Legend of Heroes",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Dragon Slayer - The Legend of Heroes (USA).chd"
+    },
+    {
+      "title": "Xenoblade Chronicles X",
+      "system": "wiiu",
+      "bucket": "wiiu/Xenoblade Chronicles X (US) (v48).wua"
+    },
+    {
+      "title": "Tokyo Mirage Sessions #FE",
+      "system": "wiiu",
+      "bucket": "wiiu/Tokyo Mirage Sessions #FE (US) (v16).wua"
+    },
+    {
+      "title": "Tales of Vesperia",
+      "system": "xbox360",
+      "bucket": "xbox360/Tales of Vesperia (USA).zar"
+    },
+    {
+      "title": "Eternal Sonata",
+      "system": "xbox360",
+      "bucket": "xbox360/Eternal Sonata (USA) (En,Ja).zar"
     }
   ]
 }

@@ -246,6 +246,26 @@
       "title": "Pinball Hall of Fame: The Williams Collection",
       "system": "psp",
       "bucket": "psp/Pinball Hall of Fame - The Williams Collection (USA).chd"
+    },
+    {
+      "title": "Pinball Spectacular",
+      "system": "c64",
+      "bucket": "c64/Pinball Spectacular (World) (MAX).zip"
+    },
+    {
+      "title": "Pinball Blaster",
+      "system": "msx",
+      "bucket": "msx/Pinball Blaster (Europe).zip"
+    },
+    {
+      "title": "Kirby no Omochabako - Pinball",
+      "system": "satellaview",
+      "bucket": "satellaview/Kirby no Omochabako - Pinball (Japan).zip"
+    },
+    {
+      "title": "Galactic Pinball",
+      "system": "virtualboy",
+      "bucket": "virtualboy/Galactic Pinball (Japan, USA) (En).zip"
     }
   ]
 }

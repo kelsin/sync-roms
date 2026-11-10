@@ -1753,6 +1753,198 @@
       "category": "Other",
       "system": "fbneo",
       "bucket": "fbneo/agalletu.zip"
+    },
+    {
+      "title": "Raiden",
+      "system": "atarijaguar",
+      "bucket": "atarijaguar/Raiden (World) (Rev A).zip",
+      "category": "Other"
+    },
+    {
+      "title": "Tempest 2000",
+      "system": "atarijaguar",
+      "bucket": "atarijaguar/Tempest 2000 (World).zip",
+      "category": "Other"
+    },
+    {
+      "title": "Defender 2000",
+      "system": "atarijaguar",
+      "bucket": "atarijaguar/Defender 2000 (World).zip",
+      "category": "Other"
+    },
+    {
+      "title": "Vanguard",
+      "system": "atari5200",
+      "bucket": "atari5200/Vanguard (USA).zip",
+      "category": "Other"
+    },
+    {
+      "title": "Zarlor Mercenary",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Zarlor Mercenary (World).zip",
+      "category": "Other"
+    },
+    {
+      "title": "Nemesis (Gradius)",
+      "system": "msx",
+      "bucket": "msx/Nemesis (Japan, Europe) (En).zip",
+      "category": "Konami"
+    },
+    {
+      "title": "Nemesis 2",
+      "system": "msx",
+      "bucket": "msx/Nemesis 2 (Japan, Europe) (En) (Alt).zip",
+      "category": "Konami"
+    },
+    {
+      "title": "Nemesis 3 - The Eve of Destruction",
+      "system": "msx",
+      "bucket": "msx/Nemesis 3 - The Eve of Destruction (Japan, Europe) (En).zip",
+      "category": "Konami"
+    },
+    {
+      "title": "Salamander (MSX)",
+      "system": "msx",
+      "bucket": "msx/Salamander (Japan) (Wii U Virtual Console).zip",
+      "category": "Konami"
+    },
+    {
+      "title": "Parodius (MSX)",
+      "system": "msx",
+      "bucket": "msx/Parodius (Japan) (Alt).zip",
+      "category": "Konami"
+    },
+    {
+      "title": "TwinBee (MSX)",
+      "system": "msx",
+      "bucket": "msx/Twin Bee (Japan) (Alt 3).zip",
+      "category": "Konami"
+    },
+    {
+      "title": "Zanac (MSX)",
+      "system": "msx",
+      "bucket": "msx/Zanac (Japan) (v2).zip",
+      "category": "Other"
+    },
+    {
+      "title": "Space Manbow",
+      "system": "msx2",
+      "bucket": "msx2/Space Manbow (Japan) (Wii U Virtual Console).zip",
+      "category": "Konami"
+    },
+    {
+      "title": "Aleste",
+      "system": "msx2",
+      "bucket": "msx2/Aleste (Japan).zip",
+      "category": "Other"
+    },
+    {
+      "title": "Zanac Ex",
+      "system": "msx2",
+      "bucket": "msx2/Zanac Ex (Japan).zip",
+      "category": "Other"
+    },
+    {
+      "title": "Dezaemon BSX - Sugoi STG 2 Crystal Guardian",
+      "system": "satellaview",
+      "bucket": "satellaview/Dezaemon BSX Version - Sugoi STG 2 - Crystal Guardian (Japan) (En).zip",
+      "category": "Other"
+    },
+    {
+      "title": "Star Soldier - 2 Minute Mode",
+      "system": "satellaview",
+      "bucket": "satellaview/Star Soldier - 2 Minute Mode (Japan) (En).zip",
+      "category": "Other"
+    },
+    {
+      "title": "Super Aleste",
+      "system": "satellaview",
+      "bucket": "satellaview/Super Aleste (Japan).zip",
+      "category": "Other"
+    },
+    {
+      "title": "Twinkle Star Sprites",
+      "system": "neogeocd",
+      "bucket": "neogeocd/Twinkle Star Sprites (Japan) (En,Ja).chd",
+      "category": "Other"
+    },
+    {
+      "title": "Cotton",
+      "system": "ngpc",
+      "bucket": "ngpc/Fantastic Night Dreams - Cotton (Europe).zip",
+      "category": "Other"
+    },
+    {
+      "title": "Aldynes",
+      "system": "supergrafx",
+      "bucket": "supergrafx/Aldynes - The Misson Code for Rage Crisis (Japan).zip",
+      "category": "Other"
+    },
+    {
+      "title": "1941: Counter Attack",
+      "system": "supergrafx",
+      "bucket": "supergrafx/1941 - Counter Attack (Japan).zip",
+      "category": "Other"
+    },
+    {
+      "title": "Star Parodier",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Star Parodier (Japan).chd",
+      "category": "Other"
+    },
+    {
+      "title": "Gate of Thunder",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Gate of Thunder + Bonk's Adventure + Bonk's Revenge (USA).chd",
+      "category": "Other"
+    },
+    {
+      "title": "Sylphia",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Sylphia (Japan).chd",
+      "category": "Other"
+    },
+    {
+      "title": "Seirei Senshi Spriggan",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Seirei Senshi Spriggan (Japan).chd",
+      "category": "Other"
+    },
+    {
+      "title": "Down Load 2",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Down Load 2 (Japan).chd",
+      "category": "Other"
+    },
+    {
+      "title": "Android Assault",
+      "system": "segacd",
+      "bucket": "segacd/Android Assault - The Revenge of Bari-Arm (USA).chd",
+      "category": "Other"
+    },
+    {
+      "title": "Robo Aleste",
+      "system": "segacd",
+      "bucket": "segacd/Robo Aleste (USA).chd",
+      "category": "Other"
+    },
+    {
+      "title": "Kolibri",
+      "system": "sega32x",
+      "bucket": "sega32x/Kolibri (USA, Europe).zip",
+      "category": "Other"
+    },
+    {
+      "title": "Judgement Silversword",
+      "system": "wonderswancolor",
+      "bucket": "wonderswancolor/Judgement Silversword - Rebirth Edition (Japan) (Rev 5C21).zip",
+      "category": "Other"
+    },
+    {
+      "title": "Vertical Force",
+      "system": "virtualboy",
+      "bucket": "virtualboy/Vertical Force (USA).zip",
+      "category": "Other"
     }
   ]
 }

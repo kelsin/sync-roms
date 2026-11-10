@@ -379,6 +379,21 @@
       "title": "Spawn: In the Demon's Hand",
       "system": "dreamcast",
       "bucket": "dreamcast/Spawn - In the Demon's Hand (USA).chd"
+    },
+    {
+      "title": "Double Dragon",
+      "system": "atari7800",
+      "bucket": "atari7800/Double Dragon (USA).zip"
+    },
+    {
+      "title": "Kung-Fu Master",
+      "system": "atari7800",
+      "bucket": "atari7800/Kung-Fu Master (USA).zip"
+    },
+    {
+      "title": "Final Fight CD",
+      "system": "segacd",
+      "bucket": "segacd/Final Fight CD (USA).chd"
     }
   ]
 }
