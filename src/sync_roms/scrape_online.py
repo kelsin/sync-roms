@@ -527,14 +527,14 @@ def scrape_command(args):
     """Scrape the available ROMs that have no metadata yet from ScreenScraper into scrapes/<system>/.
 
     args: system (storage folder name, or None for all), retry (also try ROMs marked unknown), skip_media (media type
-    folder names not to download), dry_run.
+    folder names not to download), dry_run, and optionally all (every ROM in the storage, not just the listed games).
     """
     skip = _check_skip(args.skip_media)
     print(ui.bold("🖼️  Scrape from ScreenScraper") + ui.dim(f"  {s3.access(True)}"))
     systems = _pick_systems(args.system)
     try:
         print("📏 Listing the ROMs available in storage...")
-        roms = scrape_files.bucket_roms(systems)
+        roms = scrape_files.bucket_roms(systems, all_files=getattr(args, "all", False))
         listed = [s for s in systems if roms.get(s["bucket"])]
         metadata = {}
         for s in listed:

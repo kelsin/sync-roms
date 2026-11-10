@@ -113,7 +113,7 @@ TOPICS = {
   the rest are matched by content (the CRCs inside zips).
 """,
     "scrape": """
-  sync-roms scrape [--system ID] [--retry] [--skip-media TYPES] [--dry-run]
+  sync-roms scrape [--system ID] [--all] [--retry] [--skip-media TYPES] [--dry-run]
   sync-roms scrape match SYSTEM ROM GAME_ID_OR_NAME [--skip-media TYPES] [--dry-run]
   sync-roms scrape --set-credentials
 
@@ -121,6 +121,7 @@ TOPICS = {
   metadata and media (and the Onion/Slot images) to storage. The ROMs and how each will be
   looked up are listed first. ROMs ScreenScraper doesn't know are remembered and skipped until --retry.
   --system ID        only that storage folder (e.g. gba)
+  --all              every ROM in the storage, not just those your games.json lists (core list, sets, full systems)
   --skip-media TYPES comma-separated media folders not to download (covers, 3dboxes, backcovers, fanart, manuals,
                      marquees, ...); other values are refused with the list
   --dry-run          list the ROMs and the metadata and media folders that would be written; no ScreenScraper
@@ -326,7 +327,7 @@ LEGACY = {
     ("games", "edit"): ["--edit"], ("cards", "edit"): ["--edit"], ("edit",): ["--edit"],
 }
 BOOL_FLAGS = {"-n", "--dry-run", "-y", "--yes", "-a", "--ask"}
-PLAIN_FLAGS = BOOL_FLAGS | {"--replace", "--json", "--no-clean", "--retry", "--set-credentials"}
+PLAIN_FLAGS = BOOL_FLAGS | {"--replace", "--json", "--no-clean", "--retry", "--all", "--set-credentials"}
 VALUE_FLAGS = {"--system", "--device", "--layout", "--systems", "--device-id", "--skip-media"}
 
 
@@ -377,6 +378,7 @@ def build_parser():
     ap.add_argument("--scrape", action="store_true")
     ap.add_argument("--scrape-match", nargs=3, metavar=("SYSTEM", "ROM", "GAME"))
     ap.add_argument("--retry", action="store_true")
+    ap.add_argument("--all", action="store_true")
     ap.add_argument("--skip-media")
     ap.add_argument("--set-credentials", action="store_true")
     ap.add_argument("--diff", nargs="?", const="")
@@ -429,7 +431,9 @@ def check_modes(args):
         ui.fail("--system only applies to `diff` and `scrape`", 2)
     if args.retry and mode != "--scrape":
         ui.fail("--retry only applies to `scrape`", 2)
-    if args.set_credentials and (mode != "--scrape" or args.system or args.retry or args.skip_media or args.dry_run):
+    if args.all and mode != "--scrape":
+        ui.fail("--all only applies to `scrape`", 2)
+    if args.set_credentials and (mode != "--scrape" or args.system or args.retry or args.all or args.skip_media or args.dry_run):
         ui.fail("--set-credentials only goes with `scrape`, on its own", 2)
     if args.skip_media is not None:
         if mode not in ("--scrape", "--scrape-match"):
