@@ -24,7 +24,7 @@ SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "clean": ("scrapes", "remove scrapes/ media and metadata for ROMs that aren't in storage"),
     "playlist": ("[DIR]", "create or fix the .m3u playlist of every multi-disc game"),
     "convert": ("[DIR]", "unzip archives and convert disc images to verified .chd"),
-    "tools": ("install", "brew install the 7z and chdman that `convert` needs"),
+    "tools": ("install", "brew install the 7z, unar and chdman that `convert` needs"),
     "mirror": ("[DIR] | use DIR | clear", "make or refresh a local copy of everything your lists reference"),
     "config": ("show|path", "show the effective settings and where each comes from"),
     "doctor": ("", "check the AWS profile, storage access, tools and your data files"),
@@ -148,14 +148,14 @@ TOPICS = {
     "convert": """
   sync-roms convert [DIR] [--dry-run]
 
-  Unzips (7z) every .zip/.7z and converts each disc image (.cue, .gdi, .toc, .iso) to a verified .chd (Xbox .iso to xiso, Xbox 360 .iso to .zar),
+  Unzips (7z, or unar for .rar) every .zip/.7z/.rar, and the archives inside them, and converts each disc image (.cue, .gdi, .toc, .iso) to a verified .chd (Xbox .iso to xiso, Xbox 360 .iso to .zar),
   per the `chd` key in systems.json of the system whose folder it is in. Archives and images are removed once their chd verifies,
   then the .m3u playlists are fixed. Needs 7z, chdman and, for Xbox, extract-xiso and, for Xbox 360, iso2zar (see `tools install`). (Old names: --cd, --chd)
 """,
     "tools": """
   sync-roms tools install
 
-  brew install the 7z (sevenzip) and chdman (rom-tools) that `convert` needs, and say how to build extract-xiso and iso2zar.
+  brew install the 7z (sevenzip), unar and chdman (rom-tools) that `convert` needs, and say how to build extract-xiso and iso2zar.
 """,
     "mirror": """
   sync-roms mirror [DIR] [--dry-run]     make or refresh a local copy of everything the lists reference (no DIR: the saved mirror)
