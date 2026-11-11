@@ -47,9 +47,13 @@ class Pure(unittest.TestCase):
         self.assertTrue(text.endswith("… still sizing"))
         self.assertFalse(over)
 
-    def test_status_is_red_when_over(self):
+    def test_status_color_follows_how_full_the_card_is(self):
         self.assertEqual(cardedit.status_of(U(2, 0, False), 1)[1], "red")
-        self.assertIsInstance(cardedit.status_of(U(1, 0, False), 2), str)
+        self.assertEqual(cardedit.status_of(U(69, 0, False), 100)[1], "green")
+        self.assertEqual(cardedit.status_of(U(70, 0, False), 100)[1], "yellow")
+        self.assertEqual(cardedit.status_of(U(89, 0, False), 100)[1], "yellow")
+        self.assertEqual(cardedit.status_of(U(90, 0, False), 100)[1], "red")
+        self.assertIsInstance(cardedit.status_of(U(1, 0, False), None), str)
 
     def test_system_labels(self):
         card = {"games": {"psx": {"full_system": True}}}
@@ -134,7 +138,7 @@ class Flow(DataDir):
         title, labels, kw = calls[0]
         self.assertEqual([l.strip() for l in labels], ["Game Boy Advance", "⭐ Game Boy"])
         self.assertEqual(kw["extras"][0], [("  1 picked", "green"), ("  5 B", "dim")])  # the ROM
-        self.assertEqual(kw["status"](None), "💾 21 B / 1 GB · 1 GB free · 1 game(s)")  # ROM and the GBA BIOS
+        self.assertEqual(kw["status"](None), ("💾 21 B / 1 GB · 1 GB free · 1 game(s)", "green"))  # ROM and the GBA BIOS
         self.assertEqual([p for p, _ in self.started], ["BIOS/"])
 
     def test_sizes_arrive_in_the_background_and_redraw(self):
@@ -247,8 +251,8 @@ class Flow(DataDir):
         self.cache = {"gba/": self.files["gba/"], "scrapes/gba/": {}, "BIOS/": {"BIOS/gba_bios.bin": 16}, "gb/": {}}
 
         def step(labels, kw):
-            self.assertEqual(kw["status"]([False] * 4), "💾 0 B / 1 GB · 1 GB free · 0 game(s)")
-            self.assertEqual(kw["status"]([True, False, False, True]), "💾 26 B / 1 GB · 1 GB free · 2 game(s)")
+            self.assertEqual(kw["status"]([False] * 4), ("💾 0 B / 1 GB · 1 GB free · 0 game(s)", "green"))
+            self.assertEqual(kw["status"]([True, False, False, True]), ("💾 26 B / 1 GB · 1 GB free · 2 game(s)", "green"))
             return [False] * 4
         self.run_system(step)
 

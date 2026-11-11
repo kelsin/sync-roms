@@ -39,10 +39,16 @@ def header(usage, capacity):
     return text, over
 
 
+WARN_AT, FULL_AT = 0.70, 0.90  # the header is green below WARN_AT of the card, yellow below FULL_AT, then red
+
+
 def status_of(usage, capacity):
-    """header() as a filter_list status: red when over budget."""
+    """header() as a filter_list status: green until 70% of the card, yellow until 90%, red above (and when over budget)."""
     text, over = header(usage, capacity)
-    return (text, "red") if over else text
+    if capacity is None:
+        return text
+    share = usage.bytes / capacity
+    return (text, "red" if over or share >= FULL_AT else "yellow" if share >= WARN_AT else "green")
 
 
 def system_labels(card, systems, recommended, usages):

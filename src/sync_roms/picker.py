@@ -225,14 +225,15 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
 
     def run(stdscr):
         curses.use_default_colors()
-        green_a = red_a = cyan_a = 0
+        green_a = red_a = cyan_a = yellow_a = 0
         if curses.has_colors():
             curses.start_color()
             curses.init_pair(1, curses.COLOR_GREEN, -1)
             curses.init_pair(2, curses.COLOR_RED, -1)
             curses.init_pair(3, curses.COLOR_CYAN, -1)
-            green_a, red_a, cyan_a = (curses.color_pair(n) for n in (1, 2, 3))
-        colors = {"green": green_a, "red": red_a, "cyan": cyan_a, "dim": curses.A_DIM}
+            curses.init_pair(4, curses.COLOR_YELLOW, -1)
+            green_a, red_a, cyan_a, yellow_a = (curses.color_pair(n) for n in (1, 2, 3, 4))
+        colors = {"green": green_a, "red": red_a, "cyan": cyan_a, "yellow": yellow_a, "dim": curses.A_DIM}
         state = list(session["sel"]) if "sel" in session else list(start)
         view_mode = session.get("view_mode", 0)  # multi: 0 all rows, 1 only rows that are on, 2 only rows changed
         revealed = session.get("revealed", False)
