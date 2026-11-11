@@ -9,14 +9,16 @@ RECOMMENDED_SHARE = 2 / 3
 DEFAULT_TTL_DAYS = 183
 COLLECTION = "Surprise"
 
-ENGLISH_REGIONS = {"USA", "World", "Europe", "UK", "Australia", "Canada"}
-REGIONS = ENGLISH_REGIONS | {"Japan", "Korea", "Asia", "China", "Taiwan", "Hong Kong", "Brazil", "France", "Germany",
-                             "Spain", "Italy", "Netherlands", "Sweden", "Scandinavia", "Russia", "Latin America",
-                             "Unknown"}
+ENGLISH_REGIONS = {"USA", "World", "Europe", "UK", "United Kingdom", "Australia", "Canada"}
+REGIONS = ENGLISH_REGIONS | {
+    "Japan", "Korea", "Asia", "China", "Taiwan", "Hong Kong", "India", "Israel", "Turkey", "UAE", "Brazil", "Argentina",
+    "Chile", "Mexico", "Latin America", "France", "Germany", "Spain", "Italy", "Netherlands", "Sweden", "Denmark",
+    "Finland", "Norway", "Scandinavia", "Poland", "Portugal", "Russia", "Greece", "Ireland", "Switzerland", "Austria",
+    "Belgium", "Croatia", "Czech", "Hungary", "New Zealand", "South Africa", "Unknown"}
 NOT_FULL = ("Proto", "Beta", "Demo", "Sample", "Kiosk", "Pirate", "Hack", "Unl")
 RERELEASE = ("Virtual Console", "Switch Online", "Classic Mini", "Mini Mix", "Mega Drive Mini", "Genesis Mini",
              "Collection", "Anthology", "Archives", "Sega Ages", "Sega Channel", "Evercade", "Steam", "GOG",
-             "Retro-Bit", "Limited Run", "e-Reader")
+             "Retro-Bit", "Limited Run", "e-Reader", "QUByte Classics")
 LANGUAGE = re.compile(r"^[A-Z][a-z](-[A-Za-z]+)?$")
 
 
@@ -44,7 +46,7 @@ def is_candidate(key, system, family, bios):
     if family is not None:
         title = family["parents"].get(stem)
         return title is not None and not any(parts[0].split()[:1] == ["Japan"] for parts in _paren_groups(title))
-    if re.search(r"\[[bh][^\]]*\]", stem):
+    if re.search(r"\[[bh][^\]]*\]", stem, re.I):
         return False
     groups = _paren_groups(stem)
     if any(p.startswith(NOT_FULL) for parts in groups for p in parts):

@@ -27,6 +27,16 @@ class SurpriseRulesTest(unittest.TestCase):
         self.assertEqual([n for n in IN if not surprise.is_candidate("gba/" + n, GBA, None, bios)], [])
         self.assertEqual([n for n in OUT if surprise.is_candidate("gba/" + n, GBA, None, bios)], [])
 
+    def test_unlisted_regions_are_not_english_and_more_rules(self):
+        ok = lambda n: surprise.is_candidate("gba/" + n, GBA, None, set())
+        for n in ("Game (Denmark).zip", "Game (Spain).zip", "Game (China).zip", "Game (Mexico, Portugal).zip"):
+            self.assertFalse(ok(n), n)
+        for n in ("Game (United Kingdom).zip", "Game (Europe, Netherlands).zip", "Game (Spain, UK).zip"):
+            self.assertTrue(ok(n), n)
+        self.assertFalse(ok("Game (USA)[Beta 2.1].zip"))
+        self.assertTrue(ok("Game (USA) [!].zip"))
+        self.assertFalse(ok("Game (USA) (QUByte Classics).zip"))
+
     def test_arcade_parents_only_and_not_japan(self):
         family = {"parents": {"10yard": "10-Yard Fight (World, set 1)", "armedf": "Armed F (Japan)",
                               "1943j2": "1943 Kai (Japan 900227)"},
