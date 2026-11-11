@@ -13,7 +13,7 @@ from . import __version__, clean, commands, downloads, edit, external, m3u, pick
 
 SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "sync": ("[CARD]", "download the ROMs, BIOS and scraped data for a card (this is what plain `sync-roms CARD` does)"),
-    "edit": ("", "interactive editor for cards and device systems (same as `games edit`)"),
+    "edit": ("", "interactive editor: cards, sets, device systems (same as `games edit`)"),
     "games": ("edit|list|add|remove|full|sets|export|import", "edit a card's games, interactively or from scripts"),
     "sets": ("edit", "edit the repo's game sets by hand and open a PR with the changes"),
     "cards": ("edit|list|new|set|rename|delete", "list and manage the cards you've synced"),
@@ -60,7 +60,7 @@ TOPICS = {
   Picker keys: ↑/↓ j/k ^N/^P move, / filter, space/tab toggle, a all/none, z show 0-ROM systems, e edit games, D clear the card's own games, enter go, esc/q cancel.
 """,
     "games": """
-  sync-roms games edit                        interactive editor (cards, device systems)
+  sync-roms games edit                        interactive editor (cards, sets, device systems)
   sync-roms games list --card NAME [--json]
   sync-roms games add SYSTEM KEY... --card NAME [-n]      KEY: file name, SYSTEM/file key, or a glob like 'Mario*'
   sync-roms games remove SYSTEM KEY... --card NAME [-n]
@@ -81,7 +81,7 @@ TOPICS = {
   rename it. ➕ New set creates one; d deletes the highlighted one. Esc reviews the changes before the PR is opened.
 """,
     "edit": """
-  sync-roms edit                              same as `games edit`
+  sync-roms edit                              main menu: Cards, Sets (opens a PR), Device systems; same as `games edit`
 """,
     "cards": """
   sync-roms cards edit                        same as `games edit`
@@ -222,7 +222,7 @@ def help_text(topic=None):
 {ui.bold('EXAMPLES')}
   sync-roms /Volumes/SD                          sync the card
   sync-roms sync /Volumes/SD --device rg35xx-sp --layout knulli --systems all --yes --dry-run
-  sync-roms games add gba 'Metroid*' --card SD   add games to a card's extras
+  sync-roms games add gba 'Metroid*' --card SD   add games to a card
   sync-roms upload roms ~/roms/gba               upload ROMs to storage
 
   {ui.dim('The old flags (--edit, --upload, --upload-scrapes, --clean-scrapes, --m3u, --cd, --install-tools, --mirror,')}

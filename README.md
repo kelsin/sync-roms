@@ -473,7 +473,7 @@ read to show what is in it, so the read-only profile is enough. No folders are n
 sync-roms --edit
 ```
 
-0. Pick one of your cards, or **➕ New card** (asks for its folder name, then its device and
+0. The menu has **Cards**, **Sets** and **Device systems**. **Sets** is `sync-roms sets edit` (see below; it needs `git` and a logged-in `gh`, and returns here if they are missing). **Device systems** is described at the end of this section. Under **Cards**, pick one of your cards, or **➕ New card** (asks for its folder name, then its device and
    firmware, like the first sync does, and saves the card). On a card, `v` changes its device and firmware instead of opening it (saved with the review at the end) and drops the card's games for systems the new device or firmware doesn't use. Each card's row shows its current device and firmware.
 1. A card opens on every system its device can play, in the usual order. Systems recommended for the device's screen
    are marked ⭐; each system with picks shows how many games and how much space they take (ROMs plus the scraped
@@ -495,7 +495,7 @@ sync-roms --edit
 
 Personal sets are files in `~/.sync-roms/sets/<id>.json` (same format as the package's sets, below), appear next to the built-in ones and can be referenced like them; an id already used by a built-in set is refused. You can also write them by hand, and `sync-roms check` validates them.
 
-On the top menu, `v` changes a card's device and firmware, `r` renames a card and `d` deletes one (both ask first, and act at once). **🧩 Device systems** edits which systems a device recommends: it is saved as the `add`/`remove` overlay in `device-systems.json`, relative to the repo defaults. A file that isn't valid JSON is never overwritten: sync-roms says so and leaves it for you to fix (`sync-roms check` lists the problems).
+On the Cards list, `v` changes a card's device and firmware, `r` renames a card and `d` deletes one (both ask first, and act at once). **🧩 Device systems** edits which systems a device recommends: it is saved as the `add`/`remove` overlay in `device-systems.json`, relative to the repo defaults. A file that isn't valid JSON is never overwritten: sync-roms says so and leaves it for you to fix (`sync-roms check` lists the problems).
 
 ### Editing from scripts
 
@@ -550,7 +550,7 @@ to the set in a later release are synced too, for the systems the card has enabl
 system's game list, then `f` on a set (it shows 📦) to toggle it; the games it syncs show 📦 and switching one
 off excludes it on that card. Unknown set names are skipped with a warning.
 
-### A card's extras in `cards.json`
+### A card's games in `cards.json`
 
 ```json
 { "RGSP": { "device": "anbernic-rg-sp", "layout": "muos", "games": { "gba": { "full_system": true } } } }

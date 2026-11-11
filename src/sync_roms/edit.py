@@ -168,7 +168,7 @@ def toggle_set_ref(sets_on, set_id):
 SETUP_KEY = "v"
 DELETE_KEY = "d"
 RENAME_KEY = "r"
-MENU_HINT = "Enter open · Esc save · v device · r rename · d delete"
+MENU_HINT = "Enter open · Esc back · v device · r rename · d delete"
 GAMES_HINT = "Space toggle · Enter done · Esc back · / filter · w note · a all · o view"
 
 
@@ -216,7 +216,7 @@ def make_set_from_extras(t, sets, sets_by_id):
     Returns the new set's id, or None when cancelled or there is nothing to save."""
     systems = [s for s in t["data"]["systems"] if s["games"]]
     if not systems:
-        note(ui.yellow("ℹ️  This card has no extra games to make a set from."))
+        note(ui.yellow("ℹ️  This card has no games to make a set from."))
         return None
     while True:
         name = ui.ask(f"📦 Name for the new set of {sum(len(s['games']) for s in systems)} game(s) "
@@ -237,8 +237,8 @@ def make_set_from_extras(t, sets, sets_by_id):
 
 
 def edit_manifest():
-    """The editor's top menu: cards (each opens the card editor, which saves games as they change), new card,
-    device systems; device/firmware and device-system changes are reviewed and saved at the end."""
+    """The editor's top menu: Cards (each opens the card editor, which saves games as they change), Sets (opens a PR),
+    Device systems; device/firmware and device-system changes are reviewed and saved at the end."""
     print(ui.bold("✏️  Edit mode") + ui.dim(f"  {s3.access()}"))
     if not store.cards_readable():
         ui.fail(f"{os.path.join(store.data_dir(), 'cards.json')} isn't valid JSON, so nothing could be saved. "
@@ -302,7 +302,7 @@ def edit_manifest():
         targets[name] = {"label": f"💳 {name}", "setup": setup}
 
     def delete_card(name):
-        if not ui.confirm(f"🗑️  Delete card {name} and its extra games now? (cards.json.bak keeps the copy from before this run)", default=False):
+        if not ui.confirm(f"🗑️  Delete card {name} and its games now? (cards.json.bak keeps the copy from before this run)", default=False):
             return
         if name in store.load_cards():
             store.delete_card(name)
@@ -373,31 +373,50 @@ def edit_manifest():
         d["systems"] = [x for x in base if x in now] + [x for x in ids if x in now and x not in base]
         return True
 
+    def edit_cards():
+        """The card list: open a card, add one, or change/rename/delete the highlighted one. Esc goes back."""
+        while True:
+            saved = store.load_cards()
+            cards = sorted(set(saved) | {k for k in targets if k is not None})
+            n = len(cards)
+            options = [f"💳 {name}" for name in cards] + ["➕ New card"]
+            extras = [setup_extra(name, saved) + pending_extra(name) for name in cards] + [[]]
+            i = picker.filter_list("💳 Which card?  (Esc = back)", options, extras=extras,
+                                   hotkeys=(SETUP_KEY, DELETE_KEY, RENAME_KEY), hint=MENU_HINT)
+            if i is None:
+                return
+            if isinstance(i, tuple):
+                if i[1] < n:
+                    {SETUP_KEY: change_setup, DELETE_KEY: delete_card, RENAME_KEY: rename_card}[i[0]](cards[i[1]])
+            elif i < n:
+                open_card(cards[i])
+            else:
+                add_card()
+
+    def edit_sets():
+        """The repo's sets; opens a PR and needs git and gh, so a missing tool returns here instead of ending the editor."""
+        from . import setedit
+        try:
+            setedit.edit_sets()
+        except SystemExit:
+            pass  # the reason is already printed
+
     def menu():
         """The top menu. Returns True to review and save, False to quit without saving."""
         try:
             while True:
-                saved = store.load_cards()
-                cards = sorted(set(saved) | {k for k in targets if k is not None})
-                n = len(cards)
-                options = ([f"💳 {name}" for name in cards]
-                           + ["➕ New card", "🧩 Device systems", "✅ Done (review & save)", "🚪 Quit without saving"])
-                extras = ([setup_extra(name, saved) + pending_extra(name) for name in cards]
-                          + [[], [("  " + str(len(overlay_pending)) + " edited", "cyan")] if overlay_pending else [], [], []])
+                options = ["💳 Cards", "📦 Sets", "🧩 Device systems", "✅ Done (review & save)", "🚪 Quit without saving"]
+                extras = [[("  " + str(len(targets)) + " pending", "cyan")] if targets else [],
+                          [], [("  " + str(len(overlay_pending)) + " edited", "cyan")] if overlay_pending else [], [], []]
                 i = picker.filter_list("✏️  What do you want to edit?  (Esc = review & save)", options, extras=extras,
-                                       hotkeys=(SETUP_KEY, DELETE_KEY, RENAME_KEY),
-                                       hint=MENU_HINT)
-                if i is None or i == n + 2:
+                                       hint="Enter open · Esc review & save")
+                if i is None or i == 3:
                     return True
-                if isinstance(i, tuple):
-                    if i[1] < n:
-                        {SETUP_KEY: change_setup, DELETE_KEY: delete_card, RENAME_KEY: rename_card}[i[0]](cards[i[1]])
-                    continue
-                if i < n:
-                    open_card(cards[i])
-                elif i == n:
-                    add_card()
-                elif i == n + 1:
+                if i == 0:
+                    edit_cards()
+                elif i == 1:
+                    edit_sets()
+                elif i == 2:
                     while edit_device_systems():
                         pass
                 else:

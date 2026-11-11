@@ -44,6 +44,23 @@ class ErrorsTest(Isolated):
         self.assertEqual((code, err), (0, ""))
 
 
+class EditAliasTest(Isolated):
+    def test_every_edit_spelling_opens_the_main_menu(self):
+        for argv in (["edit"], ["games", "edit"], ["cards", "edit"], ["--edit"], ["-e"]):
+            with self.subTest(argv=argv), mock.patch.object(edit, "edit_manifest", return_value=0) as run:
+                code, _, err = self.sync(argv, {"bucket": "b"})
+                self.assertEqual((code, err), (0, ""))
+            run.assert_called_once_with()
+
+    def test_dry_run_with_edit_is_a_usage_error(self):
+        for argv in (["edit", "--dry-run"], ["--edit", "-n"]):
+            with self.subTest(argv=argv), mock.patch.object(edit, "edit_manifest") as run:
+                code, _, err = self.sync(argv)
+            self.assertEqual(code, 2)
+            self.assertIn("--dry-run has no effect on --edit", err)
+            run.assert_not_called()
+
+
 class ExitCodeTest(Isolated):
     def code_of(self, fn, *a):
         with contextlib.redirect_stderr(io.StringIO()), contextlib.redirect_stdout(io.StringIO()), self.assertRaises(SystemExit) as cm:
@@ -92,13 +109,13 @@ class EofTest(EditBase):
             return edit.edit_manifest()
 
     def test_eof_on_new_card_name_cancels(self):
-        self.assertEqual(self.run_eof([0, None]), 0)
+        self.assertEqual(self.run_eof([0, 0, None, None]), 0)
         self.assertFalse(os.path.exists(self.path("cards.json")))
 
     def test_eof_on_rename_cancels(self):
         with open(self.path("cards.json"), "w") as f:
             json.dump({"c": {"layout": "esde", "device": "full"}}, f)
-        self.run_eof([(edit.RENAME_KEY, 0), 3])
+        self.run_eof([0, (edit.RENAME_KEY, 0), None, 3])
         self.assertEqual(list(self.read("cards.json")), ["c"])
 
 

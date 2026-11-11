@@ -308,7 +308,7 @@ class SetupChange(DataDir):
     def test_changing_the_device_drops_games_it_cannot_play_at_save(self):
         self.write_json("cards.json", {"c": {"device": "full", "layout": "esde",
                                              "games": {"gba": [g("gba/A.zip")], "gb": [g("gb/B.gb")]}}})
-        picks = iter([(edit.SETUP_KEY, 0), 3])  # v on the card, then Done
+        picks = iter([0, (edit.SETUP_KEY, 0), None, 3])  # Cards, v on the card, back, Done
         device = {**DEVICE, "systems": ["gba"]}
         with mock.patch.object(store, "repo_json", side_effect=lambda name: [dict(s) for s in CATALOG[name]]), \
                 mock.patch.object(store, "load_manifest", return_value=CATALOG), \
