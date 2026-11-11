@@ -379,9 +379,6 @@ What goes up, and how it is stored:
 | `downloaded_media/<system>/<type>/…` | `scrapes/<system>/<type>/…` | Only files whose ROM name matches an available ROM. `._` files, dotfiles and `CLEANUP/` are skipped. Uploaded when new or a different size |
 | (made from the cover, 3D box or screenshot) | `scrapes/<system>/onion/<ROM>.png` | Onion box art, a PNG that fits 250x360. Created whenever it is missing from storage, even if its source image was already uploaded. Not made for ROMs in subfolders. Needs Pillow or `sips` |
 | (a Slot card's `Labels/`, or made from the cover, 3D box or screenshot) | `scrapes/<system>/slot/<ROM>.png` | Slot cart label for the Game Boy systems, a PNG that fits 1280x661 (GBA) or 1024x901 (GB, GBC). A card's label is uploaded as is and replaces one of a different size; a derived one is created only when none exists, subfolders included, and needs Pillow or `sips` |
-| `themes/…` | `scrapes/esde/themes/…` | Per file, same size check. `themes-list` is skipped |
-| `collections/*.cfg` | `scrapes/esde/collections/*.cfg` | Union of the lines in both versions |
-| `settings/es_settings.xml` | `scrapes/esde/settings.json` | Allowlisted keys only: scraper behavior, miximage generation, theme (not aspect ratio) and gamelist/UI behavior. Credentials are never included. Merged with storage's file, local wins |
 
 For uploads, "available ROMs" are the games your cards list that exist in storage, which is
 what a sync installs. Scraped files for any other ROM are left out. A `gamelist.xml` that can't be read
@@ -390,8 +387,7 @@ is skipped with a warning.
 `sync-roms --clean-scrapes` (or `-c`) needs no folder. It compares storage's `scrapes/` media and
 `metadata.json` entries with every ROM file in storage's system folders (not only the games
 listed on your cards), lists what no longer matches (including whole systems with no folder in the
-bucket), and after you confirm (default no) deletes the media and rewrites the metadata files. `--dry-run` only lists. Themes, collections and settings are never
-touched.
+bucket), and after you confirm (default no) deletes the media and rewrites the metadata files. `--dry-run` only lists.
 
 ## Scraping from ScreenScraper (`scrape`)
 

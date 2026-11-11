@@ -1,4 +1,4 @@
-"""ES-DE style scrape data: gamelists, settings, upload and cleanup."""
+"""ES-DE style scrape data: gamelists, media, upload and cleanup."""
 import json
 import os
 import xml.etree.ElementTree as ET
@@ -147,42 +147,12 @@ def plan_upload(es_dir, roms, existing, remote_texts):
                 plan["derived_present"] += 1
             elif source:
                 plan["derived"].append((key, source, sizes[source], box))
-
-    themes = os.path.join(es_dir, "themes")
-    for rel, full in scrape_plan.walk_files(themes, skip_top=("themes-list",)) if os.path.isdir(themes) else []:
-        size = os.path.getsize(full)
-        if size:
-            want_file(f"{scrape_plan.SCRAPES}/esde/themes/{rel}", full, size)
-
-    collections = os.path.join(es_dir, "collections")
-    for name in sorted(os.listdir(collections)) if os.path.isdir(collections) else []:
-        if name.endswith(".cfg") and not name.startswith("."):
-            key = f"{scrape_plan.SCRAPES}/esde/collections/{name}"
-            old = remote_texts.get(key, "")
-            new = scrape_plan.merge_lines(old, read(os.path.join(collections, name)))
-            if new and new != old:
-                plan["texts"].append((key, new, f"collection {name}"))
-
-    settings = os.path.join(es_dir, "settings", "es_settings.xml")
-    if os.path.isfile(settings):
-        local = scrape_plan.safe_settings(read(settings))
-        key = f"{scrape_plan.SCRAPES}/esde/settings.json"
-        old = remote_texts.get(key, "")
-        try:
-            remote = json.loads(old) if old else {}
-        except ValueError:
-            plan["warnings"].append(f"{key} in storage isn't valid JSON, skipped")
-            remote = None
-        text = scrape_plan.dump_json({**remote, **local}) if remote is not None and local else old
-        if text != old:
-            plan["texts"].append((key, text, f"settings (+{len(set(local) - set(remote))} new)"))
     return plan
 
 
 def text_keys(existing):
-    """Keys under scrapes/ that are text files we merge into."""
-    return [k for k in existing if k.endswith("/metadata.json") or "/esde/collections/" in k
-            or k == f"{scrape_plan.SCRAPES}/esde/settings.json"]
+    """Keys under scrapes/ of the metadata.json files we merge into."""
+    return [k for k in existing if k.endswith("/metadata.json")]
 
 
 def _upload_text_keys(es_dir, existing, roms):
@@ -294,7 +264,7 @@ def upload_scrapes(args):
         print(ui.dim(f"     {label}"))
     if len(texts) > 15:
         print(ui.dim(f"     … and {len(texts) - 15} more"))
-    print(f"🖼️  Files to upload (media, themes): {ui.bold(str(len(files)))} "
+    print(f"🖼️  Files to upload (media): {ui.bold(str(len(files)))} "
           f"({ui.human_size(sum(f[2] for f in files))}), {plan['present']} already there")
     print(f"🧅 Onion box art and Slot labels to create from local images: {ui.bold(str(len(derived)))}, {plan['derived_present']} already there")
     if not files and not texts and not derived:
@@ -327,15 +297,14 @@ def upload_scrapes(args):
 def plan_clean(existing, roms, remote_texts):
     """What in scrapes/ no longer matches an available ROM.
 
-    Returns (delete keys, rewrites [(key, text)], per-system counts, warnings). Themes, collections
-    and settings (scrapes/esde/) are never touched.
+    Returns (delete keys, rewrites [(key, text)], per-system counts, warnings).
     """
     stems = rom_stems(roms)
     delete, rewrites, warnings = [], [], []
     per = defaultdict(lambda: {"media": 0, "bytes": 0, "entries": 0})
     for key, size in sorted(existing.items()):
         parts = key.split("/")
-        if len(parts) < 3 or parts[0] != scrape_plan.SCRAPES or parts[1] == "esde" or key.endswith("/"):
+        if len(parts) < 3 or parts[0] != scrape_plan.SCRAPES or key.endswith("/"):
             continue
         system = parts[1]
         if parts[2] == "metadata.json" and len(parts) == 3:
@@ -369,7 +338,7 @@ def clean_scrapes(args):
         roms = bucket_roms(manifest["systems"], all_files=True)
         print("☁️  Listing scrapes/...")
         existing = s3.list_sizes(scrape_plan.SCRAPES + "/")
-        remote_texts = s3.fetch_texts([k for k in text_keys(existing) if k.endswith("/metadata.json")])
+        remote_texts = s3.fetch_texts(text_keys(existing))
     except s3.ERRORS as e:
         ui.fail(f"{e}", 3)
     delete, rewrites, per, warnings = plan_clean(existing, roms, remote_texts)

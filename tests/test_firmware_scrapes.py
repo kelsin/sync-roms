@@ -448,6 +448,33 @@ class DerivedUploadTest(unittest.TestCase):
         self.assertTrue(all(src.endswith(os.path.join("covers", "A.png")) for _, src, _, _ in plan["derived"]))
 
 
+class EsdeExtrasUploadTest(unittest.TestCase):
+    def test_themes_collections_and_settings_are_not_uploaded(self):
+        with tempfile.TemporaryDirectory() as es:
+            touch(os.path.join(es, "themes", "my-theme", "theme.xml"))
+            touch(os.path.join(es, "downloaded_media", "snes", "covers", "A.png"))
+            os.makedirs(os.path.join(es, "collections"))
+            with open(os.path.join(es, "collections", "custom-Fav.cfg"), "w") as f:
+                f.write("%ROMPATH%/snes/A.sfc\n")
+            os.makedirs(os.path.join(es, "settings"))
+            with open(os.path.join(es, "settings", "es_settings.xml"), "w") as f:
+                f.write('<?xml version="1.0"?>\n<bool name="ScraperRegionFallback" value="true" />\n')
+            plan = scrape_files.plan_upload(es, {"snes": {"A.sfc"}}, {}, {})
+        self.assertEqual([k for k, *_ in plan["files"]], ["scrapes/snes/covers/A.png"])
+        self.assertEqual(plan["texts"], [])
+        self.assertFalse(any("/esde/" in k for k, *_ in plan["files"] + plan["texts"] + plan["derived"]))
+
+    def test_text_keys_are_metadata_only(self):
+        existing = {"scrapes/gba/metadata.json": 1, "scrapes/esde/collections/custom-Fav.cfg": 1,
+                    "scrapes/esde/settings.json": 1, "scrapes/gba/covers/A.png": 1}
+        self.assertEqual(scrape_files.text_keys(existing), ["scrapes/gba/metadata.json"])
+
+    def test_clean_leaves_old_esde_objects_alone(self):
+        existing = {"scrapes/esde/themes/t/theme.xml": 1, "scrapes/esde/settings.json": 1,
+                    "scrapes/esde/collections/custom-Fav.cfg": 1}
+        self.assertEqual(scrape_files.plan_clean(existing, {}, {})[:2], ([], []))
+
+
 class UnsafeKeyTest(unittest.TestCase):
     def test_theme_key_with_dotdot_is_skipped(self):
         listing = {"scrapes/esde/themes/ok/a.xml": 1, "scrapes/esde/themes/../../evil": 2}
