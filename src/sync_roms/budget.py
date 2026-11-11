@@ -44,11 +44,10 @@ def _system_usage(card, system, sets):
         sizes = sizecache.cached(f"{bucket}/")
         if sizes is None:
             return Usage(0, 0, True)
-        keys = sorted(k for k in sizes if not k.endswith("/"))
+        keys = sorted(k for k in sizes if not k.endswith("/"))  # sync installs every file: exclusions don't apply
     else:
-        keys = [g["bucket"] for g in games["games"] if g.get("bucket")]
-    skip = (card.get("excluded") or {}).get(bucket, ())
-    keys = [k for k in keys if k not in skip]
+        skip = (card.get("excluded") or {}).get(bucket, ())
+        keys = [g["bucket"] for g in games["games"] if g.get("bucket") and g["bucket"] not in skip]
     if not keys:
         return Usage(0, 0, False)  # nothing picked: nothing to size
     costs, partial = game_costs(card, system, keys)
@@ -56,9 +55,10 @@ def _system_usage(card, system, sets):
 
 
 def system_usage(card, system):
-    """Usage of one system on a card: its direct picks, set references and full system, minus the card's exclusions.
-    Sizes not cached yet count as 0 and make the usage partial; a picked game not in storage (absent from a cached
-    listing) counts as 0 and is not partial; a system with nothing picked is 0 and not partial."""
+    """Usage of one system on a card: its direct picks, set references and full system, minus the card's exclusions
+    (a full system ignores them, as sync does). Sizes not cached yet count as 0 and make the usage partial; a picked
+    game not in storage (absent from a cached listing) counts as 0 and is not partial; a system with nothing picked is
+    0 and not partial."""
     return _system_usage(card, system, store.load_sets())
 
 

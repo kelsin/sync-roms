@@ -54,6 +54,10 @@ class Budget(DataDir):
         u = self.usage({"games": {"sets": ["s"]}, "excluded": {"gba": ["gba/A.zip"]}}, "other")
         self.assertEqual((u.bytes, u.count), (200, 1))
 
+    def test_full_system_ignores_exclusions_like_sync(self):
+        u = self.usage({"games": {"gba": {"full_system": True}}, "excluded": {"gba": ["gba/A.zip"]}}, "other")
+        self.assertEqual((u.bytes, u.count), (700, 3))
+
     def test_uncached_is_partial(self):
         self.cache.pop("gba/")
         u = self.usage({"games": {"gba": [g("gba/A.zip")]}}, "other")
