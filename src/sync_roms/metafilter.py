@@ -49,7 +49,7 @@ def matches(vals, filters):
 
 
 def counts(idx, keys, field):
-    """[(value, number of keys with it)] of one field over the given bucket keys: most common first, then by name;
+    """[(value, number of keys with it)] of one field over the given bucket keys: alphabetical (ignoring case);
     years in year order. Spellings that differ only by case are one value, shown as its most common spelling (the
     first seen on a tie)."""
     spellings = {}  # casefolded value -> {spelling: count}, in the order first seen
@@ -60,7 +60,7 @@ def counts(idx, keys, field):
     tally = {max(seen, key=seen.get): sum(seen.values()) for seen in spellings.values()}
     if field == "year":
         return sorted(tally.items())
-    return sorted(tally.items(), key=lambda kv: (-kv[1], kv[0].lower(), kv[0]))
+    return sorted(tally.items(), key=lambda kv: (kv[0].lower(), kv[0]))
 
 
 def describe(filters):

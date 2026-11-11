@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.2.0](https://github.com/kelsin/sync-roms/compare/v1.1.0...v1.2.0) (2026-11-11)
+
+
+### :video_game: Features
+
+* **edit:** hide systems with an empty folder in the card editor ([#208](https://github.com/kelsin/sync-roms/issues/208)) ([c9f02f2](https://github.com/kelsin/sync-roms/commit/c9f02f25e278c294edd466d45212c4d57db4b9a4))
+* **edit:** show synced/total games per set in the set picker ([#210](https://github.com/kelsin/sync-roms/issues/210)) ([8b1bce0](https://github.com/kelsin/sync-roms/commit/8b1bce0e5dcb9066c133d6cb98f53120f510c292))
+* **edit:** sort metadata filter values alphabetically ([#212](https://github.com/kelsin/sync-roms/issues/212)) ([2f5d472](https://github.com/kelsin/sync-roms/commit/2f5d47281306d2e7d4fa1f994efd4f332a514526))
+* **edit:** start the metadata value picker on the current selection ([#214](https://github.com/kelsin/sync-roms/issues/214)) ([0fd4f10](https://github.com/kelsin/sync-roms/commit/0fd4f1034004c904f24d8e36d05fe6139d44f4ff))
+* **edit:** start the set picker on the set the list is filtered to ([#211](https://github.com/kelsin/sync-roms/issues/211)) ([7f4e275](https://github.com/kelsin/sync-roms/commit/7f4e275b365dc81d2dcae622ebcc21e1e9155414))
+* **edit:** toggle a set's games on one system with space/tab ([#213](https://github.com/kelsin/sync-roms/issues/213)) ([a68fa81](https://github.com/kelsin/sync-roms/commit/a68fa8106652ae9308b2946925715b14d49b8922))
+
 ## [1.1.0](https://github.com/kelsin/sync-roms/compare/v1.0.0...v1.1.0) (2026-11-11)
 
 
