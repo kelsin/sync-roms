@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.1.0](https://github.com/kelsin/sync-roms/compare/v1.0.0...v1.1.0) (2026-11-11)
+
+
+### :video_game: Features
+
+* **edit:** add D hotkey to clear all picks from a card ([#203](https://github.com/kelsin/sync-roms/issues/203)) ([e275392](https://github.com/kelsin/sync-roms/commit/e27539236a7eec77816d201e14aad8d1c91e3b49))
+* **edit:** show all keybindings in a popup on ? ([#205](https://github.com/kelsin/sync-roms/issues/205)) ([527783c](https://github.com/kelsin/sync-roms/commit/527783c4b3d5e503ae67ea50e3dccb1b8113287d))
+* **edit:** sort systems by company then name in the editors ([#207](https://github.com/kelsin/sync-roms/issues/207)) ([13065b4](https://github.com/kelsin/sync-roms/commit/13065b429e58a1da814e4ba73cb706f96cb2a904))
+
+
+### :bug: Bug Fixes
+
+* **edit:** exit without waiting for background size refreshes ([#206](https://github.com/kelsin/sync-roms/issues/206)) ([d28aaf3](https://github.com/kelsin/sync-roms/commit/d28aaf355a34b484a09545062904b42f84ce498c))
+* **edit:** toggle full system and set references in place without redrawing the screen ([#202](https://github.com/kelsin/sync-roms/issues/202)) ([dd318ce](https://github.com/kelsin/sync-roms/commit/dd318ce7f909f89f0d801392970b1f79fd1ffc79))
+
 ## [1.0.0](https://github.com/kelsin/sync-roms/compare/v0.48.0...v1.0.0) (2026-11-11)
 
 
