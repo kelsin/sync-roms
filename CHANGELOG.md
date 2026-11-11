@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.5.0](https://github.com/kelsin/sync-roms/compare/v1.4.0...v1.5.0) (2026-11-11)
+
+
+### :video_game: Features
+
+* **cache:** read storage listings from a persistent storage cache ([#228](https://github.com/kelsin/sync-roms/issues/228)) ([e924fee](https://github.com/kelsin/sync-roms/commit/e924feedb70c21b49dcd5968a667176c3f4973df))
+* **collections:** filter the add-games list by set and metadata ([#226](https://github.com/kelsin/sync-roms/issues/226)) ([a5c5e88](https://github.com/kelsin/sync-roms/commit/a5c5e880252f00fec1897efa8d9fc40f6b485e3f))
+
 ## [1.4.0](https://github.com/kelsin/sync-roms/compare/v1.3.0...v1.4.0) (2026-11-11)
 
 
