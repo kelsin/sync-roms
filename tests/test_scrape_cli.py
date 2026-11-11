@@ -154,11 +154,11 @@ class SetCredentials(RealDataDirGuard):
         return code, out.getvalue()
 
     def test_saves_without_printing_values(self):
-        code, out = self.run_it(["me"], ["s3cret"])
+        code, out = self.run_it(["scraper-user"], ["s3cret"])
         self.assertEqual(code, 0)
         with open(self.path) as f:
             saved = json.load(f)
-        self.assertEqual(saved, {"screenscraper_user": "me", "screenscraper_password": "s3cret"})
+        self.assertEqual(saved, {"screenscraper_user": "scraper-user", "screenscraper_password": "s3cret"})
         for value in saved.values():
             self.assertNotIn(value, out)
         self.assertEqual(stat.S_IMODE(os.stat(self.path).st_mode), 0o600)

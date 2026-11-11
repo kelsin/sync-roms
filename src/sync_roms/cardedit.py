@@ -307,10 +307,11 @@ def edit_card(name, setup=None):
         edit_system(name, systems[i], setup, sizing)
 
 
-def pick_set(system, sets, games, titles, catalog):
+def pick_set(system, sets, games, titles, catalog, current=None, synced=lambda: set()):
     """The set to filter a system's games to, or None: sets with games in catalog (the system's bucket keys) are
-    offered. Space/Tab adds that set's games on this system to games (in place) as direct picks, or removes them when
-    all are already picked; other systems are untouched."""
+    offered, starting on the one named current, each with how many of its games are synced out of those in storage
+    (synced() gives the synced bucket keys). Space/Tab adds that set's games on this system to games (in place) as
+    direct picks, or removes them when all are already picked; other systems are untouched."""
     shown = [(x, set_filter(x, system)) for x in sets]
     shown = [(x, keys) for x, keys in shown if keys & catalog]
     if not shown:
@@ -321,8 +322,8 @@ def pick_set(system, sets, games, titles, catalog):
     extras = [[]] * len(shown)
 
     def mark():
-        have = {g.get("bucket") for g in games}
-        extras[:] = [[("  ✅ added", "green")] if keys & catalog <= have else [] for _, keys in shown]
+        done = synced()
+        extras[:] = [[(f"  {len(keys & catalog & done)}/{len(keys & catalog)}", "cyan")] for _, keys in shown]
 
     def on_hotkey(_key, idx):
         """Toggles in place, so the screen isn't torn down and redrawn."""
@@ -339,7 +340,8 @@ def pick_set(system, sets, games, titles, catalog):
         return True
 
     mark()
-    i = picker.filter_list(f"📦 Sets with games on {system['name']}", labels, extras=extras,
+    cursor = next((n for n, (x, _) in enumerate(shown) if x["name"] == current), 0)
+    i = picker.filter_list(f"📦 Sets with games on {system['name']}", labels, extras=extras, cursor=cursor,
                            hotkeys=(" ", "\t"), hint=SETS_HINT, on_hotkey=on_hotkey)
     if i is None:
         return None
@@ -524,7 +526,8 @@ def edit_system(name, system, setup, sizing=None):
             elif result[0] == META_KEY:
                 pick_meta(system, meta, meta_filt, lambda field: [r[1] for r in rows if keep(r[1], field)])
             else:
-                chosen = pick_set(system, sets, s["games"], titles, {r[1] for r in rows})
+                chosen = pick_set(system, sets, s["games"], titles, {r[1] for r in rows}, filt and filt[0],
+                                  lambda: {k for k, v in states(cover()).items() if v})
                 if chosen:
                     filt = (chosen["name"], set_filter(chosen, system))
     except (KeyboardInterrupt, curses.error):  # Ctrl-C, or a terminal too small to draw the list: keep the toggles
