@@ -86,6 +86,49 @@ class GamesTest(CardCmd):
         entry = self.read("cards.json")["SD"]
         self.assertEqual((entry["collections"], entry["frontend_collections"]), (["favs"], ["Favs"]))
 
+    def test_export_carries_surprise_state(self):
+        self.write_json("cards.json", {"SD": {"device": "full", "layout": "esde", "surprise": False, "surprises": [
+            {"system": "gba", "bucket": "gba/A (USA).zip", "title": "A (USA)"}], "games": {"gba": [{"bucket": "gba/B.zip"}]}}})
+        code, out, _ = self.run_cmd("games", "export")
+        self.assertEqual(out.splitlines(), ["gba/B.zip", "@surprise false", "@surprises gba/A (USA).zip"])
+
+    def test_import_reads_surprise_lines(self):
+        path = self.path("list.txt")
+        with open(path, "w") as f:
+            f.write("gba/B.zip\n@surprise false\n@surprises gba/A (USA).zip\n@surprises nope/X.zip\n@surprise maybe\n")
+        with mock.patch.object(commands.s3, "list_sizes", lambda prefix, sizes=True: {}):
+            code, _, err = self.run_cmd("games", "import", path)
+        self.assertEqual(code, 0)
+        self.assertIn("nope/X.zip", err)
+        self.assertIn("@surprise maybe", err)
+        entry = self.read("cards.json")["SD"]
+        self.assertIs(entry["surprise"], False)
+        self.assertEqual(entry["surprises"], [{"system": "gba", "bucket": "gba/A (USA).zip", "title": "A (USA)"}])
+        self.assertEqual(entry["games"]["gba"][0]["bucket"], "gba/B.zip")
+
+    def test_import_surprise_true_drops_the_off_flag(self):
+        self.write_json("cards.json", {"SD": {"device": "full", "layout": "esde", "surprise": False}})
+        path = self.path("list.txt")
+        with open(path, "w") as f:
+            f.write("@surprise true\n")
+        self.assertEqual(self.run_cmd("games", "import", path)[0], 0)
+        self.assertNotIn("surprise", self.read("cards.json")["SD"])
+
+    def test_multi_disc_surprise_round_trips(self):
+        ff7 = {"system": "psx", "bucket": "psx/FF7 (USA).m3u", "title": "FF7 (USA)",
+               "files": ["psx/FF7 (USA) (Disc 1).chd", "psx/FF7 (USA) (Disc 2).chd"]}
+        self.write_json("cards.json", {"SD": {"device": "full", "layout": "esde", "surprises": [ff7]}})
+        out = self.run_cmd("games", "export")[1]
+        self.assertEqual(out.splitlines(), ["@surprises psx/FF7 (USA).m3u"])
+        path = self.path("list.txt")
+        with open(path, "w") as f:
+            f.write(out)
+        self.write_json("cards.json", {"SD": {"device": "full", "layout": "esde"}})
+        listing = dict.fromkeys([ff7["bucket"], *ff7["files"], "psx/Spyro (USA).chd"], 1)
+        with mock.patch.object(commands.s3, "list_sizes", lambda prefix, sizes=True: listing if prefix == "psx/" else {}):
+            self.assertEqual(self.run_cmd("games", "import", path)[0], 0)
+        self.assertEqual(self.read("cards.json")["SD"]["surprises"], [ff7])
+
     def test_card_target_requires_an_existing_card(self):
         self.assertEqual(Cmd.run_cmd(self, "games", "add", "gba", "A.zip", "--card", "NOPE")[0], 2)
         self.assertEqual(self.run_cmd("games", "add", "gba", "A.zip")[0], 0)

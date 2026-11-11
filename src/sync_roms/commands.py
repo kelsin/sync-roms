@@ -7,7 +7,7 @@ import re
 import sys
 
 from . import collections as colls
-from . import external, picker, runtime, s3, setedit, store, ui, usersettings
+from . import external, m3u, picker, runtime, s3, setedit, store, surprise, ui, usersettings
 
 
 UNKNOWN_SHOWN = 8  # device ids named in an "unknown device" error
@@ -271,8 +271,8 @@ def parse_collection(value):
 # Card-entry list fields that `games export`/`import` carry as `@field value` lines, one per value. CARD_HOOKS gives a
 # field its own parse(value) -> item or None (None skips the line; the hook warns) and format(item) -> text; a field
 # without one uses the text as it is.
-CARD_FIELDS = ("collections", "frontend_collections")
-CARD_HOOKS = {"collections": (parse_collection, str)}
+CARD_FIELDS = ("collections", "frontend_collections", "surprise", "surprises")
+CARD_HOOKS = {"collections": (parse_collection, str), "surprises": (None, lambda s: s["bucket"])}
 
 
 def games_export(args):
@@ -284,10 +284,32 @@ def games_export(args):
         print(key)
     card = store.load_cards()[args.card]
     for field in CARD_FIELDS:
+        if field == "surprise":
+            if isinstance(card, dict) and not surprise.enabled(card):
+                print("@surprise false")
+            continue
         values = card.get(field) if isinstance(card, dict) else None
         for value in values if isinstance(values, list) else []:
+            if field == "surprises" and not (isinstance(value, dict) and isinstance(value.get("bucket"), str)):
+                continue
             print(f"@{field} {CARD_HOOKS.get(field, (None, str))[1](value)}")
     return 0
+
+
+def surprise_entries(keys_by_system):
+    """Saved-surprise dicts for {system: [keys]}; a multi-disc game's other keys come from the system's listing."""
+    out = []
+    for system, keys in keys_by_system.items():
+        groups = {}
+        try:
+            groups = m3u.file_groups(s3.list_sizes(f"{system}/", sizes=False))
+        except (*s3.ERRORS, SystemExit):
+            ui.warn(f"can't list {system}/, importing its surprises without their other discs")
+        for key in keys:
+            entry = {"system": system, "bucket": key, "title": store.key_title(key)}
+            files = [k for k in groups.get(key, []) if k != key]
+            out.append({**entry, "files": files} if files else entry)
+    return out
 
 
 def games_import(args):
@@ -297,11 +319,27 @@ def games_import(args):
     except OSError as e:
         ui.fail(f"Can't read {args.file}: {e}", 2)
     changes, by_system, known, fields = [], {}, set(system_ids()), {}
+    surprise_state, surprise_keys = None, {}
     for line in lines:
         if line.startswith("@"):
             field, _, text = line[1:].partition(" ")
             if field not in CARD_FIELDS:
                 ui.warn(f"skipping {line!r}: unknown card field")
+                continue
+            if field == "surprise":
+                if text.strip() in ("true", "false"):
+                    surprise_state = text.strip() == "true"
+                    changes.append(("+", f"@surprise {text.strip()}"))
+                else:
+                    ui.warn(f"skipping {line!r}: expected @surprise true or false")
+                continue
+            if field == "surprises":
+                system, _, name = text.strip().partition("/")
+                if system not in known or not name:
+                    ui.warn(f"skipping {line!r}: expected @surprises SYSTEM/file")
+                else:
+                    surprise_keys.setdefault(system, []).append(text.strip())
+                    changes.append(("+", f"@surprises {text.strip()}"))
                 continue
             value = CARD_HOOKS.get(field, (lambda text: text, str))[0](text.strip())
             if value is not None:
@@ -324,7 +362,16 @@ def games_import(args):
     def save_all(raw):
         if save(raw) is False:
             return False
-        return store.update_card(args.card, **fields) if fields else None
+        values = dict(fields)
+        if surprise_state is False:
+            values["surprise"] = False
+        if surprise_keys:
+            values["surprises"] = surprise_entries(surprise_keys)
+        if surprise_state:
+            cards = store.load_cards()
+            if isinstance(cards.get(args.card), dict) and cards[args.card].pop("surprise", None) is not None:
+                store.write_cards(cards)
+        return store.update_card(args.card, **values) if values else None
 
     return finish(args, raw, save_all, changes)
 

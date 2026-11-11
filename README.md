@@ -479,7 +479,7 @@ sync-roms --edit
    red above (or over). Sizes come from a cache in
    `~/.sync-roms/sizes.json` that is refreshed in the background when you open a system; until it is ready sizes show
    `…`. `/` filters, `Enter` opens a system, `l` adds a collection to the card (each shows how many of its games are playable on the card's device, and `Space`/`Enter` toggles the whole collection), `f` makes it a full system (every file in its folder; `f` again brings the
-   game list back). Games save to `cards.json` as you leave a
+   game list back), `u` turns the card's [Surprise](#surprise) on or off (the title says which). Games save to `cards.json` as you leave a
    system (the previous file is kept as `cards.json.bak`). `Esc` goes back to the menu.
 2. A system shows every file in its storage folder. `✅` is synced, `⬜` is not; a 📦 next to a game says a set the
    card references syncs it (switching it off excludes it from that set on this card). `/` searches, `Space` (or `Tab`)
@@ -493,7 +493,7 @@ sync-roms --edit
    matched ignoring case, so `Capcom` and `capcom` are one value. Picking another
    value of the same field replaces it; filters on different fields, the set filter and `/` all combine, and the title
    shows what is active. A game with no value for a field never matches a filter on it. The metadata is read in the
-   background once per session, so the menu says it is loading at first. `c` clears every filter and shows every game again.
+   background once per session, so the menu says it is loading at first. `p` narrows the list to games that were surprises within the last `surprise_ttl_days` (🎁 past surprises only), `c` clears every filter and shows every game again.
    Pending changes show as `➕` / `➖` and the bottom line updates the card's total as you toggle. `w` writes a note on a
    picked game. A 💖 next to a game says one of the card's collections syncs it: it is always on, can't be switched off here, per-card exclusions don't apply to it, and it counts in the card's budget. `Enter` keeps your changes; `Esc` asks whether to keep or revert them if there are any.
 3. When you leave the menu, device/firmware and device-system changes are summarized, then **save**, **keep
@@ -511,7 +511,7 @@ sync-roms games remove gba 'Metroid Fusion.zip' --card SD
 sync-roms games full psx on --card SD              # sync a whole system
 sync-roms games sets add pinball --card SD
 sync-roms games list --json --card SD
-sync-roms games export --card SD > list.txt      # SYSTEM/file per line, SYSTEM/* for a full system, then @collections ID and @frontend_collections NAME lines
+sync-roms games export --card SD > list.txt      # SYSTEM/file per line, SYSTEM/* for a full system, then @collections ID, @frontend_collections NAME, @surprise false (only when Surprise is off) and @surprises SYSTEM/file (one per surprise) lines
 sync-roms games import list.txt --card SD         # a field with @ lines in the file replaces the card's value
 sync-roms cards new SD --device rg35xx-sp --layout knulli --size 256GB   # --size is optional; shown in `cards list` and on sync
 ```
@@ -557,6 +557,30 @@ It works in a card's `games` entry in `cards.json`. A set reference is live: gam
 to the set in a later release are synced too, for the systems the card has enabled. In `--edit`, press `s` in a
 system's game list, then `f` on a set (it shows 📦) to toggle it; the games it syncs show 📦 and switching one
 off excludes it on that card. Unknown set names are skipped with a warning.
+
+### Surprise
+
+Every card gets up to 10 surprises: random full English games (no BIOS, prototypes, betas, demos, hacks, re-releases or
+compilations; a multi-disc game counts as one) from the systems of the run, in addition to the games you picked. It is on by default. Seven of the ten come from
+the systems recommended for the card's device and three from the others, spread evenly over the systems; a system with no
+candidates passes its slots on. Games never surprised, then games surprised before, then games another card currently
+holds are used in that order. Full systems are left out, and so is any game already on the card.
+
+- **In a sync** the step runs after the systems are chosen. Interactively it first asks which of the card's current
+  surprises to replace (`Esc` there behaves as it does in any picker: it keeps them all), fills the empty slots, and opens
+  the card editor so you can adjust the card. Without a terminal, with `--yes` or `--json` it replaces all of them. `--dry-run`
+  changes no surprises: it only says whether it would ask or replace all, previews the picks for empty slots and saves nothing.
+  The mirror is refreshed a second time only when this step or the editor changed the card's picks.
+- **In the card editor**, `u` in the system list turns Surprise on or off for the card (off removes its surprises at the next
+  sync), and `p` in a game list shows only the games surprised within `surprise_ttl_days`. A surprise shows in the
+  game list as 🎁 Surprise and can't be switched off there, like a collection game; it counts in the card's budget and size warning.
+- **History** is kept in `~/.sync-roms/surprises.json` (system, bucket, title, card, ISO date) and pruned past
+  `surprise_ttl_days` in `settings.json` (default 183) whenever it is written. It is how a game comes around again only later.
+- **Frontends**: ES-DE and Knulli cards get the surprises as a custom collection named `Surprise`, written like any
+  other [collection](#collections-in-es-de-and-knulli); that name is reserved, so a collection can't be called Surprise.
+- **Mirror**: picks are made from storage itself, not the mirror, so they can be games the mirror doesn't have yet.
+- `cards.json` holds `"surprise": false` when it is off and `"surprises"` (`[{"system", "bucket", "title", "files"?}]`, `files` being
+  a multi-disc game's other keys); `games export` and `import` carry both, and `sync-roms check` validates them.
 
 ### A card's games in `cards.json`
 
