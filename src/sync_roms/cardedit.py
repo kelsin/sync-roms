@@ -307,9 +307,9 @@ def edit_card(name, setup=None):
         edit_system(name, systems[i], setup, sizing)
 
 
-def pick_set(system, sets, sets_on, catalog):
+def pick_set(system, sets, sets_on, catalog, current=None):
     """The set to filter a system's games to, or None: sets with games in catalog (the system's bucket keys) are
-    offered. f switches a set's reference on the card (in sets_on, in place)."""
+    offered, starting on the one named current. f switches a set's reference on the card (in sets_on, in place)."""
     shown = [(x, set_filter(x, system)) for x in sets]
     shown = [(x, keys) for x, keys in shown if keys & catalog]
     if not shown:
@@ -331,7 +331,8 @@ def pick_set(system, sets, sets_on, catalog):
         return True
 
     mark()
-    i = picker.filter_list(f"📦 Sets with games on {system['name']}", labels, extras=extras,
+    cursor = next((n for n, (x, _) in enumerate(shown) if x["name"] == current), 0)
+    i = picker.filter_list(f"📦 Sets with games on {system['name']}", labels, extras=extras, cursor=cursor,
                            hotkeys=(FULL_KEY,), hint=SETS_HINT, on_hotkey=on_hotkey)
     if i is None:
         return None
@@ -517,7 +518,7 @@ def edit_system(name, system, setup, sizing=None):
                 pick_meta(system, meta, meta_filt, lambda field: [r[1] for r in rows if keep(r[1], field)])
             else:
                 refs = list(sets_on)
-                chosen = pick_set(system, sets, sets_on, {r[1] for r in rows})
+                chosen = pick_set(system, sets, sets_on, {r[1] for r in rows}, filt and filt[0])
                 if sets_on != refs:  # kept as is: rows switched by the reference change aren't pending, so u keeps them
                     covered = cover()  # an exclusion means nothing once no set covers the game, on any system
                     excluded.intersection_update(covered)
