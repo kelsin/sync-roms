@@ -114,6 +114,42 @@ def pick_systems(rows, initial=None, state=None, editable=False, sizes=True):
     return [i for i, on in enumerate(result) if on]
 
 
+def help_lines(multi, hint, hidden_count=False, has_note=False):
+    """Every key a filter_list accepts, then this screen's own hint entries."""
+    lines = ["j/k ↑/↓ ^N/^P   move", "g/G             top / bottom", "^D/^U           half page",
+             "^F/^B PgDn/PgUp page", "/               filter (Enter keeps it, Esc clears it)",
+             "Enter           " + ("done" if multi else "pick"), "Esc/q/^G        clear the filter, then go back"]
+    if multi:
+        lines += ["Space/Tab       toggle the row", "a               toggle all shown", "o               view: all / on / changed",
+                  "u               revert this list"]
+        if has_note:
+            lines.append("w               edit the row's note")
+    if hidden_count:
+        lines.append("z               show / hide hidden rows")
+    lines.append("?               this help")
+    extra = [e for e in hint.split(" · ") if e] if hint else []
+    if extra:
+        lines += ["", "This screen:"] + ["  " + e for e in extra]
+    return lines
+
+
+def show_help(stdscr, lines):
+    """Draw the key list over the screen and wait for any key."""
+    h, w = stdscr.getmaxyx()
+    lines = ["Keybindings", ""] + lines + ["", "Press any key to close"]
+    top = max(0, (h - len(lines)) // 2)
+    left = max(0, (w - max(cell_width(l) for l in lines)) // 2 - 2)
+    stdscr.erase()
+    for n, line in enumerate(lines[:h - 1]):
+        stdscr.addnstr(top + n, left, line, max(1, w - left - 1), curses.A_BOLD if n == 0 else 0)
+    stdscr.refresh()
+    stdscr.timeout(-1)
+    try:
+        stdscr.get_wch()
+    except curses.error:
+        pass
+
+
 def cell_width(text):
     """Terminal cells text takes up (emoji and CJK are two wide)."""
     return sum(2 if unicodedata.east_asian_width(c) in "WF" else 1 for c in text)
@@ -352,6 +388,9 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
                 cur = moved
             elif k == "/":
                 typing, qpos = True, len(query)
+            elif k == "?":
+                show_help(stdscr, help_lines(multi, hint, hidden_count, bool(on_note)))
+                stdscr.timeout(POLL_MS if poll else -1)
             elif k == "j":
                 cur = min(len(vis) - 1, cur + 1)
             elif k == "k":
