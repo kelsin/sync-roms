@@ -16,22 +16,48 @@ def slug(name):
     return re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")
 
 
+def _clean_games(games):
+    """The usable games (dicts with a text system and bucket; files kept only as text keys) and whether any was
+    changed or dropped."""
+    out = []
+    for game in games:
+        if store._game_keys(game) is None:
+            continue
+        game = dict(game)
+        if isinstance(game.get("files"), list):
+            game["files"] = [k for k in game["files"] if isinstance(k, str) and k]
+        else:
+            game.pop("files", None)
+        out.append(game)
+    return out, out != games
+
+
 def load_collections():
-    """Every readable collection as {"id", "name", "description", "games"}, sorted by name (case-insensitive)."""
+    """Every readable collection as {"id", "name", "description", "games"}, sorted by name (case-insensitive).
+    Malformed games are dropped; each problem file is warned about once per run."""
     folder = collections_dir()
     found = []
     for name in sorted(os.listdir(folder)) if os.path.isdir(folder) else []:
         if not name.endswith(".json"):
             continue
+        problem = None
         try:
             with open(os.path.join(folder, name), encoding="utf-8") as f:
                 data = json.load(f)
             if not isinstance(data["name"], str) or not isinstance(data["games"], list):
                 raise ValueError("needs a text 'name' and a 'games' list")
-            found.append({"id": name[:-5], "name": data["name"], "description": data.get("description", ""),
-                          "games": data["games"]})
+            games, dropped = _clean_games(data["games"])
+            description = data.get("description", "")
+            found.append({"id": name[:-5], "name": data["name"],
+                          "description": description if isinstance(description, str) else "", "games": games})
+            if dropped:
+                problem = f"collections/{name}: some games aren't valid (each needs a system and a bucket), skipped"
         except (OSError, ValueError, AttributeError, KeyError, TypeError) as e:
-            ui.warn(f"collections/{name}: couldn't be read ({e}), skipped")
+            problem = f"collections/{name}: couldn't be read ({e}), skipped"
+        path = os.path.join(folder, name)
+        if problem and path not in store._warned:
+            store._warned.add(path)
+            ui.warn(problem)
     return sorted(found, key=lambda c: c["name"].lower())
 
 

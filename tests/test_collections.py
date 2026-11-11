@@ -44,6 +44,41 @@ class Files(DataDir):
         self.assertEqual(len(problems), 4)
         self.assertTrue(all(p.startswith("collections/") for p in problems))
 
+    def test_malformed_games_are_dropped_with_one_warning_per_file(self):
+        os.makedirs(self.path("collections"))
+        self.write_json("collections/mixed.json", {"name": "Mixed", "description": 5, "games": [
+            "gba/Loose.zip", None, 7, {"title": "No system", "bucket": "gba/A.zip"}, {"system": "gba"},
+            {"system": "", "bucket": "gba/B.zip"}, {"system": 3, "bucket": "gba/C.zip"}, {"system": "gba", "bucket": ["x"]},
+            {"title": "Kept", "system": "gba", "bucket": "gba/Kept.zip", "files": "gba/Kept.sav"},
+            {"title": "Discs", "system": "psx", "bucket": "psx/FF7.m3u", "files": ["psx/FF7 (Disc 1).chd", 5, None]},
+            FF7]})
+        with mock.patch.object(ui, "warn") as warn:
+            loaded = collections.load_collections()
+            collections.load_collections()
+        self.assertEqual(warn.call_count, 1)
+        self.assertIn("collections/mixed.json", warn.call_args[0][0])
+        (coll,) = loaded
+        self.assertEqual(coll["description"], "")
+        self.assertEqual(coll["games"], [{"title": "Kept", "system": "gba", "bucket": "gba/Kept.zip"},
+                                         {"title": "Discs", "system": "psx", "bucket": "psx/FF7.m3u",
+                                          "files": ["psx/FF7 (Disc 1).chd"]}, FF7])
+        self.assertEqual(collections.collection_games(coll), coll["games"])
+
+    def test_clean_file_warns_nothing(self):
+        collections.save_collection({"id": "favs", "description": "Mine", **FAVS})
+        with mock.patch.object(ui, "warn") as warn:
+            self.assertEqual(collections.load_collections()[0]["games"], FAVS["games"])
+        warn.assert_not_called()
+
+    def test_unreadable_file_warns_once_per_run(self):
+        os.makedirs(self.path("collections"))
+        with open(self.path("collections/bad.json"), "w") as f:
+            f.write("{")
+        with mock.patch.object(ui, "warn") as warn:
+            collections.load_collections()
+            collections.load_collections()
+        self.assertEqual(warn.call_count, 1)
+
     def test_no_folder_is_no_collections_and_delete_removes_the_file(self):
         self.assertEqual(collections.load_collections(), [])
         collections.save_collection({"id": "favs", **FAVS})

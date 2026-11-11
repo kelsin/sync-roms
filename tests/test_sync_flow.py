@@ -17,6 +17,7 @@ from helpers import MANIFEST, list_sizes  # noqa: E402
 
 GAME = {"title": "Game", "system": "gba", "bucket": "gba/Game.zip"}
 FAVS = {"id": "favs", "name": "Favs", "games": [GAME]}
+REAL_LOAD_COLLECTIONS = collections_mod.load_collections
 
 
 def read_from(card_dir, *parts):
@@ -266,6 +267,19 @@ class SyncFlowTest(unittest.TestCase):
         self.run_sync(cards={"collections": ["favs"]}, colls=[favs], manifest={**MANIFEST, "systems": MANIFEST["systems"] + [psx]},
                       setup=(device, "esde"), files=["ROMs/gba/Game.zip", "ROMs/psx/FF7.chd"],
                       after=lambda d: read_from(d, "ES-DE", "collections", "custom-Favs.cfg"))
+        self.assertEqual(self.after, "%ROMPATH%/gba/Game.zip\n")
+
+    def test_malformed_collection_games_are_skipped_at_the_end_of_the_sync(self):
+        data = tempfile.TemporaryDirectory()
+        self.addCleanup(data.cleanup)
+        os.makedirs(os.path.join(data.name, "collections"))
+        store.write_json(os.path.join(data.name, "collections", "favs.json"),
+                         {"name": "Favs", "games": [GAME, "gba/Loose.zip", {"bucket": "gba/Other.zip"}, {"system": "gba"}]})
+        with contextlib.redirect_stderr(io.StringIO()):
+            code, *_ = self.run_sync(cards={"collections": ["favs"]}, files=["ROMs/gba/Game.zip"], extra=(
+                (store, "data_dir", lambda: data.name), (collections_mod, "load_collections", REAL_LOAD_COLLECTIONS)),
+                after=lambda d: read_from(d, "ES-DE", "collections", "custom-Favs.cfg"))
+        self.assertEqual(code, 0)
         self.assertEqual(self.after, "%ROMPATH%/gba/Game.zip\n")
 
     def surprise_calls(self, result=(), **kw):

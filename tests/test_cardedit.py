@@ -201,6 +201,13 @@ class Flow(DataDir):
         self.assertEqual(calls[1][2]["extras"], [[("  ✅ on the card", "green")]])
         self.assertEqual(self.read("cards.json")["c"]["collections"], ["favs"])
 
+    def test_collections_hotkey_skips_malformed_games(self):
+        self.favs("gba/Loose.zip", None, {"system": "gba"})
+        self.card()
+        with contextlib.redirect_stderr(io.StringIO()):
+            calls = self.run_card(returns((cardedit.COLLECTIONS_KEY, 0)), returns(None), returns(None))
+        self.assertEqual(calls[1][1], ["Favs  (2 playable, 1 not playable)"])
+
     def test_enter_toggles_a_collection_off_again(self):
         self.favs()
         self.card(collections=["favs"])
