@@ -17,7 +17,7 @@ def system(bucket, name, bios=()):
     return {"bucket": bucket, "name": name, "folders": {"esde": bucket}, "bios": {"files": list(bios)}}
 
 
-GBA, GB, PSX = system("gba", "Game Boy Advance", ["gba_bios.bin"]), system("gb", "Game Boy"), system("psx", "PlayStation")
+GBA, GB, PSX = system("gba", "Game Boy Advance", ["gba_bios.bin"]), system("gb", "Game Boy", ["gb_bios.bin"]), system("psx", "PlayStation")
 DEVICE = {"id": "d", "name": "D", "firmwares": ["esde"], "systems": ["gba", "gb"]}
 CATALOG = {"systems": [GBA, GB, PSX], "devices": [DEVICE],
            "layouts": {"esde": {"label": "ES-DE", "roms_dir": "ROMs", "bios_dir": "BIOS"}}}
@@ -251,6 +251,51 @@ class Flow(DataDir):
             self.assertEqual(kw["status"]([True, False, False, True]), "💾 26 B / 1 GB · 1 GB free · 2 game(s)")
             return [False] * 4
         self.run_system(step)
+
+    def test_game_view_counts_other_systems_bios_once(self):
+        self.card(games={"gb": [g("gb/Red.gb")]})
+        self.cache = {"gba/": self.files["gba/"], "gb/": self.files["gb/"], "scrapes/gba/": {}, "scrapes/gb/": {},
+                      "BIOS/": {"BIOS/gb_bios.bin": 1000, "BIOS/gba_bios.bin": 16}}
+        card = cardedit.card_entry("c", (DEVICE, "esde"))
+        self.assertEqual(budget.card_usage(card, [GBA, GB]).bytes, 1002)  # what the system list shows
+
+        seen = []
+
+        def step(labels, kw):
+            kw["status"]([False] * 4)
+            kw["status"]([True, False, False, False])  # Emerald (3) and the GBA BIOS (16)
+            return [False] * 4
+        with mock.patch.object(cardedit, "status_of", side_effect=lambda u, c: seen.append(u.bytes)):
+            self.run_system(step)
+        self.assertEqual(seen, [1002, 1021])
+
+    def test_entering_a_system_lists_names_only(self):
+        self.card()
+        calls = []
+        real = s3.list_sizes
+
+        def listing(prefix, sizes=True):
+            calls.append((prefix, sizes))
+            return real(prefix, sizes)
+        with mock.patch.object(s3, "list_sizes", listing):
+            self.run_system(returns([False] * 4))
+        self.assertEqual(calls, [("gba/", False)])
+
+    def test_ctrl_c_saves_what_was_toggled(self):
+        self.card(games={"gba": [g("gba/Ruby.zip")]})
+
+        def filtered_pass(labels, kw):  # Zelda on, then the set list
+            kw["session"]["sel"][labels.index("Zelda.zip")] = True
+            return (cardedit.SET_KEY, 0)
+
+        def interrupted(labels, kw):  # Ruby off, then Ctrl-C mid-list
+            kw["session"]["sel"][labels.index("Ruby.zip")] = False
+            raise KeyboardInterrupt
+        with self.assertRaises(KeyboardInterrupt):
+            self.run_system(filtered_pass, returns((cardedit.FULL_KEY, 0)), returns(None), interrupted)
+        entry = self.read("cards.json")["c"]  # the first pass, the set reference and the interrupted pass
+        self.assertEqual(entry["games"], {"gba": [g("gba/Ruby.zip"), g("gba/Zelda.zip")], "sets": ["pk"]})
+        self.assertEqual(entry["excluded"], {"gba": ["gba/Ruby.zip"]})
 
     def test_full_system_has_no_game_list(self):
         self.card(games={"gba": {"full_system": True}})

@@ -99,7 +99,7 @@ def refresh_async(prefix, on_done):
     def run():
         try:
             result = refresh(prefix)
-        except Exception:  # the thread must never die loudly: the editor falls back to what it had
+        except (Exception, SystemExit):  # the thread must never die loudly (ui.fail raises SystemExit): fall back
             result = cached(prefix) or {}
         on_done(result)
 

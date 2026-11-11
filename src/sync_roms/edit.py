@@ -404,7 +404,7 @@ def edit_manifest():
                     if not changed_targets() and not overlay_pending or ui.confirm("Discard your pending changes and quit?", default=False):
                         return False
         except KeyboardInterrupt:
-            print(ui.yellow("\n🛑 Interrupted — your pending changes are kept; review them below."))
+            print(ui.yellow("\n🛑 Interrupted — card games are saved; pending device and device-system changes are kept: review them below."))
             return True
 
     def changed_targets():

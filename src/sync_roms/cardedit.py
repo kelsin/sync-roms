@@ -2,7 +2,7 @@
 and each system's games with a set filter. Changes are saved to cards.json as they are made."""
 import queue
 
-from . import budget, edit, picker, scrape_plan, sizecache, store, ui
+from . import budget, edit, picker, s3, scrape_plan, sizecache, store, ui
 
 FULL_KEY = "f"
 MAKE_SET_KEY = "m"
@@ -218,7 +218,8 @@ def edit_system(name, system, setup, sizing=None):
     excluded = set(before_excluded.get(bucket, ()))
     sets = store.load_sets()
     sets_by_id = {x["id"]: x for x in sets}
-    in_storage = store.folder_keys(bucket)
+    # names only: on a folder a sized listing stats every file, which the background refresh already does
+    in_storage = {k for k in s3.list_sizes(f"{bucket}/", sizes=False) if not k.endswith("/")}
     rows = edit.system_rows(s, in_storage)
     others = [x for x in can_play(store.repo_json("systems"), setup) if x["bucket"] != bucket]
     capacity = budget.card_capacity(card_entry(name, setup, cards))
@@ -227,7 +228,9 @@ def edit_system(name, system, setup, sizing=None):
     def work_out():
         card = card_entry(name, setup, cards)
         usages = budget.system_usages(card, others)
-        work["others"] = budget.card_usage(card, others, usages)
+        parts = list(usages.values())  # without BIOS: it is added once, with this system's, in status
+        work["others"] = budget.Usage(sum(p.bytes for p in parts), sum(p.count for p in parts),
+                                      any(p.partial for p in parts))
         picked = [x for x in others if budget.picked(usages[x["bucket"]])]
         work["bios"] = (budget.bios_usage(picked), budget.bios_usage(picked + [system]))
         work["costs"], work["scrapes_missing"] = budget.game_costs(card, system, [r[1] for r in rows])
@@ -255,45 +258,8 @@ def edit_system(name, system, setup, sizing=None):
             out.append((f"  {SIZING}", "dim"))
         return out
 
-    while True:
-        notes = cover()
-        base = states(notes)
-        shown = [r for r in rows if filt is None or r[1] in filt[1]]
-        keys = [r[1] for r in shown]
-        session = {"sel": [base[k] for k in keys]}
-        extras = [row_extras(k, notes, st) for k, st in zip(keys, session["sel"])]
-
-        def status(state):
-            now = dict(base)
-            now.update(zip(keys, state))
-            picked = [k for k, st in now.items() if st]
-            mine = sum(work["costs"].get(k, 0) for k in picked)
-            bios = work["bios"][1 if picked else 0]
-            partial = (work["others"].partial or bios.partial
-                       or bool(picked) and (work["scrapes_missing"] or any(k not in work["costs"] for k in picked)))
-            total = budget.Usage(work["others"].bytes + mine + bios.bytes, work["others"].count + len(picked), partial)
-            return status_of(total, capacity)
-
-        def poll():
-            if sizing.finished():
-                work_out()
-                extras[:] = [row_extras(k, notes, st) for k, st in zip(keys, session["sel"])]
-
-        def note_text(i):
-            game = next((g for g in s["games"] if g.get("bucket") == keys[i]), None)
-            return game.get("note", "") if game else ""
-
-        def on_note(i, text):
-            if not edit.set_note(s, keys[i], text):
-                return "Switch the game on and press Enter first, then add its note"
-            return "Note saved" if text else "Note cleared"
-
-        where = f" · 📦 {filt[0]} only (c shows all)" if filt else ""
-        result = picker.filter_list(f"✏️  {system['name']} on {name} — ✅ synced, ⬜ not, 📦 from a set{where}",
-                                    [r[3] for r in shown], multi=True, initial=[start[k] for k in keys],
-                                    extras=extras, hint=GAMES_HINT, hotkeys=(SET_KEY, CLEAR_KEY), status=status,
-                                    poll=poll, session=session, note_text=note_text, on_note=on_note)
-        state = session["sel"] if isinstance(result, tuple) else result
+    def apply(shown, notes, base, state):
+        """Fold one pass's on/off states into the card being edited."""
         for (_, key, title, _), want in zip(shown, state):
             if want == base[key]:
                 continue
@@ -303,24 +269,78 @@ def edit_system(name, system, setup, sizing=None):
                 s["games"].append({"title": title, "bucket": key})
             else:
                 s["games"] = [g for g in s["games"] if g.get("bucket") != key]
-        if not isinstance(result, tuple):
-            break
-        if result[0] == CLEAR_KEY:
-            filt = None
-        else:
-            chosen = pick_set(system, sets, sets_on, {r[1] for r in rows})
-            if chosen:
-                filt = (chosen["name"], set_filter(chosen, system))
-    games = {k: v for k, v in raw.items() if k not in (bucket, store.SETS_KEY)}
-    if s["games"]:
-        games[bucket] = s["games"]
-    if sets_on:
-        games[store.SETS_KEY] = sets_on
-    new_excluded = {b: list(k) for b, k in before_excluded.items() if b != bucket}
-    if excluded:
-        new_excluded[bucket] = sorted(excluded)
-    changed = store.sorted_list(games) != store.sorted_list(raw) or new_excluded != before_excluded
-    if changed:
-        store.update_card(name, games=store.sorted_list(games),
-                          **({"excluded": new_excluded} if new_excluded or before_excluded else {}))
-    return changed
+
+    def save():
+        games = {k: v for k, v in raw.items() if k not in (bucket, store.SETS_KEY)}
+        if s["games"]:
+            games[bucket] = s["games"]
+        if sets_on:
+            games[store.SETS_KEY] = sets_on
+        new_excluded = {b: list(k) for b, k in before_excluded.items() if b != bucket}
+        if excluded:
+            new_excluded[bucket] = sorted(excluded)
+        changed = store.sorted_list(games) != store.sorted_list(raw) or new_excluded != before_excluded
+        if changed:
+            store.update_card(name, games=store.sorted_list(games),
+                              **({"excluded": new_excluded} if new_excluded or before_excluded else {}))
+        return changed
+
+    pending = None  # (rows shown, notes, states before) of the pass on screen, applied if Ctrl-C ends it
+    try:
+        while True:
+            notes = cover()
+            base = states(notes)
+            shown = [r for r in rows if filt is None or r[1] in filt[1]]
+            keys = [r[1] for r in shown]
+            session = {"sel": [base[k] for k in keys]}
+            extras = [row_extras(k, notes, st) for k, st in zip(keys, session["sel"])]
+
+            def status(state):
+                now = dict(base)
+                now.update(zip(keys, state))
+                picked = [k for k, st in now.items() if st]
+                mine = sum(work["costs"].get(k, 0) for k in picked)
+                bios = work["bios"][1 if picked else 0]
+                partial = (work["others"].partial or bios.partial
+                           or bool(picked) and (work["scrapes_missing"] or any(k not in work["costs"] for k in picked)))
+                total = budget.Usage(work["others"].bytes + mine + bios.bytes, work["others"].count + len(picked),
+                                     partial)
+                return status_of(total, capacity)
+
+            def poll():
+                if sizing.finished():
+                    work_out()
+                    extras[:] = [row_extras(k, notes, st) for k, st in zip(keys, session["sel"])]
+
+            def note_text(i):
+                game = next((g for g in s["games"] if g.get("bucket") == keys[i]), None)
+                return game.get("note", "") if game else ""
+
+            def on_note(i, text):
+                if not edit.set_note(s, keys[i], text):
+                    return "Switch the game on and press Enter first, then add its note"
+                return "Note saved" if text else "Note cleared"
+
+            where = f" · 📦 {filt[0]} only (c shows all)" if filt else ""
+            pending = (shown, notes, base, session)
+            result = picker.filter_list(f"✏️  {system['name']} on {name} — ✅ synced, ⬜ not, 📦 from a set{where}",
+                                        [r[3] for r in shown], multi=True, initial=[start[k] for k in keys],
+                                        extras=extras, hint=GAMES_HINT, hotkeys=(SET_KEY, CLEAR_KEY), status=status,
+                                        poll=poll, session=session, note_text=note_text, on_note=on_note)
+            pending = None
+            apply(shown, notes, base, session["sel"] if isinstance(result, tuple) else result)
+            if not isinstance(result, tuple):
+                break
+            if result[0] == CLEAR_KEY:
+                filt = None
+            else:
+                chosen = pick_set(system, sets, sets_on, {r[1] for r in rows})
+                if chosen:
+                    filt = (chosen["name"], set_filter(chosen, system))
+    except KeyboardInterrupt:
+        if pending:
+            shown, notes, base, session = pending
+            apply(shown, notes, base, session["sel"])
+        save()
+        raise
+    return save()

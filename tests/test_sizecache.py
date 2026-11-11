@@ -169,5 +169,12 @@ class SizeCacheTest(helpers.DataDir):
         self.assertEqual(got, [{}])
 
 
+    def test_async_exit_from_a_worker_still_calls_on_done(self):
+        got = []
+        with mock.patch.object(sizecache, "refresh", side_effect=SystemExit(3)):
+            sizecache.refresh_async("gba/", got.append).join(5)
+        self.assertEqual(got, [{}])
+
+
 if __name__ == "__main__":
     unittest.main()
