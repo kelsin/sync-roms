@@ -565,6 +565,7 @@ def stale_media(layout_name, systems, roms_dir, es_dir, base=None):
     stale, seen = [], set()
     if layout_name in ("muos", "slot"):
         return stale_firmware_media(layout_name, systems, roms_dir, base)
+    named = {esde_name(x, layout_name) for x in systems}
     for s in systems:
         folder = s["folders"].get(layout_name)
         rom_dir = os.path.join(roms_dir, folder) if folder else None
@@ -577,6 +578,12 @@ def stale_media(layout_name, systems, roms_dir, es_dir, base=None):
                 media = os.path.join(media_root_of(layout_name, s, base, es_dir), mtype)
                 stale += [full for rel, full in walk_files(media) if os.path.splitext(rel)[0] not in stems] \
                     if os.path.isdir(media) else []
+            old = s["bucket"]  # an older sync named the folders after the bucket: all of it is stale once the ES-DE one exists
+            if old != esde_name(s, layout_name) and old not in named and os.path.isdir(media_root_of(layout_name, s, base, es_dir)):
+                stale += [full for _, full in walk_files(media_root_of(layout_name, {"folders": {}, "bucket": old}, base, es_dir))]
+                if layout_name == "esde":
+                    stale += [path for path in [os.path.join(es_dir, "gamelists", old, GAMELIST_FILES["esde"])]
+                              if os.path.isfile(path)]
         elif layout_name == "knulli":
             for sub in ("images", "videos", "manuals"):
                 base = os.path.join(rom_dir, sub)

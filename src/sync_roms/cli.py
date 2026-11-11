@@ -679,6 +679,9 @@ def sync_card(args):
     systems, layouts = manifest["systems"], manifest["layouts"]
     if not any(s["games"] or s.get("full_system") for s in systems):
         print(ui.dim(f"  {card} has no games picked"))
+    old_list = os.path.join(store.data_dir(), "games.json")  # the core list from before cards had their own games
+    if os.path.exists(old_list) and store.personal_json("games.json"):
+        ui.warn(f"{old_list} is no longer read; pick its games for {card} in 'sync-roms edit'.")
     saved = store.load_cards().get(card)
     chosen_setup = choose_card_setup(args, base, card, manifest, saved)
     if chosen_setup is None:

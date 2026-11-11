@@ -91,6 +91,20 @@ class EmudeckPlanTest(unittest.TestCase):
         self.assertEqual([os.path.basename(p) for p in stale], ["Gone.png"])
 
 
+    def test_stale_media_clears_the_older_bucket_named_esde_folders(self):
+        with tempfile.TemporaryDirectory() as base:
+            es = os.path.join(base, "ES-DE")
+            touch(os.path.join(es, "downloaded_media", "sg-1000", "covers", "A.png"))
+            touch(os.path.join(es, "downloaded_media", "sg1000", "covers", "A.png"))  # from before the rename
+            touch(os.path.join(es, "gamelists", "sg1000", "gamelist.xml"))
+            touch(os.path.join(base, "ROMs", "sg-1000", "A.sg"))
+            system = {"bucket": "sg1000", "folders": {"esde": "sg-1000"}}
+            stale = scrape_plan.stale_media("esde", [system], os.path.join(base, "ROMs"), es, base)
+            self.assertEqual(sorted(os.path.relpath(p, es) for p in stale),
+                             [os.path.join("downloaded_media", "sg1000", "covers", "A.png"),
+                              os.path.join("gamelists", "sg1000", "gamelist.xml")])
+
+
 class SlotPlanTest(unittest.TestCase):
     def test_label_goes_in_labels_named_after_the_rom(self):
         with tempfile.TemporaryDirectory() as root:
