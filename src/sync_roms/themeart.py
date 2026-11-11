@@ -1,5 +1,5 @@
-"""Art Book Next artwork for the Surprise collection on ES-DE and Knulli cards."""
-import filecmp
+"""Art Book Next artwork for custom collections (Surprise and the ones given art) on ES-DE and Knulli cards."""
+import json
 import http.client
 import os
 import shutil
@@ -10,9 +10,10 @@ import zlib
 
 from . import __version__, frontend, runtime, s3, store, ui
 
-ART = os.path.join(store.REPO_DATA, "themes", "art-book-next")  # the Surprise files, laid out as in the ES-DE theme
-ART_PNG = "_inc/systems/artwork-outline/surprise.png"
-LOGO_SVG = "_inc/systems/logos/surprise.svg"
+THEME_DATA = os.path.join(store.REPO_DATA, "themes", "art-book-next")
+SURPRISE_ART = "surprise"
+# The Outline-style artwork a collection can use, by id: art/<id>.png; art.json has the labels the editor shows.
+# Logos are drawn from the outlines of the theme's logo font (logo-font.json, from Changa One: see OFL.txt).
 
 # ES-DE on Android keeps downloaded themes off the card, so the card gets its own copy of the theme with the Surprise
 # files added, under a folder name of its own (ES-DE prefers a downloaded theme of the same name). The copy comes from
@@ -55,19 +56,72 @@ def _read(path):
         return ""
 
 
-def _copy(src, dest):
-    """Copy src to dest unless dest already has the same content. Returns whether it copied."""
-    if os.path.exists(dest) and filecmp.cmp(src, dest, shallow=False):
-        return False
-    os.makedirs(os.path.dirname(dest), exist_ok=True)
-    shutil.copyfile(src, dest)
+def art_choices():
+    """{art id: label} of the artwork a collection can pick, in the order the editor lists it."""
+    with open(os.path.join(THEME_DATA, "art.json"), encoding="utf-8") as f:
+        return json.load(f)
+
+
+def art_png(art_id):
+    """The artwork file for art_id, or None when there is none."""
+    path = os.path.join(THEME_DATA, "art", f"{art_id}.png")
+    return path if art_id and "/" not in art_id and "\\" not in art_id and os.path.isfile(path) else None
+
+
+def logo_svg(text):
+    """An SVG logo (200x40, white, like the theme's own) spelling text in capitals with the theme's logo font."""
+    with open(os.path.join(THEME_DATA, "logo-font.json"), encoding="utf-8") as f:
+        font = json.load(f)
+    glyphs = [font["glyphs"][c] for c in text.upper() if c in font["glyphs"]]
+    width = sum(g["advance"] for g in glyphs) or 1
+    scale = min(18.7 / font["cap_height"], 190 / width)  # capitals as tall as the theme's logos, never wider than 190
+    # the capitals are centred on the middle line (the theme's own logos run from 11.15 to 29.85)
+    paths, x = [], 0
+    for g in glyphs:
+        if g["path"]:
+            paths.append(f'<path transform="translate({x} 0)" d="{g["path"]}"/>')
+        x += g["advance"]
+    left = (200 - width * scale) / 2
+    return ('<?xml version="1.0" encoding="utf-8"?>\n'
+            '<svg viewBox="0 0 200 40" xmlns="http://www.w3.org/2000/svg">\n'
+            f'  <g fill="#fff" transform="translate({left:.2f} {20 + scale * font["cap_height"] / 2:.2f}) '
+            f'scale({scale:.5f} {-scale:.5f})">{"".join(paths)}</g>\n</svg>\n')
+
+
+def _put(path, data):
+    """Write data (bytes) to path unless it already holds them. Returns whether it wrote."""
+    try:
+        with open(path, "rb") as f:
+            if f.read() == data:
+                return False
+    except FileNotFoundError:
+        pass
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "wb") as f:
+        f.write(data)
     return True
 
 
-def _art_files():
-    """Paths (relative, /-separated) of the Surprise files in ART."""
-    return sorted(os.path.relpath(os.path.join(root, f), ART).replace(os.sep, "/")
-                  for root, _, files in os.walk(ART) for f in files)
+def _reserved(layout_name):
+    """Lowercase theme names a collection can't take art for: the systems' own, and the theme's built-in collections
+    (giving them art would replace the system's)."""
+    names = {s["folders"].get(layout_name) or "" for s in store.repo_json("systems")} - {""}
+    return {n.lower() for n in names} | {"custom-collections", "now-playing", "completed", "all", "favorites",
+                                         "lastplayed", "recent"}
+
+
+def usable(layout_name, arts):
+    """The {collection name: art png} of arts ({name: art id}) that can be installed, warning about the rest."""
+    out = {}
+    for name, art_id in sorted(arts.items()):
+        png = art_png(art_id)
+        if not png:
+            ui.warn(f"{name}: there is no theme art called {art_id!r}; skipped")
+        elif name.lower() in _reserved(layout_name) or name.lower().startswith("auto-"):
+            ui.warn(f"{name}: a collection named like a system or a built-in collection can't have its own theme art")
+        else:
+            out[name] = png
+    return out
 
 
 # --- ES-DE ---------------------------------------------------------------------------------------------------------
@@ -114,16 +168,29 @@ def _extract(archive_path, dest, commit):
     os.rename(part, dest)
 
 
-def install_esde(base):
-    """Put Art Book Next with the Surprise art on the card and select it. Returns whether anything changed."""
-    if not esde_wanted(base):
+def _esde_files(arts):
+    """{path in the theme: bytes} giving each collection in arts ({name: art png}) its art. ES-DE themes a custom
+    collection by its name in lower case."""
+    files = {}
+    for name, png in arts.items():
+        folder = name.lower()
+        with open(png, "rb") as f:
+            files[f"_inc/systems/artwork-outline/{folder}.png"] = f.read()
+        files[f"_inc/systems/logos/{folder}.svg"] = logo_svg(name).encode()
+        files[f"{folder}/theme.xml"] = b"<theme><include>./../theme.xml</include></theme>\n"
+    return files
+
+
+def install_esde(base, arts):
+    """Put Art Book Next with the collections' art on the card and select it. Returns whether anything changed."""
+    if not esde_wanted(base) or not arts:
         return False
     dest = _esde_dir(base)
     commit = _stored_commit()
     changed = False
     if not commit:
         if not os.path.exists(os.path.join(dest, ESDE_MARKER)):
-            ui.warn("Storage has no copy of Art Book Next for ES-DE, so the Surprise collection has no art; "
+            ui.warn("Storage has no copy of Art Book Next for ES-DE, so collections have no art; "
                     "run `sync-roms themes update` to add one")
             return False
     elif commit != _card_commit(base):
@@ -134,17 +201,17 @@ def install_esde(base):
                 s3.download((ESDE_ARCHIVE, path, None))
                 _extract(path, dest, commit)
         except (*s3.ERRORS, *ARCHIVE_ERRORS, ValueError) as e:
-            ui.warn(f"Couldn't install Art Book Next for the Surprise collection: {e}")
+            ui.warn(f"Couldn't install Art Book Next for the collections' art: {e}")
             return False
         changed = True
-    for rel in _art_files():
-        changed |= _copy(os.path.join(ART, rel), s3.safe_join(dest, rel))
+    for rel, data in _esde_files(arts).items():
+        changed |= _put(s3.safe_join(dest, rel), data)
     _write_settings(frontend.settings_path("esde", base), "esde", {"Theme": ESDE_COPY})
     return changed
 
 
-def describe_esde(base):
-    if not esde_wanted(base):
+def describe_esde(base, arts):
+    if not esde_wanted(base) or not arts:
         return
     commit = _stored_commit()
     if not commit and not os.path.exists(os.path.join(_esde_dir(base), ESDE_MARKER)):
@@ -152,7 +219,7 @@ def describe_esde(base):
         return
     if commit and commit != _card_commit(base):
         print(ui.dim(f"🎨 would copy Art Book Next ({commit[:7]}) into ES-DE/themes/{ESDE_COPY}"))
-    print(ui.dim("🎨 would add the Surprise art to it and select it as the ES-DE theme"))
+    print(ui.dim(f"🎨 would add art for {', '.join(arts)} to it and select it as the ES-DE theme"))
 
 
 def _github(url, accept=None):
@@ -213,27 +280,34 @@ def knulli_settings(name):
             "UseCustomCollectionsSystemEx": "false"}
 
 
-def install_knulli(base, name):
-    """Put the Surprise art in Knulli's theme customizations for the collection called name. Returns whether files changed."""
-    if not knulli_wanted(base):
+def install_knulli(base, arts):
+    """Put the collections' art ({name: art png}) in Knulli's theme customizations. Returns whether files changed."""
+    if not knulli_wanted(base) or not arts:
         return False
     root = os.path.join(base, KNULLI_DIR)
-    changed = _copy(os.path.join(ART, ART_PNG), os.path.join(root, "artwork", f"{name}.png"))
-    changed |= _copy(os.path.join(ART, LOGO_SVG), os.path.join(root, "logos", f"{name}.svg"))
-    _write_settings(frontend.settings_path("knulli", base), "knulli", knulli_settings(name),
+    changed, settings = False, {}
+    for name, png in arts.items():
+        with open(png, "rb") as f:
+            changed |= _put(os.path.join(root, "artwork", f"{name}.png"), f.read())
+        changed |= _put(os.path.join(root, "logos", f"{name}.svg"), logo_svg(name).encode())
+        settings.update(knulli_settings(name))
+    _write_settings(frontend.settings_path("knulli", base), "knulli", settings,
                     only_if_unset={"UseCustomCollectionsSystemEx"})
     return changed
 
 
-def describe_knulli(base, name):
-    if knulli_wanted(base):
-        print(ui.dim(f"🎨 would add the Surprise art to {KNULLI_DIR.replace(os.sep, '/')}/ and use it for {name}"))
+def describe_knulli(base, arts):
+    if knulli_wanted(base) and arts:
+        print(ui.dim(f"🎨 would add art for {', '.join(arts)} to {KNULLI_DIR.replace(os.sep, '/')}/"))
 
 
-def install(layout_name, base, name):
-    """Add the Surprise collection's art for the frontend on the card. Returns whether files changed."""
-    return install_esde(base) if layout_name == "esde" else install_knulli(base, name)
+def install(layout_name, base, arts):
+    """Give the custom collections in arts ({name: art id}) their art in the frontend's theme. Returns whether files
+    changed."""
+    arts = usable(layout_name, arts)
+    return install_esde(base, arts) if layout_name == "esde" else install_knulli(base, arts)
 
 
-def describe(layout_name, base, name):
-    describe_esde(base) if layout_name == "esde" else describe_knulli(base, name)
+def describe(layout_name, base, arts):
+    arts = usable(layout_name, arts)
+    describe_esde(base, arts) if layout_name == "esde" else describe_knulli(base, arts)

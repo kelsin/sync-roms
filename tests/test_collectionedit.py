@@ -6,7 +6,7 @@ from unittest import mock
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 from helpers import DataDir  # noqa: E402
-from sync_roms import cli, collectionedit, commands, collections, edit, listedit, picker, setedit, store, ui  # noqa: E402
+from sync_roms import cli, collectionedit, commands, collections, edit, listedit, picker, setedit, store, themeart, ui  # noqa: E402
 
 SYSTEMS = [{"name": "Game Boy Advance", "bucket": "gba"}, {"name": "PlayStation", "bucket": "psx"}]
 DISCS = {"psx/FF7.m3u", "psx/FF7 (Disc 1).chd", "psx/FF7 (Disc 2).chd", "psx/Crash.chd"}
@@ -119,3 +119,22 @@ class Wiring(unittest.TestCase):
         self.assertEqual(commands.second_words()["collections"], ["edit"])
         self.assertEqual(cli.SUBCOMMANDS["collections"][0], "edit")
         self.assertIn("sync-roms collections edit", cli.TOPICS["collections"])
+
+
+class ArtPicker(unittest.TestCase):
+    def pick(self, collection, index):
+        with mock.patch.object(picker, "filter_list", lambda *a, **k: index):
+            collectionedit.pick_art(collection)
+        return collection
+
+    def test_picking_art_sets_it_and_none_clears_it(self):
+        first = next(iter(themeart.art_choices()))
+        self.assertEqual(self.pick({"name": "Favs"}, 1)["art"], first)
+        self.assertNotIn("art", self.pick({"name": "Favs", "art": first}, 0))
+        self.assertEqual(self.pick({"name": "Favs", "art": first}, None)["art"], first)  # Esc keeps it
+        self.assertEqual(collectionedit.art_label(first), themeart.art_choices()[first])
+        self.assertEqual(collectionedit.art_label(None), "none")
+
+
+if __name__ == "__main__":
+    unittest.main()

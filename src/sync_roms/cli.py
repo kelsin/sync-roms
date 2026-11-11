@@ -90,7 +90,8 @@ TOPICS = {
   Your own lists of games (like a set, but personal), saved straight to ~/.sync-roms/collections/<id>.json when you pick
   Done; Quit discards. No git or gh needed, and nothing goes to storage or the repo. Same keys as the set editor.
   Deleting a collection that cards use asks first, then removes it from them. In a card's system list, l adds a
-  collection to that card.
+  collection to that card. Theme art picks the picture (Action, RPG, ...) the collection gets on ES-DE and Knulli cards
+  that use Art Book Next.
 """,
     "themes": """
   sync-roms themes update [--dry-run]         put the latest Art Book Next for ES-DE in storage
@@ -973,7 +974,7 @@ def sync_card(args):
         surprises = [x for x in entry.get("surprises") or () if isinstance(x, dict)
                      and isinstance(x.get("system"), str) and isinstance(x.get("bucket"), str)]
         if surprise.enabled(entry) and surprises:  # as saved now: the card editor may have changed them
-            card_colls.append({"name": surprise.COLLECTION, "games": surprises})
+            card_colls.append({"name": surprise.COLLECTION, "games": surprises})  # its art is added below
         owned = names("frontend_collections")
         if not card_colls and not owned:
             return
@@ -985,18 +986,21 @@ def sync_card(args):
 
         wanted = frontend.wanted_collections(layout_name, card_colls, systems, on_card)
         plan = frontend.plan_collections(layout_name, base, wanted, owned)
-        surprise_name = frontend.safe_name(surprise.COLLECTION)
+        arts = {frontend.safe_name(c["name"]): c["art"] for c in card_colls if c.get("art")}
+        if surprise.COLLECTION in plan["enable"]:
+            arts[surprise.COLLECTION] = themeart.SURPRISE_ART
+        arts = {name: art for name, art in arts.items() if name in plan["enable"]}
         if dry_run:
             frontend.describe_collections(plan, layout_name)
-            if surprise_name in plan["enable"]:
-                themeart.describe(layout_name, base, surprise_name)
+            if arts:
+                themeart.describe(layout_name, base, arts)
             return
         for warning in plan["warnings"]:
             ui.warn(warning)
         frontend.apply_collections(plan, layout_name, base)
         if plan["owned"] != owned:
             store.update_card(card, frontend_collections=plan["owned"])
-        art = surprise_name in plan["enable"] and themeart.install(layout_name, base, surprise_name)
+        art = bool(arts) and themeart.install(layout_name, base, arts)
         if clean_card and (plan["writes"] or plan["deletes"] or art):
             clean._clean_root = base
         if plan["writes"]:

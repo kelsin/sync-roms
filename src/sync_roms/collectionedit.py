@@ -2,7 +2,7 @@
 import copy
 
 from . import collections as colls
-from . import edit, m3u, picker, s3, store, surprise, ui
+from . import edit, m3u, picker, s3, store, surprise, themeart, ui
 from .listedit import ask_category, game_label, reconcile, recategorize, view
 
 
@@ -35,13 +35,33 @@ GAMES_HINT = "Space toggle · Enter done · / filter · w note · a all · p pas
 
 # --- Editing the games of one collection -------------------------------------------------------------
 
+def art_label(art_id):
+    return themeart.art_choices().get(art_id, "none") if art_id else "none"
+
+
+def pick_art(collection):
+    """Let the user pick the collection's theme art (or none)."""
+    choices = themeart.art_choices()
+    ids = [None, *choices]
+    current = ids.index(collection.get("art")) if collection.get("art") in ids else 0
+    j = picker.filter_list(f"🎨 {collection['name']}: art in the Art Book Next theme (ES-DE, Knulli)",
+                           ["None (the theme's default)", *choices.values()], cursor=current)
+    if j is None:
+        return
+    if ids[j]:
+        collection["art"] = ids[j]
+    else:
+        collection.pop("art", None)
+
+
 def edit_one(collection, systems, keys_of):
     """Edit one collection: remove games, add games from a system, change categories, rename."""
     names = {s["bucket"]: s["name"] for s in systems}
     while True:
         i = picker.filter_list(f"✏️  {collection['name']} (Esc = back)",
                                [f"Games in this collection ({len(collection['games'])}): switch some off",
-                                "Add games from a system", "Change a game's category", "Rename / change the description"])
+                                "Add games from a system", "Change a game's category", "Rename / change the description",
+                                f"Theme art: {art_label(collection.get('art'))}"])
         if i is None:
             return
         shown = view(collection, systems)
@@ -82,6 +102,8 @@ def edit_one(collection, systems, keys_of):
             j = picker.filter_list("✏️  Change which game's category?", [game_label(g, names) for g in games])
             if j is not None:
                 recategorize(collection["games"], games[j], ask_category(collection["games"], games[j].get("title", "it")))
+        elif i == 4:
+            pick_art(collection)
         else:
             name = ui.ask(f"Name [{collection['name']}] (empty keeps it): ").strip()
             problem = colls.collection_problem(name, ()) if name else None
