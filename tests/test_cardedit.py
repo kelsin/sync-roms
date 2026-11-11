@@ -313,8 +313,88 @@ class Flow(DataDir):
         with self.assertRaises(KeyboardInterrupt):
             self.run_system(filtered_pass, returns((cardedit.FULL_KEY, 0)), returns(None), interrupted)
         entry = self.read("cards.json")["c"]  # the first pass, the set reference and the interrupted pass
-        self.assertEqual(entry["games"], {"gba": [g("gba/Ruby.zip"), g("gba/Zelda.zip")], "sets": ["pk"]})
+        self.assertEqual(entry["games"], {"gba": [g("gba/Zelda.zip")], "sets": ["pk"]})
         self.assertEqual(entry["excluded"], {"gba": ["gba/Ruby.zip"]})
+
+    def initial_of(self, kw, labels, name):
+        return kw["initial"][labels.index(name)]
+
+    def test_switching_on_an_excluded_set_game_drops_the_exclusion_only(self):
+        self.card(games={"sets": ["pk"]}, excluded={"gba": ["gba/Ruby.zip"]})
+        _, calls = self.run_system(toggle("Ruby.zip"))
+        self.assertFalse(self.initial_of(calls[0][2], calls[0][1], "Ruby.zip"))
+        entry = self.read("cards.json")["c"]
+        self.assertEqual(entry["games"], {"sets": ["pk"]})  # the set syncs it: no direct pick
+        self.assertNotIn("gba", entry.get("excluded", {}))
+
+    def test_an_excluded_direct_pick_shows_off_as_sync_skips_it_and_on_clears_it(self):
+        self.write_json("cards.json", {"c": {"device": "d", "layout": "esde", "games": {"gba": [g("gba/Ruby.zip")]},
+                                             "excluded": {"gba": ["gba/Ruby.zip"]}}})
+        _, calls = self.run_system(toggle("Ruby.zip"))
+        self.assertFalse(self.initial_of(calls[0][2], calls[0][1], "Ruby.zip"))
+        entry = self.read("cards.json")["c"]
+        self.assertEqual(entry["games"], {"gba": [g("gba/Ruby.zip")]})  # still one pick
+        self.assertNotIn("gba", entry.get("excluded", {}))
+
+    def test_switching_off_a_game_no_set_covers_adds_no_exclusion(self):
+        self.card(games={"gba": [g("gba/Zelda.zip")]})
+        self.run_system(toggle("Zelda.zip"))
+        entry = self.read("cards.json")["c"]
+        self.assertEqual(entry["games"], {})
+        self.assertNotIn("excluded", entry)
+
+    def test_removing_the_set_reference_drops_its_exclusions_and_a_direct_pick_wins(self):
+        self.write_json("cards.json", {"c": {"device": "d", "layout": "esde",
+                                             "games": {"gba": [g("gba/Ruby.zip")], "sets": ["pk"]},
+                                             "excluded": {"gba": ["gba/Ruby.zip", "gba/Ruby.sav"]}}})
+
+        def after(labels, kw):
+            self.assertTrue(self.initial_of(kw, labels, "Ruby.zip"))  # the direct pick is synced again
+            self.assertFalse(self.initial_of(kw, labels, "Ruby.sav"))
+            return kw["session"]["sel"]
+        self.run_system(returns((cardedit.SET_KEY, 0)), returns((cardedit.FULL_KEY, 0)), returns(None), after)
+        entry = self.read("cards.json")["c"]
+        self.assertEqual(entry["games"], {"gba": [g("gba/Ruby.zip")]})
+        self.assertEqual(entry["excluded"], {})
+
+    def test_revert_after_a_set_reference_change_keeps_it_without_exclusions(self):
+        self.card()
+
+        def after(labels, kw):
+            self.assertEqual(kw["initial"], kw["session"]["sel"])  # its games aren't pending
+            self.assertTrue(self.initial_of(kw, labels, "Ruby.zip"))
+            return list(kw["initial"])  # Esc, then u
+        self.run_system(returns((cardedit.SET_KEY, 0)), returns((cardedit.FULL_KEY, 0)), returns(None), after)
+        entry = self.read("cards.json")["c"]
+        self.assertEqual(entry["games"], {"sets": ["pk"]})
+        self.assertNotIn("excluded", entry)
+
+    def test_a_storage_listing_error_is_a_note(self):
+        self.card()
+        notes = []
+
+        def fail(prefix, sizes=True):
+            raise OSError("share is gone")
+        with mock.patch.object(s3, "list_sizes", fail), mock.patch.object(edit, "note", notes.append):
+            changed, calls = self.run_system()
+        self.assertFalse(changed)
+        self.assertEqual(calls, [])
+        self.assertIn("Couldn't list Game Boy Advance in storage: share is gone", notes[0])
+
+    def test_a_terminal_too_small_still_saves_the_toggles(self):
+        import curses
+        self.card()
+
+        def first(labels, kw):
+            kw["session"]["sel"][labels.index("Zelda.zip")] = True
+            return (cardedit.CLEAR_KEY, None)
+
+        def too_small(labels, kw):
+            kw["session"]["sel"][labels.index("Emerald.zip")] = True
+            raise curses.error("addnstr() returned ERR")
+        with self.assertRaises(curses.error):
+            self.run_system(first, too_small)
+        self.assertEqual(sorted(x["bucket"] for x in store.card_games("c")["gba"]), ["gba/Emerald.zip", "gba/Zelda.zip"])
 
     def test_full_system_has_no_game_list(self):
         self.card(games={"gba": {"full_system": True}})

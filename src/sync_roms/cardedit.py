@@ -1,5 +1,6 @@
 """The card editor: every system a card's device can play (recommended ones marked) with its picks and space used,
 and each system's games with set and scraped-metadata filters. Changes are saved to cards.json as they are made."""
+import curses
 import json
 import queue
 import threading
@@ -301,7 +302,11 @@ def edit_system(name, system, setup, sizing=None):
     sets = store.load_sets()
     sets_by_id = {x["id"]: x for x in sets}
     # names only: on a folder a sized listing stats every file, which the background refresh already does
-    in_storage = {k for k in s3.list_sizes(f"{bucket}/", sizes=False) if not k.endswith("/")}
+    try:
+        in_storage = {k for k in s3.list_sizes(f"{bucket}/", sizes=False) if not k.endswith("/")}
+    except s3.ERRORS as e:
+        edit.note(ui.yellow(f"⚠️  Couldn't list {system['name']} in storage: {e}"))
+        return False
     rows = edit.system_rows(s, in_storage)
     titles = {k: title for _, k, title, _ in rows}
     groups = m3u.file_groups(in_storage)  # a multi-disc game's files are switched on and off together
@@ -325,9 +330,10 @@ def edit_system(name, system, setup, sizing=None):
         return edit.cover_notes(sets_by_id, sets_on)
 
     def states(notes):
-        """{bucket key: synced} for every row, from the card as edited so far."""
+        """{bucket key: synced} for every row, from the card as edited so far: picked directly or by a referenced set,
+        and not excluded (as sync does)."""
         direct = {g.get("bucket") for g in s["games"]}
-        return {k: k not in excluded if k in notes else k in direct for _, k, _, _ in rows}
+        return {k: (k in notes or k in direct) and k not in excluded for _, k, _, _ in rows}
 
     start = states(cover())
     filt = None  # (set name, bucket keys) the list is narrowed to
@@ -362,16 +368,21 @@ def edit_system(name, system, setup, sizing=None):
         return out
 
     def apply(keys, notes, base, state):
-        """Fold one pass's on/off states into the card being edited."""
+        """Fold one pass's on/off states into the card being edited. On: not excluded, and picked directly unless a
+        referenced set covers it. Off: not picked directly, and excluded only while a referenced set covers it."""
         for key, want in changes(keys, base, state).items():
             if want == base[key]:
                 continue
-            if key in notes:
-                excluded.symmetric_difference_update({key})
-            elif want:
-                s["games"].append({"title": titles[key], "bucket": key})
+            if want:
+                excluded.discard(key)
+                if key not in notes and all(g.get("bucket") != key for g in s["games"]):
+                    s["games"].append({"title": titles[key], "bucket": key})
             else:
                 s["games"] = [g for g in s["games"] if g.get("bucket") != key]
+                if key in notes:
+                    excluded.add(key)
+                else:
+                    excluded.discard(key)
 
     def save():
         games = {k: v for k, v in raw.items() if k not in (bucket, store.SETS_KEY)}
@@ -445,10 +456,14 @@ def edit_system(name, system, setup, sizing=None):
             elif result[0] == META_KEY:
                 pick_meta(system, meta, meta_filt, lambda field: [r[1] for r in rows if keep(r[1], field)])
             else:
+                refs = list(sets_on)
                 chosen = pick_set(system, sets, sets_on, {r[1] for r in rows})
+                if sets_on != refs:  # kept as is: rows switched by the reference change aren't pending, so u keeps them
+                    excluded.intersection_update(cover())  # an exclusion means nothing once no set covers the game
+                    start = states(cover())
                 if chosen:
                     filt = (chosen["name"], set_filter(chosen, system))
-    except KeyboardInterrupt:
+    except (KeyboardInterrupt, curses.error):  # Ctrl-C, or a terminal too small to draw the list: keep the toggles
         if pending:
             keys, notes, base, session = pending
             apply(keys, notes, base, session["sel"])
