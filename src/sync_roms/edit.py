@@ -39,7 +39,7 @@ def set_note(s, key, text):
 FULL_SYSTEM_NOTE = "Full system: every file in its folder is synced, so it can't be toggled"
 
 
-def toggle_games(title, rows, extras=None, covered=None, excluded=None):
+def toggle_games(title, rows, extras=None, covered=None, excluded=None, hotkeys=(), hint=None):
     """Multi-select over rows of (system, bucket key, game title, label); adds/removes games in each system in place.
 
     extras: {bucket key: [more bucket keys]} added or removed together with that row's key.
@@ -49,6 +49,8 @@ def toggle_games(title, rows, extras=None, covered=None, excluded=None):
     with that note (e.g. games a set reference already syncs).
     excluded: {system bucket: [keys]}, updated in place. When given, covered rows can be switched off (they start on
     unless listed) and the off ones are recorded there; only full systems stay locked.
+    hotkeys/hint: extra keys the list offers (and the hint line to show). The toggles made so far are applied, and the
+    key pressed is returned (None on Enter).
     """
     notes = [FULL_SYSTEM_NOTE if s.get("full_system") else covered(s, key) if covered else None
              for s, key, _, _ in rows]
@@ -73,8 +75,13 @@ def toggle_games(title, rows, extras=None, covered=None, excluded=None):
             return "Switch the game on and press Enter first, then add its note"
         return "Note saved" if text else "Note cleared"
 
+    session = {"sel": list(initial)}
     state = picker.filter_list(title, [label for *_, label in rows], multi=True, initial=initial, locked=locked,
-                               locked_note=[n or "" for n in notes], hint=GAMES_HINT, note_text=note_text, on_note=on_note)
+                               locked_note=[n or "" for n in notes], hint=hint or GAMES_HINT, note_text=note_text,
+                               on_note=on_note, hotkeys=hotkeys, session=session)
+    pressed = state[0] if isinstance(state, tuple) else None
+    if pressed:
+        state = session["sel"]
     removed = defaultdict(set)  # system bucket -> keys to drop from its games
     systems = {}
     for (s, key, name, _), on, was, lock, opt in zip(rows, state, initial, locked, optional):
@@ -98,6 +105,7 @@ def toggle_games(title, rows, extras=None, covered=None, excluded=None):
     for bucket, keys in removed.items():
         if keys and bucket in systems:
             systems[bucket]["games"] = [g for g in systems[bucket]["games"] if g.get("bucket") not in keys]
+    return pressed
 
 
 def system_rows(s, in_bucket):
@@ -210,35 +218,9 @@ def target_changes(t):
     return added, removed
 
 
-def make_set_from_extras(t, sets, sets_by_id):
-    """Save a card target's picked games as a personal set and add it to the open set lists.
-
-    Returns the new set's id, or None when cancelled or there is nothing to save."""
-    systems = [s for s in t["data"]["systems"] if s["games"]]
-    if not systems:
-        note(ui.yellow("ℹ️  This card has no games to make a set from."))
-        return None
-    while True:
-        name = ui.ask(f"📦 Name for the new set of {sum(len(s['games']) for s in systems)} game(s) "
-                      "(empty to cancel): ").strip()
-        if not name:
-            return None
-        problem = store.personal_set_problem(name)
-        if not problem:
-            break
-        print(ui.yellow(f"  {problem}"))
-    set_id = store.save_personal_set(name, systems)
-    new = store.read_set_file(os.path.join(store.personal_sets_dir(), set_id + ".json"), set_id)
-    sets.append(new)
-    sets.sort(key=lambda x: x["name"].lower())
-    sets_by_id[set_id] = new
-    print(ui.green(f"📦 Saved set {name}") + ui.dim(f"  ({store.personal_sets_dir()}); press s in a system to find it"))
-    return set_id
-
-
 def edit_manifest():
     """The editor's top menu: Cards (each opens the card editor, which saves games as they change), Sets (opens a PR),
-    Device systems; device/firmware and device-system changes are reviewed and saved at the end."""
+    Collections (saved as you leave the collection editor), Device systems; device/firmware and device-system changes are reviewed and saved at the end."""
     print(ui.bold("✏️  Edit mode") + ui.dim(f"  {s3.access()}"))
     if not store.cards_readable():
         ui.fail(f"{os.path.join(store.data_dir(), 'cards.json')} isn't valid JSON, so nothing could be saved. "
@@ -403,22 +385,29 @@ def edit_manifest():
             pass  # the reason is already printed
         note("")  # keep what it printed (a PR link, why it stopped) on screen until the menu redraws
 
+    def edit_collections():
+        from . import collectionedit
+        collectionedit.edit_collections()
+        note("")  # keep what it printed on screen until the menu redraws
+
     def menu():
         """The top menu. Returns True to review and save, False to quit without saving."""
         try:
             while True:
-                options = ["💳 Cards", "📦 Sets", "🧩 Device systems", "✅ Done (review & save)", "🚪 Quit without saving"]
+                options = ["💳 Cards", "📦 Sets", "💖 Collections", "🧩 Device systems", "✅ Done (review & save)", "🚪 Quit without saving"]
                 extras = [[("  " + str(len(targets)) + " pending", "cyan")] if targets else [],
-                          [], [("  " + str(len(overlay_pending)) + " edited", "cyan")] if overlay_pending else [], [], []]
+                          [], [], [("  " + str(len(overlay_pending)) + " edited", "cyan")] if overlay_pending else [], [], []]
                 i = picker.filter_list("✏️  What do you want to edit?  (Esc = review & save)", options, extras=extras,
                                        hint="Enter open · Esc review & save")
-                if i is None or i == 3:
+                if i is None or i == 4:
                     return True
                 if i == 0:
                     edit_cards()
                 elif i == 1:
                     edit_sets()
                 elif i == 2:
+                    edit_collections()
+                elif i == 3:
                     while edit_device_systems():
                         pass
                 else:

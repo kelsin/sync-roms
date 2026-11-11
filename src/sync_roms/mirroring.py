@@ -1,4 +1,5 @@
 """Local mirror of storage."""
+import contextlib
 import os
 from concurrent.futures import ThreadPoolExecutor
 
@@ -10,14 +11,14 @@ MIRROR_PRUNE_ASK = 25  # delete more unreferenced mirror files than this (or ove
 
 def mirror_wanted(manifest):
     """{bucket key: size} of everything the game lists and BIOS requirements reference that is in storage: the ROMs a sync
-    installs, every system's BIOS files, the scraped data of those ROMs, and all of scrapes/esde/."""
+    installs, every system's BIOS files, the scraped data of those ROMs, and storage's Onion themes."""
     systems = manifest["systems"]
     todo = [s for s in systems if s.get("full_system") or store.listed(s)]
     with ThreadPoolExecutor(runtime.WORKERS) as ex:
-        others = [ex.submit(s3.list_sizes, prefix) for prefix in ("BIOS/", runtime.THEMES_PREFIX, f"{scrape_plan.SCRAPES}/esde/")]
+        others = [ex.submit(s3.list_sizes, prefix) for prefix in ("BIOS/", runtime.THEMES_PREFIX)]
         roms = list(ex.map(store.list_system, todo))
         scrapes = list(ex.map(lambda s: s3.list_sizes(f"{scrape_plan.SCRAPES}/{s['bucket']}/"), todo))
-        bios, themes, esde = (f.result() for f in others)
+        bios, themes = (f.result() for f in others)
     wanted = {}
     for s, have, scraped in zip(todo, roms, scrapes):
         keys = [k for k in store.available_keys(s, have) if k in have]
@@ -33,7 +34,6 @@ def mirror_wanted(manifest):
             if "BIOS/" + f in bios:
                 wanted["BIOS/" + f] = bios["BIOS/" + f]
     wanted.update((k, v) for k, v in themes.items() if not k.endswith("/"))
-    wanted.update((k, v) for k, v in esde.items() if not k.endswith("/"))
     return wanted
 
 
@@ -92,6 +92,17 @@ def refresh_mirror(root, dry_run=False):
     if stale:
         print(ui.green(f"  🧹 Deleted {len(stale)} file(s) no longer referenced"))
     return failed
+
+
+@contextlib.contextmanager
+def storage_reads():
+    """Read from storage itself, past the mirror, inside the block."""
+    saved = runtime._mirror_root
+    runtime._mirror_root = None
+    try:
+        yield
+    finally:
+        runtime._mirror_root = saved
 
 
 def use_mirror(root, dry_run):

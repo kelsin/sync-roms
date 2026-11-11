@@ -8,14 +8,17 @@ from concurrent.futures import ThreadPoolExecutor
 
 from botocore.exceptions import BotoCoreError, ClientError, NoCredentialsError
 
-from . import __version__, clean, commands, downloads, edit, external, m3u, picker, runtime, s3, scrape_plan, store, ui, usersettings, vita
+from . import __version__, budget, cardedit, clean, commands, downloads, edit, external, frontend, m3u, mirroring, picker, runtime, s3, scrape_plan, store
+from . import surprise, ui, usersettings, vita
+from . import collections as colls
 
 
 SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "sync": ("[CARD]", "download the ROMs, BIOS and scraped data for a card (this is what plain `sync-roms CARD` does)"),
-    "edit": ("", "interactive editor: cards, sets, device systems (same as `games edit`)"),
+    "edit": ("", "interactive editor: cards, sets, collections, device systems (same as `games edit`)"),
     "games": ("edit|list|add|remove|full|sets|export|import", "edit a card's games, interactively or from scripts"),
     "sets": ("edit", "edit the repo's game sets by hand and open a PR with the changes"),
+    "collections": ("edit", "edit your collections of favourite games (saved in ~/.sync-roms/collections/)"),
     "cards": ("edit|list|new|set|rename|delete", "list and manage the cards you've synced"),
     "devices": ("[ID]", "list the supported devices, or one device's systems"),
     "upload": ("roms [DIR] | scrapes [CARD]", "upload ROMs or a card's scraped data to storage"),
@@ -28,7 +31,7 @@ SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "mirror": ("[DIR] | use DIR | clear", "make or refresh a local copy of everything your lists reference"),
     "config": ("show|path", "show the effective settings and where each comes from"),
     "doctor": ("", "check the AWS profile, storage access, tools and your data files"),
-    "check": ("", "validate cards.json, the device overlay and the sets"),
+    "check": ("", "validate cards.json, surprises.json, the device overlay, the sets and your collections"),
     "completion": ("bash|zsh|fish", "print a shell completion script"),
 }
 
@@ -66,8 +69,8 @@ TOPICS = {
   sync-roms games remove SYSTEM KEY... --card NAME [-n]
   sync-roms games full SYSTEM on|off --card NAME [-n]
   sync-roms games sets list | add ID | remove ID --card NAME [-n]
-  sync-roms games export --card NAME        one SYSTEM/file per line (full systems as 'SYSTEM/*')
-  sync-roms games import FILE --card NAME [-n]            add the games in such a file
+  sync-roms games export --card NAME        one SYSTEM/file per line (full systems as 'SYSTEM/*'), then '@collections ID', '@frontend_collections NAME', '@surprise false' (only when Surprise is off) and '@surprises SYSTEM/file' lines
+  sync-roms games import FILE --card NAME [-n]            add the games in such a file; '@' lines replace the card's collections / frontend_collections / surprises, and set Surprise on or off
 
   --card NAME is required: a card's games are saved in ~/.sync-roms/cards.json with the previous version kept as .bak. Removing only drops a game from the list.
   In the editor: / filters, Space toggles a row, a all/none shown, u reverts the list, o cycles all/on/changed, f toggles a whole set or system.
@@ -80,8 +83,16 @@ TOPICS = {
   Pick a set to switch games off, add games from a system (you're asked for a category), change a game's category or
   rename it. ➕ New set creates one; d deletes the highlighted one. Esc reviews the changes before the PR is opened.
 """,
+    "collections": """
+  sync-roms collections edit                  edit your collections of favourite games
+
+  Your own lists of games (like a set, but personal), saved straight to ~/.sync-roms/collections/<id>.json when you pick
+  Done; Quit discards. No git or gh needed, and nothing goes to storage or the repo. Same keys as the set editor.
+  Deleting a collection that cards use asks first, then removes it from them. In a card's system list, l adds a
+  collection to that card.
+""",
     "edit": """
-  sync-roms edit                              main menu: Cards, Sets (opens a PR), Device systems; same as `games edit`
+  sync-roms edit                              main menu: Cards, Sets (opens a PR), Collections, Device systems; same as `games edit`
 """,
     "cards": """
   sync-roms cards edit                        same as `games edit`
@@ -176,7 +187,7 @@ TOPICS = {
     "check": """
   sync-roms check [--bucket-keys]
 
-  Validates cards.json, device-systems.json and the sets (built-in and ~/.sync-roms/sets): bad JSON,
+  Validates cards.json, surprises.json, device-systems.json and the sets: bad JSON,
   unknown systems, devices and sets. Exits 1 if anything is wrong.
   --bucket-keys also lists storage (read-only profile) and reports every game or set file it doesn't have.
 """,
@@ -675,7 +686,6 @@ def sync_card(args):
     print(ui.bold("🎮 sync-roms") + ui.dim(f"  {s3.access()}"))
     mirror = usersettings.load_settings().get("mirror")
     if mirror:
-        from . import mirroring
         mirroring.use_mirror(mirror, args.dry_run)
     print("📄 Fetching manifests...")
     card = os.path.basename(base) or base
@@ -750,7 +760,8 @@ def sync_card(args):
             size_cache[bucket] = (total_bytes(downloads.plan_downloads(jobs, unzip, disc_dir)), total)
         return size_cache[bucket]
 
-    while True:
+    def relist():
+        """List the systems not listed yet and work out every system's keys to sync."""
         todo = [s for s in systems if s["bucket"] not in listings]
         with ThreadPoolExecutor(runtime.WORKERS) as ex:
             listings.update(zip((s["bucket"] for s in todo),
@@ -759,6 +770,9 @@ def sync_card(args):
         for s in systems:
             avail[s["bucket"]] = store.available_keys(s, listings[s["bucket"]])
             discs[s["bucket"]] = m3u.disc_keys(avail[s["bucket"]]) if disc_dir else ()
+
+    while True:
+        relist()
         if runtime.ROOT:
             rows = [(f"{s['name']}  ({len(available(s))} roms)", bool(available(s)), 0, 0) for s in systems]
         else:
@@ -799,6 +813,30 @@ def sync_card(args):
         print(ui.yellow("👋 Nothing selected."))
         return 0
     chosen = [systems[i] for i in chosen]
+    interactive = not (ui.ASSUME_YES or args.json) and ui.has_terminal()
+    surprise.run_surprise(card, (device, layout_name), chosen, interactive, args.dry_run)
+    if not args.dry_run:  # the step (and the card editor it opens) may have changed the card's games
+        def picks(s):
+            return s.get("full_system"), store.listed(s)
+        chosen_ids = {s["bucket"] for s in chosen}
+        before = {s["bucket"]: picks(s) for s in systems}
+        systems = reload_systems()
+        changed = [s["bucket"] for s in systems if picks(s) != before.get(s["bucket"])]
+        if changed and runtime._mirror_root:  # the new picks reach the mirror before they are copied from it
+            root = runtime._mirror_root
+            try:
+                with mirroring.storage_reads():
+                    failed = mirroring.refresh_mirror(root)
+                if failed:
+                    ui.warn(f"{failed} mirror download(s) failed; files missing from the mirror will fail to copy. Re-run to retry")
+            except (*s3.ERRORS, SystemExit) as e:  # S3 failed, or the folder isn't a mirror
+                ui.warn(f"Couldn't refresh the mirror ({e}); using what it has")
+        for bucket in changed:
+            listings.pop(bucket, None)
+            size_cache.pop(bucket, None)
+        relist()
+        chosen = [s for s in systems if s["bucket"] in chosen_ids]
+        saved = store.load_cards().get(card)
     print(ui.bold(f"\n🔎 Checking {len(chosen)} system(s) against storage..."))
 
     def dest_of(s):
@@ -904,12 +942,60 @@ def sync_card(args):
     def build_plan(present):
         if not scraped:
             print("🖼️  Reading scraped data...")
-            scraped["data"] = scrape_plan.load_scrape_data(chosen, layout_name == "esde")
+            scraped["data"] = scrape_plan.load_scrape_data(chosen)
             scraped["rels"] = {s["bucket"]: [k.split("/", 1)[1] for k in available(s) if k in listings[s["bucket"]]]
                                for s in chosen}
         if unzip:  # a ROM that's extracted from its archive is on the card under another extension
             present = lambda path, exists=present: exists(path) or downloads.archive_extracted(path)  # noqa: E731
-        return scrape_plan.build_scrape_plan(layout_name, chosen, *scraped["data"], scraped["rels"], dest_of, es_dir, present, base)
+        return scrape_plan.build_scrape_plan(layout_name, chosen, scraped["data"], scraped["rels"], dest_of, es_dir, present, base)
+
+    def frontend_step(dry_run):
+        """Write the card's collections as the frontend's custom collections (ES-DE, Knulli)."""
+        if layout_name not in frontend.FRONTEND_LAYOUTS:
+            return
+        entry = store.load_cards().get(card)
+        entry = entry if isinstance(entry, dict) else {}
+
+        def names(field):
+            """The card's list field as its text items (anything else stored there is ignored)."""
+            values = entry.get(field)
+            return [v for v in values if isinstance(v, str)] if isinstance(values, list) else []
+        by_id = {c["id"]: c for c in colls.load_collections()}
+        card_colls = [by_id[i] for i in names("collections") if i in by_id]
+        surprises = [x for x in entry.get("surprises") or () if isinstance(x, dict)
+                     and isinstance(x.get("system"), str) and isinstance(x.get("bucket"), str)]
+        if surprise.enabled(entry) and surprises:  # as saved now: the card editor may have changed them
+            card_colls.append({"name": surprise.COLLECTION, "games": surprises})
+        owned = names("frontend_collections")
+        if not card_colls and not owned:
+            return
+        coming = {(s["bucket"], downloads.rom_rel(k, False)) for s in chosen
+                  for k in available(s) if k in listings[s["bucket"]]} if dry_run else set()
+
+        def on_card(s, rel):
+            return (s["bucket"], rel) in coming or os.path.exists(os.path.join(dest_of(s), rel))
+
+        wanted = frontend.wanted_collections(layout_name, card_colls, systems, on_card)
+        plan = frontend.plan_collections(layout_name, base, wanted, owned)
+        if dry_run:
+            frontend.describe_collections(plan, layout_name)
+            return
+        for warning in plan["warnings"]:
+            ui.warn(warning)
+        frontend.apply_collections(plan, layout_name, base)
+        if clean_card and (plan["writes"] or plan["deletes"]):
+            clean._clean_root = base
+        if plan["owned"] != owned:
+            store.update_card(card, frontend_collections=plan["owned"])
+        if plan["writes"]:
+            print(ui.green(f"💖 Wrote {len(plan['writes'])} collection(s) for {layout['label']}"))
+
+    capacity = budget.card_capacity(saved or {}) if surprise.enabled(saved or {}) else None
+    if capacity:
+        used = budget.card_usage(cardedit.card_entry(card, (device, layout_name)), systems).bytes
+        if used > capacity:
+            ui.warn(f"{card}'s picks take {cardedit.size_text(used)} of its {saved['size']}: "
+                    f"{cardedit.size_text(used - capacity)} over")
 
     if args.dry_run:
         print(ui.yellow("\n🧪 Dry run — nothing downloaded or deleted"))
@@ -929,6 +1015,7 @@ def sync_card(args):
             scrape_plan.describe_scrape_plan(build_plan(lambda path: True))
             stale_count = len(scrape_plan.stale_media(layout_name, manifest['systems'], roms_dir, es_dir, base))
             print(f"🧹 Media on the card for ROMs it doesn't have: {stale_count} file(s) to remove")
+        frontend_step(True)
         if layout_name == "esde":
             clean.clean_android_media(base, card, True, args.ask)
         plan_json["stale_media"] = stale_count
@@ -985,13 +1072,14 @@ def sync_card(args):
     if scrapes:
         plan = build_plan(os.path.exists)
         scrape_plan.describe_scrape_plan(plan)
-        if clean_card and (plan["jobs"] or plan["extras"] or plan["writes"] or plan["gamelists"]):
+        if clean_card and (plan["jobs"] or plan["writes"] or plan["gamelists"]):
             clean._clean_root = base
         failed += scrape_plan.apply_scrape_plan(plan, base)
         stale = scrape_plan.stale_media(layout_name, manifest["systems"], roms_dir, es_dir, base)
     remove_stale_media(stale)
     for folder in scrape_plan.prune_empty_systems(layout_name, manifest["systems"], roms_dir):
         print(ui.green(f"🧹 Removed empty system folder {os.path.relpath(folder, base)}"))
+    frontend_step(False)
     if layout_name == "esde":  # only Android cards have these folders; a Knulli card's "music" must stay
         clean.clean_android_media(base, card, False, args.ask)
     if failures:

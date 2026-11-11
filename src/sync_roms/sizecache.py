@@ -92,8 +92,10 @@ def refresh(prefix):
     if root and not _is_folder(root):  # an unmounted share lists as empty: that must not wipe the sizes
         raise FileNotFoundError(f"{root} is missing")
     entry = _load().get(prefix)
-    bucket = s3.read_root() is None  # a bucket listing carries the sizes and there is nothing to stat
-    partial = bool(runtime._mirror_root)  # a mirror's listing misses files that exist in storage: never drop names
+    bucket = root is None  # a bucket listing carries the sizes and there is nothing to stat
+    # A mirror's listing misses files that exist in storage: never drop names. Taken from root alone, so a mirror swapped
+    # out by storage_reads() mid-refresh can't make its listing count as complete.
+    partial = root is not None and root != runtime.ROOT
     names = s3.list_sizes(prefix, sizes=bucket)
     if entry is None or _clock() - entry["built"] > MAX_AGE:
         files = names if bucket else s3.list_sizes(prefix)

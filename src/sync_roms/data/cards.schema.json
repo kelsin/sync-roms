@@ -14,6 +14,30 @@
         "type": "array",
         "items": {"type": "string"}
       },
+      "collections": {
+        "description": "Ids of the user's collections synced whole to this card",
+        "type": "array",
+        "items": {"type": "string"}
+      },
+      "frontend_collections": {
+        "description": "Custom collection names sync-roms wrote to the card's frontend",
+        "type": "array",
+        "items": {"type": "string"}
+      },
+      "surprise": {"type": "boolean", "description": "false turns Surprise off (absent: on)"},
+      "surprises": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["system", "bucket", "title"],
+          "properties": {
+            "system": {"type": "string"},
+            "bucket": {"type": "string"},
+            "title": {"type": "string"},
+            "files": {"type": "array", "items": {"type": "string"}, "description": "the game's other files"}
+          }
+        }
+      },
       "games": {"$ref": "games.schema.json", "description": "The card's games"}
     }
   }
