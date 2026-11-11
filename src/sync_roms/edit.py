@@ -211,7 +211,7 @@ def target_changes(t):
 
 
 def make_set_from_extras(t, sets, sets_by_id):
-    """Save the games in a card target's extras as a personal set and add it to the open set lists.
+    """Save a card target's picked games as a personal set and add it to the open set lists.
 
     Returns the new set's id, or None when cancelled or there is nothing to save."""
     systems = [s for s in t["data"]["systems"] if s["games"]]
@@ -400,6 +400,7 @@ def edit_manifest():
             setedit.edit_sets()
         except SystemExit:
             pass  # the reason is already printed
+        note("")  # keep what it printed (a PR link, why it stopped) on screen until the menu redraws
 
     def menu():
         """The top menu. Returns True to review and save, False to quit without saving."""
@@ -452,7 +453,7 @@ def edit_manifest():
 
     while True:
         if not menu():
-            print(ui.yellow("👋 Quit without saving."))
+            print(ui.yellow("👋 Quit without saving the device changes (card games were saved as you edited them)."))
             return 0
         changed = changed_targets()
         if not changed and not overlay_pending:

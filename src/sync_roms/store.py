@@ -179,7 +179,7 @@ _warned = set()  # warnings already printed this run, so a menu redraw doesn't r
 
 
 def card_games(card, cards=None):
-    """The extra games list saved for a card in cards.json ({} when it has none). cards: cards.json already loaded."""
+    """The games list saved for a card in cards.json ({} when it has none). cards: cards.json already loaded."""
     entry = (load_cards() if cards is None else cards).get(card)
     games = entry.get("games") if isinstance(entry, dict) else None
     return games if isinstance(games, dict) else {}

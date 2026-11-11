@@ -233,7 +233,7 @@ def edit_system(name, system, setup, sizing=None):
                                       any(p.partial for p in parts))
         picked = [x for x in others if budget.picked(usages[x["bucket"]])]
         work["bios"] = (budget.bios_usage(picked), budget.bios_usage(picked + [system]))
-        work["costs"], work["scrapes_missing"] = budget.game_costs(card, system, [r[1] for r in rows])
+        work["costs"], work["partial"] = budget.game_costs(card, system, [r[1] for r in rows])
 
     work_out()
 
@@ -302,7 +302,7 @@ def edit_system(name, system, setup, sizing=None):
                 mine = sum(work["costs"].get(k, 0) for k in picked)
                 bios = work["bios"][1 if picked else 0]
                 partial = (work["others"].partial or bios.partial
-                           or bool(picked) and (work["scrapes_missing"] or any(k not in work["costs"] for k in picked)))
+                           or bool(picked) and work["partial"])
                 total = budget.Usage(work["others"].bytes + mine + bios.bytes, work["others"].count + len(picked),
                                      partial)
                 return status_of(total, capacity)

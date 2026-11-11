@@ -314,7 +314,7 @@ def cards_list(args):
     if args.json:
         ui.emit_json(rows)
         return 0
-    ui.table([(r["name"], r["device"] or "(no device set)", r["layout"] or "", r["size"] or "", f"{r['extras']} extra entries") for r in rows])
+    ui.table([(r["name"], r["device"] or "(no device set)", r["layout"] or "", r["size"] or "", f"{r['extras']} game entries") for r in rows])
     return 0
 
 
@@ -369,9 +369,9 @@ def cards_delete(args):
     if args.name not in store.load_cards():
         ui.fail(f"No card named {args.name!r}", 2)
     if args.dry_run:
-        print(ui.yellow(f"🧪 Would delete card {args.name} and its extra games"))
+        print(ui.yellow(f"🧪 Would delete card {args.name} and its games"))
         return 0
-    if not args.yes and not ui.confirm(f"Delete card {args.name} and its extra games? (cards.json.bak keeps the old file)", default=False):
+    if not args.yes and not ui.confirm(f"Delete card {args.name} and its games? (cards.json.bak keeps the old file)", default=False):
         print(ui.yellow("↩️  Kept"))
         return 0
     if not store.delete_card(args.name):

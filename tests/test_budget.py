@@ -85,6 +85,12 @@ class Budget(DataDir):
         self.assertEqual(tuple(u), (100, 1, True))
         self.assertEqual(tuple(budget.bios_usage([GBA])), (0, 0, False))  # no BIOS needed: nothing to size
 
+    def test_picked_game_not_in_storage_costs_nothing_and_is_not_partial(self):
+        u = self.usage({"games": {"gba": [g("gba/A.zip"), g("gba/Gone.zip")]}}, "other")
+        self.assertEqual(tuple(u), (100, 2, False))
+        u = self.usage({"games": {"gba": [g("gba/A.zip"), g("gba/Gone.zip")]}}, "slot")
+        self.assertEqual(tuple(u), (105, 2, False))
+
     def test_nothing_picked_is_not_partial(self):
         self.cache.clear()
         self.assertEqual(tuple(self.usage({})), (0, 0, False))

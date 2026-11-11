@@ -269,6 +269,19 @@ class Flow(DataDir):
             self.run_system(step)
         self.assertEqual(seen, [1002, 1021])
 
+    def test_picked_game_not_in_storage_is_not_still_sizing(self):
+        self.card(games={"gba": [g("gba/Ruby.zip"), g("gba/Gone.zip")]})
+        self.cache = {"gba/": self.files["gba/"], "scrapes/gba/": {}, "BIOS/": {}}
+
+        def step(labels, kw):
+            self.assertIn("Gone.zip  ⚠️ not in storage", labels)
+            self.assertEqual(kw["status"](kw["session"]["sel"]), "💾 5 B used · 2 game(s)")
+            return kw["session"]["sel"]
+        self.run_system(step)
+        with mock.patch.object(store, "recommended_systems", return_value=set()):
+            calls = self.run_card(returns(None))
+        self.assertEqual(calls[0][2]["status"](None), "💾 5 B used · 2 game(s)")
+
     def test_entering_a_system_lists_names_only(self):
         self.card()
         calls = []

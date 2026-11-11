@@ -53,7 +53,7 @@ The editor becomes system-first, with sets as a filter inside a system, and a li
 - Per game cost = ROM size + the scrape files the card's layout would install for that ROM (reuse `plan_scrapes` / layout rules). BIOS counted for the card's systems.
 - Card size parsed from the card's existing size string (a card without size shows used only).
 - Sizes cache: persistent file in `~/.sync-roms/` (per system, per file: size). On opening a system: (1) name listing (fast on SMB) diffed against the cache — stat only new files, drop removed; (2) spot-check ~5 random cached files and, if any size differs, rebuild that system in the background; (3) background refresh after ~30 days. Work runs in the background so the screen is usable at once; uncached systems show "…" until ready.
-- Measured on the user's NAS (`/Volumes/roms`, existing 32-thread stat): ~1,500 files in 3–11 s per system, so per-system on demand is fine; a whole-share scan (~100 systems) is minutes and must not run at startup.
+- Measured: sizing one system on demand is fast enough; a whole-share scan of every system is slow and must not run at startup.
 - Scrape sizes use the same cache, from the `scrapes/` listing.
 
 ### Core list removal
@@ -82,7 +82,7 @@ The editor becomes system-first, with sets as a filter inside a system, and a li
 - A card with no picks syncs nothing for games (BIOS and the like unchanged) and prints a one-line note; no refusal.
 - `sets` references on cards stay. Budget is computed on the resolved set of bucket keys (direct picks + set references + `full_system`, minus the card's `excluded`), deduplicated by key, so a game picked twice counts once. "Picked count" is that resolved count.
 - Scrape cost counts every file the layout would install for a ROM, including `onion/` and `slot/` PNGs that are already stored in `scrapes/`. A system with no scrapes costs ROM only. Refactor `plan_scrapes` into a per-ROM cost helper if needed. Until a system's sizes are cached, its numbers show "…" and the header total is marked partial.
-- Sizes come from whichever backend `s3.read_root()` / the bucket currently resolves to; the cache is keyed by that source.
+- Sizes come from whichever backend `s3.read_root()` / the bucket currently resolves to. Entries are keyed by bucket key (the path from the storage root), shared by every backend; a refresh from a local mirror only adds and updates sizes, never drops names (the mirror holds only some files).
 - Ratios match by exact string. A system or device with no ratio is never recommended by ratio (overrides still apply).
 - A card with no or unparseable size string shows used only, no warning.
 

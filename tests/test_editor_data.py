@@ -221,10 +221,6 @@ class SystemsPickerKeys(unittest.TestCase):
         self.assertEqual(self.run_keys(keys), [0])
 
 
-if __name__ == "__main__":
-    unittest.main()
-
-
 class CheckRatios(Cmd):
     def test_repo_data_is_clean(self):
         self.assertEqual(commands.check_data(), [])
@@ -247,3 +243,7 @@ class CheckRatios(Cmd):
             self.assertTrue(commands.valid_ratio(ok))
         for bad in ("4:", "0:3", "4:3:2", " 4:3", 43, None):
             self.assertFalse(commands.valid_ratio(bad), bad)
+
+
+if __name__ == "__main__":
+    unittest.main()

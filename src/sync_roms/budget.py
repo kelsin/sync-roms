@@ -19,19 +19,22 @@ def scrape_costs(layout, system, rels, listing):
 
 
 def game_costs(card, system, keys):
-    """({key: ROM bytes + scrape bytes} for the keys whose ROM size is cached, whether the scrape sizes are missing).
-    A key left out has no size yet (or isn't in storage)."""
+    """({key: ROM bytes + scrape bytes} for the keys in the system's size cache, partial). partial: the system's
+    sizes, or the scrape sizes the layout needs, aren't cached yet. Once they are, a key left out isn't in storage:
+    it costs nothing."""
     bucket = system["bucket"]
-    sizes = sizecache.cached(f"{bucket}/") or {}
+    sizes = sizecache.cached(f"{bucket}/")
+    partial = sizes is None and bool(keys)
+    sizes = sizes or {}
     layout = card.get("layout")
     sized = [k for k in keys if k in sizes]
     if layout not in scrape_plan.SCRAPE_LAYOUTS or not keys:
-        return {k: sizes[k] for k in sized}, False
+        return {k: sizes[k] for k in sized}, partial
     scrapes = sizecache.cached(f"{scrape_plan.SCRAPES}/{bucket}/")
     if scrapes is None:
         return {k: sizes[k] for k in sized}, True
     extra = scrape_costs(layout, system, [k[len(bucket) + 1:] for k in sized], scrapes)
-    return {k: sizes[k] + extra[k[len(bucket) + 1:]] for k in sized}, False
+    return {k: sizes[k] + extra[k[len(bucket) + 1:]] for k in sized}, partial
 
 
 def _system_usage(card, system, sets):
@@ -48,13 +51,14 @@ def _system_usage(card, system, sets):
     keys = [k for k in keys if k not in skip]
     if not keys:
         return Usage(0, 0, False)  # nothing picked: nothing to size
-    costs, scrapes_missing = game_costs(card, system, keys)
-    return Usage(sum(costs.values()), len(keys), scrapes_missing or len(costs) < len(keys))
+    costs, partial = game_costs(card, system, keys)
+    return Usage(sum(costs.values()), len(keys), partial)  # count includes picked games not in storage
 
 
 def system_usage(card, system):
     """Usage of one system on a card: its direct picks, set references and full system, minus the card's exclusions.
-    Sizes not cached yet count as 0 and make the usage partial; a system with nothing picked is 0 and not partial."""
+    Sizes not cached yet count as 0 and make the usage partial; a picked game not in storage (absent from a cached
+    listing) counts as 0 and is not partial; a system with nothing picked is 0 and not partial."""
     return _system_usage(card, system, store.load_sets())
 
 

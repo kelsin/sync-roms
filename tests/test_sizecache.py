@@ -5,7 +5,7 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import helpers  # noqa: E402
-from sync_roms import s3, sizecache  # noqa: E402
+from sync_roms import runtime, s3, sizecache  # noqa: E402
 
 
 class FakeStore:
@@ -140,11 +140,12 @@ class SizeCacheTest(helpers.DataDir):
         self.write_json("sizes.json", [1])
         self.assertIsNone(sizecache.cached("gba/"))
 
-    def test_other_source_is_empty(self):
-        self.write_json("sizes.json", {"source": "s3://other", "prefixes": {"gba/": {"at": 1, "built": 1, "files": {"gba/x": 9}}}})
-        self.assertIsNone(sizecache.cached("gba/"))
+    def test_an_older_file_with_a_source_still_loads(self):
+        self.write_json("sizes.json", {"source": "s3://other", "prefixes": {"gba/": {"built": 1, "files": {"gba/x": 9}}}})
+        self.assertEqual(sizecache.cached("gba/"), {"gba/x": 9})
+        self.now = 1000.0 + sizecache.MAX_AGE + 10  # old: rebuilt from the listing, the removed file dropped
         sizecache.refresh("gba/")
-        self.assertEqual(self.read("sizes.json")["source"], "/nas")
+        self.assertNotIn("source", self.read("sizes.json"))
         self.assertNotIn("gba/x", sizecache.cached("gba/"))
 
     def test_other_prefixes_survive_a_refresh(self):
@@ -168,6 +169,30 @@ class SizeCacheTest(helpers.DataDir):
         sizecache.refresh_async("nes/", got.append).join(5)
         self.assertEqual(got, [{}])
 
+
+    def test_entries_are_shared_by_every_source(self):
+        sizecache.refresh("gba/")  # read from the /nas folder
+        with mock.patch.object(s3, "read_root", return_value=None), mock.patch.object(s3, "location",
+                                                                                     return_value="s3://b"):
+            self.assertEqual(sizecache.cached("gba/"), {"gba/a.zip": 1, "gba/b.zip": 2, "gba/c.zip": 3})
+
+    def test_a_mirror_refresh_adds_and_updates_but_never_drops(self):
+        sizecache.refresh("gba/")
+        self.fake.files = {"gba/a.zip": 100, "gba/new.zip": 4}  # the mirror has only some files
+        with mock.patch.object(runtime, "_mirror_root", "/mirror"), \
+                mock.patch.object(s3, "read_root", return_value="/mirror"):
+            sizecache.refresh("gba/")  # the spot check sees a.zip changed: rebuilt, merged into what was there
+            self.assertEqual(sizecache.cached("gba/"), {"gba/a.zip": 100, "gba/b.zip": 2, "gba/c.zip": 3,
+                                                        "gba/new.zip": 4})
+            self.fake.files["gba/more.zip"] = 5
+            sizecache.refresh("gba/")  # incremental: adds the new name, keeps the ones the mirror lacks
+            self.assertEqual(sizecache.cached("gba/"), {"gba/a.zip": 100, "gba/b.zip": 2, "gba/c.zip": 3,
+                                                        "gba/new.zip": 4, "gba/more.zip": 5})
+            self.now += sizecache.MAX_AGE + 10  # old: rebuilt, still merged
+            sizecache.refresh("gba/")
+            self.assertIn("gba/b.zip", sizecache.cached("gba/"))
+        sizecache.refresh("gba/")  # the storage folder itself: removed files drop
+        self.assertNotIn("gba/b.zip", sizecache.cached("gba/"))
 
     def test_async_exit_from_a_worker_still_calls_on_done(self):
         got = []

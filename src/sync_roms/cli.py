@@ -91,7 +91,7 @@ TOPICS = {
   sync-roms cards rename OLD NEW
   sync-roms cards delete NAME [--yes]
 
-  A card is a folder name (the card root's basename) with a remembered device, firmware and extra games.
+  A card is a folder name (the card root's basename) with a remembered device, firmware and games.
 """,
     "devices": """
   sync-roms devices [ID] [--json]
