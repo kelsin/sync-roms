@@ -57,6 +57,14 @@ class Index(unittest.TestCase):
         self.assertEqual(hits({"genre": "Platform", "year": "1999"}), ["gba/A.zip"])
         self.assertEqual(hits({"genre": "Puzzle", "developer": "X"}), [])  # C has no developer
 
+    def test_values_are_alphabetical(self):
+        idx = mf.index({"A.zip": {"developer": "Zed", "publisher": "zulu", "genre": "Sports"},
+                        "B.zip": {"developer": "Zed", "publisher": "zulu", "genre": "Sports"},
+                        "C.zip": {"developer": "Alpha", "publisher": "Bravo", "genre": "Action"}}, "gba")
+        self.assertEqual(mf.counts(idx, list(idx), "developer"), [("Alpha", 1), ("Zed", 2)])
+        self.assertEqual(mf.counts(idx, list(idx), "publisher"), [("Bravo", 1), ("zulu", 2)])
+        self.assertEqual(mf.counts(idx, list(idx), "genre"), [("Action", 1), ("Sports", 2)])
+
     def test_spellings_that_differ_by_case_are_one_value(self):
         idx = mf.index({"A.zip": {"developer": "capcom", "genre": "action"},
                         "B.zip": {"developer": "Capcom", "genre": "Action"},
