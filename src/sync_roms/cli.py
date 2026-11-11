@@ -669,6 +669,7 @@ def report_failures(failures):
 
 def sync_card(args):
     from . import chd
+    store.preload_repo_data()
     base = os.path.abspath(os.path.expanduser(args.base_dir or os.getcwd()))
 
     print(ui.bold("🎮 sync-roms") + ui.dim(f"  {s3.access()}"))
