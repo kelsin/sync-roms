@@ -299,16 +299,65 @@ class SyncFlowTest(unittest.TestCase):
         self.assertEqual(code, 0)
         self.assertIn(f"{self.card}'s picks take 2 GB of its 1 GB: 1 GB over", warned)
 
-    def test_mirror_is_refreshed_again_after_the_surprise_step(self):
+    def mirror_root(self):
         tmp = tempfile.TemporaryDirectory()
         self.addCleanup(tmp.cleanup)
-        root = tmp.name
-        open(os.path.join(root, runtime.MIRROR_MARKER), "w").close()
-        seen = []
-        code, *_ = self.run_sync(settings={"mirror": root}, extra=(
-            (cli.surprise, "run_surprise", lambda *a: []),
-            (mirroring, "refresh_mirror", lambda r, dry_run=False: seen.append((r, runtime._mirror_root)) or 0)))
+        open(os.path.join(tmp.name, runtime.MIRROR_MARKER), "w").close()
+        return tmp.name
+
+    def run_editing(self, old, new, keys, **kw):
+        """A sync whose Surprise step (or the editor it opens) changes the gba system from `old` to `new`;
+        storage's gba/ holds `keys`. Returns (code, the ROM keys downloaded, the mirror refreshes)."""
+        manifest = {**MANIFEST, "systems": [{**MANIFEST["systems"][0], **old}]}
+        got, seen = [], []
+
+        def step(*a):
+            manifest["systems"] = [{**MANIFEST["systems"][0], **new}]
+            return []
+        code, *_ = self.run_sync(manifest=manifest, extra=(
+            (cli.surprise, "run_surprise", step),
+            (s3, "list_sizes", lambda prefix, sizes=True: {k: 5 for k in keys} if prefix == "gba/" else {}),
+            (s3, "stat_sizes", lambda wanted: {k: 5 for k in wanted if k in keys}),
+            (cli.downloads, "run_downloads", lambda todo, *a: got.extend(k for k, _, _ in todo) or 0),
+            (mirroring, "refresh_mirror", lambda r, dry_run=False: seen.append((r, runtime._mirror_root)) or 0)) + kw.pop("extra", ()), **kw)
+        return code, got, seen
+
+    def test_mirror_is_refreshed_again_when_the_step_changes_the_picks(self):
+        root = self.mirror_root()
+        code, _, seen = self.run_editing({}, {"games": [{"bucket": "gba/New.zip"}]}, ["gba/Game.zip", "gba/New.zip"],
+                                         settings={"mirror": root})
+        self.assertEqual(code, 0)
         self.assertEqual(seen, [(root, None), (root, None)])  # use_mirror, then after the step: both read storage
+
+    def test_mirror_is_not_refreshed_again_when_the_picks_are_unchanged(self):
+        root = self.mirror_root()
+        code, _, seen = self.run_editing({}, {}, ["gba/Game.zip"], settings={"mirror": root})
+        self.assertEqual(code, 0)
+        self.assertEqual(seen, [(root, None)])
+
+    def test_games_the_step_adds_are_downloaded_and_the_ones_it_drops_are_removed(self):
+        code, got, _ = self.run_editing({"games": [{"bucket": "gba/Game.zip"}, {"bucket": "gba/Old.zip"}]},
+                                        {"games": [{"bucket": "gba/Game.zip"}, {"bucket": "gba/New.zip"}]},
+                                        ["gba/Game.zip", "gba/Old.zip", "gba/New.zip"], yes=False,
+                                        files=["ROMs/gba/Old.zip"], extra=((ui, "choose", lambda *a, **k: "y"),),
+                                        after=lambda d: os.path.exists(os.path.join(d, "ROMs", "gba", "Old.zip")))
+        self.assertEqual(code, 0)
+        self.assertIn("gba/New.zip", got)
+        self.assertNotIn("gba/Old.zip", got)
+        self.assertFalse(self.after)
+
+    def test_switching_to_full_system_in_the_step_lists_the_whole_folder(self):
+        root = self.mirror_root()  # reading from a folder, a game list only stats its own games
+        code, got, _ = self.run_editing({}, {"full_system": True}, ["gba/Game.zip", "gba/Other.zip"], settings={"mirror": root})
+        self.assertEqual(code, 0)
+        self.assertEqual(sorted(got), ["gba/Game.zip", "gba/Other.zip"])
+
+    def test_surprise_collection_comes_from_the_saved_card_after_the_editor(self):
+        saved = [{"system": "gba", "bucket": "gba/Game.zip", "title": "Game"}]
+        self.run_sync(cards={"surprises": saved}, files=["ROMs/gba/Game.zip"],
+                      extra=((cli.surprise, "run_surprise", lambda *a: []),),  # what the step returned before the editor
+                      after=lambda d: read_from(d, "ES-DE", "collections", "custom-Surprise.cfg"))
+        self.assertEqual(self.after, "%ROMPATH%/gba/Game.zip\n")
 
     def test_surprise_off_removes_its_collection_file(self):
         def prepare(card_dir):

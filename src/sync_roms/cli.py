@@ -814,9 +814,15 @@ def sync_card(args):
         return 0
     chosen = [systems[i] for i in chosen]
     interactive = not (ui.ASSUME_YES or args.json) and ui.has_terminal()
-    surprises = surprise.run_surprise(card, (device, layout_name), chosen, interactive, args.dry_run)
+    surprise.run_surprise(card, (device, layout_name), chosen, interactive, args.dry_run)
     if not args.dry_run:  # the step (and the card editor it opens) may have changed the card's games
-        if runtime._mirror_root:  # the new picks reach the mirror before they are copied from it
+        def picks(s):
+            return s.get("full_system"), store.listed(s)
+        chosen_ids = {s["bucket"] for s in chosen}
+        before = {s["bucket"]: picks(s) for s in systems}
+        systems = reload_systems()
+        changed = [s["bucket"] for s in systems if picks(s) != before.get(s["bucket"])]
+        if changed and runtime._mirror_root:  # the new picks reach the mirror before they are copied from it
             root = runtime._mirror_root
             try:
                 with mirroring.storage_reads():
@@ -825,13 +831,9 @@ def sync_card(args):
                     ui.warn(f"{failed} mirror download(s) failed; files missing from the mirror will fail to copy. Re-run to retry")
             except (*s3.ERRORS, SystemExit) as e:  # S3 failed, or the folder isn't a mirror
                 ui.warn(f"Couldn't refresh the mirror ({e}); using what it has")
-        chosen_ids = {s["bucket"] for s in chosen}
-        before = {s["bucket"]: store.listed(s) for s in systems}
-        systems = reload_systems()
-        for s in systems:
-            if store.listed(s) != before.get(s["bucket"]):
-                listings.pop(s["bucket"], None)
-                size_cache.pop(s["bucket"], None)
+        for bucket in changed:
+            listings.pop(bucket, None)
+            size_cache.pop(bucket, None)
         relist()
         chosen = [s for s in systems if s["bucket"] in chosen_ids]
         saved = store.load_cards().get(card)
@@ -954,7 +956,9 @@ def sync_card(args):
         entry = store.load_cards().get(card) or {}
         by_id = {c["id"]: c for c in colls.load_collections()}
         card_colls = [by_id[i] for i in entry.get("collections", ()) if i in by_id]
-        if surprise.enabled(entry) and surprises:
+        surprises = [x for x in entry.get("surprises") or () if isinstance(x, dict)
+                     and isinstance(x.get("system"), str) and isinstance(x.get("bucket"), str)]
+        if surprise.enabled(entry) and surprises:  # as saved now: the card editor may have changed them
             card_colls.append({"name": surprise.COLLECTION, "games": surprises})
         owned = entry.get("frontend_collections", [])
         if not card_colls and not owned:
