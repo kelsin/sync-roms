@@ -29,7 +29,8 @@ class SurpriseRulesTest(unittest.TestCase):
 
     def test_unlisted_regions_are_not_english_and_more_rules(self):
         ok = lambda n: surprise.is_candidate("gba/" + n, GBA, None, set())
-        for n in ("Game (Denmark).zip", "Game (Spain).zip", "Game (China).zip", "Game (Mexico, Portugal).zip"):
+        for n in ("Game (Denmark).zip", "Game (Spain).zip", "Game (China).zip", "Game (Mexico, Portugal).zip",
+                  "Game (Ukraine).zip", "Game (Thailand).zip"):
             self.assertFalse(ok(n), n)
         for n in ("Game (United Kingdom).zip", "Game (Europe, Netherlands).zip", "Game (Spain, UK).zip"):
             self.assertTrue(ok(n), n)

@@ -14,7 +14,10 @@ REGIONS = ENGLISH_REGIONS | {
     "Japan", "Korea", "Asia", "China", "Taiwan", "Hong Kong", "India", "Israel", "Turkey", "UAE", "Brazil", "Argentina",
     "Chile", "Mexico", "Latin America", "France", "Germany", "Spain", "Italy", "Netherlands", "Sweden", "Denmark",
     "Finland", "Norway", "Scandinavia", "Poland", "Portugal", "Russia", "Greece", "Ireland", "Switzerland", "Austria",
-    "Belgium", "Croatia", "Czech", "Hungary", "New Zealand", "South Africa", "Unknown"}
+    "Belgium", "Croatia", "Czech", "Hungary", "New Zealand", "South Africa", "Ukraine", "Bulgaria", "Romania",
+    "Serbia", "Slovakia", "Slovenia", "Estonia", "Latvia", "Lithuania", "Iceland", "Indonesia", "Thailand", "Vietnam",
+    "Philippines", "Malaysia", "Singapore", "Egypt", "Saudi Arabia", "Peru", "Colombia", "Venezuela", "Uruguay",
+    "Macao", "Unknown"}
 NOT_FULL = ("Proto", "Beta", "Demo", "Sample", "Kiosk", "Pirate", "Hack", "Unl")
 RERELEASE = ("Virtual Console", "Switch Online", "Classic Mini", "Mini Mix", "Mega Drive Mini", "Genesis Mini",
              "Collection", "Anthology", "Archives", "Sega Ages", "Sega Channel", "Evercade", "Steam", "GOG",
