@@ -511,8 +511,8 @@ sync-roms games remove gba 'Metroid Fusion.zip' --card SD
 sync-roms games full psx on --card SD              # sync a whole system
 sync-roms games sets add pinball --card SD
 sync-roms games list --json --card SD
-sync-roms games export --card SD > list.txt      # SYSTEM/file per line, SYSTEM/* for a full system
-sync-roms games import list.txt --card SD
+sync-roms games export --card SD > list.txt      # SYSTEM/file per line, SYSTEM/* for a full system, then @collections ID and @frontend_collections NAME lines
+sync-roms games import list.txt --card SD         # a field with @ lines in the file replaces the card's value
 sync-roms cards new SD --device rg35xx-sp --layout knulli --size 256GB   # --size is optional; shown in `cards list` and on sync
 ```
 

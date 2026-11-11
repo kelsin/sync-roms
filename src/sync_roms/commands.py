@@ -259,6 +259,21 @@ def games_sets(args):
     return finish(args, raw, save, [])
 
 
+def parse_collection(value):
+    """A collection id from an import line; None (with a warning) when no such collection exists."""
+    if value not in {c["id"] for c in colls.load_collections()}:
+        ui.warn(f"unknown collection {value!r}, skipped")
+        return None
+    return value
+
+
+# Card-entry list fields that `games export`/`import` carry as `@field value` lines, one per value. CARD_HOOKS gives a
+# field its own parse(value) -> item or None (None skips the line; the hook warns) and format(item) -> text; a field
+# without one uses the text as it is.
+CARD_FIELDS = ("collections", "frontend_collections")
+CARD_HOOKS = {"collections": (parse_collection, str)}
+
+
 def games_export(args):
     raw, _ = load_target(args.card)
     for system, entry in raw.items():
@@ -266,6 +281,11 @@ def games_export(args):
             print(f"{system}/*")
     for _, key, _ in game_entries(raw):
         print(key)
+    card = store.load_cards()[args.card]
+    for field in CARD_FIELDS:
+        values = card.get(field) if isinstance(card, dict) else None
+        for value in values if isinstance(values, list) else []:
+            print(f"@{field} {CARD_HOOKS.get(field, (None, str))[1](value)}")
     return 0
 
 
@@ -275,8 +295,17 @@ def games_import(args):
         lines = [l.strip() for l in (sys.stdin if args.file == "-" else open(args.file, encoding="utf-8")) if l.strip() and not l.startswith("#")]
     except OSError as e:
         ui.fail(f"Can't read {args.file}: {e}", 2)
-    changes, by_system, known = [], {}, set(system_ids())
+    changes, by_system, known, fields = [], {}, set(system_ids()), {}
     for line in lines:
+        if line.startswith("@"):
+            field, _, text = line[1:].partition(" ")
+            if field not in CARD_FIELDS:
+                ui.warn(f"skipping {line!r}: unknown card field")
+                continue
+            value = CARD_HOOKS.get(field, (lambda text: text, str))[0](text.strip())
+            if value is not None:
+                fields.setdefault(field, []).append(value)
+            continue
         system, _, name = line.partition("/")
         if system not in known or not name:
             ui.warn(f"skipping {line!r}: expected SYSTEM/file or SYSTEM/*")
@@ -288,7 +317,15 @@ def games_import(args):
             by_system.setdefault(system, []).append(line)
     for system, keys in by_system.items():
         changes += add_games(raw, system, keys)
-    return finish(args, raw, save, changes)
+    for field, values in fields.items():
+        changes.append(("+", f"{field}: {', '.join(CARD_HOOKS.get(field, (None, str))[1](v) for v in values)}"))
+
+    def save_all(raw):
+        if save(raw) is False:
+            return False
+        return store.update_card(args.card, **fields) if fields else None
+
+    return finish(args, raw, save_all, changes)
 
 
 # --- Cards ------------------------------------------------------------------------------------------

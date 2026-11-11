@@ -66,6 +66,26 @@ class GamesTest(CardCmd):
         self.assertEqual(saved["nes"], {"full_system": True})
         self.assertEqual(saved["gba"][0]["bucket"], "gba/A.zip")
 
+    def test_export_and_import_carry_collections_and_frontend_names(self):
+        from sync_roms import collections
+        collections.save_collection({"id": "favs", "name": "Favs", "games": []})
+        cards = self.read("cards.json")
+        cards["SD"].update(collections=["favs"], frontend_collections=["Favs"])
+        self.write_json("cards.json", cards)
+        self.assertEqual(self.run_cmd("games", "export")[1].splitlines(), ["@collections favs", "@frontend_collections Favs"])
+        self.write_json("cards.json", {"SD": {"device": "full", "layout": "esde"}})
+        listing = os.path.join(self.tmp.name, "list.txt")
+        with open(listing, "w") as f:
+            f.write("@collections favs\n@collections ghost\n@frontend_collections Favs\n@bogus x\n")
+        code, _, err = self.run_cmd("games", "import", listing, "-n")
+        self.assertEqual((code, self.read("cards.json")["SD"].get("collections")), (0, None))
+        code, _, err = self.run_cmd("games", "import", listing)
+        self.assertEqual(code, 0)
+        self.assertIn("ghost", err)
+        self.assertIn("@bogus", err)
+        entry = self.read("cards.json")["SD"]
+        self.assertEqual((entry["collections"], entry["frontend_collections"]), (["favs"], ["Favs"]))
+
     def test_card_target_requires_an_existing_card(self):
         self.assertEqual(Cmd.run_cmd(self, "games", "add", "gba", "A.zip", "--card", "NOPE")[0], 2)
         self.assertEqual(self.run_cmd("games", "add", "gba", "A.zip")[0], 0)
