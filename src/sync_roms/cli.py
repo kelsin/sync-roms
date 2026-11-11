@@ -572,6 +572,9 @@ def dispatch_mode(args, mode):
             from . import mirroring
             print()
             mirroring.use_mirror(mirror, False)
+        if args.edit:  # the editor's background size refreshes must not hold up the exit
+            from . import sizecache
+            sizecache.exit_now(code)
         return True, code
     return False, None
 

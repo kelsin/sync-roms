@@ -9,6 +9,7 @@ that isn't a whole number is dropped."""
 import json
 import os
 import random
+import sys
 import threading
 import time
 
@@ -112,6 +113,15 @@ def refresh(prefix):
     files = dict(old) if partial else {k: old[k] for k in kept}
     files.update(sizes_of([k for k in names if k not in old]))
     return _save(prefix, files, entry["built"])
+
+
+def exit_now(code):
+    """Exit without waiting for background refreshes: their thread-pool workers can sit on slow network stats, and
+    Python's exit would join them. Waits for any cache write in progress, so the file is never cut off."""
+    sys.stdout.flush()
+    sys.stderr.flush()
+    with _lock:
+        os._exit(code)
 
 
 def refresh_async(prefix, on_done):

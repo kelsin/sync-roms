@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 
-from sync_roms import chd, commands, diff, edit, m3u, picker, runtime, s3, scrape_files, store, ui, upload  # noqa: E402
+from sync_roms import chd, commands, diff, edit, m3u, picker, runtime, s3, scrape_files, sizecache, store, ui, upload  # noqa: E402
 from test_edit import EditBase  # noqa: E402
 from test_scripting import Isolated  # noqa: E402
 
@@ -47,10 +47,12 @@ class ErrorsTest(Isolated):
 class EditAliasTest(Isolated):
     def test_every_edit_spelling_opens_the_main_menu(self):
         for argv in (["edit"], ["games", "edit"], ["cards", "edit"], ["--edit"], ["-e"]):
-            with self.subTest(argv=argv), mock.patch.object(edit, "edit_manifest", return_value=0) as run:
+            with self.subTest(argv=argv), mock.patch.object(edit, "edit_manifest", return_value=0) as run, \
+                    mock.patch.object(sizecache, "exit_now") as leave:
                 code, _, err = self.sync(argv, {"bucket": "b"})
                 self.assertEqual((code, err), (0, ""))
             run.assert_called_once_with()
+            leave.assert_called_once_with(0)
 
     def test_dry_run_with_edit_is_a_usage_error(self):
         for argv in (["edit", "--dry-run"], ["--edit", "-n"]):
