@@ -8,7 +8,8 @@ from concurrent.futures import ThreadPoolExecutor
 
 from botocore.exceptions import BotoCoreError, ClientError, NoCredentialsError
 
-from . import __version__, clean, commands, downloads, edit, external, m3u, picker, runtime, s3, scrape_plan, store, ui, usersettings, vita
+from . import __version__, clean, commands, downloads, edit, external, frontend, m3u, picker, runtime, s3, scrape_plan, store, ui, usersettings, vita
+from . import collections as colls
 
 
 SUBCOMMANDS = {  # name -> (usage, one-line summary)
@@ -920,6 +921,37 @@ def sync_card(args):
             present = lambda path, exists=present: exists(path) or downloads.archive_extracted(path)  # noqa: E731
         return scrape_plan.build_scrape_plan(layout_name, chosen, scraped["data"], scraped["rels"], dest_of, es_dir, present, base)
 
+    def frontend_step(dry_run):
+        """Write the card's collections as the frontend's custom collections (ES-DE, Knulli)."""
+        if layout_name not in frontend.FRONTEND_LAYOUTS:
+            return
+        entry = store.load_cards().get(card) or {}
+        by_id = {c["id"]: c for c in colls.load_collections()}
+        card_colls = [by_id[i] for i in entry.get("collections", ()) if i in by_id]
+        owned = entry.get("frontend_collections", [])
+        if not card_colls and not owned:
+            return
+        coming = {(s["bucket"], downloads.rom_rel(k, False)) for s in chosen
+                  for k in available(s) if k in listings[s["bucket"]]} if dry_run else set()
+
+        def on_card(s, rel):
+            return (s["bucket"], rel) in coming or os.path.exists(os.path.join(dest_of(s), rel))
+
+        wanted = frontend.wanted_collections(layout_name, card_colls, systems, on_card)
+        plan = frontend.plan_collections(layout_name, base, wanted, owned)
+        if dry_run:
+            frontend.describe_collections(plan, layout_name)
+            return
+        for warning in plan["warnings"]:
+            ui.warn(warning)
+        frontend.apply_collections(plan, layout_name, base)
+        if clean_card and (plan["writes"] or plan["deletes"]):
+            clean._clean_root = base
+        if plan["owned"] != owned:
+            store.update_card(card, frontend_collections=plan["owned"])
+        if plan["writes"]:
+            print(ui.green(f"💖 Wrote {len(plan['writes'])} collection(s) for {layout['label']}"))
+
     if args.dry_run:
         print(ui.yellow("\n🧪 Dry run — nothing downloaded or deleted"))
         plan_json = {
@@ -938,6 +970,7 @@ def sync_card(args):
             scrape_plan.describe_scrape_plan(build_plan(lambda path: True))
             stale_count = len(scrape_plan.stale_media(layout_name, manifest['systems'], roms_dir, es_dir, base))
             print(f"🧹 Media on the card for ROMs it doesn't have: {stale_count} file(s) to remove")
+        frontend_step(True)
         if layout_name == "esde":
             clean.clean_android_media(base, card, True, args.ask)
         plan_json["stale_media"] = stale_count
@@ -1001,6 +1034,7 @@ def sync_card(args):
     remove_stale_media(stale)
     for folder in scrape_plan.prune_empty_systems(layout_name, manifest["systems"], roms_dir):
         print(ui.green(f"🧹 Removed empty system folder {os.path.relpath(folder, base)}"))
+    frontend_step(False)
     if layout_name == "esde":  # only Android cards have these folders; a Knulli card's "music" must stay
         clean.clean_android_media(base, card, False, args.ask)
     if failures:

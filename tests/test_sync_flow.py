@@ -11,7 +11,20 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 
 from sync_roms import cli, clean, downloads, s3, scrape_plan, store, ui, usersettings  # noqa: E402
+from sync_roms import collections as collections_mod  # noqa: E402
 from helpers import MANIFEST, list_sizes  # noqa: E402
+
+
+GAME = {"title": "Game", "system": "gba", "bucket": "gba/Game.zip"}
+FAVS = {"id": "favs", "name": "Favs", "games": [GAME]}
+
+
+def read_from(card_dir, *parts):
+    path = os.path.join(card_dir, *parts)
+    if not os.path.exists(path):
+        return None
+    with open(path) as f:
+        return f.read()
 
 
 def captured(fn, *a, **kw):
@@ -138,7 +151,8 @@ class PlainOutputTest(unittest.TestCase):
 
 
 class SyncFlowTest(unittest.TestCase):
-    def run_sync(self, cards=None, yes=True, dry_run=False, plan=None, picks=None, stale=(), extra=()):
+    def run_sync(self, cards=None, yes=True, dry_run=False, plan=None, picks=None, stale=(), extra=(),
+                 manifest=MANIFEST, setup=(None, "esde"), files=(), colls=(), after=None):
         updates, picked = [], []
         with tempfile.TemporaryDirectory() as card_dir:
             card = os.path.basename(card_dir)
@@ -148,15 +162,16 @@ class SyncFlowTest(unittest.TestCase):
                 for target, kw in (
                         (sys, {"argv": argv}),
                         (usersettings, {"ensure_bucket": lambda: None, "load_settings": lambda: {}}),
-                        (store, {"load_manifest": lambda names=(): MANIFEST, "load_cards": lambda: cards,
+                        (store, {"load_manifest": lambda names=(): manifest, "load_cards": lambda: cards,
                                  "save_card": lambda *a: None,
                                  "update_card": lambda name, **v: updates.append(v)}),
                         (s3, {"list_sizes": list_sizes, "fetch_texts": lambda keys: {}}),
-                        (cli.picker, {"saved_setup": lambda *a: (None, "esde"),
+                        (cli.picker, {"saved_setup": lambda *a: setup,
                                       "pick_systems": lambda rows, present, state, editable: picked.append(present) or [0]}),
                         (cli.downloads, {"run_downloads": lambda *a: 0, "plan_downloads": lambda jobs, unzip=False, disc_dir=None: plan if plan is not None else jobs}),
                         (cli.clean, {"clean_android_media": lambda *a: None}),
-                        (scrape_plan, {"stale_media": lambda *a: [os.path.join(card_dir, s) for s in stale]})):
+                        (scrape_plan, {"stale_media": lambda *a: [os.path.join(card_dir, s) for s in stale]}),
+                        (collections_mod, {"load_collections": lambda: list(colls)})):
                     for name, value in kw.items():
                         st.enter_context(mock.patch.object(target, name, value))
                 st.enter_context(mock.patch.object(cli.clean, "_clean_root", None))
@@ -169,7 +184,12 @@ class SyncFlowTest(unittest.TestCase):
                 st.enter_context(mock.patch.object(scrape_plan, "apply_scrape_plan", lambda *a: 0))
                 for s in stale:
                     open(os.path.join(card_dir, s), "w").close()
+                for rel in files:
+                    os.makedirs(os.path.dirname(os.path.join(card_dir, rel)), exist_ok=True)
+                    open(os.path.join(card_dir, rel), "w").close()
                 code, out = captured(cli.sync)
+                if after:
+                    self.after = after(card_dir)
                 root = cli.clean._clean_root
                 left = [s for s in stale if os.path.exists(os.path.join(card_dir, s))]
         return code, out, updates, picked, root, left
@@ -204,6 +224,43 @@ class SyncFlowTest(unittest.TestCase):
     def test_yes_with_saved_selection_skips_the_picker(self):
         code, _, _, picked, _, _ = self.run_sync(cards={"systems": ["gba"]})
         self.assertEqual((code, picked), (0, []))
+
+    def test_esde_card_gets_its_collection_written_enabled_and_owned(self):
+        _, _, updates, _, _, _ = self.run_sync(cards={"collections": ["favs"]}, colls=[FAVS], files=["ROMs/gba/Game.zip"],
+                                               after=lambda d: (read_from(d, "ES-DE", "collections", "custom-Favs.cfg"),
+                                                                read_from(d, "ES-DE", "settings", "es_settings.xml")))
+        cfg, settings = self.after
+        self.assertEqual(cfg, "%ROMPATH%/gba/Game.zip\n")
+        self.assertIn('<string name="CollectionSystemsCustom" value="Favs" />', settings)
+        self.assertIn({"frontend_collections": ["Favs"]}, updates)
+
+    def test_knulli_card_writes_under_system_configs(self):
+        manifest = {**MANIFEST, "systems": [{**MANIFEST["systems"][0], "folders": {"knulli": "gba"}}],
+                    "layouts": {"knulli": {"label": "Knulli", "roms_dir": "roms", "bios_dir": "bios"}}}
+        self.run_sync(cards={"collections": ["favs"]}, colls=[FAVS], manifest=manifest, setup=(None, "knulli"),
+                      files=["roms/gba/Game.zip"],
+                      after=lambda d: (read_from(d, "system", "configs", "emulationstation", "collections", "custom-Favs.cfg"),
+                                       read_from(d, "system", "configs", "emulationstation", "es_settings.cfg")))
+        cfg, settings = self.after
+        self.assertEqual(cfg, "./roms/gba/Game.zip\n")
+        self.assertIn("<config>", settings)
+
+    def test_dry_run_describes_and_writes_nothing(self):
+        _, out, updates, _, _, _ = self.run_sync(cards={"collections": ["favs"]}, colls=[FAVS], dry_run=True,
+                                                 after=lambda d: os.path.exists(os.path.join(d, "ES-DE", "collections")))
+        self.assertIn("custom-Favs.cfg", out)
+        self.assertFalse(self.after)
+        self.assertFalse([u for u in updates if "frontend_collections" in u])
+
+    def test_a_collection_game_on_a_system_the_device_cant_play_is_ignored(self):
+        psx = {"name": "PlayStation", "bucket": "psx", "folders": {"esde": "psx"}, "bios": {"files": []},
+               "games": [{"bucket": "psx/FF7.chd"}]}
+        device = {"id": "d", "name": "D", "note": "", "systems": ["gba"]}
+        favs = {**FAVS, "games": [GAME, {"title": "FF7", "system": "psx", "bucket": "psx/FF7.chd"}]}
+        self.run_sync(cards={"collections": ["favs"]}, colls=[favs], manifest={**MANIFEST, "systems": MANIFEST["systems"] + [psx]},
+                      setup=(device, "esde"), files=["ROMs/gba/Game.zip", "ROMs/psx/FF7.chd"],
+                      after=lambda d: read_from(d, "ES-DE", "collections", "custom-Favs.cfg"))
+        self.assertEqual(self.after, "%ROMPATH%/gba/Game.zip\n")
 
 
 if __name__ == "__main__":

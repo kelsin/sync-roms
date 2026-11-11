@@ -623,6 +623,28 @@ It is meant for preparing a downloaded rom pack before you upload it to storage,
   BIOS lists come from the ES-DE default libretro cores, so they may not match what Knulli
   or Onion use; on Knulli check Game Settings > Missing Bios Check.
 
+### Collections in ES-DE and Knulli
+
+Only ES-DE and Knulli cards get them. Each sync writes the card's collections (see [Collections](#collections)) as the
+frontend's custom collections, listing the collection games that are on the card; games on systems the card doesn't
+sync are left out. `--dry-run` lists what would be written.
+
+| | ES-DE | Knulli |
+|---|---|---|
+| File | `ES-DE/collections/custom-<Name>.cfg` | `system/configs/emulationstation/collections/custom-<Name>.cfg` |
+| Line | `%ROMPATH%/<system folder>/<path on card>` | `./roms/<system folder>/<path on card>` |
+| Enable | `CollectionSystemsCustom` in `ES-DE/settings/es_settings.xml` | `CollectionSystemsCustom` in `system/configs/emulationstation/es_settings.cfg` |
+
+- `<Name>` is the collection's name without the characters ES-DE rejects (`* " , . / : ; < > \ |`, newline, tab);
+  collections whose names come out alike share one file.
+- `CollectionSystemsCustom` is the comma-separated list of enabled custom collections. Sync adds its names and keeps
+  any others there; only that one line is changed (or added), and the file is created if missing.
+- sync-roms only touches collection files it wrote (recorded as the card's `frontend_collections`). A collection made
+  in the frontend with the same name is skipped with a warning. A collection removed from the card, or renamed, has
+  its old file deleted and its name unlisted.
+- The files are rewritten each sync, so edits made to them in the frontend are lost.
+- Close the frontend before syncing: it rewrites its settings file from memory.
+
 ## Troubleshooting
 
 | Symptom | Fix |
