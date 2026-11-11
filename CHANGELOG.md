@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.0](https://github.com/kelsin/sync-roms/compare/v1.2.0...v1.3.0) (2026-11-11)
+
+
+### :video_game: Features
+
+* **edit:** show emoji for empty and fully synced sets in the set picker ([#215](https://github.com/kelsin/sync-roms/issues/215)) ([1dd222b](https://github.com/kelsin/sync-roms/commit/1dd222b62a92b90ef8817ada5b784df095c43866))
+
 ## [1.2.0](https://github.com/kelsin/sync-roms/compare/v1.1.0...v1.2.0) (2026-11-11)
 
 
