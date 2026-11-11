@@ -407,6 +407,12 @@ class SyncFlowTest(unittest.TestCase):
                       dry_run=True, extra=art)
         self.assertEqual((installed, described), (want, want))
 
+    def test_a_collection_with_art_but_no_games_on_the_card_gets_none(self):
+        installed = []
+        self.run_sync(cards={"collections": ["favs"], "surprise": False}, colls=[{**FAVS, "art": "rpg"}],
+                      extra=((cli.themeart, "install", lambda *a: installed.append(a)),))
+        self.assertEqual(installed, [])
+
     def test_collections_without_art_get_none(self):
         installed = []
         self.run_sync(cards={"collections": ["favs"], "surprise": False}, colls=[FAVS], files=["ROMs/gba/Game.zip"],

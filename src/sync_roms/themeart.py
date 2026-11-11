@@ -1,11 +1,13 @@
 """Art Book Next artwork for custom collections (Surprise and the ones given art) on ES-DE and Knulli cards."""
 import json
+import unicodedata
 import http.client
 import os
 import shutil
 import tarfile
 import tempfile
 import urllib.request
+from xml.sax import saxutils
 import zlib
 
 from . import __version__, frontend, runtime, s3, store, ui
@@ -24,6 +26,7 @@ ESDE_REPO = "anthonycaccese/art-book-next-es-de"
 ESDE_ARCHIVE = runtime.ESDE_THEMES_PREFIX + "art-book-next-es-de.tar.gz"
 ESDE_COMMIT = runtime.ESDE_THEMES_PREFIX + "art-book-next-es-de.commit"  # the commit the archive was made from
 ESDE_MARKER = ".sync-roms-commit"  # the same, in the card's copy
+ESDE_OWNED = ".sync-roms-collections"  # the collection folders sync-roms gave art in the card's copy
 ARCHIVE_ERRORS = (tarfile.TarError, EOFError, zlib.error)  # what a damaged .tar.gz raises
 
 # Knulli's Art Book Next is read-only, but takes artwork and logos from theme-customizations/ on the card for systems
@@ -64,15 +67,20 @@ def art_choices():
 
 def art_png(art_id):
     """The artwork file for art_id, or None when there is none."""
-    path = os.path.join(THEME_DATA, "art", f"{art_id}.png")
-    return path if art_id and "/" not in art_id and "\\" not in art_id and os.path.isfile(path) else None
+    if art_id != SURPRISE_ART and art_id not in art_choices():
+        return None
+    return os.path.join(THEME_DATA, "art", f"{art_id}.png")
 
 
 def logo_svg(text):
-    """An SVG logo (200x40, white, like the theme's own) spelling text in capitals with the theme's logo font."""
+    """An SVG logo (200x40, white, like the theme's own) spelling text in capitals with the theme's logo font, or None
+    when the font can't draw it (the frontend then shows the name as text)."""
     with open(os.path.join(THEME_DATA, "logo-font.json"), encoding="utf-8") as f:
         font = json.load(f)
-    glyphs = [font["glyphs"][c] for c in text.upper() if c in font["glyphs"]]
+    text = "".join(c for c in unicodedata.normalize("NFKD", text) if not unicodedata.combining(c)).upper()
+    if not text.strip() or any(c not in font["glyphs"] for c in text):
+        return None
+    glyphs = [font["glyphs"][c] for c in text]
     width = sum(g["advance"] for g in glyphs) or 1
     scale = min(18.7 / font["cap_height"], 190 / width)  # capitals as tall as the theme's logos, never wider than 190
     # the capitals are centred on the middle line (the theme's own logos run from 11.15 to 29.85)
@@ -107,20 +115,25 @@ def _reserved(layout_name):
     (giving them art would replace the system's)."""
     names = {s["folders"].get(layout_name) or "" for s in store.repo_json("systems")} - {""}
     return {n.lower() for n in names} | {"custom-collections", "now-playing", "completed", "all", "favorites",
-                                         "lastplayed", "recent"}
+                                         "lastplayed", "recent", "2players", "4players", "neverplayed",
+                                         "retroachievements", "arcade", "vertical", "lightgun", "wheel", "trackball",
+                                         "spinner"}
 
 
 def usable(layout_name, arts):
     """The {collection name: art png} of arts ({name: art id}) that can be installed, warning about the rest."""
-    out = {}
+    out, taken = {}, set()
     for name, art_id in sorted(arts.items()):
         png = art_png(art_id)
         if not png:
             ui.warn(f"{name}: there is no theme art called {art_id!r}; skipped")
         elif name.lower() in _reserved(layout_name) or name.lower().startswith("auto-"):
             ui.warn(f"{name}: a collection named like a system or a built-in collection can't have its own theme art")
+        elif name.lower() in taken:  # cards ignore case, and ES-DE themes a collection by its name in lower case
+            ui.warn(f"{name}: another collection with this name in other capitals already has theme art; skipped")
         else:
             out[name] = png
+            taken.add(name.lower())
     return out
 
 
@@ -168,6 +181,22 @@ def _extract(archive_path, dest, commit):
     os.rename(part, dest)
 
 
+def _metadata(name):
+    """The theme's metadata for a custom collection (as the theme has for its own custom-collections)."""
+    return ("<theme>\n    <variables>\n"
+            f"        <systemName>{saxutils.escape(name)}</systemName>\n"
+            "        <systemDescription>A custom collection.</systemDescription>\n"
+            "        <systemManufacturer>Various</systemManufacturer>\n"
+            "        <systemReleaseYear>Various</systemReleaseYear>\n"
+            "        <systemReleaseDate>Various</systemReleaseDate>\n"
+            "        <systemReleaseDateFormated>Various</systemReleaseDateFormated>\n"
+            "        <systemHardwareType>Collection</systemHardwareType>\n"
+            "        <systemCoverSize>1-1</systemCoverSize>\n"
+            "        <systemCoverSizeType>square</systemCoverSizeType>\n"
+            "        <systemCartSize>1-1</systemCartSize>\n"
+            "    </variables>\n</theme>\n").encode()
+
+
 def _esde_files(arts):
     """{path in the theme: bytes} giving each collection in arts ({name: art png}) its art. ES-DE themes a custom
     collection by its name in lower case."""
@@ -176,9 +205,18 @@ def _esde_files(arts):
         folder = name.lower()
         with open(png, "rb") as f:
             files[f"_inc/systems/artwork-outline/{folder}.png"] = f.read()
-        files[f"_inc/systems/logos/{folder}.svg"] = logo_svg(name).encode()
+        logo = logo_svg(name)
+        if logo:
+            files[f"_inc/systems/logos/{folder}.svg"] = logo.encode()
+        files[f"_inc/systems/_metadata-global/{folder}.xml"] = _metadata(name)
         files[f"{folder}/theme.xml"] = b"<theme><include>./../theme.xml</include></theme>\n"
     return files
+
+
+def _theme_has(dest, folder):
+    """Whether the theme copy at dest themes folder itself (it has metadata for it that sync-roms didn't write)."""
+    owned = set(_read(os.path.join(dest, ESDE_OWNED)).splitlines()) | {SURPRISE_ART}
+    return folder not in owned and os.path.exists(os.path.join(dest, "_inc", "systems", "_metadata-global", f"{folder}.xml"))
 
 
 def install_esde(base, arts):
@@ -204,6 +242,11 @@ def install_esde(base, arts):
             ui.warn(f"Couldn't install Art Book Next for the collections' art: {e}")
             return False
         changed = True
+    for name in [n for n in arts if _theme_has(dest, n.lower())]:
+        ui.warn(f"{name}: Art Book Next already has art of its own for that name; skipped")
+        del arts[name]
+    owned = set(_read(os.path.join(dest, ESDE_OWNED)).splitlines()) | {n.lower() for n in arts}
+    changed |= _put(os.path.join(dest, ESDE_OWNED), "".join(f"{n}\n" for n in sorted(owned)).encode())
     for rel, data in _esde_files(arts).items():
         changed |= _put(s3.safe_join(dest, rel), data)
     _write_settings(frontend.settings_path("esde", base), "esde", {"Theme": ESDE_COPY})
@@ -289,8 +332,12 @@ def install_knulli(base, arts):
     for name, png in arts.items():
         with open(png, "rb") as f:
             changed |= _put(os.path.join(root, "artwork", f"{name}.png"), f.read())
-        changed |= _put(os.path.join(root, "logos", f"{name}.svg"), logo_svg(name).encode())
+        logo = logo_svg(name)
+        if logo:
+            changed |= _put(os.path.join(root, "logos", f"{name}.svg"), logo.encode())
         settings.update(knulli_settings(name))
+        if not logo:  # the theme shows the name as text
+            del settings[f"subset.{name}.system-logos"]
     _write_settings(frontend.settings_path("knulli", base), "knulli", settings,
                     only_if_unset={"UseCustomCollectionsSystemEx"})
     return changed

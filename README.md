@@ -540,7 +540,8 @@ Fighting, Racing, Sports, Puzzle, Strategy, Horror, Rhythm or Arcade, drawn in t
 the collection file gets `"art": "<id>"`). When an ES-DE or Knulli card using that theme gets the collection, it shows on
 its own in the system carousel with that art and a logo of its name, drawn with the theme's logo font (Changa One, SIL
 Open Font License: `OFL.txt` there). The Surprise collection always gets the gift-box art. A collection named like a
-system or one of the frontend's own collections gets no art.
+system or one of the frontend's own collections gets no art, and a name the font can't draw (accents are dropped first)
+gets no logo, so the frontend shows it as text.
 
 - **ES-DE** (when `Theme` in `es_settings.xml` is `art-book-next-es-de`): ES-DE on Android keeps downloaded themes off
   the card, so sync copies the theme from a GitHub archive of it kept in storage (`os/esde/themes/`, about 200 MB, and
