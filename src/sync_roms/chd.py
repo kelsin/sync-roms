@@ -45,6 +45,8 @@ def disc_images(paths, strict=True, skipped=None):
     return images + [(p, [p]) for p in sorted(paths) if p.lower().endswith(".iso") and p not in used]
 
 
+CD_ARCHIVE_EXTS = external.ARCHIVE_EXTS + (".rar",)  # --cd also unpacks rars (PSN packs); a sync never does
+
 XISO_TAG_OFFSET, XISO_TAG = 31337, b"in!xiso"  # extract-xiso marks the images it has optimized
 
 
@@ -89,7 +91,7 @@ def plan_chd(root, folders, skipped=None, roots=None, stale=None):
         if roots is not None:
             roots[sysroot] = system
         files = [os.path.join(dirpath, f) for f in sorted(files) if not external.own_temp(f)]
-        jobs += [(system, sysroot, f, None) for f in files if f.lower().endswith(external.ARCHIVE_EXTS)]
+        jobs += [(system, sysroot, f, None) for f in files if f.lower().endswith(CD_ARCHIVE_EXTS)]
         if system["chd"]["mode"] == "xiso":
             jobs += [(system, sysroot, f, [f]) for f in files if f.lower().endswith(".iso") and not is_optimized_xiso(f)]
         elif system["chd"]["mode"] == "zar":
@@ -261,17 +263,42 @@ def convert_all(pairs, clash, make, exists_ok=False):
             return error
 
 
+NESTED_DEPTH = 3  # archives inside archives (a PSN rar holding a rar) are extracted this many levels down
+
+
+def extract_command(tools, path, out):
+    """unar for a rar when it is installed (7-Zip can't decode some RAR 2.9 archives), else 7z."""
+    if path.lower().endswith(".rar") and tools.get("unar"):
+        return [tools["unar"], "-q", "-f", "-D", "-o", out, path]
+    return [tools["7z"], "x", "-y", "-bso0", "-bsp0", f"-o{out}", "--", path]
+
+
+def extracted_files(tmp):
+    return [os.path.join(dp, f) for dp, _, fns in os.walk(tmp) for f in sorted(fns) if not os.path.islink(os.path.join(dp, f))]
+
+
 def chd_archive(tools, cfg, path, report=None):
-    """Extract an archive next to itself, then convert its discs (or, for extract-only systems, move its files out).
+    """Extract an archive next to itself (and the archives inside it, but not for extract-only systems), then convert
+    its discs (or, for extract-only systems, move its files out).
     The archive goes only once everything is done; None on success, else the error."""
     folder = os.path.dirname(path)
     tmp = tempfile.mkdtemp(prefix=".chd-", dir=folder)
     try:
-        error = external.run_tool([tools["7z"], "x", "-y", "-bso0", "-bsp0", f"-o{tmp}", "--", path])
+        error = external.run_tool(extract_command(tools, path, tmp))
         if error:
             return error
-        extracted = [os.path.join(dp, f) for dp, _, fns in os.walk(tmp) for f in sorted(fns)
-                     if not os.path.islink(os.path.join(dp, f))]
+        extracted = extracted_files(tmp)
+        for _ in range(NESTED_DEPTH if cfg["mode"] != "extract" else 0):  # extract-only systems keep inner archives
+            inner = [f for f in extracted if f.lower().endswith(CD_ARCHIVE_EXTS)]
+            if not inner:
+                break
+            for f in inner:  # an old-style split rar's .r00, .r01, ... volumes beside it are read too
+                out = tempfile.mkdtemp(prefix=".chd-", dir=os.path.dirname(f))
+                error = external.run_tool(extract_command(tools, f, out))
+                if error:
+                    return f"{os.path.basename(f)} in the archive: {error}"
+                os.remove(f)
+            extracted = extracted_files(tmp)
         if cfg["mode"] == "extract":
             error = move_flat([(f, os.path.join(folder, os.path.basename(f))) for f in extracted])
         elif cfg["mode"] in ("xiso", "zar"):
@@ -288,11 +315,14 @@ def chd_archive(tools, cfg, path, report=None):
                                     lambda image, out: make_zar(tools, image, out, report))
         else:
             images = disc_images(extracted, strict=False)
-            if not images:
+            kept = [f for f in extracted if f.lower().endswith(tuple(cfg.get("keep", ())))]
+            if not images and not kept:
                 return "no disc image in the archive"
             pairs = [(image, os.path.join(folder, os.path.splitext(os.path.basename(image))[0] + ".chd")) for image, _ in images]
             error = convert_all(pairs, "two discs in the archive would make the same .chd",
                                 lambda image, out: make_chd(tools, cfg, image, out, report), exists_ok=True)
+            if not error:
+                error = move_flat([(f, os.path.join(folder, os.path.basename(f))) for f in kept])
         if error:
             return error
         os.remove(path)
@@ -408,7 +438,7 @@ def chd_command(args):
         return 0
     tools = {}
     modes = {j[0]["chd"]["mode"] for j in jobs}
-    for tool, needed in (("7z", any(j[3] is None for j in jobs)), ("chdman", bool(modes - {"extract", "xiso", "zar"})),
+    for tool, needed in (("7z", any(j[3] is None for j in jobs)), ("unar", False), ("chdman", bool(modes - {"extract", "xiso", "zar"})),
                          ("extract-xiso", "xiso" in modes), ("iso2zar", "zar" in modes)):
         tools[tool] = external.find_tool(tool)
         if needed and not tools[tool]:

@@ -16,6 +16,7 @@ from sync_roms import chd, external, m3u, store  # noqa: E402
 
 CD = {"chd": {"mode": "cd"}}
 DVD = {"chd": {"mode": "dvd", "codec": "zlib"}}
+PS3 = {"chd": {"mode": "dvd", "codec": "zstd", "keep": [".pkg", ".rap", ".dkey", ".key"]}}
 EXTRACT = {"chd": {"mode": "extract"}}
 XISO = {"chd": {"mode": "xiso", "m3u": False}}
 ZAR = {"chd": {"mode": "zar", "m3u": False}}
@@ -32,9 +33,10 @@ class FakeTools:
 
     def __call__(self, cmd, progress=None, tty=False):
         self.calls.append(cmd)
-        if cmd[0] == "7z":
-            out = next(a for a in cmd if a.startswith("-o"))[2:]
-            for name in self.archive:
+        if cmd[0] in ("7z", "unar"):
+            out = cmd[cmd.index("-o") + 1] if cmd[0] == "unar" else next(a for a in cmd if a.startswith("-o"))[2:]
+            names = self.archive.get(os.path.basename(cmd[-1]), ()) if isinstance(self.archive, dict) else self.archive
+            for name in names:
                 with open(os.path.join(out, name), "w") as f:
                     f.write(CUE if name.endswith(".cue") else "x")
         elif cmd[0] == "iso2zar":
@@ -217,6 +219,62 @@ class ChdTest(unittest.TestCase):
         self.assertEqual(error, "createdvd failed")
         self.assertEqual(self.files(), ["Game.zip"])
 
+    def test_archive_disc_keys_are_kept_beside_the_chd(self):
+        self.touch("Game.zip")
+        with mock.patch.object(external, "run_tool", FakeTools(archive=["Game.iso", "Game.dkey", "readme.txt"])) as fake:
+            error = chd.chd_archive(self.tools, PS3["chd"], os.path.join(self.dir, "Game.zip"))
+        self.assertIsNone(error)
+        self.assertEqual(self.files(), ["Game.chd", "Game.dkey"])
+        self.assertEqual([c[-2:] for c in fake.calls if c[1] == "createdvd"], [["-c", "zstd"]])
+
+    def test_psn_archive_is_extracted_to_its_pkg_and_rap_files(self):
+        self.touch("Game.rar")
+        with mock.patch.object(external, "run_tool", FakeTools(archive=["Game.pkg", "UP0001.rap", "cover.jpg"])) as fake:
+            error = chd.chd_archive(self.tools, PS3["chd"], os.path.join(self.dir, "Game.rar"))
+        self.assertIsNone(error)
+        self.assertEqual(self.files(), ["Game.pkg", "UP0001.rap"])
+        self.assertFalse([c for c in fake.calls if c[0] == "chdman"])
+
+    def test_nested_archives_are_extracted(self):
+        self.touch("Game.rar")
+        fake = FakeTools(archive={"Game.rar": ["Inner.rar", "Inner.r00", "cover.jpg"], "Inner.rar": ["Game.pkg", "Disc.zip"],
+                                  "Disc.zip": ["Disc.iso"]})
+        with mock.patch.object(external, "run_tool", fake):
+            error = chd.chd_archive(self.tools, PS3["chd"], os.path.join(self.dir, "Game.rar"))
+        self.assertIsNone(error)
+        self.assertEqual(self.files(), ["Disc.chd", "Game.pkg"])
+
+    def test_failed_inner_archive_keeps_the_archive(self):
+        self.touch("Game.rar")
+        fake = FakeTools(archive={"Game.rar": ["Inner.rar"]})
+        real = fake.__call__
+        with mock.patch.object(external, "run_tool", lambda cmd, *a, **k: "bad" if cmd[-1].endswith("Inner.rar") else real(cmd)):
+            error = chd.chd_archive(self.tools, PS3["chd"], os.path.join(self.dir, "Game.rar"))
+        self.assertEqual(error, "Inner.rar in the archive: bad")
+        self.assertEqual(self.files(), ["Game.rar"])
+
+    def test_rars_use_unar_when_it_is_installed(self):
+        self.touch("Game.rar")
+        fake = FakeTools(archive={"Game.rar": ["Disc.zip"], "Disc.zip": ["Game.pkg"]})
+        with mock.patch.object(external, "run_tool", fake):
+            error = chd.chd_archive(dict(self.tools, unar="unar"), PS3["chd"], os.path.join(self.dir, "Game.rar"))
+        self.assertIsNone(error)
+        self.assertEqual([c[0] for c in fake.calls], ["unar", "7z"])
+        self.assertEqual(self.files(), ["Game.pkg"])
+
+    def test_extract_only_systems_keep_inner_archives(self):
+        self.touch("Game.7z")
+        with mock.patch.object(external, "run_tool", FakeTools(archive={"Game.7z": ["Disk.zip"]})):
+            error = chd.chd_archive(self.tools, EXTRACT["chd"], os.path.join(self.dir, "Game.7z"))
+        self.assertIsNone(error)
+        self.assertEqual(self.files(), ["Disk.zip"])
+
+    def test_rar_archives_are_planned_for_cd_only(self):
+        self.touch("ps3/Game.rar", "ps3/Game.pkg")
+        jobs = chd.plan_chd(self.dir, chd.chd_folders([dict(PS3, folders={"esde": "ps3"})]))
+        self.assertEqual([(j[2], j[3]) for j in jobs], [(os.path.join(self.dir, "ps3", "Game.rar"), None)])
+        self.assertNotIn(".rar", external.ARCHIVE_EXTS)
+
     def test_archive_without_a_disc_image_is_kept(self):
         self.touch("Game.zip")
         with mock.patch.object(external, "run_tool", FakeTools(archive=["readme.txt"])):
@@ -385,6 +443,7 @@ class ChdTest(unittest.TestCase):
         self.assertEqual(systems["psx"]["chd"], {"mode": "cd"})
         self.assertEqual(systems["wii"]["chd"], {"mode": "extract"})
         self.assertEqual(systems["ps2"]["chd"], {"mode": "dvd", "codec": "zlib"})
+        self.assertEqual(systems["ps3"]["chd"], PS3["chd"])
         self.assertFalse(systems["3do"]["chd"]["m3u"])
         self.assertEqual(systems["xbox"]["chd"], {"mode": "xiso", "m3u": False})
         self.assertEqual(systems["xbox360"]["chd"], {"mode": "zar", "m3u": False})
