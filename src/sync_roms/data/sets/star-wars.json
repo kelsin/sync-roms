@@ -1,6 +1,6 @@
 {
   "name": "Star Wars",
-  "description": "Star Wars games from the 8-bit era through the GameCube, DS and PSP.",
+  "description": "Star Wars games from the Atari 2600 through the 3DS.",
   "games": [
     {
       "title": "Star Wars (Arcade)",
@@ -26,6 +26,11 @@
       "title": "Star Wars - The Empire Strikes Back",
       "system": "nes",
       "bucket": "nes/Star Wars - The Empire Strikes Back (USA).zip"
+    },
+    {
+      "title": "Star Wars (Namco)",
+      "system": "nes",
+      "bucket": "nes/Star Wars (Japan) (Namco).zip"
     },
     {
       "title": "Super Star Wars (Rev 1)",
@@ -297,6 +302,11 @@
       "bucket": "psp/Star Wars - Battlefront - Renegade Squadron (USA).chd"
     },
     {
+      "title": "Star Wars - Battlefront - Elite Squadron",
+      "system": "psp",
+      "bucket": "psp/Star Wars - Battlefront - Elite Squadron (USA) (En,Fr,Es).chd"
+    },
+    {
       "title": "Star Wars - Battlefront II",
       "system": "psp",
       "bucket": "psp/Star Wars - Battlefront II (USA).chd"
@@ -315,6 +325,21 @@
       "title": "Star Wars - The Force Unleashed",
       "system": "psp",
       "bucket": "psp/Star Wars - The Force Unleashed (USA) (En,Fr).chd"
+    },
+    {
+      "title": "LEGO Star Wars III - The Clone Wars",
+      "system": "3ds",
+      "bucket": "3ds/LEGO Star Wars III - The Clone Wars (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "LEGO Star Wars - The Force Awakens",
+      "system": "3ds",
+      "bucket": "3ds/LEGO Star Wars - The Force Awakens (USA).zip"
+    },
+    {
+      "title": "Angry Birds Star Wars",
+      "system": "3ds",
+      "bucket": "3ds/Angry Birds Star Wars (USA) (En,Fr,Es,Pt).zip"
     },
     {
       "title": "Star Wars: Episode I: Jedi Power Battles",
@@ -355,6 +380,46 @@
       "title": "Star Wars - The Empire Strikes Back",
       "system": "atari2600",
       "bucket": "atari2600/Star Wars - The Empire Strikes Back (USA).zip"
+    },
+    {
+      "title": "Star Wars - The Arcade Game",
+      "system": "atari2600",
+      "bucket": "atari2600/Star Wars - The Arcade Game (USA).zip"
+    },
+    {
+      "title": "Star Wars - Jedi Arena",
+      "system": "atari2600",
+      "bucket": "atari2600/Star Wars - Jedi Arena (USA).zip"
+    },
+    {
+      "title": "Star Wars - Return of the Jedi - Death Star Battle",
+      "system": "atari2600",
+      "bucket": "atari2600/Star Wars - Return of the Jedi - Death Star Battle (USA).zip"
+    },
+    {
+      "title": "Star Wars - The Arcade Game",
+      "system": "atari5200",
+      "bucket": "atari5200/Star Wars - The Arcade Game (USA).zip"
+    },
+    {
+      "title": "Star Wars - Return of the Jedi - Death Star Battle",
+      "system": "atari5200",
+      "bucket": "atari5200/Star Wars - Return of the Jedi - Death Star Battle (USA).zip"
+    },
+    {
+      "title": "Star Wars - The Empire Strikes Back",
+      "system": "intellivision",
+      "bucket": "intellivision/Star Wars - The Empire Strikes Back (USA, Europe).zip"
+    },
+    {
+      "title": "Star Wars - The Arcade Game",
+      "system": "colecovision",
+      "bucket": "colecovision/Star Wars - The Arcade Game (USA).zip"
+    },
+    {
+      "title": "Star Wars - The Arcade Game",
+      "system": "c64",
+      "bucket": "c64/Star Wars - The Arcade Game (USA, Europe).zip"
     }
   ]
 }

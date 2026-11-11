@@ -1,0 +1,1709 @@
+{
+  "name": "Adventure & Visual Novels",
+  "description": "Point-and-click, detective and puzzle adventures and visual novels.",
+  "games": [
+    {
+      "title": "Gyakuten Saiban",
+      "category": "Ace Attorney",
+      "system": "gba",
+      "bucket": "gba/Gyakuten Saiban (Japan) (Rev 1).zip"
+    },
+    {
+      "title": "Gyakuten Saiban 2",
+      "category": "Ace Attorney",
+      "system": "gba",
+      "bucket": "gba/Gyakuten Saiban 2 (Japan).zip"
+    },
+    {
+      "title": "Gyakuten Saiban 3",
+      "category": "Ace Attorney",
+      "system": "gba",
+      "bucket": "gba/Gyakuten Saiban 3 (Japan).zip"
+    },
+    {
+      "title": "Phoenix Wright - Ace Attorney",
+      "category": "Ace Attorney",
+      "system": "nds",
+      "bucket": "nds/Phoenix Wright - Ace Attorney (USA).zip"
+    },
+    {
+      "title": "Phoenix Wright - Ace Attorney - Justice for All",
+      "category": "Ace Attorney",
+      "system": "nds",
+      "bucket": "nds/Phoenix Wright - Ace Attorney - Justice for All (USA).zip"
+    },
+    {
+      "title": "Phoenix Wright - Ace Attorney - Trials and Tribulations",
+      "category": "Ace Attorney",
+      "system": "nds",
+      "bucket": "nds/Phoenix Wright - Ace Attorney - Trials and Tribulations (USA).zip"
+    },
+    {
+      "title": "Apollo Justice - Ace Attorney",
+      "category": "Ace Attorney",
+      "system": "nds",
+      "bucket": "nds/Apollo Justice - Ace Attorney (USA).zip"
+    },
+    {
+      "title": "Ace Attorney Investigations - Miles Edgeworth",
+      "category": "Ace Attorney",
+      "system": "nds",
+      "bucket": "nds/Ace Attorney Investigations - Miles Edgeworth (USA).zip"
+    },
+    {
+      "title": "Gyakuten Kenji 2",
+      "category": "Ace Attorney",
+      "system": "nds",
+      "bucket": "nds/Gyakuten Kenji 2 (Japan).zip"
+    },
+    {
+      "title": "Gyakuten Saiban 123 - Naruhodo Selection",
+      "category": "Ace Attorney",
+      "system": "3ds",
+      "bucket": "3ds/Gyakuten Saiban 123 - Naruhodo Selection (Japan).zip"
+    },
+    {
+      "title": "Gyakuten Saiban 4",
+      "category": "Ace Attorney",
+      "system": "3ds",
+      "bucket": "3ds/Gyakuten Saiban 4 (Japan).zip"
+    },
+    {
+      "title": "Gyakuten Saiban 5",
+      "category": "Ace Attorney",
+      "system": "3ds",
+      "bucket": "3ds/Gyakuten Saiban 5 (Japan).zip"
+    },
+    {
+      "title": "Gyakuten Saiban 6",
+      "category": "Ace Attorney",
+      "system": "3ds",
+      "bucket": "3ds/Gyakuten Saiban 6 (Japan).zip"
+    },
+    {
+      "title": "Dai Gyakuten Saiban - Naruhodou Ryuunosuke no Bouken",
+      "category": "Ace Attorney",
+      "system": "3ds",
+      "bucket": "3ds/Dai Gyakuten Saiban - Naruhodou Ryuunosuke no Bouken (Japan).zip"
+    },
+    {
+      "title": "Dai Gyakuten Saiban 2 - Naruhodou Ryuunosuke no Kakugo",
+      "category": "Ace Attorney",
+      "system": "3ds",
+      "bucket": "3ds/Dai Gyakuten Saiban 2 - Naruhodou Ryuunosuke no Kakugo (Japan).zip"
+    },
+    {
+      "title": "Professor Layton and the Curious Village",
+      "category": "Professor Layton",
+      "system": "nds",
+      "bucket": "nds/Professor Layton and the Curious Village (USA, Australia).zip"
+    },
+    {
+      "title": "Professor Layton and the Diabolical Box",
+      "category": "Professor Layton",
+      "system": "nds",
+      "bucket": "nds/Professor Layton and the Diabolical Box (USA).zip"
+    },
+    {
+      "title": "Professor Layton and the Unwound Future",
+      "category": "Professor Layton",
+      "system": "nds",
+      "bucket": "nds/Professor Layton and the Unwound Future (USA).zip"
+    },
+    {
+      "title": "Professor Layton and the Last Specter",
+      "category": "Professor Layton",
+      "system": "nds",
+      "bucket": "nds/Professor Layton and the Last Specter (USA).zip"
+    },
+    {
+      "title": "Professor Layton and the Miracle Mask",
+      "category": "Professor Layton",
+      "system": "3ds",
+      "bucket": "3ds/Professor Layton and the Miracle Mask (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Professor Layton and the Azran Legacy",
+      "category": "Professor Layton",
+      "system": "3ds",
+      "bucket": "3ds/Professor Layton and the Azran Legacy (USA).zip"
+    },
+    {
+      "title": "Professor Layton vs. Phoenix Wright - Ace Attorney",
+      "category": "Professor Layton",
+      "system": "3ds",
+      "bucket": "3ds/Professor Layton vs. Phoenix Wright - Ace Attorney (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Layton's Mystery Journey - Katrielle and the Millionaires' Conspiracy",
+      "category": "Professor Layton",
+      "system": "3ds",
+      "bucket": "3ds/Layton's Mystery Journey - Katrielle and the Millionaires' Conspiracy (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Nine Hours, Nine Persons, Nine Doors",
+      "category": "Zero Escape & Danganronpa",
+      "system": "nds",
+      "bucket": "nds/Nine Hours, Nine Persons, Nine Doors (USA).zip"
+    },
+    {
+      "title": "Zero Escape - Virtue's Last Reward",
+      "category": "Zero Escape & Danganronpa",
+      "system": "3ds",
+      "bucket": "3ds/Zero Escape - Virtue's Last Reward (USA) (Rev 2).zip"
+    },
+    {
+      "title": "Zero Escape - Zero Time Dilemma",
+      "category": "Zero Escape & Danganronpa",
+      "system": "3ds",
+      "bucket": "3ds/Zero Escape - Zero Time Dilemma (USA).zip"
+    },
+    {
+      "title": "Zero Escape - The Nonary Games",
+      "category": "Zero Escape & Danganronpa",
+      "system": "psvita",
+      "bucket": "psvita/Zero Escape The Nonary Games [PCSE01006] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Zero Escape - Virtue's Last Reward",
+      "category": "Zero Escape & Danganronpa",
+      "system": "psvita",
+      "bucket": "psvita/Zero Escape - Virtue's Last Reward [PCSE00085] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Zero Escape - Zero Time Dilemma",
+      "category": "Zero Escape & Danganronpa",
+      "system": "psvita",
+      "bucket": "psvita/Zero Escape - Zero Time Dilemma [PCSE00781] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Danganronpa - Hope's Academy and Despair's Students",
+      "category": "Zero Escape & Danganronpa",
+      "system": "psp",
+      "bucket": "psp/Danganronpa - Hope's Academy and Despair's Students (Japan) [T-En by Project Zetsubou v1.0] [n].chd"
+    },
+    {
+      "title": "Danganronpa - Trigger Happy Havoc",
+      "category": "Zero Escape & Danganronpa",
+      "system": "psvita",
+      "bucket": "psvita/Danganronpa [PCSE00261] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Danganronpa 2 - Goodbye Despair",
+      "category": "Zero Escape & Danganronpa",
+      "system": "psvita",
+      "bucket": "psvita/Danganronpa2 [PCSE00399] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Danganronpa V3 - Killing Harmony",
+      "category": "Zero Escape & Danganronpa",
+      "system": "psvita",
+      "bucket": "psvita/Danganronpa V3 [PCSE01100] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Trace Memory",
+      "category": "Detective & Mystery",
+      "system": "nds",
+      "bucket": "nds/Trace Memory (USA).zip"
+    },
+    {
+      "title": "Hotel Dusk - Room 215",
+      "category": "Detective & Mystery",
+      "system": "nds",
+      "bucket": "nds/Hotel Dusk - Room 215 (USA).zip"
+    },
+    {
+      "title": "Last Window - The Secret of Cape West",
+      "category": "Detective & Mystery",
+      "system": "nds",
+      "bucket": "nds/Last Window - The Secret of Cape West (Europe) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Again - Interactive Crime Novel",
+      "category": "Detective & Mystery",
+      "system": "nds",
+      "bucket": "nds/Again - Interactive Crime Novel (USA).zip"
+    },
+    {
+      "title": "Ghost Trick - Phantom Detective",
+      "category": "Detective & Mystery",
+      "system": "nds",
+      "bucket": "nds/Ghost Trick - Phantom Detective (USA) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Jake Hunter - Detective Chronicles",
+      "category": "Detective & Mystery",
+      "system": "nds",
+      "bucket": "nds/Jake Hunter - Detective Chronicles (USA).zip"
+    },
+    {
+      "title": "Jake Hunter Detective Story - Memories of the Past",
+      "category": "Detective & Mystery",
+      "system": "nds",
+      "bucket": "nds/Jake Hunter Detective Story - Memories of the Past (USA).zip"
+    },
+    {
+      "title": "Jake Hunter Detective Story - Ghost of the Dusk",
+      "category": "Detective & Mystery",
+      "system": "3ds",
+      "bucket": "3ds/Jake Hunter Detective Story - Ghost of the Dusk (USA).zip"
+    },
+    {
+      "title": "Touch Detective",
+      "category": "Detective & Mystery",
+      "system": "nds",
+      "bucket": "nds/Touch Detective (USA).zip"
+    },
+    {
+      "title": "Touch Detective 2 1-2",
+      "category": "Detective & Mystery",
+      "system": "nds",
+      "bucket": "nds/Touch Detective 2 1-2 (USA).zip"
+    },
+    {
+      "title": "Time Hollow",
+      "category": "Detective & Mystery",
+      "system": "nds",
+      "bucket": "nds/Time Hollow (USA) (En,Fr).zip"
+    },
+    {
+      "title": "Lux-Pain",
+      "category": "Detective & Mystery",
+      "system": "nds",
+      "bucket": "nds/Lux-Pain (USA).zip"
+    },
+    {
+      "title": "Theresia..",
+      "category": "Detective & Mystery",
+      "system": "nds",
+      "bucket": "nds/Theresia.. (USA).zip"
+    },
+    {
+      "title": "Flower, Sun and Rain - Murder and Mystery in Paradise",
+      "category": "Detective & Mystery",
+      "system": "nds",
+      "bucket": "nds/Flower, Sun and Rain - Murder and Mystery in Paradise (USA).zip"
+    },
+    {
+      "title": "Unsolved Crimes",
+      "category": "Detective & Mystery",
+      "system": "nds",
+      "bucket": "nds/Unsolved Crimes (USA).zip"
+    },
+    {
+      "title": "Miami Law",
+      "category": "Detective & Mystery",
+      "system": "nds",
+      "bucket": "nds/Miami Law (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "LifeSigns - Surgical Unit",
+      "category": "Detective & Mystery",
+      "system": "nds",
+      "bucket": "nds/LifeSigns - Surgical Unit (USA).zip"
+    },
+    {
+      "title": "Agatha Christie - The ABC Murders",
+      "category": "Detective & Mystery",
+      "system": "nds",
+      "bucket": "nds/Agatha Christie - The ABC Murders (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "CSI - Crime Scene Investigation - Dark Motives",
+      "category": "Detective & Mystery",
+      "system": "nds",
+      "bucket": "nds/CSI - Crime Scene Investigation - Dark Motives (USA) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "CSI - Crime Scene Investigation - Deadly Intent - The Hidden Cases",
+      "category": "Detective & Mystery",
+      "system": "nds",
+      "bucket": "nds/CSI - Crime Scene Investigation - Deadly Intent - The Hidden Cases (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "CSI - Crime Scene Investigation - Unsolved!",
+      "category": "Detective & Mystery",
+      "system": "nds",
+      "bucket": "nds/CSI - Crime Scene Investigation - Unsolved! (USA) (En,Fr,Es) (NDSi Enhanced).zip"
+    },
+    {
+      "title": "Sherlock Holmes - The Mystery of the Mummy",
+      "category": "Detective & Mystery",
+      "system": "nds",
+      "bucket": "nds/Sherlock Holmes - The Mystery of the Mummy (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Sherlock Holmes and the Mystery of Osborne House",
+      "category": "Detective & Mystery",
+      "system": "nds",
+      "bucket": "nds/Sherlock Holmes and the Mystery of Osborne House (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Nancy Drew - The Deadly Secret of Olde World Park",
+      "category": "Detective & Mystery",
+      "system": "nds",
+      "bucket": "nds/Nancy Drew - The Deadly Secret of Olde World Park (USA).zip"
+    },
+    {
+      "title": "Nancy Drew - The Mystery of the Clue Bender Society",
+      "category": "Detective & Mystery",
+      "system": "nds",
+      "bucket": "nds/Nancy Drew - The Mystery of the Clue Bender Society (USA).zip"
+    },
+    {
+      "title": "Nancy Drew - The Hidden Staircase",
+      "category": "Detective & Mystery",
+      "system": "nds",
+      "bucket": "nds/Nancy Drew - The Hidden Staircase (USA).zip"
+    },
+    {
+      "title": "Nancy Drew - The Model Mysteries",
+      "category": "Detective & Mystery",
+      "system": "nds",
+      "bucket": "nds/Nancy Drew - The Model Mysteries (USA).zip"
+    },
+    {
+      "title": "Nancy Drew - Message in a Haunted Mansion",
+      "category": "Detective & Mystery",
+      "system": "gba",
+      "bucket": "gba/Nancy Drew - Message in a Haunted Mansion (USA).zip"
+    },
+    {
+      "title": "Mystery Case Files - MillionHeir",
+      "category": "Detective & Mystery",
+      "system": "nds",
+      "bucket": "nds/Mystery Case Files - MillionHeir (USA, Australia) (En,Fr,Es) (Rev 1).zip"
+    },
+    {
+      "title": "May's Mystery - Forbidden Memories",
+      "category": "Detective & Mystery",
+      "system": "nds",
+      "bucket": "nds/May's Mystery - Forbidden Memories (USA).zip"
+    },
+    {
+      "title": "Detective Pikachu",
+      "category": "Detective & Mystery",
+      "system": "3ds",
+      "bucket": "3ds/Detective Pikachu (USA) (En,Ja,Fr,De,Es,It,Zh).zip"
+    },
+    {
+      "title": "Doctor Lautrec and the Forgotten Knights",
+      "category": "Detective & Mystery",
+      "system": "3ds",
+      "bucket": "3ds/Doctor Lautrec and the Forgotten Knights (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "James Noir's Hollywood Crimes",
+      "category": "Detective & Mystery",
+      "system": "3ds",
+      "bucket": "3ds/James Noir's Hollywood Crimes (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "J. B. Harold Murder Club",
+      "category": "Detective & Mystery",
+      "system": "tg-cd",
+      "bucket": "tg-cd/J. B. Harold Murder Club (USA) (En,Ja).chd"
+    },
+    {
+      "title": "Maniac Mansion",
+      "category": "Point-and-Click",
+      "system": "nes",
+      "bucket": "nes/Maniac Mansion (USA).zip"
+    },
+    {
+      "title": "Shadowgate",
+      "category": "Point-and-Click",
+      "system": "nes",
+      "bucket": "nes/Shadowgate (USA).zip"
+    },
+    {
+      "title": "Deja Vu",
+      "category": "Point-and-Click",
+      "system": "nes",
+      "bucket": "nes/Deja Vu (USA).zip"
+    },
+    {
+      "title": "Uninvited",
+      "category": "Point-and-Click",
+      "system": "nes",
+      "bucket": "nes/Uninvited (USA).zip"
+    },
+    {
+      "title": "King's Quest V",
+      "category": "Point-and-Click",
+      "system": "nes",
+      "bucket": "nes/King's Quest V (USA).zip"
+    },
+    {
+      "title": "Princess Tomato in the Salad Kingdom",
+      "category": "Point-and-Click",
+      "system": "nes",
+      "bucket": "nes/Princess Tomato in the Salad Kingdom (USA).zip"
+    },
+    {
+      "title": "Nightshade",
+      "category": "Point-and-Click",
+      "system": "nes",
+      "bucket": "nes/Nightshade (USA).zip"
+    },
+    {
+      "title": "Tombs & Treasure",
+      "category": "Point-and-Click",
+      "system": "nes",
+      "bucket": "nes/Tombs & Treasure (USA).zip"
+    },
+    {
+      "title": "King's Quest - Quest for the Crown",
+      "category": "Point-and-Click",
+      "system": "mastersystem",
+      "bucket": "mastersystem/King's Quest - Quest for the Crown (USA).zip"
+    },
+    {
+      "title": "Shadowgate Classic",
+      "category": "Point-and-Click",
+      "system": "gbc",
+      "bucket": "gbc/Shadowgate Classic (USA, Europe) (En,Fr,De,Es,Sv) (GB Compatible).zip"
+    },
+    {
+      "title": "Deja Vu I & II - The Casebooks of Ace Harding",
+      "category": "Point-and-Click",
+      "system": "gbc",
+      "bucket": "gbc/Deja Vu I & II - The Casebooks of Ace Harding (USA).zip"
+    },
+    {
+      "title": "Shadowgate 64 - Trials of the Four Towers",
+      "category": "Point-and-Click",
+      "system": "n64",
+      "bucket": "n64/Shadowgate 64 - Trials of the Four Towers (USA) (En,Es).zip"
+    },
+    {
+      "title": "Dracula - The Undead",
+      "category": "Point-and-Click",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Dracula - The Undead (USA, Europe).zip"
+    },
+    {
+      "title": "Scooby-Doo Mystery",
+      "category": "Point-and-Click",
+      "system": "genesis",
+      "bucket": "genesis/Scooby-Doo Mystery (USA).zip"
+    },
+    {
+      "title": "Cosmic Spacehead",
+      "category": "Point-and-Click",
+      "system": "genesis",
+      "bucket": "genesis/Cosmic Spacehead (USA, Europe) (En,Fr,De,Es).zip"
+    },
+    {
+      "title": "Cosmic Spacehead",
+      "category": "Point-and-Click",
+      "system": "gamegear",
+      "bucket": "gamegear/Cosmic Spacehead (USA, Europe).zip"
+    },
+    {
+      "title": "Cosmic Spacehead",
+      "category": "Point-and-Click",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Cosmic Spacehead (Europe) (En,Fr,De,Es).zip"
+    },
+    {
+      "title": "Secret of Monkey Island, The",
+      "category": "Point-and-Click",
+      "system": "segacd",
+      "bucket": "segacd/Secret of Monkey Island, The (USA) (RE).chd"
+    },
+    {
+      "title": "Rise of the Dragon",
+      "category": "Point-and-Click",
+      "system": "segacd",
+      "bucket": "segacd/Rise of the Dragon (USA) (Rerelease) (RE).chd"
+    },
+    {
+      "title": "Adventures of Willy Beamish, The",
+      "category": "Point-and-Click",
+      "system": "segacd",
+      "bucket": "segacd/Adventures of Willy Beamish, The (USA).chd"
+    },
+    {
+      "title": "Snatcher",
+      "category": "Point-and-Click",
+      "system": "segacd",
+      "bucket": "segacd/Snatcher (USA).chd"
+    },
+    {
+      "title": "Space Adventure, The - Cobra - The Legendary Bandit",
+      "category": "Point-and-Click",
+      "system": "segacd",
+      "bucket": "segacd/Space Adventure, The - Cobra - The Legendary Bandit (USA).chd"
+    },
+    {
+      "title": "Dune",
+      "category": "Point-and-Click",
+      "system": "segacd",
+      "bucket": "segacd/Dune (USA).chd"
+    },
+    {
+      "title": "Jurassic Park",
+      "category": "Point-and-Click",
+      "system": "segacd",
+      "bucket": "segacd/Jurassic Park (USA) (RE).chd"
+    },
+    {
+      "title": "Iron Helix",
+      "category": "Point-and-Click",
+      "system": "segacd",
+      "bucket": "segacd/Iron Helix (USA).chd"
+    },
+    {
+      "title": "Loom",
+      "category": "Point-and-Click",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Loom (USA).chd"
+    },
+    {
+      "title": "Beyond Shadowgate",
+      "category": "Point-and-Click",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Beyond Shadowgate (USA).chd"
+    },
+    {
+      "title": "Broken Sword - The Shadow of the Templars",
+      "category": "Point-and-Click",
+      "system": "psx",
+      "bucket": "psx/Broken Sword - The Shadow of the Templars (USA).chd"
+    },
+    {
+      "title": "Broken Sword II - The Smoking Mirror",
+      "category": "Point-and-Click",
+      "system": "psx",
+      "bucket": "psx/Broken Sword II - The Smoking Mirror (USA).chd"
+    },
+    {
+      "title": "Terry Pratchett's Discworld",
+      "category": "Point-and-Click",
+      "system": "psx",
+      "bucket": "psx/Terry Pratchett's Discworld (USA).chd"
+    },
+    {
+      "title": "Discworld II - Mortality Bytes!",
+      "category": "Point-and-Click",
+      "system": "psx",
+      "bucket": "psx/Discworld II - Mortality Bytes! (USA).chd"
+    },
+    {
+      "title": "Blazing Dragons",
+      "category": "Point-and-Click",
+      "system": "psx",
+      "bucket": "psx/Blazing Dragons (USA).chd"
+    },
+    {
+      "title": "Chronicles of the Sword",
+      "category": "Point-and-Click",
+      "system": "psx",
+      "bucket": "psx/Chronicles of the Sword (USA).m3u",
+      "files": [
+        "psx/Chronicles of the Sword (USA) (Disc 1).chd",
+        "psx/Chronicles of the Sword (USA) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "City of Lost Children, The",
+      "category": "Point-and-Click",
+      "system": "psx",
+      "bucket": "psx/City of Lost Children, The (USA) (En,Es,It).chd"
+    },
+    {
+      "title": "Clock Tower",
+      "category": "Point-and-Click",
+      "system": "psx",
+      "bucket": "psx/Clock Tower (USA).chd"
+    },
+    {
+      "title": "Clock Tower II - The Struggle Within",
+      "category": "Point-and-Click",
+      "system": "psx",
+      "bucket": "psx/Clock Tower II - The Struggle Within (USA).chd"
+    },
+    {
+      "title": "Dracula - The Resurrection",
+      "category": "Point-and-Click",
+      "system": "psx",
+      "bucket": "psx/Dracula - The Resurrection (USA).m3u",
+      "files": [
+        "psx/Dracula - The Resurrection (USA) (Disc 1).chd",
+        "psx/Dracula - The Resurrection (USA) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "Dracula - The Last Sanctuary",
+      "category": "Point-and-Click",
+      "system": "psx",
+      "bucket": "psx/Dracula - The Last Sanctuary (USA).m3u",
+      "files": [
+        "psx/Dracula - The Last Sanctuary (USA) (Disc 1).chd",
+        "psx/Dracula - The Last Sanctuary (USA) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "Echo Night",
+      "category": "Point-and-Click",
+      "system": "psx",
+      "bucket": "psx/Echo Night (USA).chd"
+    },
+    {
+      "title": "In Cold Blood",
+      "category": "Point-and-Click",
+      "system": "psx",
+      "bucket": "psx/In Cold Blood (USA).m3u",
+      "files": [
+        "psx/In Cold Blood (USA) (Disc 1).chd",
+        "psx/In Cold Blood (USA) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "Juggernaut",
+      "category": "Point-and-Click",
+      "system": "psx",
+      "bucket": "psx/Juggernaut (USA).m3u",
+      "files": [
+        "psx/Juggernaut (USA) (Disc 1).chd",
+        "psx/Juggernaut (USA) (Disc 2).chd",
+        "psx/Juggernaut (USA) (Disc 3).chd"
+      ]
+    },
+    {
+      "title": "Sentient",
+      "category": "Point-and-Click",
+      "system": "psx",
+      "bucket": "psx/Sentient (USA).chd"
+    },
+    {
+      "title": "Silverload",
+      "category": "Point-and-Click",
+      "system": "psx",
+      "bucket": "psx/Silverload (USA).chd"
+    },
+    {
+      "title": "Gold and Glory - The Road to El Dorado",
+      "category": "Point-and-Click",
+      "system": "psx",
+      "bucket": "psx/Gold and Glory - The Road to El Dorado (USA).chd"
+    },
+    {
+      "title": "Pajama Sam - You Are What You Eat from Your Head to Your Feet",
+      "category": "Point-and-Click",
+      "system": "psx",
+      "bucket": "psx/Pajama Sam - You Are What You Eat from Your Head to Your Feet (USA).chd"
+    },
+    {
+      "title": "Blazing Dragons",
+      "category": "Point-and-Click",
+      "system": "saturn",
+      "bucket": "saturn/Blazing Dragons (USA).chd"
+    },
+    {
+      "title": "Terry Pratchett's Discworld",
+      "category": "Point-and-Click",
+      "system": "saturn",
+      "bucket": "saturn/Terry Pratchett's Discworld (Europe) (En,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "Discworld II - Missing Presumed...!",
+      "category": "Point-and-Click",
+      "system": "saturn",
+      "bucket": "saturn/Discworld II - Missing Presumed...! (Europe) (En,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "Atlantis - The Lost Tales",
+      "category": "Point-and-Click",
+      "system": "saturn",
+      "bucket": "saturn/Atlantis - The Lost Tales (Europe) (En,De,Es).m3u",
+      "files": [
+        "saturn/Atlantis - The Lost Tales (Europe) (En,De,Es) (Disc 1).chd",
+        "saturn/Atlantis - The Lost Tales (Europe) (En,De,Es) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "Shenmue",
+      "category": "Point-and-Click",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Shenmue (USA).m3u",
+      "files": [
+        "dreamcast/Shenmue (USA) (Disc 1).chd",
+        "dreamcast/Shenmue (USA) (Disc 2).chd",
+        "dreamcast/Shenmue (USA) (Disc 3).chd"
+      ]
+    },
+    {
+      "title": "Shenmue II",
+      "category": "Point-and-Click",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Shenmue II (Europe) (En,Fr,De,Es).m3u",
+      "files": [
+        "dreamcast/Shenmue II (Europe) (En,Fr,De,Es) (Disc 1).chd",
+        "dreamcast/Shenmue II (Europe) (En,Fr,De,Es) (Disc 2).chd",
+        "dreamcast/Shenmue II (Europe) (En,Fr,De,Es) (Disc 3).chd",
+        "dreamcast/Shenmue II (Europe) (En,Fr,De,Es) (Disc 4).chd"
+      ]
+    },
+    {
+      "title": "Stupid Invaders",
+      "category": "Point-and-Click",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Stupid Invaders (USA).m3u",
+      "files": [
+        "dreamcast/Stupid Invaders (USA) (Disc 1).chd",
+        "dreamcast/Stupid Invaders (USA) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "Omikron - The Nomad Soul",
+      "category": "Point-and-Click",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Omikron - The Nomad Soul (USA) (En,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "Dragon Riders - Chronicles of Pern",
+      "category": "Point-and-Click",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Dragon Riders - Chronicles of Pern (USA).chd"
+    },
+    {
+      "title": "Broken Sword - The Shadow of the Templars",
+      "category": "Point-and-Click",
+      "system": "gba",
+      "bucket": "gba/Broken Sword - The Shadow of the Templars (USA) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Broken Sword - Shadow of the Templars - The Director's Cut",
+      "category": "Point-and-Click",
+      "system": "nds",
+      "bucket": "nds/Broken Sword - Shadow of the Templars - The Director's Cut (USA) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Syberia",
+      "category": "Point-and-Click",
+      "system": "nds",
+      "bucket": "nds/B. Sokal Syberia (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Secret Files - Tunguska",
+      "category": "Point-and-Click",
+      "system": "nds",
+      "bucket": "nds/Secret Files - Tunguska (USA) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Secret Files 2 - Puritas Cordis",
+      "category": "Point-and-Click",
+      "system": "nds",
+      "bucket": "nds/Secret Files 2 - Puritas Cordis (Europe) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Runaway - The Dream of the Turtle",
+      "category": "Point-and-Click",
+      "system": "nds",
+      "bucket": "nds/Runaway - The Dream of the Turtle (Europe) (En,Fr,De,Es,It) (Rev 1).zip"
+    },
+    {
+      "title": "Runaway - A Twist of Fate",
+      "category": "Point-and-Click",
+      "system": "nds",
+      "bucket": "nds/Runaway - A Twist of Fate (Europe) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Ankh - Curse of the Scarab King",
+      "category": "Point-and-Click",
+      "system": "nds",
+      "bucket": "nds/Ankh - Curse of the Scarab King (Europe) (En,Es,It,Nl,Pl,Ru).zip"
+    },
+    {
+      "title": "Undercover - Dual Motives",
+      "category": "Point-and-Click",
+      "system": "nds",
+      "bucket": "nds/Undercover - Dual Motives (Europe) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Insecticide",
+      "category": "Point-and-Click",
+      "system": "nds",
+      "bucket": "nds/Insecticide (USA).zip"
+    },
+    {
+      "title": "Chronicles of Mystery - Curse of the Ancient Temple",
+      "category": "Point-and-Click",
+      "system": "nds",
+      "bucket": "nds/Chronicles of Mystery - Curse of the Ancient Temple (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Chronicles of Mystery - The Secret Tree of Life",
+      "category": "Point-and-Click",
+      "system": "nds",
+      "bucket": "nds/Chronicles of Mystery - The Secret Tree of Life (USA) (En,Fr,Es) (NDSi Enhanced).zip"
+    },
+    {
+      "title": "Dream Chronicles",
+      "category": "Point-and-Click",
+      "system": "nds",
+      "bucket": "nds/Dream Chronicles (USA) (En,Fr).zip"
+    },
+    {
+      "title": "Broken Age",
+      "category": "Point-and-Click",
+      "system": "psvita",
+      "bucket": "psvita/Broken Age [PCSE00657] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Walking Dead, The - A Telltale Games Series - Game of the Year Edition",
+      "category": "Point-and-Click",
+      "system": "xbox360",
+      "bucket": "xbox360/Walking Dead, The - A Telltale Games Series - Game of the Year Edition (USA, Europe).zar"
+    },
+    {
+      "title": "Walking Dead, The - Season Two - A Telltale Games Series",
+      "category": "Point-and-Click",
+      "system": "xbox360",
+      "bucket": "xbox360/Walking Dead, The - Season Two - A Telltale Games Series (USA, Europe).zar"
+    },
+    {
+      "title": "Wolf Among Us, The - A Telltale Games Series",
+      "category": "Point-and-Click",
+      "system": "xbox360",
+      "bucket": "xbox360/Wolf Among Us, The - A Telltale Games Series (USA, Europe).zar"
+    },
+    {
+      "title": "Night Trap",
+      "category": "FMV & CD-ROM Era",
+      "system": "segacd",
+      "bucket": "segacd/Night Trap (USA) (Sega CD 32X) (RE-1).m3u",
+      "files": [
+        "segacd/Night Trap (USA) (Disc 1) (Sega CD 32X) (RE-1).chd",
+        "segacd/Night Trap (USA) (Disc 2) (Sega CD 32X) (RE-1).chd"
+      ]
+    },
+    {
+      "title": "Double Switch",
+      "category": "FMV & CD-ROM Era",
+      "system": "segacd",
+      "bucket": "segacd/Double Switch (USA).chd"
+    },
+    {
+      "title": "Ground Zero Texas",
+      "category": "FMV & CD-ROM Era",
+      "system": "segacd",
+      "bucket": "segacd/Ground Zero Texas (USA).m3u",
+      "files": [
+        "segacd/Ground Zero Texas (USA) (Disc 1).chd",
+        "segacd/Ground Zero Texas (USA) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "Dracula Unleashed",
+      "category": "FMV & CD-ROM Era",
+      "system": "segacd",
+      "bucket": "segacd/Dracula Unleashed (USA).m3u",
+      "files": [
+        "segacd/Dracula Unleashed (USA) (Disc 1).chd",
+        "segacd/Dracula Unleashed (USA) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "Sherlock Holmes - Consulting Detective",
+      "category": "FMV & CD-ROM Era",
+      "system": "segacd",
+      "bucket": "segacd/Sherlock Holmes - Consulting Detective (USA).chd"
+    },
+    {
+      "title": "Sherlock Holmes - Consulting Detective - Vol. II",
+      "category": "FMV & CD-ROM Era",
+      "system": "segacd",
+      "bucket": "segacd/Sherlock Holmes - Consulting Detective - Vol. II (USA).m3u",
+      "files": [
+        "segacd/Sherlock Holmes - Consulting Detective - Vol. II (USA) (Disc 1).chd",
+        "segacd/Sherlock Holmes - Consulting Detective - Vol. II (USA) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "Mansion of Hidden Souls",
+      "category": "FMV & CD-ROM Era",
+      "system": "segacd",
+      "bucket": "segacd/Mansion of Hidden Souls (USA).chd"
+    },
+    {
+      "title": "Fahrenheit",
+      "category": "FMV & CD-ROM Era",
+      "system": "segacd",
+      "bucket": "segacd/Fahrenheit (USA).m3u",
+      "files": [
+        "segacd/Fahrenheit (USA) (Disc 1) (Key Disc) (Sega CD).chd",
+        "segacd/Fahrenheit (USA) (Disc 2) (32X CD).chd"
+      ]
+    },
+    {
+      "title": "WireHead",
+      "category": "FMV & CD-ROM Era",
+      "system": "segacd",
+      "bucket": "segacd/WireHead (USA).chd"
+    },
+    {
+      "title": "Time Gal",
+      "category": "FMV & CD-ROM Era",
+      "system": "segacd",
+      "bucket": "segacd/Time Gal (USA).chd"
+    },
+    {
+      "title": "Road Avenger",
+      "category": "FMV & CD-ROM Era",
+      "system": "segacd",
+      "bucket": "segacd/Road Avenger (USA).chd"
+    },
+    {
+      "title": "Cobra Command",
+      "category": "FMV & CD-ROM Era",
+      "system": "segacd",
+      "bucket": "segacd/Cobra Command (USA).chd"
+    },
+    {
+      "title": "Revenge of the Ninja",
+      "category": "FMV & CD-ROM Era",
+      "system": "segacd",
+      "bucket": "segacd/Revenge of the Ninja (USA).chd"
+    },
+    {
+      "title": "Dragon's Lair",
+      "category": "FMV & CD-ROM Era",
+      "system": "segacd",
+      "bucket": "segacd/Dragon's Lair (USA).chd"
+    },
+    {
+      "title": "Space Ace",
+      "category": "FMV & CD-ROM Era",
+      "system": "segacd",
+      "bucket": "segacd/Space Ace (USA).chd"
+    },
+    {
+      "title": "Sherlock Holmes - Consulting Detective",
+      "category": "FMV & CD-ROM Era",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Sherlock Holmes - Consulting Detective (USA).chd"
+    },
+    {
+      "title": "Sherlock Holmes - Consulting Detective - Vol. II",
+      "category": "FMV & CD-ROM Era",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Sherlock Holmes - Consulting Detective - Vol. II (USA).chd"
+    },
+    {
+      "title": "It Came from the Desert",
+      "category": "FMV & CD-ROM Era",
+      "system": "tg-cd",
+      "bucket": "tg-cd/It Came from the Desert (USA).chd"
+    },
+    {
+      "title": "Myst",
+      "category": "FMV & CD-ROM Era",
+      "system": "atarijaguarcd",
+      "bucket": "atarijaguarcd/Myst (USA).chd"
+    },
+    {
+      "title": "Dragon's Lair",
+      "category": "FMV & CD-ROM Era",
+      "system": "atarijaguarcd",
+      "bucket": "atarijaguarcd/Dragon's Lair (USA).chd"
+    },
+    {
+      "title": "Space Ace",
+      "category": "FMV & CD-ROM Era",
+      "system": "atarijaguarcd",
+      "bucket": "atarijaguarcd/Space Ace (USA).chd"
+    },
+    {
+      "title": "BrainDead 13",
+      "category": "FMV & CD-ROM Era",
+      "system": "atarijaguarcd",
+      "bucket": "atarijaguarcd/BrainDead 13 (USA).chd"
+    },
+    {
+      "title": "Myst",
+      "category": "FMV & CD-ROM Era",
+      "system": "psx",
+      "bucket": "psx/Myst (USA).chd"
+    },
+    {
+      "title": "Riven - The Sequel to Myst",
+      "category": "FMV & CD-ROM Era",
+      "system": "psx",
+      "bucket": "psx/Riven - The Sequel to Myst (USA).m3u",
+      "files": [
+        "psx/Riven - The Sequel to Myst (USA) (Disc 1).chd",
+        "psx/Riven - The Sequel to Myst (USA) (Disc 2).chd",
+        "psx/Riven - The Sequel to Myst (USA) (Disc 3).chd",
+        "psx/Riven - The Sequel to Myst (USA) (Disc 4).chd",
+        "psx/Riven - The Sequel to Myst (USA) (Disc 5).chd"
+      ]
+    },
+    {
+      "title": "D",
+      "category": "FMV & CD-ROM Era",
+      "system": "psx",
+      "bucket": "psx/D (USA).m3u",
+      "files": [
+        "psx/D (USA) (Disc 1).chd",
+        "psx/D (USA) (Disc 2).chd",
+        "psx/D (USA) (Disc 3).chd"
+      ]
+    },
+    {
+      "title": "X-Files, The",
+      "category": "FMV & CD-ROM Era",
+      "system": "psx",
+      "bucket": "psx/X-Files, The (USA).m3u",
+      "files": [
+        "psx/X-Files, The (USA) (Disc 1).chd",
+        "psx/X-Files, The (USA) (Disc 2).chd",
+        "psx/X-Files, The (USA) (Disc 3).chd",
+        "psx/X-Files, The (USA) (Disc 4).chd"
+      ]
+    },
+    {
+      "title": "Fox Hunt",
+      "category": "FMV & CD-ROM Era",
+      "system": "psx",
+      "bucket": "psx/Fox Hunt (USA).m3u",
+      "files": [
+        "psx/Fox Hunt (USA) (Disc 1).chd",
+        "psx/Fox Hunt (USA) (Disc 2).chd",
+        "psx/Fox Hunt (USA) (Disc 3).chd"
+      ]
+    },
+    {
+      "title": "Psychic Detective",
+      "category": "FMV & CD-ROM Era",
+      "system": "psx",
+      "bucket": "psx/Psychic Detective (USA).m3u",
+      "files": [
+        "psx/Psychic Detective (USA) (Disc 1).chd",
+        "psx/Psychic Detective (USA) (Disc 2).chd",
+        "psx/Psychic Detective (USA) (Disc 3).chd"
+      ]
+    },
+    {
+      "title": "BrainDead 13",
+      "category": "FMV & CD-ROM Era",
+      "system": "psx",
+      "bucket": "psx/BrainDead 13 (USA).m3u",
+      "files": [
+        "psx/BrainDead 13 (USA) (Disc 1).chd",
+        "psx/BrainDead 13 (USA) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "Cyberia",
+      "category": "FMV & CD-ROM Era",
+      "system": "psx",
+      "bucket": "psx/Cyberia (USA).chd"
+    },
+    {
+      "title": "Myst",
+      "category": "FMV & CD-ROM Era",
+      "system": "saturn",
+      "bucket": "saturn/Myst (USA).chd"
+    },
+    {
+      "title": "Riven - The Sequel to Myst",
+      "category": "FMV & CD-ROM Era",
+      "system": "saturn",
+      "bucket": "saturn/Riven - The Sequel to Myst (Europe).m3u",
+      "files": [
+        "saturn/Riven - The Sequel to Myst (Europe) (Disc 1).chd",
+        "saturn/Riven - The Sequel to Myst (Europe) (Disc 2).chd",
+        "saturn/Riven - The Sequel to Myst (Europe) (Disc 3).chd",
+        "saturn/Riven - The Sequel to Myst (Europe) (Disc 4).chd"
+      ]
+    },
+    {
+      "title": "D",
+      "category": "FMV & CD-ROM Era",
+      "system": "saturn",
+      "bucket": "saturn/D (USA) (Disc I).chd",
+      "files": [
+        "saturn/D (USA) (Disc II).chd"
+      ]
+    },
+    {
+      "title": "Enemy Zero",
+      "category": "FMV & CD-ROM Era",
+      "system": "saturn",
+      "bucket": "saturn/Enemy Zero (USA).m3u",
+      "files": [
+        "saturn/Enemy Zero (USA) (Disc 0).chd",
+        "saturn/Enemy Zero (USA) (Disc 1).chd",
+        "saturn/Enemy Zero (USA) (Disc 2).chd",
+        "saturn/Enemy Zero (USA) (Disc 3).chd"
+      ]
+    },
+    {
+      "title": "Lunacy",
+      "category": "FMV & CD-ROM Era",
+      "system": "saturn",
+      "bucket": "saturn/Lunacy (USA).m3u",
+      "files": [
+        "saturn/Lunacy (USA) (Disc 1).chd",
+        "saturn/Lunacy (USA) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "Mansion of Hidden Souls, The",
+      "category": "FMV & CD-ROM Era",
+      "system": "saturn",
+      "bucket": "saturn/Mansion of Hidden Souls, The (USA).chd"
+    },
+    {
+      "title": "Double Switch",
+      "category": "FMV & CD-ROM Era",
+      "system": "saturn",
+      "bucket": "saturn/Double Switch (USA).m3u",
+      "files": [
+        "saturn/Double Switch (USA) (Disc 1).chd",
+        "saturn/Double Switch (USA) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "BrainDead 13",
+      "category": "FMV & CD-ROM Era",
+      "system": "saturn",
+      "bucket": "saturn/BrainDead 13 (USA).chd"
+    },
+    {
+      "title": "Cyberia",
+      "category": "FMV & CD-ROM Era",
+      "system": "saturn",
+      "bucket": "saturn/Cyberia (USA) (En,Fr,De).chd"
+    },
+    {
+      "title": "Frankenstein - Through the Eyes of the Monster",
+      "category": "FMV & CD-ROM Era",
+      "system": "saturn",
+      "bucket": "saturn/Frankenstein - Through the Eyes of the Monster (Europe).chd"
+    },
+    {
+      "title": "Jewels of the Oracle",
+      "category": "FMV & CD-ROM Era",
+      "system": "saturn",
+      "bucket": "saturn/Jewels of the Oracle (Europe) (En,Ja,Fr,De).chd"
+    },
+    {
+      "title": "D2",
+      "category": "FMV & CD-ROM Era",
+      "system": "dreamcast",
+      "bucket": "dreamcast/D2 (USA).m3u",
+      "files": [
+        "dreamcast/D2 (USA) (Disc 1).chd",
+        "dreamcast/D2 (USA) (Disc 2).chd",
+        "dreamcast/D2 (USA) (Disc 3).chd",
+        "dreamcast/D2 (USA) (Disc 4).chd"
+      ]
+    },
+    {
+      "title": "Myst",
+      "category": "FMV & CD-ROM Era",
+      "system": "nds",
+      "bucket": "nds/Myst (USA) (En,Fr) (Rev 1).zip"
+    },
+    {
+      "title": "Myst",
+      "category": "FMV & CD-ROM Era",
+      "system": "3ds",
+      "bucket": "3ds/Myst (USA) (En,Fr).zip"
+    },
+    {
+      "title": "Myst",
+      "category": "FMV & CD-ROM Era",
+      "system": "psp",
+      "bucket": "psp/Myst (Europe) (En,Fr,De).chd"
+    },
+    {
+      "title": "Hakuoki - Demon of the Fleeting Blossom",
+      "category": "Visual Novels",
+      "system": "psp",
+      "bucket": "psp/Hakuoki - Demon of the Fleeting Blossom (USA).chd"
+    },
+    {
+      "title": "Sweet Fuse - At Your Side",
+      "category": "Visual Novels",
+      "system": "psp",
+      "bucket": "psp/Sweet Fuse - At Your Side (USA).chd"
+    },
+    {
+      "title": "Steins;Gate",
+      "category": "Visual Novels",
+      "system": "psp",
+      "bucket": "psp/Steins;Gate (Japan) [T-En by HaselLoyance v1.0.1].chd"
+    },
+    {
+      "title": "Never7 - The End of Infinity",
+      "category": "Visual Novels",
+      "system": "psp",
+      "bucket": "psp/Never7 - The End of Infinity (Japan) [T-En by Jv110 v2].chd"
+    },
+    {
+      "title": "Ever17 - The Out of Infinity Premium Edition",
+      "category": "Visual Novels",
+      "system": "psp",
+      "bucket": "psp/Ever17 - The Out of Infinity Premium Edition (Japan) [T-En by MrComputerRevo Beta4].chd"
+    },
+    {
+      "title": "Remember11 - The Age of Infinity",
+      "category": "Visual Novels",
+      "system": "psp",
+      "bucket": "psp/Remember11 - The Age of Infinity (Japan) [T-En by Dreambottle & TLWiki Team v2.1].chd"
+    },
+    {
+      "title": "AIR",
+      "category": "Visual Novels",
+      "system": "psp",
+      "bucket": "psp/AIR (Japan) [T-En by Patr0805 v0.9].chd"
+    },
+    {
+      "title": "Little Busters - Converted Edition",
+      "category": "Visual Novels",
+      "system": "psp",
+      "bucket": "psp/Little Busters - Converted Edition (Japan) [T-En by Patr0805 v0.95].chd"
+    },
+    {
+      "title": "Planetarian - The Dream of a Little Star",
+      "category": "Visual Novels",
+      "system": "psp",
+      "bucket": "psp/Planetarian - The Dream of a Little Star (Japan) [T-En by ShinjiGR v1.0] [n].chd"
+    },
+    {
+      "title": "Yarudora Portable - Double Cast",
+      "category": "Visual Novels",
+      "system": "psp",
+      "bucket": "psp/Yarudora Portable - Double Cast (Japan) [T-En by Cargodin & Esperknight v1.1].chd"
+    },
+    {
+      "title": "Evangelion - Girlfriend of Steel 2nd",
+      "category": "Visual Novels",
+      "system": "psp",
+      "bucket": "psp/Evangelion - Girlfriend of Steel 2nd (Japan) [T-En by Blacklabel Translations v1.01] [n].chd"
+    },
+    {
+      "title": "Sound of the Sky - Quintet of Maidens",
+      "category": "Visual Novels",
+      "system": "psp",
+      "bucket": "psp/Sound of the Sky - Quintet of Maidens (Japan) [T-En by Okaysubs v1.0] [n].chd"
+    },
+    {
+      "title": "Suzumiya Haruhi no Yakusoku",
+      "category": "Visual Novels",
+      "system": "psp",
+      "bucket": "psp/Suzumiya Haruhi no Yakusoku (Japan) [T-En by EsperKnight & Soywiz & Tom & Zarradeth v1].chd"
+    },
+    {
+      "title": "Sakurasou no Pet na Kanojo",
+      "category": "Visual Novels",
+      "system": "psp",
+      "bucket": "psp/Sakurasou no Pet na Kanojo (Japan) [T-En by Eternal Nyaboron team v0.2.1].chd"
+    },
+    {
+      "title": "Ore no Imouto ga Konna ni Kawaii Wake ga Nai Portable ga Tsuzuku Wake ga Nai",
+      "category": "Visual Novels",
+      "system": "psp",
+      "bucket": "psp/Ore no Imouto ga Konna ni Kawaii Wake ga Nai Portable ga Tsuzuku Wake ga Nai (Japan).m3u",
+      "files": [
+        "psp/Ore no Imouto ga Konna ni Kawaii Wake ga Nai Portable ga Tsuzuku Wake ga Nai (Japan) (Disc 1) [T-En by Rinjinbu Translations v1].chd",
+        "psp/Ore no Imouto ga Konna ni Kawaii Wake ga Nai Portable ga Tsuzuku Wake ga Nai (Japan) (Disc 2) [T-En by Rinjinbu Translations v1].chd"
+      ]
+    },
+    {
+      "title": "Tora Dora Portable!",
+      "category": "Visual Novels",
+      "system": "psp",
+      "bucket": "psp/Tora Dora Portable! (Japan) [T-En by Chronoes & Verdelish & Xyz v1.10].chd"
+    },
+    {
+      "title": "GA - Geijutsuka Art Design Class - Slapstick Wonder Land",
+      "category": "Visual Novels",
+      "system": "psp",
+      "bucket": "psp/GA - Geijutsuka Art Design Class - Slapstick Wonder Land (Japan) [T-En by Nodamiki v1.0].chd"
+    },
+    {
+      "title": "Tantei Opera Milky Holmes",
+      "category": "Visual Novels",
+      "system": "psp",
+      "bucket": "psp/Tantei Opera Milky Holmes (Japan) [T-En by Desuwa v0.4].chd"
+    },
+    {
+      "title": "Tokimeki Memorial Girl's Side Premium - 3rd Story",
+      "category": "Visual Novels",
+      "system": "psp",
+      "bucket": "psp/Tokimeki Memorial Girl's Side Premium - 3rd Story (Japan) [T-En by Jjjewel v1.00].chd"
+    },
+    {
+      "title": "StormLover Kai!!",
+      "category": "Visual Novels",
+      "system": "psp",
+      "bucket": "psp/StormLover Kai!! (Japan) [T-En by Jjjewel & Xyz v0.90].chd"
+    },
+    {
+      "title": "Hakuoki - Memories of the Shinsengumi",
+      "category": "Visual Novels",
+      "system": "3ds",
+      "bucket": "3ds/Hakuoki - Memories of the Shinsengumi (USA).zip"
+    },
+    {
+      "title": "Corpse Party",
+      "category": "Visual Novels",
+      "system": "3ds",
+      "bucket": "3ds/Corpse Party (USA).zip"
+    },
+    {
+      "title": "Code - Realize - Guardian of Rebirth",
+      "category": "Visual Novels",
+      "system": "psvita",
+      "bucket": "psvita/Code - Realize ~Guardian of Rebirth~ [PCSE00763] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Code - Realize - Future Blessings",
+      "category": "Visual Novels",
+      "system": "psvita",
+      "bucket": "psvita/Code - Realize ～Future Blessings～ [PCSE01057] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Code - Realize - Wintertide Miracles",
+      "category": "Visual Novels",
+      "system": "psvita",
+      "bucket": "psvita/Code：Realize ～Wintertide Miracles～ [PCSE01278] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Hatoful Boyfriend",
+      "category": "Visual Novels",
+      "system": "psvita",
+      "bucket": "psvita/Hatoful Boyfriend [PCSE00653] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Hatoful Boyfriend - Holiday Star",
+      "category": "Visual Novels",
+      "system": "psvita",
+      "bucket": "psvita/Hatoful Boyfriend 2 [PCSE00776] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Portopia Renzoku Satsujin Jiken",
+      "category": "Japanese Adventure Classics",
+      "system": "nes",
+      "bucket": "nes/Portopia Renzoku Satsujin Jiken (Japan).zip"
+    },
+    {
+      "title": "Hokkaidou Rensa Satsujin - Okhotsk ni Kiyu",
+      "category": "Japanese Adventure Classics",
+      "system": "nes",
+      "bucket": "nes/Hokkaidou Rensa Satsujin - Okhotsk ni Kiyu (Japan).zip"
+    },
+    {
+      "title": "Metal Slader Glory",
+      "category": "Japanese Adventure Classics",
+      "system": "nes",
+      "bucket": "nes/Metal Slader Glory (Japan).zip"
+    },
+    {
+      "title": "Famicom Tantei Club - Kieta Koukeisha",
+      "category": "Japanese Adventure Classics",
+      "system": "fds",
+      "bucket": "fds/Famicom Tantei Club - Kieta Koukeisha - Zenpen (Japan) (DV 1, 3).zip",
+      "files": [
+        "fds/Famicom Tantei Club - Kieta Koukeisha - Kouhen (Japan).zip"
+      ]
+    },
+    {
+      "title": "Famicom Tantei Club Part II - Ushiro ni Tatsu Shoujo",
+      "category": "Japanese Adventure Classics",
+      "system": "fds",
+      "bucket": "fds/Famicom Tantei Club Part II - Ushiro ni Tatsu Shoujo - Zenpen (Japan).zip",
+      "files": [
+        "fds/Famicom Tantei Club Part II - Ushiro ni Tatsu Shoujo - Kouhen (Japan) (DV 3, 4).zip"
+      ]
+    },
+    {
+      "title": "Famicom Mukashibanashi - Shin Onigashima",
+      "category": "Japanese Adventure Classics",
+      "system": "fds",
+      "bucket": "fds/Famicom Mukashibanashi - Shin Onigashima - Zenpen (Japan) (DV 2, 3) (Disk Writer).zip",
+      "files": [
+        "fds/Famicom Mukashibanashi - Shin Onigashima - Kouhen (Japan).zip"
+      ]
+    },
+    {
+      "title": "Famicom Tantei Club Part II - Ushiro ni Tatsu Shoujo",
+      "category": "Japanese Adventure Classics",
+      "system": "snes",
+      "bucket": "snes/Famicom Tantei Club Part II - Ushiro ni Tatsu Shoujo (Japan) (Rev 1) (NP).zip"
+    },
+    {
+      "title": "Clock Tower",
+      "category": "Japanese Adventure Classics",
+      "system": "snes",
+      "bucket": "snes/Clock Tower (Japan).zip"
+    },
+    {
+      "title": "Otogirisou",
+      "category": "Japanese Adventure Classics",
+      "system": "snes",
+      "bucket": "snes/Otogirisou (Japan).zip"
+    },
+    {
+      "title": "Kamaitachi no Yoru",
+      "category": "Japanese Adventure Classics",
+      "system": "snes",
+      "bucket": "snes/Kamaitachi no Yoru (Japan).zip"
+    },
+    {
+      "title": "Ihatovo Monogatari",
+      "category": "Japanese Adventure Classics",
+      "system": "snes",
+      "bucket": "snes/Ihatovo Monogatari (Japan).zip"
+    },
+    {
+      "title": "Radical Dreamers - Nusume Nai Houseki",
+      "category": "Japanese Adventure Classics",
+      "system": "satellaview",
+      "bucket": "satellaview/Radical Dreamers - Nusume Nai Houseki (Japan) (2-24).zip"
+    },
+    {
+      "title": "Snatcher",
+      "category": "Japanese Adventure Classics",
+      "system": "saturn",
+      "bucket": "saturn/Snatcher (Japan).chd"
+    },
+    {
+      "title": "Policenauts",
+      "category": "Japanese Adventure Classics",
+      "system": "saturn",
+      "bucket": "saturn/Policenauts (Japan).m3u",
+      "files": [
+        "saturn/Policenauts (Japan) (Disc 1).chd",
+        "saturn/Policenauts (Japan) (Disc 2).chd",
+        "saturn/Policenauts (Japan) (Disc 3).chd"
+      ]
+    },
+    {
+      "title": "Eve - Burst Error",
+      "category": "Japanese Adventure Classics",
+      "system": "saturn",
+      "bucket": "saturn/Eve - Burst Error (Japan).m3u",
+      "files": [
+        "saturn/Eve - Burst Error (Japan) (Disc 1) (Kojiroh Disc).chd",
+        "saturn/Eve - Burst Error (Japan) (Disc 2) (Marina Disc).chd",
+        "saturn/Eve - Burst Error (Japan) (Disc 3) (Terror Disc).chd",
+        "saturn/Eve - Burst Error (Japan) (Disc 4) (Making Disc).chd"
+      ]
+    },
+    {
+      "title": "Yu-No - Konoyo no Hate de Koi o Utau Shoujo",
+      "category": "Japanese Adventure Classics",
+      "system": "saturn",
+      "bucket": "saturn/Yu-No - Konoyo no Hate de Koi o Utau Shoujo (Japan) (Disc A).chd",
+      "files": [
+        "saturn/Yu-No - Konoyo no Hate de Koi o Utau Shoujo (Japan) (Disc B).chd",
+        "saturn/Yu-No - Konoyo no Hate de Koi o Utau Shoujo (Japan) (Disc C).chd"
+      ]
+    },
+    {
+      "title": "Sound Novel Machi",
+      "category": "Japanese Adventure Classics",
+      "system": "saturn",
+      "bucket": "saturn/Sound Novel Machi (Japan).m3u",
+      "files": [
+        "saturn/Sound Novel Machi (Japan) (Disc 1) (10.11-10.13 Incl.) (1M).chd",
+        "saturn/Sound Novel Machi (Japan) (Disc 2) (10.13-10.15 Incl.) (2M).chd"
+      ]
+    },
+    {
+      "title": "Time Travelers",
+      "category": "Japanese Adventure Classics",
+      "system": "3ds",
+      "bucket": "3ds/Time Travelers (Japan).zip"
+    },
+    {
+      "title": "Prince of Persia",
+      "category": "Cinematic Platformers",
+      "system": "nes",
+      "bucket": "nes/Prince of Persia (USA).zip"
+    },
+    {
+      "title": "Prince of Persia",
+      "category": "Cinematic Platformers",
+      "system": "gb",
+      "bucket": "gb/Prince of Persia (USA).zip"
+    },
+    {
+      "title": "Prince of Persia",
+      "category": "Cinematic Platformers",
+      "system": "gbc",
+      "bucket": "gbc/Prince of Persia (USA, Europe) (En,Fr,De,Es,It) (GB Compatible).zip"
+    },
+    {
+      "title": "Prince of Persia",
+      "category": "Cinematic Platformers",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Prince of Persia (Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Prince of Persia",
+      "category": "Cinematic Platformers",
+      "system": "gamegear",
+      "bucket": "gamegear/Prince of Persia (USA, Europe).zip"
+    },
+    {
+      "title": "Prince of Persia",
+      "category": "Cinematic Platformers",
+      "system": "genesis",
+      "bucket": "genesis/Prince of Persia (USA).zip"
+    },
+    {
+      "title": "Prince of Persia",
+      "category": "Cinematic Platformers",
+      "system": "segacd",
+      "bucket": "segacd/Prince of Persia (USA).chd"
+    },
+    {
+      "title": "Prince of Persia",
+      "category": "Cinematic Platformers",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Prince of Persia (USA).chd"
+    },
+    {
+      "title": "Prince of Persia",
+      "category": "Cinematic Platformers",
+      "system": "snes",
+      "bucket": "snes/Prince of Persia (USA).zip"
+    },
+    {
+      "title": "Prince of Persia 2",
+      "category": "Cinematic Platformers",
+      "system": "snes",
+      "bucket": "snes/Prince of Persia 2 (USA).zip"
+    },
+    {
+      "title": "Dragon's Lair",
+      "category": "Cinematic Platformers",
+      "system": "nes",
+      "bucket": "nes/Dragon's Lair (USA).zip"
+    },
+    {
+      "title": "Out of This World",
+      "category": "Cinematic Platformers",
+      "system": "snes",
+      "bucket": "snes/Out of This World (USA).zip"
+    },
+    {
+      "title": "Out of This World",
+      "category": "Cinematic Platformers",
+      "system": "genesis",
+      "bucket": "genesis/Out of This World (USA).zip"
+    },
+    {
+      "title": "Heart of the Alien - Out of This World Parts I and II",
+      "category": "Cinematic Platformers",
+      "system": "segacd",
+      "bucket": "segacd/Heart of the Alien - Out of This World Parts I and II (USA) (RE).chd"
+    },
+    {
+      "title": "Flashback - The Quest for Identity",
+      "category": "Cinematic Platformers",
+      "system": "snes",
+      "bucket": "snes/Flashback - The Quest for Identity (USA) (En,Fr,De).zip"
+    },
+    {
+      "title": "Flashback - The Quest for Identity",
+      "category": "Cinematic Platformers",
+      "system": "genesis",
+      "bucket": "genesis/Flashback - The Quest for Identity (USA) (En,Fr).zip"
+    },
+    {
+      "title": "Flashback - The Quest for Identity",
+      "category": "Cinematic Platformers",
+      "system": "segacd",
+      "bucket": "segacd/Flashback - The Quest for Identity (USA).chd"
+    },
+    {
+      "title": "Flashback - The Quest for Identity",
+      "category": "Cinematic Platformers",
+      "system": "atarijaguar",
+      "bucket": "atarijaguar/Flashback - The Quest for Identity (World) (En,Fr).zip"
+    },
+    {
+      "title": "Blackthorne",
+      "category": "Cinematic Platformers",
+      "system": "snes",
+      "bucket": "snes/Blackthorne (USA).zip"
+    },
+    {
+      "title": "Blackthorne",
+      "category": "Cinematic Platformers",
+      "system": "sega32x",
+      "bucket": "sega32x/Blackthorne (USA).zip"
+    },
+    {
+      "title": "Blackthorne",
+      "category": "Cinematic Platformers",
+      "system": "gba",
+      "bucket": "gba/Blackthorne (USA).zip"
+    },
+    {
+      "title": "Nosferatu",
+      "category": "Cinematic Platformers",
+      "system": "snes",
+      "bucket": "snes/Nosferatu (USA).zip"
+    },
+    {
+      "title": "Lester the Unlikely",
+      "category": "Cinematic Platformers",
+      "system": "snes",
+      "bucket": "snes/Lester the Unlikely (USA).zip"
+    },
+    {
+      "title": "Generations Lost",
+      "category": "Cinematic Platformers",
+      "system": "genesis",
+      "bucket": "genesis/Generations Lost (USA, Europe).zip"
+    },
+    {
+      "title": "Oddworld - Abe's Oddysee",
+      "category": "Cinematic Platformers",
+      "system": "psx",
+      "bucket": "psx/Oddworld - Abe's Oddysee (USA) (Rev 2).chd"
+    },
+    {
+      "title": "Oddworld - Abe's Exoddus",
+      "category": "Cinematic Platformers",
+      "system": "psx",
+      "bucket": "psx/Oddworld - Abe's Exoddus (USA).m3u",
+      "files": [
+        "psx/Oddworld - Abe's Exoddus (USA) (Disc 1).chd",
+        "psx/Oddworld - Abe's Exoddus (USA) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "Oddworld Adventures",
+      "category": "Cinematic Platformers",
+      "system": "gb",
+      "bucket": "gb/Oddworld Adventures (USA, Europe).zip"
+    },
+    {
+      "title": "Oddworld Adventures 2",
+      "category": "Cinematic Platformers",
+      "system": "gbc",
+      "bucket": "gbc/Oddworld Adventures 2 (USA) (En,Fr,De,Es,It) (GB Compatible).zip"
+    },
+    {
+      "title": "Heart of Darkness",
+      "category": "Cinematic Platformers",
+      "system": "psx",
+      "bucket": "psx/Heart of Darkness (USA).m3u",
+      "files": [
+        "psx/Heart of Darkness (USA) (Disc 1).chd",
+        "psx/Heart of Darkness (USA) (Disc 2).chd"
+      ]
+    }
+  ]
+}

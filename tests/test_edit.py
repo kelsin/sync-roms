@@ -97,7 +97,7 @@ class EditFlow(EditBase):
         self.assertFalse(os.path.exists(self.path("games.json")))
 
     def test_no_changes_nothing_saved(self):
-        self.assertEqual(self.run_edit([3], confirmed=True), 0)
+        self.assertEqual(self.run_edit([4], confirmed=True), 0)
         self.assertFalse(os.path.exists(self.path("cards.json")))
 
 
@@ -121,21 +121,21 @@ class MenuActions(EditBase):
 
     def test_rename_a_saved_card(self):
         self.write_json("cards.json", {"c": {"layout": "esde", "device": "full"}})
-        self.run_menu([0, (edit.RENAME_KEY, 0), None, 3])
+        self.run_menu([0, (edit.RENAME_KEY, 0), None, 4])
         self.assertEqual(list(self.read("cards.json")), ["renamed"])
 
     def test_delete_a_saved_card(self):
         self.write_json("cards.json", {"c": {"layout": "esde", "device": "full"}})
-        self.run_menu([0, (edit.DELETE_KEY, 0), None, 3])
+        self.run_menu([0, (edit.DELETE_KEY, 0), None, 4])
         self.assertEqual(self.read("cards.json"), {})
 
     def test_declined_delete_keeps_the_card(self):
         self.write_json("cards.json", {"c": {"layout": "esde", "device": "full"}})
-        self.run_menu([0, (edit.DELETE_KEY, 0), None, 3], confirm=False)
+        self.run_menu([0, (edit.DELETE_KEY, 0), None, 4], confirm=False)
         self.assertIn("c", self.read("cards.json"))
 
     def test_done_with_no_changes_saves_nothing(self):
-        self.assertEqual(self.run_menu([3]), 0)
+        self.assertEqual(self.run_menu([4]), 0)
         self.assertFalse(os.path.exists(self.path("cards.json")))
 
     def device_case(self):
@@ -148,14 +148,14 @@ class MenuActions(EditBase):
         dev, base, ids = self.device_case()
         extra = next(x for x in ids if x not in base)
         self.write_json("device-systems.json", {dev["id"]: {"add": [extra]}})
-        self.run_menu([2, 0, None, 3], multi=lambda initial, labels: [x in base for x in ids])
+        self.run_menu([3, 0, None, 4], multi=lambda initial, labels: [x in base for x in ids])
         self.assertEqual(self.read("device-systems.json"), {})
 
     def test_opening_a_device_and_changing_nothing_is_not_an_edit(self):
         dev, base, ids = self.device_case()
         extra = next(x for x in ids if x not in base)
         self.write_json("device-systems.json", {dev["id"]: {"add": [extra]}})
-        self.run_menu([2, 0, None, 3], multi=lambda initial, labels: list(initial))
+        self.run_menu([3, 0, None, 4], multi=lambda initial, labels: list(initial))
         self.assertEqual(self.read("device-systems.json"), {dev["id"]: {"add": [extra]}})
         self.assertFalse(os.path.exists(self.path("device-systems.json.bak")))
 
@@ -173,32 +173,39 @@ class MenuActions(EditBase):
             edit.edit_manifest()
         return seen
 
-    def test_top_menu_entries_are_exactly_cards_sets_and_device_systems(self):
+    def test_top_menu_entries_are_exactly_cards_sets_collections_and_device_systems(self):
         top = self.top_titles([None])[0][1]
-        self.assertEqual(top, ["💳 Cards", "📦 Sets", "🧩 Device systems", "✅ Done (review & save)", "🚪 Quit without saving"])
+        self.assertEqual(top, ["💳 Cards", "📦 Sets", "💖 Collections", "🧩 Device systems",
+                               "✅ Done (review & save)", "🚪 Quit without saving"])
 
     def test_choosing_sets_calls_edit_sets_and_a_failure_returns_to_the_menu(self):
         from sync_roms import setedit
         with mock.patch.object(setedit, "edit_sets", side_effect=SystemExit(3)) as run:
-            self.assertEqual(self.run_menu([1, 3]), 0)
+            self.assertEqual(self.run_menu([1, 4]), 0)
+        run.assert_called_once()
+
+    def test_choosing_collections_opens_the_collection_editor(self):
+        from sync_roms import collectionedit
+        with mock.patch.object(collectionedit, "edit_collections", return_value=0) as run:
+            self.assertEqual(self.run_menu([2, 4]), 0)
         run.assert_called_once()
 
     def test_choosing_device_systems_opens_the_device_list(self):
-        seen = self.top_titles([2, None, 3])
+        seen = self.top_titles([3, None, 4])
         self.assertIn("recommended systems", seen[1][0])
 
     def test_choosing_a_card_calls_the_card_editor(self):
         from sync_roms import cardedit
         self.write_json("cards.json", {"c": {"layout": "esde", "device": "full"}})
         with mock.patch.object(cardedit, "edit_card") as run:
-            self.run_menu([0, 0, None, 3])
+            self.run_menu([0, 0, None, 4])
         self.assertEqual(run.call_args[0][0], "c")
 
     def test_unwritable_cards_json_refuses_to_edit(self):
         with open(self.path("cards.json"), "w") as f:
             f.write("{oops")
         with contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit) as cm:
-            self.run_menu([3])
+            self.run_menu([4])
         self.assertNotEqual(cm.exception.code, 0)
 
 

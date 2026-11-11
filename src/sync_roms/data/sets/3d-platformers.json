@@ -1,7 +1,467 @@
 {
   "name": "3D Platformers",
-  "description": "Jak and Daxter, Ratchet & Clank, Sly Cooper and Super Mario Galaxy.",
+  "description": "3D platformers from Super Mario 64 and Crash Bandicoot to Jak and Daxter, Ratchet & Clank, Sly Cooper and Super Mario Galaxy.",
   "games": [
+    {
+      "title": "Super Mario 64",
+      "system": "n64",
+      "bucket": "n64/Super Mario 64 (USA).zip"
+    },
+    {
+      "title": "Banjo-Kazooie",
+      "system": "n64",
+      "bucket": "n64/Banjo-Kazooie (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Banjo-Tooie",
+      "system": "n64",
+      "bucket": "n64/Banjo-Tooie (USA).zip"
+    },
+    {
+      "title": "Donkey Kong 64",
+      "system": "n64",
+      "bucket": "n64/Donkey Kong 64 (USA).zip"
+    },
+    {
+      "title": "Conker's Bad Fur Day",
+      "system": "n64",
+      "bucket": "n64/Conker's Bad Fur Day (USA).zip"
+    },
+    {
+      "title": "Rayman 2: The Great Escape",
+      "system": "n64",
+      "bucket": "n64/Rayman 2 - The Great Escape (USA) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Rocket: Robot on Wheels",
+      "system": "n64",
+      "bucket": "n64/Rocket - Robot on Wheels (USA).zip"
+    },
+    {
+      "title": "Space Station Silicon Valley",
+      "system": "n64",
+      "bucket": "n64/SpaceStation Silicon Valley (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Glover",
+      "system": "n64",
+      "bucket": "n64/Glover (USA).zip"
+    },
+    {
+      "title": "Gex 64: Enter the Gecko",
+      "system": "n64",
+      "bucket": "n64/Gex 64 - Enter the Gecko (USA).zip"
+    },
+    {
+      "title": "Gex 3: Deep Cover Gecko",
+      "system": "n64",
+      "bucket": "n64/Gex 3 - Deep Cover Gecko (USA).zip"
+    },
+    {
+      "title": "Chameleon Twist",
+      "system": "n64",
+      "bucket": "n64/Chameleon Twist (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Chameleon Twist 2",
+      "system": "n64",
+      "bucket": "n64/Chameleon Twist 2 (USA).zip"
+    },
+    {
+      "title": "Tonic Trouble",
+      "system": "n64",
+      "bucket": "n64/Tonic Trouble (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Earthworm Jim 3D",
+      "system": "n64",
+      "bucket": "n64/Earthworm Jim 3D (USA).zip"
+    },
+    {
+      "title": "Mystical Ninja Starring Goemon",
+      "system": "n64",
+      "bucket": "n64/Mystical Ninja Starring Goemon (USA).zip"
+    },
+    {
+      "title": "Bomberman 64",
+      "system": "n64",
+      "bucket": "n64/Bomberman 64 (USA).zip"
+    },
+    {
+      "title": "Bomberman Hero",
+      "system": "n64",
+      "bucket": "n64/Bomberman Hero (USA).zip"
+    },
+    {
+      "title": "Bomberman 64: The Second Attack!",
+      "system": "n64",
+      "bucket": "n64/Bomberman 64 - The Second Attack! (USA).zip"
+    },
+    {
+      "title": "Donald Duck: Goin' Quackers",
+      "system": "n64",
+      "bucket": "n64/Donald Duck - Goin' Quackers (USA) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Toy Story 2: Buzz Lightyear to the Rescue!",
+      "system": "n64",
+      "bucket": "n64/Toy Story 2 - Buzz Lightyear to the Rescue! (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Blues Brothers 2000",
+      "system": "n64",
+      "bucket": "n64/Blues Brothers 2000 (USA).zip"
+    },
+    {
+      "title": "A Bug's Life",
+      "system": "n64",
+      "bucket": "n64/Bug's Life, A (USA).zip"
+    },
+    {
+      "title": "Duck Dodgers Starring Daffy Duck",
+      "system": "n64",
+      "bucket": "n64/Duck Dodgers Starring Daffy Duck (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Starshot: Space Circus Fever",
+      "system": "n64",
+      "bucket": "n64/Starshot - Space Circus Fever (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Crash Bandicoot",
+      "system": "psx",
+      "bucket": "psx/Crash Bandicoot (USA).chd"
+    },
+    {
+      "title": "Crash Bandicoot 2: Cortex Strikes Back",
+      "system": "psx",
+      "bucket": "psx/Crash Bandicoot 2 - Cortex Strikes Back (USA).chd"
+    },
+    {
+      "title": "Crash Bandicoot: Warped",
+      "system": "psx",
+      "bucket": "psx/Crash Bandicoot - Warped (USA).chd"
+    },
+    {
+      "title": "Spyro the Dragon",
+      "system": "psx",
+      "bucket": "psx/Spyro the Dragon (USA).chd"
+    },
+    {
+      "title": "Spyro 2: Ripto's Rage!",
+      "system": "psx",
+      "bucket": "psx/Spyro 2 - Ripto's Rage! (USA).chd"
+    },
+    {
+      "title": "Spyro: Year of the Dragon",
+      "system": "psx",
+      "bucket": "psx/Spyro - Year of the Dragon (USA) (Rev 1).chd"
+    },
+    {
+      "title": "Ape Escape",
+      "system": "psx",
+      "bucket": "psx/Ape Escape (USA).chd"
+    },
+    {
+      "title": "Croc: Legend of the Gobbos",
+      "system": "psx",
+      "bucket": "psx/Croc - Legend of the Gobbos (USA).chd"
+    },
+    {
+      "title": "Croc 2",
+      "system": "psx",
+      "bucket": "psx/Croc 2 (USA).chd"
+    },
+    {
+      "title": "Gex: Enter the Gecko",
+      "system": "psx",
+      "bucket": "psx/Gex - Enter the Gecko (USA).chd"
+    },
+    {
+      "title": "Gex 3: Deep Cover Gecko",
+      "system": "psx",
+      "bucket": "psx/Gex 3 - Deep Cover Gecko (USA).chd"
+    },
+    {
+      "title": "Jumping Flash!",
+      "system": "psx",
+      "bucket": "psx/Jumping Flash! (USA).chd"
+    },
+    {
+      "title": "Jumping Flash! 2",
+      "system": "psx",
+      "bucket": "psx/Jumping Flash! 2 (USA).chd"
+    },
+    {
+      "title": "Rayman 2: The Great Escape",
+      "system": "psx",
+      "bucket": "psx/Rayman 2 - The Great Escape (USA) (En,Fr,Es).chd"
+    },
+    {
+      "title": "Pac-Man World",
+      "system": "psx",
+      "bucket": "psx/Pac-Man World - 20th Anniversary (USA).chd"
+    },
+    {
+      "title": "Bugs Bunny: Lost in Time",
+      "system": "psx",
+      "bucket": "psx/Bugs Bunny - Lost in Time (USA) (En,Fr,Es).chd"
+    },
+    {
+      "title": "Bugs Bunny & Taz: Time Busters",
+      "system": "psx",
+      "bucket": "psx/Bugs Bunny & Taz - Time Busters (USA) (En,Fr,Es).chd"
+    },
+    {
+      "title": "Looney Tunes: Sheep Raider",
+      "system": "psx",
+      "bucket": "psx/Looney Tunes - Sheep Raider (USA) (En,Fr,Es,Pt).chd"
+    },
+    {
+      "title": "Jersey Devil",
+      "system": "psx",
+      "bucket": "psx/Jersey Devil (USA).chd"
+    },
+    {
+      "title": "Blasto",
+      "system": "psx",
+      "bucket": "psx/Blasto (USA).chd"
+    },
+    {
+      "title": "40 Winks",
+      "system": "psx",
+      "bucket": "psx/40 Winks (USA).chd"
+    },
+    {
+      "title": "Rascal",
+      "system": "psx",
+      "bucket": "psx/Rascal (USA).chd"
+    },
+    {
+      "title": "Muppet Monster Adventure",
+      "system": "psx",
+      "bucket": "psx/Muppet Monster Adventure (USA).chd"
+    },
+    {
+      "title": "Kingsley's Adventure",
+      "system": "psx",
+      "bucket": "psx/Kingsley's Adventure (USA).chd"
+    },
+    {
+      "title": "Pitfall 3D: Beyond the Jungle",
+      "system": "psx",
+      "bucket": "psx/Pitfall 3D - Beyond the Jungle (USA).chd"
+    },
+    {
+      "title": "Floating Runner: Quest for the 7 Crystals",
+      "system": "psx",
+      "bucket": "psx/Floating Runner - Quest for the 7 Crystals (USA).chd"
+    },
+    {
+      "title": "Toy Story 2: Buzz Lightyear to the Rescue!",
+      "system": "psx",
+      "bucket": "psx/Disney-Pixar Toy Story 2 - Buzz Lightyear to the Rescue! (USA) (Rev 1).chd"
+    },
+    {
+      "title": "Donald Duck: Goin' Quackers",
+      "system": "psx",
+      "bucket": "psx/Disney's Donald Duck - Goin' Quackers (USA).chd"
+    },
+    {
+      "title": "The Emperor's New Groove",
+      "system": "psx",
+      "bucket": "psx/Disney's The Emperor's New Groove (USA).chd"
+    },
+    {
+      "title": "Aladdin in Nasira's Revenge",
+      "system": "psx",
+      "bucket": "psx/Disney's Aladdin in Nasira's Revenge (USA).chd"
+    },
+    {
+      "title": "Monsters, Inc.: Scream Team",
+      "system": "psx",
+      "bucket": "psx/Disney-Pixar Monsters, Inc. - Scream Team (USA).chd"
+    },
+    {
+      "title": "Animorphs: Shattered Reality",
+      "system": "psx",
+      "bucket": "psx/Animorphs - Shattered Reality (USA).chd"
+    },
+    {
+      "title": "Barbie: Explorer",
+      "system": "psx",
+      "bucket": "psx/Barbie - Explorer (USA).chd"
+    },
+    {
+      "title": "Bubsy 3D: Furbitten Planet",
+      "system": "psx",
+      "bucket": "psx/Bubsy 3D - Furbitten Planet (USA).chd"
+    },
+    {
+      "title": "102 Dalmatians: Puppies to the Rescue",
+      "system": "psx",
+      "bucket": "psx/Disney's 102 Dalmatians - Puppies to the Rescue (USA).chd"
+    },
+    {
+      "title": "The Lion King: Simba's Mighty Adventure",
+      "system": "psx",
+      "bucket": "psx/Disney's The Lion King - Simba's Mighty Adventure (USA).chd"
+    },
+    {
+      "title": "Glover",
+      "system": "psx",
+      "bucket": "psx/Glover (USA).chd"
+    },
+    {
+      "title": "The Grinch",
+      "system": "psx",
+      "bucket": "psx/Grinch, The (USA) (En,Fr,Es).chd"
+    },
+    {
+      "title": "Jackie Chan Stuntmaster",
+      "system": "psx",
+      "bucket": "psx/Jackie Chan Stuntmaster (USA).chd"
+    },
+    {
+      "title": "Monster Rancher Hop-A-Bout",
+      "system": "psx",
+      "bucket": "psx/Monster Rancher Hop-A-Bout (USA).chd"
+    },
+    {
+      "title": "Mort the Chicken",
+      "system": "psx",
+      "bucket": "psx/Mort the Chicken (USA).chd"
+    },
+    {
+      "title": "Ninja: Shadow of Darkness",
+      "system": "psx",
+      "bucket": "psx/Ninja - Shadow of Darkness (USA).chd"
+    },
+    {
+      "title": "Psybadek",
+      "system": "psx",
+      "bucket": "psx/Psybadek (USA).chd"
+    },
+    {
+      "title": "Scooby-Doo and the Cyber Chase",
+      "system": "psx",
+      "bucket": "psx/Scooby-Doo and the Cyber Chase (USA).chd"
+    },
+    {
+      "title": "Shrek Treasure Hunt",
+      "system": "psx",
+      "bucket": "psx/Shrek Treasure Hunt (USA).chd"
+    },
+    {
+      "title": "T'ai Fu: Wrath of the Tiger",
+      "system": "psx",
+      "bucket": "psx/T'ai Fu - Wrath of the Tiger (USA).chd"
+    },
+    {
+      "title": "Tail Concerto",
+      "system": "psx",
+      "bucket": "psx/Tail Concerto (USA).chd"
+    },
+    {
+      "title": "Treasure Planet",
+      "system": "psx",
+      "bucket": "psx/Disney's Treasure Planet (USA).chd"
+    },
+    {
+      "title": "Hugo: The Evil Mirror",
+      "system": "psx",
+      "bucket": "psx/Hugo - The Evil Mirror (USA) (En,Es).chd"
+    },
+    {
+      "title": "M&M's: Shell Shocked",
+      "system": "psx",
+      "bucket": "psx/M&M's - Shell Shocked (USA).chd"
+    },
+    {
+      "title": "Stuart Little 2",
+      "system": "psx",
+      "bucket": "psx/Stuart Little 2 (USA).chd"
+    },
+    {
+      "title": "Bug!",
+      "system": "saturn",
+      "bucket": "saturn/Bug! (USA) (R).chd"
+    },
+    {
+      "title": "Bug Too!",
+      "system": "saturn",
+      "bucket": "saturn/Bug Too! (USA).chd"
+    },
+    {
+      "title": "Croc: Legend of the Gobbos",
+      "system": "saturn",
+      "bucket": "saturn/Croc - Legend of the Gobbos (USA).chd"
+    },
+    {
+      "title": "Willy Wombat",
+      "system": "saturn",
+      "bucket": "saturn/Willy Wombat (Japan).chd"
+    },
+    {
+      "title": "Sonic Adventure International",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Sonic Adventure International (Japan) (En,Ja,Fr,De,Es).chd"
+    },
+    {
+      "title": "Sonic Adventure 2",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Sonic Adventure 2 (USA) (En,Ja,Fr,De,Es).chd"
+    },
+    {
+      "title": "Rayman 2: The Great Escape",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Rayman 2 - The Great Escape (USA) (En,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "Super Magnetic Neo",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Super Magnetic Neo (USA).chd"
+    },
+    {
+      "title": "Kao the Kangaroo",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Kao the Kangaroo (USA) (En,Es).chd"
+    },
+    {
+      "title": "Toy Story 2: Buzz Lightyear to the Rescue!",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Disney-Pixar Toy Story 2 - Buzz Lightyear to the Rescue! (USA).chd"
+    },
+    {
+      "title": "Donald Duck: Goin' Quackers",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Disney's Donald Duck - Goin' Quackers (USA).chd"
+    },
+    {
+      "title": "Evil Twin: Cyprien's Chronicles",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Evil Twin - Cyprien's Chronicles (Europe) (En,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "Napple Tale: Arsia in Daydream",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Napple Tale - Arsia in Daydream (Japan).chd"
+    },
+    {
+      "title": "102 Dalmatians: Puppies to the Rescue",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Disney's 102 Dalmatians - Puppies to the Rescue (USA).chd"
+    },
+    {
+      "title": "Fur Fighters",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Fur Fighters (USA) (En,Fr,De,Es) (Rev B).chd"
+    },
+    {
+      "title": "The Grinch",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Grinch, The (USA) (En,Fr,Es).chd"
+    },
     {
       "title": "Jak and Daxter: The Precursor Legacy",
       "system": "ps2",
@@ -48,6 +508,381 @@
       "bucket": "ps2/Sly 3 - Honor Among Thieves (USA).chd"
     },
     {
+      "title": "Psychonauts",
+      "system": "ps2",
+      "bucket": "ps2/Psychonauts (USA).chd"
+    },
+    {
+      "title": "Sonic Heroes",
+      "system": "ps2",
+      "bucket": "ps2/Sonic Heroes (USA) (En,Ja,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "Daxter",
+      "system": "psp",
+      "bucket": "psp/Daxter (USA) (En,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "Jak and Daxter: The Lost Frontier",
+      "system": "psp",
+      "bucket": "psp/Jak and Daxter - The Lost Frontier (USA) (En,Fr,Es).chd"
+    },
+    {
+      "title": "Ratchet & Clank: Size Matters",
+      "system": "psp",
+      "bucket": "psp/Ratchet & Clank - Size Matters (USA) (En,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "Secret Agent Clank",
+      "system": "psp",
+      "bucket": "psp/Secret Agent Clank (USA) (En,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "Ape Escape: On the Loose",
+      "system": "psp",
+      "bucket": "psp/Ape Escape - On the Loose (USA).chd"
+    },
+    {
+      "title": "Crash of the Titans",
+      "system": "psp",
+      "bucket": "psp/Crash of the Titans (USA).chd"
+    },
+    {
+      "title": "Crash: Mind over Mutant",
+      "system": "psp",
+      "bucket": "psp/Crash - Mind over Mutant (USA) (En,Fr).chd"
+    },
+    {
+      "title": "Pac-Man World 3",
+      "system": "psp",
+      "bucket": "psp/Pac-Man World 3 (USA).chd"
+    },
+    {
+      "title": "Death Jr.",
+      "system": "psp",
+      "bucket": "psp/Death Jr. (USA).chd"
+    },
+    {
+      "title": "Death Jr. II: Root of Evil",
+      "system": "psp",
+      "bucket": "psp/Death Jr. II - Root of Evil (USA).chd"
+    },
+    {
+      "title": "Kao Challengers",
+      "system": "psp",
+      "bucket": "psp/Kao Challengers (USA).chd"
+    },
+    {
+      "title": "Tokobot",
+      "system": "psp",
+      "bucket": "psp/Tokobot (USA).chd"
+    },
+    {
+      "title": "Super Monkey Ball Adventure",
+      "system": "psp",
+      "bucket": "psp/Super Monkey Ball Adventure (USA).chd"
+    },
+    {
+      "title": "Gurumin: A Monstrous Adventure",
+      "system": "psp",
+      "bucket": "psp/Gurumin - A Monstrous Adventure (USA).chd"
+    },
+    {
+      "title": "Asterix & Obelix XXL 2",
+      "system": "psp",
+      "bucket": "psp/Asterix & Obelix XXL 2 (Europe) (En,Fr,De,Es,It,Nl).chd"
+    },
+    {
+      "title": "Toy Story 3",
+      "system": "psp",
+      "bucket": "psp/Disney-Pixar Toy Story 3 (USA) (En,Fr,Es).chd"
+    },
+    {
+      "title": "Super Mario Sunshine",
+      "system": "gc",
+      "bucket": "gc/Super Mario Sunshine (USA).rvz"
+    },
+    {
+      "title": "Sonic Adventure DX: Director's Cut",
+      "system": "gc",
+      "bucket": "gc/Sonic Adventure DX - Director's Cut (USA) (En,Ja,Fr,De,Es).rvz"
+    },
+    {
+      "title": "Sonic Adventure 2: Battle",
+      "system": "gc",
+      "bucket": "gc/Sonic Adventure 2 - Battle (USA) (En,Ja,Fr,De,Es).rvz"
+    },
+    {
+      "title": "Sonic Heroes",
+      "system": "gc",
+      "bucket": "gc/Sonic Heroes (USA) (En,Ja,Fr,De,Es,It).rvz"
+    },
+    {
+      "title": "Shadow the Hedgehog",
+      "system": "gc",
+      "bucket": "gc/Shadow the Hedgehog (USA) (En,Ja,Fr,De,Es,It).rvz"
+    },
+    {
+      "title": "Billy Hatcher and the Giant Egg",
+      "system": "gc",
+      "bucket": "gc/Billy Hatcher and the Giant Egg (USA).rvz"
+    },
+    {
+      "title": "Wario World",
+      "system": "gc",
+      "bucket": "gc/Wario World (USA).rvz"
+    },
+    {
+      "title": "Chibi-Robo! Plug into Adventure!",
+      "system": "gc",
+      "bucket": "gc/Chibi-Robo! Plug into Adventure! (USA).rvz"
+    },
+    {
+      "title": "Pac-Man World 2",
+      "system": "gc",
+      "bucket": "gc/Pac-Man World 2 (USA).rvz"
+    },
+    {
+      "title": "Pac-Man World 3",
+      "system": "gc",
+      "bucket": "gc/Pac-Man World 3 (USA).rvz"
+    },
+    {
+      "title": "Rayman 3: Hoodlum Havoc",
+      "system": "gc",
+      "bucket": "gc/Rayman 3 - Hoodlum Havoc (USA) (En,Fr,De,Es,It).rvz"
+    },
+    {
+      "title": "Crash Bandicoot: The Wrath of Cortex",
+      "system": "gc",
+      "bucket": "gc/Crash Bandicoot - The Wrath of Cortex (USA).rvz"
+    },
+    {
+      "title": "Spyro: Enter the Dragonfly",
+      "system": "gc",
+      "bucket": "gc/Spyro - Enter the Dragonfly (USA).rvz"
+    },
+    {
+      "title": "Spyro: A Hero's Tail",
+      "system": "gc",
+      "bucket": "gc/Spyro - A Hero's Tail (USA).rvz"
+    },
+    {
+      "title": "The Legend of Spyro: A New Beginning",
+      "system": "gc",
+      "bucket": "gc/Legend of Spyro, The - A New Beginning (USA).rvz"
+    },
+    {
+      "title": "Ty the Tasmanian Tiger",
+      "system": "gc",
+      "bucket": "gc/Ty the Tasmanian Tiger (USA).rvz"
+    },
+    {
+      "title": "Ty the Tasmanian Tiger 2: Bush Rescue",
+      "system": "gc",
+      "bucket": "gc/Ty the Tasmanian Tiger 2 - Bush Rescue (USA).rvz"
+    },
+    {
+      "title": "Ty the Tasmanian Tiger 3: Night of the Quinkan",
+      "system": "gc",
+      "bucket": "gc/TY the Tasmanian Tiger - Night of the Quinkan (USA).rvz"
+    },
+    {
+      "title": "Tak and the Power of Juju",
+      "system": "gc",
+      "bucket": "gc/Tak and the Power of Juju (USA).rvz"
+    },
+    {
+      "title": "Tak 2: The Staff of Dreams",
+      "system": "gc",
+      "bucket": "gc/Nickelodeon Tak 2 - The Staff of Dreams (USA).rvz"
+    },
+    {
+      "title": "Tak: The Great Juju Challenge",
+      "system": "gc",
+      "bucket": "gc/Nickelodeon Tak - The Great Juju Challenge (USA).rvz"
+    },
+    {
+      "title": "Vexx",
+      "system": "gc",
+      "bucket": "gc/Vexx (USA).rvz"
+    },
+    {
+      "title": "I-Ninja",
+      "system": "gc",
+      "bucket": "gc/I-Ninja (USA).rvz"
+    },
+    {
+      "title": "Scaler",
+      "system": "gc",
+      "bucket": "gc/Scaler (USA) (En,Fr).rvz"
+    },
+    {
+      "title": "Dr. Muto",
+      "system": "gc",
+      "bucket": "gc/Dr. Muto (USA).rvz"
+    },
+    {
+      "title": "Zapper: One Wicked Cricket!",
+      "system": "gc",
+      "bucket": "gc/Zapper (USA).rvz"
+    },
+    {
+      "title": "Kao the Kangaroo: Round 2",
+      "system": "gc",
+      "bucket": "gc/Kao the Kangaroo - Round 2 (USA).rvz"
+    },
+    {
+      "title": "Pitfall: The Lost Expedition",
+      "system": "gc",
+      "bucket": "gc/Pitfall - The Lost Expedition (USA).rvz"
+    },
+    {
+      "title": "SpongeBob SquarePants: Battle for Bikini Bottom",
+      "system": "gc",
+      "bucket": "gc/Nickelodeon SpongeBob SquarePants in - Battle for Bikini Bottom (USA).rvz"
+    },
+    {
+      "title": "The SpongeBob SquarePants Movie",
+      "system": "gc",
+      "bucket": "gc/Nickelodeon SpongeBob SquarePants - The Movie (USA) (Rev 1).rvz"
+    },
+    {
+      "title": "Scooby-Doo! Night of 100 Frights",
+      "system": "gc",
+      "bucket": "gc/Scooby-Doo! Night of 100 Frights (USA) (Rev 1).rvz"
+    },
+    {
+      "title": "Taz: Wanted",
+      "system": "gc",
+      "bucket": "gc/Taz - Wanted (USA) (En,Fr,De,Es,It).rvz"
+    },
+    {
+      "title": "Donald Duck: Goin' Quackers",
+      "system": "gc",
+      "bucket": "gc/Disney's Donald Duck - Goin' Quackers (USA) (En,Fr).rvz"
+    },
+    {
+      "title": "Animaniacs: The Great Edgar Hunt",
+      "system": "gc",
+      "bucket": "gc/Animaniacs - The Great Edgar Hunt (USA).rvz"
+    },
+    {
+      "title": "Asterix & Obelix XXL",
+      "system": "gc",
+      "bucket": "gc/Asterix & Obelix XXL (Europe) (En,Fr,De,Es,It).rvz"
+    },
+    {
+      "title": "Bionicle",
+      "system": "gc",
+      "bucket": "gc/Bionicle (USA).rvz"
+    },
+    {
+      "title": "Carmen Sandiego: The Secret of the Stolen Drums",
+      "system": "gc",
+      "bucket": "gc/Carmen Sandiego - The Secret of the Stolen Drums (USA) (En,Fr).rvz"
+    },
+    {
+      "title": "Codename: Kids Next Door - Operation: V.I.D.E.O.G.A.M.E.",
+      "system": "gc",
+      "bucket": "gc/Codename - Kids Next Door - Operation - V.I.D.E.O.G.A.M.E. (USA).rvz"
+    },
+    {
+      "title": "Curious George",
+      "system": "gc",
+      "bucket": "gc/Curious George (USA).rvz"
+    },
+    {
+      "title": "Chicken Little",
+      "system": "gc",
+      "bucket": "gc/Disney's Chicken Little (USA).rvz"
+    },
+    {
+      "title": "PK: Out of the Shadows",
+      "system": "gc",
+      "bucket": "gc/Disney's PK - Out of the Shadows (USA) (En,Fr,De,It).rvz"
+    },
+    {
+      "title": "Tarzan: Untamed",
+      "system": "gc",
+      "bucket": "gc/Disney's Tarzan - Untamed (USA) (En,Fr).rvz"
+    },
+    {
+      "title": "Ed, Edd n Eddy: The Mis-Edventures",
+      "system": "gc",
+      "bucket": "gc/Ed, Edd n Eddy - The Mis-Edventures (USA).rvz"
+    },
+    {
+      "title": "The Fairly OddParents: Breakin' da Rules",
+      "system": "gc",
+      "bucket": "gc/Fairly OddParents, The - Breakin' da Rules (USA).rvz"
+    },
+    {
+      "title": "The Fairly OddParents: Shadow Showdown",
+      "system": "gc",
+      "bucket": "gc/Fairly OddParents, The - Shadow Showdown (USA).rvz"
+    },
+    {
+      "title": "The Hobbit: The Prelude to the Lord of the Rings",
+      "system": "gc",
+      "bucket": "gc/Hobbit, The - The Prelude to the Lord of the Rings (USA).rvz"
+    },
+    {
+      "title": "Ice Age 2: The Meltdown",
+      "system": "gc",
+      "bucket": "gc/Ice Age 2 - The Meltdown (USA).rvz"
+    },
+    {
+      "title": "Lemony Snicket's A Series of Unfortunate Events",
+      "system": "gc",
+      "bucket": "gc/Lemony Snicket's A Series of Unfortunate Events (USA).rvz"
+    },
+    {
+      "title": "Looney Tunes: Back in Action",
+      "system": "gc",
+      "bucket": "gc/Looney Tunes - Back in Action (USA) (Rev 1).rvz"
+    },
+    {
+      "title": "Robots",
+      "system": "gc",
+      "bucket": "gc/Robots (USA).rvz"
+    },
+    {
+      "title": "Scooby-Doo! Unmasked",
+      "system": "gc",
+      "bucket": "gc/Scooby-Doo! Unmasked (USA) (En,Fr).rvz"
+    },
+    {
+      "title": "Super Monkey Ball Adventure",
+      "system": "gc",
+      "bucket": "gc/Super Monkey Ball Adventure (USA).rvz"
+    },
+    {
+      "title": "Wallace & Gromit in Project Zoo",
+      "system": "gc",
+      "bucket": "gc/Wallace & Gromit in Project Zoo (USA).rvz"
+    },
+    {
+      "title": "Jimmy Neutron Boy Genius: Attack of the Twonkies",
+      "system": "gc",
+      "bucket": "gc/Nickelodeon Jimmy Neutron - Boy Genius - Attack of the Twonkies (USA).rvz"
+    },
+    {
+      "title": "SpongeBob SquarePants: Creature from the Krusty Krab",
+      "system": "gc",
+      "bucket": "gc/Nickelodeon SpongeBob SquarePants - Creature from the Krusty Krab (USA).rvz"
+    },
+    {
+      "title": "SpongeBob SquarePants: Revenge of the Flying Dutchman",
+      "system": "gc",
+      "bucket": "gc/Nickelodeon SpongeBob SquarePants - Revenge of the Flying Dutchman (USA).rvz"
+    },
+    {
+      "title": "Sphinx and the Cursed Mummy",
+      "system": "gc",
+      "bucket": "gc/Sphinx and the Cursed Mummy (USA).rvz"
+    },
+    {
       "title": "Super Mario Galaxy",
       "system": "wii",
       "bucket": "wii/Super Mario Galaxy (USA) (En,Fr,Es).rvz"
@@ -56,6 +891,36 @@
       "title": "Super Mario Galaxy 2",
       "system": "wii",
       "bucket": "wii/Super Mario Galaxy 2 (USA) (En,Fr,Es).rvz"
+    },
+    {
+      "title": "Sonic and the Secret Rings",
+      "system": "wii",
+      "bucket": "wii/Sonic and the Secret Rings (USA) (En,Ja,Fr,De,Es,It).rvz"
+    },
+    {
+      "title": "Sonic Unleashed",
+      "system": "wii",
+      "bucket": "wii/Sonic Unleashed (USA) (En,Ja,Fr,De,Es,It).rvz"
+    },
+    {
+      "title": "Sonic and the Black Knight",
+      "system": "wii",
+      "bucket": "wii/Sonic and the Black Knight (USA) (En,Ja,Fr,De,Es,It).rvz"
+    },
+    {
+      "title": "Sonic Colors",
+      "system": "wii",
+      "bucket": "wii/Sonic Colors (USA) (En,Ja,Fr,De,Es,It).rvz"
+    },
+    {
+      "title": "Epic Mickey",
+      "system": "wii",
+      "bucket": "wii/Disney Epic Mickey (USA) (En,Fr,Es).rvz"
+    },
+    {
+      "title": "Epic Mickey 2: The Power of Two",
+      "system": "wii",
+      "bucket": "wii/Disney Epic Mickey 2 - The Power of Two (USA) (En,Fr,Es,Pt).rvz"
     },
     {
       "title": "Conker: Live & Reloaded",
@@ -86,6 +951,71 @@
       "title": "Captain Toad: Treasure Tracker",
       "system": "wiiu",
       "bucket": "wiiu/Captain Toad Treasure Tracker (US) (v16).wua"
+    },
+    {
+      "title": "Super Mario 64 DS",
+      "system": "nds",
+      "bucket": "nds/Super Mario 64 DS (USA, Australia) (Rev 1).zip"
+    },
+    {
+      "title": "Rayman DS",
+      "system": "nds",
+      "bucket": "nds/Rayman DS (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Crash of the Titans",
+      "system": "nds",
+      "bucket": "nds/Crash of the Titans (USA).zip"
+    },
+    {
+      "title": "Pac'n Roll",
+      "system": "nds",
+      "bucket": "nds/Pac'n Roll (USA).zip"
+    },
+    {
+      "title": "Pac-Man World 3",
+      "system": "nds",
+      "bucket": "nds/Pac-Man World 3 (USA).zip"
+    },
+    {
+      "title": "Insecticide",
+      "system": "nds",
+      "bucket": "nds/Insecticide (USA).zip"
+    },
+    {
+      "title": "Super Mario 3D Land",
+      "system": "3ds",
+      "bucket": "3ds/Super Mario 3D Land (USA) (En,Fr,Es) (Rev 1).zip"
+    },
+    {
+      "title": "Rayman 3D",
+      "system": "3ds",
+      "bucket": "3ds/Rayman 3D (USA) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Sonic Lost World",
+      "system": "3ds",
+      "bucket": "3ds/Sonic Lost World (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Captain Toad: Treasure Tracker",
+      "system": "3ds",
+      "bucket": "3ds/Captain Toad - Treasure Tracker (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Tearaway",
+      "system": "psvita",
+      "bucket": "psvita/Tearaway™ [PCSA00144] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Epic Mickey 2: The Power of Two",
+      "system": "psvita",
+      "bucket": "psvita/Disney Epic Mickey 2 [PCSA00110] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Alice: Madness Returns",
+      "system": "xbox360",
+      "bucket": "xbox360/Alice - Madness Returns (USA, Europe) (En,Fr,De,Es,It).zar"
     }
   ]
 }

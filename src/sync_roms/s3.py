@@ -1,6 +1,7 @@
 """Storage plumbing: the S3 bucket, or a folder (e.g. a network share) in its place."""
 import contextlib
 import os
+import shutil
 import stat
 from concurrent.futures import ThreadPoolExecutor
 
@@ -196,6 +197,12 @@ def put_text(key, text):
     out = s3_client(runtime.WRITE_PROFILE).put_object(Bucket=runtime.BUCKET, Key=key, Body=body)
     from . import inventory
     inventory.wrote(key, len(body), out.get("ETag"))
+
+
+def put_file(key, path):
+    if runtime.ROOT:
+        return write_file(key, lambda tmp: shutil.copyfile(path, tmp))
+    s3_client(runtime.WRITE_PROFILE).upload_file(path, runtime.BUCKET, key)
 
 
 def list_with_etags(prefix):

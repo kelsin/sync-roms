@@ -1,0 +1,3792 @@
+{
+  "name": "Disney & Licensed Classics",
+  "description": "Disney, cartoon, comic-book and movie tie-in games worth playing.",
+  "games": [
+    {
+      "title": "DuckTales",
+      "category": "Disney",
+      "system": "nes",
+      "bucket": "nes/DuckTales (USA).zip"
+    },
+    {
+      "title": "DuckTales",
+      "category": "Disney",
+      "system": "gb",
+      "bucket": "gb/DuckTales (USA).zip"
+    },
+    {
+      "title": "DuckTales 2",
+      "category": "Disney",
+      "system": "nes",
+      "bucket": "nes/DuckTales 2 (USA).zip"
+    },
+    {
+      "title": "DuckTales 2",
+      "category": "Disney",
+      "system": "gb",
+      "bucket": "gb/DuckTales 2 (USA).zip"
+    },
+    {
+      "title": "Chip 'n Dale - Rescue Rangers",
+      "category": "Disney",
+      "system": "nes",
+      "bucket": "nes/Chip 'n Dale - Rescue Rangers (USA).zip"
+    },
+    {
+      "title": "Chip 'n Dale - Rescue Rangers 2",
+      "category": "Disney",
+      "system": "nes",
+      "bucket": "nes/Chip 'n Dale - Rescue Rangers 2 (USA).zip"
+    },
+    {
+      "title": "Darkwing Duck",
+      "category": "Disney",
+      "system": "nes",
+      "bucket": "nes/Darkwing Duck (USA).zip"
+    },
+    {
+      "title": "Darkwing Duck",
+      "category": "Disney",
+      "system": "gb",
+      "bucket": "gb/Darkwing Duck (USA).zip"
+    },
+    {
+      "title": "Darkwing Duck",
+      "category": "Disney",
+      "system": "tg16",
+      "bucket": "tg16/Darkwing Duck (USA).zip"
+    },
+    {
+      "title": "TaleSpin",
+      "category": "Disney",
+      "system": "genesis",
+      "bucket": "genesis/TaleSpin (USA, Europe).zip"
+    },
+    {
+      "title": "TaleSpin",
+      "category": "Disney",
+      "system": "gamegear",
+      "bucket": "gamegear/TaleSpin (USA, Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "TaleSpin",
+      "category": "Disney",
+      "system": "tg16",
+      "bucket": "tg16/TaleSpin (USA).zip"
+    },
+    {
+      "title": "Little Mermaid, The",
+      "category": "Disney",
+      "system": "nes",
+      "bucket": "nes/Little Mermaid, The (USA).zip"
+    },
+    {
+      "title": "Little Mermaid, The",
+      "category": "Disney",
+      "system": "gb",
+      "bucket": "gb/Little Mermaid, The (USA).zip"
+    },
+    {
+      "title": "Mickey Mousecapade",
+      "category": "Disney",
+      "system": "nes",
+      "bucket": "nes/Mickey Mousecapade (USA).zip"
+    },
+    {
+      "title": "Mickey's Dangerous Chase",
+      "category": "Disney",
+      "system": "gb",
+      "bucket": "gb/Mickey's Dangerous Chase (USA).zip"
+    },
+    {
+      "title": "Maui Mallard in Cold Shadow",
+      "category": "Disney",
+      "system": "gb",
+      "bucket": "gb/Maui Mallard in Cold Shadow (USA).zip"
+    },
+    {
+      "title": "Maui Mallard in Cold Shadow",
+      "category": "Disney",
+      "system": "snes",
+      "bucket": "snes/Maui Mallard in Cold Shadow (USA).zip"
+    },
+    {
+      "title": "Donald in Maui Mallard",
+      "category": "Disney",
+      "system": "genesis",
+      "bucket": "genesis/Donald in Maui Mallard (Europe) (Rev A).zip"
+    },
+    {
+      "title": "Magical Quest Starring Mickey Mouse, The",
+      "category": "Disney",
+      "system": "snes",
+      "bucket": "snes/Magical Quest Starring Mickey Mouse, The (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Great Circus Mystery Starring Mickey & Minnie, The",
+      "category": "Disney",
+      "system": "snes",
+      "bucket": "snes/Great Circus Mystery Starring Mickey & Minnie, The (USA).zip"
+    },
+    {
+      "title": "Great Circus Mystery Starring Mickey & Minnie, The",
+      "category": "Disney",
+      "system": "genesis",
+      "bucket": "genesis/Great Circus Mystery Starring Mickey & Minnie, The (USA).zip"
+    },
+    {
+      "title": "Mickey to Donald - Magical Adventure 3",
+      "category": "Disney",
+      "system": "snes",
+      "bucket": "snes/Mickey to Donald - Magical Adventure 3 (Japan).zip"
+    },
+    {
+      "title": "Magical Quest 2 Starring Mickey & Minnie",
+      "category": "Disney",
+      "system": "gba",
+      "bucket": "gba/Magical Quest 2 Starring Mickey & Minnie (USA) (En,Fr,De).zip"
+    },
+    {
+      "title": "Magical Quest 3 Starring Mickey & Donald",
+      "category": "Disney",
+      "system": "gba",
+      "bucket": "gba/Magical Quest 3 Starring Mickey & Donald (USA) (En,Fr,De).zip"
+    },
+    {
+      "title": "Magical Quest Starring Mickey & Minnie",
+      "category": "Disney",
+      "system": "gba",
+      "bucket": "gba/Magical Quest Starring Mickey & Minnie (USA).zip"
+    },
+    {
+      "title": "Mickey Mania - The Timeless Adventures of Mickey Mouse",
+      "category": "Disney",
+      "system": "snes",
+      "bucket": "snes/Mickey Mania - The Timeless Adventures of Mickey Mouse (USA).zip"
+    },
+    {
+      "title": "Mickey Mania - The Timeless Adventures of Mickey Mouse",
+      "category": "Disney",
+      "system": "genesis",
+      "bucket": "genesis/Mickey Mania - The Timeless Adventures of Mickey Mouse (USA).zip"
+    },
+    {
+      "title": "Mickey Mania - The Timeless Adventures of Mickey Mouse",
+      "category": "Disney",
+      "system": "segacd",
+      "bucket": "segacd/Mickey Mania - The Timeless Adventures of Mickey Mouse (USA).chd"
+    },
+    {
+      "title": "Bonkers",
+      "category": "Disney",
+      "system": "snes",
+      "bucket": "snes/Bonkers (USA).zip"
+    },
+    {
+      "title": "Bonkers",
+      "category": "Disney",
+      "system": "genesis",
+      "bucket": "genesis/Bonkers (USA, Europe).zip"
+    },
+    {
+      "title": "Gargoyles",
+      "category": "Disney",
+      "system": "genesis",
+      "bucket": "genesis/Gargoyles (USA).zip"
+    },
+    {
+      "title": "Castle of Illusion Starring Mickey Mouse",
+      "category": "Disney",
+      "system": "genesis",
+      "bucket": "genesis/Castle of Illusion Starring Mickey Mouse (USA, Europe).zip"
+    },
+    {
+      "title": "Castle of Illusion Starring Mickey Mouse",
+      "category": "Disney",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Castle of Illusion Starring Mickey Mouse (USA, Europe, Brazil) (En) (Rev 1).zip"
+    },
+    {
+      "title": "Castle of Illusion Starring Mickey Mouse",
+      "category": "Disney",
+      "system": "gamegear",
+      "bucket": "gamegear/Castle of Illusion Starring Mickey Mouse (USA, Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Land of Illusion Starring Mickey Mouse",
+      "category": "Disney",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Land of Illusion Starring Mickey Mouse (Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Land of Illusion Starring Mickey Mouse",
+      "category": "Disney",
+      "system": "gamegear",
+      "bucket": "gamegear/Land of Illusion Starring Mickey Mouse (USA, Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Legend of Illusion Starring Mickey Mouse",
+      "category": "Disney",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Legend of Illusion Starring Mickey Mouse (Brazil) (En).zip"
+    },
+    {
+      "title": "Legend of Illusion Starring Mickey Mouse",
+      "category": "Disney",
+      "system": "gamegear",
+      "bucket": "gamegear/Legend of Illusion Starring Mickey Mouse (USA, Europe).zip"
+    },
+    {
+      "title": "World of Illusion Starring Mickey Mouse and Donald Duck",
+      "category": "Disney",
+      "system": "genesis",
+      "bucket": "genesis/World of Illusion Starring Mickey Mouse and Donald Duck (USA, Korea) (En).zip"
+    },
+    {
+      "title": "QuackShot Starring Donald Duck",
+      "category": "Disney",
+      "system": "genesis",
+      "bucket": "genesis/QuackShot Starring Donald Duck (World) (Rev A).zip"
+    },
+    {
+      "title": "Fantasia",
+      "category": "Disney",
+      "system": "genesis",
+      "bucket": "genesis/Fantasia (USA, Europe).zip"
+    },
+    {
+      "title": "Lucky Dime Caper Starring Donald Duck, The",
+      "category": "Disney",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Lucky Dime Caper Starring Donald Duck, The (Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Lucky Dime Caper Starring Donald Duck, The",
+      "category": "Disney",
+      "system": "gamegear",
+      "bucket": "gamegear/Lucky Dime Caper Starring Donald Duck, The (USA, Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Deep Duck Trouble Starring Donald Duck",
+      "category": "Disney",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Deep Duck Trouble Starring Donald Duck (Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Deep Duck Trouble Starring Donald Duck",
+      "category": "Disney",
+      "system": "gamegear",
+      "bucket": "gamegear/Deep Duck Trouble Starring Donald Duck (USA, Europe).zip"
+    },
+    {
+      "title": "Donald no Magical World",
+      "category": "Disney",
+      "system": "gamegear",
+      "bucket": "gamegear/Donald no Magical World (Japan) (En,Ja).zip"
+    },
+    {
+      "title": "Sega Ages - I Love Mickey Mouse - Fushigi no Oshiro Daibouken & I Love Donald Duck - Georgia Ou no Hihou",
+      "category": "Disney",
+      "system": "saturn",
+      "bucket": "saturn/Sega Ages - I Love Mickey Mouse - Fushigi no Oshiro Daibouken & I Love Donald Duck - Georgia Ou no Hihou (Japan).chd"
+    },
+    {
+      "title": "Donald Duck Advance",
+      "category": "Disney",
+      "system": "gba",
+      "bucket": "gba/Donald Duck Advance (USA).zip"
+    },
+    {
+      "title": "Lion King 1 1-2, The",
+      "category": "Disney",
+      "system": "gba",
+      "bucket": "gba/Lion King 1 1-2, The (USA).zip"
+    },
+    {
+      "title": "Lilo & Stitch",
+      "category": "Disney",
+      "system": "gba",
+      "bucket": "gba/Lilo & Stitch (USA).zip"
+    },
+    {
+      "title": "Tim Burton's The Nightmare Before Christmas - The Pumpkin King",
+      "category": "Disney",
+      "system": "gba",
+      "bucket": "gba/Tim Burton's The Nightmare Before Christmas - The Pumpkin King (USA, Europe) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Tarzan",
+      "category": "Disney",
+      "system": "gbc",
+      "bucket": "gbc/Tarzan (USA, Europe).zip"
+    },
+    {
+      "title": "Tarzan",
+      "category": "Disney",
+      "system": "n64",
+      "bucket": "n64/Tarzan (USA).zip"
+    },
+    {
+      "title": "Alice in Wonderland",
+      "category": "Disney",
+      "system": "gbc",
+      "bucket": "gbc/Alice in Wonderland (USA, Australia).zip"
+    },
+    {
+      "title": "Disney's Hercules Action Game",
+      "category": "Disney",
+      "system": "psx",
+      "bucket": "psx/Disney's Hercules Action Game (USA).chd"
+    },
+    {
+      "title": "Disney's Tarzan",
+      "category": "Disney",
+      "system": "psx",
+      "bucket": "psx/Disney's Tarzan (USA).chd"
+    },
+    {
+      "title": "Disney's Donald Duck - Goin' Quackers",
+      "category": "Disney",
+      "system": "psx",
+      "bucket": "psx/Disney's Donald Duck - Goin' Quackers (USA).chd"
+    },
+    {
+      "title": "Disney's Donald Duck - Goin' Quackers",
+      "category": "Disney",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Disney's Donald Duck - Goin' Quackers (USA).chd"
+    },
+    {
+      "title": "Disney's Donald Duck - Goin' Quackers",
+      "category": "Disney",
+      "system": "gc",
+      "bucket": "gc/Disney's Donald Duck - Goin' Quackers (USA) (En,Fr).rvz"
+    },
+    {
+      "title": "Disney's The Lion King - Simba's Mighty Adventure",
+      "category": "Disney",
+      "system": "psx",
+      "bucket": "psx/Disney's The Lion King - Simba's Mighty Adventure (USA).chd"
+    },
+    {
+      "title": "Disney-Pixar Toy Story 2 - Buzz Lightyear to the Rescue!",
+      "category": "Disney",
+      "system": "psx",
+      "bucket": "psx/Disney-Pixar Toy Story 2 - Buzz Lightyear to the Rescue! (USA) (Rev 1).chd"
+    },
+    {
+      "title": "Disney-Pixar Toy Story 2 - Buzz Lightyear to the Rescue!",
+      "category": "Disney",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Disney-Pixar Toy Story 2 - Buzz Lightyear to the Rescue! (USA).chd"
+    },
+    {
+      "title": "Toy Story 2 - Buzz Lightyear to the Rescue!",
+      "category": "Disney",
+      "system": "n64",
+      "bucket": "n64/Toy Story 2 - Buzz Lightyear to the Rescue! (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Disney's The Emperor's New Groove",
+      "category": "Disney",
+      "system": "psx",
+      "bucket": "psx/Disney's The Emperor's New Groove (USA).chd"
+    },
+    {
+      "title": "Disney's Aladdin in Nasira's Revenge",
+      "category": "Disney",
+      "system": "psx",
+      "bucket": "psx/Disney's Aladdin in Nasira's Revenge (USA).chd"
+    },
+    {
+      "title": "Disney's Lilo & Stitch",
+      "category": "Disney",
+      "system": "psx",
+      "bucket": "psx/Disney's Lilo & Stitch (USA).chd"
+    },
+    {
+      "title": "Disney Presents Tigger's Honey Hunt",
+      "category": "Disney",
+      "system": "psx",
+      "bucket": "psx/Disney Presents Tigger's Honey Hunt (USA).chd"
+    },
+    {
+      "title": "Tigger's Honey Hunt",
+      "category": "Disney",
+      "system": "n64",
+      "bucket": "n64/Tigger's Honey Hunt (USA).zip"
+    },
+    {
+      "title": "Disney's Tarzan - Untamed",
+      "category": "Disney",
+      "system": "gc",
+      "bucket": "gc/Disney's Tarzan - Untamed (USA) (En,Fr).rvz"
+    },
+    {
+      "title": "Disney Epic Mickey",
+      "category": "Disney",
+      "system": "wii",
+      "bucket": "wii/Disney Epic Mickey (USA) (En,Fr,Es).rvz"
+    },
+    {
+      "title": "Disney Epic Mickey 2 - The Power of Two",
+      "category": "Disney",
+      "system": "wii",
+      "bucket": "wii/Disney Epic Mickey 2 - The Power of Two (USA) (En,Fr,Es,Pt).rvz"
+    },
+    {
+      "title": "Disney Epic Mickey 2",
+      "category": "Disney",
+      "system": "psvita",
+      "bucket": "psvita/Disney Epic Mickey 2 [PCSA00110] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Disney Epic Mickey - Power of Illusion",
+      "category": "Disney",
+      "system": "3ds",
+      "bucket": "3ds/Disney Epic Mickey - Power of Illusion (USA) (En,Fr,Es,Pt).zip"
+    },
+    {
+      "title": "Jungle Book, The",
+      "category": "Disney",
+      "system": "snes",
+      "bucket": "snes/Jungle Book, The (USA).zip"
+    },
+    {
+      "title": "Jungle Book, The",
+      "category": "Disney",
+      "system": "genesis",
+      "bucket": "genesis/Jungle Book, The (USA).zip"
+    },
+    {
+      "title": "Jungle Book, The",
+      "category": "Disney",
+      "system": "nes",
+      "bucket": "nes/Jungle Book, The (USA).zip"
+    },
+    {
+      "title": "Aladdin",
+      "category": "Disney",
+      "system": "snes",
+      "bucket": "snes/Aladdin (USA).zip"
+    },
+    {
+      "title": "Aladdin",
+      "category": "Disney",
+      "system": "genesis",
+      "bucket": "genesis/Aladdin (USA).zip"
+    },
+    {
+      "title": "Aladdin",
+      "category": "Disney",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Aladdin (Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Aladdin",
+      "category": "Disney",
+      "system": "gamegear",
+      "bucket": "gamegear/Aladdin (USA, Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Aladdin",
+      "category": "Disney",
+      "system": "gba",
+      "bucket": "gba/Aladdin (USA) (En,Fr,De,Es).zip"
+    },
+    {
+      "title": "Lion King, The",
+      "category": "Disney",
+      "system": "snes",
+      "bucket": "snes/Lion King, The (USA).zip"
+    },
+    {
+      "title": "Lion King, The",
+      "category": "Disney",
+      "system": "genesis",
+      "bucket": "genesis/Lion King, The (World).zip"
+    },
+    {
+      "title": "Lion King, The",
+      "category": "Disney",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Lion King, The (Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Lion King, The",
+      "category": "Disney",
+      "system": "gamegear",
+      "bucket": "gamegear/Lion King, The (USA).zip"
+    },
+    {
+      "title": "Toy Story",
+      "category": "Disney",
+      "system": "snes",
+      "bucket": "snes/Toy Story (USA).zip"
+    },
+    {
+      "title": "Toy Story",
+      "category": "Disney",
+      "system": "genesis",
+      "bucket": "genesis/Toy Story (USA).zip"
+    },
+    {
+      "title": "Kim Possible 2 - Drakken's Demise",
+      "category": "Disney",
+      "system": "gba",
+      "bucket": "gba/Kim Possible 2 - Drakken's Demise (USA) (En,Fr).zip"
+    },
+    {
+      "title": "Kim Possible 3 - Team Possible",
+      "category": "Disney",
+      "system": "gba",
+      "bucket": "gba/Kim Possible 3 - Team Possible (USA) (En,Fr).zip"
+    },
+    {
+      "title": "TaleSpin",
+      "category": "Disney",
+      "system": "nes",
+      "bucket": "nes/TaleSpin (USA).zip"
+    },
+    {
+      "title": "TaleSpin",
+      "category": "Disney",
+      "system": "gb",
+      "bucket": "gb/TaleSpin (USA).zip"
+    },
+    {
+      "title": "Goof Troop",
+      "category": "Disney",
+      "system": "snes",
+      "bucket": "snes/Goof Troop (USA).zip"
+    },
+    {
+      "title": "Adventures in the Magic Kingdom",
+      "category": "Disney",
+      "system": "nes",
+      "bucket": "nes/Adventures in the Magic Kingdom (USA).zip"
+    },
+    {
+      "title": "Who Framed Roger Rabbit",
+      "category": "Disney",
+      "system": "nes",
+      "bucket": "nes/Who Framed Roger Rabbit (USA).zip"
+    },
+    {
+      "title": "Who Framed Roger Rabbit",
+      "category": "Disney",
+      "system": "gb",
+      "bucket": "gb/Who Framed Roger Rabbit (USA).zip"
+    },
+    {
+      "title": "Dick Tracy",
+      "category": "Disney",
+      "system": "genesis",
+      "bucket": "genesis/Dick Tracy (World).zip"
+    },
+    {
+      "title": "Rocketeer, The",
+      "category": "Disney",
+      "system": "nes",
+      "bucket": "nes/Rocketeer, The (USA).zip"
+    },
+    {
+      "title": "Mickey's Speedway USA",
+      "category": "Disney",
+      "system": "n64",
+      "bucket": "n64/Mickey's Speedway USA (USA).zip"
+    },
+    {
+      "title": "Mickey's Speedway USA",
+      "category": "Disney",
+      "system": "gbc",
+      "bucket": "gbc/Mickey's Speedway USA (USA, Europe) (En,Fr,De,Es).zip"
+    },
+    {
+      "title": "Mickey's Racing Adventure",
+      "category": "Disney",
+      "system": "gbc",
+      "bucket": "gbc/Mickey's Racing Adventure (USA, Europe) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Disney-Pixar Toy Story Racer",
+      "category": "Disney",
+      "system": "psx",
+      "bucket": "psx/Disney-Pixar Toy Story Racer (USA).chd"
+    },
+    {
+      "title": "Toy Story Racer",
+      "category": "Disney",
+      "system": "gbc",
+      "bucket": "gbc/Toy Story Racer (USA, Europe).zip"
+    },
+    {
+      "title": "Walt Disney World Quest - Magical Racing Tour",
+      "category": "Disney",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Walt Disney World Quest - Magical Racing Tour (USA).chd"
+    },
+    {
+      "title": "Walt Disney World Quest - Magical Racing Tour",
+      "category": "Disney",
+      "system": "psx",
+      "bucket": "psx/Walt Disney World Quest - Magical Racing Tour (USA).chd"
+    },
+    {
+      "title": "Walt Disney World Quest - Magical Racing Tour",
+      "category": "Disney",
+      "system": "gbc",
+      "bucket": "gbc/Walt Disney World Quest - Magical Racing Tour (USA, Europe).zip"
+    },
+    {
+      "title": "Disney's Magical Mirror Starring Mickey Mouse",
+      "category": "Disney",
+      "system": "gc",
+      "bucket": "gc/Disney's Magical Mirror Starring Mickey Mouse (USA).rvz"
+    },
+    {
+      "title": "Tron 2.0 - Killer App",
+      "category": "Disney",
+      "system": "gba",
+      "bucket": "gba/Tron 2.0 - Killer App (USA).zip"
+    },
+    {
+      "title": "Tron",
+      "category": "Disney",
+      "system": "fbneo",
+      "bucket": "fbneo/tron.zip"
+    },
+    {
+      "title": "Disney-Pixar Toy Story 3",
+      "category": "Disney",
+      "system": "psp",
+      "bucket": "psp/Disney-Pixar Toy Story 3 (USA) (En,Fr,Es).chd"
+    },
+    {
+      "title": "Disney Magical World",
+      "category": "Disney",
+      "system": "3ds",
+      "bucket": "3ds/Disney Magical World (USA).zip"
+    },
+    {
+      "title": "Disney Magical World 2",
+      "category": "Disney",
+      "system": "3ds",
+      "bucket": "3ds/Disney Magical World 2 (USA).zip"
+    },
+    {
+      "title": "Tiny Toon Adventures",
+      "category": "Looney Tunes & Cartoons",
+      "system": "nes",
+      "bucket": "nes/Tiny Toon Adventures (USA).zip"
+    },
+    {
+      "title": "Tiny Toon Adventures 2 - Trouble in Wackyland",
+      "category": "Looney Tunes & Cartoons",
+      "system": "nes",
+      "bucket": "nes/Tiny Toon Adventures 2 - Trouble in Wackyland (USA).zip"
+    },
+    {
+      "title": "Tiny Toon Adventures - Babs' Big Break",
+      "category": "Looney Tunes & Cartoons",
+      "system": "gb",
+      "bucket": "gb/Tiny Toon Adventures - Babs' Big Break (USA, Europe).zip"
+    },
+    {
+      "title": "Tiny Toon Adventures 2 - Montana's Movie Madness",
+      "category": "Looney Tunes & Cartoons",
+      "system": "gb",
+      "bucket": "gb/Tiny Toon Adventures 2 - Montana's Movie Madness (USA, Europe).zip"
+    },
+    {
+      "title": "Tiny Toon Adventures - Buster Busts Loose!",
+      "category": "Looney Tunes & Cartoons",
+      "system": "snes",
+      "bucket": "snes/Tiny Toon Adventures - Buster Busts Loose! (USA).zip"
+    },
+    {
+      "title": "Tiny Toon Adventures - Wacky Sports Challenge",
+      "category": "Looney Tunes & Cartoons",
+      "system": "snes",
+      "bucket": "snes/Tiny Toon Adventures - Wacky Sports Challenge (USA).zip"
+    },
+    {
+      "title": "Tiny Toon Adventures - Buster's Hidden Treasure",
+      "category": "Looney Tunes & Cartoons",
+      "system": "genesis",
+      "bucket": "genesis/Tiny Toon Adventures - Buster's Hidden Treasure (USA).zip"
+    },
+    {
+      "title": "Tiny Toon Adventures - ACME All-Stars",
+      "category": "Looney Tunes & Cartoons",
+      "system": "genesis",
+      "bucket": "genesis/Tiny Toon Adventures - ACME All-Stars (USA, Korea) (En).zip"
+    },
+    {
+      "title": "Tiny Toon Adventures - Buster Saves the Day",
+      "category": "Looney Tunes & Cartoons",
+      "system": "gbc",
+      "bucket": "gbc/Tiny Toon Adventures - Buster Saves the Day (USA).zip"
+    },
+    {
+      "title": "Bugs Bunny Crazy Castle, The",
+      "category": "Looney Tunes & Cartoons",
+      "system": "nes",
+      "bucket": "nes/Bugs Bunny Crazy Castle, The (USA).zip"
+    },
+    {
+      "title": "Bugs Bunny Crazy Castle, The",
+      "category": "Looney Tunes & Cartoons",
+      "system": "gb",
+      "bucket": "gb/Bugs Bunny Crazy Castle, The (USA, Europe).zip"
+    },
+    {
+      "title": "Bugs Bunny Crazy Castle 2, The",
+      "category": "Looney Tunes & Cartoons",
+      "system": "gb",
+      "bucket": "gb/Bugs Bunny Crazy Castle 2, The (USA).zip"
+    },
+    {
+      "title": "Bugs Bunny - Crazy Castle 3",
+      "category": "Looney Tunes & Cartoons",
+      "system": "gbc",
+      "bucket": "gbc/Bugs Bunny - Crazy Castle 3 (USA, Europe) (GB Compatible).zip"
+    },
+    {
+      "title": "Bugs Bunny in - Crazy Castle 4",
+      "category": "Looney Tunes & Cartoons",
+      "system": "gbc",
+      "bucket": "gbc/Bugs Bunny in - Crazy Castle 4 (USA).zip"
+    },
+    {
+      "title": "Bugs Bunny Birthday Blowout, The",
+      "category": "Looney Tunes & Cartoons",
+      "system": "nes",
+      "bucket": "nes/Bugs Bunny Birthday Blowout, The (USA).zip"
+    },
+    {
+      "title": "Bugs Bunny - Rabbit Rampage",
+      "category": "Looney Tunes & Cartoons",
+      "system": "snes",
+      "bucket": "snes/Bugs Bunny - Rabbit Rampage (USA).zip"
+    },
+    {
+      "title": "Bugs Bunny in Double Trouble",
+      "category": "Looney Tunes & Cartoons",
+      "system": "genesis",
+      "bucket": "genesis/Bugs Bunny in Double Trouble (USA).zip"
+    },
+    {
+      "title": "Bugs Bunny in Double Trouble",
+      "category": "Looney Tunes & Cartoons",
+      "system": "gamegear",
+      "bucket": "gamegear/Bugs Bunny in Double Trouble (USA, Europe).zip"
+    },
+    {
+      "title": "Bugs Bunny - Lost in Time",
+      "category": "Looney Tunes & Cartoons",
+      "system": "psx",
+      "bucket": "psx/Bugs Bunny - Lost in Time (USA) (En,Fr,Es).chd"
+    },
+    {
+      "title": "Bugs Bunny & Taz - Time Busters",
+      "category": "Looney Tunes & Cartoons",
+      "system": "psx",
+      "bucket": "psx/Bugs Bunny & Taz - Time Busters (USA) (En,Fr,Es).chd"
+    },
+    {
+      "title": "Looney Tunes - Sheep Raider",
+      "category": "Looney Tunes & Cartoons",
+      "system": "psx",
+      "bucket": "psx/Looney Tunes - Sheep Raider (USA) (En,Fr,Es,Pt).chd"
+    },
+    {
+      "title": "Looney Tunes",
+      "category": "Looney Tunes & Cartoons",
+      "system": "gb",
+      "bucket": "gb/Looney Tunes (USA, Europe).zip"
+    },
+    {
+      "title": "Looney Tunes",
+      "category": "Looney Tunes & Cartoons",
+      "system": "gbc",
+      "bucket": "gbc/Looney Tunes (USA) (GB Compatible).zip"
+    },
+    {
+      "title": "Looney Tunes - Carrot Crazy",
+      "category": "Looney Tunes & Cartoons",
+      "system": "gbc",
+      "bucket": "gbc/Looney Tunes - Carrot Crazy (USA) (En,Fr,Es) (GB Compatible).zip"
+    },
+    {
+      "title": "Looney Tunes Collector - Alert!",
+      "category": "Looney Tunes & Cartoons",
+      "system": "gbc",
+      "bucket": "gbc/Looney Tunes Collector - Alert! (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Looney Tunes B-Ball",
+      "category": "Looney Tunes & Cartoons",
+      "system": "snes",
+      "bucket": "snes/Looney Tunes B-Ball (USA).zip"
+    },
+    {
+      "title": "Looney Tunes Racing",
+      "category": "Looney Tunes & Cartoons",
+      "system": "psx",
+      "bucket": "psx/Looney Tunes Racing (USA) (En,Fr,Es).chd"
+    },
+    {
+      "title": "Looney Tunes - Space Race",
+      "category": "Looney Tunes & Cartoons",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Looney Tunes - Space Race (USA) (En,Fr,Es).chd"
+    },
+    {
+      "title": "Road Runner's Death Valley Rally",
+      "category": "Looney Tunes & Cartoons",
+      "system": "snes",
+      "bucket": "snes/Road Runner's Death Valley Rally (USA).zip"
+    },
+    {
+      "title": "Desert Demolition Starring Road Runner and Wile E. Coyote",
+      "category": "Looney Tunes & Cartoons",
+      "system": "genesis",
+      "bucket": "genesis/Desert Demolition Starring Road Runner and Wile E. Coyote (USA, Europe).zip"
+    },
+    {
+      "title": "Desert Speedtrap Starring Road Runner and Wile E. Coyote",
+      "category": "Looney Tunes & Cartoons",
+      "system": "gamegear",
+      "bucket": "gamegear/Desert Speedtrap Starring Road Runner and Wile E. Coyote (USA, Brazil) (En).zip"
+    },
+    {
+      "title": "Desert Speedtrap Starring Road Runner and Wile E. Coyote",
+      "category": "Looney Tunes & Cartoons",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Desert Speedtrap Starring Road Runner and Wile E. Coyote (Europe, Brazil) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Daffy Duck - The Marvin Missions",
+      "category": "Looney Tunes & Cartoons",
+      "system": "snes",
+      "bucket": "snes/Daffy Duck - The Marvin Missions (USA).zip"
+    },
+    {
+      "title": "Daffy Duck",
+      "category": "Looney Tunes & Cartoons",
+      "system": "gb",
+      "bucket": "gb/Daffy Duck (USA, Europe) (SGB Enhanced).zip"
+    },
+    {
+      "title": "Daffy Duck in Hollywood",
+      "category": "Looney Tunes & Cartoons",
+      "system": "genesis",
+      "bucket": "genesis/Daffy Duck in Hollywood (Europe) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Daffy Duck in Hollywood",
+      "category": "Looney Tunes & Cartoons",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Daffy Duck in Hollywood (Europe, Brazil) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Daffy Duck in Hollywood",
+      "category": "Looney Tunes & Cartoons",
+      "system": "gamegear",
+      "bucket": "gamegear/Daffy Duck in Hollywood (Europe, Brazil) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Duck Dodgers Starring Daffy Duck",
+      "category": "Looney Tunes & Cartoons",
+      "system": "n64",
+      "bucket": "n64/Duck Dodgers Starring Daffy Duck (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Taz-Mania",
+      "category": "Looney Tunes & Cartoons",
+      "system": "genesis",
+      "bucket": "genesis/Taz-Mania (World).zip"
+    },
+    {
+      "title": "Taz-Mania",
+      "category": "Looney Tunes & Cartoons",
+      "system": "snes",
+      "bucket": "snes/Taz-Mania (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Taz-Mania",
+      "category": "Looney Tunes & Cartoons",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Taz-Mania (Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Taz-Mania",
+      "category": "Looney Tunes & Cartoons",
+      "system": "gamegear",
+      "bucket": "gamegear/Taz-Mania (USA, Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Taz in Escape from Mars",
+      "category": "Looney Tunes & Cartoons",
+      "system": "genesis",
+      "bucket": "genesis/Taz in Escape from Mars (USA).zip"
+    },
+    {
+      "title": "Taz in Escape from Mars",
+      "category": "Looney Tunes & Cartoons",
+      "system": "gamegear",
+      "bucket": "gamegear/Taz in Escape from Mars (USA, Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Taz - Wanted",
+      "category": "Looney Tunes & Cartoons",
+      "system": "gc",
+      "bucket": "gc/Taz - Wanted (USA) (En,Fr,De,Es,It).rvz"
+    },
+    {
+      "title": "Speedy Gonzales",
+      "category": "Looney Tunes & Cartoons",
+      "system": "gb",
+      "bucket": "gb/Speedy Gonzales (USA, Europe).zip"
+    },
+    {
+      "title": "Speedy Gonzales - Los Gatos Bandidos",
+      "category": "Looney Tunes & Cartoons",
+      "system": "snes",
+      "bucket": "snes/Speedy Gonzales - Los Gatos Bandidos (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Sylvester & Tweety in Cagey Capers",
+      "category": "Looney Tunes & Cartoons",
+      "system": "genesis",
+      "bucket": "genesis/Sylvester & Tweety in Cagey Capers (USA, Europe).zip"
+    },
+    {
+      "title": "Porky Pig's Haunted Holiday",
+      "category": "Looney Tunes & Cartoons",
+      "system": "snes",
+      "bucket": "snes/Porky Pig's Haunted Holiday (USA).zip"
+    },
+    {
+      "title": "Animaniacs",
+      "category": "Looney Tunes & Cartoons",
+      "system": "snes",
+      "bucket": "snes/Animaniacs (USA).zip"
+    },
+    {
+      "title": "Animaniacs",
+      "category": "Looney Tunes & Cartoons",
+      "system": "genesis",
+      "bucket": "genesis/Animaniacs (USA).zip"
+    },
+    {
+      "title": "Animaniacs",
+      "category": "Looney Tunes & Cartoons",
+      "system": "gb",
+      "bucket": "gb/Animaniacs (USA) (SGB Enhanced).zip"
+    },
+    {
+      "title": "Tom & Jerry - The Ultimate Game of Cat and Mouse!",
+      "category": "Looney Tunes & Cartoons",
+      "system": "nes",
+      "bucket": "nes/Tom & Jerry - The Ultimate Game of Cat and Mouse! (USA).zip"
+    },
+    {
+      "title": "Tom and Jerry",
+      "category": "Looney Tunes & Cartoons",
+      "system": "snes",
+      "bucket": "snes/Tom and Jerry (USA).zip"
+    },
+    {
+      "title": "Tom and Jerry - Frantic Antics!",
+      "category": "Looney Tunes & Cartoons",
+      "system": "genesis",
+      "bucket": "genesis/Tom and Jerry - Frantic Antics! (USA).zip"
+    },
+    {
+      "title": "Tom and Jerry in Fists of Furry",
+      "category": "Looney Tunes & Cartoons",
+      "system": "n64",
+      "bucket": "n64/Tom and Jerry in Fists of Furry (USA).zip"
+    },
+    {
+      "title": "Tom & Jerry in War of the Whiskers",
+      "category": "Looney Tunes & Cartoons",
+      "system": "gc",
+      "bucket": "gc/Tom & Jerry in War of the Whiskers (USA).rvz"
+    },
+    {
+      "title": "Flintstones, The - The Rescue of Dino & Hoppy",
+      "category": "Looney Tunes & Cartoons",
+      "system": "nes",
+      "bucket": "nes/Flintstones, The - The Rescue of Dino & Hoppy (USA).zip"
+    },
+    {
+      "title": "Flintstones, The - The Surprise at Dinosaur Peak!",
+      "category": "Looney Tunes & Cartoons",
+      "system": "nes",
+      "bucket": "nes/Flintstones, The - The Surprise at Dinosaur Peak! (USA).zip"
+    },
+    {
+      "title": "Flintstones, The",
+      "category": "Looney Tunes & Cartoons",
+      "system": "snes",
+      "bucket": "snes/Flintstones, The (USA) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Flintstones, The",
+      "category": "Looney Tunes & Cartoons",
+      "system": "genesis",
+      "bucket": "genesis/Flintstones, The (USA) (Taito).zip"
+    },
+    {
+      "title": "Flintstones, The - The Treasure of Sierra Madrock",
+      "category": "Looney Tunes & Cartoons",
+      "system": "snes",
+      "bucket": "snes/Flintstones, The - The Treasure of Sierra Madrock (USA).zip"
+    },
+    {
+      "title": "Jetsons, The - Cogswell's Caper",
+      "category": "Looney Tunes & Cartoons",
+      "system": "nes",
+      "bucket": "nes/Jetsons, The - Cogswell's Caper (USA).zip"
+    },
+    {
+      "title": "Jetsons, The - Invasion of the Planet Pirates",
+      "category": "Looney Tunes & Cartoons",
+      "system": "snes",
+      "bucket": "snes/Jetsons, The - Invasion of the Planet Pirates (USA).zip"
+    },
+    {
+      "title": "Scooby-Doo Mystery",
+      "category": "Looney Tunes & Cartoons",
+      "system": "genesis",
+      "bucket": "genesis/Scooby-Doo Mystery (USA).zip"
+    },
+    {
+      "title": "Scooby-Doo Mystery",
+      "category": "Looney Tunes & Cartoons",
+      "system": "snes",
+      "bucket": "snes/Scooby-Doo Mystery (USA).zip"
+    },
+    {
+      "title": "Scooby-Doo! Night of 100 Frights",
+      "category": "Looney Tunes & Cartoons",
+      "system": "gc",
+      "bucket": "gc/Scooby-Doo! Night of 100 Frights (USA) (Rev 1).rvz"
+    },
+    {
+      "title": "Wacky Races",
+      "category": "Looney Tunes & Cartoons",
+      "system": "nes",
+      "bucket": "nes/Wacky Races (USA).zip"
+    },
+    {
+      "title": "Wacky Races",
+      "category": "Looney Tunes & Cartoons",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Wacky Races (USA).chd"
+    },
+    {
+      "title": "Adventures of Yogi Bear",
+      "category": "Looney Tunes & Cartoons",
+      "system": "snes",
+      "bucket": "snes/Adventures of Yogi Bear (USA).zip"
+    },
+    {
+      "title": "Inspector Gadget",
+      "category": "Looney Tunes & Cartoons",
+      "system": "snes",
+      "bucket": "snes/Inspector Gadget (USA).zip"
+    },
+    {
+      "title": "The Simpsons",
+      "category": "Looney Tunes & Cartoons",
+      "system": "fbneo",
+      "bucket": "fbneo/simpsons.zip"
+    },
+    {
+      "title": "The Simpsons",
+      "category": "Looney Tunes & Cartoons",
+      "system": "mame",
+      "bucket": "mame/simpsons.zip"
+    },
+    {
+      "title": "Simpsons, The - Bart vs. the Space Mutants",
+      "category": "Looney Tunes & Cartoons",
+      "system": "nes",
+      "bucket": "nes/Simpsons, The - Bart vs. the Space Mutants (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Simpsons, The - Bart vs. the Space Mutants",
+      "category": "Looney Tunes & Cartoons",
+      "system": "genesis",
+      "bucket": "genesis/Simpsons, The - Bart vs. the Space Mutants (USA, Europe) (Rev A).zip"
+    },
+    {
+      "title": "Simpsons, The - Bart vs. the World",
+      "category": "Looney Tunes & Cartoons",
+      "system": "nes",
+      "bucket": "nes/Simpsons, The - Bart vs. the World (USA).zip"
+    },
+    {
+      "title": "Simpsons, The - Bart's Nightmare",
+      "category": "Looney Tunes & Cartoons",
+      "system": "snes",
+      "bucket": "snes/Simpsons, The - Bart's Nightmare (USA).zip"
+    },
+    {
+      "title": "Simpsons, The - Bart's Nightmare",
+      "category": "Looney Tunes & Cartoons",
+      "system": "genesis",
+      "bucket": "genesis/Simpsons, The - Bart's Nightmare (USA, Europe).zip"
+    },
+    {
+      "title": "Virtual Bart",
+      "category": "Looney Tunes & Cartoons",
+      "system": "snes",
+      "bucket": "snes/Virtual Bart (USA).zip"
+    },
+    {
+      "title": "Virtual Bart",
+      "category": "Looney Tunes & Cartoons",
+      "system": "genesis",
+      "bucket": "genesis/Virtual Bart (World).zip"
+    },
+    {
+      "title": "Krusty's Fun House",
+      "category": "Looney Tunes & Cartoons",
+      "system": "nes",
+      "bucket": "nes/Krusty's Fun House (USA).zip"
+    },
+    {
+      "title": "Krusty's Super Fun House",
+      "category": "Looney Tunes & Cartoons",
+      "system": "snes",
+      "bucket": "snes/Krusty's Super Fun House (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Krusty's Super Fun House",
+      "category": "Looney Tunes & Cartoons",
+      "system": "genesis",
+      "bucket": "genesis/Krusty's Super Fun House (USA, Europe) (Rev A).zip"
+    },
+    {
+      "title": "Simpsons, The - Night of the Living Treehouse of Horror",
+      "category": "Looney Tunes & Cartoons",
+      "system": "gbc",
+      "bucket": "gbc/Simpsons, The - Night of the Living Treehouse of Horror (USA, Europe).zip"
+    },
+    {
+      "title": "Simpsons, The - Road Rage",
+      "category": "Looney Tunes & Cartoons",
+      "system": "gc",
+      "bucket": "gc/Simpsons, The - Road Rage (USA).rvz"
+    },
+    {
+      "title": "Simpsons, The - Hit & Run",
+      "category": "Looney Tunes & Cartoons",
+      "system": "gc",
+      "bucket": "gc/Simpsons, The - Hit & Run (USA).rvz"
+    },
+    {
+      "title": "Simpsons Game, The",
+      "category": "Looney Tunes & Cartoons",
+      "system": "psp",
+      "bucket": "psp/Simpsons Game, The (USA).chd"
+    },
+    {
+      "title": "Simpsons Game, The",
+      "category": "Looney Tunes & Cartoons",
+      "system": "nds",
+      "bucket": "nds/Simpsons Game, The (USA).zip"
+    },
+    {
+      "title": "Ren & Stimpy Show Presents, The - Stimpy's Invention",
+      "category": "Looney Tunes & Cartoons",
+      "system": "genesis",
+      "bucket": "genesis/Ren & Stimpy Show Presents, The - Stimpy's Invention (USA).zip"
+    },
+    {
+      "title": "Ren & Stimpy Show, The - Veediots!",
+      "category": "Looney Tunes & Cartoons",
+      "system": "snes",
+      "bucket": "snes/Ren & Stimpy Show, The - Veediots! (USA).zip"
+    },
+    {
+      "title": "Rocko's Modern Life - Spunky's Dangerous Day",
+      "category": "Looney Tunes & Cartoons",
+      "system": "snes",
+      "bucket": "snes/Rocko's Modern Life - Spunky's Dangerous Day (USA).zip"
+    },
+    {
+      "title": "Aaahh!!! Real Monsters",
+      "category": "Looney Tunes & Cartoons",
+      "system": "snes",
+      "bucket": "snes/Aaahh!!! Real Monsters (USA).zip"
+    },
+    {
+      "title": "Aaahh!!! Real Monsters",
+      "category": "Looney Tunes & Cartoons",
+      "system": "genesis",
+      "bucket": "genesis/Aaahh!!! Real Monsters (USA).zip"
+    },
+    {
+      "title": "Beavis and Butt-Head",
+      "category": "Looney Tunes & Cartoons",
+      "system": "genesis",
+      "bucket": "genesis/Beavis and Butt-Head (USA).zip"
+    },
+    {
+      "title": "Beavis and Butt-Head",
+      "category": "Looney Tunes & Cartoons",
+      "system": "snes",
+      "bucket": "snes/Beavis and Butt-Head (USA).zip"
+    },
+    {
+      "title": "Nickelodeon Rugrats - Search for Reptar",
+      "category": "Looney Tunes & Cartoons",
+      "system": "psx",
+      "bucket": "psx/Nickelodeon Rugrats - Search for Reptar (USA).chd"
+    },
+    {
+      "title": "Nickelodeon SpongeBob SquarePants - SuperSponge",
+      "category": "Looney Tunes & Cartoons",
+      "system": "psx",
+      "bucket": "psx/Nickelodeon SpongeBob SquarePants - SuperSponge (USA).chd"
+    },
+    {
+      "title": "SpongeBob SquarePants - SuperSponge",
+      "category": "Looney Tunes & Cartoons",
+      "system": "gba",
+      "bucket": "gba/SpongeBob SquarePants - SuperSponge (USA, Europe).zip"
+    },
+    {
+      "title": "Nickelodeon SpongeBob SquarePants - Revenge of the Flying Dutchman",
+      "category": "Looney Tunes & Cartoons",
+      "system": "gc",
+      "bucket": "gc/Nickelodeon SpongeBob SquarePants - Revenge of the Flying Dutchman (USA).rvz"
+    },
+    {
+      "title": "Nickelodeon SpongeBob SquarePants in - Battle for Bikini Bottom",
+      "category": "Looney Tunes & Cartoons",
+      "system": "gc",
+      "bucket": "gc/Nickelodeon SpongeBob SquarePants in - Battle for Bikini Bottom (USA).rvz"
+    },
+    {
+      "title": "SpongeBob SquarePants - Battle for Bikini Bottom",
+      "category": "Looney Tunes & Cartoons",
+      "system": "gba",
+      "bucket": "gba/SpongeBob SquarePants - Battle for Bikini Bottom (USA).zip"
+    },
+    {
+      "title": "Nickelodeon SpongeBob SquarePants - The Movie",
+      "category": "Looney Tunes & Cartoons",
+      "system": "gc",
+      "bucket": "gc/Nickelodeon SpongeBob SquarePants - The Movie (USA) (Rev 1).rvz"
+    },
+    {
+      "title": "SpongeBob SquarePants Movie, The",
+      "category": "Looney Tunes & Cartoons",
+      "system": "gba",
+      "bucket": "gba/SpongeBob SquarePants Movie, The (USA).zip"
+    },
+    {
+      "title": "Samurai Jack - The Amulet of Time",
+      "category": "Looney Tunes & Cartoons",
+      "system": "gba",
+      "bucket": "gba/Samurai Jack - The Amulet of Time (USA, Europe).zip"
+    },
+    {
+      "title": "Powerpuff Girls, The - Mojo Jojo A-Go-Go",
+      "category": "Looney Tunes & Cartoons",
+      "system": "gba",
+      "bucket": "gba/Powerpuff Girls, The - Mojo Jojo A-Go-Go (USA) (En,Fr,De,Es,It,Nl).zip"
+    },
+    {
+      "title": "Dexter's Laboratory - Deesaster Strikes!",
+      "category": "Looney Tunes & Cartoons",
+      "system": "gba",
+      "bucket": "gba/Dexter's Laboratory - Deesaster Strikes! (USA) (En,Fr,De,Es,It) (Rev 1).zip"
+    },
+    {
+      "title": "Adventure Time - Hey Ice King! Why'd You Steal Our Garbage!!",
+      "category": "Looney Tunes & Cartoons",
+      "system": "3ds",
+      "bucket": "3ds/Adventure Time - Hey Ice King! Why'd You Steal Our Garbage!! (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Regular Show - Mordecai & Rigby in 8-Bit Land",
+      "category": "Looney Tunes & Cartoons",
+      "system": "3ds",
+      "bucket": "3ds/Regular Show - Mordecai & Rigby in 8-Bit Land (USA).zip"
+    },
+    {
+      "title": "Felix the Cat",
+      "category": "Looney Tunes & Cartoons",
+      "system": "nes",
+      "bucket": "nes/Felix the Cat (USA) (Hudson).zip"
+    },
+    {
+      "title": "Felix the Cat",
+      "category": "Looney Tunes & Cartoons",
+      "system": "gb",
+      "bucket": "gb/Felix the Cat (USA, Europe).zip"
+    },
+    {
+      "title": "Garfield - Caught in the Act",
+      "category": "Looney Tunes & Cartoons",
+      "system": "genesis",
+      "bucket": "genesis/Garfield - Caught in the Act (USA, Europe).zip"
+    },
+    {
+      "title": "Garfield - Caught in the Act",
+      "category": "Looney Tunes & Cartoons",
+      "system": "gamegear",
+      "bucket": "gamegear/Garfield - Caught in the Act (USA, Europe).zip"
+    },
+    {
+      "title": "Popeye",
+      "category": "Looney Tunes & Cartoons",
+      "system": "fbneo",
+      "bucket": "fbneo/popeye.zip"
+    },
+    {
+      "title": "Popeye",
+      "category": "Looney Tunes & Cartoons",
+      "system": "nes",
+      "bucket": "nes/Popeye (World) (Rev 1).zip"
+    },
+    {
+      "title": "Popeye 2",
+      "category": "Looney Tunes & Cartoons",
+      "system": "gb",
+      "bucket": "gb/Popeye 2 (USA).zip"
+    },
+    {
+      "title": "Asterix",
+      "category": "Looney Tunes & Cartoons",
+      "system": "fbneo",
+      "bucket": "fbneo/asterix.zip"
+    },
+    {
+      "title": "Asterix",
+      "category": "Looney Tunes & Cartoons",
+      "system": "snes",
+      "bucket": "snes/Asterix (Europe) (En,Fr,De,Es).zip"
+    },
+    {
+      "title": "Asterix",
+      "category": "Looney Tunes & Cartoons",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Asterix (Europe, Brazil) (En,Fr) (Rev 1).zip"
+    },
+    {
+      "title": "Asterix",
+      "category": "Looney Tunes & Cartoons",
+      "system": "nes",
+      "bucket": "nes/Asterix (Europe) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Asterix",
+      "category": "Looney Tunes & Cartoons",
+      "system": "gb",
+      "bucket": "gb/Asterix (Europe) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Asterix & Obelix",
+      "category": "Looney Tunes & Cartoons",
+      "system": "snes",
+      "bucket": "snes/Asterix & Obelix (Europe) (En,Fr,De,Es).zip"
+    },
+    {
+      "title": "Asterix & Obelix",
+      "category": "Looney Tunes & Cartoons",
+      "system": "gbc",
+      "bucket": "gbc/Asterix & Obelix (Europe) (En,Fr,De,Es).zip"
+    },
+    {
+      "title": "Asterix and the Great Rescue",
+      "category": "Looney Tunes & Cartoons",
+      "system": "genesis",
+      "bucket": "genesis/Asterix and the Great Rescue (USA).zip"
+    },
+    {
+      "title": "Asterix and the Great Rescue",
+      "category": "Looney Tunes & Cartoons",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Asterix and the Great Rescue (Europe, Brazil) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Asterix and the Secret Mission",
+      "category": "Looney Tunes & Cartoons",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Asterix and the Secret Mission (Europe, Brazil) (En,Fr,De).zip"
+    },
+    {
+      "title": "Asterix and the Power of the Gods",
+      "category": "Looney Tunes & Cartoons",
+      "system": "genesis",
+      "bucket": "genesis/Asterix and the Power of the Gods (Europe) (En,Fr,De,Es).zip"
+    },
+    {
+      "title": "Asterix & Obelix XXL",
+      "category": "Looney Tunes & Cartoons",
+      "system": "gc",
+      "bucket": "gc/Asterix & Obelix XXL (Europe) (En,Fr,De,Es,It).rvz"
+    },
+    {
+      "title": "Smurfs, The",
+      "category": "Looney Tunes & Cartoons",
+      "system": "snes",
+      "bucket": "snes/Smurfs, The (Europe) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Smurfs, The",
+      "category": "Looney Tunes & Cartoons",
+      "system": "genesis",
+      "bucket": "genesis/Smurfs, The (Europe) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Smurfs, The",
+      "category": "Looney Tunes & Cartoons",
+      "system": "segacd",
+      "bucket": "segacd/Smurfs, The (Europe) (En,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "Smurfs, The",
+      "category": "Looney Tunes & Cartoons",
+      "system": "nes",
+      "bucket": "nes/Smurfs, The (Europe) (En,Fr,De,Es).zip"
+    },
+    {
+      "title": "Smurfs, The",
+      "category": "Looney Tunes & Cartoons",
+      "system": "gb",
+      "bucket": "gb/Smurfs, The (USA, Europe) (En,Fr,De) (Rev 1) (SGB Enhanced).zip"
+    },
+    {
+      "title": "Smurfs, The",
+      "category": "Looney Tunes & Cartoons",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Smurfs, The (Europe, Brazil) (En,Fr,De,Es).zip"
+    },
+    {
+      "title": "Smurfs Travel the World, The",
+      "category": "Looney Tunes & Cartoons",
+      "system": "snes",
+      "bucket": "snes/Smurfs Travel the World, The (Europe) (En,Fr,De,Es).zip"
+    },
+    {
+      "title": "Tintin in Tibet",
+      "category": "Looney Tunes & Cartoons",
+      "system": "snes",
+      "bucket": "snes/Tintin in Tibet (Europe) (En,Es,Sv).zip"
+    },
+    {
+      "title": "Tintin in Tibet",
+      "category": "Looney Tunes & Cartoons",
+      "system": "genesis",
+      "bucket": "genesis/Tintin in Tibet (Europe) (En,Fr,De,Es,Nl,Sv).zip"
+    },
+    {
+      "title": "Tintin - Prisoners of the Sun",
+      "category": "Looney Tunes & Cartoons",
+      "system": "snes",
+      "bucket": "snes/Tintin - Prisoners of the Sun (Europe) (En,Fr,De,Es).zip"
+    },
+    {
+      "title": "Lucky Luke",
+      "category": "Looney Tunes & Cartoons",
+      "system": "snes",
+      "bucket": "snes/Lucky Luke (Europe) (En,Fr,De,Es).zip"
+    },
+    {
+      "title": "Lucky Luke",
+      "category": "Looney Tunes & Cartoons",
+      "system": "gbc",
+      "bucket": "gbc/Lucky Luke (USA) (En,Fr,De,Es).zip"
+    },
+    {
+      "title": "Lucky Luke",
+      "category": "Looney Tunes & Cartoons",
+      "system": "psx",
+      "bucket": "psx/Lucky Luke (USA).chd"
+    },
+    {
+      "title": "Bucky O'Hare",
+      "category": "Looney Tunes & Cartoons",
+      "system": "fbneo",
+      "bucket": "fbneo/bucky.zip"
+    },
+    {
+      "title": "Bucky O'Hare",
+      "category": "Looney Tunes & Cartoons",
+      "system": "nes",
+      "bucket": "nes/Bucky O'Hare (USA).zip"
+    },
+    {
+      "title": "Biker Mice from Mars",
+      "category": "Looney Tunes & Cartoons",
+      "system": "snes",
+      "bucket": "snes/Biker Mice from Mars (USA).zip"
+    },
+    {
+      "title": "G.I. Joe - A Real American Hero",
+      "category": "Looney Tunes & Cartoons",
+      "system": "nes",
+      "bucket": "nes/G.I. Joe - A Real American Hero (USA).zip"
+    },
+    {
+      "title": "G.I. Joe - The Atlantis Factor",
+      "category": "Looney Tunes & Cartoons",
+      "system": "nes",
+      "bucket": "nes/G.I. Joe - The Atlantis Factor (USA).zip"
+    },
+    {
+      "title": "G.I. Joe",
+      "category": "Looney Tunes & Cartoons",
+      "system": "fbneo",
+      "bucket": "fbneo/gijoeu.zip"
+    },
+    {
+      "title": "Monster in My Pocket",
+      "category": "Looney Tunes & Cartoons",
+      "system": "nes",
+      "bucket": "nes/Monster in My Pocket (USA).zip"
+    },
+    {
+      "title": "Mighty Morphin Power Rangers",
+      "category": "Looney Tunes & Cartoons",
+      "system": "snes",
+      "bucket": "snes/Mighty Morphin Power Rangers (USA).zip"
+    },
+    {
+      "title": "Mighty Morphin Power Rangers",
+      "category": "Looney Tunes & Cartoons",
+      "system": "genesis",
+      "bucket": "genesis/Mighty Morphin Power Rangers (USA).zip"
+    },
+    {
+      "title": "Mighty Morphin Power Rangers",
+      "category": "Looney Tunes & Cartoons",
+      "system": "segacd",
+      "bucket": "segacd/Mighty Morphin Power Rangers (USA).chd"
+    },
+    {
+      "title": "Mighty Morphin Power Rangers",
+      "category": "Looney Tunes & Cartoons",
+      "system": "gamegear",
+      "bucket": "gamegear/Mighty Morphin Power Rangers (USA, Europe).zip"
+    },
+    {
+      "title": "Mighty Morphin Power Rangers",
+      "category": "Looney Tunes & Cartoons",
+      "system": "gb",
+      "bucket": "gb/Mighty Morphin Power Rangers (USA, Europe) (SGB Enhanced).zip"
+    },
+    {
+      "title": "Mighty Morphin Power Rangers - The Movie",
+      "category": "Looney Tunes & Cartoons",
+      "system": "snes",
+      "bucket": "snes/Mighty Morphin Power Rangers - The Movie (USA).zip"
+    },
+    {
+      "title": "Mighty Morphin Power Rangers - The Movie",
+      "category": "Looney Tunes & Cartoons",
+      "system": "genesis",
+      "bucket": "genesis/Mighty Morphin Power Rangers - The Movie (USA).zip"
+    },
+    {
+      "title": "Mighty Morphin Power Rangers - The Movie",
+      "category": "Looney Tunes & Cartoons",
+      "system": "gamegear",
+      "bucket": "gamegear/Mighty Morphin Power Rangers - The Movie (USA, Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Mighty Morphin Power Rangers - The Fighting Edition",
+      "category": "Looney Tunes & Cartoons",
+      "system": "snes",
+      "bucket": "snes/Mighty Morphin Power Rangers - The Fighting Edition (USA).zip"
+    },
+    {
+      "title": "Astro Boy - Omega Factor",
+      "category": "Looney Tunes & Cartoons",
+      "system": "gba",
+      "bucket": "gba/Astro Boy - Omega Factor (USA) (En,Ja,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Teenage Mutant Ninja Turtles",
+      "category": "Teenage Mutant Ninja Turtles",
+      "system": "fbneo",
+      "bucket": "fbneo/tmntu.zip"
+    },
+    {
+      "title": "Teenage Mutant Ninja Turtles",
+      "category": "Teenage Mutant Ninja Turtles",
+      "system": "mame",
+      "bucket": "mame/tmntu.zip"
+    },
+    {
+      "title": "Teenage Mutant Ninja Turtles - Turtles in Time",
+      "category": "Teenage Mutant Ninja Turtles",
+      "system": "fbneo",
+      "bucket": "fbneo/tmnt2.zip"
+    },
+    {
+      "title": "Teenage Mutant Ninja Turtles",
+      "category": "Teenage Mutant Ninja Turtles",
+      "system": "nes",
+      "bucket": "nes/Teenage Mutant Ninja Turtles (USA).zip"
+    },
+    {
+      "title": "Teenage Mutant Ninja Turtles II - The Arcade Game",
+      "category": "Teenage Mutant Ninja Turtles",
+      "system": "nes",
+      "bucket": "nes/Teenage Mutant Ninja Turtles II - The Arcade Game (USA).zip"
+    },
+    {
+      "title": "Teenage Mutant Ninja Turtles III - The Manhattan Project",
+      "category": "Teenage Mutant Ninja Turtles",
+      "system": "nes",
+      "bucket": "nes/Teenage Mutant Ninja Turtles III - The Manhattan Project (USA).zip"
+    },
+    {
+      "title": "Teenage Mutant Ninja Turtles - Tournament Fighters",
+      "category": "Teenage Mutant Ninja Turtles",
+      "system": "nes",
+      "bucket": "nes/Teenage Mutant Ninja Turtles - Tournament Fighters (USA).zip"
+    },
+    {
+      "title": "Teenage Mutant Ninja Turtles IV - Turtles in Time",
+      "category": "Teenage Mutant Ninja Turtles",
+      "system": "snes",
+      "bucket": "snes/Teenage Mutant Ninja Turtles IV - Turtles in Time (USA).zip"
+    },
+    {
+      "title": "Teenage Mutant Ninja Turtles - Tournament Fighters",
+      "category": "Teenage Mutant Ninja Turtles",
+      "system": "snes",
+      "bucket": "snes/Teenage Mutant Ninja Turtles - Tournament Fighters (USA).zip"
+    },
+    {
+      "title": "Teenage Mutant Ninja Turtles - The Hyperstone Heist",
+      "category": "Teenage Mutant Ninja Turtles",
+      "system": "genesis",
+      "bucket": "genesis/Teenage Mutant Ninja Turtles - The Hyperstone Heist (USA).zip"
+    },
+    {
+      "title": "Teenage Mutant Ninja Turtles - Tournament Fighters",
+      "category": "Teenage Mutant Ninja Turtles",
+      "system": "genesis",
+      "bucket": "genesis/Teenage Mutant Ninja Turtles - Tournament Fighters (USA).zip"
+    },
+    {
+      "title": "Teenage Mutant Ninja Turtles - Fall of the Foot Clan",
+      "category": "Teenage Mutant Ninja Turtles",
+      "system": "gb",
+      "bucket": "gb/Teenage Mutant Ninja Turtles - Fall of the Foot Clan (USA).zip"
+    },
+    {
+      "title": "Teenage Mutant Ninja Turtles II - Back from the Sewers",
+      "category": "Teenage Mutant Ninja Turtles",
+      "system": "gb",
+      "bucket": "gb/Teenage Mutant Ninja Turtles II - Back from the Sewers (USA).zip"
+    },
+    {
+      "title": "Teenage Mutant Ninja Turtles III - Radical Rescue",
+      "category": "Teenage Mutant Ninja Turtles",
+      "system": "gb",
+      "bucket": "gb/Teenage Mutant Ninja Turtles III - Radical Rescue (USA).zip"
+    },
+    {
+      "title": "Teenage Mutant Ninja Turtles",
+      "category": "Teenage Mutant Ninja Turtles",
+      "system": "gba",
+      "bucket": "gba/Teenage Mutant Ninja Turtles (USA).zip"
+    },
+    {
+      "title": "Teenage Mutant Ninja Turtles 2 - Battle Nexus",
+      "category": "Teenage Mutant Ninja Turtles",
+      "system": "gba",
+      "bucket": "gba/Teenage Mutant Ninja Turtles 2 - Battle Nexus (USA).zip"
+    },
+    {
+      "title": "Teenage Mutant Ninja Turtles",
+      "category": "Teenage Mutant Ninja Turtles",
+      "system": "gc",
+      "bucket": "gc/Teenage Mutant Ninja Turtles (USA).rvz"
+    },
+    {
+      "title": "Teenage Mutant Ninja Turtles 2 - Battle Nexus",
+      "category": "Teenage Mutant Ninja Turtles",
+      "system": "gc",
+      "bucket": "gc/Teenage Mutant Ninja Turtles 2 - Battle Nexus (USA).m3u",
+      "files": [
+        "gc/Teenage Mutant Ninja Turtles 2 - Battle Nexus (USA) (Disc 1).rvz",
+        "gc/Teenage Mutant Ninja Turtles 2 - Battle Nexus (USA) (Disc 2).rvz"
+      ]
+    },
+    {
+      "title": "Teenage Mutant Ninja Turtles 3 - Mutant Nightmare",
+      "category": "Teenage Mutant Ninja Turtles",
+      "system": "gc",
+      "bucket": "gc/Teenage Mutant Ninja Turtles 3 - Mutant Nightmare (USA).m3u",
+      "files": [
+        "gc/Teenage Mutant Ninja Turtles 3 - Mutant Nightmare (USA) (Disc 1).rvz",
+        "gc/Teenage Mutant Ninja Turtles 3 - Mutant Nightmare (USA) (Disc 2).rvz"
+      ]
+    },
+    {
+      "title": "Teenage Mutant Ninja Turtles 3 - Mutant Nightmare",
+      "category": "Teenage Mutant Ninja Turtles",
+      "system": "nds",
+      "bucket": "nds/Teenage Mutant Ninja Turtles 3 - Mutant Nightmare (USA).zip"
+    },
+    {
+      "title": "Teenage Mutant Ninja Turtles - Arcade Attack",
+      "category": "Teenage Mutant Ninja Turtles",
+      "system": "nds",
+      "bucket": "nds/Teenage Mutant Ninja Turtles - Arcade Attack (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Teenage Mutant Ninja Turtles",
+      "category": "Teenage Mutant Ninja Turtles",
+      "system": "3ds",
+      "bucket": "3ds/Teenage Mutant Ninja Turtles (USA) (En,Fr).zip"
+    },
+    {
+      "title": "Teenage Mutant Ninja Turtles - Danger of the Ooze",
+      "category": "Teenage Mutant Ninja Turtles",
+      "system": "3ds",
+      "bucket": "3ds/Teenage Mutant Ninja Turtles - Danger of the Ooze (USA).zip"
+    },
+    {
+      "title": "Teenage Mutant Ninja Turtles - Mutants in Manhattan",
+      "category": "Teenage Mutant Ninja Turtles",
+      "system": "xbox360",
+      "bucket": "xbox360/Teenage Mutant Ninja Turtles - Mutants in Manhattan (USA, Europe).zar"
+    },
+    {
+      "title": "TMNT",
+      "category": "Teenage Mutant Ninja Turtles",
+      "system": "gba",
+      "bucket": "gba/TMNT (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "TMNT",
+      "category": "Teenage Mutant Ninja Turtles",
+      "system": "gc",
+      "bucket": "gc/TMNT (USA) (En,Fr,Es).rvz"
+    },
+    {
+      "title": "TMNT",
+      "category": "Teenage Mutant Ninja Turtles",
+      "system": "psp",
+      "bucket": "psp/TMNT (USA).chd"
+    },
+    {
+      "title": "TMNT",
+      "category": "Teenage Mutant Ninja Turtles",
+      "system": "nds",
+      "bucket": "nds/TMNT (USA) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "TMNT",
+      "category": "Teenage Mutant Ninja Turtles",
+      "system": "xbox360",
+      "bucket": "xbox360/TMNT (USA) (En,Fr,De,Es,It).zar"
+    },
+    {
+      "title": "TMNT - Mutant Melee",
+      "category": "Teenage Mutant Ninja Turtles",
+      "system": "gc",
+      "bucket": "gc/TMNT - Mutant Melee (USA).rvz"
+    },
+    {
+      "title": "Nickelodeon Teenage Mutant Ninja Turtles",
+      "category": "Teenage Mutant Ninja Turtles",
+      "system": "3ds",
+      "bucket": "3ds/Nickelodeon Teenage Mutant Ninja Turtles (USA) (En,Fr).zip"
+    },
+    {
+      "title": "Batman - The Video Game",
+      "category": "Comics",
+      "system": "nes",
+      "bucket": "nes/Batman - The Video Game (USA).zip"
+    },
+    {
+      "title": "Batman - The Video Game",
+      "category": "Comics",
+      "system": "gb",
+      "bucket": "gb/Batman - The Video Game (World).zip"
+    },
+    {
+      "title": "Batman - The Video Game",
+      "category": "Comics",
+      "system": "genesis",
+      "bucket": "genesis/Batman - The Video Game (USA).zip"
+    },
+    {
+      "title": "Batman - Return of the Joker",
+      "category": "Comics",
+      "system": "nes",
+      "bucket": "nes/Batman - Return of the Joker (USA).zip"
+    },
+    {
+      "title": "Batman - Return of the Joker",
+      "category": "Comics",
+      "system": "gb",
+      "bucket": "gb/Batman - Return of the Joker (USA, Europe).zip"
+    },
+    {
+      "title": "Batman Returns",
+      "category": "Comics",
+      "system": "snes",
+      "bucket": "snes/Batman Returns (USA).zip"
+    },
+    {
+      "title": "Batman Returns",
+      "category": "Comics",
+      "system": "nes",
+      "bucket": "nes/Batman Returns (USA).zip"
+    },
+    {
+      "title": "Batman Returns",
+      "category": "Comics",
+      "system": "segacd",
+      "bucket": "segacd/Batman Returns (USA).chd"
+    },
+    {
+      "title": "Batman Returns",
+      "category": "Comics",
+      "system": "genesis",
+      "bucket": "genesis/Batman Returns (World).zip"
+    },
+    {
+      "title": "Batman Returns",
+      "category": "Comics",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Batman Returns (Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Batman Returns",
+      "category": "Comics",
+      "system": "gamegear",
+      "bucket": "gamegear/Batman Returns (World).zip"
+    },
+    {
+      "title": "Batman Returns",
+      "category": "Comics",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Batman Returns (USA, Europe).zip"
+    },
+    {
+      "title": "Adventures of Batman & Robin, The",
+      "category": "Comics",
+      "system": "snes",
+      "bucket": "snes/Adventures of Batman & Robin, The (USA).zip"
+    },
+    {
+      "title": "Adventures of Batman & Robin, The",
+      "category": "Comics",
+      "system": "genesis",
+      "bucket": "genesis/Adventures of Batman & Robin, The (USA).zip"
+    },
+    {
+      "title": "Adventures of Batman & Robin, The",
+      "category": "Comics",
+      "system": "gamegear",
+      "bucket": "gamegear/Adventures of Batman & Robin, The (USA, Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Adventures of Batman and Robin, The",
+      "category": "Comics",
+      "system": "segacd",
+      "bucket": "segacd/Adventures of Batman and Robin, The (USA).chd"
+    },
+    {
+      "title": "Batman - The Animated Series",
+      "category": "Comics",
+      "system": "gb",
+      "bucket": "gb/Batman - The Animated Series (USA, Europe).zip"
+    },
+    {
+      "title": "Batman",
+      "category": "Comics",
+      "system": "fbneo",
+      "bucket": "fbneo/batman.zip"
+    },
+    {
+      "title": "Batman - Vengeance",
+      "category": "Comics",
+      "system": "gc",
+      "bucket": "gc/Batman - Vengeance (USA) (En,Fr,Es).rvz"
+    },
+    {
+      "title": "Batman - Vengeance",
+      "category": "Comics",
+      "system": "gba",
+      "bucket": "gba/Batman - Vengeance (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Batman - Rise of Sin Tzu",
+      "category": "Comics",
+      "system": "gc",
+      "bucket": "gc/Batman - Rise of Sin Tzu (USA) (En,Fr,Es).rvz"
+    },
+    {
+      "title": "Batman - Rise of Sin Tzu",
+      "category": "Comics",
+      "system": "gba",
+      "bucket": "gba/Batman - Rise of Sin Tzu (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Batman Begins",
+      "category": "Comics",
+      "system": "gc",
+      "bucket": "gc/Batman Begins (USA).rvz"
+    },
+    {
+      "title": "Batman Begins",
+      "category": "Comics",
+      "system": "gba",
+      "bucket": "gba/Batman Begins (USA, Europe) (En,Fr,De,Es,It,Nl).zip"
+    },
+    {
+      "title": "Batman - The Brave and the Bold - The Videogame",
+      "category": "Comics",
+      "system": "nds",
+      "bucket": "nds/Batman - The Brave and the Bold - The Videogame (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Batman - Arkham Asylum - Game of the Year Edition",
+      "category": "Comics",
+      "system": "xbox360",
+      "bucket": "xbox360/Batman - Arkham Asylum - Game of the Year Edition (USA) (En,Fr,De,Es,It).zar"
+    },
+    {
+      "title": "Batman - Arkham City - Game of the Year Edition",
+      "category": "Comics",
+      "system": "xbox360",
+      "bucket": "xbox360/Batman - Arkham City - Game of the Year Edition (USA, Europe) (En,Ja,Fr,De,Es,It,Pt,Ko,Pl,Ru) (Disc 1).zar",
+      "files": [
+        "xbox360/Batman - Arkham City - Game of the Year Edition (USA, Europe) (En,Ja,Fr,De,Es,It,Pt,Ko,Pl,Ru) (Disc 2).zar"
+      ]
+    },
+    {
+      "title": "Batman - Arkham Origins",
+      "category": "Comics",
+      "system": "xbox360",
+      "bucket": "xbox360/Batman - Arkham Origins (USA, Europe) (En,Fr,De,Es,It,Ko,Pl,Ru) (Disc 1).zar",
+      "files": [
+        "xbox360/Batman - Arkham Origins (USA, Europe) (En,Fr,De,Es,It,Ko,Pl,Ru) (Disc 2).zar"
+      ]
+    },
+    {
+      "title": "Batman - Arkham Origins Blackgate",
+      "category": "Comics",
+      "system": "3ds",
+      "bucket": "3ds/Batman - Arkham Origins Blackgate (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "LEGO Batman - The Videogame",
+      "category": "Comics",
+      "system": "psp",
+      "bucket": "psp/LEGO Batman - The Videogame (USA) (En,Fr,Es).chd"
+    },
+    {
+      "title": "LEGO Batman 2 - DC Super Heroes",
+      "category": "Comics",
+      "system": "nds",
+      "bucket": "nds/LEGO Batman 2 - DC Super Heroes (USA) (En,Fr,Es,Pt).zip"
+    },
+    {
+      "title": "LEGO Batman - The Videogame",
+      "category": "Comics",
+      "system": "nds",
+      "bucket": "nds/LEGO Batman - The Videogame (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "LEGO Batman 2 - DC Super Heroes",
+      "category": "Comics",
+      "system": "3ds",
+      "bucket": "3ds/LEGO Batman 2 - DC Super Heroes (USA) (En,Fr,Es,Pt).zip"
+    },
+    {
+      "title": "LEGO Batman 3 - Beyond Gotham",
+      "category": "Comics",
+      "system": "3ds",
+      "bucket": "3ds/LEGO Batman 3 - Beyond Gotham (USA) (En,Fr,Es,Pt).zip"
+    },
+    {
+      "title": "Superman",
+      "category": "Comics",
+      "system": "genesis",
+      "bucket": "genesis/Superman (USA).zip"
+    },
+    {
+      "title": "Death and Return of Superman, The",
+      "category": "Comics",
+      "system": "snes",
+      "bucket": "snes/Death and Return of Superman, The (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Death and Return of Superman, The",
+      "category": "Comics",
+      "system": "genesis",
+      "bucket": "genesis/Death and Return of Superman, The (USA).zip"
+    },
+    {
+      "title": "Superman - Shadow of Apokolips",
+      "category": "Comics",
+      "system": "gc",
+      "bucket": "gc/Superman - Shadow of Apokolips (USA).rvz"
+    },
+    {
+      "title": "Justice League Heroes",
+      "category": "Comics",
+      "system": "psp",
+      "bucket": "psp/Justice League Heroes (USA).chd"
+    },
+    {
+      "title": "Injustice",
+      "category": "Comics",
+      "system": "psvita",
+      "bucket": "psvita/Injustice [PCSE00271] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Scribblenauts Unmasked - A DC Comics Adventure",
+      "category": "Comics",
+      "system": "3ds",
+      "bucket": "3ds/Scribblenauts Unmasked - A DC Comics Adventure (USA) (En,Fr,Es,Pt).zip"
+    },
+    {
+      "title": "Teen Titans",
+      "category": "Comics",
+      "system": "gc",
+      "bucket": "gc/Teen Titans (USA) (En,Fr).rvz"
+    },
+    {
+      "title": "Teen Titans",
+      "category": "Comics",
+      "system": "gba",
+      "bucket": "gba/Teen Titans (USA) (En,Fr).zip"
+    },
+    {
+      "title": "Spider-Man - The Videogame",
+      "category": "Comics",
+      "system": "fbneo",
+      "bucket": "fbneo/spidmanu.zip"
+    },
+    {
+      "title": "Spider-Man",
+      "category": "Comics",
+      "system": "genesis",
+      "bucket": "genesis/Spider-Man (World) (Sega).zip"
+    },
+    {
+      "title": "Spider-Man",
+      "category": "Comics",
+      "system": "genesis",
+      "bucket": "genesis/Spider-Man (USA, Europe) (Acclaim).zip"
+    },
+    {
+      "title": "Spider-Man",
+      "category": "Comics",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Spider-Man (USA, Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Spider-Man",
+      "category": "Comics",
+      "system": "gamegear",
+      "bucket": "gamegear/Spider-Man (USA, Europe).zip"
+    },
+    {
+      "title": "Spider-Man",
+      "category": "Comics",
+      "system": "snes",
+      "bucket": "snes/Spider-Man (USA).zip"
+    },
+    {
+      "title": "Spider-Man",
+      "category": "Comics",
+      "system": "psx",
+      "bucket": "psx/Spider-Man (USA).chd"
+    },
+    {
+      "title": "Spider-Man",
+      "category": "Comics",
+      "system": "n64",
+      "bucket": "n64/Spider-Man (USA).zip"
+    },
+    {
+      "title": "Spider-Man",
+      "category": "Comics",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Spider-Man (USA).chd"
+    },
+    {
+      "title": "Spider-Man",
+      "category": "Comics",
+      "system": "gbc",
+      "bucket": "gbc/Spider-Man (USA, Europe).zip"
+    },
+    {
+      "title": "Spider-Man",
+      "category": "Comics",
+      "system": "gba",
+      "bucket": "gba/Spider-Man (USA, Europe).zip"
+    },
+    {
+      "title": "Spider-Man",
+      "category": "Comics",
+      "system": "gc",
+      "bucket": "gc/Spider-Man (USA) (Rev 1).rvz"
+    },
+    {
+      "title": "Amazing Spider-Man vs. The Kingpin, The",
+      "category": "Comics",
+      "system": "segacd",
+      "bucket": "segacd/Amazing Spider-Man vs. The Kingpin, The (USA) (Rev 1).chd"
+    },
+    {
+      "title": "Amazing Spider-Man, The",
+      "category": "Comics",
+      "system": "gb",
+      "bucket": "gb/Amazing Spider-Man, The (USA, Europe).zip"
+    },
+    {
+      "title": "Amazing Spider-Man, The - Web of Fire",
+      "category": "Comics",
+      "system": "sega32x",
+      "bucket": "sega32x/Amazing Spider-Man, The - Web of Fire (USA).zip"
+    },
+    {
+      "title": "Spider-Man - Venom - Maximum Carnage",
+      "category": "Comics",
+      "system": "snes",
+      "bucket": "snes/Spider-Man - Venom - Maximum Carnage (USA).zip"
+    },
+    {
+      "title": "Spider-Man . Venom - Maximum Carnage",
+      "category": "Comics",
+      "system": "genesis",
+      "bucket": "genesis/Spider-Man . Venom - Maximum Carnage (World).zip"
+    },
+    {
+      "title": "Venom - Spider-Man - Separation Anxiety",
+      "category": "Comics",
+      "system": "snes",
+      "bucket": "snes/Venom - Spider-Man - Separation Anxiety (USA).zip"
+    },
+    {
+      "title": "Venom . Spider-Man - Separation Anxiety",
+      "category": "Comics",
+      "system": "genesis",
+      "bucket": "genesis/Venom . Spider-Man - Separation Anxiety (USA, Europe).zip"
+    },
+    {
+      "title": "Spider-Man 2 - Enter - Electro",
+      "category": "Comics",
+      "system": "psx",
+      "bucket": "psx/Spider-Man 2 - Enter - Electro (USA) (Rev 1).chd"
+    },
+    {
+      "title": "Spider-Man 2 - The Sinister Six",
+      "category": "Comics",
+      "system": "gbc",
+      "bucket": "gbc/Spider-Man 2 - The Sinister Six (USA, Europe).zip"
+    },
+    {
+      "title": "Spider-Man - Mysterio's Menace",
+      "category": "Comics",
+      "system": "gba",
+      "bucket": "gba/Spider-Man - Mysterio's Menace (USA, Europe).zip"
+    },
+    {
+      "title": "Spider-Man 2",
+      "category": "Comics",
+      "system": "gc",
+      "bucket": "gc/Spider-Man 2 (USA).rvz"
+    },
+    {
+      "title": "Spider-Man 2",
+      "category": "Comics",
+      "system": "gba",
+      "bucket": "gba/Spider-Man 2 (USA, Europe).zip"
+    },
+    {
+      "title": "Spider-Man 2",
+      "category": "Comics",
+      "system": "psp",
+      "bucket": "psp/Spider-Man 2 (USA).chd"
+    },
+    {
+      "title": "Spider-Man 2",
+      "category": "Comics",
+      "system": "nds",
+      "bucket": "nds/Spider-Man 2 (USA).zip"
+    },
+    {
+      "title": "Ultimate Spider-Man",
+      "category": "Comics",
+      "system": "gc",
+      "bucket": "gc/Ultimate Spider-Man (USA).rvz"
+    },
+    {
+      "title": "Ultimate Spider-Man",
+      "category": "Comics",
+      "system": "gba",
+      "bucket": "gba/Ultimate Spider-Man (USA).zip"
+    },
+    {
+      "title": "Ultimate Spider-Man",
+      "category": "Comics",
+      "system": "nds",
+      "bucket": "nds/Ultimate Spider-Man (USA).zip"
+    },
+    {
+      "title": "Spider-Man 3",
+      "category": "Comics",
+      "system": "gba",
+      "bucket": "gba/Spider-Man 3 (USA).zip"
+    },
+    {
+      "title": "Spider-Man 3",
+      "category": "Comics",
+      "system": "psp",
+      "bucket": "psp/Spider-Man 3 (USA).chd"
+    },
+    {
+      "title": "Spider-Man 3",
+      "category": "Comics",
+      "system": "nds",
+      "bucket": "nds/Spider-Man 3 (USA).zip"
+    },
+    {
+      "title": "Spider-Man - Web of Shadows",
+      "category": "Comics",
+      "system": "nds",
+      "bucket": "nds/Spider-Man - Web of Shadows (USA) (En,Fr).zip"
+    },
+    {
+      "title": "Spider-Man - Web of Shadows - Amazing Allies Edition",
+      "category": "Comics",
+      "system": "psp",
+      "bucket": "psp/Spider-Man - Web of Shadows - Amazing Allies Edition (USA) (En,Fr).chd"
+    },
+    {
+      "title": "Spider-Man - Shattered Dimensions",
+      "category": "Comics",
+      "system": "nds",
+      "bucket": "nds/Spider-Man - Shattered Dimensions (USA) (En,Fr).zip"
+    },
+    {
+      "title": "Spider-Man - Edge of Time",
+      "category": "Comics",
+      "system": "3ds",
+      "bucket": "3ds/Spider-Man - Edge of Time (USA).zip"
+    },
+    {
+      "title": "Spider-Man - Edge of Time",
+      "category": "Comics",
+      "system": "nds",
+      "bucket": "nds/Spider-Man - Edge of Time (USA) (En,Fr).zip"
+    },
+    {
+      "title": "X-Men",
+      "category": "Comics",
+      "system": "fbneo",
+      "bucket": "fbneo/xmen.zip"
+    },
+    {
+      "title": "X-Men",
+      "category": "Comics",
+      "system": "mame",
+      "bucket": "mame/xmen.zip"
+    },
+    {
+      "title": "X-Men",
+      "category": "Comics",
+      "system": "genesis",
+      "bucket": "genesis/X-Men (USA).zip"
+    },
+    {
+      "title": "X-Men",
+      "category": "Comics",
+      "system": "gamegear",
+      "bucket": "gamegear/X-Men (USA).zip"
+    },
+    {
+      "title": "X-Men 2 - Clone Wars",
+      "category": "Comics",
+      "system": "genesis",
+      "bucket": "genesis/X-Men 2 - Clone Wars (USA, Europe).zip"
+    },
+    {
+      "title": "X-Men - Mutant Apocalypse",
+      "category": "Comics",
+      "system": "snes",
+      "bucket": "snes/X-Men - Mutant Apocalypse (USA).zip"
+    },
+    {
+      "title": "X-Men - Gamemaster's Legacy",
+      "category": "Comics",
+      "system": "gamegear",
+      "bucket": "gamegear/X-Men - Gamemaster's Legacy (USA, Europe).zip"
+    },
+    {
+      "title": "X-Men - Mojo World",
+      "category": "Comics",
+      "system": "gamegear",
+      "bucket": "gamegear/X-Men - Mojo World (USA).zip"
+    },
+    {
+      "title": "X-Men - Mojo World",
+      "category": "Comics",
+      "system": "mastersystem",
+      "bucket": "mastersystem/X-Men - Mojo World (Brazil) (En).zip"
+    },
+    {
+      "title": "Wolverine - Adamantium Rage",
+      "category": "Comics",
+      "system": "snes",
+      "bucket": "snes/Wolverine - Adamantium Rage (USA).zip"
+    },
+    {
+      "title": "Wolverine - Adamantium Rage",
+      "category": "Comics",
+      "system": "genesis",
+      "bucket": "genesis/Wolverine - Adamantium Rage (USA, Europe).zip"
+    },
+    {
+      "title": "X-Men - Children of the Atom",
+      "category": "Comics",
+      "system": "fbneo",
+      "bucket": "fbneo/xmcotau.zip"
+    },
+    {
+      "title": "X-Men - Children of the Atom",
+      "category": "Comics",
+      "system": "saturn",
+      "bucket": "saturn/X-Men - Children of the Atom (USA).chd"
+    },
+    {
+      "title": "X-Men - Children of the Atom",
+      "category": "Comics",
+      "system": "psx",
+      "bucket": "psx/X-Men - Children of the Atom (USA).chd"
+    },
+    {
+      "title": "Marvel Super Heroes",
+      "category": "Comics",
+      "system": "fbneo",
+      "bucket": "fbneo/mshu.zip"
+    },
+    {
+      "title": "Marvel Super Heroes",
+      "category": "Comics",
+      "system": "saturn",
+      "bucket": "saturn/Marvel Super Heroes (USA).chd"
+    },
+    {
+      "title": "Marvel Super Heroes",
+      "category": "Comics",
+      "system": "psx",
+      "bucket": "psx/Marvel Super Heroes (USA).chd"
+    },
+    {
+      "title": "X-Men vs. Street Fighter",
+      "category": "Comics",
+      "system": "fbneo",
+      "bucket": "fbneo/xmvsfu.zip"
+    },
+    {
+      "title": "X-Men vs. Street Fighter",
+      "category": "Comics",
+      "system": "psx",
+      "bucket": "psx/X-Men vs. Street Fighter (USA).chd"
+    },
+    {
+      "title": "Marvel Super Heroes vs. Street Fighter",
+      "category": "Comics",
+      "system": "fbneo",
+      "bucket": "fbneo/mshvsfu.zip"
+    },
+    {
+      "title": "Marvel Super Heroes vs. Street Fighter",
+      "category": "Comics",
+      "system": "psx",
+      "bucket": "psx/Marvel Super Heroes vs. Street Fighter (USA).chd"
+    },
+    {
+      "title": "Marvel vs. Capcom - Clash of Super Heroes",
+      "category": "Comics",
+      "system": "fbneo",
+      "bucket": "fbneo/mvscu.zip"
+    },
+    {
+      "title": "Marvel vs. Capcom - Clash of Super Heroes",
+      "category": "Comics",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Marvel vs. Capcom - Clash of Super Heroes (USA).chd"
+    },
+    {
+      "title": "Marvel vs. Capcom - Clash of Super Heroes",
+      "category": "Comics",
+      "system": "psx",
+      "bucket": "psx/Marvel vs. Capcom - Clash of Super Heroes (USA).chd"
+    },
+    {
+      "title": "Marvel vs. Capcom 2",
+      "category": "Comics",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Marvel vs. Capcom 2 (USA).chd"
+    },
+    {
+      "title": "Marvel vs. Capcom 2 - New Age of Heroes",
+      "category": "Comics",
+      "system": "ps2",
+      "bucket": "ps2/Marvel vs. Capcom 2 - New Age of Heroes (USA).chd"
+    },
+    {
+      "title": "Marvel Super Heroes in War of the Gems",
+      "category": "Comics",
+      "system": "snes",
+      "bucket": "snes/Marvel Super Heroes in War of the Gems (USA).zip"
+    },
+    {
+      "title": "X-Men - Mutant Academy",
+      "category": "Comics",
+      "system": "psx",
+      "bucket": "psx/X-Men - Mutant Academy (USA).chd"
+    },
+    {
+      "title": "X-Men - Mutant Academy",
+      "category": "Comics",
+      "system": "gbc",
+      "bucket": "gbc/X-Men - Mutant Academy (USA, Europe) (Rev 1).zip"
+    },
+    {
+      "title": "X-Men - Mutant Academy 2",
+      "category": "Comics",
+      "system": "psx",
+      "bucket": "psx/X-Men - Mutant Academy 2 (USA).chd"
+    },
+    {
+      "title": "X-Men - Next Dimension",
+      "category": "Comics",
+      "system": "gc",
+      "bucket": "gc/X-Men - Next Dimension (USA).rvz"
+    },
+    {
+      "title": "X-Men Legends",
+      "category": "Comics",
+      "system": "gc",
+      "bucket": "gc/X-Men Legends (USA).rvz"
+    },
+    {
+      "title": "X-Men Legends II - Rise of Apocalypse",
+      "category": "Comics",
+      "system": "gc",
+      "bucket": "gc/X-Men Legends II - Rise of Apocalypse (USA).rvz"
+    },
+    {
+      "title": "X-Men Legends II - Rise of Apocalypse",
+      "category": "Comics",
+      "system": "psp",
+      "bucket": "psp/X-Men Legends II - Rise of Apocalypse (USA).chd"
+    },
+    {
+      "title": "X2 - Wolverine's Revenge",
+      "category": "Comics",
+      "system": "gc",
+      "bucket": "gc/X2 - Wolverine's Revenge (USA).rvz"
+    },
+    {
+      "title": "X2 - Wolverine's Revenge",
+      "category": "Comics",
+      "system": "gba",
+      "bucket": "gba/X2 - Wolverine's Revenge (USA, Europe).zip"
+    },
+    {
+      "title": "X-Men - Reign of Apocalypse",
+      "category": "Comics",
+      "system": "gba",
+      "bucket": "gba/X-Men - Reign of Apocalypse (USA, Europe).zip"
+    },
+    {
+      "title": "Captain America and the Avengers",
+      "category": "Comics",
+      "system": "fbneo",
+      "bucket": "fbneo/captavenu.zip"
+    },
+    {
+      "title": "Captain America and the Avengers",
+      "category": "Comics",
+      "system": "genesis",
+      "bucket": "genesis/Captain America and the Avengers (USA).zip"
+    },
+    {
+      "title": "Captain America and the Avengers",
+      "category": "Comics",
+      "system": "snes",
+      "bucket": "snes/Captain America and the Avengers (USA).zip"
+    },
+    {
+      "title": "Captain America and the Avengers",
+      "category": "Comics",
+      "system": "nes",
+      "bucket": "nes/Captain America and the Avengers (USA).zip"
+    },
+    {
+      "title": "The Punisher",
+      "category": "Comics",
+      "system": "fbneo",
+      "bucket": "fbneo/punisheru.zip"
+    },
+    {
+      "title": "Punisher, The",
+      "category": "Comics",
+      "system": "genesis",
+      "bucket": "genesis/Punisher, The (USA).zip"
+    },
+    {
+      "title": "Punisher, The",
+      "category": "Comics",
+      "system": "nes",
+      "bucket": "nes/Punisher, The (USA).zip"
+    },
+    {
+      "title": "Incredible Hulk, The",
+      "category": "Comics",
+      "system": "snes",
+      "bucket": "snes/Incredible Hulk, The (USA).zip"
+    },
+    {
+      "title": "Incredible Hulk, The",
+      "category": "Comics",
+      "system": "genesis",
+      "bucket": "genesis/Incredible Hulk, The (USA, Europe).zip"
+    },
+    {
+      "title": "Incredible Hulk, The - Ultimate Destruction",
+      "category": "Comics",
+      "system": "gc",
+      "bucket": "gc/Incredible Hulk, The - Ultimate Destruction (USA).rvz"
+    },
+    {
+      "title": "Hulk",
+      "category": "Comics",
+      "system": "gc",
+      "bucket": "gc/Hulk (USA).rvz"
+    },
+    {
+      "title": "Marvel - Ultimate Alliance",
+      "category": "Comics",
+      "system": "psp",
+      "bucket": "psp/Marvel - Ultimate Alliance (USA) (v2.00).chd"
+    },
+    {
+      "title": "Marvel - Ultimate Alliance",
+      "category": "Comics",
+      "system": "gba",
+      "bucket": "gba/Marvel - Ultimate Alliance (USA).zip"
+    },
+    {
+      "title": "Marvel - Ultimate Alliance 2",
+      "category": "Comics",
+      "system": "psp",
+      "bucket": "psp/Marvel - Ultimate Alliance 2 (USA).chd"
+    },
+    {
+      "title": "LEGO Marvel Avengers",
+      "category": "Comics",
+      "system": "3ds",
+      "bucket": "3ds/LEGO Marvel Avengers (USA) (En,Fr,Es,Pt).zip"
+    },
+    {
+      "title": "LEGO Marvel Super Heroes - Universe in Peril",
+      "category": "Comics",
+      "system": "3ds",
+      "bucket": "3ds/LEGO Marvel Super Heroes - Universe in Peril (USA) (En,Fr,Es,Pt) (English-only Audio).zip"
+    },
+    {
+      "title": "LEGO Marvel Super Heroes - Universe in Peril",
+      "category": "Comics",
+      "system": "nds",
+      "bucket": "nds/LEGO Marvel Super Heroes - Universe in Peril (USA) (En,Fr,Es,Pt).zip"
+    },
+    {
+      "title": "Cadillacs and Dinosaurs",
+      "category": "Comics",
+      "system": "fbneo",
+      "bucket": "fbneo/dinou.zip"
+    },
+    {
+      "title": "Cadillacs and Dinosaurs - The Second Cataclysm",
+      "category": "Comics",
+      "system": "segacd",
+      "bucket": "segacd/Cadillacs and Dinosaurs - The Second Cataclysm (USA, Brazil) (RE).chd"
+    },
+    {
+      "title": "Judge Dredd",
+      "category": "Comics",
+      "system": "snes",
+      "bucket": "snes/Judge Dredd (USA).zip"
+    },
+    {
+      "title": "Judge Dredd",
+      "category": "Comics",
+      "system": "genesis",
+      "bucket": "genesis/Judge Dredd (World).zip"
+    },
+    {
+      "title": "Todd McFarlane's Spawn - The Video Game",
+      "category": "Comics",
+      "system": "snes",
+      "bucket": "snes/Todd McFarlane's Spawn - The Video Game (USA).zip"
+    },
+    {
+      "title": "Spawn - In the Demon's Hand",
+      "category": "Comics",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Spawn - In the Demon's Hand (USA).chd"
+    },
+    {
+      "title": "Walking Dead, The - A Telltale Games Series - Game of the Year Edition",
+      "category": "Comics",
+      "system": "xbox360",
+      "bucket": "xbox360/Walking Dead, The - A Telltale Games Series - Game of the Year Edition (USA, Europe).zar"
+    },
+    {
+      "title": "Walking Dead, The - Season Two - A Telltale Games Series",
+      "category": "Comics",
+      "system": "xbox360",
+      "bucket": "xbox360/Walking Dead, The - Season Two - A Telltale Games Series (USA, Europe).zar"
+    },
+    {
+      "title": "GoldenEye 007",
+      "category": "Movies & TV",
+      "system": "n64",
+      "bucket": "n64/GoldenEye 007 (USA).zip"
+    },
+    {
+      "title": "GoldenEye 007",
+      "category": "Movies & TV",
+      "system": "nds",
+      "bucket": "nds/GoldenEye 007 (USA).zip"
+    },
+    {
+      "title": "007 - The World Is Not Enough",
+      "category": "Movies & TV",
+      "system": "n64",
+      "bucket": "n64/007 - The World Is Not Enough (USA).zip"
+    },
+    {
+      "title": "007 - The World Is Not Enough",
+      "category": "Movies & TV",
+      "system": "psx",
+      "bucket": "psx/007 - The World Is Not Enough (USA).chd"
+    },
+    {
+      "title": "007 - Tomorrow Never Dies",
+      "category": "Movies & TV",
+      "system": "psx",
+      "bucket": "psx/007 - Tomorrow Never Dies (USA).chd"
+    },
+    {
+      "title": "007 - Agent Under Fire",
+      "category": "Movies & TV",
+      "system": "gc",
+      "bucket": "gc/007 - Agent Under Fire (USA) (Rev 1).rvz"
+    },
+    {
+      "title": "007 - Nightfire",
+      "category": "Movies & TV",
+      "system": "gc",
+      "bucket": "gc/007 - Nightfire (USA).rvz"
+    },
+    {
+      "title": "007 - NightFire",
+      "category": "Movies & TV",
+      "system": "gba",
+      "bucket": "gba/007 - NightFire (USA, Europe) (En,Fr,De).zip"
+    },
+    {
+      "title": "007 - Everything or Nothing",
+      "category": "Movies & TV",
+      "system": "gc",
+      "bucket": "gc/007 - Everything or Nothing (USA).rvz"
+    },
+    {
+      "title": "007 - Everything or Nothing",
+      "category": "Movies & TV",
+      "system": "gba",
+      "bucket": "gba/007 - Everything or Nothing (USA, Europe) (En,Fr,De).zip"
+    },
+    {
+      "title": "007 - From Russia with Love",
+      "category": "Movies & TV",
+      "system": "gc",
+      "bucket": "gc/007 - From Russia with Love (USA).rvz"
+    },
+    {
+      "title": "007 - From Russia with Love",
+      "category": "Movies & TV",
+      "system": "psp",
+      "bucket": "psp/007 - From Russia with Love (USA).chd"
+    },
+    {
+      "title": "007 - Blood Stone",
+      "category": "Movies & TV",
+      "system": "nds",
+      "bucket": "nds/007 - Blood Stone (USA).zip"
+    },
+    {
+      "title": "James Bond 007",
+      "category": "Movies & TV",
+      "system": "gb",
+      "bucket": "gb/James Bond 007 (USA, Europe) (SGB Enhanced).zip"
+    },
+    {
+      "title": "James Bond 007 - The Duel",
+      "category": "Movies & TV",
+      "system": "genesis",
+      "bucket": "genesis/James Bond 007 - The Duel (USA).zip"
+    },
+    {
+      "title": "Aliens",
+      "category": "Movies & TV",
+      "system": "fbneo",
+      "bucket": "fbneo/aliensu.zip"
+    },
+    {
+      "title": "Alien vs. Predator",
+      "category": "Movies & TV",
+      "system": "mame",
+      "bucket": "mame/avsp.zip"
+    },
+    {
+      "title": "Alien 3 - The Gun",
+      "category": "Movies & TV",
+      "system": "fbneo",
+      "bucket": "fbneo/alien3u.zip"
+    },
+    {
+      "title": "Alien 3",
+      "category": "Movies & TV",
+      "system": "snes",
+      "bucket": "snes/Alien 3 (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Alien 3",
+      "category": "Movies & TV",
+      "system": "genesis",
+      "bucket": "genesis/Alien 3 (USA, Europe) (Rev A).zip"
+    },
+    {
+      "title": "Alien 3",
+      "category": "Movies & TV",
+      "system": "nes",
+      "bucket": "nes/Alien 3 (USA).zip"
+    },
+    {
+      "title": "Alien 3",
+      "category": "Movies & TV",
+      "system": "gb",
+      "bucket": "gb/Alien 3 (USA, Europe).zip"
+    },
+    {
+      "title": "Alien 3",
+      "category": "Movies & TV",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Alien 3 (Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Alien vs Predator",
+      "category": "Movies & TV",
+      "system": "atarijaguar",
+      "bucket": "atarijaguar/Alien vs Predator (World).zip"
+    },
+    {
+      "title": "Alien vs Predator",
+      "category": "Movies & TV",
+      "system": "snes",
+      "bucket": "snes/Alien vs Predator (USA).zip"
+    },
+    {
+      "title": "Alien Trilogy",
+      "category": "Movies & TV",
+      "system": "psx",
+      "bucket": "psx/Alien Trilogy (USA).chd"
+    },
+    {
+      "title": "Alien Trilogy",
+      "category": "Movies & TV",
+      "system": "saturn",
+      "bucket": "saturn/Alien Trilogy (USA).chd"
+    },
+    {
+      "title": "Alien Resurrection",
+      "category": "Movies & TV",
+      "system": "psx",
+      "bucket": "psx/Alien Resurrection (USA).chd"
+    },
+    {
+      "title": "Aliens - Infestation",
+      "category": "Movies & TV",
+      "system": "nds",
+      "bucket": "nds/Aliens - Infestation (USA) (En,Fr,De).zip"
+    },
+    {
+      "title": "Predator 2",
+      "category": "Movies & TV",
+      "system": "genesis",
+      "bucket": "genesis/Predator 2 (USA, Europe).zip"
+    },
+    {
+      "title": "RoboCop",
+      "category": "Movies & TV",
+      "system": "fbneo",
+      "bucket": "fbneo/robocopu.zip"
+    },
+    {
+      "title": "RoboCop 2",
+      "category": "Movies & TV",
+      "system": "fbneo",
+      "bucket": "fbneo/robocop2u.zip"
+    },
+    {
+      "title": "RoboCop",
+      "category": "Movies & TV",
+      "system": "nes",
+      "bucket": "nes/RoboCop (USA).zip"
+    },
+    {
+      "title": "RoboCop",
+      "category": "Movies & TV",
+      "system": "gb",
+      "bucket": "gb/RoboCop (USA, Europe) (Rev 1).zip"
+    },
+    {
+      "title": "RoboCop Versus The Terminator",
+      "category": "Movies & TV",
+      "system": "genesis",
+      "bucket": "genesis/RoboCop Versus The Terminator (USA).zip"
+    },
+    {
+      "title": "RoboCop versus The Terminator",
+      "category": "Movies & TV",
+      "system": "snes",
+      "bucket": "snes/RoboCop versus The Terminator (USA).zip"
+    },
+    {
+      "title": "Terminator 2 - Judgment Day",
+      "category": "Movies & TV",
+      "system": "fbneo",
+      "bucket": "fbneo/term2.zip"
+    },
+    {
+      "title": "Terminator, The",
+      "category": "Movies & TV",
+      "system": "segacd",
+      "bucket": "segacd/Terminator, The (USA).chd"
+    },
+    {
+      "title": "Terminator, The",
+      "category": "Movies & TV",
+      "system": "genesis",
+      "bucket": "genesis/Terminator, The (USA).zip"
+    },
+    {
+      "title": "T2 - The Arcade Game",
+      "category": "Movies & TV",
+      "system": "genesis",
+      "bucket": "genesis/T2 - The Arcade Game (USA, Europe).zip"
+    },
+    {
+      "title": "T2 - The Arcade Game",
+      "category": "Movies & TV",
+      "system": "snes",
+      "bucket": "snes/T2 - The Arcade Game (USA).zip"
+    },
+    {
+      "title": "T2 - The Arcade Game",
+      "category": "Movies & TV",
+      "system": "gamegear",
+      "bucket": "gamegear/T2 - The Arcade Game (USA, Europe).zip"
+    },
+    {
+      "title": "Jurassic Park",
+      "category": "Movies & TV",
+      "system": "fbneo",
+      "bucket": "fbneo/jpark.zip"
+    },
+    {
+      "title": "Jurassic Park",
+      "category": "Movies & TV",
+      "system": "snes",
+      "bucket": "snes/Jurassic Park (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Jurassic Park",
+      "category": "Movies & TV",
+      "system": "genesis",
+      "bucket": "genesis/Jurassic Park (USA).zip"
+    },
+    {
+      "title": "Jurassic Park",
+      "category": "Movies & TV",
+      "system": "segacd",
+      "bucket": "segacd/Jurassic Park (USA) (RE).chd"
+    },
+    {
+      "title": "Jurassic Park",
+      "category": "Movies & TV",
+      "system": "nes",
+      "bucket": "nes/Jurassic Park (USA).zip"
+    },
+    {
+      "title": "Jurassic Park",
+      "category": "Movies & TV",
+      "system": "gb",
+      "bucket": "gb/Jurassic Park (USA).zip"
+    },
+    {
+      "title": "Jurassic Park - Rampage Edition",
+      "category": "Movies & TV",
+      "system": "genesis",
+      "bucket": "genesis/Jurassic Park - Rampage Edition (USA, Europe).zip"
+    },
+    {
+      "title": "Jurassic Park Part 2 - The Chaos Continues",
+      "category": "Movies & TV",
+      "system": "snes",
+      "bucket": "snes/Jurassic Park Part 2 - The Chaos Continues (USA) (En,Fr,De,It).zip"
+    },
+    {
+      "title": "Lost World, The - Jurassic Park",
+      "category": "Movies & TV",
+      "system": "genesis",
+      "bucket": "genesis/Lost World, The - Jurassic Park (USA, Europe).zip"
+    },
+    {
+      "title": "Lost World, The - Jurassic Park",
+      "category": "Movies & TV",
+      "system": "saturn",
+      "bucket": "saturn/Lost World, The - Jurassic Park (USA).chd"
+    },
+    {
+      "title": "Lost World, The - Jurassic Park - Special Edition",
+      "category": "Movies & TV",
+      "system": "psx",
+      "bucket": "psx/Lost World, The - Jurassic Park - Special Edition (USA).chd"
+    },
+    {
+      "title": "LEGO Jurassic World",
+      "category": "Movies & TV",
+      "system": "3ds",
+      "bucket": "3ds/LEGO Jurassic World (USA) (En,Fr,Es,Pt).zip"
+    },
+    {
+      "title": "Indiana Jones and the Temple of Doom",
+      "category": "Movies & TV",
+      "system": "mame",
+      "bucket": "mame/indytemp.zip"
+    },
+    {
+      "title": "Indiana Jones' Greatest Adventures",
+      "category": "Movies & TV",
+      "system": "snes",
+      "bucket": "snes/Indiana Jones' Greatest Adventures (USA).zip"
+    },
+    {
+      "title": "Indiana Jones and the Last Crusade",
+      "category": "Movies & TV",
+      "system": "nes",
+      "bucket": "nes/Indiana Jones and the Last Crusade (USA) (Taito).zip"
+    },
+    {
+      "title": "Indiana Jones and the Last Crusade",
+      "category": "Movies & TV",
+      "system": "genesis",
+      "bucket": "genesis/Indiana Jones and the Last Crusade (USA).zip"
+    },
+    {
+      "title": "Indiana Jones and the Temple of Doom",
+      "category": "Movies & TV",
+      "system": "nes",
+      "bucket": "nes/Indiana Jones and the Temple of Doom (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Indiana Jones and the Infernal Machine",
+      "category": "Movies & TV",
+      "system": "n64",
+      "bucket": "n64/Indiana Jones and the Infernal Machine (USA).zip"
+    },
+    {
+      "title": "Indiana Jones and the Staff of Kings",
+      "category": "Movies & TV",
+      "system": "psp",
+      "bucket": "psp/Indiana Jones and the Staff of Kings (USA) (En,Fr).chd"
+    },
+    {
+      "title": "Indiana Jones and the Staff of Kings",
+      "category": "Movies & TV",
+      "system": "nds",
+      "bucket": "nds/Indiana Jones and the Staff of Kings (USA) (En,Fr).zip"
+    },
+    {
+      "title": "LEGO Indiana Jones 2 - The Adventure Continues",
+      "category": "Movies & TV",
+      "system": "psp",
+      "bucket": "psp/LEGO Indiana Jones 2 - The Adventure Continues (USA) (En,Fr,Es).chd"
+    },
+    {
+      "title": "LEGO Indiana Jones - The Original Adventures",
+      "category": "Movies & TV",
+      "system": "psp",
+      "bucket": "psp/LEGO Indiana Jones - The Original Adventures (USA) (En,Fr,Es).chd"
+    },
+    {
+      "title": "LEGO Indiana Jones 2 - The Adventure Continues",
+      "category": "Movies & TV",
+      "system": "nds",
+      "bucket": "nds/LEGO Indiana Jones 2 - The Adventure Continues (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "LEGO Indiana Jones - The Original Adventures",
+      "category": "Movies & TV",
+      "system": "nds",
+      "bucket": "nds/LEGO Indiana Jones - The Original Adventures (USA) (En,Fr,De,Es,It,Da).zip"
+    },
+    {
+      "title": "Ghostbusters",
+      "category": "Movies & TV",
+      "system": "genesis",
+      "bucket": "genesis/Ghostbusters (USA, Europe).zip"
+    },
+    {
+      "title": "New Ghostbusters II",
+      "category": "Movies & TV",
+      "system": "nes",
+      "bucket": "nes/New Ghostbusters II (Europe).zip"
+    },
+    {
+      "title": "Ghostbusters II",
+      "category": "Movies & TV",
+      "system": "gb",
+      "bucket": "gb/Ghostbusters II (USA, Europe).zip"
+    },
+    {
+      "title": "The Real Ghostbusters",
+      "category": "Movies & TV",
+      "system": "fbneo",
+      "bucket": "fbneo/ghostb.zip"
+    },
+    {
+      "title": "Ghostbusters - The Video Game",
+      "category": "Movies & TV",
+      "system": "psp",
+      "bucket": "psp/Ghostbusters - The Video Game (USA).chd"
+    },
+    {
+      "title": "Ghostbusters - The Video Game",
+      "category": "Movies & TV",
+      "system": "nds",
+      "bucket": "nds/Ghostbusters - The Video Game (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Gremlins 2 - The New Batch",
+      "category": "Movies & TV",
+      "system": "nes",
+      "bucket": "nes/Gremlins 2 - The New Batch (USA).zip"
+    },
+    {
+      "title": "Gremlins 2 - The New Batch",
+      "category": "Movies & TV",
+      "system": "gb",
+      "bucket": "gb/Gremlins 2 - The New Batch (World).zip"
+    },
+    {
+      "title": "Goonies II, The",
+      "category": "Movies & TV",
+      "system": "nes",
+      "bucket": "nes/Goonies II, The (USA).zip"
+    },
+    {
+      "title": "Vs. The Goonies",
+      "category": "Movies & TV",
+      "system": "mame",
+      "bucket": "mame/goonies.zip"
+    },
+    {
+      "title": "Little Nemo - The Dream Master",
+      "category": "Movies & TV",
+      "system": "nes",
+      "bucket": "nes/Little Nemo - The Dream Master (USA).zip"
+    },
+    {
+      "title": "Nemo",
+      "category": "Movies & TV",
+      "system": "fbneo",
+      "bucket": "fbneo/nemo.zip"
+    },
+    {
+      "title": "Willow",
+      "category": "Movies & TV",
+      "system": "nes",
+      "bucket": "nes/Willow (USA).zip"
+    },
+    {
+      "title": "Willow",
+      "category": "Movies & TV",
+      "system": "fbneo",
+      "bucket": "fbneo/willowu.zip"
+    },
+    {
+      "title": "Hook",
+      "category": "Movies & TV",
+      "system": "snes",
+      "bucket": "snes/Hook (USA).zip"
+    },
+    {
+      "title": "Hook",
+      "category": "Movies & TV",
+      "system": "genesis",
+      "bucket": "genesis/Hook (USA).zip"
+    },
+    {
+      "title": "Hook",
+      "category": "Movies & TV",
+      "system": "segacd",
+      "bucket": "segacd/Hook (USA).chd"
+    },
+    {
+      "title": "Hook",
+      "category": "Movies & TV",
+      "system": "fbneo",
+      "bucket": "fbneo/hooku.zip"
+    },
+    {
+      "title": "Michael Jackson's Moonwalker",
+      "category": "Movies & TV",
+      "system": "fbneo",
+      "bucket": "fbneo/mwalku.zip"
+    },
+    {
+      "title": "Michael Jackson's Moonwalker",
+      "category": "Movies & TV",
+      "system": "mame",
+      "bucket": "mame/moonwalk.zip"
+    },
+    {
+      "title": "Michael Jackson's Moonwalker",
+      "category": "Movies & TV",
+      "system": "genesis",
+      "bucket": "genesis/Michael Jackson's Moonwalker (Japan, USA) (En).zip"
+    },
+    {
+      "title": "Michael Jackson's Moonwalker",
+      "category": "Movies & TV",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Michael Jackson's Moonwalker (USA, Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Addams Family, The",
+      "category": "Movies & TV",
+      "system": "snes",
+      "bucket": "snes/Addams Family, The (USA).zip"
+    },
+    {
+      "title": "Addams Family, The",
+      "category": "Movies & TV",
+      "system": "genesis",
+      "bucket": "genesis/Addams Family, The (USA, Europe).zip"
+    },
+    {
+      "title": "Addams Family, The",
+      "category": "Movies & TV",
+      "system": "nes",
+      "bucket": "nes/Addams Family, The (USA).zip"
+    },
+    {
+      "title": "Addams Family, The",
+      "category": "Movies & TV",
+      "system": "gb",
+      "bucket": "gb/Addams Family, The (USA).zip"
+    },
+    {
+      "title": "Addams Family, The",
+      "category": "Movies & TV",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Addams Family, The (USA).chd"
+    },
+    {
+      "title": "Addams Family, The - Pugsley's Scavenger Hunt",
+      "category": "Movies & TV",
+      "system": "snes",
+      "bucket": "snes/Addams Family, The - Pugsley's Scavenger Hunt (USA).zip"
+    },
+    {
+      "title": "Blues Brothers, The",
+      "category": "Movies & TV",
+      "system": "snes",
+      "bucket": "snes/Blues Brothers, The (USA).zip"
+    },
+    {
+      "title": "Mask, The",
+      "category": "Movies & TV",
+      "system": "snes",
+      "bucket": "snes/Mask, The (USA).zip"
+    },
+    {
+      "title": "True Lies",
+      "category": "Movies & TV",
+      "system": "snes",
+      "bucket": "snes/True Lies (USA).zip"
+    },
+    {
+      "title": "True Lies",
+      "category": "Movies & TV",
+      "system": "genesis",
+      "bucket": "genesis/True Lies (World).zip"
+    },
+    {
+      "title": "Demolition Man",
+      "category": "Movies & TV",
+      "system": "snes",
+      "bucket": "snes/Demolition Man (USA).zip"
+    },
+    {
+      "title": "Demolition Man",
+      "category": "Movies & TV",
+      "system": "genesis",
+      "bucket": "genesis/Demolition Man (USA, Europe).zip"
+    },
+    {
+      "title": "Demolition Man",
+      "category": "Movies & TV",
+      "system": "segacd",
+      "bucket": "segacd/Demolition Man (USA).chd"
+    },
+    {
+      "title": "Stargate",
+      "category": "Movies & TV",
+      "system": "snes",
+      "bucket": "snes/Stargate (USA).zip"
+    },
+    {
+      "title": "Stargate",
+      "category": "Movies & TV",
+      "system": "genesis",
+      "bucket": "genesis/Stargate (USA, Europe).zip"
+    },
+    {
+      "title": "Die Hard",
+      "category": "Movies & TV",
+      "system": "nes",
+      "bucket": "nes/Die Hard (USA).zip"
+    },
+    {
+      "title": "Die Hard Arcade",
+      "category": "Movies & TV",
+      "system": "saturn",
+      "bucket": "saturn/Die Hard Arcade (USA).chd"
+    },
+    {
+      "title": "Die Hard Trilogy",
+      "category": "Movies & TV",
+      "system": "psx",
+      "bucket": "psx/Die Hard Trilogy (USA) (Rev 1).chd"
+    },
+    {
+      "title": "Die Hard Trilogy",
+      "category": "Movies & TV",
+      "system": "saturn",
+      "bucket": "saturn/Die Hard Trilogy (USA).chd"
+    },
+    {
+      "title": "Rambo III",
+      "category": "Movies & TV",
+      "system": "fbneo",
+      "bucket": "fbneo/rambo3u.zip"
+    },
+    {
+      "title": "Rambo III",
+      "category": "Movies & TV",
+      "system": "genesis",
+      "bucket": "genesis/Rambo III (USA, Europe, Korea) (En) (Rev A).zip"
+    },
+    {
+      "title": "Rambo - First Blood Part II",
+      "category": "Movies & TV",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Rambo - First Blood Part II (USA).zip"
+    },
+    {
+      "title": "Untouchables, The",
+      "category": "Movies & TV",
+      "system": "nes",
+      "bucket": "nes/Untouchables, The (USA) (Rev 2).zip"
+    },
+    {
+      "title": "Dune - The Battle for Arrakis",
+      "category": "Movies & TV",
+      "system": "genesis",
+      "bucket": "genesis/Dune - The Battle for Arrakis (USA).zip"
+    },
+    {
+      "title": "Mission - Impossible",
+      "category": "Movies & TV",
+      "system": "nes",
+      "bucket": "nes/Mission - Impossible (USA).zip"
+    },
+    {
+      "title": "Mission - Impossible",
+      "category": "Movies & TV",
+      "system": "n64",
+      "bucket": "n64/Mission - Impossible (USA).zip"
+    },
+    {
+      "title": "Mission - Impossible",
+      "category": "Movies & TV",
+      "system": "psx",
+      "bucket": "psx/Mission - Impossible (USA) (En,Fr,Es).chd"
+    },
+    {
+      "title": "Jackie Chan's Action Kung Fu",
+      "category": "Movies & TV",
+      "system": "nes",
+      "bucket": "nes/Jackie Chan's Action Kung Fu (USA).zip"
+    },
+    {
+      "title": "Jackie Chan's Action Kung Fu",
+      "category": "Movies & TV",
+      "system": "tg16",
+      "bucket": "tg16/Jackie Chan's Action Kung Fu (USA).zip"
+    },
+    {
+      "title": "Jackie Chan Stuntmaster",
+      "category": "Movies & TV",
+      "system": "psx",
+      "bucket": "psx/Jackie Chan Stuntmaster (USA).chd"
+    },
+    {
+      "title": "Scorpion King, The - Sword of Osiris",
+      "category": "Movies & TV",
+      "system": "gba",
+      "bucket": "gba/Scorpion King, The - Sword of Osiris (USA).zip"
+    },
+    {
+      "title": "Buffy the Vampire Slayer - Chaos Bleeds",
+      "category": "Movies & TV",
+      "system": "gc",
+      "bucket": "gc/Buffy the Vampire Slayer - Chaos Bleeds (USA).rvz"
+    },
+    {
+      "title": "Lord of the Rings, The - The Two Towers",
+      "category": "Movies & TV",
+      "system": "gc",
+      "bucket": "gc/Lord of the Rings, The - The Two Towers (USA).rvz"
+    },
+    {
+      "title": "Lord of the Rings, The - The Two Towers",
+      "category": "Movies & TV",
+      "system": "gba",
+      "bucket": "gba/Lord of the Rings, The - The Two Towers (USA, Europe) (En,Fr,De,Es,It,Nl).zip"
+    },
+    {
+      "title": "Lord of the Rings, The - The Return of the King",
+      "category": "Movies & TV",
+      "system": "gc",
+      "bucket": "gc/Lord of the Rings, The - The Return of the King (USA).rvz"
+    },
+    {
+      "title": "Lord of the Rings, The - The Return of the King",
+      "category": "Movies & TV",
+      "system": "gba",
+      "bucket": "gba/Lord of the Rings, The - The Return of the King (USA, Europe) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Lord of the Rings, The - The Third Age",
+      "category": "Movies & TV",
+      "system": "gc",
+      "bucket": "gc/Lord of the Rings, The - The Third Age (USA).m3u",
+      "files": [
+        "gc/Lord of the Rings, The - The Third Age (USA) (Disc 1).rvz",
+        "gc/Lord of the Rings, The - The Third Age (USA) (Disc 2).rvz"
+      ]
+    },
+    {
+      "title": "Lord of the Rings, The - The Third Age",
+      "category": "Movies & TV",
+      "system": "gba",
+      "bucket": "gba/Lord of the Rings, The - The Third Age (USA, Europe) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Hobbit, The - The Prelude to the Lord of the Rings",
+      "category": "Movies & TV",
+      "system": "gc",
+      "bucket": "gc/Hobbit, The - The Prelude to the Lord of the Rings (USA).rvz"
+    },
+    {
+      "title": "Hobbit, The - The Prelude to the Lord of the Rings",
+      "category": "Movies & TV",
+      "system": "gba",
+      "bucket": "gba/Hobbit, The - The Prelude to the Lord of the Rings (USA).zip"
+    },
+    {
+      "title": "LEGO The Lord of the Rings",
+      "category": "Movies & TV",
+      "system": "3ds",
+      "bucket": "3ds/LEGO The Lord of the Rings (USA) (En,Fr,Es,Pt).zip"
+    },
+    {
+      "title": "LEGO The Lord of the Rings",
+      "category": "Movies & TV",
+      "system": "nds",
+      "bucket": "nds/LEGO The Lord of the Rings (USA) (En,Fr,Es,Pt).zip"
+    },
+    {
+      "title": "LEGO The Hobbit",
+      "category": "Movies & TV",
+      "system": "3ds",
+      "bucket": "3ds/LEGO The Hobbit (USA) (En,Fr,Es,Pt).zip"
+    },
+    {
+      "title": "Harry Potter and the Sorcerer's Stone",
+      "category": "Movies & TV",
+      "system": "gbc",
+      "bucket": "gbc/Harry Potter and the Sorcerer's Stone (USA, Europe) (En,Fr,De,Es,It,Nl,Pt,Sv,No,Da,Fi).zip"
+    },
+    {
+      "title": "Harry Potter and the Sorcerer's Stone",
+      "category": "Movies & TV",
+      "system": "gba",
+      "bucket": "gba/Harry Potter and the Sorcerer's Stone (USA, Europe) (En,Fr,De,Es,It,Nl,Pt,Sv,No,Da).zip"
+    },
+    {
+      "title": "Harry Potter and the Sorcerer's Stone",
+      "category": "Movies & TV",
+      "system": "psx",
+      "bucket": "psx/Harry Potter and the Sorcerer's Stone (USA) (En,Fr,Es).chd"
+    },
+    {
+      "title": "Harry Potter and the Sorcerer's Stone",
+      "category": "Movies & TV",
+      "system": "gc",
+      "bucket": "gc/Harry Potter and the Sorcerer's Stone (USA) (En,Es) (Rev 1).rvz"
+    },
+    {
+      "title": "Harry Potter and the Chamber of Secrets",
+      "category": "Movies & TV",
+      "system": "gbc",
+      "bucket": "gbc/Harry Potter and the Chamber of Secrets (USA, Europe) (En,Fr,De,Es,It,Nl,Pt,Sv,Da).zip"
+    },
+    {
+      "title": "Harry Potter and the Chamber of Secrets",
+      "category": "Movies & TV",
+      "system": "gba",
+      "bucket": "gba/Harry Potter and the Chamber of Secrets (USA, Europe) (En,Fr,De,Es,It,Nl,Pt,Sv,No,Da).zip"
+    },
+    {
+      "title": "Harry Potter and the Chamber of Secrets",
+      "category": "Movies & TV",
+      "system": "psx",
+      "bucket": "psx/Harry Potter and the Chamber of Secrets (USA) (En,Fr,Es).chd"
+    },
+    {
+      "title": "Harry Potter and the Chamber of Secrets",
+      "category": "Movies & TV",
+      "system": "gc",
+      "bucket": "gc/Harry Potter and the Chamber of Secrets (USA).rvz"
+    },
+    {
+      "title": "Harry Potter and the Prisoner of Azkaban",
+      "category": "Movies & TV",
+      "system": "gba",
+      "bucket": "gba/Harry Potter and the Prisoner of Azkaban (USA, Europe) (En,Fr,De,Es,It,Nl,Da).zip"
+    },
+    {
+      "title": "Harry Potter and the Prisoner of Azkaban",
+      "category": "Movies & TV",
+      "system": "gc",
+      "bucket": "gc/Harry Potter and the Prisoner of Azkaban (USA).rvz"
+    },
+    {
+      "title": "Harry Potter - Quidditch World Cup",
+      "category": "Movies & TV",
+      "system": "gc",
+      "bucket": "gc/Harry Potter - Quidditch World Cup (USA) (En,Fr,Es).rvz"
+    },
+    {
+      "title": "Harry Potter - Quidditch World Cup",
+      "category": "Movies & TV",
+      "system": "gba",
+      "bucket": "gba/Harry Potter - Quidditch World Cup (USA, Europe) (En,Fr,De,Es,It,Nl,Da).zip"
+    },
+    {
+      "title": "LEGO Harry Potter - Years 1-4",
+      "category": "Movies & TV",
+      "system": "psp",
+      "bucket": "psp/LEGO Harry Potter - Years 1-4 (USA) (En,Fr,Es).chd"
+    },
+    {
+      "title": "LEGO Harry Potter - Years 5-7",
+      "category": "Movies & TV",
+      "system": "psp",
+      "bucket": "psp/LEGO Harry Potter - Years 5-7 (USA) (En,Fr,Es,Pt).chd"
+    },
+    {
+      "title": "LEGO Harry Potter - Years 1-4",
+      "category": "Movies & TV",
+      "system": "nds",
+      "bucket": "nds/LEGO Harry Potter - Years 1-4 (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "LEGO Harry Potter - Years 5-7",
+      "category": "Movies & TV",
+      "system": "nds",
+      "bucket": "nds/LEGO Harry Potter - Years 5-7 (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "LEGO Harry Potter - Years 5-7",
+      "category": "Movies & TV",
+      "system": "3ds",
+      "bucket": "3ds/LEGO Harry Potter - Years 5-7 (USA) (En,Fr,Es,Pt).zip"
+    },
+    {
+      "title": "LEGO Pirates of the Caribbean - The Video Game",
+      "category": "Movies & TV",
+      "system": "psp",
+      "bucket": "psp/LEGO Pirates of the Caribbean - The Video Game (USA) (En,Fr,Es).chd"
+    },
+    {
+      "title": "LEGO Pirates of the Caribbean - The Video Game",
+      "category": "Movies & TV",
+      "system": "nds",
+      "bucket": "nds/LEGO Pirates of the Caribbean - The Video Game (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "LEGO Pirates of the Caribbean - The Video Game",
+      "category": "Movies & TV",
+      "system": "3ds",
+      "bucket": "3ds/LEGO Pirates of the Caribbean - The Video Game (USA) (En,Fr,Es) (Rev 1).zip"
+    },
+    {
+      "title": "LEGO Movie Videogame, The",
+      "category": "Movies & TV",
+      "system": "3ds",
+      "bucket": "3ds/LEGO Movie Videogame, The (USA) (En,Fr,Es,Pt).zip"
+    },
+    {
+      "title": "Peter Jackson's King Kong - The Official Game of the Movie",
+      "category": "Movies & TV",
+      "system": "gc",
+      "bucket": "gc/Peter Jackson's King Kong - The Official Game of the Movie (USA) (En,Fr,Es).rvz"
+    },
+    {
+      "title": "Peter Jackson's King Kong - The Official Game of the Movie",
+      "category": "Movies & TV",
+      "system": "psp",
+      "bucket": "psp/Peter Jackson's King Kong - The Official Game of the Movie (USA) (En,Fr,Es).chd"
+    },
+    {
+      "title": "Peter Jackson's King Kong - The Official Game of the Movie",
+      "category": "Movies & TV",
+      "system": "nds",
+      "bucket": "nds/Peter Jackson's King Kong - The Official Game of the Movie (USA) (En,Fr,De,Es,It,Nl,Sv,No,Da,Fi) (Rev 1).zip"
+    },
+    {
+      "title": "Shrek 2",
+      "category": "Movies & TV",
+      "system": "gc",
+      "bucket": "gc/Shrek 2 (USA).rvz"
+    },
+    {
+      "title": "Shrek 2",
+      "category": "Movies & TV",
+      "system": "gba",
+      "bucket": "gba/Shrek 2 (USA, Europe).zip"
+    },
+    {
+      "title": "DreamWorks Madagascar",
+      "category": "Movies & TV",
+      "system": "gc",
+      "bucket": "gc/DreamWorks Madagascar (USA) (Rev 1).rvz"
+    },
+    {
+      "title": "Madagascar",
+      "category": "Movies & TV",
+      "system": "gba",
+      "bucket": "gba/Madagascar (USA).zip"
+    },
+    {
+      "title": "Star Trek",
+      "category": "Movies & TV",
+      "system": "fbneo",
+      "bucket": "fbneo/startrek.zip"
+    },
+    {
+      "title": "Star Trek - 25th Anniversary",
+      "category": "Movies & TV",
+      "system": "nes",
+      "bucket": "nes/Star Trek - 25th Anniversary (USA).zip"
+    },
+    {
+      "title": "Star Trek - 25th Anniversary",
+      "category": "Movies & TV",
+      "system": "gb",
+      "bucket": "gb/Star Trek - 25th Anniversary (USA, Europe).zip"
+    },
+    {
+      "title": "Star Trek - The Next Generation - Future's Past",
+      "category": "Movies & TV",
+      "system": "snes",
+      "bucket": "snes/Star Trek - The Next Generation - Future's Past (USA).zip"
+    },
+    {
+      "title": "Star Trek - The Next Generation - Echoes from the Past",
+      "category": "Movies & TV",
+      "system": "genesis",
+      "bucket": "genesis/Star Trek - The Next Generation - Echoes from the Past (USA) (Rev A).zip"
+    },
+    {
+      "title": "Cool Spot",
+      "category": "Brands & Mascots",
+      "system": "genesis",
+      "bucket": "genesis/Cool Spot (USA).zip"
+    },
+    {
+      "title": "Cool Spot",
+      "category": "Brands & Mascots",
+      "system": "snes",
+      "bucket": "snes/Cool Spot (USA).zip"
+    },
+    {
+      "title": "Cool Spot",
+      "category": "Brands & Mascots",
+      "system": "gamegear",
+      "bucket": "gamegear/Cool Spot (USA).zip"
+    },
+    {
+      "title": "Cool Spot",
+      "category": "Brands & Mascots",
+      "system": "gb",
+      "bucket": "gb/Cool Spot (USA).zip"
+    },
+    {
+      "title": "Cool Spot",
+      "category": "Brands & Mascots",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Cool Spot (Europe).zip"
+    },
+    {
+      "title": "Spot Goes to Hollywood",
+      "category": "Brands & Mascots",
+      "system": "genesis",
+      "bucket": "genesis/Spot Goes to Hollywood (USA).zip"
+    },
+    {
+      "title": "Spot Goes to Hollywood",
+      "category": "Brands & Mascots",
+      "system": "saturn",
+      "bucket": "saturn/Spot Goes to Hollywood (USA).chd"
+    },
+    {
+      "title": "Spot Goes to Hollywood",
+      "category": "Brands & Mascots",
+      "system": "psx",
+      "bucket": "psx/Spot Goes to Hollywood (USA).chd"
+    },
+    {
+      "title": "Spot - The Video Game",
+      "category": "Brands & Mascots",
+      "system": "nes",
+      "bucket": "nes/Spot - The Video Game (USA).zip"
+    },
+    {
+      "title": "Spot - The Video Game",
+      "category": "Brands & Mascots",
+      "system": "gb",
+      "bucket": "gb/Spot - The Video Game (USA).zip"
+    },
+    {
+      "title": "Spot - The Cool Adventure",
+      "category": "Brands & Mascots",
+      "system": "gb",
+      "bucket": "gb/Spot - The Cool Adventure (USA).zip"
+    },
+    {
+      "title": "M.C. Kids",
+      "category": "Brands & Mascots",
+      "system": "nes",
+      "bucket": "nes/M.C. Kids (USA).zip"
+    },
+    {
+      "title": "Mick & Mack as the Global Gladiators",
+      "category": "Brands & Mascots",
+      "system": "genesis",
+      "bucket": "genesis/Mick & Mack as the Global Gladiators (USA).zip"
+    },
+    {
+      "title": "Global Gladiators",
+      "category": "Brands & Mascots",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Global Gladiators (Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Global Gladiators",
+      "category": "Brands & Mascots",
+      "system": "gamegear",
+      "bucket": "gamegear/Global Gladiators (Europe).zip"
+    },
+    {
+      "title": "McDonald's Treasure Land Adventure",
+      "category": "Brands & Mascots",
+      "system": "genesis",
+      "bucket": "genesis/McDonald's Treasure Land Adventure (USA).zip"
+    },
+    {
+      "title": "Yo! Noid",
+      "category": "Brands & Mascots",
+      "system": "nes",
+      "bucket": "nes/Yo! Noid (USA).zip"
+    },
+    {
+      "title": "Chester Cheetah - Too Cool to Fool",
+      "category": "Brands & Mascots",
+      "system": "genesis",
+      "bucket": "genesis/Chester Cheetah - Too Cool to Fool (USA).zip"
+    },
+    {
+      "title": "Chester Cheetah - Too Cool to Fool",
+      "category": "Brands & Mascots",
+      "system": "snes",
+      "bucket": "snes/Chester Cheetah - Too Cool to Fool (USA).zip"
+    },
+    {
+      "title": "Chester Cheetah - Wild Wild Quest",
+      "category": "Brands & Mascots",
+      "system": "genesis",
+      "bucket": "genesis/Chester Cheetah - Wild Wild Quest (USA).zip"
+    },
+    {
+      "title": "Chester Cheetah - Wild Wild Quest",
+      "category": "Brands & Mascots",
+      "system": "snes",
+      "bucket": "snes/Chester Cheetah - Wild Wild Quest (USA).zip"
+    },
+    {
+      "title": "Coca-Cola Kid",
+      "category": "Brands & Mascots",
+      "system": "gamegear",
+      "bucket": "gamegear/Coca-Cola Kid (Japan).zip"
+    }
+  ]
+}

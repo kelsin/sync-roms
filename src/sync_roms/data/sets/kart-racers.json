@@ -1,0 +1,2062 @@
+{
+  "name": "Kart & Combat Racing",
+  "description": "Kart racers, futuristic racers and vehicular combat.",
+  "games": [
+    {
+      "title": "Super Mario Kart",
+      "category": "Kart & Mascot",
+      "system": "snes",
+      "bucket": "snes/Super Mario Kart (USA).zip"
+    },
+    {
+      "title": "Mario Kart 64",
+      "category": "Kart & Mascot",
+      "system": "n64",
+      "bucket": "n64/Mario Kart 64 (USA).zip"
+    },
+    {
+      "title": "Mario Kart - Super Circuit",
+      "category": "Kart & Mascot",
+      "system": "gba",
+      "bucket": "gba/Mario Kart - Super Circuit (USA).zip"
+    },
+    {
+      "title": "Mario Kart - Double Dash!!",
+      "category": "Kart & Mascot",
+      "system": "gc",
+      "bucket": "gc/Mario Kart - Double Dash!! (USA).rvz"
+    },
+    {
+      "title": "Mario Kart DS",
+      "category": "Kart & Mascot",
+      "system": "nds",
+      "bucket": "nds/Mario Kart DS (USA, Australia) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Mario Kart Wii",
+      "category": "Kart & Mascot",
+      "system": "wii",
+      "bucket": "wii/Mario Kart Wii (USA) (En,Fr,Es).rvz"
+    },
+    {
+      "title": "Mario Kart 7",
+      "category": "Kart & Mascot",
+      "system": "3ds",
+      "bucket": "3ds/Mario Kart 7 (USA) (En,Fr,Es) (Rev 1).zip"
+    },
+    {
+      "title": "Mario Kart 8",
+      "category": "Kart & Mascot",
+      "system": "wiiu",
+      "bucket": "wiiu/MARIO KART 8 (US) (v81).wua"
+    },
+    {
+      "title": "Diddy Kong Racing",
+      "category": "Kart & Mascot",
+      "system": "n64",
+      "bucket": "n64/Diddy Kong Racing (USA) (En,Fr) (Rev 1).zip"
+    },
+    {
+      "title": "Diddy Kong Racing DS",
+      "category": "Kart & Mascot",
+      "system": "nds",
+      "bucket": "nds/Diddy Kong Racing DS (USA).zip"
+    },
+    {
+      "title": "CTR - Crash Team Racing",
+      "category": "Kart & Mascot",
+      "system": "psx",
+      "bucket": "psx/CTR - Crash Team Racing (USA).chd"
+    },
+    {
+      "title": "Crash Nitro Kart",
+      "category": "Kart & Mascot",
+      "system": "gba",
+      "bucket": "gba/Crash Nitro Kart (USA).zip"
+    },
+    {
+      "title": "Crash Nitro Kart",
+      "category": "Kart & Mascot",
+      "system": "gc",
+      "bucket": "gc/Crash Nitro Kart (USA).rvz"
+    },
+    {
+      "title": "Crash Tag Team Racing",
+      "category": "Kart & Mascot",
+      "system": "gc",
+      "bucket": "gc/Crash Tag Team Racing (USA).rvz"
+    },
+    {
+      "title": "Crash Tag Team Racing",
+      "category": "Kart & Mascot",
+      "system": "psp",
+      "bucket": "psp/Crash Tag Team Racing (USA).chd"
+    },
+    {
+      "title": "Chocobo Racing",
+      "category": "Kart & Mascot",
+      "system": "psx",
+      "bucket": "psx/Chocobo Racing (USA).chd"
+    },
+    {
+      "title": "Bomberman Fantasy Race",
+      "category": "Kart & Mascot",
+      "system": "psx",
+      "bucket": "psx/Bomberman Fantasy Race (USA).chd"
+    },
+    {
+      "title": "Konami Krazy Racers",
+      "category": "Kart & Mascot",
+      "system": "gba",
+      "bucket": "gba/Konami Krazy Racers (USA).zip"
+    },
+    {
+      "title": "Sonic Drift",
+      "category": "Kart & Mascot",
+      "system": "gamegear",
+      "bucket": "gamegear/Sonic Drift (Japan) (En).zip"
+    },
+    {
+      "title": "Sonic Drift 2",
+      "category": "Kart & Mascot",
+      "system": "gamegear",
+      "bucket": "gamegear/Sonic Drift 2 (World).zip"
+    },
+    {
+      "title": "Sonic R",
+      "category": "Kart & Mascot",
+      "system": "saturn",
+      "bucket": "saturn/Sonic R (USA, Brazil).chd"
+    },
+    {
+      "title": "Sonic & SEGA All-Stars Racing",
+      "category": "Kart & Mascot",
+      "system": "nds",
+      "bucket": "nds/Sonic & SEGA All-Stars Racing (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Sonic & Sega All-Stars Racing",
+      "category": "Kart & Mascot",
+      "system": "wii",
+      "bucket": "wii/Sonic & Sega All-Stars Racing (USA) (En,Fr,Es).rvz"
+    },
+    {
+      "title": "Sonic & All-Stars Racing Transformed",
+      "category": "Kart & Mascot",
+      "system": "3ds",
+      "bucket": "3ds/Sonic & All-Stars Racing Transformed (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Kirby Air Ride",
+      "category": "Kart & Mascot",
+      "system": "gc",
+      "bucket": "gc/Kirby Air Ride (USA).rvz"
+    },
+    {
+      "title": "Snowboard Kids",
+      "category": "Kart & Mascot",
+      "system": "n64",
+      "bucket": "n64/Snowboard Kids (USA).zip"
+    },
+    {
+      "title": "Snowboard Kids 2",
+      "category": "Kart & Mascot",
+      "system": "n64",
+      "bucket": "n64/Snowboard Kids 2 (USA).zip"
+    },
+    {
+      "title": "SBK - Snowboard Kids",
+      "category": "Kart & Mascot",
+      "system": "nds",
+      "bucket": "nds/SBK - Snowboard Kids (USA).zip"
+    },
+    {
+      "title": "Mickey's Speedway USA",
+      "category": "Kart & Mascot",
+      "system": "n64",
+      "bucket": "n64/Mickey's Speedway USA (USA).zip"
+    },
+    {
+      "title": "Mickey's Speedway USA",
+      "category": "Kart & Mascot",
+      "system": "gbc",
+      "bucket": "gbc/Mickey's Speedway USA (USA, Europe) (En,Fr,De,Es).zip"
+    },
+    {
+      "title": "Mickey's Racing Adventure",
+      "category": "Kart & Mascot",
+      "system": "gbc",
+      "bucket": "gbc/Mickey's Racing Adventure (USA, Europe) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Walt Disney World Quest - Magical Racing Tour",
+      "category": "Kart & Mascot",
+      "system": "psx",
+      "bucket": "psx/Walt Disney World Quest - Magical Racing Tour (USA).chd"
+    },
+    {
+      "title": "Walt Disney World Quest - Magical Racing Tour",
+      "category": "Kart & Mascot",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Walt Disney World Quest - Magical Racing Tour (USA).chd"
+    },
+    {
+      "title": "Walt Disney World Quest - Magical Racing Tour",
+      "category": "Kart & Mascot",
+      "system": "gbc",
+      "bucket": "gbc/Walt Disney World Quest - Magical Racing Tour (USA, Europe).zip"
+    },
+    {
+      "title": "Speed Punks",
+      "category": "Kart & Mascot",
+      "system": "psx",
+      "bucket": "psx/Speed Punks (USA).chd"
+    },
+    {
+      "title": "Motor Toon Grand Prix",
+      "category": "Kart & Mascot",
+      "system": "psx",
+      "bucket": "psx/Motor Toon Grand Prix (USA).chd"
+    },
+    {
+      "title": "Looney Tunes Racing",
+      "category": "Kart & Mascot",
+      "system": "psx",
+      "bucket": "psx/Looney Tunes Racing (USA) (En,Fr,Es).chd"
+    },
+    {
+      "title": "Looney Tunes Racing",
+      "category": "Kart & Mascot",
+      "system": "gbc",
+      "bucket": "gbc/Looney Tunes Racing (USA) (En,Fr,De,Es,It,Nl).zip"
+    },
+    {
+      "title": "Looney Tunes - Space Race",
+      "category": "Kart & Mascot",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Looney Tunes - Space Race (USA) (En,Fr,Es).chd"
+    },
+    {
+      "title": "Wacky Races",
+      "category": "Kart & Mascot",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Wacky Races (USA).chd"
+    },
+    {
+      "title": "Wacky Races",
+      "category": "Kart & Mascot",
+      "system": "gbc",
+      "bucket": "gbc/Wacky Races (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Wacky Races - Crash & Dash",
+      "category": "Kart & Mascot",
+      "system": "nds",
+      "bucket": "nds/Wacky Races - Crash & Dash (USA) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Disney-Pixar Toy Story Racer",
+      "category": "Kart & Mascot",
+      "system": "psx",
+      "bucket": "psx/Disney-Pixar Toy Story Racer (USA).chd"
+    },
+    {
+      "title": "Toy Story Racer",
+      "category": "Kart & Mascot",
+      "system": "gbc",
+      "bucket": "gbc/Toy Story Racer (USA, Europe).zip"
+    },
+    {
+      "title": "Nicktoons Racing",
+      "category": "Kart & Mascot",
+      "system": "psx",
+      "bucket": "psx/Nicktoons Racing (USA).chd"
+    },
+    {
+      "title": "Nicktoons Racing",
+      "category": "Kart & Mascot",
+      "system": "gba",
+      "bucket": "gba/Nicktoons Racing (USA).zip"
+    },
+    {
+      "title": "Nicktoons Racing",
+      "category": "Kart & Mascot",
+      "system": "gbc",
+      "bucket": "gbc/Nicktoons Racing (USA).zip"
+    },
+    {
+      "title": "LEGO Racers",
+      "category": "Kart & Mascot",
+      "system": "n64",
+      "bucket": "n64/LEGO Racers (USA) (En,Fr,De,Es,It,Nl,Sv,No,Da,Fi).zip"
+    },
+    {
+      "title": "LEGO Racers",
+      "category": "Kart & Mascot",
+      "system": "psx",
+      "bucket": "psx/LEGO Racers (USA) (En,Fr,De,Es,It,Nl,Sv,No,Da,Fi).chd"
+    },
+    {
+      "title": "LEGO Racers",
+      "category": "Kart & Mascot",
+      "system": "gbc",
+      "bucket": "gbc/LEGO Racers (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "LEGO Racers 2",
+      "category": "Kart & Mascot",
+      "system": "gba",
+      "bucket": "gba/LEGO Racers 2 (USA) (En,Fr).zip"
+    },
+    {
+      "title": "South Park Rally",
+      "category": "Kart & Mascot",
+      "system": "n64",
+      "bucket": "n64/South Park Rally (USA).zip"
+    },
+    {
+      "title": "South Park Rally",
+      "category": "Kart & Mascot",
+      "system": "psx",
+      "bucket": "psx/South Park Rally (USA).chd"
+    },
+    {
+      "title": "South Park Rally",
+      "category": "Kart & Mascot",
+      "system": "dreamcast",
+      "bucket": "dreamcast/South Park Rally (USA).chd"
+    },
+    {
+      "title": "Muppet RaceMania",
+      "category": "Kart & Mascot",
+      "system": "psx",
+      "bucket": "psx/Muppet RaceMania (USA).chd"
+    },
+    {
+      "title": "Woody Woodpecker Racing",
+      "category": "Kart & Mascot",
+      "system": "psx",
+      "bucket": "psx/Woody Woodpecker Racing (USA).chd"
+    },
+    {
+      "title": "Woody Woodpecker Racing",
+      "category": "Kart & Mascot",
+      "system": "gbc",
+      "bucket": "gbc/Woody Woodpecker Racing (USA).zip"
+    },
+    {
+      "title": "Smurf Racer!",
+      "category": "Kart & Mascot",
+      "system": "psx",
+      "bucket": "psx/Smurf Racer! (USA) (En,Fr,Es).chd"
+    },
+    {
+      "title": "Rascal Racers",
+      "category": "Kart & Mascot",
+      "system": "psx",
+      "bucket": "psx/Rascal Racers (USA).chd"
+    },
+    {
+      "title": "Miracle Space Race",
+      "category": "Kart & Mascot",
+      "system": "psx",
+      "bucket": "psx/Miracle Space Race (USA).chd"
+    },
+    {
+      "title": "Street Racer",
+      "category": "Kart & Mascot",
+      "system": "snes",
+      "bucket": "snes/Street Racer (USA).zip"
+    },
+    {
+      "title": "Street Racer",
+      "category": "Kart & Mascot",
+      "system": "genesis",
+      "bucket": "genesis/Street Racer (Europe).zip"
+    },
+    {
+      "title": "Street Racer",
+      "category": "Kart & Mascot",
+      "system": "psx",
+      "bucket": "psx/Street Racer (USA).chd"
+    },
+    {
+      "title": "Street Racer",
+      "category": "Kart & Mascot",
+      "system": "saturn",
+      "bucket": "saturn/Street Racer (Europe).chd"
+    },
+    {
+      "title": "Street Racer",
+      "category": "Kart & Mascot",
+      "system": "gb",
+      "bucket": "gb/Street Racer (USA, Europe).zip"
+    },
+    {
+      "title": "Atari Karts",
+      "category": "Kart & Mascot",
+      "system": "atarijaguar",
+      "bucket": "atarijaguar/Atari Karts (World).zip"
+    },
+    {
+      "title": "BC Racers",
+      "category": "Kart & Mascot",
+      "system": "segacd",
+      "bucket": "segacd/BC Racers (USA).chd"
+    },
+    {
+      "title": "BC Racers",
+      "category": "Kart & Mascot",
+      "system": "sega32x",
+      "bucket": "sega32x/BC Racers (USA).zip"
+    },
+    {
+      "title": "Stunt Race FX",
+      "category": "Kart & Mascot",
+      "system": "snes",
+      "bucket": "snes/Stunt Race FX (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Uniracers",
+      "category": "Kart & Mascot",
+      "system": "snes",
+      "bucket": "snes/Uniracers (USA).zip"
+    },
+    {
+      "title": "Banjo-Pilot",
+      "category": "Kart & Mascot",
+      "system": "gba",
+      "bucket": "gba/Banjo-Pilot (USA).zip"
+    },
+    {
+      "title": "Digimon Racing",
+      "category": "Kart & Mascot",
+      "system": "gba",
+      "bucket": "gba/Digimon Racing (USA) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Cartoon Network Speedway",
+      "category": "Kart & Mascot",
+      "system": "gba",
+      "bucket": "gba/Cartoon Network Speedway (USA).zip"
+    },
+    {
+      "title": "Cartoon Network Racing",
+      "category": "Kart & Mascot",
+      "system": "nds",
+      "bucket": "nds/Cartoon Network Racing (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Shrek - Swamp Kart Speedway",
+      "category": "Kart & Mascot",
+      "system": "gba",
+      "bucket": "gba/Shrek - Swamp Kart Speedway (USA) (En,Fr,De,Es,It,Nl) (Rev 1).zip"
+    },
+    {
+      "title": "Shrek - Smash n' Crash Racing",
+      "category": "Kart & Mascot",
+      "system": "gba",
+      "bucket": "gba/Shrek - Smash n' Crash Racing (USA).zip"
+    },
+    {
+      "title": "DreamWorks Shrek - Smash n' Crash Racing",
+      "category": "Kart & Mascot",
+      "system": "gc",
+      "bucket": "gc/DreamWorks Shrek - Smash n' Crash Racing (USA).rvz"
+    },
+    {
+      "title": "Shrek - Smash n' Crash Racing",
+      "category": "Kart & Mascot",
+      "system": "nds",
+      "bucket": "nds/Shrek - Smash n' Crash Racing (USA).zip"
+    },
+    {
+      "title": "DreamWorks Shrek - Smash n' Crash Racing",
+      "category": "Kart & Mascot",
+      "system": "psp",
+      "bucket": "psp/DreamWorks Shrek - Smash n' Crash Racing (USA).chd"
+    },
+    {
+      "title": "Pac-Man World Rally",
+      "category": "Kart & Mascot",
+      "system": "gc",
+      "bucket": "gc/Pac-Man World Rally (USA).rvz"
+    },
+    {
+      "title": "Pac-Man World Rally",
+      "category": "Kart & Mascot",
+      "system": "psp",
+      "bucket": "psp/Pac-Man World Rally (USA).chd"
+    },
+    {
+      "title": "ModNation Racers",
+      "category": "Kart & Mascot",
+      "system": "psp",
+      "bucket": "psp/ModNation Racers (USA) (En,Fr,Es).chd"
+    },
+    {
+      "title": "Freaky Flyers",
+      "category": "Kart & Mascot",
+      "system": "gc",
+      "bucket": "gc/Freaky Flyers (USA).m3u",
+      "files": [
+        "gc/Freaky Flyers (USA) (Disc 1).rvz",
+        "gc/Freaky Flyers (USA) (Disc 2).rvz"
+      ]
+    },
+    {
+      "title": "Penny Racers",
+      "category": "Kart & Mascot",
+      "system": "n64",
+      "bucket": "n64/Penny Racers (USA).zip"
+    },
+    {
+      "title": "Choro Q 64 2 - Hacha Mecha Grand Prix Race",
+      "category": "Kart & Mascot",
+      "system": "n64",
+      "bucket": "n64/Choro Q 64 2 - Hacha Mecha Grand Prix Race (Japan).zip"
+    },
+    {
+      "title": "Gadget Racers",
+      "category": "Kart & Mascot",
+      "system": "gba",
+      "bucket": "gba/Gadget Racers (USA).zip"
+    },
+    {
+      "title": "Road Trip - The Arcade Edition",
+      "category": "Kart & Mascot",
+      "system": "gc",
+      "bucket": "gc/Road Trip - The Arcade Edition (USA).rvz"
+    },
+    {
+      "title": "Pocket Racers",
+      "category": "Kart & Mascot",
+      "system": "psp",
+      "bucket": "psp/Pocket Racers (USA).chd"
+    },
+    {
+      "title": "Antz Racing",
+      "category": "Kart & Mascot",
+      "system": "gbc",
+      "bucket": "gbc/Antz Racing (USA) (En,Fr,De,Es,It,Nl).zip"
+    },
+    {
+      "title": "Doraemon Kart",
+      "category": "Kart & Mascot",
+      "system": "gb",
+      "bucket": "gb/Doraemon Kart (Japan) (SGB Enhanced).zip"
+    },
+    {
+      "title": "Doraemon Kart 2",
+      "category": "Kart & Mascot",
+      "system": "gbc",
+      "bucket": "gbc/Doraemon Kart 2 (Japan) (SGB Enhanced) (GB Compatible).zip"
+    },
+    {
+      "title": "MySims - Racing",
+      "category": "Kart & Mascot",
+      "system": "nds",
+      "bucket": "nds/MySims - Racing (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Ben 10 - Galactic Racing",
+      "category": "Kart & Mascot",
+      "system": "nds",
+      "bucket": "nds/Ben 10 - Galactic Racing (USA) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Ben 10 - Galactic Racing",
+      "category": "Kart & Mascot",
+      "system": "3ds",
+      "bucket": "3ds/Ben 10 - Galactic Racing (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Madagascar Kartz",
+      "category": "Kart & Mascot",
+      "system": "nds",
+      "bucket": "nds/Madagascar Kartz (USA) (En,Fr).zip"
+    },
+    {
+      "title": "Super Star Kartz",
+      "category": "Kart & Mascot",
+      "system": "nds",
+      "bucket": "nds/Super Star Kartz (USA) (En,Fr).zip"
+    },
+    {
+      "title": "DreamWorks Super Star Kartz",
+      "category": "Kart & Mascot",
+      "system": "3ds",
+      "bucket": "3ds/DreamWorks Super Star Kartz (USA) (En,Fr).zip"
+    },
+    {
+      "title": "Garfield Kart",
+      "category": "Kart & Mascot",
+      "system": "3ds",
+      "bucket": "3ds/Garfield Kart (USA).zip"
+    },
+    {
+      "title": "PenPen TriIcelon",
+      "category": "Kart & Mascot",
+      "system": "dreamcast",
+      "bucket": "dreamcast/PenPen TriIcelon (USA).chd"
+    },
+    {
+      "title": "Power Rangers Zeo - Battle Racers",
+      "category": "Kart & Mascot",
+      "system": "snes",
+      "bucket": "snes/Power Rangers Zeo - Battle Racers (USA).zip"
+    },
+    {
+      "title": "Uchuu Race - Astro Go! Go!",
+      "category": "Kart & Mascot",
+      "system": "snes",
+      "bucket": "snes/Uchuu Race - Astro Go! Go! (Japan) (En).zip"
+    },
+    {
+      "title": "F-Zero",
+      "category": "Futuristic",
+      "system": "snes",
+      "bucket": "snes/F-Zero (USA).zip"
+    },
+    {
+      "title": "F-Zero X",
+      "category": "Futuristic",
+      "system": "n64",
+      "bucket": "n64/F-Zero X (USA).zip"
+    },
+    {
+      "title": "F-Zero - Maximum Velocity",
+      "category": "Futuristic",
+      "system": "gba",
+      "bucket": "gba/F-Zero - Maximum Velocity (USA, Europe).zip"
+    },
+    {
+      "title": "F-Zero - GP Legend",
+      "category": "Futuristic",
+      "system": "gba",
+      "bucket": "gba/F-Zero - GP Legend (USA).zip"
+    },
+    {
+      "title": "F-Zero - Climax",
+      "category": "Futuristic",
+      "system": "gba",
+      "bucket": "gba/F-Zero - Climax (Japan).zip"
+    },
+    {
+      "title": "F-Zero GX",
+      "category": "Futuristic",
+      "system": "gc",
+      "bucket": "gc/F-Zero GX (USA).rvz"
+    },
+    {
+      "title": "WipEout",
+      "category": "Futuristic",
+      "system": "psx",
+      "bucket": "psx/WipEout (USA).chd"
+    },
+    {
+      "title": "WipEout",
+      "category": "Futuristic",
+      "system": "saturn",
+      "bucket": "saturn/WipEout (USA).chd"
+    },
+    {
+      "title": "Wipeout XL",
+      "category": "Futuristic",
+      "system": "psx",
+      "bucket": "psx/Wipeout XL (USA).chd"
+    },
+    {
+      "title": "WipEout 2097",
+      "category": "Futuristic",
+      "system": "saturn",
+      "bucket": "saturn/WipEout 2097 (Europe).chd"
+    },
+    {
+      "title": "WipEout 3",
+      "category": "Futuristic",
+      "system": "psx",
+      "bucket": "psx/WipEout 3 (USA).chd"
+    },
+    {
+      "title": "Wipeout 64",
+      "category": "Futuristic",
+      "system": "n64",
+      "bucket": "n64/Wipeout 64 (USA).zip"
+    },
+    {
+      "title": "WipEout Fusion",
+      "category": "Futuristic",
+      "system": "ps2",
+      "bucket": "ps2/WipEout Fusion (USA).chd"
+    },
+    {
+      "title": "Wipeout Pure",
+      "category": "Futuristic",
+      "system": "psp",
+      "bucket": "psp/Wipeout Pure (USA) (En,Fr,Es) (v2.00).chd"
+    },
+    {
+      "title": "Wipeout Pulse",
+      "category": "Futuristic",
+      "system": "psp",
+      "bucket": "psp/Wipeout Pulse (USA) (En,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "WipEout 2048",
+      "category": "Futuristic",
+      "system": "psvita",
+      "bucket": "psvita/WipEout® 2048 [PCSA00015] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Extreme-G",
+      "category": "Futuristic",
+      "system": "n64",
+      "bucket": "n64/Extreme-G (USA).zip"
+    },
+    {
+      "title": "Extreme-G XG2",
+      "category": "Futuristic",
+      "system": "n64",
+      "bucket": "n64/Extreme-G XG2 (USA).zip"
+    },
+    {
+      "title": "XGIII - Extreme G Racing",
+      "category": "Futuristic",
+      "system": "gc",
+      "bucket": "gc/XGIII - Extreme G Racing (USA).rvz"
+    },
+    {
+      "title": "XGRA - Extreme G Racing Association",
+      "category": "Futuristic",
+      "system": "gc",
+      "bucket": "gc/XGRA - Extreme G Racing Association (USA).rvz"
+    },
+    {
+      "title": "Rollcage",
+      "category": "Futuristic",
+      "system": "psx",
+      "bucket": "psx/Rollcage (USA).chd"
+    },
+    {
+      "title": "Rollcage Stage II",
+      "category": "Futuristic",
+      "system": "psx",
+      "bucket": "psx/Rollcage Stage II (USA).chd"
+    },
+    {
+      "title": "Jet Moto",
+      "category": "Futuristic",
+      "system": "psx",
+      "bucket": "psx/Jet Moto (USA).chd"
+    },
+    {
+      "title": "Jet Moto 2 - Championship Edition",
+      "category": "Futuristic",
+      "system": "psx",
+      "bucket": "psx/Jet Moto 2 - Championship Edition (USA).chd"
+    },
+    {
+      "title": "Jet Moto 3",
+      "category": "Futuristic",
+      "system": "psx",
+      "bucket": "psx/Jet Moto 3 (USA).chd"
+    },
+    {
+      "title": "Hydro Thunder",
+      "category": "Futuristic",
+      "system": "n64",
+      "bucket": "n64/Hydro Thunder (USA).zip"
+    },
+    {
+      "title": "Hydro Thunder",
+      "category": "Futuristic",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Hydro Thunder (USA) (Rev 1).chd"
+    },
+    {
+      "title": "Hydro Thunder",
+      "category": "Futuristic",
+      "system": "psx",
+      "bucket": "psx/Hydro Thunder (USA).chd"
+    },
+    {
+      "title": "Star Wars Episode I - Racer",
+      "category": "Futuristic",
+      "system": "n64",
+      "bucket": "n64/Star Wars Episode I - Racer (USA).zip"
+    },
+    {
+      "title": "Star Wars - Episode I - Racer",
+      "category": "Futuristic",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Star Wars - Episode I - Racer (USA).chd"
+    },
+    {
+      "title": "Star Wars Episode I - Racer",
+      "category": "Futuristic",
+      "system": "gbc",
+      "bucket": "gbc/Star Wars Episode I - Racer (USA, Europe) (Rumble Version).zip"
+    },
+    {
+      "title": "San Francisco Rush 2049",
+      "category": "Futuristic",
+      "system": "n64",
+      "bucket": "n64/San Francisco Rush 2049 (USA).zip"
+    },
+    {
+      "title": "San Francisco Rush 2049",
+      "category": "Futuristic",
+      "system": "dreamcast",
+      "bucket": "dreamcast/San Francisco Rush 2049 (USA) (En,Fr,De,Es,It,Nl).chd"
+    },
+    {
+      "title": "San Francisco Rush 2049",
+      "category": "Futuristic",
+      "system": "gbc",
+      "bucket": "gbc/San Francisco Rush 2049 (USA, Europe).zip"
+    },
+    {
+      "title": "AeroGauge",
+      "category": "Futuristic",
+      "system": "n64",
+      "bucket": "n64/AeroGauge (USA).zip"
+    },
+    {
+      "title": "Stunt Racer 64",
+      "category": "Futuristic",
+      "system": "n64",
+      "bucket": "n64/Stunt Racer 64 (USA).zip"
+    },
+    {
+      "title": "Killer Loop",
+      "category": "Futuristic",
+      "system": "psx",
+      "bucket": "psx/Killer Loop (USA).chd"
+    },
+    {
+      "title": "N-Gen Racing",
+      "category": "Futuristic",
+      "system": "psx",
+      "bucket": "psx/N-Gen Racing (USA).chd"
+    },
+    {
+      "title": "CyberSpeed",
+      "category": "Futuristic",
+      "system": "psx",
+      "bucket": "psx/CyberSpeed (USA) (Rev 1).chd"
+    },
+    {
+      "title": "Motorhead",
+      "category": "Futuristic",
+      "system": "psx",
+      "bucket": "psx/Motorhead (USA).chd"
+    },
+    {
+      "title": "Streak Hoverboard Racing",
+      "category": "Futuristic",
+      "system": "psx",
+      "bucket": "psx/Streak Hoverboard Racing (USA).chd"
+    },
+    {
+      "title": "Hi-Octane - The Track Fights Back!",
+      "category": "Futuristic",
+      "system": "psx",
+      "bucket": "psx/Hi-Octane - The Track Fights Back! (USA) (En,Fr,De,Es).chd"
+    },
+    {
+      "title": "Hi-Octane - The Track Fights Back!",
+      "category": "Futuristic",
+      "system": "saturn",
+      "bucket": "saturn/Hi-Octane - The Track Fights Back! (USA) (En,Fr,De,Es).chd"
+    },
+    {
+      "title": "Cyber Speedway",
+      "category": "Futuristic",
+      "system": "saturn",
+      "bucket": "saturn/Cyber Speedway (USA).chd"
+    },
+    {
+      "title": "MagForce Racing",
+      "category": "Futuristic",
+      "system": "dreamcast",
+      "bucket": "dreamcast/MagForce Racing (USA) (En,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "POD - Speedzone",
+      "category": "Futuristic",
+      "system": "dreamcast",
+      "bucket": "dreamcast/POD - Speedzone (USA).chd"
+    },
+    {
+      "title": "TrickStyle",
+      "category": "Futuristic",
+      "system": "dreamcast",
+      "bucket": "dreamcast/TrickStyle (USA).chd"
+    },
+    {
+      "title": "Tube Slider - The Championship of Future Formula",
+      "category": "Futuristic",
+      "system": "gc",
+      "bucket": "gc/Tube Slider - The Championship of Future Formula (USA).rvz"
+    },
+    {
+      "title": "Drome Racers",
+      "category": "Futuristic",
+      "system": "gc",
+      "bucket": "gc/Drome Racers (USA).rvz"
+    },
+    {
+      "title": "Drome Racers",
+      "category": "Futuristic",
+      "system": "gba",
+      "bucket": "gba/Drome Racers (USA).zip"
+    },
+    {
+      "title": "Sonic Riders",
+      "category": "Futuristic",
+      "system": "gc",
+      "bucket": "gc/Sonic Riders (USA) (En,Ja,Fr,De,Es,It).rvz"
+    },
+    {
+      "title": "Sonic Riders",
+      "category": "Futuristic",
+      "system": "ps2",
+      "bucket": "ps2/Sonic Riders (USA) (En,Ja,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "Sonic Riders - Zero Gravity",
+      "category": "Futuristic",
+      "system": "wii",
+      "bucket": "wii/Sonic Riders - Zero Gravity (USA) (En,Ja,Fr,De,Es,It).rvz"
+    },
+    {
+      "title": "Top Gear 3000",
+      "category": "Futuristic",
+      "system": "snes",
+      "bucket": "snes/Top Gear 3000 (USA).zip"
+    },
+    {
+      "title": "OutRun 2019",
+      "category": "Futuristic",
+      "system": "genesis",
+      "bucket": "genesis/OutRun 2019 (USA).zip"
+    },
+    {
+      "title": "MegaRace",
+      "category": "Futuristic",
+      "system": "segacd",
+      "bucket": "segacd/MegaRace (USA).chd"
+    },
+    {
+      "title": "Speed Racer - The Videogame",
+      "category": "Futuristic",
+      "system": "nds",
+      "bucket": "nds/Speed Racer - The Videogame (USA) (En,Fr,Es,Pt).zip"
+    },
+    {
+      "title": "Scorcher",
+      "category": "Futuristic",
+      "system": "saturn",
+      "bucket": "saturn/Scorcher (USA) (RE).chd"
+    },
+    {
+      "title": "Twisted Metal",
+      "category": "Combat",
+      "system": "psx",
+      "bucket": "psx/Twisted Metal (USA).chd"
+    },
+    {
+      "title": "Twisted Metal 2",
+      "category": "Combat",
+      "system": "psx",
+      "bucket": "psx/Twisted Metal 2 (USA).chd"
+    },
+    {
+      "title": "Twisted Metal III",
+      "category": "Combat",
+      "system": "psx",
+      "bucket": "psx/Twisted Metal III (USA) (Rev 1).chd"
+    },
+    {
+      "title": "Twisted Metal 4",
+      "category": "Combat",
+      "system": "psx",
+      "bucket": "psx/Twisted Metal 4 (USA) (Rev 1).chd"
+    },
+    {
+      "title": "Twisted Metal - Small Brawl",
+      "category": "Combat",
+      "system": "psx",
+      "bucket": "psx/Twisted Metal - Small Brawl (USA).chd"
+    },
+    {
+      "title": "Twisted Metal - Head-On",
+      "category": "Combat",
+      "system": "psp",
+      "bucket": "psp/Twisted Metal - Head-On (USA).chd"
+    },
+    {
+      "title": "Vigilante 8",
+      "category": "Combat",
+      "system": "psx",
+      "bucket": "psx/Vigilante 8 (USA) (Rev 1).chd"
+    },
+    {
+      "title": "Vigilante 8",
+      "category": "Combat",
+      "system": "n64",
+      "bucket": "n64/Vigilante 8 (USA).zip"
+    },
+    {
+      "title": "Vigilante 8",
+      "category": "Combat",
+      "system": "gbc",
+      "bucket": "gbc/Vigilante 8 (USA) (Rumble Version).zip"
+    },
+    {
+      "title": "Vigilante 8 - 2nd Offense",
+      "category": "Combat",
+      "system": "psx",
+      "bucket": "psx/Vigilante 8 - 2nd Offense (USA).chd"
+    },
+    {
+      "title": "Vigilante 8 - 2nd Offense",
+      "category": "Combat",
+      "system": "n64",
+      "bucket": "n64/Vigilante 8 - 2nd Offense (USA).zip"
+    },
+    {
+      "title": "Vigilante 8 - 2nd Offense",
+      "category": "Combat",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Vigilante 8 - 2nd Offense (USA).chd"
+    },
+    {
+      "title": "Rogue Trip - Vacation 2012",
+      "category": "Combat",
+      "system": "psx",
+      "bucket": "psx/Rogue Trip - Vacation 2012 (USA).chd"
+    },
+    {
+      "title": "Critical Depth",
+      "category": "Combat",
+      "system": "psx",
+      "bucket": "psx/Critical Depth (USA).chd"
+    },
+    {
+      "title": "Star Wars - Demolition",
+      "category": "Combat",
+      "system": "psx",
+      "bucket": "psx/Star Wars - Demolition (USA).chd"
+    },
+    {
+      "title": "Star Wars - Demolition",
+      "category": "Combat",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Star Wars - Demolition (USA).chd"
+    },
+    {
+      "title": "Grudge Warriors",
+      "category": "Combat",
+      "system": "psx",
+      "bucket": "psx/Grudge Warriors (USA).chd"
+    },
+    {
+      "title": "Auto Destruct",
+      "category": "Combat",
+      "system": "psx",
+      "bucket": "psx/Auto Destruct (USA).chd"
+    },
+    {
+      "title": "Off-World Interceptor Extreme",
+      "category": "Combat",
+      "system": "psx",
+      "bucket": "psx/Off-World Interceptor Extreme (USA).chd"
+    },
+    {
+      "title": "Off-World Interceptor Extreme",
+      "category": "Combat",
+      "system": "saturn",
+      "bucket": "saturn/Off-World Interceptor Extreme (USA).chd"
+    },
+    {
+      "title": "Red Asphalt",
+      "category": "Combat",
+      "system": "psx",
+      "bucket": "psx/Red Asphalt (USA).chd"
+    },
+    {
+      "title": "S.C.A.R.S.",
+      "category": "Combat",
+      "system": "psx",
+      "bucket": "psx/S.C.A.R.S. (USA).chd"
+    },
+    {
+      "title": "S.C.A.R.S.",
+      "category": "Combat",
+      "system": "n64",
+      "bucket": "n64/S.C.A.R.S. (USA).zip"
+    },
+    {
+      "title": "Wreckin Crew - Drive Dangerously",
+      "category": "Combat",
+      "system": "psx",
+      "bucket": "psx/Wreckin Crew - Drive Dangerously (USA) (En,Es).chd"
+    },
+    {
+      "title": "Dead in the Water",
+      "category": "Combat",
+      "system": "psx",
+      "bucket": "psx/Dead in the Water (USA).chd"
+    },
+    {
+      "title": "Impact Racing",
+      "category": "Combat",
+      "system": "psx",
+      "bucket": "psx/Impact Racing (USA).chd"
+    },
+    {
+      "title": "Impact Racing",
+      "category": "Combat",
+      "system": "saturn",
+      "bucket": "saturn/Impact Racing (USA).chd"
+    },
+    {
+      "title": "Carmageddon 64",
+      "category": "Combat",
+      "system": "n64",
+      "bucket": "n64/Carmageddon 64 (USA).zip"
+    },
+    {
+      "title": "Carmageddon - Carpocalypse Now",
+      "category": "Combat",
+      "system": "gbc",
+      "bucket": "gbc/Carmageddon - Carpocalypse Now (USA, Europe) (En,Fr,Es,It).zip"
+    },
+    {
+      "title": "Destruction Derby",
+      "category": "Combat",
+      "system": "psx",
+      "bucket": "psx/Destruction Derby (USA).chd"
+    },
+    {
+      "title": "Destruction Derby",
+      "category": "Combat",
+      "system": "saturn",
+      "bucket": "saturn/Destruction Derby (Europe).chd"
+    },
+    {
+      "title": "Destruction Derby 2",
+      "category": "Combat",
+      "system": "psx",
+      "bucket": "psx/Destruction Derby 2 (USA).chd"
+    },
+    {
+      "title": "Destruction Derby Raw",
+      "category": "Combat",
+      "system": "psx",
+      "bucket": "psx/Destruction Derby Raw (USA).chd"
+    },
+    {
+      "title": "Destruction Derby 64",
+      "category": "Combat",
+      "system": "n64",
+      "bucket": "n64/Destruction Derby 64 (USA).zip"
+    },
+    {
+      "title": "Demolition Racer",
+      "category": "Combat",
+      "system": "psx",
+      "bucket": "psx/Demolition Racer (USA).chd"
+    },
+    {
+      "title": "Demolition Racer - No Exit",
+      "category": "Combat",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Demolition Racer - No Exit (USA).chd"
+    },
+    {
+      "title": "BattleTanx",
+      "category": "Combat",
+      "system": "n64",
+      "bucket": "n64/BattleTanx (USA).zip"
+    },
+    {
+      "title": "BattleTanx - Global Assault",
+      "category": "Combat",
+      "system": "n64",
+      "bucket": "n64/BattleTanx - Global Assault (USA).zip"
+    },
+    {
+      "title": "BattleTanx - Global Assault",
+      "category": "Combat",
+      "system": "psx",
+      "bucket": "psx/BattleTanx - Global Assault (USA).chd"
+    },
+    {
+      "title": "BattleTanx",
+      "category": "Combat",
+      "system": "gbc",
+      "bucket": "gbc/BattleTanx (USA).zip"
+    },
+    {
+      "title": "Cel Damage",
+      "category": "Combat",
+      "system": "gc",
+      "bucket": "gc/Cel Damage (USA).rvz"
+    },
+    {
+      "title": "RoadKill",
+      "category": "Combat",
+      "system": "gc",
+      "bucket": "gc/RoadKill (USA).rvz"
+    },
+    {
+      "title": "WWE Crush Hour",
+      "category": "Combat",
+      "system": "gc",
+      "bucket": "gc/WWE Crush Hour (USA).rvz"
+    },
+    {
+      "title": "Hot Wheels - Velocity X",
+      "category": "Combat",
+      "system": "gc",
+      "bucket": "gc/Hot Wheels - Velocity X (USA).rvz"
+    },
+    {
+      "title": "Road Rash",
+      "category": "Combat",
+      "system": "genesis",
+      "bucket": "genesis/Road Rash (USA, Europe).zip"
+    },
+    {
+      "title": "Road Rash II",
+      "category": "Combat",
+      "system": "genesis",
+      "bucket": "genesis/Road Rash II (USA, Europe) (RR206).zip"
+    },
+    {
+      "title": "Road Rash 3",
+      "category": "Combat",
+      "system": "genesis",
+      "bucket": "genesis/Road Rash 3 (USA, Europe).zip"
+    },
+    {
+      "title": "Road Rash",
+      "category": "Combat",
+      "system": "gb",
+      "bucket": "gb/Road Rash (USA, Europe).zip"
+    },
+    {
+      "title": "Road Rash",
+      "category": "Combat",
+      "system": "gbc",
+      "bucket": "gbc/Road Rash (USA, Europe).zip"
+    },
+    {
+      "title": "Road Rash",
+      "category": "Combat",
+      "system": "gamegear",
+      "bucket": "gamegear/Road Rash (USA).zip"
+    },
+    {
+      "title": "Road Rash",
+      "category": "Combat",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Road Rash (Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Road Rash",
+      "category": "Combat",
+      "system": "segacd",
+      "bucket": "segacd/Road Rash (USA).chd"
+    },
+    {
+      "title": "Road Rash",
+      "category": "Combat",
+      "system": "saturn",
+      "bucket": "saturn/Road Rash (USA).chd"
+    },
+    {
+      "title": "Road Rash",
+      "category": "Combat",
+      "system": "psx",
+      "bucket": "psx/Road Rash (USA).chd"
+    },
+    {
+      "title": "Road Rash 3D",
+      "category": "Combat",
+      "system": "psx",
+      "bucket": "psx/Road Rash 3D (USA).chd"
+    },
+    {
+      "title": "Road Rash - Jailbreak",
+      "category": "Combat",
+      "system": "psx",
+      "bucket": "psx/Road Rash - Jailbreak (USA).chd"
+    },
+    {
+      "title": "Road Rash 64",
+      "category": "Combat",
+      "system": "n64",
+      "bucket": "n64/Road Rash 64 (USA).zip"
+    },
+    {
+      "title": "Road Rash - Jailbreak",
+      "category": "Combat",
+      "system": "gba",
+      "bucket": "gba/Road Rash - Jailbreak (USA).zip"
+    },
+    {
+      "title": "Skitchin'",
+      "category": "Combat",
+      "system": "genesis",
+      "bucket": "genesis/Skitchin' (USA, Europe).zip"
+    },
+    {
+      "title": "Spy Hunter",
+      "category": "Combat",
+      "system": "nes",
+      "bucket": "nes/Spy Hunter (USA).zip"
+    },
+    {
+      "title": "Super Spy Hunter",
+      "category": "Combat",
+      "system": "nes",
+      "bucket": "nes/Super Spy Hunter (USA).zip"
+    },
+    {
+      "title": "Spy Hunter",
+      "category": "Combat",
+      "system": "fbneo",
+      "bucket": "fbneo/spyhunt.zip"
+    },
+    {
+      "title": "Spy Hunter II",
+      "category": "Combat",
+      "system": "fbneo",
+      "bucket": "fbneo/spyhunt2.zip"
+    },
+    {
+      "title": "Spy Hunter",
+      "category": "Combat",
+      "system": "gba",
+      "bucket": "gba/Spy Hunter (USA) (En,Ja,Fr,De,Es).zip"
+    },
+    {
+      "title": "Spy Hunter",
+      "category": "Combat",
+      "system": "3ds",
+      "bucket": "3ds/Spy Hunter (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "RoadBlasters",
+      "category": "Combat",
+      "system": "nes",
+      "bucket": "nes/RoadBlasters (USA).zip"
+    },
+    {
+      "title": "RoadBlasters",
+      "category": "Combat",
+      "system": "genesis",
+      "bucket": "genesis/RoadBlasters (USA).zip"
+    },
+    {
+      "title": "RoadBlasters",
+      "category": "Combat",
+      "system": "atarilynx",
+      "bucket": "atarilynx/RoadBlasters (World).zip"
+    },
+    {
+      "title": "RoadBlasters",
+      "category": "Combat",
+      "system": "mame",
+      "bucket": "mame/roadblst.zip"
+    },
+    {
+      "title": "Chase H.Q.",
+      "category": "Combat",
+      "system": "tg16",
+      "bucket": "tg16/Chase H.Q. (USA).zip"
+    },
+    {
+      "title": "Chase H.Q.",
+      "category": "Combat",
+      "system": "gb",
+      "bucket": "gb/Chase H.Q. (USA, Europe).zip"
+    },
+    {
+      "title": "Chase H.Q.",
+      "category": "Combat",
+      "system": "gamegear",
+      "bucket": "gamegear/Chase H.Q. (USA).zip"
+    },
+    {
+      "title": "Taito Chase H.Q.",
+      "category": "Combat",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Taito Chase H.Q. (Europe).zip"
+    },
+    {
+      "title": "Chase H.Q. II",
+      "category": "Combat",
+      "system": "genesis",
+      "bucket": "genesis/Chase H.Q. II (USA).zip"
+    },
+    {
+      "title": "Super Chase H.Q.",
+      "category": "Combat",
+      "system": "snes",
+      "bucket": "snes/Super Chase H.Q. (USA).zip"
+    },
+    {
+      "title": "Super Chase H.Q.",
+      "category": "Combat",
+      "system": "gb",
+      "bucket": "gb/Super Chase H.Q. (USA, Europe).zip"
+    },
+    {
+      "title": "Chase H.Q. - Secret Police",
+      "category": "Combat",
+      "system": "gbc",
+      "bucket": "gbc/Chase H.Q. - Secret Police (USA) (SGB Enhanced) (GB Compatible).zip"
+    },
+    {
+      "title": "S.C.I. - Special Criminal Investigation",
+      "category": "Combat",
+      "system": "tg16",
+      "bucket": "tg16/S.C.I. - Special Criminal Investigation (Japan).zip"
+    },
+    {
+      "title": "Outlander",
+      "category": "Combat",
+      "system": "snes",
+      "bucket": "snes/Outlander (USA).zip"
+    },
+    {
+      "title": "Outlander",
+      "category": "Combat",
+      "system": "genesis",
+      "bucket": "genesis/Outlander (USA).zip"
+    },
+    {
+      "title": "Battle Cars",
+      "category": "Combat",
+      "system": "snes",
+      "bucket": "snes/Battle Cars (USA).zip"
+    },
+    {
+      "title": "Mach Rider",
+      "category": "Combat",
+      "system": "nes",
+      "bucket": "nes/Mach Rider (Japan, USA) (En) (Rev 1).zip"
+    },
+    {
+      "title": "Mad Max",
+      "category": "Combat",
+      "system": "nes",
+      "bucket": "nes/Mad Max (USA).zip"
+    },
+    {
+      "title": "Knight Rider",
+      "category": "Combat",
+      "system": "nes",
+      "bucket": "nes/Knight Rider (USA).zip"
+    },
+    {
+      "title": "Battle Wheels",
+      "category": "Combat",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Battle Wheels (USA, Europe).zip"
+    },
+    {
+      "title": "Burnout 3 - Takedown",
+      "category": "Combat",
+      "system": "ps2",
+      "bucket": "ps2/Burnout 3 - Takedown (USA).chd"
+    },
+    {
+      "title": "Burnout Legends",
+      "category": "Combat",
+      "system": "psp",
+      "bucket": "psp/Burnout Legends (USA) (En,Fr,De,Es,It,Nl) (v2.00).chd"
+    },
+    {
+      "title": "Burnout Dominator",
+      "category": "Combat",
+      "system": "psp",
+      "bucket": "psp/Burnout Dominator (USA).chd"
+    },
+    {
+      "title": "Burnout Revenge",
+      "category": "Combat",
+      "system": "xbox360",
+      "bucket": "xbox360/Burnout Revenge (USA).zar"
+    },
+    {
+      "title": "Pursuit Force",
+      "category": "Combat",
+      "system": "psp",
+      "bucket": "psp/Pursuit Force (USA).chd"
+    },
+    {
+      "title": "Pursuit Force - Extreme Justice",
+      "category": "Combat",
+      "system": "psp",
+      "bucket": "psp/Pursuit Force - Extreme Justice (USA) (En,Fr,Es).chd"
+    },
+    {
+      "title": "Full Auto 2 - Battlelines",
+      "category": "Combat",
+      "system": "psp",
+      "bucket": "psp/Full Auto 2 - Battlelines (USA).chd"
+    },
+    {
+      "title": "Fired Up",
+      "category": "Combat",
+      "system": "psp",
+      "bucket": "psp/Fired Up (Europe, Australia) (En,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "FlatOut - Head On",
+      "category": "Combat",
+      "system": "psp",
+      "bucket": "psp/FlatOut - Head On (USA).chd"
+    },
+    {
+      "title": "Red Dog - Superior Firepower",
+      "category": "Combat",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Red Dog - Superior Firepower (USA).chd"
+    },
+    {
+      "title": "Wild Metal",
+      "category": "Combat",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Wild Metal (USA) (En,Fr,De,Es,It,Pt).chd"
+    },
+    {
+      "title": "Car Battler Joe",
+      "category": "Combat",
+      "system": "gba",
+      "bucket": "gba/Car Battler Joe (USA).zip"
+    },
+    {
+      "title": "Ray Tracers",
+      "category": "Combat",
+      "system": "psx",
+      "bucket": "psx/Ray Tracers (USA).chd"
+    },
+    {
+      "title": "007 Racing",
+      "category": "Combat",
+      "system": "psx",
+      "bucket": "psx/007 Racing (USA).chd"
+    },
+    {
+      "title": "Fatal Run",
+      "category": "Combat",
+      "system": "atari7800",
+      "bucket": "atari7800/Fatal Run (USA).zip"
+    },
+    {
+      "title": "Action Fighter",
+      "category": "Combat",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Action Fighter (USA, Europe, Brazil) (En) (Rev 1).zip"
+    },
+    {
+      "title": "Assault Rigs",
+      "category": "Combat",
+      "system": "psx",
+      "bucket": "psx/Assault Rigs (USA).chd"
+    },
+    {
+      "title": "R.C. Pro-Am",
+      "category": "Top-down & RC",
+      "system": "nes",
+      "bucket": "nes/R.C. Pro-Am (USA) (Rev 1).zip"
+    },
+    {
+      "title": "R.C. Pro-Am II",
+      "category": "Top-down & RC",
+      "system": "nes",
+      "bucket": "nes/R.C. Pro-Am II (USA).zip"
+    },
+    {
+      "title": "Super R.C. Pro-Am",
+      "category": "Top-down & RC",
+      "system": "gb",
+      "bucket": "gb/Super R.C. Pro-Am (USA, Europe).zip"
+    },
+    {
+      "title": "Championship Pro-Am",
+      "category": "Top-down & RC",
+      "system": "genesis",
+      "bucket": "genesis/Championship Pro-Am (USA).zip"
+    },
+    {
+      "title": "Rock N' Roll Racing",
+      "category": "Top-down & RC",
+      "system": "snes",
+      "bucket": "snes/Rock N' Roll Racing (USA).zip"
+    },
+    {
+      "title": "Rock n' Roll Racing",
+      "category": "Top-down & RC",
+      "system": "genesis",
+      "bucket": "genesis/Rock n' Roll Racing (USA).zip"
+    },
+    {
+      "title": "Radical Psycho Machine Racing",
+      "category": "Top-down & RC",
+      "system": "snes",
+      "bucket": "snes/Radical Psycho Machine Racing (USA).zip"
+    },
+    {
+      "title": "Micro Machines",
+      "category": "Top-down & RC",
+      "system": "genesis",
+      "bucket": "genesis/Micro Machines (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Micro Machines 2 - Turbo Tournament",
+      "category": "Top-down & RC",
+      "system": "genesis",
+      "bucket": "genesis/Micro Machines 2 - Turbo Tournament (Europe) (J-Cart).zip"
+    },
+    {
+      "title": "Micro Machines - Turbo Tournament 96",
+      "category": "Top-down & RC",
+      "system": "genesis",
+      "bucket": "genesis/Micro Machines - Turbo Tournament 96 (Europe) (Rev 1) (J-Cart).zip"
+    },
+    {
+      "title": "Micro Machines - Military",
+      "category": "Top-down & RC",
+      "system": "genesis",
+      "bucket": "genesis/Micro Machines - Military (Europe) (J-Cart).zip"
+    },
+    {
+      "title": "Micro Machines",
+      "category": "Top-down & RC",
+      "system": "snes",
+      "bucket": "snes/Micro Machines (USA).zip"
+    },
+    {
+      "title": "Micro Machines 2 - Turbo Tournament",
+      "category": "Top-down & RC",
+      "system": "snes",
+      "bucket": "snes/Micro Machines 2 - Turbo Tournament (Europe).zip"
+    },
+    {
+      "title": "Micro Machines",
+      "category": "Top-down & RC",
+      "system": "gb",
+      "bucket": "gb/Micro Machines (USA, Europe).zip"
+    },
+    {
+      "title": "Micro Machines 2 - Turbo Tournament",
+      "category": "Top-down & RC",
+      "system": "gb",
+      "bucket": "gb/Micro Machines 2 - Turbo Tournament (Europe).zip"
+    },
+    {
+      "title": "Micro Machines 1 and 2 - Twin Turbo",
+      "category": "Top-down & RC",
+      "system": "gbc",
+      "bucket": "gbc/Micro Machines 1 and 2 - Twin Turbo (USA, Europe).zip"
+    },
+    {
+      "title": "Micro Machines V3",
+      "category": "Top-down & RC",
+      "system": "gbc",
+      "bucket": "gbc/Micro Machines V3 (USA, Europe).zip"
+    },
+    {
+      "title": "Micro Machines",
+      "category": "Top-down & RC",
+      "system": "gamegear",
+      "bucket": "gamegear/Micro Machines (USA, Europe).zip"
+    },
+    {
+      "title": "Micro Machines 2 - Turbo Tournament",
+      "category": "Top-down & RC",
+      "system": "gamegear",
+      "bucket": "gamegear/Micro Machines 2 - Turbo Tournament (Europe).zip"
+    },
+    {
+      "title": "Micro Machines",
+      "category": "Top-down & RC",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Micro Machines (Europe).zip"
+    },
+    {
+      "title": "Micro Machines 64 Turbo",
+      "category": "Top-down & RC",
+      "system": "n64",
+      "bucket": "n64/Micro Machines 64 Turbo (USA).zip"
+    },
+    {
+      "title": "Micro Machines V3",
+      "category": "Top-down & RC",
+      "system": "psx",
+      "bucket": "psx/Micro Machines V3 (USA).chd"
+    },
+    {
+      "title": "Micro Machines",
+      "category": "Top-down & RC",
+      "system": "gba",
+      "bucket": "gba/Micro Machines (Europe) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Micro Machines",
+      "category": "Top-down & RC",
+      "system": "gc",
+      "bucket": "gc/Micro Machines (Europe) (En,Fr,De,Es,It).rvz"
+    },
+    {
+      "title": "Micro Machines V4",
+      "category": "Top-down & RC",
+      "system": "nds",
+      "bucket": "nds/Micro Machines V4 (USA).zip"
+    },
+    {
+      "title": "Micro Machines V4",
+      "category": "Top-down & RC",
+      "system": "psp",
+      "bucket": "psp/Micro Machines V4 (Europe) (En,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "FoxKids.com - Micro Maniacs Racing",
+      "category": "Top-down & RC",
+      "system": "psx",
+      "bucket": "psx/FoxKids.com - Micro Maniacs Racing (USA).chd"
+    },
+    {
+      "title": "Micro Maniacs",
+      "category": "Top-down & RC",
+      "system": "gbc",
+      "bucket": "gbc/Micro Maniacs (Europe).zip"
+    },
+    {
+      "title": "Ivan 'Ironman' Stewart's Super Off Road",
+      "category": "Top-down & RC",
+      "system": "nes",
+      "bucket": "nes/Ivan 'Ironman' Stewart's Super Off Road (USA).zip"
+    },
+    {
+      "title": "Super Off Road",
+      "category": "Top-down & RC",
+      "system": "snes",
+      "bucket": "snes/Super Off Road (USA).zip"
+    },
+    {
+      "title": "Super Off Road - The Baja",
+      "category": "Top-down & RC",
+      "system": "snes",
+      "bucket": "snes/Super Off Road - The Baja (USA).zip"
+    },
+    {
+      "title": "Super Off Road",
+      "category": "Top-down & RC",
+      "system": "gb",
+      "bucket": "gb/Super Off Road (USA, Europe).zip"
+    },
+    {
+      "title": "Super Off Road",
+      "category": "Top-down & RC",
+      "system": "gamegear",
+      "bucket": "gamegear/Super Off Road (USA, Europe).zip"
+    },
+    {
+      "title": "Super Off Road",
+      "category": "Top-down & RC",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Super Off Road (Europe).zip"
+    },
+    {
+      "title": "Super Off-Road",
+      "category": "Top-down & RC",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Super Off-Road (USA, Europe).zip"
+    },
+    {
+      "title": "Ironman Ivan Stewart's Super Off-Road",
+      "category": "Top-down & RC",
+      "system": "mame",
+      "bucket": "mame/offroad.zip"
+    },
+    {
+      "title": "Ironman Ivan Stewart's Super Off-Road Track-Pak",
+      "category": "Top-down & RC",
+      "system": "mame",
+      "bucket": "mame/offroadt.zip"
+    },
+    {
+      "title": "Super Sprint",
+      "category": "Top-down & RC",
+      "system": "nes",
+      "bucket": "nes/Super Sprint (Japan) (En).zip"
+    },
+    {
+      "title": "Super Sprint",
+      "category": "Top-down & RC",
+      "system": "mame",
+      "bucket": "mame/ssprint.zip"
+    },
+    {
+      "title": "Championship Sprint",
+      "category": "Top-down & RC",
+      "system": "mame",
+      "bucket": "mame/csprint.zip"
+    },
+    {
+      "title": "Bad Lands",
+      "category": "Top-down & RC",
+      "system": "fbneo",
+      "bucket": "fbneo/badlands.zip"
+    },
+    {
+      "title": "Hot Rod",
+      "category": "Top-down & RC",
+      "system": "fbneo",
+      "bucket": "fbneo/hotrod.zip"
+    },
+    {
+      "title": "Danny Sullivan's Indy Heat",
+      "category": "Top-down & RC",
+      "system": "nes",
+      "bucket": "nes/Danny Sullivan's Indy Heat (USA).zip"
+    },
+    {
+      "title": "Cobra Triangle",
+      "category": "Top-down & RC",
+      "system": "nes",
+      "bucket": "nes/Cobra Triangle (USA).zip"
+    },
+    {
+      "title": "Eliminator Boat Duel",
+      "category": "Top-down & RC",
+      "system": "nes",
+      "bucket": "nes/Eliminator Boat Duel (USA).zip"
+    },
+    {
+      "title": "Galaxy 5000 - Racing in the 51st Century",
+      "category": "Top-down & RC",
+      "system": "nes",
+      "bucket": "nes/Galaxy 5000 - Racing in the 51st Century (USA).zip"
+    },
+    {
+      "title": "Super Cars",
+      "category": "Top-down & RC",
+      "system": "nes",
+      "bucket": "nes/Super Cars (USA).zip"
+    },
+    {
+      "title": "Bigfoot",
+      "category": "Top-down & RC",
+      "system": "nes",
+      "bucket": "nes/Bigfoot (USA).zip"
+    },
+    {
+      "title": "Bump 'n' Jump",
+      "category": "Top-down & RC",
+      "system": "nes",
+      "bucket": "nes/Bump 'n' Jump (USA).zip"
+    },
+    {
+      "title": "Burnin' Rubber",
+      "category": "Top-down & RC",
+      "system": "fbneo",
+      "bucket": "fbneo/brubber.zip"
+    },
+    {
+      "title": "Road Fighter",
+      "category": "Top-down & RC",
+      "system": "nes",
+      "bucket": "nes/Road Fighter (Europe).zip"
+    },
+    {
+      "title": "Road Fighter",
+      "category": "Top-down & RC",
+      "system": "fbneo",
+      "bucket": "fbneo/roadf.zip"
+    },
+    {
+      "title": "Biker Mice from Mars",
+      "category": "Top-down & RC",
+      "system": "snes",
+      "bucket": "snes/Biker Mice from Mars (USA).zip"
+    },
+    {
+      "title": "Cyber Spin",
+      "category": "Top-down & RC",
+      "system": "snes",
+      "bucket": "snes/Cyber Spin (USA).zip"
+    },
+    {
+      "title": "Combat Cars",
+      "category": "Top-down & RC",
+      "system": "genesis",
+      "bucket": "genesis/Combat Cars (USA, Europe).zip"
+    },
+    {
+      "title": "Super Skidmarks",
+      "category": "Top-down & RC",
+      "system": "genesis",
+      "bucket": "genesis/Super Skidmarks (Europe) (J-Cart).zip"
+    },
+    {
+      "title": "Power Drive",
+      "category": "Top-down & RC",
+      "system": "genesis",
+      "bucket": "genesis/Power Drive (Europe) (En,Fr,De,Es,Pt).zip"
+    },
+    {
+      "title": "Power Drive",
+      "category": "Top-down & RC",
+      "system": "snes",
+      "bucket": "snes/Power Drive (Europe) (En,Fr,De,Es,Pt).zip"
+    },
+    {
+      "title": "Power Drive Rally",
+      "category": "Top-down & RC",
+      "system": "atarijaguar",
+      "bucket": "atarijaguar/Power Drive Rally (World).zip"
+    },
+    {
+      "title": "Moto Roader",
+      "category": "Top-down & RC",
+      "system": "tg16",
+      "bucket": "tg16/Moto Roader (USA).zip"
+    },
+    {
+      "title": "Moto Roader II",
+      "category": "Top-down & RC",
+      "system": "tg16",
+      "bucket": "tg16/Moto Roader II (Japan).zip"
+    },
+    {
+      "title": "Super Drift Out - World Rally Championships",
+      "category": "Top-down & RC",
+      "system": "snes",
+      "bucket": "snes/Super Drift Out - World Rally Championships (Japan) (En).zip"
+    },
+    {
+      "title": "Drift Out",
+      "category": "Top-down & RC",
+      "system": "fbneo",
+      "bucket": "fbneo/driftout.zip"
+    },
+    {
+      "title": "Neo Drift Out - New Technology",
+      "category": "Top-down & RC",
+      "system": "fbneo",
+      "bucket": "fbneo/neodrift.zip"
+    },
+    {
+      "title": "Over Top",
+      "category": "Top-down & RC",
+      "system": "fbneo",
+      "bucket": "fbneo/overtop.zip"
+    },
+    {
+      "title": "Thrash Rally",
+      "category": "Top-down & RC",
+      "system": "fbneo",
+      "bucket": "fbneo/trally.zip"
+    },
+    {
+      "title": "Re-Volt",
+      "category": "Top-down & RC",
+      "system": "n64",
+      "bucket": "n64/Re-Volt (USA).zip"
+    },
+    {
+      "title": "Re-Volt",
+      "category": "Top-down & RC",
+      "system": "psx",
+      "bucket": "psx/Re-Volt (USA).chd"
+    },
+    {
+      "title": "Re-Volt",
+      "category": "Top-down & RC",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Re-Volt (USA).chd"
+    },
+    {
+      "title": "RC Revenge",
+      "category": "Top-down & RC",
+      "system": "psx",
+      "bucket": "psx/RC Revenge (USA).chd"
+    },
+    {
+      "title": "RC de Go!",
+      "category": "Top-down & RC",
+      "system": "psx",
+      "bucket": "psx/RC de Go! (USA).chd"
+    },
+    {
+      "title": "Team Losi RC Racer",
+      "category": "Top-down & RC",
+      "system": "psx",
+      "bucket": "psx/Team Losi RC Racer (USA).chd"
+    },
+    {
+      "title": "Circuit Breakers",
+      "category": "Top-down & RC",
+      "system": "psx",
+      "bucket": "psx/Circuit Breakers (USA).chd"
+    },
+    {
+      "title": "Rush Hour",
+      "category": "Top-down & RC",
+      "system": "psx",
+      "bucket": "psx/Rush Hour (USA).chd"
+    },
+    {
+      "title": "Toy Racer",
+      "category": "Top-down & RC",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Toy Racer (Europe) (En,Fr,De,Es).chd"
+    },
+    {
+      "title": "Racing Gears Advance",
+      "category": "Top-down & RC",
+      "system": "gba",
+      "bucket": "gba/Racing Gears Advance (USA).zip"
+    },
+    {
+      "title": "Karnaaj Rally",
+      "category": "Top-down & RC",
+      "system": "gba",
+      "bucket": "gba/Karnaaj Rally (USA, Europe).zip"
+    },
+    {
+      "title": "Family Circuit",
+      "category": "Top-down & RC",
+      "system": "nes",
+      "bucket": "nes/Family Circuit (Japan).zip"
+    },
+    {
+      "title": "Rally Bike",
+      "category": "Top-down & RC",
+      "system": "nes",
+      "bucket": "nes/Rally Bike (USA).zip"
+    },
+    {
+      "title": "Top Gear Pocket",
+      "category": "Top-down & RC",
+      "system": "gbc",
+      "bucket": "gbc/Top Gear Pocket (USA) (Rumble Version).zip"
+    },
+    {
+      "title": "Dirty Racing",
+      "category": "Top-down & RC",
+      "system": "gb",
+      "bucket": "gb/Dirty Racing (Japan).zip"
+    }
+  ]
+}

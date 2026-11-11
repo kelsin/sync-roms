@@ -1,0 +1,1001 @@
+{
+  "name": "First-Person Shooters",
+  "description": "Console and handheld first-person shooters.",
+  "games": [
+    {
+      "title": "Wolfenstein 3D",
+      "category": "Doom & id Tech",
+      "system": "atarijaguar",
+      "bucket": "atarijaguar/Wolfenstein 3D (World).zip"
+    },
+    {
+      "title": "Wolfenstein 3-D",
+      "category": "Doom & id Tech",
+      "system": "snes",
+      "bucket": "snes/Wolfenstein 3-D (USA).zip"
+    },
+    {
+      "title": "Wolfenstein 3D",
+      "category": "Doom & id Tech",
+      "system": "gba",
+      "bucket": "gba/Wolfenstein 3D (USA, Europe).zip"
+    },
+    {
+      "title": "Doom",
+      "category": "Doom & id Tech",
+      "system": "atarijaguar",
+      "bucket": "atarijaguar/Doom (World).zip"
+    },
+    {
+      "title": "Doom",
+      "category": "Doom & id Tech",
+      "system": "sega32x",
+      "bucket": "sega32x/Doom (Japan, USA) (En).zip"
+    },
+    {
+      "title": "Doom",
+      "category": "Doom & id Tech",
+      "system": "snes",
+      "bucket": "snes/Doom (USA).zip"
+    },
+    {
+      "title": "Doom",
+      "category": "Doom & id Tech",
+      "system": "psx",
+      "bucket": "psx/Doom (USA) (Rev 1).chd"
+    },
+    {
+      "title": "Final Doom",
+      "category": "Doom & id Tech",
+      "system": "psx",
+      "bucket": "psx/Final Doom (USA).chd"
+    },
+    {
+      "title": "Doom",
+      "category": "Doom & id Tech",
+      "system": "saturn",
+      "bucket": "saturn/Doom (USA).chd"
+    },
+    {
+      "title": "Doom 64",
+      "category": "Doom & id Tech",
+      "system": "n64",
+      "bucket": "n64/Doom 64 (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Doom",
+      "category": "Doom & id Tech",
+      "system": "gba",
+      "bucket": "gba/Doom (USA, Europe).zip"
+    },
+    {
+      "title": "Doom II",
+      "category": "Doom & id Tech",
+      "system": "gba",
+      "bucket": "gba/Doom II (USA).zip"
+    },
+    {
+      "title": "Hexen",
+      "category": "Doom & id Tech",
+      "system": "saturn",
+      "bucket": "saturn/Hexen (USA).chd"
+    },
+    {
+      "title": "Hexen",
+      "category": "Doom & id Tech",
+      "system": "psx",
+      "bucket": "psx/Hexen (USA).chd"
+    },
+    {
+      "title": "Hexen",
+      "category": "Doom & id Tech",
+      "system": "n64",
+      "bucket": "n64/Hexen (USA).zip"
+    },
+    {
+      "title": "Quake",
+      "category": "Doom & id Tech",
+      "system": "saturn",
+      "bucket": "saturn/Quake (USA).chd"
+    },
+    {
+      "title": "Quake",
+      "category": "Doom & id Tech",
+      "system": "n64",
+      "bucket": "n64/Quake (USA).zip"
+    },
+    {
+      "title": "Quake II",
+      "category": "Doom & id Tech",
+      "system": "n64",
+      "bucket": "n64/Quake II (USA).zip"
+    },
+    {
+      "title": "Quake II",
+      "category": "Doom & id Tech",
+      "system": "psx",
+      "bucket": "psx/Quake II (USA).chd"
+    },
+    {
+      "title": "Quake III - Arena",
+      "category": "Doom & id Tech",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Quake III - Arena (USA).chd"
+    },
+    {
+      "title": "Duke Nukem 3D",
+      "category": "Duke Nukem & Build Engine",
+      "system": "saturn",
+      "bucket": "saturn/Duke Nukem 3D (USA).chd"
+    },
+    {
+      "title": "Duke Nukem 64",
+      "category": "Duke Nukem & Build Engine",
+      "system": "n64",
+      "bucket": "n64/Duke Nukem 64 (USA).zip"
+    },
+    {
+      "title": "Duke Nukem - Total Meltdown",
+      "category": "Duke Nukem & Build Engine",
+      "system": "psx",
+      "bucket": "psx/Duke Nukem - Total Meltdown (USA).chd"
+    },
+    {
+      "title": "Duke Nukem 3D",
+      "category": "Duke Nukem & Build Engine",
+      "system": "genesis",
+      "bucket": "genesis/Duke Nukem 3D (Brazil) (En).zip"
+    },
+    {
+      "title": "Duke Nukem 3D",
+      "category": "Duke Nukem & Build Engine",
+      "system": "gamecom",
+      "bucket": "gamecom/Duke Nukem 3D (USA).zip"
+    },
+    {
+      "title": "Duke Nukem Advance",
+      "category": "Duke Nukem & Build Engine",
+      "system": "gba",
+      "bucket": "gba/Duke Nukem Advance (USA).zip"
+    },
+    {
+      "title": "Powerslave",
+      "category": "Duke Nukem & Build Engine",
+      "system": "saturn",
+      "bucket": "saturn/Powerslave (USA).chd"
+    },
+    {
+      "title": "Powerslave",
+      "category": "Duke Nukem & Build Engine",
+      "system": "psx",
+      "bucket": "psx/Powerslave (USA).chd"
+    },
+    {
+      "title": "GoldenEye 007",
+      "category": "Rare & 007",
+      "system": "n64",
+      "bucket": "n64/GoldenEye 007 (USA).zip"
+    },
+    {
+      "title": "Perfect Dark",
+      "category": "Rare & 007",
+      "system": "n64",
+      "bucket": "n64/Perfect Dark (USA) (Rev 1).zip"
+    },
+    {
+      "title": "007 - The World Is Not Enough",
+      "category": "Rare & 007",
+      "system": "n64",
+      "bucket": "n64/007 - The World Is Not Enough (USA).zip"
+    },
+    {
+      "title": "007 - The World Is Not Enough",
+      "category": "Rare & 007",
+      "system": "psx",
+      "bucket": "psx/007 - The World Is Not Enough (USA).chd"
+    },
+    {
+      "title": "007 - Agent Under Fire",
+      "category": "Rare & 007",
+      "system": "gc",
+      "bucket": "gc/007 - Agent Under Fire (USA) (Rev 1).rvz"
+    },
+    {
+      "title": "007 - Nightfire",
+      "category": "Rare & 007",
+      "system": "gc",
+      "bucket": "gc/007 - Nightfire (USA).rvz"
+    },
+    {
+      "title": "007 - NightFire",
+      "category": "Rare & 007",
+      "system": "gba",
+      "bucket": "gba/007 - NightFire (USA, Europe) (En,Fr,De).zip"
+    },
+    {
+      "title": "GoldenEye - Rogue Agent",
+      "category": "Rare & 007",
+      "system": "gc",
+      "bucket": "gc/GoldenEye - Rogue Agent (USA).m3u",
+      "files": [
+        "gc/GoldenEye - Rogue Agent (USA) (Disc 1).rvz",
+        "gc/GoldenEye - Rogue Agent (USA) (Disc 2).rvz"
+      ]
+    },
+    {
+      "title": "GoldenEye - Rogue Agent",
+      "category": "Rare & 007",
+      "system": "nds",
+      "bucket": "nds/GoldenEye - Rogue Agent (USA).zip"
+    },
+    {
+      "title": "GoldenEye 007",
+      "category": "Rare & 007",
+      "system": "nds",
+      "bucket": "nds/GoldenEye 007 (USA).zip"
+    },
+    {
+      "title": "TimeSplitters 2",
+      "category": "Rare & 007",
+      "system": "gc",
+      "bucket": "gc/TimeSplitters 2 (USA).rvz"
+    },
+    {
+      "title": "TimeSplitters - Future Perfect",
+      "category": "Rare & 007",
+      "system": "gc",
+      "bucket": "gc/TimeSplitters - Future Perfect (USA).rvz"
+    },
+    {
+      "title": "Turok - Dinosaur Hunter",
+      "category": "Turok",
+      "system": "n64",
+      "bucket": "n64/Turok - Dinosaur Hunter (USA) (Rev 2).zip"
+    },
+    {
+      "title": "Turok 2 - Seeds of Evil",
+      "category": "Turok",
+      "system": "n64",
+      "bucket": "n64/Turok 2 - Seeds of Evil (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Turok - Rage Wars",
+      "category": "Turok",
+      "system": "n64",
+      "bucket": "n64/Turok - Rage Wars (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Turok 3 - Shadow of Oblivion",
+      "category": "Turok",
+      "system": "n64",
+      "bucket": "n64/Turok 3 - Shadow of Oblivion (USA).zip"
+    },
+    {
+      "title": "Turok - Evolution",
+      "category": "Turok",
+      "system": "gc",
+      "bucket": "gc/Turok - Evolution (USA).rvz"
+    },
+    {
+      "title": "Halo - Combat Evolved",
+      "category": "Halo",
+      "system": "xbox",
+      "bucket": "xbox/Halo - Combat Evolved (USA) (Rev 2).iso"
+    },
+    {
+      "title": "Halo 2",
+      "category": "Halo",
+      "system": "xbox",
+      "bucket": "xbox/Halo 2 (USA, Europe) (En,Ja,Fr,De,Es,It,Zh,Ko).iso"
+    },
+    {
+      "title": "Halo 3",
+      "category": "Halo",
+      "system": "xbox360",
+      "bucket": "xbox360/Halo 3 (USA, Europe) (En,Ja,Fr,De,Es,It,Pt,Zh,Ko).zar"
+    },
+    {
+      "title": "Halo - Reach",
+      "category": "Halo",
+      "system": "xbox360",
+      "bucket": "xbox360/Halo - Reach (World) (En,Ja,Fr,De,Es,It,Pt,Zh,Ko).zar"
+    },
+    {
+      "title": "Halo 4",
+      "category": "Halo",
+      "system": "xbox360",
+      "bucket": "xbox360/Halo 4 (World) (En,Ja,Fr,De,Es,It,Nl,Pt,No,Da,Fi,Zh,Ko,Pl,Ru) (Disc 1).zar",
+      "files": [
+        "xbox360/Halo 4 (World) (En,Ja,Fr,De,Es,It,Nl,Pt,No,Da,Fi,Zh,Ko,Pl,Ru) (Disc 2).zar"
+      ]
+    },
+    {
+      "title": "Medal of Honor",
+      "category": "Military",
+      "system": "psx",
+      "bucket": "psx/Medal of Honor (USA).chd"
+    },
+    {
+      "title": "Medal of Honor - Underground",
+      "category": "Military",
+      "system": "psx",
+      "bucket": "psx/Medal of Honor - Underground (USA).chd"
+    },
+    {
+      "title": "Medal of Honor - Underground",
+      "category": "Military",
+      "system": "gba",
+      "bucket": "gba/Medal of Honor - Underground (USA).zip"
+    },
+    {
+      "title": "Medal of Honor - Frontline",
+      "category": "Military",
+      "system": "gc",
+      "bucket": "gc/Medal of Honor - Frontline (USA).rvz"
+    },
+    {
+      "title": "Medal of Honor - Rising Sun",
+      "category": "Military",
+      "system": "gc",
+      "bucket": "gc/Medal of Honor - Rising Sun (USA).m3u",
+      "files": [
+        "gc/Medal of Honor - Rising Sun (USA) (Disc 1).rvz",
+        "gc/Medal of Honor - Rising Sun (USA) (Disc 2).rvz"
+      ]
+    },
+    {
+      "title": "Medal of Honor - European Assault",
+      "category": "Military",
+      "system": "gc",
+      "bucket": "gc/Medal of Honor - European Assault (USA).rvz"
+    },
+    {
+      "title": "Medal of Honor - Heroes",
+      "category": "Military",
+      "system": "psp",
+      "bucket": "psp/Medal of Honor - Heroes (USA).chd"
+    },
+    {
+      "title": "Medal of Honor - Heroes 2",
+      "category": "Military",
+      "system": "psp",
+      "bucket": "psp/Medal of Honor - Heroes 2 (USA).chd"
+    },
+    {
+      "title": "Call of Duty - Finest Hour",
+      "category": "Military",
+      "system": "gc",
+      "bucket": "gc/Call of Duty - Finest Hour (USA).rvz"
+    },
+    {
+      "title": "Call of Duty 2 - Big Red One",
+      "category": "Military",
+      "system": "gc",
+      "bucket": "gc/Call of Duty 2 - Big Red One (USA).rvz"
+    },
+    {
+      "title": "Call of Duty - Roads to Victory",
+      "category": "Military",
+      "system": "psp",
+      "bucket": "psp/Call of Duty - Roads to Victory (USA) (En,Ja,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "Call of Duty 4 - Modern Warfare",
+      "category": "Military",
+      "system": "nds",
+      "bucket": "nds/Call of Duty 4 - Modern Warfare (USA).zip"
+    },
+    {
+      "title": "Call of Duty - World at War",
+      "category": "Military",
+      "system": "nds",
+      "bucket": "nds/Call of Duty - World at War (USA).zip"
+    },
+    {
+      "title": "Call of Duty - Modern Warfare - Mobilized",
+      "category": "Military",
+      "system": "nds",
+      "bucket": "nds/Call of Duty - Modern Warfare - Mobilized (USA).zip"
+    },
+    {
+      "title": "Call of Duty - Black Ops",
+      "category": "Military",
+      "system": "nds",
+      "bucket": "nds/Call of Duty - Black Ops (USA).zip"
+    },
+    {
+      "title": "Call of Duty - Modern Warfare 3 - Defiance",
+      "category": "Military",
+      "system": "nds",
+      "bucket": "nds/Call of Duty - Modern Warfare 3 - Defiance (USA).zip"
+    },
+    {
+      "title": "Brothers in Arms - D-Day",
+      "category": "Military",
+      "system": "psp",
+      "bucket": "psp/Brothers in Arms - D-Day (USA).chd"
+    },
+    {
+      "title": "Tom Clancy's Rainbow Six",
+      "category": "Military",
+      "system": "n64",
+      "bucket": "n64/Tom Clancy's Rainbow Six (USA).zip"
+    },
+    {
+      "title": "Tom Clancy's Rainbow Six",
+      "category": "Military",
+      "system": "psx",
+      "bucket": "psx/Tom Clancy's Rainbow Six (USA).chd"
+    },
+    {
+      "title": "Tom Clancy's Rainbow Six - Rogue Spear",
+      "category": "Military",
+      "system": "psx",
+      "bucket": "psx/Tom Clancy's Rainbow Six - Rogue Spear (USA).chd"
+    },
+    {
+      "title": "Tom Clancy's Rainbow Six - Lone Wolf",
+      "category": "Military",
+      "system": "psx",
+      "bucket": "psx/Tom Clancy's Rainbow Six - Lone Wolf (USA).chd"
+    },
+    {
+      "title": "Tom Clancy's Rainbow Six with Eagle Watch Missions",
+      "category": "Military",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Tom Clancy's Rainbow Six with Eagle Watch Missions (USA).chd"
+    },
+    {
+      "title": "Tom Clancy's Rainbow Six - Rogue Spear + Mission Pack - Urban Operations",
+      "category": "Military",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Tom Clancy's Rainbow Six - Rogue Spear + Mission Pack - Urban Operations (USA).chd"
+    },
+    {
+      "title": "Tom Clancy's Rainbow Six 3",
+      "category": "Military",
+      "system": "gc",
+      "bucket": "gc/Tom Clancy's Rainbow Six 3 (USA).rvz"
+    },
+    {
+      "title": "Tom Clancy's Rainbow Six - Lockdown",
+      "category": "Military",
+      "system": "gc",
+      "bucket": "gc/Tom Clancy's Rainbow Six - Lockdown (USA).rvz"
+    },
+    {
+      "title": "Tom Clancy's Rainbow Six - Vegas",
+      "category": "Military",
+      "system": "psp",
+      "bucket": "psp/Tom Clancy's Rainbow Six - Vegas (USA) (En,Fr,Es).chd"
+    },
+    {
+      "title": "Tom Clancy's Ghost Recon",
+      "category": "Military",
+      "system": "gc",
+      "bucket": "gc/Tom Clancy's Ghost Recon (USA).rvz"
+    },
+    {
+      "title": "Sum of All Fears, The",
+      "category": "Military",
+      "system": "gc",
+      "bucket": "gc/Sum of All Fears, The (USA).rvz"
+    },
+    {
+      "title": "Delta Force Urban Warfare",
+      "category": "Military",
+      "system": "psx",
+      "bucket": "psx/Delta Force Urban Warfare (USA) (En,Fr,Es).chd"
+    },
+    {
+      "title": "Soldier of Fortune",
+      "category": "Military",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Soldier of Fortune (USA).chd"
+    },
+    {
+      "title": "Faceball 2000",
+      "category": "Sci-Fi & Horror",
+      "system": "snes",
+      "bucket": "snes/Faceball 2000 (USA).zip"
+    },
+    {
+      "title": "Faceball",
+      "category": "Sci-Fi & Horror",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Faceball (Japan).chd"
+    },
+    {
+      "title": "Zero Tolerance",
+      "category": "Sci-Fi & Horror",
+      "system": "genesis",
+      "bucket": "genesis/Zero Tolerance (USA, Europe) (Rev A).zip"
+    },
+    {
+      "title": "Bloodshot",
+      "category": "Sci-Fi & Horror",
+      "system": "genesis",
+      "bucket": "genesis/Bloodshot (Europe) (En,Fr,De,Es).zip"
+    },
+    {
+      "title": "Bloodshot ~ Battle Frenzy",
+      "category": "Sci-Fi & Horror",
+      "system": "segacd",
+      "bucket": "segacd/Bloodshot ~ Battle Frenzy (Europe) (En,Fr,De,Es).chd"
+    },
+    {
+      "title": "Cyber-Cop",
+      "category": "Sci-Fi & Horror",
+      "system": "genesis",
+      "bucket": "genesis/Cyber-Cop (USA).zip"
+    },
+    {
+      "title": "Metal Head",
+      "category": "Sci-Fi & Horror",
+      "system": "sega32x",
+      "bucket": "sega32x/Metal Head (Japan, USA) (En,Ja).zip"
+    },
+    {
+      "title": "Alien vs Predator",
+      "category": "Sci-Fi & Horror",
+      "system": "atarijaguar",
+      "bucket": "atarijaguar/Alien vs Predator (World).zip"
+    },
+    {
+      "title": "Kileak - The DNA Imperative",
+      "category": "Sci-Fi & Horror",
+      "system": "psx",
+      "bucket": "psx/Kileak - The DNA Imperative (USA).chd"
+    },
+    {
+      "title": "Epidemic",
+      "category": "Sci-Fi & Horror",
+      "system": "psx",
+      "bucket": "psx/Epidemic (USA).chd"
+    },
+    {
+      "title": "Jumping Flash!",
+      "category": "Sci-Fi & Horror",
+      "system": "psx",
+      "bucket": "psx/Jumping Flash! (USA).chd"
+    },
+    {
+      "title": "Jumping Flash! 2",
+      "category": "Sci-Fi & Horror",
+      "system": "psx",
+      "bucket": "psx/Jumping Flash! 2 (USA).chd"
+    },
+    {
+      "title": "Space Hulk - Vengeance of the Blood Angels",
+      "category": "Sci-Fi & Horror",
+      "system": "psx",
+      "bucket": "psx/Space Hulk - Vengeance of the Blood Angels (USA).chd"
+    },
+    {
+      "title": "Defcon 5 - Peace Has a Price...",
+      "category": "Sci-Fi & Horror",
+      "system": "psx",
+      "bucket": "psx/Defcon 5 - Peace Has a Price... (USA).chd"
+    },
+    {
+      "title": "Krazy Ivan",
+      "category": "Sci-Fi & Horror",
+      "system": "psx",
+      "bucket": "psx/Krazy Ivan (USA).chd"
+    },
+    {
+      "title": "PO'ed",
+      "category": "Sci-Fi & Horror",
+      "system": "psx",
+      "bucket": "psx/PO'ed (USA).chd"
+    },
+    {
+      "title": "Alien Trilogy",
+      "category": "Sci-Fi & Horror",
+      "system": "psx",
+      "bucket": "psx/Alien Trilogy (USA).chd"
+    },
+    {
+      "title": "Disruptor",
+      "category": "Sci-Fi & Horror",
+      "system": "psx",
+      "bucket": "psx/Disruptor (USA).chd"
+    },
+    {
+      "title": "Descent",
+      "category": "Sci-Fi & Horror",
+      "system": "psx",
+      "bucket": "psx/Descent (USA).chd"
+    },
+    {
+      "title": "Descent Maximum",
+      "category": "Sci-Fi & Horror",
+      "system": "psx",
+      "bucket": "psx/Descent Maximum (USA).chd"
+    },
+    {
+      "title": "Star Wars - Dark Forces",
+      "category": "Sci-Fi & Horror",
+      "system": "psx",
+      "bucket": "psx/Star Wars - Dark Forces (USA).chd"
+    },
+    {
+      "title": "Codename - Tenka",
+      "category": "Sci-Fi & Horror",
+      "system": "psx",
+      "bucket": "psx/Codename - Tenka (USA) (Rev 1).chd"
+    },
+    {
+      "title": "Brahma Force - The Assault on Beltlogger 9",
+      "category": "Sci-Fi & Horror",
+      "system": "psx",
+      "bucket": "psx/Brahma Force - The Assault on Beltlogger 9 (USA).chd"
+    },
+    {
+      "title": "Shadow Master",
+      "category": "Sci-Fi & Horror",
+      "system": "psx",
+      "bucket": "psx/Shadow Master (USA).chd"
+    },
+    {
+      "title": "Forsaken",
+      "category": "Sci-Fi & Horror",
+      "system": "psx",
+      "bucket": "psx/Forsaken (USA).chd"
+    },
+    {
+      "title": "South Park",
+      "category": "Sci-Fi & Horror",
+      "system": "psx",
+      "bucket": "psx/South Park (USA).chd"
+    },
+    {
+      "title": "Armorines - Project S.W.A.R.M.",
+      "category": "Sci-Fi & Horror",
+      "system": "psx",
+      "bucket": "psx/Armorines - Project S.W.A.R.M. (USA).chd"
+    },
+    {
+      "title": "Alien Resurrection",
+      "category": "Sci-Fi & Horror",
+      "system": "psx",
+      "bucket": "psx/Alien Resurrection (USA).chd"
+    },
+    {
+      "title": "Resident Evil - Survivor",
+      "category": "Sci-Fi & Horror",
+      "system": "psx",
+      "bucket": "psx/Resident Evil - Survivor (USA).chd"
+    },
+    {
+      "title": "Men in Black - The Series - Crashdown",
+      "category": "Sci-Fi & Horror",
+      "system": "psx",
+      "bucket": "psx/Men in Black - The Series - Crashdown (USA).chd"
+    },
+    {
+      "title": "Robotica",
+      "category": "Sci-Fi & Horror",
+      "system": "saturn",
+      "bucket": "saturn/Robotica (USA).chd"
+    },
+    {
+      "title": "Ghen War",
+      "category": "Sci-Fi & Horror",
+      "system": "saturn",
+      "bucket": "saturn/Ghen War (USA).chd"
+    },
+    {
+      "title": "Space Hulk - Vengeance of the Blood Angels",
+      "category": "Sci-Fi & Horror",
+      "system": "saturn",
+      "bucket": "saturn/Space Hulk - Vengeance of the Blood Angels (USA).chd"
+    },
+    {
+      "title": "Defcon 5 - Peace Has a Price...",
+      "category": "Sci-Fi & Horror",
+      "system": "saturn",
+      "bucket": "saturn/Defcon 5 - Peace Has a Price... (USA).chd"
+    },
+    {
+      "title": "Krazy Ivan",
+      "category": "Sci-Fi & Horror",
+      "system": "saturn",
+      "bucket": "saturn/Krazy Ivan (Europe).chd"
+    },
+    {
+      "title": "Gungriffon",
+      "category": "Sci-Fi & Horror",
+      "system": "saturn",
+      "bucket": "saturn/Gungriffon (USA).chd"
+    },
+    {
+      "title": "Alien Trilogy",
+      "category": "Sci-Fi & Horror",
+      "system": "saturn",
+      "bucket": "saturn/Alien Trilogy (USA).chd"
+    },
+    {
+      "title": "Congo - The Movie - The Lost City of Zinj",
+      "category": "Sci-Fi & Horror",
+      "system": "saturn",
+      "bucket": "saturn/Congo - The Movie - The Lost City of Zinj (USA).chd"
+    },
+    {
+      "title": "Forsaken 64",
+      "category": "Sci-Fi & Horror",
+      "system": "n64",
+      "bucket": "n64/Forsaken 64 (USA).zip"
+    },
+    {
+      "title": "South Park",
+      "category": "Sci-Fi & Horror",
+      "system": "n64",
+      "bucket": "n64/South Park (USA).zip"
+    },
+    {
+      "title": "Armorines - Project S.W.A.R.M.",
+      "category": "Sci-Fi & Horror",
+      "system": "n64",
+      "bucket": "n64/Armorines - Project S.W.A.R.M. (USA).zip"
+    },
+    {
+      "title": "John Romero's Daikatana",
+      "category": "Sci-Fi & Horror",
+      "system": "n64",
+      "bucket": "n64/John Romero's Daikatana (USA).zip"
+    },
+    {
+      "title": "Unreal Tournament",
+      "category": "Sci-Fi & Horror",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Unreal Tournament (USA) (En,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "KISS Psycho Circus - The Nightmare Child",
+      "category": "Sci-Fi & Horror",
+      "system": "dreamcast",
+      "bucket": "dreamcast/KISS Psycho Circus - The Nightmare Child (USA).chd"
+    },
+    {
+      "title": "Outtrigger",
+      "category": "Sci-Fi & Horror",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Outtrigger (USA).chd"
+    },
+    {
+      "title": "Metroid Prime",
+      "category": "Sci-Fi & Horror",
+      "system": "gc",
+      "bucket": "gc/Metroid Prime (USA) (Rev 2).rvz"
+    },
+    {
+      "title": "Metroid Prime 2 - Echoes",
+      "category": "Sci-Fi & Horror",
+      "system": "gc",
+      "bucket": "gc/Metroid Prime 2 - Echoes (USA).rvz"
+    },
+    {
+      "title": "Die Hard - Vendetta",
+      "category": "Sci-Fi & Horror",
+      "system": "gc",
+      "bucket": "gc/Die Hard - Vendetta (USA).rvz"
+    },
+    {
+      "title": "Red Faction II",
+      "category": "Sci-Fi & Horror",
+      "system": "gc",
+      "bucket": "gc/Red Faction II (USA).rvz"
+    },
+    {
+      "title": "Star Wars - Jedi Knight II - Jedi Outcast",
+      "category": "Sci-Fi & Horror",
+      "system": "gc",
+      "bucket": "gc/Star Wars - Jedi Knight II - Jedi Outcast (USA).rvz"
+    },
+    {
+      "title": "XIII",
+      "category": "Sci-Fi & Horror",
+      "system": "gc",
+      "bucket": "gc/XIII (USA) (En,Fr,Es).rvz"
+    },
+    {
+      "title": "Judge Dredd - Dredd vs. Death",
+      "category": "Sci-Fi & Horror",
+      "system": "gc",
+      "bucket": "gc/Judge Dredd - Dredd vs. Death (USA).rvz"
+    },
+    {
+      "title": "Robocop - Aratanaru Kiki",
+      "category": "Sci-Fi & Horror",
+      "system": "gc",
+      "bucket": "gc/Robocop - Aratanaru Kiki (Japan).rvz"
+    },
+    {
+      "title": "Serious Sam - Next Encounter",
+      "category": "Sci-Fi & Horror",
+      "system": "gc",
+      "bucket": "gc/Serious Sam - Next Encounter (USA) (Rev 1).rvz"
+    },
+    {
+      "title": "Geist",
+      "category": "Sci-Fi & Horror",
+      "system": "gc",
+      "bucket": "gc/Geist (USA).rvz"
+    },
+    {
+      "title": "Star Wars - Jedi Knight II - Jedi Outcast",
+      "category": "Sci-Fi & Horror",
+      "system": "xbox",
+      "bucket": "xbox/Star Wars - Jedi Knight II - Jedi Outcast (USA).iso"
+    },
+    {
+      "title": "Star Wars - Jedi Knight - Jedi Academy",
+      "category": "Sci-Fi & Horror",
+      "system": "xbox",
+      "bucket": "xbox/Star Wars - Jedi Knight - Jedi Academy (USA) (En,Fr,De).iso"
+    },
+    {
+      "title": "Metroid Prime Trilogy",
+      "category": "Sci-Fi & Horror",
+      "system": "wii",
+      "bucket": "wii/Metroid Prime Trilogy (USA).rvz"
+    },
+    {
+      "title": "BioShock",
+      "category": "Sci-Fi & Horror",
+      "system": "xbox360",
+      "bucket": "xbox360/BioShock (World) (En,Fr,De,Es,It).zar"
+    },
+    {
+      "title": "Orange Box, The",
+      "category": "Sci-Fi & Horror",
+      "system": "xbox360",
+      "bucket": "xbox360/Orange Box, The (World) (En,Fr,De).zar"
+    },
+    {
+      "title": "Borderlands",
+      "category": "Sci-Fi & Horror",
+      "system": "xbox360",
+      "bucket": "xbox360/Borderlands (World) (En,Fr,De,Es,It).zar"
+    },
+    {
+      "title": "Left 4 Dead 2",
+      "category": "Sci-Fi & Horror",
+      "system": "xbox360",
+      "bucket": "xbox360/Left 4 Dead 2 (World) (En,Ja,Fr,De,Es,It,Pt,Zh,Ko,Pl,Ru).zar"
+    },
+    {
+      "title": "BioShock 2",
+      "category": "Sci-Fi & Horror",
+      "system": "xbox360",
+      "bucket": "xbox360/BioShock 2 (USA, Europe) (En,Fr,Es).zar"
+    },
+    {
+      "title": "Brink",
+      "category": "Sci-Fi & Horror",
+      "system": "xbox360",
+      "bucket": "xbox360/Brink (USA).zar"
+    },
+    {
+      "title": "Bulletstorm",
+      "category": "Sci-Fi & Horror",
+      "system": "xbox360",
+      "bucket": "xbox360/Bulletstorm (USA, Europe) (En,Fr,De,Es,It,Pl,Ru).zar"
+    },
+    {
+      "title": "Borderlands 2",
+      "category": "Sci-Fi & Horror",
+      "system": "xbox360",
+      "bucket": "xbox360/Borderlands 2 (World) (En,Ja,Fr,De,Es,It).zar"
+    },
+    {
+      "title": "ZombiU",
+      "category": "Sci-Fi & Horror",
+      "system": "wiiu",
+      "bucket": "wiiu/ZombiU (US) (v32).wua"
+    },
+    {
+      "title": "Faceball 2000",
+      "category": "Handheld",
+      "system": "gb",
+      "bucket": "gb/Faceball 2000 (USA).zip"
+    },
+    {
+      "title": "Faceball 2000",
+      "category": "Handheld",
+      "system": "gamegear",
+      "bucket": "gamegear/Faceball 2000 (Japan).zip"
+    },
+    {
+      "title": "Ecks vs Sever",
+      "category": "Handheld",
+      "system": "gba",
+      "bucket": "gba/Ecks vs Sever (USA) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Dark Arena",
+      "category": "Handheld",
+      "system": "gba",
+      "bucket": "gba/Dark Arena (USA, Europe).zip"
+    },
+    {
+      "title": "Ballistic - Ecks vs. Sever",
+      "category": "Handheld",
+      "system": "gba",
+      "bucket": "gba/Ballistic - Ecks vs. Sever (USA).zip"
+    },
+    {
+      "title": "Ice Nine",
+      "category": "Handheld",
+      "system": "gba",
+      "bucket": "gba/Ice Nine (USA, Europe) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Serious Sam Advance",
+      "category": "Handheld",
+      "system": "gba",
+      "bucket": "gba/Serious Sam Advance (USA) (En,Fr,De).zip"
+    },
+    {
+      "title": "Metroid Prime - Hunters",
+      "category": "Handheld",
+      "system": "nds",
+      "bucket": "nds/Metroid Prime - Hunters (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Dementium - The Ward",
+      "category": "Handheld",
+      "system": "nds",
+      "bucket": "nds/Dementium - The Ward (USA).zip"
+    },
+    {
+      "title": "Moon",
+      "category": "Handheld",
+      "system": "nds",
+      "bucket": "nds/Moon (USA).zip"
+    },
+    {
+      "title": "C.O.R.E.",
+      "category": "Handheld",
+      "system": "nds",
+      "bucket": "nds/C.O.R.E. (USA) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Dementium II",
+      "category": "Handheld",
+      "system": "nds",
+      "bucket": "nds/Dementium II (USA) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Coded Arms",
+      "category": "Handheld",
+      "system": "psp",
+      "bucket": "psp/Coded Arms (USA).chd"
+    },
+    {
+      "title": "Ghost in the Shell - Stand Alone Complex",
+      "category": "Handheld",
+      "system": "psp",
+      "bucket": "psp/Ghost in the Shell - Stand Alone Complex (USA).chd"
+    },
+    {
+      "title": "Coded Arms - Contagion",
+      "category": "Handheld",
+      "system": "psp",
+      "bucket": "psp/Coded Arms - Contagion (USA).chd"
+    },
+    {
+      "title": "Killzone™ Mercenary",
+      "category": "Handheld",
+      "system": "psvita",
+      "bucket": "psvita/Killzone™ Mercenary [PCSA00107] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Metroid Prime - Federation Force",
+      "category": "Handheld",
+      "system": "3ds",
+      "bucket": "3ds/Metroid Prime - Federation Force (USA) (En,Fr,Es).zip"
+    }
+  ]
+}

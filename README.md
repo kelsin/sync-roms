@@ -224,10 +224,6 @@ While typing a filter (or a note, which `w` opens in the game list): `^A` `^E` s
    `sortname` also keeps each parent followed by its clones. ES-DE's "strip extra MAME info" option hides the variant
    in parentheses. Regenerate the file with `tools/gen_clones.py MAME.xml FBNEO.dat` (MAME's `-listxml` output and
    FBNeo's arcade DAT).
-
-   For the `esde` layout every sync also brings the shared extras from `scrapes/esde/`: new or changed
-   theme files, collection lines you don't have yet (added to your `.cfg` files), and the shared settings
-   (only those keys are set in `es_settings.xml`; close ES-DE first, it rewrites the file when it exits).
 6. Finally, media on the card for ROMs the card doesn't have is removed, with no confirmation. It looks at
    every system in the layout, not only the ones you synced, and leaves systems whose ROM folder doesn't
    exist, and folders that aren't systems in `src/sync_roms/data/systems.json` (like ES-DE's `androidapps`), alone.
@@ -264,6 +260,8 @@ Every mode is a command (`sync-roms COMMAND --help` explains one; plain `sync-ro
 | `edit`, `games edit`, `cards edit` | interactive list editor | `--edit` |
 | `games list\|add\|remove\|full\|sets\|export\|import` | edit lists from scripts, see below | |
 | `sets edit` | edit the repo's game sets by hand and open a PR (needs `git` and a logged-in `gh`) | |
+| `collections edit` | edit your collections of favourite games (saved in `~/.sync-roms/collections/`) | |
+| `themes update` | put the latest Art Book Next for ES-DE (for collections' theme art) in storage | |
 | `cards list\|new\|set\|rename\|delete` | manage cards | |
 | `devices [ID]` | list devices, or one device's systems (`--json`) | `--devices` |
 | `upload roms [DIR]` / `upload scrapes [CARD]` | upload to storage | `--upload`, `--upload-scrapes` |
@@ -310,8 +308,8 @@ On `esde` and `emudeck` cards every Vita zip in `psvita/` gets a `.psvita` file 
 | `--upload [DIR]` | Upload the ROMs in `DIR` and its subfolders (default: current directory) to storage folder of a system you pick; the system is guessed from the folder name (see below) |
 | `-c`, `--clean-scrapes` | Remove scraped data in storage for ROMs that aren't available (see below) |
 | `--m3u [DIR]` | Create or fix the `.m3u` playlist of every multi-disc game (`Name (Disc 1) (Extra).chd`, `Name (Disc 2).chd`) in `DIR` and its subfolders (default: current directory). The playlist is named after the title without `(Disc N)` or tags the discs don't share (`Name (Sega CD).m3u`). Playlists with the wrong discs are rewritten, ones with some missing files lose those lines, ones with no files left are deleted after asking, and ones listing exactly a game's discs under another name are renamed. Local only; `--dry-run` previews |
-| `--cd [DIR]`, `--chd [DIR]` | (`--chd` is the old name) Unzip (7z) every `.zip`/`.7z` and convert each disc image (`.cue`, `.gdi`, `.toc`, `.iso`) to a `.chd` with `chdman`, in parallel (up to one file per CPU core; with fewer files than cores each `chdman` gets the spare cores), per the `chd` setting in `systems.json` for the system whose folder it is in (`DIR` is one system folder or a folder of them, default: current directory). The chd is verified before the archive and image files are removed, a failure keeps them, and the `.m3u` playlists of every system folder are fixed afterwards, even when there was nothing to convert (also shown by `--dry-run`). A progress bar (files done and overall percent, from `chdman`'s own progress) shows in a terminal. Mode `cd` uses `createcd`; `dvd` (PS2, PSP) uses `createdvd` for `.iso` files with the system's `args`; `extract` (GameCube, Wii) only unzips and leaves the `.rvz`/`.iso` files; `xiso` (Xbox) rewrites each `.iso` that isn't already an xiso with `extract-xiso -r` and checks it with `-l`; `zar` (Xbox 360) compresses each `.iso` into a `.zar` with `iso2zar` and removes the iso. `"m3u": false` skips playlists (3DO). Local only; `--dry-run` previews |
-| `--install-tools` | `brew install` the 7z (`sevenzip`) and chdman (`rom-tools`) that `--cd` needs, whichever are missing, and say how to build extract-xiso |
+| `--cd [DIR]`, `--chd [DIR]` | (`--chd` is the old name) Unzip (7z, or unar for `.rar` when installed, since 7-Zip can't decode some RAR 2.9 archives) every `.zip`/`.7z`/`.rar` (and the archives inside it, up to 3 levels, except for `extract` systems) and convert each disc image (`.cue`, `.gdi`, `.toc`, `.iso`) to a `.chd` with `chdman`, in parallel (up to one file per CPU core; with fewer files than cores each `chdman` gets the spare cores), per the `chd` setting in `systems.json` for the system whose folder it is in (`DIR` is one system folder or a folder of them, default: current directory). The chd is verified before the archive and image files are removed, a failure keeps them, and the `.m3u` playlists of every system folder are fixed afterwards, even when there was nothing to convert (also shown by `--dry-run`). A progress bar (files done and overall percent, from `chdman`'s own progress) shows in a terminal. Mode `cd` uses `createcd`; `dvd` (PS2, PS3, PSP) uses `createdvd` for `.iso` files with the system's `args`; `extract` (GameCube, Wii) only unzips and leaves the `.rvz`/`.iso` files; `xiso` (Xbox) rewrites each `.iso` that isn't already an xiso with `extract-xiso -r` and checks it with `-l`; `zar` (Xbox 360) compresses each `.iso` into a `.zar` with `iso2zar` and removes the iso. `"m3u": false` skips playlists (3DO). Local only; `--dry-run` previews |
+| `--install-tools` | `brew install` the 7z (`sevenzip`), unar and chdman (`rom-tools`) that `--cd` needs, whichever are missing, and say how to build extract-xiso |
 | `--mirror [DIR]` | Make or refresh a local mirror of storage (see below). No `DIR`: the saved mirror |
 | `--use-mirror DIR` | Same as `--mirror DIR`, then save `DIR` as the local mirror |
 | `--clear-mirror` | Forget the saved mirror (its files are left alone) |
@@ -380,9 +378,6 @@ What goes up, and how it is stored:
 | `downloaded_media/<system>/<type>/…` | `scrapes/<system>/<type>/…` | Only files whose ROM name matches an available ROM. `._` files, dotfiles and `CLEANUP/` are skipped. Uploaded when new or a different size |
 | (made from the cover, 3D box or screenshot) | `scrapes/<system>/onion/<ROM>.png` | Onion box art, a PNG that fits 250x360. Created whenever it is missing from storage, even if its source image was already uploaded. Not made for ROMs in subfolders. Needs Pillow or `sips` |
 | (a Slot card's `Labels/`, or made from the cover, 3D box or screenshot) | `scrapes/<system>/slot/<ROM>.png` | Slot cart label for the Game Boy systems, a PNG that fits 1280x661 (GBA) or 1024x901 (GB, GBC). A card's label is uploaded as is and replaces one of a different size; a derived one is created only when none exists, subfolders included, and needs Pillow or `sips` |
-| `themes/…` | `scrapes/esde/themes/…` | Per file, same size check. `themes-list` is skipped |
-| `collections/*.cfg` | `scrapes/esde/collections/*.cfg` | Union of the lines in both versions |
-| `settings/es_settings.xml` | `scrapes/esde/settings.json` | Allowlisted keys only: scraper behavior, miximage generation, theme (not aspect ratio) and gamelist/UI behavior. Credentials are never included. Merged with storage's file, local wins |
 
 For uploads, "available ROMs" are the games your cards list that exist in storage, which is
 what a sync installs. Scraped files for any other ROM are left out. A `gamelist.xml` that can't be read
@@ -391,8 +386,7 @@ is skipped with a warning.
 `sync-roms --clean-scrapes` (or `-c`) needs no folder. It compares storage's `scrapes/` media and
 `metadata.json` entries with every ROM file in storage's system folders (not only the games
 listed on your cards), lists what no longer matches (including whole systems with no folder in the
-bucket), and after you confirm (default no) deletes the media and rewrites the metadata files. `--dry-run` only lists. Themes, collections and settings are never
-touched.
+bucket), and after you confirm (default no) deletes the media and rewrites the metadata files. `--dry-run` only lists.
 
 ## Scraping from ScreenScraper (`scrape`)
 
@@ -451,7 +445,7 @@ matches) and `scrape-unknown.json` (the ROMs ScreenScraper didn't know). Delete 
 
 `sync-roms --mirror DIR` keeps a local copy of just what the game lists reference, with storage's
 own key layout: the ROMs a sync installs (every file of a full system), every system's
-BIOS files, `scrapes/<system>/` metadata and media for those ROMs, and all of `scrapes/esde/`.
+BIOS files, `scrapes/<system>/` metadata and media for those ROMs.
 It compares file sizes, so a rerun with nothing changed lists storage and downloads nothing.
 Anything in the mirror that is no longer referenced (a game removed from a card's games or from the
 bucket) is deleted. `--dry-run` shows the plan. A non-empty folder that isn't already a mirror
@@ -478,15 +472,15 @@ read to show what is in it, so the read-only profile is enough. No folders are n
 sync-roms --edit
 ```
 
-0. The menu has **Cards**, **Sets** and **Device systems**. **Sets** is `sync-roms sets edit` (see below; it needs `git` and a logged-in `gh`, and returns here if they are missing). **Device systems** is described at the end of this section. Under **Cards**, pick one of your cards, or **➕ New card** (asks for its folder name, then its device and
+0. The menu has **Cards**, **Sets**, **Collections** and **Device systems**. **Sets** is `sync-roms sets edit` (see below; it needs `git` and a logged-in `gh`, and returns here if they are missing). **Collections** is `sync-roms collections edit` (see below). **Device systems** is described at the end of this section. Under **Cards**, pick one of your cards, or **➕ New card** (asks for its folder name, then its device and
    firmware, like the first sync does, and saves the card). On a card, `v` changes its device and firmware instead of opening it (saved with the review at the end) and drops the card's games for systems the new device or firmware doesn't use. Each card's row shows its current device and firmware.
 1. A card opens on every system its device can play, in the usual order. Systems recommended for the device's screen
    are marked ⭐; each system with picks shows how many games and how much space they take (ROMs plus the scraped
    files the card's firmware installs). The bottom line shows the card's total (games, scrapes and the BIOS files of
    the systems it syncs) against its size and the free space, in green below 70% of the card, yellow below 90% and
    red above (or over). Sizes come from the storage cache (see [Storage cache](#storage-cache)); without one they show
-   `…` and the total says "not sized". `/` filters, `Enter` opens a system, `f` makes it a full system (every file in its folder; `f` again brings the
-   game list back), `m` saves the card's picked games as a personal set. Games save to `cards.json` as you leave a
+   `…` and the total says "not sized". `/` filters, `Enter` opens a system, `l` adds a collection to the card (each shows how many of its games are playable on the card's device, and `Space`/`Enter` toggles the whole collection), `f` makes it a full system (every file in its folder; `f` again brings the
+   game list back), `u` turns the card's [Surprise](#surprise) on or off (the title says which). Games save to `cards.json` as you leave a
    system (the previous file is kept as `cards.json.bak`). `Esc` goes back to the menu.
 2. A system shows every file in its storage folder. `✅` is synced, `⬜` is not; a 📦 next to a game says a set the
    card references syncs it (switching it off excludes it from that set on this card). `/` searches, `Space` (or `Tab`)
@@ -500,13 +494,11 @@ sync-roms --edit
    matched ignoring case, so `Capcom` and `capcom` are one value. Picking another
    value of the same field replaces it; filters on different fields, the set filter and `/` all combine, and the title
    shows what is active. A game with no value for a field never matches a filter on it. The metadata is read in the
-   background once per session, so the menu says it is loading at first. `c` clears every filter and shows every game again.
+   background once per session, so the menu says it is loading at first. `p` narrows the list to games that were surprises within the last `surprise_ttl_days` (🎁 past surprises only), `c` clears every filter and shows every game again.
    Pending changes show as `➕` / `➖` and the bottom line updates the card's total as you toggle. `w` writes a note on a
-   picked game. `Enter` keeps your changes; `Esc` asks whether to keep or revert them if there are any.
+   picked game. A 💖 next to a game says one of the card's collections syncs it: it is always on, can't be switched off here, per-card exclusions don't apply to it, and it counts in the card's budget. `Enter` keeps your changes; `Esc` asks whether to keep or revert them if there are any.
 3. When you leave the menu, device/firmware and device-system changes are summarized, then **save**, **keep
    editing**, **discard**, or **list every change**. Nothing is uploaded.
-
-Personal sets are files in `~/.sync-roms/sets/<id>.json` (same format as the package's sets, below), appear next to the built-in ones and can be referenced like them; an id already used by a built-in set is refused. You can also write them by hand, and `sync-roms check` validates them.
 
 On the Cards list, `v` changes a card's device and firmware, `r` renames a card and `d` deletes one (both ask first, and act at once). **🧩 Device systems** edits which systems a device can play: it is saved as the `add`/`remove` overlay in `device-systems.json`, relative to the repo defaults. A file that isn't valid JSON is never overwritten: sync-roms says so and leaves it for you to fix (`sync-roms check` lists the problems).
 
@@ -520,12 +512,12 @@ sync-roms games remove gba 'Metroid Fusion.zip' --card SD
 sync-roms games full psx on --card SD              # sync a whole system
 sync-roms games sets add pinball --card SD
 sync-roms games list --json --card SD
-sync-roms games export --card SD > list.txt      # SYSTEM/file per line, SYSTEM/* for a full system
-sync-roms games import list.txt --card SD
+sync-roms games export --card SD > list.txt      # SYSTEM/file per line, SYSTEM/* for a full system, then @collections ID, @frontend_collections NAME, @surprise false (only when Surprise is off) and @surprises SYSTEM/file (one per surprise) lines
+sync-roms games import list.txt --card SD         # a field with @ lines in the file replaces the card's value
 sync-roms cards new SD --device rg35xx-sp --layout knulli --size 256GB   # --size is optional; shown in `cards list` and on sync
 ```
 
-A set file (in the package's `data/sets/` or your `~/.sync-roms/sets/`) is `{"name": ..., "description": ..., "games": [{"title": ..., "system": "gba", "bucket": "gba/Game.zip"}]}`.
+A set file (in the package's `data/sets/`) is `{"name": ..., "description": ..., "games": [{"title": ..., "system": "gba", "bucket": "gba/Game.zip"}]}`.
 A multi-disc game adds `"files": [...]` with its other storage keys (the discs); `bucket` is the playlist (`.m3u`) or disc 1.
 Toggling the game adds or removes every file, one card entry each.
 Entries for an unknown system are skipped with a warning. A full system has no game list to edit: every file is always synced, so opening it in the card editor only says so (press `f` on it in the system list to turn the list back on).
@@ -535,6 +527,35 @@ Removing a game only drops it from the card's games; the file stays in storage.
 ### Editing the built-in sets
 
 `sync-roms sets edit` edits the sets in this repo's `data/sets/` and opens a PR with the changes, so it works from any install. Pick a set to switch games off, add games from a system (you're asked for a category; existing ones are listed), change a game's category, or rename it. **➕ New set** creates a set and `d` deletes the highlighted one (it warns if a card still references it). Esc shows the changes; confirming clones `kelsin/sync-roms` to a temporary folder, writes the changed set files, pushes a branch and runs `gh pr create`. It needs `git` and a logged-in `gh`, and writes nothing to storage or to `~/.sync-roms`.
+
+### Collections
+
+`sync-roms collections edit` edits your own collections of favourite games. A collection is a file like a set file (`{"name": ..., "games": [...]}`) at `~/.sync-roms/collections/<id>.json`; the editor has the same keys as the set editor and saves straight to that folder when you pick Done (Quit discards). They are personal: they never go to storage or into the repo, and no `git` or `gh` is needed. Deleting a collection that cards use asks first and removes it from those cards. In **Add games from a system**, `p` narrows the list to games that were surprises within the last `surprise_ttl_days` and `c` shows every game again, so a surprise you liked is easy to keep.
+
+#### Theme art for collections
+
+In the collection editor, **Theme art** picks a picture for the collection: Action, Adventure, Platformer, RPG, Shooter,
+Fighting, Racing, Sports, Puzzle, Strategy, Horror, Rhythm or Arcade, drawn in the Outline style of the
+[Art Book Next](https://github.com/anthonycaccese/art-book-next-es-de) theme (`src/sync_roms/data/themes/art-book-next/art/`;
+the collection file gets `"art": "<id>"`). When an ES-DE or Knulli card using that theme gets the collection, it shows on
+its own in the system carousel with that art and a logo of its name, drawn with the theme's logo font (Changa One, SIL
+Open Font License: `OFL.txt` there). The Surprise collection always gets the gift-box art. A collection named like a
+system or one of the frontend's own collections gets no art, and a name the font can't draw (accents are dropped first)
+gets no logo, so the frontend shows it as text.
+
+- **ES-DE** (when `Theme` in `es_settings.xml` is `art-book-next-es-de`): ES-DE on Android keeps downloaded themes off
+  the card, so sync copies the theme from a GitHub archive of it kept in storage (`os/esde/themes/`, about 200 MB, and
+  in the mirror) into `ES-DE/themes/art-book-next-sync-roms/`, adds each collection's files (named for the collection in
+  lower case) and sets `Theme` to that copy. `sync-roms themes update` puts the theme's latest commit in storage; a
+  card's copy is replaced when storage has a newer one. ES-DE's theme downloader doesn't update the copy, and its menu
+  lists both copies as Art Book Next. The art is for the Outline color schemes; others show the theme's default art.
+- **Knulli** (when `ThemeSet` in `es_settings.cfg` is unset or Art Book Next): the built-in theme is read-only, so the
+  art goes to `theme-customizations/art-book-next/artwork/<Name>.png` and `logos/<Name>.svg`, and `es_settings.cfg`
+  gets `subset.<Name>.system-view-artwork` and `subset.<Name>.system-logos` set to `custom`, so only that collection
+  uses them (its logo sits a little lower than on the Outline systems). Knulli only shows a custom collection on its own
+  when it isn't grouped under Collections, so `UseCustomCollectionsSystemEx` is set to `false` unless you already chose
+  a value; that shows your other custom collections on their own too.
+- Art for a collection that is renamed or removed stays in the theme folders; it is unused.
 
 ### Full systems
 
@@ -563,6 +584,32 @@ to the set in a later release are synced too, for the systems the card has enabl
 system's game list, then `f` on a set (it shows 📦) to toggle it; the games it syncs show 📦 and switching one
 off excludes it on that card. Unknown set names are skipped with a warning.
 
+### Surprise
+
+Every card gets up to 10 surprises: random full English games (no BIOS, prototypes, betas, demos, hacks, re-releases or
+compilations; a multi-disc game counts as one) from the systems of the run, in addition to the games you picked. It is on by default. Seven of the ten come from
+the systems recommended for the card's device and three from the others, spread evenly over the systems; a system with no
+candidates passes its slots on. Games never surprised, then games surprised before, then games another card currently
+holds are used in that order. Full systems are left out, and so is any game already on the card.
+
+- **In a sync** the step runs after the systems are chosen. Interactively it first asks which of the card's current
+  surprises to replace (`Esc` there behaves as it does in any picker: it keeps them all), fills the empty slots, and opens
+  the card editor so you can adjust the card. Without a terminal, with `--yes` or `--json` it replaces all of them. `--dry-run`
+  changes no surprises: it only says whether it would ask or replace all, previews the picks for empty slots and saves nothing.
+  The mirror is refreshed a second time only when this step or the editor changed the card's picks.
+- **In the card editor**, `u` in the system list turns Surprise on or off for the card (off removes its surprises at the next
+  sync), and `p` in a game list shows only the games surprised within `surprise_ttl_days`. A surprise shows in the
+  game list as 🎁 Surprise and can't be switched off there, like a collection game; it counts in the card's budget and size warning.
+- **History** is kept in `~/.sync-roms/surprises.json` (system, bucket, title, card, ISO date) and pruned past
+  `surprise_ttl_days` in `settings.json` (default 183) whenever it is written. It is how a game comes around again only later.
+- **Frontends**: ES-DE and Knulli cards get the surprises as a custom collection named `Surprise`, written like any
+  other [collection](#collections-in-es-de-and-knulli); that name is reserved, so a collection can't be called Surprise.
+- **Art Book Next**: Surprise gets a gift-box artwork and logo in the theme's Outline style, like any
+  [collection with theme art](#theme-art-for-collections).
+- **Mirror**: picks are made from storage itself, not the mirror, so they can be games the mirror doesn't have yet.
+- `cards.json` holds `"surprise": false` when it is off and `"surprises"` (`[{"system", "bucket", "title", "files"?}]`, `files` being
+  a multi-disc game's other keys); `games export` and `import` carry both, and `sync-roms check` validates them.
+
 ### A card's games in `cards.json`
 
 ```json
@@ -581,7 +628,7 @@ for that card only. In the systems picker, `o` shows only the selected systems.
 Run it on a card or a single system folder after syncing:
 
 ```bash
-sync-roms --install-tools                # once: brew install sevenzip rom-tools
+sync-roms --install-tools                # once: brew install sevenzip unar rom-tools
 sync-roms --cd --dry-run /Volumes/SD/ROMs
 sync-roms --cd /Volumes/SD/ROMs/psx
 ```
@@ -591,7 +638,7 @@ Each system's behaviour is the `chd` setting in `src/sync_roms/data/systems.json
 | `mode` | Systems | What happens |
 |---|---|---|
 | `cd` | Sega CD, Saturn, TurboGrafx-CD, PC-FX, Neo Geo CD, PS1, 3DO, Dreamcast | `chdman createcd` from the `.cue`/`.gdi`/`.toc` (or `.iso`) |
-| `dvd` | PS2, PSP | `chdman createdvd` for `.iso` files plus the system's `args` (PS2 `-c zlib`, PSP `-hs 2048`); bin/cue games use `createcd` |
+| `dvd` | PS2, PS3, PSP | `chdman createdvd` for `.iso` files plus the system's `args` (PS2 `-c zlib`, PS3 `-c zstd`, PSP `-hs 2048`); bin/cue games use `createcd`. PS3 archives also keep their `.pkg`, `.rap`, `.dkey` and `.key` files (the system's `keep` list) beside the `.chd`s, so a PSN `.rar` just extracts to its PKG and RAP files for installing and an encrypted disc keeps the key it needs; an archive's other files (covers, readmes) are dropped. PS3 chds only load in ARMSX3 (Android), not in RPCS3, aPS3e or RPCSX |
 | `extract` | GameCube, Wii | archives are unzipped and the files (e.g. `.rvz`) left as they are; nothing is converted |
 | `xiso` | Xbox | archives are unzipped, then each `.iso` is rewritten as an optimized xiso with `extract-xiso -r` on a hidden copy that replaces the original only once `extract-xiso -l` lists it cleanly; isos already in xiso format are left alone |
 | `zar` | Xbox 360 | archives are unzipped, then each `.iso` is compressed into a zstd [ZArchive](https://github.com/Rucadi/ZArchive) `.zar` with `iso2zar` (written under a hidden `.part` name, renamed once the tool succeeds and the file is not empty) and the iso is removed; Xenia Canary and XenDroid read `.zar` |
@@ -643,6 +690,28 @@ An old `~/.sync-roms/sizes.json` is no longer read; delete it.
 - Every BIOS file listed for a chosen system is downloaded; there is no required/optional distinction.
   BIOS lists come from the ES-DE default libretro cores, so they may not match what Knulli
   or Onion use; on Knulli check Game Settings > Missing Bios Check.
+
+### Collections in ES-DE and Knulli
+
+Only ES-DE and Knulli cards get them. Each sync writes the card's collections (see [Collections](#collections)) as the
+frontend's custom collections, listing the collection games that are on the card; games on systems the card doesn't
+sync are left out. `--dry-run` lists what would be written.
+
+| | ES-DE | Knulli |
+|---|---|---|
+| File | `ES-DE/collections/custom-<Name>.cfg` | `system/configs/emulationstation/collections/custom-<Name>.cfg` |
+| Line | `%ROMPATH%/<system folder>/<path on card>` | `./roms/<system folder>/<path on card>` |
+| Enable | `CollectionSystemsCustom` in `ES-DE/settings/es_settings.xml` | `CollectionSystemsCustom` in `system/configs/emulationstation/es_settings.cfg` |
+
+- `<Name>` is the collection's name without the characters ES-DE rejects (`* " , . / : ; < > \ |`, newline, tab);
+  collections whose names come out alike share one file.
+- `CollectionSystemsCustom` is the comma-separated list of enabled custom collections. Sync adds its names and keeps
+  any others there; only that one line is changed (or added), and the file is created if missing.
+- sync-roms only touches collection files it wrote (recorded as the card's `frontend_collections`). A collection made
+  in the frontend with the same name is skipped with a warning. A collection removed from the card, or renamed, has
+  its old file deleted and its name unlisted.
+- The files are rewritten each sync, so edits made to them in the frontend are lost.
+- Close the frontend before syncing: it rewrites its settings file from memory.
 
 ## Troubleshooting
 

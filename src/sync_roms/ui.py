@@ -189,9 +189,14 @@ def confirm(question, default=True):
             return False
 
 
+def has_terminal():
+    """Whether there is an interactive terminal to ask on."""
+    return sys.stdin.isatty() and (_real_stdout or sys.stdout).isatty()  # --quiet swaps stdout for a discard sink
+
+
 def require_terminal(what, flag):
     """Fail with the flag to use when a step needs an interactive terminal and there isn't one."""
-    if not (sys.stdin.isatty() and (_real_stdout or sys.stdout).isatty()):  # --quiet swaps stdout for a discard sink
+    if not has_terminal():
         fail(f"Can't {what} without a terminal: pass {flag}", 2)
 
 

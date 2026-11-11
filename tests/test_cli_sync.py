@@ -44,7 +44,8 @@ class SyncSmokeTest(RealDataDirGuard):
                         (s3, {"list_sizes": list_sizes, "fetch_texts": lambda keys: {}}),
                         (cli.picker, {"saved_setup": lambda *a: (None, "esde"), "pick_systems": picks}),
                         (cli.downloads, {"run_downloads": lambda *a: 0}),
-                        (cli.clean, {"clean_android_media": lambda *a: None})) + tuple(patches):
+                        (cli.clean, {"clean_android_media": lambda *a: None}),
+                        (cli.surprise, {"run_surprise": lambda *a, **k: []})) + tuple(patches):
                     for name, value in kw.items():
                         st.enter_context(mock.patch.object(target, name, value))
                 st.enter_context(mock.patch.object(cli.clean, "_clean_root", None))

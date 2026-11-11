@@ -2341,6 +2341,16 @@
     "bios": {
       "files": [],
       "note": "Needs PS3UPDAT.PUP firmware"
+    },
+    "chd": {
+      "mode": "dvd",
+      "codec": "zstd",
+      "keep": [
+        ".pkg",
+        ".rap",
+        ".dkey",
+        ".key"
+      ]
     }
   },
   {

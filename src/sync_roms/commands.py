@@ -1,15 +1,17 @@
 """Scriptable subcommands: games, cards, config, doctor, check and completion; plus helpers the sync flow uses."""
 import argparse
+import datetime
 import json
 import os
 import re
 import sys
 
-from . import external, inventory, picker, runtime, s3, setedit, store, ui, usersettings
+from . import collections as colls
+from . import external, inventory, m3u, picker, runtime, s3, setedit, store, surprise, ui, usersettings
 
 
 UNKNOWN_SHOWN = 8  # device ids named in an "unknown device" error
-COMMANDS = {"games", "sets", "cards", "cache", "config", "doctor", "check", "completion"}
+COMMANDS = {"games", "sets", "collections", "themes", "cards", "cache", "config", "doctor", "check", "completion"}
 
 
 class Parser(argparse.ArgumentParser):
@@ -259,6 +261,21 @@ def games_sets(args):
     return finish(args, raw, save, [])
 
 
+def parse_collection(value):
+    """A collection id from an import line; None (with a warning) when no such collection exists."""
+    if value not in {c["id"] for c in colls.load_collections()}:
+        ui.warn(f"unknown collection {value!r}, skipped")
+        return None
+    return value
+
+
+# Card-entry list fields that `games export`/`import` carry as `@field value` lines, one per value. CARD_HOOKS gives a
+# field its own parse(value) -> item or None (None skips the line; the hook warns) and format(item) -> text; a field
+# without one uses the text as it is.
+CARD_FIELDS = ("collections", "frontend_collections", "surprise", "surprises")
+CARD_HOOKS = {"collections": (parse_collection, str), "surprises": (None, lambda s: s["bucket"])}
+
+
 def games_export(args):
     raw, _ = load_target(args.card)
     for system, entry in raw.items():
@@ -266,7 +283,34 @@ def games_export(args):
             print(f"{system}/*")
     for _, key, _ in game_entries(raw):
         print(key)
+    card = store.load_cards()[args.card]
+    for field in CARD_FIELDS:
+        if field == "surprise":
+            if isinstance(card, dict) and not surprise.enabled(card):
+                print("@surprise false")
+            continue
+        values = card.get(field) if isinstance(card, dict) else None
+        for value in values if isinstance(values, list) else []:
+            if field == "surprises" and not (isinstance(value, dict) and isinstance(value.get("bucket"), str)):
+                continue
+            print(f"@{field} {CARD_HOOKS.get(field, (None, str))[1](value)}")
     return 0
+
+
+def surprise_entries(keys_by_system):
+    """Saved-surprise dicts for {system: [keys]}; a multi-disc game's other keys come from the system's listing."""
+    out = []
+    for system, keys in keys_by_system.items():
+        groups = {}
+        try:
+            groups = m3u.file_groups(inventory.files(f"{system}/", sizes=False))
+        except (*s3.ERRORS, SystemExit):
+            ui.warn(f"can't list {system}/, importing its surprises without their other discs")
+        for key in keys:
+            entry = {"system": system, "bucket": key, "title": store.key_title(key)}
+            files = [k for k in groups.get(key, []) if k != key]
+            out.append({**entry, "files": files} if files else entry)
+    return out
 
 
 def games_import(args):
@@ -275,8 +319,38 @@ def games_import(args):
         lines = [l.strip() for l in (sys.stdin if args.file == "-" else open(args.file, encoding="utf-8")) if l.strip() and not l.startswith("#")]
     except OSError as e:
         ui.fail(f"Can't read {args.file}: {e}", 2)
-    changes, by_system, known = [], {}, set(system_ids())
+    changes, by_system, known, fields = [], {}, set(system_ids()), {}
+    surprise_state, surprise_keys = None, {}
     for line in lines:
+        if line.startswith("@"):
+            field, _, text = line[1:].partition(" ")
+            if field not in CARD_FIELDS:
+                ui.warn(f"skipping {line!r}: unknown card field")
+                continue
+            if field == "surprise":
+                if text.strip() in ("true", "false"):
+                    surprise_state = text.strip() == "true"
+                    changes.append(("+", f"@surprise {text.strip()}"))
+                else:
+                    ui.warn(f"skipping {line!r}: expected @surprise true or false")
+                continue
+            if field == "surprises":
+                system, _, name = text.strip().partition("/")
+                if system not in known or not name:
+                    ui.warn(f"skipping {line!r}: expected @surprises SYSTEM/file")
+                elif sum(map(len, surprise_keys.values())) >= surprise.SLOTS:
+                    ui.warn(f"skipping {line!r}: a card holds at most {surprise.SLOTS} surprises")
+                else:
+                    surprise_keys.setdefault(system, []).append(text.strip())
+                    changes.append(("+", f"@surprises {text.strip()}"))
+                continue
+            if not text.strip():
+                ui.warn(f"skipping {line!r}: expected @{field} VALUE")
+                continue
+            value = CARD_HOOKS.get(field, (lambda text: text, str))[0](text.strip())
+            if value is not None:
+                fields.setdefault(field, []).append(value)
+            continue
         system, _, name = line.partition("/")
         if system not in known or not name:
             ui.warn(f"skipping {line!r}: expected SYSTEM/file or SYSTEM/*")
@@ -288,7 +362,24 @@ def games_import(args):
             by_system.setdefault(system, []).append(line)
     for system, keys in by_system.items():
         changes += add_games(raw, system, keys)
-    return finish(args, raw, save, changes)
+    for field, values in fields.items():
+        changes.append(("+", f"{field}: {', '.join(CARD_HOOKS.get(field, (None, str))[1](v) for v in values)}"))
+
+    def save_all(raw):
+        if save(raw) is False:
+            return False
+        values = dict(fields)
+        if surprise_state is False:
+            values["surprise"] = False
+        if surprise_keys:
+            values["surprises"] = surprise_entries(surprise_keys)
+        if surprise_state:
+            cards = store.load_cards()
+            if isinstance(cards.get(args.card), dict) and cards[args.card].pop("surprise", None) is not None:
+                store.write_cards(cards)
+        return store.update_card(args.card, **values) if values else None
+
+    return finish(args, raw, save_all, changes)
 
 
 # --- Cards ------------------------------------------------------------------------------------------
@@ -406,52 +497,68 @@ def cache_cmd(args):
     return inventory.update_command() if args.action == "update" else inventory.status_command()
 
 
+def check_game_file(problems, path, where, systems):
+    """Check one set or collection file; returns its [(system, key)] pairs, or None when the file is unusable.
+
+    where: the name problems are reported under. systems: the set of known system ids."""
+    try:
+        with open(path, encoding="utf-8") as f:
+            data = json.load(f)
+    except (OSError, ValueError) as e:
+        problems.append(f"{where}: not valid JSON ({e})")
+        return None
+    games = data.get("games") if isinstance(data, dict) else None
+    if not isinstance(games, list):
+        problems.append(f"{where}: must be an object with a 'games' list")
+        return None
+    if not isinstance(data.get("name"), str) or not data["name"]:
+        problems.append(f"{where}: missing 'name'")
+    listed = []
+    for g in games:
+        if not isinstance(g, dict) or not isinstance(g.get("bucket"), str) or not g["bucket"]:
+            problems.append(f"{where}: entry without a bucket key: {g!r}")
+            continue
+        system = g.get("system")
+        if system not in systems:
+            problems.append(f"{where}: {g['bucket']}: unknown system {system!r}")
+            continue
+        if not g.get("title"):
+            problems.append(f"{where}: {g['bucket']}: missing 'title'")
+        if not isinstance(g.get("category", ""), str):
+            problems.append(f"{where}: {g['bucket']}: 'category' must be a string")
+        files = g.get("files", [])
+        if not isinstance(files, list) or not all(isinstance(k, str) for k in files):
+            problems.append(f"{where}: {g['bucket']}: 'files' must be a list of bucket keys")
+            files = []
+        for k in [g["bucket"]] + files:
+            if not k.startswith(system + "/"):
+                problems.append(f"{where}: {k!r} isn't under {system}/")
+            else:
+                listed.append((system, k))
+    return listed
+
+
+def check_folder(problems, folder, prefix, systems):
+    """Check every .json file in folder with check_game_file; returns {prefix + file name: [(system, key)]}."""
+    keys = {}
+    for name in sorted(os.listdir(folder)) if os.path.isdir(folder) else []:
+        if name.endswith(".json"):
+            listed = check_game_file(problems, os.path.join(folder, name), f"{prefix}{name}", systems)
+            if listed is not None:
+                keys[f"{prefix}{name}"] = listed
+    return keys
+
+
 def check_sets(problems, systems):
-    """Check every set file (repo and personal) and return the keys each one lists as {set id: [(system, key)]}.
+    """Check every repo set file and return the keys each one lists as {set id: [(system, key)]}.
 
     systems: the set of known system ids."""
-    keys = {}
-    folders = [(store.REPO_DATA + "/sets", ""), (store.personal_sets_dir(), "sets/")]
-    for folder, prefix in folders:
-        for name in sorted(os.listdir(folder)) if os.path.isdir(folder) else []:
-            if not name.endswith(".json"):
-                continue
-            where = f"{prefix}{name}"
-            try:
-                with open(os.path.join(folder, name)) as f:
-                    data = json.load(f)
-            except (OSError, ValueError) as e:
-                problems.append(f"{where}: not valid JSON ({e})")
-                continue
-            games = data.get("games") if isinstance(data, dict) else None
-            if not isinstance(games, list):
-                problems.append(f"{where}: must be an object with a 'games' list")
-                continue
-            if not isinstance(data.get("name"), str) or not data["name"]:
-                problems.append(f"{where}: missing 'name'")
-            listed = keys.setdefault(where, [])
-            for g in games:
-                if not isinstance(g, dict) or not isinstance(g.get("bucket"), str) or not g["bucket"]:
-                    problems.append(f"{where}: entry without a bucket key: {g!r}")
-                    continue
-                system = g.get("system")
-                if system not in systems:
-                    problems.append(f"{where}: {g['bucket']}: unknown system {system!r}")
-                    continue
-                if not g.get("title"):
-                    problems.append(f"{where}: {g['bucket']}: missing 'title'")
-                if not isinstance(g.get("category", ""), str):
-                    problems.append(f"{where}: {g['bucket']}: 'category' must be a string")
-                files = g.get("files", [])
-                if not isinstance(files, list) or not all(isinstance(k, str) for k in files):
-                    problems.append(f"{where}: {g['bucket']}: 'files' must be a list of bucket keys")
-                    files = []
-                for k in [g["bucket"]] + files:
-                    if not k.startswith(system + "/"):
-                        problems.append(f"{where}: {k!r} isn't under {system}/")
-                    else:
-                        listed.append((system, k))
-    return keys
+    return check_folder(problems, store.REPO_DATA + "/sets", "", systems)
+
+
+def check_collections(problems, systems):
+    """Check every file in the user's collections folder; returns {"collections/<file>": [(system, key)]}."""
+    return check_folder(problems, colls.collections_dir(), "collections/", systems)
 
 
 def valid_ratio(value):
@@ -491,6 +598,8 @@ def check_data(list_keys=None, repo_systems=None):
     layouts = set(store.repo_json("layouts"))
     sets = {x["id"] for x in store.load_sets()}
     wanted.update(check_sets(problems, systems))
+    wanted.update(check_collections(problems, systems))
+    collection_ids = {c["id"] for c in colls.load_collections()}
 
     def load(name):
         path = os.path.join(store.data_dir(), name)
@@ -547,6 +656,52 @@ def check_data(list_keys=None, repo_systems=None):
                             for sid in ids if not isinstance(sid, str) or sid not in systems)
         if "games" in entry:
             check_list(f"cards.json: {name}", entry["games"])
+        picked = entry.get("collections", [])
+        if not isinstance(picked, list) or not all(isinstance(i, str) for i in picked):
+            problems.append(f"cards.json: {name}: 'collections' must be a list of collection ids")
+        else:
+            problems.extend(f"cards.json: {name}: unknown collection {i!r}" for i in picked if i not in collection_ids)
+        names = entry.get("frontend_collections", [])
+        if not isinstance(names, list) or not all(isinstance(i, str) for i in names):
+            problems.append(f"cards.json: {name}: 'frontend_collections' must be a list of names")
+        if "surprise" in entry and not isinstance(entry["surprise"], bool):
+            problems.append(f"cards.json: {name}: 'surprise' must be true or false")
+        picks = entry.get("surprises", [])
+        if not isinstance(picks, list):
+            problems.append(f"cards.json: {name}: 'surprises' must be a list")
+        else:
+            for g in picks:
+                if not isinstance(g, dict) or not all(isinstance(g.get(k), str) and g.get(k)
+                                                      for k in ("system", "bucket", "title")):
+                    problems.append(f"cards.json: {name}: surprises: each must have system, bucket and title")
+                elif g["system"] not in systems:
+                    problems.append(f"cards.json: {name}: surprises: unknown system {g['system']!r}")
+                else:
+                    files = g.get("files", [])
+                    if not isinstance(files, list) or not all(isinstance(k, str) for k in files):
+                        problems.append(f"cards.json: {name}: surprises: {g['bucket']}: 'files' must be a list of bucket keys")
+                        files = []
+                    for k in [g["bucket"]] + files:
+                        if not k.startswith(g["system"] + "/"):
+                            problems.append(f"cards.json: {name}: surprises: {k!r} isn't under {g['system']}/")
+                        else:
+                            wanted.setdefault(f"cards.json: {name}: surprises", []).append((g["system"], k))
+    history = load("surprises.json")
+    if history is not None and not isinstance(history, list):
+        problems.append("surprises.json: must be a list")
+        history = []
+    for e in history or []:
+        if not isinstance(e, dict) or not all(isinstance(e.get(k), str) for k in ("system", "bucket", "title", "card", "date")):
+            problems.append("surprises.json: entry needs system, bucket, title, card and date")
+            continue
+        if e["system"] not in systems:
+            problems.append(f"surprises.json: unknown system {e['system']!r}")
+        elif not e["bucket"].startswith(e["system"] + "/"):
+            problems.append(f"surprises.json: {e['bucket']!r} isn't under {e['system']}/")
+        try:
+            datetime.date.fromisoformat(e["date"])
+        except ValueError:
+            problems.append(f"surprises.json: {e['date']!r} isn't an ISO date")
     overlay = load("device-systems.json")
     if overlay is not None and not isinstance(overlay, dict):
         problems.append("device-systems.json: must be an object")
@@ -600,7 +755,7 @@ def check_cmd(args):
     for n in check_notices(repo_systems):
         print(ui.yellow(f"⚠️  {n}"))
     if not problems:
-        print(ui.green("✅ cards.json, device-systems.json and the sets look fine"))
+        print(ui.green("✅ cards.json, surprises.json, device-systems.json, the sets and your collections look fine"))
     return 1 if problems else 0
 
 
@@ -680,6 +835,17 @@ def all_flags():
     return sorted(found - {"--device-id"})  # --device-id is set by `devices ID`, not typed
 
 
+def collections_edit(args):
+    from . import collectionedit  # imported late: it reaches this module through edit
+    return collectionedit.edit_collections()
+
+
+def themes_update(args):
+    from . import themeart
+    usersettings.ensure_bucket()
+    return themeart.update_storage(args.dry_run)
+
+
 def second_words():
     """{command: the words that can follow it} for the commands that have subcommands."""
     from . import cli
@@ -689,6 +855,8 @@ def second_words():
             words.setdefault(key[0], []).append(key[1])
     words["games"] = sorted(set(words.get("games", [])) | {"list", "add", "remove", "full", "sets", "export", "import"})
     words["sets"] = ["edit"]
+    words["collections"] = ["edit"]
+    words["themes"] = ["update"]
     words["cards"] = ["edit", "list", "new", "set", "rename", "delete"]
     words["config"] = ["show", "path"]
     words["cache"] = ["update"]
@@ -775,6 +943,15 @@ def build_parser():
     sets = sub.add_parser("sets", add_help=False, allow_abbrev=False)
     ssub = sets.add_subparsers(dest="action", required=True)
     p = ssub.add_parser("edit", allow_abbrev=False); p.set_defaults(fn=lambda a: setedit.edit_sets())
+
+    collections = sub.add_parser("collections", add_help=False, allow_abbrev=False)
+    colsub = collections.add_subparsers(dest="action", required=True)
+    p = colsub.add_parser("edit", allow_abbrev=False)
+    p.set_defaults(fn=collections_edit)
+
+    themes = sub.add_parser("themes", add_help=False, allow_abbrev=False)
+    tsub = themes.add_subparsers(dest="action", required=True)
+    p = tsub.add_parser("update", allow_abbrev=False); common(p, card=False); p.set_defaults(fn=themes_update)
 
     cards = sub.add_parser("cards", add_help=False, allow_abbrev=False)
     csub = cards.add_subparsers(dest="action", required=True)

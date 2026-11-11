@@ -1,0 +1,15 @@
+{
+  "action": "Action",
+  "adventure": "Adventure",
+  "platformer": "Platformer",
+  "rpg": "RPG",
+  "shooter": "Shooter",
+  "fighting": "Fighting",
+  "racing": "Racing",
+  "sports": "Sports",
+  "puzzle": "Puzzle",
+  "strategy": "Strategy",
+  "horror": "Horror",
+  "rhythm": "Rhythm",
+  "arcade": "Arcade"
+}

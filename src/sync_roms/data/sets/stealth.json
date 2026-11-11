@@ -1,0 +1,611 @@
+{
+  "name": "Stealth & Espionage",
+  "description": "Metal Gear and other sneaking games.",
+  "games": [
+    {
+      "title": "Metal Gear",
+      "category": "Metal Gear",
+      "system": "msx2",
+      "bucket": "msx2/Metal Gear (Europe).zip"
+    },
+    {
+      "title": "Metal Gear 2 - Solid Snake",
+      "category": "Metal Gear",
+      "system": "msx2",
+      "bucket": "msx2/Metal Gear 2 - Solid Snake (Japan).zip"
+    },
+    {
+      "title": "Metal Gear",
+      "category": "Metal Gear",
+      "system": "nes",
+      "bucket": "nes/Metal Gear (USA).zip"
+    },
+    {
+      "title": "Snake's Revenge",
+      "category": "Metal Gear",
+      "system": "nes",
+      "bucket": "nes/Snake's Revenge (USA).zip"
+    },
+    {
+      "title": "Metal Gear Solid",
+      "category": "Metal Gear",
+      "system": "psx",
+      "bucket": "psx/Metal Gear Solid (USA) (Rev 1).m3u",
+      "files": [
+        "psx/Metal Gear Solid (USA) (Disc 1) (Rev 1).chd",
+        "psx/Metal Gear Solid (USA) (Disc 2) (Rev 1).chd"
+      ]
+    },
+    {
+      "title": "Metal Gear Solid - VR Missions",
+      "category": "Metal Gear",
+      "system": "psx",
+      "bucket": "psx/Metal Gear Solid - VR Missions (USA).chd"
+    },
+    {
+      "title": "Metal Gear Solid",
+      "category": "Metal Gear",
+      "system": "gbc",
+      "bucket": "gbc/Metal Gear Solid (USA).zip"
+    },
+    {
+      "title": "Metal Gear Solid 2 - Substance",
+      "category": "Metal Gear",
+      "system": "ps2",
+      "bucket": "ps2/Metal Gear Solid 2 - Substance (USA).chd"
+    },
+    {
+      "title": "Metal Gear Solid - The Twin Snakes",
+      "category": "Metal Gear",
+      "system": "gc",
+      "bucket": "gc/Metal Gear Solid - The Twin Snakes (USA).m3u",
+      "files": [
+        "gc/Metal Gear Solid - The Twin Snakes (USA) (Disc 1).rvz",
+        "gc/Metal Gear Solid - The Twin Snakes (USA) (Disc 2).rvz"
+      ]
+    },
+    {
+      "title": "Metal Gear Solid 3 - Subsistence",
+      "category": "Metal Gear",
+      "system": "ps2",
+      "bucket": "ps2/Metal Gear Solid 3 - Subsistence (USA) (En,Es).m3u",
+      "files": [
+        "ps2/Metal Gear Solid 3 - Subsistence (USA) (En,Es) (Disc 1) (Subsistence Disc).chd",
+        "ps2/Metal Gear Solid 3 - Subsistence (USA) (En,Es) (Disc 2) (Persistence).chd",
+        "ps2/Metal Gear Solid 3 - Subsistence (USA) (En,Es) (Disc 3) (Existence) (Limited Edition).chd"
+      ]
+    },
+    {
+      "title": "Metal Gear Acid",
+      "category": "Metal Gear",
+      "system": "psp",
+      "bucket": "psp/Metal Gear Acid (USA).chd"
+    },
+    {
+      "title": "Metal Gear Acid 2",
+      "category": "Metal Gear",
+      "system": "psp",
+      "bucket": "psp/Metal Gear Acid 2 (USA).chd"
+    },
+    {
+      "title": "Metal Gear Solid - Portable Ops",
+      "category": "Metal Gear",
+      "system": "psp",
+      "bucket": "psp/Metal Gear Solid - Portable Ops (USA).chd"
+    },
+    {
+      "title": "Metal Gear Solid - Portable Ops Plus",
+      "category": "Metal Gear",
+      "system": "psp",
+      "bucket": "psp/Metal Gear Solid - Portable Ops Plus (USA).chd"
+    },
+    {
+      "title": "Metal Gear Solid - Peace Walker",
+      "category": "Metal Gear",
+      "system": "psp",
+      "bucket": "psp/Metal Gear Solid - Peace Walker (USA) (En,Fr,Es) (v2.00).chd"
+    },
+    {
+      "title": "Metal Gear Solid - Snake Eater 3D",
+      "category": "Metal Gear",
+      "system": "3ds",
+      "bucket": "3ds/Metal Gear Solid - Snake Eater 3D (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Metal Gear Solid HD Collection",
+      "category": "Metal Gear",
+      "system": "psvita",
+      "bucket": "psvita/Metal Gear Solid HD [PCSE00020] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Metal Gear Solid - HD Collection",
+      "category": "Metal Gear",
+      "system": "xbox360",
+      "bucket": "xbox360/Metal Gear Solid - HD Collection (USA) (En,Fr,Es) (Disc 1).zar",
+      "files": [
+        "xbox360/Metal Gear Solid - HD Collection (USA) (En,Fr,Es) (Disc 2).zar"
+      ]
+    },
+    {
+      "title": "Metal Gear Solid V - Ground Zeroes",
+      "category": "Metal Gear",
+      "system": "xbox360",
+      "bucket": "xbox360/Metal Gear Solid V - Ground Zeroes (USA, Europe) (En,Ja,Fr,De,Es,It,Pt,Ru).zar"
+    },
+    {
+      "title": "Metal Gear Solid V - The Phantom Pain",
+      "category": "Metal Gear",
+      "system": "xbox360",
+      "bucket": "xbox360/Metal Gear Solid V - The Phantom Pain (USA, Europe) (En,Ja,Fr,De,Es,It,Pt,Ru) (Disc 1).zar",
+      "files": [
+        "xbox360/Metal Gear Solid V - The Phantom Pain (USA, Europe) (En,Ja,Fr,De,Es,It,Pt,Ru) (Disc 2).zar"
+      ]
+    },
+    {
+      "title": "Metal Gear Rising - Revengeance",
+      "category": "Metal Gear",
+      "system": "xbox360",
+      "bucket": "xbox360/Metal Gear Rising - Revengeance (USA, Europe) (En,Ja,Fr,De,Es,It,Pt).zar"
+    },
+    {
+      "title": "Tenchu 2 - Birth of the Stealth Assassins",
+      "category": "Tenchu",
+      "system": "psx",
+      "bucket": "psx/Tenchu 2 - Birth of the Stealth Assassins (USA).chd"
+    },
+    {
+      "title": "Tenchu - Time of the Assassins",
+      "category": "Tenchu",
+      "system": "psp",
+      "bucket": "psp/Tenchu - Time of the Assassins (Europe) (En,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "Tenchu - Dark Secret",
+      "category": "Tenchu",
+      "system": "nds",
+      "bucket": "nds/Tenchu - Dark Secret (USA).zip"
+    },
+    {
+      "title": "Tenchu - Shadow Assassins",
+      "category": "Tenchu",
+      "system": "psp",
+      "bucket": "psp/Tenchu - Shadow Assassins (USA).chd"
+    },
+    {
+      "title": "Syphon Filter",
+      "category": "Syphon Filter",
+      "system": "psx",
+      "bucket": "psx/Syphon Filter (USA) (Rev 1).chd"
+    },
+    {
+      "title": "Syphon Filter 2",
+      "category": "Syphon Filter",
+      "system": "psx",
+      "bucket": "psx/Syphon Filter 2 (USA).m3u",
+      "files": [
+        "psx/Syphon Filter 2 (USA) (Disc 1).chd",
+        "psx/Syphon Filter 2 (USA) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "Syphon Filter 3",
+      "category": "Syphon Filter",
+      "system": "psx",
+      "bucket": "psx/Syphon Filter 3 (USA).chd"
+    },
+    {
+      "title": "Syphon Filter - Dark Mirror",
+      "category": "Syphon Filter",
+      "system": "psp",
+      "bucket": "psp/Syphon Filter - Dark Mirror (USA).chd"
+    },
+    {
+      "title": "Syphon Filter - Logan's Shadow",
+      "category": "Syphon Filter",
+      "system": "psp",
+      "bucket": "psp/Syphon Filter - Logan's Shadow (USA).chd"
+    },
+    {
+      "title": "Tom Clancy's Splinter Cell",
+      "category": "Splinter Cell",
+      "system": "gc",
+      "bucket": "gc/Tom Clancy's Splinter Cell (USA).rvz"
+    },
+    {
+      "title": "Tom Clancy's Splinter Cell - Pandora Tomorrow",
+      "category": "Splinter Cell",
+      "system": "gc",
+      "bucket": "gc/Tom Clancy's Splinter Cell - Pandora Tomorrow (USA).rvz"
+    },
+    {
+      "title": "Tom Clancy's Splinter Cell - Chaos Theory",
+      "category": "Splinter Cell",
+      "system": "gc",
+      "bucket": "gc/Tom Clancy's Splinter Cell - Chaos Theory (USA) (En,Fr,Es).m3u",
+      "files": [
+        "gc/Tom Clancy's Splinter Cell - Chaos Theory (USA) (En,Fr,Es) (Disc 1).rvz",
+        "gc/Tom Clancy's Splinter Cell - Chaos Theory (USA) (En,Fr,Es) (Disc 2).rvz"
+      ]
+    },
+    {
+      "title": "Tom Clancy's Splinter Cell - Double Agent",
+      "category": "Splinter Cell",
+      "system": "gc",
+      "bucket": "gc/Tom Clancy's Splinter Cell - Double Agent (USA) (En,Fr,Es).m3u",
+      "files": [
+        "gc/Tom Clancy's Splinter Cell - Double Agent (USA) (En,Fr,Es) (Disc 1).rvz",
+        "gc/Tom Clancy's Splinter Cell - Double Agent (USA) (En,Fr,Es) (Disc 2).rvz"
+      ]
+    },
+    {
+      "title": "Tom Clancy's Splinter Cell",
+      "category": "Splinter Cell",
+      "system": "gba",
+      "bucket": "gba/Tom Clancy's Splinter Cell (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Tom Clancy's Splinter Cell - Pandora Tomorrow",
+      "category": "Splinter Cell",
+      "system": "gba",
+      "bucket": "gba/Tom Clancy's Splinter Cell - Pandora Tomorrow (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Tom Clancy's Splinter Cell - Chaos Theory",
+      "category": "Splinter Cell",
+      "system": "nds",
+      "bucket": "nds/Tom Clancy's Splinter Cell - Chaos Theory (USA) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Tom Clancy's Splinter Cell - Essentials",
+      "category": "Splinter Cell",
+      "system": "psp",
+      "bucket": "psp/Tom Clancy's Splinter Cell - Essentials (USA).chd"
+    },
+    {
+      "title": "Tom Clancy's Splinter Cell 3D",
+      "category": "Splinter Cell",
+      "system": "3ds",
+      "bucket": "3ds/Tom Clancy's Splinter Cell 3D (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Tecmo's Deception - Invitation to Darkness",
+      "category": "Deception",
+      "system": "psx",
+      "bucket": "psx/Tecmo's Deception - Invitation to Darkness (USA).chd"
+    },
+    {
+      "title": "Kagero - Deception II",
+      "category": "Deception",
+      "system": "psx",
+      "bucket": "psx/Kagero - Deception II (USA).chd"
+    },
+    {
+      "title": "Deception III - Dark Delusion",
+      "category": "Deception",
+      "system": "psx",
+      "bucket": "psx/Deception III - Dark Delusion (USA).chd"
+    },
+    {
+      "title": "005",
+      "category": "Other",
+      "system": "mame",
+      "bucket": "mame/005.zip"
+    },
+    {
+      "title": "Lupin III",
+      "category": "Other",
+      "system": "mame",
+      "bucket": "mame/lupin3.zip"
+    },
+    {
+      "title": "Bonanza Bros.",
+      "category": "Other",
+      "system": "fbneo",
+      "bucket": "fbneo/bnzabros.zip"
+    },
+    {
+      "title": "Bonanza Bros.",
+      "category": "Other",
+      "system": "genesis",
+      "bucket": "genesis/Bonanza Bros. (USA, Europe, Korea) (En) (Rev B).zip"
+    },
+    {
+      "title": "Bonanza Bros.",
+      "category": "Other",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Bonanza Bros. (Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Bonanza Bros.",
+      "category": "Other",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Bonanza Bros. (Japan).chd"
+    },
+    {
+      "title": "Infiltrator",
+      "category": "Other",
+      "system": "nes",
+      "bucket": "nes/Infiltrator (USA).zip"
+    },
+    {
+      "title": "Rescue - The Embassy Mission",
+      "category": "Other",
+      "system": "nes",
+      "bucket": "nes/Rescue - The Embassy Mission (USA).zip"
+    },
+    {
+      "title": "GoldenEye 007",
+      "category": "Other",
+      "system": "n64",
+      "bucket": "n64/GoldenEye 007 (USA).zip"
+    },
+    {
+      "title": "Perfect Dark",
+      "category": "Other",
+      "system": "n64",
+      "bucket": "n64/Perfect Dark (USA) (Rev 1).zip"
+    },
+    {
+      "title": "WinBack - Covert Operations",
+      "category": "Other",
+      "system": "n64",
+      "bucket": "n64/WinBack - Covert Operations (USA).zip"
+    },
+    {
+      "title": "Perfect Dark",
+      "category": "Other",
+      "system": "gbc",
+      "bucket": "gbc/Perfect Dark (USA, Europe) (En,Fr,De,Es,It) (Rumble Version).zip"
+    },
+    {
+      "title": "Chicken Run",
+      "category": "Other",
+      "system": "gbc",
+      "bucket": "gbc/Chicken Run (USA, Europe) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Grinch, The",
+      "category": "Other",
+      "system": "gbc",
+      "bucket": "gbc/Grinch, The (USA).zip"
+    },
+    {
+      "title": "007 - Tomorrow Never Dies",
+      "category": "Other",
+      "system": "psx",
+      "bucket": "psx/007 - Tomorrow Never Dies (USA).chd"
+    },
+    {
+      "title": "007 - The World Is Not Enough",
+      "category": "Other",
+      "system": "psx",
+      "bucket": "psx/007 - The World Is Not Enough (USA).chd"
+    },
+    {
+      "title": "Looney Tunes - Sheep Raider",
+      "category": "Other",
+      "system": "psx",
+      "bucket": "psx/Looney Tunes - Sheep Raider (USA) (En,Fr,Es,Pt).chd"
+    },
+    {
+      "title": "Chicken Run",
+      "category": "Other",
+      "system": "psx",
+      "bucket": "psx/Chicken Run (USA).chd"
+    },
+    {
+      "title": "Grinch, The",
+      "category": "Other",
+      "system": "psx",
+      "bucket": "psx/Grinch, The (USA) (En,Fr,Es).chd"
+    },
+    {
+      "title": "Headhunter",
+      "category": "Other",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Headhunter (Europe) (En,Fr,De,Es).m3u",
+      "files": [
+        "dreamcast/Headhunter (Europe) (En,Fr,De,Es) (Disc 1).chd",
+        "dreamcast/Headhunter (Europe) (En,Fr,De,Es) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "Industrial Spy - Operation Espionage",
+      "category": "Other",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Industrial Spy - Operation Espionage (USA).chd"
+    },
+    {
+      "title": "Chicken Run",
+      "category": "Other",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Chicken Run (USA).chd"
+    },
+    {
+      "title": "Grinch, The",
+      "category": "Other",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Grinch, The (USA) (En,Fr,Es).chd"
+    },
+    {
+      "title": "Boktai - The Sun Is in Your Hand",
+      "category": "Other",
+      "system": "gba",
+      "bucket": "gba/Boktai - The Sun Is in Your Hand (USA).zip"
+    },
+    {
+      "title": "Boktai 2 - Solar Boy Django",
+      "category": "Other",
+      "system": "gba",
+      "bucket": "gba/Boktai 2 - Solar Boy Django (USA).zip"
+    },
+    {
+      "title": "Mission Impossible - Operation Surma",
+      "category": "Other",
+      "system": "gba",
+      "bucket": "gba/Mission Impossible - Operation Surma (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "007 - Everything or Nothing",
+      "category": "Other",
+      "system": "gba",
+      "bucket": "gba/007 - Everything or Nothing (USA, Europe) (En,Fr,De).zip"
+    },
+    {
+      "title": "Sly Cooper and the Thievius Raccoonus",
+      "category": "Other",
+      "system": "ps2",
+      "bucket": "ps2/Sly Cooper and the Thievius Raccoonus (USA).chd"
+    },
+    {
+      "title": "Sly 2 - Band of Thieves",
+      "category": "Other",
+      "system": "ps2",
+      "bucket": "ps2/Sly 2 - Band of Thieves (USA).chd"
+    },
+    {
+      "title": "Sly 3 - Honor Among Thieves",
+      "category": "Other",
+      "system": "ps2",
+      "bucket": "ps2/Sly 3 - Honor Among Thieves (USA).chd"
+    },
+    {
+      "title": "Beyond Good & Evil",
+      "category": "Other",
+      "system": "ps2",
+      "bucket": "ps2/Beyond Good & Evil (USA) (En,Fr,Es).chd"
+    },
+    {
+      "title": "Bully",
+      "category": "Other",
+      "system": "ps2",
+      "bucket": "ps2/Bully (USA).chd"
+    },
+    {
+      "title": "Beyond Good & Evil",
+      "category": "Other",
+      "system": "gc",
+      "bucket": "gc/Beyond Good & Evil (USA) (En,Es).rvz"
+    },
+    {
+      "title": "Hitman 2 - Silent Assassin",
+      "category": "Other",
+      "system": "gc",
+      "bucket": "gc/Hitman 2 - Silent Assassin (USA).rvz"
+    },
+    {
+      "title": "Rogue Ops",
+      "category": "Other",
+      "system": "gc",
+      "bucket": "gc/Rogue Ops (USA).rvz"
+    },
+    {
+      "title": "Second Sight",
+      "category": "Other",
+      "system": "gc",
+      "bucket": "gc/Second Sight (USA).rvz"
+    },
+    {
+      "title": "XIII",
+      "category": "Other",
+      "system": "gc",
+      "bucket": "gc/XIII (USA) (En,Fr,Es).rvz"
+    },
+    {
+      "title": "Batman Begins",
+      "category": "Other",
+      "system": "gc",
+      "bucket": "gc/Batman Begins (USA).rvz"
+    },
+    {
+      "title": "007 - Agent Under Fire",
+      "category": "Other",
+      "system": "gc",
+      "bucket": "gc/007 - Agent Under Fire (USA) (Rev 1).rvz"
+    },
+    {
+      "title": "007 - Nightfire",
+      "category": "Other",
+      "system": "gc",
+      "bucket": "gc/007 - Nightfire (USA).rvz"
+    },
+    {
+      "title": "007 - Everything or Nothing",
+      "category": "Other",
+      "system": "gc",
+      "bucket": "gc/007 - Everything or Nothing (USA).rvz"
+    },
+    {
+      "title": "Manhunt 2",
+      "category": "Other",
+      "system": "psp",
+      "bucket": "psp/Manhunt 2 (USA, Canada).chd"
+    },
+    {
+      "title": "Assassin's Creed - Bloodlines",
+      "category": "Other",
+      "system": "psp",
+      "bucket": "psp/Assassin's Creed - Bloodlines (USA) (En,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "Shinobido - Tales of the Ninja",
+      "category": "Other",
+      "system": "psp",
+      "bucket": "psp/Shinobido - Tales of the Ninja (Europe) (En,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "Assassin's Creed - Altair's Chronicles",
+      "category": "Other",
+      "system": "nds",
+      "bucket": "nds/Assassin's Creed - Altair's Chronicles (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Assassin's Creed II - Discovery",
+      "category": "Other",
+      "system": "nds",
+      "bucket": "nds/Assassin's Creed II - Discovery (USA) (En,Fr,Es) (NDSi Enhanced).zip"
+    },
+    {
+      "title": "Batman - Arkham Origins Blackgate",
+      "category": "Other",
+      "system": "3ds",
+      "bucket": "3ds/Batman - Arkham Origins Blackgate (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Adventures of Tintin, The - The Game",
+      "category": "Other",
+      "system": "3ds",
+      "bucket": "3ds/Adventures of Tintin, The - The Game (USA) (En,Fr,Es,Pt).zip"
+    },
+    {
+      "title": "Batman - Arkham Asylum - Game of the Year Edition",
+      "category": "Other",
+      "system": "xbox360",
+      "bucket": "xbox360/Batman - Arkham Asylum - Game of the Year Edition (USA) (En,Fr,De,Es,It).zar"
+    },
+    {
+      "title": "Vampire Rain",
+      "category": "Other",
+      "system": "xbox360",
+      "bucket": "xbox360/Vampire Rain (USA, Europe).zar"
+    },
+    {
+      "title": "Batman - Arkham City - Game of the Year Edition",
+      "category": "Other",
+      "system": "xbox360",
+      "bucket": "xbox360/Batman - Arkham City - Game of the Year Edition (USA, Europe) (En,Ja,Fr,De,Es,It,Pt,Ko,Pl,Ru) (Disc 1).zar",
+      "files": [
+        "xbox360/Batman - Arkham City - Game of the Year Edition (USA, Europe) (En,Ja,Fr,De,Es,It,Pt,Ko,Pl,Ru) (Disc 2).zar"
+      ]
+    },
+    {
+      "title": "Batman - Arkham Origins",
+      "category": "Other",
+      "system": "xbox360",
+      "bucket": "xbox360/Batman - Arkham Origins (USA, Europe) (En,Fr,De,Es,It,Ko,Pl,Ru) (Disc 1).zar",
+      "files": [
+        "xbox360/Batman - Arkham Origins (USA, Europe) (En,Fr,De,Es,It,Ko,Pl,Ru) (Disc 2).zar"
+      ]
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 {
   "name": "Pre-NES & Retro Oddities",
-  "description": "Atari, Intellivision, Colecovision, Vectrex and other early-era systems, plus classic compilations.",
+  "description": "Atari, Intellivision, Colecovision, Vectrex and other early-era systems, oddball consoles and handhelds, plus classic compilations.",
   "games": [
     {
       "title": "Adventure",
@@ -73,6 +73,336 @@
       "bucket": "atari2600/Pole Position (USA).zip"
     },
     {
+      "title": "Asteroids",
+      "system": "atari2600",
+      "bucket": "atari2600/Asteroids (Japan, USA) (En).zip"
+    },
+    {
+      "title": "Pac-Man",
+      "system": "atari2600",
+      "bucket": "atari2600/Pac-Man (USA).zip"
+    },
+    {
+      "title": "E.T. - The Extra-Terrestrial",
+      "system": "atari2600",
+      "bucket": "atari2600/E.T. - The Extra-Terrestrial (USA).zip"
+    },
+    {
+      "title": "Berzerk",
+      "system": "atari2600",
+      "bucket": "atari2600/Berzerk (Japan, USA) (En).zip"
+    },
+    {
+      "title": "Breakout",
+      "system": "atari2600",
+      "bucket": "atari2600/Breakout ~ Breakaway IV (Japan, USA) (En).zip"
+    },
+    {
+      "title": "Super Breakout",
+      "system": "atari2600",
+      "bucket": "atari2600/Super Breakout (USA).zip"
+    },
+    {
+      "title": "Centipede",
+      "system": "atari2600",
+      "bucket": "atari2600/Centipede (Japan, USA) (En).zip"
+    },
+    {
+      "title": "Defender",
+      "system": "atari2600",
+      "bucket": "atari2600/Defender (USA).zip"
+    },
+    {
+      "title": "Demon Attack (Rev 1)",
+      "system": "atari2600",
+      "bucket": "atari2600/Demon Attack (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Enduro",
+      "system": "atari2600",
+      "bucket": "atari2600/Enduro (USA).zip"
+    },
+    {
+      "title": "Freeway",
+      "system": "atari2600",
+      "bucket": "atari2600/Freeway (USA).zip"
+    },
+    {
+      "title": "Haunted House",
+      "system": "atari2600",
+      "bucket": "atari2600/Haunted House (USA).zip"
+    },
+    {
+      "title": "Joust",
+      "system": "atari2600",
+      "bucket": "atari2600/Joust (USA).zip"
+    },
+    {
+      "title": "Jr. Pac-Man",
+      "system": "atari2600",
+      "bucket": "atari2600/Jr. Pac-Man (USA).zip"
+    },
+    {
+      "title": "Keystone Kapers",
+      "system": "atari2600",
+      "bucket": "atari2600/Keystone Kapers (USA).zip"
+    },
+    {
+      "title": "MegaMania - A Space Nightmare",
+      "system": "atari2600",
+      "bucket": "atari2600/MegaMania - A Space Nightmare (USA).zip"
+    },
+    {
+      "title": "Montezuma's Revenge - Featuring Panama Joe",
+      "system": "atari2600",
+      "bucket": "atari2600/Montezuma's Revenge - Featuring Panama Joe (USA).zip"
+    },
+    {
+      "title": "Pitfall II - Lost Caverns",
+      "system": "atari2600",
+      "bucket": "atari2600/Pitfall II - Lost Caverns (USA).zip"
+    },
+    {
+      "title": "Phoenix",
+      "system": "atari2600",
+      "bucket": "atari2600/Phoenix (USA).zip"
+    },
+    {
+      "title": "Q-bert",
+      "system": "atari2600",
+      "bucket": "atari2600/Q-bert (USA).zip"
+    },
+    {
+      "title": "Raiders of the Lost Ark",
+      "system": "atari2600",
+      "bucket": "atari2600/Raiders of the Lost Ark (USA).zip"
+    },
+    {
+      "title": "Solaris",
+      "system": "atari2600",
+      "bucket": "atari2600/Solaris (USA).zip"
+    },
+    {
+      "title": "Star Raiders",
+      "system": "atari2600",
+      "bucket": "atari2600/Star Raiders (USA).zip"
+    },
+    {
+      "title": "Stampede",
+      "system": "atari2600",
+      "bucket": "atari2600/Stampede (USA).zip"
+    },
+    {
+      "title": "Superman",
+      "system": "atari2600",
+      "bucket": "atari2600/Superman (USA).zip"
+    },
+    {
+      "title": "Seaquest",
+      "system": "atari2600",
+      "bucket": "atari2600/Seaquest (USA).zip"
+    },
+    {
+      "title": "Chopper Command",
+      "system": "atari2600",
+      "bucket": "atari2600/Chopper Command (USA).zip"
+    },
+    {
+      "title": "Cosmic Ark",
+      "system": "atari2600",
+      "bucket": "atari2600/Cosmic Ark (USA).zip"
+    },
+    {
+      "title": "Atlantis",
+      "system": "atari2600",
+      "bucket": "atari2600/Atlantis (USA).zip"
+    },
+    {
+      "title": "Barnstorming",
+      "system": "atari2600",
+      "bucket": "atari2600/Barnstorming (USA).zip"
+    },
+    {
+      "title": "Beamrider",
+      "system": "atari2600",
+      "bucket": "atari2600/Beamrider (USA).zip"
+    },
+    {
+      "title": "Frostbite",
+      "system": "atari2600",
+      "bucket": "atari2600/Frostbite (USA).zip"
+    },
+    {
+      "title": "Warlords",
+      "system": "atari2600",
+      "bucket": "atari2600/Warlords (USA).zip"
+    },
+    {
+      "title": "Video Pinball",
+      "system": "atari2600",
+      "bucket": "atari2600/Video Pinball ~ Arcade Pinball (USA).zip"
+    },
+    {
+      "title": "Circus Atari",
+      "system": "atari2600",
+      "bucket": "atari2600/Circus Atari (Japan, USA) (En).zip"
+    },
+    {
+      "title": "Night Driver",
+      "system": "atari2600",
+      "bucket": "atari2600/Night Driver (USA).zip"
+    },
+    {
+      "title": "Indy 500",
+      "system": "atari2600",
+      "bucket": "atari2600/Indy 500 ~ Race (USA).zip"
+    },
+    {
+      "title": "Outlaw",
+      "system": "atari2600",
+      "bucket": "atari2600/Outlaw ~ Gunslinger (USA).zip"
+    },
+    {
+      "title": "Video Olympics",
+      "system": "atari2600",
+      "bucket": "atari2600/Video Olympics ~ Pong Sports (USA).zip"
+    },
+    {
+      "title": "Air-Sea Battle",
+      "system": "atari2600",
+      "bucket": "atari2600/Air-Sea Battle ~ Target Fun (Japan, USA) (En).zip"
+    },
+    {
+      "title": "Vanguard",
+      "system": "atari2600",
+      "bucket": "atari2600/Vanguard (USA).zip"
+    },
+    {
+      "title": "Moon Patrol",
+      "system": "atari2600",
+      "bucket": "atari2600/Moon Patrol (USA).zip"
+    },
+    {
+      "title": "Galaxian",
+      "system": "atari2600",
+      "bucket": "atari2600/Galaxian (USA).zip"
+    },
+    {
+      "title": "Millipede",
+      "system": "atari2600",
+      "bucket": "atari2600/Millipede (USA).zip"
+    },
+    {
+      "title": "Crystal Castles",
+      "system": "atari2600",
+      "bucket": "atari2600/Crystal Castles (USA).zip"
+    },
+    {
+      "title": "Battlezone",
+      "system": "atari2600",
+      "bucket": "atari2600/Battlezone (Japan, USA) (En).zip"
+    },
+    {
+      "title": "Mario Bros.",
+      "system": "atari2600",
+      "bucket": "atari2600/Mario Bros. (USA).zip"
+    },
+    {
+      "title": "Donkey Kong Junior",
+      "system": "atari2600",
+      "bucket": "atari2600/Donkey Kong Junior (USA).zip"
+    },
+    {
+      "title": "Jungle Hunt",
+      "system": "atari2600",
+      "bucket": "atari2600/Jungle Hunt (USA).zip"
+    },
+    {
+      "title": "Spider Fighter",
+      "system": "atari2600",
+      "bucket": "atari2600/Spider Fighter (USA).zip"
+    },
+    {
+      "title": "Robot Tank",
+      "system": "atari2600",
+      "bucket": "atari2600/Robot Tank (USA).zip"
+    },
+    {
+      "title": "Pressure Cooker",
+      "system": "atari2600",
+      "bucket": "atari2600/Pressure Cooker (USA).zip"
+    },
+    {
+      "title": "Kool-Aid Man",
+      "system": "atari2600",
+      "bucket": "atari2600/Kool-Aid Man (USA).zip"
+    },
+    {
+      "title": "Star Wars - The Empire Strikes Back",
+      "system": "atari2600",
+      "bucket": "atari2600/Star Wars - The Empire Strikes Back (USA).zip"
+    },
+    {
+      "title": "SwordQuest - EarthWorld",
+      "system": "atari2600",
+      "bucket": "atari2600/SwordQuest - EarthWorld (USA).zip"
+    },
+    {
+      "title": "Secret Quest",
+      "system": "atari2600",
+      "bucket": "atari2600/Secret Quest (USA).zip"
+    },
+    {
+      "title": "Fishing Derby",
+      "system": "atari2600",
+      "bucket": "atari2600/Fishing Derby (USA).zip"
+    },
+    {
+      "title": "Boxing",
+      "system": "atari2600",
+      "bucket": "atari2600/Boxing (USA).zip"
+    },
+    {
+      "title": "Skiing",
+      "system": "atari2600",
+      "bucket": "atari2600/Skiing (USA).zip"
+    },
+    {
+      "title": "Tennis",
+      "system": "atari2600",
+      "bucket": "atari2600/Tennis (USA).zip"
+    },
+    {
+      "title": "Ice Hockey",
+      "system": "atari2600",
+      "bucket": "atari2600/Ice Hockey (USA).zip"
+    },
+    {
+      "title": "Dragster",
+      "system": "atari2600",
+      "bucket": "atari2600/Dragster (USA).zip"
+    },
+    {
+      "title": "Gravitar",
+      "system": "atari2600",
+      "bucket": "atari2600/Gravitar (USA).zip"
+    },
+    {
+      "title": "Air Raid",
+      "system": "atari2600",
+      "bucket": "atari2600/Air Raid (USA).zip"
+    },
+    {
+      "title": "Halloween",
+      "system": "atari2600",
+      "bucket": "atari2600/Halloween (USA).zip"
+    },
+    {
+      "title": "Stargate",
+      "system": "atari2600",
+      "bucket": "atari2600/Stargate (USA).zip"
+    },
+    {
       "title": "Centipede",
       "system": "atari5200",
       "bucket": "atari5200/Centipede (USA).zip"
@@ -96,6 +426,226 @@
       "title": "Space Invaders",
       "system": "atari5200",
       "bucket": "atari5200/Space Invaders (USA).zip"
+    },
+    {
+      "title": "BerZerk",
+      "system": "atari5200",
+      "bucket": "atari5200/BerZerk (USA).zip"
+    },
+    {
+      "title": "Defender",
+      "system": "atari5200",
+      "bucket": "atari5200/Defender (USA).zip"
+    },
+    {
+      "title": "Dig Dug",
+      "system": "atari5200",
+      "bucket": "atari5200/Dig Dug (USA).zip"
+    },
+    {
+      "title": "Joust",
+      "system": "atari5200",
+      "bucket": "atari5200/Joust (USA).zip"
+    },
+    {
+      "title": "Ms. Pac-Man",
+      "system": "atari5200",
+      "bucket": "atari5200/Ms. Pac-Man (USA).zip"
+    },
+    {
+      "title": "Pole Position",
+      "system": "atari5200",
+      "bucket": "atari5200/Pole Position (USA).zip"
+    },
+    {
+      "title": "Q-bert",
+      "system": "atari5200",
+      "bucket": "atari5200/Q-bert (USA).zip"
+    },
+    {
+      "title": "QIX",
+      "system": "atari5200",
+      "bucket": "atari5200/QIX (USA).zip"
+    },
+    {
+      "title": "Robotron 2084",
+      "system": "atari5200",
+      "bucket": "atari5200/Robotron 2084 (USA).zip"
+    },
+    {
+      "title": "Star Raiders",
+      "system": "atari5200",
+      "bucket": "atari5200/Star Raiders (USA).zip"
+    },
+    {
+      "title": "Super Breakout",
+      "system": "atari5200",
+      "bucket": "atari5200/Super Breakout (USA).zip"
+    },
+    {
+      "title": "Tempest",
+      "system": "atari5200",
+      "bucket": "atari5200/Tempest (USA) (AtariAge).zip"
+    },
+    {
+      "title": "Rescue on Fractalus!",
+      "system": "atari5200",
+      "bucket": "atari5200/Rescue on Fractalus! (USA).zip"
+    },
+    {
+      "title": "Ballblazer",
+      "system": "atari5200",
+      "bucket": "atari5200/Ballblazer (USA).zip"
+    },
+    {
+      "title": "Space Dungeon",
+      "system": "atari5200",
+      "bucket": "atari5200/Space Dungeon (USA).zip"
+    },
+    {
+      "title": "David Crane's Pitfall II - Lost Caverns",
+      "system": "atari5200",
+      "bucket": "atari5200/David Crane's Pitfall II - Lost Caverns (USA).zip"
+    },
+    {
+      "title": "H.E.R.O.",
+      "system": "atari5200",
+      "bucket": "atari5200/H.E.R.O. (USA).zip"
+    },
+    {
+      "title": "Montezuma's Revenge - Featuring Panama Joe",
+      "system": "atari5200",
+      "bucket": "atari5200/Montezuma's Revenge - Featuring Panama Joe (USA).zip"
+    },
+    {
+      "title": "Bounty Bob Strikes Back!",
+      "system": "atari5200",
+      "bucket": "atari5200/Bounty Bob Strikes Back! (USA).zip"
+    },
+    {
+      "title": "Moon Patrol",
+      "system": "atari5200",
+      "bucket": "atari5200/Moon Patrol (USA).zip"
+    },
+    {
+      "title": "Mario Bros.",
+      "system": "atari5200",
+      "bucket": "atari5200/Mario Bros. (USA).zip"
+    },
+    {
+      "title": "Wizard of Wor",
+      "system": "atari5200",
+      "bucket": "atari5200/Wizard of Wor (USA).zip"
+    },
+    {
+      "title": "Zaxxon",
+      "system": "atari5200",
+      "bucket": "atari5200/Zaxxon (USA).zip"
+    },
+    {
+      "title": "Gyruss",
+      "system": "atari5200",
+      "bucket": "atari5200/Gyruss (USA).zip"
+    },
+    {
+      "title": "Star Wars - The Arcade Game",
+      "system": "atari5200",
+      "bucket": "atari5200/Star Wars - The Arcade Game (USA).zip"
+    },
+    {
+      "title": "Countermeasure",
+      "system": "atari5200",
+      "bucket": "atari5200/Countermeasure (USA).zip"
+    },
+    {
+      "title": "Dreadnaught Factor, The",
+      "system": "atari5200",
+      "bucket": "atari5200/Dreadnaught Factor, The (USA).zip"
+    },
+    {
+      "title": "Pengo",
+      "system": "atari5200",
+      "bucket": "atari5200/Pengo (USA).zip"
+    },
+    {
+      "title": "Popeye",
+      "system": "atari5200",
+      "bucket": "atari5200/Popeye (USA).zip"
+    },
+    {
+      "title": "Kangaroo",
+      "system": "atari5200",
+      "bucket": "atari5200/Kangaroo (USA).zip"
+    },
+    {
+      "title": "Jungle Hunt",
+      "system": "atari5200",
+      "bucket": "atari5200/Jungle Hunt (USA).zip"
+    },
+    {
+      "title": "Frogger",
+      "system": "atari5200",
+      "bucket": "atari5200/Frogger (USA).zip"
+    },
+    {
+      "title": "Vanguard",
+      "system": "atari5200",
+      "bucket": "atari5200/Vanguard (USA).zip"
+    },
+    {
+      "title": "Gorf",
+      "system": "atari5200",
+      "bucket": "atari5200/Gorf (USA).zip"
+    },
+    {
+      "title": "Beamrider",
+      "system": "atari5200",
+      "bucket": "atari5200/Beamrider (USA).zip"
+    },
+    {
+      "title": "Carol Shaw's River Raid",
+      "system": "atari5200",
+      "bucket": "atari5200/Carol Shaw's River Raid (USA).zip"
+    },
+    {
+      "title": "Kaboom!",
+      "system": "atari5200",
+      "bucket": "atari5200/Kaboom! (USA).zip"
+    },
+    {
+      "title": "Miner 2049er Starring Bounty Bob",
+      "system": "atari5200",
+      "bucket": "atari5200/Miner 2049er Starring Bounty Bob (USA).zip"
+    },
+    {
+      "title": "Pitfall!",
+      "system": "atari5200",
+      "bucket": "atari5200/Pitfall! (USA).zip"
+    },
+    {
+      "title": "Star Trek - Strategic Operations Simulator",
+      "system": "atari5200",
+      "bucket": "atari5200/Star Trek - Strategic Operations Simulator (USA).zip"
+    },
+    {
+      "title": "Congo Bongo",
+      "system": "atari5200",
+      "bucket": "atari5200/Congo Bongo (USA).zip"
+    },
+    {
+      "title": "Mr. Do!'s Castle",
+      "system": "atari5200",
+      "bucket": "atari5200/Mr. Do!'s Castle (USA).zip"
+    },
+    {
+      "title": "Choplifter!",
+      "system": "atari5200",
+      "bucket": "atari5200/Choplifter! (USA).zip"
+    },
+    {
+      "title": "Gremlins",
+      "system": "atari5200",
+      "bucket": "atari5200/Gremlins (USA).zip"
     },
     {
       "title": "Ms. Pac-Man",
@@ -138,6 +688,181 @@
       "bucket": "atari7800/Galaga (USA).zip"
     },
     {
+      "title": "Ballblazer",
+      "system": "atari7800",
+      "bucket": "atari7800/Ballblazer (USA).zip"
+    },
+    {
+      "title": "Commando",
+      "system": "atari7800",
+      "bucket": "atari7800/Commando (USA).zip"
+    },
+    {
+      "title": "Dark Chambers",
+      "system": "atari7800",
+      "bucket": "atari7800/Dark Chambers (USA).zip"
+    },
+    {
+      "title": "Desert Falcon",
+      "system": "atari7800",
+      "bucket": "atari7800/Desert Falcon (USA).zip"
+    },
+    {
+      "title": "Dig Dug",
+      "system": "atari7800",
+      "bucket": "atari7800/Dig Dug (USA).zip"
+    },
+    {
+      "title": "Donkey Kong Junior",
+      "system": "atari7800",
+      "bucket": "atari7800/Donkey Kong Junior (USA).zip"
+    },
+    {
+      "title": "Double Dragon",
+      "system": "atari7800",
+      "bucket": "atari7800/Double Dragon (USA).zip"
+    },
+    {
+      "title": "Ikari Warriors",
+      "system": "atari7800",
+      "bucket": "atari7800/Ikari Warriors (USA).zip"
+    },
+    {
+      "title": "Impossible Mission",
+      "system": "atari7800",
+      "bucket": "atari7800/Impossible Mission (USA).zip"
+    },
+    {
+      "title": "Karateka",
+      "system": "atari7800",
+      "bucket": "atari7800/Karateka (USA).zip"
+    },
+    {
+      "title": "Mario Bros.",
+      "system": "atari7800",
+      "bucket": "atari7800/Mario Bros. (USA).zip"
+    },
+    {
+      "title": "Midnight Mutants",
+      "system": "atari7800",
+      "bucket": "atari7800/Midnight Mutants (USA).zip"
+    },
+    {
+      "title": "Pole Position II",
+      "system": "atari7800",
+      "bucket": "atari7800/Pole Position II (USA).zip"
+    },
+    {
+      "title": "Robotron - 2084",
+      "system": "atari7800",
+      "bucket": "atari7800/Robotron - 2084 (USA).zip"
+    },
+    {
+      "title": "Scrapyard Dog",
+      "system": "atari7800",
+      "bucket": "atari7800/Scrapyard Dog (USA).zip"
+    },
+    {
+      "title": "Tower Toppler",
+      "system": "atari7800",
+      "bucket": "atari7800/Tower Toppler (USA).zip"
+    },
+    {
+      "title": "Xenophobe",
+      "system": "atari7800",
+      "bucket": "atari7800/Xenophobe (USA).zip"
+    },
+    {
+      "title": "Xevious",
+      "system": "atari7800",
+      "bucket": "atari7800/Xevious (USA).zip"
+    },
+    {
+      "title": "Alien Brigade",
+      "system": "atari7800",
+      "bucket": "atari7800/Alien Brigade (USA).zip"
+    },
+    {
+      "title": "Basketbrawl",
+      "system": "atari7800",
+      "bucket": "atari7800/Basketbrawl (USA).zip"
+    },
+    {
+      "title": "Choplifter!",
+      "system": "atari7800",
+      "bucket": "atari7800/Choplifter! (USA).zip"
+    },
+    {
+      "title": "Crossbow",
+      "system": "atari7800",
+      "bucket": "atari7800/Crossbow (USA).zip"
+    },
+    {
+      "title": "Fatal Run",
+      "system": "atari7800",
+      "bucket": "atari7800/Fatal Run (USA).zip"
+    },
+    {
+      "title": "Planet Smashers",
+      "system": "atari7800",
+      "bucket": "atari7800/Planet Smashers (USA).zip"
+    },
+    {
+      "title": "Rampage",
+      "system": "atari7800",
+      "bucket": "atari7800/Rampage (USA).zip"
+    },
+    {
+      "title": "Kung-Fu Master",
+      "system": "atari7800",
+      "bucket": "atari7800/Kung-Fu Master (USA).zip"
+    },
+    {
+      "title": "Motor Psycho",
+      "system": "atari7800",
+      "bucket": "atari7800/Motor Psycho (USA).zip"
+    },
+    {
+      "title": "Sentinel",
+      "system": "atari7800",
+      "bucket": "atari7800/Sentinel (Europe).zip"
+    },
+    {
+      "title": "Meltdown",
+      "system": "atari7800",
+      "bucket": "atari7800/Meltdown (USA).zip"
+    },
+    {
+      "title": "One-on-One Basketball",
+      "system": "atari7800",
+      "bucket": "atari7800/One-on-One Basketball (USA).zip"
+    },
+    {
+      "title": "Winter Games",
+      "system": "atari7800",
+      "bucket": "atari7800/Winter Games (USA).zip"
+    },
+    {
+      "title": "Summer Games",
+      "system": "atari7800",
+      "bucket": "atari7800/Summer Games (USA).zip"
+    },
+    {
+      "title": "Super Skateboardin'",
+      "system": "atari7800",
+      "bucket": "atari7800/Super Skateboardin' (USA).zip"
+    },
+    {
+      "title": "Mean 18 Ultimate Golf",
+      "system": "atari7800",
+      "bucket": "atari7800/Mean 18 Ultimate Golf (USA).zip"
+    },
+    {
+      "title": "Super Huey UH-IX",
+      "system": "atari7800",
+      "bucket": "atari7800/Super Huey UH-IX (USA).zip"
+    },
+    {
       "title": "Blue Lightning",
       "system": "atarilynx",
       "bucket": "atarilynx/Blue Lightning (World).zip"
@@ -168,6 +893,231 @@
       "bucket": "atarilynx/Rampage (World).zip"
     },
     {
+      "title": "A.P.B.",
+      "system": "atarilynx",
+      "bucket": "atarilynx/A.P.B. (USA, Europe).zip"
+    },
+    {
+      "title": "Awesome Golf",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Awesome Golf (USA, Europe).zip"
+    },
+    {
+      "title": "Batman Returns",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Batman Returns (USA, Europe).zip"
+    },
+    {
+      "title": "Battle Wheels",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Battle Wheels (USA, Europe).zip"
+    },
+    {
+      "title": "Battlezone 2000",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Battlezone 2000 (USA, Europe).zip"
+    },
+    {
+      "title": "Checkered Flag",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Checkered Flag (USA, Europe).zip"
+    },
+    {
+      "title": "Crystal Mines II",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Crystal Mines II (USA, Europe).zip"
+    },
+    {
+      "title": "Desert Strike - Return to the Gulf",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Desert Strike - Return to the Gulf (USA, Europe).zip"
+    },
+    {
+      "title": "Dracula - The Undead",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Dracula - The Undead (USA, Europe).zip"
+    },
+    {
+      "title": "Electrocop",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Electrocop (World).zip"
+    },
+    {
+      "title": "Gates of Zendocon",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Gates of Zendocon (World).zip"
+    },
+    {
+      "title": "Hard Drivin'",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Hard Drivin' (USA, Europe).zip"
+    },
+    {
+      "title": "Joust",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Joust (USA, Europe).zip"
+    },
+    {
+      "title": "Lemmings",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Lemmings (USA, Europe).zip"
+    },
+    {
+      "title": "Ms. Pac-Man",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Ms. Pac-Man (World).zip"
+    },
+    {
+      "title": "Ninja Gaiden",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Ninja Gaiden (USA, Europe).zip"
+    },
+    {
+      "title": "Ninja Gaiden III - The Ancient Ship of Doom",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Ninja Gaiden III - The Ancient Ship of Doom (USA, Europe).zip"
+    },
+    {
+      "title": "Pac-Land",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Pac-Land (USA, Europe).zip"
+    },
+    {
+      "title": "Paperboy",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Paperboy (World).zip"
+    },
+    {
+      "title": "Pinball Jam",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Pinball Jam (USA, Europe).zip"
+    },
+    {
+      "title": "Rampart",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Rampart (USA, Europe).zip"
+    },
+    {
+      "title": "RoadBlasters",
+      "system": "atarilynx",
+      "bucket": "atarilynx/RoadBlasters (World).zip"
+    },
+    {
+      "title": "Robotron 2084",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Robotron 2084 (USA, Europe).zip"
+    },
+    {
+      "title": "Rygar",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Rygar (World).zip"
+    },
+    {
+      "title": "S.T.U.N. Runner",
+      "system": "atarilynx",
+      "bucket": "atarilynx/S.T.U.N. Runner (USA, Europe).zip"
+    },
+    {
+      "title": "Scrapyard Dog",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Scrapyard Dog (USA, Europe).zip"
+    },
+    {
+      "title": "Shadow of the Beast",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Shadow of the Beast (USA, Europe).zip"
+    },
+    {
+      "title": "Shanghai",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Shanghai (World).zip"
+    },
+    {
+      "title": "Steel Talons",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Steel Talons (USA, Europe).zip"
+    },
+    {
+      "title": "Super Skweek",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Super Skweek (USA, Europe).zip"
+    },
+    {
+      "title": "Switchblade II",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Switchblade II (USA, Europe).zip"
+    },
+    {
+      "title": "Todd's Adventures in Slime World",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Todd's Adventures in Slime World (World).zip"
+    },
+    {
+      "title": "Toki",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Toki (USA, Europe).zip"
+    },
+    {
+      "title": "Turbo Sub",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Turbo Sub (USA, Europe).zip"
+    },
+    {
+      "title": "Warbirds",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Warbirds (USA, Europe).zip"
+    },
+    {
+      "title": "Xenophobe",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Xenophobe (World).zip"
+    },
+    {
+      "title": "Xybots",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Xybots (USA, Europe).zip"
+    },
+    {
+      "title": "Zarlor Mercenary",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Zarlor Mercenary (World).zip"
+    },
+    {
+      "title": "Block Out",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Block Out (USA, Europe).zip"
+    },
+    {
+      "title": "Robo-Squash",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Robo-Squash (World).zip"
+    },
+    {
+      "title": "QIX",
+      "system": "atarilynx",
+      "bucket": "atarilynx/QIX (USA, Europe).zip"
+    },
+    {
+      "title": "Hydra",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Hydra (USA, Europe).zip"
+    },
+    {
+      "title": "Super Asteroids, Missile Command",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Super Asteroids, Missile Command (USA, Europe).zip"
+    },
+    {
+      "title": "Double Dragon",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Double Dragon (USA, Europe).zip"
+    },
+    {
+      "title": "Pit-Fighter",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Pit-Fighter (USA, Europe).zip"
+    },
+    {
       "title": "Tempest 2000",
       "system": "atarijaguar",
       "bucket": "atarijaguar/Tempest 2000 (World).zip"
@@ -196,6 +1146,246 @@
       "title": "Iron Soldier",
       "system": "atarijaguar",
       "bucket": "atarijaguar/Iron Soldier (World).zip"
+    },
+    {
+      "title": "Atari Karts",
+      "system": "atarijaguar",
+      "bucket": "atarijaguar/Atari Karts (World).zip"
+    },
+    {
+      "title": "Attack of the Mutant Penguins",
+      "system": "atarijaguar",
+      "bucket": "atarijaguar/Attack of the Mutant Penguins (World).zip"
+    },
+    {
+      "title": "Defender 2000",
+      "system": "atarijaguar",
+      "bucket": "atarijaguar/Defender 2000 (World).zip"
+    },
+    {
+      "title": "Missile Command 3D",
+      "system": "atarijaguar",
+      "bucket": "atarijaguar/Missile Command 3D (World).zip"
+    },
+    {
+      "title": "Raiden (Rev A)",
+      "system": "atarijaguar",
+      "bucket": "atarijaguar/Raiden (World) (Rev A).zip"
+    },
+    {
+      "title": "Wolfenstein 3D",
+      "system": "atarijaguar",
+      "bucket": "atarijaguar/Wolfenstein 3D (World).zip"
+    },
+    {
+      "title": "Power Drive Rally",
+      "system": "atarijaguar",
+      "bucket": "atarijaguar/Power Drive Rally (World).zip"
+    },
+    {
+      "title": "Super Burnout",
+      "system": "atarijaguar",
+      "bucket": "atarijaguar/Super Burnout (World).zip"
+    },
+    {
+      "title": "Zool 2",
+      "system": "atarijaguar",
+      "bucket": "atarijaguar/Zool 2 (World).zip"
+    },
+    {
+      "title": "Flashback - The Quest for Identity",
+      "system": "atarijaguar",
+      "bucket": "atarijaguar/Flashback - The Quest for Identity (World) (En,Fr).zip"
+    },
+    {
+      "title": "Cannon Fodder",
+      "system": "atarijaguar",
+      "bucket": "atarijaguar/Cannon Fodder (World).zip"
+    },
+    {
+      "title": "Pinball Fantasies",
+      "system": "atarijaguar",
+      "bucket": "atarijaguar/Pinball Fantasies (World).zip"
+    },
+    {
+      "title": "Ruiner Pinball",
+      "system": "atarijaguar",
+      "bucket": "atarijaguar/Ruiner Pinball (USA, Europe).zip"
+    },
+    {
+      "title": "Breakout 2000",
+      "system": "atarijaguar",
+      "bucket": "atarijaguar/Breakout 2000 (USA, Europe).zip"
+    },
+    {
+      "title": "Towers II - Plight of the Stargazer",
+      "system": "atarijaguar",
+      "bucket": "atarijaguar/Towers II - Plight of the Stargazer (USA, Europe).zip"
+    },
+    {
+      "title": "Hover Strike",
+      "system": "atarijaguar",
+      "bucket": "atarijaguar/Hover Strike (World).zip"
+    },
+    {
+      "title": "I-War",
+      "system": "atarijaguar",
+      "bucket": "atarijaguar/I-War (USA, Europe).zip"
+    },
+    {
+      "title": "Trevor McFur in the Crescent Galaxy (Rev A)",
+      "system": "atarijaguar",
+      "bucket": "atarijaguar/Trevor McFur in the Crescent Galaxy (World) (Rev A).zip"
+    },
+    {
+      "title": "Kasumi Ninja",
+      "system": "atarijaguar",
+      "bucket": "atarijaguar/Kasumi Ninja (World).zip"
+    },
+    {
+      "title": "Club Drive",
+      "system": "atarijaguar",
+      "bucket": "atarijaguar/Club Drive (World).zip"
+    },
+    {
+      "title": "Checkered Flag",
+      "system": "atarijaguar",
+      "bucket": "atarijaguar/Checkered Flag (World).zip"
+    },
+    {
+      "title": "Ultra Vortek",
+      "system": "atarijaguar",
+      "bucket": "atarijaguar/Ultra Vortek (World).zip"
+    },
+    {
+      "title": "Fight for Life",
+      "system": "atarijaguar",
+      "bucket": "atarijaguar/Fight for Life (USA, Europe).zip"
+    },
+    {
+      "title": "NBA Jam - Tournament Edition",
+      "system": "atarijaguar",
+      "bucket": "atarijaguar/NBA Jam - Tournament Edition (USA, Europe).zip"
+    },
+    {
+      "title": "Theme Park",
+      "system": "atarijaguar",
+      "bucket": "atarijaguar/Theme Park (World).zip"
+    },
+    {
+      "title": "Syndicate",
+      "system": "atarijaguar",
+      "bucket": "atarijaguar/Syndicate (World).zip"
+    },
+    {
+      "title": "International Sensible Soccer",
+      "system": "atarijaguar",
+      "bucket": "atarijaguar/International Sensible Soccer (World).zip"
+    },
+    {
+      "title": "Zoop",
+      "system": "atarijaguar",
+      "bucket": "atarijaguar/Zoop (USA, Europe).zip"
+    },
+    {
+      "title": "Evolution - Dino Dudes",
+      "system": "atarijaguar",
+      "bucket": "atarijaguar/Evolution - Dino Dudes (World).zip"
+    },
+    {
+      "title": "Bubsy in Fractured Furry Tales",
+      "system": "atarijaguar",
+      "bucket": "atarijaguar/Bubsy in Fractured Furry Tales (World).zip"
+    },
+    {
+      "title": "White Men Can't Jump",
+      "system": "atarijaguar",
+      "bucket": "atarijaguar/White Men Can't Jump (USA, Europe).zip"
+    },
+    {
+      "title": "Val d'Isere Skiing and Snowboarding",
+      "system": "atarijaguar",
+      "bucket": "atarijaguar/Val d'Isere Skiing and Snowboarding (World).zip"
+    },
+    {
+      "title": "Pitfall - The Mayan Adventure",
+      "system": "atarijaguar",
+      "bucket": "atarijaguar/Pitfall - The Mayan Adventure (USA, Europe).zip"
+    },
+    {
+      "title": "Supercross 3D",
+      "system": "atarijaguar",
+      "bucket": "atarijaguar/Supercross 3D (USA, Europe).zip"
+    },
+    {
+      "title": "Flip Out!",
+      "system": "atarijaguar",
+      "bucket": "atarijaguar/Flip Out! (World).zip"
+    },
+    {
+      "title": "Battle Morph",
+      "system": "atarijaguarcd",
+      "bucket": "atarijaguarcd/Battle Morph (USA).chd"
+    },
+    {
+      "title": "Blue Lightning",
+      "system": "atarijaguarcd",
+      "bucket": "atarijaguarcd/Blue Lightning (USA).chd"
+    },
+    {
+      "title": "BrainDead 13",
+      "system": "atarijaguarcd",
+      "bucket": "atarijaguarcd/BrainDead 13 (USA).chd"
+    },
+    {
+      "title": "Dragon's Lair",
+      "system": "atarijaguarcd",
+      "bucket": "atarijaguarcd/Dragon's Lair (USA).chd"
+    },
+    {
+      "title": "Space Ace",
+      "system": "atarijaguarcd",
+      "bucket": "atarijaguarcd/Space Ace (USA).chd"
+    },
+    {
+      "title": "Highlander - The Last of the MacLeods",
+      "system": "atarijaguarcd",
+      "bucket": "atarijaguarcd/Highlander - The Last of the MacLeods (USA).chd"
+    },
+    {
+      "title": "Hover Strike - Unconquered Lands",
+      "system": "atarijaguarcd",
+      "bucket": "atarijaguarcd/Hover Strike - Unconquered Lands (USA).chd"
+    },
+    {
+      "title": "Iron Soldier 2",
+      "system": "atarijaguarcd",
+      "bucket": "atarijaguarcd/Iron Soldier 2 (USA) (Songbird Limited Edition).chd"
+    },
+    {
+      "title": "Myst",
+      "system": "atarijaguarcd",
+      "bucket": "atarijaguarcd/Myst (USA).chd"
+    },
+    {
+      "title": "Primal Rage",
+      "system": "atarijaguarcd",
+      "bucket": "atarijaguarcd/Primal Rage (USA).chd"
+    },
+    {
+      "title": "Baldies (Rev 1)",
+      "system": "atarijaguarcd",
+      "bucket": "atarijaguarcd/Baldies (USA) (Rev 1).chd"
+    },
+    {
+      "title": "Vid Grid",
+      "system": "atarijaguarcd",
+      "bucket": "atarijaguarcd/Vid Grid (USA).chd"
+    },
+    {
+      "title": "World Tour Racing",
+      "system": "atarijaguarcd",
+      "bucket": "atarijaguarcd/World Tour Racing (USA).chd"
     },
     {
       "title": "Donkey Kong (v1.1)",
@@ -231,6 +1421,346 @@
       "title": "Space Fury",
       "system": "colecovision",
       "bucket": "colecovision/Space Fury (USA, Europe).zip"
+    },
+    {
+      "title": "Antarctic Adventure",
+      "system": "colecovision",
+      "bucket": "colecovision/Antarctic Adventure (USA, Europe).zip"
+    },
+    {
+      "title": "BurgerTime",
+      "system": "colecovision",
+      "bucket": "colecovision/BurgerTime (USA, Europe).zip"
+    },
+    {
+      "title": "Carnival",
+      "system": "colecovision",
+      "bucket": "colecovision/Carnival (USA, Europe).zip"
+    },
+    {
+      "title": "Centipede",
+      "system": "colecovision",
+      "bucket": "colecovision/Centipede (USA).zip"
+    },
+    {
+      "title": "Choplifter!",
+      "system": "colecovision",
+      "bucket": "colecovision/Choplifter! (USA).zip"
+    },
+    {
+      "title": "Cosmic Avenger",
+      "system": "colecovision",
+      "bucket": "colecovision/Cosmic Avenger (USA, Europe).zip"
+    },
+    {
+      "title": "Defender",
+      "system": "colecovision",
+      "bucket": "colecovision/Defender (USA) (BUG Fixed).zip"
+    },
+    {
+      "title": "Donkey Kong Junior",
+      "system": "colecovision",
+      "bucket": "colecovision/Donkey Kong Junior (USA, Europe).zip"
+    },
+    {
+      "title": "Frenzy",
+      "system": "colecovision",
+      "bucket": "colecovision/Frenzy (USA, Europe).zip"
+    },
+    {
+      "title": "Frogger II - ThreeeDeep!",
+      "system": "colecovision",
+      "bucket": "colecovision/Frogger II - ThreeeDeep! (USA).zip"
+    },
+    {
+      "title": "Galaxian",
+      "system": "colecovision",
+      "bucket": "colecovision/Galaxian (USA).zip"
+    },
+    {
+      "title": "Gorf",
+      "system": "colecovision",
+      "bucket": "colecovision/Gorf (USA, Europe).zip"
+    },
+    {
+      "title": "Gyruss",
+      "system": "colecovision",
+      "bucket": "colecovision/Gyruss (USA).zip"
+    },
+    {
+      "title": "H.E.R.O. - Helicopter Emergency Rescue Operation",
+      "system": "colecovision",
+      "bucket": "colecovision/H.E.R.O. - Helicopter Emergency Rescue Operation (USA).zip"
+    },
+    {
+      "title": "Jumpman Junior",
+      "system": "colecovision",
+      "bucket": "colecovision/Jumpman Junior (USA, Europe).zip"
+    },
+    {
+      "title": "Jungle Hunt",
+      "system": "colecovision",
+      "bucket": "colecovision/Jungle Hunt (USA).zip"
+    },
+    {
+      "title": "Lady Bug",
+      "system": "colecovision",
+      "bucket": "colecovision/Lady Bug (USA, Europe).zip"
+    },
+    {
+      "title": "Looping",
+      "system": "colecovision",
+      "bucket": "colecovision/Looping (USA, Europe).zip"
+    },
+    {
+      "title": "Miner 2049er Starring Bounty Bob (v1.1)",
+      "system": "colecovision",
+      "bucket": "colecovision/Miner 2049er Starring Bounty Bob (USA, Europe) (v1.1).zip"
+    },
+    {
+      "title": "Montezuma's Revenge",
+      "system": "colecovision",
+      "bucket": "colecovision/Montezuma's Revenge (USA).zip"
+    },
+    {
+      "title": "Mouse Trap",
+      "system": "colecovision",
+      "bucket": "colecovision/Mouse Trap (USA, Europe).zip"
+    },
+    {
+      "title": "Mr. Do!'s Castle",
+      "system": "colecovision",
+      "bucket": "colecovision/Mr. Do!'s Castle (USA).zip"
+    },
+    {
+      "title": "Oil's Well",
+      "system": "colecovision",
+      "bucket": "colecovision/Oil's Well (USA).zip"
+    },
+    {
+      "title": "Omega Race",
+      "system": "colecovision",
+      "bucket": "colecovision/Omega Race (USA, Europe).zip"
+    },
+    {
+      "title": "Pepper II",
+      "system": "colecovision",
+      "bucket": "colecovision/Pepper II (USA, Europe).zip"
+    },
+    {
+      "title": "Pitfall II - Lost Caverns",
+      "system": "colecovision",
+      "bucket": "colecovision/Pitfall II - Lost Caverns (USA).zip"
+    },
+    {
+      "title": "Popeye",
+      "system": "colecovision",
+      "bucket": "colecovision/Popeye (USA).zip"
+    },
+    {
+      "title": "Q-bert",
+      "system": "colecovision",
+      "bucket": "colecovision/Q-bert (USA).zip"
+    },
+    {
+      "title": "River Raid",
+      "system": "colecovision",
+      "bucket": "colecovision/River Raid (USA).zip"
+    },
+    {
+      "title": "Spy Hunter",
+      "system": "colecovision",
+      "bucket": "colecovision/Spy Hunter (USA).zip"
+    },
+    {
+      "title": "Star Wars - The Arcade Game",
+      "system": "colecovision",
+      "bucket": "colecovision/Star Wars - The Arcade Game (USA).zip"
+    },
+    {
+      "title": "Subroc",
+      "system": "colecovision",
+      "bucket": "colecovision/Subroc (USA, Europe).zip"
+    },
+    {
+      "title": "Root Beer Tapper",
+      "system": "colecovision",
+      "bucket": "colecovision/Root Beer Tapper (USA).zip"
+    },
+    {
+      "title": "Time Pilot",
+      "system": "colecovision",
+      "bucket": "colecovision/Time Pilot (USA, Europe).zip"
+    },
+    {
+      "title": "Turbo",
+      "system": "colecovision",
+      "bucket": "colecovision/Turbo (USA, Europe).zip"
+    },
+    {
+      "title": "Venture",
+      "system": "colecovision",
+      "bucket": "colecovision/Venture (USA, Europe).zip"
+    },
+    {
+      "title": "WarGames",
+      "system": "colecovision",
+      "bucket": "colecovision/WarGames (USA, Europe).zip"
+    },
+    {
+      "title": "Buck Rogers - Planet of Zoom",
+      "system": "colecovision",
+      "bucket": "colecovision/Buck Rogers - Planet of Zoom (USA, Europe).zip"
+    },
+    {
+      "title": "Congo Bongo",
+      "system": "colecovision",
+      "bucket": "colecovision/Congo Bongo (USA).zip"
+    },
+    {
+      "title": "Fortune Builder",
+      "system": "colecovision",
+      "bucket": "colecovision/Fortune Builder (USA).zip"
+    },
+    {
+      "title": "Keystone Kapers",
+      "system": "colecovision",
+      "bucket": "colecovision/Keystone Kapers (USA).zip"
+    },
+    {
+      "title": "Moonsweeper",
+      "system": "colecovision",
+      "bucket": "colecovision/Moonsweeper (USA, Europe).zip"
+    },
+    {
+      "title": "Roc 'N Rope",
+      "system": "colecovision",
+      "bucket": "colecovision/Roc 'N Rope (USA, Europe).zip"
+    },
+    {
+      "title": "Slither",
+      "system": "colecovision",
+      "bucket": "colecovision/Slither (USA, Europe).zip"
+    },
+    {
+      "title": "Space Panic",
+      "system": "colecovision",
+      "bucket": "colecovision/Space Panic (USA, Europe).zip"
+    },
+    {
+      "title": "Super Cobra",
+      "system": "colecovision",
+      "bucket": "colecovision/Super Cobra (USA).zip"
+    },
+    {
+      "title": "Tarzan",
+      "system": "colecovision",
+      "bucket": "colecovision/Tarzan (USA, Europe).zip"
+    },
+    {
+      "title": "Victory",
+      "system": "colecovision",
+      "bucket": "colecovision/Victory (USA).zip"
+    },
+    {
+      "title": "War Room",
+      "system": "colecovision",
+      "bucket": "colecovision/War Room (USA).zip"
+    },
+    {
+      "title": "Frantic Freddy",
+      "system": "colecovision",
+      "bucket": "colecovision/Frantic Freddy (USA).zip"
+    },
+    {
+      "title": "BC's Quest for Tires",
+      "system": "colecovision",
+      "bucket": "colecovision/BC's Quest for Tires (USA).zip"
+    },
+    {
+      "title": "Dragonfire",
+      "system": "colecovision",
+      "bucket": "colecovision/Dragonfire (USA).zip"
+    },
+    {
+      "title": "Beamrider",
+      "system": "colecovision",
+      "bucket": "colecovision/Beamrider (USA).zip"
+    },
+    {
+      "title": "Activision Decathlon, The",
+      "system": "colecovision",
+      "bucket": "colecovision/Activision Decathlon, The (USA).zip"
+    },
+    {
+      "title": "Rocky - Super Action Boxing",
+      "system": "colecovision",
+      "bucket": "colecovision/Rocky - Super Action Boxing (USA, Europe).zip"
+    },
+    {
+      "title": "Super Action Baseball",
+      "system": "colecovision",
+      "bucket": "colecovision/Super Action Baseball (USA).zip"
+    },
+    {
+      "title": "Destructor",
+      "system": "colecovision",
+      "bucket": "colecovision/Destructor (USA, Europe).zip"
+    },
+    {
+      "title": "Dam Busters, The",
+      "system": "colecovision",
+      "bucket": "colecovision/Dam Busters, The (USA).zip"
+    },
+    {
+      "title": "Illusions",
+      "system": "colecovision",
+      "bucket": "colecovision/Illusions (USA).zip"
+    },
+    {
+      "title": "Gateway to Apshai",
+      "system": "colecovision",
+      "bucket": "colecovision/Gateway to Apshai (USA, Europe).zip"
+    },
+    {
+      "title": "Tutankham",
+      "system": "colecovision",
+      "bucket": "colecovision/Tutankham (USA).zip"
+    },
+    {
+      "title": "Up 'n Down",
+      "system": "colecovision",
+      "bucket": "colecovision/Up 'n Down (USA).zip"
+    },
+    {
+      "title": "Bump 'n' Jump",
+      "system": "colecovision",
+      "bucket": "colecovision/Bump 'n' Jump (USA, Europe).zip"
+    },
+    {
+      "title": "Boulder Dash",
+      "system": "colecovision",
+      "bucket": "colecovision/Boulder Dash (USA).zip"
+    },
+    {
+      "title": "Cabbage Patch Kids - Adventures in the Park",
+      "system": "colecovision",
+      "bucket": "colecovision/Cabbage Patch Kids - Adventures in the Park (USA, Europe).zip"
+    },
+    {
+      "title": "Front Line",
+      "system": "colecovision",
+      "bucket": "colecovision/Front Line (USA, Europe) (Standard Controller).zip"
+    },
+    {
+      "title": "Alcazar - The Forgotten Fortress",
+      "system": "colecovision",
+      "bucket": "colecovision/Alcazar - The Forgotten Fortress (USA).zip"
+    },
+    {
+      "title": "2010 - The Graphic Action Game",
+      "system": "colecovision",
+      "bucket": "colecovision/2010 - The Graphic Action Game (USA).zip"
     },
     {
       "title": "Astrosmash",
@@ -278,6 +1808,261 @@
       "bucket": "odyssey2/Quest for the Rings (USA, Europe).zip"
     },
     {
+      "title": "UFO",
+      "system": "odyssey2",
+      "bucket": "odyssey2/UFO (USA).zip"
+    },
+    {
+      "title": "Killer Bees",
+      "system": "odyssey2",
+      "bucket": "odyssey2/Killer Bees (USA).zip"
+    },
+    {
+      "title": "Freedom Fighters",
+      "system": "odyssey2",
+      "bucket": "odyssey2/Freedom Fighters (USA, Europe).zip"
+    },
+    {
+      "title": "Attack of the Timelord",
+      "system": "odyssey2",
+      "bucket": "odyssey2/Attack of the Timelord (USA).zip"
+    },
+    {
+      "title": "Conquest of the World",
+      "system": "odyssey2",
+      "bucket": "odyssey2/Conquest of the World (USA, Europe).zip"
+    },
+    {
+      "title": "Great Wall Street Fortune Hunt, The",
+      "system": "odyssey2",
+      "bucket": "odyssey2/Great Wall Street Fortune Hunt, The (USA, Europe).zip"
+    },
+    {
+      "title": "K.C.'s Krazy Chase",
+      "system": "odyssey2",
+      "bucket": "odyssey2/K.C.'s Krazy Chase (USA, Europe).zip"
+    },
+    {
+      "title": "Turtles",
+      "system": "odyssey2",
+      "bucket": "odyssey2/Turtles (USA).zip"
+    },
+    {
+      "title": "Smithereens",
+      "system": "odyssey2",
+      "bucket": "odyssey2/Smithereens (USA).zip"
+    },
+    {
+      "title": "P.T. Barnum's Acrobats",
+      "system": "odyssey2",
+      "bucket": "odyssey2/P.T. Barnum's Acrobats (USA).zip"
+    },
+    {
+      "title": "Monkeyshines",
+      "system": "odyssey2",
+      "bucket": "odyssey2/Monkeyshines (USA, Europe).zip"
+    },
+    {
+      "title": "War of Nerves",
+      "system": "odyssey2",
+      "bucket": "odyssey2/War of Nerves (USA, Europe).zip"
+    },
+    {
+      "title": "Alien Invaders - Plus",
+      "system": "odyssey2",
+      "bucket": "odyssey2/Alien Invaders - Plus (USA, Europe).zip"
+    },
+    {
+      "title": "Invaders from Hyperspace",
+      "system": "odyssey2",
+      "bucket": "odyssey2/Invaders from Hyperspace (USA).zip"
+    },
+    {
+      "title": "Blockout + Breakdown",
+      "system": "odyssey2",
+      "bucket": "odyssey2/Blockout + Breakdown (USA, Europe).zip"
+    },
+    {
+      "title": "Speedway + Spin-out + Crypto-logic",
+      "system": "odyssey2",
+      "bucket": "odyssey2/Speedway + Spin-out + Crypto-logic (USA, Europe).zip"
+    },
+    {
+      "title": "Showdown in 2100 A.D.",
+      "system": "odyssey2",
+      "bucket": "odyssey2/Showdown in 2100 A.D. (USA).zip"
+    },
+    {
+      "title": "Pachinko",
+      "system": "odyssey2",
+      "bucket": "odyssey2/Pachinko (USA, Europe).zip"
+    },
+    {
+      "title": "Demon Attack",
+      "system": "odyssey2",
+      "bucket": "odyssey2/Demon Attack (USA, Europe).zip"
+    },
+    {
+      "title": "Atlantis",
+      "system": "odyssey2",
+      "bucket": "odyssey2/Atlantis (USA, Europe).zip"
+    },
+    {
+      "title": "Frogger",
+      "system": "odyssey2",
+      "bucket": "odyssey2/Frogger (Europe).zip"
+    },
+    {
+      "title": "Popeye",
+      "system": "odyssey2",
+      "bucket": "odyssey2/Popeye (Europe).zip"
+    },
+    {
+      "title": "Q-Bert",
+      "system": "odyssey2",
+      "bucket": "odyssey2/Q-Bert (Europe).zip"
+    },
+    {
+      "title": "Super Cobra",
+      "system": "odyssey2",
+      "bucket": "odyssey2/Super Cobra (Europe).zip"
+    },
+    {
+      "title": "Type & Tell",
+      "system": "odyssey2",
+      "bucket": "odyssey2/Type & Tell (USA).zip"
+    },
+    {
+      "title": "Nimble Numbers Ned",
+      "system": "odyssey2",
+      "bucket": "odyssey2/Nimble Numbers Ned (USA).zip"
+    },
+    {
+      "title": "Sid the Spellbinder",
+      "system": "odyssey2",
+      "bucket": "odyssey2/Sid the Spellbinder (USA).zip"
+    },
+    {
+      "title": "Power Lords",
+      "system": "odyssey2",
+      "bucket": "odyssey2/Power Lords (USA).zip"
+    },
+    {
+      "title": "Cosmic Conflict",
+      "system": "odyssey2",
+      "bucket": "odyssey2/Cosmic Conflict (USA).zip"
+    },
+    {
+      "title": "Thunderball",
+      "system": "odyssey2",
+      "bucket": "odyssey2/Thunderball (USA, Europe).zip"
+    },
+    {
+      "title": "Armored Encounter + Sub Chase",
+      "system": "odyssey2",
+      "bucket": "odyssey2/Armored Encounter + Sub Chase (USA, Europe).zip"
+    },
+    {
+      "title": "Hockey + Soccer",
+      "system": "odyssey2",
+      "bucket": "odyssey2/Hockey + Soccer (USA, Europe).zip"
+    },
+    {
+      "title": "Baseball",
+      "system": "odyssey2",
+      "bucket": "odyssey2/Baseball (USA, Europe).zip"
+    },
+    {
+      "title": "Football",
+      "system": "odyssey2",
+      "bucket": "odyssey2/Football (USA, Europe).zip"
+    },
+    {
+      "title": "Computer Golf",
+      "system": "odyssey2",
+      "bucket": "odyssey2/Computer Golf (USA).zip"
+    },
+    {
+      "title": "Las Vegas Blackjack",
+      "system": "odyssey2",
+      "bucket": "odyssey2/Las Vegas Blackjack (USA, Europe).zip"
+    },
+    {
+      "title": "Dynasty",
+      "system": "odyssey2",
+      "bucket": "odyssey2/Dynasty (USA).zip"
+    },
+    {
+      "title": "I've Got Your Number",
+      "system": "odyssey2",
+      "bucket": "odyssey2/I've Got Your Number (USA, Europe).zip"
+    },
+    {
+      "title": "Casino Slot Machine",
+      "system": "odyssey2",
+      "bucket": "odyssey2/Casino Slot Machine (USA, Europe).zip"
+    },
+    {
+      "title": "Take the Money and Run",
+      "system": "odyssey2",
+      "bucket": "odyssey2/Take the Money and Run (USA, Europe).zip"
+    },
+    {
+      "title": "Out of This World + Helicopter Rescue",
+      "system": "odyssey2",
+      "bucket": "odyssey2/Out of This World + Helicopter Rescue (USA).zip"
+    },
+    {
+      "title": "Electronic Table Soccer",
+      "system": "odyssey2",
+      "bucket": "odyssey2/Electronic Table Soccer (USA, Europe).zip"
+    },
+    {
+      "title": "Pocket Billiards",
+      "system": "odyssey2",
+      "bucket": "odyssey2/Pocket Billiards (USA, Europe).zip"
+    },
+    {
+      "title": "Alpine Skiing",
+      "system": "odyssey2",
+      "bucket": "odyssey2/Alpine Skiing (USA, Europe).zip"
+    },
+    {
+      "title": "Bowling + Basketball",
+      "system": "odyssey2",
+      "bucket": "odyssey2/Bowling + Basketball (USA, Europe).zip"
+    },
+    {
+      "title": "Volleyball",
+      "system": "odyssey2",
+      "bucket": "odyssey2/Volleyball (USA, Europe).zip"
+    },
+    {
+      "title": "Terrahawks",
+      "system": "odyssey2",
+      "bucket": "odyssey2/Terrahawks (Europe).zip"
+    },
+    {
+      "title": "Nightmare",
+      "system": "odyssey2",
+      "bucket": "odyssey2/Nightmare (Europe).zip"
+    },
+    {
+      "title": "Loony Balloon",
+      "system": "odyssey2",
+      "bucket": "odyssey2/Loony Balloon (Europe).zip"
+    },
+    {
+      "title": "Neutron Star",
+      "system": "odyssey2",
+      "bucket": "odyssey2/Neutron Star (Europe).zip"
+    },
+    {
+      "title": "Norseman",
+      "system": "odyssey2",
+      "bucket": "odyssey2/Norseman (Europe).zip"
+    },
+    {
       "title": "Mine Storm II (Rev 2)",
       "system": "vectrex",
       "bucket": "vectrex/Mine Storm II (USA) (Rev 2).zip"
@@ -306,6 +2091,116 @@
       "title": "Berzerk",
       "system": "vectrex",
       "bucket": "vectrex/Berzerk (USA).zip"
+    },
+    {
+      "title": "3D Crazy Coaster",
+      "system": "vectrex",
+      "bucket": "vectrex/3D Crazy Coaster (USA).zip"
+    },
+    {
+      "title": "3D Mine Storm",
+      "system": "vectrex",
+      "bucket": "vectrex/3D Mine Storm (USA).zip"
+    },
+    {
+      "title": "3D Narrow Escape",
+      "system": "vectrex",
+      "bucket": "vectrex/3D Narrow Escape (USA).zip"
+    },
+    {
+      "title": "Bedlam",
+      "system": "vectrex",
+      "bucket": "vectrex/Bedlam (USA, Europe).zip"
+    },
+    {
+      "title": "Blitz! - Action Football",
+      "system": "vectrex",
+      "bucket": "vectrex/Blitz! - Action Football (USA, Europe) (Alt).zip"
+    },
+    {
+      "title": "Clean Sweep",
+      "system": "vectrex",
+      "bucket": "vectrex/Clean Sweep (World).zip"
+    },
+    {
+      "title": "Cosmic Chasm",
+      "system": "vectrex",
+      "bucket": "vectrex/Cosmic Chasm (World).zip"
+    },
+    {
+      "title": "Fortress of Narzod",
+      "system": "vectrex",
+      "bucket": "vectrex/Fortress of Narzod (USA, Europe).zip"
+    },
+    {
+      "title": "Heads-Up - Action Soccer",
+      "system": "vectrex",
+      "bucket": "vectrex/Heads-Up - Action Soccer (World).zip"
+    },
+    {
+      "title": "HyperChase - Auto Race",
+      "system": "vectrex",
+      "bucket": "vectrex/HyperChase - Auto Race (World).zip"
+    },
+    {
+      "title": "Polar Rescue",
+      "system": "vectrex",
+      "bucket": "vectrex/Polar Rescue (USA).zip"
+    },
+    {
+      "title": "Pole Position",
+      "system": "vectrex",
+      "bucket": "vectrex/Pole Position (USA).zip"
+    },
+    {
+      "title": "Rip Off",
+      "system": "vectrex",
+      "bucket": "vectrex/Rip Off (World).zip"
+    },
+    {
+      "title": "Solar Quest",
+      "system": "vectrex",
+      "bucket": "vectrex/Solar Quest (World).zip"
+    },
+    {
+      "title": "Space Wars",
+      "system": "vectrex",
+      "bucket": "vectrex/Space Wars (World).zip"
+    },
+    {
+      "title": "Spinball",
+      "system": "vectrex",
+      "bucket": "vectrex/Spinball (USA).zip"
+    },
+    {
+      "title": "Star Trek - The Motion Picture",
+      "system": "vectrex",
+      "bucket": "vectrex/Star Trek - The Motion Picture (USA).zip"
+    },
+    {
+      "title": "StarHawk",
+      "system": "vectrex",
+      "bucket": "vectrex/StarHawk (World).zip"
+    },
+    {
+      "title": "WebWars",
+      "system": "vectrex",
+      "bucket": "vectrex/WebWars (USA).zip"
+    },
+    {
+      "title": "Art Master",
+      "system": "vectrex",
+      "bucket": "vectrex/Art Master (USA).zip"
+    },
+    {
+      "title": "AnimAction - Advanced Animation",
+      "system": "vectrex",
+      "bucket": "vectrex/AnimAction - Advanced Animation (USA).zip"
+    },
+    {
+      "title": "Melody Master - Music Composition and Entertainment",
+      "system": "vectrex",
+      "bucket": "vectrex/Melody Master - Music Composition and Entertainment (USA).zip"
     },
     {
       "title": "Virtual Boy Wario Land (En)",
@@ -368,9 +2263,419 @@
       "bucket": "gc/Midway Arcade Treasures 3 (USA).rvz"
     },
     {
+      "title": "Sonic Mega Collection",
+      "system": "gc",
+      "bucket": "gc/Sonic Mega Collection (USA).rvz"
+    },
+    {
+      "title": "Pac-Man Vs.",
+      "system": "gc",
+      "bucket": "gc/Pac-Man Vs. (USA).rvz"
+    },
+    {
       "title": "Advanced Dungeons & Dragons",
       "system": "intellivision",
       "bucket": "intellivision/Advanced Dungeons & Dragons (USA, Europe).zip"
+    },
+    {
+      "title": "Major League Baseball",
+      "system": "intellivision",
+      "bucket": "intellivision/Major League Baseball (World).zip"
+    },
+    {
+      "title": "NFL Football",
+      "system": "intellivision",
+      "bucket": "intellivision/NFL Football (World).zip"
+    },
+    {
+      "title": "Sea Battle",
+      "system": "intellivision",
+      "bucket": "intellivision/Sea Battle (World).zip"
+    },
+    {
+      "title": "Space Battle (v1.1)",
+      "system": "intellivision",
+      "bucket": "intellivision/Space Battle (World) (v1.1).zip"
+    },
+    {
+      "title": "Space Armada",
+      "system": "intellivision",
+      "bucket": "intellivision/Space Armada (World).zip"
+    },
+    {
+      "title": "Auto Racing",
+      "system": "intellivision",
+      "bucket": "intellivision/Auto Racing (World) (Car-Relative Steering).zip"
+    },
+    {
+      "title": "Armor Battle",
+      "system": "intellivision",
+      "bucket": "intellivision/Armor Battle (USA, Europe) (Fast Tanks).zip"
+    },
+    {
+      "title": "SNAFU",
+      "system": "intellivision",
+      "bucket": "intellivision/SNAFU (World).zip"
+    },
+    {
+      "title": "Frog Bog",
+      "system": "intellivision",
+      "bucket": "intellivision/Frog Bog (World).zip"
+    },
+    {
+      "title": "Shark! Shark!",
+      "system": "intellivision",
+      "bucket": "intellivision/Shark! Shark! (USA, Europe).zip"
+    },
+    {
+      "title": "B-17 Bomber",
+      "system": "intellivision",
+      "bucket": "intellivision/B-17 Bomber (USA, Europe).zip"
+    },
+    {
+      "title": "Bomb Squad",
+      "system": "intellivision",
+      "bucket": "intellivision/Bomb Squad (USA, Europe).zip"
+    },
+    {
+      "title": "Space Spartans",
+      "system": "intellivision",
+      "bucket": "intellivision/Space Spartans (USA, Europe).zip"
+    },
+    {
+      "title": "Microsurgeon",
+      "system": "intellivision",
+      "bucket": "intellivision/Microsurgeon (USA, Europe).zip"
+    },
+    {
+      "title": "Advanced Dungeons & Dragons - Treasure of Tarmin",
+      "system": "intellivision",
+      "bucket": "intellivision/Advanced Dungeons & Dragons - Treasure of Tarmin (USA, Europe).zip"
+    },
+    {
+      "title": "Thunder Castle",
+      "system": "intellivision",
+      "bucket": "intellivision/Thunder Castle (USA).zip"
+    },
+    {
+      "title": "Tower of Doom",
+      "system": "intellivision",
+      "bucket": "intellivision/Tower of Doom (USA).zip"
+    },
+    {
+      "title": "Diner",
+      "system": "intellivision",
+      "bucket": "intellivision/Diner (USA).zip"
+    },
+    {
+      "title": "Dreadnaught Factor, The",
+      "system": "intellivision",
+      "bucket": "intellivision/Dreadnaught Factor, The (USA).zip"
+    },
+    {
+      "title": "Beauty & the Beast",
+      "system": "intellivision",
+      "bucket": "intellivision/Beauty & the Beast (USA, Europe).zip"
+    },
+    {
+      "title": "Demon Attack",
+      "system": "intellivision",
+      "bucket": "intellivision/Demon Attack (USA, Europe).zip"
+    },
+    {
+      "title": "Atlantis",
+      "system": "intellivision",
+      "bucket": "intellivision/Atlantis (USA, Europe).zip"
+    },
+    {
+      "title": "Dracula",
+      "system": "intellivision",
+      "bucket": "intellivision/Dracula (USA, Europe).zip"
+    },
+    {
+      "title": "Ice Trek",
+      "system": "intellivision",
+      "bucket": "intellivision/Ice Trek (USA, Europe).zip"
+    },
+    {
+      "title": "Tropical Trouble",
+      "system": "intellivision",
+      "bucket": "intellivision/Tropical Trouble (USA, Europe).zip"
+    },
+    {
+      "title": "Worm Whomper",
+      "system": "intellivision",
+      "bucket": "intellivision/Worm Whomper (USA, Europe).zip"
+    },
+    {
+      "title": "Happy Trails",
+      "system": "intellivision",
+      "bucket": "intellivision/Happy Trails (USA, Europe).zip"
+    },
+    {
+      "title": "Beamrider",
+      "system": "intellivision",
+      "bucket": "intellivision/Beamrider (USA, Europe).zip"
+    },
+    {
+      "title": "Pitfall!",
+      "system": "intellivision",
+      "bucket": "intellivision/Pitfall! (USA, Europe).zip"
+    },
+    {
+      "title": "River Raid",
+      "system": "intellivision",
+      "bucket": "intellivision/River Raid (USA, Europe).zip"
+    },
+    {
+      "title": "Stampede",
+      "system": "intellivision",
+      "bucket": "intellivision/Stampede (USA, Europe).zip"
+    },
+    {
+      "title": "Donkey Kong",
+      "system": "intellivision",
+      "bucket": "intellivision/Donkey Kong (USA, Europe).zip"
+    },
+    {
+      "title": "Bump 'n' Jump",
+      "system": "intellivision",
+      "bucket": "intellivision/Bump 'n' Jump (USA, Europe).zip"
+    },
+    {
+      "title": "Masters of the Universe - The Power of He-Man",
+      "system": "intellivision",
+      "bucket": "intellivision/Masters of the Universe - The Power of He-Man (USA, Europe).zip"
+    },
+    {
+      "title": "Buzz Bombers",
+      "system": "intellivision",
+      "bucket": "intellivision/Buzz Bombers (USA, Europe).zip"
+    },
+    {
+      "title": "Vectron",
+      "system": "intellivision",
+      "bucket": "intellivision/Vectron (USA, Europe).zip"
+    },
+    {
+      "title": "Star Strike",
+      "system": "intellivision",
+      "bucket": "intellivision/Star Strike (World).zip"
+    },
+    {
+      "title": "Sub Hunt",
+      "system": "intellivision",
+      "bucket": "intellivision/Sub Hunt (USA, Europe).zip"
+    },
+    {
+      "title": "Triple Action",
+      "system": "intellivision",
+      "bucket": "intellivision/Triple Action (World).zip"
+    },
+    {
+      "title": "Boxing",
+      "system": "intellivision",
+      "bucket": "intellivision/Boxing (World).zip"
+    },
+    {
+      "title": "PGA Golf",
+      "system": "intellivision",
+      "bucket": "intellivision/PGA Golf (World).zip"
+    },
+    {
+      "title": "NHL Hockey",
+      "system": "intellivision",
+      "bucket": "intellivision/NHL Hockey (World).zip"
+    },
+    {
+      "title": "NBA Basketball",
+      "system": "intellivision",
+      "bucket": "intellivision/NBA Basketball (USA, Europe).zip"
+    },
+    {
+      "title": "Chip Shot - Super Pro Golf",
+      "system": "intellivision",
+      "bucket": "intellivision/Chip Shot - Super Pro Golf (USA).zip"
+    },
+    {
+      "title": "Thin Ice",
+      "system": "intellivision",
+      "bucket": "intellivision/Thin Ice (USA).zip"
+    },
+    {
+      "title": "Hover Force",
+      "system": "intellivision",
+      "bucket": "intellivision/Hover Force (USA).zip"
+    },
+    {
+      "title": "Commando",
+      "system": "intellivision",
+      "bucket": "intellivision/Commando (USA).zip"
+    },
+    {
+      "title": "Pole Position",
+      "system": "intellivision",
+      "bucket": "intellivision/Pole Position (USA).zip"
+    },
+    {
+      "title": "Dig Dug",
+      "system": "intellivision",
+      "bucket": "intellivision/Dig Dug (USA).zip"
+    },
+    {
+      "title": "Centipede",
+      "system": "intellivision",
+      "bucket": "intellivision/Centipede (USA).zip"
+    },
+    {
+      "title": "Defender",
+      "system": "intellivision",
+      "bucket": "intellivision/Defender (USA).zip"
+    },
+    {
+      "title": "Pac-Man",
+      "system": "intellivision",
+      "bucket": "intellivision/Pac-Man (USA) (Atarisoft).zip"
+    },
+    {
+      "title": "Q-bert",
+      "system": "intellivision",
+      "bucket": "intellivision/Q-bert (USA, Europe).zip"
+    },
+    {
+      "title": "Frogger",
+      "system": "intellivision",
+      "bucket": "intellivision/Frogger (USA, Europe).zip"
+    },
+    {
+      "title": "Kool-Aid Man",
+      "system": "intellivision",
+      "bucket": "intellivision/Kool-Aid Man (USA).zip"
+    },
+    {
+      "title": "TRON Maze-A-Tron",
+      "system": "intellivision",
+      "bucket": "intellivision/TRON Maze-A-Tron (USA, Europe).zip"
+    },
+    {
+      "title": "TRON Solar Sailer",
+      "system": "intellivision",
+      "bucket": "intellivision/TRON Solar Sailer (USA, Europe).zip"
+    },
+    {
+      "title": "Mission X",
+      "system": "intellivision",
+      "bucket": "intellivision/Mission X (USA, Europe).zip"
+    },
+    {
+      "title": "Space Hawk",
+      "system": "intellivision",
+      "bucket": "intellivision/Space Hawk (USA, Europe).zip"
+    },
+    {
+      "title": "Horse Racing",
+      "system": "intellivision",
+      "bucket": "intellivision/Horse Racing (World).zip"
+    },
+    {
+      "title": "Las Vegas Poker & Blackjack",
+      "system": "intellivision",
+      "bucket": "intellivision/Las Vegas Poker & Blackjack (World) (1979).zip"
+    },
+    {
+      "title": "Sharp Shot",
+      "system": "intellivision",
+      "bucket": "intellivision/Sharp Shot (USA, Europe).zip"
+    },
+    {
+      "title": "Motocross",
+      "system": "intellivision",
+      "bucket": "intellivision/Motocross (USA, Europe).zip"
+    },
+    {
+      "title": "Swords & Serpents",
+      "system": "intellivision",
+      "bucket": "intellivision/Swords & Serpents (USA, Europe).zip"
+    },
+    {
+      "title": "Mountain Madness - Super Pro Skiing",
+      "system": "intellivision",
+      "bucket": "intellivision/Mountain Madness - Super Pro Skiing (USA).zip"
+    },
+    {
+      "title": "Biplanes",
+      "system": "intellivision",
+      "bucket": "intellivision/Biplanes (USA, Europe) (Intellivision Lives!).zip"
+    },
+    {
+      "title": "Pinball",
+      "system": "intellivision",
+      "bucket": "intellivision/Pinball (USA).zip"
+    },
+    {
+      "title": "Venture",
+      "system": "intellivision",
+      "bucket": "intellivision/Venture (USA, Europe).zip"
+    },
+    {
+      "title": "Lady Bug",
+      "system": "intellivision",
+      "bucket": "intellivision/Lady Bug (USA, Europe).zip"
+    },
+    {
+      "title": "Mouse Trap",
+      "system": "intellivision",
+      "bucket": "intellivision/Mouse Trap (USA, Europe).zip"
+    },
+    {
+      "title": "Carnival",
+      "system": "intellivision",
+      "bucket": "intellivision/Carnival (USA, Europe).zip"
+    },
+    {
+      "title": "Zaxxon",
+      "system": "intellivision",
+      "bucket": "intellivision/Zaxxon (USA, Europe).zip"
+    },
+    {
+      "title": "Popeye",
+      "system": "intellivision",
+      "bucket": "intellivision/Popeye (USA, Europe).zip"
+    },
+    {
+      "title": "Star Wars - The Empire Strikes Back",
+      "system": "intellivision",
+      "bucket": "intellivision/Star Wars - The Empire Strikes Back (USA, Europe).zip"
+    },
+    {
+      "title": "White Water!",
+      "system": "intellivision",
+      "bucket": "intellivision/White Water! (USA, Europe).zip"
+    },
+    {
+      "title": "Safecracker",
+      "system": "intellivision",
+      "bucket": "intellivision/Safecracker (USA, Europe).zip"
+    },
+    {
+      "title": "Truckin'",
+      "system": "intellivision",
+      "bucket": "intellivision/Truckin' (USA).zip"
+    },
+    {
+      "title": "Loco-Motion",
+      "system": "intellivision",
+      "bucket": "intellivision/Loco-Motion (USA).zip"
+    },
+    {
+      "title": "Fathom",
+      "system": "intellivision",
+      "bucket": "intellivision/Fathom (USA, Europe).zip"
+    },
+    {
+      "title": "Dragonfire",
+      "system": "intellivision",
+      "bucket": "intellivision/Dragonfire (USA, Europe).zip"
     },
     {
       "title": "Activision Classics",
@@ -478,6 +2783,91 @@
       "bucket": "psx/Buster Bros. Collection (USA).chd"
     },
     {
+      "title": "Arcade Party Pak",
+      "system": "psx",
+      "bucket": "psx/Arcade Party Pak (USA).chd"
+    },
+    {
+      "title": "Williams Arcade's Greatest Hits",
+      "system": "psx",
+      "bucket": "psx/Williams Arcade's Greatest Hits (USA).chd"
+    },
+    {
+      "title": "Xevious 3D-G+",
+      "system": "psx",
+      "bucket": "psx/Xevious 3D-G+ (USA).chd"
+    },
+    {
+      "title": "Q-bert",
+      "system": "psx",
+      "bucket": "psx/Q-bert (USA).chd"
+    },
+    {
+      "title": "Frogger",
+      "system": "psx",
+      "bucket": "psx/Frogger (USA).chd"
+    },
+    {
+      "title": "Arcade's Greatest Hits",
+      "system": "saturn",
+      "bucket": "saturn/Arcade's Greatest Hits (USA).chd"
+    },
+    {
+      "title": "Arcade's Greatest Hits - The Atari Collection 1",
+      "system": "saturn",
+      "bucket": "saturn/Arcade's Greatest Hits - The Atari Collection 1 (USA).chd"
+    },
+    {
+      "title": "Sega Ages Volume 1",
+      "system": "saturn",
+      "bucket": "saturn/Sega Ages Volume 1 (USA).chd"
+    },
+    {
+      "title": "Sega Ages - Memorial Selection Vol. 1",
+      "system": "saturn",
+      "bucket": "saturn/Sega Ages - Memorial Selection Vol. 1 (Japan).chd"
+    },
+    {
+      "title": "Sega Ages - Memorial Selection Vol. 2",
+      "system": "saturn",
+      "bucket": "saturn/Sega Ages - Memorial Selection Vol. 2 (Japan).chd"
+    },
+    {
+      "title": "Konami Antiques - MSX Collection Ultra Pack",
+      "system": "saturn",
+      "bucket": "saturn/Konami Antiques - MSX Collection Ultra Pack (Japan) (2M).chd"
+    },
+    {
+      "title": "Capcom Generation - Dai-1-shuu Gekitsuiou no Jidai",
+      "system": "saturn",
+      "bucket": "saturn/Capcom Generation - Dai-1-shuu Gekitsuiou no Jidai (Japan).chd"
+    },
+    {
+      "title": "Capcom Generation - Dai-2-shuu Makai to Kishi",
+      "system": "saturn",
+      "bucket": "saturn/Capcom Generation - Dai-2-shuu Makai to Kishi (Japan).chd"
+    },
+    {
+      "title": "Capcom Generation - Dai-3-shuu Koko ni Rekishi Hajimaru",
+      "system": "saturn",
+      "bucket": "saturn/Capcom Generation - Dai-3-shuu Koko ni Rekishi Hajimaru (Japan).chd"
+    },
+    {
+      "title": "Capcom Generation - Dai-4-shuu Kokou no Eiyuu",
+      "system": "saturn",
+      "bucket": "saturn/Capcom Generation - Dai-4-shuu Kokou no Eiyuu (Japan).chd"
+    },
+    {
+      "title": "Irem Arcade Classics",
+      "system": "saturn",
+      "bucket": "saturn/Irem Arcade Classics (Japan).chd"
+    },
+    {
+      "title": "Space Invaders",
+      "system": "saturn",
+      "bucket": "saturn/Space Invaders (Japan).chd"
+    },
+    {
       "title": "Midway's Greatest Arcade Hits: Volume 1",
       "system": "dreamcast",
       "bucket": "dreamcast/Midway's Greatest Arcade Hits - Volume 1 (USA).chd"
@@ -506,6 +2896,21 @@
       "title": "Centipede",
       "system": "dreamcast",
       "bucket": "dreamcast/Centipede (USA).chd"
+    },
+    {
+      "title": "Namco Museum",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Namco Museum (USA).chd"
+    },
+    {
+      "title": "Yu Suzuki Game Works Vol. 1",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Yu Suzuki Game Works Vol. 1 (Japan).chd"
+    },
+    {
+      "title": "Q-bert",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Q-bert (USA).chd"
     },
     {
       "title": "Gridrunner",
@@ -558,6 +2963,206 @@
       "bucket": "c64/Battlezone (USA, Europe).zip"
     },
     {
+      "title": "Pitfall!",
+      "system": "c64",
+      "bucket": "c64/Pitfall! (USA, Europe).zip"
+    },
+    {
+      "title": "Frogger",
+      "system": "c64",
+      "bucket": "c64/Frogger (USA, Europe).zip"
+    },
+    {
+      "title": "Donkey Kong",
+      "system": "c64",
+      "bucket": "c64/Donkey Kong (USA, Europe).zip"
+    },
+    {
+      "title": "Pac-Man",
+      "system": "c64",
+      "bucket": "c64/Pac-Man (USA, Europe).zip"
+    },
+    {
+      "title": "Ms. Pac-Man",
+      "system": "c64",
+      "bucket": "c64/Ms. Pac-Man (USA, Europe).zip"
+    },
+    {
+      "title": "Dig Dug",
+      "system": "c64",
+      "bucket": "c64/Dig Dug (USA, Europe).zip"
+    },
+    {
+      "title": "Centipede",
+      "system": "c64",
+      "bucket": "c64/Centipede (USA, Europe).zip"
+    },
+    {
+      "title": "Defender",
+      "system": "c64",
+      "bucket": "c64/Defender (USA, Europe).zip"
+    },
+    {
+      "title": "Galaxian",
+      "system": "c64",
+      "bucket": "c64/Galaxian (USA, Europe).zip"
+    },
+    {
+      "title": "Pole Position",
+      "system": "c64",
+      "bucket": "c64/Pole Position (USA, Europe).zip"
+    },
+    {
+      "title": "Moon Patrol",
+      "system": "c64",
+      "bucket": "c64/Moon Patrol (USA, Europe).zip"
+    },
+    {
+      "title": "Q-bert",
+      "system": "c64",
+      "bucket": "c64/Q-bert (USA, Europe).zip"
+    },
+    {
+      "title": "Zaxxon",
+      "system": "c64",
+      "bucket": "c64/Zaxxon (USA, Europe).zip"
+    },
+    {
+      "title": "Gorf",
+      "system": "c64",
+      "bucket": "c64/Gorf (USA, Europe).zip"
+    },
+    {
+      "title": "Gyruss",
+      "system": "c64",
+      "bucket": "c64/Gyruss (USA, Europe).zip"
+    },
+    {
+      "title": "Jungle Hunt",
+      "system": "c64",
+      "bucket": "c64/Jungle Hunt (USA, Europe).zip"
+    },
+    {
+      "title": "Popeye",
+      "system": "c64",
+      "bucket": "c64/Popeye (USA, Europe).zip"
+    },
+    {
+      "title": "Star Wars - The Arcade Game",
+      "system": "c64",
+      "bucket": "c64/Star Wars - The Arcade Game (USA, Europe).zip"
+    },
+    {
+      "title": "Spy Hunter",
+      "system": "c64",
+      "bucket": "c64/Spy Hunter (USA, Europe).zip"
+    },
+    {
+      "title": "Tapper",
+      "system": "c64",
+      "bucket": "c64/Tapper (USA, Europe).zip"
+    },
+    {
+      "title": "Choplifter!",
+      "system": "c64",
+      "bucket": "c64/Choplifter! (USA, Europe).zip"
+    },
+    {
+      "title": "River Raid",
+      "system": "c64",
+      "bucket": "c64/River Raid (USA, Europe).zip"
+    },
+    {
+      "title": "Beamrider",
+      "system": "c64",
+      "bucket": "c64/Beamrider (USA, Europe).zip"
+    },
+    {
+      "title": "Activision Decathlon, The",
+      "system": "c64",
+      "bucket": "c64/Activision Decathlon, The (USA, Europe).zip"
+    },
+    {
+      "title": "Ghostbusters",
+      "system": "c64",
+      "bucket": "c64/Ghostbusters (USA, Europe).zip"
+    },
+    {
+      "title": "Kung-Fu Master",
+      "system": "c64",
+      "bucket": "c64/Kung-Fu Master (USA, Europe).zip"
+    },
+    {
+      "title": "BC's Quest for Tires",
+      "system": "c64",
+      "bucket": "c64/BC's Quest for Tires (USA, Europe).zip"
+    },
+    {
+      "title": "Oil's Well",
+      "system": "c64",
+      "bucket": "c64/Oil's Well (USA, Europe).zip"
+    },
+    {
+      "title": "Toy Bizarre",
+      "system": "c64",
+      "bucket": "c64/Toy Bizarre (USA, Europe).zip"
+    },
+    {
+      "title": "Park Patrol",
+      "system": "c64",
+      "bucket": "c64/Park Patrol (USA, Europe).zip"
+    },
+    {
+      "title": "Attack of the Mutant Camels",
+      "system": "c64",
+      "bucket": "c64/Attack of the Mutant Camels (USA).zip"
+    },
+    {
+      "title": "Omega Race",
+      "system": "c64",
+      "bucket": "c64/Omega Race (USA, Europe).zip"
+    },
+    {
+      "title": "Radar Rat Race (v02)",
+      "system": "c64",
+      "bucket": "c64/Radar Rat Race (Japan) (v02) (MAX).zip"
+    },
+    {
+      "title": "Jupiter Lander (v02)",
+      "system": "c64",
+      "bucket": "c64/Jupiter Lander (World) (v02) (MAX).zip"
+    },
+    {
+      "title": "Blueprint",
+      "system": "c64",
+      "bucket": "c64/Blueprint (USA, Europe).zip"
+    },
+    {
+      "title": "Jack Attack",
+      "system": "c64",
+      "bucket": "c64/Jack Attack (USA, Europe).zip"
+    },
+    {
+      "title": "Pitstop",
+      "system": "c64",
+      "bucket": "c64/Pitstop (USA, Europe).zip"
+    },
+    {
+      "title": "Gateway to Apshai",
+      "system": "c64",
+      "bucket": "c64/Gateway to Apshai (USA, Europe).zip"
+    },
+    {
+      "title": "Frogger II - Threeedeep!",
+      "system": "c64",
+      "bucket": "c64/Frogger II - Threeedeep! (USA, Europe).zip"
+    },
+    {
+      "title": "International Football",
+      "system": "c64",
+      "bucket": "c64/International Football (USA, Europe).zip"
+    },
+    {
       "title": "Antarctic Adventure",
       "system": "msx",
       "bucket": "msx/Antarctic Adventure (Europe).zip"
@@ -578,6 +3183,306 @@
       "bucket": "msx/Jet Set Willy (Japan).zip"
     },
     {
+      "title": "Penguin Adventure",
+      "system": "msx",
+      "bucket": "msx/Penguin Adventure (Japan, Europe) (En).zip"
+    },
+    {
+      "title": "Nemesis",
+      "system": "msx",
+      "bucket": "msx/Nemesis (Japan, Europe) (En).zip"
+    },
+    {
+      "title": "Nemesis 2",
+      "system": "msx",
+      "bucket": "msx/Nemesis 2 (Japan, Europe) (En) (Alt).zip"
+    },
+    {
+      "title": "Salamander",
+      "system": "msx",
+      "bucket": "msx/Salamander (Japan) (Wii U Virtual Console).zip"
+    },
+    {
+      "title": "Parodius",
+      "system": "msx",
+      "bucket": "msx/Parodius (Japan) (Alt).zip"
+    },
+    {
+      "title": "Yie Ar Kung-Fu",
+      "system": "msx",
+      "bucket": "msx/Yie Ar Kung-Fu (Japan) (Alt).zip"
+    },
+    {
+      "title": "Road Fighter",
+      "system": "msx",
+      "bucket": "msx/Road Fighter (Japan) (Alt).zip"
+    },
+    {
+      "title": "Hyper Sports 2",
+      "system": "msx",
+      "bucket": "msx/Hyper Sports 2 (Japan) (Wii U Virtual Console).zip"
+    },
+    {
+      "title": "Track & Field 1",
+      "system": "msx",
+      "bucket": "msx/Track & Field 1 (Europe).zip"
+    },
+    {
+      "title": "Athletic Land",
+      "system": "msx",
+      "bucket": "msx/Athletic Land (Japan).zip"
+    },
+    {
+      "title": "Circus Charlie",
+      "system": "msx",
+      "bucket": "msx/Circus Charlie (Japan) (Wii U Virtual Console).zip"
+    },
+    {
+      "title": "Comic Bakery",
+      "system": "msx",
+      "bucket": "msx/Comic Bakery (Japan).zip"
+    },
+    {
+      "title": "Sky Jaguar",
+      "system": "msx",
+      "bucket": "msx/Sky Jaguar (Japan) (Wii U Virtual Console).zip"
+    },
+    {
+      "title": "King's Valley",
+      "system": "msx",
+      "bucket": "msx/King's Valley (Japan, Europe) (En).zip"
+    },
+    {
+      "title": "Magical Tree",
+      "system": "msx",
+      "bucket": "msx/Magical Tree (Japan).zip"
+    },
+    {
+      "title": "Hyper Rally",
+      "system": "msx",
+      "bucket": "msx/Hyper Rally (Japan).zip"
+    },
+    {
+      "title": "Konami's Boxing",
+      "system": "msx",
+      "bucket": "msx/Konami's Boxing (Japan).zip"
+    },
+    {
+      "title": "Konami's Ping-Pong",
+      "system": "msx",
+      "bucket": "msx/Konami's Ping-Pong (Japan).zip"
+    },
+    {
+      "title": "Konami's Tennis",
+      "system": "msx",
+      "bucket": "msx/Konami's Tennis (Japan).zip"
+    },
+    {
+      "title": "Pippols",
+      "system": "msx",
+      "bucket": "msx/Pippols (Japan).zip"
+    },
+    {
+      "title": "Goonies, The",
+      "system": "msx",
+      "bucket": "msx/Goonies, The (Japan).zip"
+    },
+    {
+      "title": "Zanac (v2)",
+      "system": "msx",
+      "bucket": "msx/Zanac (Japan) (v2).zip"
+    },
+    {
+      "title": "Thexder",
+      "system": "msx",
+      "bucket": "msx/Thexder (Japan).zip"
+    },
+    {
+      "title": "Hydlide",
+      "system": "msx",
+      "bucket": "msx/Hydlide (Japan).zip"
+    },
+    {
+      "title": "Galaga",
+      "system": "msx",
+      "bucket": "msx/Galaga (Japan).zip"
+    },
+    {
+      "title": "Pac-Man",
+      "system": "msx",
+      "bucket": "msx/Pac-Man (Japan).zip"
+    },
+    {
+      "title": "Dig Dug",
+      "system": "msx",
+      "bucket": "msx/Dig Dug (Japan).zip"
+    },
+    {
+      "title": "Mappy",
+      "system": "msx",
+      "bucket": "msx/Mappy (Japan).zip"
+    },
+    {
+      "title": "Rally-X",
+      "system": "msx",
+      "bucket": "msx/Rally-X (Japan).zip"
+    },
+    {
+      "title": "Lode Runner",
+      "system": "msx",
+      "bucket": "msx/Lode Runner (Japan).zip"
+    },
+    {
+      "title": "Eggerland Mystery",
+      "system": "msx",
+      "bucket": "msx/Eggerland Mystery (Japan).zip"
+    },
+    {
+      "title": "Elevator Action",
+      "system": "msx",
+      "bucket": "msx/Elevator Action (Japan).zip"
+    },
+    {
+      "title": "Pitfall!",
+      "system": "msx",
+      "bucket": "msx/Pitfall! (Japan).zip"
+    },
+    {
+      "title": "Pitfall II - Lost Caverns",
+      "system": "msx",
+      "bucket": "msx/Pitfall II - Lost Caverns (Japan).zip"
+    },
+    {
+      "title": "River Raid",
+      "system": "msx",
+      "bucket": "msx/River Raid (Japan).zip"
+    },
+    {
+      "title": "H.E.R.O.",
+      "system": "msx",
+      "bucket": "msx/H.E.R.O. (Japan).zip"
+    },
+    {
+      "title": "Alien 8",
+      "system": "msx",
+      "bucket": "msx/Alien 8 (Japan).zip"
+    },
+    {
+      "title": "Frogger",
+      "system": "msx",
+      "bucket": "msx/Frogger (Japan).zip"
+    },
+    {
+      "title": "Time Pilot",
+      "system": "msx",
+      "bucket": "msx/Time Pilot (Japan).zip"
+    },
+    {
+      "title": "Space Invaders",
+      "system": "msx",
+      "bucket": "msx/Space Invaders (Japan).zip"
+    },
+    {
+      "title": "Binary Land",
+      "system": "msx",
+      "bucket": "msx/Binary Land (Japan).zip"
+    },
+    {
+      "title": "Star Force",
+      "system": "msx",
+      "bucket": "msx/Star Force (Japan).zip"
+    },
+    {
+      "title": "Castle, The",
+      "system": "msx",
+      "bucket": "msx/Castle, The (Japan).zip"
+    },
+    {
+      "title": "Green Beret",
+      "system": "msx",
+      "bucket": "msx/Green Beret (Europe).zip"
+    },
+    {
+      "title": "Pooyan",
+      "system": "msx",
+      "bucket": "msx/Pooyan (Japan).zip"
+    },
+    {
+      "title": "Spelunker",
+      "system": "msx",
+      "bucket": "msx/Spelunker (Japan).zip"
+    },
+    {
+      "title": "Dragon Slayer",
+      "system": "msx",
+      "bucket": "msx/Dragon Slayer (Japan).zip"
+    },
+    {
+      "title": "Black Onyx, The",
+      "system": "msx",
+      "bucket": "msx/Black Onyx, The (Japan).zip"
+    },
+    {
+      "title": "Dragon Slayer IV - Drasle Family",
+      "system": "msx",
+      "bucket": "msx/Dragon Slayer IV - Drasle Family (Japan).zip"
+    },
+    {
+      "title": "Golvellius",
+      "system": "msx",
+      "bucket": "msx/Golvellius (Japan).zip"
+    },
+    {
+      "title": "Guardic",
+      "system": "msx",
+      "bucket": "msx/Guardic (Japan).zip"
+    },
+    {
+      "title": "King's Valley II",
+      "system": "msx",
+      "bucket": "msx/King's Valley II (Japan, Europe) (En).zip"
+    },
+    {
+      "title": "Knightmare II - The Maze of Galious",
+      "system": "msx",
+      "bucket": "msx/Knightmare II - The Maze of Galious (Japan).zip"
+    },
+    {
+      "title": "Metal Gear",
+      "system": "msx2",
+      "bucket": "msx2/Metal Gear (Europe).zip"
+    },
+    {
+      "title": "Space Manbow",
+      "system": "msx2",
+      "bucket": "msx2/Space Manbow (Japan) (Wii U Virtual Console).zip"
+    },
+    {
+      "title": "Vampire Killer",
+      "system": "msx2",
+      "bucket": "msx2/Vampire Killer (Japan, Europe) (En).zip"
+    },
+    {
+      "title": "Zanac Ex",
+      "system": "msx2",
+      "bucket": "msx2/Zanac Ex (Japan).zip"
+    },
+    {
+      "title": "Bubble Bobble",
+      "system": "msx2",
+      "bucket": "msx2/Bubble Bobble (Japan).zip"
+    },
+    {
+      "title": "Metal Gear 2 - Solid Snake",
+      "system": "msx2",
+      "bucket": "msx2/Metal Gear 2 - Solid Snake (Japan).zip"
+    },
+    {
+      "title": "Aleste",
+      "system": "msx2",
+      "bucket": "msx2/Aleste (Japan).zip"
+    },
+    {
       "title": "3-D Tetris",
       "system": "virtualboy",
       "bucket": "virtualboy/3-D Tetris (USA).zip"
@@ -593,6 +3498,71 @@
       "bucket": "virtualboy/Insmouth no Yakata (Japan).zip"
     },
     {
+      "title": "Golf",
+      "system": "virtualboy",
+      "bucket": "virtualboy/Golf (USA).zip"
+    },
+    {
+      "title": "Mario's Tennis",
+      "system": "virtualboy",
+      "bucket": "virtualboy/Mario's Tennis (Japan, USA) (En).zip"
+    },
+    {
+      "title": "Nester's Funky Bowling",
+      "system": "virtualboy",
+      "bucket": "virtualboy/Nester's Funky Bowling (USA).zip"
+    },
+    {
+      "title": "SD Gundam - Dimension War",
+      "system": "virtualboy",
+      "bucket": "virtualboy/SD Gundam - Dimension War (Japan).zip"
+    },
+    {
+      "title": "Space Invaders - Virtual Collection",
+      "system": "virtualboy",
+      "bucket": "virtualboy/Space Invaders - Virtual Collection (Japan).zip"
+    },
+    {
+      "title": "Space Squash",
+      "system": "virtualboy",
+      "bucket": "virtualboy/Space Squash (Japan).zip"
+    },
+    {
+      "title": "V-Tetris",
+      "system": "virtualboy",
+      "bucket": "virtualboy/V-Tetris (Japan).zip"
+    },
+    {
+      "title": "Vertical Force",
+      "system": "virtualboy",
+      "bucket": "virtualboy/Vertical Force (USA).zip"
+    },
+    {
+      "title": "Virtual Bowling",
+      "system": "virtualboy",
+      "bucket": "virtualboy/Virtual Bowling (Japan).zip"
+    },
+    {
+      "title": "Virtual Fishing",
+      "system": "virtualboy",
+      "bucket": "virtualboy/Virtual Fishing (Japan).zip"
+    },
+    {
+      "title": "Virtual Lab",
+      "system": "virtualboy",
+      "bucket": "virtualboy/Virtual Lab (Japan).zip"
+    },
+    {
+      "title": "Virtual League Baseball",
+      "system": "virtualboy",
+      "bucket": "virtualboy/Virtual League Baseball (USA).zip"
+    },
+    {
+      "title": "Waterworld",
+      "system": "virtualboy",
+      "bucket": "virtualboy/Waterworld (USA).zip"
+    },
+    {
       "title": "Night Trap",
       "system": "segacd",
       "bucket": "segacd/Night Trap (USA) (Disc 1) (Sega CD 32X) (RE-1).chd"
@@ -606,6 +3576,1602 @@
       "title": "Road Avenger",
       "system": "segacd",
       "bucket": "segacd/Road Avenger (USA).chd"
+    },
+    {
+      "title": "Sewer Shark (Rev 1)",
+      "system": "segacd",
+      "bucket": "segacd/Sewer Shark (USA) (Rev 1).chd"
+    },
+    {
+      "title": "Double Switch",
+      "system": "segacd",
+      "bucket": "segacd/Double Switch (USA).chd"
+    },
+    {
+      "title": "Ground Zero Texas",
+      "system": "segacd",
+      "bucket": "segacd/Ground Zero Texas (USA).m3u",
+      "files": [
+        "segacd/Ground Zero Texas (USA) (Disc 1).chd",
+        "segacd/Ground Zero Texas (USA) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "Corpse Killer",
+      "system": "segacd",
+      "bucket": "segacd/Corpse Killer (USA) (Sega CD 32X).chd"
+    },
+    {
+      "title": "Slam City with Scottie Pippen",
+      "system": "segacd",
+      "bucket": "segacd/Slam City with Scottie Pippen (USA) (Sega CD 32X).m3u",
+      "files": [
+        "segacd/Slam City with Scottie Pippen (USA) (Disc 1) (Fingers) (Sega CD 32X).chd",
+        "segacd/Slam City with Scottie Pippen (USA) (Disc 2) (Juice) (Sega CD 32X).chd",
+        "segacd/Slam City with Scottie Pippen (USA) (Disc 3) (Mad Dog) (Sega CD 32X).chd",
+        "segacd/Slam City with Scottie Pippen (USA) (Disc 4) (Smash) (Sega CD 32X).chd"
+      ]
+    },
+    {
+      "title": "Dragon's Lair",
+      "system": "segacd",
+      "bucket": "segacd/Dragon's Lair (USA).chd"
+    },
+    {
+      "title": "Space Ace",
+      "system": "segacd",
+      "bucket": "segacd/Space Ace (USA).chd"
+    },
+    {
+      "title": "Time Gal",
+      "system": "segacd",
+      "bucket": "segacd/Time Gal (USA).chd"
+    },
+    {
+      "title": "Cobra Command",
+      "system": "segacd",
+      "bucket": "segacd/Cobra Command (USA).chd"
+    },
+    {
+      "title": "Mad Dog McCree",
+      "system": "segacd",
+      "bucket": "segacd/Mad Dog McCree (USA).chd"
+    },
+    {
+      "title": "Who Shot Johnny Rock",
+      "system": "segacd",
+      "bucket": "segacd/Who Shot Johnny Rock (USA).chd"
+    },
+    {
+      "title": "Supreme Warrior",
+      "system": "segacd",
+      "bucket": "segacd/Supreme Warrior (USA) (Sega CD 32X).m3u",
+      "files": [
+        "segacd/Supreme Warrior (USA) (Disc 1) (Fire & Earth) (Sega CD 32X).chd",
+        "segacd/Supreme Warrior (USA) (Disc 2) (Wind & Fang Tu) (Sega CD 32X).chd"
+      ]
+    },
+    {
+      "title": "Tomcat Alley",
+      "system": "segacd",
+      "bucket": "segacd/Tomcat Alley (USA).chd"
+    },
+    {
+      "title": "WireHead",
+      "system": "segacd",
+      "bucket": "segacd/WireHead (USA).chd"
+    },
+    {
+      "title": "Prize Fighter",
+      "system": "segacd",
+      "bucket": "segacd/Prize Fighter (USA).m3u",
+      "files": [
+        "segacd/Prize Fighter (USA) (Disc 1).chd",
+        "segacd/Prize Fighter (USA) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "Sherlock Holmes - Consulting Detective",
+      "system": "segacd",
+      "bucket": "segacd/Sherlock Holmes - Consulting Detective (USA).chd"
+    },
+    {
+      "title": "Dracula Unleashed",
+      "system": "segacd",
+      "bucket": "segacd/Dracula Unleashed (USA).m3u",
+      "files": [
+        "segacd/Dracula Unleashed (USA) (Disc 1).chd",
+        "segacd/Dracula Unleashed (USA) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "Surgical Strike",
+      "system": "segacd",
+      "bucket": "segacd/Surgical Strike (Brazil) (Sega CD 32X).chd"
+    },
+    {
+      "title": "Fahrenheit",
+      "system": "segacd",
+      "bucket": "segacd/Fahrenheit (USA).m3u",
+      "files": [
+        "segacd/Fahrenheit (USA) (Disc 1) (Key Disc) (Sega CD).chd",
+        "segacd/Fahrenheit (USA) (Disc 2) (32X CD).chd"
+      ]
+    },
+    {
+      "title": "Midnight Raiders",
+      "system": "segacd",
+      "bucket": "segacd/Midnight Raiders (USA).chd"
+    },
+    {
+      "title": "Revenge of the Ninja",
+      "system": "segacd",
+      "bucket": "segacd/Revenge of the Ninja (USA).chd"
+    },
+    {
+      "title": "Star Wars - Rebel Assault",
+      "system": "segacd",
+      "bucket": "segacd/Star Wars - Rebel Assault (USA).chd"
+    },
+    {
+      "title": "Mansion of Hidden Souls",
+      "system": "segacd",
+      "bucket": "segacd/Mansion of Hidden Souls (USA).chd"
+    },
+    {
+      "title": "Microcosm",
+      "system": "segacd",
+      "bucket": "segacd/Microcosm (USA).chd"
+    },
+    {
+      "title": "Wild Woody",
+      "system": "segacd",
+      "bucket": "segacd/Wild Woody (USA).chd"
+    },
+    {
+      "title": "Night Striker",
+      "system": "segacd",
+      "bucket": "segacd/Night Striker (Japan, Korea).chd"
+    },
+    {
+      "title": "Bram Stoker's Dracula",
+      "system": "segacd",
+      "bucket": "segacd/Bram Stoker's Dracula (USA) (Version 2.0).chd"
+    },
+    {
+      "title": "Bouncers",
+      "system": "segacd",
+      "bucket": "segacd/Bouncers (USA).chd"
+    },
+    {
+      "title": "Third World War",
+      "system": "segacd",
+      "bucket": "segacd/Third World War (USA).chd"
+    },
+    {
+      "title": "Girl's Garden",
+      "system": "sg1000",
+      "bucket": "sg1000/Girl's Garden (Japan, Australia) (Ja).zip"
+    },
+    {
+      "title": "Flicky",
+      "system": "sg1000",
+      "bucket": "sg1000/Flicky (Japan, New Zealand) (Ja).zip"
+    },
+    {
+      "title": "Wonder Boy",
+      "system": "sg1000",
+      "bucket": "sg1000/Wonder Boy (Japan, Australia) (Ja).zip"
+    },
+    {
+      "title": "Ninja Princess",
+      "system": "sg1000",
+      "bucket": "sg1000/Ninja Princess (Japan, Australia) (Ja).zip"
+    },
+    {
+      "title": "Doki Doki Penguin Land",
+      "system": "sg1000",
+      "bucket": "sg1000/Doki Doki Penguin Land (Japan).zip"
+    },
+    {
+      "title": "Zippy Race",
+      "system": "sg1000",
+      "bucket": "sg1000/Zippy Race (Japan, Australia) (Ja).zip"
+    },
+    {
+      "title": "Star Jacker (Rev 2)",
+      "system": "sg1000",
+      "bucket": "sg1000/Star Jacker (Japan, Europe) (En) (Rev 2).zip"
+    },
+    {
+      "title": "Congo Bongo (Rev 1)",
+      "system": "sg1000",
+      "bucket": "sg1000/Congo Bongo (Japan, Europe, Australia, New Zealand) (En) (Rev 1).zip"
+    },
+    {
+      "title": "Monaco GP (Rev 2)",
+      "system": "sg1000",
+      "bucket": "sg1000/Monaco GP (Japan, Europe) (Ja) (Rev 2).zip"
+    },
+    {
+      "title": "Zaxxon",
+      "system": "sg1000",
+      "bucket": "sg1000/Zaxxon (Japan).zip"
+    },
+    {
+      "title": "Pitfall II - The Lost Caverns (Rev 1)",
+      "system": "sg1000",
+      "bucket": "sg1000/Pitfall II - The Lost Caverns (Japan) (Rev 1).zip"
+    },
+    {
+      "title": "H.E.R.O.",
+      "system": "sg1000",
+      "bucket": "sg1000/H.E.R.O. (Japan).zip"
+    },
+    {
+      "title": "Choplifter",
+      "system": "sg1000",
+      "bucket": "sg1000/Choplifter (Japan, Australia) (Ja).zip"
+    },
+    {
+      "title": "Elevator Action",
+      "system": "sg1000",
+      "bucket": "sg1000/Elevator Action (Japan).zip"
+    },
+    {
+      "title": "Bomb Jack",
+      "system": "sg1000",
+      "bucket": "sg1000/Bomb Jack (Japan, Australia) (Ja).zip"
+    },
+    {
+      "title": "Bank Panic",
+      "system": "sg1000",
+      "bucket": "sg1000/Bank Panic (Japan).zip"
+    },
+    {
+      "title": "Gulkave",
+      "system": "sg1000",
+      "bucket": "sg1000/Gulkave (Japan).zip"
+    },
+    {
+      "title": "Orguss",
+      "system": "sg1000",
+      "bucket": "sg1000/Orguss (Japan, Europe, Australia, New Zealand) (En).zip"
+    },
+    {
+      "title": "Sindbad Mystery",
+      "system": "sg1000",
+      "bucket": "sg1000/Sindbad Mystery (Japan, Europe, Australia, New Zealand) (En).zip"
+    },
+    {
+      "title": "Champion Boxing",
+      "system": "sg1000",
+      "bucket": "sg1000/Champion Boxing (Japan, New Zealand) (Ja).zip"
+    },
+    {
+      "title": "Lode Runner",
+      "system": "sg1000",
+      "bucket": "sg1000/Lode Runner (Japan, Europe, Australia) (En).zip"
+    },
+    {
+      "title": "Championship Lode Runner",
+      "system": "sg1000",
+      "bucket": "sg1000/Championship Lode Runner (Japan, Australia) (Ja).zip"
+    },
+    {
+      "title": "Star Force",
+      "system": "sg1000",
+      "bucket": "sg1000/Star Force (Japan, Australia) (Ja).zip"
+    },
+    {
+      "title": "Exerion",
+      "system": "sg1000",
+      "bucket": "sg1000/Exerion (Japan, Europe, Australia, New Zealand) (En).zip"
+    },
+    {
+      "title": "Hang On II",
+      "system": "sg1000",
+      "bucket": "sg1000/Hang On II (Japan, Australia) (Ja).zip"
+    },
+    {
+      "title": "Safari Hunting",
+      "system": "sg1000",
+      "bucket": "sg1000/Safari Hunting (Japan, Europe, Australia, New Zealand) (Ja).zip"
+    },
+    {
+      "title": "N-Sub",
+      "system": "sg1000",
+      "bucket": "sg1000/N-Sub (Japan, Europe, Australia, New Zealand) (Ja).zip"
+    },
+    {
+      "title": "Borderline",
+      "system": "sg1000",
+      "bucket": "sg1000/Borderline (Japan, Europe, Australia, New Zealand) (En).zip"
+    },
+    {
+      "title": "Pacar",
+      "system": "sg1000",
+      "bucket": "sg1000/Pacar (Japan, Europe, Australia, New Zealand) (En).zip"
+    },
+    {
+      "title": "Sega-Galaga",
+      "system": "sg1000",
+      "bucket": "sg1000/Sega-Galaga (Japan, Australia) (Ja).zip"
+    },
+    {
+      "title": "Space Invaders",
+      "system": "sg1000",
+      "bucket": "sg1000/Space Invaders (Japan).zip"
+    },
+    {
+      "title": "Drol",
+      "system": "sg1000",
+      "bucket": "sg1000/Drol (Japan, Australia) (Ja).zip"
+    },
+    {
+      "title": "Castle, The",
+      "system": "sg1000",
+      "bucket": "sg1000/Castle, The (Japan).zip"
+    },
+    {
+      "title": "Hustle Chumy",
+      "system": "sg1000",
+      "bucket": "sg1000/Hustle Chumy (Japan).zip"
+    },
+    {
+      "title": "Chack'n Pop",
+      "system": "sg1000",
+      "bucket": "sg1000/Chack'n Pop (Japan).zip"
+    },
+    {
+      "title": "Golgo 13",
+      "system": "sg1000",
+      "bucket": "sg1000/Golgo 13 (Japan).zip"
+    },
+    {
+      "title": "Yamato",
+      "system": "sg1000",
+      "bucket": "sg1000/Yamato (Japan, Europe, Australia, New Zealand) (En).zip"
+    },
+    {
+      "title": "Pop Flamer",
+      "system": "sg1000",
+      "bucket": "sg1000/Pop Flamer (Japan, Europe, Australia, New Zealand) (En).zip"
+    },
+    {
+      "title": "Q-bert",
+      "system": "sg1000",
+      "bucket": "sg1000/Q-bert (Japan) (Othello Multivision).zip"
+    },
+    {
+      "title": "Rock n' Bolt",
+      "system": "sg1000",
+      "bucket": "sg1000/Rock n' Bolt (Japan).zip"
+    },
+    {
+      "title": "Sega Flipper",
+      "system": "sg1000",
+      "bucket": "sg1000/Sega Flipper (Japan, Europe, Australia, New Zealand) (En).zip"
+    },
+    {
+      "title": "Black Onyx, The",
+      "system": "sg1000",
+      "bucket": "sg1000/Black Onyx, The (Japan).zip"
+    },
+    {
+      "title": "Dragon Wang (Rev 1)",
+      "system": "sg1000",
+      "bucket": "sg1000/Dragon Wang (Japan) (Rev 1).zip"
+    },
+    {
+      "title": "Space Slalom",
+      "system": "sg1000",
+      "bucket": "sg1000/Space Slalom (Japan).zip"
+    },
+    {
+      "title": "Champion Baseball",
+      "system": "sg1000",
+      "bucket": "sg1000/Champion Baseball (Japan, Australia, New Zealand) (Ja).zip"
+    },
+    {
+      "title": "Safari Race",
+      "system": "sg1000",
+      "bucket": "sg1000/Safari Race (Japan, Europe, Australia, New Zealand) (Ja).zip"
+    },
+    {
+      "title": "Zoom 909",
+      "system": "sg1000",
+      "bucket": "sg1000/Zoom 909 (Japan).zip"
+    },
+    {
+      "title": "GP World (Rev 1)",
+      "system": "sg1000",
+      "bucket": "sg1000/GP World (Japan) (Rev 1).zip"
+    },
+    {
+      "title": "C_So!",
+      "system": "sg1000",
+      "bucket": "sg1000/C_So! (Japan).zip"
+    },
+    {
+      "title": "Guzzler",
+      "system": "sg1000",
+      "bucket": "sg1000/Guzzler (Japan) (Othello Multivision).zip"
+    },
+    {
+      "title": "Dodge It",
+      "system": "channelf",
+      "bucket": "channelf/Dodge It (USA).zip"
+    },
+    {
+      "title": "Video Whizball",
+      "system": "channelf",
+      "bucket": "channelf/Video Whizball (USA).zip"
+    },
+    {
+      "title": "Alien Invasion",
+      "system": "channelf",
+      "bucket": "channelf/Alien Invasion (USA).zip"
+    },
+    {
+      "title": "Space War",
+      "system": "channelf",
+      "bucket": "channelf/Space War (USA).zip"
+    },
+    {
+      "title": "Maze, Jailbreak, Blind-man's-bluff, Trailblazer",
+      "system": "channelf",
+      "bucket": "channelf/Maze, Jailbreak, Blind-man's-bluff, Trailblazer (USA).zip"
+    },
+    {
+      "title": "Pinball Challenge",
+      "system": "channelf",
+      "bucket": "channelf/Pinball Challenge (USA).zip"
+    },
+    {
+      "title": "Bowling",
+      "system": "channelf",
+      "bucket": "channelf/Bowling (USA).zip"
+    },
+    {
+      "title": "Baseball",
+      "system": "channelf",
+      "bucket": "channelf/Baseball (USA).zip"
+    },
+    {
+      "title": "Drag Race",
+      "system": "channelf",
+      "bucket": "channelf/Drag Race (USA).zip"
+    },
+    {
+      "title": "Spitfire",
+      "system": "channelf",
+      "bucket": "channelf/Spitfire (USA).zip"
+    },
+    {
+      "title": "Robot War, Torpedo Alley",
+      "system": "channelf",
+      "bucket": "channelf/Robot War, Torpedo Alley (USA).zip"
+    },
+    {
+      "title": "Desert Fox, Shooting Gallery",
+      "system": "channelf",
+      "bucket": "channelf/Desert Fox, Shooting Gallery (USA).zip"
+    },
+    {
+      "title": "Sonar Search",
+      "system": "channelf",
+      "bucket": "channelf/Sonar Search (USA).zip"
+    },
+    {
+      "title": "Pro Football",
+      "system": "channelf",
+      "bucket": "channelf/Pro Football (USA).zip"
+    },
+    {
+      "title": "Galactic Space Wars, Lunar Lander",
+      "system": "channelf",
+      "bucket": "channelf/Galactic Space Wars, Lunar Lander (USA).zip"
+    },
+    {
+      "title": "Hangman",
+      "system": "channelf",
+      "bucket": "channelf/Hangman (USA).zip"
+    },
+    {
+      "title": "Tic-Tac-Toe, Shooting Gallery, Doodle, Quadra-Doodle",
+      "system": "channelf",
+      "bucket": "channelf/Tic-Tac-Toe, Shooting Gallery, Doodle, Quadra-Doodle (USA).zip"
+    },
+    {
+      "title": "Video Blackjack",
+      "system": "channelf",
+      "bucket": "channelf/Video Blackjack (USA).zip"
+    },
+    {
+      "title": "Backgammon, Acey-Deucey",
+      "system": "channelf",
+      "bucket": "channelf/Backgammon, Acey-Deucey (USA).zip"
+    },
+    {
+      "title": "Checkers",
+      "system": "channelf",
+      "bucket": "channelf/Checkers (USA).zip"
+    },
+    {
+      "title": "Cat Trax",
+      "system": "arcadia",
+      "bucket": "arcadia/Cat Trax (USA, Europe).zip"
+    },
+    {
+      "title": "Jungler",
+      "system": "arcadia",
+      "bucket": "arcadia/Jungler (USA, Europe).zip"
+    },
+    {
+      "title": "Jump Bug",
+      "system": "arcadia",
+      "bucket": "arcadia/Jump Bug (Europe).zip"
+    },
+    {
+      "title": "Crazy Climber",
+      "system": "arcadia",
+      "bucket": "arcadia/Crazy Climber (Europe).zip"
+    },
+    {
+      "title": "Pleiades",
+      "system": "arcadia",
+      "bucket": "arcadia/Pleiades (Europe).zip"
+    },
+    {
+      "title": "Route 16",
+      "system": "arcadia",
+      "bucket": "arcadia/Route 16 (Europe).zip"
+    },
+    {
+      "title": "Funky Fish",
+      "system": "arcadia",
+      "bucket": "arcadia/Funky Fish (Europe).zip"
+    },
+    {
+      "title": "Turtles",
+      "system": "arcadia",
+      "bucket": "arcadia/Turtles (Europe).zip"
+    },
+    {
+      "title": "The End",
+      "system": "arcadia",
+      "bucket": "arcadia/The End (Europe).zip"
+    },
+    {
+      "title": "Red Clash",
+      "system": "arcadia",
+      "bucket": "arcadia/Red Clash (USA, Europe).zip"
+    },
+    {
+      "title": "Spiders",
+      "system": "arcadia",
+      "bucket": "arcadia/Spiders (USA, Europe).zip"
+    },
+    {
+      "title": "Astro Invader",
+      "system": "arcadia",
+      "bucket": "arcadia/Astro Invader (Europe).zip"
+    },
+    {
+      "title": "R2D Tank",
+      "system": "arcadia",
+      "bucket": "arcadia/R2D Tank (Europe).zip"
+    },
+    {
+      "title": "Hobo",
+      "system": "arcadia",
+      "bucket": "arcadia/Hobo (Europe).zip"
+    },
+    {
+      "title": "Space Vultures",
+      "system": "arcadia",
+      "bucket": "arcadia/Space Vultures (USA, Europe).zip"
+    },
+    {
+      "title": "Escape",
+      "system": "arcadia",
+      "bucket": "arcadia/Escape (USA, Europe).zip"
+    },
+    {
+      "title": "Cube Up",
+      "system": "gamate",
+      "bucket": "gamate/Cube Up (World).zip"
+    },
+    {
+      "title": "Witty Apee",
+      "system": "gamate",
+      "bucket": "gamate/Witty Apee (World).zip"
+    },
+    {
+      "title": "Galaxy Invaders",
+      "system": "gamate",
+      "bucket": "gamate/Galaxy Invaders (World).zip"
+    },
+    {
+      "title": "Mini Golf",
+      "system": "gamate",
+      "bucket": "gamate/Mini Golf (World).zip"
+    },
+    {
+      "title": "Tornado",
+      "system": "gamate",
+      "bucket": "gamate/Tornado (World).zip"
+    },
+    {
+      "title": "Legend of Dragon Knight",
+      "system": "gamate",
+      "bucket": "gamate/Legend of Dragon Knight (World).zip"
+    },
+    {
+      "title": "Kiki Inland",
+      "system": "gamate",
+      "bucket": "gamate/Kiki Inland (World).zip"
+    },
+    {
+      "title": "Devil Castle",
+      "system": "gamate",
+      "bucket": "gamate/Devil Castle (World).zip"
+    },
+    {
+      "title": "Pipemania",
+      "system": "gamate",
+      "bucket": "gamate/Pipemania (World).zip"
+    },
+    {
+      "title": "Vindicators",
+      "system": "gamate",
+      "bucket": "gamate/Vindicators (World).zip"
+    },
+    {
+      "title": "Mighty Tank",
+      "system": "gamate",
+      "bucket": "gamate/Mighty Tank (World).zip"
+    },
+    {
+      "title": "Bomb Blaster",
+      "system": "gamate",
+      "bucket": "gamate/Bomb Blaster (World).zip"
+    },
+    {
+      "title": "Suleiman's Treasure",
+      "system": "megaduck",
+      "bucket": "megaduck/Suleiman's Treasure (World).zip"
+    },
+    {
+      "title": "Arctic Zone",
+      "system": "megaduck",
+      "bucket": "megaduck/Arctic Zone (World).zip"
+    },
+    {
+      "title": "Bomb Disposer",
+      "system": "megaduck",
+      "bucket": "megaduck/Bomb Disposer (World).zip"
+    },
+    {
+      "title": "Street Rider",
+      "system": "megaduck",
+      "bucket": "megaduck/Street Rider (World).zip"
+    },
+    {
+      "title": "Snake Roy",
+      "system": "megaduck",
+      "bucket": "megaduck/Snake Roy (World).zip"
+    },
+    {
+      "title": "Magical Tower",
+      "system": "megaduck",
+      "bucket": "megaduck/Magical Tower (World).zip"
+    },
+    {
+      "title": "Pile Wonder",
+      "system": "megaduck",
+      "bucket": "megaduck/Pile Wonder (World).zip"
+    },
+    {
+      "title": "The Brick Wall",
+      "system": "megaduck",
+      "bucket": "megaduck/The Brick Wall (World).zip"
+    },
+    {
+      "title": "Zipball",
+      "system": "megaduck",
+      "bucket": "megaduck/Zipball (World).zip"
+    },
+    {
+      "title": "Vex",
+      "system": "megaduck",
+      "bucket": "megaduck/Vex (World).zip"
+    },
+    {
+      "title": "Worm Visitor",
+      "system": "megaduck",
+      "bucket": "megaduck/Worm Visitor (World).zip"
+    },
+    {
+      "title": "Captain Knick Knack",
+      "system": "megaduck",
+      "bucket": "megaduck/Captain Knick Knack (World).zip"
+    },
+    {
+      "title": "Crystball (Rev 1)",
+      "system": "supervision",
+      "bucket": "supervision/Crystball (USA, Europe) (Rev 1).zip"
+    },
+    {
+      "title": "Alien",
+      "system": "supervision",
+      "bucket": "supervision/Alien (USA, Europe).zip"
+    },
+    {
+      "title": "Balloon Fight",
+      "system": "supervision",
+      "bucket": "supervision/Balloon Fight (USA, Europe).zip"
+    },
+    {
+      "title": "Chimera",
+      "system": "supervision",
+      "bucket": "supervision/Chimera (USA, Europe).zip"
+    },
+    {
+      "title": "Carrier (Rev 1)",
+      "system": "supervision",
+      "bucket": "supervision/Carrier (USA, Europe) (Rev 1).zip"
+    },
+    {
+      "title": "Journey to the West",
+      "system": "supervision",
+      "bucket": "supervision/Journey to the West (USA).zip"
+    },
+    {
+      "title": "Super Pang",
+      "system": "supervision",
+      "bucket": "supervision/Super Pang (USA, Europe).zip"
+    },
+    {
+      "title": "Super Kong",
+      "system": "supervision",
+      "bucket": "supervision/Super Kong (USA, Europe).zip"
+    },
+    {
+      "title": "PacBoy & Mouse",
+      "system": "supervision",
+      "bucket": "supervision/PacBoy & Mouse (USA, Europe).zip"
+    },
+    {
+      "title": "Hero Kid",
+      "system": "supervision",
+      "bucket": "supervision/Hero Kid (USA, Europe).zip"
+    },
+    {
+      "title": "Sonny X'Press",
+      "system": "supervision",
+      "bucket": "supervision/Sonny X'Press (USA, Europe).zip"
+    },
+    {
+      "title": "Delta Hero",
+      "system": "supervision",
+      "bucket": "supervision/Delta Hero (USA, Europe).zip"
+    },
+    {
+      "title": "Galactic Crusader",
+      "system": "supervision",
+      "bucket": "supervision/Galactic Crusader (USA, Europe).zip"
+    },
+    {
+      "title": "Eagle Plan",
+      "system": "supervision",
+      "bucket": "supervision/Eagle Plan (USA, Europe).zip"
+    },
+    {
+      "title": "Batman & Robin",
+      "system": "gamecom",
+      "bucket": "gamecom/Batman & Robin (USA).zip"
+    },
+    {
+      "title": "Centipede",
+      "system": "gamecom",
+      "bucket": "gamecom/Centipede (USA).zip"
+    },
+    {
+      "title": "Duke Nukem 3D",
+      "system": "gamecom",
+      "bucket": "gamecom/Duke Nukem 3D (USA).zip"
+    },
+    {
+      "title": "Fighters Megamix",
+      "system": "gamecom",
+      "bucket": "gamecom/Fighters Megamix (USA).zip"
+    },
+    {
+      "title": "Frogger",
+      "system": "gamecom",
+      "bucket": "gamecom/Frogger (USA).zip"
+    },
+    {
+      "title": "Henry",
+      "system": "gamecom",
+      "bucket": "gamecom/Henry (USA).zip"
+    },
+    {
+      "title": "Indy 500",
+      "system": "gamecom",
+      "bucket": "gamecom/Indy 500 (USA).zip"
+    },
+    {
+      "title": "Jurassic Park - The Lost World",
+      "system": "gamecom",
+      "bucket": "gamecom/Jurassic Park - The Lost World (USA).zip"
+    },
+    {
+      "title": "Lights Out",
+      "system": "gamecom",
+      "bucket": "gamecom/Lights Out (USA).zip"
+    },
+    {
+      "title": "Monopoly",
+      "system": "gamecom",
+      "bucket": "gamecom/Monopoly (USA).zip"
+    },
+    {
+      "title": "Mortal Kombat Trilogy",
+      "system": "gamecom",
+      "bucket": "gamecom/Mortal Kombat Trilogy (USA).zip"
+    },
+    {
+      "title": "Resident Evil 2",
+      "system": "gamecom",
+      "bucket": "gamecom/Resident Evil 2 (USA).zip"
+    },
+    {
+      "title": "Scrabble",
+      "system": "gamecom",
+      "bucket": "gamecom/Scrabble (USA).zip"
+    },
+    {
+      "title": "Sonic Jam",
+      "system": "gamecom",
+      "bucket": "gamecom/Sonic Jam (USA).zip"
+    },
+    {
+      "title": "Williams Arcade Classics",
+      "system": "gamecom",
+      "bucket": "gamecom/Williams Arcade Classics (USA).zip"
+    },
+    {
+      "title": "Wheel of Fortune",
+      "system": "gamecom",
+      "bucket": "gamecom/Wheel of Fortune (USA).zip"
+    },
+    {
+      "title": "Jeopardy!",
+      "system": "gamecom",
+      "bucket": "gamecom/Jeopardy! (USA).zip"
+    },
+    {
+      "title": "Quiz Wiz - Cyber Trivia",
+      "system": "gamecom",
+      "bucket": "gamecom/Quiz Wiz - Cyber Trivia (USA).zip"
+    },
+    {
+      "title": "Tiger Casino",
+      "system": "gamecom",
+      "bucket": "gamecom/Tiger Casino (USA).zip"
+    },
+    {
+      "title": "Pokemon Party Mini",
+      "system": "pokemini",
+      "bucket": "pokemini/Pokemon Party Mini (USA).zip"
+    },
+    {
+      "title": "Pokemon Pinball Mini",
+      "system": "pokemini",
+      "bucket": "pokemini/Pokemon Pinball Mini (USA, Europe).zip"
+    },
+    {
+      "title": "Pokemon Puzzle Collection",
+      "system": "pokemini",
+      "bucket": "pokemini/Pokemon Puzzle Collection (USA, Europe).zip"
+    },
+    {
+      "title": "Pokemon Zany Cards",
+      "system": "pokemini",
+      "bucket": "pokemini/Pokemon Zany Cards (USA, Europe).zip"
+    },
+    {
+      "title": "Pokemon Tetris",
+      "system": "pokemini",
+      "bucket": "pokemini/Pokemon Tetris (Europe) (En,Ja,Fr).zip"
+    },
+    {
+      "title": "Pokemon Race Mini",
+      "system": "pokemini",
+      "bucket": "pokemini/Pokemon Race Mini (Japan).zip"
+    },
+    {
+      "title": "Pichu Bros. Mini",
+      "system": "pokemini",
+      "bucket": "pokemini/Pichu Bros. Mini (Japan).zip"
+    },
+    {
+      "title": "Togepi no Daibouken",
+      "system": "pokemini",
+      "bucket": "pokemini/Togepi no Daibouken (Japan).zip"
+    },
+    {
+      "title": "Pokemon Sodateyasan Mini",
+      "system": "pokemini",
+      "bucket": "pokemini/Pokemon Sodateyasan Mini (Japan).zip"
+    },
+    {
+      "title": "Pokemon Puzzle Collection Vol. 2",
+      "system": "pokemini",
+      "bucket": "pokemini/Pokemon Puzzle Collection Vol. 2 (Japan).zip"
+    },
+    {
+      "title": "King of Fighters R-1 - Pocket Fighting Series",
+      "system": "ngp",
+      "bucket": "ngp/King of Fighters R-1 - Pocket Fighting Series (Japan, Europe) (En,Ja).zip"
+    },
+    {
+      "title": "Samurai Shodown! - Pocket Fighting Series",
+      "system": "ngp",
+      "bucket": "ngp/Samurai Shodown! - Pocket Fighting Series (Japan, Europe) (En,Ja).zip"
+    },
+    {
+      "title": "Baseball Stars - Pocket Sports Series",
+      "system": "ngp",
+      "bucket": "ngp/Baseball Stars - Pocket Sports Series (Japan, Europe) (En,Ja).zip"
+    },
+    {
+      "title": "Pocket Tennis - Pocket Sports Series",
+      "system": "ngp",
+      "bucket": "ngp/Pocket Tennis - Pocket Sports Series (Japan, Europe) (En,Ja).zip"
+    },
+    {
+      "title": "NeoGeo Cup '98",
+      "system": "ngp",
+      "bucket": "ngp/NeoGeo Cup '98 (Japan, Europe) (En,Ja).zip"
+    },
+    {
+      "title": "Melon-chan no Seichou Nikki",
+      "system": "ngp",
+      "bucket": "ngp/Melon-chan no Seichou Nikki (Japan).zip"
+    },
+    {
+      "title": "Neo Cherry Master - Real Casino Series",
+      "system": "ngp",
+      "bucket": "ngp/Neo Cherry Master - Real Casino Series (Japan) (En,Ja).zip"
+    },
+    {
+      "title": "Renketsu Puzzle Tsunagete Pon!",
+      "system": "ngp",
+      "bucket": "ngp/Renketsu Puzzle Tsunagete Pon! (Japan).zip"
+    },
+    {
+      "title": "Poi Poi Ninja World",
+      "system": "sufami",
+      "bucket": "sufami/Poi Poi Ninja World (Japan).zip"
+    },
+    {
+      "title": "SD Ultra Battle - Ultraman Densetsu",
+      "system": "sufami",
+      "bucket": "sufami/SD Ultra Battle - Ultraman Densetsu (Japan).zip"
+    },
+    {
+      "title": "SD Ultra Battle - Seven Densetsu",
+      "system": "sufami",
+      "bucket": "sufami/SD Ultra Battle - Seven Densetsu (Japan).zip"
+    },
+    {
+      "title": "SD Gundam Generation - Ichinen Sensouki",
+      "system": "sufami",
+      "bucket": "sufami/SD Gundam Generation - Ichinen Sensouki (Japan).zip"
+    },
+    {
+      "title": "Bishoujo Senshi Sailor Moon Sailor Stars - Fuwafuwa Panic 2",
+      "system": "sufami",
+      "bucket": "sufami/Bishoujo Senshi Sailor Moon Sailor Stars - Fuwafuwa Panic 2 (Japan).zip"
+    },
+    {
+      "title": "Crayon Shin-chan - Nagagutsu Dobon!!",
+      "system": "sufami",
+      "bucket": "sufami/Crayon Shin-chan - Nagagutsu Dobon!! (Japan).zip"
+    },
+    {
+      "title": "Gegege no Kitarou - Youkai Donjara",
+      "system": "sufami",
+      "bucket": "sufami/Gegege no Kitarou - Youkai Donjara (Japan).zip"
+    },
+    {
+      "title": "Gekisou Sentai Carranger - Zenkai! Racer Senshi",
+      "system": "sufami",
+      "bucket": "sufami/Gekisou Sentai Carranger - Zenkai! Racer Senshi (Japan).zip"
+    },
+    {
+      "title": "1941 - Counter Attack",
+      "system": "supergrafx",
+      "bucket": "supergrafx/1941 - Counter Attack (Japan).zip"
+    },
+    {
+      "title": "Aldynes - The Misson Code for Rage Crisis",
+      "system": "supergrafx",
+      "bucket": "supergrafx/Aldynes - The Misson Code for Rage Crisis (Japan).zip"
+    },
+    {
+      "title": "Battle Ace",
+      "system": "supergrafx",
+      "bucket": "supergrafx/Battle Ace (Japan).zip"
+    },
+    {
+      "title": "Daimakaimura",
+      "system": "supergrafx",
+      "bucket": "supergrafx/Daimakaimura (Japan).zip"
+    },
+    {
+      "title": "Madou King Granzort",
+      "system": "supergrafx",
+      "bucket": "supergrafx/Madou King Granzort (Japan).zip"
+    },
+    {
+      "title": "Knuckles' Chaotix",
+      "system": "sega32x",
+      "bucket": "sega32x/Knuckles' Chaotix (Japan, USA) (En).zip"
+    },
+    {
+      "title": "Kolibri",
+      "system": "sega32x",
+      "bucket": "sega32x/Kolibri (USA, Europe).zip"
+    },
+    {
+      "title": "Virtua Racing Deluxe",
+      "system": "sega32x",
+      "bucket": "sega32x/Virtua Racing Deluxe (USA).zip"
+    },
+    {
+      "title": "Star Wars Arcade",
+      "system": "sega32x",
+      "bucket": "sega32x/Star Wars Arcade (USA).zip"
+    },
+    {
+      "title": "Tempo",
+      "system": "sega32x",
+      "bucket": "sega32x/Tempo (Japan, USA) (En).zip"
+    },
+    {
+      "title": "Metal Head",
+      "system": "sega32x",
+      "bucket": "sega32x/Metal Head (Japan, USA) (En,Ja).zip"
+    },
+    {
+      "title": "Stellar Assault",
+      "system": "sega32x",
+      "bucket": "sega32x/Stellar Assault (USA, Europe).zip"
+    },
+    {
+      "title": "Doom",
+      "system": "sega32x",
+      "bucket": "sega32x/Doom (Japan, USA) (En).zip"
+    },
+    {
+      "title": "Space Harrier",
+      "system": "sega32x",
+      "bucket": "sega32x/Space Harrier (Japan, USA) (En).zip"
+    },
+    {
+      "title": "After Burner Complete",
+      "system": "sega32x",
+      "bucket": "sega32x/After Burner Complete (Japan, USA) (En).zip"
+    },
+    {
+      "title": "Zaxxon's Motherbase 2000",
+      "system": "sega32x",
+      "bucket": "sega32x/Zaxxon's Motherbase 2000 (Japan, USA) (En).zip"
+    },
+    {
+      "title": "Darxide",
+      "system": "sega32x",
+      "bucket": "sega32x/Darxide (Europe) (En,Fr,De,Es).zip"
+    },
+    {
+      "title": "Virtua Fighter",
+      "system": "sega32x",
+      "bucket": "sega32x/Virtua Fighter (Japan, USA) (En).zip"
+    },
+    {
+      "title": "Blackthorne",
+      "system": "sega32x",
+      "bucket": "sega32x/Blackthorne (USA).zip"
+    },
+    {
+      "title": "Cosmic Carnage",
+      "system": "sega32x",
+      "bucket": "sega32x/Cosmic Carnage (Japan, USA) (En).zip"
+    },
+    {
+      "title": "T-MEK",
+      "system": "sega32x",
+      "bucket": "sega32x/T-MEK (USA, Europe).zip"
+    },
+    {
+      "title": "Amazing Spider-Man, The - Web of Fire",
+      "system": "sega32x",
+      "bucket": "sega32x/Amazing Spider-Man, The - Web of Fire (USA).zip"
+    },
+    {
+      "title": "BC Racers",
+      "system": "sega32x",
+      "bucket": "sega32x/BC Racers (USA).zip"
+    },
+    {
+      "title": "Motocross Championship",
+      "system": "sega32x",
+      "bucket": "sega32x/Motocross Championship (USA).zip"
+    },
+    {
+      "title": "WWF WrestleMania - The Arcade Game",
+      "system": "sega32x",
+      "bucket": "sega32x/WWF WrestleMania - The Arcade Game (USA).zip"
+    },
+    {
+      "title": "Mortal Kombat II",
+      "system": "sega32x",
+      "bucket": "sega32x/Mortal Kombat II (Japan, USA) (En).zip"
+    },
+    {
+      "title": "NBA Jam - Tournament Edition",
+      "system": "sega32x",
+      "bucket": "sega32x/NBA Jam - Tournament Edition (World).zip"
+    },
+    {
+      "title": "Yume Koujou - Doki Doki Panic",
+      "system": "fds",
+      "bucket": "fds/Yume Koujou - Doki Doki Panic (Japan) (DV 2).zip"
+    },
+    {
+      "title": "Nazo no Murasamejou",
+      "system": "fds",
+      "bucket": "fds/Nazo no Murasamejou (Japan).zip"
+    },
+    {
+      "title": "Super Mario Bros. 2",
+      "system": "fds",
+      "bucket": "fds/Super Mario Bros. 2 (Japan) (En) (DV 2).zip"
+    },
+    {
+      "title": "All Night Nippon Super Mario Bros.",
+      "system": "fds",
+      "bucket": "fds/All Night Nippon Super Mario Bros. (Japan) (Promo).zip"
+    },
+    {
+      "title": "Otocky",
+      "system": "fds",
+      "bucket": "fds/Otocky (Japan).zip"
+    },
+    {
+      "title": "Famicom Grand Prix II - 3D Hot Rally",
+      "system": "fds",
+      "bucket": "fds/Famicom Grand Prix II - 3D Hot Rally (Japan) (DV 8) (Disk Writer) (Famicom 3D System).zip"
+    },
+    {
+      "title": "Famicom Grand Prix - F1 Race",
+      "system": "fds",
+      "bucket": "fds/Famicom Grand Prix - F1 Race (Japan) (DV 1) (Disk Writer).zip"
+    },
+    {
+      "title": "Vs. Excitebike",
+      "system": "fds",
+      "bucket": "fds/Vs. Excitebike (Japan) (En).zip"
+    },
+    {
+      "title": "Kaettekita Mario Bros.",
+      "system": "fds",
+      "bucket": "fds/Kaettekita Mario Bros. (Japan) (Disk Writer).zip"
+    },
+    {
+      "title": "Bio Miracle Bokutte Upa",
+      "system": "fds",
+      "bucket": "fds/Bio Miracle Bokutte Upa (Japan).zip"
+    },
+    {
+      "title": "Falsion",
+      "system": "fds",
+      "bucket": "fds/Falsion (Japan).zip"
+    },
+    {
+      "title": "Kiki Kaikai - Dotou Hen (Rev 1)",
+      "system": "fds",
+      "bucket": "fds/Kiki Kaikai - Dotou Hen (Japan) (Rev 1) (Disk Writer).zip"
+    },
+    {
+      "title": "Smash Ping Pong",
+      "system": "fds",
+      "bucket": "fds/Smash Ping Pong (Japan).zip"
+    },
+    {
+      "title": "Moero TwinBee - Cinnamon Hakase wo Sukue! (Rev 1)",
+      "system": "fds",
+      "bucket": "fds/Moero TwinBee - Cinnamon Hakase wo Sukue! (Japan) (Rev 1).zip"
+    },
+    {
+      "title": "I Am a Teacher - Super Mario no Sweater",
+      "system": "fds",
+      "bucket": "fds/I Am a Teacher - Super Mario no Sweater (Japan).zip"
+    },
+    {
+      "title": "Knight Move (Rev 1)",
+      "system": "fds",
+      "bucket": "fds/Knight Move (Japan) (Rev 1) (Disk Writer).zip"
+    },
+    {
+      "title": "Famimaga Disk Vol. 5 - Puyo Puyo",
+      "system": "fds",
+      "bucket": "fds/Famimaga Disk Vol. 5 - Puyo Puyo (Japan) (Disk Writer).zip"
+    },
+    {
+      "title": "Ai Senshi Nicol",
+      "system": "fds",
+      "bucket": "fds/Ai Senshi Nicol (Japan).zip"
+    },
+    {
+      "title": "Gyruss",
+      "system": "fds",
+      "bucket": "fds/Gyruss (Japan).zip"
+    },
+    {
+      "title": "Armana no Kiseki",
+      "system": "fds",
+      "bucket": "fds/Armana no Kiseki (Japan).zip"
+    },
+    {
+      "title": "Esper Dream (Rev 1)",
+      "system": "fds",
+      "bucket": "fds/Esper Dream (Japan) (Rev 1) (Disk Writer).zip"
+    },
+    {
+      "title": "Meikyuu Jiin Dababa",
+      "system": "fds",
+      "bucket": "fds/Meikyuu Jiin Dababa (Japan).zip"
+    },
+    {
+      "title": "Relics - Ankoku Yousai",
+      "system": "fds",
+      "bucket": "fds/Relics - Ankoku Yousai (Japan).zip"
+    },
+    {
+      "title": "Golf - Japan Course",
+      "system": "fds",
+      "bucket": "fds/Golf - Japan Course (Japan) (DV 2).zip"
+    },
+    {
+      "title": "Golf - US Course",
+      "system": "fds",
+      "bucket": "fds/Golf - US Course (Japan) (DV 2) (Disk Writer).zip"
+    },
+    {
+      "title": "Youkai Yashiki",
+      "system": "fds",
+      "bucket": "fds/Youkai Yashiki (Japan).zip"
+    },
+    {
+      "title": "Yuu Maze",
+      "system": "fds",
+      "bucket": "fds/Yuu Maze (Japan).zip"
+    },
+    {
+      "title": "Arcade Classic No. 1 - Asteroids & Missile Command (SGB Enhanced)",
+      "system": "gb",
+      "bucket": "gb/Arcade Classic No. 1 - Asteroids & Missile Command (USA, Europe) (SGB Enhanced).zip"
+    },
+    {
+      "title": "Arcade Classic No. 2 - Centipede & Millipede (SGB Enhanced)",
+      "system": "gb",
+      "bucket": "gb/Arcade Classic No. 2 - Centipede & Millipede (USA, Europe) (SGB Enhanced).zip"
+    },
+    {
+      "title": "Arcade Classic No. 3 - Galaga & Galaxian (SGB Enhanced)",
+      "system": "gb",
+      "bucket": "gb/Arcade Classic No. 3 - Galaga & Galaxian (USA) (SGB Enhanced).zip"
+    },
+    {
+      "title": "Arcade Classic No. 4 - Defender & Joust (SGB Enhanced)",
+      "system": "gb",
+      "bucket": "gb/Arcade Classic No. 4 - Defender & Joust (USA, Europe) (SGB Enhanced).zip"
+    },
+    {
+      "title": "Arcade Classics - Super Breakout & Battlezone (SGB Enhanced)",
+      "system": "gb",
+      "bucket": "gb/Arcade Classics - Super Breakout & Battlezone (USA, Europe) (SGB Enhanced).zip"
+    },
+    {
+      "title": "Game & Watch Gallery (Rev 1) (SGB Enhanced)",
+      "system": "gb",
+      "bucket": "gb/Game & Watch Gallery (USA) (Rev 1) (SGB Enhanced).zip"
+    },
+    {
+      "title": "Game & Watch Gallery 2 (SGB Enhanced)",
+      "system": "gbc",
+      "bucket": "gbc/Game & Watch Gallery 2 (USA, Europe) (SGB Enhanced) (GB Compatible).zip"
+    },
+    {
+      "title": "Game & Watch Gallery 3 (SGB Enhanced)",
+      "system": "gbc",
+      "bucket": "gbc/Game & Watch Gallery 3 (USA, Europe) (SGB Enhanced) (GB Compatible).zip"
+    },
+    {
+      "title": "Konami GB Collection Vol.1",
+      "system": "gbc",
+      "bucket": "gbc/Konami GB Collection Vol.1 (Europe) (GB Compatible).zip"
+    },
+    {
+      "title": "Konami GB Collection Vol.2",
+      "system": "gbc",
+      "bucket": "gbc/Konami GB Collection Vol.2 (Europe) (GB Compatible).zip"
+    },
+    {
+      "title": "Konami GB Collection Vol.3",
+      "system": "gbc",
+      "bucket": "gbc/Konami GB Collection Vol.3 (Europe) (GB Compatible).zip"
+    },
+    {
+      "title": "Konami GB Collection Vol.4",
+      "system": "gbc",
+      "bucket": "gbc/Konami GB Collection Vol.4 (Europe) (GB Compatible).zip"
+    },
+    {
+      "title": "Midway Presents Arcade Hits - Joust & Defender",
+      "system": "gbc",
+      "bucket": "gbc/Midway Presents Arcade Hits - Joust & Defender (USA, Europe) (GB Compatible).zip"
+    },
+    {
+      "title": "Midway Presents Arcade Hits - Moon Patrol & Spy Hunter",
+      "system": "gbc",
+      "bucket": "gbc/Midway Presents Arcade Hits - Moon Patrol & Spy Hunter (USA, Europe) (GB Compatible).zip"
+    },
+    {
+      "title": "Activision Anthology",
+      "system": "gba",
+      "bucket": "gba/Activision Anthology (USA).zip"
+    },
+    {
+      "title": "Atari Anniversary Advance",
+      "system": "gba",
+      "bucket": "gba/Atari Anniversary Advance (USA).zip"
+    },
+    {
+      "title": "Namco Museum",
+      "system": "gba",
+      "bucket": "gba/Namco Museum (USA).zip"
+    },
+    {
+      "title": "Namco Museum - 50th Anniversary",
+      "system": "gba",
+      "bucket": "gba/Namco Museum - 50th Anniversary (USA).zip"
+    },
+    {
+      "title": "Pac-Man Collection",
+      "system": "gba",
+      "bucket": "gba/Pac-Man Collection (USA).zip"
+    },
+    {
+      "title": "Konami Collector's Series - Arcade Advanced",
+      "system": "gba",
+      "bucket": "gba/Konami Collector's Series - Arcade Advanced (USA).zip"
+    },
+    {
+      "title": "Midway's Greatest Arcade Hits",
+      "system": "gba",
+      "bucket": "gba/Midway's Greatest Arcade Hits (USA, Europe).zip"
+    },
+    {
+      "title": "SEGA Arcade Gallery",
+      "system": "gba",
+      "bucket": "gba/SEGA Arcade Gallery (USA).zip"
+    },
+    {
+      "title": "Game & Watch Gallery 4",
+      "system": "gba",
+      "bucket": "gba/Game & Watch Gallery 4 (USA).zip"
+    },
+    {
+      "title": "3 Games in One! - Super Breakout + Millipede + Lunar Lander",
+      "system": "gba",
+      "bucket": "gba/3 Games in One! - Super Breakout + Millipede + Lunar Lander (USA).zip"
+    },
+    {
+      "title": "3 Games in One! - Yars' Revenge + Asteroids + Pong",
+      "system": "gba",
+      "bucket": "gba/3 Games in One! - Yars' Revenge + Asteroids + Pong (USA).zip"
+    },
+    {
+      "title": "2 Games in One! - Gauntlet + Rampart",
+      "system": "gba",
+      "bucket": "gba/2 Games in One! - Gauntlet + Rampart (USA).zip"
+    },
+    {
+      "title": "2 Games in One! - Paperboy + Rampage",
+      "system": "gba",
+      "bucket": "gba/2 Games in One! - Paperboy + Rampage (USA).zip"
+    },
+    {
+      "title": "2 Games in One! - Marble Madness + Klax",
+      "system": "gba",
+      "bucket": "gba/2 Games in One! - Marble Madness + Klax (USA).zip"
+    },
+    {
+      "title": "2 Games in One! - Spy Hunter + Super Sprint",
+      "system": "gba",
+      "bucket": "gba/2 Games in One! - Spy Hunter + Super Sprint (USA).zip"
+    },
+    {
+      "title": "3 Games in One! - Breakout + Centipede + Warlords",
+      "system": "gba",
+      "bucket": "gba/3 Games in One! - Breakout + Centipede + Warlords (USA).zip"
+    },
+    {
+      "title": "Williams Arcade's Greatest Hits",
+      "system": "snes",
+      "bucket": "snes/Williams Arcade's Greatest Hits (USA).zip"
+    },
+    {
+      "title": "Arcade's Greatest Hits - The Atari Collection 1",
+      "system": "snes",
+      "bucket": "snes/Arcade's Greatest Hits - The Atari Collection 1 (USA).zip"
+    },
+    {
+      "title": "Namco Museum 64",
+      "system": "n64",
+      "bucket": "n64/Namco Museum 64 (USA).zip"
+    },
+    {
+      "title": "Midway's Greatest Arcade Hits - Volume 1",
+      "system": "n64",
+      "bucket": "n64/Midway's Greatest Arcade Hits - Volume 1 (USA).zip"
+    },
+    {
+      "title": "Williams Arcade's Greatest Hits",
+      "system": "genesis",
+      "bucket": "genesis/Williams Arcade's Greatest Hits (USA).zip"
+    },
+    {
+      "title": "Arcade Classics",
+      "system": "genesis",
+      "bucket": "genesis/Arcade Classics (USA, Europe).zip"
+    },
+    {
+      "title": "Retro Atari Classics",
+      "system": "nds",
+      "bucket": "nds/Retro Atari Classics (USA, Europe).zip"
+    },
+    {
+      "title": "Atari Greatest Hits - Volume 1",
+      "system": "nds",
+      "bucket": "nds/Atari Greatest Hits - Volume 1 (USA).zip"
+    },
+    {
+      "title": "Atari Greatest Hits - Volume 2",
+      "system": "nds",
+      "bucket": "nds/Atari Greatest Hits - Volume 2 (USA).zip"
+    },
+    {
+      "title": "Namco Museum DS",
+      "system": "nds",
+      "bucket": "nds/Namco Museum DS (USA).zip"
+    },
+    {
+      "title": "Konami Classics Series - Arcade Hits",
+      "system": "nds",
+      "bucket": "nds/Konami Classics Series - Arcade Hits (USA) (En,Ja).zip"
+    },
+    {
+      "title": "Intellivision Lives!",
+      "system": "nds",
+      "bucket": "nds/Intellivision Lives! (USA).zip"
+    },
+    {
+      "title": "Game & Watch Collection",
+      "system": "nds",
+      "bucket": "nds/Game & Watch Collection (USA, Europe) (Club Nintendo).zip"
+    },
+    {
+      "title": "Game & Watch Collection 2",
+      "system": "nds",
+      "bucket": "nds/Game & Watch Collection 2 (USA) (Club Nintendo).zip"
+    },
+    {
+      "title": "Retro Game Challenge",
+      "system": "nds",
+      "bucket": "nds/Retro Game Challenge (USA).zip"
+    },
+    {
+      "title": "Sega 3D Classics Collection",
+      "system": "3ds",
+      "bucket": "3ds/Sega 3D Classics Collection (USA).zip"
+    },
+    {
+      "title": "Pac-Man & Galaga Dimensions",
+      "system": "3ds",
+      "bucket": "3ds/Pac-Man & Galaga Dimensions (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Atari Classics Evolved",
+      "system": "psp",
+      "bucket": "psp/Atari Classics Evolved (USA).chd"
+    },
+    {
+      "title": "Namco Museum Battle Collection",
+      "system": "psp",
+      "bucket": "psp/Namco Museum Battle Collection (USA).chd"
+    },
+    {
+      "title": "Midway Arcade Treasures - Extended Play",
+      "system": "psp",
+      "bucket": "psp/Midway Arcade Treasures - Extended Play (USA).chd"
+    },
+    {
+      "title": "Capcom Classics Collection Remixed",
+      "system": "psp",
+      "bucket": "psp/Capcom Classics Collection Remixed (USA).chd"
+    },
+    {
+      "title": "Capcom Classics Collection Reloaded",
+      "system": "psp",
+      "bucket": "psp/Capcom Classics Collection Reloaded (USA).chd"
+    },
+    {
+      "title": "Taito Legends Power-Up",
+      "system": "psp",
+      "bucket": "psp/Taito Legends Power-Up (USA).chd"
+    },
+    {
+      "title": "SNK Arcade Classics Vol. 1",
+      "system": "psp",
+      "bucket": "psp/SNK Arcade Classics Vol. 1 (USA).chd"
+    },
+    {
+      "title": "Activision Hits Remixed",
+      "system": "psp",
+      "bucket": "psp/Activision Hits Remixed (USA).chd"
+    },
+    {
+      "title": "EA Replay",
+      "system": "psp",
+      "bucket": "psp/EA Replay (USA).chd"
+    },
+    {
+      "title": "Sega Genesis Collection",
+      "system": "psp",
+      "bucket": "psp/Sega Genesis Collection (USA).chd"
+    },
+    {
+      "title": "Taito Legends",
+      "system": "ps2",
+      "bucket": "ps2/Taito Legends (USA).chd"
+    },
+    {
+      "title": "Taito Legends 2",
+      "system": "ps2",
+      "bucket": "ps2/Taito Legends 2 (USA).chd"
+    },
+    {
+      "title": "Capcom Classics Collection Vol. 1",
+      "system": "ps2",
+      "bucket": "ps2/Capcom Classics Collection Vol. 1 (USA).chd"
+    },
+    {
+      "title": "Capcom Classics Collection Vol. 2",
+      "system": "ps2",
+      "bucket": "ps2/Capcom Classics Collection Vol. 2 (USA).chd"
+    },
+    {
+      "title": "Sonic Mega Collection Plus",
+      "system": "ps2",
+      "bucket": "ps2/Sonic Mega Collection Plus (USA).chd"
     }
   ]
 }

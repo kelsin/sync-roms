@@ -2,7 +2,7 @@
 import os
 from collections import defaultdict, namedtuple
 
-from . import commands, inventory, scrape_plan, store
+from . import collections as colls, commands, inventory, scrape_plan, store
 
 Usage = namedtuple("Usage", "bytes count partial")
 
@@ -37,7 +37,7 @@ def game_costs(card, system, keys):
     return {k: sizes[k] + extra[k[len(bucket) + 1:]] for k in sized}, partial
 
 
-def _system_usage(card, system, sets):
+def _system_usage(card, system, sets, collections_by_id):
     bucket = system["bucket"]
     games = store.merge_lists([{"bucket": bucket}], [card.get("games") or {}], sets)[0]
     if games["full_system"]:
@@ -48,10 +48,16 @@ def _system_usage(card, system, sets):
     else:
         skip = (card.get("excluded") or {}).get(bucket, ())
         keys = [g["bucket"] for g in games["games"] if g.get("bucket") and g["bucket"] not in skip]
+        keys += [g["bucket"] for g in store.card_locked_games(card, collections_by_id).get(bucket, ())
+                 if g["bucket"] not in keys]  # collection games ignore exclusions
     if not keys:
         return Usage(0, 0, False)  # nothing picked: nothing to size
     costs, partial = game_costs(card, system, keys)
     return Usage(sum(costs.values()), len(keys), partial)  # count includes picked games not in storage
+
+
+def _collections_by_id():
+    return {c["id"]: c for c in colls.load_collections()}
 
 
 def system_usage(card, system):
@@ -59,13 +65,13 @@ def system_usage(card, system):
     (a full system ignores them, as sync does). Sizes not cached yet count as 0 and make the usage partial; a picked
     game not in storage (absent from a cached listing) counts as 0 and is not partial; a system with nothing picked is
     0 and not partial."""
-    return _system_usage(card, system, store.load_sets())
+    return _system_usage(card, system, store.load_sets(), _collections_by_id())
 
 
 def system_usages(card, systems):
     """{system bucket: Usage} for each of the systems (the sets are read once)."""
-    sets = store.load_sets()
-    return {s["bucket"]: _system_usage(card, s, sets) for s in systems}
+    sets, by_id = store.load_sets(), _collections_by_id()
+    return {s["bucket"]: _system_usage(card, s, sets, by_id) for s in systems}
 
 
 def bios_usage(systems):

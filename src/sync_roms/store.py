@@ -214,6 +214,54 @@ def card_excluded(card, cards=None):
     return excluded if isinstance(excluded, dict) else {}
 
 
+def _game_keys(game):
+    """A locked game's (system, [bucket key, then its files]), or None when it isn't a usable game entry."""
+    if not isinstance(game, dict):
+        return None
+    system, bucket, files = game.get("system"), game.get("bucket"), game.get("files")
+    if not (isinstance(system, str) and system and isinstance(bucket, str) and bucket):
+        return None
+    return system, [bucket] + [k for k in (files if isinstance(files, list) else ()) if isinstance(k, str) and k]
+
+
+def card_locked_games(entry, collections_by_id):
+    """The games a card's collections add, then its current surprises (when Surprise is on),
+    {system bucket: [{"title", "bucket", "from"}]}: one entry per key of a game (its bucket key, then its files),
+    the first occurrence winning within a system. Ids that don't load and malformed games are skipped."""
+    from . import surprise  # surprise imports store
+    ids = entry.get("collections") if isinstance(entry, dict) else None
+    locked = {}
+
+    def add(game, label):
+        parsed = _game_keys(game)
+        if parsed:
+            seen = locked.setdefault(parsed[0], [])
+            for key in parsed[1]:
+                if all(g["bucket"] != key for g in seen):
+                    seen.append({"title": game.get("title"), "bucket": key, "from": label})
+
+    for cid in ids if isinstance(ids, list) else ():
+        coll = collections_by_id.get(cid)
+        for game in (coll or {}).get("games", []):
+            add(game, f"💖 {coll['name']}")
+    if isinstance(entry, dict) and surprise.enabled(entry):
+        picks = entry.get("surprises")
+        for game in picks if isinstance(picks, list) else ():
+            add(game, surprise.LABEL)
+    return {system: games for system, games in locked.items() if games}
+
+
+def merge_locked(systems, locked):
+    """Append locked games ({system bucket: [game]}) to the systems that list them, skipping keys already listed.
+    Unknown systems are skipped; a full system's flag is left alone."""
+    for s in systems:
+        have = {g.get("bucket") for g in s["games"]}
+        for g in locked.get(s["bucket"], ()):
+            if g["bucket"] not in have:
+                s["games"].append(dict(g))
+                have.add(g["bucket"])
+
+
 def all_card_names(cards=None):
     return sorted(load_cards() if cards is None else cards)
 
@@ -315,7 +363,8 @@ def load_catalog():
 
 def load_manifest(card_names=()):
     """Systems, devices and layouts from the repo, joined with the games of the named cards (their picks, set
-    references and full systems) and the device-system overlay. No cards means no games."""
+    references and full systems, plus the games of their collections and, with Surprise on, their current
+    surprises) and the device-system overlay. No cards means no games."""
     sets = load_sets()
     cards = load_cards()
     if prune_unknown_sets(sets, cards):
@@ -328,6 +377,10 @@ def load_manifest(card_names=()):
         for s in manifest["systems"]:
             skip = excluded.get(s["bucket"], ())
             s["games"] = [g for g in s["games"] if g.get("bucket") not in skip]
+    from . import collections
+    by_id = {c["id"]: c for c in collections.load_collections()}
+    for n in card_names:
+        merge_locked(manifest["systems"], card_locked_games(cards.get(n) or {}, by_id))
     apply_device_overlay(manifest["devices"], manifest["systems"], load_overlay())
     return manifest
 
@@ -425,11 +478,6 @@ def save_card(name, device, layout):
     update_card(name, device=device["id"] if device else "full", layout=layout)
 
 
-def personal_sets_dir():
-    """Where the user's own set files live: <data dir>/sets/."""
-    return os.path.join(data_dir(), "sets")
-
-
 PRETTY = {"indent": 2, "ensure_ascii": False, "trailing_newline": True}  # write_json format of every hand-readable file
 
 
@@ -464,56 +512,17 @@ def repo_set_files():
 
 
 def load_sets():
-    """Game sets from the repo's data/sets/*.json and the user's ~/.sync-roms/sets/*.json, sorted by name.
+    """Game sets from the repo's data/sets/*.json, sorted by name.
 
     Each file is {"name", "description" (optional), "games": [{"title", "system", "bucket", "files" (optional)}]}.
     "category" (optional) groups games in the set editor.
     "files" are extra bucket keys (e.g. the discs of a multi-disc game) toggled together with "bucket".
-    A personal file with a repo set's id, or that isn't valid JSON, is skipped with a warning.
     """
-    sets = repo_set_files()
-    taken = {x["id"] for x in sets}
-    mine = personal_sets_dir()
-    for name in sorted(os.listdir(mine)) if os.path.isdir(mine) else []:
-        if not name.endswith(".json"):
-            continue
-        if name[:-5] in taken:
-            ui.warn(f"sets/{name}: a built-in set already has the id {name[:-5]!r}, skipped")
-            continue
-        try:
-            sets.append(read_set_file(os.path.join(mine, name), name[:-5]))
-        except (OSError, ValueError, AttributeError) as e:
-            ui.warn(f"sets/{name}: couldn't be read ({e}), skipped")
-    return sorted(sets, key=lambda x: x["name"].lower())
+    return sorted(repo_set_files(), key=lambda x: x["name"].lower())
 
 
 def set_slug(name):
     return re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")
-
-
-def personal_set_problem(name):
-    """Why name can't be a new personal set's name, or None if it can (its id must be new, also among repo sets)."""
-    set_id = set_slug(name)
-    if not set_id:
-        return "A set needs a name with letters or digits."
-    if any(x["id"] == set_id for x in load_sets()):
-        return f"There is already a set with the id {set_id}."
-    return None
-
-
-def save_personal_set(name, systems):
-    """Write ~/.sync-roms/sets/<id>.json from the games of the given systems (sorted); returns the set id."""
-    problem = personal_set_problem(name)
-    if problem:
-        raise ValueError(problem)
-    games = [{"title": g.get("title") or key_title(g["bucket"]), "system": s["bucket"],
-              **{k: v for k, v in g.items() if k in ("bucket", "note")}}
-             for s in sorted(systems, key=lambda x: x["bucket"]) for g in sort_games(s["games"]) if g.get("bucket")]
-    set_id = set_slug(name)
-    os.makedirs(personal_sets_dir(), exist_ok=True)
-    write_json(os.path.join(personal_sets_dir(), set_id + ".json"), set_data({"name": name.strip(), "games": games}),
-               **PRETTY)
-    return set_id
 
 
 def sort_games(games):

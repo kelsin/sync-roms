@@ -7,12 +7,11 @@ import subprocess
 import xml.etree.ElementTree as ET
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
-from xml.sax.saxutils import escape, unescape
 
 from . import downloads, inventory, runtime, s3, store, ui
 
 
-# --- Scraped data (media, metadata, themes, collections, settings) --------------------------------
+# --- Scraped data (media, metadata) --------------------------------
 # Lives in storage under scrapes/. Metadata is neutral JSON with only the fields that are safe
 # to share; media keeps ES-DE's media type folder names.
 SCRAPES = "scrapes"
@@ -31,15 +30,6 @@ SLOT_LABEL_MAX = {"gba": (1280, 661), "gb": (1024, 901), "gbc": (1024, 901)}
 BUCKET_MEDIA = MEDIA_TYPES | {ONION_TYPE, SLOT_TYPE}
 TEXT_FIELDS = ("name", "desc", "developer", "publisher", "genre", "players")
 UNKNOWN_FIELDS = {"developer", "publisher", "genre", "players"}  # ES-DE writes "unknown" for these
-SETTING_PREFIXES = ("Scrape", "Miximage", "Theme")  # Scrape covers Scrape* and Scraper*
-SETTING_EXCLUDE = {"ScraperUsernameScreenScraper", "ScraperPasswordScreenScraper",
-                   "ScraperUseAccountScreenScraper", "ThemeAspectRatio"}
-SETTING_UI = {"DefaultSortOrder", "FavoritesFirst", "FavoritesStar", "FavoritesAddButton",
-              "FavStarCustom", "FavFirstCustom", "FoldersOnTop", "GamelistFilters", "ShowHiddenFiles",
-              "ShowHiddenGames", "SaveGamelistsMode", "AlternativeEmulatorPerGame", "StartupView",
-              "QuickSystemSelect", "RandomEntryButton", "ListScrollOverlay", "MAMENameStripExtraInfo",
-              "CollectionCustomGrouping", "SystemsSorting"}
-SETTING_LINE = re.compile(r'<(bool|int|string)\s+name="([^"]+)"\s+value="([^"]*)"\s*/>')
 
 
 def dump_json(data):
@@ -85,39 +75,6 @@ def merge_metadata(remote, local):
     for rom, fields in local.items():
         merged[rom] = {**merged.get(rom, {}), **fields}
     return merged
-
-
-def merge_lines(remote, local):
-    """Union of the lines of two text files: remote lines first, then new local ones."""
-    seen, out = set(), []
-    for line in (remote + "\n" + local).splitlines():
-        line = line.strip()
-        if line and line not in seen:
-            seen.add(line)
-            out.append(line)
-    return "\n".join(out) + "\n" if out else ""
-
-
-def share_setting(name):
-    if not re.fullmatch(r"[A-Za-z0-9_]+", name):
-        return False
-    if re.search(r"password|username|passkey", name, re.I) or name in SETTING_EXCLUDE:
-        return False
-    return name.startswith(SETTING_PREFIXES) or name in SETTING_UI
-
-
-def safe_settings(text):
-    """{name: typed value} for the ES-DE settings that are safe to share, from es_settings.xml."""
-    out = {}
-    for kind, name, value in SETTING_LINE.findall(text):
-        if not share_setting(name):
-            continue
-        value = unescape(value, {"&quot;": '"', "&apos;": "'"})
-        try:
-            out[name] = (value == "true") if kind == "bool" else int(value) if kind == "int" else value
-        except ValueError:
-            pass
-    return out
 
 
 def walk_files(root, skip_top=()):
@@ -365,79 +322,13 @@ def update_gamelist(path, entries):
     return True
 
 
-def setting_line(name, value):
-    if isinstance(value, bool):
-        return f'<bool name="{name}" value="{str(value).lower()}" />'
-    if isinstance(value, int):
-        return f'<int name="{name}" value="{value}" />'
-    return f'<string name="{name}" value="{escape(str(value), {chr(34): "&quot;"})}" />'
-
-
-def update_settings(text, settings):
-    """es_settings.xml text with the given typed settings set: lines replaced in place, missing ones added."""
-    lines = text.splitlines() or ['<?xml version="1.0"?>']
-    todo = {k: v for k, v in settings.items() if share_setting(k)}
-    for i, line in enumerate(lines):
-        m = SETTING_LINE.search(line)
-        if m and m.group(2) in todo:
-            lines[i] = setting_line(m.group(2), todo.pop(m.group(2)))
-    lines += [setting_line(k, v) for k, v in todo.items()]
-    return "\n".join(lines) + "\n"
-
-
-def plan_esde_extras(es_dir, listing, texts):
-    """Themes, collections and settings from scrapes/esde/ that the card is missing or has older.
-
-    listing: {key: size} under scrapes/esde/; texts: {key: text} of its collections and settings.json.
-    Returns (download jobs, [(path, text)] to write).
-    """
-    prefix = f"{SCRAPES}/esde/"
-    jobs = []
-    for key, size in sorted(listing.items()):
-        if key.startswith(prefix + "themes/") and not key.endswith("/"):
-            try:
-                jobs.append((key, s3.safe_join(es_dir, "themes/" + key[len(prefix + "themes/"):]), size))
-            except ValueError as e:
-                print(ui.yellow(f"  ⚠️  skipping {e}"))
-    writes = []
-    for key, text in sorted(texts.items()):
-        if key.startswith(prefix + "collections/") and key.endswith(".cfg"):
-            try:
-                path = s3.safe_join(es_dir, "collections/" + key[len(prefix + "collections/"):])
-            except ValueError as e:
-                print(ui.yellow(f"  ⚠️  skipping {e}"))
-                continue
-        elif key == prefix + "settings.json":
-            path = os.path.join(es_dir, "settings", "es_settings.xml")
-        else:
-            continue
-        old = ""
-        if os.path.exists(path):
-            with open(path, encoding="utf-8") as f:
-                old = f.read()
-        if key.endswith(".cfg"):
-            new = merge_lines(old, text)
-            changed = new.splitlines() != old.splitlines()
-        else:
-            try:
-                new = update_settings(old, json.loads(text))
-            except ValueError:
-                continue
-            changed = new != old
-        if changed:
-            writes.append((path, new))
-    return downloads.plan_downloads(downloads.with_sizes(jobs)), writes
-
-
-def load_scrape_data(systems, esde):
-    """The storage's scrape data for the chosen systems: {storage folder: (listing, metadata)}, plus the
-    shared scrapes/esde/ listing and texts when the layout is esde."""
+def load_scrape_data(systems):
+    """The storage's scrape data for the chosen systems: {storage folder: (listing, metadata)}."""
     with ThreadPoolExecutor(runtime.WORKERS) as ex:
         listings = list(ex.map(lambda s: inventory.files(f"{SCRAPES}/{s['bucket']}/", sizes=False), systems))
-    extra = inventory.files(f"{SCRAPES}/esde/", sizes=False) if esde else {}
     meta_keys = [f"{SCRAPES}/{s['bucket']}/metadata.json" for s, l in zip(systems, listings)
                  if f"{SCRAPES}/{s['bucket']}/metadata.json" in l]
-    texts = s3.fetch_texts(meta_keys + [k for k in extra if k.endswith(".cfg") or k.endswith("/settings.json")])
+    texts = s3.fetch_texts(meta_keys)
     data = {}
     for s, listing in zip(systems, listings):
         key = f"{SCRAPES}/{s['bucket']}/metadata.json"
@@ -446,7 +337,7 @@ def load_scrape_data(systems, esde):
         except ValueError:
             meta = {}
         data[s["bucket"]] = (listing, meta)
-    return data, extra, {k: v for k, v in texts.items() if k.startswith(f"{SCRAPES}/esde/")}
+    return data
 
 
 def read_text(path):
@@ -471,9 +362,9 @@ def media_root_of(layout_name, system, base, es_dir):
     return os.path.join(es_dir, "downloaded_media", esde_name(system))
 
 
-def build_scrape_plan(layout_name, systems, data, extra, extra_texts, rom_rels, dest_of, es_dir, present, base):
-    """Everything a sync installs from scrapes/: media jobs, gamelist entries per file, text files, ES-DE extras."""
-    plan = {"jobs": [], "gamelists": defaultdict(dict), "extras": [], "writes": []}
+def build_scrape_plan(layout_name, systems, data, rom_rels, dest_of, es_dir, present, base):
+    """Everything a sync installs from scrapes/: media jobs, gamelist entries per file, text files."""
+    plan = {"jobs": [], "gamelists": defaultdict(dict), "writes": []}
     clones = store.repo_json("clones")
     for s in systems:
         listing, meta = data[s["bucket"]]
@@ -492,21 +383,19 @@ def build_scrape_plan(layout_name, systems, data, extra, extra_texts, rom_rels, 
         if entries:
             gl = (os.path.join(es_dir, "gamelists", esde_name(s)) if layout_name == "esde" else rom_dir)
             plan["gamelists"][os.path.join(gl, GAMELIST_FILES[layout_name])].update(entries)
-    if layout_name == "esde":
-        plan["extras"], plan["writes"] = plan_esde_extras(es_dir, extra, extra_texts)
     return plan
 
 
 def describe_scrape_plan(plan):
-    jobs = plan["jobs"] + plan["extras"]
+    jobs = plan["jobs"]
     print(f"🖼️  Scraped data: {ui.bold(str(len(jobs)))} file(s) to download "
           f"({ui.human_size(sum(j[2] or 0 for j in jobs))}), {len(plan['gamelists'])} gamelist file(s) to update"
-          + (f", {len(plan['writes'])} text/collection/settings file(s)" if plan["writes"] else ""))
+          + (f", {len(plan['writes'])} text file(s)" if plan["writes"] else ""))
 
 
 def apply_scrape_plan(plan, base):
-    """Download the media, then write the gamelists, collections and settings. Returns failures."""
-    failed = downloads.run_downloads(plan["jobs"] + plan["extras"], "Scraped data", "🖼️", base)
+    """Download the media, then write the gamelists and text files. Returns failures."""
+    failed = downloads.run_downloads(plan["jobs"], "Scraped data", "🖼️", base)
     for path, entries in plan["gamelists"].items():
         try:
             update_gamelist(path, entries)

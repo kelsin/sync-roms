@@ -8,7 +8,7 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
-from sync_roms import scrape_files, scrape_plan, store  # noqa: E402
+from sync_roms import mirroring, scrape_files, scrape_plan, store  # noqa: E402
 
 GBA = {"name": "Game Boy Advance", "bucket": "gba",
        "folders": {"esde": "gba", "muos": "gba", "slot": "GBA"}, "muos_catalogue": "Nintendo Game Boy Advance"}
@@ -56,14 +56,14 @@ class MuosPlanTest(unittest.TestCase):
     def test_build_plan_uses_the_catalogue_folder_and_skips_unchanged_text(self):
         with tempfile.TemporaryDirectory() as base:
             data = {"gba": (LISTING, META)}
-            args = ("muos", [GBA], data, {}, {}, {"gba": ["A.zip"]}, lambda s: "/x", os.path.join(base, "ES-DE"),
+            args = ("muos", [GBA], data, {"gba": ["A.zip"]}, lambda s: "/x", os.path.join(base, "ES-DE"),
                     lambda p: True, base)
             plan = scrape_plan.build_scrape_plan(*args)
             catalogue = os.path.join(base, "MUOS", "info", "catalogue", "Nintendo Game Boy Advance")
             self.assertEqual(sorted(j[1] for j in plan["jobs"]),
                              sorted([os.path.join(catalogue, "box", "A.png"), os.path.join(catalogue, "preview", "A.jpg")]))
             self.assertEqual(len(plan["writes"]), 1)
-            scrape_plan.apply_scrape_plan({"jobs": [], "extras": [], "gamelists": {}, "writes": plan["writes"]}, base)
+            scrape_plan.apply_scrape_plan({"jobs": [], "gamelists": {}, "writes": plan["writes"]}, base)
             self.assertEqual(scrape_plan.build_scrape_plan(*args)["writes"], [])
 
 
@@ -71,13 +71,13 @@ class EmudeckPlanTest(unittest.TestCase):
     def test_media_goes_in_emulation_tools_with_no_gamelist(self):
         with tempfile.TemporaryDirectory() as base:
             data = {"gba": (LISTING, META)}
-            plan = scrape_plan.build_scrape_plan("emudeck", [GBA], data, {}, {}, {"gba": ["A.zip"]}, lambda s: "/x",
+            plan = scrape_plan.build_scrape_plan("emudeck", [GBA], data, {"gba": ["A.zip"]}, lambda s: "/x",
                                                  os.path.join(base, "ES-DE"), lambda p: True, base)
             media = os.path.join(base, "Emulation", "tools", "downloaded_media", "gba")
             self.assertEqual(sorted(j[1] for j in plan["jobs"]),
                              sorted([os.path.join(media, "covers", "A.png"), os.path.join(media, "screenshots", "A.jpg"),
                                      os.path.join(media, "3dboxes", "A.png")]))
-        self.assertEqual((plan["gamelists"], plan["extras"], plan["writes"]), ({}, [], []))
+        self.assertEqual((plan["gamelists"], plan["writes"]), ({}, []))
 
     def test_stale_media_is_found_in_the_emudeck_media_folder(self):
         with tempfile.TemporaryDirectory() as base:
@@ -119,7 +119,7 @@ class SlotPlanTest(unittest.TestCase):
             card = os.path.join(base, "Games", "GBA")
             data = {"gba": (LISTING, META)}
             asked = []
-            plan = scrape_plan.build_scrape_plan("slot", [GBA], data, {}, {}, {"gba": ["hacks/B.zip"]}, lambda s: card,
+            plan = scrape_plan.build_scrape_plan("slot", [GBA], data, {"gba": ["hacks/B.zip"]}, lambda s: card,
                                          os.path.join(base, "ES-DE"), lambda p: asked.append(p) or True, base)
         self.assertEqual(asked, [os.path.join(card, "B.zip")])
         self.assertEqual([j[1] for j in plan["jobs"]], [os.path.join(base, "Labels", "GBA", "B.png")])
@@ -322,7 +322,7 @@ class SharedFolderTest(unittest.TestCase):
                 "n3ds": ({"scrapes/n3ds/covers/B.png": 5}, {"B.3ds": {"name": "B"}})}
         with tempfile.TemporaryDirectory() as base:
             es = os.path.join(base, "ES-DE")
-            plan = scrape_plan.build_scrape_plan("esde", [system_of("3ds"), system_of("n3ds")], data, {}, {},
+            plan = scrape_plan.build_scrape_plan("esde", [system_of("3ds"), system_of("n3ds")], data,
                                                  {"3ds": ["A.3ds"], "n3ds": ["B.3ds"]}, lambda s: "/x", es,
                                                  lambda p: True, base)
             media = os.path.join(es, "downloaded_media", "n3ds", "covers")
@@ -448,19 +448,63 @@ class DerivedUploadTest(unittest.TestCase):
         self.assertTrue(all(src.endswith(os.path.join("covers", "A.png")) for _, src, _, _ in plan["derived"]))
 
 
-class UnsafeKeyTest(unittest.TestCase):
-    def test_theme_key_with_dotdot_is_skipped(self):
-        listing = {"scrapes/esde/themes/ok/a.xml": 1, "scrapes/esde/themes/../../evil": 2}
-        with tempfile.TemporaryDirectory() as root, contextlib.redirect_stdout(io.StringIO()):
-            jobs, _ = scrape_plan.plan_esde_extras(root, listing, {})
-        self.assertEqual([k for k, _, _ in jobs], ["scrapes/esde/themes/ok/a.xml"])
+class EsdeExtrasUploadTest(unittest.TestCase):
+    def test_themes_collections_and_settings_are_not_uploaded(self):
+        with tempfile.TemporaryDirectory() as es:
+            touch(os.path.join(es, "themes", "my-theme", "theme.xml"))
+            touch(os.path.join(es, "downloaded_media", "snes", "covers", "A.png"))
+            os.makedirs(os.path.join(es, "collections"))
+            with open(os.path.join(es, "collections", "custom-Fav.cfg"), "w") as f:
+                f.write("%ROMPATH%/snes/A.sfc\n")
+            os.makedirs(os.path.join(es, "settings"))
+            with open(os.path.join(es, "settings", "es_settings.xml"), "w") as f:
+                f.write('<?xml version="1.0"?>\n<bool name="ScraperRegionFallback" value="true" />\n')
+            plan = scrape_files.plan_upload(es, {"snes": {"A.sfc"}}, {}, {})
+        self.assertEqual([k for k, *_ in plan["files"]], ["scrapes/snes/covers/A.png"])
+        self.assertEqual(plan["texts"], [])
+        self.assertFalse(any("/esde/" in k for k, *_ in plan["files"] + plan["texts"] + plan["derived"]))
+
+    def test_text_keys_are_metadata_only(self):
+        existing = {"scrapes/gba/metadata.json": 1, "scrapes/esde/collections/custom-Fav.cfg": 1,
+                    "scrapes/esde/settings.json": 1, "scrapes/gba/covers/A.png": 1}
+        self.assertEqual(scrape_files.text_keys(existing), ["scrapes/gba/metadata.json"])
+
+    def test_clean_leaves_old_esde_objects_alone(self):
+        existing = {"scrapes/esde/themes/t/theme.xml": 1, "scrapes/esde/settings.json": 1,
+                    "scrapes/esde/collections/custom-Fav.cfg": 1}
+        self.assertEqual(scrape_files.plan_clean(existing, {}, {})[:2], ([], []))
 
 
-class ShareSettingTest(unittest.TestCase):
-    def test_names_must_be_plain_identifiers(self):
-        self.assertTrue(scrape_plan.share_setting("ScraperFoo_1"))
-        self.assertFalse(scrape_plan.share_setting('Scrape" evil="1'))
-        self.assertFalse(scrape_plan.share_setting("Scrape Foo"))
+class EsdeExtrasSyncTest(unittest.TestCase):
+    def test_sync_plan_has_no_esde_extras(self):
+        with tempfile.TemporaryDirectory() as base:
+            es = os.path.join(base, "ES-DE")
+            plan = scrape_plan.build_scrape_plan("esde", [GBA], {"gba": (LISTING, META)}, {"gba": ["A.zip"]},
+                                                 lambda s: os.path.join(base, "ROMs", "gba"), es, lambda p: True, base)
+        self.assertEqual(set(plan), {"jobs", "gamelists", "writes"})
+        self.assertFalse(any(k.startswith("scrapes/esde/") for k, *_ in plan["jobs"]))
+        self.assertFalse(any(os.path.relpath(p, es).split(os.sep)[0] in ("themes", "collections", "settings")
+                             for p, _ in plan["writes"]))
+
+    def test_load_scrape_data_never_lists_scrapes_esde(self):
+        with mock.patch.object(scrape_plan.s3, "list_sizes", return_value={}) as ls, \
+                mock.patch.object(scrape_plan.s3, "fetch_texts", return_value={}) as ft:
+            data = scrape_plan.load_scrape_data([GBA])
+        self.assertEqual(data, {"gba": ({}, {})})
+        self.assertEqual([c.args[0] for c in ls.call_args_list], ["scrapes/gba/"])
+        ft.assert_called_once_with([])
+
+    def test_mirror_wanted_skips_scrapes_esde_but_keeps_onion_themes(self):
+        listings = {"BIOS/": {"BIOS/gba_bios.bin": 1}, "os/onion/Themes/": {"os/onion/Themes/t/a.png": 2},
+                    "scrapes/esde/": {"scrapes/esde/themes/t/theme.xml": 3},
+                    "gba/": {"gba/A.zip": 4}, "scrapes/gba/": {"scrapes/gba/covers/A.png": 5}}
+        manifest = {"systems": [{"bucket": "gba", "games": [{"bucket": "gba/A.zip"}], "bios": {"files": ["gba_bios.bin"]}}]}
+        with mock.patch.object(mirroring.s3, "read_root", return_value=None), \
+                mock.patch.object(mirroring.s3, "list_sizes", side_effect=lambda p, sizes=True: listings.get(p, {})) as ls:
+            wanted = mirroring.mirror_wanted(manifest)
+        self.assertEqual(wanted, {"gba/A.zip": 4, "scrapes/gba/covers/A.png": 5, "BIOS/gba_bios.bin": 1,
+                                  "os/onion/Themes/t/a.png": 2})
+        self.assertNotIn("scrapes/esde/", [c.args[0] for c in ls.call_args_list])
 
 
 if __name__ == "__main__":

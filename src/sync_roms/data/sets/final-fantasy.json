@@ -8,6 +8,16 @@
       "bucket": "nes/Final Fantasy (USA).zip"
     },
     {
+      "title": "Final Fantasy II",
+      "system": "nes",
+      "bucket": "nes/Final Fantasy II (Japan).zip"
+    },
+    {
+      "title": "Final Fantasy III",
+      "system": "nes",
+      "bucket": "nes/Final Fantasy III (Japan).zip"
+    },
+    {
       "title": "Final Fantasy II (Rev 1)",
       "system": "snes",
       "bucket": "snes/Final Fantasy II (USA) (Rev 1).zip"
@@ -16,6 +26,11 @@
       "title": "Final Fantasy III (Rev 1)",
       "system": "snes",
       "bucket": "snes/Final Fantasy III (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Final Fantasy V",
+      "system": "snes",
+      "bucket": "snes/Final Fantasy V (Japan).zip"
     },
     {
       "title": "Final Fantasy - Mystic Quest (Rev 1)",
@@ -41,6 +56,21 @@
       "title": "Final Fantasy Adventure",
       "system": "gb",
       "bucket": "gb/Final Fantasy Adventure (USA).zip"
+    },
+    {
+      "title": "Final Fantasy",
+      "system": "wonderswancolor",
+      "bucket": "wonderswancolor/Final Fantasy (Japan).zip"
+    },
+    {
+      "title": "Final Fantasy II",
+      "system": "wonderswancolor",
+      "bucket": "wonderswancolor/Final Fantasy II (Japan).zip"
+    },
+    {
+      "title": "Final Fantasy IV",
+      "system": "wonderswancolor",
+      "bucket": "wonderswancolor/Final Fantasy IV (Japan).zip"
     },
     {
       "title": "Final Fantasy Origins (Rev 1)",
@@ -115,6 +145,11 @@
       "bucket": "gba/Final Fantasy Tactics Advance (USA).zip"
     },
     {
+      "title": "Chocobo Land - A Game of Dice",
+      "system": "gba",
+      "bucket": "gba/Chocobo Land - A Game of Dice (Japan).zip"
+    },
+    {
       "title": "Final Fantasy X",
       "system": "ps2",
       "bucket": "ps2/Final Fantasy X.chd"
@@ -170,6 +205,31 @@
       "bucket": "nds/Final Fantasy Fables - Chocobo Tales (USA).zip"
     },
     {
+      "title": "Chocobo to Mahou no Ehon - Majo to Shoujo to 5-nin no Yuusha",
+      "system": "nds",
+      "bucket": "nds/Chocobo to Mahou no Ehon - Majo to Shoujo to 5-nin no Yuusha (Japan).zip"
+    },
+    {
+      "title": "Cid to Chocobo no Fushigi na Dungeon - Toki Wasure no Meikyuu DS+",
+      "system": "nds",
+      "bucket": "nds/Cid to Chocobo no Fushigi na Dungeon - Toki Wasure no Meikyuu DS+ (Japan).zip"
+    },
+    {
+      "title": "Theatrhythm Final Fantasy",
+      "system": "3ds",
+      "bucket": "3ds/Theatrhythm Final Fantasy (USA).zip"
+    },
+    {
+      "title": "Theatrhythm Final Fantasy - Curtain Call",
+      "system": "3ds",
+      "bucket": "3ds/Theatrhythm Final Fantasy - Curtain Call (USA).zip"
+    },
+    {
+      "title": "Final Fantasy Explorers",
+      "system": "3ds",
+      "bucket": "3ds/Final Fantasy Explorers (USA).zip"
+    },
+    {
       "title": "Final Fantasy - Crystal Chronicles",
       "system": "gc",
       "bucket": "gc/Final Fantasy - Crystal Chronicles (USA).rvz"
@@ -215,6 +275,11 @@
       "bucket": "psp/Final Fantasy Type-0 (English Patched v2).chd"
     },
     {
+      "title": "Dragon Quest & Final Fantasy in Itadaki Street Portable (English Prerelease 3)",
+      "system": "psp",
+      "bucket": "psp/Dragon Quest & Final Fantasy in Itadaki Street Portable (Japan) [T-En by MortoQueiba & Choppasmith Prerelease 3].chd"
+    },
+    {
       "title": "Final Fantasy Tactics",
       "system": "psx",
       "bucket": "psx/Final Fantasy Tactics (USA).chd"
@@ -233,6 +298,16 @@
       "title": "Chocobo's Dungeon 2",
       "system": "psx",
       "bucket": "psx/Chocobo's Dungeon 2 (USA).chd"
+    },
+    {
+      "title": "Chocobo no Fushigi na Dungeon for WonderSwan (Rev 3)",
+      "system": "wonderswan",
+      "bucket": "wonderswan/Chocobo no Fushigi na Dungeon for WonderSwan (Japan) (Rev 3).zip"
+    },
+    {
+      "title": "Hataraku Chocobo",
+      "system": "wonderswancolor",
+      "bucket": "wonderswancolor/Hataraku Chocobo (Japan).zip"
     },
     {
       "title": "Final Fantasy Chronicles - Chrono Trigger",

@@ -217,6 +217,621 @@
       "bucket": "psx/Street Racer (USA).chd"
     },
     {
+      "title": "The Need for Speed",
+      "system": "psx",
+      "bucket": "psx/Road & Track Presents - The Need for Speed (USA).chd"
+    },
+    {
+      "title": "Road Rash",
+      "system": "psx",
+      "bucket": "psx/Road Rash (USA).chd"
+    },
+    {
+      "title": "Road Rash 3D",
+      "system": "psx",
+      "bucket": "psx/Road Rash 3D (USA).chd"
+    },
+    {
+      "title": "Road Rash: Jailbreak",
+      "system": "psx",
+      "bucket": "psx/Road Rash - Jailbreak (USA).chd"
+    },
+    {
+      "title": "Test Drive 4",
+      "system": "psx",
+      "bucket": "psx/Test Drive 4 (USA).chd"
+    },
+    {
+      "title": "Test Drive 5",
+      "system": "psx",
+      "bucket": "psx/Test Drive 5 (USA).chd"
+    },
+    {
+      "title": "Test Drive 6",
+      "system": "psx",
+      "bucket": "psx/Test Drive 6 (USA).chd"
+    },
+    {
+      "title": "Test Drive Le Mans",
+      "system": "psx",
+      "bucket": "psx/Test Drive Le Mans (USA) (En,Fr,Es).chd"
+    },
+    {
+      "title": "Test Drive Off-Road",
+      "system": "psx",
+      "bucket": "psx/Test Drive Off-Road (USA).chd"
+    },
+    {
+      "title": "TOCA Championship Racing",
+      "system": "psx",
+      "bucket": "psx/TOCA Championship Racing (USA) (En,Es).chd"
+    },
+    {
+      "title": "TOCA 2: Touring Car Challenge",
+      "system": "psx",
+      "bucket": "psx/TOCA 2 - Touring Car Challenge (USA) (En,Fr,Es).chd"
+    },
+    {
+      "title": "NASCAR Rumble",
+      "system": "psx",
+      "bucket": "psx/NASCAR Rumble (USA).chd"
+    },
+    {
+      "title": "NASCAR 2001",
+      "system": "psx",
+      "bucket": "psx/NASCAR 2001 (USA).chd"
+    },
+    {
+      "title": "Rally Cross",
+      "system": "psx",
+      "bucket": "psx/Rally Cross (USA).chd"
+    },
+    {
+      "title": "Rally Cross 2",
+      "system": "psx",
+      "bucket": "psx/Rally Cross 2 (USA).chd"
+    },
+    {
+      "title": "Mobil 1 Rally Championship",
+      "system": "psx",
+      "bucket": "psx/Mobil 1 Rally Championship (USA).chd"
+    },
+    {
+      "title": "Michelin Rally Masters: Race of Champions",
+      "system": "psx",
+      "bucket": "psx/Michelin Rally Masters - Race of Champions (USA) (En,Fr,Es).chd"
+    },
+    {
+      "title": "Destruction Derby Raw",
+      "system": "psx",
+      "bucket": "psx/Destruction Derby Raw (USA).chd"
+    },
+    {
+      "title": "Demolition Racer",
+      "system": "psx",
+      "bucket": "psx/Demolition Racer (USA).chd"
+    },
+    {
+      "title": "Hydro Thunder",
+      "system": "psx",
+      "bucket": "psx/Hydro Thunder (USA).chd"
+    },
+    {
+      "title": "Chocobo Racing",
+      "system": "psx",
+      "bucket": "psx/Chocobo Racing (USA).chd"
+    },
+    {
+      "title": "Bomberman Fantasy Race",
+      "system": "psx",
+      "bucket": "psx/Bomberman Fantasy Race (USA).chd"
+    },
+    {
+      "title": "LEGO Racers",
+      "system": "psx",
+      "bucket": "psx/LEGO Racers (USA) (En,Fr,De,Es,It,Nl,Sv,No,Da,Fi).chd"
+    },
+    {
+      "title": "Micro Machines V3",
+      "system": "psx",
+      "bucket": "psx/Micro Machines V3 (USA).chd"
+    },
+    {
+      "title": "Circuit Breakers",
+      "system": "psx",
+      "bucket": "psx/Circuit Breakers (USA).chd"
+    },
+    {
+      "title": "Re-Volt",
+      "system": "psx",
+      "bucket": "psx/Re-Volt (USA).chd"
+    },
+    {
+      "title": "Looney Tunes Racing",
+      "system": "psx",
+      "bucket": "psx/Looney Tunes Racing (USA) (En,Fr,Es).chd"
+    },
+    {
+      "title": "Walt Disney World Quest: Magical Racing Tour",
+      "system": "psx",
+      "bucket": "psx/Walt Disney World Quest - Magical Racing Tour (USA).chd"
+    },
+    {
+      "title": "Muppet RaceMania",
+      "system": "psx",
+      "bucket": "psx/Muppet RaceMania (USA).chd"
+    },
+    {
+      "title": "Hot Wheels: Turbo Racing",
+      "system": "psx",
+      "bucket": "psx/Hot Wheels - Turbo Racing (USA).chd"
+    },
+    {
+      "title": "Formula 1",
+      "system": "psx",
+      "bucket": "psx/Formula 1 (USA) (Rev 1).chd"
+    },
+    {
+      "title": "Formula 1 Championship Edition",
+      "system": "psx",
+      "bucket": "psx/Formula 1 Championship Edition (USA) (En,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "Formula One 99",
+      "system": "psx",
+      "bucket": "psx/Formula One 99 (USA, Canada) (En,Fr,Es).chd"
+    },
+    {
+      "title": "Monaco Grand Prix",
+      "system": "psx",
+      "bucket": "psx/Monaco Grand Prix (USA).chd"
+    },
+    {
+      "title": "Andretti Racing",
+      "system": "psx",
+      "bucket": "psx/Andretti Racing (USA).chd"
+    },
+    {
+      "title": "Motorhead",
+      "system": "psx",
+      "bucket": "psx/Motorhead (USA).chd"
+    },
+    {
+      "title": "Tokyo Highway Battle",
+      "system": "psx",
+      "bucket": "psx/Tokyo Highway Battle (USA).chd"
+    },
+    {
+      "title": "Felony 11-79",
+      "system": "psx",
+      "bucket": "psx/Felony 11-79 (USA).chd"
+    },
+    {
+      "title": "Runabout 2",
+      "system": "psx",
+      "bucket": "psx/Runabout 2 (USA).chd"
+    },
+    {
+      "title": "S.C.A.R.S.",
+      "system": "psx",
+      "bucket": "psx/S.C.A.R.S. (USA).chd"
+    },
+    {
+      "title": "Ducati World: Racing Challenge",
+      "system": "psx",
+      "bucket": "psx/Ducati World - Racing Challenge (USA).chd"
+    },
+    {
+      "title": "Moto Racer World Tour",
+      "system": "psx",
+      "bucket": "psx/Moto Racer World Tour (USA).chd"
+    },
+    {
+      "title": "Twisted Metal: Small Brawl",
+      "system": "psx",
+      "bucket": "psx/Twisted Metal - Small Brawl (USA).chd"
+    },
+    {
+      "title": "Rogue Trip: Vacation 2012",
+      "system": "psx",
+      "bucket": "psx/Rogue Trip - Vacation 2012 (USA).chd"
+    },
+    {
+      "title": "Critical Depth",
+      "system": "psx",
+      "bucket": "psx/Critical Depth (USA).chd"
+    },
+    {
+      "title": "Cool Boarders",
+      "system": "psx",
+      "bucket": "psx/Cool Boarders (USA).chd"
+    },
+    {
+      "title": "Cool Boarders 4",
+      "system": "psx",
+      "bucket": "psx/Cool Boarders 4 (USA).chd"
+    },
+    {
+      "title": "Cool Boarders 2001",
+      "system": "psx",
+      "bucket": "psx/Cool Boarders 2001 (USA).chd"
+    },
+    {
+      "title": "007 Racing",
+      "system": "psx",
+      "bucket": "psx/007 Racing (USA).chd"
+    },
+    {
+      "title": "2Xtreme",
+      "system": "psx",
+      "bucket": "psx/2Xtreme (USA).chd"
+    },
+    {
+      "title": "3Xtreme",
+      "system": "psx",
+      "bucket": "psx/3Xtreme (USA).chd"
+    },
+    {
+      "title": "All Star Racing 2",
+      "system": "psx",
+      "bucket": "psx/All Star Racing 2 (USA).chd"
+    },
+    {
+      "title": "ATV: Quad Power Racing",
+      "system": "psx",
+      "bucket": "psx/ATV - Quad Power Racing (USA).chd"
+    },
+    {
+      "title": "Batman: Gotham City Racer",
+      "system": "psx",
+      "bucket": "psx/Batman - Gotham City Racer (USA).chd"
+    },
+    {
+      "title": "Bravo Air Race",
+      "system": "psx",
+      "bucket": "psx/Bravo Air Race (USA).chd"
+    },
+    {
+      "title": "Bugriders: The Race of Kings",
+      "system": "psx",
+      "bucket": "psx/Bugriders - The Race of Kings (USA).chd"
+    },
+    {
+      "title": "Burning Road",
+      "system": "psx",
+      "bucket": "psx/Burning Road (USA).chd"
+    },
+    {
+      "title": "Car and Driver Presents: Grand Tour Racing '98",
+      "system": "psx",
+      "bucket": "psx/Car and Driver Presents - Grand Tour Racing '98 (USA).chd"
+    },
+    {
+      "title": "CART World Series",
+      "system": "psx",
+      "bucket": "psx/CART World Series (USA).chd"
+    },
+    {
+      "title": "Castrol Honda Superbike Racing",
+      "system": "psx",
+      "bucket": "psx/Castrol Honda Superbike Racing (USA).chd"
+    },
+    {
+      "title": "Championship Motocross featuring Ricky Carmichael",
+      "system": "psx",
+      "bucket": "psx/Championship Motocross featuring Ricky Carmichael (USA).chd"
+    },
+    {
+      "title": "CyberSpeed",
+      "system": "psx",
+      "bucket": "psx/CyberSpeed (USA) (Rev 1).chd"
+    },
+    {
+      "title": "Dead in the Water",
+      "system": "psx",
+      "bucket": "psx/Dead in the Water (USA).chd"
+    },
+    {
+      "title": "The Dukes of Hazzard II: Daisy Dukes It Out",
+      "system": "psx",
+      "bucket": "psx/Dukes of Hazzard II, The - Daisy Dukes It Out (USA).chd"
+    },
+    {
+      "title": "The Dukes of Hazzard: Racing for Home",
+      "system": "psx",
+      "bucket": "psx/Dukes of Hazzard, The - Racing for Home (USA) (Rev 1).chd"
+    },
+    {
+      "title": "ESPN Extreme Games",
+      "system": "psx",
+      "bucket": "psx/ESPN Extreme Games (USA).chd"
+    },
+    {
+      "title": "Extreme Go-Kart Racing",
+      "system": "psx",
+      "bucket": "psx/Extreme Go-Kart Racing (USA).chd"
+    },
+    {
+      "title": "F1 2000",
+      "system": "psx",
+      "bucket": "psx/F1 2000 (USA) (En,Fr,Es).chd"
+    },
+    {
+      "title": "F1 Championship Season 2000",
+      "system": "psx",
+      "bucket": "psx/F1 Championship Season 2000 (USA).chd"
+    },
+    {
+      "title": "F1 Racing Championship",
+      "system": "psx",
+      "bucket": "psx/F1 Racing Championship (USA) (En,Fr).chd"
+    },
+    {
+      "title": "F1 World Grand Prix",
+      "system": "psx",
+      "bucket": "psx/F1 World Grand Prix (USA).chd"
+    },
+    {
+      "title": "Ford Racing",
+      "system": "psx",
+      "bucket": "psx/Ford Racing (USA).chd"
+    },
+    {
+      "title": "Formula 1 98",
+      "system": "psx",
+      "bucket": "psx/Formula 1 98 (USA) (En,Fr,De,Es,It,Fi).chd"
+    },
+    {
+      "title": "Formula One 2000",
+      "system": "psx",
+      "bucket": "psx/Formula One 2000 (USA).chd"
+    },
+    {
+      "title": "Hi-Octane: The Track Fights Back!",
+      "system": "psx",
+      "bucket": "psx/Hi-Octane - The Track Fights Back! (USA) (En,Fr,De,Es).chd"
+    },
+    {
+      "title": "Hooters: Road Trip",
+      "system": "psx",
+      "bucket": "psx/Hooters - Road Trip (USA).chd"
+    },
+    {
+      "title": "Hot Wheels: Extreme Racing",
+      "system": "psx",
+      "bucket": "psx/Hot Wheels - Extreme Racing (USA).chd"
+    },
+    {
+      "title": "IHRA Drag Racing",
+      "system": "psx",
+      "bucket": "psx/IHRA Drag Racing (USA).chd"
+    },
+    {
+      "title": "The Italian Job",
+      "system": "psx",
+      "bucket": "psx/Italian Job, The (USA).chd"
+    },
+    {
+      "title": "Jeremy McGrath Supercross 2000",
+      "system": "psx",
+      "bucket": "psx/Jeremy McGrath Supercross 2000 (USA).chd"
+    },
+    {
+      "title": "Jeremy McGrath Supercross 98",
+      "system": "psx",
+      "bucket": "psx/Jeremy McGrath Supercross 98 (USA).chd"
+    },
+    {
+      "title": "Killer Loop",
+      "system": "psx",
+      "bucket": "psx/Killer Loop (USA).chd"
+    },
+    {
+      "title": "Motocross Mania",
+      "system": "psx",
+      "bucket": "psx/Motocross Mania (USA).chd"
+    },
+    {
+      "title": "Motocross Mania 2",
+      "system": "psx",
+      "bucket": "psx/Motocross Mania 2 (USA).chd"
+    },
+    {
+      "title": "N-Gen Racing",
+      "system": "psx",
+      "bucket": "psx/N-Gen Racing (USA).chd"
+    },
+    {
+      "title": "NASCAR 2000",
+      "system": "psx",
+      "bucket": "psx/NASCAR 2000 (USA).chd"
+    },
+    {
+      "title": "NASCAR 98 Collector's Edition",
+      "system": "psx",
+      "bucket": "psx/NASCAR 98 Collector's Edition (USA).chd"
+    },
+    {
+      "title": "NASCAR 99 Legacy",
+      "system": "psx",
+      "bucket": "psx/NASCAR 99 Legacy (USA).chd"
+    },
+    {
+      "title": "NASCAR Heat",
+      "system": "psx",
+      "bucket": "psx/NASCAR Heat (USA).chd"
+    },
+    {
+      "title": "NASCAR Racing",
+      "system": "psx",
+      "bucket": "psx/NASCAR Racing (USA).chd"
+    },
+    {
+      "title": "NASCAR Thunder 2002",
+      "system": "psx",
+      "bucket": "psx/NASCAR Thunder 2002 (USA).chd"
+    },
+    {
+      "title": "NASCAR Thunder 2003",
+      "system": "psx",
+      "bucket": "psx/NASCAR Thunder 2003 (USA).chd"
+    },
+    {
+      "title": "NASCAR Thunder 2004",
+      "system": "psx",
+      "bucket": "psx/NASCAR Thunder 2004 (USA).chd"
+    },
+    {
+      "title": "Nicktoons Racing",
+      "system": "psx",
+      "bucket": "psx/Nicktoons Racing (USA).chd"
+    },
+    {
+      "title": "Off-World Interceptor Extreme",
+      "system": "psx",
+      "bucket": "psx/Off-World Interceptor Extreme (USA).chd"
+    },
+    {
+      "title": "Peak Performance",
+      "system": "psx",
+      "bucket": "psx/Peak Performance (USA).chd"
+    },
+    {
+      "title": "Polaris SnoCross",
+      "system": "psx",
+      "bucket": "psx/Polaris SnoCross (USA).chd"
+    },
+    {
+      "title": "Porsche Challenge",
+      "system": "psx",
+      "bucket": "psx/Porsche Challenge (USA) (En,Fr,Es).chd"
+    },
+    {
+      "title": "Racing",
+      "system": "psx",
+      "bucket": "psx/Racing (USA) (En,Fr,Es).chd"
+    },
+    {
+      "title": "Ray Tracers",
+      "system": "psx",
+      "bucket": "psx/Ray Tracers (USA).chd"
+    },
+    {
+      "title": "Rayman Rush",
+      "system": "psx",
+      "bucket": "psx/Rayman Rush (USA).chd"
+    },
+    {
+      "title": "RC de Go!",
+      "system": "psx",
+      "bucket": "psx/RC de Go! (USA).chd"
+    },
+    {
+      "title": "RC Revenge",
+      "system": "psx",
+      "bucket": "psx/RC Revenge (USA).chd"
+    },
+    {
+      "title": "Roadsters",
+      "system": "psx",
+      "bucket": "psx/Roadsters (USA).chd"
+    },
+    {
+      "title": "Running Wild",
+      "system": "psx",
+      "bucket": "psx/Running Wild (USA).chd"
+    },
+    {
+      "title": "Rush Hour",
+      "system": "psx",
+      "bucket": "psx/Rush Hour (USA).chd"
+    },
+    {
+      "title": "Sea-Doo Hydro Cross",
+      "system": "psx",
+      "bucket": "psx/Sea-Doo Hydro Cross (USA).chd"
+    },
+    {
+      "title": "Smurf Racer!",
+      "system": "psx",
+      "bucket": "psx/Smurf Racer! (USA) (En,Fr,Es).chd"
+    },
+    {
+      "title": "SnoCross Championship Racing",
+      "system": "psx",
+      "bucket": "psx/SnoCross Championship Racing (USA).chd"
+    },
+    {
+      "title": "South Park Rally",
+      "system": "psx",
+      "bucket": "psx/South Park Rally (USA).chd"
+    },
+    {
+      "title": "Speed Racer",
+      "system": "psx",
+      "bucket": "psx/Speed Racer (USA).chd"
+    },
+    {
+      "title": "Sports Car GT",
+      "system": "psx",
+      "bucket": "psx/Sports Car GT (USA).chd"
+    },
+    {
+      "title": "Starwinder: The Ultimate Space Race",
+      "system": "psx",
+      "bucket": "psx/Starwinder - The Ultimate Space Race (USA).chd"
+    },
+    {
+      "title": "Team Losi RC Racer",
+      "system": "psx",
+      "bucket": "psx/Team Losi RC Racer (USA).chd"
+    },
+    {
+      "title": "Test Drive Off-Road 2",
+      "system": "psx",
+      "bucket": "psx/Test Drive Off-Road 2 (USA).chd"
+    },
+    {
+      "title": "Test Drive Off-Road 3",
+      "system": "psx",
+      "bucket": "psx/Test Drive Off-Road 3 (USA).chd"
+    },
+    {
+      "title": "Thunder Truck Rally",
+      "system": "psx",
+      "bucket": "psx/Thunder Truck Rally (USA).chd"
+    },
+    {
+      "title": "Tyco R-C: Assault with a Battery",
+      "system": "psx",
+      "bucket": "psx/Tyco R-C - Assault with a Battery (USA).chd"
+    },
+    {
+      "title": "Vanishing Point",
+      "system": "psx",
+      "bucket": "psx/Vanishing Point (USA).chd"
+    },
+    {
+      "title": "VMX Racing",
+      "system": "psx",
+      "bucket": "psx/VMX Racing (USA).chd"
+    },
+    {
+      "title": "VR Sports Powerboat Racing",
+      "system": "psx",
+      "bucket": "psx/VR Sports Powerboat Racing (USA).chd"
+    },
+    {
+      "title": "Woody Woodpecker Racing",
+      "system": "psx",
+      "bucket": "psx/Woody Woodpecker Racing (USA).chd"
+    },
+    {
+      "title": "XS Airboat Racing",
+      "system": "psx",
+      "bucket": "psx/XS Airboat Racing (USA).chd"
+    },
+    {
       "title": "Neo Drift Out",
       "system": "neogeocd",
       "bucket": "neogeocd/Neo Drift Out - New Technology (Japan).chd"
@@ -247,6 +862,740 @@
       "bucket": "ps2/Gran Turismo 4 (USA) (v2.00).chd"
     },
     {
+      "title": "WipEout Fusion",
+      "system": "ps2",
+      "bucket": "ps2/WipEout Fusion (USA).chd"
+    },
+    {
+      "title": "SSX",
+      "system": "ps2",
+      "bucket": "ps2/SSX (USA).chd"
+    },
+    {
+      "title": "SSX Tricky",
+      "system": "ps2",
+      "bucket": "ps2/SSX Tricky (USA).chd"
+    },
+    {
+      "title": "SSX 3",
+      "system": "ps2",
+      "bucket": "ps2/SSX 3 (USA).chd"
+    },
+    {
+      "title": "SSX on Tour",
+      "system": "ps2",
+      "bucket": "ps2/SSX on Tour (USA).chd"
+    },
+    {
+      "title": "Sonic Riders",
+      "system": "ps2",
+      "bucket": "ps2/Sonic Riders (USA) (En,Ja,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "F-Zero GX",
+      "system": "gc",
+      "bucket": "gc/F-Zero GX (USA).rvz"
+    },
+    {
+      "title": "Mario Kart: Double Dash!!",
+      "system": "gc",
+      "bucket": "gc/Mario Kart - Double Dash!! (USA).rvz"
+    },
+    {
+      "title": "Kirby Air Ride",
+      "system": "gc",
+      "bucket": "gc/Kirby Air Ride (USA).rvz"
+    },
+    {
+      "title": "Wave Race: Blue Storm",
+      "system": "gc",
+      "bucket": "gc/Wave Race - Blue Storm (USA).rvz"
+    },
+    {
+      "title": "1080 Avalanche",
+      "system": "gc",
+      "bucket": "gc/1080 Avalanche (USA).rvz"
+    },
+    {
+      "title": "Burnout",
+      "system": "gc",
+      "bucket": "gc/Burnout (USA).rvz"
+    },
+    {
+      "title": "Burnout 2: Point of Impact",
+      "system": "gc",
+      "bucket": "gc/Burnout 2 - Point of Impact (USA).rvz"
+    },
+    {
+      "title": "Need for Speed: Hot Pursuit 2",
+      "system": "gc",
+      "bucket": "gc/Need for Speed - Hot Pursuit 2 (USA).rvz"
+    },
+    {
+      "title": "Need for Speed: Underground",
+      "system": "gc",
+      "bucket": "gc/Need for Speed - Underground (USA).rvz"
+    },
+    {
+      "title": "Need for Speed: Underground 2",
+      "system": "gc",
+      "bucket": "gc/Need for Speed - Underground 2 (USA).rvz"
+    },
+    {
+      "title": "Need for Speed: Most Wanted",
+      "system": "gc",
+      "bucket": "gc/Need for Speed - Most Wanted (USA).rvz"
+    },
+    {
+      "title": "Need for Speed: Carbon",
+      "system": "gc",
+      "bucket": "gc/Need for Speed - Carbon (USA).rvz"
+    },
+    {
+      "title": "XGIII: Extreme G Racing",
+      "system": "gc",
+      "bucket": "gc/XGIII - Extreme G Racing (USA).rvz"
+    },
+    {
+      "title": "XGRA: Extreme G Racing Association",
+      "system": "gc",
+      "bucket": "gc/XGRA - Extreme G Racing Association (USA).rvz"
+    },
+    {
+      "title": "R: Racing Evolution",
+      "system": "gc",
+      "bucket": "gc/R-Racing Evolution (USA).rvz"
+    },
+    {
+      "title": "Auto Modellista",
+      "system": "gc",
+      "bucket": "gc/Auto Modellista (USA).rvz"
+    },
+    {
+      "title": "Road Trip: The Arcade Edition",
+      "system": "gc",
+      "bucket": "gc/Road Trip - The Arcade Edition (USA).rvz"
+    },
+    {
+      "title": "Tube Slider: The Championship of Future Formula",
+      "system": "gc",
+      "bucket": "gc/Tube Slider - The Championship of Future Formula (USA).rvz"
+    },
+    {
+      "title": "Crazy Taxi",
+      "system": "gc",
+      "bucket": "gc/Crazy Taxi (USA).rvz"
+    },
+    {
+      "title": "18 Wheeler: American Pro Trucker",
+      "system": "gc",
+      "bucket": "gc/18 Wheeler - American Pro Trucker (USA).rvz"
+    },
+    {
+      "title": "Crash Nitro Kart",
+      "system": "gc",
+      "bucket": "gc/Crash Nitro Kart (USA).rvz"
+    },
+    {
+      "title": "Crash Tag Team Racing",
+      "system": "gc",
+      "bucket": "gc/Crash Tag Team Racing (USA).rvz"
+    },
+    {
+      "title": "Sonic Riders",
+      "system": "gc",
+      "bucket": "gc/Sonic Riders (USA) (En,Ja,Fr,De,Es,It).rvz"
+    },
+    {
+      "title": "SSX Tricky",
+      "system": "gc",
+      "bucket": "gc/SSX Tricky (USA).rvz"
+    },
+    {
+      "title": "SSX 3",
+      "system": "gc",
+      "bucket": "gc/SSX 3 (USA).rvz"
+    },
+    {
+      "title": "SSX On Tour",
+      "system": "gc",
+      "bucket": "gc/SSX On Tour (USA).rvz"
+    },
+    {
+      "title": "F1 2002",
+      "system": "gc",
+      "bucket": "gc/F1 2002 (USA).rvz"
+    },
+    {
+      "title": "F1 Career Challenge",
+      "system": "gc",
+      "bucket": "gc/F1 Career Challenge (Europe) (En,Fr,De,It).rvz"
+    },
+    {
+      "title": "NASCAR: Dirt to Daytona",
+      "system": "gc",
+      "bucket": "gc/NASCAR - Dirt to Daytona (USA).rvz"
+    },
+    {
+      "title": "NASCAR 2005: Chase for the Cup",
+      "system": "gc",
+      "bucket": "gc/NASCAR 2005 - Chase for the Cup (USA).rvz"
+    },
+    {
+      "title": "V-Rally 3",
+      "system": "gc",
+      "bucket": "gc/V-Rally 3 (Europe) (En,Fr,De,Es,It).rvz"
+    },
+    {
+      "title": "4x4 Evo 2",
+      "system": "gc",
+      "bucket": "gc/4x4 Evo 2 (USA).rvz"
+    },
+    {
+      "title": "American Chopper 2: Full Throttle",
+      "system": "gc",
+      "bucket": "gc/American Chopper 2 - Full Throttle (USA).rvz"
+    },
+    {
+      "title": "ATV: Quad Power Racing 2",
+      "system": "gc",
+      "bucket": "gc/ATV - Quad Power Racing 2 (USA).rvz"
+    },
+    {
+      "title": "Big Air Freestyle",
+      "system": "gc",
+      "bucket": "gc/Big Air Freestyle (USA).rvz"
+    },
+    {
+      "title": "Big Mutha Truckers",
+      "system": "gc",
+      "bucket": "gc/Big Mutha Truckers (USA).rvz"
+    },
+    {
+      "title": "Butt-Ugly Martians: Zoom or Doom!",
+      "system": "gc",
+      "bucket": "gc/Butt-Ugly Martians - Zoom or Doom! (Europe) (En,Fr,De,Es,It).rvz"
+    },
+    {
+      "title": "Cel Damage",
+      "system": "gc",
+      "bucket": "gc/Cel Damage (USA).rvz"
+    },
+    {
+      "title": "City Racer",
+      "system": "gc",
+      "bucket": "gc/City Racer (USA).rvz"
+    },
+    {
+      "title": "Cocoto Kart Racer",
+      "system": "gc",
+      "bucket": "gc/Cocoto Kart Racer (Europe) (En,Fr,De,Es,It).rvz"
+    },
+    {
+      "title": "Dakar 2: The World's Ultimate Rally",
+      "system": "gc",
+      "bucket": "gc/Dakar 2 - The World's Ultimate Rally (USA) (En,Fr,De,Es,It).rvz"
+    },
+    {
+      "title": "Driven",
+      "system": "gc",
+      "bucket": "gc/Driven (USA) (En,Fr,De,Es,It).rvz"
+    },
+    {
+      "title": "Drome Racers",
+      "system": "gc",
+      "bucket": "gc/Drome Racers (USA).rvz"
+    },
+    {
+      "title": "Freaky Flyers",
+      "system": "gc",
+      "bucket": "gc/Freaky Flyers (USA).m3u",
+      "files": [
+        "gc/Freaky Flyers (USA) (Disc 1).rvz",
+        "gc/Freaky Flyers (USA) (Disc 2).rvz"
+      ]
+    },
+    {
+      "title": "Freekstyle",
+      "system": "gc",
+      "bucket": "gc/Freekstyle (USA).rvz"
+    },
+    {
+      "title": "Grooverider: Slot Car Thunder",
+      "system": "gc",
+      "bucket": "gc/Grooverider - Slot Car Thunder (USA).rvz"
+    },
+    {
+      "title": "GT Cube",
+      "system": "gc",
+      "bucket": "gc/GT Cube (Japan).rvz"
+    },
+    {
+      "title": "Hot Wheels: Velocity X",
+      "system": "gc",
+      "bucket": "gc/Hot Wheels - Velocity X (USA).rvz"
+    },
+    {
+      "title": "Hot Wheels: World Race",
+      "system": "gc",
+      "bucket": "gc/Hot Wheels - World Race (USA) (Rev 1).rvz"
+    },
+    {
+      "title": "The Italian Job",
+      "system": "gc",
+      "bucket": "gc/Italian Job, The (USA).rvz"
+    },
+    {
+      "title": "Jeremy McGrath Supercross World",
+      "system": "gc",
+      "bucket": "gc/Jeremy McGrath Supercross World (USA).rvz"
+    },
+    {
+      "title": "Lotus Challenge",
+      "system": "gc",
+      "bucket": "gc/Lotus Challenge (USA).rvz"
+    },
+    {
+      "title": "Micro Machines",
+      "system": "gc",
+      "bucket": "gc/Micro Machines (Europe) (En,Fr,De,Es,It).rvz"
+    },
+    {
+      "title": "Monster 4x4: Masters of Metal",
+      "system": "gc",
+      "bucket": "gc/Monster 4x4 - Masters of Metal (USA).rvz"
+    },
+    {
+      "title": "Monster Jam: Maximum Destruction",
+      "system": "gc",
+      "bucket": "gc/Monster Jam - Maximum Destruction (USA).rvz"
+    },
+    {
+      "title": "MX SuperFly",
+      "system": "gc",
+      "bucket": "gc/MX SuperFly (USA).rvz"
+    },
+    {
+      "title": "NASCAR Thunder 2003",
+      "system": "gc",
+      "bucket": "gc/NASCAR Thunder 2003 (USA).rvz"
+    },
+    {
+      "title": "Pac-Man World Rally",
+      "system": "gc",
+      "bucket": "gc/Pac-Man World Rally (USA).rvz"
+    },
+    {
+      "title": "Pro Rally 2002",
+      "system": "gc",
+      "bucket": "gc/Pro Rally 2002 (USA) (En,Fr,Es).rvz"
+    },
+    {
+      "title": "Rally Championship",
+      "system": "gc",
+      "bucket": "gc/Rally Championship (USA).rvz"
+    },
+    {
+      "title": "RoadKill",
+      "system": "gc",
+      "bucket": "gc/RoadKill (USA).rvz"
+    },
+    {
+      "title": "San Francisco Rush 2049",
+      "system": "gc",
+      "bucket": "gc/San Francisco Rush 2049 [GR2E5D].iso"
+    },
+    {
+      "title": "The Simpsons: Road Rage",
+      "system": "gc",
+      "bucket": "gc/Simpsons, The - Road Rage (USA).rvz"
+    },
+    {
+      "title": "Smashing Drive",
+      "system": "gc",
+      "bucket": "gc/Smashing Drive (USA).rvz"
+    },
+    {
+      "title": "Smuggler's Run: Warzones",
+      "system": "gc",
+      "bucket": "gc/Smuggler's Run - Warzones (USA).rvz"
+    },
+    {
+      "title": "Speed Challenge: Jacques Villeneuve's Racing Vision",
+      "system": "gc",
+      "bucket": "gc/Speed Challenge - Jacques Villeneuve's Racing Vision (Europe) (En,Fr).rvz"
+    },
+    {
+      "title": "Speed Kings",
+      "system": "gc",
+      "bucket": "gc/Speed Kings (USA).rvz"
+    },
+    {
+      "title": "SpyHunter",
+      "system": "gc",
+      "bucket": "gc/SpyHunter (USA).rvz"
+    },
+    {
+      "title": "Starsky & Hutch",
+      "system": "gc",
+      "bucket": "gc/Starsky & Hutch (USA).rvz"
+    },
+    {
+      "title": "SX Superstar",
+      "system": "gc",
+      "bucket": "gc/SX Superstar (USA).rvz"
+    },
+    {
+      "title": "World Racing",
+      "system": "gc",
+      "bucket": "gc/World Racing (Europe) (En,Fr,De,Es,It).rvz"
+    },
+    {
+      "title": "Wreckless: The Yakuza Missions",
+      "system": "gc",
+      "bucket": "gc/Wreckless - The Yakuza Missions (USA).rvz"
+    },
+    {
+      "title": "WWE Crush Hour",
+      "system": "gc",
+      "bucket": "gc/WWE Crush Hour (USA).rvz"
+    },
+    {
+      "title": "Ridge Racer",
+      "system": "psp",
+      "bucket": "psp/Ridge Racer (USA) (En,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "Ridge Racer 2",
+      "system": "psp",
+      "bucket": "psp/Ridge Racer 2 (Europe, Australia) (En,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "Wipeout Pure",
+      "system": "psp",
+      "bucket": "psp/Wipeout Pure (USA) (En,Fr,Es) (v2.00).chd"
+    },
+    {
+      "title": "Wipeout Pulse",
+      "system": "psp",
+      "bucket": "psp/Wipeout Pulse (USA) (En,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "Gran Turismo",
+      "system": "psp",
+      "bucket": "psp/Gran Turismo (USA) (En,Fr,Es) (v2.00).chd"
+    },
+    {
+      "title": "Burnout Legends",
+      "system": "psp",
+      "bucket": "psp/Burnout Legends (USA) (En,Fr,De,Es,It,Nl) (v2.00).chd"
+    },
+    {
+      "title": "Burnout Dominator",
+      "system": "psp",
+      "bucket": "psp/Burnout Dominator (USA).chd"
+    },
+    {
+      "title": "OutRun 2006: Coast 2 Coast",
+      "system": "psp",
+      "bucket": "psp/OutRun 2006 - Coast 2 Coast (USA).chd"
+    },
+    {
+      "title": "Need for Speed: Underground Rivals",
+      "system": "psp",
+      "bucket": "psp/Need for Speed - Underground Rivals (USA).chd"
+    },
+    {
+      "title": "Need for Speed: Most Wanted 5-1-0",
+      "system": "psp",
+      "bucket": "psp/Need for Speed - Most Wanted - 5-1-0 (USA).chd"
+    },
+    {
+      "title": "Need for Speed Carbon: Own the City",
+      "system": "psp",
+      "bucket": "psp/Need for Speed - Carbon - Own the City (USA).chd"
+    },
+    {
+      "title": "Need for Speed: ProStreet",
+      "system": "psp",
+      "bucket": "psp/Need for Speed - ProStreet (USA).chd"
+    },
+    {
+      "title": "Need for Speed: Undercover",
+      "system": "psp",
+      "bucket": "psp/Need for Speed - Undercover (USA) (En,Fr).chd"
+    },
+    {
+      "title": "Need for Speed: Shift",
+      "system": "psp",
+      "bucket": "psp/Need for Speed - Shift (USA) (En,Fr,Es).chd"
+    },
+    {
+      "title": "Midnight Club 3: DUB Edition",
+      "system": "psp",
+      "bucket": "psp/Midnight Club 3 - DUB Edition (USA) (v2.02).chd"
+    },
+    {
+      "title": "Midnight Club: L.A. Remix",
+      "system": "psp",
+      "bucket": "psp/Midnight Club - L.A. Remix (USA).chd"
+    },
+    {
+      "title": "MotorStorm: Arctic Edge",
+      "system": "psp",
+      "bucket": "psp/MotorStorm - Arctic Edge (USA) (En,Fr,De,Es,It,Nl,Pt,Ru).chd"
+    },
+    {
+      "title": "ModNation Racers",
+      "system": "psp",
+      "bucket": "psp/ModNation Racers (USA) (En,Fr,Es).chd"
+    },
+    {
+      "title": "Sega Rally Revo",
+      "system": "psp",
+      "bucket": "psp/Sega Rally Revo (USA).chd"
+    },
+    {
+      "title": "Test Drive Unlimited",
+      "system": "psp",
+      "bucket": "psp/Test Drive Unlimited (USA).chd"
+    },
+    {
+      "title": "Split-Second",
+      "system": "psp",
+      "bucket": "psp/Split-Second (USA) (En,Fr,Es).chd"
+    },
+    {
+      "title": "FlatOut: Head On",
+      "system": "psp",
+      "bucket": "psp/FlatOut - Head On (USA).chd"
+    },
+    {
+      "title": "Juiced 2: Hot Import Nights",
+      "system": "psp",
+      "bucket": "psp/Juiced 2 - Hot Import Nights (USA).chd"
+    },
+    {
+      "title": "Initial D: Street Stage",
+      "system": "psp",
+      "bucket": "psp/Initial D - Street Stage (Japan, Asia).chd"
+    },
+    {
+      "title": "Wangan Midnight Portable",
+      "system": "psp",
+      "bucket": "psp/Wangan Midnight Portable (Japan).chd"
+    },
+    {
+      "title": "L.A. Rush",
+      "system": "psp",
+      "bucket": "psp/Rush (USA).chd"
+    },
+    {
+      "title": "Race Driver 2006",
+      "system": "psp",
+      "bucket": "psp/Race Driver 2006 (USA).chd"
+    },
+    {
+      "title": "TOCA Race Driver 2",
+      "system": "psp",
+      "bucket": "psp/TOCA Race Driver 2 (Europe) (En,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "TOCA Race Driver 3 Challenge",
+      "system": "psp",
+      "bucket": "psp/TOCA Race Driver 3 Challenge (Europe) (En,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "Colin McRae Rally 2005 Plus",
+      "system": "psp",
+      "bucket": "psp/Colin McRae Rally 2005 Plus (Europe) (En,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "WRC: FIA World Rally Championship",
+      "system": "psp",
+      "bucket": "psp/WRC - FIA World Rally Championship (USA).chd"
+    },
+    {
+      "title": "Dirt 2",
+      "system": "psp",
+      "bucket": "psp/Dirt 2 (USA) (En,Fr,Es).chd"
+    },
+    {
+      "title": "F1 Grand Prix",
+      "system": "psp",
+      "bucket": "psp/F1 Grand Prix (Europe) (En,Fr,De,Es,It) (v2.00).chd"
+    },
+    {
+      "title": "Formula One 06",
+      "system": "psp",
+      "bucket": "psp/Formula One 06 (Europe) (En,Fr,De,Es,It,Pt,Fi).chd"
+    },
+    {
+      "title": "F1 2009",
+      "system": "psp",
+      "bucket": "psp/F1 2009 (USA).chd"
+    },
+    {
+      "title": "MotoGP",
+      "system": "psp",
+      "bucket": "psp/MotoGP (USA).chd"
+    },
+    {
+      "title": "Micro Machines V4",
+      "system": "psp",
+      "bucket": "psp/Micro Machines V4 (Europe) (En,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "GripShift",
+      "system": "psp",
+      "bucket": "psp/GripShift (USA).chd"
+    },
+    {
+      "title": "Crash Tag Team Racing",
+      "system": "psp",
+      "bucket": "psp/Crash Tag Team Racing (USA).chd"
+    },
+    {
+      "title": "Crazy Taxi: Fare Wars",
+      "system": "psp",
+      "bucket": "psp/Crazy Taxi - Fare Wars (USA) (v2.01).chd"
+    },
+    {
+      "title": "Twisted Metal: Head-On",
+      "system": "psp",
+      "bucket": "psp/Twisted Metal - Head-On (USA).chd"
+    },
+    {
+      "title": "Pursuit Force",
+      "system": "psp",
+      "bucket": "psp/Pursuit Force (USA).chd"
+    },
+    {
+      "title": "Pursuit Force: Extreme Justice",
+      "system": "psp",
+      "bucket": "psp/Pursuit Force - Extreme Justice (USA) (En,Fr,Es).chd"
+    },
+    {
+      "title": "SSX on Tour",
+      "system": "psp",
+      "bucket": "psp/SSX on Tour (USA).chd"
+    },
+    {
+      "title": "Asphalt: Urban GT 2",
+      "system": "psp",
+      "bucket": "psp/Asphalt - Urban GT 2 (Europe) (En,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "ATV Offroad Fury: Blazin' Trails",
+      "system": "psp",
+      "bucket": "psp/ATV Offroad Fury - Blazin' Trails (USA).chd"
+    },
+    {
+      "title": "ATV Offroad Fury Pro",
+      "system": "psp",
+      "bucket": "psp/ATV Offroad Fury Pro (USA).chd"
+    },
+    {
+      "title": "Driver 76",
+      "system": "psp",
+      "bucket": "psp/Driver 76 (USA).chd"
+    },
+    {
+      "title": "The Fast and the Furious",
+      "system": "psp",
+      "bucket": "psp/Fast and the Furious, The (USA).chd"
+    },
+    {
+      "title": "Fired Up",
+      "system": "psp",
+      "bucket": "psp/Fired Up (Europe, Australia) (En,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "Ford Racing: Off Road",
+      "system": "psp",
+      "bucket": "psp/Ford Racing - Off Road (USA).chd"
+    },
+    {
+      "title": "Full Auto 2: Battlelines",
+      "system": "psp",
+      "bucket": "psp/Full Auto 2 - Battlelines (USA).chd"
+    },
+    {
+      "title": "Hot Wheels: Ultimate Racing",
+      "system": "psp",
+      "bucket": "psp/Hot Wheels - Ultimate Racing (USA).chd"
+    },
+    {
+      "title": "Juiced: Eliminator",
+      "system": "psp",
+      "bucket": "psp/Juiced - Eliminator (USA).chd"
+    },
+    {
+      "title": "Monster Jam: Path of Destruction",
+      "system": "psp",
+      "bucket": "psp/Monster Jam - Path of Destruction (USA).chd"
+    },
+    {
+      "title": "Monster Jam: Urban Assault",
+      "system": "psp",
+      "bucket": "psp/Monster Jam - Urban Assault (USA).chd"
+    },
+    {
+      "title": "MTX Mototrax",
+      "system": "psp",
+      "bucket": "psp/MTX Mototrax (USA).chd"
+    },
+    {
+      "title": "MX vs. ATV Reflex",
+      "system": "psp",
+      "bucket": "psp/MX vs. ATV Reflex (USA) (En,Fr).chd"
+    },
+    {
+      "title": "MX vs. ATV Untamed",
+      "system": "psp",
+      "bucket": "psp/MX vs. ATV Untamed (USA).chd"
+    },
+    {
+      "title": "Pac-Man World Rally",
+      "system": "psp",
+      "bucket": "psp/Pac-Man World Rally (USA).chd"
+    },
+    {
+      "title": "Pocket Racers",
+      "system": "psp",
+      "bucket": "psp/Pocket Racers (USA).chd"
+    },
+    {
+      "title": "SBK 09: Superbike World Championship",
+      "system": "psp",
+      "bucket": "psp/SBK 09 - Superbike World Championship (Europe) (En,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "Sonic Rivals",
+      "system": "psp",
+      "bucket": "psp/Sonic Rivals (USA).chd"
+    },
+    {
+      "title": "Sonic Rivals 2",
+      "system": "psp",
+      "bucket": "psp/Sonic Rivals 2 (USA).chd"
+    },
+    {
+      "title": "Street Riders",
+      "system": "psp",
+      "bucket": "psp/Street Riders (Europe) (En,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "Street Supremacy",
+      "system": "psp",
+      "bucket": "psp/Street Supremacy (USA).chd"
+    },
+    {
+      "title": "WipEout 2048",
+      "system": "psvita",
+      "bucket": "psvita/WipEout® 2048 [PCSA00015] [USA] [NoNpDRM].zip"
+    },
+    {
       "title": "Mario Kart Wii",
       "system": "wii",
       "bucket": "wii/Mario Kart Wii (USA) (En,Fr,Es).rvz"
@@ -255,6 +1604,11 @@
       "title": "Sonic & Sega All-Stars Racing",
       "system": "wii",
       "bucket": "wii/Sonic & Sega All-Stars Racing (USA) (En,Fr,Es).rvz"
+    },
+    {
+      "title": "Sonic Riders: Zero Gravity",
+      "system": "wii",
+      "bucket": "wii/Sonic Riders - Zero Gravity (USA) (En,Ja,Fr,De,Es,It).rvz"
     },
     {
       "title": "Crazy Taxi",
@@ -362,6 +1716,131 @@
       "bucket": "dreamcast/Spirit of Speed 1937 (USA) (En,Fr,De,Es).chd"
     },
     {
+      "title": "18 Wheeler: American Pro Trucker",
+      "system": "dreamcast",
+      "bucket": "dreamcast/18 Wheeler - American Pro Trucker (USA).chd"
+    },
+    {
+      "title": "4 Wheel Thunder",
+      "system": "dreamcast",
+      "bucket": "dreamcast/4 Wheel Thunder (USA).chd"
+    },
+    {
+      "title": "Flag to Flag",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Flag to Flag (USA).chd"
+    },
+    {
+      "title": "Demolition Racer: No Exit",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Demolition Racer - No Exit (USA).chd"
+    },
+    {
+      "title": "F1 World Grand Prix",
+      "system": "dreamcast",
+      "bucket": "dreamcast/F1 World Grand Prix (USA) (En,Fr,De,Es).chd"
+    },
+    {
+      "title": "Test Drive 6",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Test Drive 6 (USA).chd"
+    },
+    {
+      "title": "Test Drive V-Rally",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Test Drive V-Rally (USA) (En,Fr,De).chd"
+    },
+    {
+      "title": "TNN Motorsports Hardcore Heat",
+      "system": "dreamcast",
+      "bucket": "dreamcast/TNN Motorsports Hardcore Heat (USA).chd"
+    },
+    {
+      "title": "Speed Devils: Online Racing",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Speed Devils - Online Racing (USA).chd"
+    },
+    {
+      "title": "Super Runabout: San Francisco Edition",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Super Runabout - San Francisco Edition (USA).chd"
+    },
+    {
+      "title": "Looney Tunes: Space Race",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Looney Tunes - Space Race (USA) (En,Fr,Es).chd"
+    },
+    {
+      "title": "Walt Disney World Quest: Magical Racing Tour",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Walt Disney World Quest - Magical Racing Tour (USA).chd"
+    },
+    {
+      "title": "Toy Racer",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Toy Racer (Europe) (En,Fr,De,Es).chd"
+    },
+    {
+      "title": "TrickStyle",
+      "system": "dreamcast",
+      "bucket": "dreamcast/TrickStyle (USA).chd"
+    },
+    {
+      "title": "Rippin' Riders",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Rippin' Riders (USA).chd"
+    },
+    {
+      "title": "Vigilante 8: 2nd Offense",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Vigilante 8 - 2nd Offense (USA).chd"
+    },
+    {
+      "title": "F1 Racing Championship",
+      "system": "dreamcast",
+      "bucket": "dreamcast/F1 Racing Championship (Europe) (En,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "F1 World Grand Prix II for Dreamcast",
+      "system": "dreamcast",
+      "bucket": "dreamcast/F1 World Grand Prix II for Dreamcast (Europe) (En,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "Jeremy McGrath Supercross 2000",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Jeremy McGrath Supercross 2000 (USA).chd"
+    },
+    {
+      "title": "Monaco Grand Prix",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Monaco Grand Prix (USA).chd"
+    },
+    {
+      "title": "PenPen TriIcelon",
+      "system": "dreamcast",
+      "bucket": "dreamcast/PenPen TriIcelon (USA).chd"
+    },
+    {
+      "title": "Roadsters",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Roadsters (USA).chd"
+    },
+    {
+      "title": "SnoCross Championship Racing",
+      "system": "dreamcast",
+      "bucket": "dreamcast/SnoCross Championship Racing (USA).chd"
+    },
+    {
+      "title": "South Park Rally",
+      "system": "dreamcast",
+      "bucket": "dreamcast/South Park Rally (USA).chd"
+    },
+    {
+      "title": "Zusar Vasar",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Zusar Vasar (Japan) (En,Ja).chd"
+    },
+    {
       "title": "Project Gotham Racing",
       "system": "xbox",
       "bucket": "xbox/Project Gotham Racing (USA).iso"
@@ -397,6 +1876,26 @@
       "bucket": "atarilynx/RoadBlasters (World).zip"
     },
     {
+      "title": "Checkered Flag",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Checkered Flag (USA, Europe).zip"
+    },
+    {
+      "title": "Hard Drivin'",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Hard Drivin' (USA, Europe).zip"
+    },
+    {
+      "title": "Super Off-Road",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Super Off-Road (USA, Europe).zip"
+    },
+    {
+      "title": "S.T.U.N. Runner",
+      "system": "atarilynx",
+      "bucket": "atarilynx/S.T.U.N. Runner (USA, Europe).zip"
+    },
+    {
       "title": "Atari Karts",
       "system": "atarijaguar",
       "bucket": "atarijaguar/Atari Karts (World).zip"
@@ -412,6 +1911,26 @@
       "bucket": "atarijaguar/Power Drive Rally (World).zip"
     },
     {
+      "title": "Checkered Flag",
+      "system": "atarijaguar",
+      "bucket": "atarijaguar/Checkered Flag (World).zip"
+    },
+    {
+      "title": "Club Drive",
+      "system": "atarijaguar",
+      "bucket": "atarijaguar/Club Drive (World).zip"
+    },
+    {
+      "title": "Supercross 3D",
+      "system": "atarijaguar",
+      "bucket": "atarijaguar/Supercross 3D (USA, Europe).zip"
+    },
+    {
+      "title": "World Tour Racing",
+      "system": "atarijaguarcd",
+      "bucket": "atarijaguarcd/World Tour Racing (USA).chd"
+    },
+    {
       "title": "Enduro",
       "system": "atari2600",
       "bucket": "atari2600/Enduro (USA).zip"
@@ -422,9 +1941,159 @@
       "bucket": "atari2600/Pole Position (USA).zip"
     },
     {
+      "title": "Indy 500",
+      "system": "atari2600",
+      "bucket": "atari2600/Indy 500 ~ Race (USA).zip"
+    },
+    {
+      "title": "Night Driver",
+      "system": "atari2600",
+      "bucket": "atari2600/Night Driver (USA).zip"
+    },
+    {
+      "title": "Grand Prix",
+      "system": "atari2600",
+      "bucket": "atari2600/Grand Prix (USA).zip"
+    },
+    {
+      "title": "Dragster",
+      "system": "atari2600",
+      "bucket": "atari2600/Dragster (USA).zip"
+    },
+    {
+      "title": "Fatal Run",
+      "system": "atari2600",
+      "bucket": "atari2600/Fatal Run (USA).zip"
+    },
+    {
+      "title": "Bump 'n' Jump",
+      "system": "atari2600",
+      "bucket": "atari2600/Bump 'n' Jump (USA).zip"
+    },
+    {
+      "title": "Dodge 'Em",
+      "system": "atari2600",
+      "bucket": "atari2600/Dodge 'Em ~ Dodger Cars (USA).zip"
+    },
+    {
+      "title": "Motocross",
+      "system": "atari2600",
+      "bucket": "atari2600/Motocross (USA).zip"
+    },
+    {
+      "title": "Racing Car",
+      "system": "atari2600",
+      "bucket": "atari2600/Racing Car (USA).zip"
+    },
+    {
+      "title": "Spy Hunter",
+      "system": "atari2600",
+      "bucket": "atari2600/Spy Hunter (USA).zip"
+    },
+    {
+      "title": "Street Racer",
+      "system": "atari2600",
+      "bucket": "atari2600/Street Racer ~ Speedway II (USA).zip"
+    },
+    {
+      "title": "Up 'n Down",
+      "system": "atari2600",
+      "bucket": "atari2600/Up 'n Down (USA).zip"
+    },
+    {
+      "title": "Pole Position",
+      "system": "atari5200",
+      "bucket": "atari5200/Pole Position (USA).zip"
+    },
+    {
       "title": "Pole Position II",
       "system": "atari7800",
       "bucket": "atari7800/Pole Position II (USA).zip"
+    },
+    {
+      "title": "Fatal Run",
+      "system": "atari7800",
+      "bucket": "atari7800/Fatal Run (USA).zip"
+    },
+    {
+      "title": "Motor Psycho",
+      "system": "atari7800",
+      "bucket": "atari7800/Motor Psycho (USA).zip"
+    },
+    {
+      "title": "Turbo",
+      "system": "colecovision",
+      "bucket": "colecovision/Turbo (USA, Europe).zip"
+    },
+    {
+      "title": "Pitstop",
+      "system": "colecovision",
+      "bucket": "colecovision/Pitstop (USA, Europe) (v1.1).zip"
+    },
+    {
+      "title": "Bump 'n' Jump",
+      "system": "colecovision",
+      "bucket": "colecovision/Bump 'n' Jump (USA, Europe).zip"
+    },
+    {
+      "title": "The Dukes of Hazzard",
+      "system": "colecovision",
+      "bucket": "colecovision/Dukes of Hazzard, The (USA).zip"
+    },
+    {
+      "title": "Motocross Racer",
+      "system": "colecovision",
+      "bucket": "colecovision/Motocross Racer (USA).zip"
+    },
+    {
+      "title": "Spy Hunter",
+      "system": "colecovision",
+      "bucket": "colecovision/Spy Hunter (USA).zip"
+    },
+    {
+      "title": "Up 'n Down",
+      "system": "colecovision",
+      "bucket": "colecovision/Up 'n Down (USA).zip"
+    },
+    {
+      "title": "Pole Position",
+      "system": "intellivision",
+      "bucket": "intellivision/Pole Position (USA).zip"
+    },
+    {
+      "title": "Bump 'n' Jump",
+      "system": "intellivision",
+      "bucket": "intellivision/Bump 'n' Jump (USA, Europe).zip"
+    },
+    {
+      "title": "Auto Racing",
+      "system": "intellivision",
+      "bucket": "intellivision/Auto Racing (World) (Screen-Relative Steering).zip"
+    },
+    {
+      "title": "Motocross",
+      "system": "intellivision",
+      "bucket": "intellivision/Motocross (USA, Europe).zip"
+    },
+    {
+      "title": "Racing Cars",
+      "system": "intellivision",
+      "bucket": "intellivision/Racing Cars (USA, Europe) (Intellivision Lives!).zip"
+    },
+    {
+      "title": "Turbo",
+      "system": "intellivision",
+      "bucket": "intellivision/Turbo (USA, Europe).zip"
+    },
+    {
+      "title": "Pole Position",
+      "system": "vectrex",
+      "bucket": "vectrex/Pole Position (USA).zip"
+    },
+    {
+      "title": "HyperChase: Auto Race",
+      "system": "vectrex",
+      "bucket": "vectrex/HyperChase - Auto Race (World).zip"
     },
     {
       "title": "Road Fighter",
@@ -442,9 +2111,54 @@
       "bucket": "msx/F-1 Spirit - The Way to Formula-1 (Japan).zip"
     },
     {
+      "title": "Hyper Rally",
+      "system": "msx",
+      "bucket": "msx/Hyper Rally (Japan).zip"
+    },
+    {
+      "title": "Rally-X",
+      "system": "msx",
+      "bucket": "msx/Rally-X (Japan).zip"
+    },
+    {
+      "title": "American Truck",
+      "system": "msx",
+      "bucket": "msx/American Truck (Japan).zip"
+    },
+    {
+      "title": "Battle Cross",
+      "system": "msx",
+      "bucket": "msx/Battle Cross (Japan).zip"
+    },
+    {
+      "title": "Choro Q",
+      "system": "msx",
+      "bucket": "msx/Choro Q (Japan).zip"
+    },
+    {
+      "title": "City Connection",
+      "system": "msx",
+      "bucket": "msx/City Connection (Japan).zip"
+    },
+    {
+      "title": "Crazy Cars",
+      "system": "msx",
+      "bucket": "msx/Crazy Cars (Europe).zip"
+    },
+    {
+      "title": "Le Mans 2",
+      "system": "msx",
+      "bucket": "msx/Le Mans 2 (Europe).zip"
+    },
+    {
       "title": "Out Run (MSX2)",
       "system": "msx2",
       "bucket": "msx2/Out Run (Japan).zip"
+    },
+    {
+      "title": "Mad Rider",
+      "system": "msx2",
+      "bucket": "msx2/Mad Rider (Japan).zip"
     },
     {
       "title": "Pole Position (C64)",
@@ -462,14 +2176,624 @@
       "bucket": "c64/Chase H.Q. II - Special Criminal Investigation (Europe).zip"
     },
     {
+      "title": "BadLands",
+      "system": "c64",
+      "bucket": "c64/BadLands (USA, Europe).zip"
+    },
+    {
+      "title": "LeMans",
+      "system": "c64",
+      "bucket": "c64/LeMans (USA, Europe) (MAX).zip"
+    },
+    {
+      "title": "Road Race",
+      "system": "c64",
+      "bucket": "c64/Road Race (Japan) (v02) (MAX).zip"
+    },
+    {
+      "title": "Spy Hunter",
+      "system": "c64",
+      "bucket": "c64/Spy Hunter (USA, Europe).zip"
+    },
+    {
+      "title": "Up'n Down",
+      "system": "c64",
+      "bucket": "c64/Up'n Down (USA, Europe).zip"
+    },
+    {
       "title": "Ardu-Racer",
       "system": "arduboy",
       "bucket": "arduboy/Ardu-Racer (World) (v1.3).zip"
     },
     {
+      "title": "Street Racer",
+      "system": "arduboy",
+      "bucket": "arduboy/Street Racer (World).zip"
+    },
+    {
       "title": "Virtua Racing Deluxe",
       "system": "sega32x",
       "bucket": "sega32x/Virtua Racing Deluxe (USA).zip"
+    },
+    {
+      "title": "BC Racers",
+      "system": "sega32x",
+      "bucket": "sega32x/BC Racers (USA).zip"
+    },
+    {
+      "title": "Motocross Championship",
+      "system": "sega32x",
+      "bucket": "sega32x/Motocross Championship (USA).zip"
+    },
+    {
+      "title": "OutRun",
+      "system": "genesis",
+      "bucket": "genesis/OutRun (USA, Europe).zip"
+    },
+    {
+      "title": "Turbo OutRun",
+      "system": "genesis",
+      "bucket": "genesis/Turbo OutRun (Japan, Europe) (En).zip"
+    },
+    {
+      "title": "OutRun 2019",
+      "system": "genesis",
+      "bucket": "genesis/OutRun 2019 (USA).zip"
+    },
+    {
+      "title": "OutRunners",
+      "system": "genesis",
+      "bucket": "genesis/OutRunners (USA).zip"
+    },
+    {
+      "title": "Super Hang-On",
+      "system": "genesis",
+      "bucket": "genesis/Super Hang-On (Japan, USA) (En,Ja).zip"
+    },
+    {
+      "title": "Super Monaco GP",
+      "system": "genesis",
+      "bucket": "genesis/Super Monaco GP (Japan, USA) (En,Ja).zip"
+    },
+    {
+      "title": "Ayrton Senna's Super Monaco GP II",
+      "system": "genesis",
+      "bucket": "genesis/Ayrton Senna's Super Monaco GP II (USA) (En,Ja).zip"
+    },
+    {
+      "title": "Virtua Racing",
+      "system": "genesis",
+      "bucket": "genesis/Virtua Racing (USA).zip"
+    },
+    {
+      "title": "Road Rash",
+      "system": "genesis",
+      "bucket": "genesis/Road Rash (USA, Europe).zip"
+    },
+    {
+      "title": "Road Rash II",
+      "system": "genesis",
+      "bucket": "genesis/Road Rash II (USA, Europe) (RR206).zip"
+    },
+    {
+      "title": "Road Rash 3",
+      "system": "genesis",
+      "bucket": "genesis/Road Rash 3 (USA, Europe).zip"
+    },
+    {
+      "title": "Skitchin'",
+      "system": "genesis",
+      "bucket": "genesis/Skitchin' (USA, Europe).zip"
+    },
+    {
+      "title": "Rock n' Roll Racing",
+      "system": "genesis",
+      "bucket": "genesis/Rock n' Roll Racing (USA).zip"
+    },
+    {
+      "title": "Micro Machines",
+      "system": "genesis",
+      "bucket": "genesis/Micro Machines (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Micro Machines 2: Turbo Tournament",
+      "system": "genesis",
+      "bucket": "genesis/Micro Machines 2 - Turbo Tournament (Europe) (J-Cart).zip"
+    },
+    {
+      "title": "Micro Machines: Turbo Tournament 96",
+      "system": "genesis",
+      "bucket": "genesis/Micro Machines - Turbo Tournament 96 (Europe) (Rev 1) (J-Cart).zip"
+    },
+    {
+      "title": "Super Skidmarks",
+      "system": "genesis",
+      "bucket": "genesis/Super Skidmarks (Europe) (J-Cart).zip"
+    },
+    {
+      "title": "Combat Cars",
+      "system": "genesis",
+      "bucket": "genesis/Combat Cars (USA, Europe).zip"
+    },
+    {
+      "title": "Championship Pro-Am",
+      "system": "genesis",
+      "bucket": "genesis/Championship Pro-Am (USA).zip"
+    },
+    {
+      "title": "Lotus Turbo Challenge",
+      "system": "genesis",
+      "bucket": "genesis/Lotus Turbo Challenge (USA, Europe).zip"
+    },
+    {
+      "title": "Lotus II: RECS",
+      "system": "genesis",
+      "bucket": "genesis/Lotus II (USA, Europe).zip"
+    },
+    {
+      "title": "Top Gear 2",
+      "system": "genesis",
+      "bucket": "genesis/Top Gear 2 (USA).zip"
+    },
+    {
+      "title": "Hard Drivin'",
+      "system": "genesis",
+      "bucket": "genesis/Hard Drivin' (World).zip"
+    },
+    {
+      "title": "Chase H.Q. II",
+      "system": "genesis",
+      "bucket": "genesis/Chase H.Q. II (USA).zip"
+    },
+    {
+      "title": "RoadBlasters",
+      "system": "genesis",
+      "bucket": "genesis/RoadBlasters (USA).zip"
+    },
+    {
+      "title": "Street Racer",
+      "system": "genesis",
+      "bucket": "genesis/Street Racer (Europe).zip"
+    },
+    {
+      "title": "Power Drive",
+      "system": "genesis",
+      "bucket": "genesis/Power Drive (Europe) (En,Fr,De,Es,Pt).zip"
+    },
+    {
+      "title": "Newman Haas IndyCar: Featuring Nigel Mansell",
+      "system": "genesis",
+      "bucket": "genesis/Newman Haas IndyCar - Featuring Nigel Mansell (World).zip"
+    },
+    {
+      "title": "Mario Andretti Racing",
+      "system": "genesis",
+      "bucket": "genesis/Mario Andretti Racing (USA, Europe).zip"
+    },
+    {
+      "title": "Formula One",
+      "system": "genesis",
+      "bucket": "genesis/Formula One (USA).zip"
+    },
+    {
+      "title": "Double Clutch",
+      "system": "genesis",
+      "bucket": "genesis/Double Clutch (Europe).zip"
+    },
+    {
+      "title": "ESPN Speed World",
+      "system": "genesis",
+      "bucket": "genesis/ESPN Speed World (USA).zip"
+    },
+    {
+      "title": "F1 Circus MD",
+      "system": "genesis",
+      "bucket": "genesis/F1 Circus MD (Japan) (En).zip"
+    },
+    {
+      "title": "Fastest 1",
+      "system": "genesis",
+      "bucket": "genesis/Fastest 1 (Japan).zip"
+    },
+    {
+      "title": "Kawasaki Superbike Challenge",
+      "system": "genesis",
+      "bucket": "genesis/Kawasaki Superbike Challenge (USA, Europe).zip"
+    },
+    {
+      "title": "Nigel Mansell's World Championship Racing",
+      "system": "genesis",
+      "bucket": "genesis/Nigel Mansell's World Championship Racing (USA).zip"
+    },
+    {
+      "title": "Quad Challenge",
+      "system": "genesis",
+      "bucket": "genesis/Quad Challenge (USA).zip"
+    },
+    {
+      "title": "Race Drivin'",
+      "system": "genesis",
+      "bucket": "genesis/Race Drivin' (USA).zip"
+    },
+    {
+      "title": "Road Rash",
+      "system": "segacd",
+      "bucket": "segacd/Road Rash (USA).chd"
+    },
+    {
+      "title": "Jaguar XJ220",
+      "system": "segacd",
+      "bucket": "segacd/Jaguar XJ220 (USA).chd"
+    },
+    {
+      "title": "MegaRace",
+      "system": "segacd",
+      "bucket": "segacd/MegaRace (USA).chd"
+    },
+    {
+      "title": "Formula One World Championship: Beyond the Limit",
+      "system": "segacd",
+      "bucket": "segacd/Formula One World Championship - Beyond the Limit (USA).chd"
+    },
+    {
+      "title": "BC Racers",
+      "system": "segacd",
+      "bucket": "segacd/BC Racers (USA).chd"
+    },
+    {
+      "title": "F1 Circus CD",
+      "system": "segacd",
+      "bucket": "segacd/F1 Circus CD (Japan).chd"
+    },
+    {
+      "title": "Racing Aces",
+      "system": "segacd",
+      "bucket": "segacd/Racing Aces (USA).chd"
+    },
+    {
+      "title": "Road Avenger",
+      "system": "segacd",
+      "bucket": "segacd/Road Avenger (USA).chd"
+    },
+    {
+      "title": "OutRun",
+      "system": "mastersystem",
+      "bucket": "mastersystem/OutRun (World).zip"
+    },
+    {
+      "title": "OutRun 3-D",
+      "system": "mastersystem",
+      "bucket": "mastersystem/OutRun 3-D (Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "OutRun Europa",
+      "system": "mastersystem",
+      "bucket": "mastersystem/OutRun Europa (Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Battle Out Run",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Battle Out Run (Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Hang-On & Safari Hunt",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Hang On & Safari Hunt (USA).zip"
+    },
+    {
+      "title": "Enduro Racer",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Enduro Racer (Japan).zip"
+    },
+    {
+      "title": "Super Monaco GP",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Super Monaco GP (USA).zip"
+    },
+    {
+      "title": "Ayrton Senna's Super Monaco GP II",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Ayrton Senna's Super Monaco GP II (Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "World Grand Prix",
+      "system": "mastersystem",
+      "bucket": "mastersystem/World Grand Prix (USA, Brazil) (En).zip"
+    },
+    {
+      "title": "GP Rider",
+      "system": "mastersystem",
+      "bucket": "mastersystem/GP Rider (Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Road Rash",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Road Rash (Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Micro Machines",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Micro Machines (Europe).zip"
+    },
+    {
+      "title": "Chase H.Q.",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Taito Chase H.Q. (Europe).zip"
+    },
+    {
+      "title": "Super Off Road",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Super Off Road (Europe).zip"
+    },
+    {
+      "title": "Buggy Run",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Buggy Run (Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Action Fighter",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Action Fighter (USA, Europe, Brazil) (En) (Rev 1).zip"
+    },
+    {
+      "title": "Fire & Forget II",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Fire & Forget II (Europe).zip"
+    },
+    {
+      "title": "R.C. Grand Prix",
+      "system": "mastersystem",
+      "bucket": "mastersystem/R.C. Grand Prix (USA, Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Special Criminal Investigation",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Special Criminal Investigation (Europe).zip"
+    },
+    {
+      "title": "OutRun",
+      "system": "gamegear",
+      "bucket": "gamegear/OutRun (Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "OutRun Europa",
+      "system": "gamegear",
+      "bucket": "gamegear/OutRun Europa (USA).zip"
+    },
+    {
+      "title": "Sonic Drift",
+      "system": "gamegear",
+      "bucket": "gamegear/Sonic Drift (Japan) (En).zip"
+    },
+    {
+      "title": "Sonic Drift 2",
+      "system": "gamegear",
+      "bucket": "gamegear/Sonic Drift 2 (World).zip"
+    },
+    {
+      "title": "Super Monaco GP",
+      "system": "gamegear",
+      "bucket": "gamegear/Super Monaco GP (USA, Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Ayrton Senna's Super Monaco GP II",
+      "system": "gamegear",
+      "bucket": "gamegear/Ayrton Senna's Super Monaco GP II (USA, Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Road Rash",
+      "system": "gamegear",
+      "bucket": "gamegear/Road Rash (USA).zip"
+    },
+    {
+      "title": "Micro Machines",
+      "system": "gamegear",
+      "bucket": "gamegear/Micro Machines (USA, Europe).zip"
+    },
+    {
+      "title": "Micro Machines 2: Turbo Tournament",
+      "system": "gamegear",
+      "bucket": "gamegear/Micro Machines 2 - Turbo Tournament (Europe).zip"
+    },
+    {
+      "title": "GP Rider",
+      "system": "gamegear",
+      "bucket": "gamegear/GP Rider (World).zip"
+    },
+    {
+      "title": "Chase H.Q.",
+      "system": "gamegear",
+      "bucket": "gamegear/Chase H.Q. (USA).zip"
+    },
+    {
+      "title": "Super Off Road",
+      "system": "gamegear",
+      "bucket": "gamegear/Super Off Road (USA, Europe).zip"
+    },
+    {
+      "title": "Power Drive",
+      "system": "gamegear",
+      "bucket": "gamegear/Power Drive (Europe).zip"
+    },
+    {
+      "title": "Kawasaki Superbike Challenge",
+      "system": "gamegear",
+      "bucket": "gamegear/Kawasaki Superbike Challenge (USA).zip"
+    },
+    {
+      "title": "R.C. Grand Prix",
+      "system": "gamegear",
+      "bucket": "gamegear/R.C. Grand Prix (USA).zip"
+    },
+    {
+      "title": "Hang-On II",
+      "system": "sg1000",
+      "bucket": "sg1000/Hang On II (Japan, Australia) (Ja).zip"
+    },
+    {
+      "title": "Monaco GP",
+      "system": "sg1000",
+      "bucket": "sg1000/Monaco GP (Japan, Europe) (Ja) (Rev 2).zip"
+    },
+    {
+      "title": "GP World",
+      "system": "sg1000",
+      "bucket": "sg1000/GP World (Japan) (Rev 1).zip"
+    },
+    {
+      "title": "Zippy Race",
+      "system": "sg1000",
+      "bucket": "sg1000/Zippy Race (Japan, Australia) (Ja).zip"
+    },
+    {
+      "title": "Sega Rally Championship Plus",
+      "system": "saturn",
+      "bucket": "saturn/Sega Rally Championship Plus Netlink Edition (USA).chd"
+    },
+    {
+      "title": "Daytona USA: Championship Circuit Edition",
+      "system": "saturn",
+      "bucket": "saturn/Daytona USA C.C.E. Net Link Edition (USA).chd"
+    },
+    {
+      "title": "Virtua Racing",
+      "system": "saturn",
+      "bucket": "saturn/Virtua Racing (USA) (15S).chd"
+    },
+    {
+      "title": "Sega Touring Car Championship",
+      "system": "saturn",
+      "bucket": "saturn/Sega Touring Car Championship (USA).chd"
+    },
+    {
+      "title": "Manx TT SuperBike",
+      "system": "saturn",
+      "bucket": "saturn/Manx TT SuperBike (USA).chd"
+    },
+    {
+      "title": "Hang-On GP",
+      "system": "saturn",
+      "bucket": "saturn/Hang-On GP (USA).chd"
+    },
+    {
+      "title": "Sonic R",
+      "system": "saturn",
+      "bucket": "saturn/Sonic R (USA, Brazil).chd"
+    },
+    {
+      "title": "Sega Ages: OutRun",
+      "system": "saturn",
+      "bucket": "saturn/Sega Ages - OutRun (Japan) (Rev A).chd"
+    },
+    {
+      "title": "Sega Ages: Power Drift",
+      "system": "saturn",
+      "bucket": "saturn/Sega Ages - Power Drift (Japan).chd"
+    },
+    {
+      "title": "Gale Racer",
+      "system": "saturn",
+      "bucket": "saturn/Gale Racer (Japan) (En,Ja) (1A).chd"
+    },
+    {
+      "title": "The Need for Speed",
+      "system": "saturn",
+      "bucket": "saturn/Road & Track Presents - The Need for Speed (USA).chd"
+    },
+    {
+      "title": "Road Rash",
+      "system": "saturn",
+      "bucket": "saturn/Road Rash (USA).chd"
+    },
+    {
+      "title": "WipEout",
+      "system": "saturn",
+      "bucket": "saturn/WipEout (USA).chd"
+    },
+    {
+      "title": "WipEout 2097",
+      "system": "saturn",
+      "bucket": "saturn/WipEout 2097 (Europe).chd"
+    },
+    {
+      "title": "Destruction Derby",
+      "system": "saturn",
+      "bucket": "saturn/Destruction Derby (Europe).chd"
+    },
+    {
+      "title": "High Velocity: Mountain Racing Challenge",
+      "system": "saturn",
+      "bucket": "saturn/High Velocity - Mountain Racing Challenge (USA).chd"
+    },
+    {
+      "title": "Touge King the Spirits 2",
+      "system": "saturn",
+      "bucket": "saturn/Touge King the Spirits 2 (Japan).chd"
+    },
+    {
+      "title": "Drift King Shutokou Battle '97",
+      "system": "saturn",
+      "bucket": "saturn/Drift King Shutokou Battle '97 - Tsuchiya Keiichi & Bandou Masaaki (Japan).chd"
+    },
+    {
+      "title": "Andretti Racing",
+      "system": "saturn",
+      "bucket": "saturn/Andretti Racing (USA).chd"
+    },
+    {
+      "title": "NASCAR 98",
+      "system": "saturn",
+      "bucket": "saturn/NASCAR 98 (USA).chd"
+    },
+    {
+      "title": "F1 Challenge",
+      "system": "saturn",
+      "bucket": "saturn/F1 Challenge (USA).chd"
+    },
+    {
+      "title": "Street Racer",
+      "system": "saturn",
+      "bucket": "saturn/Street Racer (Europe).chd"
+    },
+    {
+      "title": "Steep Slope Sliders",
+      "system": "saturn",
+      "bucket": "saturn/Steep Slope Sliders (USA).chd"
+    },
+    {
+      "title": "Choro Q Park",
+      "system": "saturn",
+      "bucket": "saturn/Choro Q Park (Japan).chd"
+    },
+    {
+      "title": "Cyber Speedway",
+      "system": "saturn",
+      "bucket": "saturn/Cyber Speedway (USA).chd"
+    },
+    {
+      "title": "Hi-Octane: The Track Fights Back!",
+      "system": "saturn",
+      "bucket": "saturn/Hi-Octane - The Track Fights Back! (USA) (En,Fr,De,Es).chd"
+    },
+    {
+      "title": "Off-World Interceptor Extreme",
+      "system": "saturn",
+      "bucket": "saturn/Off-World Interceptor Extreme (USA).chd"
+    },
+    {
+      "title": "Race Drivin'",
+      "system": "saturn",
+      "bucket": "saturn/Race Drivin' (Japan) (2M).chd"
+    },
+    {
+      "title": "Scorcher",
+      "system": "saturn",
+      "bucket": "saturn/Scorcher (USA) (RE).chd"
+    },
+    {
+      "title": "Zero4 Champ DooZy-J Type-R",
+      "system": "saturn",
+      "bucket": "saturn/Zero4 Champ DooZy-J Type-R (Japan).chd"
     },
     {
       "title": "Mario Kart 8",
@@ -485,6 +2809,2571 @@
       "title": "Burnout Paradise",
       "system": "xbox360",
       "bucket": "xbox360/Burnout Paradise (USA).zar"
+    },
+    {
+      "title": "Project Gotham Racing 3",
+      "system": "xbox360",
+      "bucket": "xbox360/Project Gotham Racing 3 (USA) (En,Ja,Fr,De,Es,It,Zh,Ko) (Rev 1).zar"
+    },
+    {
+      "title": "Burnout Revenge",
+      "system": "xbox360",
+      "bucket": "xbox360/Burnout Revenge (USA).zar"
+    },
+    {
+      "title": "Excitebike",
+      "system": "nes",
+      "bucket": "nes/Excitebike (Japan, USA) (En).zip"
+    },
+    {
+      "title": "R.C. Pro-Am",
+      "system": "nes",
+      "bucket": "nes/R.C. Pro-Am (USA) (Rev 1).zip"
+    },
+    {
+      "title": "R.C. Pro-Am II",
+      "system": "nes",
+      "bucket": "nes/R.C. Pro-Am II (USA).zip"
+    },
+    {
+      "title": "Rad Racer",
+      "system": "nes",
+      "bucket": "nes/Rad Racer (USA).zip"
+    },
+    {
+      "title": "Rad Racer II",
+      "system": "nes",
+      "bucket": "nes/Rad Racer II (USA).zip"
+    },
+    {
+      "title": "Mach Rider",
+      "system": "nes",
+      "bucket": "nes/Mach Rider (Japan, USA) (En) (Rev 1).zip"
+    },
+    {
+      "title": "Cobra Triangle",
+      "system": "nes",
+      "bucket": "nes/Cobra Triangle (USA).zip"
+    },
+    {
+      "title": "Ivan 'Ironman' Stewart's Super Off Road",
+      "system": "nes",
+      "bucket": "nes/Ivan 'Ironman' Stewart's Super Off Road (USA).zip"
+    },
+    {
+      "title": "Al Unser Jr. Turbo Racing",
+      "system": "nes",
+      "bucket": "nes/Al Unser Jr. Turbo Racing (USA).zip"
+    },
+    {
+      "title": "Danny Sullivan's Indy Heat",
+      "system": "nes",
+      "bucket": "nes/Danny Sullivan's Indy Heat (USA).zip"
+    },
+    {
+      "title": "Michael Andretti's World GP",
+      "system": "nes",
+      "bucket": "nes/Michael Andretti's World GP (USA).zip"
+    },
+    {
+      "title": "Formula One: Built to Win",
+      "system": "nes",
+      "bucket": "nes/Formula One - Built to Win (USA).zip"
+    },
+    {
+      "title": "Galaxy 5000: Racing in the 51st Century",
+      "system": "nes",
+      "bucket": "nes/Galaxy 5000 - Racing in the 51st Century (USA).zip"
+    },
+    {
+      "title": "Road Fighter",
+      "system": "nes",
+      "bucket": "nes/Road Fighter (Europe).zip"
+    },
+    {
+      "title": "City Connection",
+      "system": "nes",
+      "bucket": "nes/City Connection (USA).zip"
+    },
+    {
+      "title": "Bump 'n' Jump",
+      "system": "nes",
+      "bucket": "nes/Bump 'n' Jump (USA).zip"
+    },
+    {
+      "title": "Spy Hunter",
+      "system": "nes",
+      "bucket": "nes/Spy Hunter (USA).zip"
+    },
+    {
+      "title": "RoadBlasters",
+      "system": "nes",
+      "bucket": "nes/RoadBlasters (USA).zip"
+    },
+    {
+      "title": "Bigfoot",
+      "system": "nes",
+      "bucket": "nes/Bigfoot (USA).zip"
+    },
+    {
+      "title": "Bill Elliott's NASCAR Challenge",
+      "system": "nes",
+      "bucket": "nes/Bill Elliott's NASCAR Challenge (USA).zip"
+    },
+    {
+      "title": "Championship Rally",
+      "system": "nes",
+      "bucket": "nes/Championship Rally (Europe).zip"
+    },
+    {
+      "title": "Cycle Race: Road Man",
+      "system": "nes",
+      "bucket": "nes/Cycle Race - Road Man (Japan).zip"
+    },
+    {
+      "title": "Days of Thunder",
+      "system": "nes",
+      "bucket": "nes/Days of Thunder (USA).zip"
+    },
+    {
+      "title": "Eliminator Boat Duel",
+      "system": "nes",
+      "bucket": "nes/Eliminator Boat Duel (USA).zip"
+    },
+    {
+      "title": "F1 Circus",
+      "system": "nes",
+      "bucket": "nes/F1 Circus (Japan).zip"
+    },
+    {
+      "title": "F1 Race",
+      "system": "nes",
+      "bucket": "nes/F1 Race (Japan).zip"
+    },
+    {
+      "title": "Family Circuit",
+      "system": "nes",
+      "bucket": "nes/Family Circuit (Japan).zip"
+    },
+    {
+      "title": "Final Lap",
+      "system": "nes",
+      "bucket": "nes/Final Lap (Japan).zip"
+    },
+    {
+      "title": "Formula 1 Sensation",
+      "system": "nes",
+      "bucket": "nes/Formula 1 Sensation (Europe).zip"
+    },
+    {
+      "title": "Knight Rider",
+      "system": "nes",
+      "bucket": "nes/Knight Rider (USA).zip"
+    },
+    {
+      "title": "Monster Truck Rally",
+      "system": "nes",
+      "bucket": "nes/Monster Truck Rally (USA).zip"
+    },
+    {
+      "title": "Motocross Champion",
+      "system": "nes",
+      "bucket": "nes/Motocross Champion (Japan).zip"
+    },
+    {
+      "title": "Motor City Patrol",
+      "system": "nes",
+      "bucket": "nes/Motor City Patrol (USA).zip"
+    },
+    {
+      "title": "Nigel Mansell's World Championship Racing",
+      "system": "nes",
+      "bucket": "nes/Nigel Mansell's World Championship Racing (USA).zip"
+    },
+    {
+      "title": "Paris-Dakar Rally Special",
+      "system": "nes",
+      "bucket": "nes/Paris-Dakar Rally Special (Japan).zip"
+    },
+    {
+      "title": "Racer Mini Yonku: Japan Cup",
+      "system": "nes",
+      "bucket": "nes/Racer Mini Yonku - Japan Cup (Japan).zip"
+    },
+    {
+      "title": "Rally Bike",
+      "system": "nes",
+      "bucket": "nes/Rally Bike (USA).zip"
+    },
+    {
+      "title": "Route-16 Turbo",
+      "system": "nes",
+      "bucket": "nes/Route-16 Turbo (Japan).zip"
+    },
+    {
+      "title": "Seicross",
+      "system": "nes",
+      "bucket": "nes/Seicross (USA).zip"
+    },
+    {
+      "title": "Slalom",
+      "system": "nes",
+      "bucket": "nes/Slalom (USA).zip"
+    },
+    {
+      "title": "Super Cars",
+      "system": "nes",
+      "bucket": "nes/Super Cars (USA).zip"
+    },
+    {
+      "title": "Super Sprint",
+      "system": "nes",
+      "bucket": "nes/Super Sprint (Japan) (En).zip"
+    },
+    {
+      "title": "Famicom Grand Prix: F1 Race",
+      "system": "fds",
+      "bucket": "fds/Famicom Grand Prix - F1 Race (Japan) (DV 1) (Disk Writer).zip"
+    },
+    {
+      "title": "Famicom Grand Prix II: 3D Hot Rally",
+      "system": "fds",
+      "bucket": "fds/Famicom Grand Prix II - 3D Hot Rally (Japan) (DV 8) (Disk Writer) (Famicom 3D System).zip"
+    },
+    {
+      "title": "Vs. Excitebike",
+      "system": "fds",
+      "bucket": "fds/Vs. Excitebike (Japan) (En).zip"
+    },
+    {
+      "title": "F-Zero",
+      "system": "snes",
+      "bucket": "snes/F-Zero (USA).zip"
+    },
+    {
+      "title": "Super Mario Kart",
+      "system": "snes",
+      "bucket": "snes/Super Mario Kart (USA).zip"
+    },
+    {
+      "title": "Top Gear",
+      "system": "snes",
+      "bucket": "snes/Top Gear (USA).zip"
+    },
+    {
+      "title": "Top Gear 2",
+      "system": "snes",
+      "bucket": "snes/Top Gear 2 (USA).zip"
+    },
+    {
+      "title": "Top Gear 3000",
+      "system": "snes",
+      "bucket": "snes/Top Gear 3000 (USA).zip"
+    },
+    {
+      "title": "Rock N' Roll Racing",
+      "system": "snes",
+      "bucket": "snes/Rock N' Roll Racing (USA).zip"
+    },
+    {
+      "title": "Stunt Race FX",
+      "system": "snes",
+      "bucket": "snes/Stunt Race FX (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Uniracers",
+      "system": "snes",
+      "bucket": "snes/Uniracers (USA).zip"
+    },
+    {
+      "title": "Biker Mice from Mars",
+      "system": "snes",
+      "bucket": "snes/Biker Mice from Mars (USA).zip"
+    },
+    {
+      "title": "Street Racer",
+      "system": "snes",
+      "bucket": "snes/Street Racer (USA).zip"
+    },
+    {
+      "title": "Micro Machines",
+      "system": "snes",
+      "bucket": "snes/Micro Machines (USA).zip"
+    },
+    {
+      "title": "Super Off Road",
+      "system": "snes",
+      "bucket": "snes/Super Off Road (USA).zip"
+    },
+    {
+      "title": "Super Off Road: The Baja",
+      "system": "snes",
+      "bucket": "snes/Super Off Road - The Baja (USA).zip"
+    },
+    {
+      "title": "Battle Cars",
+      "system": "snes",
+      "bucket": "snes/Battle Cars (USA).zip"
+    },
+    {
+      "title": "Road Riot 4WD",
+      "system": "snes",
+      "bucket": "snes/Road Riot 4WD (USA).zip"
+    },
+    {
+      "title": "Super Chase H.Q.",
+      "system": "snes",
+      "bucket": "snes/Super Chase H.Q. (USA).zip"
+    },
+    {
+      "title": "Lamborghini American Challenge",
+      "system": "snes",
+      "bucket": "snes/Lamborghini American Challenge (USA).zip"
+    },
+    {
+      "title": "The Duel: Test Drive II",
+      "system": "snes",
+      "bucket": "snes/Duel, The - Test Drive II (USA).zip"
+    },
+    {
+      "title": "F1 ROC: Race of Champions",
+      "system": "snes",
+      "bucket": "snes/F1 ROC - Race of Champions (USA).zip"
+    },
+    {
+      "title": "F1-ROC II: Race of Champions",
+      "system": "snes",
+      "bucket": "snes/F1-ROC II - Race of Champions (USA).zip"
+    },
+    {
+      "title": "F1 Pole Position",
+      "system": "snes",
+      "bucket": "snes/F1 Pole Position (USA).zip"
+    },
+    {
+      "title": "Newman Haas IndyCar featuring Nigel Mansell",
+      "system": "snes",
+      "bucket": "snes/Newman Haas IndyCar featuring Nigel Mansell (USA).zip"
+    },
+    {
+      "title": "Michael Andretti's Indy Car Challenge",
+      "system": "snes",
+      "bucket": "snes/Michael Andretti's Indy Car Challenge (USA).zip"
+    },
+    {
+      "title": "Kyle Petty's No Fear Racing",
+      "system": "snes",
+      "bucket": "snes/Kyle Petty's No Fear Racing (USA).zip"
+    },
+    {
+      "title": "Power Drive",
+      "system": "snes",
+      "bucket": "snes/Power Drive (Europe) (En,Fr,De,Es,Pt).zip"
+    },
+    {
+      "title": "GP-1",
+      "system": "snes",
+      "bucket": "snes/GP-1 (USA).zip"
+    },
+    {
+      "title": "Drift King Shutokou Battle '94",
+      "system": "snes",
+      "bucket": "snes/Drift King Shutokou Battle '94 - Tsuchiya Keiichi & Bandou Masaaki (Japan).zip"
+    },
+    {
+      "title": "Al Unser Jr.'s Road to the Top",
+      "system": "snes",
+      "bucket": "snes/Al Unser Jr.'s Road to the Top (USA).zip"
+    },
+    {
+      "title": "Battle Cross",
+      "system": "snes",
+      "bucket": "snes/Battle Cross (Japan).zip"
+    },
+    {
+      "title": "Battle Grand Prix",
+      "system": "snes",
+      "bucket": "snes/Battle Grand Prix (USA).zip"
+    },
+    {
+      "title": "Battle Racers",
+      "system": "snes",
+      "bucket": "snes/Battle Racers (Japan).zip"
+    },
+    {
+      "title": "Cyber Spin",
+      "system": "snes",
+      "bucket": "snes/Cyber Spin (USA).zip"
+    },
+    {
+      "title": "Dirt Racer",
+      "system": "snes",
+      "bucket": "snes/Dirt Racer (Europe) (En,Fr,De).zip"
+    },
+    {
+      "title": "Dirt Trax FX",
+      "system": "snes",
+      "bucket": "snes/Dirt Trax FX (USA).zip"
+    },
+    {
+      "title": "ESPN Speedworld",
+      "system": "snes",
+      "bucket": "snes/ESPN Speedworld (USA).zip"
+    },
+    {
+      "title": "F-1 Grand Prix",
+      "system": "snes",
+      "bucket": "snes/F-1 Grand Prix (Japan).zip"
+    },
+    {
+      "title": "F1 Pole Position 2",
+      "system": "snes",
+      "bucket": "snes/F1 Pole Position 2 (Europe).zip"
+    },
+    {
+      "title": "Final Stretch",
+      "system": "snes",
+      "bucket": "snes/Final Stretch (Japan).zip"
+    },
+    {
+      "title": "Full Throttle: All-American Racing",
+      "system": "snes",
+      "bucket": "snes/Full Throttle - All-American Racing (USA).zip"
+    },
+    {
+      "title": "GP-1: Part II",
+      "system": "snes",
+      "bucket": "snes/GP-1 - Part II (USA).zip"
+    },
+    {
+      "title": "GT Racing",
+      "system": "snes",
+      "bucket": "snes/GT Racing (Japan).zip"
+    },
+    {
+      "title": "Hashire Hebereke",
+      "system": "snes",
+      "bucket": "snes/Hashire Hebereke (Japan).zip"
+    },
+    {
+      "title": "Kawasaki Caribbean Challenge",
+      "system": "snes",
+      "bucket": "snes/Kawasaki Caribbean Challenge (USA).zip"
+    },
+    {
+      "title": "Kawasaki Superbike Challenge",
+      "system": "snes",
+      "bucket": "snes/Kawasaki Superbike Challenge (USA).zip"
+    },
+    {
+      "title": "Micro Machines 2: Turbo Tournament",
+      "system": "snes",
+      "bucket": "snes/Micro Machines 2 - Turbo Tournament (Europe).zip"
+    },
+    {
+      "title": "Nigel Mansell's World Championship Racing",
+      "system": "snes",
+      "bucket": "snes/Nigel Mansell's World Championship Racing (USA).zip"
+    },
+    {
+      "title": "Power Rangers Zeo: Battle Racers",
+      "system": "snes",
+      "bucket": "snes/Power Rangers Zeo - Battle Racers (USA).zip"
+    },
+    {
+      "title": "Race Drivin'",
+      "system": "snes",
+      "bucket": "snes/Race Drivin' (USA).zip"
+    },
+    {
+      "title": "Redline F-1 Racer",
+      "system": "snes",
+      "bucket": "snes/Redline F-1 Racer (USA).zip"
+    },
+    {
+      "title": "SD F-1 Grand Prix",
+      "system": "snes",
+      "bucket": "snes/SD F-1 Grand Prix (Japan).zip"
+    },
+    {
+      "title": "Speed Racer",
+      "system": "snes",
+      "bucket": "snes/Speed Racer (USA).zip"
+    },
+    {
+      "title": "Super Drift Out: World Rally Championships",
+      "system": "snes",
+      "bucket": "snes/Super Drift Out - World Rally Championships (Japan) (En).zip"
+    },
+    {
+      "title": "Super Mad Champ",
+      "system": "snes",
+      "bucket": "snes/Super Mad Champ (Japan).zip"
+    },
+    {
+      "title": "Suzuka 8 Hours",
+      "system": "snes",
+      "bucket": "snes/Suzuka 8 Hours (USA).zip"
+    },
+    {
+      "title": "Uchuu Race: Astro Go! Go!",
+      "system": "snes",
+      "bucket": "snes/Uchuu Race - Astro Go! Go! (Japan) (En).zip"
+    },
+    {
+      "title": "Zero 4 Champ RR",
+      "system": "snes",
+      "bucket": "snes/Zero 4 Champ RR (Japan) (Rev 1).zip"
+    },
+    {
+      "title": "Zero 4 Champ RR-Z",
+      "system": "snes",
+      "bucket": "snes/Zero 4 Champ RR-Z (Japan).zip"
+    },
+    {
+      "title": "BS F-Zero Grand Prix 2",
+      "system": "satellaview",
+      "bucket": "satellaview/BS F-Zero Grand Prix 2 - Practice (Japan) (6-7).zip"
+    },
+    {
+      "title": "Mario Kart 64",
+      "system": "n64",
+      "bucket": "n64/Mario Kart 64 (USA).zip"
+    },
+    {
+      "title": "Diddy Kong Racing",
+      "system": "n64",
+      "bucket": "n64/Diddy Kong Racing (USA) (En,Fr) (Rev 1).zip"
+    },
+    {
+      "title": "F-Zero X",
+      "system": "n64",
+      "bucket": "n64/F-Zero X (USA).zip"
+    },
+    {
+      "title": "Wave Race 64",
+      "system": "n64",
+      "bucket": "n64/Wave Race 64 - Kawasaki Jet Ski (USA) (Rev 1).zip"
+    },
+    {
+      "title": "1080 Snowboarding",
+      "system": "n64",
+      "bucket": "n64/1080 Snowboarding (Japan, USA) (En,Ja).zip"
+    },
+    {
+      "title": "Excitebike 64",
+      "system": "n64",
+      "bucket": "n64/Excitebike 64 (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Beetle Adventure Racing!",
+      "system": "n64",
+      "bucket": "n64/Beetle Adventure Racing! (USA) (En,Fr,De).zip"
+    },
+    {
+      "title": "Star Wars Episode I: Racer",
+      "system": "n64",
+      "bucket": "n64/Star Wars Episode I - Racer (USA).zip"
+    },
+    {
+      "title": "Cruis'n USA",
+      "system": "n64",
+      "bucket": "n64/Cruis'n USA (USA) (Rev 2).zip"
+    },
+    {
+      "title": "Cruis'n World",
+      "system": "n64",
+      "bucket": "n64/Cruis'n World (USA).zip"
+    },
+    {
+      "title": "Cruis'n Exotica",
+      "system": "n64",
+      "bucket": "n64/Cruis'n Exotica (USA).zip"
+    },
+    {
+      "title": "San Francisco Rush: Extreme Racing",
+      "system": "n64",
+      "bucket": "n64/San Francisco Rush - Extreme Racing (USA) (En,Fr,De) (Rev 1).zip"
+    },
+    {
+      "title": "Rush 2: Extreme Racing USA",
+      "system": "n64",
+      "bucket": "n64/Rush 2 - Extreme Racing USA (USA).zip"
+    },
+    {
+      "title": "San Francisco Rush 2049",
+      "system": "n64",
+      "bucket": "n64/San Francisco Rush 2049 (USA).zip"
+    },
+    {
+      "title": "Hydro Thunder",
+      "system": "n64",
+      "bucket": "n64/Hydro Thunder (USA).zip"
+    },
+    {
+      "title": "California Speed",
+      "system": "n64",
+      "bucket": "n64/California Speed (USA).zip"
+    },
+    {
+      "title": "Extreme-G",
+      "system": "n64",
+      "bucket": "n64/Extreme-G (USA).zip"
+    },
+    {
+      "title": "Extreme-G XG2",
+      "system": "n64",
+      "bucket": "n64/Extreme-G XG2 (USA).zip"
+    },
+    {
+      "title": "Wipeout 64",
+      "system": "n64",
+      "bucket": "n64/Wipeout 64 (USA).zip"
+    },
+    {
+      "title": "Ridge Racer 64",
+      "system": "n64",
+      "bucket": "n64/RR64 - Ridge Racer 64 (USA).zip"
+    },
+    {
+      "title": "World Driver Championship",
+      "system": "n64",
+      "bucket": "n64/World Driver Championship (USA).zip"
+    },
+    {
+      "title": "Top Gear Rally",
+      "system": "n64",
+      "bucket": "n64/Top Gear Rally (USA).zip"
+    },
+    {
+      "title": "Top Gear Rally 2",
+      "system": "n64",
+      "bucket": "n64/Top Gear Rally 2 (USA).zip"
+    },
+    {
+      "title": "Top Gear Overdrive",
+      "system": "n64",
+      "bucket": "n64/Top Gear Overdrive (USA).zip"
+    },
+    {
+      "title": "Top Gear Hyper-Bike",
+      "system": "n64",
+      "bucket": "n64/Top Gear Hyper-Bike (USA).zip"
+    },
+    {
+      "title": "V-Rally Edition 99",
+      "system": "n64",
+      "bucket": "n64/V-Rally Edition 99 (USA).zip"
+    },
+    {
+      "title": "Rally Challenge 2000",
+      "system": "n64",
+      "bucket": "n64/Rally Challenge 2000 (USA).zip"
+    },
+    {
+      "title": "MRC: Multi-Racing Championship",
+      "system": "n64",
+      "bucket": "n64/MRC - Multi-Racing Championship (USA).zip"
+    },
+    {
+      "title": "Automobili Lamborghini",
+      "system": "n64",
+      "bucket": "n64/Automobili Lamborghini (USA).zip"
+    },
+    {
+      "title": "Stunt Racer 64",
+      "system": "n64",
+      "bucket": "n64/Stunt Racer 64 (USA).zip"
+    },
+    {
+      "title": "Re-Volt",
+      "system": "n64",
+      "bucket": "n64/Re-Volt (USA).zip"
+    },
+    {
+      "title": "Micro Machines 64 Turbo",
+      "system": "n64",
+      "bucket": "n64/Micro Machines 64 Turbo (USA).zip"
+    },
+    {
+      "title": "Penny Racers",
+      "system": "n64",
+      "bucket": "n64/Penny Racers (USA).zip"
+    },
+    {
+      "title": "LEGO Racers",
+      "system": "n64",
+      "bucket": "n64/LEGO Racers (USA) (En,Fr,De,Es,It,Nl,Sv,No,Da,Fi).zip"
+    },
+    {
+      "title": "Mickey's Speedway USA",
+      "system": "n64",
+      "bucket": "n64/Mickey's Speedway USA (USA).zip"
+    },
+    {
+      "title": "Hot Wheels: Turbo Racing",
+      "system": "n64",
+      "bucket": "n64/Hot Wheels - Turbo Racing (USA).zip"
+    },
+    {
+      "title": "Road Rash 64",
+      "system": "n64",
+      "bucket": "n64/Road Rash 64 (USA).zip"
+    },
+    {
+      "title": "Destruction Derby 64",
+      "system": "n64",
+      "bucket": "n64/Destruction Derby 64 (USA).zip"
+    },
+    {
+      "title": "Vigilante 8",
+      "system": "n64",
+      "bucket": "n64/Vigilante 8 (USA).zip"
+    },
+    {
+      "title": "Vigilante 8: 2nd Offense",
+      "system": "n64",
+      "bucket": "n64/Vigilante 8 - 2nd Offense (USA).zip"
+    },
+    {
+      "title": "F-1 World Grand Prix",
+      "system": "n64",
+      "bucket": "n64/F-1 World Grand Prix (USA).zip"
+    },
+    {
+      "title": "F-1 World Grand Prix II",
+      "system": "n64",
+      "bucket": "n64/F-1 World Grand Prix II (Europe) (En,Fr,De,Es).zip"
+    },
+    {
+      "title": "Indy Racing 2000",
+      "system": "n64",
+      "bucket": "n64/Indy Racing 2000 (USA).zip"
+    },
+    {
+      "title": "Snowboard Kids",
+      "system": "n64",
+      "bucket": "n64/Snowboard Kids (USA).zip"
+    },
+    {
+      "title": "Snowboard Kids 2",
+      "system": "n64",
+      "bucket": "n64/Snowboard Kids 2 (USA).zip"
+    },
+    {
+      "title": "AeroGauge",
+      "system": "n64",
+      "bucket": "n64/AeroGauge (USA).zip"
+    },
+    {
+      "title": "Carmageddon 64",
+      "system": "n64",
+      "bucket": "n64/Carmageddon 64 (USA).zip"
+    },
+    {
+      "title": "Choro Q 64 2: Hacha Mecha Grand Prix Race",
+      "system": "n64",
+      "bucket": "n64/Choro Q 64 2 - Hacha Mecha Grand Prix Race (Japan).zip"
+    },
+    {
+      "title": "F1 Pole Position 64",
+      "system": "n64",
+      "bucket": "n64/F1 Pole Position 64 (USA) (En,Fr,De).zip"
+    },
+    {
+      "title": "F1 Racing Championship",
+      "system": "n64",
+      "bucket": "n64/F1 Racing Championship (Europe) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "GT 64: Championship Edition",
+      "system": "n64",
+      "bucket": "n64/GT 64 - Championship Edition (USA).zip"
+    },
+    {
+      "title": "Iggy's Reckin' Balls",
+      "system": "n64",
+      "bucket": "n64/Iggy's Reckin' Balls (USA).zip"
+    },
+    {
+      "title": "Jeremy McGrath Supercross 2000",
+      "system": "n64",
+      "bucket": "n64/Jeremy McGrath Supercross 2000 (USA).zip"
+    },
+    {
+      "title": "Monaco Grand Prix",
+      "system": "n64",
+      "bucket": "n64/Monaco Grand Prix (USA).zip"
+    },
+    {
+      "title": "Monster Truck Madness 64",
+      "system": "n64",
+      "bucket": "n64/Monster Truck Madness 64 (USA).zip"
+    },
+    {
+      "title": "NASCAR 2000",
+      "system": "n64",
+      "bucket": "n64/NASCAR 2000 (USA).zip"
+    },
+    {
+      "title": "NASCAR 99",
+      "system": "n64",
+      "bucket": "n64/NASCAR 99 (USA).zip"
+    },
+    {
+      "title": "Off Road Challenge",
+      "system": "n64",
+      "bucket": "n64/Off Road Challenge (USA).zip"
+    },
+    {
+      "title": "Polaris SnoCross",
+      "system": "n64",
+      "bucket": "n64/Polaris SnoCross (USA).zip"
+    },
+    {
+      "title": "Roadsters",
+      "system": "n64",
+      "bucket": "n64/Roadsters (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "S.C.A.R.S.",
+      "system": "n64",
+      "bucket": "n64/S.C.A.R.S. (USA).zip"
+    },
+    {
+      "title": "South Park Rally",
+      "system": "n64",
+      "bucket": "n64/South Park Rally (USA).zip"
+    },
+    {
+      "title": "Supercross 2000",
+      "system": "n64",
+      "bucket": "n64/Supercross 2000 (USA).zip"
+    },
+    {
+      "title": "F-1 Race",
+      "system": "gb",
+      "bucket": "gb/F-1 Race (World) (Rev 1).zip"
+    },
+    {
+      "title": "Super R.C. Pro-Am",
+      "system": "gb",
+      "bucket": "gb/Super R.C. Pro-Am (USA, Europe).zip"
+    },
+    {
+      "title": "Wave Race",
+      "system": "gb",
+      "bucket": "gb/Wave Race (USA, Europe).zip"
+    },
+    {
+      "title": "Road Rash",
+      "system": "gb",
+      "bucket": "gb/Road Rash (USA, Europe).zip"
+    },
+    {
+      "title": "Micro Machines",
+      "system": "gb",
+      "bucket": "gb/Micro Machines (USA, Europe).zip"
+    },
+    {
+      "title": "Micro Machines 2: Turbo Tournament",
+      "system": "gb",
+      "bucket": "gb/Micro Machines 2 - Turbo Tournament (Europe).zip"
+    },
+    {
+      "title": "Motocross Maniacs",
+      "system": "gb",
+      "bucket": "gb/Motocross Maniacs (USA).zip"
+    },
+    {
+      "title": "Chase H.Q.",
+      "system": "gb",
+      "bucket": "gb/Chase H.Q. (USA, Europe).zip"
+    },
+    {
+      "title": "Street Racer",
+      "system": "gb",
+      "bucket": "gb/Street Racer (USA, Europe).zip"
+    },
+    {
+      "title": "Super Off Road",
+      "system": "gb",
+      "bucket": "gb/Super Off Road (USA, Europe).zip"
+    },
+    {
+      "title": "Dead Heat Scramble",
+      "system": "gb",
+      "bucket": "gb/Dead Heat Scramble (USA).zip"
+    },
+    {
+      "title": "World Circuit Series",
+      "system": "gb",
+      "bucket": "gb/World Circuit Series (USA).zip"
+    },
+    {
+      "title": "F1 Pole Position",
+      "system": "gb",
+      "bucket": "gb/F1 Pole Position (USA, Europe).zip"
+    },
+    {
+      "title": "Lamborghini American Challenge",
+      "system": "gb",
+      "bucket": "gb/Lamborghini American Challenge (USA, Europe).zip"
+    },
+    {
+      "title": "Days of Thunder",
+      "system": "gb",
+      "bucket": "gb/Days of Thunder (USA, Europe).zip"
+    },
+    {
+      "title": "Jeep Jamboree: Off-Road Adventure",
+      "system": "gb",
+      "bucket": "gb/Jeep Jamboree - Off-Road Adventure (USA).zip"
+    },
+    {
+      "title": "Monster Truck",
+      "system": "gb",
+      "bucket": "gb/Monster Truck (Japan).zip"
+    },
+    {
+      "title": "Nigel Mansell's World Championship Racing",
+      "system": "gb",
+      "bucket": "gb/Nigel Mansell's World Championship Racing (USA).zip"
+    },
+    {
+      "title": "Race Days",
+      "system": "gb",
+      "bucket": "gb/Race Days (USA).zip"
+    },
+    {
+      "title": "Race Drivin'",
+      "system": "gb",
+      "bucket": "gb/Race Drivin' (USA, Europe).zip"
+    },
+    {
+      "title": "Racing Damashii",
+      "system": "gb",
+      "bucket": "gb/Racing Damashii (Japan).zip"
+    },
+    {
+      "title": "Roadster",
+      "system": "gb",
+      "bucket": "gb/Roadster (Japan).zip"
+    },
+    {
+      "title": "V-Rally: Championship Edition",
+      "system": "gb",
+      "bucket": "gb/V-Rally - Championship Edition (Europe) (En,Fr,De).zip"
+    },
+    {
+      "title": "Top Gear Pocket",
+      "system": "gbc",
+      "bucket": "gbc/Top Gear Pocket (USA) (Rumble Version).zip"
+    },
+    {
+      "title": "Top Gear Pocket 2",
+      "system": "gbc",
+      "bucket": "gbc/Top Gear Pocket 2 (USA).zip"
+    },
+    {
+      "title": "Wacky Races",
+      "system": "gbc",
+      "bucket": "gbc/Wacky Races (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Micro Machines 1 and 2: Twin Turbo",
+      "system": "gbc",
+      "bucket": "gbc/Micro Machines 1 and 2 - Twin Turbo (USA, Europe).zip"
+    },
+    {
+      "title": "Micro Machines V3",
+      "system": "gbc",
+      "bucket": "gbc/Micro Machines V3 (USA, Europe).zip"
+    },
+    {
+      "title": "Mickey's Racing Adventure",
+      "system": "gbc",
+      "bucket": "gbc/Mickey's Racing Adventure (USA, Europe) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Mickey's Speedway USA",
+      "system": "gbc",
+      "bucket": "gbc/Mickey's Speedway USA (USA, Europe) (En,Fr,De,Es).zip"
+    },
+    {
+      "title": "LEGO Racers",
+      "system": "gbc",
+      "bucket": "gbc/LEGO Racers (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Star Wars Episode I: Racer",
+      "system": "gbc",
+      "bucket": "gbc/Star Wars Episode I - Racer (USA, Europe) (Rumble Version).zip"
+    },
+    {
+      "title": "V-Rally: Edition 99",
+      "system": "gbc",
+      "bucket": "gbc/V-Rally - Edition 99 (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Road Rash",
+      "system": "gbc",
+      "bucket": "gbc/Road Rash (USA, Europe).zip"
+    },
+    {
+      "title": "San Francisco Rush 2049",
+      "system": "gbc",
+      "bucket": "gbc/San Francisco Rush 2049 (USA, Europe).zip"
+    },
+    {
+      "title": "Cruis'n Exotica",
+      "system": "gbc",
+      "bucket": "gbc/Cruis'n Exotica (USA).zip"
+    },
+    {
+      "title": "TOCA Touring Car Championship",
+      "system": "gbc",
+      "bucket": "gbc/TOCA Touring Car Championship (USA, Europe).zip"
+    },
+    {
+      "title": "Test Drive Le Mans",
+      "system": "gbc",
+      "bucket": "gbc/Test Drive Le Mans (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "F1 World Grand Prix II",
+      "system": "gbc",
+      "bucket": "gbc/F1 World Grand Prix II for Game Boy Color (USA) (En,Fr,De,Es).zip"
+    },
+    {
+      "title": "Looney Tunes Racing",
+      "system": "gbc",
+      "bucket": "gbc/Looney Tunes Racing (USA) (En,Fr,De,Es,It,Nl).zip"
+    },
+    {
+      "title": "Toy Story Racer",
+      "system": "gbc",
+      "bucket": "gbc/Toy Story Racer (USA, Europe).zip"
+    },
+    {
+      "title": "Walt Disney World Quest: Magical Racing Tour",
+      "system": "gbc",
+      "bucket": "gbc/Walt Disney World Quest - Magical Racing Tour (USA, Europe).zip"
+    },
+    {
+      "title": "Motocross Maniacs 2",
+      "system": "gbc",
+      "bucket": "gbc/Motocross Maniacs 2 (USA).zip"
+    },
+    {
+      "title": "Chase H.Q.: Secret Police",
+      "system": "gbc",
+      "bucket": "gbc/Chase H.Q. - Secret Police (USA) (SGB Enhanced) (GB Compatible).zip"
+    },
+    {
+      "title": "Vigilante 8",
+      "system": "gbc",
+      "bucket": "gbc/Vigilante 8 (USA) (Rumble Version).zip"
+    },
+    {
+      "title": "Carmageddon: Carpocalypse Now",
+      "system": "gbc",
+      "bucket": "gbc/Carmageddon - Carpocalypse Now (USA, Europe) (En,Fr,Es,It).zip"
+    },
+    {
+      "title": "Choro Q: Hyper Customable GB",
+      "system": "gbc",
+      "bucket": "gbc/Choro Q - Hyper Customable GB (Japan) (SGB Enhanced) (GB Compatible).zip"
+    },
+    {
+      "title": "Colin McRae Rally",
+      "system": "gbc",
+      "bucket": "gbc/Colin McRae Rally (Europe).zip"
+    },
+    {
+      "title": "Driver: You Are the Wheelman",
+      "system": "gbc",
+      "bucket": "gbc/Driver - You Are the Wheelman (USA) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "The Dukes of Hazzard: Racing for Home",
+      "system": "gbc",
+      "bucket": "gbc/Dukes of Hazzard, The - Racing for Home (USA).zip"
+    },
+    {
+      "title": "F-1 World Grand Prix",
+      "system": "gbc",
+      "bucket": "gbc/F-1 World Grand Prix (Europe) (En,Fr,De,Es).zip"
+    },
+    {
+      "title": "F1 Championship Season 2000",
+      "system": "gbc",
+      "bucket": "gbc/F1 Championship Season 2000 (Europe) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "F1 Racing Championship",
+      "system": "gbc",
+      "bucket": "gbc/F1 Racing Championship (Europe) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Formula One 2000",
+      "system": "gbc",
+      "bucket": "gbc/Formula One 2000 (USA).zip"
+    },
+    {
+      "title": "Hot Wheels: Stunt Track Driver",
+      "system": "gbc",
+      "bucket": "gbc/Hot Wheels - Stunt Track Driver (USA, Europe) (SGB Enhanced) (GB Compatible).zip"
+    },
+    {
+      "title": "International Rally",
+      "system": "gbc",
+      "bucket": "gbc/International Rally (USA) (SGB Enhanced) (GB Compatible).zip"
+    },
+    {
+      "title": "Jeff Gordon XS Racing",
+      "system": "gbc",
+      "bucket": "gbc/Jeff Gordon XS Racing (USA) (GB Compatible).zip"
+    },
+    {
+      "title": "Jeremy McGrath Supercross 2000",
+      "system": "gbc",
+      "bucket": "gbc/Jeremy McGrath Supercross 2000 (USA, Europe).zip"
+    },
+    {
+      "title": "LEGO Stunt Rally",
+      "system": "gbc",
+      "bucket": "gbc/LEGO Stunt Rally (USA).zip"
+    },
+    {
+      "title": "Micro Maniacs",
+      "system": "gbc",
+      "bucket": "gbc/Micro Maniacs (Europe).zip"
+    },
+    {
+      "title": "NASCAR 2000",
+      "system": "gbc",
+      "bucket": "gbc/NASCAR 2000 (USA, Europe).zip"
+    },
+    {
+      "title": "NASCAR Heat",
+      "system": "gbc",
+      "bucket": "gbc/NASCAR Heat (USA).zip"
+    },
+    {
+      "title": "NASCAR Racers",
+      "system": "gbc",
+      "bucket": "gbc/NASCAR Racers (USA).zip"
+    },
+    {
+      "title": "Nicktoons Racing",
+      "system": "gbc",
+      "bucket": "gbc/Nicktoons Racing (USA).zip"
+    },
+    {
+      "title": "No Fear: Downhill Mountain Biking",
+      "system": "gbc",
+      "bucket": "gbc/No Fear - Downhill Mountain Biking (Europe).zip"
+    },
+    {
+      "title": "Polaris SnoCross",
+      "system": "gbc",
+      "bucket": "gbc/Polaris SnoCross (USA) (Rumble Version).zip"
+    },
+    {
+      "title": "Roadsters",
+      "system": "gbc",
+      "bucket": "gbc/Roadsters (USA) (En,Fr,De,Es,It,Nl) (GB Compatible).zip"
+    },
+    {
+      "title": "Test Drive 2001",
+      "system": "gbc",
+      "bucket": "gbc/Test Drive 2001 (USA).zip"
+    },
+    {
+      "title": "Test Drive 6",
+      "system": "gbc",
+      "bucket": "gbc/Test Drive 6 (USA) (GB Compatible).zip"
+    },
+    {
+      "title": "Test Drive Cycles",
+      "system": "gbc",
+      "bucket": "gbc/Test Drive Cycles (USA).zip"
+    },
+    {
+      "title": "Test Drive Off-Road 3",
+      "system": "gbc",
+      "bucket": "gbc/Test Drive Off-Road 3 (USA) (Rumble Version) (SGB Enhanced) (GB Compatible).zip"
+    },
+    {
+      "title": "Woody Woodpecker Racing",
+      "system": "gbc",
+      "bucket": "gbc/Woody Woodpecker Racing (USA).zip"
+    },
+    {
+      "title": "Mario Kart: Super Circuit",
+      "system": "gba",
+      "bucket": "gba/Mario Kart - Super Circuit (USA).zip"
+    },
+    {
+      "title": "F-Zero: Maximum Velocity",
+      "system": "gba",
+      "bucket": "gba/F-Zero - Maximum Velocity (USA, Europe).zip"
+    },
+    {
+      "title": "F-Zero: GP Legend",
+      "system": "gba",
+      "bucket": "gba/F-Zero - GP Legend (USA).zip"
+    },
+    {
+      "title": "F-Zero: Climax",
+      "system": "gba",
+      "bucket": "gba/F-Zero - Climax (Japan).zip"
+    },
+    {
+      "title": "Konami Krazy Racers",
+      "system": "gba",
+      "bucket": "gba/Konami Krazy Racers (USA).zip"
+    },
+    {
+      "title": "Crash Nitro Kart",
+      "system": "gba",
+      "bucket": "gba/Crash Nitro Kart (USA).zip"
+    },
+    {
+      "title": "Banjo-Pilot",
+      "system": "gba",
+      "bucket": "gba/Banjo-Pilot (USA).zip"
+    },
+    {
+      "title": "Digimon Racing",
+      "system": "gba",
+      "bucket": "gba/Digimon Racing (USA) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "GT Advance: Championship Racing",
+      "system": "gba",
+      "bucket": "gba/GT Advance - Championship Racing (USA, Europe).zip"
+    },
+    {
+      "title": "GT Advance 2: Rally Racing",
+      "system": "gba",
+      "bucket": "gba/GT Advance 2 - Rally Racing (USA).zip"
+    },
+    {
+      "title": "GT Advance 3: Pro Concept Racing",
+      "system": "gba",
+      "bucket": "gba/GT Advance 3 - Pro Concept Racing (USA).zip"
+    },
+    {
+      "title": "Racing Gears Advance",
+      "system": "gba",
+      "bucket": "gba/Racing Gears Advance (USA).zip"
+    },
+    {
+      "title": "Top Gear Rally",
+      "system": "gba",
+      "bucket": "gba/Top Gear Rally (USA).zip"
+    },
+    {
+      "title": "Top Gear GT Championship",
+      "system": "gba",
+      "bucket": "gba/Top Gear GT Championship (USA).zip"
+    },
+    {
+      "title": "V-Rally 3",
+      "system": "gba",
+      "bucket": "gba/V-Rally 3 (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Colin McRae Rally 2.0",
+      "system": "gba",
+      "bucket": "gba/Colin McRae Rally 2.0 (USA) (En,Fr,De).zip"
+    },
+    {
+      "title": "SEGA Rally Championship",
+      "system": "gba",
+      "bucket": "gba/SEGA Rally Championship (USA).zip"
+    },
+    {
+      "title": "Need for Speed: Porsche Unleashed",
+      "system": "gba",
+      "bucket": "gba/Need for Speed - Porsche Unleashed (USA).zip"
+    },
+    {
+      "title": "Need for Speed: Underground",
+      "system": "gba",
+      "bucket": "gba/Need for Speed - Underground (USA, Europe) (En,Fr,De,It).zip"
+    },
+    {
+      "title": "Need for Speed: Underground 2",
+      "system": "gba",
+      "bucket": "gba/Need for Speed - Underground 2 (USA, Europe) (En,Fr,De,It).zip"
+    },
+    {
+      "title": "Need for Speed: Most Wanted",
+      "system": "gba",
+      "bucket": "gba/Need for Speed - Most Wanted (USA, Europe) (En,Fr,De,It).zip"
+    },
+    {
+      "title": "Need for Speed Carbon: Own the City",
+      "system": "gba",
+      "bucket": "gba/Need for Speed - Carbon - Own the City (USA, Europe) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Midnight Club: Street Racing",
+      "system": "gba",
+      "bucket": "gba/Midnight Club - Street Racing (USA).zip"
+    },
+    {
+      "title": "Tokyo Xtreme Racer Advance",
+      "system": "gba",
+      "bucket": "gba/Tokyo Xtreme Racer Advance (USA).zip"
+    },
+    {
+      "title": "Initial D: Another Stage",
+      "system": "gba",
+      "bucket": "gba/Initial D - Another Stage (Japan).zip"
+    },
+    {
+      "title": "Street Racing Syndicate",
+      "system": "gba",
+      "bucket": "gba/Street Racing Syndicate (USA).zip"
+    },
+    {
+      "title": "Cruis'n Velocity",
+      "system": "gba",
+      "bucket": "gba/Cruis'n Velocity (USA, Europe).zip"
+    },
+    {
+      "title": "Moto Racer Advance",
+      "system": "gba",
+      "bucket": "gba/Moto Racer Advance (USA) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "MotoGP",
+      "system": "gba",
+      "bucket": "gba/MotoGP (USA) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Road Rash: Jailbreak",
+      "system": "gba",
+      "bucket": "gba/Road Rash - Jailbreak (USA).zip"
+    },
+    {
+      "title": "Rock 'N Roll Racing",
+      "system": "gba",
+      "bucket": "gba/Rock 'N Roll Racing (USA).zip"
+    },
+    {
+      "title": "Micro Machines",
+      "system": "gba",
+      "bucket": "gba/Micro Machines (Europe) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Karnaaj Rally",
+      "system": "gba",
+      "bucket": "gba/Karnaaj Rally (USA, Europe).zip"
+    },
+    {
+      "title": "Gadget Racers",
+      "system": "gba",
+      "bucket": "gba/Gadget Racers (USA).zip"
+    },
+    {
+      "title": "Road Trip: Shifting Gears",
+      "system": "gba",
+      "bucket": "gba/Shifting Gears - Road Trip (USA).zip"
+    },
+    {
+      "title": "Stuntman",
+      "system": "gba",
+      "bucket": "gba/Stuntman (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Crazy Taxi: Catch a Ride",
+      "system": "gba",
+      "bucket": "gba/Crazy Taxi - Catch a Ride (USA).zip"
+    },
+    {
+      "title": "F1 2002",
+      "system": "gba",
+      "bucket": "gba/F1 2002 (USA, Europe).zip"
+    },
+    {
+      "title": "Classic NES Series: Excitebike",
+      "system": "gba",
+      "bucket": "gba/Classic NES Series - Excitebike (USA, Europe).zip"
+    },
+    {
+      "title": "Spy Hunter + Super Sprint",
+      "system": "gba",
+      "bucket": "gba/2 Games in One! - Spy Hunter + Super Sprint (USA).zip"
+    },
+    {
+      "title": "SSX Tricky",
+      "system": "gba",
+      "bucket": "gba/SSX Tricky (USA, Europe) (En,Fr,De).zip"
+    },
+    {
+      "title": "SSX 3",
+      "system": "gba",
+      "bucket": "gba/SSX 3 (USA, Europe).zip"
+    },
+    {
+      "title": "Antz: Extreme Racing",
+      "system": "gba",
+      "bucket": "gba/Antz - Extreme Racing (USA).zip"
+    },
+    {
+      "title": "ATV: Quad Power Racing",
+      "system": "gba",
+      "bucket": "gba/ATV - Quad Power Racing (USA, Europe).zip"
+    },
+    {
+      "title": "Big Mutha Truckers",
+      "system": "gba",
+      "bucket": "gba/Big Mutha Truckers (USA).zip"
+    },
+    {
+      "title": "Cars: Mater-National Championship",
+      "system": "gba",
+      "bucket": "gba/Cars - Mater-National Championship (USA) (En,Fr).zip"
+    },
+    {
+      "title": "Cars",
+      "system": "gba",
+      "bucket": "gba/Cars (USA, Europe).zip"
+    },
+    {
+      "title": "Cartoon Network Speedway",
+      "system": "gba",
+      "bucket": "gba/Cartoon Network Speedway (USA).zip"
+    },
+    {
+      "title": "Cocoto: Kart Racer",
+      "system": "gba",
+      "bucket": "gba/Cocoto - Kart Racer (Europe) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Corvette",
+      "system": "gba",
+      "bucket": "gba/Corvette (USA) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Crazy Frog Racer",
+      "system": "gba",
+      "bucket": "gba/Crazy Frog Racer (Europe) (En,Fr,De,Nl).zip"
+    },
+    {
+      "title": "Driven",
+      "system": "gba",
+      "bucket": "gba/Driven (USA) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Driver 2 Advance",
+      "system": "gba",
+      "bucket": "gba/Driver 2 Advance (USA).zip"
+    },
+    {
+      "title": "Drome Racers",
+      "system": "gba",
+      "bucket": "gba/Drome Racers (USA).zip"
+    },
+    {
+      "title": "Ford Racing 3",
+      "system": "gba",
+      "bucket": "gba/Ford Racing 3 (USA).zip"
+    },
+    {
+      "title": "Freekstyle",
+      "system": "gba",
+      "bucket": "gba/Freekstyle (USA).zip"
+    },
+    {
+      "title": "GT Racers",
+      "system": "gba",
+      "bucket": "gba/GT Racers (Europe) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Herbie: Fully Loaded",
+      "system": "gba",
+      "bucket": "gba/Herbie - Fully Loaded (USA).zip"
+    },
+    {
+      "title": "Hot Wheels: All Out",
+      "system": "gba",
+      "bucket": "gba/Hot Wheels - All Out (USA).zip"
+    },
+    {
+      "title": "Hot Wheels: Burnin' Rubber",
+      "system": "gba",
+      "bucket": "gba/Hot Wheels - Burnin' Rubber (USA).zip"
+    },
+    {
+      "title": "Hot Wheels: Stunt Track Challenge",
+      "system": "gba",
+      "bucket": "gba/Hot Wheels - Stunt Track Challenge (USA, Europe).zip"
+    },
+    {
+      "title": "Hot Wheels: Velocity X",
+      "system": "gba",
+      "bucket": "gba/Hot Wheels - Velocity X (USA).zip"
+    },
+    {
+      "title": "Hot Wheels: World Race",
+      "system": "gba",
+      "bucket": "gba/Hot Wheels - World Race (USA).zip"
+    },
+    {
+      "title": "Hugo: Bukkazoom!",
+      "system": "gba",
+      "bucket": "gba/Hugo - Bukkazoom! (Europe) (En,Fr,De,Es,It,Nl,Pt,Sv,No,Da,Fi,Pl).zip"
+    },
+    {
+      "title": "LEGO Racers 2",
+      "system": "gba",
+      "bucket": "gba/LEGO Racers 2 (USA) (En,Fr).zip"
+    },
+    {
+      "title": "Monster Jam: Maximum Destruction",
+      "system": "gba",
+      "bucket": "gba/Monster Jam - Maximum Destruction (USA).zip"
+    },
+    {
+      "title": "Monster Truck Madness",
+      "system": "gba",
+      "bucket": "gba/Monster Truck Madness (USA, Europe).zip"
+    },
+    {
+      "title": "Monster Trucks",
+      "system": "gba",
+      "bucket": "gba/Monster Trucks (USA, Europe).zip"
+    },
+    {
+      "title": "Motocross Maniacs Advance",
+      "system": "gba",
+      "bucket": "gba/Motocross Maniacs Advance (USA) (En,Es).zip"
+    },
+    {
+      "title": "NASCAR Heat 2002",
+      "system": "gba",
+      "bucket": "gba/NASCAR Heat 2002 (USA).zip"
+    },
+    {
+      "title": "Nicktoons Racing",
+      "system": "gba",
+      "bucket": "gba/Nicktoons Racing (USA).zip"
+    },
+    {
+      "title": "Racing Fever",
+      "system": "gba",
+      "bucket": "gba/Racing Fever (Europe) (En,De,Es,It).zip"
+    },
+    {
+      "title": "Shrek: Smash n' Crash Racing",
+      "system": "gba",
+      "bucket": "gba/Shrek - Smash n' Crash Racing (USA).zip"
+    },
+    {
+      "title": "The Simpsons: Road Rage",
+      "system": "gba",
+      "bucket": "gba/Simpsons, The - Road Rage (USA, Europe).zip"
+    },
+    {
+      "title": "Smashing Drive",
+      "system": "gba",
+      "bucket": "gba/Smashing Drive (USA).zip"
+    },
+    {
+      "title": "Smuggler's Run",
+      "system": "gba",
+      "bucket": "gba/Smuggler's Run (USA).zip"
+    },
+    {
+      "title": "Spy Hunter",
+      "system": "gba",
+      "bucket": "gba/Spy Hunter (USA) (En,Ja,Fr,De,Es).zip"
+    },
+    {
+      "title": "Starsky & Hutch",
+      "system": "gba",
+      "bucket": "gba/Starsky & Hutch (USA).zip"
+    },
+    {
+      "title": "TOCA World Touring Cars",
+      "system": "gba",
+      "bucket": "gba/TOCA World Touring Cars (Europe).zip"
+    },
+    {
+      "title": "Tony Hawk's Downhill Jam",
+      "system": "gba",
+      "bucket": "gba/Tony Hawk's Downhill Jam (USA).zip"
+    },
+    {
+      "title": "Mario Kart DS",
+      "system": "nds",
+      "bucket": "nds/Mario Kart DS (USA, Australia) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Diddy Kong Racing DS",
+      "system": "nds",
+      "bucket": "nds/Diddy Kong Racing DS (USA).zip"
+    },
+    {
+      "title": "Sonic & SEGA All-Stars Racing",
+      "system": "nds",
+      "bucket": "nds/Sonic & SEGA All-Stars Racing (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Ridge Racer DS",
+      "system": "nds",
+      "bucket": "nds/Ridge Racer DS (USA, Europe).zip"
+    },
+    {
+      "title": "Burnout Legends",
+      "system": "nds",
+      "bucket": "nds/Burnout Legends (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Asphalt: Urban GT",
+      "system": "nds",
+      "bucket": "nds/Asphalt - Urban GT (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Asphalt: Urban GT 2",
+      "system": "nds",
+      "bucket": "nds/Asphalt - Urban GT 2 (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Need for Speed: Underground 2",
+      "system": "nds",
+      "bucket": "nds/Need for Speed - Underground 2 (USA) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Need for Speed: Most Wanted",
+      "system": "nds",
+      "bucket": "nds/Need for Speed - Most Wanted (USA).zip"
+    },
+    {
+      "title": "Need for Speed Carbon: Own the City",
+      "system": "nds",
+      "bucket": "nds/Need for Speed Carbon - Own the City (USA) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Need for Speed: ProStreet",
+      "system": "nds",
+      "bucket": "nds/Need for Speed - ProStreet (USA) (En,Fr,De,Es,It) (Rev 1).zip"
+    },
+    {
+      "title": "Need for Speed: Undercover",
+      "system": "nds",
+      "bucket": "nds/Need for Speed - Undercover (USA) (En,Fr,De,Es,It,Nl).zip"
+    },
+    {
+      "title": "Need for Speed: Nitro",
+      "system": "nds",
+      "bucket": "nds/Need for Speed - Nitro (USA) (En,Fr,De,Es,It,Nl).zip"
+    },
+    {
+      "title": "Race Driver: Create & Race",
+      "system": "nds",
+      "bucket": "nds/Race Driver - Create & Race (USA) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Grid",
+      "system": "nds",
+      "bucket": "nds/Grid (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "DiRT 2",
+      "system": "nds",
+      "bucket": "nds/DiRT 2 (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "TrackMania DS",
+      "system": "nds",
+      "bucket": "nds/TrackMania DS (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "TrackMania Turbo",
+      "system": "nds",
+      "bucket": "nds/TrackMania Turbo (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Juiced 2: Hot Import Nights",
+      "system": "nds",
+      "bucket": "nds/Juiced 2 - Hot Import Nights (USA).zip"
+    },
+    {
+      "title": "Ferrari Challenge: Trofeo Pirelli",
+      "system": "nds",
+      "bucket": "nds/Ferrari Challenge - Trofeo Pirelli (USA) (En,Fr).zip"
+    },
+    {
+      "title": "Indianapolis 500 Legends",
+      "system": "nds",
+      "bucket": "nds/Indianapolis 500 Legends (USA).zip"
+    },
+    {
+      "title": "Moto Racer DS",
+      "system": "nds",
+      "bucket": "nds/Moto Racer DS (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "MySims: Racing",
+      "system": "nds",
+      "bucket": "nds/MySims - Racing (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Speed Racer: The Videogame",
+      "system": "nds",
+      "bucket": "nds/Speed Racer - The Videogame (USA) (En,Fr,Es,Pt).zip"
+    },
+    {
+      "title": "SBK: Snowboard Kids",
+      "system": "nds",
+      "bucket": "nds/SBK - Snowboard Kids (USA).zip"
+    },
+    {
+      "title": "ATV Quad Frenzy",
+      "system": "nds",
+      "bucket": "nds/ATV Quad Frenzy (USA).zip"
+    },
+    {
+      "title": "Ben 10: Galactic Racing",
+      "system": "nds",
+      "bucket": "nds/Ben 10 - Galactic Racing (USA) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Big Mutha Truckers",
+      "system": "nds",
+      "bucket": "nds/Big Mutha Truckers (USA).zip"
+    },
+    {
+      "title": "Bigfoot: Collision Course",
+      "system": "nds",
+      "bucket": "nds/Bigfoot - Collision Course (USA).zip"
+    },
+    {
+      "title": "Biker Mice from Mars",
+      "system": "nds",
+      "bucket": "nds/Biker Mice from Mars (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Cars: Mater-National Championship",
+      "system": "nds",
+      "bucket": "nds/Cars - Mater-National Championship (USA).zip"
+    },
+    {
+      "title": "Cars: Race-O-Rama",
+      "system": "nds",
+      "bucket": "nds/Cars - Race-O-Rama (USA) (En,Fr).zip"
+    },
+    {
+      "title": "Cars",
+      "system": "nds",
+      "bucket": "nds/Cars (USA).zip"
+    },
+    {
+      "title": "Cars 2",
+      "system": "nds",
+      "bucket": "nds/Cars 2 (USA) (En,Fr,Es) (NDSi Enhanced).zip"
+    },
+    {
+      "title": "Cartoon Network Racing",
+      "system": "nds",
+      "bucket": "nds/Cartoon Network Racing (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Chrysler Classic Racing",
+      "system": "nds",
+      "bucket": "nds/Chrysler Classic Racing (USA) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Cocoto: Kart Racer",
+      "system": "nds",
+      "bucket": "nds/Cocoto - Kart Racer (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Corvette Evolution GT",
+      "system": "nds",
+      "bucket": "nds/Corvette Evolution GT (USA).zip"
+    },
+    {
+      "title": "Crazy Frog Racer",
+      "system": "nds",
+      "bucket": "nds/Crazy Frog Racer (Europe) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Ducati Moto",
+      "system": "nds",
+      "bucket": "nds/Ducati Moto (USA).zip"
+    },
+    {
+      "title": "Ford Racing 3",
+      "system": "nds",
+      "bucket": "nds/Ford Racing 3 (USA).zip"
+    },
+    {
+      "title": "Herbie: Rescue Rally",
+      "system": "nds",
+      "bucket": "nds/Herbie - Rescue Rally (USA) (En,Fr,De,Es).zip"
+    },
+    {
+      "title": "Hot Wheels: Battle Force 5",
+      "system": "nds",
+      "bucket": "nds/Hot Wheels - Battle Force 5 (USA).zip"
+    },
+    {
+      "title": "Hot Wheels: Beat That!",
+      "system": "nds",
+      "bucket": "nds/Hot Wheels - Beat That! (USA).zip"
+    },
+    {
+      "title": "Hot Wheels: Track Attack",
+      "system": "nds",
+      "bucket": "nds/Hot Wheels - Track Attack (USA) (En,Fr) (NDSi Enhanced).zip"
+    },
+    {
+      "title": "M&M's: Kart Racing",
+      "system": "nds",
+      "bucket": "nds/M&M's - Kart Racing (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Madagascar Kartz",
+      "system": "nds",
+      "bucket": "nds/Madagascar Kartz (USA) (En,Fr).zip"
+    },
+    {
+      "title": "Micro Machines V4",
+      "system": "nds",
+      "bucket": "nds/Micro Machines V4 (USA).zip"
+    },
+    {
+      "title": "Monster Jam: Path of Destruction",
+      "system": "nds",
+      "bucket": "nds/Monster Jam - Path of Destruction (USA) (En,Fr).zip"
+    },
+    {
+      "title": "Monster Jam: Urban Assault",
+      "system": "nds",
+      "bucket": "nds/Monster Jam - Urban Assault (USA) (En,Fr).zip"
+    },
+    {
+      "title": "Monster Jam",
+      "system": "nds",
+      "bucket": "nds/Monster Jam (USA).zip"
+    },
+    {
+      "title": "MX vs ATV Reflex",
+      "system": "nds",
+      "bucket": "nds/MX vs ATV Reflex (USA) (En,Fr).zip"
+    },
+    {
+      "title": "MX vs. ATV Untamed",
+      "system": "nds",
+      "bucket": "nds/MX vs. ATV Untamed (USA).zip"
+    },
+    {
+      "title": "Pimp My Ride: Street Racing",
+      "system": "nds",
+      "bucket": "nds/Pimp My Ride - Street Racing (USA) (En,Fr).zip"
+    },
+    {
+      "title": "Pokemon Dash",
+      "system": "nds",
+      "bucket": "nds/Pokemon Dash (USA).zip"
+    },
+    {
+      "title": "Shrek: Smash n' Crash Racing",
+      "system": "nds",
+      "bucket": "nds/Shrek - Smash n' Crash Racing (USA).zip"
+    },
+    {
+      "title": "SpongeBob's Boating Bash",
+      "system": "nds",
+      "bucket": "nds/SpongeBob's Boating Bash (USA) (NDSi Enhanced).zip"
+    },
+    {
+      "title": "Tony Hawk's Downhill Jam",
+      "system": "nds",
+      "bucket": "nds/Tony Hawk's Downhill Jam (USA).zip"
+    },
+    {
+      "title": "Turbo: Super Stunt Squad",
+      "system": "nds",
+      "bucket": "nds/Turbo - Super Stunt Squad (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Wacky Races: Crash & Dash",
+      "system": "nds",
+      "bucket": "nds/Wacky Races - Crash & Dash (USA) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Yamaha Supercross",
+      "system": "nds",
+      "bucket": "nds/Yamaha Supercross (USA).zip"
+    },
+    {
+      "title": "Mario Kart 7",
+      "system": "3ds",
+      "bucket": "3ds/Mario Kart 7 (USA) (En,Fr,Es) (Rev 1).zip"
+    },
+    {
+      "title": "Sonic & All-Stars Racing Transformed",
+      "system": "3ds",
+      "bucket": "3ds/Sonic & All-Stars Racing Transformed (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Ridge Racer 3D",
+      "system": "3ds",
+      "bucket": "3ds/Ridge Racer 3D (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Asphalt 3D",
+      "system": "3ds",
+      "bucket": "3ds/Asphalt 3D (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Need for Speed: The Run",
+      "system": "3ds",
+      "bucket": "3ds/Need for Speed - The Run (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "F1 2011",
+      "system": "3ds",
+      "bucket": "3ds/F1 2011 (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "WRC: FIA World Rally Championship",
+      "system": "3ds",
+      "bucket": "3ds/WRC - FIA World Rally Championship (Europe) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Ben 10: Galactic Racing",
+      "system": "3ds",
+      "bucket": "3ds/Ben 10 - Galactic Racing (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Cars 2",
+      "system": "3ds",
+      "bucket": "3ds/Cars 2 (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Driver: Renegade",
+      "system": "3ds",
+      "bucket": "3ds/Driver - Renegade (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Fast & Furious: Showdown",
+      "system": "3ds",
+      "bucket": "3ds/Fast & Furious - Showdown (USA) (En,Fr).zip"
+    },
+    {
+      "title": "Garfield Kart",
+      "system": "3ds",
+      "bucket": "3ds/Garfield Kart (USA).zip"
+    },
+    {
+      "title": "Hot Wheels: World's Best Driver",
+      "system": "3ds",
+      "bucket": "3ds/Hot Wheels - World's Best Driver (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "NASCAR Unleashed",
+      "system": "3ds",
+      "bucket": "3ds/NASCAR Unleashed (USA).zip"
+    },
+    {
+      "title": "Runabout 3D: Drive Impossible",
+      "system": "3ds",
+      "bucket": "3ds/Runabout 3D - Drive Impossible (Japan).zip"
+    },
+    {
+      "title": "Skylanders SuperChargers Racing",
+      "system": "3ds",
+      "bucket": "3ds/Skylanders SuperChargers Racing (USA).zip"
+    },
+    {
+      "title": "Spy Hunter",
+      "system": "3ds",
+      "bucket": "3ds/Spy Hunter (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Turbo: Super Stunt Squad",
+      "system": "3ds",
+      "bucket": "3ds/Turbo - Super Stunt Squad (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Final Lap Twin",
+      "system": "tg16",
+      "bucket": "tg16/Final Lap Twin (USA).zip"
+    },
+    {
+      "title": "Victory Run",
+      "system": "tg16",
+      "bucket": "tg16/Victory Run (USA).zip"
+    },
+    {
+      "title": "Moto Roader",
+      "system": "tg16",
+      "bucket": "tg16/Moto Roader (USA).zip"
+    },
+    {
+      "title": "Moto Roader II",
+      "system": "tg16",
+      "bucket": "tg16/Moto Roader II (Japan).zip"
+    },
+    {
+      "title": "Out Run",
+      "system": "tg16",
+      "bucket": "tg16/Out Run (Japan).zip"
+    },
+    {
+      "title": "Power Drift",
+      "system": "tg16",
+      "bucket": "tg16/Power Drift (Japan).zip"
+    },
+    {
+      "title": "Chase H.Q.",
+      "system": "tg16",
+      "bucket": "tg16/Chase H.Q. (USA).zip"
+    },
+    {
+      "title": "Zero4 Champ",
+      "system": "tg16",
+      "bucket": "tg16/Zero4 Champ (Japan).zip"
+    },
+    {
+      "title": "F-1 Dream",
+      "system": "tg16",
+      "bucket": "tg16/F-1 Dream (Japan).zip"
+    },
+    {
+      "title": "F1 Circus",
+      "system": "tg16",
+      "bucket": "tg16/F1 Circus (Japan).zip"
+    },
+    {
+      "title": "Knight Rider Special",
+      "system": "tg16",
+      "bucket": "tg16/Knight Rider Special (Japan).zip"
+    },
+    {
+      "title": "Racing Damashii",
+      "system": "tg16",
+      "bucket": "tg16/Racing Damashii (Japan).zip"
+    },
+    {
+      "title": "Moto Roader MC",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Motoroader MC (Japan).chd"
+    },
+    {
+      "title": "Road Spirits",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Road Spirits (Japan).chd"
+    },
+    {
+      "title": "F1 Circus Special: Pole to Win",
+      "system": "tg-cd",
+      "bucket": "tg-cd/F1 Circus Special - Pole to Win (Japan) (FAAT, FACT).chd"
+    },
+    {
+      "title": "Rally Championship",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Rally Championship (Japan) (FABT).chd"
+    },
+    {
+      "title": "Indy 500",
+      "system": "gamecom",
+      "bucket": "gamecom/Indy 500 (USA).zip"
+    },
+    {
+      "title": "Out Run",
+      "system": "fbneo",
+      "bucket": "fbneo/outrun.zip"
+    },
+    {
+      "title": "Turbo Out Run",
+      "system": "fbneo",
+      "bucket": "fbneo/toutrun.zip"
+    },
+    {
+      "title": "Hang-On",
+      "system": "fbneo",
+      "bucket": "fbneo/hangon.zip"
+    },
+    {
+      "title": "Super Hang-On",
+      "system": "fbneo",
+      "bucket": "fbneo/shangon.zip"
+    },
+    {
+      "title": "Enduro Racer",
+      "system": "fbneo",
+      "bucket": "fbneo/enduror.zip"
+    },
+    {
+      "title": "Power Drift",
+      "system": "fbneo",
+      "bucket": "fbneo/pdrift.zip"
+    },
+    {
+      "title": "A.B. Cop",
+      "system": "fbneo",
+      "bucket": "fbneo/abcop.zip"
+    },
+    {
+      "title": "Rally-X",
+      "system": "fbneo",
+      "bucket": "fbneo/rallyx.zip"
+    },
+    {
+      "title": "New Rally-X",
+      "system": "fbneo",
+      "bucket": "fbneo/nrallyx.zip"
+    },
+    {
+      "title": "Turbo",
+      "system": "fbneo",
+      "bucket": "fbneo/turbo.zip"
+    },
+    {
+      "title": "Spy Hunter",
+      "system": "fbneo",
+      "bucket": "fbneo/spyhunt.zip"
+    },
+    {
+      "title": "Burnin' Rubber",
+      "system": "fbneo",
+      "bucket": "fbneo/brubber.zip"
+    },
+    {
+      "title": "Traverse USA",
+      "system": "fbneo",
+      "bucket": "fbneo/travrusa.zip"
+    },
+    {
+      "title": "City Connection",
+      "system": "fbneo",
+      "bucket": "fbneo/citycon.zip"
+    },
+    {
+      "title": "Road Fighter",
+      "system": "fbneo",
+      "bucket": "fbneo/roadf.zip"
+    },
+    {
+      "title": "Konami GT",
+      "system": "fbneo",
+      "bucket": "fbneo/konamigt.zip"
+    },
+    {
+      "title": "Hot Chase",
+      "system": "fbneo",
+      "bucket": "fbneo/hotchase.zip"
+    },
+    {
+      "title": "WEC Le Mans 24",
+      "system": "fbneo",
+      "bucket": "fbneo/wecleman.zip"
+    },
+    {
+      "title": "Chequered Flag",
+      "system": "fbneo",
+      "bucket": "fbneo/chqflag.zip"
+    },
+    {
+      "title": "Final Lap",
+      "system": "fbneo",
+      "bucket": "fbneo/finallap.zip"
+    },
+    {
+      "title": "Final Lap 2",
+      "system": "fbneo",
+      "bucket": "fbneo/finalap2.zip"
+    },
+    {
+      "title": "Final Lap 3",
+      "system": "fbneo",
+      "bucket": "fbneo/finalap3.zip"
+    },
+    {
+      "title": "Suzuka 8 Hours",
+      "system": "fbneo",
+      "bucket": "fbneo/suzuka8h.zip"
+    },
+    {
+      "title": "Dirt Fox",
+      "system": "fbneo",
+      "bucket": "fbneo/dirtfoxj.zip"
+    },
+    {
+      "title": "F-1 Dream",
+      "system": "fbneo",
+      "bucket": "fbneo/f1dream.zip"
+    },
+    {
+      "title": "Mad Gear",
+      "system": "fbneo",
+      "bucket": "fbneo/madgear.zip"
+    },
+    {
+      "title": "Slip Stream",
+      "system": "fbneo",
+      "bucket": "fbneo/slipstrm.zip"
+    },
+    {
+      "title": "Bad Lands",
+      "system": "fbneo",
+      "bucket": "fbneo/badlands.zip"
+    },
+    {
+      "title": "Cisco Heat",
+      "system": "fbneo",
+      "bucket": "fbneo/cischeat.zip"
+    },
+    {
+      "title": "Grand Prix Star",
+      "system": "fbneo",
+      "bucket": "fbneo/f1gpstar.zip"
+    },
+    {
+      "title": "F-1 Grand Prix Star II",
+      "system": "fbneo",
+      "bucket": "fbneo/f1gpstr2.zip"
+    },
+    {
+      "title": "F-1 Grand Prix",
+      "system": "fbneo",
+      "bucket": "fbneo/f1gp.zip"
+    },
+    {
+      "title": "F-1 Grand Prix Part II",
+      "system": "fbneo",
+      "bucket": "fbneo/f1gp2.zip"
+    },
+    {
+      "title": "Lethal Crash Race",
+      "system": "fbneo",
+      "bucket": "fbneo/crshrace.zip"
+    },
+    {
+      "title": "Rally Bike",
+      "system": "fbneo",
+      "bucket": "fbneo/rallybik.zip"
+    },
+    {
+      "title": "Drift Out",
+      "system": "fbneo",
+      "bucket": "fbneo/driftout.zip"
+    },
+    {
+      "title": "Drift Out '94: The Hard Order",
+      "system": "fbneo",
+      "bucket": "fbneo/drifto94.zip"
+    },
+    {
+      "title": "Neo Drift Out: New Technology",
+      "system": "fbneo",
+      "bucket": "fbneo/neodrift.zip"
+    },
+    {
+      "title": "Thrash Rally",
+      "system": "fbneo",
+      "bucket": "fbneo/trally.zip"
+    },
+    {
+      "title": "Over Top",
+      "system": "fbneo",
+      "bucket": "fbneo/overtop.zip"
+    },
+    {
+      "title": "Riding Hero",
+      "system": "fbneo",
+      "bucket": "fbneo/ridhero.zip"
+    },
+    {
+      "title": "World Rally 2: Twin Racing",
+      "system": "fbneo",
+      "bucket": "fbneo/wrally2.zip"
+    },
+    {
+      "title": "Racing Beat",
+      "system": "fbneo",
+      "bucket": "fbneo/racingb.zip"
+    },
+    {
+      "title": "Double Axle",
+      "system": "fbneo",
+      "bucket": "fbneo/dblaxle.zip"
+    },
+    {
+      "title": "Buggy Challenge",
+      "system": "fbneo",
+      "bucket": "fbneo/buggychl.zip"
+    },
+    {
+      "title": "Hot Rod",
+      "system": "fbneo",
+      "bucket": "fbneo/hotrod.zip"
+    },
+    {
+      "title": "F-1 Super Lap",
+      "system": "fbneo",
+      "bucket": "fbneo/f1lap.zip"
+    },
+    {
+      "title": "Night Driver",
+      "system": "fbneo",
+      "bucket": "fbneo/nitedrvr.zip"
+    },
+    {
+      "title": "Blomby Car",
+      "system": "fbneo",
+      "bucket": "fbneo/blmbycar.zip"
+    },
+    {
+      "title": "Pole Position",
+      "system": "mame",
+      "bucket": "mame/polepos.zip"
+    },
+    {
+      "title": "Pole Position II",
+      "system": "mame",
+      "bucket": "mame/polepos2.zip"
+    },
+    {
+      "title": "Super Sprint",
+      "system": "mame",
+      "bucket": "mame/ssprint.zip"
+    },
+    {
+      "title": "Championship Sprint",
+      "system": "mame",
+      "bucket": "mame/csprint.zip"
+    },
+    {
+      "title": "Ironman Ivan Stewart's Super Off-Road",
+      "system": "mame",
+      "bucket": "mame/offroad.zip"
+    },
+    {
+      "title": "Danny Sullivan's Indy Heat",
+      "system": "mame",
+      "bucket": "mame/indyheat.zip"
+    },
+    {
+      "title": "RoadBlasters",
+      "system": "mame",
+      "bucket": "mame/roadblst.zip"
+    },
+    {
+      "title": "APB: All Points Bulletin",
+      "system": "mame",
+      "bucket": "mame/apb.zip"
+    },
+    {
+      "title": "Hard Drivin'",
+      "system": "mame",
+      "bucket": "mame/harddriv.zip"
+    },
+    {
+      "title": "Race Drivin'",
+      "system": "mame",
+      "bucket": "mame/racedriv.zip"
+    },
+    {
+      "title": "S.T.U.N. Runner",
+      "system": "mame",
+      "bucket": "mame/stunrun.zip"
+    },
+    {
+      "title": "Road Riot 4WD",
+      "system": "mame",
+      "bucket": "mame/roadriot.zip"
+    },
+    {
+      "title": "Speed Buggy",
+      "system": "mame",
+      "bucket": "mame/spdbuggy.zip"
+    },
+    {
+      "title": "World Grand Prix",
+      "system": "mame",
+      "bucket": "mame/wgp.zip"
+    },
+    {
+      "title": "Winning Run '91",
+      "system": "mame",
+      "bucket": "mame/winrun91.zip"
+    },
+    {
+      "title": "Ridge Racer",
+      "system": "mame",
+      "bucket": "mame/ridgeraj.zip"
+    },
+    {
+      "title": "Ridge Racer 2",
+      "system": "mame",
+      "bucket": "mame/ridger2j.zip"
+    },
+    {
+      "title": "Rave Racer",
+      "system": "mame",
+      "bucket": "mame/raveracw.zip"
+    },
+    {
+      "title": "Ace Driver",
+      "system": "mame",
+      "bucket": "mame/acedrvrw.zip"
+    },
+    {
+      "title": "Ace Driver: Victory Lap",
+      "system": "mame",
+      "bucket": "mame/victlapw.zip"
+    },
+    {
+      "title": "Cyber Cycles",
+      "system": "mame",
+      "bucket": "mame/cybrcycc.zip"
+    },
+    {
+      "title": "Alpine Racer",
+      "system": "mame",
+      "bucket": "mame/alpinerd.zip"
+    },
+    {
+      "title": "Over Drive",
+      "system": "mame",
+      "bucket": "mame/overdriv.zip"
+    },
+    {
+      "title": "Racin' Force",
+      "system": "mame",
+      "bucket": "mame/racinfrc.zip"
+    },
+    {
+      "title": "Vs. Excitebike",
+      "system": "mame",
+      "bucket": "mame/excitebk.zip"
+    },
+    {
+      "title": "San Francisco Rush",
+      "system": "mame",
+      "bucket": "mame/sfrush.zip"
+    },
+    {
+      "title": "Cruis'n USA",
+      "system": "mame",
+      "bucket": "mame/crusnusa.zip"
+    },
+    {
+      "title": "Cruis'n World",
+      "system": "mame",
+      "bucket": "mame/crusnwld.zip"
+    },
+    {
+      "title": "California Speed",
+      "system": "mame",
+      "bucket": "mame/calspeed.zip"
+    },
+    {
+      "title": "Off Road Challenge",
+      "system": "mame",
+      "bucket": "mame/offroadc.zip"
+    },
+    {
+      "title": "Off Road Thunder",
+      "system": "mame",
+      "bucket": "mame/offroadt.zip"
+    },
+    {
+      "title": "Hard Drivin's Airborne",
+      "system": "mame",
+      "bucket": "mame/hdrivair.zip"
+    },
+    {
+      "title": "Sprint 1",
+      "system": "mame",
+      "bucket": "mame/sprint1.zip"
+    },
+    {
+      "title": "Sprint 4",
+      "system": "mame",
+      "bucket": "mame/sprint4.zip"
+    },
+    {
+      "title": "Sprint 8",
+      "system": "mame",
+      "bucket": "mame/sprint8.zip"
+    },
+    {
+      "title": "Super Bug",
+      "system": "mame",
+      "bucket": "mame/superbug.zip"
+    },
+    {
+      "title": "Monte Carlo",
+      "system": "mame",
+      "bucket": "mame/montecar.zip"
+    },
+    {
+      "title": "Speed Freak",
+      "system": "mame",
+      "bucket": "mame/speedfrk.zip"
+    },
+    {
+      "title": "Drag Race",
+      "system": "mame",
+      "bucket": "mame/dragrace.zip"
+    },
+    {
+      "title": "Fire Truck",
+      "system": "mame",
+      "bucket": "mame/firetrk.zip"
+    },
+    {
+      "title": "Monaco Grand Prix",
+      "system": "arcadia",
+      "bucket": "arcadia/Monaco Grand Prix (Europe).zip"
+    },
+    {
+      "title": "Route 16",
+      "system": "arcadia",
+      "bucket": "arcadia/Route 16 (Europe).zip"
+    },
+    {
+      "title": "Drag Race",
+      "system": "channelf",
+      "bucket": "channelf/Drag Race (USA).zip"
+    },
+    {
+      "title": "Street Rider",
+      "system": "megaduck",
+      "bucket": "megaduck/Street Rider (World).zip"
+    },
+    {
+      "title": "Race + Spin-out + Cryptogram",
+      "system": "odyssey2",
+      "bucket": "odyssey2/Race + Spin-out + Cryptogram (Europe).zip"
+    },
+    {
+      "title": "Grand Prix",
+      "system": "supervision",
+      "bucket": "supervision/Grand Prix (USA, Europe).zip"
+    },
+    {
+      "title": "Final Lap 2000",
+      "system": "wonderswan",
+      "bucket": "wonderswan/Final Lap 2000 (Japan).zip"
+    },
+    {
+      "title": "Final Lap Special: GT & Formula Machine",
+      "system": "wonderswancolor",
+      "bucket": "wonderswancolor/Final Lap Special - GT & Formula Machine (Japan).zip"
     }
   ]
 }

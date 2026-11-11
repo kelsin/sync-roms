@@ -9,7 +9,7 @@ from unittest import mock
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 from helpers import DataDir  # noqa: E402
-from sync_roms import budget, cardedit, edit, inventory, picker, s3, store, ui  # noqa: E402
+from sync_roms import budget, cardedit, collections, edit, inventory, picker, s3, store, surprise, ui  # noqa: E402
 
 U = budget.Usage
 
@@ -134,6 +134,120 @@ class Flow(DataDir):
 
     def card(self, **entry):
         self.write_json("cards.json", {"c": {"device": "d", "layout": "esde", **entry}})
+
+    def test_u_toggles_surprise_and_the_title_shows_it(self):
+        self.card(size="1 GB")
+        calls = self.run_card(returns((cardedit.SURPRISE_KEY, 0)), returns((cardedit.SURPRISE_KEY, 0)), returns(None))
+        self.assertIn("🎁 Surprise on", calls[0][0])
+        self.assertIn("🎁 Surprise off", calls[1][0])
+        self.assertIn("🎁 Surprise on", calls[2][0])
+        self.assertNotIn("surprise", self.read("cards.json")["c"])
+
+    def test_u_off_saves_false(self):
+        self.card(size="1 GB")
+        self.run_card(returns((cardedit.SURPRISE_KEY, 0)), returns(None))
+        self.assertIs(self.read("cards.json")["c"]["surprise"], False)
+
+    def test_u_off_clears_the_current_surprises(self):
+        self.card(surprises=[{"system": "gba", "bucket": "gba/Zelda.zip", "title": "Zelda"}])
+        self.assertFalse(cardedit.toggle_surprise("c"))
+        self.assertNotIn("surprises", self.read("cards.json")["c"])
+
+    def test_a_text_collections_field_is_not_split_into_letters(self):
+        self.favs()
+        self.card(collections="favs")
+        self.run_card(returns((cardedit.COLLECTIONS_KEY, 0)), returns((" ", 0)), returns(None), returns(None))
+        self.assertEqual(self.read("cards.json")["c"]["collections"], ["favs"])
+
+    def test_p_narrows_the_game_list_to_past_surprises(self):
+        self.card()
+        with mock.patch.object(surprise, "past_keys", return_value={"gba/Ruby.zip"}):
+            _, calls = self.run_system(returns((cardedit.PAST_SURPRISE_KEY, 0)), returns((cardedit.CLEAR_KEY, 0)),
+                                       lambda labels, kw: [False] * len(labels))
+        self.assertEqual(calls[1][1], ["Ruby.zip"])
+        self.assertIn("🎁 past surprises only (c shows all)", calls[1][0])
+        self.assertEqual(len(calls[2][1]), len(calls[0][1]))
+
+    def test_p_with_no_past_surprises_says_so_and_keeps_the_list(self):
+        self.card()
+        with mock.patch.object(surprise, "past_keys", return_value=set()), \
+                mock.patch.object(edit, "note") as note:
+            _, calls = self.run_system(returns((cardedit.PAST_SURPRISE_KEY, 0)), lambda labels, kw: [False] * len(labels))
+        self.assertIn("No past surprises on Game Boy Advance", note.call_args[0][0])
+        self.assertEqual(len(calls[1][1]), len(calls[0][1]))
+
+    def test_surprise_rows_are_locked_in_the_game_list(self):
+        self.card(surprises=[{"system": "gba", "bucket": "gba/Zelda.zip", "title": "Zelda"}])
+        _, calls = self.run_system(lambda labels, kw: list(kw["initial"]))
+        labels, kw = calls[0][1], calls[0][2]
+        i = labels.index("Zelda.zip")
+        self.assertTrue(kw["locked"][i])
+        self.assertIn("🎁 Surprise", str(kw["extras"][i]) + str(kw.get("locked_note")))
+
+    def test_system_list_offers_no_make_set_key(self):
+        self.card(games={"gba": [g("gba/Ruby.zip")]})
+        kw = self.run_card(returns(None))[0][2]
+        self.assertNotIn("m", kw["hotkeys"])
+        self.assertNotIn("make set", kw["hint"])
+        self.assertFalse(hasattr(cardedit, "MAKE_SET_KEY"))
+
+    def favs(self, *more):
+        collections.save_collection({"id": "favs", "name": "Favs", "games": [
+            {"title": "Ruby", "system": "gba", "bucket": "gba/Ruby.zip"}, {"title": "Red", "system": "gb", "bucket": "gb/Red.gb"},
+            {"title": "FF7", "system": "psx", "bucket": "psx/FF7.chd"}, *more]})
+
+    def test_collections_hotkey_shows_playable_counts_and_space_toggles(self):
+        self.favs({"title": "Pokemon", "system": "nds", "bucket": "nds/Pokemon.nds"})
+        self.card()
+        nds = {**system("nds", "Nintendo DS"), "folders": {}}  # the device runs it, but esde has no folder for it
+        with mock.patch.dict(CATALOG, systems=CATALOG["systems"] + [nds]), \
+                mock.patch.dict(DEVICE, systems=["gba", "gb", "nds"]):
+            calls = self.run_card(returns((cardedit.COLLECTIONS_KEY, 0)), returns((" ", 0)), returns(None), returns(None))
+        self.assertEqual(calls[1][1], ["Favs  (2 playable, 2 not playable)"])
+        self.assertEqual(calls[1][2]["extras"], [[("  ✅ on the card", "green")]])
+        self.assertEqual(self.read("cards.json")["c"]["collections"], ["favs"])
+
+    def test_collections_hotkey_skips_malformed_games(self):
+        self.favs("gba/Loose.zip", None, {"system": "gba"})
+        self.card()
+        with contextlib.redirect_stderr(io.StringIO()):
+            calls = self.run_card(returns((cardedit.COLLECTIONS_KEY, 0)), returns(None), returns(None))
+        self.assertEqual(calls[1][1], ["Favs  (2 playable, 1 not playable)"])
+
+    def test_enter_toggles_a_collection_off_again(self):
+        self.favs()
+        self.card(collections=["favs"])
+        self.run_card(returns((cardedit.COLLECTIONS_KEY, 0)), returns(0), returns(None), returns(None))
+        self.assertEqual(self.read("cards.json")["c"]["collections"], [])
+
+    def test_no_collections_is_a_note(self):
+        self.card()
+        with mock.patch.object(edit, "note") as note:
+            calls = self.run_card(returns((cardedit.COLLECTIONS_KEY, 0)), returns(None))
+        self.assertEqual(len(calls), 2)  # the system list twice, no collection list
+        self.assertIn("sync-roms collections edit", note.call_args[0][0])
+
+    def test_collection_games_are_on_locked_and_marked_even_when_excluded(self):
+        self.favs()
+        self.card(collections=["favs"], excluded={"gba": ["gba/Ruby.zip"]})
+        changed, calls = self.run_system(toggle())
+        _, labels, kw = calls[0]
+        i = labels.index("Ruby.zip")
+        self.assertTrue(kw["initial"][i])
+        self.assertEqual([n for n, on in enumerate(kw["locked"]) if on], [i])
+        self.assertEqual(kw["locked_note"][i], "From 💖 Favs; take it off the card to remove this game")
+        self.assertIn(("  💖 Favs", "cyan"), kw["extras"][i])
+        self.assertFalse(changed)
+
+    def test_collection_games_count_in_the_game_view_and_system_list(self):
+        self.favs()
+        self.card(size="1 GB", collections=["favs"])
+        self.cache = {"gba/": self.files["gba/"], "gb/": self.files["gb/"], "scrapes/gba/": {}, "scrapes/gb/": {}, "BIOS/": {}}
+        _, calls = self.run_system(toggle())
+        kw = calls[0][2]
+        self.assertIn("· 2 file(s)", kw["status"](kw["initial"])[0])  # Ruby here, Red on Game Boy
+        extras = self.run_card(returns(None))[0][2]["extras"]
+        self.assertIn(("  1 picked", "green"), extras[0])
 
     def run_card(self, *steps):
         script = Script(*steps)
@@ -651,7 +765,7 @@ class SetupChange(DataDir):
     def test_changing_the_device_drops_games_it_cannot_play_at_save(self):
         self.write_json("cards.json", {"c": {"device": "full", "layout": "esde",
                                              "games": {"gba": [g("gba/A.zip")], "gb": [g("gb/B.gb")]}}})
-        picks = iter([0, (edit.SETUP_KEY, 0), None, 3])  # Cards, v on the card, back, Done
+        picks = iter([0, (edit.SETUP_KEY, 0), None, 4])  # Cards, v on the card, back, Done
         device = {**DEVICE, "systems": ["gba"]}
         with mock.patch.object(store, "repo_json", side_effect=lambda name: [dict(s) for s in CATALOG[name]]), \
                 mock.patch.object(store, "load_manifest", return_value=CATALOG), \

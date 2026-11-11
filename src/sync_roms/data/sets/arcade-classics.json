@@ -1,0 +1,2718 @@
+{
+  "name": "Arcade Classics",
+  "description": "Non-shmup, non-fighter arcade essentials from the golden age through CPS and Neo Geo.",
+  "games": [
+    {
+      "title": "Space Invaders",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/invaders.zip"
+    },
+    {
+      "title": "Super Breakout",
+      "category": "Golden Age",
+      "system": "mame",
+      "bucket": "mame/sbrkout.zip"
+    },
+    {
+      "title": "Asteroids",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/asteroid.zip"
+    },
+    {
+      "title": "Galaxian",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/galaxian.zip"
+    },
+    {
+      "title": "Lunar Lander",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/llander.zip"
+    },
+    {
+      "title": "Space Invaders Part II",
+      "category": "Golden Age",
+      "system": "mame",
+      "bucket": "mame/invadpt2.zip"
+    },
+    {
+      "title": "Asteroids Deluxe",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/astdelux.zip"
+    },
+    {
+      "title": "Battlezone",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/bzone.zip"
+    },
+    {
+      "title": "Berzerk",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/berzerk.zip"
+    },
+    {
+      "title": "Carnival",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/carnival.zip"
+    },
+    {
+      "title": "Centipede",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/centiped.zip"
+    },
+    {
+      "title": "Crazy Climber",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/cclimber.zip"
+    },
+    {
+      "title": "Defender",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/defender.zip"
+    },
+    {
+      "title": "Missile Command",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/missile.zip"
+    },
+    {
+      "title": "Moon Cresta",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/mooncrstu.zip"
+    },
+    {
+      "title": "Pac-Man",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/pacman.zip"
+    },
+    {
+      "title": "Phoenix",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/phoenix.zip"
+    },
+    {
+      "title": "Radar Scope",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/radarscp.zip"
+    },
+    {
+      "title": "Rally-X",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/rallyx.zip"
+    },
+    {
+      "title": "Space Duel",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/spacduel.zip"
+    },
+    {
+      "title": "Star Castle",
+      "category": "Golden Age",
+      "system": "mame",
+      "bucket": "mame/starcas.zip"
+    },
+    {
+      "title": "Tempest",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/tempest.zip"
+    },
+    {
+      "title": "Warlords",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/warlords.zip"
+    },
+    {
+      "title": "Wizard of Wor",
+      "category": "Golden Age",
+      "system": "mame",
+      "bucket": "mame/wow.zip"
+    },
+    {
+      "title": "Bosconian",
+      "category": "Golden Age",
+      "system": "mame",
+      "bucket": "mame/bosco.zip"
+    },
+    {
+      "title": "Donkey Kong",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/dkong.zip"
+    },
+    {
+      "title": "Fantasy",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/fantasyu.zip"
+    },
+    {
+      "title": "Frogger",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/frogger.zip"
+    },
+    {
+      "title": "Galaga",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/galaga.zip"
+    },
+    {
+      "title": "Gorf",
+      "category": "Golden Age",
+      "system": "mame",
+      "bucket": "mame/gorf.zip"
+    },
+    {
+      "title": "Jump Bug",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/jumpbug.zip"
+    },
+    {
+      "title": "Lady Bug",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/ladybug.zip"
+    },
+    {
+      "title": "Lock'n'Chase",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/lnc.zip"
+    },
+    {
+      "title": "Make Trax",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/maketrax.zip"
+    },
+    {
+      "title": "Mouse Trap",
+      "category": "Golden Age",
+      "system": "mame",
+      "bucket": "mame/mtrap.zip"
+    },
+    {
+      "title": "Ms. Pac-Man",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/mspacman.zip"
+    },
+    {
+      "title": "New Rally-X",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/nrallyx.zip"
+    },
+    {
+      "title": "Omega Race",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/omegrace.zip"
+    },
+    {
+      "title": "Pleiads",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/pleiads.zip"
+    },
+    {
+      "title": "Qix",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/qix.zip"
+    },
+    {
+      "title": "Satan's Hollow",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/shollow.zip"
+    },
+    {
+      "title": "Scramble",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/scramble.zip"
+    },
+    {
+      "title": "Solar Fox",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/solarfox.zip"
+    },
+    {
+      "title": "Stargate",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/stargate.zip"
+    },
+    {
+      "title": "Super Cobra",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/scobra.zip"
+    },
+    {
+      "title": "Turbo",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/turbo.zip"
+    },
+    {
+      "title": "Vanguard",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/vanguard.zip"
+    },
+    {
+      "title": "Venture",
+      "category": "Golden Age",
+      "system": "mame",
+      "bucket": "mame/venture.zip"
+    },
+    {
+      "title": "Amidar",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/amidar.zip"
+    },
+    {
+      "title": "Bagman",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/bagman.zip"
+    },
+    {
+      "title": "Black Widow",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/bwidow.zip"
+    },
+    {
+      "title": "Bubbles",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/bubbles.zip"
+    },
+    {
+      "title": "Buck Rogers: Planet of Zoom",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/buckrog.zip"
+    },
+    {
+      "title": "BurgerTime",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/btime3.zip"
+    },
+    {
+      "title": "Dig Dug",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/digdug.zip"
+    },
+    {
+      "title": "Donkey Kong Junior",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/dkongjr.zip"
+    },
+    {
+      "title": "Food Fight",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/foodf.zip"
+    },
+    {
+      "title": "Frenzy",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/frenzy.zip"
+    },
+    {
+      "title": "Front Line",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/frontlin.zip"
+    },
+    {
+      "title": "Gravitar",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/gravitar.zip"
+    },
+    {
+      "title": "Joust",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/joust.zip"
+    },
+    {
+      "title": "Jungle Hunt",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/jungleh.zip"
+    },
+    {
+      "title": "Kangaroo",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/kangaroo.zip"
+    },
+    {
+      "title": "Millipede",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/milliped.zip"
+    },
+    {
+      "title": "Moon Patrol",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/mpatrol.zip"
+    },
+    {
+      "title": "Mr. Do!",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/mrdo.zip"
+    },
+    {
+      "title": "Nibbler",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/nibbler.zip"
+    },
+    {
+      "title": "Pac-Man Plus",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/pacplus.zip"
+    },
+    {
+      "title": "Pengo",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/pengo.zip"
+    },
+    {
+      "title": "Pole Position",
+      "category": "Golden Age",
+      "system": "mame",
+      "bucket": "mame/polepos.zip"
+    },
+    {
+      "title": "Pooyan",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/pooyan.zip"
+    },
+    {
+      "title": "Popeye",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/popeye.zip"
+    },
+    {
+      "title": "Q*bert",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/qbert.zip"
+    },
+    {
+      "title": "Robotron: 2084",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/robotron.zip"
+    },
+    {
+      "title": "Sinistar",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/sinistar.zip"
+    },
+    {
+      "title": "Star Trek",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/startrek.zip"
+    },
+    {
+      "title": "Super Pac-Man",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/superpac.zip"
+    },
+    {
+      "title": "Time Pilot",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/timeplt.zip"
+    },
+    {
+      "title": "Tron",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/tron.zip"
+    },
+    {
+      "title": "Tutankham",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/tutankhm.zip"
+    },
+    {
+      "title": "Xevious",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/xevious.zip"
+    },
+    {
+      "title": "Zaxxon",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/zaxxon.zip"
+    },
+    {
+      "title": "Zoo Keeper",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/zookeep.zip"
+    },
+    {
+      "title": "10-Yard Fight",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/10yard.zip"
+    },
+    {
+      "title": "Chack'n Pop",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/chaknpop.zip"
+    },
+    {
+      "title": "Champion Baseball",
+      "category": "Golden Age",
+      "system": "mame",
+      "bucket": "mame/champbas.zip"
+    },
+    {
+      "title": "Congo Bongo",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/congo.zip"
+    },
+    {
+      "title": "Crystal Castles",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/ccastles.zip"
+    },
+    {
+      "title": "Discs of Tron",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/dotron.zip"
+    },
+    {
+      "title": "Donkey Kong 3",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/dkong3.zip"
+    },
+    {
+      "title": "Elevator Action",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/elevator.zip"
+    },
+    {
+      "title": "Exerion",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/exerion.zip"
+    },
+    {
+      "title": "Gyruss",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/gyruss.zip"
+    },
+    {
+      "title": "I, Robot",
+      "category": "Golden Age",
+      "system": "mame",
+      "bucket": "mame/irobot.zip"
+    },
+    {
+      "title": "Jr. Pac-Man",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/jrpacman.zip"
+    },
+    {
+      "title": "Juno First",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/junofrst.zip"
+    },
+    {
+      "title": "Libble Rabble",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/liblrabl.zip"
+    },
+    {
+      "title": "Major Havoc",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/mhavoc.zip"
+    },
+    {
+      "title": "Mappy",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/mappy.zip"
+    },
+    {
+      "title": "Mario Bros.",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/mario.zip"
+    },
+    {
+      "title": "Mr. Do's Castle",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/docastle.zip"
+    },
+    {
+      "title": "Pac & Pal",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/pacnpal.zip"
+    },
+    {
+      "title": "Pole Position II",
+      "category": "Golden Age",
+      "system": "mame",
+      "bucket": "mame/polepos2.zip"
+    },
+    {
+      "title": "Roc'n Rope",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/rocnrope.zip"
+    },
+    {
+      "title": "Spy Hunter",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/spyhunt.zip"
+    },
+    {
+      "title": "Star Wars",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/starwars.zip"
+    },
+    {
+      "title": "Tapper",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/tapper.zip"
+    },
+    {
+      "title": "Track & Field",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/trackfld.zip"
+    },
+    {
+      "title": "Up'n Down",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/upndown.zip"
+    },
+    {
+      "title": "1942",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/1942.zip"
+    },
+    {
+      "title": "Bomb Jack",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/bombjack.zip"
+    },
+    {
+      "title": "Circus Charlie",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/circusc.zip"
+    },
+    {
+      "title": "Do! Run Run",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/dorunrun.zip"
+    },
+    {
+      "title": "Dragon Buster",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/drgnbstr.zip"
+    },
+    {
+      "title": "Flicky",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/flicky.zip"
+    },
+    {
+      "title": "Gaplus",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/gaplus.zip"
+    },
+    {
+      "title": "Hyper Sports",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/hyperspt.zip"
+    },
+    {
+      "title": "Kung-Fu Master",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/kungfumd.zip"
+    },
+    {
+      "title": "Lode Runner",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/ldrun.zip"
+    },
+    {
+      "title": "Marble Madness",
+      "category": "Golden Age",
+      "system": "mame",
+      "bucket": "mame/marble.zip"
+    },
+    {
+      "title": "Mikie",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/mikie.zip"
+    },
+    {
+      "title": "Ninja-Kid",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/ninjakun.zip"
+    },
+    {
+      "title": "Pac-Land",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/pacland.zip"
+    },
+    {
+      "title": "Paperboy",
+      "category": "Golden Age",
+      "system": "mame",
+      "bucket": "mame/paperboy.zip"
+    },
+    {
+      "title": "Pirate Ship Higemaru",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/higemaru.zip"
+    },
+    {
+      "title": "Punch-Out!!",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/punchout.zip"
+    },
+    {
+      "title": "Return of the Jedi",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/jedi.zip"
+    },
+    {
+      "title": "Road Fighter",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/roadf.zip"
+    },
+    {
+      "title": "SonSon",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/sonson.zip"
+    },
+    {
+      "title": "Super Punch-Out!!",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/spnchout.zip"
+    },
+    {
+      "title": "The Legend of Kage",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/lkage.zip"
+    },
+    {
+      "title": "The Tower of Druaga",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/todruaga.zip"
+    },
+    {
+      "title": "Timber",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/timber.zip"
+    },
+    {
+      "title": "Time Pilot '84",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/tp84.zip"
+    },
+    {
+      "title": "Vs. Balloon Fight",
+      "category": "Golden Age",
+      "system": "mame",
+      "bucket": "mame/balonfgt.zip"
+    },
+    {
+      "title": "Vs. Excitebike",
+      "category": "Golden Age",
+      "system": "mame",
+      "bucket": "mame/excitebk.zip"
+    },
+    {
+      "title": "Vs. Ice Climber",
+      "category": "Golden Age",
+      "system": "mame",
+      "bucket": "mame/iceclimb.zip"
+    },
+    {
+      "title": "Vs. Wrecking Crew",
+      "category": "Golden Age",
+      "system": "mame",
+      "bucket": "mame/wrecking.zip"
+    },
+    {
+      "title": "Vulgus",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/vulgus.zip"
+    },
+    {
+      "title": "Dig Dug II",
+      "category": "Namco",
+      "system": "fbneo",
+      "bucket": "fbneo/digdug2.zip"
+    },
+    {
+      "title": "Metro-Cross",
+      "category": "Namco",
+      "system": "fbneo",
+      "bucket": "fbneo/metrocrs.zip"
+    },
+    {
+      "title": "Genpei ToumaDen",
+      "category": "Namco",
+      "system": "fbneo",
+      "bucket": "fbneo/genpeitd.zip"
+    },
+    {
+      "title": "Rolling Thunder",
+      "category": "Namco",
+      "system": "fbneo",
+      "bucket": "fbneo/rthunder.zip"
+    },
+    {
+      "title": "Toypop",
+      "category": "Namco",
+      "system": "fbneo",
+      "bucket": "fbneo/toypop.zip"
+    },
+    {
+      "title": "Final Lap",
+      "category": "Namco",
+      "system": "fbneo",
+      "bucket": "fbneo/finallap.zip"
+    },
+    {
+      "title": "Pac-Mania",
+      "category": "Namco",
+      "system": "fbneo",
+      "bucket": "fbneo/pacmania.zip"
+    },
+    {
+      "title": "Shadowland",
+      "category": "Namco",
+      "system": "fbneo",
+      "bucket": "fbneo/shadowld.zip"
+    },
+    {
+      "title": "Wonder Momo",
+      "category": "Namco",
+      "system": "fbneo",
+      "bucket": "fbneo/wndrmomo.zip"
+    },
+    {
+      "title": "Assault",
+      "category": "Namco",
+      "system": "fbneo",
+      "bucket": "fbneo/assault.zip"
+    },
+    {
+      "title": "Splatterhouse",
+      "category": "Namco",
+      "system": "fbneo",
+      "bucket": "fbneo/splatter.zip"
+    },
+    {
+      "title": "Marvel Land",
+      "category": "Namco",
+      "system": "fbneo",
+      "bucket": "fbneo/marvland.zip"
+    },
+    {
+      "title": "Valkyrie no Densetsu",
+      "category": "Namco",
+      "system": "fbneo",
+      "bucket": "fbneo/valkyrie.zip"
+    },
+    {
+      "title": "Rolling Thunder 2",
+      "category": "Namco",
+      "system": "fbneo",
+      "bucket": "fbneo/rthun2.zip"
+    },
+    {
+      "title": "Lucky & Wild",
+      "category": "Namco",
+      "system": "fbneo",
+      "bucket": "fbneo/luckywld.zip"
+    },
+    {
+      "title": "Numan Athletics",
+      "category": "Namco",
+      "system": "fbneo",
+      "bucket": "fbneo/numanath.zip"
+    },
+    {
+      "title": "Point Blank",
+      "category": "Namco",
+      "system": "fbneo",
+      "bucket": "fbneo/ptblank.zip"
+    },
+    {
+      "title": "The Outfoxies",
+      "category": "Namco",
+      "system": "fbneo",
+      "bucket": "fbneo/outfxies.zip"
+    },
+    {
+      "title": "Mach Breakers",
+      "category": "Namco",
+      "system": "fbneo",
+      "bucket": "fbneo/machbrkr.zip"
+    },
+    {
+      "title": "Mr. Driller",
+      "category": "Namco",
+      "system": "mame",
+      "bucket": "mame/mrdrillr.zip"
+    },
+    {
+      "title": "Mr. Driller 2",
+      "category": "Namco",
+      "system": "mame",
+      "bucket": "mame/mrdrilr2.zip"
+    },
+    {
+      "title": "Gauntlet",
+      "category": "Atari, Midway & Williams",
+      "system": "fbneo",
+      "bucket": "fbneo/gauntlet.zip"
+    },
+    {
+      "title": "Indiana Jones and the Temple of Doom",
+      "category": "Atari, Midway & Williams",
+      "system": "mame",
+      "bucket": "mame/indytemp.zip"
+    },
+    {
+      "title": "Road Runner",
+      "category": "Atari, Midway & Williams",
+      "system": "mame",
+      "bucket": "mame/roadrunn.zip"
+    },
+    {
+      "title": "The Empire Strikes Back",
+      "category": "Atari, Midway & Williams",
+      "system": "fbneo",
+      "bucket": "fbneo/esb.zip"
+    },
+    {
+      "title": "720 Degrees",
+      "category": "Atari, Midway & Williams",
+      "system": "mame",
+      "bucket": "mame/720.zip"
+    },
+    {
+      "title": "Championship Sprint",
+      "category": "Atari, Midway & Williams",
+      "system": "mame",
+      "bucket": "mame/csprint.zip"
+    },
+    {
+      "title": "Gauntlet II",
+      "category": "Atari, Midway & Williams",
+      "system": "fbneo",
+      "bucket": "fbneo/gaunt2.zip"
+    },
+    {
+      "title": "Joust 2: Survival of the Fittest",
+      "category": "Atari, Midway & Williams",
+      "system": "mame",
+      "bucket": "mame/joust2.zip"
+    },
+    {
+      "title": "Rampage",
+      "category": "Atari, Midway & Williams",
+      "system": "fbneo",
+      "bucket": "fbneo/rampage.zip"
+    },
+    {
+      "title": "Super Sprint",
+      "category": "Atari, Midway & Williams",
+      "system": "mame",
+      "bucket": "mame/ssprint.zip"
+    },
+    {
+      "title": "APB: All Points Bulletin",
+      "category": "Atari, Midway & Williams",
+      "system": "mame",
+      "bucket": "mame/apb.zip"
+    },
+    {
+      "title": "Blasteroids",
+      "category": "Atari, Midway & Williams",
+      "system": "fbneo",
+      "bucket": "fbneo/blstroid.zip"
+    },
+    {
+      "title": "RoadBlasters",
+      "category": "Atari, Midway & Williams",
+      "system": "mame",
+      "bucket": "mame/roadblst.zip"
+    },
+    {
+      "title": "Xenophobe",
+      "category": "Atari, Midway & Williams",
+      "system": "fbneo",
+      "bucket": "fbneo/xenophob.zip"
+    },
+    {
+      "title": "Xybots",
+      "category": "Atari, Midway & Williams",
+      "system": "fbneo",
+      "bucket": "fbneo/xybots.zip"
+    },
+    {
+      "title": "Cyberball",
+      "category": "Atari, Midway & Williams",
+      "system": "mame",
+      "bucket": "mame/cyberbal.zip"
+    },
+    {
+      "title": "Hard Drivin'",
+      "category": "Atari, Midway & Williams",
+      "system": "mame",
+      "bucket": "mame/harddriv.zip"
+    },
+    {
+      "title": "Narc",
+      "category": "Atari, Midway & Williams",
+      "system": "fbneo",
+      "bucket": "fbneo/narc.zip"
+    },
+    {
+      "title": "Tetris (Atari)",
+      "category": "Atari, Midway & Williams",
+      "system": "fbneo",
+      "bucket": "fbneo/atetris.zip"
+    },
+    {
+      "title": "Toobin'",
+      "category": "Atari, Midway & Williams",
+      "system": "fbneo",
+      "bucket": "fbneo/toobin.zip"
+    },
+    {
+      "title": "Vindicators",
+      "category": "Atari, Midway & Williams",
+      "system": "fbneo",
+      "bucket": "fbneo/vindictr.zip"
+    },
+    {
+      "title": "Arch Rivals",
+      "category": "Atari, Midway & Williams",
+      "system": "fbneo",
+      "bucket": "fbneo/archrivl.zip"
+    },
+    {
+      "title": "Badlands",
+      "category": "Atari, Midway & Williams",
+      "system": "fbneo",
+      "bucket": "fbneo/badlands.zip"
+    },
+    {
+      "title": "S.T.U.N. Runner",
+      "category": "Atari, Midway & Williams",
+      "system": "mame",
+      "bucket": "mame/stunrun.zip"
+    },
+    {
+      "title": "Klax",
+      "category": "Atari, Midway & Williams",
+      "system": "fbneo",
+      "bucket": "fbneo/klax.zip"
+    },
+    {
+      "title": "Rampart",
+      "category": "Atari, Midway & Williams",
+      "system": "fbneo",
+      "bucket": "fbneo/rampart.zip"
+    },
+    {
+      "title": "Smash T.V.",
+      "category": "Atari, Midway & Williams",
+      "system": "fbneo",
+      "bucket": "fbneo/smashtv.zip"
+    },
+    {
+      "title": "Trog",
+      "category": "Atari, Midway & Williams",
+      "system": "fbneo",
+      "bucket": "fbneo/trog.zip"
+    },
+    {
+      "title": "Total Carnage",
+      "category": "Atari, Midway & Williams",
+      "system": "fbneo",
+      "bucket": "fbneo/totcarn.zip"
+    },
+    {
+      "title": "NBA Jam",
+      "category": "Atari, Midway & Williams",
+      "system": "fbneo",
+      "bucket": "fbneo/nbajam.zip"
+    },
+    {
+      "title": "Cruis'n USA",
+      "category": "Atari, Midway & Williams",
+      "system": "mame",
+      "bucket": "mame/crusnusa.zip"
+    },
+    {
+      "title": "NBA Jam Tournament Edition",
+      "category": "Atari, Midway & Williams",
+      "system": "fbneo",
+      "bucket": "fbneo/nbajamte.zip"
+    },
+    {
+      "title": "NHL Open Ice: 2 on 2 Challenge",
+      "category": "Atari, Midway & Williams",
+      "system": "fbneo",
+      "bucket": "fbneo/openice.zip"
+    },
+    {
+      "title": "NBA Hangtime",
+      "category": "Atari, Midway & Williams",
+      "system": "fbneo",
+      "bucket": "fbneo/nbahangt.zip"
+    },
+    {
+      "title": "Rampage World Tour",
+      "category": "Atari, Midway & Williams",
+      "system": "fbneo",
+      "bucket": "fbneo/rmpgwt.zip"
+    },
+    {
+      "title": "Choplifter",
+      "category": "Sega",
+      "system": "fbneo",
+      "bucket": "fbneo/choplift.zip"
+    },
+    {
+      "title": "Hang-On",
+      "category": "Sega",
+      "system": "fbneo",
+      "bucket": "fbneo/hangon.zip"
+    },
+    {
+      "title": "Pitfall II",
+      "category": "Sega",
+      "system": "fbneo",
+      "bucket": "fbneo/pitfall2.zip"
+    },
+    {
+      "title": "Space Harrier",
+      "category": "Sega",
+      "system": "fbneo",
+      "bucket": "fbneo/sharrier.zip"
+    },
+    {
+      "title": "Alex Kidd: The Lost Stars",
+      "category": "Sega",
+      "system": "fbneo",
+      "bucket": "fbneo/alexkidd.zip"
+    },
+    {
+      "title": "Enduro Racer",
+      "category": "Sega",
+      "system": "fbneo",
+      "bucket": "fbneo/enduror.zip"
+    },
+    {
+      "title": "Out Run",
+      "category": "Sega",
+      "system": "fbneo",
+      "bucket": "fbneo/outrun.zip"
+    },
+    {
+      "title": "Quartet",
+      "category": "Sega",
+      "system": "fbneo",
+      "bucket": "fbneo/quartet.zip"
+    },
+    {
+      "title": "Wonder Boy",
+      "category": "Sega",
+      "system": "fbneo",
+      "bucket": "fbneo/wboy.zip"
+    },
+    {
+      "title": "After Burner II",
+      "category": "Sega",
+      "system": "fbneo",
+      "bucket": "fbneo/aburner2.zip"
+    },
+    {
+      "title": "Shinobi",
+      "category": "Sega",
+      "system": "fbneo",
+      "bucket": "fbneo/shinobi.zip"
+    },
+    {
+      "title": "Super Hang-On",
+      "category": "Sega",
+      "system": "fbneo",
+      "bucket": "fbneo/shangon.zip"
+    },
+    {
+      "title": "Wonder Boy: Monster Land",
+      "category": "Sega",
+      "system": "fbneo",
+      "bucket": "fbneo/wbml.zip"
+    },
+    {
+      "title": "Altered Beast",
+      "category": "Sega",
+      "system": "fbneo",
+      "bucket": "fbneo/altbeast.zip"
+    },
+    {
+      "title": "Dynamite Dux",
+      "category": "Sega",
+      "system": "fbneo",
+      "bucket": "fbneo/ddux.zip"
+    },
+    {
+      "title": "Gain Ground",
+      "category": "Sega",
+      "system": "fbneo",
+      "bucket": "fbneo/gground.zip"
+    },
+    {
+      "title": "Power Drift",
+      "category": "Sega",
+      "system": "fbneo",
+      "bucket": "fbneo/pdrift.zip"
+    },
+    {
+      "title": "Tetris (Sega)",
+      "category": "Sega",
+      "system": "fbneo",
+      "bucket": "fbneo/tetris.zip"
+    },
+    {
+      "title": "Wonder Boy III: Monster Lair",
+      "category": "Sega",
+      "system": "fbneo",
+      "bucket": "fbneo/wb3.zip"
+    },
+    {
+      "title": "Crack Down",
+      "category": "Sega",
+      "system": "fbneo",
+      "bucket": "fbneo/crkdownu.zip"
+    },
+    {
+      "title": "Cyber Police ESWAT",
+      "category": "Sega",
+      "system": "fbneo",
+      "bucket": "fbneo/eswatu.zip"
+    },
+    {
+      "title": "Golden Axe",
+      "category": "Sega",
+      "system": "fbneo",
+      "bucket": "fbneo/goldnaxe.zip"
+    },
+    {
+      "title": "Shadow Dancer",
+      "category": "Sega",
+      "system": "fbneo",
+      "bucket": "fbneo/shdancer1.zip"
+    },
+    {
+      "title": "Turbo Out Run",
+      "category": "Sega",
+      "system": "fbneo",
+      "bucket": "fbneo/toutrun.zip"
+    },
+    {
+      "title": "Alien Storm",
+      "category": "Sega",
+      "system": "fbneo",
+      "bucket": "fbneo/astormu.zip"
+    },
+    {
+      "title": "Bonanza Bros",
+      "category": "Sega",
+      "system": "fbneo",
+      "bucket": "fbneo/bnzabros.zip"
+    },
+    {
+      "title": "Columns",
+      "category": "Sega",
+      "system": "fbneo",
+      "bucket": "fbneo/columns.zip"
+    },
+    {
+      "title": "Michael Jackson's Moonwalker",
+      "category": "Sega",
+      "system": "fbneo",
+      "bucket": "fbneo/mwalku.zip"
+    },
+    {
+      "title": "Spider-Man: The Videogame",
+      "category": "Sega",
+      "system": "fbneo",
+      "bucket": "fbneo/spidmanu.zip"
+    },
+    {
+      "title": "Golden Axe: The Revenge of Death Adder",
+      "category": "Sega",
+      "system": "fbneo",
+      "bucket": "fbneo/ga2u.zip"
+    },
+    {
+      "title": "OutRunners",
+      "category": "Sega",
+      "system": "fbneo",
+      "bucket": "fbneo/orunnersu.zip"
+    },
+    {
+      "title": "Puyo Puyo",
+      "category": "Sega",
+      "system": "fbneo",
+      "bucket": "fbneo/puyo.zip"
+    },
+    {
+      "title": "Puzzle & Action: Tant-R",
+      "category": "Sega",
+      "system": "fbneo",
+      "bucket": "fbneo/tantr.zip"
+    },
+    {
+      "title": "SegaSonic The Hedgehog",
+      "category": "Sega",
+      "system": "fbneo",
+      "bucket": "fbneo/sonic.zip"
+    },
+    {
+      "title": "Puyo Puyo 2",
+      "category": "Sega",
+      "system": "fbneo",
+      "bucket": "fbneo/puyopuy2.zip"
+    },
+    {
+      "title": "Arkanoid",
+      "category": "Taito",
+      "system": "fbneo",
+      "bucket": "fbneo/arkanoidu.zip"
+    },
+    {
+      "title": "Bubble Bobble",
+      "category": "Taito",
+      "system": "fbneo",
+      "bucket": "fbneo/bublboblr.zip"
+    },
+    {
+      "title": "KiKi KaiKai",
+      "category": "Taito",
+      "system": "fbneo",
+      "bucket": "fbneo/kikikai.zip"
+    },
+    {
+      "title": "Arkanoid: Revenge of Doh",
+      "category": "Taito",
+      "system": "fbneo",
+      "bucket": "fbneo/arknoid2u.zip"
+    },
+    {
+      "title": "Continental Circus",
+      "category": "Taito",
+      "system": "fbneo",
+      "bucket": "fbneo/contcircu.zip"
+    },
+    {
+      "title": "Rainbow Islands",
+      "category": "Taito",
+      "system": "fbneo",
+      "bucket": "fbneo/rbisland.zip"
+    },
+    {
+      "title": "Rastan",
+      "category": "Taito",
+      "system": "fbneo",
+      "bucket": "fbneo/rastanu.zip"
+    },
+    {
+      "title": "Super Qix",
+      "category": "Taito",
+      "system": "fbneo",
+      "bucket": "fbneo/sqixu.zip"
+    },
+    {
+      "title": "The Ninja Warriors",
+      "category": "Taito",
+      "system": "fbneo",
+      "bucket": "fbneo/ninjaw.zip"
+    },
+    {
+      "title": "Chase H.Q.",
+      "category": "Taito",
+      "system": "fbneo",
+      "bucket": "fbneo/chasehqu.zip"
+    },
+    {
+      "title": "The NewZealand Story",
+      "category": "Taito",
+      "system": "fbneo",
+      "bucket": "fbneo/tnzsuo.zip"
+    },
+    {
+      "title": "Cadash",
+      "category": "Taito",
+      "system": "fbneo",
+      "bucket": "fbneo/cadashu.zip"
+    },
+    {
+      "title": "Cameltry",
+      "category": "Taito",
+      "system": "fbneo",
+      "bucket": "fbneo/cameltryau.zip"
+    },
+    {
+      "title": "Don Doko Don",
+      "category": "Taito",
+      "system": "fbneo",
+      "bucket": "fbneo/dondokodu.zip"
+    },
+    {
+      "title": "Plotting",
+      "category": "Taito",
+      "system": "fbneo",
+      "bucket": "fbneo/plottingu.zip"
+    },
+    {
+      "title": "Special Criminal Investigation",
+      "category": "Taito",
+      "system": "fbneo",
+      "bucket": "fbneo/sciu.zip"
+    },
+    {
+      "title": "Volfied",
+      "category": "Taito",
+      "system": "fbneo",
+      "bucket": "fbneo/volfiedu.zip"
+    },
+    {
+      "title": "Growl",
+      "category": "Taito",
+      "system": "fbneo",
+      "bucket": "fbneo/growlu.zip"
+    },
+    {
+      "title": "Liquid Kids",
+      "category": "Taito",
+      "system": "fbneo",
+      "bucket": "fbneo/liquidku.zip"
+    },
+    {
+      "title": "The Ninja Kids",
+      "category": "Taito",
+      "system": "fbneo",
+      "bucket": "fbneo/ninjaku.zip"
+    },
+    {
+      "title": "PuLiRuLa",
+      "category": "Taito",
+      "system": "fbneo",
+      "bucket": "fbneo/pulirula.zip"
+    },
+    {
+      "title": "Warrior Blade: Rastan Saga Episode III",
+      "category": "Taito",
+      "system": "fbneo",
+      "bucket": "fbneo/warriorb.zip"
+    },
+    {
+      "title": "Bubble Bobble II",
+      "category": "Taito",
+      "system": "fbneo",
+      "bucket": "fbneo/bublbob2.zip"
+    },
+    {
+      "title": "Elevator Action Returns",
+      "category": "Taito",
+      "system": "fbneo",
+      "bucket": "fbneo/elvactr.zip"
+    },
+    {
+      "title": "Bubble Memories",
+      "category": "Taito",
+      "system": "fbneo",
+      "bucket": "fbneo/bubblem.zip"
+    },
+    {
+      "title": "Puzzle Bobble 2",
+      "category": "Taito",
+      "system": "fbneo",
+      "bucket": "fbneo/pbobble2.zip"
+    },
+    {
+      "title": "Cleopatra Fortune",
+      "category": "Taito",
+      "system": "fbneo",
+      "bucket": "fbneo/cleopatr.zip"
+    },
+    {
+      "title": "Kicker",
+      "category": "Konami",
+      "system": "fbneo",
+      "bucket": "fbneo/kicker.zip"
+    },
+    {
+      "title": "Rush'n Attack",
+      "category": "Konami",
+      "system": "fbneo",
+      "bucket": "fbneo/rushatck.zip"
+    },
+    {
+      "title": "Jail Break",
+      "category": "Konami",
+      "system": "fbneo",
+      "bucket": "fbneo/jailbrek.zip"
+    },
+    {
+      "title": "Top Gunner",
+      "category": "Konami",
+      "system": "fbneo",
+      "bucket": "fbneo/topgunr.zip"
+    },
+    {
+      "title": "WEC Le Mans 24",
+      "category": "Konami",
+      "system": "fbneo",
+      "bucket": "fbneo/wecleman.zip"
+    },
+    {
+      "title": "Contra",
+      "category": "Konami",
+      "system": "fbneo",
+      "bucket": "fbneo/contra.zip"
+    },
+    {
+      "title": "'88 Games",
+      "category": "Konami",
+      "system": "fbneo",
+      "bucket": "fbneo/88games.zip"
+    },
+    {
+      "title": "Combat School",
+      "category": "Konami",
+      "system": "fbneo",
+      "bucket": "fbneo/combatsc.zip"
+    },
+    {
+      "title": "Haunted Castle",
+      "category": "Konami",
+      "system": "fbneo",
+      "bucket": "fbneo/hcastle.zip"
+    },
+    {
+      "title": "Super Contra",
+      "category": "Konami",
+      "system": "fbneo",
+      "bucket": "fbneo/scontra.zip"
+    },
+    {
+      "title": "Crime Fighters",
+      "category": "Konami",
+      "system": "mame",
+      "bucket": "mame/crimfght.zip"
+    },
+    {
+      "title": "Teenage Mutant Ninja Turtles",
+      "category": "Konami",
+      "system": "fbneo",
+      "bucket": "fbneo/tmntu.zip"
+    },
+    {
+      "title": "Aliens",
+      "category": "Konami",
+      "system": "fbneo",
+      "bucket": "fbneo/aliensu.zip"
+    },
+    {
+      "title": "Punk Shot",
+      "category": "Konami",
+      "system": "fbneo",
+      "bucket": "fbneo/punkshot.zip"
+    },
+    {
+      "title": "Sunset Riders",
+      "category": "Konami",
+      "system": "fbneo",
+      "bucket": "fbneo/ssriders.zip"
+    },
+    {
+      "title": "Teenage Mutant Ninja Turtles: Turtles in Time",
+      "category": "Konami",
+      "system": "fbneo",
+      "bucket": "fbneo/tmnt2.zip"
+    },
+    {
+      "title": "The Simpsons",
+      "category": "Konami",
+      "system": "fbneo",
+      "bucket": "fbneo/simpsons.zip"
+    },
+    {
+      "title": "Vendetta",
+      "category": "Konami",
+      "system": "fbneo",
+      "bucket": "fbneo/vendettar.zip"
+    },
+    {
+      "title": "Asterix",
+      "category": "Konami",
+      "system": "fbneo",
+      "bucket": "fbneo/asterix.zip"
+    },
+    {
+      "title": "Bucky O'Hare",
+      "category": "Konami",
+      "system": "fbneo",
+      "bucket": "fbneo/bucky.zip"
+    },
+    {
+      "title": "G.I. Joe",
+      "category": "Konami",
+      "system": "fbneo",
+      "bucket": "fbneo/gijoeu.zip"
+    },
+    {
+      "title": "Wild West C.O.W.-Boys of Moo Mesa",
+      "category": "Konami",
+      "system": "fbneo",
+      "bucket": "fbneo/moomesa.zip"
+    },
+    {
+      "title": "X-Men",
+      "category": "Konami",
+      "system": "fbneo",
+      "bucket": "fbneo/xmen.zip"
+    },
+    {
+      "title": "Gaiapolis",
+      "category": "Konami",
+      "system": "fbneo",
+      "bucket": "fbneo/gaiapols.zip"
+    },
+    {
+      "title": "Metamorphic Force",
+      "category": "Konami",
+      "system": "fbneo",
+      "bucket": "fbneo/metamrph.zip"
+    },
+    {
+      "title": "Mystic Warriors",
+      "category": "Konami",
+      "system": "fbneo",
+      "bucket": "fbneo/mystwarr.zip"
+    },
+    {
+      "title": "Violent Storm",
+      "category": "Konami",
+      "system": "fbneo",
+      "bucket": "fbneo/viostorm.zip"
+    },
+    {
+      "title": "Commando",
+      "category": "Capcom",
+      "system": "fbneo",
+      "bucket": "fbneo/commandou.zip"
+    },
+    {
+      "title": "Ghosts'n Goblins",
+      "category": "Capcom",
+      "system": "fbneo",
+      "bucket": "fbneo/gngt.zip"
+    },
+    {
+      "title": "Gun.Smoke",
+      "category": "Capcom",
+      "system": "fbneo",
+      "bucket": "fbneo/gunsmokeu.zip"
+    },
+    {
+      "title": "The Speed Rumbler",
+      "category": "Capcom",
+      "system": "fbneo",
+      "bucket": "fbneo/srumbler.zip"
+    },
+    {
+      "title": "Trojan",
+      "category": "Capcom",
+      "system": "fbneo",
+      "bucket": "fbneo/trojan.zip"
+    },
+    {
+      "title": "Bionic Commando",
+      "category": "Capcom",
+      "system": "fbneo",
+      "bucket": "fbneo/bionicc1.zip"
+    },
+    {
+      "title": "Black Tiger",
+      "category": "Capcom",
+      "system": "fbneo",
+      "bucket": "fbneo/blktiger.zip"
+    },
+    {
+      "title": "Tiger Road",
+      "category": "Capcom",
+      "system": "fbneo",
+      "bucket": "fbneo/tigeroad.zip"
+    },
+    {
+      "title": "Ghouls'n Ghosts",
+      "category": "Capcom",
+      "system": "fbneo",
+      "bucket": "fbneo/ghoulsu.zip"
+    },
+    {
+      "title": "Buster Bros.",
+      "category": "Capcom",
+      "system": "fbneo",
+      "bucket": "fbneo/bbros.zip"
+    },
+    {
+      "title": "Final Fight",
+      "category": "Capcom",
+      "system": "fbneo",
+      "bucket": "fbneo/ffightuc.zip"
+    },
+    {
+      "title": "Strider",
+      "category": "Capcom",
+      "system": "fbneo",
+      "bucket": "fbneo/strider.zip"
+    },
+    {
+      "title": "Willow",
+      "category": "Capcom",
+      "system": "fbneo",
+      "bucket": "fbneo/willowu.zip"
+    },
+    {
+      "title": "Magic Sword: Heroic Fantasy",
+      "category": "Capcom",
+      "system": "fbneo",
+      "bucket": "fbneo/mswordu.zip"
+    },
+    {
+      "title": "Mega Twins",
+      "category": "Capcom",
+      "system": "fbneo",
+      "bucket": "fbneo/mtwins.zip"
+    },
+    {
+      "title": "Mercs",
+      "category": "Capcom",
+      "system": "fbneo",
+      "bucket": "fbneo/mercsu.zip"
+    },
+    {
+      "title": "Nemo",
+      "category": "Capcom",
+      "system": "fbneo",
+      "bucket": "fbneo/nemo.zip"
+    },
+    {
+      "title": "Super Buster Bros.",
+      "category": "Capcom",
+      "system": "fbneo",
+      "bucket": "fbneo/sbbros.zip"
+    },
+    {
+      "title": "Captain Commando",
+      "category": "Capcom",
+      "system": "fbneo",
+      "bucket": "fbneo/captcommu.zip"
+    },
+    {
+      "title": "Knights of the Round",
+      "category": "Capcom",
+      "system": "fbneo",
+      "bucket": "fbneo/knightsu.zip"
+    },
+    {
+      "title": "The King of Dragons",
+      "category": "Capcom",
+      "system": "fbneo",
+      "bucket": "fbneo/kodu.zip"
+    },
+    {
+      "title": "Three Wonders",
+      "category": "Capcom",
+      "system": "fbneo",
+      "bucket": "fbneo/3wondersu.zip"
+    },
+    {
+      "title": "Warriors of Fate",
+      "category": "Capcom",
+      "system": "fbneo",
+      "bucket": "fbneo/wofu.zip"
+    },
+    {
+      "title": "Cadillacs and Dinosaurs",
+      "category": "Capcom",
+      "system": "fbneo",
+      "bucket": "fbneo/dinou.zip"
+    },
+    {
+      "title": "Dungeons & Dragons: Tower of Doom",
+      "category": "Capcom",
+      "system": "fbneo",
+      "bucket": "fbneo/ddtodu.zip"
+    },
+    {
+      "title": "Saturday Night Slam Masters",
+      "category": "Capcom",
+      "system": "fbneo",
+      "bucket": "fbneo/slammastu.zip"
+    },
+    {
+      "title": "The Punisher",
+      "category": "Capcom",
+      "system": "fbneo",
+      "bucket": "fbneo/punisheru.zip"
+    },
+    {
+      "title": "Alien vs. Predator",
+      "category": "Capcom",
+      "system": "fbneo",
+      "bucket": "fbneo/avspu.zip"
+    },
+    {
+      "title": "Armored Warriors",
+      "category": "Capcom",
+      "system": "fbneo",
+      "bucket": "fbneo/armwaru.zip"
+    },
+    {
+      "title": "Pang! 3",
+      "category": "Capcom",
+      "system": "fbneo",
+      "bucket": "fbneo/pang3.zip"
+    },
+    {
+      "title": "Dungeons & Dragons: Shadow over Mystara",
+      "category": "Capcom",
+      "system": "fbneo",
+      "bucket": "fbneo/ddsomu.zip"
+    },
+    {
+      "title": "Super Puzzle Fighter II Turbo",
+      "category": "Capcom",
+      "system": "fbneo",
+      "bucket": "fbneo/spf2tu.zip"
+    },
+    {
+      "title": "Battle Circuit",
+      "category": "Capcom",
+      "system": "fbneo",
+      "bucket": "fbneo/batcir.zip"
+    },
+    {
+      "title": "Mighty! Pang",
+      "category": "Capcom",
+      "system": "fbneo",
+      "bucket": "fbneo/mpangu.zip"
+    },
+    {
+      "title": "Puzz Loop 2",
+      "category": "Capcom",
+      "system": "fbneo",
+      "bucket": "fbneo/pzloop2.zip"
+    },
+    {
+      "title": "Baseball Stars Professional",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/bstars.zip"
+    },
+    {
+      "title": "Blue's Journey",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/bjourney.zip"
+    },
+    {
+      "title": "Cyber-Lip",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/cyberlip.zip"
+    },
+    {
+      "title": "League Bowling",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/lbowling.zip"
+    },
+    {
+      "title": "Magician Lord",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/maglord.zip"
+    },
+    {
+      "title": "NAM-1975",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/nam1975.zip"
+    },
+    {
+      "title": "Ninja Combat",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/ncombat.zip"
+    },
+    {
+      "title": "Puzzled",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/joyjoy.zip"
+    },
+    {
+      "title": "Riding Hero",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/ridhero.zip"
+    },
+    {
+      "title": "The Super Spy",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/superspy.zip"
+    },
+    {
+      "title": "Top Player's Golf",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/tpgolf.zip"
+    },
+    {
+      "title": "2020 Super Baseball",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/2020bb.zip"
+    },
+    {
+      "title": "Burning Fight",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/burningfh.zip"
+    },
+    {
+      "title": "Crossed Swords",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/crsword.zip"
+    },
+    {
+      "title": "Eight Man",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/eightman.zip"
+    },
+    {
+      "title": "Robo Army",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/roboarmy.zip"
+    },
+    {
+      "title": "Sengoku",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/sengokuh.zip"
+    },
+    {
+      "title": "Soccer Brawl",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/socbrawl.zip"
+    },
+    {
+      "title": "Thrash Rally",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/trally.zip"
+    },
+    {
+      "title": "Baseball Stars 2",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/bstars2.zip"
+    },
+    {
+      "title": "Football Frenzy",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/fbfrenzy.zip"
+    },
+    {
+      "title": "Mutation Nation",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/mutnat.zip"
+    },
+    {
+      "title": "Ninja Commando",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/ncommand.zip"
+    },
+    {
+      "title": "Super Sidekicks",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/ssideki.zip"
+    },
+    {
+      "title": "3 Count Bout",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/3countb.zip"
+    },
+    {
+      "title": "Sengoku 2",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/sengoku2.zip"
+    },
+    {
+      "title": "Spin Master",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/spinmast.zip"
+    },
+    {
+      "title": "Panic Bomber",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/panicbom.zip"
+    },
+    {
+      "title": "Power Spikes II",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/pspikes2.zip"
+    },
+    {
+      "title": "Puzzle Bobble",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/pbobblen.zip"
+    },
+    {
+      "title": "Street Hoop",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/strhoop.zip"
+    },
+    {
+      "title": "Super Sidekicks 2 - The World Championship",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/ssideki2.zip"
+    },
+    {
+      "title": "Top Hunter - Roddy & Cathy",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/tophuntr.zip"
+    },
+    {
+      "title": "Windjammers",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/wjammers.zip"
+    },
+    {
+      "title": "Goal! Goal! Goal!",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/goalx3.zip"
+    },
+    {
+      "title": "Puzzle De Pon!",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/puzzledp.zip"
+    },
+    {
+      "title": "Stakes Winner",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/stakwin.zip"
+    },
+    {
+      "title": "Super Sidekicks 3 - The Next Glory",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/ssideki3.zip"
+    },
+    {
+      "title": "Magical Drop II",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/magdrop2.zip"
+    },
+    {
+      "title": "Metal Slug",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/mslug.zip"
+    },
+    {
+      "title": "Neo Drift Out - New Technology",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/neodrift.zip"
+    },
+    {
+      "title": "Neo Mr. Do!",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/neomrdo.zip"
+    },
+    {
+      "title": "Neo Turf Masters",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/turfmast.zip"
+    },
+    {
+      "title": "Over Top",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/overtop.zip"
+    },
+    {
+      "title": "Pleasure Goal",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/pgoal.zip"
+    },
+    {
+      "title": "Super Dodge Ball (Neo Geo)",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/sdodgeb.zip"
+    },
+    {
+      "title": "Tecmo World Soccer '96",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/twsoc96.zip"
+    },
+    {
+      "title": "The Ultimate 11 - The SNK Football Championship",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/ssideki4.zip"
+    },
+    {
+      "title": "Magical Drop III",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/magdrop3.zip"
+    },
+    {
+      "title": "Money Puzzle Exchanger",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/miexchng.zip"
+    },
+    {
+      "title": "Neo Bomberman",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/neobombe.zip"
+    },
+    {
+      "title": "Pop 'n Bounce",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/popbounc.zip"
+    },
+    {
+      "title": "Puzzle De Pon! R!",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/puzzldpr.zip"
+    },
+    {
+      "title": "Shock Troopers",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/shocktro.zip"
+    },
+    {
+      "title": "The Irritating Maze",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/irrmaze.zip"
+    },
+    {
+      "title": "Battle Flip Shot",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/flipshot.zip"
+    },
+    {
+      "title": "Metal Slug 2",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/mslug2.zip"
+    },
+    {
+      "title": "Neo-Geo Cup '98 - The Road to the Victory",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/neocup98.zip"
+    },
+    {
+      "title": "Shock Troopers - 2nd Squad",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/shocktr2.zip"
+    },
+    {
+      "title": "Ganryu",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/ganryu.zip"
+    },
+    {
+      "title": "Metal Slug X",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/mslugx.zip"
+    },
+    {
+      "title": "Metal Slug 3",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/mslug3.zip"
+    },
+    {
+      "title": "Nightmare in the Dark",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/nitd.zip"
+    },
+    {
+      "title": "Sengoku 3",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/sengoku3.zip"
+    },
+    {
+      "title": "Zupapa!",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/zupapa.zip"
+    },
+    {
+      "title": "Metal Slug 4",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/mslug4.zip"
+    },
+    {
+      "title": "Metal Slug 5",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/mslug5.zip"
+    },
+    {
+      "title": "Pochi and Nyaa",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/pnyaa.zip"
+    },
+    {
+      "title": "Arm Wrestling",
+      "category": "Other",
+      "system": "fbneo",
+      "bucket": "fbneo/armwrest.zip"
+    },
+    {
+      "title": "City Connection",
+      "category": "Other",
+      "system": "fbneo",
+      "bucket": "fbneo/citycon.zip"
+    },
+    {
+      "title": "Pinball Action",
+      "category": "Other",
+      "system": "fbneo",
+      "bucket": "fbneo/pbaction.zip"
+    },
+    {
+      "title": "Tehkan World Cup",
+      "category": "Other",
+      "system": "mame",
+      "bucket": "mame/tehkanwc.zip"
+    },
+    {
+      "title": "Athena",
+      "category": "Other",
+      "system": "fbneo",
+      "bucket": "fbneo/athena.zip"
+    },
+    {
+      "title": "Break Thru",
+      "category": "Other",
+      "system": "fbneo",
+      "bucket": "fbneo/brkthru.zip"
+    },
+    {
+      "title": "Ikari Warriors",
+      "category": "Other",
+      "system": "fbneo",
+      "bucket": "fbneo/ikari.zip"
+    },
+    {
+      "title": "Renegade",
+      "category": "Other",
+      "system": "fbneo",
+      "bucket": "fbneo/renegade.zip"
+    },
+    {
+      "title": "Rygar",
+      "category": "Other",
+      "system": "fbneo",
+      "bucket": "fbneo/rygar.zip"
+    },
+    {
+      "title": "Side Pocket",
+      "category": "Other",
+      "system": "fbneo",
+      "bucket": "fbneo/sidepckt.zip"
+    },
+    {
+      "title": "Solomon's Key",
+      "category": "Other",
+      "system": "fbneo",
+      "bucket": "fbneo/solomon.zip"
+    },
+    {
+      "title": "Victory Road",
+      "category": "Other",
+      "system": "fbneo",
+      "bucket": "fbneo/victroad.zip"
+    },
+    {
+      "title": "Vs. Mighty Bomb Jack",
+      "category": "Other",
+      "system": "mame",
+      "bucket": "mame/mightybj.zip"
+    },
+    {
+      "title": "Vs. Super Mario Bros.",
+      "category": "Other",
+      "system": "mame",
+      "bucket": "mame/suprmrio.zip"
+    },
+    {
+      "title": "Double Dragon",
+      "category": "Other",
+      "system": "fbneo",
+      "bucket": "fbneo/ddragonu.zip"
+    },
+    {
+      "title": "Guerrilla War",
+      "category": "Other",
+      "system": "fbneo",
+      "bucket": "fbneo/gwar.zip"
+    },
+    {
+      "title": "Heavy Barrel",
+      "category": "Other",
+      "system": "fbneo",
+      "bucket": "fbneo/hbarrelu.zip"
+    },
+    {
+      "title": "Karnov",
+      "category": "Other",
+      "system": "fbneo",
+      "bucket": "fbneo/karnov.zip"
+    },
+    {
+      "title": "Ninja-Kid II",
+      "category": "Other",
+      "system": "fbneo",
+      "bucket": "fbneo/ninjakd2.zip"
+    },
+    {
+      "title": "Psycho Soldier",
+      "category": "Other",
+      "system": "fbneo",
+      "bucket": "fbneo/psychos.zip"
+    },
+    {
+      "title": "Super Dodge Ball",
+      "category": "Other",
+      "system": "fbneo",
+      "bucket": "fbneo/spdodgeb.zip"
+    },
+    {
+      "title": "Tecmo Bowl",
+      "category": "Other",
+      "system": "fbneo",
+      "bucket": "fbneo/tbowl.zip"
+    },
+    {
+      "title": "Atomic Runner Chelnov",
+      "category": "Other",
+      "system": "fbneo",
+      "bucket": "fbneo/chelnovu.zip"
+    },
+    {
+      "title": "Bad Dudes vs. Dragonninja",
+      "category": "Other",
+      "system": "fbneo",
+      "bucket": "fbneo/baddudes.zip"
+    },
+    {
+      "title": "Double Dragon II: The Revenge",
+      "category": "Other",
+      "system": "fbneo",
+      "bucket": "fbneo/ddragon2u.zip"
+    },
+    {
+      "title": "Ninja Gaiden",
+      "category": "Other",
+      "system": "fbneo",
+      "bucket": "fbneo/gaiden.zip"
+    },
+    {
+      "title": "Ninja Spirit",
+      "category": "Other",
+      "system": "fbneo",
+      "bucket": "fbneo/nspirit.zip"
+    },
+    {
+      "title": "P.O.W. - Prisoners of War",
+      "category": "Other",
+      "system": "fbneo",
+      "bucket": "fbneo/pow.zip"
+    },
+    {
+      "title": "RoboCop",
+      "category": "Other",
+      "system": "fbneo",
+      "bucket": "fbneo/robocopu.zip"
+    },
+    {
+      "title": "Vigilante",
+      "category": "Other",
+      "system": "fbneo",
+      "bucket": "fbneo/vigilantb.zip"
+    },
+    {
+      "title": "Dynamite Duke",
+      "category": "Other",
+      "system": "fbneo",
+      "bucket": "fbneo/dyndukeu.zip"
+    },
+    {
+      "title": "Ironman Stewart's Super Off-Road",
+      "category": "Other",
+      "system": "mame",
+      "bucket": "mame/offroad.zip"
+    },
+    {
+      "title": "Midnight Resistance",
+      "category": "Other",
+      "system": "fbneo",
+      "bucket": "fbneo/midresu.zip"
+    },
+    {
+      "title": "Sly Spy",
+      "category": "Other",
+      "system": "fbneo",
+      "bucket": "fbneo/slyspy.zip"
+    },
+    {
+      "title": "Tecmo Knight",
+      "category": "Other",
+      "system": "fbneo",
+      "bucket": "fbneo/tknight.zip"
+    },
+    {
+      "title": "Tecmo World Cup '90",
+      "category": "Other",
+      "system": "mame",
+      "bucket": "mame/wc90.zip"
+    },
+    {
+      "title": "Toki",
+      "category": "Other",
+      "system": "fbneo",
+      "bucket": "fbneo/tokiu.zip"
+    },
+    {
+      "title": "WWF Superstars",
+      "category": "Other",
+      "system": "fbneo",
+      "bucket": "fbneo/wwfsstaru4.zip"
+    },
+    {
+      "title": "Ataxx",
+      "category": "Other",
+      "system": "mame",
+      "bucket": "mame/ataxx.zip"
+    },
+    {
+      "title": "Double Dragon 3: The Rosetta Stone",
+      "category": "Other",
+      "system": "fbneo",
+      "bucket": "fbneo/ddragon3.zip"
+    },
+    {
+      "title": "Gate of Doom",
+      "category": "Other",
+      "system": "fbneo",
+      "bucket": "fbneo/gatedoom.zip"
+    },
+    {
+      "title": "Hammerin' Harry",
+      "category": "Other",
+      "system": "fbneo",
+      "bucket": "fbneo/hharryu.zip"
+    },
+    {
+      "title": "Pipe Dream",
+      "category": "Other",
+      "system": "fbneo",
+      "bucket": "fbneo/pipedrmu.zip"
+    },
+    {
+      "title": "Rod-Land",
+      "category": "Other",
+      "system": "fbneo",
+      "bucket": "fbneo/rodland.zip"
+    },
+    {
+      "title": "Snow Bros.",
+      "category": "Other",
+      "system": "fbneo",
+      "bucket": "fbneo/snowbros.zip"
+    },
+    {
+      "title": "The Cliffhanger: Edward Randy",
+      "category": "Other",
+      "system": "fbneo",
+      "bucket": "fbneo/edrandy.zip"
+    },
+    {
+      "title": "The Combatribes",
+      "category": "Other",
+      "system": "fbneo",
+      "bucket": "fbneo/ctribe.zip"
+    },
+    {
+      "title": "Two Crude Dudes",
+      "category": "Other",
+      "system": "fbneo",
+      "bucket": "fbneo/twocrude.zip"
+    },
+    {
+      "title": "Atomic Punk",
+      "category": "Other",
+      "system": "fbneo",
+      "bucket": "fbneo/atompunk.zip"
+    },
+    {
+      "title": "Avenging Spirit",
+      "category": "Other",
+      "system": "fbneo",
+      "bucket": "fbneo/avspirit.zip"
+    },
+    {
+      "title": "Captain America and The Avengers",
+      "category": "Other",
+      "system": "fbneo",
+      "bucket": "fbneo/captavenu.zip"
+    },
+    {
+      "title": "Caveman Ninja",
+      "category": "Other",
+      "system": "fbneo",
+      "bucket": "fbneo/cninjau.zip"
+    },
+    {
+      "title": "GunForce",
+      "category": "Other",
+      "system": "fbneo",
+      "bucket": "fbneo/gunforceu.zip"
+    },
+    {
+      "title": "RoboCop 2",
+      "category": "Other",
+      "system": "fbneo",
+      "bucket": "fbneo/robocop2u.zip"
+    },
+    {
+      "title": "Tumble Pop",
+      "category": "Other",
+      "system": "fbneo",
+      "bucket": "fbneo/tumblep.zip"
+    },
+    {
+      "title": "Welltris",
+      "category": "Other",
+      "system": "fbneo",
+      "bucket": "fbneo/welltris.zip"
+    },
+    {
+      "title": "WWF WrestleFest",
+      "category": "Other",
+      "system": "fbneo",
+      "bucket": "fbneo/wwfwfestu.zip"
+    },
+    {
+      "title": "Undercover Cops",
+      "category": "Other",
+      "system": "fbneo",
+      "bucket": "fbneo/uccopsaru.zip"
+    },
+    {
+      "title": "Ninja Baseball Bat Man",
+      "category": "Other",
+      "system": "fbneo",
+      "bucket": "fbneo/nbbatmanu.zip"
+    },
+    {
+      "title": "Shadow Force",
+      "category": "Other",
+      "system": "fbneo",
+      "bucket": "fbneo/shadfrceu.zip"
+    },
+    {
+      "title": "World Rally Championship",
+      "category": "Other",
+      "system": "fbneo",
+      "bucket": "fbneo/wrallyat.zip"
+    },
+    {
+      "title": "Gun Force II",
+      "category": "Other",
+      "system": "fbneo",
+      "bucket": "fbneo/gunforc2.zip"
+    },
+    {
+      "title": "Night Slashers",
+      "category": "Other",
+      "system": "fbneo",
+      "bucket": "fbneo/nslasheru.zip"
+    },
+    {
+      "title": "Snow Bros. 2",
+      "category": "Other",
+      "system": "fbneo",
+      "bucket": "fbneo/snowbro2.zip"
+    },
+    {
+      "title": "Tetris Plus",
+      "category": "Other",
+      "system": "fbneo",
+      "bucket": "fbneo/tetrisp.zip"
+    }
+  ]
+}

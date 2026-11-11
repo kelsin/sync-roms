@@ -9,7 +9,7 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
-from sync_roms import cardedit, commands, edit, picker, store  # noqa: E402
+from sync_roms import cardedit, collectionedit, commands, edit, picker, store  # noqa: E402
 from helpers import Cmd, DataDir  # noqa: E402
 
 
@@ -18,65 +18,22 @@ def target(games):
     return edit.new_target("c", raw)
 
 
-class PersonalSets(DataDir):
-    def systems(self):
-        return [{"bucket": "gba", "full_system": False,
-                 "games": [{"title": "B", "bucket": "gba/B.zip", "note": "fun"}, {"title": "A", "bucket": "gba/A.zip"}]},
-                {"bucket": "nes", "full_system": False, "games": []}]
-
-    def test_save_and_load_alongside_repo_sets(self):
-        set_id = store.save_personal_set("My Picks", self.systems())
-        self.assertEqual(set_id, "my-picks")
-        data = self.read("sets/my-picks.json")
-        self.assertEqual(data["name"], "My Picks")
-        self.assertEqual([g["bucket"] for g in data["games"]], ["gba/A.zip", "gba/B.zip"])
-        self.assertEqual(data["games"][1], {"title": "B", "system": "gba", "bucket": "gba/B.zip", "note": "fun"})
-        ids = [x["id"] for x in store.load_sets()]
-        self.assertIn("my-picks", ids)
-        self.assertIn("pinball", ids)
-
-    def test_ids_cannot_collide(self):
-        self.assertIn("already", store.personal_set_problem("Pinball"))
-        store.save_personal_set("Mine", self.systems())
-        self.assertIn("already", store.personal_set_problem("mine"))
-        self.assertIsNone(store.personal_set_problem("Other"))
-        self.assertIsNotNone(store.personal_set_problem("   "))
-        self.assertIsNotNone(store.personal_set_problem("!!!"))
-
-    def test_hand_placed_colliding_file_is_skipped_and_bad_json_ignored(self):
+class NoPersonalSets(DataDir):
+    def test_load_sets_ignores_the_data_folder_sets(self):
         os.makedirs(self.path("sets"))
-        with open(self.path("sets/pinball.json"), "w") as f:
-            json.dump({"name": "Fake", "games": []}, f)
-        with open(self.path("sets/bad.json"), "w") as f:
-            f.write("{oops")
+        self.write_json("sets/mine.json", {"name": "Mine", "games": []})
+        self.write_json("sets/pinball.json", {"name": "Fake", "games": []})
         err = io.StringIO()
         with contextlib.redirect_stderr(err):
             sets = store.load_sets()
+        self.assertEqual(sorted(x["id"] for x in sets), sorted(x["id"] for x in store.repo_set_files()))
         self.assertEqual([x["name"] for x in sets if x["id"] == "pinball"], ["Pinball"])
-        self.assertNotIn("bad", [x["id"] for x in sets])
-        self.assertIn("pinball", err.getvalue())
+        self.assertEqual(err.getvalue(), "")
 
-    def test_editor_makes_a_set_from_extras(self):
-        t = target([{"title": "A", "bucket": "gba/A.zip"}])
-        sets = store.load_sets()
-        by_id = {x["id"]: x for x in sets}
-        with mock.patch.object(edit.ui, "ask", return_value="Road Trip"), \
-                contextlib.redirect_stdout(io.StringIO()):
-            made = edit.make_set_from_extras(t, sets, by_id)
-        self.assertEqual(made, "road-trip")
-        self.assertIn("road-trip", by_id)
-        self.assertTrue(os.path.exists(self.path("sets/road-trip.json")))
-
-    def test_editor_refuses_empty_extras_and_colliding_name(self):
-        sets = store.load_sets()
-        with mock.patch.object(edit, "note") as n:
-            self.assertIsNone(edit.make_set_from_extras(target([]), sets, {}))
-        self.assertTrue(n.called)
-        t = target([{"title": "A", "bucket": "gba/A.zip"}])
-        with mock.patch.object(edit.ui, "ask", side_effect=["Pinball", ""]), mock.patch.object(edit, "note"), \
-                contextlib.redirect_stdout(io.StringIO()):
-            self.assertIsNone(edit.make_set_from_extras(t, sets, {}))
-        self.assertFalse(os.path.exists(self.path("sets")))
+    def test_personal_set_helpers_are_gone(self):
+        for name in ("personal_sets_dir", "save_personal_set", "personal_set_problem"):
+            self.assertFalse(hasattr(store, name), name)
+        self.assertFalse(hasattr(edit, "make_set_from_extras"))
 
 
 class Notes(DataDir):
@@ -117,9 +74,11 @@ class Schemas(unittest.TestCase):
         games, cards = self.load("games.schema.json"), self.load("cards.schema.json")
         self.assertIn("sets", games["properties"])
         card = cards["additionalProperties"]["properties"]
-        for key in ("device", "layout", "android_media", "systems", "games"):
+        for key in ("device", "layout", "android_media", "systems", "games", "collections", "frontend_collections",
+                    "surprise", "surprises"):
             self.assertIn(key, card)
         self.assertEqual(card["systems"]["items"]["type"], "string")
+        self.assertEqual(self.load("collections.schema.json")["required"], ["name", "games"])
 
 
 class CheckSystemsKey(Cmd):
@@ -131,19 +90,35 @@ class CheckSystemsKey(Cmd):
         self.write_json("cards.json", {"c": {"device": "full", "layout": "esde", "systems": "gba"}})
         self.assertEqual(len(commands.check_data()), 1)
 
-    def test_personal_set_files_are_checked(self):
+    def test_files_in_the_data_folder_sets_are_not_checked(self):
+        self.write_json("cards.json", {"c": {"device": "full", "layout": "esde"}})
         os.makedirs(self.path("sets"))
-        self.write_json("sets/mine.json", {"name": "Mine", "games": [
-            {"title": "A", "system": "gba", "bucket": "gba/A.zip"},
-            {"title": "B", "system": "nope", "bucket": "nope/B.zip"},
-            {"system": "gba", "bucket": "nes/C.zip"}]})
+        self.write_json("sets/mine.json", {"name": "Mine", "games": [{"title": "B", "system": "nope", "bucket": "nope/B.zip"}]})
         with open(self.path("sets/bad.json"), "w") as f:
             f.write("{oops")
+        self.assertEqual(commands.check_data(), [])
+
+
+class CheckSurprise(Cmd):
+    def test_check_flags_bad_surprise_data(self):
+        self.write_json("cards.json", {"SD": {"surprise": "yes", "surprises": [{"system": "gba"}]}})
+        self.write_json("surprises.json", [{"system": "nope", "bucket": "x", "title": "t", "card": "SD", "date": "soon"}])
         problems = commands.check_data()
-        self.assertTrue(any("mine" in p and "nope" in p for p in problems))
-        self.assertTrue(any("mine" in p and "nes/C.zip" in p for p in problems))
-        self.assertTrue(any("mine" in p and "title" in p for p in problems))
-        self.assertTrue(any("bad" in p for p in problems))
+        self.assertIn("cards.json: SD: 'surprise' must be true or false", problems)
+        self.assertIn("cards.json: SD: surprises: each must have system, bucket and title", problems)
+        self.assertIn("surprises.json: unknown system 'nope'", problems)
+        self.assertIn("surprises.json: 'soon' isn't an ISO date", problems)
+
+    def test_good_surprise_data_passes_and_buckets_are_checked(self):
+        s = {"system": "gba", "bucket": "gba/A.zip", "title": "A"}
+        self.write_json("cards.json", {"SD": {"device": "full", "layout": "esde", "surprise": True, "surprises": [s]}})
+        self.write_json("surprises.json", [dict(s, card="SD", date="2026-11-11")])
+        self.assertEqual(commands.check_data(), [])
+        self.assertTrue(any("gba/A.zip" in p for p in commands.check_data(lambda system: set())))
+
+    def test_surprises_file_must_be_a_list(self):
+        self.write_json("surprises.json", {})
+        self.assertEqual(commands.check_data(), ["surprises.json: must be a list"])
 
 
 class CheckBucketKeys(Cmd):
@@ -151,16 +126,18 @@ class CheckBucketKeys(Cmd):
         with open(self.path("cards.json"), "w") as f:
             json.dump({"c": {"device": "full", "layout": "esde",
                              "games": {"gba": [{"title": "A", "bucket": "gba/A.zip"}, {"title": "B", "bucket": "gba/B.zip"}]}}}, f)
-        os.makedirs(self.path("sets"))
-        with open(self.path("sets/mine.json"), "w") as f:
-            json.dump({"name": "Mine", "games": [{"title": "D", "system": "nes", "bucket": "nes/D.zip",
-                                                  "files": ["nes/D2.zip"]}]}, f)
-        listings = {"gba": {"gba/A.zip"}, "nes": {"nes/D.zip"}}
-        problems = commands.check_data(lambda system: listings.get(system, set()))
+        problems = commands.check_data(lambda system: {"gba/A.zip"} if system == "gba" else set())
         self.assertTrue(any("gba/B.zip" in p for p in problems))
-        self.assertTrue(any("nes/D2.zip" in p for p in problems))
-        self.assertFalse(any("gba/A.zip" in p or "nes/D.zip" in p for p in problems))
+        self.assertFalse(any("gba/A.zip" in p for p in problems))
         self.assertEqual(commands.check_data(), [])
+
+    def test_bucket_keys_cover_every_key_of_a_collection_game(self):
+        os.makedirs(self.path("collections"))
+        self.write_json("collections/mine.json", {"name": "Mine", "games": [
+            {"title": "D", "system": "nes", "bucket": "nes/D.zip", "files": ["nes/D2.zip"]}]})
+        problems = commands.check_data(lambda system: {"nes/D.zip"} if system == "nes" else set())
+        self.assertTrue(any("nes/D2.zip" in p for p in problems))
+        self.assertFalse(any("nes/D.zip" in p for p in problems))
 
     def test_flag_uses_the_readonly_profile_and_refuses_the_write_profile(self):
         from sync_roms import runtime, s3
@@ -180,7 +157,7 @@ class Hints(unittest.TestCase):
     def test_hints_fit_a_narrow_terminal_and_lead_with_the_main_keys(self):
         hints = [picker.SYSTEMS_HINT, picker.systems_hint(True), picker.MULTI_HINT, picker.SINGLE_HINT,
                  edit.MENU_HINT, edit.GAMES_HINT, cardedit.LIST_HINT, cardedit.GAMES_HINT, cardedit.SETS_HINT,
-                 cardedit.META_HINT, cardedit.VALUES_HINT]
+                 cardedit.META_HINT, cardedit.VALUES_HINT, collectionedit.GAMES_HINT]
         for h in hints:
             self.assertLessEqual(picker.cell_width(h), 80, h)
         self.assertTrue(picker.systems_hint(False).startswith("Space toggle · Enter go"))

@@ -1,6 +1,6 @@
 {
   "name": "Best of 16-Bit",
-  "description": "Landmark SNES, Genesis and TurboGrafx-16 games.",
+  "description": "Landmark SNES, Genesis, Sega CD, 32X and TurboGrafx-16 games.",
   "games": [
     {
       "title": "Super Mario All-Stars + Super Mario World",
@@ -28,6 +28,11 @@
       "bucket": "snes/Donkey Kong Country 2 - Diddy's Kong Quest (USA) (En,Fr) (Rev 1).zip"
     },
     {
+      "title": "Donkey Kong Country 3 - Dixie Kong's Double Trouble!",
+      "system": "snes",
+      "bucket": "snes/Donkey Kong Country 3 - Dixie Kong's Double Trouble! (USA) (En,Fr).zip"
+    },
+    {
       "title": "EarthBound",
       "system": "snes",
       "bucket": "snes/EarthBound (USA).zip"
@@ -36,6 +41,11 @@
       "title": "Final Fantasy III (Rev 1)",
       "system": "snes",
       "bucket": "snes/Final Fantasy III (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Final Fantasy II",
+      "system": "snes",
+      "bucket": "snes/Final Fantasy II (USA) (Rev 1).zip"
     },
     {
       "title": "Super Mario World 2 - Yoshi's Island (Rev 1)",
@@ -68,6 +78,21 @@
       "bucket": "snes/Mega Man X (USA) (Rev 1).zip"
     },
     {
+      "title": "Mega Man X2",
+      "system": "snes",
+      "bucket": "snes/Mega Man X2 (USA).zip"
+    },
+    {
+      "title": "Mega Man X3",
+      "system": "snes",
+      "bucket": "snes/Mega Man X3 (USA).zip"
+    },
+    {
+      "title": "Mega Man 7",
+      "system": "snes",
+      "bucket": "snes/Mega Man 7 (USA).zip"
+    },
+    {
       "title": "Contra III - The Alien Wars",
       "system": "snes",
       "bucket": "snes/Contra III - The Alien Wars (USA).zip"
@@ -83,9 +108,24 @@
       "bucket": "snes/Kirby Super Star (USA).zip"
     },
     {
+      "title": "Kirby's Dream Land 3",
+      "system": "snes",
+      "bucket": "snes/Kirby's Dream Land 3 (USA).zip"
+    },
+    {
+      "title": "Kirby's Dream Course",
+      "system": "snes",
+      "bucket": "snes/Kirby's Dream Course (USA).zip"
+    },
+    {
       "title": "Street Fighter II Turbo (Rev 1)",
       "system": "snes",
       "bucket": "snes/Street Fighter II Turbo (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Super Street Fighter II",
+      "system": "snes",
+      "bucket": "snes/Super Street Fighter II (USA) (Rev 1).zip"
     },
     {
       "title": "Super Punch-Out!!",
@@ -143,9 +183,214 @@
       "bucket": "snes/Earthworm Jim (USA).zip"
     },
     {
+      "title": "Breath of Fire II",
+      "system": "snes",
+      "bucket": "snes/Breath of Fire II (USA).zip"
+    },
+    {
+      "title": "Lufia II - Rise of the Sinistrals",
+      "system": "snes",
+      "bucket": "snes/Lufia II - Rise of the Sinistrals (USA).zip"
+    },
+    {
+      "title": "Terranigma",
+      "system": "snes",
+      "bucket": "snes/Terranigma (Europe).zip"
+    },
+    {
+      "title": "Trials of Mana",
+      "system": "snes",
+      "bucket": "snes/Trials of Mana (World) (Rev 1) (Collection of Mana).zip"
+    },
+    {
+      "title": "Ogre Battle - The March of the Black Queen",
+      "system": "snes",
+      "bucket": "snes/Ogre Battle - The March of the Black Queen (USA).zip"
+    },
+    {
+      "title": "Harvest Moon",
+      "system": "snes",
+      "bucket": "snes/Harvest Moon (USA).zip"
+    },
+    {
+      "title": "Shadowrun",
+      "system": "snes",
+      "bucket": "snes/Shadowrun (USA).zip"
+    },
+    {
+      "title": "SimCity",
+      "system": "snes",
+      "bucket": "snes/SimCity (USA).zip"
+    },
+    {
+      "title": "Mortal Kombat II",
+      "system": "snes",
+      "bucket": "snes/Mortal Kombat II (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Killer Instinct",
+      "system": "snes",
+      "bucket": "snes/Killer Instinct (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Teenage Mutant Ninja Turtles IV - Turtles in Time",
+      "system": "snes",
+      "bucket": "snes/Teenage Mutant Ninja Turtles IV - Turtles in Time (USA).zip"
+    },
+    {
+      "title": "Super Bomberman 2",
+      "system": "snes",
+      "bucket": "snes/Super Bomberman 2 (USA).zip"
+    },
+    {
+      "title": "Super Star Wars",
+      "system": "snes",
+      "bucket": "snes/Super Star Wars (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Super Star Wars - The Empire Strikes Back",
+      "system": "snes",
+      "bucket": "snes/Super Star Wars - The Empire Strikes Back (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Super Star Wars - Return of the Jedi",
+      "system": "snes",
+      "bucket": "snes/Super Star Wars - Return of the Jedi (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Sunset Riders",
+      "system": "snes",
+      "bucket": "snes/Sunset Riders (USA).zip"
+    },
+    {
+      "title": "Demon's Crest",
+      "system": "snes",
+      "bucket": "snes/Demon's Crest (USA).zip"
+    },
+    {
+      "title": "Wild Guns",
+      "system": "snes",
+      "bucket": "snes/Wild Guns (USA).zip"
+    },
+    {
+      "title": "Pocky & Rocky",
+      "system": "snes",
+      "bucket": "snes/Pocky & Rocky (USA).zip"
+    },
+    {
+      "title": "Legend of the Mystical Ninja, The",
+      "system": "snes",
+      "bucket": "snes/Legend of the Mystical Ninja, The (USA).zip"
+    },
+    {
+      "title": "Gradius III",
+      "system": "snes",
+      "bucket": "snes/Gradius III (USA).zip"
+    },
+    {
+      "title": "R-Type III",
+      "system": "snes",
+      "bucket": "snes/R-Type III (USA).zip"
+    },
+    {
+      "title": "Axelay",
+      "system": "snes",
+      "bucket": "snes/Axelay (USA).zip"
+    },
+    {
+      "title": "Space Megaforce",
+      "system": "snes",
+      "bucket": "snes/Space Megaforce (USA).zip"
+    },
+    {
+      "title": "U.N. Squadron",
+      "system": "snes",
+      "bucket": "snes/U.N. Squadron (USA).zip"
+    },
+    {
+      "title": "Stunt Race FX",
+      "system": "snes",
+      "bucket": "snes/Stunt Race FX (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Top Gear",
+      "system": "snes",
+      "bucket": "snes/Top Gear (USA).zip"
+    },
+    {
+      "title": "Rock N' Roll Racing",
+      "system": "snes",
+      "bucket": "snes/Rock N' Roll Racing (USA).zip"
+    },
+    {
+      "title": "Lost Vikings, The",
+      "system": "snes",
+      "bucket": "snes/Lost Vikings, The (USA).zip"
+    },
+    {
+      "title": "Out of This World",
+      "system": "snes",
+      "bucket": "snes/Out of This World (USA).zip"
+    },
+    {
+      "title": "Super Smash T.V.",
+      "system": "snes",
+      "bucket": "snes/Super Smash T.V. (USA).zip"
+    },
+    {
+      "title": "Aladdin",
+      "system": "snes",
+      "bucket": "snes/Aladdin (USA).zip"
+    },
+    {
+      "title": "Magical Quest Starring Mickey Mouse, The",
+      "system": "snes",
+      "bucket": "snes/Magical Quest Starring Mickey Mouse, The (USA) (Rev 1).zip"
+    },
+    {
+      "title": "NBA Jam - Tournament Edition",
+      "system": "snes",
+      "bucket": "snes/NBA Jam - Tournament Edition (USA).zip"
+    },
+    {
+      "title": "Ken Griffey Jr. Presents Major League Baseball",
+      "system": "snes",
+      "bucket": "snes/Ken Griffey Jr. Presents Major League Baseball (USA) (Rev 1).zip"
+    },
+    {
+      "title": "NHL '94",
+      "system": "snes",
+      "bucket": "snes/NHL '94 (USA).zip"
+    },
+    {
+      "title": "Tecmo Super Bowl",
+      "system": "snes",
+      "bucket": "snes/Tecmo Super Bowl (USA).zip"
+    },
+    {
+      "title": "International Superstar Soccer Deluxe",
+      "system": "snes",
+      "bucket": "snes/International Superstar Soccer Deluxe (USA).zip"
+    },
+    {
+      "title": "Tetris & Dr. Mario",
+      "system": "snes",
+      "bucket": "snes/Tetris & Dr. Mario (USA).zip"
+    },
+    {
+      "title": "Earthworm Jim 2",
+      "system": "snes",
+      "bucket": "snes/Earthworm Jim 2 (USA).zip"
+    },
+    {
       "title": "Sonic The Hedgehog 3",
       "system": "genesis",
       "bucket": "genesis/Sonic The Hedgehog 3 (USA).zip"
+    },
+    {
+      "title": "Sonic The Hedgehog",
+      "system": "genesis",
+      "bucket": "genesis/Sonic The Hedgehog (Japan, Europe, Korea) (En).zip"
     },
     {
       "title": "Sonic & Knuckles",
@@ -153,9 +398,24 @@
       "bucket": "genesis/Sonic & Knuckles (World).zip"
     },
     {
+      "title": "Sonic 3 & Knuckles",
+      "system": "genesis",
+      "bucket": "genesis/Sonic & Knuckles + Sonic The Hedgehog 3 (USA) (Lock-on Combination).zip"
+    },
+    {
+      "title": "Sonic Spinball",
+      "system": "genesis",
+      "bucket": "genesis/Sonic Spinball (USA).zip"
+    },
+    {
       "title": "Streets of Rage 2",
       "system": "genesis",
       "bucket": "genesis/Streets of Rage 2 (USA).zip"
+    },
+    {
+      "title": "Streets of Rage",
+      "system": "genesis",
+      "bucket": "genesis/Streets of Rage (World) (Rev A).zip"
     },
     {
       "title": "Gunstar Heroes",
@@ -168,9 +428,24 @@
       "bucket": "genesis/Phantasy Star IV (USA).zip"
     },
     {
+      "title": "Phantasy Star II",
+      "system": "genesis",
+      "bucket": "genesis/Phantasy Star II (USA, Europe) (Rev A).zip"
+    },
+    {
       "title": "Shining Force II",
       "system": "genesis",
       "bucket": "genesis/Shining Force II (USA).zip"
+    },
+    {
+      "title": "Shining Force",
+      "system": "genesis",
+      "bucket": "genesis/Shining Force (USA).zip"
+    },
+    {
+      "title": "Shining in the Darkness",
+      "system": "genesis",
+      "bucket": "genesis/Shining in the Darkness (USA, Europe).zip"
     },
     {
       "title": "Castlevania - Bloodlines",
@@ -181,6 +456,11 @@
       "title": "Vectorman",
       "system": "genesis",
       "bucket": "genesis/Vectorman (USA, Europe).zip"
+    },
+    {
+      "title": "Vectorman 2",
+      "system": "genesis",
+      "bucket": "genesis/Vectorman 2 (USA).zip"
     },
     {
       "title": "Comix Zone",
@@ -201,6 +481,11 @@
       "title": "Revenge of Shinobi, The (Rev B)",
       "system": "genesis",
       "bucket": "genesis/Revenge of Shinobi, The (USA, Europe) (Rev B).zip"
+    },
+    {
+      "title": "Shadow Dancer - The Secret of Shinobi",
+      "system": "genesis",
+      "bucket": "genesis/Shadow Dancer - The Secret of Shinobi (World).zip"
     },
     {
       "title": "Landstalker",
@@ -228,9 +513,19 @@
       "bucket": "genesis/Earthworm Jim (USA).zip"
     },
     {
+      "title": "Earthworm Jim 2",
+      "system": "genesis",
+      "bucket": "genesis/Earthworm Jim 2 (USA).zip"
+    },
+    {
       "title": "Road Rash II (RR206)",
       "system": "genesis",
       "bucket": "genesis/Road Rash II (USA, Europe) (RR206).zip"
+    },
+    {
+      "title": "Road Rash 3",
+      "system": "genesis",
+      "bucket": "genesis/Road Rash 3 (USA, Europe).zip"
     },
     {
       "title": "Contra - Hard Corps",
@@ -238,14 +533,274 @@
       "bucket": "genesis/Contra - Hard Corps (USA, Korea) (En).zip"
     },
     {
+      "title": "Rocket Knight Adventures",
+      "system": "genesis",
+      "bucket": "genesis/Rocket Knight Adventures (USA).zip"
+    },
+    {
+      "title": "Dynamite Headdy",
+      "system": "genesis",
+      "bucket": "genesis/Dynamite Headdy (USA, Europe).zip"
+    },
+    {
+      "title": "Ristar",
+      "system": "genesis",
+      "bucket": "genesis/Ristar (USA, Europe).zip"
+    },
+    {
+      "title": "Alien Soldier",
+      "system": "genesis",
+      "bucket": "genesis/Alien Soldier (Europe).zip"
+    },
+    {
+      "title": "Kid Chameleon",
+      "system": "genesis",
+      "bucket": "genesis/Kid Chameleon (USA, Europe).zip"
+    },
+    {
+      "title": "ToeJam & Earl",
+      "system": "genesis",
+      "bucket": "genesis/ToeJam & Earl (USA, Europe, Korea) (En).zip"
+    },
+    {
+      "title": "ToeJam & Earl in Panic on Funkotron",
+      "system": "genesis",
+      "bucket": "genesis/ToeJam & Earl in Panic on Funkotron (USA).zip"
+    },
+    {
+      "title": "Ecco the Dolphin",
+      "system": "genesis",
+      "bucket": "genesis/Ecco the Dolphin (USA, Europe, Korea) (En).zip"
+    },
+    {
+      "title": "Ecco - The Tides of Time",
+      "system": "genesis",
+      "bucket": "genesis/Ecco - The Tides of Time (USA).zip"
+    },
+    {
+      "title": "Castle of Illusion Starring Mickey Mouse",
+      "system": "genesis",
+      "bucket": "genesis/Castle of Illusion Starring Mickey Mouse (USA, Europe).zip"
+    },
+    {
+      "title": "World of Illusion Starring Mickey Mouse and Donald Duck",
+      "system": "genesis",
+      "bucket": "genesis/World of Illusion Starring Mickey Mouse and Donald Duck (USA, Korea) (En).zip"
+    },
+    {
+      "title": "QuackShot Starring Donald Duck",
+      "system": "genesis",
+      "bucket": "genesis/QuackShot Starring Donald Duck (World) (Rev A).zip"
+    },
+    {
+      "title": "Strider",
+      "system": "genesis",
+      "bucket": "genesis/Strider (USA, Europe).zip"
+    },
+    {
+      "title": "Ghouls'n Ghosts",
+      "system": "genesis",
+      "bucket": "genesis/Ghouls'n Ghosts (Japan, USA) (En).zip"
+    },
+    {
+      "title": "Mega Man - The Wily Wars",
+      "system": "genesis",
+      "bucket": "genesis/Mega Man - The Wily Wars (Europe).zip"
+    },
+    {
+      "title": "Pulseman",
+      "system": "genesis",
+      "bucket": "genesis/Pulseman (Japan).zip"
+    },
+    {
+      "title": "Wonder Boy in Monster World",
+      "system": "genesis",
+      "bucket": "genesis/Wonder Boy in Monster World (USA, Europe).zip"
+    },
+    {
+      "title": "Monster World IV",
+      "system": "genesis",
+      "bucket": "genesis/Monster World IV (USA) (Genesis Mini).zip"
+    },
+    {
+      "title": "Teenage Mutant Ninja Turtles - The Hyperstone Heist",
+      "system": "genesis",
+      "bucket": "genesis/Teenage Mutant Ninja Turtles - The Hyperstone Heist (USA).zip"
+    },
+    {
+      "title": "Adventures of Batman & Robin, The",
+      "system": "genesis",
+      "bucket": "genesis/Adventures of Batman & Robin, The (USA).zip"
+    },
+    {
+      "title": "X-Men 2 - Clone Wars",
+      "system": "genesis",
+      "bucket": "genesis/X-Men 2 - Clone Wars (USA, Europe).zip"
+    },
+    {
+      "title": "Michael Jackson's Moonwalker",
+      "system": "genesis",
+      "bucket": "genesis/Michael Jackson's Moonwalker (Japan, USA) (En).zip"
+    },
+    {
+      "title": "Flashback - The Quest for Identity",
+      "system": "genesis",
+      "bucket": "genesis/Flashback - The Quest for Identity (USA) (En,Fr).zip"
+    },
+    {
+      "title": "Thunder Force III",
+      "system": "genesis",
+      "bucket": "genesis/Thunder Force III (Japan, USA) (En).zip"
+    },
+    {
+      "title": "Lightening Force - Quest for the Darkstar",
+      "system": "genesis",
+      "bucket": "genesis/Lightening Force - Quest for the Darkstar (USA).zip"
+    },
+    {
+      "title": "MUSHA - Metallic Uniframe Super Hybrid Armor",
+      "system": "genesis",
+      "bucket": "genesis/MUSHA - Metallic Uniframe Super Hybrid Armor (USA).zip"
+    },
+    {
+      "title": "Ranger X",
+      "system": "genesis",
+      "bucket": "genesis/Ranger X (USA).zip"
+    },
+    {
+      "title": "Herzog Zwei",
+      "system": "genesis",
+      "bucket": "genesis/Herzog Zwei (USA, Europe).zip"
+    },
+    {
+      "title": "General Chaos",
+      "system": "genesis",
+      "bucket": "genesis/General Chaos (USA, Europe).zip"
+    },
+    {
+      "title": "Dune - The Battle for Arrakis",
+      "system": "genesis",
+      "bucket": "genesis/Dune - The Battle for Arrakis (USA).zip"
+    },
+    {
+      "title": "Starflight",
+      "system": "genesis",
+      "bucket": "genesis/Starflight (USA, Europe) (Rev A).zip"
+    },
+    {
+      "title": "Shadowrun",
+      "system": "genesis",
+      "bucket": "genesis/Shadowrun (USA).zip"
+    },
+    {
+      "title": "Crusader of Centy",
+      "system": "genesis",
+      "bucket": "genesis/Crusader of Centy (USA).zip"
+    },
+    {
+      "title": "Gauntlet IV",
+      "system": "genesis",
+      "bucket": "genesis/Gauntlet IV (USA, Europe) (En,Ja).zip"
+    },
+    {
+      "title": "Mortal Kombat II",
+      "system": "genesis",
+      "bucket": "genesis/Mortal Kombat II (World).zip"
+    },
+    {
+      "title": "Street Fighter II' - Special Champion Edition",
+      "system": "genesis",
+      "bucket": "genesis/Street Fighter II' - Special Champion Edition (USA).zip"
+    },
+    {
+      "title": "Eternal Champions",
+      "system": "genesis",
+      "bucket": "genesis/Eternal Champions (USA).zip"
+    },
+    {
+      "title": "NHL '94",
+      "system": "genesis",
+      "bucket": "genesis/NHL '94 (USA, Europe).zip"
+    },
+    {
+      "title": "NBA Jam - Tournament Edition",
+      "system": "genesis",
+      "bucket": "genesis/NBA Jam - Tournament Edition (World).zip"
+    },
+    {
+      "title": "Mutant League Football",
+      "system": "genesis",
+      "bucket": "genesis/Mutant League Football (USA, Europe).zip"
+    },
+    {
+      "title": "OutRun",
+      "system": "genesis",
+      "bucket": "genesis/OutRun (USA, Europe).zip"
+    },
+    {
+      "title": "Virtua Racing",
+      "system": "genesis",
+      "bucket": "genesis/Virtua Racing (USA).zip"
+    },
+    {
+      "title": "Micro Machines",
+      "system": "genesis",
+      "bucket": "genesis/Micro Machines (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Desert Strike - Return to the Gulf",
+      "system": "genesis",
+      "bucket": "genesis/Desert Strike - Return to the Gulf (USA, Europe).zip"
+    },
+    {
+      "title": "Columns",
+      "system": "genesis",
+      "bucket": "genesis/Columns (USA, Europe).zip"
+    },
+    {
+      "title": "Dr. Robotnik's Mean Bean Machine",
+      "system": "genesis",
+      "bucket": "genesis/Dr. Robotnik's Mean Bean Machine (USA).zip"
+    },
+    {
       "title": "Bonk's Adventure",
       "system": "tg16",
       "bucket": "tg16/Bonk's Adventure (USA).zip"
     },
     {
+      "title": "Bonk's Revenge",
+      "system": "tg16",
+      "bucket": "tg16/Bonk's Revenge (USA).zip"
+    },
+    {
+      "title": "Bonk 3 - Bonk's Big Adventure",
+      "system": "tg16",
+      "bucket": "tg16/Bonk 3 - Bonk's Big Adventure (USA).zip"
+    },
+    {
+      "title": "Air Zonk",
+      "system": "tg16",
+      "bucket": "tg16/Air Zonk (USA).zip"
+    },
+    {
       "title": "Blazing Lazers",
       "system": "tg16",
       "bucket": "tg16/Blazing Lazers (USA).zip"
+    },
+    {
+      "title": "Soldier Blade",
+      "system": "tg16",
+      "bucket": "tg16/Soldier Blade (USA).zip"
+    },
+    {
+      "title": "Super Star Soldier",
+      "system": "tg16",
+      "bucket": "tg16/Super Star Soldier (USA).zip"
+    },
+    {
+      "title": "Final Soldier",
+      "system": "tg16",
+      "bucket": "tg16/Final Soldier (Japan) (En).zip"
     },
     {
       "title": "R-Type",
@@ -258,9 +813,469 @@
       "bucket": "tg16/Dungeon Explorer (USA).zip"
     },
     {
+      "title": "Military Madness",
+      "system": "tg16",
+      "bucket": "tg16/Military Madness (USA).zip"
+    },
+    {
+      "title": "Neutopia",
+      "system": "tg16",
+      "bucket": "tg16/Neutopia (USA).zip"
+    },
+    {
+      "title": "Neutopia II",
+      "system": "tg16",
+      "bucket": "tg16/Neutopia II (USA).zip"
+    },
+    {
+      "title": "Cadash",
+      "system": "tg16",
+      "bucket": "tg16/Cadash (USA).zip"
+    },
+    {
+      "title": "Dragon's Curse",
+      "system": "tg16",
+      "bucket": "tg16/Dragon's Curse (USA).zip"
+    },
+    {
+      "title": "Legendary Axe, The",
+      "system": "tg16",
+      "bucket": "tg16/Legendary Axe, The (USA).zip"
+    },
+    {
+      "title": "Ninja Spirit",
+      "system": "tg16",
+      "bucket": "tg16/Ninja Spirit (USA).zip"
+    },
+    {
+      "title": "Splatterhouse",
+      "system": "tg16",
+      "bucket": "tg16/Splatterhouse (USA).zip"
+    },
+    {
+      "title": "New Adventure Island",
+      "system": "tg16",
+      "bucket": "tg16/New Adventure Island (USA).zip"
+    },
+    {
+      "title": "Parasol Stars - The Story of Bubble Bobble III",
+      "system": "tg16",
+      "bucket": "tg16/Parasol Stars - The Story of Bubble Bobble III (USA).zip"
+    },
+    {
+      "title": "Devil's Crush",
+      "system": "tg16",
+      "bucket": "tg16/Devil's Crush (USA).zip"
+    },
+    {
+      "title": "Alien Crush",
+      "system": "tg16",
+      "bucket": "tg16/Alien Crush (USA).zip"
+    },
+    {
+      "title": "Galaga '90",
+      "system": "tg16",
+      "bucket": "tg16/Galaga '90 (USA).zip"
+    },
+    {
+      "title": "Magical Chase",
+      "system": "tg16",
+      "bucket": "tg16/Magical Chase (USA).zip"
+    },
+    {
+      "title": "Parodius Da! - Shinwa kara Owarai e",
+      "system": "tg16",
+      "bucket": "tg16/Parodius Da! - Shinwa kara Owarai e (Japan).zip"
+    },
+    {
+      "title": "Bomberman '93",
+      "system": "tg16",
+      "bucket": "tg16/Bomberman '93 (USA).zip"
+    },
+    {
+      "title": "Bomberman '94",
+      "system": "tg16",
+      "bucket": "tg16/Bomberman '94 (World) (Wii U Virtual Console).zip"
+    },
+    {
+      "title": "Street Fighter II' - Champion Edition",
+      "system": "tg16",
+      "bucket": "tg16/Street Fighter II' - Champion Edition (Japan).zip"
+    },
+    {
+      "title": "Gekisha Boy",
+      "system": "tg16",
+      "bucket": "tg16/Gekisha Boy (Japan).zip"
+    },
+    {
+      "title": "Gomola Speed",
+      "system": "tg16",
+      "bucket": "tg16/Gomola Speed (Japan).zip"
+    },
+    {
+      "title": "Nekketsu Koukou Dodgeball-bu - PC Bangai Hen",
+      "system": "tg16",
+      "bucket": "tg16/Nekketsu Koukou Dodgeball-bu - PC Bangai Hen (Japan).zip"
+    },
+    {
+      "title": "Chase H.Q.",
+      "system": "tg16",
+      "bucket": "tg16/Chase H.Q. (USA).zip"
+    },
+    {
+      "title": "Fantasy Zone",
+      "system": "tg16",
+      "bucket": "tg16/Fantasy Zone (USA).zip"
+    },
+    {
+      "title": "Legendary Axe II",
+      "system": "tg16",
+      "bucket": "tg16/Legendary Axe II (USA).zip"
+    },
+    {
+      "title": "Dragon Spirit",
+      "system": "tg16",
+      "bucket": "tg16/Dragon Spirit (USA).zip"
+    },
+    {
+      "title": "Darius Alpha",
+      "system": "tg16",
+      "bucket": "tg16/Darius Alpha (World) (SG Enhanced) (Darius Cozmic Collection).zip"
+    },
+    {
+      "title": "Out Run",
+      "system": "tg16",
+      "bucket": "tg16/Out Run (Japan).zip"
+    },
+    {
+      "title": "Space Harrier",
+      "system": "tg16",
+      "bucket": "tg16/Space Harrier (USA).zip"
+    },
+    {
+      "title": "Gradius",
+      "system": "tg16",
+      "bucket": "tg16/Gradius (World) (Wii U Virtual Console).zip"
+    },
+    {
+      "title": "World Court Tennis",
+      "system": "tg16",
+      "bucket": "tg16/World Court Tennis (USA).zip"
+    },
+    {
+      "title": "Final Lap Twin",
+      "system": "tg16",
+      "bucket": "tg16/Final Lap Twin (USA).zip"
+    },
+    {
+      "title": "Silent Debuggers",
+      "system": "tg16",
+      "bucket": "tg16/Silent Debuggers (USA).zip"
+    },
+    {
+      "title": "Salamander",
+      "system": "tg16",
+      "bucket": "tg16/Salamander (World) (Wii U Virtual Console).zip"
+    },
+    {
+      "title": "Aoi Blink",
+      "system": "tg16",
+      "bucket": "tg16/Aoi Blink (Japan).zip"
+    },
+    {
       "title": "Super Metroid (En,Fr,De)",
       "system": "snes",
       "bucket": "snes/Super Metroid (Japan, USA) (En,Ja).zip"
+    },
+    {
+      "title": "Lufia & the Fortress of Doom",
+      "system": "snes",
+      "bucket": "snes/Lufia & the Fortress of Doom (USA).zip"
+    },
+    {
+      "title": "Adventures of Batman & Robin, The",
+      "system": "snes",
+      "bucket": "snes/Adventures of Batman & Robin, The (USA).zip"
+    },
+    {
+      "title": "Super Bomberman",
+      "system": "snes",
+      "bucket": "snes/Super Bomberman (USA).zip"
+    },
+    {
+      "title": "Batman Returns",
+      "system": "snes",
+      "bucket": "snes/Batman Returns (USA).zip"
+    },
+    {
+      "title": "Prince of Persia",
+      "system": "snes",
+      "bucket": "snes/Prince of Persia (USA).zip"
+    },
+    {
+      "title": "NBA Jam",
+      "system": "snes",
+      "bucket": "snes/NBA Jam (USA) (Rev 1).zip"
+    },
+    {
+      "title": "E.V.O. - Search for Eden",
+      "system": "snes",
+      "bucket": "snes/E.V.O. - Search for Eden (USA).zip"
+    },
+    {
+      "title": "True Lies",
+      "system": "snes",
+      "bucket": "snes/True Lies (USA).zip"
+    },
+    {
+      "title": "Magic Sword",
+      "system": "snes",
+      "bucket": "snes/Magic Sword (USA).zip"
+    },
+    {
+      "title": "Brain Lord",
+      "system": "snes",
+      "bucket": "snes/Brain Lord (USA).zip"
+    },
+    {
+      "title": "Super Adventure Island II",
+      "system": "snes",
+      "bucket": "snes/Super Adventure Island II (USA).zip"
+    },
+    {
+      "title": "Saturday Night Slam Masters",
+      "system": "snes",
+      "bucket": "snes/Saturday Night Slam Masters (USA).zip"
+    },
+    {
+      "title": "Boogerman - A Pick and Flick Adventure",
+      "system": "snes",
+      "bucket": "snes/Boogerman - A Pick and Flick Adventure (USA).zip"
+    },
+    {
+      "title": "Goof Troop",
+      "system": "snes",
+      "bucket": "snes/Goof Troop (USA).zip"
+    },
+    {
+      "title": "WeaponLord",
+      "system": "snes",
+      "bucket": "snes/WeaponLord (USA).zip"
+    },
+    {
+      "title": "Phalanx",
+      "system": "snes",
+      "bucket": "snes/Phalanx (USA).zip"
+    },
+    {
+      "title": "Indiana Jones' Greatest Adventures",
+      "system": "snes",
+      "bucket": "snes/Indiana Jones' Greatest Adventures (USA).zip"
+    },
+    {
+      "title": "Uniracers",
+      "system": "snes",
+      "bucket": "snes/Uniracers (USA).zip"
+    },
+    {
+      "title": "Ys III - Wanderers from Ys",
+      "system": "snes",
+      "bucket": "snes/Ys III - Wanderers from Ys (USA).zip"
+    },
+    {
+      "title": "Mega Man Soccer",
+      "system": "snes",
+      "bucket": "snes/Mega Man Soccer (USA).zip"
+    },
+    {
+      "title": "Jurassic Park",
+      "system": "snes",
+      "bucket": "snes/Jurassic Park (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Cybernator",
+      "system": "snes",
+      "bucket": "snes/Cybernator (USA).zip"
+    },
+    {
+      "title": "Metal Warriors",
+      "system": "snes",
+      "bucket": "snes/Metal Warriors (USA).zip"
+    },
+    {
+      "title": "Blackthorne",
+      "system": "snes",
+      "bucket": "snes/Blackthorne (USA).zip"
+    },
+    {
+      "title": "Super Tennis",
+      "system": "snes",
+      "bucket": "snes/Super Tennis (USA).zip"
+    },
+    {
+      "title": "Soul Blazer",
+      "system": "snes",
+      "bucket": "snes/Soul Blazer (USA).zip"
+    },
+    {
+      "title": "Arcana",
+      "system": "snes",
+      "bucket": "snes/Arcana (USA).zip"
+    },
+    {
+      "title": "Breath of Fire",
+      "system": "snes",
+      "bucket": "snes/Breath of Fire (USA).zip"
+    },
+    {
+      "title": "Final Fight 3",
+      "system": "snes",
+      "bucket": "snes/Final Fight 3 (USA).zip"
+    },
+    {
+      "title": "Ghost Chaser Densei",
+      "system": "snes",
+      "bucket": "snes/Ghost Chaser Densei (Japan).zip"
+    },
+    {
+      "title": "Smart Ball",
+      "system": "snes",
+      "bucket": "snes/Smart Ball (USA).zip"
+    },
+    {
+      "title": "Kirby's Avalanche",
+      "system": "snes",
+      "bucket": "snes/Kirby's Avalanche (USA).zip"
+    },
+    {
+      "title": "Super Bonk",
+      "system": "snes",
+      "bucket": "snes/Super Bonk (USA).zip"
+    },
+    {
+      "title": "Super Turrican 2",
+      "system": "snes",
+      "bucket": "snes/Super Turrican 2 (USA).zip"
+    },
+    {
+      "title": "Go Go Ackman",
+      "system": "snes",
+      "bucket": "snes/Go Go Ackman (Japan).zip"
+    },
+    {
+      "title": "Final Fight 2",
+      "system": "snes",
+      "bucket": "snes/Final Fight 2 (USA).zip"
+    },
+    {
+      "title": "Ultimate Mortal Kombat 3",
+      "system": "snes",
+      "bucket": "snes/Ultimate Mortal Kombat 3 (USA).zip"
+    },
+    {
+      "title": "Knights of the Round",
+      "system": "snes",
+      "bucket": "snes/Knights of the Round (USA).zip"
+    },
+    {
+      "title": "Super Baseball Simulator 1.000",
+      "system": "snes",
+      "bucket": "snes/Super Baseball Simulator 1.000 (USA).zip"
+    },
+    {
+      "title": "Thunder Spirits",
+      "system": "snes",
+      "bucket": "snes/Thunder Spirits (USA).zip"
+    },
+    {
+      "title": "Robotrek",
+      "system": "snes",
+      "bucket": "snes/Robotrek (USA).zip"
+    },
+    {
+      "title": "Teenage Mutant Ninja Turtles - Tournament Fighters",
+      "system": "snes",
+      "bucket": "snes/Teenage Mutant Ninja Turtles - Tournament Fighters (USA).zip"
+    },
+    {
+      "title": "Street Fighter Alpha 2",
+      "system": "snes",
+      "bucket": "snes/Street Fighter Alpha 2 (USA).zip"
+    },
+    {
+      "title": "Sparkster",
+      "system": "snes",
+      "bucket": "snes/Sparkster (USA).zip"
+    },
+    {
+      "title": "Tetris Battle Gaiden",
+      "system": "snes",
+      "bucket": "snes/Tetris Battle Gaiden (Japan).zip"
+    },
+    {
+      "title": "Skyblazer",
+      "system": "snes",
+      "bucket": "snes/Skyblazer (USA).zip"
+    },
+    {
+      "title": "FireStriker",
+      "system": "snes",
+      "bucket": "snes/FireStriker (USA).zip"
+    },
+    {
+      "title": "Samurai Shodown",
+      "system": "snes",
+      "bucket": "snes/Samurai Shodown (USA).zip"
+    },
+    {
+      "title": "Rockman & Forte",
+      "system": "snes",
+      "bucket": "snes/Rockman & Forte (Japan).zip"
+    },
+    {
+      "title": "Final Fantasy - Mystic Quest",
+      "system": "snes",
+      "bucket": "snes/Final Fantasy - Mystic Quest (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Street Fighter II",
+      "system": "snes",
+      "bucket": "snes/Street Fighter II (USA).zip"
+    },
+    {
+      "title": "SimAnt - The Electronic Ant Colony",
+      "system": "snes",
+      "bucket": "snes/SimAnt - The Electronic Ant Colony (USA).zip"
+    },
+    {
+      "title": "Ganpuru - Gunman's Proof",
+      "system": "snes",
+      "bucket": "snes/Ganpuru - Gunman's Proof (Japan).zip"
+    },
+    {
+      "title": "Ganbare Goemon 3 - Shishi Juurokubee no Karakuri Manjigatame",
+      "system": "snes",
+      "bucket": "snes/Ganbare Goemon 3 - Shishi Juurokubee no Karakuri Manjigatame (Japan) (Rev 2).zip"
+    },
+    {
+      "title": "Ganbare Goemon 2 - Kiteretsu Shougun Magginesu",
+      "system": "snes",
+      "bucket": "snes/Ganbare Goemon 2 - Kiteretsu Shougun Magginesu (Japan).zip"
+    },
+    {
+      "title": "Mario no Super Picross",
+      "system": "snes",
+      "bucket": "snes/Mario no Super Picross (Japan).zip"
+    },
+    {
+      "title": "Ganbare Goemon Kirakira Douchuu - Boku ga Dancer ni Natta Wake",
+      "system": "snes",
+      "bucket": "snes/Ganbare Goemon Kirakira Douchuu - Boku ga Dancer ni Natta Wake (Japan) (Rev 2).zip"
+    },
+    {
+      "title": "Hameln no Violin Hiki",
+      "system": "snes",
+      "bucket": "snes/Hameln no Violin Hiki (Japan).zip"
     },
     {
       "title": "Sonic The Hedgehog 2 (Rev B)",
@@ -273,9 +1288,199 @@
       "bucket": "genesis/Altered Beast (Japan, USA) (En) (Rev A).zip"
     },
     {
+      "title": "James Pond II - Codename - Robocod",
+      "system": "genesis",
+      "bucket": "genesis/James Pond II - Codename - Robocod (USA, Europe).zip"
+    },
+    {
+      "title": "John Madden Football '93",
+      "system": "genesis",
+      "bucket": "genesis/John Madden Football '93 (USA, Europe) (EA Sports).zip"
+    },
+    {
+      "title": "Warsong",
+      "system": "genesis",
+      "bucket": "genesis/Warsong (USA).zip"
+    },
+    {
+      "title": "Alisia Dragoon",
+      "system": "genesis",
+      "bucket": "genesis/Alisia Dragoon (USA).zip"
+    },
+    {
+      "title": "ESWAT - City under Siege",
+      "system": "genesis",
+      "bucket": "genesis/ESWAT - City under Siege (USA, Europe) (Rev A).zip"
+    },
+    {
+      "title": "Steel Empire",
+      "system": "genesis",
+      "bucket": "genesis/Steel Empire (USA).zip"
+    },
+    {
+      "title": "FIFA Soccer 95",
+      "system": "genesis",
+      "bucket": "genesis/FIFA Soccer 95 (USA, Europe) (En,Fr,De,Es).zip"
+    },
+    {
+      "title": "Rainbow Islands Extra",
+      "system": "genesis",
+      "bucket": "genesis/Rainbow Islands Extra (Japan).zip"
+    },
+    {
+      "title": "Dungeons & Dragons - Warriors of the Eternal Sun",
+      "system": "genesis",
+      "bucket": "genesis/Dungeons & Dragons - Warriors of the Eternal Sun (USA, Europe).zip"
+    },
+    {
+      "title": "Splatterhouse 2",
+      "system": "genesis",
+      "bucket": "genesis/Splatterhouse 2 (USA).zip"
+    },
+    {
+      "title": "Road Rash",
+      "system": "genesis",
+      "bucket": "genesis/Road Rash (USA, Europe).zip"
+    },
+    {
       "title": "Ys Book I & II",
       "system": "tg-cd",
       "bucket": "tg-cd/Ys Book I & II (USA).chd"
+    },
+    {
+      "title": "Ys III - Wanderers from Ys",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Ys III - Wanderers from Ys (USA).chd"
+    },
+    {
+      "title": "Akumajou Dracula X - Chi no Rondo",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Akumajou Dracula X - Chi no Rondo (Japan).chd"
+    },
+    {
+      "title": "Gate of Thunder",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Gate of Thunder + Bonk's Adventure + Bonk's Revenge (USA).chd"
+    },
+    {
+      "title": "Lords of Thunder",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Lords of Thunder (USA).chd"
+    },
+    {
+      "title": "Seirei Senshi Spriggan",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Seirei Senshi Spriggan (Japan) [T-En].chd"
+    },
+    {
+      "title": "Star Parodier",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Star Parodier (Japan).chd"
+    },
+    {
+      "title": "Ginga Fukei Densetsu Sapphire",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Ginga Fukei Densetsu Sapphire (Japan).chd"
+    },
+    {
+      "title": "Fantastic Night Dreams - Cotton",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Fantastic Night Dreams - Cotton (USA).chd"
+    },
+    {
+      "title": "Dungeon Explorer II",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Dungeon Explorer II (USA).chd"
+    },
+    {
+      "title": "Dragon Slayer - The Legend of Heroes",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Dragon Slayer - The Legend of Heroes (USA).chd"
+    },
+    {
+      "title": "Sylphia",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Sylphia (Japan).chd"
+    },
+    {
+      "title": "Puyo Puyo CD Tsuu",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Puyo Puyo CD Tsuu (Japan).chd"
+    },
+    {
+      "title": "Downtown Nekketsu Monogatari",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Downtown Nekketsu Monogatari (Japan).chd"
+    },
+    {
+      "title": "Faussete Amour",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Faussete Amour (Japan).chd"
+    },
+    {
+      "title": "Bomberman - Panic Bomber",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Bomberman - Panic Bomber (Japan) (FABT).chd"
+    },
+    {
+      "title": "Cosmic Fantasy 2",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Cosmic Fantasy 2 (USA).chd"
+    },
+    {
+      "title": "Super Darius II",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Super Darius II (Japan).chd"
+    },
+    {
+      "title": "Strider Hiryuu",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Strider Hiryuu (Japan).chd"
+    },
+    {
+      "title": "Flash Hiders",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Flash Hiders (Japan).chd"
+    },
+    {
+      "title": "Dynastic Hero, The",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Dynastic Hero, The (USA).chd"
+    },
+    {
+      "title": "Super Air Zonk - Rockabilly-Paradise",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Super Air Zonk - Rockabilly-Paradise (USA).chd"
+    },
+    {
+      "title": "Ai Chou Aniki",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Ai Chou Aniki (Japan) (SADS, SAES).chd"
+    },
+    {
+      "title": "Gradius II - Gofer no Yabou",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Gradius II - Gofer no Yabou (Japan).chd"
+    },
+    {
+      "title": "Kabuki Ittouryoudan",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Kabuki Ittouryoudan (Japan) (FABT).chd"
+    },
+    {
+      "title": "Ryuuko no Ken",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Ryuuko no Ken (Japan) (En,Ja,Es) (FACT).chd"
+    },
+    {
+      "title": "Garou Densetsu Special",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Garou Densetsu Special (Japan) (FABT).chd"
+    },
+    {
+      "title": "Asuka 120% Maxima - Burning Fest. Maxima",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Asuka 120% Maxima - Burning Fest. Maxima (Japan).chd"
     },
     {
       "title": "Sonic CD",
@@ -288,9 +1493,183 @@
       "bucket": "segacd/Lunar - The Silver Star (USA) (RE).chd"
     },
     {
+      "title": "Lunar - Eternal Blue",
+      "system": "segacd",
+      "bucket": "segacd/Lunar - Eternal Blue (USA) (RE).chd"
+    },
+    {
       "title": "Snatcher",
       "system": "segacd",
       "bucket": "segacd/Snatcher (USA).chd"
+    },
+    {
+      "title": "Popful Mail",
+      "system": "segacd",
+      "bucket": "segacd/Popful Mail (USA) (RE).chd"
+    },
+    {
+      "title": "Shining Force CD",
+      "system": "segacd",
+      "bucket": "segacd/Shining Force CD (USA) (5R, 6R).chd"
+    },
+    {
+      "title": "Final Fight CD",
+      "system": "segacd",
+      "bucket": "segacd/Final Fight CD (USA).chd"
+    },
+    {
+      "title": "Eternal Champions - Challenge from the Dark Side",
+      "system": "segacd",
+      "bucket": "segacd/Eternal Champions - Challenge from the Dark Side (USA) (RE).chd"
+    },
+    {
+      "title": "Terminator, The",
+      "system": "segacd",
+      "bucket": "segacd/Terminator, The (USA).chd"
+    },
+    {
+      "title": "Silpheed",
+      "system": "segacd",
+      "bucket": "segacd/Silpheed (USA).chd"
+    },
+    {
+      "title": "Robo Aleste",
+      "system": "segacd",
+      "bucket": "segacd/Robo Aleste (USA).chd"
+    },
+    {
+      "title": "Keio Flying Squadron",
+      "system": "segacd",
+      "bucket": "segacd/Keio Flying Squadron (USA).chd"
+    },
+    {
+      "title": "Android Assault - The Revenge of Bari-Arm",
+      "system": "segacd",
+      "bucket": "segacd/Android Assault - The Revenge of Bari-Arm (USA).chd"
+    },
+    {
+      "title": "Batman Returns",
+      "system": "segacd",
+      "bucket": "segacd/Batman Returns (USA).chd"
+    },
+    {
+      "title": "Vay",
+      "system": "segacd",
+      "bucket": "segacd/Vay (USA).chd"
+    },
+    {
+      "title": "Earthworm Jim - Special Edition",
+      "system": "segacd",
+      "bucket": "segacd/Earthworm Jim - Special Edition (USA) (RE).chd"
+    },
+    {
+      "title": "Dark Wizard",
+      "system": "segacd",
+      "bucket": "segacd/Dark Wizard (USA).chd"
+    },
+    {
+      "title": "Night Trap",
+      "system": "segacd",
+      "bucket": "segacd/Night Trap (USA) (Sega CD 32X) (RE-1).m3u",
+      "files": [
+        "segacd/Night Trap (USA) (Disc 1) (Sega CD 32X) (RE-1).chd",
+        "segacd/Night Trap (USA) (Disc 2) (Sega CD 32X) (RE-1).chd"
+      ]
+    },
+    {
+      "title": "AH3 - Thunderstrike",
+      "system": "segacd",
+      "bucket": "segacd/AH3 - Thunderstrike (USA).chd"
+    },
+    {
+      "title": "Panic!",
+      "system": "segacd",
+      "bucket": "segacd/Panic! (USA) (RE).chd"
+    },
+    {
+      "title": "Secret of Monkey Island, The",
+      "system": "segacd",
+      "bucket": "segacd/Secret of Monkey Island, The (USA) (RE).chd"
+    },
+    {
+      "title": "Road Avenger",
+      "system": "segacd",
+      "bucket": "segacd/Road Avenger (USA).chd"
+    },
+    {
+      "title": "After Burner Complete",
+      "system": "sega32x",
+      "bucket": "sega32x/After Burner Complete (Japan, USA) (En).zip"
+    },
+    {
+      "title": "Knuckles' Chaotix",
+      "system": "sega32x",
+      "bucket": "sega32x/Knuckles' Chaotix (Japan, USA) (En).zip"
+    },
+    {
+      "title": "Metal Head",
+      "system": "sega32x",
+      "bucket": "sega32x/Metal Head (Japan, USA) (En,Ja).zip"
+    },
+    {
+      "title": "Kolibri",
+      "system": "sega32x",
+      "bucket": "sega32x/Kolibri (USA, Europe).zip"
+    },
+    {
+      "title": "Virtua Fighter",
+      "system": "sega32x",
+      "bucket": "sega32x/Virtua Fighter (Japan, USA) (En).zip"
+    },
+    {
+      "title": "Virtua Racing Deluxe",
+      "system": "sega32x",
+      "bucket": "sega32x/Virtua Racing Deluxe (USA).zip"
+    },
+    {
+      "title": "Star Wars Arcade",
+      "system": "sega32x",
+      "bucket": "sega32x/Star Wars Arcade (USA).zip"
+    },
+    {
+      "title": "Tempo",
+      "system": "sega32x",
+      "bucket": "sega32x/Tempo (Japan, USA) (En).zip"
+    },
+    {
+      "title": "Space Harrier",
+      "system": "sega32x",
+      "bucket": "sega32x/Space Harrier (Japan, USA) (En).zip"
+    },
+    {
+      "title": "WWF WrestleMania - The Arcade Game",
+      "system": "sega32x",
+      "bucket": "sega32x/WWF WrestleMania - The Arcade Game (USA).zip"
+    },
+    {
+      "title": "Doom",
+      "system": "sega32x",
+      "bucket": "sega32x/Doom (Japan, USA) (En).zip"
+    },
+    {
+      "title": "Blackthorne",
+      "system": "sega32x",
+      "bucket": "sega32x/Blackthorne (USA).zip"
+    },
+    {
+      "title": "Mortal Kombat II",
+      "system": "sega32x",
+      "bucket": "sega32x/Mortal Kombat II (Japan, USA) (En).zip"
+    },
+    {
+      "title": "NBA Jam - Tournament Edition",
+      "system": "sega32x",
+      "bucket": "sega32x/NBA Jam - Tournament Edition (World).zip"
+    },
+    {
+      "title": "Stellar Assault",
+      "system": "sega32x",
+      "bucket": "sega32x/Stellar Assault (USA, Europe).zip"
     }
   ]
 }
