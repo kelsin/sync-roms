@@ -119,13 +119,15 @@ class Flow(DataDir):
         self.files = {"gba/": {"gba/Emerald.zip": 3, "gba/Ruby.zip": 5, "gba/Ruby.sav": 1, "gba/Zelda.zip": 7},
                       "gb/": {"gb/Red.gb": 2}}
         self.cache = {}
+        self.folders = {"gba", "gb", "psx"}
         self.started = []
         cardedit._inflight.clear()
         self.addCleanup(cardedit._inflight.clear)
         for target, attrs in ((store, {"load_catalog": lambda: CATALOG, "load_sets": lambda: [SET],
                                        "repo_json": lambda name: CATALOG[name],
                                        "recommended_systems": lambda device, systems: set()}),
-                              (s3, {"list_sizes": lambda prefix, sizes=True: self.files.get(prefix, {})}),
+                              (s3, {"list_sizes": lambda prefix, sizes=True: self.files.get(prefix, {}),
+                                    "list_folders": lambda: self.folders}),
                               (sizecache, {"cached": lambda p: self.cache.get(p),
                                            "refresh_async": lambda p, done: self.started.append((p, done))}),
                               (edit, {"note": lambda text: None}),
@@ -156,6 +158,20 @@ class Flow(DataDir):
         self.assertEqual([l.strip() for l in self.run_card(returns(None))[0][1]], ["Game Boy Advance"])
         self.card(size="1 GB", games={"gb": [g("gb/Red.gb")]})
         self.assertEqual([l.strip() for l in self.run_card(returns(None))[0][1]], ["Game Boy", "Game Boy Advance"])
+
+    def test_system_list_hides_systems_with_no_storage_folder_unless_picked(self):
+        self.card(size="1 GB")
+        self.folders = {"gba"}  # gb was never opened, so nothing is cached for it
+        self.assertEqual([l.strip() for l in self.run_card(returns(None))[0][1]], ["Game Boy Advance"])
+        self.card(size="1 GB", games={"gb": [g("gb/Red.gb")]})
+        self.assertEqual([l.strip() for l in self.run_card(returns(None))[0][1]], ["Game Boy", "Game Boy Advance"])
+
+    def test_system_list_shows_every_system_when_storage_cannot_be_listed(self):
+        self.card(size="1 GB")
+        for error in (OSError("unreachable"), SystemExit(3)):
+            with mock.patch.object(s3, "list_folders", side_effect=error):
+                labels = self.run_card(returns(None))[0][1]
+            self.assertEqual([l.strip() for l in labels], ["Game Boy", "Game Boy Advance"])
 
     def test_system_list_is_what_the_device_plays_sorted_by_company_and_name(self):
         self.card(size="1 GB", games={"gba": [g("gba/Ruby.zip")]})

@@ -256,8 +256,14 @@ def edit_card(name, setup=None):
     sizing.start("BIOS/")
     start_card = card_entry(name, setup)
     start_usages = budget.system_usages(start_card, systems)
-    systems = [s for s in systems  # a folder cached as empty has nothing to pick, unless it already has picks
-               if sizecache.cached(f"{s['bucket']}/") != {} or budget.picked(start_usages[s["bucket"]])]
+    try:
+        with ui.silent_thread():
+            folders = s3.list_folders()
+    except (*s3.ERRORS, SystemExit):  # storage can't be reached (ui.fail raises SystemExit): go by the cache alone
+        folders = None
+    systems = [s for s in systems  # a missing or empty folder has nothing to pick, unless it already has picks
+               if budget.picked(start_usages[s["bucket"]])
+               or (folders is None or s["bucket"] in folders) and sizecache.cached(f"{s['bucket']}/") != {}]
     for s in systems:  # the systems with picks are sized now, so the total doesn't wait for each to be opened
         if budget.picked(start_usages[s["bucket"]]):
             start_system(sizing, s["bucket"], setup[1])
