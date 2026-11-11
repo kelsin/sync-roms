@@ -1,0 +1,126 @@
+import os
+import sys
+import unittest
+from unittest import mock
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import helpers  # noqa: E402
+from sync_roms import s3, sizecache  # noqa: E402
+
+
+class FakeStore:
+    """Stands in for s3 listing and stat: files is {key: size}; counts the stats made."""
+
+    def __init__(self, files):
+        self.files = dict(files)
+        self.stats = []
+        self.fail = False
+
+    def list_sizes(self, prefix, sizes=True):
+        if self.fail:
+            raise OSError("share is gone")
+        return {k: (v if sizes else None) for k, v in self.files.items() if k.startswith(prefix)}
+
+    def stat_sizes(self, keys):
+        keys = list(keys)
+        self.stats.extend(keys)
+        return {k: self.files[k] for k in keys if k in self.files}
+
+
+class SizeCacheTest(helpers.DataDir):
+    def setUp(self):
+        super().setUp()
+        self.fake = FakeStore({"gba/a.zip": 1, "gba/b.zip": 2, "gba/c.zip": 3})
+        self.now = 1000.0
+        for target, value in (("list_sizes", self.fake.list_sizes), ("stat_sizes", self.fake.stat_sizes),
+                              ("location", lambda: "/nas")):
+            p = mock.patch.object(s3, target, value)
+            p.start()
+            self.addCleanup(p.stop)
+        for target, value in (("_clock", lambda: self.now), ("_sample", lambda pop, n: list(pop)[:n])):
+            p = mock.patch.object(sizecache, target, value)
+            p.start()
+            self.addCleanup(p.stop)
+
+    def test_uncached_is_none_then_first_refresh_fills(self):
+        self.assertIsNone(sizecache.cached("gba/"))
+        self.assertEqual(sizecache.refresh("gba/"), {"gba/a.zip": 1, "gba/b.zip": 2, "gba/c.zip": 3})
+        self.assertEqual(sizecache.cached("gba/"), {"gba/a.zip": 1, "gba/b.zip": 2, "gba/c.zip": 3})
+
+    def test_second_refresh_stats_only_the_new_file(self):
+        sizecache.refresh("gba/")
+        del self.fake.files["gba/a.zip"]
+        self.fake.files["gba/d.zip"] = 4
+        self.fake.stats.clear()
+        self.assertEqual(sizecache.refresh("gba/"), {"gba/b.zip": 2, "gba/c.zip": 3, "gba/d.zip": 4})
+        self.assertEqual(self.fake.stats, ["gba/b.zip", "gba/c.zip", "gba/d.zip"])  # spot checks plus the one new file
+        self.assertEqual(sizecache.cached("gba/"), {"gba/b.zip": 2, "gba/c.zip": 3, "gba/d.zip": 4})
+
+    def test_spot_check_mismatch_rebuilds(self):
+        sizecache.refresh("gba/")
+        self.fake.files["gba/b.zip"] = 20
+        self.assertEqual(sizecache.refresh("gba/")["gba/b.zip"], 20)
+
+    def test_spot_check_missing_file_rebuilds(self):
+        sizecache.refresh("gba/")
+        names = dict.fromkeys(self.fake.files)
+        with mock.patch.object(s3, "stat_sizes", lambda keys: {}), \
+                mock.patch.object(s3, "list_sizes", lambda p, sizes=True: dict(self.fake.files) if sizes else names):
+            self.assertEqual(sizecache.refresh("gba/"), {"gba/a.zip": 1, "gba/b.zip": 2, "gba/c.zip": 3})
+
+    def test_old_entry_rebuilds_and_fresh_one_does_not(self):
+        sizecache.refresh("gba/")
+        self.now += sizecache.MAX_AGE
+        self.fake.stats.clear()
+        sizecache.refresh("gba/")
+        self.assertTrue(self.fake.stats)  # exactly at the limit: still fresh, so spot checks ran
+        self.now += sizecache.MAX_AGE + 1
+        self.fake.stats.clear()
+        with mock.patch.object(s3, "list_sizes", wraps=s3.list_sizes) as ls:
+            sizecache.refresh("gba/")
+        self.assertIn(mock.call("gba/"), ls.call_args_list)  # older than 30 days: full listing with sizes
+        self.assertEqual(self.fake.stats, [])
+
+    def test_corrupt_file_is_empty(self):
+        with open(self.path("sizes.json"), "w") as f:
+            f.write("{nope")
+        self.assertIsNone(sizecache.cached("gba/"))
+        self.assertEqual(sizecache.refresh("gba/")["gba/a.zip"], 1)
+
+    def test_wrong_shape_is_empty(self):
+        self.write_json("sizes.json", {"source": "/nas", "prefixes": {"gba/": "x"}})
+        self.assertIsNone(sizecache.cached("gba/"))
+        self.write_json("sizes.json", [1])
+        self.assertIsNone(sizecache.cached("gba/"))
+
+    def test_other_source_is_empty(self):
+        self.write_json("sizes.json", {"source": "s3://other", "prefixes": {"gba/": {"at": 1, "files": {"gba/x": 9}}}})
+        self.assertIsNone(sizecache.cached("gba/"))
+        sizecache.refresh("gba/")
+        self.assertEqual(self.read("sizes.json")["source"], "/nas")
+        self.assertNotIn("gba/x", sizecache.cached("gba/"))
+
+    def test_other_prefixes_survive_a_refresh(self):
+        self.fake.files["nes/z.zip"] = 7
+        sizecache.refresh("nes/")
+        sizecache.refresh("gba/")
+        self.assertEqual(sizecache.cached("nes/"), {"nes/z.zip": 7})
+
+    def test_async_calls_on_done_with_result(self):
+        got = []
+        sizecache.refresh_async("gba/", got.append).join(5)
+        self.assertEqual(got, [{"gba/a.zip": 1, "gba/b.zip": 2, "gba/c.zip": 3}])
+
+    def test_async_failure_falls_back_to_cache(self):
+        sizecache.refresh("gba/")
+        self.fake.fail = True
+        got = []
+        sizecache.refresh_async("gba/", got.append).join(5)
+        self.assertEqual(got, [{"gba/a.zip": 1, "gba/b.zip": 2, "gba/c.zip": 3}])
+        got.clear()
+        sizecache.refresh_async("nes/", got.append).join(5)
+        self.assertEqual(got, [{}])
+
+
+if __name__ == "__main__":
+    unittest.main()
