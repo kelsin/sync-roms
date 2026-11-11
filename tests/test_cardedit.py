@@ -306,7 +306,7 @@ class Flow(DataDir):
         self.card()
 
         def added(labels, kw):
-            self.assertEqual(kw["extras"], [[("  2/2", "cyan")]])
+            self.assertEqual(kw["extras"], [[("  ✅", "cyan")]])
             return None
         self.run_system(returns((cardedit.SET_KEY, 0)), returns((" ", 0)), added,
                         lambda labels, kw: kw["session"]["sel"])

@@ -325,7 +325,11 @@ def pick_set(system, sets, games, titles, catalog, current=None, synced=lambda: 
 
     def mark():
         done = synced()
-        extras[:] = [[(f"  {len(keys & catalog & done)}/{len(keys & catalog)}", "cyan")] for _, keys in shown]
+        def count(keys):
+            have, total = len(keys & catalog & done), len(keys & catalog)
+            return "➖" if total == 0 else "✅" if have == total else f"{have}/{total}"
+
+        extras[:] = [[(f"  {count(keys)}", "cyan")] for _, keys in shown]
 
     def on_hotkey(_key, idx):
         """Toggles in place, so the screen isn't torn down and redrawn."""
