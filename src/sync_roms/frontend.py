@@ -8,6 +8,8 @@ from . import downloads, ui
 FRONTEND_LAYOUTS = {"esde", "knulli"}
 _LABELS = {"esde": "ES-DE", "knulli": "Knulli"}
 _DROPPED = '*",./:;<>\\|\n\t\r'  # characters ES-DE rejects in a collection name
+_UNESCAPE = {"&quot;": '"', "&apos;": "'"}
+_ESCAPE = {'"': "&quot;", "'": "&apos;"}
 _SETTING = re.compile(r'<string name="CollectionSystemsCustom" value="([^"]*)"\s*/>')
 
 
@@ -37,10 +39,10 @@ def collection_line(layout_name, folder, rel):
 def set_enabled(text, layout_name, add, remove):
     """text (the frontend's settings file) with the add names enabled and the remove names not, as custom collections."""
     match = _SETTING.search(text)
-    names = [n for n in saxutils.unescape(match.group(1)).split(",") if n] if match else []
+    names = [n for n in saxutils.unescape(match.group(1), _UNESCAPE).split(",") if n] if match else []
     names = [n for n in names if n not in remove]
     names += sorted(n for n in set(add) if n not in names)
-    value = saxutils.escape(",".join(names), {'"': "&quot;"})
+    value = saxutils.escape(",".join(names), _ESCAPE)
     line = f'<string name="CollectionSystemsCustom" value="{value}" />'
     if match:
         return text[:match.start()] + line + text[match.end():]
@@ -68,7 +70,10 @@ def plan_collections(layout_name, base, wanted, owned):
         plan["writes"].append((path, "\n".join(wanted[name]) + "\n"))
         plan["enable"].add(name)
     plan["owned"] = sorted(plan["enable"])
-    for name in owned:
+    for name in dict.fromkeys(owned):
+        if safe_name(name) != name:
+            plan["warnings"].append(f"ignoring the recorded collection name {name!r}; it isn't a valid name")
+            continue
         if name in plan["enable"]:
             continue
         plan["disable"].add(name)
@@ -84,7 +89,10 @@ def apply_collections(plan, layout_name, base):
         with open(path, "w", encoding="utf-8", newline="\n") as f:
             f.write(text)
     for path in plan["deletes"]:
-        os.remove(path)
+        try:
+            os.remove(path)
+        except FileNotFoundError:
+            pass
     if not (plan["enable"] or plan["disable"]):
         return
     path = settings_path(layout_name, base)

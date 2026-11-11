@@ -47,6 +47,11 @@ class Enabled(unittest.TestCase):
         self.assertEqual(frontend.set_enabled(text, "esde", {"R&B"}, set()),
                          '<string name="CollectionSystemsCustom" value="A&amp;B,R&amp;B" />\n')
 
+    def test_apostrophes_and_quotes_in_other_names_survive_untouched(self):
+        text = '<string name="CollectionSystemsCustom" value="Kel&apos;s,Say &quot;hi&quot;,A&amp;B" />\n'
+        self.assertEqual(frontend.set_enabled(text, "esde", {"Favs"}, set()),
+                         text.replace('B"', 'B,Favs"'))
+
 
 class Plan(unittest.TestCase):
     def setUp(self):
@@ -96,6 +101,19 @@ class Plan(unittest.TestCase):
         frontend.apply_collections(plan, "esde", self.base)
         self.assertFalse(os.path.exists(old))
         self.assertIn('value="Mine,New"', self.read(frontend.settings_path("esde", self.base)))
+
+    def test_an_owned_name_that_is_not_a_safe_name_is_ignored_with_one_warning(self):
+        outside = os.path.join(self.base, "x.cfg")
+        self.put(outside, "keep\n")
+        plan = frontend.plan_collections("esde", self.base, {}, ["../../x", "../../x"])
+        self.assertEqual((plan["deletes"], plan["disable"], plan["owned"]), ([], set(), []))
+        self.assertEqual(len(plan["warnings"]), 1)
+        self.assertTrue(os.path.exists(outside))
+
+    def test_a_delete_that_already_vanished_is_fine(self):
+        gone = frontend.collection_path("esde", self.base, "Old")
+        plan = {"writes": [], "deletes": [gone], "enable": set(), "disable": {"Old"}, "owned": [], "warnings": []}
+        frontend.apply_collections(plan, "esde", self.base)
 
     def test_nothing_wanted_or_owned_touches_nothing(self):
         frontend.apply_collections(frontend.plan_collections("esde", self.base, {}, []), "esde", self.base)
