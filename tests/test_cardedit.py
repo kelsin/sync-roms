@@ -1,5 +1,6 @@
 import contextlib
 import io
+import json
 import os
 import sys
 import unittest
@@ -109,7 +110,8 @@ class Flow(DataDir):
                               (s3, {"list_sizes": lambda prefix, sizes=True: self.files.get(prefix, {})}),
                               (sizecache, {"cached": lambda p: self.cache.get(p),
                                            "refresh_async": lambda p, done: self.started.append((p, done))}),
-                              (edit, {"note": lambda text: None})):
+                              (edit, {"note": lambda text: None}),
+                              (cardedit, {"_spawn": lambda fn: None, "_metadata": {}})):  # no metadata read
             for name, new in attrs.items():
                 p = mock.patch.object(target, name, new)
                 p.start()
@@ -319,6 +321,125 @@ class Flow(DataDir):
         changed, calls = self.run_system()
         self.assertFalse(changed)
         self.assertEqual(calls, [])
+
+
+class MetaFlow(Flow):
+    META = {"Emerald.zip": {"genre": "Platform", "releasedate": "2004-01-01"},
+            "Ruby.zip": {"genre": "RPG / Pokemon", "releasedate": "2002"},
+            "Zelda.zip": {"genre": "Platform", "releasedate": "20010304", "players": "1"}}
+
+    def setUp(self):
+        super().setUp()
+        self.texts = {"scrapes/gba/metadata.json": json.dumps(self.META)}
+        self.loaders, self.fetched, self.notes = [], [], []
+
+        def get_text(key):
+            self.fetched.append(key)
+            if key not in self.texts:
+                raise FileNotFoundError(key)
+            return self.texts[key]
+        for target, name, new in ((cardedit, "_spawn", self.loaders.append), (cardedit, "_metadata", {}),
+                                  (s3, "get_text", get_text), (edit, "note", self.notes.append)):
+            p = mock.patch.object(target, name, new)
+            p.start()
+            self.addCleanup(p.stop)
+
+    def load(self):
+        """Run the background loads that were started (what the worker thread does)."""
+        while self.loaders:
+            self.loaders.pop(0)()
+
+    def opens_meta(self, labels, kw):
+        self.load()
+        return (cardedit.META_KEY, 0)
+
+    def test_filters_narrow_combine_with_the_set_filter_and_clear(self):
+        self.card()
+
+        def fields(labels, kw):
+            self.assertEqual(labels, ["Developer", "Publisher", "Genre", "Players", "Year"])
+            self.assertEqual(kw["status"](None), "Pick a field")
+            return 2
+
+        def genres(labels, kw):
+            self.assertEqual(labels, ["Platform", "RPG"])
+            self.assertEqual(kw["extras"], [[("  2 game(s)", "dim")], [("  1 game(s)", "dim")]])
+            return 0
+
+        def platform(labels, kw):
+            self.assertEqual(labels, ["Emerald.zip", "Zelda.zip"])
+            kw["session"]["sel"][1] = True  # Zelda on
+            return (cardedit.META_KEY, 0)
+
+        def fields_again(labels, kw):
+            self.assertEqual(kw["extras"][2], [("  Platform", "cyan")])
+            return 4
+
+        def years(labels, kw):
+            self.assertEqual(labels, ["2001", "2004"])  # counted over the Platform games only
+            return 0
+
+        def both(labels, kw):
+            self.assertEqual(labels, ["Zelda.zip"])
+            self.assertEqual(kw["session"]["sel"], [True])
+            return (cardedit.SET_KEY, 0)
+
+        def with_set(labels, kw):
+            self.assertEqual(labels, [])  # Pokemon's GBA games aren't Platform games
+            return (cardedit.CLEAR_KEY, None)
+
+        def everything(labels, kw):
+            self.assertEqual(labels, ["Emerald.zip", "Ruby.sav", "Ruby.zip", "Zelda.zip"])
+            return kw["session"]["sel"]
+        _, calls = self.run_system(self.opens_meta, fields, genres, platform, fields_again, years, both, returns(0),
+                                   with_set, everything)
+        titles = [c[0] for c in calls]
+        self.assertIn("genre: Platform (c shows all)", titles[3])
+        self.assertIn("genre: Platform · year: 2001 (c shows all)", titles[6])
+        self.assertIn("📦 Pokemon only · genre: Platform · year: 2001", titles[8])
+        self.assertNotIn("c shows all", titles[9])
+        self.assertEqual(store.card_games("c"), {"gba": [g("gba/Zelda.zip")]})
+        self.assertEqual(self.fetched, ["scrapes/gba/metadata.json"])
+
+    def test_menu_shows_loading_until_the_metadata_is_read(self):
+        self.card()
+
+        def loading(labels, kw):
+            self.assertIn("loading", kw["status"](None))
+            return 2  # chosen too early: the menu comes back
+
+        def loaded(labels, kw):
+            self.load()
+            self.assertEqual(kw["status"](None), "Pick a field")
+            return None
+        self.run_system(returns((cardedit.META_KEY, 0)), loading, loaded, lambda labels, kw: kw["session"]["sel"])
+
+    def test_missing_or_invalid_metadata_says_so(self):
+        for texts in ({}, {"scrapes/gba/metadata.json": "not json"}, {"scrapes/gba/metadata.json": "[]"}):
+            self.texts, self.notes[:] = texts, []
+            self.card()
+            _, calls = self.run_system(self.opens_meta, lambda labels, kw: kw["session"]["sel"])
+            self.assertEqual(len(calls), 2)  # no field menu
+            self.assertEqual(len(self.notes), 1)
+            self.assertIn("No scraped metadata for Game Boy Advance yet", self.notes[0])
+
+    def test_metadata_is_read_once_per_session(self):
+        self.card()
+        self.run_system(self.opens_meta, returns(None), lambda labels, kw: kw["session"]["sel"])
+        self.run_system(returns((cardedit.META_KEY, 0)), returns(None), lambda labels, kw: kw["session"]["sel"])
+        self.assertEqual(self.fetched, ["scrapes/gba/metadata.json"])
+        self.assertEqual(self.loaders, [])
+
+    def test_ctrl_c_in_a_filtered_view_saves_what_was_toggled(self):
+        self.card()
+
+        def interrupted(labels, kw):
+            self.assertEqual(labels, ["Emerald.zip", "Zelda.zip"])
+            kw["session"]["sel"][1] = True
+            raise KeyboardInterrupt
+        with self.assertRaises(KeyboardInterrupt):
+            self.run_system(self.opens_meta, returns(2), returns(0), interrupted)
+        self.assertEqual(store.card_games("c"), {"gba": [g("gba/Zelda.zip")]})
 
 
 class SetupChange(DataDir):

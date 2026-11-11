@@ -1,15 +1,20 @@
 """The card editor: every system a card's device can play (recommended ones marked) with its picks and space used,
-and each system's games with a set filter. Changes are saved to cards.json as they are made."""
+and each system's games with set and scraped-metadata filters. Changes are saved to cards.json as they are made."""
+import json
 import queue
+import threading
 
-from . import budget, edit, picker, s3, scrape_plan, sizecache, store, ui
+from . import budget, edit, metafilter, picker, s3, scrape_plan, sizecache, store, ui
 
 FULL_KEY = "f"
 MAKE_SET_KEY = "m"
 SET_KEY = "s"
 CLEAR_KEY = "c"
+META_KEY = "m"
 LIST_HINT = "Enter games · f full system · m make a set · Esc back · / filter"
-GAMES_HINT = "Space toggle · Enter done · Esc back · / search · s set filter · c clear · a all"
+GAMES_HINT = "Space toggle · Enter done · Esc back · / search · s set · m metadata · c clear"
+META_HINT = "Enter list its values · Esc back"
+VALUES_HINT = "Enter narrow to it · Esc back · / filter"
 SETS_HINT = "Enter show its games · f sync the full set · Esc back · / filter"
 SIZING = "…"
 
@@ -108,6 +113,76 @@ class Sizing:
             any_done = True
 
 
+LOADING = "loading"
+_metadata = {}  # system bucket -> metafilter.index, kept for the session so entering a system again doesn't fetch it again
+
+
+def _spawn(fn):
+    threading.Thread(target=fn, daemon=True).start()
+
+
+class Metadata:
+    """A system's scraped metadata.json as a metafilter.index, read once per session on a background thread (like
+    Sizing, the worker never touches the screen). A failed read is not kept, so the next visit tries again."""
+
+    def __init__(self, bucket):
+        self.bucket = bucket
+        self.done = queue.Queue()
+        self.result = _metadata.get(bucket, LOADING)
+        if self.result is LOADING:
+            _spawn(self._load)
+
+    def _load(self):
+        try:
+            text = s3.get_text(f"{scrape_plan.SCRAPES}/{self.bucket}/metadata.json")
+            result = metafilter.index(json.loads(text), self.bucket)
+        except (Exception, SystemExit):  # missing, unreadable or not JSON: no metadata
+            result = None
+        self.done.put(result)
+
+    def get(self):
+        """The index, None when there is none, or LOADING. Never waits."""
+        if self.result is LOADING:
+            try:
+                self.result = self.done.get_nowait()
+            except queue.Empty:
+                return LOADING
+            if self.result is not None:
+                _metadata[self.bucket] = self.result
+        return self.result
+
+
+def pick_meta(system, meta, filters, keys):
+    """Set one metadata field of filters (in place) to a value picked from a list. keys(field): the bucket keys the game
+    view would show without that field's filter; the values and their counts come from those."""
+    pos = 0
+    while True:
+        if meta.get() is None:
+            edit.note(ui.yellow(f"ℹ️  No scraped metadata for {system['name']} yet."))
+            return
+        extras = [[(f"  {filters[f]}", "cyan")] if f in filters else [] for f, _ in metafilter.FIELDS]
+        i = picker.filter_list(f"🏷️  Filter {system['name']} by", [label for _, label in metafilter.FIELDS],
+                               extras=extras, cursor=pos, hint=META_HINT, poll=lambda: None,
+                               status=lambda _s: f"{SIZING} loading scraped metadata" if meta.get() is LOADING
+                               else "Pick a field")
+        if i is None:
+            return
+        pos = i
+        idx = meta.get()
+        if not isinstance(idx, dict):
+            continue  # still loading (or found missing): ask again
+        field, label = metafilter.FIELDS[i]
+        found = metafilter.counts(idx, keys(field), field)
+        if not found:
+            edit.note(ui.yellow(f"ℹ️  No game in this list has a {label.lower()} in its scraped metadata."))
+            continue
+        j = picker.filter_list(f"🏷️  {label} on {system['name']}", [v for v, _ in found],
+                               extras=[[(f"  {n} game(s)", "dim")] for _, n in found], hint=VALUES_HINT)
+        if j is not None:
+            filters[field] = found[j][0]
+            return
+
+
 def card_entry(name, setup, cards=None):
     """A card's saved entry, with the layout of the setup being edited (it may not be saved yet)."""
     entry = (store.load_cards() if cards is None else cards).get(name)
@@ -204,8 +279,8 @@ def pick_set(system, sets, sets_on, catalog):
 
 
 def edit_system(name, system, setup, sizing=None):
-    """A card's games of one system: the whole storage folder, searchable, filterable to a set's games. Saves to
-    cards.json when left; returns whether anything changed."""
+    """A card's games of one system: the whole storage folder, searchable, filterable to a set's games and by scraped
+    metadata. Saves to cards.json when left; returns whether anything changed."""
     sizing = sizing or Sizing()
     bucket = system["bucket"]
     sizing.start(f"{bucket}/")
@@ -218,6 +293,7 @@ def edit_system(name, system, setup, sizing=None):
         edit.note(ui.yellow(f"ℹ️  {system['name']} is a full system: every file in its storage folder is downloaded, "
                             "so there is no game list to edit."))
         return False
+    meta = Metadata(bucket)
     s = {**system, "games": [dict(g) for g in entry if isinstance(g, dict)] if isinstance(entry, list) else []}
     sets_on = list(store.list_sets(raw))
     before_excluded = store.card_excluded(name, cards)
@@ -253,6 +329,13 @@ def edit_system(name, system, setup, sizing=None):
 
     start = states(cover())
     filt = None  # (set name, bucket keys) the list is narrowed to
+    meta_filt = {}  # {metadata field: value} the list is narrowed to as well
+
+    def keep(key, skip=None):
+        """Whether the filters (all but the skip field's metadata one) show a row."""
+        wanted = {f: v for f, v in meta_filt.items() if f != skip}
+        return ((filt is None or key in filt[1])
+                and (not wanted or metafilter.matches(meta.get().get(key, {}), wanted)))
 
     def row_extras(key, notes, state):
         out = []
@@ -296,7 +379,7 @@ def edit_system(name, system, setup, sizing=None):
         while True:
             notes = cover()
             base = states(notes)
-            shown = [r for r in rows if filt is None or r[1] in filt[1]]
+            shown = [r for r in rows if keep(r[1])]
             keys = [r[1] for r in shown]
             session = {"sel": [base[k] for k in keys]}
             extras = [row_extras(k, notes, st) for k, st in zip(keys, session["sel"])]
@@ -327,11 +410,13 @@ def edit_system(name, system, setup, sizing=None):
                     return "Switch the game on and press Enter first, then add its note"
                 return "Note saved" if text else "Note cleared"
 
-            where = f" · 📦 {filt[0]} only (c shows all)" if filt else ""
+            parts = ([f"📦 {filt[0]} only"] if filt else []) + ([metafilter.describe(meta_filt)] if meta_filt else [])
+            where = f" · {' · '.join(parts)} (c shows all)" if parts else ""
             pending = (shown, notes, base, session)
             result = picker.filter_list(f"✏️  {system['name']} on {name} — ✅ synced, ⬜ not, 📦 from a set{where}",
                                         [r[3] for r in shown], multi=True, initial=[start[k] for k in keys],
-                                        extras=extras, hint=GAMES_HINT, hotkeys=(SET_KEY, CLEAR_KEY), status=status,
+                                        extras=extras, hint=GAMES_HINT, hotkeys=(SET_KEY, META_KEY, CLEAR_KEY),
+                                        status=status,
                                         poll=poll, session=session, note_text=note_text, on_note=on_note)
             pending = None
             apply(shown, notes, base, session["sel"] if isinstance(result, tuple) else result)
@@ -339,6 +424,9 @@ def edit_system(name, system, setup, sizing=None):
                 break
             if result[0] == CLEAR_KEY:
                 filt = None
+                meta_filt.clear()
+            elif result[0] == META_KEY:
+                pick_meta(system, meta, meta_filt, lambda field: [r[1] for r in rows if keep(r[1], field)])
             else:
                 chosen = pick_set(system, sets, sets_on, {r[1] for r in rows})
                 if chosen:

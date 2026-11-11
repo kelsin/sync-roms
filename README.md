@@ -487,7 +487,13 @@ sync-roms --edit
    card references syncs it (switching it off excludes it from that set on this card). `/` searches, `Space` (or `Tab`)
    toggles the game under the cursor, `a` toggles everything shown, `u` reverts, `o` cycles the view between all
    rows, only those that are on, and only those you changed. `s` lists the sets with games on this system: `Enter`
-   narrows the list to that set's games here, `f` makes the card sync the whole set. `c` shows every game again.
+   narrows the list to that set's games here, `f` makes the card sync the whole set. `m` filters by the system's
+   scraped metadata (`scrapes/<system>/metadata.json`): pick **Developer**, **Publisher**, **Genre** (its first part,
+   so `Sports / Baseball` is `Sports`), **Players** (1, 2, 3-4 or 5+; a `1-2` game is in both 1 and 2) or **Year**,
+   then a value (each shows how many games in the list have it) to narrow the list to those games. Picking another
+   value of the same field replaces it; filters on different fields, the set filter and `/` all combine, and the title
+   shows what is active. A game with no value for a field never matches a filter on it. The metadata is read in the
+   background once per session, so the menu says it is loading at first. `c` clears every filter and shows every game again.
    Pending changes show as `➕` / `➖` and the bottom line updates the card's total as you toggle. `w` writes a note on a
    picked game. `Enter` keeps your changes; `Esc` asks whether to keep or revert them if there are any.
 3. When you leave the menu, device/firmware and device-system changes are summarized, then **save**, **keep
