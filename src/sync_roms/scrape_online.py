@@ -720,7 +720,7 @@ def _check_skip(skip):
 
 
 def _pick_systems(name):
-    systems = store.load_manifest()["systems"]
+    systems = store.load_manifest(store.all_card_names())["systems"]
     if name:
         systems = [s for s in systems if s["bucket"] == name]
         if not systems:

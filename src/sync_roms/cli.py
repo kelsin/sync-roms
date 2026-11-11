@@ -61,13 +61,13 @@ TOPICS = {
 """,
     "games": """
   sync-roms games edit                        interactive editor (cards, device systems)
-  sync-roms games list [--card NAME] [--json]
-  sync-roms games add SYSTEM KEY... [--card NAME] [-n]      KEY: file name, SYSTEM/file key, or a glob like 'Mario*'
-  sync-roms games remove SYSTEM KEY... [--card NAME] [-n]
-  sync-roms games full SYSTEM on|off [--card NAME] [-n]
-  sync-roms games sets list | add ID | remove ID [--card NAME] [-n]
-  sync-roms games export [--card NAME]        one SYSTEM/file per line (full systems as 'SYSTEM/*')
-  sync-roms games import FILE [--card NAME] [-n]            add the games in such a file
+  sync-roms games list --card NAME [--json]
+  sync-roms games add SYSTEM KEY... --card NAME [-n]      KEY: file name, SYSTEM/file key, or a glob like 'Mario*'
+  sync-roms games remove SYSTEM KEY... --card NAME [-n]
+  sync-roms games full SYSTEM on|off --card NAME [-n]
+  sync-roms games sets list | add ID | remove ID --card NAME [-n]
+  sync-roms games export --card NAME        one SYSTEM/file per line (full systems as 'SYSTEM/*')
+  sync-roms games import FILE --card NAME [-n]            add the games in such a file
 
   --card NAME is required: a card's games are saved in ~/.sync-roms/cards.json with the previous version kept as .bak. Removing only drops a game from the list.
   In the editor: / filters, Space toggles a row, a all/none shown, u reverts the list, o cycles all/on/changed, f toggles a whole set or system.

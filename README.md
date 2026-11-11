@@ -525,8 +525,7 @@ instead of a list:
 ```
 
 No system is a full system by default. In `--edit`, press `f` on a system in the **By system** list to
-toggle it (🗂️). A full system's games can't be toggled one by one; a card can't turn off a system that a set
-has as full.
+toggle it (🗂️). A full system's games can't be toggled one by one.
 
 ### Full sets
 

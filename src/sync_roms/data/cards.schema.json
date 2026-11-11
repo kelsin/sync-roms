@@ -14,7 +14,7 @@
         "type": "array",
         "items": {"type": "string"}
       },
-      "games": {"$ref": "games.schema.json", "description": "The card's extra games"}
+      "games": {"$ref": "games.schema.json", "description": "The card's games"}
     }
   }
 }

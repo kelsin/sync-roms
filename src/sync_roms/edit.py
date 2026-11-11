@@ -47,7 +47,7 @@ def toggle_games(title, rows, extras=None, covered=None, excluded=None):
 
     Rows of a full system are shown on and locked: its whole storage folder is synced.
     covered: optional callable (system, bucket key) -> note or None; rows with a note are shown on and locked
-    with that note (e.g. games a set reference or core already syncs).
+    with that note (e.g. games a set reference already syncs).
     excluded: {system bucket: [keys]}, updated in place. When given, covered rows can be switched off (they start on
     unless listed) and the off ones are recorded there; only full systems stay locked.
     """
@@ -117,8 +117,8 @@ def edit_card_system(card, bucket, setup):
     t = new_target(card, store.card_games(card, cards))
     drop_inapplicable(t, setup)
     s = next(x for x in t["data"]["systems"] if x["bucket"] == bucket)
-    full, keys = cover_notes({x["id"]: x for x in store.load_sets()}, t["sets_on"])
-    if s.get("full_system") or bucket in full:
+    keys = cover_notes({x["id"]: x for x in store.load_sets()}, t["sets_on"])
+    if s.get("full_system"):
         note(ui.yellow(f"ℹ️  {s['name']} is a full system: every file in its storage folder is downloaded, "
                        "so there is no game list to edit."))
         return False
@@ -173,14 +173,13 @@ def valid_card_name(name, existing):
 def cover_notes(sets_by_id, own_set_ids):
     """Why games are synced without being in the list being edited.
 
-    Returns ({system bucket: note} for whole systems, {bucket key: note} for single games). The notes come from
-    the list's own set references.
+    Returns {bucket key: note}, from the list's own set references.
     """
-    full, keys = {}, {}
+    keys = {}
     for sid in own_set_ids:
         for g in store.set_games(sets_by_id[sid]) if sid in sets_by_id else []:
             keys.setdefault(g["bucket"], f"Full set: {sets_by_id[sid]['name']}")
-    return full, keys
+    return keys
 
 
 def toggle_set_ref(sets_on, set_id):
@@ -309,7 +308,7 @@ def edit_manifest():
 
         def edit_system():
             now = snapshot(t["data"])
-            full, keys = cover()
+            keys = cover()
             width = max((len(s["name"]) for s in systems), default=0)
             labels, extras = [], []
             covered_by = defaultdict(set)
@@ -319,7 +318,7 @@ def edit_manifest():
                 b = s["bucket"]
                 changed = now[b] ^ t["was"][b]
                 total = len(bucket_keys[b])
-                whole = s.get("full_system") or b in full
+                whole = s.get("full_system")
                 covered = covered_by[b]
                 have = total if whole else len((now[b] | covered) & bucket_keys[b])
                 missing = 0 if whole else len(now[b] - bucket_keys[b])
@@ -339,14 +338,11 @@ def edit_manifest():
             if isinstance(i, tuple):
                 pos["system"] = i[1]
                 s = systems[i[1]]
-                if s["bucket"] in full:
-                    note(ui.yellow(f"ℹ️  {s['name']} is a full system from a set, so it can't be changed here."))
-                else:
-                    toggle_full_system(s)
+                toggle_full_system(s)
                 return True
             pos["system"] = i
             s = systems[i]
-            if s.get("full_system") or s["bucket"] in full:
+            if s.get("full_system"):
                 note(ui.yellow(f"ℹ️  {s['name']} is a full system: every file in its storage folder is "
                                "downloaded, so there is no game list to edit."))
                 return True
@@ -359,13 +355,13 @@ def edit_manifest():
             if not sets:
                 note(ui.yellow("ℹ️  No game sets found."))
                 return False
-            full, keys = cover()
+            keys = cover()
             now = snapshot(t["data"])
             labels, extras = [], []
             for game_set in sets:
                 entries = [(g.get("system"), g.get("bucket")) for g in game_set["games"] if g.get("system") in by_bucket]
                 on = sum(1 for sid, key in entries if by_bucket[sid].get("full_system")
-                         or key in now[sid] or sid in full or key in keys)
+                         or key in now[sid] or key in keys)
                 desc = f" — {game_set['description']}" if game_set["description"] else ""
                 labels.append(f"{game_set['name']}  ({on}/{len(entries)} on){desc}")
                 extras.append([("  📦 full set", "green")] if game_set["id"] in t["sets_on"] else [])
@@ -383,7 +379,7 @@ def edit_manifest():
                 files = {g["bucket"]: g["files"] for g in sets[i]["games"] if g.get("bucket") and g.get("files")}
                 ref = "  📦 full set (f on the set list to stop syncing all of it)" if sets[i]["id"] in t["sets_on"] else ""
                 toggle_games(f"✏️  {sets[i]['name']} — ✅ in {where}, ⬜ not{ref}", rows, files,
-                             covered=lambda s, key: full.get(s["bucket"]) or keys.get(key))
+                             covered=lambda s, key: keys.get(key))
             else:
                 note(ui.yellow(f"ℹ️  {sets[i]['name']} has no games to toggle."))
             return True

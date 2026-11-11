@@ -15,7 +15,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 from realdir_guard import RealDataDirGuard  # noqa: E402
 from sync_roms import cli, scrape_online, store, usersettings  # noqa: E402
-from helpers import Isolated, script_for  # noqa: E402
+from helpers import DataDir, Isolated, script_for  # noqa: E402
 
 
 class Translate(unittest.TestCase):
@@ -202,6 +202,15 @@ class SetCredentials(RealDataDirGuard):
             with self.assertRaises(SystemExit):
                 scrape_online.set_credentials()
         self.assertFalse(os.path.exists(self.path))
+
+
+class PickSystems(DataDir):
+    def test_scrape_without_all_sees_the_games_of_every_card(self):
+        self.write_json("cards.json", {"c": {"device": "full", "layout": "esde",
+                                             "games": {"gba": [{"title": "A", "bucket": "gba/A.zip"}]}}})
+        by = {s["bucket"]: s for s in scrape_online._pick_systems(None)}
+        self.assertEqual([g["bucket"] for g in by["gba"]["games"]], ["gba/A.zip"])
+        self.assertEqual([s["bucket"] for s in scrape_online._pick_systems("gba")], ["gba"])
 
 
 class Completion(unittest.TestCase):

@@ -29,8 +29,8 @@ class Helpers(unittest.TestCase):
         self.assertEqual(store.dump_list(systems[2:], []), {})
 
     def test_cover_notes(self):
-        full, keys = edit.cover_notes(SETS, ["s"])
-        self.assertEqual((full, keys["gba/A.zip"]), ({}, "Full set: Mix"))
+        keys = edit.cover_notes(SETS, ["s"])
+        self.assertEqual(keys["gba/A.zip"], "Full set: Mix")
 
 
 class Saving(DataDir):
