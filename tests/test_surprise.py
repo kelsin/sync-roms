@@ -1,5 +1,7 @@
 import collections
+import contextlib
 import datetime
+import io
 import json
 import os
 import random
@@ -10,7 +12,7 @@ from unittest import mock
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import helpers  # noqa: E402
 import isolate  # noqa: E402,F401
-from sync_roms import mirroring, store, surprise  # noqa: E402
+from sync_roms import cardedit, mirroring, picker, runtime, store, surprise  # noqa: E402
 
 GBA = {"bucket": "gba", "bios": {"files": ["gba_bios.bin"]}}
 IN = ["Super Mario Advance (USA, Europe).zip", "Castlevania - Aria of Sorrow (USA).zip",
@@ -157,6 +159,27 @@ class StorageCase(helpers.StorageDir):
         with open(os.path.join(self.data, "cards.json")) as f:
             return json.load(f)
 
+    def card(self, **entry):
+        self.write_cards({"SD": {"device": "full", "layout": "esde", **entry}})
+
+    def chosen(self):
+        return [s for s in store.load_manifest(["SD"])["systems"] if s["bucket"] in ("gba", "gb")]
+
+    def surprise(self, system, i):
+        ext = "gb" if system == "gb" else "zip"
+        return {"system": system, "bucket": f"{system}/G{i} (USA).{ext}", "title": f"G{i} (USA)"}
+
+    def fail_call(self, *a, **k):
+        raise AssertionError(f"unexpected call {a!r} {k!r}")
+
+    @contextlib.contextmanager
+    def patched(self, filter_list=None, edit_card=None):
+        """picker.filter_list and cardedit.edit_card replaced; one left out does nothing and returns None."""
+        noop = lambda *a, **k: None  # noqa: E731
+        with mock.patch.object(picker, "filter_list", filter_list or noop), \
+                mock.patch.object(cardedit, "edit_card", edit_card or noop):
+            yield
+
 
 class History(helpers.DataDir):
     def test_save_prunes_past_the_ttl_and_recent_reads_within_it(self):
@@ -223,6 +246,112 @@ class Mirror(StorageCase):
         self.write_cards({"SD": {"device": "full", "layout": "esde",
                                  "surprises": [{"system": "gba", "bucket": "gba/A (USA).zip", "title": "A (USA)"}]}})
         self.assertIn("gba/A (USA).zip", mirroring.mirror_wanted(store.load_manifest(store.all_card_names())))
+
+
+class Step(StorageCase):
+    def setUp(self):
+        super().setUp()
+        for i in range(15):
+            self.put(f"gba/G{i} (USA).zip")
+            self.put(f"gb/G{i} (USA).gb")
+        self.card()
+        quiet = contextlib.redirect_stdout(io.StringIO())  # the step prints its picks
+        quiet.__enter__()
+        self.addCleanup(quiet.__exit__, None, None, None)
+
+    def run_step(self, interactive, dry_run, seed):
+        """run_surprise on the dry-run tests, with its printed lines."""
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            got = surprise.run_surprise("SD", (None, "esde"), self.chosen(), interactive, dry_run, rng=random.Random(seed))
+        return got, out.getvalue()
+
+    def test_interactive_asks_which_to_replace_then_opens_the_editor(self):
+        current = [self.surprise("gba", i) for i in range(5)] + [self.surprise("gb", i) for i in range(5)]
+        self.card(surprises=current)
+        lists, edits = [], []
+        with self.patched(filter_list=lambda title, labels, **kw: lists.append((title, labels, kw)) or [True] + [False] * 9,
+                          edit_card=lambda name, setup=None: edits.append(name)):
+            got = surprise.run_surprise("SD", (None, "esde"), self.chosen(), True, False, rng=random.Random(1))
+        title, labels, kw = lists[0]
+        self.assertEqual(title, "Pick the surprises to replace")
+        self.assertEqual(kw["initial"], [False] * 10)
+        self.assertEqual(len(got), 10)
+        self.assertNotIn(current[0], got)
+        self.assertTrue(all(c in got for c in current[1:]))
+        self.assertEqual(store.load_cards()["SD"]["surprises"], got)
+        self.assertEqual([h["bucket"] for h in surprise.load_history()], [g["bucket"] for g in got if g not in current])
+        self.assertEqual(edits, ["SD"])
+
+    def test_surprises_outside_the_run_are_dropped(self):
+        self.card(surprises=[self.surprise("gba", 0), self.surprise("psx", 0)])
+        with self.patched(filter_list=lambda t, labels, **kw: [False] * len(labels)):
+            got = surprise.run_surprise("SD", (None, "esde"), self.chosen(), True, False, rng=random.Random(2))
+        self.assertNotIn("psx", {g["system"] for g in got})
+        self.assertIn(self.surprise("gba", 0), got)
+
+    def test_dry_run_keeps_every_surprise_and_only_previews_the_empty_slots(self):
+        self.card(surprises=[self.surprise("gba", 0)])
+        before = self.read_cards()
+        with self.patched(filter_list=self.fail_call, edit_card=self.fail_call):
+            got, out = self.run_step(True, True, 3)
+        self.assertEqual(got, [self.surprise("gba", 0)])  # the saved ones; the 9 fills are only printed
+        self.assertIn("🎁 would ask which surprises to replace", out)
+        self.assertIn("9 new pick(s)", out)
+        self.assertEqual(self.read_cards(), before)
+        self.assertFalse(os.path.exists(os.path.join(self.data, "surprises.json")))
+
+    def test_unattended_dry_run_says_it_would_replace_them_all(self):
+        current = [self.surprise("gba", i) for i in range(5)] + [self.surprise("gb", i) for i in range(5)]
+        self.card(surprises=current)
+        before = self.read_cards()
+        with self.patched(filter_list=self.fail_call, edit_card=self.fail_call):
+            got, out = self.run_step(False, True, 3)
+        self.assertEqual(got, current)
+        self.assertIn("🎁 would replace all 10 surprises", out)
+        self.assertNotIn("new pick", out)  # no empty slot to preview
+        self.assertEqual(self.read_cards(), before)
+        self.assertFalse(os.path.exists(os.path.join(self.data, "surprises.json")))
+
+    def test_unattended_replaces_all_ten_and_saves(self):
+        current = [self.surprise("gba", i) for i in range(5)] + [self.surprise("gb", i) for i in range(5)]
+        self.card(surprises=current)
+        with self.patched(filter_list=self.fail_call, edit_card=self.fail_call):
+            got = surprise.run_surprise("SD", (None, "esde"), self.chosen(), False, False, rng=random.Random(4))
+        self.assertEqual(len(got), 10)
+        self.assertFalse(any(c in got for c in current))
+        self.assertEqual(store.load_cards()["SD"]["surprises"], got)
+        self.assertEqual(len(surprise.load_history()), 10)
+
+    def test_card_selection_and_other_cards_current_are_respected(self):
+        picks = {"gba": [{"bucket": f"gba/G{i} (USA).zip"} for i in range(14)]}  # one GBA game left unpicked
+        self.card(games=picks)
+        with self.patched(filter_list=self.fail_call, edit_card=self.fail_call):
+            got = surprise.run_surprise("SD", (None, "esde"), self.chosen(), False, False, rng=random.Random(5))
+        self.assertEqual([g["bucket"] for g in got if g["system"] == "gba"], ["gba/G14 (USA).zip"])
+
+    def test_full_systems_are_left_out_of_the_pools(self):
+        self.card(games={"gb": {"full_system": True}})
+        with self.patched(filter_list=self.fail_call, edit_card=self.fail_call):
+            got = surprise.run_surprise("SD", (None, "esde"), self.chosen(), False, False, rng=random.Random(7))
+        self.assertEqual(len(got), 10)
+        self.assertEqual({g["system"] for g in got}, {"gba"})
+
+    def test_off_clears_surprises_keeps_history_and_picks_nothing(self):
+        self.card(surprise=False, surprises=[self.surprise("gba", 0)])
+        surprise.save_history([{**self.surprise("gba", 0), "card": "SD", "date": "2026-11-01"}], datetime.date(2026, 11, 11))
+        with self.patched(filter_list=self.fail_call, edit_card=self.fail_call):
+            self.assertEqual(surprise.run_surprise("SD", (None, "esde"), self.chosen(), True, False), [])
+        self.assertNotIn("surprises", store.load_cards()["SD"])
+        self.assertEqual(len(surprise.load_history()), 1)
+
+    def test_candidates_come_from_storage_not_the_mirror(self):
+        mirror = os.path.join(self.tmp.name, "mirror")  # holds nothing
+        os.makedirs(mirror)
+        with mock.patch.object(runtime, "_mirror_root", mirror), self.patched(filter_list=self.fail_call, edit_card=self.fail_call):
+            got = surprise.run_surprise("SD", (None, "esde"), self.chosen(), False, False, rng=random.Random(6))
+            self.assertEqual(runtime._mirror_root, mirror)  # restored after the step
+        self.assertEqual(len(got), 10)
 
 
 if __name__ == "__main__":

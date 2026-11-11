@@ -1,4 +1,5 @@
 """Local mirror of storage."""
+import contextlib
 import os
 from concurrent.futures import ThreadPoolExecutor
 
@@ -91,6 +92,17 @@ def refresh_mirror(root, dry_run=False):
     if stale:
         print(ui.green(f"  🧹 Deleted {len(stale)} file(s) no longer referenced"))
     return failed
+
+
+@contextlib.contextmanager
+def storage_reads():
+    """Read from storage itself, past the mirror, inside the block."""
+    saved = runtime._mirror_root
+    runtime._mirror_root = None
+    try:
+        yield
+    finally:
+        runtime._mirror_root = saved
 
 
 def use_mirror(root, dry_run):
