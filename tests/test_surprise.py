@@ -123,6 +123,12 @@ class SurprisePickTest(unittest.TestCase):
             self.assertEqual({x["bucket"] for x in got2}, {"a/Fresh.zip", "a/Past.zip"})
             self.assertEqual(len(got3), 3)
 
+    def test_more_kept_than_slots_picks_nothing(self):
+        kept = [{"system": "a", "bucket": f"a/K{i}.zip", "title": f"K{i}"} for i in range(12)]
+        need = max(surprise.SLOTS - len(kept), 0)
+        self.assertEqual(surprise.pick({"a": pool("a", 500)}, kept, need, {"a"}, set(), set(), random.Random(0)), [])
+        self.assertEqual(surprise.pick({"a": pool("a", 500)}, kept, -2, {"a"}, set(), set(), random.Random(0)), [])
+
     def test_need_zero_picks_nothing(self):
         self.assertEqual(surprise.pick({"a": pool("a", 5)}, [], 0, {"a"}, set(), set(), random.Random(0)), [])
 
@@ -344,6 +350,13 @@ class Step(StorageCase):
             self.assertEqual(surprise.run_surprise("SD", (None, "esde"), self.chosen(), True, False), [])
         self.assertNotIn("surprises", store.load_cards()["SD"])
         self.assertEqual(len(surprise.load_history()), 1)
+
+    def test_twelve_kept_surprises_get_no_new_picks(self):
+        current = [self.surprise("gba", i) for i in range(12)]
+        self.card(surprises=current)
+        with self.patched(filter_list=lambda t, labels, **kw: [False] * len(labels)):
+            got = surprise.run_surprise("SD", (None, "esde"), self.chosen(), True, False, rng=random.Random(8))
+        self.assertEqual(got, current)
 
     def test_candidates_come_from_storage_not_the_mirror(self):
         mirror = os.path.join(self.tmp.name, "mirror")  # holds nothing

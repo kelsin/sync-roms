@@ -179,7 +179,7 @@ def pick(pools, kept, need, recommended, recent, others_current, rng):
     def fill(group, slots):
         """Give each slot to the group's system with the fewest picks that still has games, so systems that run out
         pass their slots on and the rest stay even. Returns the unused slots."""
-        while slots:
+        while slots > 0:
             open_ = [b for b in groups[group] if left[b]]
             if not open_:
                 break
@@ -252,7 +252,7 @@ def run_surprise(card_name, setup, chosen_systems, interactive, dry_run, rng=Non
         kept = current if states is None else [x for x, replace in zip(current, states) if not replace]
     else:
         kept = []
-    need = SLOTS - len(kept)
+    need = max(SLOTS - len(kept), 0)
     new = []
     if need:
         taken = {g["bucket"] for s in chosen_systems for g in s.get("games", ()) if g.get("bucket")}

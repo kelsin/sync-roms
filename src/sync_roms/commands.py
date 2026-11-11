@@ -337,6 +337,8 @@ def games_import(args):
                 system, _, name = text.strip().partition("/")
                 if system not in known or not name:
                     ui.warn(f"skipping {line!r}: expected @surprises SYSTEM/file")
+                elif sum(map(len, surprise_keys.values())) >= surprise.SLOTS:
+                    ui.warn(f"skipping {line!r}: a card holds at most {surprise.SLOTS} surprises")
                 else:
                     surprise_keys.setdefault(system, []).append(text.strip())
                     changes.append(("+", f"@surprises {text.strip()}"))

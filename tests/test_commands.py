@@ -106,6 +106,18 @@ class GamesTest(CardCmd):
         self.assertEqual(entry["surprises"], [{"system": "gba", "bucket": "gba/A (USA).zip", "title": "A (USA)"}])
         self.assertEqual(entry["games"]["gba"][0]["bucket"], "gba/B.zip")
 
+    def test_import_keeps_at_most_ten_surprises(self):
+        path = self.path("list.txt")
+        with open(path, "w") as f:
+            f.write("".join(f"@surprises gba/G{i} (USA).zip\n" for i in range(12)))
+        with mock.patch.object(commands.s3, "list_sizes", lambda prefix, sizes=True: {}):
+            code, _, err = self.run_cmd("games", "import", path)
+        self.assertEqual(code, 0)
+        self.assertIn("gba/G10 (USA).zip", err)
+        self.assertIn("gba/G11 (USA).zip", err)
+        self.assertEqual([x["bucket"] for x in self.read("cards.json")["SD"]["surprises"]],
+                         [f"gba/G{i} (USA).zip" for i in range(10)])
+
     def test_import_surprise_true_drops_the_off_flag(self):
         self.write_json("cards.json", {"SD": {"device": "full", "layout": "esde", "surprise": False}})
         path = self.path("list.txt")
