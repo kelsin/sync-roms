@@ -904,12 +904,12 @@ def sync_card(args):
     def build_plan(present):
         if not scraped:
             print("🖼️  Reading scraped data...")
-            scraped["data"] = scrape_plan.load_scrape_data(chosen, layout_name == "esde")
+            scraped["data"] = scrape_plan.load_scrape_data(chosen)
             scraped["rels"] = {s["bucket"]: [k.split("/", 1)[1] for k in available(s) if k in listings[s["bucket"]]]
                                for s in chosen}
         if unzip:  # a ROM that's extracted from its archive is on the card under another extension
             present = lambda path, exists=present: exists(path) or downloads.archive_extracted(path)  # noqa: E731
-        return scrape_plan.build_scrape_plan(layout_name, chosen, *scraped["data"], scraped["rels"], dest_of, es_dir, present, base)
+        return scrape_plan.build_scrape_plan(layout_name, chosen, scraped["data"], scraped["rels"], dest_of, es_dir, present, base)
 
     if args.dry_run:
         print(ui.yellow("\n🧪 Dry run — nothing downloaded or deleted"))
@@ -985,7 +985,7 @@ def sync_card(args):
     if scrapes:
         plan = build_plan(os.path.exists)
         scrape_plan.describe_scrape_plan(plan)
-        if clean_card and (plan["jobs"] or plan["extras"] or plan["writes"] or plan["gamelists"]):
+        if clean_card and (plan["jobs"] or plan["writes"] or plan["gamelists"]):
             clean._clean_root = base
         failed += scrape_plan.apply_scrape_plan(plan, base)
         stale = scrape_plan.stale_media(layout_name, manifest["systems"], roms_dir, es_dir, base)

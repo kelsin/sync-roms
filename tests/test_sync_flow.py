@@ -162,8 +162,10 @@ class SyncFlowTest(unittest.TestCase):
                 st.enter_context(mock.patch.object(cli.clean, "_clean_root", None))
                 st.enter_context(mock.patch.object(ui, "confirm", lambda *a, **k: True))
                 st.enter_context(mock.patch.object(scrape_plan, "SCRAPE_LAYOUTS", {"esde"}))
-                st.enter_context(mock.patch.object(scrape_plan, "load_scrape_data", lambda *a: ({}, {})))
-                st.enter_context(mock.patch.object(scrape_plan, "build_scrape_plan", lambda *a: {"jobs": [], "extras": [], "gamelists": {}, "writes": []}))
+                st.enter_context(mock.patch.object(scrape_plan, "load_scrape_data", lambda systems: {}))
+                st.enter_context(mock.patch.object(scrape_plan, "build_scrape_plan",
+                                                   lambda layout, systems, data, rels, dest_of, es_dir, present, base:
+                                                   {"jobs": [], "gamelists": {}, "writes": []}))
                 st.enter_context(mock.patch.object(scrape_plan, "apply_scrape_plan", lambda *a: 0))
                 for s in stale:
                     open(os.path.join(card_dir, s), "w").close()

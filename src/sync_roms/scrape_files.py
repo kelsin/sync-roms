@@ -161,7 +161,7 @@ def _upload_text_keys(es_dir, existing, roms):
     wanted = {f"{scrape_plan.SCRAPES}/{system}/metadata.json" for system, paths in roms.items()
               if paths and any(os.path.isfile(os.path.join(es_dir, "gamelists", n, "gamelist.xml"))
                                for n in names[system] | {system})}
-    return [k for k in text_keys(existing) if not k.endswith("/metadata.json") or k in wanted]
+    return [k for k in text_keys(existing) if k in wanted]
 
 
 def plan_slot_upload(labels_dir, systems, roms, existing):

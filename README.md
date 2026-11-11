@@ -224,10 +224,6 @@ While typing a filter (or a note, which `w` opens in the game list): `^A` `^E` s
    `sortname` also keeps each parent followed by its clones. ES-DE's "strip extra MAME info" option hides the variant
    in parentheses. Regenerate the file with `tools/gen_clones.py MAME.xml FBNEO.dat` (MAME's `-listxml` output and
    FBNeo's arcade DAT).
-
-   For the `esde` layout every sync also brings the shared extras from `scrapes/esde/`: new or changed
-   theme files, collection lines you don't have yet (added to your `.cfg` files), and the shared settings
-   (only those keys are set in `es_settings.xml`; close ES-DE first, it rewrites the file when it exits).
 6. Finally, media on the card for ROMs the card doesn't have is removed, with no confirmation. It looks at
    every system in the layout, not only the ones you synced, and leaves systems whose ROM folder doesn't
    exist, and folders that aren't systems in `src/sync_roms/data/systems.json` (like ES-DE's `androidapps`), alone.
@@ -446,7 +442,7 @@ matches) and `scrape-unknown.json` (the ROMs ScreenScraper didn't know). Delete 
 
 `sync-roms --mirror DIR` keeps a local copy of just what the game lists reference, with storage's
 own key layout: the ROMs a sync installs (every file of a full system), every system's
-BIOS files, `scrapes/<system>/` metadata and media for those ROMs, and all of `scrapes/esde/`.
+BIOS files, `scrapes/<system>/` metadata and media for those ROMs.
 It compares file sizes, so a rerun with nothing changed lists storage and downloads nothing.
 Anything in the mirror that is no longer referenced (a game removed from a card's games or from the
 bucket) is deleted. `--dry-run` shows the plan. A non-empty folder that isn't already a mirror
