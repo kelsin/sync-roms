@@ -285,6 +285,15 @@ def plan_scrapes(layout_name, rom_rels, listing, meta, media_root, rom_dir, pres
     return jobs, entries, texts
 
 
+def scrape_cost(layout_name, system, rom_rel, listing):
+    """Bytes of scraped files a sync would install for one ROM (rom_rel: its path in the system folder) under a
+    layout, from a listing of scrapes/<system>/ with sizes; 0 for a layout without scrapes or a ROM with none."""
+    if layout_name not in SCRAPE_LAYOUTS:
+        return 0
+    jobs, _, _ = plan_scrapes(layout_name, [rom_rel], listing, {}, "/media", "/roms", lambda rom: True)
+    return sum(size or 0 for _, _, size in jobs)
+
+
 NO_SHRINK = "Onion box art and Slot labels need Pillow or macOS sips to resize images"
 
 
