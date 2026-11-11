@@ -218,7 +218,7 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
     set them all to the toggled row's new state (locked ones excepted).
     """
     os.environ.setdefault("ESCDELAY", "25")
-    lowered = [l.lower() for l in labels]
+    lowered = [l.casefold() for l in labels]
     start = list(initial) if initial is not None else [False] * len(labels)
     locked = locked or [False] * len(labels)
     hidden = hidden or [False] * len(labels)
@@ -253,7 +253,7 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
         if poll:
             stdscr.timeout(POLL_MS)
         while True:
-            terms = query.lower().split()
+            terms = query.casefold().split()
             vis = [i for i, l in enumerate(lowered) if (revealed or not hidden[i]) and all(t in l for t in terms)
                    and (view_mode == 0 or (state[i] if view_mode == 1 else state[i] != start[i]))]
             vis.sort(key=lambda i: hidden[i])  # revealed rows go last; stable within each group

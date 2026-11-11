@@ -425,7 +425,7 @@ class Links(unittest.TestCase):
 class MetaFlow(Flow):
     META = {"Emerald.zip": {"genre": "Platform", "releasedate": "2004-01-01"},
             "Ruby.zip": {"genre": "RPG / Pokemon", "releasedate": "2002"},
-            "Zelda.zip": {"genre": "Platform", "releasedate": "20010304", "players": "1"}}
+            "Zelda.zip": {"genre": "platform", "releasedate": "20010304"}}  # spelled differently: same genre
 
     def setUp(self):
         super().setUp()
@@ -456,7 +456,7 @@ class MetaFlow(Flow):
         self.card()
 
         def fields(labels, kw):
-            self.assertEqual(labels, ["Developer", "Publisher", "Genre", "Players", "Year"])
+            self.assertEqual(labels, ["Developer", "Publisher", "Genre", "Year"])
             self.assertEqual(kw["status"](None), "Pick a field")
             return 2
 
@@ -472,7 +472,7 @@ class MetaFlow(Flow):
 
         def fields_again(labels, kw):
             self.assertEqual(kw["extras"][2], [("  Platform", "cyan")])
-            return 4
+            return 3
 
         def years(labels, kw):
             self.assertEqual(labels, ["2001", "2004"])  # counted over the Platform games only

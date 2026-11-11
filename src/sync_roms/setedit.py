@@ -73,7 +73,8 @@ def ask_category(games, what):
     cats = list(dict.fromkeys(g["category"] for g in games if g.get("category")))
     if cats:
         print(ui.dim(f"  Categories: {', '.join(cats)}"))
-    return ui.ask(f"🏷️  Category for {what} (empty for none): ").strip()
+    typed = ui.ask(f"🏷️  Category for {what} (empty for none): ").strip()
+    return next((c for c in cats if c.casefold() == typed.casefold()), typed)  # "cave" is the existing "Cave"
 
 
 def game_label(game, names):
