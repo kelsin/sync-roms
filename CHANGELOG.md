@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.4.0](https://github.com/kelsin/sync-roms/compare/v1.3.0...v1.4.0) (2026-11-11)
+
+
+### :video_game: Features
+
+* add custom collections and surprise ([#223](https://github.com/kelsin/sync-roms/issues/223)) ([5a89ee1](https://github.com/kelsin/sync-roms/commit/5a89ee180e7888e0343365e25781756ae1a592f0))
+* **chd:** convert ps3 isos to zstd chds and unpack psn archives ([#222](https://github.com/kelsin/sync-roms/issues/222)) ([27e2c5b](https://github.com/kelsin/sync-roms/commit/27e2c5be04f345f491deccae68874637a5f94c14))
+* **collections:** let a collection pick Art Book Next theme art ([#225](https://github.com/kelsin/sync-roms/issues/225)) ([00e1736](https://github.com/kelsin/sync-roms/commit/00e17364633160887f8816032125e074a650a20b))
+* **edit:** hide systems with no storage folder in the card editor ([#217](https://github.com/kelsin/sync-roms/issues/217)) ([0a176a0](https://github.com/kelsin/sync-roms/commit/0a176a0761b8a66ee43cff0619ba5c2e022d0601))
+* **sets:** expand every set and add seventeen new ones ([#221](https://github.com/kelsin/sync-roms/issues/221)) ([53c9e33](https://github.com/kelsin/sync-roms/commit/53c9e332f237ee61d5fd76e623be162e34f39652))
+* **surprise:** add Art Book Next art for the Surprise collection ([#224](https://github.com/kelsin/sync-roms/issues/224)) ([1db9166](https://github.com/kelsin/sync-roms/commit/1db91668737fba9ae603c4c5808281603468c1a5))
+* **sync:** copy a system's rom_files from BIOS/ into its ROM folder ([#220](https://github.com/kelsin/sync-roms/issues/220)) ([9eace0b](https://github.com/kelsin/sync-roms/commit/9eace0b7fb946dd238e2e6e865d4cd30d96609e3))
+
+
+### :bug: Bug Fixes
+
+* **sync:** keep repo data readable when an upgrade removes the install mid-run ([#218](https://github.com/kelsin/sync-roms/issues/218)) ([8354541](https://github.com/kelsin/sync-roms/commit/83545411ecb26e1f1ac220dcc506844041915519))
+
 ## [1.3.0](https://github.com/kelsin/sync-roms/compare/v1.2.0...v1.3.0) (2026-11-11)
 
 
