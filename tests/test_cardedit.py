@@ -153,6 +153,17 @@ class Flow(DataDir):
         self.run_card(returns((cardedit.SURPRISE_KEY, 0)), returns(None))
         self.assertIs(self.read("cards.json")["c"]["surprise"], False)
 
+    def test_u_off_clears_the_current_surprises(self):
+        self.card(surprises=[{"system": "gba", "bucket": "gba/Zelda.zip", "title": "Zelda"}])
+        self.assertFalse(cardedit.toggle_surprise("c"))
+        self.assertNotIn("surprises", self.read("cards.json")["c"])
+
+    def test_a_text_collections_field_is_not_split_into_letters(self):
+        self.favs()
+        self.card(collections="favs")
+        self.run_card(returns((cardedit.COLLECTIONS_KEY, 0)), returns((" ", 0)), returns(None), returns(None))
+        self.assertEqual(self.read("cards.json")["c"]["collections"], ["favs"])
+
     def test_p_narrows_the_game_list_to_past_surprises(self):
         self.card()
         with mock.patch.object(surprise, "past_keys", return_value={"gba/Ruby.zip"}):

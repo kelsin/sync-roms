@@ -97,7 +97,7 @@ def remove_from_cards(collection_id):
     cards = store.load_cards()
     changed = []
     for name, card in cards.items():
-        ids = card.get("collections")
+        ids = card.get("collections") if isinstance(card, dict) else None
         if isinstance(ids, list) and collection_id in ids:
             card["collections"] = [i for i in ids if i != collection_id]
             changed.append(name)

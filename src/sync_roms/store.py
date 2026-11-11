@@ -363,7 +363,8 @@ def load_catalog():
 
 def load_manifest(card_names=()):
     """Systems, devices and layouts from the repo, joined with the games of the named cards (their picks, set
-    references and full systems) and the device-system overlay. No cards means no games."""
+    references and full systems, plus the games of their collections and, with Surprise on, their current
+    surprises) and the device-system overlay. No cards means no games."""
     sets = load_sets()
     cards = load_cards()
     if prune_unknown_sets(sets, cards):

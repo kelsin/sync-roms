@@ -38,6 +38,9 @@ class SizeCacheTest(helpers.DataDir):
             p = mock.patch.object(s3, target, value)
             p.start()
             self.addCleanup(p.stop)
+        p = mock.patch.object(runtime, "ROOT", "/nas")  # reads come from the storage folder itself
+        p.start()
+        self.addCleanup(p.stop)
         for target, value in (("_clock", lambda: self.now), ("_sample", lambda pop, n: list(pop)[:n]),
                               ("_is_folder", lambda path: True)):
             p = mock.patch.object(sizecache, target, value)
@@ -202,6 +205,15 @@ class SizeCacheTest(helpers.DataDir):
             self.assertIn("gba/b.zip", sizecache.cached("gba/"))
         sizecache.refresh("gba/")  # the storage folder itself: removed files drop
         self.assertNotIn("gba/b.zip", sizecache.cached("gba/"))
+
+    def test_a_mirror_listing_stays_partial_when_the_mirror_is_swapped_out_mid_refresh(self):
+        sizecache.refresh("gba/")
+        self.fake.files = {"gba/a.zip": 1}  # the mirror has only one file
+        # The refresh starts reading from the mirror; storage_reads() in another thread then clears runtime._mirror_root.
+        with mock.patch.object(runtime, "_mirror_root", None), \
+                mock.patch.object(s3, "read_root", side_effect=["/mirror", "/nas", "/nas"]):
+            sizecache.refresh("gba/")
+        self.assertEqual(sizecache.cached("gba/"), {"gba/a.zip": 1, "gba/b.zip": 2, "gba/c.zip": 3})
 
     def test_a_missing_storage_folder_keeps_the_cache(self):
         import tempfile

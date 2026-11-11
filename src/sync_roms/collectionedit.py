@@ -98,7 +98,8 @@ def edit_one(collection, systems, keys_of):
 def cards_using(collection_id):
     """The names of the cards whose collections hold collection_id, sorted."""
     return sorted(name for name, card in store.load_cards().items()
-                  if isinstance(card.get("collections"), list) and collection_id in card["collections"])
+                  if isinstance(card, dict) and isinstance(card.get("collections"), list)
+                  and collection_id in card["collections"])
 
 
 def new_collection(working):

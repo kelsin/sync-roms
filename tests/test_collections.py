@@ -95,6 +95,13 @@ class Files(DataDir):
     def test_collection_games_skips_entries_without_a_bucket(self):
         self.assertEqual(collections.collection_games({"games": [{"title": "x"}, *FAVS["games"]]}), FAVS["games"])
 
+    def test_remove_from_cards_and_cards_using_skip_non_dict_cards(self):
+        from sync_roms import collectionedit
+        self.write_json("cards.json", {"a": {"collections": ["favs"]}, "b": "junk", "c": None, "d": ["favs"]})
+        self.assertEqual(collectionedit.cards_using("favs"), ["a"])
+        self.assertEqual(collections.remove_from_cards("favs"), ["a"])
+        self.assertEqual(self.read("cards.json")["b"], "junk")
+
     def test_remove_from_cards_rewrites_only_cards_that_use_it(self):
         self.write_json("cards.json", {"a": {"collections": ["favs", "x"]}, "b": {"collections": ["favs"]}, "c": {}})
         self.assertEqual(collections.remove_from_cards("favs"), ["a", "b"])

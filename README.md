@@ -529,7 +529,7 @@ Removing a game only drops it from the card's games; the file stays in storage.
 
 ### Collections
 
-`sync-roms collections edit` edits your own collections of favourite games. A collection is a file like a set file (`{"name": ..., "games": [...]}`) at `~/.sync-roms/collections/<id>.json`; the editor has the same keys as the set editor and saves straight to that folder when you pick Done (Quit discards). They are personal: they never go to storage or into the repo, and no `git` or `gh` is needed. Deleting a collection that cards use asks first and removes it from those cards.
+`sync-roms collections edit` edits your own collections of favourite games. A collection is a file like a set file (`{"name": ..., "games": [...]}`) at `~/.sync-roms/collections/<id>.json`; the editor has the same keys as the set editor and saves straight to that folder when you pick Done (Quit discards). They are personal: they never go to storage or into the repo, and no `git` or `gh` is needed. Deleting a collection that cards use asks first and removes it from those cards. In **Add games from a system**, `p` narrows the list to games that were surprises within the last `surprise_ttl_days` and `c` shows every game again, so a surprise you liked is easy to keep.
 
 ### Full systems
 

@@ -329,6 +329,7 @@ def toggle_surprise(name):
         entry.pop("surprise")
     else:
         entry["surprise"] = False
+        entry.pop("surprises", None)  # off clears the current picks
     store.write_cards(cards)
     return surprise.enabled(entry)
 
@@ -341,7 +342,9 @@ def pick_collections(name, playable):
         edit.note(ui.yellow("ℹ️  No collections yet: make one in sync-roms collections edit "
                             "(or 💖 Collections in sync-roms edit)."))
         return
-    ids = list(store.load_cards().get(name, {}).get("collections") or [])
+    entry = store.load_cards().get(name)
+    saved = entry.get("collections") if isinstance(entry, dict) else None
+    ids = [i for i in saved if isinstance(i, str)] if isinstance(saved, list) else []
     labels = []
     for c in found:
         p = sum(1 for g in colls.collection_games(c) if g.get("system") in playable)
