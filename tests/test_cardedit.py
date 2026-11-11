@@ -9,7 +9,7 @@ from unittest import mock
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 from helpers import DataDir  # noqa: E402
-from sync_roms import budget, cardedit, edit, picker, s3, sizecache, store, ui  # noqa: E402
+from sync_roms import budget, cardedit, collections, edit, picker, s3, sizecache, store, ui  # noqa: E402
 
 U = budget.Usage
 
@@ -146,6 +146,57 @@ class Flow(DataDir):
         self.assertNotIn("m", kw["hotkeys"])
         self.assertNotIn("make set", kw["hint"])
         self.assertFalse(hasattr(cardedit, "MAKE_SET_KEY"))
+
+    def favs(self, *more):
+        collections.save_collection({"id": "favs", "name": "Favs", "games": [
+            {"title": "Ruby", "system": "gba", "bucket": "gba/Ruby.zip"}, {"title": "Red", "system": "gb", "bucket": "gb/Red.gb"},
+            {"title": "FF7", "system": "psx", "bucket": "psx/FF7.chd"}, *more]})
+
+    def test_collections_hotkey_shows_playable_counts_and_space_toggles(self):
+        self.favs({"title": "Pokemon", "system": "nds", "bucket": "nds/Pokemon.nds"})
+        self.card()
+        nds = {**system("nds", "Nintendo DS"), "folders": {}}  # the device runs it, but esde has no folder for it
+        with mock.patch.dict(CATALOG, systems=CATALOG["systems"] + [nds]), \
+                mock.patch.dict(DEVICE, systems=["gba", "gb", "nds"]):
+            calls = self.run_card(returns((cardedit.COLLECTIONS_KEY, 0)), returns((" ", 0)), returns(None), returns(None))
+        self.assertEqual(calls[1][1], ["Favs  (2 playable, 2 not playable)"])
+        self.assertEqual(calls[1][2]["extras"], [[("  ✅ on the card", "green")]])
+        self.assertEqual(self.read("cards.json")["c"]["collections"], ["favs"])
+
+    def test_enter_toggles_a_collection_off_again(self):
+        self.favs()
+        self.card(collections=["favs"])
+        self.run_card(returns((cardedit.COLLECTIONS_KEY, 0)), returns(0), returns(None), returns(None))
+        self.assertEqual(self.read("cards.json")["c"]["collections"], [])
+
+    def test_no_collections_is_a_note(self):
+        self.card()
+        with mock.patch.object(edit, "note") as note:
+            calls = self.run_card(returns((cardedit.COLLECTIONS_KEY, 0)), returns(None))
+        self.assertEqual(len(calls), 2)  # the system list twice, no collection list
+        self.assertIn("sync-roms collections edit", note.call_args[0][0])
+
+    def test_collection_games_are_on_locked_and_marked_even_when_excluded(self):
+        self.favs()
+        self.card(collections=["favs"], excluded={"gba": ["gba/Ruby.zip"]})
+        changed, calls = self.run_system(toggle())
+        _, labels, kw = calls[0]
+        i = labels.index("Ruby.zip")
+        self.assertTrue(kw["initial"][i])
+        self.assertEqual([n for n, on in enumerate(kw["locked"]) if on], [i])
+        self.assertEqual(kw["locked_note"][i], "From 💖 Favs; take it off the card to remove this game")
+        self.assertIn(("  💖 Favs", "cyan"), kw["extras"][i])
+        self.assertFalse(changed)
+
+    def test_collection_games_count_in_the_game_view_and_system_list(self):
+        self.favs()
+        self.card(size="1 GB", collections=["favs"])
+        self.cache = {"gba/": self.files["gba/"], "gb/": self.files["gb/"], "scrapes/gba/": {}, "scrapes/gb/": {}, "BIOS/": {}}
+        _, calls = self.run_system(toggle())
+        kw = calls[0][2]
+        self.assertIn("· 2 file(s)", kw["status"](kw["initial"])[0])  # Ruby here, Red on Game Boy
+        extras = self.run_card(returns(None))[0][2]["extras"]
+        self.assertIn(("  1 picked", "green"), extras[0])
 
     def run_card(self, *steps):
         script = Script(*steps)
