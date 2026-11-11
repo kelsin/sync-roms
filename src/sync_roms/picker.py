@@ -190,7 +190,7 @@ POLL_MS = 200  # how often filter_list calls its poll while no key comes
 
 def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, extras=None, locked=None, locked_note="",
                 hotkeys=(), note_text=None, on_note=None, esc_asks=True, hidden=None, status=None, diff_marks=True,
-                session=None, poll=None, links=None):
+                session=None, poll=None, links=None, on_hotkey=None):
     """Modal list: vim keys for moving and acting, Emacs keys for editing the filter.
 
     Normal mode: j/k ↑/↓ ^N/^P move · g/G top/bottom · ^D/^U half page · ^F/^B/PgUp/PgDn/^V page · / filter ·
@@ -216,6 +216,8 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
     so poll can update extras in place (and status can read what it changed).
     links: optional per-label lists of the label indexes switched together with it (multi mode): Space/Tab and `a`
     set them all to the toggled row's new state (locked ones excepted).
+    on_hotkey: optional callable(key, label index) -> bool, tried first for a hotkey; True means it handled the key
+    in place (the list stays open and is redrawn, so it can update extras), False returns (key, index) as usual.
     """
     os.environ.setdefault("ESCDELAY", "25")
     lowered = [l.casefold() for l in labels]
@@ -343,6 +345,8 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
                 continue
             moved = move_key(k, cur, len(vis) - 1, view)
             if k in hotkeys and (vis or multi):
+                if on_hotkey and on_hotkey(k, vis[cur] if vis else None):
+                    continue
                 return k, (vis[cur] if vis else None)
             if moved is not None:
                 cur = moved

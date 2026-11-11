@@ -92,7 +92,11 @@ class Script:
 
     def __call__(self, title, labels, **kw):
         self.calls.append((title, list(labels), kw))
-        return next(self.steps)(labels, kw)
+        while True:
+            result = next(self.steps)(labels, kw)
+            handled = isinstance(result, tuple) and kw.get("on_hotkey") and kw["on_hotkey"](*result)
+            if not handled:  # a hotkey handled in place leaves the list open for the next step
+                return result
 
 
 def returns(value):
