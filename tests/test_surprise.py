@@ -1,4 +1,6 @@
+import collections
 import os
+import random
 import sys
 import unittest
 
@@ -54,6 +56,75 @@ class SurpriseRulesTest(unittest.TestCase):
         self.assertEqual(sorted(surprise.units(psx, keys, None, set())),
                          [["psx/FF7 (USA).m3u", "psx/FF7 (USA) (Disc 1).chd", "psx/FF7 (USA) (Disc 2).chd"],
                           ["psx/Spyro (USA).chd"]])
+
+
+def pool(system, n):
+    return [[f"{system}/G{i} (USA).zip"] for i in range(n)]
+
+
+def count(picked):
+    return collections.Counter(p["system"] for p in picked)
+
+
+class SurprisePickTest(unittest.TestCase):
+    def test_seven_three_split_counts_kept(self):
+        pools = {s: pool(s, 20) for s in "abcd"}
+        kept = [{"system": "a", "bucket": "a/K1.zip", "title": "K1"},
+                {"system": "a", "bucket": "a/K2.zip", "title": "K2"},
+                {"system": "c", "bucket": "c/K3.zip", "title": "K3"}]
+        got = count(surprise.pick(pools, kept, 7, {"a", "b"}, set(), set(), random.Random(1)))
+        self.assertEqual(got["a"] + got["b"], 5)
+        self.assertEqual(got["c"] + got["d"], 2)
+        self.assertEqual(sum(got.values()), 7)
+
+    def test_full_ten_is_seven_three_spread_evenly(self):
+        pools = {s: pool(s, 20) for s in "abcde"}
+        got = count(surprise.pick(pools, [], 10, {"a", "b", "c"}, set(), set(), random.Random(2)))
+        self.assertEqual(sorted(got[s] for s in "abc"), [2, 2, 3])
+        self.assertEqual(sorted(got[s] for s in "de"), [1, 2])
+
+    def test_recommended_system_with_few_candidates_passes_slots_on(self):
+        pools = {"a": pool("a", 2), "b": pool("b", 20), "c": pool("c", 20)}
+        got = count(surprise.pick(pools, [], 10, {"a"}, set(), set(), random.Random(3)))
+        self.assertEqual(got["a"], 2)
+        self.assertEqual(got["b"] + got["c"], 8)
+        self.assertEqual(sorted((got["b"], got["c"])), [4, 4])
+
+    def test_two_systems_both_recommended_split_five_five(self):
+        pools = {"a": pool("a", 20), "b": pool("b", 20)}
+        got = count(surprise.pick(pools, [], 10, {"a", "b"}, set(), set(), random.Random(4)))
+        self.assertEqual(got, {"a": 5, "b": 5})
+
+    def test_no_recommended_systems_gives_all_slots_to_the_others(self):
+        got = count(surprise.pick({"a": pool("a", 20)}, [], 10, set(), set(), set(), random.Random(5)))
+        self.assertEqual(got, {"a": 10})
+
+    def test_multi_disc_game_takes_one_slot(self):
+        disc = ["p/FF7 (USA).m3u", "p/FF7 (USA) (Disc 1).chd", "p/FF7 (USA) (Disc 2).chd"]
+        got = surprise.pick({"p": [disc, ["p/Spyro (USA).chd"]]}, [], 10, set(), set(), set(), random.Random(6))
+        self.assertEqual(len(got), 2)
+        ff7 = next(x for x in got if x["bucket"] == "p/FF7 (USA).m3u")
+        self.assertEqual(ff7, {"system": "p", "bucket": "p/FF7 (USA).m3u", "title": "FF7 (USA)", "files": disc[1:]})
+        self.assertNotIn("files", next(x for x in got if x["bucket"] == "p/Spyro (USA).chd"))
+
+    def test_best_tier_first(self):
+        units = [["a/Fresh.zip"], ["a/Past.zip"], ["a/Other.zip"]]
+        for seed in range(20):
+            got1 = surprise.pick({"a": units}, [], 1, set(), {"a/Past.zip"}, {"a/Other.zip"}, random.Random(seed))
+            got2 = surprise.pick({"a": units}, [], 2, set(), {"a/Past.zip"}, {"a/Other.zip"}, random.Random(seed))
+            got3 = surprise.pick({"a": units}, [], 3, set(), {"a/Past.zip"}, {"a/Other.zip"}, random.Random(seed))
+            self.assertEqual([x["bucket"] for x in got1], ["a/Fresh.zip"])
+            self.assertEqual({x["bucket"] for x in got2}, {"a/Fresh.zip", "a/Past.zip"})
+            self.assertEqual(len(got3), 3)
+
+    def test_need_zero_picks_nothing(self):
+        self.assertEqual(surprise.pick({"a": pool("a", 5)}, [], 0, {"a"}, set(), set(), random.Random(0)), [])
+
+    def test_every_system_runs_out_returns_what_there_is(self):
+        got = surprise.pick({"a": pool("a", 2), "b": pool("b", 1), "c": []}, [], 10, {"a"}, set(), set(),
+                            random.Random(7))
+        self.assertEqual(count(got), {"a": 2, "b": 1})
+        self.assertEqual(surprise.pick({}, [], 10, set(), set(), set(), random.Random(7)), [])
 
 
 if __name__ == "__main__":

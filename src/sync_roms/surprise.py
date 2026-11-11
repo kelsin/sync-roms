@@ -2,7 +2,7 @@
 import posixpath
 import re
 
-from . import m3u
+from . import m3u, store
 
 SLOTS = 10
 RECOMMENDED_SHARE = 2 / 3
@@ -70,4 +70,49 @@ def units(system, keys, family, bios):
             seen.add(tuple(unit))
             if is_candidate(unit[0], system, family, bios):
                 out.append(unit)
+    return out
+
+
+def _surprise(system, unit):
+    out = {"system": system, "bucket": unit[0], "title": store.key_title(unit[0])}
+    if unit[1:]:
+        out["files"] = unit[1:]
+    return out
+
+
+def pick(pools, kept, need, recommended, recent, others_current, rng):
+    """Up to need new surprises from pools ({system bucket: [units]}): about two thirds (kept ones counted) from the
+    recommended systems, spread evenly, slots passing on when a system runs out. Unused games come first, then ones
+    surprised before (recent), then ones another card currently holds."""
+    left = {b: list(u) for b, u in pools.items()}
+    groups = {g: [b for b in sorted(left) if (b in recommended) == g] for g in (True, False)}
+    for g in groups.values():
+        rng.shuffle(g)
+    kept_rec = sum(1 for k in kept if k["system"] in recommended)
+    want_rec = min(max(round(SLOTS * RECOMMENDED_SHARE) - kept_rec, 0), need)
+    out = []
+
+    def tier(unit):
+        return 2 if unit[0] in others_current else 1 if unit[0] in recent else 0
+
+    given = dict.fromkeys(left, 0)
+
+    def fill(group, slots):
+        """Give each slot to the group's system with the fewest picks that still has games, so systems that run out
+        pass their slots on and the rest stay even. Returns the unused slots."""
+        while slots:
+            open_ = [b for b in groups[group] if left[b]]
+            if not open_:
+                break
+            b = min(open_, key=given.__getitem__)
+            best = min(map(tier, left[b]))
+            unit = rng.choice([u for u in left[b] if tier(u) == best])
+            left[b].remove(unit)
+            given[b] += 1
+            out.append(_surprise(b, unit))
+            slots -= 1
+        return slots
+
+    rest = fill(False, need - want_rec + fill(True, want_rec))
+    fill(True, rest)
     return out
