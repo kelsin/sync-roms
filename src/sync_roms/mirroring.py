@@ -29,7 +29,7 @@ def mirror_wanted(manifest):
                     len(parts) > 3 and parts[2] in scrape_plan.BUCKET_MEDIA and os.path.splitext("/".join(parts[3:]))[0] in stems):
                 wanted[key] = size
     for s in systems:
-        for f in s["bios"]["files"]:
+        for f in s["bios"]["files"] + s["bios"].get("rom_files", []):
             if "BIOS/" + f in bios:
                 wanted["BIOS/" + f] = bios["BIOS/" + f]
     wanted.update((k, v) for k, v in themes.items() if not k.endswith("/"))

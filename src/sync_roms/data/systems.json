@@ -1332,6 +1332,13 @@
       ],
       "libretro_cores": [
         "fbneo"
+      ],
+      "rom_files": [
+        "fbneo/decocass.zip",
+        "fbneo/isgsm.zip",
+        "fbneo/neogeo.zip",
+        "fbneo/pgm.zip",
+        "fbneo/skns.zip"
       ]
     }
   },
@@ -3341,7 +3348,10 @@
     },
     "bios": {
       "files": [],
-      "note": "MAME is ES-DE's default emulator and needs its BIOS/device zip in the same folder as the game zips, not in BIOS/"
+      "rom_files": [
+        "gamate.zip"
+      ],
+      "note": "MAME is ES-DE's default emulator and needs its BIOS/device zip in the same folder as the game zips, so it is copied there from BIOS/"
     }
   },
   {
@@ -3361,7 +3371,10 @@
     },
     "bios": {
       "files": [],
-      "note": "MAME is ES-DE's default emulator and needs its BIOS/device zip in the same folder as the game zips, not in BIOS/"
+      "rom_files": [
+        "gamecom.zip"
+      ],
+      "note": "MAME is ES-DE's default emulator and needs its BIOS/device zip in the same folder as the game zips, so it is copied there from BIOS/"
     }
   },
   {
