@@ -474,17 +474,26 @@ sync-roms --edit
 ```
 
 0. Pick one of your cards, or **➕ New card** (asks for its folder name, then its device and
-   firmware, like the first sync does). On a card, `v` changes its device and firmware instead of opening it (saved with the other changes) and unticks the card's extra games for systems the new device or firmware doesn't use. Each card's row shows its current device and firmware. Games a card already gets from its sets show greyed out with a 🔒.
-1. Pick **By system** or **By set**, then `/` to filter the list (every word you type must
-   match) and `Enter` to pick one. `Esc` goes back; `Esc` at the first menu goes to the review (the menu also has **Done** and **Quit without saving** rows). `Ctrl-C` keeps your pending changes and goes to the review.
-2. For a system you see every file in its storage folder. For a set (a curated list in the
-   package's `data/sets/*.json`) you see its games from every system, sorted by system then title.
-   `✅` is already in the list, `⬜` is not. `/` filters, `Space` (or `Tab`) toggles the game
-   under the cursor, `a` toggles everything currently shown, `u` reverts the list to how it was when opened, `o` cycles the view between all rows, only those that are on, and only those you changed. `Enter` keeps your changes; `Esc` asks whether to keep or revert them if there are any.
-   Pending changes show as `➕` / `➖`. `w` writes a note on the game under the cursor (empty clears it); notes are shown when a game is locked and are kept when the game is saved into a set.
-3. When you finish, you get a summary of additions and removals per system, then **save**, **keep editing**, **discard**, or **list every change**. Saving writes the cards' entries in `cards.json`, keeping the previous files as `.bak` next to them. Nothing is uploaded.
+   firmware, like the first sync does, and saves the card). On a card, `v` changes its device and firmware instead of opening it (saved with the review at the end) and drops the card's games for systems the new device or firmware doesn't use. Each card's row shows its current device and firmware.
+1. A card opens on every system its device can play, in the usual order. Systems recommended for the device's screen
+   are marked ⭐; each system with picks shows how many games and how much space they take (ROMs plus the scraped
+   files the card's firmware installs). The bottom line shows the card's total (games, scrapes and the BIOS files of
+   the systems it syncs) against its size, the free space, and turns red when it is over. Sizes come from a cache in
+   `~/.sync-roms/sizes.json` that is refreshed in the background when you open a system; until it is ready sizes show
+   `…`. `/` filters, `Enter` opens a system, `f` makes it a full system (every file in its folder; `f` again brings the
+   game list back), `m` saves the card's picked games as a personal set. Games save to `cards.json` as you leave a
+   system (the previous file is kept as `cards.json.bak`). `Esc` goes back to the menu.
+2. A system shows every file in its storage folder. `✅` is synced, `⬜` is not; a 📦 next to a game says a set the
+   card references syncs it (switching it off excludes it from that set on this card). `/` searches, `Space` (or `Tab`)
+   toggles the game under the cursor, `a` toggles everything shown, `u` reverts, `o` cycles the view between all
+   rows, only those that are on, and only those you changed. `s` lists the sets with games on this system: `Enter`
+   narrows the list to that set's games here, `f` makes the card sync the whole set. `c` shows every game again.
+   Pending changes show as `➕` / `➖` and the bottom line updates the card's total as you toggle. `w` writes a note on a
+   picked game. `Enter` keeps your changes; `Esc` asks whether to keep or revert them if there are any.
+3. When you leave the menu, device/firmware and device-system changes are summarized, then **save**, **keep
+   editing**, **discard**, or **list every change**. Nothing is uploaded.
 
-On a card, **📦 Make a set from these extras** saves the card's extra games as a personal set. Personal sets are files in `~/.sync-roms/sets/<id>.json` (same format as the package's sets, below), appear next to the built-in ones under **By set** and can be referenced like them; an id already used by a built-in set is refused. You can also write them by hand, and `sync-roms check` validates them.
+Personal sets are files in `~/.sync-roms/sets/<id>.json` (same format as the package's sets, below), appear next to the built-in ones and can be referenced like them; an id already used by a built-in set is refused. You can also write them by hand, and `sync-roms check` validates them.
 
 On the top menu, `v` changes a card's device and firmware, `r` renames a card and `d` deletes one (both ask first, and act at once). **🧩 Device systems** edits which systems a device recommends: it is saved as the `add`/`remove` overlay in `device-systems.json`, relative to the repo defaults. A file that isn't valid JSON is never overwritten: sync-roms says so and leaves it for you to fix (`sync-roms check` lists the problems).
 
@@ -524,7 +533,7 @@ instead of a list:
 { "gb": { "full_system": true } }
 ```
 
-No system is a full system by default. In `--edit`, press `f` on a system in the **By system** list to
+No system is a full system by default. In `--edit`, press `f` on a system in a card's system list to
 toggle it (🗂️). A full system's games can't be toggled one by one.
 
 ### Full sets
@@ -537,9 +546,9 @@ holding the set file names without `.json`:
 ```
 
 It works in a card's `games` entry in `cards.json`. A set reference is live: games added
-to the set in a later release are synced too, for the systems the card has enabled. In `--edit`, press `f`
-on a set in the **By set** list (it shows 📦) to toggle it without opening it; inside a referenced set the
-games show greyed out. Unknown set names are skipped with a warning.
+to the set in a later release are synced too, for the systems the card has enabled. In `--edit`, press `s` in a
+system's game list, then `f` on a set (it shows 📦) to toggle it; the games it syncs show 📦 and switching one
+off excludes it on that card. Unknown set names are skipped with a warning.
 
 ### A card's extras in `cards.json`
 

@@ -22,12 +22,27 @@ def _path():
     return os.path.join(store.data_dir(), "sizes.json")
 
 
+_parsed = {}  # path -> (stat signature, parsed JSON): the editor reads the cache on every redraw, so parse once per change
+
+
+def _read(path):
+    """The parsed sizes.json, parsed again only when the file changed (it is always replaced whole, by a rename)."""
+    st = os.stat(path)
+    sig = (st.st_ino, st.st_size, st.st_mtime_ns, st.st_ctime_ns)
+    hit = _parsed.get(path)
+    if hit and hit[0] == sig:
+        return hit[1]
+    with open(path) as f:
+        data = json.load(f)
+    _parsed[path] = (sig, data)
+    return data
+
+
 def _load():
     """{prefix: {"built": time, "files": {key: size}}} for the current source; {} when missing, corrupt or another source.
     A missing or invalid "built" becomes 0, which counts as old."""
     try:
-        with open(_path()) as f:
-            data = json.load(f)
+        data = _read(_path())
         if data["source"] != s3.location():
             return {}
         entries = {}

@@ -8,7 +8,7 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from helpers import DataDir  # noqa: E402,F401  (re-exported: other test modules still import it from here)
-from sync_roms import edit, picker, runtime, s3, store, ui  # noqa: E402
+from sync_roms import edit, picker, runtime, s3, sizecache, store, ui  # noqa: E402
 
 SETS = {"s": {"id": "s", "name": "Mix", "games": [{"system": "gba", "bucket": "gba/A.zip", "files": ["gba/A2.zip"]}]}}
 
@@ -76,6 +76,7 @@ class EditBase(DataDir):
         with mock.patch.object(runtime, "BUCKET", "b", create=True), \
                 mock.patch.object(s3, "list_sizes", return_value={}), \
                 mock.patch.object(picker, "filter_list", side_effect=lambda *a, **k: next(picks)), \
+                mock.patch.object(sizecache, "refresh_async"), \
                 mock.patch("builtins.input", return_value=name), \
                 mock.patch.object(picker, "choose_setup", return_value=(None, "esde")), \
                 mock.patch.object(ui, "confirm", return_value=confirmed), \
@@ -86,14 +87,14 @@ class EditBase(DataDir):
 
 
 class EditFlow(EditBase):
-    def test_cancel_writes_nothing(self):
-        # main menu: "New card" is the last option; inside the card menu Esc; then Esc to finish
+    def test_new_card_left_empty_and_declined_is_removed(self):
+        # main menu: "New card" is option 0 with no cards; the card editor Esc; the menu Esc to finish
         self.assertEqual(self.run_edit([0, None, None], confirmed=False), 0)
-        self.assertFalse(os.path.exists(self.path("cards.json")))
+        self.assertNotIn("newcard", self.read("cards.json"))
 
     def test_new_card_saved_with_setup(self):
         self.assertEqual(self.run_edit([0, None, None], confirmed=True), 0)
-        self.assertEqual(self.read("cards.json")["newcard"], {"device": "full", "layout": "esde", "games": {}})
+        self.assertEqual(self.read("cards.json")["newcard"], {"device": "full", "layout": "esde"})
         self.assertFalse(os.path.exists(self.path("games.json")))
 
     def test_no_changes_nothing_saved(self):
@@ -112,6 +113,7 @@ class MenuActions(EditBase):
         with mock.patch.object(runtime, "BUCKET", "b", create=True), \
                 mock.patch.object(s3, "list_sizes", return_value={}), \
                 mock.patch.object(picker, "filter_list", side_effect=fake), \
+                mock.patch.object(sizecache, "refresh_async"), \
                 mock.patch("builtins.input", side_effect=lambda *a: next(inputs)), \
                 mock.patch.object(ui, "confirm", return_value=confirm), \
                 mock.patch.object(ui, "choose", side_effect=lambda *a, **k: "s"), \
@@ -168,94 +170,10 @@ class MenuActions(EditBase):
         self.assertNotEqual(cm.exception.code, 0)
 
 
-class FullToggles(EditBase):
-    def run_with(self, picks, bucket_files=None, confirmed=True):
-        picks, calls = iter(picks), []
-
-        def fake(*a, **k):
-            calls.append(k)
-            return next(picks)
-        files = bucket_files or {}
-        with mock.patch.object(runtime, "BUCKET", "b", create=True), \
-                mock.patch.object(s3, "list_sizes", side_effect=lambda prefix: files.get(prefix, {})), \
-                mock.patch.object(picker, "filter_list", side_effect=fake), \
-                mock.patch.object(ui, "confirm", return_value=confirmed), \
-                mock.patch.object(ui, "choose", side_effect=lambda *a, **k: "s" if confirmed else "d"), \
-                mock.patch.object(edit, "note"), \
-                contextlib.redirect_stdout(io.StringIO()):
-            edit.edit_manifest()
-        return calls
-
+class SetRefs(unittest.TestCase):
     def test_toggle_set_ref(self):
         self.assertEqual(edit.toggle_set_ref(["a"], "b"), ["a", "b"])
         self.assertEqual(edit.toggle_set_ref(["a", "b"], "a"), ["b"])
-
-    def test_toggle_full_system_keeps_games(self):
-        s = {"full_system": False, "games": [{"bucket": "gba/A.zip"}]}
-        edit.toggle_full_system(s)
-        self.assertTrue(s["full_system"])
-        self.assertEqual(len(s["games"]), 1)
-
-    def test_set_menu_hotkey_toggles_and_redraws(self):
-        first = store.load_sets()[1]["id"]
-        self.write_json("cards.json", {"c": {"layout": "esde", "device": "full"}})
-        calls = self.run_with([0, 1, (edit.FULL_KEY, 1), None, None, None])
-        self.assertEqual(self.read("cards.json")["c"]["games"], {"sets": [first]})
-        self.assertEqual(calls[3]["cursor"], 1)
-        self.assertEqual(calls[3]["extras"][1], [("  📦 full set", "green")])
-        self.assertIn(edit.FULL_KEY, calls[2]["hotkeys"])
-
-    def test_system_hotkey_toggles_full_system(self):
-        self.write_json("cards.json", {"c": {"layout": "esde", "device": "full"}})
-        self.run_with([0, 0, (edit.FULL_KEY, 0), None, None, None], {"gba/": {"gba/A.zip": 1}})
-        self.assertEqual(self.read("cards.json")["c"]["games"], {"gba": {"full_system": True}})
-
-    def test_set_ref_rows_locked(self):
-        self.write_json("cards.json", {"c": {"layout": "esde", "device": "full", "games": {"sets": ["mario"]}}})
-        tracked = []
-        with mock.patch.object(edit, "toggle_games",
-                               side_effect=lambda *a, **k: tracked.append((a, k))):
-            ids = [x["id"] for x in store.load_sets()]
-            self.run_with([0, 1, ids.index("mario"), None, None, None])
-        rows = tracked[0][0][1]
-        note = tracked[0][1]["covered"](rows[0][0], rows[0][1])
-        self.assertEqual(note, "Full set: Mario")
-
-    def device_and_unsupported(self):
-        """A device and a system bucket id (with a esde folder) it doesn't run."""
-        systems = store.repo_json("systems")
-        for d in store.load_manifest()["devices"]:
-            if "esde" in d["firmwares"]:
-                other = next((x["bucket"] for x in systems if x["bucket"] not in d["systems"] and x["folders"].get("esde")), None)
-                if other:
-                    return d, other
-        self.fail("no device with an unsupported system")
-
-    def test_opening_a_card_drops_games_of_unsupported_systems(self):
-        device, other = self.device_and_unsupported()
-        self.write_json("cards.json", {"c": {"layout": "esde", "device": device["id"],
-                                             "games": {other: [{"title": "X", "bucket": f"{other}/X.zip"}]}}})
-        self.run_with([0, None, None])
-        self.assertEqual(self.read("cards.json")["c"]["games"], {})
-
-    def test_set_counts_only_count_supported_systems(self):
-        device, other = self.device_and_unsupported()
-        self.write_json("cards.json", {"c": {"layout": "esde", "device": device["id"]}})
-        game_set = {"id": "t", "name": "T", "description": "", "games": [
-            {"system": other, "bucket": f"{other}/X.zip"}, {"system": device["systems"][0], "bucket": "a/Y.zip"}]}
-        labels = []
-        picks = iter([0, 1, None, None, None])
-
-        def fake(title, items, **k):
-            labels.append(items)
-            return next(picks)
-        with mock.patch.object(store, "load_sets", return_value=[game_set]), \
-                mock.patch.object(picker, "filter_list", side_effect=fake), \
-                mock.patch.object(s3, "list_sizes", return_value={}), \
-                mock.patch.object(runtime, "BUCKET", "b", create=True), \
-                contextlib.redirect_stdout(io.StringIO()):
-            edit.edit_manifest()
-        self.assertIn("(0/1 on)", labels[2][0])
 
 
 if __name__ == "__main__":

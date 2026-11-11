@@ -65,7 +65,35 @@ class Budget(DataDir):
 
     def test_card_usage_sums(self):
         u = budget.card_usage({"layout": "other", "games": {"gba": [g("gba/A.zip")]}}, [GBA, {"bucket": "ps2"}])
-        self.assertEqual(tuple(u), (100, 1, True))  # ps2 has no cache
+        self.assertEqual(tuple(u), (100, 1, False))  # ps2 has nothing picked, so its missing cache doesn't matter
+        u = budget.card_usage({"layout": "other", "games": {"gba": [g("gba/A.zip")], "ps2": [g("ps2/X.iso")]}},
+                              [GBA, {"bucket": "ps2"}])
+        self.assertEqual(tuple(u), (100, 2, True))  # ps2 has no cache
+
+    def test_card_usage_adds_bios_of_picked_systems_once(self):
+        self.cache["BIOS/"] = {"BIOS/gba_bios.bin": 16, "BIOS/gb_bios.bin": 1, "BIOS/scph1001.bin": 512}
+        gba = {**GBA, "bios": {"files": ["gba_bios.bin", "gb_bios.bin", "missing.bin"]}}
+        gb = {"bucket": "gb", "bios": {"files": ["gb_bios.bin"]}}
+        ps1 = {"bucket": "psx", "bios": {"files": ["scph1001.bin"]}}
+        self.cache["gb/"] = {"gb/T.gb": 7}
+        card = {"layout": "other", "games": {"gba": [g("gba/A.zip")], "gb": [g("gb/T.gb")]}}
+        self.assertEqual(tuple(budget.card_usage(card, [gba, gb, ps1])), (100 + 7 + 17, 2, False))  # psx unpicked
+
+    def test_bios_uncached_is_partial(self):
+        gba = {**GBA, "bios": {"files": ["gba_bios.bin"]}}
+        u = budget.card_usage({"layout": "other", "games": {"gba": [g("gba/A.zip")]}}, [gba])
+        self.assertEqual(tuple(u), (100, 1, True))
+        self.assertEqual(tuple(budget.bios_usage([GBA])), (0, 0, False))  # no BIOS needed: nothing to size
+
+    def test_nothing_picked_is_not_partial(self):
+        self.cache.clear()
+        self.assertEqual(tuple(self.usage({})), (0, 0, False))
+
+    def test_game_costs(self):
+        costs, missing = budget.game_costs({"layout": "slot"}, GBA, ["gba/A.zip", "gba/B.zip", "gba/Z.zip"])
+        self.assertEqual((costs, missing), ({"gba/A.zip": 105, "gba/B.zip": 200}, False))
+        self.cache.pop("scrapes/gba/")
+        self.assertEqual(budget.game_costs({"layout": "esde"}, GBA, ["gba/A.zip"]), ({"gba/A.zip": 100}, True))
 
     def test_capacity(self):
         self.assertEqual(budget.card_capacity({"size": "512 GB"}), 512 * 10 ** 9)

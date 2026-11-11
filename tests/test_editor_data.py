@@ -8,7 +8,7 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
-from sync_roms import commands, edit, picker, store  # noqa: E402
+from sync_roms import cardedit, commands, edit, picker, store  # noqa: E402
 from helpers import Cmd, DataDir  # noqa: E402
 
 
@@ -178,7 +178,7 @@ class CheckBucketKeys(Cmd):
 class Hints(unittest.TestCase):
     def test_hints_fit_a_narrow_terminal_and_lead_with_the_main_keys(self):
         hints = [picker.SYSTEMS_HINT, picker.systems_hint(True), picker.MULTI_HINT, picker.SINGLE_HINT,
-                 edit.FULL_HINT.format(what="full system"), edit.MENU_HINT, edit.GAMES_HINT]
+                 edit.MENU_HINT, edit.GAMES_HINT, cardedit.LIST_HINT, cardedit.GAMES_HINT, cardedit.SETS_HINT]
         for h in hints:
             self.assertLessEqual(picker.cell_width(h), 80, h)
         self.assertTrue(picker.systems_hint(False).startswith("Space toggle · Enter go"))

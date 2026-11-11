@@ -185,9 +185,12 @@ def read_line(stdscr, prompt, text=""):
             text, pos = edited
 
 
+POLL_MS = 200  # how often filter_list calls its poll while no key comes
+
+
 def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, extras=None, locked=None, locked_note="",
                 hotkeys=(), note_text=None, on_note=None, esc_asks=True, hidden=None, status=None, diff_marks=True,
-                session=None):
+                session=None, poll=None):
     """Modal list: vim keys for moving and acting, Emacs keys for editing the filter.
 
     Normal mode: j/k ↑/↓ ^N/^P move · g/G top/bottom · ^D/^U half page · ^F/^B/PgUp/PgDn/^V page · / filter ·
@@ -206,8 +209,11 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
     note_text(label index) gives the text to start from.
     hotkeys: normal-mode keys that return (key, label index) for the highlighted row instead of acting.
     hidden: optional per-label flags; those rows are left out (and drawn dim) until `z` reveals them.
-    status(states) -> text: replaces the "N/M shown" status. diff_marks: show ➕/➖ against `initial` (else ✅/⬜ only).
+    status(states) -> text, or (text, color): replaces the "N/M shown" status. diff_marks: show ➕/➖ against `initial`
+    (else ✅/⬜ only).
     session: a dict the caller keeps so selection, view, revealed rows and cursor survive reopening the list.
+    poll: optional callable, called on the curses thread whenever no key came for POLL_MS; the list is then redrawn,
+    so poll can update extras in place (and status can read what it changed).
     """
     os.environ.setdefault("ESCDELAY", "25")
     lowered = [l.lower() for l in labels]
@@ -234,6 +240,8 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
         query, qpos, typing = "", 0, False
         cur, top = cursor, 0
         notice = ""
+        if poll:
+            stdscr.timeout(POLL_MS)
         while True:
             terms = query.lower().split()
             vis = [i for i, l in enumerate(lowered) if (revealed or not hidden[i]) and all(t in l for t in terms)
@@ -282,7 +290,9 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
                         break
                     stdscr.addnstr(pos - top + 3, x, text, w - 1 - x, attr | colors[color])
                     x += cell_width(text)
-            line = status(state) if status else f"{len(vis)}/{len(labels)} shown"
+            line, line_color = status(state) if status else f"{len(vis)}/{len(labels)} shown", None
+            if isinstance(line, tuple):
+                line, line_color = line
             if multi and diff_marks:
                 added = sum(1 for a, b in zip(state, start) if a and not b)
                 removed = sum(1 for a, b in zip(state, start) if b and not a)
@@ -297,12 +307,14 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
                 line = notice
                 notice = ""
             stdscr.addnstr(h - 1, 0, " " * (w - 1), w - 1)
-            stdscr.addnstr(h - 1, 0, line, w - 1, curses.A_BOLD)
+            stdscr.addnstr(h - 1, 0, line, w - 1, curses.A_BOLD | (colors[line_color] if line_color else 0))
             if typing:
                 stdscr.move(1, min(w - 1, 3 + cell_width(query[:qpos])))
             try:
                 k = stdscr.get_wch()
             except curses.error:
+                if poll:
+                    poll()
                 continue
             if typing:
                 edited = line_key(query, qpos, k)
@@ -354,10 +366,14 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
                 stdscr.addnstr(h - 1, 0, " " * (w - 1), w - 1)
                 stdscr.addnstr(h - 1, 0, f"Keep +{added} −{removed} pending change(s)?  y/Enter keep · u revert · any other key keeps editing",
                                w - 1, curses.A_BOLD | red_a)
+                stdscr.timeout(-1)  # wait for the answer even when polling
                 try:
                     answer = stdscr.get_wch()
                 except curses.error:
                     continue
+                finally:
+                    if poll:
+                        stdscr.timeout(POLL_MS)
                 if answer in ("y", "Y", "\n", "\r", curses.KEY_ENTER):
                     return state
                 if answer in ("u", "U"):
