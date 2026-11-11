@@ -9,7 +9,7 @@ from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
 from xml.sax.saxutils import escape, unescape
 
-from . import downloads, runtime, s3, store, ui
+from . import downloads, inventory, runtime, s3, store, ui
 
 
 # --- Scraped data (media, metadata, themes, collections, settings) --------------------------------
@@ -433,8 +433,8 @@ def load_scrape_data(systems, esde):
     """The storage's scrape data for the chosen systems: {storage folder: (listing, metadata)}, plus the
     shared scrapes/esde/ listing and texts when the layout is esde."""
     with ThreadPoolExecutor(runtime.WORKERS) as ex:
-        listings = list(ex.map(lambda s: s3.list_sizes(f"{SCRAPES}/{s['bucket']}/", sizes=False), systems))
-    extra = s3.list_sizes(f"{SCRAPES}/esde/", sizes=False) if esde else {}
+        listings = list(ex.map(lambda s: inventory.files(f"{SCRAPES}/{s['bucket']}/", sizes=False), systems))
+    extra = inventory.files(f"{SCRAPES}/esde/", sizes=False) if esde else {}
     meta_keys = [f"{SCRAPES}/{s['bucket']}/metadata.json" for s, l in zip(systems, listings)
                  if f"{SCRAPES}/{s['bucket']}/metadata.json" in l]
     texts = s3.fetch_texts(meta_keys + [k for k in extra if k.endswith(".cfg") or k.endswith("/settings.json")])

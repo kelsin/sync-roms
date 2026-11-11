@@ -9,7 +9,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 from botocore.exceptions import BotoCoreError, ClientError
 
-from . import diff, downloads, picker, runtime, s3, scrape_plan, store, ui
+from . import diff, downloads, inventory, picker, runtime, s3, scrape_plan, store, ui
 
 
 UPLOAD_MULTIPART_AT = 64 * 1024 * 1024  # files this big go up as parallel parts
@@ -133,7 +133,10 @@ def run_uploads(todo):
     try:
         with tempfile.TemporaryDirectory() as tmp, ThreadPoolExecutor(os.cpu_count() or 4) as shrinkers, \
                 create_transfer_manager(client, config) as manager:
+            sent = {}  # job n -> bytes sent (a shrunk PNG is smaller than its file)
+
             def send(job, path, n):
+                sent[n] = job[2] if path == job[1] else os.path.getsize(path)
                 manager.upload(path, runtime.BUCKET, job[0],
                                {"ContentType": mimetypes.guess_type(path)[0] or "application/octet-stream"},
                                [queue_when_done_class()(done, n, job, lambda b: moved.add(n, b))])
@@ -164,6 +167,7 @@ def run_uploads(todo):
                     prog = ui.dim(f"[{i}/{len(todo)}]")
                     try:
                         future.result()
+                        inventory.wrote(job[0], sent[n])  # its ETag isn't known: a multipart upload's isn't the MD5
                         bar.say(f"  {prog} ✅ {job[0]}")
                     except Exception as e:
                         failed += 1
@@ -198,7 +202,7 @@ def upload_command(args):
         return replace_command(args, folder, systems[i])
     try:
         print("☁️  Listing what's already there...")
-        existing = s3.list_sizes(bucket + "/")
+        existing = inventory.files(bucket + "/")
     except s3.ERRORS as e:
         ui.fail(f"{e}", 3)
     new, changed, same = plan_rom_upload(folder, bucket, existing)
@@ -236,7 +240,7 @@ def replace_command(args, folder, system):
     md5 = functools.lru_cache(maxsize=None)(lambda p: diff.file_md5(os.path.join(folder, *p.split("/"))))  # each file hashed once
     try:
         print("☁️  Listing what's already there...")
-        remote = s3.list_with_etags(bucket + "/")
+        remote = inventory.etags(bucket + "/")
         print("🔍 Matching files by content...")
         renames, new, changed, only_bucket = diff.plan_replace(
             local, remote, lambda p: diff.local_fingerprint(os.path.join(folder, *p.split("/"))),

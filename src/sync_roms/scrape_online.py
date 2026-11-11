@@ -17,7 +17,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 from botocore.exceptions import ClientError
 
-from . import runtime, s3, scrape_files, scrape_plan, scrape_state, screenscraper, store, ui, upload, usersettings
+from . import inventory, runtime, s3, scrape_files, scrape_plan, scrape_state, screenscraper, store, ui, upload, usersettings
 
 CHUNK = 8 << 20
 
@@ -105,7 +105,7 @@ def _candidate_etags(candidates):
     if runtime.ROOT:
         return {name: {rom: (size, f"{mtime}-{size}") for rom, (size, mtime) in found.items()}
                 for name, found in _stat_roms(candidates).items()}
-    etags = _each(lambda name: s3.list_with_etags(name + "/"), candidates)
+    etags = _each(lambda name: inventory.etags(name + "/"), candidates)
     if s3.read_root():
         _stat_roms({name: [r for r in roms if r in etags[name]] for name, roms in candidates.items()})
     return etags
@@ -519,7 +519,7 @@ def run_batch(system, batch, started, shrink, outcomes, listing, index, pending,
         todo = [j for js in jobs.values() for j in js]
         try:
             upload_failed = upload.run_uploads(todo) if todo else 0
-            have = s3.list_sizes(f"{scrape_plan.SCRAPES}/{name}/") if upload_failed else {}
+            have = inventory.files(f"{scrape_plan.SCRAPES}/{name}/") if upload_failed else {}
         except s3.ERRORS as e:
             _storage_fail(f"Uploading {name} media", e, rerun)
         if upload_failed:
@@ -669,7 +669,7 @@ def run_scrape(client, systems, todo, skip, ask=True, replace=False, forced=None
     count = sum(len(v) for v in todo.values())
     listings, metadata = dict(listings or {}), metadata or {}
     try:
-        listings.update(_each(lambda name: s3.list_sizes(f"{scrape_plan.SCRAPES}/{name}/"), [n for n in todo if n not in listings]))
+        listings.update(_each(lambda name: inventory.files(f"{scrape_plan.SCRAPES}/{name}/"), [n for n in todo if n not in listings]))
     except s3.ERRORS as e:
         ui.fail(f"{e}", 3)
     indexes = {name: scrape_plan.scrape_index(listings[name]) for name in todo}
@@ -763,7 +763,7 @@ def _scrape_command(args):
                 metadata[name] = data
         fill = None
         if getattr(args, "fill_media", False):
-            have = _each(lambda name: s3.list_sizes(f"{scrape_plan.SCRAPES}/{name}/", sizes=False), [s["bucket"] for s in listed])
+            have = _each(lambda name: inventory.files(f"{scrape_plan.SCRAPES}/{name}/", sizes=False), [s["bucket"] for s in listed])
             fill = (set(screenscraper.MEDIA_MAP.values()) - skip, have)
         candidates = find_candidates(listed, roms, metadata, retry=args.retry, fill=fill)
         for s in listed:
@@ -810,7 +810,7 @@ def match_command(args):
     if "screenscraper" not in system:
         ui.fail(f"{name} has no ScreenScraper system id, so it can't be scraped", 2)
     try:
-        listing = s3.list_with_etags(name + "/")
+        listing = inventory.etags(name + "/")
     except s3.ERRORS as e:
         ui.fail(f"{e}", 3)
     if args.rom not in listing:
@@ -837,7 +837,7 @@ def match_command(args):
     try:
         data = load_metadata(name)
         replace = args.rom in data
-        media = s3.list_sizes(f"{scrape_plan.SCRAPES}/{name}/")
+        media = inventory.files(f"{scrape_plan.SCRAPES}/{name}/")
     except ValueError:
         ui.fail(f"{metadata_key(name)} isn't valid JSON", 3)
     except s3.ERRORS as e:

@@ -6,7 +6,7 @@ from unittest import mock
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 from helpers import DataDir  # noqa: E402
-from sync_roms import budget, sizecache  # noqa: E402
+from sync_roms import budget, inventory  # noqa: E402
 
 GBA = {"bucket": "gba", "name": "GBA"}
 SIZES = {"gba/A.zip": 100, "gba/B.zip": 200, "gba/C.zip": 400}
@@ -24,7 +24,7 @@ class Budget(DataDir):
         super().setUp()
         self.cache = {"gba/": SIZES, "scrapes/gba/": SCRAPES}
         for target, new in (("cached", lambda p: self.cache.get(p)), ):
-            p = mock.patch.object(sizecache, target, new)
+            p = mock.patch.object(inventory, target, new)
             p.start()
             self.addCleanup(p.stop)
         p = mock.patch("sync_roms.store.load_sets", lambda: [SET])

@@ -6,7 +6,7 @@ from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
 
 
-from . import runtime, s3, scrape_plan, store, ui, upload
+from . import inventory, runtime, s3, scrape_plan, store, ui, upload
 
 
 def bucket_roms(systems, all_files=False):
@@ -17,7 +17,7 @@ def bucket_roms(systems, all_files=False):
     """
     todo = systems if all_files else [s for s in systems if s.get("full_system") or store.listed(s)]
     with ThreadPoolExecutor(runtime.WORKERS) as ex:
-        listings = list(ex.map(lambda s: s3.list_sizes(s["bucket"] + "/") if all_files else store.list_system(s), todo))
+        listings = list(ex.map(lambda s: inventory.files(s["bucket"] + "/") if all_files else store.list_system(s), todo))
     roms = {s["bucket"]: set() for s in systems}
     for s, have in zip(todo, listings):
         keys = (k for k in have if not k.endswith("/")) if all_files else (k for k in store.available_keys(s, have) if k in have)
@@ -231,7 +231,7 @@ def upload_slot_labels(args, labels_dir):
         systems = [s for s in manifest["systems"] if s["folders"].get("slot")]
         roms = bucket_roms(systems, all_files=True)
         print("☁️  Listing what's already in scrapes/...")
-        existing = s3.list_sizes(scrape_plan.SCRAPES + "/")
+        existing = inventory.files(scrape_plan.SCRAPES + "/")
     except s3.ERRORS as e:
         ui.fail(f"{e}", 3)
     files, present, unmatched = plan_slot_upload(labels_dir, systems, roms, existing)
@@ -277,7 +277,7 @@ def upload_scrapes(args):
         print("📏 Listing the ROMs available in storage...")
         roms = bucket_roms(manifest["systems"])
         print("☁️  Listing what's already in scrapes/...")
-        existing = s3.list_sizes(scrape_plan.SCRAPES + "/")
+        existing = inventory.files(scrape_plan.SCRAPES + "/")
         remote_texts = s3.fetch_texts(_upload_text_keys(es_dir, existing, roms))
         print("🔎 Comparing...")
         plan = plan_upload(es_dir, roms, existing, remote_texts)
@@ -368,7 +368,7 @@ def clean_scrapes(args):
         print("📏 Listing every ROM in storage...")
         roms = bucket_roms(manifest["systems"], all_files=True)
         print("☁️  Listing scrapes/...")
-        existing = s3.list_sizes(scrape_plan.SCRAPES + "/")
+        existing = inventory.files(scrape_plan.SCRAPES + "/")
         remote_texts = s3.fetch_texts([k for k in text_keys(existing) if k.endswith("/metadata.json")])
     except s3.ERRORS as e:
         ui.fail(f"{e}", 3)

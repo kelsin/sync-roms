@@ -6,7 +6,7 @@ import shutil
 import sys
 import tempfile
 
-from . import s3, ui
+from . import inventory, s3, ui
 
 
 REPO_DATA = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
@@ -47,7 +47,7 @@ def key_title(key):
 
 def folder_keys(bucket):
     """Bucket keys of the files in a system's storage folder."""
-    return {k for k in s3.list_sizes(bucket + "/") if not k.endswith("/")}
+    return {k for k in inventory.files(bucket + "/") if not k.endswith("/")}
 
 
 # The process umask can only be read by setting it, so it is read once here, while a single thread is running: a
@@ -351,8 +351,8 @@ def list_system(s):
     """{key: size} of what a sync needs from a system's bucket folder. Reading from a folder (e.g. a network share),
     a system with a game list only stats those games instead of walking the whole folder."""
     if not s.get("full_system") and s3.read_root():
-        return s3.stat_sizes(listed(s))
-    return s3.list_sizes(s["bucket"] + "/")
+        return inventory.stat(listed(s))
+    return inventory.files(s["bucket"] + "/")
 
 
 def data_dir():

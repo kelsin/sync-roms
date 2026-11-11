@@ -8,7 +8,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 from botocore.exceptions import BotoCoreError, ClientError, NoCredentialsError
 
-from . import __version__, clean, commands, downloads, edit, external, m3u, picker, runtime, s3, scrape_plan, store, ui, usersettings, vita
+from . import __version__, clean, commands, downloads, edit, external, inventory, m3u, picker, runtime, s3, scrape_plan, store, ui, usersettings, vita
 
 
 SUBCOMMANDS = {  # name -> (usage, one-line summary)
@@ -26,6 +26,7 @@ SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "convert": ("[DIR]", "unzip archives and convert disc images to verified .chd"),
     "tools": ("install", "brew install the 7z and chdman that `convert` needs"),
     "mirror": ("[DIR] | use DIR | clear", "make or refresh a local copy of everything your lists reference"),
+    "cache": ("[update]", "show the storage cache every command reads file lists and sizes from, or update it"),
     "config": ("show|path", "show the effective settings and where each comes from"),
     "doctor": ("", "check the AWS profile, storage access, tools and your data files"),
     "check": ("", "validate cards.json, the device overlay and the sets"),
@@ -168,6 +169,20 @@ TOPICS = {
   sync-roms config show      the effective bucket, endpoint, profiles and mirror, and where each came from
   sync-roms config path      the data folder
 """,
+    "cache": """
+  sync-roms cache [update]
+
+  Every command reads what storage holds (file names, sizes and, for a bucket, ETags) from a cache in
+  ~/.sync-roms/storage-cache.json; only the files themselves are downloaded from storage. Nothing refreshes it on its
+  own: sync-roms's own uploads, moves and deletes keep it up to date, and after changing storage any other way run
+  `sync-roms cache update`.
+
+  cache          where the cache was read from, when it was last updated, and its files and size per folder
+  cache update   read all of storage again: one listing of a bucket, or a walk and a stat of every file in a folder
+
+  With no cache for the storage in use, the first command that reads storage offers to build it. Saying no is
+  remembered (storage_cache_declined in settings.json), and commands then list storage each run.
+""",
     "doctor": """
   sync-roms doctor
 
@@ -292,6 +307,7 @@ def main():
     except BotoCoreError as e:
         ui.fail(f"Couldn't reach S3: {e}\n   → check your network, ROMS_ENDPOINT, and `aws sts get-caller-identity --profile {runtime.PROFILE}`", 3)
     finally:
+        inventory.flush()
         clean.clean_dirs()
 
 
@@ -545,6 +561,8 @@ def dispatch_mode(args, mode):
         from . import scrape_online
         return True, scrape_online.set_credentials()
     usersettings.ensure_bucket()
+    if not args.json:  # the JSON document is all that reaches stdout: no question
+        inventory.prepare()
     if args.scrape:
         from . import scrape_online
         return True, scrape_online.scrape_command(args)
@@ -572,9 +590,6 @@ def dispatch_mode(args, mode):
             from . import mirroring
             print()
             mirroring.use_mirror(mirror, False)
-        if args.edit:  # the editor's background size refreshes must not hold up the exit
-            from . import sizecache
-            sizecache.exit_now(code)
         return True, code
     return False, None
 
@@ -721,6 +736,8 @@ def sync_card(args):
     listings, state = {}, {}  # listings: {system id: {key: size}}, kept until the system's games change
     avail, discs, size_cache = {}, {}, {}  # per system id: the keys to sync, their multi-disc keys, (bytes to download, total bytes)
 
+    sized = not runtime.ROOT or inventory.current() is not None  # sizes are known before picking
+
     def available(s):
         return avail[s["bucket"]]
 
@@ -728,10 +745,10 @@ def sync_card(args):
         return discs[s["bucket"]]
 
     def listing_of(s):
-        """{key: size} of a system's bucket folder. From a root folder, names only (a share is slow to stat):
-        a full system's files are listed, a game list needs no listing, and sizes are read for what gets synced."""
-        if runtime.ROOT:
-            return s3.list_sizes(s["bucket"] + "/", sizes=False) if s.get("full_system") else {}
+        """{key: size} of a system's bucket folder. From a root folder with no storage cache, names only (a share is slow
+        to stat): a full system's files are listed, a game list needs no listing, and sizes are read for what gets synced."""
+        if not sized:
+            return inventory.files(s["bucket"] + "/", sizes=False) if s.get("full_system") else {}
         return store.list_system(s)
 
     def sizes(s):
@@ -759,7 +776,7 @@ def sync_card(args):
         for s in systems:
             avail[s["bucket"]] = store.available_keys(s, listings[s["bucket"]])
             discs[s["bucket"]] = m3u.disc_keys(avail[s["bucket"]]) if disc_dir else ()
-        if runtime.ROOT:
+        if not sized:
             rows = [(f"{s['name']}  ({len(available(s))} roms)", bool(available(s)), 0, 0) for s in systems]
         else:
             rows = [(f"{s['name']}  ({len(available(s))} roms, {ui.human_size(total)})", bool(available(s)), need, total)
@@ -774,7 +791,7 @@ def sync_card(args):
             chosen = saved_idx
             break
         chosen = picker.pick_systems(rows, saved_idx if saved_idx and not state else present, state, editable=not args.dry_run,
-                                     **({"sizes": False} if runtime.ROOT else {}))
+                                     **({} if sized else {"sizes": False}))
         if not isinstance(chosen, tuple):
             if chosen and not args.dry_run:
                 store.update_card(card, systems=[systems[i]["bucket"] for i in chosen])
@@ -813,8 +830,8 @@ def sync_card(args):
         wanted = available(s)
         if not wanted:
             continue
-        if runtime.ROOT:  # sizes are read now, only for the ROMs being synced
-            listings[s["bucket"]] = s3.stat_sizes(wanted)
+        if not sized:  # sizes are read now, only for the ROMs being synced
+            listings[s["bucket"]] = inventory.stat(wanted)
         have = listings[s["bucket"]]
         dest = dest_of(s)
         disc_keys = discs_of(s)
@@ -851,7 +868,7 @@ def sync_card(args):
     bios_dests |= {("BIOS/" + f, dest_of(s), os.path.basename(f))
                    for s in bios_systems if available(s) and not unzip for f in s["bios"].get("rom_files", [])}
     bios_keys = sorted({k for k, _, _ in bios_dests})
-    bios_have = (s3.stat_sizes(bios_keys) if s3.read_root() else s3.list_sizes("BIOS/")) if bios_keys else {}
+    bios_have = (inventory.stat(bios_keys) if s3.read_root() else inventory.files("BIOS/")) if bios_keys else {}
     bios_jobs = []
     for k, folder, rel in sorted(bios_dests):
         if k in bios_have:
@@ -862,7 +879,7 @@ def sync_card(args):
     ui.report_missing([k for k in bios_keys if k not in bios_have], "BIOS file(s)")
     # Android cards also get storage's os/android/APKs/ files (APKs, the Obtainium app list) in an APKs/ folder to install from
     apk_dir = os.path.join(base, "APKs")
-    apk_jobs = ([(k, os.path.join(apk_dir, k[len(runtime.APKS_PREFIX):]), size) for k, size in sorted(s3.list_sizes(runtime.APKS_PREFIX, sizes=False).items())
+    apk_jobs = ([(k, os.path.join(apk_dir, k[len(runtime.APKS_PREFIX):]), size) for k, size in sorted(inventory.files(runtime.APKS_PREFIX, sizes=False).items())
                  if not k.endswith("/")] if layout_name == "esde" else [])
     apk_jobs = downloads.with_sizes(apk_jobs)
 
@@ -870,7 +887,7 @@ def sync_card(args):
     themes_dir = layout.get("themes_dir")
     theme_jobs = []
     if themes_dir:
-        for k, size in sorted(s3.list_sizes(runtime.THEMES_PREFIX, sizes=False).items()):
+        for k, size in sorted(inventory.files(runtime.THEMES_PREFIX, sizes=False).items()):
             rel = k[len(runtime.THEMES_PREFIX):]
             if k.endswith("/") or os.path.basename(rel) == ".DS_Store":
                 continue

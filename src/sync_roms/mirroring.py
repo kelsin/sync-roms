@@ -2,7 +2,7 @@
 import os
 from concurrent.futures import ThreadPoolExecutor
 
-from . import downloads, runtime, s3, scrape_plan, store, ui, usersettings
+from . import downloads, inventory, runtime, s3, scrape_plan, store, ui, usersettings
 
 
 MIRROR_PRUNE_ASK = 25  # delete more unreferenced mirror files than this (or over a tenth of it) only after confirming
@@ -14,9 +14,9 @@ def mirror_wanted(manifest):
     systems = manifest["systems"]
     todo = [s for s in systems if s.get("full_system") or store.listed(s)]
     with ThreadPoolExecutor(runtime.WORKERS) as ex:
-        others = [ex.submit(s3.list_sizes, prefix) for prefix in ("BIOS/", runtime.THEMES_PREFIX, f"{scrape_plan.SCRAPES}/esde/")]
+        others = [ex.submit(inventory.files, prefix) for prefix in ("BIOS/", runtime.THEMES_PREFIX, f"{scrape_plan.SCRAPES}/esde/")]
         roms = list(ex.map(store.list_system, todo))
-        scrapes = list(ex.map(lambda s: s3.list_sizes(f"{scrape_plan.SCRAPES}/{s['bucket']}/"), todo))
+        scrapes = list(ex.map(lambda s: inventory.files(f"{scrape_plan.SCRAPES}/{s['bucket']}/"), todo))
         bios, themes, esde = (f.result() for f in others)
     wanted = {}
     for s, have, scraped in zip(todo, roms, scrapes):

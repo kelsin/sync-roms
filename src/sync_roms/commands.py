@@ -5,11 +5,11 @@ import os
 import re
 import sys
 
-from . import external, picker, runtime, s3, setedit, store, ui, usersettings
+from . import external, inventory, picker, runtime, s3, setedit, store, ui, usersettings
 
 
 UNKNOWN_SHOWN = 8  # device ids named in an "unknown device" error
-COMMANDS = {"games", "sets", "cards", "config", "doctor", "check", "completion"}
+COMMANDS = {"games", "sets", "cards", "cache", "config", "doctor", "check", "completion"}
 
 
 class Parser(argparse.ArgumentParser):
@@ -124,7 +124,8 @@ def resolve_keys(system, patterns, listing=None):
             continue
         if listing is None:
             usersettings.ensure_bucket()
-            listing = [k for k in s3.list_sizes(system + "/") if not k.endswith("/")]
+            inventory.prepare()
+            listing = [k for k in inventory.files(system + "/") if not k.endswith("/")]
         if f"{system}/{name}" in listing:  # a real name that happens to contain * or ?
             keys.append(f"{system}/{name}")
             continue
@@ -400,6 +401,11 @@ def config_cmd(args):
     return 0
 
 
+def cache_cmd(args):
+    usersettings.ensure_bucket()
+    return inventory.update_command() if args.action == "update" else inventory.status_command()
+
+
 def check_sets(problems, systems):
     """Check every set file (repo and personal) and return the keys each one lists as {set id: [(system, key)]}.
 
@@ -575,7 +581,8 @@ def bucket_lister():
     if not runtime.ROOT and runtime.PROFILE == runtime.WRITE_PROFILE:
         ui.fail(f"--bucket-keys only reads storage; use the read-only profile, not {runtime.WRITE_PROFILE!r} "
                 "(--profile / ROMS_PROFILE)", 2)
-    return lambda system: {k for k in s3.list_sizes(system + "/") if not k.endswith("/")}
+    inventory.prepare()
+    return lambda system: {k for k in inventory.files(system + "/") if not k.endswith("/")}
 
 
 def check_notices(repo_systems):
@@ -684,6 +691,7 @@ def second_words():
     words["sets"] = ["edit"]
     words["cards"] = ["edit", "list", "new", "set", "rename", "delete"]
     words["config"] = ["show", "path"]
+    words["cache"] = ["update"]
     words["completion"] = ["bash", "zsh", "fish"]
     return words
 
@@ -778,6 +786,7 @@ def build_parser():
     p = csub.add_parser("delete", allow_abbrev=False); common(p, card=False); p.add_argument("name"); p.set_defaults(fn=cards_delete)
 
     p = sub.add_parser("config", allow_abbrev=False); common(p, card=False); p.add_argument("action", choices=["show", "path"], nargs="?", default="show"); p.set_defaults(fn=config_cmd)
+    p = sub.add_parser("cache", allow_abbrev=False); common(p, card=False); p.add_argument("action", choices=["update"], nargs="?"); p.set_defaults(fn=cache_cmd)
     p = sub.add_parser("doctor", allow_abbrev=False); common(p, card=False); p.set_defaults(fn=doctor_cmd)
     p = sub.add_parser("check", allow_abbrev=False); common(p, card=False); p.add_argument("--bucket-keys", action="store_true"); p.set_defaults(fn=check_cmd)
     p = sub.add_parser("completion", allow_abbrev=False); common(p, card=False); p.add_argument("shell", choices=["bash", "zsh", "fish", "list"])
