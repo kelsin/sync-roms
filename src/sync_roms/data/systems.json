@@ -2106,6 +2106,26 @@
   },
   {
     "name": "Nintendo 3DS",
+    "bucket": "3ds",
+    "ratio": "5:3",
+    "screenscraper": 17,
+    "folders": {
+      "esde": "n3ds",
+      "knulli": "3ds",
+      "onion": null,
+      "allium": null,
+      "muos": "3ds",
+      "slot": null,
+      "emudeck": "n3ds"
+    },
+    "muos_catalogue": "Nintendo 3DS",
+    "bios": {
+      "files": [],
+      "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
+    }
+  },
+  {
+    "name": "New Nintendo 3DS",
     "bucket": "n3ds",
     "ratio": "5:3",
     "screenscraper": 17,

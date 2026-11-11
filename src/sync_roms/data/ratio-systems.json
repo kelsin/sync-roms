@@ -1,7 +1,7 @@
 {
   "ratios": {
-    "3:5": ["fbneo", "mame", "nds", "n3ds"],
+    "3:5": ["fbneo", "mame", "nds", "3ds", "n3ds"],
     "1:1": ["gb", "gbc"]
   },
-  "dual_screen": ["nds", "n3ds"]
+  "dual_screen": ["nds", "3ds", "n3ds"]
 }

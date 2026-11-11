@@ -34,11 +34,11 @@ class Recommended(unittest.TestCase):
     def test_dual_screen_adds_ds_and_3ds(self):
         self.assertNotIn("nds", store.recommended_systems(dev("16:9"), SYSTEMS))
         got = store.recommended_systems(dev("16:9", "4:3"), SYSTEMS)
-        self.assertLessEqual({"nds", "n3ds"}, got)
+        self.assertLessEqual({"nds", "3ds", "n3ds"}, got)
 
     def test_3_5_overrides(self):
         got = store.recommended_systems(dev("3:5"), SYSTEMS)
-        self.assertLessEqual({"fbneo", "mame", "nds", "n3ds"}, got)
+        self.assertLessEqual({"fbneo", "mame", "nds", "3ds", "n3ds"}, got)
 
     def test_1_1_overrides(self):
         self.assertLessEqual({"gb", "gbc"}, store.recommended_systems(dev("1:1"), SYSTEMS))
