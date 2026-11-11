@@ -181,7 +181,9 @@ While typing a filter (or a note, which `w` opens in the game list): `^A` `^E` s
 3. Before downloading, a summary shows how many files will be fetched and their
    total size (e.g. `💿 ROMs: 120 to download (3.4 GB), 5 already present`).
 4. ROMs download into the layout's ROMs folder (`<system>/`), then the BIOS files for
-   the chosen systems download into its BIOS folder (RetroArch system-dir layout).
+   the chosen systems download into its BIOS folder (RetroArch system-dir layout). A system's
+   `rom_files` (MAME-style BIOS zips such as `gamate.zip`) are kept in storage's `BIOS/` too, but copied
+   into that system's ROM folder instead, while it has ROMs to sync.
    Each finished file prints as `[i/N] ✅ gba/Game.gba`. When the local folder name
    differs from storage's (e.g. a Knulli device), it prints
    `[i/N] ✅ genesis → megadrive/Game.md` (storage folder → local folder/file).

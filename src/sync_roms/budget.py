@@ -71,7 +71,7 @@ def system_usages(card, systems):
 def bios_usage(systems):
     """Bytes of the BIOS files the systems need (each file once), from the BIOS/ cache; count is how many are in
     storage. Partial while BIOS/ isn't cached. A file not in storage costs nothing."""
-    files = {f for s in systems for f in (s.get("bios") or {}).get("files", [])}
+    files = {f for s in systems for k in ("files", "rom_files") for f in (s.get("bios") or {}).get(k, [])}
     if not files:
         return Usage(0, 0, False)
     sizes = sizecache.cached("BIOS/")

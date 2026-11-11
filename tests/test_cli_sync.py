@@ -143,6 +143,46 @@ class SyncSmokeTest(RealDataDirGuard):
         self.run_sync(False, lambda rows, present, state, editable: [0], prepare=prepare, patches=patches)
         self.assertEqual([j[0] for j in bios], ["BIOS/scph1001.bin"])
 
+    def test_rom_files_go_in_the_rom_folder_and_are_not_extras(self):
+        """A system's rom_files come from BIOS/ into its ROM folder; one already there isn't offered for deletion."""
+        gamate = {"name": "Gamate", "bucket": "gamate", "folders": {"esde": "gamate"},
+                  "bios": {"files": [], "rom_files": ["gamate.zip"]}, "games": [{"bucket": "gamate/Game.zip"}]}
+        manifest = {**MANIFEST, "systems": [gamate]}
+
+        def prepare(card):
+            os.makedirs(os.path.join(card, "ROMs", "gamate"))
+            open(os.path.join(card, "ROMs", "gamate", "gamate.zip"), "w").close()
+        bios, asked = [], []
+        listing = {"gamate/": {"gamate/Game.zip": 5}, "BIOS/": {"BIOS/gamate.zip": 3}}
+        patches = ((store, {"load_manifest": lambda names=(): manifest}),
+                   (cli, {"free_space": lambda path: 10**9}),
+                   (cli.downloads, {"run_downloads": lambda todo, label, *a: (bios.extend(todo) if label == "BIOS" else None) or 0}),
+                   (cli.s3, {"list_sizes": lambda prefix, sizes=True: listing.get(prefix, {})}),
+                   (cli.ui, {"choose": lambda q, *a, **k: asked.append(q) or "n"}))
+        self.run_sync(False, prepare=prepare, patches=patches)
+        self.assertEqual([(k, os.path.relpath(p, os.path.dirname(os.path.dirname(os.path.dirname(p))))) for k, p, _ in bios],
+                         [("BIOS/gamate.zip", os.path.join("ROMs", "gamate", "gamate.zip"))])
+        self.assertFalse([q for q in asked if q.startswith("Delete these")], asked)
+
+    def test_rom_files_alone_are_extras_and_do_not_count_as_roms(self):
+        """With no games to sync, a system's ROM-folder BIOS file is removed and doesn't pull in its BIOS."""
+        gamate = {"name": "Tiger Gamate", "bucket": "gamate", "folders": {"esde": "gamate"},
+                  "bios": {"files": ["other.bin"], "rom_files": ["gamate.zip"]}, "games": []}
+        manifest = {**MANIFEST, "systems": [SYSTEM, gamate]}
+
+        def prepare(card):
+            os.makedirs(os.path.join(card, "ROMs", "gamate"))
+            open(os.path.join(card, "ROMs", "gamate", "gamate.zip"), "w").close()
+        bios, asked = [], []
+        patches = ((store, {"load_manifest": lambda names=(): manifest}),
+                   (cli, {"free_space": lambda path: 10**9}),
+                   (cli.downloads, {"run_downloads": lambda todo, label, *a: (bios.extend(todo) if label == "BIOS" else None) or 0}),
+                   (cli.s3, {"list_sizes": lambda prefix, sizes=True: {"BIOS/gamate.zip": 3, "BIOS/other.bin": 1} if prefix == "BIOS/" else list_sizes(prefix)}),
+                   (cli.ui, {"choose": lambda q, *a, **k: asked.append(q) or "n"}))
+        self.run_sync(False, prepare=prepare, patches=patches)
+        self.assertEqual(bios, [])
+        self.assertEqual([q for q in asked if q.startswith("Delete these")], ["Delete these 1 local file(s) (0 B)?"])
+
     def test_android_files_are_copied_to_apks_on_esde_cards(self):
         got = []
         patches = ((cli, {"free_space": lambda path: 10**9}),

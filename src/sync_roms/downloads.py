@@ -185,20 +185,22 @@ def walk_roms(dest, keep_dotfiles=False, skip_db=False):
         yield root, files
 
 
-def has_local_files(dest, skip_db=False):
-    """True if dest has any ROM file (frontend files and dotfiles are ignored)."""
-    return any(files for _, files in walk_roms(dest, skip_db=skip_db))
+def has_local_files(dest, skip_db=False, ignore=()):
+    """True if dest has any ROM file (frontend files and dotfiles are ignored, and so are the ignore names at its top)."""
+    return any(f for root, files in walk_roms(dest, skip_db=skip_db) for f in files
+               if not (f in ignore and os.path.normpath(root) == os.path.normpath(dest)))
 
 
-def find_extras(dest, wanted_keys, unzip=False, skip_db=False, disc_dir=None, discs=()):
+def find_extras(dest, wanted_keys, unzip=False, skip_db=False, disc_dir=None, discs=(), keep=()):
     """Local files under dest that aren't in the system's ROM list (frontend files and dotfiles are ignored;
     a .psvita file is kept while its .zip is listed).
 
     unzip: the layout extracts archives flat, so a listed archive's extracted ROM isn't an extra.
     disc_dir: the layout's folder for multi-disc games' discs (discs: their keys); its files are checked too.
+    keep: paths inside dest that are expected too (BIOS files that go in the ROM folder).
     """
     rels = [rom_rel(k, unzip, disc_dir, discs) for k in wanted_keys]
-    expected = {os.path.normpath(r) for r in rels}
+    expected = {os.path.normpath(r) for r in rels} | {os.path.normpath(r) for r in keep}
     stems = {os.path.splitext(r)[0] for r in rels if r.lower().endswith(external.ARCHIVE_EXTS)} if unzip else set()
     extras = []
     walks = list(walk_roms(dest, skip_db=skip_db))

@@ -83,6 +83,11 @@ class Budget(DataDir):
         card = {"layout": "other", "games": {"gba": [g("gba/A.zip")], "gb": [g("gb/T.gb")]}}
         self.assertEqual(tuple(budget.card_usage(card, [gba, gb, ps1])), (100 + 7 + 17, 2, False))  # psx unpicked
 
+    def test_bios_usage_counts_rom_folder_bios(self):
+        self.cache["BIOS/"] = {"BIOS/gamate.zip": 5, "BIOS/a.bin": 2}
+        gamate = {"bucket": "gamate", "bios": {"files": ["a.bin"], "rom_files": ["gamate.zip"]}}
+        self.assertEqual(tuple(budget.bios_usage([gamate])), (7, 2, False))
+
     def test_bios_uncached_is_partial(self):
         gba = {**GBA, "bios": {"files": ["gba_bios.bin"]}}
         u = budget.card_usage({"layout": "other", "games": {"gba": [g("gba/A.zip")]}}, [gba])

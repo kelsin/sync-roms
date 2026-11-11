@@ -804,6 +804,10 @@ def sync_card(args):
     def dest_of(s):
         return os.path.join(roms_dir, s["folders"][layout_name])
 
+    def rom_bios_names(s):
+        """The names the system's ROM-folder BIOS files have on the card."""
+        return {os.path.basename(f) for f in s["bios"].get("rom_files", [])}
+
     rom_jobs, missing, extras, moved = [], [], [], set()
     for s in chosen:
         wanted = available(s)
@@ -829,23 +833,30 @@ def sync_card(args):
     # a system with nothing to sync is always scanned, selected or not: whatever it has on the card is unwanted
     chosen_ids = {s["bucket"] for s in chosen}
     dropped_dests = {os.path.join(roms_dir, s["folders"][layout_name]) for s in dropped if s["folders"].get(layout_name)}
-    dest_keys, dest_discs = defaultdict(list), defaultdict(set)
+    # a system's rom_files are BIOS files that go in its ROM folder (MAME-style BIOS zips), kept while it has ROMs to sync
+    dest_keys, dest_discs, dest_bios = defaultdict(list), defaultdict(set), defaultdict(set)
     for t in systems:
         dest_keys[dest_of(t)] += available(t)
         dest_discs[dest_of(t)].update(discs_of(t))
+        if available(t) and not unzip:
+            dest_bios[dest_of(t)].update(rom_bios_names(t))
     for dest in sorted({dest_of(s) for s in systems if s["bucket"] in chosen_ids or not available(s)} | dropped_dests):
-        extras += downloads.find_extras(dest, dest_keys[dest], unzip, onion, disc_dir, dest_discs[dest])
+        extras += downloads.find_extras(dest, dest_keys[dest], unzip, onion, disc_dir, dest_discs[dest], dest_bios[dest])
 
     # BIOS for every system with ROMs already on the card too, even when this sync doesn't touch that system
     bios_systems = chosen + [s for s in systems if s["bucket"] not in chosen_ids
-                             and downloads.has_local_files(dest_of(s), onion)]
-    bios_keys = sorted({"BIOS/" + f for s in bios_systems for f in s["bios"]["files"]})
+                             and downloads.has_local_files(dest_of(s), onion, rom_bios_names(s))]
+    # (bucket key, folder, path in it) of each BIOS file: in the BIOS folder, or in the ROM folder of a system with ROMs to sync
+    bios_dests = {("BIOS/" + f, bios_dir, f) for s in bios_systems for f in s["bios"]["files"]}
+    bios_dests |= {("BIOS/" + f, dest_of(s), os.path.basename(f))
+                   for s in bios_systems if available(s) and not unzip for f in s["bios"].get("rom_files", [])}
+    bios_keys = sorted({k for k, _, _ in bios_dests})
     bios_have = (s3.stat_sizes(bios_keys) if s3.read_root() else s3.list_sizes("BIOS/")) if bios_keys else {}
     bios_jobs = []
-    for k in bios_keys:
+    for k, folder, rel in sorted(bios_dests):
         if k in bios_have:
             try:
-                bios_jobs.append((k, s3.safe_join(bios_dir, k[len("BIOS/"):]), bios_have[k]))
+                bios_jobs.append((k, s3.safe_join(folder, rel), bios_have[k]))
             except ValueError as e:
                 print(ui.yellow(f"  ⚠️  skipping {e}"))
     ui.report_missing([k for k in bios_keys if k not in bios_have], "BIOS file(s)")
