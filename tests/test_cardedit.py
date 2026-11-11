@@ -47,6 +47,7 @@ class Pure(unittest.TestCase):
         text, over = cardedit.header(U(10 ** 9, 1, True), None)
         self.assertTrue(text.endswith("not sized (sync-roms cache update)"))
         self.assertFalse(over)
+        self.assertEqual(cardedit.header(U(10 ** 9, 1, False), None, 0)[0], "💾 1 GB used · 1 file(s) · ⬇️  0 B to download")
 
     def test_silent_thread_hides_warn_and_fail_output(self):
         err = io.StringIO()
@@ -437,9 +438,52 @@ class Flow(DataDir):
             kw["status"]([False] * 4)
             kw["status"]([True, False, False, False])  # Emerald (3) and the GBA BIOS (16)
             return [False] * 4
-        with mock.patch.object(cardedit, "status_of", side_effect=lambda u, c: seen.append(u.bytes)):
+        with mock.patch.object(cardedit, "status_of", side_effect=lambda u, c, fetch=None: seen.append(u.bytes)):
             self.run_system(step)
         self.assertEqual(seen, [1002, 1021])
+
+    def test_download_preview_counts_only_roms_not_on_the_card(self):
+        self.card(games={"gba": [g("gba/Ruby.zip")], "gb": [g("gb/Red.gb")]})
+        self.cache = {"gba/": self.files["gba/"], "gb/": self.files["gb/"], "scrapes/gba/": {}, "scrapes/gb/": {},
+                      "BIOS/": {}}
+        on_card = {"gba/Ruby.zip"}
+
+        def to_fetch(s, keys):
+            return {k for k in keys if k not in on_card}
+        statuses = []
+
+        def system_list(labels, kw):
+            statuses.append(kw["status"](None))
+            return None
+        script = Script(system_list)
+        with mock.patch.object(picker, "filter_list", script), contextlib.redirect_stdout(io.StringIO()):
+            cardedit.edit_card("c", (DEVICE, "esde"), to_fetch)
+        self.assertTrue(statuses[0].endswith("⬇️  2 B to download"), statuses)  # Red (2); Ruby is on the card
+
+        def games(labels, kw):
+            statuses.append(kw["status"]([True, False, True, False]))  # Emerald (3) too
+            return [False] * 4
+        script = Script(games)
+        with mock.patch.object(picker, "filter_list", script), contextlib.redirect_stdout(io.StringIO()):
+            cardedit.edit_system("c", GBA, (DEVICE, "esde"), to_fetch)
+        self.assertTrue(statuses[1].endswith("⬇️  5 B to download"), statuses)
+
+    def test_collections_screen_shows_the_card_status_after_each_toggle(self):
+        favs = {"id": "favs", "name": "Favs", "games": [{"system": "gba", "bucket": "gba/Zelda.zip", "title": "Zelda"}]}
+        self.card()
+        self.cache = {"gba/": self.files["gba/"], "gb/": self.files["gb/"], "scrapes/gba/": {}, "scrapes/gb/": {},
+                      "BIOS/": {}}
+        statuses = []
+
+        def step(labels, kw):
+            statuses.append(kw["status"](None))
+            return (" ", 0) if len(statuses) == 1 else None
+        with mock.patch.object(collections, "load_collections", lambda: [favs]), \
+                mock.patch.object(picker, "filter_list", Script(step, step)), contextlib.redirect_stdout(io.StringIO()):
+            cardedit.pick_collections("c", {"gba"}, lambda: cardedit.card_status("c", (DEVICE, "esde"), [GBA, GB],
+                                                                                 lambda s, keys: set(keys)))
+        self.assertIn("0 file(s) · ⬇️  0 B to download", statuses[0])
+        self.assertIn("1 file(s) · ⬇️  7 B to download", statuses[1])
 
     def test_picked_game_not_in_storage_is_not_still_sizing(self):
         self.card(games={"gba": [g("gba/Ruby.zip"), g("gba/Gone.zip")]})

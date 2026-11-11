@@ -281,12 +281,3 @@ class Keys(unittest.TestCase):
         self.assertEqual(got, [False, False, False, True])
         self.assertEqual(run_list(["G", " ", "\n"], self.LABELS, multi=True, hidden=[False, False, False, True]),
                          [False, False, True, False])
-
-    def test_pick_systems_returns_indexes_and_actions(self):
-        rows = [("a", True, 1, 2), ("b", False, 0, 0), ("c", True, 1, 2)]
-        import curses
-        for keys, want in ((["j", " ", "\n"], [2]), (["j", "e"], ("games", 2)), (["D"], ("clear", None)), (["q"], None)):
-            with mock.patch.object(picker.ui, "require_terminal"), mock.patch.object(curses, "curs_set"), \
-                    mock.patch.object(curses, "use_default_colors"), mock.patch.object(curses, "has_colors", return_value=False), \
-                    mock.patch.object(curses, "wrapper", side_effect=lambda f, k=keys: f(Screen(k))):
-                self.assertEqual(picker.pick_systems(rows, editable=True), want)

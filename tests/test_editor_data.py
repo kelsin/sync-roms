@@ -81,14 +81,10 @@ class Schemas(unittest.TestCase):
         self.assertEqual(self.load("collections.schema.json")["required"], ["name", "games"])
 
 
-class CheckSystemsKey(Cmd):
-    def test_card_systems_must_be_known_system_ids(self):
-        self.write_json("cards.json", {"c": {"device": "full", "layout": "esde", "systems": ["gba"]}})
-        self.assertEqual(commands.check_data(), [])
+class CheckCards(Cmd):
+    def test_an_old_systems_selection_is_ignored(self):
         self.write_json("cards.json", {"c": {"device": "full", "layout": "esde", "systems": ["nope", 3]}})
-        self.assertEqual(len(commands.check_data()), 2)
-        self.write_json("cards.json", {"c": {"device": "full", "layout": "esde", "systems": "gba"}})
-        self.assertEqual(len(commands.check_data()), 1)
+        self.assertEqual(commands.check_data(), [])
 
     def test_files_in_the_data_folder_sets_are_not_checked(self):
         self.write_json("cards.json", {"c": {"device": "full", "layout": "esde"}})
@@ -155,17 +151,16 @@ class CheckBucketKeys(Cmd):
 
 class Hints(unittest.TestCase):
     def test_hints_fit_a_narrow_terminal_and_lead_with_the_main_keys(self):
-        hints = [picker.SYSTEMS_HINT, picker.systems_hint(True), picker.MULTI_HINT, picker.SINGLE_HINT,
+        hints = [picker.MULTI_HINT, picker.SINGLE_HINT,
                  edit.MENU_HINT, edit.GAMES_HINT, cardedit.LIST_HINT, cardedit.GAMES_HINT, cardedit.SETS_HINT,
                  cardedit.META_HINT, cardedit.VALUES_HINT, collectionedit.GAMES_HINT]
         for h in hints:
             self.assertLessEqual(picker.cell_width(h), 80, h)
-        self.assertTrue(picker.systems_hint(False).startswith("Space toggle · Enter go"))
         self.assertTrue(picker.MULTI_HINT.startswith("Space toggle · Enter done"))
         self.assertTrue(edit.MENU_HINT.startswith("Enter open"))
 
 
-class SystemsPickerKeys(unittest.TestCase):
+class MultiPickerKeys(unittest.TestCase):
     def run_keys(self, keys):
         import curses
 
@@ -181,19 +176,18 @@ class SystemsPickerKeys(unittest.TestCase):
 
             def __getattr__(self, name):
                 return lambda *a, **k: None
-        rows = [("a", True, 1, 1), ("b", True, 1, 1), ("c", True, 1, 1)]
-        with mock.patch.object(picker.ui, "require_terminal"), \
-                mock.patch.object(curses, "curs_set"), mock.patch.object(curses, "use_default_colors"), \
+        with mock.patch.object(curses, "curs_set"), mock.patch.object(curses, "use_default_colors"), \
                 mock.patch.object(curses, "has_colors", return_value=False), \
                 mock.patch.object(curses, "wrapper", side_effect=lambda f: f(Screen())):
-            return picker.pick_systems(rows)
+            result = picker.filter_list("t", ["a", "b", "c"], multi=True)
+        return [i for i, on in enumerate(result) if on]
 
     def test_home_and_end_move_the_cursor(self):
         import curses
         self.assertEqual(self.run_keys([curses.KEY_END, " ", "\n"]), [2])
         self.assertEqual(self.run_keys([curses.KEY_END, curses.KEY_HOME, " ", "\n"]), [0])
 
-    def test_o_shows_only_selected_systems(self):
+    def test_o_shows_only_selected_rows(self):
         import curses
         # select a and c, press o: b is hidden, so Down from a lands on c; space unselects it
         keys = [" ", curses.KEY_END, " ", "o", curses.KEY_HOME, curses.KEY_DOWN, " ", "\n"]

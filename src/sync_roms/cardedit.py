@@ -33,9 +33,10 @@ def size_text(n):
             return f"{n:.1f}".rstrip("0").rstrip(".") + f" {unit}"
 
 
-def header(usage, capacity):
+def header(usage, capacity, fetch=None):
     """(status text, over budget) for a card's budget.Usage against its capacity in bytes (None: no size known).
-    A partial usage is "not sized": there is no storage cache to size it from."""
+    A partial usage is "not sized": there is no storage cache to size it from. fetch: bytes of ROMs not on the card
+    yet (None: not known, as outside a sync)."""
     used = size_text(usage.bytes)
     if capacity is None:
         text, over = f"💾 {used} used", False
@@ -44,6 +45,8 @@ def header(usage, capacity):
         text = f"💾 {used} / {size_text(capacity)} · " + (
             f"⚠️  {size_text(usage.bytes - capacity)} over" if over else f"{size_text(capacity - usage.bytes)} free")
     text += f" · {usage.count} file(s)"
+    if fetch is not None:
+        text += f" · ⬇️  {size_text(fetch)} to download"
     if usage.partial:
         text += f" · not sized ({inventory.UPDATE_HINT})"
     return text, over
@@ -52,9 +55,9 @@ def header(usage, capacity):
 WARN_AT, FULL_AT = 0.70, 0.90  # the header is green below WARN_AT of the card, yellow below FULL_AT, then red
 
 
-def status_of(usage, capacity):
+def status_of(usage, capacity, fetch=None):
     """header() as a filter_list status: green until 70% of the card, yellow until 90%, red above (and when over budget)."""
-    text, over = header(usage, capacity)
+    text, over = header(usage, capacity, fetch)
     if capacity is None:
         return text
     share = usage.bytes / capacity
@@ -186,8 +189,10 @@ def toggle_full(name, bucket):
     store.update_card(name, games=store.sorted_list(games))
 
 
-def edit_card(name, setup=None):
-    """The card's system list. setup: (device or None for Full, layout) to edit with instead of the saved one."""
+def edit_card(name, setup=None, to_fetch=None):
+    """The card's system list. setup: (device or None for Full, layout) to edit with instead of the saved one.
+    to_fetch(system, keys): the keys not on the card yet, when editing from a sync; the status then shows how much
+    a sync would download."""
     catalog = store.load_catalog()
     cards = store.load_cards()
     setup = setup or picker.saved_setup(cards.get(name), catalog["devices"], catalog["layouts"], name)
@@ -217,6 +222,7 @@ def edit_card(name, setup=None):
             card = card_entry(name, setup)
             usages = budget.system_usages(card, systems)
             view["total"] = budget.card_usage(card, systems, usages)
+            view["fetch"] = budget.card_fetch_bytes(card, systems, to_fetch) if to_fetch else None
             return system_labels(card, systems, recommended, usages)
 
         labels, extras = work_out()
@@ -233,7 +239,7 @@ def edit_card(name, setup=None):
         i = picker.filter_list(f"💳 {name} — its systems (⭐ for the device) · 🎁 Surprise {'on' if on else 'off'}",
                                labels, extras=extras, cursor=pos,
                                hotkeys=(FULL_KEY, COLLECTIONS_KEY, SURPRISE_KEY, CLEAR_ALL_KEY), hint=LIST_HINT,
-                               status=lambda _state: status_of(view["total"], capacity),
+                               status=lambda _state: status_of(view["total"], capacity, view["fetch"]),
                                on_hotkey=on_hotkey)
         if i is None:
             return
@@ -242,7 +248,8 @@ def edit_card(name, setup=None):
             if key == FULL_KEY:
                 toggle_full(name, systems[pos]["bucket"])
             elif key == COLLECTIONS_KEY:
-                pick_collections(name, {s["bucket"] for s in can_play(catalog["systems"], setup)})
+                pick_collections(name, {s["bucket"] for s in can_play(catalog["systems"], setup)},
+                                 lambda: card_status(name, setup, systems, to_fetch))
             elif key == SURPRISE_KEY:
                 toggle_surprise(name)
             elif key == CLEAR_ALL_KEY:
@@ -250,7 +257,15 @@ def edit_card(name, setup=None):
                     store.update_card(name, games={}, **({"excluded": {}} if store.card_excluded(name) else {}))
             continue
         pos = i
-        edit_system(name, systems[i], setup)
+        edit_system(name, systems[i], setup, to_fetch)
+
+
+def card_status(name, setup, systems, to_fetch=None):
+    """status_of for the card as saved now, over the systems the card editor lists."""
+    card = card_entry(name, setup)
+    total = budget.card_usage(card, systems)
+    fetch = budget.card_fetch_bytes(card, systems, to_fetch) if to_fetch else None
+    return status_of(total, budget.card_capacity(card), fetch)
 
 
 def toggle_surprise(name):
@@ -268,9 +283,10 @@ def toggle_surprise(name):
     return surprise.enabled(entry)
 
 
-def pick_collections(name, playable):
+def pick_collections(name, playable, card_status=None):
     """Toggle the collections a card includes (Space/Tab in place, Enter toggles and reopens on that row), saving each
-    toggle at once. Each is shown with how many of its games are on systems in playable (system buckets the card syncs)."""
+    toggle at once. Each is shown with how many of its games are on systems in playable (system buckets the card syncs).
+    card_status(): the card's size status, worked out again after each toggle."""
     found = colls.load_collections()
     if not found:
         edit.note(ui.yellow("ℹ️  No collections yet: make one in sync-roms collections edit "
@@ -285,9 +301,11 @@ def pick_collections(name, playable):
         n = len(colls.collection_games(c)) - p
         labels.append(f"{c['name']}  ({p} playable" + (f", {n} not playable)" if n else ")"))
     extras = [[] for _ in found]
+    shown = {}
 
     def mark():
         extras[:] = [[("  ✅ on the card", "green")] if c["id"] in ids else [] for c in found]
+        shown["status"] = card_status() if card_status else None
 
     def toggle(idx):
         cid = found[idx]["id"]
@@ -305,7 +323,8 @@ def pick_collections(name, playable):
     pos = 0
     while True:
         i = picker.filter_list(f"💖 Collections on {name} (Space/Enter toggles)", labels, extras=extras, cursor=pos,
-                               hotkeys=(" ", "\t"), on_hotkey=on_hotkey)
+                               hotkeys=(" ", "\t"), on_hotkey=on_hotkey,
+                               status=(lambda _state: shown["status"]) if card_status else None)
         if i is None:
             return
         toggle(i)
@@ -357,9 +376,9 @@ def pick_set(system, sets, games, titles, catalog, current=None, synced=lambda: 
     return shown[i][0]
 
 
-def edit_system(name, system, setup):
+def edit_system(name, system, setup, to_fetch=None):
     """A card's games of one system: the whole storage folder, searchable, filterable to a set's games and by scraped
-    metadata. Saves to cards.json when left; returns whether anything changed."""
+    metadata. Saves to cards.json when left; returns whether anything changed. to_fetch: as for edit_card."""
     bucket = system["bucket"]
     cards = store.load_cards()
     raw = store.card_games(name, cards)
@@ -402,6 +421,7 @@ def edit_system(name, system, setup):
         picked = [x for x in others if budget.picked(usages[x["bucket"]])]
         work["bios"] = (budget.bios_usage(picked), budget.bios_usage(picked + [system]))
         work["costs"], work["partial"] = budget.game_costs(card, system, [r[1] for r in rows])
+        work["fetch"] = budget.card_fetch_bytes(card, others, to_fetch) if to_fetch else None
 
     work_out()
 
@@ -504,7 +524,8 @@ def edit_system(name, system, setup):
                            or bool(picked) and work["partial"])
                 total = budget.Usage(work["others"].bytes + mine + bios.bytes, work["others"].count + len(picked),
                                      partial)
-                return status_of(total, capacity)
+                fetch = None if to_fetch is None else work["fetch"] + budget.fetch_bytes(system, picked, to_fetch)
+                return status_of(total, capacity, fetch)
 
             def note_text(i):
                 game = next((g for g in s["games"] if g.get("bucket") == keys[i]), None)

@@ -223,11 +223,12 @@ def _pools(chosen_systems, taken):
     return pools
 
 
-def run_surprise(card_name, setup, chosen_systems, interactive, dry_run, rng=None, today=None):
+def run_surprise(card_name, setup, chosen_systems, interactive, dry_run, rng=None, today=None, to_fetch=None):
     """The sync step: replace some or all of a card's surprises (asking which when interactive), fill the empty slots,
-    save the card and the history, then open the card editor when interactive. A dry run changes nothing and only
-    previews the empty slots; when storage can't be listed nothing is replaced or saved. Returns the card's surprises
-    after the step (on a dry run, the saved ones)."""
+    save the card and the history, then open the card editor when interactive (with Surprise off too). A dry run
+    changes nothing and only previews the empty slots; when storage can't be listed nothing is replaced or saved.
+    Returns the card's surprises after the step (on a dry run, the saved ones). to_fetch: passed to the card editor
+    for its download preview."""
     rng = rng or random.Random()
     today = today or datetime.date.today()
     cards = store.load_cards()
@@ -237,6 +238,9 @@ def run_surprise(card_name, setup, chosen_systems, interactive, dry_run, rng=Non
         if entry.get("surprises") and not dry_run:
             entry.pop("surprises")
             store.write_cards(cards)
+        if interactive and not dry_run:
+            from . import cardedit  # cardedit imports much of the package
+            cardedit.edit_card(card_name, setup, to_fetch)
         return []
     names = {s["bucket"]: s["name"] for s in chosen_systems}
     saved = entry.get("surprises")
@@ -281,5 +285,5 @@ def run_surprise(card_name, setup, chosen_systems, interactive, dry_run, rng=Non
                                         "card": card_name, "date": today.isoformat()} for x in new], today)
     if interactive:
         from . import cardedit  # cardedit imports much of the package
-        cardedit.edit_card(card_name, setup)
+        cardedit.edit_card(card_name, setup, to_fetch)
     return result

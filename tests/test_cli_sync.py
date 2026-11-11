@@ -31,7 +31,7 @@ class SyncSmokeTest(RealDataDirGuard):
         patch.start()
         self.addCleanup(patch.stop)
 
-    def run_sync(self, dry_run, picks=lambda rows, present, state, editable: [0], edit_card_system=None, prepare=None, patches=()):
+    def run_sync(self, dry_run, prepare=None, patches=()):
         with tempfile.TemporaryDirectory() as card:
             if prepare:
                 prepare(card)
@@ -42,15 +42,13 @@ class SyncSmokeTest(RealDataDirGuard):
                         (usersettings, {"ensure_bucket": lambda: None, "load_settings": lambda: {}}),
                         (store, {"load_manifest": lambda names=(): MANIFEST, "load_cards": lambda: {}, "save_card": lambda *a: None}),
                         (s3, {"list_sizes": list_sizes, "fetch_texts": lambda keys: {}}),
-                        (cli.picker, {"saved_setup": lambda *a: (None, "esde"), "pick_systems": picks}),
+                        (cli.picker, {"saved_setup": lambda *a: (None, "esde")}),
                         (cli.downloads, {"run_downloads": lambda *a: 0}),
                         (cli.clean, {"clean_android_media": lambda *a: None}),
                         (cli.surprise, {"run_surprise": lambda *a, **k: []})) + tuple(patches):
                     for name, value in kw.items():
                         st.enter_context(mock.patch.object(target, name, value))
                 st.enter_context(mock.patch.object(cli.clean, "_clean_root", None))
-                if edit_card_system:
-                    st.enter_context(mock.patch.object(cli.edit, "edit_card_system", edit_card_system))
                 st.enter_context(contextlib.redirect_stdout(io.StringIO()))
                 return cli.sync()
 
@@ -60,17 +58,24 @@ class SyncSmokeTest(RealDataDirGuard):
     def test_real_run_with_a_scrape_layout(self):
         self.assertEqual(self.run_sync(False), 0)
 
-    def test_games_key_edits_the_cards_games_then_reopens_the_picker(self):
-        answers, edited, states = iter([("games", 0), [0]]), [], []
+    def test_every_system_with_games_is_synced_and_the_editor_gets_what_is_not_on_the_card(self):
+        empty = {"name": "GCE Vectrex", "bucket": "vectrex", "folders": {"esde": "vectrex"}, "bios": {"files": []}, "games": []}
+        manifest = {**MANIFEST, "systems": [SYSTEM, empty]}
+        calls = []
 
-        def picks(rows, present, state, editable):
-            states.append(state)
-            state.setdefault("sel", [False])
-            return next(answers)
-        self.assertEqual(self.run_sync(False, picks, lambda *a: edited.append(a) or True), 0)
-        self.assertEqual([a[1] for a in edited], ["gba"])
-        self.assertIs(states[0], states[1])
-        self.assertTrue(states[1]["sel"][0])
+        def prepare(card):
+            os.makedirs(os.path.join(card, "ROMs", "gba"))
+            with open(os.path.join(card, "ROMs", "gba", "Game.zip"), "wb") as f:
+                f.write(b"x" * 5)
+
+        def run_surprise(card, setup, chosen, interactive, dry_run, to_fetch=None):
+            calls.append(([s["bucket"] for s in chosen], to_fetch(SYSTEM, ["gba/Game.zip", "gba/New.zip"])))
+            return []
+        patches = ((store, {"load_manifest": lambda names=(): manifest}),
+                   (cli.surprise, {"run_surprise": run_surprise}),
+                   (cli.inventory, {"cached": lambda prefix: {"gba/Game.zip": 5, "gba/New.zip": 7}}))
+        self.assertEqual(self.run_sync(False, prepare=prepare, patches=patches), 0)
+        self.assertEqual(calls, [(["gba"], {"gba/New.zip"})])
 
     def test_card_with_no_picks_syncs_no_games_and_says_so(self):
         empty = {**SYSTEM, "games": []}
@@ -83,11 +88,6 @@ class SyncSmokeTest(RealDataDirGuard):
         lines.clear()
         self.assertEqual(self.run_sync(False, patches=((cli.ui, {"dim": lambda text: lines.append(text) or text}),)), 0)
         self.assertFalse(any("no games picked" in x for x in lines))
-
-    def test_dry_run_picker_is_not_editable(self):
-        flags = []
-        self.run_sync(True, lambda rows, present, state, editable: flags.append(editable) or [0])
-        self.assertEqual(flags, [False])
 
     def old_rom(self, size):
         def prepare(card):
@@ -111,7 +111,7 @@ class SyncSmokeTest(RealDataDirGuard):
         self.assertFalse(any("Try anyway" in q for q in asked), asked)
 
     def test_roms_of_systems_with_nothing_to_sync_are_extras(self):
-        """A system with no games listed, selected or not, keeps no ROMs on the card."""
+        """A system with no games listed keeps no ROMs on the card."""
         empty = {"name": "GCE Vectrex", "bucket": "vectrex", "folders": {"esde": "vectrex"}, "bios": {"files": []}, "games": []}
         manifest = {**MANIFEST, "systems": [SYSTEM, empty]}
 
@@ -119,13 +119,11 @@ class SyncSmokeTest(RealDataDirGuard):
             for rel in ("gba/Game.zip", "vectrex/Old.zip"):
                 os.makedirs(os.path.join(card, "ROMs", os.path.dirname(rel)), exist_ok=True)
                 open(os.path.join(card, "ROMs", rel), "w").close()
-        for picked in ([0], [0, 1]):
-            with self.subTest(picked=picked):
-                asked = []
-                patches = ((store, {"load_manifest": lambda names=(): manifest}),
-                           (cli.ui, {"choose": lambda q, *a, **k: asked.append(q) or "n"}))
-                self.run_sync(False, lambda rows, present, state, editable: picked, prepare=prepare, patches=patches)
-                self.assertEqual([q for q in asked if q.startswith("Delete these")], ["Delete these 1 local file(s) (0 B)?"])
+        asked = []
+        patches = ((store, {"load_manifest": lambda names=(): manifest}),
+                   (cli.ui, {"choose": lambda q, *a, **k: asked.append(q) or "n"}))
+        self.run_sync(False, prepare=prepare, patches=patches)
+        self.assertEqual([q for q in asked if q.startswith("Delete these")], ["Delete these 1 local file(s) (0 B)?"])
 
     def test_bios_of_unchosen_systems_with_roms_on_the_card_is_synced(self):
         """BIOS is added for a system whose ROMs are on the card even when this sync doesn't pick it."""
@@ -141,7 +139,7 @@ class SyncSmokeTest(RealDataDirGuard):
                    (cli.downloads, {"run_downloads": lambda todo, label, *a: (bios.extend(todo) if label == "BIOS" else None) or 0}),
                    (cli.s3, {"list_sizes": lambda prefix, sizes=True: {"BIOS/scph1001.bin": 5} if prefix == "BIOS/" else list_sizes(prefix)}),
                    (cli.ui, {"choose": lambda q, *a, **k: "n"}))
-        self.run_sync(False, lambda rows, present, state, editable: [0], prepare=prepare, patches=patches)
+        self.run_sync(False, prepare=prepare, patches=patches)
         self.assertEqual([j[0] for j in bios], ["BIOS/scph1001.bin"])
 
     def test_rom_files_go_in_the_rom_folder_and_are_not_extras(self):

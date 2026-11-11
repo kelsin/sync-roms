@@ -61,10 +61,8 @@ class BashCompletion(unittest.TestCase):
         self.assertEqual(self.complete("sync-roms", "--device", "f"), ["full"])
         self.assertIn("RGSP", self.complete("sync-roms", "--card", "R"))
 
-    def test_systems_is_a_comma_list(self):
-        self.assertEqual(self.complete("sync-roms", "--systems", "g"), ["gba", "gbc"])
-        self.assertEqual(self.complete("sync-roms", "--systems", "gba,sn"), ["gba,snes"])
-        self.assertEqual(self.complete("sync-roms", "--systems", "gba,gb"), ["gba,gba", "gba,gbc"])
+    def test_system_completes_system_ids(self):
+        self.assertEqual(self.complete("sync-roms", "--system", "g"), ["gba", "gbc"])
 
     def test_commands_and_flags(self):
         self.assertIn("games", self.complete("sync-roms", ""))
@@ -84,7 +82,7 @@ class OtherShells(unittest.TestCase):
     def test_fish_completes_values_and_every_flag(self):
         text = script_for("fish")
         self.assertIn('-l card -x -a "(sync-roms completion list cards)"', text)
-        self.assertIn('-l systems -x -a "all (sync-roms completion list systems)"', text)
+        self.assertIn('-l system -x -a "(sync-roms completion list systems)"', text)
         for flag in commands.all_flags():
             if flag.startswith("--"):
                 self.assertIn(f"-l {flag[2:]}", text)

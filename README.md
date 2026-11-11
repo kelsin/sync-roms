@@ -136,29 +136,10 @@ Then:
    `src/sync_roms/data/device-systems.json`, adjustable with your own overlay; only those are listed) and its firmwares (`firmwares` in
    `src/sync_roms/data/devices.json`, see `layouts`; the first is highlighted). Or choose Full (every system) and any firmware. Systems with no
    folder in the chosen firmware are skipped.
-2. **Toggle systems** — for a device, its recommended systems that have ROMs start on.
-   Otherwise systems whose local folder already has files start on
-   (dotfiles ignored), everything else starts off. Systems with no downloadable
-   ROMs are hidden and never pre-selected; press `z` to show them (sorted last, dimmed). BIOS files still
-   download for any system you select. The status bar shows a running total for the
-   selected systems: how much is still left to download (files you already have
-   are skipped) and the full size, e.g. `18 selected · 12.3 GB to download (86.1 GB total)`.
-   ROMs only; BIOS files aren't counted.
-
-   | Key | Action |
-   | --- | --- |
-   | `↑` `↓` / `j` `k` / `^N` `^P` | move |
-   | `g` `G` / `Home` `End` | top / bottom |
-   | `PgUp` `PgDn` / `^V` | page |
-   | `/` | filter by name (`Enter` keeps it, `Esc` clears it); see [List keys](#list-keys) |
-   | `space` `tab` | toggle system |
-   | `a` | all on, or all off if they already are (visible systems) |
-   | `o` | cycle the view: all / only selected / only changed |
-   | `z` | show/hide systems with 0 ROMs |
-   | `e` | edit the highlighted system's games for this card (same list as `games edit`), then return here. Not shown with `--dry-run` |
-   | `D` | clear this card's games after asking |
-   | `enter` | start downloading |
-   | `q` / `Esc` | quit |
+2. **Edit the card** — every system with games picked on the card syncs. After the [Surprise](#surprise) step,
+   a sync in a terminal opens the [card editor](#editing-the-game-list---edit) on the card; `Esc` there goes on with the sync.
+   Its bottom line also shows how much a sync would download (`⬇️  12.3 GB to download`: ROMs not on the card yet;
+   scraped files and BIOS aren't counted), updated as you add games, sets and collections.
 
 ### List keys
 
@@ -181,13 +162,13 @@ While typing a filter (or a note, which `w` opens in the game list): `^A` `^E` s
 3. Before downloading, a summary shows how many files will be fetched and their
    total size (e.g. `💿 ROMs: 120 to download (3.4 GB), 5 already present`).
 4. ROMs download into the layout's ROMs folder (`<system>/`), then the BIOS files for
-   the chosen systems download into its BIOS folder (RetroArch system-dir layout). A system's
+   the card's systems download into its BIOS folder (RetroArch system-dir layout). A system's
    `rom_files` (MAME-style BIOS zips such as `gamate.zip`) are kept in storage's `BIOS/` too, but copied
    into that system's ROM folder instead, while it has ROMs to sync.
    Each finished file prints as `[i/N] ✅ gba/Game.gba`. When the local folder name
    differs from storage's (e.g. a Knulli device), it prints
    `[i/N] ✅ genesis → megadrive/Game.md` (storage folder → local folder/file).
-5. Scraped data for the chosen systems' games is installed from storage's `scrapes/` folder (see
+5. Scraped data for the card's games is installed from storage's `scrapes/` folder (see
    [Scraped data](#scraped-data---upload-scrapes---clean-scrapes)), converted for the layout:
 
    | Firmware | Media | Metadata |
@@ -282,11 +263,11 @@ The old flags keep working. Flags that make no sense for a command (`--dry-run` 
 
 ### Unattended use
 
-`--yes` answers every prompt with its default (deleting local files stays "no"). A first sync can skip both pickers:
+`--yes` answers every prompt with its default (deleting local files stays "no"). A first sync can skip the setup picker:
 
 ```bash
-sync-roms sync /Volumes/SD --device rg35xx-sp --layout knulli --systems all --yes
-sync-roms sync /Volumes/SD --systems gba,snes --dry-run     # preview a saved card
+sync-roms sync /Volumes/SD --device rg35xx-sp --layout knulli --yes
+sync-roms sync /Volumes/SD --dry-run     # preview a saved card
 ```
 
 Without a terminal and without those flags the pickers fail with the flag to use. Prompts read from a closed stdin take their default.
@@ -317,10 +298,10 @@ On `esde` and `emudeck` cards every Vita zip in `psvita/` gets a `.psvita` file 
 | `--replace` | `upload roms` only: make the storage folder match `DIR`. Renamed files are moved by content and left-over storage files are listed so you pick which to delete |
 | `--devices` | List the supported devices with their chip and the number of systems each one gets, then exit |
 | `-y`, `--yes` | Answer prompts with their default |
-| `--device ID\|full`, `--layout NAME`, `--systems IDS\|all` | Sync: choose the setup and systems without the pickers (the setup is saved for the card) |
+| `--device ID\|full`, `--layout NAME` | Sync: choose the setup without the picker (it is saved for the card) |
 | `--size SIZE` | `cards new` / `cards set`: the card's size as people read it (`256`, `512GB`, `1TB`), saved in `cards.json` and shown by `cards list` and on sync |
 | `--no-clean` | Sync: skip the end-of-run card tidy |
-| `--json` | `devices`, `games list`, `cards list`, `diff` and `sync --dry-run`: one JSON document on stdout, nothing else (pass `--device`/`--layout`/`--systems` so no picker is needed; `diff` also needs `--system ID` unless the folder is named after a system) |
+| `--json` | `devices`, `games list`, `cards list`, `diff` and `sync --dry-run`: one JSON document on stdout, nothing else (pass `--device`/`--layout` so no picker is needed; `diff` also needs `--system ID` unless the folder is named after a system) |
 | `--card NAME` | `games` commands: the card whose games to change (required; see Editing from scripts) |
 | `--system ID` | `diff`: the system to compare with, instead of the picker. `scrape`: only that storage folder |
 | `--scrape` | Scrape the ROMs that have no metadata from ScreenScraper (the old form of `scrape`; see Scraping from ScreenScraper) |
@@ -478,7 +459,8 @@ sync-roms --edit
    are marked ⭐; each system with picks shows how many games and how much space they take (ROMs plus the scraped
    files the card's firmware installs). The bottom line shows the card's total (games, scrapes and the BIOS files of
    the systems it syncs) against its size and the free space, in green below 70% of the card, yellow below 90% and
-   red above (or over). Sizes come from the storage cache (see [Storage cache](#storage-cache)); without one they show
+   red above (or over). Opened from a sync, it also shows how much of the card's ROMs aren't on it yet
+   (`⬇️  … to download`). Sizes come from the storage cache (see [Storage cache](#storage-cache)); without one they show
    `…` and the total says "not sized". `/` filters, `Enter` opens a system, `l` adds a collection to the card (each shows how many of its games are playable on the card's device, and `Space`/`Enter` toggles the whole collection), `f` makes it a full system (every file in its folder; `f` again brings the
    game list back), `u` turns the card's [Surprise](#surprise) on or off (the title says which). Games save to `cards.json` as you leave a
    system (the previous file is kept as `cards.json.bak`). `Esc` goes back to the menu.
@@ -592,9 +574,9 @@ the systems recommended for the card's device and three from the others, spread 
 candidates passes its slots on. Games never surprised, then games surprised before, then games another card currently
 holds are used in that order. Full systems are left out, and so is any game already on the card.
 
-- **In a sync** the step runs after the systems are chosen. Interactively it first asks which of the card's current
+- **In a sync** the step runs before anything downloads, over the systems with games picked. Interactively it first asks which of the card's current
   surprises to replace (`Esc` there behaves as it does in any picker: it keeps them all), fills the empty slots, and opens
-  the card editor so you can adjust the card. Without a terminal, with `--yes` or `--json` it replaces all of them. `--dry-run`
+  the card editor so you can adjust the card (with Surprise off, the editor still opens). Without a terminal, with `--yes` or `--json` it replaces all of them. `--dry-run`
   changes no surprises: it only says whether it would ask or replace all, previews the picks for empty slots and saves nothing.
   The mirror is refreshed a second time only when this step or the editor changed the card's picks.
 - **In the card editor**, `u` in the system list turns Surprise on or off for the card (off removes its surprises at the next
@@ -674,9 +656,9 @@ An old `~/.sync-roms/sizes.json` is no longer read; delete it.
   `{"miyoo-flip-v2": {"add": ["psx"], "remove": ["gba"]}}` (system ids as in `systems.json`; the package's
   order is kept and notes always come from the package). An old full-copy `device-systems.json` from before the overlay does nothing; delete it. BIOS files are always `BIOS/<file>` in storage.
 - System folders in storage use the ES-DE system name (e.g. `gba/`, `dreamcast/`).
-- Reads each chosen system's files from the storage cache and compares file sizes, so only
+- Reads each synced system's files from the storage cache and compares file sizes, so only
   missing or changed files are downloaded (for `full_system` systems, every file in the folder) (8 in parallel, via boto3).
-- Local files in a chosen system's folder that are no longer in the card's games
+- Local files in a synced system's folder that are no longer in the card's games
   are listed and deleted only after you confirm (default **no**; `--dry-run` shows them).
   Folders of systems you didn't pick, BIOS files and dotfiles are never touched.
   Files frontends add to ROM folders are ignored too (never counted as "already has files",
@@ -687,7 +669,7 @@ An old `~/.sync-roms/sizes.json` is no longer read; delete it.
   `NGP` = Neo Geo Pocket + Color). A folder's expected files are the
   union of all those systems' lists, so syncing one never offers the other's ROMs for deletion.
 - Slot can't read archives or subfolders, so a Slot sync extracts each downloaded `.zip` (and `.7z`, which needs `7z`, see `--install-tools`) into the system folder and deletes the archive. It assumes the archive is named like the ROM inside; an archive whose ROM has another name is downloaded again each sync.
-- Every BIOS file listed for a chosen system is downloaded; there is no required/optional distinction.
+- Every BIOS file listed for a synced system is downloaded; there is no required/optional distinction.
   BIOS lists come from the ES-DE default libretro cores, so they may not match what Knulli
   or Onion use; on Knulli check Game Settings > Missing Bios Check.
 
