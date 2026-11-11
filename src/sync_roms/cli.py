@@ -953,14 +953,20 @@ def sync_card(args):
         """Write the card's collections as the frontend's custom collections (ES-DE, Knulli)."""
         if layout_name not in frontend.FRONTEND_LAYOUTS:
             return
-        entry = store.load_cards().get(card) or {}
+        entry = store.load_cards().get(card)
+        entry = entry if isinstance(entry, dict) else {}
+
+        def names(field):
+            """The card's list field as its text items (anything else stored there is ignored)."""
+            values = entry.get(field)
+            return [v for v in values if isinstance(v, str)] if isinstance(values, list) else []
         by_id = {c["id"]: c for c in colls.load_collections()}
-        card_colls = [by_id[i] for i in entry.get("collections", ()) if i in by_id]
+        card_colls = [by_id[i] for i in names("collections") if i in by_id]
         surprises = [x for x in entry.get("surprises") or () if isinstance(x, dict)
                      and isinstance(x.get("system"), str) and isinstance(x.get("bucket"), str)]
         if surprise.enabled(entry) and surprises:  # as saved now: the card editor may have changed them
             card_colls.append({"name": surprise.COLLECTION, "games": surprises})
-        owned = entry.get("frontend_collections", [])
+        owned = names("frontend_collections")
         if not card_colls and not owned:
             return
         coming = {(s["bucket"], downloads.rom_rel(k, False)) for s in chosen

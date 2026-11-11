@@ -282,6 +282,26 @@ class SyncFlowTest(unittest.TestCase):
         self.assertEqual(code, 0)
         self.assertEqual(self.after, "%ROMPATH%/gba/Game.zip\n")
 
+    def run_with_user_files(self, cards):
+        """A sync of the card entry cards with the user's own custom-F.cfg, custom-a.cfg and custom-Favs.cfg on it;
+        returns (exit code, which of them are left)."""
+        names = ("F", "a", "Favs")
+
+        def prepare(card_dir):
+            for name in names:
+                path = frontend.collection_path("esde", card_dir, name)
+                os.makedirs(os.path.dirname(path), exist_ok=True)
+                open(path, "w").close()
+        code, *_ = self.run_sync(cards=cards, prepare=prepare, colls=[FAVS], after=lambda d: [
+            n for n in names if os.path.exists(frontend.collection_path("esde", d, n))])
+        return code, self.after
+
+    def test_malformed_card_collection_fields_delete_nothing(self):
+        for cards in ({"frontend_collections": None}, {"frontend_collections": "Favs"}, {"collections": None},
+                      {"collections": "favs", "frontend_collections": [None, 5, ""]}):
+            with self.subTest(cards=cards), contextlib.redirect_stderr(io.StringIO()):
+                self.assertEqual(self.run_with_user_files(cards), (0, ["F", "a", "Favs"]))
+
     def surprise_calls(self, result=(), **kw):
         calls = []
         fake = lambda card, setup, chosen, interactive, dry_run: calls.append((interactive, dry_run, [s["bucket"] for s in chosen])) or list(result)  # noqa: E731

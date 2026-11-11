@@ -71,7 +71,7 @@ def plan_collections(layout_name, base, wanted, owned):
         plan["enable"].add(name)
     plan["owned"] = sorted(plan["enable"])
     for name in dict.fromkeys(owned):
-        if safe_name(name) != name:
+        if not name or safe_name(name) != name:
             plan["warnings"].append(f"ignoring the recorded collection name {name!r}; it isn't a valid name")
             continue
         if name in plan["enable"]:

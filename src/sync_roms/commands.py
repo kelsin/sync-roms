@@ -343,6 +343,9 @@ def games_import(args):
                     surprise_keys.setdefault(system, []).append(text.strip())
                     changes.append(("+", f"@surprises {text.strip()}"))
                 continue
+            if not text.strip():
+                ui.warn(f"skipping {line!r}: expected @{field} VALUE")
+                continue
             value = CARD_HOOKS.get(field, (lambda text: text, str))[0](text.strip())
             if value is not None:
                 fields.setdefault(field, []).append(value)

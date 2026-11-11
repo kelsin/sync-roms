@@ -110,6 +110,14 @@ class Plan(unittest.TestCase):
         self.assertEqual(len(plan["warnings"]), 1)
         self.assertTrue(os.path.exists(outside))
 
+    def test_an_empty_owned_name_deletes_nothing(self):
+        blank = frontend.collection_path("esde", self.base, "")
+        self.put(blank, "keep\n")
+        plan = frontend.plan_collections("esde", self.base, {}, [""])
+        self.assertEqual((plan["deletes"], plan["disable"], plan["owned"]), ([], set(), []))
+        frontend.apply_collections(plan, "esde", self.base)
+        self.assertTrue(os.path.exists(blank))
+
     def test_a_delete_that_already_vanished_is_fine(self):
         gone = frontend.collection_path("esde", self.base, "Old")
         plan = {"writes": [], "deletes": [gone], "enable": set(), "disable": {"Old"}, "owned": [], "warnings": []}

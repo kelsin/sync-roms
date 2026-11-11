@@ -86,6 +86,13 @@ class GamesTest(CardCmd):
         entry = self.read("cards.json")["SD"]
         self.assertEqual((entry["collections"], entry["frontend_collections"]), (["favs"], ["Favs"]))
 
+    def test_import_skips_an_empty_frontend_collection_name(self):
+        path = self.path("list.txt")
+        with open(path, "w") as f:
+            f.write("@frontend_collections\n@frontend_collections   \n@frontend_collections Favs\n")
+        self.assertEqual(self.run_cmd("games", "import", path)[0], 0)
+        self.assertEqual(self.read("cards.json")["SD"]["frontend_collections"], ["Favs"])
+
     def test_export_carries_surprise_state(self):
         self.write_json("cards.json", {"SD": {"device": "full", "layout": "esde", "surprise": False, "surprises": [
             {"system": "gba", "bucket": "gba/A (USA).zip", "title": "A (USA)"}], "games": {"gba": [{"bucket": "gba/B.zip"}]}}})
