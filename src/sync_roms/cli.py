@@ -8,7 +8,8 @@ from concurrent.futures import ThreadPoolExecutor
 
 from botocore.exceptions import BotoCoreError, ClientError, NoCredentialsError
 
-from . import __version__, clean, commands, downloads, edit, external, frontend, m3u, picker, runtime, s3, scrape_plan, store, ui, usersettings, vita
+from . import __version__, budget, cardedit, clean, commands, downloads, edit, external, frontend, m3u, mirroring, picker, runtime, s3, scrape_plan, store
+from . import surprise, ui, usersettings, vita
 from . import collections as colls
 
 
@@ -685,7 +686,6 @@ def sync_card(args):
     print(ui.bold("🎮 sync-roms") + ui.dim(f"  {s3.access()}"))
     mirror = usersettings.load_settings().get("mirror")
     if mirror:
-        from . import mirroring
         mirroring.use_mirror(mirror, args.dry_run)
     print("📄 Fetching manifests...")
     card = os.path.basename(base) or base
@@ -760,7 +760,8 @@ def sync_card(args):
             size_cache[bucket] = (total_bytes(downloads.plan_downloads(jobs, unzip, disc_dir)), total)
         return size_cache[bucket]
 
-    while True:
+    def relist():
+        """List the systems not listed yet and work out every system's keys to sync."""
         todo = [s for s in systems if s["bucket"] not in listings]
         with ThreadPoolExecutor(runtime.WORKERS) as ex:
             listings.update(zip((s["bucket"] for s in todo),
@@ -769,6 +770,9 @@ def sync_card(args):
         for s in systems:
             avail[s["bucket"]] = store.available_keys(s, listings[s["bucket"]])
             discs[s["bucket"]] = m3u.disc_keys(avail[s["bucket"]]) if disc_dir else ()
+
+    while True:
+        relist()
         if runtime.ROOT:
             rows = [(f"{s['name']}  ({len(available(s))} roms)", bool(available(s)), 0, 0) for s in systems]
         else:
@@ -809,6 +813,28 @@ def sync_card(args):
         print(ui.yellow("👋 Nothing selected."))
         return 0
     chosen = [systems[i] for i in chosen]
+    interactive = not (ui.ASSUME_YES or args.json) and ui.has_terminal()
+    surprises = surprise.run_surprise(card, (device, layout_name), chosen, interactive, args.dry_run)
+    if not args.dry_run:  # the step (and the card editor it opens) may have changed the card's games
+        if runtime._mirror_root:  # the new picks reach the mirror before they are copied from it
+            root = runtime._mirror_root
+            try:
+                with mirroring.storage_reads():
+                    failed = mirroring.refresh_mirror(root)
+                if failed:
+                    ui.warn(f"{failed} mirror download(s) failed; files missing from the mirror will fail to copy. Re-run to retry")
+            except (*s3.ERRORS, SystemExit) as e:  # S3 failed, or the folder isn't a mirror
+                ui.warn(f"Couldn't refresh the mirror ({e}); using what it has")
+        chosen_ids = {s["bucket"] for s in chosen}
+        before = {s["bucket"]: store.listed(s) for s in systems}
+        systems = reload_systems()
+        for s in systems:
+            if store.listed(s) != before.get(s["bucket"]):
+                listings.pop(s["bucket"], None)
+                size_cache.pop(s["bucket"], None)
+        relist()
+        chosen = [s for s in systems if s["bucket"] in chosen_ids]
+        saved = store.load_cards().get(card)
     print(ui.bold(f"\n🔎 Checking {len(chosen)} system(s) against storage..."))
 
     def dest_of(s):
@@ -928,6 +954,8 @@ def sync_card(args):
         entry = store.load_cards().get(card) or {}
         by_id = {c["id"]: c for c in colls.load_collections()}
         card_colls = [by_id[i] for i in entry.get("collections", ()) if i in by_id]
+        if surprise.enabled(entry) and surprises:
+            card_colls.append({"name": surprise.COLLECTION, "games": surprises})
         owned = entry.get("frontend_collections", [])
         if not card_colls and not owned:
             return
@@ -951,6 +979,13 @@ def sync_card(args):
             store.update_card(card, frontend_collections=plan["owned"])
         if plan["writes"]:
             print(ui.green(f"💖 Wrote {len(plan['writes'])} collection(s) for {layout['label']}"))
+
+    capacity = budget.card_capacity(saved or {}) if surprise.enabled(saved or {}) else None
+    if capacity:
+        used = budget.card_usage(cardedit.card_entry(card, (device, layout_name)), systems).bytes
+        if used > capacity:
+            ui.warn(f"{card}'s picks take {cardedit.size_text(used)} of its {saved['size']}: "
+                    f"{cardedit.size_text(used - capacity)} over")
 
     if args.dry_run:
         print(ui.yellow("\n🧪 Dry run — nothing downloaded or deleted"))

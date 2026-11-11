@@ -10,7 +10,7 @@ from unittest import mock
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 
-from sync_roms import cli, clean, downloads, s3, scrape_plan, store, ui, usersettings  # noqa: E402
+from sync_roms import budget, cli, clean, downloads, frontend, mirroring, runtime, s3, scrape_plan, store, ui, usersettings  # noqa: E402
 from sync_roms import collections as collections_mod  # noqa: E402
 from helpers import MANIFEST, list_sizes  # noqa: E402
 
@@ -152,16 +152,16 @@ class PlainOutputTest(unittest.TestCase):
 
 class SyncFlowTest(unittest.TestCase):
     def run_sync(self, cards=None, yes=True, dry_run=False, plan=None, picks=None, stale=(), extra=(),
-                 manifest=MANIFEST, setup=(None, "esde"), files=(), colls=(), after=None):
+                 manifest=MANIFEST, setup=(None, "esde"), files=(), colls=(), after=None, settings=None, prepare=None):
         updates, picked = [], []
         with tempfile.TemporaryDirectory() as card_dir:
-            card = os.path.basename(card_dir)
+            card = self.card = os.path.basename(card_dir)
             argv = ["sync-roms", card_dir] + (["--yes"] if yes else []) + (["--dry-run"] if dry_run else [])
             cards = {card: v for v in [cards or {}]} if cards is not None else {}
             with contextlib.ExitStack() as st:
                 for target, kw in (
                         (sys, {"argv": argv}),
-                        (usersettings, {"ensure_bucket": lambda: None, "load_settings": lambda: {}}),
+                        (usersettings, {"ensure_bucket": lambda: None, "load_settings": lambda: dict(settings or {})}),
                         (store, {"load_manifest": lambda names=(): manifest, "load_cards": lambda: cards,
                                  "save_card": lambda *a: None,
                                  "update_card": lambda name, **v: updates.append(v)}),
@@ -182,6 +182,12 @@ class SyncFlowTest(unittest.TestCase):
                                                    lambda layout, systems, data, rels, dest_of, es_dir, present, base:
                                                    {"jobs": [], "gamelists": {}, "writes": []}))
                 st.enter_context(mock.patch.object(scrape_plan, "apply_scrape_plan", lambda *a: 0))
+                st.enter_context(mock.patch.object(cli.surprise, "run_surprise", lambda *a, **k: []))
+                st.enter_context(mock.patch.object(runtime, "_mirror_root", None))
+                for target, name, value in extra:
+                    st.enter_context(mock.patch.object(target, name, value))
+                if prepare:
+                    prepare(card_dir)
                 for s in stale:
                     open(os.path.join(card_dir, s), "w").close()
                 for rel in files:
@@ -261,6 +267,59 @@ class SyncFlowTest(unittest.TestCase):
                       setup=(device, "esde"), files=["ROMs/gba/Game.zip", "ROMs/psx/FF7.chd"],
                       after=lambda d: read_from(d, "ES-DE", "collections", "custom-Favs.cfg"))
         self.assertEqual(self.after, "%ROMPATH%/gba/Game.zip\n")
+
+    def surprise_calls(self, result=(), **kw):
+        calls = []
+        fake = lambda card, setup, chosen, interactive, dry_run: calls.append((interactive, dry_run, [s["bucket"] for s in chosen])) or list(result)  # noqa: E731
+        return calls, self.run_sync(extra=((cli.surprise, "run_surprise", fake),), **kw)
+
+    def test_yes_runs_surprise_unattended(self):
+        calls, _ = self.surprise_calls(yes=True)
+        self.assertEqual(calls, [(False, False, ["gba"])])
+
+    def test_dry_run_describes_the_saved_surprises_and_saves_nothing(self):
+        saved = [{"system": "gba", "bucket": "gba/Game.zip", "title": "Game"}]
+        calls, (code, out, updates, *_) = self.surprise_calls(result=saved, cards={"surprises": saved}, yes=True, dry_run=True)
+        self.assertEqual(calls, [(False, True, ["gba"])])
+        self.assertEqual(code, 0)
+        self.assertIn("custom-Surprise.cfg (1 game(s))", out)
+        self.assertFalse([u for u in updates if "surprises" in u or "frontend_collections" in u])
+
+    def test_terminal_run_is_interactive(self):
+        with mock.patch.object(ui, "has_terminal", return_value=True):
+            calls, _ = self.surprise_calls(cards={"systems": ["gba"]}, yes=False)
+        self.assertEqual(calls[0][:2], (True, False))
+
+    def test_over_capacity_warns_and_goes_on(self):
+        big = budget.Usage(2 * 10 ** 9, 1, False)
+        warned = []
+        code, *_ = self.run_sync(cards={"size": "1 GB"}, extra=(
+            (cli.surprise, "run_surprise", lambda *a: []), (cli.budget, "card_usage", lambda *a, **k: big),
+            (ui, "warn", warned.append)))
+        self.assertEqual(code, 0)
+        self.assertIn(f"{self.card}'s picks take 2 GB of its 1 GB: 1 GB over", warned)
+
+    def test_mirror_is_refreshed_again_after_the_surprise_step(self):
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        root = tmp.name
+        open(os.path.join(root, runtime.MIRROR_MARKER), "w").close()
+        seen = []
+        code, *_ = self.run_sync(settings={"mirror": root}, extra=(
+            (cli.surprise, "run_surprise", lambda *a: []),
+            (mirroring, "refresh_mirror", lambda r, dry_run=False: seen.append((r, runtime._mirror_root)) or 0)))
+        self.assertEqual(seen, [(root, None), (root, None)])  # use_mirror, then after the step: both read storage
+
+    def test_surprise_off_removes_its_collection_file(self):
+        def prepare(card_dir):
+            self.cfg = frontend.collection_path("esde", card_dir, "Surprise")
+            os.makedirs(os.path.dirname(self.cfg), exist_ok=True)
+            open(self.cfg, "w").close()
+        code, _, updates, *_ = self.run_sync(cards={"surprise": False, "frontend_collections": ["Surprise"]}, prepare=prepare)
+        self.assertEqual(code, 0)
+        self.assertFalse(os.path.exists(self.cfg))
+        last = [u for u in updates if "frontend_collections" in u][-1]
+        self.assertNotIn("Surprise", last["frontend_collections"])
 
 
 if __name__ == "__main__":
