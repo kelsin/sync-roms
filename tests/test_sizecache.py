@@ -33,7 +33,8 @@ class SizeCacheTest(helpers.DataDir):
         self.fake = FakeStore({"gba/a.zip": 1, "gba/b.zip": 2, "gba/c.zip": 3})
         self.now = 1000.0
         for target, value in (("list_sizes", self.fake.list_sizes), ("stat_sizes", self.fake.stat_sizes),
-                              ("location", lambda: "/nas")):
+                              ("location", lambda: "/nas"),
+                              ("read_root", lambda: "/nas")):
             p = mock.patch.object(s3, target, value)
             p.start()
             self.addCleanup(p.stop)
@@ -81,6 +82,52 @@ class SizeCacheTest(helpers.DataDir):
         self.assertIn(mock.call("gba/"), ls.call_args_list)  # older than 30 days: full listing with sizes
         self.assertEqual(self.fake.stats, [])
 
+    def test_incremental_keeps_built_and_old_built_rebuilds(self):
+        sizecache.refresh("gba/")
+        self.now += 100
+        self.fake.files["gba/d.zip"] = 4
+        sizecache.refresh("gba/")
+        self.assertEqual(self.read("sizes.json")["prefixes"]["gba/"]["built"], 1000.0)
+        self.now = 1000.0 + sizecache.MAX_AGE + 1
+        self.fake.files["gba/b.zip"] = 99
+        with mock.patch.object(sizecache, "_sample", lambda pop, n: []):
+            sizecache.refresh("gba/")
+        self.assertEqual(self.read("sizes.json")["prefixes"]["gba/"]["built"], self.now)
+        self.assertEqual(sizecache.cached("gba/")["gba/b.zip"], 99)
+
+    def test_missing_built_counts_as_old(self):
+        self.write_json("sizes.json", {"source": "/nas", "prefixes": {"gba/": {"files": {"gba/a.zip": 50}}}})
+        self.assertEqual(sizecache.cached("gba/"), {"gba/a.zip": 50})
+        self.now = sizecache.MAX_AGE + 1
+        with mock.patch.object(sizecache, "_sample", lambda pop, n: []):
+            self.assertEqual(sizecache.refresh("gba/")["gba/a.zip"], 1)
+
+    def test_bucket_mode_never_stats(self):
+        def boom(keys):
+            raise TypeError("stat_sizes needs a folder")
+        with mock.patch.object(s3, "read_root", lambda: None), mock.patch.object(s3, "stat_sizes", boom):
+            sizecache.refresh("gba/")
+            del self.fake.files["gba/a.zip"]
+            self.fake.files["gba/d.zip"] = 4
+            self.assertEqual(sizecache.refresh("gba/"), {"gba/b.zip": 2, "gba/c.zip": 3, "gba/d.zip": 4})
+            self.fake.files["gba/b.zip"] = 20  # a changed size is caught by the spot check
+            self.assertEqual(sizecache.refresh("gba/")["gba/b.zip"], 20)
+
+    def test_interleaved_refreshes_of_two_prefixes_both_survive(self):
+        self.fake.files["nes/z.zip"] = 7
+        real = self.fake.list_sizes
+        done = []
+
+        def listing(prefix, sizes=True):
+            if prefix == "gba/" and not done:
+                done.append(1)
+                sizecache.refresh("nes/")  # finishes while gba is still being listed
+            return real(prefix, sizes)
+        with mock.patch.object(s3, "list_sizes", listing):
+            sizecache.refresh("gba/")
+        self.assertEqual(sizecache.cached("nes/"), {"nes/z.zip": 7})
+        self.assertEqual(len(sizecache.cached("gba/")), 3)
+
     def test_corrupt_file_is_empty(self):
         with open(self.path("sizes.json"), "w") as f:
             f.write("{nope")
@@ -94,7 +141,7 @@ class SizeCacheTest(helpers.DataDir):
         self.assertIsNone(sizecache.cached("gba/"))
 
     def test_other_source_is_empty(self):
-        self.write_json("sizes.json", {"source": "s3://other", "prefixes": {"gba/": {"at": 1, "files": {"gba/x": 9}}}})
+        self.write_json("sizes.json", {"source": "s3://other", "prefixes": {"gba/": {"at": 1, "built": 1, "files": {"gba/x": 9}}}})
         self.assertIsNone(sizecache.cached("gba/"))
         sizecache.refresh("gba/")
         self.assertEqual(self.read("sizes.json")["source"], "/nas")

@@ -23,15 +23,20 @@ def _path():
 
 
 def _load():
-    """{prefix: {"at": time, "files": {key: size}}} for the current source; {} when missing, corrupt or another source."""
+    """{prefix: {"built": time, "files": {key: size}}} for the current source; {} when missing, corrupt or another source.
+    A missing or invalid "built" becomes 0, which counts as old."""
     try:
         with open(_path()) as f:
             data = json.load(f)
         if data["source"] != s3.location():
             return {}
-        prefixes = data["prefixes"]
-        return {p: e for p, e in prefixes.items()
-                if isinstance(e, dict) and isinstance(e.get("at"), (int, float)) and isinstance(e.get("files"), dict)}
+        entries = {}
+        for p, e in data["prefixes"].items():
+            if isinstance(e, dict) and isinstance(e.get("files"), dict):
+                built = e.get("built")
+                ok = isinstance(built, (int, float)) and not isinstance(built, bool)
+                entries[p] = {"built": built if ok else 0, "files": e["files"]}
+        return entries
     except (OSError, ValueError, KeyError, TypeError, AttributeError):
         return {}
 
@@ -42,29 +47,35 @@ def cached(prefix):
     return dict(entry["files"]) if entry else None
 
 
-def _save(entries, prefix, files):
-    entries[prefix] = {"at": _clock(), "files": files}
-    store.write_json(_path(), {"source": s3.location(), "prefixes": entries})
+_lock = threading.Lock()
+
+
+def _save(prefix, files, built):
+    """Store one prefix. Re-reads the file under the lock so a refresh of another prefix that finished meanwhile is kept."""
+    with _lock:
+        entries = _load()
+        entries[prefix] = {"built": built, "files": files}
+        store.write_json(_path(), {"source": s3.location(), "prefixes": entries})
     return files
 
 
 def refresh(prefix):
     """Bring the cache for a prefix up to date (blocking) and return {key: size}. Raises what the listing raises."""
-    entries = _load()
-    entry = entries.get(prefix)
-    names = s3.list_sizes(prefix, sizes=False)
-    if entry is None or _clock() - entry["at"] > MAX_AGE:
-        return _save(entries, prefix, s3.list_sizes(prefix))
+    entry = _load().get(prefix)
+    bucket = s3.read_root() is None  # a bucket listing carries the sizes and there is nothing to stat
+    names = s3.list_sizes(prefix, sizes=bucket)
+    if entry is None or _clock() - entry["built"] > MAX_AGE:
+        return _save(prefix, names if bucket else s3.list_sizes(prefix), _clock())
     old = entry["files"]
     kept = [k for k in old if k in names]  # a removed file is dropped below, not a sign the sizes are stale
     check = _sample(kept, min(SPOT_CHECKS, len(kept)))
-    now = s3.stat_sizes(check)
+    sizes_of = (lambda keys: {k: names[k] for k in keys}) if bucket else s3.stat_sizes
+    now = sizes_of(check)
     if any(now.get(k) != old[k] for k in check):
-        return _save(entries, prefix, s3.list_sizes(prefix))
+        return _save(prefix, names if bucket else s3.list_sizes(prefix), _clock())
     files = {k: old[k] for k in kept}
-    new = [k for k in names if k not in old]
-    files.update(s3.stat_sizes(new))
-    return _save(entries, prefix, files)
+    files.update(sizes_of([k for k in names if k not in old]))
+    return _save(prefix, files, entry["built"])
 
 
 def refresh_async(prefix, on_done):
