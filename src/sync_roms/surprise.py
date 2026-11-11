@@ -1,8 +1,11 @@
 """Surprise: a few random full English games per system, rotated on a schedule. This part holds the candidate rules."""
+import datetime
+import json
+import os
 import posixpath
 import re
 
-from . import m3u, store
+from . import m3u, store, ui, usersettings
 
 SLOTS = 10
 RECOMMENDED_SHARE = 2 / 3
@@ -23,6 +26,78 @@ RERELEASE = ("Virtual Console", "Switch Online", "Classic Mini", "Mini Mix", "Me
              "Collection", "Anthology", "Archives", "Sega Ages", "Sega Channel", "Evercade", "Steam", "GOG",
              "Retro-Bit", "Limited Run", "e-Reader", "QUByte Classics")
 LANGUAGE = re.compile(r"^[A-Z][a-z](-[A-Za-z]+)?$")
+
+
+LABEL = "\U0001F381 Surprise"
+
+
+def enabled(entry):
+    """Whether Surprise is on for a card's cards.json entry (on unless 'surprise' is false)."""
+    return not (isinstance(entry, dict) and entry.get("surprise") is False)
+
+
+def ttl_days():
+    """Days before a surprise may come around again: the surprise_ttl_days setting, default 183."""
+    days = usersettings.load_settings().get("surprise_ttl_days")
+    return days if isinstance(days, int) and not isinstance(days, bool) and days >= 0 else DEFAULT_TTL_DAYS
+
+
+def _history_path():
+    return os.path.join(store.data_dir(), "surprises.json")
+
+
+def _read_history():
+    """(entries, readable): readable is False when the file exists but isn't a JSON list."""
+    try:
+        with open(_history_path()) as f:
+            data = json.load(f)
+    except OSError:
+        return [], True
+    except ValueError:
+        return [], False
+    return (data, True) if isinstance(data, list) else ([], False)
+
+
+def load_history():
+    """Past surprises, [{"system", "bucket", "title", "card", "date"}]; empty when the file is missing or unreadable."""
+    entries, readable = _read_history()
+    if not readable and "surprises" not in store._warned:
+        store._warned.add("surprises")
+        ui.warn("surprises.json isn't a valid JSON list; ignoring it and leaving it untouched")
+    return entries
+
+
+def _date(entry):
+    try:
+        return datetime.date.fromisoformat(entry["date"])
+    except (KeyError, TypeError, ValueError):
+        return None
+
+
+def recent(history, today, ttl):
+    """Bucket keys surprised within the last ttl days."""
+    return {e["bucket"] for e in history
+            if isinstance(e, dict) and isinstance(e.get("bucket"), str)
+            and (d := _date(e)) is not None and (today - d).days <= ttl}
+
+
+def save_history(entries, today):
+    """Write entries to surprises.json, dropping ones past the TTL or with a bad date. An unreadable file is left alone."""
+    if not _read_history()[1]:
+        ui.warn(f"Not saving: {_history_path()} isn't valid JSON and would be overwritten. Fix or move it first.")
+        return
+    ttl = ttl_days()
+    kept = [e for e in entries if (d := _date(e)) is not None and (today - d).days <= ttl]
+    try:
+        os.makedirs(store.data_dir(), exist_ok=True)
+        store.write_json(_history_path(), kept, **store.PRETTY)
+    except OSError as e:
+        ui.warn(f"Couldn't save the surprise history: {e}")
+
+
+def past_keys(bucket):
+    """Recently surprised bucket keys under a system's folder."""
+    return {k for k in recent(load_history(), datetime.date.today(), ttl_days()) if k.startswith(bucket + "/")}
 
 
 def _paren_groups(name):

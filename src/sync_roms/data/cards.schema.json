@@ -24,6 +24,20 @@
         "type": "array",
         "items": {"type": "string"}
       },
+      "surprise": {"type": "boolean", "description": "false turns Surprise off (absent: on)"},
+      "surprises": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["system", "bucket", "title"],
+          "properties": {
+            "system": {"type": "string"},
+            "bucket": {"type": "string"},
+            "title": {"type": "string"},
+            "files": {"type": "array", "items": {"type": "string"}, "description": "the game's other files"}
+          }
+        }
+      },
       "games": {"$ref": "games.schema.json", "description": "The card's games"}
     }
   }

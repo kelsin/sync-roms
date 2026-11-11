@@ -1,12 +1,16 @@
 import collections
+import datetime
+import json
 import os
 import random
 import sys
 import unittest
+from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import helpers  # noqa: E402
 import isolate  # noqa: E402,F401
-from sync_roms import surprise  # noqa: E402
+from sync_roms import mirroring, store, surprise  # noqa: E402
 
 GBA = {"bucket": "gba", "bios": {"files": ["gba_bios.bin"]}}
 IN = ["Super Mario Advance (USA, Europe).zip", "Castlevania - Aria of Sorrow (USA).zip",
@@ -143,3 +147,74 @@ class SurprisePickTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class StorageCase(helpers.StorageDir):
+    def setUp(self):
+        super().setUp()
+        os.makedirs(self.data)
+
+    def write_cards(self, cards):
+        store.write_cards(cards)
+
+    def read_cards(self):
+        with open(os.path.join(self.data, "cards.json")) as f:
+            return json.load(f)
+
+
+class History(helpers.DataDir):
+    def test_save_prunes_past_the_ttl_and_recent_reads_within_it(self):
+        today = datetime.date(2026, 11, 11)
+        old = {"system": "gba", "bucket": "gba/Old.zip", "title": "Old", "card": "SD", "date": "2026-05-01"}
+        new = {"system": "gba", "bucket": "gba/New.zip", "title": "New", "card": "SD", "date": "2026-10-01"}
+        surprise.save_history([old, new], today)
+        self.assertEqual(self.read("surprises.json"), [new])
+        self.assertEqual(surprise.recent([old, new], today, 183), {"gba/New.zip"})
+
+    def test_ttl_comes_from_settings_default_183(self):
+        self.assertEqual(surprise.ttl_days(), 183)
+        self.write_json("settings.json", {"surprise_ttl_days": 30})
+        self.assertEqual(surprise.ttl_days(), 30)
+
+    def test_unreadable_history_is_empty_and_not_overwritten(self):
+        with open(self.path("surprises.json"), "w") as f:
+            f.write("{nope")
+        with mock.patch.object(surprise.ui, "warn") as warn:
+            self.assertEqual(surprise.load_history(), [])
+            surprise.save_history([], datetime.date(2026, 11, 11))
+        self.assertEqual(warn.call_count, 2)
+        with open(self.path("surprises.json")) as f:
+            self.assertEqual(f.read(), "{nope")
+
+    def test_past_keys_limits_to_a_bucket(self):
+        today = datetime.date.today().isoformat()
+        self.write_json("surprises.json", [
+            {"system": "gba", "bucket": "gba/A.zip", "title": "A", "card": "SD", "date": today},
+            {"system": "gbc", "bucket": "gbc/B.zip", "title": "B", "card": "SD", "date": today}])
+        self.assertEqual(surprise.past_keys("gba"), {"gba/A.zip"})
+
+
+class Locked(unittest.TestCase):
+    def test_card_locked_games_adds_surprises_only_when_on(self):
+        s = {"system": "gba", "bucket": "gba/A (USA).zip", "title": "A (USA)"}
+        disc = {"system": "psx", "bucket": "psx/F (USA).m3u", "title": "F (USA)",
+                "files": ["psx/F (USA) (Disc 1).chd", "psx/F (USA) (Disc 2).chd"]}
+        got = store.card_locked_games({"surprises": [s, disc]}, {})
+        self.assertEqual([g["bucket"] for g in got["gba"]], ["gba/A (USA).zip"])
+        self.assertEqual(got["gba"][0]["from"], "\U0001F381 Surprise")
+        self.assertEqual([g["bucket"] for g in got["psx"]], [disc["bucket"]] + disc["files"])
+        self.assertEqual(store.card_locked_games({"surprise": False, "surprises": [s]}, {}), {})
+
+    def test_collection_games_come_first(self):
+        s = {"system": "gba", "bucket": "gba/A.zip", "title": "A"}
+        coll = {"c": {"name": "Mine", "games": [dict(s)]}}
+        got = store.card_locked_games({"collections": ["c"], "surprises": [s]}, coll)
+        self.assertEqual([(g["bucket"], g["from"]) for g in got["gba"]], [("gba/A.zip", "\U0001F496 Mine")])
+
+
+class Mirror(StorageCase):
+    def test_mirror_wanted_includes_current_surprises(self):
+        self.put("gba/A (USA).zip")
+        self.write_cards({"SD": {"device": "full", "layout": "esde",
+                                 "surprises": [{"system": "gba", "bucket": "gba/A (USA).zip", "title": "A (USA)"}]}})
+        self.assertIn("gba/A (USA).zip", mirroring.mirror_wanted(store.load_manifest(store.all_card_names())))

@@ -30,7 +30,7 @@ SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "mirror": ("[DIR] | use DIR | clear", "make or refresh a local copy of everything your lists reference"),
     "config": ("show|path", "show the effective settings and where each comes from"),
     "doctor": ("", "check the AWS profile, storage access, tools and your data files"),
-    "check": ("", "validate cards.json, the device overlay, the sets and your collections"),
+    "check": ("", "validate cards.json, surprises.json, the device overlay, the sets and your collections"),
     "completion": ("bash|zsh|fish", "print a shell completion script"),
 }
 
@@ -186,7 +186,7 @@ TOPICS = {
     "check": """
   sync-roms check [--bucket-keys]
 
-  Validates cards.json, device-systems.json and the sets: bad JSON,
+  Validates cards.json, surprises.json, device-systems.json and the sets: bad JSON,
   unknown systems, devices and sets. Exits 1 if anything is wrong.
   --bucket-keys also lists storage (read-only profile) and reports every game or set file it doesn't have.
 """,

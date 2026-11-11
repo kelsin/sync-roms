@@ -74,7 +74,8 @@ class Schemas(unittest.TestCase):
         games, cards = self.load("games.schema.json"), self.load("cards.schema.json")
         self.assertIn("sets", games["properties"])
         card = cards["additionalProperties"]["properties"]
-        for key in ("device", "layout", "android_media", "systems", "games", "collections", "frontend_collections"):
+        for key in ("device", "layout", "android_media", "systems", "games", "collections", "frontend_collections",
+                    "surprise", "surprises"):
             self.assertIn(key, card)
         self.assertEqual(card["systems"]["items"]["type"], "string")
         self.assertEqual(self.load("collections.schema.json")["required"], ["name", "games"])
@@ -96,6 +97,28 @@ class CheckSystemsKey(Cmd):
         with open(self.path("sets/bad.json"), "w") as f:
             f.write("{oops")
         self.assertEqual(commands.check_data(), [])
+
+
+class CheckSurprise(Cmd):
+    def test_check_flags_bad_surprise_data(self):
+        self.write_json("cards.json", {"SD": {"surprise": "yes", "surprises": [{"system": "gba"}]}})
+        self.write_json("surprises.json", [{"system": "nope", "bucket": "x", "title": "t", "card": "SD", "date": "soon"}])
+        problems = commands.check_data()
+        self.assertIn("cards.json: SD: 'surprise' must be true or false", problems)
+        self.assertIn("cards.json: SD: surprises: each must have system, bucket and title", problems)
+        self.assertIn("surprises.json: unknown system 'nope'", problems)
+        self.assertIn("surprises.json: 'soon' isn't an ISO date", problems)
+
+    def test_good_surprise_data_passes_and_buckets_are_checked(self):
+        s = {"system": "gba", "bucket": "gba/A.zip", "title": "A"}
+        self.write_json("cards.json", {"SD": {"device": "full", "layout": "esde", "surprise": True, "surprises": [s]}})
+        self.write_json("surprises.json", [dict(s, card="SD", date="2026-11-11")])
+        self.assertEqual(commands.check_data(), [])
+        self.assertTrue(any("gba/A.zip" in p for p in commands.check_data(lambda system: set())))
+
+    def test_surprises_file_must_be_a_list(self):
+        self.write_json("surprises.json", {})
+        self.assertEqual(commands.check_data(), ["surprises.json: must be a list"])
 
 
 class CheckBucketKeys(Cmd):

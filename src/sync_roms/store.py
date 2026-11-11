@@ -215,7 +215,7 @@ def card_excluded(card, cards=None):
 
 
 def card_locked_games(entry, collections_by_id):
-    """The games a card's collections add, {system bucket: [{"title", "bucket", "from"}]}: one entry per key of a
+    """The games a card's collections add, then its current surprises (when Surprise is on), {system bucket: [{"title", "bucket", "from"}]}: one entry per key of a
     game (its bucket key, then its files), the first occurrence winning within a system. Ids that don't load are
     skipped."""
     ids = entry.get("collections") if isinstance(entry, dict) else None
@@ -228,6 +228,16 @@ def card_locked_games(entry, collections_by_id):
             for key in keys:
                 if key and all(g["bucket"] != key for g in seen):
                     seen.append({"title": game.get("title"), "bucket": key, "from": f"💖 {coll['name']}"})
+    from . import surprise  # surprise imports store
+    if isinstance(entry, dict) and surprise.enabled(entry):
+        for game in entry.get("surprises") or ():
+            if not isinstance(game, dict) or not isinstance(game.get("system"), str) \
+                    or not isinstance(game.get("bucket"), str):
+                continue
+            seen = locked.setdefault(game["system"], [])
+            for key in [game["bucket"]] + list(game.get("files") or []):
+                if key and all(g["bucket"] != key for g in seen):
+                    seen.append({"title": game.get("title"), "bucket": key, "from": surprise.LABEL})
     return {system: games for system, games in locked.items() if games}
 
 

@@ -1,5 +1,6 @@
 """Scriptable subcommands: games, cards, config, doctor, check and completion; plus helpers the sync flow uses."""
 import argparse
+import datetime
 import json
 import os
 import re
@@ -605,6 +606,44 @@ def check_data(list_keys=None, repo_systems=None):
         names = entry.get("frontend_collections", [])
         if not isinstance(names, list) or not all(isinstance(i, str) for i in names):
             problems.append(f"cards.json: {name}: 'frontend_collections' must be a list of names")
+        if "surprise" in entry and not isinstance(entry["surprise"], bool):
+            problems.append(f"cards.json: {name}: 'surprise' must be true or false")
+        picks = entry.get("surprises", [])
+        if not isinstance(picks, list):
+            problems.append(f"cards.json: {name}: 'surprises' must be a list")
+        else:
+            for g in picks:
+                if not isinstance(g, dict) or not all(isinstance(g.get(k), str) and g.get(k)
+                                                      for k in ("system", "bucket", "title")):
+                    problems.append(f"cards.json: {name}: surprises: each must have system, bucket and title")
+                elif g["system"] not in systems:
+                    problems.append(f"cards.json: {name}: surprises: unknown system {g['system']!r}")
+                else:
+                    files = g.get("files", [])
+                    if not isinstance(files, list) or not all(isinstance(k, str) for k in files):
+                        problems.append(f"cards.json: {name}: surprises: {g['bucket']}: 'files' must be a list of bucket keys")
+                        files = []
+                    for k in [g["bucket"]] + files:
+                        if not k.startswith(g["system"] + "/"):
+                            problems.append(f"cards.json: {name}: surprises: {k!r} isn't under {g['system']}/")
+                        else:
+                            wanted.setdefault(f"cards.json: {name}: surprises", []).append((g["system"], k))
+    history = load("surprises.json")
+    if history is not None and not isinstance(history, list):
+        problems.append("surprises.json: must be a list")
+        history = []
+    for e in history or []:
+        if not isinstance(e, dict) or not all(isinstance(e.get(k), str) for k in ("system", "bucket", "title", "card", "date")):
+            problems.append("surprises.json: entry needs system, bucket, title, card and date")
+            continue
+        if e["system"] not in systems:
+            problems.append(f"surprises.json: unknown system {e['system']!r}")
+        elif not e["bucket"].startswith(e["system"] + "/"):
+            problems.append(f"surprises.json: {e['bucket']!r} isn't under {e['system']}/")
+        try:
+            datetime.date.fromisoformat(e["date"])
+        except ValueError:
+            problems.append(f"surprises.json: {e['date']!r} isn't an ISO date")
     overlay = load("device-systems.json")
     if overlay is not None and not isinstance(overlay, dict):
         problems.append("device-systems.json: must be an object")
@@ -657,7 +696,7 @@ def check_cmd(args):
     for n in check_notices(repo_systems):
         print(ui.yellow(f"⚠️  {n}"))
     if not problems:
-        print(ui.green("✅ cards.json, device-systems.json, the sets and your collections look fine"))
+        print(ui.green("✅ cards.json, surprises.json, device-systems.json, the sets and your collections look fine"))
     return 1 if problems else 0
 
 
