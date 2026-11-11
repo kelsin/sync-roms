@@ -3,6 +3,7 @@ import io
 import json
 import os
 import sys
+import tempfile
 import unittest
 from unittest import mock
 
@@ -244,6 +245,21 @@ class CheckRatios(Cmd):
             self.assertTrue(commands.valid_ratio(ok))
         for bad in ("4:", "0:3", "4:3:2", " 4:3", 43, None):
             self.assertFalse(commands.valid_ratio(bad), bad)
+
+
+class RepoDataSurvivesRemoval(unittest.TestCase):
+    """An upgrade deletes the installed data folder under a running sync; data read up front must still be served."""
+
+    def test_preloaded_file_is_served_after_it_is_removed(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            with open(os.path.join(tmp, "clones.json"), "w") as f:
+                json.dump({"mame": {}}, f)
+            with mock.patch.object(store, "REPO_DATA", tmp):
+                store.preload_repo_data()
+                os.remove(os.path.join(tmp, "clones.json"))
+                self.assertEqual(store.repo_json("clones"), {"mame": {}})
+                with self.assertRaises(FileNotFoundError):
+                    store.repo_json("never-there")
 
 
 if __name__ == "__main__":

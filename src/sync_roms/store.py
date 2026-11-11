@@ -19,13 +19,25 @@ def repo_json(name):
     """A repo data file, parsed fresh on every call (callers mutate the result) from text cached until the file changes
     (json.loads of the text is faster than deep-copying a cached parse)."""
     path = os.path.join(REPO_DATA, name + ".json")
-    st = os.stat(path)
-    sig = (st.st_mtime_ns, st.st_size)
     cached = _repo_text.get(path)
+    try:
+        st = os.stat(path)
+    except FileNotFoundError:  # an upgrade removed the install under a running sync: serve what was read
+        if not cached:
+            raise
+        return json.loads(cached[1])
+    sig = (st.st_mtime_ns, st.st_size)
     if not cached or cached[0] != sig:
         with open(path) as f:
             cached = _repo_text[path] = (sig, f.read())
     return json.loads(cached[1])
+
+
+def preload_repo_data():
+    """Read every repo data file now, so a long sync still has them if an upgrade removes the install mid-run."""
+    for name in os.listdir(REPO_DATA):
+        if name.endswith(".json"):
+            repo_json(name[:-5])
 
 
 def key_title(key):
