@@ -214,6 +214,34 @@ def card_excluded(card, cards=None):
     return excluded if isinstance(excluded, dict) else {}
 
 
+def card_locked_games(entry, collections_by_id):
+    """The games a card's collections add, {system bucket: [{"title", "bucket", "from"}]}: one entry per key of a
+    game (its bucket key, then its files), the first occurrence winning within a system. Ids that don't load are
+    skipped."""
+    ids = entry.get("collections") if isinstance(entry, dict) else None
+    locked = {}
+    for cid in ids if isinstance(ids, list) else ():
+        coll = collections_by_id.get(cid)
+        for game in (coll or {}).get("games", []):
+            keys = [game.get("bucket")] + list(game.get("files") or [])
+            seen = locked.setdefault(game.get("system"), [])
+            for key in keys:
+                if key and all(g["bucket"] != key for g in seen):
+                    seen.append({"title": game.get("title"), "bucket": key, "from": f"💖 {coll['name']}"})
+    return {system: games for system, games in locked.items() if games}
+
+
+def merge_locked(systems, locked):
+    """Append locked games ({system bucket: [game]}) to the systems that list them, skipping keys already listed.
+    Unknown systems are skipped; a full system's flag is left alone."""
+    for s in systems:
+        have = {g.get("bucket") for g in s["games"]}
+        for g in locked.get(s["bucket"], ()):
+            if g["bucket"] not in have:
+                s["games"].append(dict(g))
+                have.add(g["bucket"])
+
+
 def all_card_names(cards=None):
     return sorted(load_cards() if cards is None else cards)
 
@@ -328,6 +356,10 @@ def load_manifest(card_names=()):
         for s in manifest["systems"]:
             skip = excluded.get(s["bucket"], ())
             s["games"] = [g for g in s["games"] if g.get("bucket") not in skip]
+    from . import collections
+    by_id = {c["id"]: c for c in collections.load_collections()}
+    for n in card_names:
+        merge_locked(manifest["systems"], card_locked_games(cards.get(n) or {}, by_id))
     apply_device_overlay(manifest["devices"], manifest["systems"], load_overlay())
     return manifest
 

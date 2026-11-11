@@ -10,6 +10,9 @@ from sync_roms import collections, commands, store, ui  # noqa: E402
 
 FAVS = {"name": "Favs", "games": [{"title": "Ruby", "system": "gba", "bucket": "gba/Ruby.zip"}]}
 
+FF7 = {"title": "FF7", "system": "psx", "bucket": "psx/FF7.m3u",
+       "files": ["psx/FF7 (Disc 1).chd", "psx/FF7 (Disc 2).chd"]}
+
 
 class Files(DataDir):
     def test_save_and_load_round_trip_sorted_by_name_without_the_id(self):
@@ -84,6 +87,35 @@ class Check(DataDir):
                                              "frontend_collections": "Mine"}})
         self.assertEqual(commands.check_data(), ["cards.json: c: unknown collection 'ghost'",
                                                  "cards.json: c: 'frontend_collections' must be a list of names"])
+
+
+class Selection(DataDir):
+    def setUp(self):
+        super().setUp()
+        collections.save_collection({"id": "favs", "name": "Favs", "games": FAVS["games"] + [FF7]})
+        collections.save_collection({"id": "more", "name": "More", "games": [{"title": "Zelda", "system": "gba", "bucket": "gba/Zelda.zip"}]})
+
+    def by_id(self):
+        return {c["id"]: c for c in collections.load_collections()}
+
+    def test_locked_games_expand_files_and_say_where_they_come_from(self):
+        locked = store.card_locked_games({"collections": ["favs", "ghost"]}, self.by_id())
+        self.assertEqual(sorted(locked), ["gba", "psx"])
+        self.assertEqual(locked["gba"], [{"title": "Ruby", "bucket": "gba/Ruby.zip", "from": "💖 Favs"}])
+        self.assertEqual([g["bucket"] for g in locked["psx"]], ["psx/FF7.m3u", "psx/FF7 (Disc 1).chd", "psx/FF7 (Disc 2).chd"])
+        self.assertEqual(store.card_locked_games({}, self.by_id()), {})
+
+    def test_load_manifest_adds_them_after_picks_and_excluded_never_drops_them(self):
+        self.write_json("cards.json", {"c": {"device": "full", "layout": "esde", "collections": ["favs"],
+                                             "games": {"gba": [{"bucket": "gba/A.zip"}, {"bucket": "gba/Ruby.zip"}]},
+                                             "excluded": {"gba": ["gba/Ruby.zip"]}}})
+        gba = next(s for s in store.load_manifest(["c"])["systems"] if s["bucket"] == "gba")
+        self.assertEqual([g["bucket"] for g in gba["games"]], ["gba/A.zip", "gba/Ruby.zip"])
+
+    def test_every_cards_collections_are_in_the_mirror_list(self):
+        self.write_json("cards.json", {"a": {"collections": ["favs"]}, "b": {"collections": ["more"]}})
+        gba = next(s for s in store.load_manifest(store.all_card_names())["systems"] if s["bucket"] == "gba")
+        self.assertEqual(sorted(g["bucket"] for g in gba["games"]), ["gba/Ruby.zip", "gba/Zelda.zip"])
 
 
 if __name__ == "__main__":
