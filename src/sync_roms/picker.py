@@ -114,6 +114,42 @@ def pick_systems(rows, initial=None, state=None, editable=False, sizes=True):
     return [i for i, on in enumerate(result) if on]
 
 
+def help_lines(multi, hint, hidden_count=False, has_note=False):
+    """Every key a filter_list accepts, then this screen's own hint entries."""
+    lines = ["j/k ↑/↓ ^N/^P   move", "g/G             top / bottom", "^D/^U           half page",
+             "^F/^B PgDn/PgUp page", "/               filter (Enter keeps it, Esc clears it)",
+             "Enter           " + ("done" if multi else "pick"), "Esc/q/^G        clear the filter, then go back"]
+    if multi:
+        lines += ["Space/Tab       toggle the row", "a               toggle all shown", "o               view: all / on / changed",
+                  "u               revert this list"]
+        if has_note:
+            lines.append("w               edit the row's note")
+    if hidden_count:
+        lines.append("z               show / hide hidden rows")
+    lines.append("?               this help")
+    extra = [e for e in hint.split(" · ") if e] if hint else []
+    if extra:
+        lines += ["", "This screen:"] + ["  " + e for e in extra]
+    return lines
+
+
+def show_help(stdscr, lines):
+    """Draw the key list over the screen and wait for any key."""
+    h, w = stdscr.getmaxyx()
+    lines = ["Keybindings", ""] + lines + ["", "Press any key to close"]
+    top = max(0, (h - len(lines)) // 2)
+    left = max(0, (w - max(cell_width(l) for l in lines)) // 2 - 2)
+    stdscr.erase()
+    for n, line in enumerate(lines[:h - 1]):
+        stdscr.addnstr(top + n, left, line, max(1, w - left - 1), curses.A_BOLD if n == 0 else 0)
+    stdscr.refresh()
+    stdscr.timeout(-1)
+    try:
+        stdscr.get_wch()
+    except curses.error:
+        pass
+
+
 def cell_width(text):
     """Terminal cells text takes up (emoji and CJK are two wide)."""
     return sum(2 if unicodedata.east_asian_width(c) in "WF" else 1 for c in text)
@@ -190,7 +226,7 @@ POLL_MS = 200  # how often filter_list calls its poll while no key comes
 
 def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, extras=None, locked=None, locked_note="",
                 hotkeys=(), note_text=None, on_note=None, esc_asks=True, hidden=None, status=None, diff_marks=True,
-                session=None, poll=None, links=None):
+                session=None, poll=None, links=None, on_hotkey=None):
     """Modal list: vim keys for moving and acting, Emacs keys for editing the filter.
 
     Normal mode: j/k ↑/↓ ^N/^P move · g/G top/bottom · ^D/^U half page · ^F/^B/PgUp/PgDn/^V page · / filter ·
@@ -216,6 +252,8 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
     so poll can update extras in place (and status can read what it changed).
     links: optional per-label lists of the label indexes switched together with it (multi mode): Space/Tab and `a`
     set them all to the toggled row's new state (locked ones excepted).
+    on_hotkey: optional callable(key, label index) -> bool, tried first for a hotkey; True means it handled the key
+    in place (the list stays open and is redrawn, so it can update extras), False returns (key, index) as usual.
     """
     os.environ.setdefault("ESCDELAY", "25")
     lowered = [l.casefold() for l in labels]
@@ -343,11 +381,16 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
                 continue
             moved = move_key(k, cur, len(vis) - 1, view)
             if k in hotkeys and (vis or multi):
+                if on_hotkey and on_hotkey(k, vis[cur] if vis else None):
+                    continue
                 return k, (vis[cur] if vis else None)
             if moved is not None:
                 cur = moved
             elif k == "/":
                 typing, qpos = True, len(query)
+            elif k == "?":
+                show_help(stdscr, help_lines(multi, hint, hidden_count, bool(on_note)))
+                stdscr.timeout(POLL_MS if poll else -1)
             elif k == "j":
                 cur = min(len(vis) - 1, cur + 1)
             elif k == "k":
