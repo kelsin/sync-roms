@@ -277,7 +277,7 @@ class Step(StorageCase):
         self.card(surprises=current)
         lists, edits = [], []
         with self.patched(filter_list=lambda title, labels, **kw: lists.append((title, labels, kw)) or [True] + [False] * 9,
-                          edit_card=lambda name, setup=None: edits.append(name)):
+                          edit_card=lambda name, setup=None, to_fetch=None: edits.append(name)):
             got = surprise.run_surprise("SD", (None, "esde"), self.chosen(), True, False, rng=random.Random(1))
         title, labels, kw = lists[0]
         self.assertEqual(title, "Pick the surprises to replace")
@@ -346,10 +346,18 @@ class Step(StorageCase):
     def test_off_clears_surprises_keeps_history_and_picks_nothing(self):
         self.card(surprise=False, surprises=[self.surprise("gba", 0)])
         surprise.save_history([{**self.surprise("gba", 0), "card": "SD", "date": "2026-11-01"}], datetime.date(2026, 11, 11))
-        with self.patched(filter_list=self.fail_call, edit_card=self.fail_call):
+        edits = []
+        with self.patched(filter_list=self.fail_call, edit_card=lambda name, setup=None, to_fetch=None: edits.append(name)):
             self.assertEqual(surprise.run_surprise("SD", (None, "esde"), self.chosen(), True, False), [])
         self.assertNotIn("surprises", store.load_cards()["SD"])
         self.assertEqual(len(surprise.load_history()), 1)
+        self.assertEqual(edits, ["SD"])  # the card editor still opens
+
+    def test_off_unattended_or_dry_run_opens_no_editor(self):
+        self.card(surprise=False)
+        with self.patched(filter_list=self.fail_call, edit_card=self.fail_call):
+            self.assertEqual(surprise.run_surprise("SD", (None, "esde"), self.chosen(), False, False), [])
+            self.assertEqual(surprise.run_surprise("SD", (None, "esde"), self.chosen(), True, True), [])
 
     def test_twelve_kept_surprises_get_no_new_picks(self):
         current = [self.surprise("gba", i) for i in range(12)]
@@ -382,7 +390,7 @@ class Step(StorageCase):
             raise SystemExit("offline")
         with mock.patch.object(surprise.s3, "list_folders", down), contextlib.redirect_stderr(io.StringIO()), \
                 self.patched(filter_list=lambda t, labels, **kw: [True] * len(labels),
-                             edit_card=lambda name, setup=None: edits.append(name)):
+                             edit_card=lambda name, setup=None, to_fetch=None: edits.append(name)):
             got = surprise.run_surprise("SD", (None, "esde"), self.chosen(), True, False, rng=random.Random(9))
         self.assertEqual(got, current)
         self.assertEqual(store.load_cards()["SD"]["surprises"], current)

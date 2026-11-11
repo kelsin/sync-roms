@@ -37,19 +37,26 @@ def game_costs(card, system, keys):
     return {k: sizes[k] + extra[k[len(bucket) + 1:]] for k in sized}, partial
 
 
-def _system_usage(card, system, sets, collections_by_id):
+def _system_keys(card, system, sets, collections_by_id):
+    """The keys the card syncs of a system, or None for a full system whose sizes aren't cached yet."""
     bucket = system["bucket"]
     games = store.merge_lists([{"bucket": bucket}], [card.get("games") or {}], sets)[0]
     if games["full_system"]:
         sizes = inventory.cached(f"{bucket}/")
         if sizes is None:
-            return Usage(0, 0, True)
-        keys = sorted(k for k in sizes if not k.endswith("/"))  # sync installs every file: exclusions don't apply
-    else:
-        skip = (card.get("excluded") or {}).get(bucket, ())
-        keys = [g["bucket"] for g in games["games"] if g.get("bucket") and g["bucket"] not in skip]
-        keys += [g["bucket"] for g in store.card_locked_games(card, collections_by_id).get(bucket, ())
-                 if g["bucket"] not in keys]  # collection games ignore exclusions
+            return None
+        return sorted(k for k in sizes if not k.endswith("/"))  # sync installs every file: exclusions don't apply
+    skip = (card.get("excluded") or {}).get(bucket, ())
+    keys = [g["bucket"] for g in games["games"] if g.get("bucket") and g["bucket"] not in skip]
+    keys += [g["bucket"] for g in store.card_locked_games(card, collections_by_id).get(bucket, ())
+             if g["bucket"] not in keys]  # collection games ignore exclusions
+    return keys
+
+
+def _system_usage(card, system, sets, collections_by_id):
+    keys = _system_keys(card, system, sets, collections_by_id)
+    if keys is None:
+        return Usage(0, 0, True)
     if not keys:
         return Usage(0, 0, False)  # nothing picked: nothing to size
     costs, partial = game_costs(card, system, keys)
@@ -72,6 +79,18 @@ def system_usages(card, systems):
     """{system bucket: Usage} for each of the systems (the sets are read once)."""
     sets, by_id = store.load_sets(), _collections_by_id()
     return {s["bucket"]: _system_usage(card, s, sets, by_id) for s in systems}
+
+
+def fetch_bytes(system, keys, to_fetch):
+    """ROM bytes of the keys that to_fetch(system, keys) says aren't on the card yet, from the size cache."""
+    sizes = inventory.cached(f"{system['bucket']}/") or {}
+    return sum(sizes.get(k, 0) for k in to_fetch(system, keys)) if keys else 0
+
+
+def card_fetch_bytes(card, systems, to_fetch):
+    """fetch_bytes over every system the card syncs: how much of its ROMs a sync would download."""
+    sets, by_id = store.load_sets(), _collections_by_id()
+    return sum(fetch_bytes(s, _system_keys(card, s, sets, by_id), to_fetch) for s in systems)
 
 
 def bios_usage(systems):

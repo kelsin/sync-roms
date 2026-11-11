@@ -39,7 +39,7 @@ SUBCOMMANDS = {  # name -> (usage, one-line summary)
 
 TOPICS = {
     "sync": """
-  sync-roms [sync] [CARD] [--dry-run] [--ask] [--yes] [--device ID|full] [--layout NAME] [--systems IDS|all] [--no-clean]
+  sync-roms [sync] [CARD] [--dry-run] [--ask] [--yes] [--device ID|full] [--layout NAME] [--no-clean]
 
   CARD is the card or folder root (default: the current directory); the chosen firmware decides the folders inside
   it (ES-DE ROMs/ BIOS/, Knulli roms/ bios/, Onion Roms/ BIOS/). Missing folders are created after you confirm.
@@ -48,12 +48,13 @@ TOPICS = {
    1. Pick a device (its recommended systems come from device-systems.json plus your overlay) or Full, then its
       firmware. Remembered per card folder name and used without asking next time; --ask confirms it first.
       --device/--layout set it without the picker (and save it).
-   2. Toggle systems (--systems a,b or --systems all skips the picker).
-   3. Local ROMs no longer in a chosen system's list, in a system with no games listed, or in a system the card's device no longer lists, are listed and, after you confirm (default no), deleted first so the free space shown is accurate.
+   2. Every system with games picked on the card is synced. Interactively, the card editor opens after the
+      Surprise step, showing the card's size and how much isn't on it yet as you add games and collections.
+   3. Local ROMs no longer in a system's list, in a system with no games listed, or in a system the card's device no longer lists, are listed and, after you confirm (default no), deleted first so the free space shown is accurate.
       Then totals and free space are shown and you confirm; ROMs download, then BIOS.
-   4. Scraped data for the chosen systems' games is installed from storage's scrapes/ folder, then media on the
+   4. Scraped data for the card's games is installed from storage's scrapes/ folder, then media on the
       card for ROMs it doesn't have is removed.
-   5. BIOS for every system with ROMs on the card is installed, chosen or not. Other systems' ROM folders are never touched.
+   5. BIOS for every system with ROMs on the card is installed, games picked or not. Other systems' ROM folders are never touched.
 
   --dry-run   show what would be downloaded and deleted, change nothing
   --yes       answer every prompt with its default (a default-no prompt, like deleting files, stays no)
@@ -62,7 +63,6 @@ TOPICS = {
   A finished run (not --dry-run) creates .metadata_never_index in CARD, empties its .fseventsd, and on a Mac runs
   dot_clean (falling back to sudo mdutil, which asks for your password). ES-DE: files in the Android media folders
   are removed and a .nomedia added after asking once per card name (the answer is remembered; --ask confirms it).
-  Picker keys: ↑/↓ j/k ^N/^P move, / filter, space/tab toggle, a all/none, z show 0-ROM systems, e edit games, D clear the card's own games, enter go, esc/q cancel.
 """,
     "games": """
   sync-roms games edit                        interactive editor (cards, sets, device systems)
@@ -242,7 +242,7 @@ def help_text(topic=None):
   {ui.yellow('-n, --dry-run')}   show what would happen, change nothing (commands that can't honor it refuse it)
   {ui.yellow('-y, --yes')}       answer prompts with their default (deleting stays "no")
   {ui.yellow('--quiet')}         print only errors, warnings and --json data (prompts go to stderr)      {ui.yellow('--verbose')}   also print the effective settings
-  {ui.yellow('--json')}          machine-readable output for devices, diff and `sync --dry-run` (use --systems with --device/--layout to skip the pickers)
+  {ui.yellow('--json')}          machine-readable output for devices, diff and `sync --dry-run` (use --device/--layout to skip the pickers)
   {ui.yellow('--profile P')} {ui.yellow('--write-profile P')} {ui.yellow('--bucket B')} {ui.yellow('--root DIR')} {ui.yellow('--endpoint URL')}   override those settings for this run
   {ui.yellow('-a, --ask')}       sync: confirm the saved device/firmware and Android media choice instead of using it silently
   {ui.yellow('--version')}       print the version      {ui.yellow('-h, --help')}   this screen
@@ -256,7 +256,7 @@ def help_text(topic=None):
 
 {ui.bold('EXAMPLES')}
   sync-roms /Volumes/SD                          sync the card
-  sync-roms sync /Volumes/SD --device rg35xx-sp --layout knulli --systems all --yes --dry-run
+  sync-roms sync /Volumes/SD --device rg35xx-sp --layout knulli --yes --dry-run
   sync-roms games add gba 'Metroid*' --card SD   add games to a card
   sync-roms upload roms ~/roms/gba               upload ROMs to storage
 
@@ -365,7 +365,7 @@ LEGACY = {
 }
 BOOL_FLAGS = {"-n", "--dry-run", "-y", "--yes", "-a", "--ask"}
 PLAIN_FLAGS = BOOL_FLAGS | {"--replace", "--json", "--no-clean", "--retry", "--all", "--fill-media", "--set-credentials"}
-VALUE_FLAGS = {"--system", "--device", "--layout", "--systems", "--device-id", "--skip-media"}
+VALUE_FLAGS = {"--system", "--device", "--layout", "--device-id", "--skip-media"}
 
 
 def translate(argv):
@@ -432,7 +432,6 @@ def build_parser():
     ap.add_argument("--system")
     ap.add_argument("--device")
     ap.add_argument("--layout")
-    ap.add_argument("--systems")
     ap.add_argument("--no-clean", action="store_true")
     ap.add_argument("--version", action="store_true")
     ap.add_argument("-h", "--help", action="store_true")
@@ -457,8 +456,8 @@ def check_modes(args):
         ui.fail(f"--dry-run has no effect on {mode}", 2)
     if args.ask and mode:
         ui.fail(f"--ask only applies to syncing a card, not {mode}", 2)
-    if (args.device or args.layout or args.systems or args.no_clean) and mode:
-        ui.fail(f"--device, --layout, --systems and --no-clean only apply to syncing a card, not {mode}", 2)
+    if (args.device or args.layout or args.no_clean) and mode:
+        ui.fail(f"--device, --layout and --no-clean only apply to syncing a card, not {mode}", 2)
     if args.base_dir and mode not in (None, "--upload-scrapes", "--clean-scrapes"):
         ui.fail(f"{mode} doesn't take a card folder ({args.base_dir!r}); give the directory right after the command", 2)
     if args.device_id and mode != "--devices":
@@ -752,10 +751,10 @@ def sync_card(args):
         return sorted((s for s in fresh if s["folders"].get(layout_name)), key=lambda s: s["name"].lower())
 
     print("📏 Reading ROM sizes...")
-    listings, state = {}, {}  # listings: {system id: {key: size}}, kept until the system's games change
-    avail, discs, size_cache = {}, {}, {}  # per system id: the keys to sync, their multi-disc keys, (bytes to download, total bytes)
+    listings = {}  # {system id: {key: size}}, kept until the system's games change
+    avail, discs = {}, {}  # per system id: the keys to sync, their multi-disc keys
 
-    sized = not runtime.ROOT or inventory.current() is not None  # sizes are known before picking
+    sized = not runtime.ROOT or inventory.current() is not None  # sizes are known up front
 
     def available(s):
         return avail[s["bucket"]]
@@ -770,22 +769,6 @@ def sync_card(args):
             return inventory.files(s["bucket"] + "/", sizes=False) if s.get("full_system") else {}
         return store.list_system(s)
 
-    def sizes(s):
-        """(bytes still to download, total bytes) for a system's ROMs."""
-        bucket = s["bucket"]
-        if bucket not in size_cache:
-            have, total, jobs = listings[bucket], 0, []
-            for k in avail[bucket]:
-                size = have.get(k, 0)
-                try:
-                    path = s3.safe_join(os.path.join(roms_dir, s["folders"][layout_name]), downloads.rom_rel(k, unzip, disc_dir, discs[bucket]))
-                except ValueError:
-                    continue
-                total += size
-                jobs.append((k, path, size))
-            size_cache[bucket] = (total_bytes(downloads.plan_downloads(jobs, unzip, disc_dir)), total)
-        return size_cache[bucket]
-
     def relist():
         """List the systems not listed yet and work out every system's keys to sync."""
         todo = [s for s in systems if s["bucket"] not in listings]
@@ -797,54 +780,36 @@ def sync_card(args):
             avail[s["bucket"]] = store.available_keys(s, listings[s["bucket"]])
             discs[s["bucket"]] = m3u.disc_keys(avail[s["bucket"]]) if disc_dir else ()
 
-    while True:
-        relist()
-        if not sized:
-            rows = [(f"{s['name']}  ({len(available(s))} roms)", bool(available(s)), 0, 0) for s in systems]
-        else:
-            rows = [(f"{s['name']}  ({len(available(s))} roms, {ui.human_size(total)})", bool(available(s)), need, total)
-                    for s in systems for need, total in [sizes(s)]]
-        present = [i for i, s in enumerate(systems)
-                   if available(s) and (device or downloads.has_local_files(os.path.join(roms_dir, s["folders"][layout_name]), onion))]
-        if args.systems:
-            chosen = commands.systems_from_flag(args.systems, systems, available)
-            break
-        saved_idx = [i for i, s in enumerate(systems) if s["bucket"] in (saved or {}).get("systems", ())]
-        if args.yes and saved_idx and not state:  # --yes with a saved selection: no picker
-            chosen = saved_idx
-            break
-        chosen = picker.pick_systems(rows, saved_idx if saved_idx and not state else present, state, editable=not args.dry_run,
-                                     **({} if sized else {"sizes": False}))
-        if not isinstance(chosen, tuple):
-            if chosen and not args.dry_run:
-                store.update_card(card, systems=[systems[i]["bucket"] for i in chosen])
-            break
-        action, row = chosen
-        if action == "games":  # the same list --edit changes for this card
-            edited = systems[row]["bucket"]
-            if edit.edit_card_system(card, edited, (device, layout_name)):
-                state["sel"][row] = True
-            listings.pop(edited, None)  # its games changed, so it is listed and sized again
-            size_cache.pop(edited, None)
-        elif ui.confirm(f"🧹 Clear {card}'s own games?", default=False):
-            store.update_card(card, games={})
-            state["sel"] = [False] * len(systems)
-            listings.clear()
-            size_cache.clear()
-        systems = reload_systems()
-    if chosen is None:
-        print(ui.yellow("👋 Cancelled."))
-        return 0
-    if not chosen:
-        print(ui.yellow("👋 Nothing selected."))
-        return 0
-    chosen = [systems[i] for i in chosen]
+    fetching = {}  # {system id: {key: whether it isn't on the card yet}}: the card's files don't change while editing
+
+    def to_fetch(s, keys):
+        """The keys of a system's ROMs that aren't on the card yet, for the card editor's size preview."""
+        bucket = s["bucket"]
+        seen = fetching.setdefault(bucket, {})
+        todo = [k for k in keys if k not in seen]
+        if todo:
+            sizes = inventory.cached(f"{bucket}/") or {}
+            disc_keys = m3u.disc_keys(keys) if disc_dir else ()
+            jobs = []
+            for k in todo:
+                try:
+                    path = s3.safe_join(os.path.join(roms_dir, s["folders"][layout_name]),
+                                        downloads.rom_rel(k, unzip, disc_dir, disc_keys))
+                except ValueError:
+                    seen[k] = False
+                    continue
+                jobs.append((k, path, sizes.get(k)))
+            need = {j[0] for j in downloads.plan_downloads(jobs, unzip, disc_dir)}
+            seen.update((k, k in need) for k, _, _ in jobs)
+        return {k for k in keys if seen[k]}
+
+    relist()
     interactive = not (ui.ASSUME_YES or args.json) and ui.has_terminal()
-    surprise.run_surprise(card, (device, layout_name), chosen, interactive, args.dry_run)
+    surprise.run_surprise(card, (device, layout_name), [s for s in systems if available(s)], interactive, args.dry_run,
+                          to_fetch=to_fetch)
     if not args.dry_run:  # the step (and the card editor it opens) may have changed the card's games
         def picks(s):
             return s.get("full_system"), store.listed(s)
-        chosen_ids = {s["bucket"] for s in chosen}
         before = {s["bucket"]: picks(s) for s in systems}
         systems = reload_systems()
         changed = [s["bucket"] for s in systems if picks(s) != before.get(s["bucket"])]
@@ -859,10 +824,12 @@ def sync_card(args):
                 ui.warn(f"Couldn't refresh the mirror ({e}); using what it has")
         for bucket in changed:
             listings.pop(bucket, None)
-            size_cache.pop(bucket, None)
         relist()
-        chosen = [s for s in systems if s["bucket"] in chosen_ids]
         saved = store.load_cards().get(card)
+    chosen = [s for s in systems if available(s)]
+    if not chosen:
+        print(ui.yellow(f"👋 {card} has nothing to sync."))
+        return 0
     print(ui.bold(f"\n🔎 Checking {len(chosen)} system(s) against storage..."))
 
     def dest_of(s):

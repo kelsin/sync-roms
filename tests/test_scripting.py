@@ -138,7 +138,7 @@ class DryRunJsonTest(Isolated):
                              a=(cli.clean, "clean_android_media", lambda *a: None))
 
     def test_dry_run_json_is_one_document(self):
-        code, out, _ = self.run_plan(["--dry-run", "--json", "--systems", "all", "--yes"])
+        code, out, _ = self.run_plan(["--dry-run", "--json", "--yes"])
         self.assertEqual(code, 0)
         plan = json.loads(out)
         self.assertEqual([d["key"] for d in plan["downloads"]], ["gba/Game.zip"])
@@ -151,7 +151,7 @@ class DryRunJsonTest(Isolated):
         self.assertEqual(self.run_plan(["--json", "--yes"])[0], 2)
 
     def test_dry_run_without_json_is_unchanged(self):
-        self.assertIn("Dry run", self.run_plan(["--dry-run", "--systems", "all", "--yes"])[1])
+        self.assertIn("Dry run", self.run_plan(["--dry-run", "--yes"])[1])
 
 
 if __name__ == "__main__":

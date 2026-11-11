@@ -75,43 +75,6 @@ def choose_setup(manifest, current=None):
 SINGLE_HINT = "Enter select · Esc back · j/k ^N/^P move · / filter"
 MULTI_HINT = "Space toggle · Enter done · Esc back · / filter · a all · o view · u revert"
 TYPING_HINT = "Enter keep filter · Esc clear · ^N/^P move · ^A/^E ^B/^F ^K ^W ^U edit"
-SYSTEMS_HINT = "Space toggle · Enter go · Esc cancel · / filter · a all/none · o view · z 0-ROM"
-
-
-def systems_hint(editable):
-    """Key hints for pick_systems, most important first so a narrow terminal cuts only the extras."""
-    if not editable:
-        return SYSTEMS_HINT
-    return "Space toggle · Enter go · Esc quit · e games · D clear · / filter · z 0-ROM"
-
-
-def pick_systems(rows, initial=None, state=None, editable=False, sizes=True):
-    """rows: list of (label, has_roms, need_bytes, total_bytes); initial: indexes toggled on at start.
-    Returns selected indexes, or None if quit.
-
-    state: a dict kept by the caller so the selection, cursor and shown/hidden 0-ROM systems survive
-    reopening the picker. editable: e (edit the highlighted system's games) and D (clear the card's games)
-    close the picker and return ("games", row index) or ("clear", None); the caller reopens it with the same state.
-    """
-    state = {} if state is None else state
-    ui.require_terminal("pick systems", "--systems a,b (or --systems all)")
-
-    def status(sel):
-        if not sizes:
-            return f"{sum(sel)} selected"
-        need = sum(r[2] for r, on in zip(rows, sel) if on)
-        total = sum(r[3] for r, on in zip(rows, sel) if on)
-        return f"{sum(sel)} selected · {ui.human_size(need)} to download ({ui.human_size(total)} total)"
-
-    result = filter_list("🕹  Pick systems", [r[0] for r in rows], multi=True,
-                         initial=[i in (initial or ()) for i in range(len(rows))], hint=systems_hint(editable),
-                         hotkeys=("e", "D") if editable else (), esc_asks=False, hidden=[not r[1] for r in rows],
-                         status=status, diff_marks=False, session=state)
-    if result is None:
-        return None
-    if isinstance(result, tuple):
-        return ("games", result[1]) if result[0] == "e" else ("clear", None)
-    return [i for i, on in enumerate(result) if on]
 
 
 def help_lines(multi, hint, hidden_count=False, has_note=False):

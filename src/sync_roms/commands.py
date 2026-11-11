@@ -76,20 +76,6 @@ def setup_from_flags(manifest, current, device_id, layout):
     return device, layout
 
 
-def systems_from_flag(flag, systems, available):
-    """Indexes into systems for --systems: 'all' (every system that has games) or a comma list of system ids."""
-    if flag == "all":
-        return [i for i, s in enumerate(systems) if available(s)]
-    ids = [x.strip() for x in flag.split(",") if x.strip()]
-    by_id = {s["bucket"]: i for i, s in enumerate(systems)}
-    unknown = [x for x in ids if x not in by_id]
-    if unknown:
-        ui.fail(f"Unknown or unsupported system(s) for this card: {', '.join(unknown)}. Available: {', '.join(by_id)}", 2)
-    return [by_id[x] for x in ids if available(systems[by_id[x]])]
-
-
-# --- Raw games lists ----------------------------------------------------------------------------------
-
 def load_target(card):
     """(raw games list, save function) for a card's games."""
     if card is None:
@@ -648,12 +634,6 @@ def check_data(list_keys=None, repo_systems=None):
             problems.append(f"cards.json: {name}: unknown device {entry.get('device')!r}")
         if entry.get("layout") not in layouts | {None}:
             problems.append(f"cards.json: {name}: unknown layout {entry.get('layout')!r}")
-        ids = entry.get("systems", [])
-        if not isinstance(ids, list):
-            problems.append(f"cards.json: {name}: 'systems' must be a list of system ids")
-        else:
-            problems.extend(f"cards.json: {name}: unknown system {sid!r}"
-                            for sid in ids if not isinstance(sid, str) or sid not in systems)
         if "games" in entry:
             check_list(f"cards.json: {name}", entry["games"])
         picked = entry.get("collections", [])
@@ -881,8 +861,6 @@ def completion_cmd(args):
     --card) COMPREPLY=($(compgen -W "$(sync-roms completion list cards)" -- "$cur")); return;;
     --device) COMPREPLY=($(compgen -W "$(sync-roms completion list devices)" -- "$cur")); return;;
     --layout) COMPREPLY=($(compgen -W "$(sync-roms completion list layouts)" -- "$cur")); return;;
-    --systems)  # a comma separated list: complete the part after the last comma
-      COMPREPLY=($(compgen -P "${{cur%"${{cur##*,}}"}}" -W "all $(sync-roms completion list systems)" -- "${{cur##*,}}")); compopt -o nospace 2>/dev/null; return;;
     --system) COMPREPLY=($(compgen -W "$(sync-roms completion list systems)" -- "$cur")); return;;
     --profile|--write-profile|--bucket|--root|--endpoint) return;;
   esac
@@ -905,12 +883,11 @@ complete -o filenames -F _sync_roms sync-roms
         lines = [f'complete -c sync-roms -f -n __fish_use_subcommand -a "{subs}"']
         for name, w in second.items():
             lines.append(f'complete -c sync-roms -f -n "__fish_seen_subcommand_from {name}; and not __fish_seen_subcommand_from {" ".join(w)}" -a "{" ".join(w)}"')
-        values = {"card": "cards", "device": "devices", "layout": "layouts", "system": "systems", "systems": "systems"}
+        values = {"card": "cards", "device": "devices", "layout": "layouts", "system": "systems"}
         for flag in (f for f in flag_list if f.startswith("--")):
             name = flag[2:]
             if name in values:
-                extra = "all " if name == "systems" else ""
-                lines.append(f'complete -c sync-roms -l {name} -x -a "{extra}(sync-roms completion list {values[name]})"')
+                lines.append(f'complete -c sync-roms -l {name} -x -a "(sync-roms completion list {values[name]})"')
             else:
                 lines.append(f"complete -c sync-roms -l {name}")
         print("\n".join(lines))

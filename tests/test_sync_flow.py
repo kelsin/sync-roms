@@ -152,9 +152,9 @@ class PlainOutputTest(unittest.TestCase):
 
 
 class SyncFlowTest(unittest.TestCase):
-    def run_sync(self, cards=None, yes=True, dry_run=False, plan=None, picks=None, stale=(), extra=(),
+    def run_sync(self, cards=None, yes=True, dry_run=False, plan=None, stale=(), extra=(),
                  manifest=MANIFEST, setup=(None, "esde"), files=(), colls=(), after=None, settings=None, prepare=None):
-        updates, picked = [], []
+        updates = []
         with tempfile.TemporaryDirectory() as card_dir:
             card = self.card = os.path.basename(card_dir)
             argv = ["sync-roms", card_dir] + (["--yes"] if yes else []) + (["--dry-run"] if dry_run else [])
@@ -167,8 +167,7 @@ class SyncFlowTest(unittest.TestCase):
                                  "save_card": lambda *a: None,
                                  "update_card": lambda name, **v: updates.append(v)}),
                         (s3, {"list_sizes": list_sizes, "fetch_texts": lambda keys: {}}),
-                        (cli.picker, {"saved_setup": lambda *a: setup,
-                                      "pick_systems": lambda rows, present, state, editable: picked.append(present) or [0]}),
+                        (cli.picker, {"saved_setup": lambda *a: setup}),
                         (cli.downloads, {"run_downloads": lambda *a: 0, "plan_downloads": lambda jobs, unzip=False, disc_dir=None: plan if plan is not None else jobs}),
                         (cli.clean, {"clean_android_media": lambda *a: None}),
                         (scrape_plan, {"stale_media": lambda *a: [os.path.join(card_dir, s) for s in stale]}),
@@ -199,41 +198,30 @@ class SyncFlowTest(unittest.TestCase):
                     self.after = after(card_dir)
                 root = cli.clean._clean_root
                 left = [s for s in stale if os.path.exists(os.path.join(card_dir, s))]
-        return code, out, updates, picked, root, left
+        return code, out, updates, root, left
 
     def test_nothing_downloaded_skips_card_cleaning(self):
-        _, _, _, _, root, _ = self.run_sync(plan=[])
+        _, _, _, root, _ = self.run_sync(plan=[])
         self.assertIsNone(root)
 
     def test_download_marks_the_card_for_cleaning(self):
-        _, _, _, _, root, _ = self.run_sync()
+        _, _, _, root, _ = self.run_sync()
         self.assertIsNotNone(root)
 
     def test_stale_media_listed_before_removal(self):
-        _, out, _, _, _, left = self.run_sync(stale=("a.png", "b.png"))
+        _, out, _, _, left = self.run_sync(stale=("a.png", "b.png"))
         self.assertIn("2 media file(s)", out)
         self.assertIn("a.png", out)
         self.assertLess(out.index("a.png"), out.index("Removed 2"))
         self.assertEqual(left, [])
 
-    def test_picker_selection_is_saved_for_the_card(self):
-        _, _, updates, _, _, _ = self.run_sync(cards={"device": "full"}, yes=False)
-        self.assertIn({"systems": ["gba"]}, updates)
-
-    def test_dry_run_does_not_save_the_selection(self):
-        _, _, updates, _, _, _ = self.run_sync(cards={}, yes=False, dry_run=True)
-        self.assertNotIn({"systems": ["gba"]}, updates)
-
-    def test_saved_selection_starts_the_picker(self):
-        _, _, _, picked, _, _ = self.run_sync(cards={"systems": ["gba"]}, yes=False)
-        self.assertEqual(picked, [[0]])
-
-    def test_yes_with_saved_selection_skips_the_picker(self):
-        code, _, _, picked, _, _ = self.run_sync(cards={"systems": ["gba"]})
-        self.assertEqual((code, picked), (0, []))
+    def test_every_system_with_games_syncs_and_no_selection_is_saved(self):
+        code, _, updates, _, _ = self.run_sync(cards={"device": "full", "systems": []}, yes=False)
+        self.assertEqual(code, 0)
+        self.assertFalse([u for u in updates if "systems" in u])
 
     def test_esde_card_gets_its_collection_written_enabled_and_owned(self):
-        _, _, updates, _, _, _ = self.run_sync(cards={"collections": ["favs"]}, colls=[FAVS], files=["ROMs/gba/Game.zip"],
+        _, _, updates, _, _ = self.run_sync(cards={"collections": ["favs"]}, colls=[FAVS], files=["ROMs/gba/Game.zip"],
                                                after=lambda d: (read_from(d, "ES-DE", "collections", "custom-Favs.cfg"),
                                                                 read_from(d, "ES-DE", "settings", "es_settings.xml")))
         cfg, settings = self.after
@@ -253,7 +241,7 @@ class SyncFlowTest(unittest.TestCase):
         self.assertIn("<config>", settings)
 
     def test_dry_run_describes_and_writes_nothing(self):
-        _, out, updates, _, _, _ = self.run_sync(cards={"collections": ["favs"]}, colls=[FAVS], dry_run=True,
+        _, out, updates, _, _ = self.run_sync(cards={"collections": ["favs"]}, colls=[FAVS], dry_run=True,
                                                  after=lambda d: os.path.exists(os.path.join(d, "ES-DE", "collections")))
         self.assertIn("custom-Favs.cfg", out)
         self.assertFalse(self.after)
@@ -304,7 +292,7 @@ class SyncFlowTest(unittest.TestCase):
 
     def surprise_calls(self, result=(), **kw):
         calls = []
-        fake = lambda card, setup, chosen, interactive, dry_run: calls.append((interactive, dry_run, [s["bucket"] for s in chosen])) or list(result)  # noqa: E731
+        fake = lambda card, setup, chosen, interactive, dry_run, **k: calls.append((interactive, dry_run, [s["bucket"] for s in chosen])) or list(result)  # noqa: E731
         return calls, self.run_sync(extra=((cli.surprise, "run_surprise", fake),), **kw)
 
     def test_yes_runs_surprise_unattended(self):
@@ -321,14 +309,14 @@ class SyncFlowTest(unittest.TestCase):
 
     def test_terminal_run_is_interactive(self):
         with mock.patch.object(ui, "has_terminal", return_value=True):
-            calls, _ = self.surprise_calls(cards={"systems": ["gba"]}, yes=False)
+            calls, _ = self.surprise_calls(yes=False)
         self.assertEqual(calls[0][:2], (True, False))
 
     def test_over_capacity_warns_and_goes_on(self):
         big = budget.Usage(2 * 10 ** 9, 1, False)
         warned = []
         code, *_ = self.run_sync(cards={"size": "1 GB"}, extra=(
-            (cli.surprise, "run_surprise", lambda *a: []), (cli.budget, "card_usage", lambda *a, **k: big),
+            (cli.surprise, "run_surprise", lambda *a, **k: []), (cli.budget, "card_usage", lambda *a, **k: big),
             (ui, "warn", warned.append)))
         self.assertEqual(code, 0)
         self.assertIn(f"{self.card}'s picks take 2 GB of its 1 GB: 1 GB over", warned)
@@ -345,7 +333,7 @@ class SyncFlowTest(unittest.TestCase):
         manifest = {**MANIFEST, "systems": [{**MANIFEST["systems"][0], **old}]}
         got, seen = [], []
 
-        def step(*a):
+        def step(*a, **k):
             manifest["systems"] = [{**MANIFEST["systems"][0], **new}]
             return []
         code, *_ = self.run_sync(manifest=manifest, extra=(
@@ -389,7 +377,7 @@ class SyncFlowTest(unittest.TestCase):
     def test_surprise_collection_comes_from_the_saved_card_after_the_editor(self):
         saved = [{"system": "gba", "bucket": "gba/Game.zip", "title": "Game"}]
         self.run_sync(cards={"surprises": saved}, files=["ROMs/gba/Game.zip"],
-                      extra=((cli.surprise, "run_surprise", lambda *a: []),),  # what the step returned before the editor
+                      extra=((cli.surprise, "run_surprise", lambda *a, **k: []),),  # what the step returned before the editor
                       after=lambda d: read_from(d, "ES-DE", "collections", "custom-Surprise.cfg"))
         self.assertEqual(self.after, "%ROMPATH%/gba/Game.zip\n")
 
