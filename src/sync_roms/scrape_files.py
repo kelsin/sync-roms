@@ -63,8 +63,12 @@ def plan_upload(es_dir, roms, existing, remote_texts):
     """
     stems = rom_stems(roms)
     plan = {"files": [], "texts": [], "present": 0, "derived": [], "derived_present": 0, "warnings": []}
+    planned = set()  # each storage key is planned once: the uploads run in parallel
 
     def want_file(key, path, size):
+        if key in planned:
+            return
+        planned.add(key)
         if existing.get(key) == size:
             plan["present"] += 1
         else:
@@ -77,10 +81,24 @@ def plan_upload(es_dir, roms, existing, remote_texts):
     # the card's folders have ES-DE's system names (or, synced before, bucket names); 3ds and n3ds share one, so
     # each file goes to the storage folder of the system its ROM belongs to
     buckets = esde_buckets()
-    gamelists = os.path.join(es_dir, "gamelists")
-    for name in sorted(os.listdir(gamelists)) if os.path.isdir(gamelists) else []:
-        path = os.path.join(gamelists, name, "gamelist.xml")
-        systems = [b for b in buckets.get(name) or [name] if roms.get(b)]
+    renamed = {b: name for name, bs in buckets.items() for b in bs if b != name}  # bucket -> its ES-DE folder name
+
+    def folders(kind):
+        """[(folder, its systems' buckets)] in es_dir/kind, ES-DE-named folders first. A bucket-named folder from an
+        older sync is skipped (with a warning) when the ES-DE-named one is there too."""
+        top = os.path.join(es_dir, kind)
+        names = sorted(os.listdir(top)) if os.path.isdir(top) else []
+        out = []
+        for name in names:
+            if name in renamed and name not in buckets and renamed[name] in names:
+                plan["warnings"].append(f"{kind}/{name} is from an older sync and was skipped; remove it")
+            else:
+                out.append((name, buckets.get(name) or [name]))
+        return sorted(out, key=lambda f: f[0] not in buckets)
+
+    for name, systems in folders("gamelists"):
+        path = os.path.join(es_dir, "gamelists", name, "gamelist.xml")
+        systems = [b for b in systems if roms.get(b)]
         if not systems or not os.path.isfile(path):
             continue
         try:
@@ -91,6 +109,9 @@ def plan_upload(es_dir, roms, existing, remote_texts):
         for system in systems:
             local = {k: v for k, v in parsed.items() if k in roms[system] and v}
             key = f"{scrape_plan.SCRAPES}/{system}/metadata.json"
+            if key in planned:
+                continue
+            planned.add(key)
             old = remote_texts.get(key, "")
             try:
                 remote = json.loads(old) if old else {}
@@ -106,8 +127,8 @@ def plan_upload(es_dir, roms, existing, remote_texts):
     media = os.path.join(es_dir, "downloaded_media")
     art = defaultdict(dict)  # (system, ROM name) -> {media type: local path} for Onion box art and Slot labels
     sizes = {}  # local path -> size of the art sources
-    for name in sorted(os.listdir(media)) if os.path.isdir(media) else []:
-        for system in buckets.get(name) or [name]:
+    for name, systems in folders("downloaded_media"):
+        for system in systems:
             if not stems.get(system):
                 continue
             for mtype in sorted(scrape_plan.MEDIA_TYPES):
@@ -118,7 +139,7 @@ def plan_upload(es_dir, roms, existing, remote_texts):
                     if size:  # ES-DE leaves empty placeholders for media it didn't find
                         want_file(f"{scrape_plan.SCRAPES}/{system}/{mtype}/{rel}", full, size)
                         if mtype in scrape_plan.ONION_ART + scrape_plan.SLOT_ART:
-                            art[(system, stem)][mtype] = full
+                            art[(system, stem)].setdefault(mtype, full)
                             sizes[full] = size
     for (system, stem), found in sorted(art.items()):
         for key, source, box in derived_art(system, stem, found):

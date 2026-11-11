@@ -341,18 +341,50 @@ class SharedFolderTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as es:
             touch(os.path.join(es, "downloaded_media", "n3ds", "covers", "A.png"))
             touch(os.path.join(es, "downloaded_media", "n3ds", "covers", "B.png"))
-            touch(os.path.join(es, "downloaded_media", "3ds", "covers", "C.png"))  # a card synced by bucket name
             os.makedirs(os.path.join(es, "gamelists", "n3ds"))
             with open(os.path.join(es, "gamelists", "n3ds", "gamelist.xml"), "w") as f:
                 f.write(gamelist)
-            roms = {"3ds": {"A.3ds", "C.3ds"}, "n3ds": {"B.3ds"}}
+            roms = {"3ds": {"A.3ds"}, "n3ds": {"B.3ds"}}
             plan = scrape_files.plan_upload(es, roms, {}, {})
             wanted = scrape_files._upload_text_keys(es, {"scrapes/3ds/metadata.json": 1,
                                                          "scrapes/n3ds/metadata.json": 1}, roms)
         self.assertEqual(sorted(k for k, *_ in plan["files"]),
-                         ["scrapes/3ds/covers/A.png", "scrapes/3ds/covers/C.png", "scrapes/n3ds/covers/B.png"])
+                         ["scrapes/3ds/covers/A.png", "scrapes/n3ds/covers/B.png"])
         self.assertEqual(sorted(k for k, *_ in plan["texts"]), ["scrapes/3ds/metadata.json", "scrapes/n3ds/metadata.json"])
         self.assertEqual(sorted(wanted), ["scrapes/3ds/metadata.json", "scrapes/n3ds/metadata.json"])
+
+
+class StaleFolderUploadTest(unittest.TestCase):
+    """A bucket-named folder an older sync left (3ds) next to the ES-DE-named one (n3ds)."""
+
+    def plan(self, folders):
+        with tempfile.TemporaryDirectory() as es:
+            for name, size in folders:
+                path = os.path.join(es, "downloaded_media", name, "covers", "A.png")
+                os.makedirs(os.path.dirname(path))
+                with open(path, "wb") as f:
+                    f.write(b"x" * size)
+                os.makedirs(os.path.join(es, "gamelists", name))
+                with open(os.path.join(es, "gamelists", name, "gamelist.xml"), "w") as f:
+                    f.write(f"<gameList><game><path>./A.3ds</path><name>A from {name}</name></game></gameList>")
+            plan = scrape_files.plan_upload(es, {"3ds": {"A.3ds"}}, {}, {})
+        return plan
+
+    def test_the_old_folder_is_skipped_when_the_new_one_is_there(self):
+        plan = self.plan([("3ds", 1), ("n3ds", 2)])
+        self.assertEqual([(k, size) for k, _, size in plan["files"]], [("scrapes/3ds/covers/A.png", 2)])
+        self.assertEqual([k for k, *_ in plan["texts"]], ["scrapes/3ds/metadata.json"])
+        self.assertIn("A from n3ds", plan["texts"][0][1])
+        self.assertEqual(len({k for k, *_ in plan["derived"]}), len(plan["derived"]))
+        self.assertTrue(all("n3ds" in src for _, src, _, _ in plan["derived"]))
+        self.assertEqual(sorted(plan["warnings"]), ["downloaded_media/3ds is from an older sync and was skipped; remove it",
+                                                    "gamelists/3ds is from an older sync and was skipped; remove it"])
+
+    def test_only_the_old_folder_still_uploads(self):
+        plan = self.plan([("3ds", 1)])
+        self.assertEqual([(k, size) for k, _, size in plan["files"]], [("scrapes/3ds/covers/A.png", 1)])
+        self.assertIn("A from 3ds", plan["texts"][0][1])
+        self.assertEqual(plan["warnings"], [])
 
 
 class DerivedUploadTest(unittest.TestCase):

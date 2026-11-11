@@ -346,7 +346,8 @@ class Flow(DataDir):
     def test_removing_the_set_reference_drops_its_exclusions_and_a_direct_pick_wins(self):
         self.write_json("cards.json", {"c": {"device": "d", "layout": "esde",
                                              "games": {"gba": [g("gba/Ruby.zip")], "sets": ["pk"]},
-                                             "excluded": {"gba": ["gba/Ruby.zip", "gba/Ruby.sav"]}}})
+                                             "excluded": {"gba": ["gba/Ruby.zip", "gba/Ruby.sav"],
+                                                          "gb": ["gb/Red.gb"], "nes": ["nes/Other.nes"]}}})
 
         def after(labels, kw):
             self.assertTrue(self.initial_of(kw, labels, "Ruby.zip"))  # the direct pick is synced again
@@ -355,7 +356,7 @@ class Flow(DataDir):
         self.run_system(returns((cardedit.SET_KEY, 0)), returns((cardedit.FULL_KEY, 0)), returns(None), after)
         entry = self.read("cards.json")["c"]
         self.assertEqual(entry["games"], {"gba": [g("gba/Ruby.zip")]})
-        self.assertEqual(entry["excluded"], {})
+        self.assertEqual(entry["excluded"], {})  # the other systems' exclusions no set covers go too
 
     def test_revert_after_a_set_reference_change_keeps_it_without_exclusions(self):
         self.card()

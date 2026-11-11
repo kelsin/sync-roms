@@ -299,6 +299,7 @@ def edit_system(name, system, setup, sizing=None):
     sets_on = list(store.list_sets(raw))
     before_excluded = store.card_excluded(name, cards)
     excluded = set(before_excluded.get(bucket, ()))
+    other_excluded = {b: list(k) for b, k in before_excluded.items() if b != bucket}
     sets = store.load_sets()
     sets_by_id = {x["id"]: x for x in sets}
     # names only: on a folder a sized listing stats every file, which the background refresh already does
@@ -390,7 +391,7 @@ def edit_system(name, system, setup, sizing=None):
             games[bucket] = s["games"]
         if sets_on:
             games[store.SETS_KEY] = sets_on
-        new_excluded = {b: list(k) for b, k in before_excluded.items() if b != bucket}
+        new_excluded = {b: k for b, k in other_excluded.items() if k}
         if excluded:
             new_excluded[bucket] = sorted(excluded)
         changed = store.sorted_list(games) != store.sorted_list(raw) or new_excluded != before_excluded
@@ -459,7 +460,9 @@ def edit_system(name, system, setup, sizing=None):
                 refs = list(sets_on)
                 chosen = pick_set(system, sets, sets_on, {r[1] for r in rows})
                 if sets_on != refs:  # kept as is: rows switched by the reference change aren't pending, so u keeps them
-                    excluded.intersection_update(cover())  # an exclusion means nothing once no set covers the game
+                    covered = cover()  # an exclusion means nothing once no set covers the game, on any system
+                    excluded.intersection_update(covered)
+                    other_excluded.update((b, [k for k in keys if k in covered]) for b, keys in other_excluded.items())
                     start = states(cover())
                 if chosen:
                     filt = (chosen["name"], set_filter(chosen, system))
