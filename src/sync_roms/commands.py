@@ -89,13 +89,13 @@ def systems_from_flag(flag, systems, available):
 # --- Raw games lists ----------------------------------------------------------------------------------
 
 def load_target(card):
-    """(raw games list, save function) for the core list, or for a card's extras."""
-    store.seed_personal_files()
+    """(raw games list, save function) for a card's games."""
     if card is None:
-        return store.personal_json("games.json"), lambda raw: store.save_lists(raw, {})
+        ui.fail("Name the card with --card NAME (games lists belong to cards). Cards: "
+                f"{', '.join(store.all_card_names()) or '(none yet)'}", 2)
     if card not in store.load_cards():
         ui.fail(f"No card named {card!r}. Cards: {', '.join(store.all_card_names()) or '(none yet)'}", 2)
-    return store.card_games(card), lambda raw: store.save_lists(None, {card: raw})
+    return store.card_games(card), lambda raw: store.save_lists({card: raw})
 
 
 def system_ids():
@@ -170,7 +170,7 @@ def finish(args, raw, save, changes):
         return 0
     if save(raw) is False:
         return 3
-    print(ui.green(f"💾 Saved {len(changes)} change(s)") + ui.dim(f" ({'card ' + args.card if args.card else 'core list'})"))
+    print(ui.green(f"💾 Saved {len(changes)} change(s)") + ui.dim(f" (card {args.card})"))
     return 0
 
 
@@ -314,7 +314,7 @@ def cards_list(args):
     if args.json:
         ui.emit_json(rows)
         return 0
-    ui.table([(r["name"], r["device"] or "(no device set)", r["layout"] or "", r["size"] or "", f"{r['extras']} extra entries") for r in rows])
+    ui.table([(r["name"], r["device"] or "(no device set)", r["layout"] or "", r["size"] or "", f"{r['extras']} game entries") for r in rows])
     return 0
 
 
@@ -369,9 +369,9 @@ def cards_delete(args):
     if args.name not in store.load_cards():
         ui.fail(f"No card named {args.name!r}", 2)
     if args.dry_run:
-        print(ui.yellow(f"🧪 Would delete card {args.name} and its extra games"))
+        print(ui.yellow(f"🧪 Would delete card {args.name} and its games"))
         return 0
-    if not args.yes and not ui.confirm(f"Delete card {args.name} and its extra games? (cards.json.bak keeps the old file)", default=False):
+    if not args.yes and not ui.confirm(f"Delete card {args.name} and its games? (cards.json.bak keeps the old file)", default=False):
         print(ui.yellow("↩️  Kept"))
         return 0
     if not store.delete_card(args.name):
@@ -448,6 +448,11 @@ def check_sets(problems, systems):
     return keys
 
 
+def valid_ratio(value):
+    """True for a W:H aspect ratio string of two positive whole numbers."""
+    return isinstance(value, str) and re.fullmatch(r"[1-9][0-9]*:[1-9][0-9]*", value) is not None
+
+
 def check_data(list_keys=None, repo_systems=None):
     """Problems found in the user's data files, as strings.
 
@@ -461,8 +466,21 @@ def check_data(list_keys=None, repo_systems=None):
         sid = s.get("screenscraper")
         if sid is not None and (not isinstance(sid, int) or isinstance(sid, bool)):
             problems.append(f"systems.json: {s['bucket']}: screenscraper must be an integer")
+    for s in repo_systems:
+        ratio = s.get("ratio")
+        if ratio is not None and not valid_ratio(ratio):
+            problems.append(f"systems.json: {s['bucket']}: ratio must look like W:H with whole numbers, not {ratio!r}")
     wanted = {}  # where -> [(system, key)] for the bucket check
     systems = {s["bucket"] for s in repo_systems}
+    over = store.repo_json("ratio-systems")
+    for ratio, ids in list(over.get("ratios", {}).items()) + [("dual_screen", over.get("dual_screen", []))]:
+        if ratio != "dual_screen" and not valid_ratio(ratio):
+            problems.append(f"ratio-systems.json: ratio {ratio!r} must look like W:H with whole numbers")
+        problems.extend(f"ratio-systems.json: {ratio}: unknown system {i!r}" for i in ids if i not in systems)
+    for d in store.repo_json("devices"):
+        for key in ("screen", "screen2"):
+            if key in d and not valid_ratio(d[key]):
+                problems.append(f"devices.json: {d['id']}: {key} must look like W:H with whole numbers, not {d[key]!r}")
     devices = {d["id"] for d in store.repo_json("devices")}
     layouts = set(store.repo_json("layouts"))
     sets = {x["id"] for x in store.load_sets()}
@@ -503,9 +521,6 @@ def check_data(list_keys=None, repo_systems=None):
             elif not (isinstance(entry, dict) and "full_system" in entry):
                 problems.append(f"{where}: {key}: must be a list of games or {{\"full_system\": true}}")
 
-    core = load("games.json")
-    if core is not None:
-        check_list("games.json", core)
     cards = load("cards.json")
     if cards is not None and not isinstance(cards, dict):
         problems.append("cards.json: must be an object")
@@ -578,7 +593,7 @@ def check_cmd(args):
     for n in check_notices(repo_systems):
         print(ui.yellow(f"⚠️  {n}"))
     if not problems:
-        print(ui.green("✅ games.json, cards.json, device-systems.json and the sets look fine"))
+        print(ui.green("✅ cards.json, device-systems.json and the sets look fine"))
     return 1 if problems else 0
 
 

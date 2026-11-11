@@ -95,6 +95,7 @@
     {
       "id": "wii-3ds",
       "add": [
+        "3ds",
         "n3ds",
         "wii"
       ],

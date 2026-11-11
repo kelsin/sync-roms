@@ -285,6 +285,15 @@ def plan_scrapes(layout_name, rom_rels, listing, meta, media_root, rom_dir, pres
     return jobs, entries, texts
 
 
+def scrape_cost(layout_name, system, rom_rel, listing):
+    """Bytes of scraped files a sync would install for one ROM (rom_rel: its path in the system folder) under a
+    layout, from a listing of scrapes/<system>/ with sizes; 0 for a layout without scrapes or a ROM with none."""
+    if layout_name not in SCRAPE_LAYOUTS:
+        return 0
+    jobs, _, _ = plan_scrapes(layout_name, [rom_rel], listing, {}, "/media", "/roms", lambda rom: True)
+    return sum(size or 0 for _, _, size in jobs)
+
+
 NO_SHRINK = "Onion box art and Slot labels need Pillow or macOS sips to resize images"
 
 
@@ -445,6 +454,12 @@ def read_text(path):
         return f.read()
 
 
+def esde_name(system, layout_name="esde"):
+    """ES-DE's name for a system, which its media and gamelist folders use: the first part of its ROM folder in the
+    layout (so systems that share a ROM folder share them), or its bucket when the layout has no folder for it."""
+    return (system["folders"].get(layout_name) or system["bucket"]).split("/")[0]
+
+
 def media_root_of(layout_name, system, base, es_dir):
     """The folder a system's scraped media goes in, for layouts that keep it apart from the ROMs."""
     if layout_name == "muos":
@@ -452,8 +467,8 @@ def media_root_of(layout_name, system, base, es_dir):
     if layout_name == "slot":
         return os.path.join(base, "Labels", system["folders"]["slot"])
     if layout_name == "emudeck":
-        return os.path.join(base, EMUDECK_MEDIA, system["bucket"])
-    return os.path.join(es_dir, "downloaded_media", system["bucket"])
+        return os.path.join(base, EMUDECK_MEDIA, esde_name(system, "emudeck"))
+    return os.path.join(es_dir, "downloaded_media", esde_name(system))
 
 
 def build_scrape_plan(layout_name, systems, data, extra, extra_texts, rom_rels, dest_of, es_dir, present, base):
@@ -475,7 +490,7 @@ def build_scrape_plan(layout_name, systems, data, extra, extra_texts, rom_rels, 
             if not os.path.exists(path) or read_text(path) != text:
                 plan["writes"].append((path, text))
         if entries:
-            gl = (os.path.join(es_dir, "gamelists", s["bucket"]) if layout_name == "esde" else rom_dir)
+            gl = (os.path.join(es_dir, "gamelists", esde_name(s)) if layout_name == "esde" else rom_dir)
             plan["gamelists"][os.path.join(gl, GAMELIST_FILES[layout_name])].update(entries)
     if layout_name == "esde":
         plan["extras"], plan["writes"] = plan_esde_extras(es_dir, extra, extra_texts)
@@ -550,6 +565,7 @@ def stale_media(layout_name, systems, roms_dir, es_dir, base=None):
     stale, seen = [], set()
     if layout_name in ("muos", "slot"):
         return stale_firmware_media(layout_name, systems, roms_dir, base)
+    named = {esde_name(x, layout_name) for x in systems}
     for s in systems:
         folder = s["folders"].get(layout_name)
         rom_dir = os.path.join(roms_dir, folder) if folder else None
@@ -562,6 +578,12 @@ def stale_media(layout_name, systems, roms_dir, es_dir, base=None):
                 media = os.path.join(media_root_of(layout_name, s, base, es_dir), mtype)
                 stale += [full for rel, full in walk_files(media) if os.path.splitext(rel)[0] not in stems] \
                     if os.path.isdir(media) else []
+            old = s["bucket"]  # an older sync named the folders after the bucket: all of it is stale once the ES-DE one exists
+            if old != esde_name(s, layout_name) and old not in named and os.path.isdir(media_root_of(layout_name, s, base, es_dir)):
+                stale += [full for _, full in walk_files(media_root_of(layout_name, {"folders": {}, "bucket": old}, base, es_dir))]
+                if layout_name == "esde":
+                    stale += [path for path in [os.path.join(es_dir, "gamelists", old, GAMELIST_FILES["esde"])]
+                              if os.path.isfile(path)]
         elif layout_name == "knulli":
             for sub in ("images", "videos", "manuals"):
                 base = os.path.join(rom_dir, sub)

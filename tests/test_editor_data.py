@@ -8,7 +8,7 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
-from sync_roms import commands, edit, picker, store  # noqa: E402
+from sync_roms import cardedit, commands, edit, picker, store  # noqa: E402
 from helpers import Cmd, DataDir  # noqa: E402
 
 
@@ -98,16 +98,12 @@ class Notes(DataDir):
 
 class Sorting(DataDir):
     def test_save_sorts_systems_and_games(self):
-        store.save_lists({"nes": [{"bucket": "nes/b.zip"}], "gba": [{"bucket": "gba/Z.zip"}, {"bucket": "gba/a.zip"}],
-                          "sets": ["z", "a"]},
-                         {"c": {"snes": [{"bucket": "snes/2"}, {"bucket": "snes/1"}], "gba": []}})
-        text = open(self.path("games.json")).read()
-        data = json.loads(text)
-        self.assertEqual(list(data), ["gba", "nes", "sets"])
-        self.assertEqual([g["bucket"] for g in data["gba"]], ["gba/a.zip", "gba/Z.zip"])
-        self.assertEqual(data["sets"], ["a", "z"])
+        store.save_lists({"c": {"snes": [{"bucket": "snes/2"}, {"bucket": "snes/1"}], "gba": [{"bucket": "gba/Z.zip"}, {"bucket": "gba/a.zip"}],
+                                "sets": ["z", "a"]}})
         card = self.read("cards.json")["c"]["games"]
-        self.assertEqual(list(card), ["gba", "snes"])
+        self.assertEqual(list(card), ["gba", "sets", "snes"])
+        self.assertEqual([g["bucket"] for g in card["gba"]], ["gba/a.zip", "gba/Z.zip"])
+        self.assertEqual(card["sets"], ["a", "z"])
         self.assertEqual([g["bucket"] for g in card["snes"]], ["snes/1", "snes/2"])
 
 
@@ -151,8 +147,9 @@ class CheckSystemsKey(Cmd):
 
 class CheckBucketKeys(Cmd):
     def test_missing_keys_are_reported_per_file(self):
-        with open(self.path("games.json"), "w") as f:
-            json.dump({"gba": [{"title": "A", "bucket": "gba/A.zip"}, {"title": "B", "bucket": "gba/B.zip"}]}, f)
+        with open(self.path("cards.json"), "w") as f:
+            json.dump({"c": {"device": "full", "layout": "esde",
+                             "games": {"gba": [{"title": "A", "bucket": "gba/A.zip"}, {"title": "B", "bucket": "gba/B.zip"}]}}}, f)
         os.makedirs(self.path("sets"))
         with open(self.path("sets/mine.json"), "w") as f:
             json.dump({"name": "Mine", "games": [{"title": "D", "system": "nes", "bucket": "nes/D.zip",
@@ -181,7 +178,8 @@ class CheckBucketKeys(Cmd):
 class Hints(unittest.TestCase):
     def test_hints_fit_a_narrow_terminal_and_lead_with_the_main_keys(self):
         hints = [picker.SYSTEMS_HINT, picker.systems_hint(True), picker.MULTI_HINT, picker.SINGLE_HINT,
-                 edit.FULL_HINT.format(what="full system"), edit.MENU_HINT, edit.GAMES_HINT]
+                 edit.MENU_HINT, edit.GAMES_HINT, cardedit.LIST_HINT, cardedit.GAMES_HINT, cardedit.SETS_HINT,
+                 cardedit.META_HINT, cardedit.VALUES_HINT]
         for h in hints:
             self.assertLessEqual(picker.cell_width(h), 80, h)
         self.assertTrue(picker.systems_hint(False).startswith("Space toggle · Enter go"))
@@ -222,6 +220,30 @@ class SystemsPickerKeys(unittest.TestCase):
         # select a and c, press o: b is hidden, so Down from a lands on c; space unselects it
         keys = [" ", curses.KEY_END, " ", "o", curses.KEY_HOME, curses.KEY_DOWN, " ", "\n"]
         self.assertEqual(self.run_keys(keys), [0])
+
+
+class CheckRatios(Cmd):
+    def test_repo_data_is_clean(self):
+        self.assertEqual(commands.check_data(), [])
+
+    def test_unknown_system_in_ratio_systems_is_reported(self):
+        good = store.repo_json("ratio-systems")
+        bad = {"ratios": {"3:5": ["nope"], "wide": ["gb"]}, "dual_screen": ["ghost"]}
+        for data, expect in ((good, 0), (bad, 3)):
+            with mock.patch.object(store, "repo_json", lambda n, real=store.repo_json, data=data:
+                                   data if n == "ratio-systems" else real(n)):
+                self.assertEqual(len(commands.check_data()), expect)
+
+    def test_malformed_system_ratio_is_reported(self):
+        systems = store.repo_json("systems")
+        systems[0]["ratio"] = "4/3"
+        problems = commands.check_data(repo_systems=systems)
+        self.assertEqual(len(problems), 1)
+        self.assertIn("ratio", problems[0])
+        for ok in ("4:3", "31:27"):
+            self.assertTrue(commands.valid_ratio(ok))
+        for bad in ("4:", "0:3", "4:3:2", " 4:3", 43, None):
+            self.assertFalse(commands.valid_ratio(bad), bad)
 
 
 if __name__ == "__main__":

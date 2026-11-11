@@ -185,9 +185,12 @@ def read_line(stdscr, prompt, text=""):
             text, pos = edited
 
 
+POLL_MS = 200  # how often filter_list calls its poll while no key comes
+
+
 def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, extras=None, locked=None, locked_note="",
                 hotkeys=(), note_text=None, on_note=None, esc_asks=True, hidden=None, status=None, diff_marks=True,
-                session=None):
+                session=None, poll=None, links=None):
     """Modal list: vim keys for moving and acting, Emacs keys for editing the filter.
 
     Normal mode: j/k ↑/↓ ^N/^P move · g/G top/bottom · ^D/^U half page · ^F/^B/PgUp/PgDn/^V page · / filter ·
@@ -206,27 +209,40 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
     note_text(label index) gives the text to start from.
     hotkeys: normal-mode keys that return (key, label index) for the highlighted row instead of acting.
     hidden: optional per-label flags; those rows are left out (and drawn dim) until `z` reveals them.
-    status(states) -> text: replaces the "N/M shown" status. diff_marks: show ➕/➖ against `initial` (else ✅/⬜ only).
+    status(states) -> text, or (text, color): replaces the "N/M shown" status. diff_marks: show ➕/➖ against `initial`
+    (else ✅/⬜ only).
     session: a dict the caller keeps so selection, view, revealed rows and cursor survive reopening the list.
+    poll: optional callable, called on the curses thread whenever no key came for POLL_MS; the list is then redrawn,
+    so poll can update extras in place (and status can read what it changed).
+    links: optional per-label lists of the label indexes switched together with it (multi mode): Space/Tab and `a`
+    set them all to the toggled row's new state (locked ones excepted).
     """
     os.environ.setdefault("ESCDELAY", "25")
-    lowered = [l.lower() for l in labels]
+    lowered = [l.casefold() for l in labels]
     start = list(initial) if initial is not None else [False] * len(labels)
     locked = locked or [False] * len(labels)
     hidden = hidden or [False] * len(labels)
     hidden_count = sum(hidden)
     session = {} if session is None else session
 
+    def linked(rows):
+        """rows and the rows linked to them, without locked ones."""
+        out = dict.fromkeys(rows)
+        for i in rows:
+            out.update(dict.fromkeys(links[i] if links else ()))
+        return [i for i in out if not locked[i]]
+
     def run(stdscr):
         curses.use_default_colors()
-        green_a = red_a = cyan_a = 0
+        green_a = red_a = cyan_a = yellow_a = 0
         if curses.has_colors():
             curses.start_color()
             curses.init_pair(1, curses.COLOR_GREEN, -1)
             curses.init_pair(2, curses.COLOR_RED, -1)
             curses.init_pair(3, curses.COLOR_CYAN, -1)
-            green_a, red_a, cyan_a = (curses.color_pair(n) for n in (1, 2, 3))
-        colors = {"green": green_a, "red": red_a, "cyan": cyan_a, "dim": curses.A_DIM}
+            curses.init_pair(4, curses.COLOR_YELLOW, -1)
+            green_a, red_a, cyan_a, yellow_a = (curses.color_pair(n) for n in (1, 2, 3, 4))
+        colors = {"green": green_a, "red": red_a, "cyan": cyan_a, "yellow": yellow_a, "dim": curses.A_DIM}
         state = list(session["sel"]) if "sel" in session else list(start)
         view_mode = session.get("view_mode", 0)  # multi: 0 all rows, 1 only rows that are on, 2 only rows changed
         revealed = session.get("revealed", False)
@@ -234,8 +250,10 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
         query, qpos, typing = "", 0, False
         cur, top = cursor, 0
         notice = ""
+        if poll:
+            stdscr.timeout(POLL_MS)
         while True:
-            terms = query.lower().split()
+            terms = query.casefold().split()
             vis = [i for i, l in enumerate(lowered) if (revealed or not hidden[i]) and all(t in l for t in terms)
                    and (view_mode == 0 or (state[i] if view_mode == 1 else state[i] != start[i]))]
             vis.sort(key=lambda i: hidden[i])  # revealed rows go last; stable within each group
@@ -282,7 +300,9 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
                         break
                     stdscr.addnstr(pos - top + 3, x, text, w - 1 - x, attr | colors[color])
                     x += cell_width(text)
-            line = status(state) if status else f"{len(vis)}/{len(labels)} shown"
+            line, line_color = status(state) if status else f"{len(vis)}/{len(labels)} shown", None
+            if isinstance(line, tuple):
+                line, line_color = line
             if multi and diff_marks:
                 added = sum(1 for a, b in zip(state, start) if a and not b)
                 removed = sum(1 for a, b in zip(state, start) if b and not a)
@@ -297,12 +317,14 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
                 line = notice
                 notice = ""
             stdscr.addnstr(h - 1, 0, " " * (w - 1), w - 1)
-            stdscr.addnstr(h - 1, 0, line, w - 1, curses.A_BOLD)
+            stdscr.addnstr(h - 1, 0, line, w - 1, curses.A_BOLD | (colors[line_color] if line_color else 0))
             if typing:
                 stdscr.move(1, min(w - 1, 3 + cell_width(query[:qpos])))
             try:
                 k = stdscr.get_wch()
             except curses.error:
+                if poll:
+                    poll()
                 continue
             if typing:
                 edited = line_key(query, qpos, k)
@@ -354,10 +376,14 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
                 stdscr.addnstr(h - 1, 0, " " * (w - 1), w - 1)
                 stdscr.addnstr(h - 1, 0, f"Keep +{added} −{removed} pending change(s)?  y/Enter keep · u revert · any other key keeps editing",
                                w - 1, curses.A_BOLD | red_a)
+                stdscr.timeout(-1)  # wait for the answer even when polling
                 try:
                     answer = stdscr.get_wch()
                 except curses.error:
                     continue
+                finally:
+                    if poll:
+                        stdscr.timeout(POLL_MS)
                 if answer in ("y", "Y", "\n", "\r", curses.KEY_ENTER):
                     return state
                 if answer in ("u", "U"):
@@ -379,7 +405,9 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
                 cur = top = 0
             elif k in ("\t", " ") and vis:
                 if not locked[vis[cur]]:
-                    state[vis[cur]] = not state[vis[cur]]
+                    target = not state[vis[cur]]
+                    for i in linked([vis[cur]]):
+                        state[i] = target
             elif k == "w" and vis and on_note and not locked[vis[cur]]:
                 text = read_line(stdscr, "Note (empty clears, Esc cancels): ", note_text(vis[cur]) if note_text else "")
                 if text is not None:
@@ -387,6 +415,6 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
             elif k in ("a", "\x01") and vis:
                 free = [i for i in vis if not locked[i]]
                 target = not all(state[i] for i in free)
-                for i in free:
+                for i in linked(free):
                     state[i] = target
     return curses.wrapper(run)

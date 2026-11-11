@@ -73,7 +73,8 @@ def ask_category(games, what):
     cats = list(dict.fromkeys(g["category"] for g in games if g.get("category")))
     if cats:
         print(ui.dim(f"  Categories: {', '.join(cats)}"))
-    return ui.ask(f"🏷️  Category for {what} (empty for none): ").strip()
+    typed = ui.ask(f"🏷️  Category for {what} (empty for none): ").strip()
+    return next((c for c in cats if c.casefold() == typed.casefold()), typed)  # "cave" is the existing "Cave"
 
 
 def game_label(game, names):
@@ -214,14 +215,8 @@ def open_pr(after, found):
 # --- The editor --------------------------------------------------------------------------------------
 
 def local_references(set_id):
-    """Where your own lists still use a set id: games.json and cards."""
-    found = []
-    try:
-        if set_id in store.list_sets(store.personal_json("games.json")):
-            found.append("games.json")
-    except OSError:
-        pass
-    found += [f"card {card}" for card in store.all_card_names() if set_id in store.list_sets(store.card_games(card))]
+    """Where your own cards still use a set id."""
+    found = [f"card {card}" for card in store.all_card_names() if set_id in store.list_sets(store.card_games(card))]
     return found
 
 

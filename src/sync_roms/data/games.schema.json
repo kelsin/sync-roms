@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "sync-roms games list (games.json, or the \"games\" of a card in cards.json)",
+  "title": "sync-roms games list (the \"games\" of a card in cards.json)",
   "type": "object",
   "properties": {
     "sets": {

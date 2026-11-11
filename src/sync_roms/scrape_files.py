@@ -12,7 +12,7 @@ from . import runtime, s3, scrape_plan, store, ui, upload
 def bucket_roms(systems, all_files=False):
     """{storage folder: set of ROM paths in it}, from storage's real contents.
 
-    By default only the ROMs a sync would install (the games games.json lists, or every file of a
+    By default only the ROMs a sync would install (the games the cards list, or every file of a
     full system). With all_files, every file in the system's storage folder.
     """
     todo = systems if all_files else [s for s in systems if s.get("full_system") or store.listed(s)]
@@ -43,6 +43,14 @@ def derived_art(system, stem, found):
             for kind, order, box in wanted]
 
 
+def esde_buckets():
+    """{ES-DE folder name: the buckets of the systems that use it} ("n3ds": 3ds and n3ds)."""
+    out = defaultdict(list)
+    for s in store.repo_json("systems"):
+        out[scrape_plan.esde_name(s)].append(s["bucket"])
+    return out
+
+
 def plan_upload(es_dir, roms, existing, remote_texts):
     """What to upload from an ES-DE data folder.
 
@@ -55,8 +63,12 @@ def plan_upload(es_dir, roms, existing, remote_texts):
     """
     stems = rom_stems(roms)
     plan = {"files": [], "texts": [], "present": 0, "derived": [], "derived_present": 0, "warnings": []}
+    planned = set()  # each storage key is planned once: the uploads run in parallel
 
     def want_file(key, path, size):
+        if key in planned:
+            return
+        planned.add(key)
         if existing.get(key) == size:
             plan["present"] += 1
         else:
@@ -66,46 +78,69 @@ def plan_upload(es_dir, roms, existing, remote_texts):
         with open(path, encoding="utf-8") as f:
             return f.read()
 
-    gamelists = os.path.join(es_dir, "gamelists")
-    for system in sorted(os.listdir(gamelists)) if os.path.isdir(gamelists) else []:
-        path = os.path.join(gamelists, system, "gamelist.xml")
-        if not roms.get(system) or not os.path.isfile(path):
+    # the card's folders have ES-DE's system names (or, synced before, bucket names); 3ds and n3ds share one, so
+    # each file goes to the storage folder of the system its ROM belongs to
+    buckets = esde_buckets()
+    renamed = {b: name for name, bs in buckets.items() for b in bs if b != name}  # bucket -> its ES-DE folder name
+
+    def folders(kind):
+        """[(folder, its systems' buckets)] in es_dir/kind, ES-DE-named folders first. A bucket-named folder from an
+        older sync is skipped (with a warning) when the ES-DE-named one is there too."""
+        top = os.path.join(es_dir, kind)
+        names = sorted(os.listdir(top)) if os.path.isdir(top) else []
+        out = []
+        for name in names:
+            if name in renamed and name not in buckets and renamed[name] in names:
+                plan["warnings"].append(f"{kind}/{name} is from an older sync and was skipped; remove it")
+            else:
+                out.append((name, buckets.get(name) or [name]))
+        return sorted(out, key=lambda f: f[0] not in buckets)
+
+    for name, systems in folders("gamelists"):
+        path = os.path.join(es_dir, "gamelists", name, "gamelist.xml")
+        systems = [b for b in systems if roms.get(b)]
+        if not systems or not os.path.isfile(path):
             continue
         try:
-            local = scrape_plan.parse_gamelist(read(path))
+            parsed = scrape_plan.parse_gamelist(read(path))
         except (ET.ParseError, OSError, UnicodeDecodeError) as e:
-            plan["warnings"].append(f"{system}: couldn't read gamelist.xml ({e}), skipped")
+            plan["warnings"].append(f"{name}: couldn't read gamelist.xml ({e}), skipped")
             continue
-        local = {k: v for k, v in local.items() if k in roms[system] and v}
-        key = f"{scrape_plan.SCRAPES}/{system}/metadata.json"
-        old = remote_texts.get(key, "")
-        try:
-            remote = json.loads(old) if old else {}
-        except ValueError:
-            plan["warnings"].append(f"{key} in storage isn't valid JSON, skipped")
-            continue
-        merged = scrape_plan.merge_metadata(remote, local)
-        text = scrape_plan.dump_json(merged) if local else old
-        if local and text != old:
-            new = len(set(merged) - set(remote))
-            plan["texts"].append((key, text, f"{system} metadata (+{new} new, {len(local) - new} checked)"))
+        for system in systems:
+            local = {k: v for k, v in parsed.items() if k in roms[system] and v}
+            key = f"{scrape_plan.SCRAPES}/{system}/metadata.json"
+            if key in planned:
+                continue
+            planned.add(key)
+            old = remote_texts.get(key, "")
+            try:
+                remote = json.loads(old) if old else {}
+            except ValueError:
+                plan["warnings"].append(f"{key} in storage isn't valid JSON, skipped")
+                continue
+            merged = scrape_plan.merge_metadata(remote, local)
+            text = scrape_plan.dump_json(merged) if local else old
+            if local and text != old:
+                new = len(set(merged) - set(remote))
+                plan["texts"].append((key, text, f"{system} metadata (+{new} new, {len(local) - new} checked)"))
 
     media = os.path.join(es_dir, "downloaded_media")
     art = defaultdict(dict)  # (system, ROM name) -> {media type: local path} for Onion box art and Slot labels
     sizes = {}  # local path -> size of the art sources
-    for system in sorted(os.listdir(media)) if os.path.isdir(media) else []:
-        if not stems.get(system):
-            continue
-        for mtype in sorted(scrape_plan.MEDIA_TYPES):
-            base = os.path.join(media, system, mtype)
-            for rel, full in scrape_plan.walk_files(base) if os.path.isdir(base) else []:
-                stem = os.path.splitext(rel)[0]
-                size = os.path.getsize(full) if stem in stems[system] else 0
-                if size:  # ES-DE leaves empty placeholders for media it didn't find
-                    want_file(f"{scrape_plan.SCRAPES}/{system}/{mtype}/{rel}", full, size)
-                    if mtype in scrape_plan.ONION_ART + scrape_plan.SLOT_ART:
-                        art[(system, stem)][mtype] = full
-                        sizes[full] = size
+    for name, systems in folders("downloaded_media"):
+        for system in systems:
+            if not stems.get(system):
+                continue
+            for mtype in sorted(scrape_plan.MEDIA_TYPES):
+                base = os.path.join(media, name, mtype)
+                for rel, full in scrape_plan.walk_files(base) if os.path.isdir(base) else []:
+                    stem = os.path.splitext(rel)[0]
+                    size = os.path.getsize(full) if stem in stems[system] else 0
+                    if size:  # ES-DE leaves empty placeholders for media it didn't find
+                        want_file(f"{scrape_plan.SCRAPES}/{system}/{mtype}/{rel}", full, size)
+                        if mtype in scrape_plan.ONION_ART + scrape_plan.SLOT_ART:
+                            art[(system, stem)].setdefault(mtype, full)
+                            sizes[full] = size
     for (system, stem), found in sorted(art.items()):
         for key, source, box in derived_art(system, stem, found):
             if key in existing:
@@ -152,8 +187,10 @@ def text_keys(existing):
 
 def _upload_text_keys(es_dir, existing, roms):
     """text_keys(existing) without the metadata.json of systems the upload doesn't read: no ROMs, or no local gamelist.xml."""
+    names = defaultdict(set, {b: {name} for name, buckets in esde_buckets().items() for b in buckets})
     wanted = {f"{scrape_plan.SCRAPES}/{system}/metadata.json" for system, paths in roms.items()
-              if paths and os.path.isfile(os.path.join(es_dir, "gamelists", system, "gamelist.xml"))}
+              if paths and any(os.path.isfile(os.path.join(es_dir, "gamelists", n, "gamelist.xml"))
+                               for n in names[system] | {system})}
     return [k for k in text_keys(existing) if not k.endswith("/metadata.json") or k in wanted]
 
 
@@ -324,7 +361,7 @@ def plan_clean(existing, roms, remote_texts):
 
 
 def clean_scrapes(args):
-    """Remove scrapes/ media and metadata for ROMs that aren't in storage (any ROM file, listed in games.json or not)."""
+    """Remove scrapes/ media and metadata for ROMs that aren't in storage (any ROM file, listed or not)."""
     print(ui.bold("🧹 Clean scrapes") + ui.dim(f"  {s3.access(True)}"))
     try:
         manifest = store.load_manifest()

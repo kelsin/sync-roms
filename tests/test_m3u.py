@@ -82,6 +82,32 @@ class M3uTest(unittest.TestCase):
         self.assertEqual(sorted(os.listdir(self.dir)), sorted(FAH))
 
 
+class FileGroupsTest(unittest.TestCase):
+    def test_discs_and_playlist_are_one_group(self):
+        keys = ["psx/A (USA) (Disc 1).chd", "psx/A (USA) (Disc 2).chd", "psx/A (USA).m3u", "psx/B (USA).chd"]
+        groups = m3u.file_groups(keys)
+        whole = ["psx/A (USA).m3u", "psx/A (USA) (Disc 1).chd", "psx/A (USA) (Disc 2).chd"]
+        for k in whole:
+            self.assertEqual(groups[k], whole)
+        self.assertNotIn("psx/B (USA).chd", groups)  # a single-disc game is no group
+
+    def test_three_discs_with_tags_in_order(self):
+        keys = ["segacd/" + f for f in FAH + ["Fahrenheit (USA) (Disc 3) (Sega CD).chd", "Fahrenheit (USA) (Sega CD).m3u"]]
+        self.assertEqual(m3u.file_groups(keys)[keys[2]],
+                         ["segacd/Fahrenheit (USA) (Sega CD).m3u"] + keys[:3])
+
+    def test_no_playlist_groups_the_discs(self):
+        keys = ["gc/G (Disc 2).rvz", "gc/G (Disc 1).rvz"]
+        self.assertEqual(m3u.file_groups(keys)["gc/G (Disc 2).rvz"], ["gc/G (Disc 1).rvz", "gc/G (Disc 2).rvz"])
+
+    def test_subfolders_group_within_their_folder(self):
+        keys = ["psx/x/A (Disc 1).chd", "psx/x/A (Disc 2).chd", "psx/x/A.m3u", "psx/y/A (Disc 1).chd", "psx/A.m3u"]
+        groups = m3u.file_groups(keys)
+        self.assertEqual(groups["psx/x/A.m3u"], ["psx/x/A.m3u", "psx/x/A (Disc 1).chd", "psx/x/A (Disc 2).chd"])
+        self.assertNotIn("psx/y/A (Disc 1).chd", groups)
+        self.assertNotIn("psx/A.m3u", groups)
+
+
 class HiddenDiscsTest(unittest.TestCase):
     def setUp(self):
         self._tmp = tempfile.TemporaryDirectory()
