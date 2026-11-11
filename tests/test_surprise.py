@@ -358,6 +358,36 @@ class Step(StorageCase):
             got = surprise.run_surprise("SD", (None, "esde"), self.chosen(), True, False, rng=random.Random(8))
         self.assertEqual(got, current)
 
+    def test_storage_listing_failure_keeps_the_surprises(self):
+        current = [self.surprise("gba", i) for i in range(5)] + [self.surprise("gb", i) for i in range(5)]
+        self.card(surprises=current)
+        surprise.save_history([{**self.surprise("gba", 0), "card": "SD", "date": "2026-11-01"}], datetime.date(2026, 11, 11))
+        before, history = self.read_cards(), surprise.load_history()
+
+        def down(*a, **k):
+            raise SystemExit("offline")
+        with mock.patch.object(surprise.s3, "list_folders", down), contextlib.redirect_stderr(io.StringIO()), \
+                self.patched(filter_list=self.fail_call, edit_card=self.fail_call):
+            got = surprise.run_surprise("SD", (None, "esde"), self.chosen(), False, False, rng=random.Random(9))
+        self.assertEqual(got, current)
+        self.assertEqual(self.read_cards(), before)
+        self.assertEqual(surprise.load_history(), history)
+
+    def test_storage_listing_failure_interactive_keeps_them_and_opens_the_editor(self):
+        current = [self.surprise("gba", i) for i in range(10)]
+        self.card(surprises=current)
+        edits = []
+
+        def down(*a, **k):
+            raise SystemExit("offline")
+        with mock.patch.object(surprise.s3, "list_folders", down), contextlib.redirect_stderr(io.StringIO()), \
+                self.patched(filter_list=lambda t, labels, **kw: [True] * len(labels),
+                             edit_card=lambda name, setup=None: edits.append(name)):
+            got = surprise.run_surprise("SD", (None, "esde"), self.chosen(), True, False, rng=random.Random(9))
+        self.assertEqual(got, current)
+        self.assertEqual(store.load_cards()["SD"]["surprises"], current)
+        self.assertEqual(edits, ["SD"])
+
     def test_candidates_come_from_storage_not_the_mirror(self):
         mirror = os.path.join(self.tmp.name, "mirror")  # holds nothing
         os.makedirs(mirror)
