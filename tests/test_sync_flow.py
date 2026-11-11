@@ -393,6 +393,22 @@ class SyncFlowTest(unittest.TestCase):
                       after=lambda d: read_from(d, "ES-DE", "collections", "custom-Surprise.cfg"))
         self.assertEqual(self.after, "%ROMPATH%/gba/Game.zip\n")
 
+    def test_surprise_collection_gets_its_theme_art(self):
+        saved = [{"system": "gba", "bucket": "gba/Game.zip", "title": "Game"}]
+        installed, described = [], []
+        art = ((cli.themeart, "install", lambda *a: installed.append(a[::2]) or True),
+               (cli.themeart, "describe", lambda *a: described.append(a[::2])))
+        self.run_sync(cards={"surprises": saved}, files=["ROMs/gba/Game.zip"], plan=[], extra=art)
+        self.assertEqual(installed, [("esde", "Surprise")])
+        self.run_sync(cards={"surprises": saved}, files=["ROMs/gba/Game.zip"], dry_run=True, extra=art)
+        self.assertEqual((installed, described), ([("esde", "Surprise")], [("esde", "Surprise")]))
+
+    def test_other_collections_get_no_theme_art(self):
+        installed = []
+        self.run_sync(cards={"collections": ["favs"], "surprise": False}, colls=[FAVS], files=["ROMs/gba/Game.zip"],
+                      extra=((cli.themeart, "install", lambda *a: installed.append(a)),))
+        self.assertEqual(installed, [])
+
     def test_surprise_off_removes_its_collection_file(self):
         def prepare(card_dir):
             self.cfg = frontend.collection_path("esde", card_dir, "Surprise")
