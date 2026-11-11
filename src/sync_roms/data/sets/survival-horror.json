@@ -1,7 +1,27 @@
 {
   "name": "Survival Horror",
-  "description": "PlayStation, PlayStation 2 and Dreamcast survival horror, from the Resident Evil era onward.",
+  "description": "Survival horror across every system in the collection, from Sweet Home and the Resident Evil era onward.",
   "games": [
+    {
+      "title": "Haunted House",
+      "system": "atari2600",
+      "bucket": "atari2600/Haunted House (USA).zip"
+    },
+    {
+      "title": "Sweet Home",
+      "system": "nes",
+      "bucket": "nes/Sweet Home (Japan).zip"
+    },
+    {
+      "title": "Friday the 13th",
+      "system": "nes",
+      "bucket": "nes/Friday the 13th (USA).zip"
+    },
+    {
+      "title": "Clock Tower",
+      "system": "snes",
+      "bucket": "snes/Clock Tower (Japan).zip"
+    },
     {
       "title": "Resident Evil (Director's Cut)",
       "system": "psx",
@@ -165,6 +185,96 @@
       "bucket": "psx/Resident Evil - Survivor (USA).chd"
     },
     {
+      "title": "Echo Night",
+      "system": "psx",
+      "bucket": "psx/Echo Night (USA).chd"
+    },
+    {
+      "title": "OverBlood",
+      "system": "psx",
+      "bucket": "psx/OverBlood (USA).chd"
+    },
+    {
+      "title": "Martian Gothic: Unification",
+      "system": "psx",
+      "bucket": "psx/Martian Gothic - Unification (USA).chd"
+    },
+    {
+      "title": "Vampire Hunter D",
+      "system": "psx",
+      "bucket": "psx/Vampire Hunter D (USA).chd"
+    },
+    {
+      "title": "D",
+      "system": "psx",
+      "bucket": "psx/D (USA).m3u",
+      "files": [
+        "psx/D (USA) (Disc 1).chd",
+        "psx/D (USA) (Disc 2).chd",
+        "psx/D (USA) (Disc 3).chd"
+      ]
+    },
+    {
+      "title": "Resident Evil",
+      "system": "saturn",
+      "bucket": "saturn/Resident Evil (USA).chd"
+    },
+    {
+      "title": "Deep Fear",
+      "system": "saturn",
+      "bucket": "saturn/Deep Fear (Europe).m3u",
+      "files": [
+        "saturn/Deep Fear (Europe) (Disc 1).chd",
+        "saturn/Deep Fear (Europe) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "Enemy Zero",
+      "system": "saturn",
+      "bucket": "saturn/Enemy Zero (USA).m3u",
+      "files": [
+        "saturn/Enemy Zero (USA) (Disc 0).chd",
+        "saturn/Enemy Zero (USA) (Disc 1).chd",
+        "saturn/Enemy Zero (USA) (Disc 2).chd",
+        "saturn/Enemy Zero (USA) (Disc 3).chd"
+      ]
+    },
+    {
+      "title": "Alone in the Dark: One-Eyed Jack's Revenge",
+      "system": "saturn",
+      "bucket": "saturn/Alone in the Dark - One-Eyed Jack's Revenge (USA).chd"
+    },
+    {
+      "title": "Alien Trilogy",
+      "system": "saturn",
+      "bucket": "saturn/Alien Trilogy (USA).chd"
+    },
+    {
+      "title": "Alien vs Predator",
+      "system": "atarijaguar",
+      "bucket": "atarijaguar/Alien vs Predator (World).zip"
+    },
+    {
+      "title": "Resident Evil 2",
+      "system": "n64",
+      "bucket": "n64/Resident Evil 2 (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Nightmare Creatures",
+      "system": "n64",
+      "bucket": "n64/Nightmare Creatures (USA).zip"
+    },
+    {
+      "title": "Resident Evil Gaiden",
+      "system": "gbc",
+      "bucket": "gbc/Resident Evil Gaiden (USA).zip"
+    },
+    {
+      "title": "Alone in the Dark: The New Nightmare",
+      "system": "gbc",
+      "bucket": "gbc/Alone in the Dark - The New Nightmare (USA) (En,Fr,Es).zip"
+    },
+    {
       "title": "Fatal Frame",
       "system": "ps2",
       "bucket": "ps2/Fatal Frame (USA).chd"
@@ -282,6 +392,11 @@
       ]
     },
     {
+      "title": "Evil Dead: Hail to the King",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Evil Dead - Hail to the King (USA).chd"
+    },
+    {
       "title": "D2",
       "system": "dreamcast",
       "bucket": "dreamcast/D2 (USA).m3u",
@@ -308,24 +423,200 @@
       "bucket": "dreamcast/Carrier (USA).chd"
     },
     {
+      "title": "The Ring: Terror's Realm",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Ring, The - Terror's Realm (USA).chd"
+    },
+    {
       "title": "Nightmare Creatures II",
       "system": "dreamcast",
       "bucket": "dreamcast/Nightmare Creatures II (USA).chd"
     },
     {
-      "title": "Silver",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Silver (USA).chd"
-    },
-    {
-      "title": "Seventh Cross Evolution",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Seventh Cross Evolution (USA).chd"
-    },
-    {
       "title": "The Typing of the Dead",
       "system": "dreamcast",
       "bucket": "dreamcast/Typing of the Dead, The (USA).chd"
+    },
+    {
+      "title": "Resident Evil",
+      "system": "gc",
+      "bucket": "gc/Resident Evil (USA).m3u",
+      "files": [
+        "gc/Resident Evil (USA) (Disc 1).rvz",
+        "gc/Resident Evil (USA) (Disc 2).rvz"
+      ]
+    },
+    {
+      "title": "Resident Evil Zero",
+      "system": "gc",
+      "bucket": "gc/Resident Evil Zero (USA).m3u",
+      "files": [
+        "gc/Resident Evil Zero (USA) (Disc 1).rvz",
+        "gc/Resident Evil Zero (USA) (Disc 2).rvz"
+      ]
+    },
+    {
+      "title": "Resident Evil 4",
+      "system": "gc",
+      "bucket": "gc/Resident Evil 4 (USA).m3u",
+      "files": [
+        "gc/Resident Evil 4 (USA) (Disc 1).rvz",
+        "gc/Resident Evil 4 (USA) (Disc 2).rvz"
+      ]
+    },
+    {
+      "title": "Eternal Darkness: Sanity's Requiem",
+      "system": "gc",
+      "bucket": "gc/Eternal Darkness - Sanity's Requiem (USA).rvz"
+    },
+    {
+      "title": "Resident Evil 2",
+      "system": "gc",
+      "bucket": "gc/Resident Evil 2 (USA).rvz"
+    },
+    {
+      "title": "Resident Evil 3 - Nemesis",
+      "system": "gc",
+      "bucket": "gc/Resident Evil 3 - Nemesis (USA).rvz"
+    },
+    {
+      "title": "Resident Evil - Code - Veronica X",
+      "system": "gc",
+      "bucket": "gc/Resident Evil - Code - Veronica X (USA).m3u",
+      "files": [
+        "gc/Resident Evil - Code - Veronica X (USA) (Disc 1).rvz",
+        "gc/Resident Evil - Code - Veronica X (USA) (Disc 2).rvz"
+      ]
+    },
+    {
+      "title": "Monster House",
+      "system": "gc",
+      "bucket": "gc/Monster House (USA) (En,Fr).rvz"
+    },
+    {
+      "title": "Silent Hill Origins",
+      "system": "psp",
+      "bucket": "psp/Silent Hill Origins (USA) (En,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "Silent Hill: Shattered Memories",
+      "system": "psp",
+      "bucket": "psp/Silent Hill - Shattered Memories (USA).chd"
+    },
+    {
+      "title": "The 3rd Birthday",
+      "system": "psp",
+      "bucket": "psp/3rd Birthday, The (USA).chd"
+    },
+    {
+      "title": "Obscure: The Aftermath",
+      "system": "psp",
+      "bucket": "psp/Obscure - The Aftermath (USA) (En,Fr,Es).chd"
+    },
+    {
+      "title": "Manhunt 2",
+      "system": "psp",
+      "bucket": "psp/Manhunt 2 (USA, Canada).chd"
+    },
+    {
+      "title": "Resident Evil: Deadly Silence",
+      "system": "nds",
+      "bucket": "nds/Resident Evil - Deadly Silence (USA).zip"
+    },
+    {
+      "title": "Dementium: The Ward",
+      "system": "nds",
+      "bucket": "nds/Dementium - The Ward (USA).zip"
+    },
+    {
+      "title": "Dementium II",
+      "system": "nds",
+      "bucket": "nds/Dementium II (USA) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Theresia",
+      "system": "nds",
+      "bucket": "nds/Theresia.. (USA).zip"
+    },
+    {
+      "title": "Nanashi no Geemu",
+      "system": "nds",
+      "bucket": "nds/Nanashi no Geemu (Japan).zip"
+    },
+    {
+      "title": "Nanashi no Geemu Me",
+      "system": "nds",
+      "bucket": "nds/Nanashi no Geemu Me (Japan).zip"
+    },
+    {
+      "title": "Touch the Dead",
+      "system": "nds",
+      "bucket": "nds/Touch the Dead (USA) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Resident Evil: Revelations",
+      "system": "3ds",
+      "bucket": "3ds/Resident Evil - Revelations (USA) (En,Ja,Fr,De,Es,It) (Rev 1).zip"
+    },
+    {
+      "title": "Corpse Party",
+      "system": "3ds",
+      "bucket": "3ds/Corpse Party (USA).zip"
+    },
+    {
+      "title": "Spirit Camera: The Cursed Memoir",
+      "system": "3ds",
+      "bucket": "3ds/Spirit Camera - The Cursed Memoir (USA).zip"
+    },
+    {
+      "title": "Alan Wake",
+      "system": "xbox360",
+      "bucket": "xbox360/Alan Wake (World) (En,Ja,Fr,De,Es,It,Zh,Ko,Pl,Ru).zar"
+    },
+    {
+      "title": "Dead Rising",
+      "system": "xbox360",
+      "bucket": "xbox360/Dead Rising (USA) (Rev 1).zar"
+    },
+    {
+      "title": "Dead Rising 2",
+      "system": "xbox360",
+      "bucket": "xbox360/Dead Rising 2 (World) (En,Ja,Fr,Es,It,Ko).zar"
+    },
+    {
+      "title": "Dead Rising 2 - Off the Record",
+      "system": "xbox360",
+      "bucket": "xbox360/Dead Rising 2 - Off the Record (World) (En,Ja,Fr,Es,It,Ko).zar"
+    },
+    {
+      "title": "Vampire Rain",
+      "system": "xbox360",
+      "bucket": "xbox360/Vampire Rain (USA, Europe).zar"
+    },
+    {
+      "title": "ZombiU",
+      "system": "wiiu",
+      "bucket": "wiiu/ZombiU (US) (v32).wua"
+    },
+    {
+      "title": "Iron Helix",
+      "system": "segacd",
+      "bucket": "segacd/Iron Helix (USA).chd"
+    },
+    {
+      "title": "Resident Evil 2",
+      "system": "gamecom",
+      "bucket": "gamecom/Resident Evil 2 (USA).zip"
+    },
+    {
+      "title": "Shiryou Sensen - War of the Dead",
+      "system": "msx2",
+      "bucket": "msx2/Shiryou Sensen - War of the Dead (Japan).zip"
+    },
+    {
+      "title": "Ghost House",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Ghost House (USA, Europe, Brazil) (En).zip"
     }
   ]
 }

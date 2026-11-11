@@ -1,6 +1,6 @@
 {
   "name": "Sonic the Hedgehog",
-  "description": "Sonic across Sega's 8-bit, 16-bit and handheld platforms.",
+  "description": "Sonic the Hedgehog games and spin-offs across consoles, handhelds and arcade.",
   "games": [
     {
       "title": "Sonic The Hedgehog",
@@ -33,6 +33,11 @@
       "bucket": "genesis/Dr. Robotnik's Mean Bean Machine (USA).zip"
     },
     {
+      "title": "Sonic Eraser",
+      "system": "genesis",
+      "bucket": "genesis/Sonic Eraser (Japan) (SegaNet).zip"
+    },
+    {
       "title": "Sonic CD (RE125)",
       "system": "segacd",
       "bucket": "segacd/Sonic CD (USA) (RE125).chd"
@@ -46,6 +51,31 @@
       "title": "Sonic The Hedgehog (En)",
       "system": "mastersystem",
       "bucket": "mastersystem/Sonic The Hedgehog (USA, Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Sonic The Hedgehog 2 (Rev 1)",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Sonic The Hedgehog 2 (Europe, Brazil) (En) (Rev 1).zip"
+    },
+    {
+      "title": "Sonic Chaos",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Sonic Chaos (Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Sonic Blast",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Sonic Blast (Brazil) (En).zip"
+    },
+    {
+      "title": "Sonic Spinball",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Sonic Spinball (Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Dr. Robotnik's Mean Bean Machine",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Dr. Robotnik's Mean Bean Machine (Europe, Brazil) (En).zip"
     },
     {
       "title": "Sonic The Hedgehog",
@@ -68,6 +98,11 @@
       "bucket": "gamegear/Sonic The Hedgehog - Triple Trouble (USA, Europe, Brazil) (En).zip"
     },
     {
+      "title": "Sonic Drift",
+      "system": "gamegear",
+      "bucket": "gamegear/Sonic Drift (Japan) (En).zip"
+    },
+    {
       "title": "Sonic Drift 2",
       "system": "gamegear",
       "bucket": "gamegear/Sonic Drift 2 (World).zip"
@@ -81,6 +116,21 @@
       "title": "Sonic Blast",
       "system": "gamegear",
       "bucket": "gamegear/Sonic Blast (World).zip"
+    },
+    {
+      "title": "Tails Adventure",
+      "system": "gamegear",
+      "bucket": "gamegear/Tails Adventure (World) (En,Ja).zip"
+    },
+    {
+      "title": "Tails no Skypatrol",
+      "system": "gamegear",
+      "bucket": "gamegear/Tails no Skypatrol (Japan).zip"
+    },
+    {
+      "title": "Dr. Robotnik's Mean Bean Machine",
+      "system": "gamegear",
+      "bucket": "gamegear/Dr. Robotnik's Mean Bean Machine (USA, Europe).zip"
     },
     {
       "title": "Sonic Jam",
@@ -168,6 +218,56 @@
       "bucket": "nds/Sonic Colors (USA) (En,Ja,Fr,De,Es,It).zip"
     },
     {
+      "title": "Sonic & SEGA All-Stars Racing",
+      "system": "nds",
+      "bucket": "nds/Sonic & SEGA All-Stars Racing (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Mario & Sonic at the Olympic Games",
+      "system": "nds",
+      "bucket": "nds/Mario & Sonic at the Olympic Games (USA) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Mario & Sonic at the Olympic Winter Games",
+      "system": "nds",
+      "bucket": "nds/Mario & Sonic at the Olympic Winter Games (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Sonic Generations (Rev 1)",
+      "system": "3ds",
+      "bucket": "3ds/Sonic Generations (USA) (En,Fr,Es) (Rev 1).zip"
+    },
+    {
+      "title": "Sonic Lost World",
+      "system": "3ds",
+      "bucket": "3ds/Sonic Lost World (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Sonic Boom - Shattered Crystal",
+      "system": "3ds",
+      "bucket": "3ds/Sonic Boom - Shattered Crystal (USA).zip"
+    },
+    {
+      "title": "Sonic Boom - Fire & Ice",
+      "system": "3ds",
+      "bucket": "3ds/Sonic Boom - Fire & Ice (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Sonic & All-Stars Racing Transformed",
+      "system": "3ds",
+      "bucket": "3ds/Sonic & All-Stars Racing Transformed (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Mario & Sonic at the London 2012 Olympic Games (Rev 1)",
+      "system": "3ds",
+      "bucket": "3ds/Mario & Sonic at the London 2012 Olympic Games (USA) (En,Fr,Es) (Rev 1).zip"
+    },
+    {
+      "title": "Mario & Sonic at the Rio 2016 Olympic Games",
+      "system": "3ds",
+      "bucket": "3ds/Mario & Sonic at the Rio 2016 Olympic Games (USA) (En,Fr,Es).zip"
+    },
+    {
       "title": "Sonic 3D Blast",
       "system": "saturn",
       "bucket": "saturn/Sonic 3D Blast (USA).chd"
@@ -233,6 +333,21 @@
       "bucket": "ps2/Sonic Mega Collection Plus (USA).chd"
     },
     {
+      "title": "Sonic Heroes",
+      "system": "ps2",
+      "bucket": "ps2/Sonic Heroes (USA) (En,Ja,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "Sonic Riders",
+      "system": "ps2",
+      "bucket": "ps2/Sonic Riders (USA) (En,Ja,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "Sonic Gems Collection",
+      "system": "ps2",
+      "bucket": "ps2/Sonic Gems Collection (Europe, Australia) (En,Fr,De,Es,It).chd"
+    },
+    {
       "title": "Sonic & Sega All-Stars Racing",
       "system": "wii",
       "bucket": "wii/Sonic & Sega All-Stars Racing (USA) (En,Fr,Es).rvz"
@@ -281,6 +396,31 @@
       "title": "ChuChu Rocket!",
       "system": "dreamcast",
       "bucket": "dreamcast/ChuChu Rocket! (USA) (En,Ja,Fr,De,Es).chd"
+    },
+    {
+      "title": "Sonic Jam",
+      "system": "gamecom",
+      "bucket": "gamecom/Sonic Jam (USA).zip"
+    },
+    {
+      "title": "SegaSonic The Hedgehog",
+      "system": "fbneo",
+      "bucket": "fbneo/sonic.zip"
+    },
+    {
+      "title": "SegaSonic Cosmo Fighter",
+      "system": "fbneo",
+      "bucket": "fbneo/sonicfgt.zip"
+    },
+    {
+      "title": "SegaSonic Bros.",
+      "system": "fbneo",
+      "bucket": "fbneo/ssonicbr.zip"
+    },
+    {
+      "title": "Waku Waku Sonic Patrol Car",
+      "system": "fbneo",
+      "bucket": "fbneo/soniccar.zip"
     }
   ]
 }

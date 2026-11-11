@@ -1,6 +1,6 @@
 {
   "name": "Mega Man",
-  "description": "Mega Man, Mega Man X and Legends across consoles and handhelds.",
+  "description": "Every Mega Man series across consoles, handhelds and arcade.",
   "games": [
     {
       "title": "Mega Man",
@@ -33,6 +33,11 @@
       "bucket": "nes/Mega Man 6 (USA).zip"
     },
     {
+      "title": "Wily & Right no Rockboard - That's Paradise",
+      "system": "nes",
+      "bucket": "nes/Wily & Right no Rockboard - That's Paradise (Japan).zip"
+    },
+    {
       "title": "Mega Man X (Rev 1)",
       "system": "snes",
       "bucket": "snes/Mega Man X (USA) (Rev 1).zip"
@@ -51,6 +56,11 @@
       "title": "Mega Man 7",
       "system": "snes",
       "bucket": "snes/Mega Man 7 (USA).zip"
+    },
+    {
+      "title": "Rockman & Forte",
+      "system": "snes",
+      "bucket": "snes/Rockman & Forte (Japan).zip"
     },
     {
       "title": "Mega Man - The Wily Wars",
@@ -111,6 +121,31 @@
       "title": "Mega Man 8",
       "system": "psx",
       "bucket": "psx/Mega Man 8 (USA).chd"
+    },
+    {
+      "title": "Mega Man 8",
+      "system": "saturn",
+      "bucket": "saturn/Mega Man 8 (USA).chd"
+    },
+    {
+      "title": "Mega Man X3",
+      "system": "saturn",
+      "bucket": "saturn/Mega Man X3 (Europe).chd"
+    },
+    {
+      "title": "Mega Man X4",
+      "system": "saturn",
+      "bucket": "saturn/Mega Man X4 (USA).chd"
+    },
+    {
+      "title": "Super Adventure Rockman",
+      "system": "saturn",
+      "bucket": "saturn/Super Adventure Rockman (Japan) (1M).m3u",
+      "files": [
+        "saturn/Super Adventure Rockman (Japan) (Disc 1) (Episode 1 - Tsuki no Shinden) (1M).chd",
+        "saturn/Super Adventure Rockman (Japan) (Disc 2) (Episode 2 - Shitou! Wily Numbers) (1M).chd",
+        "saturn/Super Adventure Rockman (Japan) (Disc 3) (Episode 3 - Saigo no Tatakai!!) (1M).chd"
+      ]
     },
     {
       "title": "Mega Man Legends",
@@ -203,9 +238,24 @@
       "bucket": "nds/Mega Man Star Force - Dragon (USA).zip"
     },
     {
+      "title": "Mega Man Star Force - Leo",
+      "system": "nds",
+      "bucket": "nds/Mega Man Star Force - Leo (USA).zip"
+    },
+    {
+      "title": "Mega Man Star Force - Pegasus",
+      "system": "nds",
+      "bucket": "nds/Mega Man Star Force - Pegasus (USA).zip"
+    },
+    {
       "title": "Mega Man Star Force 2 - Zerker x Ninja",
       "system": "nds",
       "bucket": "nds/Mega Man Star Force 2 - Zerker x Ninja (USA).zip"
+    },
+    {
+      "title": "Mega Man Star Force 2 - Zerker x Saurian",
+      "system": "nds",
+      "bucket": "nds/Mega Man Star Force 2 - Zerker x Saurian (USA).zip"
     },
     {
       "title": "Mega Man Star Force 3 - Black Ace",
@@ -213,9 +263,19 @@
       "bucket": "nds/Mega Man Star Force 3 - Black Ace (USA).zip"
     },
     {
+      "title": "Mega Man Star Force 3 - Red Joker",
+      "system": "nds",
+      "bucket": "nds/Mega Man Star Force 3 - Red Joker (USA).zip"
+    },
+    {
       "title": "Mega Man Battle Network 5 - Double Team DS",
       "system": "nds",
       "bucket": "nds/Mega Man Battle Network 5 - Double Team DS (USA).zip"
+    },
+    {
+      "title": "Rockman EXE - Operate Shooting Star",
+      "system": "nds",
+      "bucket": "nds/Rockman EXE - Operate Shooting Star (Japan).zip"
     },
     {
       "title": "Mega Man - Battle Network 3 - White Version",
@@ -251,6 +311,21 @@
       "title": "Mega Man - Battle Chip Challenge",
       "system": "gba",
       "bucket": "gba/Megaman - Battle Chip Challenge (USA).zip"
+    },
+    {
+      "title": "Rockman EXE 4.5 - Real Operation",
+      "system": "gba",
+      "bucket": "gba/Rockman EXE 4.5 - Real Operation (Japan).zip"
+    },
+    {
+      "title": "Rockman EXE WS",
+      "system": "wonderswancolor",
+      "bucket": "wonderswancolor/Rockman EXE WS (Japan).zip"
+    },
+    {
+      "title": "Rockman EXE - N1 Battle (Rev 1)",
+      "system": "wonderswancolor",
+      "bucket": "wonderswancolor/Rockman EXE - N1 Battle (Japan) (Rev 1).zip"
     },
     {
       "title": "Mega Man 64",
@@ -298,9 +373,34 @@
       "bucket": "ps2/Mega Man X8 (USA).chd"
     },
     {
+      "title": "Mega Man Anniversary Collection",
+      "system": "ps2",
+      "bucket": "ps2/Mega Man Anniversary Collection (USA).chd"
+    },
+    {
+      "title": "Mega Man X Collection",
+      "system": "ps2",
+      "bucket": "ps2/Mega Man X Collection (USA).chd"
+    },
+    {
       "title": "Rockman: Battle & Fighters",
       "system": "ngpc",
       "bucket": "ngpc/Rockman - Battle & Fighters (Japan).zip"
+    },
+    {
+      "title": "Rockman & Forte - Mirai Kara no Chousensha",
+      "system": "wonderswan",
+      "bucket": "wonderswan/Rockman & Forte - Mirai Kara no Chousensha (Japan).zip"
+    },
+    {
+      "title": "Mega Man - The Power Battle",
+      "system": "fbneo",
+      "bucket": "fbneo/megaman.zip"
+    },
+    {
+      "title": "Mega Man 2 - The Power Fighters",
+      "system": "fbneo",
+      "bucket": "fbneo/megaman2.zip"
     },
     {
       "title": "Mega Man 9",
@@ -321,6 +421,11 @@
       "title": "Mega Man X5",
       "system": "ps3",
       "bucket": "ps3/Mega Man X5 PSN [NPUJ-01334].rar"
+    },
+    {
+      "title": "Mega Man Legacy Collection",
+      "system": "3ds",
+      "bucket": "3ds/Mega Man Legacy Collection (USA).zip"
     }
   ]
 }

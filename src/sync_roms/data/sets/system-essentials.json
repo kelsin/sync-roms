@@ -1,0 +1,2566 @@
+{
+  "name": "System Essentials",
+  "description": "Starter picks for systems the genre sets barely touch.",
+  "games": [
+    {
+      "title": "Uncharted - Golden Abyss",
+      "category": "PS Vita",
+      "system": "psvita",
+      "bucket": "psvita/Uncharted - Golden Abyss™ [PCSA00029] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Gravity Rush",
+      "category": "PS Vita",
+      "system": "psvita",
+      "bucket": "psvita/GRAVITY RUSH™ [PCSA00011] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Tearaway",
+      "category": "PS Vita",
+      "system": "psvita",
+      "bucket": "psvita/Tearaway™ [PCSA00144] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Persona 4 Golden",
+      "category": "PS Vita",
+      "system": "psvita",
+      "bucket": "psvita/Persona 4 GOLDEN [PCSE00120] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Killzone - Mercenary",
+      "category": "PS Vita",
+      "system": "psvita",
+      "bucket": "psvita/Killzone™ Mercenary [PCSA00107] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "WipEout 2048",
+      "category": "PS Vita",
+      "system": "psvita",
+      "bucket": "psvita/WipEout® 2048 [PCSA00015] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Metal Gear Solid HD Collection",
+      "category": "PS Vita",
+      "system": "psvita",
+      "bucket": "psvita/Metal Gear Solid HD [PCSE00020] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Rayman Origins",
+      "category": "PS Vita",
+      "system": "psvita",
+      "bucket": "psvita/Rayman® Origins [PCSE00052] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Rayman Legends",
+      "category": "PS Vita",
+      "system": "psvita",
+      "bucket": "psvita/Rayman® Legends [PCSE00277] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "LittleBigPlanet - Marvel Super Hero Edition",
+      "category": "PS Vita",
+      "system": "psvita",
+      "bucket": "psvita/LittleBigPlanet™ Marvel Edition [PCSA00549] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Lumines Electronic Symphony",
+      "category": "PS Vita",
+      "system": "psvita",
+      "bucket": "psvita/Lumines Electronic Symphony [PCSE00009] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Super Stardust Delta",
+      "category": "PS Vita",
+      "system": "psvita",
+      "bucket": "psvita/Super Stardust™ Delta [PCSA00006] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Resogun",
+      "category": "PS Vita",
+      "system": "psvita",
+      "bucket": "psvita/RESOGUN™ [PCSA00103] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Soul Sacrifice",
+      "category": "PS Vita",
+      "system": "psvita",
+      "bucket": "psvita/Soul Sacrifice™ [PCSA00092] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Soul Sacrifice Delta",
+      "category": "PS Vita",
+      "system": "psvita",
+      "bucket": "psvita/Soul Sacrifice™ Delta [PCSA00152] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Dragon's Crown",
+      "category": "PS Vita",
+      "system": "psvita",
+      "bucket": "psvita/Dragon's Crown [PCSE00019] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Muramasa Rebirth",
+      "category": "PS Vita",
+      "system": "psvita",
+      "bucket": "psvita/Muramasa Rebirth [PCSE00240] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Odin Sphere Leifthrasir",
+      "category": "PS Vita",
+      "system": "psvita",
+      "bucket": "psvita/Odin Sphere Leifthrasir [PCSE00899] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Ys - Memories of Celceta",
+      "category": "PS Vita",
+      "system": "psvita",
+      "bucket": "psvita/Ys - Memories of Celceta [PCSE00245] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Danganronpa - Trigger Happy Havoc",
+      "category": "PS Vita",
+      "system": "psvita",
+      "bucket": "psvita/Danganronpa [PCSE00261] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Danganronpa 2 - Goodbye Despair",
+      "category": "PS Vita",
+      "system": "psvita",
+      "bucket": "psvita/Danganronpa2 [PCSE00399] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Zero Escape - Virtue's Last Reward",
+      "category": "PS Vita",
+      "system": "psvita",
+      "bucket": "psvita/Zero Escape - Virtue's Last Reward [PCSE00085] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Persona 4 - Dancing All Night",
+      "category": "PS Vita",
+      "system": "psvita",
+      "bucket": "psvita/Persona 4 - Dancing All Night [PCSE00764] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Digimon Story - Cyber Sleuth",
+      "category": "PS Vita",
+      "system": "psvita",
+      "bucket": "psvita/DIGIMON STORY CYBER SLEUTH [PCSE00755] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Child of Light",
+      "category": "PS Vita",
+      "system": "psvita",
+      "bucket": "psvita/Child of Light [PCSE00480] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Velocity2X",
+      "category": "PS Vita",
+      "system": "psvita",
+      "bucket": "psvita/Velocity®2X [PCSE00374] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Hotline Miami",
+      "category": "PS Vita",
+      "system": "psvita",
+      "bucket": "psvita/Hotline Miami [PCSE00249] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Hotline Miami 2 - Wrong Number",
+      "category": "PS Vita",
+      "system": "psvita",
+      "bucket": "psvita/Hotline Miami 2 [PCSE00402] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Bastion",
+      "category": "PS Vita",
+      "system": "psvita",
+      "bucket": "psvita/Bastion [PCSE00790] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Fez",
+      "category": "PS Vita",
+      "system": "psvita",
+      "bucket": "psvita/FEZ [PCSE00404] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Undertale",
+      "category": "PS Vita",
+      "system": "psvita",
+      "bucket": "psvita/Undertale [PCSE01116] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Legend of Zelda, The - A Link Between Worlds",
+      "category": "3DS",
+      "system": "3ds",
+      "bucket": "3ds/Legend of Zelda, The - A Link Between Worlds (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Legend of Zelda, The - Ocarina of Time 3D",
+      "category": "3DS",
+      "system": "3ds",
+      "bucket": "3ds/Legend of Zelda, The - Ocarina of Time 3D (USA) (En,Fr,Es) (Rev 1).zip"
+    },
+    {
+      "title": "Legend of Zelda, The - Majora's Mask 3D",
+      "category": "3DS",
+      "system": "3ds",
+      "bucket": "3ds/Legend of Zelda, The - Majora's Mask 3D (USA) (En,Fr,Es) (Rev 1).zip"
+    },
+    {
+      "title": "Super Mario 3D Land",
+      "category": "3DS",
+      "system": "3ds",
+      "bucket": "3ds/Super Mario 3D Land (USA) (En,Fr,Es) (Rev 1).zip"
+    },
+    {
+      "title": "Mario Kart 7",
+      "category": "3DS",
+      "system": "3ds",
+      "bucket": "3ds/Mario Kart 7 (USA) (En,Fr,Es) (Rev 1).zip"
+    },
+    {
+      "title": "Super Smash Bros. for Nintendo 3DS",
+      "category": "3DS",
+      "system": "3ds",
+      "bucket": "3ds/Super Smash Bros. for Nintendo 3DS (USA) (En,Fr,Es) (Rev 11).zip"
+    },
+    {
+      "title": "Animal Crossing - New Leaf - Welcome Amiibo",
+      "category": "3DS",
+      "system": "3ds",
+      "bucket": "3ds/Animal Crossing - New Leaf - Welcome Amiibo (USA).zip"
+    },
+    {
+      "title": "Fire Emblem - Awakening",
+      "category": "3DS",
+      "system": "3ds",
+      "bucket": "3ds/Fire Emblem - Awakening (USA).zip"
+    },
+    {
+      "title": "Fire Emblem Fates - Birthright",
+      "category": "3DS",
+      "system": "3ds",
+      "bucket": "3ds/Fire Emblem Fates - Birthright (USA).zip"
+    },
+    {
+      "title": "Fire Emblem Fates - Conquest",
+      "category": "3DS",
+      "system": "3ds",
+      "bucket": "3ds/Fire Emblem Fates - Conquest (USA).zip"
+    },
+    {
+      "title": "Fire Emblem Echoes - Shadows of Valentia",
+      "category": "3DS",
+      "system": "3ds",
+      "bucket": "3ds/Fire Emblem Echoes - Shadows of Valentia (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Kid Icarus - Uprising",
+      "category": "3DS",
+      "system": "3ds",
+      "bucket": "3ds/Kid Icarus - Uprising (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Metroid - Samus Returns",
+      "category": "3DS",
+      "system": "3ds",
+      "bucket": "3ds/Metroid - Samus Returns (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Luigi's Mansion - Dark Moon",
+      "category": "3DS",
+      "system": "3ds",
+      "bucket": "3ds/Luigi's Mansion - Dark Moon (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Luigi's Mansion",
+      "category": "3DS",
+      "system": "3ds",
+      "bucket": "3ds/Luigi's Mansion (USA).zip"
+    },
+    {
+      "title": "Star Fox 64 3D",
+      "category": "3DS",
+      "system": "3ds",
+      "bucket": "3ds/Star Fox 64 3D (USA) (En,Fr,Es) (Rev 3).zip"
+    },
+    {
+      "title": "Donkey Kong Country Returns 3D",
+      "category": "3DS",
+      "system": "3ds",
+      "bucket": "3ds/Donkey Kong Country Returns 3D (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Kirby - Planet Robobot",
+      "category": "3DS",
+      "system": "3ds",
+      "bucket": "3ds/Kirby - Planet Robobot (USA).zip"
+    },
+    {
+      "title": "Kirby - Triple Deluxe",
+      "category": "3DS",
+      "system": "3ds",
+      "bucket": "3ds/Kirby - Triple Deluxe (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Mario & Luigi - Dream Team",
+      "category": "3DS",
+      "system": "3ds",
+      "bucket": "3ds/Mario & Luigi - Dream Team (USA) (En,Fr,Es) (Rev 1).zip"
+    },
+    {
+      "title": "Mario & Luigi - Bowser's Inside Story + Bowser Jr.'s Journey",
+      "category": "3DS",
+      "system": "3ds",
+      "bucket": "3ds/Mario & Luigi - Bowser's Inside Story + Bowser Jr.'s Journey (USA).zip"
+    },
+    {
+      "title": "Mario & Luigi - Superstar Saga + Bowser's Minions",
+      "category": "3DS",
+      "system": "3ds",
+      "bucket": "3ds/Mario & Luigi - Superstar Saga + Bowser's Minions (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Mario Golf - World Tour",
+      "category": "3DS",
+      "system": "3ds",
+      "bucket": "3ds/Mario Golf - World Tour (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Pokemon X",
+      "category": "3DS",
+      "system": "3ds",
+      "bucket": "3ds/Pokemon X (USA) (En,Ja,Fr,De,Es,It,Ko).zip"
+    },
+    {
+      "title": "Pokemon Y",
+      "category": "3DS",
+      "system": "3ds",
+      "bucket": "3ds/Pokemon Y (USA) (En,Ja,Fr,De,Es,It,Ko).zip"
+    },
+    {
+      "title": "Pokemon Omega Ruby",
+      "category": "3DS",
+      "system": "3ds",
+      "bucket": "3ds/Pokemon Omega Ruby (USA) (En,Ja,Fr,De,Es,It,Ko) (Rev 2).zip"
+    },
+    {
+      "title": "Pokemon Alpha Sapphire",
+      "category": "3DS",
+      "system": "3ds",
+      "bucket": "3ds/Pokemon Alpha Sapphire (USA) (En,Ja,Fr,De,Es,It,Ko) (Rev 2).zip"
+    },
+    {
+      "title": "Pokemon Ultra Sun",
+      "category": "3DS",
+      "system": "3ds",
+      "bucket": "3ds/Pokemon Ultra Sun (USA) (En,Ja,Fr,De,Es,It,Zh,Ko).zip"
+    },
+    {
+      "title": "Pokemon Ultra Moon",
+      "category": "3DS",
+      "system": "3ds",
+      "bucket": "3ds/Pokemon Ultra Moon (USA) (En,Ja,Fr,De,Es,It,Zh,Ko).zip"
+    },
+    {
+      "title": "Bravely Default",
+      "category": "3DS",
+      "system": "3ds",
+      "bucket": "3ds/Bravely Default (USA) (En,Ja,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Dragon Quest VII - Fragments of the Forgotten Past",
+      "category": "3DS",
+      "system": "3ds",
+      "bucket": "3ds/Dragon Quest VII - Fragments of the Forgotten Past (USA).zip"
+    },
+    {
+      "title": "Dragon Quest VIII - Journey of the Cursed King",
+      "category": "3DS",
+      "system": "3ds",
+      "bucket": "3ds/Dragon Quest VIII - Journey of the Cursed King (USA).zip"
+    },
+    {
+      "title": "Fantasy Life",
+      "category": "3DS",
+      "system": "3ds",
+      "bucket": "3ds/Fantasy Life (USA).zip"
+    },
+    {
+      "title": "Ever Oasis",
+      "category": "3DS",
+      "system": "3ds",
+      "bucket": "3ds/Ever Oasis (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Monster Hunter 4 Ultimate",
+      "category": "3DS",
+      "system": "3ds",
+      "bucket": "3ds/Monster Hunter 4 Ultimate (USA).zip"
+    },
+    {
+      "title": "Monster Hunter Generations",
+      "category": "3DS",
+      "system": "3ds",
+      "bucket": "3ds/Monster Hunter Generations (USA).zip"
+    },
+    {
+      "title": "Shin Megami Tensei IV",
+      "category": "3DS",
+      "system": "3ds",
+      "bucket": "3ds/Shin Megami Tensei IV (USA).zip"
+    },
+    {
+      "title": "Shin Megami Tensei IV - Apocalypse",
+      "category": "3DS",
+      "system": "3ds",
+      "bucket": "3ds/Shin Megami Tensei IV - Apocalypse (USA).zip"
+    },
+    {
+      "title": "Shin Megami Tensei - Strange Journey Redux",
+      "category": "3DS",
+      "system": "3ds",
+      "bucket": "3ds/Shin Megami Tensei - Strange Journey Redux (USA).zip"
+    },
+    {
+      "title": "Shin Megami Tensei - Devil Summoner - Soul Hackers",
+      "category": "3DS",
+      "system": "3ds",
+      "bucket": "3ds/Shin Megami Tensei - Devil Summoner - Soul Hackers (USA).zip"
+    },
+    {
+      "title": "Shin Megami Tensei - Devil Survivor Overclocked",
+      "category": "3DS",
+      "system": "3ds",
+      "bucket": "3ds/Shin Megami Tensei - Devil Survivor Overclocked (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Shin Megami Tensei - Devil Survivor 2 - Record Breaker",
+      "category": "3DS",
+      "system": "3ds",
+      "bucket": "3ds/Shin Megami Tensei - Devil Survivor 2 - Record Breaker (USA).zip"
+    },
+    {
+      "title": "Radiant Historia - Perfect Chronology",
+      "category": "3DS",
+      "system": "3ds",
+      "bucket": "3ds/Radiant Historia - Perfect Chronology (USA).zip"
+    },
+    {
+      "title": "Tales of the Abyss",
+      "category": "3DS",
+      "system": "3ds",
+      "bucket": "3ds/Tales of the Abyss (USA).zip"
+    },
+    {
+      "title": "Xenoblade Chronicles 3D",
+      "category": "3DS",
+      "system": "n3ds",
+      "bucket": "n3ds/Xenoblade Chronicles 3D (USA) (En,Fr,Es) (Rev 1).3ds"
+    },
+    {
+      "title": "Theatrhythm Final Fantasy - Curtain Call",
+      "category": "3DS",
+      "system": "3ds",
+      "bucket": "3ds/Theatrhythm Final Fantasy - Curtain Call (USA).zip"
+    },
+    {
+      "title": "Professor Layton and the Miracle Mask",
+      "category": "3DS",
+      "system": "3ds",
+      "bucket": "3ds/Professor Layton and the Miracle Mask (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Professor Layton vs. Phoenix Wright - Ace Attorney",
+      "category": "3DS",
+      "system": "3ds",
+      "bucket": "3ds/Professor Layton vs. Phoenix Wright - Ace Attorney (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Zero Escape - Virtue's Last Reward",
+      "category": "3DS",
+      "system": "3ds",
+      "bucket": "3ds/Zero Escape - Virtue's Last Reward (USA) (Rev 2).zip"
+    },
+    {
+      "title": "Resident Evil - Revelations",
+      "category": "3DS",
+      "system": "3ds",
+      "bucket": "3ds/Resident Evil - Revelations (USA) (En,Ja,Fr,De,Es,It) (Rev 1).zip"
+    },
+    {
+      "title": "Metal Gear Solid - Snake Eater 3D",
+      "category": "3DS",
+      "system": "3ds",
+      "bucket": "3ds/Metal Gear Solid - Snake Eater 3D (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Sonic Generations",
+      "category": "3DS",
+      "system": "3ds",
+      "bucket": "3ds/Sonic Generations (USA) (En,Fr,Es) (Rev 1).zip"
+    },
+    {
+      "title": "Shantae and the Pirate's Curse",
+      "category": "3DS",
+      "system": "3ds",
+      "bucket": "3ds/Shantae and the Pirate's Curse (USA).zip"
+    },
+    {
+      "title": "Shovel Knight",
+      "category": "3DS",
+      "system": "3ds",
+      "bucket": "3ds/Shovel Knight (USA).zip"
+    },
+    {
+      "title": "Legend of Zelda, The - Ocarina of Time",
+      "category": "Nintendo 64",
+      "system": "n64",
+      "bucket": "n64/Legend of Zelda, The - Ocarina of Time (USA) (Rev 2).zip"
+    },
+    {
+      "title": "Legend of Zelda, The - Majora's Mask",
+      "category": "Nintendo 64",
+      "system": "n64",
+      "bucket": "n64/Legend of Zelda, The - Majora's Mask (USA).zip"
+    },
+    {
+      "title": "Super Mario 64",
+      "category": "Nintendo 64",
+      "system": "n64",
+      "bucket": "n64/Super Mario 64 (USA).zip"
+    },
+    {
+      "title": "Paper Mario",
+      "category": "Nintendo 64",
+      "system": "n64",
+      "bucket": "n64/Paper Mario (USA).zip"
+    },
+    {
+      "title": "Mario Kart 64",
+      "category": "Nintendo 64",
+      "system": "n64",
+      "bucket": "n64/Mario Kart 64 (USA).zip"
+    },
+    {
+      "title": "Super Smash Bros.",
+      "category": "Nintendo 64",
+      "system": "n64",
+      "bucket": "n64/Super Smash Bros. (USA).zip"
+    },
+    {
+      "title": "Star Fox 64",
+      "category": "Nintendo 64",
+      "system": "n64",
+      "bucket": "n64/Star Fox 64 (USA) (Rev 1).zip"
+    },
+    {
+      "title": "F-Zero X",
+      "category": "Nintendo 64",
+      "system": "n64",
+      "bucket": "n64/F-Zero X (USA).zip"
+    },
+    {
+      "title": "Wave Race 64 - Kawasaki Jet Ski",
+      "category": "Nintendo 64",
+      "system": "n64",
+      "bucket": "n64/Wave Race 64 - Kawasaki Jet Ski (USA) (Rev 1).zip"
+    },
+    {
+      "title": "1080 Snowboarding",
+      "category": "Nintendo 64",
+      "system": "n64",
+      "bucket": "n64/1080 Snowboarding (Japan, USA) (En,Ja).zip"
+    },
+    {
+      "title": "Pilotwings 64",
+      "category": "Nintendo 64",
+      "system": "n64",
+      "bucket": "n64/Pilotwings 64 (USA).zip"
+    },
+    {
+      "title": "Yoshi's Story",
+      "category": "Nintendo 64",
+      "system": "n64",
+      "bucket": "n64/Yoshi's Story (USA) (En,Ja).zip"
+    },
+    {
+      "title": "Kirby 64 - The Crystal Shards",
+      "category": "Nintendo 64",
+      "system": "n64",
+      "bucket": "n64/Kirby 64 - The Crystal Shards (USA).zip"
+    },
+    {
+      "title": "Donkey Kong 64",
+      "category": "Nintendo 64",
+      "system": "n64",
+      "bucket": "n64/Donkey Kong 64 (USA).zip"
+    },
+    {
+      "title": "Diddy Kong Racing",
+      "category": "Nintendo 64",
+      "system": "n64",
+      "bucket": "n64/Diddy Kong Racing (USA) (En,Fr) (Rev 1).zip"
+    },
+    {
+      "title": "Banjo-Kazooie",
+      "category": "Nintendo 64",
+      "system": "n64",
+      "bucket": "n64/Banjo-Kazooie (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Banjo-Tooie",
+      "category": "Nintendo 64",
+      "system": "n64",
+      "bucket": "n64/Banjo-Tooie (USA).zip"
+    },
+    {
+      "title": "Conker's Bad Fur Day",
+      "category": "Nintendo 64",
+      "system": "n64",
+      "bucket": "n64/Conker's Bad Fur Day (USA).zip"
+    },
+    {
+      "title": "Jet Force Gemini",
+      "category": "Nintendo 64",
+      "system": "n64",
+      "bucket": "n64/Jet Force Gemini (USA).zip"
+    },
+    {
+      "title": "Blast Corps",
+      "category": "Nintendo 64",
+      "system": "n64",
+      "bucket": "n64/Blast Corps (USA) (Rev 1).zip"
+    },
+    {
+      "title": "GoldenEye 007",
+      "category": "Nintendo 64",
+      "system": "n64",
+      "bucket": "n64/GoldenEye 007 (USA).zip"
+    },
+    {
+      "title": "Perfect Dark",
+      "category": "Nintendo 64",
+      "system": "n64",
+      "bucket": "n64/Perfect Dark (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Mario Party",
+      "category": "Nintendo 64",
+      "system": "n64",
+      "bucket": "n64/Mario Party (USA).zip"
+    },
+    {
+      "title": "Mario Party 2",
+      "category": "Nintendo 64",
+      "system": "n64",
+      "bucket": "n64/Mario Party 2 (USA).zip"
+    },
+    {
+      "title": "Mario Party 3",
+      "category": "Nintendo 64",
+      "system": "n64",
+      "bucket": "n64/Mario Party 3 (USA).zip"
+    },
+    {
+      "title": "Mario Tennis",
+      "category": "Nintendo 64",
+      "system": "n64",
+      "bucket": "n64/Mario Tennis (USA).zip"
+    },
+    {
+      "title": "Mario Golf",
+      "category": "Nintendo 64",
+      "system": "n64",
+      "bucket": "n64/Mario Golf (USA).zip"
+    },
+    {
+      "title": "Pokemon Snap",
+      "category": "Nintendo 64",
+      "system": "n64",
+      "bucket": "n64/Pokemon Snap (USA).zip"
+    },
+    {
+      "title": "Pokemon Stadium",
+      "category": "Nintendo 64",
+      "system": "n64",
+      "bucket": "n64/Pokemon Stadium (USA) (Rev 2).zip"
+    },
+    {
+      "title": "Pokemon Stadium 2",
+      "category": "Nintendo 64",
+      "system": "n64",
+      "bucket": "n64/Pokemon Stadium 2 (USA).zip"
+    },
+    {
+      "title": "Mystical Ninja Starring Goemon",
+      "category": "Nintendo 64",
+      "system": "n64",
+      "bucket": "n64/Mystical Ninja Starring Goemon (USA).zip"
+    },
+    {
+      "title": "Goemon's Great Adventure",
+      "category": "Nintendo 64",
+      "system": "n64",
+      "bucket": "n64/Goemon's Great Adventure (USA).zip"
+    },
+    {
+      "title": "Mischief Makers",
+      "category": "Nintendo 64",
+      "system": "n64",
+      "bucket": "n64/Mischief Makers (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Sin and Punishment - Hoshi no Keishousha",
+      "category": "Nintendo 64",
+      "system": "n64",
+      "bucket": "n64/Tsumi to Batsu - Hoshi no Keishousha (Japan).zip"
+    },
+    {
+      "title": "Bomberman 64",
+      "category": "Nintendo 64",
+      "system": "n64",
+      "bucket": "n64/Bomberman 64 (USA).zip"
+    },
+    {
+      "title": "SpaceStation Silicon Valley",
+      "category": "Nintendo 64",
+      "system": "n64",
+      "bucket": "n64/SpaceStation Silicon Valley (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Body Harvest",
+      "category": "Nintendo 64",
+      "system": "n64",
+      "bucket": "n64/Body Harvest (USA).zip"
+    },
+    {
+      "title": "Glover",
+      "category": "Nintendo 64",
+      "system": "n64",
+      "bucket": "n64/Glover (USA).zip"
+    },
+    {
+      "title": "Gex 64 - Enter the Gecko",
+      "category": "Nintendo 64",
+      "system": "n64",
+      "bucket": "n64/Gex 64 - Enter the Gecko (USA).zip"
+    },
+    {
+      "title": "Rayman 2 - The Great Escape",
+      "category": "Nintendo 64",
+      "system": "n64",
+      "bucket": "n64/Rayman 2 - The Great Escape (USA) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Star Wars - Rogue Squadron",
+      "category": "Nintendo 64",
+      "system": "n64",
+      "bucket": "n64/Star Wars - Rogue Squadron (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Star Wars - Shadows of the Empire",
+      "category": "Nintendo 64",
+      "system": "n64",
+      "bucket": "n64/Star Wars - Shadows of the Empire (USA) (Rev 2).zip"
+    },
+    {
+      "title": "Star Wars Episode I - Racer",
+      "category": "Nintendo 64",
+      "system": "n64",
+      "bucket": "n64/Star Wars Episode I - Racer (USA).zip"
+    },
+    {
+      "title": "Turok 2 - Seeds of Evil",
+      "category": "Nintendo 64",
+      "system": "n64",
+      "bucket": "n64/Turok 2 - Seeds of Evil (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Doom 64",
+      "category": "Nintendo 64",
+      "system": "n64",
+      "bucket": "n64/Doom 64 (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Duke Nukem 64",
+      "category": "Nintendo 64",
+      "system": "n64",
+      "bucket": "n64/Duke Nukem 64 (USA).zip"
+    },
+    {
+      "title": "Quake II",
+      "category": "Nintendo 64",
+      "system": "n64",
+      "bucket": "n64/Quake II (USA).zip"
+    },
+    {
+      "title": "Resident Evil 2",
+      "category": "Nintendo 64",
+      "system": "n64",
+      "bucket": "n64/Resident Evil 2 (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Ogre Battle 64 - Person of Lordly Caliber",
+      "category": "Nintendo 64",
+      "system": "n64",
+      "bucket": "n64/Ogre Battle 64 - Person of Lordly Caliber (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Harvest Moon 64",
+      "category": "Nintendo 64",
+      "system": "n64",
+      "bucket": "n64/Harvest Moon 64 (USA).zip"
+    },
+    {
+      "title": "StarCraft 64",
+      "category": "Nintendo 64",
+      "system": "n64",
+      "bucket": "n64/StarCraft 64 (USA).zip"
+    },
+    {
+      "title": "Worms Armageddon",
+      "category": "Nintendo 64",
+      "system": "n64",
+      "bucket": "n64/Worms Armageddon (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Tony Hawk's Pro Skater 2",
+      "category": "Nintendo 64",
+      "system": "n64",
+      "bucket": "n64/Tony Hawk's Pro Skater 2 (USA).zip"
+    },
+    {
+      "title": "Mortal Kombat Trilogy",
+      "category": "Nintendo 64",
+      "system": "n64",
+      "bucket": "n64/Mortal Kombat Trilogy (USA) (Rev 2).zip"
+    },
+    {
+      "title": "WCW-nWo Revenge",
+      "category": "Nintendo 64",
+      "system": "n64",
+      "bucket": "n64/WCW-nWo Revenge (USA).zip"
+    },
+    {
+      "title": "WWF WrestleMania 2000",
+      "category": "Nintendo 64",
+      "system": "n64",
+      "bucket": "n64/WWF WrestleMania 2000 (USA).zip"
+    },
+    {
+      "title": "WWF No Mercy",
+      "category": "Nintendo 64",
+      "system": "n64",
+      "bucket": "n64/WWF No Mercy (USA) (Rev 1).zip"
+    },
+    {
+      "title": "NiGHTS into Dreams...",
+      "category": "Saturn",
+      "system": "saturn",
+      "bucket": "saturn/NiGHTS into Dreams... (USA) (with 3D Control Pad) (RE).chd"
+    },
+    {
+      "title": "Panzer Dragoon II Zwei",
+      "category": "Saturn",
+      "system": "saturn",
+      "bucket": "saturn/Panzer Dragoon II Zwei (USA).chd"
+    },
+    {
+      "title": "Panzer Dragoon Saga",
+      "category": "Saturn",
+      "system": "saturn",
+      "bucket": "saturn/Panzer Dragoon Saga (USA).m3u",
+      "files": [
+        "saturn/Panzer Dragoon Saga (USA) (Disc 1).chd",
+        "saturn/Panzer Dragoon Saga (USA) (Disc 2).chd",
+        "saturn/Panzer Dragoon Saga (USA) (Disc 3).chd",
+        "saturn/Panzer Dragoon Saga (USA) (Disc 4).chd"
+      ]
+    },
+    {
+      "title": "Burning Rangers",
+      "category": "Saturn",
+      "system": "saturn",
+      "bucket": "saturn/Burning Rangers (USA).chd"
+    },
+    {
+      "title": "Sonic Jam",
+      "category": "Saturn",
+      "system": "saturn",
+      "bucket": "saturn/Sonic Jam (USA).chd"
+    },
+    {
+      "title": "Sonic R",
+      "category": "Saturn",
+      "system": "saturn",
+      "bucket": "saturn/Sonic R (USA, Brazil).chd"
+    },
+    {
+      "title": "Astal",
+      "category": "Saturn",
+      "system": "saturn",
+      "bucket": "saturn/Astal (USA) (3S).chd"
+    },
+    {
+      "title": "Clockwork Knight - Pepperouchau's Adventure",
+      "category": "Saturn",
+      "system": "saturn",
+      "bucket": "saturn/Clockwork Knight - Pepperouchau's Adventure (USA).chd"
+    },
+    {
+      "title": "Guardian Heroes",
+      "category": "Saturn",
+      "system": "saturn",
+      "bucket": "saturn/Guardian Heroes (USA).chd"
+    },
+    {
+      "title": "Die Hard Arcade",
+      "category": "Saturn",
+      "system": "saturn",
+      "bucket": "saturn/Die Hard Arcade (USA).chd"
+    },
+    {
+      "title": "Saturn Bomberman",
+      "category": "Saturn",
+      "system": "saturn",
+      "bucket": "saturn/Saturn Bomberman (USA) (1S).chd"
+    },
+    {
+      "title": "Baku Baku Animal - World Zookeeper Contest",
+      "category": "Saturn",
+      "system": "saturn",
+      "bucket": "saturn/Baku Baku Animal - World Zookeeper Contest (USA).chd"
+    },
+    {
+      "title": "Powerslave",
+      "category": "Saturn",
+      "system": "saturn",
+      "bucket": "saturn/Powerslave (USA).chd"
+    },
+    {
+      "title": "Virtua Fighter 2",
+      "category": "Saturn",
+      "system": "saturn",
+      "bucket": "saturn/Virtua Fighter 2 (USA) (RE).chd"
+    },
+    {
+      "title": "Fighters Megamix",
+      "category": "Saturn",
+      "system": "saturn",
+      "bucket": "saturn/Fighters Megamix (USA) (RE).chd"
+    },
+    {
+      "title": "Fighting Vipers",
+      "category": "Saturn",
+      "system": "saturn",
+      "bucket": "saturn/Fighting Vipers (USA) (5S, 6S).chd"
+    },
+    {
+      "title": "Last Bronx",
+      "category": "Saturn",
+      "system": "saturn",
+      "bucket": "saturn/Last Bronx (USA).chd"
+    },
+    {
+      "title": "Virtual On - Cyber Troopers",
+      "category": "Saturn",
+      "system": "saturn",
+      "bucket": "saturn/Virtual On - Cyber Troopers (USA).chd"
+    },
+    {
+      "title": "Virtua Cop",
+      "category": "Saturn",
+      "system": "saturn",
+      "bucket": "saturn/Virtua Cop (USA) (8S, 12S).chd"
+    },
+    {
+      "title": "Virtua Cop 2",
+      "category": "Saturn",
+      "system": "saturn",
+      "bucket": "saturn/Virtua Cop 2 (USA).chd"
+    },
+    {
+      "title": "Sega Rally Championship Plus Netlink Edition",
+      "category": "Saturn",
+      "system": "saturn",
+      "bucket": "saturn/Sega Rally Championship Plus Netlink Edition (USA).chd"
+    },
+    {
+      "title": "Daytona USA C.C.E. Net Link Edition",
+      "category": "Saturn",
+      "system": "saturn",
+      "bucket": "saturn/Daytona USA C.C.E. Net Link Edition (USA).chd"
+    },
+    {
+      "title": "Manx TT SuperBike",
+      "category": "Saturn",
+      "system": "saturn",
+      "bucket": "saturn/Manx TT SuperBike (USA).chd"
+    },
+    {
+      "title": "Worldwide Soccer '98",
+      "category": "Saturn",
+      "system": "saturn",
+      "bucket": "saturn/Worldwide Soccer '98 (USA) (En,Fr,Es).chd"
+    },
+    {
+      "title": "Night Warriors - Darkstalkers' Revenge",
+      "category": "Saturn",
+      "system": "saturn",
+      "bucket": "saturn/Night Warriors - Darkstalkers' Revenge (USA).chd"
+    },
+    {
+      "title": "Vampire Savior - The Lord of Vampire",
+      "category": "Saturn",
+      "system": "saturn",
+      "bucket": "saturn/Vampire Savior - The Lord of Vampire (Japan).chd"
+    },
+    {
+      "title": "X-Men - Children of the Atom",
+      "category": "Saturn",
+      "system": "saturn",
+      "bucket": "saturn/X-Men - Children of the Atom (USA).chd"
+    },
+    {
+      "title": "X-Men vs. Street Fighter",
+      "category": "Saturn",
+      "system": "saturn",
+      "bucket": "saturn/X-Men vs. Street Fighter (Japan) (3M).chd"
+    },
+    {
+      "title": "Street Fighter Zero 3",
+      "category": "Saturn",
+      "system": "saturn",
+      "bucket": "saturn/Street Fighter Zero 3 (Japan).chd"
+    },
+    {
+      "title": "World Heroes Perfect",
+      "category": "Saturn",
+      "system": "saturn",
+      "bucket": "saturn/World Heroes Perfect (Japan).chd"
+    },
+    {
+      "title": "King of Fighters '97, The",
+      "category": "Saturn",
+      "system": "saturn",
+      "bucket": "saturn/King of Fighters '97, The (Japan).chd"
+    },
+    {
+      "title": "Metal Slug - Super Vehicle-001",
+      "category": "Saturn",
+      "system": "saturn",
+      "bucket": "saturn/Metal Slug - Super Vehicle-001 (Japan) (Rev A).chd"
+    },
+    {
+      "title": "Dungeons & Dragons Collection",
+      "category": "Saturn",
+      "system": "saturn",
+      "bucket": "saturn/Dungeons & Dragons Collection (Japan).m3u",
+      "files": [
+        "saturn/Dungeons & Dragons Collection (Japan) (Disc 1) (Tower of Doom).chd",
+        "saturn/Dungeons & Dragons Collection (Japan) (Disc 2) (Shadow over Mystara).chd"
+      ]
+    },
+    {
+      "title": "Elevator Action^2 - Returns",
+      "category": "Saturn",
+      "system": "saturn",
+      "bucket": "saturn/Elevator Action^2 - Returns (Japan).chd"
+    },
+    {
+      "title": "Shinrei Jusatsushi Taroumaru",
+      "category": "Saturn",
+      "system": "saturn",
+      "bucket": "saturn/Shinrei Jusatsushi Taroumaru (Japan).chd"
+    },
+    {
+      "title": "Keio Flying Squadron 2",
+      "category": "Saturn",
+      "system": "saturn",
+      "bucket": "saturn/Keio Flying Squadron 2 (Europe).chd"
+    },
+    {
+      "title": "Assault Suit Leynos 2",
+      "category": "Saturn",
+      "system": "saturn",
+      "bucket": "saturn/Assault Suit Leynos 2 (Japan).chd"
+    },
+    {
+      "title": "Radiant Silvergun",
+      "category": "Saturn",
+      "system": "saturn",
+      "bucket": "saturn/Radiant Silvergun (Japan).chd"
+    },
+    {
+      "title": "Battle Garegga",
+      "category": "Saturn",
+      "system": "saturn",
+      "bucket": "saturn/Battle Garegga (Japan).chd"
+    },
+    {
+      "title": "Batsugun",
+      "category": "Saturn",
+      "system": "saturn",
+      "bucket": "saturn/Batsugun (Japan).chd"
+    },
+    {
+      "title": "DoDonPachi",
+      "category": "Saturn",
+      "system": "saturn",
+      "bucket": "saturn/DoDonPachi (Japan).chd"
+    },
+    {
+      "title": "Soukyuu Gurentai",
+      "category": "Saturn",
+      "system": "saturn",
+      "bucket": "saturn/Soukyuu Gurentai (Japan) (Rev A).chd"
+    },
+    {
+      "title": "Hyper Duel",
+      "category": "Saturn",
+      "system": "saturn",
+      "bucket": "saturn/Hyper Duel (Japan).chd"
+    },
+    {
+      "title": "Shippuu Mahou Daisakusen - Kingdom-Grandprix",
+      "category": "Saturn",
+      "system": "saturn",
+      "bucket": "saturn/Shippuu Mahou Daisakusen - Kingdom-Grandprix (Japan).chd"
+    },
+    {
+      "title": "Akumajou Dracula X - Gekka no Yasoukyoku",
+      "category": "Saturn",
+      "system": "saturn",
+      "bucket": "saturn/Akumajou Dracula X - Gekka no Yasoukyoku (Japan) (2M).chd"
+    },
+    {
+      "title": "Princess Crown",
+      "category": "Saturn",
+      "system": "saturn",
+      "bucket": "saturn/Princess Crown (Japan) (Rev A) (13M).chd"
+    },
+    {
+      "title": "Legend of Oasis, The",
+      "category": "Saturn",
+      "system": "saturn",
+      "bucket": "saturn/Legend of Oasis, The (USA).chd"
+    },
+    {
+      "title": "Shining the Holy Ark",
+      "category": "Saturn",
+      "system": "saturn",
+      "bucket": "saturn/Shining the Holy Ark (USA).chd"
+    },
+    {
+      "title": "Shining Force III",
+      "category": "Saturn",
+      "system": "saturn",
+      "bucket": "saturn/Shining Force III (USA).chd"
+    },
+    {
+      "title": "Dragon Force",
+      "category": "Saturn",
+      "system": "saturn",
+      "bucket": "saturn/Dragon Force (USA).chd"
+    },
+    {
+      "title": "Albert Odyssey - Legend of Eldean",
+      "category": "Saturn",
+      "system": "saturn",
+      "bucket": "saturn/Albert Odyssey - Legend of Eldean (USA) (RE).chd"
+    },
+    {
+      "title": "Lunar - Silver Star Story Complete",
+      "category": "Saturn",
+      "system": "saturn",
+      "bucket": "saturn/Lunar - Silver Star Story Complete (Japan).chd"
+    },
+    {
+      "title": "Vandal Hearts - Ushinawareta Kodai Bunmei",
+      "category": "Saturn",
+      "system": "saturn",
+      "bucket": "saturn/Vandal Hearts - Ushinawareta Kodai Bunmei (Japan).chd"
+    },
+    {
+      "title": "Sakura Wars",
+      "category": "Saturn",
+      "system": "saturn",
+      "bucket": "saturn/Sakura Wars (Japan).m3u",
+      "files": [
+        "saturn/Sakura Wars (Japan) (Disc 1) [T-En].chd",
+        "saturn/Sakura Wars (Japan) (Disc 2) [T-En].chd"
+      ]
+    },
+    {
+      "title": "Policenauts",
+      "category": "Saturn",
+      "system": "saturn",
+      "bucket": "saturn/Policenauts (Japan).m3u",
+      "files": [
+        "saturn/Policenauts (Japan) (Disc 1).chd",
+        "saturn/Policenauts (Japan) (Disc 2).chd",
+        "saturn/Policenauts (Japan) (Disc 3).chd"
+      ]
+    },
+    {
+      "title": "Alex Kidd in Miracle World",
+      "category": "Master System",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Alex Kidd in Miracle World (USA, Europe, Brazil) (En) (Rev 1).zip"
+    },
+    {
+      "title": "Alex Kidd in Shinobi World",
+      "category": "Master System",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Alex Kidd in Shinobi World (USA, Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Sonic The Hedgehog",
+      "category": "Master System",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Sonic The Hedgehog (USA, Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Sonic The Hedgehog 2",
+      "category": "Master System",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Sonic The Hedgehog 2 (Europe, Brazil) (En) (Rev 1).zip"
+    },
+    {
+      "title": "Sonic Chaos",
+      "category": "Master System",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Sonic Chaos (Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Wonder Boy",
+      "category": "Master System",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Wonder Boy (USA, Europe, Brazil) (En) (Rev 1).zip"
+    },
+    {
+      "title": "Wonder Boy in Monster Land",
+      "category": "Master System",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Wonder Boy in Monster Land (USA, Europe).zip"
+    },
+    {
+      "title": "Wonder Boy III - The Dragon's Trap",
+      "category": "Master System",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Wonder Boy III - The Dragon's Trap (USA, Europe).zip"
+    },
+    {
+      "title": "Psycho Fox",
+      "category": "Master System",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Psycho Fox (USA, Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Asterix",
+      "category": "Master System",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Asterix (Europe, Brazil) (En,Fr) (Rev 1).zip"
+    },
+    {
+      "title": "Castle of Illusion Starring Mickey Mouse",
+      "category": "Master System",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Castle of Illusion Starring Mickey Mouse (USA, Europe, Brazil) (En) (Rev 1).zip"
+    },
+    {
+      "title": "Land of Illusion Starring Mickey Mouse",
+      "category": "Master System",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Land of Illusion Starring Mickey Mouse (Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Legend of Illusion Starring Mickey Mouse",
+      "category": "Master System",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Legend of Illusion Starring Mickey Mouse (Brazil) (En).zip"
+    },
+    {
+      "title": "Lucky Dime Caper Starring Donald Duck, The",
+      "category": "Master System",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Lucky Dime Caper Starring Donald Duck, The (Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Dynamite Headdy",
+      "category": "Master System",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Dynamite Headdy (Brazil) (En).zip"
+    },
+    {
+      "title": "Bubble Bobble",
+      "category": "Master System",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Bubble Bobble (Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Marble Madness",
+      "category": "Master System",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Marble Madness (Europe).zip"
+    },
+    {
+      "title": "Shinobi",
+      "category": "Master System",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Shinobi (USA, Europe, Brazil) (En) (Rev 1).zip"
+    },
+    {
+      "title": "Ninja Gaiden",
+      "category": "Master System",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Ninja Gaiden (Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Kenseiden",
+      "category": "Master System",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Kenseiden (USA, Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Master of Darkness",
+      "category": "Master System",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Master of Darkness (Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Ghouls'n Ghosts",
+      "category": "Master System",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Ghouls'n Ghosts (USA, Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Double Dragon",
+      "category": "Master System",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Double Dragon (World).zip"
+    },
+    {
+      "title": "Alien Syndrome",
+      "category": "Master System",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Alien Syndrome (USA, Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Rescue Mission",
+      "category": "Master System",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Rescue Mission (USA, Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Operation Wolf",
+      "category": "Master System",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Operation Wolf (Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Spy vs Spy",
+      "category": "Master System",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Spy vs Spy (USA, Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Aztec Adventure",
+      "category": "Master System",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Aztec Adventure (World).zip"
+    },
+    {
+      "title": "Phantasy Star",
+      "category": "Master System",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Phantasy Star (USA, Europe) (Rev A).zip"
+    },
+    {
+      "title": "Ys - The Vanished Omens",
+      "category": "Master System",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Ys - The Vanished Omens (USA, Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Miracle Warriors - Seal of The Dark Lord",
+      "category": "Master System",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Miracle Warriors - Seal of The Dark Lord (USA, Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Golden Axe Warrior",
+      "category": "Master System",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Golden Axe Warrior (USA, Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Golvellius - Valley of Doom",
+      "category": "Master System",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Golvellius - Valley of Doom (USA, Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Dragon Crystal",
+      "category": "Master System",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Dragon Crystal (Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Fantasy Zone",
+      "category": "Master System",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Fantasy Zone (World) (Rev 1).zip"
+    },
+    {
+      "title": "Fantasy Zone II",
+      "category": "Master System",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Fantasy Zone II (USA, Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "R-Type",
+      "category": "Master System",
+      "system": "mastersystem",
+      "bucket": "mastersystem/R-Type (World).zip"
+    },
+    {
+      "title": "Power Strike II",
+      "category": "Master System",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Power Strike II (Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Sagaia",
+      "category": "Master System",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Sagaia (Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Megumi Rescue",
+      "category": "Master System",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Megumi Rescue (Japan).zip"
+    },
+    {
+      "title": "Space Harrier",
+      "category": "Master System",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Space Harrier (Japan, USA) (En).zip"
+    },
+    {
+      "title": "Space Harrier 3-D",
+      "category": "Master System",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Space Harrier 3-D (USA, Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "After Burner",
+      "category": "Master System",
+      "system": "mastersystem",
+      "bucket": "mastersystem/After Burner (World).zip"
+    },
+    {
+      "title": "OutRun",
+      "category": "Master System",
+      "system": "mastersystem",
+      "bucket": "mastersystem/OutRun (World).zip"
+    },
+    {
+      "title": "Enduro Racer",
+      "category": "Master System",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Enduro Racer (Japan).zip"
+    },
+    {
+      "title": "Road Rash",
+      "category": "Master System",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Road Rash (Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Taito Chase H.Q.",
+      "category": "Master System",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Taito Chase H.Q. (Europe).zip"
+    },
+    {
+      "title": "California Games",
+      "category": "Master System",
+      "system": "mastersystem",
+      "bucket": "mastersystem/California Games (USA, Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Basketball Nightmare",
+      "category": "Master System",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Basketball Nightmare (Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Virtua Fighter Animation",
+      "category": "Master System",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Virtua Fighter Animation (Brazil) (En).zip"
+    },
+    {
+      "title": "Bonk's Adventure",
+      "category": "PC Engine / TG-16",
+      "system": "tg16",
+      "bucket": "tg16/Bonk's Adventure (USA).zip"
+    },
+    {
+      "title": "Bonk's Revenge",
+      "category": "PC Engine / TG-16",
+      "system": "tg16",
+      "bucket": "tg16/Bonk's Revenge (USA).zip"
+    },
+    {
+      "title": "Bonk 3 - Bonk's Big Adventure",
+      "category": "PC Engine / TG-16",
+      "system": "tg16",
+      "bucket": "tg16/Bonk 3 - Bonk's Big Adventure (USA).zip"
+    },
+    {
+      "title": "Air Zonk",
+      "category": "PC Engine / TG-16",
+      "system": "tg16",
+      "bucket": "tg16/Air Zonk (USA).zip"
+    },
+    {
+      "title": "New Adventure Island",
+      "category": "PC Engine / TG-16",
+      "system": "tg16",
+      "bucket": "tg16/New Adventure Island (USA).zip"
+    },
+    {
+      "title": "Keith Courage in Alpha Zones",
+      "category": "PC Engine / TG-16",
+      "system": "tg16",
+      "bucket": "tg16/Keith Courage in Alpha Zones (USA).zip"
+    },
+    {
+      "title": "Legendary Axe, The",
+      "category": "PC Engine / TG-16",
+      "system": "tg16",
+      "bucket": "tg16/Legendary Axe, The (USA).zip"
+    },
+    {
+      "title": "Legendary Axe II",
+      "category": "PC Engine / TG-16",
+      "system": "tg16",
+      "bucket": "tg16/Legendary Axe II (USA).zip"
+    },
+    {
+      "title": "Ninja Spirit",
+      "category": "PC Engine / TG-16",
+      "system": "tg16",
+      "bucket": "tg16/Ninja Spirit (USA).zip"
+    },
+    {
+      "title": "Splatterhouse",
+      "category": "PC Engine / TG-16",
+      "system": "tg16",
+      "bucket": "tg16/Splatterhouse (USA).zip"
+    },
+    {
+      "title": "Legend of Hero Tonma",
+      "category": "PC Engine / TG-16",
+      "system": "tg16",
+      "bucket": "tg16/Legend of Hero Tonma (USA).zip"
+    },
+    {
+      "title": "Dragon's Curse",
+      "category": "PC Engine / TG-16",
+      "system": "tg16",
+      "bucket": "tg16/Dragon's Curse (USA).zip"
+    },
+    {
+      "title": "Neutopia",
+      "category": "PC Engine / TG-16",
+      "system": "tg16",
+      "bucket": "tg16/Neutopia (USA).zip"
+    },
+    {
+      "title": "Neutopia II",
+      "category": "PC Engine / TG-16",
+      "system": "tg16",
+      "bucket": "tg16/Neutopia II (USA).zip"
+    },
+    {
+      "title": "Dungeon Explorer",
+      "category": "PC Engine / TG-16",
+      "system": "tg16",
+      "bucket": "tg16/Dungeon Explorer (USA).zip"
+    },
+    {
+      "title": "Cadash",
+      "category": "PC Engine / TG-16",
+      "system": "tg16",
+      "bucket": "tg16/Cadash (USA).zip"
+    },
+    {
+      "title": "Military Madness",
+      "category": "PC Engine / TG-16",
+      "system": "tg16",
+      "bucket": "tg16/Military Madness (USA).zip"
+    },
+    {
+      "title": "Bomberman '94",
+      "category": "PC Engine / TG-16",
+      "system": "tg16",
+      "bucket": "tg16/Bomberman '94 (World) (Wii U Virtual Console).zip"
+    },
+    {
+      "title": "Parasol Stars - The Story of Bubble Bobble III",
+      "category": "PC Engine / TG-16",
+      "system": "tg16",
+      "bucket": "tg16/Parasol Stars - The Story of Bubble Bobble III (USA).zip"
+    },
+    {
+      "title": "Don Doko Don!",
+      "category": "PC Engine / TG-16",
+      "system": "tg16",
+      "bucket": "tg16/Don Doko Don! (Japan).zip"
+    },
+    {
+      "title": "Maerchen Maze",
+      "category": "PC Engine / TG-16",
+      "system": "tg16",
+      "bucket": "tg16/Maerchen Maze (Japan).zip"
+    },
+    {
+      "title": "Boxyboy",
+      "category": "PC Engine / TG-16",
+      "system": "tg16",
+      "bucket": "tg16/Boxyboy (USA).zip"
+    },
+    {
+      "title": "Gomola Speed",
+      "category": "PC Engine / TG-16",
+      "system": "tg16",
+      "bucket": "tg16/Gomola Speed (Japan).zip"
+    },
+    {
+      "title": "Gekisha Boy",
+      "category": "PC Engine / TG-16",
+      "system": "tg16",
+      "bucket": "tg16/Gekisha Boy (Japan).zip"
+    },
+    {
+      "title": "Batman",
+      "category": "PC Engine / TG-16",
+      "system": "tg16",
+      "bucket": "tg16/Batman (Japan).zip"
+    },
+    {
+      "title": "Die Hard",
+      "category": "PC Engine / TG-16",
+      "system": "tg16",
+      "bucket": "tg16/Die Hard (Japan).zip"
+    },
+    {
+      "title": "Veigues - Tactical Gladiator",
+      "category": "PC Engine / TG-16",
+      "system": "tg16",
+      "bucket": "tg16/Veigues - Tactical Gladiator (USA).zip"
+    },
+    {
+      "title": "Street Fighter II' - Champion Edition",
+      "category": "PC Engine / TG-16",
+      "system": "tg16",
+      "bucket": "tg16/Street Fighter II' - Champion Edition (Japan).zip"
+    },
+    {
+      "title": "Devil's Crush",
+      "category": "PC Engine / TG-16",
+      "system": "tg16",
+      "bucket": "tg16/Devil's Crush (USA).zip"
+    },
+    {
+      "title": "Alien Crush",
+      "category": "PC Engine / TG-16",
+      "system": "tg16",
+      "bucket": "tg16/Alien Crush (USA).zip"
+    },
+    {
+      "title": "Time Cruise",
+      "category": "PC Engine / TG-16",
+      "system": "tg16",
+      "bucket": "tg16/Time Cruise (USA).zip"
+    },
+    {
+      "title": "R-Type",
+      "category": "PC Engine / TG-16",
+      "system": "tg16",
+      "bucket": "tg16/R-Type (USA).zip"
+    },
+    {
+      "title": "Blazing Lazers",
+      "category": "PC Engine / TG-16",
+      "system": "tg16",
+      "bucket": "tg16/Blazing Lazers (USA).zip"
+    },
+    {
+      "title": "Soldier Blade",
+      "category": "PC Engine / TG-16",
+      "system": "tg16",
+      "bucket": "tg16/Soldier Blade (USA).zip"
+    },
+    {
+      "title": "Super Star Soldier",
+      "category": "PC Engine / TG-16",
+      "system": "tg16",
+      "bucket": "tg16/Super Star Soldier (USA).zip"
+    },
+    {
+      "title": "Magical Chase",
+      "category": "PC Engine / TG-16",
+      "system": "tg16",
+      "bucket": "tg16/Magical Chase (USA).zip"
+    },
+    {
+      "title": "Galaga '90",
+      "category": "PC Engine / TG-16",
+      "system": "tg16",
+      "bucket": "tg16/Galaga '90 (USA).zip"
+    },
+    {
+      "title": "Aero Blasters",
+      "category": "PC Engine / TG-16",
+      "system": "tg16",
+      "bucket": "tg16/Aero Blasters (USA).zip"
+    },
+    {
+      "title": "Cyber-Core",
+      "category": "PC Engine / TG-16",
+      "system": "tg16",
+      "bucket": "tg16/Cyber-Core (USA).zip"
+    },
+    {
+      "title": "1943 Kai",
+      "category": "PC Engine / TG-16",
+      "system": "tg16",
+      "bucket": "tg16/1943 Kai (Japan).zip"
+    },
+    {
+      "title": "Atomic Robo-Kid Special",
+      "category": "PC Engine / TG-16",
+      "system": "tg16",
+      "bucket": "tg16/Atomic Robo-Kid Special (Japan).zip"
+    },
+    {
+      "title": "Barunba",
+      "category": "PC Engine / TG-16",
+      "system": "tg16",
+      "bucket": "tg16/Barunba (Japan).zip"
+    },
+    {
+      "title": "Zipang",
+      "category": "PC Engine / TG-16",
+      "system": "tg16",
+      "bucket": "tg16/Zipang (Japan).zip"
+    },
+    {
+      "title": "Akumajou Dracula X - Chi no Rondo",
+      "category": "PC Engine CD",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Akumajou Dracula X - Chi no Rondo (Japan).chd"
+    },
+    {
+      "title": "Ys Book I & II",
+      "category": "PC Engine CD",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Ys Book I & II (USA).chd"
+    },
+    {
+      "title": "Ys III - Wanderers from Ys",
+      "category": "PC Engine CD",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Ys III - Wanderers from Ys (USA).chd"
+    },
+    {
+      "title": "Ys IV - The Dawn of Ys",
+      "category": "PC Engine CD",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Ys IV - The Dawn of Ys (Japan) (Rev 4).chd"
+    },
+    {
+      "title": "Snatcher CD-ROMantic",
+      "category": "PC Engine CD",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Snatcher CD-ROMantic (Japan).chd"
+    },
+    {
+      "title": "Downtown Nekketsu Monogatari",
+      "category": "PC Engine CD",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Downtown Nekketsu Monogatari (Japan).chd"
+    },
+    {
+      "title": "Strider Hiryuu",
+      "category": "PC Engine CD",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Strider Hiryuu (Japan).chd"
+    },
+    {
+      "title": "Browning",
+      "category": "PC Engine CD",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Browning (Japan).chd"
+    },
+    {
+      "title": "Faceball",
+      "category": "PC Engine CD",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Faceball (Japan).chd"
+    },
+    {
+      "title": "3x3 Eyes - Sanjiyan Henjou",
+      "category": "PC Engine CD",
+      "system": "tg-cd",
+      "bucket": "tg-cd/3x3 Eyes - Sanjiyan Henjou (Japan) (Rev 1).chd"
+    },
+    {
+      "title": "Puyo Puyo CD Tsuu",
+      "category": "PC Engine CD",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Puyo Puyo CD Tsuu (Japan).chd"
+    },
+    {
+      "title": "Lords of Thunder",
+      "category": "PC Engine CD",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Lords of Thunder (USA).chd"
+    },
+    {
+      "title": "Gate of Thunder + Bonk's Adventure + Bonk's Revenge",
+      "category": "PC Engine CD",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Gate of Thunder + Bonk's Adventure + Bonk's Revenge (USA).chd"
+    },
+    {
+      "title": "Seirei Senshi Spriggan",
+      "category": "PC Engine CD",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Seirei Senshi Spriggan (Japan) [T-En].chd"
+    },
+    {
+      "title": "Star Parodier",
+      "category": "PC Engine CD",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Star Parodier (Japan).chd"
+    },
+    {
+      "title": "Sylphia",
+      "category": "PC Engine CD",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Sylphia (Japan).chd"
+    },
+    {
+      "title": "Ginga Fukei Densetsu Sapphire",
+      "category": "PC Engine CD",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Ginga Fukei Densetsu Sapphire (Japan).chd"
+    },
+    {
+      "title": "Zelda no Densetsu - The Hyrule Fantasy",
+      "category": "Famicom Disk System",
+      "system": "fds",
+      "bucket": "fds/Zelda no Densetsu - The Hyrule Fantasy (Japan) (Collector's Edition).zip"
+    },
+    {
+      "title": "Link no Bouken - The Legend of Zelda 2",
+      "category": "Famicom Disk System",
+      "system": "fds",
+      "bucket": "fds/Link no Bouken - The Legend of Zelda 2 (Japan) (Rev 1) (Collector's Edition).zip"
+    },
+    {
+      "title": "Metroid",
+      "category": "Famicom Disk System",
+      "system": "fds",
+      "bucket": "fds/Metroid (Japan) (Rev 3).zip"
+    },
+    {
+      "title": "Hikari Shinwa - Palthena no Kagami",
+      "category": "Famicom Disk System",
+      "system": "fds",
+      "bucket": "fds/Hikari Shinwa - Palthena no Kagami (Japan) (Rev 1).zip"
+    },
+    {
+      "title": "Nazo no Murasamejou",
+      "category": "Famicom Disk System",
+      "system": "fds",
+      "bucket": "fds/Nazo no Murasamejou (Japan).zip"
+    },
+    {
+      "title": "Super Mario Bros.",
+      "category": "Famicom Disk System",
+      "system": "fds",
+      "bucket": "fds/Super Mario Bros. (Japan).zip"
+    },
+    {
+      "title": "Super Mario Bros. 2",
+      "category": "Famicom Disk System",
+      "system": "fds",
+      "bucket": "fds/Super Mario Bros. 2 (Japan) (En) (DV 2).zip"
+    },
+    {
+      "title": "All Night Nippon Super Mario Bros.",
+      "category": "Famicom Disk System",
+      "system": "fds",
+      "bucket": "fds/All Night Nippon Super Mario Bros. (Japan) (Promo).zip"
+    },
+    {
+      "title": "Kaettekita Mario Bros.",
+      "category": "Famicom Disk System",
+      "system": "fds",
+      "bucket": "fds/Kaettekita Mario Bros. (Japan) (Disk Writer).zip"
+    },
+    {
+      "title": "Yume Koujou - Doki Doki Panic",
+      "category": "Famicom Disk System",
+      "system": "fds",
+      "bucket": "fds/Yume Koujou - Doki Doki Panic (Japan) (DV 2).zip"
+    },
+    {
+      "title": "Akumajou Dracula",
+      "category": "Famicom Disk System",
+      "system": "fds",
+      "bucket": "fds/Akumajou Dracula (Japan) (Rev 2) (Disk Writer).zip"
+    },
+    {
+      "title": "Dracula II - Noroi no Fuuin",
+      "category": "Famicom Disk System",
+      "system": "fds",
+      "bucket": "fds/Dracula II - Noroi no Fuuin (Japan).zip"
+    },
+    {
+      "title": "Esper Dream",
+      "category": "Famicom Disk System",
+      "system": "fds",
+      "bucket": "fds/Esper Dream (Japan) (Rev 1) (Disk Writer).zip"
+    },
+    {
+      "title": "Ai Senshi Nicol",
+      "category": "Famicom Disk System",
+      "system": "fds",
+      "bucket": "fds/Ai Senshi Nicol (Japan).zip"
+    },
+    {
+      "title": "Armana no Kiseki",
+      "category": "Famicom Disk System",
+      "system": "fds",
+      "bucket": "fds/Armana no Kiseki (Japan).zip"
+    },
+    {
+      "title": "Bio Miracle Bokutte Upa",
+      "category": "Famicom Disk System",
+      "system": "fds",
+      "bucket": "fds/Bio Miracle Bokutte Upa (Japan).zip"
+    },
+    {
+      "title": "Youkai Yashiki",
+      "category": "Famicom Disk System",
+      "system": "fds",
+      "bucket": "fds/Youkai Yashiki (Japan).zip"
+    },
+    {
+      "title": "Falsion",
+      "category": "Famicom Disk System",
+      "system": "fds",
+      "bucket": "fds/Falsion (Japan).zip"
+    },
+    {
+      "title": "Otocky",
+      "category": "Famicom Disk System",
+      "system": "fds",
+      "bucket": "fds/Otocky (Japan).zip"
+    },
+    {
+      "title": "Wrecking Crew",
+      "category": "Famicom Disk System",
+      "system": "fds",
+      "bucket": "fds/Wrecking Crew (Japan) (Disk Writer).zip"
+    },
+    {
+      "title": "Vs. Excitebike",
+      "category": "Famicom Disk System",
+      "system": "fds",
+      "bucket": "fds/Vs. Excitebike (Japan) (En).zip"
+    },
+    {
+      "title": "Clu Clu Land",
+      "category": "Famicom Disk System",
+      "system": "fds",
+      "bucket": "fds/Clu Clu Land (Japan) (En) (Disk Writer).zip"
+    },
+    {
+      "title": "Ice Hockey",
+      "category": "Famicom Disk System",
+      "system": "fds",
+      "bucket": "fds/Ice Hockey (Japan).zip"
+    },
+    {
+      "title": "Famicom Grand Prix - F1 Race",
+      "category": "Famicom Disk System",
+      "system": "fds",
+      "bucket": "fds/Famicom Grand Prix - F1 Race (Japan) (DV 1) (Disk Writer).zip"
+    },
+    {
+      "title": "Famicom Grand Prix II - 3D Hot Rally",
+      "category": "Famicom Disk System",
+      "system": "fds",
+      "bucket": "fds/Famicom Grand Prix II - 3D Hot Rally (Japan) (DV 8) (Disk Writer) (Famicom 3D System).zip"
+    },
+    {
+      "title": "Bubble Bobble",
+      "category": "Famicom Disk System",
+      "system": "fds",
+      "bucket": "fds/Bubble Bobble (Japan).zip"
+    },
+    {
+      "title": "Monty on the Run - Monty no Doki Doki Dai Dassou",
+      "category": "Famicom Disk System",
+      "system": "fds",
+      "bucket": "fds/Monty on the Run - Monty no Doki Doki Dai Dassou (Japan).zip"
+    },
+    {
+      "title": "Nazo no Kabe - Block Kuzushi",
+      "category": "Famicom Disk System",
+      "system": "fds",
+      "bucket": "fds/Nazo no Kabe - Block Kuzushi (Japan).zip"
+    },
+    {
+      "title": "Knight Move",
+      "category": "Famicom Disk System",
+      "system": "fds",
+      "bucket": "fds/Knight Move (Japan) (Rev 1) (Disk Writer).zip"
+    },
+    {
+      "title": "Yuu Maze",
+      "category": "Famicom Disk System",
+      "system": "fds",
+      "bucket": "fds/Yuu Maze (Japan).zip"
+    },
+    {
+      "title": "Dead Zone",
+      "category": "Famicom Disk System",
+      "system": "fds",
+      "bucket": "fds/Dead Zone (Japan).zip"
+    },
+    {
+      "title": "Dirty Pair - Project Eden",
+      "category": "Famicom Disk System",
+      "system": "fds",
+      "bucket": "fds/Dirty Pair - Project Eden (Japan) (Rev 1) (Disk Writer).zip"
+    },
+    {
+      "title": "Cleopatra no Mahou",
+      "category": "Famicom Disk System",
+      "system": "fds",
+      "bucket": "fds/Cleopatra no Mahou (Japan).zip"
+    },
+    {
+      "title": "Silviana - Ai Ippai no Little Angel",
+      "category": "Famicom Disk System",
+      "system": "fds",
+      "bucket": "fds/Silviana - Ai Ippai no Little Angel (Japan).zip"
+    },
+    {
+      "title": "Famicom Tantei Club Part II - Ushiro ni Tatsu Shoujo",
+      "category": "Famicom Disk System",
+      "system": "fds",
+      "bucket": "fds/Famicom Tantei Club Part II - Ushiro ni Tatsu Shoujo - Zenpen (Japan).zip",
+      "files": [
+        "fds/Famicom Tantei Club Part II - Ushiro ni Tatsu Shoujo - Kouhen (Japan) (DV 3, 4).zip"
+      ]
+    },
+    {
+      "title": "Girl's Garden",
+      "category": "SG-1000",
+      "system": "sg1000",
+      "bucket": "sg1000/Girl's Garden (Japan, Australia) (Ja).zip"
+    },
+    {
+      "title": "Ninja Princess",
+      "category": "SG-1000",
+      "system": "sg1000",
+      "bucket": "sg1000/Ninja Princess (Japan, Australia) (Ja).zip"
+    },
+    {
+      "title": "Doki Doki Penguin Land",
+      "category": "SG-1000",
+      "system": "sg1000",
+      "bucket": "sg1000/Doki Doki Penguin Land (Japan).zip"
+    },
+    {
+      "title": "Flicky",
+      "category": "SG-1000",
+      "system": "sg1000",
+      "bucket": "sg1000/Flicky (Japan, New Zealand) (Ja).zip"
+    },
+    {
+      "title": "Wonder Boy",
+      "category": "SG-1000",
+      "system": "sg1000",
+      "bucket": "sg1000/Wonder Boy (Japan, Australia) (Ja).zip"
+    },
+    {
+      "title": "Gulkave",
+      "category": "SG-1000",
+      "system": "sg1000",
+      "bucket": "sg1000/Gulkave (Japan).zip"
+    },
+    {
+      "title": "Star Jacker",
+      "category": "SG-1000",
+      "system": "sg1000",
+      "bucket": "sg1000/Star Jacker (Japan, Europe) (En) (Rev 2).zip"
+    },
+    {
+      "title": "H.E.R.O.",
+      "category": "SG-1000",
+      "system": "sg1000",
+      "bucket": "sg1000/H.E.R.O. (Japan).zip"
+    },
+    {
+      "title": "Choplifter",
+      "category": "SG-1000",
+      "system": "sg1000",
+      "bucket": "sg1000/Choplifter (Japan, Australia) (Ja).zip"
+    },
+    {
+      "title": "Bomb Jack",
+      "category": "SG-1000",
+      "system": "sg1000",
+      "bucket": "sg1000/Bomb Jack (Japan, Australia) (Ja).zip"
+    },
+    {
+      "title": "Elevator Action",
+      "category": "SG-1000",
+      "system": "sg1000",
+      "bucket": "sg1000/Elevator Action (Japan).zip"
+    },
+    {
+      "title": "Hustle Chumy",
+      "category": "SG-1000",
+      "system": "sg1000",
+      "bucket": "sg1000/Hustle Chumy (Japan).zip"
+    },
+    {
+      "title": "Dragon Wang",
+      "category": "SG-1000",
+      "system": "sg1000",
+      "bucket": "sg1000/Dragon Wang (Japan) (Rev 1).zip"
+    },
+    {
+      "title": "Castle, The",
+      "category": "SG-1000",
+      "system": "sg1000",
+      "bucket": "sg1000/Castle, The (Japan).zip"
+    },
+    {
+      "title": "Congo Bongo",
+      "category": "SG-1000",
+      "system": "sg1000",
+      "bucket": "sg1000/Congo Bongo (Japan, Europe, Australia, New Zealand) (En) (Rev 1).zip"
+    },
+    {
+      "title": "Sega-Galaga",
+      "category": "SG-1000",
+      "system": "sg1000",
+      "bucket": "sg1000/Sega-Galaga (Japan, Australia) (Ja).zip"
+    },
+    {
+      "title": "Space Invaders",
+      "category": "SG-1000",
+      "system": "sg1000",
+      "bucket": "sg1000/Space Invaders (Japan).zip"
+    },
+    {
+      "title": "Monaco GP",
+      "category": "SG-1000",
+      "system": "sg1000",
+      "bucket": "sg1000/Monaco GP (Japan, Europe) (Ja) (Rev 2).zip"
+    },
+    {
+      "title": "Kaze no Klonoa - Moonlight Museum",
+      "category": "WonderSwan",
+      "system": "wonderswan",
+      "bucket": "wonderswan/Kaze no Klonoa - Moonlight Museum (Japan).zip"
+    },
+    {
+      "title": "Makaimura for WonderSwan",
+      "category": "WonderSwan",
+      "system": "wonderswan",
+      "bucket": "wonderswan/Makaimura for WonderSwan (Japan).zip"
+    },
+    {
+      "title": "Rockman & Forte - Mirai Kara no Chousensha",
+      "category": "WonderSwan",
+      "system": "wonderswan",
+      "bucket": "wonderswan/Rockman & Forte - Mirai Kara no Chousensha (Japan).zip"
+    },
+    {
+      "title": "Buffers Evolution",
+      "category": "WonderSwan",
+      "system": "wonderswan",
+      "bucket": "wonderswan/Buffers Evolution (Japan).zip"
+    },
+    {
+      "title": "Pocket Fighter",
+      "category": "WonderSwan",
+      "system": "wonderswan",
+      "bucket": "wonderswan/Pocket Fighter (Japan).zip"
+    },
+    {
+      "title": "Clock Tower for WonderSwan",
+      "category": "WonderSwan",
+      "system": "wonderswan",
+      "bucket": "wonderswan/Clock Tower for WonderSwan (Japan) (Rev 1).zip"
+    },
+    {
+      "title": "Chocobo no Fushigi na Dungeon for WonderSwan",
+      "category": "WonderSwan",
+      "system": "wonderswan",
+      "bucket": "wonderswan/Chocobo no Fushigi na Dungeon for WonderSwan (Japan) (Rev 3).zip"
+    },
+    {
+      "title": "Neon Genesis Evangelion - Shito Ikusei",
+      "category": "WonderSwan",
+      "system": "wonderswan",
+      "bucket": "wonderswan/Neon Genesis Evangelion - Shito Ikusei (Japan).zip"
+    },
+    {
+      "title": "GunPey",
+      "category": "WonderSwan",
+      "system": "wonderswan",
+      "bucket": "wonderswan/GunPey (Japan).zip"
+    },
+    {
+      "title": "Puyo Puyo Tsuu",
+      "category": "WonderSwan",
+      "system": "wonderswan",
+      "bucket": "wonderswan/Puyo Puyo Tsuu (Japan).zip"
+    },
+    {
+      "title": "Magical Drop for WonderSwan",
+      "category": "WonderSwan",
+      "system": "wonderswan",
+      "bucket": "wonderswan/Magical Drop for WonderSwan (Japan).zip"
+    },
+    {
+      "title": "Rainbow Islands - Putty's Party",
+      "category": "WonderSwan",
+      "system": "wonderswan",
+      "bucket": "wonderswan/Rainbow Islands - Putty's Party (Japan).zip"
+    },
+    {
+      "title": "Lode Runner for WonderSwan",
+      "category": "WonderSwan",
+      "system": "wonderswan",
+      "bucket": "wonderswan/Lode Runner for WonderSwan (Japan).zip"
+    },
+    {
+      "title": "Engacho! for WonderSwan",
+      "category": "WonderSwan",
+      "system": "wonderswan",
+      "bucket": "wonderswan/Engacho! for WonderSwan (Japan).zip"
+    },
+    {
+      "title": "D's Garage 21 Koubo Game - Tane o Maku Tori",
+      "category": "WonderSwan",
+      "system": "wonderswan",
+      "bucket": "wonderswan/D's Garage 21 Koubo Game - Tane o Maku Tori (Japan).zip"
+    },
+    {
+      "title": "Side Pocket for WonderSwan",
+      "category": "WonderSwan",
+      "system": "wonderswan",
+      "bucket": "wonderswan/Side Pocket for WonderSwan (Japan).zip"
+    },
+    {
+      "title": "beatmania for WonderSwan",
+      "category": "WonderSwan",
+      "system": "wonderswan",
+      "bucket": "wonderswan/beatmania for WonderSwan (Japan).zip"
+    },
+    {
+      "title": "Final Lap 2000",
+      "category": "WonderSwan",
+      "system": "wonderswan",
+      "bucket": "wonderswan/Final Lap 2000 (Japan).zip"
+    },
+    {
+      "title": "Bakusou Dekotora Densetsu for WonderSwan",
+      "category": "WonderSwan",
+      "system": "wonderswan",
+      "bucket": "wonderswan/Bakusou Dekotora Densetsu for WonderSwan (Japan).zip"
+    },
+    {
+      "title": "From TV Animation One Piece - Grand Battle Swan Colosseum",
+      "category": "WonderSwan",
+      "system": "wonderswancolor",
+      "bucket": "wonderswancolor/From TV Animation One Piece - Grand Battle Swan Colosseum (Japan).zip"
+    },
+    {
+      "title": "Judgement Silversword - Rebirth Edition",
+      "category": "WonderSwan",
+      "system": "wonderswancolor",
+      "bucket": "wonderswancolor/Judgement Silversword - Rebirth Edition (Japan) (Rev 5C21).zip"
+    },
+    {
+      "title": "Mr. Driller",
+      "category": "WonderSwan",
+      "system": "wonderswancolor",
+      "bucket": "wonderswancolor/Mr. Driller (Japan).zip"
+    },
+    {
+      "title": "Golden Axe",
+      "category": "WonderSwan",
+      "system": "wonderswancolor",
+      "bucket": "wonderswancolor/Golden Axe (Japan).zip"
+    },
+    {
+      "title": "Guilty Gear Petit 2",
+      "category": "WonderSwan",
+      "system": "wonderswancolor",
+      "bucket": "wonderswancolor/Guilty Gear Petit 2 (Japan).zip"
+    },
+    {
+      "title": "Final Fantasy IV",
+      "category": "WonderSwan",
+      "system": "wonderswancolor",
+      "bucket": "wonderswancolor/Final Fantasy IV (Japan).zip"
+    },
+    {
+      "title": "Front Mission",
+      "category": "WonderSwan",
+      "system": "wonderswancolor",
+      "bucket": "wonderswancolor/Front Mission (Japan).zip"
+    },
+    {
+      "title": "SD Gundam - Operation U.C.",
+      "category": "WonderSwan",
+      "system": "wonderswancolor",
+      "bucket": "wonderswancolor/SD Gundam - Operation U.C. (Japan).zip"
+    },
+    {
+      "title": "Flash Koibito-kun",
+      "category": "WonderSwan",
+      "system": "wonderswancolor",
+      "bucket": "wonderswancolor/Flash Koibito-kun (Japan).zip"
+    },
+    {
+      "title": "Rhyme Rider Kerorican",
+      "category": "WonderSwan",
+      "system": "wonderswancolor",
+      "bucket": "wonderswancolor/Rhyme Rider Kerorican (Japan).zip"
+    },
+    {
+      "title": "GunPey EX",
+      "category": "WonderSwan",
+      "system": "wonderswancolor",
+      "bucket": "wonderswancolor/GunPey EX (Japan).zip"
+    },
+    {
+      "title": "Tetris",
+      "category": "WonderSwan",
+      "system": "wonderswancolor",
+      "bucket": "wonderswancolor/Tetris (Japan).zip"
+    },
+    {
+      "title": "King of Fighters R-1 - Pocket Fighting Series",
+      "category": "Neo Geo Pocket",
+      "system": "ngp",
+      "bucket": "ngp/King of Fighters R-1 - Pocket Fighting Series (Japan, Europe) (En,Ja).zip"
+    },
+    {
+      "title": "Samurai Shodown! - Pocket Fighting Series",
+      "category": "Neo Geo Pocket",
+      "system": "ngp",
+      "bucket": "ngp/Samurai Shodown! - Pocket Fighting Series (Japan, Europe) (En,Ja).zip"
+    },
+    {
+      "title": "SNK vs. Capcom - The Match of the Millennium",
+      "category": "Neo Geo Pocket",
+      "system": "ngpc",
+      "bucket": "ngpc/SNK vs. Capcom - The Match of the Millennium (World) (En,Ja).zip"
+    },
+    {
+      "title": "King of Fighters R-2 - Pocket Fighting Series",
+      "category": "Neo Geo Pocket",
+      "system": "ngpc",
+      "bucket": "ngpc/King of Fighters R-2 - Pocket Fighting Series (World) (En,Ja).zip"
+    },
+    {
+      "title": "Samurai Shodown! 2 - Pocket Fighting Series",
+      "category": "Neo Geo Pocket",
+      "system": "ngpc",
+      "bucket": "ngpc/Samurai Shodown! 2 - Pocket Fighting Series (World) (En,Ja).zip"
+    },
+    {
+      "title": "Last Blade, The - Beyond the Destiny",
+      "category": "Neo Geo Pocket",
+      "system": "ngpc",
+      "bucket": "ngpc/Last Blade, The - Beyond the Destiny (USA, Europe).zip"
+    },
+    {
+      "title": "Fatal Fury F-Contact - Pocket Fighting Series",
+      "category": "Neo Geo Pocket",
+      "system": "ngpc",
+      "bucket": "ngpc/Fatal Fury F-Contact - Pocket Fighting Series (World) (En,Ja).zip"
+    },
+    {
+      "title": "SNK Gals' Fighters",
+      "category": "Neo Geo Pocket",
+      "system": "ngpc",
+      "bucket": "ngpc/SNK Gals' Fighters (USA, Europe).zip"
+    },
+    {
+      "title": "Rockman - Battle & Fighters",
+      "category": "Neo Geo Pocket",
+      "system": "ngpc",
+      "bucket": "ngpc/Rockman - Battle & Fighters (Japan).zip"
+    },
+    {
+      "title": "Metal Slug - 1st Mission",
+      "category": "Neo Geo Pocket",
+      "system": "ngpc",
+      "bucket": "ngpc/Metal Slug - 1st Mission (World) (En,Ja).zip"
+    },
+    {
+      "title": "Metal Slug - 2nd Mission",
+      "category": "Neo Geo Pocket",
+      "system": "ngpc",
+      "bucket": "ngpc/Metal Slug - 2nd Mission (World) (En,Ja).zip"
+    },
+    {
+      "title": "Sonic The Hedgehog - Pocket Adventure",
+      "category": "Neo Geo Pocket",
+      "system": "ngpc",
+      "bucket": "ngpc/Sonic The Hedgehog - Pocket Adventure (World) (En,Ja).zip"
+    },
+    {
+      "title": "Dark Arms - Beast Buster 1999",
+      "category": "Neo Geo Pocket",
+      "system": "ngpc",
+      "bucket": "ngpc/Dark Arms - Beast Buster 1999 (World) (En,Ja).zip"
+    },
+    {
+      "title": "Fantastic Night Dreams - Cotton",
+      "category": "Neo Geo Pocket",
+      "system": "ngpc",
+      "bucket": "ngpc/Fantastic Night Dreams - Cotton (Europe).zip"
+    },
+    {
+      "title": "SNK vs. Capcom - Card Fighters' Clash - Capcom Version",
+      "category": "Neo Geo Pocket",
+      "system": "ngpc",
+      "bucket": "ngpc/SNK vs. Capcom - Card Fighters' Clash - Capcom Version (USA, Europe).zip"
+    },
+    {
+      "title": "SNK vs. Capcom - Card Fighters' Clash - SNK Version",
+      "category": "Neo Geo Pocket",
+      "system": "ngpc",
+      "bucket": "ngpc/SNK vs. Capcom - Card Fighters' Clash - SNK Version (USA, Europe).zip"
+    },
+    {
+      "title": "SNK vs. Capcom - Card Fighters 2 - Expand Edition",
+      "category": "Neo Geo Pocket",
+      "system": "ngpc",
+      "bucket": "ngpc/SNK vs. Capcom - Card Fighters 2 - Expand Edition (Japan).zip"
+    },
+    {
+      "title": "Faselei!",
+      "category": "Neo Geo Pocket",
+      "system": "ngpc",
+      "bucket": "ngpc/Faselei! (USA, Europe).zip"
+    },
+    {
+      "title": "Biomotor Unitron",
+      "category": "Neo Geo Pocket",
+      "system": "ngpc",
+      "bucket": "ngpc/Biomotor Unitron (USA, Europe).zip"
+    },
+    {
+      "title": "Evolution - Eternal Dungeons",
+      "category": "Neo Geo Pocket",
+      "system": "ngpc",
+      "bucket": "ngpc/Evolution - Eternal Dungeons (Europe) (v03).zip"
+    },
+    {
+      "title": "Densetsu no Ogre Battle Gaiden - Zenobia no Ouji",
+      "category": "Neo Geo Pocket",
+      "system": "ngpc",
+      "bucket": "ngpc/Densetsu no Ogre Battle Gaiden - Zenobia no Ouji (Japan).zip"
+    },
+    {
+      "title": "Dive Alert - Becky's Version",
+      "category": "Neo Geo Pocket",
+      "system": "ngpc",
+      "bucket": "ngpc/Dive Alert - Becky's Version (USA, Europe).zip"
+    },
+    {
+      "title": "Dive Alert - Matt's Version",
+      "category": "Neo Geo Pocket",
+      "system": "ngpc",
+      "bucket": "ngpc/Dive Alert - Matt's Version (USA, Europe).zip"
+    },
+    {
+      "title": "Neo Turf Masters",
+      "category": "Neo Geo Pocket",
+      "system": "ngpc",
+      "bucket": "ngpc/Neo Turf Masters (World) (En,Ja).zip"
+    },
+    {
+      "title": "Pocket Tennis Color - Pocket Sports Series",
+      "category": "Neo Geo Pocket",
+      "system": "ngpc",
+      "bucket": "ngpc/Pocket Tennis Color - Pocket Sports Series (World) (En,Ja).zip"
+    },
+    {
+      "title": "Baseball Stars Color - Pocket Sports Series",
+      "category": "Neo Geo Pocket",
+      "system": "ngpc",
+      "bucket": "ngpc/Baseball Stars Color - Pocket Sports Series (World) (En,Ja).zip"
+    },
+    {
+      "title": "Pac-Man",
+      "category": "Neo Geo Pocket",
+      "system": "ngpc",
+      "bucket": "ngpc/Pac-Man (World) (En,Ja).zip"
+    },
+    {
+      "title": "Crush Roller",
+      "category": "Neo Geo Pocket",
+      "system": "ngpc",
+      "bucket": "ngpc/Crush Roller (World) (En,Ja).zip"
+    },
+    {
+      "title": "Puyo Pop",
+      "category": "Neo Geo Pocket",
+      "system": "ngpc",
+      "bucket": "ngpc/Puyo Pop (World) (En,Ja) (v06).zip"
+    },
+    {
+      "title": "Bust-A-Move Pocket",
+      "category": "Neo Geo Pocket",
+      "system": "ngpc",
+      "bucket": "ngpc/Bust-A-Move Pocket (USA).zip"
+    },
+    {
+      "title": "Magical Drop Pocket",
+      "category": "Neo Geo Pocket",
+      "system": "ngpc",
+      "bucket": "ngpc/Magical Drop Pocket (USA, Europe).zip"
+    },
+    {
+      "title": "Puzzle Link 2",
+      "category": "Neo Geo Pocket",
+      "system": "ngpc",
+      "bucket": "ngpc/Puzzle Link 2 (USA, Europe).zip"
+    }
+  ]
+}

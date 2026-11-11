@@ -1,0 +1,216 @@
+{
+  "name": "Kirby",
+  "description": "Kirby platformers and spin-offs.",
+  "games": [
+    {
+      "title": "Kirby's Dream Land",
+      "category": "Mainline",
+      "system": "gb",
+      "bucket": "gb/Kirby's Dream Land (USA, Europe).zip"
+    },
+    {
+      "title": "Kirby's Adventure",
+      "category": "Mainline",
+      "system": "nes",
+      "bucket": "nes/Kirby's Adventure (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Kirby's Dream Land 2",
+      "category": "Mainline",
+      "system": "gb",
+      "bucket": "gb/Kirby's Dream Land 2 (USA, Europe) (SGB Enhanced).zip"
+    },
+    {
+      "title": "Kirby Super Star",
+      "category": "Mainline",
+      "system": "snes",
+      "bucket": "snes/Kirby Super Star (USA).zip"
+    },
+    {
+      "title": "Kirby's Dream Land 3",
+      "category": "Mainline",
+      "system": "snes",
+      "bucket": "snes/Kirby's Dream Land 3 (USA).zip"
+    },
+    {
+      "title": "Kirby 64 - The Crystal Shards",
+      "category": "Mainline",
+      "system": "n64",
+      "bucket": "n64/Kirby 64 - The Crystal Shards (USA).zip"
+    },
+    {
+      "title": "Kirby - Nightmare in Dream Land",
+      "category": "Mainline",
+      "system": "gba",
+      "bucket": "gba/Kirby - Nightmare in Dream Land (USA).zip"
+    },
+    {
+      "title": "Kirby & The Amazing Mirror",
+      "category": "Mainline",
+      "system": "gba",
+      "bucket": "gba/Kirby & The Amazing Mirror (USA).zip"
+    },
+    {
+      "title": "Kirby - Squeak Squad",
+      "category": "Mainline",
+      "system": "nds",
+      "bucket": "nds/Kirby - Squeak Squad (USA).zip"
+    },
+    {
+      "title": "Kirby Super Star Ultra",
+      "category": "Mainline",
+      "system": "nds",
+      "bucket": "nds/Kirby Super Star Ultra (USA).zip"
+    },
+    {
+      "title": "Kirby's Return to Dream Land",
+      "category": "Mainline",
+      "system": "wii",
+      "bucket": "wii/Kirby's Return to Dream Land (USA) (En,Fr,Es).rvz"
+    },
+    {
+      "title": "Kirby - Triple Deluxe",
+      "category": "Mainline",
+      "system": "3ds",
+      "bucket": "3ds/Kirby - Triple Deluxe (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Kirby - Planet Robobot",
+      "category": "Mainline",
+      "system": "3ds",
+      "bucket": "3ds/Kirby - Planet Robobot (USA).zip"
+    },
+    {
+      "title": "Kirby's Pinball Land",
+      "category": "Spin-offs",
+      "system": "gb",
+      "bucket": "gb/Kirby's Pinball Land (USA, Europe).zip"
+    },
+    {
+      "title": "Kirby's Dream Course",
+      "category": "Spin-offs",
+      "system": "snes",
+      "bucket": "snes/Kirby's Dream Course (USA).zip"
+    },
+    {
+      "title": "Kirby's Avalanche",
+      "category": "Spin-offs",
+      "system": "snes",
+      "bucket": "snes/Kirby's Avalanche (USA).zip"
+    },
+    {
+      "title": "Kirby's Block Ball",
+      "category": "Spin-offs",
+      "system": "gb",
+      "bucket": "gb/Kirby's Block Ball (USA, Europe) (SGB Enhanced).zip"
+    },
+    {
+      "title": "Kirby's Star Stacker",
+      "category": "Spin-offs",
+      "system": "gb",
+      "bucket": "gb/Kirby's Star Stacker (USA, Europe) (SGB Enhanced).zip"
+    },
+    {
+      "title": "Kirby no Kirakira Kids",
+      "category": "Spin-offs",
+      "system": "snes",
+      "bucket": "snes/Kirby no Kirakira Kids (Japan).zip"
+    },
+    {
+      "title": "Kirby - Tilt 'n' Tumble",
+      "category": "Spin-offs",
+      "system": "gbc",
+      "bucket": "gbc/Kirby - Tilt 'n' Tumble (USA).zip"
+    },
+    {
+      "title": "Kirby Air Ride",
+      "category": "Spin-offs",
+      "system": "gc",
+      "bucket": "gc/Kirby Air Ride (USA).rvz"
+    },
+    {
+      "title": "Kirby - Canvas Curse",
+      "category": "Spin-offs",
+      "system": "nds",
+      "bucket": "nds/Kirby - Canvas Curse (USA).zip"
+    },
+    {
+      "title": "Kirby's Epic Yarn",
+      "category": "Spin-offs",
+      "system": "wii",
+      "bucket": "wii/Kirby's Epic Yarn (USA) (En,Fr,Es).rvz"
+    },
+    {
+      "title": "Kirby Mass Attack",
+      "category": "Spin-offs",
+      "system": "nds",
+      "bucket": "nds/Kirby Mass Attack (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Kirby and the Rainbow Curse",
+      "category": "Spin-offs",
+      "system": "wiiu",
+      "bucket": "wiiu/Kirby and the Rainbow Curse (US) (v16).wua"
+    },
+    {
+      "title": "Kirby Battle Royale",
+      "category": "Spin-offs",
+      "system": "3ds",
+      "bucket": "3ds/Kirby Battle Royale (USA) (En,Ja,Fr,De,Es,It,Nl,Ko) (Rev 2).zip"
+    },
+    {
+      "title": "Kirby's Extra Epic Yarn",
+      "category": "Spin-offs",
+      "system": "3ds",
+      "bucket": "3ds/Kirby's Extra Epic Yarn (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Kirby no Omochabako - Arrange Ball",
+      "category": "Spin-offs",
+      "system": "satellaview",
+      "bucket": "satellaview/Kirby no Omochabako - Arrange Ball (Japan).zip"
+    },
+    {
+      "title": "Kirby no Omochabako - Ball Rally",
+      "category": "Spin-offs",
+      "system": "satellaview",
+      "bucket": "satellaview/Kirby no Omochabako - Ball Rally (Japan).zip"
+    },
+    {
+      "title": "Kirby no Omochabako - Baseball",
+      "category": "Spin-offs",
+      "system": "satellaview",
+      "bucket": "satellaview/Kirby no Omochabako - Baseball (Japan) (2-9).zip"
+    },
+    {
+      "title": "Kirby no Omochabako - Cannon Ball",
+      "category": "Spin-offs",
+      "system": "satellaview",
+      "bucket": "satellaview/Kirby no Omochabako - Cannon Ball (Japan).zip"
+    },
+    {
+      "title": "Kirby no Omochabako - Guruguru Ball",
+      "category": "Spin-offs",
+      "system": "satellaview",
+      "bucket": "satellaview/Kirby no Omochabako - Guruguru Ball (Japan).zip"
+    },
+    {
+      "title": "Kirby no Omochabako - Hoshi Kuzushi",
+      "category": "Spin-offs",
+      "system": "satellaview",
+      "bucket": "satellaview/Kirby no Omochabako - Hoshi Kuzushi (Japan).zip"
+    },
+    {
+      "title": "Kirby no Omochabako - Pachinko",
+      "category": "Spin-offs",
+      "system": "satellaview",
+      "bucket": "satellaview/Kirby no Omochabako - Pachinko (Japan).zip"
+    },
+    {
+      "title": "Kirby no Omochabako - Pinball",
+      "category": "Spin-offs",
+      "system": "satellaview",
+      "bucket": "satellaview/Kirby no Omochabako - Pinball (Japan).zip"
+    }
+  ]
+}

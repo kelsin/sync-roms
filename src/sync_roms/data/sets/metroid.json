@@ -1,11 +1,16 @@
 {
   "name": "Metroid",
-  "description": "Samus Aran's side-scrolling adventures plus the DS spin-offs and the Wii games.",
+  "description": "Samus Aran's side-scrolling adventures plus the Prime series and its spin-offs.",
   "games": [
     {
       "title": "Metroid",
       "system": "nes",
       "bucket": "nes/Metroid (USA).zip"
+    },
+    {
+      "title": "Metroid (Rev 3)",
+      "system": "fds",
+      "bucket": "fds/Metroid (Japan) (Rev 3).zip"
     },
     {
       "title": "Metroid II - Return of Samus",
@@ -21,6 +26,11 @@
       "title": "Metroid - Zero Mission",
       "system": "gba",
       "bucket": "gba/Metroid - Zero Mission (USA).zip"
+    },
+    {
+      "title": "Classic NES Series - Metroid",
+      "system": "gba",
+      "bucket": "gba/Classic NES Series - Metroid (USA, Europe).zip"
     },
     {
       "title": "Metroid Prime (Rev 2)",
@@ -41,6 +51,16 @@
       "title": "Metroid Prime Pinball",
       "system": "nds",
       "bucket": "nds/Metroid Prime Pinball (USA).zip"
+    },
+    {
+      "title": "Metroid - Samus Returns",
+      "system": "3ds",
+      "bucket": "3ds/Metroid - Samus Returns (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Metroid Prime - Federation Force",
+      "system": "3ds",
+      "bucket": "3ds/Metroid Prime - Federation Force (USA) (En,Fr,Es).zip"
     },
     {
       "title": "Super Metroid",

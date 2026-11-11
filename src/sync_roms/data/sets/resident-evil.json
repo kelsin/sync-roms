@@ -27,9 +27,19 @@
       "bucket": "psx/Resident Evil - Survivor (USA).chd"
     },
     {
+      "title": "Resident Evil",
+      "system": "saturn",
+      "bucket": "saturn/Resident Evil (USA).chd"
+    },
+    {
       "title": "Resident Evil 2 (Rev 1)",
       "system": "n64",
       "bucket": "n64/Resident Evil 2 (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Resident Evil 2",
+      "system": "gamecom",
+      "bucket": "gamecom/Resident Evil 2 (USA).zip"
     },
     {
       "title": "Resident Evil Gaiden",
@@ -40,6 +50,16 @@
       "title": "Resident Evil - Deadly Silence",
       "system": "nds",
       "bucket": "nds/Resident Evil - Deadly Silence (USA).zip"
+    },
+    {
+      "title": "Resident Evil - Revelations (Rev 1)",
+      "system": "3ds",
+      "bucket": "3ds/Resident Evil - Revelations (USA) (En,Ja,Fr,De,Es,It) (Rev 1).zip"
+    },
+    {
+      "title": "Resident Evil - The Mercenaries 3D (Rev 1)",
+      "system": "3ds",
+      "bucket": "3ds/Resident Evil - The Mercenaries 3D (USA) (En,Fr) (Rev 1).zip"
     },
     {
       "title": "Resident Evil",
@@ -85,6 +105,29 @@
       "files": [
         "gc/Resident Evil 4 (USA) (Disc 1).rvz",
         "gc/Resident Evil 4 (USA) (Disc 2).rvz"
+      ]
+    },
+    {
+      "title": "Resident Evil 2",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Resident Evil 2 (USA).m3u",
+      "files": [
+        "dreamcast/Resident Evil 2 (USA) (Disc 1).chd",
+        "dreamcast/Resident Evil 2 (USA) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "Resident Evil 3 - Nemesis",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Resident Evil 3 - Nemesis (USA).chd"
+    },
+    {
+      "title": "Resident Evil - Code - Veronica",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Resident Evil - Code - Veronica (USA).m3u",
+      "files": [
+        "dreamcast/Resident Evil - Code - Veronica (USA) (Disc 1).chd",
+        "dreamcast/Resident Evil - Code - Veronica (USA) (Disc 2).chd"
       ]
     },
     {

@@ -1,0 +1,2236 @@
+{
+  "name": "RPG Series",
+  "description": "Complete runs of the major JRPG series, as opposed to the curated picks in JRPG Essentials.",
+  "games": [
+    {
+      "title": "Dragon Warrior",
+      "category": "Dragon Quest",
+      "system": "nes",
+      "bucket": "nes/Dragon Warrior (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Dragon Warrior II",
+      "category": "Dragon Quest",
+      "system": "nes",
+      "bucket": "nes/Dragon Warrior II (USA).zip"
+    },
+    {
+      "title": "Dragon Warrior III",
+      "category": "Dragon Quest",
+      "system": "nes",
+      "bucket": "nes/Dragon Warrior III (USA).zip"
+    },
+    {
+      "title": "Dragon Warrior IV",
+      "category": "Dragon Quest",
+      "system": "nes",
+      "bucket": "nes/Dragon Warrior IV (USA).zip"
+    },
+    {
+      "title": "Dragon Quest",
+      "category": "Dragon Quest",
+      "system": "msx",
+      "bucket": "msx/Dragon Quest (Japan).zip"
+    },
+    {
+      "title": "Dragon Quest II",
+      "category": "Dragon Quest",
+      "system": "msx",
+      "bucket": "msx/Dragon Quest II (Japan).zip"
+    },
+    {
+      "title": "Dragon Quest",
+      "category": "Dragon Quest",
+      "system": "msx2",
+      "bucket": "msx2/Dragon Quest (Japan).zip"
+    },
+    {
+      "title": "Dragon Quest II",
+      "category": "Dragon Quest",
+      "system": "msx2",
+      "bucket": "msx2/Dragon Quest II (Japan).zip"
+    },
+    {
+      "title": "Dragon Quest I & II",
+      "category": "Dragon Quest",
+      "system": "snes",
+      "bucket": "snes/Dragon Quest I & II (Japan).zip"
+    },
+    {
+      "title": "Dragon Quest III - Soshite Densetsu e...",
+      "category": "Dragon Quest",
+      "system": "snes",
+      "bucket": "snes/Dragon Quest III - Soshite Densetsu e... (Japan).zip"
+    },
+    {
+      "title": "Dragon Quest V - Tenkuu no Hanayome",
+      "category": "Dragon Quest",
+      "system": "snes",
+      "bucket": "snes/Dragon Quest V - Tenkuu no Hanayome (Japan).zip"
+    },
+    {
+      "title": "Dragon Quest VI - Maboroshi no Daichi",
+      "category": "Dragon Quest",
+      "system": "snes",
+      "bucket": "snes/Dragon Quest VI - Maboroshi no Daichi (Japan).zip"
+    },
+    {
+      "title": "BS Dragon Quest I",
+      "category": "Dragon Quest",
+      "system": "satellaview",
+      "bucket": "satellaview/BS Dragon Quest I (Japan) (SoundLink).zip"
+    },
+    {
+      "title": "Dragon Warrior I & II",
+      "category": "Dragon Quest",
+      "system": "gbc",
+      "bucket": "gbc/Dragon Warrior I & II (USA) (SGB Enhanced) (GB Compatible).zip"
+    },
+    {
+      "title": "Dragon Warrior III",
+      "category": "Dragon Quest",
+      "system": "gbc",
+      "bucket": "gbc/Dragon Warrior III (USA).zip"
+    },
+    {
+      "title": "Dragon Warrior VII",
+      "category": "Dragon Quest",
+      "system": "psx",
+      "bucket": "psx/Dragon Warrior VII (USA).m3u",
+      "files": [
+        "psx/Dragon Warrior VII (USA) (Disc 1).chd",
+        "psx/Dragon Warrior VII (USA) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "Dragon Quest VIII - Journey of the Cursed King",
+      "category": "Dragon Quest",
+      "system": "ps2",
+      "bucket": "ps2/Dragon Quest VIII - Journey of the Cursed King (USA).chd"
+    },
+    {
+      "title": "Dragon Quest IV - Chapters of the Chosen",
+      "category": "Dragon Quest",
+      "system": "nds",
+      "bucket": "nds/Dragon Quest IV - Chapters of the Chosen (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Dragon Quest V - Hand of the Heavenly Bride",
+      "category": "Dragon Quest",
+      "system": "nds",
+      "bucket": "nds/Dragon Quest V - Hand of the Heavenly Bride (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Dragon Quest VI - Realms of Revelation",
+      "category": "Dragon Quest",
+      "system": "nds",
+      "bucket": "nds/Dragon Quest VI - Realms of Revelation (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Dragon Quest IX - Sentinels of the Starry Skies",
+      "category": "Dragon Quest",
+      "system": "nds",
+      "bucket": "nds/Dragon Quest IX - Sentinels of the Starry Skies (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Dragon Quest VII - Fragments of the Forgotten Past",
+      "category": "Dragon Quest",
+      "system": "3ds",
+      "bucket": "3ds/Dragon Quest VII - Fragments of the Forgotten Past (USA).zip"
+    },
+    {
+      "title": "Dragon Quest VIII - Journey of the Cursed King",
+      "category": "Dragon Quest",
+      "system": "3ds",
+      "bucket": "3ds/Dragon Quest VIII - Journey of the Cursed King (USA).zip"
+    },
+    {
+      "title": "Dragon Quest XI - Sugi Sarishi Toki o Motomete",
+      "category": "Dragon Quest",
+      "system": "3ds",
+      "bucket": "3ds/Dragon Quest XI - Sugi Sarishi Toki o Motomete (Japan).zip"
+    },
+    {
+      "title": "Dragon Warrior Monsters",
+      "category": "Dragon Quest",
+      "system": "gbc",
+      "bucket": "gbc/Dragon Warrior Monsters (USA, Europe) (SGB Enhanced) (GB Compatible).zip"
+    },
+    {
+      "title": "Dragon Warrior Monsters 2 - Cobi's Journey",
+      "category": "Dragon Quest",
+      "system": "gbc",
+      "bucket": "gbc/Dragon Warrior Monsters 2 - Cobi's Journey (USA) (SGB Enhanced) (GB Compatible).zip"
+    },
+    {
+      "title": "Dragon Warrior Monsters 2 - Tara's Adventure",
+      "category": "Dragon Quest",
+      "system": "gbc",
+      "bucket": "gbc/Dragon Warrior Monsters 2 - Tara's Adventure (USA) (SGB Enhanced) (GB Compatible).zip"
+    },
+    {
+      "title": "Dragon Quest Monsters - Caravan Heart",
+      "category": "Dragon Quest",
+      "system": "gba",
+      "bucket": "gba/Dragon Quest Monsters - Caravan Heart (Japan).zip"
+    },
+    {
+      "title": "Dragon Quest Monsters - Joker",
+      "category": "Dragon Quest",
+      "system": "nds",
+      "bucket": "nds/Dragon Quest Monsters - Joker (USA).zip"
+    },
+    {
+      "title": "Dragon Quest Monsters - Joker 2",
+      "category": "Dragon Quest",
+      "system": "nds",
+      "bucket": "nds/Dragon Quest Monsters - Joker 2 (USA) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Dragon Quest Monsters - Terry no Wonderland 3D",
+      "category": "Dragon Quest",
+      "system": "3ds",
+      "bucket": "3ds/Dragon Quest Monsters - Terry no Wonderland 3D (Japan).zip"
+    },
+    {
+      "title": "Dragon Quest Monsters 2 - Iru to Ruka no Fushigi na Fushigi na Kagi",
+      "category": "Dragon Quest",
+      "system": "3ds",
+      "bucket": "3ds/Dragon Quest Monsters 2 - Iru to Ruka no Fushigi na Fushigi na Kagi (Japan).zip"
+    },
+    {
+      "title": "Dragon Quest Monsters - Joker 3",
+      "category": "Dragon Quest",
+      "system": "3ds",
+      "bucket": "3ds/Dragon Quest Monsters - Joker 3 (Japan).zip"
+    },
+    {
+      "title": "Dragon Quest Monsters - Joker 3 Professional",
+      "category": "Dragon Quest",
+      "system": "3ds",
+      "bucket": "3ds/Dragon Quest Monsters - Joker 3 Professional (Japan).zip"
+    },
+    {
+      "title": "Torneko no Daibouken - Fushigi no Dungeon",
+      "category": "Dragon Quest",
+      "system": "snes",
+      "bucket": "snes/Torneko no Daibouken - Fushigi no Dungeon (Japan) (Rev 1).zip"
+    },
+    {
+      "title": "World of Dragon Warrior - Torneko - The Last Hope",
+      "category": "Dragon Quest",
+      "system": "psx",
+      "bucket": "psx/World of Dragon Warrior - Torneko - The Last Hope (USA).chd"
+    },
+    {
+      "title": "Dragon Quest Characters - Torneko no Daibouken 2 Advance - Fushigi no Dungeon",
+      "category": "Dragon Quest",
+      "system": "gba",
+      "bucket": "gba/Dragon Quest Characters - Torneko no Daibouken 2 Advance - Fushigi no Dungeon (Japan).zip"
+    },
+    {
+      "title": "Dragon Quest Characters - Torneko no Daibouken 3 Advance - Fushigi no Dungeon",
+      "category": "Dragon Quest",
+      "system": "gba",
+      "bucket": "gba/Dragon Quest Characters - Torneko no Daibouken 3 Advance - Fushigi no Dungeon (Japan).zip"
+    },
+    {
+      "title": "Slime Morimori Dragon Quest - Shougeki no Shippo Dan",
+      "category": "Dragon Quest",
+      "system": "gba",
+      "bucket": "gba/Slime Morimori Dragon Quest - Shougeki no Shippo Dan (Japan).zip"
+    },
+    {
+      "title": "Dragon Quest Heroes - Rocket Slime",
+      "category": "Dragon Quest",
+      "system": "nds",
+      "bucket": "nds/Dragon Quest Heroes - Rocket Slime (USA).zip"
+    },
+    {
+      "title": "Slime Mori Mori Dragon Quest 3 - Daikaizoku to Shippo Dan",
+      "category": "Dragon Quest",
+      "system": "3ds",
+      "bucket": "3ds/Slime Mori Mori Dragon Quest 3 - Daikaizoku to Shippo Dan (Japan).zip"
+    },
+    {
+      "title": "Itadaki Street DS - Dragon Quest Super Mario",
+      "category": "Dragon Quest",
+      "system": "nds",
+      "bucket": "nds/Itadaki Street DS - Dragon Quest Super Mario (Japan).zip"
+    },
+    {
+      "title": "Dragon Quest & Final Fantasy in Itadaki Street Portable (English)",
+      "category": "Dragon Quest",
+      "system": "psp",
+      "bucket": "psp/Dragon Quest & Final Fantasy in Itadaki Street Portable (Japan) [T-En by MortoQueiba & Choppasmith Prerelease 3].chd"
+    },
+    {
+      "title": "Theatrhythm Dragon Quest",
+      "category": "Dragon Quest",
+      "system": "3ds",
+      "bucket": "3ds/Theatrhythm Dragon Quest (Japan).zip"
+    },
+    {
+      "title": "Dragon Quest Builders",
+      "category": "Dragon Quest",
+      "system": "psvita",
+      "bucket": "psvita/DRAGON QUEST BUILDERS [PCSE00912] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Digital Devil Monogatari Megami Tensei",
+      "category": "Shin Megami Tensei & Persona",
+      "system": "msx",
+      "bucket": "msx/Digital Devil Monogatari Megami Tensei (Japan).zip"
+    },
+    {
+      "title": "Digital Devil Story - Megami Tensei",
+      "category": "Shin Megami Tensei & Persona",
+      "system": "nes",
+      "bucket": "nes/Digital Devil Story - Megami Tensei (Japan).zip"
+    },
+    {
+      "title": "Digital Devil Story - Megami Tensei II",
+      "category": "Shin Megami Tensei & Persona",
+      "system": "nes",
+      "bucket": "nes/Digital Devil Story - Megami Tensei II (Japan) (Rev 1).zip"
+    },
+    {
+      "title": "Kyuuyaku Megami Tensei",
+      "category": "Shin Megami Tensei & Persona",
+      "system": "snes",
+      "bucket": "snes/Kyuuyaku Megami Tensei (Japan) (Rev 1).zip"
+    },
+    {
+      "title": "Shin Megami Tensei (English)",
+      "category": "Shin Megami Tensei & Persona",
+      "system": "snes",
+      "bucket": "snes/Shin Megami Tensei 1 (English Addendum 1.0)[Automap].zip"
+    },
+    {
+      "title": "Shin Megami Tensei II (English)",
+      "category": "Shin Megami Tensei & Persona",
+      "system": "snes",
+      "bucket": "snes/Shin Megami Tensei II (English v1.00 - NameFixes).zip"
+    },
+    {
+      "title": "Shin Megami Tensei if... (English)",
+      "category": "Shin Megami Tensei & Persona",
+      "system": "snes",
+      "bucket": "snes/Shin Megami Tensei if... (Eng. patched v1.0).zip"
+    },
+    {
+      "title": "Shin Megami Tensei",
+      "category": "Shin Megami Tensei & Persona",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Shin Megami Tensei (Japan).chd"
+    },
+    {
+      "title": "Shin Megami Tensei",
+      "category": "Shin Megami Tensei & Persona",
+      "system": "segacd",
+      "bucket": "segacd/Shin Megami Tensei (Japan).chd"
+    },
+    {
+      "title": "Shin Megami Tensei",
+      "category": "Shin Megami Tensei & Persona",
+      "system": "gba",
+      "bucket": "gba/Shin Megami Tensei (Japan).zip"
+    },
+    {
+      "title": "Shin Megami Tensei II",
+      "category": "Shin Megami Tensei & Persona",
+      "system": "gba",
+      "bucket": "gba/Shin Megami Tensei II (Japan).zip"
+    },
+    {
+      "title": "Shin Megami Tensei - Nocturne",
+      "category": "Shin Megami Tensei & Persona",
+      "system": "ps2",
+      "bucket": "ps2/Shin Megami Tensei - Nocturne (USA).chd"
+    },
+    {
+      "title": "Shin Megami Tensei - Strange Journey",
+      "category": "Shin Megami Tensei & Persona",
+      "system": "nds",
+      "bucket": "nds/Shin Megami Tensei - Strange Journey (USA).zip"
+    },
+    {
+      "title": "Shin Megami Tensei - Strange Journey Redux",
+      "category": "Shin Megami Tensei & Persona",
+      "system": "3ds",
+      "bucket": "3ds/Shin Megami Tensei - Strange Journey Redux (USA).zip"
+    },
+    {
+      "title": "Shin Megami Tensei IV",
+      "category": "Shin Megami Tensei & Persona",
+      "system": "3ds",
+      "bucket": "3ds/Shin Megami Tensei IV (USA).zip"
+    },
+    {
+      "title": "Shin Megami Tensei IV - Apocalypse",
+      "category": "Shin Megami Tensei & Persona",
+      "system": "3ds",
+      "bucket": "3ds/Shin Megami Tensei IV - Apocalypse (USA).zip"
+    },
+    {
+      "title": "Megami Tensei Gaiden - Last Bible",
+      "category": "Shin Megami Tensei & Persona",
+      "system": "gb",
+      "bucket": "gb/Megami Tensei Gaiden - Last Bible (Japan).zip"
+    },
+    {
+      "title": "Megami Tensei Gaiden - Last Bible II",
+      "category": "Shin Megami Tensei & Persona",
+      "system": "gb",
+      "bucket": "gb/Megami Tensei Gaiden - Last Bible II (Japan).zip"
+    },
+    {
+      "title": "Megami Tensei Gaiden - Last Bible II",
+      "category": "Shin Megami Tensei & Persona",
+      "system": "gbc",
+      "bucket": "gbc/Megami Tensei Gaiden - Last Bible II (Japan) (SGB Enhanced) (GB Compatible).zip"
+    },
+    {
+      "title": "Megami Tensei Gaiden - Last Bible",
+      "category": "Shin Megami Tensei & Persona",
+      "system": "gamegear",
+      "bucket": "gamegear/Megami Tensei Gaiden - Last Bible (Japan).zip"
+    },
+    {
+      "title": "Megami Tensei Gaiden - Last Bible Special",
+      "category": "Shin Megami Tensei & Persona",
+      "system": "gamegear",
+      "bucket": "gamegear/Megami Tensei Gaiden - Last Bible Special (Japan).zip"
+    },
+    {
+      "title": "Last Bible III",
+      "category": "Shin Megami Tensei & Persona",
+      "system": "snes",
+      "bucket": "snes/Last Bible III (Japan).zip"
+    },
+    {
+      "title": "Majin Tensei",
+      "category": "Shin Megami Tensei & Persona",
+      "system": "snes",
+      "bucket": "snes/Majin Tensei (Japan) (Rev 2).zip"
+    },
+    {
+      "title": "Majin Tensei II - Spiral Nemesis",
+      "category": "Shin Megami Tensei & Persona",
+      "system": "snes",
+      "bucket": "snes/Majin Tensei II - Spiral Nemesis (Japan).zip"
+    },
+    {
+      "title": "Jack Bros.",
+      "category": "Shin Megami Tensei & Persona",
+      "system": "virtualboy",
+      "bucket": "virtualboy/Jack Bros. (USA).zip"
+    },
+    {
+      "title": "Shin Megami Tensei - Devil Summoner",
+      "category": "Shin Megami Tensei & Persona",
+      "system": "saturn",
+      "bucket": "saturn/Shin Megami Tensei - Devil Summoner (Japan) (Rev B).chd"
+    },
+    {
+      "title": "Devil Summoner - Soul Hackers",
+      "category": "Shin Megami Tensei & Persona",
+      "system": "saturn",
+      "bucket": "saturn/Devil Summoner - Soul Hackers (Japan).m3u",
+      "files": [
+        "saturn/Devil Summoner - Soul Hackers (Japan) (Disc 01).chd",
+        "saturn/Devil Summoner - Soul Hackers (Japan) (Disc 02).chd"
+      ]
+    },
+    {
+      "title": "Shin Megami Tensei - Devil Summoner - Soul Hackers",
+      "category": "Shin Megami Tensei & Persona",
+      "system": "3ds",
+      "bucket": "3ds/Shin Megami Tensei - Devil Summoner - Soul Hackers (USA).zip"
+    },
+    {
+      "title": "Shin Megami Tensei - Devil Summoner - Raidou Kuzunoha vs. the Soulless Army",
+      "category": "Shin Megami Tensei & Persona",
+      "system": "ps2",
+      "bucket": "ps2/Shin Megami Tensei - Devil Summoner - Raidou Kuzunoha vs. the Soulless Army (USA).chd"
+    },
+    {
+      "title": "Shin Megami Tensei - Devil Summoner 2 - Raidou Kuzunoha vs. King Abaddon",
+      "category": "Shin Megami Tensei & Persona",
+      "system": "ps2",
+      "bucket": "ps2/Shin Megami Tensei - Devil Summoner 2 - Raidou Kuzunoha vs. King Abaddon (USA).chd"
+    },
+    {
+      "title": "Shin Megami Tensei - Digital Devil Saga",
+      "category": "Shin Megami Tensei & Persona",
+      "system": "ps2",
+      "bucket": "ps2/Shin Megami Tensei - Digital Devil Saga (USA).chd"
+    },
+    {
+      "title": "Shin Megami Tensei - Digital Devil Saga 2",
+      "category": "Shin Megami Tensei & Persona",
+      "system": "ps2",
+      "bucket": "ps2/Shin Megami Tensei - Digital Devil Saga 2 (USA).chd"
+    },
+    {
+      "title": "Shin Megami Tensei - Devil Survivor",
+      "category": "Shin Megami Tensei & Persona",
+      "system": "nds",
+      "bucket": "nds/Shin Megami Tensei - Devil Survivor (USA).zip"
+    },
+    {
+      "title": "Shin Megami Tensei - Devil Survivor 2",
+      "category": "Shin Megami Tensei & Persona",
+      "system": "nds",
+      "bucket": "nds/Shin Megami Tensei - Devil Survivor 2 (USA).zip"
+    },
+    {
+      "title": "Shin Megami Tensei - Devil Survivor Overclocked",
+      "category": "Shin Megami Tensei & Persona",
+      "system": "3ds",
+      "bucket": "3ds/Shin Megami Tensei - Devil Survivor Overclocked (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Shin Megami Tensei - Devil Survivor 2 - Record Breaker",
+      "category": "Shin Megami Tensei & Persona",
+      "system": "3ds",
+      "bucket": "3ds/Shin Megami Tensei - Devil Survivor 2 - Record Breaker (USA).zip"
+    },
+    {
+      "title": "Shin Megami Tensei Devil Children - Kuro no Sho",
+      "category": "Shin Megami Tensei & Persona",
+      "system": "gbc",
+      "bucket": "gbc/Shin Megami Tensei Devil Children - Kuro no Sho (Japan) (Rev 1) (SGB Enhanced) (GB Compatible).zip"
+    },
+    {
+      "title": "Shin Megami Tensei Devil Children - Aka no Sho",
+      "category": "Shin Megami Tensei & Persona",
+      "system": "gbc",
+      "bucket": "gbc/Shin Megami Tensei Devil Children - Aka no Sho (Japan) (Rev 1) (SGB Enhanced) (GB Compatible).zip"
+    },
+    {
+      "title": "Shin Megami Tensei Devil Children - Shiro no Sho",
+      "category": "Shin Megami Tensei & Persona",
+      "system": "gbc",
+      "bucket": "gbc/Shin Megami Tensei Devil Children - Shiro no Sho (Japan).zip"
+    },
+    {
+      "title": "Shin Megami Tensei Trading Card - Card Summoner",
+      "category": "Shin Megami Tensei & Persona",
+      "system": "gbc",
+      "bucket": "gbc/Shin Megami Tensei Trading Card - Card Summoner (Japan).zip"
+    },
+    {
+      "title": "DemiKids - Light Version",
+      "category": "Shin Megami Tensei & Persona",
+      "system": "gba",
+      "bucket": "gba/DemiKids - Light Version (USA).zip"
+    },
+    {
+      "title": "DemiKids - Dark Version",
+      "category": "Shin Megami Tensei & Persona",
+      "system": "gba",
+      "bucket": "gba/DemiKids - Dark Version (USA).zip"
+    },
+    {
+      "title": "Shin Megami Tensei - Devil Children - Honoo no Sho",
+      "category": "Shin Megami Tensei & Persona",
+      "system": "gba",
+      "bucket": "gba/Shin Megami Tensei - Devil Children - Honoo no Sho (Japan).zip"
+    },
+    {
+      "title": "Shin Megami Tensei - Devil Children - Koori no Sho",
+      "category": "Shin Megami Tensei & Persona",
+      "system": "gba",
+      "bucket": "gba/Shin Megami Tensei - Devil Children - Koori no Sho (Japan).zip"
+    },
+    {
+      "title": "Shin Megami Tensei - Devil Children - Puzzle de Call!",
+      "category": "Shin Megami Tensei & Persona",
+      "system": "gba",
+      "bucket": "gba/Shin Megami Tensei - Devil Children - Puzzle de Call! (Japan).zip"
+    },
+    {
+      "title": "Shin Megami Tensei - Devil Children - Messiah Riser",
+      "category": "Shin Megami Tensei & Persona",
+      "system": "gba",
+      "bucket": "gba/Shin Megami Tensei - Devil Children - Messiah Riser (Japan).zip"
+    },
+    {
+      "title": "Persona",
+      "category": "Shin Megami Tensei & Persona",
+      "system": "psx",
+      "bucket": "psx/Persona (USA).chd"
+    },
+    {
+      "title": "Persona 2 - Eternal Punishment",
+      "category": "Shin Megami Tensei & Persona",
+      "system": "psx",
+      "bucket": "psx/Persona 2 - Eternal Punishment (USA).chd"
+    },
+    {
+      "title": "Shin Megami Tensei - Persona",
+      "category": "Shin Megami Tensei & Persona",
+      "system": "psp",
+      "bucket": "psp/Shin Megami Tensei - Persona (USA).chd"
+    },
+    {
+      "title": "Shin Megami Tensei - Persona 2 - Innocent Sin",
+      "category": "Shin Megami Tensei & Persona",
+      "system": "psp",
+      "bucket": "psp/Shin Megami Tensei - Persona 2 - Innocent Sin (USA).chd"
+    },
+    {
+      "title": "Shin Megami Tensei - Persona 3",
+      "category": "Shin Megami Tensei & Persona",
+      "system": "ps2",
+      "bucket": "ps2/Shin Megami Tensei - Persona 3 (USA).chd"
+    },
+    {
+      "title": "Shin Megami Tensei - Persona 3 FES",
+      "category": "Shin Megami Tensei & Persona",
+      "system": "ps2",
+      "bucket": "ps2/Shin Megami Tensei - Persona 3 FES (USA).chd"
+    },
+    {
+      "title": "Shin Megami Tensei - Persona 3 Portable",
+      "category": "Shin Megami Tensei & Persona",
+      "system": "psp",
+      "bucket": "psp/Shin Megami Tensei - Persona 3 Portable (USA).chd"
+    },
+    {
+      "title": "Shin Megami Tensei - Persona 4",
+      "category": "Shin Megami Tensei & Persona",
+      "system": "ps2",
+      "bucket": "ps2/Shin Megami Tensei - Persona 4 (USA).chd"
+    },
+    {
+      "title": "Persona 4 Golden",
+      "category": "Shin Megami Tensei & Persona",
+      "system": "psvita",
+      "bucket": "psvita/Persona 4 GOLDEN [PCSE00120] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Persona 4 - Dancing All Night",
+      "category": "Shin Megami Tensei & Persona",
+      "system": "psvita",
+      "bucket": "psvita/Persona 4 - Dancing All Night [PCSE00764] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Persona 4 Arena",
+      "category": "Shin Megami Tensei & Persona",
+      "system": "xbox360",
+      "bucket": "xbox360/Persona 4 Arena (USA).zar"
+    },
+    {
+      "title": "Persona Q - Shadow of the Labyrinth",
+      "category": "Shin Megami Tensei & Persona",
+      "system": "3ds",
+      "bucket": "3ds/Persona Q - Shadow of the Labyrinth (USA).zip"
+    },
+    {
+      "title": "Persona Q2 - New Cinema Labyrinth",
+      "category": "Shin Megami Tensei & Persona",
+      "system": "3ds",
+      "bucket": "3ds/Persona Q2 - New Cinema Labyrinth (USA).zip"
+    },
+    {
+      "title": "Tokyo Mirage Sessions #FE",
+      "category": "Shin Megami Tensei & Persona",
+      "system": "wiiu",
+      "bucket": "wiiu/Tokyo Mirage Sessions #FE (US) (v16).wua"
+    },
+    {
+      "title": "Tales of Phantasia",
+      "category": "Tales",
+      "system": "snes",
+      "bucket": "snes/Tales of Phantasia (Japan).zip"
+    },
+    {
+      "title": "Tales of Phantasia",
+      "category": "Tales",
+      "system": "gba",
+      "bucket": "gba/Tales of Phantasia (USA, Australia).zip"
+    },
+    {
+      "title": "Tales of Phantasia - Full Voice Edition (English)",
+      "category": "Tales",
+      "system": "psp",
+      "bucket": "psp/Tales of Phantasia - Full Voice Edition (English v1.2)[QoL].chd"
+    },
+    {
+      "title": "Tales of Destiny",
+      "category": "Tales",
+      "system": "psx",
+      "bucket": "psx/Tales of Destiny (USA).chd"
+    },
+    {
+      "title": "Tales of Destiny II",
+      "category": "Tales",
+      "system": "psx",
+      "bucket": "psx/Tales of Destiny II (USA).m3u",
+      "files": [
+        "psx/Tales of Destiny II (USA) (Disc 1).chd",
+        "psx/Tales of Destiny II (USA) (Disc 2).chd",
+        "psx/Tales of Destiny II (USA) (Disc 3).chd"
+      ]
+    },
+    {
+      "title": "Tales of Eternia",
+      "category": "Tales",
+      "system": "psp",
+      "bucket": "psp/Tales of Eternia (Europe) (v2.02).chd"
+    },
+    {
+      "title": "Tales of Symphonia",
+      "category": "Tales",
+      "system": "gc",
+      "bucket": "gc/Tales of Symphonia (USA).m3u",
+      "files": [
+        "gc/Tales of Symphonia (USA) (Disc 1).rvz",
+        "gc/Tales of Symphonia (USA) (Disc 2).rvz"
+      ]
+    },
+    {
+      "title": "Tales of Legendia",
+      "category": "Tales",
+      "system": "ps2",
+      "bucket": "ps2/Tales of Legendia (USA).chd"
+    },
+    {
+      "title": "Tales of the Abyss",
+      "category": "Tales",
+      "system": "ps2",
+      "bucket": "ps2/Tales of the Abyss (USA).chd"
+    },
+    {
+      "title": "Tales of the Abyss",
+      "category": "Tales",
+      "system": "3ds",
+      "bucket": "3ds/Tales of the Abyss (USA).zip"
+    },
+    {
+      "title": "Tales of the Tempest",
+      "category": "Tales",
+      "system": "nds",
+      "bucket": "nds/Tales of the Tempest (Japan).zip"
+    },
+    {
+      "title": "Tales of Innocence",
+      "category": "Tales",
+      "system": "nds",
+      "bucket": "nds/Tales of Innocence (Japan).zip"
+    },
+    {
+      "title": "Tales of Hearts - Anime Movie Edition",
+      "category": "Tales",
+      "system": "nds",
+      "bucket": "nds/Tales of Hearts - Anime Movie Edition (Japan).zip"
+    },
+    {
+      "title": "Tales of Hearts R",
+      "category": "Tales",
+      "system": "psvita",
+      "bucket": "psvita/TALES OF HEARTS R [PCSE00429] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Tales of Vesperia",
+      "category": "Tales",
+      "system": "xbox360",
+      "bucket": "xbox360/Tales of Vesperia (USA).zar"
+    },
+    {
+      "title": "Tales of Phantasia - Narikiri Dungeon",
+      "category": "Tales",
+      "system": "gbc",
+      "bucket": "gbc/Tales of Phantasia - Narikiri Dungeon (Japan) (SGB Enhanced) (GB Compatible).zip"
+    },
+    {
+      "title": "Tales of the World - Narikiri Dungeon 2",
+      "category": "Tales",
+      "system": "gba",
+      "bucket": "gba/Tales of the World - Narikiri Dungeon 2 (Japan).zip"
+    },
+    {
+      "title": "Tales of the World - Narikiri Dungeon 3",
+      "category": "Tales",
+      "system": "gba",
+      "bucket": "gba/Tales of the World - Narikiri Dungeon 3 (Japan).zip"
+    },
+    {
+      "title": "Tales of the World - Summoner's Lineage",
+      "category": "Tales",
+      "system": "gba",
+      "bucket": "gba/Tales of the World - Summoner's Lineage (Japan).zip"
+    },
+    {
+      "title": "Tales of Phantasia - Narikiri Dungeon X (English)",
+      "category": "Tales",
+      "system": "psp",
+      "bucket": "psp/Tales of Phantasia - Narikiri Dungeon X (English v1.2).chd"
+    },
+    {
+      "title": "Tales of the World - Radiant Mythology",
+      "category": "Tales",
+      "system": "psp",
+      "bucket": "psp/Tales of the World - Radiant Mythology (USA).chd"
+    },
+    {
+      "title": "Tales of the World - Radiant Mythology 2 (English)",
+      "category": "Tales",
+      "system": "psp",
+      "bucket": "psp/Tales of the World - Radiant Mythology 2 (English 31-08).chd"
+    },
+    {
+      "title": "Tales of the World - Radiant Mythology 3 (English)",
+      "category": "Tales",
+      "system": "psp",
+      "bucket": "psp/Tales of the World - Radiant Mythology 3 (English v1.02).chd"
+    },
+    {
+      "title": "Tales of VS",
+      "category": "Tales",
+      "system": "psp",
+      "bucket": "psp/Tales of VS (Japan).chd"
+    },
+    {
+      "title": "Tales of the Heroes - Twin Brave",
+      "category": "Tales",
+      "system": "psp",
+      "bucket": "psp/Tales of the Heroes - Twin Brave (Japan, Korea).chd"
+    },
+    {
+      "title": "Tales of the World - Reve Unitia",
+      "category": "Tales",
+      "system": "3ds",
+      "bucket": "3ds/Tales of the World - Reve Unitia (Japan).zip"
+    },
+    {
+      "title": "Final Fantasy Adventure",
+      "category": "Mana",
+      "system": "gb",
+      "bucket": "gb/Final Fantasy Adventure (USA).zip"
+    },
+    {
+      "title": "Secret of Mana",
+      "category": "Mana",
+      "system": "snes",
+      "bucket": "snes/Secret of Mana (USA).zip"
+    },
+    {
+      "title": "Trials of Mana",
+      "category": "Mana",
+      "system": "snes",
+      "bucket": "snes/Trials of Mana (World) (Rev 1) (Collection of Mana).zip"
+    },
+    {
+      "title": "Legend of Mana",
+      "category": "Mana",
+      "system": "psx",
+      "bucket": "psx/Legend of Mana (USA).chd"
+    },
+    {
+      "title": "Sword of Mana",
+      "category": "Mana",
+      "system": "gba",
+      "bucket": "gba/Sword of Mana (USA, Australia).zip"
+    },
+    {
+      "title": "Children of Mana",
+      "category": "Mana",
+      "system": "nds",
+      "bucket": "nds/Children of Mana (USA, Australia).zip"
+    },
+    {
+      "title": "Heroes of Mana",
+      "category": "Mana",
+      "system": "nds",
+      "bucket": "nds/Heroes of Mana (USA).zip"
+    },
+    {
+      "title": "Adventures of Mana",
+      "category": "Mana",
+      "system": "psvita",
+      "bucket": "psvita/Adventures of Mana [PCSE00905] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Secret of Mana",
+      "category": "Mana",
+      "system": "psvita",
+      "bucket": "psvita/Secret of Mana [PCSE01153] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Final Fantasy Legend, The",
+      "category": "SaGa",
+      "system": "gb",
+      "bucket": "gb/Final Fantasy Legend, The (USA).zip"
+    },
+    {
+      "title": "Final Fantasy Legend II",
+      "category": "SaGa",
+      "system": "gb",
+      "bucket": "gb/Final Fantasy Legend II (USA).zip"
+    },
+    {
+      "title": "Final Fantasy Legend III",
+      "category": "SaGa",
+      "system": "gb",
+      "bucket": "gb/Final Fantasy Legend III (USA).zip"
+    },
+    {
+      "title": "Makai Toushi Sa-Ga",
+      "category": "SaGa",
+      "system": "wonderswancolor",
+      "bucket": "wonderswancolor/Makai Toushi Sa-Ga (Japan).zip"
+    },
+    {
+      "title": "SaGa 2 - Hihou Densetsu - Goddess of Destiny",
+      "category": "SaGa",
+      "system": "nds",
+      "bucket": "nds/SaGa 2 - Hihou Densetsu - Goddess of Destiny (Japan).zip"
+    },
+    {
+      "title": "SaGa 3 - Jikuu no Hasha - Shadow or Light",
+      "category": "SaGa",
+      "system": "nds",
+      "bucket": "nds/SaGa 3 - Jikuu no Hasha - Shadow or Light (Japan).zip"
+    },
+    {
+      "title": "Romancing Sa-Ga",
+      "category": "SaGa",
+      "system": "snes",
+      "bucket": "snes/Romancing Sa-Ga (Japan) (Rev 1).zip"
+    },
+    {
+      "title": "Romancing Sa-Ga 2",
+      "category": "SaGa",
+      "system": "snes",
+      "bucket": "snes/Romancing Sa-Ga 2 (Japan).zip"
+    },
+    {
+      "title": "Romancing Sa-Ga 3",
+      "category": "SaGa",
+      "system": "snes",
+      "bucket": "snes/Romancing Sa-Ga 3 (Japan) (Rev 1).zip"
+    },
+    {
+      "title": "Romancing Sa-Ga",
+      "category": "SaGa",
+      "system": "wonderswancolor",
+      "bucket": "wonderswancolor/Romancing Sa-Ga (Japan).zip"
+    },
+    {
+      "title": "Romancing SaGa",
+      "category": "SaGa",
+      "system": "ps2",
+      "bucket": "ps2/Romancing SaGa (USA).chd"
+    },
+    {
+      "title": "Romancing SaGa 2",
+      "category": "SaGa",
+      "system": "psvita",
+      "bucket": "psvita/Romancing SaGa 2 [PCSE01094] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Romancing SaGa 3",
+      "category": "SaGa",
+      "system": "psvita",
+      "bucket": "psvita/Romancing SaGa 3 [PCSE01337] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "SaGa Frontier",
+      "category": "SaGa",
+      "system": "psx",
+      "bucket": "psx/SaGa Frontier (USA).chd"
+    },
+    {
+      "title": "SaGa Frontier 2",
+      "category": "SaGa",
+      "system": "psx",
+      "bucket": "psx/SaGa Frontier 2 (USA).chd"
+    },
+    {
+      "title": "Chrono Trigger",
+      "category": "Chrono",
+      "system": "snes",
+      "bucket": "snes/Chrono Trigger (USA).zip"
+    },
+    {
+      "title": "Final Fantasy Chronicles - Chrono Trigger",
+      "category": "Chrono",
+      "system": "psx",
+      "bucket": "psx/Final Fantasy Chronicles - Chrono Trigger (USA) (Rev 1).chd"
+    },
+    {
+      "title": "Chrono Trigger",
+      "category": "Chrono",
+      "system": "nds",
+      "bucket": "nds/Chrono Trigger (USA) (En,Fr).zip"
+    },
+    {
+      "title": "Radical Dreamers - Nusume Nai Houseki",
+      "category": "Chrono",
+      "system": "satellaview",
+      "bucket": "satellaview/Radical Dreamers - Nusume Nai Houseki (Japan) (2-24).zip"
+    },
+    {
+      "title": "Chrono Cross",
+      "category": "Chrono",
+      "system": "psx",
+      "bucket": "psx/Chrono Cross (USA).m3u",
+      "files": [
+        "psx/Chrono Cross (USA) (Disc 1).chd",
+        "psx/Chrono Cross (USA) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "Kingdom Hearts",
+      "category": "Kingdom Hearts",
+      "system": "ps2",
+      "bucket": "ps2/Kingdom Hearts (USA).chd"
+    },
+    {
+      "title": "Kingdom Hearts Final Mix (English)",
+      "category": "Kingdom Hearts",
+      "system": "ps2",
+      "bucket": "ps2/Kingdom Hearts Final Mix (English v2026-06-26).chd"
+    },
+    {
+      "title": "Kingdom Hearts - Chain of Memories",
+      "category": "Kingdom Hearts",
+      "system": "gba",
+      "bucket": "gba/Kingdom Hearts - Chain of Memories (USA).zip"
+    },
+    {
+      "title": "Kingdom Hearts - Re-Chain of Memories",
+      "category": "Kingdom Hearts",
+      "system": "ps2",
+      "bucket": "ps2/Kingdom Hearts - Re-Chain of Memories (USA).chd"
+    },
+    {
+      "title": "Kingdom Hearts II",
+      "category": "Kingdom Hearts",
+      "system": "ps2",
+      "bucket": "ps2/Kingdom Hearts II (USA).chd"
+    },
+    {
+      "title": "Kingdom Hearts II - Final Mix+ (English)",
+      "category": "Kingdom Hearts",
+      "system": "ps2",
+      "bucket": "ps2/Kingdom Hearts II - Final Mix+ (English Patched)[Undub][4-3].chd"
+    },
+    {
+      "title": "Kingdom Hearts - 358-2 Days",
+      "category": "Kingdom Hearts",
+      "system": "nds",
+      "bucket": "nds/Kingdom Hearts - 358-2 Days (USA) (En,Fr).zip"
+    },
+    {
+      "title": "Kingdom Hearts - Birth by Sleep",
+      "category": "Kingdom Hearts",
+      "system": "psp",
+      "bucket": "psp/Kingdom Hearts - Birth by Sleep (USA) (En,Fr,Es).chd"
+    },
+    {
+      "title": "Kingdom Hearts - Birth by Sleep Final Mix (English)",
+      "category": "Kingdom Hearts",
+      "system": "psp",
+      "bucket": "psp/Kingdom Hearts - Birth by Sleep (Japan) (Final Mix) [T-En by Truthkey v1.0.12].chd"
+    },
+    {
+      "title": "Kingdom Hearts - Re-coded",
+      "category": "Kingdom Hearts",
+      "system": "nds",
+      "bucket": "nds/Kingdom Hearts - Re-coded (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Kingdom Hearts 3D - Dream Drop Distance",
+      "category": "Kingdom Hearts",
+      "system": "3ds",
+      "bucket": "3ds/Kingdom Hearts 3D - Dream Drop Distance (USA) (En,Fr).zip"
+    },
+    {
+      "title": "Suikoden",
+      "category": "Suikoden",
+      "system": "psx",
+      "bucket": "psx/Suikoden (USA) (Rev 1).chd"
+    },
+    {
+      "title": "Gensou Suikoden",
+      "category": "Suikoden",
+      "system": "saturn",
+      "bucket": "saturn/Gensou Suikoden (Japan).chd"
+    },
+    {
+      "title": "Suikoden II",
+      "category": "Suikoden",
+      "system": "psx",
+      "bucket": "psx/Suikoden II (USA).chd"
+    },
+    {
+      "title": "Suikoden III",
+      "category": "Suikoden",
+      "system": "ps2",
+      "bucket": "ps2/Suikoden III (USA).chd"
+    },
+    {
+      "title": "Suikoden IV",
+      "category": "Suikoden",
+      "system": "ps2",
+      "bucket": "ps2/Suikoden IV (USA).chd"
+    },
+    {
+      "title": "Suikoden Tactics",
+      "category": "Suikoden",
+      "system": "ps2",
+      "bucket": "ps2/Suikoden Tactics (USA).chd"
+    },
+    {
+      "title": "Suikoden V",
+      "category": "Suikoden",
+      "system": "ps2",
+      "bucket": "ps2/Suikoden V (USA).chd"
+    },
+    {
+      "title": "Gensou Suikoden - Card Stories",
+      "category": "Suikoden",
+      "system": "gba",
+      "bucket": "gba/Gensou Suikoden - Card Stories (Japan).zip"
+    },
+    {
+      "title": "Suikoden - Tierkreis",
+      "category": "Suikoden",
+      "system": "nds",
+      "bucket": "nds/Suikoden - Tierkreis (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Genso Suikoden Tsumugareshi Hyakunen no Toki (English)",
+      "category": "Suikoden",
+      "system": "psp",
+      "bucket": "psp/Genso Suikoden Tsumugareshi Hyakunen no Toki (English v1.0.2).chd"
+    },
+    {
+      "title": "Breath of Fire",
+      "category": "Breath of Fire",
+      "system": "snes",
+      "bucket": "snes/Breath of Fire (USA).zip"
+    },
+    {
+      "title": "Breath of Fire II",
+      "category": "Breath of Fire",
+      "system": "snes",
+      "bucket": "snes/Breath of Fire II (USA).zip"
+    },
+    {
+      "title": "Breath of Fire",
+      "category": "Breath of Fire",
+      "system": "gba",
+      "bucket": "gba/Breath of Fire (USA).zip"
+    },
+    {
+      "title": "Breath of Fire II",
+      "category": "Breath of Fire",
+      "system": "gba",
+      "bucket": "gba/Breath of Fire II (USA).zip"
+    },
+    {
+      "title": "Breath of Fire III",
+      "category": "Breath of Fire",
+      "system": "psx",
+      "bucket": "psx/Breath of Fire III (USA).chd"
+    },
+    {
+      "title": "Breath of Fire III",
+      "category": "Breath of Fire",
+      "system": "psp",
+      "bucket": "psp/Breath of Fire III (Europe).chd"
+    },
+    {
+      "title": "Breath of Fire IV",
+      "category": "Breath of Fire",
+      "system": "psx",
+      "bucket": "psx/Breath of Fire IV (USA).chd"
+    },
+    {
+      "title": "Phantasy Star",
+      "category": "Phantasy Star",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Phantasy Star (USA, Europe) (Rev A).zip"
+    },
+    {
+      "title": "Phantasy Star Fukkokuban",
+      "category": "Phantasy Star",
+      "system": "genesis",
+      "bucket": "genesis/Phantasy Star Fukkokuban (Japan).zip"
+    },
+    {
+      "title": "Phantasy Star II",
+      "category": "Phantasy Star",
+      "system": "genesis",
+      "bucket": "genesis/Phantasy Star II (USA, Europe) (Rev A).zip"
+    },
+    {
+      "title": "Phantasy Star III - Generations of Doom",
+      "category": "Phantasy Star",
+      "system": "genesis",
+      "bucket": "genesis/Phantasy Star III - Generations of Doom (USA, Europe, Korea) (En).zip"
+    },
+    {
+      "title": "Phantasy Star IV",
+      "category": "Phantasy Star",
+      "system": "genesis",
+      "bucket": "genesis/Phantasy Star IV (USA).zip"
+    },
+    {
+      "title": "Phantasy Star II - Amia's Adventure",
+      "category": "Phantasy Star",
+      "system": "genesis",
+      "bucket": "genesis/Phantasy Star II - Amia's Adventure (Japan) (SegaNet).zip"
+    },
+    {
+      "title": "Phantasy Star II - Anne's Adventure",
+      "category": "Phantasy Star",
+      "system": "genesis",
+      "bucket": "genesis/Phantasy Star II - Anne's Adventure (Japan) (SegaNet).zip"
+    },
+    {
+      "title": "Phantasy Star II - Huey's Adventure",
+      "category": "Phantasy Star",
+      "system": "genesis",
+      "bucket": "genesis/Phantasy Star II - Huey's Adventure (Japan) (SegaNet).zip"
+    },
+    {
+      "title": "Phantasy Star II - Kinds's Adventure",
+      "category": "Phantasy Star",
+      "system": "genesis",
+      "bucket": "genesis/Phantasy Star II - Kinds's Adventure (Japan) (SegaNet).zip"
+    },
+    {
+      "title": "Phantasy Star II - Nei's Adventure",
+      "category": "Phantasy Star",
+      "system": "genesis",
+      "bucket": "genesis/Phantasy Star II - Nei's Adventure (Japan) (SegaNet).zip"
+    },
+    {
+      "title": "Phantasy Star II - Rudger's Adventure",
+      "category": "Phantasy Star",
+      "system": "genesis",
+      "bucket": "genesis/Phantasy Star II - Rudger's Adventure (Japan) (SegaNet).zip"
+    },
+    {
+      "title": "Phantasy Star II - Shilka's Adventure",
+      "category": "Phantasy Star",
+      "system": "genesis",
+      "bucket": "genesis/Phantasy Star II - Shilka's Adventure (Japan) (SegaNet).zip"
+    },
+    {
+      "title": "Phantasy Star II - Yushis's Adventure",
+      "category": "Phantasy Star",
+      "system": "genesis",
+      "bucket": "genesis/Phantasy Star II - Yushis's Adventure (Japan) (SegaNet).zip"
+    },
+    {
+      "title": "Phantasy Star Adventure",
+      "category": "Phantasy Star",
+      "system": "gamegear",
+      "bucket": "gamegear/Phantasy Star Adventure (Japan).zip"
+    },
+    {
+      "title": "Phantasy Star Gaiden",
+      "category": "Phantasy Star",
+      "system": "gamegear",
+      "bucket": "gamegear/Phantasy Star Gaiden (Japan).zip"
+    },
+    {
+      "title": "Sega Ages - Phantasy Star Collection",
+      "category": "Phantasy Star",
+      "system": "saturn",
+      "bucket": "saturn/Sega Ages - Phantasy Star Collection (Japan).chd"
+    },
+    {
+      "title": "Phantasy Star Collection",
+      "category": "Phantasy Star",
+      "system": "gba",
+      "bucket": "gba/Phantasy Star Collection (USA).zip"
+    },
+    {
+      "title": "Phantasy Star Online Ver. 2",
+      "category": "Phantasy Star",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Phantasy Star Online Ver. 2 (USA) (En,Ja,Fr,De,Es).chd"
+    },
+    {
+      "title": "Phantasy Star Online Episode I & II Plus",
+      "category": "Phantasy Star",
+      "system": "gc",
+      "bucket": "gc/Phantasy Star Online Episode I & II Plus (USA) (En,Ja,Fr,De,Es) (Rev 2).rvz"
+    },
+    {
+      "title": "Phantasy Star Online Episode III - C.A.R.D. Revolution",
+      "category": "Phantasy Star",
+      "system": "gc",
+      "bucket": "gc/Phantasy Star Online Episode III - C.A.R.D. Revolution (USA) (En,Ja).rvz"
+    },
+    {
+      "title": "Phantasy Star Universe",
+      "category": "Phantasy Star",
+      "system": "ps2",
+      "bucket": "ps2/Phantasy Star Universe (USA).chd"
+    },
+    {
+      "title": "Phantasy Star 0",
+      "category": "Phantasy Star",
+      "system": "nds",
+      "bucket": "nds/Phantasy Star 0 (USA).zip"
+    },
+    {
+      "title": "Phantasy Star Portable",
+      "category": "Phantasy Star",
+      "system": "psp",
+      "bucket": "psp/Phantasy Star Portable (USA).chd"
+    },
+    {
+      "title": "Phantasy Star Portable 2",
+      "category": "Phantasy Star",
+      "system": "psp",
+      "bucket": "psp/Phantasy Star Portable 2 (USA).chd"
+    },
+    {
+      "title": "Phantasy Star Portable 2 Infinity (English)",
+      "category": "Phantasy Star",
+      "system": "psp",
+      "bucket": "psp/Phantasy Star Portable 2 Infinity (Japan) [T-En by JamRules & Weyu v1.7].chd"
+    },
+    {
+      "title": "Ys - The Vanished Omens",
+      "category": "Ys",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Ys - The Vanished Omens (USA, Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Ys",
+      "category": "Ys",
+      "system": "nes",
+      "bucket": "nes/Ys (Japan).zip"
+    },
+    {
+      "title": "Ys II - Ancient Ys Vanished - The Final Chapter",
+      "category": "Ys",
+      "system": "nes",
+      "bucket": "nes/Ys II - Ancient Ys Vanished - The Final Chapter (Japan).zip"
+    },
+    {
+      "title": "Ys III - Wanderers from Ys",
+      "category": "Ys",
+      "system": "nes",
+      "bucket": "nes/Ys III - Wanderers from Ys (Japan).zip"
+    },
+    {
+      "title": "Ys Book I & II",
+      "category": "Ys",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Ys Book I & II (USA).chd"
+    },
+    {
+      "title": "Ys III - Wanderers from Ys",
+      "category": "Ys",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Ys III - Wanderers from Ys (USA).chd"
+    },
+    {
+      "title": "Ys III",
+      "category": "Ys",
+      "system": "genesis",
+      "bucket": "genesis/Ys III (USA).zip"
+    },
+    {
+      "title": "Ys III - Wanderers from Ys",
+      "category": "Ys",
+      "system": "snes",
+      "bucket": "snes/Ys III - Wanderers from Ys (USA).zip"
+    },
+    {
+      "title": "Ys IV - The Dawn of Ys",
+      "category": "Ys",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Ys IV - The Dawn of Ys (Japan) (Rev 4).chd"
+    },
+    {
+      "title": "Ys IV - Mask of the Sun",
+      "category": "Ys",
+      "system": "snes",
+      "bucket": "snes/Ys IV - Mask of the Sun (Japan).zip"
+    },
+    {
+      "title": "Ys V - Ushinawareta Suna no Miyako Kefin",
+      "category": "Ys",
+      "system": "snes",
+      "bucket": "snes/Ys V - Ushinawareta Suna no Miyako Kefin (Japan).zip"
+    },
+    {
+      "title": "Legacy of Ys - Books I & II",
+      "category": "Ys",
+      "system": "nds",
+      "bucket": "nds/Legacy of Ys - Books I & II (USA).zip"
+    },
+    {
+      "title": "Ys Strategy",
+      "category": "Ys",
+      "system": "nds",
+      "bucket": "nds/Ys Strategy (Europe).zip"
+    },
+    {
+      "title": "Ys I & II Chronicles",
+      "category": "Ys",
+      "system": "psp",
+      "bucket": "psp/Ys I & II Chronicles (USA).chd"
+    },
+    {
+      "title": "Ys - The Oath in Felghana",
+      "category": "Ys",
+      "system": "psp",
+      "bucket": "psp/Ys - The Oath in Felghana (USA).chd"
+    },
+    {
+      "title": "Ys - The Ark of Napishtim",
+      "category": "Ys",
+      "system": "psp",
+      "bucket": "psp/Ys - The Ark of Napishtim (USA).chd"
+    },
+    {
+      "title": "Ys Seven",
+      "category": "Ys",
+      "system": "psp",
+      "bucket": "psp/Ys Seven (USA).chd"
+    },
+    {
+      "title": "Ys vs. Sora no Kiseki - Alternative Saga (English)",
+      "category": "Ys",
+      "system": "psp",
+      "bucket": "psp/Ys vs. Sora no Kiseki - Alternative Saga (Japan) [T-En by Flame v2] [i].chd"
+    },
+    {
+      "title": "Ys Origin",
+      "category": "Ys",
+      "system": "psvita",
+      "bucket": "psvita/Ys Origin [PCSE01033] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Ys - Memories of Celceta",
+      "category": "Ys",
+      "system": "psvita",
+      "bucket": "psvita/Ys - Memories of Celceta [PCSE00245] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Ys VIII - Lacrimosa of Dana",
+      "category": "Ys",
+      "system": "psvita",
+      "bucket": "psvita/Ys VIII [PCSE01103] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Dragon Slayer - The Legend of Heroes",
+      "category": "The Legend of Heroes",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Dragon Slayer - The Legend of Heroes (USA).chd"
+    },
+    {
+      "title": "Dragon Slayer - The Legend of Heroes II",
+      "category": "The Legend of Heroes",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Dragon Slayer - The Legend of Heroes II (Japan).chd"
+    },
+    {
+      "title": "Dragon Slayer - Eiyuu Densetsu",
+      "category": "The Legend of Heroes",
+      "system": "genesis",
+      "bucket": "genesis/Dragon Slayer - Eiyuu Densetsu (Japan).zip"
+    },
+    {
+      "title": "Dragon Slayer - Eiyuu Densetsu II",
+      "category": "The Legend of Heroes",
+      "system": "genesis",
+      "bucket": "genesis/Dragon Slayer - Eiyuu Densetsu II (Japan).zip"
+    },
+    {
+      "title": "Dragon Slayer - Eiyuu Densetsu",
+      "category": "The Legend of Heroes",
+      "system": "snes",
+      "bucket": "snes/Dragon Slayer - Eiyuu Densetsu (Japan) (Rev 1) (NP).zip"
+    },
+    {
+      "title": "Dragon Slayer - Eiyuu Densetsu II",
+      "category": "The Legend of Heroes",
+      "system": "snes",
+      "bucket": "snes/Dragon Slayer - Eiyuu Densetsu II (Japan).zip"
+    },
+    {
+      "title": "Dragon Slayer - Eiyuu Densetsu",
+      "category": "The Legend of Heroes",
+      "system": "satellaview",
+      "bucket": "satellaview/Dragon Slayer - Eiyuu Densetsu (Japan).zip"
+    },
+    {
+      "title": "Legend of Heroes I & II, The - Eiyuu Densetsu",
+      "category": "The Legend of Heroes",
+      "system": "saturn",
+      "bucket": "saturn/Legend of Heroes I & II, The - Eiyuu Densetsu (Japan).chd"
+    },
+    {
+      "title": "Shiroki Majo - Mou Hitotsu no Eiyuu Densetsu",
+      "category": "The Legend of Heroes",
+      "system": "saturn",
+      "bucket": "saturn/Shiroki Majo - Mou Hitotsu no Eiyuu Densetsu (Japan).m3u",
+      "files": [
+        "saturn/Shiroki Majo - Mou Hitotsu no Eiyuu Densetsu (Japan) (Disc 1).chd",
+        "saturn/Shiroki Majo - Mou Hitotsu no Eiyuu Densetsu (Japan) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "Legend of Heroes II, The - Prophecy of the Moonlight Witch",
+      "category": "The Legend of Heroes",
+      "system": "psp",
+      "bucket": "psp/Legend of Heroes II, The - Prophecy of the Moonlight Witch (USA).chd"
+    },
+    {
+      "title": "Legend of Heroes, The - A Tear of Vermillion",
+      "category": "The Legend of Heroes",
+      "system": "psp",
+      "bucket": "psp/Legend of Heroes, The - A Tear of Vermillion (USA).chd"
+    },
+    {
+      "title": "Legend of Heroes III, The - Song of the Ocean",
+      "category": "The Legend of Heroes",
+      "system": "psp",
+      "bucket": "psp/Legend of Heroes III, The - Song of the Ocean (USA).chd"
+    },
+    {
+      "title": "Legend of Heroes, The - Trails in the Sky",
+      "category": "The Legend of Heroes",
+      "system": "psp",
+      "bucket": "psp/Legend of Heroes, The - Trails in the Sky (USA).chd"
+    },
+    {
+      "title": "Legend of Heroes, The - Zero no Kiseki (English)",
+      "category": "The Legend of Heroes",
+      "system": "psp",
+      "bucket": "psp/Legend of Heroes, The - Zero no Kiseki (Japan) [T-En by Zerker & Guren v1.0.2].chd"
+    },
+    {
+      "title": "Legend of Heroes, The - Ao no Kiseki (English)",
+      "category": "The Legend of Heroes",
+      "system": "psp",
+      "bucket": "psp/Legend of Heroes, The - Ao no Kiseki (Japan) [T-En by Flame & Guren v15] [n].chd"
+    },
+    {
+      "title": "Nayuta - Endless Trails (English)",
+      "category": "The Legend of Heroes",
+      "system": "psp",
+      "bucket": "psp/Nayuta - Endless Trails (Japan) [T-En by Flame v4.15] [Add by Dackst v1.0.1] [n].chd"
+    },
+    {
+      "title": "The Legend of Heroes - Trails of Cold Steel",
+      "category": "The Legend of Heroes",
+      "system": "psvita",
+      "bucket": "psvita/THE LEGEND OF HEROES - TRAILS OF COLD STEEL [PCSE00786] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "The Legend of Heroes - Trails of Cold Steel II",
+      "category": "The Legend of Heroes",
+      "system": "psvita",
+      "bucket": "psvita/THE LEGEND OF HEROES - TRAILS OF COLD STEEL II [PCSE00896] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Lunar - The Silver Star",
+      "category": "Lunar",
+      "system": "segacd",
+      "bucket": "segacd/Lunar - The Silver Star (USA) (RE).chd"
+    },
+    {
+      "title": "Lunar - Eternal Blue",
+      "category": "Lunar",
+      "system": "segacd",
+      "bucket": "segacd/Lunar - Eternal Blue (USA) (RE).chd"
+    },
+    {
+      "title": "Lunar - Silver Star Story Complete",
+      "category": "Lunar",
+      "system": "saturn",
+      "bucket": "saturn/Lunar - Silver Star Story Complete (Japan).chd"
+    },
+    {
+      "title": "Lunar 2 - Eternal Blue",
+      "category": "Lunar",
+      "system": "saturn",
+      "bucket": "saturn/Lunar 2 - Eternal Blue (Japan).m3u",
+      "files": [
+        "saturn/Lunar 2 - Eternal Blue (Japan) (Disc 1).chd",
+        "saturn/Lunar 2 - Eternal Blue (Japan) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "Mahou Gakuen Lunar!",
+      "category": "Lunar",
+      "system": "saturn",
+      "bucket": "saturn/Mahou Gakuen Lunar! (Japan) (2M).chd"
+    },
+    {
+      "title": "Lunar - Sanposuru Gakuen",
+      "category": "Lunar",
+      "system": "gamegear",
+      "bucket": "gamegear/Lunar - Sanposuru Gakuen (Japan).zip"
+    },
+    {
+      "title": "Lunar - Silver Star Story Complete",
+      "category": "Lunar",
+      "system": "psx",
+      "bucket": "psx/Lunar - Silver Star Story Complete (USA).m3u",
+      "files": [
+        "psx/Lunar - Silver Star Story Complete (USA) (Disc 1).chd",
+        "psx/Lunar - Silver Star Story Complete (USA) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "Lunar 2 - Eternal Blue Complete",
+      "category": "Lunar",
+      "system": "psx",
+      "bucket": "psx/Lunar 2 - Eternal Blue Complete (USA).m3u",
+      "files": [
+        "psx/Lunar 2 - Eternal Blue Complete (USA) (Disc 1).chd",
+        "psx/Lunar 2 - Eternal Blue Complete (USA) (Disc 2).chd",
+        "psx/Lunar 2 - Eternal Blue Complete (USA) (Disc 3).chd"
+      ]
+    },
+    {
+      "title": "Lunar Legend",
+      "category": "Lunar",
+      "system": "gba",
+      "bucket": "gba/Lunar Legend (USA).zip"
+    },
+    {
+      "title": "Lunar - Dragon Song",
+      "category": "Lunar",
+      "system": "nds",
+      "bucket": "nds/Lunar - Dragon Song (USA).zip"
+    },
+    {
+      "title": "Lunar - Silver Star Harmony",
+      "category": "Lunar",
+      "system": "psp",
+      "bucket": "psp/Lunar - Silver Star Harmony (USA).chd"
+    },
+    {
+      "title": "Star Ocean",
+      "category": "Star Ocean",
+      "system": "snes",
+      "bucket": "snes/Star Ocean (Japan).zip"
+    },
+    {
+      "title": "Star Ocean - Blue Sphere",
+      "category": "Star Ocean",
+      "system": "gbc",
+      "bucket": "gbc/Star Ocean - Blue Sphere (Japan) (SGB Enhanced) (GB Compatible).zip"
+    },
+    {
+      "title": "Star Ocean - The Second Story",
+      "category": "Star Ocean",
+      "system": "psx",
+      "bucket": "psx/Star Ocean - The Second Story (USA).m3u",
+      "files": [
+        "psx/Star Ocean - The Second Story (USA) (Disc 1).chd",
+        "psx/Star Ocean - The Second Story (USA) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "Star Ocean - Till the End of Time",
+      "category": "Star Ocean",
+      "system": "ps2",
+      "bucket": "ps2/Star Ocean - Till the End of Time (USA).m3u",
+      "files": [
+        "ps2/Star Ocean - Till the End of Time (USA) (Disc 1).chd",
+        "ps2/Star Ocean - Till the End of Time (USA) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "Star Ocean - First Departure",
+      "category": "Star Ocean",
+      "system": "psp",
+      "bucket": "psp/Star Ocean - First Departure (USA).chd"
+    },
+    {
+      "title": "Star Ocean - Second Evolution",
+      "category": "Star Ocean",
+      "system": "psp",
+      "bucket": "psp/Star Ocean - Second Evolution (USA).chd"
+    },
+    {
+      "title": "Wild Arms",
+      "category": "Wild Arms",
+      "system": "psx",
+      "bucket": "psx/Wild Arms (USA).chd"
+    },
+    {
+      "title": "Wild Arms 2",
+      "category": "Wild Arms",
+      "system": "psx",
+      "bucket": "psx/Wild Arms 2 (USA).m3u",
+      "files": [
+        "psx/Wild Arms 2 (USA) (Disc 1).chd",
+        "psx/Wild Arms 2 (USA) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "Wild Arms 3",
+      "category": "Wild Arms",
+      "system": "ps2",
+      "bucket": "ps2/Wild Arms 3 (USA).chd"
+    },
+    {
+      "title": "Wild Arms - Alter Code - F",
+      "category": "Wild Arms",
+      "system": "ps2",
+      "bucket": "ps2/Wild Arms - Alter Code - F (USA).chd"
+    },
+    {
+      "title": "Wild Arms 4",
+      "category": "Wild Arms",
+      "system": "ps2",
+      "bucket": "ps2/Wild Arms 4 (USA).chd"
+    },
+    {
+      "title": "Wild Arms 5",
+      "category": "Wild Arms",
+      "system": "ps2",
+      "bucket": "ps2/Wild Arms 5 (USA).chd"
+    },
+    {
+      "title": "Wild Arms XF",
+      "category": "Wild Arms",
+      "system": "psp",
+      "bucket": "psp/Wild Arms XF (USA).chd"
+    },
+    {
+      "title": "Grandia",
+      "category": "Grandia",
+      "system": "saturn",
+      "bucket": "saturn/Grandia (Japan) (4M).m3u",
+      "files": [
+        "saturn/Grandia (Japan) (Disc 1) (4M).chd",
+        "saturn/Grandia (Japan) (Disc 2) (4M).chd"
+      ]
+    },
+    {
+      "title": "Grandia - Digital Museum",
+      "category": "Grandia",
+      "system": "saturn",
+      "bucket": "saturn/Grandia - Digital Museum (Japan) (Rev A) (10M).chd"
+    },
+    {
+      "title": "Grandia",
+      "category": "Grandia",
+      "system": "psx",
+      "bucket": "psx/Grandia (USA).m3u",
+      "files": [
+        "psx/Grandia (USA) (Disc 1).chd",
+        "psx/Grandia (USA) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "Grandia - Parallel Trippers",
+      "category": "Grandia",
+      "system": "gbc",
+      "bucket": "gbc/Grandia - Parallel Trippers (Japan).zip"
+    },
+    {
+      "title": "Grandia II",
+      "category": "Grandia",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Grandia II (USA).chd"
+    },
+    {
+      "title": "Grandia II",
+      "category": "Grandia",
+      "system": "ps2",
+      "bucket": "ps2/Grandia II (USA).chd"
+    },
+    {
+      "title": "Grandia Xtreme",
+      "category": "Grandia",
+      "system": "ps2",
+      "bucket": "ps2/Grandia Xtreme (USA).chd"
+    },
+    {
+      "title": "Grandia III",
+      "category": "Grandia",
+      "system": "ps2",
+      "bucket": "ps2/Grandia III (USA).m3u",
+      "files": [
+        "ps2/Grandia III (USA) (Disc 1).chd",
+        "ps2/Grandia III (USA) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "Lufia & the Fortress of Doom",
+      "category": "Lufia",
+      "system": "snes",
+      "bucket": "snes/Lufia & the Fortress of Doom (USA).zip"
+    },
+    {
+      "title": "Lufia II - Rise of the Sinistrals",
+      "category": "Lufia",
+      "system": "snes",
+      "bucket": "snes/Lufia II - Rise of the Sinistrals (USA).zip"
+    },
+    {
+      "title": "Lufia - The Legend Returns",
+      "category": "Lufia",
+      "system": "gbc",
+      "bucket": "gbc/Lufia - The Legend Returns (USA).zip"
+    },
+    {
+      "title": "Lufia - The Ruins of Lore",
+      "category": "Lufia",
+      "system": "gba",
+      "bucket": "gba/Lufia - The Ruins of Lore (USA).zip"
+    },
+    {
+      "title": "Lufia - Curse of the Sinistrals",
+      "category": "Lufia",
+      "system": "nds",
+      "bucket": "nds/Lufia - Curse of the Sinistrals (USA).zip"
+    },
+    {
+      "title": "Golden Sun",
+      "category": "Golden Sun",
+      "system": "gba",
+      "bucket": "gba/Golden Sun (USA, Europe).zip"
+    },
+    {
+      "title": "Golden Sun - The Lost Age",
+      "category": "Golden Sun",
+      "system": "gba",
+      "bucket": "gba/Golden Sun - The Lost Age (USA, Europe).zip"
+    },
+    {
+      "title": "Golden Sun - Dark Dawn",
+      "category": "Golden Sun",
+      "system": "nds",
+      "bucket": "nds/Golden Sun - Dark Dawn (USA, Australia) (En,Es).zip"
+    },
+    {
+      "title": "Arc the Lad Collection - Arc the Lad",
+      "category": "Arc the Lad",
+      "system": "psx",
+      "bucket": "psx/Arc the Lad Collection - Arc the Lad (USA).chd"
+    },
+    {
+      "title": "Arc the Lad Collection - Arc the Lad II",
+      "category": "Arc the Lad",
+      "system": "psx",
+      "bucket": "psx/Arc the Lad Collection - Arc the Lad II (USA).chd"
+    },
+    {
+      "title": "Arc the Lad Collection - Arc Arena - Monster Tournament",
+      "category": "Arc the Lad",
+      "system": "psx",
+      "bucket": "psx/Arc the Lad Collection - Arc Arena - Monster Tournament (USA).chd"
+    },
+    {
+      "title": "Arc the Lad Collection - Arc the Lad III",
+      "category": "Arc the Lad",
+      "system": "psx",
+      "bucket": "psx/Arc the Lad Collection - Arc the Lad III (USA).m3u",
+      "files": [
+        "psx/Arc the Lad Collection - Arc the Lad III (USA) (Disc 1).chd",
+        "psx/Arc the Lad Collection - Arc the Lad III (USA) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "Arc the Lad - Kishin Fukkatsu",
+      "category": "Arc the Lad",
+      "system": "wonderswancolor",
+      "bucket": "wonderswancolor/Arc the Lad - Kishin Fukkatsu (Japan).zip"
+    },
+    {
+      "title": "Arc the Lad - Twilight of the Spirits",
+      "category": "Arc the Lad",
+      "system": "ps2",
+      "bucket": "ps2/Arc the Lad - Twilight of the Spirits (USA).chd"
+    },
+    {
+      "title": "Arc the Lad - End of Darkness",
+      "category": "Arc the Lad",
+      "system": "ps2",
+      "bucket": "ps2/Arc the Lad - End of Darkness (USA).chd"
+    },
+    {
+      "title": "Xenogears",
+      "category": "Xeno",
+      "system": "psx",
+      "bucket": "psx/Xenogears (USA).m3u",
+      "files": [
+        "psx/Xenogears (USA) (Disc 1).chd",
+        "psx/Xenogears (USA) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "Xenosaga Episode I - Der Wille zur Macht",
+      "category": "Xeno",
+      "system": "ps2",
+      "bucket": "ps2/Xenosaga Episode I - Der Wille zur Macht (USA).chd"
+    },
+    {
+      "title": "Xenosaga Episode II - Jenseits von Gut und Boese",
+      "category": "Xeno",
+      "system": "ps2",
+      "bucket": "ps2/Xenosaga Episode II - Jenseits von Gut und Boese (USA).m3u",
+      "files": [
+        "ps2/Xenosaga Episode II - Jenseits von Gut und Boese (USA) (Disc 1).chd",
+        "ps2/Xenosaga Episode II - Jenseits von Gut und Boese (USA) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "Xenosaga Episode III - Also sprach Zarathustra",
+      "category": "Xeno",
+      "system": "ps2",
+      "bucket": "ps2/Xenosaga Episode III - Also sprach Zarathustra (USA).m3u",
+      "files": [
+        "ps2/Xenosaga Episode III - Also sprach Zarathustra (USA) (Disc 1).chd",
+        "ps2/Xenosaga Episode III - Also sprach Zarathustra (USA) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "Xenosaga I & II",
+      "category": "Xeno",
+      "system": "nds",
+      "bucket": "nds/Xenosaga I & II (Japan).zip"
+    },
+    {
+      "title": "Xenoblade Chronicles",
+      "category": "Xeno",
+      "system": "wii",
+      "bucket": "wii/Xenoblade Chronicles (USA, Asia) (En,Fr,Es).rvz"
+    },
+    {
+      "title": "Xenoblade Chronicles 3D",
+      "category": "Xeno",
+      "system": "n3ds",
+      "bucket": "n3ds/Xenoblade Chronicles 3D (USA) (En,Fr,Es) (Rev 1).3ds"
+    },
+    {
+      "title": "Xenoblade Chronicles X",
+      "category": "Xeno",
+      "system": "wiiu",
+      "bucket": "wiiu/Xenoblade Chronicles X (US) (v48).wua"
+    },
+    {
+      "title": "Koudelka",
+      "category": "Shadow Hearts",
+      "system": "psx",
+      "bucket": "psx/Koudelka (USA).m3u",
+      "files": [
+        "psx/Koudelka (USA) (Disc 1).chd",
+        "psx/Koudelka (USA) (Disc 2).chd",
+        "psx/Koudelka (USA) (Disc 3).chd",
+        "psx/Koudelka (USA) (Disc 4).chd"
+      ]
+    },
+    {
+      "title": "Shadow Hearts",
+      "category": "Shadow Hearts",
+      "system": "ps2",
+      "bucket": "ps2/Shadow Hearts (USA).chd"
+    },
+    {
+      "title": "Shadow Hearts - Covenant",
+      "category": "Shadow Hearts",
+      "system": "ps2",
+      "bucket": "ps2/Shadow Hearts - Covenant (USA).m3u",
+      "files": [
+        "ps2/Shadow Hearts - Covenant (USA) (Disc 1).chd",
+        "ps2/Shadow Hearts - Covenant (USA) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "Shadow Hearts - From the New World",
+      "category": "Shadow Hearts",
+      "system": "ps2",
+      "bucket": "ps2/Shadow Hearts - From the New World (USA).chd"
+    },
+    {
+      "title": "EarthBound Beginnings",
+      "category": "Mother",
+      "system": "nes",
+      "bucket": "nes/EarthBound Beginnings (USA, Europe) (Virtual Console).zip"
+    },
+    {
+      "title": "EarthBound",
+      "category": "Mother",
+      "system": "snes",
+      "bucket": "snes/EarthBound (USA).zip"
+    },
+    {
+      "title": "Mother 1+2 (English)",
+      "category": "Mother",
+      "system": "gba",
+      "bucket": "gba/Mother 1+2 (English).zip"
+    },
+    {
+      "title": "Mother 3 (English)",
+      "category": "Mother",
+      "system": "gba",
+      "bucket": "gba/Mother 3 (English v1.3a).zip"
+    },
+    {
+      "title": "Marie no Atelier Ver. 1.3 - Salburg no Renkinjutsushi",
+      "category": "Atelier",
+      "system": "saturn",
+      "bucket": "saturn/Marie no Atelier Ver. 1.3 - Salburg no Renkinjutsushi (Japan).chd"
+    },
+    {
+      "title": "Marie & Elie no Atelier - Salburg no Renkinjutsushi 1 & 2",
+      "category": "Atelier",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Marie & Elie no Atelier - Salburg no Renkinjutsushi 1 & 2 (Japan) (Game Disc) (Rev A).chd"
+    },
+    {
+      "title": "Marie no Atelier GB",
+      "category": "Atelier",
+      "system": "gbc",
+      "bucket": "gbc/Marie no Atelier GB (Japan) (SGB Enhanced) (GB Compatible).zip"
+    },
+    {
+      "title": "Elie no Atelier GB",
+      "category": "Atelier",
+      "system": "gbc",
+      "bucket": "gbc/Elie no Atelier GB (Japan) (SGB Enhanced) (GB Compatible).zip"
+    },
+    {
+      "title": "Alchemist Marie & Elie - Futari no Atelier",
+      "category": "Atelier",
+      "system": "wonderswancolor",
+      "bucket": "wonderswancolor/Alchemist Marie & Elie - Futari no Atelier (Japan).zip"
+    },
+    {
+      "title": "Marie, Elie & Anis no Atelier - Soyokaze kara no Dengon",
+      "category": "Atelier",
+      "system": "gba",
+      "bucket": "gba/Marie, Elie & Anis no Atelier - Soyokaze kara no Dengon (Japan).zip"
+    },
+    {
+      "title": "Atelier Iris - Eternal Mana",
+      "category": "Atelier",
+      "system": "ps2",
+      "bucket": "ps2/Atelier Iris - Eternal Mana (USA).chd"
+    },
+    {
+      "title": "Atelier Iris 2 - The Azoth of Destiny",
+      "category": "Atelier",
+      "system": "ps2",
+      "bucket": "ps2/Atelier Iris 2 - The Azoth of Destiny (USA).chd"
+    },
+    {
+      "title": "Atelier Iris 3 - Grand Phantasm",
+      "category": "Atelier",
+      "system": "ps2",
+      "bucket": "ps2/Atelier Iris 3 - Grand Phantasm (USA).chd"
+    },
+    {
+      "title": "Lise no Atelier - O'ldor no Renkinjutsushi",
+      "category": "Atelier",
+      "system": "nds",
+      "bucket": "nds/Lise no Atelier - O'ldor no Renkinjutsushi (Japan) (Rev 1).zip"
+    },
+    {
+      "title": "Atelier Annie - Alchemists of Sera Island",
+      "category": "Atelier",
+      "system": "nds",
+      "bucket": "nds/Atelier Annie - Alchemists of Sera Island (USA).zip"
+    },
+    {
+      "title": "Lina no Atelier - Strahl no Renkinjutsushi",
+      "category": "Atelier",
+      "system": "nds",
+      "bucket": "nds/Lina no Atelier - Strahl no Renkinjutsushi (Japan).zip"
+    },
+    {
+      "title": "Shin Rorona no Atelier Hajimari no Monogatari - Arland no Renkinjutsushi",
+      "category": "Atelier",
+      "system": "3ds",
+      "bucket": "3ds/Shin Rorona no Atelier Hajimari no Monogatari - Arland no Renkinjutsushi (Japan).zip"
+    },
+    {
+      "title": "Atelier Rorona Plus",
+      "category": "Atelier",
+      "system": "psvita",
+      "bucket": "psvita/Atelier Rorona Plus [PCSE00466] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Atelier Totori Plus",
+      "category": "Atelier",
+      "system": "psvita",
+      "bucket": "psvita/Atelier Totori Plus [PCSE00231] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Atelier Meruru Plus",
+      "category": "Atelier",
+      "system": "psvita",
+      "bucket": "psvita/Atelier Meruru Plus [PCSE00296] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Atelier Ayesha Plus",
+      "category": "Atelier",
+      "system": "psvita",
+      "bucket": "psvita/Atelier Ayesha Plus [PCSE00584] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Atelier Escha & Logy Plus",
+      "category": "Atelier",
+      "system": "psvita",
+      "bucket": "psvita/Atelier Escha & Logy Plus [PCSE00826] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Atelier Shallie Plus",
+      "category": "Atelier",
+      "system": "psvita",
+      "bucket": "psvita/Atelier Shallie Plus [PCSE00998] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Atelier Sophie",
+      "category": "Atelier",
+      "system": "psvita",
+      "bucket": "psvita/Atelier Sophie [PCSE00892] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Atelier Firis",
+      "category": "Atelier",
+      "system": "psvita",
+      "bucket": "psvita/Atelier Firis [PCSE01044] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Monster Hunter Freedom",
+      "category": "Monster Hunter",
+      "system": "psp",
+      "bucket": "psp/Monster Hunter Freedom (USA).chd"
+    },
+    {
+      "title": "Monster Hunter Freedom 2",
+      "category": "Monster Hunter",
+      "system": "psp",
+      "bucket": "psp/Monster Hunter Freedom 2 (USA).chd"
+    },
+    {
+      "title": "Monster Hunter Freedom Unite",
+      "category": "Monster Hunter",
+      "system": "psp",
+      "bucket": "psp/Monster Hunter Freedom Unite (USA) (En,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "Monster Hunter Tri",
+      "category": "Monster Hunter",
+      "system": "wii",
+      "bucket": "wii/Monster Hunter Tri (USA) (En,Fr,Es).rvz"
+    },
+    {
+      "title": "Monster Hunter Portable 3rd (English)",
+      "category": "Monster Hunter",
+      "system": "psp",
+      "bucket": "psp/Monster Hunter Portable 3rd (Japan) [T-En by Team Maverick One v5.0] [PPSSPP HD version].chd"
+    },
+    {
+      "title": "Monster Hunter 3 Ultimate",
+      "category": "Monster Hunter",
+      "system": "3ds",
+      "bucket": "3ds/Monster Hunter 3 Ultimate (USA) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Monster Hunter 3 Ultimate",
+      "category": "Monster Hunter",
+      "system": "wiiu",
+      "bucket": "wiiu/MH3U (US) (v32).wua"
+    },
+    {
+      "title": "Monster Hunter 4 Ultimate",
+      "category": "Monster Hunter",
+      "system": "3ds",
+      "bucket": "3ds/Monster Hunter 4 Ultimate (USA).zip"
+    },
+    {
+      "title": "Monster Hunter Generations",
+      "category": "Monster Hunter",
+      "system": "3ds",
+      "bucket": "3ds/Monster Hunter Generations (USA).zip"
+    },
+    {
+      "title": "Monster Hunter XX - Double Cross",
+      "category": "Monster Hunter",
+      "system": "3ds",
+      "bucket": "3ds/Monster Hunter XX - Double Cross (Japan).zip"
+    },
+    {
+      "title": "Monster Hunter Stories",
+      "category": "Monster Hunter",
+      "system": "3ds",
+      "bucket": "3ds/Monster Hunter Stories (USA).zip"
+    },
+    {
+      "title": "Etrian Odyssey",
+      "category": "Etrian Odyssey",
+      "system": "nds",
+      "bucket": "nds/Etrian Odyssey (USA).zip"
+    },
+    {
+      "title": "Etrian Odyssey II - Heroes of Lagaard",
+      "category": "Etrian Odyssey",
+      "system": "nds",
+      "bucket": "nds/Etrian Odyssey II - Heroes of Lagaard (USA).zip"
+    },
+    {
+      "title": "Etrian Odyssey III - The Drowned City",
+      "category": "Etrian Odyssey",
+      "system": "nds",
+      "bucket": "nds/Etrian Odyssey III - The Drowned City (USA).zip"
+    },
+    {
+      "title": "Etrian Odyssey IV - Legends of the Titan",
+      "category": "Etrian Odyssey",
+      "system": "3ds",
+      "bucket": "3ds/Etrian Odyssey IV - Legends of the Titan (USA).zip"
+    },
+    {
+      "title": "Etrian Odyssey Untold - The Millennium Girl",
+      "category": "Etrian Odyssey",
+      "system": "3ds",
+      "bucket": "3ds/Etrian Odyssey Untold - The Millennium Girl (USA).zip"
+    },
+    {
+      "title": "Etrian Odyssey 2 Untold - The Fafnir Knight",
+      "category": "Etrian Odyssey",
+      "system": "3ds",
+      "bucket": "3ds/Etrian Odyssey 2 Untold - The Fafnir Knight (USA).zip"
+    },
+    {
+      "title": "Etrian Odyssey V - Beyond the Myth",
+      "category": "Etrian Odyssey",
+      "system": "3ds",
+      "bucket": "3ds/Etrian Odyssey V - Beyond the Myth (USA).zip"
+    },
+    {
+      "title": "Etrian Odyssey Nexus",
+      "category": "Etrian Odyssey",
+      "system": "3ds",
+      "bucket": "3ds/Etrian Odyssey Nexus (USA).zip"
+    },
+    {
+      "title": "Etrian Mystery Dungeon",
+      "category": "Etrian Odyssey",
+      "system": "3ds",
+      "bucket": "3ds/Etrian Mystery Dungeon (USA).zip"
+    },
+    {
+      "title": "Sekaiju to Fushigi no Dungeon 2",
+      "category": "Etrian Odyssey",
+      "system": "3ds",
+      "bucket": "3ds/Sekaiju to Fushigi no Dungeon 2 (Japan).zip"
+    }
+  ]
+}

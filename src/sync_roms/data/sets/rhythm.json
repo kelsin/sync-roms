@@ -1,0 +1,772 @@
+{
+  "name": "Rhythm & Music",
+  "description": "Rhythm-action and music games.",
+  "games": [
+    {
+      "title": "PaRappa the Rapper",
+      "category": "Sony",
+      "system": "psx",
+      "bucket": "psx/PaRappa the Rapper (USA) (En,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "PaRappa the Rapper",
+      "category": "Sony",
+      "system": "psp",
+      "bucket": "psp/PaRappa the Rapper (USA).chd"
+    },
+    {
+      "title": "Um Jammer Lammy",
+      "category": "Sony",
+      "system": "psx",
+      "bucket": "psx/Um Jammer Lammy (USA).chd"
+    },
+    {
+      "title": "PaRappa the Rapper 2",
+      "category": "Sony",
+      "system": "ps2",
+      "bucket": "ps2/PaRappa the Rapper 2 (USA) (En,Ja).chd"
+    },
+    {
+      "title": "Frequency",
+      "category": "Sony",
+      "system": "ps2",
+      "bucket": "ps2/Frequency (USA).chd"
+    },
+    {
+      "title": "Amplitude",
+      "category": "Sony",
+      "system": "ps2",
+      "bucket": "ps2/Amplitude (USA).chd"
+    },
+    {
+      "title": "Patapon",
+      "category": "Sony",
+      "system": "psp",
+      "bucket": "psp/Patapon (USA).chd"
+    },
+    {
+      "title": "Patapon 2",
+      "category": "Sony",
+      "system": "psp",
+      "bucket": "psp/Patapon 2 (USA) (En,Fr,Es).chd"
+    },
+    {
+      "title": "Patapon 3",
+      "category": "Sony",
+      "system": "psp",
+      "bucket": "psp/Patapon 3 (USA) (En,Fr,Es,Pt).chd"
+    },
+    {
+      "title": "LocoRoco",
+      "category": "Sony",
+      "system": "psp",
+      "bucket": "psp/LocoRoco (USA) (En,Ja,Fr,De,Es,It,Nl,Pt,Sv,No,Da,Fi,Zh,Ko,Ru).chd"
+    },
+    {
+      "title": "LocoRoco 2",
+      "category": "Sony",
+      "system": "psp",
+      "bucket": "psp/LocoRoco 2 (USA) (En,Ja,Fr,De,Es,It,Nl,Pt,Sv,No,Da,Fi,Ko,Ru).chd"
+    },
+    {
+      "title": "Sound Shapes",
+      "category": "Sony",
+      "system": "psvita",
+      "bucket": "psvita/Sound Shapes™ [PCSA00003] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Beatmania GB",
+      "category": "Bemani",
+      "system": "gbc",
+      "bucket": "gbc/Beatmania GB (Japan) (SGB Enhanced) (GB Compatible).zip"
+    },
+    {
+      "title": "Beatmania GB 2 - Gotcha Mix",
+      "category": "Bemani",
+      "system": "gbc",
+      "bucket": "gbc/Beatmania GB 2 - Gotcha Mix (Japan) (SGB Enhanced) (GB Compatible).zip"
+    },
+    {
+      "title": "Beatmania GB - Gotcha Mix 2",
+      "category": "Bemani",
+      "system": "gbc",
+      "bucket": "gbc/Beatmania GB - Gotcha Mix 2 (Japan).zip"
+    },
+    {
+      "title": "beatmania for WonderSwan",
+      "category": "Bemani",
+      "system": "wonderswan",
+      "bucket": "wonderswan/beatmania for WonderSwan (Japan).zip"
+    },
+    {
+      "title": "Dance Dance Revolution",
+      "category": "Bemani",
+      "system": "psx",
+      "bucket": "psx/Dance Dance Revolution (USA).chd"
+    },
+    {
+      "title": "Dance Dance Revolution Konamix",
+      "category": "Bemani",
+      "system": "psx",
+      "bucket": "psx/Dance Dance Revolution Konamix (USA).chd"
+    },
+    {
+      "title": "Dance Dance Revolution - Disney Mix",
+      "category": "Bemani",
+      "system": "psx",
+      "bucket": "psx/Dance Dance Revolution - Disney Mix (USA).chd"
+    },
+    {
+      "title": "Dance Dance Revolution 2nd Mix - Dreamcast Edition",
+      "category": "Bemani",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Dance Dance Revolution 2nd Mix - Dreamcast Edition (Japan).chd"
+    },
+    {
+      "title": "Dance Dance Revolution - Club Version - Dreamcast Edition",
+      "category": "Bemani",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Dance Dance Revolution - Club Version - Dreamcast Edition (Japan).chd"
+    },
+    {
+      "title": "Dance Dance Revolution GB",
+      "category": "Bemani",
+      "system": "gbc",
+      "bucket": "gbc/Dance Dance Revolution GB (Japan).zip"
+    },
+    {
+      "title": "Dance Dance Revolution GB 2",
+      "category": "Bemani",
+      "system": "gbc",
+      "bucket": "gbc/Dance Dance Revolution GB 2 (Japan).zip"
+    },
+    {
+      "title": "Dance Dance Revolution GB 3",
+      "category": "Bemani",
+      "system": "gbc",
+      "bucket": "gbc/Dance Dance Revolution GB 3 (Japan).zip"
+    },
+    {
+      "title": "Dance Dance Revolution GB - Disney Mix",
+      "category": "Bemani",
+      "system": "gbc",
+      "bucket": "gbc/Dance Dance Revolution GB - Disney Mix (Japan).zip"
+    },
+    {
+      "title": "Dance Dance Revolution - Mario Mix",
+      "category": "Bemani",
+      "system": "gc",
+      "bucket": "gc/Dance Dance Revolution - Mario Mix (USA).rvz"
+    },
+    {
+      "title": "Pop'n Music",
+      "category": "Bemani",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Pop'n Music (Japan).chd"
+    },
+    {
+      "title": "Pop'n Music 2",
+      "category": "Bemani",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Pop'n Music 2 (Japan).chd"
+    },
+    {
+      "title": "Pop'n Music GB",
+      "category": "Bemani",
+      "system": "gbc",
+      "bucket": "gbc/Pop'n Music GB (Japan).zip"
+    },
+    {
+      "title": "Pop'n Music GB - Animation Melody",
+      "category": "Bemani",
+      "system": "gbc",
+      "bucket": "gbc/Pop'n Music GB - Animation Melody (Japan).zip"
+    },
+    {
+      "title": "Pop'n Music GB - Disney Tunes",
+      "category": "Bemani",
+      "system": "gbc",
+      "bucket": "gbc/Pop'n Music GB - Disney Tunes (Japan).zip"
+    },
+    {
+      "title": "Pop'n Music Portable",
+      "category": "Bemani",
+      "system": "psp",
+      "bucket": "psp/Pop'n Music Portable (Japan).chd"
+    },
+    {
+      "title": "Pop'n Music Portable 2",
+      "category": "Bemani",
+      "system": "psp",
+      "bucket": "psp/Pop'n Music Portable 2 (Japan).chd"
+    },
+    {
+      "title": "Rhythm Tengoku",
+      "category": "Nintendo",
+      "system": "gba",
+      "bucket": "gba/Rhythm Tengoku (Japan) (Rev 1).zip"
+    },
+    {
+      "title": "Rhythm Heaven",
+      "category": "Nintendo",
+      "system": "nds",
+      "bucket": "nds/Rhythm Heaven (USA).zip"
+    },
+    {
+      "title": "Rhythm Paradise Megamix",
+      "category": "Nintendo",
+      "system": "3ds",
+      "bucket": "3ds/Rhythm Paradise Megamix (Europe) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Osu! Tatakae! Ouendan",
+      "category": "Nintendo",
+      "system": "nds",
+      "bucket": "nds/Osu! Tatakae! Ouendan (Japan).zip"
+    },
+    {
+      "title": "Moero! Nekketsu Rhythm Damashii - Osu! Tatakae! Ouendan 2",
+      "category": "Nintendo",
+      "system": "nds",
+      "bucket": "nds/Moero! Nekketsu Rhythm Damashii - Osu! Tatakae! Ouendan 2 (Japan).zip"
+    },
+    {
+      "title": "Elite Beat Agents",
+      "category": "Nintendo",
+      "system": "nds",
+      "bucket": "nds/Elite Beat Agents (USA).zip"
+    },
+    {
+      "title": "Donkey Konga",
+      "category": "Nintendo",
+      "system": "gc",
+      "bucket": "gc/Donkey Konga (USA).rvz"
+    },
+    {
+      "title": "Donkey Konga 2",
+      "category": "Nintendo",
+      "system": "gc",
+      "bucket": "gc/Donkey Konga 2 (USA).rvz"
+    },
+    {
+      "title": "Daigassou! Band-Brothers",
+      "category": "Nintendo",
+      "system": "nds",
+      "bucket": "nds/Daigassou! Band-Brothers (Japan).zip"
+    },
+    {
+      "title": "Jam with the Band",
+      "category": "Nintendo",
+      "system": "nds",
+      "bucket": "nds/Jam with the Band (Europe) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Daigassou! Band Brothers P",
+      "category": "Nintendo",
+      "system": "3ds",
+      "bucket": "3ds/Daigassou! Band Brothers P (Japan).zip"
+    },
+    {
+      "title": "Electroplankton",
+      "category": "Nintendo",
+      "system": "nds",
+      "bucket": "nds/Electroplankton (USA).zip"
+    },
+    {
+      "title": "Otocky",
+      "category": "Nintendo",
+      "system": "fds",
+      "bucket": "fds/Otocky (Japan).zip"
+    },
+    {
+      "title": "Dance Aerobics",
+      "category": "Nintendo",
+      "system": "nes",
+      "bucket": "nes/Dance Aerobics (USA).zip"
+    },
+    {
+      "title": "Space Channel 5",
+      "category": "Sega",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Space Channel 5 (USA).chd"
+    },
+    {
+      "title": "Space Channel 5 Part 2",
+      "category": "Sega",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Space Channel 5 Part 2 (Japan).chd"
+    },
+    {
+      "title": "Space Channel 5 - Special Edition",
+      "category": "Sega",
+      "system": "ps2",
+      "bucket": "ps2/Space Channel 5 - Special Edition (USA).m3u",
+      "files": [
+        "ps2/Space Channel 5 - Special Edition (USA) (Disc 1).chd",
+        "ps2/Space Channel 5 - Special Edition (USA) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "Space Channel 5 - Ulala's Cosmic Attack",
+      "category": "Sega",
+      "system": "gba",
+      "bucket": "gba/Space Channel 5 - Ulala's Cosmic Attack (USA).zip"
+    },
+    {
+      "title": "Samba de Amigo",
+      "category": "Sega",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Samba de Amigo (USA).chd"
+    },
+    {
+      "title": "Rez",
+      "category": "Sega",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Rez (Europe) (En,Ja,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "Rez",
+      "category": "Sega",
+      "system": "ps2",
+      "bucket": "ps2/Rez (USA) (En,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "Puyo Puyo Da! Featuring Ellena System",
+      "category": "Sega",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Puyo Puyo Da! Featuring Ellena System (Japan).chd"
+    },
+    {
+      "title": "Rhythm Thief & the Emperor's Treasure",
+      "category": "Sega",
+      "system": "3ds",
+      "bucket": "3ds/Rhythm Thief & the Emperor's Treasure (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Hatsune Miku - Project Diva",
+      "category": "Vocaloid & idol",
+      "system": "psp",
+      "bucket": "psp/Hatsune Miku - Project Diva (Japan) [T-En by Diva Fan Project v1.0].chd"
+    },
+    {
+      "title": "Hatsune Miku - Project Diva 2nd",
+      "category": "Vocaloid & idol",
+      "system": "psp",
+      "bucket": "psp/Hatsune Miku - Project Diva 2nd (Japan) [T-En by Diva Fan Project v3.0].chd"
+    },
+    {
+      "title": "Hatsune Miku - Project Diva Extend",
+      "category": "Vocaloid & idol",
+      "system": "psp",
+      "bucket": "psp/Hatsune Miku - Project Diva Extend (Japan) [T-En by Diva Fan Project v2.0].chd"
+    },
+    {
+      "title": "Hatsune Miku - Project DIVA f",
+      "category": "Vocaloid & idol",
+      "system": "psvita",
+      "bucket": "psvita/Hatsune Miku - Project DIVA f [PCSE00326] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Hatsune Miku - Project DIVA F 2nd",
+      "category": "Vocaloid & idol",
+      "system": "psvita",
+      "bucket": "psvita/Hatsune Miku - PJ DIVA F 2nd [PCSE00434] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Hatsune Miku - Project DIVA X",
+      "category": "Vocaloid & idol",
+      "system": "psvita",
+      "bucket": "psvita/Hatsune Miku - Project DIVA X [PCSE00867] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Hatsune Miku and Future Stars - Project Mirai",
+      "category": "Vocaloid & idol",
+      "system": "3ds",
+      "bucket": "3ds/Hatsune Miku and Future Stars - Project Mirai (Japan).zip"
+    },
+    {
+      "title": "Hatsune Miku - Project Mirai 2",
+      "category": "Vocaloid & idol",
+      "system": "3ds",
+      "bucket": "3ds/Hatsune Miku - Project Mirai 2 (Japan).zip"
+    },
+    {
+      "title": "Hatsune Miku - Project Mirai DX",
+      "category": "Vocaloid & idol",
+      "system": "3ds",
+      "bucket": "3ds/Hatsune Miku - Project Mirai DX (USA).zip"
+    },
+    {
+      "title": "Megpoid the Music",
+      "category": "Vocaloid & idol",
+      "system": "psp",
+      "bucket": "psp/Megpoid the Music (Japan).chd"
+    },
+    {
+      "title": "The Idol Master SP - Shiny Festa - Honey Sound",
+      "category": "Vocaloid & idol",
+      "system": "psp",
+      "bucket": "psp/Idol Master SP, The - Shiny Festa - Honey Sound (Japan) [T-En by zzzzzzzzz].chd"
+    },
+    {
+      "title": "The Idol Master SP - Shiny Festa - Funky Note",
+      "category": "Vocaloid & idol",
+      "system": "psp",
+      "bucket": "psp/Idol Master SP, The - Shiny Festa - Funky Note (Japan) [T-En by zzzzzzzzz].chd"
+    },
+    {
+      "title": "The Idol Master SP - Shiny Festa - Groovy Tune",
+      "category": "Vocaloid & idol",
+      "system": "psp",
+      "bucket": "psp/Idol Master SP, The - Shiny Festa - Groovy Tune (Japan) [T-En by zzzzzzzzz].chd"
+    },
+    {
+      "title": "Persona 4 - Dancing All Night",
+      "category": "Vocaloid & idol",
+      "system": "psvita",
+      "bucket": "psvita/Persona 4 - Dancing All Night [PCSE00764] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Taiko no Tatsujin DS - Touch de Dokodon!",
+      "category": "Taiko",
+      "system": "nds",
+      "bucket": "nds/Taiko no Tatsujin DS - Touch de Dokodon! (Japan) (Rev 1).zip"
+    },
+    {
+      "title": "Metcha! Taiko no Tatsujin DS - 7-tsu no Shima no Daibouken",
+      "category": "Taiko",
+      "system": "nds",
+      "bucket": "nds/Metcha! Taiko no Tatsujin DS - 7-tsu no Shima no Daibouken (Japan).zip"
+    },
+    {
+      "title": "Taiko no Tatsujin DS - Dororon! Yookai Daikessen!!",
+      "category": "Taiko",
+      "system": "nds",
+      "bucket": "nds/Taiko no Tatsujin DS - Dororon! Yookai Daikessen!! (Japan).zip"
+    },
+    {
+      "title": "Taiko no Tatsujin Portable",
+      "category": "Taiko",
+      "system": "psp",
+      "bucket": "psp/Taiko no Tatsujin Portable (Japan, Asia) (v2.00).chd"
+    },
+    {
+      "title": "Taiko no Tatsujin Portable 2",
+      "category": "Taiko",
+      "system": "psp",
+      "bucket": "psp/Taiko no Tatsujin Portable 2 (Japan).chd"
+    },
+    {
+      "title": "Taiko no Tatsujin Portable DX",
+      "category": "Taiko",
+      "system": "psp",
+      "bucket": "psp/Taiko no Tatsujin Portable DX (Japan, Korea).chd"
+    },
+    {
+      "title": "Taiko no Tatsujin - Don to Katsu no Jikuu Daibouken",
+      "category": "Taiko",
+      "system": "3ds",
+      "bucket": "3ds/Taiko no Tatsujin - Don to Katsu no Jikuu Daibouken (Japan).zip"
+    },
+    {
+      "title": "Taiko no Tatsujin - Doko Don! Mystery Adventure",
+      "category": "Taiko",
+      "system": "3ds",
+      "bucket": "3ds/Taiko no Tatsujin - Doko Don! Mystery Adventure (Japan).zip"
+    },
+    {
+      "title": "Guitar Hero - On Tour",
+      "category": "Band games",
+      "system": "nds",
+      "bucket": "nds/Guitar Hero - On Tour (USA) (En,Fr).zip"
+    },
+    {
+      "title": "Guitar Hero - On Tour - Decades",
+      "category": "Band games",
+      "system": "nds",
+      "bucket": "nds/Guitar Hero - On Tour - Decades (USA) (En,Fr).zip"
+    },
+    {
+      "title": "Guitar Hero - On Tour - Modern Hits",
+      "category": "Band games",
+      "system": "nds",
+      "bucket": "nds/Guitar Hero - On Tour - Modern Hits (USA) (En,Fr).zip"
+    },
+    {
+      "title": "Band Hero",
+      "category": "Band games",
+      "system": "nds",
+      "bucket": "nds/Band Hero (USA) (En,Fr).zip"
+    },
+    {
+      "title": "Rock Band 3",
+      "category": "Band games",
+      "system": "nds",
+      "bucket": "nds/Rock Band 3 (USA) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "LEGO Rock Band",
+      "category": "Band games",
+      "system": "nds",
+      "bucket": "nds/LEGO Rock Band (USA) (En,Fr,De,Es,It,Da).zip"
+    },
+    {
+      "title": "Rock Band Unplugged",
+      "category": "Band games",
+      "system": "psp",
+      "bucket": "psp/Rock Band Unplugged (USA).chd"
+    },
+    {
+      "title": "Ultimate Band",
+      "category": "Band games",
+      "system": "nds",
+      "bucket": "nds/Ultimate Band (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Rock Revolution",
+      "category": "Band games",
+      "system": "nds",
+      "bucket": "nds/Rock Revolution (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Guitar Rock Tour",
+      "category": "Band games",
+      "system": "nds",
+      "bucket": "nds/Guitar Rock Tour (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Jam Sessions - Sing and Play Guitar",
+      "category": "Band games",
+      "system": "nds",
+      "bucket": "nds/Jam Sessions - Sing and Play Guitar (USA) (En,Fr,De,Es,It,Nl) (Rev 1).zip"
+    },
+    {
+      "title": "Karaoke Revolution Party",
+      "category": "Band games",
+      "system": "gc",
+      "bucket": "gc/Karaoke Revolution Party (USA).rvz"
+    },
+    {
+      "title": "Bust A Groove",
+      "category": "Other",
+      "system": "psx",
+      "bucket": "psx/Bust A Groove (USA).chd"
+    },
+    {
+      "title": "Bust A Groove 2",
+      "category": "Other",
+      "system": "psx",
+      "bucket": "psx/Bust A Groove 2 (USA).chd"
+    },
+    {
+      "title": "Gitaroo Man",
+      "category": "Other",
+      "system": "ps2",
+      "bucket": "ps2/Gitaroo Man (USA).chd"
+    },
+    {
+      "title": "Gitaroo Man Lives!",
+      "category": "Other",
+      "system": "psp",
+      "bucket": "psp/Gitaroo Man Lives! (USA).chd"
+    },
+    {
+      "title": "DJ Max Emotional Sense - Fever",
+      "category": "Other",
+      "system": "psp",
+      "bucket": "psp/DJ Max Emotional Sense - Fever (USA).chd"
+    },
+    {
+      "title": "DJ Max Portable 3",
+      "category": "Other",
+      "system": "psp",
+      "bucket": "psp/DJ Max Portable 3 (USA).chd"
+    },
+    {
+      "title": "SUPERBEAT XONiC",
+      "category": "Other",
+      "system": "psvita",
+      "bucket": "psvita/SUPERBEAT XONiC [PCSE00717] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Pump It Up - Exceed Portable",
+      "category": "Other",
+      "system": "psp",
+      "bucket": "psp/Pump It Up - Exceed Portable (Korea) (En,Ko).chd"
+    },
+    {
+      "title": "Theatrhythm Final Fantasy",
+      "category": "Other",
+      "system": "3ds",
+      "bucket": "3ds/Theatrhythm Final Fantasy (USA).zip"
+    },
+    {
+      "title": "Theatrhythm Final Fantasy - Curtain Call",
+      "category": "Other",
+      "system": "3ds",
+      "bucket": "3ds/Theatrhythm Final Fantasy - Curtain Call (USA).zip"
+    },
+    {
+      "title": "Lumines - Puzzle Fusion",
+      "category": "Other",
+      "system": "psp",
+      "bucket": "psp/Lumines - Puzzle Fusion (USA) (En,Ja).chd"
+    },
+    {
+      "title": "Lumines II",
+      "category": "Other",
+      "system": "psp",
+      "bucket": "psp/Lumines II (USA).chd"
+    },
+    {
+      "title": "Lumines Electronic Symphony",
+      "category": "Other",
+      "system": "psvita",
+      "bucket": "psvita/Lumines Electronic Symphony [PCSE00009] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Every Extend Extra",
+      "category": "Other",
+      "system": "psp",
+      "bucket": "psp/Every Extend Extra (USA).chd"
+    },
+    {
+      "title": "Bit.Trip Saga",
+      "category": "Other",
+      "system": "3ds",
+      "bucket": "3ds/Bit.Trip Saga (USA).zip"
+    },
+    {
+      "title": "Cool Cool Toon",
+      "category": "Other",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Cool Cool Toon (Japan).chd"
+    },
+    {
+      "title": "Jung Rhythm",
+      "category": "Other",
+      "system": "saturn",
+      "bucket": "saturn/Jung Rhythm (Japan).chd"
+    },
+    {
+      "title": "DJ Wars",
+      "category": "Other",
+      "system": "saturn",
+      "bucket": "saturn/DJ Wars (Japan) (Rev A) (10M).chd"
+    },
+    {
+      "title": "Turntablist - DJ Battle",
+      "category": "Other",
+      "system": "wonderswan",
+      "bucket": "wonderswan/Turntablist - DJ Battle (Japan).zip"
+    },
+    {
+      "title": "Wasabi Produce - Street Dancer",
+      "category": "Other",
+      "system": "wonderswan",
+      "bucket": "wonderswan/Wasabi Produce - Street Dancer (Japan).zip"
+    },
+    {
+      "title": "Rhyme Rider Kerorican",
+      "category": "Other",
+      "system": "wonderswancolor",
+      "bucket": "wonderswancolor/Rhyme Rider Kerorican (Japan).zip"
+    },
+    {
+      "title": "Michael Jackson - The Experience",
+      "category": "Other",
+      "system": "nds",
+      "bucket": "nds/Michael Jackson - The Experience (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Michael Jackson - The Experience 3D",
+      "category": "Other",
+      "system": "3ds",
+      "bucket": "3ds/Michael Jackson - The Experience 3D (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Michael Jackson - The Experience",
+      "category": "Other",
+      "system": "psp",
+      "bucket": "psp/Michael Jackson - The Experience (USA) (En,Fr,De,Es,It,Pl,Ru).chd"
+    },
+    {
+      "title": "Maestro! - Jump in Music",
+      "category": "Other",
+      "system": "nds",
+      "bucket": "nds/Maestro! - Jump in Music (Europe) (En,Fr,De,Es,It,Nl,Pt,Sv,No,Da).zip"
+    },
+    {
+      "title": "Draglade",
+      "category": "Other",
+      "system": "nds",
+      "bucket": "nds/Draglade (USA).zip"
+    },
+    {
+      "title": "Zubo",
+      "category": "Other",
+      "system": "nds",
+      "bucket": "nds/Zubo (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Utacchi",
+      "category": "Other",
+      "system": "nds",
+      "bucket": "nds/Utacchi (Japan).zip"
+    },
+    {
+      "title": "Nodame Cantabile",
+      "category": "Other",
+      "system": "nds",
+      "bucket": "nds/Nodame Cantabile (Japan).zip"
+    },
+    {
+      "title": "Beat City",
+      "category": "Other",
+      "system": "nds",
+      "bucket": "nds/Beat City (USA).zip"
+    },
+    {
+      "title": "Boogie",
+      "category": "Other",
+      "system": "nds",
+      "bucket": "nds/Boogie (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Gabrielle's Ghostly Groove 3D",
+      "category": "Other",
+      "system": "3ds",
+      "bucket": "3ds/Gabrielle's Ghostly Groove 3D (USA).zip"
+    },
+    {
+      "title": "Britney's Dance Beat",
+      "category": "Other",
+      "system": "gba",
+      "bucket": "gba/Britney's Dance Beat (USA).zip"
+    },
+    {
+      "title": "MC Groovz Dance Craze",
+      "category": "Other",
+      "system": "gc",
+      "bucket": "gc/MC Groovz Dance Craze (USA).rvz"
+    },
+    {
+      "title": "Walt Disney's The Jungle Book - Rhythm n' Groove",
+      "category": "Other",
+      "system": "psx",
+      "bucket": "psx/Walt Disney's The Jungle Book - Rhythm n' Groove (USA).chd"
+    },
+    {
+      "title": "MTV Music Generator",
+      "category": "Other",
+      "system": "psx",
+      "bucket": "psx/MTV Music Generator (USA).chd"
+    },
+    {
+      "title": "Pocket Music",
+      "category": "Other",
+      "system": "gba",
+      "bucket": "gba/Pocket Music (Europe) (En,Fr,De,Es,It).zip"
+    }
+  ]
+}

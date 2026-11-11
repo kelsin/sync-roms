@@ -1,6 +1,6 @@
 {
   "name": "Mario",
-  "description": "Mario, Wario, Yoshi and Donkey Kong platformers and spin-offs on Nintendo systems.",
+  "description": "Mario, Wario, Yoshi and Donkey Kong platformers and spin-offs, from the arcade originals and their home ports to the Nintendo systems.",
   "games": [
     {
       "title": "Super Mario Bros.",
@@ -248,6 +248,41 @@
       "bucket": "gc/Dance Dance Revolution - Mario Mix (USA).rvz"
     },
     {
+      "title": "Donkey Kong Jungle Beat",
+      "system": "gc",
+      "bucket": "gc/Donkey Kong Jungle Beat (USA).rvz"
+    },
+    {
+      "title": "Donkey Konga",
+      "system": "gc",
+      "bucket": "gc/Donkey Konga (USA).rvz"
+    },
+    {
+      "title": "Donkey Konga 2",
+      "system": "gc",
+      "bucket": "gc/Donkey Konga 2 (USA).rvz"
+    },
+    {
+      "title": "WarioWare, Inc. - Mega Party Game$!",
+      "system": "gc",
+      "bucket": "gc/WarioWare, Inc. - Mega Party Game$! (USA).rvz"
+    },
+    {
+      "title": "Nintendo Puzzle Collection",
+      "system": "gc",
+      "bucket": "gc/Nintendo Puzzle Collection (Japan).rvz"
+    },
+    {
+      "title": "NBA Street V3",
+      "system": "gc",
+      "bucket": "gc/NBA Street V3 (USA).rvz"
+    },
+    {
+      "title": "SSX On Tour",
+      "system": "gc",
+      "bucket": "gc/SSX On Tour (USA).rvz"
+    },
+    {
       "title": "New Super Mario Bros.",
       "system": "nds",
       "bucket": "nds/New Super Mario Bros. (USA, Australia).zip"
@@ -308,6 +343,191 @@
       "bucket": "nds/Yoshi Touch & Go (USA, Australia).zip"
     },
     {
+      "title": "Super Princess Peach",
+      "system": "nds",
+      "bucket": "nds/Super Princess Peach (USA).zip"
+    },
+    {
+      "title": "Mario vs. Donkey Kong - Mini-Land Mayhem! (Rev 2)",
+      "system": "nds",
+      "bucket": "nds/Mario vs. Donkey Kong - Mini-Land Mayhem! (USA) (En,Fr,Es) (Rev 2) (NDSi Enhanced).zip"
+    },
+    {
+      "title": "Mario Hoops 3 on 3",
+      "system": "nds",
+      "bucket": "nds/Mario Hoops 3 on 3 (USA).zip"
+    },
+    {
+      "title": "DK - Jungle Climber",
+      "system": "nds",
+      "bucket": "nds/DK - Jungle Climber (USA).zip"
+    },
+    {
+      "title": "Diddy Kong Racing DS",
+      "system": "nds",
+      "bucket": "nds/Diddy Kong Racing DS (USA).zip"
+    },
+    {
+      "title": "Mario & Sonic at the Olympic Games",
+      "system": "nds",
+      "bucket": "nds/Mario & Sonic at the Olympic Games (USA) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Mario & Sonic at the Olympic Winter Games",
+      "system": "nds",
+      "bucket": "nds/Mario & Sonic at the Olympic Winter Games (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Itadaki Street DS - Dragon Quest Super Mario",
+      "system": "nds",
+      "bucket": "nds/Itadaki Street DS - Dragon Quest Super Mario (Japan).zip"
+    },
+    {
+      "title": "Wi-Fi Taiou - Yakuman DS",
+      "system": "nds",
+      "bucket": "nds/Wi-Fi Taiou - Yakuman DS (Japan).zip"
+    },
+    {
+      "title": "Game & Watch Collection",
+      "system": "nds",
+      "bucket": "nds/Game & Watch Collection (USA, Europe) (Club Nintendo).zip"
+    },
+    {
+      "title": "Game & Watch Collection 2",
+      "system": "nds",
+      "bucket": "nds/Game & Watch Collection 2 (USA) (Club Nintendo).zip"
+    },
+    {
+      "title": "Super Mario 3D Land (Rev 1)",
+      "system": "3ds",
+      "bucket": "3ds/Super Mario 3D Land (USA) (En,Fr,Es) (Rev 1).zip"
+    },
+    {
+      "title": "New Super Mario Bros. 2",
+      "system": "3ds",
+      "bucket": "3ds/New Super Mario Bros. 2 (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Super Mario Maker for Nintendo 3DS (Rev 3)",
+      "system": "3ds",
+      "bucket": "3ds/Super Mario Maker for Nintendo 3DS (USA) (En,Fr,Es) (Rev 3).zip"
+    },
+    {
+      "title": "Mario Kart 7 (Rev 1)",
+      "system": "3ds",
+      "bucket": "3ds/Mario Kart 7 (USA) (En,Fr,Es) (Rev 1).zip"
+    },
+    {
+      "title": "Luigi's Mansion",
+      "system": "3ds",
+      "bucket": "3ds/Luigi's Mansion (USA).zip"
+    },
+    {
+      "title": "Luigi's Mansion - Dark Moon",
+      "system": "3ds",
+      "bucket": "3ds/Luigi's Mansion - Dark Moon (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Paper Mario - Sticker Star",
+      "system": "3ds",
+      "bucket": "3ds/Paper Mario - Sticker Star (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Mario & Luigi - Superstar Saga + Bowser's Minions",
+      "system": "3ds",
+      "bucket": "3ds/Mario & Luigi - Superstar Saga + Bowser's Minions (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Mario & Luigi - Bowser's Inside Story + Bowser Jr.'s Journey",
+      "system": "3ds",
+      "bucket": "3ds/Mario & Luigi - Bowser's Inside Story + Bowser Jr.'s Journey (USA).zip"
+    },
+    {
+      "title": "Mario & Luigi - Dream Team (Rev 1)",
+      "system": "3ds",
+      "bucket": "3ds/Mario & Luigi - Dream Team (USA) (En,Fr,Es) (Rev 1).zip"
+    },
+    {
+      "title": "Mario & Luigi - Paper Jam",
+      "system": "3ds",
+      "bucket": "3ds/Mario & Luigi - Paper Jam (USA).zip"
+    },
+    {
+      "title": "Yoshi's New Island",
+      "system": "3ds",
+      "bucket": "3ds/Yoshi's New Island (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Poochy & Yoshi's Woolly World (Rev 1)",
+      "system": "3ds",
+      "bucket": "3ds/Poochy & Yoshi's Woolly World (USA) (En,Fr,Es) (Rev 1).zip"
+    },
+    {
+      "title": "Donkey Kong Country Returns 3D",
+      "system": "3ds",
+      "bucket": "3ds/Donkey Kong Country Returns 3D (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Captain Toad - Treasure Tracker",
+      "system": "3ds",
+      "bucket": "3ds/Captain Toad - Treasure Tracker (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "WarioWare Gold (Rev 1)",
+      "system": "3ds",
+      "bucket": "3ds/WarioWare Gold (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Mario vs. Donkey Kong - Minna de Mini-Land",
+      "system": "3ds",
+      "bucket": "3ds/Mario vs. Donkey Kong - Minna de Mini-Land (Japan).zip"
+    },
+    {
+      "title": "Mario Party - Island Tour",
+      "system": "3ds",
+      "bucket": "3ds/Mario Party - Island Tour (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Mario Party - Star Rush",
+      "system": "3ds",
+      "bucket": "3ds/Mario Party - Star Rush (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Mario Party - The Top 100",
+      "system": "3ds",
+      "bucket": "3ds/Mario Party - The Top 100 (USA).zip"
+    },
+    {
+      "title": "Mario Golf - World Tour",
+      "system": "3ds",
+      "bucket": "3ds/Mario Golf - World Tour (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Mario Tennis Open (Rev 1)",
+      "system": "3ds",
+      "bucket": "3ds/Mario Tennis Open (USA) (En,Fr,Es) (Rev 1).zip"
+    },
+    {
+      "title": "Mario Sports Superstars",
+      "system": "3ds",
+      "bucket": "3ds/Mario Sports Superstars (USA).zip"
+    },
+    {
+      "title": "Mario & Sonic at the London 2012 Olympic Games (Rev 1)",
+      "system": "3ds",
+      "bucket": "3ds/Mario & Sonic at the London 2012 Olympic Games (USA) (En,Fr,Es) (Rev 1).zip"
+    },
+    {
+      "title": "Mario & Sonic at the Rio 2016 Olympic Games",
+      "system": "3ds",
+      "bucket": "3ds/Mario & Sonic at the Rio 2016 Olympic Games (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Puzzle & Dragons Z + Puzzle & Dragons Super Mario Bros. Edition",
+      "system": "3ds",
+      "bucket": "3ds/Puzzle & Dragons Z + Puzzle & Dragons Super Mario Bros. Edition (USA).zip"
+    },
+    {
       "title": "Dr. Mario (Rev 1)",
       "system": "gb",
       "bucket": "gb/Dr. Mario (World) (Rev 1).zip"
@@ -333,6 +553,36 @@
       "bucket": "gbc/Super Mario Bros. Deluxe (USA, Europe) (Rev 1).zip"
     },
     {
+      "title": "Game & Watch Gallery 2",
+      "system": "gbc",
+      "bucket": "gbc/Game & Watch Gallery 2 (USA, Europe) (SGB Enhanced) (GB Compatible).zip"
+    },
+    {
+      "title": "Game & Watch Gallery 3",
+      "system": "gbc",
+      "bucket": "gbc/Game & Watch Gallery 3 (USA, Europe) (SGB Enhanced) (GB Compatible).zip"
+    },
+    {
+      "title": "Donkey Kong Country",
+      "system": "gbc",
+      "bucket": "gbc/Donkey Kong Country (USA, Europe) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Donkey Kong GB - Dinky Kong & Dixie Kong",
+      "system": "gbc",
+      "bucket": "gbc/Donkey Kong GB - Dinky Kong & Dixie Kong (Japan).zip"
+    },
+    {
+      "title": "Mobile Golf",
+      "system": "gbc",
+      "bucket": "gbc/Mobile Golf (Japan).zip"
+    },
+    {
+      "title": "Jaguar Mishin Sashi Senyou Soft - Mario Family",
+      "system": "gbc",
+      "bucket": "gbc/Jaguar Mishin Sashi Senyou Soft - Mario Family (Japan).zip"
+    },
+    {
       "title": "Mario vs. Donkey Kong",
       "system": "gba",
       "bucket": "gba/Mario vs. Donkey Kong (USA, Australia).zip"
@@ -356,6 +606,11 @@
       "title": "Yoshi's Story",
       "system": "n64",
       "bucket": "n64/Yoshi's Story (USA) (En,Ja).zip"
+    },
+    {
+      "title": "Mario no Photopie",
+      "system": "n64",
+      "bucket": "n64/Mario no Photopie (Japan).zip"
     },
     {
       "title": "Mario Paint (Japan, USA)",
@@ -413,6 +668,96 @@
       "bucket": "nes/Yoshi's Cookie (USA).zip"
     },
     {
+      "title": "Wrecking Crew",
+      "system": "nes",
+      "bucket": "nes/Wrecking Crew (World).zip"
+    },
+    {
+      "title": "Donkey Kong Jr. Math",
+      "system": "nes",
+      "bucket": "nes/Donkey Kong Jr. Math (USA, Europe).zip"
+    },
+    {
+      "title": "Donkey Kong Jr. + Jr. Lesson",
+      "system": "nes",
+      "bucket": "nes/Donkey Kong Jr. + Jr. Lesson (Japan).zip"
+    },
+    {
+      "title": "NES Open Tournament Golf",
+      "system": "nes",
+      "bucket": "nes/NES Open Tournament Golf (USA).zip"
+    },
+    {
+      "title": "Mario is Missing!",
+      "system": "nes",
+      "bucket": "nes/Mario is Missing! (USA).zip"
+    },
+    {
+      "title": "Mario's Time Machine",
+      "system": "nes",
+      "bucket": "nes/Mario's Time Machine (USA).zip"
+    },
+    {
+      "title": "Super Mario Bros. 2",
+      "system": "fds",
+      "bucket": "fds/Super Mario Bros. 2 (Japan) (En) (DV 2).zip"
+    },
+    {
+      "title": "All Night Nippon Super Mario Bros.",
+      "system": "fds",
+      "bucket": "fds/All Night Nippon Super Mario Bros. (Japan) (Promo).zip"
+    },
+    {
+      "title": "Kaettekita Mario Bros.",
+      "system": "fds",
+      "bucket": "fds/Kaettekita Mario Bros. (Japan) (Disk Writer).zip"
+    },
+    {
+      "title": "Super Mario Bros.",
+      "system": "fds",
+      "bucket": "fds/Super Mario Bros. (Japan).zip"
+    },
+    {
+      "title": "Donkey Kong",
+      "system": "fds",
+      "bucket": "fds/Donkey Kong (Japan) (Disk Writer).zip"
+    },
+    {
+      "title": "Donkey Kong Jr.",
+      "system": "fds",
+      "bucket": "fds/Donkey Kong Jr. (Japan) (Disk Writer).zip"
+    },
+    {
+      "title": "Wrecking Crew",
+      "system": "fds",
+      "bucket": "fds/Wrecking Crew (Japan) (Disk Writer).zip"
+    },
+    {
+      "title": "Golf - Japan Course",
+      "system": "fds",
+      "bucket": "fds/Golf - Japan Course (Japan) (DV 2).zip"
+    },
+    {
+      "title": "Golf - US Course",
+      "system": "fds",
+      "bucket": "fds/Golf - US Course (Japan) (DV 2) (Disk Writer).zip"
+    },
+    {
+      "title": "Famicom Grand Prix - F1 Race",
+      "system": "fds",
+      "bucket": "fds/Famicom Grand Prix - F1 Race (Japan) (DV 1) (Disk Writer).zip"
+    },
+    {
+      "title": "Famicom Grand Prix II - 3D Hot Rally",
+      "system": "fds",
+      "bucket": "fds/Famicom Grand Prix II - 3D Hot Rally (Japan) (DV 8) (Disk Writer) (Famicom 3D System).zip"
+    },
+    {
+      "title": "I Am a Teacher - Super Mario no Sweater",
+      "system": "fds",
+      "bucket": "fds/I Am a Teacher - Super Mario no Sweater (Japan).zip"
+    },
+    {
       "title": "Donkey Kong (Japan, USA)",
       "system": "gb",
       "bucket": "gb/Donkey Kong (Japan, USA) (En) (SGB Enhanced).zip"
@@ -446,6 +791,31 @@
       "title": "Yoshi's Cookie",
       "system": "gb",
       "bucket": "gb/Yoshi's Cookie (USA, Europe).zip"
+    },
+    {
+      "title": "Game & Watch Gallery (Rev 1)",
+      "system": "gb",
+      "bucket": "gb/Game & Watch Gallery (USA) (Rev 1) (SGB Enhanced).zip"
+    },
+    {
+      "title": "Wario Blast Featuring Bomberman!",
+      "system": "gb",
+      "bucket": "gb/Wario Blast Featuring Bomberman! (USA, Europe) (SGB Enhanced).zip"
+    },
+    {
+      "title": "Picross 2",
+      "system": "gb",
+      "bucket": "gb/Picross 2 (Japan) (SGB Enhanced).zip"
+    },
+    {
+      "title": "Tetris Attack (Rev 1)",
+      "system": "gb",
+      "bucket": "gb/Tetris Attack (USA, Europe) (Rev 1) (SGB Enhanced).zip"
+    },
+    {
+      "title": "Alleyway",
+      "system": "gb",
+      "bucket": "gb/Alleyway (World).zip"
     },
     {
       "title": "Classic NES Series - Super Mario Bros.",
@@ -483,6 +853,36 @@
       "bucket": "gba/Classic NES Series - Donkey Kong (USA, Europe).zip"
     },
     {
+      "title": "DK - King of Swing",
+      "system": "gba",
+      "bucket": "gba/DK - King of Swing (USA).zip"
+    },
+    {
+      "title": "Game & Watch Gallery 4",
+      "system": "gba",
+      "bucket": "gba/Game & Watch Gallery 4 (USA).zip"
+    },
+    {
+      "title": "2 Games in One! - Dr. Mario + Puzzle League",
+      "system": "gba",
+      "bucket": "gba/2 Games in One! - Dr. Mario + Puzzle League (USA).zip"
+    },
+    {
+      "title": "Famicom Mini 11 - Mario Bros.",
+      "system": "gba",
+      "bucket": "gba/Famicom Mini 11 - Mario Bros. (Japan).zip"
+    },
+    {
+      "title": "Famicom Mini 14 - Wrecking Crew",
+      "system": "gba",
+      "bucket": "gba/Famicom Mini 14 - Wrecking Crew (Japan).zip"
+    },
+    {
+      "title": "Famicom Mini 21 - Super Mario Bros. 2",
+      "system": "gba",
+      "bucket": "gba/Famicom Mini 21 - Super Mario Bros. 2 (Japan).zip"
+    },
+    {
       "title": "Donkey Kong Country (Rev 2)",
       "system": "snes",
       "bucket": "snes/Donkey Kong Country (USA) (Rev 2).zip"
@@ -503,9 +903,149 @@
       "bucket": "snes/Tetris & Dr. Mario (USA).zip"
     },
     {
+      "title": "Tetris Attack",
+      "system": "snes",
+      "bucket": "snes/Tetris Attack (USA) (En,Ja).zip"
+    },
+    {
+      "title": "Dr. Mario",
+      "system": "snes",
+      "bucket": "snes/Dr. Mario (Japan) (En) (NP).zip"
+    },
+    {
+      "title": "Yoshi no Cookie - Kuruppon Oven de Cookie",
+      "system": "snes",
+      "bucket": "snes/Yoshi no Cookie - Kuruppon Oven de Cookie (Japan).zip"
+    },
+    {
+      "title": "Mario to Wario",
+      "system": "snes",
+      "bucket": "snes/Mario to Wario (Japan) (En).zip"
+    },
+    {
+      "title": "Mario no Super Picross",
+      "system": "snes",
+      "bucket": "snes/Mario no Super Picross (Japan).zip"
+    },
+    {
+      "title": "Picross NP Vol. 2",
+      "system": "snes",
+      "bucket": "snes/Picross NP Vol. 2 (Japan) (Rev 1) (NP).zip"
+    },
+    {
+      "title": "Picross NP Vol. 6",
+      "system": "snes",
+      "bucket": "snes/Picross NP Vol. 6 (Japan) (Rev 1) (NP).zip"
+    },
+    {
+      "title": "Picross NP Vol. 7",
+      "system": "snes",
+      "bucket": "snes/Picross NP Vol. 7 (Japan) (Rev 1) (NP).zip"
+    },
+    {
+      "title": "Picross NP Vol. 8",
+      "system": "snes",
+      "bucket": "snes/Picross NP Vol. 8 (Japan) (Rev 1) (NP).zip"
+    },
+    {
+      "title": "Wrecking Crew '98",
+      "system": "snes",
+      "bucket": "snes/Wrecking Crew '98 (Japan).zip"
+    },
+    {
+      "title": "Undake 30 - Same Game Daisakusen - Mario Version",
+      "system": "snes",
+      "bucket": "snes/Undake 30 - Same Game Daisakusen - Mario Version (Japan).zip"
+    },
+    {
+      "title": "Mario Is Missing!",
+      "system": "snes",
+      "bucket": "snes/Mario Is Missing! (USA).zip"
+    },
+    {
+      "title": "Mario's Time Machine",
+      "system": "snes",
+      "bucket": "snes/Mario's Time Machine (USA).zip"
+    },
+    {
+      "title": "Mario's Early Years - Fun with Letters",
+      "system": "snes",
+      "bucket": "snes/Mario's Early Years - Fun with Letters (USA).zip"
+    },
+    {
+      "title": "Mario's Early Years - Fun with Numbers",
+      "system": "snes",
+      "bucket": "snes/Mario's Early Years - Fun with Numbers (USA).zip"
+    },
+    {
+      "title": "Mario's Early Years - Preschool Fun",
+      "system": "snes",
+      "bucket": "snes/Mario's Early Years - Preschool Fun (USA).zip"
+    },
+    {
+      "title": "BS Super Mario USA - Power Challenge",
+      "system": "satellaview",
+      "bucket": "satellaview/BS Super Mario USA - Power Challenge - Dai-1-kai (Japan) (SoundLink).zip",
+      "files": [
+        "satellaview/BS Super Mario USA - Power Challenge - Dai-2-kai (Japan) (SoundLink).zip",
+        "satellaview/BS Super Mario USA - Power Challenge - Dai-3-kai (Japan) (SoundLink).zip",
+        "satellaview/BS Super Mario USA - Power Challenge - Dai-4-kai (Japan) (SoundLink).zip"
+      ]
+    },
+    {
+      "title": "Excitebike - Bunbun Mario Battle",
+      "system": "satellaview",
+      "bucket": "satellaview/Excitebike - Bunbun Mario Battle - Stadium 1 (Japan) (6-30) (SoundLink).zip",
+      "files": [
+        "satellaview/Excitebike - Bunbun Mario Battle - Stadium 2 (Japan) (7-6) (SoundLink).zip",
+        "satellaview/Excitebike - Bunbun Mario Battle - Stadium 3 (Japan) (11-5) (SoundLink).zip",
+        "satellaview/Excitebike - Bunbun Mario Battle - Stadium 4 (Japan) (2-18) (SoundLink).zip"
+      ]
+    },
+    {
+      "title": "BS Super Mario Collection - Dai-3-shuu",
+      "system": "satellaview",
+      "bucket": "satellaview/BS Super Mario Collection - Dai-3-shuu (Japan) (3-17) (SoundLink).zip"
+    },
+    {
+      "title": "Dr. Mario BS",
+      "system": "satellaview",
+      "bucket": "satellaview/Dr. Mario BS (Japan) (6-3).zip"
+    },
+    {
+      "title": "Mario Paint - BS Ban",
+      "system": "satellaview",
+      "bucket": "satellaview/Mario Paint - BS Ban (Japan).zip"
+    },
+    {
+      "title": "Mario Paint - Yuushou Naizou Ban",
+      "system": "satellaview",
+      "bucket": "satellaview/Mario Paint - Yuushou Naizou Ban (Japan).zip"
+    },
+    {
+      "title": "Wario no Mori - Event Version 2",
+      "system": "satellaview",
+      "bucket": "satellaview/Wario no Mori - Event Version 2 (Japan).zip"
+    },
+    {
+      "title": "Wario no Mori - Futatabi",
+      "system": "satellaview",
+      "bucket": "satellaview/Wario no Mori - Futatabi (Japan) (8-11).zip"
+    },
+    {
+      "title": "Yoshi no Panepon - BS Ban",
+      "system": "satellaview",
+      "bucket": "satellaview/Yoshi no Panepon - BS Ban (Japan) (En,Ja) (7-25).zip"
+    },
+    {
       "title": "Donkey Kong 64",
       "system": "n64",
       "bucket": "n64/Donkey Kong 64 (USA).zip"
+    },
+    {
+      "title": "Diddy Kong Racing (Rev 1)",
+      "system": "n64",
+      "bucket": "n64/Diddy Kong Racing (USA) (En,Fr) (Rev 1).zip"
     },
     {
       "title": "Donkey Kong Country Returns",
@@ -571,6 +1111,111 @@
       "title": "Captain Toad: Treasure Tracker",
       "system": "wiiu",
       "bucket": "wiiu/Captain Toad Treasure Tracker (US) (v16).wua"
+    },
+    {
+      "title": "Yoshi's Woolly World",
+      "system": "wiiu",
+      "bucket": "wiiu/Yoshi's Woolly World (US) (v32).wua"
+    },
+    {
+      "title": "Donkey Kong Country: Tropical Freeze",
+      "system": "wiiu",
+      "bucket": "wiiu/DKC Tropical Freeze (US) (v16).wua"
+    },
+    {
+      "title": "Donkey Kong",
+      "system": "fbneo",
+      "bucket": "fbneo/dkong.zip"
+    },
+    {
+      "title": "Donkey Kong Junior",
+      "system": "fbneo",
+      "bucket": "fbneo/dkongjr.zip"
+    },
+    {
+      "title": "Donkey Kong 3",
+      "system": "fbneo",
+      "bucket": "fbneo/dkong3.zip"
+    },
+    {
+      "title": "Mario Bros.",
+      "system": "fbneo",
+      "bucket": "fbneo/mario.zip"
+    },
+    {
+      "title": "Vs. Super Mario Bros.",
+      "system": "mame",
+      "bucket": "mame/suprmrio.zip"
+    },
+    {
+      "title": "Vs. Dr. Mario",
+      "system": "mame",
+      "bucket": "mame/drmario.zip"
+    },
+    {
+      "title": "Vs. Wrecking Crew",
+      "system": "mame",
+      "bucket": "mame/wrecking.zip"
+    },
+    {
+      "title": "Donkey Kong",
+      "system": "colecovision",
+      "bucket": "colecovision/Donkey Kong (USA, Europe) (v1.1).zip"
+    },
+    {
+      "title": "Donkey Kong Junior",
+      "system": "colecovision",
+      "bucket": "colecovision/Donkey Kong Junior (USA, Europe).zip"
+    },
+    {
+      "title": "Donkey Kong",
+      "system": "atari2600",
+      "bucket": "atari2600/Donkey Kong (USA).zip"
+    },
+    {
+      "title": "Donkey Kong Junior",
+      "system": "atari2600",
+      "bucket": "atari2600/Donkey Kong Junior (USA).zip"
+    },
+    {
+      "title": "Mario Bros.",
+      "system": "atari2600",
+      "bucket": "atari2600/Mario Bros. (USA).zip"
+    },
+    {
+      "title": "Mario Bros.",
+      "system": "atari5200",
+      "bucket": "atari5200/Mario Bros. (USA).zip"
+    },
+    {
+      "title": "Donkey Kong",
+      "system": "atari7800",
+      "bucket": "atari7800/Donkey Kong (USA).zip"
+    },
+    {
+      "title": "Donkey Kong Junior",
+      "system": "atari7800",
+      "bucket": "atari7800/Donkey Kong Junior (USA).zip"
+    },
+    {
+      "title": "Mario Bros.",
+      "system": "atari7800",
+      "bucket": "atari7800/Mario Bros. (USA).zip"
+    },
+    {
+      "title": "Donkey Kong",
+      "system": "intellivision",
+      "bucket": "intellivision/Donkey Kong (USA, Europe).zip"
+    },
+    {
+      "title": "Donkey Kong Junior",
+      "system": "intellivision",
+      "bucket": "intellivision/Donkey Kong Junior (USA, Europe).zip"
+    },
+    {
+      "title": "Donkey Kong",
+      "system": "c64",
+      "bucket": "c64/Donkey Kong (USA, Europe).zip"
     }
   ]
 }

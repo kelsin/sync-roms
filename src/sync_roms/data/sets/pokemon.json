@@ -18,6 +18,11 @@
       "bucket": "gb/Pokemon - Yellow Version - Special Pikachu Edition (USA, Europe) (CGB+SGB Enhanced).zip"
     },
     {
+      "title": "Pocket Monsters - Midori (Rev 1)",
+      "system": "gb",
+      "bucket": "gb/Pocket Monsters - Midori (Japan) (Rev 1) (SGB Enhanced).zip"
+    },
+    {
       "title": "Pokemon - Gold Version (SGB Enhanced)",
       "system": "gbc",
       "bucket": "gbc/Pokemon - Gold Version (USA, Europe) (SGB Enhanced) (GB Compatible).zip"
@@ -173,14 +178,89 @@
       "bucket": "gc/Pokemon Channel (USA).rvz"
     },
     {
+      "title": "Pokemon Box - Ruby & Sapphire (Rev 1)",
+      "system": "gc",
+      "bucket": "gc/Pokemon Box - Ruby & Sapphire (USA) (Rev 1).rvz"
+    },
+    {
+      "title": "Pokemon Party Mini",
+      "system": "pokemini",
+      "bucket": "pokemini/Pokemon Party Mini (USA).zip"
+    },
+    {
+      "title": "Pokemon Pinball Mini",
+      "system": "pokemini",
+      "bucket": "pokemini/Pokemon Pinball Mini (USA, Europe).zip"
+    },
+    {
+      "title": "Pokemon Puzzle Collection",
+      "system": "pokemini",
+      "bucket": "pokemini/Pokemon Puzzle Collection (USA, Europe).zip"
+    },
+    {
+      "title": "Pokemon Puzzle Collection Vol. 2",
+      "system": "pokemini",
+      "bucket": "pokemini/Pokemon Puzzle Collection Vol. 2 (Japan).zip"
+    },
+    {
+      "title": "Pokemon Zany Cards",
+      "system": "pokemini",
+      "bucket": "pokemini/Pokemon Zany Cards (USA, Europe).zip"
+    },
+    {
+      "title": "Pokemon Tetris",
+      "system": "pokemini",
+      "bucket": "pokemini/Pokemon Tetris (Europe) (En,Ja,Fr).zip"
+    },
+    {
+      "title": "Pokemon Race Mini",
+      "system": "pokemini",
+      "bucket": "pokemini/Pokemon Race Mini (Japan).zip"
+    },
+    {
+      "title": "Pokemon Sodateyasan Mini",
+      "system": "pokemini",
+      "bucket": "pokemini/Pokemon Sodateyasan Mini (Japan).zip"
+    },
+    {
+      "title": "Pichu Bros. Mini",
+      "system": "pokemini",
+      "bucket": "pokemini/Pichu Bros. Mini (Japan).zip"
+    },
+    {
+      "title": "Togepi no Daibouken",
+      "system": "pokemini",
+      "bucket": "pokemini/Togepi no Daibouken (Japan).zip"
+    },
+    {
       "title": "Pokemon Puzzle League",
       "system": "n64",
       "bucket": "n64/Pokemon Puzzle League (USA).zip"
     },
     {
+      "title": "Pokemon Stadium (Japan)",
+      "system": "n64",
+      "bucket": "n64/Pokemon Stadium (Japan).zip"
+    },
+    {
+      "title": "Hey You, Pikachu!",
+      "system": "n64",
+      "bucket": "n64/Hey You, Pikachu! (USA).zip"
+    },
+    {
       "title": "Pokemon Puzzle Challenge",
       "system": "gbc",
       "bucket": "gbc/Pokemon Puzzle Challenge (USA, Australia).zip"
+    },
+    {
+      "title": "Pokemon Card GB 2 - GR Dan Sanjou!",
+      "system": "gbc",
+      "bucket": "gbc/Pokemon Card GB 2 - GR Dan Sanjou! (Japan).zip"
+    },
+    {
+      "title": "Picross NP Vol. 1",
+      "system": "snes",
+      "bucket": "snes/Picross NP Vol. 1 (Japan) (Rev 1) (NP).zip"
     },
     {
       "title": "Pokemon - Diamond Version (Rev 5)",
@@ -196,6 +276,96 @@
       "title": "Pokemon Conquest (Rev 1)",
       "system": "nds",
       "bucket": "nds/Pokemon Conquest (USA, Australia) (Rev 1) (NDSi Enhanced).zip"
+    },
+    {
+      "title": "Pokemon Mystery Dungeon - Explorers of Time",
+      "system": "nds",
+      "bucket": "nds/Pokemon Mystery Dungeon - Explorers of Time (USA).zip"
+    },
+    {
+      "title": "Pokemon Mystery Dungeon - Explorers of Darkness",
+      "system": "nds",
+      "bucket": "nds/Pokemon Mystery Dungeon - Explorers of Darkness (USA).zip"
+    },
+    {
+      "title": "Pokemon Dash",
+      "system": "nds",
+      "bucket": "nds/Pokemon Dash (USA).zip"
+    },
+    {
+      "title": "Learn with Pokemon - Typing Adventure",
+      "system": "nds",
+      "bucket": "nds/Learn with Pokemon - Typing Adventure (Europe).zip"
+    },
+    {
+      "title": "Pokemon Card Game - Asobikata DS",
+      "system": "nds",
+      "bucket": "nds/Pokemon Card Game - Asobikata DS (Japan).zip"
+    },
+    {
+      "title": "Pokemon X",
+      "system": "3ds",
+      "bucket": "3ds/Pokemon X (USA) (En,Ja,Fr,De,Es,It,Ko).zip"
+    },
+    {
+      "title": "Pokemon Y",
+      "system": "3ds",
+      "bucket": "3ds/Pokemon Y (USA) (En,Ja,Fr,De,Es,It,Ko).zip"
+    },
+    {
+      "title": "Pokemon Omega Ruby (Rev 2)",
+      "system": "3ds",
+      "bucket": "3ds/Pokemon Omega Ruby (USA) (En,Ja,Fr,De,Es,It,Ko) (Rev 2).zip"
+    },
+    {
+      "title": "Pokemon Alpha Sapphire (Rev 2)",
+      "system": "3ds",
+      "bucket": "3ds/Pokemon Alpha Sapphire (USA) (En,Ja,Fr,De,Es,It,Ko) (Rev 2).zip"
+    },
+    {
+      "title": "Pokemon Ultra Sun",
+      "system": "3ds",
+      "bucket": "3ds/Pokemon Ultra Sun (USA) (En,Ja,Fr,De,Es,It,Zh,Ko).zip"
+    },
+    {
+      "title": "Pokemon Ultra Moon",
+      "system": "3ds",
+      "bucket": "3ds/Pokemon Ultra Moon (USA) (En,Ja,Fr,De,Es,It,Zh,Ko).zip"
+    },
+    {
+      "title": "Pokemon Mystery Dungeon - Gates to Infinity",
+      "system": "3ds",
+      "bucket": "3ds/Pokemon Mystery Dungeon - Gates to Infinity (USA).zip"
+    },
+    {
+      "title": "Pokemon Super Mystery Dungeon",
+      "system": "3ds",
+      "bucket": "3ds/Pokemon Super Mystery Dungeon (USA).zip"
+    },
+    {
+      "title": "Pokemon Rumble Blast (Rev 1)",
+      "system": "3ds",
+      "bucket": "3ds/Pokemon Rumble Blast (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Pokemon Rumble World",
+      "system": "3ds",
+      "bucket": "3ds/Pokemon Rumble World (USA).zip"
+    },
+    {
+      "title": "Detective Pikachu",
+      "system": "3ds",
+      "bucket": "3ds/Detective Pikachu (USA) (En,Ja,Fr,De,Es,It,Zh).zip"
+    },
+    {
+      "title": "Pokemon Art Academy (Rev 2)",
+      "system": "3ds",
+      "bucket": "3ds/Pokemon Art Academy (USA) (En,Fr,Es) (Rev 2).zip"
+    },
+    {
+      "title": "Pokkén Tournament",
+      "system": "wiiu",
+      "bucket": "wiiu/POKKÉN TOURNAMENT (US) (v64).wua"
     }
   ]
 }

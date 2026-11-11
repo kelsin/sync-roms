@@ -1,0 +1,1619 @@
+{
+  "name": "Light Gun & Rail Shooters",
+  "description": "Light-gun games, gallery shooters and on-rails shooters.",
+  "games": [
+    {
+      "title": "Crossbow",
+      "category": "Arcade Light Gun",
+      "system": "fbneo",
+      "bucket": "fbneo/crossbow.zip"
+    },
+    {
+      "title": "Cheyenne",
+      "category": "Arcade Light Gun",
+      "system": "fbneo",
+      "bucket": "fbneo/cheyenne.zip"
+    },
+    {
+      "title": "Combat",
+      "category": "Arcade Light Gun",
+      "system": "fbneo",
+      "bucket": "fbneo/combat.zip"
+    },
+    {
+      "title": "Crackshot",
+      "category": "Arcade Light Gun",
+      "system": "fbneo",
+      "bucket": "fbneo/cracksht.zip"
+    },
+    {
+      "title": "Vs. Duck Hunt",
+      "category": "Arcade Light Gun",
+      "system": "mame",
+      "bucket": "mame/duckhunt.zip"
+    },
+    {
+      "title": "Vs. Hogan's Alley",
+      "category": "Arcade Light Gun",
+      "system": "mame",
+      "bucket": "mame/hogalley.zip"
+    },
+    {
+      "title": "N.Y. Captor",
+      "category": "Arcade Light Gun",
+      "system": "fbneo",
+      "bucket": "fbneo/nycaptor.zip"
+    },
+    {
+      "title": "Shooting Master",
+      "category": "Arcade Light Gun",
+      "system": "fbneo",
+      "bucket": "fbneo/shtngmst.zip"
+    },
+    {
+      "title": "Chiller",
+      "category": "Arcade Light Gun",
+      "system": "fbneo",
+      "bucket": "fbneo/chiller.zip"
+    },
+    {
+      "title": "Clay Pigeon",
+      "category": "Arcade Light Gun",
+      "system": "fbneo",
+      "bucket": "fbneo/claypign.zip"
+    },
+    {
+      "title": "Hit 'n Miss",
+      "category": "Arcade Light Gun",
+      "system": "fbneo",
+      "bucket": "fbneo/hitnmiss.zip"
+    },
+    {
+      "title": "Operation Wolf",
+      "category": "Arcade Light Gun",
+      "system": "fbneo",
+      "bucket": "fbneo/opwolfu.zip"
+    },
+    {
+      "title": "Operation Thunderbolt",
+      "category": "Arcade Light Gun",
+      "system": "fbneo",
+      "bucket": "fbneo/othunderu.zip"
+    },
+    {
+      "title": "Vs. Freedom Force",
+      "category": "Arcade Light Gun",
+      "system": "mame",
+      "bucket": "mame/vsfdf.zip"
+    },
+    {
+      "title": "Who Dunit",
+      "category": "Arcade Light Gun",
+      "system": "fbneo",
+      "bucket": "fbneo/whodunit.zip"
+    },
+    {
+      "title": "Beast Busters",
+      "category": "Arcade Light Gun",
+      "system": "fbneo",
+      "bucket": "fbneo/bbustersu.zip"
+    },
+    {
+      "title": "Line of Fire",
+      "category": "Arcade Light Gun",
+      "system": "fbneo",
+      "bucket": "fbneo/loffireu.zip"
+    },
+    {
+      "title": "Mechanized Attack",
+      "category": "Arcade Light Gun",
+      "system": "fbneo",
+      "bucket": "fbneo/mechattu.zip"
+    },
+    {
+      "title": "Golly! Ghost!",
+      "category": "Arcade Light Gun",
+      "system": "fbneo",
+      "bucket": "fbneo/gollygho.zip"
+    },
+    {
+      "title": "Laser Ghost",
+      "category": "Arcade Light Gun",
+      "system": "fbneo",
+      "bucket": "fbneo/lghostu.zip"
+    },
+    {
+      "title": "Steel Gunner",
+      "category": "Arcade Light Gun",
+      "system": "fbneo",
+      "bucket": "fbneo/sgunner.zip"
+    },
+    {
+      "title": "Space Gun",
+      "category": "Arcade Light Gun",
+      "system": "fbneo",
+      "bucket": "fbneo/spacegunu.zip"
+    },
+    {
+      "title": "Rail Chase",
+      "category": "Arcade Light Gun",
+      "system": "fbneo",
+      "bucket": "fbneo/rchase.zip"
+    },
+    {
+      "title": "Steel Gunner 2",
+      "category": "Arcade Light Gun",
+      "system": "fbneo",
+      "bucket": "fbneo/sgunner2.zip"
+    },
+    {
+      "title": "Terminator 2: Judgment Day",
+      "category": "Arcade Light Gun",
+      "system": "fbneo",
+      "bucket": "fbneo/term2.zip"
+    },
+    {
+      "title": "Bubble Trouble - Golly! Ghost! 2",
+      "category": "Arcade Light Gun",
+      "system": "fbneo",
+      "bucket": "fbneo/bubbletr.zip"
+    },
+    {
+      "title": "Gunbuster",
+      "category": "Arcade Light Gun",
+      "system": "fbneo",
+      "bucket": "fbneo/gunbustru.zip"
+    },
+    {
+      "title": "Lethal Enforcers",
+      "category": "Arcade Light Gun",
+      "system": "fbneo",
+      "bucket": "fbneo/lethalen.zip"
+    },
+    {
+      "title": "Wild Pilot",
+      "category": "Arcade Light Gun",
+      "system": "fbneo",
+      "bucket": "fbneo/wildplt.zip"
+    },
+    {
+      "title": "Alien 3: The Gun",
+      "category": "Arcade Light Gun",
+      "system": "fbneo",
+      "bucket": "fbneo/alien3u.zip"
+    },
+    {
+      "title": "Dragon Gun",
+      "category": "Arcade Light Gun",
+      "system": "fbneo",
+      "bucket": "fbneo/dragngun.zip"
+    },
+    {
+      "title": "Jurassic Park",
+      "category": "Arcade Light Gun",
+      "system": "fbneo",
+      "bucket": "fbneo/jpark.zip"
+    },
+    {
+      "title": "Under Fire",
+      "category": "Arcade Light Gun",
+      "system": "fbneo",
+      "bucket": "fbneo/undrfireu.zip"
+    },
+    {
+      "title": "Lethal Enforcers II - Gun Fighters",
+      "category": "Arcade Light Gun",
+      "system": "mame",
+      "bucket": "mame/le2.zip"
+    },
+    {
+      "title": "Locked 'n Loaded",
+      "category": "Arcade Light Gun",
+      "system": "mame",
+      "bucket": "mame/lockload.zip"
+    },
+    {
+      "title": "Lord of Gun",
+      "category": "Arcade Light Gun",
+      "system": "fbneo",
+      "bucket": "fbneo/lordgunu.zip"
+    },
+    {
+      "title": "Operation Wolf 3",
+      "category": "Arcade Light Gun",
+      "system": "fbneo",
+      "bucket": "fbneo/opwolf3u.zip"
+    },
+    {
+      "title": "Point Blank",
+      "category": "Arcade Light Gun",
+      "system": "fbneo",
+      "bucket": "fbneo/ptblank.zip"
+    },
+    {
+      "title": "Revolution X",
+      "category": "Arcade Light Gun",
+      "system": "fbneo",
+      "bucket": "fbneo/revx.zip"
+    },
+    {
+      "title": "Target Hits",
+      "category": "Arcade Light Gun",
+      "system": "fbneo",
+      "bucket": "fbneo/targeth.zip"
+    },
+    {
+      "title": "Mobile Suit Gundam Final Shooting",
+      "category": "Arcade Light Gun",
+      "system": "fbneo",
+      "bucket": "fbneo/gdfs.zip"
+    },
+    {
+      "title": "Zombie Raid",
+      "category": "Arcade Light Gun",
+      "system": "fbneo",
+      "bucket": "fbneo/zombraid.zip"
+    },
+    {
+      "title": "Lethal Justice",
+      "category": "Arcade Light Gun",
+      "system": "mame",
+      "bucket": "mame/lethalj.zip"
+    },
+    {
+      "title": "One Shot One Kill",
+      "category": "Arcade Light Gun",
+      "system": "fbneo",
+      "bucket": "fbneo/oneshot.zip"
+    },
+    {
+      "title": "Police Trainer",
+      "category": "Arcade Light Gun",
+      "system": "mame",
+      "bucket": "mame/policetr.zip"
+    },
+    {
+      "title": "Egg Venture",
+      "category": "Arcade Light Gun",
+      "system": "mame",
+      "bucket": "mame/eggventr.zip"
+    },
+    {
+      "title": "Bang!",
+      "category": "Arcade Light Gun",
+      "system": "fbneo",
+      "bucket": "fbneo/bang.zip"
+    },
+    {
+      "title": "Sharpshooter",
+      "category": "Arcade Light Gun",
+      "system": "mame",
+      "bucket": "mame/sshooter.zip"
+    },
+    {
+      "title": "Zero Point",
+      "category": "Arcade Light Gun",
+      "system": "fbneo",
+      "bucket": "fbneo/zeropnt.zip"
+    },
+    {
+      "title": "Zero Point 2",
+      "category": "Arcade Light Gun",
+      "system": "fbneo",
+      "bucket": "fbneo/zeropnt2.zip"
+    },
+    {
+      "title": "Golgo 13",
+      "category": "Arcade Light Gun",
+      "system": "mame",
+      "bucket": "mame/golgo13.zip"
+    },
+    {
+      "title": "Deer Hunting USA",
+      "category": "Arcade Light Gun",
+      "system": "fbneo",
+      "bucket": "fbneo/deerhunt.zip"
+    },
+    {
+      "title": "Duck Hunt",
+      "category": "Console Light Gun",
+      "system": "nes",
+      "bucket": "nes/Duck Hunt (World).zip"
+    },
+    {
+      "title": "Hogan's Alley",
+      "category": "Console Light Gun",
+      "system": "nes",
+      "bucket": "nes/Hogan's Alley (World).zip"
+    },
+    {
+      "title": "Wild Gunman",
+      "category": "Console Light Gun",
+      "system": "nes",
+      "bucket": "nes/Wild Gunman (Japan, USA) (En).zip"
+    },
+    {
+      "title": "Gumshoe",
+      "category": "Console Light Gun",
+      "system": "nes",
+      "bucket": "nes/Gumshoe (USA, Europe).zip"
+    },
+    {
+      "title": "Barker Bill's Trick Shooting",
+      "category": "Console Light Gun",
+      "system": "nes",
+      "bucket": "nes/Barker Bill's Trick Shooting (USA).zip"
+    },
+    {
+      "title": "Freedom Force",
+      "category": "Console Light Gun",
+      "system": "nes",
+      "bucket": "nes/Freedom Force (USA).zip"
+    },
+    {
+      "title": "Operation Wolf",
+      "category": "Console Light Gun",
+      "system": "nes",
+      "bucket": "nes/Operation Wolf (USA).zip"
+    },
+    {
+      "title": "To the Earth",
+      "category": "Console Light Gun",
+      "system": "nes",
+      "bucket": "nes/To the Earth (USA).zip"
+    },
+    {
+      "title": "Shooting Range",
+      "category": "Console Light Gun",
+      "system": "nes",
+      "bucket": "nes/Shooting Range (USA).zip"
+    },
+    {
+      "title": "Mechanized Attack",
+      "category": "Console Light Gun",
+      "system": "nes",
+      "bucket": "nes/Mechanized Attack (USA).zip"
+    },
+    {
+      "title": "Laser Invasion",
+      "category": "Console Light Gun",
+      "system": "nes",
+      "bucket": "nes/Laser Invasion (USA).zip"
+    },
+    {
+      "title": "Adventures of Bayou Billy, The",
+      "category": "Console Light Gun",
+      "system": "nes",
+      "bucket": "nes/Adventures of Bayou Billy, The (USA).zip"
+    },
+    {
+      "title": "Lone Ranger, The",
+      "category": "Console Light Gun",
+      "system": "nes",
+      "bucket": "nes/Lone Ranger, The (USA).zip"
+    },
+    {
+      "title": "Gotcha! - The Sport!",
+      "category": "Console Light Gun",
+      "system": "nes",
+      "bucket": "nes/Gotcha! - The Sport! (USA).zip"
+    },
+    {
+      "title": "Space Shadow",
+      "category": "Console Light Gun",
+      "system": "nes",
+      "bucket": "nes/Space Shadow (Japan).zip"
+    },
+    {
+      "title": "Hang On & Safari Hunt",
+      "category": "Console Light Gun",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Hang On & Safari Hunt (USA).zip"
+    },
+    {
+      "title": "Marksman Shooting & Trap Shooting",
+      "category": "Console Light Gun",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Marksman Shooting & Trap Shooting (USA, Brazil) (En).zip"
+    },
+    {
+      "title": "Shooting Gallery",
+      "category": "Console Light Gun",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Shooting Gallery (USA, Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Gangster Town",
+      "category": "Console Light Gun",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Gangster Town (USA, Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Missile Defense 3-D",
+      "category": "Console Light Gun",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Missile Defense 3-D (USA, Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Rescue Mission",
+      "category": "Console Light Gun",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Rescue Mission (USA, Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Wanted",
+      "category": "Console Light Gun",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Wanted (USA, Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Rambo III",
+      "category": "Console Light Gun",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Rambo III (USA, Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Operation Wolf",
+      "category": "Console Light Gun",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Operation Wolf (Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Assault City",
+      "category": "Console Light Gun",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Assault City (USA, Europe, Brazil) (En) (Light Phaser).zip"
+    },
+    {
+      "title": "Laser Ghost",
+      "category": "Console Light Gun",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Laser Ghost (Europe).zip"
+    },
+    {
+      "title": "Space Gun",
+      "category": "Console Light Gun",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Space Gun (Europe).zip"
+    },
+    {
+      "title": "T2 - The Arcade Game",
+      "category": "Console Light Gun",
+      "system": "mastersystem",
+      "bucket": "mastersystem/T2 - The Arcade Game (Europe).zip"
+    },
+    {
+      "title": "Alien Brigade",
+      "category": "Console Light Gun",
+      "system": "atari7800",
+      "bucket": "atari7800/Alien Brigade (USA).zip"
+    },
+    {
+      "title": "Barnyard Blaster",
+      "category": "Console Light Gun",
+      "system": "atari7800",
+      "bucket": "atari7800/Barnyard Blaster (USA).zip"
+    },
+    {
+      "title": "Crossbow",
+      "category": "Console Light Gun",
+      "system": "atari7800",
+      "bucket": "atari7800/Crossbow (USA).zip"
+    },
+    {
+      "title": "Meltdown",
+      "category": "Console Light Gun",
+      "system": "atari7800",
+      "bucket": "atari7800/Meltdown (USA).zip"
+    },
+    {
+      "title": "Sentinel",
+      "category": "Console Light Gun",
+      "system": "atari7800",
+      "bucket": "atari7800/Sentinel (Europe).zip"
+    },
+    {
+      "title": "Super Scope 6",
+      "category": "Console Light Gun",
+      "system": "snes",
+      "bucket": "snes/Super Scope 6 (USA).zip"
+    },
+    {
+      "title": "Battle Clash",
+      "category": "Console Light Gun",
+      "system": "snes",
+      "bucket": "snes/Battle Clash (USA).zip"
+    },
+    {
+      "title": "Metal Combat - Falcon's Revenge",
+      "category": "Console Light Gun",
+      "system": "snes",
+      "bucket": "snes/Metal Combat - Falcon's Revenge (USA).zip"
+    },
+    {
+      "title": "Yoshi's Safari",
+      "category": "Console Light Gun",
+      "system": "snes",
+      "bucket": "snes/Yoshi's Safari (USA).zip"
+    },
+    {
+      "title": "Tin Star",
+      "category": "Console Light Gun",
+      "system": "snes",
+      "bucket": "snes/Tin Star (USA).zip"
+    },
+    {
+      "title": "Bazooka Blitzkrieg",
+      "category": "Console Light Gun",
+      "system": "snes",
+      "bucket": "snes/Bazooka Blitzkrieg (USA).zip"
+    },
+    {
+      "title": "X Zone",
+      "category": "Console Light Gun",
+      "system": "snes",
+      "bucket": "snes/X Zone (Japan, USA) (En).zip"
+    },
+    {
+      "title": "Operation Thunderbolt",
+      "category": "Console Light Gun",
+      "system": "snes",
+      "bucket": "snes/Operation Thunderbolt (USA).zip"
+    },
+    {
+      "title": "T2 - The Arcade Game",
+      "category": "Console Light Gun",
+      "system": "snes",
+      "bucket": "snes/T2 - The Arcade Game (USA).zip"
+    },
+    {
+      "title": "Lethal Enforcers",
+      "category": "Console Light Gun",
+      "system": "snes",
+      "bucket": "snes/Lethal Enforcers (USA).zip"
+    },
+    {
+      "title": "Menacer - 6-Game Cartridge",
+      "category": "Console Light Gun",
+      "system": "genesis",
+      "bucket": "genesis/Menacer - 6-Game Cartridge (USA, Europe).zip"
+    },
+    {
+      "title": "T2 - The Arcade Game",
+      "category": "Console Light Gun",
+      "system": "genesis",
+      "bucket": "genesis/T2 - The Arcade Game (USA, Europe).zip"
+    },
+    {
+      "title": "Body Count",
+      "category": "Console Light Gun",
+      "system": "genesis",
+      "bucket": "genesis/Body Count (Europe) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Lethal Enforcers",
+      "category": "Console Light Gun",
+      "system": "genesis",
+      "bucket": "genesis/Lethal Enforcers (USA).zip"
+    },
+    {
+      "title": "Lethal Enforcers II - Gun Fighters",
+      "category": "Console Light Gun",
+      "system": "genesis",
+      "bucket": "genesis/Lethal Enforcers II - Gun Fighters (USA).zip"
+    },
+    {
+      "title": "Lethal Enforcers",
+      "category": "Console Light Gun",
+      "system": "segacd",
+      "bucket": "segacd/Lethal Enforcers (USA).chd"
+    },
+    {
+      "title": "Lethal Enforcers II - Gun Fighters",
+      "category": "Console Light Gun",
+      "system": "segacd",
+      "bucket": "segacd/Lethal Enforcers II - Gun Fighters (USA).chd"
+    },
+    {
+      "title": "Virtua Cop",
+      "category": "Console Light Gun",
+      "system": "saturn",
+      "bucket": "saturn/Virtua Cop (USA) (8S, 12S).chd"
+    },
+    {
+      "title": "Virtua Cop 2",
+      "category": "Console Light Gun",
+      "system": "saturn",
+      "bucket": "saturn/Virtua Cop 2 (USA).chd"
+    },
+    {
+      "title": "House of the Dead, The",
+      "category": "Console Light Gun",
+      "system": "saturn",
+      "bucket": "saturn/House of the Dead, The (USA).chd"
+    },
+    {
+      "title": "Area 51",
+      "category": "Console Light Gun",
+      "system": "saturn",
+      "bucket": "saturn/Area 51 (USA).chd"
+    },
+    {
+      "title": "Maximum Force",
+      "category": "Console Light Gun",
+      "system": "saturn",
+      "bucket": "saturn/Maximum Force (USA).chd"
+    },
+    {
+      "title": "Crypt Killer",
+      "category": "Console Light Gun",
+      "system": "saturn",
+      "bucket": "saturn/Crypt Killer (USA).chd"
+    },
+    {
+      "title": "Die Hard Trilogy",
+      "category": "Console Light Gun",
+      "system": "saturn",
+      "bucket": "saturn/Die Hard Trilogy (USA).chd"
+    },
+    {
+      "title": "Mighty Hits",
+      "category": "Console Light Gun",
+      "system": "saturn",
+      "bucket": "saturn/Mighty Hits (Europe).chd"
+    },
+    {
+      "title": "Scud - The Disposable Assassin",
+      "category": "Console Light Gun",
+      "system": "saturn",
+      "bucket": "saturn/Scud - The Disposable Assassin (USA).chd"
+    },
+    {
+      "title": "Revolution X - Music Is the Weapon",
+      "category": "Console Light Gun",
+      "system": "saturn",
+      "bucket": "saturn/Revolution X - Music Is the Weapon (USA).chd"
+    },
+    {
+      "title": "Death Crimson",
+      "category": "Console Light Gun",
+      "system": "saturn",
+      "bucket": "saturn/Death Crimson (Japan).chd"
+    },
+    {
+      "title": "Mechanical Violator Hakaider - Last Judgement",
+      "category": "Console Light Gun",
+      "system": "saturn",
+      "bucket": "saturn/Mechanical Violator Hakaider - Last Judgement (Japan).chd"
+    },
+    {
+      "title": "Time Crisis",
+      "category": "Console Light Gun",
+      "system": "psx",
+      "bucket": "psx/Time Crisis (USA).chd"
+    },
+    {
+      "title": "Time Crisis - Project Titan",
+      "category": "Console Light Gun",
+      "system": "psx",
+      "bucket": "psx/Time Crisis - Project Titan (USA).chd"
+    },
+    {
+      "title": "Point Blank",
+      "category": "Console Light Gun",
+      "system": "psx",
+      "bucket": "psx/Point Blank (USA).chd"
+    },
+    {
+      "title": "Point Blank 2",
+      "category": "Console Light Gun",
+      "system": "psx",
+      "bucket": "psx/Point Blank 2 (USA).chd"
+    },
+    {
+      "title": "Point Blank 3",
+      "category": "Console Light Gun",
+      "system": "psx",
+      "bucket": "psx/Point Blank 3 (USA).chd"
+    },
+    {
+      "title": "Elemental Gearbolt",
+      "category": "Console Light Gun",
+      "system": "psx",
+      "bucket": "psx/Elemental Gearbolt (USA).chd"
+    },
+    {
+      "title": "Die Hard Trilogy",
+      "category": "Console Light Gun",
+      "system": "psx",
+      "bucket": "psx/Die Hard Trilogy (USA) (Rev 1).chd"
+    },
+    {
+      "title": "Die Hard Trilogy 2 - Viva Las Vegas",
+      "category": "Console Light Gun",
+      "system": "psx",
+      "bucket": "psx/Die Hard Trilogy 2 - Viva Las Vegas (USA).chd"
+    },
+    {
+      "title": "Area 51",
+      "category": "Console Light Gun",
+      "system": "psx",
+      "bucket": "psx/Area 51 (USA) (Rev 1).chd"
+    },
+    {
+      "title": "Maximum Force",
+      "category": "Console Light Gun",
+      "system": "psx",
+      "bucket": "psx/Maximum Force (USA).chd"
+    },
+    {
+      "title": "Crypt Killer",
+      "category": "Console Light Gun",
+      "system": "psx",
+      "bucket": "psx/Crypt Killer (USA).chd"
+    },
+    {
+      "title": "Lethal Enforcers I & II",
+      "category": "Console Light Gun",
+      "system": "psx",
+      "bucket": "psx/Lethal Enforcers I & II (USA).chd"
+    },
+    {
+      "title": "Project - Horned Owl",
+      "category": "Console Light Gun",
+      "system": "psx",
+      "bucket": "psx/Project - Horned Owl (USA).chd"
+    },
+    {
+      "title": "Judge Dredd",
+      "category": "Console Light Gun",
+      "system": "psx",
+      "bucket": "psx/Judge Dredd (USA).chd"
+    },
+    {
+      "title": "Revolution X - Music Is the Weapon",
+      "category": "Console Light Gun",
+      "system": "psx",
+      "bucket": "psx/Revolution X - Music Is the Weapon (USA).chd"
+    },
+    {
+      "title": "Resident Evil - Survivor",
+      "category": "Console Light Gun",
+      "system": "psx",
+      "bucket": "psx/Resident Evil - Survivor (USA).chd"
+    },
+    {
+      "title": "Gunfighter - The Legend of Jesse James",
+      "category": "Console Light Gun",
+      "system": "psx",
+      "bucket": "psx/Gunfighter - The Legend of Jesse James (USA).chd"
+    },
+    {
+      "title": "House of the Dead 2, The",
+      "category": "Console Light Gun",
+      "system": "dreamcast",
+      "bucket": "dreamcast/House of the Dead 2, The (USA).chd"
+    },
+    {
+      "title": "Confidential Mission",
+      "category": "Console Light Gun",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Confidential Mission (USA).chd"
+    },
+    {
+      "title": "Virtua Cop 2",
+      "category": "Console Light Gun",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Virtua Cop 2 (Japan).chd"
+    },
+    {
+      "title": "Silent Scope",
+      "category": "Console Light Gun",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Silent Scope (USA).chd"
+    },
+    {
+      "title": "Death Crimson 2",
+      "category": "Console Light Gun",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Death Crimson 2 (Japan).chd"
+    },
+    {
+      "title": "Death Crimson OX",
+      "category": "Console Light Gun",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Death Crimson OX (USA).chd"
+    },
+    {
+      "title": "Resident Evil - Dead Aim",
+      "category": "Console Light Gun",
+      "system": "ps2",
+      "bucket": "ps2/Resident Evil - Dead Aim (USA).chd"
+    },
+    {
+      "title": "Silent Scope",
+      "category": "Console Light Gun",
+      "system": "gba",
+      "bucket": "gba/Silent Scope (USA) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Point Blank DS",
+      "category": "Console Light Gun",
+      "system": "nds",
+      "bucket": "nds/Point Blank DS (USA).zip"
+    },
+    {
+      "title": "Touch the Dead",
+      "category": "Console Light Gun",
+      "system": "nds",
+      "bucket": "nds/Touch the Dead (USA) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Little Red Riding Hood's Zombie BBQ",
+      "category": "Console Light Gun",
+      "system": "nds",
+      "bucket": "nds/Little Red Riding Hood's Zombie BBQ (USA).zip"
+    },
+    {
+      "title": "Sewer Shark",
+      "category": "FMV Shooters",
+      "system": "segacd",
+      "bucket": "segacd/Sewer Shark (USA) (Rev 1).chd"
+    },
+    {
+      "title": "Mad Dog McCree",
+      "category": "FMV Shooters",
+      "system": "segacd",
+      "bucket": "segacd/Mad Dog McCree (USA).chd"
+    },
+    {
+      "title": "Mad Dog II - The Lost Gold",
+      "category": "FMV Shooters",
+      "system": "segacd",
+      "bucket": "segacd/Mad Dog II - The Lost Gold (USA).chd"
+    },
+    {
+      "title": "Who Shot Johnny Rock",
+      "category": "FMV Shooters",
+      "system": "segacd",
+      "bucket": "segacd/Who Shot Johnny Rock (USA).chd"
+    },
+    {
+      "title": "Crime Patrol",
+      "category": "FMV Shooters",
+      "system": "segacd",
+      "bucket": "segacd/Crime Patrol (USA).chd"
+    },
+    {
+      "title": "Ground Zero Texas",
+      "category": "FMV Shooters",
+      "system": "segacd",
+      "bucket": "segacd/Ground Zero Texas (USA).m3u",
+      "files": [
+        "segacd/Ground Zero Texas (USA) (Disc 1).chd",
+        "segacd/Ground Zero Texas (USA) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "Tomcat Alley",
+      "category": "FMV Shooters",
+      "system": "segacd",
+      "bucket": "segacd/Tomcat Alley (USA).chd"
+    },
+    {
+      "title": "Corpse Killer",
+      "category": "FMV Shooters",
+      "system": "segacd",
+      "bucket": "segacd/Corpse Killer (USA) (Sega CD 32X).chd"
+    },
+    {
+      "title": "Midnight Raiders",
+      "category": "FMV Shooters",
+      "system": "segacd",
+      "bucket": "segacd/Midnight Raiders (USA).chd"
+    },
+    {
+      "title": "Microcosm",
+      "category": "FMV Shooters",
+      "system": "segacd",
+      "bucket": "segacd/Microcosm (USA).chd"
+    },
+    {
+      "title": "Novastorm",
+      "category": "FMV Shooters",
+      "system": "segacd",
+      "bucket": "segacd/Novastorm (USA).chd"
+    },
+    {
+      "title": "Star Wars - Rebel Assault",
+      "category": "FMV Shooters",
+      "system": "segacd",
+      "bucket": "segacd/Star Wars - Rebel Assault (USA).chd"
+    },
+    {
+      "title": "Loadstar - The Legend of Tully Bodine",
+      "category": "FMV Shooters",
+      "system": "segacd",
+      "bucket": "segacd/Loadstar - The Legend of Tully Bodine (USA, Brazil).chd"
+    },
+    {
+      "title": "Cadillacs and Dinosaurs - The Second Cataclysm",
+      "category": "FMV Shooters",
+      "system": "segacd",
+      "bucket": "segacd/Cadillacs and Dinosaurs - The Second Cataclysm (USA, Brazil) (RE).chd"
+    },
+    {
+      "title": "Corpse Killer - Graveyard Edition",
+      "category": "FMV Shooters",
+      "system": "saturn",
+      "bucket": "saturn/Corpse Killer - Graveyard Edition (USA).m3u",
+      "files": [
+        "saturn/Corpse Killer - Graveyard Edition (USA) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "Chaos Control",
+      "category": "FMV Shooters",
+      "system": "saturn",
+      "bucket": "saturn/Chaos Control (Europe) (En,Fr,De).chd"
+    },
+    {
+      "title": "Creature Shock - Special Edition",
+      "category": "FMV Shooters",
+      "system": "saturn",
+      "bucket": "saturn/Creature Shock - Special Edition (USA).m3u",
+      "files": [
+        "saturn/Creature Shock - Special Edition (USA) (Disc 1).chd",
+        "saturn/Creature Shock - Special Edition (USA) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "Cyberia",
+      "category": "FMV Shooters",
+      "system": "saturn",
+      "bucket": "saturn/Cyberia (USA) (En,Fr,De).chd"
+    },
+    {
+      "title": "Novastorm",
+      "category": "FMV Shooters",
+      "system": "psx",
+      "bucket": "psx/Novastorm (USA).m3u",
+      "files": [
+        "psx/Novastorm (USA) (Disc 1).chd",
+        "psx/Novastorm (USA) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "Cyberia",
+      "category": "FMV Shooters",
+      "system": "psx",
+      "bucket": "psx/Cyberia (USA).chd"
+    },
+    {
+      "title": "Star Wars - Rebel Assault II - The Hidden Empire",
+      "category": "FMV Shooters",
+      "system": "psx",
+      "bucket": "psx/Star Wars - Rebel Assault II - The Hidden Empire (USA).m3u",
+      "files": [
+        "psx/Star Wars - Rebel Assault II - The Hidden Empire (USA) (Disc 1).chd",
+        "psx/Star Wars - Rebel Assault II - The Hidden Empire (USA) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "Hive, The",
+      "category": "FMV Shooters",
+      "system": "psx",
+      "bucket": "psx/Hive, The (USA).m3u",
+      "files": [
+        "psx/Hive, The (USA) (Disc 1).chd",
+        "psx/Hive, The (USA) (Disc 2).chd"
+      ]
+    },
+    {
+      "title": "Empire City: 1931",
+      "category": "Cabal-Style",
+      "system": "fbneo",
+      "bucket": "fbneo/empcityu.zip"
+    },
+    {
+      "title": "Cabal",
+      "category": "Cabal-Style",
+      "system": "fbneo",
+      "bucket": "fbneo/cabal.zip"
+    },
+    {
+      "title": "Dead Angle",
+      "category": "Cabal-Style",
+      "system": "fbneo",
+      "bucket": "fbneo/deadang.zip"
+    },
+    {
+      "title": "Devastators",
+      "category": "Cabal-Style",
+      "system": "fbneo",
+      "bucket": "fbneo/devstors.zip"
+    },
+    {
+      "title": "Dynamite Duke",
+      "category": "Cabal-Style",
+      "system": "fbneo",
+      "bucket": "fbneo/dyndukeu.zip"
+    },
+    {
+      "title": "The Double Dynamites",
+      "category": "Cabal-Style",
+      "system": "fbneo",
+      "bucket": "fbneo/dbldynu.zip"
+    },
+    {
+      "title": "Rambo III",
+      "category": "Cabal-Style",
+      "system": "fbneo",
+      "bucket": "fbneo/rambo3u.zip"
+    },
+    {
+      "title": "Blood Bros.",
+      "category": "Cabal-Style",
+      "system": "fbneo",
+      "bucket": "fbneo/bloodbrou.zip"
+    },
+    {
+      "title": "NAM-1975",
+      "category": "Cabal-Style",
+      "system": "fbneo",
+      "bucket": "fbneo/nam1975.zip"
+    },
+    {
+      "title": "Spinal Breakers",
+      "category": "Cabal-Style",
+      "system": "fbneo",
+      "bucket": "fbneo/spinlbrku.zip"
+    },
+    {
+      "title": "Riot",
+      "category": "Cabal-Style",
+      "system": "fbneo",
+      "bucket": "fbneo/riot.zip"
+    },
+    {
+      "title": "Alligator Hunt",
+      "category": "Cabal-Style",
+      "system": "fbneo",
+      "bucket": "fbneo/aligator.zip"
+    },
+    {
+      "title": "Pirates",
+      "category": "Cabal-Style",
+      "system": "fbneo",
+      "bucket": "fbneo/pirates.zip"
+    },
+    {
+      "title": "Zunzunkyou no Yabou",
+      "category": "Cabal-Style",
+      "system": "fbneo",
+      "bucket": "fbneo/zunkyou.zip"
+    },
+    {
+      "title": "Cabal",
+      "category": "Cabal-Style",
+      "system": "nes",
+      "bucket": "nes/Cabal (USA).zip"
+    },
+    {
+      "title": "Punisher, The",
+      "category": "Cabal-Style",
+      "system": "nes",
+      "bucket": "nes/Punisher, The (USA).zip"
+    },
+    {
+      "title": "Magnum Kikiippatsu - Empire City - 1931",
+      "category": "Cabal-Style",
+      "system": "nes",
+      "bucket": "nes/Magnum Kikiippatsu - Empire City - 1931 (Japan).zip"
+    },
+    {
+      "title": "Dead Angle",
+      "category": "Cabal-Style",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Dead Angle (USA, Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Dynamite Duke",
+      "category": "Cabal-Style",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Dynamite Duke (Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Dynamite Duke",
+      "category": "Cabal-Style",
+      "system": "genesis",
+      "bucket": "genesis/Dynamite Duke (World) (Rev A).zip"
+    },
+    {
+      "title": "Wild Guns",
+      "category": "Cabal-Style",
+      "system": "snes",
+      "bucket": "snes/Wild Guns (USA).zip"
+    },
+    {
+      "title": "Nam-1975",
+      "category": "Cabal-Style",
+      "system": "neogeocd",
+      "bucket": "neogeocd/Nam-1975 (Japan) (En,Ja).chd"
+    },
+    {
+      "title": "Buck Rogers: Planet of Zoom",
+      "category": "Rail Shooters",
+      "system": "fbneo",
+      "bucket": "fbneo/buckrog.zip"
+    },
+    {
+      "title": "Star Wars",
+      "category": "Rail Shooters",
+      "system": "fbneo",
+      "bucket": "fbneo/starwars.zip"
+    },
+    {
+      "title": "The Empire Strikes Back",
+      "category": "Rail Shooters",
+      "system": "fbneo",
+      "bucket": "fbneo/esb.zip"
+    },
+    {
+      "title": "Space Harrier",
+      "category": "Rail Shooters",
+      "system": "fbneo",
+      "bucket": "fbneo/sharrier.zip"
+    },
+    {
+      "title": "Thunder Ceptor",
+      "category": "Rail Shooters",
+      "system": "fbneo",
+      "bucket": "fbneo/tceptor.zip"
+    },
+    {
+      "title": "After Burner II",
+      "category": "Rail Shooters",
+      "system": "fbneo",
+      "bucket": "fbneo/aburner2.zip"
+    },
+    {
+      "title": "Thunder Blade",
+      "category": "Rail Shooters",
+      "system": "fbneo",
+      "bucket": "fbneo/thndrbld.zip"
+    },
+    {
+      "title": "Galaxy Force 2",
+      "category": "Rail Shooters",
+      "system": "fbneo",
+      "bucket": "fbneo/gforce2.zip"
+    },
+    {
+      "title": "Night Striker",
+      "category": "Rail Shooters",
+      "system": "fbneo",
+      "bucket": "fbneo/nightstru.zip"
+    },
+    {
+      "title": "Burning Force)",
+      "category": "Rail Shooters",
+      "system": "fbneo",
+      "bucket": "fbneo/burnforc.zip"
+    },
+    {
+      "title": "G-LOC Air Battle",
+      "category": "Rail Shooters",
+      "system": "fbneo",
+      "bucket": "fbneo/glocu.zip"
+    },
+    {
+      "title": "Starblade",
+      "category": "Rail Shooters",
+      "system": "mame",
+      "bucket": "mame/starblad.zip"
+    },
+    {
+      "title": "Solvalou",
+      "category": "Rail Shooters",
+      "system": "mame",
+      "bucket": "mame/solvalou.zip"
+    },
+    {
+      "title": "G.I. Joe",
+      "category": "Rail Shooters",
+      "system": "fbneo",
+      "bucket": "fbneo/gijoeu.zip"
+    },
+    {
+      "title": "Space Harrier",
+      "category": "Rail Shooters",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Space Harrier (Japan, USA) (En).zip"
+    },
+    {
+      "title": "Space Harrier 3-D",
+      "category": "Rail Shooters",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Space Harrier 3-D (USA, Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Zaxxon 3-D",
+      "category": "Rail Shooters",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Zaxxon 3-D (World).zip"
+    },
+    {
+      "title": "After Burner",
+      "category": "Rail Shooters",
+      "system": "mastersystem",
+      "bucket": "mastersystem/After Burner (World).zip"
+    },
+    {
+      "title": "Thunder Blade",
+      "category": "Rail Shooters",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Thunder Blade (USA, Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Galaxy Force",
+      "category": "Rail Shooters",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Galaxy Force (USA).zip"
+    },
+    {
+      "title": "G-LOC - Air Battle",
+      "category": "Rail Shooters",
+      "system": "mastersystem",
+      "bucket": "mastersystem/G-LOC - Air Battle (Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "3-D WorldRunner",
+      "category": "Rail Shooters",
+      "system": "nes",
+      "bucket": "nes/3-D WorldRunner (USA).zip"
+    },
+    {
+      "title": "Attack Animal Gakuen",
+      "category": "Rail Shooters",
+      "system": "nes",
+      "bucket": "nes/Attack Animal Gakuen (Japan) (Famicom 3D System).zip"
+    },
+    {
+      "title": "Cosmic Epsilon",
+      "category": "Rail Shooters",
+      "system": "nes",
+      "bucket": "nes/Cosmic Epsilon (Japan) (Famicom 3D System).zip"
+    },
+    {
+      "title": "Space Harrier",
+      "category": "Rail Shooters",
+      "system": "nes",
+      "bucket": "nes/Space Harrier (Japan).zip"
+    },
+    {
+      "title": "Space Harrier",
+      "category": "Rail Shooters",
+      "system": "tg16",
+      "bucket": "tg16/Space Harrier (USA).zip"
+    },
+    {
+      "title": "After Burner II",
+      "category": "Rail Shooters",
+      "system": "tg16",
+      "bucket": "tg16/After Burner II (Japan).zip"
+    },
+    {
+      "title": "Space Harrier II",
+      "category": "Rail Shooters",
+      "system": "genesis",
+      "bucket": "genesis/Space Harrier II (World).zip"
+    },
+    {
+      "title": "Super Thunder Blade",
+      "category": "Rail Shooters",
+      "system": "genesis",
+      "bucket": "genesis/Super Thunder Blade (World).zip"
+    },
+    {
+      "title": "After Burner II",
+      "category": "Rail Shooters",
+      "system": "genesis",
+      "bucket": "genesis/After Burner II (USA, Europe).zip"
+    },
+    {
+      "title": "Burning Force",
+      "category": "Rail Shooters",
+      "system": "genesis",
+      "bucket": "genesis/Burning Force (USA).zip"
+    },
+    {
+      "title": "Galaxy Force II",
+      "category": "Rail Shooters",
+      "system": "genesis",
+      "bucket": "genesis/Galaxy Force II (World) (Rev B).zip"
+    },
+    {
+      "title": "G-LOC - Air Battle",
+      "category": "Rail Shooters",
+      "system": "genesis",
+      "bucket": "genesis/G-LOC - Air Battle (World).zip"
+    },
+    {
+      "title": "Panorama Cotton",
+      "category": "Rail Shooters",
+      "system": "genesis",
+      "bucket": "genesis/Panorama Cotton (Japan).zip"
+    },
+    {
+      "title": "Space Harrier",
+      "category": "Rail Shooters",
+      "system": "gamegear",
+      "bucket": "gamegear/Space Harrier (World).zip"
+    },
+    {
+      "title": "G-LOC - Air Battle",
+      "category": "Rail Shooters",
+      "system": "gamegear",
+      "bucket": "gamegear/G-LOC - Air Battle (USA, Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Panzer Dragoon Mini",
+      "category": "Rail Shooters",
+      "system": "gamegear",
+      "bucket": "gamegear/Panzer Dragoon Mini (Japan).zip"
+    },
+    {
+      "title": "Space Harrier",
+      "category": "Rail Shooters",
+      "system": "sega32x",
+      "bucket": "sega32x/Space Harrier (Japan, USA) (En).zip"
+    },
+    {
+      "title": "After Burner Complete",
+      "category": "Rail Shooters",
+      "system": "sega32x",
+      "bucket": "sega32x/After Burner Complete (Japan, USA) (En).zip"
+    },
+    {
+      "title": "Star Wars Arcade",
+      "category": "Rail Shooters",
+      "system": "sega32x",
+      "bucket": "sega32x/Star Wars Arcade (USA).zip"
+    },
+    {
+      "title": "After Burner III",
+      "category": "Rail Shooters",
+      "system": "segacd",
+      "bucket": "segacd/After Burner III (USA).chd"
+    },
+    {
+      "title": "Night Striker",
+      "category": "Rail Shooters",
+      "system": "segacd",
+      "bucket": "segacd/Night Striker (Japan, Korea).chd"
+    },
+    {
+      "title": "SoulStar",
+      "category": "Rail Shooters",
+      "system": "segacd",
+      "bucket": "segacd/SoulStar (USA).chd"
+    },
+    {
+      "title": "Starblade",
+      "category": "Rail Shooters",
+      "system": "segacd",
+      "bucket": "segacd/Starblade (USA).chd"
+    },
+    {
+      "title": "A-X-101",
+      "category": "Rail Shooters",
+      "system": "segacd",
+      "bucket": "segacd/A-X-101 (USA) (RE).chd"
+    },
+    {
+      "title": "Star Fox",
+      "category": "Rail Shooters",
+      "system": "snes",
+      "bucket": "snes/Star Fox (USA) (Rev 2).zip"
+    },
+    {
+      "title": "Star Fox 2",
+      "category": "Rail Shooters",
+      "system": "snes",
+      "bucket": "snes/Star Fox 2 (USA, Europe) (Classic Mini, Switch Online).zip"
+    },
+    {
+      "title": "HyperZone",
+      "category": "Rail Shooters",
+      "system": "snes",
+      "bucket": "snes/HyperZone (USA).zip"
+    },
+    {
+      "title": "Shien's Revenge",
+      "category": "Rail Shooters",
+      "system": "snes",
+      "bucket": "snes/Shien's Revenge (USA).zip"
+    },
+    {
+      "title": "Panzer Dragoon",
+      "category": "Rail Shooters",
+      "system": "saturn",
+      "bucket": "saturn/Panzer Dragoon (USA) (5S).chd"
+    },
+    {
+      "title": "Panzer Dragoon II Zwei",
+      "category": "Rail Shooters",
+      "system": "saturn",
+      "bucket": "saturn/Panzer Dragoon II Zwei (USA).chd"
+    },
+    {
+      "title": "Solar Eclipse",
+      "category": "Rail Shooters",
+      "system": "saturn",
+      "bucket": "saturn/Solar Eclipse (USA) (2S).chd"
+    },
+    {
+      "title": "Sky Target",
+      "category": "Rail Shooters",
+      "system": "saturn",
+      "bucket": "saturn/Sky Target (USA).chd"
+    },
+    {
+      "title": "Wing Arms",
+      "category": "Rail Shooters",
+      "system": "saturn",
+      "bucket": "saturn/Wing Arms (USA) (5S).chd"
+    },
+    {
+      "title": "Sega Ages - Space Harrier",
+      "category": "Rail Shooters",
+      "system": "saturn",
+      "bucket": "saturn/Sega Ages - Space Harrier (Japan) (Rev A) (13M).chd"
+    },
+    {
+      "title": "Sega Ages - After Burner II",
+      "category": "Rail Shooters",
+      "system": "saturn",
+      "bucket": "saturn/Sega Ages - After Burner II (Japan).chd"
+    },
+    {
+      "title": "Sega Ages - Galaxy Force II",
+      "category": "Rail Shooters",
+      "system": "saturn",
+      "bucket": "saturn/Sega Ages - Galaxy Force II (Japan).chd"
+    },
+    {
+      "title": "Night Striker S",
+      "category": "Rail Shooters",
+      "system": "saturn",
+      "bucket": "saturn/Night Striker S (Japan).chd"
+    },
+    {
+      "title": "Starblade Alpha",
+      "category": "Rail Shooters",
+      "system": "psx",
+      "bucket": "psx/Starblade Alpha (USA).chd"
+    },
+    {
+      "title": "Jupiter Strike",
+      "category": "Rail Shooters",
+      "system": "psx",
+      "bucket": "psx/Jupiter Strike (USA).chd"
+    },
+    {
+      "title": "N2O - Nitrous Oxide",
+      "category": "Rail Shooters",
+      "system": "psx",
+      "bucket": "psx/N2O - Nitrous Oxide (USA).chd"
+    },
+    {
+      "title": "Omega Boost",
+      "category": "Rail Shooters",
+      "system": "psx",
+      "bucket": "psx/Omega Boost (USA).chd"
+    },
+    {
+      "title": "Vanark",
+      "category": "Rail Shooters",
+      "system": "psx",
+      "bucket": "psx/Vanark (USA).chd"
+    },
+    {
+      "title": "Star Fox 64",
+      "category": "Rail Shooters",
+      "system": "n64",
+      "bucket": "n64/Star Fox 64 (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Pokemon Snap",
+      "category": "Rail Shooters",
+      "system": "n64",
+      "bucket": "n64/Pokemon Snap (USA).zip"
+    },
+    {
+      "title": "Knife Edge - Nose Gunner",
+      "category": "Rail Shooters",
+      "system": "n64",
+      "bucket": "n64/Knife Edge - Nose Gunner (USA).zip"
+    },
+    {
+      "title": "Tsumi to Batsu - Hoshi no Keishousha",
+      "category": "Rail Shooters",
+      "system": "n64",
+      "bucket": "n64/Tsumi to Batsu - Hoshi no Keishousha (Japan).zip"
+    },
+    {
+      "title": "Rez",
+      "category": "Rail Shooters",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Rez (Europe) (En,Ja,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "Rainbow Cotton",
+      "category": "Rail Shooters",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Rainbow Cotton (Japan).chd"
+    },
+    {
+      "title": "Rez",
+      "category": "Rail Shooters",
+      "system": "ps2",
+      "bucket": "ps2/Rez (USA) (En,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "Iridion 3D",
+      "category": "Rail Shooters",
+      "system": "gba",
+      "bucket": "gba/Iridion 3D (USA, Europe).zip"
+    },
+    {
+      "title": "Star X",
+      "category": "Rail Shooters",
+      "system": "gba",
+      "bucket": "gba/Star X (USA) (En,Fr,De,Es,It,Nl).zip"
+    },
+    {
+      "title": "Star Fox - Assault",
+      "category": "Rail Shooters",
+      "system": "gc",
+      "bucket": "gc/Star Fox - Assault (USA).rvz"
+    },
+    {
+      "title": "Panzer Dragoon Orta",
+      "category": "Rail Shooters",
+      "system": "xbox",
+      "bucket": "xbox/Panzer Dragoon Orta (USA).iso"
+    },
+    {
+      "title": "After Burner - Black Falcon",
+      "category": "Rail Shooters",
+      "system": "psp",
+      "bucket": "psp/After Burner - Black Falcon (USA) (En,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "Sin & Punishment - Star Successor",
+      "category": "Rail Shooters",
+      "system": "wii",
+      "bucket": "wii/Sin & Punishment - Star Successor (USA).rvz"
+    },
+    {
+      "title": "Star Fox 64 3D",
+      "category": "Rail Shooters",
+      "system": "3ds",
+      "bucket": "3ds/Star Fox 64 3D (USA) (En,Fr,Es) (Rev 3).zip"
+    },
+    {
+      "title": "Kid Icarus - Uprising",
+      "category": "Rail Shooters",
+      "system": "3ds",
+      "bucket": "3ds/Kid Icarus - Uprising (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Star Fox Zero",
+      "category": "Rail Shooters",
+      "system": "wiiu",
+      "bucket": "wiiu/Star Fox Zero (US) (v16).wua"
+    }
+  ]
+}
