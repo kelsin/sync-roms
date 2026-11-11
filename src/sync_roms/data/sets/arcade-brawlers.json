@@ -23,39 +23,14 @@
       "bucket": "fbneo/kodu.zip"
     },
     {
-      "title": "Aliens",
-      "system": "fbneo",
-      "bucket": "fbneo/aliensu.zip"
-    },
-    {
       "title": "Double Dragon",
       "system": "fbneo",
       "bucket": "fbneo/ddragonu.zip"
     },
     {
-      "title": "Teenage Mutant Ninja Turtles (2 Players)",
+      "title": "Teenage Mutant Ninja Turtles: Turtles in Time",
       "system": "fbneo",
       "bucket": "fbneo/tmnt2.zip"
-    },
-    {
-      "title": "Metal Slug",
-      "system": "fbneo",
-      "bucket": "fbneo/mslug.zip"
-    },
-    {
-      "title": "Metal Slug 2",
-      "system": "fbneo",
-      "bucket": "fbneo/mslug2.zip"
-    },
-    {
-      "title": "Metal Slug 3",
-      "system": "fbneo",
-      "bucket": "fbneo/mslug3.zip"
-    },
-    {
-      "title": "Metal Slug X",
-      "system": "fbneo",
-      "bucket": "fbneo/mslugx.zip"
     },
     {
       "title": "Captain Commando",
@@ -71,11 +46,6 @@
       "title": "The Simpsons",
       "system": "fbneo",
       "bucket": "fbneo/simpsons.zip"
-    },
-    {
-      "title": "Sunset Riders",
-      "system": "fbneo",
-      "bucket": "fbneo/ssriders.zip"
     },
     {
       "title": "Teenage Mutant Ninja Turtles",
@@ -121,6 +91,456 @@
       "title": "Armored Warriors",
       "system": "fbneo",
       "bucket": "fbneo/armwaru.zip"
+    },
+    {
+      "title": "Battle Circuit",
+      "system": "fbneo",
+      "bucket": "fbneo/batcir.zip"
+    },
+    {
+      "title": "Dungeons & Dragons: Tower of Doom",
+      "system": "fbneo",
+      "bucket": "fbneo/ddtodu.zip"
+    },
+    {
+      "title": "Dungeons & Dragons: Shadow over Mystara",
+      "system": "fbneo",
+      "bucket": "fbneo/ddsomu.zip"
+    },
+    {
+      "title": "Dynasty Wars",
+      "system": "fbneo",
+      "bucket": "fbneo/dynwar.zip"
+    },
+    {
+      "title": "Double Dragon 3: The Rosetta Stone",
+      "system": "fbneo",
+      "bucket": "fbneo/ddragon3.zip"
+    },
+    {
+      "title": "Renegade",
+      "system": "fbneo",
+      "bucket": "fbneo/renegade.zip"
+    },
+    {
+      "title": "The Combatribes",
+      "system": "fbneo",
+      "bucket": "fbneo/ctribe.zip"
+    },
+    {
+      "title": "Shadow Force",
+      "system": "fbneo",
+      "bucket": "fbneo/shadfrceu.zip"
+    },
+    {
+      "title": "Golden Axe: The Revenge of Death Adder",
+      "system": "fbneo",
+      "bucket": "fbneo/ga2u.zip"
+    },
+    {
+      "title": "Altered Beast",
+      "system": "fbneo",
+      "bucket": "fbneo/altbeast.zip"
+    },
+    {
+      "title": "Alien Storm",
+      "system": "fbneo",
+      "bucket": "fbneo/astormu.zip"
+    },
+    {
+      "title": "D.D. Crew",
+      "system": "fbneo",
+      "bucket": "fbneo/ddcrewu.zip"
+    },
+    {
+      "title": "Arabian Fight",
+      "system": "fbneo",
+      "bucket": "fbneo/arabfgtu.zip"
+    },
+    {
+      "title": "Spider-Man: The Videogame",
+      "system": "fbneo",
+      "bucket": "fbneo/spidmanu.zip"
+    },
+    {
+      "title": "Riot City",
+      "system": "fbneo",
+      "bucket": "fbneo/riotcity.zip"
+    },
+    {
+      "title": "Michael Jackson's Moonwalker",
+      "system": "fbneo",
+      "bucket": "fbneo/mwalku.zip"
+    },
+    {
+      "title": "Violent Storm",
+      "system": "fbneo",
+      "bucket": "fbneo/viostorm.zip"
+    },
+    {
+      "title": "Metamorphic Force",
+      "system": "fbneo",
+      "bucket": "fbneo/metamrph.zip"
+    },
+    {
+      "title": "Asterix",
+      "system": "fbneo",
+      "bucket": "fbneo/asterix.zip"
+    },
+    {
+      "title": "Bad Dudes vs. DragonNinja",
+      "system": "fbneo",
+      "bucket": "fbneo/baddudes.zip"
+    },
+    {
+      "title": "Two Crude",
+      "system": "fbneo",
+      "bucket": "fbneo/twocrude.zip"
+    },
+    {
+      "title": "Night Slashers",
+      "system": "fbneo",
+      "bucket": "fbneo/nslasheru.zip"
+    },
+    {
+      "title": "Captain America and the Avengers",
+      "system": "fbneo",
+      "bucket": "fbneo/captavenu.zip"
+    },
+    {
+      "title": "Splatterhouse",
+      "system": "fbneo",
+      "bucket": "fbneo/splatter.zip"
+    },
+    {
+      "title": "The Ninja Warriors",
+      "system": "fbneo",
+      "bucket": "fbneo/ninjaw.zip"
+    },
+    {
+      "title": "Growl",
+      "system": "fbneo",
+      "bucket": "fbneo/growlu.zip"
+    },
+    {
+      "title": "Warrior Blade: Rastan Saga Episode III",
+      "system": "fbneo",
+      "bucket": "fbneo/warriorb.zip"
+    },
+    {
+      "title": "PuLiRuLa",
+      "system": "fbneo",
+      "bucket": "fbneo/pulirula.zip"
+    },
+    {
+      "title": "Silent Dragon",
+      "system": "fbneo",
+      "bucket": "fbneo/silentdu.zip"
+    },
+    {
+      "title": "Arabian Magic",
+      "system": "fbneo",
+      "bucket": "fbneo/arabianm.zip"
+    },
+    {
+      "title": "Light Bringer",
+      "system": "fbneo",
+      "bucket": "fbneo/lightbr.zip"
+    },
+    {
+      "title": "Ninja Gaiden",
+      "system": "fbneo",
+      "bucket": "fbneo/gaiden.zip"
+    },
+    {
+      "title": "The Ninja Kids",
+      "system": "fbneo",
+      "bucket": "fbneo/ninjaku.zip"
+    },
+    {
+      "title": "Undercover Cops: Alpha Renewal Version",
+      "system": "fbneo",
+      "bucket": "fbneo/uccopsaru.zip"
+    },
+    {
+      "title": "Hook",
+      "system": "fbneo",
+      "bucket": "fbneo/hooku.zip"
+    },
+    {
+      "title": "Ninja Baseball Bat Man",
+      "system": "fbneo",
+      "bucket": "fbneo/nbbatmanu.zip"
+    },
+    {
+      "title": "Blade Master",
+      "system": "fbneo",
+      "bucket": "fbneo/bmaster.zip"
+    },
+    {
+      "title": "Vigilante",
+      "system": "fbneo",
+      "bucket": "fbneo/vigilantb.zip"
+    },
+    {
+      "title": "Kung-Fu Master",
+      "system": "fbneo",
+      "bucket": "fbneo/kungfumd.zip"
+    },
+    {
+      "title": "64th. Street: A Detective Story",
+      "system": "fbneo",
+      "bucket": "fbneo/64street.zip"
+    },
+    {
+      "title": "P.O.W.: Prisoners of War",
+      "system": "fbneo",
+      "bucket": "fbneo/pow.zip"
+    },
+    {
+      "title": "Gang Wars",
+      "system": "fbneo",
+      "bucket": "fbneo/gangwarsu.zip"
+    },
+    {
+      "title": "Sengoku 3",
+      "system": "fbneo",
+      "bucket": "fbneo/sengoku3.zip"
+    },
+    {
+      "title": "Eight Man",
+      "system": "fbneo",
+      "bucket": "fbneo/eightman.zip"
+    },
+    {
+      "title": "Knuckle Bash",
+      "system": "fbneo",
+      "bucket": "fbneo/kbash.zip"
+    },
+    {
+      "title": "Denjin Makai",
+      "system": "fbneo",
+      "bucket": "fbneo/denjinmk.zip"
+    },
+    {
+      "title": "Guardians: Denjin Makai II",
+      "system": "fbneo",
+      "bucket": "fbneo/grdians.zip"
+    },
+    {
+      "title": "Zero Team",
+      "system": "fbneo",
+      "bucket": "fbneo/zeroteam.zip"
+    },
+    {
+      "title": "Legionnaire",
+      "system": "fbneo",
+      "bucket": "fbneo/legionnau.zip"
+    },
+    {
+      "title": "Battletoads",
+      "system": "fbneo",
+      "bucket": "fbneo/btoads.zip"
+    },
+    {
+      "title": "Pretty Soldier Sailor Moon",
+      "system": "fbneo",
+      "bucket": "fbneo/sailormnnu.zip"
+    },
+    {
+      "title": "Oriental Legend",
+      "system": "fbneo",
+      "bucket": "fbneo/orlegend.zip"
+    },
+    {
+      "title": "Knights of Valour Plus",
+      "system": "fbneo",
+      "bucket": "fbneo/kovplus.zip"
+    },
+    {
+      "title": "Knights of Valour Superheroes",
+      "system": "fbneo",
+      "bucket": "fbneo/kovsh.zip"
+    },
+    {
+      "title": "Knights of Valour 2 Plus: Nine Dragons",
+      "system": "fbneo",
+      "bucket": "fbneo/kov2p.zip"
+    },
+    {
+      "title": "The Gladiator",
+      "system": "fbneo",
+      "bucket": "fbneo/theglad.zip"
+    },
+    {
+      "title": "Knights of Valour",
+      "system": "fbneo",
+      "bucket": "fbneo/kov111.zip"
+    },
+    {
+      "title": "Knights of Valour 2",
+      "system": "fbneo",
+      "bucket": "fbneo/kov2.zip"
+    },
+    {
+      "title": "Oriental Legend Super",
+      "system": "fbneo",
+      "bucket": "fbneo/olds.zip"
+    },
+    {
+      "title": "Oriental Legend Special Plus",
+      "system": "fbneo",
+      "bucket": "fbneo/oldsplus.zip"
+    },
+    {
+      "title": "Burning Fight",
+      "system": "fbneo",
+      "bucket": "fbneo/burningfh.zip"
+    },
+    {
+      "title": "Mutation Nation",
+      "system": "fbneo",
+      "bucket": "fbneo/mutnat.zip"
+    },
+    {
+      "title": "Ninja Combat",
+      "system": "fbneo",
+      "bucket": "fbneo/ncombat.zip"
+    },
+    {
+      "title": "Robo Army",
+      "system": "fbneo",
+      "bucket": "fbneo/roboarmy.zip"
+    },
+    {
+      "title": "Sengoku",
+      "system": "fbneo",
+      "bucket": "fbneo/sengokuh.zip"
+    },
+    {
+      "title": "Sengoku 2",
+      "system": "fbneo",
+      "bucket": "fbneo/sengoku2.zip"
+    },
+    {
+      "title": "Gaia Crusaders",
+      "system": "fbneo",
+      "bucket": "fbneo/gaia.zip"
+    },
+    {
+      "title": "Gaiapolis",
+      "system": "fbneo",
+      "bucket": "fbneo/gaiapols.zip"
+    },
+    {
+      "title": "Gate of Doom",
+      "system": "fbneo",
+      "bucket": "fbneo/gatedoom.zip"
+    },
+    {
+      "title": "Wizard Fire",
+      "system": "fbneo",
+      "bucket": "fbneo/wizdfireu.zip"
+    },
+    {
+      "title": "Dynamite Dux",
+      "system": "fbneo",
+      "bucket": "fbneo/ddux.zip"
+    },
+    {
+      "title": "Tough Turf",
+      "system": "fbneo",
+      "bucket": "fbneo/tturfu.zip"
+    },
+    {
+      "title": "DJ Boy",
+      "system": "fbneo",
+      "bucket": "fbneo/djboyu.zip"
+    },
+    {
+      "title": "B.Rap Boys Special",
+      "system": "fbneo",
+      "bucket": "fbneo/brapboyspu.zip"
+    },
+    {
+      "title": "Karate Blazers",
+      "system": "fbneo",
+      "bucket": "fbneo/karatblzu.zip"
+    },
+    {
+      "title": "Hachoo!",
+      "system": "fbneo",
+      "bucket": "fbneo/hachoo.zip"
+    },
+    {
+      "title": "Kabuki-Z",
+      "system": "fbneo",
+      "bucket": "fbneo/kabukiz.zip"
+    },
+    {
+      "title": "Kozure Ookami",
+      "system": "fbneo",
+      "bucket": "fbneo/kozure.zip"
+    },
+    {
+      "title": "Mug Smashers",
+      "system": "fbneo",
+      "bucket": "fbneo/mugsmash.zip"
+    },
+    {
+      "title": "Ninja Clowns",
+      "system": "fbneo",
+      "bucket": "fbneo/ninclown.zip"
+    },
+    {
+      "title": "Skull & Crossbones",
+      "system": "fbneo",
+      "bucket": "fbneo/skullxbo.zip"
+    },
+    {
+      "title": "The Legend of Silkroad",
+      "system": "fbneo",
+      "bucket": "fbneo/silkroad.zip"
+    },
+    {
+      "title": "Ultra Toukon Densetsu",
+      "system": "fbneo",
+      "bucket": "fbneo/utoukond.zip"
+    },
+    {
+      "title": "Vamf x1/2",
+      "system": "fbneo",
+      "bucket": "fbneo/vamphalf.zip"
+    },
+    {
+      "title": "Riding Fight",
+      "system": "fbneo",
+      "bucket": "fbneo/ridingf.zip"
+    },
+    {
+      "title": "Avengers",
+      "system": "fbneo",
+      "bucket": "fbneo/avengers.zip"
+    },
+    {
+      "title": "Superman",
+      "system": "fbneo",
+      "bucket": "fbneo/supermanu.zip"
+    },
+    {
+      "title": "Tecmo Knight",
+      "system": "fbneo",
+      "bucket": "fbneo/tknight.zip"
+    },
+    {
+      "title": "Trio The Punch: Never Forget Me...",
+      "system": "fbneo",
+      "bucket": "fbneo/triothep.zip"
+    },
+    {
+      "title": "China Gate",
+      "system": "fbneo",
+      "bucket": "fbneo/chinagat.zip"
     },
     {
       "title": "Streets of Rage (Rev A)",
@@ -231,9 +651,44 @@
       "bucket": "gc/X-Men Legends (USA).rvz"
     },
     {
-      "title": "Contra 4",
-      "system": "nds",
-      "bucket": "nds/Contra 4 (USA).zip"
+      "title": "Viewtiful Joe",
+      "system": "gc",
+      "bucket": "gc/Viewtiful Joe (USA).rvz"
+    },
+    {
+      "title": "Viewtiful Joe 2",
+      "system": "gc",
+      "bucket": "gc/Viewtiful Joe 2 (USA).rvz"
+    },
+    {
+      "title": "X-Men Legends II - Rise of Apocalypse",
+      "system": "gc",
+      "bucket": "gc/X-Men Legends II - Rise of Apocalypse (USA).rvz"
+    },
+    {
+      "title": "TMNT",
+      "system": "gc",
+      "bucket": "gc/TMNT (USA) (En,Fr,Es).rvz"
+    },
+    {
+      "title": "Buffy the Vampire Slayer - Chaos Bleeds",
+      "system": "gc",
+      "bucket": "gc/Buffy the Vampire Slayer - Chaos Bleeds (USA).rvz"
+    },
+    {
+      "title": "Batman - Rise of Sin Tzu",
+      "system": "gc",
+      "bucket": "gc/Batman - Rise of Sin Tzu (USA) (En,Fr,Es).rvz"
+    },
+    {
+      "title": "Hulk",
+      "system": "gc",
+      "bucket": "gc/Hulk (USA).rvz"
+    },
+    {
+      "title": "Teen Titans",
+      "system": "gc",
+      "bucket": "gc/Teen Titans (USA) (En,Fr).rvz"
     },
     {
       "title": "Final Fight One",
@@ -256,9 +711,74 @@
       "bucket": "gba/Teenage Mutant Ninja Turtles (USA).zip"
     },
     {
-      "title": "Sunset Riders",
-      "system": "genesis",
-      "bucket": "genesis/Sunset Riders (USA).zip"
+      "title": "Advance Guardian Heroes",
+      "system": "gba",
+      "bucket": "gba/Advance Guardian Heroes (USA).zip"
+    },
+    {
+      "title": "Gekido Advance - Kintaro's Revenge",
+      "system": "gba",
+      "bucket": "gba/Gekido Advance - Kintaro's Revenge (USA).zip"
+    },
+    {
+      "title": "TMNT",
+      "system": "gba",
+      "bucket": "gba/TMNT (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Astro Boy - Omega Factor",
+      "system": "gba",
+      "bucket": "gba/Astro Boy - Omega Factor (USA) (En,Ja,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Dragon Ball - Advanced Adventure",
+      "system": "gba",
+      "bucket": "gba/Dragon Ball - Advanced Adventure (USA).zip"
+    },
+    {
+      "title": "Dragon Ball GT - Transformation",
+      "system": "gba",
+      "bucket": "gba/Dragon Ball GT - Transformation (USA).zip"
+    },
+    {
+      "title": "Jackie Chan Adventures - Legend of the Dark Hand",
+      "system": "gba",
+      "bucket": "gba/Jackie Chan Adventures - Legend of the Dark Hand (USA, Europe).zip"
+    },
+    {
+      "title": "Justice League Heroes - The Flash",
+      "system": "gba",
+      "bucket": "gba/Justice League Heroes - The Flash (USA).zip"
+    },
+    {
+      "title": "Teenage Mutant Ninja Turtles 2 - Battle Nexus",
+      "system": "gba",
+      "bucket": "gba/Teenage Mutant Ninja Turtles 2 - Battle Nexus (USA).zip"
+    },
+    {
+      "title": "Altered Beast - Guardian of the Realms",
+      "system": "gba",
+      "bucket": "gba/Altered Beast - Guardian of the Realms (USA).zip"
+    },
+    {
+      "title": "Bruce Lee - Return of the Legend",
+      "system": "gba",
+      "bucket": "gba/Bruce Lee - Return of the Legend (USA).zip"
+    },
+    {
+      "title": "X-Men - Reign of Apocalypse",
+      "system": "gba",
+      "bucket": "gba/X-Men - Reign of Apocalypse (USA, Europe).zip"
+    },
+    {
+      "title": "Star Wars - Episode III - Revenge of the Sith",
+      "system": "gba",
+      "bucket": "gba/Star Wars - Episode III - Revenge of the Sith (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Batman - Rise of Sin Tzu",
+      "system": "gba",
+      "bucket": "gba/Batman - Rise of Sin Tzu (USA) (En,Fr,Es).zip"
     },
     {
       "title": "Punisher, The",
@@ -281,6 +801,116 @@
       "bucket": "genesis/Spider-Man . Venom - Maximum Carnage (World).zip"
     },
     {
+      "title": "Golden Axe III",
+      "system": "genesis",
+      "bucket": "genesis/Golden Axe III (Japan) (En).zip"
+    },
+    {
+      "title": "Alien Storm",
+      "system": "genesis",
+      "bucket": "genesis/Alien Storm (World).zip"
+    },
+    {
+      "title": "Altered Beast",
+      "system": "genesis",
+      "bucket": "genesis/Altered Beast (Japan, USA) (En) (Rev A).zip"
+    },
+    {
+      "title": "Comix Zone",
+      "system": "genesis",
+      "bucket": "genesis/Comix Zone (USA).zip"
+    },
+    {
+      "title": "Teenage Mutant Ninja Turtles - The Hyperstone Heist",
+      "system": "genesis",
+      "bucket": "genesis/Teenage Mutant Ninja Turtles - The Hyperstone Heist (USA).zip"
+    },
+    {
+      "title": "Splatterhouse 2",
+      "system": "genesis",
+      "bucket": "genesis/Splatterhouse 2 (USA).zip"
+    },
+    {
+      "title": "Splatterhouse 3",
+      "system": "genesis",
+      "bucket": "genesis/Splatterhouse 3 (USA).zip"
+    },
+    {
+      "title": "Two Crude Dudes",
+      "system": "genesis",
+      "bucket": "genesis/Two Crude Dudes (USA).zip"
+    },
+    {
+      "title": "Mighty Morphin Power Rangers - The Movie",
+      "system": "genesis",
+      "bucket": "genesis/Mighty Morphin Power Rangers - The Movie (USA).zip"
+    },
+    {
+      "title": "Battletoads",
+      "system": "genesis",
+      "bucket": "genesis/Battletoads (World).zip"
+    },
+    {
+      "title": "Captain America and the Avengers",
+      "system": "genesis",
+      "bucket": "genesis/Captain America and the Avengers (USA).zip"
+    },
+    {
+      "title": "Growl",
+      "system": "genesis",
+      "bucket": "genesis/Growl (USA).zip"
+    },
+    {
+      "title": "DJ Boy",
+      "system": "genesis",
+      "bucket": "genesis/DJ Boy (USA).zip"
+    },
+    {
+      "title": "Cyborg Justice",
+      "system": "genesis",
+      "bucket": "genesis/Cyborg Justice (USA, Europe).zip"
+    },
+    {
+      "title": "Mazin Saga - Mutant Fighter",
+      "system": "genesis",
+      "bucket": "genesis/Mazin Saga - Mutant Fighter (USA).zip"
+    },
+    {
+      "title": "Mystical Fighter",
+      "system": "genesis",
+      "bucket": "genesis/Mystical Fighter (USA).zip"
+    },
+    {
+      "title": "The Death and Return of Superman",
+      "system": "genesis",
+      "bucket": "genesis/Death and Return of Superman, The (USA).zip"
+    },
+    {
+      "title": "Venom . Spider-Man - Separation Anxiety",
+      "system": "genesis",
+      "bucket": "genesis/Venom . Spider-Man - Separation Anxiety (USA, Europe).zip"
+    },
+    {
+      "title": "Michael Jackson's Moonwalker",
+      "system": "genesis",
+      "bucket": "genesis/Michael Jackson's Moonwalker (Japan, USA) (En).zip"
+    },
+    {
+      "title": "Double Dragon II - The Revenge",
+      "system": "genesis",
+      "bucket": "genesis/Double Dragon II - The Revenge (Japan) (En).zip"
+    },
+    {
+      "title": "Bishoujo Senshi Sailor Moon",
+      "system": "genesis",
+      "bucket": "genesis/Bishoujo Senshi Sailor Moon (Japan).zip"
+    },
+    {
+      "title": "Last Battle",
+      "system": "genesis",
+      "bucket": "genesis/Last Battle (USA, Europe, Korea) (En).zip"
+    },
+    {
       "title": "Captain Commando",
       "system": "snes",
       "bucket": "snes/Captain Commando (USA).zip"
@@ -289,6 +919,181 @@
       "title": "Combatribes, The",
       "system": "snes",
       "bucket": "snes/Combatribes, The (USA).zip"
+    },
+    {
+      "title": "Final Fight",
+      "system": "snes",
+      "bucket": "snes/Final Fight (USA).zip"
+    },
+    {
+      "title": "Knights of the Round",
+      "system": "snes",
+      "bucket": "snes/Knights of the Round (USA).zip"
+    },
+    {
+      "title": "King of Dragons",
+      "system": "snes",
+      "bucket": "snes/King of Dragons (USA).zip"
+    },
+    {
+      "title": "Super Double Dragon",
+      "system": "snes",
+      "bucket": "snes/Super Double Dragon (USA).zip"
+    },
+    {
+      "title": "Rival Turf!",
+      "system": "snes",
+      "bucket": "snes/Rival Turf! (USA).zip"
+    },
+    {
+      "title": "Brawl Brothers",
+      "system": "snes",
+      "bucket": "snes/Brawl Brothers (USA).zip"
+    },
+    {
+      "title": "The Peace Keepers",
+      "system": "snes",
+      "bucket": "snes/Peace Keepers, The (USA).zip"
+    },
+    {
+      "title": "Battletoads in Battlemaniacs",
+      "system": "snes",
+      "bucket": "snes/Battletoads in Battlemaniacs (USA).zip"
+    },
+    {
+      "title": "The Death and Return of Superman",
+      "system": "snes",
+      "bucket": "snes/Death and Return of Superman, The (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Sonic Blast Man",
+      "system": "snes",
+      "bucket": "snes/Sonic Blast Man (USA).zip"
+    },
+    {
+      "title": "Mighty Morphin Power Rangers",
+      "system": "snes",
+      "bucket": "snes/Mighty Morphin Power Rangers (USA).zip"
+    },
+    {
+      "title": "The Pirates of Dark Water",
+      "system": "snes",
+      "bucket": "snes/Pirates of Dark Water, The (USA).zip"
+    },
+    {
+      "title": "Legend",
+      "system": "snes",
+      "bucket": "snes/Legend (USA).zip"
+    },
+    {
+      "title": "Iron Commando",
+      "system": "snes",
+      "bucket": "snes/Iron Commando (World) (QUByte Classics).zip"
+    },
+    {
+      "title": "Undercover Cops",
+      "system": "snes",
+      "bucket": "snes/Undercover Cops (Japan).zip"
+    },
+    {
+      "title": "Ghost Chaser Densei",
+      "system": "snes",
+      "bucket": "snes/Ghost Chaser Densei (Japan).zip"
+    },
+    {
+      "title": "Bishoujo Senshi Sailor Moon R",
+      "system": "snes",
+      "bucket": "snes/Bishoujo Senshi Sailor Moon R (Japan).zip"
+    },
+    {
+      "title": "River City Girls Zero",
+      "system": "snes",
+      "bucket": "snes/River City Girls Zero (USA) (RCG Translation, Switch).zip"
+    },
+    {
+      "title": "Battletoads-Double Dragon",
+      "system": "snes",
+      "bucket": "snes/Battletoads-Double Dragon (USA).zip"
+    },
+    {
+      "title": "Spider-Man - Venom - Maximum Carnage",
+      "system": "snes",
+      "bucket": "snes/Spider-Man - Venom - Maximum Carnage (USA).zip"
+    },
+    {
+      "title": "Venom - Spider-Man - Separation Anxiety",
+      "system": "snes",
+      "bucket": "snes/Venom - Spider-Man - Separation Anxiety (USA).zip"
+    },
+    {
+      "title": "X-Men - Mutant Apocalypse",
+      "system": "snes",
+      "bucket": "snes/X-Men - Mutant Apocalypse (USA).zip"
+    },
+    {
+      "title": "Marvel Super Heroes in War of the Gems",
+      "system": "snes",
+      "bucket": "snes/Marvel Super Heroes in War of the Gems (USA).zip"
+    },
+    {
+      "title": "Alien vs Predator",
+      "system": "snes",
+      "bucket": "snes/Alien vs Predator (USA).zip"
+    },
+    {
+      "title": "Mighty Morphin Power Rangers - The Movie",
+      "system": "snes",
+      "bucket": "snes/Mighty Morphin Power Rangers - The Movie (USA).zip"
+    },
+    {
+      "title": "Sonic Blast Man II",
+      "system": "snes",
+      "bucket": "snes/Sonic Blast Man II (USA).zip"
+    },
+    {
+      "title": "The Tick",
+      "system": "snes",
+      "bucket": "snes/Tick, The (USA).zip"
+    },
+    {
+      "title": "Stone Protectors",
+      "system": "snes",
+      "bucket": "snes/Stone Protectors (USA).zip"
+    },
+    {
+      "title": "Todd McFarlane's Spawn - The Video Game",
+      "system": "snes",
+      "bucket": "snes/Todd McFarlane's Spawn - The Video Game (USA).zip"
+    },
+    {
+      "title": "Final Fight Guy",
+      "system": "snes",
+      "bucket": "snes/Final Fight Guy (USA).zip"
+    },
+    {
+      "title": "Gourmet Warriors",
+      "system": "snes",
+      "bucket": "snes/Gourmet Warriors (World) (QUByte Classics).zip"
+    },
+    {
+      "title": "Battle Zeque Den",
+      "system": "snes",
+      "bucket": "snes/Battle Zeque Den (Japan).zip"
+    },
+    {
+      "title": "Bishoujo Senshi Sailor Moon",
+      "system": "snes",
+      "bucket": "snes/Bishoujo Senshi Sailor Moon (Japan).zip"
+    },
+    {
+      "title": "Shounen Ninja Sasuke",
+      "system": "snes",
+      "bucket": "snes/Shounen Ninja Sasuke (Japan).zip"
+    },
+    {
+      "title": "Kamen Rider",
+      "system": "snes",
+      "bucket": "snes/Kamen Rider (Japan) (Rev 1).zip"
     },
     {
       "title": "Streets of Rage",
@@ -301,6 +1106,11 @@
       "bucket": "gamegear/Streets of Rage 2 (World).zip"
     },
     {
+      "title": "Double Dragon",
+      "system": "gamegear",
+      "bucket": "gamegear/Double Dragon (USA, Europe).zip"
+    },
+    {
       "title": "Battletoads-Double Dragon",
       "system": "gb",
       "bucket": "gb/Battletoads-Double Dragon (USA).zip"
@@ -311,9 +1121,59 @@
       "bucket": "gb/Teenage Mutant Ninja Turtles III - Radical Rescue (USA).zip"
     },
     {
+      "title": "Double Dragon",
+      "system": "gb",
+      "bucket": "gb/Double Dragon (USA, Europe).zip"
+    },
+    {
+      "title": "Double Dragon II",
+      "system": "gb",
+      "bucket": "gb/Double Dragon II (USA, Europe).zip"
+    },
+    {
+      "title": "Kung-Fu Master",
+      "system": "gb",
+      "bucket": "gb/Kung-Fu Master (USA, Europe).zip"
+    },
+    {
+      "title": "Teenage Mutant Ninja Turtles - Fall of the Foot Clan",
+      "system": "gb",
+      "bucket": "gb/Teenage Mutant Ninja Turtles - Fall of the Foot Clan (USA).zip"
+    },
+    {
+      "title": "Teenage Mutant Ninja Turtles II - Back from the Sewers",
+      "system": "gb",
+      "bucket": "gb/Teenage Mutant Ninja Turtles II - Back from the Sewers (USA).zip"
+    },
+    {
       "title": "Fighting Force",
       "system": "psx",
       "bucket": "psx/Fighting Force (USA) (Rev 2).chd"
+    },
+    {
+      "title": "Gekido - Urban Fighters",
+      "system": "psx",
+      "bucket": "psx/Gekido - Urban Fighters (USA).chd"
+    },
+    {
+      "title": "Jackie Chan Stuntmaster",
+      "system": "psx",
+      "bucket": "psx/Jackie Chan Stuntmaster (USA).chd"
+    },
+    {
+      "title": "Fighting Force 2",
+      "system": "psx",
+      "bucket": "psx/Fighting Force 2 (USA).chd"
+    },
+    {
+      "title": "Batman Forever - The Arcade Game",
+      "system": "psx",
+      "bucket": "psx/Batman Forever - The Arcade Game (USA).chd"
+    },
+    {
+      "title": "T'ai Fu - Wrath of the Tiger",
+      "system": "psx",
+      "bucket": "psx/T'ai Fu - Wrath of the Tiger (USA).chd"
     },
     {
       "title": "Burning Fight",
@@ -361,6 +1221,16 @@
       "bucket": "ps2/God Hand (USA).chd"
     },
     {
+      "title": "Viewtiful Joe",
+      "system": "ps2",
+      "bucket": "ps2/Viewtiful Joe (USA).chd"
+    },
+    {
+      "title": "Viewtiful Joe 2",
+      "system": "ps2",
+      "bucket": "ps2/Viewtiful Joe 2 (USA).chd"
+    },
+    {
       "title": "Dynamite Cop!",
       "system": "dreamcast",
       "bucket": "dreamcast/Dynamite Cop! (USA).chd"
@@ -381,6 +1251,26 @@
       "bucket": "dreamcast/Spawn - In the Demon's Hand (USA).chd"
     },
     {
+      "title": "Zombie Revenge",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Zombie Revenge (USA).chd"
+    },
+    {
+      "title": "Fighting Force 2",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Fighting Force 2 (USA) (Rev A).chd"
+    },
+    {
+      "title": "Sword of the Berserk - Guts' Rage",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Sword of the Berserk - Guts' Rage (USA).chd"
+    },
+    {
+      "title": "Sega Smash Pack - Volume 1",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Sega Smash Pack - Volume 1 (USA).chd"
+    },
+    {
       "title": "Double Dragon",
       "system": "atari7800",
       "bucket": "atari7800/Double Dragon (USA).zip"
@@ -394,6 +1284,395 @@
       "title": "Final Fight CD",
       "system": "segacd",
       "bucket": "segacd/Final Fight CD (USA).chd"
+    },
+    {
+      "title": "The Ninja Warriors",
+      "system": "segacd",
+      "bucket": "segacd/Ninja Warriors, The (Japan).chd"
+    },
+    {
+      "title": "Double Dragon",
+      "system": "nes",
+      "bucket": "nes/Double Dragon (USA).zip"
+    },
+    {
+      "title": "Double Dragon II - The Revenge",
+      "system": "nes",
+      "bucket": "nes/Double Dragon II - The Revenge (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Double Dragon III - The Sacred Stones",
+      "system": "nes",
+      "bucket": "nes/Double Dragon III - The Sacred Stones (USA).zip"
+    },
+    {
+      "title": "River City Ransom",
+      "system": "nes",
+      "bucket": "nes/River City Ransom (USA).zip"
+    },
+    {
+      "title": "Mighty Final Fight",
+      "system": "nes",
+      "bucket": "nes/Mighty Final Fight (USA).zip"
+    },
+    {
+      "title": "Teenage Mutant Ninja Turtles II - The Arcade Game",
+      "system": "nes",
+      "bucket": "nes/Teenage Mutant Ninja Turtles II - The Arcade Game (USA).zip"
+    },
+    {
+      "title": "Teenage Mutant Ninja Turtles III - The Manhattan Project",
+      "system": "nes",
+      "bucket": "nes/Teenage Mutant Ninja Turtles III - The Manhattan Project (USA).zip"
+    },
+    {
+      "title": "Battletoads",
+      "system": "nes",
+      "bucket": "nes/Battletoads (USA).zip"
+    },
+    {
+      "title": "Bad Dudes",
+      "system": "nes",
+      "bucket": "nes/Bad Dudes (USA).zip"
+    },
+    {
+      "title": "Renegade",
+      "system": "nes",
+      "bucket": "nes/Renegade (USA).zip"
+    },
+    {
+      "title": "Kung Fu",
+      "system": "nes",
+      "bucket": "nes/Kung Fu (Japan, USA) (En).zip"
+    },
+    {
+      "title": "Downtown Special - Kunio-kun no Jidaigeki Da yo Zenin Shuugou!",
+      "system": "nes",
+      "bucket": "nes/Downtown Special - Kunio-kun no Jidaigeki Da yo Zenin Shuugou! (Japan).zip"
+    },
+    {
+      "title": "P.O.W. - Prisoners of War",
+      "system": "nes",
+      "bucket": "nes/P.O.W. - Prisoners of War (USA).zip"
+    },
+    {
+      "title": "Battletoads-Double Dragon",
+      "system": "nes",
+      "bucket": "nes/Battletoads-Double Dragon (USA).zip"
+    },
+    {
+      "title": "The Adventures of Bayou Billy",
+      "system": "nes",
+      "bucket": "nes/Adventures of Bayou Billy, The (USA).zip"
+    },
+    {
+      "title": "Target - Renegade",
+      "system": "nes",
+      "bucket": "nes/Target - Renegade (USA).zip"
+    },
+    {
+      "title": "Batman Returns",
+      "system": "nes",
+      "bucket": "nes/Batman Returns (USA).zip"
+    },
+    {
+      "title": "Spartan X 2",
+      "system": "nes",
+      "bucket": "nes/Spartan X 2 (Japan).zip"
+    },
+    {
+      "title": "Golden Axe",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Golden Axe (USA, Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Double Dragon",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Double Dragon (World).zip"
+    },
+    {
+      "title": "Vigilante",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Vigilante (USA, Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Streets of Rage",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Streets of Rage (Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Streets of Rage II",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Streets of Rage II (Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Renegade",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Renegade (Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Black Belt",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Black Belt (USA, Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Dynamite Dux",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Dynamite Dux (Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Altered Beast",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Altered Beast (USA, Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Vigilante",
+      "system": "tg16",
+      "bucket": "tg16/Vigilante (USA).zip"
+    },
+    {
+      "title": "Splatterhouse",
+      "system": "tg16",
+      "bucket": "tg16/Splatterhouse (USA).zip"
+    },
+    {
+      "title": "The Ninja Warriors",
+      "system": "tg16",
+      "bucket": "tg16/Ninja Warriors, The (Japan).zip"
+    },
+    {
+      "title": "China Warrior",
+      "system": "tg16",
+      "bucket": "tg16/China Warrior (USA).zip"
+    },
+    {
+      "title": "Riot Zone",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Riot Zone (USA).chd"
+    },
+    {
+      "title": "Double Dragon II - The Revenge",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Double Dragon II - The Revenge (Japan).chd"
+    },
+    {
+      "title": "Downtown Nekketsu Monogatari (River City Ransom)",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Downtown Nekketsu Monogatari (Japan).chd"
+    },
+    {
+      "title": "Mad Stalker - Full Metal Force",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Mad Stalker - Full Metal Force (Japan).chd"
+    },
+    {
+      "title": "Ane-san",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Ane-san (Japan).chd"
+    },
+    {
+      "title": "Guardian Heroes",
+      "system": "saturn",
+      "bucket": "saturn/Guardian Heroes (USA).chd"
+    },
+    {
+      "title": "Die Hard Arcade",
+      "system": "saturn",
+      "bucket": "saturn/Die Hard Arcade (USA).chd"
+    },
+    {
+      "title": "Three Dirty Dwarves",
+      "system": "saturn",
+      "bucket": "saturn/Three Dirty Dwarves (USA) (RE).chd"
+    },
+    {
+      "title": "Dungeons & Dragons Collection",
+      "system": "saturn",
+      "bucket": "saturn/Dungeons & Dragons Collection (Japan).m3u",
+      "files": [
+        "saturn/Dungeons & Dragons Collection (Japan) (Disc 1) (Tower of Doom).chd",
+        "saturn/Dungeons & Dragons Collection (Japan) (Disc 2) (Shadow over Mystara).chd"
+      ]
+    },
+    {
+      "title": "Arcade Gears Vol. 1 - Pu-Li-Ru-La",
+      "system": "saturn",
+      "bucket": "saturn/Arcade Gears Vol. 1 - Pu-Li-Ru-La (Japan).chd"
+    },
+    {
+      "title": "Batman Forever - The Arcade Game",
+      "system": "saturn",
+      "bucket": "saturn/Batman Forever - The Arcade Game (USA).chd"
+    },
+    {
+      "title": "Nekketsu Oyako",
+      "system": "saturn",
+      "bucket": "saturn/Nekketsu Oyako (Japan).chd"
+    },
+    {
+      "title": "Tenchi o Kurau II - Sekiheki no Tatakai",
+      "system": "saturn",
+      "bucket": "saturn/Tenchi o Kurau II - Sekiheki no Tatakai (Japan).chd"
+    },
+    {
+      "title": "Crows - The Battle Action for SegaSaturn",
+      "system": "saturn",
+      "bucket": "saturn/Crows - The Battle Action for SegaSaturn (Japan).chd"
+    },
+    {
+      "title": "Fighting Force 64",
+      "system": "n64",
+      "bucket": "n64/Fighting Force 64 (USA).zip"
+    },
+    {
+      "title": "Batman Beyond - Return of the Joker",
+      "system": "n64",
+      "bucket": "n64/Batman Beyond - Return of the Joker (USA).zip"
+    },
+    {
+      "title": "Capcom Classics Collection Remixed",
+      "system": "psp",
+      "bucket": "psp/Capcom Classics Collection Remixed (USA).chd"
+    },
+    {
+      "title": "Capcom Classics Collection Reloaded",
+      "system": "psp",
+      "bucket": "psp/Capcom Classics Collection Reloaded (USA).chd"
+    },
+    {
+      "title": "Guilty Gear Judgment",
+      "system": "psp",
+      "bucket": "psp/Guilty Gear Judgment (USA).chd"
+    },
+    {
+      "title": "The Warriors",
+      "system": "psp",
+      "bucket": "psp/Warriors, The (USA).chd"
+    },
+    {
+      "title": "Kenka Bancho - Badass Rumble",
+      "system": "psp",
+      "bucket": "psp/Kenka Bancho - Badass Rumble (USA).chd"
+    },
+    {
+      "title": "Teenage Mutant Ninja Turtles - Arcade Attack",
+      "system": "nds",
+      "bucket": "nds/Teenage Mutant Ninja Turtles - Arcade Attack (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Viewtiful Joe - Double Trouble!",
+      "system": "nds",
+      "bucket": "nds/Viewtiful Joe - Double Trouble! (USA).zip"
+    },
+    {
+      "title": "Tokyo Beat Down",
+      "system": "nds",
+      "bucket": "nds/Tokyo Beat Down (USA).zip"
+    },
+    {
+      "title": "Batman - The Brave and the Bold - The Videogame",
+      "system": "nds",
+      "bucket": "nds/Batman - The Brave and the Bold - The Videogame (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Thor - God of Thunder",
+      "system": "nds",
+      "bucket": "nds/Thor - God of Thunder (USA) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Star Wars - Episode III - Revenge of the Sith",
+      "system": "nds",
+      "bucket": "nds/Star Wars - Episode III - Revenge of the Sith (USA) (En,Fr,De,Es,It,Nl).zip"
+    },
+    {
+      "title": "Teenage Mutant Ninja Turtles 3 - Mutant Nightmare",
+      "system": "nds",
+      "bucket": "nds/Teenage Mutant Ninja Turtles 3 - Mutant Nightmare (USA).zip"
+    },
+    {
+      "title": "River City - Tokyo Rumble",
+      "system": "3ds",
+      "bucket": "3ds/River City - Tokyo Rumble (USA).zip"
+    },
+    {
+      "title": "River City - Rival Showdown",
+      "system": "3ds",
+      "bucket": "3ds/River City - Rival Showdown (USA).zip"
+    },
+    {
+      "title": "Code of Princess",
+      "system": "3ds",
+      "bucket": "3ds/Code of Princess (USA).zip"
+    },
+    {
+      "title": "Senran Kagura Burst",
+      "system": "3ds",
+      "bucket": "3ds/Senran Kagura Burst (Europe).zip"
+    },
+    {
+      "title": "Senran Kagura 2 - Deep Crimson",
+      "system": "3ds",
+      "bucket": "3ds/Senran Kagura 2 - Deep Crimson (USA).zip"
+    },
+    {
+      "title": "Dragon's Crown",
+      "system": "psvita",
+      "bucket": "psvita/Dragon's Crown [PCSE00019] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Muramasa Rebirth",
+      "system": "psvita",
+      "bucket": "psvita/Muramasa Rebirth [PCSE00240] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Golden Axe",
+      "system": "wonderswancolor",
+      "bucket": "wonderswancolor/Golden Axe (Japan).zip"
+    },
+    {
+      "title": "Die Hard Arcade",
+      "system": "mame",
+      "bucket": "mame/diehard.zip"
+    },
+    {
+      "title": "Batman Forever",
+      "system": "mame",
+      "bucket": "mame/batmanfr.zip"
+    },
+    {
+      "title": "Guardians of the 'Hood",
+      "system": "mame",
+      "bucket": "mame/guardian.zip"
+    },
+    {
+      "title": "Golden Axe - Beast Rider",
+      "system": "xbox360",
+      "bucket": "xbox360/Golden Axe - Beast Rider (USA, Europe) (En,Fr,Es,It).zar"
+    },
+    {
+      "title": "Teenage Mutant Ninja Turtles - Mutants in Manhattan",
+      "system": "xbox360",
+      "bucket": "xbox360/Teenage Mutant Ninja Turtles - Mutants in Manhattan (USA, Europe).zar"
+    },
+    {
+      "title": "TMNT",
+      "system": "xbox360",
+      "bucket": "xbox360/TMNT (USA) (En,Fr,De,Es,It).zar"
+    },
+    {
+      "title": "Muramasa - The Demon Blade",
+      "system": "wii",
+      "bucket": "wii/Muramasa - The Demon Blade (USA).rvz"
+    },
+    {
+      "title": "Double Dragon",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Double Dragon (USA, Europe).zip"
+    },
+    {
+      "title": "Ninja Gaiden",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Ninja Gaiden (USA, Europe).zip"
     }
   ]
 }

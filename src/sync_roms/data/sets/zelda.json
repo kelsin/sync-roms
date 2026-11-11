@@ -13,9 +13,54 @@
       "bucket": "nes/Zelda II - The Adventure of Link (USA).zip"
     },
     {
+      "title": "Zelda no Densetsu - The Hyrule Fantasy",
+      "system": "fds",
+      "bucket": "fds/Zelda no Densetsu - The Hyrule Fantasy (Japan) (Collector's Edition).zip"
+    },
+    {
+      "title": "Link no Bouken - The Legend of Zelda 2 (Rev 1)",
+      "system": "fds",
+      "bucket": "fds/Link no Bouken - The Legend of Zelda 2 (Japan) (Rev 1) (Collector's Edition).zip"
+    },
+    {
       "title": "Legend of Zelda, The - A Link to the Past",
       "system": "snes",
       "bucket": "snes/Legend of Zelda, The - A Link to the Past (USA).zip"
+    },
+    {
+      "title": "BS Zelda no Densetsu",
+      "system": "satellaview",
+      "bucket": "satellaview/BS Zelda no Densetsu - Dai-1-wa (Japan) (Rerun) (SoundLink).zip",
+      "files": [
+        "satellaview/BS Zelda no Densetsu - Dai-2-wa (Japan) (SoundLink).zip",
+        "satellaview/BS Zelda no Densetsu - Dai-3-wa (Japan) (SoundLink).zip",
+        "satellaview/BS Zelda no Densetsu - Dai-4-wa (Japan) (Rerun) (SoundLink).zip"
+      ]
+    },
+    {
+      "title": "BS Zelda no Densetsu - Map 2",
+      "system": "satellaview",
+      "bucket": "satellaview/BS Zelda no Densetsu - Map 2 - Dai-1-wa (Japan) (SoundLink).zip"
+    },
+    {
+      "title": "BS Zelda no Densetsu - Inishie no Sekiban",
+      "system": "satellaview",
+      "bucket": "satellaview/BS Zelda no Densetsu - Inishie no Sekiban - Dai-1-wa (Japan) (SoundLink).zip",
+      "files": [
+        "satellaview/BS Zelda no Densetsu - Inishie no Sekiban - Dai-2-wa (Japan) (SoundLink).zip",
+        "satellaview/BS Zelda no Densetsu - Inishie no Sekiban - Dai-3-wa (Japan) (SoundLink).zip",
+        "satellaview/BS Zelda no Densetsu - Inishie no Sekiban - Dai-4-wa (Japan) (SoundLink).zip"
+      ]
+    },
+    {
+      "title": "Zelda no Densetsu - Kamigami no Triforce",
+      "system": "satellaview",
+      "bucket": "satellaview/Zelda no Densetsu - Kamigami no Triforce (Japan) (11-30).zip"
+    },
+    {
+      "title": "Picross NP Vol. 5",
+      "system": "snes",
+      "bucket": "snes/Picross NP Vol. 5 (Japan) (Rev 1) (NP).zip"
     },
     {
       "title": "Legend of Zelda, The - Link's Awakening (Rev 2)",
@@ -46,6 +91,16 @@
       "title": "Legend of Zelda, The - The Minish Cap",
       "system": "gba",
       "bucket": "gba/Legend of Zelda, The - The Minish Cap (USA).zip"
+    },
+    {
+      "title": "Classic NES Series - The Legend of Zelda",
+      "system": "gba",
+      "bucket": "gba/Classic NES Series - The Legend of Zelda (USA, Europe).zip"
+    },
+    {
+      "title": "Classic NES Series - Zelda II - The Adventure of Link",
+      "system": "gba",
+      "bucket": "gba/Classic NES Series - Zelda II - The Adventure of Link (USA, Europe).zip"
     },
     {
       "title": "Legend of Zelda, The - Ocarina of Time",
@@ -91,6 +146,46 @@
       "title": "Legend of Zelda, The - Spirit Tracks (Rev 1)",
       "system": "nds",
       "bucket": "nds/Legend of Zelda, The - Spirit Tracks (USA) (En,Fr,Es) (Rev 1).zip"
+    },
+    {
+      "title": "Freshly-Picked - Tingle's Rosy Rupeeland",
+      "system": "nds",
+      "bucket": "nds/Freshly-Picked - Tingle's Rosy Rupeeland (Europe) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Irozuki Tingle no Koi no Balloon Trip",
+      "system": "nds",
+      "bucket": "nds/Irozuki Tingle no Koi no Balloon Trip (Japan).zip"
+    },
+    {
+      "title": "Tingle no Balloon Fight DS",
+      "system": "nds",
+      "bucket": "nds/Tingle no Balloon Fight DS (Japan) (Club Nintendo).zip"
+    },
+    {
+      "title": "Legend of Zelda, The - Ocarina of Time 3D (Rev 1)",
+      "system": "3ds",
+      "bucket": "3ds/Legend of Zelda, The - Ocarina of Time 3D (USA) (En,Fr,Es) (Rev 1).zip"
+    },
+    {
+      "title": "Legend of Zelda, The - Majora's Mask 3D (Rev 1)",
+      "system": "3ds",
+      "bucket": "3ds/Legend of Zelda, The - Majora's Mask 3D (USA) (En,Fr,Es) (Rev 1).zip"
+    },
+    {
+      "title": "Legend of Zelda, The - A Link Between Worlds",
+      "system": "3ds",
+      "bucket": "3ds/Legend of Zelda, The - A Link Between Worlds (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Legend of Zelda, The - Tri Force Heroes",
+      "system": "3ds",
+      "bucket": "3ds/Legend of Zelda, The - Tri Force Heroes (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Hyrule Warriors Legends",
+      "system": "3ds",
+      "bucket": "3ds/Hyrule Warriors Legends (USA).zip"
     },
     {
       "title": "Legend of Zelda, The - Ocarina of Time - Master Quest",

@@ -1,0 +1,667 @@
+{
+  "name": "Fan Translations",
+  "description": "Japan-only games playable in English through fan patches.",
+  "games": [
+    {
+      "title": "Mother 1+2",
+      "category": "RPG",
+      "system": "gba",
+      "bucket": "gba/Mother 1+2 (English).zip"
+    },
+    {
+      "title": "Mother 3",
+      "category": "RPG",
+      "system": "gba",
+      "bucket": "gba/Mother 3 (English v1.3a).zip"
+    },
+    {
+      "title": "Shin Megami Tensei 1",
+      "category": "RPG",
+      "system": "snes",
+      "bucket": "snes/Shin Megami Tensei 1 (English Addendum 1.0)[Automap].zip"
+    },
+    {
+      "title": "Shin Megami Tensei II",
+      "category": "RPG",
+      "system": "snes",
+      "bucket": "snes/Shin Megami Tensei II (English v1.00 - NameFixes).zip"
+    },
+    {
+      "title": "Shin Megami Tensei if...",
+      "category": "RPG",
+      "system": "snes",
+      "bucket": "snes/Shin Megami Tensei if... (Eng. patched v1.0).zip"
+    },
+    {
+      "title": "7th Dragon 2020",
+      "category": "RPG",
+      "system": "psp",
+      "bucket": "psp/7th Dragon 2020 (Japan) [T-En by Geoff Embree v0.91].chd"
+    },
+    {
+      "title": "7th Dragon 2020-II",
+      "category": "RPG",
+      "system": "psp",
+      "bucket": "psp/7th Dragon 2020-II (Japan) [T-En by Geoff Embree v0.91].chd"
+    },
+    {
+      "title": "Legend of Heroes, The - Zero no Kiseki",
+      "category": "RPG",
+      "system": "psp",
+      "bucket": "psp/Legend of Heroes, The - Zero no Kiseki (Japan) [T-En by Zerker & Guren v1.0.2].chd"
+    },
+    {
+      "title": "Legend of Heroes, The - Ao no Kiseki",
+      "category": "RPG",
+      "system": "psp",
+      "bucket": "psp/Legend of Heroes, The - Ao no Kiseki (Japan) [T-En by Flame & Guren v15] [n].chd"
+    },
+    {
+      "title": "Tales of Phantasia - Full Voice Edition",
+      "category": "RPG",
+      "system": "psp",
+      "bucket": "psp/Tales of Phantasia - Full Voice Edition (English v1.2)[QoL].chd"
+    },
+    {
+      "title": "Tales of Phantasia - Narikiri Dungeon X",
+      "category": "RPG",
+      "system": "psp",
+      "bucket": "psp/Tales of Phantasia - Narikiri Dungeon X (English v1.2).chd"
+    },
+    {
+      "title": "Tales of the World - Radiant Mythology 2",
+      "category": "RPG",
+      "system": "psp",
+      "bucket": "psp/Tales of the World - Radiant Mythology 2 (English 31-08).chd"
+    },
+    {
+      "title": "Tales of the World - Radiant Mythology 3",
+      "category": "RPG",
+      "system": "psp",
+      "bucket": "psp/Tales of the World - Radiant Mythology 3 (English v1.02).chd"
+    },
+    {
+      "title": "Grand Knights History",
+      "category": "RPG",
+      "system": "psp",
+      "bucket": "psp/Grand Knights History (Japan) [T-En by Justfuit v1.16].chd"
+    },
+    {
+      "title": "Last Ranker",
+      "category": "RPG",
+      "system": "psp",
+      "bucket": "psp/Last Ranker (Japan) [T-En by Flame & EnglishSubs4All v2.3].chd"
+    },
+    {
+      "title": "Sol Trigger",
+      "category": "RPG",
+      "system": "psp",
+      "bucket": "psp/Sol Trigger (Japan) [T-En by GareJei & JamRules v0.9] [i].chd"
+    },
+    {
+      "title": "Fate Extra CCC",
+      "category": "RPG",
+      "system": "psp",
+      "bucket": "psp/Fate Extra CCC (English v1.0).chd"
+    },
+    {
+      "title": "Genso Suikoden Tsumugareshi Hyakunen no Toki",
+      "category": "RPG",
+      "system": "psp",
+      "bucket": "psp/Genso Suikoden Tsumugareshi Hyakunen no Toki (English v1.0.2).chd"
+    },
+    {
+      "title": "One Piece - Romance Dawn",
+      "category": "RPG",
+      "system": "psp",
+      "bucket": "psp/One Piece - Romance Dawn (Japan) [T-En by ______ vBeta R2].chd"
+    },
+    {
+      "title": "Digimon Adventure",
+      "category": "RPG",
+      "system": "psp",
+      "bucket": "psp/Digimon Adventure (Japan) [T-En by Kazari v1.2].chd"
+    },
+    {
+      "title": "Digimon World - Re-Digitize",
+      "category": "RPG",
+      "system": "psp",
+      "bucket": "psp/Digimon World - Re-Digitize (Japan) [T-En by Operation Decoded v1.1] [Dub version].chd"
+    },
+    {
+      "title": "Mahou Shoujo Madoka Magica Portable",
+      "category": "RPG",
+      "system": "psp",
+      "bucket": "psp/Mahou Shoujo Madoka Magica Portable (Japan) [T-En by Traduko Soft + Carlitos v12-26-20].chd"
+    },
+    {
+      "title": "Shiren the Wanderer 3",
+      "category": "RPG",
+      "system": "psp",
+      "bucket": "psp/Shiren the Wanderer 3 (Japan) [T-En by Aka Translations v0.01] [n].chd"
+    },
+    {
+      "title": "Kingdom Hearts Final Mix",
+      "category": "Action RPG",
+      "system": "ps2",
+      "bucket": "ps2/Kingdom Hearts Final Mix (English v2026-06-26).chd"
+    },
+    {
+      "title": "Kingdom Hearts II - Final Mix+",
+      "category": "Action RPG",
+      "system": "ps2",
+      "bucket": "ps2/Kingdom Hearts II - Final Mix+ (English Patched)[Undub][4-3].chd"
+    },
+    {
+      "title": "Kingdom Hearts - Birth by Sleep",
+      "category": "Action RPG",
+      "system": "psp",
+      "bucket": "psp/Kingdom Hearts - Birth by Sleep (Japan) (Final Mix) [T-En by Truthkey v1.0.12].chd"
+    },
+    {
+      "title": "Final Fantasy Reishiki",
+      "category": "Action RPG",
+      "system": "psp",
+      "bucket": "psp/Final Fantasy Reishiki (Japan) [T-En by SkyBladeCloud v2].chd"
+    },
+    {
+      "title": "Final Fantasy Type-0 (alternate patch)",
+      "category": "Action RPG",
+      "system": "psp",
+      "bucket": "psp/Final Fantasy Type-0 (English Patched v2).chd"
+    },
+    {
+      "title": "Nayuta - Endless Trails",
+      "category": "Action RPG",
+      "system": "psp",
+      "bucket": "psp/Nayuta - Endless Trails (Japan) [T-En by Flame v4.15] [Add by Dackst v1.0.1] [n].chd"
+    },
+    {
+      "title": "Phantasy Star Portable 2 Infinity",
+      "category": "Action RPG",
+      "system": "psp",
+      "bucket": "psp/Phantasy Star Portable 2 Infinity (Japan) [T-En by JamRules & Weyu v1.7].chd"
+    },
+    {
+      "title": "Monster Hunter Portable 3rd",
+      "category": "Action RPG",
+      "system": "psp",
+      "bucket": "psp/Monster Hunter Portable 3rd (Japan) [T-En by Team Maverick One v5.0] [PPSSPP HD version].chd"
+    },
+    {
+      "title": "God Eater 2",
+      "category": "Action RPG",
+      "system": "psp",
+      "bucket": "psp/God Eater 2 (Japan) [T-En by Gaikoz199 Beta] [i].chd"
+    },
+    {
+      "title": "Toukiden Kiwami",
+      "category": "Action RPG",
+      "system": "psp",
+      "bucket": "psp/Toukiden Kiwami (Japan) [T-En by HoaiTrung97 Fan Translation Team v3.0].chd"
+    },
+    {
+      "title": "Lord of Apocalypse",
+      "category": "Action RPG",
+      "system": "psp",
+      "bucket": "psp/Lord of Apocalypse (Japan) [T-En by Serberker, Sabaku.D.Tonio, Jinouga v1.6].chd"
+    },
+    {
+      "title": "Sword Art Online - Infinity Moment",
+      "category": "Action RPG",
+      "system": "psp",
+      "bucket": "psp/Sword Art Online - Infinity Moment (Japan) [T-En by HoaiTrung97 v2.0].chd"
+    },
+    {
+      "title": "Danball Senki Boost",
+      "category": "Action RPG",
+      "system": "psp",
+      "bucket": "psp/Danball Senki Boost (Japan) [T-En by DSB Translation Team v1.0] [i].chd"
+    },
+    {
+      "title": "Kidou Senshi Gundam AGE Cosmic Drive",
+      "category": "Action RPG",
+      "system": "psp",
+      "bucket": "psp/Kidou Senshi Gundam AGE Cosmic Drive (Japan) [T-En by Maxtram & CrashmanX v1.0].chd"
+    },
+    {
+      "title": "Kidou Senshi Gundam AGE Universe Accel",
+      "category": "Action RPG",
+      "system": "psp",
+      "bucket": "psp/Kidou Senshi Gundam AGE Universe Accel (Japan) [T-En by Maxtram & CrashmanX v1.0].chd"
+    },
+    {
+      "title": "Yuusha 30 Second",
+      "category": "Action RPG",
+      "system": "psp",
+      "bucket": "psp/Yuusha 30 Second (Japan) [T-En by ChepChep & Ignis00 v1.0.2].chd"
+    },
+    {
+      "title": "Fire Emblem - Shadow Dragon and the Blade of Light",
+      "category": "Strategy RPG",
+      "system": "nes",
+      "bucket": "nes/Fire Emblem Shadow Dragon and the Blade of Light (English v1.4.1).zip"
+    },
+    {
+      "title": "Fire Emblem Gaiden",
+      "category": "Strategy RPG",
+      "system": "nes",
+      "bucket": "nes/Fire Emblem Gaiden (English v1.01)[Names+Font Fix].zip"
+    },
+    {
+      "title": "Fire Emblem - Akaneia Saga - Episode 1",
+      "category": "Strategy RPG",
+      "system": "snes",
+      "bucket": "snes/Fire Emblem - Akaneia Saga - Episode 1 (English v1.01).zip"
+    },
+    {
+      "title": "Fire Emblem - Akaneia Saga - Episode 2",
+      "category": "Strategy RPG",
+      "system": "snes",
+      "bucket": "snes/Fire Emblem - Akaneia Saga - Episode 2 (English v1.01).zip"
+    },
+    {
+      "title": "Fire Emblem - Akaneia Saga - Episode 3",
+      "category": "Strategy RPG",
+      "system": "snes",
+      "bucket": "snes/Fire Emblem - Akaneia Saga - Episode 3 (English v1.01).zip"
+    },
+    {
+      "title": "Fire Emblem - Akaneia Saga - Episode 4",
+      "category": "Strategy RPG",
+      "system": "snes",
+      "bucket": "snes/Fire Emblem - Akaneia Saga - Episode 4 (English v1.01).zip"
+    },
+    {
+      "title": "Fire Emblem - Seisen no Keifu",
+      "category": "Strategy RPG",
+      "system": "snes",
+      "bucket": "snes/Fire Emblem - Seisen no Keifu (English v1.01)[Lil-Nordion].zip"
+    },
+    {
+      "title": "Fire Emblem - Thracia 776",
+      "category": "Strategy RPG",
+      "system": "snes",
+      "bucket": "snes/Fire Emblem - Thracia 776 (English v108).zip"
+    },
+    {
+      "title": "Fire Emblem - Fuuin no Tsurugi",
+      "category": "Strategy RPG",
+      "system": "gba",
+      "bucket": "gba/Fire Emblem - Fuuin no Tsurugi (English v1.2.1).zip"
+    },
+    {
+      "title": "Fire Emblem - Souen no Kiseki",
+      "category": "Strategy RPG",
+      "system": "gc",
+      "bucket": "gc/Fire Emblem - Souen no Kiseki (Eng tran).rvz"
+    },
+    {
+      "title": "Fire Emblem - New Mystery of the Emblem - Heroes of Light and Shadow",
+      "category": "Strategy RPG",
+      "system": "nds",
+      "bucket": "nds/Fire Emblem True Mystery Of The Emblem Heroes of Light and Shadow (English v3.01)[Beta 2.1].zip"
+    },
+    {
+      "title": "Der Langrisser",
+      "category": "Strategy RPG",
+      "system": "snes",
+      "bucket": "snes/Der Langrisser (English v1.3.1)[Near-D].zip"
+    },
+    {
+      "title": "Sakura Wars",
+      "category": "Strategy RPG",
+      "system": "saturn",
+      "bucket": "saturn/Sakura Wars (Japan).m3u",
+      "files": [
+        "saturn/Sakura Wars (Japan) (Disc 1) [T-En].chd",
+        "saturn/Sakura Wars (Japan) (Disc 2) [T-En].chd"
+      ]
+    },
+    {
+      "title": "Sakura Wars 2",
+      "category": "Strategy RPG",
+      "system": "saturn",
+      "bucket": "saturn/Sakura Wars 2 (Japan).m3u",
+      "files": [
+        "saturn/Sakura Wars 2 (Japan) (Disc 1) [T-En].chd",
+        "saturn/Sakura Wars 2 (Japan) (Disc 2) [T-En].chd",
+        "saturn/Sakura Wars 2 (Japan) (Disc 3) [T-En].chd"
+      ]
+    },
+    {
+      "title": "Super Robot Taisen GC",
+      "category": "Strategy RPG",
+      "system": "gc",
+      "bucket": "gc/Super Robot Taisen GC (Eng tran).rvz"
+    },
+    {
+      "title": "Super Robot Wars A Portable",
+      "category": "Strategy RPG",
+      "system": "psp",
+      "bucket": "psp/Super Robot Wars A Portable (Japan) [T-En by Steel Soul v1.01] [n].chd"
+    },
+    {
+      "title": "Super Robot Taisen - Operation Extend",
+      "category": "Strategy RPG",
+      "system": "psp",
+      "bucket": "psp/Super Robot Taisen - Operation Extend (Japan) [T-En by CrashmanX].chd"
+    },
+    {
+      "title": "SD Gundam - G Generation Over World",
+      "category": "Strategy RPG",
+      "system": "psp",
+      "bucket": "psp/SD Gundam - G Generation Over World (Japan) [T-En by Izzul95 v1.1].chd"
+    },
+    {
+      "title": "R-Type Tactics II - Operation Bitter Chocolate",
+      "category": "Strategy RPG",
+      "system": "psp",
+      "bucket": "psp/R-Type Tactics II - Operation Bitter Chocolate (Japan) [T-En by Isourou-san v1.1].chd"
+    },
+    {
+      "title": "Valkyria Chronicles 3",
+      "category": "Strategy RPG",
+      "system": "psp",
+      "bucket": "psp/Valkyria Chronicles 3 (English v1.0.8).chd"
+    },
+    {
+      "title": "Valkyria Chronicles 3 - Extra Edition",
+      "category": "Strategy RPG",
+      "system": "psp",
+      "bucket": "psp/Valkyria Chronicles 3 - Extra Edition (Japan) [T-En by Valkyria Chronicles 3 Translation Project v2] [i] [n].chd"
+    },
+    {
+      "title": "Phantom Kingdom Portable",
+      "category": "Strategy RPG",
+      "system": "psp",
+      "bucket": "psp/Phantom Kingdom Portable (Japan) [T-En by ChepChep & DurableTomb & Ignis00 v0.9.3].chd"
+    },
+    {
+      "title": "Pucelle, La - Ragnarok",
+      "category": "Strategy RPG",
+      "system": "psp",
+      "bucket": "psp/Pucelle, La - Ragnarok (Japan) [T-En by ChepChep & Hatsubai v1.1.2].chd"
+    },
+    {
+      "title": "Queens Blade - Spiral Chaos",
+      "category": "Strategy RPG",
+      "system": "psp",
+      "bucket": "psp/Queens Blade - Spiral Chaos (Japan) [T-En by leecherboy v0.9 BETA].chd"
+    },
+    {
+      "title": "Berserk Millennium Falcon",
+      "category": "Action",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Berserk Millennium Falcon (English v1.1).chd"
+    },
+    {
+      "title": "Kurohyou - Ryu ga Gotoku Shinshou",
+      "category": "Action",
+      "system": "psp",
+      "bucket": "psp/Kurohyou - Ryu ga Gotoku Shinshou (Japan) [T-en by FlyingClimber v11-2020].chd"
+    },
+    {
+      "title": "Samuraidou Portable",
+      "category": "Action",
+      "system": "psp",
+      "bucket": "psp/Samuraidou Portable (Japan) [T-En by Aka Translations v0.02].chd"
+    },
+    {
+      "title": "Samuraidou 2 Portable",
+      "category": "Action",
+      "system": "psp",
+      "bucket": "psp/Samuraidou 2 Portable (Japan) [T-En by 2012Z v003].chd"
+    },
+    {
+      "title": "Musou Orochi 2 Special",
+      "category": "Action",
+      "system": "psp",
+      "bucket": "psp/Musou Orochi 2 Special (Japan) [T-En by Yuu Ho v72%].chd"
+    },
+    {
+      "title": "Shin Sangoku Musou - Multi Raid 2",
+      "category": "Action",
+      "system": "psp",
+      "bucket": "psp/Shin Sangoku Musou - Multi Raid 2 (Japan) [T-En by Yuu Ho v3].chd"
+    },
+    {
+      "title": "Kidou Senshi Gundam - Gundam vs. Gundam NEXT PLUS",
+      "category": "Action",
+      "system": "psp",
+      "bucket": "psp/Kidou Senshi Gundam - Gundam vs. Gundam NEXT PLUS (Japan) [T-En by DaTeHaCKs Team v1.5].chd"
+    },
+    {
+      "title": "Ys vs. Sora no Kiseki - Alternative Saga",
+      "category": "Action",
+      "system": "psp",
+      "bucket": "psp/Ys vs. Sora no Kiseki - Alternative Saga (Japan) [T-En by Flame v2] [i].chd"
+    },
+    {
+      "title": "Toaru Majutsu no Index",
+      "category": "Action",
+      "system": "psp",
+      "bucket": "psp/Toaru Majutsu no Index (Japan) [T-En by JeruTz v20191912].chd"
+    },
+    {
+      "title": "Mahou Shoujo Lyrical Nanoha A's Portable - The Gears of Destiny",
+      "category": "Action",
+      "system": "psp",
+      "bucket": "psp/Mahou Shoujo Lyrical Nanoha A's Portable - The Gears of Destiny (Japan) [T-En by Vivid Translations v20180523].chd"
+    },
+    {
+      "title": "Seirei Senshi Spriggan",
+      "category": "Action",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Seirei Senshi Spriggan (Japan) [T-En].chd"
+    },
+    {
+      "title": "Spriggan Mark 2 - Re Terraform Project",
+      "category": "Action",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Spriggan Mark 2 - Re Terraform Project (Japan) [T-En].chd"
+    },
+    {
+      "title": "Danganronpa - Hope's Academy and Despair's Students",
+      "category": "Visual Novel",
+      "system": "psp",
+      "bucket": "psp/Danganronpa - Hope's Academy and Despair's Students (Japan) [T-En by Project Zetsubou v1.0] [n].chd"
+    },
+    {
+      "title": "Danganronpa (alternate patch)",
+      "category": "Visual Novel",
+      "system": "psp",
+      "bucket": "psp/Danganronpa (English Patched).chd"
+    },
+    {
+      "title": "Steins;Gate",
+      "category": "Visual Novel",
+      "system": "psp",
+      "bucket": "psp/Steins;Gate (Japan) [T-En by HaselLoyance v1.0.1].chd"
+    },
+    {
+      "title": "Never7 - The End of Infinity",
+      "category": "Visual Novel",
+      "system": "psp",
+      "bucket": "psp/Never7 - The End of Infinity (Japan) [T-En by Jv110 v2].chd"
+    },
+    {
+      "title": "Ever17 - The Out of Infinity Premium Edition",
+      "category": "Visual Novel",
+      "system": "psp",
+      "bucket": "psp/Ever17 - The Out of Infinity Premium Edition (Japan) [T-En by MrComputerRevo Beta4].chd"
+    },
+    {
+      "title": "Remember11 - The Age of Infinity",
+      "category": "Visual Novel",
+      "system": "psp",
+      "bucket": "psp/Remember11 - The Age of Infinity (Japan) [T-En by Dreambottle & TLWiki Team v2.1].chd"
+    },
+    {
+      "title": "AIR",
+      "category": "Visual Novel",
+      "system": "psp",
+      "bucket": "psp/AIR (Japan) [T-En by Patr0805 v0.9].chd"
+    },
+    {
+      "title": "Little Busters - Converted Edition",
+      "category": "Visual Novel",
+      "system": "psp",
+      "bucket": "psp/Little Busters - Converted Edition (Japan) [T-En by Patr0805 v0.95].chd"
+    },
+    {
+      "title": "Planetarian - The Dream of a Little Star",
+      "category": "Visual Novel",
+      "system": "psp",
+      "bucket": "psp/Planetarian - The Dream of a Little Star (Japan) [T-En by ShinjiGR v1.0] [n].chd"
+    },
+    {
+      "title": "Yarudora Portable - Double Cast",
+      "category": "Visual Novel",
+      "system": "psp",
+      "bucket": "psp/Yarudora Portable - Double Cast (Japan) [T-En by Cargodin & Esperknight v1.1].chd"
+    },
+    {
+      "title": "Evangelion - Girlfriend of Steel 2nd",
+      "category": "Visual Novel",
+      "system": "psp",
+      "bucket": "psp/Evangelion - Girlfriend of Steel 2nd (Japan) [T-En by Blacklabel Translations v1.01] [n].chd"
+    },
+    {
+      "title": "Sound of the Sky - Quintet of Maidens",
+      "category": "Visual Novel",
+      "system": "psp",
+      "bucket": "psp/Sound of the Sky - Quintet of Maidens (Japan) [T-En by Okaysubs v1.0] [n].chd"
+    },
+    {
+      "title": "Suzumiya Haruhi no Yakusoku",
+      "category": "Visual Novel",
+      "system": "psp",
+      "bucket": "psp/Suzumiya Haruhi no Yakusoku (Japan) [T-En by EsperKnight & Soywiz & Tom & Zarradeth v1].chd"
+    },
+    {
+      "title": "Sakurasou no Pet na Kanojo",
+      "category": "Visual Novel",
+      "system": "psp",
+      "bucket": "psp/Sakurasou no Pet na Kanojo (Japan) [T-En by Eternal Nyaboron team v0.2.1].chd"
+    },
+    {
+      "title": "Ore no Imouto ga Konna ni Kawaii Wake ga Nai Portable ga Tsuzuku Wake ga Nai",
+      "category": "Visual Novel",
+      "system": "psp",
+      "bucket": "psp/Ore no Imouto ga Konna ni Kawaii Wake ga Nai Portable ga Tsuzuku Wake ga Nai (Japan).m3u",
+      "files": [
+        "psp/Ore no Imouto ga Konna ni Kawaii Wake ga Nai Portable ga Tsuzuku Wake ga Nai (Japan) (Disc 1) [T-En by Rinjinbu Translations v1].chd",
+        "psp/Ore no Imouto ga Konna ni Kawaii Wake ga Nai Portable ga Tsuzuku Wake ga Nai (Japan) (Disc 2) [T-En by Rinjinbu Translations v1].chd"
+      ]
+    },
+    {
+      "title": "Tora Dora Portable!",
+      "category": "Visual Novel",
+      "system": "psp",
+      "bucket": "psp/Tora Dora Portable! (Japan) [T-En by Chronoes & Verdelish & Xyz v1.10].chd"
+    },
+    {
+      "title": "GA - Geijutsuka Art Design Class - Slapstick Wonder Land",
+      "category": "Visual Novel",
+      "system": "psp",
+      "bucket": "psp/GA - Geijutsuka Art Design Class - Slapstick Wonder Land (Japan) [T-En by Nodamiki v1.0].chd"
+    },
+    {
+      "title": "Tantei Opera Milky Holmes",
+      "category": "Visual Novel",
+      "system": "psp",
+      "bucket": "psp/Tantei Opera Milky Holmes (Japan) [T-En by Desuwa v0.4].chd"
+    },
+    {
+      "title": "Tokimeki Memorial Girl's Side Premium - 3rd Story",
+      "category": "Visual Novel",
+      "system": "psp",
+      "bucket": "psp/Tokimeki Memorial Girl's Side Premium - 3rd Story (Japan) [T-En by Jjjewel v1.00].chd"
+    },
+    {
+      "title": "StormLover Kai!!",
+      "category": "Visual Novel",
+      "system": "psp",
+      "bucket": "psp/StormLover Kai!! (Japan) [T-En by Jjjewel & Xyz v0.90].chd"
+    },
+    {
+      "title": "Hatsune Miku - Project Diva",
+      "category": "Rhythm & Idol",
+      "system": "psp",
+      "bucket": "psp/Hatsune Miku - Project Diva (Japan) [T-En by Diva Fan Project v1.0].chd"
+    },
+    {
+      "title": "Hatsune Miku - Project Diva 2nd",
+      "category": "Rhythm & Idol",
+      "system": "psp",
+      "bucket": "psp/Hatsune Miku - Project Diva 2nd (Japan) [T-En by Diva Fan Project v3.0].chd"
+    },
+    {
+      "title": "Hatsune Miku - Project Diva Extend",
+      "category": "Rhythm & Idol",
+      "system": "psp",
+      "bucket": "psp/Hatsune Miku - Project Diva Extend (Japan) [T-En by Diva Fan Project v2.0].chd"
+    },
+    {
+      "title": "Idol Master SP, The - Perfect Sun",
+      "category": "Rhythm & Idol",
+      "system": "psp",
+      "bucket": "psp/Idol Master SP, The - Perfect Sun (Japan) [T-En by VN Translations v12-14-12].chd"
+    },
+    {
+      "title": "Idol Master SP, The - Missing Moon",
+      "category": "Rhythm & Idol",
+      "system": "psp",
+      "bucket": "psp/Idol Master SP, The - Missing Moon (Japan) [T-En by VN Translations v12-14-12].chd"
+    },
+    {
+      "title": "Idolmaster SP, The - Wandering Star",
+      "category": "Rhythm & Idol",
+      "system": "psp",
+      "bucket": "psp/Idolmaster SP, The - Wandering Star (Japan) [T-En by VN Translations v12-14-12].chd"
+    },
+    {
+      "title": "Idol Master SP, The - Shiny Festa - Honey Sound",
+      "category": "Rhythm & Idol",
+      "system": "psp",
+      "bucket": "psp/Idol Master SP, The - Shiny Festa - Honey Sound (Japan) [T-En by zzzzzzzzz].chd"
+    },
+    {
+      "title": "Idol Master SP, The - Shiny Festa - Funky Note",
+      "category": "Rhythm & Idol",
+      "system": "psp",
+      "bucket": "psp/Idol Master SP, The - Shiny Festa - Funky Note (Japan) [T-En by zzzzzzzzz].chd"
+    },
+    {
+      "title": "Idol Master SP, The - Shiny Festa - Groovy Tune",
+      "category": "Rhythm & Idol",
+      "system": "psp",
+      "bucket": "psp/Idol Master SP, The - Shiny Festa - Groovy Tune (Japan) [T-En by zzzzzzzzz].chd"
+    },
+    {
+      "title": "Yu-Gi-Oh! 5D's Tag Force 6",
+      "category": "Card, Board & Sports",
+      "system": "psp",
+      "bucket": "psp/Yu-Gi-Oh! 5D's Tag Force 6 (Japan) [T-En by Clickclaxer01 v2.0].chd"
+    },
+    {
+      "title": "Yu-Gi-Oh! ARC-V Tag Force Special",
+      "category": "Card, Board & Sports",
+      "system": "psp",
+      "bucket": "psp/Yu-Gi-Oh! ARC-V Tag Force Special (Japan) [T-En by FLS Gaming Projects v2.1].chd"
+    },
+    {
+      "title": "Dragon Quest & Final Fantasy in Itadaki Street Portable",
+      "category": "Card, Board & Sports",
+      "system": "psp",
+      "bucket": "psp/Dragon Quest & Final Fantasy in Itadaki Street Portable (Japan) [T-En by MortoQueiba & Choppasmith Prerelease 3].chd"
+    },
+    {
+      "title": "World Soccer Winning Eleven 6 - Final Evolution",
+      "category": "Card, Board & Sports",
+      "system": "gc",
+      "bucket": "gc/World Soccer Winning Eleven 6 - Final Evolution (Eng tran).rvz"
+    }
+  ]
+}

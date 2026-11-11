@@ -1,0 +1,3974 @@
+{
+  "name": "Sports",
+  "description": "Arcade-style and landmark sports games.",
+  "games": [
+    {
+      "title": "NBA Jam",
+      "category": "Basketball",
+      "system": "fbneo",
+      "bucket": "fbneo/nbajam.zip"
+    },
+    {
+      "title": "NBA Jam Tournament Edition",
+      "category": "Basketball",
+      "system": "fbneo",
+      "bucket": "fbneo/nbajamte.zip"
+    },
+    {
+      "title": "NBA Jam",
+      "category": "Basketball",
+      "system": "snes",
+      "bucket": "snes/NBA Jam (USA) (Rev 1).zip"
+    },
+    {
+      "title": "NBA Jam - Tournament Edition",
+      "category": "Basketball",
+      "system": "snes",
+      "bucket": "snes/NBA Jam - Tournament Edition (USA).zip"
+    },
+    {
+      "title": "NBA Jam",
+      "category": "Basketball",
+      "system": "genesis",
+      "bucket": "genesis/NBA Jam (USA, Europe) (Rev 1).zip"
+    },
+    {
+      "title": "NBA Jam - Tournament Edition",
+      "category": "Basketball",
+      "system": "genesis",
+      "bucket": "genesis/NBA Jam - Tournament Edition (World).zip"
+    },
+    {
+      "title": "NBA Jam",
+      "category": "Basketball",
+      "system": "segacd",
+      "bucket": "segacd/NBA Jam (USA).chd"
+    },
+    {
+      "title": "NBA Jam - Tournament Edition",
+      "category": "Basketball",
+      "system": "sega32x",
+      "bucket": "sega32x/NBA Jam - Tournament Edition (World).zip"
+    },
+    {
+      "title": "NBA Jam - Tournament Edition",
+      "category": "Basketball",
+      "system": "atarijaguar",
+      "bucket": "atarijaguar/NBA Jam - Tournament Edition (USA, Europe).zip"
+    },
+    {
+      "title": "NBA Jam - Tournament Edition",
+      "category": "Basketball",
+      "system": "saturn",
+      "bucket": "saturn/NBA Jam - Tournament Edition (USA) (3S).chd"
+    },
+    {
+      "title": "NBA Jam - Tournament Edition",
+      "category": "Basketball",
+      "system": "psx",
+      "bucket": "psx/NBA Jam - Tournament Edition (USA).chd"
+    },
+    {
+      "title": "NBA Jam - Tournament Edition",
+      "category": "Basketball",
+      "system": "gamegear",
+      "bucket": "gamegear/NBA Jam - Tournament Edition (World).zip"
+    },
+    {
+      "title": "NBA Jam - Tournament Edition",
+      "category": "Basketball",
+      "system": "gb",
+      "bucket": "gb/NBA Jam - Tournament Edition (USA, Europe).zip"
+    },
+    {
+      "title": "NBA Hangtime",
+      "category": "Basketball",
+      "system": "fbneo",
+      "bucket": "fbneo/nbahangt.zip"
+    },
+    {
+      "title": "NBA Hangtime",
+      "category": "Basketball",
+      "system": "n64",
+      "bucket": "n64/NBA Hangtime (USA).zip"
+    },
+    {
+      "title": "NBA Hang Time",
+      "category": "Basketball",
+      "system": "snes",
+      "bucket": "snes/NBA Hang Time (USA).zip"
+    },
+    {
+      "title": "NBA Hang Time",
+      "category": "Basketball",
+      "system": "genesis",
+      "bucket": "genesis/NBA Hang Time (USA).zip"
+    },
+    {
+      "title": "NBA Hangtime",
+      "category": "Basketball",
+      "system": "psx",
+      "bucket": "psx/NBA Hangtime (USA).chd"
+    },
+    {
+      "title": "NBA Showtime - NBA on NBC",
+      "category": "Basketball",
+      "system": "dreamcast",
+      "bucket": "dreamcast/NBA Showtime - NBA on NBC (USA).chd"
+    },
+    {
+      "title": "NBA Showtime - NBA on NBC",
+      "category": "Basketball",
+      "system": "n64",
+      "bucket": "n64/NBA Showtime - NBA on NBC (USA).zip"
+    },
+    {
+      "title": "NBA Showtime - NBA on NBC",
+      "category": "Basketball",
+      "system": "psx",
+      "bucket": "psx/NBA Showtime - NBA on NBC (USA).chd"
+    },
+    {
+      "title": "NBA Hoopz",
+      "category": "Basketball",
+      "system": "dreamcast",
+      "bucket": "dreamcast/NBA Hoopz (USA).chd"
+    },
+    {
+      "title": "NBA Hoopz",
+      "category": "Basketball",
+      "system": "psx",
+      "bucket": "psx/NBA Hoopz (USA).chd"
+    },
+    {
+      "title": "Arch Rivals - A Basketbrawl!",
+      "category": "Basketball",
+      "system": "nes",
+      "bucket": "nes/Arch Rivals - A Basketbrawl! (USA).zip"
+    },
+    {
+      "title": "Arch Rivals - The Arcade Game",
+      "category": "Basketball",
+      "system": "genesis",
+      "bucket": "genesis/Arch Rivals - The Arcade Game (USA, Europe).zip"
+    },
+    {
+      "title": "Punk Shot",
+      "category": "Basketball",
+      "system": "fbneo",
+      "bucket": "fbneo/punkshot.zip"
+    },
+    {
+      "title": "Double Dribble",
+      "category": "Basketball",
+      "system": "nes",
+      "bucket": "nes/Double Dribble (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Double Dribble",
+      "category": "Basketball",
+      "system": "fbneo",
+      "bucket": "fbneo/ddribble.zip"
+    },
+    {
+      "title": "Double Dribble - The Playoff Edition",
+      "category": "Basketball",
+      "system": "genesis",
+      "bucket": "genesis/Double Dribble - The Playoff Edition (USA).zip"
+    },
+    {
+      "title": "Double Dribble - 5 on 5",
+      "category": "Basketball",
+      "system": "gb",
+      "bucket": "gb/Double Dribble - 5 on 5 (USA).zip"
+    },
+    {
+      "title": "Tecmo NBA Basketball",
+      "category": "Basketball",
+      "system": "nes",
+      "bucket": "nes/Tecmo NBA Basketball (USA) (NES-BK) (Rev 1).zip"
+    },
+    {
+      "title": "Tecmo Super NBA Basketball",
+      "category": "Basketball",
+      "system": "snes",
+      "bucket": "snes/Tecmo Super NBA Basketball (USA) (SNS-NA).zip"
+    },
+    {
+      "title": "Tecmo Super NBA Basketball",
+      "category": "Basketball",
+      "system": "genesis",
+      "bucket": "genesis/Tecmo Super NBA Basketball (USA).zip"
+    },
+    {
+      "title": "Jordan vs Bird - One on One",
+      "category": "Basketball",
+      "system": "nes",
+      "bucket": "nes/Jordan vs Bird - One on One (USA).zip"
+    },
+    {
+      "title": "Jordan vs Bird",
+      "category": "Basketball",
+      "system": "genesis",
+      "bucket": "genesis/Jordan vs Bird (USA, Europe) (Rev A).zip"
+    },
+    {
+      "title": "Hoops",
+      "category": "Basketball",
+      "system": "nes",
+      "bucket": "nes/Hoops (USA).zip"
+    },
+    {
+      "title": "Lakers versus Celtics and the NBA Playoffs",
+      "category": "Basketball",
+      "system": "genesis",
+      "bucket": "genesis/Lakers versus Celtics and the NBA Playoffs (USA, Europe).zip"
+    },
+    {
+      "title": "Bulls vs Lakers and the NBA Playoffs",
+      "category": "Basketball",
+      "system": "genesis",
+      "bucket": "genesis/Bulls vs Lakers and the NBA Playoffs (USA, Europe).zip"
+    },
+    {
+      "title": "Bulls vs Blazers and the NBA Playoffs",
+      "category": "Basketball",
+      "system": "snes",
+      "bucket": "snes/Bulls vs Blazers and the NBA Playoffs (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Bulls versus Blazers and the NBA Playoffs",
+      "category": "Basketball",
+      "system": "genesis",
+      "bucket": "genesis/Bulls versus Blazers and the NBA Playoffs (USA, Europe).zip"
+    },
+    {
+      "title": "NBA Live 95",
+      "category": "Basketball",
+      "system": "snes",
+      "bucket": "snes/NBA Live 95 (USA).zip"
+    },
+    {
+      "title": "NBA Live 95",
+      "category": "Basketball",
+      "system": "genesis",
+      "bucket": "genesis/NBA Live 95 (USA, Europe).zip"
+    },
+    {
+      "title": "NBA Live 98",
+      "category": "Basketball",
+      "system": "snes",
+      "bucket": "snes/NBA Live 98 (USA).zip"
+    },
+    {
+      "title": "NBA Live 98",
+      "category": "Basketball",
+      "system": "genesis",
+      "bucket": "genesis/NBA Live 98 (USA).zip"
+    },
+    {
+      "title": "NBA Live 98",
+      "category": "Basketball",
+      "system": "psx",
+      "bucket": "psx/NBA Live 98 (USA).chd"
+    },
+    {
+      "title": "NBA Live 2000",
+      "category": "Basketball",
+      "system": "psx",
+      "bucket": "psx/NBA Live 2000 (USA).chd"
+    },
+    {
+      "title": "NBA Live 2000",
+      "category": "Basketball",
+      "system": "n64",
+      "bucket": "n64/NBA Live 2000 (USA) (En,Fr,De,Es).zip"
+    },
+    {
+      "title": "NBA Live 2005",
+      "category": "Basketball",
+      "system": "gc",
+      "bucket": "gc/NBA Live 2005 (USA).rvz"
+    },
+    {
+      "title": "NBA Action 98",
+      "category": "Basketball",
+      "system": "saturn",
+      "bucket": "saturn/NBA Action 98 (USA).chd"
+    },
+    {
+      "title": "NBA Give 'n Go",
+      "category": "Basketball",
+      "system": "snes",
+      "bucket": "snes/NBA Give 'n Go (USA).zip"
+    },
+    {
+      "title": "Bill Laimbeer's Combat Basketball",
+      "category": "Basketball",
+      "system": "snes",
+      "bucket": "snes/Bill Laimbeer's Combat Basketball (USA).zip"
+    },
+    {
+      "title": "Barkley Shut Up and Jam!",
+      "category": "Basketball",
+      "system": "genesis",
+      "bucket": "genesis/Barkley Shut Up and Jam! (USA, Europe).zip"
+    },
+    {
+      "title": "Barkley Shut Up and Jam!",
+      "category": "Basketball",
+      "system": "snes",
+      "bucket": "snes/Barkley Shut Up and Jam! (USA).zip"
+    },
+    {
+      "title": "Kobe Bryant in NBA Courtside",
+      "category": "Basketball",
+      "system": "n64",
+      "bucket": "n64/Kobe Bryant in NBA Courtside (USA).zip"
+    },
+    {
+      "title": "NBA Courtside 2 featuring Kobe Bryant",
+      "category": "Basketball",
+      "system": "n64",
+      "bucket": "n64/NBA Courtside 2 featuring Kobe Bryant (USA).zip"
+    },
+    {
+      "title": "NBA Courtside 2002",
+      "category": "Basketball",
+      "system": "gc",
+      "bucket": "gc/NBA Courtside 2002 (USA).rvz"
+    },
+    {
+      "title": "NBA 2K",
+      "category": "Basketball",
+      "system": "dreamcast",
+      "bucket": "dreamcast/NBA 2K (USA).chd"
+    },
+    {
+      "title": "NBA 2K1",
+      "category": "Basketball",
+      "system": "dreamcast",
+      "bucket": "dreamcast/NBA 2K1 (USA).chd"
+    },
+    {
+      "title": "NBA 2K2",
+      "category": "Basketball",
+      "system": "dreamcast",
+      "bucket": "dreamcast/NBA 2K2 (USA).chd"
+    },
+    {
+      "title": "NBA 2K3",
+      "category": "Basketball",
+      "system": "gc",
+      "bucket": "gc/NBA 2K3 (USA).rvz"
+    },
+    {
+      "title": "NBA 2K13",
+      "category": "Basketball",
+      "system": "psp",
+      "bucket": "psp/NBA 2K13 (USA).chd"
+    },
+    {
+      "title": "NBA Street",
+      "category": "Basketball",
+      "system": "gc",
+      "bucket": "gc/NBA Street (USA).rvz"
+    },
+    {
+      "title": "NBA Street Vol. 2",
+      "category": "Basketball",
+      "system": "gc",
+      "bucket": "gc/NBA Street Vol. 2 (USA).rvz"
+    },
+    {
+      "title": "NBA Street V3",
+      "category": "Basketball",
+      "system": "gc",
+      "bucket": "gc/NBA Street V3 (USA).rvz"
+    },
+    {
+      "title": "NBA Street Showdown",
+      "category": "Basketball",
+      "system": "psp",
+      "bucket": "psp/NBA Street Showdown (USA).chd"
+    },
+    {
+      "title": "NBA Ballers - Rebound",
+      "category": "Basketball",
+      "system": "psp",
+      "bucket": "psp/NBA Ballers - Rebound (USA).chd"
+    },
+    {
+      "title": "Mario Hoops 3 on 3",
+      "category": "Basketball",
+      "system": "nds",
+      "bucket": "nds/Mario Hoops 3 on 3 (USA).zip"
+    },
+    {
+      "title": "Basketbrawl",
+      "category": "Basketball",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Basketbrawl (USA, Europe).zip"
+    },
+    {
+      "title": "Double Dunk",
+      "category": "Basketball",
+      "system": "atari2600",
+      "bucket": "atari2600/Double Dunk (USA).zip"
+    },
+    {
+      "title": "One-on-One Basketball",
+      "category": "Basketball",
+      "system": "atari7800",
+      "bucket": "atari7800/One-on-One Basketball (USA).zip"
+    },
+    {
+      "title": "NBA Basketball",
+      "category": "Basketball",
+      "system": "intellivision",
+      "bucket": "intellivision/NBA Basketball (USA, Europe).zip"
+    },
+    {
+      "title": "Dunk Shot",
+      "category": "Basketball",
+      "system": "fbneo",
+      "bucket": "fbneo/dunkshot.zip"
+    },
+    {
+      "title": "Hoops '96",
+      "category": "Basketball",
+      "system": "fbneo",
+      "bucket": "fbneo/hoops96.zip"
+    },
+    {
+      "title": "Dunk Mania",
+      "category": "Basketball",
+      "system": "mame",
+      "bucket": "mame/dunkmnia.zip"
+    },
+    {
+      "title": "Tecmo Bowl",
+      "category": "Football",
+      "system": "nes",
+      "bucket": "nes/Tecmo Bowl (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Tecmo Bowl",
+      "category": "Football",
+      "system": "fbneo",
+      "bucket": "fbneo/tbowl.zip"
+    },
+    {
+      "title": "Tecmo Bowl",
+      "category": "Football",
+      "system": "gb",
+      "bucket": "gb/Tecmo Bowl (USA).zip"
+    },
+    {
+      "title": "Tecmo Super Bowl",
+      "category": "Football",
+      "system": "nes",
+      "bucket": "nes/Tecmo Super Bowl (USA).zip"
+    },
+    {
+      "title": "Tecmo Super Bowl",
+      "category": "Football",
+      "system": "snes",
+      "bucket": "snes/Tecmo Super Bowl (USA).zip"
+    },
+    {
+      "title": "Tecmo Super Bowl",
+      "category": "Football",
+      "system": "genesis",
+      "bucket": "genesis/Tecmo Super Bowl (USA).zip"
+    },
+    {
+      "title": "Tecmo Super Bowl II - Special Edition",
+      "category": "Football",
+      "system": "snes",
+      "bucket": "snes/Tecmo Super Bowl II - Special Edition (USA).zip"
+    },
+    {
+      "title": "Tecmo Super Bowl II - Special Edition",
+      "category": "Football",
+      "system": "genesis",
+      "bucket": "genesis/Tecmo Super Bowl II - Special Edition (USA).zip"
+    },
+    {
+      "title": "Tecmo Super Bowl III - Final Edition",
+      "category": "Football",
+      "system": "snes",
+      "bucket": "snes/Tecmo Super Bowl III - Final Edition (USA).zip"
+    },
+    {
+      "title": "Tecmo Super Bowl III - Final Edition",
+      "category": "Football",
+      "system": "genesis",
+      "bucket": "genesis/Tecmo Super Bowl III - Final Edition (USA).zip"
+    },
+    {
+      "title": "Tecmo Super Bowl",
+      "category": "Football",
+      "system": "psx",
+      "bucket": "psx/Tecmo Super Bowl (USA).chd"
+    },
+    {
+      "title": "Tecmo Bowl - Kickoff",
+      "category": "Football",
+      "system": "nds",
+      "bucket": "nds/Tecmo Bowl - Kickoff (USA).zip"
+    },
+    {
+      "title": "John Madden Football",
+      "category": "Football",
+      "system": "genesis",
+      "bucket": "genesis/John Madden Football (USA, Europe).zip"
+    },
+    {
+      "title": "John Madden Football '93",
+      "category": "Football",
+      "system": "genesis",
+      "bucket": "genesis/John Madden Football '93 (USA, Europe) (EA Sports).zip"
+    },
+    {
+      "title": "Madden NFL '94",
+      "category": "Football",
+      "system": "genesis",
+      "bucket": "genesis/Madden NFL '94 (USA, Europe).zip"
+    },
+    {
+      "title": "Madden NFL '94",
+      "category": "Football",
+      "system": "snes",
+      "bucket": "snes/Madden NFL '94 (USA).zip"
+    },
+    {
+      "title": "Madden NFL 95",
+      "category": "Football",
+      "system": "genesis",
+      "bucket": "genesis/Madden NFL 95 (USA, Europe).zip"
+    },
+    {
+      "title": "Madden NFL 98",
+      "category": "Football",
+      "system": "genesis",
+      "bucket": "genesis/Madden NFL 98 (USA).zip"
+    },
+    {
+      "title": "Madden NFL 98",
+      "category": "Football",
+      "system": "snes",
+      "bucket": "snes/Madden NFL 98 (USA).zip"
+    },
+    {
+      "title": "Madden NFL 98",
+      "category": "Football",
+      "system": "saturn",
+      "bucket": "saturn/Madden NFL 98 (USA).chd"
+    },
+    {
+      "title": "Madden NFL 2001",
+      "category": "Football",
+      "system": "psx",
+      "bucket": "psx/Madden NFL 2001 (USA).chd"
+    },
+    {
+      "title": "Madden NFL 2001",
+      "category": "Football",
+      "system": "n64",
+      "bucket": "n64/Madden NFL 2001 (USA).zip"
+    },
+    {
+      "title": "Madden NFL 2004",
+      "category": "Football",
+      "system": "gc",
+      "bucket": "gc/Madden NFL 2004 (USA) (Rev 1).rvz"
+    },
+    {
+      "title": "Madden NFL 2005",
+      "category": "Football",
+      "system": "gc",
+      "bucket": "gc/Madden NFL 2005 (USA).rvz"
+    },
+    {
+      "title": "Madden NFL 2005",
+      "category": "Football",
+      "system": "gba",
+      "bucket": "gba/Madden NFL 2005 (USA).zip"
+    },
+    {
+      "title": "Madden NFL 2005",
+      "category": "Football",
+      "system": "nds",
+      "bucket": "nds/Madden NFL 2005 (USA).zip"
+    },
+    {
+      "title": "Madden NFL 08",
+      "category": "Football",
+      "system": "psp",
+      "bucket": "psp/Madden NFL 08 (USA).chd"
+    },
+    {
+      "title": "Madden NFL Football",
+      "category": "Football",
+      "system": "3ds",
+      "bucket": "3ds/Madden NFL Football (USA).zip"
+    },
+    {
+      "title": "Joe Montana Football",
+      "category": "Football",
+      "system": "genesis",
+      "bucket": "genesis/Joe Montana Football (World).zip"
+    },
+    {
+      "title": "Joe Montana II - Sports Talk Football",
+      "category": "Football",
+      "system": "genesis",
+      "bucket": "genesis/Joe Montana II - Sports Talk Football (World) (Rev A).zip"
+    },
+    {
+      "title": "NFL Sports Talk Football '93 Starring Joe Montana",
+      "category": "Football",
+      "system": "genesis",
+      "bucket": "genesis/NFL Sports Talk Football '93 Starring Joe Montana (USA, Europe) (Rev A).zip"
+    },
+    {
+      "title": "NFL Football '94 Starring Joe Montana",
+      "category": "Football",
+      "system": "genesis",
+      "bucket": "genesis/NFL Football '94 Starring Joe Montana (USA).zip"
+    },
+    {
+      "title": "NFL '95",
+      "category": "Football",
+      "system": "genesis",
+      "bucket": "genesis/NFL '95 (USA).zip"
+    },
+    {
+      "title": "Prime Time NFL Starring Deion Sanders",
+      "category": "Football",
+      "system": "genesis",
+      "bucket": "genesis/Prime Time NFL Starring Deion Sanders (USA).zip"
+    },
+    {
+      "title": "Bill Walsh College Football",
+      "category": "Football",
+      "system": "genesis",
+      "bucket": "genesis/Bill Walsh College Football (USA, Europe).zip"
+    },
+    {
+      "title": "Mutant League Football",
+      "category": "Football",
+      "system": "genesis",
+      "bucket": "genesis/Mutant League Football (USA, Europe).zip"
+    },
+    {
+      "title": "NFL 2K",
+      "category": "Football",
+      "system": "dreamcast",
+      "bucket": "dreamcast/NFL 2K (USA).chd"
+    },
+    {
+      "title": "NFL 2K1",
+      "category": "Football",
+      "system": "dreamcast",
+      "bucket": "dreamcast/NFL 2K1 (USA).chd"
+    },
+    {
+      "title": "NFL 2K2",
+      "category": "Football",
+      "system": "dreamcast",
+      "bucket": "dreamcast/NFL 2K2 (USA).chd"
+    },
+    {
+      "title": "NFL 2K3",
+      "category": "Football",
+      "system": "gc",
+      "bucket": "gc/NFL 2K3 (USA).rvz"
+    },
+    {
+      "title": "NCAA College Football 2K2 - Road to the Rose Bowl",
+      "category": "Football",
+      "system": "dreamcast",
+      "bucket": "dreamcast/NCAA College Football 2K2 - Road to the Rose Bowl (USA).chd"
+    },
+    {
+      "title": "NCAA Football 2005",
+      "category": "Football",
+      "system": "gc",
+      "bucket": "gc/NCAA Football 2005 (USA).rvz"
+    },
+    {
+      "title": "NFL GameDay",
+      "category": "Football",
+      "system": "psx",
+      "bucket": "psx/NFL GameDay (USA).chd"
+    },
+    {
+      "title": "NFL GameDay 98",
+      "category": "Football",
+      "system": "psx",
+      "bucket": "psx/NFL GameDay 98 (USA).chd"
+    },
+    {
+      "title": "NCAA GameBreaker 98",
+      "category": "Football",
+      "system": "psx",
+      "bucket": "psx/NCAA GameBreaker 98 (USA).chd"
+    },
+    {
+      "title": "NFL Quarterback Club 98",
+      "category": "Football",
+      "system": "n64",
+      "bucket": "n64/NFL Quarterback Club 98 (USA).zip"
+    },
+    {
+      "title": "NFL Blitz",
+      "category": "Football",
+      "system": "n64",
+      "bucket": "n64/NFL Blitz (USA).zip"
+    },
+    {
+      "title": "NFL Blitz",
+      "category": "Football",
+      "system": "psx",
+      "bucket": "psx/NFL Blitz (USA).chd"
+    },
+    {
+      "title": "NFL Blitz",
+      "category": "Football",
+      "system": "gbc",
+      "bucket": "gbc/NFL Blitz (USA, Europe) (Rev 1) (GB Compatible).zip"
+    },
+    {
+      "title": "NFL Blitz 2000",
+      "category": "Football",
+      "system": "n64",
+      "bucket": "n64/NFL Blitz 2000 (USA) (Rev 1).zip"
+    },
+    {
+      "title": "NFL Blitz 2000",
+      "category": "Football",
+      "system": "psx",
+      "bucket": "psx/NFL Blitz 2000 (USA).chd"
+    },
+    {
+      "title": "NFL Blitz 2000",
+      "category": "Football",
+      "system": "dreamcast",
+      "bucket": "dreamcast/NFL Blitz 2000 (USA) (Rev 1).chd"
+    },
+    {
+      "title": "NFL Blitz 2001",
+      "category": "Football",
+      "system": "n64",
+      "bucket": "n64/NFL Blitz 2001 (USA).zip"
+    },
+    {
+      "title": "NFL Blitz 2001",
+      "category": "Football",
+      "system": "psx",
+      "bucket": "psx/NFL Blitz 2001 (USA).chd"
+    },
+    {
+      "title": "NFL Blitz 2001",
+      "category": "Football",
+      "system": "dreamcast",
+      "bucket": "dreamcast/NFL Blitz 2001 (USA).chd"
+    },
+    {
+      "title": "NFL Blitz 2002",
+      "category": "Football",
+      "system": "gc",
+      "bucket": "gc/NFL Blitz 2002 (USA).rvz"
+    },
+    {
+      "title": "NFL Blitz 2002",
+      "category": "Football",
+      "system": "gba",
+      "bucket": "gba/NFL Blitz 2002 (USA).zip"
+    },
+    {
+      "title": "NFL Blitz 2003",
+      "category": "Football",
+      "system": "gc",
+      "bucket": "gc/NFL Blitz 2003 (USA).rvz"
+    },
+    {
+      "title": "NFL Blitz Pro",
+      "category": "Football",
+      "system": "gc",
+      "bucket": "gc/NFL Blitz Pro (USA).rvz"
+    },
+    {
+      "title": "Blitz - Overtime",
+      "category": "Football",
+      "system": "psp",
+      "bucket": "psp/Blitz - Overtime (USA).chd"
+    },
+    {
+      "title": "Kurt Warner's Arena Football Unleashed",
+      "category": "Football",
+      "system": "psx",
+      "bucket": "psx/Kurt Warner's Arena Football Unleashed (USA).chd"
+    },
+    {
+      "title": "NFL Street",
+      "category": "Football",
+      "system": "gc",
+      "bucket": "gc/NFL Street (USA).rvz"
+    },
+    {
+      "title": "NFL Street 2",
+      "category": "Football",
+      "system": "gc",
+      "bucket": "gc/NFL Street 2 (USA).rvz"
+    },
+    {
+      "title": "NFL Street 2 - Unleashed",
+      "category": "Football",
+      "system": "psp",
+      "bucket": "psp/NFL Street 2 - Unleashed (USA).chd"
+    },
+    {
+      "title": "NFL Street 3",
+      "category": "Football",
+      "system": "psp",
+      "bucket": "psp/NFL Street 3 (USA).chd"
+    },
+    {
+      "title": "Backyard Football",
+      "category": "Football",
+      "system": "gba",
+      "bucket": "gba/Backyard Football (USA).zip"
+    },
+    {
+      "title": "10-Yard Fight",
+      "category": "Football",
+      "system": "nes",
+      "bucket": "nes/10-Yard Fight (USA, Europe).zip"
+    },
+    {
+      "title": "10-Yard Fight",
+      "category": "Football",
+      "system": "fbneo",
+      "bucket": "fbneo/10yard.zip"
+    },
+    {
+      "title": "John Elway's Quarterback",
+      "category": "Football",
+      "system": "nes",
+      "bucket": "nes/John Elway's Quarterback (USA).zip"
+    },
+    {
+      "title": "Quarterback",
+      "category": "Football",
+      "system": "mame",
+      "bucket": "mame/quarterb.zip"
+    },
+    {
+      "title": "NES Play Action Football",
+      "category": "Football",
+      "system": "nes",
+      "bucket": "nes/NES Play Action Football (USA).zip"
+    },
+    {
+      "title": "Cyberball",
+      "category": "Football",
+      "system": "nes",
+      "bucket": "nes/Cyberball (USA).zip"
+    },
+    {
+      "title": "Cyberball",
+      "category": "Football",
+      "system": "genesis",
+      "bucket": "genesis/Cyberball (World).zip"
+    },
+    {
+      "title": "Cyberball",
+      "category": "Football",
+      "system": "mame",
+      "bucket": "mame/cyberbal.zip"
+    },
+    {
+      "title": "Tournament Cyberball",
+      "category": "Football",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Tournament Cyberball (USA, Europe).zip"
+    },
+    {
+      "title": "Atari Football",
+      "category": "Football",
+      "system": "mame",
+      "bucket": "mame/atarifb.zip"
+    },
+    {
+      "title": "Gridiron Fight",
+      "category": "Football",
+      "system": "mame",
+      "bucket": "mame/gridiron.zip"
+    },
+    {
+      "title": "Pigskin 621AD",
+      "category": "Football",
+      "system": "fbneo",
+      "bucket": "fbneo/pigskin.zip"
+    },
+    {
+      "title": "Jerry Glanville's Pigskin Footbrawl",
+      "category": "Football",
+      "system": "genesis",
+      "bucket": "genesis/Jerry Glanville's Pigskin Footbrawl (USA).zip"
+    },
+    {
+      "title": "NFL Football",
+      "category": "Football",
+      "system": "intellivision",
+      "bucket": "intellivision/NFL Football (World).zip"
+    },
+    {
+      "title": "Baseball",
+      "category": "Baseball",
+      "system": "nes",
+      "bucket": "nes/Baseball (USA, Europe).zip"
+    },
+    {
+      "title": "Baseball",
+      "category": "Baseball",
+      "system": "gb",
+      "bucket": "gb/Baseball (World).zip"
+    },
+    {
+      "title": "R.B.I. Baseball",
+      "category": "Baseball",
+      "system": "nes",
+      "bucket": "nes/R.B.I. Baseball (USA).zip"
+    },
+    {
+      "title": "Vs. Atari R.B.I. Baseball",
+      "category": "Baseball",
+      "system": "mame",
+      "bucket": "mame/rbibb.zip"
+    },
+    {
+      "title": "R.B.I. Baseball 4",
+      "category": "Baseball",
+      "system": "genesis",
+      "bucket": "genesis/R.B.I. Baseball 4 (USA).zip"
+    },
+    {
+      "title": "Baseball Stars",
+      "category": "Baseball",
+      "system": "nes",
+      "bucket": "nes/Baseball Stars (USA).zip"
+    },
+    {
+      "title": "Baseball Stars II",
+      "category": "Baseball",
+      "system": "nes",
+      "bucket": "nes/Baseball Stars II (USA).zip"
+    },
+    {
+      "title": "Bases Loaded",
+      "category": "Baseball",
+      "system": "nes",
+      "bucket": "nes/Bases Loaded (USA) (Rev 2).zip"
+    },
+    {
+      "title": "Bases Loaded II - Second Season",
+      "category": "Baseball",
+      "system": "nes",
+      "bucket": "nes/Bases Loaded II - Second Season (USA).zip"
+    },
+    {
+      "title": "Bad News Baseball",
+      "category": "Baseball",
+      "system": "nes",
+      "bucket": "nes/Bad News Baseball (USA).zip"
+    },
+    {
+      "title": "Cyber Stadium Series - Base Wars",
+      "category": "Baseball",
+      "system": "nes",
+      "bucket": "nes/Cyber Stadium Series - Base Wars (USA).zip"
+    },
+    {
+      "title": "Baseball Simulator 1.000",
+      "category": "Baseball",
+      "system": "nes",
+      "bucket": "nes/Baseball Simulator 1.000 (USA).zip"
+    },
+    {
+      "title": "Super Baseball Simulator 1.000",
+      "category": "Baseball",
+      "system": "snes",
+      "bucket": "snes/Super Baseball Simulator 1.000 (USA).zip"
+    },
+    {
+      "title": "Little League Baseball - Championship Series",
+      "category": "Baseball",
+      "system": "nes",
+      "bucket": "nes/Little League Baseball - Championship Series (USA).zip"
+    },
+    {
+      "title": "Tecmo Baseball",
+      "category": "Baseball",
+      "system": "nes",
+      "bucket": "nes/Tecmo Baseball (USA).zip"
+    },
+    {
+      "title": "Dusty Diamond's All-Star Softball",
+      "category": "Baseball",
+      "system": "nes",
+      "bucket": "nes/Dusty Diamond's All-Star Softball (USA).zip"
+    },
+    {
+      "title": "Ken Griffey Jr. Presents Major League Baseball",
+      "category": "Baseball",
+      "system": "snes",
+      "bucket": "snes/Ken Griffey Jr. Presents Major League Baseball (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Ken Griffey Jr. Presents Major League Baseball",
+      "category": "Baseball",
+      "system": "gb",
+      "bucket": "gb/Ken Griffey Jr. Presents Major League Baseball (USA, Europe) (SGB Enhanced).zip"
+    },
+    {
+      "title": "Ken Griffey Jr.'s Winning Run",
+      "category": "Baseball",
+      "system": "snes",
+      "bucket": "snes/Ken Griffey Jr.'s Winning Run (USA).zip"
+    },
+    {
+      "title": "Major League Baseball Featuring Ken Griffey Jr.",
+      "category": "Baseball",
+      "system": "n64",
+      "bucket": "n64/Major League Baseball Featuring Ken Griffey Jr. (USA).zip"
+    },
+    {
+      "title": "Ken Griffey Jr.'s Slugfest",
+      "category": "Baseball",
+      "system": "n64",
+      "bucket": "n64/Ken Griffey Jr.'s Slugfest (USA).zip"
+    },
+    {
+      "title": "All-Star Baseball 99",
+      "category": "Baseball",
+      "system": "n64",
+      "bucket": "n64/All-Star Baseball 99 (USA).zip"
+    },
+    {
+      "title": "All-Star Baseball 2001",
+      "category": "Baseball",
+      "system": "n64",
+      "bucket": "n64/All-Star Baseball 2001 (USA).zip"
+    },
+    {
+      "title": "Super Baseball 2020",
+      "category": "Baseball",
+      "system": "snes",
+      "bucket": "snes/Super Baseball 2020 (USA).zip"
+    },
+    {
+      "title": "Super Baseball 2020",
+      "category": "Baseball",
+      "system": "genesis",
+      "bucket": "genesis/Super Baseball 2020 (USA, Europe).zip"
+    },
+    {
+      "title": "World Series Baseball",
+      "category": "Baseball",
+      "system": "genesis",
+      "bucket": "genesis/World Series Baseball (USA).zip"
+    },
+    {
+      "title": "World Series Baseball 98",
+      "category": "Baseball",
+      "system": "genesis",
+      "bucket": "genesis/World Series Baseball 98 (USA).zip"
+    },
+    {
+      "title": "World Series Baseball Starring Deion Sanders",
+      "category": "Baseball",
+      "system": "sega32x",
+      "bucket": "sega32x/World Series Baseball Starring Deion Sanders (USA).zip"
+    },
+    {
+      "title": "World Series Baseball",
+      "category": "Baseball",
+      "system": "saturn",
+      "bucket": "saturn/World Series Baseball (USA).chd"
+    },
+    {
+      "title": "World Series Baseball 98",
+      "category": "Baseball",
+      "system": "saturn",
+      "bucket": "saturn/World Series Baseball 98 (USA).chd"
+    },
+    {
+      "title": "World Series Baseball 2K2",
+      "category": "Baseball",
+      "system": "dreamcast",
+      "bucket": "dreamcast/World Series Baseball 2K2 (USA).chd"
+    },
+    {
+      "title": "Sports Talk Baseball",
+      "category": "Baseball",
+      "system": "genesis",
+      "bucket": "genesis/Sports Talk Baseball (USA).zip"
+    },
+    {
+      "title": "Tommy Lasorda Baseball",
+      "category": "Baseball",
+      "system": "genesis",
+      "bucket": "genesis/Tommy Lasorda Baseball (USA) (Rev A).zip"
+    },
+    {
+      "title": "Reggie Jackson Baseball",
+      "category": "Baseball",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Reggie Jackson Baseball (USA).zip"
+    },
+    {
+      "title": "World Class Baseball",
+      "category": "Baseball",
+      "system": "tg16",
+      "bucket": "tg16/World Class Baseball (USA).zip"
+    },
+    {
+      "title": "Triple Play 98",
+      "category": "Baseball",
+      "system": "psx",
+      "bucket": "psx/Triple Play 98 (USA).chd"
+    },
+    {
+      "title": "MLB 99",
+      "category": "Baseball",
+      "system": "psx",
+      "bucket": "psx/MLB 99 (USA).chd"
+    },
+    {
+      "title": "High Heat Major League Baseball 2002",
+      "category": "Baseball",
+      "system": "psx",
+      "bucket": "psx/High Heat Major League Baseball 2002 (USA).chd"
+    },
+    {
+      "title": "MVP Baseball 2004",
+      "category": "Baseball",
+      "system": "gc",
+      "bucket": "gc/MVP Baseball 2004 (USA).rvz"
+    },
+    {
+      "title": "MVP Baseball 2005",
+      "category": "Baseball",
+      "system": "gc",
+      "bucket": "gc/MVP Baseball 2005 (USA).rvz"
+    },
+    {
+      "title": "MVP Baseball",
+      "category": "Baseball",
+      "system": "psp",
+      "bucket": "psp/MVP Baseball (USA).chd"
+    },
+    {
+      "title": "MLB 11 - The Show",
+      "category": "Baseball",
+      "system": "psp",
+      "bucket": "psp/MLB 11 - The Show (USA).chd"
+    },
+    {
+      "title": "MLB SlugFest 2003",
+      "category": "Baseball",
+      "system": "gc",
+      "bucket": "gc/MLB SlugFest 2003 (USA).rvz"
+    },
+    {
+      "title": "MLB SlugFest 2004",
+      "category": "Baseball",
+      "system": "gba",
+      "bucket": "gba/MLB SlugFest 2004 (USA).zip"
+    },
+    {
+      "title": "Mario Superstar Baseball",
+      "category": "Baseball",
+      "system": "gc",
+      "bucket": "gc/Mario Superstar Baseball (USA).rvz"
+    },
+    {
+      "title": "Baseball Advance",
+      "category": "Baseball",
+      "system": "gba",
+      "bucket": "gba/Baseball Advance (USA).zip"
+    },
+    {
+      "title": "Backyard Baseball",
+      "category": "Baseball",
+      "system": "gba",
+      "bucket": "gba/Backyard Baseball (USA).zip"
+    },
+    {
+      "title": "Backyard Baseball",
+      "category": "Baseball",
+      "system": "gc",
+      "bucket": "gc/Backyard Baseball (USA).rvz"
+    },
+    {
+      "title": "MLB Power Pros 2008",
+      "category": "Baseball",
+      "system": "nds",
+      "bucket": "nds/MLB Power Pros 2008 (USA).zip"
+    },
+    {
+      "title": "Major League Baseball",
+      "category": "Baseball",
+      "system": "intellivision",
+      "bucket": "intellivision/Major League Baseball (World).zip"
+    },
+    {
+      "title": "World Series Major League Baseball",
+      "category": "Baseball",
+      "system": "intellivision",
+      "bucket": "intellivision/World Series Major League Baseball (USA).zip"
+    },
+    {
+      "title": "Champion Base Ball",
+      "category": "Baseball",
+      "system": "mame",
+      "bucket": "mame/champbas.zip"
+    },
+    {
+      "title": "Vs. Baseball",
+      "category": "Baseball",
+      "system": "mame",
+      "bucket": "mame/vsbball.zip"
+    },
+    {
+      "title": "Strike Zone Baseball",
+      "category": "Baseball",
+      "system": "mame",
+      "bucket": "mame/strkzone.zip"
+    },
+    {
+      "title": "Stadium Hero",
+      "category": "Baseball",
+      "system": "fbneo",
+      "bucket": "fbneo/stadhero.zip"
+    },
+    {
+      "title": "Ice Hockey",
+      "category": "Hockey",
+      "system": "nes",
+      "bucket": "nes/Ice Hockey (USA).zip"
+    },
+    {
+      "title": "Blades of Steel",
+      "category": "Hockey",
+      "system": "nes",
+      "bucket": "nes/Blades of Steel (USA).zip"
+    },
+    {
+      "title": "Blades of Steel",
+      "category": "Hockey",
+      "system": "fbneo",
+      "bucket": "fbneo/bladestl.zip"
+    },
+    {
+      "title": "Blades of Steel",
+      "category": "Hockey",
+      "system": "gb",
+      "bucket": "gb/Blades of Steel (USA).zip"
+    },
+    {
+      "title": "NHL Hockey",
+      "category": "Hockey",
+      "system": "genesis",
+      "bucket": "genesis/NHL Hockey (USA).zip"
+    },
+    {
+      "title": "NHLPA Hockey 93",
+      "category": "Hockey",
+      "system": "genesis",
+      "bucket": "genesis/NHLPA Hockey 93 (USA, Europe) (EA Sports).zip"
+    },
+    {
+      "title": "NHL '94",
+      "category": "Hockey",
+      "system": "genesis",
+      "bucket": "genesis/NHL '94 (USA, Europe).zip"
+    },
+    {
+      "title": "NHL '94",
+      "category": "Hockey",
+      "system": "snes",
+      "bucket": "snes/NHL '94 (USA).zip"
+    },
+    {
+      "title": "NHL '94",
+      "category": "Hockey",
+      "system": "segacd",
+      "bucket": "segacd/NHL '94 (USA).chd"
+    },
+    {
+      "title": "NHL 95",
+      "category": "Hockey",
+      "system": "genesis",
+      "bucket": "genesis/NHL 95 (USA, Europe).zip"
+    },
+    {
+      "title": "NHL 96",
+      "category": "Hockey",
+      "system": "genesis",
+      "bucket": "genesis/NHL 96 (USA, Europe).zip"
+    },
+    {
+      "title": "NHL 96",
+      "category": "Hockey",
+      "system": "snes",
+      "bucket": "snes/NHL 96 (USA).zip"
+    },
+    {
+      "title": "NHL 98",
+      "category": "Hockey",
+      "system": "genesis",
+      "bucket": "genesis/NHL 98 (USA).zip"
+    },
+    {
+      "title": "Mutant League Hockey",
+      "category": "Hockey",
+      "system": "genesis",
+      "bucket": "genesis/Mutant League Hockey (USA, Europe).zip"
+    },
+    {
+      "title": "Mario Lemieux Hockey",
+      "category": "Hockey",
+      "system": "genesis",
+      "bucket": "genesis/Mario Lemieux Hockey (USA, Europe).zip"
+    },
+    {
+      "title": "Tecmo Super Hockey",
+      "category": "Hockey",
+      "system": "genesis",
+      "bucket": "genesis/Tecmo Super Hockey (USA).zip"
+    },
+    {
+      "title": "Hit the Ice",
+      "category": "Hockey",
+      "system": "fbneo",
+      "bucket": "fbneo/hitice.zip"
+    },
+    {
+      "title": "Hit the Ice - VHL - The Official Video Hockey League",
+      "category": "Hockey",
+      "system": "genesis",
+      "bucket": "genesis/Hit the Ice - VHL - The Official Video Hockey League (USA).zip"
+    },
+    {
+      "title": "Hit the Ice - VHL - The Official Video Hockey League",
+      "category": "Hockey",
+      "system": "snes",
+      "bucket": "snes/Hit the Ice - VHL - The Official Video Hockey League (USA).zip"
+    },
+    {
+      "title": "Hit the Ice - VHL - The Official Video Hockey League",
+      "category": "Hockey",
+      "system": "tg16",
+      "bucket": "tg16/Hit the Ice - VHL - The Official Video Hockey League (USA).zip"
+    },
+    {
+      "title": "NHL Open Ice - 2 on 2 Challenge",
+      "category": "Hockey",
+      "system": "fbneo",
+      "bucket": "fbneo/openice.zip"
+    },
+    {
+      "title": "NHL Open Ice - 2 on 2 Challenge",
+      "category": "Hockey",
+      "system": "psx",
+      "bucket": "psx/NHL Open Ice - 2 on 2 Challenge (USA).chd"
+    },
+    {
+      "title": "Wayne Gretzky's 3D Hockey",
+      "category": "Hockey",
+      "system": "n64",
+      "bucket": "n64/Wayne Gretzky's 3D Hockey (USA) (Rev 1).zip"
+    },
+    {
+      "title": "NHL 99",
+      "category": "Hockey",
+      "system": "n64",
+      "bucket": "n64/NHL 99 (USA).zip"
+    },
+    {
+      "title": "NHL Breakaway 98",
+      "category": "Hockey",
+      "system": "n64",
+      "bucket": "n64/NHL Breakaway 98 (USA).zip"
+    },
+    {
+      "title": "NHL 98",
+      "category": "Hockey",
+      "system": "psx",
+      "bucket": "psx/NHL 98 (USA).chd"
+    },
+    {
+      "title": "NHL 2001",
+      "category": "Hockey",
+      "system": "psx",
+      "bucket": "psx/NHL 2001 (USA).chd"
+    },
+    {
+      "title": "NHL FaceOff 98",
+      "category": "Hockey",
+      "system": "psx",
+      "bucket": "psx/NHL FaceOff 98 (USA).chd"
+    },
+    {
+      "title": "NHL Rock the Rink",
+      "category": "Hockey",
+      "system": "psx",
+      "bucket": "psx/NHL Rock the Rink (USA).chd"
+    },
+    {
+      "title": "NHL 2K",
+      "category": "Hockey",
+      "system": "dreamcast",
+      "bucket": "dreamcast/NHL 2K (USA).chd"
+    },
+    {
+      "title": "NHL 2K2",
+      "category": "Hockey",
+      "system": "dreamcast",
+      "bucket": "dreamcast/NHL 2K2 (USA).chd"
+    },
+    {
+      "title": "NHL 2K3",
+      "category": "Hockey",
+      "system": "gc",
+      "bucket": "gc/NHL 2K3 (USA).rvz"
+    },
+    {
+      "title": "NHL 2004",
+      "category": "Hockey",
+      "system": "gc",
+      "bucket": "gc/NHL 2004 (USA).rvz"
+    },
+    {
+      "title": "NHL Hitz 2002",
+      "category": "Hockey",
+      "system": "gc",
+      "bucket": "gc/NHL Hitz 2002 (USA).rvz"
+    },
+    {
+      "title": "NHL Hitz 2003",
+      "category": "Hockey",
+      "system": "gc",
+      "bucket": "gc/NHL Hitz 2003 (USA).rvz"
+    },
+    {
+      "title": "NHL Hitz 2003",
+      "category": "Hockey",
+      "system": "gba",
+      "bucket": "gba/NHL Hitz 2003 (USA).zip"
+    },
+    {
+      "title": "NHL Hitz Pro",
+      "category": "Hockey",
+      "system": "gc",
+      "bucket": "gc/NHL Hitz Pro (USA).rvz"
+    },
+    {
+      "title": "NHL 07",
+      "category": "Hockey",
+      "system": "psp",
+      "bucket": "psp/NHL 07 (USA).chd"
+    },
+    {
+      "title": "Ice Hockey",
+      "category": "Hockey",
+      "system": "atari2600",
+      "bucket": "atari2600/Ice Hockey (USA).zip"
+    },
+    {
+      "title": "Hat Trick",
+      "category": "Hockey",
+      "system": "atari7800",
+      "bucket": "atari7800/Hat Trick (USA).zip"
+    },
+    {
+      "title": "Hat Trick",
+      "category": "Hockey",
+      "system": "mame",
+      "bucket": "mame/hattrick.zip"
+    },
+    {
+      "title": "Soccer",
+      "category": "Soccer",
+      "system": "nes",
+      "bucket": "nes/Soccer (Japan, USA) (En).zip"
+    },
+    {
+      "title": "Goal!",
+      "category": "Soccer",
+      "system": "nes",
+      "bucket": "nes/Goal! (USA).zip"
+    },
+    {
+      "title": "Goal! Two",
+      "category": "Soccer",
+      "system": "nes",
+      "bucket": "nes/Goal! Two (USA).zip"
+    },
+    {
+      "title": "Tecmo World Cup Soccer",
+      "category": "Soccer",
+      "system": "nes",
+      "bucket": "nes/Tecmo World Cup Soccer (Europe).zip"
+    },
+    {
+      "title": "Super Soccer",
+      "category": "Soccer",
+      "system": "snes",
+      "bucket": "snes/Super Soccer (USA).zip"
+    },
+    {
+      "title": "International Superstar Soccer",
+      "category": "Soccer",
+      "system": "snes",
+      "bucket": "snes/International Superstar Soccer (USA).zip"
+    },
+    {
+      "title": "International Superstar Soccer Deluxe",
+      "category": "Soccer",
+      "system": "snes",
+      "bucket": "snes/International Superstar Soccer Deluxe (USA).zip"
+    },
+    {
+      "title": "International Superstar Soccer Deluxe",
+      "category": "Soccer",
+      "system": "genesis",
+      "bucket": "genesis/International Superstar Soccer Deluxe (Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "International Superstar Soccer 64",
+      "category": "Soccer",
+      "system": "n64",
+      "bucket": "n64/International Superstar Soccer 64 (USA).zip"
+    },
+    {
+      "title": "International Superstar Soccer '98",
+      "category": "Soccer",
+      "system": "n64",
+      "bucket": "n64/International Superstar Soccer '98 (USA).zip"
+    },
+    {
+      "title": "International Superstar Soccer 2000",
+      "category": "Soccer",
+      "system": "n64",
+      "bucket": "n64/International Superstar Soccer 2000 (USA) (En,Es) (Rev 1).zip"
+    },
+    {
+      "title": "International Superstar Soccer Pro '98",
+      "category": "Soccer",
+      "system": "psx",
+      "bucket": "psx/International Superstar Soccer Pro '98 (USA) (En,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "ISS Pro Evolution",
+      "category": "Soccer",
+      "system": "psx",
+      "bucket": "psx/ISS Pro Evolution (USA).chd"
+    },
+    {
+      "title": "International Superstar Soccer 2",
+      "category": "Soccer",
+      "system": "gc",
+      "bucket": "gc/International Superstar Soccer 2 (Europe) (En,Fr,De,Es,It).rvz"
+    },
+    {
+      "title": "International Superstar Soccer Advance",
+      "category": "Soccer",
+      "system": "gba",
+      "bucket": "gba/International Superstar Soccer Advance (Europe).zip"
+    },
+    {
+      "title": "FIFA International Soccer",
+      "category": "Soccer",
+      "system": "genesis",
+      "bucket": "genesis/FIFA International Soccer (USA, Europe) (En,Fr,De,Es).zip"
+    },
+    {
+      "title": "FIFA International Soccer",
+      "category": "Soccer",
+      "system": "snes",
+      "bucket": "snes/FIFA International Soccer (USA).zip"
+    },
+    {
+      "title": "FIFA Soccer 95",
+      "category": "Soccer",
+      "system": "genesis",
+      "bucket": "genesis/FIFA Soccer 95 (USA, Europe) (En,Fr,De,Es).zip"
+    },
+    {
+      "title": "FIFA Soccer 96",
+      "category": "Soccer",
+      "system": "genesis",
+      "bucket": "genesis/FIFA Soccer 96 (USA, Europe) (En,Fr,De,Es,It,Sv).zip"
+    },
+    {
+      "title": "FIFA - Road to World Cup 98",
+      "category": "Soccer",
+      "system": "psx",
+      "bucket": "psx/FIFA - Road to World Cup 98 (USA) (En,Fr,De,Es,Nl,Sv).chd"
+    },
+    {
+      "title": "FIFA - Road to World Cup 98",
+      "category": "Soccer",
+      "system": "n64",
+      "bucket": "n64/FIFA - Road to World Cup 98 (USA) (En,Fr,De,Es,It,Nl,Sv).zip"
+    },
+    {
+      "title": "World Cup 98",
+      "category": "Soccer",
+      "system": "n64",
+      "bucket": "n64/World Cup 98 (USA) (En,Fr,De,Es,It,Nl,Sv,Da).zip"
+    },
+    {
+      "title": "FIFA 2000 - Major League Soccer",
+      "category": "Soccer",
+      "system": "psx",
+      "bucket": "psx/FIFA 2000 - Major League Soccer (USA) (En,De,Es,Nl,Sv).chd"
+    },
+    {
+      "title": "FIFA Soccer 07",
+      "category": "Soccer",
+      "system": "gc",
+      "bucket": "gc/FIFA Soccer 07 (USA).rvz"
+    },
+    {
+      "title": "FIFA Soccer 07",
+      "category": "Soccer",
+      "system": "gba",
+      "bucket": "gba/FIFA Soccer 07 (USA, Europe) (En,Fr,De,Es).zip"
+    },
+    {
+      "title": "FIFA Soccer 11",
+      "category": "Soccer",
+      "system": "nds",
+      "bucket": "nds/FIFA Soccer 11 (USA) (En,Fr,De,Es,It) (NDSi Enhanced).zip"
+    },
+    {
+      "title": "FIFA Soccer 10",
+      "category": "Soccer",
+      "system": "psp",
+      "bucket": "psp/FIFA Soccer 10 (USA) (En,Es).chd"
+    },
+    {
+      "title": "FIFA Soccer 13",
+      "category": "Soccer",
+      "system": "3ds",
+      "bucket": "3ds/FIFA Soccer 13 (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "FIFA Street",
+      "category": "Soccer",
+      "system": "gc",
+      "bucket": "gc/FIFA Street (USA).rvz"
+    },
+    {
+      "title": "FIFA Street 2",
+      "category": "Soccer",
+      "system": "gc",
+      "bucket": "gc/FIFA Street 2 (USA).rvz"
+    },
+    {
+      "title": "FIFA Street 2",
+      "category": "Soccer",
+      "system": "psp",
+      "bucket": "psp/FIFA Street 2 (USA).chd"
+    },
+    {
+      "title": "Sensible Soccer",
+      "category": "Soccer",
+      "system": "genesis",
+      "bucket": "genesis/Sensible Soccer (Europe) (En,Fr,De,It).zip"
+    },
+    {
+      "title": "International Sensible Soccer",
+      "category": "Soccer",
+      "system": "genesis",
+      "bucket": "genesis/International Sensible Soccer (Europe) (En,Fr,De,It).zip"
+    },
+    {
+      "title": "International Sensible Soccer",
+      "category": "Soccer",
+      "system": "atarijaguar",
+      "bucket": "atarijaguar/International Sensible Soccer (World).zip"
+    },
+    {
+      "title": "Sensible Soccer",
+      "category": "Soccer",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Sensible Soccer (Europe).zip"
+    },
+    {
+      "title": "Mega Man Soccer",
+      "category": "Soccer",
+      "system": "snes",
+      "bucket": "snes/Mega Man Soccer (USA).zip"
+    },
+    {
+      "title": "Worldwide Soccer - Sega International Victory Goal Edition",
+      "category": "Soccer",
+      "system": "saturn",
+      "bucket": "saturn/Worldwide Soccer - Sega International Victory Goal Edition (USA) (RE).chd"
+    },
+    {
+      "title": "Sega Worldwide Soccer '97",
+      "category": "Soccer",
+      "system": "saturn",
+      "bucket": "saturn/Sega Worldwide Soccer '97 (USA).chd"
+    },
+    {
+      "title": "Worldwide Soccer '98",
+      "category": "Soccer",
+      "system": "saturn",
+      "bucket": "saturn/Worldwide Soccer '98 (USA) (En,Fr,Es).chd"
+    },
+    {
+      "title": "Virtua Striker 2",
+      "category": "Soccer",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Virtua Striker 2 (USA) (En,Ja,De,Es).chd"
+    },
+    {
+      "title": "Virtua Striker 2002",
+      "category": "Soccer",
+      "system": "gc",
+      "bucket": "gc/Virtua Striker 2002 (USA).rvz"
+    },
+    {
+      "title": "Sega Soccer Slam",
+      "category": "Soccer",
+      "system": "gc",
+      "bucket": "gc/Sega Soccer Slam (USA).rvz"
+    },
+    {
+      "title": "Super Mario Strikers",
+      "category": "Soccer",
+      "system": "gc",
+      "bucket": "gc/Super Mario Strikers (USA).rvz"
+    },
+    {
+      "title": "Mario Strikers Charged",
+      "category": "Soccer",
+      "system": "wii",
+      "bucket": "wii/Mario Strikers Charged (USA) (En,Fr,Es) (Rev 1).rvz"
+    },
+    {
+      "title": "World Soccer Winning Eleven 6 - Final Evolution",
+      "category": "Soccer",
+      "system": "gc",
+      "bucket": "gc/World Soccer Winning Eleven 6 - Final Evolution (Eng tran).rvz"
+    },
+    {
+      "title": "Pro Evolution Soccer 6",
+      "category": "Soccer",
+      "system": "psp",
+      "bucket": "psp/Pro Evolution Soccer 6 (Europe) (En,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "PES 2014 - Pro Evolution Soccer",
+      "category": "Soccer",
+      "system": "psp",
+      "bucket": "psp/PES 2014 - Pro Evolution Soccer (USA).chd"
+    },
+    {
+      "title": "Winning Eleven - Pro Evolution Soccer 2007",
+      "category": "Soccer",
+      "system": "nds",
+      "bucket": "nds/Winning Eleven - Pro Evolution Soccer 2007 (USA) (En,Es).zip"
+    },
+    {
+      "title": "Pro Evolution Soccer 2013 3D",
+      "category": "Soccer",
+      "system": "3ds",
+      "bucket": "3ds/Pro Evolution Soccer 2013 3D (USA) (En,Fr,Es,Pt).zip"
+    },
+    {
+      "title": "Super Shot Soccer",
+      "category": "Soccer",
+      "system": "psx",
+      "bucket": "psx/Super Shot Soccer (USA).chd"
+    },
+    {
+      "title": "World Cup Italia '90",
+      "category": "Soccer",
+      "system": "mastersystem",
+      "bucket": "mastersystem/World Cup Italia '90 (Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Tehkan World Cup",
+      "category": "Soccer",
+      "system": "mame",
+      "bucket": "mame/tehkanwc.zip"
+    },
+    {
+      "title": "Tecmo World Cup '90",
+      "category": "Soccer",
+      "system": "mame",
+      "bucket": "mame/wc90.zip"
+    },
+    {
+      "title": "Tecmo World Soccer '96",
+      "category": "Soccer",
+      "system": "mame",
+      "bucket": "mame/tws96.zip"
+    },
+    {
+      "title": "World Soccer Finals",
+      "category": "Soccer",
+      "system": "mame",
+      "bucket": "mame/wsf.zip"
+    },
+    {
+      "title": "Euro Champ '92",
+      "category": "Soccer",
+      "system": "fbneo",
+      "bucket": "fbneo/euroch92.zip"
+    },
+    {
+      "title": "Taito Cup Finals",
+      "category": "Soccer",
+      "system": "fbneo",
+      "bucket": "fbneo/cupfinal.zip"
+    },
+    {
+      "title": "Hat Trick Hero",
+      "category": "Soccer",
+      "system": "fbneo",
+      "bucket": "fbneo/htherou.zip"
+    },
+    {
+      "title": "Golf",
+      "category": "Golf & Tennis",
+      "system": "nes",
+      "bucket": "nes/Golf (USA, Asia) (En).zip"
+    },
+    {
+      "title": "Golf",
+      "category": "Golf & Tennis",
+      "system": "gb",
+      "bucket": "gb/Golf (World).zip"
+    },
+    {
+      "title": "Golf",
+      "category": "Golf & Tennis",
+      "system": "virtualboy",
+      "bucket": "virtualboy/Golf (USA).zip"
+    },
+    {
+      "title": "NES Open Tournament Golf",
+      "category": "Golf & Tennis",
+      "system": "nes",
+      "bucket": "nes/NES Open Tournament Golf (USA).zip"
+    },
+    {
+      "title": "Lee Trevino's Fighting Golf",
+      "category": "Golf & Tennis",
+      "system": "nes",
+      "bucket": "nes/Lee Trevino's Fighting Golf (USA).zip"
+    },
+    {
+      "title": "HAL's Hole in One Golf",
+      "category": "Golf & Tennis",
+      "system": "snes",
+      "bucket": "snes/HAL's Hole in One Golf (USA).zip"
+    },
+    {
+      "title": "PGA Tour Golf II",
+      "category": "Golf & Tennis",
+      "system": "genesis",
+      "bucket": "genesis/PGA Tour Golf II (USA, Europe) (Rev A).zip"
+    },
+    {
+      "title": "PGA Tour Golf III",
+      "category": "Golf & Tennis",
+      "system": "genesis",
+      "bucket": "genesis/PGA Tour Golf III (USA, Europe).zip"
+    },
+    {
+      "title": "Arnold Palmer Tournament Golf",
+      "category": "Golf & Tennis",
+      "system": "genesis",
+      "bucket": "genesis/Arnold Palmer Tournament Golf (USA, Europe).zip"
+    },
+    {
+      "title": "Zany Golf",
+      "category": "Golf & Tennis",
+      "system": "genesis",
+      "bucket": "genesis/Zany Golf (USA, Europe).zip"
+    },
+    {
+      "title": "Power Golf",
+      "category": "Golf & Tennis",
+      "system": "tg16",
+      "bucket": "tg16/Power Golf (USA).zip"
+    },
+    {
+      "title": "Pebble Beach Golf Links",
+      "category": "Golf & Tennis",
+      "system": "saturn",
+      "bucket": "saturn/Pebble Beach Golf Links (USA).chd"
+    },
+    {
+      "title": "Mario Golf",
+      "category": "Golf & Tennis",
+      "system": "n64",
+      "bucket": "n64/Mario Golf (USA).zip"
+    },
+    {
+      "title": "Mario Golf",
+      "category": "Golf & Tennis",
+      "system": "gbc",
+      "bucket": "gbc/Mario Golf (USA).zip"
+    },
+    {
+      "title": "Mario Golf - Advance Tour",
+      "category": "Golf & Tennis",
+      "system": "gba",
+      "bucket": "gba/Mario Golf - Advance Tour (USA).zip"
+    },
+    {
+      "title": "Mario Golf - Toadstool Tour",
+      "category": "Golf & Tennis",
+      "system": "gc",
+      "bucket": "gc/Mario Golf - Toadstool Tour (USA).rvz"
+    },
+    {
+      "title": "Mario Golf - World Tour",
+      "category": "Golf & Tennis",
+      "system": "3ds",
+      "bucket": "3ds/Mario Golf - World Tour (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Hot Shots Golf",
+      "category": "Golf & Tennis",
+      "system": "psx",
+      "bucket": "psx/Hot Shots Golf (USA).chd"
+    },
+    {
+      "title": "Hot Shots Golf 2",
+      "category": "Golf & Tennis",
+      "system": "psx",
+      "bucket": "psx/Hot Shots Golf 2 (USA).chd"
+    },
+    {
+      "title": "Hot Shots Golf - Open Tee",
+      "category": "Golf & Tennis",
+      "system": "psp",
+      "bucket": "psp/Hot Shots Golf - Open Tee (USA) (v2.00).chd"
+    },
+    {
+      "title": "Hot Shots Golf - Open Tee 2",
+      "category": "Golf & Tennis",
+      "system": "psp",
+      "bucket": "psp/Hot Shots Golf - Open Tee 2 (USA) (FW3.96).chd"
+    },
+    {
+      "title": "Pangya - Fantasy Golf",
+      "category": "Golf & Tennis",
+      "system": "psp",
+      "bucket": "psp/Pangya - Fantasy Golf (USA).chd"
+    },
+    {
+      "title": "Tee Off",
+      "category": "Golf & Tennis",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Tee Off (USA).chd"
+    },
+    {
+      "title": "Swingerz Golf",
+      "category": "Golf & Tennis",
+      "system": "gc",
+      "bucket": "gc/Swingerz Golf (USA).rvz"
+    },
+    {
+      "title": "Outlaw Golf",
+      "category": "Golf & Tennis",
+      "system": "gc",
+      "bucket": "gc/Outlaw Golf (USA).rvz"
+    },
+    {
+      "title": "Tiger Woods PGA Tour 2004",
+      "category": "Golf & Tennis",
+      "system": "gba",
+      "bucket": "gba/Tiger Woods PGA Tour 2004 (USA, Europe).zip"
+    },
+    {
+      "title": "Tiger Woods PGA Tour 2004",
+      "category": "Golf & Tennis",
+      "system": "gc",
+      "bucket": "gc/Tiger Woods PGA Tour 2004 (USA).m3u",
+      "files": [
+        "gc/Tiger Woods PGA Tour 2004 (USA) (Disc 1).rvz",
+        "gc/Tiger Woods PGA Tour 2004 (USA) (Disc 2).rvz"
+      ]
+    },
+    {
+      "title": "Tiger Woods PGA Tour 2005",
+      "category": "Golf & Tennis",
+      "system": "gc",
+      "bucket": "gc/Tiger Woods PGA Tour 2005 (USA).m3u",
+      "files": [
+        "gc/Tiger Woods PGA Tour 2005 (USA) (Disc 1).rvz",
+        "gc/Tiger Woods PGA Tour 2005 (USA) (Disc 2).rvz"
+      ]
+    },
+    {
+      "title": "Tiger Woods PGA Tour 10",
+      "category": "Golf & Tennis",
+      "system": "psp",
+      "bucket": "psp/Tiger Woods PGA Tour 10 (USA).chd"
+    },
+    {
+      "title": "True Swing Golf",
+      "category": "Golf & Tennis",
+      "system": "nds",
+      "bucket": "nds/True Swing Golf (USA) (En,Ja,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Eagle Shot Golf",
+      "category": "Golf & Tennis",
+      "system": "fbneo",
+      "bucket": "fbneo/eaglshot.zip"
+    },
+    {
+      "title": "Major Title",
+      "category": "Golf & Tennis",
+      "system": "fbneo",
+      "bucket": "fbneo/majtitle.zip"
+    },
+    {
+      "title": "Tennis",
+      "category": "Golf & Tennis",
+      "system": "nes",
+      "bucket": "nes/Tennis (Japan, USA) (En).zip"
+    },
+    {
+      "title": "Tennis",
+      "category": "Golf & Tennis",
+      "system": "gb",
+      "bucket": "gb/Tennis (World).zip"
+    },
+    {
+      "title": "Vs. Tennis",
+      "category": "Golf & Tennis",
+      "system": "mame",
+      "bucket": "mame/vstennis.zip"
+    },
+    {
+      "title": "Mario's Tennis",
+      "category": "Golf & Tennis",
+      "system": "virtualboy",
+      "bucket": "virtualboy/Mario's Tennis (Japan, USA) (En).zip"
+    },
+    {
+      "title": "Super Tennis",
+      "category": "Golf & Tennis",
+      "system": "snes",
+      "bucket": "snes/Super Tennis (USA).zip"
+    },
+    {
+      "title": "Smash Tennis",
+      "category": "Golf & Tennis",
+      "system": "snes",
+      "bucket": "snes/Smash Tennis (Europe).zip"
+    },
+    {
+      "title": "Final Match Tennis",
+      "category": "Golf & Tennis",
+      "system": "tg16",
+      "bucket": "tg16/Final Match Tennis (Japan).zip"
+    },
+    {
+      "title": "World Court Tennis",
+      "category": "Golf & Tennis",
+      "system": "tg16",
+      "bucket": "tg16/World Court Tennis (USA).zip"
+    },
+    {
+      "title": "Pete Sampras Tennis",
+      "category": "Golf & Tennis",
+      "system": "genesis",
+      "bucket": "genesis/Pete Sampras Tennis (USA, Europe) (Rev 1) (MDST17FF) (J-Cart).zip"
+    },
+    {
+      "title": "Wimbledon Championship Tennis",
+      "category": "Golf & Tennis",
+      "system": "genesis",
+      "bucket": "genesis/Wimbledon Championship Tennis (USA).zip"
+    },
+    {
+      "title": "Mario Tennis",
+      "category": "Golf & Tennis",
+      "system": "n64",
+      "bucket": "n64/Mario Tennis (USA).zip"
+    },
+    {
+      "title": "Mario Tennis",
+      "category": "Golf & Tennis",
+      "system": "gbc",
+      "bucket": "gbc/Mario Tennis (USA).zip"
+    },
+    {
+      "title": "Mario Tennis - Power Tour",
+      "category": "Golf & Tennis",
+      "system": "gba",
+      "bucket": "gba/Mario Tennis - Power Tour (USA, Australia) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Mario Power Tennis",
+      "category": "Golf & Tennis",
+      "system": "gc",
+      "bucket": "gc/Mario Power Tennis (USA) (Rev 1).rvz"
+    },
+    {
+      "title": "Mario Tennis Open",
+      "category": "Golf & Tennis",
+      "system": "3ds",
+      "bucket": "3ds/Mario Tennis Open (USA) (En,Fr,Es) (Rev 1).zip"
+    },
+    {
+      "title": "Virtua Tennis",
+      "category": "Golf & Tennis",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Virtua Tennis (USA).chd"
+    },
+    {
+      "title": "Tennis 2K2",
+      "category": "Golf & Tennis",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Tennis 2K2 (USA) (En,Ja,Fr,De,Es) (Rev A).chd"
+    },
+    {
+      "title": "Virtua Tennis",
+      "category": "Golf & Tennis",
+      "system": "gba",
+      "bucket": "gba/Virtua Tennis (USA).zip"
+    },
+    {
+      "title": "Virtua Tennis - World Tour",
+      "category": "Golf & Tennis",
+      "system": "psp",
+      "bucket": "psp/Virtua Tennis - World Tour (USA) (En,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "Virtua Tennis 3",
+      "category": "Golf & Tennis",
+      "system": "psp",
+      "bucket": "psp/Virtua Tennis 3 (USA) (En,Ja,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "Hot Shots Tennis - Get a Grip",
+      "category": "Golf & Tennis",
+      "system": "psp",
+      "bucket": "psp/Hot Shots Tennis - Get a Grip (USA) (En,Fr,Es).chd"
+    },
+    {
+      "title": "Smash Court Tennis 3",
+      "category": "Golf & Tennis",
+      "system": "psp",
+      "bucket": "psp/Smash Court Tennis 3 (USA).chd"
+    },
+    {
+      "title": "SEGA Superstars Tennis",
+      "category": "Golf & Tennis",
+      "system": "nds",
+      "bucket": "nds/SEGA Superstars Tennis (USA) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Tony Hawk's Pro Skater",
+      "category": "Extreme",
+      "system": "psx",
+      "bucket": "psx/Tony Hawk's Pro Skater (USA).chd"
+    },
+    {
+      "title": "Tony Hawk's Pro Skater",
+      "category": "Extreme",
+      "system": "n64",
+      "bucket": "n64/Tony Hawk's Pro Skater (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Tony Hawk's Pro Skater",
+      "category": "Extreme",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Tony Hawk's Pro Skater (USA).chd"
+    },
+    {
+      "title": "Tony Hawk's Pro Skater 2",
+      "category": "Extreme",
+      "system": "psx",
+      "bucket": "psx/Tony Hawk's Pro Skater 2 (USA).chd"
+    },
+    {
+      "title": "Tony Hawk's Pro Skater 2",
+      "category": "Extreme",
+      "system": "n64",
+      "bucket": "n64/Tony Hawk's Pro Skater 2 (USA).zip"
+    },
+    {
+      "title": "Tony Hawk's Pro Skater 2",
+      "category": "Extreme",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Tony Hawk's Pro Skater 2 (USA).chd"
+    },
+    {
+      "title": "Tony Hawk's Pro Skater 2",
+      "category": "Extreme",
+      "system": "gba",
+      "bucket": "gba/Tony Hawk's Pro Skater 2 (USA, Europe).zip"
+    },
+    {
+      "title": "Tony Hawk's Pro Skater 2",
+      "category": "Extreme",
+      "system": "gbc",
+      "bucket": "gbc/Tony Hawk's Pro Skater 2 (USA, Europe).zip"
+    },
+    {
+      "title": "Tony Hawk's Pro Skater 3",
+      "category": "Extreme",
+      "system": "psx",
+      "bucket": "psx/Tony Hawk's Pro Skater 3 (USA).chd"
+    },
+    {
+      "title": "Tony Hawk's Pro Skater 3",
+      "category": "Extreme",
+      "system": "n64",
+      "bucket": "n64/Tony Hawk's Pro Skater 3 (USA).zip"
+    },
+    {
+      "title": "Tony Hawk's Pro Skater 3",
+      "category": "Extreme",
+      "system": "ps2",
+      "bucket": "ps2/Tony Hawk's Pro Skater 3 (USA) (Rev 1).chd"
+    },
+    {
+      "title": "Tony Hawk's Pro Skater 3",
+      "category": "Extreme",
+      "system": "gc",
+      "bucket": "gc/Tony Hawk's Pro Skater 3 (USA).rvz"
+    },
+    {
+      "title": "Tony Hawk's Pro Skater 3",
+      "category": "Extreme",
+      "system": "gba",
+      "bucket": "gba/Tony Hawk's Pro Skater 3 (USA, Europe).zip"
+    },
+    {
+      "title": "Tony Hawk's Pro Skater 3",
+      "category": "Extreme",
+      "system": "gbc",
+      "bucket": "gbc/Tony Hawk's Pro Skater 3 (USA, Europe).zip"
+    },
+    {
+      "title": "Tony Hawk's Pro Skater 4",
+      "category": "Extreme",
+      "system": "psx",
+      "bucket": "psx/Tony Hawk's Pro Skater 4 (USA).chd"
+    },
+    {
+      "title": "Tony Hawk's Pro Skater 4",
+      "category": "Extreme",
+      "system": "ps2",
+      "bucket": "ps2/Tony Hawk's Pro Skater 4 (USA) (v2.01).chd"
+    },
+    {
+      "title": "Tony Hawk's Pro Skater 4",
+      "category": "Extreme",
+      "system": "gc",
+      "bucket": "gc/Tony Hawk's Pro Skater 4 (USA).rvz"
+    },
+    {
+      "title": "Tony Hawk's Pro Skater 4",
+      "category": "Extreme",
+      "system": "gba",
+      "bucket": "gba/Tony Hawk's Pro Skater 4 (USA, Europe).zip"
+    },
+    {
+      "title": "Tony Hawk's Underground",
+      "category": "Extreme",
+      "system": "gc",
+      "bucket": "gc/Tony Hawk's Underground (USA).rvz"
+    },
+    {
+      "title": "Tony Hawk's Underground",
+      "category": "Extreme",
+      "system": "gba",
+      "bucket": "gba/Tony Hawk's Underground (USA, Europe).zip"
+    },
+    {
+      "title": "Tony Hawk's Underground 2",
+      "category": "Extreme",
+      "system": "gc",
+      "bucket": "gc/Tony Hawk's Underground 2 (USA).rvz"
+    },
+    {
+      "title": "Tony Hawk's Underground 2",
+      "category": "Extreme",
+      "system": "gba",
+      "bucket": "gba/Tony Hawk's Underground 2 (USA, Europe).zip"
+    },
+    {
+      "title": "Tony Hawk's Underground 2 Remix",
+      "category": "Extreme",
+      "system": "psp",
+      "bucket": "psp/Tony Hawk's Underground 2 Remix (USA).chd"
+    },
+    {
+      "title": "Tony Hawk's American Wasteland",
+      "category": "Extreme",
+      "system": "gc",
+      "bucket": "gc/Tony Hawk's American Wasteland (USA).rvz"
+    },
+    {
+      "title": "Tony Hawk's American Sk8land",
+      "category": "Extreme",
+      "system": "gba",
+      "bucket": "gba/Tony Hawk's American Sk8land (USA).zip"
+    },
+    {
+      "title": "Tony Hawk's American Sk8land",
+      "category": "Extreme",
+      "system": "nds",
+      "bucket": "nds/Tony Hawk's American Sk8land (USA).zip"
+    },
+    {
+      "title": "Tony Hawk's Project 8",
+      "category": "Extreme",
+      "system": "psp",
+      "bucket": "psp/Tony Hawk's Project 8 (USA) (v2.03).chd"
+    },
+    {
+      "title": "Tony Hawk's Proving Ground",
+      "category": "Extreme",
+      "system": "nds",
+      "bucket": "nds/Tony Hawk's Proving Ground (USA).zip"
+    },
+    {
+      "title": "Tony Hawk's Downhill Jam",
+      "category": "Extreme",
+      "system": "gba",
+      "bucket": "gba/Tony Hawk's Downhill Jam (USA).zip"
+    },
+    {
+      "title": "Tony Hawk's Downhill Jam",
+      "category": "Extreme",
+      "system": "nds",
+      "bucket": "nds/Tony Hawk's Downhill Jam (USA).zip"
+    },
+    {
+      "title": "Disney's Extreme Skate Adventure",
+      "category": "Extreme",
+      "system": "gc",
+      "bucket": "gc/Disney's Extreme Skate Adventure (USA).rvz"
+    },
+    {
+      "title": "Thrasher - Skate and Destroy",
+      "category": "Extreme",
+      "system": "psx",
+      "bucket": "psx/Thrasher - Skate and Destroy (USA).chd"
+    },
+    {
+      "title": "Grind Session",
+      "category": "Extreme",
+      "system": "psx",
+      "bucket": "psx/Grind Session (USA).chd"
+    },
+    {
+      "title": "Skate It",
+      "category": "Extreme",
+      "system": "nds",
+      "bucket": "nds/Skate It (USA) (En,Fr,De,Es,It,Nl).zip"
+    },
+    {
+      "title": "Skate or Die",
+      "category": "Extreme",
+      "system": "nes",
+      "bucket": "nes/Skate or Die (USA).zip"
+    },
+    {
+      "title": "Skate or Die 2 - The Search for Double Trouble",
+      "category": "Extreme",
+      "system": "nes",
+      "bucket": "nes/Skate or Die 2 - The Search for Double Trouble (USA).zip"
+    },
+    {
+      "title": "Ski or Die",
+      "category": "Extreme",
+      "system": "nes",
+      "bucket": "nes/Ski or Die (USA).zip"
+    },
+    {
+      "title": "720 Degrees",
+      "category": "Extreme",
+      "system": "nes",
+      "bucket": "nes/720 Degrees (USA).zip"
+    },
+    {
+      "title": "720 Degrees",
+      "category": "Extreme",
+      "system": "gbc",
+      "bucket": "gbc/720 Degrees (USA, Europe) (GB Compatible).zip"
+    },
+    {
+      "title": "Town & Country Surf Designs - Wood & Water Rage",
+      "category": "Extreme",
+      "system": "nes",
+      "bucket": "nes/Town & Country Surf Designs - Wood & Water Rage (USA).zip"
+    },
+    {
+      "title": "Dave Mirra Freestyle BMX - Maximum Remix",
+      "category": "Extreme",
+      "system": "psx",
+      "bucket": "psx/Dave Mirra Freestyle BMX - Maximum Remix (USA).chd"
+    },
+    {
+      "title": "Dave Mirra Freestyle BMX",
+      "category": "Extreme",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Dave Mirra Freestyle BMX (USA).chd"
+    },
+    {
+      "title": "Dave Mirra Freestyle BMX 2",
+      "category": "Extreme",
+      "system": "gc",
+      "bucket": "gc/Dave Mirra Freestyle BMX 2 (USA).rvz"
+    },
+    {
+      "title": "Dave Mirra Freestyle BMX 2",
+      "category": "Extreme",
+      "system": "gba",
+      "bucket": "gba/Dave Mirra Freestyle BMX 2 (USA).zip"
+    },
+    {
+      "title": "Mat Hoffman's Pro BMX",
+      "category": "Extreme",
+      "system": "psx",
+      "bucket": "psx/Mat Hoffman's Pro BMX (USA).chd"
+    },
+    {
+      "title": "Mat Hoffman's Pro BMX",
+      "category": "Extreme",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Mat Hoffman's Pro BMX (USA).chd"
+    },
+    {
+      "title": "Mat Hoffman's Pro BMX 2",
+      "category": "Extreme",
+      "system": "gc",
+      "bucket": "gc/Mat Hoffman's Pro BMX 2 (USA).rvz"
+    },
+    {
+      "title": "Aggressive Inline",
+      "category": "Extreme",
+      "system": "gc",
+      "bucket": "gc/Aggressive Inline (USA).rvz"
+    },
+    {
+      "title": "Aggressive Inline",
+      "category": "Extreme",
+      "system": "gba",
+      "bucket": "gba/Aggressive Inline (USA).zip"
+    },
+    {
+      "title": "Kelly Slater's Pro Surfer",
+      "category": "Extreme",
+      "system": "gc",
+      "bucket": "gc/Kelly Slater's Pro Surfer (USA).rvz"
+    },
+    {
+      "title": "TransWorld Surf - Next Wave",
+      "category": "Extreme",
+      "system": "gc",
+      "bucket": "gc/TransWorld Surf - Next Wave (USA).rvz"
+    },
+    {
+      "title": "SSX",
+      "category": "Extreme",
+      "system": "ps2",
+      "bucket": "ps2/SSX (USA).chd"
+    },
+    {
+      "title": "SSX Tricky",
+      "category": "Extreme",
+      "system": "ps2",
+      "bucket": "ps2/SSX Tricky (USA).chd"
+    },
+    {
+      "title": "SSX Tricky",
+      "category": "Extreme",
+      "system": "gc",
+      "bucket": "gc/SSX Tricky (USA).rvz"
+    },
+    {
+      "title": "SSX Tricky",
+      "category": "Extreme",
+      "system": "gba",
+      "bucket": "gba/SSX Tricky (USA, Europe) (En,Fr,De).zip"
+    },
+    {
+      "title": "SSX 3",
+      "category": "Extreme",
+      "system": "ps2",
+      "bucket": "ps2/SSX 3 (USA).chd"
+    },
+    {
+      "title": "SSX 3",
+      "category": "Extreme",
+      "system": "gc",
+      "bucket": "gc/SSX 3 (USA).rvz"
+    },
+    {
+      "title": "SSX 3",
+      "category": "Extreme",
+      "system": "gba",
+      "bucket": "gba/SSX 3 (USA, Europe).zip"
+    },
+    {
+      "title": "SSX on Tour",
+      "category": "Extreme",
+      "system": "ps2",
+      "bucket": "ps2/SSX on Tour (USA).chd"
+    },
+    {
+      "title": "SSX On Tour",
+      "category": "Extreme",
+      "system": "gc",
+      "bucket": "gc/SSX On Tour (USA).rvz"
+    },
+    {
+      "title": "SSX on Tour",
+      "category": "Extreme",
+      "system": "psp",
+      "bucket": "psp/SSX on Tour (USA).chd"
+    },
+    {
+      "title": "1080 Snowboarding",
+      "category": "Extreme",
+      "system": "n64",
+      "bucket": "n64/1080 Snowboarding (Japan, USA) (En,Ja).zip"
+    },
+    {
+      "title": "1080 Avalanche",
+      "category": "Extreme",
+      "system": "gc",
+      "bucket": "gc/1080 Avalanche (USA).rvz"
+    },
+    {
+      "title": "Cool Boarders",
+      "category": "Extreme",
+      "system": "psx",
+      "bucket": "psx/Cool Boarders (USA).chd"
+    },
+    {
+      "title": "Cool Boarders 2",
+      "category": "Extreme",
+      "system": "psx",
+      "bucket": "psx/Cool Boarders 2 (USA).chd"
+    },
+    {
+      "title": "Cool Boarders 3",
+      "category": "Extreme",
+      "system": "psx",
+      "bucket": "psx/Cool Boarders 3 (USA).chd"
+    },
+    {
+      "title": "Cool Boarders 4",
+      "category": "Extreme",
+      "system": "psx",
+      "bucket": "psx/Cool Boarders 4 (USA).chd"
+    },
+    {
+      "title": "Cool Boarders Pocket",
+      "category": "Extreme",
+      "system": "ngpc",
+      "bucket": "ngpc/Cool Boarders Pocket (Japan, Europe) (En,Ja).zip"
+    },
+    {
+      "title": "Steep Slope Sliders",
+      "category": "Extreme",
+      "system": "saturn",
+      "bucket": "saturn/Steep Slope Sliders (USA).chd"
+    },
+    {
+      "title": "Rippin' Riders",
+      "category": "Extreme",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Rippin' Riders (USA).chd"
+    },
+    {
+      "title": "Slalom",
+      "category": "Extreme",
+      "system": "nes",
+      "bucket": "nes/Slalom (USA).zip"
+    },
+    {
+      "title": "Wave Race 64 - Kawasaki Jet Ski",
+      "category": "Extreme",
+      "system": "n64",
+      "bucket": "n64/Wave Race 64 - Kawasaki Jet Ski (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Wave Race - Blue Storm",
+      "category": "Extreme",
+      "system": "gc",
+      "bucket": "gc/Wave Race - Blue Storm (USA).rvz"
+    },
+    {
+      "title": "Wave Race",
+      "category": "Extreme",
+      "system": "gb",
+      "bucket": "gb/Wave Race (USA, Europe).zip"
+    },
+    {
+      "title": "Excitebike",
+      "category": "Extreme",
+      "system": "nes",
+      "bucket": "nes/Excitebike (Japan, USA) (En).zip"
+    },
+    {
+      "title": "Vs. Excitebike",
+      "category": "Extreme",
+      "system": "mame",
+      "bucket": "mame/excitebk.zip"
+    },
+    {
+      "title": "Vs. Excitebike",
+      "category": "Extreme",
+      "system": "fds",
+      "bucket": "fds/Vs. Excitebike (Japan) (En).zip"
+    },
+    {
+      "title": "Excitebike 64",
+      "category": "Extreme",
+      "system": "n64",
+      "bucket": "n64/Excitebike 64 (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Punch-Out!!",
+      "category": "Boxing & Wrestling",
+      "system": "fbneo",
+      "bucket": "fbneo/punchout.zip"
+    },
+    {
+      "title": "Super Punch-Out!!",
+      "category": "Boxing & Wrestling",
+      "system": "fbneo",
+      "bucket": "fbneo/spnchout.zip"
+    },
+    {
+      "title": "Arm Wrestling",
+      "category": "Boxing & Wrestling",
+      "system": "fbneo",
+      "bucket": "fbneo/armwrest.zip"
+    },
+    {
+      "title": "Mike Tyson's Punch-Out!!",
+      "category": "Boxing & Wrestling",
+      "system": "nes",
+      "bucket": "nes/Mike Tyson's Punch-Out!! (Japan, USA) (En) (Rev 1).zip"
+    },
+    {
+      "title": "Super Punch-Out!!",
+      "category": "Boxing & Wrestling",
+      "system": "snes",
+      "bucket": "snes/Super Punch-Out!! (USA).zip"
+    },
+    {
+      "title": "Punch-Out!!",
+      "category": "Boxing & Wrestling",
+      "system": "wii",
+      "bucket": "wii/Punch-Out!! (USA) (En,Fr,Es) (Rev 1).rvz"
+    },
+    {
+      "title": "Ring King",
+      "category": "Boxing & Wrestling",
+      "system": "nes",
+      "bucket": "nes/Ring King (USA).zip"
+    },
+    {
+      "title": "Ring King",
+      "category": "Boxing & Wrestling",
+      "system": "fbneo",
+      "bucket": "fbneo/ringking.zip"
+    },
+    {
+      "title": "Vs. T.K.O. Boxing",
+      "category": "Boxing & Wrestling",
+      "system": "mame",
+      "bucket": "mame/tkoboxng.zip"
+    },
+    {
+      "title": "Evander Holyfield's 'Real Deal' Boxing",
+      "category": "Boxing & Wrestling",
+      "system": "genesis",
+      "bucket": "genesis/Evander Holyfield's 'Real Deal' Boxing (World).zip"
+    },
+    {
+      "title": "Boxing Legends of the Ring",
+      "category": "Boxing & Wrestling",
+      "system": "genesis",
+      "bucket": "genesis/Boxing Legends of the Ring (USA).zip"
+    },
+    {
+      "title": "Boxing Legends of the Ring",
+      "category": "Boxing & Wrestling",
+      "system": "snes",
+      "bucket": "snes/Boxing Legends of the Ring (USA).zip"
+    },
+    {
+      "title": "Rocky",
+      "category": "Boxing & Wrestling",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Rocky (World).zip"
+    },
+    {
+      "title": "Rocky",
+      "category": "Boxing & Wrestling",
+      "system": "gc",
+      "bucket": "gc/Rocky (USA).rvz"
+    },
+    {
+      "title": "Ready 2 Rumble Boxing",
+      "category": "Boxing & Wrestling",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Ready 2 Rumble Boxing (USA).chd"
+    },
+    {
+      "title": "Ready 2 Rumble Boxing",
+      "category": "Boxing & Wrestling",
+      "system": "n64",
+      "bucket": "n64/Ready 2 Rumble Boxing (USA).zip"
+    },
+    {
+      "title": "Ready 2 Rumble Boxing",
+      "category": "Boxing & Wrestling",
+      "system": "psx",
+      "bucket": "psx/Ready 2 Rumble Boxing (USA).chd"
+    },
+    {
+      "title": "Ready 2 Rumble Boxing - Round 2",
+      "category": "Boxing & Wrestling",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Ready 2 Rumble Boxing - Round 2 (USA) (En,Fr,De).chd"
+    },
+    {
+      "title": "Ready 2 Rumble Boxing - Round 2",
+      "category": "Boxing & Wrestling",
+      "system": "n64",
+      "bucket": "n64/Ready 2 Rumble Boxing - Round 2 (USA).zip"
+    },
+    {
+      "title": "Ready 2 Rumble Boxing - Round 2",
+      "category": "Boxing & Wrestling",
+      "system": "psx",
+      "bucket": "psx/Ready 2 Rumble Boxing - Round 2 (USA).chd"
+    },
+    {
+      "title": "Knockout Kings 2000",
+      "category": "Boxing & Wrestling",
+      "system": "n64",
+      "bucket": "n64/Knockout Kings 2000 (USA).zip"
+    },
+    {
+      "title": "Knockout Kings 2001",
+      "category": "Boxing & Wrestling",
+      "system": "psx",
+      "bucket": "psx/Knockout Kings 2001 (USA).chd"
+    },
+    {
+      "title": "Fight Night Round 2",
+      "category": "Boxing & Wrestling",
+      "system": "gc",
+      "bucket": "gc/Fight Night Round 2 (USA).rvz"
+    },
+    {
+      "title": "Fight Night Round 3",
+      "category": "Boxing & Wrestling",
+      "system": "psp",
+      "bucket": "psp/Fight Night Round 3 (USA).chd"
+    },
+    {
+      "title": "Boxing Fever",
+      "category": "Boxing & Wrestling",
+      "system": "gba",
+      "bucket": "gba/Boxing Fever (USA, Europe).zip"
+    },
+    {
+      "title": "Hajime no Ippo - The Fighting!",
+      "category": "Boxing & Wrestling",
+      "system": "gba",
+      "bucket": "gba/Hajime no Ippo - The Fighting! (Japan).zip"
+    },
+    {
+      "title": "Boxing",
+      "category": "Boxing & Wrestling",
+      "system": "atari2600",
+      "bucket": "atari2600/Boxing (USA).zip"
+    },
+    {
+      "title": "Pro Wrestling",
+      "category": "Boxing & Wrestling",
+      "system": "nes",
+      "bucket": "nes/Pro Wrestling (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Pro Wrestling",
+      "category": "Boxing & Wrestling",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Pro Wrestling (USA, Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Tecmo World Wrestling",
+      "category": "Boxing & Wrestling",
+      "system": "nes",
+      "bucket": "nes/Tecmo World Wrestling (USA).zip"
+    },
+    {
+      "title": "Tag Team Wrestling",
+      "category": "Boxing & Wrestling",
+      "system": "nes",
+      "bucket": "nes/Tag Team Wrestling (USA).zip"
+    },
+    {
+      "title": "WCW World Championship Wrestling",
+      "category": "Boxing & Wrestling",
+      "system": "nes",
+      "bucket": "nes/WCW World Championship Wrestling (USA).zip"
+    },
+    {
+      "title": "WWF Superstars",
+      "category": "Boxing & Wrestling",
+      "system": "fbneo",
+      "bucket": "fbneo/wwfsstaru4.zip"
+    },
+    {
+      "title": "WWF Superstars",
+      "category": "Boxing & Wrestling",
+      "system": "gb",
+      "bucket": "gb/WWF Superstars (USA, Europe).zip"
+    },
+    {
+      "title": "WWF WrestleMania",
+      "category": "Boxing & Wrestling",
+      "system": "fbneo",
+      "bucket": "fbneo/wwfmania.zip"
+    },
+    {
+      "title": "WWF WrestleMania - The Arcade Game",
+      "category": "Boxing & Wrestling",
+      "system": "snes",
+      "bucket": "snes/WWF WrestleMania - The Arcade Game (USA).zip"
+    },
+    {
+      "title": "WWF WrestleMania - The Arcade Game",
+      "category": "Boxing & Wrestling",
+      "system": "genesis",
+      "bucket": "genesis/WWF WrestleMania - The Arcade Game (USA, Europe).zip"
+    },
+    {
+      "title": "WWF WrestleMania - The Arcade Game",
+      "category": "Boxing & Wrestling",
+      "system": "sega32x",
+      "bucket": "sega32x/WWF WrestleMania - The Arcade Game (USA).zip"
+    },
+    {
+      "title": "WWF WrestleMania - The Arcade Game",
+      "category": "Boxing & Wrestling",
+      "system": "psx",
+      "bucket": "psx/WWF WrestleMania - The Arcade Game (USA).chd"
+    },
+    {
+      "title": "WWF WrestleMania - The Arcade Game",
+      "category": "Boxing & Wrestling",
+      "system": "saturn",
+      "bucket": "saturn/WWF WrestleMania - The Arcade Game (USA).chd"
+    },
+    {
+      "title": "WWF Royal Rumble",
+      "category": "Boxing & Wrestling",
+      "system": "snes",
+      "bucket": "snes/WWF Royal Rumble (USA).zip"
+    },
+    {
+      "title": "WWF Royal Rumble",
+      "category": "Boxing & Wrestling",
+      "system": "genesis",
+      "bucket": "genesis/WWF Royal Rumble (World).zip"
+    },
+    {
+      "title": "WWF Raw",
+      "category": "Boxing & Wrestling",
+      "system": "snes",
+      "bucket": "snes/WWF Raw (USA).zip"
+    },
+    {
+      "title": "WWF RAW",
+      "category": "Boxing & Wrestling",
+      "system": "genesis",
+      "bucket": "genesis/WWF RAW (World).zip"
+    },
+    {
+      "title": "Saturday Night Slam Masters",
+      "category": "Boxing & Wrestling",
+      "system": "fbneo",
+      "bucket": "fbneo/slammastu.zip"
+    },
+    {
+      "title": "Saturday Night Slam Masters",
+      "category": "Boxing & Wrestling",
+      "system": "snes",
+      "bucket": "snes/Saturday Night Slam Masters (USA).zip"
+    },
+    {
+      "title": "Saturday Night Slammasters",
+      "category": "Boxing & Wrestling",
+      "system": "genesis",
+      "bucket": "genesis/Saturday Night Slammasters (USA).zip"
+    },
+    {
+      "title": "Muscle Bomber Duo - Ultimate Team Battle",
+      "category": "Boxing & Wrestling",
+      "system": "fbneo",
+      "bucket": "fbneo/mbombrd.zip"
+    },
+    {
+      "title": "Ring of Destruction - Slammasters II",
+      "category": "Boxing & Wrestling",
+      "system": "fbneo",
+      "bucket": "fbneo/ringdest.zip"
+    },
+    {
+      "title": "Natsume Championship Wrestling",
+      "category": "Boxing & Wrestling",
+      "system": "snes",
+      "bucket": "snes/Natsume Championship Wrestling (USA).zip"
+    },
+    {
+      "title": "Super Fire Pro Wrestling Special",
+      "category": "Boxing & Wrestling",
+      "system": "snes",
+      "bucket": "snes/Super Fire Pro Wrestling Special (Japan) (Rev 1).zip"
+    },
+    {
+      "title": "Super Fire Pro Wrestling X Premium",
+      "category": "Boxing & Wrestling",
+      "system": "snes",
+      "bucket": "snes/Super Fire Pro Wrestling X Premium (Japan).zip"
+    },
+    {
+      "title": "Fire Pro Wrestling - Combination Tag",
+      "category": "Boxing & Wrestling",
+      "system": "tg16",
+      "bucket": "tg16/Fire Pro Wrestling - Combination Tag (Japan).zip"
+    },
+    {
+      "title": "Fire Pro Wrestling 2 - 2nd Bout",
+      "category": "Boxing & Wrestling",
+      "system": "tg16",
+      "bucket": "tg16/Fire Pro Wrestling 2 - 2nd Bout (Japan).zip"
+    },
+    {
+      "title": "Fire Pro Wrestling 3 - Legend Bout",
+      "category": "Boxing & Wrestling",
+      "system": "tg16",
+      "bucket": "tg16/Fire Pro Wrestling 3 - Legend Bout (Japan).zip"
+    },
+    {
+      "title": "Fire Prowrestling S - 6Men Scramble",
+      "category": "Boxing & Wrestling",
+      "system": "saturn",
+      "bucket": "saturn/Fire Prowrestling S - 6Men Scramble (Japan) (2M).chd"
+    },
+    {
+      "title": "Fire Pro Wrestling D",
+      "category": "Boxing & Wrestling",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Fire Pro Wrestling D (Japan).chd"
+    },
+    {
+      "title": "Fire Pro Wrestling",
+      "category": "Boxing & Wrestling",
+      "system": "gba",
+      "bucket": "gba/Fire Pro Wrestling (USA, Europe).zip"
+    },
+    {
+      "title": "Fire Pro Wrestling 2",
+      "category": "Boxing & Wrestling",
+      "system": "gba",
+      "bucket": "gba/Fire Pro Wrestling 2 (USA).zip"
+    },
+    {
+      "title": "Fire Pro Wrestling for WonderSwan",
+      "category": "Boxing & Wrestling",
+      "system": "wonderswan",
+      "bucket": "wonderswan/Fire Pro Wrestling for WonderSwan (Japan) (Rev 5).zip"
+    },
+    {
+      "title": "WCW vs. nWo - World Tour",
+      "category": "Boxing & Wrestling",
+      "system": "n64",
+      "bucket": "n64/WCW vs. nWo - World Tour (USA) (Rev 1).zip"
+    },
+    {
+      "title": "WCW-nWo Revenge",
+      "category": "Boxing & Wrestling",
+      "system": "n64",
+      "bucket": "n64/WCW-nWo Revenge (USA).zip"
+    },
+    {
+      "title": "WWF WrestleMania 2000",
+      "category": "Boxing & Wrestling",
+      "system": "n64",
+      "bucket": "n64/WWF WrestleMania 2000 (USA).zip"
+    },
+    {
+      "title": "WWF No Mercy",
+      "category": "Boxing & Wrestling",
+      "system": "n64",
+      "bucket": "n64/WWF No Mercy (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Virtual Pro Wrestling 64",
+      "category": "Boxing & Wrestling",
+      "system": "n64",
+      "bucket": "n64/Virtual Pro Wrestling 64 (Japan).zip"
+    },
+    {
+      "title": "Virtual Pro Wrestling 2 - Oudou Keishou",
+      "category": "Boxing & Wrestling",
+      "system": "n64",
+      "bucket": "n64/Virtual Pro Wrestling 2 - Oudou Keishou (Japan).zip"
+    },
+    {
+      "title": "WWF War Zone",
+      "category": "Boxing & Wrestling",
+      "system": "n64",
+      "bucket": "n64/WWF War Zone (USA).zip"
+    },
+    {
+      "title": "WWF SmackDown!",
+      "category": "Boxing & Wrestling",
+      "system": "psx",
+      "bucket": "psx/WWF SmackDown! (USA).chd"
+    },
+    {
+      "title": "WWF SmackDown! 2 - Know Your Role",
+      "category": "Boxing & Wrestling",
+      "system": "psx",
+      "bucket": "psx/WWF SmackDown! 2 - Know Your Role (USA).chd"
+    },
+    {
+      "title": "WCW vs. the World",
+      "category": "Boxing & Wrestling",
+      "system": "psx",
+      "bucket": "psx/WCW vs. the World (USA).chd"
+    },
+    {
+      "title": "Power Move Pro Wrestling",
+      "category": "Boxing & Wrestling",
+      "system": "psx",
+      "bucket": "psx/Power Move Pro Wrestling (USA).chd"
+    },
+    {
+      "title": "WWF Royal Rumble",
+      "category": "Boxing & Wrestling",
+      "system": "dreamcast",
+      "bucket": "dreamcast/WWF Royal Rumble (USA).chd"
+    },
+    {
+      "title": "Giant Gram - Zen Nihon Pro Wres 2 in Nihon Budoukan",
+      "category": "Boxing & Wrestling",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Giant Gram - Zen Nihon Pro Wres 2 in Nihon Budoukan (Japan).chd"
+    },
+    {
+      "title": "Giant Gram 2000 - Zen Nihon Pro Wres 3 Eikou no Yuusha-tachi",
+      "category": "Boxing & Wrestling",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Giant Gram 2000 - Zen Nihon Pro Wres 3 Eikou no Yuusha-tachi (Japan).chd"
+    },
+    {
+      "title": "Zen Nihon Pro Wres featuring Virtua",
+      "category": "Boxing & Wrestling",
+      "system": "saturn",
+      "bucket": "saturn/Zen Nihon Pro Wres featuring Virtua (Japan) (Rev A).chd"
+    },
+    {
+      "title": "WWE Wrestlemania X8",
+      "category": "Boxing & Wrestling",
+      "system": "gc",
+      "bucket": "gc/WWE Wrestlemania X8 (USA).rvz"
+    },
+    {
+      "title": "WWE Wrestlemania XIX",
+      "category": "Boxing & Wrestling",
+      "system": "gc",
+      "bucket": "gc/WWE Wrestlemania XIX (USA).rvz"
+    },
+    {
+      "title": "WWE Day of Reckoning",
+      "category": "Boxing & Wrestling",
+      "system": "gc",
+      "bucket": "gc/WWE Day of Reckoning (USA) (Rev 1).rvz"
+    },
+    {
+      "title": "WWE Day of Reckoning 2",
+      "category": "Boxing & Wrestling",
+      "system": "gc",
+      "bucket": "gc/WWE Day of Reckoning 2 (USA).rvz"
+    },
+    {
+      "title": "Def Jam - Vendetta",
+      "category": "Boxing & Wrestling",
+      "system": "gc",
+      "bucket": "gc/Def Jam - Vendetta (USA).rvz"
+    },
+    {
+      "title": "Def Jam - Fight for NY",
+      "category": "Boxing & Wrestling",
+      "system": "gc",
+      "bucket": "gc/Def Jam - Fight for NY (USA).rvz"
+    },
+    {
+      "title": "Def Jam - Fight for NY - The Takeover",
+      "category": "Boxing & Wrestling",
+      "system": "psp",
+      "bucket": "psp/Def Jam - Fight for NY - The Takeover (USA).chd"
+    },
+    {
+      "title": "Ultimate Muscle - Legends vs. New Generation",
+      "category": "Boxing & Wrestling",
+      "system": "gc",
+      "bucket": "gc/Ultimate Muscle - Legends vs. New Generation (USA).rvz"
+    },
+    {
+      "title": "WWE - Road to WrestleMania X8",
+      "category": "Boxing & Wrestling",
+      "system": "gba",
+      "bucket": "gba/WWE - Road to WrestleMania X8 (USA, Europe).zip"
+    },
+    {
+      "title": "WWE SmackDown vs Raw 2010 Featuring ECW",
+      "category": "Boxing & Wrestling",
+      "system": "nds",
+      "bucket": "nds/WWE SmackDown vs Raw 2010 Featuring ECW (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "WWE SmackDown vs. Raw 2011",
+      "category": "Boxing & Wrestling",
+      "system": "psp",
+      "bucket": "psp/WWE SmackDown vs. Raw 2011 (USA).chd"
+    },
+    {
+      "title": "WWE All Stars",
+      "category": "Boxing & Wrestling",
+      "system": "psp",
+      "bucket": "psp/WWE All Stars (USA).chd"
+    },
+    {
+      "title": "WWE All Stars",
+      "category": "Boxing & Wrestling",
+      "system": "3ds",
+      "bucket": "3ds/WWE All Stars (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Big Bang Pro Wrestling",
+      "category": "Boxing & Wrestling",
+      "system": "ngpc",
+      "bucket": "ngpc/Big Bang Pro Wrestling (Japan) (En,Ja).zip"
+    },
+    {
+      "title": "Wrestle War",
+      "category": "Boxing & Wrestling",
+      "system": "genesis",
+      "bucket": "genesis/Wrestle War (Japan, Europe) (En).zip"
+    },
+    {
+      "title": "Wrestle War",
+      "category": "Boxing & Wrestling",
+      "system": "fbneo",
+      "bucket": "fbneo/wrestwar.zip"
+    },
+    {
+      "title": "Mat Mania",
+      "category": "Boxing & Wrestling",
+      "system": "fbneo",
+      "bucket": "fbneo/matmania.zip"
+    },
+    {
+      "title": "Mania Challenge",
+      "category": "Boxing & Wrestling",
+      "system": "fbneo",
+      "bucket": "fbneo/maniach.zip"
+    },
+    {
+      "title": "The Big Pro Wrestling!",
+      "category": "Boxing & Wrestling",
+      "system": "fbneo",
+      "bucket": "fbneo/bigprowr.zip"
+    },
+    {
+      "title": "Body Slam",
+      "category": "Boxing & Wrestling",
+      "system": "fbneo",
+      "bucket": "fbneo/bodyslam.zip"
+    },
+    {
+      "title": "Champion Wrestler",
+      "category": "Boxing & Wrestling",
+      "system": "fbneo",
+      "bucket": "fbneo/champwru.zip"
+    },
+    {
+      "title": "Ring Rage",
+      "category": "Boxing & Wrestling",
+      "system": "fbneo",
+      "bucket": "fbneo/ringrage.zip"
+    },
+    {
+      "title": "Robo Wres 2001",
+      "category": "Boxing & Wrestling",
+      "system": "fbneo",
+      "bucket": "fbneo/robowres.zip"
+    },
+    {
+      "title": "Super Dodge Ball",
+      "category": "Kunio & Technos",
+      "system": "fbneo",
+      "bucket": "fbneo/spdodgeb.zip"
+    },
+    {
+      "title": "Super Dodge Ball",
+      "category": "Kunio & Technos",
+      "system": "nes",
+      "bucket": "nes/Super Dodge Ball (USA).zip"
+    },
+    {
+      "title": "Super Dodge Ball (Neo Geo)",
+      "category": "Kunio & Technos",
+      "system": "fbneo",
+      "bucket": "fbneo/sdodgeb.zip"
+    },
+    {
+      "title": "Super Dodge Ball Advance",
+      "category": "Kunio & Technos",
+      "system": "gba",
+      "bucket": "gba/Super Dodge Ball Advance (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Super Dodgeball Brawlers",
+      "category": "Kunio & Technos",
+      "system": "nds",
+      "bucket": "nds/Super Dodgeball Brawlers (USA).zip"
+    },
+    {
+      "title": "Kunio-kun no Dodge Ball Da yo Zenin Shuugou!",
+      "category": "Kunio & Technos",
+      "system": "snes",
+      "bucket": "snes/Kunio-kun no Dodge Ball Da yo Zenin Shuugou! (Japan).zip"
+    },
+    {
+      "title": "Nekketsu Koukou Dodgeball-bu - Kyouteki! Dodge Soldier no Maki",
+      "category": "Kunio & Technos",
+      "system": "gb",
+      "bucket": "gb/Nekketsu Koukou Dodgeball-bu - Kyouteki! Dodge Soldier no Maki (Japan).zip"
+    },
+    {
+      "title": "Nekketsu Koukou Dodgeball-bu - PC Bangai Hen",
+      "category": "Kunio & Technos",
+      "system": "tg16",
+      "bucket": "tg16/Nekketsu Koukou Dodgeball-bu - PC Bangai Hen (Japan).zip"
+    },
+    {
+      "title": "Nintendo World Cup",
+      "category": "Kunio & Technos",
+      "system": "nes",
+      "bucket": "nes/Nintendo World Cup (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Nintendo World Cup",
+      "category": "Kunio & Technos",
+      "system": "gb",
+      "bucket": "gb/Nintendo World Cup (USA, Europe).zip"
+    },
+    {
+      "title": "Nekketsu Koukou Dodgeball-bu - Soccer Hen MD",
+      "category": "Kunio & Technos",
+      "system": "genesis",
+      "bucket": "genesis/Nekketsu Koukou Dodgeball-bu - Soccer Hen MD (Japan).zip"
+    },
+    {
+      "title": "Nekketsu Koukou Dodgeball-bu - PC Soccer Hen",
+      "category": "Kunio & Technos",
+      "system": "tg16",
+      "bucket": "tg16/Nekketsu Koukou Dodgeball-bu - PC Soccer Hen (Japan).zip"
+    },
+    {
+      "title": "Nekketsu Koukou Dodgeball-bu CD - Soccer-hen",
+      "category": "Kunio & Technos",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Nekketsu Koukou Dodgeball-bu CD - Soccer-hen (Japan).chd"
+    },
+    {
+      "title": "Kunio-kun no Nekketsu Soccer League",
+      "category": "Kunio & Technos",
+      "system": "nes",
+      "bucket": "nes/Kunio-kun no Nekketsu Soccer League (Japan).zip"
+    },
+    {
+      "title": "River City - Soccer Hooligans",
+      "category": "Kunio & Technos",
+      "system": "nds",
+      "bucket": "nds/River City - Soccer Hooligans (USA).zip"
+    },
+    {
+      "title": "Crash 'n' the Boys - Street Challenge",
+      "category": "Kunio & Technos",
+      "system": "nes",
+      "bucket": "nes/Crash 'n' the Boys - Street Challenge (USA).zip"
+    },
+    {
+      "title": "Bikkuri Nekketsu Shin Kiroku! - Dokodemo Kin Medal",
+      "category": "Kunio & Technos",
+      "system": "gb",
+      "bucket": "gb/Bikkuri Nekketsu Shin Kiroku! - Dokodemo Kin Medal (Japan).zip"
+    },
+    {
+      "title": "Downtown - Nekketsu Koushinkyoku - Soreyuke Daiundoukai",
+      "category": "Kunio & Technos",
+      "system": "nes",
+      "bucket": "nes/Downtown - Nekketsu Koushinkyoku - Soreyuke Daiundoukai (Japan).zip"
+    },
+    {
+      "title": "Downtown - Nekketsu Koushinkyoku - Dokodemo Daiundoukai",
+      "category": "Kunio & Technos",
+      "system": "gb",
+      "bucket": "gb/Downtown - Nekketsu Koushinkyoku - Dokodemo Daiundoukai (Japan).zip"
+    },
+    {
+      "title": "Downtown Nekketsu Koushinkyoku - Soreyuke Daiundoukai",
+      "category": "Kunio & Technos",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Downtown Nekketsu Koushinkyoku - Soreyuke Daiundoukai (Japan).chd"
+    },
+    {
+      "title": "River City - Super Sports Challenge",
+      "category": "Kunio & Technos",
+      "system": "nds",
+      "bucket": "nds/River City - Super Sports Challenge (USA).zip"
+    },
+    {
+      "title": "Ike Ike! Nekketsu Hockey-bu - Subette Koronde Dairantou",
+      "category": "Kunio & Technos",
+      "system": "nes",
+      "bucket": "nes/Ike Ike! Nekketsu Hockey-bu - Subette Koronde Dairantou (Japan).zip"
+    },
+    {
+      "title": "Nekketsu! Street Basket - Ganbare Dunk Heroes",
+      "category": "Kunio & Technos",
+      "system": "nes",
+      "bucket": "nes/Nekketsu! Street Basket - Ganbare Dunk Heroes (Japan).zip"
+    },
+    {
+      "title": "Downtown - Nekketsu Baseball Monogatari - Yakyuu de Shoubu da! Kunio-kun",
+      "category": "Kunio & Technos",
+      "system": "snes",
+      "bucket": "snes/Downtown - Nekketsu Baseball Monogatari - Yakyuu de Shoubu da! Kunio-kun (Japan).zip"
+    },
+    {
+      "title": "Nekketsu! Beach Volley Da yo Kunio-kun",
+      "category": "Kunio & Technos",
+      "system": "gb",
+      "bucket": "gb/Nekketsu! Beach Volley Da yo Kunio-kun (Japan) (SGB Enhanced).zip"
+    },
+    {
+      "title": "U.S. Championship V'ball",
+      "category": "Kunio & Technos",
+      "system": "fbneo",
+      "bucket": "fbneo/vball.zip"
+    },
+    {
+      "title": "Super Spike V'Ball",
+      "category": "Kunio & Technos",
+      "system": "nes",
+      "bucket": "nes/Super Spike V'Ball (USA).zip"
+    },
+    {
+      "title": "Baseball Stars Professional",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/bstars.zip"
+    },
+    {
+      "title": "Baseball Stars 2",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/bstars2.zip"
+    },
+    {
+      "title": "2020 Super Baseball",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/2020bb.zip"
+    },
+    {
+      "title": "Super Sidekicks",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/ssideki.zip"
+    },
+    {
+      "title": "Super Sidekicks 2 - The World Championship",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/ssideki2.zip"
+    },
+    {
+      "title": "Super Sidekicks 3 - The Next Glory",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/ssideki3.zip"
+    },
+    {
+      "title": "The Ultimate 11 - The SNK Football Championship",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/ssideki4.zip"
+    },
+    {
+      "title": "Neo-Geo Cup '98 - The Road to the Victory",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/neocup98.zip"
+    },
+    {
+      "title": "Soccer Brawl",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/socbrawl.zip"
+    },
+    {
+      "title": "Goal! Goal! Goal!",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/goalx3.zip"
+    },
+    {
+      "title": "Pleasure Goal",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/pgoal.zip"
+    },
+    {
+      "title": "Football Frenzy",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/fbfrenzy.zip"
+    },
+    {
+      "title": "Street Hoop",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/strhoop.zip"
+    },
+    {
+      "title": "Neo Turf Masters",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/turfmast.zip"
+    },
+    {
+      "title": "Top Player's Golf",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/tpgolf.zip"
+    },
+    {
+      "title": "Windjammers",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/wjammers.zip"
+    },
+    {
+      "title": "Battle Flip Shot",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/flipshot.zip"
+    },
+    {
+      "title": "Bang Bead",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/bangbead.zip"
+    },
+    {
+      "title": "3 Count Bout",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/3countb.zip"
+    },
+    {
+      "title": "Power Spikes II",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/pspikes2.zip"
+    },
+    {
+      "title": "League Bowling",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/lbowling.zip"
+    },
+    {
+      "title": "Stakes Winner",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/stakwin.zip"
+    },
+    {
+      "title": "Stakes Winner 2",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/stakwin2.zip"
+    },
+    {
+      "title": "Baseball Stars Color - Pocket Sports Series",
+      "category": "Neo Geo",
+      "system": "ngpc",
+      "bucket": "ngpc/Baseball Stars Color - Pocket Sports Series (World) (En,Ja).zip"
+    },
+    {
+      "title": "Pocket Tennis Color - Pocket Sports Series",
+      "category": "Neo Geo",
+      "system": "ngpc",
+      "bucket": "ngpc/Pocket Tennis Color - Pocket Sports Series (World) (En,Ja).zip"
+    },
+    {
+      "title": "Neo Turf Masters",
+      "category": "Neo Geo",
+      "system": "ngpc",
+      "bucket": "ngpc/Neo Turf Masters (World) (En,Ja).zip"
+    },
+    {
+      "title": "NeoGeo Cup '98 Plus Color - Pocket Sports Series",
+      "category": "Neo Geo",
+      "system": "ngpc",
+      "bucket": "ngpc/NeoGeo Cup '98 Plus Color - Pocket Sports Series (World) (En,Ja).zip"
+    },
+    {
+      "title": "Dynamite Slugger",
+      "category": "Neo Geo",
+      "system": "ngpc",
+      "bucket": "ngpc/Dynamite Slugger (Japan, Europe) (En,Ja).zip"
+    },
+    {
+      "title": "Track & Field",
+      "category": "Olympic & Multi-event",
+      "system": "fbneo",
+      "bucket": "fbneo/trackfld.zip"
+    },
+    {
+      "title": "Hyper Sports",
+      "category": "Olympic & Multi-event",
+      "system": "fbneo",
+      "bucket": "fbneo/hyperspt.zip"
+    },
+    {
+      "title": "'88 Games",
+      "category": "Olympic & Multi-event",
+      "system": "fbneo",
+      "bucket": "fbneo/88games.zip"
+    },
+    {
+      "title": "Track & Field",
+      "category": "Olympic & Multi-event",
+      "system": "nes",
+      "bucket": "nes/Track & Field (USA).zip"
+    },
+    {
+      "title": "Track & Field II",
+      "category": "Olympic & Multi-event",
+      "system": "nes",
+      "bucket": "nes/Track & Field II (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Track & Field",
+      "category": "Olympic & Multi-event",
+      "system": "gb",
+      "bucket": "gb/Track & Field (USA, Europe).zip"
+    },
+    {
+      "title": "World Class Track Meet",
+      "category": "Olympic & Multi-event",
+      "system": "nes",
+      "bucket": "nes/World Class Track Meet (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Caveman Games",
+      "category": "Olympic & Multi-event",
+      "system": "nes",
+      "bucket": "nes/Caveman Games (USA).zip"
+    },
+    {
+      "title": "Capcom's Gold Medal Challenge '92",
+      "category": "Olympic & Multi-event",
+      "system": "nes",
+      "bucket": "nes/Capcom's Gold Medal Challenge '92 (USA).zip"
+    },
+    {
+      "title": "Numan Athletics",
+      "category": "Olympic & Multi-event",
+      "system": "fbneo",
+      "bucket": "fbneo/numanath.zip"
+    },
+    {
+      "title": "Gold Medalist",
+      "category": "Olympic & Multi-event",
+      "system": "fbneo",
+      "bucket": "fbneo/goldmedl.zip"
+    },
+    {
+      "title": "International Track & Field",
+      "category": "Olympic & Multi-event",
+      "system": "psx",
+      "bucket": "psx/International Track & Field (USA).chd"
+    },
+    {
+      "title": "International Track & Field 2000",
+      "category": "Olympic & Multi-event",
+      "system": "psx",
+      "bucket": "psx/International Track & Field 2000 (USA).chd"
+    },
+    {
+      "title": "International Track & Field 2000",
+      "category": "Olympic & Multi-event",
+      "system": "n64",
+      "bucket": "n64/International Track & Field 2000 (USA).zip"
+    },
+    {
+      "title": "ESPN International Track & Field",
+      "category": "Olympic & Multi-event",
+      "system": "dreamcast",
+      "bucket": "dreamcast/ESPN International Track & Field (USA).chd"
+    },
+    {
+      "title": "New International Track & Field",
+      "category": "Olympic & Multi-event",
+      "system": "nds",
+      "bucket": "nds/New International Track & Field (USA) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Nagano Winter Olympics '98",
+      "category": "Olympic & Multi-event",
+      "system": "n64",
+      "bucket": "n64/Nagano Winter Olympics '98 (USA).zip"
+    },
+    {
+      "title": "DecAthlete",
+      "category": "Olympic & Multi-event",
+      "system": "saturn",
+      "bucket": "saturn/DecAthlete (USA).chd"
+    },
+    {
+      "title": "Winter Heat",
+      "category": "Olympic & Multi-event",
+      "system": "saturn",
+      "bucket": "saturn/Winter Heat (USA).chd"
+    },
+    {
+      "title": "Winter Heat",
+      "category": "Olympic & Multi-event",
+      "system": "mame",
+      "bucket": "mame/winterht.zip"
+    },
+    {
+      "title": "Virtua Athlete 2000",
+      "category": "Olympic & Multi-event",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Virtua Athlete 2000 (USA) (En,Fr,De,Es).chd"
+    },
+    {
+      "title": "Sydney 2000",
+      "category": "Olympic & Multi-event",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Sydney 2000 (USA).chd"
+    },
+    {
+      "title": "Olympic Gold",
+      "category": "Olympic & Multi-event",
+      "system": "genesis",
+      "bucket": "genesis/Olympic Gold (Japan, USA, Korea) (En,Fr,De,Es,It,Nl,Pt,Sv) (Rev A).zip"
+    },
+    {
+      "title": "Olympic Summer Games",
+      "category": "Olympic & Multi-event",
+      "system": "genesis",
+      "bucket": "genesis/Olympic Summer Games (USA).zip"
+    },
+    {
+      "title": "Winter Olympic Games",
+      "category": "Olympic & Multi-event",
+      "system": "genesis",
+      "bucket": "genesis/Winter Olympic Games (USA) (En,Fr,De,Es,It,Pt,Sv,No).zip"
+    },
+    {
+      "title": "California Games",
+      "category": "Olympic & Multi-event",
+      "system": "nes",
+      "bucket": "nes/California Games (USA).zip"
+    },
+    {
+      "title": "California Games",
+      "category": "Olympic & Multi-event",
+      "system": "genesis",
+      "bucket": "genesis/California Games (USA, Europe).zip"
+    },
+    {
+      "title": "California Games",
+      "category": "Olympic & Multi-event",
+      "system": "mastersystem",
+      "bucket": "mastersystem/California Games (USA, Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "California Games",
+      "category": "Olympic & Multi-event",
+      "system": "atarilynx",
+      "bucket": "atarilynx/California Games (World).zip"
+    },
+    {
+      "title": "California Games",
+      "category": "Olympic & Multi-event",
+      "system": "atari2600",
+      "bucket": "atari2600/California Games (USA).zip"
+    },
+    {
+      "title": "California Games II",
+      "category": "Olympic & Multi-event",
+      "system": "snes",
+      "bucket": "snes/California Games II (USA).zip"
+    },
+    {
+      "title": "Winter Games",
+      "category": "Olympic & Multi-event",
+      "system": "nes",
+      "bucket": "nes/Winter Games (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Summer Games",
+      "category": "Olympic & Multi-event",
+      "system": "atari2600",
+      "bucket": "atari2600/Summer Games (USA).zip"
+    },
+    {
+      "title": "Winter Games",
+      "category": "Olympic & Multi-event",
+      "system": "atari2600",
+      "bucket": "atari2600/Winter Games (USA).zip"
+    },
+    {
+      "title": "World Games",
+      "category": "Olympic & Multi-event",
+      "system": "nes",
+      "bucket": "nes/World Games (USA).zip"
+    },
+    {
+      "title": "The Activision Decathlon",
+      "category": "Olympic & Multi-event",
+      "system": "atari2600",
+      "bucket": "atari2600/Activision Decathlon, The (USA).zip"
+    },
+    {
+      "title": "Mario & Sonic at the Olympic Games",
+      "category": "Olympic & Multi-event",
+      "system": "nds",
+      "bucket": "nds/Mario & Sonic at the Olympic Games (USA) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Mario & Sonic at the Olympic Winter Games",
+      "category": "Olympic & Multi-event",
+      "system": "nds",
+      "bucket": "nds/Mario & Sonic at the Olympic Winter Games (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Mario & Sonic at the London 2012 Olympic Games",
+      "category": "Olympic & Multi-event",
+      "system": "3ds",
+      "bucket": "3ds/Mario & Sonic at the London 2012 Olympic Games (USA) (En,Fr,Es) (Rev 1).zip"
+    },
+    {
+      "title": "Mario & Sonic at the Rio 2016 Olympic Games",
+      "category": "Olympic & Multi-event",
+      "system": "3ds",
+      "bucket": "3ds/Mario & Sonic at the Rio 2016 Olympic Games (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Sports Jam",
+      "category": "Olympic & Multi-event",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Sports Jam (USA).chd"
+    },
+    {
+      "title": "Capcom Sports Club",
+      "category": "Olympic & Multi-event",
+      "system": "fbneo",
+      "bucket": "fbneo/csclub.zip"
+    },
+    {
+      "title": "Volleyball",
+      "category": "Other Sports",
+      "system": "nes",
+      "bucket": "nes/Volleyball (USA, Europe).zip"
+    },
+    {
+      "title": "Kings of the Beach - Professional Beach Volleyball",
+      "category": "Other Sports",
+      "system": "nes",
+      "bucket": "nes/Kings of the Beach - Professional Beach Volleyball (USA).zip"
+    },
+    {
+      "title": "Super Volleyball",
+      "category": "Other Sports",
+      "system": "genesis",
+      "bucket": "genesis/Super Volleyball (USA).zip"
+    },
+    {
+      "title": "Super Volleyball",
+      "category": "Other Sports",
+      "system": "tg16",
+      "bucket": "tg16/Super Volleyball (USA).zip"
+    },
+    {
+      "title": "Power Spikes",
+      "category": "Other Sports",
+      "system": "fbneo",
+      "bucket": "fbneo/pspikesu.zip"
+    },
+    {
+      "title": "Beach Spikers - Virtua Beach Volleyball",
+      "category": "Other Sports",
+      "system": "gc",
+      "bucket": "gc/Beach Spikers - Virtua Beach Volleyball (USA).rvz"
+    },
+    {
+      "title": "Dead or Alive Xtreme Beach Volleyball",
+      "category": "Other Sports",
+      "system": "xbox",
+      "bucket": "xbox/Dead or Alive Xtreme Beach Volleyball (USA) (En,Ja).iso"
+    },
+    {
+      "title": "Championship Bowling",
+      "category": "Other Sports",
+      "system": "nes",
+      "bucket": "nes/Championship Bowling (USA).zip"
+    },
+    {
+      "title": "Super Bowling",
+      "category": "Other Sports",
+      "system": "snes",
+      "bucket": "snes/Super Bowling (USA).zip"
+    },
+    {
+      "title": "Nester's Funky Bowling",
+      "category": "Other Sports",
+      "system": "virtualboy",
+      "bucket": "virtualboy/Nester's Funky Bowling (USA).zip"
+    },
+    {
+      "title": "Capcom Bowling",
+      "category": "Other Sports",
+      "system": "fbneo",
+      "bucket": "fbneo/capbowl.zip"
+    },
+    {
+      "title": "Side Pocket",
+      "category": "Other Sports",
+      "system": "nes",
+      "bucket": "nes/Side Pocket (USA).zip"
+    },
+    {
+      "title": "Side Pocket",
+      "category": "Other Sports",
+      "system": "snes",
+      "bucket": "snes/Side Pocket (USA).zip"
+    },
+    {
+      "title": "Side Pocket",
+      "category": "Other Sports",
+      "system": "genesis",
+      "bucket": "genesis/Side Pocket (USA).zip"
+    },
+    {
+      "title": "Lunar Pool",
+      "category": "Other Sports",
+      "system": "nes",
+      "bucket": "nes/Lunar Pool (USA).zip"
+    },
+    {
+      "title": "Speedball 2 - Brutal Deluxe",
+      "category": "Other Sports",
+      "system": "genesis",
+      "bucket": "genesis/Speedball 2 - Brutal Deluxe (USA).zip"
+    },
+    {
+      "title": "Speedball 2",
+      "category": "Other Sports",
+      "system": "gba",
+      "bucket": "gba/Speedball 2 (Europe) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Blast Lacrosse",
+      "category": "Other Sports",
+      "system": "psx",
+      "bucket": "psx/Blast Lacrosse (USA).chd"
+    },
+    {
+      "title": "Jonah Lomu Rugby",
+      "category": "Other Sports",
+      "system": "saturn",
+      "bucket": "saturn/Jonah Lomu Rugby (Europe).chd"
+    },
+    {
+      "title": "Sega Bass Fishing",
+      "category": "Other Sports",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Sega Bass Fishing (USA).chd"
+    },
+    {
+      "title": "Sega Bass Fishing 2",
+      "category": "Other Sports",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Sega Bass Fishing 2 (USA).chd"
+    },
+    {
+      "title": "Sega Marine Fishing",
+      "category": "Other Sports",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Sega Marine Fishing (USA).chd"
+    },
+    {
+      "title": "Smash Ping Pong",
+      "category": "Other Sports",
+      "system": "fds",
+      "bucket": "fds/Smash Ping Pong (Japan).zip"
+    },
+    {
+      "title": "Shufflepuck Cafe",
+      "category": "Other Sports",
+      "system": "nes",
+      "bucket": "nes/Shufflepuck Cafe (Japan).zip"
+    }
+  ]
+}

@@ -18,9 +18,89 @@
       "bucket": "nes/Faxanadu (USA) (Rev 1).zip"
     },
     {
+      "title": "Blaster Master",
+      "system": "nes",
+      "bucket": "nes/Blaster Master (USA).zip"
+    },
+    {
+      "title": "Rygar",
+      "system": "nes",
+      "bucket": "nes/Rygar (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Goonies II, The",
+      "system": "nes",
+      "bucket": "nes/Goonies II, The (USA).zip"
+    },
+    {
+      "title": "Legacy of the Wizard",
+      "system": "nes",
+      "bucket": "nes/Legacy of the Wizard (USA).zip"
+    },
+    {
+      "title": "Battle of Olympus, The",
+      "system": "nes",
+      "bucket": "nes/Battle of Olympus, The (USA).zip"
+    },
+    {
+      "title": "Clash at Demonhead",
+      "system": "nes",
+      "bucket": "nes/Clash at Demonhead (USA).zip"
+    },
+    {
+      "title": "Strider",
+      "system": "nes",
+      "bucket": "nes/Strider (USA).zip"
+    },
+    {
+      "title": "Ufouria - The Saga",
+      "system": "nes",
+      "bucket": "nes/Ufouria - The Saga (Europe).zip"
+    },
+    {
+      "title": "Ghoul School",
+      "system": "nes",
+      "bucket": "nes/Ghoul School (USA).zip"
+    },
+    {
+      "title": "Getsu Fuuma Den",
+      "system": "nes",
+      "bucket": "nes/Getsu Fuuma Den (Japan).zip"
+    },
+    {
+      "title": "Knightmare II - The Maze of Galious",
+      "system": "msx",
+      "bucket": "msx/Knightmare II - The Maze of Galious (Japan).zip"
+    },
+    {
+      "title": "Dragon Slayer II - Xanadu",
+      "system": "msx",
+      "bucket": "msx/Dragon Slayer II - Xanadu (Japan).zip"
+    },
+    {
+      "title": "Vampire Killer",
+      "system": "msx2",
+      "bucket": "msx2/Vampire Killer (Japan, Europe) (En).zip"
+    },
+    {
+      "title": "Dragon Slayer IV - Drasle Family",
+      "system": "msx2",
+      "bucket": "msx2/Dragon Slayer IV - Drasle Family (Japan).zip"
+    },
+    {
       "title": "Metroid II - Return of Samus",
       "system": "gb",
       "bucket": "gb/Metroid II - Return of Samus (World).zip"
+    },
+    {
+      "title": "Dr. Franken",
+      "system": "gb",
+      "bucket": "gb/Dr. Franken (USA).zip"
+    },
+    {
+      "title": "Teenage Mutant Ninja Turtles III - Radical Rescue",
+      "system": "gb",
+      "bucket": "gb/Teenage Mutant Ninja Turtles III - Radical Rescue (USA).zip"
     },
     {
       "title": "Castlevania - Symphony of the Night",
@@ -28,9 +108,69 @@
       "bucket": "psx/Castlevania - Symphony of the Night (USA).chd"
     },
     {
+      "title": "Tomba!",
+      "system": "psx",
+      "bucket": "psx/Tomba! (USA).chd"
+    },
+    {
+      "title": "Tomba! 2 - The Evil Swine Return",
+      "system": "psx",
+      "bucket": "psx/Tomba! 2 - The Evil Swine Return (USA).chd"
+    },
+    {
+      "title": "Powerslave",
+      "system": "psx",
+      "bucket": "psx/Powerslave (USA).chd"
+    },
+    {
+      "title": "The Divide - Enemies Within",
+      "system": "psx",
+      "bucket": "psx/Divide, The - Enemies Within (USA).chd"
+    },
+    {
+      "title": "Blaster Master - Blasting Again",
+      "system": "psx",
+      "bucket": "psx/Blaster Master - Blasting Again (USA).chd"
+    },
+    {
+      "title": "Akumajou Dracula X - Gekka no Yasoukyoku",
+      "system": "saturn",
+      "bucket": "saturn/Akumajou Dracula X - Gekka no Yasoukyoku (Japan) (2M).chd"
+    },
+    {
+      "title": "Powerslave",
+      "system": "saturn",
+      "bucket": "saturn/Powerslave (USA).chd"
+    },
+    {
       "title": "Wonder Boy in Monster World",
       "system": "genesis",
       "bucket": "genesis/Wonder Boy in Monster World (USA, Europe).zip"
+    },
+    {
+      "title": "Monster World IV",
+      "system": "genesis",
+      "bucket": "genesis/Monster World IV (USA) (Genesis Mini).zip"
+    },
+    {
+      "title": "Todd's Adventures in Slime World",
+      "system": "genesis",
+      "bucket": "genesis/Todd's Adventures in Slime World (USA).zip"
+    },
+    {
+      "title": "QuackShot Starring Donald Duck",
+      "system": "genesis",
+      "bucket": "genesis/QuackShot Starring Donald Duck (World) (Rev A).zip"
+    },
+    {
+      "title": "Blaster Master 2",
+      "system": "genesis",
+      "bucket": "genesis/Blaster Master 2 (USA).zip"
+    },
+    {
+      "title": "Phantom 2040",
+      "system": "genesis",
+      "bucket": "genesis/Phantom 2040 (USA).zip"
     },
     {
       "title": "Wonder Boy III - The Dragon's Trap",
@@ -38,9 +178,64 @@
       "bucket": "mastersystem/Wonder Boy III - The Dragon's Trap (USA, Europe).zip"
     },
     {
-      "title": "Super Castlevania IV",
-      "system": "snes",
-      "bucket": "snes/Super Castlevania IV (USA).zip"
+      "title": "Zillion",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Zillion (USA, Europe) (Rev 1).zip"
+    },
+    {
+      "title": "Cyborg Hunter",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Cyborg Hunter (USA, Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Lord of the Sword",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Lord of the Sword (USA, Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Wonder Boy in Monster World",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Wonder Boy in Monster World (Europe).zip"
+    },
+    {
+      "title": "Dragon's Curse",
+      "system": "tg16",
+      "bucket": "tg16/Dragon's Curse (USA).zip"
+    },
+    {
+      "title": "Dynastic Hero, The",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Dynastic Hero, The (USA).chd"
+    },
+    {
+      "title": "Shape Shifter",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Shape Shifter (USA).chd"
+    },
+    {
+      "title": "Todd's Adventures in Slime World",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Todd's Adventures in Slime World (Japan).chd"
+    },
+    {
+      "title": "Tails Adventure",
+      "system": "gamegear",
+      "bucket": "gamegear/Tails Adventure (World) (En,Ja).zip"
+    },
+    {
+      "title": "Wonder Boy - The Dragon's Trap",
+      "system": "gamegear",
+      "bucket": "gamegear/Wonder Boy - The Dragon's Trap (Europe).zip"
+    },
+    {
+      "title": "Phantom 2040",
+      "system": "gamegear",
+      "bucket": "gamegear/Phantom 2040 (USA, Europe).zip"
+    },
+    {
+      "title": "Todd's Adventures in Slime World",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Todd's Adventures in Slime World (World).zip"
     },
     {
       "title": "Legend of Zelda, The - A Link to the Past",
@@ -48,14 +243,34 @@
       "bucket": "snes/Legend of Zelda, The - A Link to the Past (USA).zip"
     },
     {
+      "title": "Demon's Crest",
+      "system": "snes",
+      "bucket": "snes/Demon's Crest (USA).zip"
+    },
+    {
+      "title": "Super Adventure Island II",
+      "system": "snes",
+      "bucket": "snes/Super Adventure Island II (USA).zip"
+    },
+    {
+      "title": "Phantom 2040",
+      "system": "snes",
+      "bucket": "snes/Phantom 2040 (USA).zip"
+    },
+    {
       "title": "Wario Land 3 (En,Ja)",
       "system": "gbc",
       "bucket": "gbc/Wario Land 3 (World) (En,Ja).zip"
     },
     {
-      "title": "Pocky & Rocky 2",
-      "system": "snes",
-      "bucket": "snes/Pocky & Rocky 2 (USA).zip"
+      "title": "Shantae",
+      "system": "gbc",
+      "bucket": "gbc/Shantae (USA).zip"
+    },
+    {
+      "title": "Blaster Master - Enemy Below",
+      "system": "gbc",
+      "bucket": "gbc/Blaster Master - Enemy Below (USA, Europe) (SGB Enhanced) (GB Compatible).zip"
     },
     {
       "title": "Metroid Fusion",
@@ -88,6 +303,31 @@
       "bucket": "gba/Wario Land 4 (USA, Europe).zip"
     },
     {
+      "title": "Kirby & The Amazing Mirror",
+      "system": "gba",
+      "bucket": "gba/Kirby & The Amazing Mirror (USA).zip"
+    },
+    {
+      "title": "Shaman King - Master of Spirits",
+      "system": "gba",
+      "bucket": "gba/Shaman King - Master of Spirits (USA).zip"
+    },
+    {
+      "title": "Shaman King - Master of Spirits 2",
+      "system": "gba",
+      "bucket": "gba/Shaman King - Master of Spirits 2 (USA).zip"
+    },
+    {
+      "title": "Scurge - Hive",
+      "system": "gba",
+      "bucket": "gba/Scurge - Hive (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Samurai Jack - The Amulet of Time",
+      "system": "gba",
+      "bucket": "gba/Samurai Jack - The Amulet of Time (USA, Europe).zip"
+    },
+    {
       "title": "Metroid Prime (Rev 2)",
       "system": "gc",
       "bucket": "gc/Metroid Prime (USA) (Rev 2).rvz"
@@ -96,6 +336,31 @@
       "title": "Metroid Prime 2 - Echoes",
       "system": "gc",
       "bucket": "gc/Metroid Prime 2 - Echoes (USA).rvz"
+    },
+    {
+      "title": "Blowout",
+      "system": "gc",
+      "bucket": "gc/Blowout (USA).rvz"
+    },
+    {
+      "title": "Castlevania - Lament of Innocence",
+      "system": "ps2",
+      "bucket": "ps2/Castlevania - Lament of Innocence (USA).chd"
+    },
+    {
+      "title": "Castlevania - Curse of Darkness",
+      "system": "ps2",
+      "bucket": "ps2/Castlevania - Curse of Darkness (USA).chd"
+    },
+    {
+      "title": "Metroid Prime Trilogy",
+      "system": "wii",
+      "bucket": "wii/Metroid Prime Trilogy (USA).rvz"
+    },
+    {
+      "title": "Metroid - Other M",
+      "system": "wii",
+      "bucket": "wii/Metroid - Other M (USA) (En,Fr,Es).rvz"
     },
     {
       "title": "Castlevania - Dawn of Sorrow",
@@ -128,14 +393,124 @@
       "bucket": "nds/Metroid Prime - Hunters (USA) (Rev 1).zip"
     },
     {
+      "title": "Monster Tale",
+      "system": "nds",
+      "bucket": "nds/Monster Tale (USA).zip"
+    },
+    {
+      "title": "Aliens - Infestation",
+      "system": "nds",
+      "bucket": "nds/Aliens - Infestation (USA) (En,Fr,De).zip"
+    },
+    {
+      "title": "Wario - Master of Disguise",
+      "system": "nds",
+      "bucket": "nds/Wario - Master of Disguise (USA).zip"
+    },
+    {
+      "title": "Spider-Man - Web of Shadows",
+      "system": "nds",
+      "bucket": "nds/Spider-Man - Web of Shadows (USA) (En,Fr).zip"
+    },
+    {
+      "title": "Spider-Man - Shattered Dimensions",
+      "system": "nds",
+      "bucket": "nds/Spider-Man - Shattered Dimensions (USA) (En,Fr).zip"
+    },
+    {
+      "title": "Scurge - Hive",
+      "system": "nds",
+      "bucket": "nds/Scurge - Hive (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Alice in Wonderland",
+      "system": "nds",
+      "bucket": "nds/Alice in Wonderland (USA) (En,Fr,Es) (NDSi Enhanced).zip"
+    },
+    {
+      "title": "Kirby Super Star Ultra",
+      "system": "nds",
+      "bucket": "nds/Kirby Super Star Ultra (USA).zip"
+    },
+    {
       "title": "Super Metroid (En,Fr,De)",
       "system": "snes",
       "bucket": "snes/Super Metroid (Japan, USA) (En,Ja).zip"
     },
     {
+      "title": "Kirby Super Star",
+      "system": "snes",
+      "bucket": "snes/Kirby Super Star (USA).zip"
+    },
+    {
       "title": "Castlevania - The Dracula X Chronicles",
       "system": "psp",
       "bucket": "psp/Castlevania - The Dracula X Chronicles (USA).chd"
+    },
+    {
+      "title": "Metroid - Samus Returns",
+      "system": "3ds",
+      "bucket": "3ds/Metroid - Samus Returns (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Castlevania - Lords of Shadow - Mirror of Fate",
+      "system": "3ds",
+      "bucket": "3ds/Castlevania - Lords of Shadow - Mirror of Fate (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Shantae and the Pirate's Curse",
+      "system": "3ds",
+      "bucket": "3ds/Shantae and the Pirate's Curse (USA).zip"
+    },
+    {
+      "title": "Cave Story 3D",
+      "system": "3ds",
+      "bucket": "3ds/Cave Story 3D (USA).zip"
+    },
+    {
+      "title": "Batman - Arkham Origins Blackgate",
+      "system": "3ds",
+      "bucket": "3ds/Batman - Arkham Origins Blackgate (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Teenage Mutant Ninja Turtles - Danger of the Ooze",
+      "system": "3ds",
+      "bucket": "3ds/Teenage Mutant Ninja Turtles - Danger of the Ooze (USA).zip"
+    },
+    {
+      "title": "Salt and Sanctuary",
+      "system": "psvita",
+      "bucket": "psvita/Salt and Sanctuary [PCSE01023] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Batman - Arkham Asylum - Game of the Year Edition",
+      "system": "xbox360",
+      "bucket": "xbox360/Batman - Arkham Asylum - Game of the Year Edition (USA) (En,Fr,De,Es,It).zar"
+    },
+    {
+      "title": "Metroid",
+      "system": "fds",
+      "bucket": "fds/Metroid (Japan) (Rev 3).zip"
+    },
+    {
+      "title": "Dracula II - Noroi no Fuuin",
+      "system": "fds",
+      "bucket": "fds/Dracula II - Noroi no Fuuin (Japan).zip"
+    },
+    {
+      "title": "Popful Mail",
+      "system": "segacd",
+      "bucket": "segacd/Popful Mail (USA) (RE).chd"
+    },
+    {
+      "title": "Shadow Man",
+      "system": "n64",
+      "bucket": "n64/Shadow Man (USA).zip"
+    },
+    {
+      "title": "Shadow Man",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Shadow Man (USA) (Rev A).chd"
     }
   ]
 }
