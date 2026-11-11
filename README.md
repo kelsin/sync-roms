@@ -198,7 +198,9 @@ While typing a filter (or a note, which `w` opens in the game list): `^A` `^E` s
    | `slot` | `Labels/<system>/Game.png`, the cart label prepared at upload | none |
    | `emudeck` | `Emulation/tools/downloaded_media/<system>/<type>/…` (every type) | none: ES-DE keeps gamelists in `~/ES-DE`, off the card |
 
-   muOS and Slot keep their media in folders of their own, flat even for ROMs in subfolders. An existing
+   For `esde` and `emudeck`, `<system>` is the system's ES-DE folder name (`sg-1000`, `n3ds`): systems that share a
+   ROM folder, like `3ds` and `n3ds`, share its media and gamelist folders, and an upload sends each file back to the
+   system whose ROM it matches. muOS and Slot keep their media in folders of their own, flat even for ROMs in subfolders. An existing
    `.txt` is rewritten only when the description differs.
 
    Knulli's main image is the miximage, or the screenshot if there is none. Onion's picture is made

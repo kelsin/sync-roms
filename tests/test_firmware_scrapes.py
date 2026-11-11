@@ -296,6 +296,65 @@ class SlotLabelCommandTest(unittest.TestCase):
             slot.assert_not_called()
 
 
+def system_of(bucket):
+    return next(s for s in systems() if s["bucket"] == bucket)
+
+
+class SharedFolderTest(unittest.TestCase):
+    """3ds and n3ds share ES-DE's n3ds ROM folder, so they share its media and gamelist folders too."""
+
+    def test_media_and_gamelist_go_in_the_shared_folder(self):
+        data = {"3ds": ({"scrapes/3ds/covers/A.png": 5}, {"A.3ds": {"name": "A"}}),
+                "n3ds": ({"scrapes/n3ds/covers/B.png": 5}, {"B.3ds": {"name": "B"}})}
+        with tempfile.TemporaryDirectory() as base:
+            es = os.path.join(base, "ES-DE")
+            plan = scrape_plan.build_scrape_plan("esde", [system_of("3ds"), system_of("n3ds")], data, {}, {},
+                                                 {"3ds": ["A.3ds"], "n3ds": ["B.3ds"]}, lambda s: "/x", es,
+                                                 lambda p: True, base)
+            media = os.path.join(es, "downloaded_media", "n3ds", "covers")
+            self.assertEqual(sorted(j[1] for j in plan["jobs"]),
+                             [os.path.join(media, "A.png"), os.path.join(media, "B.png")])
+            self.assertEqual(list(plan["gamelists"]), [os.path.join(es, "gamelists", "n3ds", "gamelist.xml")])
+            self.assertEqual(sorted(next(iter(plan["gamelists"].values()))), ["A.3ds", "B.3ds"])
+
+    def test_emudeck_and_esde_use_the_folder_name(self):
+        self.assertEqual(scrape_plan.media_root_of("emudeck", system_of("3ds"), "/c", "/c/ES-DE"),
+                         os.path.join("/c", scrape_plan.EMUDECK_MEDIA, "n3ds"))
+        self.assertEqual(scrape_plan.media_root_of("esde", system_of("sg1000"), "/c", "/c/ES-DE"),
+                         os.path.join("/c/ES-DE", "downloaded_media", "sg-1000"))
+        self.assertEqual(scrape_plan.esde_name({"bucket": "wiiu", "folders": {"emudeck": "wiiu/roms"}}, "emudeck"),
+                         "wiiu")
+
+    def test_stale_media_looks_in_the_shared_folder(self):
+        with tempfile.TemporaryDirectory() as base:
+            es = os.path.join(base, "ES-DE")
+            touch(os.path.join(base, "ROMs", "n3ds", "A.3ds"))
+            touch(os.path.join(es, "downloaded_media", "n3ds", "covers", "A.png"))
+            touch(os.path.join(es, "downloaded_media", "n3ds", "covers", "Gone.png"))
+            stale = scrape_plan.stale_media("esde", [system_of("3ds"), system_of("n3ds")],
+                                            os.path.join(base, "ROMs"), es, base)
+        self.assertEqual([os.path.basename(p) for p in stale], ["Gone.png"])
+
+    def test_upload_splits_the_shared_folder_by_system(self):
+        gamelist = ("<gameList><game><path>./A.3ds</path><name>A</name></game>"
+                    "<game><path>./B.3ds</path><name>B</name></game></gameList>")
+        with tempfile.TemporaryDirectory() as es:
+            touch(os.path.join(es, "downloaded_media", "n3ds", "covers", "A.png"))
+            touch(os.path.join(es, "downloaded_media", "n3ds", "covers", "B.png"))
+            touch(os.path.join(es, "downloaded_media", "3ds", "covers", "C.png"))  # a card synced by bucket name
+            os.makedirs(os.path.join(es, "gamelists", "n3ds"))
+            with open(os.path.join(es, "gamelists", "n3ds", "gamelist.xml"), "w") as f:
+                f.write(gamelist)
+            roms = {"3ds": {"A.3ds", "C.3ds"}, "n3ds": {"B.3ds"}}
+            plan = scrape_files.plan_upload(es, roms, {}, {})
+            wanted = scrape_files._upload_text_keys(es, {"scrapes/3ds/metadata.json": 1,
+                                                         "scrapes/n3ds/metadata.json": 1}, roms)
+        self.assertEqual(sorted(k for k, *_ in plan["files"]),
+                         ["scrapes/3ds/covers/A.png", "scrapes/3ds/covers/C.png", "scrapes/n3ds/covers/B.png"])
+        self.assertEqual(sorted(k for k, *_ in plan["texts"]), ["scrapes/3ds/metadata.json", "scrapes/n3ds/metadata.json"])
+        self.assertEqual(sorted(wanted), ["scrapes/3ds/metadata.json", "scrapes/n3ds/metadata.json"])
+
+
 class DerivedUploadTest(unittest.TestCase):
     def derived(self, files, system="gba", roms=("A.zip", "hacks/B.zip"), existing=None):
         with tempfile.TemporaryDirectory() as es:

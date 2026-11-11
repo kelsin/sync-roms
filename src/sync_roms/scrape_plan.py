@@ -454,6 +454,12 @@ def read_text(path):
         return f.read()
 
 
+def esde_name(system, layout_name="esde"):
+    """ES-DE's name for a system, which its media and gamelist folders use: the first part of its ROM folder in the
+    layout (so systems that share a ROM folder share them), or its bucket when the layout has no folder for it."""
+    return (system["folders"].get(layout_name) or system["bucket"]).split("/")[0]
+
+
 def media_root_of(layout_name, system, base, es_dir):
     """The folder a system's scraped media goes in, for layouts that keep it apart from the ROMs."""
     if layout_name == "muos":
@@ -461,8 +467,8 @@ def media_root_of(layout_name, system, base, es_dir):
     if layout_name == "slot":
         return os.path.join(base, "Labels", system["folders"]["slot"])
     if layout_name == "emudeck":
-        return os.path.join(base, EMUDECK_MEDIA, system["bucket"])
-    return os.path.join(es_dir, "downloaded_media", system["bucket"])
+        return os.path.join(base, EMUDECK_MEDIA, esde_name(system, "emudeck"))
+    return os.path.join(es_dir, "downloaded_media", esde_name(system))
 
 
 def build_scrape_plan(layout_name, systems, data, extra, extra_texts, rom_rels, dest_of, es_dir, present, base):
@@ -484,7 +490,7 @@ def build_scrape_plan(layout_name, systems, data, extra, extra_texts, rom_rels, 
             if not os.path.exists(path) or read_text(path) != text:
                 plan["writes"].append((path, text))
         if entries:
-            gl = (os.path.join(es_dir, "gamelists", s["bucket"]) if layout_name == "esde" else rom_dir)
+            gl = (os.path.join(es_dir, "gamelists", esde_name(s)) if layout_name == "esde" else rom_dir)
             plan["gamelists"][os.path.join(gl, GAMELIST_FILES[layout_name])].update(entries)
     if layout_name == "esde":
         plan["extras"], plan["writes"] = plan_esde_extras(es_dir, extra, extra_texts)
