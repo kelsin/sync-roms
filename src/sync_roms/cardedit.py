@@ -305,9 +305,10 @@ def edit_card(name, setup=None):
         edit_system(name, systems[i], setup, sizing)
 
 
-def pick_set(system, sets, sets_on, catalog):
+def pick_set(system, sets, sets_on, catalog, synced=lambda: set()):
     """The set to filter a system's games to, or None: sets with games in catalog (the system's bucket keys) are
-    offered. f switches a set's reference on the card (in sets_on, in place)."""
+    offered, each with how many of its games are synced out of those in storage (synced() gives the synced bucket keys).
+    f switches a set's reference on the card (in sets_on, in place)."""
     shown = [(x, set_filter(x, system)) for x in sets]
     shown = [(x, keys) for x, keys in shown if keys & catalog]
     if not shown:
@@ -318,7 +319,9 @@ def pick_set(system, sets, sets_on, catalog):
     extras = [[]] * len(shown)
 
     def mark():
-        extras[:] = [[("  📦 full set", "green")] if x["id"] in sets_on else [] for x, _ in shown]
+        done = synced()
+        extras[:] = [[(f"  {len(keys & catalog & done)}/{len(keys & catalog)}", "cyan")]
+                     + ([("  📦 full set", "green")] if x["id"] in sets_on else []) for x, keys in shown]
 
     def on_hotkey(_key, idx):
         """f switches the reference in place, so the screen isn't torn down and redrawn."""
@@ -515,7 +518,8 @@ def edit_system(name, system, setup, sizing=None):
                 pick_meta(system, meta, meta_filt, lambda field: [r[1] for r in rows if keep(r[1], field)])
             else:
                 refs = list(sets_on)
-                chosen = pick_set(system, sets, sets_on, {r[1] for r in rows})
+                chosen = pick_set(system, sets, sets_on, {r[1] for r in rows},
+                                  lambda: {k for k, v in states(cover()).items() if v})
                 if sets_on != refs:  # kept as is: rows switched by the reference change aren't pending, so u keeps them
                     covered = cover()  # an exclusion means nothing once no set covers the game, on any system
                     excluded.intersection_update(covered)
