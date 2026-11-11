@@ -2,7 +2,7 @@
 import copy
 
 from . import collections as colls
-from . import edit, m3u, picker, s3, store, ui
+from . import edit, m3u, picker, s3, store, surprise, ui
 from .listedit import ask_category, game_label, reconcile, recategorize, view
 
 
@@ -26,6 +26,11 @@ def fold_discs(games, in_storage):
     for g in games:
         if g.get("bucket") in groups and "files" not in g:
             g["files"] = groups[g["bucket"]][1:]
+
+
+PAST_SURPRISE_KEY = "p"
+CLEAR_KEY = "c"
+GAMES_HINT = "Space toggle · Enter done · / filter · w note · a all · p past · c clear"
 
 
 # --- Editing the games of one collection -------------------------------------------------------------
@@ -53,8 +58,21 @@ def edit_one(collection, systems, keys_of):
                 continue
             s = shown[systems[j]["bucket"]]
             had = {g["bucket"] for g in s["games"]}
-            edit.toggle_games(f"✏️  {s['name']} — ✅ in {collection['name']}, ⬜ in storage only",
-                              system_rows(s, keys_of(s["bucket"])))
+            all_rows, past = system_rows(s, keys_of(s["bucket"])), None
+            while True:
+                where = " · 🎁 past surprises only (c shows all)" if past is not None else ""
+                pressed = edit.toggle_games(
+                    f"✏️  {s['name']} — ✅ in {collection['name']}, ⬜ in storage only{where}",
+                    [r for r in all_rows if past is None or r[1] in past],
+                    hotkeys=(PAST_SURPRISE_KEY, CLEAR_KEY), hint=GAMES_HINT)
+                if pressed == PAST_SURPRISE_KEY:
+                    past = surprise.past_keys(s["bucket"]) or None
+                    if past is None:
+                        edit.note(ui.yellow(f"ℹ️  No past surprises on {s['name']}."))
+                elif pressed == CLEAR_KEY:
+                    past = None
+                else:
+                    break
             added = {g["bucket"] for g in s["games"]} - had
             category = ask_category(collection["games"], f"{len(added)} new game(s)") if added else ""
             collection["games"] = reconcile(collection["games"], shown, category)

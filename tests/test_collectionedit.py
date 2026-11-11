@@ -46,6 +46,28 @@ class Discs(unittest.TestCase):
                                                 "files": ["psx/FF7 (Disc 1).chd", "psx/FF7 (Disc 2).chd"]}])
 
 
+    def test_p_narrows_the_add_games_list_to_past_surprises(self):
+        from sync_roms import surprise
+        collection = {"name": "Favs", "games": []}
+        picks = iter([1, 0, None])  # add from a system, Game Boy Advance, back
+        lists = []
+
+        def fake(title, labels, **kw):
+            if kw.get("multi"):
+                lists.append((title, list(labels)))
+                steps = [("p", 0), ("c", 0), kw["initial"]]
+                return steps[len(lists) - 1]
+            return next(picks)
+
+        keys = {"gba/Ruby.zip", "gba/Zelda.zip"}
+        with mock.patch.object(picker, "filter_list", fake), mock.patch.object(ui, "ask", return_value=""), \
+                mock.patch.object(surprise, "past_keys", return_value={"gba/Ruby.zip"}):
+            collectionedit.edit_one(collection, SYSTEMS, lambda bucket: keys if bucket == "gba" else set())
+        self.assertEqual(lists[1][1], ["Ruby.zip"])
+        self.assertIn("🎁 past surprises only (c shows all)", lists[1][0])
+        self.assertEqual(len(lists[2][1]), 2)
+
+
 class Editor(DataDir):
     def run_editor(self, picks, asks=(), confirm=True, edit_one=None):
         picks, confirms = iter(picks), []

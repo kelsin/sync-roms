@@ -9,7 +9,7 @@ from unittest import mock
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 from helpers import DataDir  # noqa: E402
-from sync_roms import budget, cardedit, collections, edit, picker, s3, sizecache, store, ui  # noqa: E402
+from sync_roms import budget, cardedit, collections, edit, picker, s3, sizecache, store, surprise, ui  # noqa: E402
 
 U = budget.Usage
 
@@ -139,6 +139,44 @@ class Flow(DataDir):
 
     def card(self, **entry):
         self.write_json("cards.json", {"c": {"device": "d", "layout": "esde", **entry}})
+
+    def test_u_toggles_surprise_and_the_title_shows_it(self):
+        self.card(size="1 GB")
+        calls = self.run_card(returns((cardedit.SURPRISE_KEY, 0)), returns((cardedit.SURPRISE_KEY, 0)), returns(None))
+        self.assertIn("🎁 Surprise on", calls[0][0])
+        self.assertIn("🎁 Surprise off", calls[1][0])
+        self.assertIn("🎁 Surprise on", calls[2][0])
+        self.assertNotIn("surprise", self.read("cards.json")["c"])
+
+    def test_u_off_saves_false(self):
+        self.card(size="1 GB")
+        self.run_card(returns((cardedit.SURPRISE_KEY, 0)), returns(None))
+        self.assertIs(self.read("cards.json")["c"]["surprise"], False)
+
+    def test_p_narrows_the_game_list_to_past_surprises(self):
+        self.card()
+        with mock.patch.object(surprise, "past_keys", return_value={"gba/Ruby.zip"}):
+            _, calls = self.run_system(returns((cardedit.PAST_SURPRISE_KEY, 0)), returns((cardedit.CLEAR_KEY, 0)),
+                                       lambda labels, kw: [False] * len(labels))
+        self.assertEqual(calls[1][1], ["Ruby.zip"])
+        self.assertIn("🎁 past surprises only (c shows all)", calls[1][0])
+        self.assertEqual(len(calls[2][1]), len(calls[0][1]))
+
+    def test_p_with_no_past_surprises_says_so_and_keeps_the_list(self):
+        self.card()
+        with mock.patch.object(surprise, "past_keys", return_value=set()), \
+                mock.patch.object(edit, "note") as note:
+            _, calls = self.run_system(returns((cardedit.PAST_SURPRISE_KEY, 0)), lambda labels, kw: [False] * len(labels))
+        self.assertIn("No past surprises on Game Boy Advance", note.call_args[0][0])
+        self.assertEqual(len(calls[1][1]), len(calls[0][1]))
+
+    def test_surprise_rows_are_locked_in_the_game_list(self):
+        self.card(surprises=[{"system": "gba", "bucket": "gba/Zelda.zip", "title": "Zelda"}])
+        _, calls = self.run_system(lambda labels, kw: list(kw["initial"]))
+        labels, kw = calls[0][1], calls[0][2]
+        i = labels.index("Zelda.zip")
+        self.assertTrue(kw["locked"][i])
+        self.assertIn("🎁 Surprise", str(kw["extras"][i]) + str(kw.get("locked_note")))
 
     def test_system_list_offers_no_make_set_key(self):
         self.card(games={"gba": [g("gba/Ruby.zip")]})

@@ -39,7 +39,7 @@ def set_note(s, key, text):
 FULL_SYSTEM_NOTE = "Full system: every file in its folder is synced, so it can't be toggled"
 
 
-def toggle_games(title, rows, extras=None, covered=None, excluded=None):
+def toggle_games(title, rows, extras=None, covered=None, excluded=None, hotkeys=(), hint=None):
     """Multi-select over rows of (system, bucket key, game title, label); adds/removes games in each system in place.
 
     extras: {bucket key: [more bucket keys]} added or removed together with that row's key.
@@ -49,6 +49,8 @@ def toggle_games(title, rows, extras=None, covered=None, excluded=None):
     with that note (e.g. games a set reference already syncs).
     excluded: {system bucket: [keys]}, updated in place. When given, covered rows can be switched off (they start on
     unless listed) and the off ones are recorded there; only full systems stay locked.
+    hotkeys/hint: extra keys the list offers (and the hint line to show). The toggles made so far are applied, and the
+    key pressed is returned (None on Enter).
     """
     notes = [FULL_SYSTEM_NOTE if s.get("full_system") else covered(s, key) if covered else None
              for s, key, _, _ in rows]
@@ -73,8 +75,13 @@ def toggle_games(title, rows, extras=None, covered=None, excluded=None):
             return "Switch the game on and press Enter first, then add its note"
         return "Note saved" if text else "Note cleared"
 
+    session = {"sel": list(initial)}
     state = picker.filter_list(title, [label for *_, label in rows], multi=True, initial=initial, locked=locked,
-                               locked_note=[n or "" for n in notes], hint=GAMES_HINT, note_text=note_text, on_note=on_note)
+                               locked_note=[n or "" for n in notes], hint=hint or GAMES_HINT, note_text=note_text,
+                               on_note=on_note, hotkeys=hotkeys, session=session)
+    pressed = state[0] if isinstance(state, tuple) else None
+    if pressed:
+        state = session["sel"]
     removed = defaultdict(set)  # system bucket -> keys to drop from its games
     systems = {}
     for (s, key, name, _), on, was, lock, opt in zip(rows, state, initial, locked, optional):
@@ -98,6 +105,7 @@ def toggle_games(title, rows, extras=None, covered=None, excluded=None):
     for bucket, keys in removed.items():
         if keys and bucket in systems:
             systems[bucket]["games"] = [g for g in systems[bucket]["games"] if g.get("bucket") not in keys]
+    return pressed
 
 
 def system_rows(s, in_bucket):

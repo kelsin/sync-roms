@@ -5,16 +5,18 @@ import json
 import queue
 import threading
 
-from . import budget, collections as colls, edit, m3u, metafilter, picker, s3, scrape_plan, sizecache, store, ui
+from . import budget, collections as colls, edit, m3u, metafilter, picker, s3, scrape_plan, sizecache, store, surprise, ui
 
 FULL_KEY = "f"
 SET_KEY = "s"
 CLEAR_KEY = "c"
 CLEAR_ALL_KEY = "D"
 COLLECTIONS_KEY = "l"
+SURPRISE_KEY = "u"
+PAST_SURPRISE_KEY = "p"
 META_KEY = "m"
-LIST_HINT = "Enter games · f full · l collections · D clear all · Esc back"
-GAMES_HINT = "Space toggle · Enter done · Esc back · / search · s set · m metadata · c clear"
+LIST_HINT = "Enter games · f full · l collections · u surprise · D clear all · / filter"
+GAMES_HINT = "Space toggle · Enter done · / search · s set · m meta · c clear · p past"
 META_HINT = "Enter list its values · Esc back"
 VALUES_HINT = "Enter narrow to it · Esc back · / filter"
 SETS_HINT = "Enter show its games · Space/Tab toggle its games here · Esc back · / filter"
@@ -293,8 +295,10 @@ def edit_card(name, setup=None):
             extras[:] = work_out()[1]
             return True
 
-        i = picker.filter_list(f"💳 {name} — its systems (⭐ for the device)", labels, extras=extras,
-                               cursor=pos, hotkeys=(FULL_KEY, COLLECTIONS_KEY, CLEAR_ALL_KEY), hint=LIST_HINT,
+        on = surprise.enabled(store.load_cards().get(name))
+        i = picker.filter_list(f"💳 {name} — its systems (⭐ for the device) · 🎁 Surprise {'on' if on else 'off'}",
+                               labels, extras=extras, cursor=pos,
+                               hotkeys=(FULL_KEY, COLLECTIONS_KEY, SURPRISE_KEY, CLEAR_ALL_KEY), hint=LIST_HINT,
                                status=lambda _state: status_of(view["total"], capacity, sizing.busy()), poll=poll,
                                on_hotkey=on_hotkey)
         if i is None:
@@ -305,12 +309,28 @@ def edit_card(name, setup=None):
                 toggle_full(name, systems[pos]["bucket"])
             elif key == COLLECTIONS_KEY:
                 pick_collections(name, {s["bucket"] for s in can_play(catalog["systems"], setup)})
+            elif key == SURPRISE_KEY:
+                toggle_surprise(name)
             elif key == CLEAR_ALL_KEY:
                 if ui.confirm(f"🧹 Clear every pick, full system and set from {name}?", default=False):
                     store.update_card(name, games={}, **({"excluded": {}} if store.card_excluded(name) else {}))
             continue
         pos = i
         edit_system(name, systems[i], setup, sizing)
+
+
+def toggle_surprise(name):
+    """Switch a card's Surprise on or off (on is the absence of the field); returns the new state."""
+    cards = store.load_cards()
+    entry = cards.get(name)
+    if not isinstance(entry, dict):
+        return True
+    if entry.get("surprise") is False:
+        entry.pop("surprise")
+    else:
+        entry["surprise"] = False
+    store.write_cards(cards)
+    return surprise.enabled(entry)
 
 
 def pick_collections(name, playable):
@@ -462,11 +482,13 @@ def edit_system(name, system, setup, sizing=None):
     start = states(cover())
     filt = None  # (set name, bucket keys) the list is narrowed to
     meta_filt = {}  # {metadata field: value} the list is narrowed to as well
+    past = None  # bucket keys of the past surprises the list is narrowed to
 
     def keep(key, skip=None):
         """Whether the filters (all but the skip field's metadata one) show a row."""
         wanted = {f: v for f, v in meta_filt.items() if f != skip}
         return ((filt is None or key in filt[1])
+                and (past is None or key in past)
                 and (not wanted or metafilter.matches(meta.get().get(key, {}), wanted)))
 
     def row_extras(key, notes, state):
@@ -563,12 +585,12 @@ def edit_system(name, system, setup, sizing=None):
                     return "Switch the game on and press Enter first, then add its note"
                 return "Note saved" if text else "Note cleared"
 
-            parts = ([f"📦 {filt[0]} only"] if filt else []) + ([metafilter.describe(meta_filt)] if meta_filt else [])
+            parts = ([f"📦 {filt[0]} only"] if filt else []) + (["🎁 past surprises only"] if past is not None else []) + ([metafilter.describe(meta_filt)] if meta_filt else [])
             where = f" · {' · '.join(parts)} (c shows all)" if parts else ""
             pending = (keys, notes, base, session)
             result = picker.filter_list(f"✏️  {system['name']} on {name} — ✅ synced, ⬜ not, 📦 from a set{where}",
                                         [r[3] for r in shown], multi=True, initial=[start[k] for k in keys],
-                                        extras=extras, hint=GAMES_HINT, hotkeys=(SET_KEY, META_KEY, CLEAR_KEY),
+                                        extras=extras, hint=GAMES_HINT, hotkeys=(SET_KEY, META_KEY, PAST_SURPRISE_KEY, CLEAR_KEY),
                                         status=status,
                                         poll=poll, session=session, note_text=note_text, on_note=on_note,
                                         links=links, locked=[k in locked_from for k in keys],
@@ -580,7 +602,13 @@ def edit_system(name, system, setup, sizing=None):
                 break
             if result[0] == CLEAR_KEY:
                 filt = None
+                past = None
                 meta_filt.clear()
+            elif result[0] == PAST_SURPRISE_KEY:
+                past = surprise.past_keys(bucket)
+                if not past:
+                    past = None
+                    edit.note(ui.yellow(f"ℹ️  No past surprises on {system['name']}."))
             elif result[0] == META_KEY:
                 pick_meta(system, meta, meta_filt, lambda field: [r[1] for r in rows if keep(r[1], field)])
             else:
