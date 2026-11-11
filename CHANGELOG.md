@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.0.0](https://github.com/kelsin/sync-roms/compare/v0.48.0...v1.0.0) (2026-11-11)
+
+
+### ⚠ BREAKING CHANGES
+
+* **edit:** system-first card editor with space budget, filters and recommended systems ([#200](https://github.com/kelsin/sync-roms/issues/200))
+
+### :video_game: Features
+
+* **edit:** system-first card editor with space budget, filters and recommended systems ([#200](https://github.com/kelsin/sync-roms/issues/200)) ([14f10be](https://github.com/kelsin/sync-roms/commit/14f10be7b9e45e0ea1567136e6ccecf399511ea0))
+
 ## [0.48.0](https://github.com/kelsin/sync-roms/compare/v0.47.1...v0.48.0) (2026-11-10)
 
 
