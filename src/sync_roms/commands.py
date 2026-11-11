@@ -448,6 +448,11 @@ def check_sets(problems, systems):
     return keys
 
 
+def valid_ratio(value):
+    """True for a W:H aspect ratio string of two positive whole numbers."""
+    return isinstance(value, str) and re.fullmatch(r"[1-9][0-9]*:[1-9][0-9]*", value) is not None
+
+
 def check_data(list_keys=None, repo_systems=None):
     """Problems found in the user's data files, as strings.
 
@@ -461,8 +466,21 @@ def check_data(list_keys=None, repo_systems=None):
         sid = s.get("screenscraper")
         if sid is not None and (not isinstance(sid, int) or isinstance(sid, bool)):
             problems.append(f"systems.json: {s['bucket']}: screenscraper must be an integer")
+    for s in repo_systems:
+        ratio = s.get("ratio")
+        if ratio is not None and not valid_ratio(ratio):
+            problems.append(f"systems.json: {s['bucket']}: ratio must look like W:H with whole numbers, not {ratio!r}")
     wanted = {}  # where -> [(system, key)] for the bucket check
     systems = {s["bucket"] for s in repo_systems}
+    over = store.repo_json("ratio-systems")
+    for ratio, ids in list(over.get("ratios", {}).items()) + [("dual_screen", over.get("dual_screen", []))]:
+        if ratio != "dual_screen" and not valid_ratio(ratio):
+            problems.append(f"ratio-systems.json: ratio {ratio!r} must look like W:H with whole numbers")
+        problems.extend(f"ratio-systems.json: {ratio}: unknown system {i!r}" for i in ids if i not in systems)
+    for d in store.repo_json("devices"):
+        for key in ("screen", "screen2"):
+            if key in d and not valid_ratio(d[key]):
+                problems.append(f"devices.json: {d['id']}: {key} must look like W:H with whole numbers, not {d[key]!r}")
     devices = {d["id"] for d in store.repo_json("devices")}
     layouts = set(store.repo_json("layouts"))
     sets = {x["id"] for x in store.load_sets()}

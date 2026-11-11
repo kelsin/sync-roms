@@ -92,6 +92,26 @@ def device_defaults(systems=None):
             for dev, e in data["devices"].items()}
 
 
+def recommended_systems(device, systems):
+    """Ids of the systems to highlight for a device: those whose native ratio is the device's screen, the
+    ratio-systems.json overrides for that screen, and the dual-screen list when it has a second screen, limited to what the
+    device can play (its overlaid "systems", else the repo defaults). Ratios match by exact string.
+
+    systems: the already-loaded systems list."""
+    over = repo_json("ratio-systems")
+    screen = device.get("screen")
+    picked = set()
+    if screen:
+        picked |= {s["bucket"] for s in systems if s.get("ratio") == screen}
+        picked |= set(over.get("ratios", {}).get(screen, []))
+    if device.get("screen2"):
+        picked |= set(over.get("dual_screen", []))
+    can_play = device.get("systems")
+    if can_play is None:
+        can_play = device_defaults(systems).get(device.get("id"), {}).get("systems", [])
+    return picked & set(can_play) & {s["bucket"] for s in systems}
+
+
 def personal_json(name):
     path = os.path.join(data_dir(), name)
     try:

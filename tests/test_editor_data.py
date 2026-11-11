@@ -226,3 +226,27 @@ class SystemsPickerKeys(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class CheckRatios(Cmd):
+    def test_repo_data_is_clean(self):
+        self.assertEqual(commands.check_data(), [])
+
+    def test_unknown_system_in_ratio_systems_is_reported(self):
+        good = store.repo_json("ratio-systems")
+        bad = {"ratios": {"3:5": ["nope"], "wide": ["gb"]}, "dual_screen": ["ghost"]}
+        for data, expect in ((good, 0), (bad, 3)):
+            with mock.patch.object(store, "repo_json", lambda n, real=store.repo_json, data=data:
+                                   data if n == "ratio-systems" else real(n)):
+                self.assertEqual(len(commands.check_data()), expect)
+
+    def test_malformed_system_ratio_is_reported(self):
+        systems = store.repo_json("systems")
+        systems[0]["ratio"] = "4/3"
+        problems = commands.check_data(repo_systems=systems)
+        self.assertEqual(len(problems), 1)
+        self.assertIn("ratio", problems[0])
+        for ok in ("4:3", "31:27"):
+            self.assertTrue(commands.valid_ratio(ok))
+        for bad in ("4:", "0:3", "4:3:2", " 4:3", 43, None):
+            self.assertFalse(commands.valid_ratio(bad), bad)
