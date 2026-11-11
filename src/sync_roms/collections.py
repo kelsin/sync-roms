@@ -48,8 +48,11 @@ def load_collections():
                 raise ValueError("needs a text 'name' and a 'games' list")
             games, dropped = _clean_games(data["games"])
             description = data.get("description", "")
-            found.append({"id": name[:-5], "name": data["name"],
-                          "description": description if isinstance(description, str) else "", "games": games})
+            entry = {"id": name[:-5], "name": data["name"],
+                     "description": description if isinstance(description, str) else "", "games": games}
+            if isinstance(data.get("art"), str) and data["art"]:
+                entry["art"] = data["art"]
+            found.append(entry)
             if dropped:
                 problem = f"collections/{name}: some games aren't valid (each needs a system and a bucket), skipped"
         except (OSError, ValueError, AttributeError, KeyError, TypeError) as e:
@@ -66,6 +69,8 @@ def save_collection(collection):
     data = {"name": collection["name"]}
     if collection.get("description"):
         data["description"] = collection["description"]
+    if collection.get("art"):
+        data["art"] = collection["art"]
     data["games"] = collection["games"]
     os.makedirs(collections_dir(), exist_ok=True)
     store.write_json(os.path.join(collections_dir(), collection["id"] + ".json"), data, **store.PRETTY)

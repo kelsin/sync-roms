@@ -393,17 +393,27 @@ class SyncFlowTest(unittest.TestCase):
                       after=lambda d: read_from(d, "ES-DE", "collections", "custom-Surprise.cfg"))
         self.assertEqual(self.after, "%ROMPATH%/gba/Game.zip\n")
 
-    def test_surprise_collection_gets_its_theme_art(self):
+    def test_surprise_and_collections_with_art_get_theme_art(self):
         saved = [{"system": "gba", "bucket": "gba/Game.zip", "title": "Game"}]
+        favs = {**FAVS, "art": "rpg"}
         installed, described = [], []
-        art = ((cli.themeart, "install", lambda *a: installed.append(a[::2]) or True),
-               (cli.themeart, "describe", lambda *a: described.append(a[::2])))
-        self.run_sync(cards={"surprises": saved}, files=["ROMs/gba/Game.zip"], plan=[], extra=art)
-        self.assertEqual(installed, [("esde", "Surprise")])
-        self.run_sync(cards={"surprises": saved}, files=["ROMs/gba/Game.zip"], dry_run=True, extra=art)
-        self.assertEqual((installed, described), ([("esde", "Surprise")], [("esde", "Surprise")]))
+        art = ((cli.themeart, "install", lambda layout, base, arts: installed.append((layout, arts)) or True),
+               (cli.themeart, "describe", lambda layout, base, arts: described.append((layout, arts))))
+        want = [("esde", {"Favs": "rpg", "Surprise": "surprise"})]
+        self.run_sync(cards={"surprises": saved, "collections": ["favs"]}, colls=[favs], files=["ROMs/gba/Game.zip"],
+                      plan=[], extra=art)
+        self.assertEqual(installed, want)
+        self.run_sync(cards={"surprises": saved, "collections": ["favs"]}, colls=[favs], files=["ROMs/gba/Game.zip"],
+                      dry_run=True, extra=art)
+        self.assertEqual((installed, described), (want, want))
 
-    def test_other_collections_get_no_theme_art(self):
+    def test_a_collection_with_art_but_no_games_on_the_card_gets_none(self):
+        installed = []
+        self.run_sync(cards={"collections": ["favs"], "surprise": False}, colls=[{**FAVS, "art": "rpg"}],
+                      extra=((cli.themeart, "install", lambda *a: installed.append(a)),))
+        self.assertEqual(installed, [])
+
+    def test_collections_without_art_get_none(self):
         installed = []
         self.run_sync(cards={"collections": ["favs"], "surprise": False}, colls=[FAVS], files=["ROMs/gba/Game.zip"],
                       extra=((cli.themeart, "install", lambda *a: installed.append(a)),))

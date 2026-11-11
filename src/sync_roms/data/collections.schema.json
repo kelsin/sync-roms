@@ -6,6 +6,7 @@
   "properties": {
     "name": {"type": "string"},
     "description": {"type": "string"},
+    "art": {"type": "string", "description": "theme art id (src/sync_roms/data/themes/art-book-next/art.json)"},
     "games": {
       "type": "array",
       "items": {

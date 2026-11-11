@@ -34,10 +34,46 @@ def read(path):
         return f.read()
 
 
+SURPRISE = {"Surprise": "surprise"}
+
+
 class Assets(unittest.TestCase):
-    def test_the_surprise_files_are_in_the_repo(self):
-        self.assertEqual(themeart._art_files(), ["_inc/systems/_metadata-global/surprise.xml", themeart.ART_PNG,
-                                                 themeart.LOGO_SVG, "surprise/theme.xml"])
+    def test_every_listed_art_and_surprise_have_a_picture(self):
+        for art_id in [*themeart.art_choices(), themeart.SURPRISE_ART]:
+            self.assertTrue(themeart.art_png(art_id), art_id)
+        self.assertIsNone(themeart.art_png("nope"))
+        self.assertIsNone(themeart.art_png("../art/surprise"))
+
+    def test_a_logo_spells_the_name_in_capitals_and_fits(self):
+        svg = themeart.logo_svg("Shmups 2!")
+        self.assertEqual(svg.count("<path "), 8)  # S H M U P S 2 !: the space has no outline
+        self.assertIn('viewBox="0 0 200 40"', svg)
+        long = themeart.logo_svg("A very long collection name that has to shrink")
+        scale = float(long.split("scale(")[1].split(" ")[0])
+        self.assertLess(scale, 18.7 / 625)
+
+
+class Logos(unittest.TestCase):
+    def test_accents_fold_and_a_name_the_font_cant_draw_gets_no_logo(self):
+        self.assertEqual(themeart.logo_svg("Pokémon").count("<path "), 7)
+        self.assertIsNone(themeart.logo_svg("東方"))
+        self.assertIsNone(themeart.logo_svg("  "))
+
+
+class Usable(unittest.TestCase):
+    def test_unknown_art_and_names_of_systems_or_built_in_collections_are_skipped(self):
+        warned = []
+        with mock.patch.object(ui, "warn", warned.append):
+            got = themeart.usable("esde", {"Favs": "rpg", "Odd": "nope", "SNES": "rpg", "Now-Playing": "rpg",
+                                           "auto-favorites": "rpg"})
+        self.assertEqual(list(got), ["Favs"])
+        self.assertEqual(len(warned), 4)
+
+    def test_names_differing_only_in_case_keep_the_first(self):
+        with mock.patch.object(ui, "warn", lambda *a: None):
+            self.assertEqual(list(themeart.usable("esde", {"RPG Faves": "rpg", "Rpg Faves": "action"})), ["RPG Faves"])
+        with mock.patch.object(ui, "warn", lambda *a: None):
+            self.assertEqual(list(themeart.usable("knulli", {"Lightgun": "shooter"})), [])
 
 
 class Settings(unittest.TestCase):
@@ -84,7 +120,7 @@ class Esde(Card):
 
     def install(self):
         with contextlib.redirect_stdout(io.StringIO()):
-            return themeart.install("esde", self.base, "Surprise")
+            return themeart.install("esde", self.base, {**SURPRISE, "My Shmups": "shooter"})
 
     def copy(self, *rel):
         return os.path.join(self.base, "ES-DE", "themes", themeart.ESDE_COPY, *rel)
@@ -100,8 +136,10 @@ class Esde(Card):
         self.settings(themeart.ESDE_THEME)
         self.assertTrue(self.install())
         self.assertEqual(read(self.copy("theme.xml")), "<theme/>")
-        self.assertTrue(os.path.exists(self.copy(*themeart.ART_PNG.split("/"))))
+        self.assertTrue(os.path.exists(self.copy("_inc", "systems", "artwork-outline", "surprise.png")))
         self.assertTrue(os.path.exists(self.copy("surprise", "theme.xml")))
+        self.assertIn("<path ", read(self.copy("_inc", "systems", "logos", "my shmups.svg")))
+        self.assertTrue(os.path.exists(self.copy("my shmups", "theme.xml")))
         self.assertEqual(read(self.copy(themeart.ESDE_MARKER)).strip(), "abc")
         self.assertIn(f'value="{themeart.ESDE_COPY}"', read(frontend.settings_path("esde", self.base)))
         self.assertFalse(self.install())  # nothing new the second time
@@ -141,6 +179,18 @@ class Esde(Card):
         self.assertFalse(os.path.exists(os.path.join(self.base, "ES-DE", "evil.txt")))
 
 
+class EsdeOwnArt(Esde):
+    def test_a_name_the_theme_already_themes_is_skipped_but_one_sync_roms_wrote_is_kept(self):
+        self.store("abc", {"theme.xml": b"<theme/>", "_inc/systems/_metadata-global/steam.xml": b"<theme/>"})
+        self.settings(themeart.ESDE_THEME)
+        with contextlib.redirect_stdout(io.StringIO()):
+            themeart.install("esde", self.base, {"Steam": "action", "My Shmups": "shooter"})
+            self.assertFalse(themeart.install("esde", self.base, {"My Shmups": "shooter"}))
+        self.assertIn("Steam", self.warned[0])
+        self.assertFalse(os.path.exists(self.copy("_inc", "systems", "artwork-outline", "steam.png")))
+        self.assertIn("<systemName>My Shmups</systemName>", read(self.copy("_inc", "systems", "_metadata-global", "my shmups.xml")))
+
+
 class Update(Esde):
     def run_update(self, latest, tarball=b"", dry_run=False):
         def github(url, accept=None):
@@ -178,18 +228,26 @@ class Knulli(Card):
         return os.path.join(self.base, "theme-customizations", "art-book-next", *rel)
 
     def test_art_and_settings_for_the_collection(self):
-        self.assertTrue(themeart.install("knulli", self.base, "Surprise"))
+        self.assertTrue(themeart.install("knulli", self.base, SURPRISE))
         self.assertTrue(os.path.exists(self.path("artwork", "Surprise.png")))
-        self.assertTrue(os.path.exists(self.path("logos", "Surprise.svg")))
+        self.assertIn("<path ", read(self.path("logos", "Surprise.svg")))
         settings = read(frontend.settings_path("knulli", self.base))
         for name, value in themeart.knulli_settings("Surprise").items():
             self.assertIn(f'<string name="{name}" value="{value}" />', settings)
-        self.assertFalse(themeart.install("knulli", self.base, "Surprise"))  # nothing new the second time
+        self.assertFalse(themeart.install("knulli", self.base, SURPRISE))  # nothing new the second time
+
+    def test_a_name_without_a_logo_keeps_the_text_name(self):
+        themeart.install("knulli", self.base, {"東方": "shooter"})
+        self.assertTrue(os.path.exists(self.path("artwork", "東方.png")))
+        self.assertFalse(os.path.exists(self.path("logos", "東方.svg")))
+        settings = read(frontend.settings_path("knulli", self.base))
+        self.assertIn("subset.東方.system-view-artwork", settings)
+        self.assertNotIn("subset.東方.system-logos", settings)
 
     def test_a_grouping_choice_already_made_is_kept(self):
         path = frontend.settings_path("knulli", self.base)
         write(path, '<config>\n\t<string name="UseCustomCollectionsSystemEx" value="true" />\n</config>\n')
-        themeart.install("knulli", self.base, "Surprise")
+        themeart.install("knulli", self.base, SURPRISE)
         settings = read(path)
         self.assertIn('name="UseCustomCollectionsSystemEx" value="true"', settings)
         self.assertIn('name="subset.Surprise.system-view-artwork" value="custom"', settings)
@@ -197,7 +255,7 @@ class Knulli(Card):
     def test_another_theme_is_left_alone(self):
         path = frontend.settings_path("knulli", self.base)
         write(path, '<config>\n\t<string name="ThemeSet" value="es-theme-carbon" />\n</config>\n')
-        self.assertFalse(themeart.install("knulli", self.base, "Surprise"))
+        self.assertFalse(themeart.install("knulli", self.base, SURPRISE))
         self.assertFalse(os.path.exists(self.path()))
         self.assertNotIn("subset.", read(path))
 

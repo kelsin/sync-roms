@@ -1,3 +1,4 @@
+import json
 import os
 import sys
 import unittest
@@ -106,6 +107,17 @@ class Files(DataDir):
         self.write_json("cards.json", {"a": {"collections": ["favs", "x"]}, "b": {"collections": ["favs"]}, "c": {}})
         self.assertEqual(collections.remove_from_cards("favs"), ["a", "b"])
         self.assertEqual(self.read("cards.json"), {"a": {"collections": ["x"]}, "b": {"collections": []}, "c": {}})
+
+
+class Art(DataDir):
+    def test_art_is_saved_and_loaded_and_a_bad_value_ignored(self):
+        collections.save_collection({"id": "favs", "art": "rpg", **FAVS})
+        self.assertEqual(collections.load_collections()[0]["art"], "rpg")
+        collections.save_collection({"id": "favs", **FAVS})
+        self.assertNotIn("art", collections.load_collections()[0])
+        with open(os.path.join(collections.collections_dir(), "favs.json"), "w") as f:
+            json.dump({**FAVS, "art": 5}, f)
+        self.assertNotIn("art", collections.load_collections()[0])
 
 
 class Check(DataDir):
