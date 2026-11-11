@@ -150,6 +150,13 @@ class Flow(DataDir):
             changed = edit.edit_card_system("c", bucket, (DEVICE, "esde"))
         return changed, script.calls
 
+    def test_system_list_hides_systems_cached_as_empty_unless_picked(self):
+        self.card(size="1 GB")
+        self.cache = {"gb/": {}, "gba/": self.files["gba/"], "scrapes/gba/": {}, "BIOS/": {}}
+        self.assertEqual([l.strip() for l in self.run_card(returns(None))[0][1]], ["Game Boy Advance"])
+        self.card(size="1 GB", games={"gb": [g("gb/Red.gb")]})
+        self.assertEqual([l.strip() for l in self.run_card(returns(None))[0][1]], ["Game Boy", "Game Boy Advance"])
+
     def test_system_list_is_what_the_device_plays_sorted_by_company_and_name(self):
         self.card(size="1 GB", games={"gba": [g("gba/Ruby.zip")]})
         self.cache = {"gba/": self.files["gba/"], "scrapes/gba/": {}, "BIOS/": {"BIOS/gba_bios.bin": 16}}
