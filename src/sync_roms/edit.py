@@ -112,12 +112,12 @@ def system_rows(s, in_bucket):
 def edit_card_system(card, bucket, setup):
     """Toggle the games of one system in a card's extras (as --edit does) and save them. Returns whether anything changed.
 
-    Games the core list or the card's own sets already sync are shown on and locked."""
+    Games the card's own sets already sync are shown on and locked."""
     cards = store.load_cards()
     t = new_target(card, store.card_games(card, cards))
     drop_inapplicable(t, setup)
     s = next(x for x in t["data"]["systems"] if x["bucket"] == bucket)
-    full, keys = cover_notes({x["id"]: x for x in store.load_sets()}, t["sets_on"], store.personal_json("games.json"))
+    full, keys = cover_notes({x["id"]: x for x in store.load_sets()}, t["sets_on"])
     if s.get("full_system") or bucket in full:
         note(ui.yellow(f"ℹ️  {s['name']} is a full system: every file in its storage folder is downloaded, "
                        "so there is no game list to edit."))
@@ -125,7 +125,7 @@ def edit_card_system(card, bucket, setup):
     in_bucket = store.folder_keys(bucket)
     before = store.card_excluded(card, cards)
     excluded = {b: list(k) for b, k in before.items()}
-    toggle_games(f"✏️  {s['name']} — ✅ synced to {card}, ⬜ not (core and set games can be switched off here)",
+    toggle_games(f"✏️  {s['name']} — ✅ synced to {card}, ⬜ not (set games can be switched off here)",
                  system_rows(s, in_bucket), covered=lambda _s, key: keys.get(key), excluded=excluded)
     excluded = {b: k for b, k in excluded.items() if k}
     changed = excluded != before
@@ -133,7 +133,7 @@ def edit_card_system(card, bucket, setup):
         store.update_card(card, excluded=excluded)
     if not any(target_changes(t)):
         return changed
-    store.save_lists(None, {card: store.dump_list(t["data"]["systems"], t["sets_on"])})
+    store.save_lists({card: store.dump_list(t["data"]["systems"], t["sets_on"])})
     return True
 
 
@@ -170,24 +170,13 @@ def valid_card_name(name, existing):
     return None
 
 
-def cover_notes(sets_by_id, own_set_ids, core=None):
+def cover_notes(sets_by_id, own_set_ids):
     """Why games are synced without being in the list being edited.
 
     Returns ({system bucket: note} for whole systems, {bucket key: note} for single games). The notes come from
-    the list's own set references and, when editing a card, from the core list (a raw games list).
+    the list's own set references.
     """
     full, keys = {}, {}
-    if core is not None:
-        for bucket, entry in core.items():
-            if isinstance(entry, dict) and entry.get("full_system"):
-                full[bucket] = "From core: full system"
-            elif isinstance(entry, list):
-                for g in entry:
-                    if isinstance(g, dict) and g.get("bucket"):
-                        keys.setdefault(g["bucket"], "From core")
-        for sid in store.list_sets(core):
-            for g in store.set_games(sets_by_id[sid]) if sid in sets_by_id else []:
-                keys.setdefault(g["bucket"], f"From core: {sets_by_id[sid]['name']}")
     for sid in own_set_ids:
         for g in store.set_games(sets_by_id[sid]) if sid in sets_by_id else []:
             keys.setdefault(g["bucket"], f"Full set: {sets_by_id[sid]['name']}")
@@ -277,13 +266,12 @@ def make_set_from_extras(t, sets, sets_by_id):
 
 
 def edit_manifest():
-    """Add/remove games in the core list or a card's extras (browsing by system or by set), then save them."""
+    """Add/remove games in a card's list (browsing by system or by set), then save them."""
     print(ui.bold("✏️  Edit mode") + ui.dim(f"  {s3.access()}"))
     if not store.cards_readable():
         ui.fail(f"{os.path.join(store.data_dir(), 'cards.json')} isn't valid JSON, so nothing could be saved. "
                 "Fix or move it first.", 3)
-    manifest = store.load_manifest()  # also seeds games.json
-    core_raw = store.personal_json("games.json")
+    manifest = store.load_manifest()
     repo_systems = manifest["systems"]
     print(ui.dim(f"📡 Listing {s3.location()}/ ..."))
     with ThreadPoolExecutor(runtime.WORKERS) as ex:
@@ -298,13 +286,8 @@ def edit_manifest():
             if g.get("system") not in names:
                 print(ui.yellow(f"⚠️  Set {game_set['name']}: unknown system {g.get('system')!r}, skipped"), file=sys.stderr)
 
-    targets = {}  # None (the core list) or a card name -> editing state
+    targets = {}  # card name -> editing state
     new_cards = set()  # cards made in this session
-
-    def core_now():
-        """The core list as it stands in this session."""
-        core = targets.get(None)
-        return store.dump_list(core["data"]["systems"], core["sets_on"]) if core else core_raw
 
     def saved_setup(name, cards=None):
         """The device and firmware saved for a card (cards: cards.json already loaded)."""
@@ -318,11 +301,11 @@ def edit_manifest():
         by_bucket = {s["bucket"]: s for s in systems_all}
         systems = sorted((s for s in systems_all if bucket_keys[s["bucket"]] or s["games"] or s.get("full_system")),
                          key=lambda s: s["name"].lower())
-        where = "games.json" if not is_card else f"{t['label']}'s extras"
+        where = f"{t['label']}'s extras"
         pos = {"system": 0, "set": 0}
 
         def cover():
-            return cover_notes(sets_by_id, t["sets_on"], core_now() if is_card else None)
+            return cover_notes(sets_by_id, t["sets_on"])
 
         def edit_system():
             now = snapshot(t["data"])
@@ -357,7 +340,7 @@ def edit_manifest():
                 pos["system"] = i[1]
                 s = systems[i[1]]
                 if s["bucket"] in full:
-                    note(ui.yellow(f"ℹ️  {s['name']} is a full system in core, so it can't be changed here."))
+                    note(ui.yellow(f"ℹ️  {s['name']} is a full system from a set, so it can't be changed here."))
                 else:
                     toggle_full_system(s)
                 return True
@@ -420,7 +403,7 @@ def edit_manifest():
         setup = None
         if key not in targets:
             cards = store.load_cards()
-            raw = core_raw if key is None else store.card_games(key, cards)
+            raw = store.card_games(key, cards)
             targets[key] = new_target(label, raw)
             setup = saved_setup(key, cards) if is_card else None
             if setup:
@@ -546,26 +529,24 @@ def edit_manifest():
                 saved = store.load_cards()
                 cards = sorted(set(saved) | {k for k in targets if k is not None})
                 n = len(cards)
-                options = (["🏠 Core (every card)"] + [f"💳 {name}" for name in cards]
+                options = ([f"💳 {name}" for name in cards]
                            + ["➕ New card", "🧩 Device systems", "✅ Done (review & save)", "🚪 Quit without saving"])
-                extras = ([pending_extra(None)] + [setup_extra(name, saved) + pending_extra(name) for name in cards]
+                extras = ([setup_extra(name, saved) + pending_extra(name) for name in cards]
                           + [[], [("  " + str(len(overlay_pending)) + " edited", "cyan")] if overlay_pending else [], [], []])
                 i = picker.filter_list("✏️  What do you want to edit?  (Esc = review & save)", options, extras=extras,
                                        hotkeys=(SETUP_KEY, DELETE_KEY, RENAME_KEY),
                                        hint=MENU_HINT)
-                if i is None or i == n + 3:
+                if i is None or i == n + 2:
                     return True
                 if isinstance(i, tuple):
-                    if 0 < i[1] <= n:
-                        {SETUP_KEY: change_setup, DELETE_KEY: delete_card, RENAME_KEY: rename_card}[i[0]](cards[i[1] - 1])
+                    if i[1] < n:
+                        {SETUP_KEY: change_setup, DELETE_KEY: delete_card, RENAME_KEY: rename_card}[i[0]](cards[i[1]])
                     continue
-                if i == 0:
-                    open_target(None, "🏠 Core", False)
-                elif i <= n:
-                    open_target(cards[i - 1], f"💳 {cards[i - 1]}", True)
-                elif i == n + 1:
+                if i < n:
+                    open_target(cards[i], f"💳 {cards[i]}", True)
+                elif i == n:
                     add_card()
-                elif i == n + 2:
+                elif i == n + 1:
                     while edit_device_systems():
                         pass
                 else:
@@ -621,8 +602,7 @@ def edit_manifest():
     for key, t in changed.items():
         if t["setup"]:
             store.save_card(key, *t["setup"])
-    saved = store.save_lists(store.dump_list(targets[None]["data"]["systems"], targets[None]["sets_on"]) if None in changed else None,
-               {k: store.dump_list(t["data"]["systems"], t["sets_on"]) for k, t in changed.items() if k is not None})
+    saved = store.save_lists({k: store.dump_list(t["data"]["systems"], t["sets_on"]) for k, t in changed.items()})
     if overlay_pending:
         store.save_overlay(overlay_pending)
     if not saved:

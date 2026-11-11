@@ -29,27 +29,15 @@ class Helpers(unittest.TestCase):
         self.assertEqual(store.dump_list(systems[2:], []), {})
 
     def test_cover_notes(self):
-        core = {"nes": {"full_system": True}, "gba": [{"bucket": "gba/C.zip"}], "sets": ["s"]}
-        full, keys = edit.cover_notes(SETS, ["s", "missing"], core)
-        self.assertEqual(full, {"nes": "From core: full system"})
-        self.assertEqual(keys["gba/C.zip"], "From core")
-        self.assertEqual(keys["gba/A2.zip"], "From core: Mix")
         full, keys = edit.cover_notes(SETS, ["s"])
         self.assertEqual((full, keys["gba/A.zip"]), ({}, "Full set: Mix"))
 
 
 class Saving(DataDir):
-    def test_save_lists_writes_core_and_card(self):
+    def test_save_lists_writes_card(self):
         store.update_card("c", device="x", layout="esde")
-        store.save_lists({"gba": [{"bucket": "gba/A.zip"}]}, {"c": {"sets": ["s"]}})
-        with open(self.path("games.json")) as f:
-            text = f.read()
-        self.assertTrue(text.endswith("\n"))
-        self.assertEqual(json.loads(text), {"gba": [{"bucket": "gba/A.zip"}]})
+        store.save_lists({"c": {"sets": ["s"]}})
         self.assertEqual(self.read("cards.json")["c"], {"device": "x", "layout": "esde", "games": {"sets": ["s"]}})
-
-    def test_save_lists_without_core_leaves_games_json(self):
-        store.save_lists(None, {"c": {}})
         self.assertFalse(os.path.exists(self.path("games.json")))
 
 
@@ -100,16 +88,16 @@ class EditBase(DataDir):
 class EditFlow(EditBase):
     def test_cancel_writes_nothing(self):
         # main menu: "New card" is the last option; inside the card menu Esc; then Esc to finish
-        self.assertEqual(self.run_edit([1, None, None], confirmed=False), 0)
+        self.assertEqual(self.run_edit([0, None, None], confirmed=False), 0)
         self.assertFalse(os.path.exists(self.path("cards.json")))
 
     def test_new_card_saved_with_setup(self):
-        self.assertEqual(self.run_edit([1, None, None], confirmed=True), 0)
+        self.assertEqual(self.run_edit([0, None, None], confirmed=True), 0)
         self.assertEqual(self.read("cards.json")["newcard"], {"device": "full", "layout": "esde", "games": {}})
-        self.assertEqual(self.read("games.json"), {})
+        self.assertFalse(os.path.exists(self.path("games.json")))
 
     def test_no_changes_nothing_saved(self):
-        self.assertEqual(self.run_edit([0, None, None], confirmed=True), 0)
+        self.assertEqual(self.run_edit([2], confirmed=True), 0)
         self.assertFalse(os.path.exists(self.path("cards.json")))
 
 
@@ -133,21 +121,21 @@ class MenuActions(EditBase):
 
     def test_rename_a_saved_card(self):
         self.write_json("cards.json", {"c": {"layout": "esde", "device": "full"}})
-        self.run_menu([(edit.RENAME_KEY, 1), 4])
+        self.run_menu([(edit.RENAME_KEY, 0), 3])
         self.assertEqual(list(self.read("cards.json")), ["renamed"])
 
     def test_delete_a_saved_card(self):
         self.write_json("cards.json", {"c": {"layout": "esde", "device": "full"}})
-        self.run_menu([(edit.DELETE_KEY, 1), 4])
+        self.run_menu([(edit.DELETE_KEY, 0), 3])
         self.assertEqual(self.read("cards.json"), {})
 
     def test_declined_delete_keeps_the_card(self):
         self.write_json("cards.json", {"c": {"layout": "esde", "device": "full"}})
-        self.run_menu([(edit.DELETE_KEY, 1), 4], confirm=False)
+        self.run_menu([(edit.DELETE_KEY, 0), 3], confirm=False)
         self.assertIn("c", self.read("cards.json"))
 
     def test_done_with_no_changes_saves_nothing(self):
-        self.assertEqual(self.run_menu([3]), 0)
+        self.assertEqual(self.run_menu([2]), 0)
         self.assertFalse(os.path.exists(self.path("cards.json")))
 
     def device_case(self):
@@ -161,14 +149,14 @@ class MenuActions(EditBase):
         dev, base, ids = self.device_case()
         extra = next(x for x in ids if x not in base)
         self.write_json("device-systems.json", {dev["id"]: {"add": [extra]}})
-        self.run_menu([2, 0, None, 3], multi=lambda initial, labels: [x in base for x in ids])
+        self.run_menu([1, 0, None, 2], multi=lambda initial, labels: [x in base for x in ids])
         self.assertEqual(self.read("device-systems.json"), {})
 
     def test_opening_a_device_and_changing_nothing_is_not_an_edit(self):
         dev, base, ids = self.device_case()
         extra = next(x for x in ids if x not in base)
         self.write_json("device-systems.json", {dev["id"]: {"add": [extra]}})
-        self.run_menu([2, 0, None, 3], multi=lambda initial, labels: list(initial))
+        self.run_menu([1, 0, None, 2], multi=lambda initial, labels: list(initial))
         self.assertEqual(self.read("device-systems.json"), {dev["id"]: {"add": [extra]}})
         self.assertFalse(os.path.exists(self.path("device-systems.json.bak")))
 
@@ -176,7 +164,7 @@ class MenuActions(EditBase):
         with open(self.path("cards.json"), "w") as f:
             f.write("{oops")
         with contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit) as cm:
-            self.run_menu([3])
+            self.run_menu([2])
         self.assertNotEqual(cm.exception.code, 0)
 
 
@@ -210,24 +198,20 @@ class FullToggles(EditBase):
 
     def test_set_menu_hotkey_toggles_and_redraws(self):
         first = store.load_sets()[1]["id"]
+        self.write_json("cards.json", {"c": {"layout": "esde", "device": "full"}})
         calls = self.run_with([0, 1, (edit.FULL_KEY, 1), None, None, None])
-        self.assertEqual(self.read("games.json"), {"sets": [first]})
+        self.assertEqual(self.read("cards.json")["c"]["games"], {"sets": [first]})
         self.assertEqual(calls[3]["cursor"], 1)
         self.assertEqual(calls[3]["extras"][1], [("  📦 full set", "green")])
         self.assertIn(edit.FULL_KEY, calls[2]["hotkeys"])
 
     def test_system_hotkey_toggles_full_system(self):
-        self.run_with([0, 0, (edit.FULL_KEY, 0), None, None, None], {"gba/": {"gba/A.zip": 1}})
-        self.assertEqual(self.read("games.json"), {"gba": {"full_system": True}})
-
-    def test_core_full_system_blocks_card_toggle(self):
-        self.write_json("games.json", {"gba": {"full_system": True}})
         self.write_json("cards.json", {"c": {"layout": "esde", "device": "full"}})
-        self.run_with([1, 0, (edit.FULL_KEY, 0), None, None, None], {"gba/": {"gba/A.zip": 1}})
-        self.assertNotIn("games", self.read("cards.json")["c"])
+        self.run_with([0, 0, (edit.FULL_KEY, 0), None, None, None], {"gba/": {"gba/A.zip": 1}})
+        self.assertEqual(self.read("cards.json")["c"]["games"], {"gba": {"full_system": True}})
 
     def test_set_ref_rows_locked(self):
-        self.write_json("games.json", {"sets": ["mario"]})
+        self.write_json("cards.json", {"c": {"layout": "esde", "device": "full", "games": {"sets": ["mario"]}}})
         tracked = []
         with mock.patch.object(edit, "toggle_games",
                                side_effect=lambda *a, **k: tracked.append((a, k))):
@@ -236,24 +220,6 @@ class FullToggles(EditBase):
         rows = tracked[0][0][1]
         note = tracked[0][1]["covered"](rows[0][0], rows[0][1])
         self.assertEqual(note, "Full set: Mario")
-
-    def test_card_named_core_leaves_core_list_alone(self):
-        self.write_json("games.json", {"gba": [{"title": "A", "bucket": "gba/A.zip"}]})
-        self.write_json("cards.json", {"core": {"layout": "esde", "device": "full"}})
-        self.run_with([1, 1, (edit.FULL_KEY, 0), None, None, None], confirmed=True)
-        self.assertEqual(self.read("games.json"), {"gba": [{"title": "A", "bucket": "gba/A.zip"}]})
-
-    def test_by_set_locks_systems_full_in_core(self):
-        self.write_json("games.json", {"nes": {"full_system": True}})
-        self.write_json("cards.json", {"c": {"layout": "esde", "device": "full"}})
-        tracked = []
-        nes_set = next(x["id"] for x in store.load_sets() if any(g["system"] == "nes" for g in x["games"]))
-        ids = [x["id"] for x in store.load_sets()]
-        with mock.patch.object(edit, "toggle_games", side_effect=lambda *a, **k: tracked.append((a, k))):
-            self.run_with([1, 1, ids.index(nes_set), None, None, None])
-        rows, covered = tracked[0][0][1], tracked[0][1]["covered"]
-        nes_row = next(r for r in rows if r[0]["bucket"] == "nes")
-        self.assertTrue(covered(nes_row[0], nes_row[1]))
 
     def device_and_unsupported(self):
         """A device and a system bucket id (with a esde folder) it doesn't run."""
@@ -269,7 +235,7 @@ class FullToggles(EditBase):
         device, other = self.device_and_unsupported()
         self.write_json("cards.json", {"c": {"layout": "esde", "device": device["id"],
                                              "games": {other: [{"title": "X", "bucket": f"{other}/X.zip"}]}}})
-        self.run_with([1, None, None])
+        self.run_with([0, None, None])
         self.assertEqual(self.read("cards.json")["c"]["games"], {})
 
     def test_set_counts_only_count_supported_systems(self):
@@ -278,7 +244,7 @@ class FullToggles(EditBase):
         game_set = {"id": "t", "name": "T", "description": "", "games": [
             {"system": other, "bucket": f"{other}/X.zip"}, {"system": device["systems"][0], "bucket": "a/Y.zip"}]}
         labels = []
-        picks = iter([1, 1, None, None, None])
+        picks = iter([0, 1, None, None, None])
 
         def fake(title, items, **k):
             labels.append(items)

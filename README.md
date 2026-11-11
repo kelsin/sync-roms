@@ -156,7 +156,7 @@ Then:
    | `o` | cycle the view: all / only selected / only changed |
    | `z` | show/hide systems with 0 ROMs |
    | `e` | edit the highlighted system's games for this card (same list as `games edit`), then return here. Not shown with `--dry-run` |
-   | `D` | clear this card's own extra games after asking (the core list stays) |
+   | `D` | clear this card's own games after asking |
    | `enter` | start downloading |
    | `q` / `Esc` | quit |
 
@@ -299,7 +299,7 @@ On `esde` and `emudeck` cards every Vita zip in `psvita/` gets a `.psvita` file 
 | Flag | Description |
 | --- | --- |
 | `-n`, `--dry-run` | Show what would be downloaded (with total sizes), download nothing. With `--mirror`/`--use-mirror`, show what the mirror would download and delete |
-| `-e`, `--edit` | Add/remove games in the core list (`games.json`) or a card's extras, then save (see below) |
+| `-e`, `--edit` | Add/remove games in a card's list, then save (see below) |
 | `-a`, `--ask` | Confirm saved settings (device and layout, Android media folders) instead of using them silently. Answering no asks the question again and saves the new answer |
 | `-u`, `--upload-scrapes` | (`-u` is deprecated: it is not `--upload`) Upload `BASE_DIR/ES-DE` scraped data to storage (see below) |
 | `--upload [DIR]` | Upload the ROMs in `DIR` and its subfolders (default: current directory) to storage folder of a system you pick; the system is guessed from the folder name (see below) |
@@ -318,7 +318,7 @@ On `esde` and `emudeck` cards every Vita zip in `psvita/` gets a `.psvita` file 
 | `--size SIZE` | `cards new` / `cards set`: the card's size as people read it (`256`, `512GB`, `1TB`), saved in `cards.json` and shown by `cards list` and on sync |
 | `--no-clean` | Sync: skip the end-of-run card tidy |
 | `--json` | `devices`, `games list`, `cards list`, `diff` and `sync --dry-run`: one JSON document on stdout, nothing else (pass `--device`/`--layout`/`--systems` so no picker is needed; `diff` also needs `--system ID` unless the folder is named after a system) |
-| `--card NAME` | `games` commands: work on that card's extras instead of the core list (see Editing from scripts) |
+| `--card NAME` | `games` commands: the card whose games to change (required; see Editing from scripts) |
 | `--system ID` | `diff`: the system to compare with, instead of the picker. `scrape`: only that storage folder |
 | `--scrape` | Scrape the ROMs that have no metadata from ScreenScraper (the old form of `scrape`; see Scraping from ScreenScraper) |
 | `--scrape-match SYSTEM ROM GAME` | Tell the scraper which ScreenScraper game a ROM is, then scrape it (the old form of `scrape match`) |
@@ -379,13 +379,13 @@ What goes up, and how it is stored:
 | `collections/*.cfg` | `scrapes/esde/collections/*.cfg` | Union of the lines in both versions |
 | `settings/es_settings.xml` | `scrapes/esde/settings.json` | Allowlisted keys only: scraper behavior, miximage generation, theme (not aspect ratio) and gamelist/UI behavior. Credentials are never included. Merged with storage's file, local wins |
 
-For uploads, "available ROMs" are the games listed in `games.json` that exist in storage, which is
+For uploads, "available ROMs" are the games your cards list that exist in storage, which is
 what a sync installs. Scraped files for any other ROM are left out. A `gamelist.xml` that can't be read
 is skipped with a warning.
 
 `sync-roms --clean-scrapes` (or `-c`) needs no folder. It compares storage's `scrapes/` media and
 `metadata.json` entries with every ROM file in storage's system folders (not only the games
-listed in `games.json`), lists what no longer matches (including whole systems with no folder in the
+listed on your cards), lists what no longer matches (including whole systems with no folder in the
 bucket), and after you confirm (default no) deletes the media and rewrites the metadata files. `--dry-run` only lists. Themes, collections and settings are never
 touched.
 
@@ -448,7 +448,7 @@ matches) and `scrape-unknown.json` (the ROMs ScreenScraper didn't know). Delete 
 own key layout: the ROMs a sync installs (every file of a full system), every system's
 BIOS files, `scrapes/<system>/` metadata and media for those ROMs, and all of `scrapes/esde/`.
 It compares file sizes, so a rerun with nothing changed lists storage and downloads nothing.
-Anything in the mirror that is no longer referenced (a game removed from `games.json` or from the
+Anything in the mirror that is no longer referenced (a game removed from a card's games or from the
 bucket) is deleted. `--dry-run` shows the plan. A non-empty folder that isn't already a mirror
 (it has no `.sync-roms-mirror` file) is refused.
 
@@ -464,18 +464,17 @@ or `--clean-scrapes`.
 
 ## Editing the game list (`--edit`)
 
-There are two kinds of list. The **core** list, `~/.sync-roms/games.json`, goes to every card (for the
-systems that card has enabled). A card can also have **extras**, saved in `cards.json` under the card's folder
-name next to its device and layout; a card syncs core plus its own extras, and extras only add games.
-A fresh install starts with no games, so every system shows 0 ROMs until you add some here. Storage is only
+A card's games are saved in `cards.json` under the card's folder name, next to its device and layout; a card
+syncs exactly what is picked for it (games, whole sets, full systems). Any old `~/.sync-roms/games.json` is no longer read.
+A fresh install starts with no games, so a card syncs no games until you pick some here. Storage is only
 read to show what is in it, so the read-only profile is enough. No folders are needed:
 
 ```bash
 sync-roms --edit
 ```
 
-0. Pick **🏠 Core**, one of your cards, or **➕ New card** (asks for its folder name, then its device and
-   firmware, like the first sync does). On a card, `v` changes its device and firmware instead of opening it (saved with the other changes) and unticks the card's extra games for systems the new device or firmware doesn't use. Each card's row shows its current device and firmware. Games a card already gets from core show greyed out with a 🔒.
+0. Pick one of your cards, or **➕ New card** (asks for its folder name, then its device and
+   firmware, like the first sync does). On a card, `v` changes its device and firmware instead of opening it (saved with the other changes) and unticks the card's extra games for systems the new device or firmware doesn't use. Each card's row shows its current device and firmware. Games a card already gets from its sets show greyed out with a 🔒.
 1. Pick **By system** or **By set**, then `/` to filter the list (every word you type must
    match) and `Enter` to pick one. `Esc` goes back; `Esc` at the first menu goes to the review (the menu also has **Done** and **Quit without saving** rows). `Ctrl-C` keeps your pending changes and goes to the review.
 2. For a system you see every file in its storage folder. For a set (a curated list in the
@@ -483,7 +482,7 @@ sync-roms --edit
    `✅` is already in the list, `⬜` is not. `/` filters, `Space` (or `Tab`) toggles the game
    under the cursor, `a` toggles everything currently shown, `u` reverts the list to how it was when opened, `o` cycles the view between all rows, only those that are on, and only those you changed. `Enter` keeps your changes; `Esc` asks whether to keep or revert them if there are any.
    Pending changes show as `➕` / `➖`. `w` writes a note on the game under the cursor (empty clears it); notes are shown when a game is locked and are kept when the game is saved into a set.
-3. When you finish, you get a summary of additions and removals per system, then **save**, **keep editing**, **discard**, or **list every change**. Saving writes `games.json` and/or the cards' entries in `cards.json`, keeping the previous files as `.bak` next to them. Nothing is uploaded.
+3. When you finish, you get a summary of additions and removals per system, then **save**, **keep editing**, **discard**, or **list every change**. Saving writes the cards' entries in `cards.json`, keeping the previous files as `.bak` next to them. Nothing is uploaded.
 
 On a card, **📦 Make a set from these extras** saves the card's extra games as a personal set. Personal sets are files in `~/.sync-roms/sets/<id>.json` (same format as the package's sets, below), appear next to the built-in ones under **By set** and can be referenced like them; an id already used by a built-in set is refused. You can also write them by hand, and `sync-roms check` validates them.
 
@@ -491,7 +490,7 @@ On the top menu, `v` changes a card's device and firmware, `r` renames a card an
 
 ### Editing from scripts
 
-`--card NAME` picks a card's extras instead of the core list; every command takes `--dry-run` and prints what it changed.
+`--card NAME` picks the card; every command takes `--dry-run` and prints what it changed.
 
 ```bash
 sync-roms games add gba 'Metroid*' --card SD      # a name, SYSTEM/name, or a glob matched against storage
@@ -506,19 +505,19 @@ sync-roms cards new SD --device rg35xx-sp --layout knulli --size 256GB   # --siz
 
 A set file (in the package's `data/sets/` or your `~/.sync-roms/sets/`) is `{"name": ..., "description": ..., "games": [{"title": ..., "system": "gba", "bucket": "gba/Game.zip"}]}`.
 A multi-disc game adds `"files": [...]` with its other storage keys (the discs); `bucket` is the playlist (`.m3u`) or disc 1.
-Toggling the game adds or removes every file, one `games.json` entry each.
+Toggling the game adds or removes every file, one card entry each.
 Entries for an unknown system are skipped with a warning. Games of a full system show greyed out with a 🔒: they are always synced and can't be toggled.
 
-Removing a game only drops it from `games.json`; the file stays in storage.
+Removing a game only drops it from the card's games; the file stays in storage.
 
 ### Editing the built-in sets
 
-`sync-roms sets edit` edits the sets in this repo's `data/sets/` and opens a PR with the changes, so it works from any install. Pick a set to switch games off, add games from a system (you're asked for a category; existing ones are listed), change a game's category, or rename it. **➕ New set** creates a set and `d` deletes the highlighted one (it warns if your `games.json` or a card still references it). Esc shows the changes; confirming clones `kelsin/sync-roms` to a temporary folder, writes the changed set files, pushes a branch and runs `gh pr create`. It needs `git` and a logged-in `gh`, and writes nothing to storage or to `~/.sync-roms`.
+`sync-roms sets edit` edits the sets in this repo's `data/sets/` and opens a PR with the changes, so it works from any install. Pick a set to switch games off, add games from a system (you're asked for a category; existing ones are listed), change a game's category, or rename it. **➕ New set** creates a set and `d` deletes the highlighted one (it warns if a card still references it). Esc shows the changes; confirming clones `kelsin/sync-roms` to a temporary folder, writes the changed set files, pushes a branch and runs `gh pr create`. It needs `git` and a logged-in `gh`, and writes nothing to storage or to `~/.sync-roms`.
 
 ### Full systems
 
 A system can sync every file in its storage folder (subfolders included) instead of a game list, so adding
-a file to storage is enough to publish it. Set its entry in `games.json` to `{"full_system": true}`
+a file to storage is enough to publish it. Set its entry in a card's `games` to `{"full_system": true}`
 instead of a list:
 
 ```json
@@ -526,7 +525,7 @@ instead of a list:
 ```
 
 No system is a full system by default. In `--edit`, press `f` on a system in the **By system** list to
-toggle it (🗂️). A full system's games can't be toggled one by one; a card can't turn off a system that core
+toggle it (🗂️). A full system's games can't be toggled one by one; a card can't turn off a system that a set
 has as full.
 
 ### Full sets
@@ -538,7 +537,7 @@ holding the set file names without `.json`:
 { "sets": ["mario", "zelda"], "gba": [ { "title": "Game", "bucket": "gba/Game.zip" } ] }
 ```
 
-It works in `games.json` and in a card's `games` entry in `cards.json`. A set reference is live: games added
+It works in a card's `games` entry in `cards.json`. A set reference is live: games added
 to the set in a later release are synced too, for the systems the card has enabled. In `--edit`, press `f`
 on a set in the **By set** list (it shows 📦) to toggle it without opening it; inside a referenced set the
 games show greyed out. Unknown set names are skipped with a warning.
@@ -549,12 +548,11 @@ games show greyed out. Unknown set names are skipped with a warning.
 { "RGSP": { "device": "anbernic-rg-sp", "layout": "muos", "games": { "gba": { "full_system": true } } } }
 ```
 
-`games` has the same shape as `games.json`, including `"sets"`. A card is identified by its folder name, so
-renaming the folder makes it a new card. The local mirror (`--mirror`) holds the core list plus every card's
-extras.
+`games` maps system ids to games (or `{"full_system": true}`), and may hold `"sets"`. A card is identified by its folder name, so
+renaming the folder makes it a new card. The local mirror (`--mirror`) holds every card's games.
 
-`excluded` (`{"gba": ["gba/A.zip"]}`) lists core or set games this card opts out of. Press `e` on a system in the
-picker: games the core list or sets sync show as on and can be switched off (and back on); the choice is saved
+`excluded` (`{"gba": ["gba/A.zip"]}`) lists set games this card opts out of. Press `e` on a system in the
+picker: games its sets sync show as on and can be switched off (and back on); the choice is saved
 for that card only. In the systems picker, `o` shows only the selected systems.
 
 ## Converting to CHD and xiso (`--cd`, formerly `--chd`)
@@ -581,20 +579,20 @@ Each system's behaviour is the `chd` setting in `src/sync_roms/data/systems.json
 
 Every `.chd` is verified with `chdman verify` before its archive, `.cue`, `.bin` and `.iso` files are deleted; on any failure the originals are kept. Each `.chd` is written under a hidden `.part` name and renamed only after it verifies. `Ctrl-C` stops `7z` and `chdman`, removes the partial files and exits (130) without starting anything else; a rerun picks up where it stopped, and also deletes the extraction folders (`.chd-*`) a hard kill left behind.
 
-It is meant for preparing a downloaded rom pack before you upload it to storage, so storage holds the `.chd` and `.m3u` files and `games.json` lists those names. Running it on a card synced from storage that still has the `.zip` files makes the next `sync-roms` run list the `.chd` files as files not in your game list (it asks before deleting, default no) and download the zips again.
+It is meant for preparing a downloaded rom pack before you upload it to storage, so storage holds the `.chd` and `.m3u` files and the card's games list those names. Running it on a card synced from storage that still has the `.zip` files makes the next `sync-roms` run list the `.chd` files as files not in your game list (it asks before deleting, default no) and download the zips again.
 
 ## How it works
 
 - Reads the systems, layouts, devices and BIOS requirements from `src/sync_roms/data/` in the package, each device's
-  recommended systems (`device-systems.json`) too, and your games (`games.json`) from `~/.sync-roms/`, never from
-  storage. `games.json` is copied there from the package's starter version on first run. An optional
+  recommended systems (`device-systems.json`) too, and your cards (`cards.json`) from `~/.sync-roms/`, never from
+  storage. An optional
   `~/.sync-roms/device-systems.json` adjusts a device's recommended systems:
   `{"miyoo-flip-v2": {"add": ["psx"], "remove": ["gba"]}}` (system ids as in `systems.json`; the package's
   order is kept and notes always come from the package). An old full-copy `device-systems.json` from before the overlay does nothing; delete it. BIOS files are always `BIOS/<file>` in storage.
 - System folders in storage use the ES-DE system name (e.g. `gba/`, `dreamcast/`).
 - Lists each chosen system's storage folder once and compares file sizes, so only
   missing or changed files are downloaded (for `full_system` systems, every file in the folder) (8 in parallel, via boto3).
-- Local files in a chosen system's folder that are no longer in its `games.json` list
+- Local files in a chosen system's folder that are no longer in the card's games
   are listed and deleted only after you confirm (default **no**; `--dry-run` shows them).
   Folders of systems you didn't pick, BIOS files and dotfiles are never touched.
   Files frontends add to ROM folders are ignored too (never counted as "already has files",
@@ -615,5 +613,5 @@ It is meant for preparing a downloaded rom pack before you upload it to storage,
 | --- | --- |
 | `AccessDenied` / `Unable to locate credentials` | Define the `roms-readonly` profile in `~/.aws/config` and `~/.aws/credentials`; `sync-roms doctor` checks the profile, storage and tools |
 | `cards.json isn't valid JSON` | Fix the file (the last good copy is `cards.json.bak`); sync-roms refuses to overwrite it. `sync-roms check` finds the problem |
-| "listed in manifest but not in storage" warnings | A game in your `games.json` (or a required BIOS file) isn't in storage; it is skipped |
-| A system shows `(0 roms)` | Your `games.json` has no games for that system, or none of them are in storage (BIOS is still fetched if selected). Add games with `--edit` |
+| "listed in manifest but not in storage" warnings | A game on your card (or a required BIOS file) isn't in storage; it is skipped |
+| A system shows `(0 roms)` | Your card has no games for that system, or none of them are in storage (BIOS is still fetched if selected). Add games with `--edit` |

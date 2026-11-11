@@ -98,16 +98,12 @@ class Notes(DataDir):
 
 class Sorting(DataDir):
     def test_save_sorts_systems_and_games(self):
-        store.save_lists({"nes": [{"bucket": "nes/b.zip"}], "gba": [{"bucket": "gba/Z.zip"}, {"bucket": "gba/a.zip"}],
-                          "sets": ["z", "a"]},
-                         {"c": {"snes": [{"bucket": "snes/2"}, {"bucket": "snes/1"}], "gba": []}})
-        text = open(self.path("games.json")).read()
-        data = json.loads(text)
-        self.assertEqual(list(data), ["gba", "nes", "sets"])
-        self.assertEqual([g["bucket"] for g in data["gba"]], ["gba/a.zip", "gba/Z.zip"])
-        self.assertEqual(data["sets"], ["a", "z"])
+        store.save_lists({"c": {"snes": [{"bucket": "snes/2"}, {"bucket": "snes/1"}], "gba": [{"bucket": "gba/Z.zip"}, {"bucket": "gba/a.zip"}],
+                                "sets": ["z", "a"]}})
         card = self.read("cards.json")["c"]["games"]
-        self.assertEqual(list(card), ["gba", "snes"])
+        self.assertEqual(list(card), ["gba", "sets", "snes"])
+        self.assertEqual([g["bucket"] for g in card["gba"]], ["gba/a.zip", "gba/Z.zip"])
+        self.assertEqual(card["sets"], ["a", "z"])
         self.assertEqual([g["bucket"] for g in card["snes"]], ["snes/1", "snes/2"])
 
 
@@ -151,8 +147,9 @@ class CheckSystemsKey(Cmd):
 
 class CheckBucketKeys(Cmd):
     def test_missing_keys_are_reported_per_file(self):
-        with open(self.path("games.json"), "w") as f:
-            json.dump({"gba": [{"title": "A", "bucket": "gba/A.zip"}, {"title": "B", "bucket": "gba/B.zip"}]}, f)
+        with open(self.path("cards.json"), "w") as f:
+            json.dump({"c": {"device": "full", "layout": "esde",
+                             "games": {"gba": [{"title": "A", "bucket": "gba/A.zip"}, {"title": "B", "bucket": "gba/B.zip"}]}}}, f)
         os.makedirs(self.path("sets"))
         with open(self.path("sets/mine.json"), "w") as f:
             json.dump({"name": "Mine", "games": [{"title": "D", "system": "nes", "bucket": "nes/D.zip",

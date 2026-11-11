@@ -10,7 +10,6 @@ from . import s3, ui
 
 
 REPO_DATA = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
-PERSONAL_FILES = ("games.json",)  # per-user, in data_dir(); never read from storage
 
 
 _repo_text = {}  # path -> ((mtime_ns, size), file text)
@@ -138,17 +137,8 @@ def backup(path):
         shutil.copyfile(path, path + ".bak")
 
 
-def seed_personal_files():
-    """Give the user their own copy of each personal file, starting from the repo's version."""
-    os.makedirs(data_dir(), exist_ok=True)
-    for name in PERSONAL_FILES:
-        dest = os.path.join(data_dir(), name)
-        if not os.path.exists(dest):
-            shutil.copyfile(os.path.join(REPO_DATA, name), dest)
-
-
 def apply_games(systems, games):
-    """Attach each system's games from games.json. An entry of {"full_system": true} instead of a list
+    """Attach each system's games from a games list. An entry of {"full_system": true} instead of a list
     marks a system whose every bucket file is synced."""
     for s in systems:
         entry = games.get(s["bucket"], [])
@@ -196,7 +186,7 @@ def card_games(card, cards=None):
 
 
 def card_excluded(card, cards=None):
-    """Games a card opted out of, {system bucket: [bucket keys]}: dropped from what the core list and sets sync there.
+    """Games a card opted out of, {system bucket: [bucket keys]}: dropped from what its sets sync there.
     cards: cards.json already loaded."""
     entry = (load_cards() if cards is None else cards).get(card)
     excluded = entry.get("excluded") if isinstance(entry, dict) else None
@@ -270,7 +260,7 @@ def merge_lists(systems, lists, sets):
 
 
 def prune_unknown_sets(sets, cards=None):
-    """Drop set ids that no longer exist from games.json and every card's extras, rewriting only files that change.
+    """Drop set ids that no longer exist from every card's games, rewriting only what changes.
     cards: cards.json already loaded. Returns whether anything was rewritten."""
     cards_in = load_cards() if cards is None else cards
     known = {x["id"] for x in sets}
@@ -286,14 +276,12 @@ def prune_unknown_sets(sets, cards=None):
             out[SETS_KEY] = keep
         return out, gone
 
-    core = pruned(personal_json("games.json"))
     changed = {n: p for n in all_card_names(cards_in) if (p := pruned(card_games(n, cards_in)))}
-    for where, p in [("games.json", core)] + [(f"card {n}", p) for n, p in changed.items()]:
-        if p:
-            ui.warn(f"{where}: removed sets that no longer exist: {', '.join(p[1])}")
-    if core or changed:
-        save_lists(core[0] if core else None, {n: p[0] for n, p in changed.items()})
-    return bool(core or changed)
+    for n, p in changed.items():
+        ui.warn(f"card {n}: removed sets that no longer exist: {', '.join(p[1])}")
+    if changed:
+        save_lists({n: p[0] for n, p in changed.items()})
+    return bool(changed)
 
 
 def load_catalog():
@@ -305,15 +293,14 @@ def load_catalog():
 
 
 def load_manifest(card_names=()):
-    """Systems, devices and layouts from the repo, joined with the personal games (plus the extras of the
-    named cards) and device-system overlay."""
-    seed_personal_files()
+    """Systems, devices and layouts from the repo, joined with the games of the named cards (their picks, set
+    references and full systems) and the device-system overlay. No cards means no games."""
     sets = load_sets()
     cards = load_cards()
     if prune_unknown_sets(sets, cards):
         cards = load_cards()
     manifest = {name: repo_json(name) for name in ("layouts", "systems", "devices")}
-    lists = [personal_json("games.json")] + [card_games(n, cards) for n in card_names]
+    lists = [card_games(n, cards) for n in card_names]
     merge_lists(manifest["systems"], lists, sets)
     if len(card_names) == 1:
         excluded = card_excluded(card_names[0], cards)
@@ -325,7 +312,7 @@ def load_manifest(card_names=()):
 
 
 def listed(s):
-    """Bucket keys of the games games.json lists for a system."""
+    """Bucket keys of the games a system lists."""
     return [g["bucket"] for g in s.get("games", []) if g.get("bucket")]
 
 
@@ -526,7 +513,7 @@ def sorted_list(raw):
 
 
 def dump_list(systems, sets_on):
-    """A games list as saved to games.json or a card's cards.json entry."""
+    """A games list as saved in a card's cards.json entry."""
     out = {s["bucket"]: {"full_system": True} if s["full_system"] else s["games"]
            for s in systems if s["full_system"] or s["games"]}
     if sets_on:
@@ -534,10 +521,8 @@ def dump_list(systems, sets_on):
     return out
 
 
-def save_lists(core, cards):
-    """Write the core list (when given) to games.json and each card's list into its cards.json entry."""
-    if core is not None:
-        write_json(os.path.join(data_dir(), "games.json"), sorted_list(core), backup=True, **PRETTY)
+def save_lists(cards):
+    """Write each card's games list into its cards.json entry."""
     if not cards:
         return True
     saved = load_cards()

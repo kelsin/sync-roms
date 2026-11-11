@@ -13,8 +13,8 @@ from . import __version__, clean, commands, downloads, edit, external, m3u, pick
 
 SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "sync": ("[CARD]", "download the ROMs, BIOS and scraped data for a card (this is what plain `sync-roms CARD` does)"),
-    "edit": ("", "interactive editor for the core list, card extras and device systems (same as `games edit`)"),
-    "games": ("edit|list|add|remove|full|sets|export|import", "edit the core game list or a card's extras, interactively or from scripts"),
+    "edit": ("", "interactive editor for cards and device systems (same as `games edit`)"),
+    "games": ("edit|list|add|remove|full|sets|export|import", "edit a card's games, interactively or from scripts"),
     "sets": ("edit", "edit the repo's game sets by hand and open a PR with the changes"),
     "cards": ("edit|list|new|set|rename|delete", "list and manage the cards you've synced"),
     "devices": ("[ID]", "list the supported devices, or one device's systems"),
@@ -28,7 +28,7 @@ SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "mirror": ("[DIR] | use DIR | clear", "make or refresh a local copy of everything your lists reference"),
     "config": ("show|path", "show the effective settings and where each comes from"),
     "doctor": ("", "check the AWS profile, storage access, tools and your data files"),
-    "check": ("", "validate games.json, cards.json, the device overlay and the sets"),
+    "check": ("", "validate cards.json, the device overlay and the sets"),
     "completion": ("bash|zsh|fish", "print a shell completion script"),
 }
 
@@ -60,7 +60,7 @@ TOPICS = {
   Picker keys: ↑/↓ j/k ^N/^P move, / filter, space/tab toggle, a all/none, z show 0-ROM systems, e edit games, D clear the card's own games, enter go, esc/q cancel.
 """,
     "games": """
-  sync-roms games edit                        interactive editor (core list, card extras, device systems)
+  sync-roms games edit                        interactive editor (cards, device systems)
   sync-roms games list [--card NAME] [--json]
   sync-roms games add SYSTEM KEY... [--card NAME] [-n]      KEY: file name, SYSTEM/file key, or a glob like 'Mario*'
   sync-roms games remove SYSTEM KEY... [--card NAME] [-n]
@@ -69,8 +69,7 @@ TOPICS = {
   sync-roms games export [--card NAME]        one SYSTEM/file per line (full systems as 'SYSTEM/*')
   sync-roms games import FILE [--card NAME] [-n]            add the games in such a file
 
-  Without --card the core list (every card) is changed; with it, that card's extras. Lists are saved in ~/.sync-roms/
-  (games.json, cards.json) with the previous version kept as .bak. Removing only drops a game from the list.
+  --card NAME is required: a card's games are saved in ~/.sync-roms/cards.json with the previous version kept as .bak. Removing only drops a game from the list.
   In the editor: / filters, Space toggles a row, a all/none shown, u reverts the list, o cycles all/on/changed, f toggles a whole set or system.
 """,
     "sets": """
@@ -122,7 +121,7 @@ TOPICS = {
   metadata and media (and the Onion/Slot images) to storage. The ROMs and how each will be
   looked up are listed first. ROMs ScreenScraper doesn't know are remembered and skipped until --retry.
   --system ID        only that storage folder (e.g. gba)
-  --all              every ROM in the storage, not just those your games.json lists (core list, sets, full systems)
+  --all              every ROM in the storage, not just those your cards list (games, sets, full systems)
   --fill-media       also scrape ROMs that have metadata but lack some media type in storage (ScreenScraper is asked
                      again for each, even when it has no such media); their existing metadata is kept
   --skip-media TYPES comma-separated media folders not to download (covers, 3dboxes, backcovers, fanart, manuals,
@@ -177,7 +176,7 @@ TOPICS = {
     "check": """
   sync-roms check [--bucket-keys]
 
-  Validates games.json, cards.json, device-systems.json and the sets (built-in and ~/.sync-roms/sets): bad JSON,
+  Validates cards.json, device-systems.json and the sets (built-in and ~/.sync-roms/sets): bad JSON,
   unknown systems, devices and sets. Exits 1 if anything is wrong.
   --bucket-keys also lists storage (read-only profile) and reports every game or set file it doesn't have.
 """,
@@ -678,6 +677,8 @@ def sync_card(args):
     card = os.path.basename(base) or base
     manifest = store.load_manifest([card])
     systems, layouts = manifest["systems"], manifest["layouts"]
+    if not any(s["games"] or s.get("full_system") for s in systems):
+        print(ui.dim(f"  {card} has no games picked"))
     saved = store.load_cards().get(card)
     chosen_setup = choose_card_setup(args, base, card, manifest, saved)
     if chosen_setup is None:
@@ -778,7 +779,7 @@ def sync_card(args):
                 state["sel"][row] = True
             listings.pop(edited, None)  # its games changed, so it is listed and sized again
             size_cache.pop(edited, None)
-        elif ui.confirm(f"🧹 Clear {card}'s own games? (the core list stays)", default=False):
+        elif ui.confirm(f"🧹 Clear {card}'s own games?", default=False):
             store.update_card(card, games={})
             state["sel"] = [False] * len(systems)
             listings.clear()

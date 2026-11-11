@@ -15,49 +15,69 @@ from helpers import Cmd, DataDir  # noqa: E402,F401
 
 
 
-class GamesTest(Cmd):
+class CardCmd(Cmd):
+    """Cmd with a card SD saved, so `games` commands can name it."""
+
+    def setUp(self):
+        super().setUp()
+        with open(self.path("cards.json"), "w") as f:
+            json.dump({"SD": {"device": "full", "layout": "esde"}}, f)
+
+    def run_cmd(self, *argv):
+        return super().run_cmd(*argv, *(["--card", "SD"] if argv[0] == "games" else []))
+
+    def games(self):
+        return self.read("cards.json")["SD"].get("games", {})
+
+
+class GamesTest(CardCmd):
     def test_add_remove_and_dry_run(self):
         self.assertEqual(self.run_cmd("games", "add", "gba", "A.zip", "gba/B.zip")[0], 0)
-        self.assertEqual([g["bucket"] for g in self.read("games.json")["gba"]], ["gba/A.zip", "gba/B.zip"])
+        self.assertEqual([g["bucket"] for g in self.games()["gba"]], ["gba/A.zip", "gba/B.zip"])
         self.run_cmd("games", "add", "gba", "C.zip", "-n")
-        self.assertEqual(len(self.read("games.json")["gba"]), 2)
+        self.assertEqual(len(self.games()["gba"]), 2)
         self.run_cmd("games", "remove", "gba", "A.zip")
-        self.assertEqual([g["bucket"] for g in self.read("games.json")["gba"]], ["gba/B.zip"])
+        self.assertEqual([g["bucket"] for g in self.games()["gba"]], ["gba/B.zip"])
         self.run_cmd("games", "remove", "gba", "B.zip")
-        self.assertNotIn("gba", self.read("games.json"))
+        self.assertNotIn("gba", self.games())
+
+    def test_games_commands_require_a_card(self):
+        code, _, err = Cmd.run_cmd(self, "games", "add", "gba", "A.zip")
+        self.assertEqual(code, 2)
+        self.assertIn("--card", err)
+        self.assertFalse(os.path.exists(self.path("games.json")))
 
     def test_unknown_system_exits_2(self):
         self.assertEqual(self.run_cmd("games", "add", "nope", "A.zip")[0], 2)
 
     def test_full_system_and_export_import(self):
         self.run_cmd("games", "full", "gba", "on")
-        self.assertEqual(self.read("games.json")["gba"], {"full_system": True})
+        self.assertEqual(self.games()["gba"], {"full_system": True})
         self.assertEqual(self.run_cmd("games", "export")[1].split(), ["gba/*"])
         self.run_cmd("games", "full", "gba", "off")
-        self.assertNotIn("gba", self.read("games.json"))
+        self.assertNotIn("gba", self.games())
         listing = os.path.join(self.tmp.name, "list.txt")
         with open(listing, "w") as f:
             f.write("# comment\ngba/A.zip\nnes/*\nbogus line\n")
         code, _, err = self.run_cmd("games", "import", listing)
         self.assertEqual(code, 0)
         self.assertIn("bogus line", err)
-        saved = self.read("games.json")
+        saved = self.games()
         self.assertEqual(saved["nes"], {"full_system": True})
         self.assertEqual(saved["gba"][0]["bucket"], "gba/A.zip")
 
     def test_card_target_requires_an_existing_card(self):
-        self.assertEqual(self.run_cmd("games", "add", "gba", "A.zip", "--card", "SD")[0], 2)
-        self.write_cards({"SD": {"device": "full", "layout": "esde"}})
-        self.assertEqual(self.run_cmd("games", "add", "gba", "A.zip", "--card", "SD")[0], 0)
+        self.assertEqual(Cmd.run_cmd(self, "games", "add", "gba", "A.zip", "--card", "NOPE")[0], 2)
+        self.assertEqual(self.run_cmd("games", "add", "gba", "A.zip")[0], 0)
         self.assertEqual(self.read("cards.json")["SD"]["games"]["gba"][0]["bucket"], "gba/A.zip")
         self.assertEqual(self.read("cards.json")["SD"]["layout"], "esde")
 
     def test_sets_add_remove(self):
         set_id = store.load_sets()[0]["id"]
         self.run_cmd("games", "sets", "add", set_id)
-        self.assertEqual(self.read("games.json")["sets"], [set_id])
+        self.assertEqual(self.games()["sets"], [set_id])
         self.run_cmd("games", "sets", "remove", set_id)
-        self.assertNotIn("sets", self.read("games.json"))
+        self.assertNotIn("sets", self.games())
         self.assertEqual(self.run_cmd("games", "sets", "add", "nope")[0], 2)
 
     def write_cards(self, cards):
@@ -65,20 +85,20 @@ class GamesTest(Cmd):
             json.dump(cards, f)
 
 
-class BracketKeysTest(Cmd):
+class BracketKeysTest(CardCmd):
     NAME = "[BIOS] Nintendo Game Boy Boot ROM (World).zip"
 
     def test_bracketed_names_are_literal(self):
         self.assertEqual(self.run_cmd("games", "add", "gba", self.NAME)[0], 0)
-        self.assertEqual([g["bucket"] for g in self.read("games.json")["gba"]], [f"gba/{self.NAME}"])
+        self.assertEqual([g["bucket"] for g in self.games()["gba"]], [f"gba/{self.NAME}"])
         self.assertEqual(self.run_cmd("games", "remove", "gba", self.NAME)[0], 0)
-        self.assertNotIn("gba", self.read("games.json"))
+        self.assertNotIn("gba", self.games())
 
     def test_remove_globs_against_the_list_without_s3(self):
         self.run_cmd("games", "add", "gba", "A1.zip", "A2.zip", "B.zip")
         with mock.patch.object(commands.s3, "list_sizes", side_effect=AssertionError("no S3 for remove")):
             self.assertEqual(self.run_cmd("games", "remove", "gba", "A*.zip")[0], 0)
-        self.assertEqual([g["bucket"] for g in self.read("games.json")["gba"]], ["gba/B.zip"])
+        self.assertEqual([g["bucket"] for g in self.games()["gba"]], ["gba/B.zip"])
 
 
 class CardsTest(Cmd):
@@ -112,19 +132,14 @@ class DataSafetyTest(Cmd):
             f.write("{oops")
         with contextlib.redirect_stderr(io.StringIO()):
             self.assertFalse(store.update_card("SD", device="full", layout="esde"))
-            self.assertFalse(store.save_lists(None, {"SD": {}}))
+            self.assertFalse(store.save_lists({"SD": {}}))
         code, _, _ = self.run_cmd("cards", "new", "SD", "--device", "full", "--layout", "esde")
         self.assertNotEqual(code, 0)
 
-    def test_saves_keep_a_backup(self):
-        store.save_lists({"gba": []}, {})
-        store.save_lists({"nes": []}, {})
-        with open(self.path("games.json.bak")) as f:
-            self.assertEqual(json.load(f), {"gba": []})
-
     def test_check_finds_problems(self):
-        with open(self.path("games.json"), "w") as f:
-            json.dump({"nope": [], "gba": [{"title": "x", "bucket": "nes/x.zip"}], "sets": ["ghost"]}, f)
+        with open(self.path("cards.json"), "w") as f:
+            json.dump({"c": {"device": "full", "layout": "esde",
+                             "games": {"nope": [], "gba": [{"title": "x", "bucket": "nes/x.zip"}], "sets": ["ghost"]}}}, f)
         problems = commands.check_data()
         self.assertEqual(len(problems), 3)
 
@@ -143,13 +158,13 @@ class CheckShapesTest(Cmd):
 
     def test_wrong_shapes_are_reported_not_raised(self):
         dev = store.repo_json("devices")[0]["id"]
-        for name, data in (("cards.json", []), ("device-systems.json", []), ("games.json", [])):
+        for name, data in (("cards.json", []), ("device-systems.json", [])):
             with self.subTest(name=name):
                 self.write(name, data)
                 self.assertTrue(commands.check_data())
                 os.remove(self.path(name))
-        self.write("games.json", {"gba": [{"bucket": 5}]})
-        self.write("cards.json", {"c": {"device": "full", "layout": "esde", "games": []}})
+        self.write("cards.json", {"c": {"device": "full", "layout": "esde", "games": []},
+                                  "d": {"device": "full", "layout": "esde", "games": {"gba": [{"bucket": 5}]}}})
         self.write("device-systems.json", {dev: {"add": "gba", "remove": 3}, "x": []})
         self.assertGreaterEqual(len(commands.check_data()), 4)
 
@@ -257,7 +272,7 @@ class CardSizeTest(Cmd):
         self.assertEqual(self.run_cmd("cards", "new", "SD", "--device", "full", "--layout", "esde", "--size", "big")[0], 2)
 
 
-class FailedSaveTest(Cmd):
+class FailedSaveTest(CardCmd):
     def test_games_save_failure_exits_3(self):
         with mock.patch.object(store, "save_lists", return_value=False):
             self.assertEqual(self.run_cmd("games", "add", "gba", "A.zip")[0], 3)

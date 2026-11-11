@@ -12,7 +12,7 @@ from . import runtime, s3, scrape_plan, store, ui, upload
 def bucket_roms(systems, all_files=False):
     """{storage folder: set of ROM paths in it}, from storage's real contents.
 
-    By default only the ROMs a sync would install (the games games.json lists, or every file of a
+    By default only the ROMs a sync would install (the games the cards list, or every file of a
     full system). With all_files, every file in the system's storage folder.
     """
     todo = systems if all_files else [s for s in systems if s.get("full_system") or store.listed(s)]
@@ -324,7 +324,7 @@ def plan_clean(existing, roms, remote_texts):
 
 
 def clean_scrapes(args):
-    """Remove scrapes/ media and metadata for ROMs that aren't in storage (any ROM file, listed in games.json or not)."""
+    """Remove scrapes/ media and metadata for ROMs that aren't in storage (any ROM file, listed or not)."""
     print(ui.bold("🧹 Clean scrapes") + ui.dim(f"  {s3.access(True)}"))
     try:
         manifest = store.load_manifest()

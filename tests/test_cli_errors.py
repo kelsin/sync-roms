@@ -92,13 +92,13 @@ class EofTest(EditBase):
             return edit.edit_manifest()
 
     def test_eof_on_new_card_name_cancels(self):
-        self.assertEqual(self.run_eof([1, None]), 0)
+        self.assertEqual(self.run_eof([0, None]), 0)
         self.assertFalse(os.path.exists(self.path("cards.json")))
 
     def test_eof_on_rename_cancels(self):
         with open(self.path("cards.json"), "w") as f:
             json.dump({"c": {"layout": "esde", "device": "full"}}, f)
-        self.run_eof([(edit.RENAME_KEY, 1), 4])
+        self.run_eof([(edit.RENAME_KEY, 0), 3])
         self.assertEqual(list(self.read("cards.json")), ["c"])
 
 

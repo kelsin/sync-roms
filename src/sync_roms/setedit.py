@@ -214,14 +214,8 @@ def open_pr(after, found):
 # --- The editor --------------------------------------------------------------------------------------
 
 def local_references(set_id):
-    """Where your own lists still use a set id: games.json and cards."""
-    found = []
-    try:
-        if set_id in store.list_sets(store.personal_json("games.json")):
-            found.append("games.json")
-    except OSError:
-        pass
-    found += [f"card {card}" for card in store.all_card_names() if set_id in store.list_sets(store.card_games(card))]
+    """Where your own cards still use a set id."""
+    found = [f"card {card}" for card in store.all_card_names() if set_id in store.list_sets(store.card_games(card))]
     return found
 
 

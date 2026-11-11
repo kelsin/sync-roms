@@ -71,6 +71,18 @@ class SyncSmokeTest(RealDataDirGuard):
         self.assertIs(states[0], states[1])
         self.assertTrue(states[1]["sel"][0])
 
+    def test_card_with_no_picks_syncs_no_games_and_says_so(self):
+        empty = {**SYSTEM, "games": []}
+        manifest = {**MANIFEST, "systems": [empty]}
+        lines = []
+        patches = ((store, {"load_manifest": lambda names=(): manifest}),
+                   (cli.ui, {"dim": lambda text: lines.append(text) or text}))
+        self.assertEqual(self.run_sync(False, patches=patches), 0)
+        self.assertEqual(sum("has no games picked" in x for x in lines), 1)
+        lines.clear()
+        self.assertEqual(self.run_sync(False, patches=((cli.ui, {"dim": lambda text: lines.append(text) or text}),)), 0)
+        self.assertFalse(any("no games picked" in x for x in lines))
+
     def test_dry_run_picker_is_not_editable(self):
         flags = []
         self.run_sync(True, lambda rows, present, state, editable: flags.append(editable) or [0])
