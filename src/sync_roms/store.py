@@ -425,11 +425,6 @@ def save_card(name, device, layout):
     update_card(name, device=device["id"] if device else "full", layout=layout)
 
 
-def personal_sets_dir():
-    """Where the user's own set files live: <data dir>/sets/."""
-    return os.path.join(data_dir(), "sets")
-
-
 PRETTY = {"indent": 2, "ensure_ascii": False, "trailing_newline": True}  # write_json format of every hand-readable file
 
 
@@ -464,56 +459,17 @@ def repo_set_files():
 
 
 def load_sets():
-    """Game sets from the repo's data/sets/*.json and the user's ~/.sync-roms/sets/*.json, sorted by name.
+    """Game sets from the repo's data/sets/*.json, sorted by name.
 
     Each file is {"name", "description" (optional), "games": [{"title", "system", "bucket", "files" (optional)}]}.
     "category" (optional) groups games in the set editor.
     "files" are extra bucket keys (e.g. the discs of a multi-disc game) toggled together with "bucket".
-    A personal file with a repo set's id, or that isn't valid JSON, is skipped with a warning.
     """
-    sets = repo_set_files()
-    taken = {x["id"] for x in sets}
-    mine = personal_sets_dir()
-    for name in sorted(os.listdir(mine)) if os.path.isdir(mine) else []:
-        if not name.endswith(".json"):
-            continue
-        if name[:-5] in taken:
-            ui.warn(f"sets/{name}: a built-in set already has the id {name[:-5]!r}, skipped")
-            continue
-        try:
-            sets.append(read_set_file(os.path.join(mine, name), name[:-5]))
-        except (OSError, ValueError, AttributeError) as e:
-            ui.warn(f"sets/{name}: couldn't be read ({e}), skipped")
-    return sorted(sets, key=lambda x: x["name"].lower())
+    return sorted(repo_set_files(), key=lambda x: x["name"].lower())
 
 
 def set_slug(name):
     return re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")
-
-
-def personal_set_problem(name):
-    """Why name can't be a new personal set's name, or None if it can (its id must be new, also among repo sets)."""
-    set_id = set_slug(name)
-    if not set_id:
-        return "A set needs a name with letters or digits."
-    if any(x["id"] == set_id for x in load_sets()):
-        return f"There is already a set with the id {set_id}."
-    return None
-
-
-def save_personal_set(name, systems):
-    """Write ~/.sync-roms/sets/<id>.json from the games of the given systems (sorted); returns the set id."""
-    problem = personal_set_problem(name)
-    if problem:
-        raise ValueError(problem)
-    games = [{"title": g.get("title") or key_title(g["bucket"]), "system": s["bucket"],
-              **{k: v for k, v in g.items() if k in ("bucket", "note")}}
-             for s in sorted(systems, key=lambda x: x["bucket"]) for g in sort_games(s["games"]) if g.get("bucket")]
-    set_id = set_slug(name)
-    os.makedirs(personal_sets_dir(), exist_ok=True)
-    write_json(os.path.join(personal_sets_dir(), set_id + ".json"), set_data({"name": name.strip(), "games": games}),
-               **PRETTY)
-    return set_id
 
 
 def sort_games(games):

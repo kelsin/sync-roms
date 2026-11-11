@@ -210,32 +210,6 @@ def target_changes(t):
     return added, removed
 
 
-def make_set_from_extras(t, sets, sets_by_id):
-    """Save a card target's picked games as a personal set and add it to the open set lists.
-
-    Returns the new set's id, or None when cancelled or there is nothing to save."""
-    systems = [s for s in t["data"]["systems"] if s["games"]]
-    if not systems:
-        note(ui.yellow("ℹ️  This card has no games to make a set from."))
-        return None
-    while True:
-        name = ui.ask(f"📦 Name for the new set of {sum(len(s['games']) for s in systems)} game(s) "
-                      "(empty to cancel): ").strip()
-        if not name:
-            return None
-        problem = store.personal_set_problem(name)
-        if not problem:
-            break
-        print(ui.yellow(f"  {problem}"))
-    set_id = store.save_personal_set(name, systems)
-    new = store.read_set_file(os.path.join(store.personal_sets_dir(), set_id + ".json"), set_id)
-    sets.append(new)
-    sets.sort(key=lambda x: x["name"].lower())
-    sets_by_id[set_id] = new
-    print(ui.green(f"📦 Saved set {name}") + ui.dim(f"  ({store.personal_sets_dir()}); press s in a system to find it"))
-    return set_id
-
-
 def edit_manifest():
     """The editor's top menu: Cards (each opens the card editor, which saves games as they change), Sets (opens a PR),
     Device systems; device/firmware and device-system changes are reviewed and saved at the end."""

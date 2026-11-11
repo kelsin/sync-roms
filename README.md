@@ -478,7 +478,7 @@ sync-roms --edit
    red above (or over). Sizes come from a cache in
    `~/.sync-roms/sizes.json` that is refreshed in the background when you open a system; until it is ready sizes show
    `…`. `/` filters, `Enter` opens a system, `f` makes it a full system (every file in its folder; `f` again brings the
-   game list back), `m` saves the card's picked games as a personal set. Games save to `cards.json` as you leave a
+   game list back). Games save to `cards.json` as you leave a
    system (the previous file is kept as `cards.json.bak`). `Esc` goes back to the menu.
 2. A system shows every file in its storage folder. `✅` is synced, `⬜` is not; a 📦 next to a game says a set the
    card references syncs it (switching it off excludes it from that set on this card). `/` searches, `Space` (or `Tab`)
@@ -498,8 +498,6 @@ sync-roms --edit
 3. When you leave the menu, device/firmware and device-system changes are summarized, then **save**, **keep
    editing**, **discard**, or **list every change**. Nothing is uploaded.
 
-Personal sets are files in `~/.sync-roms/sets/<id>.json` (same format as the package's sets, below), appear next to the built-in ones and can be referenced like them; an id already used by a built-in set is refused. You can also write them by hand, and `sync-roms check` validates them.
-
 On the Cards list, `v` changes a card's device and firmware, `r` renames a card and `d` deletes one (both ask first, and act at once). **🧩 Device systems** edits which systems a device can play: it is saved as the `add`/`remove` overlay in `device-systems.json`, relative to the repo defaults. A file that isn't valid JSON is never overwritten: sync-roms says so and leaves it for you to fix (`sync-roms check` lists the problems).
 
 ### Editing from scripts
@@ -517,7 +515,7 @@ sync-roms games import list.txt --card SD
 sync-roms cards new SD --device rg35xx-sp --layout knulli --size 256GB   # --size is optional; shown in `cards list` and on sync
 ```
 
-A set file (in the package's `data/sets/` or your `~/.sync-roms/sets/`) is `{"name": ..., "description": ..., "games": [{"title": ..., "system": "gba", "bucket": "gba/Game.zip"}]}`.
+A set file (in the package's `data/sets/`) is `{"name": ..., "description": ..., "games": [{"title": ..., "system": "gba", "bucket": "gba/Game.zip"}]}`.
 A multi-disc game adds `"files": [...]` with its other storage keys (the discs); `bucket` is the playlist (`.m3u`) or disc 1.
 Toggling the game adds or removes every file, one card entry each.
 Entries for an unknown system are skipped with a warning. A full system has no game list to edit: every file is always synced, so opening it in the card editor only says so (press `f` on it in the system list to turn the list back on).

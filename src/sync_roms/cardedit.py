@@ -8,12 +8,11 @@ import threading
 from . import budget, edit, m3u, metafilter, picker, s3, scrape_plan, sizecache, store, ui
 
 FULL_KEY = "f"
-MAKE_SET_KEY = "m"
 SET_KEY = "s"
 CLEAR_KEY = "c"
 CLEAR_ALL_KEY = "D"
 META_KEY = "m"
-LIST_HINT = "Enter games · f full · m make set · D clear all · Esc back · / filter"
+LIST_HINT = "Enter games · f full · D clear all · Esc back · / filter"
 GAMES_HINT = "Space toggle · Enter done · Esc back · / search · s set · m metadata · c clear"
 META_HINT = "Enter list its values · Esc back"
 VALUES_HINT = "Enter narrow to it · Esc back · / filter"
@@ -294,7 +293,7 @@ def edit_card(name, setup=None):
             return True
 
         i = picker.filter_list(f"💳 {name} — its systems (⭐ for the device)", labels, extras=extras,
-                               cursor=pos, hotkeys=(FULL_KEY, MAKE_SET_KEY, CLEAR_ALL_KEY), hint=LIST_HINT,
+                               cursor=pos, hotkeys=(FULL_KEY, CLEAR_ALL_KEY), hint=LIST_HINT,
                                status=lambda _state: status_of(view["total"], capacity, sizing.busy()), poll=poll,
                                on_hotkey=on_hotkey)
         if i is None:
@@ -306,10 +305,6 @@ def edit_card(name, setup=None):
             elif key == CLEAR_ALL_KEY:
                 if ui.confirm(f"🧹 Clear every pick, full system and set from {name}?", default=False):
                     store.update_card(name, games={}, **({"excluded": {}} if store.card_excluded(name) else {}))
-            else:
-                sets = store.load_sets()
-                edit.make_set_from_extras(edit.new_target(name, store.card_games(name)), sets,
-                                          {x["id"]: x for x in sets})
             continue
         pos = i
         edit_system(name, systems[i], setup, sizing)

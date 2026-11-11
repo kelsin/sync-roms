@@ -401,11 +401,11 @@ def config_cmd(args):
 
 
 def check_sets(problems, systems):
-    """Check every set file (repo and personal) and return the keys each one lists as {set id: [(system, key)]}.
+    """Check every repo set file and return the keys each one lists as {set id: [(system, key)]}.
 
     systems: the set of known system ids."""
     keys = {}
-    folders = [(store.REPO_DATA + "/sets", ""), (store.personal_sets_dir(), "sets/")]
+    folders = [(store.REPO_DATA + "/sets", "")]
     for folder, prefix in folders:
         for name in sorted(os.listdir(folder)) if os.path.isdir(folder) else []:
             if not name.endswith(".json"):

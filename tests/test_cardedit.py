@@ -140,6 +140,13 @@ class Flow(DataDir):
     def card(self, **entry):
         self.write_json("cards.json", {"c": {"device": "d", "layout": "esde", **entry}})
 
+    def test_system_list_offers_no_make_set_key(self):
+        self.card(games={"gba": [g("gba/Ruby.zip")]})
+        kw = self.run_card(returns(None))[0][2]
+        self.assertNotIn("m", kw["hotkeys"])
+        self.assertNotIn("make set", kw["hint"])
+        self.assertFalse(hasattr(cardedit, "MAKE_SET_KEY"))
+
     def run_card(self, *steps):
         script = Script(*steps)
         with mock.patch.object(picker, "filter_list", script), contextlib.redirect_stdout(io.StringIO()):
