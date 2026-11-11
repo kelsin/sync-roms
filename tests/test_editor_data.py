@@ -74,9 +74,10 @@ class Schemas(unittest.TestCase):
         games, cards = self.load("games.schema.json"), self.load("cards.schema.json")
         self.assertIn("sets", games["properties"])
         card = cards["additionalProperties"]["properties"]
-        for key in ("device", "layout", "android_media", "systems", "games"):
+        for key in ("device", "layout", "android_media", "systems", "games", "collections", "frontend_collections"):
             self.assertIn(key, card)
         self.assertEqual(card["systems"]["items"]["type"], "string")
+        self.assertEqual(self.load("collections.schema.json")["required"], ["name", "games"])
 
 
 class CheckSystemsKey(Cmd):
@@ -106,6 +107,14 @@ class CheckBucketKeys(Cmd):
         self.assertTrue(any("gba/B.zip" in p for p in problems))
         self.assertFalse(any("gba/A.zip" in p for p in problems))
         self.assertEqual(commands.check_data(), [])
+
+    def test_bucket_keys_cover_every_key_of_a_collection_game(self):
+        os.makedirs(self.path("collections"))
+        self.write_json("collections/mine.json", {"name": "Mine", "games": [
+            {"title": "D", "system": "nes", "bucket": "nes/D.zip", "files": ["nes/D2.zip"]}]})
+        problems = commands.check_data(lambda system: {"nes/D.zip"} if system == "nes" else set())
+        self.assertTrue(any("nes/D2.zip" in p for p in problems))
+        self.assertFalse(any("nes/D.zip" in p for p in problems))
 
     def test_flag_uses_the_readonly_profile_and_refuses_the_write_profile(self):
         from sync_roms import runtime, s3

@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "sync-roms collection (~/.sync-roms/collections/<id>.json)",
+  "type": "object",
+  "required": ["name", "games"],
+  "properties": {
+    "name": {"type": "string"},
+    "description": {"type": "string"},
+    "games": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["title", "system", "bucket"],
+        "properties": {
+          "title": {"type": "string"},
+          "system": {"type": "string"},
+          "bucket": {"type": "string", "minLength": 1},
+          "files": {"type": "array", "items": {"type": "string"}},
+          "category": {"type": "string"},
+          "note": {"type": "string"}
+        }
+      }
+    }
+  }
+}

@@ -5,6 +5,7 @@ import os
 import re
 import sys
 
+from . import collections as colls
 from . import external, picker, runtime, s3, setedit, store, ui, usersettings
 
 
@@ -400,52 +401,68 @@ def config_cmd(args):
     return 0
 
 
+def check_game_file(problems, path, where, systems):
+    """Check one set or collection file; returns its [(system, key)] pairs, or None when the file is unusable.
+
+    where: the name problems are reported under. systems: the set of known system ids."""
+    try:
+        with open(path, encoding="utf-8") as f:
+            data = json.load(f)
+    except (OSError, ValueError) as e:
+        problems.append(f"{where}: not valid JSON ({e})")
+        return None
+    games = data.get("games") if isinstance(data, dict) else None
+    if not isinstance(games, list):
+        problems.append(f"{where}: must be an object with a 'games' list")
+        return None
+    if not isinstance(data.get("name"), str) or not data["name"]:
+        problems.append(f"{where}: missing 'name'")
+    listed = []
+    for g in games:
+        if not isinstance(g, dict) or not isinstance(g.get("bucket"), str) or not g["bucket"]:
+            problems.append(f"{where}: entry without a bucket key: {g!r}")
+            continue
+        system = g.get("system")
+        if system not in systems:
+            problems.append(f"{where}: {g['bucket']}: unknown system {system!r}")
+            continue
+        if not g.get("title"):
+            problems.append(f"{where}: {g['bucket']}: missing 'title'")
+        if not isinstance(g.get("category", ""), str):
+            problems.append(f"{where}: {g['bucket']}: 'category' must be a string")
+        files = g.get("files", [])
+        if not isinstance(files, list) or not all(isinstance(k, str) for k in files):
+            problems.append(f"{where}: {g['bucket']}: 'files' must be a list of bucket keys")
+            files = []
+        for k in [g["bucket"]] + files:
+            if not k.startswith(system + "/"):
+                problems.append(f"{where}: {k!r} isn't under {system}/")
+            else:
+                listed.append((system, k))
+    return listed
+
+
+def check_folder(problems, folder, prefix, systems):
+    """Check every .json file in folder with check_game_file; returns {prefix + file name: [(system, key)]}."""
+    keys = {}
+    for name in sorted(os.listdir(folder)) if os.path.isdir(folder) else []:
+        if name.endswith(".json"):
+            listed = check_game_file(problems, os.path.join(folder, name), f"{prefix}{name}", systems)
+            if listed is not None:
+                keys[f"{prefix}{name}"] = listed
+    return keys
+
+
 def check_sets(problems, systems):
     """Check every repo set file and return the keys each one lists as {set id: [(system, key)]}.
 
     systems: the set of known system ids."""
-    keys = {}
-    folders = [(store.REPO_DATA + "/sets", "")]
-    for folder, prefix in folders:
-        for name in sorted(os.listdir(folder)) if os.path.isdir(folder) else []:
-            if not name.endswith(".json"):
-                continue
-            where = f"{prefix}{name}"
-            try:
-                with open(os.path.join(folder, name)) as f:
-                    data = json.load(f)
-            except (OSError, ValueError) as e:
-                problems.append(f"{where}: not valid JSON ({e})")
-                continue
-            games = data.get("games") if isinstance(data, dict) else None
-            if not isinstance(games, list):
-                problems.append(f"{where}: must be an object with a 'games' list")
-                continue
-            if not isinstance(data.get("name"), str) or not data["name"]:
-                problems.append(f"{where}: missing 'name'")
-            listed = keys.setdefault(where, [])
-            for g in games:
-                if not isinstance(g, dict) or not isinstance(g.get("bucket"), str) or not g["bucket"]:
-                    problems.append(f"{where}: entry without a bucket key: {g!r}")
-                    continue
-                system = g.get("system")
-                if system not in systems:
-                    problems.append(f"{where}: {g['bucket']}: unknown system {system!r}")
-                    continue
-                if not g.get("title"):
-                    problems.append(f"{where}: {g['bucket']}: missing 'title'")
-                if not isinstance(g.get("category", ""), str):
-                    problems.append(f"{where}: {g['bucket']}: 'category' must be a string")
-                files = g.get("files", [])
-                if not isinstance(files, list) or not all(isinstance(k, str) for k in files):
-                    problems.append(f"{where}: {g['bucket']}: 'files' must be a list of bucket keys")
-                    files = []
-                for k in [g["bucket"]] + files:
-                    if not k.startswith(system + "/"):
-                        problems.append(f"{where}: {k!r} isn't under {system}/")
-                    else:
-                        listed.append((system, k))
-    return keys
+    return check_folder(problems, store.REPO_DATA + "/sets", "", systems)
+
+
+def check_collections(problems, systems):
+    """Check every file in the user's collections folder; returns {"collections/<file>": [(system, key)]}."""
+    return check_folder(problems, colls.collections_dir(), "collections/", systems)
 
 
 def valid_ratio(value):
@@ -485,6 +502,8 @@ def check_data(list_keys=None, repo_systems=None):
     layouts = set(store.repo_json("layouts"))
     sets = {x["id"] for x in store.load_sets()}
     wanted.update(check_sets(problems, systems))
+    wanted.update(check_collections(problems, systems))
+    collection_ids = {c["id"] for c in colls.load_collections()}
 
     def load(name):
         path = os.path.join(store.data_dir(), name)
@@ -541,6 +560,14 @@ def check_data(list_keys=None, repo_systems=None):
                             for sid in ids if not isinstance(sid, str) or sid not in systems)
         if "games" in entry:
             check_list(f"cards.json: {name}", entry["games"])
+        picked = entry.get("collections", [])
+        if not isinstance(picked, list) or not all(isinstance(i, str) for i in picked):
+            problems.append(f"cards.json: {name}: 'collections' must be a list of collection ids")
+        else:
+            problems.extend(f"cards.json: {name}: unknown collection {i!r}" for i in picked if i not in collection_ids)
+        names = entry.get("frontend_collections", [])
+        if not isinstance(names, list) or not all(isinstance(i, str) for i in names):
+            problems.append(f"cards.json: {name}: 'frontend_collections' must be a list of names")
     overlay = load("device-systems.json")
     if overlay is not None and not isinstance(overlay, dict):
         problems.append("device-systems.json: must be an object")
@@ -593,7 +620,7 @@ def check_cmd(args):
     for n in check_notices(repo_systems):
         print(ui.yellow(f"⚠️  {n}"))
     if not problems:
-        print(ui.green("✅ cards.json, device-systems.json and the sets look fine"))
+        print(ui.green("✅ cards.json, device-systems.json, the sets and your collections look fine"))
     return 1 if problems else 0
 
 
