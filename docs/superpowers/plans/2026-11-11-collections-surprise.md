@@ -16,7 +16,7 @@
 
 - Tests: `python -m unittest discover -s tests` (CI's command); one file `python -m unittest discover -s tests -p 'test_x.py' -v`. Baseline before Part A: `Ran 760 tests … OK`.
 - Test first for every behaviour; use `tests/helpers.py` / `tests/isolate.py` so nothing touches the real `~/.sync-roms`, storage or `/Volumes`.
-- Conventional Commits, lowercase imperative; every commit message ends with a blank line and `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`.
+- Conventional Commits, lowercase imperative. No `Co-Authored-By`, Claude or AI mention in any commit message (user rule).
 - No real game lists in the repo (test fixtures use made-up or minimal names).
 - Personal data lives under `store.data_dir()`: `collections/<id>.json`, `surprises.json`, `settings.json` key `surprise_ttl_days` (default 183).
 - Card fields: `collections`, `frontend_collections`, `surprise` (`false` = off, absent = on), `surprises`.
@@ -116,9 +116,7 @@ Expected: all `ok`; full suite `OK`.
 
 ```bash
 git add src/sync_roms/scrape_files.py tests/test_firmware_scrapes.py README.md
-git commit -m "refactor(scrapes): stop uploading es-de themes, collections and settings
-
-Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
+git commit -m "refactor(scrapes): stop uploading es-de themes, collections and settings"
 ```
 
 ### Task 2 (A2): Sync and the mirror stop listing or installing `scrapes/esde/`
@@ -230,9 +228,7 @@ Expected: `OK`.
 
 ```bash
 git add src/sync_roms/scrape_plan.py src/sync_roms/cli.py src/sync_roms/mirroring.py tests/test_firmware_scrapes.py tests/test_sync_flow.py README.md
-git commit -m "refactor(sync): stop installing es-de themes, collections and settings
-
-Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
+git commit -m "refactor(sync): stop installing es-de themes, collections and settings"
 ```
 
 ### Task 3 (A3): Remove personal sets
@@ -358,9 +354,7 @@ Expected: `OK`.
 
 ```bash
 git add src/sync_roms/store.py src/sync_roms/setedit.py src/sync_roms/commands.py src/sync_roms/cardedit.py src/sync_roms/edit.py src/sync_roms/cli.py tests/test_editor_data.py tests/test_cardedit.py README.md CLAUDE.md
-git commit -m "refactor(sets): remove personal sets
-
-Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
+git commit -m "refactor(sets): remove personal sets"
 ```
 
 ## Part B: custom collections
@@ -548,9 +542,7 @@ class Check(DataDir):
 
 ```bash
 git add src/sync_roms/collections.py src/sync_roms/frontend.py src/sync_roms/data/collections.schema.json src/sync_roms/data/cards.schema.json src/sync_roms/commands.py src/sync_roms/cli.py CLAUDE.md tests/test_collections.py tests/test_editor_data.py
-git commit -m "feat(collections): add personal collection files and check them
-
-Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
+git commit -m "feat(collections): add personal collection files and check them"
 ```
 
 ### Task 5 (B2): Collection games in the selection and the budget
@@ -639,9 +631,7 @@ class Selection(DataDir):
 
 ```bash
 git add src/sync_roms/store.py src/sync_roms/budget.py tests/test_collections.py tests/test_budget.py
-git commit -m "feat(collections): sync a card's collection games and count them in its budget
-
-Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
+git commit -m "feat(collections): sync a card's collection games and count them in its budget"
 ```
 
 ### Task 6 (B3): Card editor: `l` toggles collections, 💖 rows are locked
@@ -749,9 +739,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 
 ```bash
 git add src/sync_roms/cardedit.py tests/test_cardedit.py
-git commit -m "feat(edit): add collections to a card with l and lock their games on
-
-Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
+git commit -m "feat(edit): add collections to a card with l and lock their games on"
 ```
 
 ### Task 7 (B4): The collection editor
@@ -878,9 +866,7 @@ class Editor(DataDir):
 
 ```bash
 git add src/sync_roms/listedit.py src/sync_roms/collectionedit.py src/sync_roms/setedit.py tests/test_collectionedit.py
-git commit -m "feat(collections): add the collection editor
-
-Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
+git commit -m "feat(collections): add the collection editor"
 ```
 
 ### Task 8 (B5): Reach the editor: `edit` menu, `sync-roms collections edit`, help, completion, README
@@ -952,9 +938,7 @@ class Wiring(unittest.TestCase):
 
 ```bash
 git add src/sync_roms/edit.py src/sync_roms/commands.py src/sync_roms/cli.py README.md tests/test_edit.py tests/test_collectionedit.py
-git commit -m "feat(collections): open the collection editor from edit and sync-roms collections edit
-
-Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
+git commit -m "feat(collections): open the collection editor from edit and sync-roms collections edit"
 ```
 
 ### Task 9 (B6): `frontend.py`: custom collection files and `CollectionSystemsCustom`
@@ -1132,9 +1116,7 @@ class Wanted(unittest.TestCase):
 
 ```bash
 git add src/sync_roms/frontend.py tests/test_frontend.py
-git commit -m "feat(sync): write custom collection files for es-de and knulli
-
-Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
+git commit -m "feat(sync): write custom collection files for es-de and knulli"
 ```
 
 ### Task 10 (B7): Sync writes the card's collections into ES-DE and Knulli
@@ -1236,9 +1218,7 @@ def read_from(card_dir, *parts):
 
 ```bash
 git add src/sync_roms/cli.py README.md tests/test_sync_flow.py
-git commit -m "feat(sync): show a card's collections as custom collections in es-de and knulli
-
-Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
+git commit -m "feat(sync): show a card's collections as custom collections in es-de and knulli"
 ```
 
 ### Task 11 (B8): `games export`/`import` carry `collections` and `frontend_collections`
@@ -1301,9 +1281,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 
 ```bash
 git add src/sync_roms/commands.py src/sync_roms/cli.py README.md tests/test_commands.py
-git commit -m "feat(games): carry a card's collections through games export and import
-
-Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
+git commit -m "feat(games): carry a card's collections through games export and import"
 ```
 
 ## Part C: Surprise
@@ -1427,9 +1405,7 @@ Decisions:
 
 ```bash
 git add src/sync_roms/surprise.py tests/test_surprise.py
-git commit -m "feat(surprise): add the full english game rules for surprise candidates
-
-Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
+git commit -m "feat(surprise): add the full english game rules for surprise candidates"
 ```
 
 ### Task 13 (C2): Slot allocation and tiers
@@ -1558,9 +1534,7 @@ def pick(pools, kept, need, recommended, recent, others_current, rng):
 
 ```bash
 git add src/sync_roms/surprise.py tests/test_surprise.py
-git commit -m "feat(surprise): pick surprises seven from recommended systems, three from the rest
-
-Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
+git commit -m "feat(surprise): pick surprises seven from recommended systems, three from the rest"
 ```
 
 ### Task 14 (C3): History, settings, card state and check
@@ -1692,9 +1666,7 @@ def test_check_flags_bad_surprise_data(self):
 
 ```bash
 git add src/sync_roms/surprise.py src/sync_roms/store.py src/sync_roms/usersettings.py src/sync_roms/commands.py src/sync_roms/cli.py src/sync_roms/data/cards.schema.json tests/
-git commit -m "feat(surprise): keep surprise history and sync a card's surprises
-
-Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
+git commit -m "feat(surprise): keep surprise history and sync a card's surprises"
 ```
 
 ### Task 15 (C4): The sync step `run_surprise`
@@ -1889,9 +1861,7 @@ def test_candidates_come_from_storage_not_the_mirror(self):
 
 ```bash
 git add src/sync_roms/surprise.py src/sync_roms/mirroring.py tests/test_surprise.py
-git commit -m "feat(surprise): pick a card's surprises during sync
-
-Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
+git commit -m "feat(surprise): pick a card's surprises during sync"
 ```
 
 ### Task 16 (C5): Wire Surprise into `sync_card`
@@ -2015,9 +1985,7 @@ def test_surprise_off_removes_its_collection_file(self):
 
 ```bash
 git add src/sync_roms/ui.py src/sync_roms/cli.py tests/test_sync_flow.py tests/test_cli_sync.py
-git commit -m "feat(sync): pick surprises after the systems are chosen
-
-Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
+git commit -m "feat(sync): pick surprises after the systems are chosen"
 ```
 
 ### Task 17 (C6): Editor keys: `u` toggles Surprise, `p` finds past surprises
@@ -2093,9 +2061,7 @@ Plus one test in the collection editor's test file: `p` there narrows its add-ga
 
 ```bash
 git add src/sync_roms/cardedit.py src/sync_roms/collectionedit.py tests/
-git commit -m "feat(edit): toggle surprise per card and filter games to past surprises
-
-Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
+git commit -m "feat(edit): toggle surprise per card and filter games to past surprises"
 ```
 
 ### Task 18 (C7): Export/import and docs
@@ -2188,7 +2154,5 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 
 ```bash
 git add src/sync_roms/commands.py src/sync_roms/cli.py README.md CLAUDE.md tests/
-git commit -m "docs(surprise): document surprise and carry it through games export and import
-
-Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
+git commit -m "docs(surprise): document surprise and carry it through games export and import"
 ```
