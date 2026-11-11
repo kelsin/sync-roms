@@ -189,6 +189,16 @@ class Flow(DataDir):
         self.assertEqual(seen[0], {"gba": {"full_system": True, "games": [g("gba/Ruby.zip")]}})
         self.assertEqual(store.card_games("c"), {"gba": [g("gba/Ruby.zip")]})
 
+    def test_clear_all_hotkey_empties_the_card_after_confirming(self):
+        entry = {"games": {"gba": [g("gba/Ruby.zip")], "gb": {"full_system": True}, "sets": ["pk"]},
+                 "excluded": {"gba": ["gba/Ruby.zip"]}}
+        for answer, want in ((False, entry["games"]), (True, {})):
+            self.card(**entry)
+            with mock.patch.object(ui, "confirm", return_value=answer):
+                self.run_card(returns((cardedit.CLEAR_ALL_KEY, 0)), returns(None))
+            self.assertEqual(store.card_games("c"), want)
+            self.assertEqual(store.card_excluded("c"), entry["excluded"] if not answer else {})
+
     def test_full_system_keeps_the_list_for_a_later_session(self):
         self.card(games={"gba": [g("gba/Ruby.zip")]})
         self.run_card(returns((cardedit.FULL_KEY, 0)), returns(None))  # full system on, editor closed

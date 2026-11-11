@@ -11,8 +11,9 @@ FULL_KEY = "f"
 MAKE_SET_KEY = "m"
 SET_KEY = "s"
 CLEAR_KEY = "c"
+CLEAR_ALL_KEY = "D"
 META_KEY = "m"
-LIST_HINT = "Enter games · f full system · m make a set · Esc back · / filter"
+LIST_HINT = "Enter games · f full · m make set · D clear all · Esc back · / filter"
 GAMES_HINT = "Space toggle · Enter done · Esc back · / search · s set · m metadata · c clear"
 META_HINT = "Enter list its values · Esc back"
 VALUES_HINT = "Enter narrow to it · Esc back · / filter"
@@ -285,7 +286,7 @@ def edit_card(name, setup=None):
             return True
 
         i = picker.filter_list(f"💳 {name} — its systems (⭐ recommended for the device)", labels, extras=extras,
-                               cursor=pos, hotkeys=(FULL_KEY, MAKE_SET_KEY), hint=LIST_HINT,
+                               cursor=pos, hotkeys=(FULL_KEY, MAKE_SET_KEY, CLEAR_ALL_KEY), hint=LIST_HINT,
                                status=lambda _state: status_of(view["total"], capacity, sizing.busy()), poll=poll,
                                on_hotkey=on_hotkey)
         if i is None:
@@ -294,6 +295,9 @@ def edit_card(name, setup=None):
             key, pos = i
             if key == FULL_KEY:
                 toggle_full(name, systems[pos]["bucket"])
+            elif key == CLEAR_ALL_KEY:
+                if ui.confirm(f"🧹 Clear every pick, full system and set from {name}?", default=False):
+                    store.update_card(name, games={}, **({"excluded": {}} if store.card_excluded(name) else {}))
             else:
                 sets = store.load_sets()
                 edit.make_set_from_extras(edit.new_target(name, store.card_games(name)), sets,
