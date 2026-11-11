@@ -57,6 +57,12 @@ class S3Test(unittest.TestCase):
         self.rs.add_response("list_objects_v2", {"IsTruncated": False}, {"Bucket": BUCKET, "Prefix": "none/"})
         self.assertEqual(s3.list_sizes("none/"), {})
 
+    def test_list_folders(self):
+        self.rs.add_response("list_objects_v2", {"CommonPrefixes": [{"Prefix": "BIOS/"}, {"Prefix": "gba/"}],
+                                                 "Contents": [{"Key": "readme.txt", "Size": 1}], "IsTruncated": False},
+                             {"Bucket": BUCKET, "Delimiter": "/"})
+        self.assertEqual(s3.list_folders(), {"BIOS", "gba"})
+
     def test_get_text(self):
         self.rs.add_response("get_object", {"Body": io.BytesIO("héllo".encode("utf-8"))},
                              {"Bucket": BUCKET, "Key": "scrapes/x/metadata.json"})
@@ -125,6 +131,15 @@ class MirrorListTest(unittest.TestCase):
                 f.write("xyz")
             with mock.patch.object(runtime, "_mirror_root", tmp):
                 self.assertEqual(s3.list_sizes("gba/"), {"gba/a.zip": 3})
+
+
+class FolderListTest(unittest.TestCase):
+    def test_list_folders_reads_the_storage_folder(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            os.makedirs(os.path.join(tmp, "gba"))
+            open(os.path.join(tmp, "notes.txt"), "w").close()
+            with mock.patch.object(runtime, "ROOT", tmp):
+                self.assertEqual(s3.list_folders(), {"gba"})
 
 
 class CopyFileTest(unittest.TestCase):

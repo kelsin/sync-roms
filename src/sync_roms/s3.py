@@ -77,6 +77,15 @@ def list_sizes(prefix, sizes=True):
     return {o["Key"]: o["Size"] for page in pages for o in page.get("Contents", [])}
 
 
+def list_folders():
+    """Names of the top-level folders in storage (one listing, however many files they hold)."""
+    if runtime.ROOT:
+        with os.scandir(runtime.ROOT) as entries:
+            return {e.name for e in entries if e.is_dir()}
+    pages = s3_client().get_paginator("list_objects_v2").paginate(Bucket=runtime.BUCKET, Delimiter="/")
+    return {p["Prefix"].rstrip("/") for page in pages for p in page.get("CommonPrefixes", [])}
+
+
 def stat_sizes(keys):
     """{key: size} of the keys that exist as files in the read folder, checked in parallel (one stat each, no folder walk)."""
     def size(key):
