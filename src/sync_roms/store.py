@@ -214,30 +214,40 @@ def card_excluded(card, cards=None):
     return excluded if isinstance(excluded, dict) else {}
 
 
+def _game_keys(game):
+    """A locked game's (system, [bucket key, then its files]), or None when it isn't a usable game entry."""
+    if not isinstance(game, dict):
+        return None
+    system, bucket, files = game.get("system"), game.get("bucket"), game.get("files")
+    if not (isinstance(system, str) and system and isinstance(bucket, str) and bucket):
+        return None
+    return system, [bucket] + [k for k in (files if isinstance(files, list) else ()) if isinstance(k, str) and k]
+
+
 def card_locked_games(entry, collections_by_id):
-    """The games a card's collections add, then its current surprises (when Surprise is on), {system bucket: [{"title", "bucket", "from"}]}: one entry per key of a
-    game (its bucket key, then its files), the first occurrence winning within a system. Ids that don't load are
-    skipped."""
+    """The games a card's collections add, then its current surprises (when Surprise is on),
+    {system bucket: [{"title", "bucket", "from"}]}: one entry per key of a game (its bucket key, then its files),
+    the first occurrence winning within a system. Ids that don't load and malformed games are skipped."""
+    from . import surprise  # surprise imports store
     ids = entry.get("collections") if isinstance(entry, dict) else None
     locked = {}
+
+    def add(game, label):
+        parsed = _game_keys(game)
+        if parsed:
+            seen = locked.setdefault(parsed[0], [])
+            for key in parsed[1]:
+                if all(g["bucket"] != key for g in seen):
+                    seen.append({"title": game.get("title"), "bucket": key, "from": label})
+
     for cid in ids if isinstance(ids, list) else ():
         coll = collections_by_id.get(cid)
         for game in (coll or {}).get("games", []):
-            keys = [game.get("bucket")] + list(game.get("files") or [])
-            seen = locked.setdefault(game.get("system"), [])
-            for key in keys:
-                if key and all(g["bucket"] != key for g in seen):
-                    seen.append({"title": game.get("title"), "bucket": key, "from": f"💖 {coll['name']}"})
-    from . import surprise  # surprise imports store
+            add(game, f"💖 {coll['name']}")
     if isinstance(entry, dict) and surprise.enabled(entry):
-        for game in entry.get("surprises") or ():
-            if not isinstance(game, dict) or not isinstance(game.get("system"), str) \
-                    or not isinstance(game.get("bucket"), str):
-                continue
-            seen = locked.setdefault(game["system"], [])
-            for key in [game["bucket"]] + list(game.get("files") or []):
-                if key and all(g["bucket"] != key for g in seen):
-                    seen.append({"title": game.get("title"), "bucket": key, "from": surprise.LABEL})
+        picks = entry.get("surprises")
+        for game in picks if isinstance(picks, list) else ():
+            add(game, surprise.LABEL)
     return {system: games for system, games in locked.items() if games}
 
 

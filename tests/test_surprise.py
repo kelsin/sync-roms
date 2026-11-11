@@ -145,10 +145,6 @@ class SurprisePickTest(unittest.TestCase):
         self.assertEqual(firsts, {"a", "b"})
 
 
-if __name__ == "__main__":
-    unittest.main()
-
-
 class StorageCase(helpers.StorageDir):
     def setUp(self):
         super().setUp()
@@ -205,6 +201,15 @@ class Locked(unittest.TestCase):
         self.assertEqual([g["bucket"] for g in got["psx"]], [disc["bucket"]] + disc["files"])
         self.assertEqual(store.card_locked_games({"surprise": False, "surprises": [s]}, {}), {})
 
+    def test_malformed_games_add_no_bogus_keys(self):
+        for files in (5, "ab", [1], [None, "gba/B.zip"]):
+            game = {"system": "gba", "bucket": "gba/A.zip", "title": "A", "files": files}
+            for entry, colls in (({"surprises": [game, 7, {"system": "", "bucket": "x"}]}, {}),
+                                 ({"collections": ["c"]}, {"c": {"name": "Mine", "games": [game, 7]}})):
+                got = store.card_locked_games(entry, colls)
+                keys = [g["bucket"] for g in got["gba"]]
+                self.assertEqual(keys, ["gba/A.zip", "gba/B.zip"] if files == [None, "gba/B.zip"] else ["gba/A.zip"])
+
     def test_collection_games_come_first(self):
         s = {"system": "gba", "bucket": "gba/A.zip", "title": "A"}
         coll = {"c": {"name": "Mine", "games": [dict(s)]}}
@@ -218,3 +223,7 @@ class Mirror(StorageCase):
         self.write_cards({"SD": {"device": "full", "layout": "esde",
                                  "surprises": [{"system": "gba", "bucket": "gba/A (USA).zip", "title": "A (USA)"}]}})
         self.assertIn("gba/A (USA).zip", mirroring.mirror_wanted(store.load_manifest(store.all_card_names())))
+
+
+if __name__ == "__main__":
+    unittest.main()
