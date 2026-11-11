@@ -14,11 +14,11 @@ from sync_roms import budget, cardedit, edit, picker, s3, sizecache, store, ui  
 U = budget.Usage
 
 
-def system(bucket, name, bios=()):
-    return {"bucket": bucket, "name": name, "folders": {"esde": bucket}, "bios": {"files": list(bios)}}
+def system(bucket, name, bios=(), company="Nintendo"):
+    return {"bucket": bucket, "name": name, "company": company, "folders": {"esde": bucket}, "bios": {"files": list(bios)}}
 
 
-GBA, GB, PSX = system("gba", "Game Boy Advance", ["gba_bios.bin"]), system("gb", "Game Boy", ["gb_bios.bin"]), system("psx", "PlayStation")
+GBA, GB, PSX = system("gba", "Game Boy Advance", ["gba_bios.bin"]), system("gb", "Game Boy", ["gb_bios.bin"]), system("psx", "PlayStation", company="Sony")
 DEVICE = {"id": "d", "name": "D", "firmwares": ["esde"], "systems": ["gba", "gb"]}
 CATALOG = {"systems": [GBA, GB, PSX], "devices": [DEVICE],
            "layouts": {"esde": {"label": "ES-DE", "roms_dir": "ROMs", "bios_dir": "BIOS"}}}
@@ -72,10 +72,10 @@ class Pure(unittest.TestCase):
         card = {"games": {"psx": {"full_system": True}}}
         usages = {"gba": U(2 * 10 ** 9, 4, False), "gb": U(0, 0, False), "psx": U(0, 0, True)}
         labels, extras = cardedit.system_labels(card, [GBA, GB, PSX], {"gb"}, usages)
-        self.assertEqual([l.strip() for l in labels], ["Game Boy Advance", "⭐ Game Boy", "PlayStation"])  # file order
+        self.assertEqual([l.strip() for l in labels], ["Game Boy Advance", "⭐ Game Boy", "PlayStation"])  # the given order
         self.assertTrue(labels[1].startswith("⭐ "))
         self.assertEqual(extras[0], [("  4 picked", "green"), ("  2 GB", "dim")])
-        self.assertEqual(extras[1], [("  recommended", "cyan")])
+        self.assertEqual(extras[1], [])
         self.assertEqual(extras[2], [("  🗂️  full system", "cyan"), ("  … picked", "green"), ("  …", "dim")])
 
     def test_set_filter_is_one_system(self):
@@ -150,14 +150,14 @@ class Flow(DataDir):
             changed = edit.edit_card_system("c", bucket, (DEVICE, "esde"))
         return changed, script.calls
 
-    def test_system_list_is_what_the_device_plays_in_file_order(self):
+    def test_system_list_is_what_the_device_plays_sorted_by_company_and_name(self):
         self.card(size="1 GB", games={"gba": [g("gba/Ruby.zip")]})
         self.cache = {"gba/": self.files["gba/"], "scrapes/gba/": {}, "BIOS/": {"BIOS/gba_bios.bin": 16}}
         with mock.patch.object(store, "recommended_systems", return_value={"gb"}):
             calls = self.run_card(returns(None))
         title, labels, kw = calls[0]
-        self.assertEqual([l.strip() for l in labels], ["Game Boy Advance", "⭐ Game Boy"])
-        self.assertEqual(kw["extras"][0], [("  1 picked", "green"), ("  5 B", "dim")])  # the ROM
+        self.assertEqual([l.strip() for l in labels], ["⭐ Game Boy", "Game Boy Advance"])
+        self.assertEqual(kw["extras"][1], [("  1 picked", "green"), ("  5 B", "dim")])  # the ROM
         self.assertEqual(kw["status"](None), ("💾 21 B / 1 GB · 1 GB free · 1 file(s)", "green"))  # ROM and the GBA BIOS
         self.assertEqual([p for p, _ in self.started], ["BIOS/", "gba/", "scrapes/gba/"])  # the picked system is sized too
 
@@ -166,14 +166,14 @@ class Flow(DataDir):
 
         def step(labels, kw):
             self.assertIn("still sizing", kw["status"](None))
-            self.assertEqual(kw["extras"][0][1], ("  …", "dim"))
+            self.assertEqual(kw["extras"][1][1], ("  …", "dim"))
             self.cache.update({"gba/": self.files["gba/"], "scrapes/gba/": {}, "BIOS/": {}})
             kw["poll"]()  # nothing finished yet: unchanged
-            self.assertEqual(kw["extras"][0][1], ("  …", "dim"))
+            self.assertEqual(kw["extras"][1][1], ("  …", "dim"))
             for _, done in self.started:
                 done({})  # what the worker thread calls
             kw["poll"]()
-            self.assertEqual(kw["extras"][0][1], ("  5 B", "dim"))
+            self.assertEqual(kw["extras"][1][1], ("  5 B", "dim"))
             self.assertEqual(kw["status"](None), "💾 5 B used · 1 file(s)")
             return None
         self.run_card(step)
@@ -184,8 +184,8 @@ class Flow(DataDir):
 
         def look(labels, kw):
             seen.append(store.card_games("c"))
-            return (cardedit.FULL_KEY, 0)
-        self.run_card(returns((cardedit.FULL_KEY, 0)), look, returns(None))
+            return (cardedit.FULL_KEY, 1)
+        self.run_card(returns((cardedit.FULL_KEY, 1)), look, returns(None))
         self.assertEqual(seen[0], {"gba": {"full_system": True, "games": [g("gba/Ruby.zip")]}})
         self.assertEqual(store.card_games("c"), {"gba": [g("gba/Ruby.zip")]})
 
@@ -201,11 +201,11 @@ class Flow(DataDir):
 
     def test_full_system_keeps_the_list_for_a_later_session(self):
         self.card(games={"gba": [g("gba/Ruby.zip")]})
-        self.run_card(returns((cardedit.FULL_KEY, 0)), returns(None))  # full system on, editor closed
-        self.run_card(returns((cardedit.FULL_KEY, 0)), returns(None))  # a new session switches it off
+        self.run_card(returns((cardedit.FULL_KEY, 1)), returns(None))  # full system on, editor closed
+        self.run_card(returns((cardedit.FULL_KEY, 1)), returns(None))  # a new session switches it off
         self.assertEqual(store.card_games("c"), {"gba": [g("gba/Ruby.zip")]})
         self.card(games={"gba": {"full_system": True}})  # no list was replaced: off removes the system
-        self.run_card(returns((cardedit.FULL_KEY, 0)), returns(None))
+        self.run_card(returns((cardedit.FULL_KEY, 1)), returns(None))
         self.assertEqual(store.card_games("c"), {})
 
     def test_header_says_not_sized_once_nothing_is_running(self):
@@ -240,7 +240,7 @@ class Flow(DataDir):
 
     def test_entering_a_system_refreshes_its_sizes(self):
         self.card()
-        self.run_card(returns(0), returns([False] * 4), returns(None))
+        self.run_card(returns(1), returns([False] * 4), returns(None))
         self.assertEqual([p for p, _ in self.started], ["BIOS/", "gba/", "scrapes/gba/"])
 
     def test_toggle_a_game_saves_it(self):

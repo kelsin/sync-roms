@@ -143,8 +143,7 @@ class MenuActions(EditBase):
     def device_case(self):
         dev = store.load_manifest()["devices"][0]
         base = store.device_defaults()[dev["id"]]["systems"]
-        names = {s["bucket"]: s["name"] for s in store.load_manifest()["systems"]}
-        ids = sorted(names, key=lambda x: names[x].lower())
+        ids = [s["bucket"] for s in sorted(store.load_manifest()["systems"], key=store.system_sort_key)]
         return dev, base, ids
 
     def test_returning_to_the_defaults_drops_the_overlay_entry(self):

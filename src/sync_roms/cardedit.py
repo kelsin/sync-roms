@@ -60,8 +60,8 @@ def status_of(usage, capacity, busy=True):
 
 
 def system_labels(card, systems, recommended, usages):
-    """(labels, extras) for the system list, in the given (systems.json) order: recommended systems get a ⭐ and a
-    cyan "recommended"; each picked system shows its count and size (… while not sized)."""
+    """(labels, extras) for the system list, in the given order: recommended systems get a ⭐; each picked system
+    shows its count and size (… while not sized)."""
     width = max((len(s["name"]) for s in systems), default=0)
     games = card.get("games") or {}
     labels, extras = [], []
@@ -76,8 +76,6 @@ def system_labels(card, systems, recommended, usages):
         if u and budget.picked(u):
             row.append((f"  {u.count or SIZING} picked", "green"))
             row.append((f"  {SIZING if u.partial else size_text(u.bytes)}", "dim"))
-        if rec:
-            row.append(("  recommended", "cyan"))
         extras.append(row)
     return labels, extras
 
@@ -88,8 +86,8 @@ def set_filter(game_set, system):
 
 
 def can_play(systems, setup):
-    """The systems a (device or None for Full, layout) setup syncs, in systems.json order."""
-    return [s for s in systems if store.system_applies(s, *setup)]
+    """The systems a (device or None for Full, layout) setup syncs, sorted by company then name."""
+    return sorted((s for s in systems if store.system_applies(s, *setup)), key=store.system_sort_key)
 
 
 _inflight = {}  # prefix -> the Sizing objects waiting on its running refresh, so a prefix is never refreshed twice at once
@@ -285,7 +283,7 @@ def edit_card(name, setup=None):
             extras[:] = work_out()[1]
             return True
 
-        i = picker.filter_list(f"💳 {name} — its systems (⭐ recommended for the device)", labels, extras=extras,
+        i = picker.filter_list(f"💳 {name} — its systems (⭐ for the device)", labels, extras=extras,
                                cursor=pos, hotkeys=(FULL_KEY, MAKE_SET_KEY, CLEAR_ALL_KEY), hint=LIST_HINT,
                                status=lambda _state: status_of(view["total"], capacity, sizing.busy()), poll=poll,
                                on_hotkey=on_hotkey)

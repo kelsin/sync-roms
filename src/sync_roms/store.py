@@ -95,6 +95,11 @@ def device_defaults(systems=None):
             for dev, e in data["devices"].items()}
 
 
+def system_sort_key(system):
+    """Sort key for system lists in the editors: company, then system name, case-insensitive."""
+    return (system.get("company", "").lower(), system["name"].lower())
+
+
 def recommended_systems(device, systems):
     """Ids of the systems to highlight for a device: those whose native ratio is the device's screen, the
     ratio-systems.json overrides for that screen, and the dual-screen list when it has a second screen, limited to what the

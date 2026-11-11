@@ -1,6 +1,7 @@
 [
   {
     "name": "Multiple Arcade Machine Emulator",
+    "company": "Arcade",
     "bucket": "mame",
     "ratio": "4:3",
     "screenscraper": 75,
@@ -21,6 +22,7 @@
   },
   {
     "name": "Atari 2600",
+    "company": "Atari",
     "bucket": "atari2600",
     "ratio": "4:3",
     "screenscraper": 26,
@@ -41,6 +43,7 @@
   },
   {
     "name": "Atari 5200",
+    "company": "Atari",
     "bucket": "atari5200",
     "ratio": "4:3",
     "screenscraper": 40,
@@ -65,6 +68,7 @@
   },
   {
     "name": "Atari 7800 ProSystem",
+    "company": "Atari",
     "bucket": "atari7800",
     "ratio": "4:3",
     "screenscraper": 41,
@@ -89,6 +93,7 @@
   },
   {
     "name": "Atari 800",
+    "company": "Atari",
     "bucket": "atari800",
     "ratio": "4:3",
     "screenscraper": 43,
@@ -117,6 +122,7 @@
   },
   {
     "name": "Atari Lynx",
+    "company": "Atari",
     "bucket": "atarilynx",
     "ratio": "16:10",
     "screenscraper": 28,
@@ -141,6 +147,7 @@
   },
   {
     "name": "Atari ST",
+    "company": "Atari",
     "bucket": "atarist",
     "ratio": "4:3",
     "screenscraper": 42,
@@ -167,6 +174,7 @@
   },
   {
     "name": "Coleco ColecoVision",
+    "company": "Coleco",
     "bucket": "colecovision",
     "ratio": "4:3",
     "screenscraper": 48,
@@ -199,6 +207,7 @@
   },
   {
     "name": "Nintendo Game Boy Advance",
+    "company": "Nintendo",
     "bucket": "gba",
     "ratio": "3:2",
     "screenscraper": 12,
@@ -226,6 +235,7 @@
   },
   {
     "name": "Nintendo Game Boy Color",
+    "company": "Nintendo",
     "bucket": "gbc",
     "ratio": "10:9",
     "screenscraper": 10,
@@ -255,6 +265,7 @@
   },
   {
     "name": "Nintendo Game Boy",
+    "company": "Nintendo",
     "bucket": "gb",
     "ratio": "10:9",
     "screenscraper": 9,
@@ -284,6 +295,7 @@
   },
   {
     "name": "Mattel Electronics Intellivision",
+    "company": "Mattel",
     "bucket": "intellivision",
     "ratio": "4:3",
     "screenscraper": 115,
@@ -312,6 +324,7 @@
   },
   {
     "name": "SNK Neo Geo",
+    "company": "SNK",
     "bucket": "neogeo",
     "ratio": "4:3",
     "screenscraper": 142,
@@ -359,6 +372,7 @@
   },
   {
     "name": "Nintendo Entertainment System",
+    "company": "Nintendo",
     "bucket": "nes",
     "ratio": "4:3",
     "screenscraper": 3,
@@ -379,6 +393,7 @@
   },
   {
     "name": "Nintendo Famicom Disk System",
+    "company": "Nintendo",
     "bucket": "fds",
     "ratio": "4:3",
     "screenscraper": 106,
@@ -407,6 +422,7 @@
   },
   {
     "name": "Nintendo 64",
+    "company": "Nintendo",
     "bucket": "n64",
     "ratio": "4:3",
     "screenscraper": 14,
@@ -427,6 +443,7 @@
   },
   {
     "name": "Nintendo DS",
+    "company": "Nintendo",
     "bucket": "nds",
     "ratio": "4:3",
     "screenscraper": 15,
@@ -459,6 +476,7 @@
   },
   {
     "name": "Magnavox Odyssey 2",
+    "company": "Magnavox",
     "bucket": "odyssey2",
     "ratio": "4:3",
     "screenscraper": 104,
@@ -487,6 +505,7 @@
   },
   {
     "name": "NEC PC-FX",
+    "company": "NEC",
     "bucket": "pcfx",
     "ratio": "4:3",
     "screenscraper": 72,
@@ -515,6 +534,7 @@
   },
   {
     "name": "NEC PC-98",
+    "company": "NEC",
     "bucket": "pc98",
     "ratio": "4:3",
     "screenscraper": 208,
@@ -554,6 +574,7 @@
   },
   {
     "name": "Sega Mega Drive 32X",
+    "company": "Sega",
     "bucket": "sega32x",
     "ratio": "4:3",
     "screenscraper": 19,
@@ -583,6 +604,7 @@
   },
   {
     "name": "Sega CD",
+    "company": "Sega",
     "bucket": "segacd",
     "ratio": "4:3",
     "screenscraper": 20,
@@ -622,6 +644,7 @@
   },
   {
     "name": "Sega Dreamcast",
+    "company": "Sega",
     "bucket": "dreamcast",
     "ratio": "4:3",
     "screenscraper": 23,
@@ -659,6 +682,7 @@
   },
   {
     "name": "Sega Game Gear",
+    "company": "Sega",
     "bucket": "gamegear",
     "ratio": "10:9",
     "screenscraper": 21,
@@ -695,6 +719,7 @@
   },
   {
     "name": "Sega Genesis",
+    "company": "Sega",
     "bucket": "genesis",
     "ratio": "4:3",
     "screenscraper": 1,
@@ -731,6 +756,7 @@
   },
   {
     "name": "Sega Master System",
+    "company": "Sega",
     "bucket": "mastersystem",
     "ratio": "4:3",
     "screenscraper": 2,
@@ -767,6 +793,7 @@
   },
   {
     "name": "Sega Saturn",
+    "company": "Sega",
     "bucket": "saturn",
     "ratio": "4:3",
     "screenscraper": 22,
@@ -801,6 +828,7 @@
   },
   {
     "name": "Nintendo SNES (Super Nintendo)",
+    "company": "Nintendo",
     "bucket": "snes",
     "ratio": "4:3",
     "screenscraper": 4,
@@ -844,6 +872,7 @@
   },
   {
     "name": "NEC TurboGrafx-16",
+    "company": "NEC",
     "bucket": "tg16",
     "ratio": "4:3",
     "screenscraper": 31,
@@ -874,6 +903,7 @@
   },
   {
     "name": "NEC TurboGrafx-CD",
+    "company": "NEC",
     "bucket": "tg-cd",
     "ratio": "4:3",
     "screenscraper": 114,
@@ -907,6 +937,7 @@
   },
   {
     "name": "GCE Vectrex",
+    "company": "GCE",
     "bucket": "vectrex",
     "ratio": "3:4",
     "screenscraper": 102,
@@ -930,6 +961,7 @@
   },
   {
     "name": "Nintendo Virtual Boy",
+    "company": "Nintendo",
     "bucket": "virtualboy",
     "ratio": "12:7",
     "screenscraper": 11,
@@ -952,6 +984,7 @@
   },
   {
     "name": "Bandai WonderSwan",
+    "company": "Bandai",
     "bucket": "wonderswan",
     "ratio": "14:9",
     "screenscraper": 45,
@@ -974,6 +1007,7 @@
   },
   {
     "name": "Bandai WonderSwan Color",
+    "company": "Bandai",
     "bucket": "wonderswancolor",
     "ratio": "14:9",
     "screenscraper": 46,
@@ -996,6 +1030,7 @@
   },
   {
     "name": "AdvanceMAME",
+    "company": "Arcade",
     "bucket": "mame-advmame",
     "ratio": "4:3",
     "screenscraper": 75,
@@ -1015,6 +1050,7 @@
   },
   {
     "name": "Arcade",
+    "company": "Arcade",
     "bucket": "arcade",
     "ratio": "4:3",
     "screenscraper": 75,
@@ -1035,6 +1071,7 @@
   },
   {
     "name": "Arduboy Miniature Game System",
+    "company": "Game Engine",
     "bucket": "arduboy",
     "ratio": "2:1",
     "screenscraper": 263,
@@ -1055,6 +1092,7 @@
   },
   {
     "name": "Sammy Corporation Atomiswave",
+    "company": "Sammy",
     "bucket": "atomiswave",
     "ratio": "4:3",
     "screenscraper": 53,
@@ -1086,6 +1124,7 @@
   },
   {
     "name": "ChaiLove Game Engine",
+    "company": "Game Engine",
     "bucket": "chailove",
     "folders": {
       "esde": "chailove",
@@ -1104,6 +1143,7 @@
   },
   {
     "name": "Fairchild Channel F",
+    "company": "Fairchild",
     "bucket": "channelf",
     "ratio": "4:3",
     "screenscraper": 80,
@@ -1130,6 +1170,7 @@
   },
   {
     "name": "Capcom Play System I",
+    "company": "Capcom",
     "bucket": "cps1",
     "ratio": "4:3",
     "folders": {
@@ -1149,6 +1190,7 @@
   },
   {
     "name": "Capcom Play System II",
+    "company": "Capcom",
     "bucket": "cps2",
     "ratio": "4:3",
     "folders": {
@@ -1168,6 +1210,7 @@
   },
   {
     "name": "Capcom Play System III",
+    "company": "Capcom",
     "bucket": "cps3",
     "ratio": "4:3",
     "folders": {
@@ -1187,6 +1230,7 @@
   },
   {
     "name": "Daphne Arcade LaserDisc Emulator",
+    "company": "Arcade",
     "bucket": "daphne",
     "ratio": "4:3",
     "screenscraper": 49,
@@ -1206,6 +1250,7 @@
   },
   {
     "name": "Doom",
+    "company": "Game Engine",
     "bucket": "doom",
     "ratio": "4:3",
     "folders": {
@@ -1225,6 +1270,7 @@
   },
   {
     "name": "EasyRPG Game Engine",
+    "company": "Game Engine",
     "bucket": "easyrpg",
     "ratio": "4:3",
     "folders": {
@@ -1244,6 +1290,7 @@
   },
   {
     "name": "FinalBurn Neo",
+    "company": "Arcade",
     "bucket": "fbneo",
     "ratio": "4:3",
     "screenscraper": 75,
@@ -1290,6 +1337,7 @@
   },
   {
     "name": "LowRes NX Fantasy Console",
+    "company": "Game Engine",
     "bucket": "lowresnx",
     "ratio": "4:3",
     "folders": {
@@ -1309,6 +1357,7 @@
   },
   {
     "name": "Lutro Game Engine",
+    "company": "Game Engine",
     "bucket": "lutro",
     "folders": {
       "esde": "lutro",
@@ -1326,6 +1375,7 @@
   },
   {
     "name": "Creatronic Mega Duck",
+    "company": "Creatronic",
     "bucket": "megaduck",
     "ratio": "10:9",
     "screenscraper": 90,
@@ -1346,6 +1396,7 @@
   },
   {
     "name": "Nintendo 64DD",
+    "company": "Nintendo",
     "bucket": "n64dd",
     "ratio": "4:3",
     "folders": {
@@ -1371,6 +1422,7 @@
   },
   {
     "name": "Sega NAOMI",
+    "company": "Sega",
     "bucket": "naomi",
     "ratio": "4:3",
     "screenscraper": 56,
@@ -1402,6 +1454,7 @@
   },
   {
     "name": "SNK Neo Geo CD",
+    "company": "SNK",
     "bucket": "neogeocd",
     "ratio": "4:3",
     "screenscraper": 70,
@@ -1440,6 +1493,7 @@
   },
   {
     "name": "SNK Neo Geo Pocket",
+    "company": "SNK",
     "bucket": "ngp",
     "ratio": "20:19",
     "screenscraper": 25,
@@ -1462,6 +1516,7 @@
   },
   {
     "name": "SNK Neo Geo Pocket Color",
+    "company": "SNK",
     "bucket": "ngpc",
     "ratio": "20:19",
     "screenscraper": 82,
@@ -1484,6 +1539,7 @@
   },
   {
     "name": "OpenBOR Game Engine",
+    "company": "Game Engine",
     "bucket": "openbor",
     "ratio": "4:3",
     "folders": {
@@ -1503,6 +1559,7 @@
   },
   {
     "name": "3DO Interactive Multiplayer",
+    "company": "The 3DO Company",
     "bucket": "3do",
     "ratio": "4:3",
     "screenscraper": 29,
@@ -1544,6 +1601,7 @@
   },
   {
     "name": "PICO-8 Fantasy Console",
+    "company": "Game Engine",
     "bucket": "pico8",
     "ratio": "1:1",
     "screenscraper": 234,
@@ -1564,6 +1622,7 @@
   },
   {
     "name": "Nintendo Pokémon Mini",
+    "company": "Nintendo",
     "bucket": "pokemini",
     "ratio": "3:2",
     "screenscraper": 211,
@@ -1584,6 +1643,7 @@
   },
   {
     "name": "Ports",
+    "company": "Game Engine",
     "bucket": "ports",
     "folders": {
       "esde": "ports",
@@ -1601,6 +1661,7 @@
   },
   {
     "name": "Sony PlayStation",
+    "company": "Sony",
     "bucket": "psx",
     "ratio": "4:3",
     "screenscraper": 57,
@@ -1648,6 +1709,7 @@
   },
   {
     "name": "Sony PlayStation Portable",
+    "company": "Sony",
     "bucket": "psp",
     "ratio": "16:9",
     "screenscraper": 61,
@@ -1675,6 +1737,7 @@
   },
   {
     "name": "Nintendo Satellaview",
+    "company": "Nintendo",
     "bucket": "satellaview",
     "ratio": "4:3",
     "screenscraper": 107,
@@ -1718,6 +1781,7 @@
   },
   {
     "name": "ScummVM Game Engine",
+    "company": "Game Engine",
     "bucket": "scummvm",
     "screenscraper": 123,
     "folders": {
@@ -1737,6 +1801,7 @@
   },
   {
     "name": "NEC SuperGrafx",
+    "company": "NEC",
     "bucket": "supergrafx",
     "ratio": "4:3",
     "screenscraper": 105,
@@ -1767,6 +1832,7 @@
   },
   {
     "name": "Nintendo Super Game Boy",
+    "company": "Nintendo",
     "bucket": "sgb",
     "ratio": "4:3",
     "folders": {
@@ -1817,6 +1883,7 @@
   },
   {
     "name": "Bandai SuFami Turbo",
+    "company": "Nintendo",
     "bucket": "sufami",
     "ratio": "4:3",
     "screenscraper": 108,
@@ -1860,6 +1927,7 @@
   },
   {
     "name": "Watara Supervision",
+    "company": "Watara",
     "bucket": "supervision",
     "ratio": "1:1",
     "screenscraper": 207,
@@ -1880,6 +1948,7 @@
   },
   {
     "name": "TIC-80 Fantasy Computer",
+    "company": "Game Engine",
     "bucket": "tic80",
     "ratio": "16:9",
     "screenscraper": 222,
@@ -1900,6 +1969,7 @@
   },
   {
     "name": "Quake",
+    "company": "Game Engine",
     "bucket": "quake",
     "ratio": "4:3",
     "folders": {
@@ -1919,6 +1989,7 @@
   },
   {
     "name": "Uzebox Open Source Console",
+    "company": "Game Engine",
     "bucket": "uzebox",
     "ratio": "4:3",
     "folders": {
@@ -1938,6 +2009,7 @@
   },
   {
     "name": "Atari Jaguar",
+    "company": "Atari",
     "bucket": "atarijaguar",
     "ratio": "4:3",
     "screenscraper": 27,
@@ -1958,6 +2030,7 @@
   },
   {
     "name": "Atari Jaguar CD",
+    "company": "Atari",
     "bucket": "atarijaguarcd",
     "ratio": "4:3",
     "screenscraper": 171,
@@ -1977,6 +2050,7 @@
   },
   {
     "name": "Philips CD-i",
+    "company": "Philips",
     "bucket": "cdimono1",
     "ratio": "4:3",
     "screenscraper": 133,
@@ -2003,6 +2077,7 @@
   },
   {
     "name": "Nintendo GameCube",
+    "company": "Nintendo",
     "bucket": "gc",
     "ratio": "4:3",
     "screenscraper": 13,
@@ -2036,6 +2111,7 @@
   },
   {
     "name": "Sega Mark III",
+    "company": "Sega",
     "bucket": "mark3",
     "ratio": "4:3",
     "folders": {
@@ -2070,6 +2146,7 @@
   },
   {
     "name": "Sega Model 2",
+    "company": "Sega",
     "bucket": "model2",
     "ratio": "4:3",
     "folders": {
@@ -2088,6 +2165,7 @@
   },
   {
     "name": "Sega Model 3",
+    "company": "Sega",
     "bucket": "model3",
     "ratio": "4:3",
     "folders": {
@@ -2106,6 +2184,7 @@
   },
   {
     "name": "Nintendo 3DS",
+    "company": "Nintendo",
     "bucket": "3ds",
     "ratio": "5:3",
     "screenscraper": 17,
@@ -2126,6 +2205,7 @@
   },
   {
     "name": "New Nintendo 3DS",
+    "company": "Nintendo",
     "bucket": "n3ds",
     "ratio": "5:3",
     "screenscraper": 17,
@@ -2146,6 +2226,7 @@
   },
   {
     "name": "Sega NAOMI 2",
+    "company": "Sega",
     "bucket": "naomi2",
     "ratio": "4:3",
     "folders": {
@@ -2175,6 +2256,7 @@
   },
   {
     "name": "Sega NAOMI GD-ROM",
+    "company": "Sega",
     "bucket": "naomigd",
     "ratio": "4:3",
     "folders": {
@@ -2204,6 +2286,7 @@
   },
   {
     "name": "Sony PlayStation 2",
+    "company": "Sony",
     "bucket": "ps2",
     "ratio": "4:3",
     "screenscraper": 58,
@@ -2235,6 +2318,7 @@
   },
   {
     "name": "Sony PlayStation 3",
+    "company": "Sony",
     "bucket": "ps3",
     "ratio": "16:9",
     "screenscraper": 59,
@@ -2254,6 +2338,7 @@
   },
   {
     "name": "Sony PlayStation 4",
+    "company": "Sony",
     "bucket": "ps4",
     "ratio": "16:9",
     "folders": {
@@ -2272,6 +2357,7 @@
   },
   {
     "name": "Sony PlayStation Vita",
+    "company": "Sony",
     "bucket": "psvita",
     "ratio": "16:9",
     "screenscraper": 62,
@@ -2291,6 +2377,7 @@
   },
   {
     "name": "Sega Titan Video Game System",
+    "company": "Sega",
     "bucket": "stv",
     "ratio": "4:3",
     "folders": {
@@ -2309,6 +2396,7 @@
   },
   {
     "name": "Nintendo Switch",
+    "company": "Nintendo",
     "bucket": "switch",
     "ratio": "16:9",
     "screenscraper": 225,
@@ -2328,6 +2416,7 @@
   },
   {
     "name": "Namco-Sega-Nintendo Triforce",
+    "company": "Namco / Sega / Nintendo",
     "bucket": "triforce",
     "ratio": "4:3",
     "folders": {
@@ -2346,6 +2435,7 @@
   },
   {
     "name": "Taito Type X",
+    "company": "Taito",
     "bucket": "type-x",
     "ratio": "4:3",
     "folders": {
@@ -2364,6 +2454,7 @@
   },
   {
     "name": "Nintendo Wii",
+    "company": "Nintendo",
     "bucket": "wii",
     "ratio": "16:9",
     "screenscraper": 16,
@@ -2386,6 +2477,7 @@
   },
   {
     "name": "Nintendo Wii U",
+    "company": "Nintendo",
     "bucket": "wiiu",
     "ratio": "16:9",
     "screenscraper": 18,
@@ -2405,6 +2497,7 @@
   },
   {
     "name": "Microsoft Xbox",
+    "company": "Microsoft",
     "bucket": "xbox",
     "ratio": "4:3",
     "screenscraper": 32,
@@ -2444,6 +2537,7 @@
   },
   {
     "name": "Microsoft Xbox 360",
+    "company": "Microsoft",
     "bucket": "xbox360",
     "ratio": "16:9",
     "screenscraper": 33,
@@ -2467,6 +2561,7 @@
   },
   {
     "name": "Microsoft Xbox One",
+    "company": "Microsoft",
     "bucket": "xboxone",
     "ratio": "16:9",
     "folders": {
@@ -2485,6 +2580,7 @@
   },
   {
     "name": "Sega SG-1000",
+    "company": "Sega",
     "bucket": "sg1000",
     "ratio": "4:3",
     "screenscraper": 109,
@@ -2506,6 +2602,7 @@
   },
   {
     "name": "MSX",
+    "company": "Microsoft",
     "bucket": "msx",
     "ratio": "4:3",
     "screenscraper": 113,
@@ -2856,6 +2953,7 @@
   },
   {
     "name": "MSX2",
+    "company": "Microsoft",
     "bucket": "msx2",
     "ratio": "4:3",
     "screenscraper": 116,
@@ -3206,6 +3304,7 @@
   },
   {
     "name": "Emerson Arcadia 2001",
+    "company": "Emerson",
     "bucket": "arcadia",
     "ratio": "4:3",
     "screenscraper": 94,
@@ -3227,6 +3326,7 @@
   },
   {
     "name": "Bit Corporation Gamate",
+    "company": "Bit Corporation",
     "bucket": "gamate",
     "ratio": "16:15",
     "screenscraper": 266,
@@ -3246,6 +3346,7 @@
   },
   {
     "name": "Tiger Game.com",
+    "company": "Tiger",
     "bucket": "gamecom",
     "ratio": "5:4",
     "screenscraper": 121,
@@ -3265,6 +3366,7 @@
   },
   {
     "name": "Commodore 64",
+    "company": "Commodore",
     "bucket": "c64",
     "ratio": "4:3",
     "screenscraper": 66,
