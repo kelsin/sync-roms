@@ -211,8 +211,10 @@ def pick_meta(system, meta, filters, keys):
         if not found:
             edit.note(ui.yellow(f"ℹ️  No game in this list has a {label.lower()} in its scraped metadata."))
             continue
-        j = picker.filter_list(f"🏷️  {label} on {system['name']}", [v for v, _ in found],
-                               extras=[[(f"  {n} game(s)", "dim")] for _, n in found], hint=VALUES_HINT)
+        values = [v for v, _ in found]
+        j = picker.filter_list(f"🏷️  {label} on {system['name']}", values,
+                               extras=[[(f"  {n} game(s)", "dim")] for _, n in found], hint=VALUES_HINT,
+                               cursor=values.index(filters[field]) if filters.get(field) in values else 0)
         if j is not None:
             filters[field] = found[j][0]
             return
