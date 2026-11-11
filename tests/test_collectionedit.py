@@ -1,0 +1,89 @@
+import os
+import sys
+import unittest
+from unittest import mock
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import isolate  # noqa: E402,F401
+from helpers import DataDir  # noqa: E402
+from sync_roms import collectionedit, collections, edit, listedit, picker, setedit, store, ui  # noqa: E402
+
+SYSTEMS = [{"name": "Game Boy Advance", "bucket": "gba"}, {"name": "PlayStation", "bucket": "psx"}]
+DISCS = {"psx/FF7.m3u", "psx/FF7 (Disc 1).chd", "psx/FF7 (Disc 2).chd", "psx/Crash.chd"}
+RUBY = {"title": "Ruby", "system": "gba", "bucket": "gba/Ruby.zip"}
+
+
+class Shared(unittest.TestCase):
+    def test_set_editor_uses_the_shared_helpers(self):
+        for name in ("view", "insert_game", "reconcile", "recategorize", "ask_category", "game_label"):
+            self.assertIs(getattr(setedit, name), getattr(listedit, name))
+
+
+class Discs(unittest.TestCase):
+    def test_a_multi_disc_game_is_one_row_and_keeps_its_discs(self):
+        entry = {"bucket": "psx", "name": "PlayStation", "full_system": False, "games": []}
+        self.assertEqual([r[1] for r in collectionedit.system_rows(entry, DISCS)], ["psx/Crash.chd", "psx/FF7.m3u"])
+        games = [{"title": "FF7", "system": "psx", "bucket": "psx/FF7.m3u"}, {"title": "Crash", "system": "psx", "bucket": "psx/Crash.chd"}]
+        collectionedit.fold_discs(games, DISCS)
+        self.assertEqual(games[0]["files"], ["psx/FF7 (Disc 1).chd", "psx/FF7 (Disc 2).chd"])
+        self.assertNotIn("files", games[1])
+
+    def test_adding_a_multi_disc_game_from_a_system_stores_its_discs(self):
+        collection = {"name": "Favs", "games": []}
+        picks = iter([1, 1, None])  # add from a system, PlayStation, back
+        rows = []
+
+        def toggle(title, shown_rows, **k):  # switch on the FF7 row
+            rows.extend(r[1] for r in shown_rows)
+            s, key, title, _ = shown_rows[1]
+            s["games"].append({"bucket": key, "title": title})
+
+        with mock.patch.object(picker, "filter_list", lambda *a, **k: next(picks)), \
+                mock.patch.object(edit, "toggle_games", toggle), mock.patch.object(ui, "ask", return_value=""):
+            collectionedit.edit_one(collection, SYSTEMS, lambda bucket: DISCS if bucket == "psx" else set())
+        self.assertEqual(rows, ["psx/Crash.chd", "psx/FF7.m3u"])
+        self.assertEqual(collection["games"], [{"title": "FF7", "system": "psx", "bucket": "psx/FF7.m3u",
+                                                "files": ["psx/FF7 (Disc 1).chd", "psx/FF7 (Disc 2).chd"]}])
+
+
+class Editor(DataDir):
+    def run_editor(self, picks, asks=(), confirm=True, edit_one=None):
+        picks, confirms = iter(picks), []
+        with mock.patch.object(store, "repo_json", return_value=SYSTEMS), \
+                mock.patch.object(picker, "filter_list", lambda *a, **k: next(picks)), \
+                mock.patch.object(ui, "ask", side_effect=list(asks)), \
+                mock.patch.object(ui, "confirm", lambda text, **k: confirms.append(text) or confirm), \
+                mock.patch.object(edit, "note") as note, \
+                mock.patch.object(collectionedit, "edit_one", edit_one or (lambda c, systems, keys_of: c["games"].append(dict(RUBY)))), \
+                mock.patch("subprocess.run") as run:
+            code = collectionedit.edit_collections()
+        run.assert_not_called()  # no git, no gh
+        return code, confirms, note
+
+    def test_new_collection_is_saved_on_done(self):
+        code, _, _ = self.run_editor([0, 2], asks=["Favs", "my faves"])  # ➕ New, then (one collection) ✅ Done
+        self.assertEqual(code, 0)
+        self.assertEqual(self.read("collections/favs.json"), {"name": "Favs", "description": "my faves", "games": [RUBY]})
+
+    def test_quit_discards_everything(self):
+        collections.save_collection({"id": "favs", "name": "Favs", "games": [RUBY]})
+        self.run_editor([(edit.DELETE_KEY, 0), 2])  # delete, then (no collections left) 🚪 Quit, confirmed
+        self.assertTrue(os.path.exists(self.path("collections/favs.json")))
+
+    def test_deleting_a_collection_cards_use_confirms_and_removes_it_from_them(self):
+        collections.save_collection({"id": "favs", "name": "Favs", "games": [RUBY]})
+        self.write_json("cards.json", {"a": {"collections": ["favs", "x"]}, "b": {"collections": ["favs"]}, "c": {}})
+        _, confirms, _ = self.run_editor([(edit.DELETE_KEY, 0), 1])  # delete, then ✅ Done
+        self.assertIn("a, b", confirms[0])
+        self.assertFalse(os.path.exists(self.path("collections/favs.json")))
+        self.assertEqual(self.read("cards.json"), {"a": {"collections": ["x"]}, "b": {"collections": []}, "c": {}})
+
+    def test_declined_delete_keeps_it(self):
+        collections.save_collection({"id": "favs", "name": "Favs", "games": [RUBY]})
+        self.run_editor([(edit.DELETE_KEY, 0), 2], confirm=False)  # still one collection: index 2 is ✅ Done
+        self.assertTrue(os.path.exists(self.path("collections/favs.json")))
+
+    def test_an_empty_collection_is_refused_on_done(self):
+        _, _, note = self.run_editor([0, 2, 3], asks=["Empty", ""], edit_one=lambda c, s, k: None, confirm=True)
+        self.assertIn("Empty has no games", note.call_args_list[0][0][0])
+        self.assertFalse(os.path.exists(self.path("collections")))

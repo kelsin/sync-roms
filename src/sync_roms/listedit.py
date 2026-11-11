@@ -1,0 +1,60 @@
+"""Games-list helpers shared by the set and collection editors."""
+from . import ui
+
+
+def view(listing, systems):
+    """A games list's games per known system, shaped like a card's games so the toggler can edit them."""
+    return {s["bucket"]: {"bucket": s["bucket"], "name": s["name"], "full_system": False,
+                          "games": [g for g in listing["games"] if g.get("system") == s["bucket"] and g.get("bucket")]}
+            for s in systems}
+
+
+def insert_game(games, game):
+    """Add game after the last game of its category, or at the end when its category is new (or it has none)."""
+    cat = game.get("category")
+    last = max((i for i, x in enumerate(games) if cat and x.get("category") == cat), default=len(games) - 1)
+    games.insert(last + 1, game)
+
+
+def reconcile(games, shown, category=""):
+    """A games list's games after the toggler changed `shown` (a view): drop what was switched off, add what was switched on.
+
+    Entries of systems that weren't shown, and untouched entries, are kept as they are."""
+    now = {g["bucket"]: (s["bucket"], g) for s in shown.values() for g in s["games"]}
+    out = [g for g in games if g.get("system") not in shown or not g.get("bucket") or g["bucket"] in now]
+    have = {g.get("bucket") for g in out}
+    for key, (system, g) in now.items():
+        if key not in have:
+            insert_game(out, {"title": g["title"], **({"category": category} if category else {}),
+                              "system": system, "bucket": key})
+    return out
+
+
+def recategorize(games, game, category):
+    """Give game a new category (empty removes it) and move it next to the games of that category."""
+    if (game.get("category") or "") == category:
+        return
+    moved = {}
+    for k, v in game.items():
+        if k != "category":
+            moved[k] = v
+        if k == "title" and category:
+            moved["category"] = category
+    if category:
+        moved.setdefault("category", category)
+    games[:] = [x for x in games if x is not game]
+    insert_game(games, moved)
+
+
+def ask_category(games, what):
+    cats = list(dict.fromkeys(g["category"] for g in games if g.get("category")))
+    if cats:
+        print(ui.dim(f"  Categories: {', '.join(cats)}"))
+    typed = ui.ask(f"🏷️  Category for {what} (empty for none): ").strip()
+    return next((c for c in cats if c.casefold() == typed.casefold()), typed)  # "cave" is the existing "Cave"
+
+
+def game_label(game, names):
+    """A game's row label; names: {system bucket: system name}."""
+    return f"{game.get('category') + ' — ' if game.get('category') else ''}{names.get(game.get('system'), game.get('system'))}" \
+           f" — {game.get('title') or game['bucket']}"
