@@ -190,7 +190,7 @@ POLL_MS = 200  # how often filter_list calls its poll while no key comes
 
 def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, extras=None, locked=None, locked_note="",
                 hotkeys=(), note_text=None, on_note=None, esc_asks=True, hidden=None, status=None, diff_marks=True,
-                session=None, poll=None):
+                session=None, poll=None, links=None):
     """Modal list: vim keys for moving and acting, Emacs keys for editing the filter.
 
     Normal mode: j/k ↑/↓ ^N/^P move · g/G top/bottom · ^D/^U half page · ^F/^B/PgUp/PgDn/^V page · / filter ·
@@ -214,6 +214,8 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
     session: a dict the caller keeps so selection, view, revealed rows and cursor survive reopening the list.
     poll: optional callable, called on the curses thread whenever no key came for POLL_MS; the list is then redrawn,
     so poll can update extras in place (and status can read what it changed).
+    links: optional per-label lists of the label indexes switched together with it (multi mode): Space/Tab and `a`
+    set them all to the toggled row's new state (locked ones excepted).
     """
     os.environ.setdefault("ESCDELAY", "25")
     lowered = [l.lower() for l in labels]
@@ -222,6 +224,13 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
     hidden = hidden or [False] * len(labels)
     hidden_count = sum(hidden)
     session = {} if session is None else session
+
+    def linked(rows):
+        """rows and the rows linked to them, without locked ones."""
+        out = dict.fromkeys(rows)
+        for i in rows:
+            out.update(dict.fromkeys(links[i] if links else ()))
+        return [i for i in out if not locked[i]]
 
     def run(stdscr):
         curses.use_default_colors()
@@ -396,7 +405,9 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
                 cur = top = 0
             elif k in ("\t", " ") and vis:
                 if not locked[vis[cur]]:
-                    state[vis[cur]] = not state[vis[cur]]
+                    target = not state[vis[cur]]
+                    for i in linked([vis[cur]]):
+                        state[i] = target
             elif k == "w" and vis and on_note and not locked[vis[cur]]:
                 text = read_line(stdscr, "Note (empty clears, Esc cancels): ", note_text(vis[cur]) if note_text else "")
                 if text is not None:
@@ -404,6 +415,6 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
             elif k in ("a", "\x01") and vis:
                 free = [i for i in vis if not locked[i]]
                 target = not all(state[i] for i in free)
-                for i in free:
+                for i in linked(free):
                     state[i] = target
     return curses.wrapper(run)

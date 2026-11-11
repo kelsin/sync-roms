@@ -4,7 +4,7 @@ import json
 import queue
 import threading
 
-from . import budget, edit, metafilter, picker, s3, scrape_plan, sizecache, store, ui
+from . import budget, edit, m3u, metafilter, picker, s3, scrape_plan, sizecache, store, ui
 
 FULL_KEY = "f"
 MAKE_SET_KEY = "m"
@@ -303,6 +303,8 @@ def edit_system(name, system, setup, sizing=None):
     # names only: on a folder a sized listing stats every file, which the background refresh already does
     in_storage = {k for k in s3.list_sizes(f"{bucket}/", sizes=False) if not k.endswith("/")}
     rows = edit.system_rows(s, in_storage)
+    titles = {k: title for _, k, title, _ in rows}
+    groups = m3u.file_groups(in_storage)  # a multi-disc game's files are switched on and off together
     others = [x for x in can_play(store.repo_json("systems"), setup) if x["bucket"] != bucket]
     capacity = budget.card_capacity(card_entry(name, setup, cards))
     work = {}
@@ -339,6 +341,8 @@ def edit_system(name, system, setup, sizing=None):
 
     def row_extras(key, notes, state):
         out = []
+        if key in groups:
+            out.append((f"  🔗 {len(groups[key])} files", "dim"))
         if key in notes:
             out.append((f"  📦 {notes[key].split(': ', 1)[-1]}", "cyan" if state else "dim"))
         if key in work["costs"]:
@@ -347,15 +351,25 @@ def edit_system(name, system, setup, sizing=None):
             out.append((f"  {SIZING}", "dim"))
         return out
 
-    def apply(shown, notes, base, state):
+    def changes(keys, base, state):
+        """{bucket key: synced} for what one pass switched, each switched file's whole multi-disc game with it (the
+        files the pass didn't show too)."""
+        out = {}
+        for key, want in zip(keys, state):
+            if want != base[key]:
+                for k in groups.get(key, [key]):
+                    out.setdefault(k, want)
+        return out
+
+    def apply(keys, notes, base, state):
         """Fold one pass's on/off states into the card being edited."""
-        for (_, key, title, _), want in zip(shown, state):
+        for key, want in changes(keys, base, state).items():
             if want == base[key]:
                 continue
             if key in notes:
                 excluded.symmetric_difference_update({key})
             elif want:
-                s["games"].append({"title": title, "bucket": key})
+                s["games"].append({"title": titles[key], "bucket": key})
             else:
                 s["games"] = [g for g in s["games"] if g.get("bucket") != key]
 
@@ -381,12 +395,14 @@ def edit_system(name, system, setup, sizing=None):
             base = states(notes)
             shown = [r for r in rows if keep(r[1])]
             keys = [r[1] for r in shown]
+            index = {k: i for i, k in enumerate(keys)}
+            links = [[index[m] for m in groups.get(k, ()) if m in index] for k in keys]
             session = {"sel": [base[k] for k in keys]}
             extras = [row_extras(k, notes, st) for k, st in zip(keys, session["sel"])]
 
             def status(state):
                 now = dict(base)
-                now.update(zip(keys, state))
+                now.update(changes(keys, base, state))
                 picked = [k for k, st in now.items() if st]
                 mine = sum(work["costs"].get(k, 0) for k in picked)
                 bios = work["bios"][1 if picked else 0]
@@ -412,14 +428,15 @@ def edit_system(name, system, setup, sizing=None):
 
             parts = ([f"📦 {filt[0]} only"] if filt else []) + ([metafilter.describe(meta_filt)] if meta_filt else [])
             where = f" · {' · '.join(parts)} (c shows all)" if parts else ""
-            pending = (shown, notes, base, session)
+            pending = (keys, notes, base, session)
             result = picker.filter_list(f"✏️  {system['name']} on {name} — ✅ synced, ⬜ not, 📦 from a set{where}",
                                         [r[3] for r in shown], multi=True, initial=[start[k] for k in keys],
                                         extras=extras, hint=GAMES_HINT, hotkeys=(SET_KEY, META_KEY, CLEAR_KEY),
                                         status=status,
-                                        poll=poll, session=session, note_text=note_text, on_note=on_note)
+                                        poll=poll, session=session, note_text=note_text, on_note=on_note,
+                                        links=links)
             pending = None
-            apply(shown, notes, base, session["sel"] if isinstance(result, tuple) else result)
+            apply(keys, notes, base, session["sel"] if isinstance(result, tuple) else result)
             if not isinstance(result, tuple):
                 break
             if result[0] == CLEAR_KEY:
@@ -433,8 +450,8 @@ def edit_system(name, system, setup, sizing=None):
                     filt = (chosen["name"], set_filter(chosen, system))
     except KeyboardInterrupt:
         if pending:
-            shown, notes, base, session = pending
-            apply(shown, notes, base, session["sel"])
+            keys, notes, base, session = pending
+            apply(keys, notes, base, session["sel"])
         save()
         raise
     return save()

@@ -41,6 +41,21 @@ def disc_keys(keys):
     return {posixpath.join(d, f) for d, names in folders.items() for discs in disc_groups(names).values() for f in discs}
 
 
+def file_groups(keys):
+    """{bucket key: every key of its game} for the multi-disc games among keys: its playlist (when in keys) and its
+    discs, within one folder. Keys that are no multi-disc game's are left out."""
+    folders = defaultdict(set)
+    for k in keys:
+        folders[posixpath.dirname(k)].add(posixpath.basename(k))
+    out = {}
+    for d, names in folders.items():
+        for m3u, discs in disc_groups(names).items():
+            group = [posixpath.join(d, f) for f in ([m3u] if m3u in names else []) + discs]
+            for k in group:
+                out[k] = group
+    return out
+
+
 def prefix_playlists(dest, disc_dir):
     """Point the playlists directly in dest at their discs in dest/disc_dir. Returns how many it rewrote."""
     rewritten = 0

@@ -486,7 +486,8 @@ sync-roms --edit
 2. A system shows every file in its storage folder. `✅` is synced, `⬜` is not; a 📦 next to a game says a set the
    card references syncs it (switching it off excludes it from that set on this card). `/` searches, `Space` (or `Tab`)
    toggles the game under the cursor, `a` toggles everything shown, `u` reverts, `o` cycles the view between all
-   rows, only those that are on, and only those you changed. `s` lists the sets with games on this system: `Enter`
+   rows, only those that are on, and only those you changed. A multi-disc game's playlist and discs (marked 🔗) switch
+   on and off together, even when a filter shows only some of them. `s` lists the sets with games on this system: `Enter`
    narrows the list to that set's games here, `f` makes the card sync the whole set. `m` filters by the system's
    scraped metadata (`scrapes/<system>/metadata.json`): pick **Developer**, **Publisher**, **Genre** (its first part,
    so `Sports / Baseball` is `Sports`), **Players** (1, 2, 3-4 or 5+; a `1-2` game is in both 1 and 2) or **Year**,

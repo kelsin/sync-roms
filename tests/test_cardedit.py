@@ -323,6 +323,105 @@ class Flow(DataDir):
         self.assertEqual(calls, [])
 
 
+DISCS = ["psx/A (USA).m3u", "psx/A (USA) (Disc 1).chd", "psx/A (USA) (Disc 2).chd", "psx/A (USA) (Disc 3).chd"]
+
+
+class DiscFlow(Flow):
+    """A multi-disc game's playlist and discs are switched on and off together, each saved as its own entry."""
+
+    def setUp(self):
+        super().setUp()
+        self.files["psx/"] = {k: 10 for k in DISCS + ["psx/B (USA).chd"]}
+
+    def psx(self, *steps):
+        return self.run_system(*steps, bucket="psx")
+
+    def test_rows_are_linked_and_marked(self):
+        self.card()
+        _, calls = self.psx(returns([False] * 5))
+        _, labels, kw = calls[0]
+        self.assertEqual(labels, ["A (USA) (Disc 1).chd", "A (USA) (Disc 2).chd", "A (USA) (Disc 3).chd",
+                                  "A (USA).m3u", "B (USA).chd"])
+        self.assertEqual(kw["links"], [[3, 0, 1, 2]] * 4 + [[]])
+        self.assertEqual(kw["extras"][0][0], ("  🔗 4 files", "dim"))
+
+    def test_toggling_the_playlist_adds_every_disc(self):
+        self.card()
+        self.psx(toggle("A (USA).m3u"))
+        self.assertEqual(sorted(store.card_games("c")["psx"], key=lambda x: x["bucket"]),
+                         sorted((g(k) for k in DISCS), key=lambda x: x["bucket"]))
+
+    def test_toggling_a_later_disc_adds_the_whole_game_and_untoggling_removes_it(self):
+        self.card()
+        self.psx(toggle("A (USA) (Disc 2).chd"))
+        self.assertEqual(sorted(x["bucket"] for x in store.card_games("c")["psx"]), sorted(DISCS))
+        self.psx(toggle("A (USA) (Disc 3).chd"))
+        self.assertEqual(store.card_games("c"), {})
+
+    def test_status_counts_the_whole_game(self):
+        self.card()
+
+        def step(labels, kw):
+            state = [True, False, False, False, False]  # only Disc 1 switched (as a script would)
+            self.assertIn("4 game(s)", kw["status"](state))
+            return state
+        self.psx(step)
+
+    def test_a_partial_pick_is_kept_until_a_member_is_toggled(self):
+        self.card(games={"psx": [g(DISCS[1])]})
+        self.psx(returns([True, False, False, False, False]))
+        self.assertEqual(store.card_games("c"), {"psx": [g(DISCS[1])]})
+        self.psx(toggle("A (USA) (Disc 1).chd"))  # Disc 1 off: the whole game is off
+        self.assertEqual(store.card_games("c"), {})
+
+    def test_a_set_filter_showing_one_disc_still_switches_the_whole_game(self):
+        self.card()
+        one = {"id": "one", "name": "One", "description": "", "games": [{"system": "psx", "bucket": DISCS[1]}]}
+
+        def filtered(labels, kw):
+            self.assertEqual(labels, ["A (USA) (Disc 1).chd"])
+            return [True]
+        with mock.patch.object(store, "load_sets", lambda: [one]):
+            self.psx(returns((cardedit.SET_KEY, 0)), returns(0), filtered)
+        self.assertEqual(sorted(x["bucket"] for x in store.card_games("c")["psx"]), sorted(DISCS))
+        self.assertEqual(sorted(x["bucket"] for x in self.read("cards.json")["c"]["games"]["psx"]), sorted(DISCS))
+
+
+class Links(unittest.TestCase):
+    def run_keys(self, keys, labels, links, initial=None, locked=None):
+        import curses
+
+        class Screen:
+            def __init__(self):
+                self.keys = iter(keys)
+
+            def getmaxyx(self):
+                return 24, 80
+
+            def get_wch(self):
+                return next(self.keys)
+
+            def __getattr__(self, name):
+                return lambda *a, **k: None
+        with mock.patch.object(curses, "curs_set"), mock.patch.object(curses, "use_default_colors"), \
+                mock.patch.object(curses, "has_colors", return_value=False), \
+                mock.patch.object(curses, "wrapper", side_effect=lambda f: f(Screen())):
+            return picker.filter_list("t", labels, multi=True, initial=initial, links=links, locked=locked)
+
+    def test_space_switches_linked_rows_to_the_new_state(self):
+        links = [[0, 2], [], [0, 2]]
+        self.assertEqual(self.run_keys([" ", "\n"], ["a", "b", "c"], links), [True, False, True])
+        self.assertEqual(self.run_keys(["j", "j", " ", "\n"], ["a", "b", "c"], links, initial=[True, False, False]),
+                         [True, False, True])  # partial: the toggled row's new state wins
+
+    def test_toggle_all_reaches_rows_hidden_by_the_filter(self):
+        links = [[0, 2], [], [0, 2]]
+        self.assertEqual(self.run_keys(["/", "a", "\n", "a", "\n"], ["a", "b", "c"], links), [True, False, True])
+
+    def test_no_links_toggles_one_row(self):
+        self.assertEqual(self.run_keys([" ", "\n"], ["a", "b"], None), [True, False])
+
+
 class MetaFlow(Flow):
     META = {"Emerald.zip": {"genre": "Platform", "releasedate": "2004-01-01"},
             "Ruby.zip": {"genre": "RPG / Pokemon", "releasedate": "2002"},
