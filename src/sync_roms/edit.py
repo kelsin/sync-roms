@@ -348,7 +348,8 @@ def edit_manifest():
     def edit_device_systems():
         """Pick a device, then toggle which systems it recommends; saved as the add/remove overlay."""
         defaults = store.device_defaults(manifest["systems"])
-        names = {s["bucket"]: s["name"] for s in manifest["systems"]}
+        by_sort = sorted(manifest["systems"], key=store.system_sort_key)
+        names = {s["bucket"]: s["name"] for s in by_sort}
         devices = manifest["devices"]
         extras = [[("  edited", "cyan")] if d["id"] in overlay_pending else [] for d in devices]
         i = picker.filter_list("🧩 Which device's recommended systems?", [d["name"] for d in devices], extras=extras,
@@ -357,7 +358,7 @@ def edit_manifest():
             return False
         d = devices[i]
         base = defaults.get(d["id"], {}).get("systems", [])
-        ids = sorted(names, key=lambda x: names[x].lower())
+        ids = list(names)
         labels = [f"{names[x]}" + ("" if x in base else "  (not in the default)") for x in ids]
         state = picker.filter_list(f"🧩 {d['name']} — ✅ synced for this device", labels, multi=True,
                                    initial=[x in d["systems"] for x in ids])
