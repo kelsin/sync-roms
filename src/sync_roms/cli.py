@@ -9,7 +9,7 @@ from concurrent.futures import ThreadPoolExecutor
 from botocore.exceptions import BotoCoreError, ClientError, NoCredentialsError
 
 from . import __version__, budget, cardedit, clean, commands, downloads, edit, external, frontend, m3u, mirroring, picker, runtime, s3, scrape_plan, store
-from . import surprise, ui, usersettings, vita
+from . import surprise, themeart, ui, usersettings, vita
 from . import collections as colls
 
 
@@ -19,6 +19,7 @@ SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "games": ("edit|list|add|remove|full|sets|export|import", "edit a card's games, interactively or from scripts"),
     "sets": ("edit", "edit the repo's game sets by hand and open a PR with the changes"),
     "collections": ("edit", "edit your collections of favourite games (saved in ~/.sync-roms/collections/)"),
+    "themes": ("update", "copy the latest Art Book Next for ES-DE from GitHub into storage"),
     "cards": ("edit|list|new|set|rename|delete", "list and manage the cards you've synced"),
     "devices": ("[ID]", "list the supported devices, or one device's systems"),
     "upload": ("roms [DIR] | scrapes [CARD]", "upload ROMs or a card's scraped data to storage"),
@@ -90,6 +91,13 @@ TOPICS = {
   Done; Quit discards. No git or gh needed, and nothing goes to storage or the repo. Same keys as the set editor.
   Deleting a collection that cards use asks first, then removes it from them. In a card's system list, l adds a
   collection to that card.
+""",
+    "themes": """
+  sync-roms themes update [--dry-run]         put the latest Art Book Next for ES-DE in storage
+
+  Downloads the GitHub archive of the theme's latest commit (about 200 MB) and replaces os/esde/themes/ in storage
+  (write profile). Syncs copy it from there onto ES-DE cards that use Art Book Next, so the Surprise collection has its
+  art; a card's copy is replaced when storage has a newer commit. Does nothing when storage already has the latest.
 """,
     "edit": """
   sync-roms edit                              main menu: Cards, Sets (opens a PR), Collections, Device systems; same as `games edit`
@@ -977,16 +985,20 @@ def sync_card(args):
 
         wanted = frontend.wanted_collections(layout_name, card_colls, systems, on_card)
         plan = frontend.plan_collections(layout_name, base, wanted, owned)
+        surprise_name = frontend.safe_name(surprise.COLLECTION)
         if dry_run:
             frontend.describe_collections(plan, layout_name)
+            if surprise_name in plan["enable"]:
+                themeart.describe(layout_name, base, surprise_name)
             return
         for warning in plan["warnings"]:
             ui.warn(warning)
         frontend.apply_collections(plan, layout_name, base)
-        if clean_card and (plan["writes"] or plan["deletes"]):
-            clean._clean_root = base
         if plan["owned"] != owned:
             store.update_card(card, frontend_collections=plan["owned"])
+        art = surprise_name in plan["enable"] and themeart.install(layout_name, base, surprise_name)
+        if clean_card and (plan["writes"] or plan["deletes"] or art):
+            clean._clean_root = base
         if plan["writes"]:
             print(ui.green(f"💖 Wrote {len(plan['writes'])} collection(s) for {layout['label']}"))
 

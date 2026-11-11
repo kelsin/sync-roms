@@ -261,6 +261,7 @@ Every mode is a command (`sync-roms COMMAND --help` explains one; plain `sync-ro
 | `games list\|add\|remove\|full\|sets\|export\|import` | edit lists from scripts, see below | |
 | `sets edit` | edit the repo's game sets by hand and open a PR (needs `git` and a logged-in `gh`) | |
 | `collections edit` | edit your collections of favourite games (saved in `~/.sync-roms/collections/`) | |
+| `themes update` | put the latest Art Book Next for ES-DE (the Surprise collection's theme) in storage | |
 | `cards list\|new\|set\|rename\|delete` | manage cards | |
 | `devices [ID]` | list devices, or one device's systems (`--json`) | `--devices` |
 | `upload roms [DIR]` / `upload scrapes [CARD]` | upload to storage | `--upload`, `--upload-scrapes` |
@@ -578,6 +579,21 @@ holds are used in that order. Full systems are left out, and so is any game alre
   `surprise_ttl_days` in `settings.json` (default 183) whenever it is written. It is how a game comes around again only later.
 - **Frontends**: ES-DE and Knulli cards get the surprises as a custom collection named `Surprise`, written like any
   other [collection](#collections-in-es-de-and-knulli); that name is reserved, so a collection can't be called Surprise.
+- **Art Book Next**: when the card uses the [Art Book Next](https://github.com/anthonycaccese/art-book-next-es-de) theme,
+  the Surprise collection gets its own gift-box artwork and logo in the theme's Outline style
+  (`src/sync_roms/data/themes/art-book-next/`).
+  - **ES-DE** (when `Theme` in `es_settings.xml` is `art-book-next-es-de`): ES-DE on Android keeps downloaded themes off
+    the card, so sync copies the theme from a GitHub archive of it kept in storage (`os/esde/themes/`, about 200 MB,
+    and in the mirror) into `ES-DE/themes/art-book-next-sync-roms/`, adds the Surprise files and sets `Theme` to that
+    copy. `sync-roms themes update` puts the theme's latest commit in storage; a card's copy is replaced when storage has
+    a newer one. ES-DE's theme downloader doesn't update the copy, and its menu lists both copies as Art Book Next.
+    The art is for the Outline color schemes; others show the theme's default art for Surprise.
+  - **Knulli** (when `ThemeSet` in `es_settings.cfg` is unset or Art Book Next): the built-in theme is read-only, so the art
+    goes to `theme-customizations/art-book-next/artwork/Surprise.png` and `logos/Surprise.svg`, and `es_settings.cfg`
+    gets `subset.Surprise.system-view-artwork` and `subset.Surprise.system-logos` set to `custom`, so only Surprise
+    uses them (its logo sits a little lower than on the Outline systems). Knulli only shows a custom collection on its own,
+    with its art, when it isn't grouped under Collections, so `UseCustomCollectionsSystemEx` is set to `false` unless you
+    already chose a value; that shows your other custom collections on their own too.
 - **Mirror**: picks are made from storage itself, not the mirror, so they can be games the mirror doesn't have yet.
 - `cards.json` holds `"surprise": false` when it is off and `"surprises"` (`[{"system", "bucket", "title", "files"?}]`, `files` being
   a multi-disc game's other keys); `games export` and `import` carry both, and `sync-roms check` validates them.

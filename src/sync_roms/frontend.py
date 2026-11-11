@@ -10,7 +10,6 @@ _LABELS = {"esde": "ES-DE", "knulli": "Knulli"}
 _DROPPED = '*",./:;<>\\|\n\t\r'  # characters ES-DE rejects in a collection name
 _UNESCAPE = {"&quot;": '"', "&apos;": "'"}
 _ESCAPE = {'"': "&quot;", "'": "&apos;"}
-_SETTING = re.compile(r'<string name="CollectionSystemsCustom" value="([^"]*)"\s*/>')
 
 
 def safe_name(name):
@@ -36,14 +35,29 @@ def collection_line(layout_name, folder, rel):
     return f"%ROMPATH%/{folder}/{rel}" if layout_name == "esde" else f"./roms/{folder}/{rel}"
 
 
+def _string_setting(name):
+    return re.compile(rf'<string name="{re.escape(name)}" value="([^"]*)"\s*/>')
+
+
+def get_string(text, name):
+    """The value of the frontend settings file's <string name=...> entry, or None when it has none."""
+    match = _string_setting(name).search(text)
+    return saxutils.unescape(match.group(1), _UNESCAPE) if match else None
+
+
 def set_enabled(text, layout_name, add, remove):
     """text (the frontend's settings file) with the add names enabled and the remove names not, as custom collections."""
-    match = _SETTING.search(text)
+    match = _string_setting("CollectionSystemsCustom").search(text)
     names = [n for n in saxutils.unescape(match.group(1), _UNESCAPE).split(",") if n] if match else []
     names = [n for n in names if n not in remove]
     names += sorted(n for n in set(add) if n not in names)
-    value = saxutils.escape(",".join(names), _ESCAPE)
-    line = f'<string name="CollectionSystemsCustom" value="{value}" />'
+    return set_string(text, layout_name, "CollectionSystemsCustom", ",".join(names))
+
+
+def set_string(text, layout_name, name, value):
+    """text (the frontend's settings file) with its <string name=...> entry set to value, the rest left as it is."""
+    match = _string_setting(name).search(text)
+    line = f'<string name="{name}" value="{saxutils.escape(value, _ESCAPE)}" />'
     if match:
         return text[:match.start()] + line + text[match.end():]
     if layout_name == "esde":

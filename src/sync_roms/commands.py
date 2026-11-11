@@ -11,7 +11,7 @@ from . import external, m3u, picker, runtime, s3, setedit, store, surprise, ui, 
 
 
 UNKNOWN_SHOWN = 8  # device ids named in an "unknown device" error
-COMMANDS = {"games", "sets", "collections", "cards", "config", "doctor", "check", "completion"}
+COMMANDS = {"games", "sets", "collections", "themes", "cards", "config", "doctor", "check", "completion"}
 
 
 class Parser(argparse.ArgumentParser):
@@ -833,6 +833,12 @@ def collections_edit(args):
     return collectionedit.edit_collections()
 
 
+def themes_update(args):
+    from . import themeart
+    usersettings.ensure_bucket()
+    return themeart.update_storage(args.dry_run)
+
+
 def second_words():
     """{command: the words that can follow it} for the commands that have subcommands."""
     from . import cli
@@ -843,6 +849,7 @@ def second_words():
     words["games"] = sorted(set(words.get("games", [])) | {"list", "add", "remove", "full", "sets", "export", "import"})
     words["sets"] = ["edit"]
     words["collections"] = ["edit"]
+    words["themes"] = ["update"]
     words["cards"] = ["edit", "list", "new", "set", "rename", "delete"]
     words["config"] = ["show", "path"]
     words["completion"] = ["bash", "zsh", "fish"]
@@ -933,6 +940,10 @@ def build_parser():
     colsub = collections.add_subparsers(dest="action", required=True)
     p = colsub.add_parser("edit", allow_abbrev=False)
     p.set_defaults(fn=collections_edit)
+
+    themes = sub.add_parser("themes", add_help=False, allow_abbrev=False)
+    tsub = themes.add_subparsers(dest="action", required=True)
+    p = tsub.add_parser("update", allow_abbrev=False); common(p, card=False); p.set_defaults(fn=themes_update)
 
     cards = sub.add_parser("cards", add_help=False, allow_abbrev=False)
     csub = cards.add_subparsers(dest="action", required=True)

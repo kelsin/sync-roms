@@ -61,6 +61,8 @@ The old single `roms.json` is split by whether the data is personal. Nothing her
 
 There is no personal core list: a card's `games` is the only games list, and a card with no picks syncs no games. An old `~/.sync-roms/games.json` is left on disk and never read. Old personal sets in `~/.sync-roms/sets/` are left on disk and never read; sets only come from the repo. `device-systems.json` is a shared default read from the repo (never copied); users adjust it with the optional add/remove overlay. Never put a real game list in the repo.
 
+`src/sync_roms/data/themes/art-book-next/` holds the Surprise collection's Art Book Next artwork, logo and theme files, laid out as in the ES-DE theme; sync copies them into the card's copy of the theme (ES-DE; the theme itself is a GitHub archive in storage's `os/esde/themes/`, refreshed by `sync-roms themes update`) or theme customizations (Knulli).
+
 Games in a set file may have an optional `category` string; the set editor groups rows by it (in file order). Prefer one set with categories over several related top-level sets (e.g. `shmups.json`: Touhou, Psikyo, Cave, Other).
 
 Repo files must not contain notes about the bucket's contents ("not in the bucket", "bucket has..."). Device notes say only why the systems were chosen, concisely.
