@@ -6,7 +6,7 @@ import posixpath
 import random
 import re
 
-from . import m3u, mirroring, picker, s3, store, ui, usersettings
+from . import inventory, m3u, mirroring, picker, s3, store, ui, usersettings
 
 SLOTS = 10
 RECOMMENDED_SHARE = 2 / 3
@@ -203,7 +203,7 @@ def _pools(chosen_systems, taken):
     couldn't be listed."""
     with mirroring.storage_reads():
         try:
-            folders = s3.list_folders()
+            folders = inventory.folders()
         except (*s3.ERRORS, SystemExit) as e:
             ui.warn(f"Couldn't list storage for surprises, keeping the current ones: {e}")
             return None
@@ -214,7 +214,7 @@ def _pools(chosen_systems, taken):
             if bucket not in folders or s.get("full_system"):
                 continue
             try:
-                keys = s3.list_sizes(f"{bucket}/", sizes=False)
+                keys = inventory.files(f"{bucket}/", sizes=False)
             except s3.ERRORS as e:
                 ui.warn(f"Couldn't list {bucket} for surprises: {e}")
                 continue

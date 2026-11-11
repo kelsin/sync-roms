@@ -8,7 +8,7 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from helpers import DataDir  # noqa: E402,F401  (re-exported: other test modules still import it from here)
-from sync_roms import edit, picker, runtime, s3, sizecache, store, ui  # noqa: E402
+from sync_roms import edit, picker, runtime, s3, store, ui  # noqa: E402
 
 SETS = {"s": {"id": "s", "name": "Mix", "games": [{"system": "gba", "bucket": "gba/A.zip", "files": ["gba/A2.zip"]}]}}
 
@@ -76,7 +76,6 @@ class EditBase(DataDir):
         with mock.patch.object(runtime, "BUCKET", "b", create=True), \
                 mock.patch.object(s3, "list_sizes", return_value={}), \
                 mock.patch.object(picker, "filter_list", side_effect=lambda *a, **k: next(picks)), \
-                mock.patch.object(sizecache, "refresh_async"), \
                 mock.patch("builtins.input", return_value=name), \
                 mock.patch.object(picker, "choose_setup", return_value=(None, "esde")), \
                 mock.patch.object(ui, "confirm", return_value=confirmed), \
@@ -113,7 +112,6 @@ class MenuActions(EditBase):
         with mock.patch.object(runtime, "BUCKET", "b", create=True), \
                 mock.patch.object(s3, "list_sizes", return_value={}), \
                 mock.patch.object(picker, "filter_list", side_effect=fake), \
-                mock.patch.object(sizecache, "refresh_async"), \
                 mock.patch("builtins.input", side_effect=lambda *a: next(inputs)), \
                 mock.patch.object(ui, "confirm", return_value=confirm), \
                 mock.patch.object(ui, "choose", side_effect=lambda *a, **k: "s"), \

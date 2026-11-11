@@ -5,7 +5,7 @@ import json
 import queue
 import threading
 
-from . import budget, collections as colls, edit, m3u, metafilter, picker, s3, scrape_plan, sizecache, store, surprise, ui
+from . import budget, collections as colls, edit, inventory, m3u, metafilter, picker, s3, scrape_plan, store, surprise, ui
 
 FULL_KEY = "f"
 SET_KEY = "s"
@@ -33,9 +33,9 @@ def size_text(n):
             return f"{n:.1f}".rstrip("0").rstrip(".") + f" {unit}"
 
 
-def header(usage, capacity, busy=True):
+def header(usage, capacity):
     """(status text, over budget) for a card's budget.Usage against its capacity in bytes (None: no size known).
-    busy: whether size refreshes are still running; when not, a partial usage is "not sized" (a refresh failed)."""
+    A partial usage is "not sized": there is no storage cache to size it from."""
     used = size_text(usage.bytes)
     if capacity is None:
         text, over = f"💾 {used} used", False
@@ -45,16 +45,16 @@ def header(usage, capacity, busy=True):
             f"⚠️  {size_text(usage.bytes - capacity)} over" if over else f"{size_text(capacity - usage.bytes)} free")
     text += f" · {usage.count} file(s)"
     if usage.partial:
-        text += f" · {SIZING} still sizing" if busy else " · not sized"
+        text += f" · not sized ({inventory.UPDATE_HINT})"
     return text, over
 
 
 WARN_AT, FULL_AT = 0.70, 0.90  # the header is green below WARN_AT of the card, yellow below FULL_AT, then red
 
 
-def status_of(usage, capacity, busy=True):
+def status_of(usage, capacity):
     """header() as a filter_list status: green until 70% of the card, yellow until 90%, red above (and when over budget)."""
-    text, over = header(usage, capacity, busy)
+    text, over = header(usage, capacity)
     if capacity is None:
         return text
     share = usage.bytes / capacity
@@ -92,63 +92,6 @@ def can_play(systems, setup):
     return sorted((s for s in systems if store.system_applies(s, *setup)), key=store.system_sort_key)
 
 
-_inflight = {}  # prefix -> the Sizing objects waiting on its running refresh, so a prefix is never refreshed twice at once
-_inflight_lock = threading.Lock()
-
-
-class Sizing:
-    """Background size refreshes: each prefix is started once, and finished() tells the curses loop (polling on its
-    own thread) that one is done; the worker threads never touch the screen. A prefix another Sizing is already
-    refreshing joins that refresh instead of starting a second one."""
-
-    def __init__(self):
-        self.done = queue.Queue()
-        self.started = set()
-        self.pending = set()
-
-    def start(self, prefix):
-        if prefix in self.started:
-            return
-        self.started.add(prefix)
-        self.pending.add(prefix)
-        with _inflight_lock:
-            waiting = _inflight.get(prefix)
-            if waiting is not None:
-                waiting.append(self)
-                return
-            _inflight[prefix] = [self]
-
-        def finish(_sizes):
-            with _inflight_lock:
-                waiting = _inflight.pop(prefix)
-            for sizing in waiting:
-                sizing.pending.discard(prefix)
-                sizing.done.put(prefix)
-
-        sizecache.refresh_async(prefix, finish)
-
-    def busy(self):
-        """Whether a started refresh is still running."""
-        return bool(self.pending)
-
-    def finished(self):
-        """Whether any refresh finished since the last call."""
-        any_done = False
-        while True:
-            try:
-                self.done.get_nowait()
-            except queue.Empty:
-                return any_done
-            any_done = True
-
-
-def start_system(sizing, bucket, layout):
-    """Start the size refreshes the budget needs for one system: its ROM folder, and the scrapes its layout installs."""
-    sizing.start(f"{bucket}/")
-    if layout in scrape_plan.SCRAPE_LAYOUTS:
-        sizing.start(f"{scrape_plan.SCRAPES}/{bucket}/")
-
-
 LOADING = "loading"
 _metadata = {}  # system bucket -> metafilter.index, kept for the session so entering a system again doesn't fetch it again
 
@@ -158,8 +101,8 @@ def _spawn(fn):
 
 
 class Metadata:
-    """A system's scraped metadata.json as a metafilter.index, read once per session on a background thread (like
-    Sizing, the worker never touches the screen). A failed read is not kept, so the next visit tries again."""
+    """A system's scraped metadata.json as a metafilter.index, read once per session on a background thread (the
+    worker never touches the screen). A failed read is not kept, so the next visit tries again."""
 
     def __init__(self, bucket):
         self.bucket = bucket
@@ -254,21 +197,16 @@ def edit_card(name, setup=None):
     device = setup[0]
     systems = can_play(catalog["systems"], setup)
     recommended = store.recommended_systems(device, catalog["systems"]) if device else set()
-    sizing = Sizing()
-    sizing.start("BIOS/")
     start_card = card_entry(name, setup)
     start_usages = budget.system_usages(start_card, systems)
     try:
         with ui.silent_thread():
-            folders = s3.list_folders()
+            folders = inventory.folders()
     except (*s3.ERRORS, SystemExit):  # storage can't be reached (ui.fail raises SystemExit): go by the cache alone
         folders = None
     systems = [s for s in systems  # a missing or empty folder has nothing to pick, unless it already has picks
                if budget.picked(start_usages[s["bucket"]])
-               or (folders is None or s["bucket"] in folders) and sizecache.cached(f"{s['bucket']}/") != {}]
-    for s in systems:  # the systems with picks are sized now, so the total doesn't wait for each to be opened
-        if budget.picked(start_usages[s["bucket"]]):
-            start_system(sizing, s["bucket"], setup[1])
+               or (folders is None or s["bucket"] in folders) and inventory.cached(f"{s['bucket']}/") != {}]
     pos = 0
     while True:
         card = card_entry(name, setup)
@@ -283,10 +221,6 @@ def edit_card(name, setup=None):
 
         labels, extras = work_out()
 
-        def poll():
-            if sizing.finished():
-                extras[:] = work_out()[1]
-
         def on_hotkey(key, idx):
             """f switches full system in place, so the screen isn't torn down and redrawn."""
             if key != FULL_KEY or idx is None:
@@ -299,7 +233,7 @@ def edit_card(name, setup=None):
         i = picker.filter_list(f"💳 {name} — its systems (⭐ for the device) · 🎁 Surprise {'on' if on else 'off'}",
                                labels, extras=extras, cursor=pos,
                                hotkeys=(FULL_KEY, COLLECTIONS_KEY, SURPRISE_KEY, CLEAR_ALL_KEY), hint=LIST_HINT,
-                               status=lambda _state: status_of(view["total"], capacity, sizing.busy()), poll=poll,
+                               status=lambda _state: status_of(view["total"], capacity),
                                on_hotkey=on_hotkey)
         if i is None:
             return
@@ -316,7 +250,7 @@ def edit_card(name, setup=None):
                     store.update_card(name, games={}, **({"excluded": {}} if store.card_excluded(name) else {}))
             continue
         pos = i
-        edit_system(name, systems[i], setup, sizing)
+        edit_system(name, systems[i], setup)
 
 
 def toggle_surprise(name):
@@ -423,12 +357,10 @@ def pick_set(system, sets, games, titles, catalog, current=None, synced=lambda: 
     return shown[i][0]
 
 
-def edit_system(name, system, setup, sizing=None):
+def edit_system(name, system, setup):
     """A card's games of one system: the whole storage folder, searchable, filterable to a set's games and by scraped
     metadata. Saves to cards.json when left; returns whether anything changed."""
-    sizing = sizing or Sizing()
     bucket = system["bucket"]
-    start_system(sizing, bucket, setup[1])
     cards = store.load_cards()
     raw = store.card_games(name, cards)
     entry = raw.get(bucket)
@@ -444,9 +376,9 @@ def edit_system(name, system, setup, sizing=None):
     other_excluded = {b: list(k) for b, k in before_excluded.items() if b != bucket}
     sets = store.load_sets()
     sets_by_id = {x["id"]: x for x in sets}
-    # names only: on a folder a sized listing stats every file, which the background refresh already does
+    # names only: without a storage cache, a folder's sized listing stats every file
     try:
-        in_storage = {k for k in s3.list_sizes(f"{bucket}/", sizes=False) if not k.endswith("/")}
+        in_storage = {k for k in inventory.files(f"{bucket}/", sizes=False) if not k.endswith("/")}
     except s3.ERRORS as e:
         edit.note(ui.yellow(f"⚠️  Couldn't list {system['name']} in storage: {e}"))
         return False
@@ -572,12 +504,7 @@ def edit_system(name, system, setup, sizing=None):
                            or bool(picked) and work["partial"])
                 total = budget.Usage(work["others"].bytes + mine + bios.bytes, work["others"].count + len(picked),
                                      partial)
-                return status_of(total, capacity, sizing.busy())
-
-            def poll():
-                if sizing.finished():
-                    work_out()
-                    extras[:] = [row_extras(k, notes, st) for k, st in zip(keys, session["sel"])]
+                return status_of(total, capacity)
 
             def note_text(i):
                 game = next((g for g in s["games"] if g.get("bucket") == keys[i]), None)
@@ -595,7 +522,7 @@ def edit_system(name, system, setup, sizing=None):
                                         [r[3] for r in shown], multi=True, initial=[start[k] for k in keys],
                                         extras=extras, hint=GAMES_HINT, hotkeys=(SET_KEY, META_KEY, PAST_SURPRISE_KEY, CLEAR_KEY),
                                         status=status,
-                                        poll=poll, session=session, note_text=note_text, on_note=on_note,
+                                        session=session, note_text=note_text, on_note=on_note,
                                         links=links, locked=[k in locked_from for k in keys],
                                         locked_note=[f"From {locked_from[k]}; take it off the card to remove this game"
                                                      if k in locked_from else "" for k in keys])

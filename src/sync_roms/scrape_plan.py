@@ -8,7 +8,7 @@ import xml.etree.ElementTree as ET
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
 
-from . import downloads, runtime, s3, store, ui
+from . import downloads, inventory, runtime, s3, store, ui
 
 
 # --- Scraped data (media, metadata) --------------------------------
@@ -325,7 +325,7 @@ def update_gamelist(path, entries):
 def load_scrape_data(systems):
     """The storage's scrape data for the chosen systems: {storage folder: (listing, metadata)}."""
     with ThreadPoolExecutor(runtime.WORKERS) as ex:
-        listings = list(ex.map(lambda s: s3.list_sizes(f"{SCRAPES}/{s['bucket']}/", sizes=False), systems))
+        listings = list(ex.map(lambda s: inventory.files(f"{SCRAPES}/{s['bucket']}/", sizes=False), systems))
     meta_keys = [f"{SCRAPES}/{s['bucket']}/metadata.json" for s, l in zip(systems, listings)
                  if f"{SCRAPES}/{s['bucket']}/metadata.json" in l]
     texts = s3.fetch_texts(meta_keys)

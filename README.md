@@ -272,6 +272,7 @@ Every mode is a command (`sync-roms COMMAND --help` explains one; plain `sync-ro
 | `convert [DIR]` | convert disc images to CHD | `--cd`, `--chd` |
 | `tools install` | install 7z and chdman | `--install-tools` |
 | `mirror [DIR]` / `mirror use DIR` / `mirror clear` | local mirror | `--mirror`, `--use-mirror`, `--clear-mirror` |
+| `cache [update]` | show the storage cache, or read all of storage into it (see below) | |
 | `config show\|path` | effective settings and where each came from | |
 | `doctor` | check AWS profile, storage, tools and data files | |
 | `check` | validate your JSON data files | |
@@ -477,9 +478,8 @@ sync-roms --edit
    are marked ⭐; each system with picks shows how many games and how much space they take (ROMs plus the scraped
    files the card's firmware installs). The bottom line shows the card's total (games, scrapes and the BIOS files of
    the systems it syncs) against its size and the free space, in green below 70% of the card, yellow below 90% and
-   red above (or over). Sizes come from a cache in
-   `~/.sync-roms/sizes.json` that is refreshed in the background when you open a system; until it is ready sizes show
-   `…`. `/` filters, `Enter` opens a system, `l` adds a collection to the card (each shows how many of its games are playable on the card's device, and `Space`/`Enter` toggles the whole collection), `f` makes it a full system (every file in its folder; `f` again brings the
+   red above (or over). Sizes come from the storage cache (see [Storage cache](#storage-cache)); without one they show
+   `…` and the total says "not sized". `/` filters, `Enter` opens a system, `l` adds a collection to the card (each shows how many of its games are playable on the card's device, and `Space`/`Enter` toggles the whole collection), `f` makes it a full system (every file in its folder; `f` again brings the
    game list back), `u` turns the card's [Surprise](#surprise) on or off (the title says which). Games save to `cards.json` as you leave a
    system (the previous file is kept as `cards.json.bak`). `Esc` goes back to the menu.
 2. A system shows every file in its storage folder. `✅` is synced, `⬜` is not; a 📦 next to a game says a set the
@@ -649,6 +649,22 @@ Every `.chd` is verified with `chdman verify` before its archive, `.cue`, `.bin`
 
 It is meant for preparing a downloaded rom pack before you upload it to storage, so storage holds the `.chd` and `.m3u` files and the card's games list those names. Running it on a card synced from storage that still has the `.zip` files makes the next `sync-roms` run list the `.chd` files as files not in your game list (it asks before deleting, default no) and download the zips again.
 
+## Storage cache
+
+Every command reads what storage holds (each file's name and size, and for a bucket its ETag) from
+`~/.sync-roms/storage-cache.json`; only the files themselves are downloaded from storage. On a network share this
+turns minutes of listing and stat calls into an instant read.
+
+- `sync-roms cache` shows where the cache was read from, when it was last updated, and its files and size per folder.
+- `sync-roms cache update` reads all of storage again: one listing of a bucket, or a walk and a stat of every file in a
+  storage folder. Run it after changing storage outside sync-roms. Nothing refreshes the cache on its own and it never
+  expires; sync-roms's own uploads, moves and deletes keep it up to date.
+- With no cache for the storage in use (none yet, or built from another bucket or folder), the first command that reads
+  storage offers to build it. Saying no is remembered (`storage_cache_declined` in `settings.json`), and commands then
+  list storage on every run as before. `sync-roms cache update` builds it any time.
+
+An old `~/.sync-roms/sizes.json` is no longer read; delete it.
+
 ## How it works
 
 - Reads the systems, layouts, devices and BIOS requirements from `src/sync_roms/data/` in the package, each device's
@@ -658,7 +674,7 @@ It is meant for preparing a downloaded rom pack before you upload it to storage,
   `{"miyoo-flip-v2": {"add": ["psx"], "remove": ["gba"]}}` (system ids as in `systems.json`; the package's
   order is kept and notes always come from the package). An old full-copy `device-systems.json` from before the overlay does nothing; delete it. BIOS files are always `BIOS/<file>` in storage.
 - System folders in storage use the ES-DE system name (e.g. `gba/`, `dreamcast/`).
-- Lists each chosen system's storage folder once and compares file sizes, so only
+- Reads each chosen system's files from the storage cache and compares file sizes, so only
   missing or changed files are downloaded (for `full_system` systems, every file in the folder) (8 in parallel, via boto3).
 - Local files in a chosen system's folder that are no longer in the card's games
   are listed and deleted only after you confirm (default **no**; `--dry-run` shows them).

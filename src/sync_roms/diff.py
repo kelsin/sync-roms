@@ -8,7 +8,7 @@ import zipfile
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
 
-from . import downloads, picker, runtime, s3, store, ui
+from . import downloads, inventory, picker, runtime, s3, store, ui
 
 
 class RangeReader(io.RawIOBase):
@@ -201,7 +201,7 @@ def diff_command(args):
     print(ui.bold(f"🔍 Compare {systems[i]['name']}") + ui.dim(f"  {folder} ↔ {s3.location()}/{bucket}/"))
     local = local_sizes(folder)
     try:
-        remote = s3.list_with_etags(bucket + "/")
+        remote = inventory.etags(bucket + "/")
         only_local, only_bucket = plan_diff(
             local, remote, lambda p: local_fingerprint(os.path.join(folder, *p.split("/"))),
             lambda p, size, etag: bucket_fingerprint(f"{bucket}/{p}", size, etag),

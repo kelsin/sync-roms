@@ -9,7 +9,7 @@ from unittest import mock
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 from helpers import DataDir  # noqa: E402
-from sync_roms import budget, cardedit, collections, edit, picker, s3, sizecache, store, surprise, ui  # noqa: E402
+from sync_roms import budget, cardedit, collections, edit, inventory, picker, s3, store, surprise, ui  # noqa: E402
 
 U = budget.Usage
 
@@ -45,9 +45,8 @@ class Pure(unittest.TestCase):
         self.assertIn("88 GB over", text)
         self.assertEqual(cardedit.header(U(10 ** 9, 1, False), None), ("💾 1 GB used · 1 file(s)", False))
         text, over = cardedit.header(U(10 ** 9, 1, True), None)
-        self.assertTrue(text.endswith("… still sizing"))
+        self.assertTrue(text.endswith("not sized (sync-roms cache update)"))
         self.assertFalse(over)
-        self.assertTrue(cardedit.header(U(10 ** 9, 1, True), None, busy=False)[0].endswith("not sized"))
 
     def test_silent_thread_hides_warn_and_fail_output(self):
         err = io.StringIO()
@@ -120,16 +119,12 @@ class Flow(DataDir):
                       "gb/": {"gb/Red.gb": 2}}
         self.cache = {}
         self.folders = {"gba", "gb", "psx"}
-        self.started = []
-        cardedit._inflight.clear()
-        self.addCleanup(cardedit._inflight.clear)
         for target, attrs in ((store, {"load_catalog": lambda: CATALOG, "load_sets": lambda: [SET],
                                        "repo_json": lambda name: CATALOG[name],
                                        "recommended_systems": lambda device, systems: set()}),
                               (s3, {"list_sizes": lambda prefix, sizes=True: self.files.get(prefix, {}),
                                     "list_folders": lambda: self.folders}),
-                              (sizecache, {"cached": lambda p: self.cache.get(p),
-                                           "refresh_async": lambda p, done: self.started.append((p, done))}),
+                              (inventory, {"cached": lambda p: self.cache.get(p)}),
                               (edit, {"note": lambda text: None}),
                               (cardedit, {"_spawn": lambda fn: None, "_metadata": {}})):  # no metadata read
             for name, new in attrs.items():
@@ -296,24 +291,6 @@ class Flow(DataDir):
         self.assertEqual([l.strip() for l in labels], ["⭐ Game Boy", "Game Boy Advance"])
         self.assertEqual(kw["extras"][1], [("  1 picked", "green"), ("  5 B", "dim")])  # the ROM
         self.assertEqual(kw["status"](None), ("💾 21 B / 1 GB · 1 GB free · 1 file(s)", "green"))  # ROM and the GBA BIOS
-        self.assertEqual([p for p, _ in self.started], ["BIOS/", "gba/", "scrapes/gba/"])  # the picked system is sized too
-
-    def test_sizes_arrive_in_the_background_and_redraw(self):
-        self.card(games={"gba": [g("gba/Ruby.zip")]})
-
-        def step(labels, kw):
-            self.assertIn("still sizing", kw["status"](None))
-            self.assertEqual(kw["extras"][1][1], ("  …", "dim"))
-            self.cache.update({"gba/": self.files["gba/"], "scrapes/gba/": {}, "BIOS/": {}})
-            kw["poll"]()  # nothing finished yet: unchanged
-            self.assertEqual(kw["extras"][1][1], ("  …", "dim"))
-            for _, done in self.started:
-                done({})  # what the worker thread calls
-            kw["poll"]()
-            self.assertEqual(kw["extras"][1][1], ("  5 B", "dim"))
-            self.assertEqual(kw["status"](None), "💾 5 B used · 1 file(s)")
-            return None
-        self.run_card(step)
 
     def test_full_system_hotkey_saves_and_restores_the_list(self):
         self.card(games={"gba": [g("gba/Ruby.zip")]})
@@ -345,30 +322,13 @@ class Flow(DataDir):
         self.run_card(returns((cardedit.FULL_KEY, 1)), returns(None))
         self.assertEqual(store.card_games("c"), {})
 
-    def test_header_says_not_sized_once_nothing_is_running(self):
+    def test_header_says_not_sized_without_a_cache(self):
         self.card(games={"gba": [g("gba/Ruby.zip")]})
 
         def step(labels, kw):
-            self.assertIn("still sizing", kw["status"](None))
-            for _, done in self.started:
-                done({})  # every refresh ended (failed, say) and left nothing cached
-            self.assertIn("not sized", kw["status"](None))
+            self.assertIn("not sized (sync-roms cache update)", kw["status"](None))
             return None
         self.run_card(step)
-
-    def test_a_prefix_already_refreshing_is_joined_not_started_again(self):
-        a, b = cardedit.Sizing(), cardedit.Sizing()
-        a.start("gba/")
-        b.start("gba/")
-        self.assertEqual([p for p, _ in self.started], ["gba/"])
-        self.started[0][1]({})
-        self.assertTrue(a.finished() and b.finished())
-        self.assertFalse(a.busy() or b.busy())
-
-    def test_entering_a_system_refreshes_its_sizes(self):
-        self.card()
-        self.run_card(returns(1), returns([False] * 4), returns(None))
-        self.assertEqual([p for p, _ in self.started], ["BIOS/", "gba/", "scrapes/gba/"])
 
     def test_toggle_a_game_saves_it(self):
         self.card(games={"gba": [g("gba/Ruby.zip")]})
@@ -477,7 +437,7 @@ class Flow(DataDir):
             kw["status"]([False] * 4)
             kw["status"]([True, False, False, False])  # Emerald (3) and the GBA BIOS (16)
             return [False] * 4
-        with mock.patch.object(cardedit, "status_of", side_effect=lambda u, c, busy=True: seen.append(u.bytes)):
+        with mock.patch.object(cardedit, "status_of", side_effect=lambda u, c: seen.append(u.bytes)):
             self.run_system(step)
         self.assertEqual(seen, [1002, 1021])
 
@@ -848,15 +808,6 @@ class Poll(unittest.TestCase):
                                                 status=lambda s: ("over", "red")), 0)
         self.assertEqual(polled, [1])
         self.assertIn("over", drawn)
-
-
-class SizeCacheMemo(DataDir):
-    def test_a_rewritten_cache_is_read_again(self):
-        with mock.patch.object(s3, "location", return_value="here"):
-            self.write_json("sizes.json", {"source": "here", "prefixes": {"gba/": {"built": 1, "files": {"a": 1}}}})
-            self.assertEqual(sizecache.cached("gba/"), {"a": 1})
-            self.write_json("sizes.json", {"source": "here", "prefixes": {"gba/": {"built": 1, "files": {"a": 22}}}})
-            self.assertEqual(sizecache.cached("gba/"), {"a": 22})
 
 
 if __name__ == "__main__":

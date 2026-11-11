@@ -60,6 +60,8 @@ def write_file(key, write):
     os.makedirs(os.path.dirname(path), exist_ok=True)
     write(path + ".part")
     os.replace(path + ".part", path)
+    from . import inventory  # imported here: inventory reads storage through this module
+    inventory.wrote(key, os.path.getsize(path))
 
 
 def read_range(key, start, end):
@@ -191,7 +193,10 @@ def put_text(key, text):
             with open(tmp, "w", encoding="utf-8") as f:
                 f.write(text)
         return write_file(key, write)
-    s3_client(runtime.WRITE_PROFILE).put_object(Bucket=runtime.BUCKET, Key=key, Body=text.encode("utf-8"))
+    body = text.encode("utf-8")
+    out = s3_client(runtime.WRITE_PROFILE).put_object(Bucket=runtime.BUCKET, Key=key, Body=body)
+    from . import inventory
+    inventory.wrote(key, len(body), out.get("ETag"))
 
 
 def put_file(key, path):
@@ -212,6 +217,7 @@ def list_with_etags(prefix):
 
 def move_keys(moves):
     """Move storage objects server-side: copy each (old key, new key), then delete the old one. Returns the failure count."""
+    from . import inventory
     client = None if runtime.ROOT else s3_client(runtime.WRITE_PROFILE)
 
     def move(job):
@@ -234,6 +240,7 @@ def move_keys(moves):
         for i, (job, error) in enumerate(ex.map(move, moves), 1):
             prog = ui.dim(f"[{i}/{len(moves)}]")
             if error is None:
+                inventory.moved(*job)
                 print(f"  {prog} ✅ {job[0]} → {job[1]}")
             else:
                 failed += 1
@@ -243,6 +250,7 @@ def move_keys(moves):
 
 def delete_keys(keys):
     """Delete storage objects (or storage folder files) in batches of 1000. Returns the errors reported."""
+    from . import inventory
     errors = []
     for i in range(0, len(keys), 1000):
         batch = keys[i:i + 1000]
@@ -250,12 +258,15 @@ def delete_keys(keys):
             for k in batch:
                 try:
                     os.remove(safe_join(runtime.ROOT, k))
+                    inventory.removed([k])
                 except OSError as e:
                     errors.append({"Key": k, "Message": str(e)})
             print(ui.dim(f"  deleted {min(i + 1000, len(keys))}/{len(keys)}"))
             continue
         out = s3_client(runtime.WRITE_PROFILE).delete_objects(
             Bucket=runtime.BUCKET, Delete={"Objects": [{"Key": k} for k in batch], "Quiet": True})
-        errors += out.get("Errors", [])
+        failed = out.get("Errors", [])
+        errors += failed
+        inventory.removed(set(batch) - {e.get("Key") for e in failed})
         print(ui.dim(f"  deleted {min(i + 1000, len(keys))}/{len(keys)}"))
     return errors

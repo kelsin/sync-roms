@@ -4,7 +4,7 @@ import re
 import time
 from concurrent.futures import ThreadPoolExecutor
 
-from . import external, runtime, s3, ui
+from . import external, inventory, runtime, s3, ui
 
 
 def rom_rel(key, flat, disc_dir=None, discs=()):
@@ -54,7 +54,7 @@ def with_sizes(jobs):
     todo = [k for k, _, size in jobs if size is None]
     if not todo:
         return jobs
-    have = s3.stat_sizes(todo)
+    have = inventory.stat(todo)
     return [(k, p, have[k] if size is None else size) for k, p, size in jobs if size is not None or k in have]
 
 

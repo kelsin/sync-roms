@@ -2,7 +2,7 @@
 import os
 from collections import defaultdict, namedtuple
 
-from . import collections as colls, commands, scrape_plan, sizecache, store
+from . import collections as colls, commands, inventory, scrape_plan, store
 
 Usage = namedtuple("Usage", "bytes count partial")
 
@@ -23,14 +23,14 @@ def game_costs(card, system, keys):
     sizes, or the scrape sizes the layout needs, aren't cached yet. Once they are, a key left out isn't in storage:
     it costs nothing."""
     bucket = system["bucket"]
-    sizes = sizecache.cached(f"{bucket}/")
+    sizes = inventory.cached(f"{bucket}/")
     partial = sizes is None and bool(keys)
     sizes = sizes or {}
     layout = card.get("layout")
     sized = [k for k in keys if k in sizes]
     if layout not in scrape_plan.SCRAPE_LAYOUTS or not keys:
         return {k: sizes[k] for k in sized}, partial
-    scrapes = sizecache.cached(f"{scrape_plan.SCRAPES}/{bucket}/")
+    scrapes = inventory.cached(f"{scrape_plan.SCRAPES}/{bucket}/")
     if scrapes is None:
         return {k: sizes[k] for k in sized}, True
     extra = scrape_costs(layout, system, [k[len(bucket) + 1:] for k in sized], scrapes)
@@ -41,7 +41,7 @@ def _system_usage(card, system, sets, collections_by_id):
     bucket = system["bucket"]
     games = store.merge_lists([{"bucket": bucket}], [card.get("games") or {}], sets)[0]
     if games["full_system"]:
-        sizes = sizecache.cached(f"{bucket}/")
+        sizes = inventory.cached(f"{bucket}/")
         if sizes is None:
             return Usage(0, 0, True)
         keys = sorted(k for k in sizes if not k.endswith("/"))  # sync installs every file: exclusions don't apply
@@ -80,7 +80,7 @@ def bios_usage(systems):
     files = {f for s in systems for k in ("files", "rom_files") for f in (s.get("bios") or {}).get(k, [])}
     if not files:
         return Usage(0, 0, False)
-    sizes = sizecache.cached("BIOS/")
+    sizes = inventory.cached("BIOS/")
     if sizes is None:
         return Usage(0, 0, True)
     keys = [k for k in (f"BIOS/{f}" for f in files) if k in sizes]
