@@ -67,6 +67,43 @@ class Discs(unittest.TestCase):
         self.assertIn("🎁 past surprises only (c shows all)", lists[1][0])
         self.assertEqual(len(lists[2][1]), 2)
 
+    def test_s_and_m_narrow_the_add_games_list_to_a_set_and_to_metadata(self):
+        from sync_roms import cardedit
+        collection = {"name": "Favs", "games": []}
+        picks = iter([1, 0, None])
+        lists = []
+
+        def fake(title, labels, **kw):
+            if kw.get("multi"):
+                lists.append((title, list(labels)))
+                return [("s", 0), ("m", 0), ("c", 0), kw["initial"]][len(lists) - 1]
+            return next(picks)
+
+        keys = {"gba/Ruby.zip", "gba/Zelda.zip", "gba/Sonic.zip"}
+        game_set = {"id": "x", "name": "Zeldas"}
+
+        def pick_meta(system, meta, filters, keys_for):
+            filters["genre"] = "RPG"
+
+        class Meta:
+            def __init__(self, bucket):
+                pass
+
+            def get(self):
+                return {"gba/Zelda.zip": {"genre": "RPG"}}
+
+        with mock.patch.object(picker, "filter_list", fake), mock.patch.object(ui, "ask", return_value=""), \
+                mock.patch.object(store, "load_sets", return_value=[game_set]), \
+                mock.patch.object(cardedit, "pick_set", return_value=game_set), \
+                mock.patch.object(cardedit, "set_filter", return_value={"gba/Zelda.zip", "gba/Ruby.zip"}), \
+                mock.patch.object(cardedit, "pick_meta", pick_meta), mock.patch.object(cardedit, "Metadata", Meta), \
+                mock.patch.object(cardedit.metafilter, "matches", lambda m, w: m.get("genre") == w["genre"]):
+            collectionedit.edit_one(collection, SYSTEMS, lambda bucket: keys if bucket == "gba" else set())
+        self.assertEqual(lists[1][1], ["Ruby.zip", "Zelda.zip"])
+        self.assertIn("📦 Zeldas only", lists[1][0])
+        self.assertEqual(lists[2][1], ["Zelda.zip"])
+        self.assertEqual(len(lists[3][1]), 3)
+
 
 class Editor(DataDir):
     def run_editor(self, picks, asks=(), confirm=True, edit_one=None):
