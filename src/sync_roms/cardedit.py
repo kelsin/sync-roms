@@ -322,7 +322,11 @@ def pick_set(system, sets, sets_on, catalog, current=None, synced=lambda: set())
 
     def mark():
         done = synced()
-        extras[:] = [[(f"  {len(keys & catalog & done)}/{len(keys & catalog)}", "cyan")]
+        def count(keys):
+            have, total = len(keys & catalog & done), len(keys & catalog)
+            return "➖" if total == 0 else "✅" if have == total else f"{have}/{total}"
+
+        extras[:] = [[(f"  {count(keys)}", "cyan")]
                      + ([("  📦 full set", "green")] if x["id"] in sets_on else []) for x, keys in shown]
 
     def on_hotkey(_key, idx):

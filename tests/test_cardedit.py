@@ -316,7 +316,7 @@ class Flow(DataDir):
         self.card()
 
         def refs_on(labels, kw):
-            self.assertEqual(kw["extras"], [[("  2/2", "cyan"), ("  📦 full set", "green")]])
+            self.assertEqual(kw["extras"], [[("  ✅", "cyan"), ("  📦 full set", "green")]])
             return None
         self.run_system(returns((cardedit.SET_KEY, 0)), returns((cardedit.FULL_KEY, 0)), refs_on,
                         lambda labels, kw: kw["session"]["sel"])
