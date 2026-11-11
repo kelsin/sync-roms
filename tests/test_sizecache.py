@@ -38,7 +38,8 @@ class SizeCacheTest(helpers.DataDir):
             p = mock.patch.object(s3, target, value)
             p.start()
             self.addCleanup(p.stop)
-        for target, value in (("_clock", lambda: self.now), ("_sample", lambda pop, n: list(pop)[:n])):
+        for target, value in (("_clock", lambda: self.now), ("_sample", lambda pop, n: list(pop)[:n]),
+                              ("_is_folder", lambda path: True)):
             p = mock.patch.object(sizecache, target, value)
             p.start()
             self.addCleanup(p.stop)
@@ -193,6 +194,35 @@ class SizeCacheTest(helpers.DataDir):
             self.assertIn("gba/b.zip", sizecache.cached("gba/"))
         sizecache.refresh("gba/")  # the storage folder itself: removed files drop
         self.assertNotIn("gba/b.zip", sizecache.cached("gba/"))
+
+    def test_a_missing_storage_folder_keeps_the_cache(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            root = os.path.join(tmp, "nas")
+            os.makedirs(root)
+            with mock.patch.object(s3, "read_root", return_value=root), \
+                    mock.patch.object(sizecache, "_is_folder", os.path.isdir):
+                sizecache.refresh("gba/")
+                os.rename(root, root + ".gone")  # the share is unmounted: its listing would be empty
+                self.fake.files = {}
+                with self.assertRaises(FileNotFoundError):
+                    sizecache.refresh("gba/")
+                got = []
+                sizecache.refresh_async("gba/", got.append).join(5)
+        self.assertEqual(got, [{"gba/a.zip": 1, "gba/b.zip": 2, "gba/c.zip": 3}])
+        self.assertEqual(sizecache.cached("gba/"), {"gba/a.zip": 1, "gba/b.zip": 2, "gba/c.zip": 3})
+
+    def test_an_empty_listing_empties_the_cache_only_by_a_rebuild(self):
+        sizecache.refresh("gba/")
+        self.write_json("sizes.json", {"prefixes": {"gba/": {"built": 500.0, "files": {"gba/a.zip": 1}}}})
+        self.fake.files = {}
+        self.assertEqual(sizecache.refresh("gba/"), {})
+        self.assertEqual(self.read("sizes.json")["prefixes"]["gba/"]["built"], self.now)  # rebuilt, not incremental
+
+    def test_bad_sizes_are_dropped(self):
+        self.write_json("sizes.json", {"prefixes": {"gba/": {"built": 1, "files": {
+            "gba/a.zip": 1, "gba/b.zip": True, "gba/c.zip": "3", "gba/d.zip": None, "gba/e.zip": 2.5}}}})
+        self.assertEqual(sizecache.cached("gba/"), {"gba/a.zip": 1})
 
     def test_async_exit_from_a_worker_still_calls_on_done(self):
         got = []

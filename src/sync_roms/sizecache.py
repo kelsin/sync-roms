@@ -3,7 +3,9 @@
 A refresh lists names (fast even on a network share), stats only new files, drops removed ones, spot-checks a few
 cached sizes and rebuilds the system when one differs or the entry is old. Entries are keyed by bucket key
 ("gba/Game.zip"), the same whether reads come from the bucket, the storage folder or a local mirror. A mirror holds
-only some files, so a refresh from it adds and updates sizes but never drops a name. A corrupt file counts as empty."""
+only some files, so a refresh from it adds and updates sizes but never drops a name. A storage folder or mirror that is
+missing (an unmounted share) fails the refresh instead of emptying the cache. A corrupt file counts as empty, and a size
+that isn't a whole number is dropped."""
 import json
 import os
 import random
@@ -16,6 +18,7 @@ MAX_AGE = 30 * 24 * 3600  # seconds before a system is rebuilt from scratch
 SPOT_CHECKS = 5
 
 _clock = time.time  # replaced by tests
+_is_folder = os.path.isdir
 _sample = random.sample
 
 
@@ -49,7 +52,8 @@ def _load():
             if isinstance(e, dict) and isinstance(e.get("files"), dict):
                 built = e.get("built")
                 ok = isinstance(built, (int, float)) and not isinstance(built, bool)
-                entries[p] = {"built": built if ok else 0, "files": e["files"]}
+                files = {k: n for k, n in e["files"].items() if isinstance(n, int) and not isinstance(n, bool)}
+                entries[p] = {"built": built if ok else 0, "files": files}
         return entries
     except (OSError, ValueError, KeyError, TypeError, AttributeError):
         return {}
@@ -74,7 +78,11 @@ def _save(prefix, files, built):
 
 
 def refresh(prefix):
-    """Bring the cache for a prefix up to date (blocking) and return {key: size}. Raises what the listing raises."""
+    """Bring the cache for a prefix up to date (blocking) and return {key: size}. Raises what the listing raises, and
+    FileNotFoundError when the folder reads come from is missing."""
+    root = s3.read_root()
+    if root and not _is_folder(root):  # an unmounted share lists as empty: that must not wipe the sizes
+        raise FileNotFoundError(f"{root} is missing")
     entry = _load().get(prefix)
     bucket = s3.read_root() is None  # a bucket listing carries the sizes and there is nothing to stat
     partial = bool(runtime._mirror_root)  # a mirror's listing misses files that exist in storage: never drop names
@@ -87,7 +95,7 @@ def refresh(prefix):
     check = _sample(kept, min(SPOT_CHECKS, len(kept)))
     sizes_of = (lambda keys: {k: names[k] for k in keys}) if bucket else s3.stat_sizes
     now = sizes_of(check)
-    if any(now.get(k) != old[k] for k in check):
+    if any(now.get(k) != old[k] for k in check) or old and not names:  # an empty listing only empties by a rebuild
         files = names if bucket else s3.list_sizes(prefix)
         return _save(prefix, {**(old if partial else {}), **files}, _clock())
     files = dict(old) if partial else {k: old[k] for k in kept}
