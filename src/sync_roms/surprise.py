@@ -43,6 +43,12 @@ def ttl_days():
     return days if isinstance(days, int) and not isinstance(days, bool) and days >= 0 else DEFAULT_TTL_DAYS
 
 
+def excluded_systems():
+    """System ids Surprise never picks from, on every card: the surprise_excluded_systems setting."""
+    ids = usersettings.load_settings().get("surprise_excluded_systems")
+    return {i for i in ids if isinstance(i, str)} if isinstance(ids, list) else set()
+
+
 def _history_path():
     return os.path.join(store.data_dir(), "surprises.json")
 
@@ -225,7 +231,8 @@ def _pools(chosen_systems, taken):
 
 def run_surprise(card_name, setup, chosen_systems, interactive, dry_run, rng=None, today=None, to_fetch=None):
     """The sync step: replace some or all of a card's surprises (asking which when interactive), fill the empty slots,
-    save the card and the history, then open the card editor when interactive (with Surprise off too). A dry run
+    save the card and the history, then open the card editor when interactive (with Surprise off too). Systems in
+    excluded_systems() are left out, and their current surprises replaced. A dry run
     changes nothing and only previews the empty slots; when storage can't be listed nothing is replaced or saved.
     Returns the card's surprises after the step (on a dry run, the saved ones). to_fetch: passed to the card editor
     for its download preview."""
@@ -242,6 +249,8 @@ def run_surprise(card_name, setup, chosen_systems, interactive, dry_run, rng=Non
             from . import cardedit  # cardedit imports much of the package
             cardedit.edit_card(card_name, setup, to_fetch)
         return []
+    excluded = excluded_systems()
+    chosen_systems = [s for s in chosen_systems if s["bucket"] not in excluded]
     names = {s["bucket"]: s["name"] for s in chosen_systems}
     saved = entry.get("surprises")
     current = [x for x in (saved if isinstance(saved, list) else ())

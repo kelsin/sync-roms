@@ -462,7 +462,7 @@ sync-roms --edit
    red above (or over). Opened from a sync, it also shows how much of the card's ROMs aren't on it yet
    (`⬇️  … to download`). Sizes come from the storage cache (see [Storage cache](#storage-cache)); without one they show
    `…` and the total says "not sized". `/` filters, `Enter` opens a system, `l` adds a collection to the card (each shows how many of its games are playable on the card's device, and `Space`/`Enter` toggles the whole collection), `f` makes it a full system (every file in its folder; `f` again brings the
-   game list back), `u` turns the card's [Surprise](#surprise) on or off (the title says which). Games save to `cards.json` as you leave a
+   game list back), `u` opens a [Surprise](#surprise) menu: turn it on or off for the card (the title says which), or pick the systems it may use on every card. Games save to `cards.json` as you leave a
    system (the previous file is kept as `cards.json.bak`). `Esc` goes back to the menu.
 2. A system shows every file in its storage folder. `✅` is synced, `⬜` is not; a 📦 next to a game says a set the
    card references syncs it (switching it off excludes it from that set on this card). `/` searches, `Space` (or `Tab`)
@@ -572,15 +572,17 @@ Every card gets up to 10 surprises: random full English games (no BIOS, prototyp
 compilations; a multi-disc game counts as one) from the systems of the run, in addition to the games you picked. It is on by default. Seven of the ten come from
 the systems recommended for the card's device and three from the others, spread evenly over the systems; a system with no
 candidates passes its slots on. Games never surprised, then games surprised before, then games another card currently
-holds are used in that order. Full systems are left out, and so is any game already on the card.
+holds are used in that order. Full systems are left out, and so is any game already on the card. Systems listed in
+`surprise_excluded_systems` in `settings.json` (system ids, for every card) are never used, and a card's current surprises
+on them are replaced at the next sync.
 
 - **In a sync** the step runs before anything downloads, over the systems with games picked. Interactively it first asks which of the card's current
   surprises to replace (`Esc` there behaves as it does in any picker: it keeps them all), fills the empty slots, and opens
   the card editor so you can adjust the card (with Surprise off, the editor still opens). Without a terminal, with `--yes` or `--json` it replaces all of them. `--dry-run`
   changes no surprises: it only says whether it would ask or replace all, previews the picks for empty slots and saves nothing.
   The mirror is refreshed a second time only when this step or the editor changed the card's picks.
-- **In the card editor**, `u` in the system list turns Surprise on or off for the card (off removes its surprises at the next
-  sync), and `p` in a game list shows only the games surprised within `surprise_ttl_days`. A surprise shows in the
+- **In the card editor**, `u` in the system list opens a menu: turn Surprise on or off for the card (off removes its surprises
+  at the next sync), or check the systems Surprise may use (saved as `surprise_excluded_systems`, for every card), and `p` in a game list shows only the games surprised within `surprise_ttl_days`. A surprise shows in the
   game list as 🎁 Surprise and can't be switched off there, like a collection game; it counts in the card's budget and size warning.
 - **History** is kept in `~/.sync-roms/surprises.json` (system, bucket, title, card, ISO date) and pruned past
   `surprise_ttl_days` in `settings.json` (default 183) whenever it is written. It is how a game comes around again only later.
