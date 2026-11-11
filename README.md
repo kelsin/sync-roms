@@ -480,7 +480,8 @@ sync-roms --edit
 1. A card opens on every system its device can play, in the usual order. Systems recommended for the device's screen
    are marked ⭐; each system with picks shows how many games and how much space they take (ROMs plus the scraped
    files the card's firmware installs). The bottom line shows the card's total (games, scrapes and the BIOS files of
-   the systems it syncs) against its size, the free space, and turns red when it is over. Sizes come from a cache in
+   the systems it syncs) against its size and the free space, in green below 70% of the card, yellow below 90% and
+   red above (or over). Sizes come from a cache in
    `~/.sync-roms/sizes.json` that is refreshed in the background when you open a system; until it is ready sizes show
    `…`. `/` filters, `Enter` opens a system, `f` makes it a full system (every file in its folder; `f` again brings the
    game list back), `m` saves the card's picked games as a personal set. Games save to `cards.json` as you leave a
@@ -525,7 +526,7 @@ sync-roms cards new SD --device rg35xx-sp --layout knulli --size 256GB   # --siz
 A set file (in the package's `data/sets/` or your `~/.sync-roms/sets/`) is `{"name": ..., "description": ..., "games": [{"title": ..., "system": "gba", "bucket": "gba/Game.zip"}]}`.
 A multi-disc game adds `"files": [...]` with its other storage keys (the discs); `bucket` is the playlist (`.m3u`) or disc 1.
 Toggling the game adds or removes every file, one card entry each.
-Entries for an unknown system are skipped with a warning. Games of a full system show greyed out with a 🔒: they are always synced and can't be toggled.
+Entries for an unknown system are skipped with a warning. A full system has no game list to edit: every file is always synced, so opening it in the card editor only says so (press `f` on it in the system list to turn the list back on).
 
 Removing a game only drops it from the card's games; the file stays in storage.
 

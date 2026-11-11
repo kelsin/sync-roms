@@ -8,7 +8,7 @@ The editor becomes system-first, with sets as a filter inside a system, and a li
 
 ## Goals
 
-1. `sync-roms edit` opens a main menu for everything editable: cards, sets, device systems, settings. (Today's `edit`, `games edit` and `cards edit` all map to `--edit`.)
+1. `sync-roms edit` opens a main menu for everything editable: cards, sets, device systems. (Today's `edit`, `games edit` and `cards edit` all map to `--edit`.)
 2. Editing a card lists systems. Systems *recommended* for the device are highlighted. Each row shows picked games and their size.
 3. Inside a system: browse and search the system's whole catalog; a hotkey opens the set list; choosing a set narrows the view to that set's games *on this system*. Sets are never the entry point for card editing.
 4. A header always shows card used / card size, and per-system totals.
@@ -26,7 +26,7 @@ The editor becomes system-first, with sets as a filter inside a system, and a li
 ## Current state (facts from the code)
 
 - TUI is stdlib `curses`: `picker.filter_list`, `pick_systems`; card/core editing in `edit.py` (`toggle_games`, `edit_manifest`, `edit_system`, `edit_device_systems`); set editing in `setedit.py`; persistence in `store.py`.
-- Merge at sync: `store.load_manifest` merges `games.json` (core) + card games, then `sets` ids, dedups by bucket key, ORs `full_system`; single-card `excluded` is subtracted.
+- Merge at sync: `store.load_manifest` merges the card's games, then its `sets` ids, dedups by bucket key, ORs `full_system`; single-card `excluded` is subtracted from the game lists (a full system still installs every file).
 - Card size is a free-text string in `cards.json` (`"512 GB"`), `commands.parse_size` parses it; used only for the free-space check at sync.
 - No sizes are stored. They come from listings (`s3.list_sizes`, `mirror_sizes`; `stat_sizes`). The edit flow already lists keys per system but discards sizes.
 - `device-systems.json` = systems a device *can play* (tiers + per-device note), with a per-user add/remove overlay.
@@ -36,7 +36,7 @@ The editor becomes system-first, with sets as a filter inside a system, and a li
 ## Design
 
 ### Main menu
-`sync-roms edit` → menu: Cards, Sets, Device systems, Settings. Existing flags/aliases keep working and land here or in the matching sub-editor.
+`sync-roms edit` → menu: Cards, Sets, Device systems. Existing flags/aliases keep working and land here or in the matching sub-editor.
 
 ### Card editor (system-first)
 - Rows: all systems the device can play. Recommended ones are highlighted; the list keeps the normal `systems.json` order (decided by the user, no floating to the top).
@@ -47,12 +47,15 @@ The editor becomes system-first, with sets as a filter inside a system, and a li
 - List of the system's games with picked state; incremental search over the whole system.
 - Set hotkey → list of sets that contain games on this system → choosing one restricts the list to that set's games on this system (clearable). Toggling a game or the whole filtered set is allowed.
 - Existing coverage marks (`cover_notes`) become: picked directly / via a set reference / via full system.
-- Header: `used / card size`, free space, over-budget warning in red.
+- Header: `used / card size`, free space; green below 70% of the card, yellow below 90%, red above or over.
+- Metadata filter (`m`): Developer, Publisher, Genre (first part) or Year from the system's scraped `metadata.json`, then a value with its count. Values match case-insensitively; spellings that differ only by case are one value, shown in their most common spelling. Filters on different fields, the set filter and search combine.
+- A multi-disc game's playlist and discs switch on and off together, even when a filter shows only some of them; each file stays its own card entry.
+- On/off agrees with sync: a game is on when picked directly or by a referenced set and not excluded. Switching on drops its exclusion (and picks it directly if no set covers it); switching off drops the direct pick and excludes it only while a referenced set covers it. Removing a set reference drops the exclusions no set needs, and resets what revert goes back to.
 
 ### Space budget
 - Per game cost = ROM size + the scrape files the card's layout would install for that ROM (reuse `plan_scrapes` / layout rules). BIOS counted for the card's systems.
 - Card size parsed from the card's existing size string (a card without size shows used only).
-- Sizes cache: persistent file in `~/.sync-roms/` (per system, per file: size). On opening a system: (1) name listing (fast on SMB) diffed against the cache — stat only new files, drop removed; (2) spot-check ~5 random cached files and, if any size differs, rebuild that system in the background; (3) background refresh after ~30 days. Work runs in the background so the screen is usable at once; uncached systems show "…" until ready.
+- Sizes cache: `sizes.json` in the data folder, one map keyed by bucket key (`gba/Game.zip`), shared by bucket, storage-folder and mirror reads, stored per prefix with a `built` time. A missing storage folder fails the refresh and keeps the cache. On opening a system: (1) name listing (fast on SMB) diffed against the cache — stat only new files, drop removed; (2) spot-check ~5 random cached files and, if any size differs, rebuild that system in the background; (3) background refresh after ~30 days. Work runs in the background so the screen is usable at once; uncached systems show "…" until ready.
 - Measured: sizing one system on demand is fast enough; a whole-share scan of every system is slow and must not run at startup.
 - Scrape sizes use the same cache, from the `scrapes/` listing.
 
@@ -83,6 +86,7 @@ The editor becomes system-first, with sets as a filter inside a system, and a li
 - `sets` references on cards stay. Budget is computed on the resolved set of bucket keys (direct picks + set references + `full_system`, minus the card's `excluded`), deduplicated by key, so a game picked twice counts once. "Picked count" is that resolved count.
 - Scrape cost counts every file the layout would install for a ROM, including `onion/` and `slot/` PNGs that are already stored in `scrapes/`. A system with no scrapes costs ROM only. Refactor `plan_scrapes` into a per-ROM cost helper if needed. Until a system's sizes are cached, its numbers show "…" and the header total is marked partial.
 - Sizes come from whichever backend `s3.read_root()` / the bucket currently resolves to. Entries are keyed by bucket key (the path from the storage root), shared by every backend; a refresh from a local mirror only adds and updates sizes, never drops names (the mirror holds only some files).
+- `3ds` (original Nintendo 3DS) and `n3ds` are separate systems that share ES-DE's `n3ds` ROM folder; the ES-DE and EmuDeck media and gamelist folders follow the ROM folder name, so they share those too.
 - Ratios match by exact string. A system or device with no ratio is never recommended by ratio (overrides still apply).
 - A card with no or unparseable size string shows used only, no warning.
 
