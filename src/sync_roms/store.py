@@ -38,6 +38,12 @@ def folder_keys(bucket):
     return {k for k in s3.list_sizes(bucket + "/") if not k.endswith("/")}
 
 
+# The process umask can only be read by setting it, so it is read once here, while a single thread is running: a
+# background writer (the size cache) doing that at the same time as another would leave the umask at 0.
+_UMASK = os.umask(0)
+os.umask(_UMASK)
+
+
 def _keep_backup(path):
     backup(path)
 
@@ -54,9 +60,7 @@ def write_json(path, data, *, backup=False, mode=None, trailing_newline=False, *
         try:
             mode = os.stat(path).st_mode & 0o777
         except OSError:
-            umask = os.umask(0)
-            os.umask(umask)
-            mode = 0o666 & ~umask
+            mode = 0o666 & ~_UMASK
     fd, tmp = tempfile.mkstemp(dir=folder, prefix="." + os.path.basename(path) + "-", suffix=".tmp")
     try:
         with os.fdopen(fd, "w") as f:

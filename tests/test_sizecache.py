@@ -114,6 +114,14 @@ class SizeCacheTest(helpers.DataDir):
             self.fake.files["gba/b.zip"] = 20  # a changed size is caught by the spot check
             self.assertEqual(sizecache.refresh("gba/")["gba/b.zip"], 20)
 
+    def test_bucket_mode_takes_every_size_from_the_listing(self):
+        for n in range(4, 9):
+            self.fake.files[f"gba/{n}.zip"] = n
+        with mock.patch.object(s3, "read_root", lambda: None):
+            sizecache.refresh("gba/")
+            self.fake.files["gba/8.zip"] = 80  # past the 5 spot checks: still picked up from the listing
+            self.assertEqual(sizecache.refresh("gba/")["gba/8.zip"], 80)
+
     def test_interleaved_refreshes_of_two_prefixes_both_survive(self):
         self.fake.files["nes/z.zip"] = 7
         real = self.fake.list_sizes
@@ -212,12 +220,17 @@ class SizeCacheTest(helpers.DataDir):
         self.assertEqual(got, [{"gba/a.zip": 1, "gba/b.zip": 2, "gba/c.zip": 3}])
         self.assertEqual(sizecache.cached("gba/"), {"gba/a.zip": 1, "gba/b.zip": 2, "gba/c.zip": 3})
 
-    def test_an_empty_listing_empties_the_cache_only_by_a_rebuild(self):
+    def test_an_empty_listing_never_replaces_cached_sizes(self):
         sizecache.refresh("gba/")
         self.write_json("sizes.json", {"prefixes": {"gba/": {"built": 500.0, "files": {"gba/a.zip": 1}}}})
-        self.fake.files = {}
-        self.assertEqual(sizecache.refresh("gba/"), {})
-        self.assertEqual(self.read("sizes.json")["prefixes"]["gba/"]["built"], self.now)  # rebuilt, not incremental
+        self.fake.files = {}  # an unmounted share on Linux lists as an empty folder
+        with self.assertRaises(FileNotFoundError):
+            sizecache.refresh("gba/")
+        self.assertEqual(sizecache.cached("gba/"), {"gba/a.zip": 1})
+        self.now += sizecache.MAX_AGE + 1  # an old entry is rebuilt, but not from nothing
+        with self.assertRaises(FileNotFoundError):
+            sizecache.refresh("gba/")
+        self.assertEqual(sizecache.cached("gba/"), {"gba/a.zip": 1})
 
     def test_bad_sizes_are_dropped(self):
         self.write_json("sizes.json", {"prefixes": {"gba/": {"built": 1, "files": {

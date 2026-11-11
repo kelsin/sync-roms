@@ -12,7 +12,7 @@ import random
 import threading
 import time
 
-from . import runtime, s3, store
+from . import runtime, s3, store, ui
 
 MAX_AGE = 30 * 24 * 3600  # seconds before a system is rebuilt from scratch
 SPOT_CHECKS = 5
@@ -77,6 +77,13 @@ def _save(prefix, files, built):
     return files
 
 
+def _not_wiped(prefix, entry, files, partial):
+    """Fail instead of replacing a cached listing with an empty one: a share that isn't mounted can still list as an
+    empty folder (on Linux its mount point is one), and the sizes must survive that."""
+    if entry and entry["files"] and not files and not partial:
+        raise FileNotFoundError(f"{prefix} listed empty; keeping the cached sizes")
+
+
 def refresh(prefix):
     """Bring the cache for a prefix up to date (blocking) and return {key: size}. Raises what the listing raises, and
     FileNotFoundError when the folder reads come from is missing."""
@@ -89,6 +96,7 @@ def refresh(prefix):
     names = s3.list_sizes(prefix, sizes=bucket)
     if entry is None or _clock() - entry["built"] > MAX_AGE:
         files = names if bucket else s3.list_sizes(prefix)
+        _not_wiped(prefix, entry, files, partial)
         return _save(prefix, {**(entry["files"] if entry and partial else {}), **files}, _clock())
     old = entry["files"]
     kept = [k for k in old if k in names]  # a removed file is dropped below, not a sign the sizes are stale
@@ -97,7 +105,10 @@ def refresh(prefix):
     now = sizes_of(check)
     if any(now.get(k) != old[k] for k in check) or old and not names:  # an empty listing only empties by a rebuild
         files = names if bucket else s3.list_sizes(prefix)
+        _not_wiped(prefix, entry, files, partial)
         return _save(prefix, {**(old if partial else {}), **files}, _clock())
+    if bucket:  # the listing has every current size: nothing to keep from the cache
+        return _save(prefix, dict(names), entry["built"])
     files = dict(old) if partial else {k: old[k] for k in kept}
     files.update(sizes_of([k for k in names if k not in old]))
     return _save(prefix, files, entry["built"])
@@ -108,7 +119,8 @@ def refresh_async(prefix, on_done):
     gets what was cached before, or {}. Returns the started thread."""
     def run():
         try:
-            result = refresh(prefix)
+            with ui.silent_thread():  # the editor's curses screen is up
+                result = refresh(prefix)
         except (Exception, SystemExit):  # the thread must never die loudly (ui.fail raises SystemExit): fall back
             result = cached(prefix) or {}
         on_done(result)

@@ -39,14 +39,26 @@ class Pure(unittest.TestCase):
 
     def test_header(self):
         self.assertEqual(cardedit.header(U(1_500_000_000, 3, False), 512 * 10 ** 9),
-                         ("💾 1.5 GB / 512 GB · 510.5 GB free · 3 game(s)", False))
+                         ("💾 1.5 GB / 512 GB · 510.5 GB free · 3 file(s)", False))
         text, over = cardedit.header(U(600 * 10 ** 9, 9, False), 512 * 10 ** 9)
         self.assertTrue(over)
         self.assertIn("88 GB over", text)
-        self.assertEqual(cardedit.header(U(10 ** 9, 1, False), None), ("💾 1 GB used · 1 game(s)", False))
+        self.assertEqual(cardedit.header(U(10 ** 9, 1, False), None), ("💾 1 GB used · 1 file(s)", False))
         text, over = cardedit.header(U(10 ** 9, 1, True), None)
         self.assertTrue(text.endswith("… still sizing"))
         self.assertFalse(over)
+        self.assertTrue(cardedit.header(U(10 ** 9, 1, True), None, busy=False)[0].endswith("not sized"))
+
+    def test_silent_thread_hides_warn_and_fail_output(self):
+        err = io.StringIO()
+        with contextlib.redirect_stderr(err), ui.silent_thread():
+            ui.warn("quiet")
+            with self.assertRaises(SystemExit):
+                ui.fail("quiet")
+        self.assertEqual(err.getvalue(), "")
+        with contextlib.redirect_stderr(err):
+            ui.warn("loud")
+        self.assertIn("loud", err.getvalue())
 
     def test_status_color_follows_how_full_the_card_is(self):
         self.assertEqual(cardedit.status_of(U(2, 0, False), 1)[1], "red")
@@ -104,6 +116,8 @@ class Flow(DataDir):
                       "gb/": {"gb/Red.gb": 2}}
         self.cache = {}
         self.started = []
+        cardedit._inflight.clear()
+        self.addCleanup(cardedit._inflight.clear)
         for target, attrs in ((store, {"load_catalog": lambda: CATALOG, "load_sets": lambda: [SET],
                                        "repo_json": lambda name: CATALOG[name],
                                        "recommended_systems": lambda device, systems: set()}),
@@ -140,8 +154,8 @@ class Flow(DataDir):
         title, labels, kw = calls[0]
         self.assertEqual([l.strip() for l in labels], ["Game Boy Advance", "⭐ Game Boy"])
         self.assertEqual(kw["extras"][0], [("  1 picked", "green"), ("  5 B", "dim")])  # the ROM
-        self.assertEqual(kw["status"](None), ("💾 21 B / 1 GB · 1 GB free · 1 game(s)", "green"))  # ROM and the GBA BIOS
-        self.assertEqual([p for p, _ in self.started], ["BIOS/"])
+        self.assertEqual(kw["status"](None), ("💾 21 B / 1 GB · 1 GB free · 1 file(s)", "green"))  # ROM and the GBA BIOS
+        self.assertEqual([p for p, _ in self.started], ["BIOS/", "gba/", "scrapes/gba/"])  # the picked system is sized too
 
     def test_sizes_arrive_in_the_background_and_redraw(self):
         self.card(games={"gba": [g("gba/Ruby.zip")]})
@@ -156,7 +170,7 @@ class Flow(DataDir):
                 done({})  # what the worker thread calls
             kw["poll"]()
             self.assertEqual(kw["extras"][0][1], ("  5 B", "dim"))
-            self.assertEqual(kw["status"](None), "💾 5 B used · 1 game(s)")
+            self.assertEqual(kw["status"](None), "💾 5 B used · 1 file(s)")
             return None
         self.run_card(step)
 
@@ -168,8 +182,47 @@ class Flow(DataDir):
             seen.append(store.card_games("c"))
             return (cardedit.FULL_KEY, 0)
         self.run_card(returns((cardedit.FULL_KEY, 0)), look, returns(None))
-        self.assertEqual(seen[0], {"gba": {"full_system": True}})
+        self.assertEqual(seen[0], {"gba": {"full_system": True, "games": [g("gba/Ruby.zip")]}})
         self.assertEqual(store.card_games("c"), {"gba": [g("gba/Ruby.zip")]})
+
+    def test_full_system_keeps_the_list_for_a_later_session(self):
+        self.card(games={"gba": [g("gba/Ruby.zip")]})
+        self.run_card(returns((cardedit.FULL_KEY, 0)), returns(None))  # full system on, editor closed
+        self.run_card(returns((cardedit.FULL_KEY, 0)), returns(None))  # a new session switches it off
+        self.assertEqual(store.card_games("c"), {"gba": [g("gba/Ruby.zip")]})
+        self.card(games={"gba": {"full_system": True}})  # no list was replaced: off removes the system
+        self.run_card(returns((cardedit.FULL_KEY, 0)), returns(None))
+        self.assertEqual(store.card_games("c"), {})
+
+    def test_header_says_not_sized_once_nothing_is_running(self):
+        self.card(games={"gba": [g("gba/Ruby.zip")]})
+
+        def step(labels, kw):
+            self.assertIn("still sizing", kw["status"](None))
+            for _, done in self.started:
+                done({})  # every refresh ended (failed, say) and left nothing cached
+            self.assertIn("not sized", kw["status"](None))
+            return None
+        self.run_card(step)
+
+    def test_a_prefix_already_refreshing_is_joined_not_started_again(self):
+        a, b = cardedit.Sizing(), cardedit.Sizing()
+        a.start("gba/")
+        b.start("gba/")
+        self.assertEqual([p for p, _ in self.started], ["gba/"])
+        self.started[0][1]({})
+        self.assertTrue(a.finished() and b.finished())
+        self.assertFalse(a.busy() or b.busy())
+
+    def test_game_view_header_follows_a_set_reference_change(self):
+        self.card()
+        self.cache = {"gba/": self.files["gba/"], "gb/": self.files["gb/"], "scrapes/gba/": {}, "scrapes/gb/": {},
+                      "BIOS/": {}}
+
+        def after(labels, kw):  # the set adds Ruby and its save here (5 + 1 B) and Red on the other system (2 B)
+            self.assertEqual(kw["status"](kw["session"]["sel"]), "💾 8 B used · 3 file(s)")
+            return kw["session"]["sel"]
+        self.run_system(returns((cardedit.SET_KEY, 0)), returns((cardedit.FULL_KEY, 0)), returns(None), after)
 
     def test_entering_a_system_refreshes_its_sizes(self):
         self.card()
@@ -253,8 +306,8 @@ class Flow(DataDir):
         self.cache = {"gba/": self.files["gba/"], "scrapes/gba/": {}, "BIOS/": {"BIOS/gba_bios.bin": 16}, "gb/": {}}
 
         def step(labels, kw):
-            self.assertEqual(kw["status"]([False] * 4), ("💾 0 B / 1 GB · 1 GB free · 0 game(s)", "green"))
-            self.assertEqual(kw["status"]([True, False, False, True]), ("💾 26 B / 1 GB · 1 GB free · 2 game(s)", "green"))
+            self.assertEqual(kw["status"]([False] * 4), ("💾 0 B / 1 GB · 1 GB free · 0 file(s)", "green"))
+            self.assertEqual(kw["status"]([True, False, False, True]), ("💾 26 B / 1 GB · 1 GB free · 2 file(s)", "green"))
             return [False] * 4
         self.run_system(step)
 
@@ -271,7 +324,7 @@ class Flow(DataDir):
             kw["status"]([False] * 4)
             kw["status"]([True, False, False, False])  # Emerald (3) and the GBA BIOS (16)
             return [False] * 4
-        with mock.patch.object(cardedit, "status_of", side_effect=lambda u, c: seen.append(u.bytes)):
+        with mock.patch.object(cardedit, "status_of", side_effect=lambda u, c, busy=True: seen.append(u.bytes)):
             self.run_system(step)
         self.assertEqual(seen, [1002, 1021])
 
@@ -281,12 +334,12 @@ class Flow(DataDir):
 
         def step(labels, kw):
             self.assertIn("Gone.zip  ⚠️ not in storage", labels)
-            self.assertEqual(kw["status"](kw["session"]["sel"]), "💾 5 B used · 2 game(s)")
+            self.assertEqual(kw["status"](kw["session"]["sel"]), "💾 5 B used · 2 file(s)")
             return kw["session"]["sel"]
         self.run_system(step)
         with mock.patch.object(store, "recommended_systems", return_value=set()):
             calls = self.run_card(returns(None))
-        self.assertEqual(calls[0][2]["status"](None), "💾 5 B used · 2 game(s)")
+        self.assertEqual(calls[0][2]["status"](None), "💾 5 B used · 2 file(s)")
 
     def test_entering_a_system_lists_names_only(self):
         self.card()
@@ -444,7 +497,7 @@ class DiscFlow(Flow):
 
         def step(labels, kw):
             state = [True, False, False, False, False]  # only Disc 1 switched (as a script would)
-            self.assertIn("4 game(s)", kw["status"](state))
+            self.assertIn("4 file(s)", kw["status"](state))
             return state
         self.psx(step)
 

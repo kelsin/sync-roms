@@ -30,8 +30,9 @@ def size_text(n):
             return f"{n:.1f}".rstrip("0").rstrip(".") + f" {unit}"
 
 
-def header(usage, capacity):
-    """(status text, over budget) for a card's budget.Usage against its capacity in bytes (None: no size known)."""
+def header(usage, capacity, busy=True):
+    """(status text, over budget) for a card's budget.Usage against its capacity in bytes (None: no size known).
+    busy: whether size refreshes are still running; when not, a partial usage is "not sized" (a refresh failed)."""
     used = size_text(usage.bytes)
     if capacity is None:
         text, over = f"💾 {used} used", False
@@ -39,18 +40,18 @@ def header(usage, capacity):
         over = usage.bytes > capacity
         text = f"💾 {used} / {size_text(capacity)} · " + (
             f"⚠️  {size_text(usage.bytes - capacity)} over" if over else f"{size_text(capacity - usage.bytes)} free")
-    text += f" · {usage.count} game(s)"
+    text += f" · {usage.count} file(s)"
     if usage.partial:
-        text += f" · {SIZING} still sizing"
+        text += f" · {SIZING} still sizing" if busy else " · not sized"
     return text, over
 
 
 WARN_AT, FULL_AT = 0.70, 0.90  # the header is green below WARN_AT of the card, yellow below FULL_AT, then red
 
 
-def status_of(usage, capacity):
+def status_of(usage, capacity, busy=True):
     """header() as a filter_list status: green until 70% of the card, yellow until 90%, red above (and when over budget)."""
-    text, over = header(usage, capacity)
+    text, over = header(usage, capacity, busy)
     if capacity is None:
         return text
     share = usage.bytes / capacity
@@ -90,18 +91,44 @@ def can_play(systems, setup):
     return [s for s in systems if store.system_applies(s, *setup)]
 
 
+_inflight = {}  # prefix -> the Sizing objects waiting on its running refresh, so a prefix is never refreshed twice at once
+_inflight_lock = threading.Lock()
+
+
 class Sizing:
     """Background size refreshes: each prefix is started once, and finished() tells the curses loop (polling on its
-    own thread) that one is done; the worker threads never touch the screen."""
+    own thread) that one is done; the worker threads never touch the screen. A prefix another Sizing is already
+    refreshing joins that refresh instead of starting a second one."""
 
     def __init__(self):
         self.done = queue.Queue()
         self.started = set()
+        self.pending = set()
 
     def start(self, prefix):
-        if prefix not in self.started:
-            self.started.add(prefix)
-            sizecache.refresh_async(prefix, lambda _sizes: self.done.put(prefix))
+        if prefix in self.started:
+            return
+        self.started.add(prefix)
+        self.pending.add(prefix)
+        with _inflight_lock:
+            waiting = _inflight.get(prefix)
+            if waiting is not None:
+                waiting.append(self)
+                return
+            _inflight[prefix] = [self]
+
+        def finish(_sizes):
+            with _inflight_lock:
+                waiting = _inflight.pop(prefix)
+            for sizing in waiting:
+                sizing.pending.discard(prefix)
+                sizing.done.put(prefix)
+
+        sizecache.refresh_async(prefix, finish)
+
+    def busy(self):
+        """Whether a started refresh is still running."""
+        return bool(self.pending)
 
     def finished(self):
         """Whether any refresh finished since the last call."""
@@ -112,6 +139,13 @@ class Sizing:
             except queue.Empty:
                 return any_done
             any_done = True
+
+
+def start_system(sizing, bucket, layout):
+    """Start the size refreshes the budget needs for one system: its ROM folder, and the scrapes its layout installs."""
+    sizing.start(f"{bucket}/")
+    if layout in scrape_plan.SCRAPE_LAYOUTS:
+        sizing.start(f"{scrape_plan.SCRAPES}/{bucket}/")
 
 
 LOADING = "loading"
@@ -135,7 +169,8 @@ class Metadata:
 
     def _load(self):
         try:
-            text = s3.get_text(f"{scrape_plan.SCRAPES}/{self.bucket}/metadata.json")
+            with ui.silent_thread():
+                text = s3.get_text(f"{scrape_plan.SCRAPES}/{self.bucket}/metadata.json")
             result = metafilter.index(json.loads(text), self.bucket)
         except (Exception, SystemExit):  # missing, unreadable or not JSON: no metadata
             result = None
@@ -190,20 +225,18 @@ def card_entry(name, setup, cards=None):
     return {**(entry if isinstance(entry, dict) else {}), "layout": setup[1]}
 
 
-def toggle_full(name, bucket, stash):
-    """Switch a system's full_system on or off in a card and save it. The game list it replaced is kept in stash and
-    put back when it is switched off again in this session."""
+def toggle_full(name, bucket):
+    """Switch a system's full_system on or off in a card and save it. The game list it replaces stays in the entry
+    ("games", which sync ignores) and is put back when full_system is switched off again, even in a later session."""
     games = dict(store.card_games(name))
     entry = games.get(bucket)
     if isinstance(entry, dict) and entry.get("full_system"):
-        if stash.get(bucket):
-            games[bucket] = stash.pop(bucket)
+        if entry.get("games"):
+            games[bucket] = entry["games"]
         else:
             games.pop(bucket)
     else:
-        if isinstance(entry, list) and entry:
-            stash[bucket] = entry
-        games[bucket] = {"full_system": True}
+        games[bucket] = {"full_system": True, **({"games": entry} if isinstance(entry, list) and entry else {})}
     store.update_card(name, games=store.sorted_list(games))
 
 
@@ -220,7 +253,12 @@ def edit_card(name, setup=None):
     recommended = store.recommended_systems(device, catalog["systems"]) if device else set()
     sizing = Sizing()
     sizing.start("BIOS/")
-    stash, pos = {}, 0
+    start_card = card_entry(name, setup)
+    start_usages = budget.system_usages(start_card, systems)
+    for s in systems:  # the systems with picks are sized now, so the total doesn't wait for each to be opened
+        if budget.picked(start_usages[s["bucket"]]):
+            start_system(sizing, s["bucket"], setup[1])
+    pos = 0
     while True:
         card = card_entry(name, setup)
         capacity = budget.card_capacity(card)
@@ -239,13 +277,13 @@ def edit_card(name, setup=None):
 
         i = picker.filter_list(f"💳 {name} — its systems (⭐ recommended for the device)", labels, extras=extras,
                                cursor=pos, hotkeys=(FULL_KEY, MAKE_SET_KEY), hint=LIST_HINT,
-                               status=lambda _state: status_of(view["total"], capacity), poll=poll)
+                               status=lambda _state: status_of(view["total"], capacity, sizing.busy()), poll=poll)
         if i is None:
             return
         if isinstance(i, tuple):
             key, pos = i
             if key == FULL_KEY:
-                toggle_full(name, systems[pos]["bucket"], stash)
+                toggle_full(name, systems[pos]["bucket"])
             else:
                 sets = store.load_sets()
                 edit.make_set_from_extras(edit.new_target(name, store.card_games(name)), sets,
@@ -284,9 +322,7 @@ def edit_system(name, system, setup, sizing=None):
     metadata. Saves to cards.json when left; returns whether anything changed."""
     sizing = sizing or Sizing()
     bucket = system["bucket"]
-    sizing.start(f"{bucket}/")
-    if setup[1] in scrape_plan.SCRAPE_LAYOUTS:
-        sizing.start(f"{scrape_plan.SCRAPES}/{bucket}/")
+    start_system(sizing, bucket, setup[1])
     cards = store.load_cards()
     raw = store.card_games(name, cards)
     entry = raw.get(bucket)
@@ -316,7 +352,9 @@ def edit_system(name, system, setup, sizing=None):
     work = {}
 
     def work_out():
-        card = card_entry(name, setup, cards)
+        card = card_entry(name, setup, cards)  # with the set references and exclusions as edited so far
+        card = {**card, "games": {**(card.get("games") or {}), store.SETS_KEY: list(sets_on)},
+                "excluded": {b: k for b, k in other_excluded.items() if k}}
         usages = budget.system_usages(card, others)
         parts = list(usages.values())  # without BIOS: it is added once, with this system's, in status
         work["others"] = budget.Usage(sum(p.bytes for p in parts), sum(p.count for p in parts),
@@ -422,7 +460,7 @@ def edit_system(name, system, setup, sizing=None):
                            or bool(picked) and work["partial"])
                 total = budget.Usage(work["others"].bytes + mine + bios.bytes, work["others"].count + len(picked),
                                      partial)
-                return status_of(total, capacity)
+                return status_of(total, capacity, sizing.busy())
 
             def poll():
                 if sizing.finished():
@@ -464,6 +502,7 @@ def edit_system(name, system, setup, sizing=None):
                     excluded.intersection_update(covered)
                     other_excluded.update((b, [k for k in keys if k in covered]) for b, keys in other_excluded.items())
                     start = states(cover())
+                    work_out()  # the other systems' share and BIOS change with the set references
                 if chosen:
                     filt = (chosen["name"], set_filter(chosen, system))
     except (KeyboardInterrupt, curses.error):  # Ctrl-C, or a terminal too small to draw the list: keep the toggles

@@ -1,5 +1,6 @@
 """Terminal colors, prompts and progress output."""
 import collections
+import contextlib
 import json
 import os
 import queue
@@ -42,13 +43,31 @@ def err_color(code, text):
     return f"\033[{code}m{text}\033[0m" if _use_color(sys.stderr) else text
 
 
+_thread = threading.local()
+
+
+@contextlib.contextmanager
+def silent_thread():
+    """warn() and fail() print nothing on this thread inside the block (a background worker must not write over a
+    curses screen); fail() still raises."""
+    before = getattr(_thread, "silent", False)
+    _thread.silent = True
+    try:
+        yield
+    finally:
+        _thread.silent = before
+
+
 def warn(text):
+    if getattr(_thread, "silent", False):
+        return
     print(err_color("33", f"⚠️  {text}"), file=sys.stderr)
 
 
 def fail(text, code=3):
     """Exit with an error on stderr: code 3 for config/credential/tool problems, 2 for usage, 1 for failures."""
-    print(err_color("31", f"❌ {text}"), file=sys.stderr)
+    if not getattr(_thread, "silent", False):
+        print(err_color("31", f"❌ {text}"), file=sys.stderr)
     raise SystemExit(code)
 
 
