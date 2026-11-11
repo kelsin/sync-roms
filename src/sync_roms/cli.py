@@ -13,9 +13,10 @@ from . import __version__, clean, commands, downloads, edit, external, m3u, pick
 
 SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "sync": ("[CARD]", "download the ROMs, BIOS and scraped data for a card (this is what plain `sync-roms CARD` does)"),
-    "edit": ("", "interactive editor: cards, sets, device systems (same as `games edit`)"),
+    "edit": ("", "interactive editor: cards, sets, collections, device systems (same as `games edit`)"),
     "games": ("edit|list|add|remove|full|sets|export|import", "edit a card's games, interactively or from scripts"),
     "sets": ("edit", "edit the repo's game sets by hand and open a PR with the changes"),
+    "collections": ("edit", "edit your collections of favourite games (saved in ~/.sync-roms/collections/)"),
     "cards": ("edit|list|new|set|rename|delete", "list and manage the cards you've synced"),
     "devices": ("[ID]", "list the supported devices, or one device's systems"),
     "upload": ("roms [DIR] | scrapes [CARD]", "upload ROMs or a card's scraped data to storage"),
@@ -80,8 +81,16 @@ TOPICS = {
   Pick a set to switch games off, add games from a system (you're asked for a category), change a game's category or
   rename it. ➕ New set creates one; d deletes the highlighted one. Esc reviews the changes before the PR is opened.
 """,
+    "collections": """
+  sync-roms collections edit                  edit your collections of favourite games
+
+  Your own lists of games (like a set, but personal), saved straight to ~/.sync-roms/collections/<id>.json when you pick
+  Done; Quit discards. No git or gh needed, and nothing goes to storage or the repo. Same keys as the set editor.
+  Deleting a collection that cards use asks first, then removes it from them. In a card's system list, l adds a
+  collection to that card.
+""",
     "edit": """
-  sync-roms edit                              main menu: Cards, Sets (opens a PR), Device systems; same as `games edit`
+  sync-roms edit                              main menu: Cards, Sets (opens a PR), Collections, Device systems; same as `games edit`
 """,
     "cards": """
   sync-roms cards edit                        same as `games edit`

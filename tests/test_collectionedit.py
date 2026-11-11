@@ -6,7 +6,7 @@ from unittest import mock
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 from helpers import DataDir  # noqa: E402
-from sync_roms import collectionedit, collections, edit, listedit, picker, setedit, store, ui  # noqa: E402
+from sync_roms import cli, collectionedit, commands, collections, edit, listedit, picker, setedit, store, ui  # noqa: E402
 
 SYSTEMS = [{"name": "Game Boy Advance", "bucket": "gba"}, {"name": "PlayStation", "bucket": "psx"}]
 DISCS = {"psx/FF7.m3u", "psx/FF7 (Disc 1).chd", "psx/FF7 (Disc 2).chd", "psx/Crash.chd"}
@@ -87,3 +87,13 @@ class Editor(DataDir):
         _, _, note = self.run_editor([0, 2, 3], asks=["Empty", ""], edit_one=lambda c, s, k: None, confirm=True)
         self.assertIn("Empty has no games", note.call_args_list[0][0][0])
         self.assertFalse(os.path.exists(self.path("collections")))
+
+
+class Wiring(unittest.TestCase):
+    def test_command_help_and_completion(self):
+        with mock.patch.object(collectionedit, "edit_collections", return_value=0) as run:
+            self.assertEqual(commands.run(["collections", "edit"]), 0)
+        run.assert_called_once()
+        self.assertEqual(commands.second_words()["collections"], ["edit"])
+        self.assertEqual(cli.SUBCOMMANDS["collections"][0], "edit")
+        self.assertIn("sync-roms collections edit", cli.TOPICS["collections"])

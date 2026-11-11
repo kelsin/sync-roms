@@ -117,7 +117,7 @@ class EofTest(EditBase):
     def test_eof_on_rename_cancels(self):
         with open(self.path("cards.json"), "w") as f:
             json.dump({"c": {"layout": "esde", "device": "full"}}, f)
-        self.run_eof([0, (edit.RENAME_KEY, 0), None, 3])
+        self.run_eof([0, (edit.RENAME_KEY, 0), None, 4])
         self.assertEqual(list(self.read("cards.json")), ["c"])
 
 

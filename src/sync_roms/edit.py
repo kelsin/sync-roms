@@ -212,7 +212,7 @@ def target_changes(t):
 
 def edit_manifest():
     """The editor's top menu: Cards (each opens the card editor, which saves games as they change), Sets (opens a PR),
-    Device systems; device/firmware and device-system changes are reviewed and saved at the end."""
+    Collections (saved as you leave the collection editor), Device systems; device/firmware and device-system changes are reviewed and saved at the end."""
     print(ui.bold("✏️  Edit mode") + ui.dim(f"  {s3.access()}"))
     if not store.cards_readable():
         ui.fail(f"{os.path.join(store.data_dir(), 'cards.json')} isn't valid JSON, so nothing could be saved. "
@@ -377,22 +377,29 @@ def edit_manifest():
             pass  # the reason is already printed
         note("")  # keep what it printed (a PR link, why it stopped) on screen until the menu redraws
 
+    def edit_collections():
+        from . import collectionedit
+        collectionedit.edit_collections()
+        note("")  # keep what it printed on screen until the menu redraws
+
     def menu():
         """The top menu. Returns True to review and save, False to quit without saving."""
         try:
             while True:
-                options = ["💳 Cards", "📦 Sets", "🧩 Device systems", "✅ Done (review & save)", "🚪 Quit without saving"]
+                options = ["💳 Cards", "📦 Sets", "💖 Collections", "🧩 Device systems", "✅ Done (review & save)", "🚪 Quit without saving"]
                 extras = [[("  " + str(len(targets)) + " pending", "cyan")] if targets else [],
-                          [], [("  " + str(len(overlay_pending)) + " edited", "cyan")] if overlay_pending else [], [], []]
+                          [], [], [("  " + str(len(overlay_pending)) + " edited", "cyan")] if overlay_pending else [], [], []]
                 i = picker.filter_list("✏️  What do you want to edit?  (Esc = review & save)", options, extras=extras,
                                        hint="Enter open · Esc review & save")
-                if i is None or i == 3:
+                if i is None or i == 4:
                     return True
                 if i == 0:
                     edit_cards()
                 elif i == 1:
                     edit_sets()
                 elif i == 2:
+                    edit_collections()
+                elif i == 3:
                     while edit_device_systems():
                         pass
                 else:

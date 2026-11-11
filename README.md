@@ -260,6 +260,7 @@ Every mode is a command (`sync-roms COMMAND --help` explains one; plain `sync-ro
 | `edit`, `games edit`, `cards edit` | interactive list editor | `--edit` |
 | `games list\|add\|remove\|full\|sets\|export\|import` | edit lists from scripts, see below | |
 | `sets edit` | edit the repo's game sets by hand and open a PR (needs `git` and a logged-in `gh`) | |
+| `collections edit` | edit your collections of favourite games (saved in `~/.sync-roms/collections/`) | |
 | `cards list\|new\|set\|rename\|delete` | manage cards | |
 | `devices [ID]` | list devices, or one device's systems (`--json`) | `--devices` |
 | `upload roms [DIR]` / `upload scrapes [CARD]` | upload to storage | `--upload`, `--upload-scrapes` |
@@ -469,7 +470,7 @@ read to show what is in it, so the read-only profile is enough. No folders are n
 sync-roms --edit
 ```
 
-0. The menu has **Cards**, **Sets** and **Device systems**. **Sets** is `sync-roms sets edit` (see below; it needs `git` and a logged-in `gh`, and returns here if they are missing). **Device systems** is described at the end of this section. Under **Cards**, pick one of your cards, or **➕ New card** (asks for its folder name, then its device and
+0. The menu has **Cards**, **Sets**, **Collections** and **Device systems**. **Sets** is `sync-roms sets edit` (see below; it needs `git` and a logged-in `gh`, and returns here if they are missing). **Collections** is `sync-roms collections edit` (see below). **Device systems** is described at the end of this section. Under **Cards**, pick one of your cards, or **➕ New card** (asks for its folder name, then its device and
    firmware, like the first sync does, and saves the card). On a card, `v` changes its device and firmware instead of opening it (saved with the review at the end) and drops the card's games for systems the new device or firmware doesn't use. Each card's row shows its current device and firmware.
 1. A card opens on every system its device can play, in the usual order. Systems recommended for the device's screen
    are marked ⭐; each system with picks shows how many games and how much space they take (ROMs plus the scraped
@@ -477,7 +478,7 @@ sync-roms --edit
    the systems it syncs) against its size and the free space, in green below 70% of the card, yellow below 90% and
    red above (or over). Sizes come from a cache in
    `~/.sync-roms/sizes.json` that is refreshed in the background when you open a system; until it is ready sizes show
-   `…`. `/` filters, `Enter` opens a system, `f` makes it a full system (every file in its folder; `f` again brings the
+   `…`. `/` filters, `Enter` opens a system, `l` adds a collection to the card (each shows how many of its games are playable on the card's device, and `Space`/`Enter` toggles the whole collection), `f` makes it a full system (every file in its folder; `f` again brings the
    game list back). Games save to `cards.json` as you leave a
    system (the previous file is kept as `cards.json.bak`). `Esc` goes back to the menu.
 2. A system shows every file in its storage folder. `✅` is synced, `⬜` is not; a 📦 next to a game says a set the
@@ -494,7 +495,7 @@ sync-roms --edit
    shows what is active. A game with no value for a field never matches a filter on it. The metadata is read in the
    background once per session, so the menu says it is loading at first. `c` clears every filter and shows every game again.
    Pending changes show as `➕` / `➖` and the bottom line updates the card's total as you toggle. `w` writes a note on a
-   picked game. `Enter` keeps your changes; `Esc` asks whether to keep or revert them if there are any.
+   picked game. A 💖 next to a game says one of the card's collections syncs it: it is always on, can't be switched off here, per-card exclusions don't apply to it, and it counts in the card's budget. `Enter` keeps your changes; `Esc` asks whether to keep or revert them if there are any.
 3. When you leave the menu, device/firmware and device-system changes are summarized, then **save**, **keep
    editing**, **discard**, or **list every change**. Nothing is uploaded.
 
@@ -525,6 +526,10 @@ Removing a game only drops it from the card's games; the file stays in storage.
 ### Editing the built-in sets
 
 `sync-roms sets edit` edits the sets in this repo's `data/sets/` and opens a PR with the changes, so it works from any install. Pick a set to switch games off, add games from a system (you're asked for a category; existing ones are listed), change a game's category, or rename it. **➕ New set** creates a set and `d` deletes the highlighted one (it warns if a card still references it). Esc shows the changes; confirming clones `kelsin/sync-roms` to a temporary folder, writes the changed set files, pushes a branch and runs `gh pr create`. It needs `git` and a logged-in `gh`, and writes nothing to storage or to `~/.sync-roms`.
+
+### Collections
+
+`sync-roms collections edit` edits your own collections of favourite games. A collection is a file like a set file (`{"name": ..., "games": [...]}`) at `~/.sync-roms/collections/<id>.json`; the editor has the same keys as the set editor and saves straight to that folder when you pick Done (Quit discards). They are personal: they never go to storage or into the repo, and no `git` or `gh` is needed. Deleting a collection that cards use asks first and removes it from those cards.
 
 ### Full systems
 
