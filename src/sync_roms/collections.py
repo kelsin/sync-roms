@@ -26,6 +26,8 @@ def load_collections():
         try:
             with open(os.path.join(folder, name), encoding="utf-8") as f:
                 data = json.load(f)
+            if not isinstance(data["name"], str) or not isinstance(data["games"], list):
+                raise ValueError("needs a text 'name' and a 'games' list")
             found.append({"id": name[:-5], "name": data["name"], "description": data.get("description", ""),
                           "games": data["games"]})
         except (OSError, ValueError, AttributeError, KeyError, TypeError) as e:

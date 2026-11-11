@@ -29,6 +29,18 @@ class Files(DataDir):
             self.assertEqual([c["id"] for c in collections.load_collections()], ["favs"])
         self.assertIn("collections/bad.json", warn.call_args[0][0])
 
+    def test_malformed_files_are_warned_and_skipped_and_check_reports_them(self):
+        collections.save_collection({"id": "favs", **FAVS})
+        bad = {"a": {}, "b": [], "c": {"name": 5, "games": []}, "d": {"name": "X", "games": None}}
+        for n, data in bad.items():
+            self.write_json(f"collections/{n}.json", data)
+        with mock.patch.object(ui, "warn") as warn:
+            self.assertEqual([c["id"] for c in collections.load_collections()], ["favs"])
+        self.assertEqual(warn.call_count, 4)
+        problems = commands.check_data()
+        self.assertEqual(len(problems), 4)
+        self.assertTrue(all(p.startswith("collections/") for p in problems))
+
     def test_no_folder_is_no_collections_and_delete_removes_the_file(self):
         self.assertEqual(collections.load_collections(), [])
         collections.save_collection({"id": "favs", **FAVS})
