@@ -2,7 +2,7 @@
 import copy
 
 from . import collections as colls
-from . import edit, m3u, picker, s3, store, surprise, themeart, ui
+from . import cardedit, edit, m3u, metafilter, picker, s3, store, surprise, themeart, ui
 from .listedit import ask_category, game_label, reconcile, recategorize, view
 
 
@@ -30,7 +30,9 @@ def fold_discs(games, in_storage):
 
 PAST_SURPRISE_KEY = "p"
 CLEAR_KEY = "c"
-GAMES_HINT = "Space toggle · Enter done · / filter · w note · a all · p past · c clear"
+SET_KEY = "s"
+META_KEY = "m"
+GAMES_HINT = "Space toggle · Enter done · / search · s set · m meta · c clear · p past"
 
 
 # --- Editing the games of one collection -------------------------------------------------------------
@@ -78,19 +80,38 @@ def edit_one(collection, systems, keys_of):
                 continue
             s = shown[systems[j]["bucket"]]
             had = {g["bucket"] for g in s["games"]}
-            all_rows, past = system_rows(s, keys_of(s["bucket"])), None
+            all_rows, past, filt, meta_filt = system_rows(s, keys_of(s["bucket"])), None, None, {}
+            meta = cardedit.Metadata(s["bucket"])
+            titles = {r[1]: r[2] for r in all_rows}
+            sets = store.load_sets()
+
+            def keep(key, skip=None):
+                wanted = {f: v for f, v in meta_filt.items() if f != skip}
+                return ((filt is None or key in filt[1]) and (past is None or key in past)
+                        and (not wanted or metafilter.matches(meta.get().get(key, {}), wanted)))
+
             while True:
-                where = " · 🎁 past surprises only (c shows all)" if past is not None else ""
+                parts = ([f"📦 {filt[0]} only"] if filt else []) + (["🎁 past surprises only"] if past is not None else []) \
+                    + ([metafilter.describe(meta_filt)] if meta_filt else [])
+                where = f" · {' · '.join(parts)} (c shows all)" if parts else ""
                 pressed = edit.toggle_games(
                     f"✏️  {s['name']} — ✅ in {collection['name']}, ⬜ in storage only{where}",
-                    [r for r in all_rows if past is None or r[1] in past],
-                    hotkeys=(PAST_SURPRISE_KEY, CLEAR_KEY), hint=GAMES_HINT)
+                    [r for r in all_rows if keep(r[1])],
+                    hotkeys=(SET_KEY, META_KEY, PAST_SURPRISE_KEY, CLEAR_KEY), hint=GAMES_HINT)
                 if pressed == PAST_SURPRISE_KEY:
                     past = surprise.past_keys(s["bucket"]) or None
                     if past is None:
                         edit.note(ui.yellow(f"ℹ️  No past surprises on {s['name']}."))
+                elif pressed == META_KEY:
+                    cardedit.pick_meta(s, meta, meta_filt, lambda field: [r[1] for r in all_rows if keep(r[1], field)])
+                elif pressed == SET_KEY:
+                    chosen = cardedit.pick_set(s, sets, s["games"], titles, set(titles), filt and filt[0],
+                                               lambda: {g.get("bucket") for g in s["games"]})
+                    if chosen:
+                        filt = (chosen["name"], cardedit.set_filter(chosen, s))
                 elif pressed == CLEAR_KEY:
-                    past = None
+                    past, filt = None, None
+                    meta_filt.clear()
                 else:
                     break
             added = {g["bucket"] for g in s["games"]} - had
