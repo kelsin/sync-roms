@@ -12,7 +12,7 @@ The editor becomes system-first, with sets as a filter inside a system, and a li
 2. Editing a card lists systems. Systems *recommended* for the device are highlighted. Each row shows picked games and their size.
 3. Inside a system: browse and search the system's whole catalog; a hotkey opens the set list; choosing a set narrows the view to that set's games *on this system*. Sets are never the entry point for card editing.
 4. A header always shows card used / card size, and per-system totals.
-5. Remove the core list. Only per-card picks (games, `sets` references, `full_system`) remain.
+5. Remove the core list (done). Only per-card picks (games, `sets` references, `full_system`) remain.
 6. Add a stricter "recommended" tier per screen ratio, separate from "can play".
 
 ## Non-goals / anti-goals
@@ -60,20 +60,20 @@ The editor becomes system-first, with sets as a filter inside a system, and a li
 - Scrape sizes use the same cache, from the `scrapes/` listing.
 
 ### Core list removal
-- Delete `games.json` handling (starter file, `seed_personal_files` copy, `merge_lists` core input, core editor menu entry, `prune_unknown_sets` for core). Existing `~/.sync-roms/games.json` is simply no longer read (not deleted).
+- Deleted (done): `games.json` handling (starter file, `seed_personal_files` copy, `merge_lists` core input, core editor menu entry, `prune_unknown_sets` for core). Existing `~/.sync-roms/games.json` is simply no longer read (not deleted).
 - Repo docs/CLAUDE.md data-files section updated accordingly.
 - Sets remain in the repo (`data/sets/`) and in the personal set support that exists today.
 
 ### Recommended tier
 - `devices.json`: optional `screen2` (ratio of a second screen). A device with `screen2` is dual-screen.
 - `systems.json`: new `ratio` — the system's native aspect ratio (user's examples: NES/SNES/PS1/Genesis 4:3, GBA 3:2, Game Boy 10:9; others filled by the builder from knowledge and flagged for review).
-- New data file (name left to builder) of per-ratio *overrides* of the form `{ratio: [system ids]}`, plus a dual-screen entry:
+- New data file (`ratio-systems.json`) of per-ratio *overrides* of the form `{ratio: [system ids]}`, plus a dual-screen entry:
   - dual-screen devices: add `nds`, `3ds`, `n3ds`.
   - `3:5`: add `fbneo`, `mame`, and also `nds`, `3ds`, `n3ds`.
   - `1:1`: add `gb`, `gbc` (closest ratio available to their native 10:9; decided by the user).
 - A device's recommended systems = (systems whose native `ratio` equals the device `screen`) ∪ (override list for that ratio) ∪ (dual-screen list if `screen2` present), intersected with what the device can play (`device-systems.json`). The per-user overlay is unchanged: it edits only the can-play list (`device-systems.json`) and never the recommended tier (decided by the user). The recommended tier is always computed from the repo data and then intersected with the overlaid can-play list.
 
-## Calls I made (not agreed)
+## Calls I made (built as listed)
 - Over budget warns, does not block.
 - Cache spot-check count (~5) and refresh age (~30 days).
 - Native ratios for systems beyond the user's examples.
@@ -90,5 +90,5 @@ The editor becomes system-first, with sets as a filter inside a system, and a li
 - Ratios match by exact string. A system or device with no ratio is never recommended by ratio (overrides still apply).
 - A card with no or unparseable size string shows used only, no warning.
 
-## Left to the builder
+## Left to the builder (decided in the build)
 Key bindings, screen layout details, cache file format and name, breaking the work into steps, tests, how `plan_scrapes` is called for estimates, file/override data name.

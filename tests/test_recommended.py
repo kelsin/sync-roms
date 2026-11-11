@@ -31,6 +31,10 @@ class Recommended(unittest.TestCase):
         self.assertIn("gba", store.recommended_systems(dev("3:2"), SYSTEMS))
         self.assertLessEqual({"gb", "gbc"}, store.recommended_systems(dev("10:9"), SYSTEMS))
 
+    def test_game_boy_style_and_16_10_screens_get_recommendations(self):
+        self.assertLessEqual({"gb", "gbc"}, store.recommended_systems(dev("31:27"), SYSTEMS))
+        self.assertLessEqual({"psp", "switch", "wii"}, store.recommended_systems(dev("16:10"), SYSTEMS))
+
     def test_dual_screen_adds_ds_and_3ds(self):
         self.assertNotIn("nds", store.recommended_systems(dev("16:9"), SYSTEMS))
         got = store.recommended_systems(dev("16:9", "4:3"), SYSTEMS)

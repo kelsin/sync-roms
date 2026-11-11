@@ -156,7 +156,7 @@ Then:
    | `o` | cycle the view: all / only selected / only changed |
    | `z` | show/hide systems with 0 ROMs |
    | `e` | edit the highlighted system's games for this card (same list as `games edit`), then return here. Not shown with `--dry-run` |
-   | `D` | clear this card's own games after asking |
+   | `D` | clear this card's games after asking |
    | `enter` | start downloading |
    | `q` / `Esc` | quit |
 
@@ -506,19 +506,19 @@ sync-roms --edit
 
 Personal sets are files in `~/.sync-roms/sets/<id>.json` (same format as the package's sets, below), appear next to the built-in ones and can be referenced like them; an id already used by a built-in set is refused. You can also write them by hand, and `sync-roms check` validates them.
 
-On the Cards list, `v` changes a card's device and firmware, `r` renames a card and `d` deletes one (both ask first, and act at once). **🧩 Device systems** edits which systems a device recommends: it is saved as the `add`/`remove` overlay in `device-systems.json`, relative to the repo defaults. A file that isn't valid JSON is never overwritten: sync-roms says so and leaves it for you to fix (`sync-roms check` lists the problems).
+On the Cards list, `v` changes a card's device and firmware, `r` renames a card and `d` deletes one (both ask first, and act at once). **🧩 Device systems** edits which systems a device can play: it is saved as the `add`/`remove` overlay in `device-systems.json`, relative to the repo defaults. A file that isn't valid JSON is never overwritten: sync-roms says so and leaves it for you to fix (`sync-roms check` lists the problems).
 
 ### Editing from scripts
 
-`--card NAME` picks the card; every command takes `--dry-run` and prints what it changed.
+`--card NAME` picks the card and every `games` command needs it; every command takes `--dry-run` and prints what it changed.
 
 ```bash
 sync-roms games add gba 'Metroid*' --card SD      # a name, SYSTEM/name, or a glob matched against storage
-sync-roms games remove gba 'Metroid Fusion.zip'
-sync-roms games full psx on                        # sync a whole system
-sync-roms games sets add pinball
-sync-roms games list --json
-sync-roms games export > list.txt                  # SYSTEM/file per line, SYSTEM/* for a full system
+sync-roms games remove gba 'Metroid Fusion.zip' --card SD
+sync-roms games full psx on --card SD              # sync a whole system
+sync-roms games sets add pinball --card SD
+sync-roms games list --json --card SD
+sync-roms games export --card SD > list.txt      # SYSTEM/file per line, SYSTEM/* for a full system
 sync-roms games import list.txt --card SD
 sync-roms cards new SD --device rg35xx-sp --layout knulli --size 256GB   # --size is optional; shown in `cards list` and on sync
 ```
@@ -603,9 +603,9 @@ It is meant for preparing a downloaded rom pack before you upload it to storage,
 ## How it works
 
 - Reads the systems, layouts, devices and BIOS requirements from `src/sync_roms/data/` in the package, each device's
-  recommended systems (`device-systems.json`) too, and your cards (`cards.json`) from `~/.sync-roms/`, never from
+  playable systems (`device-systems.json`) too, and your cards (`cards.json`) from `~/.sync-roms/`, never from
   storage. An optional
-  `~/.sync-roms/device-systems.json` adjusts a device's recommended systems:
+  `~/.sync-roms/device-systems.json` adjusts the systems a device can play:
   `{"miyoo-flip-v2": {"add": ["psx"], "remove": ["gba"]}}` (system ids as in `systems.json`; the package's
   order is kept and notes always come from the package). An old full-copy `device-systems.json` from before the overlay does nothing; delete it. BIOS files are always `BIOS/<file>` in storage.
 - System folders in storage use the ES-DE system name (e.g. `gba/`, `dreamcast/`).

@@ -1441,7 +1441,7 @@
   {
     "name": "SNK Neo Geo Pocket",
     "bucket": "ngp",
-    "ratio": "10:9",
+    "ratio": "20:19",
     "screenscraper": 25,
     "folders": {
       "esde": "ngp",
@@ -1463,7 +1463,7 @@
   {
     "name": "SNK Neo Geo Pocket Color",
     "bucket": "ngpc",
-    "ratio": "10:9",
+    "ratio": "20:19",
     "screenscraper": 82,
     "folders": {
       "esde": "ngpc",
@@ -3228,7 +3228,7 @@
   {
     "name": "Bit Corporation Gamate",
     "bucket": "gamate",
-    "ratio": "10:9",
+    "ratio": "16:15",
     "screenscraper": 266,
     "folders": {
       "esde": "gamate",
