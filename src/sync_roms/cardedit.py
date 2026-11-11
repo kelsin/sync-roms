@@ -17,7 +17,7 @@ LIST_HINT = "Enter games · f full · m make set · D clear all · Esc back · /
 GAMES_HINT = "Space toggle · Enter done · Esc back · / search · s set · m metadata · c clear"
 META_HINT = "Enter list its values · Esc back"
 VALUES_HINT = "Enter narrow to it · Esc back · / filter"
-SETS_HINT = "Enter show its games · f sync the full set · Esc back · / filter"
+SETS_HINT = "Enter show its games · Space/Tab toggle its games here · Esc back · / filter"
 SIZING = "…"
 
 
@@ -307,10 +307,11 @@ def edit_card(name, setup=None):
         edit_system(name, systems[i], setup, sizing)
 
 
-def pick_set(system, sets, sets_on, catalog, current=None, synced=lambda: set()):
+def pick_set(system, sets, games, titles, catalog, current=None, synced=lambda: set()):
     """The set to filter a system's games to, or None: sets with games in catalog (the system's bucket keys) are
     offered, starting on the one named current, each with how many of its games are synced out of those in storage
-    (synced() gives the synced bucket keys). f switches a set's reference on the card (in sets_on, in place)."""
+    (synced() gives the synced bucket keys). Space/Tab adds that set's games on this system to games (in place) as
+    direct picks, or removes them when all are already picked; other systems are untouched."""
     shown = [(x, set_filter(x, system)) for x in sets]
     shown = [(x, keys) for x, keys in shown if keys & catalog]
     if not shown:
@@ -322,21 +323,26 @@ def pick_set(system, sets, sets_on, catalog, current=None, synced=lambda: set())
 
     def mark():
         done = synced()
-        extras[:] = [[(f"  {len(keys & catalog & done)}/{len(keys & catalog)}", "cyan")]
-                     + ([("  📦 full set", "green")] if x["id"] in sets_on else []) for x, keys in shown]
+        extras[:] = [[(f"  {len(keys & catalog & done)}/{len(keys & catalog)}", "cyan")] for _, keys in shown]
 
     def on_hotkey(_key, idx):
-        """f switches the reference in place, so the screen isn't torn down and redrawn."""
+        """Toggles in place, so the screen isn't torn down and redrawn."""
         if idx is None:
             return False
-        sets_on[:] = edit.toggle_set_ref(sets_on, shown[idx][0]["id"])
+        have = {g.get("bucket") for g in games}
+        mine = shown[idx][1] & catalog
+        if mine <= have:
+            games[:] = [g for g in games if g.get("bucket") not in mine]
+        else:
+            for key in sorted(mine - have):
+                games.append({"title": titles[key], "bucket": key})
         mark()
         return True
 
     mark()
     cursor = next((n for n, (x, _) in enumerate(shown) if x["name"] == current), 0)
     i = picker.filter_list(f"📦 Sets with games on {system['name']}", labels, extras=extras, cursor=cursor,
-                           hotkeys=(FULL_KEY,), hint=SETS_HINT, on_hotkey=on_hotkey)
+                           hotkeys=(" ", "\t"), hint=SETS_HINT, on_hotkey=on_hotkey)
     if i is None:
         return None
     return shown[i][0]
@@ -520,15 +526,8 @@ def edit_system(name, system, setup, sizing=None):
             elif result[0] == META_KEY:
                 pick_meta(system, meta, meta_filt, lambda field: [r[1] for r in rows if keep(r[1], field)])
             else:
-                refs = list(sets_on)
-                chosen = pick_set(system, sets, sets_on, {r[1] for r in rows}, filt and filt[0],
+                chosen = pick_set(system, sets, s["games"], titles, {r[1] for r in rows}, filt and filt[0],
                                   lambda: {k for k, v in states(cover()).items() if v})
-                if sets_on != refs:  # kept as is: rows switched by the reference change aren't pending, so u keeps them
-                    covered = cover()  # an exclusion means nothing once no set covers the game, on any system
-                    excluded.intersection_update(covered)
-                    other_excluded.update((b, [k for k in keys if k in covered]) for b, keys in other_excluded.items())
-                    start = states(cover())
-                    work_out()  # the other systems' share and BIOS change with the set references
                 if chosen:
                     filt = (chosen["name"], set_filter(chosen, system))
     except (KeyboardInterrupt, curses.error):  # Ctrl-C, or a terminal too small to draw the list: keep the toggles

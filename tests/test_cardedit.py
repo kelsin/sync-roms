@@ -235,16 +235,6 @@ class Flow(DataDir):
         self.assertTrue(a.finished() and b.finished())
         self.assertFalse(a.busy() or b.busy())
 
-    def test_game_view_header_follows_a_set_reference_change(self):
-        self.card()
-        self.cache = {"gba/": self.files["gba/"], "gb/": self.files["gb/"], "scrapes/gba/": {}, "scrapes/gb/": {},
-                      "BIOS/": {}}
-
-        def after(labels, kw):  # the set adds Ruby and its save here (5 + 1 B) and Red on the other system (2 B)
-            self.assertEqual(kw["status"](kw["session"]["sel"]), "💾 8 B used · 3 file(s)")
-            return kw["session"]["sel"]
-        self.run_system(returns((cardedit.SET_KEY, 0)), returns((cardedit.FULL_KEY, 0)), returns(None), after)
-
     def test_entering_a_system_refreshes_its_sizes(self):
         self.card()
         self.run_card(returns(1), returns([False] * 4), returns(None))
@@ -312,15 +302,27 @@ class Flow(DataDir):
             self.run_system(returns((cardedit.SET_KEY, 0)), offered, lambda labels, kw: kw["session"]["sel"])
         self.assertNotIn("excluded", self.read("cards.json")["c"])
 
-    def test_set_list_hotkey_syncs_the_full_set(self):
+    def test_set_list_toggle_adds_only_this_systems_games(self):
         self.card()
 
-        def refs_on(labels, kw):
-            self.assertEqual(kw["extras"], [[("  2/2", "cyan"), ("  📦 full set", "green")]])
+        def added(labels, kw):
+            self.assertEqual(kw["extras"], [[("  2/2", "cyan")]])
             return None
-        self.run_system(returns((cardedit.SET_KEY, 0)), returns((cardedit.FULL_KEY, 0)), refs_on,
+        self.run_system(returns((cardedit.SET_KEY, 0)), returns((" ", 0)), added,
                         lambda labels, kw: kw["session"]["sel"])
-        self.assertEqual(store.card_games("c"), {"sets": ["pk"]})
+        games = store.card_games("c")
+        self.assertNotIn("sets", games)
+        self.assertEqual({x["bucket"] for x in games["gba"]}, {"gba/Ruby.sav", "gba/Ruby.zip"})
+
+    def test_set_list_toggle_again_removes_them(self):
+        self.card()
+
+        def removed(labels, kw):
+            self.assertEqual(kw["extras"], [[("  0/2", "cyan")]])
+            return None
+        self.run_system(returns((cardedit.SET_KEY, 0)), returns((" ", 0)), returns((" ", 0)), removed,
+                        lambda labels, kw: kw["session"]["sel"])
+        self.assertEqual(store.card_games("c"), {})
 
     def test_game_view_status_counts_pending_picks(self):
         self.card(size="1 GB")
@@ -385,10 +387,10 @@ class Flow(DataDir):
             kw["session"]["sel"][labels.index("Ruby.zip")] = False
             raise KeyboardInterrupt
         with self.assertRaises(KeyboardInterrupt):
-            self.run_system(filtered_pass, returns((cardedit.FULL_KEY, 0)), returns(None), interrupted)
-        entry = self.read("cards.json")["c"]  # the first pass, the set reference and the interrupted pass
-        self.assertEqual(entry["games"], {"gba": [g("gba/Zelda.zip")], "sets": ["pk"]})
-        self.assertEqual(entry["excluded"], {"gba": ["gba/Ruby.zip"]})
+            self.run_system(filtered_pass, returns((" ", 0)), returns(None), interrupted)
+        entry = self.read("cards.json")["c"]  # the first pass, the set's games and the interrupted pass
+        self.assertEqual({x["bucket"] for x in entry["games"]["gba"]}, {"gba/Zelda.zip", "gba/Ruby.sav"})
+        self.assertNotIn("sets", entry["games"])
 
     def initial_of(self, kw, labels, name):
         return kw["initial"][labels.index(name)]
@@ -415,33 +417,6 @@ class Flow(DataDir):
         self.run_system(toggle("Zelda.zip"))
         entry = self.read("cards.json")["c"]
         self.assertEqual(entry["games"], {})
-        self.assertNotIn("excluded", entry)
-
-    def test_removing_the_set_reference_drops_its_exclusions_and_a_direct_pick_wins(self):
-        self.write_json("cards.json", {"c": {"device": "d", "layout": "esde",
-                                             "games": {"gba": [g("gba/Ruby.zip")], "sets": ["pk"]},
-                                             "excluded": {"gba": ["gba/Ruby.zip", "gba/Ruby.sav"],
-                                                          "gb": ["gb/Red.gb"], "nes": ["nes/Other.nes"]}}})
-
-        def after(labels, kw):
-            self.assertTrue(self.initial_of(kw, labels, "Ruby.zip"))  # the direct pick is synced again
-            self.assertFalse(self.initial_of(kw, labels, "Ruby.sav"))
-            return kw["session"]["sel"]
-        self.run_system(returns((cardedit.SET_KEY, 0)), returns((cardedit.FULL_KEY, 0)), returns(None), after)
-        entry = self.read("cards.json")["c"]
-        self.assertEqual(entry["games"], {"gba": [g("gba/Ruby.zip")]})
-        self.assertEqual(entry["excluded"], {})  # the other systems' exclusions no set covers go too
-
-    def test_revert_after_a_set_reference_change_keeps_it_without_exclusions(self):
-        self.card()
-
-        def after(labels, kw):
-            self.assertEqual(kw["initial"], kw["session"]["sel"])  # its games aren't pending
-            self.assertTrue(self.initial_of(kw, labels, "Ruby.zip"))
-            return list(kw["initial"])  # Esc, then u
-        self.run_system(returns((cardedit.SET_KEY, 0)), returns((cardedit.FULL_KEY, 0)), returns(None), after)
-        entry = self.read("cards.json")["c"]
-        self.assertEqual(entry["games"], {"sets": ["pk"]})
         self.assertNotIn("excluded", entry)
 
     def test_a_storage_listing_error_is_a_note(self):
