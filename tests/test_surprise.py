@@ -126,6 +126,20 @@ class SurprisePickTest(unittest.TestCase):
         self.assertEqual(count(got), {"a": 2, "b": 1})
         self.assertEqual(surprise.pick({}, [], 10, set(), set(), set(), random.Random(7)), [])
 
+    def test_kept_surprises_count_in_the_even_spread(self):
+        pools = {s: pool(s, 20) for s in "abc"}
+        kept = [{"system": "a", "bucket": f"a/K{i}.zip", "title": f"K{i}"} for i in range(2)]
+        for seed in range(50):
+            got = count(surprise.pick(pools, kept, 8, {"a", "b"}, set(), set(), random.Random(seed)))
+            self.assertIn((got["a"] + 2, got["b"]), [(4, 3), (3, 4)], seed)
+            self.assertEqual(got["c"], 3)
+
+    def test_ties_between_systems_vary_with_the_seed(self):
+        pools = {"a": pool("a", 5), "b": pool("b", 5)}
+        firsts = {surprise.pick(pools, [], 1, {"a", "b"}, set(), set(), random.Random(i))[0]["system"]
+                  for i in range(30)}
+        self.assertEqual(firsts, {"a", "b"})
+
 
 if __name__ == "__main__":
     unittest.main()

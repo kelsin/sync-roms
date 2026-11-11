@@ -96,6 +96,9 @@ def pick(pools, kept, need, recommended, recent, others_current, rng):
         return 2 if unit[0] in others_current else 1 if unit[0] in recent else 0
 
     given = dict.fromkeys(left, 0)
+    for k in kept:
+        if k["system"] in given:
+            given[k["system"]] += 1
 
     def fill(group, slots):
         """Give each slot to the group's system with the fewest picks that still has games, so systems that run out
