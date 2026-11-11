@@ -265,6 +265,7 @@ def edit_card(name, setup=None):
         view = {}
 
         def work_out():
+            card = card_entry(name, setup)
             usages = budget.system_usages(card, systems)
             view["total"] = budget.card_usage(card, systems, usages)
             return system_labels(card, systems, recommended, usages)
@@ -275,9 +276,18 @@ def edit_card(name, setup=None):
             if sizing.finished():
                 extras[:] = work_out()[1]
 
+        def on_hotkey(key, idx):
+            """f switches full system in place, so the screen isn't torn down and redrawn."""
+            if key != FULL_KEY or idx is None:
+                return False
+            toggle_full(name, systems[idx]["bucket"])
+            extras[:] = work_out()[1]
+            return True
+
         i = picker.filter_list(f"💳 {name} — its systems (⭐ recommended for the device)", labels, extras=extras,
                                cursor=pos, hotkeys=(FULL_KEY, MAKE_SET_KEY), hint=LIST_HINT,
-                               status=lambda _state: status_of(view["total"], capacity, sizing.busy()), poll=poll)
+                               status=lambda _state: status_of(view["total"], capacity, sizing.busy()), poll=poll,
+                               on_hotkey=on_hotkey)
         if i is None:
             return
         if isinstance(i, tuple):
@@ -301,20 +311,27 @@ def pick_set(system, sets, sets_on, catalog):
     if not shown:
         edit.note(ui.yellow(f"ℹ️  No set has games in storage for {system['name']}."))
         return None
-    pos = 0
-    while True:
-        labels = [f"{x['name']}  ({len(keys & catalog)} on {system['name']}"
-                  + (f", {len(keys - catalog)} not in storage)" if keys - catalog else ")") for x, keys in shown]
-        extras = [[("  📦 full set", "green")] if x["id"] in sets_on else [] for x, _ in shown]
-        i = picker.filter_list(f"📦 Sets with games on {system['name']}", labels, extras=extras, cursor=pos,
-                               hotkeys=(FULL_KEY,), hint=SETS_HINT)
-        if i is None:
-            return None
-        if isinstance(i, tuple):
-            pos = i[1]
-            sets_on[:] = edit.toggle_set_ref(sets_on, shown[pos][0]["id"])
-            continue
-        return shown[i][0]
+    labels = [f"{x['name']}  ({len(keys & catalog)} on {system['name']}"
+              + (f", {len(keys - catalog)} not in storage)" if keys - catalog else ")") for x, keys in shown]
+    extras = [[]] * len(shown)
+
+    def mark():
+        extras[:] = [[("  📦 full set", "green")] if x["id"] in sets_on else [] for x, _ in shown]
+
+    def on_hotkey(_key, idx):
+        """f switches the reference in place, so the screen isn't torn down and redrawn."""
+        if idx is None:
+            return False
+        sets_on[:] = edit.toggle_set_ref(sets_on, shown[idx][0]["id"])
+        mark()
+        return True
+
+    mark()
+    i = picker.filter_list(f"📦 Sets with games on {system['name']}", labels, extras=extras,
+                           hotkeys=(FULL_KEY,), hint=SETS_HINT, on_hotkey=on_hotkey)
+    if i is None:
+        return None
+    return shown[i][0]
 
 
 def edit_system(name, system, setup, sizing=None):
