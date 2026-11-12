@@ -558,6 +558,8 @@ def _run(model):
 def _draws_images():
     """True when the terminal speaks Kitty graphics or Sixel. textual-image probes the terminal on import, which must
     happen before the app starts; its block fallbacks are too coarse for the art, so they don't count."""
+    import logging
+    logging.getLogger("textual_image").setLevel(logging.ERROR)  # a terminal that doesn't answer isn't worth a traceback
     from textual_image import renderable
     if renderable.Image not in (renderable.TGPImage, renderable.SixelImage):
         return False
