@@ -1,6 +1,5 @@
 """The card editor: every system a card's device can play (recommended ones marked) with its picks and space used,
 and each system's games with set and scraped-metadata filters. Changes are saved to cards.json as they are made."""
-import curses
 import json
 import queue
 import threading
@@ -591,7 +590,7 @@ def edit_system(name, system, setup, to_fetch=None):
                                   lambda: {k for k, v in states(cover()).items() if v})
                 if chosen:
                     filt = (chosen["name"], set_filter(chosen, system))
-    except (KeyboardInterrupt, curses.error):  # Ctrl-C, or a terminal too small to draw the list: keep the toggles
+    except KeyboardInterrupt:  # Ctrl-C: keep the toggles
         if pending:
             keys, notes, base, session = pending
             apply(keys, notes, base, session["sel"])

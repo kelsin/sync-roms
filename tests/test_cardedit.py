@@ -8,7 +8,7 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
-from helpers import DataDir  # noqa: E402
+from helpers import DataDir, feed_list, pilot_list, screen_lines  # noqa: E402
 from sync_roms import budget, cardedit, collections, edit, inventory, picker, s3, store, surprise, ui  # noqa: E402
 
 U = budget.Usage
@@ -606,21 +606,6 @@ class Flow(DataDir):
         self.assertEqual(calls, [])
         self.assertIn("Couldn't list Game Boy Advance in storage: share is gone", notes[0])
 
-    def test_a_terminal_too_small_still_saves_the_toggles(self):
-        import curses
-        self.card()
-
-        def first(labels, kw):
-            kw["session"]["sel"][labels.index("Zelda.zip")] = True
-            return (cardedit.CLEAR_KEY, None)
-
-        def too_small(labels, kw):
-            kw["session"]["sel"][labels.index("Emerald.zip")] = True
-            raise curses.error("addnstr() returned ERR")
-        with self.assertRaises(curses.error):
-            self.run_system(first, too_small)
-        self.assertEqual(sorted(x["bucket"] for x in store.card_games("c")["gba"]), ["gba/Emerald.zip", "gba/Zelda.zip"])
-
     def test_full_system_has_no_game_list(self):
         self.card(games={"gba": {"full_system": True}})
         changed, calls = self.run_system()
@@ -694,37 +679,20 @@ class DiscFlow(Flow):
 
 class Links(unittest.TestCase):
     def run_keys(self, keys, labels, links, initial=None, locked=None):
-        import curses
-
-        class Screen:
-            def __init__(self):
-                self.keys = iter(keys)
-
-            def getmaxyx(self):
-                return 24, 80
-
-            def get_wch(self):
-                return next(self.keys)
-
-            def __getattr__(self, name):
-                return lambda *a, **k: None
-        with mock.patch.object(curses, "curs_set"), mock.patch.object(curses, "use_default_colors"), \
-                mock.patch.object(curses, "has_colors", return_value=False), \
-                mock.patch.object(curses, "wrapper", side_effect=lambda f: f(Screen())):
-            return picker.filter_list("t", labels, multi=True, initial=initial, links=links, locked=locked)
+        return feed_list(keys, "t", labels, multi=True, initial=initial, links=links, locked=locked)
 
     def test_space_switches_linked_rows_to_the_new_state(self):
         links = [[0, 2], [], [0, 2]]
-        self.assertEqual(self.run_keys([" ", "\n"], ["a", "b", "c"], links), [True, False, True])
-        self.assertEqual(self.run_keys(["j", "j", " ", "\n"], ["a", "b", "c"], links, initial=[True, False, False]),
+        self.assertEqual(self.run_keys(["space", "enter"], ["a", "b", "c"], links), [True, False, True])
+        self.assertEqual(self.run_keys(["j", "j", "space", "enter"], ["a", "b", "c"], links, initial=[True, False, False]),
                          [True, False, True])  # partial: the toggled row's new state wins
 
     def test_toggle_all_reaches_rows_hidden_by_the_filter(self):
         links = [[0, 2], [], [0, 2]]
-        self.assertEqual(self.run_keys(["/", "a", "\n", "a", "\n"], ["a", "b", "c"], links), [True, False, True])
+        self.assertEqual(self.run_keys(["/", "a", "enter", "a", "enter"], ["a", "b", "c"], links), [True, False, True])
 
     def test_no_links_toggles_one_row(self):
-        self.assertEqual(self.run_keys([" ", "\n"], ["a", "b"], None), [True, False])
+        self.assertEqual(self.run_keys(["space", "enter"], ["a", "b"], None), [True, False])
 
 
 class MetaFlow(Flow):
@@ -866,33 +834,16 @@ class SetupChange(DataDir):
 
 class Poll(unittest.TestCase):
     def test_filter_list_polls_while_idle_and_colors_the_status(self):
-        import curses
-        polled, drawn = [], []
+        polled, status = [], []
 
-        class Screen:
-            keys = iter([curses.error("timeout"), "\n"])
-
-            def getmaxyx(self):
-                return 24, 80
-
-            def get_wch(self):
-                k = next(self.keys)
-                if isinstance(k, Exception):
-                    raise k
-                return k
-
-            def addnstr(self, y, x, text, n, attr=0):
-                drawn.append(text)
-
-            def __getattr__(self, name):
-                return lambda *a, **k: None
-        with mock.patch.object(curses, "curs_set"), mock.patch.object(curses, "use_default_colors"), \
-                mock.patch.object(curses, "has_colors", return_value=False), \
-                mock.patch.object(curses, "wrapper", side_effect=lambda f: f(Screen())):
-            self.assertEqual(picker.filter_list("t", ["a"], poll=lambda: polled.append(1),
-                                                status=lambda s: ("over", "red")), 0)
-        self.assertEqual(polled, [1])
-        self.assertIn("over", drawn)
+        async def script(pilot):
+            await pilot.pause(picker.POLL_MS * 2 / 1000)
+            status.extend(screen_lines(pilot.app)[-1])
+            await pilot.press("enter")
+        self.assertEqual(pilot_list(script, "t", ["a"], poll=lambda: polled.append(1),
+                                    status=lambda s: ("over", "red")), 0)
+        self.assertTrue(polled)
+        self.assertEqual(status, [("over", "bold color(1) on default")])
 
 
 if __name__ == "__main__":
