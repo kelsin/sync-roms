@@ -53,6 +53,8 @@ def _save_local(tag, data):
 def _load():
     local_tag, local = _load_local()
     try:
+        if runtime.ROOT and not os.path.isdir(runtime.ROOT):
+            raise FileNotFoundError(f"{runtime.ROOT} is missing")
         tag = inventory.tag(KEY)
         if tag is None:
             if os.path.exists(_local_path()):

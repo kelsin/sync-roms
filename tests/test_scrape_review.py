@@ -9,7 +9,7 @@ from unittest import mock
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 from helpers import DataDir  # noqa: E402
-from sync_roms import ignore, inventory, scrape_online, scrape_review, scrape_state, screenscraper, ui  # noqa: E402
+from sync_roms import ignore, inventory, runtime, s3, scrape_online, scrape_review, scrape_state, screenscraper, ui  # noqa: E402
 
 GB = {"name": "Game Boy", "bucket": "gb", "screenscraper": 9, "folders": {}}
 INFO = {"name": "Study Cart", "genre": "Educational", "year": "1999", "desc": "A study aid."}
@@ -100,6 +100,32 @@ class ReviewTest(ReviewBase):
         self.assertEqual(seen, {"query": "a", "game": "42"})
         self.assertEqual(self.pending(), ["gb/b.zip", "gb/c.zip"])
 
+    def test_search_scrapes_without_asking_again(self):
+        self.answers("s", "", "k", "k", "k")
+        seen = []
+        self.patch(scrape_online, "resolve_manual", lambda *a: 42)
+        self.patch(scrape_online, "match_command", lambda args: seen.append(args.confirmed) or 1)
+        self.review()
+        self.assertEqual(seen, [True])
+
+    def test_failed_match_with_an_old_saved_match_stays_pending(self):
+        scrape_state.save_match("gb", "a.zip", 42)  # the same game, saved before; the forced run fails
+        self.answers("s", "", "k", "k", "k")
+        self.patch(scrape_online, "resolve_manual", lambda *a: 42)
+        self.patch(scrape_online, "match_command", lambda args: 1)
+        self.review()
+        self.assertEqual(self.pending(), KEYS)
+
+    def test_search_error_returns_to_prompt(self):
+        self.answers("s", "", "k", "k", "k")
+
+        def resolve(client, system, query):
+            raise screenscraper.ApiError("server down")
+        self.patch(scrape_online, "resolve_manual", resolve)
+        self.review()
+        self.assertIn("server down", self.out.getvalue())
+        self.assertEqual(self.pending(), KEYS)
+
     def test_search_cancel_returns_to_prompt(self):
         self.answers("s", "Other Name", "k", "k", "k")
 
@@ -142,6 +168,7 @@ class ReviewCommandTest(ReviewBase):
         self.assertEqual(e.exception.code, 2)
 
     def test_review_command_skips_gone_or_ignored(self):
+        self.patch(s3, "read_root", lambda: "/storage")
         self.patch(inventory, "stat", lambda keys: {"gb/b.zip": 5})  # a.zip and c.zip are gone or ignored
         self.patch(scrape_review, "_systems", lambda name: {"gb": GB})
         seen = []
@@ -150,8 +177,20 @@ class ReviewCommandTest(ReviewBase):
         self.assertEqual(seen, [(["gb/b.zip"], {"gb/b.zip": 5})])
         self.assertEqual(self.pending(), ["gb/b.zip"])
 
+    def test_review_command_bucket_without_cache_lists_sizes(self):
+        self.patch(runtime, "ROOT", None)
+        self.patch(runtime, "_mirror_root", None)
+        self.patch(inventory, "current", lambda: None)
+        self.patch(s3, "list_sizes", lambda prefix, sizes=True: {"gb/a.zip": 7} if prefix == "gb/" else {})
+        self.patch(scrape_review, "_systems", lambda name: {"gb": GB})
+        seen = []
+        self.patch(scrape_review, "review", lambda systems, keys, sizes, client=None: seen.append(sizes) or 0)
+        self.assertEqual(self.run_cmd(), 0)
+        self.assertEqual(seen, [{"gb/a.zip": 7}])
+
     def test_review_command_one_system(self):
         scrape_state.mark_notgame("nds", "x.zip", INFO)
+        self.patch(s3, "read_root", lambda: "/storage")
         self.patch(inventory, "stat", lambda keys: {k: 1 for k in keys})
         self.patch(scrape_review, "_systems", lambda name: {"gb": GB})
         seen = []

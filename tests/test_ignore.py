@@ -76,6 +76,16 @@ class LoadTest(IgnoreList):
         self.assertEqual(keys, frozenset({"gb/a.zip"}))
         self.assertEqual(err.count("⚠️"), 1)
 
+    def test_unmounted_storage_folder_keeps_local_copy(self):
+        self.store_list({"gb": ["a.zip"]})
+        ignore.keys()
+        ignore.reset()
+        with mock.patch.object(runtime, "ROOT", os.path.join(self.root.name, "not-mounted")):
+            keys, err = self.load()
+        self.assertEqual(keys, frozenset({"gb/a.zip"}))
+        self.assertTrue(os.path.exists(self.path(ignore.KEY)))
+        self.assertIn("ignored.json", err)
+
     def test_storage_error_without_local_copy_is_empty(self):
         with mock.patch.object(inventory, "tag", side_effect=OSError("share offline")):
             keys, err = self.load()

@@ -476,6 +476,16 @@ class MatchReplaceTest(RunBase):
         self.assertIsNone(scrape_state.manual_match("gba", "a.zip"))
         self.assertEqual(self.stored(), set())
 
+    def test_confirmed_match_skips_the_question_and_clears_pending(self):
+        self.put("gba/a.zip")
+        scrape_state.mark_notgame("gba", "a.zip", {"name": "", "genre": "", "year": "", "desc": ""})
+        self.client.games["x"] = game(7, "Seven")
+        args = SimpleNamespace(system="gba", rom="a.zip", game="7", skip_media=[], dry_run=False, confirmed=True)
+        with contextlib.redirect_stdout(self.out), contextlib.redirect_stderr(self.err):
+            self.assertEqual(scrape_online.match_command(args), 0)
+        self.confirm.assert_not_called()
+        self.assertNotIn("gba/a.zip", scrape_state.notgames())
+
     def test_existing_entry_is_replaced_not_merged(self):
         self.put("gba/a.zip")
         self.put("gba/b.zip")

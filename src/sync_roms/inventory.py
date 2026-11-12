@@ -144,6 +144,8 @@ def etags(prefix):
 def tag(key):
     """A tag that changes whenever one storage file's contents do, read live (never from the cache or the mirror): its
     ETag in a bucket, "<mtime_ns>-<size>" in a storage folder. None when the file doesn't exist."""
+    if runtime.ROOT and not os.path.isdir(runtime.ROOT):  # an unmounted share, not a missing file
+        raise FileNotFoundError(f"{runtime.ROOT} is missing")
     try:
         if runtime.ROOT:
             st = os.stat(s3.safe_join(runtime.ROOT, key))

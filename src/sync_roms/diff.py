@@ -8,7 +8,7 @@ import zipfile
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
 
-from . import downloads, inventory, picker, runtime, s3, store, ui
+from . import downloads, ignore, inventory, picker, runtime, s3, store, ui
 
 
 class RangeReader(io.RawIOBase):
@@ -199,7 +199,7 @@ def diff_command(args):
         return 0
     bucket = systems[i]["bucket"]
     print(ui.bold(f"🔍 Compare {systems[i]['name']}") + ui.dim(f"  {folder} ↔ {s3.location()}/{bucket}/"))
-    local = local_sizes(folder)
+    local = {p: n for p, n in local_sizes(folder).items() if not ignore.is_ignored(f"{bucket}/{p}")}
     try:
         remote = inventory.etags(bucket + "/")
         only_local, only_bucket = plan_diff(

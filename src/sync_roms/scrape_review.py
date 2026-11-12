@@ -4,7 +4,7 @@ import argparse
 import re
 import sys
 
-from . import ignore, inventory, scrape_online, scrape_state, screenscraper, ui
+from . import ignore, inventory, s3, scrape_online, scrape_state, screenscraper, ui
 
 PROMPT = "[i]gnore · [s]earch · [k]eep for later · [I]gnore all the rest  (k): "
 _TAGS = re.compile(r"\s*[\(\[][^\)\]]*[\)\]]")
@@ -31,12 +31,12 @@ def _search(system, rom, client):
     query = ui.ask(f"   Search name [{suggestion}]: ").strip() or suggestion
     try:
         game_id = scrape_online.resolve_manual(scrape_online._RomClient(client), system, query)
-    except screenscraper.NotFound as e:
+    except (screenscraper.NotFound, screenscraper.ApiError, screenscraper.QuotaExceeded) as e:
         print(ui.yellow(f"   {e}"))
         return False
-    scrape_online.match_command(argparse.Namespace(system=name, rom=rom, game=str(game_id), skip_media=None,
-                                                   dry_run=False))
-    return scrape_state.manual_match(name, rom) == game_id
+    code = scrape_online.match_command(argparse.Namespace(system=name, rom=rom, game=str(game_id), skip_media=None,
+                                                          dry_run=False, confirmed=True))
+    return code == 0 and scrape_state.manual_match(name, rom) == game_id
 
 
 def review(systems, keys, sizes, client=None):
@@ -92,7 +92,13 @@ def review_command(args):
     if not keys:
         print(ui.green("No non-game results to review ✨"))
         return 0
-    sizes = inventory.stat(keys)  # ignored or deleted ROMs are left out
+    if s3.read_root() or inventory.current() is not None:
+        sizes = inventory.stat(keys)  # ignored or deleted ROMs are left out
+    else:  # a bucket with no storage cache: one listing per system
+        sizes = {}
+        for system in sorted({k.split("/", 1)[0] for k in keys}):
+            sizes.update(inventory.files(system + "/"))
+        sizes = {k: n for k, n in sizes.items() if k in keys}
     for key in keys:
         if key not in sizes:
             scrape_state.clear_notgame(*key.split("/", 1))

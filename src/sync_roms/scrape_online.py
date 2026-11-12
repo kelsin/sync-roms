@@ -881,7 +881,7 @@ def match_command(args):
         note = f"; the {kept} media file(s) already there are kept" if kept else ""
         question = (f"🖼️  Scrape {name}/{args.rom} as ScreenScraper game {game_id} and write its media and metadata to "
                     f"{where}{note} ?")
-    if not ui.confirm(question, default=False):
+    if not getattr(args, "confirmed", False) and not ui.confirm(question, default=False):
         print(ui.yellow("👋 Cancelled."))
         return 0
     print(f"🔗 {name}/{args.rom} → ScreenScraper game {game_id}")
@@ -892,5 +892,6 @@ def match_command(args):
     how = outcomes.get(name, {}).get(args.rom, "")
     if how == "manual":  # saved only once the ROM is scraped as that game
         scrape_state.save_match(name, args.rom, game_id)
+        scrape_state.clear_notgame(name, args.rom)
         return code
     return code or 1
