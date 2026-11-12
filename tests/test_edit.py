@@ -6,6 +6,8 @@ import sys
 import unittest
 from unittest import mock
 
+from textual import events
+
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from helpers import DataDir  # noqa: E402,F401  (re-exported: other test modules still import it from here)
 from helpers import feed_list, pilot_list, screen_lines  # noqa: E402
@@ -233,6 +235,7 @@ class Keys(unittest.TestCase):
         self.assertEqual(picker.line_key("abc", 1, "ctrl+d"), ("ac", 1))
         self.assertEqual(picker.line_key("ac", 1, "b"), ("abc", 2))
         self.assertIsNone(picker.line_key("ac", 1, "ctrl+n"))
+        self.assertEqual(picker.line_key("abc", 3, "ctrl+h"), ("ab", 2))  # ^H under the kitty keyboard protocol
 
     def test_multi_toggle_all_none_and_hotkeys(self):
         self.assertEqual(run_list(["space", "j", "tab", "enter"], self.LABELS, multi=True), [True, True, False, False])
@@ -305,6 +308,15 @@ class TextualList(unittest.TestCase):
             await pilot.press("enter", "enter")
         self.assertEqual(pilot_list(script, "t", self.LABELS), 1)
         self.assertIn(("e", "reverse default on default"), lines)
+
+    def test_paste_goes_into_the_filter_and_is_ignored_otherwise(self):
+        async def script(pilot):
+            pilot.app.screen.post_message(events.Paste("q"))  # not typing: no keys pressed (q would go back)
+            await pilot.press("/")
+            pilot.app.screen.post_message(events.Paste("gam\nma"))
+            await pilot.pause()
+            await pilot.press("enter", "enter")
+        self.assertEqual(pilot_list(script, "t", self.LABELS), 2)
 
     def test_a_callback_error_comes_out_of_filter_list(self):
         def on_hotkey(key, i):

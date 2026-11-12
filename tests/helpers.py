@@ -50,13 +50,13 @@ def pilot_list(script, *args, **kwargs):
                 await script(pilot)
             return app.return_value
         return asyncio.run(drive())
-    with mock.patch.object(picker._ListApp, "run", run):
+    with mock.patch.object(picker._app_class(), "run", run):
         return picker.filter_list(*args, **kwargs)
 
 
 def screen_lines(app):
     """The list screen's rows as [(text, Rich style)] runs of non-blank text."""
-    lines = app.screen_stack[0].query_one(picker._ListLines)
+    lines = app.screen_stack[0].query_one("_ListLines")
     return [[(s.text, str(s.style)) for s in strip if s.text.strip()] for strip in lines.render_lines(lines.region)]
 
 

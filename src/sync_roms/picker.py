@@ -1,16 +1,9 @@
 """Interactive pickers: full-screen list screens (Textual)."""
+import functools
 import os
 import unicodedata
 
-os.environ.setdefault("ESCDELAY", "25")  # read when Textual is imported: Esc acts at once
-
-from rich.text import Text  # noqa: E402
-from textual.app import App  # noqa: E402
-from textual.screen import Screen  # noqa: E402
-from textual.widget import Widget  # noqa: E402
-from textual.widgets import Static  # noqa: E402
-
-from . import ui  # noqa: E402
+from . import ui
 
 
 def pick_device(devices, cursor=0):
@@ -121,7 +114,7 @@ def line_key(text, pos, k):
         return text, min(len(text), pos + 1)
     if k in ("ctrl+d", "delete"):
         return text[:pos] + text[pos + 1:], pos
-    if k == "backspace":
+    if k in ("backspace", "ctrl+h"):  # ctrl+h: how Textual names ^H under the kitty keyboard protocol
         return (text[:pos - 1] + text[pos:], pos - 1) if pos else (text, pos)
     if k == "ctrl+k":
         return text[:pos], pos
@@ -389,130 +382,152 @@ def _with_cursor(text, at):
     return text
 
 
-class _ListLines(Widget):
-    """The list screen: title, filter, hint, the shown rows, and the status on the bottom row."""
+@functools.cache
+def _app_class():
+    """The list's Textual app class, built on first use: importing Textual takes a while, and only a list needs it."""
+    os.environ.setdefault("ESCDELAY", "25")  # read when Textual is imported: Esc acts at once
+    from rich.text import Text
+    from textual.app import App
+    from textual.screen import Screen
+    from textual.widget import Widget
+    from textual.widgets import Static
 
-    def on_resize(self, event):
-        self.app.step(self.app.model.resize, event.size.height)
+    class _ListLines(Widget):
+        """The list screen: title, filter, hint, the shown rows, and the status on the bottom row."""
 
-    def row(self, m, pos):
-        i = m.vis[pos]
-        style = ["reverse"] if pos == m.cur else []
-        if m.locked[i]:
-            line = f"🔒 {m.labels[i]}"
-            style.append("dim")
-        elif m.multi:
-            if not m.diff_marks or m.state[i] == m.start[i]:
-                mark = "✅" if m.state[i] else "⬜"
-                style += ["green"] if m.state[i] and not m.diff_marks else []
+        def on_resize(self, event):
+            self.app.step(self.app.model.resize, event.size.height)
+
+        def row(self, m, pos):
+            i = m.vis[pos]
+            style = ["reverse"] if pos == m.cur else []
+            if m.locked[i]:
+                line = f"🔒 {m.labels[i]}"
+                style.append("dim")
+            elif m.multi:
+                if not m.diff_marks or m.state[i] == m.start[i]:
+                    mark = "✅" if m.state[i] else "⬜"
+                    style += ["green"] if m.state[i] and not m.diff_marks else []
+                else:
+                    mark = "➕" if m.state[i] else "➖"
+                    style.append("green" if m.state[i] else "red")
+                line = f"{mark} {m.labels[i]}"
             else:
-                mark = "➕" if m.state[i] else "➖"
-                style.append("green" if m.state[i] else "red")
-            line = f"{mark} {m.labels[i]}"
-        else:
-            line = m.labels[i]
-        if m.hidden[i]:
-            style.append("dim")
-        text = Text(line, " ".join(style))
-        for part, color in (m.extras[i] if m.extras else []):
-            text.append(part, " ".join(style + [color]))
-        return text
+                line = m.labels[i]
+            if m.hidden[i]:
+                style.append("dim")
+            text = Text(line, " ".join(style))
+            for part, color in (m.extras[i] if m.extras else []):
+                text.append(part, " ".join(style + [color]))
+            return text
 
-    def render(self):
-        m = self.app.model
-        query = Text("🔎 " + m.query)
-        lines = [Text(m.title, "bold cyan"), _with_cursor(query, 2 + m.qpos) if m.typing else query,
-                 Text(TYPING_HINT if m.typing else m.hint or (MULTI_HINT if m.multi else SINGLE_HINT), "dim")]
-        lines += [self.row(m, pos) for pos in range(m.top, min(len(m.vis), m.top + m.view))]
-        text, color, at = m.line
-        status = Text(text, f"bold {color}" if color else "bold")
-        lines += [Text()] * max(0, self.size.height - len(lines) - 1) + [status if at is None else _with_cursor(status, at)]
-        return Text("\n").join(lines)
+        def render(self):
+            m = self.app.model
+            query = Text("🔎 " + m.query)
+            lines = [Text(m.title, "bold cyan"), _with_cursor(query, 2 + m.qpos) if m.typing else query,
+                     Text(TYPING_HINT if m.typing else m.hint or (MULTI_HINT if m.multi else SINGLE_HINT), "dim")]
+            lines += [self.row(m, pos) for pos in range(m.top, min(len(m.vis), m.top + m.view))]
+            text, color, at = m.line
+            status = Text(text, f"bold {color}" if color else "bold")
+            lines += [Text()] * max(0, self.size.height - len(lines) - 1) + [status if at is None else _with_cursor(status, at)]
+            return Text("\n").join(lines)
 
 
-class _ListScreen(Screen):
-    """The list; every key goes to the app's model."""
+    class _ListScreen(Screen):
+        """The list; every key goes to the app's model."""
 
-    def compose(self):
-        yield _ListLines()
+        def compose(self):
+            yield _ListLines()
 
-    def on_key(self, event):
-        event.stop()
-        self.app.feed(_key_name(event))
+        def on_key(self, event):
+            event.stop()
+            self.app.feed(_key_name(event))
 
-
-class _HelpScreen(Screen):
-    """The key list over the list; any key closes it."""
-
-    def __init__(self, lines):
-        super().__init__()
-        self.lines = ["Keybindings", ""] + lines + ["", "Press any key to close"]
-
-    def compose(self):
-        yield Static(Text("\n").join([Text(self.lines[0], "bold")] + [Text(l) for l in self.lines[1:]]))
-
-    def on_key(self, event):
-        event.stop()
-        self.app.feed(_key_name(event))
+        def on_paste(self, event):
+            event.stop()
+            self.app.paste(event.text)
 
 
-class _ListApp(App, inherit_bindings=False):
-    """filter_list full screen: draws a _ListModel, feeds it keys and polls it. No bindings of its own, so ^P, ^Q,
-    Tab and the rest reach the list; Ctrl-C ends it (interrupted)."""
-    ENABLE_COMMAND_PALETTE = False
-    CSS = """
-    _ListLines { height: 1fr; text-wrap: nowrap; text-overflow: clip; }
-    _HelpScreen { align: center middle; }
-    _HelpScreen Static { width: auto; }
-    """
+    class _HelpScreen(Screen):
+        """The key list over the list; any key closes it."""
 
-    def __init__(self, model):
-        super().__init__(ansi_color=True)
-        self.model = model
-        self.done = False
-        self.interrupted = False
-        self.error = None  # what a step (a caller's callback, say) raised: filter_list raises it
+        def __init__(self, lines):
+            super().__init__()
+            self.lines = ["Keybindings", ""] + lines + ["", "Press any key to close"]
 
-    def get_default_screen(self):
-        return _ListScreen()
+        def compose(self):
+            yield Static(Text("\n").join([Text(self.lines[0], "bold")] + [Text(l) for l in self.lines[1:]]))
 
-    def on_mount(self):
-        if self.model.poll:
-            self.set_interval(POLL_MS / 1000, lambda: self.step(self.model.tick))
+        def on_key(self, event):
+            event.stop()
+            self.app.feed(_key_name(event))
 
-    def feed(self, k):
-        if k == "ctrl+c":
-            self.interrupted = True
-            self.finish(None)
-        else:
-            self.step(self.model.key, k)
 
-    def step(self, act, *args):
-        """Run one model step and redraw, or end the list with its result (or what it raised). The model is only
-        called through here, so Textual never swallows a callback's error."""
-        if self.done:
-            return
-        try:
-            got = act(*args)
-        except BaseException as error:
-            self.error = error
-            return self.finish(None)
-        if got is not KEEP:
-            return self.finish(got)
-        if self.model.help and not isinstance(self.screen, _HelpScreen):
-            self.push_screen(_HelpScreen(self.model.help))
-        elif not self.model.help and isinstance(self.screen, _HelpScreen):
-            self.pop_screen()
-        self.screen_stack[0].query_one(_ListLines).refresh()
+    class _ListApp(App, inherit_bindings=False):
+        """filter_list full screen: draws a _ListModel, feeds it keys and polls it. No bindings of its own, so ^P, ^Q,
+        Tab and the rest reach the list; Ctrl-C ends it (interrupted)."""
+        ENABLE_COMMAND_PALETTE = False
+        CSS = """
+        _ListLines { height: 1fr; text-wrap: nowrap; text-overflow: clip; }
+        _HelpScreen { align: center middle; }
+        _HelpScreen Static { width: auto; }
+        """
 
-    def finish(self, result):
-        self.done = True
-        self.exit(result)
+        def __init__(self, model):
+            super().__init__(ansi_color=True)
+            self.model = model
+            self.done = False
+            self.interrupted = False
+            self.error = None  # what a step (a caller's callback, say) raised: filter_list raises it
+
+        def get_default_screen(self):
+            return _ListScreen()
+
+        def on_mount(self):
+            if self.model.poll:
+                self.set_interval(POLL_MS / 1000, lambda: self.step(self.model.tick))
+
+        def feed(self, k):
+            if k == "ctrl+c":
+                self.interrupted = True
+                self.finish(None)
+            else:
+                self.step(self.model.key, k)
+
+        def paste(self, text):
+            """Pasted text goes into the filter or note being typed, a character at a time (newlines dropped)."""
+            if self.model.typing or self.model.note is not None:
+                for c in text.replace("\r", "").replace("\n", ""):
+                    self.step(self.model.key, c)
+
+        def step(self, act, *args):
+            """Run one model step and redraw, or end the list with its result (or what it raised). The model is only
+            called through here, so Textual never swallows a callback's error."""
+            if self.done:
+                return
+            try:
+                got = act(*args)
+            except BaseException as error:
+                self.error = error
+                return self.finish(None)
+            if got is not KEEP:
+                return self.finish(got)
+            if self.model.help and not isinstance(self.screen, _HelpScreen):
+                self.push_screen(_HelpScreen(self.model.help))
+            elif not self.model.help and isinstance(self.screen, _HelpScreen):
+                self.pop_screen()
+            self.screen_stack[0].query_one(_ListLines).refresh()
+
+        def finish(self, result):
+            self.done = True
+            self.exit(result)
+
+    return _ListApp
 
 
 def _run(model):
     """Show the list full screen until it is done; returns its result. Ctrl-C raises KeyboardInterrupt."""
-    app = _ListApp(model)
+    app = _app_class()(model)
     result = app.run(mouse=False)
     if app.error:
         raise app.error
