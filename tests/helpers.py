@@ -1,4 +1,5 @@
 """Shared test bases and helpers. Importing this module imports isolate first, so the run is hermetic."""
+import asyncio
 import contextlib
 import io
 import json
@@ -10,7 +11,7 @@ from unittest import mock
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 from realdir_guard import RealDataDirGuard  # noqa: E402
-from sync_roms import cli, commands, runtime, store, ui, usersettings  # noqa: E402
+from sync_roms import cli, commands, picker, runtime, store, ui, usersettings  # noqa: E402
 
 SYSTEM = {"name": "Game Boy Advance", "bucket": "gba", "folders": {"esde": "gba"}, "bios": {"files": []},
           "games": [{"bucket": "gba/Game.zip"}]}
@@ -25,6 +26,38 @@ def list_sizes(prefix, sizes=True):
 def write_json(path, data):
     with open(path, "w") as f:
         json.dump(data, f)
+
+
+def feed_list(keys, *args, **kwargs):
+    """picker.filter_list(*args, **kwargs) without a screen: its list model gets keys in turn (Textual key names or
+    characters; None: a poll tick, no key came). Returns the list's result."""
+    def run(model):
+        for k in keys:
+            got = model.tick() if k is None else model.key(k)
+            if got is not picker.KEEP:
+                return got
+        raise AssertionError("the list is still open after the last key")
+    with mock.patch.object(picker, "_run", run):
+        return picker.filter_list(*args, **kwargs)
+
+
+def pilot_list(script, *args, **kwargs):
+    """picker.filter_list(*args, **kwargs) on a headless 80x24 Textual screen that the async script(pilot) drives.
+    Returns (or raises) what filter_list does."""
+    def run(app, **_):
+        async def drive():
+            async with app.run_test() as pilot:
+                await script(pilot)
+            return app.return_value
+        return asyncio.run(drive())
+    with mock.patch.object(picker._app_class(), "run", run):
+        return picker.filter_list(*args, **kwargs)
+
+
+def screen_lines(app):
+    """The list screen's rows as [(text, Rich style)] runs of non-blank text."""
+    lines = app.screen_stack[0].query_one("_ListLines")
+    return [[(s.text, str(s.style)) for s in strip if s.text.strip()] for strip in lines.render_lines(lines.region)]
 
 
 def script_for(shell):

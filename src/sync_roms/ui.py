@@ -49,7 +49,7 @@ _thread = threading.local()
 @contextlib.contextmanager
 def silent_thread():
     """warn() and fail() print nothing on this thread inside the block (a background worker must not write over a
-    curses screen); fail() still raises."""
+    list screen); fail() still raises."""
     before = getattr(_thread, "silent", False)
     _thread.silent = True
     try:

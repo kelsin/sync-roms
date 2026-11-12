@@ -47,7 +47,8 @@ def pick_art(collection):
     ids = [None, *choices]
     current = ids.index(collection.get("art")) if collection.get("art") in ids else 0
     j = picker.filter_list(f"🎨 {collection['name']}: art in the Art Book Next theme (ES-DE, Knulli)",
-                           ["None (the theme's default)", *choices.values()], cursor=current)
+                           ["None (the theme's default)", *choices.values()], cursor=current,
+                           preview=lambda j: themeart.art_png(ids[j]) if ids[j] else None)
     if j is None:
         return
     if ids[j]:

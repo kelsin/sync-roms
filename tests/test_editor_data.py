@@ -10,7 +10,7 @@ from unittest import mock
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 from sync_roms import cardedit, collectionedit, commands, edit, picker, store  # noqa: E402
-from helpers import Cmd, DataDir  # noqa: E402
+from helpers import Cmd, DataDir, feed_list  # noqa: E402
 
 
 def target(games):
@@ -162,35 +162,16 @@ class Hints(unittest.TestCase):
 
 class MultiPickerKeys(unittest.TestCase):
     def run_keys(self, keys):
-        import curses
-
-        class Screen:
-            def __init__(self):
-                self.keys = iter(keys)
-
-            def getmaxyx(self):
-                return 24, 80
-
-            def get_wch(self):
-                return next(self.keys)
-
-            def __getattr__(self, name):
-                return lambda *a, **k: None
-        with mock.patch.object(curses, "curs_set"), mock.patch.object(curses, "use_default_colors"), \
-                mock.patch.object(curses, "has_colors", return_value=False), \
-                mock.patch.object(curses, "wrapper", side_effect=lambda f: f(Screen())):
-            result = picker.filter_list("t", ["a", "b", "c"], multi=True)
+        result = feed_list(keys, "t", ["a", "b", "c"], multi=True)
         return [i for i, on in enumerate(result) if on]
 
     def test_home_and_end_move_the_cursor(self):
-        import curses
-        self.assertEqual(self.run_keys([curses.KEY_END, " ", "\n"]), [2])
-        self.assertEqual(self.run_keys([curses.KEY_END, curses.KEY_HOME, " ", "\n"]), [0])
+        self.assertEqual(self.run_keys(["end", "space", "enter"]), [2])
+        self.assertEqual(self.run_keys(["end", "home", "space", "enter"]), [0])
 
     def test_o_shows_only_selected_rows(self):
-        import curses
         # select a and c, press o: b is hidden, so Down from a lands on c; space unselects it
-        keys = [" ", curses.KEY_END, " ", "o", curses.KEY_HOME, curses.KEY_DOWN, " ", "\n"]
+        keys = ["space", "end", "space", "o", "home", "down", "space", "enter"]
         self.assertEqual(self.run_keys(keys), [0])
 
 

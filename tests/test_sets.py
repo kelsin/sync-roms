@@ -7,7 +7,7 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
-from helpers import write_json  # noqa: E402
+from helpers import feed_list, write_json  # noqa: E402
 from sync_roms import edit, picker, store  # noqa: E402
 
 
@@ -111,40 +111,40 @@ class SetsTest(unittest.TestCase):
         self.assertIn("gen/A2.chd", buckets)
 
     def test_locked_rows_cannot_toggle(self):
-        keys = iter(["\t", "\x01", "\x1b", "y"])
+        keys = iter(["tab", "ctrl+a", "escape", "y"])
         state = self.run_list(keys, locked=[True, False])
         self.assertEqual(state, [False, True])
 
     def test_multi_esc_keeps_state(self):
-        self.assertEqual(self.run_list(iter(["\t", "\x1b", "y"])), [True, False])
+        self.assertEqual(self.run_list(iter(["tab", "escape", "y"])), [True, False])
 
     def test_multi_esc_without_changes_just_leaves(self):
-        self.assertEqual(self.run_list(iter(["\x1b"])), [False, False])
+        self.assertEqual(self.run_list(iter(["escape"])), [False, False])
 
     def test_multi_esc_can_revert(self):
-        self.assertEqual(self.run_list(iter(["\t", "\x1b", "u"])), [False, False])
+        self.assertEqual(self.run_list(iter(["tab", "escape", "u"])), [False, False])
 
     def test_multi_esc_any_other_key_keeps_editing(self):
-        self.assertEqual(self.run_list(iter(["\t", "\x1b", "z", "\n"])), [True, False])
+        self.assertEqual(self.run_list(iter(["tab", "escape", "z", "enter"])), [True, False])
 
     def test_ctrl_r_reverts_the_list(self):
-        self.assertEqual(self.run_list(iter(["\t", "u", "\n"])), [False, False])
+        self.assertEqual(self.run_list(iter(["tab", "u", "enter"])), [False, False])
 
     def test_space_toggles_in_normal_mode_and_is_text_while_typing(self):
-        self.assertEqual(self.run_list(iter([" ", "\n"])), [True, False])
-        self.assertEqual(self.run_list(iter(["/", "y", "\n", " ", "\n"])), [False, True])
-        self.assertEqual(self.run_list(iter(["/", "x", " ", "y", "\n", "\x1b", " ", "\n"])), [True, False])  # "x y" matches nothing; Esc clears it
+        self.assertEqual(self.run_list(iter(["space", "enter"])), [True, False])
+        self.assertEqual(self.run_list(iter(["/", "y", "enter", "space", "enter"])), [False, True])
+        self.assertEqual(self.run_list(iter(["/", "x", "space", "y", "enter", "escape", "space", "enter"])), [True, False])  # "x y" matches nothing; Esc clears it
 
     def test_view_cycle_shows_only_changed_rows(self):
         # toggle row 0, then ^O twice: "changed only" lists just it, and Tab then toggles that row back
-        self.assertEqual(self.run_list(iter(["\t", "\x0f", "\x0f", "\t", "\n"])), [False, False])
+        self.assertEqual(self.run_list(iter(["tab", "ctrl+o", "ctrl+o", "tab", "enter"])), [False, False])
 
     def test_hotkey_returns_pair(self):
         self.assertEqual(self.run_list(iter(["f"]), multi=False, hotkeys=("f",)), ("f", 0))
         self.assertEqual(self.run_list(iter(["j", "f"]), multi=False, hotkeys=("f",)), ("f", 1))
 
     def test_hotkey_ignored_without_rows(self):
-        self.assertIsNone(self.run_list(iter(["/", "z", "\n", "f", "\x1b", "\x1b"]), multi=False, hotkeys=("f",)))
+        self.assertIsNone(self.run_list(iter(["/", "z", "enter", "f", "escape", "escape"]), multi=False, hotkeys=("f",)))
 
     def test_covered_rows_locked_with_note(self):
         by = systems()
@@ -174,14 +174,7 @@ class SetsTest(unittest.TestCase):
         self.assertEqual(excluded["gba"], ["gba/Gone.zip"])  # A switched on, Gone switched off
 
     def run_list(self, keys, locked=None, multi=True, hotkeys=()):
-        screen = mock.MagicMock()
-        screen.getmaxyx.return_value = (24, 80)
-        screen.get_wch.side_effect = lambda: next(keys)
-        with mock.patch.object(picker.curses, "wrapper", lambda run: run(screen)), \
-                mock.patch.object(picker.curses, "curs_set"), \
-                mock.patch.object(picker.curses, "use_default_colors"), \
-                mock.patch.object(picker.curses, "has_colors", return_value=False):
-            return picker.filter_list("t", ["x", "y"], multi=multi, locked=locked, hotkeys=hotkeys)
+        return feed_list(keys, "t", ["x", "y"], multi=multi, locked=locked, hotkeys=hotkeys)
 
 
 if __name__ == "__main__":

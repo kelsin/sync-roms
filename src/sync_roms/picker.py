@@ -1,5 +1,5 @@
-"""Interactive curses pickers."""
-import curses
+"""Interactive pickers: full-screen list screens (Textual)."""
+import functools
 import os
 import unicodedata
 
@@ -96,23 +96,6 @@ def help_lines(multi, hint, hidden_count=False, has_note=False):
     return lines
 
 
-def show_help(stdscr, lines):
-    """Draw the key list over the screen and wait for any key."""
-    h, w = stdscr.getmaxyx()
-    lines = ["Keybindings", ""] + lines + ["", "Press any key to close"]
-    top = max(0, (h - len(lines)) // 2)
-    left = max(0, (w - max(cell_width(l) for l in lines)) // 2 - 2)
-    stdscr.erase()
-    for n, line in enumerate(lines[:h - 1]):
-        stdscr.addnstr(top + n, left, line, max(1, w - left - 1), curses.A_BOLD if n == 0 else 0)
-    stdscr.refresh()
-    stdscr.timeout(-1)
-    try:
-        stdscr.get_wch()
-    except curses.error:
-        pass
-
-
 def cell_width(text):
     """Terminal cells text takes up (emoji and CJK are two wide)."""
     return sum(2 if unicodedata.east_asian_width(c) in "WF" else 1 for c in text)
@@ -121,75 +104,501 @@ def cell_width(text):
 def line_key(text, pos, k):
     """Emacs-style single-line editing. Returns (text, cursor position), or None if k isn't an editing key.
     ^A/^E start/end · ^B/^F left/right · ^D delete char · ^K kill to end · ^U kill to start · ^W kill word."""
-    if k in ("\x01", curses.KEY_HOME):
+    if k in ("ctrl+a", "home"):
         return text, 0
-    if k in ("\x05", curses.KEY_END):
+    if k in ("ctrl+e", "end"):
         return text, len(text)
-    if k in ("\x02", curses.KEY_LEFT):
+    if k in ("ctrl+b", "left"):
         return text, max(0, pos - 1)
-    if k in ("\x06", curses.KEY_RIGHT):
+    if k in ("ctrl+f", "right"):
         return text, min(len(text), pos + 1)
-    if k in ("\x04", curses.KEY_DC):
+    if k in ("ctrl+d", "delete"):
         return text[:pos] + text[pos + 1:], pos
-    if k in (curses.KEY_BACKSPACE, "\x7f", "\b"):
+    if k in ("backspace", "ctrl+h"):  # ctrl+h: how Textual names ^H under the kitty keyboard protocol
         return (text[:pos - 1] + text[pos:], pos - 1) if pos else (text, pos)
-    if k == "\x0b":
+    if k == "ctrl+k":
         return text[:pos], pos
-    if k == "\x15":
+    if k == "ctrl+u":
         return text[pos:], 0
-    if k == "\x17":
+    if k == "ctrl+w":
         start = text.rfind(" ", 0, len(text[:pos].rstrip())) + 1
         return text[:start] + text[pos:], start
-    if isinstance(k, str) and k.isprintable():
+    if k == "space":
+        k = " "
+    if len(k) == 1 and k.isprintable():
         return text[:pos] + k + text[pos:], pos + 1
     return None
 
 
 def move_key(k, cur, last, view):
     """The new cursor row for a movement key (arrows, ^N/^P, PgUp/PgDn/^V, Home/End), or None if k isn't one."""
-    if k in (curses.KEY_UP, "\x10"):
+    if k in ("up", "ctrl+p"):
         return max(0, cur - 1)
-    if k in (curses.KEY_DOWN, "\x0e"):
+    if k in ("down", "ctrl+n"):
         return min(last, cur + 1)
-    if k == curses.KEY_PPAGE:
+    if k == "pageup":
         return max(0, cur - view)
-    if k in (curses.KEY_NPAGE, "\x16"):
+    if k in ("pagedown", "ctrl+v"):
         return min(last, cur + view)
-    if k == curses.KEY_HOME:
+    if k == "home":
         return 0
-    if k == curses.KEY_END:
+    if k == "end":
         return max(0, last)
     return None
 
 
-def read_line(stdscr, prompt, text=""):
-    """Edit one line on the bottom row (see line_key). Returns the text on Enter, or None on Esc or ^G."""
-    pos = len(text)
-    curses.curs_set(1)
-    while True:
-        h, w = stdscr.getmaxyx()
-        stdscr.addnstr(h - 1, 0, " " * (w - 1), w - 1)
-        stdscr.addnstr(h - 1, 0, prompt + text, w - 1, curses.A_BOLD)
-        stdscr.move(h - 1, min(w - 1, cell_width(prompt + text[:pos])))
+POLL_MS = 200  # how often filter_list calls its poll while it waits for a key
+NOTE_PROMPT = "Note (empty clears, Esc cancels): "
+KEEP = object()  # _ListModel.key: the list stays open
+HOTKEY_CHARS = {"space": " ", "tab": "\t"}  # keys callers name in hotkeys by their character
+
+
+class _ListModel:
+    """filter_list's state and what each key does to it, apart from drawing (the arguments are filter_list's)."""
+
+    def __init__(self, title, labels, multi, initial, hint, cursor, extras, locked, locked_note, hotkeys, note_text,
+                 on_note, esc_asks, hidden, status, diff_marks, session, poll, links, on_hotkey, preview=None):
+        self.preview = preview
+        self.title, self.labels, self.multi, self.hint, self.extras = title, labels, multi, hint, extras
+        self.locked_note, self.hotkeys, self.note_text, self.on_note = locked_note, hotkeys, note_text, on_note
+        self.esc_asks, self.status, self.diff_marks, self.poll = esc_asks, status, diff_marks, poll
+        self.links, self.on_hotkey = links, on_hotkey
+        self.lowered = [l.casefold() for l in labels]
+        self.start = list(initial) if initial is not None else [False] * len(labels)
+        self.locked = locked or [False] * len(labels)
+        self.hidden = hidden or [False] * len(labels)
+        self.hidden_count = sum(self.hidden)
+        self.session = {} if session is None else session
+        self.state = list(self.session["sel"]) if "sel" in self.session else list(self.start)
+        self.view_mode = self.session.get("view_mode", 0)  # multi: 0 all rows, 1 only rows that are on, 2 only rows changed
+        self.revealed = self.session.get("revealed", False)
+        self.restore = self.session.get("row")
+        self.query, self.qpos, self.typing = "", 0, False
+        self.cur, self.top = cursor, 0
+        self.notice = ""
+        self.asking = False  # multi-mode Esc: waiting for keep or revert
+        self.note = None  # (text, cursor position) while a note for row note_row is typed after w
+        self.note_row = None
+        self.help = None  # the help lines while they are shown
+        self.height = 24  # screen rows; the app sets it
+        self.update()
+
+    def preview_path(self):
+        """The image file for the highlighted row, or None (no preview, no row shown, or the row has none)."""
+        return self.preview(self.vis[self.cur]) if self.preview and self.vis else None
+
+    def update(self):
+        """Work out the shown rows (vis), keep the cursor on one and in view, save the session and work out the
+        bottom row (line, see status_line)."""
+        terms = self.query.casefold().split()
+        vis = [i for i, l in enumerate(self.lowered) if (self.revealed or not self.hidden[i]) and all(t in l for t in terms)
+               and (self.view_mode == 0 or (self.state[i] if self.view_mode == 1 else self.state[i] != self.start[i]))]
+        vis.sort(key=lambda i: self.hidden[i])  # revealed rows go last; stable within each group
         try:
-            k = stdscr.get_wch()
-        except curses.error:
-            continue
-        if k in ("\n", "\r", curses.KEY_ENTER):
+            self.cur = vis.index(self.restore)
+        except ValueError:
+            pass
+        self.restore = None
+        self.cur = max(0, min(self.cur, len(vis) - 1))
+        self.vis = vis
+        self.session.update(sel=self.state, view_mode=self.view_mode, revealed=self.revealed,
+                            row=vis[self.cur] if vis else None)
+        self.view = max(1, self.height - 4)
+        if self.cur < self.top:
+            self.top = self.cur
+        elif self.cur >= self.top + self.view:
+            self.top = self.cur - self.view + 1
+        self.line = self.status_line()
+
+    def linked(self, rows):
+        """rows and the rows linked to them, without locked ones."""
+        out = dict.fromkeys(rows)
+        for i in rows:
+            out.update(dict.fromkeys(self.links[i] if self.links else ()))
+        return [i for i in out if not self.locked[i]]
+
+    def pending(self):
+        """(rows switched on, rows switched off) against initial."""
+        return (sum(1 for a, b in zip(self.state, self.start) if a and not b),
+                sum(1 for a, b in zip(self.state, self.start) if b and not a))
+
+    def status_line(self):
+        """The bottom row as (text, color or None, cursor index or None): the keep/revert question, the note being
+        typed, or the status (a notice, the highlighted locked row's note, or the counts)."""
+        added, removed = self.pending()
+        if self.asking:
+            return (f"Keep +{added} −{removed} pending change(s)?  y/Enter keep · u revert · any other key keeps editing",
+                    "red", None)
+        if self.note is not None:
+            return NOTE_PROMPT + self.note[0], None, len(NOTE_PROMPT) + self.note[1]
+        line, line_color = self.status(self.state) if self.status else f"{len(self.vis)}/{len(self.labels)} shown", None
+        if isinstance(line, tuple):
+            line, line_color = line
+        if self.multi and self.diff_marks:
+            line += f" · +{added} −{removed} pending"
+        if self.multi and (self.diff_marks or self.view_mode):
+            line += f" · view: {('all', 'on only', 'changed only')[self.view_mode]}"
+        if not self.revealed and self.hidden_count:
+            line += f" · {self.hidden_count} hidden (press z)"
+        vis, cur = self.vis, self.cur
+        if vis and self.locked[vis[cur]]:
+            line = f"🔒 {self.locked_note[vis[cur]] if isinstance(self.locked_note, list) else self.locked_note}"
+        if self.notice:
+            line = self.notice
+        return line, line_color, None
+
+    def tick(self):
+        """Call poll, unless help or a prompt is up (those wait for a key). Returns KEEP."""
+        if self.poll and not self.help and not self.asking and self.note is None:
+            self.poll()
+            self.update()
+        return KEEP
+
+    def resize(self, height):
+        """The screen is now height rows tall. Returns KEEP."""
+        self.height = height
+        self.update()
+        return KEEP
+
+    def key(self, k):
+        """Act on one key: a Textual key name ("enter", "ctrl+a", ...) or a printable character.
+        Returns the list's result once it is done, else KEEP."""
+        self.notice = ""
+        got = self.act(k)
+        self.update()
+        return got
+
+    def act(self, k):
+        if self.help:
+            self.help = None
+            return KEEP
+        if self.asking:
+            self.asking = False
+            if k in ("y", "Y", "enter"):
+                return self.state
+            if k in ("u", "U"):
+                return list(self.start)
+            return KEEP
+        if self.note is not None:
+            if k == "enter":
+                self.notice = self.on_note(self.note_row, self.note[0].strip())
+                self.note = None
+            elif k in ("escape", "ctrl+g"):
+                self.note = None
+            else:
+                self.note = line_key(*self.note, k) or self.note
+            return KEEP
+        vis, cur = self.vis, self.cur
+        if self.typing:
+            edited = line_key(self.query, self.qpos, k)
+            if k == "enter":
+                self.typing = False
+            elif k in ("escape", "ctrl+g"):
+                self.query, self.qpos, self.typing = "", 0, False
+                self.cur = self.top = 0
+            elif edited:
+                if edited[0] != self.query:
+                    self.cur = self.top = 0
+                self.query, self.qpos = edited
+            else:
+                moved = move_key(k, cur, len(vis) - 1, self.view)
+                self.cur = cur if moved is None else moved
+            return KEEP
+        moved = move_key(k, cur, len(vis) - 1, self.view)
+        hot = HOTKEY_CHARS.get(k, k)
+        if hot in self.hotkeys and (vis or self.multi):
+            if self.on_hotkey and self.on_hotkey(hot, vis[cur] if vis else None):
+                return KEEP
+            return hot, (vis[cur] if vis else None)
+        if moved is not None:
+            self.cur = moved
+        elif k == "/":
+            self.typing, self.qpos = True, len(self.query)
+        elif k == "?":
+            self.help = help_lines(self.multi, self.hint, self.hidden_count, bool(self.on_note))
+        elif k == "j":
+            self.cur = min(len(vis) - 1, cur + 1)
+        elif k == "k":
+            self.cur = max(0, cur - 1)
+        elif k == "g":
+            self.cur = 0
+        elif k == "G":
+            self.cur = len(vis) - 1
+        elif k == "ctrl+d":
+            self.cur = min(len(vis) - 1, cur + max(1, self.view // 2))
+        elif k == "ctrl+u":
+            self.cur = max(0, cur - max(1, self.view // 2))
+        elif k == "ctrl+f":
+            self.cur = min(len(vis) - 1, cur + self.view)
+        elif k == "ctrl+b":
+            self.cur = max(0, cur - self.view)
+        elif k in ("escape", "q", "ctrl+g"):
+            if self.query:
+                self.query, self.qpos = "", 0
+                self.cur = self.top = 0
+                return KEEP
+            if not self.multi or not self.esc_asks:
+                return None
+            if self.state == self.start:
+                return self.state
+            self.asking = True
+        elif k == "enter":
+            if self.multi:
+                return self.state
+            if vis:
+                return vis[cur]
+        elif k == "z" and self.hidden_count:
+            self.revealed = not self.revealed
+        elif not self.multi:
+            pass
+        elif k == "u":
+            self.state = list(self.start)
+            self.notice = "Reverted this list to how it was when opened"
+        elif k in ("o", "ctrl+o"):
+            self.view_mode = (self.view_mode + 1) % 3
+            self.cur = self.top = 0
+        elif k in ("tab", "space") and vis:
+            if not self.locked[vis[cur]]:
+                target = not self.state[vis[cur]]
+                for i in self.linked([vis[cur]]):
+                    self.state[i] = target
+        elif k == "w" and vis and self.on_note and not self.locked[vis[cur]]:
+            text = self.note_text(vis[cur]) if self.note_text else ""
+            self.note, self.note_row = (text, len(text)), vis[cur]
+        elif k in ("a", "ctrl+a") and vis:
+            free = [i for i in vis if not self.locked[i]]
+            target = not all(self.state[i] for i in free)
+            for i in self.linked(free):
+                self.state[i] = target
+        return KEEP
+
+
+def _key_name(event):
+    """What _ListModel.key takes for a Textual key event: the character for printable keys (but "space"), else its name."""
+    c = event.character
+    return c if event.key != "space" and c and len(c) == 1 and c.isprintable() else event.key
+
+
+def _with_cursor(text, at):
+    """text with a reverse-video block at character at, where typing goes."""
+    if at >= len(text):
+        text.append(" ")
+    text.stylize("reverse", at, at + 1)
+    return text
+
+
+@functools.cache
+def _app_class():
+    """The list's Textual app class, built on first use: importing Textual takes a while, and only a list needs it."""
+    os.environ.setdefault("ESCDELAY", "25")  # read when Textual is imported: Esc acts at once
+    from rich.text import Text
+    from textual.app import App
+    from textual.screen import Screen
+    from textual.widget import Widget
+    from textual.widgets import Static
+
+    class _ListLines(Widget):
+        """The list screen: title, filter, hint, the shown rows, and the status on the bottom row."""
+
+        def on_resize(self, event):
+            self.app.step(self.app.model.resize, event.size.height)
+
+        def row(self, m, pos):
+            i = m.vis[pos]
+            style = ["reverse"] if pos == m.cur else []
+            if m.locked[i]:
+                line = f"🔒 {m.labels[i]}"
+                style.append("dim")
+            elif m.multi:
+                if not m.diff_marks or m.state[i] == m.start[i]:
+                    mark = "✅" if m.state[i] else "⬜"
+                    style += ["green"] if m.state[i] and not m.diff_marks else []
+                else:
+                    mark = "➕" if m.state[i] else "➖"
+                    style.append("green" if m.state[i] else "red")
+                line = f"{mark} {m.labels[i]}"
+            else:
+                line = m.labels[i]
+            if m.hidden[i]:
+                style.append("dim")
+            text = Text(line, " ".join(style))
+            for part, color in (m.extras[i] if m.extras else []):
+                text.append(part, " ".join(style + [color]))
             return text
-        if k in ("\x1b", "\x07"):
-            return None
-        edited = line_key(text, pos, k)
-        if edited:
-            text, pos = edited
+
+        def render(self):
+            m = self.app.model
+            query = Text("🔎 " + m.query)
+            lines = [Text(m.title, "bold cyan"), _with_cursor(query, 2 + m.qpos) if m.typing else query,
+                     Text(TYPING_HINT if m.typing else m.hint or (MULTI_HINT if m.multi else SINGLE_HINT), "dim")]
+            lines += [self.row(m, pos) for pos in range(m.top, min(len(m.vis), m.top + m.view))]
+            text, color, at = m.line
+            status = Text(text, f"bold {color}" if color else "bold")
+            lines += [Text()] * max(0, self.size.height - len(lines) - 1) + [status if at is None else _with_cursor(status, at)]
+            return Text("\n").join(lines)
 
 
-POLL_MS = 200  # how often filter_list calls its poll while no key comes
+    class _ListScreen(Screen):
+        """The list; every key goes to the app's model."""
+
+        def compose(self):
+            yield _ListLines()
+            if self.app.model.preview:
+                from textual_image.widget import Image  # already imported (and the terminal probed) by filter_list
+                yield Image(self.app.model.preview_path(), id="preview")
+
+        def on_key(self, event):
+            event.stop()
+            self.app.feed(_key_name(event))
+
+        def on_paste(self, event):
+            event.stop()
+            self.app.paste(event.text)
+
+
+    class _HelpScreen(Screen):
+        """The key list over the list; any key closes it."""
+
+        def __init__(self, lines):
+            super().__init__()
+            self.lines = ["Keybindings", ""] + lines + ["", "Press any key to close"]
+
+        def compose(self):
+            yield Static(Text("\n").join([Text(self.lines[0], "bold")] + [Text(l) for l in self.lines[1:]]))
+
+        def on_key(self, event):
+            event.stop()
+            self.app.feed(_key_name(event))
+
+
+    class _ListApp(App, inherit_bindings=False):
+        """filter_list full screen: draws a _ListModel, feeds it keys and polls it. No bindings of its own, so ^P, ^Q,
+        Tab and the rest reach the list; Ctrl-C ends it (interrupted)."""
+        ENABLE_COMMAND_PALETTE = False
+        CSS = """
+        _ListLines { width: 1fr; height: 1fr; text-wrap: nowrap; text-overflow: clip; }
+        _ListScreen { layout: horizontal; }
+        _ListScreen #preview { width: auto; max-width: 34%; height: 100%; }
+        _HelpScreen { align: center middle; }
+        _HelpScreen Static { width: auto; }
+        """
+
+        def __init__(self, model):
+            super().__init__(ansi_color=True)
+            self.model = model
+            self.done = False
+            self.interrupted = False
+            self.error = None  # what a step (a caller's callback, say) raised: filter_list raises it
+
+        def get_default_screen(self):
+            return _ListScreen()
+
+        def on_mount(self):
+            if self.model.poll:
+                self.set_interval(POLL_MS / 1000, lambda: self.step(self.model.tick))
+
+        def feed(self, k):
+            if k == "ctrl+c":
+                self.interrupted = True
+                self.finish(None)
+            elif k == "ctrl+z":  # raw mode clears ISIG, so the terminal no longer suspends on its own
+                self.action_suspend_process()
+            else:
+                self.step(self.model.key, k)
+
+        def paste(self, text):
+            """Pasted text goes into the filter or note being typed, a character at a time (newlines dropped)."""
+            if self.model.typing or self.model.note is not None:
+                for c in text.replace("\r", "").replace("\n", ""):
+                    self.step(self.model.key, c)
+
+        def step(self, act, *args):
+            """Run one model step and redraw, or end the list with its result (or what it raised). The model is only
+            called through here, so Textual never swallows a callback's error."""
+            if self.done:
+                return
+            try:
+                got = act(*args)
+            except BaseException as error:
+                self.error = error
+                return self.finish(None)
+            if got is not KEEP:
+                return self.finish(got)
+            if self.model.help and not isinstance(self.screen, _HelpScreen):
+                self.push_screen(_HelpScreen(self.model.help))
+            elif not self.model.help and isinstance(self.screen, _HelpScreen):
+                self.pop_screen()
+            self.screen_stack[0].query_one(_ListLines).refresh()
+            if self.model.preview:
+                pane = self.screen_stack[0].query_one("#preview")
+                path = self.model.preview_path()
+                if path != pane.image:  # the setter re-transmits the image, so only touch it when it changed
+                    pane.image = path
+
+        def finish(self, result):
+            self.done = True
+            self.exit(result)
+
+    return _ListApp
+
+
+def _run(model):
+    """Show the list full screen until it is done; returns its result. Ctrl-C raises KeyboardInterrupt."""
+    app = _app_class()(model)
+    result = app.run(mouse=False)
+    if app.error:
+        raise app.error
+    if app.interrupted:
+        raise KeyboardInterrupt
+    if app.return_code:  # Textual itself failed (it already printed the traceback): not an Esc
+        raise SystemExit(app.return_code)
+    return result
+
+
+def _probe_through_tmux():
+    """Inside tmux, ask the outer terminal instead of tmux, and leave the answer where textual-image keeps its own
+    probe's. tmux answers textual-image's device-attributes query itself (claiming Sixel, which it may not be able to
+    pass on), before the outer terminal's Kitty graphics reply, which then arrives late, as keys. Passed through,
+    every reply comes from the outer terminal, in order. Needs tmux's allow-passthrough; False when it gets no answer.
+    Uses textual-image internals (0.14), so anything unexpected also means False."""
+    import sys
+    try:
+        from textual_image import _terminal as term
+        from textual_image._tmux import tmux_escape
+        if not (sys.__stdout__ and sys.__stdout__.isatty()):
+            return False
+        with term.capture_until_primary_da(term._PROBE_TIMEOUT) as response:
+            sys.__stdout__.write(term._tgp_support_query() + tmux_escape("\x1b[16t") + tmux_escape("\x1b[c"))
+            sys.__stdout__.flush()
+        sixel, tgp, width, height = term._parse_probe_response(response.sequence)
+        if not (width and height):
+            rows, columns, x_pixels, y_pixels = term.get_tiocgwinsz()
+            width, height = x_pixels // columns, y_pixels // rows
+        if not (width and height):
+            return False
+        term.probe_terminal._result = term.TerminalCapabilities(term.CellSize(width, height), sixel=sixel, tgp=tgp)
+    except Exception:  # noqa: BLE001 -- a missing internal, a closed stdin or no answer: no images
+        return False
+    return sixel or tgp
+
+
+def _draws_images():
+    """True when the terminal speaks Kitty graphics or Sixel. textual-image probes the terminal on import, which must
+    happen before the app starts; its block fallbacks are too coarse for the art, so they don't count."""
+    import logging
+    logging.getLogger("textual_image").setLevel(logging.ERROR)  # a terminal that doesn't answer isn't worth a traceback
+    if os.environ.get("TMUX") and not _probe_through_tmux():
+        return False
+    from textual_image import renderable
+    if renderable.Image not in (renderable.TGPImage, renderable.SixelImage):
+        return False
+    import textual_image.widget  # noqa: F401 -- also asks the terminal for its cell size
+    return True
 
 
 def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, extras=None, locked=None, locked_note="",
                 hotkeys=(), note_text=None, on_note=None, esc_asks=True, hidden=None, status=None, diff_marks=True,
-                session=None, poll=None, links=None, on_hotkey=None):
+                session=None, poll=None, links=None, on_hotkey=None, preview=None):
     """Modal list: vim keys for moving and acting, Emacs keys for editing the filter.
 
     Normal mode: j/k ↑/↓ ^N/^P move · g/G top/bottom · ^D/^U half page · ^F/^B/PgUp/PgDn/^V page · / filter ·
@@ -211,216 +620,19 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
     status(states) -> text, or (text, color): replaces the "N/M shown" status. diff_marks: show ➕/➖ against `initial`
     (else ✅/⬜ only).
     session: a dict the caller keeps so selection, view, revealed rows and cursor survive reopening the list.
-    poll: optional callable, called on the curses thread whenever no key came for POLL_MS; the list is then redrawn,
+    poll: optional callable, called on the list's thread every POLL_MS while it waits for a key; the list is then redrawn,
     so poll can update extras in place (and status can read what it changed).
     links: optional per-label lists of the label indexes switched together with it (multi mode): Space/Tab and `a`
     set them all to the toggled row's new state (locked ones excepted).
     on_hotkey: optional callable(key, label index) -> bool, tried first for a hotkey; True means it handled the key
     in place (the list stays open and is redrawn, so it can update extras), False returns (key, index) as usual.
+    preview: optional callable(label index) -> path of an image file, or None; the list then shares the screen with an
+    image pane showing the highlighted row's image (blank when there is none), updated as the cursor and filter change.
+    Only in a terminal that draws real images (Kitty graphics or Sixel), and not inside tmux; elsewhere there is no pane.
     """
-    os.environ.setdefault("ESCDELAY", "25")
-    lowered = [l.casefold() for l in labels]
-    start = list(initial) if initial is not None else [False] * len(labels)
-    locked = locked or [False] * len(labels)
-    hidden = hidden or [False] * len(labels)
-    hidden_count = sum(hidden)
-    session = {} if session is None else session
-
-    def linked(rows):
-        """rows and the rows linked to them, without locked ones."""
-        out = dict.fromkeys(rows)
-        for i in rows:
-            out.update(dict.fromkeys(links[i] if links else ()))
-        return [i for i in out if not locked[i]]
-
-    def run(stdscr):
-        curses.use_default_colors()
-        green_a = red_a = cyan_a = yellow_a = 0
-        if curses.has_colors():
-            curses.start_color()
-            curses.init_pair(1, curses.COLOR_GREEN, -1)
-            curses.init_pair(2, curses.COLOR_RED, -1)
-            curses.init_pair(3, curses.COLOR_CYAN, -1)
-            curses.init_pair(4, curses.COLOR_YELLOW, -1)
-            green_a, red_a, cyan_a, yellow_a = (curses.color_pair(n) for n in (1, 2, 3, 4))
-        colors = {"green": green_a, "red": red_a, "cyan": cyan_a, "yellow": yellow_a, "dim": curses.A_DIM}
-        state = list(session["sel"]) if "sel" in session else list(start)
-        view_mode = session.get("view_mode", 0)  # multi: 0 all rows, 1 only rows that are on, 2 only rows changed
-        revealed = session.get("revealed", False)
-        restore = session.get("row")
-        query, qpos, typing = "", 0, False
-        cur, top = cursor, 0
-        notice = ""
-        if poll:
-            stdscr.timeout(POLL_MS)
-        while True:
-            terms = query.casefold().split()
-            vis = [i for i, l in enumerate(lowered) if (revealed or not hidden[i]) and all(t in l for t in terms)
-                   and (view_mode == 0 or (state[i] if view_mode == 1 else state[i] != start[i]))]
-            vis.sort(key=lambda i: hidden[i])  # revealed rows go last; stable within each group
-            try:
-                cur = vis.index(restore)
-            except ValueError:
-                pass
-            restore = None
-            cur = max(0, min(cur, len(vis) - 1))
-            session.update(sel=state, view_mode=view_mode, revealed=revealed, row=vis[cur] if vis else None)
-            h, w = stdscr.getmaxyx()
-            view = max(1, h - 4)
-            if cur < top:
-                top = cur
-            elif cur >= top + view:
-                top = cur - view + 1
-            curses.curs_set(1 if typing else 0)
-            stdscr.erase()
-            stdscr.addnstr(0, 0, title, w - 1, cyan_a | curses.A_BOLD)
-            stdscr.addnstr(1, 0, "🔎 " + query, w - 1)
-            stdscr.addnstr(2, 0, TYPING_HINT if typing else hint or (MULTI_HINT if multi else SINGLE_HINT), w - 1, curses.A_DIM)
-            for pos in range(top, min(len(vis), top + view)):
-                i = vis[pos]
-                attr = curses.A_REVERSE if pos == cur else 0
-                if locked[i]:
-                    line = f"🔒 {labels[i]}"
-                    attr |= curses.A_DIM
-                elif multi:
-                    if not diff_marks or state[i] == start[i]:
-                        mark = "✅" if state[i] else "⬜"
-                        attr |= green_a if state[i] and not diff_marks else 0
-                    else:
-                        mark = "➕" if state[i] else "➖"
-                        attr |= green_a if state[i] else red_a
-                    line = f"{mark} {labels[i]}"
-                else:
-                    line = labels[i]
-                if hidden[i]:
-                    attr |= curses.A_DIM
-                stdscr.addnstr(pos - top + 3, 0, line, w - 1, attr)
-                x = cell_width(line)
-                for text, color in (extras[i] if extras else []):
-                    if x >= w - 1:
-                        break
-                    stdscr.addnstr(pos - top + 3, x, text, w - 1 - x, attr | colors[color])
-                    x += cell_width(text)
-            line, line_color = status(state) if status else f"{len(vis)}/{len(labels)} shown", None
-            if isinstance(line, tuple):
-                line, line_color = line
-            if multi and diff_marks:
-                added = sum(1 for a, b in zip(state, start) if a and not b)
-                removed = sum(1 for a, b in zip(state, start) if b and not a)
-                line += f" · +{added} −{removed} pending"
-            if multi and (diff_marks or view_mode):
-                line += f" · view: {('all', 'on only', 'changed only')[view_mode]}"
-            if not revealed and hidden_count:
-                line += f" · {hidden_count} hidden (press z)"
-            if vis and locked[vis[cur]]:
-                line = f"🔒 {locked_note[vis[cur]] if isinstance(locked_note, list) else locked_note}"
-            if notice:
-                line = notice
-                notice = ""
-            stdscr.addnstr(h - 1, 0, " " * (w - 1), w - 1)
-            stdscr.addnstr(h - 1, 0, line, w - 1, curses.A_BOLD | (colors[line_color] if line_color else 0))
-            if typing:
-                stdscr.move(1, min(w - 1, 3 + cell_width(query[:qpos])))
-            try:
-                k = stdscr.get_wch()
-            except curses.error:
-                if poll:
-                    poll()
-                continue
-            if typing:
-                edited = line_key(query, qpos, k)
-                if k in ("\n", "\r", curses.KEY_ENTER):
-                    typing = False
-                elif k in ("\x1b", "\x07"):
-                    query, qpos, typing = "", 0, False
-                    cur = top = 0
-                elif edited:
-                    if edited[0] != query:
-                        cur = top = 0
-                    query, qpos = edited
-                else:
-                    moved = move_key(k, cur, len(vis) - 1, view)
-                    cur = cur if moved is None else moved
-                continue
-            moved = move_key(k, cur, len(vis) - 1, view)
-            if k in hotkeys and (vis or multi):
-                if on_hotkey and on_hotkey(k, vis[cur] if vis else None):
-                    continue
-                return k, (vis[cur] if vis else None)
-            if moved is not None:
-                cur = moved
-            elif k == "/":
-                typing, qpos = True, len(query)
-            elif k == "?":
-                show_help(stdscr, help_lines(multi, hint, hidden_count, bool(on_note)))
-                stdscr.timeout(POLL_MS if poll else -1)
-            elif k == "j":
-                cur = min(len(vis) - 1, cur + 1)
-            elif k == "k":
-                cur = max(0, cur - 1)
-            elif k == "g":
-                cur = 0
-            elif k == "G":
-                cur = len(vis) - 1
-            elif k == "\x04":
-                cur = min(len(vis) - 1, cur + max(1, view // 2))
-            elif k == "\x15":
-                cur = max(0, cur - max(1, view // 2))
-            elif k == "\x06":
-                cur = min(len(vis) - 1, cur + view)
-            elif k == "\x02":
-                cur = max(0, cur - view)
-            elif k in ("\x1b", "q", "\x07"):
-                if query:
-                    query, qpos = "", 0
-                    cur = top = 0
-                    continue
-                if not multi or not esc_asks:
-                    return None
-                if state == start:
-                    return state
-                stdscr.addnstr(h - 1, 0, " " * (w - 1), w - 1)
-                stdscr.addnstr(h - 1, 0, f"Keep +{added} −{removed} pending change(s)?  y/Enter keep · u revert · any other key keeps editing",
-                               w - 1, curses.A_BOLD | red_a)
-                stdscr.timeout(-1)  # wait for the answer even when polling
-                try:
-                    answer = stdscr.get_wch()
-                except curses.error:
-                    continue
-                finally:
-                    if poll:
-                        stdscr.timeout(POLL_MS)
-                if answer in ("y", "Y", "\n", "\r", curses.KEY_ENTER):
-                    return state
-                if answer in ("u", "U"):
-                    return list(start)
-            elif k in ("\n", "\r", curses.KEY_ENTER):
-                if multi:
-                    return state
-                if vis:
-                    return vis[cur]
-            elif k == "z" and hidden_count:
-                revealed = not revealed
-            elif not multi:
-                continue
-            elif k == "u":
-                state = list(start)
-                notice = "Reverted this list to how it was when opened"
-            elif k in ("o", "\x0f"):
-                view_mode = (view_mode + 1) % 3
-                cur = top = 0
-            elif k in ("\t", " ") and vis:
-                if not locked[vis[cur]]:
-                    target = not state[vis[cur]]
-                    for i in linked([vis[cur]]):
-                        state[i] = target
-            elif k == "w" and vis and on_note and not locked[vis[cur]]:
-                text = read_line(stdscr, "Note (empty clears, Esc cancels): ", note_text(vis[cur]) if note_text else "")
-                if text is not None:
-                    notice = on_note(vis[cur], text.strip())
-            elif k in ("a", "\x01") and vis:
-                free = [i for i in vis if not locked[i]]
-                target = not all(state[i] for i in free)
-                for i in linked(free):
-                    state[i] = target
-    return curses.wrapper(run)
+    if preview:
+        _app_class()  # first: it sets up Textual's environment
+        if not _draws_images():
+            preview = None
+    return _run(_ListModel(title, labels, multi, initial, hint, cursor, extras, locked, locked_note, hotkeys, note_text,
+                           on_note, esc_asks, hidden, status, diff_marks, session, poll, links, on_hotkey, preview))

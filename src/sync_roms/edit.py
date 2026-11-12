@@ -7,7 +7,7 @@ from . import picker, runtime, s3, store, ui
 
 
 def note(text):
-    """Say something outside the curses screen and wait, so the next redraw doesn't erase it."""
+    """Say something outside the list screen and wait, so the next redraw doesn't erase it."""
     print(text)
     try:
         input(ui.dim("   Press Enter to continue "))

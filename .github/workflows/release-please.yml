@@ -50,15 +50,32 @@ jobs:
     if: ${{ needs.release-please.outputs.release_created }}
     runs-on: macos-latest
     steps:
+      # bump-formula-pr can't refresh the Python resources of a formula whose url isn't on PyPI, so it only writes the
+      # new url, update-python-resources resolves the resources from it, the tap's script points them back at wheels,
+      # and the formula is installed and its UI dependencies imported before the PR is opened and merged.
       - run: |
           brew tap kelsin/tap
           brew trust kelsin/tap
-          brew bump-formula-pr --no-fork --no-browse --version "$VERSION" \
+          brew bump-formula-pr --write-only --version "$VERSION" \
             --url "https://github.com/kelsin/sync-roms/releases/download/$TAG/sync_roms-$VERSION.tar.gz" \
             kelsin/tap/sync-roms
-          pr=$(gh pr list --repo kelsin/homebrew-tap --head "bump-sync-roms-$VERSION" --json number --jq '.[0].number')
-          gh pr merge "$pr" --repo kelsin/homebrew-tap --squash
+          brew update-python-resources kelsin/tap/sync-roms
+          cd "$(brew --repository kelsin/tap)"
+          python3 scripts/wheel-resources.py Formula/sync-roms.rb
+          brew install --build-from-source kelsin/tap/sync-roms
+          brew test kelsin/tap/sync-roms
+          "$(brew --prefix sync-roms)/libexec/bin/python" -c "import boto3, textual, textual_image.renderable, PIL.Image"
+          branch="bump-sync-roms-$VERSION"
+          gh auth setup-git
+          git switch -c "$branch"
+          git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+            commit -am "sync-roms $VERSION"
+          git push origin "$branch"
+          gh pr create --repo kelsin/homebrew-tap --head "$branch" --title "sync-roms $VERSION" \
+            --body "Bump sync-roms to $VERSION and refresh its Python resources."
+          gh pr merge "$branch" --repo kelsin/homebrew-tap --squash --delete-branch
         env:
+          HOMEBREW_NO_AUTO_UPDATE: 1  # an auto-update would stash the uncommitted bump away before the install
           HOMEBREW_GITHUB_API_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
           GH_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
           TAG: ${{ needs.release-please.outputs.tag_name }}
