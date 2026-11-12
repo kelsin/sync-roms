@@ -895,3 +895,58 @@ def match_command(args):
         scrape_state.clear_notgame(name, args.rom)
         return code
     return code or 1
+
+
+MISSING = {  # why a ROM has no metadata: (mark, how the system's line counts it)
+    "notgame": ("🚫", "non-game"), "unknown": ("❔", "not on ScreenScraper"),
+    "manual": ("🔗", "matched, not scraped yet"), "new": ("⏳", "not looked up yet"),
+}
+
+
+def missing_command(args):
+    """`scrape missing [SYSTEM]`: list every ROM with no metadata entry and why: ScreenScraper calls it a non-game or
+    doesn't know it, it has a saved match that wasn't scraped, or it hasn't been looked up. Nothing is looked up or written.
+
+    args: system (storage folder name, or None for all) and optionally all (every ROM in the storage, not just the
+    listed games)."""
+    systems = _pick_systems(args.system)
+    print(ui.bold("🔎 ROMs with no metadata") + ui.dim(f"  {s3.location()}"))
+    try:
+        roms = scrape_files.bucket_roms(systems, all_files=getattr(args, "all", False))
+        listed = [s for s in systems if roms.get(s["bucket"])]
+
+        def loaded(name):
+            try:
+                return load_metadata(name)
+            except ValueError:
+                return None
+        metadata = _each(loaded, [s["bucket"] for s in listed])
+    except s3.ERRORS as e:
+        ui.fail(f"{e}", 3)
+    state, total = scrape_state.snapshot(), 0
+    for s in sorted(listed, key=lambda s: s["bucket"]):
+        name = s["bucket"]
+        if metadata[name] is None:
+            print(ui.yellow(f"  ⚠️  {metadata_key(name)} isn't valid JSON; skipping {name}"))
+            continue
+        why = {}
+        for r in sorted(roms[name] - set(metadata[name])):
+            why[r] = ("notgame" if state.is_notgame(name, r) else "manual" if state.manual_match(name, r) is not None
+                      else "unknown" if state.is_unknown(name, r) else "new")
+        if not why:
+            continue
+        total += len(why)
+        counts = Counter(why.values())
+        parts = [f"{counts[k]} {MISSING[k][1]}" for k in MISSING if counts[k]]
+        if "screenscraper" not in s:
+            parts = ["no ScreenScraper system id, so it can't be scraped"]
+        print(f"  {name} ({len(why)}): " + ", ".join(parts))
+        for r, k in why.items():
+            print(f"     {MISSING[k][0]} {r}")
+    if not total:
+        print(ui.green("Every ROM has metadata ✨"))
+        return 0
+    print(ui.dim("\n   Review the non-games and unknown ROMs: sync-roms scrape review [SYSTEM]"))
+    print(ui.dim("   Say which game one is: sync-roms scrape match SYSTEM ROM GAME_ID_OR_NAME"))
+    print(ui.dim("   Look up the rest: sync-roms scrape"))
+    return 0

@@ -24,7 +24,7 @@ SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "devices": ("[ID]", "list the supported devices, or one device's systems"),
     "upload": ("roms [DIR] | scrapes [CARD]", "upload ROMs or a card's scraped data to storage"),
     "diff": ("[DIR]", "list the ROMs in only DIR or only the bucket, ignoring renames"),
-    "scrape": ("[match SYSTEM ROM GAME | review [SYSTEM]]", "scrape the ROMs that have no metadata from ScreenScraper into storage's scrapes/ folder"),
+    "scrape": ("[match SYSTEM ROM GAME | review [SYSTEM] | missing [SYSTEM]]", "scrape the ROMs that have no metadata from ScreenScraper into storage's scrapes/ folder"),
     "clean": ("scrapes", "remove scrapes/ media and metadata for ROMs that aren't in storage"),
     "playlist": ("[DIR]", "create or fix the .m3u playlist of every multi-disc game"),
     "convert": ("[DIR]", "unzip archives and convert disc images to verified .chd"),
@@ -137,6 +137,7 @@ TOPICS = {
   sync-roms scrape [--system ID] [--all] [--retry] [--fill-media] [--skip-media TYPES] [--dry-run]
   sync-roms scrape match SYSTEM ROM GAME_ID_OR_NAME [--skip-media TYPES] [--dry-run]
   sync-roms scrape review [SYSTEM]
+  sync-roms scrape missing [SYSTEM] [--all]
   sync-roms scrape --set-credentials
 
   Looks up every available ROM with no entry in scrapes/<system>/metadata.json on ScreenScraper and writes its
@@ -152,6 +153,10 @@ TOPICS = {
                      credentials or requests (scrape match --dry-run does look the game up)
   match              say which ScreenScraper game a ROM is (a game id, or a name to search and pick from), then scrape it;
                      for a ROM that already has metadata it asks before replacing the entry and deleting its old media
+  review             go through the ROMs ScreenScraper calls non-games or doesn't know: ignore, search under another
+                     name and scrape the game picked, or keep for later
+  missing            list every ROM with no metadata and why (non-game, not on ScreenScraper, matched but not scraped,
+                     not looked up yet); nothing is looked up. --all: every ROM in the storage
   --set-credentials  ask for your ScreenScraper username and password (saved in settings.json,
                      readable only by you; blank keeps the current value)
   When ScreenScraper's daily quota runs out the run stops cleanly; run it again tomorrow. Writes use the write profile.
@@ -359,7 +364,8 @@ class Parser(argparse.ArgumentParser):
 LEGACY = {
     ("sync",): [], ("devices",): ["--devices"], ("diff",): ["--diff"], ("playlist",): ["--m3u"], ("convert",): ["--cd"],
     ("tools", "install"): ["--install-tools"], ("clean", "scrapes"): ["--clean-scrapes"],
-    ("scrape", "match"): ["--scrape-match"], ("scrape", "review"): ["--scrape-review"], ("scrape",): ["--scrape"],
+    ("scrape", "match"): ["--scrape-match"], ("scrape", "review"): ["--scrape-review"],
+    ("scrape", "missing"): ["--scrape-missing"], ("scrape",): ["--scrape"],
     ("upload", "roms"): ["--upload"], ("upload", "scrapes"): ["--upload-scrapes"],
     ("mirror", "use"): ["--use-mirror"], ("mirror", "clear"): ["--clear-mirror"], ("mirror",): ["--mirror"],
     ("games", "edit"): ["--edit"], ("cards", "edit"): ["--edit"], ("edit",): ["--edit"],
@@ -416,6 +422,7 @@ def build_parser():
     ap.add_argument("--scrape", action="store_true")
     ap.add_argument("--scrape-match", nargs=3, metavar=("SYSTEM", "ROM", "GAME"))
     ap.add_argument("--scrape-review", nargs="?", const="", metavar="SYSTEM")
+    ap.add_argument("--scrape-missing", nargs="?", const="", metavar="SYSTEM")
     ap.add_argument("--retry", action="store_true")
     ap.add_argument("--all", action="store_true")
     ap.add_argument("--fill-media", action="store_true")
@@ -446,7 +453,7 @@ def check_modes(args):
         ("--edit", args.edit), ("--upload", args.upload is not None), ("--diff", args.diff is not None),
         ("--upload-scrapes", args.upload_scrapes), ("--clean-scrapes", args.clean_scrapes),
         ("--scrape", args.scrape), ("--scrape-match", args.scrape_match is not None),
-        ("--scrape-review", args.scrape_review is not None),
+        ("--scrape-review", args.scrape_review is not None), ("--scrape-missing", args.scrape_missing is not None),
         ("--mirror", args.mirror is not None), ("--use-mirror", bool(args.use_mirror)), ("--clear-mirror", args.clear_mirror),
         ("--m3u", args.m3u is not None), ("--cd", args.chd is not None), ("--install-tools", args.install_tools),
         ("--devices", args.devices)) if on]
@@ -455,7 +462,7 @@ def check_modes(args):
     mode = modes[0] if modes else None
     if args.replace and mode != "--upload":
         ui.fail("--replace only works with `upload roms` (--upload)", 2)
-    if args.dry_run and mode in ("--edit", "--install-tools", "--clear-mirror", "--devices"):
+    if args.dry_run and mode in ("--edit", "--install-tools", "--clear-mirror", "--devices", "--scrape-missing"):
         ui.fail(f"--dry-run has no effect on {mode}", 2)
     if args.ask and mode:
         ui.fail(f"--ask only applies to syncing a card, not {mode}", 2)
@@ -471,8 +478,8 @@ def check_modes(args):
         ui.fail("--system only applies to `diff` and `scrape`", 2)
     if args.retry and mode != "--scrape":
         ui.fail("--retry only applies to `scrape`", 2)
-    if args.all and mode != "--scrape":
-        ui.fail("--all only applies to `scrape`", 2)
+    if args.all and mode not in ("--scrape", "--scrape-missing"):
+        ui.fail("--all only applies to `scrape` and `scrape missing`", 2)
     if args.fill_media and mode != "--scrape":
         ui.fail("--fill-media only applies to `scrape`", 2)
     if args.set_credentials and (mode != "--scrape" or args.system or args.retry or args.all or args.fill_media or args.skip_media or args.dry_run):
@@ -596,6 +603,10 @@ def dispatch_mode(args, mode):
         from . import scrape_review
         args.system = args.scrape_review or None
         return True, scrape_review.review_command(args)
+    if args.scrape_missing is not None:
+        from . import scrape_online
+        args.system = args.scrape_missing or None
+        return True, scrape_online.missing_command(args)
     if args.upload is not None:
         from . import upload
         return True, upload.upload_command(args)

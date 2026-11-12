@@ -1,5 +1,6 @@
-"""Reviewing ROMs ScreenScraper calls non-games: ignore each one, search for it under another name, or leave it for
-later. A scrape offers this at the end of its run; `sync-roms scrape review` opens it any time."""
+"""Reviewing ROMs ScreenScraper calls non-games or doesn't know: ignore each one, search for it under another name, or
+leave it for later. A scrape offers this for non-games at the end of its run; `sync-roms scrape review` opens it any time
+for both."""
 import argparse
 import re
 import sys
@@ -7,6 +8,7 @@ import sys
 from . import ignore, inventory, s3, scrape_online, scrape_state, screenscraper, ui
 
 PROMPT = "[i]gnore · [s]earch · [k]eep for later · [I]gnore all the rest  (k): "
+NOTHING = "No non-game or unknown ROMs to review ✨"
 _TAGS = re.compile(r"\s*[\(\[][^\)\]]*[\)\]]")
 
 
@@ -17,11 +19,23 @@ def search_name(rom):
 
 
 def _show(key, size, info):
-    print(ui.bold(f"\n🚫 {key}") + ui.dim(f"  {ui.human_size(size)}" if size is not None else ""))
+    """info: what ScreenScraper said of a non-game, or None for a ROM it doesn't know."""
+    print(ui.bold(f"\n{'❔' if info is None else '🚫'} {key}") + ui.dim(f"  {ui.human_size(size)}" if size is not None else ""))
+    if info is None:
+        print("   ScreenScraper: doesn't know this ROM")
+        return
     said = " · ".join(p for p in (info.get("name"), info.get("genre"), info.get("year")) if p)
     print(f"   ScreenScraper: {said or '(no details)'}")
     if info.get("desc"):
         print(ui.dim(f"   {info['desc']}"))
+
+
+def _clear(key):
+    """Take a ROM off the review lists (non-games and unknown)."""
+    name, rom = key.split("/", 1)
+    scrape_state.clear_notgame(name, rom)
+    scrape_state.clear_unknown(name, rom)
+    scrape_state.flush_unknown()
 
 
 def _search(system, rom, client):
@@ -40,13 +54,14 @@ def _search(system, rom, client):
 
 
 def review(systems, keys, sizes, client=None):
-    """Go through the pending non-games in keys ("system/rom"), one at a time. systems: {storage folder: system}."""
+    """Go through the pending non-games and unknown ROMs in keys ("system/rom"), one at a time.
+    systems: {storage folder: system}."""
     keys = sorted(keys, key=lambda k: tuple(k.split("/", 1)))
     queued = []
     try:
         for i, key in enumerate(keys):
             name, rom = key.split("/", 1)
-            _show(key, sizes.get(key), scrape_state.notgames().get(key, {}))
+            _show(key, sizes.get(key), scrape_state.notgames().get(key))
             while True:
                 answer = ui.ask(PROMPT).strip()
                 if answer in ("", "k"):
@@ -64,7 +79,7 @@ def review(systems, keys, sizes, client=None):
                     if client is None:
                         client = scrape_online.make_client()
                     if _search(systems[name], rom, client):
-                        scrape_state.clear_notgame(name, rom)
+                        _clear(key)
                         break
                     continue
         return 0
@@ -76,7 +91,7 @@ def review(systems, keys, sizes, client=None):
                 entries.setdefault(name, []).append(rom)
             ignore.add(entries)
             for key in queued:
-                scrape_state.clear_notgame(*key.split("/", 1))
+                _clear(key)
             print(ui.green(f"🙈 Ignored {len(queued)} ROM(s)"))
 
 
@@ -84,13 +99,33 @@ def _systems(name):
     return {s["bucket"]: s for s in scrape_online._pick_systems(name)}
 
 
+def _scraped(keys):
+    """The keys of unknown ROMs that have a metadata entry by now (from `upload scrapes`, say)."""
+    out = set()
+    for system in sorted({k.split("/", 1)[0] for k in keys}):
+        try:
+            have = scrape_online.load_metadata(system)
+        except ValueError:  # an unreadable metadata.json: keep its ROMs to review
+            continue
+        out |= {k for k in keys if k.split("/", 1)[0] == system and k.split("/", 1)[1] in have}
+    return out
+
+
 def review_command(args):
-    """`scrape review [SYSTEM]`: review every pending non-game (of one system, when given)."""
+    """`scrape review [SYSTEM]`: review every pending non-game and unknown ROM (of one system, when given)."""
     if not sys.stdin.isatty():
         ui.fail("scrape review needs a terminal", 2)
-    keys = sorted(k for k in scrape_state.notgames() if not args.system or k.split("/", 1)[0] == args.system)
+
+    def mine(k):
+        return not args.system or k.split("/", 1)[0] == args.system
+    notgames = {k for k in scrape_state.notgames() if mine(k)}
+    unknown = {k for k in scrape_state.unknown() if mine(k)} - notgames
+    for key in _scraped(unknown):
+        _clear(key)
+        unknown.discard(key)
+    keys = sorted(notgames | unknown)
     if not keys:
-        print(ui.green("No non-game results to review ✨"))
+        print(ui.green(NOTHING))
         return 0
     if s3.read_root() or inventory.current() is not None:
         sizes = inventory.stat(keys)  # ignored or deleted ROMs are left out
@@ -101,9 +136,9 @@ def review_command(args):
         sizes = {k: n for k, n in sizes.items() if k in keys}
     for key in keys:
         if key not in sizes:
-            scrape_state.clear_notgame(*key.split("/", 1))
+            _clear(key)
     keys = [k for k in keys if k in sizes]
     if not keys:
-        print(ui.green("No non-game results to review ✨"))
+        print(ui.green(NOTHING))
         return 0
     return review(_systems(args.system), keys, sizes)

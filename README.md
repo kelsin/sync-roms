@@ -247,7 +247,7 @@ Every mode is a command (`sync-roms COMMAND --help` explains one; plain `sync-ro
 | `devices [ID]` | list devices, or one device's systems (`--json`) | `--devices` |
 | `upload roms [DIR]` / `upload scrapes [CARD]` | upload to storage | `--upload`, `--upload-scrapes` |
 | `diff [DIR]` | compare a folder with storage | `--diff` |
-| `scrape [match SYSTEM ROM GAME]` / `scrape --set-credentials` | scrape ROMs with no metadata from ScreenScraper | `--scrape`, `--scrape-match` |
+| `scrape [match SYSTEM ROM GAME \| review [SYSTEM] \| missing [SYSTEM]]` / `scrape --set-credentials` | scrape ROMs with no metadata from ScreenScraper, review the non-game and unknown ones, or list them all | `--scrape`, `--scrape-match`, `--scrape-review`, `--scrape-missing` |
 | `clean scrapes` | remove scrapes of ROMs not in storage | `--clean-scrapes` |
 | `playlist [DIR]` | fix `.m3u` playlists | `--m3u` |
 | `convert [DIR]` | convert disc images to CHD | `--cd`, `--chd` |
@@ -306,8 +306,9 @@ On `esde` and `emudeck` cards every Vita zip in `psvita/` gets a `.psvita` file 
 | `--system ID` | `diff`: the system to compare with, instead of the picker. `scrape`: only that storage folder |
 | `--scrape` | Scrape the ROMs that have no metadata from ScreenScraper (the old form of `scrape`; see Scraping from ScreenScraper) |
 | `--scrape-match SYSTEM ROM GAME` | Tell the scraper which ScreenScraper game a ROM is, then scrape it (the old form of `scrape match`) |
-| `--scrape-review [SYSTEM]` | Review the ROMs ScreenScraper calls non-games (the old form of `scrape review`) |
-| `--all` | `scrape`: every ROM in the storage, not only the games your lists and sets reference |
+| `--scrape-review [SYSTEM]` | Review the ROMs ScreenScraper calls non-games or doesn't know (the old form of `scrape review`) |
+| `--scrape-missing [SYSTEM]` | List the ROMs with no metadata and why (the old form of `scrape missing`) |
+| `--all` | `scrape`, `scrape missing`: every ROM in the storage, not only the games your lists and sets reference |
 | `--retry` | `scrape`: also try the ROMs ScreenScraper didn't know before |
 | `--fill-media` | `scrape`: also scrape ROMs that have metadata but lack some media type in storage; their metadata is kept. ScreenScraper is asked again for each such ROM, even if it has no such media |
 | `--skip-media TYPES` | `scrape`, `scrape match`: comma-separated media folders not to download (e.g. `manuals,fanart`) |
@@ -404,12 +405,20 @@ scraper-written media (including its Onion and Slot images) is overwritten or de
 `custom/` and the `--skip-media` types are left as they are. ROMs that share the name without extension (`Game.zip`,
 `Game.7z`) share their media files; the prompt warns about them.
 
-**Unknown ROMs.** A ROM ScreenScraper doesn't know is remembered and skipped on later runs. `--retry` tries them again.
+**Unknown ROMs.** A ROM ScreenScraper doesn't know is remembered and skipped on later runs. `--retry` tries them again;
+`sync-roms scrape review [SYSTEM]` goes through them with non-games (see below), so you can search each one under
+another name.
+
+**Finding ROMs with no metadata.** `sync-roms scrape missing [SYSTEM]` lists every ROM your cards list (with `--all`,
+every ROM in storage) that has no entry in `metadata.json`, grouped by system, each marked with why: 🚫 a non-game
+waiting for review, ❔ not on ScreenScraper, 🔗 a saved match that wasn't scraped yet, or ⏳ not looked up yet. A
+system with no ScreenScraper id says so. It makes no ScreenScraper request and writes nothing.
 
 **Non-games.** ScreenScraper marks BIOS sets, demos, test carts and other software as non-games (`ZZZ(notgame)`). A
 run writes nothing for them and keeps them for review, and `--retry` doesn't look them up again. At the end of a run on
-a terminal you're asked whether to review them now; `sync-roms scrape review [SYSTEM]` reviews them any time. For each
-one, `i` ignores it, `s` searches ScreenScraper under another name (Enter takes the suggested name) and scrapes the game
+a terminal you're asked whether to review them now; `sync-roms scrape review [SYSTEM]` reviews them, and the unknown
+ROMs, any time (an unknown ROM that has a metadata entry by now, or is gone from storage, is dropped). For each one,
+`i` ignores it, `s` searches ScreenScraper under another name (Enter takes the suggested name) and scrapes the game
 you pick, `k` (the default) leaves it for later, and `I` ignores it and every one after it. Ignored ROMs are listed in
 `ignored.json` at the root of storage, shared by everyone using that storage: sync-roms never shows, syncs, uploads or
 scrapes them, and never deletes their files. Each run checks the file and keeps a copy in the data folder. To stop
