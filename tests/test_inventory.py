@@ -8,7 +8,7 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import helpers  # noqa: E402
-from sync_roms import commands, inventory, runtime, s3, store, ui, usersettings  # noqa: E402
+from sync_roms import commands, ignore, inventory, runtime, s3, store, ui, usersettings  # noqa: E402
 
 
 def quiet(fn, *args):
@@ -223,3 +223,40 @@ class StoreUsesTheCacheTest(StorageFolder):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class IgnoredTest(StorageFolder):
+    """gba/b.zip is ignored: every read leaves it out, with or without a cache, but the cache file keeps it."""
+
+    def setUp(self):
+        super().setUp()
+        p = mock.patch.object(ignore, "_keys", frozenset({"gba/b.zip"}))
+        p.start()
+        self.addCleanup(p.stop)
+
+    def each(self, check):
+        with self.subTest(cache=False):
+            check()
+        self.build()
+        with self.subTest(cache=True):
+            check()
+
+    def test_files_drops_ignored(self):
+        self.each(lambda: self.assertEqual(inventory.files("gba/"), {"gba/a.zip": 1}))
+
+    def test_cached_drops_ignored(self):
+        self.build()
+        self.assertEqual(inventory.cached("gba/"), {"gba/a.zip": 1})
+
+    def test_stat_drops_ignored(self):
+        self.each(lambda: self.assertEqual(inventory.stat(["gba/a.zip", "gba/b.zip"]), {"gba/a.zip": 1}))
+
+    def test_etags_drops_ignored(self):
+        self.each(lambda: self.assertEqual(set(inventory.etags("gba/")), {"a.zip"}))
+
+    def test_cache_file_still_holds_ignored(self):
+        self.build()
+        self.assertIn("gba/b.zip", self.read("storage-cache.json")["files"])
+
+    def test_listed_drops_ignored(self):
+        self.assertEqual(store.listed({"games": [{"bucket": "gba/a.zip"}, {"bucket": "gba/b.zip"}]}), ["gba/a.zip"])
