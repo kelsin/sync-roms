@@ -3,6 +3,7 @@ import contextlib
 import os
 import shutil
 import stat
+import unicodedata
 from concurrent.futures import ThreadPoolExecutor
 
 from botocore.config import Config
@@ -19,7 +20,22 @@ def safe_join(base, rel):
     path = os.path.join(base, rel)
     if os.path.commonpath([os.path.abspath(base), os.path.abspath(path)]) != os.path.abspath(base):
         raise ValueError(f"unsafe path: {rel!r}")
-    return path
+    return _on_disk(base, rel)
+
+
+def _on_disk(base, rel):
+    """base/rel spelled the way the disk has it. Some network shares store accented names decomposed (NFD) and find a
+    file only by that exact spelling, so a composed key misses it. A name that isn't there keeps rel's spelling, under
+    its parent's on-disk spelling."""
+    path = os.path.join(base, rel)
+    if rel.isascii() or os.path.lexists(path):
+        return path
+    for form in ("NFD", "NFC"):
+        other = os.path.join(base, unicodedata.normalize(form, rel))
+        if other != path and os.path.lexists(other):
+            return other
+    head, tail = os.path.split(rel)
+    return os.path.join(_on_disk(base, head), tail) if head else path
 
 
 JUNK_NAMES = {".DS_Store"}  # macOS Finder litter: never listed, cached, synced or scraped
@@ -73,8 +89,15 @@ def write_file(key, write):
     """Create the file for a key under the storage folder; write(tmp_path) fills a temporary file that then replaces it."""
     path = safe_join(runtime.ROOT, key)
     os.makedirs(os.path.dirname(path), exist_ok=True)
-    write(path + ".part")
-    os.replace(path + ".part", path)
+    try:
+        write(path + ".part")
+        tmp = safe_join(runtime.ROOT, key + ".part")  # a share may have stored the new name in another spelling
+        os.replace(tmp, tmp[:-len(".part")])
+    except BaseException:
+        with contextlib.suppress(OSError):
+            os.remove(safe_join(runtime.ROOT, key + ".part"))
+        raise
+    path = safe_join(runtime.ROOT, key)
     from . import inventory  # imported here: inventory reads storage through this module
     inventory.wrote(key, os.path.getsize(path))
 
@@ -173,15 +196,14 @@ def download(job, callback=None, wrote=None):
     """callback(bytes) is called as data arrives, wrote(bytes) as it is written to disk."""
     key, path, _ = job
     os.makedirs(os.path.dirname(path), exist_ok=True)
-    if read_root():
-        copy_file(safe_join(read_root(), key), path + ".part", callback, wrote)
-        os.replace(path + ".part", path)
-        return
-    from boto3.s3.transfer import TransferConfig
     try:
-        with open(path + ".part", "wb") as f:
-            s3_client().download_fileobj(runtime.BUCKET, key, CountingWriter(f, wrote) if wrote else f, Callback=callback,
-                                        Config=TransferConfig(max_concurrency=DOWNLOAD_PARTS))
+        if read_root():
+            copy_file(safe_join(read_root(), key), path + ".part", callback, wrote)
+        else:
+            from boto3.s3.transfer import TransferConfig
+            with open(path + ".part", "wb") as f:
+                s3_client().download_fileobj(runtime.BUCKET, key, CountingWriter(f, wrote) if wrote else f,
+                                            Callback=callback, Config=TransferConfig(max_concurrency=DOWNLOAD_PARTS))
         os.replace(path + ".part", path)
     except BaseException:
         with contextlib.suppress(OSError):
