@@ -465,6 +465,8 @@ def effective_settings():
     out = [(name, value, source) for name, (value, source) in usersettings.resolve_settings().items()]
     mirror = usersettings.load_settings().get("mirror")
     out.append(("mirror", mirror, "settings.json" if mirror else "unset"))
+    eject = usersettings.load_settings().get("eject")
+    out.append(("eject", eject is not False, "default" if eject is None else "settings.json"))
     return out
 
 

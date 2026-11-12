@@ -1,5 +1,6 @@
 """Cleaning junk files and Android media folders off the card."""
 import os
+import plistlib
 import shutil
 import signal
 import subprocess
@@ -10,6 +11,7 @@ from . import store, ui
 
 
 _clean_root = None
+_eject_root = None  # the card to unmount once the run is over (see eject)
 DOT_CLEAN_RETRIES = 2
 
 
@@ -165,3 +167,36 @@ def _clean_card():
             print(ui.dim(f"     {path}"))
         if len(left) > 10:
             print(ui.dim(f"     … and {len(left) - 10} more"))
+
+
+def card_disk(path):
+    """The whole disk (e.g. disk4) holding path when it is removable or external media, else None (the boot disk, a network share)."""
+    mount = os.path.realpath(path)
+    while not os.path.ismount(mount):
+        mount = os.path.dirname(mount)
+    if mount == "/":
+        return None
+    r = subprocess.run(["diskutil", "info", "-plist", mount], capture_output=True)
+    if r.returncode != 0:
+        return None
+    info = plistlib.loads(r.stdout)
+    if not (info.get("RemovableMediaOrExternalDevice") or info.get("Ejectable") or info.get("Removable")):
+        return None
+    return info.get("ParentWholeDisk") or None
+
+
+def eject():
+    """Unmount every volume on the card's disk with diskutil unmountDisk (macOS only), so it can be pulled right away."""
+    if not _eject_root or sys.platform != "darwin" or not shutil.which("diskutil"):
+        return
+    disk = card_disk(_eject_root)
+    if not disk:  # a folder on this Mac's own disk or a share: nothing to pull out
+        return
+    os.chdir("/")  # sync-roms's own working directory on the card would keep it busy
+    print(ui.bold(f"\n⏏️  Unmounting {disk}..."))
+    r = subprocess.run(["diskutil", "unmountDisk", disk], capture_output=True, text=True)
+    if r.returncode == 0:
+        print(ui.green("  ✅ Safe to remove the card"))
+    else:
+        print(ui.red(f"  ❌ {(r.stderr or r.stdout).strip()}"))
+        print(ui.dim(f"     A shell or app with the card open keeps it busy: close it, then run diskutil unmountDisk {disk}"))

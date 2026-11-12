@@ -39,7 +39,7 @@ SUBCOMMANDS = {  # name -> (usage, one-line summary)
 
 TOPICS = {
     "sync": """
-  sync-roms [sync] [CARD] [--dry-run] [--ask] [--yes] [--device ID|full] [--layout NAME] [--no-clean]
+  sync-roms [sync] [CARD] [--dry-run] [--ask] [--yes] [--device ID|full] [--layout NAME] [--no-clean] [--no-eject]
 
   CARD is the card or folder root (default: the current directory); the chosen firmware decides the folders inside
   it (ES-DE ROMs/ BIOS/, Knulli roms/ bios/, Onion Roms/ BIOS/). Missing folders are created after you confirm.
@@ -59,6 +59,8 @@ TOPICS = {
   --dry-run   show what would be downloaded and deleted, change nothing
   --yes       answer every prompt with its default (a default-no prompt, like deleting files, stays no)
   --no-clean  skip the end-of-run card tidy (.metadata_never_index, .fseventsd, dot_clean)
+  --no-eject  leave the card mounted (by default a Mac unmounts all of its volumes after a run with no failures;
+              "eject": false in settings.json turns that off for every run)
 
   A finished run (not --dry-run) creates .metadata_never_index in CARD, empties its .fseventsd, and on a Mac runs
   dot_clean (falling back to sudo mdutil, which asks for your password). ES-DE: files in the Android media folders
@@ -338,6 +340,7 @@ def main():
     finally:
         inventory.flush()
         clean.clean_dirs()
+        clean.eject()
 
 
 def list_devices(args=None):
@@ -374,7 +377,7 @@ LEGACY = {
     ("games", "edit"): ["--edit"], ("cards", "edit"): ["--edit"], ("edit",): ["--edit"],
 }
 BOOL_FLAGS = {"-n", "--dry-run", "-y", "--yes", "-a", "--ask"}
-PLAIN_FLAGS = BOOL_FLAGS | {"--replace", "--json", "--no-clean", "--retry", "--all", "--fill-media", "--set-credentials"}
+PLAIN_FLAGS = BOOL_FLAGS | {"--replace", "--json", "--no-clean", "--no-eject", "--retry", "--all", "--fill-media", "--set-credentials"}
 VALUE_FLAGS = {"--system", "--device", "--layout", "--device-id", "--skip-media"}
 
 
@@ -445,6 +448,7 @@ def build_parser():
     ap.add_argument("--device")
     ap.add_argument("--layout")
     ap.add_argument("--no-clean", action="store_true")
+    ap.add_argument("--no-eject", action="store_true")
     ap.add_argument("--version", action="store_true")
     ap.add_argument("-h", "--help", action="store_true")
     return ap
@@ -469,8 +473,8 @@ def check_modes(args):
         ui.fail(f"--dry-run has no effect on {mode}", 2)
     if args.ask and mode:
         ui.fail(f"--ask only applies to syncing a card, not {mode}", 2)
-    if (args.device or args.layout or args.no_clean) and mode:
-        ui.fail(f"--device, --layout and --no-clean only apply to syncing a card, not {mode}", 2)
+    if (args.device or args.layout or args.no_clean or args.no_eject) and mode:
+        ui.fail(f"--device, --layout, --no-clean and --no-eject only apply to syncing a card, not {mode}", 2)
     if args.base_dir and mode not in (None, "--upload-scrapes", "--clean-scrapes"):
         ui.fail(f"{mode} doesn't take a card folder ({args.base_dir!r}); give the directory right after the command", 2)
     if args.device_id and mode != "--devices":
@@ -1105,6 +1109,8 @@ def sync_card(args):
         clean.clean_android_media(base, card, False, args.ask)
     if failures:
         report_failures(failures)
+    if not failed and not args.no_eject and usersettings.load_settings().get("eject", True) is not False:
+        clean._eject_root = base  # after the card tidy, which still needs it mounted
     print(ui.green("\n🎉 Done!") if not failed else ui.red(f"\n⚠️  Done with {failed} failure(s)"))
     return 1 if failed else 0
 
