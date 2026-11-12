@@ -44,6 +44,11 @@ class CandidatesTest(MatchBase):
         out = scrape_online.find_candidates([SYSTEM], roms, {"gba": {"a.zip": {"name": "A"}}})
         self.assertEqual(out, {"gba": ["b.zip"]})
 
+    def test_pending_notgame_not_looked_up_again_even_with_retry(self):
+        scrape_state.mark_notgame("gba", "b.zip", {"name": "", "genre": "", "year": "", "desc": ""})
+        roms = {"gba": {"a.zip", "b.zip"}}
+        self.assertEqual(scrape_online.find_candidates([SYSTEM], roms, {}, retry=True)["gba"], ["a.zip"])
+
     def test_candidates_skip_unknown_unless_retry(self):
         scrape_state.mark_unknown("gba", "b.zip")
         roms = {"gba": {"a.zip", "b.zip"}}

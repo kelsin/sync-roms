@@ -356,11 +356,12 @@ class FinalReviewTest(RunBase):
         with open(os.path.join(self.root, key), "rb") as f:
             return f.read()
 
-    def test_notgame_result_is_unknown_and_writes_nothing(self):
+    def test_notgame_result_is_pending_and_writes_nothing(self):
         self.put("gba/a.zip")
-        self.client.games["a.zip"] = dict(game(1, screenscraper.NOTGAME), id=1)
+        self.client.games["a.zip"] = dict(game(1, "ZZZ(notgame):Test Cart"), id=1)
         self.assertEqual(self.run_scrape(), 0)
-        self.assertTrue(scrape_state.is_unknown("gba", "a.zip"))
+        self.assertEqual(scrape_state.notgames()["gba/a.zip"]["name"], "Test Cart")
+        self.assertFalse(scrape_state.is_unknown("gba", "a.zip"))
         self.assertEqual(self.metadata(), {})
         self.assertEqual(self.client.downloads, [])
         self.assertEqual(self.stored(), set())

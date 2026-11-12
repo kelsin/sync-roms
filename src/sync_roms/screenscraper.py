@@ -171,11 +171,8 @@ def _release_date(text):
     return f"{y}-{m:0>2}-{d:0>2}" if m.isdigit() and d.isdigit() else f"{y}-01-01"
 
 
-def parse_game(raw, regions):
-    """(metadata fields as parse_gamelist makes them, {ES-DE media folder: url}) from a game dict."""
-    raw = _unwrap(raw)
-    if is_notgame(raw):
-        return {}, {}
+def _meta(raw, regions):
+    """The metadata fields of an unwrapped game dict."""
     prefs = tuple(regions) + FALLBACK_NAME_REGIONS
     meta = {}
     name = _pick(raw.get("noms"), "region", prefs)
@@ -201,6 +198,26 @@ def parse_game(raw, regions):
     date = _release_date(_pick(raw.get("dates"), "region", prefs))
     if date:
         meta["releasedate"] = date
+    return meta
+
+
+def notgame_info(raw):
+    """What a non-game result says about itself: name (without the ZZZ(NOTGAME) mark), genre, year and the first line
+    of its description (at most 200 characters); "" for what it doesn't have."""
+    meta = _meta(_unwrap(raw), ())
+    name = meta.get("name", "")
+    if _notgame_name(name):
+        name = name[len(NOTGAME):].lstrip(":").strip()
+    desc = (meta.get("desc", "").strip().splitlines() or [""])[0][:200]
+    return {"name": name, "genre": meta.get("genre", ""), "year": meta.get("releasedate", "")[:4], "desc": desc}
+
+
+def parse_game(raw, regions):
+    """(metadata fields as parse_gamelist makes them, {ES-DE media folder: url}) from a game dict."""
+    raw = _unwrap(raw)
+    if is_notgame(raw):
+        return {}, {}
+    meta = _meta(raw, regions)
 
     media_prefs = tuple(regions) + FALLBACK_MEDIA_REGIONS
     best = {}  # folder -> ((region rank, type rank), url)

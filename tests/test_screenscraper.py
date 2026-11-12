@@ -80,6 +80,19 @@ class ParseGameTests(unittest.TestCase):
         self.assertTrue(ss.is_notgame(raw))
         self.assertFalse(ss.is_notgame(self.raw()))
 
+    def test_notgame_info(self):
+        raw = {"id": "9", "noms": [{"region": "wor", "text": "ZZZ(notgame):Bubble System Bios"}],
+               "genres": [{"noms": [{"langue": "en", "text": "Various / System"}]}],
+               "dates": [{"region": "wor", "text": "1985-01-01"}]}
+        self.assertEqual(ss.notgame_info(raw), {"name": "Bubble System Bios", "genre": "Various / System", "year": "1985", "desc": ""})
+        self.assertEqual(ss.notgame_info({"noms": [{"region": "wor", "text": ss.NOTGAME}]})["name"], "")
+
+    def test_notgame_info_desc_is_first_line_capped(self):
+        raw = {"noms": [{"region": "wor", "text": "ZZZ(notgame) Demos"}],
+               "synopsis": [{"langue": "en", "text": "x" * 300 + "\nsecond"}]}
+        info = ss.notgame_info(raw)
+        self.assertEqual((info["name"], info["desc"]), ("Demos", "x" * 200))
+
     def test_named_notgame_placeholder_is_notgame(self):
         for name in ("ZZZ(notgame):Bubble System Bios", "ZZZ(notgame):#NONGAME", "zzz(NotGame) Demos"):
             raw = {"id": "9", "noms": [{"region": "wor", "text": name}]}

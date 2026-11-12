@@ -47,6 +47,16 @@ class ScrapeStateTest(DataDir):
         self.assertEqual(scrape_state.manual_match("gba", "a.zip"), 42)
         self.assertIsNone(scrape_state.manual_match("nes", "a.zip"))
 
+    def test_mark_and_clear_notgame(self):
+        info = {"name": "Bios", "genre": "", "year": "1985", "desc": ""}
+        scrape_state.mark_notgame("fbneo", "bubsys.zip", info)
+        scrape_state._cache.clear()  # read back from disk
+        self.assertEqual(scrape_state.notgames(), {"fbneo/bubsys.zip": info})
+        self.assertTrue(scrape_state.snapshot().is_notgame("fbneo", "bubsys.zip"))
+        scrape_state.clear_notgame("fbneo", "bubsys.zip")
+        self.assertEqual(scrape_state.notgames(), {})
+        self.assertFalse(scrape_state.snapshot().is_notgame("fbneo", "bubsys.zip"))
+
     def test_unknown_round_trip(self):
         self.assertFalse(scrape_state.is_unknown("gba", "a.zip"))
         scrape_state.mark_unknown("gba", "a.zip")
