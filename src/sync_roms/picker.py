@@ -558,6 +558,10 @@ def _run(model):
 def _draws_images():
     """True when the terminal speaks Kitty graphics or Sixel. textual-image probes the terminal on import, which must
     happen before the app starts; its block fallbacks are too coarse for the art, so they don't count."""
+    if os.environ.get("TMUX"):
+        # tmux answers the probe's device-attributes query itself (claiming Sixel), so textual-image picks Sixel and
+        # the outer terminal's real reply arrives late, as keys. Don't probe at all.
+        return False
     import logging
     logging.getLogger("textual_image").setLevel(logging.ERROR)  # a terminal that doesn't answer isn't worth a traceback
     from textual_image import renderable
@@ -599,7 +603,7 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
     in place (the list stays open and is redrawn, so it can update extras), False returns (key, index) as usual.
     preview: optional callable(label index) -> path of an image file, or None; the list then shares the screen with an
     image pane showing the highlighted row's image (blank when there is none), updated as the cursor and filter change.
-    Only in a terminal that draws real images (Kitty graphics or Sixel); elsewhere there is no pane.
+    Only in a terminal that draws real images (Kitty graphics or Sixel), and not inside tmux; elsewhere there is no pane.
     """
     if preview:
         _app_class()  # first: it sets up Textual's environment
