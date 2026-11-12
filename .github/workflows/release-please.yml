@@ -51,8 +51,8 @@ jobs:
     runs-on: macos-latest
     steps:
       # bump-formula-pr can't refresh the Python resources of a formula whose url isn't on PyPI, so it only writes the
-      # new url, update-python-resources resolves the resources from it, and the formula is installed and its UI
-      # dependencies imported before the PR is opened and merged.
+      # new url, update-python-resources resolves the resources from it, the tap's script points them back at wheels,
+      # and the formula is installed and its UI dependencies imported before the PR is opened and merged.
       - run: |
           brew tap kelsin/tap
           brew trust kelsin/tap
@@ -60,11 +60,12 @@ jobs:
             --url "https://github.com/kelsin/sync-roms/releases/download/$TAG/sync_roms-$VERSION.tar.gz" \
             kelsin/tap/sync-roms
           brew update-python-resources kelsin/tap/sync-roms
+          cd "$(brew --repository kelsin/tap)"
+          python3 scripts/wheel-resources.py Formula/sync-roms.rb
           brew install --build-from-source kelsin/tap/sync-roms
           brew test kelsin/tap/sync-roms
           "$(brew --prefix sync-roms)/libexec/bin/python" -c "import boto3, textual, textual_image.renderable, PIL.Image"
           branch="bump-sync-roms-$VERSION"
-          cd "$(brew --repository kelsin/tap)"
           gh auth setup-git
           git switch -c "$branch"
           git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
