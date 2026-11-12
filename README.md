@@ -301,6 +301,7 @@ On `esde` and `emudeck` cards every Vita zip in `psvita/` gets a `.psvita` file 
 | `--device ID\|full`, `--layout NAME` | Sync: choose the setup without the picker (it is saved for the card) |
 | `--size SIZE` | `cards new` / `cards set`: the card's size as people read it (`256`, `512GB`, `1TB`), saved in `cards.json` and shown by `cards list` and on sync |
 | `--no-clean` | Sync: skip the end-of-run card tidy |
+| `--no-eject` | Sync: leave the card mounted. By default, on a Mac, a run with no failures ends with `diskutil unmountDisk` on the card's disk (removable or external disks only), so every volume on it is unmounted and the card can be pulled. `"eject": false` in `settings.json` turns it off for every run |
 | `--json` | `devices`, `games list`, `cards list`, `diff` and `sync --dry-run`: one JSON document on stdout, nothing else (pass `--device`/`--layout` so no picker is needed; `diff` also needs `--system ID` unless the folder is named after a system) |
 | `--card NAME` | `games` commands: the card whose games to change (required; see Editing from scripts) |
 | `--system ID` | `diff`: the system to compare with, instead of the picker. `scrape`: only that storage folder |

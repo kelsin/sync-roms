@@ -1,6 +1,7 @@
 import contextlib
 import io
 import os
+import plistlib
 import sys
 import tempfile
 import threading
@@ -151,13 +152,61 @@ class PlainOutputTest(unittest.TestCase):
         self.assertEqual(out.count("progress:"), 2)
 
 
+class EjectTest(unittest.TestCase):
+    def run_eject(self, info, unmount_code=0, platform="darwin", root="/Volumes/CARD"):
+        calls = []
+
+        def run(cmd, **kw):
+            calls.append(cmd)
+            if cmd[:2] == ["diskutil", "info"]:
+                return mock.Mock(returncode=0 if info is not None else 1, stdout=plistlib.dumps(info or {}))
+            return mock.Mock(returncode=unmount_code, stdout="", stderr="Unmount of disk4 failed: at least one volume could not be unmounted")
+        with contextlib.ExitStack() as st:
+            st.enter_context(mock.patch.object(clean, "_eject_root", root))
+            st.enter_context(mock.patch.object(clean.sys, "platform", platform))
+            st.enter_context(mock.patch.object(clean.shutil, "which", lambda n: "/usr/sbin/diskutil"))
+            st.enter_context(mock.patch.object(clean.os.path, "ismount", lambda p: p in ("/", "/Volumes/CARD")))
+            st.enter_context(mock.patch.object(clean.os.path, "realpath", lambda p: p))
+            st.enter_context(mock.patch.object(clean.os, "chdir", lambda p: None))
+            st.enter_context(mock.patch.object(clean.subprocess, "run", run))
+            _, out = captured(clean.eject)
+        return calls, out
+
+    def test_unmounts_the_whole_disk_of_a_removable_card(self):
+        calls, out = self.run_eject({"RemovableMediaOrExternalDevice": True, "ParentWholeDisk": "disk4"}, root="/Volumes/CARD/sub")
+        self.assertEqual(calls, [["diskutil", "info", "-plist", "/Volumes/CARD"], ["diskutil", "unmountDisk", "disk4"]])
+        self.assertIn("Safe to remove", out)
+
+    def test_leaves_an_internal_disk_mounted(self):
+        calls, out = self.run_eject({"RemovableMediaOrExternalDevice": False, "Internal": True, "ParentWholeDisk": "disk3"})
+        self.assertEqual(calls, [["diskutil", "info", "-plist", "/Volumes/CARD"]])
+        self.assertEqual(out, "")
+
+    def test_leaves_a_network_share_mounted(self):
+        calls, _ = self.run_eject(None)
+        self.assertEqual(len(calls), 1)
+
+    def test_a_folder_on_the_boot_volume_is_never_unmounted(self):
+        calls, _ = self.run_eject({}, root="/Users/me/card")
+        self.assertEqual(calls, [])
+
+    def test_a_busy_card_says_why(self):
+        _, out = self.run_eject({"Ejectable": True, "ParentWholeDisk": "disk4"}, unmount_code=1)
+        self.assertIn("could not be unmounted", out)
+        self.assertIn("diskutil unmountDisk disk4", out)
+
+    def test_does_nothing_off_a_mac(self):
+        calls, _ = self.run_eject({"Ejectable": True, "ParentWholeDisk": "disk4"}, platform="linux")
+        self.assertEqual(calls, [])
+
+
 class SyncFlowTest(unittest.TestCase):
     def run_sync(self, cards=None, yes=True, dry_run=False, plan=None, stale=(), extra=(),
-                 manifest=MANIFEST, setup=(None, "esde"), files=(), colls=(), after=None, settings=None, prepare=None):
+                 manifest=MANIFEST, setup=(None, "esde"), files=(), colls=(), after=None, settings=None, prepare=None, args=()):
         updates = []
         with tempfile.TemporaryDirectory() as card_dir:
             card = self.card = os.path.basename(card_dir)
-            argv = ["sync-roms", card_dir] + (["--yes"] if yes else []) + (["--dry-run"] if dry_run else [])
+            argv = ["sync-roms", card_dir] + (["--yes"] if yes else []) + (["--dry-run"] if dry_run else []) + list(args)
             cards = {card: v for v in [cards or {}]} if cards is not None else {}
             with contextlib.ExitStack() as st:
                 for target, kw in (
@@ -175,6 +224,7 @@ class SyncFlowTest(unittest.TestCase):
                     for name, value in kw.items():
                         st.enter_context(mock.patch.object(target, name, value))
                 st.enter_context(mock.patch.object(cli.clean, "_clean_root", None))
+                st.enter_context(mock.patch.object(cli.clean, "_eject_root", None))
                 st.enter_context(mock.patch.object(ui, "confirm", lambda *a, **k: True))
                 st.enter_context(mock.patch.object(scrape_plan, "SCRAPE_LAYOUTS", {"esde"}))
                 st.enter_context(mock.patch.object(scrape_plan, "load_scrape_data", lambda systems: {}))
@@ -197,6 +247,7 @@ class SyncFlowTest(unittest.TestCase):
                 if after:
                     self.after = after(card_dir)
                 root = cli.clean._clean_root
+                self.ejected = cli.clean._eject_root
                 left = [s for s in stale if os.path.exists(os.path.join(card_dir, s))]
         return code, out, updates, root, left
 
@@ -431,6 +482,19 @@ class SyncFlowTest(unittest.TestCase):
         self.assertFalse(os.path.exists(self.cfg))
         last = [u for u in updates if "frontend_collections" in u][-1]
         self.assertNotIn("Surprise", last["frontend_collections"])
+
+    def test_a_finished_run_ejects_the_card(self):
+        self.run_sync(files=["ROMs/gba/Game.zip"])
+        self.assertTrue(self.ejected)
+
+    def test_no_eject_flag_or_setting_keeps_the_card_mounted(self):
+        for kw in ({"args": ["--no-eject"]}, {"settings": {"eject": False}}, {"dry_run": True}):
+            self.run_sync(files=["ROMs/gba/Game.zip"], **kw)
+            self.assertIsNone(self.ejected, kw)
+
+    def test_a_run_with_failures_keeps_the_card_mounted(self):
+        self.run_sync(extra=[(cli.downloads, "run_downloads", lambda todo, *a, **k: len(todo))])
+        self.assertIsNone(self.ejected)
 
 
 if __name__ == "__main__":
