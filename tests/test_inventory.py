@@ -87,6 +87,30 @@ class FolderCacheTest(StorageFolder):
         self.assertEqual(self.build(), (1, 1, 1))
         self.assertEqual(inventory.files("gba/"), {"gba/b.zip": 20, "gba/c.zip": 4})
 
+    def test_quick_update_stats_only_new_files(self):
+        self.build()
+        os.remove(os.path.join(self.root.name, "gba/a.zip"))
+        self.put("gba/b.zip", 20)  # same name: keeps its cached size
+        self.put("gba/c.zip", 4)
+        statted = []
+        real = os.stat
+
+        def spy(p, *a, **k):
+            if str(p).endswith(".zip"):
+                statted.append(os.path.relpath(p, self.root.name))
+            return real(p, *a, **k)
+        with mock.patch.object(inventory.os, "stat", side_effect=spy), mock.patch.object(inventory, "_progress"):
+            self.assertEqual(inventory.update(quick=True), (1, 1, 0))
+        self.assertEqual(statted, [os.path.join("gba", "c.zip")])
+        self.assertEqual(inventory.files("gba/"), {"gba/b.zip": 2, "gba/c.zip": 4})
+        inventory.reset()
+        self.assertEqual(inventory.files("gba/"), {"gba/b.zip": 2, "gba/c.zip": 4})
+
+    def test_quick_update_without_a_cache_reads_everything(self):
+        with mock.patch.object(inventory, "_progress"):
+            self.assertEqual(inventory.update(quick=True), (3, 0, 0))
+        self.assertEqual(inventory.files("gba/"), {"gba/a.zip": 1, "gba/b.zip": 2})
+
     def test_a_missing_folder_keeps_the_cache(self):
         self.build()
         with mock.patch.object(runtime, "ROOT", os.path.join(self.root.name, "unmounted")), \
@@ -204,6 +228,12 @@ class CacheCommandTest(StorageFolder):
         self.assertIn("gba/", out)
         self.assertIn("BIOS/", out)
         self.assertIn("just now", out)
+
+    def test_quick_update_command(self):
+        self.run_cmd("cache", "update")
+        code, out = self.run_cmd("cache", "update", "--quick")
+        self.assertEqual(code, 0)
+        self.assertIn("3 files", out)
 
     def test_status_says_when_storage_changed(self):
         self.run_cmd("cache", "update")

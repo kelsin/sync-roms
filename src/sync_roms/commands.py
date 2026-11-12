@@ -480,7 +480,7 @@ def config_cmd(args):
 
 def cache_cmd(args):
     usersettings.ensure_bucket()
-    return inventory.update_command() if args.action == "update" else inventory.status_command()
+    return inventory.update_command(args.quick) if args.action == "update" else inventory.status_command()
 
 
 def check_game_file(problems, path, where, systems):
@@ -940,7 +940,7 @@ def build_parser():
     p = csub.add_parser("delete", allow_abbrev=False); common(p, card=False); p.add_argument("name"); p.set_defaults(fn=cards_delete)
 
     p = sub.add_parser("config", allow_abbrev=False); common(p, card=False); p.add_argument("action", choices=["show", "path"], nargs="?", default="show"); p.set_defaults(fn=config_cmd)
-    p = sub.add_parser("cache", allow_abbrev=False); common(p, card=False); p.add_argument("action", choices=["update"], nargs="?"); p.set_defaults(fn=cache_cmd)
+    p = sub.add_parser("cache", allow_abbrev=False); common(p, card=False); p.add_argument("action", choices=["update"], nargs="?"); p.add_argument("--quick", action="store_true"); p.set_defaults(fn=cache_cmd)
     p = sub.add_parser("doctor", allow_abbrev=False); common(p, card=False); p.set_defaults(fn=doctor_cmd)
     p = sub.add_parser("check", allow_abbrev=False); common(p, card=False); p.add_argument("--bucket-keys", action="store_true"); p.set_defaults(fn=check_cmd)
     p = sub.add_parser("completion", allow_abbrev=False); common(p, card=False); p.add_argument("shell", choices=["bash", "zsh", "fish", "list"])
