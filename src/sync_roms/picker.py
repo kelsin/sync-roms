@@ -555,15 +555,40 @@ def _run(model):
     return result
 
 
+def _probe_through_tmux():
+    """Inside tmux, ask the outer terminal instead of tmux, and leave the answer where textual-image keeps its own
+    probe's. tmux answers textual-image's device-attributes query itself (claiming Sixel, which it may not be able to
+    pass on), before the outer terminal's Kitty graphics reply, which then arrives late, as keys. Passed through,
+    every reply comes from the outer terminal, in order. Needs tmux's allow-passthrough; False when it gets no answer.
+    Uses textual-image internals (0.14), so anything unexpected also means False."""
+    import sys
+    try:
+        from textual_image import _terminal as term
+        from textual_image._tmux import tmux_escape
+        if not (sys.__stdout__ and sys.__stdout__.isatty()):
+            return False
+        with term.capture_until_primary_da(term._PROBE_TIMEOUT) as response:
+            sys.__stdout__.write(term._tgp_support_query() + tmux_escape("\x1b[16t") + tmux_escape("\x1b[c"))
+            sys.__stdout__.flush()
+        sixel, tgp, width, height = term._parse_probe_response(response.sequence)
+        if not (width and height):
+            rows, columns, x_pixels, y_pixels = term.get_tiocgwinsz()
+            width, height = x_pixels // columns, y_pixels // rows
+        if not (width and height):
+            return False
+        term.probe_terminal._result = term.TerminalCapabilities(term.CellSize(width, height), sixel=sixel, tgp=tgp)
+    except Exception:  # noqa: BLE001 -- a missing internal, a closed stdin or no answer: no images
+        return False
+    return sixel or tgp
+
+
 def _draws_images():
     """True when the terminal speaks Kitty graphics or Sixel. textual-image probes the terminal on import, which must
     happen before the app starts; its block fallbacks are too coarse for the art, so they don't count."""
-    if os.environ.get("TMUX"):
-        # tmux answers the probe's device-attributes query itself (claiming Sixel), so textual-image picks Sixel and
-        # the outer terminal's real reply arrives late, as keys. Don't probe at all.
-        return False
     import logging
     logging.getLogger("textual_image").setLevel(logging.ERROR)  # a terminal that doesn't answer isn't worth a traceback
+    if os.environ.get("TMUX") and not _probe_through_tmux():
+        return False
     from textual_image import renderable
     if renderable.Image not in (renderable.TGPImage, renderable.SixelImage):
         return False

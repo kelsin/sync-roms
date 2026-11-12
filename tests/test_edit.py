@@ -325,11 +325,45 @@ class TextualList(unittest.TestCase):
                 with mock.patch.object(renderable, "Image", kind):
                     self.assertEqual(picker._draws_images(), draws)
 
-    def test_no_probe_inside_tmux(self):
+    def test_no_textual_image_probe_inside_tmux_without_an_answer(self):
         from sync_roms import picker
         with mock.patch.dict(os.environ, {"TMUX": "/tmp/tmux-501/default,1,0"}), \
-                mock.patch.dict(sys.modules, {"textual_image": None}):  # importing it would fail
+                mock.patch.object(picker, "_probe_through_tmux", return_value=False), \
+                mock.patch.dict(sys.modules, {"textual_image.renderable": None}):  # importing it would fail
             self.assertFalse(picker._draws_images())
+
+    def test_tmux_probe_keeps_the_outer_terminals_answer(self):
+        import contextlib
+        import types
+        from sync_roms import picker
+        from textual_image import _terminal as term
+        if hasattr(term.probe_terminal, "_result"):
+            saved = term.probe_terminal._result
+            self.addCleanup(setattr, term.probe_terminal, "_result", saved)
+        else:
+            self.addCleanup(lambda: hasattr(term.probe_terminal, "_result") and delattr(term.probe_terminal, "_result"))
+        # what Ghostty sent back through tmux: Kitty graphics OK, cell size, and its own device attributes (no Sixel)
+        replies = "\x1b_Gi=31;OK\x1b\\\x1b[6;20;10t\x1b[?62;22;52c"
+
+        @contextlib.contextmanager
+        def capture(timeout):
+            yield types.SimpleNamespace(sequence=replies)
+        stdout = mock.MagicMock()
+        stdout.isatty.return_value = True
+        with mock.patch.object(sys, "__stdout__", stdout), mock.patch.object(term, "capture_until_primary_da", capture):
+            self.assertTrue(picker._probe_through_tmux())
+        self.assertEqual(term.probe_terminal(), term.TerminalCapabilities(term.CellSize(10, 20), sixel=False, tgp=True))
+        written = stdout.write.call_args.args[0]
+        self.assertNotIn("\x1b[c", written.replace("\x1b\x1b[c", ""))  # every query goes through tmux
+
+    def test_tmux_probe_without_an_answer_means_no_images(self):
+        from sync_roms import picker
+        from textual_image import _terminal as term
+        stdout = mock.MagicMock()
+        stdout.isatty.return_value = True
+        with mock.patch.object(sys, "__stdout__", stdout), \
+                mock.patch.object(term, "capture_until_primary_da", side_effect=TimeoutError):
+            self.assertFalse(picker._probe_through_tmux())
 
     def test_textual_failure_exits_instead_of_looking_like_esc(self):
         from sync_roms import picker
