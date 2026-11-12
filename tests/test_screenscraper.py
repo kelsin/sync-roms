@@ -80,6 +80,12 @@ class ParseGameTests(unittest.TestCase):
         self.assertTrue(ss.is_notgame(raw))
         self.assertFalse(ss.is_notgame(self.raw()))
 
+    def test_named_notgame_placeholder_is_notgame(self):
+        for name in ("ZZZ(notgame):Bubble System Bios", "ZZZ(notgame):#NONGAME", "zzz(NotGame) Demos"):
+            raw = {"id": "9", "noms": [{"region": "wor", "text": name}]}
+            self.assertTrue(ss.is_notgame(raw), name)
+            self.assertEqual(ss.parse_game(raw, ()), ({}, {}))
+
     def test_malformed_media_entries_skipped(self):
         raw = {"medias": [{"type": ["ss"], "url": "u"}, {"type": {"a": 1}, "url": "u"},
                           {"type": "ss", "region": ["wor"], "url": "https://neoclone.screenscraper.fr/ss.png"}]}
@@ -292,7 +298,8 @@ class ClientTests(unittest.TestCase):
                 self.assertFalse(os.path.exists(os.path.join(d, "a.png.part")))
 
     def test_search_and_game(self):
-        body = json.dumps({"response": {"jeux": [{"id": "5", "noms": [{"region": "us", "text": "Foo"}]}, {"x": 1}]}})
+        body = json.dumps({"response": {"jeux": [{"id": "5", "noms": [{"region": "us", "text": "Foo"}]}, {"x": 1},
+                                               {"id": "6", "noms": [{"region": "us", "text": "ZZZ(notgame):Bios"}]}]}})
         self.assertEqual(client(lambda r, timeout=None: Resp(body.encode())).search(12, "foo"), [(5, "Foo")])
         self.assertEqual(client(lambda r, timeout=None: fixture("jeuinfos_found.json")).game(12345)["id"], "12345")
 

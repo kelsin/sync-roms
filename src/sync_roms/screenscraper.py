@@ -132,9 +132,14 @@ def _unwrap(data):
     return _dict(data["jeu"]) if "jeu" in data else data
 
 
+def _notgame_name(name):
+    """Whether a name marks a non-game: ScreenScraper prefixes them with ZZZ(NOTGAME) in any case, e.g. "ZZZ(notgame):#bios"."""
+    return name.upper().startswith(NOTGAME)
+
+
 def is_notgame(raw):
-    """Whether a game dict is ScreenScraper's ZZZ(NOTGAME) placeholder."""
-    return NOTGAME in (_text(n) for n in _dicts(_unwrap(raw).get("noms")))
+    """Whether a game dict is one of ScreenScraper's ZZZ(NOTGAME) entries (BIOS, demos, tools...)."""
+    return any(_notgame_name(_text(n)) for n in _dicts(_unwrap(raw).get("noms")))
 
 
 def rom_hash_matches(raw, hashes):
@@ -401,7 +406,7 @@ class Client:
         out = []
         for g in _dicts(games):
             title = _pick(g.get("noms"), "region", FALLBACK_NAME_REGIONS)
-            if to_int(g.get("id")) > 0 and title and title != NOTGAME:
+            if to_int(g.get("id")) > 0 and title and not _notgame_name(title):
                 out.append((to_int(g["id"]), title))
         return out
 
