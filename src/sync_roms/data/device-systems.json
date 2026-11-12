@@ -104,9 +104,10 @@
     {
       "id": "switch",
       "add": [
-        "switch"
+        "switch",
+        "psvita"
       ],
-      "note": "Full speed through Dreamcast and Saturn; PSP at 4x. GameCube, Wii, 3DS and PS2 included. Switch included but game-dependent. Wii U and PS3 are compromised, so left off."
+      "note": "Full speed through Dreamcast and Saturn; PSP at 4x. GameCube, Wii, 3DS and PS2 included. Switch and Vita included but game-dependent. Wii U and PS3 are compromised, so left off."
     },
     {
       "id": "steam-deck",
@@ -139,7 +140,6 @@
         "naomi2",
         "naomigd",
         "ps3",
-        "psvita",
         "stv",
         "triforce",
         "type-x",
@@ -250,11 +250,11 @@
     },
     "anbernic-rg477m": {
       "tier": "switch",
-      "note": "Dimensity 8300 is a step below the Snapdragon 8 Gen 2. The same list as the Retroid Pocket 6, with Switch and the heavier GameCube, Wii and PS2 titles game-dependent."
+      "note": "Dimensity 8300 is a step below the Snapdragon 8 Gen 2. The same list as the Retroid Pocket 6, with Switch, Vita and the heavier GameCube, Wii and PS2 titles game-dependent."
     },
     "anbernic-rg477v": {
       "tier": "switch",
-      "note": "Dimensity 8300 is a step below the Snapdragon 8 Gen 2. The same list as the Retroid Pocket 6, with Switch and the heavier GameCube, Wii and PS2 titles game-dependent."
+      "note": "Dimensity 8300 is a step below the Snapdragon 8 Gen 2. The same list as the Retroid Pocket 6, with Switch, Vita and the heavier GameCube, Wii and PS2 titles game-dependent."
     },
     "anbernic-rg503": {
       "tier": "nds",
@@ -268,7 +268,7 @@
     },
     "anbernic-rg557": {
       "tier": "switch",
-      "note": "Dimensity 8300 is a step below the Snapdragon 8 Gen 2. The same list as the Retroid Pocket 6, with Switch and the heavier GameCube, Wii and PS2 titles game-dependent."
+      "note": "Dimensity 8300 is a step below the Snapdragon 8 Gen 2. The same list as the Retroid Pocket 6, with Switch, Vita and the heavier GameCube, Wii and PS2 titles game-dependent."
     },
     "anbernic-rg55g1": {
       "tier": "saturn"
@@ -326,15 +326,15 @@
     },
     "ayn-odin-2": {
       "tier": "switch",
-      "note": "Full speed through Dreamcast and Saturn; PSP at 4x. GameCube (3x), Wii, 3DS and PS2 (1.5-2x) included. Switch included but game-dependent. Wii U and PS3 are compromised, so left off."
+      "note": "Full speed through Dreamcast and Saturn; PSP at 4x. GameCube (3x), Wii, 3DS and PS2 (1.5-2x) included. Switch and Vita included but game-dependent. Wii U and PS3 are compromised, so left off."
     },
     "ayn-odin-2-mini": {
       "tier": "switch",
-      "note": "Full speed through Dreamcast and Saturn; PSP at 4x. GameCube (3x), Wii, 3DS and PS2 (1.5-2x) included. Switch included but game-dependent. Wii U and PS3 are compromised, so left off."
+      "note": "Full speed through Dreamcast and Saturn; PSP at 4x. GameCube (3x), Wii, 3DS and PS2 (1.5-2x) included. Switch and Vita included but game-dependent. Wii U and PS3 are compromised, so left off."
     },
     "ayn-odin-2-portal": {
       "tier": "switch",
-      "note": "Full speed through Dreamcast and Saturn; PSP at 4x. GameCube (3x), Wii, 3DS and PS2 (1.5-2x) included. Switch included but game-dependent. Wii U and PS3 are compromised, so left off."
+      "note": "Full speed through Dreamcast and Saturn; PSP at 4x. GameCube (3x), Wii, 3DS and PS2 (1.5-2x) included. Switch and Vita included but game-dependent. Wii U and PS3 are compromised, so left off."
     },
     "ayn-odin-3": {
       "tier": "switch",
@@ -345,7 +345,7 @@
     },
     "ayn-thor": {
       "tier": "switch",
-      "note": "Full speed through Dreamcast and Saturn; PSP at 4x. GameCube (3x), Wii, 3DS and PS2 (1.5-2x) included. Switch included but game-dependent. Wii U and PS3 are compromised, so left off."
+      "note": "Full speed through Dreamcast and Saturn; PSP at 4x. GameCube (3x), Wii, 3DS and PS2 (1.5-2x) included. Switch and Vita included but game-dependent. Wii U and PS3 are compromised, so left off."
     },
     "magicx-zero40": {
       "tier": "nds",
@@ -378,7 +378,7 @@
     },
     "retroid-pocket-6": {
       "tier": "switch",
-      "note": "Full speed through Dreamcast and Saturn; PSP at 4x. GameCube (3x), Wii, 3DS and PS2 (1.5-2x) included. Switch included but game-dependent. Wii U and PS3 are compromised, so left off."
+      "note": "Full speed through Dreamcast and Saturn; PSP at 4x. GameCube (3x), Wii, 3DS and PS2 (1.5-2x) included. Switch and Vita included but game-dependent. Wii U and PS3 are compromised, so left off."
     },
     "retroid-pocket-classic": {
       "tier": "saturn"
