@@ -1,8 +1,10 @@
 import contextlib
 import io
 import os
+import shutil
 import sys
 import tempfile
+import unicodedata
 import unittest
 from unittest import mock
 
@@ -194,6 +196,59 @@ class SafeJoinTest(unittest.TestCase):
 
     def test_joins_normal_keys(self):
         self.assertEqual(s3.safe_join("/base", "a/b.zip"), os.path.join("/base", "a/b.zip"))
+
+
+COMPOSED = unicodedata.normalize("NFC", "psvita/Vacances d'été.zip")
+DECOMPOSED = unicodedata.normalize("NFD", COMPOSED)
+
+
+@contextlib.contextmanager
+def decomposing_share():
+    """Act like an SMB share that stores accented names decomposed and only finds them by that exact spelling."""
+    def exact(p):
+        return p == unicodedata.normalize("NFD", p)
+
+    real_lexists, real_replace = os.path.lexists, os.replace
+
+    def lexists(p):
+        return exact(p) and real_lexists(p)
+
+    def replace(src, dst):
+        if not exact(src):
+            raise FileNotFoundError(src)
+        real_replace(src, dst)
+
+    with mock.patch.object(s3.os.path, "lexists", lexists), mock.patch.object(s3.os, "replace", replace):
+        yield
+
+
+class AccentedNameTest(unittest.TestCase):
+    def setUp(self):
+        self.root = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, self.root)
+        os.mkdir(os.path.join(self.root, "psvita"))
+
+    def test_safe_join_finds_the_decomposed_name_for_a_composed_key(self):
+        open(os.path.join(self.root, DECOMPOSED), "wb").close()
+        with decomposing_share():
+            self.assertEqual(s3.safe_join(self.root, COMPOSED), os.path.join(self.root, DECOMPOSED))
+
+    def test_write_file_replaces_the_part_file_the_share_renamed(self):
+        with mock.patch.object(runtime, "ROOT", self.root), mock.patch("sync_roms.inventory.wrote") as wrote, \
+                decomposing_share():
+            s3.write_file(COMPOSED, lambda tmp: open(tmp, "wb").write(b"abc"))
+        names = [unicodedata.normalize("NFC", n) for n in os.listdir(os.path.join(self.root, "psvita"))]
+        self.assertEqual(names, [os.path.basename(COMPOSED)])
+        wrote.assert_called_once_with(COMPOSED, 3)
+
+    def test_failed_write_leaves_no_part_file(self):
+        def fail(tmp):
+            open(tmp, "wb").write(b"ab")
+            raise OSError("boom")
+
+        with mock.patch.object(runtime, "ROOT", self.root), decomposing_share(), self.assertRaises(OSError):
+            s3.write_file(COMPOSED, fail)
+        self.assertEqual(os.listdir(os.path.join(self.root, "psvita")), [])
 
 
 if __name__ == "__main__":
