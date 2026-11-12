@@ -102,12 +102,10 @@ def current():
 # --- Reads --------------------------------------------------------------------------------------------------------
 
 def _unignored(listing, prefix=""):
-    """listing without the ignored ROMs (its keys are prefix + key)."""
+    """listing without the ignored ROMs and OS litter like .DS_Store (its keys are prefix + key)."""
     from . import ignore  # imported here: ignore checks its own file through this module
     hidden = ignore.keys()
-    if not hidden:
-        return listing
-    return {k: v for k, v in listing.items() if prefix + k not in hidden}
+    return {k: v for k, v in listing.items() if prefix + k not in hidden and not s3.junk(k)}
 
 
 def files(prefix, sizes=True):
@@ -238,6 +236,8 @@ def _read_bucket():
     pages = s3.s3_client().get_paginator("list_objects_v2").paginate(Bucket=runtime.BUCKET)
     for page in pages:
         for o in page.get("Contents", []):
+            if s3.junk(o["Key"]):
+                continue
             sizes[o["Key"]], tags[o["Key"]] = o["Size"], o["ETag"]
         _progress(f"  📋 {len(sizes):,} files listed")
     _progress(None)
@@ -250,6 +250,8 @@ def _read_folder(root, known=None):
     paths, out = [], {}
     for folder, _, names in os.walk(root):
         for name in names:
+            if s3.junk(name):
+                continue
             p = os.path.join(folder, name)
             key = os.path.relpath(p, root).replace(os.sep, "/")
             if known and key in known:
