@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.0](https://github.com/kelsin/sync-roms/compare/v2.0.0...v2.1.0) (2026-11-12)
+
+
+### :video_game: Features
+
+* **scrape:** list ROMs with no metadata and review unknown ROMs ([#233](https://github.com/kelsin/sync-roms/issues/233)) ([78580de](https://github.com/kelsin/sync-roms/commit/78580decf691574c0439595ad8628d4837517a6c))
+
 ## [2.0.0](https://github.com/kelsin/sync-roms/compare/v1.5.0...v2.0.0) (2026-11-12)
 
 
