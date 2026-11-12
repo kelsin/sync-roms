@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.2.0](https://github.com/kelsin/sync-roms/compare/v2.1.0...v2.2.0) (2026-11-12)
+
+
+### :video_game: Features
+
+* **cache:** add cache update --quick to stat only new files ([#235](https://github.com/kelsin/sync-roms/issues/235)) ([ee5f0fa](https://github.com/kelsin/sync-roms/commit/ee5f0fa9c46f4e7ac8bd8aaa62f721c0dcc395aa))
+
 ## [2.1.0](https://github.com/kelsin/sync-roms/compare/v2.0.0...v2.1.0) (2026-11-12)
 
 
