@@ -40,8 +40,8 @@ class StorageFolder(helpers.DataDir):
         with open(path, "wb") as f:
             f.write(b"x" * size)
 
-    def build(self):
-        return quiet(inventory.update)[0]
+    def build(self, full=True):
+        return quiet(inventory.update, full)[0]
 
 
 class NoCacheTest(StorageFolder):
@@ -79,7 +79,7 @@ class FolderCacheTest(StorageFolder):
         inventory.reset()
         self.assertEqual(inventory.files("gba/"), {"gba/a.zip": 1, "gba/b.zip": 2})
 
-    def test_update_counts_what_changed(self):
+    def test_full_update_counts_what_changed(self):
         self.build()
         os.remove(os.path.join(self.root.name, "gba/a.zip"))
         self.put("gba/b.zip", 20)
@@ -87,7 +87,7 @@ class FolderCacheTest(StorageFolder):
         self.assertEqual(self.build(), (1, 1, 1))
         self.assertEqual(inventory.files("gba/"), {"gba/b.zip": 20, "gba/c.zip": 4})
 
-    def test_quick_update_stats_only_new_files(self):
+    def test_update_stats_only_new_files(self):
         self.build()
         os.remove(os.path.join(self.root.name, "gba/a.zip"))
         self.put("gba/b.zip", 20)  # same name: keeps its cached size
@@ -100,15 +100,15 @@ class FolderCacheTest(StorageFolder):
                 statted.append(os.path.relpath(p, self.root.name))
             return real(p, *a, **k)
         with mock.patch.object(inventory.os, "stat", side_effect=spy), mock.patch.object(inventory, "_progress"):
-            self.assertEqual(inventory.update(quick=True), (1, 1, 0))
+            self.assertEqual(inventory.update(), (1, 1, 0))
         self.assertEqual(statted, [os.path.join("gba", "c.zip")])
         self.assertEqual(inventory.files("gba/"), {"gba/b.zip": 2, "gba/c.zip": 4})
         inventory.reset()
         self.assertEqual(inventory.files("gba/"), {"gba/b.zip": 2, "gba/c.zip": 4})
 
-    def test_quick_update_without_a_cache_reads_everything(self):
+    def test_update_without_a_cache_reads_everything(self):
         with mock.patch.object(inventory, "_progress"):
-            self.assertEqual(inventory.update(quick=True), (3, 0, 0))
+            self.assertEqual(inventory.update(), (3, 0, 0))
         self.assertEqual(inventory.files("gba/"), {"gba/a.zip": 1, "gba/b.zip": 2})
 
     def test_a_missing_folder_keeps_the_cache(self):
@@ -229,9 +229,9 @@ class CacheCommandTest(StorageFolder):
         self.assertIn("BIOS/", out)
         self.assertIn("just now", out)
 
-    def test_quick_update_command(self):
+    def test_full_update_command(self):
         self.run_cmd("cache", "update")
-        code, out = self.run_cmd("cache", "update", "--quick")
+        code, out = self.run_cmd("cache", "update", "--full")
         self.assertEqual(code, 0)
         self.assertIn("3 files", out)
 
