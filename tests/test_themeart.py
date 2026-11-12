@@ -197,6 +197,37 @@ class EsdeOwnArt(Esde):
         self.assertIn("<systemName>My Shmups</systemName>", read(self.copy("_inc", "systems", "_metadata-global", "my shmups.xml")))
 
 
+class EsdeSpareArt(Esde):
+    def test_every_picture_goes_in_under_its_art_id_even_without_collections(self):
+        self.store("abc", {"theme.xml": b"<theme/>"})
+        self.settings(themeart.ESDE_THEME)
+        with contextlib.redirect_stdout(io.StringIO()):
+            self.assertTrue(themeart.install("esde", self.base, {}))
+        for art_id in themeart.art_choices():
+            self.assertTrue(os.path.exists(self.copy("_inc", "systems", "artwork-outline", f"{art_id}.png")), art_id)
+            self.assertTrue(os.path.exists(self.copy(art_id, "theme.xml")), art_id)
+        self.assertIn(f'value="{themeart.ESDE_COPY}"', read(frontend.settings_path("esde", self.base)))
+        self.assertFalse(self.warned)
+
+    def test_a_collection_named_like_an_art_id_keeps_its_own_art(self):
+        self.store("abc", {"theme.xml": b"<theme/>"})
+        self.settings(themeart.ESDE_THEME)
+        with contextlib.redirect_stdout(io.StringIO()):
+            themeart.install("esde", self.base, {"Shmups": "horror"})
+        with open(self.copy("_inc", "systems", "artwork-outline", "shmups.png"), "rb") as f, \
+                open(themeart.art_png("horror"), "rb") as g:
+            self.assertEqual(f.read(), g.read())
+
+    def test_an_id_the_theme_already_themes_is_skipped_quietly(self):
+        art_id = next(iter(themeart.art_choices()))
+        self.store("abc", {"theme.xml": b"<theme/>", f"_inc/systems/_metadata-global/{art_id}.xml": b"<theme/>"})
+        self.settings(themeart.ESDE_THEME)
+        with contextlib.redirect_stdout(io.StringIO()):
+            themeart.install("esde", self.base, {})
+        self.assertFalse(os.path.exists(self.copy("_inc", "systems", "artwork-outline", f"{art_id}.png")))
+        self.assertFalse(self.warned)
+
+
 class Update(Esde):
     def run_update(self, latest, tarball=b"", dry_run=False):
         def github(url, accept=None):
@@ -241,6 +272,12 @@ class Knulli(Card):
         for name, value in themeart.knulli_settings("Surprise").items():
             self.assertIn(f'<string name="{name}" value="{value}" />', settings)
         self.assertFalse(themeart.install("knulli", self.base, SURPRISE))  # nothing new the second time
+
+    def test_every_picture_goes_in_under_its_art_id_without_settings(self):
+        self.assertTrue(themeart.install("knulli", self.base, {}))
+        for art_id in themeart.art_choices():
+            self.assertTrue(os.path.exists(self.path("artwork", f"{art_id}.png")), art_id)
+        self.assertFalse(os.path.exists(frontend.settings_path("knulli", self.base)))
 
     def test_a_name_without_a_logo_keeps_the_text_name(self):
         themeart.install("knulli", self.base, {"東方": "shmups"})

@@ -981,7 +981,11 @@ def sync_card(args):
         if surprise.enabled(entry) and surprises:  # as saved now: the card editor may have changed them
             card_colls.append({"name": surprise.COLLECTION, "games": surprises})  # its art is added below
         owned = names("frontend_collections")
-        if not card_colls and not owned:
+        if not card_colls and not owned:  # no collections, but the theme art is there for ones made on the device
+            if dry_run:
+                themeart.describe(layout_name, base, {})
+            elif themeart.install(layout_name, base, {}) and clean_card:
+                clean._clean_root = base
             return
         coming = {(s["bucket"], downloads.rom_rel(k, False)) for s in chosen
                   for k in available(s) if k in listings[s["bucket"]]} if dry_run else set()
@@ -997,15 +1001,14 @@ def sync_card(args):
         arts = {name: art for name, art in arts.items() if name in plan["enable"]}
         if dry_run:
             frontend.describe_collections(plan, layout_name)
-            if arts:
-                themeart.describe(layout_name, base, arts)
+            themeart.describe(layout_name, base, arts)
             return
         for warning in plan["warnings"]:
             ui.warn(warning)
         frontend.apply_collections(plan, layout_name, base)
         if plan["owned"] != owned:
             store.update_card(card, frontend_collections=plan["owned"])
-        art = bool(arts) and themeart.install(layout_name, base, arts)
+        art = themeart.install(layout_name, base, arts)
         if clean_card and (plan["writes"] or plan["deletes"] or art):
             clean._clean_root = base
         if plan["writes"]:

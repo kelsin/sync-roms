@@ -1,4 +1,5 @@
-"""Art Book Next artwork for custom collections (Surprise and the ones given art) on ES-DE and Knulli cards."""
+"""Art Book Next artwork for custom collections (Surprise, the ones given art, and every picture under its art id for
+collections made on the device) on ES-DE and Knulli cards."""
 import json
 import unicodedata
 import http.client
@@ -120,6 +121,13 @@ def _reserved(layout_name):
                                          "spinner"}
 
 
+def extras(layout_name, arts):
+    """{art id: art png} of every listed picture under its own id, so a collection made on the device with that name has
+    art too. Ids a name in arts ({name: art png}) already has, or that can't have art, are left out quietly."""
+    taken = {n.lower() for n in arts} | _reserved(layout_name)
+    return {i: art_png(i) for i in art_choices() if i.lower() not in taken and not i.lower().startswith("auto-")}
+
+
 def usable(layout_name, arts):
     """The {collection name: art png} of arts ({name: art id}) that can be installed, warning about the rest."""
     out, taken = {}, set()
@@ -219,9 +227,11 @@ def _theme_has(dest, folder):
     return folder not in owned and os.path.exists(os.path.join(dest, "_inc", "systems", "_metadata-global", f"{folder}.xml"))
 
 
-def install_esde(base, arts):
-    """Put Art Book Next with the collections' art on the card and select it. Returns whether anything changed."""
-    if not esde_wanted(base) or not arts:
+def install_esde(base, arts, spare=None):
+    """Put Art Book Next with the collections' art on the card and select it, with the spare art ({art id: png}) too.
+    Returns whether anything changed."""
+    spare = dict(spare or {})
+    if not esde_wanted(base) or not (arts or spare):
         return False
     dest = _esde_dir(base)
     commit = _stored_commit()
@@ -245,16 +255,17 @@ def install_esde(base, arts):
     for name in [n for n in arts if _theme_has(dest, n.lower())]:
         ui.warn(f"{name}: Art Book Next already has art of its own for that name; skipped")
         del arts[name]
-    owned = set(_read(os.path.join(dest, ESDE_OWNED)).splitlines()) | {n.lower() for n in arts}
+    spare = {i: png for i, png in spare.items() if not _theme_has(dest, i.lower())}
+    owned = set(_read(os.path.join(dest, ESDE_OWNED)).splitlines()) | {n.lower() for n in [*arts, *spare]}
     changed |= _put(os.path.join(dest, ESDE_OWNED), "".join(f"{n}\n" for n in sorted(owned)).encode())
-    for rel, data in _esde_files(arts).items():
+    for rel, data in _esde_files({**spare, **arts}).items():
         changed |= _put(s3.safe_join(dest, rel), data)
     _write_settings(frontend.settings_path("esde", base), "esde", {"Theme": ESDE_COPY})
     return changed
 
 
-def describe_esde(base, arts):
-    if not esde_wanted(base) or not arts:
+def describe_esde(base, arts, spare=None):
+    if not esde_wanted(base) or not (arts or spare):
         return
     commit = _stored_commit()
     if not commit and not os.path.exists(os.path.join(_esde_dir(base), ESDE_MARKER)):
@@ -262,7 +273,11 @@ def describe_esde(base, arts):
         return
     if commit and commit != _card_commit(base):
         print(ui.dim(f"🎨 would copy Art Book Next ({commit[:7]}) into ES-DE/themes/{ESDE_COPY}"))
-    print(ui.dim(f"🎨 would add art for {', '.join(arts)} to it and select it as the ES-DE theme"))
+    if arts:
+        print(ui.dim(f"🎨 would add art for {', '.join(arts)} to it"))
+    if spare:
+        print(ui.dim(f"🎨 would add the other {len(spare)} theme pictures under their art ids to it"))
+    print(ui.dim("🎨 would select it as the ES-DE theme"))
 
 
 def _github(url, accept=None):
@@ -323,12 +338,19 @@ def knulli_settings(name):
             "UseCustomCollectionsSystemEx": "false"}
 
 
-def install_knulli(base, arts):
-    """Put the collections' art ({name: art png}) in Knulli's theme customizations. Returns whether files changed."""
-    if not knulli_wanted(base) or not arts:
+def install_knulli(base, arts, spare=None):
+    """Put the collections' art ({name: art png}) in Knulli's theme customizations, and the spare art ({art id: png})
+    without settings (a collection made on the device turns its Custom artwork on there). Returns whether files changed."""
+    if not knulli_wanted(base) or not (arts or spare):
         return False
     root = os.path.join(base, KNULLI_DIR)
     changed, settings = False, {}
+    for name, png in (spare or {}).items():
+        with open(png, "rb") as f:
+            changed |= _put(os.path.join(root, "artwork", f"{name}.png"), f.read())
+        logo = logo_svg(name)
+        if logo:
+            changed |= _put(os.path.join(root, "logos", f"{name}.svg"), logo.encode())
     for name, png in arts.items():
         with open(png, "rb") as f:
             changed |= _put(os.path.join(root, "artwork", f"{name}.png"), f.read())
@@ -338,23 +360,29 @@ def install_knulli(base, arts):
         settings.update(knulli_settings(name))
         if not logo:  # the theme shows the name as text
             del settings[f"subset.{name}.system-logos"]
-    _write_settings(frontend.settings_path("knulli", base), "knulli", settings,
-                    only_if_unset={"UseCustomCollectionsSystemEx"})
+    if settings:
+        _write_settings(frontend.settings_path("knulli", base), "knulli", settings,
+                        only_if_unset={"UseCustomCollectionsSystemEx"})
     return changed
 
 
-def describe_knulli(base, arts):
+def describe_knulli(base, arts, spare=None):
     if knulli_wanted(base) and arts:
         print(ui.dim(f"🎨 would add art for {', '.join(arts)} to {KNULLI_DIR.replace(os.sep, '/')}/"))
+    if knulli_wanted(base) and spare:
+        print(ui.dim(f"🎨 would add the other {len(spare)} theme pictures under their art ids to "
+                     f"{KNULLI_DIR.replace(os.sep, '/')}/"))
 
 
 def install(layout_name, base, arts):
-    """Give the custom collections in arts ({name: art id}) their art in the frontend's theme. Returns whether files
-    changed."""
+    """Give the custom collections in arts ({name: art id}) their art in the frontend's theme, and every other picture
+    under its art id for collections made on the device. Returns whether files changed."""
     arts = usable(layout_name, arts)
-    return install_esde(base, arts) if layout_name == "esde" else install_knulli(base, arts)
+    spare = extras(layout_name, arts)
+    return (install_esde if layout_name == "esde" else install_knulli)(base, arts, spare)
 
 
 def describe(layout_name, base, arts):
     arts = usable(layout_name, arts)
-    describe_esde(base, arts) if layout_name == "esde" else describe_knulli(base, arts)
+    spare = extras(layout_name, arts)
+    (describe_esde if layout_name == "esde" else describe_knulli)(base, arts, spare)
