@@ -276,17 +276,17 @@ def _read_folder(root, known=None):
     return out
 
 
-def update(quick=False):
+def update(full=False):
     """Read all of storage into the cache and save it. Returns (added, removed, changed) file counts against the cache
-    it replaces. quick: in a storage folder, only new files are statted and the rest keep their cached size (a bucket
-    listing has every size anyway). A storage folder that is missing (an unmounted share) or lists empty when the cache has files raises
+    it replaces. In a storage folder only new files are statted and the rest keep their cached size, unless full (a
+    bucket listing has every size anyway). A storage folder that is missing (an unmounted share) or lists empty when the cache has files raises
     FileNotFoundError and keeps the cache."""
     global _tree, _tree_path, _dirty
     src = source()
     if runtime.ROOT:
         if not os.path.isdir(runtime.ROOT):
             raise FileNotFoundError(f"{runtime.ROOT} is missing")
-        old = current() if quick else None
+        old = None if full else current()
         sizes, tags = _read_folder(runtime.ROOT, old.files if old else None), {}
     else:
         sizes, tags = _read_bucket()
@@ -303,10 +303,10 @@ def update(quick=False):
             sum(k in before and before[k] != n for k, n in sizes.items()))
 
 
-def update_command(quick=False):
+def update_command(full=False):
     print(ui.bold("📇 Updating the storage cache") + ui.dim(f"  from {source()}"))
     try:
-        added, gone, changed = update(quick)
+        added, gone, changed = update(full)
     except s3.ERRORS as e:
         ui.fail(f"Couldn't read storage: {e}", 3)
     tree = current()
