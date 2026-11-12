@@ -178,6 +178,15 @@ def flush_unknown():
             _save(UNKNOWN, data)
 
 
+def unknown():
+    """The "system/rom" keys of the ROMs ScreenScraper didn't know, with the marks not yet written."""
+    with _lock:
+        keys = set(_load(UNKNOWN))
+        for k, marked in _unknown_pending.get(_path(UNKNOWN), {}).items():
+            (keys.add if marked else keys.discard)(k)
+        return keys
+
+
 def notgames():
     """{"system/rom": what ScreenScraper said} of the non-game results waiting for review."""
     with _lock:
@@ -204,10 +213,8 @@ class _Snapshot:
     def __init__(self):
         with _lock:
             self._matches = _load(MATCHES)
-            self._unknown = set(_load(UNKNOWN))
+            self._unknown = unknown()
             self._notgames = set(_load(NOTGAMES))
-            for k, marked in _unknown_pending.get(_path(UNKNOWN), {}).items():
-                (self._unknown.add if marked else self._unknown.discard)(k)
 
     def manual_match(self, system, rom):
         game_id = self._matches.get(_key(system, rom))

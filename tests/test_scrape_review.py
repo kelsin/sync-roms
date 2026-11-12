@@ -9,7 +9,7 @@ from unittest import mock
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 from helpers import DataDir  # noqa: E402
-from sync_roms import ignore, inventory, runtime, s3, scrape_online, scrape_review, scrape_state, screenscraper, ui  # noqa: E402
+from sync_roms import ignore, inventory, runtime, s3, scrape_files, scrape_online, scrape_review, scrape_state, screenscraper, ui  # noqa: E402
 
 GB = {"name": "Game Boy", "bucket": "gb", "screenscraper": 9, "folders": {}}
 INFO = {"name": "Study Cart", "genre": "Educational", "year": "1999", "desc": "A study aid."}
@@ -160,7 +160,7 @@ class ReviewCommandTest(ReviewBase):
         for key in KEYS:
             scrape_state.clear_notgame("gb", key.split("/", 1)[1])
         self.assertEqual(self.run_cmd(), 0)
-        self.assertIn("No non-game results to review", self.out.getvalue())
+        self.assertIn("No non-game or unknown ROMs to review", self.out.getvalue())
 
     def test_review_command_needs_a_terminal(self):
         with self.assertRaises(SystemExit) as e, contextlib.redirect_stderr(io.StringIO()):
@@ -197,6 +197,97 @@ class ReviewCommandTest(ReviewBase):
         self.patch(scrape_review, "review", lambda systems, keys, sizes, client=None: seen.append(keys) or 0)
         self.run_cmd(system="gb")
         self.assertEqual(seen, [KEYS])
+
+
+class UnknownReviewTest(ReviewBase):
+    def setUp(self):
+        super().setUp()
+        scrape_state.mark_unknown("gb", "u.zip")
+        scrape_state.flush_unknown()
+
+    def test_unknown_shown_as_unknown(self):
+        self.answers("k")
+        self.review(["gb/u.zip"])
+        self.assertIn("❔ gb/u.zip", self.out.getvalue())
+        self.assertIn("doesn't know this ROM", self.out.getvalue())
+
+    def test_ignore_clears_unknown(self):
+        self.answers("i")
+        self.review(["gb/u.zip"])
+        self.assertEqual(self.added, [{"gb": ["u.zip"]}])
+        self.assertEqual(scrape_state.unknown(), set())
+
+    def test_search_match_clears_unknown(self):
+        self.answers("s", "")
+        self.patch(scrape_online, "resolve_manual", lambda *a: 42)
+
+        def match(args):
+            scrape_state.save_match(args.system, args.rom, 42)
+            return 0
+        self.patch(scrape_online, "match_command", match)
+        self.review(["gb/u.zip"])
+        self.assertEqual(scrape_state.unknown(), set())
+
+    def run_cmd(self, metadata):
+        self.patch(s3, "read_root", lambda: "/storage")
+        self.patch(inventory, "stat", lambda keys: {k: 1 for k in keys})
+        self.patch(scrape_online, "load_metadata", lambda name: metadata)
+        self.patch(scrape_review, "_systems", lambda name: {"gb": GB})
+        seen = []
+        self.patch(scrape_review, "review", lambda systems, keys, sizes, client=None: seen.append(keys) or 0)
+        with mock.patch.object(sys.stdin, "isatty", lambda: True), contextlib.redirect_stdout(self.out):
+            scrape_review.review_command(argparse.Namespace(system=None))
+        return seen
+
+    def test_review_command_includes_unknown(self):
+        self.assertEqual(self.run_cmd({}), [KEYS + ["gb/u.zip"]])
+
+    def test_review_command_drops_unknown_with_metadata(self):
+        self.assertEqual(self.run_cmd({"u.zip": {}}), [KEYS])
+        self.assertEqual(scrape_state.unknown(), set())
+
+
+class MissingCommandTest(DataDir):
+    def run_cmd(self, systems, roms, metadata):
+        out = io.StringIO()
+        with mock.patch.object(scrape_online, "_pick_systems", lambda name: systems), \
+                mock.patch.object(scrape_files, "bucket_roms", lambda systems, all_files=False: roms), \
+                mock.patch.object(scrape_online, "load_metadata", lambda name: metadata[name]), \
+                contextlib.redirect_stdout(out):
+            code = scrape_online.missing_command(argparse.Namespace(system=None, all=False))
+        return code, out.getvalue()
+
+    def test_lists_each_rom_and_why(self):
+        scrape_state.mark_notgame("gb", "n.zip", INFO)
+        scrape_state.mark_unknown("gb", "u.zip")
+        scrape_state.mark_unknown("gb", "m.zip")
+        scrape_state.flush_unknown()
+        scrape_state.save_match("gb", "m.zip", 7)
+        code, out = self.run_cmd([GB], {"gb": {"done.zip", "n.zip", "u.zip", "m.zip", "new.zip"}}, {"gb": {"done.zip": {}}})
+        self.assertEqual(code, 0)
+        self.assertIn("gb (4): 1 non-game, 1 not on ScreenScraper, 1 matched, not scraped yet, 1 not looked up yet", out)
+        for line in ("🚫 n.zip", "❔ u.zip", "🔗 m.zip", "⏳ new.zip"):
+            self.assertIn(line, out)
+        self.assertNotIn("done.zip", out)
+
+    def test_system_without_screenscraper_id(self):
+        nes = {"name": "NES", "bucket": "nes", "folders": {}}
+        _, out = self.run_cmd([nes], {"nes": {"a.zip"}}, {"nes": {}})
+        self.assertIn("nes (1): no ScreenScraper system id", out)
+
+    def test_nothing_missing(self):
+        _, out = self.run_cmd([GB], {"gb": {"a.zip"}}, {"gb": {"a.zip": {}}})
+        self.assertIn("Every ROM has metadata", out)
+
+    def test_bad_metadata_skipped(self):
+        def bad(name):
+            raise ValueError("bad")
+        out = io.StringIO()
+        with mock.patch.object(scrape_online, "_pick_systems", lambda name: [GB]), \
+                mock.patch.object(scrape_files, "bucket_roms", lambda systems, all_files=False: {"gb": {"a.zip"}}), \
+                mock.patch.object(scrape_online, "load_metadata", bad), contextlib.redirect_stdout(out):
+            scrape_online.missing_command(argparse.Namespace(system=None, all=False))
+        self.assertIn("isn't valid JSON; skipping gb", out.getvalue())
 
 
 if __name__ == "__main__":
