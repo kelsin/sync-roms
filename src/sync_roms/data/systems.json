@@ -2427,8 +2427,11 @@
       "emudeck": "switch"
     },
     "bios": {
-      "files": [],
-      "note": "Needs prod.keys and firmware"
+      "files": [
+        "prod.keys",
+        "Firmware.22.1.0.zip"
+      ],
+      "note": "Eden and other Switch emulators install these from their own menus (Install keys, Install firmware); the firmware zip is installed as is"
     }
   },
   {
