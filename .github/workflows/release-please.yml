@@ -62,7 +62,7 @@ jobs:
           brew update-python-resources kelsin/tap/sync-roms
           brew install --build-from-source kelsin/tap/sync-roms
           brew test kelsin/tap/sync-roms
-          "$(brew --prefix sync-roms)/libexec/bin/python" -c "import boto3, textual, textual_image"
+          "$(brew --prefix sync-roms)/libexec/bin/python" -c "import boto3, textual, textual_image.renderable, PIL.Image"
           branch="bump-sync-roms-$VERSION"
           cd "$(brew --repository kelsin/tap)"
           gh auth setup-git
@@ -72,8 +72,9 @@ jobs:
           git push origin "$branch"
           gh pr create --repo kelsin/homebrew-tap --head "$branch" --title "sync-roms $VERSION" \
             --body "Bump sync-roms to $VERSION and refresh its Python resources."
-          gh pr merge "$branch" --repo kelsin/homebrew-tap --squash
+          gh pr merge "$branch" --repo kelsin/homebrew-tap --squash --delete-branch
         env:
+          HOMEBREW_NO_AUTO_UPDATE: 1  # an auto-update would stash the uncommitted bump away before the install
           HOMEBREW_GITHUB_API_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
           GH_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
           TAG: ${{ needs.release-please.outputs.tag_name }}

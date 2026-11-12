@@ -317,11 +317,12 @@ class TextualList(unittest.TestCase):
 
     def test_block_fallbacks_dont_count_as_drawing_images(self):
         from sync_roms import picker
-        from textual_image import renderable
-        for kind, draws in ((renderable.HalfcellImage, False), (renderable.UnicodeImage, False),
-                            (renderable.TGPImage, True)):
-            with mock.patch.object(renderable, "Image", kind), mock.patch.object(sys, "__stdout__", io.StringIO()):
-                self.assertEqual(picker._draws_images(), draws)
+        with mock.patch.object(sys, "__stdout__", io.StringIO()):  # not a terminal: the import probes it
+            from textual_image import renderable
+            for kind, draws in ((renderable.HalfcellImage, False), (renderable.UnicodeImage, False),
+                                (renderable.TGPImage, True), (renderable.SixelImage, True)):
+                with mock.patch.object(renderable, "Image", kind):
+                    self.assertEqual(picker._draws_images(), draws)
 
     def test_textual_failure_exits_instead_of_looking_like_esc(self):
         from sync_roms import picker
