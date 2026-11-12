@@ -30,7 +30,7 @@ SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "convert": ("[DIR]", "unzip archives and convert disc images to verified .chd"),
     "tools": ("install", "brew install the 7z, unar and chdman that `convert` needs"),
     "mirror": ("[DIR] | use DIR | clear", "make or refresh a local copy of everything your lists reference"),
-    "cache": ("[update]", "show the storage cache every command reads file lists and sizes from, or update it"),
+    "cache": ("[update [--quick]]", "show the storage cache every command reads file lists and sizes from, or update it"),
     "config": ("show|path", "show the effective settings and where each comes from"),
     "doctor": ("", "check the AWS profile, storage access, tools and your data files"),
     "check": ("", "validate cards.json, surprises.json, the device overlay, the sets and your collections"),
@@ -196,7 +196,7 @@ TOPICS = {
   sync-roms config path      the data folder
 """,
     "cache": """
-  sync-roms cache [update]
+  sync-roms cache [update [--quick]]
 
   Every command reads what storage holds (file names, sizes and, for a bucket, ETags) from a cache in
   ~/.sync-roms/storage-cache.json; only the files themselves are downloaded from storage. Nothing refreshes it on its
@@ -205,6 +205,8 @@ TOPICS = {
 
   cache          where the cache was read from, when it was last updated, and its files and size per folder
   cache update   read all of storage again: one listing of a bucket, or a walk and a stat of every file in a folder
+  --quick        in a folder, stat only files the cache doesn't have; the rest keep their cached size (a bucket
+                 listing is the same either way)
 
   With no cache for the storage in use, the first command that reads storage offers to build it. Saying no is
   remembered (storage_cache_declined in settings.json), and commands then list storage each run.
