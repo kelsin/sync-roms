@@ -304,6 +304,22 @@ class TextualList(unittest.TestCase):
                 got = pilot_list(script, "t", self.LABELS, preview=lambda i: paths[i] if i < 2 else None)
         self.assertEqual((got, seen), (2, [paths[0], paths[1], None]))
 
+    def test_textual_failure_exits_instead_of_looking_like_esc(self):
+        from sync_roms import picker
+
+        def failing_run(app, **kwargs):
+            app._return_code = 1  # what App.run does after printing a traceback
+        with mock.patch.object(picker._app_class(), "run", failing_run):
+            with self.assertRaises(SystemExit) as raised:
+                picker._run(mock.Mock())
+        self.assertEqual(raised.exception.code, 1)
+
+    def test_ctrl_z_suspends_and_the_list_keeps_running(self):
+        from sync_roms import picker
+        with mock.patch.object(picker._app_class(), "action_suspend_process") as suspend:
+            self.assertEqual(self.run_keys(["ctrl+z", "j", "enter"]), 1)
+        suspend.assert_called_once_with()
+
     def test_ctrl_c_raises_keyboard_interrupt(self):
         with self.assertRaises(KeyboardInterrupt):
             self.run_keys(["space", "ctrl+c"], multi=True)

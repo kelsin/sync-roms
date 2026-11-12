@@ -51,7 +51,7 @@ If the Python dependencies changed, run `brew update-python-resources kelsin/tap
 
 ## Requirements
 
-- **python3** (3.11+); boto3 is installed with the package
+- **python3** (3.11+); boto3, textual and textual-image (which brings Pillow) are installed with the package
 - An AWS profile named **`roms-readonly`** with read access to storage (not needed with a storage folder)
   (set `ROMS_PROFILE` to use a different profile name), defined in `~/.aws/config` and `~/.aws/credentials`
 - Only for `--cd`: **7z** and **chdman** (`sync-roms --install-tools` installs them with Homebrew), plus **extract-xiso** for Xbox (no Homebrew formula: build it from [XboxDev/extract-xiso](https://github.com/XboxDev/extract-xiso) with `cmake -B build && cmake --build build`) and **iso2zar** for Xbox 360 (no formula: build it from [iso2zar](https://codeberg.org/NeverAnswers/iso2zar) with `cargo build --release`)

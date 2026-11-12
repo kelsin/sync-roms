@@ -501,6 +501,8 @@ def _app_class():
             if k == "ctrl+c":
                 self.interrupted = True
                 self.finish(None)
+            elif k == "ctrl+z":  # raw mode clears ISIG, so the terminal no longer suspends on its own
+                self.action_suspend_process()
             else:
                 self.step(self.model.key, k)
 
@@ -528,7 +530,10 @@ def _app_class():
                 self.pop_screen()
             self.screen_stack[0].query_one(_ListLines).refresh()
             if self.model.preview:
-                self.screen_stack[0].query_one("#preview").image = self.model.preview_path()
+                pane = self.screen_stack[0].query_one("#preview")
+                path = self.model.preview_path()
+                if path != pane.image:  # the setter re-transmits the image, so only touch it when it changed
+                    pane.image = path
 
         def finish(self, result):
             self.done = True
@@ -545,6 +550,8 @@ def _run(model):
         raise app.error
     if app.interrupted:
         raise KeyboardInterrupt
+    if app.return_code:  # Textual itself failed (it already printed the traceback): not an Esc
+        raise SystemExit(app.return_code)
     return result
 
 
