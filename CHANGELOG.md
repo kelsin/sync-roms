@@ -1,5 +1,19 @@
 # Changelog
 
+## [2.4.0](https://github.com/kelsin/sync-roms/compare/v2.3.0...v2.4.0) (2026-11-12)
+
+
+### :video_game: Features
+
+* **devices:** recommend psvita on snapdragon 8 gen 2 class handhelds ([#242](https://github.com/kelsin/sync-roms/issues/242)) ([9152c94](https://github.com/kelsin/sync-roms/commit/9152c94a507bbb5078e1f607816e68cf9453e74c))
+* **picker:** port list screens to Textual and preview theme art ([#243](https://github.com/kelsin/sync-roms/issues/243)) ([6aa85ab](https://github.com/kelsin/sync-roms/commit/6aa85ab4e00a32662859b9b62b98a4719c4561ec))
+* **themeart:** redraw the collection art and add art for every set ([#240](https://github.com/kelsin/sync-roms/issues/240)) ([e7f3de3](https://github.com/kelsin/sync-roms/commit/e7f3de35758f28c99c8d581369ca15b736c7a574))
+
+
+### :traffic_light: Tests
+
+* **scrape:** make the quota test deterministic ([#244](https://github.com/kelsin/sync-roms/issues/244)) ([6be8841](https://github.com/kelsin/sync-roms/commit/6be88412bbc89f6d49bb2256a4d2dbe4e90d2d02))
+
 ## [2.3.0](https://github.com/kelsin/sync-roms/compare/v2.2.0...v2.3.0) (2026-11-12)
 
 
