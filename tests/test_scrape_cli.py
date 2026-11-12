@@ -30,6 +30,11 @@ class Translate(unittest.TestCase):
         self.assertEqual(cli.translate(["scrape", "match", "-n", "gba", "a b.zip", "Metroid Fusion"]),
                          ["--scrape-match", "gba", "a b.zip", "Metroid Fusion", "-n"])
 
+    def test_scrape_review_subcommand_translates(self):
+        self.assertEqual(cli.translate(["scrape", "review", "nds"]), ["--scrape-review", "nds"])
+        self.assertEqual(cli.translate(["scrape", "review"]), ["--scrape-review"])
+        self.assertEqual(cli.build_parser().parse_args(cli.translate(["scrape", "review"])).scrape_review, "")
+
     def test_match_values_starting_with_a_dash(self):
         self.assertEqual(cli.translate(["scrape", "match", "gba", "a.zip", "-1"]), ["--scrape-match", "gba", "a.zip", "-1"])
         self.assertEqual(cli.translate(["scrape", "match", "gba", "-x.zip", "-Foo", "-n"]),
@@ -63,6 +68,7 @@ class Modes(unittest.TestCase):
         self.assertEqual(self.modes("scrape", "--set-credentials"), "--scrape")
         self.assertEqual(self.modes("scrape", "--all", "--system", "gba"), "--scrape")
         self.assertEqual(self.modes("diff", "--system", "gba"), "--diff")
+        self.assertEqual(self.modes("scrape", "review", "gb"), "--scrape-review")
 
     def test_refusals(self):
         self.refused("--retry")
@@ -73,6 +79,8 @@ class Modes(unittest.TestCase):
         self.refused("--system", "gba")
         self.refused("diff", "--retry")
         self.refused("--scrape", "--upload")
+        self.refused("--scrape", "--scrape-review")
+        self.refused("scrape", "review", "--retry")
         self.refused("--scrape", "--scrape-match", "gba", "a", "1")
         self.refused("scrape", "match", "--retry", "gba", "a.zip", "1")
         self.refused("scrape", "match", "--system", "gba", "gba", "a.zip", "1")
@@ -218,7 +226,7 @@ class Completion(unittest.TestCase):
         text = script_for("bash")
         commands_line = re.search(r'-eq 1 \].*?compgen -W "([^"]*)"', text).group(1).split()
         self.assertIn("scrape", commands_line)
-        self.assertIn('scrape) COMPREPLY=($(compgen -W "match"', text)
+        self.assertIn('scrape) COMPREPLY=($(compgen -W "match review"', text)
         for word in ("--retry", "--all", "--skip-media", "--set-credentials"):
             self.assertIn(word, text)
 

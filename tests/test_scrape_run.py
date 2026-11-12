@@ -13,7 +13,7 @@ from unittest import mock
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 from helpers import StorageDir  # noqa: E402
-from sync_roms import s3, scrape_online, scrape_plan, scrape_state, screenscraper, store, ui, upload, usersettings  # noqa: E402
+from sync_roms import s3, scrape_online, scrape_plan, scrape_review, scrape_state, screenscraper, store, ui, upload, usersettings  # noqa: E402
 
 GBA = {"name": "Game Boy Advance", "bucket": "gba", "screenscraper": 12, "full_system": True, "folders": {}}
 NES = {"name": "NES", "bucket": "nes", "screenscraper": 3, "full_system": True, "folders": {}}
@@ -365,6 +365,23 @@ class FinalReviewTest(RunBase):
         self.assertEqual(self.metadata(), {})
         self.assertEqual(self.client.downloads, [])
         self.assertEqual(self.stored(), set())
+
+    def test_run_scrape_offers_review_on_tty(self):
+        self.put("gba/a.zip")
+        self.client.games["a.zip"] = dict(game(1, "ZZZ(notgame):Test Cart"), id=1)
+        seen = []
+        with mock.patch.object(sys.stdin, "isatty", lambda: True), \
+                mock.patch.object(scrape_review, "review", lambda systems, keys, sizes, client=None: seen.append(keys)):
+            self.assertEqual(self.run_scrape(), 0)
+        self.assertEqual(seen, [["gba/a.zip"]])
+
+    def test_run_scrape_on_pipe_prints_hint(self):
+        self.put("gba/a.zip")
+        self.client.games["a.zip"] = dict(game(1, "ZZZ(notgame):Test Cart"), id=1)
+        with mock.patch.object(sys.stdin, "isatty", lambda: False), \
+                mock.patch.object(scrape_review, "review", side_effect=AssertionError("asked on a pipe")):
+            self.assertEqual(self.run_scrape(), 0)
+        self.assertIn("sync-roms scrape review", self.out.getvalue())
 
     def test_game_with_no_data_fails_and_writes_no_empty_entry(self):
         self.put("gba/a.zip")

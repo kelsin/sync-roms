@@ -8,6 +8,7 @@ import os
 import shlex
 import shutil
 import stat
+import sys
 import tempfile
 import threading
 import time
@@ -673,6 +674,7 @@ def run_scrape(client, systems, todo, skip, ask=True, replace=False, forced=None
     listings: {system: {key: size} of scrapes/<system>/} and metadata: {system: its metadata.json} the caller already has."""
     count = sum(len(v) for v in todo.values())
     listings, metadata = dict(listings or {}), metadata or {}
+    before = set(scrape_state.notgames())
     try:
         listings.update(_each(lambda name: inventory.files(f"{scrape_plan.SCRAPES}/{name}/"), [n for n in todo if n not in listings]))
     except s3.ERRORS as e:
@@ -708,11 +710,25 @@ def run_scrape(client, systems, todo, skip, ask=True, replace=False, forced=None
             break
     print(ui.bold("\n📋 Results"))
     print(report({name: [r for r, _, _ in items] for name, items in todo.items()}, outcomes))
+    _offer_review(client, systems, todo, sorted(set(scrape_state.notgames()) - before))
     if quota_hit:
         print(ui.yellow("\n" + _quota_message(quota_hit, rerun)))
         return 1
     print(ui.green("\n🎉 Done!") if not failed else ui.red(f"\n⚠️  Done with {failed} failure(s); run `{rerun}` to try again"))
     return 1 if failed else 0
+
+
+def _offer_review(client, systems, todo, new):
+    """After a run that turned up non-games: review them now (on a terminal, if the user wants), else say how to later."""
+    if not new:
+        return
+    print(ui.yellow(f"\n🚫 {len(new)} ROM(s) came back as non-games"))
+    if sys.stdin.isatty() and ui.confirm("Review them now?", default=True):
+        from . import scrape_review
+        sizes = {f"{name}/{r}": size for name, items in todo.items() for r, size, _ in items}
+        scrape_review.review(systems, new, sizes, client)
+    else:
+        print(ui.dim("   Review them later with: sync-roms scrape review"))
 
 
 def _check_skip(skip):

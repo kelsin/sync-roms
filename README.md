@@ -306,6 +306,7 @@ On `esde` and `emudeck` cards every Vita zip in `psvita/` gets a `.psvita` file 
 | `--system ID` | `diff`: the system to compare with, instead of the picker. `scrape`: only that storage folder |
 | `--scrape` | Scrape the ROMs that have no metadata from ScreenScraper (the old form of `scrape`; see Scraping from ScreenScraper) |
 | `--scrape-match SYSTEM ROM GAME` | Tell the scraper which ScreenScraper game a ROM is, then scrape it (the old form of `scrape match`) |
+| `--scrape-review [SYSTEM]` | Review the ROMs ScreenScraper calls non-games (the old form of `scrape review`) |
 | `--all` | `scrape`: every ROM in the storage, not only the games your lists and sets reference |
 | `--retry` | `scrape`: also try the ROMs ScreenScraper didn't know before |
 | `--fill-media` | `scrape`: also scrape ROMs that have metadata but lack some media type in storage; their metadata is kept. ScreenScraper is asked again for each such ROM, even if it has no such media |
@@ -404,6 +405,15 @@ scraper-written media (including its Onion and Slot images) is overwritten or de
 `Game.7z`) share their media files; the prompt warns about them.
 
 **Unknown ROMs.** A ROM ScreenScraper doesn't know is remembered and skipped on later runs. `--retry` tries them again.
+
+**Non-games.** ScreenScraper marks BIOS sets, demos, test carts and other software as non-games (`ZZZ(notgame)`). A
+run writes nothing for them and keeps them for review, and `--retry` doesn't look them up again. At the end of a run on
+a terminal you're asked whether to review them now; `sync-roms scrape review [SYSTEM]` reviews them any time. For each
+one, `i` ignores it, `s` searches ScreenScraper under another name (Enter takes the suggested name) and scrapes the game
+you pick, `k` (the default) leaves it for later, and `I` ignores it and every one after it. Ignored ROMs are listed in
+`ignored.json` at the root of storage, shared by everyone using that storage: sync-roms never shows, syncs, uploads or
+scrapes them, and never deletes their files. Each run checks the file and keeps a copy in the data folder. To stop
+ignoring a ROM, remove it from `ignored.json` in storage.
 
 **Quota.** ScreenScraper limits requests per day, and separately the number of unrecognized ROMs per day. When either is
 used up the run stops cleanly with what it finished already saved and says which limit it was; run it again the next day.
