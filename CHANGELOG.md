@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.3.0](https://github.com/kelsin/sync-roms/compare/v2.2.0...v2.3.0) (2026-11-12)
+
+
+### :video_game: Features
+
+* **cache:** make cache update quick by default and add --full ([#237](https://github.com/kelsin/sync-roms/issues/237)) ([7d21ba9](https://github.com/kelsin/sync-roms/commit/7d21ba94b2b30877f0fd0119651857b65abda98c))
+
+
+### :bug: Bug Fixes
+
+* **inventory:** ignore .DS_Store files in storage listings and the cache ([#239](https://github.com/kelsin/sync-roms/issues/239)) ([2e47ece](https://github.com/kelsin/sync-roms/commit/2e47ece0249f6c8ee9ac29ec4caad81ff2e24209))
+
 ## [2.2.0](https://github.com/kelsin/sync-roms/compare/v2.1.0...v2.2.0) (2026-11-12)
 
 
