@@ -13,7 +13,7 @@ from unittest import mock
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 from helpers import StorageDir  # noqa: E402
-from sync_roms import s3, scrape_online, scrape_plan, scrape_state, screenscraper, store, ui, upload, usersettings  # noqa: E402
+from sync_roms import s3, scrape_online, scrape_plan, scrape_review, scrape_state, screenscraper, store, ui, upload, usersettings  # noqa: E402
 
 GBA = {"name": "Game Boy Advance", "bucket": "gba", "screenscraper": 12, "full_system": True, "folders": {}}
 NES = {"name": "NES", "bucket": "nes", "screenscraper": 3, "full_system": True, "folders": {}}
@@ -356,14 +356,32 @@ class FinalReviewTest(RunBase):
         with open(os.path.join(self.root, key), "rb") as f:
             return f.read()
 
-    def test_notgame_result_is_unknown_and_writes_nothing(self):
+    def test_notgame_result_is_pending_and_writes_nothing(self):
         self.put("gba/a.zip")
-        self.client.games["a.zip"] = dict(game(1, screenscraper.NOTGAME), id=1)
+        self.client.games["a.zip"] = dict(game(1, "ZZZ(notgame):Test Cart"), id=1)
         self.assertEqual(self.run_scrape(), 0)
-        self.assertTrue(scrape_state.is_unknown("gba", "a.zip"))
+        self.assertEqual(scrape_state.notgames()["gba/a.zip"]["name"], "Test Cart")
+        self.assertFalse(scrape_state.is_unknown("gba", "a.zip"))
         self.assertEqual(self.metadata(), {})
         self.assertEqual(self.client.downloads, [])
         self.assertEqual(self.stored(), set())
+
+    def test_run_scrape_offers_review_on_tty(self):
+        self.put("gba/a.zip")
+        self.client.games["a.zip"] = dict(game(1, "ZZZ(notgame):Test Cart"), id=1)
+        seen = []
+        with mock.patch.object(sys.stdin, "isatty", lambda: True), \
+                mock.patch.object(scrape_review, "review", lambda systems, keys, sizes, client=None: seen.append(keys)):
+            self.assertEqual(self.run_scrape(), 0)
+        self.assertEqual(seen, [["gba/a.zip"]])
+
+    def test_run_scrape_on_pipe_prints_hint(self):
+        self.put("gba/a.zip")
+        self.client.games["a.zip"] = dict(game(1, "ZZZ(notgame):Test Cart"), id=1)
+        with mock.patch.object(sys.stdin, "isatty", lambda: False), \
+                mock.patch.object(scrape_review, "review", side_effect=AssertionError("asked on a pipe")):
+            self.assertEqual(self.run_scrape(), 0)
+        self.assertIn("sync-roms scrape review", self.out.getvalue())
 
     def test_game_with_no_data_fails_and_writes_no_empty_entry(self):
         self.put("gba/a.zip")
@@ -457,6 +475,16 @@ class MatchReplaceTest(RunBase):
         self.assertEqual(self.run_match(), 0)
         self.assertIsNone(scrape_state.manual_match("gba", "a.zip"))
         self.assertEqual(self.stored(), set())
+
+    def test_confirmed_match_skips_the_question_and_clears_pending(self):
+        self.put("gba/a.zip")
+        scrape_state.mark_notgame("gba", "a.zip", {"name": "", "genre": "", "year": "", "desc": ""})
+        self.client.games["x"] = game(7, "Seven")
+        args = SimpleNamespace(system="gba", rom="a.zip", game="7", skip_media=[], dry_run=False, confirmed=True)
+        with contextlib.redirect_stdout(self.out), contextlib.redirect_stderr(self.err):
+            self.assertEqual(scrape_online.match_command(args), 0)
+        self.confirm.assert_not_called()
+        self.assertNotIn("gba/a.zip", scrape_state.notgames())
 
     def test_existing_entry_is_replaced_not_merged(self):
         self.put("gba/a.zip")

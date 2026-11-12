@@ -8,6 +8,7 @@ import os
 import shlex
 import shutil
 import stat
+import sys
 import tempfile
 import threading
 import time
@@ -24,7 +25,7 @@ CHUNK = 8 << 20
 
 def find_candidates(systems, roms, metadata, retry=False, fill=None):
     """{system folder: sorted ROM paths} with no entry in that system's metadata.json (and, unless retry, not marked
-    unknown; a saved manual match overrides the unknown mark).
+    unknown; a saved manual match overrides the unknown mark). Non-games waiting for review are never taken.
 
     fill: (wanted media types, {system folder: scrapes/<system>/ listing}); also takes the ROMs that have an entry
     but lack some wanted type in storage."""
@@ -37,8 +38,8 @@ def find_candidates(systems, roms, metadata, retry=False, fill=None):
         def wanted(r):
             return r not in have or (fill and fill[0] - set(index.get(os.path.splitext(r)[0], ())))
         out[system] = sorted(r for r in roms.get(system, ())
-                             if wanted(r) and (retry or state.manual_match(system, r) is not None
-                                               or not state.is_unknown(system, r)))
+                             if wanted(r) and not state.is_notgame(system, r)
+                             and (retry or state.manual_match(system, r) is not None or not state.is_unknown(system, r)))
     return out
 
 
@@ -342,7 +343,8 @@ def _media_ext(path, mtype):
 
 
 def scrape_rom(client, system, item, tmp, skip, stop, game_id=None):
-    """("done", (how, metadata, {media type: local file})), ("unknown", (how, "notgame" or "missing")), ("failed", reason), ("quota", the QuotaExceeded) or ("skipped", None) when the run stopped (quota or Ctrl-C)
+    """("done", (how, metadata, {media type: local file})), ("notgame", (how, what ScreenScraper says about it)),
+    ("unknown", (how, "missing")), ("failed", reason), ("quota", the QuotaExceeded) or ("skipped", None) when the run stopped (quota or Ctrl-C)
     before this ROM finished. game_id: see match()."""
     rom, size, etag = item
     if stop.is_set():
@@ -353,7 +355,7 @@ def scrape_rom(client, system, item, tmp, skip, stop, game_id=None):
         game_id, how = match(rc, system, rom, size, etag, game_id, stop)
         raw = rc.found if rc.found is not None else rc.game(game_id)
         if screenscraper.is_notgame(raw):
-            return "unknown", (how, "notgame")
+            return "notgame", (how, screenscraper.notgame_info(raw))
         meta, media = screenscraper.parse_game(raw, ())
         if not meta:
             raise screenscraper.ApiError("ScreenScraper returned no data for it")
@@ -489,11 +491,15 @@ def run_batch(system, batch, started, shrink, outcomes, listing, index, pending,
         jobs = {}  # ROM -> its upload jobs
         done = {}
         for (rom, _, _), (status, payload) in zip(batch, results):
-            if status == "unknown" and rom in forced:
+            if status in ("unknown", "notgame") and rom in forced:
                 failed += 1
                 outcomes[rom] = None
-                print(ui.red(f"  ❌ ScreenScraper game {forced[rom]} is not a playable game entry" if payload[1] == "notgame"
+                print(ui.red(f"  ❌ ScreenScraper game {forced[rom]} is not a playable game entry" if status == "notgame"
                              else f"  ❌ ScreenScraper has no game {forced[rom]}"))
+            elif status == "notgame":
+                scrape_state.mark_notgame(name, rom, payload[1])
+                outcomes[rom] = None
+                print(ui.dim(f"     🚫 {name}/{rom}: ScreenScraper lists it as a non-game"))
             elif status == "unknown":
                 if payload[0] == "manual":  # the saved match's game is gone: don't retry it on every run
                     print(ui.yellow(f"  ⚠️  {name}/{rom}: ScreenScraper has no game {scrape_state.manual_match(name, rom)}; "
@@ -668,6 +674,7 @@ def run_scrape(client, systems, todo, skip, ask=True, replace=False, forced=None
     listings: {system: {key: size} of scrapes/<system>/} and metadata: {system: its metadata.json} the caller already has."""
     count = sum(len(v) for v in todo.values())
     listings, metadata = dict(listings or {}), metadata or {}
+    before = set(scrape_state.notgames())
     try:
         listings.update(_each(lambda name: inventory.files(f"{scrape_plan.SCRAPES}/{name}/"), [n for n in todo if n not in listings]))
     except s3.ERRORS as e:
@@ -703,11 +710,25 @@ def run_scrape(client, systems, todo, skip, ask=True, replace=False, forced=None
             break
     print(ui.bold("\n📋 Results"))
     print(report({name: [r for r, _, _ in items] for name, items in todo.items()}, outcomes))
+    _offer_review(client, systems, todo, sorted(set(scrape_state.notgames()) - before))
     if quota_hit:
         print(ui.yellow("\n" + _quota_message(quota_hit, rerun)))
         return 1
     print(ui.green("\n🎉 Done!") if not failed else ui.red(f"\n⚠️  Done with {failed} failure(s); run `{rerun}` to try again"))
     return 1 if failed else 0
+
+
+def _offer_review(client, systems, todo, new):
+    """After a run that turned up non-games: review them now (on a terminal, if the user wants), else say how to later."""
+    if not new:
+        return
+    print(ui.yellow(f"\n🚫 {len(new)} ROM(s) came back as non-games"))
+    if sys.stdin.isatty() and ui.confirm("Review them now?", default=True):
+        from . import scrape_review
+        sizes = {f"{name}/{r}": size for name, items in todo.items() for r, size, _ in items}
+        scrape_review.review(systems, new, sizes, client)
+    else:
+        print(ui.dim("   Review them later with: sync-roms scrape review"))
 
 
 def _check_skip(skip):
@@ -860,7 +881,7 @@ def match_command(args):
         note = f"; the {kept} media file(s) already there are kept" if kept else ""
         question = (f"🖼️  Scrape {name}/{args.rom} as ScreenScraper game {game_id} and write its media and metadata to "
                     f"{where}{note} ?")
-    if not ui.confirm(question, default=False):
+    if not getattr(args, "confirmed", False) and not ui.confirm(question, default=False):
         print(ui.yellow("👋 Cancelled."))
         return 0
     print(f"🔗 {name}/{args.rom} → ScreenScraper game {game_id}")
@@ -871,5 +892,6 @@ def match_command(args):
     how = outcomes.get(name, {}).get(args.rom, "")
     if how == "manual":  # saved only once the ROM is scraped as that game
         scrape_state.save_match(name, args.rom, game_id)
+        scrape_state.clear_notgame(name, args.rom)
         return code
     return code or 1

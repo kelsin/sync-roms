@@ -101,33 +101,60 @@ def current():
 
 # --- Reads --------------------------------------------------------------------------------------------------------
 
+def _unignored(listing, prefix=""):
+    """listing without the ignored ROMs (its keys are prefix + key)."""
+    from . import ignore  # imported here: ignore checks its own file through this module
+    hidden = ignore.keys()
+    if not hidden:
+        return listing
+    return {k: v for k, v in listing.items() if prefix + k not in hidden}
+
+
 def files(prefix, sizes=True):
     """{key: size} of the files whose key starts with prefix (a folder, ending in /). Without a cache it lists storage,
-    and with sizes=False a storage folder's values are None (names list fast on a network share; each size is a stat)."""
+    and with sizes=False a storage folder's values are None (names list fast on a network share; each size is a stat).
+    Ignored ROMs are left out here and in every read below."""
     tree = current()
-    return s3.list_sizes(prefix, sizes) if tree is None else tree.under(prefix)
+    return _unignored(s3.list_sizes(prefix, sizes) if tree is None else tree.under(prefix))
 
 
 def cached(prefix):
     """files(prefix) from the cache only, or None when there is no cache (never reads storage)."""
     tree = current()
-    return None if tree is None else tree.under(prefix)
+    return None if tree is None else _unignored(tree.under(prefix))
 
 
 def stat(keys):
     """{key: size} of the keys that are files in storage."""
     tree = current()
     if tree is None:
-        return s3.stat_sizes(keys)
-    return {k: tree.files[k] for k in keys if k in tree.files and not k.endswith("/")}
+        return _unignored(s3.stat_sizes(keys))
+    return _unignored({k: tree.files[k] for k in keys if k in tree.files and not k.endswith("/")})
 
 
 def etags(prefix):
     """{path under prefix: (size, ETag)}, as s3.list_with_etags. A file whose ETag isn't known has "-", like a folder's."""
     tree = current()
     if tree is None:
-        return s3.list_with_etags(prefix)
-    return {k[len(prefix):]: (n, tree.etags.get(k, "-")) for k, n in tree.under(prefix).items() if not k.endswith("/")}
+        return _unignored(s3.list_with_etags(prefix), prefix)
+    return _unignored({k[len(prefix):]: (n, tree.etags.get(k, "-")) for k, n in tree.under(prefix).items()
+                       if not k.endswith("/")}, prefix)
+
+
+def tag(key):
+    """A tag that changes whenever one storage file's contents do, read live (never from the cache or the mirror): its
+    ETag in a bucket, "<mtime_ns>-<size>" in a storage folder. None when the file doesn't exist."""
+    if runtime.ROOT and not os.path.isdir(runtime.ROOT):  # an unmounted share, not a missing file
+        raise FileNotFoundError(f"{runtime.ROOT} is missing")
+    try:
+        if runtime.ROOT:
+            st = os.stat(s3.safe_join(runtime.ROOT, key))
+            return f"{st.st_mtime_ns}-{st.st_size}"
+        return s3.s3_client().head_object(Bucket=runtime.BUCKET, Key=key)["ETag"]
+    except s3.ERRORS as e:
+        if s3.missing(e):
+            return None
+        raise
 
 
 def folders():

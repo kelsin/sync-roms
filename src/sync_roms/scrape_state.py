@@ -11,6 +11,7 @@ _cache = {}  # file path -> ((mtime_ns, size), data): a file nobody changed sinc
 _unsaved = {}  # hash file path -> hashes saved in memory but not yet written
 _unknown_pending = {}  # unknown ledger path -> {key: True (marked) or False (cleared)} not yet written
 UNKNOWN = "scrape-unknown.json"
+NOTGAMES = "scrape-notgames.json"  # ROMs ScreenScraper calls non-games, waiting for `scrape review`: {key: what it said}
 HASH_FLUSH = 200  # hashes saved in memory before the hash file is written
 HASHES = "scrape-hashes.json"
 _warned = set()  # paths of corrupt files already warned about
@@ -177,6 +178,26 @@ def flush_unknown():
             _save(UNKNOWN, data)
 
 
+def notgames():
+    """{"system/rom": what ScreenScraper said} of the non-game results waiting for review."""
+    with _lock:
+        return dict(_load(NOTGAMES))
+
+
+def mark_notgame(system, rom, info):
+    with _lock:
+        data = dict(_load(NOTGAMES))
+        data[_key(system, rom)] = info
+        _save(NOTGAMES, data)
+
+
+def clear_notgame(system, rom):
+    with _lock:
+        data = dict(_load(NOTGAMES))
+        if data.pop(_key(system, rom), None) is not None:
+            _save(NOTGAMES, data)
+
+
 class _Snapshot:
     """manual_match and is_unknown over files read once, for checking many ROMs."""
 
@@ -184,6 +205,7 @@ class _Snapshot:
         with _lock:
             self._matches = _load(MATCHES)
             self._unknown = set(_load(UNKNOWN))
+            self._notgames = set(_load(NOTGAMES))
             for k, marked in _unknown_pending.get(_path(UNKNOWN), {}).items():
                 (self._unknown.add if marked else self._unknown.discard)(k)
 
@@ -193,6 +215,9 @@ class _Snapshot:
 
     def is_unknown(self, system, rom):
         return _key(system, rom) in self._unknown
+
+    def is_notgame(self, system, rom):
+        return _key(system, rom) in self._notgames
 
 
 def snapshot():

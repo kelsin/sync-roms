@@ -8,7 +8,8 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
-from sync_roms import runtime, s3, scrape_plan, store, upload, usersettings  # noqa: E402
+import argparse  # noqa: E402
+from sync_roms import ignore, inventory, runtime, s3, scrape_plan, store, upload, usersettings  # noqa: E402
 
 SYSTEMS = [
     {"name": "Game Boy Advance", "bucket": "gba", "folders": {"esde": "gba", "onion": "GBA"}},
@@ -62,6 +63,40 @@ class PlanRomUploadTest(unittest.TestCase):
         self.assertEqual(sorted((k, s) for k, _, s in new), [("gba/.hack.gba", 50), ("gba/Disc/d.chd", 40), ("gba/a.gba", 10)])
         self.assertEqual([(k, s) for k, _, s in changed], [("gba/c.gba", 30)])
         self.assertEqual([(k, s) for k, _, s in same], [("gba/b.gba", 20)])
+
+
+class IgnoredUploadTest(unittest.TestCase):
+    def setUp(self):
+        p = mock.patch.object(ignore, "_keys", frozenset({"gba/b.gba"}))
+        p.start()
+        self.addCleanup(p.stop)
+
+    def test_plan_rom_upload_skips_ignored(self):
+        with tempfile.TemporaryDirectory() as root:
+            touch(root, "a.gba", 10)
+            touch(root, "b.gba", 20)
+            new, changed, same = upload.plan_rom_upload(root, "gba", {})
+        self.assertEqual([k for k, _, _ in new + changed + same], ["gba/a.gba"])
+
+    def test_replace_never_uploads_ignored(self):
+        with tempfile.TemporaryDirectory() as root:
+            touch(root, "a.gba", 10)
+            touch(root, "b.gba", 20)
+            out = io.StringIO()
+            with mock.patch.object(inventory, "etags", lambda prefix: {}), contextlib.redirect_stdout(out):
+                upload.replace_command(argparse.Namespace(dry_run=True), root, SYSTEMS[0])
+        self.assertIn("gba/a.gba", out.getvalue())
+        self.assertNotIn("b.gba", out.getvalue())
+
+    def test_replace_never_deletes_ignored(self):
+        with tempfile.TemporaryDirectory() as root:
+            touch(root, "a.gba", 10)
+            out = io.StringIO()
+            listing = {"a.gba": (10, "-"), "b.gba": (20, "-")}
+            with mock.patch.object(inventory, "etags", lambda prefix: inventory._unignored(listing, prefix)), \
+                    contextlib.redirect_stdout(out):
+                upload.replace_command(argparse.Namespace(dry_run=True), root, SYSTEMS[0])
+        self.assertNotIn("would ask about deleting", out.getvalue())
 
 
 class UploadWorkersTest(unittest.TestCase):

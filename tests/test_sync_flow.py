@@ -10,7 +10,7 @@ from unittest import mock
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 
-from sync_roms import budget, cli, clean, downloads, frontend, mirroring, runtime, s3, scrape_plan, store, ui, usersettings  # noqa: E402
+from sync_roms import budget, cli, clean, downloads, frontend, ignore, mirroring, runtime, s3, scrape_plan, store, ui, usersettings  # noqa: E402
 from sync_roms import collections as collections_mod  # noqa: E402
 from helpers import MANIFEST, list_sizes  # noqa: E402
 
@@ -199,6 +199,20 @@ class SyncFlowTest(unittest.TestCase):
                 root = cli.clean._clean_root
                 left = [s for s in stale if os.path.exists(os.path.join(card_dir, s))]
         return code, out, updates, root, left
+
+    def test_ignored_listed_game_is_not_reported_missing(self):
+        jobs = []
+        _, out, _, _, _ = self.run_sync(extra=[(ignore, "_keys", frozenset({"gba/Game.zip"})),
+                                               (cli.downloads, "run_downloads", lambda todo, *a, **k: jobs.extend(todo) or 0)])
+        self.assertNotIn("missing", out.lower())
+        self.assertFalse([j for j in jobs if "Game.zip" in str(j[0])])
+
+    def test_ignored_collection_game_is_left_out(self):
+        self.run_sync(cards={"collections": ["favs"]}, colls=[FAVS], files=["ROMs/gba/Game.zip"],
+                      extra=[(ignore, "_keys", frozenset({"gba/Game.zip"}))],
+                      after=lambda d: os.path.exists(os.path.join(d, "ES-DE", "collections", "custom-Favs.cfg"))
+                      and read_from(d, "ES-DE", "collections", "custom-Favs.cfg"))
+        self.assertNotIn("Game.zip", self.after or "")
 
     def test_nothing_downloaded_skips_card_cleaning(self):
         _, _, _, root, _ = self.run_sync(plan=[])

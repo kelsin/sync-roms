@@ -9,7 +9,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 from botocore.exceptions import BotoCoreError, ClientError
 
-from . import diff, downloads, inventory, picker, runtime, s3, scrape_plan, store, ui
+from . import diff, downloads, ignore, inventory, picker, runtime, s3, scrape_plan, store, ui
 
 
 UPLOAD_MULTIPART_AT = 64 * 1024 * 1024  # files this big go up as parallel parts
@@ -33,6 +33,8 @@ def plan_rom_upload(root, bucket, existing):
     new, changed, same = [], [], []
     for path, size in zip(paths, sizes):
         key = f"{bucket}/{os.path.relpath(path, root).replace(os.sep, '/')}"
+        if ignore.is_ignored(key):  # never uploaded: storage keeps its own copy, or none
+            continue
         if key not in existing:
             new.append((key, path, size))
         elif existing[key] == size:
@@ -236,7 +238,7 @@ def replace_command(args, folder, system):
     """Make a storage folder match a local one: move renamed files, upload new and changed ones, and delete the rest
     that you pick."""
     bucket = system["bucket"]
-    local = diff.local_sizes(folder)
+    local = {p: n for p, n in diff.local_sizes(folder).items() if not ignore.is_ignored(f"{bucket}/{p}")}
     md5 = functools.lru_cache(maxsize=None)(lambda p: diff.file_md5(os.path.join(folder, *p.split("/"))))  # each file hashed once
     try:
         print("☁️  Listing what's already there...")

@@ -386,8 +386,9 @@ def load_manifest(card_names=()):
 
 
 def listed(s):
-    """Bucket keys of the games a system lists."""
-    return [g["bucket"] for g in s.get("games", []) if g.get("bucket")]
+    """Bucket keys of the games a system lists, without the ignored ones."""
+    from . import ignore  # imported here: ignore uses this module
+    return [g["bucket"] for g in s.get("games", []) if g.get("bucket") and not ignore.is_ignored(g["bucket"])]
 
 
 def available_keys(s, have):

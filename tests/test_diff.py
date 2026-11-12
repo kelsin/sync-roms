@@ -126,3 +126,25 @@ class PlanDiffTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class IgnoredDiffTest(unittest.TestCase):
+    def test_ignored_local_rom_is_not_only_local(self):
+        import argparse
+        import contextlib
+        import io
+        import tempfile
+        from unittest import mock
+        from sync_roms import diff, ignore, inventory, picker, store
+        with tempfile.TemporaryDirectory() as root:
+            for name in ("a.gba", "b.gba"):
+                with open(os.path.join(root, name), "wb") as f:
+                    f.write(b"x")
+            out = io.StringIO()
+            with mock.patch.object(ignore, "_keys", frozenset({"gba/b.gba"})), \
+                    mock.patch.object(store, "load_manifest", lambda *a: {"systems": [{"name": "GBA", "bucket": "gba", "folders": {}}]}), \
+                    mock.patch.object(picker, "filter_list", lambda *a, **k: 0), \
+                    mock.patch.object(inventory, "etags", lambda prefix: {}), contextlib.redirect_stdout(out):
+                diff.diff_command(argparse.Namespace(diff=root, system=None, json=False))
+        self.assertIn("a.gba", out.getvalue())
+        self.assertNotIn("b.gba", out.getvalue())
