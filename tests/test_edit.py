@@ -3,6 +3,7 @@ import io
 import json
 import os
 import sys
+import tempfile
 import unittest
 from unittest import mock
 
@@ -282,6 +283,26 @@ class TextualList(unittest.TestCase):
     def test_textual_keeps_none_of_the_lists_keys(self):
         self.assertEqual(self.run_keys(["ctrl+n", "ctrl+n", "ctrl+p", "ctrl+q", "enter"]), 1)
         self.assertEqual(self.run_keys(["tab", "j", "tab", "enter"], multi=True), [True, True, False])
+
+    def test_preview_image_follows_the_cursor(self):
+        from PIL import Image
+        with tempfile.TemporaryDirectory() as tmp:
+            paths = [os.path.join(tmp, f"{n}.png") for n in "ab"]
+            for path in paths:
+                Image.new("RGB", (45, 108), "red").save(path)
+            seen = []
+
+            async def script(pilot):
+                seen.append(pilot.app.screen.query_one("#preview").image)
+                await pilot.press("j")
+                seen.append(pilot.app.screen.query_one("#preview").image)
+                await pilot.press("j")
+                seen.append(pilot.app.screen.query_one("#preview").image)
+                await pilot.press("enter")
+            # not a terminal: textual-image would probe the real one on import
+            with mock.patch.object(sys, "__stdout__", io.StringIO()):
+                got = pilot_list(script, "t", self.LABELS, preview=lambda i: paths[i] if i < 2 else None)
+        self.assertEqual((got, seen), (2, [paths[0], paths[1], None]))
 
     def test_ctrl_c_raises_keyboard_interrupt(self):
         with self.assertRaises(KeyboardInterrupt):

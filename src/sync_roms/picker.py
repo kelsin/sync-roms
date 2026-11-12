@@ -157,7 +157,8 @@ class _ListModel:
     """filter_list's state and what each key does to it, apart from drawing (the arguments are filter_list's)."""
 
     def __init__(self, title, labels, multi, initial, hint, cursor, extras, locked, locked_note, hotkeys, note_text,
-                 on_note, esc_asks, hidden, status, diff_marks, session, poll, links, on_hotkey):
+                 on_note, esc_asks, hidden, status, diff_marks, session, poll, links, on_hotkey, preview=None):
+        self.preview = preview
         self.title, self.labels, self.multi, self.hint, self.extras = title, labels, multi, hint, extras
         self.locked_note, self.hotkeys, self.note_text, self.on_note = locked_note, hotkeys, note_text, on_note
         self.esc_asks, self.status, self.diff_marks, self.poll = esc_asks, status, diff_marks, poll
@@ -181,6 +182,10 @@ class _ListModel:
         self.help = None  # the help lines while they are shown
         self.height = 24  # screen rows; the app sets it
         self.update()
+
+    def preview_path(self):
+        """The image file for the highlighted row, or None (no preview, no row shown, or the row has none)."""
+        return self.preview(self.vis[self.cur]) if self.preview and self.vis else None
 
     def update(self):
         """Work out the shown rows (vis), keep the cursor on one and in view, save the session and work out the
@@ -438,6 +443,9 @@ def _app_class():
 
         def compose(self):
             yield _ListLines()
+            if self.app.model.preview:
+                from textual_image.widget import Image  # already imported (and the terminal probed) by filter_list
+                yield Image(self.app.model.preview_path(), id="preview")
 
         def on_key(self, event):
             event.stop()
@@ -468,7 +476,9 @@ def _app_class():
         Tab and the rest reach the list; Ctrl-C ends it (interrupted)."""
         ENABLE_COMMAND_PALETTE = False
         CSS = """
-        _ListLines { height: 1fr; text-wrap: nowrap; text-overflow: clip; }
+        _ListLines { width: 1fr; height: 1fr; text-wrap: nowrap; text-overflow: clip; }
+        _ListScreen { layout: horizontal; }
+        _ListScreen #preview { width: auto; max-width: 34%; height: 100%; }
         _HelpScreen { align: center middle; }
         _HelpScreen Static { width: auto; }
         """
@@ -517,6 +527,8 @@ def _app_class():
             elif not self.model.help and isinstance(self.screen, _HelpScreen):
                 self.pop_screen()
             self.screen_stack[0].query_one(_ListLines).refresh()
+            if self.model.preview:
+                self.screen_stack[0].query_one("#preview").image = self.model.preview_path()
 
         def finish(self, result):
             self.done = True
@@ -538,7 +550,7 @@ def _run(model):
 
 def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, extras=None, locked=None, locked_note="",
                 hotkeys=(), note_text=None, on_note=None, esc_asks=True, hidden=None, status=None, diff_marks=True,
-                session=None, poll=None, links=None, on_hotkey=None):
+                session=None, poll=None, links=None, on_hotkey=None, preview=None):
     """Modal list: vim keys for moving and acting, Emacs keys for editing the filter.
 
     Normal mode: j/k ↑/↓ ^N/^P move · g/G top/bottom · ^D/^U half page · ^F/^B/PgUp/PgDn/^V page · / filter ·
@@ -566,6 +578,11 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
     set them all to the toggled row's new state (locked ones excepted).
     on_hotkey: optional callable(key, label index) -> bool, tried first for a hotkey; True means it handled the key
     in place (the list stays open and is redrawn, so it can update extras), False returns (key, index) as usual.
+    preview: optional callable(label index) -> path of an image file, or None; the list then shares the screen with an
+    image pane showing the highlighted row's image (blank when there is none), updated as the cursor and filter change.
     """
+    if preview:
+        _app_class()  # first: it sets up Textual's environment
+        import textual_image.widget  # noqa: F401 -- probes the terminal on import, which must happen before the app starts
     return _run(_ListModel(title, labels, multi, initial, hint, cursor, extras, locked, locked_note, hotkeys, note_text,
-                           on_note, esc_asks, hidden, status, diff_marks, session, poll, links, on_hotkey))
+                           on_note, esc_asks, hidden, status, diff_marks, session, poll, links, on_hotkey, preview))
