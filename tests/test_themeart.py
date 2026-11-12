@@ -77,9 +77,9 @@ class Usable(unittest.TestCase):
 
     def test_names_differing_only_in_case_keep_the_first(self):
         with mock.patch.object(ui, "warn", lambda *a: None):
-            self.assertEqual(list(themeart.usable("esde", {"RPG Faves": "rpg", "Rpg Faves": "action"})), ["RPG Faves"])
+            self.assertEqual(list(themeart.usable("esde", {"RPG Faves": "rpg", "Rpg Faves": "horror"})), ["RPG Faves"])
         with mock.patch.object(ui, "warn", lambda *a: None):
-            self.assertEqual(list(themeart.usable("knulli", {"Lightgun": "shooter"})), [])
+            self.assertEqual(list(themeart.usable("knulli", {"Lightgun": "shmups"})), [])
 
 
 class Settings(unittest.TestCase):
@@ -126,7 +126,7 @@ class Esde(Card):
 
     def install(self):
         with contextlib.redirect_stdout(io.StringIO()):
-            return themeart.install("esde", self.base, {**SURPRISE, "My Shmups": "shooter"})
+            return themeart.install("esde", self.base, {**SURPRISE, "My Shmups": "shmups"})
 
     def copy(self, *rel):
         return os.path.join(self.base, "ES-DE", "themes", themeart.ESDE_COPY, *rel)
@@ -190,8 +190,8 @@ class EsdeOwnArt(Esde):
         self.store("abc", {"theme.xml": b"<theme/>", "_inc/systems/_metadata-global/steam.xml": b"<theme/>"})
         self.settings(themeart.ESDE_THEME)
         with contextlib.redirect_stdout(io.StringIO()):
-            themeart.install("esde", self.base, {"Steam": "action", "My Shmups": "shooter"})
-            self.assertFalse(themeart.install("esde", self.base, {"My Shmups": "shooter"}))
+            themeart.install("esde", self.base, {"Steam": "horror", "My Shmups": "shmups"})
+            self.assertFalse(themeart.install("esde", self.base, {"My Shmups": "shmups"}))
         self.assertIn("Steam", self.warned[0])
         self.assertFalse(os.path.exists(self.copy("_inc", "systems", "artwork-outline", "steam.png")))
         self.assertIn("<systemName>My Shmups</systemName>", read(self.copy("_inc", "systems", "_metadata-global", "my shmups.xml")))
@@ -243,7 +243,7 @@ class Knulli(Card):
         self.assertFalse(themeart.install("knulli", self.base, SURPRISE))  # nothing new the second time
 
     def test_a_name_without_a_logo_keeps_the_text_name(self):
-        themeart.install("knulli", self.base, {"東方": "shooter"})
+        themeart.install("knulli", self.base, {"東方": "shmups"})
         self.assertTrue(os.path.exists(self.path("artwork", "東方.png")))
         self.assertFalse(os.path.exists(self.path("logos", "東方.svg")))
         settings = read(frontend.settings_path("knulli", self.base))
