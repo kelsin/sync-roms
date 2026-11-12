@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.4.1](https://github.com/kelsin/sync-roms/compare/v2.4.0...v2.4.1) (2026-11-12)
+
+
+### :bug: Bug Fixes
+
+* **themeart:** clean up the collection art and drop duplicates ([#245](https://github.com/kelsin/sync-roms/issues/245)) ([05e5b66](https://github.com/kelsin/sync-roms/commit/05e5b66b945fe39eaad7f438adcadc3357151f7f))
+
 ## [2.4.0](https://github.com/kelsin/sync-roms/compare/v2.3.0...v2.4.0) (2026-11-12)
 
 
