@@ -44,6 +44,12 @@ class Assets(unittest.TestCase):
         self.assertIsNone(themeart.art_png("nope"))
         self.assertIsNone(themeart.art_png("../art/surprise"))
 
+    def test_every_set_has_art(self):
+        sets = os.path.join(os.path.dirname(themeart.THEME_DATA), "..", "sets")
+        for name in os.listdir(sets):
+            png = themeart.art_png(name.removesuffix(".json"))
+            self.assertTrue(png and os.path.isfile(png), name)
+
     def test_a_logo_spells_the_name_in_capitals_and_fits(self):
         svg = themeart.logo_svg("Shmups 2!")
         self.assertEqual(svg.count("<path "), 8)  # S H M U P S 2 !: the space has no outline
