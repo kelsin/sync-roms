@@ -38,6 +38,12 @@ STAT_WORKERS = 32  # parallel stats on a folder: each is a round trip on a netwo
 ERRORS = (ClientError, BotoCoreError, OSError)  # what a bucket or a folder can raise
 
 
+def missing(e):
+    """Whether a storage error means the file isn't there."""
+    return isinstance(e, FileNotFoundError) or (
+        isinstance(e, ClientError) and e.response.get("Error", {}).get("Code") in ("404", "NoSuchKey", "NotFound"))
+
+
 def read_root():
     """The folder reads come from (the local mirror, else the storage folder), or None when they come from storage."""
     return runtime._mirror_root or runtime.ROOT

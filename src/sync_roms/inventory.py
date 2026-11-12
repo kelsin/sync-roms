@@ -130,6 +130,20 @@ def etags(prefix):
     return {k[len(prefix):]: (n, tree.etags.get(k, "-")) for k, n in tree.under(prefix).items() if not k.endswith("/")}
 
 
+def tag(key):
+    """A tag that changes whenever one storage file's contents do, read live (never from the cache or the mirror): its
+    ETag in a bucket, "<mtime_ns>-<size>" in a storage folder. None when the file doesn't exist."""
+    try:
+        if runtime.ROOT:
+            st = os.stat(s3.safe_join(runtime.ROOT, key))
+            return f"{st.st_mtime_ns}-{st.st_size}"
+        return s3.s3_client().head_object(Bucket=runtime.BUCKET, Key=key)["ETag"]
+    except s3.ERRORS as e:
+        if s3.missing(e):
+            return None
+        raise
+
+
 def folders():
     """Names of the top-level folders in storage."""
     tree = current()
