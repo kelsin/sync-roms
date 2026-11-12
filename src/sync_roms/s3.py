@@ -22,10 +22,19 @@ def safe_join(base, rel):
     return path
 
 
+JUNK_NAMES = {".DS_Store"}  # macOS Finder litter: never listed, cached, synced or scraped
+
+
+def junk(key):
+    """Whether a storage key or local path names OS litter that sync-roms never treats as a file."""
+    return key.replace("\\", "/").rsplit("/", 1)[-1] in JUNK_NAMES
+
+
 def mirror_sizes(root, prefix="", sizes=True):
     """{key: size} of the files under root whose key starts with prefix (a folder, ending in /).
     Without sizes the values are None: a network share answers a name listing fast but each size is a round trip."""
-    paths = [os.path.join(folder, name) for folder, _, files in os.walk(os.path.join(root, prefix)) for name in files]
+    paths = [os.path.join(folder, name) for folder, _, files in os.walk(os.path.join(root, prefix)) for name in files
+             if not junk(name)]
     keys = [os.path.relpath(path, root).replace(os.sep, "/") for path in paths]
     if not sizes:
         return dict.fromkeys(keys)

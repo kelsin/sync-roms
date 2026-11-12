@@ -74,6 +74,24 @@ class FolderCacheTest(StorageFolder):
             self.assertEqual(inventory.etags("gba/"), {"a.zip": (1, "-"), "b.zip": (2, "-")})
             self.assertEqual(inventory.cached("BIOS/"), {"BIOS/x.bin": 3})
 
+    def test_ds_store_is_never_cached_or_read(self):
+        self.put(".DS_Store", 4)
+        self.put("gba/.DS_Store", 4)
+        self.assertEqual(self.build(), (3, 0, 0))
+        self.assertNotIn("gba/.DS_Store", inventory.current().files)
+        self.assertEqual(inventory.files("gba/"), {"gba/a.zip": 1, "gba/b.zip": 2})
+
+    def test_ds_store_in_an_old_cache_or_a_live_listing_is_dropped(self):
+        self.build()
+        inventory.wrote("gba/.DS_Store", 4)
+        self.assertEqual(inventory.files("gba/"), {"gba/a.zip": 1, "gba/b.zip": 2})
+        self.assertEqual(inventory.stat(["gba/.DS_Store"]), {})
+        self.assertEqual(inventory.etags("gba/"), {"a.zip": (1, "-"), "b.zip": (2, "-")})
+        inventory.reset()
+        os.remove(inventory.path())
+        self.put("gba/.DS_Store", 4)
+        self.assertEqual(inventory.files("gba/"), {"gba/a.zip": 1, "gba/b.zip": 2})
+
     def test_the_cache_survives_a_new_run(self):
         self.build()
         inventory.reset()
@@ -136,7 +154,8 @@ class BucketCacheTest(helpers.DataDir):
         client = mock.Mock()
         client.get_paginator.return_value.paginate.return_value = [
             {"Contents": [{"Key": "gba/a.zip", "Size": 1, "ETag": '"aa"'}]},
-            {"Contents": [{"Key": "BIOS/x.bin", "Size": 3, "ETag": '"bb-2"'}]}]
+            {"Contents": [{"Key": "BIOS/x.bin", "Size": 3, "ETag": '"bb-2"'},
+                          {"Key": "gba/.DS_Store", "Size": 4, "ETag": '"cc"'}]}]
         p = mock.patch.object(s3, "s3_client", return_value=client)
         p.start()
         self.addCleanup(p.stop)
@@ -146,6 +165,7 @@ class BucketCacheTest(helpers.DataDir):
         self.assertEqual(inventory.current().source, "s3://roms")
         self.assertEqual(inventory.etags("gba/"), {"a.zip": (1, '"aa"')})
         self.assertEqual(inventory.files("BIOS/"), {"BIOS/x.bin": 3})
+        self.assertNotIn("gba/.DS_Store", inventory.current().files)
 
     def test_the_endpoint_is_part_of_the_source(self):
         quiet(inventory.update)
