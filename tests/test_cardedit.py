@@ -113,6 +113,15 @@ def toggle(*names):
     return step
 
 
+def flip(i):
+    """A multi-mode step that switches row i of the initial states and presses Enter."""
+    def step(labels, kw):
+        state = list(kw["initial"])
+        state[i] = not state[i]
+        return state
+    return step
+
+
 class Flow(DataDir):
     def setUp(self):
         super().setUp()
@@ -138,16 +147,48 @@ class Flow(DataDir):
 
     def test_u_toggles_surprise_and_the_title_shows_it(self):
         self.card(size="1 GB")
-        calls = self.run_card(returns((cardedit.SURPRISE_KEY, 0)), returns((cardedit.SURPRISE_KEY, 0)), returns(None))
+        calls = self.run_card(returns((cardedit.SURPRISE_KEY, 0)), returns(0), returns((cardedit.SURPRISE_KEY, 0)),
+                              returns(0), returns(None))
         self.assertIn("🎁 Surprise on", calls[0][0])
-        self.assertIn("🎁 Surprise off", calls[1][0])
-        self.assertIn("🎁 Surprise on", calls[2][0])
+        self.assertEqual(calls[1][1][0], "Turn Surprise off for c")
+        self.assertIn("🎁 Surprise off", calls[2][0])
+        self.assertEqual(calls[3][1][0], "Turn Surprise on for c")
+        self.assertIn("🎁 Surprise on", calls[4][0])
         self.assertNotIn("surprise", self.read("cards.json")["c"])
 
     def test_u_off_saves_false(self):
         self.card(size="1 GB")
-        self.run_card(returns((cardedit.SURPRISE_KEY, 0)), returns(None))
+        self.run_card(returns((cardedit.SURPRISE_KEY, 0)), returns(0), returns(None))
         self.assertIs(self.read("cards.json")["c"]["surprise"], False)
+
+    def test_u_esc_changes_nothing(self):
+        self.card(size="1 GB")
+        self.run_card(returns((cardedit.SURPRISE_KEY, 0)), returns(None), returns(None))
+        self.assertNotIn("surprise", self.read("cards.json")["c"])
+        self.assertIsNone(self.read_settings().get("surprise_excluded_systems"))
+
+    def test_u_systems_saves_the_unchecked_ones_for_every_card(self):
+        self.card(size="1 GB")
+        self.write_json("settings.json", {"surprise_excluded_systems": ["gone"], "bucket": "b"})
+        names = [s["name"] for s in CATALOG["systems"]]
+        calls = self.run_card(returns((cardedit.SURPRISE_KEY, 0)), returns(1), flip(0), returns(None))
+        self.assertTrue(calls[2][1] and all(calls[2][1][i] == names[i] for i in range(len(names))))
+        self.assertEqual(self.read_settings()["surprise_excluded_systems"], sorted(["gone", CATALOG["systems"][0]["bucket"]]))
+        self.assertEqual(self.read_settings()["bucket"], "b")
+        self.assertNotIn("surprise", self.read("cards.json")["c"])
+
+    def test_u_systems_all_checked_removes_the_setting(self):
+        self.card(size="1 GB")
+        first = CATALOG["systems"][0]
+        self.write_json("settings.json", {"surprise_excluded_systems": [first["bucket"]]})
+        self.run_card(returns((cardedit.SURPRISE_KEY, 0)), returns(1), flip(0), returns(None))
+        self.assertNotIn("surprise_excluded_systems", self.read_settings())
+
+    def read_settings(self):
+        try:
+            return self.read("settings.json")
+        except FileNotFoundError:
+            return {}
 
     def test_u_off_clears_the_current_surprises(self):
         self.card(surprises=[{"system": "gba", "bucket": "gba/Zelda.zip", "title": "Zelda"}])

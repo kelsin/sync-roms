@@ -12,7 +12,7 @@ from unittest import mock
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import helpers  # noqa: E402
 import isolate  # noqa: E402,F401
-from sync_roms import cardedit, mirroring, picker, runtime, store, surprise  # noqa: E402
+from sync_roms import cardedit, mirroring, picker, runtime, store, surprise, usersettings  # noqa: E402
 
 GBA = {"bucket": "gba", "bios": {"files": ["gba_bios.bin"]}}
 IN = ["Super Mario Advance (USA, Europe).zip", "Castlevania - Aria of Sorrow (USA).zip",
@@ -295,6 +295,13 @@ class Step(StorageCase):
             got = surprise.run_surprise("SD", (None, "esde"), self.chosen(), True, False, rng=random.Random(2))
         self.assertNotIn("psx", {g["system"] for g in got})
         self.assertIn(self.surprise("gba", 0), got)
+
+    def test_excluded_systems_are_never_picked_and_their_surprises_are_replaced(self):
+        usersettings.save_setting("surprise_excluded_systems", ["gb"])
+        self.card(surprises=[self.surprise("gba", 0), self.surprise("gb", 0)])
+        got = surprise.run_surprise("SD", (None, "esde"), self.chosen(), False, False, rng=random.Random(3))
+        self.assertEqual(len(got), 10)
+        self.assertEqual({g["system"] for g in got}, {"gba"})
 
     def test_dry_run_keeps_every_surprise_and_only_previews_the_empty_slots(self):
         self.card(surprises=[self.surprise("gba", 0)])
