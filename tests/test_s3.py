@@ -222,6 +222,12 @@ def decomposing_share():
         yield
 
 
+def share_write(path, data):
+    """Write a new file the way that share does: it stores the name decomposed whatever spelling it was given."""
+    with open(unicodedata.normalize("NFD", path), "wb") as f:
+        f.write(data)
+
+
 class AccentedNameTest(unittest.TestCase):
     def setUp(self):
         self.root = tempfile.mkdtemp()
@@ -236,14 +242,14 @@ class AccentedNameTest(unittest.TestCase):
     def test_write_file_replaces_the_part_file_the_share_renamed(self):
         with mock.patch.object(runtime, "ROOT", self.root), mock.patch("sync_roms.inventory.wrote") as wrote, \
                 decomposing_share():
-            s3.write_file(COMPOSED, lambda tmp: open(tmp, "wb").write(b"abc"))
+            s3.write_file(COMPOSED, lambda tmp: share_write(tmp, b"abc"))
         names = [unicodedata.normalize("NFC", n) for n in os.listdir(os.path.join(self.root, "psvita"))]
         self.assertEqual(names, [os.path.basename(COMPOSED)])
         wrote.assert_called_once_with(COMPOSED, 3)
 
     def test_failed_write_leaves_no_part_file(self):
         def fail(tmp):
-            open(tmp, "wb").write(b"ab")
+            share_write(tmp, b"ab")
             raise OSError("boom")
 
         with mock.patch.object(runtime, "ROOT", self.root), decomposing_share(), self.assertRaises(OSError):
