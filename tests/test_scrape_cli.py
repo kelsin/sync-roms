@@ -171,23 +171,23 @@ class SetCredentials(RealDataDirGuard):
         return code, out.getvalue()
 
     def test_saves_without_printing_values(self):
-        code, out = self.run_it(["scraper-user"], ["s3cret"])
+        code, out = self.run_it(["scraper-user"], ["s3cret-pw"])
         self.assertEqual(code, 0)
         with open(self.path) as f:
             saved = json.load(f)
-        self.assertEqual(saved, {"screenscraper_user": "scraper-user", "screenscraper_password": "s3cret"})
+        self.assertEqual(saved, {"screenscraper_user": "scraper-user", "screenscraper_password": "s3cret-pw"})
         for value in saved.values():
             self.assertNotIn(value, out)
         self.assertEqual(stat.S_IMODE(os.stat(self.path).st_mode), 0o600)
 
     def test_blank_keeps_existing(self):
-        saved = {"screenscraper_user": "me", "screenscraper_password": "s3cret"}
-        code, out = self.run_it(["newme"], [""], saved)
+        saved = {"screenscraper_user": "old-user", "screenscraper_password": "s3cret-pw"}
+        code, out = self.run_it(["new-user"], [""], saved)
         self.assertEqual(code, 0)
         with open(self.path) as f:
             now = json.load(f)
-        self.assertEqual(now, dict(saved, screenscraper_user="newme"))
-        for value in list(saved.values()) + ["newme"]:
+        self.assertEqual(now, dict(saved, screenscraper_user="new-user"))
+        for value in list(saved.values()) + ["new-user"]:
             self.assertNotIn(value, out)
 
     def test_credentials_saved_in_one_write(self):
