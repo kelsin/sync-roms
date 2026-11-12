@@ -1,5 +1,18 @@
 # Changelog
 
+## [2.0.0](https://github.com/kelsin/sync-roms/compare/v1.5.0...v2.0.0) (2026-11-12)
+
+
+### ⚠ BREAKING CHANGES
+
+* **sync:** sync every system with games and preview downloads in the card editor ([#229](https://github.com/kelsin/sync-roms/issues/229))
+
+### :video_game: Features
+
+* **scrape:** ignore non-game ROMs and review non-game results ([#232](https://github.com/kelsin/sync-roms/issues/232)) ([ab3b1c3](https://github.com/kelsin/sync-roms/commit/ab3b1c38fcdc154882131c3e5044754b2f9aa70d))
+* **surprise:** choose the systems surprise may use on every card ([#231](https://github.com/kelsin/sync-roms/issues/231)) ([e6b5458](https://github.com/kelsin/sync-roms/commit/e6b54589e5e887a0da107c51393959e5bed2ee94))
+* **sync:** sync every system with games and preview downloads in the card editor ([#229](https://github.com/kelsin/sync-roms/issues/229)) ([9273b7d](https://github.com/kelsin/sync-roms/commit/9273b7d0c1b4489eb21c0a1b1775d170b26ee151))
+
 ## [1.5.0](https://github.com/kelsin/sync-roms/compare/v1.4.0...v1.5.0) (2026-11-11)
 
 
