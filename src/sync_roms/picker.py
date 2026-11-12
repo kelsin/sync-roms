@@ -555,6 +555,16 @@ def _run(model):
     return result
 
 
+def _draws_images():
+    """True when the terminal speaks Kitty graphics or Sixel. textual-image probes the terminal on import, which must
+    happen before the app starts; its block fallbacks are too coarse for the art, so they don't count."""
+    from textual_image import renderable
+    if renderable.Image not in (renderable.TGPImage, renderable.SixelImage):
+        return False
+    import textual_image.widget  # noqa: F401 -- also asks the terminal for its cell size
+    return True
+
+
 def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, extras=None, locked=None, locked_note="",
                 hotkeys=(), note_text=None, on_note=None, esc_asks=True, hidden=None, status=None, diff_marks=True,
                 session=None, poll=None, links=None, on_hotkey=None, preview=None):
@@ -587,9 +597,11 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
     in place (the list stays open and is redrawn, so it can update extras), False returns (key, index) as usual.
     preview: optional callable(label index) -> path of an image file, or None; the list then shares the screen with an
     image pane showing the highlighted row's image (blank when there is none), updated as the cursor and filter change.
+    Only in a terminal that draws real images (Kitty graphics or Sixel); elsewhere there is no pane.
     """
     if preview:
         _app_class()  # first: it sets up Textual's environment
-        import textual_image.widget  # noqa: F401 -- probes the terminal on import, which must happen before the app starts
+        if not _draws_images():
+            preview = None
     return _run(_ListModel(title, labels, multi, initial, hint, cursor, extras, locked, locked_note, hotkeys, note_text,
                            on_note, esc_asks, hidden, status, diff_marks, session, poll, links, on_hotkey, preview))

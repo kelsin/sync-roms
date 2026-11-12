@@ -300,9 +300,28 @@ class TextualList(unittest.TestCase):
                 seen.append(pilot.app.screen.query_one("#preview").image)
                 await pilot.press("enter")
             # not a terminal: textual-image would probe the real one on import
-            with mock.patch.object(sys, "__stdout__", io.StringIO()):
+            with mock.patch.object(sys, "__stdout__", io.StringIO()), \
+                    mock.patch("sync_roms.picker._draws_images", return_value=True):
                 got = pilot_list(script, "t", self.LABELS, preview=lambda i: paths[i] if i < 2 else None)
         self.assertEqual((got, seen), (2, [paths[0], paths[1], None]))
+
+    def test_no_preview_pane_without_terminal_graphics(self):
+        panes = []
+
+        async def script(pilot):
+            panes.append(len(pilot.app.screen.query("#preview")))
+            await pilot.press("enter")
+        with mock.patch("sync_roms.picker._draws_images", return_value=False):
+            got = pilot_list(script, "t", self.LABELS, preview=lambda i: "unused.png")
+        self.assertEqual((got, panes), (0, [0]))
+
+    def test_block_fallbacks_dont_count_as_drawing_images(self):
+        from sync_roms import picker
+        from textual_image import renderable
+        for kind, draws in ((renderable.HalfcellImage, False), (renderable.UnicodeImage, False),
+                            (renderable.TGPImage, True)):
+            with mock.patch.object(renderable, "Image", kind), mock.patch.object(sys, "__stdout__", io.StringIO()):
+                self.assertEqual(picker._draws_images(), draws)
 
     def test_textual_failure_exits_instead_of_looking_like_esc(self):
         from sync_roms import picker
