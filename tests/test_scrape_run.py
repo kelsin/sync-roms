@@ -173,9 +173,10 @@ class ScrapeRunTest(RunBase):
         for r in ("a.zip", "b.zip", "c.zip", "d.zip", "e.zip", "f.zip"):
             self.put(f"gba/{r}")
         self.client.quota_at = "c.zip"
+        self.client.threads = 1  # with two, c.zip can hit the quota while b.zip is still downloading, which stops it
         with mock.patch.object(scrape_online, "BATCH", 2):
             self.assertEqual(self.run_scrape(), 1)
-        self.assertLessEqual({"a.zip", "b.zip"}, set(self.metadata()))  # d.zip was in flight and may finish too
+        self.assertEqual(set(self.metadata()), {"a.zip", "b.zip"})  # d.zip never starts once c.zip stops the run
         self.assertNotIn("c.zip", self.metadata())
         self.assertNotIn("e.zip", self.client.lookups)
         self.assertNotIn("f.zip", self.client.lookups)
