@@ -537,8 +537,10 @@ Removing a game only drops it from the card's games; the file stays in storage.
 
 #### Theme art for collections
 
-In the collection editor, **Theme art** picks a picture for the collection: one for every set (under the set's id) plus
-RPG and Horror, drawn in the Outline style of the
+In the collection editor, **Theme art** picks a picture for the collection: one for every set (under the set's id),
+RPG and Horror, and ones for the usual kinds of personal collection (Favorites, Now Playing, Backlog, Completed,
+Kids & Family, Hard Mode, Late Night & Chill, Great Soundtracks, ROM Hacks & Homebrew, Imports, Years & Decades,
+Holidays, Device Benchmarks), drawn in the Outline style of the
 [Art Book Next](https://github.com/anthonycaccese/art-book-next-es-de) theme (`src/sync_roms/data/themes/art-book-next/art/`;
 the collection file gets `"art": "<id>"`). `tools/gen_theme_art.py` draws them (it needs Pillow). When an ES-DE or Knulli card using that theme gets the collection, it shows on
 its own in the system carousel with that art and a logo of its name, drawn with the theme's logo font (Changa One, SIL

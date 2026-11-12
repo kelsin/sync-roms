@@ -279,6 +279,139 @@ def surprise(p):  # gift
     p.l([(16, -50), (20, -58)])
 
 
+def backlog(p):  # pile of games
+    for x, y in ((-3, -33), (4, -11), (-2, 11)):
+        p.rr(x - 33, y, x + 33, y + 22, 3)
+        p.rr(x - 20, y + 6, x + 8, y + 16, 2)
+
+
+def benchmarks(p):  # gauge
+    dial = arc(0, 14, 42, 42, 180, 360) + rounded([(42, 14), (42, 28), (-42, 28), (-42, 14)], 4, False)[1:-1]
+    p.path(dial, True)
+    with p.inside(dial):
+        for a in range(210, 331, 30):
+            p.l(turn([(34, 14), (50, 14)], a, 0, 14))
+    p.l(turn([(0, 14), (28, 14)], 315, 0, 14))
+    p.o(0, 14, 5, opaque=True)
+
+
+def completed(p):  # trophy
+    p.o(-24, -26, 12, 11)
+    p.o(24, -26, 12, 11)
+    p.l([(-4, 0), (-4, 20)])
+    p.l([(4, 0), (4, 20)])
+    p.path(rounded([(-22, -20), (-22, -44), (22, -44), (22, -20)], 3, False) + arc(0, -20, 22, 26, 0, 180)[1:-1],
+           True, opaque=True)
+    p.pg(star(0, -22, 10, 4.3), 0.8)
+    p.rr(-12, 20, 12, 28, 2.5)
+    p.rr(-22, 28, 22, 42, 3)
+
+
+def decades(p):  # calendar
+    p.rr(-36, -34, 36, 42, 5)
+    p.l([(-36, -15), (36, -15)])
+    for x in (-18, 18):
+        p.rr(x - 3.5, -44, x + 3.5, -26, 3.5, opaque=True)
+    for y in (2, 24):
+        for x in (-21, 0, 21):
+            p.rr(x - 5, y - 5, x + 5, y + 5, 2)
+
+
+def favorites(p):  # hearts
+    lobe = math.degrees(math.atan2(-math.sqrt(21 ** 2 - 19 ** 2), 19)) + 360  # where the two lobes meet
+    side = math.degrees(math.atan2(56, 19) + math.acos(21 / math.hypot(19, 56)))  # where a lobe turns to the point
+    half = arc(-19, -12, 21, 21, lobe, side) + [(0, 44)]
+    heart = half + mirror(half)[-2:0:-1]
+    p.path([(x - 4, y + 4) for x, y in heart], True)
+    p.path(turn([(40 + x * 0.3, -40 + y * 0.3) for x, y in heart], 14, 40, -40), True)
+
+
+def hacks_homebrew(p):  # spanner
+    handle, jaw = math.degrees(math.asin(8 / 18)), math.degrees(math.asin(6.5 / 18))
+    right = arc(0, -28, 18, 18, 90 - handle, jaw - 90)
+    top = right[-1][1]
+    p.path(right + rounded([(6.5, top), (6.5, -31), (-6.5, -31), (-6.5, top)], 2.5, False)[1:-1] + mirror(right)[::-1]
+           + arc(0, 39, 8, 8, 180, 0), True)
+    p.o(0, 38, 2.6)
+
+
+def hard_mode(p):  # skull
+    skull = arc(0, -8, 32, 30, 150, 390) + rounded([(27.7, 7), (18, 20), (18, 40), (-18, 40), (-18, 20), (-27.7, 7)],
+                                                   4, False)[1:-1]
+    p.path(skull, True)
+    p.o(-12, -6, 8, 9)
+    p.o(12, -6, 8, 9)
+    p.pg([(0, 7), (5, 17), (-5, 17)], 1.5)
+    with p.inside(skull):
+        p.l([(-40, 27), (40, 27)])
+    for x in (-9, 0, 9):
+        p.l([(x, 27), (x, 40)])
+
+
+def holiday(p):  # snowflake
+    for a in range(0, 360, 60):
+        p.l(turn([(0, 0), (0, -44)], a))
+        p.l(turn([(-9, -37), (0, -27), (9, -37)], a), 1)
+        p.l(turn([(-5, -19), (0, -13), (5, -19)], a), 1)
+
+
+def imports(p):  # globe on a stand
+    cx, cy, tilt = -2, -8, 20
+    p.path(arc(cx, cy, 38, 38, 290, 470))
+    for a in (290, 110):
+        p.l(turn([(cx, cy), (cx + 38, cy)], a, cx, cy))
+    globe = arc(cx, cy, 30, 30, 0, 354)
+    p.path(globe, True, opaque=True)
+    with p.inside(globe):
+        for y in (-16, 0, 16):
+            p.l(turn([(cx - 40, cy + y), (cx + 40, cy + y)], tilt, cx, cy))
+    p.o(cx, cy, 13, 30, tilt)
+    p.l([(cx, cy + 38), (cx, cy + 46)])
+    p.rr(cx - 18, cy + 46, cx + 18, cy + 54, 3)
+
+
+def kids(p):  # teddy bear
+    p.o(-25, -22, 11)
+    p.o(25, -22, 11)
+    p.o(0, 6, 32, 28, opaque=True)
+    for x in (-12, 12):
+        p.o(x, -4, 2.2)
+        p.o(x, -4, 0.8)
+    p.o(0, 16, 14, 11)
+    p.o(0, 12, 2.2)
+    p.o(0, 12, 0.8)
+    p.l([(0, 14.2), (0, 19)])
+    p.c([(-5, 18), (-2.5, 21), (0, 19), (2.5, 21), (5, 18)])
+
+
+def late_night(p):  # crescent moon and stars
+    a, b = math.degrees(math.acos(20 / 36)), math.degrees(math.acos(2 / 30))  # where the two circles cross
+    moon = turn(arc(0, 0, 36, 36, a, 360 - a) + arc(18, 0, 30, 30, 360 - b, b)[1:-1], -32)
+    p.path([(x - 6, y + 4) for x, y in moon], True)
+    p.sparkle(10, -4, 9)
+    p.sparkle(30, -8, 5)
+    p.sparkle(16, -30, 4.5)
+
+
+def now_playing(p):  # gamepad
+    p.pg([(-24, -24), (24, -24), (38, -17), (45, 18), (37, 32), (26, 28), (16, 10), (-16, 10), (-26, 28), (-37, 32),
+          (-45, 18), (-38, -17)], 7)
+    p.pg([(-25, -15), (-19, -15), (-19, -9), (-13, -9), (-13, -3), (-19, -3), (-19, 3), (-25, 3), (-25, -3),
+          (-31, -3), (-31, -9), (-25, -9)], 1)
+    p.o(15, 0, 4.5)
+    p.o(26, -9, 4.5)
+    p.l([(-6, -6), (-2, -6)])
+    p.l([(2, -6), (6, -6)])
+
+
+def soundtracks(p):  # headphones
+    p.path(arc(0, 0, 37, 40, 180, 360))
+    p.path(arc(0, 0, 31, 34, 180, 360))
+    for x in (-1, 1):
+        p.rr(x * 18, 2, x * 28, 26, 3)
+        p.rr(x * 26, -4, x * 42, 32, 5, opaque=True)
+
+
 def platformers_3d(p):  # cube
     p.pg([(0, -38), (35, -19), (35, 21), (0, 42), (-35, 21), (-35, -19)], 2)
     p.l([(-35, -19), (0, 1), (35, -19)], 1.5)
@@ -698,6 +831,19 @@ ART = {
     "rpg": (rpg, (122, 84, 184), 8, 1.0, (0, 0)),
     "sports": (sports, (72, 160, 74), 10, 1.0, (0, 0)),
     "surprise": (surprise, (201, 62, 110), -6, 1.0, (0, 10)),
+    "backlog": (backlog, (100, 116, 160), -6, 1.0, (6, 0)),
+    "benchmarks": (benchmarks, (104, 64, 214), -6, 0.95, (-10, 0)),
+    "completed": (completed, (212, 160, 40), 6, 1.0, (-6, 0)),
+    "decades": (decades, (164, 84, 116), -7, 1.0, (-6, 0)),
+    "favorites": (favorites, (228, 70, 100), -8, 1.0, (-4, 0)),
+    "hacks-homebrew": (hacks_homebrew, (170, 150, 44), 38, 1.0, (0, 0)),
+    "hard-mode": (hard_mode, (44, 40, 52), -6, 1.0, (0, 0)),
+    "holiday": (holiday, (100, 168, 222), 10, 1.0, (0, 0)),
+    "imports": (imports, (24, 116, 150), 0, 1.0, (-4, 0)),
+    "kids": (kids, (104, 196, 188), -6, 1.0, (0, 0)),
+    "late-night": (late_night, (58, 48, 120), 0, 1.0, (0, 0)),
+    "now-playing": (now_playing, (76, 100, 236), -8, 0.95, (-12, 0)),
+    "soundtracks": (soundtracks, (230, 70, 160), -8, 1.0, (-22, 0)),
     "3d-platformers": (platformers_3d, (240, 150, 40), -4, 1.0, (0, 0)),
     "action-classics": (action_classics, (198, 66, 58), 32, 1.0, (0, 0)),
     "arcade-brawlers": (arcade_brawlers, (206, 84, 44), -8, 1.0, (0, 0)),
