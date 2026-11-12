@@ -3,9 +3,12 @@
 
 Each image is the theme's slanted colour band (452x1080) with a hand-drawn outline in the style of the theme's
 artwork-outline set: off-white strokes about 6px wide with slightly rough edges, 250-300px across, low on the band.
+Lines are steady and meet exactly: a line that stops at a shape is cut at its outline (Pen.inside), and a shape in
+front of another hides it (opaque).
 
     python tools/gen_theme_art.py [id ...]     # all of them, or just the ids given
 """
+import contextlib
 import math
 import os
 import random
@@ -91,19 +94,28 @@ def star(cx, cy, R, r, n=5, rot=-90):
 
 
 class Pen:
-    """Collects strokes: (points, closed) in drawing units."""
+    """Collects strokes: (points, closed, opaque, clip) in drawing units. An opaque shape hides what was drawn before
+    it; clip is the shape the stroke is cut off at, if any."""
 
     def __init__(self):
         self.strokes = []
+        self.clip = None
 
-    def path(self, pts, closed=False):
-        self.strokes.append((list(pts), closed))
+    def path(self, pts, closed=False, opaque=False):
+        self.strokes.append((list(pts), closed, opaque, self.clip))
+
+    @contextlib.contextmanager
+    def inside(self, shape):
+        """Strokes drawn in this block stop at shape's outline."""
+        self.clip = list(shape)
+        yield
+        self.clip = None
 
     def l(self, pts, r=2.5):
         self.path(rounded(pts, r, closed=False))
 
-    def pg(self, pts, r=2.5):
-        self.path(rounded(pts, r), True)
+    def pg(self, pts, r=2.5, opaque=False):
+        self.path(rounded(pts, r), True, opaque)
 
     def c(self, pts):
         self.path(spline(pts))
@@ -111,12 +123,12 @@ class Pen:
     def cc(self, pts):
         self.path(spline(pts, closed=True), True)
 
-    def o(self, cx, cy, rx, ry=None, rot=0):
-        self.path(arc(cx, cy, rx, ry or rx, 0, 354, rot), True)
+    def o(self, cx, cy, rx, ry=None, rot=0, opaque=False):
+        self.path(arc(cx, cy, rx, ry or rx, 0, 354, rot), True, opaque)
 
-    def rr(self, x0, y0, x1, y1, r=3, rot=0):
+    def rr(self, x0, y0, x1, y1, r=3, rot=0, opaque=False):
         pts = [(x0, y0), (x1, y0), (x1, y1), (x0, y1)]
-        self.pg(turn(pts, rot, (x0 + x1) / 2, (y0 + y1) / 2) if rot else pts, r)
+        self.pg(turn(pts, rot, (x0 + x1) / 2, (y0 + y1) / 2) if rot else pts, r, opaque)
 
     def sparkle(self, cx, cy, r):
         self.pg(star(cx, cy, r, r * 0.3, 4), 0.8)
@@ -151,7 +163,7 @@ class Pen:
 
 # ---------------------------------------------------------------- drawings
 
-def action(p):  # sword
+def action_classics(p):  # sword
     p.pg([(0, -50), (6.5, -40), (6.5, 18), (-6.5, 18), (-6.5, -40)], 1.5)
     p.l([(0, -36), (0, 12)])
     p.rr(-21, 18, 21, 26)
@@ -169,22 +181,10 @@ def adventure(p):  # compass
         p.l(turn([(0, -24), (0, -19)], a, 0, 6))
 
 
-def arcade(p):  # joystick
-    p.rr(-40, 16, 40, 44, 7)
-    p.o(-10, -32, 14)
-    p.l([(-9, -18), (-4, 10)])
-    p.l([(-2, -20), (5, 10)])
-    p.path(arc(1, 12, 13, 4.5, 150, 390))
-    p.o(24, 30, 5.5)
-    p.o(-24, 30, 5.5)
-
-
-def fighting(p):  # boxing glove
-    p.cc([(-20, -40), (6, -46), (28, -34), (35, -8), (27, 16), (-18, 16), (-24, -4), (-27, -24)])
-    p.c([(-25, -16), (-38, -17), (-42, -4), (-33, 6), (-23, 3)])
-    p.rr(-20, 18, 28, 45, 3)
-    p.l([(-20, 29), (28, 29)])
-    p.c([(-4, -24), (9, -17), (22, -25)])
+def fighting(p):  # versus
+    p.pg(star(0, 0, 48, 37, 12), 1)
+    p.l([(-27, -15), (-15, 15), (-3, -15)], 1)
+    p.path(arc(15, -7.5, 9.5, 7.5, 325, 90) + arc(15, 7.5, 9.5, 7.5, 270, 505)[1:])
 
 
 def horror(p):  # ghost
@@ -195,11 +195,11 @@ def horror(p):  # ghost
     p.o(0, 6, 5.5, 7.5)
 
 
-def platformer(p):  # platforms, a jump and a coin
+def platformers(p):  # platforms, a jump and a coin
     p.rr(-48, 26, -12, 38)
     p.rr(-4, -2, 34, 10)
     p.rr(-40, -36, -6, -24)
-    p.c([(-30, 20), (-25, 0), (-10, -14), (10, -8)])
+    p.dash([(-30, 18), (-26, -2), (-12, -15), (8, -10)])
     p.o(26, -30, 10)
     p.l([(26, -35), (26, -25)])
 
@@ -238,20 +238,11 @@ def rhythm(p):  # beamed notes
 def rpg(p):  # potion
     p.rr(-10, -47, 10, -37, 3)
     p.path([(6.5, -37)] + arc(0, 14, 32, 32, 281.5, 618.5) + [(-6.5, -37)])
-    p.c([(-30, 6), (-12, 1), (8, 10), (31, 4)])
+    with p.inside(arc(0, 14, 32, 32, 0, 354)):
+        p.c([(-36, 7), (-12, 1), (8, 10), (36, 3)])
     p.o(-10, 25, 4.5)
     p.o(10, 21, 3.2)
     p.o(4, 35, 3.2)
-
-
-def shooter(p):  # rocket
-    p.path(spline([(-13, 14), (-14, -14), (0, -50), (14, -14), (13, 14)]), True)
-    p.o(0, -16, 6.5)
-    p.l([(-13.5, -2), (-29, 24), (-13, 19)], 1.5)
-    p.l([(13.5, -2), (29, 24), (13, 19)], 1.5)
-    p.c([(-7, 20), (-5, 34), (0, 44), (5, 34), (7, 20)])
-    p.l([(-24, -34), (-24, -44)])
-    p.l([(24, -30), (24, -40)])
 
 
 def sports(p):  # football
@@ -266,7 +257,7 @@ def sports(p):  # football
             p.l([j, (40 * math.cos(math.radians(a + d)), 40 * math.sin(math.radians(a + d)))])
 
 
-def strategy(p):  # rook
+def strategy_tactics(p):  # rook
     p.pg([(-23, -46), (-13, -46), (-13, -38), (-5, -38), (-5, -46), (5, -46), (5, -38), (13, -38), (13, -46),
           (23, -46), (23, -24), (-23, -24)], 1.5)
     p.l([(-16, -24), (-20, 30)])
@@ -296,22 +287,19 @@ def platformers_3d(p):  # cube
     p.sparkle(-36, -38, 5)
 
 
-def action_classics(p):  # shuriken
-    p.pg(star(0, 0, 46, 13, 4, -90), 1.5)
-    p.o(0, 0, 5.5)
-
-
 def arcade_brawlers(p):  # fist
-    top = [q for x in (-22.5, -7.5, 7.5, 22.5) for q in arc(x, -12, 7.5, 11, 180, 360)]
-    p.path(top + rounded([(30, -12), (30, 26), (-30, 26), (-30, -12)], 6, False)[1:-1], True)
+    tops = [q for x in (-22.5, -7.5, 7.5, 22.5) for q in arc(x, -15, 7.5, 9, 180, 360)]
+    p.path(tops + rounded([(30, -15), (30, 27), (-30, 27), (-30, -15)], 10, False)[1:-1], True)
     for x in (-15, 0, 15):
-        p.l([(x, -12), (x, 4)])
-    p.rr(-34, 6, 10, 21, 7)
-    p.l([(-20, 26), (-22, 46)])
-    p.l([(20, 26), (22, 46)])
-    p.l([(-38, -34), (-44, -42)])
-    p.l([(0, -36), (0, -46)])
-    p.l([(38, -34), (44, -42)])
+        p.l([(x, -15), (x, 5)])
+    p.l([(0, 5), (30, 5)])
+    p.rr(-36, 5, 8, 20, 7.5, opaque=True)
+    p.l([(-16, 27), (-16, 35)])
+    p.l([(16, 27), (16, 35)])
+    p.rr(-22, 35, 22, 47)
+    p.l([(0, -32), (0, -42)])
+    p.l([(-19, -31), (-26, -39)])
+    p.l([(19, -31), (26, -39)])
 
 
 def arcade_classics(p):  # cabinet
@@ -347,11 +335,10 @@ def castlevania(p):  # bat
 
 
 def co_op(p):  # two players
-    p.o(-15, -14, 13)
-    p.path(spline([(-42, 42), (-40, 16), (-15, 6), (10, 16), (12, 42)]), True)
-    p.o(22, -28, 12)
-    p.c([(11, -8), (22, -12), (40, -4), (45, 24)])
-    p.l([(45, 24), (45, 42), (18, 42)])
+    p.o(20, -30, 12)
+    p.path(arc(20, 16, 24, 24, 180, 360) + [(44, 44), (-4, 44)], True)
+    p.o(-14, -14, 13)
+    p.path(arc(-14, 32, 27, 24, 180, 360) + [(13, 44), (-41, 44)], True, opaque=True)
 
 
 def dungeon_crawlers(p):  # key
@@ -363,13 +350,13 @@ def dungeon_crawlers(p):  # key
 
 
 def fan_translations(p):  # speech bubbles
-    p.pg([(-45, -38), (12, -38), (12, 6), (-18, 6), (-32, 21), (-30, 6), (-45, 6)], 5)
+    p.pg([(-8, -12), (46, -12), (46, 30), (36, 30), (38, 45), (23, 30), (-8, 30)], 5)
+    p.l([(20, 1), (38, 1)])
+    p.l([(0, 10), (38, 10)])
+    p.l([(0, 19), (28, 19)])
+    p.pg([(-45, -38), (12, -38), (12, 6), (-18, 6), (-32, 21), (-30, 6), (-45, 6)], 5, opaque=True)
     p.l([(-28, -4), (-16.5, -29), (-5, -4)], 1)
     p.l([(-23.5, -13), (-9.5, -13)])
-    p.l([(19, -12), (46, -12), (46, 30), (36, 30), (38, 45), (23, 30), (-8, 30), (-8, 14)], 5)
-    p.l([(24, 0), (36, 0)])
-    p.l([(2, 20), (36, 20)])
-    p.l([(22, 10), (36, 10)])
 
 
 def final_fantasy(p):  # crystal
@@ -423,11 +410,12 @@ def jrpg_essentials(p):  # treasure chest
 
 
 def kart_racers(p):  # helmet
-    p.cc([(-37, 22), (-40, -8), (-24, -36), (6, -42), (30, -30), (39, -6), (37, 20), (0, 26)])
-    p.pg([(2, -18), (32, -18), (39, 2), (8, 2)], 5)
-    p.c([(-38, -4), (-18, -8), (2, -18)])
-    p.c([(-36, 10), (-14, 8), (8, 2)])
-    p.o(-18, 14, 3)
+    shell = arc(0, -2, 40, 38, 160, 380) + rounded([(37.6, 11), (33, 27), (-31, 27), (-37.6, 11)], 7, False)[1:-1]
+    p.path(shell, True)
+    with p.inside(shell):
+        p.rr(4, -18, 60, 5, 7)
+        p.l([(-60, -6.5), (4, -6.5)])
+    p.rr(13, 13, 28, 18.5, 2.7)
 
 
 def kirby(p):  # shooting star
@@ -451,32 +439,49 @@ def licensed_classics(p):  # clapperboard
     p.l([(-27, 30), (16, 30)])
 
 
-def life_sim(p):  # seedling
-    p.rr(-26, 4, 26, 14, 2.5)
-    p.l([(-21, 14), (-16, 45), (16, 45), (21, 14)])
-    p.c([(0, 4), (-2, -12), (2, -26)])
-    p.path(spline([(2, -26), (-6, -42), (-28, -46), (-22, -30), (2, -26)]), True)
-    p.path(spline([(1, -12), (12, -32), (36, -36), (26, -16), (1, -12)]), True)
-    p.c([(-2, -28), (-12, -36), (-20, -39)])
-    p.c([(6, -15), (18, -24), (28, -30)])
+def life_sim(p):  # house and tree
+    p.l([(-46, 40), (52, 40)])
+    p.pg([(-42, -4), (-8, -36), (26, -4)], 2)
+    p.l([(-34, -4), (-34, 40)])
+    p.l([(18, -4), (18, 40)])
+    p.l([(8, -20.9), (8, -34), (16, -34), (16, -13.4)], 1.5)
+    p.path([(x * 1.3 - 8, y * 1.3 - 15) for x, y in
+            arc(-2.6, -2, 2.6, 2.6, 180, 360) + arc(2.6, -2, 2.6, 2.6, 180, 360) + [(0, 5.5)]], True)
+    p.l([(-27, 40), (-27, 17), (-15, 17), (-15, 40)], 2)
+    p.rr(-4, 12, 10, 26, 1.5)
+    p.l([(3, 12), (3, 26)])
+    p.l([(-4, 19), (10, 19)])
+    p.o(35, 8, 13)
+    p.l([(32.5, 20.76), (32.5, 40)])
+    p.l([(37.5, 20.76), (37.5, 40)])
 
 
 def light_gun(p):  # light gun
-    p.pg([(-46, -24), (26, -24), (37, -14), (33, 4), (31, 38), (10, 38), (12, -3), (-46, -3)], 3.5)
-    p.l([(-36, -24), (-36, -3)])
-    p.l([(-42, -24), (-42, -31), (-35, -31)], 1.5)
-    p.c([(-12, -3), (-11, 10), (0, 14), (11, 9)])
-    p.c([(3, -3), (0, 3), (1, 8)])
-    p.c([(20, 38), (16, 48), (28, 52), (44, 44)])
+    p.rr(-50, -20, 0, -9, 2)
+    p.rr(-50, -22.5, -41, -6.5, 2.5, opaque=True)
+    grip = rounded([(10, -4), (34, -4), (42, 38), (22, 38)], 4)
+    p.path(grip, True)
+    with p.inside(grip):
+        for y in (22, 29):
+            p.l([(0, y), (60, y)])
+    p.pg([(-6, -24), (28, -24), (39, -13), (39, 0), (-6, 0)], 3, opaque=True)
+    p.l([(16, -24), (16, -28), (23, -28), (23, -24)], 1)
+    p.l([(2, -12), (18, -12)])
+    p.o(28, -12, 2.6)
+    p.c([(-2, 0), (-3, 10), (5, 16), (15.1, 14)])
+    p.c([(6, 0), (4, 5), (7, 10)])
+    p.c([(32, 38), (32, 47), (40, 53), (52, 50), (66, 54)])
 
 
 def mario(p):  # mushroom
-    p.path(spline([(-41, 4), (-39, -24), (-17, -45), (17, -45), (39, -24), (41, 4)])
-           + spline([(41, 4), (21, 10), (0, 11), (-21, 10), (-41, 4)])[1:], True)
+    cap = (spline([(-41, 4), (-39, -24), (-17, -45), (17, -45), (39, -24), (41, 4)])
+           + spline([(41, 4), (21, 10), (0, 11), (-21, 10), (-41, 4)])[1:])
+    p.path(cap, True)
     p.c([(-18, 10), (-23, 32), (-13, 45), (13, 45), (23, 32), (18, 10)])
     p.o(0, -22, 11.5)
-    p.c([(-38, -16), (-27, -15), (-24, -3), (-31, 5)])
-    p.c([(38, -16), (27, -15), (24, -3), (31, 5)])
+    with p.inside(cap):
+        p.o(-41, -8, 13)
+        p.o(41, -8, 13)
 
 
 def mega_man(p):  # gear
@@ -490,10 +495,12 @@ def mega_man(p):  # gear
 
 
 def metroid(p):  # ringed planet
-    p.o(0, 2, 27)
+    planet = arc(0, 2, 27, 27, 0, 354)
+    p.path(planet, True)
     ring = turn(arc(0, 2, 47, 13, 0, 360), -20, 0, 2)
     p.runs(ring, lambda x, y: math.hypot(x, y - 2) > 27 or (y - 2) > -0.36 * x)
-    p.c([(-22, -10), (-6, -16), (10, -22)])
+    with p.inside(planet):
+        p.c([(-34, -6), (-6, -16), (22, -28)])
     p.sparkle(34, -38, 8)
     p.sparkle(-36, -32, 5)
     p.sparkle(-30, 40, 5)
@@ -524,21 +531,26 @@ def pinball(p):  # flippers, bumpers and a ball
     p.o(8, 4, 8.5)
 
 
-def platformers(p):  # spring
-    p.o(2, -38, 9.5)
-    p.l([(-16, -44), (-22, -50)])
-    p.l([(-18, -34), (-26, -34)])
-    p.rr(-25, -22, 25, -14, 2.5)
-    p.l([(-18, -14), (18, -5), (-18, 5), (18, 15), (-18, 25), (18, 35)], 4)
-    p.rr(-29, 37, 29, 46, 2.5)
-
-
-def pokemon(p):  # lightning bolt
-    p.pg([(10, -50), (-24, 4), (-4, 4), (-16, 48), (26, -10), (5, -10), (22, -50)], 2)
-    p.l([(-36, -30), (-28, -24)])
-    p.l([(-40, -8), (-32, -8)])
-    p.l([(34, 14), (42, 14)])
-    p.l([(30, 30), (38, 36)])
+def pokemon(p):  # pikachu
+    p.pg([(52, -6), (34, 20), (40, 28), (16, 44), (49, 36), (43, 29), (65, 4)], 1.5)
+    p.o(-21, 19, 4.5, 7, 33, opaque=True)
+    p.o(21, 19, 4.5, 7, -33, opaque=True)
+    p.pg([(-17, 0), (17, 0), (24, 32), (18, 46), (-18, 46), (-24, 32)], 8, opaque=True)
+    ear = spline([(-20, -14), (-31, -32), (-36, -50)]) + spline([(-36, -50), (-24, -36), (-11, -22)])[1:]
+    for flip in (False, True):
+        side = mirror if flip else list
+        p.path(side(ear), True)
+        with p.inside(side(ear)):
+            p.l(side([(-36.3, -32.4), (-19.7, -43.5)]))
+        p.path(side(arc(-13, 47, 8, 3.5, 0, 354)), True, opaque=True)
+    p.path(spline([(0, -26), (14, -24), (24, -16), (27, -6), (21, 6), (0, 10), (-21, 6), (-27, -6), (-24, -16),
+                   (-14, -24)], closed=True), True, opaque=True)
+    for x in (-1, 1):
+        p.o(12 * x, -10, 2.2)
+        p.o(12 * x, -10, 0.8)
+        p.o(18 * x, -1, 4.5)
+    p.l([(-0.6, -5.5), (0.6, -5.5)])
+    p.c([(-5, -2.5), (-2.5, 0.5), (0, -2), (2.5, 0.5), (5, -2.5)])
 
 
 def resident_evil(p):  # umbrella
@@ -574,14 +586,18 @@ def rpg_series(p):  # spellbook
 
 
 def run_and_gun(p):  # grenade
-    p.o(-2, 14, 26, 31)
-    p.c([(-27, 2), (-2, 7), (23, 2)])
-    p.c([(-26, 26), (-2, 31), (22, 26)])
-    p.c([(-11, -16), (-13, 14), (-11, 44)])
-    p.c([(7, -16), (9, 14), (7, 44)])
-    p.rr(-12, -30, 8, -17, 2.5)
-    p.c([(8, -27), (24, -30), (34, -14), (35, 6)])
-    p.o(-22, -34, 8.5)
+    body = arc(0, 16, 25, 29, 0, 354)
+    p.path(body, True)
+    with p.inside(body):
+        p.c([(-30, 3), (0, 8), (30, 3)])
+        p.c([(-30, 24), (0, 29), (30, 24)])
+        p.c([(-8, -16), (-10, 16), (-8, 48)])
+        p.c([(8, -16), (10, 16), (8, 48)])
+    p.rr(-10, -27, 10, -11, 2.5, opaque=True)
+    p.path(spline([(10, -23), (26, -21), (35, -8), (37, 8)]) + spline([(31.5, 8), (30, -6), (23, -15), (10, -17)]),
+           True)
+    p.o(-21, -19, 8)
+    p.l([(-13, -19), (-10, -19)])
 
 
 def shmups(p):  # fighter, seen from above
@@ -601,7 +617,8 @@ def short_sessions(p):  # hourglass
     side = spline([(-20, -38), (-19, -22), (-4, -3), (-4, 3), (-19, 22), (-20, 38)])
     p.path(side)
     p.path(mirror(side))
-    p.c([(-15, -22), (0, -19), (15, -22)])
+    with p.inside(side + mirror(side)[::-1]):
+        p.c([(-26, -24), (0, -19), (26, -24)])
     p.l([(0, -2), (0, 22)])
     p.c([(-14, 38), (-7, 30), (0, 26), (7, 30), (14, 38)])
 
@@ -635,16 +652,6 @@ def stealth(p):  # cardboard box and an alert
     p.rr(-13, 16, 13, 25, 4.5)
     p.pg([(-4.5, -52), (4.5, -52), (2.5, -32), (-2.5, -32)], 1.5)
     p.o(0, -24, 2.8)
-
-
-def strategy_tactics(p):  # pawn and pennant
-    p.o(-10, -30, 11.5)
-    p.l([(-21, -17), (1, -17)])
-    p.c([(-17, -17), (-18, 2), (-27, 28)])
-    p.c([(-3, -17), (-2, 2), (7, 28)])
-    p.rr(-33, 28, 13, 44, 3)
-    p.l([(30, 44), (30, -24)])
-    p.pg([(30, -24), (48, -14), (30, -4)], 1.5)
 
 
 def street_fighter(p):  # fireball
@@ -682,46 +689,41 @@ def zelda(p):  # shield
 
 # id: (drawing, band colour, rotation in degrees, scale, offset in px)
 ART = {
-    "action": (action, (198, 66, 58), 32, 1.0, (0, 0)),
     "adventure": (adventure, (44, 146, 118), -6, 1.0, (0, 0)),
-    "arcade": (arcade, (92, 92, 204), -7, 1.0, (0, 0)),
-    "fighting": (fighting, (232, 112, 42), -8, 1.0, (0, 0)),
+    "fighting": (fighting, (232, 112, 42), -8, 0.92, (-22, 0)),
     "horror": (horror, (72, 52, 96), 4, 1.0, (0, 0)),
-    "platformer": (platformer, (68, 148, 220), -5, 1.0, (0, 0)),
     "puzzle": (puzzle, (228, 186, 42), -6, 1.0, (0, 0)),
     "racing": (racing, (96, 104, 116), -4, 1.0, (0, 0)),
     "rhythm": (rhythm, (236, 118, 108), -4, 1.0, (0, 0)),
     "rpg": (rpg, (122, 84, 184), 8, 1.0, (0, 0)),
-    "shooter": (shooter, (52, 72, 140), 18, 1.0, (0, 0)),
     "sports": (sports, (72, 160, 74), 10, 1.0, (0, 0)),
-    "strategy": (strategy, (150, 102, 62), 5, 1.0, (0, 0)),
     "surprise": (surprise, (201, 62, 110), -6, 1.0, (0, 10)),
     "3d-platformers": (platformers_3d, (240, 150, 40), -4, 1.0, (0, 0)),
-    "action-classics": (action_classics, (150, 44, 52), 18, 1.0, (0, 0)),
+    "action-classics": (action_classics, (198, 66, 58), 32, 1.0, (0, 0)),
     "arcade-brawlers": (arcade_brawlers, (206, 84, 44), -8, 1.0, (0, 0)),
     "arcade-classics": (arcade_classics, (70, 78, 170), 6, 1.0, (0, 0)),
     "best-of-16-bit": (best_of_16_bit, (112, 96, 176), -8, 1.0, (6, 0)),
-    "castlevania": (castlevania, (120, 36, 60), -6, 1.0, (0, 0)),
-    "co-op": (co_op, (36, 150, 160), -4, 1.0, (-18, 0)),
+    "castlevania": (castlevania, (120, 36, 60), -6, 0.88, (-12, 0)),
+    "co-op": (co_op, (36, 150, 160), -4, 1.0, (-24, 0)),
     "dungeon-crawlers": (dungeon_crawlers, (104, 92, 80), 28, 1.0, (0, 0)),
-    "fan-translations": (fan_translations, (214, 92, 124), -5, 1.0, (-10, 0)),
+    "fan-translations": (fan_translations, (214, 92, 124), -5, 1.0, (-26, 0)),
     "final-fantasy": (final_fantasy, (64, 132, 206), 10, 1.0, (0, 0)),
     "fps": (fps, (156, 60, 48), 8, 1.0, (0, 0)),
     "handheld-greatest-hits": (handheld_greatest_hits, (120, 170, 60), -8, 1.0, (0, 0)),
     "hidden-gems": (hidden_gems, (40, 160, 150), -6, 1.0, (0, 0)),
     "jrpg-essentials": (jrpg_essentials, (176, 124, 44), -6, 1.0, (0, 0)),
-    "kart-racers": (kart_racers, (224, 76, 64), -8, 1.0, (0, 0)),
+    "kart-racers": (kart_racers, (224, 76, 64), -8, 1.0, (-14, 0)),
     "kirby": (kirby, (238, 132, 166), 0, 1.0, (-10, 0)),
     "licensed-classics": (licensed_classics, (60, 68, 84), -6, 1.0, (-6, 0)),
-    "life-sim": (life_sim, (104, 172, 84), -5, 1.0, (0, 0)),
-    "light-gun": (light_gun, (228, 120, 52), -10, 1.0, (-10, 0)),
+    "life-sim": (life_sim, (104, 172, 84), -5, 0.92, (-34, 0)),
+    "light-gun": (light_gun, (228, 120, 52), -10, 0.95, (-36, 0)),
     "mario": (mario, (216, 56, 56), -6, 1.0, (0, 0)),
     "mega-man": (mega_man, (48, 136, 216), 10, 1.0, (-8, 0)),
     "metroid": (metroid, (224, 104, 36), 0, 1.0, (-6, 0)),
     "metroidvanias": (metroidvanias, (84, 76, 150), -6, 1.0, (0, 0)),
     "pinball": (pinball, (170, 70, 170), -6, 1.0, (-14, 0)),
-    "platformers": (platformers, (56, 164, 200), -6, 1.0, (0, 0)),
-    "pokemon": (pokemon, (236, 180, 30), 6, 1.0, (-8, 0)),
+    "platformers": (platformers, (68, 148, 220), -5, 1.0, (0, 0)),
+    "pokemon": (pokemon, (236, 180, 30), -4, 0.86, (-74, 0)),
     "resident-evil": (resident_evil, (140, 40, 44), 16, 1.0, (0, 0)),
     "retro-oddities": (retro_oddities, (176, 112, 52), -6, 1.0, (6, 0)),
     "rpg-series": (rpg_series, (132, 72, 148), -10, 1.0, (0, 0)),
@@ -731,7 +733,7 @@ ART = {
     "sonic": (sonic, (36, 96, 200), 8, 1.0, (-12, 0)),
     "star-wars": (star_wars, (40, 44, 60), -32, 1.0, (0, 0)),
     "stealth": (stealth, (86, 110, 100), -5, 1.0, (0, 6)),
-    "strategy-tactics": (strategy_tactics, (128, 100, 64), -5, 1.0, (-18, 0)),
+    "strategy-tactics": (strategy_tactics, (150, 102, 62), 5, 1.0, (0, 0)),
     "street-fighter": (street_fighter, (226, 88, 40), -14, 1.0, (-22, 0)),
     "survival-horror": (survival_horror, (58, 62, 70), -24, 1.0, (-24, 0)),
     "system-essentials": (system_essentials, (72, 128, 180), -7, 1.0, (0, 0)),
@@ -756,29 +758,21 @@ def _resample(pts, closed, step):
 
 
 def _ink(strokes, rng):
-    """The strokes (in px) as an L mask at SS scale, drawn with an unsteady hand."""
-    img = Image.new("L", (W * SS, H * SS), 0)
-    draw = ImageDraw.Draw(img)
-    for pts, closed in strokes:
-        pts = _resample(pts, closed, 0.5)
-        n = len(pts)
-        if n < 2:
-            continue
-        length = n * 0.5
-        waves = [(amp, max(1, round(length / wl)) if closed else length / wl, rng.uniform(0, math.tau))
-                 for amp, wl in ((0.7, 190), (0.3, 80))]  # sideways drift
-        thick = (0.07, max(1, round(length / 120)) if closed else length / 120, rng.uniform(0, math.tau))
-        for i, (x, y) in enumerate(pts):
-            ax, ay = pts[i - 1] if i else pts[0]
-            bx, by = pts[i + 1] if i + 1 < n else pts[-1]
-            d = math.hypot(bx - ax, by - ay) or 1
-            f = i / n
-            off = sum(a * math.sin(math.tau * k * f + ph) for a, k, ph in waves)
-            if not closed:
-                off *= min(1, i / 12, (n - 1 - i) / 12)  # ends stay where they were put, so strokes still meet
-            x, y = x - (by - ay) / d * off, y + (bx - ax) / d * off
-            r = STROKE / 2 * (1 + thick[0] * math.sin(math.tau * thick[1] * f + thick[2])) * SS
+    """The strokes (in px) as an L mask at SS scale."""
+    size = (W * SS, H * SS)
+    img = Image.new("L", size, 0)
+    r = STROKE / 2 * SS
+    for pts, closed, opaque, clip in strokes:
+        if opaque:
+            ImageDraw.Draw(img).polygon([(x * SS, y * SS) for x, y in pts], fill=0)
+        layer = Image.new("L", size, 0) if clip else img
+        draw = ImageDraw.Draw(layer)
+        for x, y in _resample(pts, closed, 0.5):
             draw.ellipse((x * SS - r, y * SS - r, x * SS + r, y * SS + r), fill=255)
+        if clip:
+            mask = Image.new("L", size, 0)
+            ImageDraw.Draw(mask).polygon([(x * SS, y * SS) for x, y in clip], fill=255)
+            img.paste(255, mask=ImageChops.multiply(layer, mask))
     # rough edges, like the theme's brush
     noise = Image.frombytes("L", img.size, rng.randbytes(img.width * img.height))
     noise = noise.filter(ImageFilter.GaussianBlur(SS * 0.45))
@@ -792,8 +786,11 @@ def render(art_id):
     pen = Pen()
     draw(pen)
     rng = random.Random(zlib.crc32(art_id.encode()))
-    strokes = [([(CENTER[0] + dx + x * UNIT * scale, CENTER[1] + dy + y * UNIT * scale) for x, y in turn(pts, rot)],
-                closed) for pts, closed in pen.strokes]
+
+    def place(pts):
+        return [(CENTER[0] + dx + x * UNIT * scale, CENTER[1] + dy + y * UNIT * scale) for x, y in turn(pts, rot)]
+
+    strokes = [(place(pts), closed, opaque, clip and place(clip)) for pts, closed, opaque, clip in pen.strokes]
     band = Image.new("L", (W, H), 0)
     for y in range(H):
         left, right = (edge - BAND[2] * (y + 0.5) for edge in BAND[:2])

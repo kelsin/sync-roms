@@ -65,11 +65,43 @@ What storage holds (keys, sizes, a bucket's ETags) is read only through `invento
 
 There is no personal core list: a card's `games` is the only games list, and a card with no picks syncs no games. An old `~/.sync-roms/games.json` is left on disk and never read. Old personal sets in `~/.sync-roms/sets/` are left on disk and never read; sets only come from the repo. `device-systems.json` is a shared default read from the repo (never copied); users adjust it with the optional add/remove overlay. Never put a real game list in the repo.
 
-`src/sync_roms/data/themes/art-book-next/` holds the Art Book Next collection art (`art/<id>.png`: `surprise` plus the genres and sets listed in `art.json`, which a collection picks with `"art"`; every set has art under its id, and `tools/gen_theme_art.py` draws them all) and the logo font's outlines (`logo-font.json`, OFL). Sync copies them into the card's copy of the theme (ES-DE; the theme itself is a GitHub archive in storage's `os/esde/themes/`, refreshed by `sync-roms themes update`) or theme customizations (Knulli).
+`src/sync_roms/data/themes/art-book-next/` holds the Art Book Next collection art (`art/<id>.png`: `surprise` plus the ids listed in `art.json`, which a collection picks with `"art"`; every set has art under its id, and `tools/gen_theme_art.py` draws them all, following the rules under Theme art below) and the logo font's outlines (`logo-font.json`, OFL). Sync copies them into the card's copy of the theme (ES-DE; the theme itself is a GitHub archive in storage's `os/esde/themes/`, refreshed by `sync-roms themes update`) or theme customizations (Knulli).
 
 Games in a set file may have an optional `category` string; the set editor groups rows by it (in file order). Prefer one set with categories over several related top-level sets (e.g. `shmups.json`: Touhou, Psikyo, Cave, Other).
 
 Repo files must not contain notes about the bucket's contents ("not in the bucket", "bucket has..."). Device notes say only why the systems were chosen, concisely.
+
+## Theme art
+
+Rules for changing or adding a picture in `tools/gen_theme_art.py` (run it with a Python that has Pillow: `python tools/gen_theme_art.py [id ...]`). The reference is the theme's own Outline set, `_inc/systems/artwork-outline/*.png` in the archive in storage's `os/esde/themes/`: steady off-white lines about 6px wide with a slightly rough edge, corners joined, shapes closed, nothing drawn through a shape in front of it.
+
+Lines:
+
+- No wobble. Never add drift, jitter or varying thickness to "look hand-drawn"; it reads as loose and messy. The rough edge in `_ink` is the only texture.
+- Every line end must land on another stroke, run off the band, or be an obviously free mark (impact dashes, a motion trail, a dashed path). An end that stops a few units short of an outline, or pokes past it, is the main thing that looks messy.
+- Don't hand-pick the point where a detail meets a curved outline. Draw the detail too long inside `with p.inside(shape):` and it is cut at the outline.
+- Overlap is drawn back to front: the shape in front gets `opaque=True` and hides what is behind it. Don't leave gaps in the back shape by hand, and never let lines cross through a front shape.
+- A line may end on a straight edge at computed coordinates, but stay clear of that edge's rounded corners (the corner radius, in units, from each vertex).
+- Prefer `arc`, `rounded` polygons and `mirror` of one half over a closed `spline` through a few points, which comes out lumpy. Use `spline` for open curves and for outlines with ten or so evenly spaced points.
+- Close shapes. An open-ended fin, flame, cuff or body looks unfinished.
+
+Size and placement:
+
+- Drawings live in a box of about -50..50 units, y down, 3.3px per unit; the stroke is about 1.8 units wide, so keep parallel lines and small details at least 5 units apart. A solid dot is two small concentric circles (radius about 2.2 and 0.8).
+- The band is slanted and about 340px wide where the picture sits, and `CENTER` is right of its middle. Anything wider than about 85 units needs a smaller `scale` and a negative x offset in `ART`, or the band edge shaves it. A few pixels cut off looks like a mistake; only a part meant to leave the picture (a cable) should run off.
+
+Subject:
+
+- One picture per meaning. Before adding one, check `art.json` for an entry that already means the same thing (a genre and a set of the same genre, two kinds of fist). If two exist, ask which to keep; the kept picture goes under the set's id, and the other id is removed from `ART`, `art.json`, `art/` and the tests.
+- Draw the thing from the games, not a real-world lookalike: a console light gun (long thin barrel, boxy body, cable), not a pistol.
+- A series may get its character when asked. Get the proportions of the right form: Pikachu has long slim ears with a short tip band, a head smaller than its chubby body, small solid eyes and a large stepped tail; wide triangular ears on a big head is Pichu.
+- When asked to redo a picture without a subject, say which subject was chosen. When two concepts are equally plausible, show both and let the user pick.
+
+Checking:
+
+- Never finish without looking at the result. Read the generated PNG (the drawing is in y 600..1050), and also crop that part and enlarge it 2x to check every join, line end and overlap.
+- Compare with the pictures next to it in a contact sheet of all of `art/`, and show the user that sheet or the changed pictures. Keep review images out of the commit.
+- `python -m unittest discover -s tests` checks that every `art.json` id and every set has a PNG.
 
 ## Devices
 
