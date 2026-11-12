@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.6.0](https://github.com/kelsin/sync-roms/compare/v2.5.0...v2.6.0) (2026-11-12)
+
+
+### :video_game: Features
+
+* **sync:** unmount the card when a sync finishes ([#252](https://github.com/kelsin/sync-roms/issues/252)) ([a07ac47](https://github.com/kelsin/sync-roms/commit/a07ac471b40412ca45a95b94cafd4f81252492d3))
+
 ## [2.5.0](https://github.com/kelsin/sync-roms/compare/v2.4.1...v2.5.0) (2026-11-12)
 
 
