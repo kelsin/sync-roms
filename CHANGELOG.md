@@ -1,5 +1,22 @@
 # Changelog
 
+## [2.5.0](https://github.com/kelsin/sync-roms/compare/v2.4.1...v2.5.0) (2026-11-12)
+
+
+### :video_game: Features
+
+* **bios:** sync prod.keys and firmware for switch ([#248](https://github.com/kelsin/sync-roms/issues/248)) ([48bed6d](https://github.com/kelsin/sync-roms/commit/48bed6d8005b823b5c95617601ccf8235554bae7))
+
+
+### :bug: Bug Fixes
+
+* **storage:** find accented names on shares that store them decomposed ([#247](https://github.com/kelsin/sync-roms/issues/247)) ([37a0f06](https://github.com/kelsin/sync-roms/commit/37a0f062a374a2e43db56668090a79dfb4975015))
+
+
+### :traffic_light: Tests
+
+* **scrape:** fix flaky credentials output check ([#250](https://github.com/kelsin/sync-roms/issues/250)) ([ea4f81b](https://github.com/kelsin/sync-roms/commit/ea4f81b16dbfbb23084ab1b0174d27a5239d43d9))
+
 ## [2.4.1](https://github.com/kelsin/sync-roms/compare/v2.4.0...v2.4.1) (2026-11-12)
 
 
