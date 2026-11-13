@@ -6,11 +6,10 @@ import os
 import shutil
 import tarfile
 import tempfile
-import urllib.request
 from xml.sax import saxutils
 import zlib
 
-from . import __version__, frontend, runtime, s3, store, ui
+from . import frontend, github, runtime, s3, store, ui
 
 THEME_DATA = os.path.join(store.REPO_DATA, "themes", "art-book-next")
 SURPRISE_ART = "surprise"
@@ -273,18 +272,13 @@ def describe_esde(base, arts):
     print(ui.dim(f"🎨 would add art for {', '.join(arts)} to it and select it as the ES-DE theme"))
 
 
-def _github(url, accept=None):
-    headers = {"User-Agent": f"sync-roms/{__version__}", **({"Accept": accept} if accept else {})}
-    return urllib.request.urlopen(urllib.request.Request(url, headers=headers), timeout=60)
-
-
 def update_storage(dry_run=False):
     """Replace storage's Art Book Next archive with one of the theme's latest commit. Returns an exit code."""
     if runtime.ROOT and not os.path.isdir(runtime.ROOT):
         ui.warn(f"The storage folder {runtime.ROOT} isn't there (is it mounted?)")
         return 1
     try:
-        with _github(f"https://api.github.com/repos/{ESDE_REPO}/commits/HEAD", "application/vnd.github.sha") as r:
+        with github.get(f"https://api.github.com/repos/{ESDE_REPO}/commits/HEAD", "application/vnd.github.sha") as r:
             latest = r.read().decode().strip()
     except (OSError, http.client.HTTPException) as e:
         ui.warn(f"Couldn't ask GitHub for the latest Art Book Next commit: {e}")
@@ -300,7 +294,7 @@ def update_storage(dry_run=False):
     with tempfile.TemporaryDirectory() as tmp:
         path = os.path.join(tmp, "theme.tar.gz")
         try:
-            with _github(f"https://codeload.github.com/{ESDE_REPO}/tar.gz/{latest}") as r, open(path, "wb") as f:
+            with github.get(f"https://codeload.github.com/{ESDE_REPO}/tar.gz/{latest}") as r, open(path, "wb") as f:
                 shutil.copyfileobj(r, f)
             with tarfile.open(path, mode="r:gz") as archive:  # a whole, readable archive before it replaces the old one
                 count = sum(1 for m in archive if m.isfile())

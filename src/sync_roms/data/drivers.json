@@ -1,0 +1,170 @@
+{
+  "drivers": [
+    {
+      "id": "k11-turnip-24-3-r9",
+      "name": "K11MCH1 Turnip v24.3.0 R9",
+      "repo": "K11MCH1/AdrenoToolsDrivers",
+      "tag": "v24.3.0_r9",
+      "asset": "^turnip_v24\\.3\\.0_R9v2\\.zip$"
+    },
+    {
+      "id": "k11-turnip-26-r7",
+      "name": "K11MCH1 Turnip v26.0.0 R7",
+      "repo": "K11MCH1/AdrenoToolsDrivers",
+      "tag": "v26.0.0-rc07",
+      "asset": "^Turnip_v26\\.0\\.0_R7\\.zip$"
+    },
+    {
+      "id": "qualcomm-819",
+      "name": "Qualcomm driver v819.1",
+      "repo": "K11MCH1/AdrenoToolsDrivers",
+      "tag": "v819.1",
+      "asset": "^v819\\.zip$"
+    },
+    {
+      "id": "mrpurple",
+      "name": "MrPurple Turnip",
+      "repo": "MrPurple666/purple-turnip",
+      "asset": "^turnip_mrpurple_.*\\.zip$"
+    },
+    {
+      "id": "mrpurple-t19",
+      "name": "MrPurple Turnip T19",
+      "repo": "MrPurple666/purple-turnip",
+      "tag": "vturnip_mrpurple-T19-toasted.adpkg",
+      "asset": "^turnip_mrpurple-T19-toasted\\.adpkg\\.zip$"
+    },
+    {
+      "id": "mrpurple-t24",
+      "name": "MrPurple Turnip T24",
+      "repo": "MrPurple666/purple-turnip",
+      "tag": "vturnip_mrpurple_T24-toasted.adpkg",
+      "asset": "^turnip_mrpurple_T24-toasted\\.adpkg\\.zip$"
+    },
+    {
+      "id": "turnip-sd865-z",
+      "name": "Turnip SD865 Z",
+      "repo": "AlexSanz0902/turnip-sd865-z",
+      "asset": "^TurnipZ-[\\d.]+\\.zip$"
+    },
+    {
+      "id": "armsx2-turnip",
+      "name": "ARMSX2 Turnip",
+      "repo": "bmdhacks/armsx2-turnip",
+      "asset": "^turnip-.*-android\\.zip$"
+    },
+    {
+      "id": "vauzi-turnip",
+      "name": "Vauzi-17 Turnip 710/720/722",
+      "repo": "Vauzi-17/710",
+      "asset": "^Turnip-710-720-722-v[\\d.]+\\.zip$"
+    },
+    {
+      "id": "faux123-turnip",
+      "name": "faux123 Turnip",
+      "repo": "faux123/turnip-faux123-driver",
+      "asset": "^turnip_faux123_v[\\d.]+\\.adpkg\\.zip$"
+    },
+    {
+      "id": "turnip-duo",
+      "name": "Turnip Duo (Adreno 722)",
+      "repo": "sherft2607/turnip-adreno722-duo",
+      "asset": "^Turnip-Duo-v[\\d.]+\\.zip$"
+    },
+    {
+      "id": "stevenmxz-turnip",
+      "name": "StevenMXZ Turnip",
+      "repo": "StevenMXZ/Adreno-Tools-Drivers",
+      "asset": "^Turnip_v[\\d.]+-R\\d+\\.zip$"
+    },
+    {
+      "id": "stevenmxz-gen8",
+      "name": "StevenMXZ Turnip Gen8",
+      "repo": "StevenMXZ/Adreno-Tools-Drivers",
+      "asset": "^Turnip_Gen8_V\\d+\\.zip$"
+    },
+    {
+      "id": "balemuni-apex",
+      "name": "Balemuni Apex",
+      "repo": "Balemuni/Balemunis-Aurora",
+      "asset": "^Balemuni_Apex_v\\d+_ULTIMATE_SD8Gen2\\.zip$"
+    }
+  ],
+  "gpus": {
+    "adreno-610": {
+      "name": "Adreno 610",
+      "drivers": []
+    },
+    "adreno-630": {
+      "name": "Adreno 630",
+      "drivers": [
+        "mrpurple-t24"
+      ]
+    },
+    "adreno-650": {
+      "name": "Adreno 650",
+      "drivers": [
+        "k11-turnip-24-3-r9",
+        "mrpurple-t19",
+        "turnip-sd865-z",
+        "armsx2-turnip"
+      ]
+    },
+    "adreno-722": {
+      "name": "Adreno 722",
+      "drivers": [
+        "vauzi-turnip",
+        "faux123-turnip",
+        "turnip-duo",
+        "armsx2-turnip"
+      ]
+    },
+    "adreno-730": {
+      "name": "Adreno 730",
+      "drivers": [
+        "stevenmxz-turnip",
+        "mrpurple"
+      ]
+    },
+    "adreno-740": {
+      "name": "Adreno 740",
+      "drivers": [
+        "balemuni-apex",
+        "mrpurple",
+        "stevenmxz-turnip",
+        "armsx2-turnip"
+      ]
+    },
+    "adreno-a32": {
+      "name": "Adreno A32 (Snapdragon G3x Gen 2)",
+      "drivers": [
+        "k11-turnip-26-r7",
+        "mrpurple"
+      ]
+    },
+    "adreno-g3-gen-3": {
+      "name": "Adreno (Snapdragon G3 Gen 3)",
+      "drivers": [
+        "k11-turnip-26-r7",
+        "mrpurple"
+      ]
+    },
+    "adreno-830": {
+      "name": "Adreno 830",
+      "drivers": [
+        "stevenmxz-gen8",
+        "armsx2-turnip"
+      ]
+    },
+    "adreno-a12": {
+      "name": "Adreno A12 (Snapdragon G1 Gen 2)",
+      "drivers": [
+        "qualcomm-819"
+      ]
+    },
+    "adreno-a22": {
+      "name": "Adreno A22 (Snapdragon G2 Gen 2)",
+      "drivers": []
+    }
+  }
+}
