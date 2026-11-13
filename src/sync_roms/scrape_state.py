@@ -1,4 +1,4 @@
-"""Personal scrape state under the user data folder: hash cache, manual matches, unknown ledger."""
+"""Personal scrape state under the user data folder: hash cache, manual matches, unknown and not-offered media ledgers."""
 import json
 import os
 import tempfile
@@ -10,7 +10,9 @@ _lock = threading.RLock()  # scrape runs match ROMs on several threads; each sav
 _cache = {}  # file path -> ((mtime_ns, size), data): a file nobody changed since we last read or wrote it is not parsed again
 _unsaved = {}  # hash file path -> hashes saved in memory but not yet written
 _unknown_pending = {}  # unknown ledger path -> {key: True (marked) or False (cleared)} not yet written
+_nomedia_pending = {}  # not-offered ledger path -> {key: [media types] (marked) or None (cleared)} not yet written
 UNKNOWN = "scrape-unknown.json"
+NOMEDIA = "scrape-nomedia.json"  # media types ScreenScraper didn't offer for a ROM: {key: [types]}
 NOTGAMES = "scrape-notgames.json"  # ROMs ScreenScraper calls non-games, waiting for `scrape review`: {key: what it said}
 HASH_FLUSH = 200  # hashes saved in memory before the hash file is written
 HASHES = "scrape-hashes.json"
@@ -187,6 +189,43 @@ def unknown():
         return keys
 
 
+def mark_nomedia(system, rom, types):
+    """Remember the media types ScreenScraper's last answer for a ROM didn't offer (none forgets it); the ledger is
+    written by flush_nomedia."""
+    with _lock:
+        _nomedia_pending.setdefault(_path(NOMEDIA), {})[_key(system, rom)] = sorted(types) or None
+
+
+def flush_nomedia():
+    """Write the not-offered marks made so far."""
+    with _lock:
+        pending = _nomedia_pending.pop(_path(NOMEDIA), None)
+        if not pending:
+            return
+        data = _load(NOMEDIA)
+        changed = False
+        for k, types in pending.items():
+            if types and data.get(k) != types:
+                data[k] = types
+                changed = True
+            elif not types and data.pop(k, None) is not None:
+                changed = True
+        if changed:
+            _save(NOMEDIA, data)
+
+
+def nomedia():
+    """{"system/rom": [media types not offered]}, with the marks not yet written."""
+    with _lock:
+        data = dict(_load(NOMEDIA))
+        for k, types in _nomedia_pending.get(_path(NOMEDIA), {}).items():
+            if types:
+                data[k] = types
+            else:
+                data.pop(k, None)
+        return data
+
+
 def notgames():
     """{"system/rom": what ScreenScraper said} of the non-game results waiting for review."""
     with _lock:
@@ -208,13 +247,14 @@ def clear_notgame(system, rom):
 
 
 class _Snapshot:
-    """manual_match and is_unknown over files read once, for checking many ROMs."""
+    """manual_match, is_unknown, is_notgame and not_offered over files read once, for checking many ROMs."""
 
     def __init__(self):
         with _lock:
             self._matches = _load(MATCHES)
             self._unknown = unknown()
             self._notgames = set(_load(NOTGAMES))
+            self._nomedia = nomedia()
 
     def manual_match(self, system, rom):
         game_id = self._matches.get(_key(system, rom))
@@ -225,6 +265,10 @@ class _Snapshot:
 
     def is_notgame(self, system, rom):
         return _key(system, rom) in self._notgames
+
+    def not_offered(self, system, rom):
+        types = self._nomedia.get(_key(system, rom))
+        return set(types) if isinstance(types, list) else set()
 
 
 def snapshot():

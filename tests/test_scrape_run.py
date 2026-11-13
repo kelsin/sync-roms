@@ -676,6 +676,45 @@ class RoundThreeTest(RunBase):
         self.assertNotIn("isn't an object", self.out.getvalue())
 
 
+class FillMediaLedgerTest(RunBase):
+    def test_second_fill_run_skips_rom_whose_missing_types_were_not_offered(self):
+        self.put("gba/a.zip")
+        self.assertEqual(self.run_scrape(), 0)
+        with open(os.path.join(self.data, scrape_state.NOMEDIA)) as f:
+            self.assertIn("manuals", json.load(f)["gba/a.zip"])  # written by the end of the run
+        self.client.lookups.clear()
+        self.assertEqual(self.run_scrape(fill_media=True), 0)
+        self.assertEqual(self.client.lookups, [])
+        self.assertEqual(self.run_scrape(fill_media=True, retry=True), 0)
+        self.assertEqual(self.client.lookups, ["a.zip"])  # --retry asks again
+
+    def test_retry_rewrites_the_entry_from_the_new_answer(self):
+        self.put("gba/a.zip")
+        self.assertEqual(self.run_scrape(), 0)
+        self.client.games["a.zip"] = game(1, "Alpha", media=("box-2D", "ss", "fanart"))
+        self.assertEqual(self.run_scrape(fill_media=True, retry=True), 0)
+        self.assertIn("scrapes/gba/fanart/a.png", self.stored())
+        not_offered = scrape_state.snapshot().not_offered("gba", "a.zip")
+        self.assertNotIn("fanart", not_offered)
+        self.assertIn("manuals", not_offered)
+
+    def test_offered_type_not_downloaded_is_not_recorded_as_not_offered(self):
+        self.put("gba/a.zip")
+        self.put("gba/b.zip")
+        for i, rom in enumerate(("a.zip", "b.zip", "c.zip"), 1):
+            self.client.games[rom] = game(i, rom, media=("box-2D", "manuel"))
+        self.client.download_errors["http://media/1/manuel"] = screenscraper.MediaRefused("ScreenScraper media too large")
+        self.client.download_errors["http://media/2/manuel"] = screenscraper.NotFound("gone")
+        self.assertEqual(self.run_scrape(), 0)
+        self.put("gba/c.zip")
+        self.assertEqual(self.run_scrape(skip_media=["manuals"]), 0)
+        self.assertEqual(set(self.metadata()), {"a.zip", "b.zip", "c.zip"})
+        self.assertFalse(any("/manuals/" in k for k in self.stored()))
+        self.client.lookups.clear()
+        self.assertEqual(self.run_scrape(fill_media=True), 0)
+        self.assertEqual(sorted(self.client.lookups), ["a.zip", "b.zip", "c.zip"])
+
+
 class MatchRoundTwoTest(RunBase):
     def run_match(self, rom="a.zip", game_q="7", skip=()):
         args = SimpleNamespace(system="gba", rom=rom, game=game_q, skip_media=list(skip), dry_run=False)

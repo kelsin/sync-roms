@@ -313,8 +313,8 @@ On `esde` and `emudeck` cards every Vita game zip in `psvita/` gets a `.psvita` 
 | `--scrape-review [SYSTEM]` | Review the ROMs ScreenScraper calls non-games or doesn't know (the old form of `scrape review`) |
 | `--scrape-missing [SYSTEM]` | List the ROMs with no metadata and why (the old form of `scrape missing`) |
 | `--all` | `scrape`, `scrape missing`: every ROM in the storage, not only the games your lists and sets reference |
-| `--retry` | `scrape`: also try the ROMs ScreenScraper didn't know before (ROMs whose lookup failed are always tried again; non-games never are) |
-| `--fill-media` | `scrape`: also scrape ROMs that have metadata but lack some media type in storage; their metadata is kept. ScreenScraper is asked again for each such ROM, even if it has no such media |
+| `--retry` | `scrape`: also try the ROMs ScreenScraper didn't know before (ROMs whose lookup failed are always tried again; non-games never are); with `--fill-media`, also the ROMs missing only media ScreenScraper didn't offer |
+| `--fill-media` | `scrape`: also scrape ROMs that have metadata but lack some media type in storage; their metadata is kept. Media types ScreenScraper didn't offer for a ROM are remembered, and a ROM missing only those isn't asked for again until `--retry` |
 | `--skip-media TYPES` | `scrape`, `scrape match`: comma-separated media folders not to download (e.g. `manuals,fanart`) |
 | `--set-credentials` | `scrape`: ask for your ScreenScraper username and password and save them in `settings.json` |
 | `--full` | `cache update`: in a storage folder, stat every file, not only the ones the cache doesn't have (see Storage cache) |
@@ -448,8 +448,8 @@ skipped with a warning and the ROM keeps its other media. `--skip-media TYPES` t
 folder names and downloads none of them.
 
 **Local state** in the data folder (`~/.sync-roms/`): `scrape-hashes.json` (file hashes), `scrape-matches.json` (your manual
-matches), `scrape-unknown.json` (the ROMs ScreenScraper didn't know) and `scrape-notgames.json` (the non-games waiting
-for review). Delete one to forget it.
+matches), `scrape-unknown.json` (the ROMs ScreenScraper didn't know), `scrape-nomedia.json` (the media types
+ScreenScraper didn't offer for each ROM) and `scrape-notgames.json` (the non-games waiting for review). Delete one to forget it.
 
 ## Local mirror (`--mirror`, `--use-mirror`, `--clear-mirror`)
 
