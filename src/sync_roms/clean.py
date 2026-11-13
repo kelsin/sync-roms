@@ -27,6 +27,18 @@ def dot_clean(path):
     return r.returncode == 0, left
 
 
+def remove_left(paths):
+    """Delete the ._* files dot_clean left (paths) and return the ones still there, without walking the card again."""
+    for path in paths:
+        try:
+            os.remove(path)
+        except OSError:
+            pass
+    left = [p for p in paths if os.path.lexists(p)]
+    print(f"  {'❌' if left else '✅'} removed {len(paths) - len(left)} of {len(paths)}")
+    return left
+
+
 ANDROID_MEDIA_DIRS = ("Alarms", "Audiobooks", "DCIM", "Documents", "Download", "Movies", "Music",
                       "Notifications", "Pictures", "Podcasts", "Recordings", "Ringtones")
 
@@ -154,15 +166,15 @@ def _clean_card():
         return
     _stop_indexing(_clean_root)
     print(ui.bold("\n🧼 Running dot_clean..."))
-    ok, left = dot_clean(_clean_root)
-    # A first pass often leaves files behind (the card is still settling); another pass usually finishes
-    # the job.
+    _, left = dot_clean(_clean_root)
+    # A first pass often leaves files behind (the card is still settling); deleting those a moment later
+    # usually finishes the job.
     for _ in range(DOT_CLEAN_RETRIES):
-        if ok and not left:
+        if not left:
             break
         time.sleep(2)
-        print(ui.bold("\n🧼 Retrying dot_clean..."))
-        ok, left = dot_clean(_clean_root)
+        print(ui.bold(f"\n🧼 Removing the {len(left)} ._ file(s) dot_clean left..."))
+        left = remove_left(left)
     if left:
         ui.failure(ui.red(f"\n⚠️  {len(left)} ._ file(s) are still there after dot_clean:"))
         for path in left[:10]:

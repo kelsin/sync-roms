@@ -1077,11 +1077,11 @@ def sync_card(args):
             return
         for warning in plan["warnings"]:
             ui.warn(warning)
-        frontend.apply_collections(plan, layout_name, base)
+        listed = frontend.apply_collections(plan, layout_name, base)
         if plan["owned"] != owned:
             store.update_card(card, frontend_collections=plan["owned"])
         art = bool(arts) and themeart.install(layout_name, base, arts)
-        if clean_card and (plan["writes"] or plan["deletes"] or art):
+        if clean_card and (plan["writes"] or plan["deletes"] or listed or art):
             clean._clean_root = base
         if plan["writes"]:
             print(ui.green(f"💖 Wrote {len(plan['writes'])} collection(s) for {layout['label']}"))

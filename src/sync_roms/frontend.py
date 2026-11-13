@@ -81,7 +81,9 @@ def plan_collections(layout_name, base, wanted, owned):
             plan["warnings"].append(f"{_LABELS[layout_name]} already has a custom collection {name} "
                                     f"that sync-roms didn't write; skipped")
             continue
-        plan["writes"].append((path, "\n".join(wanted[name]) + "\n"))
+        text = "\n".join(wanted[name]) + "\n"
+        if _read(path) != text:
+            plan["writes"].append((path, text))
         plan["enable"].add(name)
     plan["owned"] = sorted(plan["enable"])
     for name in dict.fromkeys(owned):
@@ -97,7 +99,17 @@ def plan_collections(layout_name, base, wanted, owned):
     return plan
 
 
+def _read(path):
+    """path's text, or None when it can't be read."""
+    try:
+        with open(path, encoding="utf-8", newline="") as f:
+            return f.read()
+    except (OSError, UnicodeDecodeError):
+        return None
+
+
 def apply_collections(plan, layout_name, base):
+    """Write and delete plan's collection files and list or unlist them in the settings file; True when that file changed."""
     for path, text in plan["writes"]:
         os.makedirs(os.path.dirname(path), exist_ok=True)
         with open(path, "w", encoding="utf-8", newline="\n") as f:
@@ -108,7 +120,7 @@ def apply_collections(plan, layout_name, base):
         except FileNotFoundError:
             pass
     if not (plan["enable"] or plan["disable"]):
-        return
+        return False
     path = settings_path(layout_name, base)
     old = ""
     if os.path.exists(path):
@@ -119,6 +131,8 @@ def apply_collections(plan, layout_name, base):
         os.makedirs(os.path.dirname(path), exist_ok=True)
         with open(path, "w", encoding="utf-8", newline="\n") as f:
             f.write(new)
+        return True
+    return False
 
 
 def wanted_collections(layout_name, collections, systems, on_card):
