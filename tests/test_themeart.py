@@ -44,6 +44,14 @@ class Assets(unittest.TestCase):
         self.assertIsNone(themeart.art_png("nope"))
         self.assertIsNone(themeart.art_png("../art/surprise"))
 
+    def test_every_art_has_its_own_emoji_and_no_art_has_the_default(self):
+        ids = [*themeart.art_choices(), themeart.SURPRISE_ART]
+        emoji = [themeart.art_emoji(i) for i in ids]
+        self.assertEqual(len(set(emoji)), len(ids))
+        self.assertNotIn(themeart.DEFAULT_EMOJI, emoji)
+        self.assertEqual(themeart.art_emoji(None), themeart.DEFAULT_EMOJI)
+        self.assertEqual(themeart.art_emoji("nope"), themeart.DEFAULT_EMOJI)
+
     def test_every_set_has_art(self):
         sets = os.path.join(os.path.dirname(themeart.THEME_DATA), "..", "sets")
         for name in os.listdir(sets):
