@@ -202,18 +202,26 @@ class SetCredentials(RealDataDirGuard):
         self.quota.assert_called_once_with()
         self.assertIn("123/20000 requests used today, 2 thread(s)", out)
 
-    def test_reports_a_failed_login_check(self):
-        for error, words in ((screenscraper.Refused("ScreenScraper refused the login (HTTP 403); check it with "
-                                                    "`sync-roms scrape --set-credentials`"), "refused the login"),
-                             (screenscraper.Transient("ScreenScraper request failed (URLError)"), "URLError"),
+    def test_refused_login_says_saved_but_refused_and_fails(self):
+        self.quota.side_effect = screenscraper.Refused("ScreenScraper refused the login (HTTP 403); check it with "
+                                                       "`sync-roms scrape --set-credentials`")
+        code, out = self.run_it(["me"], ["pw"])
+        self.assertEqual(code, 1)
+        self.assertTrue(os.path.exists(self.path))
+        self.assertIn("Credentials saved, but ScreenScraper refused the check", out)
+        self.assertIn("refused the login (HTTP 403)", out)
+
+    def test_check_that_could_not_be_made_says_so(self):
+        for error, words in ((screenscraper.Transient("ScreenScraper request failed (URLError)"), "URLError"),
+                             (screenscraper.Transient("ScreenScraper request failed (HTTP 502)"), "HTTP 502"),
                              (screenscraper.QuotaExceeded("ScreenScraper quota exceeded (HTTP 430)"), "quota exceeded")):
             self.quota.side_effect = error
-            with self.subTest(error=type(error).__name__):
+            with self.subTest(words=words):
                 code, out = self.run_it(["me"], ["pw"])
                 self.assertEqual(code, 0)
-                self.assertIn("Saved", out)
-                self.assertIn("Couldn't check the login", out)
+                self.assertIn("Credentials saved, but the login couldn't be checked", out)
                 self.assertIn(words, out)
+                self.assertNotIn("refused", out)
         self.quota.side_effect, self.quota.return_value = None, None
         code, out = self.run_it(["me"], ["pw"])
         self.assertIn("no account details", out)

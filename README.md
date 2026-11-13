@@ -388,7 +388,8 @@ read profile and writes the write profile.
 credentials for the API. Run `sync-roms scrape --set-credentials` to enter your username and password (the password isn't
 echoed, a blank answer keeps the saved value). They are stored in `settings.json` as `screenscraper_user` and
 `screenscraper_password`; the file is kept readable by you only (mode 600) and `config show` never prints them. After
-saving, one request checks the login and shows today's quota and threads, or the error. A run also checks the login
+saving, one request checks the login and shows today's quota and threads, or the error; when ScreenScraper refuses it
+the command exits 1. A run also checks the login
 before it asks to start, and warns when ScreenScraper sends no account details for it.
 
 **Report.** Before looking anything up, the run lists the ROMs with no metadata and how each will be matched first, and
@@ -442,7 +443,8 @@ used up the run stops cleanly with what it finished already saved and says which
 and 40 seconds; a ROM that still fails is skipped and tried again on the next run. The run stops the same clean way, and
 says what to do, when ScreenScraper refuses the login (check it with `sync-roms scrape --set-credentials`), is closed to
 non-members or to everyone for now (try again later), or no longer accepts this version of sync-roms (update it), and
-when every ROM of a batch fails to reach ScreenScraper.
+when 3 ROMs in a row fail to reach ScreenScraper. A ROM that fails because a download can't be saved locally (a full disk)
+is skipped at once, without retries.
 
 **What is written** under `scrapes/<system>/`: the entry in `metadata.json` (merged with what is there) and one folder per media
 type (`3dboxes`, `backcovers`, `covers`, `fanart`, `manuals`, `marquees`, `miximages`, `physicalmedia`, `screenshots`,

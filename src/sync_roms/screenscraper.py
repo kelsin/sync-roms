@@ -361,6 +361,14 @@ class KeepAlive:
                     raise
 
 
+def _chunk(resp):
+    """The next piece of a download; Transient when the read is cut short or times out."""
+    try:
+        return resp.read(1 << 16)
+    except (OSError, http.client.HTTPException) as e:
+        raise Transient(f"ScreenScraper download failed ({type(e).__name__})") from None
+
+
 class Client:
     def __init__(self, user, password, dev, opener=None):
         self._auth = {"devid": dev["devid"], "devpassword": dev["devpassword"], "softname": SOFTNAME,
@@ -459,7 +467,7 @@ class Client:
             with self._open(url) as resp, open(part, "wb") as f:
                 if _too_large(resp, limit):
                     raise MediaRefused("ScreenScraper media too large")
-                chunk, total = resp.read(1 << 16), 0
+                chunk, total = _chunk(resp), 0
                 if chunk.lstrip().startswith(NOT_FOUND_PREFIX.encode()):
                     raise NotFound("not found")
                 while chunk:
@@ -469,10 +477,10 @@ class Client:
                     if total > limit:
                         raise MediaRefused("ScreenScraper media too large")
                     f.write(chunk)
-                    chunk = resp.read(1 << 16)
+                    chunk = _chunk(resp)
             os.replace(part, dest)
-        except (OSError, http.client.HTTPException) as e:  # cut short or timed out while reading, or a local write
-            raise Transient(f"ScreenScraper download failed ({type(e).__name__})") from None
+        except OSError as e:  # a local write (reads raise Transient): not worth retrying
+            raise ApiError(f"Couldn't save a ScreenScraper download ({e.strerror or type(e).__name__})") from None
         finally:
             if os.path.exists(part):
                 os.remove(part)

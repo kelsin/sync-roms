@@ -289,6 +289,20 @@ class ClientTests(unittest.TestCase):
                 client(opener).lookup(12, "g.gba", 1)
             self.assertNotIsInstance(cm.exception, (ss.Transient, ss.Refused))
 
+    def test_local_write_error_in_a_download_is_not_transient(self):
+        with tempfile.TemporaryDirectory() as d:
+            dest = os.path.join(d, "missing", "a.png")  # the .part file can't be created
+            with self.assertRaises(ss.ApiError) as cm:
+                client(lambda r, timeout=None: Resp(b"x")).download("https://neoclone.screenscraper.fr/a.png", dest)
+            self.assertNotIsInstance(cm.exception, ss.Transient)
+            self.assertIn("No such file or directory", str(cm.exception))
+            dest = os.path.join(d, "a.png")
+            with mock.patch("builtins.open", side_effect=OSError(28, "No space left on device")), \
+                    self.assertRaises(ss.ApiError) as cm:
+                client(lambda r, timeout=None: Resp(b"x")).download("https://neoclone.screenscraper.fr/a.png", dest)
+            self.assertNotIsInstance(cm.exception, ss.Transient)
+            self.assertEqual(str(cm.exception), "Couldn't save a ScreenScraper download (No space left on device)")
+
     def test_access_failures_are_refused_with_what_to_do(self):
         says = {401: ("later", "--set-credentials"), 403: ("login", "--set-credentials"), 423: ("later",), 426: ("update sync-roms",)}
         for code, words in says.items():

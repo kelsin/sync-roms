@@ -293,32 +293,71 @@ class ScrapeRunTest(RunBase):
         self.assertIn("scrape --set-credentials", out)
         self.assertNotIn("Done", out)
 
-    def test_whole_batch_of_connection_errors_stops_the_run(self):
-        for r in ("a.zip", "b.zip", "c.zip", "d.zip", "e.zip", "f.zip"):
-            self.put(f"gba/{r}")
+    def down(self, *roms):
+        """Every lookup of these ROMs fails to reach ScreenScraper, retries included."""
+        for r in roms:
+            self.client.errors[r] = [screenscraper.Transient("ScreenScraper request failed (URLError)") for _ in range(10)]
+
+    def test_three_roms_in_a_row_that_cant_reach_screenscraper_stop_the_run(self):
+        for r in "abcdef":
+            self.put(f"gba/{r}.zip")
         self.client.threads = 1
-        down = lambda: [screenscraper.Transient("ScreenScraper request failed (URLError)") for _ in range(10)]  # noqa: E731
-        self.client.errors = {r: down() for r in ("a.zip", "b.zip", "c.zip", "d.zip")}
-        with mock.patch.object(scrape_online, "BATCH", 2):
-            self.assertEqual(self.run_scrape(), 1)
-        self.assertEqual(self.client.lookups[:8], ["a.zip"] * 4 + ["b.zip"] * 4)  # each tried RETRIES more times
-        self.assertNotIn("e.zip", self.client.lookups)  # the batch after the one in flight never starts
-        self.assertNotIn("f.zip", self.client.lookups)
+        self.down("a.zip", "b.zip", "c.zip", "d.zip")
+        self.assertEqual(self.run_scrape(), 1)
+        self.assertEqual(self.client.lookups, ["a.zip"] * 4 + ["b.zip"] * 4 + ["c.zip"] * 4)  # each tried RETRIES more times
         self.assertEqual(self.metadata(), {})
         self.assertFalse(scrape_state.is_unknown("gba", "a.zip"))
         out = self.out.getvalue()
-        self.assertIn("couldn't be reached", out)
+        self.assertIn("couldn't be reached for 3 ROMs in a row", out)
         self.assertIn("URLError", out)
-        self.assertIn("again later", out)
+        self.assertIn("run `sync-roms scrape` again later", out)
 
-    def test_batch_with_one_connection_error_goes_on(self):
+    def test_count_of_roms_in_a_row_spans_systems(self):
+        self.systems = [GBA, NES]
+        self.put("gba/a.zip")
+        self.put("gba/b.zip")
+        self.put("nes/c.zip")
+        self.put("nes/d.zip")
+        self.client.threads = 1
+        self.down("a.zip", "b.zip", "c.zip")
+        self.assertEqual(self.run_scrape(all=True), 1)
+        self.assertNotIn("d.zip", self.client.lookups)
+        self.assertIn("in a row", self.out.getvalue())
+
+    def test_a_success_resets_the_count(self):
+        for r in "abcdef":
+            self.put(f"gba/{r}.zip")
+            self.client.games.setdefault(f"{r}.zip", game(ord(r), r))
+        self.client.threads = 1
+        self.down("a.zip", "b.zip", "d.zip", "e.zip")
+        self.assertEqual(self.run_scrape(), 1)
+        self.assertEqual(set(self.metadata()), {"c.zip", "f.zip"})
+        self.assertNotIn("in a row", self.out.getvalue())
+        self.assertIn("Done with 4 failure(s)", self.out.getvalue())
+
+    def test_single_rom_batch_failing_does_not_stop_the_run(self):
+        for r in ("a.zip", "b.zip", "c.zip"):
+            self.put(f"gba/{r}")
+        self.client.threads = 1
+        self.down("a.zip")
+        with mock.patch.object(scrape_online, "BATCH", 1):
+            self.assertEqual(self.run_scrape(), 1)
+        self.assertEqual(set(self.metadata()), {"b.zip", "c.zip"})
+        self.assertIn("a.zip: ScreenScraper request failed (URLError); skipped", self.out.getvalue())
+        self.assertNotIn("in a row", self.out.getvalue())
+
+    def test_local_save_errors_are_not_retried_or_counted(self):
         for r in ("a.zip", "b.zip", "c.zip", "d.zip"):
             self.put(f"gba/{r}")
-        self.client.errors = {"a.zip": [screenscraper.Transient("ScreenScraper request failed (HTTP 503)") for _ in range(4)]}
-        with mock.patch.object(scrape_online, "BATCH", 2):
-            self.assertEqual(self.run_scrape(), 1)
-        self.assertEqual(set(self.metadata()), {"b.zip", "c.zip", "d.zip"})
-        self.assertIn("a.zip: ScreenScraper request failed (HTTP 503); skipped", self.out.getvalue())
+        self.client.threads = 1
+        full = screenscraper.ApiError("Couldn't save a ScreenScraper download (No space left on device)")
+        for gid in (1, 2, 3):
+            self.client.download_errors[f"http://media/{gid}/box-2D"] = full
+        self.assertEqual(self.run_scrape(), 1)
+        self.assertEqual(self.client.downloads.count("http://media/1/box-2D"), 1)
+        self.assertEqual(set(self.metadata()), {"d.zip"})
+        self.assertIn("a.zip: Couldn't save a ScreenScraper download (No space left on device); skipped", self.out.getvalue())
+        self.assertNotIn("in a row", self.out.getvalue())
 
     def test_quota_checked_before_the_confirm(self):
         self.put("gba/a.zip")
