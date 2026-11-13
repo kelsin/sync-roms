@@ -99,11 +99,11 @@ def edit_one(collection, systems, keys_of):
             while True:
                 parts = ([f"📦 {filt[0]} only"] if filt else []) + (["🎁 past surprises only"] if past is not None else []) \
                     + ([metafilter.describe(meta_filt)] if meta_filt else [])
-                where = f" · {' · '.join(parts)} (c shows all)" if parts else ""
                 pressed = edit.toggle_games(
-                    f"✏️  {s['name']} — ✅ in {collection['name']}, ⬜ in storage only{where}",
+                    f"✏️  {s['name']} — ✅ in {collection['name']}, ⬜ in storage only",
                     [r for r in all_rows if keep(r[1])],
-                    hotkeys=(SET_KEY, META_KEY, PAST_SURPRISE_KEY, CLEAR_KEY), hint=GAMES_HINT, place=place)
+                    hotkeys=(SET_KEY, META_KEY, PAST_SURPRISE_KEY, CLEAR_KEY), hint=GAMES_HINT, place=place,
+                    filters=f"{' · '.join(parts)} (c shows all)" if parts else "")
                 if pressed == PAST_SURPRISE_KEY:
                     past = surprise.past_keys(s["bucket"]) or None
                     if past is None:

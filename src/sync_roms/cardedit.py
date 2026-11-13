@@ -49,9 +49,8 @@ def header(usage, capacity, fetch=None):
         text, over = f"💾 {used} used", False
     else:
         over = usage.bytes > capacity
-        text = f"💾 {used} / {size_text(capacity)} · " + (
-            f"⚠️  {size_text(usage.bytes - capacity)} over" if over else f"{size_text(capacity - usage.bytes)} free")
-    text += f" · {usage.count} file(s)"
+        text = f"💾 {used} / {size_text(capacity)}" + (f" · ⚠️  {size_text(usage.bytes - capacity)} over" if over else "")
+    text += f" · {usage.count} file" + ("" if usage.count == 1 else "s")
     if fetch is not None:
         text += f" · ⬇️  {size_text(fetch)} to download"
     if usage.partial:
@@ -74,12 +73,11 @@ def status_of(usage, capacity, fetch=None):
 def system_labels(card, systems, recommended, usages):
     """(labels, extras) for the system list, in the given order: recommended systems get a ⭐; each picked system
     shows its count and size (… while not sized)."""
-    width = max((len(s["name"]) for s in systems), default=0)
     games = card.get("games") or {}
     labels, extras = [], []
     for s in systems:
         rec = s["bucket"] in recommended
-        labels.append(("⭐ " if rec else "   ") + s["name"].ljust(width))
+        labels.append(("⭐ " if rec else "   ") + s["name"])
         u = usages.get(s["bucket"])
         row = []
         entry = games.get(s["bucket"])
@@ -642,12 +640,11 @@ def edit_system(name, system, setup, to_fetch=None, card_usages=None):
                 return "Note saved" if text else "Note cleared"
 
             parts = ([f"📦 {filt[0]} only"] if filt else []) + (["🎁 past surprises only"] if past is not None else []) + ([metafilter.describe(meta_filt)] if meta_filt else [])
-            where = f" · {' · '.join(parts)} (c shows all)" if parts else ""
             pending = (keys, notes, base, session)
-            result = picker.filter_list(f"✏️  {system['name']} on {name} — ✅ synced, ⬜ not, 📦 from a set{where}",
+            result = picker.filter_list(f"✏️  {system['name']} on {name} — ✅ synced, ⬜ not, 📦 from a set",
                                         [r[3] for r in shown], multi=True, initial=[start[k] for k in keys],
                                         extras=extras, hint=GAMES_HINT, hotkeys=(SET_KEY, META_KEY, PAST_SURPRISE_KEY, CLEAR_KEY, VARIANT_KEY),
-                                        key_help=GAMES_KEYS,
+                                        key_help=GAMES_KEYS, filters=f"{' · '.join(parts)} (c shows all)" if parts else "",
                                         status=status, row_note=lambda i: edit.variant_line(
                                             keys[i], variants, parents, system_names, on_card),
                                         session=session, note_text=note_text, on_note=on_note,

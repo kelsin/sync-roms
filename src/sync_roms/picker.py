@@ -109,6 +109,29 @@ def cell_width(text):
     return sum(2 if unicodedata.east_asian_width(c) in "WF" else 1 for c in text)
 
 
+MIN_LABEL = 20  # cells a cut row keeps of its label; past that, the row's end (its extras) is cut instead
+
+
+def _cut(text, width):
+    """Cut a Rich Text to width cells, ending in "…" (a wide character is never split)."""
+    if text.cell_len > width:
+        text.truncate(width - 1)
+        text.rstrip()
+        text.append("…")
+
+
+def fit_row(label, extras, width):
+    """A row of width cells (Rich Texts, cells as Textual counts them): label, then extras right-aligned. The label is
+    cut with "…" to the room the extras leave, but keeps MIN_LABEL cells (all of a shorter one); a row still too wide
+    is cut at its end."""
+    label.rstrip()
+    _cut(label, max(width - extras.cell_len, min(label.cell_len, MIN_LABEL)))
+    label.append(" " * max(0, width - label.cell_len - extras.cell_len))  # in the row's style: the highlight spans it
+    label.append_text(extras)
+    _cut(label, width)
+    return label
+
+
 def line_key(text, pos, k):
     """Emacs-style single-line editing. Returns (text, cursor position), or None if k isn't an editing key.
     ^A/^E start/end · ^B/^F left/right · ^D delete char · ^K kill to end · ^U kill to start · ^W kill word."""
@@ -166,8 +189,8 @@ class _ListModel:
 
     def __init__(self, title, labels, multi, initial, hint, cursor, extras, locked, locked_note, hotkeys, note_text,
                  on_note, esc_asks, hidden, status, diff_marks, session, poll, links, on_hotkey, preview=None, row_note=None,
-                 key_help=None):
-        self.preview, self.row_note, self.key_help = preview, row_note, key_help
+                 key_help=None, filters=""):
+        self.preview, self.row_note, self.key_help, self.filters = preview, row_note, key_help, filters
         self.title, self.labels, self.multi, self.hint, self.extras = title, labels, multi, hint, extras
         self.locked_note, self.hotkeys, self.note_text, self.on_note = locked_note, hotkeys, note_text, on_note
         self.esc_asks, self.status, self.diff_marks, self.poll = esc_asks, status, diff_marks, poll
@@ -214,6 +237,7 @@ class _ListModel:
         self.cur = max(0, min(self.cur, len(vis) - 1))
         self.vis = vis
         self.view = max(1, self.height - 4)
+        self.top = max(0, min(self.top, len(vis) - self.view))  # a restored scroll leaves no blank rows below the list
         if self.cur < self.top:
             self.top = self.cur
         elif self.cur >= self.top + self.view:
@@ -246,9 +270,8 @@ class _ListModel:
         line, line_color = self.status(self.state) if self.status else "", None
         if isinstance(line, tuple):
             line, line_color = line
-        parts = [line] if line else []
-        if self.multi and self.diff_marks:
-            parts.append(f"+{added} −{removed} pending")
+        parts = [f"+{added} −{removed}"] if self.multi and self.diff_marks else []
+        parts += [line] if line else []
         if self.multi and (self.diff_marks or self.view_mode):
             parts.append(f"view: {('all', 'on only', 'changed only')[self.view_mode]}")
         if not self.revealed and self.hidden_count:
@@ -449,10 +472,12 @@ def _app_class():
                 line = m.labels[i]
             if m.hidden[i]:
                 style.append("dim")
-            text = Text(line, " ".join(style))
+            text, extras = Text(line, " ".join(style)), Text()
             for part, color in (m.extras[i] if m.extras else []):
-                text.append(part, " ".join(style + [color]))
-            return text
+                extras.append(part, " ".join(style + [color]))
+            if self.size.width < 1:  # not laid out yet
+                return text.append_text(extras)
+            return fit_row(text, extras, self.size.width)
 
         def render(self):
             m = self.app.model
@@ -461,7 +486,11 @@ def _app_class():
                 hint = TYPING_HINT if m.multi else SINGLE_TYPING_HINT
             else:
                 hint = HELP_HINT + (m.hint or (MULTI_HINT if m.multi else SINGLE_HINT))
-            lines = [Text(m.title, "bold cyan"), _with_cursor(query, 2 + m.qpos) if m.typing else query, Text(hint, "dim")]
+            if m.typing:
+                _with_cursor(query, 2 + m.qpos)
+            if m.filters:
+                query.append("  " + m.filters, "cyan")
+            lines = [Text(m.title, "bold cyan"), query, Text(hint, "dim")]
             lines += [self.row(m, pos) for pos in range(m.top, min(len(m.vis), m.top + m.view))]
             text, color, at = m.line
             status = Text(text, f"bold {color}" if color else "bold")
@@ -656,7 +685,7 @@ def _draws_images():
 
 def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, extras=None, locked=None, locked_note="",
                 hotkeys=(), note_text=None, on_note=None, esc_asks=True, hidden=None, status=None, diff_marks=True,
-                session=None, poll=None, links=None, on_hotkey=None, preview=None, row_note=None, key_help=None):
+                session=None, poll=None, links=None, on_hotkey=None, preview=None, row_note=None, key_help=None, filters=""):
     """Modal list: vim keys for moving and acting, Emacs keys for editing the filter.
 
     Normal mode: j/k ↑/↓ ^N/^P move · g/G top/bottom · ^D/^U half page · ^F/^B/PgUp/PgDn/^V page · / filter ·
@@ -668,8 +697,8 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
     Single mode returns the chosen index, or None on Esc. Multi mode returns the list of on/off states on Enter;
     Esc asks whether to keep or revert pending changes (esc_asks=False: it just returns None).
     cursor: index the highlight starts on.
-    extras: per label, a list of (text, color) drawn after it (color: green, red, cyan or dim);
-    they are not matched by the filter.
+    extras: per label, a list of (text, color) drawn after it, right-aligned (color: green, red, cyan or dim); a long
+    label is cut with "…" to leave them room. They are not matched by the filter.
     locked: optional per-label flags; those rows are greyed out, can't be toggled, and show locked_note
     (one string, or one per label).
     on_note: optional callable(label index, text) -> message, called with a line typed after `w` on a row (multi mode);
@@ -678,8 +707,9 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
     key_help: optional (keys, what they do) pairs that `?` lists as this screen's keys; without it, it lists the hint's
     entries. Every hint line starts with "? help".
     hidden: optional per-label flags; those rows are left out (and drawn dim) until `z` reveals them.
-    status(states) -> text, or (text, color): the status row's text; its right end shows the cursor's row and
-    "N/M shown" when the text leaves room. diff_marks: show ➕/➖ against `initial` (else ✅/⬜ only).
+    status(states) -> text, or (text, color): the status row's text, after the pending counts (+on −off); its right end
+    shows the cursor's row and "N/M shown" when the text leaves room. filters: the caller's own filters, shown on the
+    filter line after the typed text. diff_marks: show ➕/➖ against `initial` (else ✅/⬜ only).
     session: a dict the caller keeps so selection, view, revealed rows, filter text, cursor and scroll survive reopening
     the list (carry_place keeps them across passes that list the same rows).
     poll: optional callable, called on the list's thread every POLL_MS while it waits for a key; the list is then redrawn,
@@ -700,7 +730,7 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
             preview = None
     return _run(_ListModel(title, labels, multi, initial, hint, cursor, extras, locked, locked_note, hotkeys, note_text,
                            on_note, esc_asks, hidden, status, diff_marks, session, poll, links, on_hotkey, preview, row_note,
-                           key_help))
+                           key_help, filters))
 
 
 PLACE = ("row", "query", "view_mode", "top")  # the session entries carry_place keeps

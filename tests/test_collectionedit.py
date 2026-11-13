@@ -127,7 +127,7 @@ class Discs(unittest.TestCase):
 
         def fake(title, labels, **kw):
             if kw.get("multi"):
-                lists.append((title, list(labels)))
+                lists.append((title, list(labels), kw.get("filters", "")))
                 steps = [("p", 0), ("c", 0), kw["initial"]]
                 return steps[len(lists) - 1]
             return next(picks)
@@ -137,7 +137,8 @@ class Discs(unittest.TestCase):
                 mock.patch.object(surprise, "past_keys", return_value={"gba/Ruby.zip"}):
             collectionedit.edit_one(collection, SYSTEMS, lambda bucket: keys if bucket == "gba" else set())
         self.assertEqual(lists[1][1], ["Ruby.zip"])
-        self.assertIn("🎁 past surprises only (c shows all)", lists[1][0])
+        self.assertEqual("🎁 past surprises only (c shows all)", lists[1][2])
+        self.assertNotIn("past surprises", lists[1][0])
         self.assertEqual(len(lists[2][1]), 2)
 
     def test_s_and_m_narrow_the_add_games_list_to_a_set_and_to_metadata(self):
@@ -148,7 +149,7 @@ class Discs(unittest.TestCase):
 
         def fake(title, labels, **kw):
             if kw.get("multi"):
-                lists.append((title, list(labels)))
+                lists.append((title, list(labels), kw.get("filters", "")))
                 return [("s", 0), ("m", 0), ("c", 0), kw["initial"]][len(lists) - 1]
             return next(picks)
 
@@ -173,7 +174,7 @@ class Discs(unittest.TestCase):
                 mock.patch.object(cardedit.metafilter, "matches", lambda m, w: m.get("genre") == w["genre"]):
             collectionedit.edit_one(collection, SYSTEMS, lambda bucket: keys if bucket == "gba" else set())
         self.assertEqual(lists[1][1], ["Ruby.zip", "Zelda.zip"])
-        self.assertIn("📦 Zeldas only", lists[1][0])
+        self.assertIn("📦 Zeldas only", lists[1][2])
         self.assertEqual(lists[2][1], ["Zelda.zip"])
         self.assertEqual(len(lists[3][1]), 3)
 

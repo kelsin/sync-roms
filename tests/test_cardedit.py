@@ -39,15 +39,14 @@ class Pure(unittest.TestCase):
 
     def test_header(self):
         self.assertEqual(cardedit.header(U(1_500_000_000, 3, False), 512 * 10 ** 9),
-                         ("💾 1.5 GB / 512 GB · 510.5 GB free · 3 file(s)", False))
-        text, over = cardedit.header(U(600 * 10 ** 9, 9, False), 512 * 10 ** 9)
-        self.assertTrue(over)
-        self.assertIn("88 GB over", text)
-        self.assertEqual(cardedit.header(U(10 ** 9, 1, False), None), ("💾 1 GB used · 1 file(s)", False))
+                         ("💾 1.5 GB / 512 GB · 3 files", False))  # what is free is the rest of the card
+        self.assertEqual(cardedit.header(U(600 * 10 ** 9, 9, False), 512 * 10 ** 9),
+                         ("💾 600 GB / 512 GB · ⚠️  88 GB over · 9 files", True))
+        self.assertEqual(cardedit.header(U(10 ** 9, 1, False), None), ("💾 1 GB used · 1 file", False))
         text, over = cardedit.header(U(10 ** 9, 1, True), None)
         self.assertTrue(text.endswith("not sized (sync-roms cache update)"))
         self.assertFalse(over)
-        self.assertEqual(cardedit.header(U(10 ** 9, 1, False), None, 0)[0], "💾 1 GB used · 1 file(s) · ⬇️  0 B to download")
+        self.assertEqual(cardedit.header(U(10 ** 9, 1, False), None, 0)[0], "💾 1 GB used · 1 file · ⬇️  0 B to download")
 
     def test_silent_thread_hides_warn_and_fail_output(self):
         err = io.StringIO()
@@ -207,7 +206,8 @@ class Flow(DataDir):
             _, calls = self.run_system(returns((cardedit.PAST_SURPRISE_KEY, 0)), returns((cardedit.CLEAR_KEY, 0)),
                                        lambda labels, kw: [False] * len(labels))
         self.assertEqual(calls[1][1], ["Ruby.zip"])
-        self.assertIn("🎁 past surprises only (c shows all)", calls[1][0])
+        self.assertEqual(calls[1][2]["filters"], "🎁 past surprises only (c shows all)")  # on the filter line
+        self.assertNotIn("past surprises", calls[1][0])
         self.assertEqual(len(calls[2][1]), len(calls[0][1]))
 
     def test_p_with_no_past_surprises_says_so_and_keeps_the_list(self):
@@ -331,7 +331,7 @@ class Flow(DataDir):
         self.cache = {"gba/": self.files["gba/"], "gb/": self.files["gb/"], "scrapes/gba/": {}, "scrapes/gb/": {}, "BIOS/": {}}
         _, calls = self.run_system(toggle())
         kw = calls[0][2]
-        self.assertIn("· 2 file(s)", kw["status"](kw["initial"])[0])  # Ruby here, Red on Game Boy
+        self.assertIn("· 2 files", kw["status"](kw["initial"])[0])  # Ruby here, Red on Game Boy
         extras = self.run_card(returns(None))[0][2]["extras"]
         self.assertIn(("  1 picked", "green"), extras[0])
 
@@ -423,7 +423,7 @@ class Flow(DataDir):
         title, labels, kw = calls[0]
         self.assertEqual([l.strip() for l in labels], ["⭐ Game Boy", "Game Boy Advance"])
         self.assertEqual(kw["extras"][1], [("  1 picked", "green"), ("  5 B", "dim")])  # the ROM
-        self.assertEqual(kw["status"](None), ("💾 21 B / 1 GB · 1 GB free · 1 file(s)", "green"))  # ROM and the GBA BIOS
+        self.assertEqual(kw["status"](None), ("💾 21 B / 1 GB · 1 file", "green"))  # ROM and the GBA BIOS
 
     def test_full_system_hotkey_saves_and_restores_the_list(self):
         self.card(games={"gba": [g("gba/Ruby.zip")]})
@@ -542,9 +542,9 @@ class Flow(DataDir):
             seen.append(kw["status"](kw["session"]["sel"])[0])
             return (cardedit.VARIANT_KEY, labels.index("Ruby.zip")) if len(seen) == 1 else kw["session"]["sel"]
         self.run_system(look, look)
-        self.assertIn("0 file(s)", seen[0])
+        self.assertIn("0 files", seen[0])
         self.assertIn("2 B /", seen[1])
-        self.assertIn("1 file(s)", seen[1])
+        self.assertIn("1 file", seen[1])
 
     def test_v_on_another_system_clears_its_exclusion(self):
         self.with_variants(self.RED)
@@ -646,7 +646,7 @@ class Flow(DataDir):
             self.assertEqual(kw["session"]["sel"], [False, False, True, False])  # kept across the filter
             return kw["session"]["sel"]
         _, calls = self.run_system(returns((cardedit.SET_KEY, 0)), pick_first_set, filtered, everything)
-        self.assertIn("Pokemon only", calls[2][0])
+        self.assertIn("Pokemon only", calls[2][2]["filters"])
         self.assertEqual(store.card_games("c"), {"gba": [g("gba/Ruby.zip")]})
 
     def test_set_list_counts_what_is_in_storage(self):
@@ -688,8 +688,8 @@ class Flow(DataDir):
         self.cache = {"gba/": self.files["gba/"], "scrapes/gba/": {}, "BIOS/": {"BIOS/gba_bios.bin": 16}, "gb/": {}}
 
         def step(labels, kw):
-            self.assertEqual(kw["status"]([False] * 4), ("💾 0 B / 1 GB · 1 GB free · 0 file(s)", "green"))
-            self.assertEqual(kw["status"]([True, False, False, True]), ("💾 26 B / 1 GB · 1 GB free · 2 file(s)", "green"))
+            self.assertEqual(kw["status"]([False] * 4), ("💾 0 B / 1 GB · 0 files", "green"))
+            self.assertEqual(kw["status"]([True, False, False, True]), ("💾 26 B / 1 GB · 2 files", "green"))
             return [False] * 4
         self.run_system(step)
 
@@ -750,8 +750,8 @@ class Flow(DataDir):
                 mock.patch.object(picker, "filter_list", Script(step, step)), contextlib.redirect_stdout(io.StringIO()):
             cardedit.pick_collections("c", {"gba"}, lambda: cardedit.card_status("c", (DEVICE, "esde"), [GBA, GB],
                                                                                  lambda s, keys: set(keys)))
-        self.assertIn("0 file(s) · ⬇️  0 B to download", statuses[0])
-        self.assertIn("1 file(s) · ⬇️  7 B to download", statuses[1])
+        self.assertIn("0 files · ⬇️  0 B to download", statuses[0])
+        self.assertIn("1 file · ⬇️  7 B to download", statuses[1])
 
     def test_picked_game_not_in_storage_is_not_still_sizing(self):
         self.card(games={"gba": [g("gba/Ruby.zip"), g("gba/Gone.zip")]})
@@ -759,12 +759,12 @@ class Flow(DataDir):
 
         def step(labels, kw):
             self.assertIn("Gone.zip  ⚠️ not in storage", labels)
-            self.assertEqual(kw["status"](kw["session"]["sel"]), "💾 5 B used · 2 file(s)")
+            self.assertEqual(kw["status"](kw["session"]["sel"]), "💾 5 B used · 2 files")
             return kw["session"]["sel"]
         self.run_system(step)
         with mock.patch.object(store, "recommended_systems", return_value=set()):
             calls = self.run_card(returns(None))
-        self.assertEqual(calls[0][2]["status"](None), "💾 5 B used · 2 file(s)")
+        self.assertEqual(calls[0][2]["status"](None), "💾 5 B used · 2 files")
 
     def test_entering_a_system_lists_names_only(self):
         self.card()
@@ -1003,7 +1003,7 @@ class DiscFlow(Flow):
 
         def step(labels, kw):
             state = [True, False, False, False, False]  # only Disc 1 switched (as a script would)
-            self.assertIn("4 file(s)", kw["status"](state))
+            self.assertIn("4 files", kw["status"](state))
             return state
         self.psx(step)
 
@@ -1115,11 +1115,12 @@ class MetaFlow(Flow):
             return kw["session"]["sel"]
         _, calls = self.run_system(self.opens_meta, fields, genres, platform, fields_again, years, both, returns(0),
                                    with_set, everything)
-        titles = [c[0] for c in calls]
-        self.assertIn("genre: Platform (c shows all)", titles[3])
-        self.assertIn("genre: Platform · year: 2001 (c shows all)", titles[6])
-        self.assertIn("📦 Pokemon only · genre: Platform · year: 2001", titles[8])
-        self.assertNotIn("c shows all", titles[9])
+        filters = [c[2].get("filters", "") for c in calls]
+        self.assertEqual("genre: Platform (c shows all)", filters[3])
+        self.assertEqual("genre: Platform · year: 2001 (c shows all)", filters[6])
+        self.assertEqual("📦 Pokemon only · genre: Platform · year: 2001 (c shows all)", filters[8])
+        self.assertEqual("", filters[9])
+        self.assertNotIn("genre", calls[8][0])
         self.assertEqual(store.card_games("c"), {"gba": [g("gba/Zelda.zip")]})
         self.assertEqual(self.fetched, ["scrapes/gba/metadata.json"])
 
@@ -1180,6 +1181,20 @@ class SetupChange(DataDir):
             self.assertEqual(edit.edit_manifest(), 0)
         entry = self.read("cards.json")["c"]
         self.assertEqual((entry["device"], entry["games"]), ("d", {"gba": [g("gba/A.zip")]}))
+
+
+class GamesStatus(unittest.TestCase):
+    def test_the_games_list_status_leaves_room_for_the_row_at_80_columns(self):
+        status = cardedit.status_of(U(123_400_000_000, 1234, False), 512 * 10 ** 9)
+        rows = []
+
+        async def script(pilot):
+            rows.append(" ".join(t for t, _ in screen_lines(pilot.app)[-1]))
+            await pilot.press("escape")
+        pilot_list(script, "t", [f"Game {i}" for i in range(2345)], multi=True, esc_asks=False, cursor=99,
+                   status=lambda _s: status)
+        self.assertTrue(rows[0].startswith("+0 −0 · 💾 123.4 GB / 512 GB · 1234 files · view: all "), rows[0])
+        self.assertTrue(rows[0].endswith(" row 100 · 2345/2345 shown"), rows[0])
 
 
 class Poll(unittest.TestCase):

@@ -531,7 +531,7 @@ sync-roms --edit
 1. A card opens on every system its device can play, in the usual order. Systems recommended for the device's screen
    are marked ⭐; each system with picks shows how many games and how much space they take (ROMs plus the scraped
    files the card's firmware installs). The bottom line shows the card's total (games, scrapes and the BIOS files of
-   the systems it syncs) against its size and the free space, in green below 70% of the card, yellow below 90% and
+   the systems it syncs) against its size, in green below 70% of the card, yellow below 90% and
    red above (or over). Opened from a sync, it also shows how much of the card's ROMs aren't on it yet
    (`⬇️  … to download`). Sizes come from the storage cache (see [Storage cache](#storage-cache)); without one they show
    `…` and the total says "not sized". `/` filters, `Enter` opens a system, `l` adds a collection to the card (each shows how many of its games are playable on the card's device, and `Space`/`Enter` toggles the whole collection), `f` makes it a full system (every file in its folder; `f` again brings the
@@ -548,10 +548,10 @@ sync-roms --edit
    so `Sports / Baseball` is `Sports`) or **Year**,
    then a value (each shows how many games in the list have it) to narrow the list to those games. Values are
    matched ignoring case, so `Capcom` and `capcom` are one value. Picking another
-   value of the same field replaces it; filters on different fields, the set filter and `/` all combine, and the title
-   shows what is active. A game with no value for a field never matches a filter on it. The metadata is read in the
+   value of the same field replaces it; filters on different fields, the set filter and `/` all combine, and the filter
+   line shows what is active. A game with no value for a field never matches a filter on it. The metadata is read in the
    background once per session, so the menu says it is loading at first. `p` narrows the list to games that were surprises within the last `surprise_ttl_days` (🎁 past surprises only), `c` clears every filter and shows every game again.
-   Pending changes show as `➕` / `➖` and the bottom line updates the card's total as you toggle. `w` writes a note on a
+   Pending changes show as `➕` / `➖` and are counted at the start of the bottom line (`+2 −1`), which updates the card's total as you toggle. `w` writes a note on a
    picked game. A 💖 next to a game says one of the card's collections syncs it: it is always on, can't be switched off here, per-card exclusions don't apply to it, and it counts in the card's budget. `Enter` keeps your changes; `Esc` asks whether to keep or revert them if there are any.
 3. When you leave the menu, device/firmware and device-system changes are summarized, then **save**, **keep
    editing**, **discard**, or **list every change**. Nothing is uploaded.

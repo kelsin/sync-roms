@@ -41,12 +41,12 @@ def feed_list(keys, *args, **kwargs):
         return picker.filter_list(*args, **kwargs)
 
 
-def pilot_list(script, *args, **kwargs):
-    """picker.filter_list(*args, **kwargs) on a headless 80x24 Textual screen that the async script(pilot) drives.
-    Returns (or raises) what filter_list does."""
+def pilot_list(script, *args, size=(80, 24), **kwargs):
+    """picker.filter_list(*args, **kwargs) on a headless Textual screen of size (80x24) that the async script(pilot)
+    drives. Returns (or raises) what filter_list does."""
     def run(app, **_):
         async def drive():
-            async with app.run_test() as pilot:
+            async with app.run_test(size=size) as pilot:
                 await script(pilot)
             return app.return_value
         return asyncio.run(drive())
@@ -58,6 +58,12 @@ def screen_lines(app):
     """The list screen's rows as [(text, Rich style)] runs of non-blank text."""
     lines = app.screen_stack[0].query_one("_ListLines")
     return [[(s.text, str(s.style)) for s in strip if s.text.strip()] for strip in lines.render_lines(lines.region)]
+
+
+def screen_text(app):
+    """The list screen's rows as plain text, each as wide as the list (trailing blanks kept)."""
+    lines = app.screen_stack[0].query_one("_ListLines")
+    return ["".join(s.text for s in strip) for strip in lines.render_lines(lines.region)]
 
 
 def script_for(shell):
