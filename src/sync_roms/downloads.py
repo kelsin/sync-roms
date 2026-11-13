@@ -10,6 +10,7 @@ from . import external, inventory, runtime, s3, ui
 
 STALE_HINT = " (not in storage any more: run sync-roms cache update)"  # a file the cache lists is gone from the storage folder
 
+
 def rom_rel(key, flat, disc_dir=None, discs=()):
     """A ROM's path inside its system folder: the bucket key without its system, or just the file name if flat.
 

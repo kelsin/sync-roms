@@ -35,7 +35,8 @@ _COLOR = _use_color(sys.stdout)
 
 
 def c(code, text):
-    return f"\033[{code}m{text}\033[0m" if _COLOR else text
+    color = _use_color(sys.stderr) if QUIET else _COLOR  # under --quiet only what goes to stderr is seen
+    return f"\033[{code}m{text}\033[0m" if color else text
 
 
 def err_color(code, text):

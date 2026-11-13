@@ -16,7 +16,7 @@ COMMANDS = {"games", "sets", "collections", "themes", "cards", "cache", "config"
 
 class Parser(argparse.ArgumentParser):
     def error(self, message):
-        ui.fail(f"{message}\n   Try 'sync-roms {self.prog.split()[-1]} --help'.", 2)
+        ui.fail(f"{message}\n   Try 'sync-roms {self.prog.split()[1]} --help'.", 2)
 
 
 # --- Helpers the sync flow uses ----------------------------------------------------------------------
@@ -482,7 +482,7 @@ def config_cmd(args):
         return 0
     print(ui.bold("⚙️  sync-roms settings") + ui.dim(f"  {store.data_dir()}"))
     for name, value, source in effective_settings():
-        print(f"  {name:<14} {value if value is not None else ui.dim('(not set)'):<28} {ui.dim(source)}")
+        print(f"  {name:<14} {(json.dumps(value) if isinstance(value, bool) else str(value)) if value is not None else ui.dim('(not set)'):<28} {ui.dim(source)}")
     return 0
 
 
@@ -959,7 +959,9 @@ def build_parser():
 
 
 def run(argv):
-    args = build_parser().parse_args(argv)
+    ap = build_parser()
+    ap.prog = f"sync-roms {argv[0]}"  # its errors (unrecognized arguments) point at the command's help
+    args = ap.parse_args(argv)
     if getattr(args, "dry_run", False) and (args.fn in (games_list, games_export, config_cmd, cache_cmd, doctor_cmd, check_cmd, completion_cmd)
                                             or (args.fn is games_sets and args.verb == "list")):
         name = " ".join(w for w in (args.command, getattr(args, "action", None), getattr(args, "verb", None)) if w)
