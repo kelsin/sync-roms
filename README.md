@@ -229,6 +229,16 @@ While typing a filter (or a note, which `w` opens in the game list): `^A` `^E` s
    without asking; with `--ask` they are confirmed first, and answering no asks the question again and saves
    the new answer (or delete that `android_media` entry from `cards.json`).
 
+   Android cards also get suggested GPU drivers. Each Adreno device in `devices.json` has a `gpu`, and
+   `drivers.json` lists the custom drivers (Turnip builds and similar) suggested for each GPU. Every sync checks
+   those drivers' GitHub releases and keeps the newest zip of each in storage's `os/drivers/` (with a `.tag` file
+   naming the release; skipped without write access, a failure only warns), then copies the ones for the card's GPU
+   to `Drivers/<driver>-<release tag>.zip` in the card root. A newer release gets a new file name and the old zip is
+   removed; the card's `cards.json` entry lists the zips sync put there (`drivers`), so files you add yourself are
+   never touched. To use one, open the emulator's driver manager (for example the GPU driver settings of Winlator,
+   Eden or another emulator that loads custom drivers), choose to install or import a driver and pick the zip from
+   `Drivers/`. Drivers load per app, so nothing changes system-wide and no root is needed.
+
    Every sync also creates `.metadata_never_index` in the card root, empties `.fseventsd` and puts a
    `.fseventsd/no_log` file in it (on any OS), so macOS doesn't index or log the card.
 
