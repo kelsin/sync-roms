@@ -4,7 +4,7 @@ import json
 import queue
 import threading
 
-from . import budget, collections as colls, edit, inventory, m3u, metafilter, picker, s3, scrape_plan, store, surprise, ui, usersettings
+from . import budget, collections as colls, edit, inventory, m3u, metafilter, picker, s3, scrape_plan, store, surprise, ui, usersettings, vita
 
 FULL_KEY = "f"
 SET_KEY = "s"
@@ -427,6 +427,7 @@ def edit_system(name, system, setup, to_fetch=None):
     rows = edit.system_rows(s, in_storage)
     titles = {k: title for _, k, title, _ in rows}
     groups = m3u.file_groups(in_storage)  # a multi-disc game's files are switched on and off together
+    bundled = vita.extras(in_storage, in_storage)  # a Vita game's DLC and update sync with it
     others = [x for x in can_play(store.repo_json("systems"), setup) if x["bucket"] != bucket]
     capacity = budget.card_capacity(card_entry(name, setup, cards))
     locked_from = {g["bucket"]: g["from"] for g in store.card_locked_games(
@@ -473,6 +474,8 @@ def edit_system(name, system, setup, to_fetch=None):
         out = []
         if key in groups:
             out.append((f"  🔗 {len(groups[key])} files", "dim"))
+        elif key in bundled:
+            out.append((f"  🔗 {len(bundled[key]) + 1} files", "dim"))
         if key in notes:
             out.append((f"  📦 {notes[key].split(': ', 1)[-1]}", "cyan" if state else "dim"))
         if key in locked_from:

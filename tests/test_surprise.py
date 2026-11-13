@@ -29,6 +29,12 @@ OUT = ["Mother 3 (Japan).zip", "Rhythm Tengoku (Japan).zip", "Densetsu no Stafy 
        "Contra (USA) (Classic Mini).zip"]
 
 
+G = "psvita/G [PCSE00349] [USA] [NoNpDRM].zip"
+DLC = "psvita/D [PCSE00349] [USA] [DLC-X].zip"
+NEW = "psvita/G [PCSE00349] [USA] [PATCH] [v1.11] [NoNpDRM].zip"
+H = "psvita/H [PCSE00001] [USA] [NoNpDRM].zip"
+
+
 class SurpriseRulesTest(unittest.TestCase):
     def test_full_english_names(self):
         bios = {"gba_bios.bin"}
@@ -62,6 +68,10 @@ class SurpriseRulesTest(unittest.TestCase):
         self.assertEqual(sorted(surprise.units(psx, keys, None, set())),
                          [["psx/FF7 (USA).m3u", "psx/FF7 (USA) (Disc 1).chd", "psx/FF7 (USA) (Disc 2).chd"],
                           ["psx/Spyro (USA).chd"]])
+
+    def test_vita_dlc_and_updates_are_never_units(self):
+        vita_sys = {"bucket": "psvita", "bios": {"files": []}}
+        self.assertEqual(surprise.units(vita_sys, {G, DLC, NEW}, None, set()), [[G]])
 
 
 def pool(system, n):

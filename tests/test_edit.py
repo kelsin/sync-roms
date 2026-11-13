@@ -17,6 +17,12 @@ from sync_roms import edit, picker, runtime, s3, store, ui  # noqa: E402
 SETS = {"s": {"id": "s", "name": "Mix", "games": [{"system": "gba", "bucket": "gba/A.zip", "files": ["gba/A2.zip"]}]}}
 
 
+G = "psvita/G [PCSE00349] [USA] [NoNpDRM].zip"
+DLC = "psvita/D [PCSE00349] [USA] [DLC-X].zip"
+NEW = "psvita/G [PCSE00349] [USA] [PATCH] [v1.11] [NoNpDRM].zip"
+H = "psvita/H [PCSE00001] [USA] [NoNpDRM].zip"
+
+
 class Helpers(unittest.TestCase):
     def test_valid_card_name(self):
         for bad in ("", "  ", "a/b"):
@@ -31,6 +37,12 @@ class Helpers(unittest.TestCase):
         self.assertEqual(store.dump_list(systems, ["s"]),
                          {"gba": {"full_system": True}, "ps2": [{"bucket": "ps2/B.iso"}], "sets": ["s"]})
         self.assertEqual(store.dump_list(systems[2:], []), {})
+
+    def test_system_rows_hide_vita_extras_unless_listed(self):
+        s = {"bucket": "psvita", "games": [{"bucket": DLC}]}
+        self.assertEqual([r[1] for r in edit.system_rows(s, {G, DLC, NEW})], [DLC, G])
+        s["games"] = []
+        self.assertEqual([r[1] for r in edit.system_rows(s, {G, DLC, NEW})], [G])
 
     def test_cover_notes(self):
         keys = edit.cover_notes(SETS, ["s"])

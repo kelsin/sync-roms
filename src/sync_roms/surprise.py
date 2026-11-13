@@ -6,7 +6,7 @@ import posixpath
 import random
 import re
 
-from . import inventory, m3u, mirroring, picker, s3, store, ui, usersettings
+from . import inventory, m3u, mirroring, picker, s3, store, ui, usersettings, vita
 
 SLOTS = 10
 RECOMMENDED_SHARE = 2 / 3
@@ -143,7 +143,7 @@ def is_candidate(key, system, family, bios):
 
 def units(system, keys, family, bios):
     """The candidate games among keys, each a list of its keys (a multi-disc game's playlist first, then its discs)."""
-    keys = sorted(k for k in keys if not k.endswith("/"))
+    keys = sorted(k for k in keys if not k.endswith("/") and not vita.is_extra(k))
     groups = m3u.file_groups(keys)
     out, seen = [], set()
     for k in keys:

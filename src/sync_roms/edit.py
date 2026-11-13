@@ -3,7 +3,7 @@ import os
 import sys
 from collections import defaultdict
 
-from . import picker, runtime, s3, store, ui
+from . import picker, runtime, s3, store, ui, vita
 
 
 def note(text):
@@ -113,7 +113,7 @@ def system_rows(s, in_bucket):
     listed = {g["bucket"] for g in s["games"] if g.get("bucket")}
     return [(s, k, store.key_title(k),
              k.split("/", 1)[1] + ("" if k in in_bucket else "  ⚠️ not in storage"))
-            for k in sorted(in_bucket | listed, key=str.lower)]
+            for k in sorted(in_bucket | listed, key=str.lower) if not vita.is_extra(k) or k in listed]
 
 
 def edit_card_system(card, bucket, setup):
