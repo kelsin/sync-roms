@@ -376,7 +376,9 @@ def build_scrape_plan(layout_name, systems, data, rom_rels, dest_of, es_dir, pre
                                             lambda rom, d=rom_dir: present(os.path.join(
                                                 d, os.path.basename(rom) if layout_name == "slot" else rom)),
                                             clones.get(s["bucket"]))
-        plan["jobs"] += downloads.plan_downloads(downloads.with_sizes(jobs))  # sizes only for media that could be installed
+        jobs = downloads.with_sizes(jobs)  # sizes only for media that could be installed
+        listing.update((k, size) for k, _, size in jobs)  # kept, so a rebuild of the plan reads none of them again
+        plan["jobs"] += downloads.plan_downloads(jobs)
         for path, text in texts:  # only the ones that would change
             if not os.path.exists(path) or read_text(path) != text:
                 plan["writes"].append((path, text))
@@ -393,9 +395,10 @@ def describe_scrape_plan(plan):
           + (f", {len(plan['writes'])} text file(s)" if plan["writes"] else ""))
 
 
-def apply_scrape_plan(plan, base):
-    """Download the media, then write the gamelists and text files. Returns failures."""
-    failed = downloads.run_downloads(plan["jobs"], "Scraped data", "🖼️", base)
+def apply_scrape_plan(plan, base, failures=None):
+    """Download the media, then write the gamelists and text files. Returns failures; failures, if given, collects
+    (key, reason) for each failed download."""
+    failed = downloads.run_downloads(plan["jobs"], "Scraped data", "🖼️", base, failures) if plan["jobs"] else 0
     for path, entries in plan["gamelists"].items():
         try:
             update_gamelist(path, entries)

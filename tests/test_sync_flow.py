@@ -100,11 +100,13 @@ class CleanDirsTest(unittest.TestCase):
 
 
 class DownloadInterruptTest(unittest.TestCase):
-    def run_interrupted(self, draws_that_interrupt):
+    def run_interrupted(self, draws_that_interrupt, fail=False):
         release, n = threading.Event(), []
 
         def download(job, cb, wrote=None):
             release.wait(5)
+            if fail:
+                raise OSError("boom")
 
         def draw(self_, done):
             n.append(done)
@@ -126,8 +128,9 @@ class DownloadInterruptTest(unittest.TestCase):
             st.enter_context(mock.patch.object(downloads, "hard_exit", hard_exit))
             st.enter_context(mock.patch.object(downloads.time, "sleep", lambda s: None))
             st.enter_context(mock.patch.object(ui, "POLL", 0.001))
+            self.out = st.enter_context(contextlib.redirect_stdout(io.StringIO()))
             try:
-                captured(downloads.run_downloads, [("gba/a.zip", "/tmp/x/a.zip", 5)], "ROMs", "i", "/tmp/x")
+                downloads.run_downloads([("gba/a.zip", "/tmp/x/a.zip", 5)], "ROMs", "i", "/tmp/x")
             except (KeyboardInterrupt, SystemExit):
                 pass
         return n, exits
@@ -140,6 +143,50 @@ class DownloadInterruptTest(unittest.TestCase):
     def test_second_ctrl_c_aborts_immediately(self):
         _, exits = self.run_interrupted({1, 2})
         self.assertEqual(exits, [1])
+
+    def test_in_flight_files_that_finish_after_ctrl_c_are_listed(self):
+        self.run_interrupted({1})
+        self.assertIn("✅ gba/a.zip", self.out.getvalue().split("Interrupted", 1)[1])
+
+    def test_quiet_shows_an_in_flight_file_that_fails_after_ctrl_c(self):
+        with mock.patch.object(ui, "QUIET", True), contextlib.redirect_stderr(io.StringIO()) as err:
+            self.run_interrupted({1}, fail=True)
+        self.assertIn("gba/a.zip", err.getvalue())
+
+    def test_abort_removes_the_part_files_of_unfinished_downloads_and_flushes(self):
+        started, release, seen = threading.Semaphore(0), threading.Event(), []
+
+        def download(job, cb, wrote=None):
+            open(job[1] + ".part", "wb").close()
+            started.release()
+            release.wait(5)
+
+        def draw(self_, done):
+            if not seen:
+                started.acquire(timeout=5)
+                started.acquire(timeout=5)
+            seen.append(done)
+            if len(seen) <= 2:
+                raise KeyboardInterrupt
+
+        with tempfile.TemporaryDirectory() as tmp, contextlib.ExitStack() as st:
+            out = io.StringIO()
+            out.flush = mock.Mock()
+
+            def hard_exit():
+                seen.append((sorted(os.listdir(tmp)), out.flush.called))
+                release.set()
+                raise SystemExit(130)
+            st.enter_context(mock.patch.object(s3, "download", download))
+            st.enter_context(mock.patch.object(ui.ProgressBar, "draw", draw))
+            st.enter_context(mock.patch.object(downloads, "hard_exit", hard_exit))
+            st.enter_context(mock.patch.object(downloads.time, "sleep", lambda s: None))
+            st.enter_context(mock.patch.object(runtime, "WORKERS", 2))
+            st.enter_context(contextlib.redirect_stdout(out))
+            jobs = [("gba/a.zip", os.path.join(tmp, "a.zip"), 5), ("gba/b.zip", os.path.join(tmp, "b.zip"), 5)]
+            with self.assertRaises(SystemExit):
+                downloads.run_downloads(jobs, "ROMs", "i", tmp)
+        self.assertEqual(seen[-1], ([], True))
 
 
 class PrepareDirsTest(unittest.TestCase):
