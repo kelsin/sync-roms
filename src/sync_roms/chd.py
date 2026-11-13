@@ -244,12 +244,20 @@ def plan_moves(pairs):
 
 
 def move_flat(pairs):
-    """Move each (src, dst), skipping leftovers of an interrupted run (see plan_moves); None on success, else the error."""
+    """Move each (src, dst), skipping leftovers of an interrupted run (see plan_moves); None on success, else the error.
+    Each file goes under its hidden .part name first (a copy when src is on another device) and is renamed once whole."""
     moves, error = plan_moves(pairs)
     if error:
         return error
     for src, dst in moves:
-        shutil.move(src, dst)
+        part = part_path(dst)
+        try:
+            shutil.move(src, part)
+            os.replace(part, dst)
+        except OSError as e:
+            if os.path.lexists(part):
+                os.remove(part)
+            return str(e)
 
 
 def convert_all(pairs, clash, make, exists_ok=False):
@@ -360,7 +368,7 @@ def job_scratch(tools, jobs):
     """(per job, the folder its archive unpacks in, None for beside itself; how many jobs can run at once).
 
     A converting archive whose unpacked size is known unpacks in the system temp folder when that is on another device
-    than the archive and has room for it; plain extraction always unpacks beside the archive. Each job's scratch (its
+    than the archive and has room for it plus a margin; plain extraction always unpacks beside the archive. Each job's scratch (its
     unpacked size, else the archive's size, or a loose image's size) counts on the volume it uses, and only as many jobs
     run as the biggest ones' scratch fits in each volume's free space, at least one.
     """
@@ -368,14 +376,16 @@ def job_scratch(tools, jobs):
     temp_dev = os.stat(temp).st_dev
     with ThreadPoolExecutor(min(os.cpu_count() or 4, len(jobs))) as ex:
         sizes = list(ex.map(lambda job: unpacked_size(tools, job[2]) if job[3] is None else None, jobs))
-    free = {}  # device: free bytes, from the first path seen on it
+    temp_free = shutil.disk_usage(temp).free
+    free = {temp_dev: temp_free}  # device: free bytes, from the first path seen on it
     needs = defaultdict(list)  # device: each of its jobs' scratch bytes
     scratch = []
     for (system, _, path, owned, *_), size in zip(jobs, sizes):
         dev = os.stat(os.path.dirname(path)).st_dev
-        free.setdefault(dev, shutil.disk_usage(os.path.dirname(path)).free)
+        if dev not in free:
+            free[dev] = shutil.disk_usage(os.path.dirname(path)).free
         local = (owned is None and system["chd"]["mode"] != "extract" and size is not None and dev != temp_dev
-                 and size <= free.setdefault(temp_dev, shutil.disk_usage(temp).free))
+                 and size + max(temp_free // 10, 2 ** 30) <= temp_free)  # a margin: temp is often the system drive
         scratch.append(temp if local else None)
         if size is None:
             size = sum(os.path.getsize(f) for f in owned or [path] if os.path.isfile(f))

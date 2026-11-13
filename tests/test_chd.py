@@ -63,6 +63,11 @@ class ChdTest(unittest.TestCase):
         self._tmp = tempfile.TemporaryDirectory()
         self.dir = os.path.realpath(self._tmp.name)
         self.addCleanup(self._tmp.cleanup)
+        systemp = tempfile.TemporaryDirectory()  # stale_local_scratch looks at this, never at the real temp folder
+        self.addCleanup(systemp.cleanup)
+        patch = mock.patch.object(tempfile, "tempdir", os.path.realpath(systemp.name))
+        patch.start()
+        self.addCleanup(patch.stop)
         self.tools = {"7z": "7z", "chdman": "chdman", "extract-xiso": "extract-xiso", "iso2zar": "iso2zar", "np": 1}
 
     def touch(self, *names, text=""):
@@ -571,7 +576,7 @@ class ChdTest(unittest.TestCase):
 
     def test_archive_unpacks_to_local_temp_on_another_device_with_room(self):
         self.zip_of("psx/Game.zip", **{"Game.iso": "x" * 100})
-        local, stack = self.local_temp(free=1000)
+        local, stack = self.local_temp(free=10 ** 12)
         with stack:
             code, calls, _ = self.run_convert(os.path.join(self.dir, "psx"))
         self.assertEqual(code, 0)
@@ -586,7 +591,7 @@ class ChdTest(unittest.TestCase):
         self.assertEqual(os.listdir(local), [])
 
     def test_archive_unpacks_beside_itself_without_room_on_the_same_device_or_for_extraction(self):
-        cases = {"no room": (99, True, "psx", "Game.zip"), "same device": (10 ** 12, False, "psx", "Game.zip"),
+        cases = {"no room": (99, True, "psx", "Game.zip"), "no margin": (2 ** 30 + 99, True, "psx", "Game.zip"), "same device": (10 ** 12, False, "psx", "Game.zip"),
                  "extraction": (10 ** 12, True, "gc", "Game.zip"), "size unknown": (10 ** 12, True, "psx", "Game.7z")}
         for case, (free, other, folder, name) in cases.items():
             with self.subTest(case):
@@ -624,6 +629,36 @@ class ChdTest(unittest.TestCase):
         self.assertEqual(error, "createdvd failed")
         self.assertEqual(self.files(), ["Game.zip", "local"])
         self.assertEqual(os.listdir(local), [])
+
+    def test_kept_files_reach_their_names_only_once_moved_and_a_failed_move_is_an_error(self):
+        local = os.path.join(self.dir, "local")
+        os.makedirs(local)
+        real_move, seen = chd.shutil.move, []
+
+        def move(src, dst):
+            seen.append((os.path.basename(dst), os.path.exists(os.path.join(self.dir, "Game.pkg"))))
+            return real_move(src, dst)
+
+        def full(src, dst):
+            with open(dst, "w") as f:
+                f.write("half")
+            raise OSError(28, "No space left on device")
+
+        for fake_move in (move, full):
+            self.touch("Game.zip")
+            with mock.patch.object(external, "run_tool", FakeTools(archive=["Game.iso", "Game.pkg"])), \
+                    mock.patch.object(chd.shutil, "move", fake_move):
+                error = chd.chd_archive(self.tools, PS3["chd"], os.path.join(self.dir, "Game.zip"), scratch=local)
+            if fake_move is move:
+                self.assertIsNone(error)
+                self.assertEqual(seen, [(".Game.pkg.part", False)])
+                self.assertTrue(external.own_temp(seen[0][0]))
+                self.assertEqual(self.files(), ["Game.chd", "Game.pkg", "local"])
+                os.remove(os.path.join(self.dir, "Game.pkg"))
+            else:
+                self.assertEqual(error, "[Errno 28] No space left on device")
+                self.assertEqual(self.files(), ["Game.chd", "Game.zip", "local"])
+            self.assertEqual(os.listdir(local), [])
 
     def test_archive_iso_is_rewritten_without_a_copy(self):
         self.touch("Game.zip")
