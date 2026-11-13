@@ -6,7 +6,7 @@ from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
 
 
-from . import inventory, runtime, s3, scrape_plan, store, ui, upload
+from . import inventory, runtime, s3, scrape_plan, store, ui, upload, vita
 
 
 def bucket_roms(systems, all_files=False):
@@ -20,7 +20,7 @@ def bucket_roms(systems, all_files=False):
         listings = list(ex.map(lambda s: inventory.files(s["bucket"] + "/") if all_files else store.list_system(s), todo))
     roms = {s["bucket"]: set() for s in systems}
     for s, have in zip(todo, listings):
-        keys = (k for k in have if not k.endswith("/")) if all_files else (k for k in store.available_keys(s, have) if k in have)
+        keys = (k for k in have if not k.endswith("/") and not vita.is_extra(k)) if all_files else (k for k in store.available_keys(s, have) if k in have and not vita.is_extra(k))
         roms[s["bucket"]] = {k.split("/", 1)[1] for k in keys}
     return roms
 

@@ -12,6 +12,10 @@ GBA = {"bucket": "gba", "name": "GBA"}
 SIZES = {"gba/A.zip": 100, "gba/B.zip": 200, "gba/C.zip": 400}
 SCRAPES = {"scrapes/gba/screenshots/A.png": 10, "scrapes/gba/onion/A.png": 3, "scrapes/gba/slot/A.png": 5,
            "scrapes/gba/screenshots/B.png": 20}
+VITA = {"bucket": "psvita", "name": "Vita"}
+G = "psvita/G [PCSE00349] [USA] [NoNpDRM].zip"
+DLC = "psvita/D [PCSE00349] [USA] [DLC-X].zip"
+UPD = "psvita/G [PCSE00349] [USA] [PATCH] [v1.02] [NoNpDRM].zip"
 SET = {"id": "s", "name": "S", "games": [{"system": "gba", "bucket": "gba/A.zip"}, {"system": "gba", "bucket": "gba/B.zip"}]}
 
 
@@ -56,6 +60,32 @@ class Budget(DataDir):
     def test_full_system(self):
         u = self.usage({"games": {"gba": {"full_system": True}}}, "other")
         self.assertEqual((u.bytes, u.count), (700, 3))
+
+    def test_vita_game_costs_include_its_extras_and_count_once(self):
+        self.cache["psvita/"] = {G: 1000, DLC: 20, UPD: 300}
+        self.assertEqual(budget.game_costs({"layout": "other"}, VITA, [G]), ({G: 1320}, False))
+        u = budget.system_usage({"layout": "other", "games": {"psvita": [g(G)]}}, VITA)
+        self.assertEqual((u.bytes, u.count), (1320, 1))
+
+    def test_vita_full_system_counts_each_file_once(self):
+        self.cache["psvita/"] = {G: 1000, DLC: 20, UPD: 300}
+        u = budget.system_usage({"layout": "other", "games": {"psvita": {"full_system": True}}}, VITA)
+        self.assertEqual(u.bytes, 1320)
+
+    def test_vita_listed_extras_count_once(self):
+        self.cache["psvita/"] = {G: 1000, DLC: 20, UPD: 300}
+        u = budget.system_usage({"layout": "other", "games": {"psvita": [g(G), g(DLC)]}}, VITA)
+        self.assertEqual(u.bytes, 1320)
+        self.assertEqual(budget.fetch_bytes(VITA, [G, DLC], lambda s, keys: set(keys)), 1320)
+
+    def test_vita_fetch_counts_extras(self):
+        self.cache["psvita/"] = {G: 1000, DLC: 20, UPD: 300}
+        asked = []
+        self.assertEqual(budget.fetch_bytes(VITA, [G], lambda s, keys: asked.extend(keys) or set(keys)), 1320)
+        self.assertEqual(sorted(asked), sorted([G, DLC, UPD]))
+
+    def test_fetch_with_no_keys_is_zero(self):
+        self.assertEqual(budget.fetch_bytes(VITA, None, lambda s, keys: set(keys)), 0)
 
     def test_excluded(self):
         u = self.usage({"games": {"sets": ["s"]}, "excluded": {"gba": ["gba/A.zip"]}}, "other")

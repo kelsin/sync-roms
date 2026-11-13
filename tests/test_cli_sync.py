@@ -234,6 +234,36 @@ class SyncSmokeTest(RealDataDirGuard):
         patches = ((cli, {"free_space": lambda path: 3}), (cli.ui, {"confirm": lambda q, default=True: False}))
         self.assertEqual(self.run_sync(False, patches=patches), 0)
 
+    def test_vita_game_syncs_its_dlc_and_newest_update_and_drops_the_old_update(self):
+        game = "psvita/G [PCSE00349] [USA] [NoNpDRM].zip"
+        old = "psvita/G [PCSE00349] [USA] [PATCH] [v1.02] [NoNpDRM].zip"
+        new = "psvita/G [PCSE00349] [USA] [PATCH] [v1.11] [NoNpDRM].zip"
+        dlc = "psvita/D [PCSE00349] [USA] [DLC-X].zip"
+        listing = {game: 4, old: 5, new: 6, dlc: 7}
+        vita_system = {"name": "Vita", "bucket": "psvita", "folders": {"esde": "psvita"}, "bios": {"files": []},
+                       "games": [{"bucket": game}]}
+        manifest = {**MANIFEST, "systems": [vita_system]}
+        jobs, asked = [], []
+
+        def prepare(card):
+            os.makedirs(os.path.join(card, "ROMs", "psvita"))
+            for key in (game, old):
+                with open(os.path.join(card, "ROMs", key), "wb") as f:
+                    f.write(b"x" * listing[key])
+
+        def run_downloads(todo, *args, **kwargs):
+            jobs.extend(job[0] for job in todo)
+            return 0
+        patches = ((store, {"load_manifest": lambda names=(): manifest}),
+                   (s3, {"list_sizes": lambda prefix, sizes=True: dict(listing) if prefix == "psvita/" else {}}),
+                   (cli.downloads, {"run_downloads": run_downloads}),
+                   (cli.vita, {"add_psvita_files": lambda dests: []}),
+                   (cli.ui, {"choose": lambda q, *a, **k: asked.append(q) or "y",
+                             "confirm": lambda q, default=True: asked.append(q) or True}))
+        self.assertEqual(self.run_sync(False, prepare=prepare, patches=patches), 0)
+        self.assertEqual(sorted(jobs), sorted([dlc, new]))
+        self.assertTrue(any(q.startswith("Delete these 1") for q in asked), asked)
+
 
 if __name__ == "__main__":
     unittest.main()

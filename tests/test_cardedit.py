@@ -613,7 +613,38 @@ class Flow(DataDir):
         self.assertEqual(calls, [])
 
 
+G = "psvita/G [PCSE00349] [USA] [NoNpDRM].zip"
+DLC = "psvita/D [PCSE00349] [USA] [DLC-X].zip"
+NEW = "psvita/G [PCSE00349] [USA] [PATCH] [v1.11] [NoNpDRM].zip"
+H = "psvita/H [PCSE00001] [USA] [NoNpDRM].zip"
+
 DISCS = ["psx/A (USA).m3u", "psx/A (USA) (Disc 1).chd", "psx/A (USA) (Disc 2).chd", "psx/A (USA) (Disc 3).chd"]
+
+
+class VitaFlow(Flow):
+    """A Vita game's DLC and update are not rows: the game is marked and syncs them with it."""
+
+    def setUp(self):
+        super().setUp()
+        self.files["psvita/"] = {G: 10, DLC: 1, NEW: 2, H: 5}
+        vita = {"name": "Sony PlayStation Vita", "bucket": "psvita", "folders": {"esde": "psvita"}, "bios": {"files": []}}
+        catalog = {**CATALOG, "systems": CATALOG["systems"] + [vita]}
+        p = mock.patch.object(store, "repo_json", lambda name: catalog[name])
+        p.start()
+        self.addCleanup(p.stop)
+
+    def test_only_games_are_rows_and_a_game_with_extras_is_marked(self):
+        self.card()
+        _, calls = self.run_system(returns([False, False]), bucket="psvita")
+        _, labels, kw = calls[0]
+        self.assertEqual(labels, [G.split("/", 1)[1], H.split("/", 1)[1]])
+        self.assertEqual(kw["extras"][0][0], ("  🔗 3 files", "dim"))
+        self.assertFalse(any("🔗" in text for text, _ in kw["extras"][1]))
+
+    def test_picking_a_game_saves_only_the_game(self):
+        self.card()
+        self.run_system(toggle(G.split("/", 1)[1]), bucket="psvita")
+        self.assertEqual(store.card_games("c")["psvita"], [g(G)])
 
 
 class DiscFlow(Flow):
