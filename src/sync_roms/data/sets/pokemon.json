@@ -5,12 +5,13 @@
     {
       "title": "Pokemon - Red Version (SGB Enhanced)",
       "system": "gb",
-      "bucket": "gb/Pokemon - Red Version (USA, Europe) (SGB Enhanced).zip"
-    },
-    {
-      "title": "Pokemon - Blue Version (SGB Enhanced)",
-      "system": "gb",
-      "bucket": "gb/Pokemon - Blue Version (USA, Europe) (SGB Enhanced).zip"
+      "bucket": "gb/Pokemon - Red Version (USA, Europe) (SGB Enhanced).zip",
+      "variants": [
+        {
+          "bucket": "gb/Pokemon - Blue Version (USA, Europe) (SGB Enhanced).zip",
+          "note": "GB: Blue version-exclusive Pokemon"
+        }
+      ]
     },
     {
       "title": "Pokemon - Yellow Version",
@@ -25,12 +26,13 @@
     {
       "title": "Pokemon - Gold Version (SGB Enhanced)",
       "system": "gbc",
-      "bucket": "gbc/Pokemon - Gold Version (USA, Europe) (SGB Enhanced) (GB Compatible).zip"
-    },
-    {
-      "title": "Pokemon - Silver Version (SGB Enhanced)",
-      "system": "gbc",
-      "bucket": "gbc/Pokemon - Silver Version (USA, Europe) (SGB Enhanced) (GB Compatible).zip"
+      "bucket": "gbc/Pokemon - Gold Version (USA, Europe) (SGB Enhanced) (GB Compatible).zip",
+      "variants": [
+        {
+          "bucket": "gbc/Pokemon - Silver Version (USA, Europe) (SGB Enhanced) (GB Compatible).zip",
+          "note": "GBC: Silver version-exclusive Pokemon"
+        }
+      ]
     },
     {
       "title": "Pokemon - Crystal Version (Rev 1)",
@@ -50,12 +52,13 @@
     {
       "title": "Pokemon - Ruby Version",
       "system": "gba",
-      "bucket": "gba/Pokemon - Ruby Version (USA, Europe) (Rev 2).zip"
-    },
-    {
-      "title": "Pokemon - Sapphire Version",
-      "system": "gba",
-      "bucket": "gba/Pokemon - Sapphire Version (USA, Europe) (Rev 2).zip"
+      "bucket": "gba/Pokemon - Ruby Version (USA, Europe) (Rev 2).zip",
+      "variants": [
+        {
+          "bucket": "gba/Pokemon - Sapphire Version (USA, Europe) (Rev 2).zip",
+          "note": "GBA: Sapphire version-exclusive Pokemon"
+        }
+      ]
     },
     {
       "title": "Pokemon - Emerald Version",
@@ -65,12 +68,13 @@
     {
       "title": "Pokemon - FireRed Version",
       "system": "gba",
-      "bucket": "gba/Pokemon - FireRed Version (USA, Europe) (Rev 1).zip"
-    },
-    {
-      "title": "Pokemon - LeafGreen Version",
-      "system": "gba",
-      "bucket": "gba/Pokemon - LeafGreen Version (USA, Europe) (Rev 1).zip"
+      "bucket": "gba/Pokemon - FireRed Version (USA, Europe) (Rev 1).zip",
+      "variants": [
+        {
+          "bucket": "gba/Pokemon - LeafGreen Version (USA, Europe) (Rev 1).zip",
+          "note": "GBA: LeafGreen version-exclusive Pokemon"
+        }
+      ]
     },
     {
       "title": "Pokemon Pinball - Ruby & Sapphire",
@@ -80,7 +84,13 @@
     {
       "title": "Pokemon Mystery Dungeon - Red Rescue Team",
       "system": "gba",
-      "bucket": "gba/Pokemon Mystery Dungeon - Red Rescue Team (USA, Australia).zip"
+      "bucket": "gba/Pokemon Mystery Dungeon - Red Rescue Team (USA, Australia).zip",
+      "variants": [
+        {
+          "bucket": "nds/Pokemon Mystery Dungeon - Blue Rescue Team (USA, Australia).zip",
+          "note": "DS: Blue version-exclusive Pokemon"
+        }
+      ]
     },
     {
       "title": "Pokemon Snap",
@@ -100,12 +110,13 @@
     {
       "title": "Pokemon - HeartGold Version",
       "system": "nds",
-      "bucket": "nds/Pokemon - HeartGold Version (USA).zip"
-    },
-    {
-      "title": "Pokemon - SoulSilver Version",
-      "system": "nds",
-      "bucket": "nds/Pokemon - SoulSilver Version (USA, Australia).zip"
+      "bucket": "nds/Pokemon - HeartGold Version (USA).zip",
+      "variants": [
+        {
+          "bucket": "nds/Pokemon - SoulSilver Version (USA, Australia).zip",
+          "note": "DS: SoulSilver version-exclusive Pokemon"
+        }
+      ]
     },
     {
       "title": "Pokemon - Pearl Version (Rev 5)",
@@ -133,14 +144,19 @@
       "bucket": "nds/Pokemon - White Version 2 (USA, Europe) (NDSi Enhanced).zip"
     },
     {
-      "title": "Pokemon Mystery Dungeon - Blue Rescue Team",
+      "title": "Pokemon Mystery Dungeon - Explorers of Time",
       "system": "nds",
-      "bucket": "nds/Pokemon Mystery Dungeon - Blue Rescue Team (USA, Australia).zip"
-    },
-    {
-      "title": "Pokemon Mystery Dungeon - Explorers of Sky",
-      "system": "nds",
-      "bucket": "nds/Pokemon Mystery Dungeon - Explorers of Sky (USA).zip"
+      "bucket": "nds/Pokemon Mystery Dungeon - Explorers of Time (USA).zip",
+      "variants": [
+        {
+          "bucket": "nds/Pokemon Mystery Dungeon - Explorers of Darkness (USA).zip",
+          "note": "DS: Darkness version-exclusive Pokemon"
+        },
+        {
+          "bucket": "nds/Pokemon Mystery Dungeon - Explorers of Sky (USA).zip",
+          "note": "DS: Explorers of Sky adds special episodes, Pokemon and areas"
+        }
+      ]
     },
     {
       "title": "Pokemon Ranger",
@@ -278,16 +294,6 @@
       "bucket": "nds/Pokemon Conquest (USA, Australia) (Rev 1) (NDSi Enhanced).zip"
     },
     {
-      "title": "Pokemon Mystery Dungeon - Explorers of Time",
-      "system": "nds",
-      "bucket": "nds/Pokemon Mystery Dungeon - Explorers of Time (USA).zip"
-    },
-    {
-      "title": "Pokemon Mystery Dungeon - Explorers of Darkness",
-      "system": "nds",
-      "bucket": "nds/Pokemon Mystery Dungeon - Explorers of Darkness (USA).zip"
-    },
-    {
       "title": "Pokemon Dash",
       "system": "nds",
       "bucket": "nds/Pokemon Dash (USA).zip"
@@ -315,12 +321,13 @@
     {
       "title": "Pokemon Omega Ruby (Rev 2)",
       "system": "3ds",
-      "bucket": "3ds/Pokemon Omega Ruby (USA) (En,Ja,Fr,De,Es,It,Ko) (Rev 2).zip"
-    },
-    {
-      "title": "Pokemon Alpha Sapphire (Rev 2)",
-      "system": "3ds",
-      "bucket": "3ds/Pokemon Alpha Sapphire (USA) (En,Ja,Fr,De,Es,It,Ko) (Rev 2).zip"
+      "bucket": "3ds/Pokemon Omega Ruby (USA) (En,Ja,Fr,De,Es,It,Ko) (Rev 2).zip",
+      "variants": [
+        {
+          "bucket": "3ds/Pokemon Alpha Sapphire (USA) (En,Ja,Fr,De,Es,It,Ko) (Rev 2).zip",
+          "note": "3DS: Alpha Sapphire version-exclusive Pokemon"
+        }
+      ]
     },
     {
       "title": "Pokemon Ultra Sun",

@@ -12,7 +12,13 @@
       "title": "Kirby's Adventure",
       "category": "Mainline",
       "system": "nes",
-      "bucket": "nes/Kirby's Adventure (USA) (Rev 1).zip"
+      "bucket": "nes/Kirby's Adventure (USA) (Rev 1).zip",
+      "variants": [
+        {
+          "bucket": "gba/Kirby - Nightmare in Dream Land (USA).zip",
+          "note": "GBA: remake adding Meta Knightmare, minigames and multiplayer"
+        }
+      ]
     },
     {
       "title": "Kirby's Dream Land 2",
@@ -24,7 +30,13 @@
       "title": "Kirby Super Star",
       "category": "Mainline",
       "system": "snes",
-      "bucket": "snes/Kirby Super Star (USA).zip"
+      "bucket": "snes/Kirby Super Star (USA).zip",
+      "variants": [
+        {
+          "bucket": "nds/Kirby Super Star Ultra (USA).zip",
+          "note": "DS: adds four new modes and redone graphics"
+        }
+      ]
     },
     {
       "title": "Kirby's Dream Land 3",
@@ -39,12 +51,6 @@
       "bucket": "n64/Kirby 64 - The Crystal Shards (USA).zip"
     },
     {
-      "title": "Kirby - Nightmare in Dream Land",
-      "category": "Mainline",
-      "system": "gba",
-      "bucket": "gba/Kirby - Nightmare in Dream Land (USA).zip"
-    },
-    {
       "title": "Kirby & The Amazing Mirror",
       "category": "Mainline",
       "system": "gba",
@@ -55,12 +61,6 @@
       "category": "Mainline",
       "system": "nds",
       "bucket": "nds/Kirby - Squeak Squad (USA).zip"
-    },
-    {
-      "title": "Kirby Super Star Ultra",
-      "category": "Mainline",
-      "system": "nds",
-      "bucket": "nds/Kirby Super Star Ultra (USA).zip"
     },
     {
       "title": "Kirby's Return to Dream Land",
@@ -138,7 +138,13 @@
       "title": "Kirby's Epic Yarn",
       "category": "Spin-offs",
       "system": "wii",
-      "bucket": "wii/Kirby's Epic Yarn (USA) (En,Fr,Es).rvz"
+      "bucket": "wii/Kirby's Epic Yarn (USA) (En,Fr,Es).rvz",
+      "variants": [
+        {
+          "bucket": "3ds/Kirby's Extra Epic Yarn (USA) (En,Fr,Es).zip",
+          "note": "3DS: adds Devilish mode, new abilities and minigames"
+        }
+      ]
     },
     {
       "title": "Kirby Mass Attack",
@@ -157,12 +163,6 @@
       "category": "Spin-offs",
       "system": "3ds",
       "bucket": "3ds/Kirby Battle Royale (USA) (En,Ja,Fr,De,Es,It,Nl,Ko) (Rev 2).zip"
-    },
-    {
-      "title": "Kirby's Extra Epic Yarn",
-      "category": "Spin-offs",
-      "system": "3ds",
-      "bucket": "3ds/Kirby's Extra Epic Yarn (USA) (En,Fr,Es).zip"
     },
     {
       "title": "Kirby no Omochabako - Arrange Ball",

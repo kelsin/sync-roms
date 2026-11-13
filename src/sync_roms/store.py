@@ -290,6 +290,28 @@ def set_games(game_set):
     return out
 
 
+def variant_index(sets):
+    """The variants the sets give their games, both ways: (variants, parents).
+
+    variants is {canonical bucket key: [variant entries as in the file]} in file order, a variant listed once per
+    canonical game. parents is {variant bucket key: {"bucket", "system", "title"} of its canonical game}; the first
+    set to name a variant wins. Entries without variants or without a bucket are skipped.
+    """
+    variants, parents = {}, {}
+    for s in sets:
+        for g in s["games"]:
+            key = g.get("bucket")
+            if not key or not g.get("variants"):
+                continue
+            have = variants.setdefault(key, [])
+            for v in g["variants"]:
+                if all(h["bucket"] != v["bucket"] for h in have):
+                    have.append(dict(v))
+                parents.setdefault(v["bucket"], {"bucket": key, "system": g.get("system"),
+                                                 "title": g.get("title") or key_title(key)})
+    return variants, parents
+
+
 def merge_lists(systems, lists, sets):
     """Set each system's games/full_system to the union of the games lists and the sets they reference.
 

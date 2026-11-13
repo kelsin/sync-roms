@@ -73,9 +73,9 @@
       "bucket": "genesis/Crue Ball - Heavy Metal Pinball (USA, Europe).zip"
     },
     {
-      "title": "Dragon's Fury",
-      "system": "genesis",
-      "bucket": "genesis/Dragon's Fury (USA, Europe).zip"
+      "title": "Devil's Crush",
+      "system": "tg16",
+      "bucket": "tg16/Devil's Crush (USA).zip"
     },
     {
       "title": "Virtual Pinball",
@@ -99,18 +99,8 @@
     },
     {
       "title": "Sonic Spinball",
-      "system": "mastersystem",
-      "bucket": "mastersystem/Sonic Spinball (Europe, Brazil) (En).zip"
-    },
-    {
-      "title": "Sonic Spinball",
       "system": "gamegear",
       "bucket": "gamegear/Sonic Spinball (USA, Europe, Brazil) (En).zip"
-    },
-    {
-      "title": "Pinball Dreams",
-      "system": "gamegear",
-      "bucket": "gamegear/Pinball Dreams (USA).zip"
     },
     {
       "title": "Wizard Pinball",
@@ -121,11 +111,6 @@
       "title": "Alien Crush",
       "system": "tg16",
       "bucket": "tg16/Alien Crush (USA).zip"
-    },
-    {
-      "title": "Devil's Crush",
-      "system": "tg16",
-      "bucket": "tg16/Devil's Crush (USA).zip"
     },
     {
       "title": "Time Cruise",
@@ -141,16 +126,6 @@
       "title": "Kirby's Pinball Land",
       "system": "gb",
       "bucket": "gb/Kirby's Pinball Land (USA, Europe).zip"
-    },
-    {
-      "title": "Pinball Dreams",
-      "system": "gb",
-      "bucket": "gb/Pinball Dreams (USA, Europe).zip"
-    },
-    {
-      "title": "Pinball Fantasies",
-      "system": "gb",
-      "bucket": "gb/Pinball Fantasies (USA, Europe).zip"
     },
     {
       "title": "The Getaway: High Speed II",
@@ -283,11 +258,6 @@
       "bucket": "nds/Powershot Pinball Constructor (Europe) (En,Fr,De,Es,It).zip"
     },
     {
-      "title": "Pinball Hall of Fame: The Williams Collection",
-      "system": "3ds",
-      "bucket": "3ds/Pinball Hall of Fame - The Williams' Collection (USA).zip"
-    },
-    {
       "title": "Hyper 3-D Pinball",
       "system": "saturn",
       "bucket": "saturn/Hyper 3-D Pinball (USA).chd"
@@ -299,13 +269,13 @@
     },
     {
       "title": "Pro Pinball",
-      "system": "saturn",
-      "bucket": "saturn/Pro-Pinball (USA).chd"
+      "system": "psx",
+      "bucket": "psx/Pro-Pinball (USA).chd"
     },
     {
       "title": "True Pinball",
-      "system": "saturn",
-      "bucket": "saturn/True Pinball (USA).chd"
+      "system": "psx",
+      "bucket": "psx/True Pinball (USA).chd"
     },
     {
       "title": "Digital Pinball: Necronomicon",
@@ -323,11 +293,6 @@
       "bucket": "saturn/Pinball Graffiti (Europe).chd"
     },
     {
-      "title": "Pro Pinball",
-      "system": "psx",
-      "bucket": "psx/Pro-Pinball (USA).chd"
-    },
-    {
       "title": "Pro Pinball: Timeshock!",
       "system": "psx",
       "bucket": "psx/Pro Pinball - Timeshock! (USA).chd"
@@ -341,11 +306,6 @@
       "title": "Pro Pinball: Fantastic Journey",
       "system": "psx",
       "bucket": "psx/Pro Pinball - Fantastic Journey (USA).chd"
-    },
-    {
-      "title": "True Pinball",
-      "system": "psx",
-      "bucket": "psx/True Pinball (USA).chd"
     },
     {
       "title": "Extreme Pinball",
@@ -373,11 +333,6 @@
       "bucket": "psx/Saban's Power Rangers Zeo - Full Tilt Battle Pinball (USA).chd"
     },
     {
-      "title": "Pro Pinball Trilogy",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Pro Pinball Trilogy (Europe).chd"
-    },
-    {
       "title": "Pinball Hall of Fame: The Gottlieb Collection",
       "system": "gc",
       "bucket": "gc/Pinball Hall of Fame - The Gottlieb Collection (USA).rvz"
@@ -388,19 +343,9 @@
       "bucket": "gc/Odama (USA) (Rev 1).rvz"
     },
     {
-      "title": "Pinball Hall of Fame: The Gottlieb Collection",
-      "system": "psp",
-      "bucket": "psp/Pinball Hall of Fame - The Gottlieb Collection (USA).chd"
-    },
-    {
       "title": "Pinball Hall of Fame: The Williams Collection",
       "system": "psp",
       "bucket": "psp/Pinball Hall of Fame - The Williams Collection (USA).chd"
-    },
-    {
-      "title": "Pinball Hall of Fame: The Williams Collection",
-      "system": "xbox360",
-      "bucket": "xbox360/Pinball Hall of Fame - The Williams Collection (USA).zar"
     },
     {
       "title": "Pinball Spectacular",
@@ -409,8 +354,8 @@
     },
     {
       "title": "Video Pinball",
-      "system": "atari2600",
-      "bucket": "atari2600/Video Pinball ~ Arcade Pinball (USA).zip"
+      "system": "mame",
+      "bucket": "mame/videopin.zip"
     },
     {
       "title": "Midnight Magic",
@@ -426,11 +371,6 @@
       "title": "Pinball Jam",
       "system": "atarilynx",
       "bucket": "atarilynx/Pinball Jam (USA, Europe).zip"
-    },
-    {
-      "title": "Pinball Fantasies",
-      "system": "atarijaguar",
-      "bucket": "atarijaguar/Pinball Fantasies (World).zip"
     },
     {
       "title": "Ruiner Pinball",
@@ -461,11 +401,6 @@
       "title": "Pinball Blaster",
       "system": "msx",
       "bucket": "msx/Pinball Blaster (Europe).zip"
-    },
-    {
-      "title": "Flipper Slipper",
-      "system": "msx",
-      "bucket": "msx/Flipper Slipper (Japan).zip"
     },
     {
       "title": "Thunder Ball",
@@ -523,11 +458,6 @@
       "bucket": "fbneo/flipjack.zip"
     },
     {
-      "title": "Video Pinball",
-      "system": "mame",
-      "bucket": "mame/videopin.zip"
-    },
-    {
       "title": "Super Pinball Action",
       "system": "mame",
       "bucket": "mame/spbactn.zip"
@@ -536,11 +466,6 @@
       "title": "Grand Cross",
       "system": "mame",
       "bucket": "mame/gcpinbal.zip"
-    },
-    {
-      "title": "Pinball",
-      "system": "fds",
-      "bucket": "fds/Pinball (Japan) (Disk Writer).zip"
     },
     {
       "title": "Sega Flipper",

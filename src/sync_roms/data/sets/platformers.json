@@ -12,7 +12,13 @@
       "title": "Kirby's Adventure",
       "category": "Kirby",
       "system": "nes",
-      "bucket": "nes/Kirby's Adventure (USA) (Rev 1).zip"
+      "bucket": "nes/Kirby's Adventure (USA) (Rev 1).zip",
+      "variants": [
+        {
+          "bucket": "gba/Kirby - Nightmare in Dream Land (USA).zip",
+          "note": "GBA: remake adding Meta Knightmare, minigames and multiplayer"
+        }
+      ]
     },
     {
       "title": "Kirby's Dream Land 2",
@@ -24,7 +30,13 @@
       "title": "Kirby Super Star",
       "category": "Kirby",
       "system": "snes",
-      "bucket": "snes/Kirby Super Star (USA).zip"
+      "bucket": "snes/Kirby Super Star (USA).zip",
+      "variants": [
+        {
+          "bucket": "nds/Kirby Super Star Ultra (USA).zip",
+          "note": "DS: adds four new modes and redone graphics"
+        }
+      ]
     },
     {
       "title": "Kirby's Dream Land 3",
@@ -37,12 +49,6 @@
       "category": "Kirby",
       "system": "n64",
       "bucket": "n64/Kirby 64 - The Crystal Shards (USA).zip"
-    },
-    {
-      "title": "Kirby - Nightmare in Dream Land",
-      "category": "Kirby",
-      "system": "gba",
-      "bucket": "gba/Kirby - Nightmare in Dream Land (USA).zip"
     },
     {
       "title": "Kirby & The Amazing Mirror",
@@ -63,12 +69,6 @@
       "bucket": "nds/Kirby - Squeak Squad (USA).zip"
     },
     {
-      "title": "Kirby Super Star Ultra",
-      "category": "Kirby",
-      "system": "nds",
-      "bucket": "nds/Kirby Super Star Ultra (USA).zip"
-    },
-    {
       "title": "Kirby Mass Attack",
       "category": "Kirby",
       "system": "nds",
@@ -78,7 +78,13 @@
       "title": "Kirby's Epic Yarn",
       "category": "Kirby",
       "system": "wii",
-      "bucket": "wii/Kirby's Epic Yarn (USA) (En,Fr,Es).rvz"
+      "bucket": "wii/Kirby's Epic Yarn (USA) (En,Fr,Es).rvz",
+      "variants": [
+        {
+          "bucket": "3ds/Kirby's Extra Epic Yarn (USA) (En,Fr,Es).zip",
+          "note": "3DS: adds Devilish mode, new abilities and minigames"
+        }
+      ]
     },
     {
       "title": "Kirby's Return to Dream Land",
@@ -97,12 +103,6 @@
       "category": "Kirby",
       "system": "3ds",
       "bucket": "3ds/Kirby - Planet Robobot (USA).zip"
-    },
-    {
-      "title": "Kirby's Extra Epic Yarn",
-      "category": "Kirby",
-      "system": "3ds",
-      "bucket": "3ds/Kirby's Extra Epic Yarn (USA) (En,Fr,Es).zip"
     },
     {
       "title": "Kirby and the Rainbow Curse",
@@ -285,22 +285,16 @@
       "bucket": "psx/Rayman (USA).chd"
     },
     {
-      "title": "Rayman 2 - The Great Escape",
+      "title": "Rayman 2: The Great Escape",
       "category": "Rayman",
-      "system": "psx",
-      "bucket": "psx/Rayman 2 - The Great Escape (USA) (En,Fr,Es).chd"
-    },
-    {
-      "title": "Rayman",
-      "category": "Rayman",
-      "system": "saturn",
-      "bucket": "saturn/Rayman (USA) (R2).chd"
-    },
-    {
-      "title": "Rayman",
-      "category": "Rayman",
-      "system": "atarijaguar",
-      "bucket": "atarijaguar/Rayman (World).zip"
+      "system": "n64",
+      "bucket": "n64/Rayman 2 - The Great Escape (USA) (En,Fr,De,Es,It).zip",
+      "variants": [
+        {
+          "bucket": "dreamcast/Rayman 2 - The Great Escape (USA) (En,Fr,De,Es,It).chd",
+          "note": "Dreamcast: sharper visuals and extra minigames"
+        }
+      ]
     },
     {
       "title": "Rayman",
@@ -321,12 +315,6 @@
       "bucket": "gba/Rayman 3 (USA) (En,Fr,Es).zip"
     },
     {
-      "title": "Rayman Advance",
-      "category": "Rayman",
-      "system": "gba",
-      "bucket": "gba/Rayman Advance (USA) (En,Fr,De,Es,It).zip"
-    },
-    {
       "title": "Rayman - Hoodlum's Revenge",
       "category": "Rayman",
       "system": "gba",
@@ -339,40 +327,10 @@
       "bucket": "gba/Rayman - Raving Rabbids (USA) (En,Fr,Es).zip"
     },
     {
-      "title": "Rayman 2 - The Great Escape",
-      "category": "Rayman",
-      "system": "n64",
-      "bucket": "n64/Rayman 2 - The Great Escape (USA) (En,Fr,De,Es,It).zip"
-    },
-    {
-      "title": "Rayman 2 - The Great Escape",
-      "category": "Rayman",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Rayman 2 - The Great Escape (USA) (En,Fr,De,Es,It).chd"
-    },
-    {
       "title": "Rayman 3 - Hoodlum Havoc",
       "category": "Rayman",
       "system": "gc",
       "bucket": "gc/Rayman 3 - Hoodlum Havoc (USA) (En,Fr,De,Es,It).rvz"
-    },
-    {
-      "title": "Rayman DS",
-      "category": "Rayman",
-      "system": "nds",
-      "bucket": "nds/Rayman DS (USA) (En,Fr,Es).zip"
-    },
-    {
-      "title": "Rayman 3D",
-      "category": "Rayman",
-      "system": "3ds",
-      "bucket": "3ds/Rayman 3D (USA) (En,Fr,De,Es,It).zip"
-    },
-    {
-      "title": "Rayman Origins",
-      "category": "Rayman",
-      "system": "3ds",
-      "bucket": "3ds/Rayman Origins (USA) (En,Fr,Es).zip"
     },
     {
       "title": "Rayman Origins",
@@ -385,18 +343,6 @@
       "category": "Rayman",
       "system": "wiiu",
       "bucket": "wiiu/Rayman Legends (US).wua"
-    },
-    {
-      "title": "Rayman Legends",
-      "category": "Rayman",
-      "system": "psvita",
-      "bucket": "psvita/Rayman® Legends [PCSE00277] [USA] [NoNpDRM].zip"
-    },
-    {
-      "title": "Rayman Origins",
-      "category": "Rayman",
-      "system": "psvita",
-      "bucket": "psvita/Rayman® Origins [PCSE00052] [USA] [NoNpDRM].zip"
     },
     {
       "title": "Banjo-Kazooie",
@@ -420,19 +366,19 @@
       "title": "Conker's Bad Fur Day",
       "category": "Rare & 3D Mascots",
       "system": "n64",
-      "bucket": "n64/Conker's Bad Fur Day (USA).zip"
+      "bucket": "n64/Conker's Bad Fur Day (USA).zip",
+      "variants": [
+        {
+          "bucket": "xbox/Conker - Live & Reloaded (USA) (En,Ja,Fr,De,Es,It).iso",
+          "note": "Xbox: remade graphics and new online/class multiplayer; censored"
+        }
+      ]
     },
     {
       "title": "Conker's Pocket Tales",
       "category": "Rare & 3D Mascots",
       "system": "gbc",
       "bucket": "gbc/Conker's Pocket Tales (USA, Europe) (En,Fr,De) (SGB Enhanced) (GB Compatible).zip"
-    },
-    {
-      "title": "Conker - Live & Reloaded",
-      "category": "Rare & 3D Mascots",
-      "system": "xbox",
-      "bucket": "xbox/Conker - Live & Reloaded (USA) (En,Ja,Fr,De,Es,It).iso"
     },
     {
       "title": "Sabre Wulf",
@@ -459,24 +405,6 @@
       "bucket": "psx/Gex - Enter the Gecko (USA).chd"
     },
     {
-      "title": "Gex",
-      "category": "Rare & 3D Mascots",
-      "system": "saturn",
-      "bucket": "saturn/Gex (USA).chd"
-    },
-    {
-      "title": "Gex 3 - Deep Cover Gecko",
-      "category": "Rare & 3D Mascots",
-      "system": "n64",
-      "bucket": "n64/Gex 3 - Deep Cover Gecko (USA).zip"
-    },
-    {
-      "title": "Gex 64 - Enter the Gecko",
-      "category": "Rare & 3D Mascots",
-      "system": "n64",
-      "bucket": "n64/Gex 64 - Enter the Gecko (USA).zip"
-    },
-    {
       "title": "Gex 3 - Deep Pocket Gecko",
       "category": "Rare & 3D Mascots",
       "system": "gbc",
@@ -493,12 +421,6 @@
       "category": "Rare & 3D Mascots",
       "system": "psx",
       "bucket": "psx/Croc - Legend of the Gobbos (USA).chd"
-    },
-    {
-      "title": "Croc - Legend of the Gobbos",
-      "category": "Rare & 3D Mascots",
-      "system": "saturn",
-      "bucket": "saturn/Croc - Legend of the Gobbos (USA).chd"
     },
     {
       "title": "Croc",
@@ -579,22 +501,10 @@
       "bucket": "nds/Pac-Man World 3 (USA).zip"
     },
     {
-      "title": "Pac-Man World 3",
-      "category": "Rare & 3D Mascots",
-      "system": "psp",
-      "bucket": "psp/Pac-Man World 3 (USA).chd"
-    },
-    {
       "title": "Glover",
       "category": "Rare & 3D Mascots",
       "system": "n64",
       "bucket": "n64/Glover (USA).zip"
-    },
-    {
-      "title": "Glover",
-      "category": "Rare & 3D Mascots",
-      "system": "psx",
-      "bucket": "psx/Glover (USA).chd"
     },
     {
       "title": "Chameleon Twist",
@@ -831,22 +741,10 @@
       "bucket": "nes/DuckTales (USA).zip"
     },
     {
-      "title": "DuckTales",
-      "category": "Disney",
-      "system": "gb",
-      "bucket": "gb/DuckTales (USA).zip"
-    },
-    {
       "title": "DuckTales 2",
       "category": "Disney",
       "system": "nes",
       "bucket": "nes/DuckTales 2 (USA).zip"
-    },
-    {
-      "title": "DuckTales 2",
-      "category": "Disney",
-      "system": "gb",
-      "bucket": "gb/DuckTales 2 (USA).zip"
     },
     {
       "title": "Chip 'n Dale - Rescue Rangers",
@@ -869,12 +767,6 @@
     {
       "title": "Darkwing Duck",
       "category": "Disney",
-      "system": "gb",
-      "bucket": "gb/Darkwing Duck (USA).zip"
-    },
-    {
-      "title": "Darkwing Duck",
-      "category": "Disney",
       "system": "tg16",
       "bucket": "tg16/Darkwing Duck (USA).zip"
     },
@@ -887,12 +779,6 @@
     {
       "title": "TaleSpin",
       "category": "Disney",
-      "system": "gamegear",
-      "bucket": "gamegear/TaleSpin (USA, Europe, Brazil) (En).zip"
-    },
-    {
-      "title": "TaleSpin",
-      "category": "Disney",
       "system": "tg16",
       "bucket": "tg16/TaleSpin (USA).zip"
     },
@@ -901,12 +787,6 @@
       "category": "Disney",
       "system": "nes",
       "bucket": "nes/Little Mermaid, The (USA).zip"
-    },
-    {
-      "title": "Little Mermaid, The",
-      "category": "Disney",
-      "system": "gb",
-      "bucket": "gb/Little Mermaid, The (USA).zip"
     },
     {
       "title": "Mickey Mousecapade",
@@ -923,14 +803,8 @@
     {
       "title": "Jungle Book, The",
       "category": "Disney",
-      "system": "nes",
-      "bucket": "nes/Jungle Book, The (USA).zip"
-    },
-    {
-      "title": "Jungle Book, The",
-      "category": "Disney",
-      "system": "gb",
-      "bucket": "gb/Jungle Book, The (USA, Europe).zip"
+      "system": "genesis",
+      "bucket": "genesis/Jungle Book, The (USA).zip"
     },
     {
       "title": "Jungle Book, The",
@@ -941,56 +815,8 @@
     {
       "title": "Jungle Book, The",
       "category": "Disney",
-      "system": "genesis",
-      "bucket": "genesis/Jungle Book, The (USA).zip"
-    },
-    {
-      "title": "Jungle Book, The",
-      "category": "Disney",
-      "system": "mastersystem",
-      "bucket": "mastersystem/Jungle Book, The (Europe, Brazil) (En).zip"
-    },
-    {
-      "title": "Jungle Book, The",
-      "category": "Disney",
-      "system": "gamegear",
-      "bucket": "gamegear/Jungle Book, The (USA).zip"
-    },
-    {
-      "title": "Jungle Book, The",
-      "category": "Disney",
       "system": "gba",
       "bucket": "gba/Jungle Book, The (USA) (En,Fr,De,Es,It,Nl).zip"
-    },
-    {
-      "title": "Aladdin",
-      "category": "Disney",
-      "system": "nes",
-      "bucket": "nes/Aladdin (Europe).zip"
-    },
-    {
-      "title": "Aladdin",
-      "category": "Disney",
-      "system": "gb",
-      "bucket": "gb/Aladdin (USA) (SGB Enhanced).zip"
-    },
-    {
-      "title": "Aladdin",
-      "category": "Disney",
-      "system": "gbc",
-      "bucket": "gbc/Aladdin (USA).zip"
-    },
-    {
-      "title": "Aladdin",
-      "category": "Disney",
-      "system": "gba",
-      "bucket": "gba/Aladdin (USA) (En,Fr,De,Es).zip"
-    },
-    {
-      "title": "Aladdin",
-      "category": "Disney",
-      "system": "snes",
-      "bucket": "snes/Aladdin (USA).zip"
     },
     {
       "title": "Aladdin",
@@ -1001,26 +827,14 @@
     {
       "title": "Aladdin",
       "category": "Disney",
-      "system": "mastersystem",
-      "bucket": "mastersystem/Aladdin (Europe, Brazil) (En).zip"
+      "system": "snes",
+      "bucket": "snes/Aladdin (USA).zip"
     },
     {
       "title": "Aladdin",
       "category": "Disney",
-      "system": "gamegear",
-      "bucket": "gamegear/Aladdin (USA, Europe, Brazil) (En).zip"
-    },
-    {
-      "title": "Lion King, The",
-      "category": "Disney",
-      "system": "nes",
-      "bucket": "nes/Lion King, The (Europe).zip"
-    },
-    {
-      "title": "Lion King, The",
-      "category": "Disney",
-      "system": "gb",
-      "bucket": "gb/Lion King, The (USA).zip"
+      "system": "mastersystem",
+      "bucket": "mastersystem/Aladdin (Europe, Brazil) (En).zip"
     },
     {
       "title": "Lion King, The",
@@ -1031,20 +845,8 @@
     {
       "title": "Lion King, The",
       "category": "Disney",
-      "system": "genesis",
-      "bucket": "genesis/Lion King, The (World).zip"
-    },
-    {
-      "title": "Lion King, The",
-      "category": "Disney",
       "system": "mastersystem",
       "bucket": "mastersystem/Lion King, The (Europe, Brazil) (En).zip"
-    },
-    {
-      "title": "Lion King, The",
-      "category": "Disney",
-      "system": "gamegear",
-      "bucket": "gamegear/Lion King, The (USA).zip"
     },
     {
       "title": "Beauty and the Beast",
@@ -1061,20 +863,8 @@
     {
       "title": "Pinocchio",
       "category": "Disney",
-      "system": "gb",
-      "bucket": "gb/Pinocchio (USA).zip"
-    },
-    {
-      "title": "Pinocchio",
-      "category": "Disney",
       "system": "snes",
       "bucket": "snes/Pinocchio (USA).zip"
-    },
-    {
-      "title": "Pinocchio",
-      "category": "Disney",
-      "system": "genesis",
-      "bucket": "genesis/Pinocchio (USA).zip"
     },
     {
       "title": "Hercules",
@@ -1103,32 +893,8 @@
     {
       "title": "Toy Story",
       "category": "Disney",
-      "system": "gb",
-      "bucket": "gb/Toy Story (USA) (Rev 1) (SGB Enhanced).zip"
-    },
-    {
-      "title": "Toy Story",
-      "category": "Disney",
-      "system": "snes",
-      "bucket": "snes/Toy Story (USA).zip"
-    },
-    {
-      "title": "Toy Story",
-      "category": "Disney",
       "system": "genesis",
       "bucket": "genesis/Toy Story (USA).zip"
-    },
-    {
-      "title": "Maui Mallard in Cold Shadow",
-      "category": "Disney",
-      "system": "gb",
-      "bucket": "gb/Maui Mallard in Cold Shadow (USA).zip"
-    },
-    {
-      "title": "Maui Mallard in Cold Shadow",
-      "category": "Disney",
-      "system": "snes",
-      "bucket": "snes/Maui Mallard in Cold Shadow (USA).zip"
     },
     {
       "title": "Donald in Maui Mallard",
@@ -1149,52 +915,22 @@
       "bucket": "snes/Great Circus Mystery Starring Mickey & Minnie, The (USA).zip"
     },
     {
-      "title": "Great Circus Mystery Starring Mickey & Minnie, The",
-      "category": "Disney",
-      "system": "genesis",
-      "bucket": "genesis/Great Circus Mystery Starring Mickey & Minnie, The (USA).zip"
-    },
-    {
-      "title": "Mickey to Donald - Magical Adventure 3",
-      "category": "Disney",
-      "system": "snes",
-      "bucket": "snes/Mickey to Donald - Magical Adventure 3 (Japan).zip"
-    },
-    {
-      "title": "Magical Quest 2 Starring Mickey & Minnie",
-      "category": "Disney",
-      "system": "gba",
-      "bucket": "gba/Magical Quest 2 Starring Mickey & Minnie (USA) (En,Fr,De).zip"
-    },
-    {
       "title": "Magical Quest 3 Starring Mickey & Donald",
       "category": "Disney",
       "system": "gba",
       "bucket": "gba/Magical Quest 3 Starring Mickey & Donald (USA) (En,Fr,De).zip"
     },
     {
-      "title": "Magical Quest Starring Mickey & Minnie",
-      "category": "Disney",
-      "system": "gba",
-      "bucket": "gba/Magical Quest Starring Mickey & Minnie (USA).zip"
-    },
-    {
-      "title": "Mickey Mania - The Timeless Adventures of Mickey Mouse",
-      "category": "Disney",
-      "system": "snes",
-      "bucket": "snes/Mickey Mania - The Timeless Adventures of Mickey Mouse (USA).zip"
-    },
-    {
       "title": "Mickey Mania - The Timeless Adventures of Mickey Mouse",
       "category": "Disney",
       "system": "genesis",
-      "bucket": "genesis/Mickey Mania - The Timeless Adventures of Mickey Mouse (USA).zip"
-    },
-    {
-      "title": "Mickey Mania - The Timeless Adventures of Mickey Mouse",
-      "category": "Disney",
-      "system": "segacd",
-      "bucket": "segacd/Mickey Mania - The Timeless Adventures of Mickey Mouse (USA).chd"
+      "bucket": "genesis/Mickey Mania - The Timeless Adventures of Mickey Mouse (USA).zip",
+      "variants": [
+        {
+          "bucket": "segacd/Mickey Mania - The Timeless Adventures of Mickey Mouse (USA).chd",
+          "note": "Sega CD: adds the Moose Hunt level and a CD soundtrack"
+        }
+      ]
     },
     {
       "title": "Mickey no Tokyo Disneyland Daibouken",
@@ -1239,28 +975,10 @@
       "bucket": "mastersystem/Castle of Illusion Starring Mickey Mouse (USA, Europe, Brazil) (En) (Rev 1).zip"
     },
     {
-      "title": "Castle of Illusion Starring Mickey Mouse",
-      "category": "Disney",
-      "system": "gamegear",
-      "bucket": "gamegear/Castle of Illusion Starring Mickey Mouse (USA, Europe, Brazil) (En).zip"
-    },
-    {
       "title": "Land of Illusion Starring Mickey Mouse",
       "category": "Disney",
       "system": "mastersystem",
       "bucket": "mastersystem/Land of Illusion Starring Mickey Mouse (Europe, Brazil) (En).zip"
-    },
-    {
-      "title": "Land of Illusion Starring Mickey Mouse",
-      "category": "Disney",
-      "system": "gamegear",
-      "bucket": "gamegear/Land of Illusion Starring Mickey Mouse (USA, Europe, Brazil) (En).zip"
-    },
-    {
-      "title": "Legend of Illusion Starring Mickey Mouse",
-      "category": "Disney",
-      "system": "mastersystem",
-      "bucket": "mastersystem/Legend of Illusion Starring Mickey Mouse (Brazil) (En).zip"
     },
     {
       "title": "Legend of Illusion Starring Mickey Mouse",
@@ -1293,34 +1011,16 @@
       "bucket": "mastersystem/Lucky Dime Caper Starring Donald Duck, The (Europe, Brazil) (En).zip"
     },
     {
-      "title": "Lucky Dime Caper Starring Donald Duck, The",
-      "category": "Disney",
-      "system": "gamegear",
-      "bucket": "gamegear/Lucky Dime Caper Starring Donald Duck, The (USA, Europe, Brazil) (En).zip"
-    },
-    {
       "title": "Deep Duck Trouble Starring Donald Duck",
       "category": "Disney",
       "system": "mastersystem",
       "bucket": "mastersystem/Deep Duck Trouble Starring Donald Duck (Europe, Brazil) (En).zip"
     },
     {
-      "title": "Deep Duck Trouble Starring Donald Duck",
-      "category": "Disney",
-      "system": "gamegear",
-      "bucket": "gamegear/Deep Duck Trouble Starring Donald Duck (USA, Europe).zip"
-    },
-    {
       "title": "Donald no Magical World",
       "category": "Disney",
       "system": "gamegear",
       "bucket": "gamegear/Donald no Magical World (Japan) (En,Ja).zip"
-    },
-    {
-      "title": "Sega Ages - I Love Mickey Mouse - Fushigi no Oshiro Daibouken & I Love Donald Duck - Georgia Ou no Hihou",
-      "category": "Disney",
-      "system": "saturn",
-      "bucket": "saturn/Sega Ages - I Love Mickey Mouse - Fushigi no Oshiro Daibouken & I Love Donald Duck - Georgia Ou no Hihou (Japan).chd"
     },
     {
       "title": "Donald Duck Advance",
@@ -1425,10 +1125,10 @@
       "bucket": "gbc/Tarzan (USA, Europe).zip"
     },
     {
-      "title": "Tarzan",
+      "title": "Disney's Tarzan",
       "category": "Disney",
-      "system": "n64",
-      "bucket": "n64/Tarzan (USA).zip"
+      "system": "psx",
+      "bucket": "psx/Disney's Tarzan (USA).chd"
     },
     {
       "title": "Donald Duck - Goin' Quackers",
@@ -1437,10 +1137,10 @@
       "bucket": "gbc/Donald Duck - Goin' Quackers (USA) (En,Fr,De,Es,It).zip"
     },
     {
-      "title": "Donald Duck - Goin' Quackers",
+      "title": "Donald Duck: Goin' Quackers",
       "category": "Disney",
-      "system": "n64",
-      "bucket": "n64/Donald Duck - Goin' Quackers (USA) (En,Fr,De,Es,It).zip"
+      "system": "dreamcast",
+      "bucket": "dreamcast/Disney's Donald Duck - Goin' Quackers (USA).chd"
     },
     {
       "title": "Lion King, The - Simba's Mighty Adventure",
@@ -1467,10 +1167,10 @@
       "bucket": "gbc/Bug's Life, A (USA) (SGB Enhanced) (GB Compatible).zip"
     },
     {
-      "title": "Bug's Life, A",
+      "title": "Disney-Pixar A Bug's Life",
       "category": "Disney",
-      "system": "n64",
-      "bucket": "n64/Bug's Life, A (USA).zip"
+      "system": "psx",
+      "bucket": "psx/Disney-Pixar A Bug's Life (USA).chd"
     },
     {
       "title": "Emperor's New Groove, The",
@@ -1503,30 +1203,6 @@
       "bucket": "psx/Disney's Hercules Action Game (USA).chd"
     },
     {
-      "title": "Disney's Tarzan",
-      "category": "Disney",
-      "system": "psx",
-      "bucket": "psx/Disney's Tarzan (USA).chd"
-    },
-    {
-      "title": "Disney's Donald Duck - Goin' Quackers",
-      "category": "Disney",
-      "system": "psx",
-      "bucket": "psx/Disney's Donald Duck - Goin' Quackers (USA).chd"
-    },
-    {
-      "title": "Disney's Donald Duck - Goin' Quackers",
-      "category": "Disney",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Disney's Donald Duck - Goin' Quackers (USA).chd"
-    },
-    {
-      "title": "Disney's Donald Duck - Goin' Quackers",
-      "category": "Disney",
-      "system": "gc",
-      "bucket": "gc/Disney's Donald Duck - Goin' Quackers (USA) (En,Fr).rvz"
-    },
-    {
       "title": "Disney's The Lion King - Simba's Mighty Adventure",
       "category": "Disney",
       "system": "psx",
@@ -1537,24 +1213,6 @@
       "category": "Disney",
       "system": "psx",
       "bucket": "psx/Disney-Pixar Toy Story 2 - Buzz Lightyear to the Rescue! (USA) (Rev 1).chd"
-    },
-    {
-      "title": "Disney-Pixar Toy Story 2 - Buzz Lightyear to the Rescue!",
-      "category": "Disney",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Disney-Pixar Toy Story 2 - Buzz Lightyear to the Rescue! (USA).chd"
-    },
-    {
-      "title": "Toy Story 2 - Buzz Lightyear to the Rescue!",
-      "category": "Disney",
-      "system": "n64",
-      "bucket": "n64/Toy Story 2 - Buzz Lightyear to the Rescue! (USA) (Rev 1).zip"
-    },
-    {
-      "title": "Disney-Pixar A Bug's Life",
-      "category": "Disney",
-      "system": "psx",
-      "bucket": "psx/Disney-Pixar A Bug's Life (USA).chd"
     },
     {
       "title": "Disney's The Emperor's New Groove",
@@ -1593,22 +1251,10 @@
       "bucket": "psx/Disney Presents Tigger's Honey Hunt (USA).chd"
     },
     {
-      "title": "Tigger's Honey Hunt",
-      "category": "Disney",
-      "system": "n64",
-      "bucket": "n64/Tigger's Honey Hunt (USA).zip"
-    },
-    {
       "title": "Disney's 102 Dalmatians - Puppies to the Rescue",
       "category": "Disney",
       "system": "psx",
       "bucket": "psx/Disney's 102 Dalmatians - Puppies to the Rescue (USA).chd"
-    },
-    {
-      "title": "Disney's 102 Dalmatians - Puppies to the Rescue",
-      "category": "Disney",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Disney's 102 Dalmatians - Puppies to the Rescue (USA).chd"
     },
     {
       "title": "Disney-Pixar Monsters, Inc. - Scream Team",
@@ -1641,12 +1287,6 @@
       "bucket": "wii/Disney Epic Mickey 2 - The Power of Two (USA) (En,Fr,Es,Pt).rvz"
     },
     {
-      "title": "Disney Epic Mickey 2",
-      "category": "Disney",
-      "system": "psvita",
-      "bucket": "psvita/Disney Epic Mickey 2 [PCSA00110] [USA] [NoNpDRM].zip"
-    },
-    {
       "title": "Disney Epic Mickey - Power of Illusion",
       "category": "Disney",
       "system": "3ds",
@@ -1671,10 +1311,10 @@
       "bucket": "mastersystem/Alex Kidd in Shinobi World (USA, Europe, Brazil) (En).zip"
     },
     {
-      "title": "Alex Kidd - The Lost Stars",
+      "title": "Alex Kidd: The Lost Stars",
       "category": "Sega Mascots",
-      "system": "mastersystem",
-      "bucket": "mastersystem/Alex Kidd - The Lost Stars (World).zip"
+      "system": "fbneo",
+      "bucket": "fbneo/alexkidd.zip"
     },
     {
       "title": "Alex Kidd in the Enchanted Castle",
@@ -1683,16 +1323,10 @@
       "bucket": "genesis/Alex Kidd in the Enchanted Castle (USA).zip"
     },
     {
-      "title": "Alex Kidd - The Lost Stars",
-      "category": "Sega Mascots",
-      "system": "fbneo",
-      "bucket": "fbneo/alexkidd.zip"
-    },
-    {
       "title": "Wonder Boy",
       "category": "Sega Mascots",
-      "system": "mastersystem",
-      "bucket": "mastersystem/Wonder Boy (USA, Europe, Brazil) (En) (Rev 1).zip"
+      "system": "fbneo",
+      "bucket": "fbneo/wboy.zip"
     },
     {
       "title": "Wonder Boy III - The Dragon's Trap",
@@ -1701,28 +1335,10 @@
       "bucket": "mastersystem/Wonder Boy III - The Dragon's Trap (USA, Europe).zip"
     },
     {
-      "title": "Wonder Boy in Monster Land",
+      "title": "Wonder Boy: Monster Land",
       "category": "Sega Mascots",
-      "system": "mastersystem",
-      "bucket": "mastersystem/Wonder Boy in Monster Land (USA, Europe).zip"
-    },
-    {
-      "title": "Wonder Boy in Monster World",
-      "category": "Sega Mascots",
-      "system": "mastersystem",
-      "bucket": "mastersystem/Wonder Boy in Monster World (Europe).zip"
-    },
-    {
-      "title": "Wonder Boy - The Dragon's Trap",
-      "category": "Sega Mascots",
-      "system": "gamegear",
-      "bucket": "gamegear/Wonder Boy - The Dragon's Trap (Europe).zip"
-    },
-    {
-      "title": "Wonder Boy III - Monster Lair",
-      "category": "Sega Mascots",
-      "system": "genesis",
-      "bucket": "genesis/Wonder Boy III - Monster Lair (Japan, Europe) (En).zip"
+      "system": "fbneo",
+      "bucket": "fbneo/wbml.zip"
     },
     {
       "title": "Wonder Boy in Monster World",
@@ -1731,25 +1347,7 @@
       "bucket": "genesis/Wonder Boy in Monster World (USA, Europe).zip"
     },
     {
-      "title": "Wonder Boy",
-      "category": "Sega Mascots",
-      "system": "sg1000",
-      "bucket": "sg1000/Wonder Boy (Japan, Australia) (Ja).zip"
-    },
-    {
-      "title": "Wonder Boy",
-      "category": "Sega Mascots",
-      "system": "fbneo",
-      "bucket": "fbneo/wboy.zip"
-    },
-    {
-      "title": "Wonder Boy in Monster Land",
-      "category": "Sega Mascots",
-      "system": "fbneo",
-      "bucket": "fbneo/wbml.zip"
-    },
-    {
-      "title": "Wonder Boy III - Monster Lair",
+      "title": "Wonder Boy III: Monster Lair",
       "category": "Sega Mascots",
       "system": "fbneo",
       "bucket": "fbneo/wb3.zip"
@@ -1759,30 +1357,6 @@
       "category": "Sega Mascots",
       "system": "genesis",
       "bucket": "genesis/Monster World IV (USA) (Genesis Mini).zip"
-    },
-    {
-      "title": "Monster Lair",
-      "category": "Sega Mascots",
-      "system": "tg-cd",
-      "bucket": "tg-cd/Monster Lair (USA).chd"
-    },
-    {
-      "title": "Dragon's Curse",
-      "category": "Sega Mascots",
-      "system": "tg16",
-      "bucket": "tg16/Dragon's Curse (USA).zip"
-    },
-    {
-      "title": "Dynastic Hero, The",
-      "category": "Sega Mascots",
-      "system": "tg-cd",
-      "bucket": "tg-cd/Dynastic Hero, The (USA).chd"
-    },
-    {
-      "title": "Bikkuriman World",
-      "category": "Sega Mascots",
-      "system": "tg16",
-      "bucket": "tg16/Bikkuriman World (Japan).zip"
     },
     {
       "title": "Psycho Fox",
@@ -1821,18 +1395,6 @@
       "bucket": "genesis/Dynamite Headdy (USA, Europe).zip"
     },
     {
-      "title": "Dynamite Headdy",
-      "category": "Sega Mascots",
-      "system": "gamegear",
-      "bucket": "gamegear/Dynamite Headdy (USA, Europe).zip"
-    },
-    {
-      "title": "Dynamite Headdy",
-      "category": "Sega Mascots",
-      "system": "mastersystem",
-      "bucket": "mastersystem/Dynamite Headdy (Brazil) (En).zip"
-    },
-    {
       "title": "Pulseman",
       "category": "Sega Mascots",
       "system": "genesis",
@@ -1855,12 +1417,6 @@
       "category": "Sega Mascots",
       "system": "genesis",
       "bucket": "genesis/Greendog - The Beached Surfer Dude! (USA, Europe).zip"
-    },
-    {
-      "title": "Flicky",
-      "category": "Sega Mascots",
-      "system": "genesis",
-      "bucket": "genesis/Flicky (USA, Europe).zip"
     },
     {
       "title": "Flicky",
@@ -1931,12 +1487,6 @@
     {
       "title": "Bonk's Adventure",
       "category": "Hudson",
-      "system": "nes",
-      "bucket": "nes/Bonk's Adventure (USA).zip"
-    },
-    {
-      "title": "Bonk's Adventure",
-      "category": "Hudson",
       "system": "gb",
       "bucket": "gb/Bonk's Adventure (USA).zip"
     },
@@ -1951,12 +1501,6 @@
       "category": "Hudson",
       "system": "tg16",
       "bucket": "tg16/Bonk 3 - Bonk's Big Adventure (USA).zip"
-    },
-    {
-      "title": "Bonk III - Bonk's Big Adventure",
-      "category": "Hudson",
-      "system": "tg-cd",
-      "bucket": "tg-cd/Bonk III - Bonk's Big Adventure (USA).chd"
     },
     {
       "title": "Super Bonk",
@@ -2031,22 +1575,10 @@
       "bucket": "nes/Takahashi Meijin no Bouken-jima IV (Japan).zip"
     },
     {
-      "title": "Hudson Selection Vol. 4 - Takahashi-Meijin no Boukenjima",
-      "category": "Hudson",
-      "system": "gc",
-      "bucket": "gc/Hudson Selection Vol. 4 - Takahashi-Meijin no Boukenjima (Japan).rvz"
-    },
-    {
       "title": "Milon's Secret Castle",
       "category": "Hudson",
       "system": "nes",
       "bucket": "nes/Milon's Secret Castle (USA).zip"
-    },
-    {
-      "title": "Milon's Secret Castle",
-      "category": "Hudson",
-      "system": "gb",
-      "bucket": "gb/Milon's Secret Castle (USA, Europe).zip"
     },
     {
       "title": "DoReMi Fantasy - Milon no Dokidoki Daibouken",
@@ -2059,12 +1591,6 @@
       "category": "Hudson",
       "system": "nes",
       "bucket": "nes/Felix the Cat (USA) (Hudson).zip"
-    },
-    {
-      "title": "Felix the Cat",
-      "category": "Hudson",
-      "system": "gb",
-      "bucket": "gb/Felix the Cat (USA, Europe).zip"
     },
     {
       "title": "Jackie Chan's Action Kung Fu",
@@ -2100,7 +1626,13 @@
       "title": "Earthworm Jim",
       "category": "16-bit Mascots",
       "system": "genesis",
-      "bucket": "genesis/Earthworm Jim (USA).zip"
+      "bucket": "genesis/Earthworm Jim (USA).zip",
+      "variants": [
+        {
+          "bucket": "segacd/Earthworm Jim - Special Edition (USA) (RE).chd",
+          "note": "Sega CD: adds a new level, extra animation and a CD soundtrack"
+        }
+      ]
     },
     {
       "title": "Earthworm Jim 2",
@@ -2109,64 +1641,10 @@
       "bucket": "genesis/Earthworm Jim 2 (USA).zip"
     },
     {
-      "title": "Earthworm Jim",
-      "category": "16-bit Mascots",
-      "system": "snes",
-      "bucket": "snes/Earthworm Jim (USA).zip"
-    },
-    {
-      "title": "Earthworm Jim 2",
-      "category": "16-bit Mascots",
-      "system": "snes",
-      "bucket": "snes/Earthworm Jim 2 (USA).zip"
-    },
-    {
-      "title": "Earthworm Jim - Special Edition",
-      "category": "16-bit Mascots",
-      "system": "segacd",
-      "bucket": "segacd/Earthworm Jim - Special Edition (USA) (RE).chd"
-    },
-    {
-      "title": "Earthworm Jim 2",
-      "category": "16-bit Mascots",
-      "system": "saturn",
-      "bucket": "saturn/Earthworm Jim 2 (USA).chd"
-    },
-    {
-      "title": "Earthworm Jim",
-      "category": "16-bit Mascots",
-      "system": "gba",
-      "bucket": "gba/Earthworm Jim (USA, Europe).zip"
-    },
-    {
-      "title": "Earthworm Jim 2",
-      "category": "16-bit Mascots",
-      "system": "gba",
-      "bucket": "gba/Earthworm Jim 2 (USA).zip"
-    },
-    {
-      "title": "Earthworm Jim",
-      "category": "16-bit Mascots",
-      "system": "gb",
-      "bucket": "gb/Earthworm Jim (USA).zip"
-    },
-    {
       "title": "Earthworm Jim - Menace 2 the Galaxy",
       "category": "16-bit Mascots",
       "system": "gbc",
       "bucket": "gbc/Earthworm Jim - Menace 2 the Galaxy (USA, Europe) (GB Compatible).zip"
-    },
-    {
-      "title": "Earthworm Jim",
-      "category": "16-bit Mascots",
-      "system": "gamegear",
-      "bucket": "gamegear/Earthworm Jim (USA).zip"
-    },
-    {
-      "title": "Earthworm Jim",
-      "category": "16-bit Mascots",
-      "system": "mastersystem",
-      "bucket": "mastersystem/Earthworm Jim (Brazil) (En).zip"
     },
     {
       "title": "Earthworm Jim 3D",
@@ -2187,34 +1665,10 @@
       "bucket": "snes/Aero the Acro-Bat 2 (USA).zip"
     },
     {
-      "title": "Aero the Acro-Bat",
-      "category": "16-bit Mascots",
-      "system": "genesis",
-      "bucket": "genesis/Aero the Acro-Bat (USA).zip"
-    },
-    {
-      "title": "Aero the Acro-Bat 2",
-      "category": "16-bit Mascots",
-      "system": "genesis",
-      "bucket": "genesis/Aero the Acro-Bat 2 (USA).zip"
-    },
-    {
-      "title": "Aero the Acro-Bat",
-      "category": "16-bit Mascots",
-      "system": "gba",
-      "bucket": "gba/Aero the Acro-Bat (USA).zip"
-    },
-    {
       "title": "Zero the Kamikaze Squirrel",
       "category": "16-bit Mascots",
       "system": "snes",
       "bucket": "snes/Zero the Kamikaze Squirrel (USA).zip"
-    },
-    {
-      "title": "Zero the Kamikaze Squirrel",
-      "category": "16-bit Mascots",
-      "system": "genesis",
-      "bucket": "genesis/Zero the Kamikaze Squirrel (USA).zip"
     },
     {
       "title": "Bubsy II",
@@ -2229,28 +1683,10 @@
       "bucket": "snes/Bubsy in - Claws Encounters of the Furred Kind (USA).zip"
     },
     {
-      "title": "Bubsy II",
-      "category": "16-bit Mascots",
-      "system": "genesis",
-      "bucket": "genesis/Bubsy II (USA, Europe).zip"
-    },
-    {
-      "title": "Bubsy in - Claws Encounters of the Furred Kind",
-      "category": "16-bit Mascots",
-      "system": "genesis",
-      "bucket": "genesis/Bubsy in - Claws Encounters of the Furred Kind (USA, Europe).zip"
-    },
-    {
       "title": "Bubsy in Fractured Furry Tales",
       "category": "16-bit Mascots",
       "system": "atarijaguar",
       "bucket": "atarijaguar/Bubsy in Fractured Furry Tales (World).zip"
-    },
-    {
-      "title": "Bubsy II",
-      "category": "16-bit Mascots",
-      "system": "gb",
-      "bucket": "gb/Bubsy II (USA).zip"
     },
     {
       "title": "Bubsy 3D - Furbitten Planet",
@@ -2285,32 +1721,8 @@
     {
       "title": "Zool - Ninja of the 'Nth' Dimension",
       "category": "16-bit Mascots",
-      "system": "genesis",
-      "bucket": "genesis/Zool - Ninja of the 'Nth' Dimension (USA).zip"
-    },
-    {
-      "title": "Zool - Ninja of the 'Nth' Dimension",
-      "category": "16-bit Mascots",
       "system": "snes",
       "bucket": "snes/Zool - Ninja of the 'Nth' Dimension (USA).zip"
-    },
-    {
-      "title": "Zool - Ninja of the 'Nth' Dimension",
-      "category": "16-bit Mascots",
-      "system": "gamegear",
-      "bucket": "gamegear/Zool - Ninja of the 'Nth' Dimension (USA).zip"
-    },
-    {
-      "title": "Zool - Ninja of the 'Nth' Dimension",
-      "category": "16-bit Mascots",
-      "system": "gb",
-      "bucket": "gb/Zool - Ninja of the 'Nth' Dimension (USA).zip"
-    },
-    {
-      "title": "Zool - Ninja of the 'Nth' Dimension",
-      "category": "16-bit Mascots",
-      "system": "mastersystem",
-      "bucket": "mastersystem/Zool - Ninja of the 'Nth' Dimension (Europe).zip"
     },
     {
       "title": "Zool 2",
@@ -2325,40 +1737,10 @@
       "bucket": "genesis/Cool Spot (USA).zip"
     },
     {
-      "title": "Cool Spot",
-      "category": "16-bit Mascots",
-      "system": "snes",
-      "bucket": "snes/Cool Spot (USA).zip"
-    },
-    {
-      "title": "Cool Spot",
-      "category": "16-bit Mascots",
-      "system": "gamegear",
-      "bucket": "gamegear/Cool Spot (USA).zip"
-    },
-    {
-      "title": "Cool Spot",
-      "category": "16-bit Mascots",
-      "system": "gb",
-      "bucket": "gb/Cool Spot (USA).zip"
-    },
-    {
-      "title": "Cool Spot",
-      "category": "16-bit Mascots",
-      "system": "mastersystem",
-      "bucket": "mastersystem/Cool Spot (Europe).zip"
-    },
-    {
       "title": "Spot Goes to Hollywood",
       "category": "16-bit Mascots",
       "system": "genesis",
       "bucket": "genesis/Spot Goes to Hollywood (USA).zip"
-    },
-    {
-      "title": "Spot Goes to Hollywood",
-      "category": "16-bit Mascots",
-      "system": "saturn",
-      "bucket": "saturn/Spot Goes to Hollywood (USA).chd"
     },
     {
       "title": "Spot Goes to Hollywood",
@@ -2379,28 +1761,10 @@
       "bucket": "mastersystem/Global Gladiators (Europe, Brazil) (En).zip"
     },
     {
-      "title": "Global Gladiators",
-      "category": "16-bit Mascots",
-      "system": "gamegear",
-      "bucket": "gamegear/Global Gladiators (Europe).zip"
-    },
-    {
       "title": "Mr. Nutz",
       "category": "16-bit Mascots",
       "system": "snes",
       "bucket": "snes/Mr. Nutz (USA) (En,Fr).zip"
-    },
-    {
-      "title": "Mr. Nutz",
-      "category": "16-bit Mascots",
-      "system": "genesis",
-      "bucket": "genesis/Mr. Nutz (Europe).zip"
-    },
-    {
-      "title": "Mr. Nutz",
-      "category": "16-bit Mascots",
-      "system": "gb",
-      "bucket": "gb/Mr. Nutz (Europe).zip"
     },
     {
       "title": "Mr. Nutz",
@@ -2413,12 +1777,6 @@
       "category": "16-bit Mascots",
       "system": "genesis",
       "bucket": "genesis/Boogerman - A Pick and Flick Adventure (USA).zip"
-    },
-    {
-      "title": "Boogerman - A Pick and Flick Adventure",
-      "category": "16-bit Mascots",
-      "system": "snes",
-      "bucket": "snes/Boogerman - A Pick and Flick Adventure (USA).zip"
     },
     {
       "title": "Ardy Lightfoot",
@@ -2439,76 +1797,16 @@
       "bucket": "genesis/Chuck Rock II - Son of Chuck (USA).zip"
     },
     {
-      "title": "Chuck Rock",
-      "category": "16-bit Mascots",
-      "system": "snes",
-      "bucket": "snes/Chuck Rock (USA).zip"
-    },
-    {
-      "title": "Chuck Rock",
-      "category": "16-bit Mascots",
-      "system": "segacd",
-      "bucket": "segacd/Chuck Rock (USA).chd"
-    },
-    {
-      "title": "Chuck Rock II - Son of Chuck",
-      "category": "16-bit Mascots",
-      "system": "segacd",
-      "bucket": "segacd/Chuck Rock II - Son of Chuck (USA).chd"
-    },
-    {
-      "title": "Chuck Rock",
-      "category": "16-bit Mascots",
-      "system": "gamegear",
-      "bucket": "gamegear/Chuck Rock (World).zip"
-    },
-    {
-      "title": "Chuck Rock II - Son of Chuck",
-      "category": "16-bit Mascots",
-      "system": "gamegear",
-      "bucket": "gamegear/Chuck Rock II - Son of Chuck (USA).zip"
-    },
-    {
-      "title": "Chuck Rock",
-      "category": "16-bit Mascots",
-      "system": "gb",
-      "bucket": "gb/Chuck Rock (USA, Europe).zip"
-    },
-    {
-      "title": "Chuck Rock",
-      "category": "16-bit Mascots",
-      "system": "mastersystem",
-      "bucket": "mastersystem/Chuck Rock (Europe, Brazil) (En).zip"
-    },
-    {
-      "title": "Chuck Rock II - Son of Chuck",
-      "category": "16-bit Mascots",
-      "system": "mastersystem",
-      "bucket": "mastersystem/Chuck Rock II - Son of Chuck (Europe).zip"
-    },
-    {
       "title": "Joe & Mac",
       "category": "16-bit Mascots",
       "system": "snes",
       "bucket": "snes/Joe & Mac (USA).zip"
     },
     {
-      "title": "Joe & Mac",
+      "title": "Caveman Ninja",
       "category": "16-bit Mascots",
-      "system": "genesis",
-      "bucket": "genesis/Joe & Mac (USA).zip"
-    },
-    {
-      "title": "Joe & Mac",
-      "category": "16-bit Mascots",
-      "system": "nes",
-      "bucket": "nes/Joe & Mac (USA).zip"
-    },
-    {
-      "title": "Joe & Mac",
-      "category": "16-bit Mascots",
-      "system": "gb",
-      "bucket": "gb/Joe & Mac (USA).zip"
+      "system": "fbneo",
+      "bucket": "fbneo/cninjau.zip"
     },
     {
       "title": "Joe & Mac 2 - Lost in the Tropics",
@@ -2541,42 +1839,6 @@
       "bucket": "genesis/James Pond - Underwater Agent (USA, Europe).zip"
     },
     {
-      "title": "James Pond 2 - Codename RoboCod",
-      "category": "16-bit Mascots",
-      "system": "mastersystem",
-      "bucket": "mastersystem/James Pond 2 - Codename RoboCod (Europe, Brazil) (En).zip"
-    },
-    {
-      "title": "James Pond 3 - Operation Starfi5h",
-      "category": "16-bit Mascots",
-      "system": "gamegear",
-      "bucket": "gamegear/James Pond 3 - Operation Starfi5h (Europe).zip"
-    },
-    {
-      "title": "James Pond II - Codename RoboCod",
-      "category": "16-bit Mascots",
-      "system": "gamegear",
-      "bucket": "gamegear/James Pond II - Codename RoboCod (USA).zip"
-    },
-    {
-      "title": "James Pond - Codename Robocod",
-      "category": "16-bit Mascots",
-      "system": "gba",
-      "bucket": "gba/James Pond - Codename Robocod (USA) (En,Fr,Es,Pt).zip"
-    },
-    {
-      "title": "Super James Pond",
-      "category": "16-bit Mascots",
-      "system": "snes",
-      "bucket": "snes/Super James Pond (USA).zip"
-    },
-    {
-      "title": "Super James Pond",
-      "category": "16-bit Mascots",
-      "system": "gb",
-      "bucket": "gb/Super James Pond (Europe).zip"
-    },
-    {
       "title": "Jazz Jackrabbit",
       "category": "16-bit Mascots",
       "system": "gba",
@@ -2607,18 +1869,6 @@
       "bucket": "snes/Radical Rex (USA).zip"
     },
     {
-      "title": "Radical Rex",
-      "category": "16-bit Mascots",
-      "system": "genesis",
-      "bucket": "genesis/Radical Rex (USA).zip"
-    },
-    {
-      "title": "Radical Rex",
-      "category": "16-bit Mascots",
-      "system": "segacd",
-      "bucket": "segacd/Radical Rex (USA).chd"
-    },
-    {
       "title": "High Seas Havoc",
       "category": "16-bit Mascots",
       "system": "genesis",
@@ -2634,25 +1884,13 @@
       "title": "Marko",
       "category": "16-bit Mascots",
       "system": "genesis",
-      "bucket": "genesis/Marko (USA).zip"
-    },
-    {
-      "title": "Marko's Magic Football",
-      "category": "16-bit Mascots",
-      "system": "snes",
-      "bucket": "snes/Marko's Magic Football (Europe) (En,Fr,De,Es).zip"
-    },
-    {
-      "title": "Marko's Magic Football",
-      "category": "16-bit Mascots",
-      "system": "segacd",
-      "bucket": "segacd/Marko's Magic Football (Europe) (En,Fr,De,Es).chd"
-    },
-    {
-      "title": "Marko's Magic Football",
-      "category": "16-bit Mascots",
-      "system": "gamegear",
-      "bucket": "gamegear/Marko's Magic Football (Europe) (En,Fr,De,Es).zip"
+      "bucket": "genesis/Marko (USA).zip",
+      "variants": [
+        {
+          "bucket": "segacd/Marko's Magic Football (Europe) (En,Fr,De,Es).chd",
+          "note": "Sega CD: adds a CD soundtrack"
+        }
+      ]
     },
     {
       "title": "Wiz 'N' Liz",
@@ -2667,40 +1905,22 @@
       "bucket": "genesis/Puggsy (USA).zip"
     },
     {
-      "title": "Puggsy",
-      "category": "16-bit Mascots",
-      "system": "segacd",
-      "bucket": "segacd/Puggsy (USA).chd"
-    },
-    {
       "title": "Flink",
       "category": "16-bit Mascots",
       "system": "genesis",
-      "bucket": "genesis/Flink (Europe) (En,Fr,De).zip"
-    },
-    {
-      "title": "Flink",
-      "category": "16-bit Mascots",
-      "system": "segacd",
-      "bucket": "segacd/Flink (USA).chd"
-    },
-    {
-      "title": "Chester Cheetah - Too Cool to Fool",
-      "category": "16-bit Mascots",
-      "system": "genesis",
-      "bucket": "genesis/Chester Cheetah - Too Cool to Fool (USA).zip"
+      "bucket": "genesis/Flink (Europe) (En,Fr,De).zip",
+      "variants": [
+        {
+          "bucket": "segacd/Flink (USA).chd",
+          "note": "Sega CD: adds a CD soundtrack and an animated intro"
+        }
+      ]
     },
     {
       "title": "Chester Cheetah - Too Cool to Fool",
       "category": "16-bit Mascots",
       "system": "snes",
       "bucket": "snes/Chester Cheetah - Too Cool to Fool (USA).zip"
-    },
-    {
-      "title": "Chester Cheetah - Wild Wild Quest",
-      "category": "16-bit Mascots",
-      "system": "genesis",
-      "bucket": "genesis/Chester Cheetah - Wild Wild Quest (USA).zip"
     },
     {
       "title": "Chester Cheetah - Wild Wild Quest",
@@ -2719,18 +1939,6 @@
       "category": "16-bit Mascots",
       "system": "snes",
       "bucket": "snes/Prehistorik Man (USA) (En,Fr,Es).zip"
-    },
-    {
-      "title": "Prehistorik Man",
-      "category": "16-bit Mascots",
-      "system": "gb",
-      "bucket": "gb/Prehistorik Man (USA, Europe).zip"
-    },
-    {
-      "title": "Prehistorik Man",
-      "category": "16-bit Mascots",
-      "system": "gba",
-      "bucket": "gba/Prehistorik Man (USA, Europe) (En,Fr,De,Es,It,Nl).zip"
     },
     {
       "title": "Harley's Humongous Adventure",
@@ -2777,32 +1985,14 @@
     {
       "title": "Pitfall - The Mayan Adventure",
       "category": "16-bit Mascots",
-      "system": "snes",
-      "bucket": "snes/Pitfall - The Mayan Adventure (USA).zip"
-    },
-    {
-      "title": "Pitfall - The Mayan Adventure",
-      "category": "16-bit Mascots",
       "system": "genesis",
-      "bucket": "genesis/Pitfall - The Mayan Adventure (USA).zip"
-    },
-    {
-      "title": "Pitfall - The Mayan Adventure",
-      "category": "16-bit Mascots",
-      "system": "segacd",
-      "bucket": "segacd/Pitfall - The Mayan Adventure (USA).chd"
-    },
-    {
-      "title": "Pitfall - The Mayan Adventure",
-      "category": "16-bit Mascots",
-      "system": "sega32x",
-      "bucket": "sega32x/Pitfall - The Mayan Adventure (USA).zip"
-    },
-    {
-      "title": "Pitfall - The Mayan Adventure",
-      "category": "16-bit Mascots",
-      "system": "gba",
-      "bucket": "gba/Pitfall - The Mayan Adventure (USA, Europe).zip"
+      "bucket": "genesis/Pitfall - The Mayan Adventure (USA).zip",
+      "variants": [
+        {
+          "bucket": "segacd/Pitfall - The Mayan Adventure (USA).chd",
+          "note": "Sega CD: adds a CD soundtrack and enhanced graphics"
+        }
+      ]
     },
     {
       "title": "McDonald's Treasure Land Adventure",
@@ -2813,8 +2003,8 @@
     {
       "title": "Marvel Land",
       "category": "16-bit Mascots",
-      "system": "genesis",
-      "bucket": "genesis/Marvel Land (USA).zip"
+      "system": "fbneo",
+      "bucket": "fbneo/marvland.zip"
     },
     {
       "title": "Mohawk & Headphone Jack",
@@ -2849,14 +2039,18 @@
     {
       "title": "Bubble Bobble",
       "category": "Single-Screen",
-      "system": "mame",
-      "bucket": "mame/bublbobl.zip"
-    },
-    {
-      "title": "Bubble Bobble",
-      "category": "Single-Screen",
       "system": "fbneo",
-      "bucket": "fbneo/bublboblr.zip"
+      "bucket": "fbneo/bublboblr.zip",
+      "variants": [
+        {
+          "bucket": "mastersystem/Bubble Bobble (Europe, Brazil) (En).zip",
+          "note": "Master System: 200 rounds with new items and bosses"
+        },
+        {
+          "bucket": "gba/Bubble Bobble - Old & New (USA).zip",
+          "note": "GBA: adds a remixed New mode"
+        }
+      ]
     },
     {
       "title": "Don Doko Don",
@@ -2880,13 +2074,13 @@
       "title": "Rainbow Islands",
       "category": "Single-Screen",
       "system": "fbneo",
-      "bucket": "fbneo/rbisland.zip"
-    },
-    {
-      "title": "Rainbow Islands - Extra Version",
-      "category": "Single-Screen",
-      "system": "fbneo",
-      "bucket": "fbneo/rbislande.zip"
+      "bucket": "fbneo/rbisland.zip",
+      "variants": [
+        {
+          "bucket": "fbneo/rbislande.zip",
+          "note": "Arcade: Extra Version remixes enemies and stage order"
+        }
+      ]
     },
     {
       "title": "The FairyLand Story",
@@ -2904,7 +2098,13 @@
       "title": "Snow Bros. - Nick & Tom",
       "category": "Single-Screen",
       "system": "fbneo",
-      "bucket": "fbneo/snowbros.zip"
+      "bucket": "fbneo/snowbros.zip",
+      "variants": [
+        {
+          "bucket": "genesis/Snow Bros. - Nick & Tom (Japan).zip",
+          "note": "Genesis: adds extra floors and a new final boss"
+        }
+      ]
     },
     {
       "title": "Snow Bros. 2 - With New Elves",
@@ -3047,8 +2247,14 @@
     {
       "title": "Lode Runner",
       "category": "Single-Screen",
-      "system": "fbneo",
-      "bucket": "fbneo/ldrun.zip"
+      "system": "c64",
+      "bucket": "c64/Lode Runner (USA, Europe).zip",
+      "variants": [
+        {
+          "bucket": "fbneo/ldrun.zip",
+          "note": "Arcade: Irem's version with its own levels and redrawn graphics"
+        }
+      ]
     },
     {
       "title": "TeddyBoy Blues",
@@ -3071,32 +2277,8 @@
     {
       "title": "Bubble Bobble",
       "category": "Single-Screen",
-      "system": "nes",
-      "bucket": "nes/Bubble Bobble (USA).zip"
-    },
-    {
-      "title": "Bubble Bobble",
-      "category": "Single-Screen",
-      "system": "fds",
-      "bucket": "fds/Bubble Bobble (Japan).zip"
-    },
-    {
-      "title": "Bubble Bobble",
-      "category": "Single-Screen",
       "system": "gb",
       "bucket": "gb/Bubble Bobble (USA, Europe).zip"
-    },
-    {
-      "title": "Bubble Bobble",
-      "category": "Single-Screen",
-      "system": "gamegear",
-      "bucket": "gamegear/Bubble Bobble (USA).zip"
-    },
-    {
-      "title": "Bubble Bobble",
-      "category": "Single-Screen",
-      "system": "mastersystem",
-      "bucket": "mastersystem/Bubble Bobble (Europe, Brazil) (En).zip"
     },
     {
       "title": "Bubble Bobble Part 2",
@@ -3117,24 +2299,6 @@
       "bucket": "gbc/Classic Bubble Bobble (USA) (SGB Enhanced) (GB Compatible).zip"
     },
     {
-      "title": "Bubble Bobble - Old & New",
-      "category": "Single-Screen",
-      "system": "gba",
-      "bucket": "gba/Bubble Bobble - Old & New (USA).zip"
-    },
-    {
-      "title": "Bubble Bobble also featuring Rainbow Islands",
-      "category": "Single-Screen",
-      "system": "psx",
-      "bucket": "psx/Bubble Bobble also featuring Rainbow Islands (USA).chd"
-    },
-    {
-      "title": "Bubble Bobble also featuring Rainbow Islands",
-      "category": "Single-Screen",
-      "system": "saturn",
-      "bucket": "saturn/Bubble Bobble also featuring Rainbow Islands (USA).chd"
-    },
-    {
       "title": "Bubble Bobble Revolution",
       "category": "Single-Screen",
       "system": "nds",
@@ -3151,42 +2315,6 @@
       "category": "Single-Screen",
       "system": "psp",
       "bucket": "psp/Bubble Bobble Evolution (USA).chd"
-    },
-    {
-      "title": "Rainbow Islands",
-      "category": "Single-Screen",
-      "system": "nes",
-      "bucket": "nes/Rainbow Islands (USA).zip"
-    },
-    {
-      "title": "Rainbow Islands",
-      "category": "Single-Screen",
-      "system": "mastersystem",
-      "bucket": "mastersystem/Rainbow Islands (Europe).zip"
-    },
-    {
-      "title": "Rainbow Islands",
-      "category": "Single-Screen",
-      "system": "gbc",
-      "bucket": "gbc/Rainbow Islands (Europe) (En,Fr,De,Es,It).zip"
-    },
-    {
-      "title": "Rainbow Islands - Bubble Bobble 2",
-      "category": "Single-Screen",
-      "system": "nes",
-      "bucket": "nes/Rainbow Islands - Bubble Bobble 2 (Europe).zip"
-    },
-    {
-      "title": "Rainbow Islands Extra",
-      "category": "Single-Screen",
-      "system": "genesis",
-      "bucket": "genesis/Rainbow Islands Extra (Japan).zip"
-    },
-    {
-      "title": "Rainbow Islands - The Story of Bubble Bobble 2",
-      "category": "Single-Screen",
-      "system": "tg-cd",
-      "bucket": "tg-cd/Rainbow Islands - The Story of Bubble Bobble 2 (Japan).chd"
     },
     {
       "title": "Rainbow Islands - Putty's Party",
@@ -3213,70 +2341,10 @@
       "bucket": "tg16/Parasol Stars - The Story of Bubble Bobble III (USA).zip"
     },
     {
-      "title": "Parasol Stars - Rainbow Islands II",
-      "category": "Single-Screen",
-      "system": "nes",
-      "bucket": "nes/Parasol Stars - Rainbow Islands II (Europe).zip"
-    },
-    {
-      "title": "Parasol Stars - Rainbow Islands II",
-      "category": "Single-Screen",
-      "system": "gb",
-      "bucket": "gb/Parasol Stars - Rainbow Islands II (Europe).zip"
-    },
-    {
-      "title": "Snow Brothers",
-      "category": "Single-Screen",
-      "system": "nes",
-      "bucket": "nes/Snow Brothers (USA).zip"
-    },
-    {
-      "title": "Snow Brothers",
-      "category": "Single-Screen",
-      "system": "gb",
-      "bucket": "gb/Snow Brothers (USA).zip"
-    },
-    {
-      "title": "Snow Bros. - Nick & Tom",
-      "category": "Single-Screen",
-      "system": "genesis",
-      "bucket": "genesis/Snow Bros. - Nick & Tom (Japan).zip"
-    },
-    {
-      "title": "Don Doko Don",
-      "category": "Single-Screen",
-      "system": "nes",
-      "bucket": "nes/Don Doko Don (Japan).zip"
-    },
-    {
-      "title": "Don Doko Don!",
-      "category": "Single-Screen",
-      "system": "tg16",
-      "bucket": "tg16/Don Doko Don! (Japan).zip"
-    },
-    {
       "title": "Don Doko Don 2",
       "category": "Single-Screen",
       "system": "nes",
       "bucket": "nes/Don Doko Don 2 (Japan).zip"
-    },
-    {
-      "title": "Rodland",
-      "category": "Single-Screen",
-      "system": "nes",
-      "bucket": "nes/Rodland (Europe).zip"
-    },
-    {
-      "title": "Rodland",
-      "category": "Single-Screen",
-      "system": "gb",
-      "bucket": "gb/Rodland (Europe).zip"
-    },
-    {
-      "title": "Bomb Jack",
-      "category": "Single-Screen",
-      "system": "gb",
-      "bucket": "gb/Bomb Jack (Europe).zip"
     },
     {
       "title": "Ice Climber",
@@ -3297,22 +2365,10 @@
       "bucket": "nes/Nuts & Milk (Japan).zip"
     },
     {
-      "title": "Popeye",
-      "category": "Single-Screen",
-      "system": "nes",
-      "bucket": "nes/Popeye (World) (Rev 1).zip"
-    },
-    {
-      "title": "Mappy",
-      "category": "Single-Screen",
-      "system": "nes",
-      "bucket": "nes/Mappy (Japan).zip"
-    },
-    {
       "title": "BurgerTime",
       "category": "Single-Screen",
-      "system": "nes",
-      "bucket": "nes/BurgerTime (USA).zip"
+      "system": "fbneo",
+      "bucket": "fbneo/btime3.zip"
     },
     {
       "title": "BurgerTime Deluxe",
@@ -3321,22 +2377,10 @@
       "bucket": "gb/BurgerTime Deluxe (World).zip"
     },
     {
-      "title": "Lode Runner",
-      "category": "Single-Screen",
-      "system": "nes",
-      "bucket": "nes/Lode Runner (USA).zip"
-    },
-    {
       "title": "Door Door",
       "category": "Single-Screen",
       "system": "nes",
       "bucket": "nes/Door Door (Japan).zip"
-    },
-    {
-      "title": "Chack'n Pop",
-      "category": "Single-Screen",
-      "system": "nes",
-      "bucket": "nes/Chack'n Pop (Japan).zip"
     },
     {
       "title": "Pac-Land",
@@ -3361,12 +2405,6 @@
       "category": "Arcade",
       "system": "fbneo",
       "bucket": "fbneo/liquidku.zip"
-    },
-    {
-      "title": "Caveman Ninja",
-      "category": "Arcade",
-      "system": "fbneo",
-      "bucket": "fbneo/cninjau.zip"
     },
     {
       "title": "Hammerin' Harry",
@@ -3421,12 +2459,6 @@
       "category": "Arcade",
       "system": "fbneo",
       "bucket": "fbneo/spinmast.zip"
-    },
-    {
-      "title": "Marvel Land",
-      "category": "Arcade",
-      "system": "fbneo",
-      "bucket": "fbneo/marvland.zip"
     },
     {
       "title": "Mega Twins",
@@ -3621,12 +2653,6 @@
       "bucket": "nes/Kid Kool and the Quest for the Seven Wonder Herbs (USA).zip"
     },
     {
-      "title": "Kid Niki - Radical Ninja",
-      "category": "Other 8-bit",
-      "system": "nes",
-      "bucket": "nes/Kid Niki - Radical Ninja (USA) (Rev 1).zip"
-    },
-    {
       "title": "Bucky O'Hare",
       "category": "Other 8-bit",
       "system": "nes",
@@ -3655,12 +2681,6 @@
       "category": "Other 8-bit",
       "system": "nes",
       "bucket": "nes/Kiwi Kraze - A Bird-Brained Adventure! (USA).zip"
-    },
-    {
-      "title": "NewZealand Story, The",
-      "category": "Other 8-bit",
-      "system": "mastersystem",
-      "bucket": "mastersystem/NewZealand Story, The (Europe).zip"
     },
     {
       "title": "Mappy-Land",
@@ -3711,12 +2731,6 @@
       "bucket": "nes/Bio Miracle Bokutte Upa (Japan).zip"
     },
     {
-      "title": "Bio Miracle Bokutte Upa",
-      "category": "Other 8-bit",
-      "system": "fds",
-      "bucket": "fds/Bio Miracle Bokutte Upa (Japan).zip"
-    },
-    {
       "title": "Moon Crystal",
       "category": "Other 8-bit",
       "system": "nes",
@@ -3744,43 +2758,19 @@
       "title": "Bionic Commando",
       "category": "Other 8-bit",
       "system": "nes",
-      "bucket": "nes/Bionic Commando (USA).zip"
-    },
-    {
-      "title": "Bionic Commando",
-      "category": "Other 8-bit",
-      "system": "gb",
-      "bucket": "gb/Bionic Commando (USA).zip"
+      "bucket": "nes/Bionic Commando (USA).zip",
+      "variants": [
+        {
+          "bucket": "gb/Bionic Commando (USA).zip",
+          "note": "Game Boy: reworked version with new stages and setting"
+        }
+      ]
     },
     {
       "title": "Bionic Commando - Elite Forces",
       "category": "Other 8-bit",
       "system": "gbc",
       "bucket": "gbc/Bionic Commando - Elite Forces (USA, Australia).zip"
-    },
-    {
-      "title": "Toki",
-      "category": "Other 8-bit",
-      "system": "nes",
-      "bucket": "nes/Toki (USA).zip"
-    },
-    {
-      "title": "Toki",
-      "category": "Other 8-bit",
-      "system": "atarilynx",
-      "bucket": "atarilynx/Toki (USA, Europe).zip"
-    },
-    {
-      "title": "Pac-Land",
-      "category": "Other 8-bit",
-      "system": "atarilynx",
-      "bucket": "atarilynx/Pac-Land (USA, Europe).zip"
-    },
-    {
-      "title": "Scrapyard Dog",
-      "category": "Other 8-bit",
-      "system": "atarilynx",
-      "bucket": "atarilynx/Scrapyard Dog (USA, Europe).zip"
     },
     {
       "title": "Scrapyard Dog",
@@ -3821,14 +2811,8 @@
     {
       "title": "Fantastic Dizzy",
       "category": "Other 8-bit",
-      "system": "mastersystem",
-      "bucket": "mastersystem/Fantastic Dizzy (Europe) (En,Fr,De,Es,It).zip"
-    },
-    {
-      "title": "Fantastic Dizzy",
-      "category": "Other 8-bit",
-      "system": "gamegear",
-      "bucket": "gamegear/Fantastic Dizzy (USA, Europe) (En,Fr,De,Es,It).zip"
+      "system": "genesis",
+      "bucket": "genesis/Fantastic Dizzy (USA, Europe) (En,Fr,De,Es,It).zip"
     },
     {
       "title": "Asterix",
@@ -3843,34 +2827,16 @@
       "bucket": "mastersystem/Asterix (Europe, Brazil) (En,Fr) (Rev 1).zip"
     },
     {
-      "title": "Asterix",
-      "category": "Other 8-bit",
-      "system": "gb",
-      "bucket": "gb/Asterix (Europe) (En,Fr,De,Es,It).zip"
-    },
-    {
       "title": "Asterix and the Secret Mission",
       "category": "Other 8-bit",
       "system": "mastersystem",
       "bucket": "mastersystem/Asterix and the Secret Mission (Europe, Brazil) (En,Fr,De).zip"
     },
     {
-      "title": "Asterix and the Secret Mission",
-      "category": "Other 8-bit",
-      "system": "gamegear",
-      "bucket": "gamegear/Asterix and the Secret Mission (Europe) (En,Fr,De).zip"
-    },
-    {
       "title": "Asterix and the Great Rescue",
       "category": "Other 8-bit",
       "system": "mastersystem",
       "bucket": "mastersystem/Asterix and the Great Rescue (Europe, Brazil) (En,Fr,De,Es,It).zip"
-    },
-    {
-      "title": "Asterix and the Great Rescue",
-      "category": "Other 8-bit",
-      "system": "gamegear",
-      "bucket": "gamegear/Asterix and the Great Rescue (USA, Brazil) (En).zip"
     },
     {
       "title": "Smurfs, The",
@@ -3881,20 +2847,8 @@
     {
       "title": "Smurfs, The",
       "category": "Other 8-bit",
-      "system": "gb",
-      "bucket": "gb/Smurfs, The (USA, Europe) (En,Fr,De) (Rev 1) (SGB Enhanced).zip"
-    },
-    {
-      "title": "Smurfs, The",
-      "category": "Other 8-bit",
       "system": "mastersystem",
       "bucket": "mastersystem/Smurfs, The (Europe, Brazil) (En,Fr,De,Es).zip"
-    },
-    {
-      "title": "Smurfs, The",
-      "category": "Other 8-bit",
-      "system": "gamegear",
-      "bucket": "gamegear/Smurfs, The (Europe) (En,Fr,De,Es).zip"
     },
     {
       "title": "Taz-Mania",
@@ -3903,22 +2857,10 @@
       "bucket": "mastersystem/Taz-Mania (Europe, Brazil) (En).zip"
     },
     {
-      "title": "Taz-Mania",
-      "category": "Other 8-bit",
-      "system": "gamegear",
-      "bucket": "gamegear/Taz-Mania (USA, Europe, Brazil) (En).zip"
-    },
-    {
       "title": "Daffy Duck in Hollywood",
       "category": "Other 8-bit",
       "system": "mastersystem",
       "bucket": "mastersystem/Daffy Duck in Hollywood (Europe, Brazil) (En,Fr,De,Es,It).zip"
-    },
-    {
-      "title": "Daffy Duck in Hollywood",
-      "category": "Other 8-bit",
-      "system": "gamegear",
-      "bucket": "gamegear/Daffy Duck in Hollywood (Europe, Brazil) (En,Fr,De,Es,It).zip"
     },
     {
       "title": "Desert Speedtrap Starring Road Runner and Wile E. Coyote",
@@ -3927,22 +2869,10 @@
       "bucket": "mastersystem/Desert Speedtrap Starring Road Runner and Wile E. Coyote (Europe, Brazil) (En,Fr,De,Es,It).zip"
     },
     {
-      "title": "Desert Speedtrap Starring Road Runner and Wile E. Coyote",
-      "category": "Other 8-bit",
-      "system": "gamegear",
-      "bucket": "gamegear/Desert Speedtrap Starring Road Runner and Wile E. Coyote (USA, Brazil) (En).zip"
-    },
-    {
-      "title": "Cheese Cat-astrophe Starring Speedy Gonzales",
-      "category": "Other 8-bit",
-      "system": "mastersystem",
-      "bucket": "mastersystem/Cheese Cat-astrophe Starring Speedy Gonzales (Europe, Brazil) (En,Fr,De,Es).zip"
-    },
-    {
       "title": "Cheese Cat-Astrophe Starring Speedy Gonzales",
       "category": "Other 8-bit",
-      "system": "gamegear",
-      "bucket": "gamegear/Cheese Cat-Astrophe Starring Speedy Gonzales (USA, Europe, Brazil) (En,Fr,De,Es).zip"
+      "system": "genesis",
+      "bucket": "genesis/Cheese Cat-Astrophe Starring Speedy Gonzales (Europe) (En,Fr,De,Es).zip"
     },
     {
       "title": "Flintstones, The",
@@ -3977,20 +2907,20 @@
     {
       "title": "Avenging Spirit",
       "category": "Other 8-bit",
-      "system": "gb",
-      "bucket": "gb/Avenging Spirit (USA, Europe).zip"
+      "system": "fbneo",
+      "bucket": "fbneo/avspirit.zip"
     },
     {
       "title": "Looney Tunes",
       "category": "Other 8-bit",
       "system": "gb",
-      "bucket": "gb/Looney Tunes (USA, Europe).zip"
-    },
-    {
-      "title": "Looney Tunes",
-      "category": "Other 8-bit",
-      "system": "gbc",
-      "bucket": "gbc/Looney Tunes (USA) (GB Compatible).zip"
+      "bucket": "gb/Looney Tunes (USA, Europe).zip",
+      "variants": [
+        {
+          "bucket": "gbc/Looney Tunes (USA) (GB Compatible).zip",
+          "note": "GBC: the same game in color"
+        }
+      ]
     },
     {
       "title": "Speedy Gonzales",
@@ -4079,8 +3009,8 @@
     {
       "title": "Asterix & Obelix",
       "category": "Other 8-bit",
-      "system": "gbc",
-      "bucket": "gbc/Asterix & Obelix (Europe) (En,Fr,De,Es).zip"
+      "system": "snes",
+      "bucket": "snes/Asterix & Obelix (Europe) (En,Fr,De,Es).zip"
     },
     {
       "title": "Ganbare Goemon - Sarawareta Ebisumaru",
@@ -4128,7 +3058,13 @@
       "title": "Umihara Kawase",
       "category": "Other 16-bit",
       "system": "snes",
-      "bucket": "snes/Umihara Kawase (Japan).zip"
+      "bucket": "snes/Umihara Kawase (Japan).zip",
+      "variants": [
+        {
+          "bucket": "psp/Umihara Kawase Portable (Japan).chd",
+          "note": "PSP: Portable adds new fields, with weaker physics"
+        }
+      ]
     },
     {
       "title": "Skyblazer",
@@ -4233,12 +3169,6 @@
       "bucket": "genesis/Daffy Duck in Hollywood (Europe) (En,Fr,De,Es,It).zip"
     },
     {
-      "title": "Cheese Cat-Astrophe Starring Speedy Gonzales",
-      "category": "Other 16-bit",
-      "system": "genesis",
-      "bucket": "genesis/Cheese Cat-Astrophe Starring Speedy Gonzales (Europe) (En,Fr,De,Es).zip"
-    },
-    {
       "title": "Flintstones, The",
       "category": "Other 16-bit",
       "system": "snes",
@@ -4281,12 +3211,6 @@
       "bucket": "snes/Addams Family, The (USA).zip"
     },
     {
-      "title": "Addams Family, The",
-      "category": "Other 16-bit",
-      "system": "genesis",
-      "bucket": "genesis/Addams Family, The (USA, Europe).zip"
-    },
-    {
       "title": "Addams Family, The - Pugsley's Scavenger Hunt",
       "category": "Other 16-bit",
       "system": "snes",
@@ -4297,12 +3221,6 @@
       "category": "Other 16-bit",
       "system": "snes",
       "bucket": "snes/Asterix (Europe) (En,Fr,De,Es).zip"
-    },
-    {
-      "title": "Asterix & Obelix",
-      "category": "Other 16-bit",
-      "system": "snes",
-      "bucket": "snes/Asterix & Obelix (Europe) (En,Fr,De,Es).zip"
     },
     {
       "title": "Asterix and the Great Rescue",
@@ -4323,18 +3241,6 @@
       "bucket": "snes/Smurfs, The (Europe) (En,Fr,De,Es,It).zip"
     },
     {
-      "title": "Smurfs, The",
-      "category": "Other 16-bit",
-      "system": "genesis",
-      "bucket": "genesis/Smurfs, The (Europe) (En,Fr,De,Es,It).zip"
-    },
-    {
-      "title": "Smurfs, The",
-      "category": "Other 16-bit",
-      "system": "segacd",
-      "bucket": "segacd/Smurfs, The (Europe) (En,Fr,De,Es,It).chd"
-    },
-    {
       "title": "Smurfs Travel the World, The",
       "category": "Other 16-bit",
       "system": "snes",
@@ -4345,12 +3251,6 @@
       "category": "Other 16-bit",
       "system": "snes",
       "bucket": "snes/Tintin in Tibet (Europe) (En,Es,Sv).zip"
-    },
-    {
-      "title": "Tintin in Tibet",
-      "category": "Other 16-bit",
-      "system": "genesis",
-      "bucket": "genesis/Tintin in Tibet (Europe) (En,Fr,De,Es,Nl,Sv).zip"
     },
     {
       "title": "Lucky Luke",
@@ -4371,12 +3271,6 @@
       "bucket": "snes/Out of This World (USA).zip"
     },
     {
-      "title": "Out of This World",
-      "category": "Other 16-bit",
-      "system": "genesis",
-      "bucket": "genesis/Out of This World (USA).zip"
-    },
-    {
       "title": "Heart of the Alien - Out of This World Parts I and II",
       "category": "Other 16-bit",
       "system": "segacd",
@@ -4385,38 +3279,14 @@
     {
       "title": "Flashback - The Quest for Identity",
       "category": "Other 16-bit",
-      "system": "snes",
-      "bucket": "snes/Flashback - The Quest for Identity (USA) (En,Fr,De).zip"
-    },
-    {
-      "title": "Flashback - The Quest for Identity",
-      "category": "Other 16-bit",
       "system": "genesis",
       "bucket": "genesis/Flashback - The Quest for Identity (USA) (En,Fr).zip"
-    },
-    {
-      "title": "Flashback - The Quest for Identity",
-      "category": "Other 16-bit",
-      "system": "segacd",
-      "bucket": "segacd/Flashback - The Quest for Identity (USA).chd"
     },
     {
       "title": "Prince of Persia",
       "category": "Other 16-bit",
       "system": "snes",
       "bucket": "snes/Prince of Persia (USA).zip"
-    },
-    {
-      "title": "Prince of Persia",
-      "category": "Other 16-bit",
-      "system": "genesis",
-      "bucket": "genesis/Prince of Persia (USA).zip"
-    },
-    {
-      "title": "Prince of Persia",
-      "category": "Other 16-bit",
-      "system": "segacd",
-      "bucket": "segacd/Prince of Persia (USA).chd"
     },
     {
       "title": "Prince of Persia 2",
@@ -4428,31 +3298,37 @@
       "title": "Blackthorne",
       "category": "Other 16-bit",
       "system": "snes",
-      "bucket": "snes/Blackthorne (USA).zip"
-    },
-    {
-      "title": "Blackthorne",
-      "category": "Other 16-bit",
-      "system": "sega32x",
-      "bucket": "sega32x/Blackthorne (USA).zip"
+      "bucket": "snes/Blackthorne (USA).zip",
+      "variants": [
+        {
+          "bucket": "sega32x/Blackthorne (USA).zip",
+          "note": "32X: re-rendered graphics"
+        }
+      ]
     },
     {
       "title": "Lost Vikings, The",
       "category": "Other 16-bit",
       "system": "snes",
-      "bucket": "snes/Lost Vikings, The (USA).zip"
-    },
-    {
-      "title": "Lost Vikings, The",
-      "category": "Other 16-bit",
-      "system": "genesis",
-      "bucket": "genesis/Lost Vikings, The (USA) (October, 1995).zip"
+      "bucket": "snes/Lost Vikings, The (USA).zip",
+      "variants": [
+        {
+          "bucket": "genesis/Lost Vikings, The (USA) (October, 1995).zip",
+          "note": "Genesis: adds five extra levels"
+        }
+      ]
     },
     {
       "title": "Lost Vikings 2",
       "category": "Other 16-bit",
       "system": "snes",
-      "bucket": "snes/Lost Vikings 2 (USA).zip"
+      "bucket": "snes/Lost Vikings 2 (USA).zip",
+      "variants": [
+        {
+          "bucket": "psx/Norse by Norsewest - The Return of the Lost Vikings (USA).chd",
+          "note": "PlayStation: re-rendered graphics and new FMV cutscenes"
+        }
+      ]
     },
     {
       "title": "Bravoman",
@@ -4465,18 +3341,6 @@
       "category": "Other 16-bit",
       "system": "tg16",
       "bucket": "tg16/Shockman (USA).zip"
-    },
-    {
-      "title": "Mizubaku Daibouken",
-      "category": "Other 16-bit",
-      "system": "tg16",
-      "bucket": "tg16/Mizubaku Daibouken (Japan).zip"
-    },
-    {
-      "title": "Pac-Land",
-      "category": "Other 16-bit",
-      "system": "tg16",
-      "bucket": "tg16/Pac-Land (USA).zip"
     },
     {
       "title": "Legend of Hero Tonma",
@@ -4495,12 +3359,6 @@
       "category": "Other 16-bit",
       "system": "segacd",
       "bucket": "segacd/Wild Woody (USA).chd"
-    },
-    {
-      "title": "Fantastic Dizzy",
-      "category": "Other 16-bit",
-      "system": "genesis",
-      "bucket": "genesis/Fantastic Dizzy (USA, Europe) (En,Fr,De,Es,It).zip"
     },
     {
       "title": "Klonoa - Door to Phantomile",
@@ -4543,12 +3401,6 @@
       "category": "Other 32-bit and Later",
       "system": "psx",
       "bucket": "psx/Pandemonium! (USA) (Rev 1).chd"
-    },
-    {
-      "title": "Pandemonium!",
-      "category": "Other 32-bit and Later",
-      "system": "saturn",
-      "bucket": "saturn/Pandemonium! (USA).chd"
     },
     {
       "title": "Pandemonium 2",
@@ -4601,12 +3453,6 @@
       "bucket": "psx/Johnny Bazookatone (USA).chd"
     },
     {
-      "title": "Johnny Bazookatone",
-      "category": "Other 32-bit and Later",
-      "system": "saturn",
-      "bucket": "saturn/Johnny Bazookatone (USA).chd"
-    },
-    {
       "title": "Punky Skunk",
       "category": "Other 32-bit and Later",
       "system": "psx",
@@ -4635,24 +3481,6 @@
       "category": "Other 32-bit and Later",
       "system": "n64",
       "bucket": "n64/Mystical Ninja Starring Goemon (USA).zip"
-    },
-    {
-      "title": "Mizubaku Daibouken",
-      "category": "Other 32-bit and Later",
-      "system": "saturn",
-      "bucket": "saturn/Mizubaku Daibouken (Japan).chd"
-    },
-    {
-      "title": "Norse by Norsewest - The Return of the Lost Vikings",
-      "category": "Other 32-bit and Later",
-      "system": "psx",
-      "bucket": "psx/Norse by Norsewest - The Return of the Lost Vikings (USA).chd"
-    },
-    {
-      "title": "Norse by Norsewest - The Return of the Lost Vikings",
-      "category": "Other 32-bit and Later",
-      "system": "saturn",
-      "bucket": "saturn/Norse by Norsewest - The Return of the Lost Vikings (USA).chd"
     },
     {
       "title": "Keio Flying Squadron 2",
@@ -4715,18 +3543,6 @@
       "bucket": "nds/Legendary Starfy, The (USA).zip"
     },
     {
-      "title": "Lost Vikings, The",
-      "category": "Other 32-bit and Later",
-      "system": "gba",
-      "bucket": "gba/Lost Vikings, The (USA).zip"
-    },
-    {
-      "title": "Blackthorne",
-      "category": "Other 32-bit and Later",
-      "system": "gba",
-      "bucket": "gba/Blackthorne (USA).zip"
-    },
-    {
       "title": "Lady Sia",
       "category": "Other 32-bit and Later",
       "system": "gba",
@@ -4781,10 +3597,16 @@
       "bucket": "nds/Ivy the Kiwi (USA) (En,Fr,Es).zip"
     },
     {
-      "title": "N+",
+      "title": "N Plus",
       "category": "Other 32-bit and Later",
-      "system": "nds",
-      "bucket": "nds/N+ (USA).zip"
+      "system": "psp",
+      "bucket": "psp/N Plus (USA).chd",
+      "variants": [
+        {
+          "bucket": "nds/N+ (USA).zip",
+          "note": "DS: its own set of levels"
+        }
+      ]
     },
     {
       "title": "Giana Sisters DS",

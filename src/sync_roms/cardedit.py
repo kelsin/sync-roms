@@ -4,7 +4,7 @@ import json
 import queue
 import threading
 
-from . import budget, collections as colls, edit, inventory, m3u, metafilter, picker, s3, scrape_plan, store, surprise, themeart, ui, usersettings, vita
+from . import budget, collections as colls, edit, inventory, m3u, metafilter, names, picker, s3, scrape_plan, store, surprise, themeart, ui, usersettings, vita
 
 FULL_KEY = "f"
 SET_KEY = "s"
@@ -14,8 +14,9 @@ COLLECTIONS_KEY = "l"
 SURPRISE_KEY = "u"
 PAST_SURPRISE_KEY = "p"
 META_KEY = "m"
+VARIANT_KEY = "v"
 LIST_HINT = "Enter games · f full · l collections · u surprise menu · D clear all · / filter"
-GAMES_HINT = "Space toggle · Enter done · / search · s set · m meta · c clear · p past"
+GAMES_HINT = "Space toggle · Enter done · / search · s set · m meta · p past · v variant"
 META_HINT = "Enter list its values · Esc back"
 VALUES_HINT = "Enter narrow to it · Esc back · / filter"
 SETS_HINT = "Enter show its games · Space/Tab toggle its games here · Esc back · / filter"
@@ -418,6 +419,9 @@ def edit_system(name, system, setup, to_fetch=None):
     other_excluded = {b: list(k) for b, k in before_excluded.items() if b != bucket}
     sets = store.load_sets()
     sets_by_id = {x["id"]: x for x in sets}
+    variants, parents = store.variant_index(sets)
+    system_names = {x["bucket"]: x["name"] for x in store.repo_json("systems")}
+    other_picks = {}  # {system bucket: [games]}: the card's direct picks on other systems, once a variant changes them
     # names only: without a storage cache, a folder's sized listing stats every file
     try:
         in_storage = {k for k in inventory.files(f"{bucket}/", sizes=False) if not k.endswith("/")}
@@ -436,7 +440,8 @@ def edit_system(name, system, setup, to_fetch=None):
 
     def work_out():
         card = card_entry(name, setup, cards)  # with the set references and exclusions as edited so far
-        card = {**card, "games": {**(card.get("games") or {}), store.SETS_KEY: list(sets_on)},
+        games = {**(card.get("games") or {}), **other_picks, store.SETS_KEY: list(sets_on)}
+        card = {**card, "games": {k: v for k, v in games.items() if v or k == store.SETS_KEY},
                 "excluded": {b: k for b, k in other_excluded.items() if k}}
         usages = budget.system_usages(card, others)
         parts = list(usages.values())  # without BIOS: it is added once, with this system's, in status
@@ -459,6 +464,48 @@ def edit_system(name, system, setup, to_fetch=None):
         return {k: k in locked_from or (k in notes or k in direct) and k not in excluded for _, k, _, _ in rows}
 
     start = states(cover())
+
+    def full(sb):
+        entry = raw.get(sb)
+        return sb != bucket and isinstance(entry, dict) and bool(entry.get("full_system"))
+
+    def picks_of(sb, writing=False):
+        """The card's direct picks on a system as edited so far; writing makes another system's a working copy in
+        other_picks, saved with this one."""
+        if sb == bucket:
+            return s["games"]
+        entry = raw.get(sb)
+        mine = [dict(g) for g in entry if isinstance(g, dict)] if isinstance(entry, list) else []
+        return other_picks.setdefault(sb, mine) if writing else other_picks.get(sb, mine)
+
+    def on_card(vb):
+        """Whether a variant's bucket key is synced by the card as edited so far."""
+        sb = vb.partition("/")[0]
+        if sb == bucket:
+            return states(cover()).get(vb, False)
+        return full(sb) or ((any(g.get("bucket") == vb for g in picks_of(sb)) or vb in cover())
+                            and vb not in other_excluded.get(sb, ()))
+
+    def toggle_variant(v):
+        """Add or remove a variant (and its files) as a direct pick; one the card syncs whole or through a set or
+        collection stays as it is."""
+        vb = v["bucket"]
+        sb = vb.partition("/")[0]
+        own = [vb, *v.get("files", ())]
+        if on_card(vb):
+            if full(sb) or all(g.get("bucket") != vb for g in picks_of(sb)):
+                return
+            picks = picks_of(sb, writing=True)
+            picks[:] = [g for g in picks if g.get("bucket") not in own]
+        else:
+            picks = picks_of(sb, writing=True)
+            picks.extend({"title": names.title(k), "bucket": k} for k in own
+                         if all(g.get("bucket") != k for g in picks))
+            if sb == bucket:
+                excluded.difference_update(own)
+            elif sb in other_excluded:
+                other_excluded[sb] = [k for k in other_excluded[sb] if k not in own]
+        work_out()
     filt = None  # (set name, bucket keys) the list is narrowed to
     meta_filt = {}  # {metadata field: value} the list is narrowed to as well
     past = None  # bucket keys of the past surprises the list is narrowed to
@@ -517,6 +564,11 @@ def edit_system(name, system, setup, to_fetch=None):
         games = {k: v for k, v in raw.items() if k not in (bucket, store.SETS_KEY)}
         if s["games"]:
             games[bucket] = s["games"]
+        for sb, picks in other_picks.items():
+            if picks:
+                games[sb] = picks
+            else:
+                games.pop(sb, None)
         if sets_on:
             games[store.SETS_KEY] = sets_on
         new_excluded = {b: k for b, k in other_excluded.items() if k}
@@ -567,8 +619,9 @@ def edit_system(name, system, setup, to_fetch=None):
             pending = (keys, notes, base, session)
             result = picker.filter_list(f"✏️  {system['name']} on {name} — ✅ synced, ⬜ not, 📦 from a set{where}",
                                         [r[3] for r in shown], multi=True, initial=[start[k] for k in keys],
-                                        extras=extras, hint=GAMES_HINT, hotkeys=(SET_KEY, META_KEY, PAST_SURPRISE_KEY, CLEAR_KEY),
-                                        status=status,
+                                        extras=extras, hint=GAMES_HINT, hotkeys=(SET_KEY, META_KEY, PAST_SURPRISE_KEY, CLEAR_KEY, VARIANT_KEY),
+                                        status=status, row_note=lambda i: edit.variant_line(
+                                            keys[i], variants, parents, system_names, on_card),
                                         session=session, note_text=note_text, on_note=on_note,
                                         links=links, locked=[k in locked_from for k in keys],
                                         locked_note=[f"From {locked_from[k]}; take it off the card to remove this game"
@@ -586,6 +639,14 @@ def edit_system(name, system, setup, to_fetch=None):
                 if not past:
                     past = None
                     edit.note(ui.yellow(f"ℹ️  No past surprises on {system['name']}."))
+            elif result[0] == VARIANT_KEY:
+                found = variants.get(keys[result[1]], []) if result[1] is not None else []
+                if len(found) > 1:
+                    i = picker.filter_list(f"Variants of {titles[keys[result[1]]]}",
+                                           [f"{'✅' if on_card(v['bucket']) else '⬜'} {v['note']}" for v in found])
+                    found = [] if i is None else [found[i]]
+                if found:
+                    toggle_variant(found[0])
             elif result[0] == META_KEY:
                 pick_meta(system, meta, meta_filt, lambda field: [r[1] for r in rows if keep(r[1], field)])
             else:

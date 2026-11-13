@@ -18,16 +18,6 @@
       "bucket": "nes/Castlevania III - Dracula's Curse (USA).zip"
     },
     {
-      "title": "Akumajou Dracula (Rev 2)",
-      "system": "fds",
-      "bucket": "fds/Akumajou Dracula (Japan) (Rev 2) (Disk Writer).zip"
-    },
-    {
-      "title": "Dracula II - Noroi no Fuuin",
-      "system": "fds",
-      "bucket": "fds/Dracula II - Noroi no Fuuin (Japan).zip"
-    },
-    {
       "title": "Super Castlevania IV",
       "system": "snes",
       "bucket": "snes/Super Castlevania IV (USA).zip"
@@ -60,12 +50,13 @@
     {
       "title": "Castlevania - Symphony of the Night",
       "system": "psx",
-      "bucket": "psx/Castlevania - Symphony of the Night (USA).chd"
-    },
-    {
-      "title": "Akumajou Dracula X: Gekka no Yasoukyoku",
-      "system": "saturn",
-      "bucket": "saturn/Akumajou Dracula X - Gekka no Yasoukyoku (Japan) (2M).chd"
+      "bucket": "psx/Castlevania - Symphony of the Night (USA).chd",
+      "variants": [
+        {
+          "bucket": "saturn/Akumajou Dracula X - Gekka no Yasoukyoku (Japan) (2M).chd",
+          "note": "Saturn: adds playable Maria and two new areas (Japanese)"
+        }
+      ]
     },
     {
       "title": "Castlevania - Circle of the Moon",
@@ -83,19 +74,15 @@
       "bucket": "gba/Castlevania - Aria of Sorrow (USA).zip"
     },
     {
-      "title": "Classic NES Series - Castlevania",
-      "system": "gba",
-      "bucket": "gba/Classic NES Series - Castlevania (USA).zip"
-    },
-    {
       "title": "Castlevania",
       "system": "n64",
-      "bucket": "n64/Castlevania (USA) (Rev 2).zip"
-    },
-    {
-      "title": "Castlevania - Legacy of Darkness",
-      "system": "n64",
-      "bucket": "n64/Castlevania - Legacy of Darkness (USA).zip"
+      "bucket": "n64/Castlevania (USA) (Rev 2).zip",
+      "variants": [
+        {
+          "bucket": "n64/Castlevania - Legacy of Darkness (USA).zip",
+          "note": "N64: Legacy of Darkness adds Cornell's and Henry's stories"
+        }
+      ]
     },
     {
       "title": "Castlevania: Lament of Innocence",
@@ -161,11 +148,6 @@
       "title": "Haunted Castle",
       "system": "fbneo",
       "bucket": "fbneo/hcastle.zip"
-    },
-    {
-      "title": "Vs. Castlevania",
-      "system": "mame",
-      "bucket": "mame/cstlevna.zip"
     }
   ]
 }

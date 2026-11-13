@@ -314,6 +314,26 @@ class TextualList(unittest.TestCase):
         self.assertEqual(self.run_keys(["ctrl+n", "ctrl+n", "ctrl+p", "ctrl+q", "enter"]), 1)
         self.assertEqual(self.run_keys(["tab", "j", "tab", "enter"], multi=True), [True, True, False])
 
+    def bottom_row(self, **kwargs):
+        rows = []
+
+        async def script(pilot):
+            rows.append(" ".join(t for t, _ in screen_lines(pilot.app)[-1]))
+            await pilot.press("j")
+            rows.append(" ".join(t for t, _ in screen_lines(pilot.app)[-1]))
+        pilot_list(script, "t", ["a", "b"], multi=True, **kwargs)
+        return rows
+
+    def test_row_note_shows_for_the_highlighted_row(self):
+        before, after = self.bottom_row(row_note=lambda i: "↳ Variant: x" if i == 1 else "")
+        self.assertNotIn("↳ Variant: x", before)
+        self.assertIn("↳ Variant: x", after)
+
+    def test_locked_note_wins_over_row_note(self):
+        before, _ = self.bottom_row(locked=[True, False], locked_note="L", row_note=lambda i: "R")
+        self.assertIn("🔒 L", before)
+        self.assertNotIn("R", before.replace("🔒 L", ""))
+
     def test_preview_image_follows_the_cursor(self):
         from PIL import Image
         with tempfile.TemporaryDirectory() as tmp:

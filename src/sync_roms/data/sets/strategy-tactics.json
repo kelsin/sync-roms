@@ -6,13 +6,25 @@
       "title": "Fire Emblem Shadow Dragon and the Blade of Light (English)",
       "category": "Fire Emblem",
       "system": "nes",
-      "bucket": "nes/Fire Emblem Shadow Dragon and the Blade of Light (English v1.4.1).zip"
+      "bucket": "nes/Fire Emblem Shadow Dragon and the Blade of Light (English v1.4.1).zip",
+      "variants": [
+        {
+          "bucket": "nds/Fire Emblem - Shadow Dragon (USA).zip",
+          "note": "DS: remake adds chapters, new units and an official translation"
+        }
+      ]
     },
     {
       "title": "Fire Emblem Gaiden (English)",
       "category": "Fire Emblem",
       "system": "nes",
-      "bucket": "nes/Fire Emblem Gaiden (English v1.01)[Names+Font Fix].zip"
+      "bucket": "nes/Fire Emblem Gaiden (English v1.01)[Names+Font Fix].zip",
+      "variants": [
+        {
+          "bucket": "3ds/Fire Emblem Echoes - Shadows of Valentia (USA) (En,Fr,Es).zip",
+          "note": "3DS: Echoes remake adds voice, dungeons and an official translation"
+        }
+      ]
     },
     {
       "title": "Fire Emblem - Monshou no Nazo (English)",
@@ -81,12 +93,6 @@
       "bucket": "gc/Fire Emblem - Path of Radiance (USA).rvz"
     },
     {
-      "title": "Fire Emblem - Shadow Dragon",
-      "category": "Fire Emblem",
-      "system": "nds",
-      "bucket": "nds/Fire Emblem - Shadow Dragon (USA).zip"
-    },
-    {
       "title": "Fire Emblem - Shin Monshou no Nazo - Hikari to Kage no Eiyuu (English)",
       "category": "Fire Emblem",
       "system": "nds",
@@ -115,12 +121,6 @@
       "category": "Fire Emblem",
       "system": "3ds",
       "bucket": "3ds/Fire Emblem Fates - Special Edition (USA).zip"
-    },
-    {
-      "title": "Fire Emblem Echoes - Shadows of Valentia",
-      "category": "Fire Emblem",
-      "system": "3ds",
-      "bucket": "3ds/Fire Emblem Echoes - Shadows of Valentia (USA) (En,Fr,Es).zip"
     },
     {
       "title": "Famicom Wars",
@@ -204,7 +204,13 @@
       "title": "Shining Force",
       "category": "Shining Force",
       "system": "genesis",
-      "bucket": "genesis/Shining Force (USA).zip"
+      "bucket": "genesis/Shining Force (USA).zip",
+      "variants": [
+        {
+          "bucket": "gba/Shining Force - Resurrection of the Dark Dragon (USA).zip",
+          "note": "GBA: remake adds new characters, a card system and new scenes"
+        }
+      ]
     },
     {
       "title": "Shining Force II",
@@ -213,10 +219,10 @@
       "bucket": "genesis/Shining Force II (USA).zip"
     },
     {
-      "title": "Shining Force Gaiden - Ensei, Jashin no Kuni e",
+      "title": "Shining Force CD",
       "category": "Shining Force",
-      "system": "gamegear",
-      "bucket": "gamegear/Shining Force Gaiden - Ensei, Jashin no Kuni e (Japan).zip"
+      "system": "segacd",
+      "bucket": "segacd/Shining Force CD (USA) (5R, 6R).chd"
     },
     {
       "title": "Shining Force - The Sword of Hajya",
@@ -229,12 +235,6 @@
       "category": "Shining Force",
       "system": "gamegear",
       "bucket": "gamegear/Shining Force Gaiden - Final Conflict (Japan).zip"
-    },
-    {
-      "title": "Shining Force CD",
-      "category": "Shining Force",
-      "system": "segacd",
-      "bucket": "segacd/Shining Force CD (USA) (5R, 6R).chd"
     },
     {
       "title": "Shining Force III",
@@ -255,12 +255,6 @@
       "bucket": "saturn/Shining Force III - Scenario 3 - Hyouheki no Jashinguu (Japan).chd"
     },
     {
-      "title": "Shining Force - Resurrection of the Dark Dragon",
-      "category": "Shining Force",
-      "system": "gba",
-      "bucket": "gba/Shining Force - Resurrection of the Dark Dragon (USA).zip"
-    },
-    {
       "title": "Shining Force Feather",
       "category": "Shining Force",
       "system": "nds",
@@ -273,18 +267,6 @@
       "bucket": "snes/Ogre Battle - The March of the Black Queen (USA).zip"
     },
     {
-      "title": "Densetsu no Ogre Battle",
-      "category": "Ogre Battle & Final Fantasy Tactics",
-      "system": "saturn",
-      "bucket": "saturn/Densetsu no Ogre Battle (Japan).chd"
-    },
-    {
-      "title": "Ogre Battle - Limited Edition",
-      "category": "Ogre Battle & Final Fantasy Tactics",
-      "system": "psx",
-      "bucket": "psx/Ogre Battle - Limited Edition (USA).chd"
-    },
-    {
       "title": "Ogre Battle 64 - Person of Lordly Caliber",
       "category": "Ogre Battle & Final Fantasy Tactics",
       "system": "n64",
@@ -295,18 +277,6 @@
       "category": "Ogre Battle & Final Fantasy Tactics",
       "system": "ngpc",
       "bucket": "ngpc/Densetsu no Ogre Battle Gaiden - Zenobia no Ouji (Japan).zip"
-    },
-    {
-      "title": "Tactics Ogre - Let Us Cling Together",
-      "category": "Ogre Battle & Final Fantasy Tactics",
-      "system": "snes",
-      "bucket": "snes/Tactics Ogre - Let Us Cling Together (Japan) (Rev 2) (NP).zip"
-    },
-    {
-      "title": "Tactics Ogre - Let Us Cling Together",
-      "category": "Ogre Battle & Final Fantasy Tactics",
-      "system": "saturn",
-      "bucket": "saturn/Tactics Ogre - Let Us Cling Together (Japan).chd"
     },
     {
       "title": "Tactics Ogre",
@@ -330,13 +300,13 @@
       "title": "Final Fantasy Tactics",
       "category": "Ogre Battle & Final Fantasy Tactics",
       "system": "psx",
-      "bucket": "psx/Final Fantasy Tactics (USA).chd"
-    },
-    {
-      "title": "Final Fantasy Tactics - The War of the Lions",
-      "category": "Ogre Battle & Final Fantasy Tactics",
-      "system": "psp",
-      "bucket": "psp/Final Fantasy Tactics - The War of the Lions (USA).chd"
+      "bucket": "psx/Final Fantasy Tactics (USA).chd",
+      "variants": [
+        {
+          "bucket": "psp/Final Fantasy Tactics - The War of the Lions (USA).chd",
+          "note": "PSP: adds jobs, characters, cutscenes and a new translation"
+        }
+      ]
     },
     {
       "title": "Final Fantasy Tactics Advance",
@@ -357,28 +327,10 @@
       "bucket": "genesis/Warsong (USA).zip"
     },
     {
-      "title": "Langrisser - Hikari no Matsuei",
-      "category": "Langrisser",
-      "system": "tg-cd",
-      "bucket": "tg-cd/Langrisser - Hikari no Matsuei (Japan).chd"
-    },
-    {
-      "title": "Langrisser II",
-      "category": "Langrisser",
-      "system": "genesis",
-      "bucket": "genesis/Langrisser II (Japan) (Rev B).zip"
-    },
-    {
-      "title": "Der Langrisser (English)",
+      "title": "Der Langrisser",
       "category": "Langrisser",
       "system": "snes",
       "bucket": "snes/Der Langrisser (English v1.3.1)[Near-D].zip"
-    },
-    {
-      "title": "Langrisser - Dramatic Edition",
-      "category": "Langrisser",
-      "system": "saturn",
-      "bucket": "saturn/Langrisser - Dramatic Edition (Japan) (2M).chd"
     },
     {
       "title": "Langrisser III",
@@ -419,8 +371,8 @@
     {
       "title": "Front Mission",
       "category": "Front Mission",
-      "system": "snes",
-      "bucket": "snes/Front Mission (Japan) (Rev 1).zip"
+      "system": "nds",
+      "bucket": "nds/Front Mission (USA).zip"
     },
     {
       "title": "Front Mission Series - Gun Hazard",
@@ -429,22 +381,10 @@
       "bucket": "snes/Front Mission Series - Gun Hazard (Japan).zip"
     },
     {
-      "title": "Front Mission",
-      "category": "Front Mission",
-      "system": "wonderswancolor",
-      "bucket": "wonderswancolor/Front Mission (Japan).zip"
-    },
-    {
       "title": "Front Mission 3",
       "category": "Front Mission",
       "system": "psx",
       "bucket": "psx/Front Mission 3 (USA).chd"
-    },
-    {
-      "title": "Front Mission",
-      "category": "Front Mission",
-      "system": "nds",
-      "bucket": "nds/Front Mission (USA).zip"
     },
     {
       "title": "Front Mission 2089 - Border of Madness",
@@ -459,40 +399,28 @@
       "bucket": "psx/Rhapsody - A Musical Adventure (USA).chd"
     },
     {
-      "title": "Rhapsody - A Musical Adventure",
-      "category": "Nippon Ichi",
-      "system": "nds",
-      "bucket": "nds/Rhapsody - A Musical Adventure (USA).zip"
-    },
-    {
       "title": "Disgaea - Hour of Darkness",
       "category": "Nippon Ichi",
       "system": "ps2",
-      "bucket": "ps2/Disgaea - Hour of Darkness (USA).chd"
+      "bucket": "ps2/Disgaea - Hour of Darkness (USA).chd",
+      "variants": [
+        {
+          "bucket": "psp/Disgaea - Afternoon of Darkness (USA).chd",
+          "note": "PSP: Afternoon of Darkness adds Etna mode and extra characters"
+        }
+      ]
     },
     {
       "title": "Disgaea 2 - Cursed Memories",
       "category": "Nippon Ichi",
       "system": "ps2",
-      "bucket": "ps2/Disgaea 2 - Cursed Memories (USA).chd"
-    },
-    {
-      "title": "Disgaea - Afternoon of Darkness",
-      "category": "Nippon Ichi",
-      "system": "psp",
-      "bucket": "psp/Disgaea - Afternoon of Darkness (USA).chd"
-    },
-    {
-      "title": "Disgaea 2 - Dark Hero Days",
-      "category": "Nippon Ichi",
-      "system": "psp",
-      "bucket": "psp/Disgaea 2 - Dark Hero Days (USA).chd"
-    },
-    {
-      "title": "Disgaea DS",
-      "category": "Nippon Ichi",
-      "system": "nds",
-      "bucket": "nds/Disgaea DS (USA).zip"
+      "bucket": "ps2/Disgaea 2 - Cursed Memories (USA).chd",
+      "variants": [
+        {
+          "bucket": "psp/Disgaea 2 - Dark Hero Days (USA).chd",
+          "note": "PSP: Dark Hero Days adds Axel mode and extra characters"
+        }
+      ]
     },
     {
       "title": "Disgaea 3 - Absence of Detention",
@@ -564,7 +492,13 @@
       "title": "Super Robot Taisen Gaiden - Masoukishin - The Lord of Elemental",
       "category": "Super Robot Wars",
       "system": "snes",
-      "bucket": "snes/Super Robot Taisen Gaiden - Masoukishin - The Lord of Elemental (Japan).zip"
+      "bucket": "snes/Super Robot Taisen Gaiden - Masoukishin - The Lord of Elemental (Japan).zip",
+      "variants": [
+        {
+          "bucket": "nds/Super Robot Taisen OG Saga - Masou Kishin - The Lord of Elemental (Japan).zip",
+          "note": "DS: remake with new graphics, voices and added scenes"
+        }
+      ]
     },
     {
       "title": "Super Robot Taisen F",
@@ -594,7 +528,13 @@
       "title": "Super Robot Taisen Compact",
       "category": "Super Robot Wars",
       "system": "wonderswan",
-      "bucket": "wonderswan/Super Robot Taisen Compact (Japan) (Rev 2).zip"
+      "bucket": "wonderswan/Super Robot Taisen Compact (Japan) (Rev 2).zip",
+      "variants": [
+        {
+          "bucket": "wonderswancolor/Super Robot Taisen Compact for WonderSwan Color (Japan).zip",
+          "note": "WonderSwan Color: color remake of the first Compact"
+        }
+      ]
     },
     {
       "title": "Super Robot Taisen Compact 2 - Dai-1-bu - Chijou Gekidou Hen",
@@ -615,12 +555,6 @@
       "bucket": "wonderswan/Super Robot Taisen Compact 2 - Dai-3-bu - Ginga Kessen Hen (Japan) (Rev 2).zip"
     },
     {
-      "title": "Super Robot Taisen Compact for WonderSwan Color",
-      "category": "Super Robot Wars",
-      "system": "wonderswancolor",
-      "bucket": "wonderswancolor/Super Robot Taisen Compact for WonderSwan Color (Japan).zip"
-    },
-    {
       "title": "Super Robot Taisen Compact 3",
       "category": "Super Robot Wars",
       "system": "wonderswancolor",
@@ -633,10 +567,10 @@
       "bucket": "dreamcast/Super Robot Taisen Alpha (Japan).chd"
     },
     {
-      "title": "Super Robot Taisen A",
+      "title": "Super Robot Wars A Portable",
       "category": "Super Robot Wars",
-      "system": "gba",
-      "bucket": "gba/Super Robot Taisen A (Japan).zip"
+      "system": "psp",
+      "bucket": "psp/Super Robot Wars A Portable (Japan) [T-En by Steel Soul v1.01] [n].chd"
     },
     {
       "title": "Super Robot Taisen R",
@@ -705,18 +639,6 @@
       "bucket": "nds/Super Robot Taisen L (Japan).zip"
     },
     {
-      "title": "Super Robot Taisen OG Saga - Masou Kishin - The Lord of Elemental",
-      "category": "Super Robot Wars",
-      "system": "nds",
-      "bucket": "nds/Super Robot Taisen OG Saga - Masou Kishin - The Lord of Elemental (Japan).zip"
-    },
-    {
-      "title": "Super Robot Wars A Portable (English)",
-      "category": "Super Robot Wars",
-      "system": "psp",
-      "bucket": "psp/Super Robot Wars A Portable (Japan) [T-En by Steel Soul v1.01] [n].chd"
-    },
-    {
       "title": "Super Robot Taisen - Operation Extend (English)",
       "category": "Super Robot Wars",
       "system": "psp",
@@ -735,34 +657,16 @@
       "bucket": "3ds/Super Robot Taisen BX (Japan) (Rev 1).zip"
     },
     {
-      "title": "Nobunaga no Yabou - Zenkoku Ban",
+      "title": "Nobunaga's Ambition",
       "category": "Nobunaga's Ambition",
-      "system": "msx",
-      "bucket": "msx/Nobunaga no Yabou - Zenkoku Ban (Japan).zip"
-    },
-    {
-      "title": "Nobunaga no Yabou - Zenkoku Ban",
-      "category": "Nobunaga's Ambition",
-      "system": "msx2",
-      "bucket": "msx2/Nobunaga no Yabou - Zenkoku Ban (Japan).zip"
+      "system": "snes",
+      "bucket": "snes/Nobunaga's Ambition (USA).zip"
     },
     {
       "title": "Nobunaga no Yabou - Sengoku Gunyuuden",
       "category": "Nobunaga's Ambition",
-      "system": "msx2",
-      "bucket": "msx2/Nobunaga no Yabou - Sengoku Gunyuuden (Japan).zip"
-    },
-    {
-      "title": "Nobunaga no Yabou - Bushou Fuuun Roku",
-      "category": "Nobunaga's Ambition",
-      "system": "msx2",
-      "bucket": "msx2/Nobunaga no Yabou - Bushou Fuuun Roku (Japan).zip"
-    },
-    {
-      "title": "Nobunaga's Ambition",
-      "category": "Nobunaga's Ambition",
-      "system": "nes",
-      "bucket": "nes/Nobunaga's Ambition (USA).zip"
+      "system": "saturn",
+      "bucket": "saturn/Nobunaga no Yabou - Sengoku Gunyuuden (Japan).chd"
     },
     {
       "title": "Nobunaga's Ambition II",
@@ -771,52 +675,10 @@
       "bucket": "nes/Nobunaga's Ambition II (USA).zip"
     },
     {
-      "title": "Nobunaga no Yabou - Bushou Fuuun Roku",
-      "category": "Nobunaga's Ambition",
-      "system": "nes",
-      "bucket": "nes/Nobunaga no Yabou - Bushou Fuuun Roku (Japan) (Rev 1).zip"
-    },
-    {
-      "title": "Nobunaga's Ambition",
-      "category": "Nobunaga's Ambition",
-      "system": "gb",
-      "bucket": "gb/Nobunaga's Ambition (USA).zip"
-    },
-    {
       "title": "Nobunaga no Yabou - Game Boy Ban 2",
       "category": "Nobunaga's Ambition",
       "system": "gbc",
       "bucket": "gbc/Nobunaga no Yabou - Game Boy Ban 2 (Japan) (SGB Enhanced) (GB Compatible).zip"
-    },
-    {
-      "title": "Nobunaga's Ambition",
-      "category": "Nobunaga's Ambition",
-      "system": "genesis",
-      "bucket": "genesis/Nobunaga's Ambition (USA).zip"
-    },
-    {
-      "title": "Nobunaga no Yabou - Bushou Fuuunroku",
-      "category": "Nobunaga's Ambition",
-      "system": "genesis",
-      "bucket": "genesis/Nobunaga no Yabou - Bushou Fuuunroku (Japan).zip"
-    },
-    {
-      "title": "Nobunaga no Yabou - Haouden",
-      "category": "Nobunaga's Ambition",
-      "system": "genesis",
-      "bucket": "genesis/Nobunaga no Yabou - Haouden (Japan).zip"
-    },
-    {
-      "title": "Nobunaga no Yabou - Haouden",
-      "category": "Nobunaga's Ambition",
-      "system": "segacd",
-      "bucket": "segacd/Nobunaga no Yabou - Haouden (Japan).chd"
-    },
-    {
-      "title": "Nobunaga's Ambition",
-      "category": "Nobunaga's Ambition",
-      "system": "snes",
-      "bucket": "snes/Nobunaga's Ambition (USA).zip"
     },
     {
       "title": "Nobunaga no Yabou - Haouden",
@@ -828,25 +690,13 @@
       "title": "Nobunaga no Yabou - Tenshouki",
       "category": "Nobunaga's Ambition",
       "system": "snes",
-      "bucket": "snes/Nobunaga no Yabou - Tenshouki (Japan) (Rev 1).zip"
-    },
-    {
-      "title": "Nobunaga no Yabou - Zenkokuban",
-      "category": "Nobunaga's Ambition",
-      "system": "tg-cd",
-      "bucket": "tg-cd/Nobunaga no Yabou - Zenkokuban (Japan).chd"
-    },
-    {
-      "title": "Nobunaga no Yabou - Bushou Fuuunroku",
-      "category": "Nobunaga's Ambition",
-      "system": "tg-cd",
-      "bucket": "tg-cd/Nobunaga no Yabou - Bushou Fuuunroku (Japan).chd"
-    },
-    {
-      "title": "Nobunaga no Yabou - Sengoku Gunyuuden",
-      "category": "Nobunaga's Ambition",
-      "system": "saturn",
-      "bucket": "saturn/Nobunaga no Yabou - Sengoku Gunyuuden (Japan).chd"
+      "bucket": "snes/Nobunaga no Yabou - Tenshouki (Japan) (Rev 1).zip",
+      "variants": [
+        {
+          "bucket": "saturn/Nobunaga no Yabou Tenshouki with Power-Up Kit (Japan).chd",
+          "note": "Saturn: includes the Power-Up Kit's extra scenarios and editor"
+        }
+      ]
     },
     {
       "title": "Nobunaga no Yabou - Returns",
@@ -855,22 +705,16 @@
       "bucket": "saturn/Nobunaga no Yabou - Returns (Japan).chd"
     },
     {
-      "title": "Nobunaga no Yabou Tenshouki with Power-Up Kit",
-      "category": "Nobunaga's Ambition",
-      "system": "saturn",
-      "bucket": "saturn/Nobunaga no Yabou Tenshouki with Power-Up Kit (Japan).chd"
-    },
-    {
       "title": "Nobunaga no Yabou - Shouseiroku",
       "category": "Nobunaga's Ambition",
       "system": "saturn",
-      "bucket": "saturn/Nobunaga no Yabou - Shouseiroku (Japan) (2M).chd"
-    },
-    {
-      "title": "Nobunaga no Yabou - Shouseiroku with Power-Up Kit",
-      "category": "Nobunaga's Ambition",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Nobunaga no Yabou - Shouseiroku with Power-Up Kit (Japan).chd"
+      "bucket": "saturn/Nobunaga no Yabou - Shouseiroku (Japan) (2M).chd",
+      "variants": [
+        {
+          "bucket": "dreamcast/Nobunaga no Yabou - Shouseiroku with Power-Up Kit (Japan).chd",
+          "note": "Dreamcast: includes the Power-Up Kit's extra scenarios and editor"
+        }
+      ]
     },
     {
       "title": "Nobunaga no Yabou - Reppuuden",
@@ -927,24 +771,6 @@
       "bucket": "3ds/Nobunaga no Yabou 2 (Japan).zip"
     },
     {
-      "title": "Sangokushi",
-      "category": "Romance of the Three Kingdoms",
-      "system": "msx",
-      "bucket": "msx/Sangokushi (Japan).zip"
-    },
-    {
-      "title": "Sangokushi",
-      "category": "Romance of the Three Kingdoms",
-      "system": "msx2",
-      "bucket": "msx2/Sangokushi (Japan).zip"
-    },
-    {
-      "title": "Sangokushi II",
-      "category": "Romance of the Three Kingdoms",
-      "system": "msx2",
-      "bucket": "msx2/Sangokushi II (Japan).zip"
-    },
-    {
       "title": "Romance of the Three Kingdoms",
       "category": "Romance of the Three Kingdoms",
       "system": "nes",
@@ -953,8 +779,8 @@
     {
       "title": "Romance of the Three Kingdoms II",
       "category": "Romance of the Three Kingdoms",
-      "system": "nes",
-      "bucket": "nes/Romance of the Three Kingdoms II (USA).zip"
+      "system": "snes",
+      "bucket": "snes/Romance of the Three Kingdoms II (USA).zip"
     },
     {
       "title": "Sangokushi - Game Boy Ban",
@@ -969,48 +795,6 @@
       "bucket": "gbc/Sangokushi - Game Boy Ban 2 (Japan) (SGB Enhanced) (GB Compatible).zip"
     },
     {
-      "title": "Romance of the Three Kingdoms II",
-      "category": "Romance of the Three Kingdoms",
-      "system": "genesis",
-      "bucket": "genesis/Romance of the Three Kingdoms II (USA).zip"
-    },
-    {
-      "title": "Romance of the Three Kingdoms III - Dragon of Destiny",
-      "category": "Romance of the Three Kingdoms",
-      "system": "genesis",
-      "bucket": "genesis/Romance of the Three Kingdoms III - Dragon of Destiny (USA).zip"
-    },
-    {
-      "title": "Sangokushi III",
-      "category": "Romance of the Three Kingdoms",
-      "system": "segacd",
-      "bucket": "segacd/Sangokushi III (Japan).chd"
-    },
-    {
-      "title": "Sangokushi III",
-      "category": "Romance of the Three Kingdoms",
-      "system": "tg-cd",
-      "bucket": "tg-cd/Sangokushi III (Japan).chd"
-    },
-    {
-      "title": "Sangokushi IV",
-      "category": "Romance of the Three Kingdoms",
-      "system": "sega32x",
-      "bucket": "sega32x/Sangokushi IV (Japan).zip"
-    },
-    {
-      "title": "Super Sangokushi",
-      "category": "Romance of the Three Kingdoms",
-      "system": "snes",
-      "bucket": "snes/Super Sangokushi (Japan).zip"
-    },
-    {
-      "title": "Romance of the Three Kingdoms II",
-      "category": "Romance of the Three Kingdoms",
-      "system": "snes",
-      "bucket": "snes/Romance of the Three Kingdoms II (USA).zip"
-    },
-    {
       "title": "Romance of the Three Kingdoms III - Dragon of Destiny",
       "category": "Romance of the Three Kingdoms",
       "system": "snes",
@@ -1021,6 +805,12 @@
       "category": "Romance of the Three Kingdoms",
       "system": "snes",
       "bucket": "snes/Romance of the Three Kingdoms IV - Wall of Fire (USA).zip"
+    },
+    {
+      "title": "Super Sangokushi",
+      "category": "Romance of the Three Kingdoms",
+      "system": "snes",
+      "bucket": "snes/Super Sangokushi (Japan).zip"
     },
     {
       "title": "Sangokushi Eiketsuden",
@@ -1035,46 +825,28 @@
       "bucket": "saturn/Sangokushi Returns (Japan).chd"
     },
     {
-      "title": "Romance of the Three Kingdoms IV - Wall of Fire",
-      "category": "Romance of the Three Kingdoms",
-      "system": "saturn",
-      "bucket": "saturn/Romance of the Three Kingdoms IV - Wall of Fire (USA).chd"
-    },
-    {
       "title": "Sangokushi V",
       "category": "Romance of the Three Kingdoms",
       "system": "saturn",
       "bucket": "saturn/Sangokushi V (Japan) (Rev A).chd"
     },
     {
-      "title": "Sangokushi Eiketsuden",
+      "title": "Sangokushi - Koumeiden",
       "category": "Romance of the Three Kingdoms",
-      "system": "saturn",
-      "bucket": "saturn/Sangokushi Eiketsuden (Japan).chd"
-    },
-    {
-      "title": "Sangokushi Koumeiden",
-      "category": "Romance of the Three Kingdoms",
-      "system": "saturn",
-      "bucket": "saturn/Sangokushi Koumeiden (Japan).chd"
-    },
-    {
-      "title": "Romance of the Three Kingdoms IV - Wall of Fire",
-      "category": "Romance of the Three Kingdoms",
-      "system": "psx",
-      "bucket": "psx/Romance of the Three Kingdoms IV - Wall of Fire (USA).chd"
+      "system": "gba",
+      "bucket": "gba/Sangokushi - Koumeiden (Japan).zip"
     },
     {
       "title": "Romance of the Three Kingdoms VI - Awakening of the Dragon",
       "category": "Romance of the Three Kingdoms",
       "system": "psx",
-      "bucket": "psx/Romance of the Three Kingdoms VI - Awakening of the Dragon (USA).chd"
-    },
-    {
-      "title": "Sangokushi VI with Power-Up Kit",
-      "category": "Romance of the Three Kingdoms",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Sangokushi VI with Power-Up Kit (Japan).chd"
+      "bucket": "psx/Romance of the Three Kingdoms VI - Awakening of the Dragon (USA).chd",
+      "variants": [
+        {
+          "bucket": "dreamcast/Sangokushi VI with Power-Up Kit (Japan).chd",
+          "note": "Dreamcast: includes the Power-Up Kit (Japanese only)"
+        }
+      ]
     },
     {
       "title": "Sangokushi for WonderSwan",
@@ -1087,24 +859,6 @@
       "category": "Romance of the Three Kingdoms",
       "system": "wonderswan",
       "bucket": "wonderswan/Sangokushi II for WonderSwan (Japan).zip"
-    },
-    {
-      "title": "Sangokushi",
-      "category": "Romance of the Three Kingdoms",
-      "system": "gba",
-      "bucket": "gba/Sangokushi (Japan).zip"
-    },
-    {
-      "title": "Sangokushi - Eiketsuden",
-      "category": "Romance of the Three Kingdoms",
-      "system": "gba",
-      "bucket": "gba/Sangokushi - Eiketsuden (Japan).zip"
-    },
-    {
-      "title": "Sangokushi - Koumeiden",
-      "category": "Romance of the Three Kingdoms",
-      "system": "gba",
-      "bucket": "gba/Sangokushi - Koumeiden (Japan).zip"
     },
     {
       "title": "Sangokushi DS",
@@ -1145,72 +899,6 @@
     {
       "title": "Gemfire",
       "category": "Koei",
-      "system": "nes",
-      "bucket": "nes/Gemfire (USA).zip"
-    },
-    {
-      "title": "Uncharted Waters",
-      "category": "Koei",
-      "system": "nes",
-      "bucket": "nes/Uncharted Waters (USA).zip"
-    },
-    {
-      "title": "Genghis Khan II - Clan of the Gray Wolf",
-      "category": "Koei",
-      "system": "genesis",
-      "bucket": "genesis/Genghis Khan II - Clan of the Gray Wolf (USA).zip"
-    },
-    {
-      "title": "Gemfire",
-      "category": "Koei",
-      "system": "genesis",
-      "bucket": "genesis/Gemfire (USA).zip"
-    },
-    {
-      "title": "Uncharted Waters",
-      "category": "Koei",
-      "system": "genesis",
-      "bucket": "genesis/Uncharted Waters (USA).zip"
-    },
-    {
-      "title": "Liberty or Death",
-      "category": "Koei",
-      "system": "genesis",
-      "bucket": "genesis/Liberty or Death (USA).zip"
-    },
-    {
-      "title": "P.T.O. - Pacific Theater of Operations",
-      "category": "Koei",
-      "system": "genesis",
-      "bucket": "genesis/P.T.O. - Pacific Theater of Operations (USA).zip"
-    },
-    {
-      "title": "Operation Europe - Path to Victory 1939-45",
-      "category": "Koei",
-      "system": "genesis",
-      "bucket": "genesis/Operation Europe - Path to Victory 1939-45 (USA).zip"
-    },
-    {
-      "title": "Aerobiz",
-      "category": "Koei",
-      "system": "genesis",
-      "bucket": "genesis/Aerobiz (USA).zip"
-    },
-    {
-      "title": "Aerobiz Supersonic",
-      "category": "Koei",
-      "system": "genesis",
-      "bucket": "genesis/Aerobiz Supersonic (USA).zip"
-    },
-    {
-      "title": "Genghis Khan II - Clan of the Gray Wolf",
-      "category": "Koei",
-      "system": "snes",
-      "bucket": "snes/Genghis Khan II - Clan of the Gray Wolf (USA).zip"
-    },
-    {
-      "title": "Gemfire",
-      "category": "Koei",
       "system": "snes",
       "bucket": "snes/Gemfire (USA).zip"
     },
@@ -1221,10 +909,10 @@
       "bucket": "snes/Uncharted Waters (USA).zip"
     },
     {
-      "title": "Inindo - Way of the Ninja",
+      "title": "Genghis Khan II - Clan of the Gray Wolf",
       "category": "Koei",
       "system": "snes",
-      "bucket": "snes/Inindo - Way of the Ninja (USA).zip"
+      "bucket": "snes/Genghis Khan II - Clan of the Gray Wolf (USA).zip"
     },
     {
       "title": "Liberty or Death",
@@ -1239,22 +927,10 @@
       "bucket": "snes/P.T.O. - Pacific Theater of Operations (USA).zip"
     },
     {
-      "title": "P.T.O. II - Pacific Theater of Operations",
-      "category": "Koei",
-      "system": "snes",
-      "bucket": "snes/P.T.O. II - Pacific Theater of Operations (USA).zip"
-    },
-    {
       "title": "Operation Europe - Path to Victory 1939-45",
       "category": "Koei",
       "system": "snes",
       "bucket": "snes/Operation Europe - Path to Victory 1939-45 (USA).zip"
-    },
-    {
-      "title": "Rise of the Phoenix",
-      "category": "Koei",
-      "system": "snes",
-      "bucket": "snes/Rise of the Phoenix (USA).zip"
     },
     {
       "title": "Aerobiz",
@@ -1269,10 +945,22 @@
       "bucket": "snes/Aerobiz Supersonic (USA).zip"
     },
     {
-      "title": "P.T.O. - Pacific Theater of Operations II",
+      "title": "Inindo - Way of the Ninja",
       "category": "Koei",
-      "system": "saturn",
-      "bucket": "saturn/P.T.O. - Pacific Theater of Operations II (USA).chd"
+      "system": "snes",
+      "bucket": "snes/Inindo - Way of the Ninja (USA).zip"
+    },
+    {
+      "title": "P.T.O. II - Pacific Theater of Operations",
+      "category": "Koei",
+      "system": "snes",
+      "bucket": "snes/P.T.O. II - Pacific Theater of Operations (USA).zip"
+    },
+    {
+      "title": "Rise of the Phoenix",
+      "category": "Koei",
+      "system": "snes",
+      "bucket": "snes/Rise of the Phoenix (USA).zip"
     },
     {
       "title": "Heir of Zendor - The Legend and The Land",
@@ -1387,7 +1075,13 @@
       "title": "Hoshigami - Ruining Blue Earth",
       "category": "Tactical RPGs",
       "system": "psx",
-      "bucket": "psx/Hoshigami - Ruining Blue Earth (USA).chd"
+      "bucket": "psx/Hoshigami - Ruining Blue Earth (USA).chd",
+      "variants": [
+        {
+          "bucket": "nds/Hoshigami - Ruining Blue Earth - Remix (USA).zip",
+          "note": "DS: adds story scenes and rebalanced difficulty"
+        }
+      ]
     },
     {
       "title": "Eternal Eyes",
@@ -1423,7 +1117,13 @@
       "title": "Yggdra Union - We'll Never Fight Alone",
       "category": "Tactical RPGs",
       "system": "gba",
-      "bucket": "gba/Yggdra Union - We'll Never Fight Alone (USA).zip"
+      "bucket": "gba/Yggdra Union - We'll Never Fight Alone (USA).zip",
+      "variants": [
+        {
+          "bucket": "psp/Yggdra Union (USA).chd",
+          "note": "PSP: adds new art and a multiplayer mode"
+        }
+      ]
     },
     {
       "title": "Rebelstar - Tactical Command",
@@ -1503,13 +1203,25 @@
       "title": "Shin Megami Tensei - Devil Survivor",
       "category": "Tactical RPGs",
       "system": "nds",
-      "bucket": "nds/Shin Megami Tensei - Devil Survivor (USA).zip"
+      "bucket": "nds/Shin Megami Tensei - Devil Survivor (USA).zip",
+      "variants": [
+        {
+          "bucket": "3ds/Shin Megami Tensei - Devil Survivor Overclocked (USA) (Rev 1).zip",
+          "note": "3DS: Overclocked adds an 8th day, voice acting and demons"
+        }
+      ]
     },
     {
       "title": "Shin Megami Tensei - Devil Survivor 2",
       "category": "Tactical RPGs",
       "system": "nds",
-      "bucket": "nds/Shin Megami Tensei - Devil Survivor 2 (USA).zip"
+      "bucket": "nds/Shin Megami Tensei - Devil Survivor 2 (USA).zip",
+      "variants": [
+        {
+          "bucket": "3ds/Shin Megami Tensei - Devil Survivor 2 - Record Breaker (USA).zip",
+          "note": "3DS: Record Breaker adds the Triangulum arc and voice acting"
+        }
+      ]
     },
     {
       "title": "Luminous Arc",
@@ -1534,12 +1246,6 @@
       "category": "Tactical RPGs",
       "system": "nds",
       "bucket": "nds/Hero's Saga - Laevatein Tactics (USA).zip"
-    },
-    {
-      "title": "Hoshigami - Ruining Blue Earth - Remix",
-      "category": "Tactical RPGs",
-      "system": "nds",
-      "bucket": "nds/Hoshigami - Ruining Blue Earth - Remix (USA).zip"
     },
     {
       "title": "Knights in the Nightmare",
@@ -1588,18 +1294,6 @@
       "category": "Tactical RPGs",
       "system": "psp",
       "bucket": "psp/Gungnir (USA).chd"
-    },
-    {
-      "title": "Knights in the Nightmare",
-      "category": "Tactical RPGs",
-      "system": "psp",
-      "bucket": "psp/Knights in the Nightmare (USA).chd"
-    },
-    {
-      "title": "Yggdra Union",
-      "category": "Tactical RPGs",
-      "system": "psp",
-      "bucket": "psp/Yggdra Union (USA).chd"
     },
     {
       "title": "Blazing Souls Accelate",
@@ -1674,10 +1368,16 @@
       "bucket": "psp/Valkyria Chronicles II (USA).chd"
     },
     {
-      "title": "Valkyria Chronicles 3 - Extra Edition (English)",
+      "title": "Valkyria Chronicles 3",
       "category": "Tactical RPGs",
       "system": "psp",
-      "bucket": "psp/Valkyria Chronicles 3 - Extra Edition (Japan) [T-En by Valkyria Chronicles 3 Translation Project v2] [i] [n].chd"
+      "bucket": "psp/Valkyria Chronicles 3 (English v1.0.8).chd",
+      "variants": [
+        {
+          "bucket": "psp/Valkyria Chronicles 3 - Extra Edition (Japan) [T-En by Valkyria Chronicles 3 Translation Project v2] [i] [n].chd",
+          "note": "PSP: Extra Edition adds the DLC chapters, English patch"
+        }
+      ]
     },
     {
       "title": "R-Type Command",
@@ -1696,18 +1396,6 @@
       "category": "Tactical RPGs",
       "system": "psp",
       "bucket": "psp/SD Gundam - G Generation Over World (Japan) [T-En by Izzul95 v1.1].chd"
-    },
-    {
-      "title": "Shin Megami Tensei - Devil Survivor Overclocked",
-      "category": "Tactical RPGs",
-      "system": "3ds",
-      "bucket": "3ds/Shin Megami Tensei - Devil Survivor Overclocked (USA) (Rev 1).zip"
-    },
-    {
-      "title": "Shin Megami Tensei - Devil Survivor 2 - Record Breaker",
-      "category": "Tactical RPGs",
-      "system": "3ds",
-      "bucket": "3ds/Shin Megami Tensei - Devil Survivor 2 - Record Breaker (USA).zip"
     },
     {
       "title": "Code Name - S.T.E.A.M.",
@@ -1778,8 +1466,8 @@
     {
       "title": "Defender of the Crown",
       "category": "Turn-Based Strategy",
-      "system": "nes",
-      "bucket": "nes/Defender of the Crown (USA).zip"
+      "system": "gba",
+      "bucket": "gba/Defender of the Crown (USA).zip"
     },
     {
       "title": "Shingen the Ruler",
@@ -1890,12 +1578,6 @@
       "bucket": "saturn/Iron Storm (USA).chd"
     },
     {
-      "title": "Nectaris - Military Madness",
-      "category": "Turn-Based Strategy",
-      "system": "psx",
-      "bucket": "psx/Nectaris - Military Madness (USA).chd"
-    },
-    {
       "title": "Panzer General",
       "category": "Turn-Based Strategy",
       "system": "psx",
@@ -1932,12 +1614,6 @@
       "bucket": "psx/Hogs of War (USA).chd"
     },
     {
-      "title": "Defender of the Crown",
-      "category": "Turn-Based Strategy",
-      "system": "gba",
-      "bucket": "gba/Defender of the Crown (USA).zip"
-    },
-    {
       "title": "Age of Empires - The Age of Kings",
       "category": "Turn-Based Strategy",
       "system": "nds",
@@ -1964,8 +1640,8 @@
     {
       "title": "Military History - Commander - Europe at War",
       "category": "Turn-Based Strategy",
-      "system": "nds",
-      "bucket": "nds/Military History - Commander - Europe at War (Europe) (En,Fr,De,Es,It).zip"
+      "system": "psp",
+      "bucket": "psp/Military History - Commander - Europe at War (Europe) (En,Fr,De,Es,It).chd"
     },
     {
       "title": "Battles of Prince of Persia",
@@ -1982,14 +1658,14 @@
     {
       "title": "Tom Clancy's EndWar",
       "category": "Turn-Based Strategy",
-      "system": "nds",
-      "bucket": "nds/Tom Clancy's EndWar (USA) (En,Fr).zip"
+      "system": "psp",
+      "bucket": "psp/Tom Clancy's EndWar (USA).chd"
     },
     {
       "title": "Warhammer 40,000 - Squad Command",
       "category": "Turn-Based Strategy",
-      "system": "nds",
-      "bucket": "nds/Warhammer 40,000 - Squad Command (USA) (En,Fr).zip"
+      "system": "psp",
+      "bucket": "psp/Warhammer 40,000 - Squad Command (USA) (En,Fr).chd"
     },
     {
       "title": "Jagged Alliance",
@@ -2006,8 +1682,8 @@
     {
       "title": "Steel Horizon",
       "category": "Turn-Based Strategy",
-      "system": "nds",
-      "bucket": "nds/Steel Horizon (USA).zip"
+      "system": "psp",
+      "bucket": "psp/Steel Horizon (USA).chd"
     },
     {
       "title": "Mage Knight - Destiny's Soldier",
@@ -2028,34 +1704,10 @@
       "bucket": "psp/Field Commander (USA).chd"
     },
     {
-      "title": "Steel Horizon",
-      "category": "Turn-Based Strategy",
-      "system": "psp",
-      "bucket": "psp/Steel Horizon (USA).chd"
-    },
-    {
       "title": "Mytran Wars",
       "category": "Turn-Based Strategy",
       "system": "psp",
       "bucket": "psp/Mytran Wars (USA) (En,Fr).chd"
-    },
-    {
-      "title": "Military History - Commander - Europe at War",
-      "category": "Turn-Based Strategy",
-      "system": "psp",
-      "bucket": "psp/Military History - Commander - Europe at War (Europe) (En,Fr,De,Es,It).chd"
-    },
-    {
-      "title": "Warhammer 40,000 - Squad Command",
-      "category": "Turn-Based Strategy",
-      "system": "psp",
-      "bucket": "psp/Warhammer 40,000 - Squad Command (USA) (En,Fr).chd"
-    },
-    {
-      "title": "Tom Clancy's EndWar",
-      "category": "Turn-Based Strategy",
-      "system": "psp",
-      "bucket": "psp/Tom Clancy's EndWar (USA).chd"
     },
     {
       "title": "Culdcept Revolt",
@@ -2066,92 +1718,26 @@
     {
       "title": "Worms",
       "category": "Worms",
-      "system": "genesis",
-      "bucket": "genesis/Worms (Europe).zip"
-    },
-    {
-      "title": "Worms",
-      "category": "Worms",
-      "system": "snes",
-      "bucket": "snes/Worms (Europe).zip"
-    },
-    {
-      "title": "Worms",
-      "category": "Worms",
-      "system": "gb",
-      "bucket": "gb/Worms (Europe).zip"
-    },
-    {
-      "title": "Worms",
-      "category": "Worms",
-      "system": "saturn",
-      "bucket": "saturn/Worms (USA).chd"
-    },
-    {
-      "title": "Worms",
-      "category": "Worms",
       "system": "psx",
       "bucket": "psx/Worms (USA).chd"
     },
     {
       "title": "Worms Armageddon",
       "category": "Worms",
-      "system": "psx",
-      "bucket": "psx/Worms Armageddon (USA).chd"
-    },
-    {
-      "title": "Worms World Party",
-      "category": "Worms",
-      "system": "psx",
-      "bucket": "psx/Worms World Party (USA) (En,Fr,De,Es,It,Nl,Sv,Da).chd"
-    },
-    {
-      "title": "Worms Armageddon",
-      "category": "Worms",
-      "system": "n64",
-      "bucket": "n64/Worms Armageddon (USA) (En,Fr,Es).zip"
-    },
-    {
-      "title": "Worms Armageddon",
-      "category": "Worms",
-      "system": "gbc",
-      "bucket": "gbc/Worms Armageddon (USA) (En,Fr,Es).zip"
-    },
-    {
-      "title": "Worms Armageddon",
-      "category": "Worms",
       "system": "dreamcast",
-      "bucket": "dreamcast/Worms Armageddon (USA) (En,Fr,De,Nl,Sv,No,Da).chd"
-    },
-    {
-      "title": "Worms World Party",
-      "category": "Worms",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Worms World Party (USA) (En,Fr,De,Es,It,Nl,Sv,Da).chd"
-    },
-    {
-      "title": "Worms - World Party",
-      "category": "Worms",
-      "system": "gba",
-      "bucket": "gba/Worms - World Party (USA) (En,Fr,De,Es,It).zip"
+      "bucket": "dreamcast/Worms Armageddon (USA) (En,Fr,De,Nl,Sv,No,Da).chd",
+      "variants": [
+        {
+          "bucket": "dreamcast/Worms World Party (USA) (En,Fr,De,Es,It,Nl,Sv,Da).chd",
+          "note": "Dreamcast: World Party adds new modes and weapons"
+        }
+      ]
     },
     {
       "title": "Worms 3D",
       "category": "Worms",
       "system": "gc",
       "bucket": "gc/Worms 3D (USA).rvz"
-    },
-    {
-      "title": "Worms - Open Warfare",
-      "category": "Worms",
-      "system": "nds",
-      "bucket": "nds/Worms - Open Warfare (USA).zip"
-    },
-    {
-      "title": "Worms - Open Warfare 2",
-      "category": "Worms",
-      "system": "nds",
-      "bucket": "nds/Worms - Open Warfare 2 (USA) (En,Fr).zip"
     },
     {
       "title": "Worms - Open Warfare",
@@ -2175,13 +1761,19 @@
       "title": "Populous",
       "category": "Real-Time Strategy",
       "system": "genesis",
-      "bucket": "genesis/Populous (Europe).zip"
+      "bucket": "genesis/Populous (Europe).zip",
+      "variants": [
+        {
+          "bucket": "snes/Populous (USA).zip",
+          "note": "SNES: adds extra worlds"
+        }
+      ]
     },
     {
-      "title": "Two Tribes - Populous II",
+      "title": "Populous II - Trials of the Olympian Gods",
       "category": "Real-Time Strategy",
-      "system": "genesis",
-      "bucket": "genesis/Two Tribes - Populous II (Europe).zip"
+      "system": "snes",
+      "bucket": "snes/Populous II - Trials of the Olympian Gods (Europe).zip"
     },
     {
       "title": "Power Monger",
@@ -2210,50 +1802,14 @@
     {
       "title": "Cannon Fodder",
       "category": "Real-Time Strategy",
-      "system": "genesis",
-      "bucket": "genesis/Cannon Fodder (Europe).zip"
+      "system": "snes",
+      "bucket": "snes/Cannon Fodder (Europe).zip"
     },
     {
       "title": "Syndicate",
       "category": "Real-Time Strategy",
-      "system": "genesis",
-      "bucket": "genesis/Syndicate (USA, Europe) (En,Fr,De).zip"
-    },
-    {
-      "title": "Power Monger",
-      "category": "Real-Time Strategy",
-      "system": "segacd",
-      "bucket": "segacd/Power Monger (USA).chd"
-    },
-    {
-      "title": "Populous",
-      "category": "Real-Time Strategy",
-      "system": "mastersystem",
-      "bucket": "mastersystem/Populous (Europe, Brazil) (En).zip"
-    },
-    {
-      "title": "Populous",
-      "category": "Real-Time Strategy",
-      "system": "gb",
-      "bucket": "gb/Populous (Europe).zip"
-    },
-    {
-      "title": "Populous",
-      "category": "Real-Time Strategy",
-      "system": "snes",
-      "bucket": "snes/Populous (USA).zip"
-    },
-    {
-      "title": "Populous II - Trials of the Olympian Gods",
-      "category": "Real-Time Strategy",
-      "system": "snes",
-      "bucket": "snes/Populous II - Trials of the Olympian Gods (Europe).zip"
-    },
-    {
-      "title": "PowerMonger",
-      "category": "Real-Time Strategy",
-      "system": "snes",
-      "bucket": "snes/PowerMonger (Europe).zip"
+      "system": "atarijaguar",
+      "bucket": "atarijaguar/Syndicate (World).zip"
     },
     {
       "title": "Mega-lo-Mania",
@@ -2280,50 +1836,10 @@
       "bucket": "snes/King Arthur's World (USA).zip"
     },
     {
-      "title": "Cannon Fodder",
-      "category": "Real-Time Strategy",
-      "system": "snes",
-      "bucket": "snes/Cannon Fodder (Europe).zip"
-    },
-    {
-      "title": "Syndicate",
-      "category": "Real-Time Strategy",
-      "system": "snes",
-      "bucket": "snes/Syndicate (USA).zip"
-    },
-    {
-      "title": "Cannon Fodder",
-      "category": "Real-Time Strategy",
-      "system": "atarijaguar",
-      "bucket": "atarijaguar/Cannon Fodder (World).zip"
-    },
-    {
-      "title": "Syndicate",
-      "category": "Real-Time Strategy",
-      "system": "atarijaguar",
-      "bucket": "atarijaguar/Syndicate (World).zip"
-    },
-    {
       "title": "Dragon Force",
       "category": "Real-Time Strategy",
       "system": "saturn",
       "bucket": "saturn/Dragon Force (USA).chd"
-    },
-    {
-      "title": "Command & Conquer",
-      "category": "Real-Time Strategy",
-      "system": "saturn",
-      "bucket": "saturn/Command & Conquer (USA).m3u",
-      "files": [
-        "saturn/Command & Conquer (USA) (Disc 1) (GDI Disc).chd",
-        "saturn/Command & Conquer (USA) (Disc 2) (NOD Disc).chd"
-      ]
-    },
-    {
-      "title": "WarCraft II - The Dark Saga",
-      "category": "Real-Time Strategy",
-      "system": "saturn",
-      "bucket": "saturn/WarCraft II - The Dark Saga (USA).chd"
     },
     {
       "title": "Command & Conquer",
@@ -2333,7 +1849,19 @@
       "files": [
         "psx/Command & Conquer (USA) (Disc 1) (GDI).chd",
         "psx/Command & Conquer (USA) (Disc 2) (NOD).chd"
+      ],
+      "variants": [
+        {
+          "bucket": "n64/Command & Conquer (USA).zip",
+          "note": "N64: 3D graphics and exclusive extra missions, no FMV"
+        }
       ]
+    },
+    {
+      "title": "WarCraft II - The Dark Saga",
+      "category": "Real-Time Strategy",
+      "system": "psx",
+      "bucket": "psx/WarCraft II - The Dark Saga (USA) (En,Fr,De,Es,It).chd"
     },
     {
       "title": "Command & Conquer - Red Alert",
@@ -2354,12 +1882,6 @@
         "psx/Command & Conquer - Red Alert - Retaliation (USA) (Disc 1) (Allies).chd",
         "psx/Command & Conquer - Red Alert - Retaliation (USA) (Disc 2) (Soviet).chd"
       ]
-    },
-    {
-      "title": "WarCraft II - The Dark Saga",
-      "category": "Real-Time Strategy",
-      "system": "psx",
-      "bucket": "psx/WarCraft II - The Dark Saga (USA) (En,Fr,De,Es,It).chd"
     },
     {
       "title": "Dune 2000",
@@ -2404,12 +1926,6 @@
       "bucket": "psx/Baldies (USA).chd"
     },
     {
-      "title": "Command & Conquer",
-      "category": "Real-Time Strategy",
-      "system": "n64",
-      "bucket": "n64/Command & Conquer (USA).zip"
-    },
-    {
       "title": "StarCraft 64",
       "category": "Real-Time Strategy",
       "system": "n64",
@@ -2420,12 +1936,6 @@
       "category": "Real-Time Strategy",
       "system": "gbc",
       "bucket": "gbc/Warlocked (USA).zip"
-    },
-    {
-      "title": "Cannon Fodder",
-      "category": "Real-Time Strategy",
-      "system": "gbc",
-      "bucket": "gbc/Cannon Fodder (USA) (En,Fr,De,Es,It).zip"
     },
     {
       "title": "Force 21",
@@ -2604,8 +2114,8 @@
     {
       "title": "Star Trek - Tactical Assault",
       "category": "Real-Time Strategy",
-      "system": "nds",
-      "bucket": "nds/Star Trek - Tactical Assault (USA).zip"
+      "system": "psp",
+      "bucket": "psp/Star Trek - Tactical Assault (USA).chd"
     },
     {
       "title": "Patapon",
@@ -2636,12 +2146,6 @@
       "category": "Real-Time Strategy",
       "system": "psp",
       "bucket": "psp/Fat Princess - Fistful of Cake (USA).chd"
-    },
-    {
-      "title": "Star Trek - Tactical Assault",
-      "category": "Real-Time Strategy",
-      "system": "psp",
-      "bucket": "psp/Star Trek - Tactical Assault (USA).chd"
     },
     {
       "title": "SOCOM - U.S. Navy SEALs - Tactical Strike",

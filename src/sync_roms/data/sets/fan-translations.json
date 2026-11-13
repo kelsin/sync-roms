@@ -3,12 +3,6 @@
   "description": "Japan-only games playable in English through fan patches.",
   "games": [
     {
-      "title": "Mother 1+2",
-      "category": "RPG",
-      "system": "gba",
-      "bucket": "gba/Mother 1+2 (English).zip"
-    },
-    {
       "title": "Mother 3",
       "category": "RPG",
       "system": "gba",
@@ -141,31 +135,43 @@
       "bucket": "psp/Shiren the Wanderer 3 (Japan) [T-En by Aka Translations v0.01] [n].chd"
     },
     {
-      "title": "Kingdom Hearts Final Mix",
+      "title": "Kingdom Hearts",
       "category": "Action RPG",
       "system": "ps2",
-      "bucket": "ps2/Kingdom Hearts Final Mix (English v2026-06-26).chd"
+      "bucket": "ps2/Kingdom Hearts (USA).chd",
+      "variants": [
+        {
+          "bucket": "ps2/Kingdom Hearts Final Mix (English v2026-06-26).chd",
+          "note": "Final Mix: adds bosses, abilities and scenes, English patch"
+        }
+      ]
     },
     {
-      "title": "Kingdom Hearts II - Final Mix+",
+      "title": "Kingdom Hearts II",
       "category": "Action RPG",
       "system": "ps2",
-      "bucket": "ps2/Kingdom Hearts II - Final Mix+ (English Patched)[Undub][4-3].chd"
+      "bucket": "ps2/Kingdom Hearts II (USA).chd",
+      "variants": [
+        {
+          "bucket": "ps2/Kingdom Hearts II - Final Mix+ (English Patched)[Undub][4-3].chd",
+          "note": "Final Mix+: adds bosses, scenes and Re:CoM, English patch"
+        }
+      ]
     },
     {
       "title": "Kingdom Hearts - Birth by Sleep",
       "category": "Action RPG",
       "system": "psp",
-      "bucket": "psp/Kingdom Hearts - Birth by Sleep (Japan) (Final Mix) [T-En by Truthkey v1.0.12].chd"
+      "bucket": "psp/Kingdom Hearts - Birth by Sleep (USA) (En,Fr,Es).chd",
+      "variants": [
+        {
+          "bucket": "psp/Kingdom Hearts - Birth by Sleep (Japan) (Final Mix) [T-En by Truthkey v1.0.12].chd",
+          "note": "Final Mix: adds bosses, abilities and modes, English patch"
+        }
+      ]
     },
     {
-      "title": "Final Fantasy Reishiki",
-      "category": "Action RPG",
-      "system": "psp",
-      "bucket": "psp/Final Fantasy Reishiki (Japan) [T-En by SkyBladeCloud v2].chd"
-    },
-    {
-      "title": "Final Fantasy Type-0 (alternate patch)",
+      "title": "Final Fantasy Type-0",
       "category": "Action RPG",
       "system": "psp",
       "bucket": "psp/Final Fantasy Type-0 (English Patched v2).chd"
@@ -177,10 +183,16 @@
       "bucket": "psp/Nayuta - Endless Trails (Japan) [T-En by Flame v4.15] [Add by Dackst v1.0.1] [n].chd"
     },
     {
-      "title": "Phantasy Star Portable 2 Infinity",
+      "title": "Phantasy Star Portable 2",
       "category": "Action RPG",
       "system": "psp",
-      "bucket": "psp/Phantasy Star Portable 2 Infinity (Japan) [T-En by JamRules & Weyu v1.7].chd"
+      "bucket": "psp/Phantasy Star Portable 2 (USA).chd",
+      "variants": [
+        {
+          "bucket": "psp/Phantasy Star Portable 2 Infinity (Japan) [T-En by JamRules & Weyu v1.7].chd",
+          "note": "PSP: Infinity adds new missions, areas and gear, English patch"
+        }
+      ]
     },
     {
       "title": "Monster Hunter Portable 3rd",
@@ -240,13 +252,25 @@
       "title": "Fire Emblem - Shadow Dragon and the Blade of Light",
       "category": "Strategy RPG",
       "system": "nes",
-      "bucket": "nes/Fire Emblem Shadow Dragon and the Blade of Light (English v1.4.1).zip"
+      "bucket": "nes/Fire Emblem Shadow Dragon and the Blade of Light (English v1.4.1).zip",
+      "variants": [
+        {
+          "bucket": "nds/Fire Emblem - Shadow Dragon (USA).zip",
+          "note": "DS: remake adds chapters, new units and an official translation"
+        }
+      ]
     },
     {
       "title": "Fire Emblem Gaiden",
       "category": "Strategy RPG",
       "system": "nes",
-      "bucket": "nes/Fire Emblem Gaiden (English v1.01)[Names+Font Fix].zip"
+      "bucket": "nes/Fire Emblem Gaiden (English v1.01)[Names+Font Fix].zip",
+      "variants": [
+        {
+          "bucket": "3ds/Fire Emblem Echoes - Shadows of Valentia (USA) (En,Fr,Es).zip",
+          "note": "3DS: Echoes remake adds voice, dungeons and an official translation"
+        }
+      ]
     },
     {
       "title": "Fire Emblem - Akaneia Saga - Episode 1",
@@ -363,13 +387,13 @@
       "title": "Valkyria Chronicles 3",
       "category": "Strategy RPG",
       "system": "psp",
-      "bucket": "psp/Valkyria Chronicles 3 (English v1.0.8).chd"
-    },
-    {
-      "title": "Valkyria Chronicles 3 - Extra Edition",
-      "category": "Strategy RPG",
-      "system": "psp",
-      "bucket": "psp/Valkyria Chronicles 3 - Extra Edition (Japan) [T-En by Valkyria Chronicles 3 Translation Project v2] [i] [n].chd"
+      "bucket": "psp/Valkyria Chronicles 3 (English v1.0.8).chd",
+      "variants": [
+        {
+          "bucket": "psp/Valkyria Chronicles 3 - Extra Edition (Japan) [T-En by Valkyria Chronicles 3 Translation Project v2] [i] [n].chd",
+          "note": "PSP: Extra Edition adds the DLC chapters, English patch"
+        }
+      ]
     },
     {
       "title": "Phantom Kingdom Portable",
@@ -466,12 +490,6 @@
       "category": "Visual Novel",
       "system": "psp",
       "bucket": "psp/Danganronpa - Hope's Academy and Despair's Students (Japan) [T-En by Project Zetsubou v1.0] [n].chd"
-    },
-    {
-      "title": "Danganronpa (alternate patch)",
-      "category": "Visual Novel",
-      "system": "psp",
-      "bucket": "psp/Danganronpa (English Patched).chd"
     },
     {
       "title": "Steins;Gate",

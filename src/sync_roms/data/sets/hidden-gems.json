@@ -24,8 +24,8 @@
     },
     {
       "title": "GunForce",
-      "system": "snes",
-      "bucket": "snes/GunForce (USA).zip"
+      "system": "fbneo",
+      "bucket": "fbneo/gunforceu.zip"
     },
     {
       "title": "Metal Warriors",
@@ -113,9 +113,9 @@
       "bucket": "snes/Run Saber (USA).zip"
     },
     {
-      "title": "King of Dragons",
-      "system": "snes",
-      "bucket": "snes/King of Dragons (USA).zip"
+      "title": "The King of Dragons",
+      "system": "fbneo",
+      "bucket": "fbneo/kodu.zip"
     },
     {
       "title": "Pocky & Rocky",
@@ -145,7 +145,13 @@
     {
       "title": "Umihara Kawase",
       "system": "snes",
-      "bucket": "snes/Umihara Kawase (Japan).zip"
+      "bucket": "snes/Umihara Kawase (Japan).zip",
+      "variants": [
+        {
+          "bucket": "psp/Umihara Kawase Portable (Japan).chd",
+          "note": "PSP: Portable adds new fields, with weaker physics"
+        }
+      ]
     },
     {
       "title": "DoReMi Fantasy - Milon no Dokidoki Daibouken",
@@ -180,7 +186,13 @@
     {
       "title": "Lost Vikings, The",
       "system": "snes",
-      "bucket": "snes/Lost Vikings, The (USA).zip"
+      "bucket": "snes/Lost Vikings, The (USA).zip",
+      "variants": [
+        {
+          "bucket": "genesis/Lost Vikings, The (USA) (October, 1995).zip",
+          "note": "Genesis: adds five extra levels"
+        }
+      ]
     },
     {
       "title": "True Lies",
@@ -195,12 +207,18 @@
     {
       "title": "Breath of Fire II",
       "system": "snes",
-      "bucket": "snes/Breath of Fire II (USA).zip"
+      "bucket": "snes/Breath of Fire II (USA).zip",
+      "variants": [
+        {
+          "bucket": "gba/Breath of Fire II (USA).zip",
+          "note": "GBA: new translation, a dash button and quick saves"
+        }
+      ]
     },
     {
       "title": "Magic Sword",
-      "system": "snes",
-      "bucket": "snes/Magic Sword (USA).zip"
+      "system": "fbneo",
+      "bucket": "fbneo/mswordu.zip"
     },
     {
       "title": "U.N. Squadron",
@@ -214,8 +232,8 @@
     },
     {
       "title": "Saturday Night Slam Masters",
-      "system": "snes",
-      "bucket": "snes/Saturday Night Slam Masters (USA).zip"
+      "system": "fbneo",
+      "bucket": "fbneo/slammastu.zip"
     },
     {
       "title": "Ogre Battle - The March of the Black Queen",
@@ -229,8 +247,8 @@
     },
     {
       "title": "Boogerman - A Pick and Flick Adventure",
-      "system": "snes",
-      "bucket": "snes/Boogerman - A Pick and Flick Adventure (USA).zip"
+      "system": "genesis",
+      "bucket": "genesis/Boogerman - A Pick and Flick Adventure (USA).zip"
     },
     {
       "title": "WeaponLord",
@@ -254,8 +272,8 @@
     },
     {
       "title": "Ys III - Wanderers from Ys",
-      "system": "snes",
-      "bucket": "snes/Ys III - Wanderers from Ys (USA).zip"
+      "system": "tg-cd",
+      "bucket": "tg-cd/Ys III - Wanderers from Ys (USA).chd"
     },
     {
       "title": "Legend of the Mystical Ninja, The",
@@ -273,14 +291,20 @@
       "bucket": "snes/Jurassic Park (USA) (Rev 1).zip"
     },
     {
-      "title": "Super Smash T.V.",
-      "system": "snes",
-      "bucket": "snes/Super Smash T.V. (USA).zip"
+      "title": "Smash T.V.",
+      "system": "fbneo",
+      "bucket": "fbneo/smashtv.zip"
     },
     {
       "title": "Blackthorne",
       "system": "snes",
-      "bucket": "snes/Blackthorne (USA).zip"
+      "bucket": "snes/Blackthorne (USA).zip",
+      "variants": [
+        {
+          "bucket": "sega32x/Blackthorne (USA).zip",
+          "note": "32X: re-rendered graphics"
+        }
+      ]
     },
     {
       "title": "Zombies Ate My Neighbors",
@@ -314,13 +338,19 @@
     },
     {
       "title": "Faceball 2000",
-      "system": "snes",
-      "bucket": "snes/Faceball 2000 (USA).zip"
+      "system": "gb",
+      "bucket": "gb/Faceball 2000 (USA).zip",
+      "variants": [
+        {
+          "bucket": "snes/Faceball 2000 (USA).zip",
+          "note": "SNES: adds color, more levels and a full-screen view"
+        }
+      ]
     },
     {
       "title": "Fighter's History",
-      "system": "snes",
-      "bucket": "snes/Fighter's History (USA) (Rev 1).zip"
+      "system": "fbneo",
+      "bucket": "fbneo/fghthistu.zip"
     },
     {
       "title": "FireStriker",
@@ -359,8 +389,8 @@
     },
     {
       "title": "Rolling Thunder 2",
-      "system": "genesis",
-      "bucket": "genesis/Rolling Thunder 2 (USA).zip"
+      "system": "fbneo",
+      "bucket": "fbneo/rthun2.zip"
     },
     {
       "title": "Ranger X",
@@ -399,8 +429,8 @@
     },
     {
       "title": "Cadash",
-      "system": "tg16",
-      "bucket": "tg16/Cadash (USA).zip"
+      "system": "fbneo",
+      "bucket": "fbneo/cadashu.zip"
     },
     {
       "title": "Neutopia II",
@@ -413,9 +443,9 @@
       "bucket": "tg16/Military Madness (USA).zip"
     },
     {
-      "title": "Dragon's Curse",
-      "system": "tg16",
-      "bucket": "tg16/Dragon's Curse (USA).zip"
+      "title": "Wonder Boy III - The Dragon's Trap",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Wonder Boy III - The Dragon's Trap (USA, Europe).zip"
     },
     {
       "title": "Legendary Axe, The",
@@ -424,8 +454,8 @@
     },
     {
       "title": "Ninja Spirit",
-      "system": "tg16",
-      "bucket": "tg16/Ninja Spirit (USA).zip"
+      "system": "fbneo",
+      "bucket": "fbneo/nspirit.zip"
     },
     {
       "title": "Jackie Chan's Action Kung Fu",
@@ -485,7 +515,13 @@
     {
       "title": "Ys Book I & II (Rev 2)",
       "system": "tg-cd",
-      "bucket": "tg-cd/Ys Book I & II (USA).chd"
+      "bucket": "tg-cd/Ys Book I & II (USA).chd",
+      "variants": [
+        {
+          "bucket": "psp/Ys I & II Chronicles (USA).chd",
+          "note": "PSP: Chronicles adds remastered art, new music and extras"
+        }
+      ]
     },
     {
       "title": "Guardian Heroes",
@@ -607,8 +643,8 @@
     },
     {
       "title": "Herc's Adventures",
-      "system": "saturn",
-      "bucket": "saturn/Herc's Adventures (USA) (RE).chd"
+      "system": "psx",
+      "bucket": "psx/Herc's Adventures (USA).chd"
     },
     {
       "title": "Saturn Bomberman",
@@ -715,33 +751,30 @@
       "bucket": "saturn/Virtual On - Cyber Troopers (USA).chd"
     },
     {
-      "title": "Dungeons & Dragons Collection",
-      "system": "saturn",
-      "bucket": "saturn/Dungeons & Dragons Collection (Japan).m3u",
-      "files": [
-        "saturn/Dungeons & Dragons Collection (Japan) (Disc 1) (Tower of Doom).chd",
-        "saturn/Dungeons & Dragons Collection (Japan) (Disc 2) (Shadow over Mystara).chd"
+      "title": "Die Hard Arcade",
+      "system": "mame",
+      "bucket": "mame/diehard.zip"
+    },
+    {
+      "title": "Elevator Action Returns",
+      "system": "fbneo",
+      "bucket": "fbneo/elvactr.zip"
+    },
+    {
+      "title": "Metal Slug",
+      "system": "fbneo",
+      "bucket": "fbneo/mslug.zip",
+      "variants": [
+        {
+          "bucket": "saturn/Metal Slug - Super Vehicle-001 (Japan) (Rev A).chd",
+          "note": "Saturn: adds Combat School, a mission mode with ranked challenges"
+        }
       ]
     },
     {
-      "title": "Die Hard Arcade",
-      "system": "saturn",
-      "bucket": "saturn/Die Hard Arcade (USA).chd"
-    },
-    {
-      "title": "Elevator Action^2 - Returns",
-      "system": "saturn",
-      "bucket": "saturn/Elevator Action^2 - Returns (Japan).chd"
-    },
-    {
-      "title": "Metal Slug - Super Vehicle-001",
-      "system": "saturn",
-      "bucket": "saturn/Metal Slug - Super Vehicle-001 (Japan) (Rev A).chd"
-    },
-    {
       "title": "Silhouette Mirage",
-      "system": "saturn",
-      "bucket": "saturn/Silhouette Mirage (Japan) (Rev A).chd"
+      "system": "psx",
+      "bucket": "psx/Silhouette Mirage (USA).chd"
     },
     {
       "title": "Bulk Slash",
@@ -765,33 +798,45 @@
     },
     {
       "title": "Radiant Silvergun",
-      "system": "saturn",
-      "bucket": "saturn/Radiant Silvergun (Japan).chd"
+      "system": "mame",
+      "bucket": "mame/rsgun.zip",
+      "variants": [
+        {
+          "bucket": "saturn/Radiant Silvergun (Japan).chd",
+          "note": "Saturn: adds story mode and cutscenes"
+        }
+      ]
     },
     {
       "title": "Battle Garegga",
-      "system": "saturn",
-      "bucket": "saturn/Battle Garegga (Japan).chd"
+      "system": "fbneo",
+      "bucket": "fbneo/bgaregga.zip"
     },
     {
       "title": "Batsugun",
-      "system": "saturn",
-      "bucket": "saturn/Batsugun (Japan).chd"
+      "system": "fbneo",
+      "bucket": "fbneo/batsugun.zip"
     },
     {
       "title": "DoDonPachi",
-      "system": "saturn",
-      "bucket": "saturn/DoDonPachi (Japan).chd"
+      "system": "fbneo",
+      "bucket": "fbneo/ddonpach.zip"
     },
     {
-      "title": "Soukyuu Gurentai",
-      "system": "saturn",
-      "bucket": "saturn/Soukyuu Gurentai (Japan) (Rev A).chd"
+      "title": "Soukyugurentai",
+      "system": "mame",
+      "bucket": "mame/sokyugrt.zip"
     },
     {
       "title": "Hyper Duel",
-      "system": "saturn",
-      "bucket": "saturn/Hyper Duel (Japan).chd"
+      "system": "fbneo",
+      "bucket": "fbneo/hyprduel.zip",
+      "variants": [
+        {
+          "bucket": "saturn/Hyper Duel (Japan).chd",
+          "note": "Saturn: adds a Saturn mode with remade graphics and music"
+        }
+      ]
     },
     {
       "title": "Thunder Force V",
@@ -800,23 +845,23 @@
     },
     {
       "title": "Darius Gaiden",
-      "system": "saturn",
-      "bucket": "saturn/Darius Gaiden (USA).chd"
+      "system": "fbneo",
+      "bucket": "fbneo/dariusg.zip"
     },
     {
-      "title": "Galactic Attack",
-      "system": "saturn",
-      "bucket": "saturn/Galactic Attack (USA).chd"
+      "title": "Rayforce (Gunlock)",
+      "system": "fbneo",
+      "bucket": "fbneo/gunlock.zip"
     },
     {
-      "title": "Magical Night Dreams - Cotton 2",
-      "system": "saturn",
-      "bucket": "saturn/Magical Night Dreams - Cotton 2 (Japan).chd"
+      "title": "Cotton 2",
+      "system": "mame",
+      "bucket": "mame/cotton2.zip"
     },
     {
-      "title": "Magical Night Dreams - Cotton Boomerang",
-      "system": "saturn",
-      "bucket": "saturn/Magical Night Dreams - Cotton Boomerang (Japan).chd"
+      "title": "Cotton Boomerang",
+      "system": "mame",
+      "bucket": "mame/cottonbm.zip"
     },
     {
       "title": "Dark Legend",
@@ -824,9 +869,9 @@
       "bucket": "saturn/Dark Legend (USA).chd"
     },
     {
-      "title": "Golden Axe - The Duel",
-      "system": "saturn",
-      "bucket": "saturn/Golden Axe - The Duel (USA).chd"
+      "title": "Golden Axe: The Duel",
+      "system": "mame",
+      "bucket": "mame/gaxeduel.zip"
     },
     {
       "title": "Highway 2000",
@@ -896,7 +941,13 @@
     {
       "title": "Riviera - The Promised Land",
       "system": "gba",
-      "bucket": "gba/Riviera - The Promised Land (USA).zip"
+      "bucket": "gba/Riviera - The Promised Land (USA).zip",
+      "variants": [
+        {
+          "bucket": "psp/Riviera - The Promised Land (USA).chd",
+          "note": "PSP: adds new art, voice acting and extra content"
+        }
+      ]
     },
     {
       "title": "Gunstar Super Heroes",
@@ -905,8 +956,8 @@
     },
     {
       "title": "Mr. Driller 2",
-      "system": "gba",
-      "bucket": "gba/Mr. Driller 2 (USA).zip"
+      "system": "mame",
+      "bucket": "mame/mrdrilr2.zip"
     },
     {
       "title": "Shadow of the Colossus",
@@ -926,7 +977,13 @@
     {
       "title": "Odin Sphere",
       "system": "ps2",
-      "bucket": "ps2/Odin Sphere (USA).chd"
+      "bucket": "ps2/Odin Sphere (USA).chd",
+      "variants": [
+        {
+          "bucket": "psvita/Odin Sphere Leifthrasir [PCSE00899] [USA] [NoNpDRM].zip",
+          "note": "Vita: Leifthrasir remake, reworked combat, HD art, no slowdown"
+        }
+      ]
     },
     {
       "title": "GrimGrimoire",
@@ -1074,24 +1131,9 @@
       "bucket": "fbneo/dogyuun.zip"
     },
     {
-      "title": "Batsugun",
-      "system": "fbneo",
-      "bucket": "fbneo/batsugun.zip"
-    },
-    {
       "title": "Rod-Land",
       "system": "fbneo",
       "bucket": "fbneo/rodland.zip"
-    },
-    {
-      "title": "Elevator Action Returns",
-      "system": "fbneo",
-      "bucket": "fbneo/elvactr.zip"
-    },
-    {
-      "title": "Darius Gaiden",
-      "system": "fbneo",
-      "bucket": "fbneo/dariusg.zip"
     },
     {
       "title": "PuLiRuLa",
@@ -1111,7 +1153,13 @@
     {
       "title": "Gunbird 2",
       "system": "fbneo",
-      "bucket": "fbneo/gunbird2.zip"
+      "bucket": "fbneo/gunbird2.zip",
+      "variants": [
+        {
+          "bucket": "dreamcast/Gunbird 2 (USA).chd",
+          "note": "Dreamcast: adds an extra playable character"
+        }
+      ]
     },
     {
       "title": "Dragon Blaze",
@@ -1122,11 +1170,6 @@
       "title": "Sorcer Striker",
       "system": "fbneo",
       "bucket": "fbneo/sstriker.zip"
-    },
-    {
-      "title": "DoDonPachi",
-      "system": "fbneo",
-      "bucket": "fbneo/ddonpach.zip"
     },
     {
       "title": "ESP Ra.De.",
@@ -1151,7 +1194,13 @@
     {
       "title": "Mars Matrix",
       "system": "fbneo",
-      "bucket": "fbneo/mmatrix.zip"
+      "bucket": "fbneo/mmatrix.zip",
+      "variants": [
+        {
+          "bucket": "dreamcast/Mars Matrix (USA).chd",
+          "note": "Dreamcast: adds Shot Arcade challenge mode and unlockables"
+        }
+      ]
     },
     {
       "title": "Red Earth",
@@ -1275,7 +1324,13 @@
     {
       "title": "Viewtiful Joe",
       "system": "gc",
-      "bucket": "gc/Viewtiful Joe (USA).rvz"
+      "bucket": "gc/Viewtiful Joe (USA).rvz",
+      "variants": [
+        {
+          "bucket": "ps2/Viewtiful Joe (USA).chd",
+          "note": "PS2: adds Dante as a playable character"
+        }
+      ]
     },
     {
       "title": "Viewtiful Joe 2",
@@ -1336,9 +1391,19 @@
       ]
     },
     {
-      "title": "Skies of Arcadia Legends",
-      "system": "gc",
-      "bucket": "gc/Skies of Arcadia Legends (USA).rvz"
+      "title": "Skies of Arcadia",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Skies of Arcadia (USA).m3u",
+      "files": [
+        "dreamcast/Skies of Arcadia (USA) (Disc 1).chd",
+        "dreamcast/Skies of Arcadia (USA) (Disc 2).chd"
+      ],
+      "variants": [
+        {
+          "bucket": "gc/Skies of Arcadia Legends (USA).rvz",
+          "note": "GameCube: adds bounty hunts, a side quest and fewer random battles"
+        }
+      ]
     },
     {
       "title": "Geist",
@@ -1411,11 +1476,6 @@
       "bucket": "gc/Bomberman Generation (USA) (Rev 1).rvz"
     },
     {
-      "title": "Evolution Worlds",
-      "system": "gc",
-      "bucket": "gc/Evolution Worlds (USA).rvz"
-    },
-    {
       "title": "Pac-Man Vs.",
       "system": "gc",
       "bucket": "gc/Pac-Man Vs. (USA).rvz"
@@ -1448,7 +1508,13 @@
     {
       "title": "Radiant Historia",
       "system": "nds",
-      "bucket": "nds/Radiant Historia (USA).zip"
+      "bucket": "nds/Radiant Historia (USA).zip",
+      "variants": [
+        {
+          "bucket": "3ds/Radiant Historia - Perfect Chronology (USA).zip",
+          "note": "3DS: adds a new story path, voice acting and new art"
+        }
+      ]
     },
     {
       "title": "Okamiden",
@@ -1568,12 +1634,24 @@
     {
       "title": "Shin Megami Tensei - Devil Survivor",
       "system": "nds",
-      "bucket": "nds/Shin Megami Tensei - Devil Survivor (USA).zip"
+      "bucket": "nds/Shin Megami Tensei - Devil Survivor (USA).zip",
+      "variants": [
+        {
+          "bucket": "3ds/Shin Megami Tensei - Devil Survivor Overclocked (USA) (Rev 1).zip",
+          "note": "3DS: Overclocked adds an 8th day, voice acting and demons"
+        }
+      ]
     },
     {
       "title": "Shin Megami Tensei - Strange Journey",
       "system": "nds",
-      "bucket": "nds/Shin Megami Tensei - Strange Journey (USA).zip"
+      "bucket": "nds/Shin Megami Tensei - Strange Journey (USA).zip",
+      "variants": [
+        {
+          "bucket": "3ds/Shin Megami Tensei - Strange Journey Redux (USA).zip",
+          "note": "3DS: Redux adds a new dungeon, character and endings"
+        }
+      ]
     },
     {
       "title": "Dark Spire, The",
@@ -1812,13 +1890,13 @@
     },
     {
       "title": "DuckTales",
-      "system": "gb",
-      "bucket": "gb/DuckTales (USA).zip"
+      "system": "nes",
+      "bucket": "nes/DuckTales (USA).zip"
     },
     {
       "title": "DuckTales 2",
-      "system": "gb",
-      "bucket": "gb/DuckTales 2 (USA).zip"
+      "system": "nes",
+      "bucket": "nes/DuckTales 2 (USA).zip"
     },
     {
       "title": "Batman - Return of the Joker",
@@ -1839,11 +1917,6 @@
       "title": "Gargoyle's Quest",
       "system": "gb",
       "bucket": "gb/Gargoyle's Quest (USA, Europe).zip"
-    },
-    {
-      "title": "Avenging Spirit",
-      "system": "gb",
-      "bucket": "gb/Avenging Spirit (USA, Europe).zip"
     },
     {
       "title": "Trip World",
@@ -1902,8 +1975,8 @@
     },
     {
       "title": "World Heroes 2 Jet",
-      "system": "gb",
-      "bucket": "gb/World Heroes 2 Jet (USA, Europe) (SGB Enhanced).zip"
+      "system": "fbneo",
+      "bucket": "fbneo/wh2j.zip"
     },
     {
       "title": "Battle Arena Toshinden",
@@ -1952,13 +2025,19 @@
     },
     {
       "title": "Yoshi",
-      "system": "gb",
-      "bucket": "gb/Yoshi (USA).zip"
+      "system": "nes",
+      "bucket": "nes/Yoshi (USA).zip"
     },
     {
       "title": "Yoshi's Cookie",
-      "system": "gb",
-      "bucket": "gb/Yoshi's Cookie (USA, Europe).zip"
+      "system": "nes",
+      "bucket": "nes/Yoshi's Cookie (USA).zip",
+      "variants": [
+        {
+          "bucket": "snes/Yoshi's Cookie (USA).zip",
+          "note": "SNES: adds a puzzle mode and better presentation"
+        }
+      ]
     },
     {
       "title": "Dead Heat Scramble",
@@ -1968,7 +2047,13 @@
     {
       "title": "Looney Tunes",
       "system": "gb",
-      "bucket": "gb/Looney Tunes (USA, Europe).zip"
+      "bucket": "gb/Looney Tunes (USA, Europe).zip",
+      "variants": [
+        {
+          "bucket": "gbc/Looney Tunes (USA) (GB Compatible).zip",
+          "note": "GBC: the same game in color"
+        }
+      ]
     },
     {
       "title": "Ikari no Yousai 2",
@@ -1987,8 +2072,8 @@
     },
     {
       "title": "Tumble Pop",
-      "system": "gb",
-      "bucket": "gb/Tumble Pop (USA, Europe).zip"
+      "system": "fbneo",
+      "bucket": "fbneo/tumblep.zip"
     },
     {
       "title": "Ultraman Ball",
@@ -2032,8 +2117,8 @@
     },
     {
       "title": "Samurai Shodown",
-      "system": "gb",
-      "bucket": "gb/Samurai Shodown (USA, Europe) (SGB Enhanced).zip"
+      "system": "fbneo",
+      "bucket": "fbneo/samsho.zip"
     },
     {
       "title": "King of Fighters '95, The",
@@ -2062,8 +2147,8 @@
     },
     {
       "title": "Dropzone",
-      "system": "gb",
-      "bucket": "gb/Dropzone (Europe).zip"
+      "system": "nes",
+      "bucket": "nes/Dropzone (Europe).zip"
     },
     {
       "title": "Namco Gallery Vol.3",
@@ -2071,9 +2156,9 @@
       "bucket": "gb/Namco Gallery Vol.3 (Japan) (SGB Enhanced).zip"
     },
     {
-      "title": "Lock n' Chase",
-      "system": "gb",
-      "bucket": "gb/Lock n' Chase (World).zip"
+      "title": "Lock'n'Chase",
+      "system": "fbneo",
+      "bucket": "fbneo/lnc.zip"
     },
     {
       "title": "Dexterity",
@@ -2092,8 +2177,8 @@
     },
     {
       "title": "Boulder Dash",
-      "system": "gb",
-      "bucket": "gb/Boulder Dash (Europe).zip"
+      "system": "colecovision",
+      "bucket": "colecovision/Boulder Dash (USA).zip"
     },
     {
       "title": "Lucle",
@@ -2117,13 +2202,13 @@
     },
     {
       "title": "Shanghai",
-      "system": "gb",
-      "bucket": "gb/Shanghai (USA).zip"
+      "system": "atarilynx",
+      "bucket": "atarilynx/Shanghai (World).zip"
     },
     {
-      "title": "QIX",
-      "system": "gb",
-      "bucket": "gb/QIX (World).zip"
+      "title": "Qix",
+      "system": "fbneo",
+      "bucket": "fbneo/qix.zip"
     },
     {
       "title": "Adventures of Lolo",
@@ -2136,9 +2221,9 @@
       "bucket": "gb/Shikinjou (Japan).zip"
     },
     {
-      "title": "Flipull",
-      "system": "gb",
-      "bucket": "gb/Flipull (USA).zip"
+      "title": "Flipull - An Exciting Cube Game",
+      "system": "nes",
+      "bucket": "nes/Flipull - An Exciting Cube Game (Japan) (En) (Rev 1).zip"
     },
     {
       "title": "Fastest Lap",
@@ -2197,8 +2282,8 @@
     },
     {
       "title": "Rampart",
-      "system": "gb",
-      "bucket": "gb/Rampart (USA, Europe).zip"
+      "system": "fbneo",
+      "bucket": "fbneo/rampart.zip"
     },
     {
       "title": "Power Mission",
@@ -2216,11 +2301,6 @@
       "bucket": "gb/Uno - Small World (Japan).zip"
     },
     {
-      "title": "Faceball 2000",
-      "system": "gb",
-      "bucket": "gb/Faceball 2000 (USA).zip"
-    },
-    {
       "title": "Mystical Ninja Starring Goemon",
       "system": "gb",
       "bucket": "gb/Mystical Ninja Starring Goemon (USA) (SGB Enhanced).zip"
@@ -2233,7 +2313,13 @@
     {
       "title": "Final Fantasy Adventure",
       "system": "gb",
-      "bucket": "gb/Final Fantasy Adventure (USA).zip"
+      "bucket": "gb/Final Fantasy Adventure (USA).zip",
+      "variants": [
+        {
+          "bucket": "psvita/Adventures of Mana [PCSE00905] [USA] [NoNpDRM].zip",
+          "note": "Vita: faithful 3D remake with new visuals and music"
+        }
+      ]
     },
     {
       "title": "Castlevania Legends",
@@ -2293,7 +2379,13 @@
     {
       "title": "Pocket Bomberman",
       "system": "gb",
-      "bucket": "gb/Pocket Bomberman (Europe) (SGB Enhanced).zip"
+      "bucket": "gb/Pocket Bomberman (Europe) (SGB Enhanced).zip",
+      "variants": [
+        {
+          "bucket": "gbc/Pocket Bomberman (USA, Europe) (SGB Enhanced) (GB Compatible).zip",
+          "note": "GBC: adds colour"
+        }
+      ]
     },
     {
       "title": "Spud's Adventure",
@@ -2327,8 +2419,8 @@
     },
     {
       "title": "Miner 2049er Starring Bounty Bob",
-      "system": "gb",
-      "bucket": "gb/Miner 2049er Starring Bounty Bob (USA).zip"
+      "system": "atari5200",
+      "bucket": "atari5200/Miner 2049er Starring Bounty Bob (USA).zip"
     },
     {
       "title": "Kwirk - He's A-maze-ing!",
@@ -2338,12 +2430,24 @@
     {
       "title": "Legend of the River King GB",
       "system": "gb",
-      "bucket": "gb/Legend of the River King GB (USA) (SGB Enhanced).zip"
+      "bucket": "gb/Legend of the River King GB (USA) (SGB Enhanced).zip",
+      "variants": [
+        {
+          "bucket": "gbc/Legend of the River King GBC (USA) (SGB Enhanced) (GB Compatible).zip",
+          "note": "Game Boy Color: adds color graphics"
+        }
+      ]
     },
     {
-      "title": "Snow Brothers",
-      "system": "gb",
-      "bucket": "gb/Snow Brothers (USA).zip"
+      "title": "Snow Bros.",
+      "system": "fbneo",
+      "bucket": "fbneo/snowbros.zip",
+      "variants": [
+        {
+          "bucket": "genesis/Snow Bros. - Nick & Tom (Japan).zip",
+          "note": "Genesis: adds extra floors and a new final boss"
+        }
+      ]
     },
     {
       "title": "Kirby & The Amazing Mirror",
@@ -2351,9 +2455,15 @@
       "bucket": "gba/Kirby & The Amazing Mirror (USA).zip"
     },
     {
-      "title": "Kirby - Nightmare in Dream Land",
-      "system": "gba",
-      "bucket": "gba/Kirby - Nightmare in Dream Land (USA).zip"
+      "title": "Kirby's Adventure",
+      "system": "nes",
+      "bucket": "nes/Kirby's Adventure (USA) (Rev 1).zip",
+      "variants": [
+        {
+          "bucket": "gba/Kirby - Nightmare in Dream Land (USA).zip",
+          "note": "GBA: remake adding Meta Knightmare, minigames and multiplayer"
+        }
+      ]
     },
     {
       "title": "Wario Land 4",
@@ -2367,13 +2477,19 @@
     },
     {
       "title": "Earthworm Jim 2",
-      "system": "gba",
-      "bucket": "gba/Earthworm Jim 2 (USA).zip"
+      "system": "genesis",
+      "bucket": "genesis/Earthworm Jim 2 (USA).zip"
     },
     {
-      "title": "Super Ghouls'n Ghosts",
-      "system": "gba",
-      "bucket": "gba/Super Ghouls'n Ghosts (USA, Europe).zip"
+      "title": "Super Ghouls 'N Ghosts",
+      "system": "snes",
+      "bucket": "snes/Super Ghouls 'N Ghosts (USA).zip",
+      "variants": [
+        {
+          "bucket": "gba/Super Ghouls'n Ghosts (USA, Europe).zip",
+          "note": "GBA: adds an Arrange mode with remixed stages"
+        }
+      ]
     },
     {
       "title": "Advance Guardian Heroes",
@@ -2423,7 +2539,13 @@
     {
       "title": "Yggdra Union - We'll Never Fight Alone",
       "system": "gba",
-      "bucket": "gba/Yggdra Union - We'll Never Fight Alone (USA).zip"
+      "bucket": "gba/Yggdra Union - We'll Never Fight Alone (USA).zip",
+      "variants": [
+        {
+          "bucket": "psp/Yggdra Union (USA).chd",
+          "note": "PSP: adds new art and a multiplayer mode"
+        }
+      ]
     },
     {
       "title": "Summon Night - Swordcraft Story",
@@ -2486,14 +2608,26 @@
       "bucket": "gba/Zone of the Enders - The Fist of Mars (USA).zip"
     },
     {
-      "title": "Double Dragon Advance",
-      "system": "gba",
-      "bucket": "gba/Double Dragon Advance (USA).zip"
+      "title": "Double Dragon",
+      "system": "fbneo",
+      "bucket": "fbneo/ddragonu.zip",
+      "variants": [
+        {
+          "bucket": "gba/Double Dragon Advance (USA).zip",
+          "note": "GBA: expanded remake with new stages, moves and enemies"
+        }
+      ]
     },
     {
-      "title": "River City Ransom EX",
-      "system": "gba",
-      "bucket": "gba/River City Ransom EX (USA).zip"
+      "title": "River City Ransom",
+      "system": "nes",
+      "bucket": "nes/River City Ransom (USA).zip",
+      "variants": [
+        {
+          "bucket": "gba/River City Ransom EX (USA).zip",
+          "note": "GBA: adds move customization and new techniques"
+        }
+      ]
     },
     {
       "title": "Dragon Ball - Advanced Adventure",
@@ -2522,8 +2656,14 @@
     },
     {
       "title": "Denki Blocks!",
-      "system": "gba",
-      "bucket": "gba/Denki Blocks! (USA) (En,Es).zip"
+      "system": "gbc",
+      "bucket": "gbc/Denki Blocks! (Europe) (En,Fr,De,Es,It).zip",
+      "variants": [
+        {
+          "bucket": "gba/Denki Blocks! (USA) (En,Es).zip",
+          "note": "GBA: higher-resolution graphics and better presentation"
+        }
+      ]
     },
     {
       "title": "Pinball of the Dead, The",
@@ -2641,11 +2781,6 @@
       "bucket": "gbc/Bomberman Quest (USA) (SGB Enhanced) (GB Compatible).zip"
     },
     {
-      "title": "R-Type DX",
-      "system": "gbc",
-      "bucket": "gbc/R-Type DX (USA, Europe) (GB Compatible).zip"
-    },
-    {
       "title": "Project S-11",
       "system": "gbc",
       "bucket": "gbc/Project S-11 (USA).zip"
@@ -2662,13 +2797,13 @@
     },
     {
       "title": "Crystalis",
-      "system": "gbc",
-      "bucket": "gbc/Crystalis (USA).zip"
+      "system": "nes",
+      "bucket": "nes/Crystalis (USA).zip"
     },
     {
       "title": "Cannon Fodder",
-      "system": "gbc",
-      "bucket": "gbc/Cannon Fodder (USA) (En,Fr,De,Es,It).zip"
+      "system": "snes",
+      "bucket": "snes/Cannon Fodder (Europe).zip"
     },
     {
       "title": "Jungle Book, The - Mowgli's Wild Adventure",
@@ -2732,8 +2867,8 @@
     },
     {
       "title": "Ballistic",
-      "system": "gbc",
-      "bucket": "gbc/Ballistic (USA) (GB Compatible).zip"
+      "system": "psx",
+      "bucket": "psx/Ballistic (USA).chd"
     },
     {
       "title": "Puzzle Master",
@@ -2791,11 +2926,6 @@
       "bucket": "gbc/Perfect Dark (USA, Europe) (En,Fr,De,Es,It) (Rumble Version).zip"
     },
     {
-      "title": "Dragon Warrior I & II",
-      "system": "gbc",
-      "bucket": "gbc/Dragon Warrior I & II (USA) (SGB Enhanced) (GB Compatible).zip"
-    },
-    {
       "title": "Alone in the Dark - The New Nightmare",
       "system": "gbc",
       "bucket": "gbc/Alone in the Dark - The New Nightmare (USA) (En,Fr,Es).zip"
@@ -2804,11 +2934,6 @@
       "title": "Harry Potter and the Chamber of Secrets",
       "system": "gbc",
       "bucket": "gbc/Harry Potter and the Chamber of Secrets (USA, Europe) (En,Fr,De,Es,It,Nl,Pt,Sv,Da).zip"
-    },
-    {
-      "title": "Legend of the River King GBC",
-      "system": "gbc",
-      "bucket": "gbc/Legend of the River King GBC (USA) (SGB Enhanced) (GB Compatible).zip"
     },
     {
       "title": "Legend of the River King 2",
@@ -2876,14 +3001,9 @@
       "bucket": "genesis/Sparkster (USA).zip"
     },
     {
-      "title": "Rock n' Roll Racing",
-      "system": "genesis",
-      "bucket": "genesis/Rock n' Roll Racing (USA).zip"
-    },
-    {
-      "title": "Earthworm Jim 2",
-      "system": "genesis",
-      "bucket": "genesis/Earthworm Jim 2 (USA).zip"
+      "title": "Rock N' Roll Racing",
+      "system": "snes",
+      "bucket": "snes/Rock N' Roll Racing (USA).zip"
     },
     {
       "title": "Batman - Revenge of the Joker",
@@ -2892,8 +3012,8 @@
     },
     {
       "title": "Sunset Riders",
-      "system": "genesis",
-      "bucket": "genesis/Sunset Riders (USA).zip"
+      "system": "fbneo",
+      "bucket": "fbneo/ssriders.zip"
     },
     {
       "title": "Chiki Chiki Boys",
@@ -3056,9 +3176,9 @@
       "bucket": "genesis/Bio Hazard Battle (USA, Europe).zip"
     },
     {
-      "title": "Air Buster",
-      "system": "genesis",
-      "bucket": "genesis/Air Buster (USA).zip"
+      "title": "Air Buster: Trouble Specialty Raid Unit",
+      "system": "fbneo",
+      "bucket": "fbneo/airbustr.zip"
     },
     {
       "title": "Columns III",
@@ -3071,9 +3191,9 @@
       "bucket": "genesis/Landstalker (USA).zip"
     },
     {
-      "title": "Bonanza Bros.",
-      "system": "genesis",
-      "bucket": "genesis/Bonanza Bros. (USA, Europe, Korea) (En) (Rev B).zip"
+      "title": "Bonanza Bros",
+      "system": "fbneo",
+      "bucket": "fbneo/bnzabros.zip"
     },
     {
       "title": "Wings of Wor",
@@ -3092,18 +3212,18 @@
     },
     {
       "title": "Crack Down",
-      "system": "genesis",
-      "bucket": "genesis/Crack Down (USA).zip"
+      "system": "fbneo",
+      "bucket": "fbneo/crkdownu.zip"
     },
     {
-      "title": "Atomic Robo-Kid",
-      "system": "genesis",
-      "bucket": "genesis/Atomic Robo-Kid (USA).zip"
+      "title": "Atomic Robo-kid",
+      "system": "fbneo",
+      "bucket": "fbneo/robokid.zip"
     },
     {
       "title": "Dangerous Seed",
-      "system": "genesis",
-      "bucket": "genesis/Dangerous Seed (Japan).zip"
+      "system": "fbneo",
+      "bucket": "fbneo/dangseed.zip"
     },
     {
       "title": "Fantastic Dizzy",
@@ -3121,14 +3241,9 @@
       "bucket": "genesis/Technocop (USA).zip"
     },
     {
-      "title": "Dragon's Fury",
-      "system": "genesis",
-      "bucket": "genesis/Dragon's Fury (USA, Europe).zip"
-    },
-    {
       "title": "Growl",
-      "system": "genesis",
-      "bucket": "genesis/Growl (USA).zip"
+      "system": "fbneo",
+      "bucket": "fbneo/growlu.zip"
     },
     {
       "title": "Fatal Labyrinth",
@@ -3137,13 +3252,19 @@
     },
     {
       "title": "Flicky",
-      "system": "genesis",
-      "bucket": "genesis/Flicky (USA, Europe).zip"
+      "system": "fbneo",
+      "bucket": "fbneo/flicky.zip"
     },
     {
       "title": "Gain Ground",
-      "system": "genesis",
-      "bucket": "genesis/Gain Ground (USA).zip"
+      "system": "fbneo",
+      "bucket": "fbneo/gground.zip",
+      "variants": [
+        {
+          "bucket": "genesis/Gain Ground (USA).zip",
+          "note": "Genesis: adds an extra era of stages and more warriors"
+        }
+      ]
     },
     {
       "title": "Cosmic Spacehead",
@@ -3157,23 +3278,23 @@
     },
     {
       "title": "Krusty's Super Fun House",
-      "system": "genesis",
-      "bucket": "genesis/Krusty's Super Fun House (USA, Europe) (Rev A).zip"
+      "system": "snes",
+      "bucket": "snes/Krusty's Super Fun House (USA) (Rev 1).zip"
     },
     {
       "title": "Marvel Land",
-      "system": "genesis",
-      "bucket": "genesis/Marvel Land (USA).zip"
+      "system": "fbneo",
+      "bucket": "fbneo/marvland.zip"
     },
     {
       "title": "Virtual Bart",
-      "system": "genesis",
-      "bucket": "genesis/Virtual Bart (World).zip"
+      "system": "snes",
+      "bucket": "snes/Virtual Bart (USA).zip"
     },
     {
       "title": "Midnight Resistance",
-      "system": "genesis",
-      "bucket": "genesis/Midnight Resistance (USA).zip"
+      "system": "fbneo",
+      "bucket": "fbneo/midresu.zip"
     },
     {
       "title": "World of Illusion Starring Mickey Mouse and Donald Duck",
@@ -3191,14 +3312,20 @@
       "bucket": "genesis/Ooze, The (Japan, USA) (En).zip"
     },
     {
-      "title": "Rainbow Islands Extra",
-      "system": "genesis",
-      "bucket": "genesis/Rainbow Islands Extra (Japan).zip"
+      "title": "Rainbow Islands",
+      "system": "fbneo",
+      "bucket": "fbneo/rbisland.zip",
+      "variants": [
+        {
+          "bucket": "fbneo/rbislande.zip",
+          "note": "Arcade: Extra Version remixes enemies and stage order"
+        }
+      ]
     },
     {
       "title": "RoadBlasters",
-      "system": "genesis",
-      "bucket": "genesis/RoadBlasters (USA).zip"
+      "system": "mame",
+      "bucket": "mame/roadblst.zip"
     },
     {
       "title": "Contra - Hard Corps",
@@ -3216,9 +3343,9 @@
       "bucket": "genesis/Arrow Flash (USA).zip"
     },
     {
-      "title": "Burning Force",
-      "system": "genesis",
-      "bucket": "genesis/Burning Force (USA).zip"
+      "title": "Burning Force)",
+      "system": "fbneo",
+      "bucket": "fbneo/burnforc.zip"
     },
     {
       "title": "High Seas Havoc",
@@ -3232,8 +3359,8 @@
     },
     {
       "title": "Phelios",
-      "system": "genesis",
-      "bucket": "genesis/Phelios (USA).zip"
+      "system": "fbneo",
+      "bucket": "fbneo/phelios.zip"
     },
     {
       "title": "Shining in the Darkness",
@@ -3242,8 +3369,8 @@
     },
     {
       "title": "Valis III",
-      "system": "genesis",
-      "bucket": "genesis/Valis III (USA).zip"
+      "system": "tg-cd",
+      "bucket": "tg-cd/Valis III (USA).chd"
     },
     {
       "title": "Devilish - The Next Possession",
@@ -3276,9 +3403,19 @@
       "bucket": "psp/Gran Turismo (USA) (En,Fr,Es) (v2.00).chd"
     },
     {
-      "title": "Shin Megami Tensei - Persona 3 Portable",
-      "system": "psp",
-      "bucket": "psp/Shin Megami Tensei - Persona 3 Portable (USA).chd"
+      "title": "Shin Megami Tensei - Persona 3",
+      "system": "ps2",
+      "bucket": "ps2/Shin Megami Tensei - Persona 3 (USA).chd",
+      "variants": [
+        {
+          "bucket": "ps2/Shin Megami Tensei - Persona 3 FES (USA).chd",
+          "note": "PS2: FES adds The Answer epilogue and more"
+        },
+        {
+          "bucket": "psp/Shin Megami Tensei - Persona 3 Portable (USA).chd",
+          "note": "PSP: adds a female protagonist route with new social links"
+        }
+      ]
     },
     {
       "title": "Valkyria Chronicles II",
@@ -3306,9 +3443,15 @@
       "bucket": "psp/PixelJunk Monsters - Deluxe (USA).chd"
     },
     {
-      "title": "Gitaroo Man Lives!",
-      "system": "psp",
-      "bucket": "psp/Gitaroo Man Lives! (USA).chd"
+      "title": "Gitaroo Man",
+      "system": "ps2",
+      "bucket": "ps2/Gitaroo Man (USA).chd",
+      "variants": [
+        {
+          "bucket": "psp/Gitaroo Man Lives! (USA).chd",
+          "note": "PSP: adds two duet stages"
+        }
+      ]
     },
     {
       "title": "Gurumin - A Monstrous Adventure",
@@ -3326,19 +3469,26 @@
       "bucket": "psp/Daxter (USA) (En,Fr,De,Es,It).chd"
     },
     {
-      "title": "Knights in the Nightmare",
-      "system": "psp",
-      "bucket": "psp/Knights in the Nightmare (USA).chd"
-    },
-    {
       "title": "Valkyria Chronicles 3 (English v1.0.8)",
       "system": "psp",
-      "bucket": "psp/Valkyria Chronicles 3 (English v1.0.8).chd"
+      "bucket": "psp/Valkyria Chronicles 3 (English v1.0.8).chd",
+      "variants": [
+        {
+          "bucket": "psp/Valkyria Chronicles 3 - Extra Edition (Japan) [T-En by Valkyria Chronicles 3 Translation Project v2] [i] [n].chd",
+          "note": "PSP: Extra Edition adds the DLC chapters, English patch"
+        }
+      ]
     },
     {
-      "title": "Danganronpa (English Patched)",
-      "system": "psp",
-      "bucket": "psp/Danganronpa (English Patched).chd"
+      "title": "Danganronpa - Trigger Happy Havoc",
+      "system": "psvita",
+      "bucket": "psvita/Danganronpa [PCSE00261] [USA] [NoNpDRM].zip",
+      "variants": [
+        {
+          "bucket": "psp/Danganronpa - Hope's Academy and Despair's Students (Japan) [T-En by Project Zetsubou v1.0] [n].chd",
+          "note": "PSP: the Japanese original with the Project Zetsubou English patch"
+        }
+      ]
     },
     {
       "title": "Fate Extra CCC (English v1.0)",
@@ -3359,11 +3509,6 @@
       "title": "Wild Arms XF",
       "system": "psp",
       "bucket": "psp/Wild Arms XF (USA).chd"
-    },
-    {
-      "title": "Yggdra Union",
-      "system": "psp",
-      "bucket": "psp/Yggdra Union (USA).chd"
     },
     {
       "title": "Gungnir",
@@ -3418,7 +3563,13 @@
     {
       "title": "Phantasy Star Portable 2",
       "system": "psp",
-      "bucket": "psp/Phantasy Star Portable 2 (USA).chd"
+      "bucket": "psp/Phantasy Star Portable 2 (USA).chd",
+      "variants": [
+        {
+          "bucket": "psp/Phantasy Star Portable 2 Infinity (Japan) [T-En by JamRules & Weyu v1.7].chd",
+          "note": "PSP: Infinity adds new missions, areas and gear, English patch"
+        }
+      ]
     },
     {
       "title": "Shin Megami Tensei - Persona 2 - Innocent Sin",
@@ -3551,11 +3702,6 @@
       "bucket": "psp/Dariusburst (Japan) (En,Ja).chd"
     },
     {
-      "title": "Power Stone Collection",
-      "system": "psp",
-      "bucket": "psp/Power Stone Collection (USA).chd"
-    },
-    {
       "title": "Tokobot",
       "system": "psp",
       "bucket": "psp/Tokobot (USA).chd"
@@ -3577,13 +3723,18 @@
     },
     {
       "title": "Lemmings",
-      "system": "psp",
-      "bucket": "psp/Lemmings (USA).chd"
-    },
-    {
-      "title": "Parodius Portable",
-      "system": "psp",
-      "bucket": "psp/Parodius Portable (Japan).chd"
+      "system": "snes",
+      "bucket": "snes/Lemmings (USA) (Rev 1).zip",
+      "variants": [
+        {
+          "bucket": "genesis/Lemmings (USA).zip",
+          "note": "Genesis: adds extra levels beyond the original 120"
+        },
+        {
+          "bucket": "psp/Lemmings (USA).chd",
+          "note": "PSP: remastered visuals, new levels and a level editor"
+        }
+      ]
     },
     {
       "title": "OutRun 2006 - Coast 2 Coast",
@@ -3601,24 +3752,20 @@
       "bucket": "psp/Taito Legends Power-Up (USA).chd"
     },
     {
-      "title": "Metal Slug XX",
-      "system": "psp",
-      "bucket": "psp/Metal Slug XX (USA).chd"
+      "title": "Metal Slug 7",
+      "system": "nds",
+      "bucket": "nds/Metal Slug 7 (USA).zip",
+      "variants": [
+        {
+          "bucket": "psp/Metal Slug XX (USA).chd",
+          "note": "PSP: XX adds Ralf as a playable character and new missions"
+        }
+      ]
     },
     {
       "title": "Taiko no Tatsujin Portable",
       "system": "psp",
       "bucket": "psp/Taiko no Tatsujin Portable (Japan, Asia) (v2.00).chd"
-    },
-    {
-      "title": "Umihara Kawase Portable",
-      "system": "psp",
-      "bucket": "psp/Umihara Kawase Portable (Japan).chd"
-    },
-    {
-      "title": "Space Invaders Extreme",
-      "system": "psp",
-      "bucket": "psp/Space Invaders Extreme (USA) (En,Fr,De,Es,It).chd"
     },
     {
       "title": "Macross Ace Frontier",
@@ -3631,9 +3778,15 @@
       "bucket": "psp/Me & My Katamari (USA).chd"
     },
     {
-      "title": "Darkstalkers Chronicle - The Chaos Tower",
-      "system": "psp",
-      "bucket": "psp/Darkstalkers Chronicle - The Chaos Tower (USA).chd"
+      "title": "Vampire Savior",
+      "system": "fbneo",
+      "bucket": "fbneo/vsavu.zip",
+      "variants": [
+        {
+          "bucket": "psp/Darkstalkers Chronicle - The Chaos Tower (USA).chd",
+          "note": "PSP: every fighter from all three games, plus Chaos Tower mode"
+        }
+      ]
     },
     {
       "title": "Split-Second",
@@ -3666,9 +3819,19 @@
       "bucket": "psp/Tales of the World - Radiant Mythology (USA).chd"
     },
     {
-      "title": "Star Ocean - Second Evolution",
-      "system": "psp",
-      "bucket": "psp/Star Ocean - Second Evolution (USA).chd"
+      "title": "Star Ocean: The Second Story",
+      "system": "psx",
+      "bucket": "psx/Star Ocean - The Second Story (USA).m3u",
+      "files": [
+        "psx/Star Ocean - The Second Story (USA) (Disc 1).chd",
+        "psx/Star Ocean - The Second Story (USA) (Disc 2).chd"
+      ],
+      "variants": [
+        {
+          "bucket": "psp/Star Ocean - Second Evolution (USA).chd",
+          "note": "PSP: adds new translation, voice acting, anime scenes and a character"
+        }
+      ]
     },
     {
       "title": "Tactics Ogre",
@@ -3759,17 +3922,18 @@
     {
       "title": "Hoshigami: Ruining Blue Earth",
       "system": "psx",
-      "bucket": "psx/Hoshigami - Ruining Blue Earth (USA).chd"
+      "bucket": "psx/Hoshigami - Ruining Blue Earth (USA).chd",
+      "variants": [
+        {
+          "bucket": "nds/Hoshigami - Ruining Blue Earth - Remix (USA).zip",
+          "note": "DS: adds story scenes and rebalanced difficulty"
+        }
+      ]
     },
     {
       "title": "Kartia: The Word of Fate",
       "system": "psx",
       "bucket": "psx/Kartia - The Word of Fate (USA).chd"
-    },
-    {
-      "title": "Ogre Battle",
-      "system": "psx",
-      "bucket": "psx/Ogre Battle - Limited Edition (USA).chd"
     },
     {
       "title": "Vandal Hearts",
@@ -3826,9 +3990,15 @@
       "bucket": "psx/Ape Escape (USA).chd"
     },
     {
-      "title": "Sol Divide",
-      "system": "psx",
-      "bucket": "psx/Sol Divide (USA).chd"
+      "title": "Sol Divide: Sword Of Darkness",
+      "system": "fbneo",
+      "bucket": "fbneo/soldivid.zip",
+      "variants": [
+        {
+          "bucket": "psx/Sol Divide (USA).chd",
+          "note": "PS1: adds a story mode with magic and leveling"
+        }
+      ]
     },
     {
       "title": "Carnage Heart",
@@ -3851,9 +4021,9 @@
       "bucket": "psx/R-Type Delta (USA).chd"
     },
     {
-      "title": "G. Darius",
-      "system": "psx",
-      "bucket": "psx/G. Darius (USA).chd"
+      "title": "G-Darius Ver.2",
+      "system": "mame",
+      "bucket": "mame/gdarius2.zip"
     },
     {
       "title": "Omega Boost",
@@ -3895,14 +4065,9 @@
       "bucket": "psx/Punky Skunk (USA).chd"
     },
     {
-      "title": "Silhouette Mirage",
-      "system": "psx",
-      "bucket": "psx/Silhouette Mirage (USA).chd"
-    },
-    {
       "title": "Strider 2",
-      "system": "psx",
-      "bucket": "psx/Strider 2 (USA).chd"
+      "system": "mame",
+      "bucket": "mame/strider2.zip"
     },
     {
       "title": "Adventures of Lomax, The",
@@ -3965,17 +4130,25 @@
       "bucket": "psx/Bushido Blade 2 (USA).chd"
     },
     {
-      "title": "Ehrgeiz - God Bless the Ring",
-      "system": "psx",
-      "bucket": "psx/Ehrgeiz - God Bless the Ring (USA).chd"
+      "title": "Ehrgeiz",
+      "system": "mame",
+      "bucket": "mame/ehrgeiz.zip",
+      "variants": [
+        {
+          "bucket": "psx/Ehrgeiz - God Bless the Ring (USA).chd",
+          "note": "PS1: adds the Forsaken Dungeon RPG mode and minigames"
+        }
+      ]
     },
     {
-      "title": "Rival Schools - United by Fate",
-      "system": "psx",
-      "bucket": "psx/Rival Schools - United by Fate (USA).m3u",
-      "files": [
-        "psx/Rival Schools - United by Fate (USA) (Disc 1) (Arcade Disc).chd",
-        "psx/Rival Schools - United by Fate (USA) (Disc 2) (Evolution Disc).chd"
+      "title": "Rival Schools: United by Fate",
+      "system": "mame",
+      "bucket": "mame/rvschool.zip",
+      "variants": [
+        {
+          "bucket": "psx/Rival Schools - United by Fate (USA).m3u",
+          "note": "PS1: adds the Evolution disc and story mode"
+        }
       ]
     },
     {
@@ -4072,6 +4245,12 @@
       "files": [
         "psx/Valkyrie Profile (USA) (Disc 1).chd",
         "psx/Valkyrie Profile (USA) (Disc 2).chd"
+      ],
+      "variants": [
+        {
+          "bucket": "psp/Valkyrie Profile - Lenneth (USA).chd",
+          "note": "PSP: adds new anime cutscenes"
+        }
       ]
     },
     {
@@ -4159,28 +4338,28 @@
     },
     {
       "title": "Last Resort",
-      "system": "neogeocd",
-      "bucket": "neogeocd/Last Resort (Japan) (En,Ja).chd"
+      "system": "fbneo",
+      "bucket": "fbneo/lresort.zip"
     },
     {
       "title": "Viewpoint",
-      "system": "neogeocd",
-      "bucket": "neogeocd/Viewpoint (Japan).chd"
+      "system": "fbneo",
+      "bucket": "fbneo/viewpoin.zip"
     },
     {
-      "title": "Top Hunter",
-      "system": "neogeocd",
-      "bucket": "neogeocd/Top Hunter - Roddy & Cathy (World) (En,Ja).chd"
+      "title": "Top Hunter - Roddy & Cathy",
+      "system": "fbneo",
+      "bucket": "fbneo/tophuntr.zip"
     },
     {
       "title": "Magician Lord",
-      "system": "neogeocd",
-      "bucket": "neogeocd/Magician Lord (Japan) (En,Ja).chd"
+      "system": "fbneo",
+      "bucket": "fbneo/maglord.zip"
     },
     {
-      "title": "Raguy",
-      "system": "neogeocd",
-      "bucket": "neogeocd/Raguy ~ Blue's Journey (Japan) (En,Ja).chd"
+      "title": "Blue's Journey",
+      "system": "fbneo",
+      "bucket": "fbneo/bjourney.zip"
     },
     {
       "title": "Joy Joy Kid",
@@ -4189,33 +4368,28 @@
     },
     {
       "title": "Robo Army",
-      "system": "neogeocd",
-      "bucket": "neogeocd/Robo Army (Japan) (En,Ja).chd"
+      "system": "fbneo",
+      "bucket": "fbneo/roboarmy.zip"
     },
     {
       "title": "The Super Spy",
-      "system": "neogeocd",
-      "bucket": "neogeocd/Super Spy, The (Japan) (En,Ja).chd"
+      "system": "fbneo",
+      "bucket": "fbneo/superspy.zip"
     },
     {
       "title": "Windjammers",
-      "system": "neogeocd",
-      "bucket": "neogeocd/Flying Power Disc ~ Windjammers (Japan) (En,Ja).chd"
+      "system": "fbneo",
+      "bucket": "fbneo/wjammers.zip"
     },
     {
       "title": "Crossed Swords",
-      "system": "neogeocd",
-      "bucket": "neogeocd/Crossed Swords (Japan).chd"
+      "system": "fbneo",
+      "bucket": "fbneo/crsword.zip"
     },
     {
       "title": "Bully",
       "system": "ps2",
       "bucket": "ps2/Bully (USA).chd"
-    },
-    {
-      "title": "Gitaroo Man",
-      "system": "ps2",
-      "bucket": "ps2/Gitaroo Man (USA).chd"
     },
     {
       "title": "God Hand",
@@ -4239,8 +4413,8 @@
     },
     {
       "title": "Rez",
-      "system": "ps2",
-      "bucket": "ps2/Rez (USA) (En,Fr,De,Es,It).chd"
+      "system": "dreamcast",
+      "bucket": "dreamcast/Rez (Europe) (En,Ja,Fr,De,Es,It).chd"
     },
     {
       "title": "Space Channel 5: Special Edition",
@@ -4367,7 +4541,13 @@
     {
       "title": "Kirby's Epic Yarn",
       "system": "wii",
-      "bucket": "wii/Kirby's Epic Yarn (USA) (En,Fr,Es).rvz"
+      "bucket": "wii/Kirby's Epic Yarn (USA) (En,Fr,Es).rvz",
+      "variants": [
+        {
+          "bucket": "3ds/Kirby's Extra Epic Yarn (USA) (En,Fr,Es).zip",
+          "note": "3DS: adds Devilish mode, new abilities and minigames"
+        }
+      ]
     },
     {
       "title": "Little King's Story",
@@ -4377,12 +4557,13 @@
     {
       "title": "Muramasa: The Demon Blade",
       "system": "wii",
-      "bucket": "wii/Muramasa - The Demon Blade (USA).rvz"
-    },
-    {
-      "title": "Ookami",
-      "system": "wii",
-      "bucket": "wii/Ookami (USA).rvz"
+      "bucket": "wii/Muramasa - The Demon Blade (USA).rvz",
+      "variants": [
+        {
+          "bucket": "psvita/Muramasa Rebirth [PCSE00240] [USA] [NoNpDRM].zip",
+          "note": "Vita: new translation, sharper art and Genroku Legends DLC support"
+        }
+      ]
     },
     {
       "title": "Pandora's Tower",
@@ -4481,11 +4662,6 @@
       "bucket": "dreamcast/Toy Commander (USA) (En,Fr,De,Es).chd"
     },
     {
-      "title": "Cleopatra Fortune",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Cleopatra Fortune (Japan) (Rev A).chd"
-    },
-    {
       "title": "Elemental Gimmick Gear",
       "system": "dreamcast",
       "bucket": "dreamcast/Elemental Gimmick Gear (USA).chd"
@@ -4504,15 +4680,6 @@
       "title": "Typing of the Date",
       "system": "dreamcast",
       "bucket": "dreamcast/Typing of the Date (Japan).chd"
-    },
-    {
-      "title": "Skies of Arcadia",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Skies of Arcadia (USA).m3u",
-      "files": [
-        "dreamcast/Skies of Arcadia (USA) (Disc 1).chd",
-        "dreamcast/Skies of Arcadia (USA) (Disc 2).chd"
-      ]
     },
     {
       "title": "Record of Lodoss War",
@@ -4541,13 +4708,14 @@
     },
     {
       "title": "Tech Romancer",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Tech Romancer (USA).chd"
-    },
-    {
-      "title": "Last Blade 2, The - Heart of the Samurai",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Last Blade 2, The - Heart of the Samurai (USA).chd"
+      "system": "mame",
+      "bucket": "mame/techromn.zip",
+      "variants": [
+        {
+          "bucket": "dreamcast/Tech Romancer (USA).chd",
+          "note": "Dreamcast: adds a branching story mode"
+        }
+      ]
     },
     {
       "title": "Cannon Spike",
@@ -4558,21 +4726,6 @@
       "title": "Bangai-O",
       "system": "dreamcast",
       "bucket": "dreamcast/Bangai-O (USA).chd"
-    },
-    {
-      "title": "Mars Matrix",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Mars Matrix (USA).chd"
-    },
-    {
-      "title": "Gunbird 2",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Gunbird 2 (USA).chd"
-    },
-    {
-      "title": "Ikaruga",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Ikaruga (Japan).chd"
     },
     {
       "title": "Zero Gunner 2",
@@ -4595,11 +4748,6 @@
       "bucket": "dreamcast/Rainbow Cotton (Japan).chd"
     },
     {
-      "title": "Rez",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Rez (Europe) (En,Ja,Fr,De,Es,It).chd"
-    },
-    {
       "title": "Cosmic Smash",
       "system": "dreamcast",
       "bucket": "dreamcast/Cosmic Smash (Japan).chd"
@@ -4607,12 +4755,18 @@
     {
       "title": "ChuChu Rocket!",
       "system": "dreamcast",
-      "bucket": "dreamcast/ChuChu Rocket! (USA) (En,Ja,Fr,De,Es).chd"
+      "bucket": "dreamcast/ChuChu Rocket! (USA) (En,Ja,Fr,De,Es).chd",
+      "variants": [
+        {
+          "bucket": "gba/ChuChu Rocket! (USA) (En,Ja,Fr,De,Es).zip",
+          "note": "GBA: adds a large set of new puzzles"
+        }
+      ]
     },
     {
       "title": "Mr. Driller",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Mr. Driller (USA).chd"
+      "system": "mame",
+      "bucket": "mame/mrdrillr.zip"
     },
     {
       "title": "Typing of the Dead, The",
@@ -4775,9 +4929,15 @@
       "bucket": "xbox/Jade Empire (USA, Europe) (En,Es,It).iso"
     },
     {
-      "title": "Conker - Live & Reloaded",
-      "system": "xbox",
-      "bucket": "xbox/Conker - Live & Reloaded (USA) (En,Ja,Fr,De,Es,It).iso"
+      "title": "Conker's Bad Fur Day",
+      "system": "n64",
+      "bucket": "n64/Conker's Bad Fur Day (USA).zip",
+      "variants": [
+        {
+          "bucket": "xbox/Conker - Live & Reloaded (USA) (En,Ja,Fr,De,Es,It).iso",
+          "note": "Xbox: remade graphics and new online/class multiplayer; censored"
+        }
+      ]
     },
     {
       "title": "Brute Force",
@@ -4802,7 +4962,13 @@
     {
       "title": "Todd's Adventures in Slime World",
       "system": "atarilynx",
-      "bucket": "atarilynx/Todd's Adventures in Slime World (World).zip"
+      "bucket": "atarilynx/Todd's Adventures in Slime World (World).zip",
+      "variants": [
+        {
+          "bucket": "genesis/Todd's Adventures in Slime World (USA).zip",
+          "note": "Genesis: bigger screen and reworked levels"
+        }
+      ]
     },
     {
       "title": "Gates of Zendocon",
@@ -4826,8 +4992,8 @@
     },
     {
       "title": "Scrapyard Dog",
-      "system": "atarilynx",
-      "bucket": "atarilynx/Scrapyard Dog (USA, Europe).zip"
+      "system": "atari7800",
+      "bucket": "atari7800/Scrapyard Dog (USA).zip"
     },
     {
       "title": "Towers II - Plight of the Stargazer",
@@ -4861,8 +5027,8 @@
     },
     {
       "title": "Baldies",
-      "system": "atarijaguarcd",
-      "bucket": "atarijaguarcd/Baldies (USA) (Rev 1).chd"
+      "system": "psx",
+      "bucket": "psx/Baldies (USA).chd"
     },
     {
       "title": "Battle Morph",
@@ -4890,14 +5056,9 @@
       "bucket": "atari7800/Alien Brigade (USA).zip"
     },
     {
-      "title": "Scrapyard Dog",
-      "system": "atari7800",
-      "bucket": "atari7800/Scrapyard Dog (USA).zip"
-    },
-    {
       "title": "Food Fight",
-      "system": "atari7800",
-      "bucket": "atari7800/Food Fight (USA).zip"
+      "system": "fbneo",
+      "bucket": "fbneo/foodf.zip"
     },
     {
       "title": "Desert Falcon",
@@ -4927,7 +5088,13 @@
     {
       "title": "Pitfall II - Lost Caverns",
       "system": "atari2600",
-      "bucket": "atari2600/Pitfall II - Lost Caverns (USA).zip"
+      "bucket": "atari2600/Pitfall II - Lost Caverns (USA).zip",
+      "variants": [
+        {
+          "bucket": "atari5200/David Crane's Pitfall II - Lost Caverns (USA).zip",
+          "note": "Atari 5200: adds a second, harder bonus adventure"
+        }
+      ]
     },
     {
       "title": "River Raid II",
@@ -5105,9 +5272,9 @@
       "bucket": "msx/Thexder (Japan).zip"
     },
     {
-      "title": "Golvellius",
-      "system": "msx",
-      "bucket": "msx/Golvellius (Japan).zip"
+      "title": "Golvellius - Valley of Doom",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Golvellius - Valley of Doom (USA, Europe, Brazil) (En).zip"
     },
     {
       "title": "Guardic",
@@ -5161,8 +5328,14 @@
     },
     {
       "title": "Dragon Slayer IV - Drasle Family",
-      "system": "msx2",
-      "bucket": "msx2/Dragon Slayer IV - Drasle Family (Japan).zip"
+      "system": "msx",
+      "bucket": "msx/Dragon Slayer IV - Drasle Family (Japan).zip",
+      "variants": [
+        {
+          "bucket": "msx2/Dragon Slayer IV - Drasle Family (Japan).zip",
+          "note": "MSX2: improved graphics"
+        }
+      ]
     },
     {
       "title": "Zombie Hunter",
@@ -5220,9 +5393,23 @@
       "bucket": "satellaview/BS Fire Emblem - Akaneia Senki Hen - Dai-1-wa - Palace Kanraku (Japan) (9-29) (SoundLink).zip"
     },
     {
-      "title": "BS Super Mario USA - Power Challenge - Dai-1-kai",
-      "system": "satellaview",
-      "bucket": "satellaview/BS Super Mario USA - Power Challenge - Dai-1-kai (Japan) (SoundLink).zip"
+      "title": "Super Mario Bros. 2 (Rev 1)",
+      "system": "nes",
+      "bucket": "nes/Super Mario Bros. 2 (USA) (Rev 1).zip",
+      "variants": [
+        {
+          "bucket": "gba/Super Mario Advance (USA, Europe).zip",
+          "note": "GBA: remastered graphics, voices, Yoshi egg hunt and Mario Bros."
+        },
+        {
+          "bucket": "fds/Yume Koujou - Doki Doki Panic (Japan) (DV 2).zip",
+          "note": "FDS: Doki Doki Panic, the Japanese original with its own cast"
+        },
+        {
+          "bucket": "satellaview/BS Super Mario USA - Power Challenge - Dai-1-kai (Japan) (SoundLink).zip",
+          "note": "Satellaview: broadcast challenge episodes on the All-Stars version"
+        }
+      ]
     },
     {
       "title": "Mystic Balloon",
@@ -5330,9 +5517,9 @@
       "bucket": "segacd/SoulStar (USA).chd"
     },
     {
-      "title": "Final Fight CD",
-      "system": "segacd",
-      "bucket": "segacd/Final Fight CD (USA).chd"
+      "title": "Final Fight",
+      "system": "fbneo",
+      "bucket": "fbneo/ffightuc.zip"
     },
     {
       "title": "Shining Force CD",
@@ -5381,13 +5568,25 @@
     },
     {
       "title": "Flink",
-      "system": "segacd",
-      "bucket": "segacd/Flink (USA).chd"
+      "system": "genesis",
+      "bucket": "genesis/Flink (Europe) (En,Fr,De).zip",
+      "variants": [
+        {
+          "bucket": "segacd/Flink (USA).chd",
+          "note": "Sega CD: adds a CD soundtrack and an animated intro"
+        }
+      ]
     },
     {
-      "title": "Eternal Champions - Challenge from the Dark Side",
-      "system": "segacd",
-      "bucket": "segacd/Eternal Champions - Challenge from the Dark Side (USA) (RE).chd"
+      "title": "Eternal Champions",
+      "system": "genesis",
+      "bucket": "genesis/Eternal Champions (USA).zip",
+      "variants": [
+        {
+          "bucket": "segacd/Eternal Champions - Challenge from the Dark Side (USA) (RE).chd",
+          "note": "Sega CD: adds characters, stages and new finishing moves"
+        }
+      ]
     },
     {
       "title": "Cosmic Fantasy 2",
@@ -5430,9 +5629,15 @@
       "bucket": "tg-cd/Ginga Fukei Densetsu Sapphire (Japan).chd"
     },
     {
-      "title": "Fantastic Night Dreams - Cotton",
-      "system": "tg-cd",
-      "bucket": "tg-cd/Fantastic Night Dreams - Cotton (USA).chd"
+      "title": "Cotton",
+      "system": "fbneo",
+      "bucket": "fbneo/cottonu.zip",
+      "variants": [
+        {
+          "bucket": "tg-cd/Fantastic Night Dreams - Cotton (USA).chd",
+          "note": "PC Engine CD: arranged CD soundtrack and story cutscenes"
+        }
+      ]
     },
     {
       "title": "Rayxanber III",
@@ -5465,9 +5670,9 @@
       "bucket": "tg-cd/Last Alert (USA).chd"
     },
     {
-      "title": "Dynastic Hero, The",
-      "system": "tg-cd",
-      "bucket": "tg-cd/Dynastic Hero, The (USA).chd"
+      "title": "Wonder Boy in Monster World",
+      "system": "genesis",
+      "bucket": "genesis/Wonder Boy in Monster World (USA, Europe).zip"
     },
     {
       "title": "Dungeon Explorer II",
@@ -5505,14 +5710,19 @@
       "bucket": "sega32x/Knuckles' Chaotix (Japan, USA) (En).zip"
     },
     {
-      "title": "Blackthorne",
-      "system": "sega32x",
-      "bucket": "sega32x/Blackthorne (USA).zip"
-    },
-    {
-      "title": "Virtua Racing Deluxe",
-      "system": "sega32x",
-      "bucket": "sega32x/Virtua Racing Deluxe (USA).zip"
+      "title": "Virtua Racing",
+      "system": "genesis",
+      "bucket": "genesis/Virtua Racing (USA).zip",
+      "variants": [
+        {
+          "bucket": "sega32x/Virtua Racing Deluxe (USA).zip",
+          "note": "32X: Deluxe adds tracks and cars and runs smoother"
+        },
+        {
+          "bucket": "saturn/Virtua Racing (USA) (15S).chd",
+          "note": "Saturn: adds more tracks and cars"
+        }
+      ]
     },
     {
       "title": "Star Wars Arcade",
@@ -5528,11 +5738,6 @@
       "title": "Biomotor Unitron",
       "system": "ngpc",
       "bucket": "ngpc/Biomotor Unitron (USA, Europe).zip"
-    },
-    {
-      "title": "Cotton",
-      "system": "ngpc",
-      "bucket": "ngpc/Fantastic Night Dreams - Cotton (Europe).zip"
     },
     {
       "title": "Faselei!",
@@ -5570,44 +5775,34 @@
       "bucket": "ngpc/Puzzle Link 2 (USA, Europe).zip"
     },
     {
-      "title": "Twinkle Star Sprites",
-      "system": "neogeocd",
-      "bucket": "neogeocd/Twinkle Star Sprites (Japan) (En,Ja).chd"
-    },
-    {
-      "title": "Pulstar",
-      "system": "neogeocd",
-      "bucket": "neogeocd/Pulstar (Japan) (En,Ja).chd"
-    },
-    {
       "title": "Neo Turf Masters",
-      "system": "neogeocd",
-      "bucket": "neogeocd/Big Tournament Golf ~ Neo Turf Masters (Japan) (En,Ja).chd"
+      "system": "fbneo",
+      "bucket": "fbneo/turfmast.zip"
     },
     {
       "title": "The Last Blade",
-      "system": "neogeocd",
-      "bucket": "neogeocd/Bakumatsu Roman - Gekka no Kenshi ~ The Last Blade (Japan) (En,Ja,Es,Pt).chd"
+      "system": "fbneo",
+      "bucket": "fbneo/lastblad.zip"
     },
     {
       "title": "Ninja Master's",
-      "system": "neogeocd",
-      "bucket": "neogeocd/Ninja Master's - Haou Ninpou Chou (Japan) (En,Ja).chd"
+      "system": "fbneo",
+      "bucket": "fbneo/ninjamas.zip"
     },
     {
       "title": "Ironclad",
-      "system": "neogeocd",
-      "bucket": "neogeocd/Choutetsu Brikin'ger ~ Ironclad - Tesshou Rusha (Japan) (En,Ja).chd"
+      "system": "fbneo",
+      "bucket": "fbneo/ironclad.zip"
     },
     {
-      "title": "Neo Drift Out",
-      "system": "neogeocd",
-      "bucket": "neogeocd/Neo Drift Out - New Technology (Japan).chd"
+      "title": "Neo Drift Out - New Technology",
+      "system": "fbneo",
+      "bucket": "fbneo/neodrift.zip"
     },
     {
-      "title": "ZinTricK",
-      "system": "neogeocd",
-      "bucket": "neogeocd/Oshidashi Zintrick ~ ZinTricK (Japan) (En,Ja).chd"
+      "title": "Zintrick",
+      "system": "fbneo",
+      "bucket": "fbneo/zintrckb.zip"
     },
     {
       "title": "Samurai Shodown RPG",
@@ -5620,9 +5815,9 @@
       "bucket": "supergrafx/Aldynes - The Misson Code for Rage Crisis (Japan).zip"
     },
     {
-      "title": "1941 - Counter Attack",
-      "system": "supergrafx",
-      "bucket": "supergrafx/1941 - Counter Attack (Japan).zip"
+      "title": "1941: Counter Attack",
+      "system": "fbneo",
+      "bucket": "fbneo/1941u.zip"
     },
     {
       "title": "Daimakaimura",
@@ -5658,11 +5853,6 @@
       "title": "Tane o Maku Tori",
       "system": "wonderswan",
       "bucket": "wonderswan/D's Garage 21 Koubo Game - Tane o Maku Tori (Japan).zip"
-    },
-    {
-      "title": "Clock Tower for WonderSwan",
-      "system": "wonderswan",
-      "bucket": "wonderswan/Clock Tower for WonderSwan (Japan) (Rev 1).zip"
     },
     {
       "title": "Judgement Silversword",
@@ -5760,13 +5950,25 @@
     },
     {
       "title": "Deathsmiles",
-      "system": "xbox360",
-      "bucket": "xbox360/Deathsmiles (USA).zar"
+      "system": "fbneo",
+      "bucket": "fbneo/deathsml.zip",
+      "variants": [
+        {
+          "bucket": "xbox360/Deathsmiles (USA).zar",
+          "note": "Xbox 360: adds Mega Black Label and an arranged 360 mode"
+        }
+      ]
     },
     {
       "title": "Akai Katana",
-      "system": "xbox360",
-      "bucket": "xbox360/Akai Katana (USA).zar"
+      "system": "fbneo",
+      "bucket": "fbneo/akatana.zip",
+      "variants": [
+        {
+          "bucket": "xbox360/Akai Katana (USA).zar",
+          "note": "Xbox 360: adds Slash and Shin modes and HD arrange graphics"
+        }
+      ]
     },
     {
       "title": "Otomedius Excellent",
@@ -5774,19 +5976,26 @@
       "bucket": "xbox360/Otomedius Excellent (USA).zar"
     },
     {
-      "title": "Mushihimesama Futari",
-      "system": "xbox360",
-      "bucket": "xbox360/Mushihimesama Futari Ver 1.5 (Japan).zar"
+      "title": "Mushihime-Sama Futari Ver 1.5",
+      "system": "fbneo",
+      "bucket": "fbneo/futari15.zip",
+      "variants": [
+        {
+          "bucket": "xbox360/Mushihimesama Futari Ver 1.5 (Japan).zar",
+          "note": "Xbox 360: adds Arrange and Novice modes"
+        }
+      ]
     },
     {
-      "title": "Espgaluda II Black Label",
-      "system": "xbox360",
-      "bucket": "xbox360/Espgaluda II Black Label (Japan).zar"
-    },
-    {
-      "title": "Muchi Muchi Pork! & Pink Sweets",
-      "system": "xbox360",
-      "bucket": "xbox360/Muchi Muchi Pork! & Pink Sweets (Japan).zar"
+      "title": "Espgaluda II",
+      "system": "fbneo",
+      "bucket": "fbneo/espgal2.zip",
+      "variants": [
+        {
+          "bucket": "xbox360/Espgaluda II Black Label (Japan).zar",
+          "note": "Xbox 360: adds Black Label and an Xbox 360 arrange mode"
+        }
+      ]
     },
     {
       "title": "Tokyo Mirage Sessions #FE",
@@ -5801,7 +6010,13 @@
     {
       "title": "Captain Toad - Treasure Tracker",
       "system": "wiiu",
-      "bucket": "wiiu/Captain Toad Treasure Tracker (US) (v16).wua"
+      "bucket": "wiiu/Captain Toad Treasure Tracker (US) (v16).wua",
+      "variants": [
+        {
+          "bucket": "3ds/Captain Toad - Treasure Tracker (USA) (En,Fr,Es).zip",
+          "note": "3DS: adds Super Mario Odyssey bonus levels"
+        }
+      ]
     },
     {
       "title": "ZombiU",
@@ -5849,11 +6064,6 @@
       "bucket": "n64/Tsumi to Batsu - Hoshi no Keishousha (Japan).zip"
     },
     {
-      "title": "Bangai-O",
-      "system": "n64",
-      "bucket": "n64/Bakuretsu Muteki Bangaioh (Japan).zip"
-    },
-    {
       "title": "Ogre Battle 64 - Person of Lordly Caliber",
       "system": "n64",
       "bucket": "n64/Ogre Battle 64 - Person of Lordly Caliber (USA) (Rev 1).zip"
@@ -5891,7 +6101,13 @@
     {
       "title": "Wetrix",
       "system": "n64",
-      "bucket": "n64/Wetrix (USA) (En,Fr,De,Es,It,Nl).zip"
+      "bucket": "n64/Wetrix (USA) (En,Fr,De,Es,It,Nl).zip",
+      "variants": [
+        {
+          "bucket": "dreamcast/Wetrix+ (USA).chd",
+          "note": "Dreamcast: Wetrix+ adds new modes and sharper visuals"
+        }
+      ]
     },
     {
       "title": "Tetrisphere",
@@ -5920,13 +6136,13 @@
     },
     {
       "title": "NBA Hangtime",
-      "system": "n64",
-      "bucket": "n64/NBA Hangtime (USA).zip"
+      "system": "fbneo",
+      "bucket": "fbneo/nbahangt.zip"
     },
     {
-      "title": "Mace - The Dark Age",
-      "system": "n64",
-      "bucket": "n64/Mace - The Dark Age (USA).zip"
+      "title": "Mace: The Dark Age",
+      "system": "mame",
+      "bucket": "mame/mace.zip"
     },
     {
       "title": "Quest 64",
@@ -5940,8 +6156,8 @@
     },
     {
       "title": "Shadow Man",
-      "system": "n64",
-      "bucket": "n64/Shadow Man (USA).zip"
+      "system": "dreamcast",
+      "bucket": "dreamcast/Shadow Man (USA) (Rev A).chd"
     },
     {
       "title": "Turok 3 - Shadow of Oblivion",
@@ -5949,9 +6165,15 @@
       "bucket": "n64/Turok 3 - Shadow of Oblivion (USA).zip"
     },
     {
-      "title": "Castlevania - Legacy of Darkness",
+      "title": "Castlevania",
       "system": "n64",
-      "bucket": "n64/Castlevania - Legacy of Darkness (USA).zip"
+      "bucket": "n64/Castlevania (USA) (Rev 2).zip",
+      "variants": [
+        {
+          "bucket": "n64/Castlevania - Legacy of Darkness (USA).zip",
+          "note": "N64: Legacy of Darkness adds Cornell's and Henry's stories"
+        }
+      ]
     },
     {
       "title": "Mickey's Speedway USA",
@@ -5970,18 +6192,19 @@
     },
     {
       "title": "Vigilante 8",
-      "system": "n64",
-      "bucket": "n64/Vigilante 8 (USA).zip"
+      "system": "psx",
+      "bucket": "psx/Vigilante 8 (USA) (Rev 1).chd",
+      "variants": [
+        {
+          "bucket": "n64/Vigilante 8 (USA).zip",
+          "note": "N64: adds four-player split screen and a hi-res mode"
+        }
+      ]
     },
     {
       "title": "San Francisco Rush 2049",
-      "system": "n64",
-      "bucket": "n64/San Francisco Rush 2049 (USA).zip"
-    },
-    {
-      "title": "Conker's Bad Fur Day",
-      "system": "n64",
-      "bucket": "n64/Conker's Bad Fur Day (USA).zip"
+      "system": "dreamcast",
+      "bucket": "dreamcast/San Francisco Rush 2049 (USA) (En,Fr,De,Es,It,Nl).chd"
     },
     {
       "title": "Chameleon Twist",
@@ -5997,11 +6220,6 @@
       "title": "Tonic Trouble",
       "system": "n64",
       "bucket": "n64/Tonic Trouble (USA) (Rev 1).zip"
-    },
-    {
-      "title": "Crystalis",
-      "system": "nes",
-      "bucket": "nes/Crystalis (USA).zip"
     },
     {
       "title": "Little Samson",
@@ -6225,8 +6443,8 @@
     },
     {
       "title": "Wario's Woods",
-      "system": "nes",
-      "bucket": "nes/Wario's Woods (USA).zip"
+      "system": "snes",
+      "bucket": "snes/Wario's Woods (USA).zip"
     },
     {
       "title": "Deja Vu",
@@ -6244,14 +6462,9 @@
       "bucket": "nes/Gremlins 2 - The New Batch (USA).zip"
     },
     {
-      "title": "Krusty's Fun House",
-      "system": "nes",
-      "bucket": "nes/Krusty's Fun House (USA).zip"
-    },
-    {
       "title": "Ring King",
-      "system": "nes",
-      "bucket": "nes/Ring King (USA).zip"
+      "system": "fbneo",
+      "bucket": "fbneo/ringking.zip"
     },
     {
       "title": "Batman - The Video Game",
@@ -6279,11 +6492,6 @@
       "bucket": "nes/Adventure Island (USA).zip"
     },
     {
-      "title": "River City Ransom",
-      "system": "nes",
-      "bucket": "nes/River City Ransom (USA).zip"
-    },
-    {
       "title": "Tiny Toon Adventures",
       "system": "nes",
       "bucket": "nes/Tiny Toon Adventures (USA).zip"
@@ -6295,13 +6503,8 @@
     },
     {
       "title": "Ikari Warriors",
-      "system": "nes",
-      "bucket": "nes/Ikari Warriors (USA) (Rev 1).zip"
-    },
-    {
-      "title": "DuckTales 2",
-      "system": "nes",
-      "bucket": "nes/DuckTales 2 (USA).zip"
+      "system": "fbneo",
+      "bucket": "fbneo/ikari.zip"
     },
     {
       "title": "Adventures of Lolo",
@@ -6320,8 +6523,8 @@
     },
     {
       "title": "Kid Niki - Radical Ninja",
-      "system": "nes",
-      "bucket": "nes/Kid Niki - Radical Ninja (USA) (Rev 1).zip"
+      "system": "fbneo",
+      "bucket": "fbneo/kidnikiu.zip"
     },
     {
       "title": "Krion Conquest, The",
@@ -6385,8 +6588,8 @@
     },
     {
       "title": "Bio Miracle Bokutte Upa",
-      "system": "fds",
-      "bucket": "fds/Bio Miracle Bokutte Upa (Japan).zip"
+      "system": "nes",
+      "bucket": "nes/Bio Miracle Bokutte Upa (Japan).zip"
     },
     {
       "title": "Esper Dream",
@@ -6399,24 +6602,20 @@
       "bucket": "fds/Armana no Kiseki (Japan).zip"
     },
     {
-      "title": "Yume Koujou - Doki Doki Panic",
-      "system": "fds",
-      "bucket": "fds/Yume Koujou - Doki Doki Panic (Japan) (DV 2).zip"
-    },
-    {
       "title": "Famicom Grand Prix II - 3D Hot Rally",
       "system": "fds",
       "bucket": "fds/Famicom Grand Prix II - 3D Hot Rally (Japan) (DV 8) (Disk Writer) (Famicom 3D System).zip"
     },
     {
-      "title": "Vs. Excitebike",
-      "system": "fds",
-      "bucket": "fds/Vs. Excitebike (Japan) (En).zip"
-    },
-    {
-      "title": "Golvellius - Valley of Doom",
-      "system": "mastersystem",
-      "bucket": "mastersystem/Golvellius - Valley of Doom (USA, Europe, Brazil) (En).zip"
+      "title": "Excitebike",
+      "system": "nes",
+      "bucket": "nes/Excitebike (Japan, USA) (En).zip",
+      "variants": [
+        {
+          "bucket": "fds/Vs. Excitebike (Japan) (En).zip",
+          "note": "Famicom Disk: Vs. Excitebike, adds 2P split screen and track saving"
+        }
+      ]
     },
     {
       "title": "Psycho Fox",
@@ -6469,9 +6668,9 @@
       "bucket": "mastersystem/Asterix (Europe, Brazil) (En,Fr) (Rev 1).zip"
     },
     {
-      "title": "Wonder Boy in Monster Land",
-      "system": "mastersystem",
-      "bucket": "mastersystem/Wonder Boy in Monster Land (USA, Europe).zip"
+      "title": "Wonder Boy: Monster Land",
+      "system": "fbneo",
+      "bucket": "fbneo/wbml.zip"
     },
     {
       "title": "Fantasy Zone II",
@@ -6564,11 +6763,6 @@
       "bucket": "gamegear/Coca-Cola Kid (Japan).zip"
     },
     {
-      "title": "Vampire - Master of Darkness",
-      "system": "gamegear",
-      "bucket": "gamegear/Vampire - Master of Darkness (USA).zip"
-    },
-    {
       "title": "Magical Puzzle Popils",
       "system": "gamegear",
       "bucket": "gamegear/Magical Puzzle Popils (World) (En,Ja).zip"
@@ -6579,19 +6773,9 @@
       "bucket": "gamegear/Ax Battler - A Legend of Golden Axe (USA, Europe, Brazil) (En).zip"
     },
     {
-      "title": "Baku Baku",
-      "system": "gamegear",
-      "bucket": "gamegear/Baku Baku (USA).zip"
-    },
-    {
-      "title": "Dynamite Headdy",
-      "system": "gamegear",
-      "bucket": "gamegear/Dynamite Headdy (USA, Europe).zip"
-    },
-    {
-      "title": "Devilish",
-      "system": "gamegear",
-      "bucket": "gamegear/Devilish (USA).zip"
+      "title": "Baku Baku Animal",
+      "system": "mame",
+      "bucket": "mame/bakubaku.zip"
     },
     {
       "title": "GP Rider",
@@ -6642,11 +6826,6 @@
       "title": "Rhythm Thief & the Emperor's Treasure",
       "system": "3ds",
       "bucket": "3ds/Rhythm Thief & the Emperor's Treasure (USA) (En,Fr,Es).zip"
-    },
-    {
-      "title": "Crush 3D",
-      "system": "3ds",
-      "bucket": "3ds/Crush 3D (USA) (En,Fr,Es).zip"
     },
     {
       "title": "Code of Princess",
@@ -6717,11 +6896,6 @@
       "title": "Fantasy Life",
       "system": "3ds",
       "bucket": "3ds/Fantasy Life (USA).zip"
-    },
-    {
-      "title": "Radiant Historia - Perfect Chronology",
-      "system": "3ds",
-      "bucket": "3ds/Radiant Historia - Perfect Chronology (USA).zip"
     },
     {
       "title": "Shin Megami Tensei - Devil Summoner - Soul Hackers",
@@ -6804,11 +6978,6 @@
       "bucket": "3ds/Rodea the Sky Soldier (USA).zip"
     },
     {
-      "title": "Shin Megami Tensei - Strange Journey Redux",
-      "system": "3ds",
-      "bucket": "3ds/Shin Megami Tensei - Strange Journey Redux (USA).zip"
-    },
-    {
       "title": "Gravity Rush",
       "system": "psvita",
       "bucket": "psvita/GRAVITY RUSH™ [PCSA00011] [USA] [NoNpDRM].zip"
@@ -6819,9 +6988,15 @@
       "bucket": "psvita/Tearaway™ [PCSA00144] [USA] [NoNpDRM].zip"
     },
     {
-      "title": "Soul Sacrifice Delta",
+      "title": "Soul Sacrifice",
       "system": "psvita",
-      "bucket": "psvita/Soul Sacrifice™ Delta [PCSA00152] [USA] [NoNpDRM].zip"
+      "bucket": "psvita/Soul Sacrifice™ [PCSA00092] [USA] [NoNpDRM].zip",
+      "variants": [
+        {
+          "bucket": "psvita/Soul Sacrifice™ Delta [PCSA00152] [USA] [NoNpDRM].zip",
+          "note": "Delta: adds new quests, monsters, a third faction and story"
+        }
+      ]
     },
     {
       "title": "Freedom Wars",
@@ -6829,19 +7004,9 @@
       "bucket": "psvita/FREEDOM WARS™ [PCSA00147] [USA] [NoNpDRM].zip"
     },
     {
-      "title": "Muramasa Rebirth",
-      "system": "psvita",
-      "bucket": "psvita/Muramasa Rebirth [PCSE00240] [USA] [NoNpDRM].zip"
-    },
-    {
       "title": "Dragon's Crown",
       "system": "psvita",
       "bucket": "psvita/Dragon's Crown [PCSE00019] [USA] [NoNpDRM].zip"
-    },
-    {
-      "title": "Odin Sphere Leifthrasir",
-      "system": "psvita",
-      "bucket": "psvita/Odin Sphere Leifthrasir [PCSE00899] [USA] [NoNpDRM].zip"
     },
     {
       "title": "Grand Kingdom",
@@ -6910,18 +7075,18 @@
     },
     {
       "title": "Armored Warriors",
-      "system": "mame",
-      "bucket": "mame/armwar.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/armwaru.zip"
     },
     {
-      "title": "19XX: The War Against Destiny",
-      "system": "mame",
-      "bucket": "mame/19xx.zip"
+      "title": "19XX",
+      "system": "fbneo",
+      "bucket": "fbneo/19xxu.zip"
     },
     {
       "title": "Armed Police Batrider",
-      "system": "mame",
-      "bucket": "mame/batrider.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/batrideru.zip"
     },
     {
       "title": "Jack Bros.",
@@ -7030,13 +7195,13 @@
     },
     {
       "title": "Antarctic Adventure",
-      "system": "colecovision",
-      "bucket": "colecovision/Antarctic Adventure (USA, Europe).zip"
+      "system": "msx",
+      "bucket": "msx/Antarctic Adventure (Europe).zip"
     },
     {
       "title": "Jumpman Junior",
-      "system": "colecovision",
-      "bucket": "colecovision/Jumpman Junior (USA, Europe).zip"
+      "system": "c64",
+      "bucket": "c64/Jumpman Junior (USA, Europe).zip"
     },
     {
       "title": "Pepper II",
@@ -7055,8 +7220,8 @@
     },
     {
       "title": "Gateway to Apshai",
-      "system": "colecovision",
-      "bucket": "colecovision/Gateway to Apshai (USA, Europe).zip"
+      "system": "c64",
+      "bucket": "c64/Gateway to Apshai (USA, Europe).zip"
     },
     {
       "title": "Alcazar - The Forgotten Fortress",
@@ -7127,11 +7292,6 @@
       "title": "Attack of the Mutant Camels",
       "system": "c64",
       "bucket": "c64/Attack of the Mutant Camels (USA).zip"
-    },
-    {
-      "title": "Jumpman Junior",
-      "system": "c64",
-      "bucket": "c64/Jumpman Junior (USA, Europe).zip"
     },
     {
       "title": "Toy Bizarre",

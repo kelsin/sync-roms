@@ -8,9 +8,9 @@
       "bucket": "fbneo/sf.zip"
     },
     {
-      "title": "Street Fighter II: The World Warrior",
+      "title": "Street Fighter II': Hyper Fighting",
       "system": "fbneo",
-      "bucket": "fbneo/sf2um.zip"
+      "bucket": "fbneo/sf2hfu.zip"
     },
     {
       "title": "Super Street Fighter II Turbo",
@@ -25,7 +25,13 @@
     {
       "title": "Street Fighter Alpha 3",
       "system": "fbneo",
-      "bucket": "fbneo/sfa3u.zip"
+      "bucket": "fbneo/sfa3u.zip",
+      "variants": [
+        {
+          "bucket": "psp/Street Fighter Alpha 3 Max (USA).chd",
+          "note": "PSP: adds World Tour mode and the full home roster"
+        }
+      ]
     },
     {
       "title": "Street Fighter Zero 2 Alpha",
@@ -51,21 +57,6 @@
       "title": "Cyberbots",
       "system": "fbneo",
       "bucket": "fbneo/cybotsu.zip"
-    },
-    {
-      "title": "Street Fighter II': Champion Edition",
-      "system": "fbneo",
-      "bucket": "fbneo/sf2ceuc.zip"
-    },
-    {
-      "title": "Street Fighter II': Hyper Fighting",
-      "system": "fbneo",
-      "bucket": "fbneo/sf2hfu.zip"
-    },
-    {
-      "title": "Super Street Fighter II",
-      "system": "fbneo",
-      "bucket": "fbneo/ssf2u.zip"
     },
     {
       "title": "Hyper Street Fighter II: The Anniversary Edition",
@@ -100,7 +91,13 @@
     {
       "title": "Street Fighter EX Plus",
       "system": "mame",
-      "bucket": "mame/sfexp.zip"
+      "bucket": "mame/sfexp.zip",
+      "variants": [
+        {
+          "bucket": "psx/Street Fighter EX Plus Alpha (USA).chd",
+          "note": "PS1: adds Dhalsim, Sakura and new modes"
+        }
+      ]
     },
     {
       "title": "Street Fighter EX2",
@@ -143,74 +140,14 @@
       "bucket": "fbneo/svc.zip"
     },
     {
-      "title": "Street Fighter II Turbo (Rev 1)",
-      "system": "snes",
-      "bucket": "snes/Street Fighter II Turbo (USA) (Rev 1).zip"
-    },
-    {
-      "title": "Street Fighter Alpha 2",
-      "system": "snes",
-      "bucket": "snes/Street Fighter Alpha 2 (USA).zip"
-    },
-    {
-      "title": "Street Fighter II",
-      "system": "snes",
-      "bucket": "snes/Street Fighter II (USA).zip"
-    },
-    {
-      "title": "Street Fighter II' - Special Champion Edition",
-      "system": "genesis",
-      "bucket": "genesis/Street Fighter II' - Special Champion Edition (USA).zip"
-    },
-    {
-      "title": "Super Street Fighter II",
-      "system": "genesis",
-      "bucket": "genesis/Super Street Fighter II (USA).zip"
-    },
-    {
-      "title": "Street Fighter II'",
-      "system": "mastersystem",
-      "bucket": "mastersystem/Street Fighter II' (Brazil) (En).zip"
-    },
-    {
-      "title": "Street Fighter II' - Champion Edition",
-      "system": "tg16",
-      "bucket": "tg16/Street Fighter II' - Champion Edition (Japan).zip"
-    },
-    {
-      "title": "Fighting Street",
-      "system": "tg-cd",
-      "bucket": "tg-cd/Fighting Street (USA).chd"
-    },
-    {
       "title": "Street Fighter 2010 - The Final Fight",
       "system": "nes",
       "bucket": "nes/Street Fighter 2010 - The Final Fight (USA).zip"
     },
     {
-      "title": "Super Street Fighter II Turbo - Revival",
-      "system": "gba",
-      "bucket": "gba/Super Street Fighter II Turbo - Revival (USA).zip"
-    },
-    {
-      "title": "Street Fighter Alpha 3",
-      "system": "gba",
-      "bucket": "gba/Street Fighter Alpha 3 (USA).zip"
-    },
-    {
-      "title": "Super Puzzle Fighter II (Rev 1)",
-      "system": "gba",
-      "bucket": "gba/Super Puzzle Fighter II (USA) (Rev 1).zip"
-    },
-    {
       "title": "Street Fighter Alpha Anthology",
       "system": "ps2",
       "bucket": "ps2/Street Fighter Alpha Anthology (USA).chd"
-    },
-    {
-      "title": "Street Fighter Anniversary Collection",
-      "system": "ps2",
-      "bucket": "ps2/Street Fighter Anniversary Collection (USA).chd"
     },
     {
       "title": "Street Fighter EX3",
@@ -220,27 +157,18 @@
     {
       "title": "Capcom vs. SNK 2",
       "system": "ps2",
-      "bucket": "ps2/Capcom vs. SNK 2 - Mark of the Millennium 2001 (USA).chd"
+      "bucket": "ps2/Capcom vs. SNK 2 - Mark of the Millennium 2001 (USA).chd",
+      "variants": [
+        {
+          "bucket": "gc/Capcom vs. SNK 2 EO (USA).rvz",
+          "note": "GameCube: EO adds simplified one-button special controls"
+        }
+      ]
     },
     {
-      "title": "Marvel vs. Capcom 2 - New Age of Heroes",
-      "system": "ps2",
-      "bucket": "ps2/Marvel vs. Capcom 2 - New Age of Heroes (USA).chd"
-    },
-    {
-      "title": "Super Street Fighter II (Rev 1)",
-      "system": "snes",
-      "bucket": "snes/Super Street Fighter II (USA) (Rev 1).zip"
-    },
-    {
-      "title": "Street Fighter II (Rev 1)",
-      "system": "gb",
-      "bucket": "gb/Street Fighter II (USA, Europe) (Rev 1) (SGB Enhanced).zip"
-    },
-    {
-      "title": "Street Fighter Alpha - Warriors' Dreams",
-      "system": "gbc",
-      "bucket": "gbc/Street Fighter Alpha - Warriors' Dreams (USA).zip"
+      "title": "Marvel vs. Capcom 2",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Marvel vs. Capcom 2 (USA).chd"
     },
     {
       "title": "SNK vs. Capcom - The Match of the Millennium",
@@ -268,53 +196,14 @@
       "bucket": "nds/SNK vs. Capcom - Card Fighters DS (USA) (Rev 1).zip"
     },
     {
-      "title": "Pocket Fighter",
-      "system": "wonderswan",
-      "bucket": "wonderswan/Pocket Fighter (Japan).zip"
-    },
-    {
-      "title": "Night Warriors - Darkstalkers' Revenge",
-      "system": "saturn",
-      "bucket": "saturn/Night Warriors - Darkstalkers' Revenge (USA).chd"
-    },
-    {
-      "title": "Street Fighter Alpha - Warriors' Dreams",
-      "system": "saturn",
-      "bucket": "saturn/Street Fighter Alpha - Warriors' Dreams (USA).chd"
-    },
-    {
-      "title": "Street Fighter Alpha 2",
-      "system": "saturn",
-      "bucket": "saturn/Street Fighter Alpha 2 (USA).chd"
-    },
-    {
-      "title": "Street Fighter Zero 2'",
-      "system": "saturn",
-      "bucket": "saturn/Street Fighter Zero 2' (Japan).chd"
-    },
-    {
-      "title": "Street Fighter Zero 3",
-      "system": "saturn",
-      "bucket": "saturn/Street Fighter Zero 3 (Japan).chd"
-    },
-    {
-      "title": "Street Fighter Collection",
-      "system": "saturn",
-      "bucket": "saturn/Street Fighter Collection (USA).m3u",
-      "files": [
-        "saturn/Street Fighter Collection (USA) (Disc 1).chd",
-        "saturn/Street Fighter Collection (USA) (Disc 2).chd"
-      ]
-    },
-    {
-      "title": "Capcom Generation - Dai-5-shuu Kakutouka-tachi",
-      "system": "saturn",
-      "bucket": "saturn/Capcom Generation - Dai-5-shuu Kakutouka-tachi (Japan).chd"
+      "title": "Night Warriors: Darkstalkers' Revenge",
+      "system": "fbneo",
+      "bucket": "fbneo/nwarru.zip"
     },
     {
       "title": "Street Fighter - The Movie",
-      "system": "saturn",
-      "bucket": "saturn/Street Fighter - The Movie (USA).chd"
+      "system": "psx",
+      "bucket": "psx/Street Fighter - The Movie (USA).chd"
     },
     {
       "title": "Street Fighter II Movie",
@@ -326,193 +215,20 @@
       ]
     },
     {
-      "title": "X-Men - Children of the Atom",
-      "system": "saturn",
-      "bucket": "saturn/X-Men - Children of the Atom (USA).chd"
-    },
-    {
-      "title": "Marvel Super Heroes",
-      "system": "saturn",
-      "bucket": "saturn/Marvel Super Heroes (USA).chd"
-    },
-    {
-      "title": "X-Men vs. Street Fighter",
-      "system": "saturn",
-      "bucket": "saturn/X-Men vs. Street Fighter (Japan) (3M).chd"
-    },
-    {
-      "title": "Marvel Super Heroes vs. Street Fighter",
-      "system": "saturn",
-      "bucket": "saturn/Marvel Super Heroes vs. Street Fighter (Japan).chd"
-    },
-    {
-      "title": "Super Puzzle Fighter II Turbo",
-      "system": "saturn",
-      "bucket": "saturn/Super Puzzle Fighter II Turbo (USA).chd"
-    },
-    {
-      "title": "Pocket Fighter",
-      "system": "saturn",
-      "bucket": "saturn/Pocket Fighter (Japan).chd"
-    },
-    {
-      "title": "Cyberbots - Fullmetal Madness",
-      "system": "saturn",
-      "bucket": "saturn/Cyberbots - Fullmetal Madness (Japan) (2M).chd"
-    },
-    {
-      "title": "Capcom vs. SNK 2 EO",
-      "system": "gc",
-      "bucket": "gc/Capcom vs. SNK 2 EO (USA).rvz"
-    },
-    {
-      "title": "Street Fighter Alpha 3 Max",
-      "system": "psp",
-      "bucket": "psp/Street Fighter Alpha 3 Max (USA).chd"
-    },
-    {
-      "title": "Street Fighter EX Plus Alpha",
-      "system": "psx",
-      "bucket": "psx/Street Fighter EX Plus Alpha (USA).chd"
-    },
-    {
-      "title": "Street Fighter EX2 Plus",
-      "system": "psx",
-      "bucket": "psx/Street Fighter EX2 Plus (USA).chd"
-    },
-    {
-      "title": "Street Fighter Collection",
-      "system": "psx",
-      "bucket": "psx/Street Fighter Collection (USA) (Rev 1).m3u",
-      "files": [
-        "psx/Street Fighter Collection (USA) (Disc 1) (Rev 1).chd",
-        "psx/Street Fighter Collection (USA) (Disc 2) (Rev 1).chd"
+      "title": "Capcom vs. SNK",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Capcom vs. SNK (USA).chd",
+      "variants": [
+        {
+          "bucket": "dreamcast/Capcom vs. SNK - Millennium Fight 2000 Pro (Japan).chd",
+          "note": "Dreamcast: Pro adds Dan and Joe and rebalances (Japanese)"
+        }
       ]
-    },
-    {
-      "title": "Super Puzzle Fighter II Turbo",
-      "system": "psx",
-      "bucket": "psx/Super Puzzle Fighter II Turbo (USA).chd"
-    },
-    {
-      "title": "Capcom vs. SNK Pro",
-      "system": "psx",
-      "bucket": "psx/Capcom vs. SNK Pro (USA).chd"
-    },
-    {
-      "title": "Street Fighter Collection 2",
-      "system": "psx",
-      "bucket": "psx/Street Fighter Collection 2 (USA).chd"
-    },
-    {
-      "title": "Street Fighter: The Movie",
-      "system": "psx",
-      "bucket": "psx/Street Fighter - The Movie (USA).chd"
-    },
-    {
-      "title": "Pocket Fighter",
-      "system": "psx",
-      "bucket": "psx/Pocket Fighter (USA).chd"
-    },
-    {
-      "title": "Street Fighter Alpha: Warriors' Dreams",
-      "system": "psx",
-      "bucket": "psx/Street Fighter Alpha - Warriors' Dreams (USA).chd"
-    },
-    {
-      "title": "Street Fighter Alpha 2",
-      "system": "psx",
-      "bucket": "psx/Street Fighter Alpha 2 (USA) (Rev 1).chd"
-    },
-    {
-      "title": "Street Fighter Alpha 3",
-      "system": "psx",
-      "bucket": "psx/Street Fighter Alpha 3 (USA).chd"
-    },
-    {
-      "title": "X-Men: Children of the Atom",
-      "system": "psx",
-      "bucket": "psx/X-Men - Children of the Atom (USA).chd"
-    },
-    {
-      "title": "Marvel Super Heroes",
-      "system": "psx",
-      "bucket": "psx/Marvel Super Heroes (USA).chd"
-    },
-    {
-      "title": "X-Men vs. Street Fighter",
-      "system": "psx",
-      "bucket": "psx/X-Men vs. Street Fighter (USA).chd"
-    },
-    {
-      "title": "Marvel Super Heroes vs. Street Fighter",
-      "system": "psx",
-      "bucket": "psx/Marvel Super Heroes vs. Street Fighter (USA).chd"
-    },
-    {
-      "title": "Marvel vs. Capcom: Clash of Super Heroes",
-      "system": "psx",
-      "bucket": "psx/Marvel vs. Capcom - Clash of Super Heroes (USA).chd"
     },
     {
       "title": "Tatsunoko vs. Capcom: Ultimate All-Stars",
       "system": "wii",
       "bucket": "wii/Tatsunoko vs. Capcom - Ultimate All-Stars (USA).rvz"
-    },
-    {
-      "title": "Super Street Fighter IV: 3D Edition",
-      "system": "3ds",
-      "bucket": "3ds/Super Street Fighter IV - 3D Edition (USA) (En,Fr,Es).zip"
-    },
-    {
-      "title": "Street Fighter Alpha 3",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Street Fighter Alpha 3 (USA).chd"
-    },
-    {
-      "title": "Street Fighter III: Double Impact",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Street Fighter III - Double Impact (USA).chd"
-    },
-    {
-      "title": "Street Fighter III: 3rd Strike",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Street Fighter III - 3rd Strike (USA).chd"
-    },
-    {
-      "title": "Marvel vs. Capcom: Clash of Super Heroes",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Marvel vs. Capcom - Clash of Super Heroes (USA).chd"
-    },
-    {
-      "title": "Marvel vs. Capcom 2",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Marvel vs. Capcom 2 (USA).chd"
-    },
-    {
-      "title": "Capcom vs. SNK",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Capcom vs. SNK (USA).chd"
-    },
-    {
-      "title": "Capcom vs. SNK: Millennium Fight 2000 Pro",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Capcom vs. SNK - Millennium Fight 2000 Pro (Japan).chd"
-    },
-    {
-      "title": "Capcom vs. SNK 2: Millionaire Fighting 2001",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Capcom vs. SNK 2 - Millionaire Fighting 2001 (Japan).chd"
-    },
-    {
-      "title": "Super Puzzle Fighter II X for Matching Service",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Super Puzzle Fighter II X for Matching Service (Japan).chd"
-    },
-    {
-      "title": "Super Street Fighter II X for Matching Service",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Super Street Fighter II X for Matching Service (Japan).chd"
     },
     {
       "title": "Ultra Street Fighter IV",

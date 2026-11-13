@@ -133,7 +133,7 @@ class Discs(unittest.TestCase):
             return next(picks)
 
         keys = {"gba/Ruby.zip", "gba/Zelda.zip", "gba/Sonic.zip"}
-        game_set = {"id": "x", "name": "Zeldas"}
+        game_set = {"id": "x", "name": "Zeldas", "games": []}
 
         def pick_meta(system, meta, filters, keys_for):
             filters["genre"] = "RPG"

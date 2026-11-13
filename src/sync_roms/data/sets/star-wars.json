@@ -48,36 +48,6 @@
       "bucket": "snes/Super Star Wars - Return of the Jedi (USA) (Rev 1).zip"
     },
     {
-      "title": "Star Wars (En)",
-      "system": "mastersystem",
-      "bucket": "mastersystem/Star Wars (Europe, Brazil) (En).zip"
-    },
-    {
-      "title": "Star Wars",
-      "system": "gamegear",
-      "bucket": "gamegear/Star Wars (USA, Europe).zip"
-    },
-    {
-      "title": "Super Star Wars - Return of the Jedi",
-      "system": "gamegear",
-      "bucket": "gamegear/Super Star Wars - Return of the Jedi (USA, Europe).zip"
-    },
-    {
-      "title": "Star Wars (Rev 1)",
-      "system": "gb",
-      "bucket": "gb/Star Wars (USA, Europe) (Rev 1).zip"
-    },
-    {
-      "title": "Star Wars - The Empire Strikes Back",
-      "system": "gb",
-      "bucket": "gb/Star Wars - The Empire Strikes Back (USA, Europe).zip"
-    },
-    {
-      "title": "Super Star Wars - Return of the Jedi",
-      "system": "gb",
-      "bucket": "gb/Super Star Wars - Return of the Jedi (USA, Europe) (SGB Enhanced).zip"
-    },
-    {
       "title": "Star Wars - Yoda Stories",
       "system": "gbc",
       "bucket": "gbc/Star Wars - Yoda Stories (USA, Europe) (GB Compatible).zip"
@@ -194,7 +164,13 @@
     {
       "title": "Star Wars - Episode I - Jedi Power Battles",
       "system": "psx",
-      "bucket": "psx/Star Wars - Episode I - Jedi Power Battles (USA).chd"
+      "bucket": "psx/Star Wars - Episode I - Jedi Power Battles (USA).chd",
+      "variants": [
+        {
+          "bucket": "dreamcast/Star Wars - Episode I - Jedi Power Battles (USA).chd",
+          "note": "Dreamcast: adds playable characters, modes and sharper graphics"
+        }
+      ]
     },
     {
       "title": "Star Wars - Masters of Teras Kasi",
@@ -237,14 +213,15 @@
       "bucket": "gc/LEGO Star Wars II - The Original Trilogy (USA).rvz"
     },
     {
-      "title": "LEGO Star Wars - The Complete Saga",
-      "system": "nds",
-      "bucket": "nds/LEGO Star Wars - The Complete Saga (USA).zip"
-    },
-    {
       "title": "LEGO Star Wars II - The Original Trilogy (Rev 1)",
       "system": "nds",
-      "bucket": "nds/LEGO Star Wars II - The Original Trilogy (USA) (Rev 1).zip"
+      "bucket": "nds/LEGO Star Wars II - The Original Trilogy (USA) (Rev 1).zip",
+      "variants": [
+        {
+          "bucket": "nds/LEGO Star Wars - The Complete Saga (USA).zip",
+          "note": "DS: The Complete Saga, adds Episodes I-III"
+        }
+      ]
     },
     {
       "title": "LEGO Star Wars III - The Clone Wars",
@@ -263,8 +240,8 @@
     },
     {
       "title": "Star Wars - Lethal Alliance",
-      "system": "nds",
-      "bucket": "nds/Star Wars - Lethal Alliance (USA) (En,Fr,De,Es,It).zip"
+      "system": "psp",
+      "bucket": "psp/Star Wars - Lethal Alliance (USA) (En,Fr,De,Es,It).chd"
     },
     {
       "title": "Star Wars - The Clone Wars - Jedi Alliance",
@@ -287,16 +264,6 @@
       "bucket": "nds/Star Wars - The Force Unleashed II (USA) (En,Fr,De,Es,It).zip"
     },
     {
-      "title": "LEGO Star Wars II - The Original Trilogy",
-      "system": "psp",
-      "bucket": "psp/LEGO Star Wars II - The Original Trilogy (USA).chd"
-    },
-    {
-      "title": "LEGO Star Wars III - The Clone Wars",
-      "system": "psp",
-      "bucket": "psp/LEGO Star Wars III - The Clone Wars (USA) (En,Fr,Es).chd"
-    },
-    {
       "title": "Star Wars - Battlefront - Renegade Squadron",
       "system": "psp",
       "bucket": "psp/Star Wars - Battlefront - Renegade Squadron (USA).chd"
@@ -310,11 +277,6 @@
       "title": "Star Wars - Battlefront II",
       "system": "psp",
       "bucket": "psp/Star Wars - Battlefront II (USA).chd"
-    },
-    {
-      "title": "Star Wars - Lethal Alliance",
-      "system": "psp",
-      "bucket": "psp/Star Wars - Lethal Alliance (USA) (En,Fr,De,Es,It).chd"
     },
     {
       "title": "Star Wars - The Clone Wars - Republic Heroes",
@@ -342,16 +304,6 @@
       "bucket": "3ds/Angry Birds Star Wars (USA) (En,Fr,Es,Pt).zip"
     },
     {
-      "title": "Star Wars: Episode I: Jedi Power Battles",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Star Wars - Episode I - Jedi Power Battles (USA).chd"
-    },
-    {
-      "title": "Star Wars: Episode I: Racer",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Star Wars - Episode I - Racer (USA).chd"
-    },
-    {
       "title": "Star Wars: Knights of the Old Republic",
       "system": "xbox",
       "bucket": "xbox/Star Wars - Knights of the Old Republic (USA) (Rev 1).iso"
@@ -362,29 +314,14 @@
       "bucket": "xbox/Star Wars - Knights of the Old Republic II - The Sith Lords (USA).iso"
     },
     {
-      "title": "Star Wars: Jedi Knight II: Jedi Outcast",
-      "system": "xbox",
-      "bucket": "xbox/Star Wars - Jedi Knight II - Jedi Outcast (USA).iso"
-    },
-    {
       "title": "Star Wars: Jedi Knight: Jedi Academy",
       "system": "xbox",
       "bucket": "xbox/Star Wars - Jedi Knight - Jedi Academy (USA) (En,Fr,De).iso"
     },
     {
-      "title": "Star Wars: Demolition",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Star Wars - Demolition (USA).chd"
-    },
-    {
       "title": "Star Wars - The Empire Strikes Back",
       "system": "atari2600",
       "bucket": "atari2600/Star Wars - The Empire Strikes Back (USA).zip"
-    },
-    {
-      "title": "Star Wars - The Arcade Game",
-      "system": "atari2600",
-      "bucket": "atari2600/Star Wars - The Arcade Game (USA).zip"
     },
     {
       "title": "Star Wars - Jedi Arena",
@@ -395,31 +332,6 @@
       "title": "Star Wars - Return of the Jedi - Death Star Battle",
       "system": "atari2600",
       "bucket": "atari2600/Star Wars - Return of the Jedi - Death Star Battle (USA).zip"
-    },
-    {
-      "title": "Star Wars - The Arcade Game",
-      "system": "atari5200",
-      "bucket": "atari5200/Star Wars - The Arcade Game (USA).zip"
-    },
-    {
-      "title": "Star Wars - Return of the Jedi - Death Star Battle",
-      "system": "atari5200",
-      "bucket": "atari5200/Star Wars - Return of the Jedi - Death Star Battle (USA).zip"
-    },
-    {
-      "title": "Star Wars - The Empire Strikes Back",
-      "system": "intellivision",
-      "bucket": "intellivision/Star Wars - The Empire Strikes Back (USA, Europe).zip"
-    },
-    {
-      "title": "Star Wars - The Arcade Game",
-      "system": "colecovision",
-      "bucket": "colecovision/Star Wars - The Arcade Game (USA).zip"
-    },
-    {
-      "title": "Star Wars - The Arcade Game",
-      "system": "c64",
-      "bucket": "c64/Star Wars - The Arcade Game (USA, Europe).zip"
     }
   ]
 }
