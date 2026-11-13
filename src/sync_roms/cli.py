@@ -84,8 +84,8 @@ TOPICS = {
 
   Needs git and the GitHub CLI (gh, logged in). Your edits are written to a temporary clone of kelsin/sync-roms, pushed
   as a branch and opened as a PR; nothing is written to storage or to ~/.sync-roms.
-  Pick a set to switch games off, add games from a system (you're asked for a category), change a game's category or
-  rename it. ➕ New set creates one; d deletes the highlighted one. Esc reviews the changes before the PR is opened.
+  Pick a set to switch games off, add games from a system or from another set across its systems (you're asked for a
+  category), change a game's category or rename it. ➕ New set creates one; d deletes the highlighted one. Esc reviews the changes before the PR is opened.
 """,
     "collections": """
   sync-roms collections edit                  edit your collections of favourite games
