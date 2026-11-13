@@ -433,7 +433,9 @@ class Client:
             data = json.loads(body)
         except (ValueError, RecursionError):
             raise ApiError("ScreenScraper returned an unreadable response") from None
-        self.last_quota = _quota(data) or self.last_quota
+        quota = _quota(data)
+        if quota is not None and quota.max_today:  # one without a daily max says nothing about the quota
+            self.last_quota = quota
         return data
 
     def quota(self):

@@ -252,6 +252,9 @@ class ClientTests(unittest.TestCase):
         c._opener = lambda req, timeout=None: Resp(json.dumps({"response": {"jeu": {"id": "5"}}}).encode())
         c.lookup(12, "game.gba", 100)  # a response without one keeps the last
         self.assertEqual(c.last_quota.used_today, 10)
+        c._opener = lambda req, timeout=None: Resp(json.dumps({"response": {"ssuser": {"requeststoday": "11"}, "jeu": {"id": "5"}}}).encode())
+        c.lookup(12, "game.gba", 100)  # one without a daily max keeps the last too
+        self.assertEqual(c.last_quota.used_today, 10)
         c._opener = lambda req, timeout=None: fixture("ssuserinfos.json")
         self.assertEqual(c.quota(), c.last_quota)
 

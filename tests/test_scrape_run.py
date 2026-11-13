@@ -1189,13 +1189,13 @@ class ProgressTest(RunBase):
 
         def lookup(system_id, rom_name, *a, **k):
             if rom_name == "b.zip":  # Ctrl-C while batch 1 waits, once batch 2 has finished on the other thread
-                batch2_done.wait(5)
+                self.assertTrue(batch2_done.wait(30))
                 raise KeyboardInterrupt
             return real_lookup(system_id, rom_name, *a, **k)
 
         def download(url, dest, limit=None, stop=None):
             real_download(url, dest, limit, stop)
-            if url == f"http://media/{ord('d')}/ss":
+            if url == f"http://media/{self.client.games['d.zip']['id']}/ss":
                 batch2_done.set()
         self.client.lookup, self.client.download = lookup, download
         with mock.patch.object(scrape_online, "BATCH", 2):
@@ -1238,6 +1238,52 @@ class ProgressTest(RunBase):
         out = self.out.getvalue()
         self.assertNotIn("didn't all upload", out)
         self.assertIn("1 ROM(s) scraped this run are saved and 1 are left", out)
+
+    def test_ctrl_c_while_waiting_in_the_run_saves_what_finished(self):
+        for r in "abcd":
+            self.put(f"gba/{r}.zip")
+            self.client.games.setdefault(f"{r}.zip", game(ord(r), r))
+        self.client.threads = 1
+        real_lookup, real_wait, b_running, release, calls = self.client.lookup, scrape_online.wait, threading.Event(), threading.Event(), []
+
+        def lookup(system_id, rom_name, *a, **k):
+            if rom_name == "b.zip":  # still working when Ctrl-C lands on the run's thread
+                b_running.set()
+                self.assertTrue(release.wait(30))
+            return real_lookup(system_id, rom_name, *a, **k)
+
+        def wait(fs, **kw):
+            calls.append(1)
+            if len(calls) == 2:
+                self.assertTrue(b_running.wait(30))
+                raise KeyboardInterrupt
+            release.set()
+            return real_wait(fs, **kw)
+        self.client.lookup = lookup
+        with mock.patch.object(scrape_online, "wait", wait):
+            self.assertEqual(self.run_scrape(), 130)
+        self.assertEqual(set(self.metadata()), {"a.zip"})
+        self.assertFalse(any("/b." in k for k in self.stored()))  # its lookup ended after the stop: no media kept
+        self.assertIn("1 ROM(s) scraped this run are saved and 3 are left", self.out.getvalue())
+
+    def test_ctrl_c_after_a_quota_stop_still_exits_130(self):
+        for r in ("b.zip", "c.zip"):
+            self.put(f"gba/{r}")
+        real_lookup, c_started = self.client.lookup, threading.Event()
+
+        def lookup(system_id, rom_name, *a, **k):
+            if rom_name == "b.zip":  # batch 1 hits the quota while batch 2 is working
+                self.assertTrue(c_started.wait(30))
+                raise screenscraper.QuotaExceeded("quota")
+            if rom_name == "c.zip":  # Ctrl-C while batch 2 drains
+                c_started.set()
+                raise KeyboardInterrupt
+            return real_lookup(system_id, rom_name, *a, **k)
+        self.client.lookup = lookup
+        with mock.patch.object(scrape_online, "BATCH", 1), mock.patch.object(scrape_online, "_offer_review") as review:
+            self.assertEqual(self.run_scrape(), 130)
+        review.assert_not_called()
+        self.assertIn("Interrupted", self.out.getvalue())
 
     def test_second_ctrl_c_aborts(self):
         self.put("gba/a.zip")

@@ -788,7 +788,7 @@ def scrape_system(client, system, items, threads, skip, shrink, outcomes, listin
                                rerun=rerun, position=(started, len(items)), interrupted=isinstance(halted, KeyboardInterrupt))
             started += len(batch)
             failed += n
-            halted = halted or hit
+            halted = hit if isinstance(hit, KeyboardInterrupt) else halted or hit  # Ctrl-C wins over an earlier stop
             if time.monotonic() - last_write >= METADATA_INTERVAL:
                 scrape_state.flush_unknown()  # marks from a run that finds nothing must not wait for the final flush
                 scrape_state.flush_hashes()
