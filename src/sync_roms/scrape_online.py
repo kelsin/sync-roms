@@ -737,6 +737,7 @@ def record(system, pending, outcomes, listing, index, skip, replace=False, rerun
                 print(ui.yellow(f"  ⚠️  {e.get('Key')}: couldn't delete the old file"))
         outcomes[rom] = how
         scrape_state.clear_unknown(name, rom)  # found after all, if it was a retry or a manual match
+    scrape_state.unkeep({f"{name}/{rom}" for rom in done})
     scrape_state.flush_unknown()
     print(ui.green(f"  ✅ {name}: {len(done)} ROM(s) scraped"))
     return 0, False
@@ -877,14 +878,19 @@ def run_scrape(client, systems, todo, skip, ask=True, replace=False, forced=None
     if not interrupted:  # nothing is asked after Ctrl-C
         _offer_review(client, systems, todo, sorted(set(scrape_state.notgames()) - before))
     if not forced and any(how is None for got in outcomes.values() for how in got.values()):
-        print(ui.dim("\n   Review the non-games and unknown ROMs: sync-roms scrape review [SYSTEM]"))
-        print(ui.dim("   Say which game one is: sync-roms scrape match SYSTEM ROM GAME_ID_OR_NAME"))
+        _hints()
     if halted:
         counts = (sum(1 for got in outcomes.values() for how in got.values() if how), count - sum(map(len, outcomes.values())))
         ui.failure(ui.yellow("\n" + _stop_message(halted, rerun, counts)))
         return 130 if interrupted else 1
     print(ui.green("\n🎉 Done!") if not failed else ui.red(f"\n⚠️  Done with {failed} failure(s); run `{rerun}` to try again"))
     return 1 if failed else 0
+
+
+def _hints():
+    """How to go on with ROMs that have no metadata: review them, or say which game one is."""
+    print(ui.dim("\n   Review the non-games and unknown ROMs: sync-roms scrape review [SYSTEM]"))
+    print(ui.dim("   Say which game one is: sync-roms scrape match SYSTEM ROM GAME_ID_OR_NAME"))
 
 
 def _offer_review(client, systems, todo, new):
@@ -1119,7 +1125,6 @@ def missing_command(args):
     if not total:
         print(ui.green("Every ROM has metadata ✨"))
         return 0
-    print(ui.dim("\n   Review the non-games and unknown ROMs: sync-roms scrape review [SYSTEM]"))
-    print(ui.dim("   Say which game one is: sync-roms scrape match SYSTEM ROM GAME_ID_OR_NAME"))
+    _hints()
     print(ui.dim("   Look up the rest: sync-roms scrape"))
     return 0

@@ -217,6 +217,59 @@ class ReviewTest(ReviewBase):
         self.assertIn("gb/a.zip", err.getvalue())
         self.assertIn("1 of 3", err.getvalue())
 
+    def quiet_review(self):
+        err = io.StringIO()
+        with mock.patch.object(ui, "QUIET", True), contextlib.redirect_stderr(err):
+            self.review()
+        return err.getvalue()
+
+    def test_failed_search_reason_on_stderr_under_quiet(self):
+        def resolve(client, system, query):
+            raise screenscraper.ApiError("server down")
+        self.patch(scrape_online, "resolve_manual", resolve)
+        self.answers("s", "", "q")
+        self.assertIn("server down", self.quiet_review())
+
+    def test_failed_match_says_not_scraped_under_quiet(self):
+        self.patch(scrape_online, "resolve_manual", lambda *a: 42)
+        self.patch(scrape_online, "match_command", lambda args: 1)
+        self.answers("s", "", "q")
+        self.assertIn("gb/a.zip was not scraped", self.quiet_review())
+
+    def test_kept_list_with_bad_entries_is_read_as_its_strings(self):
+        self.write_json("scrape-notgames.json", {**scrape_state.notgames(), "kept": [["x"], {"y": 1}, 3, "gb/a.zip"]})
+        self.assertEqual(scrape_state.kept(), {"gb/a.zip"})
+        self.answers("q")
+        self.review()
+        self.assertIn("gb/b.zip", self.out.getvalue())  # a.zip is kept, so b.zip comes first
+
+    def test_new_notgame_mark_drops_the_kept_mark(self):
+        scrape_state.keep("gb", "a.zip")
+        scrape_state.mark_notgame("gb", "a.zip", INFO)
+        self.assertEqual(scrape_state.kept(), set())
+
+    def test_ignore_all_after_a_search_skips_the_searched_rom(self):
+        self.patch(scrape_online, "resolve_manual", lambda *a: 42)
+
+        def match(args):
+            scrape_state.save_match(args.system, args.rom, 42)
+            return 0
+        self.patch(scrape_online, "match_command", match)
+        asked = []
+        self.patch(ui, "confirm", lambda question, **k: asked.append(question) or True)
+        self.answers("i", "s", "", "b", "I")  # a ignored, b searched, back to a, then ignore a and the rest
+        self.review()
+        self.assertEqual(asked, ["   Ignore this and the 1 remaining ROM(s)?"])
+        self.assertEqual(self.added, [{"gb": ["a.zip", "c.zip"]}])
+
+    def test_nested_step_backs(self):
+        self.answers("i", "i", "b", "b", "k", "k", "k")
+        self.review()
+        self.assertEqual(self.added, [])
+        self.assertEqual(self.out.getvalue().count("1 of 3"), 2)
+        self.assertEqual(self.out.getvalue().count("2 of 3"), 3)  # shown, back to it, and after a again
+        self.assertEqual(self.pending(), KEYS)
+
 
 class ReviewCommandTest(ReviewBase):
     def run_cmd(self, system=None, tty=True):
@@ -345,6 +398,15 @@ class ReviewRunTest(RunBase):
         self.assertEqual(self.run_scrape(), 0)
         self.assertIn("sync-roms scrape review [SYSTEM]", self.out.getvalue())
         self.assertIn("sync-roms scrape match SYSTEM ROM GAME_ID_OR_NAME", self.out.getvalue())
+
+    def test_rom_found_by_a_later_run_loses_its_kept_mark(self):
+        self.put("gba/a.zip")
+        scrape_state.mark_unknown("gba", "a.zip")
+        scrape_state.flush_unknown()
+        scrape_state.keep("gba", "a.zip")
+        self.assertEqual(self.run_scrape(retry=True), 0)
+        self.assertEqual(self.metadata(), {"a.zip": {"name": "Alpha"}})
+        self.assertEqual(scrape_state.kept(), set())
 
     def test_run_with_every_rom_matched_prints_no_hints(self):
         self.put("gba/a.zip")

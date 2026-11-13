@@ -237,7 +237,7 @@ def kept():
     """The "system/rom" keys of the ROMs (non-games and unknown) `scrape review` was told to keep for later."""
     with _lock:
         keys = _load(NOTGAMES).get(KEPT)
-        return set(keys) if isinstance(keys, list) else set()
+        return {k for k in keys if isinstance(k, str)} if isinstance(keys, list) else set()
 
 
 def keep(system, rom):
@@ -247,10 +247,21 @@ def keep(system, rom):
             _save(NOTGAMES, {**_load(NOTGAMES), KEPT: sorted(keys | {_key(system, rom)})})
 
 
-def mark_notgame(system, rom, info):
+def unkeep(keys):
+    """Drop the kept-for-later marks of keys ("system/rom"), in one write."""
     with _lock:
-        data = dict(_load(NOTGAMES))
+        have, keys = kept(), set(keys)
+        if have & keys:
+            _save(NOTGAMES, {**_load(NOTGAMES), KEPT: sorted(have - keys)})
+
+
+def mark_notgame(system, rom, info):
+    """Mark a ROM a non-game (a new mark: its kept-for-later mark goes)."""
+    with _lock:
+        data, keys = dict(_load(NOTGAMES)), kept()
         data[_key(system, rom)] = info
+        if _key(system, rom) in keys:
+            data[KEPT] = sorted(keys - {_key(system, rom)})
         _save(NOTGAMES, data)
 
 

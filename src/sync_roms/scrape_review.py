@@ -54,11 +54,14 @@ def _search(system, rom, client):
     try:
         game_id = scrape_online.resolve_manual(scrape_online._RomClient(client), system, query)
     except (screenscraper.NotFound, screenscraper.ApiError, screenscraper.QuotaExceeded) as e:
-        print(ui.yellow(f"   {e}"))
+        print(ui.yellow(f"   {e}"), file=_out())
         return False
     code = scrape_online.match_command(argparse.Namespace(system=name, rom=rom, game=str(game_id), skip_media=None,
                                                           dry_run=False, confirmed=True, client=client))
-    return code == 0 and scrape_state.manual_match(name, rom) == game_id
+    if code == 0 and scrape_state.manual_match(name, rom) == game_id:
+        return True
+    print(ui.yellow(f"   {name}/{rom} was not scraped as game {game_id}"), file=_out())
+    return False
 
 
 def review(systems, keys, sizes, client=None):
