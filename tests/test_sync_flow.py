@@ -62,10 +62,42 @@ class CleanDirsTest(unittest.TestCase):
         _, out = self.run_clean(boom)
         self.assertIn("Skipped", out)
 
-    def test_retries_dot_clean(self):
-        results = iter([(True, ["/x/._a"]), (True, [])])
-        _, out = self.run_clean(lambda p: next(results))
-        self.assertIn("Retrying dot_clean", out)
+    def run_real_dot_clean(self, removable=True):
+        """clean_dirs with the real dot_clean (its command faked to leave ._a and ._b), counting the card walks and removals."""
+        walks, removed, real_walk, real_remove, real_dot_clean = [], [], os.walk, os.remove, clean.dot_clean
+
+        def walk(path):
+            walks.append(path)
+            return real_walk(path)
+
+        def remove(path):
+            if not removable:
+                raise PermissionError("busy")
+            removed.append(os.path.basename(path))
+            real_remove(path)
+
+        def leave_files(root):
+            os.makedirs(os.path.join(root, "ROMs"), exist_ok=True)
+            for name in ("._a", os.path.join("ROMs", "._b")):
+                open(os.path.join(root, name), "w").close()
+            return real_dot_clean(root)
+        with mock.patch.object(clean.os, "walk", walk), mock.patch.object(clean.os, "remove", remove):
+            _, out = self.run_clean(leave_files, spotlight=False)
+        return walks, removed, out
+
+    def test_a_retry_removes_the_files_dot_clean_left_without_walking_the_card_again(self):
+        walks, removed, out = self.run_real_dot_clean()
+        self.assertEqual(len(walks), 1)
+        self.assertEqual(sorted(removed), ["._a", "._b"])
+        self.assertIn("Removing the 2 ._ file(s) dot_clean left", out)
+        self.assertNotIn("still there", out)
+
+    def test_files_that_cannot_be_removed_are_listed_after_the_retries_without_walking_again(self):
+        with contextlib.redirect_stderr(io.StringIO()):
+            walks, _, out = self.run_real_dot_clean(removable=False)
+        self.assertEqual(len(walks), 1)
+        self.assertEqual(out.count("Removing the 2 ._ file(s) dot_clean left"), clean.DOT_CLEAN_RETRIES)
+        self.assertIn("2 ._ file(s) are still there after dot_clean", out)
 
     def test_sudo_is_skipped_when_spotlight_is_off(self):
         calls, out = self.run_clean(lambda p: (True, []), tty=True, yes=False, spotlight=False)
@@ -93,10 +125,10 @@ class CleanDirsTest(unittest.TestCase):
 
     def test_quiet_lists_the_files_dot_clean_left(self):
         with mock.patch.object(ui, "QUIET", True), contextlib.redirect_stderr(io.StringIO()) as err:
-            _, out = self.run_clean(lambda p: (True, ["/x/._a"]), spotlight=False)
+            _, _, out = self.run_real_dot_clean(removable=False)
         self.assertIn("still there after dot_clean", err.getvalue())
-        self.assertIn("/x/._a", err.getvalue())
-        self.assertNotIn("/x/._a", out)
+        self.assertIn("._b", err.getvalue())
+        self.assertNotIn("._b", out)
 
 
 class DownloadInterruptTest(unittest.TestCase):
