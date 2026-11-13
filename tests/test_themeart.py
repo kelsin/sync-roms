@@ -9,7 +9,7 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
-from sync_roms import frontend, runtime, themeart, ui  # noqa: E402
+from sync_roms import frontend, github, runtime, themeart, ui  # noqa: E402
 
 def archive(files):
     """A .tar.gz stream like GitHub's, its files under one top folder."""
@@ -213,9 +213,9 @@ class EsdeOwnArt(Esde):
 
 class Update(Esde):
     def run_update(self, latest, tarball=b"", dry_run=False):
-        def github(url, accept=None):
+        def fake(url, accept=None):
             return io.BytesIO(latest.encode() if "api.github.com" in url else tarball)
-        with mock.patch.object(themeart, "_github", github), contextlib.redirect_stdout(io.StringIO()):
+        with mock.patch.object(github, "get", fake), contextlib.redirect_stdout(io.StringIO()):
             return themeart.update_storage(dry_run)
 
     def test_storage_gets_the_latest_archive_and_commit(self):
