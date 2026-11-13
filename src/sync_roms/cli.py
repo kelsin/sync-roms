@@ -3,6 +3,7 @@ import argparse
 import os
 import shutil
 import sys
+import time
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
 
@@ -963,18 +964,9 @@ def sync_card(args):
         rom_todo = [j for j in rom_todo if j[1] not in moved]
     elif moved:
         print(ui.dim(f"  📦 Moved {len(moved)} loose disc file(s) into {disc_dir}/"))
-    summary = [f"{icon} {label}: {ui.bold(str(len(todo)))} to download ({ui.human_size(total_bytes(todo))}), "
-               f"{len(jobs) - len(todo)} already present"
-               for icon, label, todo, jobs, always in (("💿", "ROMs", rom_todo, rom_jobs, True), ("🧠", "BIOS", bios_todo, bios_jobs, True),
-                                                       ("🤖", "Android", apk_todo, apk_jobs, False), ("🎨", "Themes", theme_todo, theme_jobs, False))
-               if always or jobs]
-    print("\n" + "\n".join(summary))
-    if extras:
-        print(f"🗑️  Local ROMs no longer in the selection: {ui.bold(str(len(extras)))}")
     es_dir = os.path.join(base, "ES-DE")
     scrapes = layout_name in scrape_plan.SCRAPE_LAYOUTS
     scraped = {}
-    todo_all = rom_todo + bios_todo + apk_todo + theme_todo
 
     def build_plan(present):
         if not scraped:
@@ -984,7 +976,32 @@ def sync_card(args):
                                for s in chosen}
         if unzip:  # a ROM that's extracted from its archive is on the card under another extension
             present = lambda path, exists=present: exists(path) or downloads.archive_extracted(path)  # noqa: E731
-        return scrape_plan.build_scrape_plan(layout_name, chosen, scraped["data"], scraped["rels"], dest_of, es_dir, present, base)
+        plan = scrape_plan.build_scrape_plan(layout_name, chosen, scraped["data"], scraped["rels"], dest_of, es_dir, present, base)
+        for key, _, size in plan["jobs"]:  # sizes read once: the rebuild after the downloads finds them here
+            scraped["data"][key.split("/")[1]][0][key] = size
+        return plan
+
+    # the media of every ROM that will be on the card, so the totals and the space check count it
+    planned = build_plan(lambda path: True) if scrapes else None
+    scrape_todo = planned["jobs"] if planned else []
+    summary = [f"{icon} {label}: {ui.bold(str(len(todo)))} to download ({ui.human_size(total_bytes(todo))}), "
+               f"{len(jobs) - len(todo)} already present"
+               for icon, label, todo, jobs, always in (("💿", "ROMs", rom_todo, rom_jobs, True), ("🧠", "BIOS", bios_todo, bios_jobs, True),
+                                                       ("🤖", "Android", apk_todo, apk_jobs, False), ("🎨", "Themes", theme_todo, theme_jobs, False))
+               if always or jobs]
+    print("\n" + "\n".join(summary))
+    if planned:
+        scrape_plan.describe_scrape_plan(planned)
+    if extras:
+        print(f"🗑️  Local ROMs no longer in the selection: {ui.bold(str(len(extras)))}")
+    todo_all = rom_todo + bios_todo + apk_todo + theme_todo + scrape_todo
+    size = (saved or {}).get("size")
+
+    def space(free):
+        """Show the card's free space; the "Not enough space" text when the downloads don't fit."""
+        print(f"💾 Free on the card: {ui.human_size(free)}" + (f" ({size} card)" if size else ""))
+        need = total_bytes(todo_all)
+        return f"Not enough space: {ui.human_size(need)} to download, {ui.human_size(free)} free" if need > free else None
 
     def frontend_step(dry_run):
         """Write the card's collections as the frontend's custom collections (ES-DE, Knulli)."""
@@ -1043,12 +1060,18 @@ def sync_card(args):
 
     if args.dry_run:
         print(ui.yellow("\n🧪 Dry run — nothing downloaded or deleted"))
+        free = free_space(base) + sum(os.path.getsize(p) for p in extras)  # the real run deletes these first
         plan_json = {
             "downloads": [{"kind": kind, "key": key, "path": path, "size": size or 0}
-                          for kind, todo in (("rom", rom_todo), ("bios", bios_todo), ("android", apk_todo), ("theme", theme_todo)) for key, path, size in todo],
-            "delete": list(extras), "missing": {"roms": missing, "bios": [k for k in bios_keys if k not in bios_have]}}
+                          for kind, todo in (("rom", rom_todo), ("bios", bios_todo), ("android", apk_todo), ("theme", theme_todo), ("scrape", scrape_todo))
+                          for key, path, size in todo],
+            "delete": list(extras), "missing": {"roms": missing, "bios": [k for k in bios_keys if k not in bios_have]},
+            "free_space": free}
         for key, path, _ in todo_all:
             print(f"  {key} {ui.dim('→')} {path}")
+        short = space(free) if todo_all else None
+        if short:
+            ui.failure(ui.red(f"❌ {short}"))
         if unzip:
             pending = {j[1] for j in rom_todo} | set(chd.card_archives({dest_of(s) for s in chosen}))
             print(f"📦 Archives to extract: {len([p for p in pending if p.lower().endswith(external.ARCHIVE_EXTS)])}")
@@ -1056,7 +1079,6 @@ def sync_card(args):
             print(f"  {ui.red('would delete')} {path}")
         stale_count = 0
         if scrapes:
-            scrape_plan.describe_scrape_plan(build_plan(lambda path: True))
             stale_count = len(scrape_plan.stale_media(layout_name, manifest['systems'], roms_dir, es_dir, base))
             print(f"🧹 Media on the card for ROMs it doesn't have: {stale_count} file(s) to remove")
         frontend_step(True)
@@ -1075,27 +1097,25 @@ def sync_card(args):
         delete_extras(extras)
 
     if todo_all:
-        need = total_bytes(todo_all)
-        free = free_space(base)
-        size = (saved or {}).get("size")
-        print(f"💾 Free on the card: {ui.human_size(free)}" + (f" ({size} card)" if size else ""))
-        if need > free:
-            short = f"Not enough space: {ui.human_size(need)} to download, {ui.human_size(free)} free"
+        short = space(free_space(base))
+        if short:
             if ui.ASSUME_YES or not ui.has_terminal():  # nobody to answer "Try anyway?"
                 ui.fail(short, 1)
             ui.failure(ui.red(f"❌ {short}"))
             if not ui.confirm("Try anyway?", default=False):
                 print(ui.yellow("👋 Cancelled."))
                 return 0
-        if not ui.confirm(f"⬇️  Download {len(todo_all)} file(s) ({ui.human_size(need)})?"):
+        if not ui.confirm(f"⬇️  Download {len(todo_all)} file(s) ({ui.human_size(total_bytes(todo_all))})?"):
             print(ui.yellow("👋 Cancelled."))
             return 0
 
     if clean_card and todo_all:  # nothing downloaded means nothing to finalize
         clean._clean_root = base
+    started = time.monotonic()
     failures = []
     failed = downloads.run_downloads(rom_todo, "ROMs", "💿", roms_dir, failures) + downloads.run_downloads(bios_todo, "BIOS", "🧠", bios_dir, failures)
-    failed += downloads.run_downloads(apk_todo, "Android", "🤖", apk_dir, failures)
+    if apk_jobs:
+        failed += downloads.run_downloads(apk_todo, "Android", "🤖", apk_dir, failures)
     if theme_todo:
         failed += downloads.run_downloads(theme_todo, "Themes", "🎨", os.path.join(base, themes_dir), failures)
     for s in chosen:
@@ -1118,10 +1138,10 @@ def sync_card(args):
     stale = []
     if scrapes:
         plan = build_plan(os.path.exists)
-        scrape_plan.describe_scrape_plan(plan)
+        scrape_todo = plan["jobs"]
         if clean_card and (plan["jobs"] or plan["writes"] or plan["gamelists"]):
             clean._clean_root = base
-        failed += scrape_plan.apply_scrape_plan(plan, base)
+        failed += scrape_plan.apply_scrape_plan(plan, base, failures)
         stale = scrape_plan.stale_media(layout_name, manifest["systems"], roms_dir, es_dir, base)
     remove_stale_media(stale)
     for folder in scrape_plan.prune_empty_systems(layout_name, manifest["systems"], roms_dir):
@@ -1133,10 +1153,14 @@ def sync_card(args):
         report_failures(failures)
     if not failed and not args.no_eject and usersettings.load_settings().get("eject", True) is not False:
         clean._eject_root = base  # after the card tidy, which still needs it mounted
+    failed_keys = {k for k, _ in failures}
+    got = [j for j in rom_todo + bios_todo + apk_todo + theme_todo + scrape_todo if j[0] not in failed_keys]
+    done = (f"downloaded {len(got)} file(s) ({ui.human_size(total_bytes(got))}) in {ui.eta(time.monotonic() - started)}"
+            + (f"; {len(missing)} listed ROM(s) not in storage" if missing else ""))
     if failed:
-        ui.failure(ui.red(f"\n⚠️  Done with {failed} failure(s)"))
+        ui.failure(ui.red(f"\n⚠️  Done with {failed} failure(s): {done}"))
     else:
-        print(ui.green("\n🎉 Done!"))
+        print(ui.green(f"\n🎉 Done: {done}"))
     return 1 if failed else 0
 
 

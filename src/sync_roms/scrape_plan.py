@@ -393,9 +393,10 @@ def describe_scrape_plan(plan):
           + (f", {len(plan['writes'])} text file(s)" if plan["writes"] else ""))
 
 
-def apply_scrape_plan(plan, base):
-    """Download the media, then write the gamelists and text files. Returns failures."""
-    failed = downloads.run_downloads(plan["jobs"], "Scraped data", "🖼️", base)
+def apply_scrape_plan(plan, base, failures=None):
+    """Download the media, then write the gamelists and text files. Returns failures; failures, if given, collects
+    (key, reason) for each failed download."""
+    failed = downloads.run_downloads(plan["jobs"], "Scraped data", "🖼️", base, failures) if plan["jobs"] else 0
     for path, entries in plan["gamelists"].items():
         try:
             update_gamelist(path, entries)

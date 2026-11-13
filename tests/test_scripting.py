@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 
-from sync_roms import chd, cli, commands, diff, edit, m3u, picker, runtime, s3, scrape_files, store, ui, upload, usersettings  # noqa: E402
+from sync_roms import chd, cli, commands, diff, edit, m3u, picker, runtime, s3, scrape_files, scrape_plan, store, ui, upload, usersettings  # noqa: E402
 from helpers import ENV, Isolated  # noqa: E402,F401
 
 
@@ -145,9 +145,9 @@ class DryRunJsonTest(Isolated):
               "games": [{"bucket": "gba/Game.zip"}, {"bucket": "gba/Gone.zip"}]}
     MANIFEST = {"systems": [SYSTEM], "devices": [], "layouts": {"esde": {"label": "ES-DE", "roms_dir": "ROMs", "bios_dir": "BIOS"}}}
 
-    def run_plan(self, argv):
+    def run_plan(self, argv, **patches):
         with tempfile.TemporaryDirectory() as card:
-            return self.sync([card] + argv, {"bucket": "b"},
+            return self.sync([card] + argv, {"bucket": "b"}, **patches,
                              m=(store, "load_manifest", lambda names=(): self.MANIFEST),
                              c=(store, "load_cards", lambda: {}),
                              l=(s3, "list_sizes", lambda prefix, sizes=True: {"gba/Game.zip": 5} if prefix == "gba/" else {}),
@@ -164,6 +164,17 @@ class DryRunJsonTest(Isolated):
         self.assertEqual(plan["missing"]["roms"], ["gba/Gone.zip"])
         self.assertEqual(plan["delete"], [])
         self.assertEqual(plan["totals"]["files"], 1)
+
+    def test_dry_run_json_has_the_scraped_media_and_the_free_space(self):
+        cover = ("scrapes/gba/covers/Game.png", "/card/ES-DE/downloaded_media/gba/covers/Game.png", 7)
+        code, out, _ = self.run_plan(["--dry-run", "--json", "--yes"],
+                                     b=(scrape_plan, "build_scrape_plan", lambda *a: {"jobs": [cover], "gamelists": {}, "writes": []}),
+                                     f=(cli, "free_space", lambda path: 1000))
+        self.assertEqual(code, 0)
+        plan = json.loads(out)
+        self.assertEqual(plan["downloads"][-1], {"kind": "scrape", "key": cover[0], "path": cover[1], "size": 7})
+        self.assertEqual((plan["totals"]["files"], plan["totals"]["bytes"]), (2, 12))
+        self.assertEqual(plan["free_space"], 1000)
 
     def test_json_without_dry_run_is_refused(self):
         self.assertEqual(self.run_plan(["--json", "--yes"])[0], 2)
