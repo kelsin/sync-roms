@@ -3,10 +3,11 @@ import os
 import sys
 import unittest
 import zipfile
+from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
-from sync_roms import diff  # noqa: E402
+from sync_roms import diff, s3  # noqa: E402
 
 
 def make_zip(files, compression=zipfile.ZIP_DEFLATED):
@@ -27,6 +28,23 @@ class ZipFingerprintTest(unittest.TestCase):
         a = make_zip({"g.nes": b"abc"})
         b = make_zip({"g.nes": b"abd"})
         self.assertNotEqual(diff.zip_fingerprint(io.BytesIO(a)), diff.zip_fingerprint(io.BytesIO(b)))
+
+    def test_a_zip_with_a_comment_needs_one_storage_read(self):
+        # without the quick end-of-zip record, zipfile reads the last 65536 + 22 bytes: all of them in the cached tail
+        buf = io.BytesIO()
+        with zipfile.ZipFile(buf, "w", zipfile.ZIP_STORED) as z:
+            z.writestr("g.bin", os.urandom(100000))
+            z.comment = b"note"
+        data = buf.getvalue()
+        reads = []
+
+        def read_range(key, start, end):
+            reads.append((start, end))
+            return data[start:end]
+        with mock.patch.object(s3, "read_range", read_range):
+            fp = diff.zip_fingerprint(diff.RangeReader("k.zip", len(data)))
+        self.assertEqual(fp, diff.zip_fingerprint(io.BytesIO(data)))
+        self.assertEqual(len(reads), 1)
 
 
 def Z(x):
@@ -211,6 +229,45 @@ class PlanDiffTest(unittest.TestCase):
         matched, _, _ = diff.match_content({"b.zip": 1, "a.zip": 2}, {"a.zip": (3, '"e"'), "b.zip": (4, '"e"')},
                                            lambda p: fp, lambda p, s, e: fp)
         self.assertEqual(sorted(matched), [("a.zip", "a.zip"), ("b.zip", "b.zip")])
+
+    def counting(self, prints):
+        calls = []
+
+        def local_print(p):
+            calls.append(("local", p))
+            return prints[p]
+
+        def remote_print(p, size, etag):
+            calls.append(("remote", p))
+            return prints[p]
+
+        def other(*a):
+            calls.append(("read", a))
+            return True
+        return calls, local_print, remote_print, other
+
+    def test_storage_files_are_not_read_when_every_local_file_matched_by_path_and_size(self):
+        prints = {"b.zip": ("zip", ((1, 1),)), "c.bin": ("raw", 7, None)}
+        calls, local_print, remote_print, other = self.counting(prints)
+        result = diff.match_content({"a.zip": 5}, {"a.zip": (5, '"e"'), "b.zip": (6, '"e"'), "c.bin": (7, '"m"')},
+                                    local_print, remote_print, md5=other, same_bytes=other)
+        self.assertEqual(result, ([], [], ["b.zip", "c.bin"]))
+        self.assertEqual(calls, [])
+
+    def test_local_files_are_not_read_when_every_storage_file_matched_by_path_and_size(self):
+        prints = {"b.zip": ("zip", ((1, 1),)), "c.bin": ("raw", 7, None)}
+        calls, local_print, remote_print, other = self.counting(prints)
+        result = diff.match_content({"a.zip": 5, "b.zip": 6, "c.bin": 7}, {"a.zip": (5, '"e"')},
+                                    local_print, remote_print, md5=other, same_bytes=other)
+        self.assertEqual(result, ([], ["b.zip", "c.bin"], []))
+        self.assertEqual(calls, [])
+
+    def test_both_sides_are_read_while_each_has_a_file_left(self):
+        prints = {"b.zip": ("zip", ((1, 1),)), "c.zip": ("zip", ((1, 1),))}
+        calls, local_print, remote_print, other = self.counting(prints)
+        result = diff.match_content({"b.zip": 6}, {"c.zip": (6, '"e"')}, local_print, remote_print)
+        self.assertEqual(result, ([("b.zip", "c.zip")], [], []))
+        self.assertEqual(sorted(calls), [("local", "b.zip"), ("remote", "c.zip")])
 
     def test_raw_files_compare_md5_when_known(self):
         self.assertTrue(diff.same_content(("raw", 5, "x"), ("raw", 5, None)))

@@ -13,7 +13,7 @@ from . import downloads, ignore, inventory, mirroring, picker, runtime, s3, stor
 
 class RangeReader(io.RawIOBase):
     """Read-only file over a bucket object, fetching byte ranges; the tail is cached since a zip's index is there."""
-    TAIL = 65536
+    TAIL = 65536 + 22  # zipfile reads this much from the end when the end-of-zip record isn't the last 22 bytes
 
     def __init__(self, key, size):
         self.key, self.size, self.pos = key, size, 0
@@ -126,7 +126,8 @@ def match_content(local, remote, local_print, remote_print, differs=None, md5=No
 
     local: {path: size}; remote: {path: (size, etag)}. A file with the same path and size on both sides is the same
     without reading it; the rest are matched by content, a file with the same path first. local_print(path) /
-    remote_print(path, size, etag) return a fingerprint, and are only called for the files left over.
+    remote_print(path, size, etag) return a fingerprint, and are only called for the files left over, when both sides
+    have some.
     differs(path, etag), if given, is asked about same-path same-size files and returns True when their bytes are
     known to differ; those are then matched by content too.
     md5(path), if given, hashes a local file whose print is ("raw", size, None), and is only called when a storage
@@ -139,6 +140,8 @@ def match_content(local, remote, local_print, remote_print, differs=None, md5=No
         suspect = {p for p, d in zip(same, ex.map(counted(lambda p: differs(p, remote[p][1]), "Checking same-size files", len(same)), same)) if d} if differs else set()
         left_local = sorted(p for p, size in local.items() if p not in remote or remote[p][0] != size or p in suspect)
         left_remote = sorted(p for p, (size, _) in remote.items() if p not in local or local[p] != size or p in suspect)
+        if not left_local or not left_remote:  # nothing on the other side to match a file with: no need to read any
+            return [], left_local, left_remote
         remote_prints = list(ex.map(counted(lambda p: remote_print(p, *remote[p]), "Reading storage files", len(left_remote)),
                                     left_remote))
         local_prints = list(ex.map(counted(local_print, "Reading local files", len(left_local)), left_local))
