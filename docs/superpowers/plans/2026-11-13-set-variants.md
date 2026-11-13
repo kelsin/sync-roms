@@ -20,7 +20,7 @@ variant's own system; `edit.toggle_games` (set, collection and add-from-set list
 - Copy (exact): one variant `↳ Variant: <note>`; card view adds ` (v adds it)` when off, ` · ✅ on the card (v removes it)`
   when on; several in the card view `↳ <n> variants (v picks): <note1>; <note2>`; several read-only
   `↳ Variants: <note1>; <note2>`; a row that is a variant `Variant of <system name> — <title>`.
-- Card view hint (exact): `Space toggle · Enter done · / search · s set · m meta · c clear · p past · v variant`.
+- Card view hint (exact): `Space toggle · Enter done · / search · s set · m meta · p past · v variant`.
 - Run tests with: `PYENV_VERSION=3.10.15 uv run --python 3.12 --with boto3 --with textual --with textual-image python -m unittest discover -s tests`
   (restore `uv.lock` with `git checkout -- uv.lock` if the run changes it; never commit it).
 - Commits: Conventional Commits, no AI attribution lines.
