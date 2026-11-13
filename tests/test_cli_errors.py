@@ -87,6 +87,14 @@ class UnhonoredFlagsTest(Isolated):
                 self.refused(argv, f"--dry-run has no effect on `{name}`",
                              r=(scrape_review, "review_command", mock.Mock(side_effect=AssertionError("ran"))))
 
+    def test_dry_run_is_refused_on_diff(self):
+        from sync_roms import diff
+        with tempfile.TemporaryDirectory() as tmp:
+            for argv in (["diff", tmp, "--dry-run"], ["-n", "diff", tmp], ["--diff", tmp, "-n"]):
+                with self.subTest(argv=argv):
+                    self.refused(argv, "--dry-run has no effect on `diff`",
+                                 d=(diff, "diff_command", mock.Mock(side_effect=AssertionError("ran"))))
+
     def test_cache_full_needs_update(self):
         self.refused(["cache", "--full"], "--full only applies to `cache update`")
 

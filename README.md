@@ -282,7 +282,7 @@ On `esde` and `emudeck` cards every Vita game zip in `psvita/` gets a `.psvita` 
 
 | Flag | Description |
 | --- | --- |
-| `-n`, `--dry-run` | Show what would be downloaded (with total sizes), download nothing. With `--mirror`/`--use-mirror`, show what the mirror would download and delete |
+| `-n`, `--dry-run` | Show what would be downloaded (with total sizes), download nothing. With `--mirror`/`--use-mirror`, show what the mirror would download and delete. Commands that only read (`diff`, `check`, `doctor`, `cache`, `config`, `completion`, `games list`/`export`/`sets list`) or can't honor it (`edit`, `scrape review`, `scrape missing`, ...) refuse it with exit 2 |
 | `-e`, `--edit` | Add/remove games in a card's list, then save (see below) |
 | `-a`, `--ask` | Confirm saved settings (device and layout, Android media folders) instead of using them silently. Answering no asks the question again and saves the new answer |
 | `-u`, `--upload-scrapes` | (`-u` is deprecated: it is not `--upload`) Upload `BASE_DIR/ES-DE` scraped data to storage (see below) |

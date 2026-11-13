@@ -134,6 +134,7 @@ TOPICS = {
 
   Lists the ROMs in only one of DIR and storage folder of a system you pick. Same path and size is the same file;
   the rest are matched by content (the CRCs inside zips, the bytes of other files, as upload roms --replace does).
+  It only reads, so --dry-run is refused.
 """,
     "scrape": """
   sync-roms scrape [--system ID] [--all] [--retry] [--fill-media] [--skip-media TYPES] [--dry-run]
@@ -474,8 +475,8 @@ def check_modes(args):
         ui.fail("--replace only works with `upload roms` (--upload)", 2)
     if args.dry_run and mode in ("--edit", "--install-tools", "--clear-mirror", "--devices", "--scrape-missing"):
         ui.fail(f"--dry-run has no effect on {mode}", 2)
-    if args.dry_run and mode == "--scrape-review":
-        ui.fail("--dry-run has no effect on `scrape review`", 2)
+    if args.dry_run and mode in ("--scrape-review", "--diff"):
+        ui.fail(f"--dry-run has no effect on `{'scrape review' if mode == '--scrape-review' else 'diff'}`", 2)
     if args.ask and mode:
         ui.fail(f"--ask only applies to syncing a card, not {mode}", 2)
     if (args.device or args.layout or args.no_clean or args.no_eject) and mode:
