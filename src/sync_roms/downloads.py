@@ -163,7 +163,7 @@ IGNORED_ROOT_DIRS = {"images", "videos", "manuals",                # Batocera / 
                      "imgs"}                                       # Onion scraped box art
 IGNORED_FILES = {"thumbs.db", "desktop.ini"}                       # Windows
 TEMP_DOWNLOAD = re.compile(r"\.(?:part|[0-9a-fA-F]{8})$")             # a download in progress or cut short (boto3 temp name)
-# Dotfiles/folders that are OS litter; walk_roms(keep_dotfiles=True) drops only these (and "._*" AppleDouble files).
+# Dotfiles/folders that are OS litter; walk_roms(keep_dotfiles=True) drops only these and sync-roms's own temp names.
 SYSTEM_DOT_NAMES = {".ds_store", ".localized", ".nomedia", ".appledouble", ".spotlight-v100", ".trashes",
                     ".fseventsd", ".temporaryitems", ".documentrevisions-v100", ".volumeicon.icns"}
 
@@ -171,13 +171,14 @@ SYSTEM_DOT_NAMES = {".ds_store", ".localized", ".nomedia", ".appledouble", ".spo
 def walk_roms(dest, keep_dotfiles=False, skip_db=False):
     """os.walk over dest that yields only real ROM-folder content (no frontend/OS leftovers).
 
-    keep_dotfiles: keep dotfiles that are real content, dropping only OS litter (.DS_Store, ._*, ...).
+    keep_dotfiles: keep dotfiles that are real content, dropping only OS litter (.DS_Store, ._*, ...) and sync-roms's
+    own temp names (.chd-*, .xiso-*, .unzip-*, external.own_temp).
     skip_db: drop *.db files (Onion's ROM list caches, named like _cache2.db or cache6.db).
     """
     def hidden(name):
         if not name.startswith("."):
             return False
-        return not keep_dotfiles or name.lower() in SYSTEM_DOT_NAMES or name.startswith("._")
+        return not keep_dotfiles or name.lower() in SYSTEM_DOT_NAMES or external.own_temp(name)
 
     for root, dirs, files in os.walk(dest):
         at_root = os.path.normpath(root) == os.path.normpath(dest)
