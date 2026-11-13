@@ -6,7 +6,7 @@ import subprocess
 import tempfile
 import time
 
-from . import edit, picker, s3, store, ui
+from . import edit, picker, previews, s3, store, ui
 from .listedit import add_from_set, ask_category, game_label, insert_game, recategorize, reconcile, stocked, view
 
 
@@ -46,7 +46,8 @@ def edit_one(game_set, systems, keys_of):
             game_set["games"] = reconcile(game_set["games"], shown)
         elif i == 1:
             options = stocked(systems)
-            j = picker.filter_list("✏️  Add games from which system?", [s["name"] for s in options])
+            j = picker.filter_list("✏️  Add games from which system?", [s["name"] for s in options],
+                                 preview=lambda k: previews.system(options[k]) if k < len(options) else None)
             if j is None:
                 continue
             s = shown[options[j]["bucket"]]
@@ -60,7 +61,8 @@ def edit_one(game_set, systems, keys_of):
             add_from_set(game_set, [x for x in store.load_sets() if x["name"] != game_set["name"]], shown, keys_of)
         elif i == 3:
             games = [g for g in game_set["games"] if g.get("bucket")]
-            j = picker.filter_list("✏️  Change which game's category?", [game_label(g, names) for g in games])
+            j = picker.filter_list("✏️  Change which game's category?", [game_label(g, names) for g in games],
+                                preview=lambda k: previews.game(games[k]["bucket"]) if k < len(games) else None)
             if j is not None:
                 recategorize(game_set["games"], games[j], ask_category(game_set["games"], games[j].get("title", "it")))
         else:
@@ -225,7 +227,8 @@ def edit_working(systems, before, working, state):
                   + ["➕ New set", "✅ Done (review & open PR)", "🚪 Quit without saving"])
         extras = [[("  " + ("new" if x not in before else "edited"), "cyan")] if x in edited else [] for x in ids] + [[], [], []]
         i = n + 1 if state["review"] else picker.filter_list("✏️  Which set?  (Esc = review & open PR)", labels, extras=extras,
-                                                    hotkeys=(edit.DELETE_KEY,), hint="/ filter · Enter open · d delete · Esc review")
+                                                    hotkeys=(edit.DELETE_KEY,), hint="/ filter · Enter open · d delete · Esc review",
+                                                    preview=lambda k: previews.collection(ids[k]) if k < n else None)
         if isinstance(i, tuple):
             if i[1] < n:
                 sid = ids[i[1]]

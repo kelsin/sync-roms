@@ -184,8 +184,10 @@ class _ListModel:
         self.update()
 
     def preview_path(self):
-        """The image file for the highlighted row, or None (no preview, no row shown, or the row has none)."""
-        return self.preview(self.vis[self.cur]) if self.preview and self.vis else None
+        """The image file for the highlighted row, or None (no preview, no row shown, the row has none, or its file
+        won't load: missing or corrupt, which would otherwise crash the image pane)."""
+        path = self.preview(self.vis[self.cur]) if self.preview and self.vis else None
+        return path if path and _image_loads(path) else None
 
     def update(self):
         """Work out the shown rows (vis), keep the cursor on one and in view, save the session and work out the
@@ -582,6 +584,17 @@ def _probe_through_tmux():
     except Exception:  # noqa: BLE001 -- a missing internal, a closed stdin or no answer: no images
         return False
     return sixel or tgp
+
+
+def _image_loads(path):
+    """Whether path is an image Pillow can read (textual-image's own error handling differs between versions)."""
+    from PIL import Image  # textual-image depends on Pillow
+    try:
+        with Image.open(path) as image:
+            image.verify()
+        return True
+    except (OSError, ValueError, EOFError, SyntaxError):
+        return False
 
 
 def _draws_images():

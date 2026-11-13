@@ -2,7 +2,7 @@
 import copy
 
 from . import collections as colls
-from . import cardedit, edit, m3u, metafilter, picker, s3, store, surprise, themeart, ui
+from . import cardedit, edit, m3u, metafilter, picker, previews, s3, store, surprise, themeart, ui
 from .listedit import add_from_set, ask_category, game_label, reconcile, recategorize, stocked, view
 
 
@@ -79,7 +79,8 @@ def edit_one(collection, systems, keys_of):
             collection["games"] = reconcile(collection["games"], shown)
         elif i == 1:
             options = stocked(systems)
-            j = picker.filter_list("✏️  Add games from which system?", [s["name"] for s in options])
+            j = picker.filter_list("✏️  Add games from which system?", [s["name"] for s in options],
+                                 preview=lambda k: previews.system(options[k]) if k < len(options) else None)
             if j is None:
                 continue
             s = shown[options[j]["bucket"]]
@@ -126,7 +127,8 @@ def edit_one(collection, systems, keys_of):
             add_from_set(collection, store.load_sets(), shown, keys_of)
         elif i == 3:
             games = [g for g in collection["games"] if g.get("bucket")]
-            j = picker.filter_list("✏️  Change which game's category?", [game_label(g, names) for g in games])
+            j = picker.filter_list("✏️  Change which game's category?", [game_label(g, names) for g in games],
+                                preview=lambda k: previews.game(games[k]["bucket"]) if k < len(games) else None)
             if j is not None:
                 recategorize(collection["games"], games[j], ask_category(collection["games"], games[j].get("title", "it")))
         elif i == 5:
@@ -220,7 +222,8 @@ def edit_working(systems, before, working):
                   + ["➕ New collection", "✅ Done (save)", "🚪 Quit without saving"])
         extras = [[("  " + ("new" if x not in before else "edited"), "cyan")] if x in changed else [] for x in ids] + [[], [], []]
         i = picker.filter_list("✏️  Which collection?  (Esc = save)", labels, extras=extras,
-                               hotkeys=(edit.DELETE_KEY,), hint="/ filter · Enter open · d delete · Esc save")
+                               hotkeys=(edit.DELETE_KEY,), hint="/ filter · Enter open · d delete · Esc save",
+                               preview=lambda k: previews.collection(working[ids[k]].get("art")) if k < n else None)
         if isinstance(i, tuple):
             if i[1] < n:
                 cid = ids[i[1]]

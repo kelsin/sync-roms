@@ -6,7 +6,7 @@ import posixpath
 import random
 import re
 
-from . import inventory, m3u, mirroring, names, picker, s3, store, ui, usersettings, vita
+from . import inventory, m3u, mirroring, names, picker, previews, s3, store, ui, usersettings, vita
 
 SLOTS = 10
 RECOMMENDED_SHARE = 2 / 3
@@ -263,7 +263,8 @@ def run_surprise(card_name, setup, chosen_systems, interactive, dry_run, rng=Non
     elif interactive and current:
         states = picker.filter_list("Pick the surprises to replace",
                                     [f"{x.get('title') or x['bucket']}  ({names[x['system']]})" for x in current],
-                                    multi=True, initial=[False] * len(current))
+                                    multi=True, initial=[False] * len(current),
+                                    preview=lambda k: previews.game(current[k]["bucket"]) if k < len(current) else None)
         kept = current if states is None else [x for x, replace in zip(current, states) if not replace]
     else:
         kept = []

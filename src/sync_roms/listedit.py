@@ -1,5 +1,5 @@
 """Games-list helpers shared by the set and collection editors."""
-from . import edit, inventory, picker, s3, ui
+from . import edit, inventory, picker, previews, s3, ui
 
 
 def view(listing, systems):
@@ -76,7 +76,8 @@ def add_from_set(listing, sets, shown, keys_of):
     """Pick one of sets and toggle its games, across every system, in listing (via shown, a view of it).
 
     New games get the category asked for, and the set's extra files (the discs of a multi-disc game)."""
-    j = picker.filter_list("✏️  Add games from which set?", [f"{x['name']}  ({len(x['games'])} games)" for x in sets])
+    j = picker.filter_list("✏️  Add games from which set?", [f"{x['name']}  ({len(x['games'])} games)" for x in sets],
+                           preview=lambda k: previews.collection(sets[k]["id"]))
     if j is None:
         return
     chosen = sets[j]
