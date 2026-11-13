@@ -289,12 +289,6 @@ class Keys(unittest.TestCase):
         self.assertEqual(notes, [(1, "ab x")])
 
 
-def tmux_probe_internals():
-    """Whether this textual-image has the internals picker._probe_through_tmux uses (0.14; Python 3.11 gets 0.12)."""
-    from textual_image import _terminal as term
-    return hasattr(term, "probe_terminal") and hasattr(term, "capture_until_primary_da")
-
-
 class TextualList(unittest.TestCase):
     """filter_list on a headless Textual screen."""
     LABELS = ["alpha", "beta", "gamma"]
@@ -402,7 +396,6 @@ class TextualList(unittest.TestCase):
                 mock.patch.dict(sys.modules, {"textual_image.renderable": None}):  # importing it would fail
             self.assertFalse(picker._draws_images())
 
-    @unittest.skipUnless(tmux_probe_internals(), "textual-image without the 0.14 probe internals")
     def test_tmux_probe_keeps_the_outer_terminals_answer(self):
         import contextlib
         import types
@@ -427,7 +420,6 @@ class TextualList(unittest.TestCase):
         written = stdout.write.call_args.args[0]
         self.assertNotIn("\x1b[c", written.replace("\x1b\x1b[c", ""))  # every query goes through tmux
 
-    @unittest.skipUnless(tmux_probe_internals(), "textual-image without the 0.14 probe internals")
     def test_tmux_probe_without_an_answer_means_no_images(self):
         from sync_roms import picker
         from textual_image import _terminal as term
