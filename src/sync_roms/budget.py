@@ -20,9 +20,8 @@ def scrape_costs(layout, system, rels, listing):
 
 def game_costs(card, system, keys):
     """({key: ROM bytes + scrape bytes} for the keys in the system's size cache, partial). A Vita game's ROM bytes
-    include its DLC and newest update. partial: the system's
-    sizes, or the scrape sizes the layout needs, aren't cached yet. Once they are, a key left out isn't in storage:
-    it costs nothing."""
+    include its DLC and newest update, unless those are keys themselves. partial: the system's sizes, or the scrape
+    sizes the layout needs, aren't cached yet. Once they are, a key left out isn't in storage: it costs nothing."""
     bucket = system["bucket"]
     sizes = inventory.cached(f"{bucket}/")
     partial = sizes is None and bool(keys)
@@ -30,7 +29,8 @@ def game_costs(card, system, keys):
     layout = card.get("layout")
     sized = [k for k in keys if k in sizes]
     extras = vita.extras(sized, sizes)
-    roms = {k: sizes[k] + sum(sizes[e] for e in extras.get(k, ())) for k in sized}
+    listed = set(sized)
+    roms = {k: sizes[k] + sum(sizes[e] for e in extras.get(k, ()) if e not in listed) for k in sized}
     if layout not in scrape_plan.SCRAPE_LAYOUTS or not keys:
         return roms, partial
     scrapes = inventory.cached(f"{scrape_plan.SCRAPES}/{bucket}/")
@@ -91,7 +91,7 @@ def fetch_bytes(system, keys, to_fetch):
     if not keys:
         return 0
     keys = list(keys)
-    keys += [e for k in vita.extras(keys, sizes).values() for e in k]
+    keys += [e for k in vita.extras(keys, sizes).values() for e in k if e not in keys]
     return sum(sizes.get(k, 0) for k in to_fetch(system, keys))
 
 

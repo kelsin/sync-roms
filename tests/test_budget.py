@@ -67,6 +67,17 @@ class Budget(DataDir):
         u = budget.system_usage({"layout": "other", "games": {"psvita": [g(G)]}}, VITA)
         self.assertEqual((u.bytes, u.count), (1320, 1))
 
+    def test_vita_full_system_counts_each_file_once(self):
+        self.cache["psvita/"] = {G: 1000, DLC: 20, UPD: 300}
+        u = budget.system_usage({"layout": "other", "games": {"psvita": {"full_system": True}}}, VITA)
+        self.assertEqual(u.bytes, 1320)
+
+    def test_vita_listed_extras_count_once(self):
+        self.cache["psvita/"] = {G: 1000, DLC: 20, UPD: 300}
+        u = budget.system_usage({"layout": "other", "games": {"psvita": [g(G), g(DLC)]}}, VITA)
+        self.assertEqual(u.bytes, 1320)
+        self.assertEqual(budget.fetch_bytes(VITA, [G, DLC], lambda s, keys: set(keys)), 1320)
+
     def test_vita_fetch_counts_extras(self):
         self.cache["psvita/"] = {G: 1000, DLC: 20, UPD: 300}
         asked = []
