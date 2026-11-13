@@ -166,8 +166,9 @@ TOPICS = {
                      credentials or requests (scrape match --dry-run does look the game up)
   match              say which ScreenScraper game a ROM is (a game id, or a name to search and pick from), then scrape it;
                      for a ROM that already has metadata it asks before replacing the entry and deleting its old media
-  review             go through the ROMs ScreenScraper calls non-games or doesn't know: ignore, search under another
-                     name and scrape the game picked, or keep for later
+  review             go through the ROMs ScreenScraper calls non-games or doesn't know, each with its position (3 of
+                     120): i ignore, s search under another name and scrape the game picked, k keep for later (listed
+                     after the others next time), b take back the last ignore, q quit, I ignore all the rest
   missing            list every ROM with no metadata and why (non-game, not on ScreenScraper, matched but not scraped,
                      not looked up yet); nothing is looked up. --all: every ROM in the storage
   --set-credentials  ask for your ScreenScraper username and password (saved in settings.json,

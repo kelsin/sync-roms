@@ -9,6 +9,7 @@ from unittest import mock
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 from helpers import DataDir  # noqa: E402
+from test_scrape_run import GBA, RunBase, game  # noqa: E402
 from sync_roms import ignore, inventory, runtime, s3, scrape_files, scrape_online, scrape_review, scrape_state, screenscraper, ui  # noqa: E402
 
 GB = {"name": "Game Boy", "bucket": "gb", "screenscraper": 9, "folders": {}}
@@ -150,6 +151,72 @@ class ReviewTest(ReviewBase):
         self.assertEqual(self.added, [{"gb": ["a.zip"]}])
         self.assertNotIn("gb/a.zip", self.pending())
 
+    def test_shows_each_items_position(self):
+        self.answers("k", "k", "k")
+        self.review()
+        for pos in ("1 of 3", "2 of 3", "3 of 3"):
+            self.assertIn(pos, self.out.getvalue())
+
+    def test_quit_applies_queued_ignores_and_stops(self):
+        self.answers("i", "q")  # a third question would find no answer
+        self.assertEqual(self.review(), 0)
+        self.assertEqual(self.added, [{"gb": ["a.zip"]}])
+        self.assertEqual(self.pending(), ["gb/b.zip", "gb/c.zip"])
+        self.assertNotIn("3 of 3", self.out.getvalue())
+
+    def test_back_takes_back_the_last_ignore_and_shows_that_item_again(self):
+        self.answers("i", "k", "b", "k", "k", "k")
+        self.review()
+        self.assertEqual(self.added, [])
+        self.assertEqual(self.pending(), KEYS)
+        self.assertEqual(self.out.getvalue().count("1 of 3"), 2)
+
+    def test_back_with_no_ignore_says_so(self):
+        self.answers("b", "k", "k", "k")
+        self.review()
+        self.assertIn("No ignore to take back", self.out.getvalue())
+        self.assertEqual(self.out.getvalue().count("1 of 3"), 1)
+
+    def test_back_over_a_search_says_it_stays(self):
+        self.patch(scrape_online, "resolve_manual", lambda *a: 42)
+
+        def match(args):
+            scrape_state.save_match(args.system, args.rom, 42)
+            return 0
+        self.patch(scrape_online, "match_command", match)
+        self.answers("i", "s", "", "b", "k", "k")  # a ignored, b searched, back at c to a, then a and c kept
+        self.review()
+        self.assertIn("gb/b.zip was scraped from a search; that stays", self.out.getvalue())
+        self.assertEqual(self.out.getvalue().count("2 of 3"), 1)  # not shown again
+        self.assertEqual(self.added, [])
+        self.assertEqual(self.pending(), ["gb/a.zip", "gb/c.zip"])
+
+    def test_unknown_answer_says_so(self):
+        self.answers("x", "k", "k", "k")
+        self.review()
+        self.assertIn("Unknown answer 'x'", self.out.getvalue())
+
+    def test_kept_items_come_after_the_unseen_ones_next_time(self):
+        self.answers("k", "q")
+        self.review()
+        self.assertEqual(scrape_state.kept(), {"gb/a.zip"})
+        self.out = io.StringIO()
+        self.answers("k", "k", "i")
+        self.review()
+        out = self.out.getvalue()
+        self.assertLess(out.index("gb/b.zip"), out.index("gb/c.zip"))
+        self.assertLess(out.index("gb/c.zip"), out.index("gb/a.zip"))
+        self.assertEqual(scrape_state.kept(), {"gb/b.zip", "gb/c.zip"})  # the ignored one's mark is gone
+        self.assertEqual(self.pending(), ["gb/b.zip", "gb/c.zip"])
+
+    def test_item_line_is_on_stderr_under_quiet(self):
+        self.answers("q")
+        err = io.StringIO()
+        with mock.patch.object(ui, "QUIET", True), contextlib.redirect_stderr(err):
+            self.review()
+        self.assertIn("gb/a.zip", err.getvalue())
+        self.assertIn("1 of 3", err.getvalue())
+
 
 class ReviewCommandTest(ReviewBase):
     def run_cmd(self, system=None, tty=True):
@@ -187,6 +254,14 @@ class ReviewCommandTest(ReviewBase):
         self.patch(scrape_review, "review", lambda systems, keys, sizes, client=None: seen.append(sizes) or 0)
         self.assertEqual(self.run_cmd(), 0)
         self.assertEqual(seen, [{"gb/a.zip": 7}])
+
+    def test_review_command_keeps_marks_when_storage_cannot_be_read(self):
+        self.patch(s3, "read_root", lambda: os.path.join(self.tmp.name, "unmounted"))
+        self.patch(inventory, "current", lambda: None)
+        with self.assertRaises(SystemExit) as e, contextlib.redirect_stderr(io.StringIO()):
+            self.run_cmd()
+        self.assertEqual(e.exception.code, 3)
+        self.assertEqual(self.pending(), KEYS)
 
     def test_review_command_one_system(self):
         scrape_state.mark_notgame("nds", "x.zip", INFO)
@@ -245,6 +320,36 @@ class UnknownReviewTest(ReviewBase):
     def test_review_command_drops_unknown_with_metadata(self):
         self.assertEqual(self.run_cmd({"u.zip": {}}), [KEYS])
         self.assertEqual(scrape_state.unknown(), set())
+
+
+class ReviewRunTest(RunBase):
+    def test_search_reuses_the_client_with_no_quota_request_or_results(self):
+        self.put("gba/a.zip")
+        scrape_state.mark_notgame("gba", "a.zip", INFO)
+        self.client.games["x"] = game(7, "Seven")
+        made = []
+        answers = ["s", "7"]
+        with mock.patch.object(scrape_online, "make_client", lambda: made.append(1) or self.client), \
+                mock.patch.object(ui, "ask", lambda prompt: answers.pop(0)), contextlib.redirect_stdout(self.out):
+            scrape_review.review({"gba": GBA}, ["gba/a.zip"], {"gba/a.zip": 3})
+        self.assertEqual(made, [1])
+        self.assertEqual(self.client.quota_calls, 0)
+        self.assertNotIn("Results", self.out.getvalue())
+        self.assertIn("gba/a.zip → Seven", self.out.getvalue())
+        self.assertEqual(self.metadata(), {"a.zip": {"name": "Seven"}})
+        self.assertEqual(scrape_state.notgames(), {})
+
+    def test_run_with_unmatched_roms_prints_the_hints(self):
+        self.put("gba/a.zip")
+        self.put("gba/z.zip")  # ScreenScraper doesn't know it
+        self.assertEqual(self.run_scrape(), 0)
+        self.assertIn("sync-roms scrape review [SYSTEM]", self.out.getvalue())
+        self.assertIn("sync-roms scrape match SYSTEM ROM GAME_ID_OR_NAME", self.out.getvalue())
+
+    def test_run_with_every_rom_matched_prints_no_hints(self):
+        self.put("gba/a.zip")
+        self.assertEqual(self.run_scrape(), 0)
+        self.assertNotIn("scrape review", self.out.getvalue())
 
 
 class MissingCommandTest(DataDir):

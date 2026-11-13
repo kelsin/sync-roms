@@ -183,7 +183,7 @@ def resolve_manual(client, system, query):
     if not results:
         raise screenscraper.NotFound(f"no results for {query!r}")
     for i, (_, title) in enumerate(results, 1):
-        print(f"  {i}. {title}")
+        print(f"  {i}. {title}", file=sys.stderr if ui.QUIET else sys.stdout)  # under --quiet the question is on stderr
     while True:
         answer = ui.ask("Pick a number (empty to cancel): ").strip()
         if not answer:
@@ -820,10 +820,11 @@ def scrape_system(client, system, items, threads, skip, shrink, outcomes, listin
 
 
 def run_scrape(client, systems, todo, skip, ask=True, replace=False, forced=None, rerun=RERUN, outcomes=None, fill=False,
-               listings=None, metadata=None):
+               listings=None, metadata=None, brief=False):
     """Confirm (unless not ask), then scrape todo ({system: [(ROM, size, etag)]}) in batches. Returns the exit code.
     replace, forced, rerun, fill: see run_batch and record. outcomes: filled with {system: {ROM: how, or None when unknown}}.
-    listings: {system: {key: size} of scrapes/<system>/} and metadata: {system: its metadata.json} the caller already has."""
+    listings: {system: {key: size} of scrapes/<system>/} and metadata: {system: its metadata.json} the caller already has.
+    brief: a search from `scrape review`: no quota request (one thread) and no results block."""
     count = sum(len(v) for v in todo.values())
     listings, metadata = dict(listings or {}), metadata or {}
     before = set(scrape_state.notgames())
@@ -837,7 +838,7 @@ def run_scrape(client, systems, todo, skip, ask=True, replace=False, forced=None
                                  for name, items in todo.items() for r, _, _ in items)
     note = f"; the {kept} media file(s) already there are kept" if kept else ""
     try:
-        quota = _retry(None, client.quota)
+        quota = screenscraper.Quota(1, 0, 0) if brief else _retry(None, client.quota)
     except screenscraper.QuotaExceeded as e:
         ui.failure(ui.yellow(_stop_message(e, rerun)))
         return 1
@@ -869,11 +870,15 @@ def run_scrape(client, systems, todo, skip, ask=True, replace=False, forced=None
         failed += n
         if halted:
             break
-    print(ui.bold("\n📋 Results"))
-    print(report({name: [r for r, _, _ in items] for name, items in todo.items()}, outcomes))
+    if not brief:
+        print(ui.bold("\n📋 Results"))
+        print(report({name: [r for r, _, _ in items] for name, items in todo.items()}, outcomes))
     interrupted = isinstance(halted, KeyboardInterrupt)
     if not interrupted:  # nothing is asked after Ctrl-C
         _offer_review(client, systems, todo, sorted(set(scrape_state.notgames()) - before))
+    if not forced and any(how is None for got in outcomes.values() for how in got.values()):
+        print(ui.dim("\n   Review the non-games and unknown ROMs: sync-roms scrape review [SYSTEM]"))
+        print(ui.dim("   Say which game one is: sync-roms scrape match SYSTEM ROM GAME_ID_OR_NAME"))
     if halted:
         counts = (sum(1 for got in outcomes.values() for how in got.values() if how), count - sum(map(len, outcomes.values())))
         ui.failure(ui.yellow("\n" + _stop_message(halted, rerun, counts)))
@@ -883,7 +888,7 @@ def run_scrape(client, systems, todo, skip, ask=True, replace=False, forced=None
 
 
 def _offer_review(client, systems, todo, new):
-    """After a run that turned up non-games: review them now (on a terminal, if the user wants), else say how to later."""
+    """After a run that turned up non-games: review them now (on a terminal, if the user wants)."""
     if not new:
         return
     print(ui.yellow(f"\n🚫 {len(new)} ROM(s) came back as non-games"))
@@ -891,8 +896,6 @@ def _offer_review(client, systems, todo, new):
         from . import scrape_review
         sizes = {f"{name}/{r}": size for name, items in todo.items() for r, size, _ in items}
         scrape_review.review(systems, new, sizes, client)
-    else:
-        print(ui.dim("   Review them later with: sync-roms scrape review"))
 
 
 def _check_skip(skip):
@@ -991,7 +994,8 @@ def match_command(args):
     and pick from), then scrape that ROM.
 
     args: system (storage folder name), rom (ROM path in it, e.g. "Game (USA).zip"), game, and optionally skip_media
-    and dry_run (resolve the game, save and write nothing).
+    and dry_run (resolve the game, save and write nothing), confirmed (don't ask) and client (the client of `scrape
+    review`, whose search this is: the run makes no quota request and prints no results block).
     """
     skip = _check_skip(getattr(args, "skip_media", None))
     system = _pick_systems(args.system)[0]
@@ -1004,7 +1008,7 @@ def match_command(args):
         ui.fail(f"{e}", 3)
     if args.rom not in listing:
         ui.fail(f"No {name}/{args.rom} in {s3.location()}", 2)
-    client = make_client()
+    client = getattr(args, "client", None) or make_client()
     rerun = "sync-roms scrape match " + shlex.join([name, args.rom, args.game])
     try:
         game_id = resolve_manual(_RomClient(client), system, args.game)
@@ -1056,7 +1060,8 @@ def match_command(args):
     size, etag = listing[args.rom]
     outcomes = {}
     code = run_scrape(client, {name: system}, {name: [(args.rom, size, etag)]}, skip, ask=False, replace=replace,
-                      forced={args.rom: game_id}, rerun=rerun, outcomes=outcomes, listings={name: media}, metadata={name: data})
+                      forced={args.rom: game_id}, rerun=rerun, outcomes=outcomes, listings={name: media}, metadata={name: data},
+                      brief=getattr(args, "client", None) is not None)
     how = outcomes.get(name, {}).get(args.rom, "")
     if how == "manual":  # saved only once the ROM is scraped as that game
         scrape_state.save_match(name, args.rom, game_id)

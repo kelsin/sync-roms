@@ -14,6 +14,7 @@ _nomedia_pending = {}  # not-offered ledger path -> {key: [media types] (marked)
 UNKNOWN = "scrape-unknown.json"
 NOMEDIA = "scrape-nomedia.json"  # media types ScreenScraper didn't offer for a ROM: {key: [types]}
 NOTGAMES = "scrape-notgames.json"  # ROMs ScreenScraper calls non-games, waiting for `scrape review`: {key: what it said}
+KEPT = "kept"  # in NOTGAMES (never a "system/rom" key): [keys] of the ROMs `scrape review` was told to keep for later
 HASH_FLUSH = 200  # hashes saved in memory before the hash file is written
 HASHES = "scrape-hashes.json"
 _warned = set()  # paths of corrupt files already warned about
@@ -229,7 +230,21 @@ def nomedia():
 def notgames():
     """{"system/rom": what ScreenScraper said} of the non-game results waiting for review."""
     with _lock:
-        return dict(_load(NOTGAMES))
+        return {k: v for k, v in _load(NOTGAMES).items() if k != KEPT}
+
+
+def kept():
+    """The "system/rom" keys of the ROMs (non-games and unknown) `scrape review` was told to keep for later."""
+    with _lock:
+        keys = _load(NOTGAMES).get(KEPT)
+        return set(keys) if isinstance(keys, list) else set()
+
+
+def keep(system, rom):
+    with _lock:
+        keys = kept()
+        if _key(system, rom) not in keys:
+            _save(NOTGAMES, {**_load(NOTGAMES), KEPT: sorted(keys | {_key(system, rom)})})
 
 
 def mark_notgame(system, rom, info):
@@ -240,9 +255,14 @@ def mark_notgame(system, rom, info):
 
 
 def clear_notgame(system, rom):
+    """Take a ROM off the non-games, and its kept-for-later mark with it."""
     with _lock:
-        data = dict(_load(NOTGAMES))
-        if data.pop(_key(system, rom), None) is not None:
+        data, keys = dict(_load(NOTGAMES)), kept()
+        changed = data.pop(_key(system, rom), None) is not None
+        if _key(system, rom) in keys:
+            data[KEPT] = sorted(keys - {_key(system, rom)})
+            changed = True
+        if changed:
             _save(NOTGAMES, data)
 
 
@@ -253,7 +273,7 @@ class _Snapshot:
         with _lock:
             self._matches = _load(MATCHES)
             self._unknown = unknown()
-            self._notgames = set(_load(NOTGAMES))
+            self._notgames = set(notgames())
             self._nomedia = nomedia()
 
     def manual_match(self, system, rom):
