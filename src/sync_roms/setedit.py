@@ -186,6 +186,7 @@ def new_set(working):
     return sid
 
 
+@picker.one_app
 def edit_sets():
     """Edit the repo's sets, then open a PR with the changes. Returns the exit code."""
     need_tools()

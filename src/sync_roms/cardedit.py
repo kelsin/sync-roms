@@ -197,6 +197,7 @@ def toggle_full(name, bucket):
     store.update_card(name, games=store.sorted_list(games))
 
 
+@picker.one_app
 def edit_card(name, setup=None, to_fetch=None):
     """The card's system list. setup: (device or None for Full, layout) to edit with instead of the saved one.
     to_fetch(system, keys): the keys not on the card yet, when editing from a sync; the status then shows how much

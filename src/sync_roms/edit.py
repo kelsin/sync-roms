@@ -6,6 +6,7 @@ from collections import defaultdict
 from . import names, picker, previews, runtime, s3, store, ui, vita
 
 
+@ui.prompt
 def note(text):
     """Say something outside the list screen and wait, so the next redraw doesn't erase it."""
     print(text)
@@ -246,6 +247,7 @@ def target_changes(t):
     return added, removed
 
 
+@picker.one_app
 def edit_manifest():
     """The editor's top menu: Cards (each opens the card editor, which saves games as they change), Sets (opens a PR),
     Collections (saved as you leave the collection editor), Device systems; device/firmware and device-system changes are reviewed and saved at the end."""
