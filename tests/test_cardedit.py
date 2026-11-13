@@ -748,6 +748,98 @@ class Flow(DataDir):
         self.assertFalse(changed)
         self.assertEqual(calls, [])
 
+    def sized(self):
+        self.cache = {"gba/": self.files["gba/"], "gb/": self.files["gb/"], "scrapes/gb/": {},
+                      "scrapes/gba/": {"scrapes/gba/screenshots/Ruby.png": 100, "scrapes/gba/screenshots/Zelda.png": 30},
+                      "BIOS/": {"BIOS/gba_bios.bin": 16, "BIOS/gb_bios.bin": 1000}}
+
+    def fresh(self):
+        """(status, extras) of the system list from a full recount of the card as saved now."""
+        card = cardedit.card_entry("c", (DEVICE, "esde"))
+        usages = budget.system_usages(card, [GB, GBA])
+        return (cardedit.status_of(budget.card_usage(card, [GB, GBA], usages), budget.card_capacity(card)),
+                cardedit.system_labels(card, [GB, GBA], set(), usages)[1])
+
+    def same_as_fresh(self, labels, kw):
+        status, extras = self.fresh()
+        self.assertEqual(kw["status"](None), status)
+        self.assertEqual(kw["extras"], extras)
+        return None
+
+    def test_kept_totals_match_a_full_recount_after_every_kind_of_change(self):
+        self.favs()
+        zelda = [{"system": "gba", "bucket": "gba/Zelda.zip", "title": "Zelda"}]
+
+        def game_view_is_fresh(step):
+            def check(labels, kw):
+                self.assertEqual(kw["status"](kw["initial"]), self.fresh()[0])
+                return step(labels, kw)
+            return check
+        keep = lambda labels, kw: kw["session"]["sel"]  # noqa: E731
+        cases = {
+            "toggle a game": ({"games": {"gba": [g("gba/Ruby.zip")], "gb": [g("gb/Red.gb")]}},
+                              [returns(1), game_view_is_fresh(toggle("Zelda.zip", "Ruby.sav"))]),
+            "f on": ({"games": {"gba": [g("gba/Ruby.zip")]}}, [returns((cardedit.FULL_KEY, 1))]),
+            "add a set's games": ({"games": {"gb": [g("gb/Red.gb")]}},
+                                  [returns(1), returns((cardedit.SET_KEY, 0)), returns((" ", 0)), returns(None), keep]),
+            "remove a set's games": ({"games": {"gba": [g("gba/Ruby.zip"), g("gba/Ruby.sav")]}},
+                                     [returns(1), returns((cardedit.SET_KEY, 0)), returns((" ", 0)), returns(None), keep]),
+            "toggle a collection on": ({}, [returns((cardedit.COLLECTIONS_KEY, 0)), returns((" ", 0)), returns(None)]),
+            "toggle a collection off": ({"collections": ["favs"], "games": {"gba": [g("gba/Zelda.zip")]}},
+                                        [returns((cardedit.COLLECTIONS_KEY, 0)), returns((" ", 0)), returns(None)]),
+            "clear all": ({"games": {"gba": [g("gba/Ruby.zip")], "gb": {"full_system": True}, "sets": ["pk"]},
+                           "excluded": {"gba": ["gba/Ruby.sav"]}}, [returns((cardedit.CLEAR_ALL_KEY, 0))]),
+            "surprise off": ({"surprises": zelda}, [returns((cardedit.SURPRISE_KEY, 0)), returns(0)]),
+            "exclude a set game": ({"games": {"sets": ["pk"]}}, [returns(1), game_view_is_fresh(toggle("Ruby.zip"))]),
+        }
+        for case, (entry, steps) in cases.items():
+            with self.subTest(case), mock.patch.object(ui, "confirm", return_value=True):
+                self.card(size="1 GB", **entry)
+                self.sized()
+                before = self.fresh()
+                self.run_card(*steps, self.same_as_fresh)
+                self.assertNotEqual(self.fresh(), before)  # the change shows
+
+    @contextlib.contextmanager
+    def counted(self):
+        """{budget function: calls} for the recount functions, counted inside the with block."""
+        calls = {}
+        with contextlib.ExitStack() as stack:
+            for fn in ("system_usages", "system_usage", "_system_usage"):
+                def count(*a, _fn=fn, _real=getattr(budget, fn)):
+                    calls[_fn] = calls.get(_fn, 0) + 1
+                    return _real(*a)
+                stack.enter_context(mock.patch.object(budget, fn, count))
+            yield calls
+
+    def test_editor_recounts_only_the_system_that_changed(self):
+        cases = {
+            "open": ([], {"system_usages": 1, "_system_usage": 2}),
+            "enter and leave": ([returns(1), lambda labels, kw: kw["initial"]], {"system_usages": 1, "_system_usage": 2}),
+            "change a system": ([returns(1), toggle("Zelda.zip")],
+                                {"system_usages": 1, "system_usage": 1, "_system_usage": 3}),
+            "f": ([returns((cardedit.FULL_KEY, 1))], {"system_usages": 1, "system_usage": 1, "_system_usage": 3}),
+        }
+        for case, (steps, want) in cases.items():
+            with self.subTest(case):
+                self.card(size="1 GB", games={"gba": [g("gba/Ruby.zip")]})
+                self.sized()
+                with self.counted() as calls:
+                    self.run_card(*steps, returns(None))
+                self.assertEqual(calls, want)
+
+    def test_a_storage_cache_change_recounts_every_system(self):
+        self.card(size="1 GB", games={"gba": [g("gba/Ruby.zip")], "gb": [g("gb/Red.gb")]})
+        self.sized()
+        version = [0]
+
+        def leave(labels, kw):  # the cache changes while the system is open
+            self.cache["gb/"] = {"gb/Red.gb": 50}
+            version[0] += 1
+            return kw["initial"]
+        with mock.patch.object(inventory, "version", lambda: version[0], create=True):
+            self.run_card(returns(1), leave, self.same_as_fresh)
+
 
 G = "psvita/G [PCSE00349] [USA] [NoNpDRM].zip"
 DLC = "psvita/D [PCSE00349] [USA] [DLC-X].zip"

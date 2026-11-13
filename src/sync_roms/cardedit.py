@@ -95,6 +95,7 @@ def can_play(systems, setup):
     return sorted((s for s in systems if store.system_applies(s, *setup)), key=store.system_sort_key)
 
 
+ALL = "all"  # edit_card: a change that may touch every system
 LOADING = "loading"
 _metadata = {}  # system bucket -> metafilter.index, kept for the session so entering a system again doesn't fetch it again
 
@@ -200,27 +201,32 @@ def edit_card(name, setup=None, to_fetch=None):
         edit.note(ui.yellow(f"ℹ️  {name} has no device and firmware set; press {edit.SETUP_KEY} on it first."))
         return
     device = setup[0]
-    systems = can_play(catalog["systems"], setup)
+    systems = playable = can_play(catalog["systems"], setup)
     recommended = store.recommended_systems(device, catalog["systems"]) if device else set()
-    start_card = card_entry(name, setup)
-    start_usages = budget.system_usages(start_card, systems)
+    # every playable system's usage, kept across passes: a change to one system recounts only it
+    usages, version = budget.system_usages(card_entry(name, setup), playable), inventory.version()
     try:
         with ui.silent_thread():
             folders = inventory.folders()
     except (*s3.ERRORS, SystemExit):  # storage can't be reached (ui.fail raises SystemExit): go by the cache alone
         folders = None
     systems = [s for s in systems  # a missing or empty folder has nothing to pick, unless it already has picks
-               if budget.picked(start_usages[s["bucket"]])
+               if budget.picked(usages[s["bucket"]])
                or (folders is None or s["bucket"] in folders) and inventory.cached(f"{s['bucket']}/") != {}]
     pos = 0
+    changed = None  # what the last pass changed: one system, ALL (any system may have) or None
     while True:
         card = card_entry(name, setup)
+        if changed is ALL or inventory.version() != version:
+            usages, version = budget.system_usages(card, playable), inventory.version()
+        elif changed:
+            usages[changed["bucket"]] = budget.system_usage(card, changed)
+        changed = None
         capacity = budget.card_capacity(card)
         view = {}
 
         def work_out():
             card = card_entry(name, setup)
-            usages = budget.system_usages(card, systems)
             view["total"] = budget.card_usage(card, systems, usages)
             view["fetch"] = budget.card_fetch_bytes(card, systems, to_fetch) if to_fetch else None
             return system_labels(card, systems, recommended, usages)
@@ -232,6 +238,7 @@ def edit_card(name, setup=None, to_fetch=None):
             if key != FULL_KEY or idx is None:
                 return False
             toggle_full(name, systems[idx]["bucket"])
+            usages[systems[idx]["bucket"]] = budget.system_usage(card_entry(name, setup), systems[idx])
             extras[:] = work_out()[1]
             return True
 
@@ -247,17 +254,22 @@ def edit_card(name, setup=None, to_fetch=None):
             key, pos = i
             if key == FULL_KEY:
                 toggle_full(name, systems[pos]["bucket"])
+                changed = systems[pos]
             elif key == COLLECTIONS_KEY:
                 pick_collections(name, {s["bucket"] for s in can_play(catalog["systems"], setup)},
                                  lambda: card_status(name, setup, systems, to_fetch))
+                changed = ALL
             elif key == SURPRISE_KEY:
                 surprise_menu(name, catalog["systems"])
+                changed = ALL
             elif key == CLEAR_ALL_KEY:
                 if ui.confirm(f"🧹 Clear every pick, full system and set from {name}?", default=False):
                     store.update_card(name, games={}, **({"excluded": {}} if store.card_excluded(name) else {}))
+                    changed = ALL
             continue
         pos = i
-        edit_system(name, systems[i], setup, to_fetch)
+        if edit_system(name, systems[i], setup, to_fetch, usages):
+            changed = systems[i]
 
 
 def card_status(name, setup, systems, to_fetch=None):
@@ -400,9 +412,11 @@ def pick_set(system, sets, games, titles, catalog, current=None, synced=lambda: 
     return shown[i][0]
 
 
-def edit_system(name, system, setup, to_fetch=None):
+def edit_system(name, system, setup, to_fetch=None, card_usages=None):
     """A card's games of one system: the whole storage folder, searchable, filterable to a set's games and by scraped
-    metadata. Saves to cards.json when left; returns whether anything changed. to_fetch: as for edit_card."""
+    metadata. Saves to cards.json when left; returns whether anything changed. to_fetch: as for edit_card.
+    card_usages: budget.system_usages of the card as saved, over every system it can play (edit_card keeps them), so
+    the other systems aren't counted again."""
     bucket = system["bucket"]
     cards = store.load_cards()
     raw = store.card_games(name, cards)
@@ -443,7 +457,7 @@ def edit_system(name, system, setup, to_fetch=None):
         games = {**(card.get("games") or {}), **other_picks, store.SETS_KEY: list(sets_on)}
         card = {**card, "games": {k: v for k, v in games.items() if v or k == store.SETS_KEY},
                 "excluded": {b: k for b, k in other_excluded.items() if k}}
-        usages = budget.system_usages(card, others)
+        usages = budget.system_usages(card, others) if card_usages is None else {x["bucket"]: card_usages[x["bucket"]] for x in others}
         parts = list(usages.values())  # without BIOS: it is added once, with this system's, in status
         work["others"] = budget.Usage(sum(p.bytes for p in parts), sum(p.count for p in parts),
                                       any(p.partial for p in parts))
