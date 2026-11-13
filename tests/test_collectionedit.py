@@ -161,10 +161,15 @@ class Discs(unittest.TestCase):
 class Editor(DataDir):
     def run_editor(self, picks, asks=(), confirm=True, edit_one=None):
         picks, confirms = iter(picks), []
+
+        def answer(value):  # KeyboardInterrupt in picks or as confirm is Ctrl-C there
+            if value is KeyboardInterrupt:
+                raise KeyboardInterrupt
+            return value
         with mock.patch.object(store, "repo_json", return_value=SYSTEMS), \
-                mock.patch.object(picker, "filter_list", lambda *a, **k: next(picks)), \
+                mock.patch.object(picker, "filter_list", lambda *a, **k: answer(next(picks))), \
                 mock.patch.object(ui, "ask", side_effect=list(asks)), \
-                mock.patch.object(ui, "confirm", lambda text, **k: confirms.append(text) or confirm), \
+                mock.patch.object(ui, "confirm", lambda text, **k: confirms.append(text) or answer(confirm)), \
                 mock.patch.object(edit, "note") as note, \
                 mock.patch.object(collectionedit, "edit_one", edit_one or (lambda c, systems, keys_of: c["games"].append(dict(RUBY)))), \
                 mock.patch("subprocess.run") as run:
@@ -199,6 +204,37 @@ class Editor(DataDir):
         _, _, note = self.run_editor([0, 2, 3], asks=["Empty", ""], edit_one=lambda c, s, k: None, confirm=True)
         self.assertIn("Empty has no games", note.call_args_list[0][0][0])
         self.assertFalse(os.path.exists(self.path("collections")))
+
+    def test_ctrl_c_asks_and_saves_the_changes(self):
+        collections.save_collection({"id": "old", "name": "Old", "games": [RUBY]})
+        self.write_json("cards.json", {"a": {"collections": ["old"]}})
+        with mock.patch("builtins.print") as out, self.assertRaises(KeyboardInterrupt):
+            self.run_editor([(edit.DELETE_KEY, 0), 0, KeyboardInterrupt], asks=["Favs", "my faves"])  # delete Old, ➕ New, Ctrl-C
+        self.assertEqual(self.read("collections/favs.json"), {"name": "Favs", "description": "my faves", "games": [RUBY]})
+        self.assertFalse(os.path.exists(self.path("collections/old.json")))
+        self.assertEqual(self.read("cards.json"), {"a": {"collections": []}})
+        self.assertIn("Saved to", str(out.call_args_list))
+
+    def test_ctrl_c_does_not_save_an_empty_collection_and_says_so(self):
+        with mock.patch("builtins.print") as out, self.assertRaises(KeyboardInterrupt):
+            self.run_editor([0, KeyboardInterrupt], asks=["Empty", ""], edit_one=lambda c, s, k: None)
+        self.assertFalse(os.path.exists(self.path("collections")))
+        self.assertIn("Empty has no games", str(out.call_args_list))
+        self.assertNotIn("Saved to", str(out.call_args_list))
+
+    def test_a_second_ctrl_c_at_the_question_discards(self):
+        with mock.patch("builtins.print") as out, self.assertRaises(KeyboardInterrupt):
+            self.run_editor([0, KeyboardInterrupt], asks=["Favs", ""], confirm=KeyboardInterrupt)
+        self.assertFalse(os.path.exists(self.path("collections")))
+        self.assertIn("Not saved", str(out.call_args_list))
+
+    def test_ctrl_c_without_changes_asks_nothing(self):
+        confirms = []
+        with mock.patch.object(ui, "confirm", lambda text, **k: confirms.append(text)), self.assertRaises(KeyboardInterrupt), \
+                mock.patch.object(store, "repo_json", return_value=SYSTEMS), \
+                mock.patch.object(picker, "filter_list", side_effect=KeyboardInterrupt):
+            collectionedit.edit_collections()
+        self.assertEqual(confirms, [])
 
 
 class Wiring(unittest.TestCase):

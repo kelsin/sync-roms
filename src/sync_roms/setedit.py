@@ -190,6 +190,17 @@ def edit_sets():
     systems = sorted(store.repo_json("systems"), key=lambda s: s["name"].lower())
     before = repo_sets()
     working = copy.deepcopy(before)
+    try:
+        return edit_working(systems, before, working)
+    except KeyboardInterrupt:  # Ctrl-C: review the changes as Done does, then stop as before
+        if diff_sets(before, working):
+            print(ui.yellow("\n🛑 Interrupted — review your changes before leaving."))
+            edit_working(systems, before, working, review=True)
+        raise
+
+
+def edit_working(systems, before, working, review=False):
+    """The sets menu over working; Done reviews it and opens a PR. review starts at that review. Returns the exit code."""
     listed = {}
 
     def keys_of(bucket):
@@ -206,8 +217,9 @@ def edit_sets():
         labels = ([f"{working[x]['name']}  ({len(working[x]['games'])} games)" for x in ids]
                   + ["➕ New set", "✅ Done (review & open PR)", "🚪 Quit without saving"])
         extras = [[("  " + ("new" if x not in before else "edited"), "cyan")] if x in edited else [] for x in ids] + [[], [], []]
-        i = picker.filter_list("✏️  Which set?  (Esc = review & open PR)", labels, extras=extras,
-                               hotkeys=(edit.DELETE_KEY,), hint="/ filter · Enter open · d delete · Esc review")
+        i = n + 1 if review else picker.filter_list("✏️  Which set?  (Esc = review & open PR)", labels, extras=extras,
+                                                    hotkeys=(edit.DELETE_KEY,), hint="/ filter · Enter open · d delete · Esc review")
+        review = False
         if isinstance(i, tuple):
             if i[1] < n:
                 sid = ids[i[1]]
