@@ -3,6 +3,7 @@ import contextlib
 import os
 import shutil
 import stat
+import time
 import unicodedata
 from concurrent.futures import ThreadPoolExecutor
 
@@ -264,24 +265,41 @@ def move_keys(moves):
                 dest = safe_join(runtime.ROOT, new)
                 os.makedirs(os.path.dirname(dest), exist_ok=True)
                 os.replace(safe_join(runtime.ROOT, old), dest)
-                return job, None
-            client.copy({"Bucket": runtime.BUCKET, "Key": old}, runtime.BUCKET, new)
-            client.delete_object(Bucket=runtime.BUCKET, Key=old)
+            else:
+                client.copy({"Bucket": runtime.BUCKET, "Key": old}, runtime.BUCKET, new)
+                client.delete_object(Bucket=runtime.BUCKET, Key=old)
+            inventory.moved(old, new)  # here, not in the loop below, so a move that finishes after ^C is recorded too
             return job, None
         except ERRORS as e:
             return job, e
 
-    failed = 0
+    failed, futs = 0, []
     print(ui.bold(f"\n🚚 Moving {len(moves)} renamed file(s)"))
-    with ThreadPoolExecutor(runtime.WORKERS) as ex:
-        for i, (job, error) in enumerate(ex.map(move, moves), 1):
+    ex = ThreadPoolExecutor(runtime.WORKERS)
+    try:
+        futs += [ex.submit(move, job) for job in moves]
+        for i, f in enumerate(futs, 1):
+            job, error = f.result()
             prog = ui.dim(f"[{i}/{len(moves)}]")
             if error is None:
-                inventory.moved(*job)
                 print(f"  {prog} ✅ {job[0]} → {job[1]}")
             else:
                 failed += 1
                 print(f"  {prog} ❌ {ui.red(job[0])}: {str(error).strip()}")
+    except KeyboardInterrupt:
+        from . import downloads  # imported here: downloads reads storage through this module
+        ex.shutdown(wait=False, cancel_futures=True)
+        running = [f for f in futs if f.running()]
+        print(ui.yellow(f"🛑 Interrupted — finishing {len(running)} move(s) in flight. ^C again to abort now."))
+        try:
+            while any(f.running() for f in running):
+                time.sleep(ui.POLL)
+        except KeyboardInterrupt:
+            print(ui.red("🛑 Aborted"))
+            downloads.hard_exit()
+        raise
+    finally:
+        ex.shutdown(wait=True, cancel_futures=True)
     return failed
 
 

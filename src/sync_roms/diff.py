@@ -73,6 +73,25 @@ def bucket_fingerprint(key, size, etag):
         return ("raw", size, None if "-" in etag else etag)  # a multipart upload's ETag isn't an md5
 
 
+SAMPLE_CHUNK = 1 << 20  # same_bytes reads chunks this big
+SAMPLES = 8  # and this many of them: the first, the last and evenly spaced ones between; a smaller file is read whole
+
+
+def same_bytes(path, key, size):
+    """True when local path and storage key (both size bytes) hold the same bytes: the whole file when it is small,
+    else SAMPLES chunks of it, so a big storage file is never read whole. Stops at the first chunk that differs."""
+    if size <= SAMPLES * SAMPLE_CHUNK:
+        spans = [(start, min(SAMPLE_CHUNK, size - start)) for start in range(0, size, SAMPLE_CHUNK)]
+    else:
+        spans = [(k * (size - SAMPLE_CHUNK) // (SAMPLES - 1), SAMPLE_CHUNK) for k in range(SAMPLES)]
+    with open(path, "rb") as f:
+        for start, n in spans:
+            f.seek(start)
+            if f.read(n) != s3.read_range(key, start, start + n):
+                return False
+    return True
+
+
 def same_content(a, b):
     if a[0] != b[0]:
         return False
@@ -95,7 +114,7 @@ def counted(fn, label, total):
     return run
 
 
-def match_content(local, remote, local_print, remote_print, differs=None, md5=None):
+def match_content(local, remote, local_print, remote_print, differs=None, md5=None, same_bytes=None):
     """([(local path, bucket path)] with the same content, only local, only storage) lists, ignoring names.
 
     local: {path: size}; remote: {path: (size, etag)}. A file with the same path and size on both sides is the same
@@ -105,6 +124,8 @@ def match_content(local, remote, local_print, remote_print, differs=None, md5=No
     known to differ; those are then matched by content too.
     md5(path), if given, hashes a local file whose print is ("raw", size, None), and is only called when a storage
     file of that size has an md5 to compare it with.
+    same_bytes(local path, bucket path), if given, compares the bytes of two raw files of the same size when one of
+    them has no md5; they are matched only when it returns True.
     """
     with ThreadPoolExecutor(runtime.WORKERS) as ex:
         same = [p for p, size in local.items() if p in remote and remote[p][0] == size]
@@ -128,13 +149,17 @@ def match_content(local, remote, local_print, remote_print, differs=None, md5=No
         else:
             by_zip[fp][path] = None
 
+    def alike(path, fp, p, other):
+        if not same_content(fp, other):
+            return False
+        return fp[0] != "raw" or same_bytes is None or (fp[2] is not None and other[2] is not None) or same_bytes(path, p)
+
     def find(path, fp):
-        if path in unmatched and same_content(fp, unmatched[path]):
+        if path in unmatched and alike(path, fp, path, unmatched[path]):
             return path
         if fp[0] != "raw":
             return next(iter(by_zip.get(fp, ())), None)
-        return next((p for p, digest in by_size.get(fp[1], {}).items()
-                     if fp[2] is None or digest is None or fp[2] == digest), None)
+        return next((p for p in by_size.get(fp[1], {}) if alike(path, fp, p, unmatched[p])), None)
 
     matched, only_local = [], []
     for path, fp in zip(left_local, local_prints):
@@ -154,13 +179,13 @@ def plan_diff(local, remote, local_print, remote_print, md5=None):
     return only_local, only_bucket
 
 
-def plan_replace(local, remote, local_print, remote_print, differs=None, md5=None):
+def plan_replace(local, remote, local_print, remote_print, differs=None, md5=None, same_bytes=None):
     """(renames, new, changed, only storage) for making the storage folder match the local one.
 
     renames: [(bucket path, local path)] with the same content under another name. changed: paths on both sides
     with different content. Arguments as in match_content.
     """
-    matched, only_local, only_bucket = match_content(local, remote, local_print, remote_print, differs, md5)
+    matched, only_local, only_bucket = match_content(local, remote, local_print, remote_print, differs, md5, same_bytes)
     renames = [(r, l) for l, r in matched if l != r]
     targets = {l for _, l in renames}
     changed = [p for p in only_local if p in remote]

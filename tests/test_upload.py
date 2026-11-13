@@ -3,13 +3,14 @@ import io
 import os
 import sys
 import tempfile
+import threading
 import unittest
 from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 import argparse  # noqa: E402
-from sync_roms import ignore, inventory, runtime, s3, scrape_plan, store, upload, usersettings  # noqa: E402
+from sync_roms import downloads, ignore, inventory, runtime, s3, scrape_plan, store, ui, upload, usersettings  # noqa: E402
 
 SYSTEMS = [
     {"name": "Game Boy Advance", "bucket": "gba", "folders": {"esde": "gba", "onion": "GBA"}},
@@ -97,6 +98,146 @@ class IgnoredUploadTest(unittest.TestCase):
                     contextlib.redirect_stdout(out):
                 upload.replace_command(argparse.Namespace(dry_run=True), root, SYSTEMS[0])
         self.assertNotIn("would ask about deleting", out.getvalue())
+
+
+class OwnTempTest(unittest.TestCase):
+    def test_own_temp_folders_are_never_uploaded(self):
+        from sync_roms import diff
+        with tempfile.TemporaryDirectory() as root:
+            touch(root, "a.gba")
+            touch(root, ".hack.gba")
+            for rel in (".chd-1/a.bin", ".xiso-2/b.iso", ".unzip-3/c.gba", "Disc/.unzip-4/d.gba"):
+                touch(root, rel)
+            new, _, _ = upload.plan_rom_upload(root, "gba", {})
+            self.assertEqual(sorted(k for k, _, _ in new), ["gba/.hack.gba", "gba/a.gba"])
+            self.assertEqual(sorted(diff.local_sizes(root)), [".hack.gba", "a.gba"])
+
+
+class ReplaceContentTest(unittest.TestCase):
+    """upload --replace on a storage folder: raw files that only share a size are not a rename."""
+
+    def setUp(self):
+        self.storage = tempfile.TemporaryDirectory()
+        self.addCleanup(self.storage.cleanup)
+        for p in (mock.patch.object(runtime, "ROOT", self.storage.name), mock.patch.object(runtime, "_mirror_root", None)):
+            p.start()
+            self.addCleanup(p.stop)
+
+    def replace(self, local, remote):
+        with tempfile.TemporaryDirectory() as root:
+            for rel, data in local.items():
+                with open(os.path.join(root, rel), "wb") as f:
+                    f.write(data)
+            for rel, data in remote.items():
+                os.makedirs(os.path.join(self.storage.name, "gba"), exist_ok=True)
+                with open(os.path.join(self.storage.name, "gba", rel), "wb") as f:
+                    f.write(data)
+            listing = {rel: (len(data), "-") for rel, data in remote.items()}
+            out = io.StringIO()
+            with mock.patch.object(inventory, "etags", lambda prefix: listing), contextlib.redirect_stdout(out):
+                upload.replace_command(argparse.Namespace(dry_run=True), root, SYSTEMS[0])
+        return out.getvalue()
+
+    def test_same_size_different_content_is_new_not_a_rename(self):
+        out = self.replace({"Game B (USA).gba": b"B" * 4096}, {"Game A (Europe).gba": b"A" * 4096})
+        self.assertNotIn("→", out)
+        self.assertIn("  gba/Game B (USA).gba", out)
+        self.assertIn("would ask about deleting gba/Game A (Europe).gba", out)
+
+    def test_same_content_under_a_new_name_is_a_rename(self):
+        out = self.replace({"Game B (USA).gba": b"A" * 4096}, {"Game A (Europe).gba": b"A" * 4096})
+        self.assertIn("Game A (Europe).gba → Game B (USA).gba", out)
+        self.assertNotIn("would ask about deleting", out)
+
+    def test_dry_run_prints_every_rename(self):
+        n = 12
+        out = self.replace({f"new{i:02}.gba": bytes([i]) * 10 for i in range(n)}, {f"old{i:02}.gba": bytes([i]) * 10 for i in range(n)})
+        for i in range(n):
+            self.assertIn(f"old{i:02}.gba → new{i:02}.gba", out)
+        self.assertNotIn("more", out)
+
+
+class CopyInterruptTest(unittest.TestCase):
+    """Ctrl-C during a copy into a storage folder stops the queued copies, as downloads do."""
+
+    def run_interrupted(self, draws_that_interrupt):
+        release, started, draws, exits = threading.Event(), [], [], []
+
+        def write_file(key, write):
+            started.append(key)
+            release.wait(5)
+
+        def draw(self_, done):
+            draws.append(done)
+            if len(draws) in draws_that_interrupt:
+                raise KeyboardInterrupt
+            if len(draws) >= 4:
+                release.set()
+
+        def hard_exit():
+            release.set()
+            exits.append(1)
+            raise SystemExit(130)
+
+        todo = [(f"gba/{i}.gba", f"/x/{i}.gba", 100 - i) for i in range(20)]
+        with contextlib.ExitStack() as st:
+            st.enter_context(mock.patch.object(s3, "write_file", write_file))
+            st.enter_context(mock.patch.object(ui.ProgressBar, "draw", draw))
+            st.enter_context(mock.patch.object(downloads, "hard_exit", hard_exit))
+            st.enter_context(mock.patch.object(runtime, "ROOT", "/storage"))
+            st.enter_context(mock.patch.object(runtime, "WORKERS", 2))
+            st.enter_context(mock.patch.object(ui, "POLL", 0.001))
+            out = st.enter_context(contextlib.redirect_stdout(io.StringIO()))
+            with self.assertRaises((KeyboardInterrupt, SystemExit)) as cm:
+                upload.run_copies(todo)
+        return cm.exception, started, exits, out.getvalue()
+
+    def test_queued_copies_do_not_run(self):
+        error, started, exits, out = self.run_interrupted({1})
+        self.assertIsInstance(error, KeyboardInterrupt)
+        self.assertEqual(sorted(started), ["gba/0.gba", "gba/1.gba"])
+        self.assertIn("finishing 2", out)
+        self.assertEqual(exits, [])
+
+    def test_second_ctrl_c_aborts_now(self):
+        error, _, exits, _ = self.run_interrupted({1, 2})
+        self.assertIsInstance(error, SystemExit)
+        self.assertEqual(exits, [1])
+
+
+class MoveInterruptTest(unittest.TestCase):
+    """Ctrl-C during s3.move_keys stops the queued moves; the moves that finished are recorded in the cache."""
+
+    def test_queued_moves_do_not_run_and_finished_ones_are_recorded(self):
+        release, started, recorded = threading.Event(), [], []
+
+        def replace(src, dst):
+            started.append(os.path.basename(src))
+            if not src.endswith("/0.gba"):  # only the first move finishes before the interrupt
+                release.wait(5)
+
+        printed = []
+
+        def fake_print(*a, **k):
+            printed.append(" ".join(map(str, a)))
+            if len(printed) == 2:  # the first move's line
+                raise KeyboardInterrupt
+            if len(printed) == 3:  # the in-flight line
+                release.set()
+
+        moves = [(f"gba/{i}.gba", f"gba/n{i}.gba") for i in range(20)]
+        with tempfile.TemporaryDirectory() as root, contextlib.ExitStack() as st:
+            st.enter_context(mock.patch.object(runtime, "ROOT", root))
+            st.enter_context(mock.patch.object(runtime, "WORKERS", 2))
+            st.enter_context(mock.patch.object(s3.os, "replace", replace))
+            st.enter_context(mock.patch.object(s3, "print", fake_print, create=True))
+            st.enter_context(mock.patch.object(inventory, "moved", lambda old, new: recorded.append(old)))
+            st.enter_context(mock.patch.object(ui, "POLL", 0.001))
+            with self.assertRaises(KeyboardInterrupt):
+                s3.move_keys(moves)
+        self.assertLessEqual(len(started), 3)
+        self.assertEqual(sorted(recorded), sorted(f"gba/{n}" for n in started))
+        self.assertTrue(any("finishing" in p for p in printed))
 
 
 class UploadWorkersTest(unittest.TestCase):

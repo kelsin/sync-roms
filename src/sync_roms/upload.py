@@ -5,6 +5,7 @@ import os
 import queue
 import tempfile
 import threading
+import time
 from concurrent.futures import ThreadPoolExecutor
 
 from botocore.exceptions import BotoCoreError, ClientError
@@ -93,21 +94,35 @@ def run_copies(todo):
         except Exception as e:
             return job, e
 
-    failed = 0
+    failed, futs = 0, []
+    ex = ThreadPoolExecutor(runtime.WORKERS)
     try:
-        with ThreadPoolExecutor(runtime.WORKERS) as ex:
-            futs = [ex.submit(copy, n) for n in range(len(order))]
-            for i, f in enumerate(futs, 1):
-                job, error = ui.wait_drawing(bar, i - 1, f.result)
-                moved.finish(i - 1)
-                prog = ui.dim(f"[{i}/{len(todo)}]")
-                if error is None:
-                    bar.say(f"  {prog} ✅ {job[0]}")
-                else:
-                    failed += 1
-                    bar.say(f"  {prog} ❌ {ui.red(job[0])}: {str(error).strip()}")
-                bar.draw(i)
+        futs += [ex.submit(copy, n) for n in range(len(order))]
+        for i, f in enumerate(futs, 1):
+            job, error = ui.wait_drawing(bar, i - 1, f.result)
+            moved.finish(i - 1)
+            prog = ui.dim(f"[{i}/{len(todo)}]")
+            if error is None:
+                bar.say(f"  {prog} ✅ {job[0]}")
+            else:
+                failed += 1
+                bar.say(f"  {prog} ❌ {ui.red(job[0])}: {str(error).strip()}")
+            bar.draw(i)
+    except KeyboardInterrupt:
+        ex.shutdown(wait=False, cancel_futures=True)
+        running = [f for f in futs if f.running()]
+        bar.say(ui.yellow(f"🛑 Interrupted — finishing {len(running)} copy(ies) in flight. ^C again to abort now."))
+        try:
+            while any(f.running() for f in running):
+                bar.draw(sum(f.done() for f in futs))
+                time.sleep(ui.POLL)
+        except KeyboardInterrupt:
+            bar.clear()
+            print(ui.red("🛑 Aborted"))
+            downloads.hard_exit()
+        raise
     finally:
+        ex.shutdown(wait=True, cancel_futures=True)
         bar.clear()
     return failed
 
@@ -247,16 +262,17 @@ def replace_command(args, folder, system):
         renames, new, changed, only_bucket = diff.plan_replace(
             local, remote, lambda p: diff.local_fingerprint(os.path.join(folder, *p.split("/"))),
             lambda p, size, etag: diff.bucket_fingerprint(f"{bucket}/{p}", size, etag),
-            lambda p, etag: "-" not in etag and md5(p) != etag.strip('"'), md5)
+            lambda p, etag: "-" not in etag and md5(p) != etag.strip('"'), md5,
+            lambda p, r: diff.same_bytes(os.path.join(folder, *p.split("/")), f"{bucket}/{r}", local[p]))
     except s3.ERRORS as e:
         ui.fail(f"{e}", 3)
     print(f"\n💿 New: {ui.bold(str(len(new)))} ({ui.human_size(sum(local[p] for p in new))})")
     print(f"♻️  Different content, would overwrite: {ui.bold(str(len(changed)))} ({ui.human_size(sum(local[p] for p in changed))})")
     print(f"🚚 Renamed, would move in storage: {ui.bold(str(len(renames)))}")
     print(f"🗑️  Only in storage, not renames: {ui.bold(str(len(only_bucket)))} ({ui.human_size(sum(remote[p][0] for p in only_bucket))})")
-    for old, newname in renames[:10]:
+    for old, newname in renames if args.dry_run else renames[:10]:
         print(ui.dim(f"     {old} → {newname}"))
-    if len(renames) > 10:
+    if len(renames) > 10 and not args.dry_run:
         print(ui.dim(f"     … and {len(renames) - 10} more"))
     for p in changed[:10]:
         print(ui.yellow(f"     overwrite {bucket}/{p} {ui.dim(ui.human_size(local[p]))}"))

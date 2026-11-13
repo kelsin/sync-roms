@@ -74,6 +74,81 @@ class PlanReplaceTest(unittest.TestCase):
         self.assertEqual((renames, new, changed, only_bucket), ([("a.zip", "b.zip")], [], [], []))
 
 
+class RawContentTest(unittest.TestCase):
+    """Raw files of the same size, without an md5 on both sides, are a rename only when same_bytes says so."""
+
+    def plan(self, local, remote, same_bytes):
+        return diff.plan_replace(local, remote, lambda p: ("raw", local[p], None),
+                                 lambda p, size, etag: ("raw", size, None), same_bytes=same_bytes)
+
+    def test_same_size_different_bytes_is_not_a_rename(self):
+        asked = []
+        renames, new, changed, only_bucket = self.plan({"Game B (USA).gba": 4096}, {"Game A (Europe).gba": (4096, '"-"')},
+                                                       lambda l, r: asked.append((l, r)) or False)
+        self.assertEqual((renames, new, changed, only_bucket), ([], ["Game B (USA).gba"], [], ["Game A (Europe).gba"]))
+        self.assertEqual(asked, [("Game B (USA).gba", "Game A (Europe).gba")])
+
+    def test_same_bytes_under_a_new_name_is_a_rename(self):
+        renames, new, _, only_bucket = self.plan({"b.gba": 4096}, {"a.gba": (4096, '"-"')}, lambda l, r: True)
+        self.assertEqual((renames, new, only_bucket), ([("a.gba", "b.gba")], [], []))
+
+    def test_tries_the_next_file_of_the_same_size(self):
+        renames, new, _, only_bucket = self.plan({"c.gba": 9}, {"a.gba": (9, '"-"'), "b.gba": (9, '"-"')},
+                                                 lambda l, r: r == "b.gba")
+        self.assertEqual((renames, new, only_bucket), ([("b.gba", "c.gba")], [], ["a.gba"]))
+
+    def test_only_same_size_pairs_are_read(self):
+        asked = []
+        self.plan({"b.gba": 5}, {"a.gba": (6, '"-"')}, lambda l, r: asked.append((l, r)) or True)
+        self.assertEqual(asked, [])
+
+    def test_known_md5s_need_no_read(self):
+        renames, _, _, _ = diff.plan_replace({"b.gba": 5}, {"a.gba": (5, '"m"')}, lambda p: ("raw", 5, None),
+                                             lambda p, size, etag: ("raw", size, "m"), md5=lambda p: "m",
+                                             same_bytes=lambda l, r: self.fail("read"))
+        self.assertEqual(renames, [("a.gba", "b.gba")])
+
+
+class SameBytesTest(unittest.TestCase):
+    """diff.same_bytes compares a local file with a storage file through s3.read_range."""
+
+    def compare(self, local, remote):
+        import tempfile
+        from unittest import mock
+        from sync_roms import s3
+        reads = []
+
+        def read_range(key, start, end):
+            reads.append((key, start, end))
+            return remote[start:end]
+
+        with tempfile.TemporaryDirectory() as tmp, mock.patch.object(s3, "read_range", read_range), \
+                mock.patch.object(diff, "SAMPLE_CHUNK", 4), mock.patch.object(diff, "SAMPLES", 4):
+            path = os.path.join(tmp, "b.gba")
+            with open(path, "wb") as f:
+                f.write(local)
+            return diff.same_bytes(path, "gba/a.gba", len(local)), reads
+
+    def test_small_file_is_compared_whole(self):
+        self.assertEqual(self.compare(b"A" * 14, b"A" * 14), (True, [("gba/a.gba", s, min(s + 4, 14)) for s in (0, 4, 8, 12)]))
+        self.assertFalse(self.compare(b"A" * 16, b"A" * 15 + b"B")[0])
+
+    def test_stops_at_the_first_chunk_that_differs(self):
+        same, reads = self.compare(b"A" * 16, b"B" * 16)
+        self.assertEqual((same, reads), (False, [("gba/a.gba", 0, 4)]))
+
+    def test_big_file_reads_the_first_last_and_evenly_spaced_chunks(self):
+        data = bytes(range(100))
+        same, reads = self.compare(data, data)
+        self.assertTrue(same)
+        self.assertEqual([(s, e) for _, s, e in reads], [(0, 4), (32, 36), (64, 68), (96, 100)])
+
+    def test_big_file_differing_in_a_chunk(self):
+        data = bytes(range(100))
+        self.assertFalse(self.compare(data, data[:33] + b"x" + data[34:])[0])
+        self.assertFalse(self.compare(data, data[:99] + b"x")[0])
+
+
 class PlanDiffTest(unittest.TestCase):
     def test_renames_and_same_files_are_ignored(self):
         local = {"same.zip": 10, "new name.zip": 20, "only local.zip": 30}

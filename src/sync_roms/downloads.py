@@ -177,7 +177,7 @@ def walk_roms(dest, keep_dotfiles=False, skip_db=False):
     def hidden(name):
         if not name.startswith("."):
             return False
-        return not keep_dotfiles or name.lower() in SYSTEM_DOT_NAMES or name.startswith("._")
+        return not keep_dotfiles or name.lower() in SYSTEM_DOT_NAMES or external.own_temp(name)
 
     for root, dirs, files in os.walk(dest):
         at_root = os.path.normpath(root) == os.path.normpath(dest)
