@@ -11,7 +11,7 @@ from unittest import mock
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 
-from sync_roms import budget, cli, clean, downloads, frontend, ignore, mirroring, runtime, s3, scrape_plan, store, ui, usersettings  # noqa: E402
+from sync_roms import budget, cli, clean, downloads, frontend, ignore, inventory, mirroring, runtime, s3, scrape_plan, store, ui, usersettings  # noqa: E402
 from sync_roms import collections as collections_mod  # noqa: E402
 from helpers import MANIFEST, list_sizes  # noqa: E402
 
@@ -264,6 +264,22 @@ class SyncFlowTest(unittest.TestCase):
                       after=lambda d: os.path.exists(os.path.join(d, "ES-DE", "collections", "custom-Favs.cfg"))
                       and read_from(d, "ES-DE", "collections", "custom-Favs.cfg"))
         self.assertNotIn("Game.zip", self.after or "")
+
+    def test_header_shows_the_cache_age(self):
+        tree = inventory.Tree("s3://b", inventory._clock() - 7200, {"gba/Game.zip": 5}, {})
+        _, out, _, _, _ = self.run_sync(extra=[(inventory, "current", lambda: tree)])
+        self.assertIn("cache updated 2 hours ago", out.splitlines()[0])
+
+    def test_rom_missing_from_the_cache_points_at_cache_update(self):
+        tree = inventory.Tree("s3://b", inventory._clock(), {"gba/Other.zip": 5}, {})
+        _, out, _, _, _ = self.run_sync(extra=[(inventory, "current", lambda: tree)])
+        self.assertIn("listed in manifest but not in storage", out)
+        self.assertIn("sync-roms cache update", out)
+
+    def test_rom_missing_without_a_cache_has_no_cache_pointer(self):
+        _, out, _, _, _ = self.run_sync(extra=[(s3, "list_sizes", lambda prefix, sizes=True: {})])
+        self.assertIn("listed in manifest but not in storage", out)
+        self.assertNotIn("cache update", out)
 
     def test_nothing_downloaded_skips_card_cleaning(self):
         _, _, _, root, _ = self.run_sync(plan=[])

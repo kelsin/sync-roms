@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 
-from sync_roms import chd, commands, diff, edit, m3u, picker, runtime, s3, scrape_files, store, ui, upload  # noqa: E402
+from sync_roms import chd, cli, commands, diff, edit, inventory, m3u, picker, runtime, s3, scrape_files, store, ui, upload  # noqa: E402
 from test_edit import EditBase  # noqa: E402
 from test_scripting import Isolated  # noqa: E402
 
@@ -94,6 +94,65 @@ class ExitCodeTest(Isolated):
             with mock.patch.object(chd, "plan_chd", return_value=[({"chd": {"mode": "cd"}}, None, "x.cue", "o")]), \
                     mock.patch.object(chd.external, "find_tool", return_value=None):
                 self.assertEqual(self.code_of(chd.chd_command, mock.Mock(chd=tmp, dry_run=False)), 3)
+
+
+class MissingStorageOrCardTest(Isolated):
+    def setUp(self):
+        super().setUp()
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        self.tmp = tmp.name
+        for p in (mock.patch.object(runtime, "ROOT", None), mock.patch.object(ui, "ASSUME_YES", False)):
+            p.start()
+            self.addCleanup(p.stop)
+
+    def test_missing_storage_folder_stops_a_sync_before_planning(self):
+        gone = os.path.join(self.tmp, "roms")
+        tree = inventory.Tree(gone, 1, {"gba/Game.zip": 5}, {})
+        with mock.patch.object(cli, "sync_card") as plan, mock.patch.object(inventory, "_load", return_value=tree), \
+                mock.patch.object(inventory, "prepare") as prepare:
+            code, out, err = self.sync([os.path.join(self.tmp, "SD"), "--yes"], {"root": gone})
+        self.assertEqual(code, 3)
+        self.assertIn(gone, err)
+        self.assertIn("mounted?", err)
+        self.assertNotIn("Traceback", out + err)
+        plan.assert_not_called()
+        prepare.assert_not_called()
+
+    def test_editor_still_opens_with_the_storage_folder_missing(self):
+        with mock.patch.object(edit, "edit_manifest", return_value=0) as run:
+            code, _, err = self.sync(["edit"], {"root": os.path.join(self.tmp, "roms")})
+        self.assertEqual((code, err), (0, ""))
+        run.assert_called_once_with()
+
+    def test_os_error_mid_run_is_a_message_not_a_traceback(self):
+        boom = FileNotFoundError(2, "No such file or directory", "/Volumes/roms/scrapes/gba/metadata.json")
+        with mock.patch.object(cli, "sync", side_effect=boom), contextlib.redirect_stdout(io.StringIO()), \
+                contextlib.redirect_stderr(io.StringIO()) as err, self.assertRaises(SystemExit) as cm:
+            cli.main()
+        self.assertEqual(cm.exception.code, 1)
+        self.assertIn("No such file or directory", err.getvalue())
+
+    def test_missing_card_path_is_a_usage_error_and_creates_nothing(self):
+        storage = os.path.join(self.tmp, "roms")
+        os.makedirs(storage)
+        card = os.path.join(self.tmp, "typo", "SD")
+        with mock.patch.object(picker, "saved_setup", return_value=(None, "esde")), \
+                mock.patch.object(store, "load_cards", return_value={}), mock.patch.object(store, "save_card"):
+            code, out, err = self.sync([card, "--yes"], {"root": storage})
+        self.assertEqual(code, 2)
+        self.assertIn(f"{card} isn't a folder", err)
+        self.assertIn("mounted?", err)
+        self.assertIn("sync-roms --help", err)
+        self.assertFalse(os.path.exists(os.path.join(self.tmp, "typo")))
+
+    def test_unusable_card_folders_are_setup_problems(self):
+        path = os.path.join(self.tmp, "ROMs")
+        open(path, "w").close()
+        with contextlib.redirect_stderr(io.StringIO()) as err, self.assertRaises(SystemExit) as cm:
+            cli.check_dir(path, "ROMs folder")
+        self.assertEqual(cm.exception.code, 3)
+        self.assertIn("is not a directory", err.getvalue())
 
 
 class EofTest(EditBase):

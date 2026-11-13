@@ -6,6 +6,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 from . import external, inventory, runtime, s3, ui
 
+STALE_HINT = " (not in storage any more: run sync-roms cache update)"  # a file the cache lists is gone from the storage folder
 
 def rom_rel(key, flat, disc_dir=None, discs=()):
     """A ROM's path inside its system folder: the bucket key without its system, or just the file name if flat.
@@ -87,6 +88,9 @@ def failure_hint(error):
         return " (access denied: check the profile can read this storage)"
     if "404" in text or "NoSuchKey" in text or "Not Found" in text:
         return " (not in storage any more)"
+    missing = getattr(error, "filename", None)
+    if "No such file" in text and runtime.ROOT and missing and os.path.abspath(missing).startswith(os.path.join(runtime.ROOT, "")):
+        return STALE_HINT
     if "No space left" in text:
         return " (the card is full)"
     if "timed out" in text.lower() or "Could not connect" in text:
