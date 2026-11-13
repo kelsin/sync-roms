@@ -439,9 +439,13 @@ system with no ScreenScraper id says so. It makes no ScreenScraper request and w
 **Non-games.** ScreenScraper marks BIOS sets, demos, test carts and other software as non-games (`ZZZ(notgame)`). A
 run writes nothing for them and keeps them for review, and `--retry` doesn't look them up again. At the end of a run on
 a terminal you're asked whether to review them now; `sync-roms scrape review [SYSTEM]` reviews them, and the unknown
-ROMs, any time (an unknown ROM that has a metadata entry by now, or is gone from storage, is dropped). For each one,
-`i` ignores it, `s` searches ScreenScraper under another name (Enter takes the suggested name) and scrapes the game
-you pick, `k` (the default) leaves it for later, and `I` ignores it and every one after it. Ignored ROMs are listed in
+ROMs, any time (an unknown ROM that has a metadata entry by now, or is gone from storage, is dropped; an unmounted
+share fails and drops nothing). A run that leaves ROMs unmatched ends with both commands. Each ROM shows its position
+(`3 of 120`); `i` ignores it, `s` searches ScreenScraper under another name (Enter takes the suggested name) and
+scrapes the game you pick (with the review's login, no quota check and no results list), `k` (the default) leaves it
+for later (ROMs kept for later come after the others in the next review), `b` takes back the last `i` and goes back to
+that ROM (a search already scraped stays: `scrape match` changes it), `q` stops, and `I` ignores it and every one
+after it. Ignores are written when the review ends, by `q`, Ctrl-C or the last ROM. Ignored ROMs are listed in
 `ignored.json` at the root of storage, shared by everyone using that storage: sync-roms never shows, syncs, uploads or
 scrapes them, and never deletes their files. Each run checks the file and keeps a copy in the data folder. To stop
 ignoring a ROM, remove it from `ignored.json` in storage.
@@ -482,7 +486,7 @@ folder names and downloads none of them.
 
 **Local state** in the data folder (`~/.sync-roms/`): `scrape-hashes.json` (file hashes), `scrape-matches.json` (your manual
 matches), `scrape-unknown.json` (the ROMs ScreenScraper didn't know), `scrape-nomedia.json` (the media types
-ScreenScraper didn't offer for each ROM) and `scrape-notgames.json` (the non-games waiting for review). Delete one to forget it.
+ScreenScraper didn't offer for each ROM) and `scrape-notgames.json` (the non-games waiting for review, and the ROMs the review kept for later). Delete one to forget it.
 
 ## Local mirror (`--mirror`, `--use-mirror`, `--clear-mirror`)
 
