@@ -1,9 +1,52 @@
 """The .psvita files ES-DE launches installed Vita3K games with: one per Vita zip, holding the game's title id."""
 import os
+import re
 import struct
 import zipfile
 
 from . import chd, downloads
+
+BUCKET = "psvita"
+TITLE_ID = re.compile(r"\[([A-Z]{4}\d{5})\]")
+VERSION = re.compile(r"\[v(\d+(?:\.\d+)*)\]")
+
+
+def kind(name):
+    """"dlc", "update" or "game", from the tags in a Vita file name."""
+    name = os.path.basename(name)
+    if "[DLC-" in name:
+        return "dlc"
+    return "update" if "[PATCH]" in name else "game"
+
+
+def is_extra(key):
+    """Whether a storage key is a Vita DLC or update."""
+    return key.startswith(BUCKET + "/") and kind(key) != "game"
+
+
+def extras(game_keys, folder_keys):
+    """{game key: [extra keys]}: each psvita game's DLC (sorted) then its newest update, matched by title id."""
+    by_id = {}
+    for key in folder_keys:
+        found = TITLE_ID.search(os.path.basename(key))
+        if found and is_extra(key):
+            by_id.setdefault(found.group(1), []).append(key)
+
+    def version(key):
+        v = VERSION.search(key)
+        return (1, tuple(int(n) for n in v.group(1).split("."))) if v else (0, ())
+
+    result = {}
+    for game in game_keys:
+        found = TITLE_ID.search(os.path.basename(game))
+        if not found or not game.startswith(BUCKET + "/") or kind(game) != "game":
+            continue
+        mine = by_id.get(found.group(1), [])
+        updates = [k for k in mine if kind(k) == "update"]
+        chosen = sorted(k for k in mine if kind(k) == "dlc") + ([max(updates, key=version)] if updates else [])
+        if chosen:
+            result[game] = chosen
+    return result
 
 
 def sfo_values(data):
@@ -55,7 +98,7 @@ def add_psvita_files(dests):
         for root, files in downloads.walk_roms(dest):
             for f in files:
                 path = os.path.join(root, f)
-                if f.lower().endswith(".zip") and not os.path.lexists(os.path.splitext(path)[0] + ".psvita"):
+                if f.lower().endswith(".zip") and kind(f) == "game" and not os.path.lexists(os.path.splitext(path)[0] + ".psvita"):
                     error = make_psvita(path)
                     if error:
                         failures.append((path, error))
