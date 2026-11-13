@@ -147,7 +147,9 @@ def match(client, system, rom, size, etag, game_id=None, stop=None):
     """(game id, how) for a ROM; how is "manual", "hash" or "name+size". Raises screenscraper.NotFound.
 
     One lookup sends the hashes, name and size together; it counts as "hash" only when the ROM ScreenScraper
-    matched carries one of the hashes sent. game_id: a match given for this run only (`scrape match`)."""
+    matched carries one of the hashes sent. A storage folder's file over HASH_MAX is sent without hashes unless they
+    are cached, and hashed for one more lookup when that finds nothing. game_id: a match given for this run only
+    (`scrape match`)."""
     if game_id:
         return game_id, "manual"
     name = system["bucket"]
@@ -156,10 +158,16 @@ def match(client, system, rom, size, etag, game_id=None, stop=None):
         return saved, "manual"
     hashes = {}
     if s3.read_root():  # a folder's ETag is a fake "mtime-size" tag; hash the file instead
-        hashes = _hashes(name, rom, size, stop)
+        hashes = _hashes(name, rom, size, stop) if size <= HASH_MAX else scrape_state.cached_hashes(name, rom, size, _mtime(name, rom)) or {}
     elif "-" not in (tag := etag.strip('"')):  # a multipart upload's ETag is not the file's MD5
         hashes = {"md5": tag}
-    game = client.lookup(system["screenscraper"], os.path.basename(rom), size, **hashes)
+    try:
+        game = client.lookup(system["screenscraper"], os.path.basename(rom), size, **hashes)
+    except screenscraper.NotFound:
+        if hashes or not s3.read_root():
+            raise
+        hashes = _hashes(name, rom, size, stop)
+        game = client.lookup(system["screenscraper"], os.path.basename(rom), size, **hashes)
     return screenscraper.to_int(game.get("id")), "hash" if screenscraper.rom_hash_matches(game, hashes) else "name+size"
 
 
@@ -187,6 +195,7 @@ def resolve_manual(client, system, query):
 BATCH = 25  # ROMs scraped and uploaded together
 LOOKAHEAD = 2  # batches in the pool at once: the next one is scraped while the last uploads
 HASH_THREADS = 4  # ROMs hashed at once ahead of their lookups
+HASH_MAX = 64 << 20  # bigger files in a storage folder are hashed only when their name and size find nothing (a bucket has no MD5 for them either)
 METADATA_INTERVAL = 60  # seconds of scraped ROMs whose entries are written to metadata.json together
 RETRIES = 3  # times a rate-limited request is tried again
 RETRY_WAIT = 2  # seconds before the first retry, doubled each time
@@ -297,11 +306,17 @@ def load_metadata(system):
     return data
 
 
-def planned_match(system, rom, etag):
+def planned_match(system, rom, size, etag):
     """How match() will look a ROM up first, without asking ScreenScraper."""
     if scrape_state.manual_match(system, rom) is not None:
         return "manual"
-    return "hash" if s3.read_root() or "-" not in etag.strip('"') else "name+size"
+    if s3.read_root():
+        return "hash" if size <= HASH_MAX or _cached(system, rom, size) else "name+size"
+    return "hash" if "-" not in etag.strip('"') else "name+size"
+
+
+def _cached(system, rom, size):
+    return scrape_state.cached_hashes(system, rom, size, _mtimes.get((system, rom))) is not None
 
 
 def report(systems_candidates, matches):
@@ -463,7 +478,7 @@ def start_batch(ex, client, system, batch, skip, stop, index, replace=False, for
     forced = forced or {}
     if hasher is not None and s3.read_root():
         for rom, size, _ in batch:
-            if rom not in forced and scrape_state.manual_match(system["bucket"], rom) is None:
+            if size <= HASH_MAX and rom not in forced and scrape_state.manual_match(system["bucket"], rom) is None:
                 prefetch_hash(hasher, system["bucket"], rom, size, stop)
     kept = {rom: set() if replace else set(index.get(os.path.splitext(rom)[0], ())) for rom, _, _ in batch}
     tmp = tempfile.mkdtemp()
@@ -642,6 +657,7 @@ def scrape_system(client, system, items, threads, skip, shrink, outcomes, listin
             quota_hit = quota_hit or hit
             if time.monotonic() - last_write >= METADATA_INTERVAL:
                 scrape_state.flush_unknown()  # marks from a run that finds nothing must not wait for the final flush
+                scrape_state.flush_hashes()
                 last_write = time.monotonic()
                 if pending:
                     n, halt = record(system, pending, outcomes, listing, index, skip, replace, rerun, fill)
@@ -796,12 +812,16 @@ def _scrape_command(args):
     except s3.ERRORS as e:
         ui.fail(f"{e}", 3)
     todo = {name: [(r, *etags[name][r]) for r in roms_ if r in etags[name]] for name, roms_ in candidates.items()}
-    planned = {name: {r: planned_match(name, r, etag) for r, _, etag in items} for name, items in todo.items()}
+    planned = {name: {r: planned_match(name, r, size, etag) for r, size, etag in items} for name, items in todo.items()}
     if not any(todo.values()):
         print(ui.green("Nothing to scrape ✨") + ("" if getattr(args, "all", False) else ui.dim("  (--all also takes the ROMs no card lists)")))
         return 0
     print(ui.bold("\n🔎 ROMs to scrape (and how each will be looked up first)"))
     print(report({name: [r for r, _, _ in items] for name, items in todo.items()}, planned))
+    if s3.read_root():
+        read = sum(size for name, items in todo.items() for r, size, _ in items
+                   if planned[name][r] == "hash" and not _cached(name, r, size))
+        print(f"  📖 {ui.human_size(read)} to read for hashing" + ui.dim(f"  (files over {ui.human_size(HASH_MAX)} only when name+size finds nothing)"))
     if args.dry_run:
         print(ui.yellow("\n🧪 Dry run — nothing looked up or written"))
         wanted = sorted(set(screenscraper.MEDIA_MAP.values()) - skip)
