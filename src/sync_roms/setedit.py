@@ -195,12 +195,15 @@ def edit_sets():
     except KeyboardInterrupt:  # Ctrl-C: review the changes as Done does, then stop as before
         if diff_sets(before, working):
             print(ui.yellow("\n🛑 Interrupted — review your changes before leaving."))
-            edit_working(systems, before, working, review=True)
+            code = edit_working(systems, before, working, review=True)
+            if code is not None:  # the user kept editing, and that ended the normal way
+                return code
         raise
 
 
 def edit_working(systems, before, working, review=False):
-    """The sets menu over working; Done reviews it and opens a PR. review starts at that review. Returns the exit code."""
+    """The sets menu over working; Done reviews it and opens a PR. review starts at that review, and returns None
+    when that first review ends the editor. Returns the exit code."""
     listed = {}
 
     def keys_of(bucket):
@@ -219,7 +222,7 @@ def edit_working(systems, before, working, review=False):
         extras = [[("  " + ("new" if x not in before else "edited"), "cyan")] if x in edited else [] for x in ids] + [[], [], []]
         i = n + 1 if review else picker.filter_list("✏️  Which set?  (Esc = review & open PR)", labels, extras=extras,
                                                     hotkeys=(edit.DELETE_KEY,), hint="/ filter · Enter open · d delete · Esc review")
-        review = False
+        reviewing, review = review, False
         if isinstance(i, tuple):
             if i[1] < n:
                 sid = ids[i[1]]
@@ -254,6 +257,6 @@ def edit_working(systems, before, working, review=False):
             continue
         if answer == "d":
             print(ui.yellow("👋 Not opened."))
-            return 0
+            return None if reviewing else 0
         print(ui.green("🎉 PR opened: ") + open_pr(working, found))
-        return 0
+        return None if reviewing else 0
