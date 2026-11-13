@@ -49,11 +49,12 @@ def junk(key):
     return name in JUNK_NAMES or name.endswith(".part")
 
 
-def mirror_sizes(root, prefix="", sizes=True):
+def mirror_sizes(root, prefix="", sizes=True, parts=False):
     """{key: size} of the files under root whose key starts with prefix (a folder, ending in /).
-    Without sizes the values are None: a network share answers a name listing fast but each size is a round trip."""
+    Without sizes the values are None: a network share answers a name listing fast but each size is a round trip.
+    parts keeps .part files in, for the mirror to delete its own leftovers."""
     paths = [os.path.join(folder, name) for folder, _, files in os.walk(os.path.join(root, prefix)) for name in files
-             if not junk(name)]
+             if not junk(name) or (parts and name.endswith(".part"))]
     keys = [os.path.relpath(path, root).replace(os.sep, "/") for path in paths]
     if not sizes:
         return dict.fromkeys(keys)
@@ -271,24 +272,34 @@ def list_with_etags(prefix):
 def move_groups(moves):
     """(old key, new key) moves in groups that each run in order, so no move overwrites a file another still has to move:
     a chain (a → b, b → c) runs its last move first, and a cycle (a → b, b → a) first moves one file to a .part name
-    in its folder. Groups don't touch each other's files."""
-    by_old = dict(moves)
-    targets = set(by_old.values())
+    in its folder. Groups don't touch each other's files. Keys are compared the way a storage folder finds names (any
+    case or Unicode form), unless that would make two moves' keys the same."""
+    def loose(key):
+        return unicodedata.normalize("NFC", key).casefold()
+    fold = loose if len({loose(old) for old, _ in moves}) == len(moves) == len({loose(new) for _, new in moves}) else str
+    by_old = {fold(old): (old, new) for old, new in moves}
+    after = {k: fold(new) for k, (_, new) in by_old.items() if fold(new) != k}  # a case-only rename is a single move
+    targets = set(after.values())
     groups, seen = [], set()
-    for start in [old for old, _ in moves if old not in targets] + [old for old, _ in moves]:  # chain starts, then cycles
+    for start in [k for k in by_old if k not in targets] + list(by_old):  # chain starts, then cycles
         if start in seen:
             continue
         walk, key = [], start
         while key in by_old and key not in seen:
             seen.add(key)
-            walk.append((key, by_old[key]))
-            key = by_old[key]
+            walk.append(by_old[key])
+            key = after.get(key)
         if key != start:
             groups.append(walk[::-1])
         else:
-            tmp = start + ".part"
-            groups.append([(start, tmp), *walk[:0:-1], (tmp, walk[0][1])])
+            tmp = walk[0][0] + ".part"
+            groups.append([(walk[0][0], tmp), *walk[:0:-1], (tmp, walk[0][1])])
     return groups
+
+
+def parked(group):
+    """The temporary name a cycle's group parks a file under, else None."""
+    return group[0][1] if len(group) > 1 and group[-1][0] == group[0][1] else None
 
 
 def move_keys(moves):
@@ -317,16 +328,23 @@ def move_keys(moves):
         out = []
         for job in group:
             out.append(move(job) if not out or out[-1][1] is None else (job, OSError(f"skipped: {out[-1][0][0]} wasn't moved")))
-        (start, tmp), (_, name) = group[0], group[-1]
-        if tmp == group[-1][0] and out[0][1] is None and out[-1][1] is not None:  # a cycle stopped with a file parked
-            if out[1][1] is not None and move((tmp, start))[1] is None:  # nothing took its old name yet
-                out[-1] = (out[-1][0], OSError(f"skipped: moved back to {start}"))
+        (start, tmp), (_, name), error = group[0], group[-1], str(out[-1][1]).strip()
+        if parked(group) and out[0][1] is None and out[-1][1] is not None:  # a cycle stopped with a file parked
+            if out[1][1] is not None:  # the move onto its old name failed, so that name is free
+                back = move((tmp, start))[1]
+                note = f"moved back to {start}" if back is None else \
+                    f"moving it back failed ({str(back).strip()}); left under this name: it should be named {start}"
+            elif out[-2][1] is None:  # only the last step failed: its new name is free
+                note = f"left under this name: it should be named {name}"
             else:
-                out[-1] = (out[-1][0], OSError(f"left under this name: it should be named {name}"))
+                note = f"left under this name: {name} still holds a file that wasn't moved; run the replace again, then delete this file"
+            out[-1] = (out[-1][0], OSError(f"{error}; {note}"))
+            if "left under" in note:
+                left[tmp] = out[-1][1]
         return out
 
     groups = move_groups(moves)
-    total, i = sum(map(len, groups)), 0
+    total, i, shown, left = sum(map(len, groups)), 0, 0, {}  # left: {parked key: error} of cycles that stopped part-way
     failed, futs = 0, []
     print(ui.bold(f"\n🚚 Moving {len(moves)} renamed file(s)"))
     ex = ThreadPoolExecutor(runtime.WORKERS)
@@ -341,18 +359,31 @@ def move_keys(moves):
                 else:
                     failed += 1
                     print(f"  {prog} ❌ {ui.red(job[0])}: {str(error).strip()}")
+            shown += 1
     except KeyboardInterrupt:
         from . import downloads  # imported here: downloads reads storage through this module
         ex.shutdown(wait=False, cancel_futures=True)
         running = [f for f in futs if f.running()]
+        unshown = [(f, g) for f, g in zip(futs[shown:], groups[shown:]) if parked(g)]  # cycles not printed yet
+
+        def tell_parked(cut):
+            """Print the parked file of each cycle not printed yet that stopped part-way (or, when cut, may have)."""
+            for f, g in unshown:
+                if parked(g) in left:
+                    print(f"  ❌ {ui.red(parked(g))}: {str(left[parked(g)]).strip()}")
+                elif cut and f.running():
+                    print(ui.red(f"  ⚠️  {parked(g)} may be left under this name: it holds the file meant for {g[-1][1]}"))
+
         print(ui.yellow(f"🛑 Interrupted — finishing {len(running)} move(s) in flight. ^C again to abort now."))
         try:
             while any(f.running() for f in running):
                 time.sleep(ui.POLL)
         except KeyboardInterrupt:
             print(ui.red("🛑 Aborted"))
+            tell_parked(True)
             inventory.flush()  # hard_exit skips the flush as sync-roms exits
             downloads.hard_exit()
+        tell_parked(False)
         raise
     finally:
         ex.shutdown(wait=True, cancel_futures=True)

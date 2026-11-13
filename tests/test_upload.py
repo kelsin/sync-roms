@@ -231,36 +231,146 @@ class RenameChainTest(unittest.TestCase):
         self.assertEqual(self.stored(), {"a.gba": b"X", "b.gba": b"Y"})
 
     def move_failing(self, files, moves, fails):
-        """s3.move_keys(moves) where moving the file named fails raises: (failures, output, storage after)."""
+        """s3.move_keys(moves) where moving a file whose name is in fails raises: (failures, output, storage after)."""
         for name, data in files.items():
             with open(os.path.join(self.folder, name), "wb") as f:
                 f.write(data)
         real_replace, out = os.replace, io.StringIO()
 
         def replace(src, dst):
-            if os.path.basename(src) == fails:
-                raise OSError("busy")
+            if os.path.basename(src) in fails:
+                raise OSError(f"busy {os.path.basename(src)}")
             real_replace(src, dst)
 
         with mock.patch.object(s3.os, "replace", replace), contextlib.redirect_stdout(out):
             failed = s3.move_keys(moves)
         return failed, out.getvalue(), self.stored()
 
+    SWAP = [("gba/a.gba", "gba/b.gba"), ("gba/b.gba", "gba/a.gba")]
+    CYCLE = [("gba/a.gba", "gba/b.gba"), ("gba/b.gba", "gba/c.gba"), ("gba/c.gba", "gba/a.gba")]
+
     def test_a_failure_in_a_cycle_moves_the_parked_file_back(self):
-        failed, _, stored = self.move_failing({"a.gba": b"X", "b.gba": b"Y"},
-                                              [("gba/a.gba", "gba/b.gba"), ("gba/b.gba", "gba/a.gba")], "b.gba")
+        failed, _, stored = self.move_failing({"a.gba": b"X", "b.gba": b"Y"}, self.SWAP, {"b.gba"})
         self.assertEqual(failed, 2)
         self.assertEqual(stored, {"a.gba": b"X", "b.gba": b"Y"})
 
-    def test_a_parked_file_that_cant_go_back_is_named(self):
-        failed, out, stored = self.move_failing(
-            {"a.gba": b"X", "b.gba": b"Y", "c.gba": b"Z"},
-            [("gba/a.gba", "gba/b.gba"), ("gba/b.gba", "gba/c.gba"), ("gba/c.gba", "gba/a.gba")], "b.gba")
+    def test_a_parked_file_that_cant_go_back_is_named_with_its_old_name(self):
+        failed, out, stored = self.move_failing({"a.gba": b"X", "b.gba": b"Y"}, self.SWAP, {"b.gba", "a.gba.part"})
+        self.assertEqual(stored, {"a.gba.part": b"X", "b.gba": b"Y"})
+        last = out.splitlines()[-1]
+        self.assertIn("gba/a.gba.part", last)
+        self.assertIn("should be named gba/a.gba", last)
+        self.assertIn("busy a.gba.part", last)  # why it couldn't go back
+
+    def test_a_parked_file_whose_new_name_is_still_taken_says_so(self):
+        failed, out, stored = self.move_failing({"a.gba": b"X", "b.gba": b"Y", "c.gba": b"Z"}, self.CYCLE, {"b.gba"})
         self.assertEqual(failed, 2)
         self.assertEqual(stored, {"a.gba.part": b"X", "a.gba": b"Z", "b.gba": b"Y"})
         last = out.splitlines()[-1]
         self.assertIn("gba/a.gba.part", last)
+        self.assertIn("gba/b.gba still holds a file that wasn't moved", last)
+        self.assertNotIn("should be named", last)
+
+    def test_a_failed_last_step_keeps_its_error_and_names_the_new_name(self):
+        failed, out, stored = self.move_failing({"a.gba": b"X", "b.gba": b"Y", "c.gba": b"Z"}, self.CYCLE, {"a.gba.part"})
+        self.assertEqual(stored, {"a.gba.part": b"X", "a.gba": b"Z", "c.gba": b"Y"})
+        last = out.splitlines()[-1]
+        self.assertIn("busy a.gba.part", last)
         self.assertIn("should be named gba/b.gba", last)
+
+    def interrupted(self, second, fail):
+        """A single move and a swap run side by side; ^C arrives while the swap's second step is in flight (again
+        while waiting for it when second). fail makes that step and the move back fail. Returns the printed lines."""
+        for name in ("x.gba", "a.gba", "b.gba"):
+            with open(os.path.join(self.folder, name), "wb") as f:
+                f.write(name.encode())
+        real_replace, parked, release, printed = os.replace, threading.Event(), threading.Event(), []
+
+        def replace(src, dst):
+            name = os.path.basename(src)
+            if name == "x.gba":
+                parked.wait(5)
+            if name == "b.gba":
+                parked.set()
+                release.wait(5)
+            if fail and name in ("b.gba", "a.gba.part"):
+                raise OSError("busy")
+            real_replace(src, dst)
+
+        def fake_print(*a, **k):
+            printed.append(" ".join(map(str, a)))
+            if len(printed) == 2:  # the single move's line
+                raise KeyboardInterrupt
+            if len(printed) == 3 and not second:  # the in-flight line
+                release.set()
+
+        def sleep(s):
+            raise KeyboardInterrupt
+
+        def hard_exit():
+            release.set()
+            raise SystemExit(130)
+
+        from sync_roms import downloads
+        with contextlib.ExitStack() as st:
+            st.enter_context(mock.patch.object(runtime, "WORKERS", 2))
+            st.enter_context(mock.patch.object(s3.os, "replace", replace))
+            st.enter_context(mock.patch.object(s3, "print", fake_print, create=True))
+            st.enter_context(mock.patch.object(ui, "POLL", 0.001))
+            st.enter_context(mock.patch.object(downloads, "hard_exit", hard_exit))
+            if second:
+                st.enter_context(mock.patch.object(s3.time, "sleep", sleep))
+            with self.assertRaises((KeyboardInterrupt, SystemExit)):
+                s3.move_keys([("gba/x.gba", "gba/y.gba"), *self.SWAP])
+        return printed
+
+    def test_a_second_ctrl_c_names_the_file_a_running_cycle_may_leave_parked(self):
+        printed = self.interrupted(second=True, fail=False)
+        aborted = next(i for i, p in enumerate(printed) if "Aborted" in p)
+        self.assertTrue(any("gba/a.gba.part" in p for p in printed[aborted:]))
+
+    def test_a_cycle_that_fails_after_ctrl_c_names_its_parked_file(self):
+        printed = self.interrupted(second=False, fail=True)
+        self.assertTrue(any("gba/a.gba.part" in p and "should be named gba/a.gba" in p for p in printed))
+
+    def test_names_that_differ_only_in_case_or_unicode_form_chain(self):
+        import unicodedata
+        self.assertEqual(s3.move_groups([("gba/a.gba", "gba/B.gba"), ("gba/b.gba", "gba/c.gba")]),
+                         [[("gba/b.gba", "gba/c.gba"), ("gba/a.gba", "gba/B.gba")]])
+        nfd = lambda s: unicodedata.normalize("NFD", s)  # noqa: E731
+        moves = [(nfd("gba/Pokémon 1.gba"), "gba/Pokémon 2.gba"), (nfd("gba/Pokémon 2.gba"), "gba/Pokémon 3.gba")]
+        self.assertEqual(s3.move_groups(moves), [moves[::-1]])
+        self.assertEqual(s3.move_groups([("gba/a.gba", "gba/A.gba")]), [[("gba/a.gba", "gba/A.gba")]])
+
+    def loose_folder(self, a, b):
+        """True when the storage folder finds name a under name b."""
+        with open(os.path.join(self.folder, a), "wb"):
+            pass
+        found = os.path.exists(os.path.join(self.folder, b))
+        os.remove(os.path.join(self.folder, a))
+        return found
+
+    def test_chain_through_another_case(self):
+        if not self.loose_folder("q.gba", "Q.gba"):
+            self.skipTest("the temp folder is case-sensitive")
+        self.replace({"B.gba": b"X" * 5, "c.gba": b"Y" * 7}, {"a.gba": b"X" * 5, "b.gba": b"Y" * 7})
+
+    def test_chain_through_another_unicode_form(self):
+        import unicodedata
+        nfd = lambda s: unicodedata.normalize("NFD", s)  # noqa: E731
+        if not self.loose_folder(nfd("é.gba"), "é.gba"):
+            self.skipTest("the temp folder tells unicode forms apart")
+        local = {"Pokémon 2.gba": b"X" * 5, "Pokémon 3.gba": b"Y" * 7}
+        for rel, data in {nfd("Pokémon 1.gba"): b"X" * 5, nfd("Pokémon 2.gba"): b"Y" * 7}.items():
+            with open(os.path.join(self.folder, rel), "wb") as f:
+                f.write(data)
+        with tempfile.TemporaryDirectory() as root:
+            for rel, data in local.items():
+                with open(os.path.join(root, rel), "wb") as f:
+                    f.write(data)
+            with mock.patch.object(ui, "confirm", lambda *a, **k: True), contextlib.redirect_stdout(io.StringIO()):
+                self.assertEqual(upload.replace_command(argparse.Namespace(dry_run=False), root, SYSTEMS[0]), 0)
+        self.assertEqual({unicodedata.normalize("NFC", n): d for n, d in self.stored().items()}, local)
 
 
 class BucketReplaceMirrorTest(unittest.TestCase):
