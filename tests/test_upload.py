@@ -727,7 +727,7 @@ class S3ClientPoolTest(unittest.TestCase):
             small, big = s3.s3_client("p"), s3.s3_client("p", connections=40)
             self.assertIs(small, s3.s3_client("p"))
             self.assertIs(big, s3.s3_client("p", connections=40))
-        self.assertEqual((small.pool, big.pool), (runtime.WORKERS, 40))
+        self.assertEqual((small.pool, big.pool), (runtime.WORKERS * s3.DOWNLOAD_PARTS, 40))  # a slot for each ranged GET
 
     def test_custom_endpoint_uses_path_style(self):
         with mock.patch.dict(s3._s3, {}, clear=True), mock.patch("boto3.Session") as session, \
