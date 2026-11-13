@@ -39,9 +39,11 @@ class Tree:
     def __init__(self, source, updated, files, etags, dirs=None):
         self.source, self.updated, self.files, self.etags, self.dirs = source, updated, files, etags, dirs or {}
         self._keys = self._folders = None
+        self.version = 0  # how many times it was patched
 
     def changed(self):
         self._keys = self._folders = None
+        self.version += 1
 
     def under(self, prefix):
         """{key: size} of the keys starting with prefix, found by bisecting the sorted keys."""
@@ -105,6 +107,13 @@ def current():
     with _lock:
         tree = _load()
         return tree if tree and tree.source == source() else None
+
+
+def version():
+    """A value that changes whenever what the cache in use holds may have: a patch, or a cache read again or rebuilt.
+    None when there is no cache."""
+    tree = current()
+    return tree and (tree, tree.version)
 
 
 # --- Reads --------------------------------------------------------------------------------------------------------

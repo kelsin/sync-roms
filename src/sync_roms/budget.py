@@ -7,14 +7,33 @@ from . import collections as colls, commands, inventory, scrape_plan, store, vit
 Usage = namedtuple("Usage", "bytes count partial")
 
 
-def scrape_costs(layout, system, rels, listing):
-    """{ROM path in the system folder: scrape bytes} for many ROMs, the listing split by ROM first so each
-    scrape_cost call only sees that ROM's files."""
+_scrapes = {"version": None, "by_stem": {}}  # each system's scrapes listing split by ROM, for one cache version
+
+
+def _scrapes_by_stem(bucket):
+    """{ROM stem: {key: size}} of the system's scrapes listing, or None when it isn't cached. Kept for the run until the
+    cache changes (a patch, or a cache read again or rebuilt)."""
+    version = inventory.version()
+    if version is None or version != _scrapes["version"]:
+        _scrapes.update(version=version, by_stem={})
+    if bucket in _scrapes["by_stem"]:
+        return _scrapes["by_stem"][bucket]
+    listing = inventory.cached(f"{scrape_plan.SCRAPES}/{bucket}/")
+    if listing is None:
+        return None
     by_stem = defaultdict(dict)
     for key, size in listing.items():
         entry = scrape_plan._index_entry(key)
         if entry:
             by_stem[entry[0]][key] = size
+    if version is not None:
+        _scrapes["by_stem"][bucket] = by_stem
+    return by_stem
+
+
+def scrape_costs(layout, system, rels, by_stem):
+    """{ROM path in the system folder: scrape bytes} for many ROMs, from the scrapes listing split by ROM
+    (_scrapes_by_stem) so each scrape_cost call only sees that ROM's files."""
     return {rel: scrape_plan.scrape_cost(layout, system, rel, by_stem.get(os.path.splitext(rel)[0], {})) for rel in rels}
 
 
@@ -33,17 +52,22 @@ def game_costs(card, system, keys):
     roms = {k: sizes[k] + sum(sizes[e] for e in extras.get(k, ()) if e not in listed) for k in sized}
     if layout not in scrape_plan.SCRAPE_LAYOUTS or not keys:
         return roms, partial
-    scrapes = inventory.cached(f"{scrape_plan.SCRAPES}/{bucket}/")
+    scrapes = _scrapes_by_stem(bucket)
     if scrapes is None:
         return roms, True
     extra = scrape_costs(layout, system, [k[len(bucket) + 1:] for k in sized], scrapes)
     return {k: roms[k] + extra[k[len(bucket) + 1:]] for k in sized}, partial
 
 
-def _system_keys(card, system, sets, collections_by_id):
-    """The keys the card syncs of a system, or None for a full system whose sizes aren't cached yet."""
+def _merged(card, systems, sets):
+    """{system bucket: its store.merge_lists entry} of the card's games and the sets they reference, expanded once."""
+    return {s["bucket"]: s for s in store.merge_lists([{"bucket": s["bucket"]} for s in systems], [card.get("games") or {}], sets)}
+
+
+def _system_keys(card, system, games, collections_by_id):
+    """The keys the card syncs of a system (games: its _merged entry), or None for a full system whose sizes aren't
+    cached yet."""
     bucket = system["bucket"]
-    games = store.merge_lists([{"bucket": bucket}], [card.get("games") or {}], sets)[0]
     if games["full_system"]:
         sizes = inventory.cached(f"{bucket}/")
         if sizes is None:
@@ -56,8 +80,8 @@ def _system_keys(card, system, sets, collections_by_id):
     return keys
 
 
-def _system_usage(card, system, sets, collections_by_id):
-    keys = _system_keys(card, system, sets, collections_by_id)
+def _system_usage(card, system, games, collections_by_id):
+    keys = _system_keys(card, system, games, collections_by_id)
     if keys is None:
         return Usage(0, 0, True)
     if not keys:
@@ -75,13 +99,13 @@ def system_usage(card, system):
     (a full system ignores them, as sync does). Sizes not cached yet count as 0 and make the usage partial; a picked
     game not in storage (absent from a cached listing) counts as 0 and is not partial; a system with nothing picked is
     0 and not partial."""
-    return _system_usage(card, system, store.load_sets(), _collections_by_id())
+    return _system_usage(card, system, _merged(card, [system], store.load_sets())[system["bucket"]], _collections_by_id())
 
 
 def system_usages(card, systems):
-    """{system bucket: Usage} for each of the systems (the sets are read once)."""
-    sets, by_id = store.load_sets(), _collections_by_id()
-    return {s["bucket"]: _system_usage(card, s, sets, by_id) for s in systems}
+    """{system bucket: Usage} for each of the systems (the sets are read and expanded once)."""
+    merged, by_id = _merged(card, systems, store.load_sets()), _collections_by_id()
+    return {s["bucket"]: _system_usage(card, s, merged[s["bucket"]], by_id) for s in systems}
 
 
 def fetch_bytes(system, keys, to_fetch):
@@ -97,8 +121,8 @@ def fetch_bytes(system, keys, to_fetch):
 
 def card_fetch_bytes(card, systems, to_fetch):
     """fetch_bytes over every system the card syncs: how much of its ROMs a sync would download."""
-    sets, by_id = store.load_sets(), _collections_by_id()
-    return sum(fetch_bytes(s, _system_keys(card, s, sets, by_id), to_fetch) for s in systems)
+    merged, by_id = _merged(card, systems, store.load_sets()), _collections_by_id()
+    return sum(fetch_bytes(s, _system_keys(card, s, merged[s["bucket"]], by_id), to_fetch) for s in systems)
 
 
 def bios_usage(systems):

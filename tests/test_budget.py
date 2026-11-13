@@ -6,7 +6,7 @@ from unittest import mock
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 from helpers import DataDir  # noqa: E402
-from sync_roms import budget, inventory  # noqa: E402
+from sync_roms import budget, ignore, inventory, store  # noqa: E402
 
 GBA = {"bucket": "gba", "name": "GBA"}
 SIZES = {"gba/A.zip": 100, "gba/B.zip": 200, "gba/C.zip": 400}
@@ -147,11 +147,59 @@ class Budget(DataDir):
         self.cache.pop("scrapes/gba/")
         self.assertEqual(budget.game_costs({"layout": "esde"}, GBA, ["gba/A.zip"]), ({"gba/A.zip": 100}, True))
 
+    def test_system_usages_expands_the_sets_once(self):
+        gb = {"bucket": "gb", "name": "GB"}
+        self.cache["gb/"] = {"gb/T.gb": 7}
+        card = {"layout": "slot", "games": {"gba": [g("gba/C.zip")], "gb": [g("gb/T.gb")], "sets": ["s"]}}
+        real, calls = store.merge_lists, []
+        with mock.patch.object(store, "merge_lists", lambda *a: calls.append(a) or real(*a)):
+            usages = budget.system_usages(card, [GBA, gb])
+        self.assertEqual(len(calls), 1)
+        self.assertEqual(usages, {"gba": budget.system_usage(card, GBA), "gb": budget.system_usage(card, gb)})
+        self.assertEqual(tuple(usages["gba"]), (100 + 5 + 200 + 400, 3, False))
+
     def test_capacity(self):
         self.assertEqual(budget.card_capacity({"size": "512 GB"}), 512 * 10 ** 9)
         self.assertEqual(budget.card_capacity({"size": "1 TB"}), 10 ** 12)
         for bad in ({}, {"size": ""}, {"size": "lots"}, {"size": 5}, {"size": None}):
             self.assertIsNone(budget.card_capacity(bad))
+
+
+class ScrapeIndex(DataDir):
+    """A real cache tree: the scrape index is kept until sync-roms patches the cache or a new one is read."""
+
+    def setUp(self):
+        super().setUp()
+        inventory.reset()
+        self.addCleanup(inventory.reset)
+        self.tree = inventory.Tree("s", 0, {**SIZES, **SCRAPES}, {})
+        self.asked = []
+        real = inventory.cached
+        for target, name, new in ((inventory, "current", lambda: self.tree), (ignore, "keys", frozenset),
+                                  (inventory, "cached", lambda p: self.asked.append(p) or real(p))):
+            p = mock.patch.object(target, name, new)
+            p.start()
+            self.addCleanup(p.stop)
+
+    def costs(self, *keys):
+        return budget.game_costs({"layout": "slot"}, GBA, list(keys))[0]
+
+    def test_scrapes_are_split_once_per_cache(self):
+        self.assertEqual(self.costs("gba/A.zip", "gba/B.zip"), {"gba/A.zip": 105, "gba/B.zip": 200})
+        self.assertEqual(self.costs("gba/A.zip"), {"gba/A.zip": 105})
+        self.assertEqual(self.asked.count("scrapes/gba/"), 1)
+
+    def test_a_patch_drops_the_kept_scrapes(self):
+        self.assertEqual(self.costs("gba/C.zip"), {"gba/C.zip": 400})
+        inventory.wrote("scrapes/gba/slot/C.png", 9)
+        self.assertEqual(self.costs("gba/C.zip"), {"gba/C.zip": 409})
+        inventory.removed(["scrapes/gba/slot/A.png"])
+        self.assertEqual(self.costs("gba/A.zip"), {"gba/A.zip": 100})
+
+    def test_a_cache_read_again_drops_the_kept_scrapes(self):
+        self.assertEqual(self.costs("gba/B.zip"), {"gba/B.zip": 200})
+        self.tree = inventory.Tree("s", 0, {**SIZES, **SCRAPES, "scrapes/gba/slot/B.png": 4}, {})  # reset or update
+        self.assertEqual(self.costs("gba/B.zip"), {"gba/B.zip": 204})
 
 
 if __name__ == "__main__":
