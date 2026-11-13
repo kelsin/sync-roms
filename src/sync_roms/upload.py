@@ -73,9 +73,10 @@ class FailedUpload:
         raise self.error
 
 
-def run_copies(todo):
+def run_copies(todo, quiet=False):
     """run_uploads for a storage folder: copy (key, path, size[, shrink]) jobs into it. Returns the failure count."""
-    print(ui.bold(f"\n📁 Copying {len(todo)} file(s)") + ui.dim(f"  to {runtime.ROOT}"))
+    if not quiet:
+        print(ui.bold(f"\n📁 Copying {len(todo)} file(s)") + ui.dim(f"  to {runtime.ROOT}"))
 
     order = sorted(todo, key=lambda j: -j[2])
     moved = ui.ByteProgress([j[2] for j in order])
@@ -103,10 +104,11 @@ def run_copies(todo):
             moved.finish(i - 1)
             prog = ui.dim(f"[{i}/{len(todo)}]")
             if error is None:
-                bar.say(f"  {prog} ✅ {job[0]}")
+                if not quiet:
+                    bar.say(f"  {prog} ✅ {job[0]}")
             else:
                 failed += 1
-                bar.say(f"  {prog} ❌ {ui.red(job[0])}: {str(error).strip()}")
+                _say_failure(bar, quiet, f"  {prog} ❌ {ui.red(job[0])}: {str(error).strip()}")
             bar.draw(i)
     except KeyboardInterrupt:
         ex.shutdown(wait=False, cancel_futures=True)
@@ -129,19 +131,29 @@ def run_copies(todo):
     return failed
 
 
-def run_uploads(todo):
+def _say_failure(bar, quiet, line):
+    """A failed file's line; quiet: through ui.failure under --quiet, so it is still seen."""
+    if quiet and ui.QUIET:
+        ui.failure(line)
+    else:
+        bar.say(line)
+
+
+def run_uploads(todo, quiet=False):
     """Upload (key, path, size[, shrink]) jobs through one shared pool of requests, so small files and the parts of
     big ones all keep the connection busy. Biggest files start first so a long one never trails at the end.
-    A 4th element (max width, max height) means: upload path shrunk to fit it, shrunk on every core while the others upload."""
+    A 4th element (max width, max height) means: upload path shrunk to fit it, shrunk on every core while the others upload.
+    quiet: no heading and no line per file, only the bar and the failures."""
     if runtime.ROOT:
-        return run_copies(todo)
+        return run_copies(todo, quiet)
     workers = upload_workers()
     client = s3.s3_client(runtime.WRITE_PROFILE, connections=workers)
     try:
         client.head_bucket(Bucket=runtime.BUCKET)  # load the CA store and open one connection before the parallel handshakes
     except (ClientError, BotoCoreError):
         pass
-    print(ui.bold(f"\n☁️  Uploading {len(todo)} file(s)") + ui.dim(f"  {workers} requests at once"))
+    if not quiet:
+        print(ui.bold(f"\n☁️  Uploading {len(todo)} file(s)") + ui.dim(f"  {workers} requests at once"))
     from boto3.s3.transfer import TransferConfig, create_transfer_manager
     config = TransferConfig(max_concurrency=workers, multipart_threshold=UPLOAD_MULTIPART_AT,
                             multipart_chunksize=UPLOAD_PART)
@@ -187,10 +199,11 @@ def run_uploads(todo):
                     try:
                         future.result()
                         inventory.wrote(job[0], sent[n])  # its ETag isn't known: a multipart upload's isn't the MD5
-                        bar.say(f"  {prog} ✅ {job[0]}")
+                        if not quiet:
+                            bar.say(f"  {prog} ✅ {job[0]}")
                     except Exception as e:
                         failed += 1
-                        bar.say(f"  {prog} ❌ {ui.red(job[0])}: {str(e).strip()}")
+                        _say_failure(bar, quiet, f"  {prog} ❌ {ui.red(job[0])}: {str(e).strip()}")
                     bar.draw(i)
             except KeyboardInterrupt:
                 shrinkers.shutdown(wait=False, cancel_futures=True)

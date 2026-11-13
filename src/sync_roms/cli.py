@@ -150,7 +150,9 @@ TOPICS = {
 
   Looks up every available ROM with no entry in scrapes/<system>/metadata.json on ScreenScraper and writes its
   metadata and media (and the Onion/Slot images) to storage. The ROMs and how each will be
-  looked up are listed first. ROMs ScreenScraper doesn't know are remembered and skipped until --retry.
+  looked up are listed first, then the most requests the run can make against what is left of today's quota. ROMs
+  ScreenScraper doesn't know are remembered and skipped until --retry. Each batch of ROMs shows today's requests and
+  the time elapsed and left; each ROM gets a line as it ends (the game it matched, how, and its media count).
   SYSTEM             only that storage folder (e.g. gba); --system ID is the same
   --retry            also look up the ROMs ScreenScraper didn't know before (ROMs whose lookup failed are always
                      tried again; non-games never are: see review) and, with --fill-media, the media it didn't offer
@@ -174,7 +176,8 @@ TOPICS = {
   A rate-limited request, a server error (HTTP 5xx) or a network failure is tried 3 more times over about a minute.
   The run stops cleanly, keeping what it finished, when ScreenScraper's daily quota runs out (run it again tomorrow),
   when ScreenScraper refuses the login, is closed or no longer accepts this version (the message says what to do), or
-  when 3 ROMs in a row can't reach it. Writes use the write profile.
+  when 3 ROMs in a row can't reach it. Ctrl-C stops it too: the ROMs that finished are uploaded and saved, it says how
+  many were saved and how many are left, and it exits 130 (a second Ctrl-C aborts at once). Writes use the write profile.
 """,
     "clean": """
   sync-roms clean scrapes [--dry-run]

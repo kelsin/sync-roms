@@ -244,6 +244,20 @@ class ClientTests(unittest.TestCase):
         self.assertIn("md5=ab", seen[0].full_url)
         self.assertTrue(seen[0].get_header("User-agent").startswith("sync-roms/"))
 
+    def test_client_keeps_the_last_account_block_it_saw(self):
+        c = client(lambda req, timeout=None: fixture("jeuinfos_found.json"))
+        self.assertIsNone(c.last_quota)
+        c.lookup(12, "game.gba", 100)
+        self.assertEqual(c.last_quota, ss.Quota(max_threads=1, used_today=10, max_today=20000))
+        c._opener = lambda req, timeout=None: Resp(json.dumps({"response": {"jeu": {"id": "5"}}}).encode())
+        c.lookup(12, "game.gba", 100)  # a response without one keeps the last
+        self.assertEqual(c.last_quota.used_today, 10)
+        c._opener = lambda req, timeout=None: Resp(json.dumps({"response": {"ssuser": {"requeststoday": "11"}, "jeu": {"id": "5"}}}).encode())
+        c.lookup(12, "game.gba", 100)  # one without a daily max keeps the last too
+        self.assertEqual(c.last_quota.used_today, 10)
+        c._opener = lambda req, timeout=None: fixture("ssuserinfos.json")
+        self.assertEqual(c.quota(), c.last_quota)
+
     def test_lookup_not_found_raises(self):
         def http404(req, timeout=None):
             raise http_error(404)

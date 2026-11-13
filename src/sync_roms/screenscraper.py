@@ -369,11 +369,20 @@ def _chunk(resp):
         raise Transient(f"ScreenScraper download failed ({type(e).__name__})") from None
 
 
+def _quota(data):
+    """The account's limits in a whole response, or None when it has no account (ssuser) in it."""
+    user = _dict(_dict(data).get("response")).get("ssuser")
+    if not isinstance(user, dict):
+        return None
+    return Quota(to_int(user.get("maxthreads"), 1), to_int(user.get("requeststoday")), to_int(user.get("maxrequestsperday")))
+
+
 class Client:
     def __init__(self, user, password, dev, opener=None):
         self._auth = {"devid": dev["devid"], "devpassword": dev["devpassword"], "softname": SOFTNAME,
                       "ssid": user, "sspassword": password}
         self._opener = opener or KeepAlive()
+        self.last_quota = None  # the account's limits from the last response that carried them
 
     def _open(self, url):
         """The response for a URL. Every error is turned into one of ours whose text never holds the URL (its query
@@ -421,17 +430,17 @@ class Client:
         if body.lstrip().startswith(NOT_FOUND_PREFIX):
             raise NotFound("not found")
         try:
-            return json.loads(body)
+            data = json.loads(body)
         except (ValueError, RecursionError):
             raise ApiError("ScreenScraper returned an unreadable response") from None
+        quota = _quota(data)
+        if quota is not None and quota.max_today:  # one without a daily max says nothing about the quota
+            self.last_quota = quota
+        return data
 
     def quota(self):
         """The account's limits, or None when the response has no account (ssuser) in it."""
-        user = _dict(_dict(self._get(EP_QUOTA)).get("response")).get("ssuser")
-        if not isinstance(user, dict):
-            return None
-        return Quota(to_int(user.get("maxthreads"), 1), to_int(user.get("requeststoday")),
-                     to_int(user.get("maxrequestsperday")))
+        return _quota(self._get(EP_QUOTA))
 
     @staticmethod
     def _game(data):

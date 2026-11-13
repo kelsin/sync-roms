@@ -14,7 +14,7 @@ import threading
 import time
 import zlib
 from collections import Counter, deque, namedtuple
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
 
 from botocore.exceptions import ClientError
 
@@ -489,8 +489,12 @@ def _storage_fail(what, e, rerun):
             f"run `{rerun}` again to continue.", 3)
 
 
-def _stop_message(e, rerun):
-    """What the user is told when e stopped the run: why, and how to continue."""
+def _stop_message(e, rerun, counts=(0, 0)):
+    """What the user is told when e stopped the run: why, and how to continue. counts: (ROMs scraped this run, ROMs left),
+    said on Ctrl-C."""
+    if isinstance(e, KeyboardInterrupt):
+        return (f"🛑 Interrupted. {counts[0]} ROM(s) scraped this run are saved and {counts[1]} are left; run `{rerun}` again "
+                "to continue where it stopped.")
     if isinstance(e, screenscraper.Refused):
         return f"⛔ {e}. Everything scraped so far is saved; run `{rerun}` again to continue where it stopped."
     if isinstance(e, screenscraper.Transient):
@@ -534,7 +538,7 @@ def _media_keys(listing, system, stem):
     return out
 
 
-Started = namedtuple("Started", "futures kept tmp")  # a batch handed to the pool: its futures, the media types storage already has per ROM, its temp folder
+Started = namedtuple("Started", "futures kept tmp stop")  # a batch handed to the pool: its futures, the media types storage already has per ROM, its temp folder, the run's stop event
 
 
 def start_batch(ex, client, system, batch, skip, stop, index, replace=False, forced=None, hasher=None):
@@ -550,39 +554,84 @@ def start_batch(ex, client, system, batch, skip, stop, index, replace=False, for
     tmp = tempfile.mkdtemp()
     futures = [ex.submit(scrape_rom, client, system, item, tmp, skip | kept[item[0]], stop, forced.get(item[0]))
                for item in batch]
-    return Started(futures, kept, tmp)
+    return Started(futures, kept, tmp, stop)
 
 
-def run_batch(system, batch, started, shrink, outcomes, listing, index, pending, replace=False, forced=None, rerun=RERUN):
-    """Wait for a started batch's ROMs, upload their media and queue their entries in pending ({ROM: (how, metadata,
-    upload jobs)}, written to metadata.json by record). Returns (failures, the error that stops the run or None): a
-    ROM's QuotaExceeded or Refused, or the Transient error of the last of UNREACHABLE_STOP ROMs in a row that couldn't
-    reach ScreenScraper.
+def _say_rom(pos, name, rom, status, payload, forced_id):
+    """Print the line of a ROM whose work ended: the game it matched, how, and its media count; nothing for a ROM
+    skipped or stopping the run (the closing message covers them)."""
+    head = f"  {ui.dim(pos)} "
+    if status in ("unknown", "notgame") and forced_id is not None:
+        ui.failure(ui.red(f"{head}❌ {name}/{rom}: " + (f"ScreenScraper game {forced_id} is not a playable game entry"
+                                                       if status == "notgame" else f"ScreenScraper has no game {forced_id}")))
+    elif status == "notgame":
+        found = f" → {payload[1]['name']}" if payload[1]["name"] else ""
+        print(ui.dim(f"{head}🚫 {name}/{rom}{found}: ScreenScraper lists it as a non-game"))
+    elif status == "unknown":
+        print(ui.dim(f"{head}❔ {name}/{rom}: not on ScreenScraper"))
+    elif status in ("failed", "unreachable"):
+        ui.failure(ui.yellow(f"{head}⚠️  {name}/{rom}: {payload if status == 'failed' else _reason(payload)}; skipped"))
+    elif status == "done":
+        how, meta, files = payload
+        found = f" → {meta['name']}" if meta.get("name") else ""
+        print(f"{head}✅ {name}/{rom}{found}" + ui.dim(f"  {how}, {len(files)} media"))
+
+
+def run_batch(system, batch, started, shrink, outcomes, listing, index, pending, replace=False, forced=None, rerun=RERUN,
+              position=(0, None), interrupted=False):
+    """Wait for a started batch's ROMs, printing a line for each as it ends, upload their media and queue their entries in
+    pending ({ROM: (how, metadata, upload jobs)}, written to metadata.json by record). Returns (failures, the error that
+    stops the run or None): a KeyboardInterrupt on Ctrl-C, a ROM's QuotaExceeded or Refused, or the Transient error of the
+    last of UNREACHABLE_STOP ROMs in a row that couldn't reach ScreenScraper.
 
     listing: {key: size} of scrapes/<system>/, and index: its scrape_index, both kept up to date with what this batch
     uploads. replace: the ROMs'
     metadata entries are replaced (not merged) and their old scraper media (never custom/ or skipped types) is
-    overwritten. forced: see start_batch; rerun: the command that continues the run.
+    overwritten. forced: see start_batch; rerun: the command that continues the run. position: (the system's ROMs
+    before this batch, its ROM count), for each ROM's line.
+
+    Ctrl-C stops the run: the ROMs still working stop at their next check, and those that finished are uploaded and
+    queued; during the upload it keeps the ROMs whose media all made it. interrupted: an earlier Ctrl-C is being
+    handled, so this one aborts (raised).
     """
     name = system["bucket"]
     forced = forced or {}
-    failed = 0
+    failed, cut = 0, False  # cut: Ctrl-C ended the upload early, so what it didn't copy is left, not failed
     kept = started.kept
+    results = [("skipped", None)] * len(batch)
+    order = {f: i for i, f in enumerate(started.futures)}
+    left, shown = set(started.futures), position[0]
+
+    def take():  # results in batch order, each ROM's line printed as it ends
+        nonlocal shown
+        while left:
+            for f in sorted(wait(left, return_when=FIRST_COMPLETED)[0], key=order.get):
+                left.discard(f)
+                i = order[f]
+                results[i] = status, payload = f.result()
+                if status not in ("skipped", "stop"):
+                    shown += 1
+                    _say_rom(f"[{shown}/{position[1] or len(batch)}]", name, batch[i][0], status, payload, forced.get(batch[i][0]))
     try:
-        results = [f.result() for f in started.futures]
-        halt = next((payload for status, payload in results if status == "stop"), _unreachable.error)
+        try:
+            take()
+        except KeyboardInterrupt:
+            if interrupted:
+                raise
+            interrupted = True
+            started.stop.set()
+            print(ui.yellow("  🛑 Interrupted — finishing the ROMs in progress and saving what is done. ^C again to abort now."))
+            take()
+        halt = KeyboardInterrupt() if interrupted else next((p for s, p in results if s == "stop"), _unreachable.error)
         jobs = {}  # ROM -> its upload jobs
         done = {}
         for (rom, _, _), (status, payload) in zip(batch, results):
             if status in ("unknown", "notgame") and rom in forced:
                 failed += 1
                 outcomes[rom] = None
-                print(ui.red(f"  ❌ ScreenScraper game {forced[rom]} is not a playable game entry" if status == "notgame"
-                             else f"  ❌ ScreenScraper has no game {forced[rom]}"))
             elif status == "notgame":
                 scrape_state.mark_notgame(name, rom, payload[1])
                 outcomes[rom] = None
-                print(ui.dim(f"     🚫 {name}/{rom}: ScreenScraper lists it as a non-game"))
             elif status == "unknown":
                 if payload[0] == "manual":  # the saved match's game is gone: don't retry it on every run
                     print(ui.yellow(f"  ⚠️  {name}/{rom}: ScreenScraper has no game {scrape_state.manual_match(name, rom)}; "
@@ -590,10 +639,8 @@ def run_batch(system, batch, started, shrink, outcomes, listing, index, pending,
                     scrape_state.forget_match(name, rom)
                 scrape_state.mark_unknown(name, rom)
                 outcomes[rom] = None
-                print(ui.dim(f"     ❔ {name}/{rom}: not on ScreenScraper"))
             elif status in ("failed", "unreachable"):
                 failed += 1
-                ui.failure(ui.yellow(f"  ⚠️  {name}/{rom}: {payload if status == 'failed' else _reason(payload)}; skipped"))
             elif status == "done":
                 how, meta, files = payload
                 stem = os.path.splitext(rom)[0]
@@ -607,15 +654,22 @@ def run_batch(system, batch, started, shrink, outcomes, listing, index, pending,
                 jobs[rom], done[rom] = rom_jobs, (how, meta)
         todo = [j for js in jobs.values() for j in js]
         try:
-            upload_failed = upload.run_uploads(todo) if todo else 0
+            try:
+                upload_failed = upload.run_uploads(todo, quiet=True) if todo else 0
+            except KeyboardInterrupt:  # run_uploads let the files in flight finish
+                if interrupted:
+                    raise
+                started.stop.set()
+                halt, cut, upload_failed = KeyboardInterrupt(), True, 1
             have = inventory.files(f"{scrape_plan.SCRAPES}/{name}/") if upload_failed else {}
         except s3.ERRORS as e:
             _storage_fail(f"Uploading {name} media", e, rerun)
         if upload_failed:
             for rom in [r for r in done if not _uploaded(jobs[r], have)]:
-                failed += 1
                 del done[rom]
-                print(ui.yellow(f"  ⚠️  {name}/{rom}: its media didn't all upload; skipped"))
+                if not cut:
+                    failed += 1
+                    ui.failure(ui.yellow(f"  ⚠️  {name}/{rom}: its media didn't all upload; skipped"))
     finally:
         shutil.rmtree(started.tmp, ignore_errors=True)
     for rom, (how, meta) in done.items():
@@ -688,6 +742,16 @@ def record(system, pending, outcomes, listing, index, skip, replace=False, rerun
     return 0, False
 
 
+def _progress(client, done, total, elapsed):
+    """A batch header's tail: the time elapsed and left (once some ROMs are done) and today's requests, when the client
+    has seen them."""
+    parts = [f"{ui.eta(elapsed)} elapsed, {ui.eta(elapsed / done * (total - done))} left"] if done else []
+    quota = client.last_quota
+    if quota is not None and quota.max_today:
+        parts.append(f"{quota.used_today}/{quota.max_today} requests used today")
+    return "  " + " · ".join(parts) if parts else ""
+
+
 def _stems(batch):
     return {os.path.splitext(rom)[0] for rom, _, _ in batch}
 
@@ -696,7 +760,8 @@ def scrape_system(client, system, items, threads, skip, shrink, outcomes, listin
                   rerun=RERUN, fill=False, metadata=None):
     """Scrape one system's ROMs on one pool of threads, in batches: the next batch is scraped while the last one uploads,
     so no thread waits for a batch's slowest ROM. Entries are written to metadata.json every METADATA_INTERVAL seconds, when
-    the system is done and when the run stops. Returns (failures, the error that stopped the run or None). Arguments: see run_batch;
+    the system is done and when the run stops. Returns (failures, the error that stopped the run or None: a KeyboardInterrupt
+    on Ctrl-C, once what finished is saved; a second Ctrl-C is raised). Arguments: see run_batch;
     index: scrape_plan.scrape_index(listing); metadata: the system's metadata.json if the caller already loaded it."""
     name = system["bucket"]
     # a metadata.json that can't be used fails before any quota is spent
@@ -706,7 +771,7 @@ def scrape_system(client, system, items, threads, skip, shrink, outcomes, listin
         return len(items), None
     batches, flight = deque(_batches(items)), deque()
     pending, stop, failed, halted, started = {}, threading.Event(), 0, None, 0
-    last_write = time.monotonic()
+    last_write = since = time.monotonic()
     ex, hasher = ThreadPoolExecutor(threads), ThreadPoolExecutor(HASH_THREADS)
     try:
         while batches or flight:
@@ -717,12 +782,13 @@ def scrape_system(client, system, items, threads, skip, shrink, outcomes, listin
             if not flight:
                 break
             batch, begun = flight.popleft()
-            print(ui.bold(f"\n🔎 {name}: ROMs {started + 1}-{started + len(batch)} of {len(items)}"))
-            started += len(batch)
+            print(ui.bold(f"\n🔎 {name}: ROMs {started + 1}-{started + len(batch)} of {len(items)}")
+                  + ui.dim(_progress(client, started, len(items), time.monotonic() - since)))
             n, hit = run_batch(system, batch, begun, shrink, outcomes, listing, index, pending, replace=replace, forced=forced,
-                               rerun=rerun)
+                               rerun=rerun, position=(started, len(items)), interrupted=isinstance(halted, KeyboardInterrupt))
+            started += len(batch)
             failed += n
-            halted = halted or hit
+            halted = hit if isinstance(hit, KeyboardInterrupt) else halted or hit  # Ctrl-C wins over an earlier stop
             if time.monotonic() - last_write >= METADATA_INTERVAL:
                 scrape_state.flush_unknown()  # marks from a run that finds nothing must not wait for the final flush
                 scrape_state.flush_hashes()
@@ -782,6 +848,11 @@ def run_scrape(client, systems, todo, skip, ask=True, replace=False, forced=None
         quota = screenscraper.Quota(1, 0, 0)
     elif quota.max_today:
         print(ui.dim(f"ScreenScraper: {_quota_line(quota)}"))
+        need, left = count * (1 + len(set(screenscraper.MEDIA_MAP.values()) - skip)), max(0, quota.max_today - quota.used_today)
+        print(ui.dim(f"  up to {need} request(s) for {count} ROM(s), {left} left today"))
+        if need > left:
+            print(ui.yellow(f"  ⚠️  This may use up today's quota: the run then stops, keeping what it finished, and `{rerun}` "
+                            "continues tomorrow"))
     if ask and not ui.confirm(f"🖼️  Scrape {count} ROM(s) from ScreenScraper and write their media and metadata to "
                               f"{s3.location()}/{scrape_plan.SCRAPES}/{note} ?", default=False):
         print(ui.yellow("👋 Cancelled."))
@@ -800,10 +871,13 @@ def run_scrape(client, systems, todo, skip, ask=True, replace=False, forced=None
             break
     print(ui.bold("\n📋 Results"))
     print(report({name: [r for r, _, _ in items] for name, items in todo.items()}, outcomes))
-    _offer_review(client, systems, todo, sorted(set(scrape_state.notgames()) - before))
+    interrupted = isinstance(halted, KeyboardInterrupt)
+    if not interrupted:  # nothing is asked after Ctrl-C
+        _offer_review(client, systems, todo, sorted(set(scrape_state.notgames()) - before))
     if halted:
-        ui.failure(ui.yellow("\n" + _stop_message(halted, rerun)))
-        return 1
+        counts = (sum(1 for got in outcomes.values() for how in got.values() if how), count - sum(map(len, outcomes.values())))
+        ui.failure(ui.yellow("\n" + _stop_message(halted, rerun, counts)))
+        return 130 if interrupted else 1
     print(ui.green("\n🎉 Done!") if not failed else ui.red(f"\n⚠️  Done with {failed} failure(s); run `{rerun}` to try again"))
     return 1 if failed else 0
 
