@@ -257,6 +257,8 @@ def put_file(key, path):
     if runtime.ROOT:
         return write_file(key, lambda tmp: shutil.copyfile(path, tmp))
     s3_client(runtime.WRITE_PROFILE).upload_file(path, runtime.BUCKET, key)
+    from . import inventory
+    inventory.wrote(key, os.path.getsize(path))
 
 
 def list_with_etags(prefix):

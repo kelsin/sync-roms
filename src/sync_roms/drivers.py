@@ -1,7 +1,12 @@
 """Custom Adreno GPU driver zips from GitHub releases, kept in storage and copied to Android cards."""
+import http.client
+import os
 import re
+import shutil
+import tempfile
+import zipfile
 
-from . import store
+from . import github, inventory, runtime, s3, store, ui
 
 PREFIX = "os/drivers/"
 
@@ -46,3 +51,77 @@ def pick_release(driver, releases):
 
 def card_name(driver_id, tag):
     return f"{driver_id}-{re.sub(r'[^A-Za-z0-9._-]', '_', tag)}.zip"
+
+
+def can_write():
+    """Whether storage can be written: a storage folder always, a bucket when the write profile exists."""
+    if runtime.ROOT:
+        return True
+    import boto3
+    from botocore.exceptions import ProfileNotFound
+    try:
+        boto3.Session(profile_name=runtime.WRITE_PROFILE)
+    except ProfileNotFound:
+        return False
+    return True
+
+
+def stored_tag(driver_id):
+    """The release tag of the driver's zip in storage (never the mirror), or None when there is no .tag."""
+    from . import mirroring
+    try:
+        with mirroring.storage_reads():
+            return s3.get_text(f"{PREFIX}{driver_id}.tag").strip()
+    except s3.ERRORS as e:
+        if s3.missing(e):
+            return None
+        raise
+
+
+def _latest(driver):
+    repo = driver["repo"]
+    if driver.get("tag"):
+        releases = [github.json(f"https://api.github.com/repos/{repo}/releases/tags/{driver['tag']}")]
+    else:
+        releases = github.json(f"https://api.github.com/repos/{repo}/releases?per_page=100")
+    return pick_release(driver, releases)
+
+
+def _update(driver, dry_run):
+    key = f"{PREFIX}{driver['id']}"
+    if driver.get("tag") and f"{key}.zip" in inventory.files(PREFIX):
+        return
+    tag, asset = _latest(driver)
+    old = stored_tag(driver["id"])
+    if old == tag:
+        return
+    if dry_run:
+        print(ui.dim(f"🧪 Dry run: would store {driver['name']} {tag}"))
+        return
+    with tempfile.TemporaryDirectory() as tmp:
+        path = os.path.join(tmp, "driver.zip")
+        with github.get(asset["browser_download_url"]) as r, open(path, "wb") as f:
+            shutil.copyfileobj(r, f)
+        if not zipfile.is_zipfile(path):
+            raise OSError(f"{asset['name']} isn't a zip file")
+        s3.put_file(f"{key}.zip", path)  # the zip first, so a .tag never names a zip that isn't there
+        s3.put_text(f"{key}.tag", tag + "\n")
+        if runtime._mirror_root:
+            for suffix, source in ((".zip", path), (".tag", None)):
+                target = s3.safe_join(runtime._mirror_root, key + suffix)
+                os.makedirs(os.path.dirname(target), exist_ok=True)
+                if source:
+                    shutil.copyfile(source, target)
+                else:
+                    with open(target, "w", encoding="utf-8") as f:
+                        f.write(tag + "\n")
+    print(f"🎮 {driver['name']}: {old or 'none in storage'} → {tag}")
+
+
+def refresh(entries, dry_run):
+    """Keep the newest release zip of each driver (a pinned one once) in storage. A failure warns and moves on."""
+    for driver in entries:
+        try:
+            _update(driver, dry_run)
+        except (OSError, http.client.HTTPException, NoAsset, *s3.ERRORS) as e:
+            ui.warn(f"Couldn't update the {driver['name']} driver: {e}")
