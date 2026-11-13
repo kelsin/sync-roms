@@ -10,7 +10,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "src"))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
-from sync_roms import cli, commands, downloads, mirroring, store, ui  # noqa: E402
+from sync_roms import cli, commands, downloads, mirroring, runtime, store, ui  # noqa: E402
 from helpers import Cmd, DataDir  # noqa: E402,F401
 
 
@@ -379,7 +379,25 @@ class DownloadsTest(unittest.TestCase):
 
     def test_failure_hint_for_a_file_gone_from_a_storage_folder_points_at_cache_update(self):
         e = FileNotFoundError(2, "No such file or directory", "/Volumes/roms/psx/Big1.chd")
-        self.assertIn("sync-roms cache update", downloads.failure_hint(e))
+        with mock.patch.object(runtime, "ROOT", "/Volumes/roms"):
+            self.assertIn("sync-roms cache update", downloads.failure_hint(e))
+
+    def test_failure_hint_for_a_missing_local_file_says_nothing_about_storage(self):
+        e = FileNotFoundError(2, "No such file or directory", "/Volumes/SD/ROMs/psx/Big1.chd.part")
+        with mock.patch.object(runtime, "ROOT", "/Volumes/roms"):
+            self.assertEqual(downloads.failure_hint(e), "")
+        with mock.patch.object(runtime, "ROOT", None):
+            self.assertEqual(downloads.failure_hint(e), "")
+
+    def test_failure_summary_points_at_cache_update_only_when_every_failure_is_stale(self):
+        stale = ("psx/A.chd", "[Errno 2] No such file or directory" + downloads.STALE_HINT)
+        other = ("psx/B.chd", "[Errno 5] Input/output error")
+        for failures, cache, retry in (([stale, stale], True, False), ([stale, other], False, True)):
+            with self.subTest(failures=failures), contextlib.redirect_stdout(io.StringIO()) as out:
+                cli.report_failures(failures)
+            last = out.getvalue().splitlines()[-1]
+            self.assertEqual("sync-roms cache update" in last, cache)
+            self.assertEqual("run the same command again" in last, retry)
 
     def test_mirror_keeps_stale_files_when_a_download_failed(self):
         import tempfile

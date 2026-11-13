@@ -727,7 +727,10 @@ def report_failures(failures):
         print(f"   {key}: {ui.dim(reason)}")
     if len(failures) > 20:
         print(ui.dim(f"   … and {len(failures) - 20} more"))
-    print(ui.dim("   Files already downloaded are skipped, so run the same command again to retry just these."))
+    if all(reason.endswith(downloads.STALE_HINT) for _, reason in failures):
+        print(ui.dim(f"   These are gone from storage since the cache was built: run {inventory.UPDATE_HINT}, then sync again."))
+    else:
+        print(ui.dim("   Files already downloaded are skipped, so run the same command again to retry just these."))
 
 
 def sync_card(args):
