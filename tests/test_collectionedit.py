@@ -6,7 +6,7 @@ from unittest import mock
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 from helpers import DataDir  # noqa: E402
-from sync_roms import cli, collectionedit, commands, collections, edit, listedit, picker, setedit, store, themeart, ui  # noqa: E402
+from sync_roms import cli, collectionedit, commands, collections, edit, inventory, listedit, picker, setedit, store, themeart, ui  # noqa: E402
 
 SYSTEMS = [{"name": "Game Boy Advance", "bucket": "gba"}, {"name": "PlayStation", "bucket": "psx"}]
 DISCS = {"psx/FF7.m3u", "psx/FF7 (Disc 1).chd", "psx/FF7 (Disc 2).chd", "psx/Crash.chd"}
@@ -15,8 +15,38 @@ RUBY = {"title": "Ruby", "system": "gba", "bucket": "gba/Ruby.zip"}
 
 class Shared(unittest.TestCase):
     def test_set_editor_uses_the_shared_helpers(self):
-        for name in ("view", "insert_game", "reconcile", "recategorize", "ask_category", "game_label"):
+        for name in ("view", "stocked", "insert_game", "reconcile", "recategorize", "ask_category", "game_label"):
             self.assertIs(getattr(setedit, name), getattr(listedit, name))
+
+
+class Stocked(unittest.TestCase):
+    SYSTEMS = SYSTEMS + [{"name": "Game Boy", "bucket": "gb"}, {"name": "Saturn", "bucket": "saturn"}]
+
+    def offered(self, module, folders, cache):
+        seen = []
+
+        def fake(title, labels, **k):
+            if title.startswith("✏️  Add games"):
+                seen.extend(labels)
+                return None
+            return 1 if not seen else None  # add from a system, then back
+
+        with mock.patch.object(inventory, "folders", side_effect=folders), \
+                mock.patch.object(inventory, "cached", lambda p: cache.get(p)), \
+                mock.patch.object(picker, "filter_list", fake):
+            module.edit_one({"name": "Favs", "games": []}, self.SYSTEMS, lambda bucket: set())
+        return seen
+
+    def test_add_games_hides_systems_with_a_missing_or_empty_folder(self):
+        cache = {"gba/": {"Ruby.zip": 1}, "psx/": {}, "gb/": {"Tetris.zip": 1}}
+        for module in (collectionedit, setedit):
+            # psx is cached as empty, saturn has no folder; gb has a folder and games
+            self.assertEqual(self.offered(module, lambda: {"gba", "psx", "gb"}, cache), ["Game Boy Advance", "Game Boy"])
+
+    def test_add_games_goes_by_the_cache_when_storage_cannot_be_reached(self):
+        def down():
+            raise OSError("down")
+        self.assertEqual(self.offered(collectionedit, down, {"psx/": {}}), ["Game Boy Advance", "Game Boy", "Saturn"])
 
 
 class Discs(unittest.TestCase):

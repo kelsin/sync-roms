@@ -1,5 +1,5 @@
 """Games-list helpers shared by the set and collection editors."""
-from . import ui
+from . import inventory, s3, ui
 
 
 def view(listing, systems):
@@ -7,6 +7,18 @@ def view(listing, systems):
     return {s["bucket"]: {"bucket": s["bucket"], "name": s["name"], "full_system": False,
                           "games": [g for g in listing["games"] if g.get("system") == s["bucket"] and g.get("bucket")]}
             for s in systems}
+
+
+def stocked(systems):
+    """The systems with files in storage, to add games from: a missing or empty folder has nothing to add.
+    All of them when storage can't be reached and nothing is cached."""
+    try:
+        with ui.silent_thread():
+            folders = inventory.folders()
+    except (*s3.ERRORS, SystemExit):  # storage can't be reached (ui.fail raises SystemExit): go by the cache alone
+        folders = None
+    return [s for s in systems
+            if (folders is None or s["bucket"] in folders) and inventory.cached(f"{s['bucket']}/") != {}]
 
 
 def insert_game(games, game):
