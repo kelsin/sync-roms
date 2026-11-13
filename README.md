@@ -387,7 +387,10 @@ read profile and writes the write profile.
 **Credentials.** You need a [ScreenScraper](https://www.screenscraper.fr) account; sync-roms carries its own developer
 credentials for the API. Run `sync-roms scrape --set-credentials` to enter your username and password (the password isn't
 echoed, a blank answer keeps the saved value). They are stored in `settings.json` as `screenscraper_user` and
-`screenscraper_password`; the file is kept readable by you only (mode 600) and `config show` never prints them.
+`screenscraper_password`; the file is kept readable by you only (mode 600) and `config show` never prints them. After
+saving, one request checks the login and shows today's quota and threads, or the error; when ScreenScraper refuses it
+the command exits 1. A run also checks the login
+before it asks to start, and warns when ScreenScraper sends no account details for it.
 
 **Report.** Before looking anything up, the run lists the ROMs with no metadata and how each will be matched first, and
 in a storage folder how much it will read to hash them.
@@ -435,6 +438,13 @@ ignoring a ROM, remove it from `ignored.json` in storage.
 
 **Quota.** ScreenScraper limits requests per day, and separately the number of unrecognized ROMs per day. When either is
 used up the run stops cleanly with what it finished already saved and says which limit it was; run it again the next day.
+
+**Errors.** A rate-limited request, a server error (HTTP 5xx) or a network failure is tried 3 more times, waiting 10, 20
+and 40 seconds; a ROM that still fails is skipped and tried again on the next run. The run stops the same clean way, and
+says what to do, when ScreenScraper refuses the login (check it with `sync-roms scrape --set-credentials`), is closed to
+non-members or to everyone for now (try again later), or no longer accepts this version of sync-roms (update it), and
+when 3 ROMs in a row fail to reach ScreenScraper. A ROM that fails because a download can't be saved locally (a full disk)
+is skipped at once, without retries.
 
 **What is written** under `scrapes/<system>/`: the entry in `metadata.json` (merged with what is there) and one folder per media
 type (`3dboxes`, `backcovers`, `covers`, `fanart`, `manuals`, `marquees`, `miximages`, `physicalmedia`, `screenshots`,

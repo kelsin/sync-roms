@@ -198,8 +198,9 @@ LOOKAHEAD = 2  # batches in the pool at once: the next one is scraped while the 
 HASH_THREADS = 4  # ROMs hashed at once ahead of their lookups
 HASH_MAX = 64 << 20  # bigger files in a storage folder are hashed only when their name and size find nothing (a bucket has no MD5 for them either)
 METADATA_INTERVAL = 60  # seconds of scraped ROMs whose entries are written to metadata.json together
-RETRIES = 3  # times a rate-limited request is tried again
-RETRY_WAIT = 2  # seconds before the first retry, doubled each time
+RETRIES = 3  # times a rate-limited or transient request is tried again
+RETRY_WAIT = 10  # seconds before the first retry, doubled each time: 70 s in all, past a per-minute cap
+UNREACHABLE_STOP = 3  # ROMs in a row that can't reach ScreenScraper after their retries stop the run
 CREDENTIALS = ("screenscraper_user", "screenscraper_password")
 # What one ROM's lookup and downloads can raise besides NotFound and QuotaExceeded: the client's own errors and
 # those it doesn't wrap (a read cut short, a timeout, a malformed media URL, an unsafe ROM path).
@@ -210,33 +211,60 @@ SCRAPER_TYPES = set(screenscraper.MEDIA_MAP.values()) | {scrape_plan.ONION_TYPE,
 
 
 class _RomClient:
-    """One ROM's view of the client: rate-limited requests are retried, and the game a lookup found is kept."""
+    """One ROM's view of the client: rate-limited and transient requests are retried (the waits end when stop is set),
+    and the game a lookup found is kept."""
 
-    def __init__(self, client):
-        self.client, self.found = client, None
+    def __init__(self, client, stop=None):
+        self.client, self.stop, self.found = client, stop, None
 
     def lookup(self, *args, **kwargs):
-        self.found = _retry(self.client.lookup, *args, **kwargs)
+        self.found = _retry(self.stop, self.client.lookup, *args, **kwargs)
         return self.found
 
     def game(self, game_id):
-        return _retry(self.client.game, game_id)
+        return _retry(self.stop, self.client.game, game_id)
 
     def search(self, system_id, name):
-        return _retry(self.client.search, system_id, name)
+        return _retry(self.stop, self.client.search, system_id, name)
 
     def download(self, url, dest, **kwargs):
-        return _retry(self.client.download, url, dest, **kwargs)
+        return _retry(self.stop, self.client.download, url, dest, **kwargs)
 
 
-def _retry(call, *args, **kwargs):
+def _retry(stop, call, /, *args, **kwargs):
+    """call's result; a rate-limited or transient failure is tried again RETRIES times, after RETRY_WAIT seconds doubled
+    each time. Raises screenscraper.Stopped when the stop event (None: there is none) is set while waiting."""
     for attempt in range(RETRIES + 1):
         try:
             return call(*args, **kwargs)
-        except screenscraper.RateLimited:
+        except (screenscraper.RateLimited, screenscraper.Transient):
             if attempt == RETRIES:
                 raise
-            time.sleep(RETRY_WAIT * 2 ** attempt)
+            if (stop or threading.Event()).wait(RETRY_WAIT * 2 ** attempt):
+                raise screenscraper.Stopped() from None
+
+
+class _Unreachable:
+    """The run's count of ROMs in a row (in the order they end) that couldn't reach ScreenScraper after their retries,
+    shared by the lookup threads; error: the Transient error that stopped the run, once the count reached UNREACHABLE_STOP."""
+
+    def __init__(self):
+        self.lock, self.count, self.error = threading.Lock(), 0, None
+
+    def reset(self):
+        with self.lock:
+            self.count, self.error = 0, None
+
+    def add(self, e):
+        """Count a ROM's outcome (e: its Transient error, None for any other outcome); whether the run must stop."""
+        with self.lock:
+            self.count = self.count + 1 if e is not None else 0
+            if self.count >= UNREACHABLE_STOP and self.error is None:
+                self.error = e
+            return self.error is not None
+
+
+_unreachable = _Unreachable()
 
 
 def make_client():
@@ -275,7 +303,26 @@ def set_credentials():
         return 0
     usersettings.save_settings({**usersettings.load_settings(), **answers})
     print(ui.green("✅ Saved ScreenScraper credentials to " + os.path.join(store.data_dir(), "settings.json")))
+    try:
+        quota = make_client().quota()
+    except screenscraper.Refused as e:
+        ui.failure(ui.red(f"❌ Credentials saved, but ScreenScraper refused the check: {e}"))
+        return 1
+    except (screenscraper.QuotaExceeded, screenscraper.ApiError) as e:
+        ui.failure(ui.yellow(f"⚠️  Credentials saved, but the login couldn't be checked: {e}"))
+        return 0
+    if quota is None:
+        ui.failure(ui.yellow(f"⚠️  {NO_ACCOUNT}"))
+    else:
+        print(ui.green(f"✅ ScreenScraper: {_quota_line(quota)}"))
     return 0
+
+
+NO_ACCOUNT = "ScreenScraper sent no account details for your login; check it with `sync-roms scrape --set-credentials`"
+
+
+def _quota_line(quota):
+    return f"{quota.used_today}/{quota.max_today} requests used today, {quota.max_threads} thread(s)"
 
 
 def _each(fn, names):
@@ -360,12 +407,21 @@ def _media_ext(path, mtype):
 
 def scrape_rom(client, system, item, tmp, skip, stop, game_id=None):
     """("done", (how, metadata, {media type: local file})), ("notgame", (how, what ScreenScraper says about it)),
-    ("unknown", (how, "missing")), ("failed", reason), ("quota", the QuotaExceeded) or ("skipped", None) when the run stopped (quota or Ctrl-C)
-    before this ROM finished. game_id: see match()."""
+    ("unknown", (how, "missing")), ("failed", reason), ("unreachable", the Transient error left after the retries),
+    ("stop", the QuotaExceeded or Refused that stops the run) or ("skipped", None) when the run stopped (quota, refused,
+    unreachable or Ctrl-C) before this ROM finished. Every outcome but "skipped" counts toward the ROMs in a row that
+    couldn't reach ScreenScraper; UNREACHABLE_STOP of them set the stop event. game_id: see match()."""
+    status, payload = _scrape_rom(client, system, item, tmp, skip, stop, game_id)
+    if status != "skipped" and _unreachable.add(payload if status == "unreachable" else None):
+        stop.set()
+    return status, payload
+
+
+def _scrape_rom(client, system, item, tmp, skip, stop, game_id):
     rom, size, etag = item
     if stop.is_set():
         return "skipped", None
-    rc = _RomClient(client)
+    rc = _RomClient(client, stop)
     how = None
     try:
         game_id, how = match(rc, system, rom, size, etag, game_id, stop)
@@ -397,13 +453,15 @@ def scrape_rom(client, system, item, tmp, skip, stop, game_id=None):
             if ext:
                 files[mtype] = dest + ext
                 os.replace(dest, files[mtype])
-    except screenscraper.QuotaExceeded as e:
+    except (screenscraper.QuotaExceeded, screenscraper.Refused) as e:
         stop.set()
-        return "quota", e
+        return "stop", e
     except screenscraper.NotFound:
         return "unknown", (how, "missing")
     except screenscraper.Stopped:
         return "skipped", None
+    except screenscraper.Transient as e:
+        return "unreachable", e
     except ROM_ERRORS as e:
         return "failed", _reason(e)
     except BaseException:  # stop the other workers at once, not when the run's thread notices
@@ -415,7 +473,7 @@ def scrape_rom(client, system, item, tmp, skip, stop, game_id=None):
 def _reason(e):
     """Printable text for a ROM's failure: our own ApiError messages (which never hold a URL), else only the error's type,
     since other errors' text can quote a media URL and the credentials in its query."""
-    return str(e) if type(e) in (screenscraper.ApiError, screenscraper.RateLimited) and str(e) else type(e).__name__
+    return str(e) if type(e) in (screenscraper.ApiError, screenscraper.RateLimited, screenscraper.Transient) and str(e) else type(e).__name__
 
 
 def _uploaded(jobs, have):
@@ -431,7 +489,13 @@ def _storage_fail(what, e, rerun):
             f"run `{rerun}` again to continue.", 3)
 
 
-def _quota_message(e, rerun):
+def _stop_message(e, rerun):
+    """What the user is told when e stopped the run: why, and how to continue."""
+    if isinstance(e, screenscraper.Refused):
+        return f"⛔ {e}. Everything scraped so far is saved; run `{rerun}` again to continue where it stopped."
+    if isinstance(e, screenscraper.Transient):
+        return (f"🔌 ScreenScraper couldn't be reached for {UNREACHABLE_STOP} ROMs in a row; the last error: {e}. Everything "
+                f"scraped so far is saved; run `{rerun}` again later to continue where it stopped.")
     if isinstance(e, screenscraper.TooManyUnrecognized):
         why = "ScreenScraper takes no more unrecognized ROMs from you today (HTTP 431)"
     else:
@@ -491,7 +555,9 @@ def start_batch(ex, client, system, batch, skip, stop, index, replace=False, for
 
 def run_batch(system, batch, started, shrink, outcomes, listing, index, pending, replace=False, forced=None, rerun=RERUN):
     """Wait for a started batch's ROMs, upload their media and queue their entries in pending ({ROM: (how, metadata,
-    upload jobs)}, written to metadata.json by record). Returns (failures, the QuotaExceeded hit or None).
+    upload jobs)}, written to metadata.json by record). Returns (failures, the error that stops the run or None): a
+    ROM's QuotaExceeded or Refused, or the Transient error of the last of UNREACHABLE_STOP ROMs in a row that couldn't
+    reach ScreenScraper.
 
     listing: {key: size} of scrapes/<system>/, and index: its scrape_index, both kept up to date with what this batch
     uploads. replace: the ROMs'
@@ -504,7 +570,7 @@ def run_batch(system, batch, started, shrink, outcomes, listing, index, pending,
     kept = started.kept
     try:
         results = [f.result() for f in started.futures]
-        quota = next((payload for status, payload in results if status == "quota"), None)
+        halt = next((payload for status, payload in results if status == "stop"), _unreachable.error)
         jobs = {}  # ROM -> its upload jobs
         done = {}
         for (rom, _, _), (status, payload) in zip(batch, results):
@@ -525,9 +591,9 @@ def run_batch(system, batch, started, shrink, outcomes, listing, index, pending,
                 scrape_state.mark_unknown(name, rom)
                 outcomes[rom] = None
                 print(ui.dim(f"     ❔ {name}/{rom}: not on ScreenScraper"))
-            elif status == "failed":
+            elif status in ("failed", "unreachable"):
                 failed += 1
-                print(ui.yellow(f"  ⚠️  {name}/{rom}: {payload}; skipped"))
+                ui.failure(ui.yellow(f"  ⚠️  {name}/{rom}: {payload if status == 'failed' else _reason(payload)}; skipped"))
             elif status == "done":
                 how, meta, files = payload
                 stem = os.path.splitext(rom)[0]
@@ -557,7 +623,7 @@ def run_batch(system, batch, started, shrink, outcomes, listing, index, pending,
             listing[j[0]] = j[2]
             scrape_plan.index_add(index, j[0], j[2])
         pending[rom] = (how, meta, jobs[rom])
-    return failed, quota
+    return failed, halt
 
 
 def _bad_entries(name, data):
@@ -630,7 +696,7 @@ def scrape_system(client, system, items, threads, skip, shrink, outcomes, listin
                   rerun=RERUN, fill=False, metadata=None):
     """Scrape one system's ROMs on one pool of threads, in batches: the next batch is scraped while the last one uploads,
     so no thread waits for a batch's slowest ROM. Entries are written to metadata.json every METADATA_INTERVAL seconds, when
-    the system is done and when the run stops. Returns (failures, the QuotaExceeded hit or None). Arguments: see run_batch;
+    the system is done and when the run stops. Returns (failures, the error that stopped the run or None). Arguments: see run_batch;
     index: scrape_plan.scrape_index(listing); metadata: the system's metadata.json if the caller already loaded it."""
     name = system["bucket"]
     # a metadata.json that can't be used fails before any quota is spent
@@ -639,7 +705,7 @@ def scrape_system(client, system, items, threads, skip, shrink, outcomes, listin
         print(ui.yellow(f"  ⚠️  {why}; skipping {name}"))
         return len(items), None
     batches, flight = deque(_batches(items)), deque()
-    pending, stop, failed, quota_hit, started = {}, threading.Event(), 0, None, 0
+    pending, stop, failed, halted, started = {}, threading.Event(), 0, None, 0
     last_write = time.monotonic()
     ex, hasher = ThreadPoolExecutor(threads), ThreadPoolExecutor(HASH_THREADS)
     try:
@@ -656,7 +722,7 @@ def scrape_system(client, system, items, threads, skip, shrink, outcomes, listin
             n, hit = run_batch(system, batch, begun, shrink, outcomes, listing, index, pending, replace=replace, forced=forced,
                                rerun=rerun)
             failed += n
-            quota_hit = quota_hit or hit
+            halted = halted or hit
             if time.monotonic() - last_write >= METADATA_INTERVAL:
                 scrape_state.flush_unknown()  # marks from a run that finds nothing must not wait for the final flush
                 scrape_state.flush_hashes()
@@ -666,9 +732,9 @@ def scrape_system(client, system, items, threads, skip, shrink, outcomes, listin
                     n, halt = record(system, pending, outcomes, listing, index, skip, replace, rerun, fill)
                     failed += n
                     if halt:
-                        return failed, quota_hit
+                        return failed, halted
         n, _ = record(system, pending, outcomes, listing, index, skip, replace, rerun, fill)
-        return failed + n, quota_hit
+        return failed + n, halted
     except BaseException:  # Ctrl-C, a storage failure: queued ROMs never start, running ones stop at their next stop check
         stop.set()
         ex.shutdown(wait=True, cancel_futures=True)
@@ -695,6 +761,7 @@ def run_scrape(client, systems, todo, skip, ask=True, replace=False, forced=None
     count = sum(len(v) for v in todo.values())
     listings, metadata = dict(listings or {}), metadata or {}
     before = set(scrape_state.notgames())
+    _unreachable.reset()
     try:
         listings.update(_each(lambda name: inventory.files(f"{scrape_plan.SCRAPES}/{name}/"), [n for n in todo if n not in listings]))
     except s3.ERRORS as e:
@@ -703,36 +770,39 @@ def run_scrape(client, systems, todo, skip, ask=True, replace=False, forced=None
     kept = 0 if replace else sum(len(indexes[name].get(os.path.splitext(r)[0], ()))
                                  for name, items in todo.items() for r, _, _ in items)
     note = f"; the {kept} media file(s) already there are kept" if kept else ""
+    try:
+        quota = _retry(None, client.quota)
+    except screenscraper.QuotaExceeded as e:
+        ui.failure(ui.yellow(_stop_message(e, rerun)))
+        return 1
+    except screenscraper.ApiError as e:
+        ui.fail(f"{e}", 3)
+    if quota is None:
+        print(ui.yellow(f"  ⚠️  {NO_ACCOUNT}; scraping on one thread"))
+        quota = screenscraper.Quota(1, 0, 0)
+    elif quota.max_today:
+        print(ui.dim(f"ScreenScraper: {_quota_line(quota)}"))
     if ask and not ui.confirm(f"🖼️  Scrape {count} ROM(s) from ScreenScraper and write their media and metadata to "
                               f"{s3.location()}/{scrape_plan.SCRAPES}/{note} ?", default=False):
         print(ui.yellow("👋 Cancelled."))
         return 0
-    try:
-        quota = _retry(client.quota)
-    except screenscraper.QuotaExceeded as e:
-        print(ui.yellow(_quota_message(e, rerun)))
-        return 1
-    except screenscraper.ApiError as e:
-        ui.fail(f"{e}", 3)
-    if quota.max_today:
-        print(ui.dim(f"ScreenScraper: {quota.used_today}/{quota.max_today} requests used today, {quota.max_threads} thread(s)"))
     shrink = scrape_plan.can_shrink()
     if not shrink:
         print(ui.yellow(f"  ⚠️  {scrape_plan.NO_SHRINK}; not making them"))
     outcomes = {} if outcomes is None else outcomes
-    failed, quota_hit = 0, None
+    failed, halted = 0, None
     for name, items in sorted(todo.items()):
         outcomes[name] = {}
-        n, quota_hit = scrape_system(client, systems[name], items, max(1, quota.max_threads), skip, shrink, outcomes[name],
-                                     listings[name], indexes[name], replace, forced, rerun, fill, metadata.get(name))
+        n, halted = scrape_system(client, systems[name], items, max(1, quota.max_threads), skip, shrink, outcomes[name],
+                                  listings[name], indexes[name], replace, forced, rerun, fill, metadata.get(name))
         failed += n
-        if quota_hit:
+        if halted:
             break
     print(ui.bold("\n📋 Results"))
     print(report({name: [r for r, _, _ in items] for name, items in todo.items()}, outcomes))
     _offer_review(client, systems, todo, sorted(set(scrape_state.notgames()) - before))
-    if quota_hit:
-        print(ui.yellow("\n" + _quota_message(quota_hit, rerun)))
+    if halted:
+        ui.failure(ui.yellow("\n" + _stop_message(halted, rerun)))
         return 1
     print(ui.green("\n🎉 Done!") if not failed else ui.red(f"\n⚠️  Done with {failed} failure(s); run `{rerun}` to try again"))
     return 1 if failed else 0
@@ -870,7 +940,7 @@ def match_command(args):
             return 0
         ui.fail(f"ScreenScraper has no game for {args.game!r}", 1)
     except screenscraper.QuotaExceeded as e:
-        print(ui.yellow(_quota_message(e, rerun)))
+        print(ui.yellow(_stop_message(e, rerun)))
         return 1
     except screenscraper.ApiError as e:
         ui.fail(f"{e}", 3)

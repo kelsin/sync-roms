@@ -266,6 +266,55 @@ class ClientTests(unittest.TestCase):
             client(opener).lookup(12, "g.gba", 1)
         self.assertIsInstance(cm.exception, ss.ApiError)
 
+    def test_server_and_network_errors_are_transient(self):
+        def raising(e):
+            def opener(req, timeout=None):
+                raise e
+            return opener
+
+        def cut(req, timeout=None):
+            class Cut(Resp):
+                def read(self, n=-1):
+                    raise ConnectionResetError()
+            return Cut(b"")
+        for opener in (raising(http_error(500)), raising(http_error(502)), raising(http_error(503)),
+                       raising(urllib.error.URLError("down")), raising(TimeoutError()), raising(ConnectionResetError()), cut):
+            with self.subTest(opener=opener), self.assertRaises(ss.Transient) as cm:
+                client(opener).lookup(12, "g.gba", 1)
+            self.assertIsInstance(cm.exception, ss.ApiError)
+        with tempfile.TemporaryDirectory() as d, self.assertRaises(ss.Transient):
+            client(cut).download("https://neoclone.screenscraper.fr/a.png", os.path.join(d, "a.png"))
+        for opener in (raising(http_error(400)), raising(http.client.InvalidURL("bad"))):
+            with self.subTest(opener=opener), self.assertRaises(ss.ApiError) as cm:
+                client(opener).lookup(12, "g.gba", 1)
+            self.assertNotIsInstance(cm.exception, (ss.Transient, ss.Refused))
+
+    def test_local_write_error_in_a_download_is_not_transient(self):
+        with tempfile.TemporaryDirectory() as d:
+            dest = os.path.join(d, "missing", "a.png")  # the .part file can't be created
+            with self.assertRaises(ss.ApiError) as cm:
+                client(lambda r, timeout=None: Resp(b"x")).download("https://neoclone.screenscraper.fr/a.png", dest)
+            self.assertNotIsInstance(cm.exception, ss.Transient)
+            self.assertIn("No such file or directory", str(cm.exception))
+            dest = os.path.join(d, "a.png")
+            with mock.patch("builtins.open", side_effect=OSError(28, "No space left on device")), \
+                    self.assertRaises(ss.ApiError) as cm:
+                client(lambda r, timeout=None: Resp(b"x")).download("https://neoclone.screenscraper.fr/a.png", dest)
+            self.assertNotIsInstance(cm.exception, ss.Transient)
+            self.assertEqual(str(cm.exception), "Couldn't save a ScreenScraper download (No space left on device)")
+
+    def test_access_failures_are_refused_with_what_to_do(self):
+        says = {401: ("later", "--set-credentials"), 403: ("login", "--set-credentials"), 423: ("later",), 426: ("update sync-roms",)}
+        for code, words in says.items():
+            def opener(req, timeout=None, code=code):
+                raise http_error(code)
+            with self.subTest(code=code), self.assertRaises(ss.Refused) as cm:
+                client(opener).lookup(12, "g.gba", 1)
+            self.assertIsInstance(cm.exception, ss.ApiError)
+            self.assertNotIsInstance(cm.exception, ss.Transient)
+            for word in words + (f"HTTP {code}",):
+                self.assertIn(word, str(cm.exception))
+
     def test_quota_parse(self):
         q = client(lambda req, timeout=None: fixture("ssuserinfos.json")).quota()
         self.assertEqual(q, ss.Quota(max_threads=1, used_today=123, max_today=20000))
@@ -334,7 +383,7 @@ class ClientTests(unittest.TestCase):
             with self.subTest(body=body):
                 with self.assertRaises(ss.ApiError):
                     client(opener).lookup(12, "g.gba", 1)
-                self.assertEqual(client(opener).quota(), ss.Quota(1, 0, 0))
+                self.assertIsNone(client(opener).quota())  # no account in the response
                 self.assertEqual(client(opener).search(12, "x"), [])
 
     def test_download_not_found_text_raises_not_found(self):

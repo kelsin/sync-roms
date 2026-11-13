@@ -37,6 +37,14 @@ HTTP_NOT_FOUND = 404
 HTTP_QUOTA = 430  # daily scrape quota
 HTTP_UNRECOGNIZED = 431  # too many unrecognized ROMs today
 HTTP_RATE_LIMIT = 429  # too many requests at once: worth retrying after a pause
+HTTP_SERVER_ERROR = 500  # this and above: worth retrying after a pause
+REFUSED = {  # not about the ROM: every request would fail the same way, so the run stops with this
+    401: "ScreenScraper's API is closed to non-members and inactive members right now (HTTP 401); try again later "
+         "(a ScreenScraper login helps: `sync-roms scrape --set-credentials`)",
+    403: "ScreenScraper refused the login (HTTP 403); check it with `sync-roms scrape --set-credentials`",
+    423: "ScreenScraper's API is closed (HTTP 423); try again later",
+    426: "ScreenScraper no longer accepts this version of sync-roms (HTTP 426); update sync-roms",
+}
 NOT_FOUND_PREFIX = "Erreur : Rom"  # plain-text body of a miss (may come with HTTP 200)
 # ScreenScraper media type -> scrape_plan.MEDIA_TYPES name. box-3D, support-2D, mixrbv1/2 are unverified.
 MEDIA_MAP = {"box-2D": "covers", "box-3D": "3dboxes", "box-2D-back": "backcovers", "ss": "screenshots",
@@ -87,6 +95,14 @@ class ApiError(Exception):
 
 class RateLimited(ApiError):
     pass
+
+
+class Transient(ApiError):
+    """A server error or a network failure: worth trying again after a pause."""
+
+
+class Refused(ApiError):
+    """ScreenScraper refuses every request for now (API closed, login refused, version blacklisted): the run stops."""
 
 
 class MediaRefused(ApiError):
@@ -345,6 +361,14 @@ class KeepAlive:
                     raise
 
 
+def _chunk(resp):
+    """The next piece of a download; Transient when the read is cut short or times out."""
+    try:
+        return resp.read(1 << 16)
+    except (OSError, http.client.HTTPException) as e:
+        raise Transient(f"ScreenScraper download failed ({type(e).__name__})") from None
+
+
 class Client:
     def __init__(self, user, password, dev, opener=None):
         self._auth = {"devid": dev["devid"], "devpassword": dev["devpassword"], "softname": SOFTNAME,
@@ -372,11 +396,15 @@ class Client:
                 raise QuotaExceeded(f"ScreenScraper quota exceeded (HTTP {e.code})") from None
             if e.code == HTTP_RATE_LIMIT:
                 raise RateLimited(f"ScreenScraper is rate limiting requests (HTTP {e.code})") from None
+            if e.code in REFUSED:
+                raise Refused(REFUSED[e.code]) from None
+            if e.code >= HTTP_SERVER_ERROR:
+                raise Transient(f"ScreenScraper request failed (HTTP {e.code})") from None
             raise ApiError(f"ScreenScraper request failed (HTTP {e.code})") from None
-        except (urllib.error.URLError, OSError, http.client.HTTPException) as e:
-            raise ApiError(f"ScreenScraper request failed ({type(e).__name__})") from None
-        except ValueError:  # a malformed URL (http.client.InvalidURL is an HTTPException, caught above)
+        except (ValueError, http.client.InvalidURL):  # a malformed URL
             raise ApiError("ScreenScraper returned a bad URL") from None
+        except (urllib.error.URLError, OSError, http.client.HTTPException) as e:
+            raise Transient(f"ScreenScraper request failed ({type(e).__name__})") from None
 
     def _get(self, endpoint, **params):
         query = urllib.parse.urlencode({**self._auth, "output": "json", **params})
@@ -386,7 +414,7 @@ class Client:
                     raise ApiError("ScreenScraper response too large")
                 body = resp.read(API_MAX + 1)
         except (OSError, http.client.HTTPException) as e:  # cut short or timed out while reading
-            raise ApiError(f"ScreenScraper request failed ({type(e).__name__})") from None
+            raise Transient(f"ScreenScraper request failed ({type(e).__name__})") from None
         if len(body) > API_MAX:
             raise ApiError("ScreenScraper response too large")
         body = body.decode("utf-8", "replace")
@@ -398,7 +426,10 @@ class Client:
             raise ApiError("ScreenScraper returned an unreadable response") from None
 
     def quota(self):
-        user = _dict(_dict(_dict(self._get(EP_QUOTA)).get("response")).get("ssuser"))
+        """The account's limits, or None when the response has no account (ssuser) in it."""
+        user = _dict(_dict(self._get(EP_QUOTA)).get("response")).get("ssuser")
+        if not isinstance(user, dict):
+            return None
         return Quota(to_int(user.get("maxthreads"), 1), to_int(user.get("requeststoday")),
                      to_int(user.get("maxrequestsperday")))
 
@@ -436,7 +467,7 @@ class Client:
             with self._open(url) as resp, open(part, "wb") as f:
                 if _too_large(resp, limit):
                     raise MediaRefused("ScreenScraper media too large")
-                chunk, total = resp.read(1 << 16), 0
+                chunk, total = _chunk(resp), 0
                 if chunk.lstrip().startswith(NOT_FOUND_PREFIX.encode()):
                     raise NotFound("not found")
                 while chunk:
@@ -446,10 +477,10 @@ class Client:
                     if total > limit:
                         raise MediaRefused("ScreenScraper media too large")
                     f.write(chunk)
-                    chunk = resp.read(1 << 16)
+                    chunk = _chunk(resp)
             os.replace(part, dest)
-        except (OSError, http.client.HTTPException) as e:  # cut short or timed out while reading, or a local write
-            raise ApiError(f"ScreenScraper download failed ({type(e).__name__})") from None
+        except OSError as e:  # a local write (reads raise Transient): not worth retrying
+            raise ApiError(f"Couldn't save a ScreenScraper download ({e.strerror or type(e).__name__})") from None
         finally:
             if os.path.exists(part):
                 os.remove(part)
