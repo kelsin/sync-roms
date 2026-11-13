@@ -548,10 +548,10 @@ sync-roms --edit
    so `Sports / Baseball` is `Sports`) or **Year**,
    then a value (each shows how many games in the list have it) to narrow the list to those games. Values are
    matched ignoring case, so `Capcom` and `capcom` are one value. Picking another
-   value of the same field replaces it; filters on different fields, the set filter and `/` all combine, and the title
-   shows what is active. A game with no value for a field never matches a filter on it. The metadata is read in the
+   value of the same field replaces it; filters on different fields, the set filter and `/` all combine, and the filter
+   line shows what is active. A game with no value for a field never matches a filter on it. The metadata is read in the
    background once per session, so the menu says it is loading at first. `p` narrows the list to games that were surprises within the last `surprise_ttl_days` (🎁 past surprises only), `c` clears every filter and shows every game again.
-   Pending changes show as `➕` / `➖` and the bottom line updates the card's total as you toggle. `w` writes a note on a
+   Pending changes show as `➕` / `➖` and are counted at the start of the bottom line (`+2 −1`), which updates the card's total and free space as you toggle. `w` writes a note on a
    picked game. A 💖 next to a game says one of the card's collections syncs it: it is always on, can't be switched off here, per-card exclusions don't apply to it, and it counts in the card's budget. `Enter` keeps your changes; `Esc` asks whether to keep or revert them if there are any.
 3. When you leave the menu, device/firmware and device-system changes are summarized, then **save**, **keep
    editing**, **discard**, or **list every change**. Nothing is uploaded.
@@ -582,7 +582,7 @@ Removing a game only drops it from the card's games; the file stays in storage.
 
 ### Editing the built-in sets
 
-`sync-roms sets edit` edits the sets in this repo's `data/sets/` and opens a PR with the changes, so it works from any install. Pick a set to switch games off, add games from a system or from another set across all its systems (you're asked for a category; existing ones are listed), change a game's category, or rename it. **➕ New set** creates a set and `d` deletes the highlighted one (it warns if a card still references it). Esc shows the changes; confirming clones `kelsin/sync-roms` to a temporary folder, writes the changed set files, pushes a branch and runs `gh pr create`. `Ctrl-C` with changes pending shows the same review first. It needs `git` and a logged-in `gh`, and writes nothing to storage or to `~/.sync-roms`.
+`sync-roms sets edit` edits the sets in this repo's `data/sets/` and opens a PR with the changes, so it works from any install. Pick a set to switch games off, add games from a system (those with files in storage, by company then name; with a storage cache each shows its file count) or from another set across all its systems (you're asked for a category; existing ones are listed), change a game's category, or rename it. **➕ New set** creates a set and `d` deletes the highlighted one (it warns if a card still references it). Esc shows the changes; confirming clones `kelsin/sync-roms` to a temporary folder, writes the changed set files, pushes a branch and runs `gh pr create`. `Ctrl-C` with changes pending shows the same review first. It needs `git` and a logged-in `gh`, and writes nothing to storage or to `~/.sync-roms`.
 
 ### Collections
 

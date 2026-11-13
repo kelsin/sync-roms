@@ -40,10 +40,10 @@ def size_text(n):
             return f"{n:.1f}".rstrip("0").rstrip(".") + f" {unit}"
 
 
-def header(usage, capacity, fetch=None):
+def header(usage, capacity, fetch=None, count=True):
     """(status text, over budget) for a card's budget.Usage against its capacity in bytes (None: no size known).
     A partial usage is "not sized": there is no storage cache to size it from. fetch: bytes of ROMs not on the card
-    yet (None: not known, as outside a sync)."""
+    yet (None: not known, as outside a sync). count: show the card's file count."""
     used = size_text(usage.bytes)
     if capacity is None:
         text, over = f"💾 {used} used", False
@@ -51,7 +51,8 @@ def header(usage, capacity, fetch=None):
         over = usage.bytes > capacity
         text = f"💾 {used} / {size_text(capacity)} · " + (
             f"⚠️  {size_text(usage.bytes - capacity)} over" if over else f"{size_text(capacity - usage.bytes)} free")
-    text += f" · {usage.count} file(s)"
+    if count:
+        text += f" · {usage.count} file" + ("" if usage.count == 1 else "s")
     if fetch is not None:
         text += f" · ⬇️  {size_text(fetch)} to download"
     if usage.partial:
@@ -62,9 +63,9 @@ def header(usage, capacity, fetch=None):
 WARN_AT, FULL_AT = 0.70, 0.90  # the header is green below WARN_AT of the card, yellow below FULL_AT, then red
 
 
-def status_of(usage, capacity, fetch=None):
+def status_of(usage, capacity, fetch=None, count=True):
     """header() as a filter_list status: green until 70% of the card, yellow until 90%, red above (and when over budget)."""
-    text, over = header(usage, capacity, fetch)
+    text, over = header(usage, capacity, fetch, count)
     if capacity is None:
         return text
     share = usage.bytes / capacity
@@ -74,12 +75,11 @@ def status_of(usage, capacity, fetch=None):
 def system_labels(card, systems, recommended, usages):
     """(labels, extras) for the system list, in the given order: recommended systems get a ⭐; each picked system
     shows its count and size (… while not sized)."""
-    width = max((len(s["name"]) for s in systems), default=0)
     games = card.get("games") or {}
     labels, extras = [], []
     for s in systems:
         rec = s["bucket"] in recommended
-        labels.append(("⭐ " if rec else "   ") + s["name"].ljust(width))
+        labels.append(("⭐ " if rec else "   ") + s["name"])
         u = usages.get(s["bucket"])
         row = []
         entry = games.get(s["bucket"])
@@ -447,6 +447,8 @@ def edit_system(name, system, setup, to_fetch=None, card_usages=None):
     variants, parents = store.variant_index(sets)
     system_names = {x["bucket"]: x["name"] for x in store.repo_json("systems")}
     other_picks = {}  # {system bucket: [games]}: the card's direct picks on other systems, once a variant changes them
+    if inventory.current() is None:
+        print(ui.dim(f"📡 Listing {s3.location()}/{bucket}/ ..."))
     # names only: without a storage cache, a folder's sized listing stats every file
     try:
         in_storage = {k for k in inventory.files(f"{bucket}/", sizes=False) if not k.endswith("/")}
@@ -630,7 +632,7 @@ def edit_system(name, system, setup, to_fetch=None, card_usages=None):
                 total = budget.Usage(work["others"].bytes + mine + bios.bytes, work["others"].count + len(picked),
                                      partial)
                 fetch = None if to_fetch is None else work["fetch"] + budget.fetch_bytes(system, picked, to_fetch)
-                return status_of(total, capacity, fetch)
+                return status_of(total, capacity, fetch, count=False)  # the whole card's file count says little here
 
             def note_text(i):
                 game = next((g for g in s["games"] if g.get("bucket") == keys[i]), None)
@@ -642,12 +644,11 @@ def edit_system(name, system, setup, to_fetch=None, card_usages=None):
                 return "Note saved" if text else "Note cleared"
 
             parts = ([f"📦 {filt[0]} only"] if filt else []) + (["🎁 past surprises only"] if past is not None else []) + ([metafilter.describe(meta_filt)] if meta_filt else [])
-            where = f" · {' · '.join(parts)} (c shows all)" if parts else ""
             pending = (keys, notes, base, session)
-            result = picker.filter_list(f"✏️  {system['name']} on {name} — ✅ synced, ⬜ not, 📦 from a set{where}",
+            result = picker.filter_list(f"✏️  {system['name']} on {name} — ✅ synced, ⬜ not, 📦 from a set",
                                         [r[3] for r in shown], multi=True, initial=[start[k] for k in keys],
                                         extras=extras, hint=GAMES_HINT, hotkeys=(SET_KEY, META_KEY, PAST_SURPRISE_KEY, CLEAR_KEY, VARIANT_KEY),
-                                        key_help=GAMES_KEYS,
+                                        key_help=GAMES_KEYS, filters=f"{' · '.join(parts)} (c shows all)" if parts else "",
                                         status=status, row_note=lambda i: edit.variant_line(
                                             keys[i], variants, parents, system_names, on_card),
                                         session=session, note_text=note_text, on_note=on_note,

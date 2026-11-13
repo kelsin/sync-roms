@@ -22,12 +22,14 @@ class Shared(unittest.TestCase):
 class Stocked(unittest.TestCase):
     SYSTEMS = SYSTEMS + [{"name": "Game Boy", "bucket": "gb"}, {"name": "Saturn", "bucket": "saturn"}]
 
-    def offered(self, module, folders, cache):
+    def offered(self, module, folders, cache, extras=None):
         seen = []
 
         def fake(title, labels, **k):
             if title.startswith("✏️  Add games"):
                 seen.extend(labels)
+                if extras is not None:
+                    extras.extend(k.get("extras") or [[]] * len(labels))
                 return None
             return 1 if not seen else None  # add from a system, then back
 
@@ -41,12 +43,35 @@ class Stocked(unittest.TestCase):
         cache = {"gba/": {"Ruby.zip": 1}, "psx/": {}, "gb/": {"Tetris.zip": 1}}
         for module in (collectionedit, setedit):
             # psx is cached as empty, saturn has no folder; gb has a folder and games
-            self.assertEqual(self.offered(module, lambda: {"gba", "psx", "gb"}, cache), ["Game Boy Advance", "Game Boy"])
+            self.assertEqual(self.offered(module, lambda: {"gba", "psx", "gb"}, cache), ["Game Boy", "Game Boy Advance"])
+
+    def test_add_games_shows_each_systems_file_count_from_the_cache(self):
+        cache = {"gba/": {"gba/Ruby.zip": 1, "gba/Emerald.zip": 2, "gba/hacks/": 0}, "gb/": {"gb/Tetris.zip": 1}}
+        for module in (collectionedit, setedit):
+            extras = []
+            self.assertEqual(self.offered(module, lambda: {"gba", "gb"}, cache, extras), ["Game Boy", "Game Boy Advance"])
+            self.assertEqual(extras, [[("  1 file", "dim")], [("  2 files", "dim")]], module.__name__)
+
+    def test_add_games_counts_nothing_without_a_cache(self):
+        extras = []
+        with mock.patch.object(inventory, "files", side_effect=AssertionError("listed a folder")):
+            self.offered(setedit, lambda: {"gba", "psx", "gb", "saturn"}, {}, extras)
+        self.assertEqual(extras, [[], [], [], []])  # every system listed (no cache to tell), none counted
+
+    def test_add_games_lists_systems_by_company_then_name_like_the_card_editor(self):
+        systems = [{"name": "Game Boy Advance", "bucket": "gba", "company": "Nintendo"},
+                   {"name": "PlayStation", "bucket": "psx", "company": "Sony"},
+                   {"name": "Mega Drive", "bucket": "md", "company": "Sega"},
+                   {"name": "Game Boy", "bucket": "gb", "company": "Nintendo"}]
+        for module in (collectionedit, setedit):
+            with mock.patch.object(self, "SYSTEMS", systems):
+                self.assertEqual(self.offered(module, lambda: {"gba", "psx", "md", "gb"}, {}),
+                                 ["Game Boy", "Game Boy Advance", "Mega Drive", "PlayStation"], module.__name__)
 
     def test_add_games_goes_by_the_cache_when_storage_cannot_be_reached(self):
         def down():
             raise OSError("down")
-        self.assertEqual(self.offered(collectionedit, down, {"psx/": {}}), ["Game Boy Advance", "Game Boy", "Saturn"])
+        self.assertEqual(self.offered(collectionedit, down, {"psx/": {}}), ["Game Boy", "Game Boy Advance", "Saturn"])
 
 
 class Discs(unittest.TestCase):
@@ -127,7 +152,7 @@ class Discs(unittest.TestCase):
 
         def fake(title, labels, **kw):
             if kw.get("multi"):
-                lists.append((title, list(labels)))
+                lists.append((title, list(labels), kw.get("filters", "")))
                 steps = [("p", 0), ("c", 0), kw["initial"]]
                 return steps[len(lists) - 1]
             return next(picks)
@@ -137,7 +162,8 @@ class Discs(unittest.TestCase):
                 mock.patch.object(surprise, "past_keys", return_value={"gba/Ruby.zip"}):
             collectionedit.edit_one(collection, SYSTEMS, lambda bucket: keys if bucket == "gba" else set())
         self.assertEqual(lists[1][1], ["Ruby.zip"])
-        self.assertIn("🎁 past surprises only (c shows all)", lists[1][0])
+        self.assertEqual("🎁 past surprises only (c shows all)", lists[1][2])
+        self.assertNotIn("past surprises", lists[1][0])
         self.assertEqual(len(lists[2][1]), 2)
 
     def test_s_and_m_narrow_the_add_games_list_to_a_set_and_to_metadata(self):
@@ -148,7 +174,7 @@ class Discs(unittest.TestCase):
 
         def fake(title, labels, **kw):
             if kw.get("multi"):
-                lists.append((title, list(labels)))
+                lists.append((title, list(labels), kw.get("filters", "")))
                 return [("s", 0), ("m", 0), ("c", 0), kw["initial"]][len(lists) - 1]
             return next(picks)
 
@@ -173,7 +199,7 @@ class Discs(unittest.TestCase):
                 mock.patch.object(cardedit.metafilter, "matches", lambda m, w: m.get("genre") == w["genre"]):
             collectionedit.edit_one(collection, SYSTEMS, lambda bucket: keys if bucket == "gba" else set())
         self.assertEqual(lists[1][1], ["Ruby.zip", "Zelda.zip"])
-        self.assertIn("📦 Zeldas only", lists[1][0])
+        self.assertIn("📦 Zeldas only", lists[1][2])
         self.assertEqual(lists[2][1], ["Zelda.zip"])
         self.assertEqual(len(lists[3][1]), 3)
 

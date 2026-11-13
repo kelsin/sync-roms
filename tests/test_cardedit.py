@@ -39,15 +39,16 @@ class Pure(unittest.TestCase):
 
     def test_header(self):
         self.assertEqual(cardedit.header(U(1_500_000_000, 3, False), 512 * 10 ** 9),
-                         ("💾 1.5 GB / 512 GB · 510.5 GB free · 3 file(s)", False))
-        text, over = cardedit.header(U(600 * 10 ** 9, 9, False), 512 * 10 ** 9)
-        self.assertTrue(over)
-        self.assertIn("88 GB over", text)
-        self.assertEqual(cardedit.header(U(10 ** 9, 1, False), None), ("💾 1 GB used · 1 file(s)", False))
+                         ("💾 1.5 GB / 512 GB · 510.5 GB free · 3 files", False))
+        self.assertEqual(cardedit.header(U(600 * 10 ** 9, 9, False), 512 * 10 ** 9),
+                         ("💾 600 GB / 512 GB · ⚠️  88 GB over · 9 files", True))
+        self.assertEqual(cardedit.header(U(1_500_000_000, 3, False), 512 * 10 ** 9, count=False),
+                         ("💾 1.5 GB / 512 GB · 510.5 GB free", False))  # the games list leaves the card's count out
+        self.assertEqual(cardedit.header(U(10 ** 9, 1, False), None), ("💾 1 GB used · 1 file", False))
         text, over = cardedit.header(U(10 ** 9, 1, True), None)
         self.assertTrue(text.endswith("not sized (sync-roms cache update)"))
         self.assertFalse(over)
-        self.assertEqual(cardedit.header(U(10 ** 9, 1, False), None, 0)[0], "💾 1 GB used · 1 file(s) · ⬇️  0 B to download")
+        self.assertEqual(cardedit.header(U(10 ** 9, 1, False), None, 0)[0], "💾 1 GB used · 1 file · ⬇️  0 B to download")
 
     def test_silent_thread_hides_warn_and_fail_output(self):
         err = io.StringIO()
@@ -120,6 +121,12 @@ def flip(i):
         state[i] = not state[i]
         return state
     return step
+
+
+def counted(kw, state):
+    """The card's file count a games list's status works out for state (the list doesn't show it)."""
+    with mock.patch.object(cardedit, "status_of", lambda u, c, fetch=None, count=True: u.count):
+        return kw["status"](state)
 
 
 class Flow(DataDir):
@@ -207,7 +214,8 @@ class Flow(DataDir):
             _, calls = self.run_system(returns((cardedit.PAST_SURPRISE_KEY, 0)), returns((cardedit.CLEAR_KEY, 0)),
                                        lambda labels, kw: [False] * len(labels))
         self.assertEqual(calls[1][1], ["Ruby.zip"])
-        self.assertIn("🎁 past surprises only (c shows all)", calls[1][0])
+        self.assertEqual(calls[1][2]["filters"], "🎁 past surprises only (c shows all)")  # on the filter line
+        self.assertNotIn("past surprises", calls[1][0])
         self.assertEqual(len(calls[2][1]), len(calls[0][1]))
 
     def test_p_with_no_past_surprises_says_so_and_keeps_the_list(self):
@@ -331,7 +339,7 @@ class Flow(DataDir):
         self.cache = {"gba/": self.files["gba/"], "gb/": self.files["gb/"], "scrapes/gba/": {}, "scrapes/gb/": {}, "BIOS/": {}}
         _, calls = self.run_system(toggle())
         kw = calls[0][2]
-        self.assertIn("· 2 file(s)", kw["status"](kw["initial"])[0])  # Ruby here, Red on Game Boy
+        self.assertEqual(counted(kw, kw["initial"]), 2)  # Ruby here, Red on Game Boy
         extras = self.run_card(returns(None))[0][2]["extras"]
         self.assertIn(("  1 picked", "green"), extras[0])
 
@@ -382,6 +390,34 @@ class Flow(DataDir):
         self.assertEqual(seen[0], ["img-gba/Ruby.sav", "img-gba/Ruby.zip", None])  # the set's rows, not all of them
         self.assertEqual(seen[1], ["img-gba/Emerald.zip", "img-gba/Ruby.sav", "img-gba/Ruby.zip", "img-gba/Zelda.zip", None])
 
+    def test_opening_a_system_without_a_storage_cache_says_it_is_listing(self):
+        self.card()
+        for tree, said in ((None, True), (mock.Mock(), False)):
+            out = io.StringIO()
+            with mock.patch.object(inventory, "current", return_value=tree), \
+                    mock.patch.object(inventory, "files", lambda p, sizes=True: self.files.get(p, {})), \
+                    mock.patch.object(picker, "filter_list", Script(lambda labels, kw: kw["session"]["sel"])), \
+                    contextlib.redirect_stdout(out):
+                edit.edit_card_system("c", "gba", (DEVICE, "esde"))
+            self.assertEqual("📡 Listing" in out.getvalue(), said, out.getvalue())
+
+    def test_a_takes_every_game_the_set_filter_shows(self):
+        self.card()
+        filter_list = picker.filter_list  # the real list, driven by keys without a screen
+
+        def take_all(labels, kw):
+            self.assertEqual(kw["filters"], "📦 Pokemon only (c shows all)")
+            self.assertNotIn("Pokemon", calls[-1][0])
+            with mock.patch.object(picker, "_run", lambda model: [model.key(k) for k in ("a", "enter")][-1]), \
+                    mock.patch.object(picker, "_draws_images", return_value=False):
+                return filter_list("t", labels, **kw)
+        script = Script(returns((cardedit.SET_KEY, 0)), returns(0), take_all)
+        calls = script.calls
+        with mock.patch.object(picker, "filter_list", script), contextlib.redirect_stdout(io.StringIO()):
+            edit.edit_card_system("c", "gba", (DEVICE, "esde"))
+        self.assertEqual(calls[2][1], ["Ruby.sav", "Ruby.zip"])  # the set's games here, not Emerald or Zelda
+        self.assertEqual(store.card_games("c"), {"gba": [g("gba/Ruby.sav"), g("gba/Ruby.zip")]})
+
     def run_card(self, *steps):
         script = Script(*steps)
         with mock.patch.object(picker, "filter_list", script), contextlib.redirect_stdout(io.StringIO()):
@@ -423,7 +459,7 @@ class Flow(DataDir):
         title, labels, kw = calls[0]
         self.assertEqual([l.strip() for l in labels], ["⭐ Game Boy", "Game Boy Advance"])
         self.assertEqual(kw["extras"][1], [("  1 picked", "green"), ("  5 B", "dim")])  # the ROM
-        self.assertEqual(kw["status"](None), ("💾 21 B / 1 GB · 1 GB free · 1 file(s)", "green"))  # ROM and the GBA BIOS
+        self.assertEqual(kw["status"](None), ("💾 21 B / 1 GB · 1 GB free · 1 file", "green"))  # ROM and the GBA BIOS
 
     def test_full_system_hotkey_saves_and_restores_the_list(self):
         self.card(games={"gba": [g("gba/Ruby.zip")]})
@@ -540,11 +576,14 @@ class Flow(DataDir):
 
         def look(labels, kw):
             seen.append(kw["status"](kw["session"]["sel"])[0])
+            counts.append(counted(kw, kw["session"]["sel"]))
             return (cardedit.VARIANT_KEY, labels.index("Ruby.zip")) if len(seen) == 1 else kw["session"]["sel"]
+        counts = []
         self.run_system(look, look)
-        self.assertIn("0 file(s)", seen[0])
+        self.assertEqual(counts[0], 0)
         self.assertIn("2 B /", seen[1])
-        self.assertIn("1 file(s)", seen[1])
+        self.assertEqual(counts[1], 1)
+        self.assertNotIn("file", seen[1])  # the card's count is left out of a games list
 
     def test_v_on_another_system_clears_its_exclusion(self):
         self.with_variants(self.RED)
@@ -646,7 +685,7 @@ class Flow(DataDir):
             self.assertEqual(kw["session"]["sel"], [False, False, True, False])  # kept across the filter
             return kw["session"]["sel"]
         _, calls = self.run_system(returns((cardedit.SET_KEY, 0)), pick_first_set, filtered, everything)
-        self.assertIn("Pokemon only", calls[2][0])
+        self.assertIn("Pokemon only", calls[2][2]["filters"])
         self.assertEqual(store.card_games("c"), {"gba": [g("gba/Ruby.zip")]})
 
     def test_set_list_counts_what_is_in_storage(self):
@@ -688,8 +727,9 @@ class Flow(DataDir):
         self.cache = {"gba/": self.files["gba/"], "scrapes/gba/": {}, "BIOS/": {"BIOS/gba_bios.bin": 16}, "gb/": {}}
 
         def step(labels, kw):
-            self.assertEqual(kw["status"]([False] * 4), ("💾 0 B / 1 GB · 1 GB free · 0 file(s)", "green"))
-            self.assertEqual(kw["status"]([True, False, False, True]), ("💾 26 B / 1 GB · 1 GB free · 2 file(s)", "green"))
+            self.assertEqual(kw["status"]([False] * 4), ("💾 0 B / 1 GB · 1 GB free", "green"))
+            self.assertEqual(kw["status"]([True, False, False, True]), ("💾 26 B / 1 GB · 1 GB free", "green"))
+            self.assertEqual(counted(kw, [True, False, False, True]), 2)
             return [False] * 4
         self.run_system(step)
 
@@ -706,7 +746,7 @@ class Flow(DataDir):
             kw["status"]([False] * 4)
             kw["status"]([True, False, False, False])  # Emerald (3) and the GBA BIOS (16)
             return [False] * 4
-        with mock.patch.object(cardedit, "status_of", side_effect=lambda u, c, fetch=None: seen.append(u.bytes)):
+        with mock.patch.object(cardedit, "status_of", side_effect=lambda u, c, fetch=None, count=True: seen.append(u.bytes)):
             self.run_system(step)
         self.assertEqual(seen, [1002, 1021])
 
@@ -750,8 +790,8 @@ class Flow(DataDir):
                 mock.patch.object(picker, "filter_list", Script(step, step)), contextlib.redirect_stdout(io.StringIO()):
             cardedit.pick_collections("c", {"gba"}, lambda: cardedit.card_status("c", (DEVICE, "esde"), [GBA, GB],
                                                                                  lambda s, keys: set(keys)))
-        self.assertIn("0 file(s) · ⬇️  0 B to download", statuses[0])
-        self.assertIn("1 file(s) · ⬇️  7 B to download", statuses[1])
+        self.assertIn("0 files · ⬇️  0 B to download", statuses[0])
+        self.assertIn("1 file · ⬇️  7 B to download", statuses[1])
 
     def test_picked_game_not_in_storage_is_not_still_sizing(self):
         self.card(games={"gba": [g("gba/Ruby.zip"), g("gba/Gone.zip")]})
@@ -759,12 +799,12 @@ class Flow(DataDir):
 
         def step(labels, kw):
             self.assertIn("Gone.zip  ⚠️ not in storage", labels)
-            self.assertEqual(kw["status"](kw["session"]["sel"]), "💾 5 B used · 2 file(s)")
+            self.assertEqual(kw["status"](kw["session"]["sel"]), "💾 5 B used")
             return kw["session"]["sel"]
         self.run_system(step)
         with mock.patch.object(store, "recommended_systems", return_value=set()):
             calls = self.run_card(returns(None))
-        self.assertEqual(calls[0][2]["status"](None), "💾 5 B used · 2 file(s)")
+        self.assertEqual(calls[0][2]["status"](None), "💾 5 B used · 2 files")
 
     def test_entering_a_system_lists_names_only(self):
         self.card()
@@ -844,11 +884,12 @@ class Flow(DataDir):
                       "scrapes/gba/": {"scrapes/gba/screenshots/Ruby.png": 100, "scrapes/gba/screenshots/Zelda.png": 30},
                       "BIOS/": {"BIOS/gba_bios.bin": 16, "BIOS/gb_bios.bin": 1000}}
 
-    def fresh(self):
-        """(status, extras) of the system list from a full recount of the card as saved now."""
+    def fresh(self, count=True):
+        """(status, extras) of the system list from a full recount of the card as saved now (count: with the file
+        count, as the system list shows it)."""
         card = cardedit.card_entry("c", (DEVICE, "esde"))
         usages = budget.system_usages(card, [GB, GBA])
-        return (cardedit.status_of(budget.card_usage(card, [GB, GBA], usages), budget.card_capacity(card)),
+        return (cardedit.status_of(budget.card_usage(card, [GB, GBA], usages), budget.card_capacity(card), count=count),
                 cardedit.system_labels(card, [GB, GBA], set(), usages)[1])
 
     def same_as_fresh(self, labels, kw):
@@ -863,7 +904,10 @@ class Flow(DataDir):
 
         def game_view_is_fresh(step):
             def check(labels, kw):
-                self.assertEqual(kw["status"](kw["initial"]), self.fresh()[0])
+                self.assertEqual(kw["status"](kw["initial"]), self.fresh(count=False)[0])
+                with mock.patch.object(cardedit, "status_of", lambda u, c, fetch=None, count=True: u):
+                    kept, full = kw["status"](kw["initial"]), self.fresh()[0]
+                self.assertEqual(kept.count, full.count)
                 return step(labels, kw)
             return check
         keep = lambda labels, kw: kw["session"]["sel"]  # noqa: E731
@@ -1003,7 +1047,7 @@ class DiscFlow(Flow):
 
         def step(labels, kw):
             state = [True, False, False, False, False]  # only Disc 1 switched (as a script would)
-            self.assertIn("4 file(s)", kw["status"](state))
+            self.assertEqual(counted(kw, state), 4)
             return state
         self.psx(step)
 
@@ -1115,11 +1159,12 @@ class MetaFlow(Flow):
             return kw["session"]["sel"]
         _, calls = self.run_system(self.opens_meta, fields, genres, platform, fields_again, years, both, returns(0),
                                    with_set, everything)
-        titles = [c[0] for c in calls]
-        self.assertIn("genre: Platform (c shows all)", titles[3])
-        self.assertIn("genre: Platform · year: 2001 (c shows all)", titles[6])
-        self.assertIn("📦 Pokemon only · genre: Platform · year: 2001", titles[8])
-        self.assertNotIn("c shows all", titles[9])
+        filters = [c[2].get("filters", "") for c in calls]
+        self.assertEqual("genre: Platform (c shows all)", filters[3])
+        self.assertEqual("genre: Platform · year: 2001 (c shows all)", filters[6])
+        self.assertEqual("📦 Pokemon only · genre: Platform · year: 2001 (c shows all)", filters[8])
+        self.assertEqual("", filters[9])
+        self.assertNotIn("genre", calls[8][0])
         self.assertEqual(store.card_games("c"), {"gba": [g("gba/Zelda.zip")]})
         self.assertEqual(self.fetched, ["scrapes/gba/metadata.json"])
 
@@ -1180,6 +1225,33 @@ class SetupChange(DataDir):
             self.assertEqual(edit.edit_manifest(), 0)
         entry = self.read("cards.json")["c"]
         self.assertEqual((entry["device"], entry["games"]), ("d", {"gba": [g("gba/A.zip")]}))
+
+
+class GamesStatus(unittest.TestCase):
+    def test_the_games_list_status_leaves_room_for_the_row_at_80_columns(self):
+        rows = []
+
+        async def script(pilot):
+            rows.append(" ".join(t for t, _ in screen_lines(pilot.app)[-1]))
+            await pilot.press("escape")
+
+        def bottom(fetch, games=812, cursor=9):
+            rows.clear()
+            status = cardedit.status_of(U(123_400_000_000, 1234, False), 512 * 10 ** 9, fetch, count=False)
+            pilot_list(script, "t", [f"Game {i}" for i in range(games)], multi=True, esc_asks=False, cursor=cursor,
+                       status=lambda _s: status)
+            return rows[0]
+        row = bottom(None)
+        self.assertTrue(row.startswith("+0 −0 · 💾 123.4 GB / 512 GB · 388.6 GB free · view: all "), row)
+        self.assertTrue(row.endswith(" row 10 · 812/812 shown"), row)
+        row = bottom(None, games=3700, cursor=2039)  # the full form doesn't fit: the same numbers without words
+        self.assertTrue(row.startswith("+0 −0 · 💾 123.4 GB / 512 GB · 388.6 GB free · view: all "), row)
+        self.assertTrue(row.endswith(" 2040 · 3700/3700"), row)
+        self.assertNotIn("row", row)
+        row = bottom(12_300_000_000, games=3700, cursor=2039)  # opened from a sync: no room, the row gives way (and the status is cut)
+        self.assertTrue(row.startswith("+0 −0 · 💾 123.4 GB / 512 GB · 388.6 GB free · ⬇️  12.3 GB to download"), row)
+        self.assertNotIn("row", row)
+        self.assertNotIn("3700", row)
 
 
 class Poll(unittest.TestCase):

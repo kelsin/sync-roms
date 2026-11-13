@@ -7,11 +7,12 @@ import tempfile
 import unittest
 from unittest import mock
 
+from rich.cells import cell_len
 from textual import events
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from helpers import DataDir  # noqa: E402,F401  (re-exported: other test modules still import it from here)
-from helpers import feed_list, pilot_list, screen_lines  # noqa: E402
+from helpers import feed_list, pilot_list, screen_lines, screen_text  # noqa: E402
 from sync_roms import edit, picker, runtime, s3, store, ui  # noqa: E402
 
 SETS = {"s": {"id": "s", "name": "Mix", "games": [{"system": "gba", "bucket": "gba/A.zip", "files": ["gba/A2.zip"]}]}}
@@ -547,7 +548,7 @@ class TextualList(unittest.TestCase):
         self.assertTrue(rows[0].endswith("row 2 · 2/4 shown"), rows[0])  # beta, delta
         self.assertEqual(rows[1], "💾 " + "x" * 77)  # no room: the position gives way, the status is cut as before
 
-    STATUS = "💾 123.4 GB / 512 GB · 388.6 GB free · 812 file(s)"
+    STATUS = "💾 123.4 GB / 512 GB · 812 files"
 
     def bottom_text(self, status, preview=None):
         from PIL import Image
@@ -565,12 +566,16 @@ class TextualList(unittest.TestCase):
                            preview=(lambda i: path) if preview else None)
         return rows[0]
 
-    def test_pending_counts_and_view_stay_ahead_of_the_position_at_80_columns(self):
-        self.assertEqual(self.bottom_text(self.STATUS), self.STATUS + " · +0 −0 pending · view: all")
+    def test_pending_counts_come_first_and_the_view_stays_ahead_of_the_position_at_80_columns(self):
+        row = self.bottom_text(self.STATUS)
+        self.assertTrue(row.startswith("+0 −0 · " + self.STATUS + " · view: all "), row)
+        self.assertTrue(row.endswith(" row 1 · 3/3 shown"), row)
 
-    def test_pending_counts_and_view_stay_ahead_of_the_position_beside_the_image_pane(self):
-        status = "💾 1 GB used · 3 file(s)"  # with pending and view, it fits the 60 columns the pane leaves
-        self.assertEqual(self.bottom_text(status, preview=True), status + " · +0 −0 pending · view: all")
+    def test_pending_counts_come_first_and_the_view_stays_ahead_of_the_position_beside_the_image_pane(self):
+        status = "💾 1 GB used · 3 files"  # in the 60 columns the pane leaves, only the compact position fits beside it
+        row = self.bottom_text(status, preview=True)
+        self.assertTrue(row.startswith("+0 −0 · " + status + " · view: all "), row)
+        self.assertTrue(row.endswith(" 1 · 3/3"), row)
 
     def test_status_counts_what_the_filter_shows(self):
         rows = []
@@ -606,3 +611,82 @@ class TextualList(unittest.TestCase):
             raise ValueError("boom")
         with self.assertRaisesRegex(ValueError, "boom"):
             self.run_keys(["f"], hotkeys=("f",), on_hotkey=on_hotkey)
+
+
+class NarrowRows(unittest.TestCase):
+    LONG = "Pocket Monsters - Super Long Adventure (Japan) (Rev 1) (Virtual Console) [T-En by Someone]"  # 90
+    EXTRAS = [[("  📦 Shmups", "cyan"), ("  1.2 GB", "dim")], [("  12 MB", "dim")]]
+
+    def rendered(self, size=(80, 24), preview=False, **kwargs):
+        """The list's lines as plain text (title, filter and hint first), and the list's width."""
+        from PIL import Image
+        out = []
+
+        async def script(pilot):
+            out.extend(screen_text(pilot.app))
+            out.append(pilot.app.screen_stack[0].query_one("_ListLines").size.width)
+            await pilot.press("escape")
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, "a.png")
+            Image.new("RGB", (45, 108), "red").save(path)
+            with mock.patch.object(sys, "__stdout__", io.StringIO()), \
+                    mock.patch("sync_roms.picker._draws_images", return_value=True):
+                pilot_list(script, "t", [self.LONG, "Short"], multi=True, esc_asks=False, extras=self.EXTRAS, size=size,
+                           preview=(lambda i: path) if preview else None, **kwargs)
+        return out[:-1], out[-1]
+
+    def test_a_long_label_is_cut_with_an_ellipsis_and_the_extras_end_at_the_right_edge(self):
+        for size, preview in (((80, 24), False), ((80, 24), True), ((100, 24), False)):
+            lines, width = self.rendered(size, preview)
+            long_row, short_row = lines[3], lines[4]
+            self.assertLess(width, cell_len("⬜ " + self.LONG + "  📦 Shmups  1.2 GB"), (size, preview))  # too long for the row
+            self.assertEqual(cell_len(long_row), width)
+            self.assertTrue(long_row.startswith("⬜ Pocket Monsters"), long_row)
+            self.assertTrue(long_row.endswith("…  📦 Shmups  1.2 GB"), long_row)  # the label gives way, the size stays last
+            self.assertEqual(cell_len(short_row), width)
+            self.assertTrue(short_row.startswith("⬜ Short "), short_row)
+            self.assertTrue(short_row.endswith(" 12 MB"), short_row)  # sizes line up on the right
+
+    def test_a_label_that_fits_is_whole_and_padded_to_the_extras(self):
+        lines, width = self.rendered((120, 24))
+        self.assertEqual(width, 120)
+        self.assertEqual(lines[3], "⬜ " + self.LONG + " " * 8 + "  📦 Shmups  1.2 GB")
+        self.assertEqual(lines[4], "⬜ Short" + " " * 105 + "  12 MB")
+
+    def test_the_cut_counts_cells_and_never_splits_a_wide_character(self):
+        from rich.text import Text
+        label = "⬜ ポケットモンスター 金 (Japan) (Rev 1)"
+        for width in range(28, 60):  # from 28 the label keeps its MIN_LABEL cells with the size beside it
+            row = picker.fit_row(Text(label), Text("  1.2 GB"), width)
+            self.assertEqual(row.cell_len, width, width)
+            self.assertTrue(row.plain.endswith("  1.2 GB"), row.plain)
+            self.assertTrue(row.plain.startswith("⬜ ポケ"), row.plain)
+            whole = label + " " * (width - cell_len(label) - 8) + "  1.2 GB"
+            self.assertTrue(row.plain == whole or row.plain.split("  1.2 GB")[0].rstrip().endswith("…"), row.plain)
+
+    def test_when_even_the_extras_do_not_fit_the_label_keeps_its_minimum_and_the_end_is_cut(self):
+        from rich.text import Text
+        row = picker.fit_row(Text("⬜ " + self.LONG), Text("  📦 A very long set name that takes the row  1.2 GB"), 40)
+        self.assertEqual(row.cell_len, 40)
+        self.assertTrue(row.plain.startswith("⬜ Pocket Monsters…"), row.plain)  # MIN_LABEL cells of the label
+        self.assertTrue(row.plain.endswith("…"), row.plain)
+        self.assertEqual(picker.fit_row(Text("⬜ ab"), Text("  " + "x" * 60), 30).plain, "⬜ ab  " + "x" * 22 + "…")
+
+    def test_extras_keep_their_colors_and_the_highlight_spans_the_row(self):
+        from rich.text import Text
+        row = picker.fit_row(Text("⬜ " + self.LONG, "reverse"), Text("  1.2 GB", "reverse dim"), 40)
+        self.assertEqual([(row.plain[s.start:s.end], str(s.style)) for s in row.spans][-1], ("  1.2 GB", "reverse dim"))
+        self.assertTrue(all("reverse" in str(s.style) for s in row.spans) and row.style == "reverse")
+
+    def test_filters_show_on_the_filter_line(self):
+        lines, _ = self.rendered(filters="📦 Shmups only (c shows all)")
+        self.assertEqual(lines[0].rstrip(), "t")
+        self.assertEqual(lines[1].rstrip(), "🔎   📦 Shmups only (c shows all)")
+
+    def test_a_restored_scroll_is_clamped_so_the_list_is_filled(self):
+        seen = []
+        session = {"sel": [True] * 25 + [False] * 5, "view_mode": 1, "row": 22, "top": 10}  # top 10 was for all 30 rows
+        with mock.patch.object(picker, "_run", seen.append):
+            picker.filter_list("t", [str(i) for i in range(30)], multi=True, session=session)
+        m = seen[0]
+        self.assertEqual((m.view, len(m.vis), m.vis[m.cur], m.top), (20, 25, 22, 5))  # rows 5..24: no blank rows

@@ -7,7 +7,7 @@ import tempfile
 import time
 
 from . import edit, picker, previews, s3, store, ui
-from .listedit import add_from_set, ask_category, game_label, insert_game, recategorize, reconcile, stocked, view
+from .listedit import add_from_set, ask_category, file_counts, game_label, insert_game, recategorize, reconcile, stocked, view
 
 
 REPO = "kelsin/sync-roms"
@@ -46,7 +46,7 @@ def edit_one(game_set, systems, keys_of):
             game_set["games"] = reconcile(game_set["games"], shown)
         elif i == 1:
             options = stocked(systems)
-            j = picker.filter_list("✏️  Add games from which system?", [s["name"] for s in options],
+            j = picker.filter_list("✏️  Add games from which system?", [s["name"] for s in options], extras=file_counts(options),
                                  preview=lambda k: previews.system(options[k]) if k < len(options) else None)
             if j is None:
                 continue

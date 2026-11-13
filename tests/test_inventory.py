@@ -465,6 +465,18 @@ class CacheCommandTest(StorageFolder):
         self.assertIn("Not used", out)
 
 
+class FolderKeysTest(unittest.TestCase):
+    def test_folder_keys_lists_names_only_without_a_cache(self):
+        asked = []
+
+        def list_sizes(prefix, sizes=True):
+            asked.append((prefix, sizes))
+            return {"gba/a.zip": None, "gba/sub/": None}
+        with mock.patch.object(inventory, "current", return_value=None), mock.patch.object(s3, "list_sizes", list_sizes):
+            self.assertEqual(store.folder_keys("gba"), {"gba/a.zip"})
+        self.assertEqual(asked, [("gba/", False)])  # each size would be a stat on a share
+
+
 class StoreUsesTheCacheTest(StorageFolder):
     def test_list_system_and_folder_keys(self):
         self.build()
