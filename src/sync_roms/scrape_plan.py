@@ -401,7 +401,7 @@ def apply_scrape_plan(plan, base):
             update_gamelist(path, entries)
         except (ET.ParseError, OSError, UnicodeDecodeError) as e:
             failed += 1
-            print(ui.red(f"  ❌ {path}: {e}"))
+            ui.failure(ui.red(f"  ❌ {path}: {e}"))
     for path, text in plan["writes"]:
         os.makedirs(os.path.dirname(path), exist_ok=True)
         with open(path, "w", encoding="utf-8", newline="") as f:
