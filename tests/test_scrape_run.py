@@ -36,16 +36,20 @@ class FakeClient:
         self.download_errors = {}  # URL -> exception its download raises
         self.quota_errors = []
         self.threads = 2
+        self.used_today = 0  # requests used today before the run
+        self.last_quota = None
         self.lookups, self.downloads, self.games_asked, self.quota_calls = [], [], [], 0
 
     def quota(self):
         self.quota_calls += 1
         if self.quota_errors:
             raise self.quota_errors.pop(0)
-        return screenscraper.Quota(self.threads, 0, 1000)
+        self.last_quota = screenscraper.Quota(self.threads, self.used_today, 1000)
+        return self.last_quota
 
     def lookup(self, system_id, rom_name, size, md5=None, sha1=None, crc=None):
         self.lookups.append(rom_name)
+        self.last_quota = screenscraper.Quota(self.threads, self.used_today + len(self.lookups), 1000)
         if rom_name == self.quota_at:
             raise screenscraper.QuotaExceeded("quota")
         if self.errors.get(rom_name):
@@ -156,7 +160,7 @@ class ScrapeRunTest(RunBase):
             return real_put(key, text)
         with mock.patch.object(upload, "run_uploads", wraps=upload.run_uploads) as ru, \
                 mock.patch.object(s3, "put_text", side_effect=put_text):
-            ru.side_effect = lambda todo: order.append(("media", sorted(j[0] for j in todo))) or upload.run_copies(todo)
+            ru.side_effect = lambda todo, quiet=False: order.append(("media", sorted(j[0] for j in todo))) or upload.run_copies(todo, quiet)
             self.assertEqual(self.run_scrape(), 0)
         self.assertEqual([o[0] for o in order], ["media", "metadata"])
         self.assertIn("scrapes/gba/covers/a.png", order[0][1])
@@ -182,9 +186,9 @@ class ScrapeRunTest(RunBase):
         self.put("gba/a.zip")
         real_run = upload.run_copies
 
-        def run_copies(todo):  # someone else writes metadata.json while the batch uploads
+        def run_copies(todo, quiet=False):  # someone else writes metadata.json while the batch uploads
             s3.put_text("scrapes/gba/metadata.json", json.dumps({"other.zip": {"name": "Other"}}))
-            return real_run(todo)
+            return real_run(todo, quiet)
         with mock.patch.object(upload, "run_copies", side_effect=run_copies):
             self.assertEqual(self.run_scrape(), 0)
         self.assertEqual(set(self.metadata()), {"a.zip", "other.zip"})
@@ -436,9 +440,9 @@ class FixRoundOneTest(RunBase):
         self.put("gba/b.zip")
         real = upload.run_copies
 
-        def run_copies(todo):
+        def run_copies(todo, quiet=False):
             bad = [j for j in todo if "/a." in j[0]]
-            return real([j for j in todo if j not in bad]) + len(bad)
+            return real([j for j in todo if j not in bad], quiet) + len(bad)
         with mock.patch.object(upload, "run_copies", side_effect=run_copies):
             self.assertEqual(self.run_scrape(), 1)
         self.assertEqual(set(self.metadata()), {"b.zip"})
@@ -451,8 +455,7 @@ class FixRoundOneTest(RunBase):
         self.client.threads = 1
         self.put("scrapes/gba/metadata.json", b'{"old.zip": {"name": "Old"}}')
         self.client.errors = {"a.zip": [KeyboardInterrupt()]}
-        with self.assertRaises(KeyboardInterrupt):
-            self.run_scrape()
+        self.assertEqual(self.run_scrape(), 130)
         # the one worker may have taken b.zip before the stop was set; nothing queued after it starts
         self.assertEqual(self.client.lookups[0], "a.zip")
         self.assertLessEqual(set(self.client.lookups), {"a.zip", "b.zip"})
@@ -472,11 +475,11 @@ class FixRoundOneTest(RunBase):
         self.put("gba/b.zip")
         real, calls = upload.run_copies, []
 
-        def run_copies(todo):
+        def run_copies(todo, quiet=False):
             calls.append(todo)
             if len(calls) == 2:
                 raise OSError("disk gone ?sspassword=hunter2")
-            return real(todo)
+            return real(todo, quiet)
         with mock.patch.object(scrape_online, "BATCH", 1), \
                 mock.patch.object(upload, "run_copies", side_effect=run_copies), self.assertRaises(SystemExit) as cm:
             self.run_scrape()
@@ -661,14 +664,14 @@ class RoundTwoRunTest(RunBase):
         self.put("gba/b.zip")
         seen, real = [], upload.run_copies
 
-        def run_copies(todo):
+        def run_copies(todo, quiet=False):
             if not seen:  # the first upload: the pool must already be on the second batch
                 for _ in range(100):
                     if "b.zip" in self.client.lookups:
                         break
                     threading.Event().wait(0.05)
                 seen.append("b.zip" in self.client.lookups)
-            return real(todo)
+            return real(todo, quiet)
         with mock.patch.object(scrape_online, "BATCH", 1), mock.patch.object(upload, "run_copies", side_effect=run_copies):
             self.assertEqual(self.run_scrape(), 0)
         self.assertEqual(seen, [True])
@@ -1100,6 +1103,169 @@ class BigFileHashTest(RunBase):
                 mock.patch.object(s3, "put_text", side_effect=put_text):
             self.assertEqual(self.run_scrape(), 0)
         self.assertIn("gba/a.zip", seen[0])  # written before the first batch's entries, not only when the run ends
+
+
+class ProgressTest(RunBase):
+    def run_quiet(self, **kw):
+        args = SimpleNamespace(**{"system": None, "retry": False, "skip_media": [], "dry_run": False, **kw})
+        with contextlib.redirect_stdout(self.out), contextlib.redirect_stderr(self.err):
+            ui.set_output(True, False)
+            try:
+                return scrape_online.scrape_command(args)
+            finally:
+                ui.reset()
+
+    def test_each_rom_gets_a_line_with_its_game_how_it_matched_and_its_media(self):
+        for r in ("a.zip", "n.zip", "x.zip", "zzz.zip"):
+            self.put(f"gba/{r}")
+        self.client.games["n.zip"] = dict(game(5, "ZZZ(notgame):Test Cart"), id=5)
+        self.client.games["x.zip"] = game(6, "Broken")
+        self.client.fail_urls = {"http://media/6/ss"}
+        self.assertEqual(self.run_scrape(), 1)
+        out = self.out.getvalue()
+        self.assertRegex(out, r"\[\d/4\] ✅ gba/a\.zip → Alpha  name\+size, 2 media")
+        self.assertRegex(out, r"\[\d/4\] 🚫 gba/n\.zip → Test Cart: ScreenScraper lists it as a non-game")
+        self.assertRegex(out, r"\[\d/4\] ⚠️  gba/x\.zip: ScreenScraper request failed \(HTTP 500\); skipped")
+        self.assertRegex(out, r"\[\d/4\] ❔ gba/zzz\.zip: not on ScreenScraper")
+        self.assertEqual(sorted(int(n) for n in __import__("re").findall(r"\[(\d)/4\]", out)), [1, 2, 3, 4])
+
+    def test_media_is_copied_without_a_line_per_file(self):
+        self.put("gba/a.zip")
+        self.assertEqual(self.run_scrape(), 0)
+        out = self.out.getvalue()
+        self.assertNotIn("scrapes/gba/covers/a.png", out)
+        self.assertNotIn("Copying", out)
+        self.assertIn("scrapes/gba/covers/a.png", self.stored())
+
+    def test_media_copy_failures_are_still_printed(self):
+        self.put("gba/a.zip")
+        real = s3.write_file
+
+        def write_file(key, write):
+            if key == "scrapes/gba/covers/a.png":
+                raise OSError("disk full")
+            return real(key, write)
+        with mock.patch.object(s3, "write_file", side_effect=write_file):
+            self.assertEqual(self.run_scrape(), 1)
+        self.assertIn("❌ scrapes/gba/covers/a.png: disk full", self.out.getvalue())
+        self.assertIn("gba/a.zip: its media didn't all upload; skipped", self.out.getvalue())
+
+    def test_batch_header_shows_time_and_quota(self):
+        for r in ("a.zip", "b.zip", "c.zip"):
+            self.put(f"gba/{r}")
+        with mock.patch.object(scrape_online, "BATCH", 1):
+            self.assertEqual(self.run_scrape(), 0)
+        out = self.out.getvalue()
+        self.assertRegex(out, r"ROMs 1-1 of 3  \d+/1000 requests used today")
+        self.assertRegex(out, r"ROMs 2-2 of 3  \d+m\d\ds elapsed, \d+m\d\ds left · \d+/1000 requests used today")
+
+    def test_batch_header_without_account_has_no_quota(self):
+        self.put("gba/a.zip")
+        self.client.quota = lambda: None
+        self.client.lookup = lambda *a, **k: self.client.games["a.zip"]
+        self.assertEqual(self.run_scrape(), 0)
+        self.assertNotIn("requests used today", self.out.getvalue())
+
+    def test_worst_case_requests_shown_before_the_confirm(self):
+        self.put("gba/a.zip")
+        self.put("gba/b.zip")
+        self.confirm.side_effect = lambda *a, **k: "up to 22 request(s) for 2 ROM(s), 1000 left today" in self.out.getvalue()
+        self.assertEqual(self.run_scrape(skip_media=["screenshots"]), 0)
+        self.assertEqual(set(self.metadata()), {"a.zip", "b.zip"})
+        self.assertNotIn("may use up", self.out.getvalue())
+
+    def test_worst_case_over_the_quota_warns(self):
+        self.put("gba/a.zip")
+        self.client.used_today = 995
+        self.assertEqual(self.run_scrape(), 0)
+        self.assertIn("up to 12 request(s) for 1 ROM(s), 5 left today", self.out.getvalue())
+        self.assertIn("may use up today's quota", self.out.getvalue())
+
+    def test_ctrl_c_saves_finished_roms_of_both_batches_in_flight(self):
+        for r in "abcdef":
+            self.put(f"gba/{r}.zip")
+            self.client.games.setdefault(f"{r}.zip", game(ord(r), r))
+        real_lookup, real_download, batch2_done = self.client.lookup, self.client.download, threading.Event()
+
+        def lookup(system_id, rom_name, *a, **k):
+            if rom_name == "b.zip":  # Ctrl-C while batch 1 waits, once batch 2 has finished on the other thread
+                batch2_done.wait(5)
+                raise KeyboardInterrupt
+            return real_lookup(system_id, rom_name, *a, **k)
+
+        def download(url, dest, limit=None, stop=None):
+            real_download(url, dest, limit, stop)
+            if url == f"http://media/{ord('d')}/ss":
+                batch2_done.set()
+        self.client.lookup, self.client.download = lookup, download
+        with mock.patch.object(scrape_online, "BATCH", 2):
+            self.assertEqual(self.run_scrape(), 130)
+        self.assertEqual(set(self.metadata()), {"a.zip", "c.zip", "d.zip"})
+        self.assertIn("scrapes/gba/covers/d.png", self.stored())
+        self.assertNotIn("e.zip", self.client.lookups)
+        out = self.out.getvalue()
+        self.assertIn("Interrupted", out)
+        self.assertIn("3 ROM(s) scraped this run are saved and 3 are left", out)
+        self.assertIn("run `sync-roms scrape` again to continue", out)
+        self.assertNotIn("Done", out)
+
+    def test_lookup_without_its_media_is_not_saved_on_ctrl_c(self):
+        self.put("gba/a.zip")
+        self.put("gba/b.zip")
+        self.client.threads = 1
+
+        def download(url, dest, limit=None, stop=None):  # b.zip's lookup finished; Ctrl-C lands during its media
+            if "/2/" in url:
+                raise KeyboardInterrupt
+            return FakeClient.download(self.client, url, dest, limit, stop)
+        self.client.download = download
+        self.assertEqual(self.run_scrape(), 130)
+        self.assertEqual(set(self.metadata()), {"a.zip"})
+        self.assertFalse(any("/b." in k for k in self.stored()))
+        self.assertIn("1 ROM(s) scraped this run are saved and 1 are left", self.out.getvalue())
+
+    def test_ctrl_c_during_the_media_copy_keeps_the_roms_copied_whole(self):
+        self.put("gba/a.zip")
+        self.put("gba/b.zip")
+        real = upload.run_copies
+
+        def run_copies(todo, quiet=False):
+            real([j for j in todo if "/a." in j[0]], quiet)
+            raise KeyboardInterrupt
+        with mock.patch.object(upload, "run_copies", side_effect=run_copies):
+            self.assertEqual(self.run_scrape(), 130)
+        self.assertEqual(set(self.metadata()), {"a.zip"})
+        out = self.out.getvalue()
+        self.assertNotIn("didn't all upload", out)
+        self.assertIn("1 ROM(s) scraped this run are saved and 1 are left", out)
+
+    def test_second_ctrl_c_aborts(self):
+        self.put("gba/a.zip")
+        self.put("gba/b.zip")
+        self.client.threads = 1
+        self.client.errors = {"b.zip": [KeyboardInterrupt()]}
+        with mock.patch.object(upload, "run_copies", side_effect=KeyboardInterrupt), self.assertRaises(KeyboardInterrupt):
+            self.run_scrape()
+        self.assertEqual(self.metadata(), {})
+
+    def test_quiet_prints_nothing_on_a_clean_run(self):
+        self.put("gba/a.zip")
+        self.assertEqual(self.run_quiet(), 0)
+        self.assertEqual(self.out.getvalue(), "")
+        self.assertEqual(self.err.getvalue(), "")
+        self.assertEqual(set(self.metadata()), {"a.zip"})
+
+    def test_quiet_prints_failures_and_the_interrupt(self):
+        self.put("gba/a.zip")
+        self.put("gba/b.zip")
+        self.client.threads = 1
+        self.client.fail_urls = {"http://media/1/ss"}
+        self.client.errors = {"b.zip": [KeyboardInterrupt()]}
+        self.assertEqual(self.run_quiet(), 130)
+        self.assertEqual(self.out.getvalue(), "")
+        err = self.err.getvalue()
+        self.assertIn("gba/a.zip: ScreenScraper request failed (HTTP 500); skipped", err)
+        self.assertIn("Interrupted. 0 ROM(s) scraped this run are saved and 2 are left", err)
 
 
 class ReportTest(unittest.TestCase):

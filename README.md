@@ -446,8 +446,20 @@ you pick, `k` (the default) leaves it for later, and `I` ignores it and every on
 scrapes them, and never deletes their files. Each run checks the file and keeps a copy in the data folder. To stop
 ignoring a ROM, remove it from `ignored.json` in storage.
 
+**Progress.** Before it asks to start, the run says the most requests it can make (one lookup and one download per
+media type for each ROM) and how many are left today. ROMs go in batches of 25; each batch's heading shows today's
+requests as ScreenScraper last reported them and, from the second batch on, the time elapsed and left, and each ROM
+gets a line as it ends:
+the game it matched and how (hash, name+size or manual) and how many media files it got, or that it isn't on
+ScreenScraper, is a non-game or failed. The media is then copied or uploaded behind a progress bar that lists only failures.
+
 **Quota.** ScreenScraper limits requests per day, and separately the number of unrecognized ROMs per day. When either is
 used up the run stops cleanly with what it finished already saved and says which limit it was; run it again the next day.
+
+**Ctrl-C.** The ROMs still being looked up or downloaded stop, and those that finished, in both batches being worked on,
+are uploaded and saved; Ctrl-C during an upload lets the files in flight finish and keeps the ROMs whose media all made
+it. The run then says how many ROMs it saved and how many are left, and exits 130; run it again to continue. A second
+Ctrl-C aborts at once.
 
 **Errors.** A rate-limited request, a server error (HTTP 5xx) or a network failure is tried 3 more times, waiting 10, 20
 and 40 seconds; a ROM that still fails is skipped and tried again on the next run. The run stops the same clean way, and

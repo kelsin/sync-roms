@@ -650,13 +650,25 @@ class FakeManager:
 
 
 class RunRomUploadsTest(unittest.TestCase):
-    def run_uploads(self, todo, manager):
+    def run_uploads(self, todo, manager, **kw):
         with mock.patch.object(runtime, "BUCKET", "test-bucket"), \
                 mock.patch("boto3.s3.transfer.create_transfer_manager", return_value=manager) as create, \
                 mock.patch.object(s3, "s3_client") as client, \
                 contextlib.redirect_stdout(io.StringIO()) as out:
-            failed = upload.run_uploads(todo)
+            failed = upload.run_uploads(todo, **kw)
         return failed, out.getvalue(), create, client
+
+    def test_quiet_shows_only_failures(self):
+        todo = [("gba/a.zip", "/x/a.zip", 1), ("gba/b.zip", "/x/b.zip", 2)]
+        failed, out, _, _ = self.run_uploads(todo, FakeManager(fail={"gba/a.zip"}), quiet=True)
+        self.assertEqual(failed, 1)
+        self.assertIn("gba/a.zip: denied", out)
+        self.assertNotIn("gba/b.zip", out)
+        self.assertNotIn("Uploading", out)
+        err = io.StringIO()
+        with contextlib.redirect_stderr(err), mock.patch.object(ui, "QUIET", True):
+            self.run_uploads(todo, FakeManager(fail={"gba/a.zip"}), quiet=True)
+        self.assertIn("gba/a.zip: denied", err.getvalue())  # --quiet discards stdout
 
     def test_biggest_first_with_content_type_on_the_write_profile(self):
         manager = FakeManager()
