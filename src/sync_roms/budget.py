@@ -2,7 +2,7 @@
 import os
 from collections import defaultdict, namedtuple
 
-from . import collections as colls, commands, inventory, scrape_plan, store
+from . import collections as colls, commands, inventory, scrape_plan, store, vita
 
 Usage = namedtuple("Usage", "bytes count partial")
 
@@ -19,7 +19,8 @@ def scrape_costs(layout, system, rels, listing):
 
 
 def game_costs(card, system, keys):
-    """({key: ROM bytes + scrape bytes} for the keys in the system's size cache, partial). partial: the system's
+    """({key: ROM bytes + scrape bytes} for the keys in the system's size cache, partial). A Vita game's ROM bytes
+    include its DLC and newest update. partial: the system's
     sizes, or the scrape sizes the layout needs, aren't cached yet. Once they are, a key left out isn't in storage:
     it costs nothing."""
     bucket = system["bucket"]
@@ -28,13 +29,15 @@ def game_costs(card, system, keys):
     sizes = sizes or {}
     layout = card.get("layout")
     sized = [k for k in keys if k in sizes]
+    extras = vita.extras(sized, sizes)
+    roms = {k: sizes[k] + sum(sizes[e] for e in extras.get(k, ())) for k in sized}
     if layout not in scrape_plan.SCRAPE_LAYOUTS or not keys:
-        return {k: sizes[k] for k in sized}, partial
+        return roms, partial
     scrapes = inventory.cached(f"{scrape_plan.SCRAPES}/{bucket}/")
     if scrapes is None:
-        return {k: sizes[k] for k in sized}, True
+        return roms, True
     extra = scrape_costs(layout, system, [k[len(bucket) + 1:] for k in sized], scrapes)
-    return {k: sizes[k] + extra[k[len(bucket) + 1:]] for k in sized}, partial
+    return {k: roms[k] + extra[k[len(bucket) + 1:]] for k in sized}, partial
 
 
 def _system_keys(card, system, sets, collections_by_id):
@@ -82,8 +85,11 @@ def system_usages(card, systems):
 
 
 def fetch_bytes(system, keys, to_fetch):
-    """ROM bytes of the keys that to_fetch(system, keys) says aren't on the card yet, from the size cache."""
+    """ROM bytes of the keys (and a Vita game's extras) that to_fetch(system, keys) says aren't on the card yet,
+    from the size cache."""
     sizes = inventory.cached(f"{system['bucket']}/") or {}
+    keys = list(keys)
+    keys += [e for k in vita.extras(keys, sizes).values() for e in k]
     return sum(sizes.get(k, 0) for k in to_fetch(system, keys)) if keys else 0
 
 
