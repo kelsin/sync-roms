@@ -122,5 +122,68 @@ class RootSettingTest(unittest.TestCase):
             self.assertEqual(runtime.ROOT, os.path.abspath(d))
 
 
+class FirstRunAnswerTest(unittest.TestCase):
+    """ensure_bucket() with nothing set: what each answer to the storage question does."""
+
+    def first_run(self, answers, quiet=False):
+        """Run ensure_bucket() on answers; returns (saved settings, input mock, stdout, stderr)."""
+        saved = {}
+        unset = {k: (None, "unset") for k in ("bucket", "root", "endpoint")} | {"profile": ("p", ""), "write_profile": ("w", "")}
+        out, err = self.out, self.err = io.StringIO(), io.StringIO()
+        with mock.patch.object(usersettings, "load_settings", lambda: dict(saved)), \
+                mock.patch.object(usersettings, "save_settings", lambda new: (saved.clear(), saved.update(new))), \
+                mock.patch.object(usersettings, "resolve_settings", lambda: unset), \
+                mock.patch.object(runtime, "ROOT", None), mock.patch.object(runtime, "BUCKET", None), \
+                mock.patch.object(runtime, "ENDPOINT", None), mock.patch.object(usersettings.ui, "QUIET", quiet), \
+                mock.patch("builtins.input", side_effect=answers) as ask, \
+                contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+            usersettings.ensure_bucket()
+        return saved, ask, out.getvalue(), err.getvalue()
+
+    def test_path_without_leading_slash_is_not_saved_as_a_bucket(self):
+        with tempfile.TemporaryDirectory() as d:
+            saved, ask, out, _ = self.first_run(["Volumes/roms", d])
+        self.assertEqual(saved, {"root": os.path.abspath(d)})
+        self.assertEqual(ask.call_count, 2)  # asked again, and no endpoint question
+        self.assertIn("Volumes/roms is not an absolute path", out)
+
+    def test_existing_folder_name_is_a_folder_and_must_be_absolute(self):
+        with tempfile.TemporaryDirectory() as d, tempfile.TemporaryDirectory() as cwd:
+            os.makedirs(os.path.join(cwd, "roms"))
+            old = os.getcwd()
+            os.chdir(cwd)
+            try:
+                saved, _, out, _ = self.first_run(["roms", d])
+            finally:
+                os.chdir(old)
+        self.assertEqual(saved, {"root": os.path.abspath(d)})
+        self.assertIn("roms is not an absolute path", out)
+
+    def test_home_folder_answer_is_expanded(self):
+        home = os.path.join(os.path.expanduser("~"), "first-run-roms")
+        os.makedirs(home)
+        self.addCleanup(os.rmdir, home)
+        saved, _, _, _ = self.first_run(["~/first-run-roms"])
+        self.assertEqual(saved, {"root": home})
+
+    def test_bucket_name_is_still_a_bucket(self):
+        saved, ask, _, _ = self.first_run(["s3://my-roms/", ""])
+        self.assertEqual(saved, {"bucket": "my-roms"})
+        self.assertEqual(ask.call_count, 2)  # bucket, then endpoint
+
+    def test_no_terminal_message_names_variables_and_flags(self):
+        with self.assertRaises(SystemExit) as cm:
+            self.first_run(EOFError())
+        self.assertEqual(cm.exception.code, 3)
+        for name in ("ROMS_BUCKET", "ROMS_ROOT", "--bucket", "--root"):
+            self.assertIn(name, self.err.getvalue())
+
+    def test_quiet_asks_on_stderr(self):
+        with tempfile.TemporaryDirectory() as d:
+            _, ask, _, err = self.first_run([d], quiet=True)
+        self.assertIn("Which S3 bucket holds your ROMs?", err)
+        ask.assert_called_once_with()
+
+
 if __name__ == "__main__":
     unittest.main()

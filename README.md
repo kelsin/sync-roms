@@ -4,9 +4,10 @@ Interactive script that downloads ROMs and the BIOS files they need from your
 S3 bucket into local folders. On first run it asks which bucket to use and saves the
 name as `bucket` in `settings.json` in the user data folder. It also asks for an optional custom S3
 endpoint URL (blank for AWS), saved as `endpoint`, for S3-compatible storage such as MinIO or Cloudflare R2
-(requests then use path-style addressing). Instead of a bucket you can give a folder path (for example a mounted
-network share, `/Volumes/roms`); it is saved as `root` and replaces the bucket and AWS entirely, with the same
-layout (`<system>/…`, `BIOS/…`, `scrapes/…`). Files you already have (same
+(requests then use path-style addressing). Instead of a bucket you can give an absolute folder path (for example a mounted
+network share, `/Volumes/roms`, or `~/roms`); it is saved as `root` and replaces the bucket and AWS entirely, with the same
+layout (`<system>/…`, `BIOS/…`, `scrapes/…`). An answer with a `/` (other than `s3://…`) or naming an existing folder is a
+folder, never a bucket name. With no terminal to ask on, set `ROMS_BUCKET` or `ROMS_ROOT` (or pass `--bucket` or `--root`). Files you already have (same
 size) are skipped, so re-running it only fetches what's new or missing. It can also keep a
 [local mirror](#local-mirror---mirror---use-mirror---clear-mirror) of storage and sync from that.
 
