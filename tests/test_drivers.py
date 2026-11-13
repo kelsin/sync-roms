@@ -139,6 +139,21 @@ class Refresh(unittest.TestCase):
         self.run_refresh([entry("a", tag="v1")])
         self.assertEqual(self.calls, [])
 
+    def test_pinned_zip_without_tag_is_fetched_and_tagged(self):
+        self.store("a", "v1")
+        os.remove(os.path.join(self.storage, "os/drivers/a.tag"))
+        self.releases["o/a"] = release("v1", "a.zip")
+        self.run_refresh([entry("a", tag="v1")])
+        self.assertEqual(self.read("os/drivers/a.tag", mode="r"), "v1\n")
+        self.assertEqual(self.read("os/drivers/a.zip"), self.body)
+
+    def test_matching_tag_without_zip_is_stored_again(self):
+        self.store("a", "v2")
+        os.remove(os.path.join(self.storage, "os/drivers/a.zip"))
+        self.releases["o/a"] = [release("v2", "a.zip")]
+        self.run_refresh([entry("a")])
+        self.assertEqual(self.read("os/drivers/a.zip"), self.body)
+
     def test_pinned_missing_fetches_its_release(self):
         self.releases["o/a"] = release("v1", "a.zip")
         self.run_refresh([entry("a", tag="v1")])
@@ -203,12 +218,17 @@ class Refresh(unittest.TestCase):
         self.assertEqual(drivers.stored_tag("a"), "v1")
 
     def test_can_write(self):
+        os.makedirs(self.storage, exist_ok=True)
         self.assertTrue(drivers.can_write())
         import botocore.exceptions
         with mock.patch.object(runtime, "ROOT", None), \
                 mock.patch("boto3.Session", side_effect=botocore.exceptions.ProfileNotFound(profile="roms")):
             self.assertFalse(drivers.can_write())
 
+    def test_can_write_storage_folder_must_be_writable(self):
+        with mock.patch("os.access", return_value=False) as access:
+            self.assertFalse(drivers.can_write())
+        access.assert_called_once_with(self.storage, os.W_OK)
 
     def test_jobs_name_files_by_id_and_tag(self):
         self.store("a", "v1/2")

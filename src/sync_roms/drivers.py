@@ -54,9 +54,9 @@ def card_name(driver_id, tag):
 
 
 def can_write():
-    """Whether storage can be written: a storage folder always, a bucket when the write profile exists."""
+    """Whether storage can be written: a storage folder when it is writable, a bucket when the write profile exists."""
     if runtime.ROOT:
-        return True
+        return os.access(runtime.ROOT, os.W_OK)
     import boto3
     from botocore.exceptions import ProfileNotFound
     try:
@@ -89,11 +89,11 @@ def _latest(driver):
 
 def _update(driver, stored, dry_run):
     key = f"{PREFIX}{driver['id']}"
-    if driver.get("tag") and f"{key}.zip" in stored:
+    if driver.get("tag") and f"{key}.zip" in stored and f"{key}.tag" in stored:
         return
     tag, asset = _latest(driver)
     old = stored_tag(driver["id"])
-    if old == tag:
+    if old == tag and f"{key}.zip" in stored:
         return
     if dry_run:
         print(ui.dim(f"🧪 Dry run: would store {driver['name']} {tag}"))
