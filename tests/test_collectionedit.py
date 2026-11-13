@@ -43,14 +43,14 @@ class Stocked(unittest.TestCase):
         cache = {"gba/": {"Ruby.zip": 1}, "psx/": {}, "gb/": {"Tetris.zip": 1}}
         for module in (collectionedit, setedit):
             # psx is cached as empty, saturn has no folder; gb has a folder and games
-            self.assertEqual(self.offered(module, lambda: {"gba", "psx", "gb"}, cache), ["Game Boy Advance", "Game Boy"])
+            self.assertEqual(self.offered(module, lambda: {"gba", "psx", "gb"}, cache), ["Game Boy", "Game Boy Advance"])
 
     def test_add_games_shows_each_systems_file_count_from_the_cache(self):
         cache = {"gba/": {"gba/Ruby.zip": 1, "gba/Emerald.zip": 2, "gba/hacks/": 0}, "gb/": {"gb/Tetris.zip": 1}}
         for module in (collectionedit, setedit):
             extras = []
-            self.assertEqual(self.offered(module, lambda: {"gba", "gb"}, cache, extras), ["Game Boy Advance", "Game Boy"])
-            self.assertEqual(extras, [[("  2 files", "dim")], [("  1 file", "dim")]], module.__name__)
+            self.assertEqual(self.offered(module, lambda: {"gba", "gb"}, cache, extras), ["Game Boy", "Game Boy Advance"])
+            self.assertEqual(extras, [[("  1 file", "dim")], [("  2 files", "dim")]], module.__name__)
 
     def test_add_games_counts_nothing_without_a_cache(self):
         extras = []
@@ -58,10 +58,20 @@ class Stocked(unittest.TestCase):
             self.offered(setedit, lambda: {"gba", "psx", "gb", "saturn"}, {}, extras)
         self.assertEqual(extras, [[], [], [], []])  # every system listed (no cache to tell), none counted
 
+    def test_add_games_lists_systems_by_company_then_name_like_the_card_editor(self):
+        systems = [{"name": "Game Boy Advance", "bucket": "gba", "company": "Nintendo"},
+                   {"name": "PlayStation", "bucket": "psx", "company": "Sony"},
+                   {"name": "Mega Drive", "bucket": "md", "company": "Sega"},
+                   {"name": "Game Boy", "bucket": "gb", "company": "Nintendo"}]
+        for module in (collectionedit, setedit):
+            with mock.patch.object(self, "SYSTEMS", systems):
+                self.assertEqual(self.offered(module, lambda: {"gba", "psx", "md", "gb"}, {}),
+                                 ["Game Boy", "Game Boy Advance", "Mega Drive", "PlayStation"], module.__name__)
+
     def test_add_games_goes_by_the_cache_when_storage_cannot_be_reached(self):
         def down():
             raise OSError("down")
-        self.assertEqual(self.offered(collectionedit, down, {"psx/": {}}), ["Game Boy Advance", "Game Boy", "Saturn"])
+        self.assertEqual(self.offered(collectionedit, down, {"psx/": {}}), ["Game Boy", "Game Boy Advance", "Saturn"])
 
 
 class Discs(unittest.TestCase):

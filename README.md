@@ -531,7 +531,7 @@ sync-roms --edit
 1. A card opens on every system its device can play, in the usual order. Systems recommended for the device's screen
    are marked ⭐; each system with picks shows how many games and how much space they take (ROMs plus the scraped
    files the card's firmware installs). The bottom line shows the card's total (games, scrapes and the BIOS files of
-   the systems it syncs) against its size, in green below 70% of the card, yellow below 90% and
+   the systems it syncs) against its size and the free space, in green below 70% of the card, yellow below 90% and
    red above (or over). Opened from a sync, it also shows how much of the card's ROMs aren't on it yet
    (`⬇️  … to download`). Sizes come from the storage cache (see [Storage cache](#storage-cache)); without one they show
    `…` and the total says "not sized". `/` filters, `Enter` opens a system, `l` adds a collection to the card (each shows how many of its games are playable on the card's device, and `Space`/`Enter` toggles the whole collection), `f` makes it a full system (every file in its folder; `f` again brings the
@@ -551,7 +551,7 @@ sync-roms --edit
    value of the same field replaces it; filters on different fields, the set filter and `/` all combine, and the filter
    line shows what is active. A game with no value for a field never matches a filter on it. The metadata is read in the
    background once per session, so the menu says it is loading at first. `p` narrows the list to games that were surprises within the last `surprise_ttl_days` (🎁 past surprises only), `c` clears every filter and shows every game again.
-   Pending changes show as `➕` / `➖` and are counted at the start of the bottom line (`+2 −1`), which updates the card's total as you toggle. `w` writes a note on a
+   Pending changes show as `➕` / `➖` and are counted at the start of the bottom line (`+2 −1`), which updates the card's total and free space as you toggle. `w` writes a note on a
    picked game. A 💖 next to a game says one of the card's collections syncs it: it is always on, can't be switched off here, per-card exclusions don't apply to it, and it counts in the card's budget. `Enter` keeps your changes; `Esc` asks whether to keep or revert them if there are any.
 3. When you leave the menu, device/firmware and device-system changes are summarized, then **save**, **keep
    editing**, **discard**, or **list every change**. Nothing is uploaded.
@@ -582,7 +582,7 @@ Removing a game only drops it from the card's games; the file stays in storage.
 
 ### Editing the built-in sets
 
-`sync-roms sets edit` edits the sets in this repo's `data/sets/` and opens a PR with the changes, so it works from any install. Pick a set to switch games off, add games from a system (those with files in storage; with a storage cache each shows its file count) or from another set across all its systems (you're asked for a category; existing ones are listed), change a game's category, or rename it. **➕ New set** creates a set and `d` deletes the highlighted one (it warns if a card still references it). Esc shows the changes; confirming clones `kelsin/sync-roms` to a temporary folder, writes the changed set files, pushes a branch and runs `gh pr create`. `Ctrl-C` with changes pending shows the same review first. It needs `git` and a logged-in `gh`, and writes nothing to storage or to `~/.sync-roms`.
+`sync-roms sets edit` edits the sets in this repo's `data/sets/` and opens a PR with the changes, so it works from any install. Pick a set to switch games off, add games from a system (those with files in storage, by company then name; with a storage cache each shows its file count) or from another set across all its systems (you're asked for a category; existing ones are listed), change a game's category, or rename it. **➕ New set** creates a set and `d` deletes the highlighted one (it warns if a card still references it). Esc shows the changes; confirming clones `kelsin/sync-roms` to a temporary folder, writes the changed set files, pushes a branch and runs `gh pr create`. `Ctrl-C` with changes pending shows the same review first. It needs `git` and a logged-in `gh`, and writes nothing to storage or to `~/.sync-roms`.
 
 ### Collections
 

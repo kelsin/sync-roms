@@ -40,17 +40,19 @@ def size_text(n):
             return f"{n:.1f}".rstrip("0").rstrip(".") + f" {unit}"
 
 
-def header(usage, capacity, fetch=None):
+def header(usage, capacity, fetch=None, count=True):
     """(status text, over budget) for a card's budget.Usage against its capacity in bytes (None: no size known).
     A partial usage is "not sized": there is no storage cache to size it from. fetch: bytes of ROMs not on the card
-    yet (None: not known, as outside a sync)."""
+    yet (None: not known, as outside a sync). count: show the card's file count."""
     used = size_text(usage.bytes)
     if capacity is None:
         text, over = f"💾 {used} used", False
     else:
         over = usage.bytes > capacity
-        text = f"💾 {used} / {size_text(capacity)}" + (f" · ⚠️  {size_text(usage.bytes - capacity)} over" if over else "")
-    text += f" · {usage.count} file" + ("" if usage.count == 1 else "s")
+        text = f"💾 {used} / {size_text(capacity)} · " + (
+            f"⚠️  {size_text(usage.bytes - capacity)} over" if over else f"{size_text(capacity - usage.bytes)} free")
+    if count:
+        text += f" · {usage.count} file" + ("" if usage.count == 1 else "s")
     if fetch is not None:
         text += f" · ⬇️  {size_text(fetch)} to download"
     if usage.partial:
@@ -61,9 +63,9 @@ def header(usage, capacity, fetch=None):
 WARN_AT, FULL_AT = 0.70, 0.90  # the header is green below WARN_AT of the card, yellow below FULL_AT, then red
 
 
-def status_of(usage, capacity, fetch=None):
+def status_of(usage, capacity, fetch=None, count=True):
     """header() as a filter_list status: green until 70% of the card, yellow until 90%, red above (and when over budget)."""
-    text, over = header(usage, capacity, fetch)
+    text, over = header(usage, capacity, fetch, count)
     if capacity is None:
         return text
     share = usage.bytes / capacity
@@ -630,7 +632,7 @@ def edit_system(name, system, setup, to_fetch=None, card_usages=None):
                 total = budget.Usage(work["others"].bytes + mine + bios.bytes, work["others"].count + len(picked),
                                      partial)
                 fetch = None if to_fetch is None else work["fetch"] + budget.fetch_bytes(system, picked, to_fetch)
-                return status_of(total, capacity, fetch)
+                return status_of(total, capacity, fetch, count=False)  # the whole card's file count says little here
 
             def note_text(i):
                 game = next((g for g in s["games"] if g.get("bucket") == keys[i]), None)
