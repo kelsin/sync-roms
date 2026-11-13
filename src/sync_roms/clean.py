@@ -130,8 +130,10 @@ def _stop_indexing(root):
     if not shutil.which("mdutil") or not spotlight_active(root):
         return
     cmd = f"sudo mdutil -i off {root} && sudo mdutil -X {root}"
-    print(ui.bold(f"\n🔍 Spotlight is indexing the card, which keeps recreating ._ files. Turning it off needs: {cmd}"))
-    if ui.ASSUME_YES or not sys.stdin.isatty():
+    ask = not ui.ASSUME_YES and sys.stdin.isatty()
+    print(ui.bold(f"\n🔍 Spotlight is indexing the card, which keeps recreating ._ files. Turning it off needs: {cmd}"),
+          file=sys.stderr if ask and ui.QUIET else sys.stdout)  # under --quiet the question is on stderr: show what it runs there too
+    if not ask:
         print(ui.yellow("  ↩️  Not asking for sudo's password here: run that command yourself if you want it"))
     elif ui.confirm("Run it now? (sudo asks for your password)"):
         # sudo needs ^C to work at its password prompt
@@ -164,9 +166,9 @@ def _clean_card():
     if left:
         ui.failure(ui.red(f"\n⚠️  {len(left)} ._ file(s) are still there after dot_clean:"))
         for path in left[:10]:
-            print(ui.dim(f"     {path}"))
+            ui.failure(ui.dim(f"     {path}"))
         if len(left) > 10:
-            print(ui.dim(f"     … and {len(left) - 10} more"))
+            ui.failure(ui.dim(f"     … and {len(left) - 10} more"))
 
 
 def card_disk(path):

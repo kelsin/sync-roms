@@ -1083,7 +1083,7 @@ def sync_card(args):
             short = f"Not enough space: {ui.human_size(need)} to download, {ui.human_size(free)} free"
             if ui.ASSUME_YES or not ui.has_terminal():  # nobody to answer "Try anyway?"
                 ui.fail(short, 1)
-            print(ui.red(f"❌ {short}"))
+            ui.failure(ui.red(f"❌ {short}"))
             if not ui.confirm("Try anyway?", default=False):
                 print(ui.yellow("👋 Cancelled."))
                 return 0

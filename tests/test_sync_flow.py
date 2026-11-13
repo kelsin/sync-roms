@@ -85,6 +85,19 @@ class CleanDirsTest(unittest.TestCase):
         calls, _ = self.run_clean(lambda p: (False, ["/x/._a"]), tty=True, yes=False)
         self.assertTrue([c for c in calls if c[0] == "sudo"])
 
+    def test_quiet_shows_the_sudo_command_with_its_question(self):
+        with mock.patch.object(ui, "QUIET", True), contextlib.redirect_stderr(io.StringIO()) as err:
+            _, out = self.run_clean(lambda p: (True, []), tty=True, yes=False)
+        self.assertIn("sudo mdutil -i off", err.getvalue())
+        self.assertNotIn("sudo mdutil", out)
+
+    def test_quiet_lists_the_files_dot_clean_left(self):
+        with mock.patch.object(ui, "QUIET", True), contextlib.redirect_stderr(io.StringIO()) as err:
+            _, out = self.run_clean(lambda p: (True, ["/x/._a"]), spotlight=False)
+        self.assertIn("still there after dot_clean", err.getvalue())
+        self.assertIn("/x/._a", err.getvalue())
+        self.assertNotIn("/x/._a", out)
+
 
 class DownloadInterruptTest(unittest.TestCase):
     def run_interrupted(self, draws_that_interrupt):

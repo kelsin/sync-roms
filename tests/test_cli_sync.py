@@ -31,12 +31,12 @@ class SyncSmokeTest(RealDataDirGuard):
         patch.start()
         self.addCleanup(patch.stop)
 
-    def run_sync(self, dry_run, prepare=None, patches=(), yes=True):
+    def run_sync(self, dry_run, prepare=None, patches=(), yes=True, args=()):
         """The exit code; what went to stderr is in self.err."""
         with tempfile.TemporaryDirectory() as card:
             if prepare:
                 prepare(card)
-            argv = ["sync-roms", card] + (["--yes"] if yes else []) + (["--dry-run"] if dry_run else [])
+            argv = ["sync-roms", card] + (["--yes"] if yes else []) + (["--dry-run"] if dry_run else []) + list(args)
             with contextlib.ExitStack() as st:
                 for target, kw in (
                         (sys, {"argv": argv}),
@@ -239,6 +239,12 @@ class SyncSmokeTest(RealDataDirGuard):
         patches = ((cli, {"free_space": lambda path: 3}),
                    (cli.ui, {"confirm": lambda q, default=True: False, "has_terminal": lambda: True}))
         self.assertEqual(self.run_sync(False, patches=patches, yes=False), 0)
+
+    def test_quiet_shows_why_it_asks_try_anyway(self):
+        patches = ((cli, {"free_space": lambda path: 3}),
+                   (cli.ui, {"confirm": lambda q, default=True: False, "has_terminal": lambda: True}))
+        self.assertEqual(self.run_sync(False, patches=patches, yes=False, args=["--quiet"]), 0)
+        self.assertIn("Not enough space", self.err.getvalue())
 
     def test_not_enough_space_fails_when_it_cannot_ask(self):
         for yes, terminal in ((True, True), (False, False)):
