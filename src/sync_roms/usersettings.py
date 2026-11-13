@@ -89,11 +89,11 @@ def ensure_bucket():
         if not name.startswith("s3://") and ("/" in name or name.startswith((".", "~")) or os.path.isdir(name)):  # a bucket name has no "/"
             root = os.path.expanduser(name)
             if not os.path.isabs(root):
-                print(ui.red(f"❌ {name} is not an absolute path: give the whole folder path, e.g. /Volumes/roms"))
+                ui.failure(ui.red(f"❌ {name} is not an absolute path: give the whole folder path, e.g. /Volumes/roms"))
                 continue
             root = os.path.abspath(root)
             if not os.path.isdir(root):
-                print(ui.red(f"❌ {root} is not a folder"))
+                ui.failure(ui.red(f"❌ {root} is not a folder"))
                 continue
             settings = {k: v for k, v in load_settings().items() if k not in ("bucket", "endpoint")}
             save_settings({**settings, "root": root})

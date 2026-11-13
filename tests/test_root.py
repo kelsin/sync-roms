@@ -184,6 +184,14 @@ class FirstRunAnswerTest(unittest.TestCase):
         self.assertIn("Which S3 bucket holds your ROMs?", err)
         ask.assert_called_once_with()
 
+    def test_quiet_shows_why_it_asks_again_on_stderr(self):
+        with tempfile.TemporaryDirectory() as d:
+            gone = os.path.join(d, "gone")
+            self.first_run(["Volumes/roms", gone, d], quiet=True)
+        err = self.err.getvalue()
+        self.assertIn("Volumes/roms is not an absolute path", err)
+        self.assertIn(f"{gone} is not a folder", err)
+
 
 if __name__ == "__main__":
     unittest.main()
