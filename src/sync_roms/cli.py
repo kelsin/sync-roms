@@ -193,7 +193,10 @@ TOPICS = {
   Unzips (7z, or unar for .rar) every .zip/.7z/.rar, and the archives inside them, and converts each disc image (.cue, .gdi, .toc, .iso) to a verified .chd (Xbox .iso to xiso, Xbox 360 .iso to .zar),
   per the `chd` key in systems.json of the system whose folder it is in. Archives and images are removed once their chd verifies,
   then the .m3u playlists are fixed. Archives that convert unpack in the system temp folder when it is on another drive with room, else beside
-  themselves; as many files convert at once as there are CPU cores and free space for. Needs 7z, chdman and, for Xbox, extract-xiso and, for Xbox 360, iso2zar (see `tools install`). (Old names: --cd, --chd)
+  themselves; as many files convert at once as there are CPU cores and free space for, biggest first. The progress bar goes by size, with the rate and time left,
+  and each file's result shows as it finishes. Inside a saved card's folder it warns that the next sync downloads the archives again and asks first (default no,
+  so --yes or no terminal stops it). Inside the storage folder, once a file converts, it ends by saying to run `sync-roms cache update`.
+  Needs 7z, chdman and, for Xbox, extract-xiso and, for Xbox 360, iso2zar (see `tools install`). (Old names: --cd, --chd)
 """,
     "tools": """
   sync-roms tools install

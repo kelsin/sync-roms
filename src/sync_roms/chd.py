@@ -7,10 +7,10 @@ import tempfile
 import threading
 import zipfile
 from collections import defaultdict
-from concurrent.futures import ThreadPoolExecutor, TimeoutError as FutureTimeout
+from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
 from types import SimpleNamespace
 
-from . import downloads, external, m3u, store, ui
+from . import downloads, external, inventory, m3u, runtime, store, ui
 
 
 def chd_folders(systems):
@@ -275,6 +275,7 @@ def convert_all(pairs, clash, make, exists_ok=False):
             return error
 
 
+UNPACKED = 0.2  # an archive job's progress once it is unpacked; its discs share the rest
 NESTED_DEPTH = 3  # archives inside archives (a PSN rar holding a rar) are extracted this many levels down
 
 
@@ -292,8 +293,14 @@ def extracted_files(tmp):
 def chd_archive(tools, cfg, path, report=None, scratch=None):
     """Extract an archive into scratch (default: next to itself), and the archives inside it, but not for extract-only
     systems, then convert its discs beside the archive (or, for extract-only systems, move its files out).
-    The archive goes only once everything is done; None on success, else the error."""
+    The archive goes only once everything is done; None on success, else the error.
+    report(fraction) gets 0-1 progress: UNPACKED once unpacked, then each disc converts its share of the rest."""
     folder = os.path.dirname(path)
+
+    def disc(image):  # report for one disc of pairs, scaled to its share
+        k = [i for i, _ in pairs].index(image)
+        return (lambda f: report(UNPACKED + (1 - UNPACKED) * (k + f) / len(pairs))) if report else None
+
     tmp = tempfile.mkdtemp(prefix=f".chd-{os.getpid()}-", dir=scratch or folder)
     try:
         error = external.run_tool(extract_command(tools, path, tmp))
@@ -311,6 +318,8 @@ def chd_archive(tools, cfg, path, report=None, scratch=None):
                     return f"{os.path.basename(f)} in the archive: {error}"
                 os.remove(f)
             extracted = extracted_files(tmp)
+        if report:
+            report(UNPACKED)
         if cfg["mode"] == "extract":
             error = move_flat([(f, os.path.join(folder, os.path.basename(f))) for f in extracted])
         elif cfg["mode"] in ("xiso", "zar"):
@@ -320,11 +329,11 @@ def chd_archive(tools, cfg, path, report=None, scratch=None):
             if cfg["mode"] == "xiso":
                 pairs = [(image, os.path.join(folder, os.path.basename(image))) for image in images]
                 error = convert_all(pairs, "two isos in the archive would make the same file",
-                                    lambda image, out: make_xiso(tools, image, out, report, disposable=True))
+                                    lambda image, out: make_xiso(tools, image, out, disc(image), disposable=True))
             else:
                 pairs = [(image, os.path.join(folder, os.path.splitext(os.path.basename(image))[0] + ".zar")) for image in images]
                 error = convert_all(pairs, "two isos in the archive would make the same .zar",
-                                    lambda image, out: make_zar(tools, image, out, report))
+                                    lambda image, out: make_zar(tools, image, out, disc(image)))
         else:
             images = disc_images(extracted, strict=False)
             kept = [f for f in extracted if f.lower().endswith(tuple(cfg.get("keep", ())))]
@@ -332,7 +341,7 @@ def chd_archive(tools, cfg, path, report=None, scratch=None):
                 return "no disc image in the archive"
             pairs = [(image, os.path.join(folder, os.path.splitext(os.path.basename(image))[0] + ".chd")) for image, _ in images]
             error = convert_all(pairs, "two discs in the archive would make the same .chd",
-                                lambda image, out: make_chd(tools, cfg, image, out, report), exists_ok=True)
+                                lambda image, out: make_chd(tools, cfg, image, out, disc(image)), exists_ok=True)
             if not error:
                 error = move_flat([(f, os.path.join(folder, os.path.basename(f))) for f in kept])
         if error:
@@ -365,12 +374,12 @@ def unpacked_size(tools, path):
 
 
 def job_scratch(tools, jobs):
-    """(per job, the folder its archive unpacks in, None for beside itself; how many jobs can run at once).
+    """(per job, the folder its archive unpacks in, None for beside itself; how many jobs can run at once; per job, its size).
 
     A converting archive whose unpacked size is known unpacks in the system temp folder when that is on another device
     than the archive and has room for it plus a margin; plain extraction always unpacks beside the archive. Each job's scratch (its
     unpacked size, else the archive's size, or a loose image's size) counts on the volume it uses, and only as many jobs
-    run as the biggest ones' scratch fits in each volume's free space, at least one.
+    run as the biggest ones' scratch fits in each volume's free space, at least one. That scratch is also the job's size.
     """
     temp = tempfile.gettempdir()
     temp_dev = os.stat(temp).st_dev
@@ -379,7 +388,7 @@ def job_scratch(tools, jobs):
     temp_free = shutil.disk_usage(temp).free
     free = {temp_dev: temp_free}  # device: free bytes, from the first path seen on it
     needs = defaultdict(list)  # device: each of its jobs' scratch bytes
-    scratch = []
+    scratch, job_sizes = [], []
     for (system, _, path, owned, *_), size in zip(jobs, sizes):
         dev = os.stat(os.path.dirname(path)).st_dev
         if dev not in free:
@@ -390,6 +399,7 @@ def job_scratch(tools, jobs):
         if size is None:
             size = sum(os.path.getsize(f) for f in owned or [path] if os.path.isfile(f))
         needs[temp_dev if local else dev].append(size)
+        job_sizes.append(size)
     fits = [len(n) for n in needs.values()]
     for dev, need in needs.items():
         total = 0
@@ -398,7 +408,7 @@ def job_scratch(tools, jobs):
             if total > free[dev]:
                 fits.append(i)
                 break
-    return scratch, max(1, min(fits))
+    return scratch, max(1, min(fits)), job_sizes
 
 
 def stale_local_scratch():
@@ -498,6 +508,18 @@ def fix_playlists(roots, dry_run):
             m3u.m3u_command(SimpleNamespace(m3u=sysroot, dry_run=dry_run))
 
 
+def warn_on_card(root, dry_run):
+    """Warn when root is inside a saved card's folder and, unless a dry run, ask to go on (default no; exits on no)."""
+    cards = store.load_cards()
+    card = next((part for part in root.split(os.sep) if part in cards), None)
+    if not card:
+        return
+    ui.failure(ui.yellow(f"⚠️  {root} is on the card {card}: the next sync lists the converted files as not in the game list "
+                         "and downloads the archives and images again. Convert before files go on a card."))
+    if not dry_run and not ui.confirm("Convert on the card anyway?", default=False):
+        ui.fail(f"Not converting on the card {card}", 1)
+
+
 def chd_command(args):
     root = os.path.abspath(os.path.expanduser(args.chd or os.getcwd()))
     if not os.path.isdir(root):
@@ -516,6 +538,8 @@ def chd_command(args):
     for system, _, path, owned, *_ in jobs:
         what = "extract" if system["chd"]["mode"] == "extract" else "convert"
         print(f"  {'📦' if owned is None else '💿'} {what} {os.path.relpath(path, root)}")
+    if jobs:
+        warn_on_card(root, args.dry_run)
     if args.dry_run:
         fix_playlists(roots, True)
         print(ui.yellow("\n🧪 Dry run — nothing changed"))
@@ -532,12 +556,14 @@ def chd_command(args):
             ui.fail(f"{tool} not found; " + (f"{external.MANUAL_TOOLS[tool]}" if tool in external.MANUAL_TOOLS else "run sync-roms --install-tools"), 3)
     remove_stale_chd_temp(stale + stale_local_scratch())
     cpus = os.cpu_count() or 1
-    scratch, fit = job_scratch(tools, jobs)
+    scratch, fit, sizes = job_scratch(tools, jobs)
+    weights = [max(1, size) for size in sizes]
+    total = sum(weights)
     workers = min(cpus, len(jobs), fit)
     tools["np"] = max(1, cpus // workers)  # cores left for each chdman once the jobs share them
-    print(ui.dim(f"  {workers} at a time, {tools['np']} core(s) each" + (" (limited by free space)" if fit < min(cpus, len(jobs)) else "")))
+    print(ui.dim(f"  {len(jobs)} to convert ({ui.human_size(total)}), {workers} at a time, {tools['np']} core(s) each" + (" (limited by free space)" if fit < min(cpus, len(jobs)) else "")))
 
-    progress = [0.0] * len(jobs)  # each job's 0-1 progress; the bar is their mean
+    progress = [0.0] * len(jobs)  # each job's 0-1 progress; the bar weighs them by size
 
     def convert(i):
         system, _, path, owned, *_ = jobs[i]
@@ -552,7 +578,7 @@ def chd_command(args):
         finally:
             progress[i] = 1.0
 
-    bar = ui.ProgressBar(len(jobs), lambda: sum(progress) / len(jobs))
+    bar = ui.ProgressBar(len(jobs), lambda: sum(p * w for p, w in zip(progress, weights)) / total, total)
     say = bar.say
 
     def draw_bar():
@@ -560,22 +586,24 @@ def chd_command(args):
 
     converted, failed = 0, 0
     pool = ThreadPoolExecutor(workers)
-    futures = [pool.submit(convert, i) for i in range(len(jobs))]
+    futures = {pool.submit(convert, i): i for i in sorted(range(len(jobs)), key=lambda i: -weights[i])}  # biggest first
+    pending = set(futures)
     try:
-        for job, future in zip(jobs, futures):
-            while True:
-                try:
-                    error = future.result(timeout=ui.POLL)
-                    break
-                except FutureTimeout:
-                    draw_bar()
-            name = os.path.relpath(job[2], root)
-            if error:
-                failed += 1
-                say(ui.red(f"  ❌ {name}: {error}") + ui.dim(" (kept)"))
-            else:
-                converted += 1
-                say(f"  ✅ {name}")
+        while pending:
+            finished, pending = wait(pending, timeout=ui.POLL, return_when=FIRST_COMPLETED)
+            for future in finished:
+                error = future.result()
+                name = os.path.relpath(jobs[futures[future]][2], root)
+                if error:
+                    failed += 1
+                    line = ui.red(f"  ❌ {name}: {error}") + ui.dim(" (kept)")
+                    if ui.QUIET:
+                        ui.failure(line)
+                    else:
+                        say(line)
+                else:
+                    converted += 1
+                    say(f"  ✅ {name}")
             draw_bar()
     except KeyboardInterrupt:
         say(ui.yellow("🛑 Interrupted, stopping and cleaning up..."))
@@ -589,9 +617,20 @@ def chd_command(args):
             except KeyboardInterrupt:
                 pass
         print(ui.yellow(f"  {converted} done, nothing half-converted; run --cd again to continue"))
+        hint_cache_update(root, converted)
         return 130
     pool.shutdown()
     bar.clear()
     fix_playlists(roots, False)
-    print((ui.red if failed else ui.green)(f"🎉 Done: {converted} converted, {failed} failed"))
+    if failed:
+        ui.failure(ui.red(f"🎉 Done: {converted} converted, {failed} failed"))
+    else:
+        print(ui.green(f"🎉 Done: {converted} converted, {failed} failed"))
+    hint_cache_update(root, converted)
     return 1 if failed else 0
+
+
+def hint_cache_update(root, converted):
+    """Say to refresh the storage cache when root is inside the storage folder and a job there succeeded, changing its files."""
+    if converted and runtime.ROOT and os.path.commonpath([root, runtime.ROOT]) == runtime.ROOT:
+        print(ui.yellow(f"⚠️  This is in the storage folder, so the storage cache is out of date: run {inventory.UPDATE_HINT}"))
