@@ -317,7 +317,7 @@ On `esde` and `emudeck` cards every Vita game zip in `psvita/` gets a `.psvita` 
 | `--fill-media` | `scrape`: also scrape ROMs that have metadata but lack some media type in storage; their metadata is kept. Media types ScreenScraper didn't offer for a ROM are remembered, and a ROM missing only those isn't asked for again until `--retry` |
 | `--skip-media TYPES` | `scrape`, `scrape match`: comma-separated media folders not to download (e.g. `manuals,fanart`) |
 | `--set-credentials` | `scrape`: ask for your ScreenScraper username and password and save them in `settings.json` |
-| `--full` | `cache update`: in a storage folder, stat every file, not only the ones the cache doesn't have (see Storage cache) |
+| `--full` | `cache update`: in a storage folder, list every folder and stat every file, not only the changed folders and the files the cache doesn't have (see Storage cache) |
 | `--bucket-keys` | `check`: also verify with the read-only profile that every game key in your lists and sets exists in storage |
 | `--quiet` | Print only errors (failed files and a sync's failure count included, and `check`'s problems), warnings and `--json` data, all on stderr except the JSON; prompts are asked on stderr |
 | `--verbose` | Also print the effective settings and where each came from, on stderr |
@@ -682,13 +682,18 @@ Every command reads what storage holds (each file's name and size, and for a buc
 turns minutes of listing and stat calls into an instant read.
 
 - `sync-roms cache` shows where the cache was read from, when it was last updated, and its files and size per folder.
-- `sync-roms cache update` reads storage again: one listing of a bucket, or a walk of a storage folder that stats only
+- `sync-roms cache update` reads storage again: one listing of a bucket, or a walk of a storage folder that checks
+  each folder's modification time and lists only the folders whose time changed since the last update, statting only
   the files the cache doesn't have: new files are added, missing ones dropped, and every other file keeps its cached
-  size (a file replaced in place under the same name isn't noticed). Run it after changing storage outside sync-roms.
-  Nothing refreshes the cache on its own and it never expires; sync-roms's own uploads, moves and deletes keep it up to
-  date.
-- `sync-roms cache update --full` also stats every file in a storage folder, catching files replaced under the same
-  name. A bucket listing already has every size, so it's the same as `cache update` there.
+  size. In a storage folder this relies on storage changing a folder's modification time whenever a file is added to,
+  removed from or renamed in it. A folder changed in the last few minutes is listed again on the following update, so
+  a change made just before an update is picked up by the next one at the latest. Run it after changing storage
+  outside sync-roms. Nothing refreshes the cache on its own and it never expires; sync-roms's own uploads, moves and
+  deletes keep it up to date.
+- `sync-roms cache update --full` lists every folder and stats every file in a storage folder. Use it for files
+  replaced under the same name (the default keeps their cached size) and for anything a folder's modification time
+  didn't show (say, a tool that sets it back). A bucket listing already has every size, so it's the same as
+  `cache update` there.
 - With no cache for the storage in use (none yet, or built from another bucket or folder), the first command that reads
   storage offers to build it. Saying no is remembered (`storage_cache_declined` in `settings.json`), and commands then
   list storage on every run as before. `sync-roms cache update` builds it any time.

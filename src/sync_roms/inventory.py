@@ -12,6 +12,7 @@ import os
 import stat as statmode
 import sys
 import threading
+import unicodedata
 import time
 from concurrent.futures import ThreadPoolExecutor
 
@@ -21,6 +22,10 @@ DECLINED = "storage_cache_declined"  # settings.json: the user said no to buildi
 UPDATE_HINT = "sync-roms cache update"
 
 _clock = time.time  # replaced by tests
+# seconds: a folder mtime this close to now (or later) isn't stored. It is longer than the macOS SMB client serves a
+# cached folder listing (up to 60 s, nsmb.conf dir_cache_max) plus slack between the share's clock and this one, so a
+# stat can't show a new mtime that a stale listing doesn't reflect.
+FRESH = 300
 _lock = threading.RLock()
 _tree = None  # the loaded cache (a Tree), False when there is none, None until read
 _tree_path = None  # the file _tree was read from (the data folder can change, in tests)
@@ -28,10 +33,11 @@ _dirty = False  # patched since it was last saved
 
 
 class Tree:
-    """The cache: source (where it was read from), updated (when), files {key: size} and etags {key: ETag}."""
+    """The cache: source (where it was read from), updated (when), files {key: size}, etags {key: ETag} and, for a
+    storage folder, dirs {folder: st_mtime_ns, or None when not trusted} of every folder the walk read ("" is the root)."""
 
-    def __init__(self, source, updated, files, etags):
-        self.source, self.updated, self.files, self.etags = source, updated, files, etags
+    def __init__(self, source, updated, files, etags, dirs=None):
+        self.source, self.updated, self.files, self.etags, self.dirs = source, updated, files, etags, dirs or {}
         self._keys = self._folders = None
 
     def changed(self):
@@ -78,8 +84,10 @@ def _load():
                 data = json.load(f)
             files = {k: n for k, n in data["files"].items() if _whole(n)}
             etags = {k: e for k, e in (data.get("etags") or {}).items() if isinstance(e, str) and k in files}
+            dirs = {k: n if _whole(n) else None for k, n in (data.get("dirs") or {}).items()}
             updated = data.get("updated")
-            _tree = Tree(str(data["source"]), updated if _whole(updated) or isinstance(updated, float) else 0, files, etags)
+            _tree = Tree(str(data["source"]), updated if _whole(updated) or isinstance(updated, float) else 0, files, etags,
+                         dirs)
         except (OSError, ValueError, KeyError, TypeError, AttributeError):
             _tree = False
     return _tree or None
@@ -163,12 +171,24 @@ def folders():
 
 # --- Patches from sync-roms's own writes ----------------------------------------------------------------------------
 
-def _patch(change):
+def _patch(change, keys):
+    """Apply change to the cache, and stop trusting the mtimes of the keys' folders (spelled as given, NFC or NFD: a share
+    may store a name decomposed), or of the nearest folder above that the cache knows, for a folder the write created:
+    the next update lists them."""
     global _dirty
     with _lock:
         tree = current()
         if tree is not None:
             change(tree)
+            for k in keys:
+                folder = k
+                while folder:
+                    folder = folder.rpartition("/")[0]
+                    names = {folder, unicodedata.normalize("NFC", folder), unicodedata.normalize("NFD", folder)} & tree.dirs.keys()
+                    for name in names:
+                        tree.dirs[name] = None
+                    if names:
+                        break
             tree.changed()
             _dirty = True
 
@@ -181,16 +201,18 @@ def wrote(key, size, etag=None):
             tree.etags[key] = etag
         else:
             tree.etags.pop(key, None)
-    _patch(change)
+    _patch(change, [key])
 
 
 def removed(keys):
     """Files were deleted from storage."""
+    keys = list(keys)
+
     def change(tree):
         for k in keys:
             tree.files.pop(k, None)
             tree.etags.pop(k, None)
-    _patch(change)
+    _patch(change, keys)
 
 
 def moved(old, new):
@@ -200,13 +222,14 @@ def moved(old, new):
             tree.files[new] = tree.files.pop(old)
             tree.etags.pop(old, None)
             tree.etags.pop(new, None)
-    _patch(change)
+    _patch(change, [old, new])
 
 
 def _save(tree):
     files = dict(sorted(tree.files.items()))
     store.write_json(path(), {"source": tree.source, "updated": tree.updated, "files": files,
-                              "etags": {k: tree.etags[k] for k in files if k in tree.etags}}, separators=(",", ":"))
+                              "etags": {k: tree.etags[k] for k in files if k in tree.etags},
+                              "dirs": dict(sorted(tree.dirs.items()))}, separators=(",", ":"))
 
 
 def flush():
@@ -244,21 +267,46 @@ def _read_bucket():
     return sizes, tags
 
 
-def _read_folder(root, known=None):
-    """{key: size} of every file under root: a walk for the names, then a stat of each (in parallel: each is a round
-    trip on a network share). A file in known {key: size} keeps that size and isn't statted."""
-    paths, out = [], {}
-    for folder, _, names in os.walk(root):
-        for name in names:
-            if s3.junk(name):
-                continue
-            p = os.path.join(folder, name)
-            key = os.path.relpath(p, root).replace(os.sep, "/")
-            if known and key in known:
-                out[key] = known[key]
-            else:
-                paths.append(p)
-        _progress(f"  📋 {len(paths) + len(out):,} files found")
+def _read_folder(root, old=None):
+    """({key: size}, dirs) of every file and folder under root (dirs as a Tree's). Every folder is statted, and one whose
+    mtime is the one old stored isn't listed: its files and subfolders come from old (a folder's mtime changes when an
+    entry is added to, removed from or renamed in it, not when a subfolder changes). The others are listed as os.walk
+    would (a symlinked folder isn't followed), and a listing error raises. A file old has keeps its cached size; the rest
+    are statted (in parallel: each is a round trip on a network share). A folder's mtime is taken before it is listed,
+    and isn't kept when it is within FRESH seconds of now."""
+    known, stored, inside = (old.files, old.dirs, {}) if old else ({}, {}, {})
+    if stored:  # folder: ([file keys], [subfolders]) in old
+        for k in known:
+            inside.setdefault(k.rpartition("/")[0], ([], []))[0].append(k)
+        for d in stored:
+            if d:
+                inside.setdefault(d.rpartition("/")[0], ([], []))[1].append(d)
+    paths, out, dirs, stack, listed = [], {}, {}, [""], 0
+    while stack:
+        folder = stack.pop()
+        path = os.path.join(root, folder) if folder else root
+        now = _clock()
+        st = os.stat(path)
+        if statmode.S_ISDIR(st.st_mode) and stored.get(folder) == st.st_mtime_ns:
+            keys, subfolders = inside.get(folder, ([], []))
+            out.update((k, known[k]) for k in keys if not s3.junk(k))
+            stack.extend(subfolders)
+            dirs[folder] = st.st_mtime_ns
+        else:
+            listed += 1
+            prefix = folder + "/" if folder else ""
+            with os.scandir(path) as entries:
+                for e in entries:
+                    if e.is_dir():  # a symlinked folder is named, as os.walk does, but not read
+                        if not e.is_symlink():
+                            stack.append(prefix + e.name)
+                    elif not s3.junk(e.name):
+                        if prefix + e.name in known:
+                            out[prefix + e.name] = known[prefix + e.name]
+                        else:
+                            paths.append(os.path.join(path, e.name))
+            dirs[folder] = st.st_mtime_ns if st.st_mtime_ns < (now - FRESH) * 1e9 else None
+        _progress(f"  📋 {len(dirs):,} folders checked, {listed:,} listed, {len(paths) + len(out):,} files found")
     _progress(None)
 
     def size(p):
@@ -275,29 +323,28 @@ def _read_folder(root, known=None):
             if i % 500 == 0 or i == len(paths):
                 _progress(f"  📏 {i:,}/{len(paths):,} files sized")
     _progress(None)
-    return out
+    return out, dirs
 
 
 def update(full=False):
     """Read all of storage into the cache and save it. Returns (added, removed, changed) file counts against the cache
-    it replaces. In a storage folder only new files are statted and the rest keep their cached size, unless full (a
-    bucket listing has every size anyway). A storage folder that is missing (an unmounted share) or lists empty when the cache has files raises
-    FileNotFoundError and keeps the cache."""
+    it replaces. In a storage folder only folders whose mtime changed are listed and only new files are statted (the rest
+    keep their cached files and sizes), unless full (a bucket listing has every size anyway). A storage folder that is
+    missing (an unmounted share) or lists empty when the cache has files raises FileNotFoundError and keeps the cache."""
     global _tree, _tree_path, _dirty
     src = source()
     if runtime.ROOT:
         if not os.path.isdir(runtime.ROOT):
             raise FileNotFoundError(f"{runtime.ROOT} is missing")
-        old = None if full else current()
-        sizes, tags = _read_folder(runtime.ROOT, old.files if old else None), {}
+        (sizes, dirs), tags = _read_folder(runtime.ROOT, None if full else current()), {}
     else:
-        sizes, tags = _read_bucket()
+        (sizes, tags), dirs = _read_bucket(), {}
     with _lock:
         old = current()
         before = old.files if old else {}
         if before and not sizes:
             raise FileNotFoundError(f"{src} listed empty; keeping the cache")
-        tree = Tree(src, _clock(), sizes, tags)
+        tree = Tree(src, _clock(), sizes, tags, dirs)
         _save(tree)
         _tree, _dirty = tree, False
         _tree_path = path()

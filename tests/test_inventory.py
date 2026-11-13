@@ -1,8 +1,10 @@
 import contextlib
 import io
+import json
 import os
 import sys
 import tempfile
+import unicodedata
 import unittest
 from unittest import mock
 
@@ -144,7 +146,7 @@ class FolderCacheTest(StorageFolder):
 
     def test_an_empty_listing_keeps_the_cache(self):
         self.build()
-        with mock.patch.object(inventory, "_read_folder", return_value={}), self.assertRaises(FileNotFoundError):
+        with mock.patch.object(inventory, "_read_folder", return_value=({}, {})), self.assertRaises(FileNotFoundError):
             inventory.update()
         self.assertEqual(len(inventory.current().files), 3)
 
@@ -178,6 +180,200 @@ class BucketCacheTest(helpers.DataDir):
         quiet(inventory.update)
         with mock.patch.object(runtime, "ENDPOINT", "http://minio"):
             self.assertIsNone(inventory.current())
+
+
+class FolderMtimeTest(StorageFolder):
+    """The default update lists only folders whose mtime changed since the cache stored it."""
+
+    def setUp(self):
+        super().setUp()
+        self.age()
+
+    def age(self):
+        """Set every folder's mtime to one in the past, so the update trusts it."""
+        old = 1_600_000_000 * 10**9
+        for folder, _, _ in os.walk(self.root.name):
+            os.utime(folder, ns=(old, old))
+
+    def update(self, full=False):
+        """(update's counts, the folders it listed, relative to the root: "." is the root)."""
+        listed, real = [], os.scandir
+
+        def spy(p=".", *a):
+            listed.append(os.path.relpath(p, self.root.name))
+            return real(p, *a)
+        with mock.patch.object(os, "scandir", side_effect=spy), mock.patch.object(inventory, "_progress"):
+            counts = inventory.update(full)
+        return counts, sorted(listed)
+
+    def test_an_unchanged_folder_is_not_listed(self):
+        self.assertEqual(self.update(), ((3, 0, 0), [".", "BIOS", "gba"]))
+        self.assertEqual(self.update(), ((0, 0, 0), []))
+        self.assertEqual(inventory.files(""), {"gba/a.zip": 1, "gba/b.zip": 2, "BIOS/x.bin": 3})
+        inventory.reset()
+        self.assertEqual(self.update(), ((0, 0, 0), []))
+
+    def test_a_new_file_in_a_subfolder_is_found(self):
+        self.put("gba/sub/c.zip", 4)
+        self.age()
+        self.update()
+        self.put("gba/sub/d.zip", 5)
+        self.assertEqual(self.update(), ((1, 0, 0), [os.path.join("gba", "sub")]))
+        self.assertEqual(inventory.files("gba/sub/"), {"gba/sub/c.zip": 4, "gba/sub/d.zip": 5})
+
+    def test_a_new_subfolder_is_found_and_a_removed_one_dropped(self):
+        self.update()
+        self.put("gba/sub/c.zip", 4)
+        self.assertEqual(self.update(), ((1, 0, 0), ["gba", os.path.join("gba", "sub")]))
+        os.remove(os.path.join(self.root.name, "gba/sub/c.zip"))
+        os.rmdir(os.path.join(self.root.name, "gba/sub"))
+        self.assertEqual(self.update(), ((0, 1, 0), ["gba"]))
+        self.assertNotIn("gba/sub", inventory.current().dirs)
+
+    def test_a_removed_file_is_dropped(self):
+        self.update()
+        os.remove(os.path.join(self.root.name, "gba/a.zip"))
+        self.assertEqual(self.update(), ((0, 1, 0), ["gba"]))
+        self.assertEqual(inventory.files("gba/"), {"gba/b.zip": 2})
+
+    def test_full_rereads_every_folder_and_file(self):
+        self.update()
+        self.put("gba/b.zip", 20)  # replaced in place: the folder's mtime stays
+        self.age()
+        self.assertEqual(self.update(), ((0, 0, 0), []))
+        self.assertEqual(self.update(full=True), ((0, 0, 1), [".", "BIOS", "gba"]))
+        self.assertEqual(inventory.files("gba/")["gba/b.zip"], 20)
+        self.assertEqual(self.update(), ((0, 0, 0), []))
+
+    def test_an_old_cache_without_dirs_loads_and_lists_everything(self):
+        store.write_json(inventory.path(), {"source": self.root.name, "updated": 1, "files": {"gba/a.zip": 1}})
+        self.assertEqual(inventory.current().files, {"gba/a.zip": 1})
+        self.assertEqual(inventory.current().dirs, {})
+        self.assertEqual(self.update(), ((2, 0, 0), [".", "BIOS", "gba"]))
+
+    def test_the_cache_file_stores_folder_mtimes_beside_the_files(self):
+        self.update()
+        with open(inventory.path()) as f:
+            data = json.load(f)
+        self.assertEqual(set(data["files"]), {"gba/a.zip", "gba/b.zip", "BIOS/x.bin"})
+        self.assertEqual(set(data["dirs"]), {"", "gba", "BIOS"})
+        self.assertEqual(data["dirs"]["gba"], os.stat(os.path.join(self.root.name, "gba")).st_mtime_ns)
+
+    def test_a_fresh_mtime_is_not_stored(self):
+        self.put("gba/c.zip", 4)  # gba's mtime is now
+        self.update()
+        self.assertIsNone(inventory.current().dirs["gba"])
+        self.assertIsInstance(inventory.current().dirs["BIOS"], int)
+        self.assertEqual(self.update(), ((0, 0, 0), ["gba"]))
+
+    def test_an_mtime_is_stored_only_when_older_than_five_minutes(self):
+        now = 1_700_000_000
+        os.utime(os.path.join(self.root.name, "gba"), ns=((now - 300) * 10**9,) * 2)
+        os.utime(os.path.join(self.root.name, "BIOS"), ns=((now - 300) * 10**9 - 1,) * 2)
+        with mock.patch.object(inventory, "_clock", return_value=float(now)):
+            self.update()
+        self.assertIsNone(inventory.current().dirs["gba"])
+        self.assertEqual(inventory.current().dirs["BIOS"], (now - 300) * 10**9 - 1)
+
+    def test_a_file_added_while_a_folder_is_listed_is_found_next_time(self):
+        later = inventory._clock() + 3600  # every mtime is old enough to store, even the one after the add
+        p = mock.patch.object(inventory, "_clock", return_value=later)
+        p.start()
+        self.addCleanup(p.stop)
+        real = os.scandir
+
+        class Listing(list):  # what os.scandir read, before the file was added
+            def __enter__(self):
+                return iter(self)
+
+            def __exit__(self, *exc):
+                pass
+
+        def adding(p=".", *a):
+            with real(p, *a) as it:
+                entries = Listing(it)
+            if os.path.basename(p) == "gba":
+                self.put("gba/c.zip", 4)
+            return entries
+        with mock.patch.object(os, "scandir", side_effect=adding), mock.patch.object(inventory, "_progress"):
+            inventory.update()
+        self.assertNotIn("gba/c.zip", inventory.current().files)
+        self.assertEqual(self.update(), ((1, 0, 0), ["gba"]))
+
+    def test_a_reused_folder_drops_what_a_listing_leaves_out(self):
+        self.update()
+        with open(inventory.path()) as f:
+            data = json.load(f)
+        data["files"]["gba/c.gba.part"] = 4  # from an older sync-roms that cached .part files
+        store.write_json(inventory.path(), data)
+        inventory.reset()
+        self.assertEqual(self.update(), ((0, 1, 0), []))
+        self.assertNotIn("gba/c.gba.part", inventory.current().files)
+
+    def test_a_listing_error_raises_and_keeps_the_cache(self):
+        self.update()
+        self.put("gba/c.zip", 4)
+        real = os.scandir
+
+        def failing(p=".", *a):
+            if os.path.basename(p) == "gba":
+                raise PermissionError(p)
+            return real(p, *a)
+        with mock.patch.object(os, "scandir", side_effect=failing), mock.patch.object(inventory, "_progress"), \
+                self.assertRaises(PermissionError):
+            inventory.update()
+        self.assertEqual(len(inventory.current().files), 3)
+
+    def test_own_writes_drop_the_folder_mtime(self):
+        self.update()
+        inventory.wrote("gba/z.zip", 9)  # not really there: only a listing can tell
+        inventory.moved("BIOS/x.bin", "BIOS/y.bin")
+        self.assertIsNone(inventory.current().dirs["gba"])
+        self.assertIsNone(inventory.current().dirs["BIOS"])
+        inventory.flush()
+        inventory.reset()
+        self.assertEqual(self.update(), ((1, 2, 0), ["BIOS", "gba"]))
+        self.assertEqual(inventory.files(""), {"gba/a.zip": 1, "gba/b.zip": 2, "BIOS/x.bin": 3})
+
+    def test_a_delete_given_as_a_generator_drops_the_folder_mtime(self):
+        self.update()
+        inventory.removed(k for k in ["gba/a.zip"])
+        self.assertIsNone(inventory.current().dirs["gba"])
+        self.assertNotIn("gba/a.zip", inventory.current().files)
+
+    def test_a_write_drops_the_mtime_of_the_folder_spelled_either_way(self):
+        nfd, nfc = unicodedata.normalize("NFD", "Pokémon"), unicodedata.normalize("NFC", "Pokémon")
+        self.put(f"{nfd}/a.zip", 1)
+        self.age()
+        self.update()
+        self.assertIsInstance(inventory.current().dirs[nfd], int)
+        inventory.wrote(f"{nfc}/b.zip", 2)
+        self.assertIsNone(inventory.current().dirs[nfd])
+
+    def test_a_write_into_a_new_folder_drops_the_nearest_known_folder_mtime(self):
+        self.update()
+        inventory.wrote("gba/new/sub/z.zip", 9)
+        self.assertEqual(inventory.current().dirs, {"": 1_600_000_000 * 10**9, "BIOS": 1_600_000_000 * 10**9, "gba": None})
+        inventory.wrote("new/z.zip", 9)
+        self.assertIsNone(inventory.current().dirs[""])
+        self.assertEqual(inventory.files("new/"), {"new/z.zip": 9})
+
+    def test_a_dirs_value_that_is_not_a_whole_number_loads_as_none(self):
+        store.write_json(inventory.path(), {"source": self.root.name, "updated": 1, "files": {"gba/a.zip": 1},
+                                            "dirs": {"": 5, "gba": "x", "BIOS": 1.5}})
+        self.assertEqual(inventory.current().dirs, {"": 5, "gba": None, "BIOS": None})
+
+    def test_an_empty_folder_a_symlinked_folder_and_a_folder_replaced_by_a_file(self):
+        os.mkdir(os.path.join(self.root.name, "empty"))
+        os.symlink(os.path.join(self.root.name, "gba"), os.path.join(self.root.name, "link"))
+        self.age()
+        self.assertEqual(self.update(), ((3, 0, 0), [".", "BIOS", "empty", "gba"]))
+        self.assertEqual(self.update(), ((0, 0, 0), []))
+        os.remove(os.path.join(self.root.name, "BIOS/x.bin"))
+        os.rmdir(os.path.join(self.root.name, "BIOS"))
+        self.put("BIOS", 6)
+        self.assertEqual(self.update(), ((1, 1, 0), ["."]))
+        self.assertEqual(inventory.current().files, {"gba/a.zip": 1, "gba/b.zip": 2, "BIOS": 6})
 
 
 class PatchTest(StorageFolder):
