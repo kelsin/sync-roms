@@ -1,4 +1,5 @@
 import contextlib
+import hashlib
 import io
 import json
 import os
@@ -844,6 +845,90 @@ class MatchCommandTest(RunBase):
         with self.assertRaises(SystemExit):
             self.run_match(rom="missing.zip")
         self.assertIsNone(scrape_state.manual_match("gba", "missing.zip"))
+
+
+class BigFileHashTest(RunBase):
+    """In a storage folder only files up to HASH_MAX are hashed before their lookup; bigger ones are hashed when their
+    name and size find nothing."""
+
+    def setUp(self):
+        super().setUp()
+        patches = (mock.patch.object(self.client, "lookup", wraps=self.client.lookup),
+                   mock.patch.object(scrape_online, "hash_file", wraps=scrape_online.hash_file))
+        self.lookup, self.hash_file = (p.start() for p in patches)
+        for p in patches:
+            self.addCleanup(p.stop)
+
+    def sent(self):
+        return [c.kwargs.get("md5") for c in self.lookup.call_args_list]
+
+    def test_big_file_is_not_hashed_on_a_hit(self):
+        self.put("gba/a.zip", b"abcd")
+        with mock.patch.object(scrape_online, "HASH_MAX", 3):
+            self.assertEqual(self.run_scrape(), 0)
+        self.hash_file.assert_not_called()
+        self.assertEqual(self.sent(), [None])
+        self.assertEqual(set(self.metadata()), {"a.zip"})
+
+    def test_big_file_is_hashed_and_looked_up_again_on_a_miss(self):
+        self.put("gba/a.zip", b"abcd")
+        self.put("gba/zzz.zip", b"abcd")
+        self.client.errors = {"a.zip": [screenscraper.NotFound("not found")]}  # found by its hashes only
+        with mock.patch.object(scrape_online, "HASH_MAX", 3):
+            self.assertEqual(self.run_scrape(), 0)
+        md5 = hashlib.md5(b"abcd").hexdigest()
+        self.assertEqual(sorted(self.client.lookups), ["a.zip", "a.zip", "zzz.zip", "zzz.zip"])  # one retry each
+        self.assertEqual(sorted(self.sent(), key=str), [None, None, md5, md5])
+        self.assertEqual(self.hash_file.call_count, 2)
+        self.assertEqual(set(self.metadata()), {"a.zip"})
+        self.assertFalse(scrape_state.is_unknown("gba", "a.zip"))
+        self.assertTrue(scrape_state.is_unknown("gba", "zzz.zip"))
+
+    def test_big_file_with_cached_hashes_sends_them_first(self):
+        path = self.put("gba/a.zip", b"abcd")
+        scrape_state.save_hashes("gba", "a.zip", 4, int(os.path.getmtime(path)), {"md5": "cached"})
+        with mock.patch.object(scrape_online, "HASH_MAX", 3), mock.patch("builtins.open", wraps=open) as op:
+            self.assertEqual(self.run_scrape(dry_run=True), 0)
+            self.assertIn("1 by hash", self.out.getvalue())
+            self.assertEqual(self.run_scrape(), 0)
+        self.assertEqual(self.sent(), ["cached"])
+        self.assertNotIn(os.path.realpath(path), [os.path.realpath(c.args[0]) for c in op.call_args_list if c.args and isinstance(c.args[0], str)])
+
+    def test_small_file_is_hashed_before_its_lookup(self):
+        self.put("gba/a.zip", b"abc")
+        self.assertEqual(self.run_scrape(), 0)
+        self.assertEqual(self.sent(), [hashlib.md5(b"abc").hexdigest()])
+        self.assertEqual(self.client.lookups, ["a.zip"])
+
+    def test_report_says_name_size_for_big_files_and_how_much_is_read(self):
+        self.put("gba/a.zip", b"abcd")
+        self.put("gba/b.zip", b"ab")
+        self.put("gba/c.zip", b"abc")
+        with mock.patch.object(scrape_online, "HASH_MAX", 3):
+            self.assertEqual(self.run_scrape(dry_run=True), 0)
+        out = self.out.getvalue()
+        self.assertIn("2 by hash, 1 by name+size", out)
+        self.assertIn("5 B to read for hashing", out)
+
+    def test_hashes_are_flushed_on_the_metadata_timer(self):
+        self.put("gba/a.zip")
+        self.put("gba/b.zip")
+        hashes_file = os.path.join(store.data_dir(), scrape_state.HASHES)
+        seen = []
+        real = s3.put_text
+
+        def put_text(key, text):
+            if not seen:
+                try:
+                    with open(hashes_file) as f:
+                        seen.append(set(json.load(f)))
+                except FileNotFoundError:
+                    seen.append(set())
+            return real(key, text)
+        with mock.patch.object(scrape_online, "BATCH", 1), mock.patch.object(scrape_online, "METADATA_INTERVAL", 0), \
+                mock.patch.object(s3, "put_text", side_effect=put_text):
+            self.assertEqual(self.run_scrape(), 0)
+        self.assertIn("gba/a.zip", seen[0])  # written before the first batch's entries, not only when the run ends
 
 
 class ReportTest(unittest.TestCase):

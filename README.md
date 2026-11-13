@@ -389,15 +389,17 @@ credentials for the API. Run `sync-roms scrape --set-credentials` to enter your 
 echoed, a blank answer keeps the saved value). They are stored in `settings.json` as `screenscraper_user` and
 `screenscraper_password`; the file is kept readable by you only (mode 600) and `config show` never prints them.
 
-**Report.** Before looking anything up, the run lists the ROMs with no metadata and how each will be matched first.
+**Report.** Before looking anything up, the run lists the ROMs with no metadata and how each will be matched first, and
+in a storage folder how much it will read to hash them.
 `--dry-run` stops there, printing the metadata entries and media folders it would write; it needs no ScreenScraper
 credentials and makes no ScreenScraper request. `scrape match --dry-run` needs credentials: a name is searched (one
 request) and you pick a result, while a numeric game id is taken as is, with no request and no check that it exists;
 nothing is written. `--system ID` limits a run to one storage folder.
 
 **Matching.** A ROM saved with `scrape match` is used as is. Otherwise one lookup sends its hashes together with its
-name and size. In a storage folder the file is hashed in place (hashes are remembered while its size and modification time
-stay the same); in S3 the object's MD5 is sent when the bucket has one. ROMs are never downloaded from S3 to be hashed. The
+name and size. In a storage folder a file up to 64 MB is hashed in place (hashes are remembered while its size and
+modification time stay the same); a bigger one is looked up by name and size, and hashed for a second lookup only when that
+finds nothing. In S3 the object's MD5 is sent when the bucket has one. ROMs are never downloaded from S3 to be hashed. The
 report counts a match as "by hash" when the ROM ScreenScraper matched has one of the hashes sent, and as "by name+size"
 otherwise; a name+size match is trusted without further checks. Names, dates and media prefer the regions `wor`, `us`,
 `eu`, `jp` in a fixed order; there is no setting for it. The response shapes and the search endpoint are written from
