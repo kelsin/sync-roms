@@ -47,8 +47,8 @@ class FakeTools:
                     f.write(b"zar")
         elif cmd[0] == "extract-xiso":
             mode = cmd[-2]
-            if mode == "-r":  # like the real tool: the rewritten image is written into -d, -D deletes the original
-                out = os.path.join(cmd[cmd.index("-d") + 1], os.path.basename(cmd[-1]))
+            if mode == "-r" and not chd.is_optimized_xiso(cmd[-1]):  # like the real tool: an optimized image is skipped,
+                out = os.path.join(cmd[cmd.index("-d") + 1], os.path.basename(cmd[-1]))  # else rewritten into -d, -D deletes it
                 os.remove(cmd[-1])
                 with open(out, "wb") as f:
                     f.write(XISO_TAG)
@@ -63,6 +63,11 @@ class ChdTest(unittest.TestCase):
         self._tmp = tempfile.TemporaryDirectory()
         self.dir = os.path.realpath(self._tmp.name)
         self.addCleanup(self._tmp.cleanup)
+        systemp = tempfile.TemporaryDirectory()  # stale_local_scratch looks at this, never at the real temp folder
+        self.addCleanup(systemp.cleanup)
+        patch = mock.patch.object(tempfile, "tempdir", os.path.realpath(systemp.name))
+        patch.start()
+        self.addCleanup(patch.stop)
         self.tools = {"7z": "7z", "chdman": "chdman", "extract-xiso": "extract-xiso", "iso2zar": "iso2zar", "np": 1}
 
     def touch(self, *names, text=""):
@@ -530,6 +535,189 @@ class ChdTest(unittest.TestCase):
         self.assertEqual(len(seen), 2)
         self.assertAlmostEqual(seen[0], 0.45)
         self.assertAlmostEqual(seen[1], 0.95)
+
+    def local_temp(self, free, other_device=True, target_free=10 ** 12):
+        """Patches the system temp folder to a folder of its own, on another device when other_device, with free bytes
+        left (target_free on every other volume)."""
+        local = os.path.join(self.dir, "local")
+        os.makedirs(local, exist_ok=True)
+        real_stat = os.stat
+
+        def stat(path, *a, **k):
+            r = real_stat(path, *a, **k)
+            if other_device and os.fspath(path) == local:
+                return os.stat_result((r.st_mode, r.st_ino, r.st_dev + 1, *tuple(r)[3:]))
+            return r
+
+        stack = contextlib.ExitStack()
+        stack.enter_context(mock.patch.object(tempfile, "tempdir", local))
+        stack.enter_context(mock.patch.object(os, "stat", stat))
+        stack.enter_context(mock.patch.object(chd.shutil, "disk_usage",
+                                              lambda p: SimpleNamespace(free=free if os.fspath(p) == local else target_free)))
+        return local, stack
+
+    def zip_of(self, name, **files):
+        os.makedirs(os.path.dirname(os.path.join(self.dir, name)), exist_ok=True)
+        with zipfile.ZipFile(os.path.join(self.dir, name), "w") as z:
+            for n, data in files.items():
+                z.writestr(n, data)
+
+    def run_convert(self, root, cpus=4):
+        calls = []
+
+        def fake_run(cmd, progress=None, tty=False):
+            calls.append(cmd)
+            return FakeTools(archive=["Game.iso"])(cmd, progress, tty) if cmd[0] == "7z" else FakeTools()(cmd, progress, tty)
+
+        with mock.patch.object(external, "run_tool", fake_run), mock.patch.object(external, "find_tool", lambda t: t), \
+                mock.patch.object(os, "cpu_count", return_value=cpus), contextlib.redirect_stdout(io.StringIO()) as out:
+            code = chd.chd_command(SimpleNamespace(chd=root, dry_run=False))
+        return code, calls, out.getvalue()
+
+    def test_archive_unpacks_to_local_temp_on_another_device_with_room(self):
+        self.zip_of("psx/Game.zip", **{"Game.iso": "x" * 100})
+        local, stack = self.local_temp(free=10 ** 12)
+        with stack:
+            code, calls, _ = self.run_convert(os.path.join(self.dir, "psx"))
+        self.assertEqual(code, 0)
+        unpack = next(a for a in calls[0] if a.startswith("-o"))[2:]
+        self.assertEqual(os.path.dirname(unpack), local)
+        create = next(c for c in calls if c[1:2] == ["createcd"])
+        self.assertEqual(os.path.dirname(create[create.index("-i") + 1]), unpack)
+        self.assertEqual(create[create.index("-o") + 1], os.path.join(self.dir, "psx", ".Game.chd.part"))
+        verify = next(c for c in calls if c[1:2] == ["verify"])
+        self.assertEqual(verify[-1], os.path.join(self.dir, "psx", ".Game.chd.part"))
+        self.assertEqual(os.listdir(os.path.join(self.dir, "psx")), ["Game.chd"])
+        self.assertEqual(os.listdir(local), [])
+
+    def test_archive_unpacks_beside_itself_without_room_on_the_same_device_or_for_extraction(self):
+        cases = {"no room": (99, True, "psx", "Game.zip"), "no margin": (2 ** 30 + 99, True, "psx", "Game.zip"), "same device": (10 ** 12, False, "psx", "Game.zip"),
+                 "extraction": (10 ** 12, True, "gc", "Game.zip"), "size unknown": (10 ** 12, True, "psx", "Game.7z")}
+        for case, (free, other, folder, name) in cases.items():
+            with self.subTest(case):
+                path = os.path.join(case, folder, name)
+                self.zip_of(path, **{"Game.iso": "x" * 100}) if name.endswith(".zip") else self.touch(path)
+                _, stack = self.local_temp(free=free, other_device=other)
+                with stack, mock.patch.object(chd, "chd_folders", lambda s: {"psx": CD, "gc": EXTRACT}), \
+                        mock.patch.object(external, "tool_output", return_value=None):
+                    code, calls, _ = self.run_convert(os.path.join(self.dir, case, folder))
+                self.assertEqual(code, 0)
+                unpack = next(a for a in calls[0] if a.startswith("-o"))[2:]
+                self.assertEqual(os.path.dirname(unpack), os.path.join(self.dir, case, folder))
+
+    def test_unpacked_size_comes_from_the_listing(self):
+        self.zip_of("a.zip", **{"A.cue": "c" * 10, "A.bin": "b" * 90})
+        self.zip_of("nested.zip", **{"A.iso": "x", "Disc.zip": "z"})
+        self.touch("a.rar", "a.7z")
+        listing = "Path = a.7z\nType = 7z\n\n----------\nPath = A.iso\nFolder = -\nSize = 4000\n\nPath = sub\nFolder = +\nSize = 0\n\n"
+        with mock.patch.object(external, "tool_output", return_value=listing) as out:
+            self.assertEqual(chd.unpacked_size(self.tools, os.path.join(self.dir, "a.7z")), 4000)
+            self.assertEqual(out.call_args[0][0][:3], ["7z", "l", "-slt"])
+            self.assertEqual(chd.unpacked_size(self.tools, os.path.join(self.dir, "a.zip")), 100)
+            self.assertEqual(out.call_count, 1)  # a zip is read without the tool
+        self.assertIsNone(chd.unpacked_size(self.tools, os.path.join(self.dir, "nested.zip")))  # inner archives grow it
+        self.assertIsNone(chd.unpacked_size(self.tools, os.path.join(self.dir, "a.rar")))
+        with mock.patch.object(external, "tool_output", return_value=None):
+            self.assertIsNone(chd.unpacked_size(self.tools, os.path.join(self.dir, "a.7z")))
+
+    def test_failed_archive_leaves_nothing_in_local_scratch(self):
+        self.touch("Game.zip")
+        local = os.path.join(self.dir, "local")
+        os.makedirs(local)
+        with mock.patch.object(external, "run_tool", FakeTools(archive=["Game.iso"], fail=("createdvd",))):
+            error = chd.chd_archive(self.tools, DVD["chd"], os.path.join(self.dir, "Game.zip"), scratch=local)
+        self.assertEqual(error, "createdvd failed")
+        self.assertEqual(self.files(), ["Game.zip", "local"])
+        self.assertEqual(os.listdir(local), [])
+
+    def test_kept_files_reach_their_names_only_once_moved_and_a_failed_move_is_an_error(self):
+        local = os.path.join(self.dir, "local")
+        os.makedirs(local)
+        real_move, seen = chd.shutil.move, []
+
+        def move(src, dst):
+            seen.append((os.path.basename(dst), os.path.exists(os.path.join(self.dir, "Game.pkg"))))
+            return real_move(src, dst)
+
+        def full(src, dst):
+            with open(dst, "w") as f:
+                f.write("half")
+            raise OSError(28, "No space left on device")
+
+        for fake_move in (move, full):
+            self.touch("Game.zip")
+            with mock.patch.object(external, "run_tool", FakeTools(archive=["Game.iso", "Game.pkg"])), \
+                    mock.patch.object(chd.shutil, "move", fake_move):
+                error = chd.chd_archive(self.tools, PS3["chd"], os.path.join(self.dir, "Game.zip"), scratch=local)
+            if fake_move is move:
+                self.assertIsNone(error)
+                self.assertEqual(seen, [(".Game.pkg.part", False)])
+                self.assertTrue(external.own_temp(seen[0][0]))
+                self.assertEqual(self.files(), ["Game.chd", "Game.pkg", "local"])
+                os.remove(os.path.join(self.dir, "Game.pkg"))
+            else:
+                self.assertEqual(error, "[Errno 28] No space left on device")
+                self.assertEqual(self.files(), ["Game.chd", "Game.zip", "local"])
+            self.assertEqual(os.listdir(local), [])
+
+    def test_archive_iso_is_rewritten_without_a_copy(self):
+        self.touch("Game.zip")
+        local = os.path.join(self.dir, "local")
+        os.makedirs(local)
+        fake = FakeTools(archive=["Game.iso"])
+        with mock.patch.object(external, "run_tool", fake), mock.patch.object(chd.shutil, "copyfile", side_effect=AssertionError("copied")):
+            error = chd.chd_archive(self.tools, XISO["chd"], os.path.join(self.dir, "Game.zip"), scratch=local)
+        self.assertIsNone(error)
+        self.assertEqual(self.files(), ["Game.iso", "local"])
+        self.assertTrue(chd.is_optimized_xiso(os.path.join(self.dir, "Game.iso")))
+        rewrite = next(c for c in fake.calls if "-r" in c)
+        self.assertEqual(os.path.dirname(os.path.dirname(rewrite[-1])), local)  # read from scratch, written on the target
+        self.assertEqual(os.path.dirname(rewrite[rewrite.index("-d") + 1]), self.dir)
+        self.assertEqual(os.listdir(local), [])
+
+    def test_archive_of_an_optimized_iso_is_moved_out_unchanged(self):
+        self.touch("Game.zip")
+        local = os.path.join(self.dir, "local")
+        os.makedirs(local)
+
+        def fake(cmd, progress=None, tty=False):
+            if cmd[0] == "7z":
+                with open(os.path.join(next(a for a in cmd if a.startswith("-o"))[2:], "Game.iso"), "wb") as f:
+                    f.write(XISO_TAG)
+                return None
+            return FakeTools()(cmd, progress, tty)
+
+        with mock.patch.object(external, "run_tool", fake):
+            error = chd.chd_archive(self.tools, XISO["chd"], os.path.join(self.dir, "Game.zip"), scratch=local)
+        self.assertIsNone(error)
+        self.assertEqual(self.files(), ["Game.iso", "local"])
+        self.assertTrue(chd.is_optimized_xiso(os.path.join(self.dir, "Game.iso")))
+        self.assertEqual(os.listdir(local), [])
+
+    def test_jobs_at_once_are_capped_by_free_space(self):
+        self.touch("psx/A.iso", "psx/B.iso", "psx/C.iso", text="x" * 100)
+        for target_free, workers, np in ((250, 2, "3"), (50, 1, "6"), (10 ** 12, 3, "2")):
+            with self.subTest(target_free=target_free):
+                _, stack = self.local_temp(free=10 ** 12, target_free=target_free)
+                with stack:
+                    code, calls, out = self.run_convert(os.path.join(self.dir, "psx"), cpus=6)
+                self.assertEqual(code, 0)
+                self.assertIn(f"{workers} at a time", out)
+                self.assertEqual({c[c.index("-np") + 1] for c in calls if c[1:2] == ["createcd"]}, {np})
+                for n in ("A", "B", "C"):
+                    os.remove(os.path.join(self.dir, "psx", n + ".chd"))
+                    self.touch(f"psx/{n}.iso", text="x" * 100)
+
+    def test_local_scratch_of_a_run_no_longer_running_is_removed(self):
+        local, stack = self.local_temp(free=10 ** 12)
+        dead, mine, other = (os.path.join(local, n) for n in (".chd-99999999-ab", f".chd-{os.getpid()}-cd", "keep"))
+        for d in (dead, mine, other):
+            os.makedirs(d)
+        self.touch("psx/Game.iso")
+        with stack:
+            self.run_convert(os.path.join(self.dir, "psx"))
+        self.assertEqual(sorted(os.listdir(local)), sorted(os.path.basename(d) for d in (mine, other)))
+        self.assertTrue(external.own_temp(os.path.basename(dead)))
 
     def test_dry_run_changes_nothing_and_needs_no_tools(self):
         self.touch("psx/Game.zip")
