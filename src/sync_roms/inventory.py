@@ -12,6 +12,7 @@ import os
 import stat as statmode
 import sys
 import threading
+import unicodedata
 import time
 from concurrent.futures import ThreadPoolExecutor
 
@@ -21,7 +22,10 @@ DECLINED = "storage_cache_declined"  # settings.json: the user said no to buildi
 UPDATE_HINT = "sync-roms cache update"
 
 _clock = time.time  # replaced by tests
-FRESH = 10  # seconds: a folder mtime this close to now (or later) isn't stored, as the folder may still be changing
+# seconds: a folder mtime this close to now (or later) isn't stored. It is longer than the macOS SMB client serves a
+# cached folder listing (up to 60 s, nsmb.conf dir_cache_max) plus slack between the share's clock and this one, so a
+# stat can't show a new mtime that a stale listing doesn't reflect.
+FRESH = 300
 _lock = threading.RLock()
 _tree = None  # the loaded cache (a Tree), False when there is none, None until read
 _tree_path = None  # the file _tree was read from (the data folder can change, in tests)
@@ -168,15 +172,18 @@ def folders():
 # --- Patches from sync-roms's own writes ----------------------------------------------------------------------------
 
 def _patch(change, keys):
-    """Apply change to the cache, and stop trusting the mtimes of the keys' folders: the next update lists them."""
+    """Apply change to the cache, and stop trusting the mtimes of the keys' folders (spelled as given, NFC or NFD: a share
+    may store a name decomposed): the next update lists them."""
     global _dirty
     with _lock:
         tree = current()
         if tree is not None:
             change(tree)
             for k in keys:
-                if k.rpartition("/")[0] in tree.dirs:
-                    tree.dirs[k.rpartition("/")[0]] = None
+                folder = k.rpartition("/")[0]
+                for name in {folder, unicodedata.normalize("NFC", folder), unicodedata.normalize("NFD", folder)}:
+                    if name in tree.dirs:
+                        tree.dirs[name] = None
             tree.changed()
             _dirty = True
 
@@ -194,6 +201,8 @@ def wrote(key, size, etag=None):
 
 def removed(keys):
     """Files were deleted from storage."""
+    keys = list(keys)
+
     def change(tree):
         for k in keys:
             tree.files.pop(k, None)

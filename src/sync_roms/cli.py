@@ -221,9 +221,11 @@ TOPICS = {
   cache          where the cache was read from, when it was last updated, and its files and size per folder
   cache update   read storage again: one listing of a bucket, or a walk of a folder that lists only subfolders
                  whose modification time changed and stats only files the cache doesn't have; the rest keep their
-                 cached files and sizes
-  --full         in a folder, list every subfolder and stat every file (catches files replaced under the same name;
-                 a bucket listing is the same either way)
+                 cached files and sizes. This relies on storage changing a folder's modification time when a file is
+                 added, removed or renamed in it; a change made in the last few minutes is picked up on the
+                 following update
+  --full         in a folder, list every subfolder and stat every file: covers files replaced under the same name
+                 and anything a folder's modification time didn't show (a bucket listing is the same either way)
 
   With no cache for the storage in use, the first command that reads storage offers to build it. Saying no is
   remembered (storage_cache_declined in settings.json), and commands then list storage each run.

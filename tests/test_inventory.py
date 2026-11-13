@@ -4,6 +4,7 @@ import json
 import os
 import sys
 import tempfile
+import unicodedata
 import unittest
 from unittest import mock
 
@@ -265,6 +266,15 @@ class FolderMtimeTest(StorageFolder):
         self.assertIsInstance(inventory.current().dirs["BIOS"], int)
         self.assertEqual(self.update(), ((0, 0, 0), ["gba"]))
 
+    def test_an_mtime_is_stored_only_when_older_than_five_minutes(self):
+        now = 1_700_000_000
+        os.utime(os.path.join(self.root.name, "gba"), ns=((now - 300) * 10**9,) * 2)
+        os.utime(os.path.join(self.root.name, "BIOS"), ns=((now - 300) * 10**9 - 1,) * 2)
+        with mock.patch.object(inventory, "_clock", return_value=float(now)):
+            self.update()
+        self.assertIsNone(inventory.current().dirs["gba"])
+        self.assertEqual(inventory.current().dirs["BIOS"], (now - 300) * 10**9 - 1)
+
     def test_a_file_added_while_a_folder_is_listed_is_found_next_time(self):
         later = inventory._clock() + 3600  # every mtime is old enough to store, even the one after the add
         p = mock.patch.object(inventory, "_clock", return_value=later)
@@ -324,6 +334,33 @@ class FolderMtimeTest(StorageFolder):
         inventory.reset()
         self.assertEqual(self.update(), ((1, 2, 0), ["BIOS", "gba"]))
         self.assertEqual(inventory.files(""), {"gba/a.zip": 1, "gba/b.zip": 2, "BIOS/x.bin": 3})
+
+    def test_a_delete_given_as_a_generator_drops_the_folder_mtime(self):
+        self.update()
+        inventory.removed(k for k in ["gba/a.zip"])
+        self.assertIsNone(inventory.current().dirs["gba"])
+        self.assertNotIn("gba/a.zip", inventory.current().files)
+
+    def test_a_write_drops_the_mtime_of_the_folder_spelled_either_way(self):
+        nfd, nfc = unicodedata.normalize("NFD", "Pokémon"), unicodedata.normalize("NFC", "Pokémon")
+        self.put(f"{nfd}/a.zip", 1)
+        self.age()
+        self.update()
+        self.assertIsInstance(inventory.current().dirs[nfd], int)
+        inventory.wrote(f"{nfc}/b.zip", 2)
+        self.assertIsNone(inventory.current().dirs[nfd])
+
+    def test_a_write_into_a_folder_the_walk_never_read_leaves_dirs_alone(self):
+        self.update()
+        before = dict(inventory.current().dirs)
+        inventory.wrote("new/z.zip", 9)
+        self.assertEqual(inventory.current().dirs, before)
+        self.assertEqual(inventory.files("new/"), {"new/z.zip": 9})
+
+    def test_a_dirs_value_that_is_not_a_whole_number_loads_as_none(self):
+        store.write_json(inventory.path(), {"source": self.root.name, "updated": 1, "files": {"gba/a.zip": 1},
+                                            "dirs": {"": 5, "gba": "x", "BIOS": 1.5}})
+        self.assertEqual(inventory.current().dirs, {"": 5, "gba": None, "BIOS": None})
 
     def test_an_empty_folder_a_symlinked_folder_and_a_folder_replaced_by_a_file(self):
         os.mkdir(os.path.join(self.root.name, "empty"))
