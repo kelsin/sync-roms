@@ -25,7 +25,7 @@ SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "devices": ("[ID]", "list the supported devices, or one device's systems"),
     "upload": ("roms [DIR] | scrapes [CARD]", "upload ROMs or a card's scraped data to storage"),
     "diff": ("[DIR]", "list the ROMs in only DIR or only the bucket, ignoring renames"),
-    "scrape": ("[match SYSTEM ROM GAME | review [SYSTEM] | missing [SYSTEM]]", "scrape the ROMs that have no metadata from ScreenScraper into storage's scrapes/ folder"),
+    "scrape": ("[SYSTEM | match SYSTEM ROM GAME | review [SYSTEM] | missing [SYSTEM]]", "scrape the ROMs that have no metadata from ScreenScraper into storage's scrapes/ folder"),
     "clean": ("scrapes", "remove scrapes/ media and metadata for ROMs that aren't in storage"),
     "playlist": ("[DIR]", "create or fix the .m3u playlist of every multi-disc game"),
     "convert": ("[DIR]", "unzip archives and convert disc images to verified .chd"),
@@ -78,7 +78,8 @@ TOPICS = {
   sync-roms games import FILE --card NAME [-n]            add the games in such a file; '@' lines replace the card's collections / frontend_collections / surprises, and set Surprise on or off
 
   --card NAME is required: a card's games are saved in ~/.sync-roms/cards.json with the previous version kept as .bak. Removing only drops a game from the list.
-  In the editor: / filters, Space toggles a row, a all/none shown, u reverts the list, o cycles all/on/changed, f toggles a whole set or system.
+  In the editor: / filters, Space toggles a row, a all/none shown, u reverts the list, o cycles all/on/changed,
+  f toggles a full system; in a system's games, s lists its sets and Space there picks (or unpicks) a set's games.
 """,
     "sets": """
   sync-roms sets edit                         edit the repo's sets (games, categories, new and deleted sets), then open a PR
@@ -128,26 +129,31 @@ TOPICS = {
 
   The system is guessed from the folder name; same-size files are skipped, a different size overwrites after you confirm.
   --replace makes the storage folder match DIR: renamed files are moved by content (big bucket files without an MD5 are
-  compared on samples, and those renames are marked), and left-over storage files are listed so you pick which to delete. Uploads use the write profile (ROMS_WRITE_PROFILE, default 'roms').
+  compared on samples, and those renames are marked), and left-over storage files are listed so you pick which to delete.
+  Uploads use the write profile (ROMS_WRITE_PROFILE, default 'roms').
 """,
     "diff": """
-  sync-roms diff [DIR]
+  sync-roms diff [DIR] [--system ID] [--json]
 
   Lists the ROMs in only one of DIR and storage folder of a system you pick. Same path and size is the same file;
   the rest are matched by content (the CRCs inside zips, the bytes of other files, as upload roms --replace does).
   It only reads, so --dry-run is refused.
+  --system ID   compare with that storage folder instead of picking one
+  --json        print the result as one JSON document (needs --system unless DIR is named after a system)
 """,
     "scrape": """
-  sync-roms scrape [--system ID] [--all] [--retry] [--fill-media] [--skip-media TYPES] [--dry-run]
+  sync-roms scrape [SYSTEM | --system ID] [--all] [--retry] [--fill-media] [--skip-media TYPES] [--dry-run]
   sync-roms scrape match SYSTEM ROM GAME_ID_OR_NAME [--skip-media TYPES] [--dry-run]
   sync-roms scrape review [SYSTEM]
-  sync-roms scrape missing [SYSTEM] [--all]
+  sync-roms scrape missing [SYSTEM | --system ID] [--all]
   sync-roms scrape --set-credentials
 
   Looks up every available ROM with no entry in scrapes/<system>/metadata.json on ScreenScraper and writes its
   metadata and media (and the Onion/Slot images) to storage. The ROMs and how each will be
   looked up are listed first. ROMs ScreenScraper doesn't know are remembered and skipped until --retry.
-  --system ID        only that storage folder (e.g. gba)
+  SYSTEM             only that storage folder (e.g. gba); --system ID is the same
+  --retry            also look up the ROMs ScreenScraper didn't know before (ROMs whose lookup failed are always
+                     tried again; non-games never are: see review)
   --all              every ROM in the storage, not just those your cards list (games, sets, full systems)
   --fill-media       also scrape ROMs that have metadata but lack some media type in storage (ScreenScraper is asked
                      again for each, even when it has no such media); their existing metadata is kept
@@ -247,6 +253,7 @@ def help_text(topic=None):
 {ui.bold('USAGE')}
   {ui.green('sync-roms')} [{ui.cyan('CARD')}]                 sync a card (same as `sync-roms sync CARD`)
   {ui.green('sync-roms')} {ui.cyan('COMMAND')} [options]      one of the commands below; `sync-roms COMMAND --help` explains it
+  {ui.green('sync-roms')} help [{ui.cyan('COMMAND')}]         the same as --help
 
 {ui.bold('COMMANDS')}
 {rows}
@@ -255,7 +262,7 @@ def help_text(topic=None):
   {ui.yellow('-n, --dry-run')}   show what would happen, change nothing (commands that can't honor it refuse it)
   {ui.yellow('-y, --yes')}       answer prompts with their default (deleting stays "no")
   {ui.yellow('--quiet')}         print only errors, warnings and --json data (prompts go to stderr)      {ui.yellow('--verbose')}   also print the effective settings
-  {ui.yellow('--json')}          machine-readable output for devices, diff and `sync --dry-run` (use --device/--layout to skip the pickers)
+  {ui.yellow('--json')}          machine-readable output for devices, diff, games list, cards list and `sync --dry-run` (use --device/--layout to skip the pickers)
   {ui.yellow('--profile P')} {ui.yellow('--write-profile P')} {ui.yellow('--bucket B')} {ui.yellow('--root DIR')} {ui.yellow('--endpoint URL')}   override those settings for this run
   {ui.yellow('-a, --ask')}       sync: confirm the saved device/firmware and Android media choice instead of using it silently
   {ui.yellow('--version')}       print the version      {ui.yellow('-h, --help')}   this screen
@@ -269,12 +276,13 @@ def help_text(topic=None):
 
 {ui.bold('EXAMPLES')}
   sync-roms /Volumes/SD                          sync the card
-  sync-roms sync /Volumes/SD --device rg35xx-sp --layout knulli --yes --dry-run
+  sync-roms sync /Volumes/SD --device anbernic-rg35xx-sp --layout knulli --yes --dry-run
   sync-roms games add gba 'Metroid*' --card SD   add games to a card
   sync-roms upload roms ~/roms/gba               upload ROMs to storage
 
-  {ui.dim('The old flags (--edit, --upload, --upload-scrapes, --clean-scrapes, --m3u, --cd, --install-tools, --mirror,')}
-  {ui.dim('--use-mirror, --clear-mirror, --devices) still work. A card folder named like a command: write ./edit.')}
+  {ui.dim('The old flags (--edit, --upload, --upload-scrapes, --clean-scrapes, --diff, --scrape, --scrape-match, --scrape-review,')}
+  {ui.dim('--scrape-missing, --m3u, --cd, --install-tools, --mirror, --use-mirror, --clear-mirror, --devices) still work.')}
+  {ui.dim('A card folder named like a command: write ./edit.')}
 """
 
 
@@ -381,6 +389,7 @@ LEGACY = {
     ("mirror", "use"): ["--use-mirror"], ("mirror", "clear"): ["--clear-mirror"], ("mirror",): ["--mirror"],
     ("games", "edit"): ["--edit"], ("cards", "edit"): ["--edit"], ("edit",): ["--edit"],
 }
+WORDS = {flags[0]: " ".join(words) for words, flags in LEGACY.items() if flags}  # mode flag -> its command, for messages
 BOOL_FLAGS = {"-n", "--dry-run", "-y", "--yes", "-a", "--ask"}
 PLAIN_FLAGS = BOOL_FLAGS | {"--replace", "--json", "--no-clean", "--no-eject", "--retry", "--all", "--fill-media", "--set-credentials"}
 VALUE_FLAGS = {"--system", "--device", "--layout", "--device-id", "--skip-media"}
@@ -472,26 +481,33 @@ def check_modes(args):
     if len(modes) > 1:
         ui.fail(f"{' and '.join(modes[:2])} can't be combined: use one command at a time", 2)
     mode = modes[0] if modes else None
+    name = WORDS.get(mode)
     if args.replace and mode != "--upload":
         ui.fail("--replace only works with `upload roms` (--upload)", 2)
-    if args.dry_run and mode in ("--edit", "--install-tools", "--clear-mirror", "--devices", "--scrape-missing"):
-        ui.fail(f"--dry-run has no effect on {mode}", 2)
-    if args.dry_run and mode in ("--scrape-review", "--diff"):
-        ui.fail(f"--dry-run has no effect on `{'scrape review' if mode == '--scrape-review' else 'diff'}`", 2)
+    if args.dry_run and mode in ("--edit", "--install-tools", "--clear-mirror", "--devices", "--scrape-missing", "--scrape-review", "--diff"):
+        ui.fail(f"--dry-run has no effect on `{name}`", 2)
     if args.ask and mode:
-        ui.fail(f"--ask only applies to syncing a card, not {mode}", 2)
+        ui.fail(f"--ask only applies to syncing a card, not `{name}`", 2)
     if (args.device or args.layout or args.no_clean or args.no_eject) and mode:
-        ui.fail(f"--device, --layout, --no-clean and --no-eject only apply to syncing a card, not {mode}", 2)
+        ui.fail(f"--device, --layout, --no-clean and --no-eject only apply to syncing a card, not `{name}`", 2)
     if args.base_dir and mode == "--clean-scrapes":
         ui.fail(f"`clean scrapes` doesn't take a folder ({args.base_dir!r})", 2)
+    if mode == "--scrape" and args.base_dir:  # `scrape gba`, like `scrape missing gba`
+        if args.system:
+            ui.fail("`scrape` takes one system: `scrape SYSTEM` or `scrape --system SYSTEM`", 2)
+        args.system, args.base_dir = args.base_dir, None
+    if mode == "--scrape-missing" and args.system:
+        if args.scrape_missing:
+            ui.fail("`scrape missing` takes one system: `scrape missing SYSTEM` or `scrape missing --system SYSTEM`", 2)
+        args.scrape_missing, args.system = args.system, None
     if args.base_dir and mode not in (None, "--upload-scrapes"):
-        ui.fail(f"{mode} doesn't take a card folder ({args.base_dir!r}); give the directory right after the command", 2)
+        ui.fail(f"`{name}` doesn't take a card folder ({args.base_dir!r}); give the directory right after the command", 2)
     if args.device_id and mode != "--devices":
         ui.fail("a device id only applies to `devices`", 2)
     if args.json and not (mode in ("--devices", "--diff") or (mode is None and args.dry_run)):
-        ui.fail("--json only applies to `devices`, `diff` and `sync --dry-run`", 2)
+        ui.fail("--json only applies to `devices`, `diff`, `games list`, `cards list` and `sync --dry-run`", 2)
     if args.system and mode not in ("--diff", "--scrape"):
-        ui.fail("--system only applies to `diff` and `scrape`", 2)
+        ui.fail("--system only applies to `diff`, `scrape` and `scrape missing`", 2)
     if args.retry and mode != "--scrape":
         ui.fail("--retry only applies to `scrape`", 2)
     if args.all and mode not in ("--scrape", "--scrape-missing"):
@@ -502,7 +518,7 @@ def check_modes(args):
         ui.fail("--set-credentials only goes with `scrape`, on its own", 2)
     if args.skip_media is not None:
         if mode not in ("--scrape", "--scrape-match"):
-            ui.fail("--skip-media only applies to `scrape`", 2)
+            ui.fail("--skip-media only applies to `scrape` and `scrape match`", 2)
         args.skip_media = [t.strip() for t in args.skip_media.split(",") if t.strip()]
         from . import scrape_online
         scrape_online._check_skip(args.skip_media)
@@ -575,6 +591,9 @@ def run(argv):
         print(help_text(argv[1] if len(argv) > 1 else None))
         return 0
     topic = next((a for a in argv if a in SUBCOMMANDS), None) if ("-h" in argv or "--help" in argv) else None
+    if topic:  # before translate(), which refuses `upload` and the others without their subcommand
+        print(help_text(topic))
+        return 0
     argv = translate(argv)
     args = build_parser().parse_args(argv)
     if args.version:

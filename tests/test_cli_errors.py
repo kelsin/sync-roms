@@ -57,7 +57,7 @@ class EditAliasTest(Isolated):
             with self.subTest(argv=argv), mock.patch.object(edit, "edit_manifest") as run:
                 code, _, err = self.sync(argv)
             self.assertEqual(code, 2)
-            self.assertIn("--dry-run has no effect on --edit", err)
+            self.assertIn("--dry-run has no effect on `edit`", err)
             run.assert_not_called()
 
 
@@ -100,6 +100,63 @@ class UnhonoredFlagsTest(Isolated):
 
     def test_clean_scrapes_takes_no_folder(self):
         self.refused(["clean", "scrapes", "/some/dir"], "`clean scrapes` doesn't take a folder")
+
+    def test_refusals_name_the_command_typed(self):
+        self.refused(["devices", "--dry-run"], "--dry-run has no effect on `devices`")
+        self.refused(["mirror", "clear", "-n"], "--dry-run has no effect on `mirror clear`")
+        self.refused(["playlist", "--ask"], "--ask only applies to syncing a card, not `playlist`")
+
+
+class UsageHelpTest(Isolated):
+    def test_help_for_commands_that_need_a_subcommand(self):
+        for name in ("upload", "clean", "tools"):
+            for flag in ("--help", "-h"):
+                with self.subTest(name=name, flag=flag):
+                    code, out, err = self.sync([name, flag])
+                    self.assertEqual((code, err), (0, ""))
+                    self.assertIn(f"sync-roms {name}", out)
+
+    def test_word_command_errors_point_at_that_command_help(self):
+        for argv, name in ((["cache", "update", "--json"], "cache"), (["cards", "list", "-n"], "cards"),
+                           (["games", "add", "--card", "SD"], "games"), (["config", "bogus"], "config")):
+            with self.subTest(argv=argv):
+                code, _, err = self.sync(argv)
+                self.assertEqual(code, 2)
+                self.assertIn(f"Try 'sync-roms {name} --help'.", err)
+
+    def test_config_show_prints_eject_as_a_word(self):
+        code, out, _ = self.sync(["config", "show"], {"eject": False})
+        self.assertEqual(code, 0)
+        self.assertRegex(out, r"eject\s+False\s")
+        code, out, _ = self.sync(["config", "show"])
+        self.assertRegex(out, r"eject\s+True\s")
+
+
+class QuietColorTest(unittest.TestCase):
+    class Stream(io.StringIO):
+        def __init__(self, tty):
+            super().__init__()
+            self.tty = tty
+
+        def isatty(self):
+            return self.tty
+
+    def failure_line(self, stdout_tty, stderr_tty):
+        out, err = self.Stream(stdout_tty), self.Stream(stderr_tty)
+        with mock.patch.dict(os.environ, clear=False), mock.patch.object(sys, "stdout", out), \
+                mock.patch.object(sys, "stderr", err), mock.patch.object(ui, "_COLOR", stdout_tty):
+            for var in ("NO_COLOR", "FORCE_COLOR", "CLICOLOR_FORCE", "TERM"):
+                os.environ.pop(var, None)
+            ui.set_output(True, False)
+            try:
+                ui.failure(ui.red("❌ x"))
+            finally:
+                ui.reset()
+        return err.getvalue()
+
+    def test_quiet_failure_lines_are_colored_by_stderr(self):
+        self.assertIn("\033[31m", self.failure_line(stdout_tty=False, stderr_tty=True))
+        self.assertNotIn("\033[", self.failure_line(stdout_tty=True, stderr_tty=False))
 
 
 class ExitCodeTest(Isolated):

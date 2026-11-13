@@ -798,9 +798,9 @@ def _scrape_command(args):
     todo = {name: [(r, *etags[name][r]) for r in roms_ if r in etags[name]] for name, roms_ in candidates.items()}
     planned = {name: {r: planned_match(name, r, etag) for r, _, etag in items} for name, items in todo.items()}
     if not any(todo.values()):
-        print(ui.green("Nothing to scrape ✨"))
+        print(ui.green("Nothing to scrape ✨") + ("" if getattr(args, "all", False) else ui.dim("  (--all also takes the ROMs no card lists)")))
         return 0
-    print(ui.bold("\n🔎 ROMs with no metadata (and how each will be looked up first)"))
+    print(ui.bold("\n🔎 ROMs to scrape (and how each will be looked up first)"))
     print(report({name: [r for r, _, _ in items] for name, items in todo.items()}, planned))
     if args.dry_run:
         print(ui.yellow("\n🧪 Dry run — nothing looked up or written"))

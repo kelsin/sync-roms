@@ -89,13 +89,13 @@ class Modes(unittest.TestCase):
         self.refused("scrape", "review", "--retry")
         self.refused("scrape", "missing", "--retry")
         self.refused("scrape", "missing", "--dry-run")
-        self.refused("scrape", "missing", "--system", "gb")
+        self.refused("scrape", "missing", "gb", "--system", "nes")
         self.refused("--scrape", "--scrape-match", "gba", "a", "1")
         self.refused("scrape", "match", "--retry", "gba", "a.zip", "1")
         self.refused("scrape", "match", "--system", "gba", "gba", "a.zip", "1")
         self.refused("scrape", "--set-credentials", "--retry")
         self.refused("scrape", "--set-credentials", "--dry-run")
-        self.refused("scrape", "/some/card")
+        self.refused("scrape", "gba", "--system", "nes")
 
     def test_skip_media_validated(self):
         with mock.patch("sys.stderr", io.StringIO()) as err, self.assertRaises(SystemExit):
@@ -138,6 +138,16 @@ class Dispatch(Isolated):
                                ens=(usersettings, "ensure_bucket", mock.Mock()))
         self.assertEqual(code, 0)
         self.assertEqual((seen["system"], seen["rom"], seen["game"]), ("gba", "a.zip", "Metroid"))
+
+    def test_scrape_and_scrape_missing_take_the_system_either_way(self):
+        for argv, fn in ((["scrape", "gba"], "scrape_command"), (["scrape", "--system", "gba"], "scrape_command"),
+                         (["scrape", "missing", "gba"], "missing_command"), (["scrape", "missing", "--system", "gba"], "missing_command")):
+            with self.subTest(argv=argv):
+                seen = {}
+                code, _, err = self.sync(argv, cmd=(scrape_online, fn, lambda a: seen.update(vars(a)) or 0),
+                                         ens=(usersettings, "ensure_bucket", mock.Mock()))
+                self.assertEqual((code, err), (0, ""))
+                self.assertEqual(seen["system"], "gba")
 
     def test_set_credentials_needs_no_bucket(self):
         ensure = mock.Mock()

@@ -247,7 +247,7 @@ Every mode is a command (`sync-roms COMMAND --help` explains one; plain `sync-ro
 | `devices [ID]` | list devices, or one device's systems (`--json`) | `--devices` |
 | `upload roms [DIR]` / `upload scrapes [CARD]` | upload to storage | `--upload`, `--upload-scrapes` |
 | `diff [DIR]` | compare a folder with storage | `--diff` |
-| `scrape [match SYSTEM ROM GAME \| review [SYSTEM] \| missing [SYSTEM]]` / `scrape --set-credentials` | scrape ROMs with no metadata from ScreenScraper, review the non-game and unknown ones, or list them all | `--scrape`, `--scrape-match`, `--scrape-review`, `--scrape-missing` |
+| `scrape [SYSTEM \| match SYSTEM ROM GAME \| review [SYSTEM] \| missing [SYSTEM]]` / `scrape --set-credentials` | scrape ROMs with no metadata from ScreenScraper, review the non-game and unknown ones, or list them all | `--scrape`, `--scrape-match`, `--scrape-review`, `--scrape-missing` |
 | `clean scrapes` | remove scrapes of ROMs not in storage | `--clean-scrapes` |
 | `playlist [DIR]` | fix `.m3u` playlists | `--m3u` |
 | `convert [DIR]` | convert disc images to CHD | `--cd`, `--chd` |
@@ -266,7 +266,7 @@ The old flags keep working. Flags that make no sense for a command (`--dry-run` 
 `--yes` answers every prompt with its default (deleting local files stays "no"). A first sync can skip the setup picker:
 
 ```bash
-sync-roms sync /Volumes/SD --device rg35xx-sp --layout knulli --yes
+sync-roms sync /Volumes/SD --device anbernic-rg35xx-sp --layout knulli --yes
 sync-roms sync /Volumes/SD --dry-run     # preview a saved card
 ```
 
@@ -274,7 +274,9 @@ Without a terminal and without those flags the pickers fail with the flag to use
 
 Exit codes: `0` done (or nothing to do, or you declined), `1` some files failed, `2` bad usage, `3` setup problem (credentials, storage, missing tool, unreadable data file), `130` interrupted. Errors go to stderr; `NO_COLOR` and `FORCE_COLOR` control colors.
 
-Before downloading, the sync shows the totals (scraped media included, on layouts that take it) and free space on the card and asks. When there isn't enough space and nobody can be asked (`--yes`, or no terminal), the sync fails with exit 1. Local ROMs no longer in the selection are listed and deleted first (after you confirm), so the free space shown is accurate. `--dry-run` shows the same free space (counting the ROMs it would delete as freed) and says when the downloads would not fit; its `--json` document lists scraped media in `downloads` with kind `scrape`, counts them in `totals`, and has the free space in bytes as `free_space`. A run ends with one line: the files and bytes downloaded, the time it took, the listed ROMs not in storage and any failures. A second `Ctrl-C` during downloads stops at once and removes the partly downloaded files.
+Before downloading, the sync shows the totals (scraped media included, on layouts that take it) and free space on the card and asks. When there isn't enough space and nobody can be asked (`--yes`, or no terminal), the sync fails with exit 1. Local ROMs no longer in the selection are listed and deleted first (after you confirm), so the free space shown is accurate. `--dry-run` shows the same free space (counting the ROMs it would delete as freed) and says when the downloads would not fit; its `--json` document lists scraped media in `downloads` with kind `scrape`, counts them in `totals`, and has the free space in bytes as `free_space`.
+
+A run ends with one line: the files and bytes downloaded, the time it took, the listed ROMs not in storage and any failures. A second `Ctrl-C` during downloads stops at once and removes the partly downloaded files.
 
 On `esde` and `emudeck` cards every Vita game zip in `psvita/` gets a `.psvita` file beside it holding the game's title id (read from the zip's `param.sfo`), which is what ES-DE launches Vita3K with; the zip itself is left as it is for Vita3K to install. The `.psvita` file is kept while its zip is in the selection and deleted with the other unwanted files once it isn't. A synced Vita game also brings its DLC and newest update from `psvita/` (matched by the title id in the file names), on every layout; the editors and Surprise list only games.
 
@@ -304,23 +306,23 @@ On `esde` and `emudeck` cards every Vita game zip in `psvita/` gets a `.psvita` 
 | `--no-eject` | Sync: leave the card mounted. By default, on a Mac, a run with no failures ends with `diskutil unmountDisk` on the card's disk (removable or external disks only), so every volume on it is unmounted and the card can be pulled. `"eject": false` in `settings.json` turns it off for every run |
 | `--json` | `devices`, `games list`, `cards list`, `diff` and `sync --dry-run`: one JSON document on stdout, nothing else (pass `--device`/`--layout` so no picker is needed; `diff` also needs `--system ID` unless the folder is named after a system) |
 | `--card NAME` | `games` commands: the card whose games to change (required; see Editing from scripts) |
-| `--system ID` | `diff`: the system to compare with, instead of the picker. `scrape`: only that storage folder |
+| `--system ID` | `diff`: the system to compare with, instead of the picker. `scrape`, `scrape missing`: only that storage folder (the same as `scrape SYSTEM`) |
 | `--scrape` | Scrape the ROMs that have no metadata from ScreenScraper (the old form of `scrape`; see Scraping from ScreenScraper) |
 | `--scrape-match SYSTEM ROM GAME` | Tell the scraper which ScreenScraper game a ROM is, then scrape it (the old form of `scrape match`) |
 | `--scrape-review [SYSTEM]` | Review the ROMs ScreenScraper calls non-games or doesn't know (the old form of `scrape review`) |
 | `--scrape-missing [SYSTEM]` | List the ROMs with no metadata and why (the old form of `scrape missing`) |
 | `--all` | `scrape`, `scrape missing`: every ROM in the storage, not only the games your lists and sets reference |
-| `--retry` | `scrape`: also try the ROMs ScreenScraper didn't know before |
+| `--retry` | `scrape`: also try the ROMs ScreenScraper didn't know before (ROMs whose lookup failed are always tried again; non-games never are) |
 | `--fill-media` | `scrape`: also scrape ROMs that have metadata but lack some media type in storage; their metadata is kept. ScreenScraper is asked again for each such ROM, even if it has no such media |
 | `--skip-media TYPES` | `scrape`, `scrape match`: comma-separated media folders not to download (e.g. `manuals,fanart`) |
-| `--set-credentials` | `scrape`: ask for the ScreenScraper login and developer credentials and save them in `settings.json` |
+| `--set-credentials` | `scrape`: ask for your ScreenScraper username and password and save them in `settings.json` |
 | `--full` | `cache update`: in a storage folder, stat every file, not only the ones the cache doesn't have (see Storage cache) |
 | `--bucket-keys` | `check`: also verify with the read-only profile that every game key in your lists and sets exists in storage |
 | `--quiet` | Print only errors (failed files and a sync's failure count included, and `check`'s problems), warnings and `--json` data, all on stderr except the JSON; prompts are asked on stderr |
 | `--verbose` | Also print the effective settings and where each came from, on stderr |
 | `--profile P`, `--write-profile P`, `--bucket B`, `--root DIR`, `--endpoint URL` | Override those settings for this run. Precedence: flag, then environment variable, then `settings.json`, then the default |
 | `--version` | Print the version |
-| `-h`, `--help` | Show the help screen (`sync-roms COMMAND --help` for one command) |
+| `-h`, `--help` | Show the help screen (`sync-roms COMMAND --help` or `sync-roms help COMMAND` for one command) |
 
 | Environment variable | Description |
 | --- | --- |
@@ -342,11 +344,13 @@ the cursor starts at the top of the list. Esc cancels.
 - Files that already exist with the same size are skipped; a file with a different size overwrites the one in the
   storage. Both counts are shown first, the overwrites are listed, and nothing uploads until you confirm (default no).
   `--dry-run` shows the plan and uploads nothing.
-- Dotfiles and frontend leftovers (`gamelist.xml`, `images/`, `Thumbs.db`...) are never uploaded.
+- Frontend and OS leftovers (`gamelist.xml`, `images/`, `Thumbs.db`, `.DS_Store`, `._*`...) are never uploaded; other
+  dotfiles are.
 - It uploads with the `ROMS_WRITE_PROFILE` profile (default `roms`) through one shared pool of requests, four per CPU
-  core (at most 64), so many small files and the parts of big ones (64MB and up go as 32MB parts) all keep the
+  core (at most 16), so many small files and the parts of big ones (64MB and up go as 32MB parts) all keep the
   connection busy. The biggest files start first. `--upload-scrapes` uses the same pool for its media, and
-  resizes Onion box art and Slot labels on every CPU core while the other files upload.
+  resizes Onion box art and Slot labels on every CPU core while the other files upload. To a storage folder, 8 files
+  are copied at once.
 
 ## Scraped data (`--upload-scrapes`, `--clean-scrapes`)
 
@@ -441,7 +445,8 @@ skipped with a warning and the ROM keeps its other media. `--skip-media TYPES` t
 folder names and downloads none of them.
 
 **Local state** in the data folder (`~/.sync-roms/`): `scrape-hashes.json` (file hashes), `scrape-matches.json` (your manual
-matches) and `scrape-unknown.json` (the ROMs ScreenScraper didn't know). Delete one to forget it.
+matches), `scrape-unknown.json` (the ROMs ScreenScraper didn't know) and `scrape-notgames.json` (the non-games waiting
+for review). Delete one to forget it.
 
 ## Local mirror (`--mirror`, `--use-mirror`, `--clear-mirror`)
 
@@ -490,7 +495,8 @@ sync-roms --edit
    toggles the game under the cursor, `a` toggles everything shown, `u` reverts, `o` cycles the view between all
    rows, only those that are on, and only those you changed. A multi-disc game's playlist and discs (marked 🔗) switch
    on and off together, even when a filter shows only some of them. `s` lists the sets with games on this system: `Enter`
-   narrows the list to that set's games here, `f` makes the card sync the whole set. `m` filters by the system's
+   narrows the list to that set's games here, `Space` (or `Tab`) picks that set's games on this system one by one (or
+   unpicks them when all are picked already); other systems are untouched. `m` filters by the system's
    scraped metadata (`scrapes/<system>/metadata.json`): pick **Developer**, **Publisher**, **Genre** (its first part,
    so `Sports / Baseball` is `Sports`) or **Year**,
    then a value (each shows how many games in the list have it) to narrow the list to those games. Values are
@@ -517,7 +523,7 @@ sync-roms games sets add pinball --card SD
 sync-roms games list --json --card SD
 sync-roms games export --card SD > list.txt      # SYSTEM/file per line, SYSTEM/* for a full system, then @collections ID, @frontend_collections NAME, @surprise false (only when Surprise is off) and @surprises SYSTEM/file (one per surprise) lines
 sync-roms games import list.txt --card SD         # a field with @ lines in the file replaces the card's value
-sync-roms cards new SD --device rg35xx-sp --layout knulli --size 256GB   # --size is optional; shown in `cards list` and on sync
+sync-roms cards new SD --device anbernic-rg35xx-sp --layout knulli --size 256GB   # --size is optional; shown in `cards list` and on sync
 ```
 
 A set file (in the package's `data/sets/`) is `{"name": ..., "description": ..., "games": [{"title": ..., "system": "gba", "bucket": "gba/Game.zip"}]}`.
@@ -585,9 +591,9 @@ holding the set file names without `.json`:
 ```
 
 It works in a card's `games` entry in `cards.json`. A set reference is live: games added
-to the set in a later release are synced too, for the systems the card has enabled. In `--edit`, press `s` in a
-system's game list, then `f` on a set (it shows 📦) to toggle it; the games it syncs show 📦 and switching one
-off excludes it on that card. Unknown set names are skipped with a warning.
+to the set in a later release are synced too, for the systems the card has enabled. `sync-roms games sets add ID --card NAME` adds one
+(the card editor's `s` picks a set's games one by one instead); in `--edit` the games a referenced set syncs show 📦,
+and switching one off excludes it on that card. Unknown set names are skipped with a warning.
 
 ### Surprise
 
@@ -632,12 +638,12 @@ for that card only. In the systems picker, `o` shows only the selected systems.
 
 ## Converting to CHD and xiso (`--cd`, formerly `--chd`)
 
-Run it on a card or a single system folder after syncing:
+Run it on a downloaded rom pack, or one system folder of it, before you upload it to storage (see below):
 
 ```bash
 sync-roms --install-tools                # once: brew install sevenzip unar rom-tools
-sync-roms --cd --dry-run /Volumes/SD/ROMs
-sync-roms --cd /Volumes/SD/ROMs/psx
+sync-roms --cd --dry-run ~/roms
+sync-roms --cd ~/roms/psx
 ```
 
 Each system's behaviour is the `chd` setting in `src/sync_roms/data/systems.json`:
