@@ -5,7 +5,13 @@
     {
       "title": "Tetris (Rev 1)",
       "system": "gb",
-      "bucket": "gb/Tetris (World) (Rev 1).zip"
+      "bucket": "gb/Tetris (World) (Rev 1).zip",
+      "variants": [
+        {
+          "bucket": "gbc/Tetris DX (World) (SGB Enhanced) (GB Compatible).zip",
+          "note": "Game Boy Color: adds color, saves and Ultra and VS CPU modes"
+        }
+      ]
     },
     {
       "title": "Tetris",
@@ -15,7 +21,13 @@
     {
       "title": "Dr. Mario",
       "system": "nes",
-      "bucket": "nes/Dr. Mario (Japan, USA) (En) (Rev 1).zip"
+      "bucket": "nes/Dr. Mario (Japan, USA) (En) (Rev 1).zip",
+      "variants": [
+        {
+          "bucket": "n64/Dr. Mario 64 (USA).zip",
+          "note": "N64: adds a story mode, Wario and four-player battles"
+        }
+      ]
     },
     {
       "title": "Tetris 2",
@@ -30,22 +42,28 @@
     {
       "title": "Yoshi's Cookie",
       "system": "nes",
-      "bucket": "nes/Yoshi's Cookie (USA).zip"
+      "bucket": "nes/Yoshi's Cookie (USA).zip",
+      "variants": [
+        {
+          "bucket": "snes/Yoshi's Cookie (USA).zip",
+          "note": "SNES: adds a puzzle mode and better presentation"
+        }
+      ]
     },
     {
       "title": "Wario's Woods",
-      "system": "nes",
-      "bucket": "nes/Wario's Woods (USA).zip"
+      "system": "snes",
+      "bucket": "snes/Wario's Woods (USA).zip"
     },
     {
       "title": "Hatris",
-      "system": "nes",
-      "bucket": "nes/Hatris (USA).zip"
+      "system": "fbneo",
+      "bucket": "fbneo/hatris.zip"
     },
     {
       "title": "Palamedes",
-      "system": "nes",
-      "bucket": "nes/Palamedes (USA).zip"
+      "system": "fbneo",
+      "bucket": "fbneo/palamed.zip"
     },
     {
       "title": "Puzznic",
@@ -54,13 +72,13 @@
     },
     {
       "title": "Pipe Dream",
-      "system": "nes",
-      "bucket": "nes/Pipe Dream (USA).zip"
+      "system": "fbneo",
+      "bucket": "fbneo/pipedrmu.zip"
     },
     {
-      "title": "QIX",
-      "system": "nes",
-      "bucket": "nes/QIX (USA).zip"
+      "title": "Qix",
+      "system": "fbneo",
+      "bucket": "fbneo/qix.zip"
     },
     {
       "title": "Loopz",
@@ -74,8 +92,8 @@
     },
     {
       "title": "Quarth",
-      "system": "nes",
-      "bucket": "nes/Quarth (Japan).zip"
+      "system": "gb",
+      "bucket": "gb/Quarth (USA, Europe).zip"
     },
     {
       "title": "Adventures of Lolo",
@@ -94,8 +112,8 @@
     },
     {
       "title": "Solomon's Key",
-      "system": "nes",
-      "bucket": "nes/Solomon's Key (USA).zip"
+      "system": "fbneo",
+      "bucket": "fbneo/solomon.zip"
     },
     {
       "title": "Fire 'n Ice",
@@ -119,13 +137,19 @@
     },
     {
       "title": "Lode Runner",
-      "system": "nes",
-      "bucket": "nes/Lode Runner (USA).zip"
+      "system": "c64",
+      "bucket": "c64/Lode Runner (USA, Europe).zip",
+      "variants": [
+        {
+          "bucket": "fbneo/ldrun.zip",
+          "note": "Arcade: Irem's version with its own levels and redrawn graphics"
+        }
+      ]
     },
     {
       "title": "Boulder Dash",
-      "system": "nes",
-      "bucket": "nes/Boulder Dash (USA).zip"
+      "system": "colecovision",
+      "bucket": "colecovision/Boulder Dash (USA).zip"
     },
     {
       "title": "Wrecking Crew",
@@ -149,8 +173,8 @@
     },
     {
       "title": "Marble Madness",
-      "system": "nes",
-      "bucket": "nes/Marble Madness (USA).zip"
+      "system": "mame",
+      "bucket": "mame/marble.zip"
     },
     {
       "title": "Bomberman",
@@ -164,13 +188,29 @@
     },
     {
       "title": "Bubble Bobble",
-      "system": "nes",
-      "bucket": "nes/Bubble Bobble (USA).zip"
+      "system": "fbneo",
+      "bucket": "fbneo/bublboblr.zip",
+      "variants": [
+        {
+          "bucket": "mastersystem/Bubble Bobble (Europe, Brazil) (En).zip",
+          "note": "Master System: 200 rounds with new items and bosses"
+        },
+        {
+          "bucket": "gba/Bubble Bobble - Old & New (USA).zip",
+          "note": "GBA: adds a remixed New mode"
+        }
+      ]
     },
     {
-      "title": "Snow Brothers",
-      "system": "nes",
-      "bucket": "nes/Snow Brothers (USA).zip"
+      "title": "Snow Bros.",
+      "system": "fbneo",
+      "bucket": "fbneo/snowbros.zip",
+      "variants": [
+        {
+          "bucket": "genesis/Snow Bros. - Nick & Tom (Japan).zip",
+          "note": "Genesis: adds extra floors and a new final boss"
+        }
+      ]
     },
     {
       "title": "Castlequest",
@@ -184,18 +224,28 @@
     },
     {
       "title": "Klax",
-      "system": "nes",
-      "bucket": "nes/Klax (Japan).zip"
+      "system": "fbneo",
+      "bucket": "fbneo/klax.zip"
     },
     {
-      "title": "Krusty's Fun House",
-      "system": "nes",
-      "bucket": "nes/Krusty's Fun House (USA).zip"
+      "title": "Krusty's Super Fun House",
+      "system": "snes",
+      "bucket": "snes/Krusty's Super Fun House (USA) (Rev 1).zip"
     },
     {
       "title": "Lemmings",
-      "system": "nes",
-      "bucket": "nes/Lemmings (USA).zip"
+      "system": "snes",
+      "bucket": "snes/Lemmings (USA) (Rev 1).zip",
+      "variants": [
+        {
+          "bucket": "genesis/Lemmings (USA).zip",
+          "note": "Genesis: adds extra levels beyond the original 120"
+        },
+        {
+          "bucket": "psp/Lemmings (USA).chd",
+          "note": "PSP: remastered visuals, new levels and a level editor"
+        }
+      ]
     },
     {
       "title": "Moai-kun",
@@ -204,8 +254,18 @@
     },
     {
       "title": "Puyo Puyo",
-      "system": "nes",
-      "bucket": "nes/Puyo Puyo (Japan).zip"
+      "system": "fbneo",
+      "bucket": "fbneo/puyo.zip",
+      "variants": [
+        {
+          "bucket": "snes/Kirby's Avalanche (USA).zip",
+          "note": "SNES: Kirby's Avalanche, the English Kirby reskin"
+        },
+        {
+          "bucket": "genesis/Dr. Robotnik's Mean Bean Machine (USA).zip",
+          "note": "Genesis: Dr. Robotnik's Mean Bean Machine, the English Sonic reskin"
+        }
+      ]
     },
     {
       "title": "Banana",
@@ -219,8 +279,8 @@
     },
     {
       "title": "Shanghai",
-      "system": "nes",
-      "bucket": "nes/Shanghai (Japan) (En).zip"
+      "system": "atarilynx",
+      "bucket": "atarilynx/Shanghai (World).zip"
     },
     {
       "title": "BreakThru",
@@ -229,8 +289,8 @@
     },
     {
       "title": "Flappy",
-      "system": "nes",
-      "bucket": "nes/Flappy (Japan).zip"
+      "system": "msx",
+      "bucket": "msx/Flappy (Japan).zip"
     },
     {
       "title": "Lot Lot",
@@ -268,24 +328,9 @@
       "bucket": "fds/Puzzle Boys (Japan) (Disk Writer).zip"
     },
     {
-      "title": "Solomon no Kagi",
-      "system": "fds",
-      "bucket": "fds/Solomon no Kagi (Japan) (Disk Writer).zip"
-    },
-    {
       "title": "Knight Move",
       "system": "fds",
       "bucket": "fds/Knight Move (Japan) (Rev 1) (Disk Writer).zip"
-    },
-    {
-      "title": "Dr. Mario (Rev 1)",
-      "system": "gb",
-      "bucket": "gb/Dr. Mario (World) (Rev 1).zip"
-    },
-    {
-      "title": "Tetris & Dr. Mario",
-      "system": "snes",
-      "bucket": "snes/Tetris & Dr. Mario (USA).zip"
     },
     {
       "title": "Tetris Attack (En,Ja)",
@@ -298,29 +343,9 @@
       "bucket": "snes/Super Bomberman (USA).zip"
     },
     {
-      "title": "Tetris 2",
-      "system": "snes",
-      "bucket": "snes/Tetris 2 (USA) (Rev 1).zip"
-    },
-    {
-      "title": "Kirby's Avalanche",
-      "system": "snes",
-      "bucket": "snes/Kirby's Avalanche (USA).zip"
-    },
-    {
-      "title": "Yoshi's Cookie",
-      "system": "snes",
-      "bucket": "snes/Yoshi's Cookie (USA).zip"
-    },
-    {
-      "title": "Wario's Woods",
-      "system": "snes",
-      "bucket": "snes/Wario's Woods (USA).zip"
-    },
-    {
-      "title": "Bust-A-Move",
-      "system": "snes",
-      "bucket": "snes/Bust-A-Move (USA).zip"
+      "title": "Puzzle Bobble",
+      "system": "fbneo",
+      "bucket": "fbneo/pbobblen.zip"
     },
     {
       "title": "Pac-Attack",
@@ -338,19 +363,19 @@
       "bucket": "snes/Zoop (USA).zip"
     },
     {
-      "title": "Magical Drop",
-      "system": "snes",
-      "bucket": "snes/Magical Drop (Japan).zip"
+      "title": "Chain Reaction (Magical Drop)",
+      "system": "fbneo",
+      "bucket": "fbneo/chainrec.zip"
     },
     {
       "title": "Magical Drop II",
-      "system": "snes",
-      "bucket": "snes/Magical Drop II (USA, Europe) (Switch Online).zip"
+      "system": "fbneo",
+      "bucket": "fbneo/magdrop2.zip"
     },
     {
-      "title": "Super Puyo Puyo Tsuu Remix",
-      "system": "snes",
-      "bucket": "snes/Super Puyo Puyo Tsuu Remix (Japan).zip"
+      "title": "Puyo Puyo 2",
+      "system": "fbneo",
+      "bucket": "fbneo/puyopuy2.zip"
     },
     {
       "title": "Tetris Battle Gaiden",
@@ -368,14 +393,14 @@
       "bucket": "snes/Super Bombliss (Japan) (En).zip"
     },
     {
-      "title": "Cosmo Gang - The Puzzle",
-      "system": "snes",
-      "bucket": "snes/Cosmo Gang - The Puzzle (Japan).zip"
+      "title": "Cosmo Gang the Puzzle",
+      "system": "fbneo",
+      "bucket": "fbneo/cgangpzl.zip"
     },
     {
-      "title": "Hebereke's Popoon",
-      "system": "snes",
-      "bucket": "snes/Hebereke's Popoon (Europe).zip"
+      "title": "Hebereke no Popoon",
+      "system": "fbneo",
+      "bucket": "fbneo/heberpop.zip"
     },
     {
       "title": "Hebereke's Popoitto",
@@ -403,11 +428,6 @@
       "bucket": "snes/Wrecking Crew '98 (Japan).zip"
     },
     {
-      "title": "Lemmings",
-      "system": "snes",
-      "bucket": "snes/Lemmings (USA) (Rev 1).zip"
-    },
-    {
       "title": "Lemmings 2 - The Tribes",
       "system": "snes",
       "bucket": "snes/Lemmings 2 - The Tribes (USA).zip"
@@ -415,22 +435,29 @@
     {
       "title": "The Lost Vikings",
       "system": "snes",
-      "bucket": "snes/Lost Vikings, The (USA).zip"
+      "bucket": "snes/Lost Vikings, The (USA).zip",
+      "variants": [
+        {
+          "bucket": "genesis/Lost Vikings, The (USA) (October, 1995).zip",
+          "note": "Genesis: adds five extra levels"
+        }
+      ]
     },
     {
       "title": "Lost Vikings 2",
       "system": "snes",
-      "bucket": "snes/Lost Vikings 2 (USA).zip"
+      "bucket": "snes/Lost Vikings 2 (USA).zip",
+      "variants": [
+        {
+          "bucket": "psx/Norse by Norsewest - The Return of the Lost Vikings (USA).chd",
+          "note": "PlayStation: re-rendered graphics and new FMV cutscenes"
+        }
+      ]
     },
     {
       "title": "Goof Troop",
       "system": "snes",
       "bucket": "snes/Goof Troop (USA).zip"
-    },
-    {
-      "title": "Krusty's Super Fun House",
-      "system": "snes",
-      "bucket": "snes/Krusty's Super Fun House (USA) (Rev 1).zip"
     },
     {
       "title": "Push-Over",
@@ -474,13 +501,8 @@
     },
     {
       "title": "Columns",
-      "system": "snes",
-      "bucket": "snes/Columns (Japan) (NP).zip"
-    },
-    {
-      "title": "Dr. Mario",
-      "system": "snes",
-      "bucket": "snes/Dr. Mario (Japan) (En) (NP).zip"
+      "system": "fbneo",
+      "bucket": "fbneo/columns.zip"
     },
     {
       "title": "Same Game",
@@ -569,18 +591,13 @@
     },
     {
       "title": "Super Buster Bros.",
-      "system": "snes",
-      "bucket": "snes/Super Buster Bros. (USA) (Rev 1).zip"
+      "system": "fbneo",
+      "bucket": "fbneo/sbbros.zip"
     },
     {
       "title": "Super Tetris 2 + Bombliss",
       "system": "snes",
       "bucket": "snes/Super Tetris 2 + Bombliss (Japan) (En) (Rev 1).zip"
-    },
-    {
-      "title": "Yoshi no Cookie: Kuruppon Oven de Cookie",
-      "system": "snes",
-      "bucket": "snes/Yoshi no Cookie - Kuruppon Oven de Cookie (Japan).zip"
     },
     {
       "title": "Puzzle Nintama Rantarou: Ninjutsu Gakuen Puzzle Taikai no Dan",
@@ -614,8 +631,8 @@
     },
     {
       "title": "The Humans",
-      "system": "snes",
-      "bucket": "snes/Humans, The (Europe).zip"
+      "system": "genesis",
+      "bucket": "genesis/Humans, The (USA).zip"
     },
     {
       "title": "Clockwerx",
@@ -643,54 +660,24 @@
       "bucket": "snes/Nontan to Issho - Kurukuru Puzzle (Japan).zip"
     },
     {
-      "title": "Columns",
-      "system": "genesis",
-      "bucket": "genesis/Columns (USA, Europe).zip"
-    },
-    {
-      "title": "Dr. Robotnik's Mean Bean Machine",
-      "system": "genesis",
-      "bucket": "genesis/Dr. Robotnik's Mean Bean Machine (USA).zip"
-    },
-    {
       "title": "Columns III - Revenge of Columns",
       "system": "genesis",
       "bucket": "genesis/Columns III (USA).zip"
     },
     {
-      "title": "Puyo Puyo Tsuu",
-      "system": "genesis",
-      "bucket": "genesis/Puyo Puyo Tsuu (Japan) (Rev A).zip"
+      "title": "Puyo Puyo Sun",
+      "system": "mame",
+      "bucket": "mame/puyosun.zip"
     },
     {
-      "title": "VS Puyo Puyo Sun",
-      "system": "genesis",
-      "bucket": "genesis/VS Puyo Puyo Sun (USA, Europe) (Mega Drive Mini 2, Genesis Mini 2).zip"
+      "title": "Tetris (Sega)",
+      "system": "fbneo",
+      "bucket": "fbneo/tetris.zip"
     },
     {
-      "title": "Tetris",
-      "system": "genesis",
-      "bucket": "genesis/Tetris (USA) (Genesis Mini).zip"
-    },
-    {
-      "title": "Klax",
-      "system": "genesis",
-      "bucket": "genesis/Klax (USA, Europe) (Tengen).zip"
-    },
-    {
-      "title": "Zoop",
-      "system": "genesis",
-      "bucket": "genesis/Zoop (USA).zip"
-    },
-    {
-      "title": "Pac-Attack",
-      "system": "genesis",
-      "bucket": "genesis/Pac-Attack (USA).zip"
-    },
-    {
-      "title": "Blockout",
-      "system": "genesis",
-      "bucket": "genesis/Blockout (World).zip"
+      "title": "Block Out",
+      "system": "fbneo",
+      "bucket": "fbneo/blockout.zip"
     },
     {
       "title": "Ultimate QIX",
@@ -698,29 +685,14 @@
       "bucket": "genesis/Ultimate QIX (USA).zip"
     },
     {
-      "title": "Puzzle & Action - Tanto-R",
-      "system": "genesis",
-      "bucket": "genesis/Puzzle & Action - Tanto-R (Japan).zip"
+      "title": "Puzzle & Action: Tant-R",
+      "system": "fbneo",
+      "bucket": "fbneo/tantr.zip"
     },
     {
-      "title": "Puzzle & Action - Ichidanto-R",
-      "system": "genesis",
-      "bucket": "genesis/Puzzle & Action - Ichidanto-R (Japan).zip"
-    },
-    {
-      "title": "Lemmings",
-      "system": "genesis",
-      "bucket": "genesis/Lemmings (USA).zip"
-    },
-    {
-      "title": "Lemmings 2 - The Tribes",
-      "system": "genesis",
-      "bucket": "genesis/Lemmings 2 - The Tribes (USA).zip"
-    },
-    {
-      "title": "The Lost Vikings",
-      "system": "genesis",
-      "bucket": "genesis/Lost Vikings, The (USA) (October, 1995).zip"
+      "title": "Puzzle & Action - Ichidant-R",
+      "system": "fbneo",
+      "bucket": "fbneo/ichir.zip"
     },
     {
       "title": "Puggsy",
@@ -728,24 +700,9 @@
       "bucket": "genesis/Puggsy (USA).zip"
     },
     {
-      "title": "Marble Madness",
-      "system": "genesis",
-      "bucket": "genesis/Marble Madness (USA, Europe).zip"
-    },
-    {
-      "title": "Mega Bomberman",
-      "system": "genesis",
-      "bucket": "genesis/Mega Bomberman (USA).zip"
-    },
-    {
-      "title": "Puyo Puyo",
-      "system": "genesis",
-      "bucket": "genesis/Puyo Puyo (Japan).zip"
-    },
-    {
-      "title": "Shanghai II: Dragon's Eye",
-      "system": "genesis",
-      "bucket": "genesis/Shanghai II - Dragon's Eye (USA).zip"
+      "title": "Bomberman '94",
+      "system": "tg16",
+      "bucket": "tg16/Bomberman '94 (World) (Wii U Virtual Console).zip"
     },
     {
       "title": "Shove It! ...The Warehouse Game",
@@ -758,54 +715,14 @@
       "bucket": "genesis/Zoom! (World).zip"
     },
     {
-      "title": "The Humans",
-      "system": "genesis",
-      "bucket": "genesis/Humans, The (USA).zip"
-    },
-    {
-      "title": "Columns",
-      "system": "mastersystem",
-      "bucket": "mastersystem/Columns (USA, Europe, Brazil) (En).zip"
-    },
-    {
-      "title": "Dr. Robotnik's Mean Bean Machine",
-      "system": "mastersystem",
-      "bucket": "mastersystem/Dr. Robotnik's Mean Bean Machine (Europe, Brazil) (En).zip"
-    },
-    {
-      "title": "Baku Baku",
-      "system": "mastersystem",
-      "bucket": "mastersystem/Baku Baku (Brazil) (En).zip"
-    },
-    {
-      "title": "KLAX",
-      "system": "mastersystem",
-      "bucket": "mastersystem/KLAX (Europe).zip"
-    },
-    {
-      "title": "Lemmings",
-      "system": "mastersystem",
-      "bucket": "mastersystem/Lemmings (Europe, Brazil) (En).zip"
+      "title": "Baku Baku Animal",
+      "system": "mame",
+      "bucket": "mame/bakubaku.zip"
     },
     {
       "title": "Penguin Land",
       "system": "mastersystem",
       "bucket": "mastersystem/Penguin Land (USA, Europe).zip"
-    },
-    {
-      "title": "Krusty's Fun House",
-      "system": "mastersystem",
-      "bucket": "mastersystem/Krusty's Fun House (Europe, Brazil) (En).zip"
-    },
-    {
-      "title": "Shanghai",
-      "system": "mastersystem",
-      "bucket": "mastersystem/Shanghai (USA, Europe).zip"
-    },
-    {
-      "title": "Marble Madness",
-      "system": "mastersystem",
-      "bucket": "mastersystem/Marble Madness (Europe).zip"
     },
     {
       "title": "Solomon no Kagi: Oujo Rihita no Namida",
@@ -828,19 +745,9 @@
       "bucket": "tg16/Bomberman (USA).zip"
     },
     {
-      "title": "Bomberman '94",
-      "system": "tg16",
-      "bucket": "tg16/Bomberman '94 (World) (Wii U Virtual Console).zip"
-    },
-    {
       "title": "Chew-Man-Fu",
       "system": "tg16",
       "bucket": "tg16/Chew-Man-Fu (USA).zip"
-    },
-    {
-      "title": "Klax",
-      "system": "tg16",
-      "bucket": "tg16/Klax (USA).zip"
     },
     {
       "title": "Boxyboy",
@@ -863,16 +770,6 @@
       "bucket": "tg16/Cratermaze (USA).zip"
     },
     {
-      "title": "Columns",
-      "system": "tg16",
-      "bucket": "tg16/Columns (Japan).zip"
-    },
-    {
-      "title": "Puzznic",
-      "system": "tg16",
-      "bucket": "tg16/Puzznic (Japan).zip"
-    },
-    {
       "title": "Puzzle Boy",
       "system": "tg16",
       "bucket": "tg16/Puzzle Boy (Japan).zip"
@@ -893,44 +790,19 @@
       "bucket": "tg16/Lode Runner - Lost Labyrinth (Japan).zip"
     },
     {
-      "title": "Shanghai",
-      "system": "tg16",
-      "bucket": "tg16/Shanghai (Japan).zip"
-    },
-    {
       "title": "Battle Lode Runner",
       "system": "tg16",
       "bucket": "tg16/Battle Lode Runner (Japan).zip"
     },
     {
-      "title": "Hatris",
-      "system": "tg16",
-      "bucket": "tg16/Hatris (Japan).zip"
-    },
-    {
-      "title": "Puyo Puyo CD",
-      "system": "tg-cd",
-      "bucket": "tg-cd/Puyo Puyo CD (Japan).chd"
-    },
-    {
-      "title": "Puyo Puyo CD Tsuu",
-      "system": "tg-cd",
-      "bucket": "tg-cd/Puyo Puyo CD Tsuu (Japan).chd"
-    },
-    {
-      "title": "Bomberman - Panic Bomber",
-      "system": "tg-cd",
-      "bucket": "tg-cd/Bomberman - Panic Bomber (Japan) (FABT).chd"
-    },
-    {
-      "title": "Lemmings",
-      "system": "tg-cd",
-      "bucket": "tg-cd/Lemmings (Japan).chd"
+      "title": "Panic Bomber",
+      "system": "fbneo",
+      "bucket": "fbneo/panicbom.zip"
     },
     {
       "title": "Buster Bros.",
-      "system": "tg-cd",
-      "bucket": "tg-cd/Buster Bros. (USA).chd"
+      "system": "fbneo",
+      "bucket": "fbneo/bbros.zip"
     },
     {
       "title": "Minesweeper",
@@ -943,24 +815,20 @@
       "bucket": "tg-cd/Pop'n Magic (Japan).chd"
     },
     {
-      "title": "Shanghai II",
-      "system": "tg-cd",
-      "bucket": "tg-cd/Shanghai II (Japan).chd"
-    },
-    {
       "title": "Splash Lake",
       "system": "tg-cd",
       "bucket": "tg-cd/Splash Lake (USA).chd"
     },
     {
-      "title": "Tetris DX (SGB Enhanced)",
-      "system": "gbc",
-      "bucket": "gbc/Tetris DX (World) (SGB Enhanced) (GB Compatible).zip"
-    },
-    {
       "title": "Wario Land II (SGB Enhanced)",
-      "system": "gbc",
-      "bucket": "gbc/Wario Land II (USA, Europe) (SGB Enhanced) (GB Compatible).zip"
+      "system": "gb",
+      "bucket": "gb/Wario Land II (USA, Europe) (SGB Enhanced).zip",
+      "variants": [
+        {
+          "bucket": "gbc/Wario Land II (USA, Europe) (SGB Enhanced) (GB Compatible).zip",
+          "note": "Game Boy Color: adds full color"
+        }
+      ]
     },
     {
       "title": "Kirby's Dream Land 2 (SGB Enhanced)",
@@ -988,14 +856,9 @@
       "bucket": "gb/Wario Blast Featuring Bomberman! (USA, Europe) (SGB Enhanced).zip"
     },
     {
-      "title": "Puzzle De Pon!",
+      "title": "Puzzle De Pon! R!",
       "system": "fbneo",
-      "bucket": "fbneo/puzzledp.zip"
-    },
-    {
-      "title": "Puzzle Bobble",
-      "system": "fbneo",
-      "bucket": "fbneo/bublbust.zip"
+      "bucket": "fbneo/puzzldpr.zip"
     },
     {
       "title": "Puzzle Bobble 2",
@@ -1006,11 +869,6 @@
       "title": "Puzzle Loop",
       "system": "fbneo",
       "bucket": "fbneo/puzzloopu.zip"
-    },
-    {
-      "title": "Magical Drop II",
-      "system": "fbneo",
-      "bucket": "fbneo/magdrop2.zip"
     },
     {
       "title": "Magical Drop III",
@@ -1033,19 +891,9 @@
       "bucket": "fbneo/pzloop2.zip"
     },
     {
-      "title": "Chain Reaction (Magical Drop)",
-      "system": "fbneo",
-      "bucket": "fbneo/chainrec.zip"
-    },
-    {
       "title": "Money Puzzle Exchanger",
       "system": "fbneo",
       "bucket": "fbneo/miexchng.zip"
-    },
-    {
-      "title": "Tetris (Sega)",
-      "system": "fbneo",
-      "bucket": "fbneo/tetris.zip"
     },
     {
       "title": "Tetris (Atari)",
@@ -1068,24 +916,9 @@
       "bucket": "fbneo/tgm2.zip"
     },
     {
-      "title": "Columns",
-      "system": "fbneo",
-      "bucket": "fbneo/columns.zip"
-    },
-    {
       "title": "Columns II - The Voyage Through Time",
       "system": "fbneo",
       "bucket": "fbneo/columns2.zip"
-    },
-    {
-      "title": "Puyo Puyo",
-      "system": "fbneo",
-      "bucket": "fbneo/puyo.zip"
-    },
-    {
-      "title": "Puyo Puyo 2",
-      "system": "fbneo",
-      "bucket": "fbneo/puyopuy2.zip"
     },
     {
       "title": "Cleopatra Fortune",
@@ -1128,19 +961,9 @@
       "bucket": "fbneo/emeralda.zip"
     },
     {
-      "title": "Cosmo Gang the Puzzle",
-      "system": "fbneo",
-      "bucket": "fbneo/cgangpzl.zip"
-    },
-    {
       "title": "Soldam",
       "system": "fbneo",
       "bucket": "fbneo/soldam.zip"
-    },
-    {
-      "title": "Hebereke no Popoon",
-      "system": "fbneo",
-      "bucket": "fbneo/heberpop.zip"
     },
     {
       "title": "Gururin",
@@ -1163,11 +986,6 @@
       "bucket": "fbneo/zintrckb.zip"
     },
     {
-      "title": "Panic Bomber",
-      "system": "fbneo",
-      "bucket": "fbneo/panicbom.zip"
-    },
-    {
       "title": "Neo Bomberman",
       "system": "fbneo",
       "bucket": "fbneo/neobombe.zip"
@@ -1178,34 +996,9 @@
       "bucket": "fbneo/irrmaze.zip"
     },
     {
-      "title": "Klax",
-      "system": "fbneo",
-      "bucket": "fbneo/klax.zip"
-    },
-    {
-      "title": "Qix",
-      "system": "fbneo",
-      "bucket": "fbneo/qix.zip"
-    },
-    {
-      "title": "Palamedes",
-      "system": "fbneo",
-      "bucket": "fbneo/palamed.zip"
-    },
-    {
-      "title": "Hatris",
-      "system": "fbneo",
-      "bucket": "fbneo/hatris.zip"
-    },
-    {
       "title": "Welltris",
       "system": "fbneo",
       "bucket": "fbneo/welltris.zip"
-    },
-    {
-      "title": "Block Out",
-      "system": "fbneo",
-      "bucket": "fbneo/blockout.zip"
     },
     {
       "title": "Boxy Boy",
@@ -1218,24 +1011,9 @@
       "bucket": "fbneo/pang3.zip"
     },
     {
-      "title": "Puzzle & Action - Tant-R",
-      "system": "fbneo",
-      "bucket": "fbneo/tantr.zip"
-    },
-    {
-      "title": "Puzzle & Action - Ichidant-R",
-      "system": "fbneo",
-      "bucket": "fbneo/ichir.zip"
-    },
-    {
       "title": "Puzzled",
       "system": "fbneo",
       "bucket": "fbneo/joyjoy.zip"
-    },
-    {
-      "title": "Puzzle De Pon! R",
-      "system": "fbneo",
-      "bucket": "fbneo/puzzldpr.zip"
     },
     {
       "title": "Logic Pro",
@@ -1288,11 +1066,6 @@
       "bucket": "fbneo/gogomile.zip"
     },
     {
-      "title": "Lemmings",
-      "system": "fbneo",
-      "bucket": "fbneo/lemmings.zip"
-    },
-    {
       "title": "Dharma Doujou",
       "system": "fbneo",
       "bucket": "fbneo/dharma.zip"
@@ -1309,8 +1082,8 @@
     },
     {
       "title": "Mr. Driller 2",
-      "system": "gba",
-      "bucket": "gba/Mr. Driller 2 (USA).zip"
+      "system": "mame",
+      "bucket": "mame/mrdrilr2.zip"
     },
     {
       "title": "Super Bust-A-Move",
@@ -1338,9 +1111,9 @@
       "bucket": "ps2/Amplitude (USA).chd"
     },
     {
-      "title": "Puyo Pop Fever",
-      "system": "gc",
-      "bucket": "gc/Puyo Pop Fever (USA) (En,Ja,Fr,De,Es,It).rvz"
+      "title": "Puyo Puyo Fever",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Puyo Puyo Fever (Japan) (En,Ja).chd"
     },
     {
       "title": "Super Monkey Ball",
@@ -1353,24 +1126,20 @@
       "bucket": "gc/Tetris Worlds (USA).rvz"
     },
     {
-      "title": "Bust-A-Move 3000",
-      "system": "gc",
-      "bucket": "gc/Bust-A-Move 3000 (USA).rvz"
-    },
-    {
-      "title": "Nintendo Puzzle Collection",
-      "system": "gc",
-      "bucket": "gc/Nintendo Puzzle Collection (Japan).rvz"
-    },
-    {
       "title": "Super Monkey Ball 2",
       "system": "gc",
       "bucket": "gc/Super Monkey Ball 2 (USA).rvz"
     },
     {
-      "title": "WarioWare, Inc. - Mega Party Game$!",
-      "system": "gc",
-      "bucket": "gc/WarioWare, Inc. - Mega Party Game$! (USA).rvz"
+      "title": "WarioWare, Inc. - Mega Microgame$!",
+      "system": "gba",
+      "bucket": "gba/WarioWare, Inc. - Mega Microgame$! (USA).zip",
+      "variants": [
+        {
+          "bucket": "gc/WarioWare, Inc. - Mega Party Game$! (USA).rvz",
+          "note": "GameCube: Mega Party Game$ adds multiplayer party modes"
+        }
+      ]
     },
     {
       "title": "ZooCube",
@@ -1378,9 +1147,15 @@
       "bucket": "gc/ZooCube (USA).rvz"
     },
     {
-      "title": "Egg Mania - Eggstreme Madness",
-      "system": "gc",
-      "bucket": "gc/Egg Mania - Eggstreme Madness (USA).rvz"
+      "title": "Egg Mania",
+      "system": "gba",
+      "bucket": "gba/Egg Mania (USA) (En,Fr,Es).zip",
+      "variants": [
+        {
+          "bucket": "gc/Egg Mania - Eggstreme Madness (USA).rvz",
+          "note": "GameCube: adds 3D graphics and multiplayer modes"
+        }
+      ]
     },
     {
       "title": "Worms Blast",
@@ -1389,8 +1164,8 @@
     },
     {
       "title": "Super Bubble Pop",
-      "system": "gc",
-      "bucket": "gc/Super Bubble Pop (USA).rvz"
+      "system": "psx",
+      "bucket": "psx/Super Bubble Pop (USA).chd"
     },
     {
       "title": "Tetris DS",
@@ -1438,24 +1213,14 @@
       "bucket": "nds/Professor Layton and the Curious Village (USA, Australia).zip"
     },
     {
-      "title": "Puyo Pop Fever",
-      "system": "nds",
-      "bucket": "nds/Puyo Pop Fever (USA) (En,Ja).zip"
-    },
-    {
       "title": "Pokemon Puzzle Challenge",
       "system": "gbc",
       "bucket": "gbc/Pokemon Puzzle Challenge (USA, Australia).zip"
     },
     {
       "title": "Mr. Driller",
-      "system": "gbc",
-      "bucket": "gbc/Mr. Driller (USA).zip"
-    },
-    {
-      "title": "Bust-A-Move 4",
-      "system": "gbc",
-      "bucket": "gbc/Bust-A-Move 4 (USA, Europe) (GB Compatible).zip"
+      "system": "mame",
+      "bucket": "mame/mrdrillr.zip"
     },
     {
       "title": "Bust-A-Move Millennium",
@@ -1464,28 +1229,8 @@
     },
     {
       "title": "Magical Tetris Challenge",
-      "system": "gbc",
-      "bucket": "gbc/Magical Tetris Challenge (USA).zip"
-    },
-    {
-      "title": "Magical Drop",
-      "system": "gbc",
-      "bucket": "gbc/Magical Drop (USA).zip"
-    },
-    {
-      "title": "Pocket Puyo Puyo Sun",
-      "system": "gbc",
-      "bucket": "gbc/Pocket Puyo Puyo Sun (Japan) (SGB Enhanced) (GB Compatible).zip"
-    },
-    {
-      "title": "Puchi Carat",
-      "system": "gbc",
-      "bucket": "gbc/Puchi Carat (Europe) (SGB Enhanced) (GB Compatible).zip"
-    },
-    {
-      "title": "Klax",
-      "system": "gbc",
-      "bucket": "gbc/Klax (USA, Europe).zip"
+      "system": "n64",
+      "bucket": "n64/Magical Tetris Challenge (USA).zip"
     },
     {
       "title": "Hexcite - The Shapes of Victory",
@@ -1494,8 +1239,14 @@
     },
     {
       "title": "Wetrix",
-      "system": "gbc",
-      "bucket": "gbc/Wetrix (Europe) (En,Fr,De).zip"
+      "system": "n64",
+      "bucket": "n64/Wetrix (USA) (En,Fr,De,Es,It,Nl).zip",
+      "variants": [
+        {
+          "bucket": "dreamcast/Wetrix+ (USA).chd",
+          "note": "Dreamcast: Wetrix+ adds new modes and sharper visuals"
+        }
+      ]
     },
     {
       "title": "Qix Adventure",
@@ -1513,11 +1264,6 @@
       "bucket": "gbc/Monster Rancher Explorer (USA).zip"
     },
     {
-      "title": "Lemmings & Oh No! More Lemmings",
-      "system": "gbc",
-      "bucket": "gbc/Lemmings & Oh No! More Lemmings (USA).zip"
-    },
-    {
       "title": "Kirby - Tilt 'n' Tumble",
       "system": "gbc",
       "bucket": "gbc/Kirby - Tilt 'n' Tumble (USA).zip"
@@ -1533,14 +1279,15 @@
       "bucket": "gbc/Microsoft - The Best of Entertainment Pack (USA).zip"
     },
     {
-      "title": "Pac-Man - Special Color Edition",
-      "system": "gbc",
-      "bucket": "gbc/Pac-Man - Special Color Edition (USA) (SGB Enhanced) (GB Compatible).zip"
-    },
-    {
       "title": "Pocket Bomberman",
-      "system": "gbc",
-      "bucket": "gbc/Pocket Bomberman (USA, Europe) (SGB Enhanced) (GB Compatible).zip"
+      "system": "gb",
+      "bucket": "gb/Pocket Bomberman (Europe) (SGB Enhanced).zip",
+      "variants": [
+        {
+          "bucket": "gbc/Pocket Bomberman (USA, Europe) (SGB Enhanced) (GB Compatible).zip",
+          "note": "GBC: adds colour"
+        }
+      ]
     },
     {
       "title": "Bomberman Max - Blue Champion",
@@ -1573,11 +1320,6 @@
       "bucket": "gbc/Lode Runner - Domudomu Dan no Yabou (Japan) (GB Compatible).zip"
     },
     {
-      "title": "Marble Madness",
-      "system": "gbc",
-      "bucket": "gbc/Marble Madness (USA, Europe).zip"
-    },
-    {
       "title": "Logical",
       "system": "gbc",
       "bucket": "gbc/Logical (USA).zip"
@@ -1600,7 +1342,13 @@
     {
       "title": "Denki Blocks!",
       "system": "gbc",
-      "bucket": "gbc/Denki Blocks! (Europe) (En,Fr,De,Es,It).zip"
+      "bucket": "gbc/Denki Blocks! (Europe) (En,Fr,De,Es,It).zip",
+      "variants": [
+        {
+          "bucket": "gba/Denki Blocks! (USA) (En,Es).zip",
+          "note": "GBA: higher-resolution graphics and better presentation"
+        }
+      ]
     },
     {
       "title": "Hello Kitty's Cube Frenzy",
@@ -1643,44 +1391,14 @@
       "bucket": "n64/New Tetris, The (USA).zip"
     },
     {
-      "title": "Magical Tetris Challenge",
-      "system": "n64",
-      "bucket": "n64/Magical Tetris Challenge (USA).zip"
-    },
-    {
       "title": "Tetris 64",
       "system": "n64",
       "bucket": "n64/Tetris 64 (Japan) (En).zip"
     },
     {
-      "title": "Dr. Mario 64",
-      "system": "n64",
-      "bucket": "n64/Dr. Mario 64 (USA).zip"
-    },
-    {
-      "title": "Wetrix",
-      "system": "n64",
-      "bucket": "n64/Wetrix (USA) (En,Fr,De,Es,It,Nl).zip"
-    },
-    {
-      "title": "Bust-A-Move 2 - Arcade Edition",
-      "system": "n64",
-      "bucket": "n64/Bust-A-Move 2 - Arcade Edition (USA).zip"
-    },
-    {
-      "title": "Bust-A-Move '99",
-      "system": "n64",
-      "bucket": "n64/Bust-A-Move '99 (USA).zip"
-    },
-    {
-      "title": "Puyo Puyo Sun 64",
-      "system": "n64",
-      "bucket": "n64/Puyo Puyo Sun 64 (Japan).zip"
-    },
-    {
-      "title": "Puyo Puyo~n Party",
-      "system": "n64",
-      "bucket": "n64/Puyo Puyoon Party (Japan).zip"
+      "title": "Puyo Puyo~n",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Puyo Puyoon (Japan).chd"
     },
     {
       "title": "Susume! Taisen Puzzle Dama - Toukon! Marutama Chou",
@@ -1699,8 +1417,8 @@
     },
     {
       "title": "Rat Attack!",
-      "system": "n64",
-      "bucket": "n64/Rat Attack! (USA).zip"
+      "system": "psx",
+      "bucket": "psx/Rat Attack! (USA).chd"
     },
     {
       "title": "Puzzle Quest - Challenge of the Warlords",
@@ -1848,14 +1566,20 @@
       "bucket": "nds/Super Scribblenauts (USA) (En,Fr,Es,Pt).zip"
     },
     {
-      "title": "Exit DS",
-      "system": "nds",
-      "bucket": "nds/Exit DS (USA) (En,Fr,De,Es,It).zip"
+      "title": "Exit",
+      "system": "psp",
+      "bucket": "psp/Exit (USA).chd"
     },
     {
-      "title": "N+",
-      "system": "nds",
-      "bucket": "nds/N+ (USA).zip"
+      "title": "N Plus",
+      "system": "psp",
+      "bucket": "psp/N Plus (USA).chd",
+      "variants": [
+        {
+          "bucket": "nds/N+ (USA).zip",
+          "note": "DS: its own set of levels"
+        }
+      ]
     },
     {
       "title": "Soul Bubbles",
@@ -1963,14 +1687,9 @@
       "bucket": "nds/Puyo Puyo Fever 2 (Japan).zip"
     },
     {
-      "title": "Puzzle Bobble DS",
-      "system": "nds",
-      "bucket": "nds/Puzzle Bobble DS (Japan).zip"
-    },
-    {
       "title": "Puzzle Chronicles",
-      "system": "nds",
-      "bucket": "nds/Puzzle Chronicles (USA) (En,Fr,Es).zip"
+      "system": "psp",
+      "bucket": "psp/Puzzle Chronicles (USA).chd"
     },
     {
       "title": "Puzzle City",
@@ -2064,8 +1783,8 @@
     },
     {
       "title": "Luxor: Pharaoh's Challenge",
-      "system": "nds",
-      "bucket": "nds/Luxor - Pharaoh's Challenge (USA).zip"
+      "system": "psp",
+      "bucket": "psp/Luxor - Pharaoh's Challenge (USA).chd"
     },
     {
       "title": "Logic Machines",
@@ -2113,9 +1832,9 @@
       "bucket": "nds/Scrabble - Crossword Game (USA).zip"
     },
     {
-      "title": "Snood 2: On Vacation",
-      "system": "nds",
-      "bucket": "nds/Snood 2 - On Vacation (USA).zip"
+      "title": "Snood 2 - On Vacation",
+      "system": "gba",
+      "bucket": "gba/Snood 2 - On Vacation (USA).zip"
     },
     {
       "title": "Sudoku Ball Detective",
@@ -2358,11 +2077,6 @@
       "bucket": "3ds/Puyo Puyo Tetris (Japan).zip"
     },
     {
-      "title": "Puyo Puyo!! 20th Anniversary",
-      "system": "3ds",
-      "bucket": "3ds/Puyo Puyo!! 20th Anniversary (Japan).zip"
-    },
-    {
       "title": "Puzzle & Dragons Z + Puzzle & Dragons Super Mario Bros. Edition",
       "system": "3ds",
       "bucket": "3ds/Puzzle & Dragons Z + Puzzle & Dragons Super Mario Bros. Edition (USA).zip"
@@ -2378,14 +2092,20 @@
       "bucket": "3ds/Hako Boy! Hakozume Box (Japan).zip"
     },
     {
-      "title": "Captain Toad - Treasure Tracker",
-      "system": "3ds",
-      "bucket": "3ds/Captain Toad - Treasure Tracker (USA) (En,Fr,Es).zip"
+      "title": "Captain Toad: Treasure Tracker",
+      "system": "wiiu",
+      "bucket": "wiiu/Captain Toad Treasure Tracker (US) (v16).wua",
+      "variants": [
+        {
+          "bucket": "3ds/Captain Toad - Treasure Tracker (USA) (En,Fr,Es).zip",
+          "note": "3DS: adds Super Mario Odyssey bonus levels"
+        }
+      ]
     },
     {
-      "title": "Crush 3D",
-      "system": "3ds",
-      "bucket": "3ds/Crush 3D (USA) (En,Fr,Es).zip"
+      "title": "Crush",
+      "system": "psp",
+      "bucket": "psp/Crush (USA) (En,Fr,Es).chd"
     },
     {
       "title": "Cubic Ninja",
@@ -2458,16 +2178,6 @@
       "bucket": "3ds/Luxor (Europe) (En,Fr,De,Nl).zip"
     },
     {
-      "title": "Jewel Master: Cradle of Egypt 2 3D",
-      "system": "3ds",
-      "bucket": "3ds/Jewel Master - Cradle of Egypt 2 3D (USA) (En,Fr,Es).zip"
-    },
-    {
-      "title": "Jewel Master: Cradle of Rome 2",
-      "system": "3ds",
-      "bucket": "3ds/Jewel Master - Cradle of Rome 2 (USA) (En,Fr,Es).zip"
-    },
-    {
       "title": "Jewel Quest: The Sapphire Dragon",
       "system": "3ds",
       "bucket": "3ds/Jewel Quest - The Sapphire Dragon (Europe) (En,Fr,De,Es,It,Nl) (Rev 1).zip"
@@ -2519,23 +2229,13 @@
     },
     {
       "title": "Gem Smashers",
-      "system": "3ds",
-      "bucket": "3ds/Gem Smashers (USA).zip"
+      "system": "gba",
+      "bucket": "gba/Gem Smashers (USA).zip"
     },
     {
       "title": "Sushi Striker: The Way of Sushido",
       "system": "3ds",
       "bucket": "3ds/Sushi Striker - The Way of Sushido (USA) (En,Fr,Es).zip"
-    },
-    {
-      "title": "Tetris 2 (Rev 1)",
-      "system": "gb",
-      "bucket": "gb/Tetris 2 (USA, Europe) (Rev 1) (SGB Enhanced).zip"
-    },
-    {
-      "title": "Tetris Attack (Rev 1)",
-      "system": "gb",
-      "bucket": "gb/Tetris Attack (USA, Europe) (Rev 1) (SGB Enhanced).zip"
     },
     {
       "title": "Tetris Blast",
@@ -2553,26 +2253,6 @@
       "bucket": "gb/Bubble Bobble (USA, Europe).zip"
     },
     {
-      "title": "Bust-A-Move 2 - Arcade Edition",
-      "system": "gb",
-      "bucket": "gb/Bust-A-Move 2 - Arcade Edition (USA, Europe).zip"
-    },
-    {
-      "title": "Pipe Dream",
-      "system": "gb",
-      "bucket": "gb/Pipe Dream (USA).zip"
-    },
-    {
-      "title": "Lemmings",
-      "system": "gb",
-      "bucket": "gb/Lemmings (USA).zip"
-    },
-    {
-      "title": "Klax (Mindscape)",
-      "system": "gb",
-      "bucket": "gb/Klax (USA) (Mindscape).zip"
-    },
-    {
       "title": "Boxxle II",
       "system": "gb",
       "bucket": "gb/Boxxle II (USA, Europe).zip"
@@ -2588,74 +2268,9 @@
       "bucket": "gb/Mario's Picross (USA, Europe) (SGB Enhanced).zip"
     },
     {
-      "title": "Yoshi's Cookie",
-      "system": "gb",
-      "bucket": "gb/Yoshi's Cookie (USA, Europe).zip"
-    },
-    {
-      "title": "Tetris Plus",
-      "system": "gb",
-      "bucket": "gb/Tetris Plus (USA, Europe) (SGB Enhanced).zip"
-    },
-    {
-      "title": "Yoshi",
-      "system": "gb",
-      "bucket": "gb/Yoshi (USA).zip"
-    },
-    {
-      "title": "Pac-Attack",
-      "system": "gb",
-      "bucket": "gb/Pac-Attack (USA) (SGB Enhanced).zip"
-    },
-    {
-      "title": "Hatris",
-      "system": "gb",
-      "bucket": "gb/Hatris (Japan, USA) (En).zip"
-    },
-    {
-      "title": "Flipull",
-      "system": "gb",
-      "bucket": "gb/Flipull (USA).zip"
-    },
-    {
-      "title": "Palamedes",
-      "system": "gb",
-      "bucket": "gb/Palamedes (Europe).zip"
-    },
-    {
-      "title": "Puzznic",
-      "system": "gb",
-      "bucket": "gb/Puzznic (Japan).zip"
-    },
-    {
-      "title": "QIX",
-      "system": "gb",
-      "bucket": "gb/QIX (World).zip"
-    },
-    {
-      "title": "Zoop",
-      "system": "gb",
-      "bucket": "gb/Zoop (USA, Europe).zip"
-    },
-    {
-      "title": "Loopz",
-      "system": "gb",
-      "bucket": "gb/Loopz (World).zip"
-    },
-    {
-      "title": "Wordtris",
-      "system": "gb",
-      "bucket": "gb/Wordtris (USA).zip"
-    },
-    {
       "title": "Alleyway",
       "system": "gb",
       "bucket": "gb/Alleyway (World).zip"
-    },
-    {
-      "title": "Pocket Puyo Puyo Tsuu",
-      "system": "gb",
-      "bucket": "gb/Pocket Puyo Puyo Tsuu (Japan) (Rev 1) (SGB Enhanced) (NP).zip"
     },
     {
       "title": "Picross 2",
@@ -2714,18 +2329,8 @@
     },
     {
       "title": "Ishido - The Way of Stones",
-      "system": "gb",
-      "bucket": "gb/Ishido - The Way of Stones (USA).zip"
-    },
-    {
-      "title": "Lemmings 2 - The Tribes",
-      "system": "gb",
-      "bucket": "gb/Lemmings 2 - The Tribes (Europe).zip"
-    },
-    {
-      "title": "Boulder Dash",
-      "system": "gb",
-      "bucket": "gb/Boulder Dash (Europe).zip"
+      "system": "atarilynx",
+      "bucket": "atarilynx/Ishido - The Way of Stones (USA, Europe).zip"
     },
     {
       "title": "Bomberman GB",
@@ -2733,44 +2338,9 @@
       "bucket": "gb/Bomberman GB (USA, Europe) (SGB Enhanced).zip"
     },
     {
-      "title": "Snow Brothers",
-      "system": "gb",
-      "bucket": "gb/Snow Brothers (USA).zip"
-    },
-    {
-      "title": "Buster Bros.",
-      "system": "gb",
-      "bucket": "gb/Buster Bros. (USA).zip"
-    },
-    {
-      "title": "Krusty's Fun House",
-      "system": "gb",
-      "bucket": "gb/Krusty's Fun House (USA, Europe).zip"
-    },
-    {
-      "title": "Puyo Puyo",
-      "system": "gb",
-      "bucket": "gb/Puyo Puyo (Japan) (Rev 1) (SGB Enhanced).zip"
-    },
-    {
-      "title": "Quarth",
-      "system": "gb",
-      "bucket": "gb/Quarth (USA, Europe).zip"
-    },
-    {
-      "title": "Same Game",
-      "system": "gb",
-      "bucket": "gb/Same Game (Japan) (SGB Enhanced).zip"
-    },
-    {
       "title": "Star Sweep",
-      "system": "gb",
-      "bucket": "gb/Star Sweep (Japan) (SGB Enhanced).zip"
-    },
-    {
-      "title": "Shanghai",
-      "system": "gb",
-      "bucket": "gb/Shanghai (USA).zip"
+      "system": "mame",
+      "bucket": "mame/starswep.zip"
     },
     {
       "title": "Minesweeper: Soukaitei",
@@ -2781,11 +2351,6 @@
       "title": "Castle Quest",
       "system": "gb",
       "bucket": "gb/Castle Quest (Europe).zip"
-    },
-    {
-      "title": "Marble Madness",
-      "system": "gb",
-      "bucket": "gb/Marble Madness (USA, Europe).zip"
     },
     {
       "title": "Boggle Plus",
@@ -2803,16 +2368,6 @@
       "bucket": "gb/Brain Drain (USA) (SGB Enhanced).zip"
     },
     {
-      "title": "Bust-A-Move 3 DX",
-      "system": "gb",
-      "bucket": "gb/Bust-A-Move 3 DX (Europe).zip"
-    },
-    {
-      "title": "Money Idol Exchanger",
-      "system": "gb",
-      "bucket": "gb/Money Idol Exchanger (Japan) (SGB Enhanced).zip"
-    },
-    {
       "title": "Solitaire FunPak",
       "system": "gb",
       "bucket": "gb/Solitaire FunPak (USA, Europe).zip"
@@ -2826,11 +2381,6 @@
       "title": "Puzzle Nintama Rantarou GB",
       "system": "gb",
       "bucket": "gb/Puzzle Nintama Rantarou GB (Japan) (SGB Enhanced).zip"
-    },
-    {
-      "title": "BreakThru!",
-      "system": "gb",
-      "bucket": "gb/BreakThru! (USA).zip"
     },
     {
       "title": "Dexterity",
@@ -2869,13 +2419,8 @@
     },
     {
       "title": "Tesserae",
-      "system": "gb",
-      "bucket": "gb/Tesserae (USA).zip"
-    },
-    {
-      "title": "Wild Snake",
-      "system": "gb",
-      "bucket": "gb/Wild Snake (USA) (SGB Enhanced).zip"
+      "system": "gamegear",
+      "bucket": "gamegear/Tesserae (USA).zip"
     },
     {
       "title": "Panel Action Bingo",
@@ -2883,24 +2428,9 @@
       "bucket": "gb/Panel Action Bingo (USA).zip"
     },
     {
-      "title": "The Humans",
-      "system": "gb",
-      "bucket": "gb/Humans, The (USA).zip"
-    },
-    {
-      "title": "Soldam",
-      "system": "gb",
-      "bucket": "gb/Soldam (Japan).zip"
-    },
-    {
       "title": "Penguin Land",
       "system": "gb",
       "bucket": "gb/Penguin Land (Japan).zip"
-    },
-    {
-      "title": "Nontan to Issho: Kurukuru Puzzle",
-      "system": "gb",
-      "bucket": "gb/Nontan to Issho - Kurukuru Puzzle (Japan).zip"
     },
     {
       "title": "Columns Crown",
@@ -2908,34 +2438,14 @@
       "bucket": "gba/Columns Crown (USA).zip"
     },
     {
-      "title": "Super Puzzle Fighter II (Rev 1)",
-      "system": "gba",
-      "bucket": "gba/Super Puzzle Fighter II (USA) (Rev 1).zip"
-    },
-    {
-      "title": "Bubble Bobble - Old & New",
-      "system": "gba",
-      "bucket": "gba/Bubble Bobble - Old & New (USA).zip"
-    },
-    {
-      "title": "Dr. Mario & Puzzle League",
-      "system": "gba",
-      "bucket": "gba/2 Games in One! - Dr. Mario + Puzzle League (USA).zip"
-    },
-    {
-      "title": "Tetris Worlds",
-      "system": "gba",
-      "bucket": "gba/Tetris Worlds (USA).zip"
+      "title": "Super Puzzle Fighter II Turbo",
+      "system": "fbneo",
+      "bucket": "fbneo/spf2tu.zip"
     },
     {
       "title": "Tetris Advance",
       "system": "gba",
       "bucket": "gba/Minna no Soft Series - Tetris Advance (Japan) (Rev 1).zip"
-    },
-    {
-      "title": "Puyo Pop Fever",
-      "system": "gba",
-      "bucket": "gba/Puyo Pop Fever (Europe) (En,Fr,De,Es,It).zip"
     },
     {
       "title": "Mr. Driller A - Fushigi na Pacteria",
@@ -2953,14 +2463,15 @@
       "bucket": "gba/Zooo - Action Puzzle Game (Europe) (En,Fr,De,Es,It).zip"
     },
     {
-      "title": "Denki Blocks!",
-      "system": "gba",
-      "bucket": "gba/Denki Blocks! (USA) (En,Es).zip"
-    },
-    {
       "title": "ChuChu Rocket!",
-      "system": "gba",
-      "bucket": "gba/ChuChu Rocket! (USA) (En,Ja,Fr,De,Es).zip"
+      "system": "dreamcast",
+      "bucket": "dreamcast/ChuChu Rocket! (USA) (En,Ja,Fr,De,Es).chd",
+      "variants": [
+        {
+          "bucket": "gba/ChuChu Rocket! (USA) (En,Ja,Fr,De,Es).zip",
+          "note": "GBA: adds a large set of new puzzles"
+        }
+      ]
     },
     {
       "title": "Kuru Kuru Kururin",
@@ -2981,11 +2492,6 @@
       "title": "Mario vs. Donkey Kong",
       "system": "gba",
       "bucket": "gba/Mario vs. Donkey Kong (USA, Australia).zip"
-    },
-    {
-      "title": "WarioWare, Inc. - Mega Microgame$!",
-      "system": "gba",
-      "bucket": "gba/WarioWare, Inc. - Mega Microgame$! (USA).zip"
     },
     {
       "title": "WarioWare - Twisted!",
@@ -3043,39 +2549,14 @@
       "bucket": "gba/It's Mr. Pants (USA, Europe).zip"
     },
     {
-      "title": "Egg Mania",
-      "system": "gba",
-      "bucket": "gba/Egg Mania (USA) (En,Fr,Es).zip"
-    },
-    {
       "title": "Snood",
       "system": "gba",
       "bucket": "gba/Snood (USA).zip"
     },
     {
-      "title": "Snood 2 - On Vacation",
-      "system": "gba",
-      "bucket": "gba/Snood 2 - On Vacation (USA).zip"
-    },
-    {
       "title": "Boulder Dash EX",
       "system": "gba",
       "bucket": "gba/Boulder Dash EX (USA).zip"
-    },
-    {
-      "title": "The Lost Vikings",
-      "system": "gba",
-      "bucket": "gba/Lost Vikings, The (USA).zip"
-    },
-    {
-      "title": "Pac-Man Collection",
-      "system": "gba",
-      "bucket": "gba/Pac-Man Collection (USA).zip"
-    },
-    {
-      "title": "Marble Madness + Klax",
-      "system": "gba",
-      "bucket": "gba/2 Games in One! - Marble Madness + Klax (USA).zip"
     },
     {
       "title": "Bomberman Tournament",
@@ -3093,24 +2574,9 @@
       "bucket": "gba/Rampage - Puzzle Attack (USA, Europe).zip"
     },
     {
-      "title": "Lode Runner",
-      "system": "gba",
-      "bucket": "gba/Lode Runner (Japan).zip"
-    },
-    {
       "title": "Shanghai Advance",
       "system": "gba",
       "bucket": "gba/Shanghai Advance (Japan).zip"
-    },
-    {
-      "title": "Worms Blast",
-      "system": "gba",
-      "bucket": "gba/Worms Blast (Europe) (En,Fr,De,Es,It).zip"
-    },
-    {
-      "title": "Bookworm",
-      "system": "gba",
-      "bucket": "gba/Bookworm (USA).zip"
     },
     {
       "title": "Dr. Sudoku",
@@ -3118,19 +2584,9 @@
       "bucket": "gba/Dr. Sudoku (USA).zip"
     },
     {
-      "title": "Gem Smashers",
-      "system": "gba",
-      "bucket": "gba/Gem Smashers (USA).zip"
-    },
-    {
       "title": "Hot Potato!",
       "system": "gba",
       "bucket": "gba/Hot Potato! (USA).zip"
-    },
-    {
-      "title": "Super Bubble Pop",
-      "system": "gba",
-      "bucket": "gba/Super Bubble Pop (USA).zip"
     },
     {
       "title": "Tiny Toon Adventures: Wacky Stackers",
@@ -3143,19 +2599,14 @@
       "bucket": "gba/Turbo Turtle Adventure (USA).zip"
     },
     {
-      "title": "ZooCube",
-      "system": "gba",
-      "bucket": "gba/ZooCube (USA).zip"
-    },
-    {
       "title": "Uno: Free Fall",
       "system": "gba",
       "bucket": "gba/Uno - Free Fall (USA).zip"
     },
     {
       "title": "Sheep",
-      "system": "gba",
-      "bucket": "gba/Sheep (Europe) (En,Fr,De,Es,It).zip"
+      "system": "psx",
+      "bucket": "psx/Sheep (USA).chd"
     },
     {
       "title": "Ultimate Brain Games",
@@ -3173,54 +2624,9 @@
       "bucket": "gba/Hamepane - Tokyo Mew Mew (Japan).zip"
     },
     {
-      "title": "Bust-A-Move",
-      "system": "gamegear",
-      "bucket": "gamegear/Bust-A-Move (USA).zip"
-    },
-    {
-      "title": "Lemmings",
-      "system": "gamegear",
-      "bucket": "gamegear/Lemmings (World).zip"
-    },
-    {
-      "title": "KLAX",
-      "system": "gamegear",
-      "bucket": "gamegear/KLAX (USA, Europe).zip"
-    },
-    {
       "title": "Super Columns",
       "system": "gamegear",
       "bucket": "gamegear/Super Columns (USA, Europe).zip"
-    },
-    {
-      "title": "Columns",
-      "system": "gamegear",
-      "bucket": "gamegear/Columns (USA, Europe, Brazil) (En) (Rev 2).zip"
-    },
-    {
-      "title": "Dr. Robotnik's Mean Bean Machine",
-      "system": "gamegear",
-      "bucket": "gamegear/Dr. Robotnik's Mean Bean Machine (USA, Europe).zip"
-    },
-    {
-      "title": "Puyo Puyo Tsuu",
-      "system": "gamegear",
-      "bucket": "gamegear/Puyo Puyo Tsuu (Japan).zip"
-    },
-    {
-      "title": "Baku Baku",
-      "system": "gamegear",
-      "bucket": "gamegear/Baku Baku (USA).zip"
-    },
-    {
-      "title": "Pac-Attack",
-      "system": "gamegear",
-      "bucket": "gamegear/Pac-Attack (USA).zip"
-    },
-    {
-      "title": "Zoop",
-      "system": "gamegear",
-      "bucket": "gamegear/Zoop (USA).zip"
     },
     {
       "title": "Magical Puzzle Popils",
@@ -3228,59 +2634,9 @@
       "bucket": "gamegear/Magical Puzzle Popils (World) (En,Ja).zip"
     },
     {
-      "title": "Puyo Puyo",
-      "system": "gamegear",
-      "bucket": "gamegear/Puyo Puyo (Japan) (En,Ja).zip"
-    },
-    {
-      "title": "Krusty's Fun House",
-      "system": "gamegear",
-      "bucket": "gamegear/Krusty's Fun House (USA, Europe).zip"
-    },
-    {
-      "title": "Marble Madness",
-      "system": "gamegear",
-      "bucket": "gamegear/Marble Madness (USA, Europe).zip"
-    },
-    {
-      "title": "Puzzle & Action: Tanto-R",
-      "system": "gamegear",
-      "bucket": "gamegear/Puzzle & Action - Tanto-R (Japan).zip"
-    },
-    {
-      "title": "Puzzle & Action: Ichidanto-R",
-      "system": "gamegear",
-      "bucket": "gamegear/Puzzle & Action - Ichidanto-R (Japan).zip"
-    },
-    {
-      "title": "Shanghai II",
-      "system": "gamegear",
-      "bucket": "gamegear/Shanghai II (Japan) (Rev A).zip"
-    },
-    {
-      "title": "Solitaire FunPak",
-      "system": "gamegear",
-      "bucket": "gamegear/Solitaire FunPak (USA).zip"
-    },
-    {
-      "title": "Tesserae",
-      "system": "gamegear",
-      "bucket": "gamegear/Tesserae (USA).zip"
-    },
-    {
       "title": "Soukoban",
-      "system": "sg1000",
-      "bucket": "sg1000/Soukoban (Japan, Australia) (Ja).zip"
-    },
-    {
-      "title": "Lode Runner",
-      "system": "sg1000",
-      "bucket": "sg1000/Lode Runner (Japan, Europe, Australia) (En).zip"
-    },
-    {
-      "title": "Championship Lode Runner",
-      "system": "sg1000",
-      "bucket": "sg1000/Championship Lode Runner (Japan, Australia) (Ja).zip"
+      "system": "msx",
+      "bucket": "msx/Soukoban (Japan).zip"
     },
     {
       "title": "Doki Doki Penguin Land",
@@ -3289,8 +2645,8 @@
     },
     {
       "title": "Rock n' Bolt",
-      "system": "sg1000",
-      "bucket": "sg1000/Rock n' Bolt (Japan).zip"
+      "system": "colecovision",
+      "bucket": "colecovision/Rock n' Bolt (USA).zip"
     },
     {
       "title": "Lumines II",
@@ -3308,9 +2664,19 @@
       "bucket": "psp/Echoshift (Europe) (En,Fr,De,Es,It,Nl,Pt,Ru) (v2.00).chd"
     },
     {
-      "title": "Gunpey",
-      "system": "psp",
-      "bucket": "psp/Gunpey (USA).chd"
+      "title": "GunPey",
+      "system": "wonderswan",
+      "bucket": "wonderswan/GunPey (Japan).zip",
+      "variants": [
+        {
+          "bucket": "wonderswancolor/GunPey EX (Japan).zip",
+          "note": "WonderSwan Color: color graphics and extra modes"
+        },
+        {
+          "bucket": "psp/Gunpey (USA).chd",
+          "note": "PSP: reworked presentation, new modes and music stages"
+        }
+      ]
     },
     {
       "title": "Every Extend Extra",
@@ -3318,19 +2684,9 @@
       "bucket": "psp/Every Extend Extra (USA).chd"
     },
     {
-      "title": "Exit",
-      "system": "psp",
-      "bucket": "psp/Exit (USA).chd"
-    },
-    {
       "title": "Exit 2 (En,Fr,De,Es,It)",
       "system": "psp",
       "bucket": "psp/Exit 2 (Europe) (En,Fr,De,Es,It).chd"
-    },
-    {
-      "title": "N Plus",
-      "system": "psp",
-      "bucket": "psp/N Plus (USA).chd"
     },
     {
       "title": "Mercury Meltdown (En,Fr,Es)",
@@ -3348,59 +2704,9 @@
       "bucket": "psp/Bust-A-Move - Deluxe (USA).chd"
     },
     {
-      "title": "Capcom Puzzle World",
-      "system": "psp",
-      "bucket": "psp/Capcom Puzzle World (USA).chd"
-    },
-    {
-      "title": "Lemmings",
-      "system": "psp",
-      "bucket": "psp/Lemmings (USA).chd"
-    },
-    {
-      "title": "Crush (En,Fr,Es)",
-      "system": "psp",
-      "bucket": "psp/Crush (USA) (En,Fr,Es).chd"
-    },
-    {
-      "title": "Pipe Mania (En,Fr)",
-      "system": "psp",
-      "bucket": "psp/Pipe Mania (USA) (En,Fr).chd"
-    },
-    {
       "title": "Lumines - Puzzle Fusion",
       "system": "psp",
       "bucket": "psp/Lumines - Puzzle Fusion (USA) (En,Ja).chd"
-    },
-    {
-      "title": "Puzzle Quest - Challenge of the Warlords",
-      "system": "psp",
-      "bucket": "psp/Puzzle Quest - Challenge of the Warlords (USA).chd"
-    },
-    {
-      "title": "Puyo Pop Fever",
-      "system": "psp",
-      "bucket": "psp/Puyo Pop Fever (Europe).chd"
-    },
-    {
-      "title": "Puyo Puyo! Puyopuyo 15th Anniversary",
-      "system": "psp",
-      "bucket": "psp/Puyo Puyo! Puyopuyo 15th Anniversary (Japan, Asia).chd"
-    },
-    {
-      "title": "Puyo Puyo 7",
-      "system": "psp",
-      "bucket": "psp/Puyo Puyo 7 (Japan).chd"
-    },
-    {
-      "title": "Puyo Puyo!! Puyopuyo 20th Anniversary",
-      "system": "psp",
-      "bucket": "psp/Puyo Puyo!! Puyopuyo 20th Anniversary (Japan).chd"
-    },
-    {
-      "title": "Bomberman - Panic Bomber",
-      "system": "psp",
-      "bucket": "psp/Bomberman - Panic Bomber (Japan).chd"
     },
     {
       "title": "Ultimate Block Party",
@@ -3458,16 +2764,6 @@
       "bucket": "psp/Bomberman (USA).chd"
     },
     {
-      "title": "Puyo Puyo Fever 2",
-      "system": "psp",
-      "bucket": "psp/Puyo Puyo Fever 2 (Japan).chd"
-    },
-    {
-      "title": "Puzzle Bobble Pocket",
-      "system": "psp",
-      "bucket": "psp/Puzzle Bobble Pocket (Japan).chd"
-    },
-    {
       "title": "Puzzle Guzzle",
       "system": "psp",
       "bucket": "psp/Puzzle Guzzle (USA).chd"
@@ -3478,34 +2774,14 @@
       "bucket": "psp/Puzzle Scape (USA).chd"
     },
     {
-      "title": "Puzzle Chronicles",
-      "system": "psp",
-      "bucket": "psp/Puzzle Chronicles (USA).chd"
-    },
-    {
       "title": "Puzzle Challenge: Crosswords and More!",
       "system": "psp",
       "bucket": "psp/Puzzle Challenge - Crosswords and More! (USA).chd"
     },
     {
-      "title": "Luxor: Pharaoh's Challenge",
-      "system": "psp",
-      "bucket": "psp/Luxor - Pharaoh's Challenge (USA).chd"
-    },
-    {
       "title": "Luxor: The Wrath of Set",
       "system": "psp",
       "bucket": "psp/Luxor - The Wrath of Set (USA).chd"
-    },
-    {
-      "title": "Puzzler Collection",
-      "system": "psp",
-      "bucket": "psp/Puzzler Collection (Europe).chd"
-    },
-    {
-      "title": "7 Wonders of the Ancient World",
-      "system": "psp",
-      "bucket": "psp/7 Wonders of the Ancient World (USA).chd"
     },
     {
       "title": "Blokus Portable: Steambot Championship",
@@ -3523,24 +2799,9 @@
       "bucket": "psp/Hot Pixel (USA).chd"
     },
     {
-      "title": "Super Fruit Fall",
-      "system": "psp",
-      "bucket": "psp/Super Fruit Fall (Europe) (En,Fr,De,Es,It).chd"
-    },
-    {
-      "title": "Zendoku",
-      "system": "psp",
-      "bucket": "psp/Zendoku (Europe) (En,Fr,De,Es,It).chd"
-    },
-    {
       "title": "Lumines Electronic Symphony",
       "system": "psvita",
       "bucket": "psvita/Lumines Electronic Symphony [PCSE00009] [USA] [NoNpDRM].zip"
-    },
-    {
-      "title": "Super Puzzle Fighter II Turbo",
-      "system": "psx",
-      "bucket": "psx/Super Puzzle Fighter II Turbo (USA).chd"
     },
     {
       "title": "Devil Dice",
@@ -3548,19 +2809,9 @@
       "bucket": "psx/Devil Dice (USA).chd"
     },
     {
-      "title": "Tetris Plus",
-      "system": "psx",
-      "bucket": "psx/Tetris Plus (USA).chd"
-    },
-    {
       "title": "Intelligent Qube",
       "system": "psx",
       "bucket": "psx/I.Q - Intelligent Qube (USA).chd"
-    },
-    {
-      "title": "Puzznic",
-      "system": "psx",
-      "bucket": "psx/Puzznic (USA).chd"
     },
     {
       "title": "Lemmings & Oh No! More Lemmings",
@@ -3568,29 +2819,9 @@
       "bucket": "psx/Lemmings & Oh No! More Lemmings (USA).chd"
     },
     {
-      "title": "Bust-A-Move '99",
-      "system": "psx",
-      "bucket": "psx/Bust-A-Move '99 (USA).chd"
-    },
-    {
-      "title": "Bust-A-Move 2: Arcade Edition",
-      "system": "psx",
-      "bucket": "psx/Bust-A-Move 2 - Arcade Edition (USA).chd"
-    },
-    {
-      "title": "Buster Bros. Collection",
-      "system": "psx",
-      "bucket": "psx/Buster Bros. Collection (USA).chd"
-    },
-    {
       "title": "The Next Tetris",
       "system": "psx",
       "bucket": "psx/Next Tetris, The (USA).chd"
-    },
-    {
-      "title": "Zoop",
-      "system": "psx",
-      "bucket": "psx/Zoop - America's Largest Killer of Time! (USA).chd"
     },
     {
       "title": "3D Lemmings",
@@ -3598,29 +2829,9 @@
       "bucket": "psx/3D Lemmings (USA).chd"
     },
     {
-      "title": "Bust-A-Move 4",
-      "system": "psx",
-      "bucket": "psx/Bust-A-Move 4 (USA).chd"
-    },
-    {
-      "title": "Mr. Driller",
-      "system": "psx",
-      "bucket": "psx/Mr. Driller (USA).chd"
-    },
-    {
       "title": "Roll Away",
       "system": "psx",
       "bucket": "psx/Roll Away (USA).chd"
-    },
-    {
-      "title": "Cleopatra's Fortune",
-      "system": "psx",
-      "bucket": "psx/Cleopatra's Fortune (USA).chd"
-    },
-    {
-      "title": "Star Sweep",
-      "system": "psx",
-      "bucket": "psx/Star Sweep (USA).chd"
     },
     {
       "title": "Ballistic",
@@ -3651,21 +2862,6 @@
       "title": "Incredible Crisis",
       "system": "psx",
       "bucket": "psx/Incredible Crisis (USA).chd"
-    },
-    {
-      "title": "Sheep",
-      "system": "psx",
-      "bucket": "psx/Sheep (USA).chd"
-    },
-    {
-      "title": "Norse by Norsewest - The Return of the Lost Vikings",
-      "system": "psx",
-      "bucket": "psx/Norse by Norsewest - The Return of the Lost Vikings (USA).chd"
-    },
-    {
-      "title": "Bubble Bobble also featuring Rainbow Islands",
-      "system": "psx",
-      "bucket": "psx/Bubble Bobble also featuring Rainbow Islands (USA).chd"
     },
     {
       "title": "Bomberman World",
@@ -3718,74 +2914,9 @@
       "bucket": "psx/One Piece Mansion (USA).chd"
     },
     {
-      "title": "Rat Attack!",
-      "system": "psx",
-      "bucket": "psx/Rat Attack! (USA).chd"
-    },
-    {
-      "title": "Super Bubble Pop",
-      "system": "psx",
-      "bucket": "psx/Super Bubble Pop (USA).chd"
-    },
-    {
       "title": "Turnabout",
       "system": "psx",
       "bucket": "psx/Turnabout (USA).chd"
-    },
-    {
-      "title": "Super Puzzle Fighter II Turbo",
-      "system": "saturn",
-      "bucket": "saturn/Super Puzzle Fighter II Turbo (USA).chd"
-    },
-    {
-      "title": "Baku Baku Animal",
-      "system": "saturn",
-      "bucket": "saturn/Baku Baku Animal - World Zookeeper Contest (USA).chd"
-    },
-    {
-      "title": "Bust-A-Move 2 - Arcade Edition",
-      "system": "saturn",
-      "bucket": "saturn/Bust-A-Move 2 - Arcade Edition (USA).chd"
-    },
-    {
-      "title": "Bust-A-Move 3",
-      "system": "saturn",
-      "bucket": "saturn/Bust-A-Move 3 (USA).chd"
-    },
-    {
-      "title": "Puyo Puyo Tsuu",
-      "system": "saturn",
-      "bucket": "saturn/Puyo Puyo Tsuu (Japan) (3M).chd"
-    },
-    {
-      "title": "Puyo Puyo Sun",
-      "system": "saturn",
-      "bucket": "saturn/Puyo Puyo Sun for SegaNet (Japan).chd"
-    },
-    {
-      "title": "Magical Drop",
-      "system": "saturn",
-      "bucket": "saturn/Magical Drop (Japan).chd"
-    },
-    {
-      "title": "Magical Drop 2",
-      "system": "saturn",
-      "bucket": "saturn/Magical Drop 2 (Japan).chd"
-    },
-    {
-      "title": "Magical Drop III",
-      "system": "saturn",
-      "bucket": "saturn/Magical Drop III - Toretate Zoukan-gou! (Japan) (2M).chd"
-    },
-    {
-      "title": "Cleopatra Fortune",
-      "system": "saturn",
-      "bucket": "saturn/Cleopatra Fortune (Japan).chd"
-    },
-    {
-      "title": "Tetris Plus",
-      "system": "saturn",
-      "bucket": "saturn/Tetris Plus (USA).chd"
     },
     {
       "title": "Tetris S",
@@ -3813,31 +2944,6 @@
       "bucket": "saturn/Deroon Dero Dero (Japan) (1M).chd"
     },
     {
-      "title": "Hebereke's Popoitto",
-      "system": "saturn",
-      "bucket": "saturn/Hebereke's Popoitto (Europe).chd"
-    },
-    {
-      "title": "Zoop",
-      "system": "saturn",
-      "bucket": "saturn/Zoop (Japan).chd"
-    },
-    {
-      "title": "3D Lemmings",
-      "system": "saturn",
-      "bucket": "saturn/3D Lemmings (Europe).chd"
-    },
-    {
-      "title": "Norse by Norsewest - The Return of the Lost Vikings",
-      "system": "saturn",
-      "bucket": "saturn/Norse by Norsewest - The Return of the Lost Vikings (USA).chd"
-    },
-    {
-      "title": "Bubble Bobble also featuring Rainbow Islands",
-      "system": "saturn",
-      "bucket": "saturn/Bubble Bobble also featuring Rainbow Islands (USA).chd"
-    },
-    {
       "title": "Saturn Bomberman",
       "system": "saturn",
       "bucket": "saturn/Saturn Bomberman (USA) (1S).chd"
@@ -3846,11 +2952,6 @@
       "title": "Kururin Pa!",
       "system": "saturn",
       "bucket": "saturn/Kururin Pa! (Japan).chd"
-    },
-    {
-      "title": "Lode Runner: The Legend Returns",
-      "system": "saturn",
-      "bucket": "saturn/Lode Runner - The Legend Returns (Japan).chd"
     },
     {
       "title": "Lode Runner Extra",
@@ -3878,54 +2979,14 @@
       "bucket": "saturn/Tokimeki Memorial Taisen Tokkaedama (Japan).chd"
     },
     {
-      "title": "BreakThru!",
-      "system": "saturn",
-      "bucket": "saturn/BreakThru! (Japan).chd"
-    },
-    {
-      "title": "ClockWerx",
-      "system": "saturn",
-      "bucket": "saturn/ClockWerx (Japan).chd"
-    },
-    {
       "title": "Joy Joy Kid",
       "system": "neogeocd",
       "bucket": "neogeocd/Joy Joy Kid ~ Puzzled (World) (En,Ja).chd"
     },
     {
-      "title": "Puyo Puyo Fever",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Puyo Puyo Fever (Japan) (En,Ja).chd"
-    },
-    {
       "title": "Puyo Puyo Da! Featuring Ellena System",
       "system": "dreamcast",
       "bucket": "dreamcast/Puyo Puyo Da! Featuring Ellena System (Japan).chd"
-    },
-    {
-      "title": "Bust-A-Move 4",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Bust-A-Move 4 (USA).chd"
-    },
-    {
-      "title": "ChuChu Rocket!",
-      "system": "dreamcast",
-      "bucket": "dreamcast/ChuChu Rocket! (USA) (En,Ja,Fr,De,Es).chd"
-    },
-    {
-      "title": "Mr. Driller",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Mr. Driller (USA).chd"
-    },
-    {
-      "title": "Wetrix+",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Wetrix+ (USA).chd"
-    },
-    {
-      "title": "The Next Tetris: On-Line Edition",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Next Tetris, The - On-Line Edition (USA).chd"
     },
     {
       "title": "Tetris 4D",
@@ -3939,33 +3000,19 @@
     },
     {
       "title": "Q-bert",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Q-bert (USA).chd"
+      "system": "psx",
+      "bucket": "psx/Q-bert (USA).chd"
     },
     {
       "title": "Worms Armageddon",
       "system": "dreamcast",
-      "bucket": "dreamcast/Worms Armageddon (USA) (En,Fr,De,Nl,Sv,No,Da).chd"
-    },
-    {
-      "title": "Worms World Party",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Worms World Party (USA) (En,Fr,De,Es,It,Nl,Sv,Da).chd"
-    },
-    {
-      "title": "Puyo Puyo~n",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Puyo Puyoon (Japan).chd"
-    },
-    {
-      "title": "Super Puzzle Fighter II X for Matching Service",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Super Puzzle Fighter II X for Matching Service (Japan).chd"
-    },
-    {
-      "title": "Cleopatra Fortune",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Cleopatra Fortune (Japan) (Rev A).chd"
+      "bucket": "dreamcast/Worms Armageddon (USA) (En,Fr,De,Nl,Sv,No,Da).chd",
+      "variants": [
+        {
+          "bucket": "dreamcast/Worms World Party (USA) (En,Fr,De,Es,It,Nl,Sv,Da).chd",
+          "note": "Dreamcast: World Party adds new modes and weapons"
+        }
+      ]
     },
     {
       "title": "Sakura Taisen - Hanagumi Taisen Columns 2",
@@ -4003,39 +3050,9 @@
       "bucket": "atarilynx/Chip's Challenge (World).zip"
     },
     {
-      "title": "Block Out",
-      "system": "atarilynx",
-      "bucket": "atarilynx/Block Out (USA, Europe).zip"
-    },
-    {
-      "title": "Klax",
-      "system": "atarilynx",
-      "bucket": "atarilynx/Klax (World).zip"
-    },
-    {
-      "title": "Lemmings",
-      "system": "atarilynx",
-      "bucket": "atarilynx/Lemmings (USA, Europe).zip"
-    },
-    {
-      "title": "QIX",
-      "system": "atarilynx",
-      "bucket": "atarilynx/QIX (USA, Europe).zip"
-    },
-    {
-      "title": "Ishido - The Way of Stones",
-      "system": "atarilynx",
-      "bucket": "atarilynx/Ishido - The Way of Stones (USA, Europe).zip"
-    },
-    {
       "title": "Crystal Mines II",
       "system": "atarilynx",
       "bucket": "atarilynx/Crystal Mines II (USA, Europe).zip"
-    },
-    {
-      "title": "Shanghai",
-      "system": "atarilynx",
-      "bucket": "atarilynx/Shanghai (World).zip"
     },
     {
       "title": "Super Skweek",
@@ -4048,29 +3065,14 @@
       "bucket": "atarijaguar/Evolution - Dino Dudes (World).zip"
     },
     {
-      "title": "Zoop",
-      "system": "atarijaguar",
-      "bucket": "atarijaguar/Zoop (USA, Europe).zip"
-    },
-    {
       "title": "Flip Out!",
       "system": "atarijaguar",
       "bucket": "atarijaguar/Flip Out! (World).zip"
     },
     {
-      "title": "QIX",
-      "system": "atari5200",
-      "bucket": "atari5200/QIX (USA).zip"
-    },
-    {
       "title": "Zenji",
       "system": "atari5200",
       "bucket": "atari5200/Zenji (USA).zip"
-    },
-    {
-      "title": "Klax",
-      "system": "atari2600",
-      "bucket": "atari2600/Klax (USA).zip"
     },
     {
       "title": "Rubik's Cube",
@@ -4098,21 +3100,6 @@
       "bucket": "msx/King's Valley II (Japan, Europe) (En).zip"
     },
     {
-      "title": "Soukoban",
-      "system": "msx",
-      "bucket": "msx/Soukoban (Japan).zip"
-    },
-    {
-      "title": "Boulder Dash",
-      "system": "msx",
-      "bucket": "msx/Boulder Dash (Japan).zip"
-    },
-    {
-      "title": "Lode Runner",
-      "system": "msx",
-      "bucket": "msx/Lode Runner (Japan).zip"
-    },
-    {
       "title": "Puzzle Panic",
       "system": "msx",
       "bucket": "msx/Puzzle Panic (Japan).zip"
@@ -4133,94 +3120,14 @@
       "bucket": "msx/Light Corridor, The (Europe).zip"
     },
     {
-      "title": "Flappy",
-      "system": "msx",
-      "bucket": "msx/Flappy (Japan).zip"
-    },
-    {
-      "title": "Lot Lot",
-      "system": "msx",
-      "bucket": "msx/Lot Lot (Japan).zip"
-    },
-    {
-      "title": "Doki Doki Penguin Land",
-      "system": "msx",
-      "bucket": "msx/Doki Doki Penguin Land (Japan).zip"
-    },
-    {
-      "title": "Championship Lode Runner",
-      "system": "msx",
-      "bucket": "msx/Championship Lode Runner (Japan).zip"
-    },
-    {
-      "title": "Rock'n Bolt",
-      "system": "msx",
-      "bucket": "msx/Rock'n Bolt (Japan).zip"
-    },
-    {
-      "title": "Zenji",
-      "system": "msx",
-      "bucket": "msx/Zenji (Japan).zip"
-    },
-    {
-      "title": "Binary Land",
-      "system": "msx",
-      "bucket": "msx/Binary Land (Japan).zip"
-    },
-    {
-      "title": "Quarth",
-      "system": "msx2",
-      "bucket": "msx2/Quarth (Japan) (Wii U Virtual Console).zip"
-    },
-    {
-      "title": "Shanghai",
-      "system": "msx2",
-      "bucket": "msx2/Shanghai (Japan).zip"
-    },
-    {
-      "title": "Tetris (MSX2)",
-      "system": "msx2",
-      "bucket": "msx2/Tetris (Japan).zip"
-    },
-    {
-      "title": "Lemmings (Satellaview)",
-      "system": "satellaview",
-      "bucket": "satellaview/Lemmings (Japan) (En).zip"
-    },
-    {
       "title": "Sutte Hakkun BS Version 2",
       "system": "satellaview",
       "bucket": "satellaview/Sutte Hakkun - BS Version 2 (Japan) (10-8).zip"
     },
     {
-      "title": "Yoshi no Panepon BS",
-      "system": "satellaview",
-      "bucket": "satellaview/Yoshi no Panepon - BS Ban (Japan) (En,Ja) (7-5).zip"
-    },
-    {
       "title": "Tamori no Picross",
       "system": "satellaview",
       "bucket": "satellaview/Tamori no Picross (Japan) (6-13).zip"
-    },
-    {
-      "title": "Super Puyo Puyo (Satellaview)",
-      "system": "satellaview",
-      "bucket": "satellaview/Super Puyo Puyo (Japan).zip"
-    },
-    {
-      "title": "Super Puyo Puyo Tsuu BS Ban",
-      "system": "satellaview",
-      "bucket": "satellaview/Super Puyo Puyo Tsuu BS Ban (Japan).zip"
-    },
-    {
-      "title": "Dr. Mario BS",
-      "system": "satellaview",
-      "bucket": "satellaview/Dr. Mario BS (Japan) (6-3).zip"
-    },
-    {
-      "title": "Panel de Pon: Event '98",
-      "system": "satellaview",
-      "bucket": "satellaview/Panel de Pon - Event '98 (Japan) (12-28).zip"
     },
     {
       "title": "Shanghai: Banri no Choujou",
@@ -4253,11 +3160,6 @@
       "bucket": "arduboy/Minesweeper (World) (Erwin's Collection).zip"
     },
     {
-      "title": "SameGame",
-      "system": "arduboy",
-      "bucket": "arduboy/SameGame (World) (v0.10).zip"
-    },
-    {
       "title": "Atomic Puzzle Pack",
       "system": "arduboy",
       "bucket": "arduboy/Atomic Puzzle Pack (World) (Erwin's Collection).zip"
@@ -4271,11 +3173,6 @@
       "title": "Sudoku-NBP",
       "system": "arduboy",
       "bucket": "arduboy/Sudoku-NBP (World) (Erwin's Collection).zip"
-    },
-    {
-      "title": "Puyo Pop",
-      "system": "ngpc",
-      "bucket": "ngpc/Puyo Pop (World) (En,Ja) (v06).zip"
     },
     {
       "title": "Bust-A-Move Pocket",
@@ -4313,54 +3210,9 @@
       "bucket": "ngp/Renketsu Puzzle Tsunagete Pon! (Japan).zip"
     },
     {
-      "title": "Magical Drop II",
-      "system": "neogeocd",
-      "bucket": "neogeocd/Magical Drop 2 (Japan) (En,Ja).chd"
-    },
-    {
-      "title": "Puzzle Bobble",
-      "system": "neogeocd",
-      "bucket": "neogeocd/Puzzle Bobble ~ Bust-A-Move (Japan) (En,Ja).chd"
-    },
-    {
-      "title": "GunPey",
-      "system": "wonderswan",
-      "bucket": "wonderswan/GunPey (Japan).zip"
-    },
-    {
-      "title": "Puyo Puyo Tsuu",
-      "system": "wonderswan",
-      "bucket": "wonderswan/Puyo Puyo Tsuu (Japan).zip"
-    },
-    {
-      "title": "Puzzle Bobble",
-      "system": "wonderswan",
-      "bucket": "wonderswan/Puzzle Bobble (Japan).zip"
-    },
-    {
-      "title": "Magical Drop for WonderSwan",
-      "system": "wonderswan",
-      "bucket": "wonderswan/Magical Drop for WonderSwan (Japan).zip"
-    },
-    {
       "title": "Lode Runner for WonderSwan",
       "system": "wonderswan",
       "bucket": "wonderswan/Lode Runner for WonderSwan (Japan).zip"
-    },
-    {
-      "title": "Shanghai Pocket",
-      "system": "wonderswan",
-      "bucket": "wonderswan/Shanghai Pocket (Japan).zip"
-    },
-    {
-      "title": "Mr. Driller",
-      "system": "wonderswancolor",
-      "bucket": "wonderswancolor/Mr. Driller (Japan).zip"
-    },
-    {
-      "title": "GunPey EX",
-      "system": "wonderswancolor",
-      "bucket": "wonderswancolor/GunPey EX (Japan).zip"
     },
     {
       "title": "Tetris",
@@ -4371,11 +3223,6 @@
       "title": "XI Little",
       "system": "wonderswancolor",
       "bucket": "wonderswancolor/XI Little (Japan).zip"
-    },
-    {
-      "title": "Panic Bomber",
-      "system": "virtualboy",
-      "bucket": "virtualboy/Panic Bomber (USA).zip"
     },
     {
       "title": "3-D Tetris",
@@ -4408,19 +3255,9 @@
       "bucket": "pokemini/Pokemon Puzzle Collection Vol. 2 (Japan).zip"
     },
     {
-      "title": "Pipemania",
-      "system": "gamate",
-      "bucket": "gamate/Pipemania (World).zip"
-    },
-    {
       "title": "Jewelriss",
       "system": "gamate",
       "bucket": "gamate/Jewelriss (World).zip"
-    },
-    {
-      "title": "Captain Toad - Treasure Tracker",
-      "system": "wiiu",
-      "bucket": "wiiu/Captain Toad Treasure Tracker (US) (v16).wua"
     },
     {
       "title": "Portal 2",
@@ -4433,41 +3270,6 @@
       "bucket": "mame/tgmj.zip"
     },
     {
-      "title": "Vs. Tetris",
-      "system": "mame",
-      "bucket": "mame/vstetris.zip"
-    },
-    {
-      "title": "Vs. Dr. Mario",
-      "system": "mame",
-      "bucket": "mame/drmario.zip"
-    },
-    {
-      "title": "Puyo Puyo Sun",
-      "system": "mame",
-      "bucket": "mame/puyosun.zip"
-    },
-    {
-      "title": "Baku Baku Animal",
-      "system": "mame",
-      "bucket": "mame/bakubaku.zip"
-    },
-    {
-      "title": "Mr. Driller",
-      "system": "mame",
-      "bucket": "mame/mrdrillr.zip"
-    },
-    {
-      "title": "Mr. Driller 2",
-      "system": "mame",
-      "bucket": "mame/mrdrilr2.zip"
-    },
-    {
-      "title": "Star Sweep",
-      "system": "mame",
-      "bucket": "mame/starswep.zip"
-    },
-    {
       "title": "Aqua Rush",
       "system": "mame",
       "bucket": "mame/aquarush.zip"
@@ -4476,31 +3278,6 @@
       "title": "Taisen Puzzle-dama",
       "system": "mame",
       "bucket": "mame/puzldama.zip"
-    },
-    {
-      "title": "Lode Runner",
-      "system": "c64",
-      "bucket": "c64/Lode Runner (USA, Europe).zip"
-    },
-    {
-      "title": "Zenji",
-      "system": "c64",
-      "bucket": "c64/Zenji (USA, Europe).zip"
-    },
-    {
-      "title": "Boulder Dash",
-      "system": "colecovision",
-      "bucket": "colecovision/Boulder Dash (USA).zip"
-    },
-    {
-      "title": "Zenji",
-      "system": "colecovision",
-      "bucket": "colecovision/Zenji (USA).zip"
-    },
-    {
-      "title": "Rock n' Bolt",
-      "system": "colecovision",
-      "bucket": "colecovision/Rock n' Bolt (USA).zip"
     },
     {
       "title": "Blockout + Breakdown",

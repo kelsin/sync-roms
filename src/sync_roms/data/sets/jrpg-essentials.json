@@ -5,17 +5,35 @@
     {
       "title": "Chrono Trigger",
       "system": "snes",
-      "bucket": "snes/Chrono Trigger (USA).zip"
+      "bucket": "snes/Chrono Trigger (USA).zip",
+      "variants": [
+        {
+          "bucket": "nds/Chrono Trigger (USA) (En,Fr).zip",
+          "note": "DS: adds the Lost Sanctum, a bonus dungeon and a new ending"
+        }
+      ]
     },
     {
       "title": "Final Fantasy II (Rev 1)",
       "system": "snes",
-      "bucket": "snes/Final Fantasy II (USA) (Rev 1).zip"
+      "bucket": "snes/Final Fantasy II (USA) (Rev 1).zip",
+      "variants": [
+        {
+          "bucket": "gba/Final Fantasy IV Advance (USA).zip",
+          "note": "GBA: adds a bonus dungeon, party swapping and a new translation"
+        }
+      ]
     },
     {
       "title": "Final Fantasy III (Rev 1)",
       "system": "snes",
-      "bucket": "snes/Final Fantasy III (USA) (Rev 1).zip"
+      "bucket": "snes/Final Fantasy III (USA) (Rev 1).zip",
+      "variants": [
+        {
+          "bucket": "gba/Final Fantasy VI Advance (USA).zip",
+          "note": "GBA: adds the Dragons' Den dungeon, new espers and a new translation"
+        }
+      ]
     },
     {
       "title": "Secret of Mana",
@@ -45,12 +63,24 @@
     {
       "title": "Breath of Fire II",
       "system": "snes",
-      "bucket": "snes/Breath of Fire II (USA).zip"
+      "bucket": "snes/Breath of Fire II (USA).zip",
+      "variants": [
+        {
+          "bucket": "gba/Breath of Fire II (USA).zip",
+          "note": "GBA: new translation, a dash button and quick saves"
+        }
+      ]
     },
     {
       "title": "Breath of Fire",
       "system": "snes",
-      "bucket": "snes/Breath of Fire (USA).zip"
+      "bucket": "snes/Breath of Fire (USA).zip",
+      "variants": [
+        {
+          "bucket": "gba/Breath of Fire (USA).zip",
+          "note": "GBA: adds a dash button and quick saves"
+        }
+      ]
     },
     {
       "title": "Final Fantasy - Mystic Quest (Rev 1)",
@@ -60,7 +90,13 @@
     {
       "title": "Final Fantasy",
       "system": "nes",
-      "bucket": "nes/Final Fantasy (USA).zip"
+      "bucket": "nes/Final Fantasy (USA).zip",
+      "variants": [
+        {
+          "bucket": "psp/Final Fantasy - 20th Anniversary Edition (USA) (En,Ja) (FW6.00).chd",
+          "note": "PSP: remake with new graphics, bonus dungeons and easier balance"
+        }
+      ]
     },
     {
       "title": "Dragon Warrior (Rev 1)",
@@ -75,12 +111,24 @@
     {
       "title": "Dragon Warrior IV",
       "system": "nes",
-      "bucket": "nes/Dragon Warrior IV (USA).zip"
+      "bucket": "nes/Dragon Warrior IV (USA).zip",
+      "variants": [
+        {
+          "bucket": "nds/Dragon Quest IV - Chapters of the Chosen (USA) (En,Fr,Es).zip",
+          "note": "DS: remake adds a sixth chapter, party chat and a new translation"
+        }
+      ]
     },
     {
       "title": "Dragon Warrior III",
       "system": "nes",
-      "bucket": "nes/Dragon Warrior III (USA).zip"
+      "bucket": "nes/Dragon Warrior III (USA).zip",
+      "variants": [
+        {
+          "bucket": "gbc/Dragon Warrior III (USA).zip",
+          "note": "GBC: remake adds a new class, a bonus dungeon and monster medals"
+        }
+      ]
     },
     {
       "title": "Crystalis",
@@ -100,12 +148,24 @@
     {
       "title": "Fire Emblem - Shadow Dragon and the Blade of Light (English v1.4.1)",
       "system": "nes",
-      "bucket": "nes/Fire Emblem Shadow Dragon and the Blade of Light (English v1.4.1).zip"
+      "bucket": "nes/Fire Emblem Shadow Dragon and the Blade of Light (English v1.4.1).zip",
+      "variants": [
+        {
+          "bucket": "nds/Fire Emblem - Shadow Dragon (USA).zip",
+          "note": "DS: remake adds chapters, new units and an official translation"
+        }
+      ]
     },
     {
       "title": "Fire Emblem Gaiden (English v1.01)",
       "system": "nes",
-      "bucket": "nes/Fire Emblem Gaiden (English v1.01)[Names+Font Fix].zip"
+      "bucket": "nes/Fire Emblem Gaiden (English v1.01)[Names+Font Fix].zip",
+      "variants": [
+        {
+          "bucket": "3ds/Fire Emblem Echoes - Shadows of Valentia (USA) (En,Fr,Es).zip",
+          "note": "3DS: Echoes remake adds voice, dungeons and an official translation"
+        }
+      ]
     },
     {
       "title": "Faria: A World of Mystery & Danger!",
@@ -123,9 +183,9 @@
       "bucket": "nes/Little Ninja Brothers (USA).zip"
     },
     {
-      "title": "Ultima: Quest of the Avatar",
-      "system": "nes",
-      "bucket": "nes/Ultima - Quest of the Avatar (USA).zip"
+      "title": "Ultima IV - Quest of the Avatar",
+      "system": "mastersystem",
+      "bucket": "mastersystem/Ultima IV - Quest of the Avatar (Europe, Brazil) (En).zip"
     },
     {
       "title": "Willow",
@@ -155,7 +215,13 @@
     {
       "title": "Shining Force",
       "system": "genesis",
-      "bucket": "genesis/Shining Force (USA).zip"
+      "bucket": "genesis/Shining Force (USA).zip",
+      "variants": [
+        {
+          "bucket": "gba/Shining Force - Resurrection of the Dark Dragon (USA).zip",
+          "note": "GBA: remake adds new characters, a card system and new scenes"
+        }
+      ]
     },
     {
       "title": "Shining Force II",
@@ -189,8 +255,8 @@
     },
     {
       "title": "Exile",
-      "system": "genesis",
-      "bucket": "genesis/Exile (USA).zip"
+      "system": "tg-cd",
+      "bucket": "tg-cd/Exile (USA).chd"
     },
     {
       "title": "Landstalker",
@@ -223,9 +289,9 @@
       "bucket": "genesis/Traysia (USA).zip"
     },
     {
-      "title": "Ys III",
-      "system": "genesis",
-      "bucket": "genesis/Ys III (USA).zip"
+      "title": "Ys III - Wanderers from Ys",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Ys III - Wanderers from Ys (USA).chd"
     },
     {
       "title": "Phantasy Star (Rev A)",
@@ -233,9 +299,15 @@
       "bucket": "mastersystem/Phantasy Star (USA, Europe) (Rev A).zip"
     },
     {
-      "title": "Ys - The Vanished Omens",
-      "system": "mastersystem",
-      "bucket": "mastersystem/Ys - The Vanished Omens (USA, Europe, Brazil) (En).zip"
+      "title": "Ys Book I & II",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Ys Book I & II (USA).chd",
+      "variants": [
+        {
+          "bucket": "psp/Ys I & II Chronicles (USA).chd",
+          "note": "PSP: Chronicles adds remastered art, new music and extras"
+        }
+      ]
     },
     {
       "title": "Miracle Warriors: Seal of The Dark Lord",
@@ -343,6 +415,12 @@
       "files": [
         "psx/Lunar - Silver Star Story Complete (USA) (Disc 1).chd",
         "psx/Lunar - Silver Star Story Complete (USA) (Disc 2).chd"
+      ],
+      "variants": [
+        {
+          "bucket": "psp/Lunar - Silver Star Harmony (USA).chd",
+          "note": "PSP: Silver Star Harmony, redrawn art, widescreen and a new prologue"
+        }
       ]
     },
     {
@@ -442,24 +520,15 @@
       "bucket": "saturn/Legend of Oasis, The (USA).chd"
     },
     {
-      "title": "Final Fantasy VI Advance",
-      "system": "gba",
-      "bucket": "gba/Final Fantasy VI Advance (USA).zip"
-    },
-    {
-      "title": "Final Fantasy I & II - Dawn of Souls",
-      "system": "gba",
-      "bucket": "gba/Final Fantasy I & II - Dawn of Souls (USA).zip"
-    },
-    {
-      "title": "Final Fantasy IV Advance",
-      "system": "gba",
-      "bucket": "gba/Final Fantasy IV Advance (USA).zip"
-    },
-    {
-      "title": "Final Fantasy V Advance",
-      "system": "gba",
-      "bucket": "gba/Final Fantasy V Advance (USA).zip"
+      "title": "Final Fantasy Anthology - Final Fantasy V (Rev 1)",
+      "system": "psx",
+      "bucket": "psx/Final Fantasy Anthology - Final Fantasy V (USA) (Rev 1).chd",
+      "variants": [
+        {
+          "bucket": "gba/Final Fantasy V Advance (USA).zip",
+          "note": "GBA: adds four jobs, a bonus dungeon and a better translation"
+        }
+      ]
     },
     {
       "title": "Golden Sun",
@@ -494,7 +563,13 @@
     {
       "title": "Dragon Quest VIII",
       "system": "ps2",
-      "bucket": "ps2/Dragon Quest VIII - Journey of the Cursed King (USA).chd"
+      "bucket": "ps2/Dragon Quest VIII - Journey of the Cursed King (USA).chd",
+      "variants": [
+        {
+          "bucket": "3ds/Dragon Quest VIII - Journey of the Cursed King (USA).zip",
+          "note": "3DS: adds Red and Morrie as party members and a new ending"
+        }
+      ]
     },
     {
       "title": "Dark Cloud 2",
@@ -502,14 +577,30 @@
       "bucket": "ps2/Dark Cloud 2 (USA) (v2.00).chd"
     },
     {
-      "title": "Persona 3 FES",
+      "title": "Shin Megami Tensei - Persona 3",
       "system": "ps2",
-      "bucket": "ps2/Shin Megami Tensei - Persona 3 FES (USA).chd"
+      "bucket": "ps2/Shin Megami Tensei - Persona 3 (USA).chd",
+      "variants": [
+        {
+          "bucket": "ps2/Shin Megami Tensei - Persona 3 FES (USA).chd",
+          "note": "PS2: FES adds The Answer epilogue and more"
+        },
+        {
+          "bucket": "psp/Shin Megami Tensei - Persona 3 Portable (USA).chd",
+          "note": "PSP: adds a female protagonist route with new social links"
+        }
+      ]
     },
     {
       "title": "Persona 4",
       "system": "ps2",
-      "bucket": "ps2/Shin Megami Tensei - Persona 4 (USA).chd"
+      "bucket": "ps2/Shin Megami Tensei - Persona 4 (USA).chd",
+      "variants": [
+        {
+          "bucket": "psvita/Persona 4 GOLDEN [PCSE00120] [USA] [NoNpDRM].zip",
+          "note": "Vita: Golden adds a new character, an extra month and QoL"
+        }
+      ]
     },
     {
       "title": "Shin Megami Tensei: Nocturne",
@@ -524,17 +615,35 @@
     {
       "title": "Disgaea: Hour of Darkness",
       "system": "ps2",
-      "bucket": "ps2/Disgaea - Hour of Darkness (USA).chd"
+      "bucket": "ps2/Disgaea - Hour of Darkness (USA).chd",
+      "variants": [
+        {
+          "bucket": "psp/Disgaea - Afternoon of Darkness (USA).chd",
+          "note": "PSP: Afternoon of Darkness adds Etna mode and extra characters"
+        }
+      ]
     },
     {
       "title": "Disgaea 2 - Cursed Memories",
       "system": "ps2",
-      "bucket": "ps2/Disgaea 2 - Cursed Memories (USA).chd"
+      "bucket": "ps2/Disgaea 2 - Cursed Memories (USA).chd",
+      "variants": [
+        {
+          "bucket": "psp/Disgaea 2 - Dark Hero Days (USA).chd",
+          "note": "PSP: Dark Hero Days adds Axel mode and extra characters"
+        }
+      ]
     },
     {
       "title": "Odin Sphere",
       "system": "ps2",
-      "bucket": "ps2/Odin Sphere (USA).chd"
+      "bucket": "ps2/Odin Sphere (USA).chd",
+      "variants": [
+        {
+          "bucket": "psvita/Odin Sphere Leifthrasir [PCSE00899] [USA] [NoNpDRM].zip",
+          "note": "Vita: Leifthrasir remake, reworked combat, HD art, no slowdown"
+        }
+      ]
     },
     {
       "title": "Rogue Galaxy",
@@ -605,12 +714,24 @@
     {
       "title": "Kingdom Hearts",
       "system": "ps2",
-      "bucket": "ps2/Kingdom Hearts (USA).chd"
+      "bucket": "ps2/Kingdom Hearts (USA).chd",
+      "variants": [
+        {
+          "bucket": "ps2/Kingdom Hearts Final Mix (English v2026-06-26).chd",
+          "note": "Final Mix: adds bosses, abilities and scenes, English patch"
+        }
+      ]
     },
     {
       "title": "Kingdom Hearts II",
       "system": "ps2",
-      "bucket": "ps2/Kingdom Hearts II (USA).chd"
+      "bucket": "ps2/Kingdom Hearts II (USA).chd",
+      "variants": [
+        {
+          "bucket": "ps2/Kingdom Hearts II - Final Mix+ (English Patched)[Undub][4-3].chd",
+          "note": "Final Mix+: adds bosses, scenes and Re:CoM, English patch"
+        }
+      ]
     },
     {
       "title": "Kingdom Hearts - Re-Chain of Memories",
@@ -627,9 +748,19 @@
       ]
     },
     {
-      "title": "Skies of Arcadia Legends",
-      "system": "gc",
-      "bucket": "gc/Skies of Arcadia Legends (USA).rvz"
+      "title": "Skies of Arcadia",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Skies of Arcadia (USA).m3u",
+      "files": [
+        "dreamcast/Skies of Arcadia (USA) (Disc 1).chd",
+        "dreamcast/Skies of Arcadia (USA) (Disc 2).chd"
+      ],
+      "variants": [
+        {
+          "bucket": "gc/Skies of Arcadia Legends (USA).rvz",
+          "note": "GameCube: adds bounty hunts, a side quest and fewer random battles"
+        }
+      ]
     },
     {
       "title": "Baten Kaitos - Eternal Wings and the Lost Ocean",
@@ -690,24 +821,9 @@
       "bucket": "gc/Custom Robo (USA).rvz"
     },
     {
-      "title": "Evolution Worlds",
-      "system": "gc",
-      "bucket": "gc/Evolution Worlds (USA).rvz"
-    },
-    {
       "title": "Super Robot Taisen GC",
       "system": "gc",
       "bucket": "gc/Super Robot Taisen GC (Eng tran).rvz"
-    },
-    {
-      "title": "Chrono Trigger",
-      "system": "nds",
-      "bucket": "nds/Chrono Trigger (USA) (En,Fr).zip"
-    },
-    {
-      "title": "Dragon Quest IV - Chapters of the Chosen",
-      "system": "nds",
-      "bucket": "nds/Dragon Quest IV - Chapters of the Chosen (USA) (En,Fr,Es).zip"
     },
     {
       "title": "Dragon Quest VI - Realms of Revelation",
@@ -722,12 +838,24 @@
     {
       "title": "Etrian Odyssey",
       "system": "nds",
-      "bucket": "nds/Etrian Odyssey (USA).zip"
+      "bucket": "nds/Etrian Odyssey (USA).zip",
+      "variants": [
+        {
+          "bucket": "3ds/Etrian Odyssey Untold - The Millennium Girl (USA).zip",
+          "note": "3DS: Untold remake adds a story mode, voice and quality-of-life"
+        }
+      ]
     },
     {
       "title": "Etrian Odyssey II - Heroes of Lagaard",
       "system": "nds",
-      "bucket": "nds/Etrian Odyssey II - Heroes of Lagaard (USA).zip"
+      "bucket": "nds/Etrian Odyssey II - Heroes of Lagaard (USA).zip",
+      "variants": [
+        {
+          "bucket": "3ds/Etrian Odyssey 2 Untold - The Fafnir Knight (USA).zip",
+          "note": "3DS: Untold remake adds a story mode, voice and quality-of-life"
+        }
+      ]
     },
     {
       "title": "Etrian Odyssey III - The Drowned City",
@@ -752,22 +880,46 @@
     {
       "title": "Radiant Historia",
       "system": "nds",
-      "bucket": "nds/Radiant Historia (USA).zip"
+      "bucket": "nds/Radiant Historia (USA).zip",
+      "variants": [
+        {
+          "bucket": "3ds/Radiant Historia - Perfect Chronology (USA).zip",
+          "note": "3DS: adds a new story path, voice acting and new art"
+        }
+      ]
     },
     {
       "title": "Shin Megami Tensei - Devil Survivor",
       "system": "nds",
-      "bucket": "nds/Shin Megami Tensei - Devil Survivor (USA).zip"
+      "bucket": "nds/Shin Megami Tensei - Devil Survivor (USA).zip",
+      "variants": [
+        {
+          "bucket": "3ds/Shin Megami Tensei - Devil Survivor Overclocked (USA) (Rev 1).zip",
+          "note": "3DS: Overclocked adds an 8th day, voice acting and demons"
+        }
+      ]
     },
     {
       "title": "Shin Megami Tensei - Devil Survivor 2",
       "system": "nds",
-      "bucket": "nds/Shin Megami Tensei - Devil Survivor 2 (USA).zip"
+      "bucket": "nds/Shin Megami Tensei - Devil Survivor 2 (USA).zip",
+      "variants": [
+        {
+          "bucket": "3ds/Shin Megami Tensei - Devil Survivor 2 - Record Breaker (USA).zip",
+          "note": "3DS: Record Breaker adds the Triangulum arc and voice acting"
+        }
+      ]
     },
     {
       "title": "Shin Megami Tensei - Strange Journey",
       "system": "nds",
-      "bucket": "nds/Shin Megami Tensei - Strange Journey (USA).zip"
+      "bucket": "nds/Shin Megami Tensei - Strange Journey (USA).zip",
+      "variants": [
+        {
+          "bucket": "3ds/Shin Megami Tensei - Strange Journey Redux (USA).zip",
+          "note": "3DS: Redux adds a new dungeon, character and endings"
+        }
+      ]
     },
     {
       "title": "Final Fantasy Tactics A2 - Grimoire of the Rift",
@@ -835,11 +987,6 @@
       "bucket": "ps2/Tales of Legendia (USA).chd"
     },
     {
-      "title": "Shin Megami Tensei - Persona 3",
-      "system": "ps2",
-      "bucket": "ps2/Shin Megami Tensei - Persona 3 (USA).chd"
-    },
-    {
       "title": "Dragon Quest V - Hand of the Heavenly Bride",
       "system": "nds",
       "bucket": "nds/Dragon Quest V - Hand of the Heavenly Bride (USA) (En,Fr,Es).zip"
@@ -902,7 +1049,13 @@
     {
       "title": "Mario & Luigi - Bowser's Inside Story",
       "system": "nds",
-      "bucket": "nds/Mario & Luigi - Bowser's Inside Story (USA) (En,Fr,Es).zip"
+      "bucket": "nds/Mario & Luigi - Bowser's Inside Story (USA) (En,Fr,Es).zip",
+      "variants": [
+        {
+          "bucket": "3ds/Mario & Luigi - Bowser's Inside Story + Bowser Jr.'s Journey (USA).zip",
+          "note": "3DS: remade graphics plus the new Bowser Jr.'s Journey side story"
+        }
+      ]
     },
     {
       "title": "Kingdom Hearts - 358-2 Days",
@@ -940,11 +1093,6 @@
       "bucket": "nds/Valkyrie Profile - Covenant of the Plume (USA).zip"
     },
     {
-      "title": "Fire Emblem - Shadow Dragon",
-      "system": "nds",
-      "bucket": "nds/Fire Emblem - Shadow Dragon (USA).zip"
-    },
-    {
       "title": "Advance Wars - Dual Strike",
       "system": "nds",
       "bucket": "nds/Advance Wars - Dual Strike (USA, Australia).zip"
@@ -953,11 +1101,6 @@
       "title": "Advance Wars - Days of Ruin",
       "system": "nds",
       "bucket": "nds/Advance Wars - Days of Ruin (USA) (En,Fr,Es).zip"
-    },
-    {
-      "title": "Disgaea DS",
-      "system": "nds",
-      "bucket": "nds/Disgaea DS (USA).zip"
     },
     {
       "title": "Front Mission",
@@ -1080,9 +1223,15 @@
       "bucket": "nds/Heroes of Mana (USA).zip"
     },
     {
-      "title": "Hoshigami: Ruining Blue Earth - Remix",
-      "system": "nds",
-      "bucket": "nds/Hoshigami - Ruining Blue Earth - Remix (USA).zip"
+      "title": "Hoshigami: Ruining Blue Earth",
+      "system": "psx",
+      "bucket": "psx/Hoshigami - Ruining Blue Earth (USA).chd",
+      "variants": [
+        {
+          "bucket": "nds/Hoshigami - Ruining Blue Earth - Remix (USA).zip",
+          "note": "DS: adds story scenes and rebalanced difficulty"
+        }
+      ]
     },
     {
       "title": "Izuna: Legend of the Unemployed Ninja",
@@ -1120,9 +1269,19 @@
       "bucket": "nds/Magical Starsign (USA).zip"
     },
     {
-      "title": "Mega Man Battle Network 5: Double Team DS",
-      "system": "nds",
-      "bucket": "nds/Mega Man Battle Network 5 - Double Team DS (USA).zip"
+      "title": "Mega Man Battle Network 5: Team Protoman",
+      "system": "gba",
+      "bucket": "gba/Megaman - Battle Network 5 - Team Protoman (USA).zip",
+      "variants": [
+        {
+          "bucket": "gba/Megaman - Battle Network 5 - Team Colonel (USA).zip",
+          "note": "GBA: Team Colonel version, with a different Navi team and areas"
+        },
+        {
+          "bucket": "nds/Mega Man Battle Network 5 - Double Team DS (USA).zip",
+          "note": "DS: both versions on one cart, plus extra Navis and bosses"
+        }
+      ]
     },
     {
       "title": "Mega Man Star Force: Pegasus",
@@ -1161,8 +1320,8 @@
     },
     {
       "title": "Rhapsody: A Musical Adventure",
-      "system": "nds",
-      "bucket": "nds/Rhapsody - A Musical Adventure (USA).zip"
+      "system": "psx",
+      "bucket": "psx/Rhapsody - A Musical Adventure (USA).chd"
     },
     {
       "title": "Rondo of Swords",
@@ -1220,44 +1379,31 @@
       "bucket": "gba/Tactics Ogre - The Knight of Lodis (USA).zip"
     },
     {
-      "title": "Breath of Fire",
-      "system": "gba",
-      "bucket": "gba/Breath of Fire (USA).zip"
-    },
-    {
-      "title": "Breath of Fire II",
-      "system": "gba",
-      "bucket": "gba/Breath of Fire II (USA).zip"
-    },
-    {
       "title": "Lufia - The Ruins of Lore",
       "system": "gba",
       "bucket": "gba/Lufia - The Ruins of Lore (USA).zip"
     },
     {
-      "title": "Lunar Legend",
-      "system": "gba",
-      "bucket": "gba/Lunar Legend (USA).zip"
-    },
-    {
-      "title": "Shining Force - Resurrection of the Dark Dragon",
-      "system": "gba",
-      "bucket": "gba/Shining Force - Resurrection of the Dark Dragon (USA).zip"
-    },
-    {
       "title": "Tales of Phantasia",
       "system": "gba",
-      "bucket": "gba/Tales of Phantasia (USA, Australia).zip"
+      "bucket": "gba/Tales of Phantasia (USA, Australia).zip",
+      "variants": [
+        {
+          "bucket": "psp/Tales of Phantasia - Full Voice Edition (English v1.2)[QoL].chd",
+          "note": "PSP: PS1-based remake with full voice and new art, English patch"
+        }
+      ]
     },
     {
       "title": "Mario & Luigi - Superstar Saga",
       "system": "gba",
-      "bucket": "gba/Mario & Luigi - Superstar Saga (USA).zip"
-    },
-    {
-      "title": "Mother 1+2 (English)",
-      "system": "gba",
-      "bucket": "gba/Mother 1+2 (English).zip"
+      "bucket": "gba/Mario & Luigi - Superstar Saga (USA).zip",
+      "variants": [
+        {
+          "bucket": "3ds/Mario & Luigi - Superstar Saga + Bowser's Minions (USA) (En,Fr,Es).zip",
+          "note": "3DS: redrawn graphics plus the new Bowser's Minions side mode"
+        }
+      ]
     },
     {
       "title": "Mother 3 (English v1.3a)",
@@ -1277,12 +1423,24 @@
     {
       "title": "Riviera - The Promised Land",
       "system": "gba",
-      "bucket": "gba/Riviera - The Promised Land (USA).zip"
+      "bucket": "gba/Riviera - The Promised Land (USA).zip",
+      "variants": [
+        {
+          "bucket": "psp/Riviera - The Promised Land (USA).chd",
+          "note": "PSP: adds new art, voice acting and extra content"
+        }
+      ]
     },
     {
       "title": "Yggdra Union - We'll Never Fight Alone",
       "system": "gba",
-      "bucket": "gba/Yggdra Union - We'll Never Fight Alone (USA).zip"
+      "bucket": "gba/Yggdra Union - We'll Never Fight Alone (USA).zip",
+      "variants": [
+        {
+          "bucket": "psp/Yggdra Union (USA).chd",
+          "note": "PSP: adds new art and a multiplayer mode"
+        }
+      ]
     },
     {
       "title": "Summon Night - Swordcraft Story",
@@ -1355,11 +1513,6 @@
       "bucket": "gba/Megaman - Battle Network 4 - Red Sun (USA).zip"
     },
     {
-      "title": "Mega Man Battle Network 5: Team Protoman",
-      "system": "gba",
-      "bucket": "gba/Megaman - Battle Network 5 - Team Protoman (USA).zip"
-    },
-    {
       "title": "Mega Man Battle Network 6: Cybeast Gregar",
       "system": "gba",
       "bucket": "gba/Megaman - Battle Network 6 - Cybeast Gregar (USA).zip"
@@ -1373,11 +1526,6 @@
       "title": "Onimusha Tactics",
       "system": "gba",
       "bucket": "gba/Onimusha Tactics (USA).zip"
-    },
-    {
-      "title": "Phantasy Star Collection",
-      "system": "gba",
-      "bucket": "gba/Phantasy Star Collection (USA).zip"
     },
     {
       "title": "Shining Soul",
@@ -1400,29 +1548,30 @@
       "bucket": "gba/Zone of the Enders - The Fist of Mars (USA).zip"
     },
     {
-      "title": "Dragon Warrior I & II",
-      "system": "gbc",
-      "bucket": "gbc/Dragon Warrior I & II (USA) (SGB Enhanced) (GB Compatible).zip"
-    },
-    {
-      "title": "Dragon Warrior III",
-      "system": "gbc",
-      "bucket": "gbc/Dragon Warrior III (USA).zip"
-    },
-    {
       "title": "Dragon Warrior Monsters",
       "system": "gbc",
-      "bucket": "gbc/Dragon Warrior Monsters (USA, Europe) (SGB Enhanced) (GB Compatible).zip"
+      "bucket": "gbc/Dragon Warrior Monsters (USA, Europe) (SGB Enhanced) (GB Compatible).zip",
+      "variants": [
+        {
+          "bucket": "3ds/Dragon Quest Monsters - Terry no Wonderland 3D (Japan).zip",
+          "note": "3DS: Japanese-only 3D remake with many more monsters"
+        }
+      ]
     },
     {
       "title": "Dragon Warrior Monsters 2 - Cobi's Journey",
       "system": "gbc",
-      "bucket": "gbc/Dragon Warrior Monsters 2 - Cobi's Journey (USA) (SGB Enhanced) (GB Compatible).zip"
-    },
-    {
-      "title": "Crystalis",
-      "system": "gbc",
-      "bucket": "gbc/Crystalis (USA).zip"
+      "bucket": "gbc/Dragon Warrior Monsters 2 - Cobi's Journey (USA) (SGB Enhanced) (GB Compatible).zip",
+      "variants": [
+        {
+          "bucket": "gbc/Dragon Warrior Monsters 2 - Tara's Adventure (USA) (SGB Enhanced) (GB Compatible).zip",
+          "note": "GBC: Tara's Adventure, the paired version with other monsters"
+        },
+        {
+          "bucket": "3ds/Dragon Quest Monsters 2 - Iru to Ruka no Fushigi na Fushigi na Kagi (Japan).zip",
+          "note": "3DS: Japanese-only 3D remake with many more monsters"
+        }
+      ]
     },
     {
       "title": "Lufia - The Legend Returns",
@@ -1457,12 +1606,24 @@
     {
       "title": "Final Fantasy Adventure",
       "system": "gb",
-      "bucket": "gb/Final Fantasy Adventure (USA).zip"
+      "bucket": "gb/Final Fantasy Adventure (USA).zip",
+      "variants": [
+        {
+          "bucket": "psvita/Adventures of Mana [PCSE00905] [USA] [NoNpDRM].zip",
+          "note": "Vita: faithful 3D remake with new visuals and music"
+        }
+      ]
     },
     {
       "title": "Final Fantasy Legend, The",
       "system": "gb",
-      "bucket": "gb/Final Fantasy Legend, The (USA).zip"
+      "bucket": "gb/Final Fantasy Legend, The (USA).zip",
+      "variants": [
+        {
+          "bucket": "wonderswancolor/Makai Toushi Sa-Ga (Japan).zip",
+          "note": "WonderSwan Color: Japanese-only remake with color graphics"
+        }
+      ]
     },
     {
       "title": "Final Fantasy Legend II",
@@ -1650,11 +1811,6 @@
       "bucket": "snes/Wizardry V - Heart of the Maelstrom (USA).zip"
     },
     {
-      "title": "Ys III: Wanderers from Ys",
-      "system": "snes",
-      "bucket": "snes/Ys III - Wanderers from Ys (USA).zip"
-    },
-    {
       "title": "Tactics Ogre - Let Us Cling Together",
       "system": "psp",
       "bucket": "psp/Tactics Ogre - Let Us Cling Together (USA).chd"
@@ -1665,9 +1821,19 @@
       "bucket": "psp/Jeanne d'Arc (USA).chd"
     },
     {
-      "title": "Valkyrie Profile - Lenneth",
-      "system": "psp",
-      "bucket": "psp/Valkyrie Profile - Lenneth (USA).chd"
+      "title": "Valkyrie Profile",
+      "system": "psx",
+      "bucket": "psx/Valkyrie Profile (USA).m3u",
+      "files": [
+        "psx/Valkyrie Profile (USA) (Disc 1).chd",
+        "psx/Valkyrie Profile (USA) (Disc 2).chd"
+      ],
+      "variants": [
+        {
+          "bucket": "psp/Valkyrie Profile - Lenneth (USA).chd",
+          "note": "PSP: adds new anime cutscenes"
+        }
+      ]
     },
     {
       "title": "Star Ocean - First Departure",
@@ -1675,9 +1841,19 @@
       "bucket": "psp/Star Ocean - First Departure (USA).chd"
     },
     {
-      "title": "Star Ocean - Second Evolution",
-      "system": "psp",
-      "bucket": "psp/Star Ocean - Second Evolution (USA).chd"
+      "title": "Star Ocean: The Second Story",
+      "system": "psx",
+      "bucket": "psx/Star Ocean - The Second Story (USA).m3u",
+      "files": [
+        "psx/Star Ocean - The Second Story (USA) (Disc 1).chd",
+        "psx/Star Ocean - The Second Story (USA) (Disc 2).chd"
+      ],
+      "variants": [
+        {
+          "bucket": "psp/Star Ocean - Second Evolution (USA).chd",
+          "note": "PSP: adds new translation, voice acting, anime scenes and a character"
+        }
+      ]
     },
     {
       "title": "Legend of Heroes, The - Trails in the Sky",
@@ -1710,24 +1886,20 @@
       "bucket": "psp/Ys Seven (USA).chd"
     },
     {
-      "title": "Ys I & II Chronicles",
-      "system": "psp",
-      "bucket": "psp/Ys I & II Chronicles (USA).chd"
-    },
-    {
       "title": "Ys - The Ark of Napishtim",
       "system": "psp",
       "bucket": "psp/Ys - The Ark of Napishtim (USA).chd"
     },
     {
-      "title": "Lunar - Silver Star Harmony",
-      "system": "psp",
-      "bucket": "psp/Lunar - Silver Star Harmony (USA).chd"
-    },
-    {
-      "title": "Shin Megami Tensei - Persona",
-      "system": "psp",
-      "bucket": "psp/Shin Megami Tensei - Persona (USA).chd"
+      "title": "Persona",
+      "system": "psx",
+      "bucket": "psx/Persona (USA).chd",
+      "variants": [
+        {
+          "bucket": "psp/Shin Megami Tensei - Persona (USA).chd",
+          "note": "PSP: new translation, better interface and the Snow Queen quest"
+        }
+      ]
     },
     {
       "title": "Shin Megami Tensei - Persona 2 - Innocent Sin",
@@ -1735,29 +1907,15 @@
       "bucket": "psp/Shin Megami Tensei - Persona 2 - Innocent Sin (USA).chd"
     },
     {
-      "title": "Shin Megami Tensei - Persona 3 Portable",
-      "system": "psp",
-      "bucket": "psp/Shin Megami Tensei - Persona 3 Portable (USA).chd"
-    },
-    {
-      "title": "Disgaea - Afternoon of Darkness",
-      "system": "psp",
-      "bucket": "psp/Disgaea - Afternoon of Darkness (USA).chd"
-    },
-    {
-      "title": "Disgaea 2 - Dark Hero Days",
-      "system": "psp",
-      "bucket": "psp/Disgaea 2 - Dark Hero Days (USA).chd"
-    },
-    {
       "title": "Kingdom Hearts - Birth by Sleep (En,Fr,Es)",
       "system": "psp",
-      "bucket": "psp/Kingdom Hearts - Birth by Sleep (USA) (En,Fr,Es).chd"
-    },
-    {
-      "title": "Riviera - The Promised Land",
-      "system": "psp",
-      "bucket": "psp/Riviera - The Promised Land (USA).chd"
+      "bucket": "psp/Kingdom Hearts - Birth by Sleep (USA) (En,Fr,Es).chd",
+      "variants": [
+        {
+          "bucket": "psp/Kingdom Hearts - Birth by Sleep (Japan) (Final Mix) [T-En by Truthkey v1.0.12].chd",
+          "note": "Final Mix: adds bosses, abilities and modes, English patch"
+        }
+      ]
     },
     {
       "title": "Wild Arms XF",
@@ -1765,9 +1923,14 @@
       "bucket": "psp/Wild Arms XF (USA).chd"
     },
     {
-      "title": "Tales of Eternia (v2.02)",
-      "system": "psp",
-      "bucket": "psp/Tales of Eternia (Europe) (v2.02).chd"
+      "title": "Tales of Destiny II",
+      "system": "psx",
+      "bucket": "psx/Tales of Destiny II (USA).m3u",
+      "files": [
+        "psx/Tales of Destiny II (USA) (Disc 1).chd",
+        "psx/Tales of Destiny II (USA) (Disc 2).chd",
+        "psx/Tales of Destiny II (USA) (Disc 3).chd"
+      ]
     },
     {
       "title": "Tales of the World - Radiant Mythology",
@@ -1790,19 +1953,20 @@
       "bucket": "psp/Tales of Phantasia - Narikiri Dungeon X (English v1.2).chd"
     },
     {
-      "title": "Tales of Phantasia - Full Voice Edition (English v1.2)[QoL]",
-      "system": "psp",
-      "bucket": "psp/Tales of Phantasia - Full Voice Edition (English v1.2)[QoL].chd"
-    },
-    {
       "title": "Genso Suikoden - Tsumugareshi Hyakunen no Toki (English v1.0.2)",
       "system": "psp",
       "bucket": "psp/Genso Suikoden Tsumugareshi Hyakunen no Toki (English v1.0.2).chd"
     },
     {
-      "title": "Monster Hunter Freedom Unite (En,Fr,De,Es,It)",
+      "title": "Monster Hunter Freedom 2",
       "system": "psp",
-      "bucket": "psp/Monster Hunter Freedom Unite (USA) (En,Fr,De,Es,It).chd"
+      "bucket": "psp/Monster Hunter Freedom 2 (USA).chd",
+      "variants": [
+        {
+          "bucket": "psp/Monster Hunter Freedom Unite (USA) (En,Fr,De,Es,It).chd",
+          "note": "PSP: Freedom Unite adds G-rank, new monsters and Felyne comrades"
+        }
+      ]
     },
     {
       "title": "Monster Hunter Portable 3rd (English)",
@@ -1812,17 +1976,18 @@
     {
       "title": "Phantasy Star Portable 2",
       "system": "psp",
-      "bucket": "psp/Phantasy Star Portable 2 (USA).chd"
+      "bucket": "psp/Phantasy Star Portable 2 (USA).chd",
+      "variants": [
+        {
+          "bucket": "psp/Phantasy Star Portable 2 Infinity (Japan) [T-En by JamRules & Weyu v1.7].chd",
+          "note": "PSP: Infinity adds new missions, areas and gear, English patch"
+        }
+      ]
     },
     {
       "title": "Crisis Core - Final Fantasy VII",
       "system": "psp",
       "bucket": "psp/Crisis Core - Final Fantasy VII (USA).chd"
-    },
-    {
-      "title": "Final Fantasy - 20th Anniversary Edition",
-      "system": "psp",
-      "bucket": "psp/Final Fantasy - 20th Anniversary Edition (USA) (En,Ja) (FW6.00).chd"
     },
     {
       "title": "Final Fantasy II",
@@ -1835,9 +2000,15 @@
       "bucket": "psp/Final Fantasy IV - The Complete Collection (USA) (En,Ja,Fr).chd"
     },
     {
-      "title": "Final Fantasy Tactics - The War of the Lions",
-      "system": "psp",
-      "bucket": "psp/Final Fantasy Tactics - The War of the Lions (USA).chd"
+      "title": "Final Fantasy Tactics",
+      "system": "psx",
+      "bucket": "psx/Final Fantasy Tactics (USA).chd",
+      "variants": [
+        {
+          "bucket": "psp/Final Fantasy Tactics - The War of the Lions (USA).chd",
+          "note": "PSP: adds jobs, characters, cutscenes and a new translation"
+        }
+      ]
     },
     {
       "title": "Final Fantasy Type-0 (English Patched v2)",
@@ -1852,7 +2023,13 @@
     {
       "title": "Valkyria Chronicles 3 (English v1.0.8)",
       "system": "psp",
-      "bucket": "psp/Valkyria Chronicles 3 (English v1.0.8).chd"
+      "bucket": "psp/Valkyria Chronicles 3 (English v1.0.8).chd",
+      "variants": [
+        {
+          "bucket": "psp/Valkyria Chronicles 3 - Extra Edition (Japan) [T-En by Valkyria Chronicles 3 Translation Project v2] [i] [n].chd",
+          "note": "PSP: Extra Edition adds the DLC chapters, English patch"
+        }
+      ]
     },
     {
       "title": "Half-Minute Hero",
@@ -1870,16 +2047,6 @@
       "bucket": "psp/Phantom Brave - The Hermuda Triangle (USA).chd"
     },
     {
-      "title": "Knights in the Nightmare",
-      "system": "psp",
-      "bucket": "psp/Knights in the Nightmare (USA).chd"
-    },
-    {
-      "title": "Yggdra Union",
-      "system": "psp",
-      "bucket": "psp/Yggdra Union (USA).chd"
-    },
-    {
       "title": "Gungnir",
       "system": "psp",
       "bucket": "psp/Gungnir (USA).chd"
@@ -1891,8 +2058,14 @@
     },
     {
       "title": "Breath of Fire III",
-      "system": "psp",
-      "bucket": "psp/Breath of Fire III (Europe).chd"
+      "system": "psx",
+      "bucket": "psx/Breath of Fire III (USA).chd",
+      "variants": [
+        {
+          "bucket": "psp/Breath of Fire III (Europe).chd",
+          "note": "PSP: adds quick saves and minor extras (Europe)"
+        }
+      ]
     },
     {
       "title": "Brave Story - New Traveler",
@@ -1995,11 +2168,6 @@
       "bucket": "psp/Fate Extra CCC (English v1.0).chd"
     },
     {
-      "title": "Final Fantasy Type-0",
-      "system": "psp",
-      "bucket": "psp/Final Fantasy Reishiki (Japan) [T-En by SkyBladeCloud v2].chd"
-    },
-    {
       "title": "Generation of Chaos",
       "system": "psp",
       "bucket": "psp/Generation of Chaos (USA).chd"
@@ -2007,7 +2175,13 @@
     {
       "title": "Gods Eater Burst",
       "system": "psp",
-      "bucket": "psp/Gods Eater Burst (USA).chd"
+      "bucket": "psp/Gods Eater Burst (USA).chd",
+      "variants": [
+        {
+          "bucket": "psvita/GOD EATER RESURRECTION [PCSE00801] [USA] [NoNpDRM].zip",
+          "note": "Vita: remake with new systems, story chapters and Predator Styles"
+        }
+      ]
     },
     {
       "title": "Hexyz Force",
@@ -2060,11 +2234,6 @@
       "bucket": "psp/Phantasy Star Portable (USA).chd"
     },
     {
-      "title": "Phantasy Star Portable 2 Infinity",
-      "system": "psp",
-      "bucket": "psp/Phantasy Star Portable 2 Infinity (Japan) [T-En by JamRules & Weyu v1.7].chd"
-    },
-    {
       "title": "Phantom Kingdom Portable",
       "system": "psp",
       "bucket": "psp/Phantom Kingdom Portable (Japan) [T-En by ChepChep & DurableTomb & Ignis00 v0.9.3].chd"
@@ -2115,11 +2284,6 @@
       "bucket": "psp/Valhalla Knights (USA).chd"
     },
     {
-      "title": "Valkyria Chronicles 3: Extra Edition",
-      "system": "psp",
-      "bucket": "psp/Valkyria Chronicles 3 - Extra Edition (Japan) [T-En by Valkyria Chronicles 3 Translation Project v2] [i] [n].chd"
-    },
-    {
       "title": "White Knight Chronicles: Origins",
       "system": "psp",
       "bucket": "psp/White Knight Chronicles - Origins (Europe) (En,Fr,De,Es,It).chd"
@@ -2135,29 +2299,6 @@
       "bucket": "psx/Legend of Legaia (USA).chd"
     },
     {
-      "title": "Final Fantasy Tactics",
-      "system": "psx",
-      "bucket": "psx/Final Fantasy Tactics (USA).chd"
-    },
-    {
-      "title": "Valkyrie Profile",
-      "system": "psx",
-      "bucket": "psx/Valkyrie Profile (USA).m3u",
-      "files": [
-        "psx/Valkyrie Profile (USA) (Disc 1).chd",
-        "psx/Valkyrie Profile (USA) (Disc 2).chd"
-      ]
-    },
-    {
-      "title": "Star Ocean: The Second Story",
-      "system": "psx",
-      "bucket": "psx/Star Ocean - The Second Story (USA).m3u",
-      "files": [
-        "psx/Star Ocean - The Second Story (USA) (Disc 1).chd",
-        "psx/Star Ocean - The Second Story (USA) (Disc 2).chd"
-      ]
-    },
-    {
       "title": "Legend of Mana",
       "system": "psx",
       "bucket": "psx/Legend of Mana (USA).chd"
@@ -2166,16 +2307,6 @@
       "title": "Persona 2: Eternal Punishment",
       "system": "psx",
       "bucket": "psx/Persona 2 - Eternal Punishment (USA).chd"
-    },
-    {
-      "title": "Persona",
-      "system": "psx",
-      "bucket": "psx/Persona (USA).chd"
-    },
-    {
-      "title": "Breath of Fire III",
-      "system": "psx",
-      "bucket": "psx/Breath of Fire III (USA).chd"
     },
     {
       "title": "Wild Arms 2",
@@ -2193,32 +2324,13 @@
       "files": [
         "psx/Dragon Warrior VII (USA) (Disc 1).chd",
         "psx/Dragon Warrior VII (USA) (Disc 2).chd"
+      ],
+      "variants": [
+        {
+          "bucket": "3ds/Dragon Quest VII - Fragments of the Forgotten Past (USA).zip",
+          "note": "3DS: remake with a faster opening, new graphics and translation"
+        }
       ]
-    },
-    {
-      "title": "Final Fantasy Chronicles - Chrono Trigger",
-      "system": "psx",
-      "bucket": "psx/Final Fantasy Chronicles - Chrono Trigger (USA) (Rev 1).chd"
-    },
-    {
-      "title": "Final Fantasy Origins",
-      "system": "psx",
-      "bucket": "psx/Final Fantasy Origins (USA) (Rev 1).chd"
-    },
-    {
-      "title": "Final Fantasy Chronicles - Final Fantasy IV",
-      "system": "psx",
-      "bucket": "psx/Final Fantasy Chronicles - Final Fantasy IV (USA) (Rev 1).chd"
-    },
-    {
-      "title": "Final Fantasy Anthology - Final Fantasy V",
-      "system": "psx",
-      "bucket": "psx/Final Fantasy Anthology - Final Fantasy V (USA) (Rev 1).chd"
-    },
-    {
-      "title": "Final Fantasy Anthology - Final Fantasy VI",
-      "system": "psx",
-      "bucket": "psx/Final Fantasy Anthology - Final Fantasy VI (USA) (Rev 1).chd"
     },
     {
       "title": "SaGa Frontier",
@@ -2234,16 +2346,6 @@
       "title": "Tales of Destiny",
       "system": "psx",
       "bucket": "psx/Tales of Destiny (USA).chd"
-    },
-    {
-      "title": "Tales of Destiny II",
-      "system": "psx",
-      "bucket": "psx/Tales of Destiny II (USA).m3u",
-      "files": [
-        "psx/Tales of Destiny II (USA) (Disc 1).chd",
-        "psx/Tales of Destiny II (USA) (Disc 2).chd",
-        "psx/Tales of Destiny II (USA) (Disc 3).chd"
-      ]
     },
     {
       "title": "Arc the Lad",
@@ -2268,11 +2370,6 @@
       "title": "Brave Fencer Musashi",
       "system": "psx",
       "bucket": "psx/Brave Fencer Musashi (USA).chd"
-    },
-    {
-      "title": "Rhapsody: A Musical Adventure",
-      "system": "psx",
-      "bucket": "psx/Rhapsody - A Musical Adventure (USA).chd"
     },
     {
       "title": "Thousand Arms",
@@ -2325,11 +2422,6 @@
       "title": "Tactics Ogre",
       "system": "psx",
       "bucket": "psx/Tactics Ogre (USA).chd"
-    },
-    {
-      "title": "Ogre Battle - Limited Edition",
-      "system": "psx",
-      "bucket": "psx/Ogre Battle - Limited Edition (USA).chd"
     },
     {
       "title": "Brigandine - The Legend of Forsena",
@@ -2405,11 +2497,6 @@
       "title": "Guardian's Crusade",
       "system": "psx",
       "bucket": "psx/Guardian's Crusade (USA).chd"
-    },
-    {
-      "title": "Hoshigami: Ruining Blue Earth",
-      "system": "psx",
-      "bucket": "psx/Hoshigami - Ruining Blue Earth (USA).chd"
     },
     {
       "title": "Kartia: The Word of Fate",
@@ -2585,8 +2672,8 @@
     },
     {
       "title": "Grandia II",
-      "system": "ps2",
-      "bucket": "ps2/Grandia II (USA).chd"
+      "system": "dreamcast",
+      "bucket": "dreamcast/Grandia II (USA).chd"
     },
     {
       "title": "Grandia Xtreme",
@@ -2646,26 +2733,24 @@
     {
       "title": "Monster Hunter Tri",
       "system": "wii",
-      "bucket": "wii/Monster Hunter Tri (USA) (En,Fr,Es).rvz"
+      "bucket": "wii/Monster Hunter Tri (USA) (En,Fr,Es).rvz",
+      "variants": [
+        {
+          "bucket": "3ds/Monster Hunter 3 Ultimate (USA) (En,Fr,De,Es,It).zip",
+          "note": "3DS: Ultimate adds G-rank, new monsters and new weapon types"
+        }
+      ]
     },
     {
       "title": "Muramasa: The Demon Blade",
       "system": "wii",
-      "bucket": "wii/Muramasa - The Demon Blade (USA).rvz"
-    },
-    {
-      "title": "Skies of Arcadia",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Skies of Arcadia (USA).m3u",
-      "files": [
-        "dreamcast/Skies of Arcadia (USA) (Disc 1).chd",
-        "dreamcast/Skies of Arcadia (USA) (Disc 2).chd"
+      "bucket": "wii/Muramasa - The Demon Blade (USA).rvz",
+      "variants": [
+        {
+          "bucket": "psvita/Muramasa Rebirth [PCSE00240] [USA] [NoNpDRM].zip",
+          "note": "Vita: new translation, sharper art and Genroku Legends DLC support"
+        }
       ]
-    },
-    {
-      "title": "Grandia II",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Grandia II (USA).chd"
     },
     {
       "title": "Phantasy Star Online Ver. 2",
@@ -2758,11 +2843,6 @@
       "bucket": "segacd/Dark Wizard (USA).chd"
     },
     {
-      "title": "Ys Book I & II",
-      "system": "tg-cd",
-      "bucket": "tg-cd/Ys Book I & II (USA).chd"
-    },
-    {
       "title": "Cosmic Fantasy 2",
       "system": "tg-cd",
       "bucket": "tg-cd/Cosmic Fantasy 2 (USA).chd"
@@ -2771,16 +2851,6 @@
       "title": "Dragon Slayer: The Legend of Heroes",
       "system": "tg-cd",
       "bucket": "tg-cd/Dragon Slayer - The Legend of Heroes (USA).chd"
-    },
-    {
-      "title": "Ys III - Wanderers from Ys",
-      "system": "tg-cd",
-      "bucket": "tg-cd/Ys III - Wanderers from Ys (USA).chd"
-    },
-    {
-      "title": "Exile",
-      "system": "tg-cd",
-      "bucket": "tg-cd/Exile (USA).chd"
     },
     {
       "title": "Exile: Wicked Phenomenon",
@@ -2801,11 +2871,6 @@
       "title": "Child of Light",
       "system": "wiiu",
       "bucket": "wiiu/CHILD of LIGHT (US) (v16).wua"
-    },
-    {
-      "title": "Monster Hunter 3 Ultimate",
-      "system": "wiiu",
-      "bucket": "wiiu/MH3U (US) (v32).wua"
     },
     {
       "title": "Paper Mario: Color Splash",
@@ -2907,11 +2972,6 @@
       "bucket": "3ds/Fire Emblem Fates - Special Edition (USA).zip"
     },
     {
-      "title": "Fire Emblem Echoes - Shadows of Valentia",
-      "system": "3ds",
-      "bucket": "3ds/Fire Emblem Echoes - Shadows of Valentia (USA) (En,Fr,Es).zip"
-    },
-    {
       "title": "Shin Megami Tensei IV",
       "system": "3ds",
       "bucket": "3ds/Shin Megami Tensei IV (USA).zip"
@@ -2922,24 +2982,9 @@
       "bucket": "3ds/Shin Megami Tensei IV - Apocalypse (USA).zip"
     },
     {
-      "title": "Shin Megami Tensei - Strange Journey Redux",
-      "system": "3ds",
-      "bucket": "3ds/Shin Megami Tensei - Strange Journey Redux (USA).zip"
-    },
-    {
       "title": "Shin Megami Tensei - Devil Summoner - Soul Hackers",
       "system": "3ds",
       "bucket": "3ds/Shin Megami Tensei - Devil Summoner - Soul Hackers (USA).zip"
-    },
-    {
-      "title": "Shin Megami Tensei - Devil Survivor Overclocked",
-      "system": "3ds",
-      "bucket": "3ds/Shin Megami Tensei - Devil Survivor Overclocked (USA) (Rev 1).zip"
-    },
-    {
-      "title": "Shin Megami Tensei - Devil Survivor 2 - Record Breaker",
-      "system": "3ds",
-      "bucket": "3ds/Shin Megami Tensei - Devil Survivor 2 - Record Breaker (USA).zip"
     },
     {
       "title": "Persona Q - Shadow of the Labyrinth",
@@ -2962,39 +3007,9 @@
       "bucket": "3ds/Etrian Odyssey V - Beyond the Myth (USA).zip"
     },
     {
-      "title": "Etrian Odyssey Untold - The Millennium Girl",
-      "system": "3ds",
-      "bucket": "3ds/Etrian Odyssey Untold - The Millennium Girl (USA).zip"
-    },
-    {
-      "title": "Etrian Odyssey 2 Untold - The Fafnir Knight",
-      "system": "3ds",
-      "bucket": "3ds/Etrian Odyssey 2 Untold - The Fafnir Knight (USA).zip"
-    },
-    {
       "title": "Etrian Odyssey Nexus",
       "system": "3ds",
       "bucket": "3ds/Etrian Odyssey Nexus (USA).zip"
-    },
-    {
-      "title": "Dragon Quest VII - Fragments of the Forgotten Past",
-      "system": "3ds",
-      "bucket": "3ds/Dragon Quest VII - Fragments of the Forgotten Past (USA).zip"
-    },
-    {
-      "title": "Dragon Quest VIII - Journey of the Cursed King",
-      "system": "3ds",
-      "bucket": "3ds/Dragon Quest VIII - Journey of the Cursed King (USA).zip"
-    },
-    {
-      "title": "Mario & Luigi - Superstar Saga + Bowser's Minions",
-      "system": "3ds",
-      "bucket": "3ds/Mario & Luigi - Superstar Saga + Bowser's Minions (USA) (En,Fr,Es).zip"
-    },
-    {
-      "title": "Mario & Luigi - Bowser's Inside Story + Bowser Jr.'s Journey",
-      "system": "3ds",
-      "bucket": "3ds/Mario & Luigi - Bowser's Inside Story + Bowser Jr.'s Journey (USA).zip"
     },
     {
       "title": "Mario & Luigi - Dream Team",
@@ -3010,16 +3025,6 @@
       "title": "Kingdom Hearts 3D - Dream Drop Distance",
       "system": "3ds",
       "bucket": "3ds/Kingdom Hearts 3D - Dream Drop Distance (USA) (En,Fr).zip"
-    },
-    {
-      "title": "Tales of the Abyss",
-      "system": "3ds",
-      "bucket": "3ds/Tales of the Abyss (USA).zip"
-    },
-    {
-      "title": "Radiant Historia - Perfect Chronology",
-      "system": "3ds",
-      "bucket": "3ds/Radiant Historia - Perfect Chronology (USA).zip"
     },
     {
       "title": "Ever Oasis",
@@ -3039,7 +3044,13 @@
     {
       "title": "Monster Hunter Generations",
       "system": "3ds",
-      "bucket": "3ds/Monster Hunter Generations (USA).zip"
+      "bucket": "3ds/Monster Hunter Generations (USA).zip",
+      "variants": [
+        {
+          "bucket": "3ds/Monster Hunter XX - Double Cross (Japan).zip",
+          "note": "3DS: Japanese-only expansion with G-rank, new styles and monsters"
+        }
+      ]
     },
     {
       "title": "Monster Hunter Stories",
@@ -3152,16 +3163,6 @@
       "bucket": "3ds/Yo-Kai Watch 3 (USA).zip"
     },
     {
-      "title": "Xenoblade Chronicles 3D",
-      "system": "n3ds",
-      "bucket": "n3ds/Xenoblade Chronicles 3D (USA) (En,Fr,Es) (Rev 1).3ds"
-    },
-    {
-      "title": "Persona 4 Golden",
-      "system": "psvita",
-      "bucket": "psvita/Persona 4 GOLDEN [PCSE00120] [USA] [NoNpDRM].zip"
-    },
-    {
       "title": "The Legend of Heroes - Trails of Cold Steel",
       "system": "psvita",
       "bucket": "psvita/THE LEGEND OF HEROES - TRAILS OF COLD STEEL [PCSE00786] [USA] [NoNpDRM].zip"
@@ -3195,11 +3196,6 @@
       "title": "Tales of Hearts R",
       "system": "psvita",
       "bucket": "psvita/TALES OF HEARTS R [PCSE00429] [USA] [NoNpDRM].zip"
-    },
-    {
-      "title": "Odin Sphere Leifthrasir",
-      "system": "psvita",
-      "bucket": "psvita/Odin Sphere Leifthrasir [PCSE00899] [USA] [NoNpDRM].zip"
     },
     {
       "title": "Disgaea 3 - Absence of Detention",
@@ -3272,11 +3268,6 @@
       "bucket": "psvita/Secret of Mana [PCSE01153] [USA] [NoNpDRM].zip"
     },
     {
-      "title": "Adventures of Mana",
-      "system": "psvita",
-      "bucket": "psvita/Adventures of Mana [PCSE00905] [USA] [NoNpDRM].zip"
-    },
-    {
       "title": "Digimon Story - Cyber Sleuth",
       "system": "psvita",
       "bucket": "psvita/DIGIMON STORY CYBER SLEUTH [PCSE00755] [USA] [NoNpDRM].zip"
@@ -3295,11 +3286,6 @@
       "title": "Cosmic Star Heroine",
       "system": "psvita",
       "bucket": "psvita/Cosmic Star Heroine [PCSE01232] [USA] [NoNpDRM].zip"
-    },
-    {
-      "title": "Child of Light",
-      "system": "psvita",
-      "bucket": "psvita/Child of Light [PCSE00480] [USA] [NoNpDRM].zip"
     },
     {
       "title": "Undertale",
@@ -3337,19 +3323,15 @@
       "bucket": "psvita/GOD EATER 2 RAGE BURST [PCSE00789] [USA] [NoNpDRM].zip"
     },
     {
-      "title": "God Eater Resurrection",
+      "title": "Soul Sacrifice",
       "system": "psvita",
-      "bucket": "psvita/GOD EATER RESURRECTION [PCSE00801] [USA] [NoNpDRM].zip"
-    },
-    {
-      "title": "Muramasa Rebirth",
-      "system": "psvita",
-      "bucket": "psvita/Muramasa Rebirth [PCSE00240] [USA] [NoNpDRM].zip"
-    },
-    {
-      "title": "Soul Sacrifice Delta",
-      "system": "psvita",
-      "bucket": "psvita/Soul Sacrifice™ Delta [PCSA00152] [USA] [NoNpDRM].zip"
+      "bucket": "psvita/Soul Sacrifice™ [PCSA00092] [USA] [NoNpDRM].zip",
+      "variants": [
+        {
+          "bucket": "psvita/Soul Sacrifice™ Delta [PCSA00152] [USA] [NoNpDRM].zip",
+          "note": "Delta: adds new quests, monsters, a third faction and story"
+        }
+      ]
     },
     {
       "title": "Summon Night 6",

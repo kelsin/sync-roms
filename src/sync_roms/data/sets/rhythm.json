@@ -9,12 +9,6 @@
       "bucket": "psx/PaRappa the Rapper (USA) (En,Fr,De,Es,It).chd"
     },
     {
-      "title": "PaRappa the Rapper",
-      "category": "Sony",
-      "system": "psp",
-      "bucket": "psp/PaRappa the Rapper (USA).chd"
-    },
-    {
       "title": "Um Jammer Lammy",
       "category": "Sony",
       "system": "psx",
@@ -325,12 +319,6 @@
       "bucket": "dreamcast/Rez (Europe) (En,Ja,Fr,De,Es,It).chd"
     },
     {
-      "title": "Rez",
-      "category": "Sega",
-      "system": "ps2",
-      "bucket": "ps2/Rez (USA) (En,Fr,De,Es,It).chd"
-    },
-    {
       "title": "Puyo Puyo Da! Featuring Ellena System",
       "category": "Sega",
       "system": "dreamcast",
@@ -562,13 +550,13 @@
       "title": "Gitaroo Man",
       "category": "Other",
       "system": "ps2",
-      "bucket": "ps2/Gitaroo Man (USA).chd"
-    },
-    {
-      "title": "Gitaroo Man Lives!",
-      "category": "Other",
-      "system": "psp",
-      "bucket": "psp/Gitaroo Man Lives! (USA).chd"
+      "bucket": "ps2/Gitaroo Man (USA).chd",
+      "variants": [
+        {
+          "bucket": "psp/Gitaroo Man Lives! (USA).chd",
+          "note": "PSP: adds two duet stages"
+        }
+      ]
     },
     {
       "title": "DJ Max Emotional Sense - Fever",

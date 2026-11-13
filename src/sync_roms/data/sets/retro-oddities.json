@@ -2863,11 +2863,6 @@
       "bucket": "saturn/Irem Arcade Classics (Japan).chd"
     },
     {
-      "title": "Space Invaders",
-      "system": "saturn",
-      "bucket": "saturn/Space Invaders (Japan).chd"
-    },
-    {
       "title": "Midway's Greatest Arcade Hits: Volume 1",
       "system": "dreamcast",
       "bucket": "dreamcast/Midway's Greatest Arcade Hits - Volume 1 (USA).chd"
@@ -4817,11 +4812,6 @@
       "title": "Ai Senshi Nicol",
       "system": "fds",
       "bucket": "fds/Ai Senshi Nicol (Japan).zip"
-    },
-    {
-      "title": "Gyruss",
-      "system": "fds",
-      "bucket": "fds/Gyruss (Japan).zip"
     },
     {
       "title": "Armana no Kiseki",

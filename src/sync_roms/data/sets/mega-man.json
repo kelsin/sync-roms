@@ -50,7 +50,13 @@
     {
       "title": "Mega Man X3",
       "system": "snes",
-      "bucket": "snes/Mega Man X3 (USA).zip"
+      "bucket": "snes/Mega Man X3 (USA).zip",
+      "variants": [
+        {
+          "bucket": "saturn/Mega Man X3 (Europe).chd",
+          "note": "Saturn: adds animated cutscenes and a CD soundtrack"
+        }
+      ]
     },
     {
       "title": "Mega Man 7",
@@ -58,9 +64,15 @@
       "bucket": "snes/Mega Man 7 (USA).zip"
     },
     {
-      "title": "Rockman & Forte",
-      "system": "snes",
-      "bucket": "snes/Rockman & Forte (Japan).zip"
+      "title": "Mega Man & Bass",
+      "system": "gba",
+      "bucket": "gba/Megaman & Bass (USA).zip",
+      "variants": [
+        {
+          "bucket": "snes/Rockman & Forte (Japan).zip",
+          "note": "SNES: the original with the full screen and better sound (Japanese)"
+        }
+      ]
     },
     {
       "title": "Mega Man - The Wily Wars",
@@ -120,22 +132,13 @@
     {
       "title": "Mega Man 8",
       "system": "psx",
-      "bucket": "psx/Mega Man 8 (USA).chd"
-    },
-    {
-      "title": "Mega Man 8",
-      "system": "saturn",
-      "bucket": "saturn/Mega Man 8 (USA).chd"
-    },
-    {
-      "title": "Mega Man X3",
-      "system": "saturn",
-      "bucket": "saturn/Mega Man X3 (Europe).chd"
-    },
-    {
-      "title": "Mega Man X4",
-      "system": "saturn",
-      "bucket": "saturn/Mega Man X4 (USA).chd"
+      "bucket": "psx/Mega Man 8 (USA).chd",
+      "variants": [
+        {
+          "bucket": "saturn/Mega Man 8 (USA).chd",
+          "note": "Saturn: adds Cut Man and Wood Man boss fights and extra art"
+        }
+      ]
     },
     {
       "title": "Super Adventure Rockman",
@@ -173,11 +176,6 @@
       "bucket": "gba/Megaman Zero 4 (USA).zip"
     },
     {
-      "title": "Mega Man & Bass",
-      "system": "gba",
-      "bucket": "gba/Megaman & Bass (USA).zip"
-    },
-    {
       "title": "Mega Man Battle Network",
       "system": "gba",
       "bucket": "gba/Megaman - Battle Network (USA).zip"
@@ -195,12 +193,17 @@
     {
       "title": "Mega Man Battle Network 5: Team Protoman",
       "system": "gba",
-      "bucket": "gba/Megaman - Battle Network 5 - Team Protoman (USA).zip"
-    },
-    {
-      "title": "Mega Man Anniversary Collection (Rev 1)",
-      "system": "gc",
-      "bucket": "gc/Mega Man Anniversary Collection (USA) (Rev 1).rvz"
+      "bucket": "gba/Megaman - Battle Network 5 - Team Protoman (USA).zip",
+      "variants": [
+        {
+          "bucket": "gba/Megaman - Battle Network 5 - Team Colonel (USA).zip",
+          "note": "GBA: Team Colonel version, with a different Navi team and areas"
+        },
+        {
+          "bucket": "nds/Mega Man Battle Network 5 - Double Team DS (USA).zip",
+          "note": "DS: both versions on one cart, plus extra Navis and bosses"
+        }
+      ]
     },
     {
       "title": "Mega Man X Collection",
@@ -226,11 +229,6 @@
       "title": "Mega Man ZX - Advent",
       "system": "nds",
       "bucket": "nds/Mega Man ZX - Advent (USA).zip"
-    },
-    {
-      "title": "Mega Man Zero Collection",
-      "system": "nds",
-      "bucket": "nds/Mega Man Zero Collection (USA).zip"
     },
     {
       "title": "Mega Man Star Force - Dragon",
@@ -268,11 +266,6 @@
       "bucket": "nds/Mega Man Star Force 3 - Red Joker (USA).zip"
     },
     {
-      "title": "Mega Man Battle Network 5 - Double Team DS",
-      "system": "nds",
-      "bucket": "nds/Mega Man Battle Network 5 - Double Team DS (USA).zip"
-    },
-    {
       "title": "Rockman EXE - Operate Shooting Star",
       "system": "nds",
       "bucket": "nds/Rockman EXE - Operate Shooting Star (Japan).zip"
@@ -291,11 +284,6 @@
       "title": "Mega Man - Battle Network 4 - Blue Moon",
       "system": "gba",
       "bucket": "gba/Megaman - Battle Network 4 - Blue Moon (USA).zip"
-    },
-    {
-      "title": "Mega Man - Battle Network 5 - Team Colonel",
-      "system": "gba",
-      "bucket": "gba/Megaman - Battle Network 5 - Team Colonel (USA).zip"
     },
     {
       "title": "Mega Man - Battle Network 6 - Cybeast Gregar",
@@ -373,16 +361,6 @@
       "bucket": "ps2/Mega Man X8 (USA).chd"
     },
     {
-      "title": "Mega Man Anniversary Collection",
-      "system": "ps2",
-      "bucket": "ps2/Mega Man Anniversary Collection (USA).chd"
-    },
-    {
-      "title": "Mega Man X Collection",
-      "system": "ps2",
-      "bucket": "ps2/Mega Man X Collection (USA).chd"
-    },
-    {
       "title": "Rockman: Battle & Fighters",
       "system": "ngpc",
       "bucket": "ngpc/Rockman - Battle & Fighters (Japan).zip"
@@ -411,21 +389,6 @@
       "title": "Mega Man 10",
       "system": "ps3",
       "bucket": "ps3/Mega Man 10 PSN [NPUB-30114].rar"
-    },
-    {
-      "title": "Mega Man X4",
-      "system": "ps3",
-      "bucket": "ps3/Mega Man X4 PSN [NPUJ-00561].rar"
-    },
-    {
-      "title": "Mega Man X5",
-      "system": "ps3",
-      "bucket": "ps3/Mega Man X5 PSN [NPUJ-01334].rar"
-    },
-    {
-      "title": "Mega Man Legacy Collection",
-      "system": "3ds",
-      "bucket": "3ds/Mega Man Legacy Collection (USA).zip"
     }
   ]
 }

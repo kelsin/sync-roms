@@ -9,36 +9,6 @@
       "bucket": "atarijaguar/Wolfenstein 3D (World).zip"
     },
     {
-      "title": "Wolfenstein 3-D",
-      "category": "Doom & id Tech",
-      "system": "snes",
-      "bucket": "snes/Wolfenstein 3-D (USA).zip"
-    },
-    {
-      "title": "Wolfenstein 3D",
-      "category": "Doom & id Tech",
-      "system": "gba",
-      "bucket": "gba/Wolfenstein 3D (USA, Europe).zip"
-    },
-    {
-      "title": "Doom",
-      "category": "Doom & id Tech",
-      "system": "atarijaguar",
-      "bucket": "atarijaguar/Doom (World).zip"
-    },
-    {
-      "title": "Doom",
-      "category": "Doom & id Tech",
-      "system": "sega32x",
-      "bucket": "sega32x/Doom (Japan, USA) (En).zip"
-    },
-    {
-      "title": "Doom",
-      "category": "Doom & id Tech",
-      "system": "snes",
-      "bucket": "snes/Doom (USA).zip"
-    },
-    {
       "title": "Doom",
       "category": "Doom & id Tech",
       "system": "psx",
@@ -51,22 +21,10 @@
       "bucket": "psx/Final Doom (USA).chd"
     },
     {
-      "title": "Doom",
-      "category": "Doom & id Tech",
-      "system": "saturn",
-      "bucket": "saturn/Doom (USA).chd"
-    },
-    {
       "title": "Doom 64",
       "category": "Doom & id Tech",
       "system": "n64",
       "bucket": "n64/Doom 64 (USA) (Rev 1).zip"
-    },
-    {
-      "title": "Doom",
-      "category": "Doom & id Tech",
-      "system": "gba",
-      "bucket": "gba/Doom (USA, Europe).zip"
     },
     {
       "title": "Doom II",
@@ -77,32 +35,20 @@
     {
       "title": "Hexen",
       "category": "Doom & id Tech",
-      "system": "saturn",
-      "bucket": "saturn/Hexen (USA).chd"
-    },
-    {
-      "title": "Hexen",
-      "category": "Doom & id Tech",
-      "system": "psx",
-      "bucket": "psx/Hexen (USA).chd"
-    },
-    {
-      "title": "Hexen",
-      "category": "Doom & id Tech",
       "system": "n64",
       "bucket": "n64/Hexen (USA).zip"
     },
     {
       "title": "Quake",
       "category": "Doom & id Tech",
-      "system": "saturn",
-      "bucket": "saturn/Quake (USA).chd"
-    },
-    {
-      "title": "Quake",
-      "category": "Doom & id Tech",
       "system": "n64",
-      "bucket": "n64/Quake (USA).zip"
+      "bucket": "n64/Quake (USA).zip",
+      "variants": [
+        {
+          "bucket": "saturn/Quake (USA).chd",
+          "note": "Saturn: adds exclusive levels"
+        }
+      ]
     },
     {
       "title": "Quake II",
@@ -126,19 +72,13 @@
       "title": "Duke Nukem 3D",
       "category": "Duke Nukem & Build Engine",
       "system": "saturn",
-      "bucket": "saturn/Duke Nukem 3D (USA).chd"
-    },
-    {
-      "title": "Duke Nukem 64",
-      "category": "Duke Nukem & Build Engine",
-      "system": "n64",
-      "bucket": "n64/Duke Nukem 64 (USA).zip"
-    },
-    {
-      "title": "Duke Nukem - Total Meltdown",
-      "category": "Duke Nukem & Build Engine",
-      "system": "psx",
-      "bucket": "psx/Duke Nukem - Total Meltdown (USA).chd"
+      "bucket": "saturn/Duke Nukem 3D (USA).chd",
+      "variants": [
+        {
+          "bucket": "n64/Duke Nukem 64 (USA).zip",
+          "note": "N64: adds split-screen co-op and new weapons; censored"
+        }
+      ]
     },
     {
       "title": "Duke Nukem 3D",
@@ -163,12 +103,6 @@
       "category": "Duke Nukem & Build Engine",
       "system": "saturn",
       "bucket": "saturn/Powerslave (USA).chd"
-    },
-    {
-      "title": "Powerslave",
-      "category": "Duke Nukem & Build Engine",
-      "system": "psx",
-      "bucket": "psx/Powerslave (USA).chd"
     },
     {
       "title": "GoldenEye 007",
@@ -322,12 +256,6 @@
       "bucket": "psx/Medal of Honor - Underground (USA).chd"
     },
     {
-      "title": "Medal of Honor - Underground",
-      "category": "Military",
-      "system": "gba",
-      "bucket": "gba/Medal of Honor - Underground (USA).zip"
-    },
-    {
       "title": "Medal of Honor - Frontline",
       "category": "Military",
       "system": "gc",
@@ -418,38 +346,32 @@
     {
       "title": "Tom Clancy's Rainbow Six",
       "category": "Military",
-      "system": "n64",
-      "bucket": "n64/Tom Clancy's Rainbow Six (USA).zip"
-    },
-    {
-      "title": "Tom Clancy's Rainbow Six",
-      "category": "Military",
       "system": "psx",
-      "bucket": "psx/Tom Clancy's Rainbow Six (USA).chd"
+      "bucket": "psx/Tom Clancy's Rainbow Six (USA).chd",
+      "variants": [
+        {
+          "bucket": "dreamcast/Tom Clancy's Rainbow Six with Eagle Watch Missions (USA).chd",
+          "note": "Dreamcast: PC-based port, adds the Eagle Watch missions"
+        }
+      ]
     },
     {
       "title": "Tom Clancy's Rainbow Six - Rogue Spear",
       "category": "Military",
       "system": "psx",
-      "bucket": "psx/Tom Clancy's Rainbow Six - Rogue Spear (USA).chd"
+      "bucket": "psx/Tom Clancy's Rainbow Six - Rogue Spear (USA).chd",
+      "variants": [
+        {
+          "bucket": "dreamcast/Tom Clancy's Rainbow Six - Rogue Spear + Mission Pack - Urban Operations (USA).chd",
+          "note": "Dreamcast: PC-based port, adds the Urban Operations missions"
+        }
+      ]
     },
     {
       "title": "Tom Clancy's Rainbow Six - Lone Wolf",
       "category": "Military",
       "system": "psx",
       "bucket": "psx/Tom Clancy's Rainbow Six - Lone Wolf (USA).chd"
-    },
-    {
-      "title": "Tom Clancy's Rainbow Six with Eagle Watch Missions",
-      "category": "Military",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Tom Clancy's Rainbow Six with Eagle Watch Missions (USA).chd"
-    },
-    {
-      "title": "Tom Clancy's Rainbow Six - Rogue Spear + Mission Pack - Urban Operations",
-      "category": "Military",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Tom Clancy's Rainbow Six - Rogue Spear + Mission Pack - Urban Operations (USA).chd"
     },
     {
       "title": "Tom Clancy's Rainbow Six 3",
@@ -496,14 +418,14 @@
     {
       "title": "Faceball 2000",
       "category": "Sci-Fi & Horror",
-      "system": "snes",
-      "bucket": "snes/Faceball 2000 (USA).zip"
-    },
-    {
-      "title": "Faceball",
-      "category": "Sci-Fi & Horror",
-      "system": "tg-cd",
-      "bucket": "tg-cd/Faceball (Japan).chd"
+      "system": "gb",
+      "bucket": "gb/Faceball 2000 (USA).zip",
+      "variants": [
+        {
+          "bucket": "snes/Faceball 2000 (USA).zip",
+          "note": "SNES: adds color, more levels and a full-screen view"
+        }
+      ]
     },
     {
       "title": "Zero Tolerance",
@@ -516,12 +438,6 @@
       "category": "Sci-Fi & Horror",
       "system": "genesis",
       "bucket": "genesis/Bloodshot (Europe) (En,Fr,De,Es).zip"
-    },
-    {
-      "title": "Bloodshot ~ Battle Frenzy",
-      "category": "Sci-Fi & Horror",
-      "system": "segacd",
-      "bucket": "segacd/Bloodshot ~ Battle Frenzy (Europe) (En,Fr,De,Es).chd"
     },
     {
       "title": "Cyber-Cop",
@@ -646,14 +562,14 @@
     {
       "title": "South Park",
       "category": "Sci-Fi & Horror",
-      "system": "psx",
-      "bucket": "psx/South Park (USA).chd"
+      "system": "n64",
+      "bucket": "n64/South Park (USA).zip"
     },
     {
       "title": "Armorines - Project S.W.A.R.M.",
       "category": "Sci-Fi & Horror",
-      "system": "psx",
-      "bucket": "psx/Armorines - Project S.W.A.R.M. (USA).chd"
+      "system": "n64",
+      "bucket": "n64/Armorines - Project S.W.A.R.M. (USA).zip"
     },
     {
       "title": "Alien Resurrection",
@@ -686,58 +602,16 @@
       "bucket": "saturn/Ghen War (USA).chd"
     },
     {
-      "title": "Space Hulk - Vengeance of the Blood Angels",
-      "category": "Sci-Fi & Horror",
-      "system": "saturn",
-      "bucket": "saturn/Space Hulk - Vengeance of the Blood Angels (USA).chd"
-    },
-    {
-      "title": "Defcon 5 - Peace Has a Price...",
-      "category": "Sci-Fi & Horror",
-      "system": "saturn",
-      "bucket": "saturn/Defcon 5 - Peace Has a Price... (USA).chd"
-    },
-    {
-      "title": "Krazy Ivan",
-      "category": "Sci-Fi & Horror",
-      "system": "saturn",
-      "bucket": "saturn/Krazy Ivan (Europe).chd"
-    },
-    {
       "title": "Gungriffon",
       "category": "Sci-Fi & Horror",
       "system": "saturn",
       "bucket": "saturn/Gungriffon (USA).chd"
     },
     {
-      "title": "Alien Trilogy",
-      "category": "Sci-Fi & Horror",
-      "system": "saturn",
-      "bucket": "saturn/Alien Trilogy (USA).chd"
-    },
-    {
       "title": "Congo - The Movie - The Lost City of Zinj",
       "category": "Sci-Fi & Horror",
       "system": "saturn",
       "bucket": "saturn/Congo - The Movie - The Lost City of Zinj (USA).chd"
-    },
-    {
-      "title": "Forsaken 64",
-      "category": "Sci-Fi & Horror",
-      "system": "n64",
-      "bucket": "n64/Forsaken 64 (USA).zip"
-    },
-    {
-      "title": "South Park",
-      "category": "Sci-Fi & Horror",
-      "system": "n64",
-      "bucket": "n64/South Park (USA).zip"
-    },
-    {
-      "title": "Armorines - Project S.W.A.R.M.",
-      "category": "Sci-Fi & Horror",
-      "system": "n64",
-      "bucket": "n64/Armorines - Project S.W.A.R.M. (USA).zip"
     },
     {
       "title": "John Romero's Daikatana",
@@ -824,12 +698,6 @@
       "bucket": "gc/Geist (USA).rvz"
     },
     {
-      "title": "Star Wars - Jedi Knight II - Jedi Outcast",
-      "category": "Sci-Fi & Horror",
-      "system": "xbox",
-      "bucket": "xbox/Star Wars - Jedi Knight II - Jedi Outcast (USA).iso"
-    },
-    {
       "title": "Star Wars - Jedi Knight - Jedi Academy",
       "category": "Sci-Fi & Horror",
       "system": "xbox",
@@ -894,18 +762,6 @@
       "category": "Sci-Fi & Horror",
       "system": "wiiu",
       "bucket": "wiiu/ZombiU (US) (v32).wua"
-    },
-    {
-      "title": "Faceball 2000",
-      "category": "Handheld",
-      "system": "gb",
-      "bucket": "gb/Faceball 2000 (USA).zip"
-    },
-    {
-      "title": "Faceball 2000",
-      "category": "Handheld",
-      "system": "gamegear",
-      "bucket": "gamegear/Faceball 2000 (Japan).zip"
     },
     {
       "title": "Ecks vs Sever",

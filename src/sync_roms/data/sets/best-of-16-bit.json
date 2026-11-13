@@ -10,17 +10,35 @@
     {
       "title": "Legend of Zelda, The - A Link to the Past",
       "system": "snes",
-      "bucket": "snes/Legend of Zelda, The - A Link to the Past (USA).zip"
+      "bucket": "snes/Legend of Zelda, The - A Link to the Past (USA).zip",
+      "variants": [
+        {
+          "bucket": "gba/Legend of Zelda, The - A Link to the Past & Four Swords (USA).zip",
+          "note": "GBA: adds Four Swords multiplayer and a bonus dungeon"
+        }
+      ]
     },
     {
       "title": "Chrono Trigger",
       "system": "snes",
-      "bucket": "snes/Chrono Trigger (USA).zip"
+      "bucket": "snes/Chrono Trigger (USA).zip",
+      "variants": [
+        {
+          "bucket": "nds/Chrono Trigger (USA) (En,Fr).zip",
+          "note": "DS: adds the Lost Sanctum, a bonus dungeon and a new ending"
+        }
+      ]
     },
     {
       "title": "Donkey Kong Country (Rev 2)",
       "system": "snes",
-      "bucket": "snes/Donkey Kong Country (USA) (Rev 2).zip"
+      "bucket": "snes/Donkey Kong Country (USA) (Rev 2).zip",
+      "variants": [
+        {
+          "bucket": "gba/Donkey Kong Country (USA).zip",
+          "note": "GBA: adds fishing and dance minigames and a time attack mode"
+        }
+      ]
     },
     {
       "title": "Donkey Kong Country 2 - Diddy's Kong Quest (En,Fr) (Rev 1)",
@@ -30,7 +48,13 @@
     {
       "title": "Donkey Kong Country 3 - Dixie Kong's Double Trouble!",
       "system": "snes",
-      "bucket": "snes/Donkey Kong Country 3 - Dixie Kong's Double Trouble! (USA) (En,Fr).zip"
+      "bucket": "snes/Donkey Kong Country 3 - Dixie Kong's Double Trouble! (USA) (En,Fr).zip",
+      "variants": [
+        {
+          "bucket": "gba/Donkey Kong Country 3 (USA).zip",
+          "note": "GBA: adds a new world, Pacifica, and a new soundtrack"
+        }
+      ]
     },
     {
       "title": "EarthBound",
@@ -40,17 +64,35 @@
     {
       "title": "Final Fantasy III (Rev 1)",
       "system": "snes",
-      "bucket": "snes/Final Fantasy III (USA) (Rev 1).zip"
+      "bucket": "snes/Final Fantasy III (USA) (Rev 1).zip",
+      "variants": [
+        {
+          "bucket": "gba/Final Fantasy VI Advance (USA).zip",
+          "note": "GBA: adds the Dragons' Den dungeon, new espers and a new translation"
+        }
+      ]
     },
     {
       "title": "Final Fantasy II",
       "system": "snes",
-      "bucket": "snes/Final Fantasy II (USA) (Rev 1).zip"
+      "bucket": "snes/Final Fantasy II (USA) (Rev 1).zip",
+      "variants": [
+        {
+          "bucket": "gba/Final Fantasy IV Advance (USA).zip",
+          "note": "GBA: adds a bonus dungeon, party swapping and a new translation"
+        }
+      ]
     },
     {
       "title": "Super Mario World 2 - Yoshi's Island (Rev 1)",
       "system": "snes",
-      "bucket": "snes/Super Mario World 2 - Yoshi's Island (USA) (Rev 1).zip"
+      "bucket": "snes/Super Mario World 2 - Yoshi's Island (USA) (Rev 1).zip",
+      "variants": [
+        {
+          "bucket": "gba/Super Mario Advance 3 - Yoshi's Island (USA).zip",
+          "note": "GBA: adds six new bonus levels"
+        }
+      ]
     },
     {
       "title": "F-Zero",
@@ -85,7 +127,13 @@
     {
       "title": "Mega Man X3",
       "system": "snes",
-      "bucket": "snes/Mega Man X3 (USA).zip"
+      "bucket": "snes/Mega Man X3 (USA).zip",
+      "variants": [
+        {
+          "bucket": "saturn/Mega Man X3 (Europe).chd",
+          "note": "Saturn: adds animated cutscenes and a CD soundtrack"
+        }
+      ]
     },
     {
       "title": "Mega Man 7",
@@ -105,7 +153,13 @@
     {
       "title": "Kirby Super Star",
       "system": "snes",
-      "bucket": "snes/Kirby Super Star (USA).zip"
+      "bucket": "snes/Kirby Super Star (USA).zip",
+      "variants": [
+        {
+          "bucket": "nds/Kirby Super Star Ultra (USA).zip",
+          "note": "DS: adds four new modes and redone graphics"
+        }
+      ]
     },
     {
       "title": "Kirby's Dream Land 3",
@@ -118,16 +172,6 @@
       "bucket": "snes/Kirby's Dream Course (USA).zip"
     },
     {
-      "title": "Street Fighter II Turbo (Rev 1)",
-      "system": "snes",
-      "bucket": "snes/Street Fighter II Turbo (USA) (Rev 1).zip"
-    },
-    {
-      "title": "Super Street Fighter II",
-      "system": "snes",
-      "bucket": "snes/Super Street Fighter II (USA) (Rev 1).zip"
-    },
-    {
       "title": "Super Punch-Out!!",
       "system": "snes",
       "bucket": "snes/Super Punch-Out!! (USA).zip"
@@ -135,7 +179,13 @@
     {
       "title": "Super Ghouls 'N Ghosts",
       "system": "snes",
-      "bucket": "snes/Super Ghouls 'N Ghosts (USA).zip"
+      "bucket": "snes/Super Ghouls 'N Ghosts (USA).zip",
+      "variants": [
+        {
+          "bucket": "gba/Super Ghouls'n Ghosts (USA, Europe).zip",
+          "note": "GBA: adds an Arrange mode with remixed stages"
+        }
+      ]
     },
     {
       "title": "ActRaiser",
@@ -179,13 +229,25 @@
     },
     {
       "title": "Earthworm Jim",
-      "system": "snes",
-      "bucket": "snes/Earthworm Jim (USA).zip"
+      "system": "genesis",
+      "bucket": "genesis/Earthworm Jim (USA).zip",
+      "variants": [
+        {
+          "bucket": "segacd/Earthworm Jim - Special Edition (USA) (RE).chd",
+          "note": "Sega CD: adds a new level, extra animation and a CD soundtrack"
+        }
+      ]
     },
     {
       "title": "Breath of Fire II",
       "system": "snes",
-      "bucket": "snes/Breath of Fire II (USA).zip"
+      "bucket": "snes/Breath of Fire II (USA).zip",
+      "variants": [
+        {
+          "bucket": "gba/Breath of Fire II (USA).zip",
+          "note": "GBA: new translation, a dash button and quick saves"
+        }
+      ]
     },
     {
       "title": "Lufia II - Rise of the Sinistrals",
@@ -223,21 +285,6 @@
       "bucket": "snes/SimCity (USA).zip"
     },
     {
-      "title": "Mortal Kombat II",
-      "system": "snes",
-      "bucket": "snes/Mortal Kombat II (USA) (Rev 1).zip"
-    },
-    {
-      "title": "Killer Instinct",
-      "system": "snes",
-      "bucket": "snes/Killer Instinct (USA) (Rev 1).zip"
-    },
-    {
-      "title": "Teenage Mutant Ninja Turtles IV - Turtles in Time",
-      "system": "snes",
-      "bucket": "snes/Teenage Mutant Ninja Turtles IV - Turtles in Time (USA).zip"
-    },
-    {
       "title": "Super Bomberman 2",
       "system": "snes",
       "bucket": "snes/Super Bomberman 2 (USA).zip"
@@ -258,11 +305,6 @@
       "bucket": "snes/Super Star Wars - Return of the Jedi (USA) (Rev 1).zip"
     },
     {
-      "title": "Sunset Riders",
-      "system": "snes",
-      "bucket": "snes/Sunset Riders (USA).zip"
-    },
-    {
       "title": "Demon's Crest",
       "system": "snes",
       "bucket": "snes/Demon's Crest (USA).zip"
@@ -281,11 +323,6 @@
       "title": "Legend of the Mystical Ninja, The",
       "system": "snes",
       "bucket": "snes/Legend of the Mystical Ninja, The (USA).zip"
-    },
-    {
-      "title": "Gradius III",
-      "system": "snes",
-      "bucket": "snes/Gradius III (USA).zip"
     },
     {
       "title": "R-Type III",
@@ -325,17 +362,18 @@
     {
       "title": "Lost Vikings, The",
       "system": "snes",
-      "bucket": "snes/Lost Vikings, The (USA).zip"
+      "bucket": "snes/Lost Vikings, The (USA).zip",
+      "variants": [
+        {
+          "bucket": "genesis/Lost Vikings, The (USA) (October, 1995).zip",
+          "note": "Genesis: adds five extra levels"
+        }
+      ]
     },
     {
       "title": "Out of This World",
       "system": "snes",
       "bucket": "snes/Out of This World (USA).zip"
-    },
-    {
-      "title": "Super Smash T.V.",
-      "system": "snes",
-      "bucket": "snes/Super Smash T.V. (USA).zip"
     },
     {
       "title": "Aladdin",
@@ -348,19 +386,14 @@
       "bucket": "snes/Magical Quest Starring Mickey Mouse, The (USA) (Rev 1).zip"
     },
     {
-      "title": "NBA Jam - Tournament Edition",
-      "system": "snes",
-      "bucket": "snes/NBA Jam - Tournament Edition (USA).zip"
-    },
-    {
       "title": "Ken Griffey Jr. Presents Major League Baseball",
       "system": "snes",
       "bucket": "snes/Ken Griffey Jr. Presents Major League Baseball (USA) (Rev 1).zip"
     },
     {
       "title": "NHL '94",
-      "system": "snes",
-      "bucket": "snes/NHL '94 (USA).zip"
+      "system": "genesis",
+      "bucket": "genesis/NHL '94 (USA, Europe).zip"
     },
     {
       "title": "Tecmo Super Bowl",
@@ -373,19 +406,20 @@
       "bucket": "snes/International Superstar Soccer Deluxe (USA).zip"
     },
     {
-      "title": "Tetris & Dr. Mario",
-      "system": "snes",
-      "bucket": "snes/Tetris & Dr. Mario (USA).zip"
-    },
-    {
       "title": "Earthworm Jim 2",
-      "system": "snes",
-      "bucket": "snes/Earthworm Jim 2 (USA).zip"
+      "system": "genesis",
+      "bucket": "genesis/Earthworm Jim 2 (USA).zip"
     },
     {
       "title": "Sonic The Hedgehog 3",
       "system": "genesis",
-      "bucket": "genesis/Sonic The Hedgehog 3 (USA).zip"
+      "bucket": "genesis/Sonic The Hedgehog 3 (USA).zip",
+      "variants": [
+        {
+          "bucket": "genesis/Sonic & Knuckles + Sonic The Hedgehog 3 (USA) (Lock-on Combination).zip",
+          "note": "Genesis: Sonic 3 & Knuckles, Sonic 3 joined with Sonic & Knuckles"
+        }
+      ]
     },
     {
       "title": "Sonic The Hedgehog",
@@ -396,11 +430,6 @@
       "title": "Sonic & Knuckles",
       "system": "genesis",
       "bucket": "genesis/Sonic & Knuckles (World).zip"
-    },
-    {
-      "title": "Sonic 3 & Knuckles",
-      "system": "genesis",
-      "bucket": "genesis/Sonic & Knuckles + Sonic The Hedgehog 3 (USA) (Lock-on Combination).zip"
     },
     {
       "title": "Sonic Spinball",
@@ -440,7 +469,13 @@
     {
       "title": "Shining Force",
       "system": "genesis",
-      "bucket": "genesis/Shining Force (USA).zip"
+      "bucket": "genesis/Shining Force (USA).zip",
+      "variants": [
+        {
+          "bucket": "gba/Shining Force - Resurrection of the Dark Dragon (USA).zip",
+          "note": "GBA: remake adds new characters, a card system and new scenes"
+        }
+      ]
     },
     {
       "title": "Shining in the Darkness",
@@ -466,11 +501,6 @@
       "title": "Comix Zone",
       "system": "genesis",
       "bucket": "genesis/Comix Zone (USA).zip"
-    },
-    {
-      "title": "Golden Axe (Rev A)",
-      "system": "genesis",
-      "bucket": "genesis/Golden Axe (World) (Rev A).zip"
     },
     {
       "title": "Shinobi III - Return of the Ninja Master",
@@ -506,16 +536,6 @@
       "title": "Aladdin",
       "system": "genesis",
       "bucket": "genesis/Aladdin (USA).zip"
-    },
-    {
-      "title": "Earthworm Jim",
-      "system": "genesis",
-      "bucket": "genesis/Earthworm Jim (USA).zip"
-    },
-    {
-      "title": "Earthworm Jim 2",
-      "system": "genesis",
-      "bucket": "genesis/Earthworm Jim 2 (USA).zip"
     },
     {
       "title": "Road Rash II (RR206)",
@@ -570,12 +590,24 @@
     {
       "title": "Ecco the Dolphin",
       "system": "genesis",
-      "bucket": "genesis/Ecco the Dolphin (USA, Europe, Korea) (En).zip"
+      "bucket": "genesis/Ecco the Dolphin (USA, Europe, Korea) (En).zip",
+      "variants": [
+        {
+          "bucket": "segacd/Ecco the Dolphin (USA).chd",
+          "note": "Sega CD: adds extra levels, a CD soundtrack and FMV"
+        }
+      ]
     },
     {
       "title": "Ecco - The Tides of Time",
       "system": "genesis",
-      "bucket": "genesis/Ecco - The Tides of Time (USA).zip"
+      "bucket": "genesis/Ecco - The Tides of Time (USA).zip",
+      "variants": [
+        {
+          "bucket": "segacd/Ecco - The Tides of Time (USA).chd",
+          "note": "Sega CD: adds a CD soundtrack and FMV cutscenes"
+        }
+      ]
     },
     {
       "title": "Castle of Illusion Starring Mickey Mouse",
@@ -591,16 +623,6 @@
       "title": "QuackShot Starring Donald Duck",
       "system": "genesis",
       "bucket": "genesis/QuackShot Starring Donald Duck (World) (Rev A).zip"
-    },
-    {
-      "title": "Strider",
-      "system": "genesis",
-      "bucket": "genesis/Strider (USA, Europe).zip"
-    },
-    {
-      "title": "Ghouls'n Ghosts",
-      "system": "genesis",
-      "bucket": "genesis/Ghouls'n Ghosts (Japan, USA) (En).zip"
     },
     {
       "title": "Mega Man - The Wily Wars",
@@ -698,34 +720,15 @@
       "bucket": "genesis/Crusader of Centy (USA).zip"
     },
     {
-      "title": "Gauntlet IV",
-      "system": "genesis",
-      "bucket": "genesis/Gauntlet IV (USA, Europe) (En,Ja).zip"
-    },
-    {
-      "title": "Mortal Kombat II",
-      "system": "genesis",
-      "bucket": "genesis/Mortal Kombat II (World).zip"
-    },
-    {
-      "title": "Street Fighter II' - Special Champion Edition",
-      "system": "genesis",
-      "bucket": "genesis/Street Fighter II' - Special Champion Edition (USA).zip"
-    },
-    {
       "title": "Eternal Champions",
       "system": "genesis",
-      "bucket": "genesis/Eternal Champions (USA).zip"
-    },
-    {
-      "title": "NHL '94",
-      "system": "genesis",
-      "bucket": "genesis/NHL '94 (USA, Europe).zip"
-    },
-    {
-      "title": "NBA Jam - Tournament Edition",
-      "system": "genesis",
-      "bucket": "genesis/NBA Jam - Tournament Edition (World).zip"
+      "bucket": "genesis/Eternal Champions (USA).zip",
+      "variants": [
+        {
+          "bucket": "segacd/Eternal Champions - Challenge from the Dark Side (USA) (RE).chd",
+          "note": "Sega CD: adds characters, stages and new finishing moves"
+        }
+      ]
     },
     {
       "title": "Mutant League Football",
@@ -733,14 +736,19 @@
       "bucket": "genesis/Mutant League Football (USA, Europe).zip"
     },
     {
-      "title": "OutRun",
-      "system": "genesis",
-      "bucket": "genesis/OutRun (USA, Europe).zip"
-    },
-    {
       "title": "Virtua Racing",
       "system": "genesis",
-      "bucket": "genesis/Virtua Racing (USA).zip"
+      "bucket": "genesis/Virtua Racing (USA).zip",
+      "variants": [
+        {
+          "bucket": "sega32x/Virtua Racing Deluxe (USA).zip",
+          "note": "32X: Deluxe adds tracks and cars and runs smoother"
+        },
+        {
+          "bucket": "saturn/Virtua Racing (USA) (15S).chd",
+          "note": "Saturn: adds more tracks and cars"
+        }
+      ]
     },
     {
       "title": "Micro Machines",
@@ -751,16 +759,6 @@
       "title": "Desert Strike - Return to the Gulf",
       "system": "genesis",
       "bucket": "genesis/Desert Strike - Return to the Gulf (USA, Europe).zip"
-    },
-    {
-      "title": "Columns",
-      "system": "genesis",
-      "bucket": "genesis/Columns (USA, Europe).zip"
-    },
-    {
-      "title": "Dr. Robotnik's Mean Bean Machine",
-      "system": "genesis",
-      "bucket": "genesis/Dr. Robotnik's Mean Bean Machine (USA).zip"
     },
     {
       "title": "Bonk's Adventure",
@@ -803,11 +801,6 @@
       "bucket": "tg16/Final Soldier (Japan) (En).zip"
     },
     {
-      "title": "R-Type",
-      "system": "tg16",
-      "bucket": "tg16/R-Type (USA).zip"
-    },
-    {
       "title": "Dungeon Explorer",
       "system": "tg16",
       "bucket": "tg16/Dungeon Explorer (USA).zip"
@@ -828,29 +821,9 @@
       "bucket": "tg16/Neutopia II (USA).zip"
     },
     {
-      "title": "Cadash",
-      "system": "tg16",
-      "bucket": "tg16/Cadash (USA).zip"
-    },
-    {
-      "title": "Dragon's Curse",
-      "system": "tg16",
-      "bucket": "tg16/Dragon's Curse (USA).zip"
-    },
-    {
       "title": "Legendary Axe, The",
       "system": "tg16",
       "bucket": "tg16/Legendary Axe, The (USA).zip"
-    },
-    {
-      "title": "Ninja Spirit",
-      "system": "tg16",
-      "bucket": "tg16/Ninja Spirit (USA).zip"
-    },
-    {
-      "title": "Splatterhouse",
-      "system": "tg16",
-      "bucket": "tg16/Splatterhouse (USA).zip"
     },
     {
       "title": "New Adventure Island",
@@ -873,19 +846,9 @@
       "bucket": "tg16/Alien Crush (USA).zip"
     },
     {
-      "title": "Galaga '90",
-      "system": "tg16",
-      "bucket": "tg16/Galaga '90 (USA).zip"
-    },
-    {
       "title": "Magical Chase",
       "system": "tg16",
       "bucket": "tg16/Magical Chase (USA).zip"
-    },
-    {
-      "title": "Parodius Da! - Shinwa kara Owarai e",
-      "system": "tg16",
-      "bucket": "tg16/Parodius Da! - Shinwa kara Owarai e (Japan).zip"
     },
     {
       "title": "Bomberman '93",
@@ -898,11 +861,6 @@
       "bucket": "tg16/Bomberman '94 (World) (Wii U Virtual Console).zip"
     },
     {
-      "title": "Street Fighter II' - Champion Edition",
-      "system": "tg16",
-      "bucket": "tg16/Street Fighter II' - Champion Edition (Japan).zip"
-    },
-    {
       "title": "Gekisha Boy",
       "system": "tg16",
       "bucket": "tg16/Gekisha Boy (Japan).zip"
@@ -913,49 +871,14 @@
       "bucket": "tg16/Gomola Speed (Japan).zip"
     },
     {
-      "title": "Nekketsu Koukou Dodgeball-bu - PC Bangai Hen",
-      "system": "tg16",
-      "bucket": "tg16/Nekketsu Koukou Dodgeball-bu - PC Bangai Hen (Japan).zip"
-    },
-    {
-      "title": "Chase H.Q.",
-      "system": "tg16",
-      "bucket": "tg16/Chase H.Q. (USA).zip"
-    },
-    {
-      "title": "Fantasy Zone",
-      "system": "tg16",
-      "bucket": "tg16/Fantasy Zone (USA).zip"
-    },
-    {
       "title": "Legendary Axe II",
       "system": "tg16",
       "bucket": "tg16/Legendary Axe II (USA).zip"
     },
     {
-      "title": "Dragon Spirit",
-      "system": "tg16",
-      "bucket": "tg16/Dragon Spirit (USA).zip"
-    },
-    {
       "title": "Darius Alpha",
       "system": "tg16",
       "bucket": "tg16/Darius Alpha (World) (SG Enhanced) (Darius Cozmic Collection).zip"
-    },
-    {
-      "title": "Out Run",
-      "system": "tg16",
-      "bucket": "tg16/Out Run (Japan).zip"
-    },
-    {
-      "title": "Space Harrier",
-      "system": "tg16",
-      "bucket": "tg16/Space Harrier (USA).zip"
-    },
-    {
-      "title": "Gradius",
-      "system": "tg16",
-      "bucket": "tg16/Gradius (World) (Wii U Virtual Console).zip"
     },
     {
       "title": "World Court Tennis",
@@ -971,11 +894,6 @@
       "title": "Silent Debuggers",
       "system": "tg16",
       "bucket": "tg16/Silent Debuggers (USA).zip"
-    },
-    {
-      "title": "Salamander",
-      "system": "tg16",
-      "bucket": "tg16/Salamander (World) (Wii U Virtual Console).zip"
     },
     {
       "title": "Aoi Blink",
@@ -1013,11 +931,6 @@
       "bucket": "snes/Prince of Persia (USA).zip"
     },
     {
-      "title": "NBA Jam",
-      "system": "snes",
-      "bucket": "snes/NBA Jam (USA) (Rev 1).zip"
-    },
-    {
       "title": "E.V.O. - Search for Eden",
       "system": "snes",
       "bucket": "snes/E.V.O. - Search for Eden (USA).zip"
@@ -1026,11 +939,6 @@
       "title": "True Lies",
       "system": "snes",
       "bucket": "snes/True Lies (USA).zip"
-    },
-    {
-      "title": "Magic Sword",
-      "system": "snes",
-      "bucket": "snes/Magic Sword (USA).zip"
     },
     {
       "title": "Brain Lord",
@@ -1043,14 +951,9 @@
       "bucket": "snes/Super Adventure Island II (USA).zip"
     },
     {
-      "title": "Saturday Night Slam Masters",
-      "system": "snes",
-      "bucket": "snes/Saturday Night Slam Masters (USA).zip"
-    },
-    {
       "title": "Boogerman - A Pick and Flick Adventure",
-      "system": "snes",
-      "bucket": "snes/Boogerman - A Pick and Flick Adventure (USA).zip"
+      "system": "genesis",
+      "bucket": "genesis/Boogerman - A Pick and Flick Adventure (USA).zip"
     },
     {
       "title": "Goof Troop",
@@ -1079,8 +982,8 @@
     },
     {
       "title": "Ys III - Wanderers from Ys",
-      "system": "snes",
-      "bucket": "snes/Ys III - Wanderers from Ys (USA).zip"
+      "system": "tg-cd",
+      "bucket": "tg-cd/Ys III - Wanderers from Ys (USA).chd"
     },
     {
       "title": "Mega Man Soccer",
@@ -1105,7 +1008,13 @@
     {
       "title": "Blackthorne",
       "system": "snes",
-      "bucket": "snes/Blackthorne (USA).zip"
+      "bucket": "snes/Blackthorne (USA).zip",
+      "variants": [
+        {
+          "bucket": "sega32x/Blackthorne (USA).zip",
+          "note": "32X: re-rendered graphics"
+        }
+      ]
     },
     {
       "title": "Super Tennis",
@@ -1125,7 +1034,13 @@
     {
       "title": "Breath of Fire",
       "system": "snes",
-      "bucket": "snes/Breath of Fire (USA).zip"
+      "bucket": "snes/Breath of Fire (USA).zip",
+      "variants": [
+        {
+          "bucket": "gba/Breath of Fire (USA).zip",
+          "note": "GBA: adds a dash button and quick saves"
+        }
+      ]
     },
     {
       "title": "Final Fight 3",
@@ -1141,11 +1056,6 @@
       "title": "Smart Ball",
       "system": "snes",
       "bucket": "snes/Smart Ball (USA).zip"
-    },
-    {
-      "title": "Kirby's Avalanche",
-      "system": "snes",
-      "bucket": "snes/Kirby's Avalanche (USA).zip"
     },
     {
       "title": "Super Bonk",
@@ -1168,24 +1078,9 @@
       "bucket": "snes/Final Fight 2 (USA).zip"
     },
     {
-      "title": "Ultimate Mortal Kombat 3",
-      "system": "snes",
-      "bucket": "snes/Ultimate Mortal Kombat 3 (USA).zip"
-    },
-    {
-      "title": "Knights of the Round",
-      "system": "snes",
-      "bucket": "snes/Knights of the Round (USA).zip"
-    },
-    {
       "title": "Super Baseball Simulator 1.000",
       "system": "snes",
       "bucket": "snes/Super Baseball Simulator 1.000 (USA).zip"
-    },
-    {
-      "title": "Thunder Spirits",
-      "system": "snes",
-      "bucket": "snes/Thunder Spirits (USA).zip"
     },
     {
       "title": "Robotrek",
@@ -1196,11 +1091,6 @@
       "title": "Teenage Mutant Ninja Turtles - Tournament Fighters",
       "system": "snes",
       "bucket": "snes/Teenage Mutant Ninja Turtles - Tournament Fighters (USA).zip"
-    },
-    {
-      "title": "Street Fighter Alpha 2",
-      "system": "snes",
-      "bucket": "snes/Street Fighter Alpha 2 (USA).zip"
     },
     {
       "title": "Sparkster",
@@ -1223,24 +1113,9 @@
       "bucket": "snes/FireStriker (USA).zip"
     },
     {
-      "title": "Samurai Shodown",
-      "system": "snes",
-      "bucket": "snes/Samurai Shodown (USA).zip"
-    },
-    {
-      "title": "Rockman & Forte",
-      "system": "snes",
-      "bucket": "snes/Rockman & Forte (Japan).zip"
-    },
-    {
       "title": "Final Fantasy - Mystic Quest",
       "system": "snes",
       "bucket": "snes/Final Fantasy - Mystic Quest (USA) (Rev 1).zip"
-    },
-    {
-      "title": "Street Fighter II",
-      "system": "snes",
-      "bucket": "snes/Street Fighter II (USA).zip"
     },
     {
       "title": "SimAnt - The Electronic Ant Colony",
@@ -1280,12 +1155,13 @@
     {
       "title": "Sonic The Hedgehog 2 (Rev B)",
       "system": "genesis",
-      "bucket": "genesis/Sonic The Hedgehog 2 (World) (Rev B).zip"
-    },
-    {
-      "title": "Altered Beast (Rev A)",
-      "system": "genesis",
-      "bucket": "genesis/Altered Beast (Japan, USA) (En) (Rev A).zip"
+      "bucket": "genesis/Sonic The Hedgehog 2 (World) (Rev B).zip",
+      "variants": [
+        {
+          "bucket": "genesis/Sonic & Knuckles + Sonic The Hedgehog 2 (World) (Rev A) (Lock-on Combination).zip",
+          "note": "Genesis: Knuckles in Sonic 2, the whole game as Knuckles"
+        }
+      ]
     },
     {
       "title": "James Pond II - Codename - Robocod",
@@ -1323,11 +1199,6 @@
       "bucket": "genesis/FIFA Soccer 95 (USA, Europe) (En,Fr,De,Es).zip"
     },
     {
-      "title": "Rainbow Islands Extra",
-      "system": "genesis",
-      "bucket": "genesis/Rainbow Islands Extra (Japan).zip"
-    },
-    {
       "title": "Dungeons & Dragons - Warriors of the Eternal Sun",
       "system": "genesis",
       "bucket": "genesis/Dungeons & Dragons - Warriors of the Eternal Sun (USA, Europe).zip"
@@ -1345,12 +1216,13 @@
     {
       "title": "Ys Book I & II",
       "system": "tg-cd",
-      "bucket": "tg-cd/Ys Book I & II (USA).chd"
-    },
-    {
-      "title": "Ys III - Wanderers from Ys",
-      "system": "tg-cd",
-      "bucket": "tg-cd/Ys III - Wanderers from Ys (USA).chd"
+      "bucket": "tg-cd/Ys Book I & II (USA).chd",
+      "variants": [
+        {
+          "bucket": "psp/Ys I & II Chronicles (USA).chd",
+          "note": "PSP: Chronicles adds remastered art, new music and extras"
+        }
+      ]
     },
     {
       "title": "Akumajou Dracula X - Chi no Rondo",
@@ -1383,11 +1255,6 @@
       "bucket": "tg-cd/Ginga Fukei Densetsu Sapphire (Japan).chd"
     },
     {
-      "title": "Fantastic Night Dreams - Cotton",
-      "system": "tg-cd",
-      "bucket": "tg-cd/Fantastic Night Dreams - Cotton (USA).chd"
-    },
-    {
       "title": "Dungeon Explorer II",
       "system": "tg-cd",
       "bucket": "tg-cd/Dungeon Explorer II (USA).chd"
@@ -1403,24 +1270,9 @@
       "bucket": "tg-cd/Sylphia (Japan).chd"
     },
     {
-      "title": "Puyo Puyo CD Tsuu",
-      "system": "tg-cd",
-      "bucket": "tg-cd/Puyo Puyo CD Tsuu (Japan).chd"
-    },
-    {
-      "title": "Downtown Nekketsu Monogatari",
-      "system": "tg-cd",
-      "bucket": "tg-cd/Downtown Nekketsu Monogatari (Japan).chd"
-    },
-    {
       "title": "Faussete Amour",
       "system": "tg-cd",
       "bucket": "tg-cd/Faussete Amour (Japan).chd"
-    },
-    {
-      "title": "Bomberman - Panic Bomber",
-      "system": "tg-cd",
-      "bucket": "tg-cd/Bomberman - Panic Bomber (Japan) (FABT).chd"
     },
     {
       "title": "Cosmic Fantasy 2",
@@ -1428,24 +1280,9 @@
       "bucket": "tg-cd/Cosmic Fantasy 2 (USA).chd"
     },
     {
-      "title": "Super Darius II",
-      "system": "tg-cd",
-      "bucket": "tg-cd/Super Darius II (Japan).chd"
-    },
-    {
-      "title": "Strider Hiryuu",
-      "system": "tg-cd",
-      "bucket": "tg-cd/Strider Hiryuu (Japan).chd"
-    },
-    {
       "title": "Flash Hiders",
       "system": "tg-cd",
       "bucket": "tg-cd/Flash Hiders (Japan).chd"
-    },
-    {
-      "title": "Dynastic Hero, The",
-      "system": "tg-cd",
-      "bucket": "tg-cd/Dynastic Hero, The (USA).chd"
     },
     {
       "title": "Super Air Zonk - Rockabilly-Paradise",
@@ -1458,24 +1295,9 @@
       "bucket": "tg-cd/Ai Chou Aniki (Japan) (SADS, SAES).chd"
     },
     {
-      "title": "Gradius II - Gofer no Yabou",
-      "system": "tg-cd",
-      "bucket": "tg-cd/Gradius II - Gofer no Yabou (Japan).chd"
-    },
-    {
       "title": "Kabuki Ittouryoudan",
       "system": "tg-cd",
       "bucket": "tg-cd/Kabuki Ittouryoudan (Japan) (FABT).chd"
-    },
-    {
-      "title": "Ryuuko no Ken",
-      "system": "tg-cd",
-      "bucket": "tg-cd/Ryuuko no Ken (Japan) (En,Ja,Es) (FACT).chd"
-    },
-    {
-      "title": "Garou Densetsu Special",
-      "system": "tg-cd",
-      "bucket": "tg-cd/Garou Densetsu Special (Japan) (FABT).chd"
     },
     {
       "title": "Asuka 120% Maxima - Burning Fest. Maxima",
@@ -1513,16 +1335,6 @@
       "bucket": "segacd/Shining Force CD (USA) (5R, 6R).chd"
     },
     {
-      "title": "Final Fight CD",
-      "system": "segacd",
-      "bucket": "segacd/Final Fight CD (USA).chd"
-    },
-    {
-      "title": "Eternal Champions - Challenge from the Dark Side",
-      "system": "segacd",
-      "bucket": "segacd/Eternal Champions - Challenge from the Dark Side (USA) (RE).chd"
-    },
-    {
       "title": "Terminator, The",
       "system": "segacd",
       "bucket": "segacd/Terminator, The (USA).chd"
@@ -1549,18 +1361,19 @@
     },
     {
       "title": "Batman Returns",
-      "system": "segacd",
-      "bucket": "segacd/Batman Returns (USA).chd"
+      "system": "genesis",
+      "bucket": "genesis/Batman Returns (World).zip",
+      "variants": [
+        {
+          "bucket": "segacd/Batman Returns (USA).chd",
+          "note": "Sega CD: adds driving stages and CD audio"
+        }
+      ]
     },
     {
       "title": "Vay",
       "system": "segacd",
       "bucket": "segacd/Vay (USA).chd"
-    },
-    {
-      "title": "Earthworm Jim - Special Edition",
-      "system": "segacd",
-      "bucket": "segacd/Earthworm Jim - Special Edition (USA) (RE).chd"
     },
     {
       "title": "Dark Wizard",
@@ -1597,11 +1410,6 @@
       "bucket": "segacd/Road Avenger (USA).chd"
     },
     {
-      "title": "After Burner Complete",
-      "system": "sega32x",
-      "bucket": "sega32x/After Burner Complete (Japan, USA) (En).zip"
-    },
-    {
       "title": "Knuckles' Chaotix",
       "system": "sega32x",
       "bucket": "sega32x/Knuckles' Chaotix (Japan, USA) (En).zip"
@@ -1617,16 +1425,6 @@
       "bucket": "sega32x/Kolibri (USA, Europe).zip"
     },
     {
-      "title": "Virtua Fighter",
-      "system": "sega32x",
-      "bucket": "sega32x/Virtua Fighter (Japan, USA) (En).zip"
-    },
-    {
-      "title": "Virtua Racing Deluxe",
-      "system": "sega32x",
-      "bucket": "sega32x/Virtua Racing Deluxe (USA).zip"
-    },
-    {
       "title": "Star Wars Arcade",
       "system": "sega32x",
       "bucket": "sega32x/Star Wars Arcade (USA).zip"
@@ -1635,36 +1433,6 @@
       "title": "Tempo",
       "system": "sega32x",
       "bucket": "sega32x/Tempo (Japan, USA) (En).zip"
-    },
-    {
-      "title": "Space Harrier",
-      "system": "sega32x",
-      "bucket": "sega32x/Space Harrier (Japan, USA) (En).zip"
-    },
-    {
-      "title": "WWF WrestleMania - The Arcade Game",
-      "system": "sega32x",
-      "bucket": "sega32x/WWF WrestleMania - The Arcade Game (USA).zip"
-    },
-    {
-      "title": "Doom",
-      "system": "sega32x",
-      "bucket": "sega32x/Doom (Japan, USA) (En).zip"
-    },
-    {
-      "title": "Blackthorne",
-      "system": "sega32x",
-      "bucket": "sega32x/Blackthorne (USA).zip"
-    },
-    {
-      "title": "Mortal Kombat II",
-      "system": "sega32x",
-      "bucket": "sega32x/Mortal Kombat II (Japan, USA) (En).zip"
-    },
-    {
-      "title": "NBA Jam - Tournament Edition",
-      "system": "sega32x",
-      "bucket": "sega32x/NBA Jam - Tournament Edition (World).zip"
     },
     {
       "title": "Stellar Assault",
