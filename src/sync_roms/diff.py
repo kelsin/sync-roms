@@ -74,13 +74,18 @@ def bucket_fingerprint(key, size, etag):
 
 
 SAMPLE_CHUNK = 1 << 20  # same_bytes reads chunks this big
-SAMPLES = 8  # and this many of them: the first, the last and evenly spaced ones between; a smaller file is read whole
+SAMPLES = 8  # and, for a big bucket file, this many of them: the first, the last and evenly spaced ones between
+
+
+def sampled(size):
+    """True when same_bytes compares a file of this size on samples: a big one in a bucket, where reading it all is a download."""
+    return not s3.read_root() and size > SAMPLES * SAMPLE_CHUNK
 
 
 def same_bytes(path, key, size):
-    """True when local path and storage key (both size bytes) hold the same bytes: the whole file when it is small,
-    else SAMPLES chunks of it, so a big storage file is never read whole. Stops at the first chunk that differs."""
-    if size <= SAMPLES * SAMPLE_CHUNK:
+    """True when local path and storage key (both size bytes) hold the same bytes, read chunk by chunk and stopping at
+    the first that differs: the whole file, or only SAMPLES chunks of it when sampled(size)."""
+    if not sampled(size):
         spans = [(start, min(SAMPLE_CHUNK, size - start)) for start in range(0, size, SAMPLE_CHUNK)]
     else:
         spans = [(k * (size - SAMPLE_CHUNK) // (SAMPLES - 1), SAMPLE_CHUNK) for k in range(SAMPLES)]
@@ -125,7 +130,7 @@ def match_content(local, remote, local_print, remote_print, differs=None, md5=No
     md5(path), if given, hashes a local file whose print is ("raw", size, None), and is only called when a storage
     file of that size has an md5 to compare it with.
     same_bytes(local path, bucket path), if given, compares the bytes of two raw files of the same size when one of
-    them has no md5; they are matched only when it returns True.
+    them has no md5; they are matched only when it returns True. A "Comparing files" counter shows on a terminal.
     """
     with ThreadPoolExecutor(runtime.WORKERS) as ex:
         same = [p for p, size in local.items() if p in remote and remote[p][0] == size]
@@ -145,7 +150,7 @@ def match_content(local, remote, local_print, remote_print, differs=None, md5=No
     by_zip, by_size = defaultdict(dict), defaultdict(dict)
     for path, fp in unmatched.items():
         if fp[0] == "raw":
-            by_size[fp[1]][path] = fp[2]
+            by_size[fp[1]][path] = None
         else:
             by_zip[fp][path] = None
 
@@ -160,6 +165,9 @@ def match_content(local, remote, local_print, remote_print, differs=None, md5=No
         if fp[0] != "raw":
             return next(iter(by_zip.get(fp, ())), None)
         return next((p for p in by_size.get(fp[1], {}) if alike(path, fp, p, unmatched[p])), None)
+
+    if same_bytes:  # reading both sides of a big file takes a while
+        find = counted(find, "Comparing files", len(left_local))
 
     matched, only_local = [], []
     for path, fp in zip(left_local, local_prints):

@@ -295,7 +295,7 @@ On `esde` and `emudeck` cards every Vita game zip in `psvita/` gets a `.psvita` 
 | `--use-mirror DIR` | Same as `--mirror DIR`, then save `DIR` as the local mirror |
 | `--clear-mirror` | Forget the saved mirror (its files are left alone) |
 | `--diff [DIR]` | Compare a folder with a bucket system's folder (the old form of `diff`; see `--system`) |
-| `--replace` | `upload roms` only: make the storage folder match `DIR`. Renamed files are moved by content and left-over storage files are listed so you pick which to delete |
+| `--replace` | `upload roms` only: make the storage folder match `DIR`. Renamed files are moved by content (big bucket files without an MD5 are compared on samples, and those renames are marked) and left-over storage files are listed so you pick which to delete |
 | `--devices` | List the supported devices with their chip and the number of systems each one gets, then exit |
 | `-y`, `--yes` | Answer prompts with their default |
 | `--device ID\|full`, `--layout NAME` | Sync: choose the setup without the picker (it is saved for the card) |

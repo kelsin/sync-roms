@@ -296,6 +296,7 @@ def move_keys(moves):
                 time.sleep(ui.POLL)
         except KeyboardInterrupt:
             print(ui.red("🛑 Aborted"))
+            inventory.flush()  # hard_exit skips the flush as sync-roms exits
             downloads.hard_exit()
         raise
     finally:

@@ -112,7 +112,7 @@ class RawContentTest(unittest.TestCase):
 class SameBytesTest(unittest.TestCase):
     """diff.same_bytes compares a local file with a storage file through s3.read_range."""
 
-    def compare(self, local, remote):
+    def compare(self, local, remote, folder=None):
         import tempfile
         from unittest import mock
         from sync_roms import s3
@@ -123,6 +123,7 @@ class SameBytesTest(unittest.TestCase):
             return remote[start:end]
 
         with tempfile.TemporaryDirectory() as tmp, mock.patch.object(s3, "read_range", read_range), \
+                mock.patch.object(s3, "read_root", lambda: folder), \
                 mock.patch.object(diff, "SAMPLE_CHUNK", 4), mock.patch.object(diff, "SAMPLES", 4):
             path = os.path.join(tmp, "b.gba")
             with open(path, "wb") as f:
@@ -147,6 +148,22 @@ class SameBytesTest(unittest.TestCase):
         data = bytes(range(100))
         self.assertFalse(self.compare(data, data[:33] + b"x" + data[34:])[0])
         self.assertFalse(self.compare(data, data[:99] + b"x")[0])
+
+    def test_big_file_in_a_folder_is_compared_whole(self):
+        data = bytes(range(100))
+        same, reads = self.compare(data, data, folder="/storage")
+        self.assertTrue(same)
+        self.assertEqual([(s, e) for _, s, e in reads], [(s, s + 4) for s in range(0, 100, 4)])
+        self.assertFalse(self.compare(data, data[:10] + b"x" + data[11:], folder="/storage")[0])  # between the samples
+
+    def test_sampled_only_for_a_big_file_in_a_bucket(self):
+        from unittest import mock
+        from sync_roms import s3
+        with mock.patch.object(diff, "SAMPLE_CHUNK", 4), mock.patch.object(diff, "SAMPLES", 4):
+            with mock.patch.object(s3, "read_root", lambda: None):
+                self.assertEqual((diff.sampled(16), diff.sampled(17)), (False, True))
+            with mock.patch.object(s3, "read_root", lambda: "/storage"):
+                self.assertFalse(diff.sampled(17))
 
 
 class PlanDiffTest(unittest.TestCase):

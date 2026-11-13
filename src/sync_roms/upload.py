@@ -119,6 +119,7 @@ def run_copies(todo):
         except KeyboardInterrupt:
             bar.clear()
             print(ui.red("🛑 Aborted"))
+            inventory.flush()  # hard_exit skips the flush as sync-roms exits
             downloads.hard_exit()
         raise
     finally:
@@ -255,6 +256,15 @@ def replace_command(args, folder, system):
     bucket = system["bucket"]
     local = {p: n for p, n in diff.local_sizes(folder).items() if not ignore.is_ignored(f"{bucket}/{p}")}
     md5 = functools.lru_cache(maxsize=None)(lambda p: diff.file_md5(os.path.join(folder, *p.split("/"))))  # each file hashed once
+    on_samples = set()  # storage paths of big bucket files matched on samples
+
+    def same(p, r):
+        if not diff.same_bytes(os.path.join(folder, *p.split("/")), f"{bucket}/{r}", local[p]):
+            return False
+        if diff.sampled(local[p]):
+            on_samples.add(r)
+        return True
+
     try:
         print("☁️  Listing what's already there...")
         remote = inventory.etags(bucket + "/")
@@ -263,7 +273,7 @@ def replace_command(args, folder, system):
             local, remote, lambda p: diff.local_fingerprint(os.path.join(folder, *p.split("/"))),
             lambda p, size, etag: diff.bucket_fingerprint(f"{bucket}/{p}", size, etag),
             lambda p, etag: "-" not in etag and md5(p) != etag.strip('"'), md5,
-            lambda p, r: diff.same_bytes(os.path.join(folder, *p.split("/")), f"{bucket}/{r}", local[p]))
+            same)
     except s3.ERRORS as e:
         ui.fail(f"{e}", 3)
     print(f"\n💿 New: {ui.bold(str(len(new)))} ({ui.human_size(sum(local[p] for p in new))})")
@@ -271,7 +281,7 @@ def replace_command(args, folder, system):
     print(f"🚚 Renamed, would move in storage: {ui.bold(str(len(renames)))}")
     print(f"🗑️  Only in storage, not renames: {ui.bold(str(len(only_bucket)))} ({ui.human_size(sum(remote[p][0] for p in only_bucket))})")
     for old, newname in renames if args.dry_run else renames[:10]:
-        print(ui.dim(f"     {old} → {newname}"))
+        print(ui.dim(f"     {old} → {newname}") + (ui.yellow("  (matched on samples)") if old in on_samples else ""))
     if len(renames) > 10 and not args.dry_run:
         print(ui.dim(f"     … and {len(renames) - 10} more"))
     for p in changed[:10]:
