@@ -91,7 +91,7 @@ Lines:
 
 Size and placement:
 
-- Drawings live in a box of about -50..50 units, y down, 3.3px per unit; the stroke is about 1.8 units wide, so keep parallel lines and small details at least 5 units apart. A solid dot is two small concentric circles (radius about 2.2 and 0.8).
+- Drawings live in a box of about -50..50 units, y down, 3.3px per unit; the stroke is about 1.8 units wide, so keep parallel lines and small details at least 5 units apart. A solid dot is two small concentric circles (radius about 2.2 and 0.8). A larger solid shape, like the eye in `sonic`, is `p.fill(shape)`; keep it to one small feature of a picture.
 - The band is slanted and about 340px wide where the picture sits, and `CENTER` is right of its middle. A picture wider than about 75 units runs off the band's right edge, and that look is wanted: the theme's own pictures are cut off on the right, and about 30 of ours lose 10 to 40px there. Don't move or shrink a picture to keep it whole on the right; give a wide one 10 to 20px of cut rather than letting it just touch the edge. Use a smaller `scale` and a negative x offset in `ART` only when more than about 40px would go, and keep the left edge clear.
 
 Subject:
