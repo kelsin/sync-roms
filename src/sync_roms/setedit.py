@@ -7,7 +7,7 @@ import tempfile
 import time
 
 from . import edit, picker, s3, store, ui
-from .listedit import add_from_set, ask_category, game_label, insert_game, recategorize, reconcile, view
+from .listedit import add_from_set, ask_category, game_label, insert_game, recategorize, reconcile, stocked, view
 
 
 REPO = "kelsin/sync-roms"
@@ -45,10 +45,11 @@ def edit_one(game_set, systems, keys_of):
             edit.toggle_games(f"✏️  {game_set['name']} — ✅ in the set, ⬜ remove it", rows)
             game_set["games"] = reconcile(game_set["games"], shown)
         elif i == 1:
-            j = picker.filter_list("✏️  Add games from which system?", [s["name"] for s in systems])
+            options = stocked(systems)
+            j = picker.filter_list("✏️  Add games from which system?", [s["name"] for s in options])
             if j is None:
                 continue
-            s = shown[systems[j]["bucket"]]
+            s = shown[options[j]["bucket"]]
             had = {g["bucket"] for g in s["games"]}
             edit.toggle_games(f"✏️  {s['name']} — ✅ in {game_set['name']}, ⬜ in storage only",
                               edit.system_rows(s, keys_of(s["bucket"])))

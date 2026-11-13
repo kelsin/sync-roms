@@ -3,7 +3,7 @@ import copy
 
 from . import collections as colls
 from . import cardedit, edit, m3u, metafilter, picker, s3, store, surprise, themeart, ui
-from .listedit import add_from_set, ask_category, game_label, reconcile, recategorize, view
+from .listedit import add_from_set, ask_category, game_label, reconcile, recategorize, stocked, view
 
 
 # --- Multi-disc games --------------------------------------------------------------------------------
@@ -78,10 +78,11 @@ def edit_one(collection, systems, keys_of):
             edit.toggle_games(f"✏️  {collection['name']} — ✅ in the collection, ⬜ remove it", rows)
             collection["games"] = reconcile(collection["games"], shown)
         elif i == 1:
-            j = picker.filter_list("✏️  Add games from which system?", [s["name"] for s in systems])
+            options = stocked(systems)
+            j = picker.filter_list("✏️  Add games from which system?", [s["name"] for s in options])
             if j is None:
                 continue
-            s = shown[systems[j]["bucket"]]
+            s = shown[options[j]["bucket"]]
             had = {g["bucket"] for g in s["games"]}
             all_rows, past, filt, meta_filt = system_rows(s, keys_of(s["bucket"])), None, None, {}
             meta = cardedit.Metadata(s["bucket"])
