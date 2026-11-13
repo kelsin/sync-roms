@@ -155,7 +155,7 @@ class Hints(unittest.TestCase):
                  edit.MENU_HINT, edit.GAMES_HINT, cardedit.LIST_HINT, cardedit.GAMES_HINT, cardedit.SETS_HINT,
                  cardedit.META_HINT, cardedit.VALUES_HINT, collectionedit.GAMES_HINT]
         for h in hints:
-            self.assertLessEqual(picker.cell_width(h + picker.HELP_HINT), 80, h)  # the list adds "· ? help"
+            self.assertLessEqual(picker.cell_width(picker.HELP_HINT + h), 80, h)  # the list adds "? help ·"
         for h in (picker.TYPING_HINT, picker.SINGLE_TYPING_HINT):
             self.assertLessEqual(picker.cell_width(h), 80, h)
         self.assertTrue(picker.MULTI_HINT.startswith("Space toggle · Enter done"))

@@ -160,8 +160,8 @@ Every list works the same way, vim-style with Emacs line editing:
 | `a` `o` `u` | all or none shown / cycle view / revert (lists with checkboxes) |
 | `?` | every key of the list, including the list's own (scroll with `j` `k`; `Esc`, `q` or `?` closes it) |
 
-The hint line under the filter ends with `? help`. The bottom line shows the highlighted row's number and how many rows
-the filter shows (`row 12 · 340/3700 shown`), after the list's own status (a card's size, say). Leaving a game list for
+The hint line under the filter starts with `? help`. The bottom line ends with the highlighted row's number and how many
+rows the filter shows (`row 12 · 340/3700 shown`) when the list's own status (a card's size, say) leaves room for it. Leaving a game list for
 `s`, `m`, `p` or `v` and coming back keeps your row, filter and view when the list shows the same games.
 
 While typing a filter (or a note, which `w` opens in the game list): `^A` `^E` start/end of line, `^B` `^F` left/right, `^D` delete a character, `^K` kill to end, `^U` kill to start, `^W` kill a word.

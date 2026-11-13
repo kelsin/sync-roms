@@ -256,6 +256,17 @@ class Keys(unittest.TestCase):
     def test_tab_while_typing_keeps_the_filter(self):
         self.assertEqual(run_list(["/", "t", "a", "tab", "j", "f"], self.LABELS, hotkeys=("f",)), ("f", 3))
 
+    def test_tab_while_typing_keeps_the_filter_where_tab_is_a_hotkey(self):
+        pressed = []
+
+        def on_hotkey(key, i):
+            pressed.append((key, i))
+            return True
+        # typing: Tab only keeps the filter; then Tab is the list's hotkey, on the filtered row
+        self.assertIsNone(run_list(["/", "b", "tab", "tab", "escape", "escape"], self.LABELS, hotkeys=(" ", "\t"),
+                                   on_hotkey=on_hotkey))
+        self.assertEqual(pressed, [("\t", 1)])
+
     def test_esc_clears_filter_before_going_back(self):
         self.assertEqual(run_list(["/", "b", "tab", "escape", "enter"], self.LABELS), 0)
         self.assertIsNone(run_list(["/", "b", "tab", "escape", "escape"], self.LABELS))
@@ -511,7 +522,7 @@ class TextualList(unittest.TestCase):
     def test_without_key_help_the_help_lists_the_hint(self):
         self.assertIn("  d delete", picker.help_lines(False, "Enter open · d delete"))
 
-    def test_every_hint_ends_with_help(self):
+    def test_every_hint_starts_with_help(self):
         hints = []
 
         async def script(pilot):
@@ -521,7 +532,7 @@ class TextualList(unittest.TestCase):
             pilot_list(script, "t", self.LABELS, **kwargs)
         self.assertEqual(len(hints), 3)
         for hint in hints:
-            self.assertTrue(hint.endswith("· ? help"), hint)
+            self.assertTrue(hint.startswith("? help ·"), hint)  # the last part a narrow list cuts
 
     def test_status_shows_the_row_and_counts_after_a_callers_status(self):
         rows = []
@@ -530,9 +541,36 @@ class TextualList(unittest.TestCase):
             await pilot.press("/", "e", "ctrl+n")
             rows.append(" ".join(t for t, _ in screen_lines(pilot.app)[-1]))
             await pilot.press("escape", "escape")
+        pilot_list(script, "t", self.LABELS + ["delta"], status=lambda _s: "💾 1 GB")
         pilot_list(script, "t", self.LABELS + ["delta"], status=lambda _s: "💾 " + "x" * 100)  # longer than the screen
-        self.assertTrue(rows[0].startswith("💾 xxx"), rows[0])
+        self.assertTrue(rows[0].startswith("💾 1 GB"), rows[0])
         self.assertTrue(rows[0].endswith("row 2 · 2/4 shown"), rows[0])  # beta, delta
+        self.assertEqual(rows[1], "💾 " + "x" * 77)  # no room: the position gives way, the status is cut as before
+
+    STATUS = "💾 123.4 GB / 512 GB · 388.6 GB free · 812 file(s)"
+
+    def bottom_text(self, status, preview=None):
+        from PIL import Image
+        rows = []
+
+        async def script(pilot):
+            rows.append(" ".join(t for t, _ in screen_lines(pilot.app)[-1]).strip())
+            await pilot.press("escape")
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, "a.png")
+            Image.new("RGB", (45, 108), "red").save(path)
+            with mock.patch.object(sys, "__stdout__", io.StringIO()), \
+                    mock.patch("sync_roms.picker._draws_images", return_value=True):
+                pilot_list(script, "t", self.LABELS, multi=True, esc_asks=False, status=lambda _s: status,
+                           preview=(lambda i: path) if preview else None)
+        return rows[0]
+
+    def test_pending_counts_and_view_stay_ahead_of_the_position_at_80_columns(self):
+        self.assertEqual(self.bottom_text(self.STATUS), self.STATUS + " · +0 −0 pending · view: all")
+
+    def test_pending_counts_and_view_stay_ahead_of_the_position_beside_the_image_pane(self):
+        status = "💾 1 GB used · 3 file(s)"  # with pending and view, it fits the 60 columns the pane leaves
+        self.assertEqual(self.bottom_text(status, preview=True), status + " · +0 −0 pending · view: all")
 
     def test_status_counts_what_the_filter_shows(self):
         rows = []

@@ -74,7 +74,7 @@ def choose_setup(manifest, current=None):
 
 SINGLE_HINT = "Enter select · Esc back · j/k ^N/^P move · / filter"
 MULTI_HINT = "Space toggle · Enter done · / filter · a all · o view · u revert"
-HELP_HINT = " · ? help"  # ends every hint line
+HELP_HINT = "? help · "  # starts every hint line, so a narrow list cuts it last
 TYPING_HINT = "Enter keep filter · Esc clear · ^N/^P move · ^A/^E ^B/^F ^K ^W ^U edit"
 SINGLE_TYPING_HINT = "Enter pick · Tab keep filter · Esc clear · ^N/^P move · ^A/^E ^K ^W ^U edit"
 HELP_FOOTER = "j/k ↑/↓ PgUp/PgDn scroll · Esc/q/? close"
@@ -264,8 +264,8 @@ class _ListModel:
         return line, line_color, None
 
     def position(self):
-        """Where the cursor is and how many rows the filter shows, for the right end of the status row ("" while a
-        prompt has the row)."""
+        """Where the cursor is and how many rows the filter shows, for the right end of the status row when it fits ("" while
+        a prompt has the row)."""
         if self.asking or self.note is not None:
             return ""
         shown = f"{len(self.vis)}/{len(self.labels)} shown"
@@ -460,14 +460,14 @@ def _app_class():
             if m.typing:
                 hint = TYPING_HINT if m.multi else SINGLE_TYPING_HINT
             else:
-                hint = (m.hint or (MULTI_HINT if m.multi else SINGLE_HINT)) + HELP_HINT
+                hint = HELP_HINT + (m.hint or (MULTI_HINT if m.multi else SINGLE_HINT))
             lines = [Text(m.title, "bold cyan"), _with_cursor(query, 2 + m.qpos) if m.typing else query, Text(hint, "dim")]
             lines += [self.row(m, pos) for pos in range(m.top, min(len(m.vis), m.top + m.view))]
             text, color, at = m.line
             status = Text(text, f"bold {color}" if color else "bold")
-            if position := m.position():  # on the right, after the status cut to fit
-                status.truncate(max(0, self.size.width - len(position) - 2), overflow="ellipsis")
-                status.append(" " * max(2, self.size.width - status.cell_len - len(position)) + position, "bold")
+            position = m.position()  # on the right, only where the status leaves room for it
+            if position and status.cell_len + 2 + len(position) <= self.size.width:
+                status.append(" " * (self.size.width - status.cell_len - len(position)) + position, "bold")
             lines += [Text()] * max(0, self.size.height - len(lines) - 1) + [status if at is None else _with_cursor(status, at)]
             return Text("\n").join(lines)
 
@@ -676,10 +676,10 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
     note_text(label index) gives the text to start from.
     hotkeys: normal-mode keys that return (key, label index) for the highlighted row instead of acting.
     key_help: optional (keys, what they do) pairs that `?` lists as this screen's keys; without it, it lists the hint's
-    entries. Every hint line ends with "? help".
+    entries. Every hint line starts with "? help".
     hidden: optional per-label flags; those rows are left out (and drawn dim) until `z` reveals them.
-    status(states) -> text, or (text, color): the status row's text; its right end always shows the cursor's row and
-    "N/M shown". diff_marks: show ➕/➖ against `initial` (else ✅/⬜ only).
+    status(states) -> text, or (text, color): the status row's text; its right end shows the cursor's row and
+    "N/M shown" when the text leaves room. diff_marks: show ➕/➖ against `initial` (else ✅/⬜ only).
     session: a dict the caller keeps so selection, view, revealed rows, filter text, cursor and scroll survive reopening
     the list (carry_place keeps them across passes that list the same rows).
     poll: optional callable, called on the list's thread every POLL_MS while it waits for a key; the list is then redrawn,
