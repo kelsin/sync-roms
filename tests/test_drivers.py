@@ -256,6 +256,13 @@ class Prune(unittest.TestCase):
         self.assertEqual(os.listdir(self.dir), [])
         self.assertEqual(self.cards["SD"]["drivers"], [])
 
+    def test_prune_with_nothing_saved_or_current_writes_nothing(self):
+        written = []
+        with mock.patch.object(store, "update_card", lambda card, **v: written.append(v)):
+            self.assertEqual(drivers.prune("SD", self.dir, [], False), [])
+        self.assertEqual(written, [])
+        self.assertNotIn("drivers", self.cards["SD"])
+
     def test_prune_dry_run_keeps_files_and_list(self):
         self.cards["SD"]["drivers"] = ["a-v1.zip"]
         self.touch("a-v1.zip")

@@ -197,16 +197,27 @@ class SyncSmokeTest(RealDataDirGuard):
         self.assertEqual([k for k, _ in got], ["os/android/APKs/Obtainium.apk"])
         self.assertEqual(os.path.basename(os.path.dirname(got[0][1])), "APKs")
 
-    def driver_sync(self, layout, writable=True, dry_run=False):
-        """Sync a card with an Adreno 650 device; (copied (key, path) pairs, refresh calls, cards.json updates)."""
+    def driver_sync(self, layout, writable=True, dry_run=False, gpu="adreno-650", saved=None):
+        """Sync a card with a device with the gpu (an Adreno 650) and the saved drivers list on the card (and in cards.json);
+        (copied (key, path) pairs, refresh calls, cards.json updates)."""
         got, refreshed, updates = [], [], []
-        device = {"id": "rp5", "name": "RP5", "systems": ["gba"], "note": "", "gpu": "adreno-650", "firmwares": [layout]}
+        device = {"id": "rp5", "name": "RP5", "systems": ["gba"], "note": "", "firmwares": [layout], **({"gpu": gpu} if gpu else {})}
+
+        class Cards(dict):  # every card has the saved drivers list
+            def get(self, key, default=None):
+                return {"drivers": saved} if saved else default
+
+        def prepare(card):
+            os.makedirs(os.path.join(card, "Drivers"))
+            for name in saved or ():
+                open(os.path.join(card, "Drivers", name), "w").close()
         layouts = {layout: {"label": layout, "roms_dir": "ROMs", "bios_dir": "BIOS"}}
         manifest = {**MANIFEST, "layouts": layouts, "devices": [device], "systems": [{**SYSTEM, "folders": {layout: "gba"}}]}
         data = {"drivers": [{"id": i, "name": f"Driver {i}", "repo": f"o/{i}", "asset": "zip"} for i in "ab"],
                 "gpus": {"adreno-650": {"drivers": ["a", "b"]}}}
         patches = ((cli, {"free_space": lambda path: 10**9}),
-                   (store, {"load_manifest": lambda names=(): manifest, "update_card": lambda card, **v: updates.append(v)}),
+                   (store, {"load_manifest": lambda names=(): manifest, "update_card": lambda card, **v: updates.append(v),
+                            "load_cards": lambda: Cards()}),
                    (cli.picker, {"saved_setup": lambda *a: (device, layout)}),
                    (cli.drivers, {"load": lambda: data, "can_write": lambda: writable, "stored_tag": lambda i: "v1",
                                   "refresh": lambda entries, dry_run: refreshed.append(([d["id"] for d in entries], dry_run))}),
@@ -214,7 +225,7 @@ class SyncSmokeTest(RealDataDirGuard):
                    (cli.s3, {"list_sizes": lambda prefix, sizes=True: {"os/drivers/a.zip": 5, "os/drivers/a.tag": 3, "os/drivers/b.zip": 7, "os/drivers/b.tag": 3}
                              if prefix == "os/drivers/" else list_sizes(prefix)}),
                    (cli.ui, {"choose": lambda q, *a, **k: "n"}))
-        self.run_sync(dry_run, patches=patches)
+        self.run_sync(dry_run, prepare=prepare, patches=patches)
         return got, refreshed, updates
 
     def test_drivers_are_copied_to_drivers_on_esde_cards(self):
@@ -224,6 +235,24 @@ class SyncSmokeTest(RealDataDirGuard):
         self.assertEqual(refreshed, [(["a", "b"], False)])
         self.assertIn("🎮 Drivers:", self.out.getvalue())
         self.assertIn({"drivers": ["a-v1.zip", "b-v1.zip"]}, updates)
+
+    def test_old_drivers_are_removed_when_a_card_gets_none(self):
+        for layout, gpu in (("esde", None), ("knulli", "adreno-650")):
+            with self.subTest(layout=layout, gpu=gpu):
+                got, refreshed, updates = self.driver_sync(layout, gpu=gpu, saved=["a-v1.zip"])
+                self.assertEqual((got, refreshed), ([], []))
+                self.assertIn("🧹 Removed old driver a-v1.zip", self.out.getvalue())
+                self.assertIn({"drivers": []}, updates)
+
+    def test_old_drivers_dry_run_removes_nothing(self):
+        _, _, updates = self.driver_sync("esde", gpu=None, saved=["a-v1.zip"], dry_run=True)
+        self.assertIn("would delete", self.out.getvalue())
+        self.assertNotIn("Removed old driver", self.out.getvalue())
+        self.assertEqual(updates, [])
+
+    def test_a_card_without_drivers_saves_no_list(self):
+        _, _, updates = self.driver_sync("esde", gpu=None)
+        self.assertFalse([u for u in updates if "drivers" in u])
 
     def test_knulli_cards_get_no_drivers(self):
         got, refreshed, updates = self.driver_sync("knulli")

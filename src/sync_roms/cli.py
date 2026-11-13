@@ -1106,9 +1106,8 @@ def sync_card(args):
             print(f"📦 Archives to extract: {len([p for p in pending if p.lower().endswith(external.ARCHIVE_EXTS)])}")
         for path in extras:
             print(f"  {ui.red('would delete')} {path}")
-        if driver_entries:
-            for name in drivers.prune(card, drivers_dir, [os.path.basename(p) for _, p, _ in driver_jobs], True):
-                print(f"  {ui.red('would delete')} {os.path.join(drivers_dir, name)}")
+        for name in drivers.prune(card, drivers_dir, [os.path.basename(p) for _, p, _ in driver_jobs], True):
+            print(f"  {ui.red('would delete')} {os.path.join(drivers_dir, name)}")
         stale_count = 0
         if scrapes:
             stale_count = len(scrape_plan.stale_media(layout_name, manifest['systems'], roms_dir, es_dir, base))
@@ -1150,8 +1149,9 @@ def sync_card(args):
         failed += downloads.run_downloads(apk_todo, "Android", "🤖", apk_dir, failures)
     if driver_entries:
         failed += downloads.run_downloads(driver_todo, "Drivers", "🎮", drivers_dir, failures)
-        for name in drivers.prune(card, drivers_dir, [os.path.basename(p) for _, p, _ in driver_jobs], False):
-            print(ui.green(f"🧹 Removed old driver {name}"))
+    # also when the card gets no drivers now (another device or layout): the ones sync copied before go
+    for name in drivers.prune(card, drivers_dir, [os.path.basename(p) for _, p, _ in driver_jobs], False):
+        print(ui.green(f"🧹 Removed old driver {name}"))
     if theme_todo:
         failed += downloads.run_downloads(theme_todo, "Themes", "🎨", os.path.join(base, themes_dir), failures)
     for s in chosen:
