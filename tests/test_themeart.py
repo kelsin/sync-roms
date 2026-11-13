@@ -145,6 +145,12 @@ class Esde(Card):
         self.assertFalse(self.install())
         self.assertFalse(os.path.exists(self.copy()))
 
+    def test_a_new_card_gets_the_theme_before_es_de_is_set_up(self):
+        self.store("abc", {"theme.xml": b"<theme/>"})
+        self.assertTrue(self.install())
+        self.assertEqual(read(self.copy("theme.xml")), "<theme/>")
+        self.assertIn(f'value="{themeart.ESDE_COPY}"', read(frontend.settings_path("esde", self.base)))
+
     def test_art_book_next_is_copied_with_the_surprise_files_and_selected(self):
         self.store("abc", {"theme.xml": b"<theme/>", "_inc/a.png": b"png"})
         self.settings(themeart.ESDE_THEME)
