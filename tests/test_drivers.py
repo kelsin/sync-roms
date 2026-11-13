@@ -9,7 +9,7 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
-from sync_roms import drivers, github, runtime, s3, ui  # noqa: E402
+from sync_roms import drivers, github, runtime, s3, store, ui  # noqa: E402
 
 
 def release(tag, *assets, **flags):
@@ -165,6 +165,25 @@ class Refresh(unittest.TestCase):
         self.assertEqual(len(self.warned), 1)
         self.assertIn("Driver b", self.warned[0])
 
+    def test_garbled_github_response_warns_and_continues(self):
+        self.releases["o/a"] = ValueError("Expecting value: line 1 column 1")
+        self.releases["o/b"] = [{"assets": []}]  # a release without a tag_name
+        self.releases["o/c"] = [release("v2", "x.zip")]
+        self.run_refresh([entry(i) for i in "abc"])
+        self.assertEqual(self.read("os/drivers/c.tag", mode="r"), "v2\n")
+        self.assertEqual(len(self.warned), 2)
+        self.assertIn("Driver a", self.warned[0])
+        self.assertIn("Driver b", self.warned[1])
+
+    def test_storage_is_listed_once_per_refresh(self):
+        listed = []
+        real = drivers.inventory.files
+        with mock.patch.object(drivers.inventory, "files", lambda prefix, *a, **k: listed.append(prefix) or real(prefix, *a, **k)):
+            self.store("a", "v1")
+            self.store("b", "v1")
+            self.run_refresh([entry("a", tag="v1"), entry("b", tag="v1")])
+        self.assertEqual(listed, [drivers.PREFIX])
+
     def test_dry_run_writes_nothing(self):
         self.releases["o/a"] = [release("v2", "a.zip")]
         self.run_refresh([entry("a")], dry_run=True)
@@ -189,6 +208,60 @@ class Refresh(unittest.TestCase):
         with mock.patch.object(runtime, "ROOT", None), \
                 mock.patch("boto3.Session", side_effect=botocore.exceptions.ProfileNotFound(profile="roms")):
             self.assertFalse(drivers.can_write())
+
+
+    def test_jobs_name_files_by_id_and_tag(self):
+        self.store("a", "v1/2")
+        self.store("b", "v3")
+        missing = []
+        with mock.patch.object(ui, "report_missing", lambda keys, what: missing.append((keys, what))):
+            jobs = drivers.jobs([entry("a"), entry("c"), entry("b")], "/card/Drivers")
+        self.assertEqual(jobs, [("os/drivers/a.zip", "/card/Drivers/a-v1_2.zip", 3),
+                                ("os/drivers/b.zip", "/card/Drivers/b-v3.zip", 3)])
+        self.assertEqual(missing, [(["os/drivers/c.zip"], "driver(s)")])
+
+
+class Prune(unittest.TestCase):
+    def setUp(self):
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        self.dir = os.path.join(tmp.name, "Drivers")
+        os.makedirs(self.dir)
+        self.cards = {"SD": {"device": "rp5", "layout": "esde"}}
+        for p in (mock.patch.object(store, "load_cards", lambda: {k: dict(v) for k, v in self.cards.items()}),
+                  mock.patch.object(store, "write_cards", self.write_cards)):
+            p.start()
+            self.addCleanup(p.stop)
+
+    def write_cards(self, cards):
+        self.cards = cards
+        return True
+
+    def touch(self, *names):
+        for n in names:
+            open(os.path.join(self.dir, n), "w").close()
+
+    def test_prune_removes_only_recorded_names(self):
+        self.cards["SD"]["drivers"] = ["a-v1.zip"]
+        self.touch("a-v1.zip", "mine.zip", "a-v2.zip")
+        self.assertEqual(drivers.prune("SD", self.dir, ["a-v2.zip"], False), ["a-v1.zip"])
+        self.assertEqual(sorted(os.listdir(self.dir)), ["a-v2.zip", "mine.zip"])
+        self.assertEqual(self.cards["SD"]["drivers"], ["a-v2.zip"])
+        self.assertEqual(self.cards["SD"]["device"], "rp5")
+
+    def test_prune_drops_a_driver_no_longer_suggested(self):
+        self.cards["SD"]["drivers"] = ["b-v1.zip"]
+        self.touch("b-v1.zip")
+        self.assertEqual(drivers.prune("SD", self.dir, [], False), ["b-v1.zip"])
+        self.assertEqual(os.listdir(self.dir), [])
+        self.assertEqual(self.cards["SD"]["drivers"], [])
+
+    def test_prune_dry_run_keeps_files_and_list(self):
+        self.cards["SD"]["drivers"] = ["a-v1.zip"]
+        self.touch("a-v1.zip")
+        self.assertEqual(drivers.prune("SD", self.dir, ["a-v2.zip"], True), ["a-v1.zip"])
+        self.assertEqual(os.listdir(self.dir), ["a-v1.zip"])
+        self.assertEqual(self.cards["SD"]["drivers"], ["a-v1.zip"])
 
 
 if __name__ == "__main__":

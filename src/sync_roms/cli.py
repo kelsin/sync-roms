@@ -9,7 +9,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 from botocore.exceptions import BotoCoreError, ClientError, NoCredentialsError
 
-from . import __version__, budget, cardedit, clean, commands, downloads, edit, external, frontend, inventory, m3u, mirroring, picker, runtime, s3, scrape_plan, store
+from . import __version__, budget, cardedit, clean, commands, downloads, drivers, edit, external, frontend, inventory, m3u, mirroring, picker, runtime, s3, scrape_plan, store
 from . import surprise, themeart, ui, usersettings, vita
 from . import collections as colls
 
@@ -74,8 +74,8 @@ TOPICS = {
   sync-roms games remove SYSTEM KEY... --card NAME [-n]
   sync-roms games full SYSTEM on|off --card NAME [-n]
   sync-roms games sets list | add ID | remove ID --card NAME [-n]
-  sync-roms games export --card NAME        one SYSTEM/file per line (full systems as 'SYSTEM/*'), then '@collections ID', '@frontend_collections NAME', '@surprise false' (only when Surprise is off) and '@surprises SYSTEM/file' lines
-  sync-roms games import FILE --card NAME [-n]            add the games in such a file; '@' lines replace the card's collections / frontend_collections / surprises, and set Surprise on or off
+  sync-roms games export --card NAME        one SYSTEM/file per line (full systems as 'SYSTEM/*'), then '@collections ID', '@frontend_collections NAME', '@drivers NAME', '@surprise false' (only when Surprise is off) and '@surprises SYSTEM/file' lines
+  sync-roms games import FILE --card NAME [-n]            add the games in such a file; '@' lines replace the card's collections / frontend_collections / drivers / surprises, and set Surprise on or off
 
   --card NAME is required: a card's games are saved in ~/.sync-roms/cards.json with the previous version kept as .bak. Removing only drops a game from the list.
   In the editor: / filters, Space toggles a row, a all/none shown, u reverts the list, o cycles all/on/changed,
@@ -961,6 +961,15 @@ def sync_card(args):
     apk_jobs = ([(k, os.path.join(apk_dir, k[len(runtime.APKS_PREFIX):]), size) for k, size in sorted(inventory.files(runtime.APKS_PREFIX, sizes=False).items())
                  if not k.endswith("/")] if layout_name == "esde" else [])
     apk_jobs = downloads.with_sizes(apk_jobs)
+    # and the suggested GPU drivers for the device's Adreno GPU, kept up to date in storage first, in a Drivers/ folder
+    driver_entries = drivers.for_device(device, layout_name)
+    drivers_dir = os.path.join(base, "Drivers")
+    if driver_entries:
+        if drivers.can_write():
+            drivers.refresh(driver_entries, args.dry_run)
+        else:
+            print(ui.dim("🎮 no write access to storage: copying the drivers it has"))
+    driver_jobs = downloads.with_sizes(drivers.jobs(driver_entries, drivers_dir)) if driver_entries else []
 
     # Onion cards also get storage's os/onion/Themes/ folders in the card's Themes/
     themes_dir = layout.get("themes_dir")
@@ -979,6 +988,7 @@ def sync_card(args):
 
     rom_todo, bios_todo = downloads.plan_downloads(rom_jobs, unzip, disc_dir), downloads.plan_downloads(bios_jobs)
     apk_todo = downloads.plan_downloads(apk_jobs)
+    driver_todo = downloads.plan_downloads(driver_jobs)
     theme_todo = downloads.plan_downloads(theme_jobs)
     if args.dry_run:  # the real run moves these first, so they are already there
         rom_todo = [j for j in rom_todo if j[1] not in moved]
@@ -1004,14 +1014,15 @@ def sync_card(args):
     summary = [f"{icon} {label}: {ui.bold(str(len(todo)))} to download ({ui.human_size(total_bytes(todo))}), "
                f"{len(jobs) - len(todo)} already present"
                for icon, label, todo, jobs, always in (("💿", "ROMs", rom_todo, rom_jobs, True), ("🧠", "BIOS", bios_todo, bios_jobs, True),
-                                                       ("🤖", "Android", apk_todo, apk_jobs, False), ("🎨", "Themes", theme_todo, theme_jobs, False))
+                                                       ("🤖", "Android", apk_todo, apk_jobs, False), ("🎮", "Drivers", driver_todo, driver_jobs, False),
+                                                       ("🎨", "Themes", theme_todo, theme_jobs, False))
                if always or jobs]
     print("\n" + "\n".join(summary))
     if planned:
         scrape_plan.describe_scrape_plan(planned)
     if extras:
         print(f"🗑️  Local ROMs no longer in the selection: {ui.bold(str(len(extras)))}")
-    todo_all = rom_todo + bios_todo + apk_todo + theme_todo + scrape_todo
+    todo_all = rom_todo + bios_todo + apk_todo + driver_todo + theme_todo + scrape_todo
     size = (saved or {}).get("size")
 
     def space(free):
@@ -1080,7 +1091,8 @@ def sync_card(args):
         free = free_space(base) + sum(os.path.getsize(p) for p in extras)  # the real run deletes these first
         plan_json = {
             "downloads": [{"kind": kind, "key": key, "path": path, "size": size or 0}
-                          for kind, todo in (("rom", rom_todo), ("bios", bios_todo), ("android", apk_todo), ("theme", theme_todo), ("scrape", scrape_todo))
+                          for kind, todo in (("rom", rom_todo), ("bios", bios_todo), ("android", apk_todo), ("driver", driver_todo),
+                                          ("theme", theme_todo), ("scrape", scrape_todo))
                           for key, path, size in todo],
             "delete": list(extras), "missing": {"roms": missing, "bios": [k for k in bios_keys if k not in bios_have]},
             "free_space": free}
@@ -1094,6 +1106,9 @@ def sync_card(args):
             print(f"📦 Archives to extract: {len([p for p in pending if p.lower().endswith(external.ARCHIVE_EXTS)])}")
         for path in extras:
             print(f"  {ui.red('would delete')} {path}")
+        if driver_entries:
+            for name in drivers.prune(card, drivers_dir, [os.path.basename(p) for _, p, _ in driver_jobs], True):
+                print(f"  {ui.red('would delete')} {os.path.join(drivers_dir, name)}")
         stale_count = 0
         if scrapes:
             stale_count = len(scrape_plan.stale_media(layout_name, manifest['systems'], roms_dir, es_dir, base))
@@ -1133,6 +1148,10 @@ def sync_card(args):
     failed = downloads.run_downloads(rom_todo, "ROMs", "💿", roms_dir, failures) + downloads.run_downloads(bios_todo, "BIOS", "🧠", bios_dir, failures)
     if apk_jobs:
         failed += downloads.run_downloads(apk_todo, "Android", "🤖", apk_dir, failures)
+    if driver_entries:
+        failed += downloads.run_downloads(driver_todo, "Drivers", "🎮", drivers_dir, failures)
+        for name in drivers.prune(card, drivers_dir, [os.path.basename(p) for _, p, _ in driver_jobs], False):
+            print(ui.green(f"🧹 Removed old driver {name}"))
     if theme_todo:
         failed += downloads.run_downloads(theme_todo, "Themes", "🎨", os.path.join(base, themes_dir), failures)
     for s in chosen:
@@ -1171,7 +1190,7 @@ def sync_card(args):
     if not failed and not args.no_eject and usersettings.load_settings().get("eject", True) is not False:
         clean._eject_root = base  # after the card tidy, which still needs it mounted
     failed_keys = {k for k, _ in failures}
-    got = [j for j in rom_todo + bios_todo + apk_todo + theme_todo + scrape_todo if j[0] not in failed_keys]
+    got = [j for j in rom_todo + bios_todo + apk_todo + driver_todo + theme_todo + scrape_todo if j[0] not in failed_keys]
     done = (f"downloaded {len(got)} file(s) ({ui.human_size(total_bytes(got))}) in {ui.eta(time.monotonic() - started)}"
             + (f"; {len(missing)} listed ROM(s) not in storage" if missing else ""))
     if failed:

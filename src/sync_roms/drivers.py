@@ -87,9 +87,9 @@ def _latest(driver):
     return pick_release(driver, releases)
 
 
-def _update(driver, dry_run):
+def _update(driver, stored, dry_run):
     key = f"{PREFIX}{driver['id']}"
-    if driver.get("tag") and f"{key}.zip" in inventory.files(PREFIX):
+    if driver.get("tag") and f"{key}.zip" in stored:
         return
     tag, asset = _latest(driver)
     old = stored_tag(driver["id"])
@@ -120,8 +120,42 @@ def _update(driver, dry_run):
 
 def refresh(entries, dry_run):
     """Keep the newest release zip of each driver (a pinned one once) in storage. A failure warns and moves on."""
+    stored = inventory.files(PREFIX, sizes=False)
     for driver in entries:
         try:
-            _update(driver, dry_run)
-        except (OSError, http.client.HTTPException, NoAsset, *s3.ERRORS) as e:
+            _update(driver, stored, dry_run)
+        except (OSError, http.client.HTTPException, NoAsset, ValueError, KeyError, TypeError, *s3.ERRORS) as e:
             ui.warn(f"Couldn't update the {driver['name']} driver: {e}")
+
+
+def jobs(entries, drivers_dir):
+    """(storage key, card path, size) of each driver whose zip (with its .tag) is in storage, named by id and tag; the
+    others are reported missing."""
+    stored = inventory.files(PREFIX)
+    out, missing = [], []
+    for driver in entries:
+        key = f"{PREFIX}{driver['id']}.zip"
+        tag = stored_tag(driver["id"]) if key in stored else None
+        if tag:
+            out.append((key, os.path.join(drivers_dir, card_name(driver["id"], tag)), stored[key]))
+        else:
+            missing.append(key)
+    ui.report_missing(missing, "driver(s)")
+    return out
+
+
+def prune(card, drivers_dir, current, dry_run):
+    """Remove the files in drivers_dir that the card's saved drivers list names but current doesn't (never another
+    file), then save current as the list. The names removed (or, in a dry run, that would be)."""
+    entry = store.load_cards().get(card)
+    entry = entry if isinstance(entry, dict) else {}
+    saved = entry.get("drivers")
+    saved = [n for n in saved if isinstance(n, str)] if isinstance(saved, list) else []
+    removed = [n for n in saved if n not in current and os.path.isfile(os.path.join(drivers_dir, os.path.basename(n)))]
+    if dry_run:
+        return removed
+    for name in removed:
+        os.remove(os.path.join(drivers_dir, os.path.basename(name)))
+    if entry.get("drivers") != sorted(current):
+        store.update_card(card, drivers=sorted(current))
+    return removed

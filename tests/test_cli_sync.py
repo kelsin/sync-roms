@@ -197,6 +197,53 @@ class SyncSmokeTest(RealDataDirGuard):
         self.assertEqual([k for k, _ in got], ["os/android/APKs/Obtainium.apk"])
         self.assertEqual(os.path.basename(os.path.dirname(got[0][1])), "APKs")
 
+    def driver_sync(self, layout, writable=True, dry_run=False):
+        """Sync a card with an Adreno 650 device; (copied (key, path) pairs, refresh calls, cards.json updates)."""
+        got, refreshed, updates = [], [], []
+        device = {"id": "rp5", "name": "RP5", "systems": ["gba"], "note": "", "gpu": "adreno-650", "firmwares": [layout]}
+        layouts = {layout: {"label": layout, "roms_dir": "ROMs", "bios_dir": "BIOS"}}
+        manifest = {**MANIFEST, "layouts": layouts, "devices": [device], "systems": [{**SYSTEM, "folders": {layout: "gba"}}]}
+        data = {"drivers": [{"id": i, "name": f"Driver {i}", "repo": f"o/{i}", "asset": "zip"} for i in "ab"],
+                "gpus": {"adreno-650": {"drivers": ["a", "b"]}}}
+        patches = ((cli, {"free_space": lambda path: 10**9}),
+                   (store, {"load_manifest": lambda names=(): manifest, "update_card": lambda card, **v: updates.append(v)}),
+                   (cli.picker, {"saved_setup": lambda *a: (device, layout)}),
+                   (cli.drivers, {"load": lambda: data, "can_write": lambda: writable, "stored_tag": lambda i: "v1",
+                                  "refresh": lambda entries, dry_run: refreshed.append(([d["id"] for d in entries], dry_run))}),
+                   (cli.downloads, {"run_downloads": lambda todo, label, icon, base, *a: (got.extend((j[0], j[1]) for j in todo) if label == "Drivers" else None) or 0}),
+                   (cli.s3, {"list_sizes": lambda prefix, sizes=True: {"os/drivers/a.zip": 5, "os/drivers/a.tag": 3, "os/drivers/b.zip": 7, "os/drivers/b.tag": 3}
+                             if prefix == "os/drivers/" else list_sizes(prefix)}),
+                   (cli.ui, {"choose": lambda q, *a, **k: "n"}))
+        self.run_sync(dry_run, patches=patches)
+        return got, refreshed, updates
+
+    def test_drivers_are_copied_to_drivers_on_esde_cards(self):
+        got, refreshed, updates = self.driver_sync("esde")
+        self.assertEqual([(k, os.path.basename(p), os.path.basename(os.path.dirname(p))) for k, p in got],
+                         [("os/drivers/a.zip", "a-v1.zip", "Drivers"), ("os/drivers/b.zip", "b-v1.zip", "Drivers")])
+        self.assertEqual(refreshed, [(["a", "b"], False)])
+        self.assertIn("🎮 Drivers:", self.out.getvalue())
+        self.assertIn({"drivers": ["a-v1.zip", "b-v1.zip"]}, updates)
+
+    def test_knulli_cards_get_no_drivers(self):
+        got, refreshed, updates = self.driver_sync("knulli")
+        self.assertEqual((got, refreshed), ([], []))
+        self.assertNotIn("Drivers", self.out.getvalue())
+        self.assertFalse([u for u in updates if "drivers" in u])
+
+    def test_no_write_access_copies_what_storage_has_without_github(self):
+        with mock.patch.object(cli.drivers.github, "json", side_effect=AssertionError("GitHub called")):
+            got, refreshed, _ = self.driver_sync("esde", writable=False)
+        self.assertEqual(refreshed, [])
+        self.assertEqual(len(got), 2)
+        self.assertIn("no write access to storage: copying the drivers it has", self.out.getvalue())
+
+    def test_dry_run_reports_drivers_and_saves_nothing(self):
+        got, refreshed, updates = self.driver_sync("esde", dry_run=True)
+        self.assertEqual(refreshed, [(["a", "b"], True)])
+        self.assertIn("os/drivers/a.zip", self.out.getvalue())
+        self.assertFalse([u for u in updates if "drivers" in u])
+
     def test_themes_are_copied_to_themes_on_onion_cards_only(self):
         listing = lambda prefix, sizes=True: ({"os/onion/Themes/": 0, "os/onion/Themes/A/config.json": 5, "os/onion/Themes/A/.DS_Store": 1}
                                   if prefix == "os/onion/Themes/" else list_sizes(prefix))
