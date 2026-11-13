@@ -127,9 +127,9 @@ class UsageHelpTest(Isolated):
     def test_config_show_prints_eject_as_a_word(self):
         code, out, _ = self.sync(["config", "show"], {"eject": False})
         self.assertEqual(code, 0)
-        self.assertRegex(out, r"eject\s+False\s")
+        self.assertRegex(out, r"eject\s+false\s")
         code, out, _ = self.sync(["config", "show"])
-        self.assertRegex(out, r"eject\s+True\s")
+        self.assertRegex(out, r"eject\s+true\s")
 
 
 class QuietColorTest(unittest.TestCase):

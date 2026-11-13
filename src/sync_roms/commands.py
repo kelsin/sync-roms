@@ -482,7 +482,7 @@ def config_cmd(args):
         return 0
     print(ui.bold("⚙️  sync-roms settings") + ui.dim(f"  {store.data_dir()}"))
     for name, value, source in effective_settings():
-        print(f"  {name:<14} {str(value) if value is not None else ui.dim('(not set)'):<28} {ui.dim(source)}")
+        print(f"  {name:<14} {(json.dumps(value) if isinstance(value, bool) else str(value)) if value is not None else ui.dim('(not set)'):<28} {ui.dim(source)}")
     return 0
 
 
