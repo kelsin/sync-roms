@@ -572,8 +572,10 @@ class TextualList(unittest.TestCase):
         self.assertTrue(row.endswith(" row 1 · 3/3 shown"), row)
 
     def test_pending_counts_come_first_and_the_view_stays_ahead_of_the_position_beside_the_image_pane(self):
-        status = "💾 1 GB used · 3 files"  # with pending and view, it fits the 60 columns the pane leaves
-        self.assertEqual(self.bottom_text(status, preview=True), "+0 −0 · " + status + " · view: all")
+        status = "💾 1 GB used · 3 files"  # in the 60 columns the pane leaves, only the compact position fits beside it
+        row = self.bottom_text(status, preview=True)
+        self.assertTrue(row.startswith("+0 −0 · " + status + " · view: all "), row)
+        self.assertTrue(row.endswith(" 1 · 3/3"), row)
 
     def test_status_counts_what_the_filter_shows(self):
         rows = []

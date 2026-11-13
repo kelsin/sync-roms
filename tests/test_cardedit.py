@@ -1244,9 +1244,14 @@ class GamesStatus(unittest.TestCase):
         row = bottom(None)
         self.assertTrue(row.startswith("+0 −0 · 💾 123.4 GB / 512 GB · 388.6 GB free · view: all "), row)
         self.assertTrue(row.endswith(" row 10 · 812/812 shown"), row)
-        row = bottom(12_300_000_000)  # opened from a sync: no room, the row gives way (and the status is cut)
+        row = bottom(None, games=3700, cursor=2039)  # the full form doesn't fit: the same numbers without words
+        self.assertTrue(row.startswith("+0 −0 · 💾 123.4 GB / 512 GB · 388.6 GB free · view: all "), row)
+        self.assertTrue(row.endswith(" 2040 · 3700/3700"), row)
+        self.assertNotIn("row", row)
+        row = bottom(12_300_000_000, games=3700, cursor=2039)  # opened from a sync: no room, the row gives way (and the status is cut)
         self.assertTrue(row.startswith("+0 −0 · 💾 123.4 GB / 512 GB · 388.6 GB free · ⬇️  12.3 GB to download"), row)
         self.assertNotIn("row", row)
+        self.assertNotIn("3700", row)
 
 
 class Poll(unittest.TestCase):

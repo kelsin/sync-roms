@@ -286,13 +286,13 @@ class _ListModel:
             line = self.notice
         return line, line_color, None
 
-    def position(self):
+    def position(self, compact=False):
         """Where the cursor is and how many rows the filter shows, for the right end of the status row when it fits ("" while
-        a prompt has the row)."""
+        a prompt has the row). compact: the same numbers without words, for when the full form doesn't fit."""
         if self.asking or self.note is not None:
             return ""
-        shown = f"{len(self.vis)}/{len(self.labels)} shown"
-        return f"row {self.cur + 1} · {shown}" if self.vis else shown
+        shown = f"{len(self.vis)}/{len(self.labels)}" + ("" if compact else " shown")
+        return (f"{self.cur + 1} · " if compact else f"row {self.cur + 1} · ") + shown if self.vis else shown
 
     def tick(self):
         """Call poll, unless help or a prompt is up (those wait for a key). Returns KEEP."""
@@ -494,9 +494,10 @@ def _app_class():
             lines += [self.row(m, pos) for pos in range(m.top, min(len(m.vis), m.top + m.view))]
             text, color, at = m.line
             status = Text(text, f"bold {color}" if color else "bold")
-            position = m.position()  # on the right, only where the status leaves room for it
-            if position and status.cell_len + 2 + len(position) <= self.size.width:
-                status.append(" " * (self.size.width - status.cell_len - len(position)) + position, "bold")
+            for position in (m.position(), m.position(compact=True)):  # on the right, the first form the status leaves room for
+                if position and status.cell_len + 2 + len(position) <= self.size.width:
+                    status.append(" " * (self.size.width - status.cell_len - len(position)) + position, "bold")
+                    break
             lines += [Text()] * max(0, self.size.height - len(lines) - 1) + [status if at is None else _with_cursor(status, at)]
             return Text("\n").join(lines)
 
@@ -708,7 +709,7 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
     entries. Every hint line starts with "? help".
     hidden: optional per-label flags; those rows are left out (and drawn dim) until `z` reveals them.
     status(states) -> text, or (text, color): the status row's text, after the pending counts (+on −off); its right end
-    shows the cursor's row and "N/M shown" when the text leaves room. filters: the caller's own filters, shown on the
+    shows the cursor's row and "N/M shown" when the text leaves room (only the numbers when just those fit). filters: the caller's own filters, shown on the
     filter line after the typed text. diff_marks: show ➕/➖ against `initial` (else ✅/⬜ only).
     session: a dict the caller keeps so selection, view, revealed rows, filter text, cursor and scroll survive reopening
     the list (carry_place keeps them across passes that list the same rows).
