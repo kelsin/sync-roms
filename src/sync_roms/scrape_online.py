@@ -28,7 +28,7 @@ def find_candidates(systems, roms, metadata, retry=False, fill=None):
     unknown; a saved manual match overrides the unknown mark). Non-games waiting for review are never taken.
 
     fill: (wanted media types, {system folder: scrapes/<system>/ listing}); also takes the ROMs that have an entry
-    but lack some wanted type in storage."""
+    but lack some wanted type in storage that ScreenScraper's last answer offered (unless retry, any type)."""
     out, state = {}, scrape_state.snapshot()
     for s in systems:
         system = s["bucket"]
@@ -36,7 +36,8 @@ def find_candidates(systems, roms, metadata, retry=False, fill=None):
         index = scrape_plan.scrape_index(fill[1].get(system, {})) if fill else {}
 
         def wanted(r):
-            return r not in have or (fill and fill[0] - set(index.get(os.path.splitext(r)[0], ())))
+            return r not in have or (fill and fill[0] - set(index.get(os.path.splitext(r)[0], ()))
+                                     - (set() if retry else state.not_offered(system, r)))
         out[system] = sorted(r for r in roms.get(system, ())
                              if wanted(r) and not state.is_notgame(system, r)
                              and (retry or state.manual_match(system, r) is not None or not state.is_unknown(system, r)))
@@ -374,6 +375,7 @@ def scrape_rom(client, system, item, tmp, skip, stop, game_id=None):
         meta, media = screenscraper.parse_game(raw, ())
         if not meta:
             raise screenscraper.ApiError("ScreenScraper returned no data for it")
+        scrape_state.mark_nomedia(system["bucket"], rom, set(screenscraper.MEDIA_MAP.values()) - set(media))
         stem = os.path.splitext(rom)[0]
         rom_tmp = tempfile.mkdtemp(dir=tmp)  # ROMs with the same stem (Game.zip, Game.7z) never share a file
         files = {}
@@ -658,6 +660,7 @@ def scrape_system(client, system, items, threads, skip, shrink, outcomes, listin
             if time.monotonic() - last_write >= METADATA_INTERVAL:
                 scrape_state.flush_unknown()  # marks from a run that finds nothing must not wait for the final flush
                 scrape_state.flush_hashes()
+                scrape_state.flush_nomedia()
                 last_write = time.monotonic()
                 if pending:
                     n, halt = record(system, pending, outcomes, listing, index, skip, replace, rerun, fill)
@@ -679,6 +682,7 @@ def scrape_system(client, system, items, threads, skip, shrink, outcomes, listin
         hasher.shutdown(wait=True, cancel_futures=True)
         scrape_state.flush_hashes()
         scrape_state.flush_unknown()
+        scrape_state.flush_nomedia()
         for _, begun in flight:
             shutil.rmtree(begun.tmp, ignore_errors=True)
 

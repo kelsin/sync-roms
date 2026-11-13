@@ -153,10 +153,11 @@ TOPICS = {
   looked up are listed first. ROMs ScreenScraper doesn't know are remembered and skipped until --retry.
   SYSTEM             only that storage folder (e.g. gba); --system ID is the same
   --retry            also look up the ROMs ScreenScraper didn't know before (ROMs whose lookup failed are always
-                     tried again; non-games never are: see review)
+                     tried again; non-games never are: see review) and, with --fill-media, the media it didn't offer
   --all              every ROM in the storage, not just those your cards list (games, sets, full systems)
-  --fill-media       also scrape ROMs that have metadata but lack some media type in storage (ScreenScraper is asked
-                     again for each, even when it has no such media); their existing metadata is kept
+  --fill-media       also scrape ROMs that have metadata but lack some media type in storage; their existing metadata
+                     is kept. Types ScreenScraper didn't offer for a ROM are remembered and not asked for again
+                     until --retry
   --skip-media TYPES comma-separated media folders not to download (covers, 3dboxes, backcovers, fanart, manuals,
                      marquees, ...); other values are refused with the list
   --dry-run          list the ROMs and the metadata and media folders that would be written; no ScreenScraper

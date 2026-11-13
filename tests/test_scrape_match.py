@@ -73,6 +73,16 @@ class CandidatesTest(MatchBase):
         out = scrape_online.find_candidates([SYSTEM], roms, meta, fill=({"covers"}, listing))
         self.assertEqual(out["gba"], ["c.zip"])  # skipped types aren't wanted
 
+    def test_fill_media_leaves_out_rom_missing_only_types_not_offered_unless_retry(self):
+        scrape_state.mark_nomedia("gba", "a.zip", {"manuals", "fanart"})
+        scrape_state.mark_nomedia("gba", "b.zip", {"manuals"})
+        roms = {"gba": {"a.zip", "b.zip"}}
+        meta = {"gba": {"a.zip": {}, "b.zip": {}}}
+        listing = {"gba": {"scrapes/gba/covers/a.png": 1, "scrapes/gba/covers/b.png": 1}}
+        fill = ({"covers", "manuals", "fanart"}, listing)
+        self.assertEqual(scrape_online.find_candidates([SYSTEM], roms, meta, fill=fill)["gba"], ["b.zip"])  # b: fanart may be there
+        self.assertEqual(scrape_online.find_candidates([SYSTEM], roms, meta, retry=True, fill=fill)["gba"], ["a.zip", "b.zip"])
+
     def test_fill_media_still_skips_unknown(self):
         scrape_state.mark_unknown("gba", "b.zip")
         out = scrape_online.find_candidates([SYSTEM], {"gba": {"b.zip"}}, {"gba": {"b.zip": {}}},
