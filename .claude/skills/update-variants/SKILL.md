@@ -26,11 +26,15 @@ The output has:
   (as an entry, extra file or variant) whose title or arcade clone family matches. A multi-disc candidate's discs
   are in its `files`.
 - `stale`: variants whose ROM is no longer in storage.
+- `unmatched`: how many new ROMs matched no set game. They are not judged or recorded; mention the count.
 - `checked_file`: `~/.sync-roms/variants-checked.json`, the ROMs already judged; they are never offered again.
 
 No matches and no stale variants: tell the user there is nothing to update and stop.
 
 ## 2. Judge each candidate
+
+Judge per ROM: one ROM often matches several set games (an arcade game and its many ports). Pick the set game it is
+the same game as; it is a variant of that one game at most, and gets one verdict. Count and report ROMs, not pairs.
 
 A candidate is a **variant** only when it is the same game as the set entry and adds something: new content, modes
 or characters, a remaster or HD version, an enhanced port, an English translation of a Japanese-only game. Anything
@@ -41,7 +45,8 @@ else is **not a variant**, with a short reason:
 | Same game, nothing added (straight port, re-release, regional copy, revision, Classic NES Series, Neo Geo CD copy) | not a variant: "same game, adds nothing" |
 | Plays substantially differently (other developer or design, demake, new-engine remake like Pokemon FireRed) | not a variant: "different game" |
 | Only shares the title | not a variant: "different game" |
-| Clearly the better main version (e.g. the arcade original of a home port in the set) | not a variant; report it |
+| Would win as the main version under the CLAUDE.md order (arcade original over a port, the lead platform, English for a text-heavy game) | not a variant; report it |
+| Can't tell from its name and what you know | leave it out of the decisions; list it for the user |
 
 A variant's note starts with the system's common name and a colon, says what it adds in plain words, under 80
 characters: `DS: adds the Lost Sanctum, a bonus dungeon and a new ending`.
@@ -51,9 +56,10 @@ and the CLAUDE.md rules; collect their verdicts as the decisions file below.
 
 ## 3. Show the proposal and wait
 
-Show the user one table of the proposed variants (set game, new variant, note), the stale variants to remove, and the
-count of candidates judged not variants with a few examples. Report any "better main version" findings separately.
-Write nothing until the user approves; apply their corrections.
+Show the user one table of the proposed variants (set game, new variant, note), the stale variants to remove, the
+number of ROMs judged not variants with a few examples, the ROMs you couldn't judge, and the unmatched count. Report
+any "better main version" findings separately. Write nothing until the user approves, even when no variant is
+proposed (approval then records the judged ROMs as checked); apply their corrections.
 
 ## 4. Apply
 
