@@ -7,6 +7,7 @@ import queue
 import sys
 import threading
 import time
+import types
 import unittest
 from unittest import mock
 
@@ -32,6 +33,7 @@ class Session(unittest.TestCase):
     def setUp(self):
         self.runs = []  # one entry per App.run
         self.events = []
+        self.while_suspended = None  # called with the app as it suspends
         for p in (mock.patch.object(ui, "has_terminal", return_value=True),
                   mock.patch.object(picker, "_draws_images", return_value=False)):
             p.start()
@@ -52,7 +54,11 @@ class Session(unittest.TestCase):
         @contextlib.contextmanager
         def suspend(app):
             self.events.append("suspend")
+            capture = sys.stdout, sys.stderr  # Textual's print capture, which App.suspend puts back on the way out
+            if self.while_suspended:
+                self.while_suspended(app)
             yield
+            sys.stdout, sys.stderr = capture
             self.events.append("resume")
         cls = picker._app_class()
         with mock.patch.object(cls, "run", run), mock.patch.object(cls, "suspend", suspend):
@@ -285,7 +291,7 @@ class Session(unittest.TestCase):
         def editor():
             picker.filter_list("A", ["a0"])
             try:
-                with mock.patch.object(picker.queue, "Queue", Late):
+                with mock.patch.object(picker, "queue", types.SimpleNamespace(Queue=Late)):
                     picker.filter_list("B", ["b0"])
             except KeyboardInterrupt:
                 pass
@@ -299,6 +305,161 @@ class Session(unittest.TestCase):
             await pilot.press("enter")
         self.assertEqual(self.run_editor(editor, script), 1)
         self.assertEqual(self.events[0], ["_WorkingScreen", "_ListScreen"])  # B is gone
+
+    def test_two_ctrl_c_at_once_end_the_list_once(self):
+        from textual import events
+
+        def editor():
+            try:
+                picker.filter_list("A", ["a0"])
+            except KeyboardInterrupt:
+                return ui.confirm("Save?")
+
+        async def script(app, pilot):
+            await wait_for(pilot, lambda: showing(app, "A"))
+            app.post_message(events.Key("ctrl+c", "\x03"))
+            app.post_message(events.Key("ctrl+c", "\x03"))
+            await pilot.pause()
+        with mock.patch("builtins.input", return_value="y"):
+            self.assertIs(self.run_editor(editor, script), True)
+        self.assertEqual(self.events, ["suspend", "resume", "app closed"])
+
+    def test_keys_after_a_list_ended_reach_nothing(self):
+        from textual import events
+        for key in ("enter", "escape", "x", "ctrl+c"):
+            with self.subTest(key=key):
+                self.events = []
+
+                def editor():
+                    picker.filter_list("A", ["a0"], hotkeys=("x",))
+                    return picker.filter_list("B", ["b0", "b1"])
+
+                async def script(app, pilot):
+                    await wait_for(pilot, lambda: showing(app, "A"))
+                    app.post_message(events.Key("enter", "\r"))
+                    app.post_message(events.Key(key, None))
+                    await wait_for(pilot, lambda: showing(app, "B"))
+                    await pilot.pause(0.1)
+                    self.assertTrue(showing(app, "B"))
+                    await pilot.press("j", "enter")
+                self.assertEqual(self.run_editor(editor, script), 1)
+
+    def test_keys_typed_while_the_app_suspends_are_dropped(self):
+        from textual import events
+        for key in ("enter", "ctrl+c"):
+            with self.subTest(key=key):
+                self.events = []
+                self.while_suspended = lambda app: app.post_message(events.Key(key, None))  # read as the input stops
+
+                def editor():
+                    picker.filter_list("A", ["a0"])
+                    ui.confirm("Delete?", default=False)
+                    return picker.filter_list("B", ["b0", "b1"])
+
+                async def script(app, pilot):
+                    await wait_for(pilot, lambda: showing(app, "A"))
+                    await pilot.press("enter")
+                    await wait_for(pilot, lambda: showing(app, "B"))
+                    await pilot.pause(0.1)
+                    self.assertTrue(showing(app, "B"))
+                    await pilot.press("j", "enter")
+                with mock.patch("builtins.input", return_value="n"):
+                    self.assertEqual(self.run_editor(editor, script), 1)
+
+    def test_a_later_ctrl_c_interrupts_the_handler_of_the_first(self):
+        hit = [threading.Event(), threading.Event()]
+
+        def editor():
+            picker.filter_list("A", ["a0"])
+            hits = 0
+            for _ in range(2):
+                try:
+                    hit[0].set()
+                    for _ in range(1000):  # ten seconds of work, then ten more in the first Ctrl-C's handler
+                        time.sleep(0.01)
+                except KeyboardInterrupt:
+                    hits += 1
+                    hit[1].set()
+            return hits
+
+        async def script(app, pilot):
+            await wait_for(pilot, lambda: showing(app, "A"))
+            await pilot.press("enter")
+            await wait_for(pilot, hit[0].is_set)
+            await pilot.press("ctrl+c")
+            await wait_for(pilot, hit[1].is_set)
+            await pilot.pause(0.05)
+            await pilot.press("ctrl+c")
+        begun = time.monotonic()
+        self.assertEqual(self.run_editor(editor, script), 2)
+        self.assertLess(time.monotonic() - begun, 5)
+
+    def test_a_list_taken_back_while_the_app_is_suspended_never_shows(self):
+        class Late(queue.Queue):
+            def get(self, *args, **kwargs):
+                raise KeyboardInterrupt
+
+        def editor():
+            picker.filter_list("A", ["a0"])
+            ui.confirm("Go on?")
+            try:
+                with mock.patch.object(picker, "queue", types.SimpleNamespace(Queue=Late)):
+                    picker.filter_list("B", ["b0"])
+            except KeyboardInterrupt:
+                pass
+            return picker.filter_list("C", ["c0", "c1"], cursor=1)
+
+        async def script(app, pilot):
+            await wait_for(pilot, lambda: showing(app, "A"))
+            await pilot.press("enter")
+            await wait_for(pilot, lambda: showing(app, "C"))
+            await pilot.pause(0.1)
+            self.events.append([type(s).__name__ for s in app.screen_stack])
+            await pilot.press("enter")
+        with mock.patch("builtins.input", return_value="y"):
+            self.assertEqual(self.run_editor(editor, script), 1)
+        self.assertIn(["_WorkingScreen", "_ListScreen"], self.events)
+
+    def test_output_around_prompts_and_later_lists_stays_in_order(self):
+        def editor():
+            print("one")
+            picker.filter_list("A", ["a0"])
+            print("two")
+            ui.confirm("Go on?")
+            print("three")
+            picker.filter_list("B", ["b0"])
+            print("four", file=sys.stderr)
+            picker.filter_list("C", ["c0"])
+            print("five")
+
+        async def script(app, pilot):
+            for title in "ABC":
+                await wait_for(pilot, lambda: showing(app, title))
+                await pilot.press("enter")
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out), contextlib.redirect_stderr(out), mock.patch("builtins.input", return_value="y"):
+            self.run_editor(editor, script)
+        self.assertEqual(out.getvalue(), "one\ntwo\nthree\nfour\nfive\n")
+
+    def test_the_terminal_is_probed_for_images_only_for_a_list_with_a_preview(self):
+        probed = mock.Mock(side_effect=lambda: self.events.append("probe") or False)
+
+        def editor():
+            picker.filter_list("A", ["a0"])
+            picker.filter_list("B", ["b0"], preview=lambda i: None)
+            return picker.filter_list("C", ["c0"], preview=lambda i: None)
+
+        async def script(app, pilot):
+            for title in "ABC":
+                await wait_for(pilot, lambda: showing(app, title))
+                await pilot.press("enter")
+        with mock.patch.object(picker, "_draws_images", probed):
+            self.run_editor(editor, script)
+        self.assertEqual(self.events, ["suspend", "probe", "resume", "app closed"])
+        self.events = []
+        with mock.patch.object(picker, "_draws_images", probed):
+            self.run_editor(lambda: picker.filter_list("A", ["a0"]), lambda app, pilot: pilot.press("enter"))
+        self.assertEqual(self.events, ["app closed"])
 
     def test_working_shows_the_last_line_printed_as_plain_text(self):
         go = threading.Event()
@@ -370,8 +531,8 @@ class Session(unittest.TestCase):
 
 
 class TextualPrintHook(unittest.TestCase):
-    """_ListApp overrides Textual's private App._print to keep what the editor prints while the app shows. If a Textual
-    upgrade renames it or changes how print reaches it, these fail: see _ListApp._print."""
+    """_ListApp overrides Textual's private App._print to keep what the editor prints while the app shows, and drops
+    stale keys by comparing their stamp with textual._time.get_time. If a Textual upgrade changes either, these fail."""
 
     def test_app_print_has_the_signature_the_override_uses(self):
         import inspect
@@ -394,6 +555,14 @@ class TextualPrintHook(unittest.TestCase):
                 print("err", file=sys.stderr)
         asyncio.run(drive())
         self.assertEqual([g for g in got if g[0].strip()], [("out", False), ("err", True)])
+
+
+    def test_key_events_are_stamped_with_the_clock_the_session_compares(self):
+        from textual import events
+        from textual._time import get_time
+        before = get_time()
+        key = events.Key("enter", "\r")
+        self.assertTrue(before <= key.time <= get_time())
 
 
 class OutsideASession(unittest.TestCase):
