@@ -280,15 +280,15 @@ def check_dir(path, label):
     """Fail early if `path` can't be used or created. Returns True if it must be created."""
     if os.path.exists(path):
         if not os.path.isdir(path):
-            raise SystemExit(ui.red(f"❌ {label} {path} exists but is not a directory"))
+            ui.fail(f"{label} {path} exists but is not a directory", 3)
         if not os.access(path, os.W_OK | os.X_OK):
-            raise SystemExit(ui.red(f"❌ No write permission for {label} {path}"))
+            ui.fail(f"No write permission for {label} {path}", 3)
         return False
     parent = os.path.dirname(path)
     while not os.path.exists(parent):
         parent = os.path.dirname(parent)
     if not os.path.isdir(parent) or not os.access(parent, os.W_OK | os.X_OK):
-        raise SystemExit(ui.red(f"❌ Can't create {label} {path}: no write permission in {parent}"))
+        ui.fail(f"Can't create {label} {path}: no write permission in {parent}", 3)
     return True
 
 
@@ -337,6 +337,8 @@ def main():
         ui.fail(f"S3 said {code or 'an error'}: {e.response.get('Error', {}).get('Message', e)}" + (f"\n   → {hint}" if hint else ""), 3)
     except BotoCoreError as e:
         ui.fail(f"Couldn't reach S3: {e}\n   → check your network, ROMS_ENDPOINT, and `aws sts get-caller-identity --profile {runtime.PROFILE}`", 3)
+    except OSError as e:  # e.g. the storage share dropped mid-run
+        ui.fail(str(e), 1)
     finally:
         inventory.flush()
         clean.clean_dirs()
@@ -597,6 +599,8 @@ def dispatch_mode(args, mode):
         from . import scrape_online
         return True, scrape_online.set_credentials()
     usersettings.ensure_bucket()
+    if runtime.ROOT and not os.path.isdir(runtime.ROOT) and not args.edit:  # the editor goes by the cache alone
+        ui.fail(f"The storage folder {runtime.ROOT} isn't there (is the share mounted?)", 3)
     if not args.json:  # the JSON document is all that reaches stdout: no question
         inventory.prepare()
     if args.scrape:
@@ -730,8 +734,12 @@ def sync_card(args):
     from . import chd
     store.preload_repo_data()
     base = os.path.abspath(os.path.expanduser(args.base_dir or os.getcwd()))
+    if not os.path.isdir(base):
+        ui.fail(f"{base} isn't a folder (is the card mounted?)\n   See sync-roms --help for the commands.", 2)
 
-    print(ui.bold("🎮 sync-roms") + ui.dim(f"  {s3.access()}"))
+    tree = inventory.current()
+    age = f"  ·  cache updated {inventory._ago(max(0, inventory._clock() - tree.updated))}" if tree and tree.updated else ""
+    print(ui.bold("🎮 sync-roms") + ui.dim(f"  {s3.access()}{age}"))
     mirror = usersettings.load_settings().get("mirror")
     if mirror:
         mirroring.use_mirror(mirror, args.dry_run)

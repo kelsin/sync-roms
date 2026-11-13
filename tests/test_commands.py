@@ -377,6 +377,10 @@ class DownloadsTest(unittest.TestCase):
         self.assertIn("access denied", downloads.failure_hint(Exception("403 Forbidden")))
         self.assertEqual(downloads.failure_hint(Exception("odd")), "")
 
+    def test_failure_hint_for_a_file_gone_from_a_storage_folder_points_at_cache_update(self):
+        e = FileNotFoundError(2, "No such file or directory", "/Volumes/roms/psx/Big1.chd")
+        self.assertIn("sync-roms cache update", downloads.failure_hint(e))
+
     def test_mirror_keeps_stale_files_when_a_download_failed(self):
         import tempfile
         with tempfile.TemporaryDirectory() as root:

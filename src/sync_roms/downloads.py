@@ -87,6 +87,8 @@ def failure_hint(error):
         return " (access denied: check the profile can read this storage)"
     if "404" in text or "NoSuchKey" in text or "Not Found" in text:
         return " (not in storage any more)"
+    if "No such file" in text:
+        return " (not in storage any more: run sync-roms cache update)"
     if "No space left" in text:
         return " (the card is full)"
     if "timed out" in text.lower() or "Could not connect" in text:
