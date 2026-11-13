@@ -493,7 +493,8 @@ ScreenScraper didn't offer for each ROM) and `scrape-notgames.json` (the non-gam
 `sync-roms --mirror DIR` keeps a local copy of just what the game lists reference, with storage's
 own key layout: the ROMs a sync installs (every file of a full system), every system's
 BIOS files, `scrapes/<system>/` metadata and media for those ROMs.
-It compares file sizes, so a rerun with nothing changed lists storage and downloads nothing.
+It compares file sizes (and the ES-DE theme's commit file, always the same size, by checksum), so a rerun with
+nothing changed lists storage and downloads nothing.
 Anything in the mirror that is no longer referenced (a game removed from a card's games or from the
 bucket) is deleted. `--dry-run` shows the plan. A non-empty folder that isn't already a mirror
 (it has no `.sync-roms-mirror` file) is refused.
