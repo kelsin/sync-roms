@@ -173,17 +173,22 @@ def folders():
 
 def _patch(change, keys):
     """Apply change to the cache, and stop trusting the mtimes of the keys' folders (spelled as given, NFC or NFD: a share
-    may store a name decomposed): the next update lists them."""
+    may store a name decomposed), or of the nearest folder above that the cache knows, for a folder the write created:
+    the next update lists them."""
     global _dirty
     with _lock:
         tree = current()
         if tree is not None:
             change(tree)
             for k in keys:
-                folder = k.rpartition("/")[0]
-                for name in {folder, unicodedata.normalize("NFC", folder), unicodedata.normalize("NFD", folder)}:
-                    if name in tree.dirs:
+                folder = k
+                while folder:
+                    folder = folder.rpartition("/")[0]
+                    names = {folder, unicodedata.normalize("NFC", folder), unicodedata.normalize("NFD", folder)} & tree.dirs.keys()
+                    for name in names:
                         tree.dirs[name] = None
+                    if names:
+                        break
             tree.changed()
             _dirty = True
 

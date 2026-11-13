@@ -350,11 +350,12 @@ class FolderMtimeTest(StorageFolder):
         inventory.wrote(f"{nfc}/b.zip", 2)
         self.assertIsNone(inventory.current().dirs[nfd])
 
-    def test_a_write_into_a_folder_the_walk_never_read_leaves_dirs_alone(self):
+    def test_a_write_into_a_new_folder_drops_the_nearest_known_folder_mtime(self):
         self.update()
-        before = dict(inventory.current().dirs)
+        inventory.wrote("gba/new/sub/z.zip", 9)
+        self.assertEqual(inventory.current().dirs, {"": 1_600_000_000 * 10**9, "BIOS": 1_600_000_000 * 10**9, "gba": None})
         inventory.wrote("new/z.zip", 9)
-        self.assertEqual(inventory.current().dirs, before)
+        self.assertIsNone(inventory.current().dirs[""])
         self.assertEqual(inventory.files("new/"), {"new/z.zip": 9})
 
     def test_a_dirs_value_that_is_not_a_whole_number_loads_as_none(self):
