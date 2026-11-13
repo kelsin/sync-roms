@@ -3,8 +3,10 @@ import asyncio
 import contextlib
 import io
 import os
+import queue
 import sys
 import threading
+import time
 import unittest
 from unittest import mock
 
@@ -231,24 +233,121 @@ class Session(unittest.TestCase):
         self.assertEqual(out.getvalue(), "saved\n")
         self.assertEqual(self.events, ["suspend", "resume", "app closed"])
 
-    def test_ctrl_c_while_working_interrupts_the_next_list(self):
-        go = threading.Event()
+    def test_ctrl_c_while_working_interrupts_the_work_at_once(self):
+        started = threading.Event()
 
         def editor():
             picker.filter_list("A", ["a0"])
-            go.wait(5)
             try:
-                picker.filter_list("B", ["b0"])
+                started.set()
+                for _ in range(1000):  # ten seconds of "work", unless interrupted
+                    time.sleep(0.01)
+                return "finished"
             except KeyboardInterrupt:
-                return "interrupted"
+                yes = ui.confirm("Save?")  # the editors' handlers ask, save or review, then stop
+                return "interrupted", yes
 
         async def script(app, pilot):
             await wait_for(pilot, lambda: showing(app, "A"))
             await pilot.press("enter")
-            await wait_for(pilot, lambda: type(app.screen).__name__ == "_WorkingScreen")
+            await wait_for(pilot, started.is_set)
             await pilot.press("ctrl+c")
+        begun = time.monotonic()
+        with mock.patch("builtins.input", return_value="y"):
+            self.assertEqual(self.run_editor(editor, script), ("interrupted", True))
+        self.assertLess(time.monotonic() - begun, 5)
+
+    def test_ctrl_c_while_working_that_escapes_the_editor_reaches_the_caller_once(self):
+        started = threading.Event()
+
+        def editor():
+            picker.filter_list("A", ["a0"])
+            started.set()
+            for _ in range(1000):
+                time.sleep(0.01)
+
+        async def script(app, pilot):
+            await wait_for(pilot, lambda: showing(app, "A"))
+            await pilot.press("enter")
+            await wait_for(pilot, started.is_set)
+            await pilot.press("ctrl+c")
+            await pilot.press("ctrl+c")  # a second one while the first unwinds
+        with self.assertRaises(KeyboardInterrupt):
+            self.run_editor(editor, script)
+        self.assertEqual(self.events, ["app closed"])
+
+    def test_ctrl_c_while_handing_over_a_list_takes_it_back(self):
+        class Late(queue.Queue):
+            """A reply queue whose wait is cut short by the Ctrl-C that came just before the list."""
+            def get(self, *args, **kwargs):
+                raise KeyboardInterrupt
+
+        def editor():
+            picker.filter_list("A", ["a0"])
+            try:
+                with mock.patch.object(picker.queue, "Queue", Late):
+                    picker.filter_list("B", ["b0"])
+            except KeyboardInterrupt:
+                pass
+            return picker.filter_list("C", ["c0", "c1"], cursor=1)
+
+        async def script(app, pilot):
+            await wait_for(pilot, lambda: showing(app, "A"))
+            await pilot.press("enter")
+            await wait_for(pilot, lambda: showing(app, "C"))
+            self.events.append([type(s).__name__ for s in app.screen_stack])
+            await pilot.press("enter")
+        self.assertEqual(self.run_editor(editor, script), 1)
+        self.assertEqual(self.events[0], ["_WorkingScreen", "_ListScreen"])  # B is gone
+
+    def test_working_shows_the_last_line_printed_as_plain_text(self):
+        go = threading.Event()
+        seen = []
+
+        def editor():
+            picker.filter_list("A", ["a0"])
+            print("📡 Listing gba ...")
+            print(ui.yellow("⚠️  \x1b[2Jslow"), file=sys.stderr)
+            go.wait(5)
+            return picker.filter_list("B", ["b0"])
+
+        async def script(app, pilot):
+            await wait_for(pilot, lambda: showing(app, "A"))
+            await pilot.press("enter")
+            last = lambda: str(app.screen_stack[0].query_one("#last").render())
+            await wait_for(pilot, lambda: "slow" in last())
+            seen.append(last())
             go.set()
-        self.assertEqual(self.run_editor(editor, script), "interrupted")
+            await wait_for(pilot, lambda: showing(app, "B"))
+            await pilot.press("enter")
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out), contextlib.redirect_stderr(out):
+            self.assertEqual(self.run_editor(editor, script), 0)
+        self.assertEqual(seen, ["⚠️  slow"])
+        self.assertEqual(out.getvalue(), "📡 Listing gba ...\n" + ui.yellow("⚠️  \x1b[2Jslow") + "\n")
+
+    def test_commands_the_set_editor_runs_use_the_normal_screen(self):
+        from sync_roms import setedit
+        main = threading.current_thread()
+
+        def fake_run(cmd, **kwargs):
+            self.events.append((cmd[0], threading.current_thread() is main))
+            return mock.Mock(returncode=0, stdout="ok\n", stderr="")
+
+        def editor():
+            picker.filter_list("A", ["a0"])
+            setedit.need_tools()
+            setedit.run(["git", "push"])
+            return picker.filter_list("B", ["b0"])
+
+        async def script(app, pilot):
+            await wait_for(pilot, lambda: showing(app, "A"))
+            await pilot.press("enter")
+            await wait_for(pilot, lambda: showing(app, "B"))
+            await pilot.press("enter")
+        with mock.patch.object(setedit.subprocess, "run", fake_run), mock.patch.object(setedit.shutil, "which", return_value="x"):
+            self.run_editor(editor, script)
+        self.assertEqual(self.events, ["suspend", ("gh", True), ("git", True), "resume", "app closed"])
 
     def test_nested_editors_share_the_session(self):
         inner = picker.one_app(lambda: picker.filter_list("B", ["b0"]))
@@ -268,6 +367,33 @@ class Session(unittest.TestCase):
         main = threading.current_thread()
         with mock.patch.object(ui, "has_terminal", return_value=False):
             self.assertIs(picker.one_app(threading.current_thread)(), main)
+
+
+class TextualPrintHook(unittest.TestCase):
+    """_ListApp overrides Textual's private App._print to keep what the editor prints while the app shows. If a Textual
+    upgrade renames it or changes how print reaches it, these fail: see _ListApp._print."""
+
+    def test_app_print_has_the_signature_the_override_uses(self):
+        import inspect
+        from textual.app import App
+        self.assertEqual(list(inspect.signature(App._print).parameters), ["self", "text", "stderr"])
+        self.assertIs(inspect.signature(App._print).parameters["stderr"].default, False)
+
+    def test_print_and_stderr_inside_a_running_app_reach_app_print(self):
+        from textual.app import App
+        got = []
+
+        class Probe(App):
+            def _print(self, text, stderr=False):
+                got.append((text, stderr))
+
+        async def drive():
+            app = Probe()
+            async with app.run_test():
+                print("out")
+                print("err", file=sys.stderr)
+        asyncio.run(drive())
+        self.assertEqual([g for g in got if g[0].strip()], [("out", False), ("err", True)])
 
 
 class OutsideASession(unittest.TestCase):

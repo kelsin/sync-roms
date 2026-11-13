@@ -6,7 +6,7 @@ from collections import defaultdict
 from . import names, picker, previews, runtime, s3, store, ui, vita
 
 
-@ui.prompt
+@ui.uses_terminal
 def note(text):
     """Say something outside the list screen and wait, so the next redraw doesn't erase it."""
     print(text)

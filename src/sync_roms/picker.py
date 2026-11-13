@@ -1,8 +1,10 @@
 """Interactive pickers: full-screen list screens (Textual)."""
 import collections
+import ctypes
 import functools
 import os
 import queue
+import re
 import signal
 import sys
 import threading
@@ -552,15 +554,17 @@ def _app_class():
 
 
     class _WorkingScreen(Screen):
-        """An editor session's screen between its lists. Ctrl-C here interrupts the next list or prompt."""
+        """An editor session's screen between its lists, with the last line the editor printed. Ctrl-C here interrupts
+        the editor's work."""
 
         def compose(self):
             yield Static(Text("Working...", "dim"))
+            yield Static(id="last")
 
         def on_key(self, event):
             event.stop()
             if event.key == "ctrl+c":
-                self.app.session.interrupted = True
+                self.app.session.interrupt()
             elif event.key == "ctrl+z":
                 self.app.action_suspend_process()
 
@@ -597,7 +601,7 @@ def _app_class():
 
         def on_mount(self):
             if self.session:
-                self.show(self.model, self.reply)
+                self.request("list", self.model, self.reply)
             elif self.model.poll:
                 self.set_interval(POLL_MS / 1000, lambda: self.step(self.model.tick))
 
@@ -607,6 +611,7 @@ def _app_class():
                 model.preview = None
             self.model, self.reply = model, reply
             self.done, self.interrupted, self.error = False, False, None
+            self.last_line("")
             self.timer = self.set_interval(POLL_MS / 1000, lambda: self.step(self.model.tick)) if model.poll else None
             self.list_screen = _ListScreen()
             self.push_screen(self.list_screen)
@@ -615,6 +620,8 @@ def _app_class():
             """A request from the session's worker (_Session.ask): show a list, or suspend the app and answer prompts on
             the normal screen (after what the worker printed meanwhile) until the next list, or the end. The SIGINT
             handler is Python's own meanwhile, so Ctrl-C raises KeyboardInterrupt (asyncio.run's would cancel the app)."""
+            if reply in self.session.withdrawn:
+                return
             if self.session.interrupted:
                 self.session.interrupted = False
                 return reply.put((None, KeyboardInterrupt()))
@@ -639,10 +646,24 @@ def _app_class():
             else:
                 self.show(*request[1:])
 
+        def withdraw(self, reply):
+            """The worker took back the list it asked for (_Session.withdraw): close it if it is up."""
+            if self.reply is reply and not self.done:
+                self.finish(None)
+
+        def last_line(self, line):
+            for last in self.screen_stack[0].query("#last"):  # none before the working screen is composed
+                last.update(Text(line, "dim"))
+
         def _print(self, text, stderr=False):
-            """What the worker prints while the app runs is kept for the normal screen; other threads' goes to Textual."""
+            """What the worker prints while the app runs is kept for the normal screen, and its last line shown under
+            "Working..."; other threads' goes to Textual. Overrides Textual's private App._print, which its print
+            capture calls with every write while the app runs (TextualPrintHook tests pin that)."""
             if self.session and threading.get_ident() == self.session.worker:
                 self.session.printed.append((stderr, text))
+                line = self.session.last_line(text)
+                if line is not None:
+                    self.call_later(self.last_line, line)
             else:
                 super()._print(text, stderr)
 
@@ -707,6 +728,7 @@ def _outcome(call):
 
 
 _session = None  # the editor session (one_app) running now, if any
+_ESCAPES = re.compile(r"\x1b(\[[0-?]*[ -/]*[@-~]|\][^\x07\x1b]*(\x07|\x1b\\)|[0-~])")  # CSI, OSC, other ESC sequences
 
 
 def _in_session():
@@ -719,8 +741,9 @@ class _Session:
     app at the first list and keeps it until the editor is done, with "Working..." between lists. Each list and each
     prompt is a request the worker hands to the main thread (to the app while it runs) and waits for: prompts run on
     the main thread with the app suspended until the next list, so input, Ctrl-C and output between prompts work as
-    without a session. What the worker prints while the app shows comes out, in order, when the normal screen is
-    back."""
+    without a session, and so do commands that may ask (ui.uses_terminal). What the worker prints while the app shows
+    comes out, in order, when the normal screen is back; its last line shows under "Working...". Ctrl-C while the
+    editor works raises KeyboardInterrupt in the worker at once (interrupt)."""
 
     def __init__(self):
         self.requests = queue.Queue()  # (kind, payload, reply) for the main thread while no app takes them; None: editor done
@@ -730,7 +753,10 @@ class _Session:
         self.waiting = None  # the reply the worker waits for from the app
         self.worker = None  # the worker's thread id
         self.result = None  # the editor's _outcome
-        self.interrupted = False  # Ctrl-C while neither a list nor a prompt was up: the next one raises KeyboardInterrupt
+        self.busy = False  # the worker runs editor code (not handing over a request): Ctrl-C can interrupt it at once
+        self.interrupted = False  # a Ctrl-C the worker gets from its next request (or once the editor is done)
+        self.withdrawn = set()  # replies of requests the worker took back (withdraw)
+        self.tail = ""  # the worker's printed text after its last newline
         self.draws = None  # _draws_images(), asked before the first app takes the terminal
         self.streams = None  # sys.stdout and sys.stderr from before the app started
         self.printed = collections.deque()  # (to stderr, text) the worker printed while the app ran
@@ -739,13 +765,13 @@ class _Session:
         """Run fn(*args, **kwargs) on the worker and serve its requests until it is done; returns or raises what it
         did, once the app is closed."""
         global _session
-        _session, ui.prompt_runner = self, self.prompt
+        _session, ui.terminal_runner = self, self.outside
         try:
             threading.Thread(target=self.work, args=(fn, args, kwargs), name="editor", daemon=True).start()
             while (request := self.prompts(self.next_request())) is not None:
                 self.serve(*request[1:])
         finally:
-            _session = ui.prompt_runner = None
+            _session = ui.terminal_runner = None
         value, error = self.result
         if error is None and self.interrupted:  # Ctrl-C after the last list
             error = KeyboardInterrupt()
@@ -758,7 +784,9 @@ class _Session:
         the editor is done."""
         while request is not None:
             kind, payload, reply = request
-            if self.interrupted:
+            if reply in self.withdrawn:
+                pass
+            elif self.interrupted:
                 self.interrupted = False
                 reply.put((None, KeyboardInterrupt()))
             elif kind == "list":
@@ -773,17 +801,44 @@ class _Session:
         while True:
             try:
                 return self.requests.get()
-            except KeyboardInterrupt:  # the worker is busy: it gets it at its next list or prompt
+            except KeyboardInterrupt:
+                self.interrupt()
+
+    def interrupt(self):
+        """Ctrl-C while neither a list nor a prompt is up (main thread). An editor at work gets KeyboardInterrupt at
+        once; one handing over a request, or still unwinding the last Ctrl-C, gets it from its next request."""
+        with self.lock:
+            if not self.busy:
                 self.interrupted = True
+                return
+            self.busy = False  # one at a time: set again once the worker is back from a list or prompt
+            # CPython's PyThreadState_SetAsyncExc: the worker raises KeyboardInterrupt at its next bytecode, as the main
+            # thread does on SIGINT (a C call it is blocked in, such as a slow read, finishes first)
+            ctypes.pythonapi.PyThreadState_SetAsyncExc(ctypes.c_ulong(self.worker), ctypes.py_object(KeyboardInterrupt))
 
     def work(self, fn, args, kwargs):
         """The worker: run the editor, then end the app and the main thread's loop."""
         self.worker = threading.get_ident()
-        self.result = _outcome(lambda: fn(*args, **kwargs))
-        with self.lock:
-            if self.app and not self.suspended:  # a suspended app ends when its prompts get the None below
-                self.app.call_later(self.app.exit)
-        self.requests.put(None)
+        self.result = _outcome(lambda: self.edit(fn, args, kwargs))
+        for _ in range(2):  # an interrupt that came as the editor ended can only land here, once
+            try:
+                with self.lock:
+                    if self.app and not self.suspended:  # a suspended app ends when its prompts get the None below
+                        self.app.call_later(self.app.exit)
+                self.requests.put(None)
+                return
+            except KeyboardInterrupt:
+                self.result = self.result if self.result[1] else (None, KeyboardInterrupt())
+
+    def edit(self, fn, args, kwargs):
+        """The editor, open to interrupt while it runs (the try covers every place an interrupt can land)."""
+        try:
+            with self.lock:
+                self.busy = True
+            return fn(*args, **kwargs)
+        finally:
+            with self.lock:
+                self.busy = False
 
     def serve(self, model, reply):
         """Run the app, showing model first, until the editor is done. If the app fails instead, the worker's pending
@@ -818,18 +873,45 @@ class _Session:
         """On the worker: have the main thread show a list (kind "list", payload its model) or run a prompt ("call",
         payload a callable), and wait. Returns (result, error)."""
         reply = queue.Queue()
-        with self.lock:
-            if self.app and not self.suspended and self.app.call_later(self.app.request, kind, payload, reply):
-                self.waiting = reply
-            else:
-                self.requests.put((kind, payload, reply))
-        got = reply.get()
+        try:
+            with self.lock:
+                self.busy = False
+                if self.app and not self.suspended and self.app.call_later(self.app.request, kind, payload, reply):
+                    self.waiting = reply
+                else:
+                    self.requests.put((kind, payload, reply))
+            got = reply.get()
+        except KeyboardInterrupt:  # an interrupt that came just before this request lands here: take it back
+            self.withdraw(reply)
+            raise
         with self.lock:
             self.waiting = None
+            self.busy = True
         return got
 
-    def prompt(self, fn, *args, **kwargs):
-        """ui.prompt_runner: a prompt asked on the worker runs on the main thread, outside the app."""
+    def withdraw(self, reply):
+        """On the worker: take back the request answered to reply; it is skipped, or closed if it is a list already
+        up."""
+        with self.lock:
+            self.withdrawn.add(reply)
+            self.waiting = None
+            if self.app and not self.suspended:
+                self.app.call_later(self.app.withdraw, reply)
+
+    def last_line(self, text):
+        """On the worker: the last complete line once text is printed, as plain text (escape sequences and control
+        characters dropped), or None when text completes no line with something in it."""
+        lines = (self.tail + text).split("\n")
+        self.tail = lines.pop()[-1000:]  # a line that never ends (a progress bar's redraws) is never shown
+        for line in reversed(lines):
+            for part in reversed(line.split("\r")):  # a progress line redraws itself after \r
+                plain = "".join(c for c in _ESCAPES.sub("", part) if c.isprintable()).rstrip()
+                if plain.strip():
+                    return plain
+        return None
+
+    def outside(self, fn, *args, **kwargs):
+        """ui.terminal_runner: fn called on the worker runs on the main thread, on the normal screen."""
         if threading.get_ident() != self.worker:
             return fn(*args, **kwargs)
         value, error = self.ask("call", functools.partial(fn, *args, **kwargs))
