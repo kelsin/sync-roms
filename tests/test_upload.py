@@ -5,6 +5,7 @@ import sys
 import tempfile
 import threading
 import unittest
+import zipfile
 from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -229,33 +230,77 @@ class RenameChainTest(unittest.TestCase):
             self.assertEqual(s3.move_keys([("gba/a.gba", "gba/b.gba"), ("gba/b.gba", "gba/c.gba")]), 2)
         self.assertEqual(self.stored(), {"a.gba": b"X", "b.gba": b"Y"})
 
+    def move_failing(self, files, moves, fails):
+        """s3.move_keys(moves) where moving the file named fails raises: (failures, output, storage after)."""
+        for name, data in files.items():
+            with open(os.path.join(self.folder, name), "wb") as f:
+                f.write(data)
+        real_replace, out = os.replace, io.StringIO()
+
+        def replace(src, dst):
+            if os.path.basename(src) == fails:
+                raise OSError("busy")
+            real_replace(src, dst)
+
+        with mock.patch.object(s3.os, "replace", replace), contextlib.redirect_stdout(out):
+            failed = s3.move_keys(moves)
+        return failed, out.getvalue(), self.stored()
+
+    def test_a_failure_in_a_cycle_moves_the_parked_file_back(self):
+        failed, _, stored = self.move_failing({"a.gba": b"X", "b.gba": b"Y"},
+                                              [("gba/a.gba", "gba/b.gba"), ("gba/b.gba", "gba/a.gba")], "b.gba")
+        self.assertEqual(failed, 2)
+        self.assertEqual(stored, {"a.gba": b"X", "b.gba": b"Y"})
+
+    def test_a_parked_file_that_cant_go_back_is_named(self):
+        failed, out, stored = self.move_failing(
+            {"a.gba": b"X", "b.gba": b"Y", "c.gba": b"Z"},
+            [("gba/a.gba", "gba/b.gba"), ("gba/b.gba", "gba/c.gba"), ("gba/c.gba", "gba/a.gba")], "b.gba")
+        self.assertEqual(failed, 2)
+        self.assertEqual(stored, {"a.gba.part": b"X", "a.gba": b"Z", "b.gba": b"Y"})
+        last = out.splitlines()[-1]
+        self.assertIn("gba/a.gba.part", last)
+        self.assertIn("should be named gba/b.gba", last)
+
 
 class BucketReplaceMirrorTest(unittest.TestCase):
     """upload --replace on a bucket compares content with the bucket itself, never with the local mirror."""
 
-    def renamed(self, mirror_bytes, bucket_bytes):
+    def renamed(self, mirror_bytes, bucket_bytes, local_bytes=b"A" * 100, ext="gba"):
         class Client:
             def get_object(self, Bucket, Key, Range):
                 start, end = map(int, Range[len("bytes="):].split("-"))
                 return {"Body": io.BytesIO(bucket_bytes[start:end + 1])}
 
         with tempfile.TemporaryDirectory() as root, tempfile.TemporaryDirectory() as mirror, contextlib.ExitStack() as st:
-            with open(os.path.join(root, "new.gba"), "wb") as f:
-                f.write(b"A" * 10)
+            with open(os.path.join(root, f"new.{ext}"), "wb") as f:
+                f.write(local_bytes)
             os.makedirs(os.path.join(mirror, "gba"))
-            with open(os.path.join(mirror, "gba", "old.gba"), "wb") as f:
+            with open(os.path.join(mirror, "gba", f"old.{ext}"), "wb") as f:
                 f.write(mirror_bytes)
             st.enter_context(mock.patch.object(runtime, "ROOT", None))
             st.enter_context(mock.patch.object(runtime, "_mirror_root", mirror))
             st.enter_context(mock.patch.object(s3, "s3_client", lambda *a, **k: Client()))
-            st.enter_context(mock.patch.object(inventory, "etags", lambda prefix: {"old.gba": (10, '"abc-2"')}))
+            st.enter_context(mock.patch.object(inventory, "etags", lambda prefix: {f"old.{ext}": (len(bucket_bytes), '"abc-2"')}))
             out = st.enter_context(contextlib.redirect_stdout(io.StringIO()))
             upload.replace_command(argparse.Namespace(dry_run=True), root, SYSTEMS[0])
-        return "old.gba → new.gba" in out.getvalue()
+        return f"old.{ext} → new.{ext}" in out.getvalue()
 
     def test_a_mirror_copy_never_decides_a_rename(self):
-        self.assertFalse(self.renamed(b"A" * 10, b"B" * 10))
-        self.assertTrue(self.renamed(b"B" * 10, b"A" * 10))
+        self.assertFalse(self.renamed(b"A" * 100, b"B" * 100))
+        self.assertTrue(self.renamed(b"B" * 100, b"A" * 100))
+
+    def test_a_mirror_zip_never_decides_a_rename(self):
+        def zipped(data):
+            buf = io.BytesIO()
+            with zipfile.ZipFile(buf, "w", zipfile.ZIP_STORED) as z:
+                z.writestr("g.gba", data)
+            return buf.getvalue()
+
+        a, b = zipped(b"A" * 10), zipped(b"B" * 10)
+        self.assertEqual(len(a), len(b))
+        self.assertFalse(self.renamed(a, b, a, "zip"))
+        self.assertTrue(self.renamed(b, a, a, "zip"))
 
 
 class BucketReplaceSamplesTest(unittest.TestCase):

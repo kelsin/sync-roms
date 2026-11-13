@@ -317,6 +317,12 @@ def move_keys(moves):
         out = []
         for job in group:
             out.append(move(job) if not out or out[-1][1] is None else (job, OSError(f"skipped: {out[-1][0][0]} wasn't moved")))
+        (start, tmp), (_, name) = group[0], group[-1]
+        if tmp == group[-1][0] and out[0][1] is None and out[-1][1] is not None:  # a cycle stopped with a file parked
+            if out[1][1] is not None and move((tmp, start))[1] is None:  # nothing took its old name yet
+                out[-1] = (out[-1][0], OSError(f"skipped: moved back to {start}"))
+            else:
+                out[-1] = (out[-1][0], OSError(f"left under this name: it should be named {name}"))
         return out
 
     groups = move_groups(moves)

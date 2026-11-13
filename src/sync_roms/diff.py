@@ -90,6 +90,7 @@ def same_bytes(path, key, size):
         spans = [(start, min(SAMPLE_CHUNK, size - start)) for start in range(0, size, SAMPLE_CHUNK)]
     else:
         spans = [(k * (size - SAMPLE_CHUNK) // (SAMPLES - 1), SAMPLE_CHUNK) for k in range(SAMPLES)]
+    # storage_reads turns the mirror off process-wide: same_bytes only runs on the main thread (match_content's find)
     with open(path, "rb") as f, mirroring.storage_reads():
         for start, n in spans:
             f.seek(start)
