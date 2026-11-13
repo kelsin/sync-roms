@@ -7,7 +7,7 @@ import tempfile
 import time
 
 from . import edit, picker, s3, store, ui
-from .listedit import ask_category, game_label, insert_game, recategorize, reconcile, stocked, view
+from .listedit import add_from_set, ask_category, game_label, insert_game, recategorize, reconcile, stocked, view
 
 
 REPO = "kelsin/sync-roms"
@@ -27,12 +27,13 @@ set_text = store.set_text  # the format of a set's file lives in store
 # --- Editing the games of one set --------------------------------------------------------------------
 
 def edit_one(game_set, systems, keys_of):
-    """Edit one set: remove games, add games from a system, change categories, rename."""
+    """Edit one set: remove games, add games from a system or another set, change categories, rename."""
     names = {s["bucket"]: s["name"] for s in systems}
     while True:
         i = picker.filter_list(f"✏️  {game_set['name']} (Esc = back)",
                                [f"Games in this set ({len(game_set['games'])}): switch some off",
-                                "Add games from a system", "Change a game's category", "Rename / change the description"])
+                                "Add games from a system", "Add games from a set", "Change a game's category",
+                                "Rename / change the description"])
         if i is None:
             return
         shown = view(game_set, systems)
@@ -56,6 +57,8 @@ def edit_one(game_set, systems, keys_of):
             category = ask_category(game_set["games"], f"{len(added)} new game(s)") if added else ""
             game_set["games"] = reconcile(game_set["games"], shown, category)
         elif i == 2:
+            add_from_set(game_set, [x for x in store.load_sets() if x["name"] != game_set["name"]], shown, keys_of)
+        elif i == 3:
             games = [g for g in game_set["games"] if g.get("bucket")]
             j = picker.filter_list("✏️  Change which game's category?", [game_label(g, names) for g in games])
             if j is not None:

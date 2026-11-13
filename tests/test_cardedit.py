@@ -245,7 +245,7 @@ class Flow(DataDir):
         with mock.patch.dict(CATALOG, systems=CATALOG["systems"] + [nds]), \
                 mock.patch.dict(DEVICE, systems=["gba", "gb", "nds"]):
             calls = self.run_card(returns((cardedit.COLLECTIONS_KEY, 0)), returns((" ", 0)), returns(None), returns(None))
-        self.assertEqual(calls[1][1], ["Favs  (2 playable, 2 not playable)"])
+        self.assertEqual(calls[1][1], ["💖 Favs  (2 playable, 2 not playable)"])
         self.assertEqual(calls[1][2]["extras"], [[("  ✅ on the card", "green")]])
         self.assertEqual(self.read("cards.json")["c"]["collections"], ["favs"])
 
@@ -254,7 +254,7 @@ class Flow(DataDir):
         self.card()
         with contextlib.redirect_stderr(io.StringIO()):
             calls = self.run_card(returns((cardedit.COLLECTIONS_KEY, 0)), returns(None), returns(None))
-        self.assertEqual(calls[1][1], ["Favs  (2 playable, 1 not playable)"])
+        self.assertEqual(calls[1][1], ["💖 Favs  (2 playable, 1 not playable)"])
 
     def test_enter_toggles_a_collection_off_again(self):
         self.favs()

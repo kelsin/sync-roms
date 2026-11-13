@@ -295,7 +295,7 @@ On `esde` and `emudeck` cards every Vita game zip in `psvita/` gets a `.psvita` 
 | `--use-mirror DIR` | Same as `--mirror DIR`, then save `DIR` as the local mirror |
 | `--clear-mirror` | Forget the saved mirror (its files are left alone) |
 | `--diff [DIR]` | Compare a folder with a bucket system's folder (the old form of `diff`; see `--system`) |
-| `--replace` | `upload roms` only: make the storage folder match `DIR`. Renamed files are moved by content and left-over storage files are listed so you pick which to delete |
+| `--replace` | `upload roms` only: make the storage folder match `DIR`. Renamed files are moved by content (big bucket files without an MD5 are compared on samples, and those renames are marked) and left-over storage files are listed so you pick which to delete |
 | `--devices` | List the supported devices with their chip and the number of systems each one gets, then exit |
 | `-y`, `--yes` | Answer prompts with their default |
 | `--device ID\|full`, `--layout NAME` | Sync: choose the setup without the picker (it is saved for the card) |
@@ -529,7 +529,7 @@ Removing a game only drops it from the card's games; the file stays in storage.
 
 ### Editing the built-in sets
 
-`sync-roms sets edit` edits the sets in this repo's `data/sets/` and opens a PR with the changes, so it works from any install. Pick a set to switch games off, add games from a system (you're asked for a category; existing ones are listed), change a game's category, or rename it. **➕ New set** creates a set and `d` deletes the highlighted one (it warns if a card still references it). Esc shows the changes; confirming clones `kelsin/sync-roms` to a temporary folder, writes the changed set files, pushes a branch and runs `gh pr create`. It needs `git` and a logged-in `gh`, and writes nothing to storage or to `~/.sync-roms`.
+`sync-roms sets edit` edits the sets in this repo's `data/sets/` and opens a PR with the changes, so it works from any install. Pick a set to switch games off, add games from a system or from another set across all its systems (you're asked for a category; existing ones are listed), change a game's category, or rename it. **➕ New set** creates a set and `d` deletes the highlighted one (it warns if a card still references it). Esc shows the changes; confirming clones `kelsin/sync-roms` to a temporary folder, writes the changed set files, pushes a branch and runs `gh pr create`. It needs `git` and a logged-in `gh`, and writes nothing to storage or to `~/.sync-roms`.
 
 ### Collections
 

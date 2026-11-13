@@ -15,7 +15,7 @@ RUBY = {"title": "Ruby", "system": "gba", "bucket": "gba/Ruby.zip"}
 
 class Shared(unittest.TestCase):
     def test_set_editor_uses_the_shared_helpers(self):
-        for name in ("view", "stocked", "insert_game", "reconcile", "recategorize", "ask_category", "game_label"):
+        for name in ("view", "stocked", "insert_game", "reconcile", "recategorize", "ask_category", "game_label", "add_from_set"):
             self.assertIs(getattr(setedit, name), getattr(listedit, name))
 
 
@@ -75,6 +75,29 @@ class Discs(unittest.TestCase):
         self.assertEqual(collection["games"], [{"title": "FF7", "system": "psx", "bucket": "psx/FF7.m3u",
                                                 "files": ["psx/FF7 (Disc 1).chd", "psx/FF7 (Disc 2).chd"]}])
 
+
+    def test_adding_from_a_set_spans_systems_and_keeps_discs(self):
+        collection = {"name": "Favs", "games": [dict(RUBY)]}
+        game_set = {"name": "Mix", "games": [
+            {"title": "Ruby", "system": "gba", "bucket": "gba/Ruby.zip"},
+            {"title": "FF7", "system": "psx", "bucket": "psx/FF7.m3u", "files": ["psx/FF7 (Disc 1).chd"]},
+            {"title": "Odd", "system": "nes", "bucket": "nes/Odd.zip"}]}
+        picks = iter([2, 0, None])  # add from a set, Mix, back
+        lists = []
+
+        def fake(title, labels, **kw):
+            if kw.get("multi"):
+                lists.append(list(labels))
+                return [False, True]  # Ruby off, FF7 on
+            return next(picks)
+
+        keys = {"gba": {"gba/Ruby.zip"}, "psx": DISCS}
+        with mock.patch.object(picker, "filter_list", fake), mock.patch.object(ui, "ask", return_value="RPG"), \
+                mock.patch("builtins.print"), mock.patch.object(store, "load_sets", return_value=[game_set]):
+            collectionedit.edit_one(collection, SYSTEMS, lambda bucket: keys.get(bucket, set()))
+        self.assertEqual(lists, [["Game Boy Advance — Ruby", "PlayStation — FF7"]])
+        self.assertEqual(collection["games"], [{"title": "FF7", "category": "RPG", "system": "psx",
+                                                "bucket": "psx/FF7.m3u", "files": ["psx/FF7 (Disc 1).chd"]}])
 
     def test_p_narrows_the_add_games_list_to_past_surprises(self):
         from sync_roms import surprise

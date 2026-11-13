@@ -84,8 +84,8 @@ TOPICS = {
 
   Needs git and the GitHub CLI (gh, logged in). Your edits are written to a temporary clone of kelsin/sync-roms, pushed
   as a branch and opened as a PR; nothing is written to storage or to ~/.sync-roms.
-  Pick a set to switch games off, add games from a system (you're asked for a category), change a game's category or
-  rename it. ➕ New set creates one; d deletes the highlighted one. Esc reviews the changes before the PR is opened.
+  Pick a set to switch games off, add games from a system or from another set across its systems (you're asked for a
+  category), change a game's category or rename it. ➕ New set creates one; d deletes the highlighted one. Esc reviews the changes before the PR is opened.
 """,
     "collections": """
   sync-roms collections edit                  edit your collections of favourite games
@@ -126,8 +126,8 @@ TOPICS = {
   sync-roms upload scrapes [CARD] [--dry-run]            upload CARD/ES-DE scraped data to storage's scrapes/ folder, merging with what's there
 
   The system is guessed from the folder name; same-size files are skipped, a different size overwrites after you confirm.
-  --replace makes the storage folder match DIR: renamed files are moved by content, and left-over storage files are listed
-  so you pick which to delete. Uploads use the write profile (ROMS_WRITE_PROFILE, default 'roms').
+  --replace makes the storage folder match DIR: renamed files are moved by content (big bucket files without an MD5 are
+  compared on samples, and those renames are marked), and left-over storage files are listed so you pick which to delete. Uploads use the write profile (ROMS_WRITE_PROFILE, default 'roms').
 """,
     "diff": """
   sync-roms diff [DIR]

@@ -3,7 +3,7 @@ import copy
 
 from . import collections as colls
 from . import cardedit, edit, m3u, metafilter, picker, s3, store, surprise, themeart, ui
-from .listedit import ask_category, game_label, reconcile, recategorize, stocked, view
+from .listedit import add_from_set, ask_category, game_label, reconcile, recategorize, stocked, view
 
 
 # --- Multi-disc games --------------------------------------------------------------------------------
@@ -46,8 +46,9 @@ def pick_art(collection):
     choices = themeart.art_choices()
     ids = [None, *choices]
     current = ids.index(collection.get("art")) if collection.get("art") in ids else 0
-    j = picker.filter_list(f"🎨 {collection['name']}: art in the Art Book Next theme (ES-DE, Knulli)",
-                           ["None (the theme's default)", *choices.values()], cursor=current,
+    j = picker.filter_list(f"{themeart.art_emoji(collection.get('art'))} {collection['name']}: art in the Art Book Next theme (ES-DE, Knulli)",
+                           [f"{themeart.art_emoji(None)} None (the theme's default)",
+                            *(f"{themeart.art_emoji(i)} {label}" for i, label in choices.items())], cursor=current,
                            preview=lambda j: themeart.art_png(ids[j]) if ids[j] else None)
     if j is None:
         return
@@ -58,13 +59,14 @@ def pick_art(collection):
 
 
 def edit_one(collection, systems, keys_of):
-    """Edit one collection: remove games, add games from a system, change categories, rename."""
+    """Edit one collection: remove games, add games from a system or a set, change categories, rename."""
     names = {s["bucket"]: s["name"] for s in systems}
     while True:
-        i = picker.filter_list(f"✏️  {collection['name']} (Esc = back)",
+        i = picker.filter_list(f"{themeart.art_emoji(collection.get('art'))} {collection['name']} (Esc = back)",
                                [f"Games in this collection ({len(collection['games'])}): switch some off",
-                                "Add games from a system", "Change a game's category", "Rename / change the description",
-                                f"Theme art: {art_label(collection.get('art'))}"])
+                                "Add games from a system", "Add games from a set", "Change a game's category",
+                                "Rename / change the description",
+                                f"{themeart.art_emoji(collection.get('art'))} Theme art: {art_label(collection.get('art'))}"])
         if i is None:
             return
         shown = view(collection, systems)
@@ -121,11 +123,13 @@ def edit_one(collection, systems, keys_of):
             collection["games"] = reconcile(collection["games"], shown, category)
             fold_discs(collection["games"], keys_of(s["bucket"]))
         elif i == 2:
+            add_from_set(collection, store.load_sets(), shown, keys_of)
+        elif i == 3:
             games = [g for g in collection["games"] if g.get("bucket")]
             j = picker.filter_list("✏️  Change which game's category?", [game_label(g, names) for g in games])
             if j is not None:
                 recategorize(collection["games"], games[j], ask_category(collection["games"], games[j].get("title", "it")))
-        elif i == 4:
+        elif i == 5:
             pick_art(collection)
         else:
             name = ui.ask(f"Name [{collection['name']}] (empty keeps it): ").strip()
@@ -180,7 +184,7 @@ def edit_collections():
         n = len(ids)
         changed = [cid for cid in ids if working[cid] != before.get(cid)]
         deleted = [cid for cid in before if cid not in working]
-        labels = ([f"{working[x]['name']}  ({len(working[x]['games'])} games)" for x in ids]
+        labels = ([f"{themeart.art_emoji(working[x].get('art'))} {working[x]['name']}  ({len(working[x]['games'])} games)" for x in ids]
                   + ["➕ New collection", "✅ Done (save)", "🚪 Quit without saving"])
         extras = [[("  " + ("new" if x not in before else "edited"), "cyan")] if x in changed else [] for x in ids] + [[], [], []]
         i = picker.filter_list("✏️  Which collection?  (Esc = save)", labels, extras=extras,
