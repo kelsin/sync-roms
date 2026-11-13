@@ -343,6 +343,10 @@
     "ayn-odin-lite": {
       "tier": "psp-n64-dc"
     },
+    "ayn-thor-lite": {
+      "tier": "wii-3ds",
+      "note": "Snapdragon 865. Full speed through Dreamcast, Saturn and PSP; GameCube, Wii, 3DS and PS2 included (heavy PS2 titles need tuning). Switch is compromised and Wii U and PS3 are unplayable, so left off."
+    },
     "ayn-thor": {
       "tier": "switch",
       "note": "Full speed through Dreamcast and Saturn; PSP at 4x. GameCube (3x), Wii, 3DS and PS2 (1.5-2x) included. Switch and Vita included but game-dependent. Wii U and PS3 are compromised, so left off."
