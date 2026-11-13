@@ -12,7 +12,7 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
-from sync_roms import chd, external, m3u, store  # noqa: E402
+from sync_roms import chd, external, m3u, runtime, store, ui  # noqa: E402
 
 CD = {"chd": {"mode": "cd"}}
 DVD = {"chd": {"mode": "dvd", "codec": "zlib"}}
@@ -725,6 +725,137 @@ class ChdTest(unittest.TestCase):
         with mock.patch.object(external, "find_tool", lambda t: None):
             self.assertEqual(chd.chd_command(args), 0)
         self.assertEqual(os.listdir(os.path.join(self.dir, "psx")), ["Game.zip"])
+
+    def bars(self, on_say=None):
+        """Patches ui.ProgressBar to record each bar made and the lines it says (each also passed to on_say)."""
+        made = []
+
+        class Bar(ui.ProgressBar):
+            def __init__(bar, *a, **k):
+                super().__init__(*a, **k)
+                bar.lines = []
+                made.append(bar)
+
+            def say(bar, line):
+                bar.lines.append(line)
+                if on_say:
+                    on_say(line)
+                super().say(line)
+
+        return made, mock.patch.object(ui, "ProgressBar", Bar)
+
+    def test_bar_is_weighted_by_bytes_and_biggest_jobs_go_first(self):
+        self.touch("psx/A.iso", text="x" * 100)
+        self.touch("psx/B.iso", text="x" * 300)
+        made, patch = self.bars()
+        seen = {}
+
+        def fake_run(cmd, progress=None, tty=False):
+            if cmd[1:2] == ["createcd"]:
+                seen[os.path.basename(cmd[cmd.index("-i") + 1])] = made[0].fraction()
+            return FakeTools()(cmd, progress, tty)
+
+        with patch, mock.patch.object(external, "run_tool", fake_run), mock.patch.object(external, "find_tool", lambda t: t), \
+                mock.patch.object(os, "cpu_count", return_value=1), contextlib.redirect_stdout(io.StringIO()) as out:
+            self.assertEqual(chd.chd_command(SimpleNamespace(chd=self.dir, dry_run=False)), 0)
+        self.assertEqual(list(seen), ["B.iso", "A.iso"])
+        self.assertAlmostEqual(seen["A.iso"], 0.75)  # B, three quarters of the bytes, is done
+        self.assertEqual(made[0].total, 400)
+        self.assertIn("2 to convert (400 B)", out.getvalue())
+
+    def test_results_print_as_jobs_finish(self):
+        self.touch("psx/A.iso", text="x" * 300)
+        self.touch("psx/B.iso", text="x" * 100)
+        b_said = threading.Event()
+
+        def fake_run(cmd, progress=None, tty=False):
+            if cmd[1:2] == ["createcd"] and cmd[cmd.index("-i") + 1].endswith("A.iso"):
+                b_said.wait(2)  # A finishes only once B's result is out
+            return FakeTools()(cmd, progress, tty)
+
+        made, patch = self.bars(lambda line: b_said.set() if "B.iso" in line else None)
+        with patch, mock.patch.object(external, "run_tool", fake_run), mock.patch.object(external, "find_tool", lambda t: t), \
+                mock.patch.object(os, "cpu_count", return_value=2), contextlib.redirect_stdout(io.StringIO()) as out:
+            self.assertEqual(chd.chd_command(SimpleNamespace(chd=self.dir, dry_run=False)), 0)
+        self.assertEqual([l.strip() for l in made[0].lines], ["✅ psx/B.iso", "✅ psx/A.iso"])
+        self.assertTrue(b_said.is_set())
+
+    def test_multi_disc_archive_progress_counts_every_disc(self):
+        self.touch("Game.zip")
+        seen = []
+
+        def fake(cmd, progress=None, tty=False):
+            if cmd[0] == "chdman":
+                if cmd[1] == "createcd":
+                    open(cmd[cmd.index("-o") + 1], "w").close()
+                progress(100)
+                return None
+            return FakeTools(archive=["Game (Disc 1).iso", "Game (Disc 2).iso"])(cmd, progress, tty)
+
+        with mock.patch.object(external, "run_tool", fake):
+            self.assertIsNone(chd.chd_archive(self.tools, CD["chd"], os.path.join(self.dir, "Game.zip"), seen.append))
+        self.assertEqual([round(f, 2) for f in seen], [0.2, 0.56, 0.6, 0.96, 1.0])  # unpacked, then each disc half the rest
+
+    def run_on_card(self, root, dry_run=False, answer=None, yes=False):
+        """chd_command on root with a saved card named SD; answer is what the terminal types (None: no terminal)."""
+        def ask(prompt):
+            if answer is None:
+                raise EOFError
+            return answer
+
+        with mock.patch.object(store, "load_cards", return_value={"SD": {"device": "full"}}), \
+                mock.patch.object(ui, "_input", ask), mock.patch.object(ui, "ASSUME_YES", yes), \
+                mock.patch.object(external, "run_tool", FakeTools()), mock.patch.object(external, "find_tool", lambda t: t), \
+                contextlib.redirect_stdout(io.StringIO()) as out, contextlib.redirect_stderr(io.StringIO()) as err:
+            try:
+                code = chd.chd_command(SimpleNamespace(chd=root, dry_run=dry_run))
+            except SystemExit as e:
+                code = e.code
+        return code, out.getvalue(), err.getvalue()
+
+    def test_converting_inside_a_saved_card_asks_first(self):
+        root = os.path.join(self.dir, "SD", "psx")
+        for case, kwargs, code in (("yes typed", {"answer": "y"}, 0), ("no typed", {"answer": "n"}, 1), ("enter", {"answer": ""}, 1),
+                                   ("--yes", {"yes": True}, 1), ("no terminal", {}, 1)):
+            with self.subTest(case):
+                self.touch("SD/psx/Game.iso")
+                got, out, err = self.run_on_card(root, **kwargs)
+                self.assertEqual(got, code)
+                self.assertIn("card SD", out)
+                self.assertIn("download", out)
+                self.assertEqual(os.listdir(root), ["Game.chd"] if code == 0 else ["Game.iso"])
+                if code:
+                    self.assertIn("Not converting", err)
+                os.remove(os.path.join(root, os.listdir(root)[0]))
+
+    def test_dry_run_inside_a_saved_card_only_warns(self):
+        self.touch("SD/psx/Game.iso")
+        with mock.patch.object(ui, "confirm", side_effect=AssertionError("asked")):
+            code, out, _ = self.run_on_card(os.path.join(self.dir, "SD", "psx"), dry_run=True)
+        self.assertEqual(code, 0)
+        self.assertIn("card SD", out)
+
+    def test_card_warning_shows_on_stderr_under_quiet(self):
+        self.touch("SD/psx/Game.iso")
+        with mock.patch.object(ui, "QUIET", True):
+            code, out, err = self.run_on_card(os.path.join(self.dir, "SD", "psx"), answer="n")
+        self.assertEqual(code, 1)
+        self.assertIn("card SD", err)
+
+    def test_folder_outside_any_card_is_not_guarded(self):
+        self.touch("psx/Game.iso")
+        code, out, _ = self.run_on_card(os.path.join(self.dir, "psx"))
+        self.assertEqual(code, 0)
+        self.assertNotIn("card SD", out)
+
+    def test_converting_inside_the_storage_folder_says_to_update_the_cache(self):
+        self.touch("psx/Game.iso")
+        for storage, dry_run, hint in ((self.dir, False, True), (self.dir, True, False), (os.path.join(self.dir, "other"), False, False)):
+            with self.subTest(storage=storage, dry_run=dry_run), mock.patch.object(runtime, "ROOT", storage):
+                _, out, _ = self.run_on_card(os.path.join(self.dir, "psx"), dry_run=dry_run)
+                self.assertEqual("sync-roms cache update" in out, hint)
+                if not dry_run:
+                    os.rename(os.path.join(self.dir, "psx", "Game.chd"), os.path.join(self.dir, "psx", "Game.iso"))
 
 
 class UnzipArchiveTest(unittest.TestCase):
