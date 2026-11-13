@@ -22,12 +22,14 @@ class Shared(unittest.TestCase):
 class Stocked(unittest.TestCase):
     SYSTEMS = SYSTEMS + [{"name": "Game Boy", "bucket": "gb"}, {"name": "Saturn", "bucket": "saturn"}]
 
-    def offered(self, module, folders, cache):
+    def offered(self, module, folders, cache, extras=None):
         seen = []
 
         def fake(title, labels, **k):
             if title.startswith("✏️  Add games"):
                 seen.extend(labels)
+                if extras is not None:
+                    extras.extend(k.get("extras") or [[]] * len(labels))
                 return None
             return 1 if not seen else None  # add from a system, then back
 
@@ -42,6 +44,19 @@ class Stocked(unittest.TestCase):
         for module in (collectionedit, setedit):
             # psx is cached as empty, saturn has no folder; gb has a folder and games
             self.assertEqual(self.offered(module, lambda: {"gba", "psx", "gb"}, cache), ["Game Boy Advance", "Game Boy"])
+
+    def test_add_games_shows_each_systems_file_count_from_the_cache(self):
+        cache = {"gba/": {"gba/Ruby.zip": 1, "gba/Emerald.zip": 2, "gba/hacks/": 0}, "gb/": {"gb/Tetris.zip": 1}}
+        for module in (collectionedit, setedit):
+            extras = []
+            self.assertEqual(self.offered(module, lambda: {"gba", "gb"}, cache, extras), ["Game Boy Advance", "Game Boy"])
+            self.assertEqual(extras, [[("  2 files", "dim")], [("  1 file", "dim")]], module.__name__)
+
+    def test_add_games_counts_nothing_without_a_cache(self):
+        extras = []
+        with mock.patch.object(inventory, "files", side_effect=AssertionError("listed a folder")):
+            self.offered(setedit, lambda: {"gba", "psx", "gb", "saturn"}, {}, extras)
+        self.assertEqual(extras, [[], [], [], []])  # every system listed (no cache to tell), none counted
 
     def test_add_games_goes_by_the_cache_when_storage_cannot_be_reached(self):
         def down():

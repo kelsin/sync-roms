@@ -445,6 +445,8 @@ def edit_system(name, system, setup, to_fetch=None, card_usages=None):
     variants, parents = store.variant_index(sets)
     system_names = {x["bucket"]: x["name"] for x in store.repo_json("systems")}
     other_picks = {}  # {system bucket: [games]}: the card's direct picks on other systems, once a variant changes them
+    if inventory.current() is None:
+        print(ui.dim(f"📡 Listing {s3.location()}/{bucket}/ ..."))
     # names only: without a storage cache, a folder's sized listing stats every file
     try:
         in_storage = {k for k in inventory.files(f"{bucket}/", sizes=False) if not k.endswith("/")}

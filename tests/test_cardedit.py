@@ -382,6 +382,17 @@ class Flow(DataDir):
         self.assertEqual(seen[0], ["img-gba/Ruby.sav", "img-gba/Ruby.zip", None])  # the set's rows, not all of them
         self.assertEqual(seen[1], ["img-gba/Emerald.zip", "img-gba/Ruby.sav", "img-gba/Ruby.zip", "img-gba/Zelda.zip", None])
 
+    def test_opening_a_system_without_a_storage_cache_says_it_is_listing(self):
+        self.card()
+        for tree, said in ((None, True), (mock.Mock(), False)):
+            out = io.StringIO()
+            with mock.patch.object(inventory, "current", return_value=tree), \
+                    mock.patch.object(inventory, "files", lambda p, sizes=True: self.files.get(p, {})), \
+                    mock.patch.object(picker, "filter_list", Script(lambda labels, kw: kw["session"]["sel"])), \
+                    contextlib.redirect_stdout(out):
+                edit.edit_card_system("c", "gba", (DEVICE, "esde"))
+            self.assertEqual("📡 Listing" in out.getvalue(), said, out.getvalue())
+
     def run_card(self, *steps):
         script = Script(*steps)
         with mock.patch.object(picker, "filter_list", script), contextlib.redirect_stdout(io.StringIO()):

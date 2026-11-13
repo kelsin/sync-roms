@@ -46,8 +46,8 @@ def key_title(key):
 
 
 def folder_keys(bucket):
-    """Bucket keys of the files in a system's storage folder."""
-    return {k for k in inventory.files(bucket + "/") if not k.endswith("/")}
+    """Bucket keys of the files in a system's storage folder (names only: without a cache, a size is a stat per file)."""
+    return {k for k in inventory.files(bucket + "/", sizes=False) if not k.endswith("/")}
 
 
 # The process umask can only be read by setting it, so it is read once here, while a single thread is running: a

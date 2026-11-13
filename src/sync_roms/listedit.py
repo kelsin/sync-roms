@@ -21,6 +21,16 @@ def stocked(systems):
             if (folders is None or s["bucket"] in folders) and inventory.cached(f"{s['bucket']}/") != {}]
 
 
+def file_counts(systems):
+    """Per system, its file count in storage as filter_list extras; none without a storage cache (counting would list
+    every folder)."""
+    out = []
+    for s in systems:
+        n = sum(not k.endswith("/") for k in inventory.cached(f"{s['bucket']}/") or {})
+        out.append([(f"  {n} file" + ("" if n == 1 else "s"), "dim")] if n else [])
+    return out
+
+
 def insert_game(games, game):
     """Add game after the last game of its category, or at the end when its category is new (or it has none)."""
     cat = game.get("category")

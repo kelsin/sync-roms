@@ -582,7 +582,7 @@ Removing a game only drops it from the card's games; the file stays in storage.
 
 ### Editing the built-in sets
 
-`sync-roms sets edit` edits the sets in this repo's `data/sets/` and opens a PR with the changes, so it works from any install. Pick a set to switch games off, add games from a system or from another set across all its systems (you're asked for a category; existing ones are listed), change a game's category, or rename it. **➕ New set** creates a set and `d` deletes the highlighted one (it warns if a card still references it). Esc shows the changes; confirming clones `kelsin/sync-roms` to a temporary folder, writes the changed set files, pushes a branch and runs `gh pr create`. `Ctrl-C` with changes pending shows the same review first. It needs `git` and a logged-in `gh`, and writes nothing to storage or to `~/.sync-roms`.
+`sync-roms sets edit` edits the sets in this repo's `data/sets/` and opens a PR with the changes, so it works from any install. Pick a set to switch games off, add games from a system (those with files in storage; with a storage cache each shows its file count) or from another set across all its systems (you're asked for a category; existing ones are listed), change a game's category, or rename it. **➕ New set** creates a set and `d` deletes the highlighted one (it warns if a card still references it). Esc shows the changes; confirming clones `kelsin/sync-roms` to a temporary folder, writes the changed set files, pushes a branch and runs `gh pr create`. `Ctrl-C` with changes pending shows the same review first. It needs `git` and a logged-in `gh`, and writes nothing to storage or to `~/.sync-roms`.
 
 ### Collections
 

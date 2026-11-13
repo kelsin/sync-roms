@@ -3,7 +3,7 @@ import copy
 
 from . import collections as colls
 from . import cardedit, edit, m3u, metafilter, picker, previews, s3, store, surprise, themeart, ui
-from .listedit import add_from_set, ask_category, game_label, reconcile, recategorize, stocked, view
+from .listedit import add_from_set, ask_category, file_counts, game_label, reconcile, recategorize, stocked, view
 
 
 # --- Multi-disc games --------------------------------------------------------------------------------
@@ -79,7 +79,7 @@ def edit_one(collection, systems, keys_of):
             collection["games"] = reconcile(collection["games"], shown)
         elif i == 1:
             options = stocked(systems)
-            j = picker.filter_list("✏️  Add games from which system?", [s["name"] for s in options],
+            j = picker.filter_list("✏️  Add games from which system?", [s["name"] for s in options], extras=file_counts(options),
                                  preview=lambda k: previews.system(options[k]) if k < len(options) else None)
             if j is None:
                 continue
