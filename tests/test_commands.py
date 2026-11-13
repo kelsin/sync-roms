@@ -480,27 +480,71 @@ class MirrorThemeUpdateTest(DataDir):
             os.makedirs(os.path.dirname(os.path.join(self.mirror, key)), exist_ok=True)
             with open(os.path.join(self.mirror, key), "wb") as f:
                 f.write(data)
+        self.storage = {themeart.ESDE_ARCHIVE: b"old", themeart.ESDE_COMMIT: self.OLD}  # what the bucket holds
 
-    def fetched(self):
-        """The keys a mirror refresh downloads."""
-        todo = []
+    def themes_update(self, archive=b"newer", commit=NEW):
+        """What `themes update` writes to the bucket."""
+        path = os.path.join(self.tmp.name, "theme.tar.gz")
+        with open(path, "wb") as f:
+            f.write(archive)
+        s3.put_file(themeart.ESDE_ARCHIVE, path)
+        s3.put_text(themeart.ESDE_COMMIT, commit.decode())
+        self.storage = {themeart.ESDE_ARCHIVE: archive, themeart.ESDE_COMMIT: commit}
+
+    def fetched(self, fail=()):
+        """The keys a mirror refresh downloads, in the order of its download batches; the keys in fail fail."""
+        batches = []
+
+        def run_downloads(jobs, label, icon, base, failures=None):
+            batches.append(sorted(k for k, _, _ in jobs))
+            for key, path, _ in jobs:
+                if key in fail:
+                    if failures is not None:
+                        failures.append((key, "boom"))
+                    continue
+                with open(path, "wb") as f:
+                    f.write(self.storage[key])
+            return sum(k in fail for k, _, _ in jobs)
         with mock.patch.object(mirroring.store, "load_manifest", return_value={"systems": []}), \
                 mock.patch.object(mirroring.store, "all_card_names", return_value=[]), \
-                mock.patch.object(mirroring.downloads, "run_downloads", side_effect=lambda jobs, *a: todo.extend(jobs) or 0), \
+                mock.patch.object(mirroring.downloads, "run_downloads", side_effect=run_downloads), \
                 contextlib.redirect_stdout(io.StringIO()):
             mirroring.refresh_mirror(self.mirror)
-        return sorted(k for k, _, _ in todo)
+        return [b for b in batches if b]
 
-    def test_mirror_fetches_the_new_archive_and_commit_after_themes_update(self):
-        archive = os.path.join(self.tmp.name, "theme.tar.gz")
-        with open(archive, "wb") as f:
-            f.write(b"newer")
-        s3.put_file(themeart.ESDE_ARCHIVE, archive)
-        s3.put_text(themeart.ESDE_COMMIT, self.NEW.decode())
-        self.assertEqual(self.fetched(), sorted([themeart.ESDE_ARCHIVE, themeart.ESDE_COMMIT]))
+    def stored_commit(self):
+        """The commit a card sees, read through the mirror."""
+        with mock.patch.object(runtime, "_mirror_root", self.mirror):
+            return themeart._stored_commit()
+
+    def test_mirror_fetches_the_archive_then_the_commit_after_themes_update(self):
+        self.themes_update()
+        self.assertEqual(self.fetched(), [[themeart.ESDE_ARCHIVE], [themeart.ESDE_COMMIT]])
+        self.assertEqual(self.stored_commit(), self.NEW.decode().strip())
+
+    def test_mirror_fetches_a_same_size_archive_when_the_commit_changed(self):
+        self.themes_update(archive=b"new")
+        self.assertEqual(self.fetched(), [[themeart.ESDE_ARCHIVE], [themeart.ESDE_COMMIT]])
+        with open(os.path.join(self.mirror, themeart.ESDE_ARCHIVE), "rb") as f:
+            self.assertEqual(f.read(), b"new")
+
+    def test_mirror_keeps_the_old_commit_when_the_archive_fails(self):
+        self.themes_update()
+        self.assertEqual(self.fetched(fail={themeart.ESDE_ARCHIVE}), [[themeart.ESDE_ARCHIVE]])
+        self.assertEqual(self.stored_commit(), self.OLD.decode().strip())
 
     def test_mirror_keeps_a_commit_file_storage_still_has(self):
         self.assertEqual(self.fetched(), [])
+
+    def test_a_commit_file_with_an_unknown_or_multipart_etag_counts_as_changed_and_is_fetched(self):
+        for tag in (None, '"0123abcd-2"'):
+            with self.subTest(tag=tag):
+                if tag is None:
+                    inventory.current().etags.pop(themeart.ESDE_COMMIT)
+                else:
+                    inventory.current().etags[themeart.ESDE_COMMIT] = tag
+                self.assertEqual(self.fetched(), [[themeart.ESDE_ARCHIVE], [themeart.ESDE_COMMIT]])
+                self.assertEqual(self.stored_commit(), self.OLD.decode().strip())
 
 
 if __name__ == "__main__":
