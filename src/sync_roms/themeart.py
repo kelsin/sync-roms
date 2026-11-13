@@ -14,6 +14,7 @@ from . import __version__, frontend, runtime, s3, store, ui
 
 THEME_DATA = os.path.join(store.REPO_DATA, "themes", "art-book-next")
 SURPRISE_ART = "surprise"
+DEFAULT_EMOJI = "💖"  # a collection with no art
 # The Outline-style artwork a collection can use, by id: art/<id>.png; art.json has the labels the editor shows.
 # Logos are drawn from the outlines of the theme's logo font (logo-font.json, from Changa One: see OFL.txt).
 
@@ -63,6 +64,12 @@ def art_choices():
     """{art id: label} of the artwork a collection can pick, in the order the editor lists it."""
     with open(os.path.join(THEME_DATA, "art.json"), encoding="utf-8") as f:
         return json.load(f)
+
+
+def art_emoji(art_id):
+    """The emoji that stands for a collection's art in the editors: its own, or DEFAULT_EMOJI when it has no art."""
+    with open(os.path.join(THEME_DATA, "emoji.json"), encoding="utf-8") as f:
+        return json.load(f).get(art_id, DEFAULT_EMOJI) if art_id else DEFAULT_EMOJI
 
 
 def art_png(art_id):

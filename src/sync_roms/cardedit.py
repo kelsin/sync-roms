@@ -4,7 +4,7 @@ import json
 import queue
 import threading
 
-from . import budget, collections as colls, edit, inventory, m3u, metafilter, picker, s3, scrape_plan, store, surprise, ui, usersettings, vita
+from . import budget, collections as colls, edit, inventory, m3u, metafilter, picker, s3, scrape_plan, store, surprise, themeart, ui, usersettings, vita
 
 FULL_KEY = "f"
 SET_KEY = "s"
@@ -322,7 +322,7 @@ def pick_collections(name, playable, card_status=None):
     for c in found:
         p = sum(1 for g in colls.collection_games(c) if g.get("system") in playable)
         n = len(colls.collection_games(c)) - p
-        labels.append(f"{c['name']}  ({p} playable" + (f", {n} not playable)" if n else ")"))
+        labels.append(f"{themeart.art_emoji(c.get('art'))} {c['name']}  ({p} playable" + (f", {n} not playable)" if n else ")"))
     extras = [[] for _ in found]
     shown = {}
 
