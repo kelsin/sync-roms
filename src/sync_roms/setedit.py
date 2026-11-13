@@ -190,6 +190,24 @@ def edit_sets():
     systems = sorted(store.repo_json("systems"), key=lambda s: s["name"].lower())
     before = repo_sets()
     working = copy.deepcopy(before)
+    state = {"review": False}
+    while True:
+        try:
+            code = edit_working(systems, before, working, state)
+        except KeyboardInterrupt:  # Ctrl-C: review the changes as Done does, then stop as before
+            if state["review"] or not diff_sets(before, working):  # Ctrl-C at that review itself, or nothing to review
+                raise
+            print(ui.yellow("\n🛑 Interrupted — review your changes before leaving."))
+            state["review"] = True
+            continue
+        if code is None:  # the review after a Ctrl-C ended the editor
+            raise KeyboardInterrupt
+        return code
+
+
+def edit_working(systems, before, working, state):
+    """The sets menu over working; Done reviews it and opens a PR. state["review"] starts at that review and stays
+    true until the user goes back to editing; when that review ends the editor, returns None. Returns the exit code."""
     listed = {}
 
     def keys_of(bucket):
@@ -206,8 +224,8 @@ def edit_sets():
         labels = ([f"{working[x]['name']}  ({len(working[x]['games'])} games)" for x in ids]
                   + ["➕ New set", "✅ Done (review & open PR)", "🚪 Quit without saving"])
         extras = [[("  " + ("new" if x not in before else "edited"), "cyan")] if x in edited else [] for x in ids] + [[], [], []]
-        i = picker.filter_list("✏️  Which set?  (Esc = review & open PR)", labels, extras=extras,
-                               hotkeys=(edit.DELETE_KEY,), hint="/ filter · Enter open · d delete · Esc review")
+        i = n + 1 if state["review"] else picker.filter_list("✏️  Which set?  (Esc = review & open PR)", labels, extras=extras,
+                                                    hotkeys=(edit.DELETE_KEY,), hint="/ filter · Enter open · d delete · Esc review")
         if isinstance(i, tuple):
             if i[1] < n:
                 sid = ids[i[1]]
@@ -235,13 +253,15 @@ def edit_sets():
         empty = [sid for kind, sid, _ in found if kind != "removed" and not working[sid]["games"]]
         if empty:
             edit.note(ui.yellow(f"ℹ️  {', '.join(empty)} has no games. Add some or delete it first."))
+            state["review"] = False
             continue
         print_changes(found)
         answer = ui.choose("🔀 Open a PR with these changes?", "oed", "o", "o open · e keep editing · d discard")
         if answer == "e":
+            state["review"] = False
             continue
         if answer == "d":
             print(ui.yellow("👋 Not opened."))
-            return 0
+            return None if state["review"] else 0
         print(ui.green("🎉 PR opened: ") + open_pr(working, found))
-        return 0
+        return None if state["review"] else 0

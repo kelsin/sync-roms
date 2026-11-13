@@ -157,6 +157,71 @@ class Editor(unittest.TestCase):
         self.assertEqual([(k, s) for k, s, _ in opened["found"]], [("new", "my-set")])
         self.assertEqual(opened["after"]["my-set"]["description"], "about it")
 
+    def test_ctrl_c_with_changes_goes_to_the_review(self):
+        before = {"old": {"name": "Old", "description": "", "games": games()}}
+        picks = iter([1, KeyboardInterrupt, None])  # "New set", Ctrl-C, keep editing, then Esc to review
+        opened = {}
+
+        def pick(*a, **k):
+            value = next(picks)
+            if value is KeyboardInterrupt:
+                raise KeyboardInterrupt
+            return value
+
+        def add_game(game_set, systems, keys_of):
+            game_set["games"].append({"title": "X", "system": "gba", "bucket": "gba/X.zip"})
+
+        with mock.patch.object(setedit, "need_tools"), mock.patch.object(setedit, "repo_sets", return_value=before), \
+                mock.patch.object(setedit, "edit_one", add_game), \
+                mock.patch.object(store, "repo_json", return_value=SYSTEMS), \
+                mock.patch.object(picker, "filter_list", pick), \
+                mock.patch.object(ui, "ask", side_effect=["My Set", "about it"]), \
+                mock.patch.object(ui, "choose", side_effect=["e", "o"]) as choose, mock.patch("builtins.print"), \
+                mock.patch.object(setedit, "open_pr", lambda after, found: opened.update(after=after, found=found) or "url"):
+            self.assertEqual(setedit.edit_sets(), 0)  # keep editing ended the interrupt: the later Done ends normally
+        self.assertEqual(choose.call_count, 2)
+        self.assertEqual([(k, s) for k, s, _ in opened["found"]], [("new", "my-set")])
+
+    def stopped(self, picks, answers):
+        """Run the editor on no sets until it stops with KeyboardInterrupt; picks and answers may hold Ctrl-C.
+        Returns the review prompts shown and the PRs opened."""
+        picks, opened = iter(picks), []
+
+        def pick(*a, **k):
+            value = next(picks)
+            if value is KeyboardInterrupt:
+                raise KeyboardInterrupt
+            return value
+        with mock.patch.object(setedit, "need_tools"), mock.patch.object(setedit, "repo_sets", return_value={}), \
+                mock.patch.object(setedit, "edit_one", lambda g, s, k: g["games"].append({"title": "X", "system": "gba", "bucket": "gba/X.zip"})), \
+                mock.patch.object(store, "repo_json", return_value=SYSTEMS), \
+                mock.patch.object(picker, "filter_list", pick), \
+                mock.patch.object(ui, "ask", side_effect=["My Set", ""]), \
+                mock.patch.object(ui, "choose", side_effect=answers) as choose, mock.patch("builtins.print"), \
+                mock.patch.object(setedit, "open_pr", lambda after, found: opened.append(found) or "url"), \
+                self.assertRaises(KeyboardInterrupt):
+            setedit.edit_sets()
+        return choose.call_count, len(opened)
+
+    def test_ctrl_c_review_that_opens_or_discards_still_stops(self):
+        for answer, prs in (("o", 1), ("d", 0)):
+            with self.subTest(answer=answer):  # "New set" (no sets yet), then Ctrl-C
+                self.assertEqual(self.stopped([0, KeyboardInterrupt], [answer]), (1, prs))
+
+    def test_ctrl_c_after_keep_editing_reviews_again(self):  # Ctrl-C, keep editing, Ctrl-C, discard
+        self.assertEqual(self.stopped([0, KeyboardInterrupt, KeyboardInterrupt], ["e", "d"]), (2, 0))
+
+    def test_ctrl_c_at_the_review_prompt_stops(self):
+        self.assertEqual(self.stopped([0, KeyboardInterrupt], [KeyboardInterrupt]), (1, 0))
+
+    def test_ctrl_c_without_changes_reviews_nothing(self):
+        with mock.patch.object(setedit, "need_tools"), mock.patch.object(setedit, "repo_sets", return_value={}), \
+                mock.patch.object(store, "repo_json", return_value=SYSTEMS), \
+                mock.patch.object(picker, "filter_list", side_effect=KeyboardInterrupt), \
+                mock.patch.object(ui, "choose") as choose, self.assertRaises(KeyboardInterrupt):
+            setedit.edit_sets()
+        choose.assert_not_called()
+
     def test_command_is_wired(self):
         with mock.patch.object(setedit, "edit_sets", return_value=0) as run:
             self.assertEqual(commands.run(["sets", "edit"]), 0)

@@ -171,6 +171,38 @@ def edit_collections():
     systems = sorted(store.repo_json("systems"), key=lambda s: s["name"].lower())
     before = {c.pop("id"): c for c in colls.load_collections()}
     working = copy.deepcopy(before)
+    try:
+        return edit_working(systems, before, working)
+    except KeyboardInterrupt:  # Ctrl-C: offer to save the changes, then stop as before
+        changed = [cid for cid in working if working[cid] != before.get(cid)]
+        deleted = [cid for cid in before if cid not in working]
+        try:
+            keep = bool(changed or deleted) and ui.confirm("\n💾 Save your collection changes?", default=True)
+        except KeyboardInterrupt:  # a second Ctrl-C discards
+            keep = False
+        if keep:
+            empty = [cid for cid in changed if not working[cid]["games"]]
+            if empty:
+                print(ui.yellow(f"ℹ️  {', '.join(working[cid]['name'] for cid in empty)} has no games, so it isn't saved."))
+            if len(empty) < len(changed) or deleted:
+                save(working, [cid for cid in changed if cid not in empty], deleted)
+        elif changed or deleted:
+            print(ui.yellow("\n👋 Not saved."))
+        raise
+
+
+def save(working, changed, deleted):
+    """Write the changed collections and remove the deleted ones (and their place on cards)."""
+    for cid in changed:
+        colls.save_collection({"id": cid, **working[cid]})
+    for cid in deleted:
+        colls.delete_collection(cid)
+        colls.remove_from_cards(cid)
+    print(ui.green(f"💖 Saved to {colls.collections_dir()}"))
+
+
+def edit_working(systems, before, working):
+    """The collections menu over working; saves it at Done. Returns the exit code."""
     listed = {}
 
     def keys_of(bucket):
@@ -217,10 +249,5 @@ def edit_collections():
         if empty:
             edit.note(ui.yellow(f"ℹ️  {', '.join(empty)} has no games. Add some or delete it first."))
             continue
-        for cid in changed:
-            colls.save_collection({"id": cid, **working[cid]})
-        for cid in deleted:
-            colls.delete_collection(cid)
-            colls.remove_from_cards(cid)
-        print(ui.green(f"💖 Saved to {colls.collections_dir()}"))
+        save(working, changed, deleted)
         return 0
