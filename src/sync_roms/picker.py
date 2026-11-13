@@ -618,14 +618,10 @@ def _app_class():
             if reply in self.session.withdrawn:
                 return
             if model.preview and self.session.draws is None:  # the terminal is asked once, on the normal screen
-                handler = signal.signal(signal.SIGINT, signal.default_int_handler)
-                try:
-                    with self.suspend():
-                        self.session.probe(model)
-                except KeyboardInterrupt:  # Ctrl-C while it asked: as in the list
-                    return reply.put((None, KeyboardInterrupt()))
-                finally:
-                    signal.signal(signal.SIGINT, handler)
+                with self.suspend():
+                    _, error = _outcome(lambda: self.session.at_terminal(self.session.probe, model))
+                if error is not None:  # Ctrl-C while it asked: as in the list
+                    return reply.put((None, error))
             self.keys_from = get_time()
             if not self.session.draws:
                 model.preview = None
@@ -638,8 +634,7 @@ def _app_class():
 
         def request(self, kind, payload, reply):
             """A request from the session's worker (_Session.ask): show a list, or suspend the app and answer prompts on
-            the normal screen (after what the worker printed meanwhile) until the next list, or the end. The SIGINT
-            handler is Python's own meanwhile, so Ctrl-C raises KeyboardInterrupt (asyncio.run's would cancel the app)."""
+            the normal screen (after what the worker printed meanwhile) until the next list, or the end."""
             if reply in self.session.withdrawn:
                 return
             if self.session.interrupted:
@@ -648,18 +643,14 @@ def _app_class():
             if kind == "list":
                 return self.show(payload, reply)
             session = self.session
-            handler = signal.signal(signal.SIGINT, signal.default_int_handler)
-            try:
-                with self.suspend():
-                    sys.stdout, sys.stderr = session.streams  # suspend() restores Textual's on the way out
-                    session.flush()
-                    with session.lock:
-                        session.suspended = True
-                    request = session.prompts((kind, payload, reply))
-                    with session.lock:
-                        session.suspended = False
-            finally:
-                signal.signal(signal.SIGINT, handler)
+            with self.suspend():
+                sys.stdout, sys.stderr = session.streams  # suspend() restores Textual's on the way out
+                session.flush()
+                with session.lock:
+                    session.suspended = True
+                request = session.prompts((kind, payload, reply))
+                with session.lock:
+                    session.suspended = False
             self.keys_from = get_time()  # what the input read while it stopped was typed before the prompt
             if request is None:  # the editor is done
                 session.requests.put(None)  # for _Session.run, once the app has closed
@@ -781,12 +772,13 @@ class _Session:
 
     def __init__(self):
         self.requests = queue.Queue()  # (kind, payload, reply) for the main thread while no app takes them; None: editor done
-        self.lock = threading.Lock()  # app and waiting, between the worker and the main thread
+        self.lock = threading.RLock()  # app and waiting, between the worker and the main thread (re-entrant: on_sigint)
         self.app = None  # the running app
         self.suspended = False  # the app is suspended for prompts: the main thread takes requests from the queue
         self.waiting = None  # the reply the worker waits for from the app
         self.worker = None  # the worker's thread id
         self.result = None  # the editor's _outcome
+        self.prompting = False  # the main thread runs a prompt (at_terminal): Ctrl-C raises KeyboardInterrupt there
         self.busy = False  # the worker runs editor code (not handing over a request): Ctrl-C can interrupt it at once
         self.pending = False  # an interrupt is on its way to the worker (_CtrlC clears it as it is raised)
         self.interrupted = False  # a Ctrl-C the worker gets from its next request (or once the editor is done)
@@ -801,11 +793,13 @@ class _Session:
         did, once the app is closed."""
         global _session
         _session, ui.terminal_runner = self, self.outside
+        handler = signal.signal(signal.SIGINT, self.on_sigint)  # also keeps asyncio.run's own (it would cancel the app)
         try:
             threading.Thread(target=self.work, args=(fn, args, kwargs), name="editor", daemon=True).start()
-            while (request := self.prompts(self.next_request())) is not None:
+            while (request := self.prompts(self.requests.get())) is not None:
                 self.serve(*request[1:])
         finally:
+            signal.signal(signal.SIGINT, handler)
             _session = ui.terminal_runner = None
         value, error = self.result
         if error is None and self.interrupted:  # Ctrl-C after the last list
@@ -825,24 +819,29 @@ class _Session:
                 self.interrupted = False
                 reply.put((None, KeyboardInterrupt()))
             elif kind == "list":
-                try:
-                    self.probe(payload)  # the terminal is still ours here
-                except KeyboardInterrupt:  # Ctrl-C while it asked: as in the list
-                    reply.put((None, KeyboardInterrupt()))
-                else:
+                _, error = _outcome(lambda: self.at_terminal(self.probe, payload))  # the terminal is still ours here
+                if error is None:
                     return request
+                reply.put((None, error))  # Ctrl-C while it asked: as in the list
             else:
-                reply.put(_outcome(payload))
-            request = self.next_request()
+                reply.put(_outcome(lambda: self.at_terminal(payload)))
+            request = self.requests.get()
         return None
 
-    def next_request(self):
-        """The worker's next request (main thread); Ctrl-C meanwhile is kept for it."""
-        while True:
-            try:
-                return self.requests.get()
-            except KeyboardInterrupt:
-                self.interrupt()
+    def at_terminal(self, fn, *args):
+        """Run a prompt (or the image probe) on the main thread, where Ctrl-C raises KeyboardInterrupt in it."""
+        self.prompting = True
+        try:
+            return fn(*args)
+        finally:
+            self.prompting = False
+
+    def on_sigint(self, signum, frame):
+        """The session's SIGINT handler (main thread): KeyboardInterrupt in a prompt, else interrupt; never an
+        exception in the session's own code."""
+        if self.prompting:
+            raise KeyboardInterrupt
+        self.interrupt()
 
     def interrupt(self):
         """Ctrl-C while neither a list nor a prompt is up (main thread). An editor at work gets KeyboardInterrupt at
@@ -860,6 +859,7 @@ class _Session:
         """The worker: run the editor, then end the app and the main thread's loop."""
         self.worker = threading.get_ident()
         self.result = _outcome(lambda: self.edit(fn, args, kwargs))
+        self.busy = False  # no check between this and the line above, so no interrupt is sent after it
         for _ in range(2):  # an interrupt that came as the editor ended can only land here, once
             try:
                 with self.lock:

@@ -4,6 +4,7 @@ import contextlib
 import io
 import os
 import queue
+import signal
 import sys
 import threading
 import time
@@ -460,6 +461,56 @@ class Session(unittest.TestCase):
         with mock.patch.object(picker, "_draws_images", probed):
             self.run_editor(lambda: picker.filter_list("A", ["a0"]), lambda app, pilot: pilot.press("enter"))
         self.assertEqual(self.events, ["app closed"])
+
+    def test_sigint_at_a_prompt_raises_in_it(self):
+        def answer(prompt=""):
+            os.kill(os.getpid(), signal.SIGINT)
+            time.sleep(2)
+            return "y"
+
+        def editor():
+            picker.filter_list("A", ["a0"])
+            try:
+                ui.confirm("Save?")
+            except KeyboardInterrupt:
+                return "interrupted"
+
+        async def script(app, pilot):
+            await wait_for(pilot, lambda: showing(app, "A"))
+            await pilot.press("enter")
+        begun = time.monotonic()
+        with mock.patch("builtins.input", answer):
+            self.assertEqual(self.run_editor(editor, script), "interrupted")
+        self.assertLess(time.monotonic() - begun, 1.5)
+        self.assertIs(signal.getsignal(signal.SIGINT), signal.default_int_handler)
+
+    def test_sigints_while_the_editor_works_reach_the_editor_never_the_app(self):
+        started = threading.Event()
+        hits = []
+
+        def editor():
+            picker.filter_list("A", ["a0"])
+            started.set()
+            for _ in range(300):
+                try:
+                    time.sleep(0.01)
+                except KeyboardInterrupt:
+                    hits.append(1)
+            return "done"
+
+        async def script(app, pilot):
+            await wait_for(pilot, lambda: showing(app, "A"))
+            await pilot.press("enter")
+            await wait_for(pilot, started.is_set)
+            for _ in range(10):
+                os.kill(os.getpid(), signal.SIGINT)
+                await pilot.pause(0.02)
+        try:
+            self.run_editor(editor, script)
+        except KeyboardInterrupt:  # one may land outside the editor's own try, as with SIGINT on the main thread
+            pass
+        self.assertEqual(self.events[-1], "app closed")
+        self.assertGreaterEqual(len(hits), 1)
 
     def test_working_shows_the_last_line_printed_as_plain_text(self):
         go = threading.Event()
