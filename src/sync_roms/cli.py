@@ -340,7 +340,7 @@ def main():
             "ExpiredToken": f"the session expired: aws sso login --profile {runtime.PROFILE}",
             "InvalidAccessKeyId": f"the access key is wrong: aws configure --profile {runtime.PROFILE}",
             "SignatureDoesNotMatch": f"the secret key is wrong: aws configure --profile {runtime.PROFILE}",
-            "NoSuchBucket": f"bucket '{runtime.BUCKET}' doesn't exist: check ROMS_BUCKET or settings.json",
+            "NoSuchBucket": f"bucket '{runtime.BUCKET}' doesn't exist: check ROMS_BUCKET or {os.path.join(store.data_dir(), 'settings.json')}",
             "AccessDenied": f"profile '{runtime.PROFILE}' can't read bucket '{runtime.BUCKET}'",
             "403": f"profile '{runtime.PROFILE}' can't read bucket '{runtime.BUCKET}'",
         }.get(code, "")

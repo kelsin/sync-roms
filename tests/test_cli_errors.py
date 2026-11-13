@@ -231,6 +231,16 @@ class MissingStorageOrCardTest(Isolated):
         self.assertEqual(cm.exception.code, 1)
         self.assertIn("No such file or directory", err.getvalue())
 
+    def test_no_such_bucket_names_the_settings_file(self):
+        from botocore.exceptions import ClientError
+        boom = ClientError({"Error": {"Code": "NoSuchBucket", "Message": "gone"}}, "ListObjectsV2")
+        with mock.patch.object(cli, "sync", side_effect=boom), mock.patch.object(runtime, "BUCKET", "typo", create=True), \
+                contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()) as err, \
+                self.assertRaises(SystemExit) as cm:
+            cli.main()
+        self.assertEqual(cm.exception.code, 3)
+        self.assertIn(os.path.join(store.data_dir(), "settings.json"), err.getvalue())
+
     def test_missing_card_path_is_a_usage_error_and_creates_nothing(self):
         storage = os.path.join(self.tmp, "roms")
         os.makedirs(storage)

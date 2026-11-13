@@ -83,13 +83,17 @@ def ensure_bucket():
     apply_settings()
     while not (runtime.BUCKET or runtime.ROOT):
         try:
-            name = input("🪣 Which S3 bucket holds your ROMs? (or a folder path, e.g. /Volumes/roms) ").strip()
+            name = ui._input("🪣 Which S3 bucket holds your ROMs? (or a folder path, e.g. /Volumes/roms) ").strip()
         except EOFError:
-            ui.fail("No bucket given", 3)
-        if name.startswith(("/", "~", ".")):  # a bucket name can't start with these
-            root = os.path.abspath(os.path.expanduser(name))
+            ui.fail("No storage given: set ROMS_BUCKET or ROMS_ROOT, or pass --bucket or --root", 3)
+        if not name.startswith("s3://") and ("/" in name or name.startswith((".", "~")) or os.path.isdir(name)):  # a bucket name has no "/"
+            root = os.path.expanduser(name)
+            if not os.path.isabs(root):
+                ui.failure(ui.red(f"❌ {name} is not an absolute path: give the whole folder path, e.g. /Volumes/roms"))
+                continue
+            root = os.path.abspath(root)
             if not os.path.isdir(root):
-                print(ui.red(f"❌ {root} is not a folder"))
+                ui.failure(ui.red(f"❌ {root} is not a folder"))
                 continue
             settings = {k: v for k, v in load_settings().items() if k not in ("bucket", "endpoint")}
             save_settings({**settings, "root": root})
@@ -100,7 +104,7 @@ def ensure_bucket():
             save_setting("bucket", name)
             runtime.BUCKET = name
             try:
-                url = input("🔗 Custom S3 endpoint URL (blank for AWS): ").strip()
+                url = ui._input("🔗 Custom S3 endpoint URL (blank for AWS): ").strip()
             except EOFError:
                 url = ""
             if url:
