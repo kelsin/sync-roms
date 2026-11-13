@@ -311,6 +311,11 @@ class VitaSyncKeysTest(StorageFolder):
         from sync_roms import scrape_files
         self.assertEqual(scrape_files.bucket_roms([VITA])["psvita"], {G.split("/", 1)[1]})
 
+    def test_scrape_all_leaves_extras_out(self):
+        from sync_roms import scrape_files
+        self.assertEqual(scrape_files.bucket_roms([VITA], all_files=True)["psvita"],
+                         {G.split("/", 1)[1], "H [PCSE00001] [USA] [NoNpDRM].zip"})
+
 
 if __name__ == "__main__":
     unittest.main()
