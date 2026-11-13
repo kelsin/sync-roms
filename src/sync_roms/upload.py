@@ -119,6 +119,7 @@ def run_copies(todo):
         except KeyboardInterrupt:
             bar.clear()
             print(ui.red("🛑 Aborted"))
+            s3.remove_parts()
             inventory.flush()  # hard_exit skips the flush as sync-roms exits
             downloads.hard_exit()
         raise

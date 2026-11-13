@@ -133,7 +133,7 @@ TOPICS = {
   sync-roms diff [DIR]
 
   Lists the ROMs in only one of DIR and storage folder of a system you pick. Same path and size is the same file;
-  the rest are matched by content (the CRCs inside zips).
+  the rest are matched by content (the CRCs inside zips, the bytes of other files, as upload roms --replace does).
 """,
     "scrape": """
   sync-roms scrape [--system ID] [--all] [--retry] [--fill-media] [--skip-media TYPES] [--dry-run]

@@ -8,7 +8,7 @@ import zipfile
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
 
-from . import downloads, ignore, inventory, picker, runtime, s3, store, ui
+from . import downloads, ignore, inventory, mirroring, picker, runtime, s3, store, ui
 
 
 class RangeReader(io.RawIOBase):
@@ -79,17 +79,18 @@ SAMPLES = 8  # and, for a big bucket file, this many of them: the first, the las
 
 def sampled(size):
     """True when same_bytes compares a file of this size on samples: a big one in a bucket, where reading it all is a download."""
-    return not s3.read_root() and size > SAMPLES * SAMPLE_CHUNK
+    return not runtime.ROOT and size > SAMPLES * SAMPLE_CHUNK
 
 
 def same_bytes(path, key, size):
     """True when local path and storage key (both size bytes) hold the same bytes, read chunk by chunk and stopping at
-    the first that differs: the whole file, or only SAMPLES chunks of it when sampled(size)."""
+    the first that differs: the whole file, or only SAMPLES chunks of it when sampled(size). Storage itself is read,
+    never the local mirror."""
     if not sampled(size):
         spans = [(start, min(SAMPLE_CHUNK, size - start)) for start in range(0, size, SAMPLE_CHUNK)]
     else:
         spans = [(k * (size - SAMPLE_CHUNK) // (SAMPLES - 1), SAMPLE_CHUNK) for k in range(SAMPLES)]
-    with open(path, "rb") as f:
+    with open(path, "rb") as f, mirroring.storage_reads():
         for start, n in spans:
             f.seek(start)
             if f.read(n) != s3.read_range(key, start, start + n):
@@ -181,9 +182,9 @@ def match_content(local, remote, local_print, remote_print, differs=None, md5=No
     return matched, only_local, list(unmatched)
 
 
-def plan_diff(local, remote, local_print, remote_print, md5=None):
+def plan_diff(local, remote, local_print, remote_print, md5=None, same_bytes=None):
     """(only local, only storage) lists of relative paths, ignoring renames. Arguments as in match_content."""
-    _, only_local, only_bucket = match_content(local, remote, local_print, remote_print, md5=md5)
+    _, only_local, only_bucket = match_content(local, remote, local_print, remote_print, md5=md5, same_bytes=same_bytes)
     return only_local, only_bucket
 
 
@@ -238,7 +239,8 @@ def diff_command(args):
         only_local, only_bucket = plan_diff(
             local, remote, lambda p: local_fingerprint(os.path.join(folder, *p.split("/"))),
             lambda p, size, etag: bucket_fingerprint(f"{bucket}/{p}", size, etag),
-            md5=lambda p: file_md5(os.path.join(folder, *p.split("/"))))
+            md5=lambda p: file_md5(os.path.join(folder, *p.split("/"))),
+            same_bytes=lambda p, r: same_bytes(os.path.join(folder, *p.split("/")), f"{bucket}/{r}", local[p]))
     except s3.ERRORS as e:
         ui.fail(f"{e}", 3)
     if args.json:

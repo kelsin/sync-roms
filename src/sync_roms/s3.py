@@ -43,8 +43,10 @@ JUNK_NAMES = {".DS_Store"}  # macOS Finder litter: never listed, cached, synced 
 
 
 def junk(key):
-    """Whether a storage key or local path names OS litter that sync-roms never treats as a file."""
-    return key.replace("\\", "/").rsplit("/", 1)[-1] in JUNK_NAMES
+    """Whether a storage key or local path names OS litter, or one of sync-roms's own .part files, that sync-roms never
+    treats as a file."""
+    name = key.replace("\\", "/").rsplit("/", 1)[-1]
+    return name in JUNK_NAMES or name.endswith(".part")
 
 
 def mirror_sizes(root, prefix="", sizes=True):
@@ -86,10 +88,21 @@ def access(write=False):
     return f"read={runtime.PROFILE}  write={runtime.WRITE_PROFILE}" if write else f"{location()}  profile={runtime.PROFILE}"
 
 
+_writing = set()  # keys write_file is writing, so an abort can remove their .part files
+
+
+def remove_parts():
+    """Remove the .part files of the writes in flight: a hard exit skips write_file's own cleanup."""
+    for key in list(_writing):
+        with contextlib.suppress(OSError):
+            os.remove(safe_join(runtime.ROOT, key + ".part"))
+
+
 def write_file(key, write):
     """Create the file for a key under the storage folder; write(tmp_path) fills a temporary file that then replaces it."""
     path = safe_join(runtime.ROOT, key)
     os.makedirs(os.path.dirname(path), exist_ok=True)
+    _writing.add(key)
     try:
         write(path + ".part")
         tmp = safe_join(runtime.ROOT, key + ".part")  # a share may have stored the new name in another spelling
@@ -98,6 +111,8 @@ def write_file(key, write):
         with contextlib.suppress(OSError):
             os.remove(safe_join(runtime.ROOT, key + ".part"))
         raise
+    finally:
+        _writing.discard(key)
     path = safe_join(runtime.ROOT, key)
     from . import inventory  # imported here: inventory reads storage through this module
     inventory.wrote(key, os.path.getsize(path))
@@ -253,8 +268,32 @@ def list_with_etags(prefix):
             if not o["Key"].endswith("/")}
 
 
+def move_groups(moves):
+    """(old key, new key) moves in groups that each run in order, so no move overwrites a file another still has to move:
+    a chain (a → b, b → c) runs its last move first, and a cycle (a → b, b → a) first moves one file to a .part name
+    in its folder. Groups don't touch each other's files."""
+    by_old = dict(moves)
+    targets = set(by_old.values())
+    groups, seen = [], set()
+    for start in [old for old, _ in moves if old not in targets] + [old for old, _ in moves]:  # chain starts, then cycles
+        if start in seen:
+            continue
+        walk, key = [], start
+        while key in by_old and key not in seen:
+            seen.add(key)
+            walk.append((key, by_old[key]))
+            key = by_old[key]
+        if key != start:
+            groups.append(walk[::-1])
+        else:
+            tmp = start + ".part"
+            groups.append([(start, tmp), *walk[:0:-1], (tmp, walk[0][1])])
+    return groups
+
+
 def move_keys(moves):
-    """Move storage objects server-side: copy each (old key, new key), then delete the old one. Returns the failure count."""
+    """Move storage objects server-side: copy each (old key, new key), then delete the old one, in the order
+    move_groups gives. Returns the failure count."""
     from . import inventory
     client = None if runtime.ROOT else s3_client(runtime.WRITE_PROFILE)
 
@@ -273,19 +312,29 @@ def move_keys(moves):
         except ERRORS as e:
             return job, e
 
+    def run(group):
+        """The group's moves in order; after one fails the rest aren't tried, as they would overwrite its file."""
+        out = []
+        for job in group:
+            out.append(move(job) if not out or out[-1][1] is None else (job, OSError(f"skipped: {out[-1][0][0]} wasn't moved")))
+        return out
+
+    groups = move_groups(moves)
+    total, i = sum(map(len, groups)), 0
     failed, futs = 0, []
     print(ui.bold(f"\n🚚 Moving {len(moves)} renamed file(s)"))
     ex = ThreadPoolExecutor(runtime.WORKERS)
     try:
-        futs += [ex.submit(move, job) for job in moves]
-        for i, f in enumerate(futs, 1):
-            job, error = f.result()
-            prog = ui.dim(f"[{i}/{len(moves)}]")
-            if error is None:
-                print(f"  {prog} ✅ {job[0]} → {job[1]}")
-            else:
-                failed += 1
-                print(f"  {prog} ❌ {ui.red(job[0])}: {str(error).strip()}")
+        futs += [ex.submit(run, group) for group in groups]
+        for f in futs:
+            for job, error in f.result():
+                i += 1
+                prog = ui.dim(f"[{i}/{total}]")
+                if error is None:
+                    print(f"  {prog} ✅ {job[0]} → {job[1]}")
+                else:
+                    failed += 1
+                    print(f"  {prog} ❌ {ui.red(job[0])}: {str(error).strip()}")
     except KeyboardInterrupt:
         from . import downloads  # imported here: downloads reads storage through this module
         ex.shutdown(wait=False, cancel_futures=True)

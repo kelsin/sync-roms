@@ -171,6 +171,93 @@ class ReplaceContentTest(unittest.TestCase):
         self.assertNotIn("more", out)
 
 
+class RenameChainTest(unittest.TestCase):
+    """upload --replace on a storage folder: renames through a name another rename moves away never overwrite it."""
+
+    def setUp(self):
+        self.storage = tempfile.TemporaryDirectory()
+        self.addCleanup(self.storage.cleanup)
+        for p in (mock.patch.object(runtime, "ROOT", self.storage.name), mock.patch.object(runtime, "_mirror_root", None),
+                  mock.patch.object(runtime, "WORKERS", 1)):  # one worker runs the moves in the order they are given
+            p.start()
+            self.addCleanup(p.stop)
+        self.folder = os.path.join(self.storage.name, "gba")
+        os.makedirs(self.folder)
+
+    def stored(self):
+        out = {}
+        for name in os.listdir(self.folder):
+            with open(os.path.join(self.folder, name), "rb") as f:
+                out[name] = f.read()
+        return out
+
+    def replace(self, local, remote):
+        for rel, data in remote.items():
+            with open(os.path.join(self.folder, rel), "wb") as f:
+                f.write(data)
+        with tempfile.TemporaryDirectory() as root:
+            for rel, data in local.items():
+                with open(os.path.join(root, rel), "wb") as f:
+                    f.write(data)
+            with mock.patch.object(ui, "confirm", lambda *a, **k: True), contextlib.redirect_stdout(io.StringIO()):
+                code = upload.replace_command(argparse.Namespace(dry_run=False), root, SYSTEMS[0])
+        self.assertEqual(code, 0)
+        self.assertEqual(self.stored(), local)
+
+    def test_chain(self):
+        self.replace({"b.gba": b"X" * 5, "c.gba": b"Y" * 7}, {"a.gba": b"X" * 5, "b.gba": b"Y" * 7})
+
+    def test_swap(self):
+        self.replace({"a.gba": b"Y" * 7, "b.gba": b"X" * 5}, {"a.gba": b"X" * 5, "b.gba": b"Y" * 7})
+
+    def test_cycle_of_three(self):
+        self.replace({"b.gba": b"X" * 5, "c.gba": b"Y" * 7, "a.gba": b"Z" * 9},
+                     {"a.gba": b"X" * 5, "b.gba": b"Y" * 7, "c.gba": b"Z" * 9})
+
+    def test_a_failed_move_stops_the_ones_that_would_overwrite_its_file(self):
+        for name, data in (("a.gba", b"X"), ("b.gba", b"Y")):
+            with open(os.path.join(self.folder, name), "wb") as f:
+                f.write(data)
+        real_replace = os.replace
+
+        def replace(src, dst):
+            if src.endswith("b.gba"):
+                raise OSError("busy")
+            real_replace(src, dst)
+
+        with mock.patch.object(s3.os, "replace", replace), contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(s3.move_keys([("gba/a.gba", "gba/b.gba"), ("gba/b.gba", "gba/c.gba")]), 2)
+        self.assertEqual(self.stored(), {"a.gba": b"X", "b.gba": b"Y"})
+
+
+class BucketReplaceMirrorTest(unittest.TestCase):
+    """upload --replace on a bucket compares content with the bucket itself, never with the local mirror."""
+
+    def renamed(self, mirror_bytes, bucket_bytes):
+        class Client:
+            def get_object(self, Bucket, Key, Range):
+                start, end = map(int, Range[len("bytes="):].split("-"))
+                return {"Body": io.BytesIO(bucket_bytes[start:end + 1])}
+
+        with tempfile.TemporaryDirectory() as root, tempfile.TemporaryDirectory() as mirror, contextlib.ExitStack() as st:
+            with open(os.path.join(root, "new.gba"), "wb") as f:
+                f.write(b"A" * 10)
+            os.makedirs(os.path.join(mirror, "gba"))
+            with open(os.path.join(mirror, "gba", "old.gba"), "wb") as f:
+                f.write(mirror_bytes)
+            st.enter_context(mock.patch.object(runtime, "ROOT", None))
+            st.enter_context(mock.patch.object(runtime, "_mirror_root", mirror))
+            st.enter_context(mock.patch.object(s3, "s3_client", lambda *a, **k: Client()))
+            st.enter_context(mock.patch.object(inventory, "etags", lambda prefix: {"old.gba": (10, '"abc-2"')}))
+            out = st.enter_context(contextlib.redirect_stdout(io.StringIO()))
+            upload.replace_command(argparse.Namespace(dry_run=True), root, SYSTEMS[0])
+        return "old.gba → new.gba" in out.getvalue()
+
+    def test_a_mirror_copy_never_decides_a_rename(self):
+        self.assertFalse(self.renamed(b"A" * 10, b"B" * 10))
+        self.assertTrue(self.renamed(b"B" * 10, b"A" * 10))
+
+
 class BucketReplaceSamplesTest(unittest.TestCase):
     """upload --replace on a bucket: a big object with no MD5 is compared on samples, and the rename says so."""
 
@@ -323,6 +410,36 @@ class AbortKeepsCacheTest(StorageFolder):
             with mock.patch.object(s3, "write_file", write_file), mock.patch.object(ui.ProgressBar, "draw", draw):
                 self.abort(lambda: upload.run_copies(todo), release)
         self.assertEqual(inventory.files("gba/").get("gba/big.gba"), 9)
+
+    def test_part_files_in_flight_are_removed(self):
+        self.build()
+        writing, draws, left = threading.Event(), [], []
+
+        class Release(threading.Event):  # set by the abort's hard_exit: see what is left in storage at that moment
+            def set(self_):
+                left.extend(n for n in os.listdir(os.path.join(self.root.name, "gba")) if n.endswith(".part"))
+                super().set()
+
+        release = Release()
+
+        def copy_file(src, dst, callback=None, wrote=None):
+            with open(dst, "wb") as f:
+                f.write(b"half")
+            writing.set()
+            release.wait(5)
+
+        def draw(self_, done):
+            draws.append(done)
+            if len(draws) <= 2:
+                writing.wait(5)
+                raise KeyboardInterrupt
+
+        with tempfile.TemporaryDirectory() as local:
+            touch(local, "c.gba", 4)
+            with mock.patch.object(s3, "copy_file", copy_file), mock.patch.object(ui.ProgressBar, "draw", draw):
+                self.abort(lambda: upload.run_copies([("gba/c.gba", os.path.join(local, "c.gba"), 4)]), release)
+        self.assertTrue(writing.is_set())
+        self.assertEqual(left, [])
 
     def test_second_ctrl_c_during_moves_aborts_and_saves_finished_moves(self):
         self.build()

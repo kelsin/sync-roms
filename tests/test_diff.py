@@ -115,7 +115,7 @@ class SameBytesTest(unittest.TestCase):
     def compare(self, local, remote, folder=None):
         import tempfile
         from unittest import mock
-        from sync_roms import s3
+        from sync_roms import runtime, s3
         reads = []
 
         def read_range(key, start, end):
@@ -123,7 +123,7 @@ class SameBytesTest(unittest.TestCase):
             return remote[start:end]
 
         with tempfile.TemporaryDirectory() as tmp, mock.patch.object(s3, "read_range", read_range), \
-                mock.patch.object(s3, "read_root", lambda: folder), \
+                mock.patch.object(runtime, "ROOT", folder), mock.patch.object(runtime, "_mirror_root", None), \
                 mock.patch.object(diff, "SAMPLE_CHUNK", 4), mock.patch.object(diff, "SAMPLES", 4):
             path = os.path.join(tmp, "b.gba")
             with open(path, "wb") as f:
@@ -158,11 +158,14 @@ class SameBytesTest(unittest.TestCase):
 
     def test_sampled_only_for_a_big_file_in_a_bucket(self):
         from unittest import mock
-        from sync_roms import s3
-        with mock.patch.object(diff, "SAMPLE_CHUNK", 4), mock.patch.object(diff, "SAMPLES", 4):
-            with mock.patch.object(s3, "read_root", lambda: None):
+        from sync_roms import runtime
+        with mock.patch.object(diff, "SAMPLE_CHUNK", 4), mock.patch.object(diff, "SAMPLES", 4), \
+                mock.patch.object(runtime, "_mirror_root", None):
+            with mock.patch.object(runtime, "ROOT", None):
                 self.assertEqual((diff.sampled(16), diff.sampled(17)), (False, True))
-            with mock.patch.object(s3, "read_root", lambda: "/storage"):
+                with mock.patch.object(runtime, "_mirror_root", "/mirror"):  # the bucket is read, not the mirror
+                    self.assertTrue(diff.sampled(17))
+            with mock.patch.object(runtime, "ROOT", "/storage"):
                 self.assertFalse(diff.sampled(17))
 
 
@@ -218,6 +221,40 @@ class PlanDiffTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class DiffContentTest(unittest.TestCase):
+    """sync-roms diff matches raw files of the same size by their bytes, as --replace does."""
+
+    def diff(self, local, remote):
+        import argparse
+        import contextlib
+        import io
+        import tempfile
+        from unittest import mock
+        from sync_roms import inventory, picker, runtime, store
+        with tempfile.TemporaryDirectory() as root, tempfile.TemporaryDirectory() as storage:
+            os.makedirs(os.path.join(storage, "gba"))
+            for folder, files in ((root, local), (os.path.join(storage, "gba"), remote)):
+                for name, data in files.items():
+                    with open(os.path.join(folder, name), "wb") as f:
+                        f.write(data)
+            out = io.StringIO()
+            with mock.patch.object(runtime, "ROOT", storage), mock.patch.object(runtime, "_mirror_root", None), \
+                    mock.patch.object(store, "load_manifest", lambda *a: {"systems": [{"name": "GBA", "bucket": "gba", "folders": {}}]}), \
+                    mock.patch.object(picker, "filter_list", lambda *a, **k: 0), \
+                    mock.patch.object(inventory, "etags", lambda prefix: {n: (len(d), "-") for n, d in remote.items()}), \
+                    contextlib.redirect_stdout(out):
+                diff.diff_command(argparse.Namespace(diff=root, system=None, json=False))
+        return out.getvalue()
+
+    def test_same_size_different_bytes_differ(self):
+        out = self.diff({"b.gba": b"B" * 5}, {"a.gba": b"A" * 5})
+        self.assertIn("Only in the folder: 1", out)
+        self.assertIn("Only in storage: 1", out)
+
+    def test_same_bytes_under_another_name_are_the_same(self):
+        self.assertIn("Same games on both sides", self.diff({"b.gba": b"A" * 5}, {"a.gba": b"A" * 5}))
 
 
 class IgnoredDiffTest(unittest.TestCase):
