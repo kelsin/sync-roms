@@ -44,6 +44,18 @@ class Helpers(unittest.TestCase):
         s["games"] = []
         self.assertEqual([r[1] for r in edit.system_rows(s, {G, DLC, NEW})], [G])
 
+    def test_system_rows_use_arcade_names(self):
+        s = {"bucket": "fbneo", "games": []}
+        row = edit.system_rows(s, {"fbneo/1941j.zip"})[0]
+        self.assertEqual(row[2], "1941: Counter Attack (Japan)")
+        self.assertIn("1941j.zip", row[3])
+
+    def test_set_rows_keep_saved_title(self):
+        s = {"bucket": "fbneo", "name": "FBNeo"}
+        gs = {"games": [{"system": "fbneo", "bucket": "fbneo/1941j.zip", "title": "Mine"}]}
+        rows = edit.set_rows(gs, {"fbneo": s}, lambda _s: {"fbneo/1941j.zip"})
+        self.assertEqual(rows[0][2], "Mine")
+
     def test_cover_notes(self):
         keys = edit.cover_notes(SETS, ["s"])
         self.assertEqual(keys["gba/A.zip"], "Full set: Mix")

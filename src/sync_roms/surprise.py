@@ -6,7 +6,7 @@ import posixpath
 import random
 import re
 
-from . import inventory, m3u, mirroring, picker, s3, store, ui, usersettings, vita
+from . import inventory, m3u, mirroring, names, picker, s3, store, ui, usersettings, vita
 
 SLOTS = 10
 RECOMMENDED_SHARE = 2 / 3
@@ -156,7 +156,7 @@ def units(system, keys, family, bios):
 
 
 def _surprise(system, unit):
-    out = {"system": system, "bucket": unit[0], "title": store.key_title(unit[0])}
+    out = {"system": system, "bucket": unit[0], "title": names.title(unit[0])}
     if unit[1:]:
         out["files"] = unit[1:]
     return out

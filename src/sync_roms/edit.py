@@ -3,7 +3,7 @@ import os
 import sys
 from collections import defaultdict
 
-from . import picker, runtime, s3, store, ui, vita
+from . import names, picker, runtime, s3, store, ui, vita
 
 
 def note(text):
@@ -98,7 +98,7 @@ def toggle_games(title, rows, extras=None, covered=None, excluded=None, hotkeys=
                 removed[s["bucket"]].discard(k)
                 if k not in listed(s):
                     listed(s).add(k)
-                    s["games"].append({"title": name if k == key else store.key_title(k), "bucket": k})
+                    s["games"].append({"title": name if k == key else names.title(k), "bucket": k})
         elif was and not on:
             systems[s["bucket"]] = s
             removed[s["bucket"]].update(keys)
@@ -112,7 +112,7 @@ def system_rows(s, in_bucket):
     """Rows for toggle_games over every file of a system's storage folder (Vita DLC and updates only if listed)
     plus any listed game that isn't in it."""
     listed = {g["bucket"] for g in s["games"] if g.get("bucket")}
-    return [(s, k, store.key_title(k),
+    return [(s, k, names.title(k),
              k.split("/", 1)[1] + ("" if k in in_bucket else "  ⚠️ not in storage"))
             for k in sorted(in_bucket | listed, key=str.lower) if not vita.is_extra(k) or k in listed]
 
@@ -136,7 +136,7 @@ def set_rows(game_set, by_bucket, bucket_keys):
         if not s or not key or key in seen:
             continue
         seen.add(key)
-        title = g.get("title") or store.key_title(key)
+        title = g.get("title") or names.title(key)
         have = bucket_keys(s)
         warn = "" if s.get("full_system") or all(k in have for k in [key] + list(g.get("files", []))) \
             else "  ⚠️ not in storage"

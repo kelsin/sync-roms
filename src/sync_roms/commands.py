@@ -7,7 +7,7 @@ import re
 import sys
 
 from . import collections as colls
-from . import external, inventory, m3u, picker, runtime, s3, setedit, store, surprise, ui, usersettings
+from . import external, inventory, m3u, names, picker, runtime, s3, setedit, store, surprise, ui, usersettings
 
 
 UNKNOWN_SHOWN = 8  # device ids named in an "unknown device" error
@@ -173,7 +173,7 @@ def add_games(raw, system, keys):
     changes = []
     for key in keys:
         if key not in have:
-            entry.append({"title": os.path.splitext(key.split("/", 1)[1])[0], "bucket": key})
+            entry.append({"title": names.title(key), "bucket": key})
             changes.append(("+", key))
     if not entry:
         del raw[system]
@@ -293,7 +293,7 @@ def surprise_entries(keys_by_system):
         except (*s3.ERRORS, SystemExit):
             ui.warn(f"can't list {system}/, importing its surprises without their other discs")
         for key in keys:
-            entry = {"system": system, "bucket": key, "title": store.key_title(key)}
+            entry = {"system": system, "bucket": key, "title": names.title(key)}
             files = [k for k in groups.get(key, []) if k != key]
             out.append({**entry, "files": files} if files else entry)
     return out
