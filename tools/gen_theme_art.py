@@ -106,6 +106,10 @@ class Pen:
     def path(self, pts, closed=False, opaque=False):
         self.strokes.append((list(pts), closed, opaque, self.clip))
 
+    def fill(self, pts):
+        """A solid shape, for the rare mark that is not a line."""
+        self.strokes.append((list(pts), True, "ink", self.clip))
+
     @contextlib.contextmanager
     def inside(self, shape):
         """Strokes drawn in this block stop at shape's outline."""
@@ -414,6 +418,199 @@ def soundtracks(p):  # headphones
         p.rr(x * 26, -4, x * 42, 32, 5, opaque=True)
 
 
+def wishlist(p):  # bookmark
+    p.pg([(-22, -46), (22, -46), (22, 46), (0, 27), (-22, 46)], 2.5)
+    p.pg(star(0, -16, 11, 4.7), 0.8)
+
+
+def recently_added(p):  # tray and a down arrow
+    p.pg([(-8, -46), (8, -46), (8, -12), (20, -12), (0, 14), (-20, -12), (-8, -12)], 1.5)
+    p.pg([(-36, 10), (-22, 10), (-15, 22), (15, 22), (22, 10), (36, 10), (36, 40), (-36, 40)], 2.5)
+
+
+def all_time_best(p):  # crown
+    p.pg([(-25, 30), (-34, -12), (-17, 6), (0, -26), (17, 6), (34, -12), (25, 30)], 1.5)
+    for x, y in ((-34, -12), (0, -26), (34, -12)):
+        p.o(x, y, 5, opaque=True)
+    p.rr(-33, 22, 33, 38, 3, opaque=True)
+    p.o(0, 30, 3)
+
+
+def replay(p):  # looping arrow
+    ro, ri, tail, head = 40, 27, -30, 250
+    rm = (ro + ri) / 2
+    at = lambda r, a: (r * math.cos(math.radians(a)), r * math.sin(math.radians(a)))
+    tip = turn([(rm, 24)], head)[0]  # straight on from the middle of the arrowhead's base
+    p.path(arc(0, 0, ro, ro, tail, head) + [at(ro + 6.5, head), tip, at(ri - 6.5, head)]
+           + arc(0, 0, ri, ri, head, tail), True)
+
+
+def on_hold(p):  # pause symbol
+    p.o(0, 0, 40)
+    p.rr(-18, -20, -6, 20, 3.5)
+    p.rr(6, -20, 18, 20, 3.5)
+
+
+def party(p):  # dice
+    def die(cx, cy, h, rot, pips, opaque=False):
+        p.rr(cx - h, cy - h, cx + h, cy + h, 6, rot=rot, opaque=opaque)
+        for x, y in turn([(cx + dx, cy + dy) for dx, dy in pips], rot, cx, cy):
+            p.o(x, y, 2.2)
+            p.o(x, y, 0.8)
+
+    die(15, -13, 19, 12, [(-9.5, -9.5), (0, 0), (9.5, 9.5)])
+    die(-13, 13, 21, -10, [(-10.5, -10.5), (10.5, -10.5), (0, 0), (-10.5, 10.5), (10.5, 10.5)], opaque=True)
+
+
+def cards(p):  # hand of cards
+    card = [(-16, -30), (16, -30), (16, 18), (-16, 18)]
+    for a in (-22, 22):
+        p.pg(turn(card, a, 0, 38), 4, opaque=True)
+    p.pg([(x, y + 13) for x, y in card], 4, opaque=True)
+    p.pg([(0, -7), (8, 7), (0, 21), (-8, 7)], 1)
+
+
+def mystery(p):  # magnifying glass
+    p.rr(-2.6, 14.9, 43.4, 25.9, 5, rot=45)
+    p.o(-10, -10, 30, opaque=True)
+    p.path(arc(-10, -10, 20, 20, 195, 255))
+
+
+def ninja(p):  # shuriken
+    p.pg(star(0, 0, 42, 12.5, 4), 1)
+    p.o(0, 0, 5)
+    for a in (45, 225):
+        p.path(arc(0, 0, 30, 30, a - 22, a + 22))
+
+
+def mecha(p):  # robot head
+    p.rr(21, 0, 33, 11, 2)
+    p.rr(-33, 0, -21, 11, 2)
+    half = [(0, -18), (18, -12), (26, -4), (26, 16), (19, 26), (12, 36)]
+    p.pg(half + mirror(half)[:0:-1], 2, opaque=True)
+    blade = [(0, -32), (0, -20), (34, -40), (38, -52)]
+    p.pg(blade, 1, opaque=True)
+    p.pg(mirror(blade), 1, opaque=True)
+    p.pg([(-6, -41), (6, -41), (6, -12), (0, -5), (-6, -12)], 1.5, opaque=True)
+    eye = [(5, 3), (20, -2), (20, 6), (5, 9)]
+    p.pg(eye, 1)
+    p.pg(mirror(eye), 1)
+    chin = rounded([(-8, 24), (8, 24), (5, 42), (-5, 42)], 1.5)
+    p.path(chin, True, opaque=True)
+    with p.inside(chin):
+        p.l([(-12, 33), (12, 33)])
+
+
+def sci_fi(p):  # flying saucer
+    p.path([(-11, -10), (11, -10)] + arc(0, 40, 26, 7, 0, 180), True)
+    p.path(arc(0, -20, 16, 16, 180, 360), True)
+    p.o(0, -14, 38, 10.5, opaque=True)
+    for x, y in ((-21, -14), (0, -12.5), (21, -14)):
+        p.o(x, y, 2.6)
+
+
+def halloween(p):  # jack-o'-lantern
+    p.pg([(-5, -20), (-7, -38), (4, -41), (5, -20)], 2)
+    p.o(-24, 8, 19, 29)
+    p.o(24, 8, 19, 29)
+    p.o(0, 8, 27, 33, opaque=True)
+    eye = [(13, -13), (22, 2), (4, 2)]
+    p.pg(eye, 1)
+    p.pg(mirror(eye), 1)
+    p.pg([(-21, 12), (-11, 21), (0, 12), (11, 21), (21, 12), (11, 31), (0, 22), (-11, 31)], 1)
+
+
+def prototypes(p):  # traffic cone
+    cone = rounded([(-26, 34), (-7, -44), (7, -44), (26, 34)], 4, False)
+    p.path(cone)
+    with p.inside(cone):
+        for y in (-20, -8, 8, 20):
+            p.l([(-40, y), (40, y)])
+    p.rr(-37, 34, 37, 44, 3)
+
+
+def skate(p):  # skateboard
+    mid = rounded([(-46, -11), (-31, 0), (31, 0), (46, -11)], 9, False)
+
+    def side(d):
+        out = []
+        for i, (x, y) in enumerate(mid):
+            a, b = mid[max(i - 1, 0)], mid[min(i + 1, len(mid) - 1)]
+            n = math.dist(a, b)
+            out.append((x - (b[1] - a[1]) / n * d, y + (b[0] - a[0]) / n * d))
+        return out
+
+    tip = math.degrees(math.atan2(11, 15))
+    for x in (-19, 19):
+        p.l([(x - 6, -2), (x - 6, 3), (x - 3, 13), (x + 3, 13), (x + 6, 3), (x + 6, -2)], 1)
+    p.path(side(-3) + arc(46, -11, 3, 3, -tip - 90, -tip + 90)[1:-1] + side(3)[::-1]
+           + arc(-46, -11, 3, 3, tip + 90, tip + 270)[1:-1], True, opaque=True)
+    for x in (-19, 19):
+        p.o(x, 16.5, 7.5, opaque=True)
+        p.o(x, 16.5, 2.2)
+        p.o(x, 16.5, 0.8)
+
+
+def wrestling(p):  # championship belt
+    p.pg([(-50, -6), (-24, -10), (24, -10), (50, -6), (50, 6), (24, 10), (-24, 10), (-50, 6)], 3)
+    for x in (-33.5, 33.5):
+        p.rr(x - 6.5, -14, x + 6.5, 14, 3, opaque=True)
+    p.o(0, 0, 22, opaque=True)
+    p.o(0, 0, 15)
+    p.pg(star(0, 0, 9, 3.9), 0.8)
+
+
+def donkey_kong(p):  # barrel
+    rx, ry, h = 36, 60.5, 40
+    a = math.degrees(math.asin(h / ry))
+    body = arc(0, 0, rx, ry, -a, a) + arc(0, 0, rx, ry, 180 - a, 180 + a)
+    p.path(body, True)
+    with p.inside(body):
+        for r in (-12, 12):
+            p.path(arc(0, 0, r, ry, -80, 80))
+    for y in (-27, 20):
+        w0, w1 = (rx * math.sqrt(1 - (v / ry) ** 2) for v in (y, y + 7))
+        p.path([(-w0, y), (w0, y), (w1, y + 7), (-w1, y + 7)], True, opaque=True)
+
+
+def yoshi(p):  # spotted egg
+    egg = arc(0, 8, 33, 32, 0, 180) + arc(0, 8, 33, 48, 180, 360)[1:-1]
+    p.path(egg, True)
+    p.o(-3, 8, 10)
+    p.o(4, -27, 7.5)
+    with p.inside(egg):
+        p.o(31, -6, 11)
+        p.o(-26, -22, 10)
+        p.o(6, 39, 10)
+        p.o(-28, 24, 9)
+
+
+def pac_man(p):  # pac-man eating a row of dots
+    p.path(arc(-22, 0, 31, 31, 35, 325) + [(-22, 0)], True)
+    for x in (13, 27, 41, 55):
+        p.o(x, 0, 2.2)
+        p.o(x, 0, 0.8)
+
+
+def tetris(p):  # falling blocks
+    p.pg([(-35, 18), (-21, 18), (-21, 32), (7, 32), (7, 46), (-35, 46)], 0)
+    p.pg([(7, 18), (35, 18), (35, 46), (7, 46)], 0)
+    p.pg([(-21, 18), (-7, 18), (-7, 4), (21, 4), (21, 18), (7, 18), (7, 32), (-21, 32)], 0)
+    p.pg([(-21, -36), (21, -36), (21, -22), (7, -22), (7, -8), (-7, -8), (-7, -22), (-21, -22)], 0)
+
+
+def dragon_quest(p):  # slime
+    body = arc(0, 12, 41, 27, -25, 205)
+    neck = spline([(0, -44), (4, -33), (10, -23), (18, -15), (28, -8), body[0], (41, 12)])[:71]
+    p.path(neck + body[1:-1] + mirror(neck)[:0:-1], True)
+    for x in (-14, 14):
+        p.o(x, 6, 7.5)
+        p.o(x, 6, 2.2)
+        p.o(x, 6, 0.8)
+    p.path(spline([(-21, 19), (-11, 22), (0, 23), (11, 22), (21, 19)])
+           + spline([(21, 19), (12, 27), (0, 30), (-12, 27), (-21, 19)])[1:-1], True)
+
+
 def platformers_3d(p):  # cube
     p.pg([(0, -38), (35, -19), (35, 21), (0, 42), (-35, 21), (-35, -19)], 2)
     p.l([(-35, -19), (0, 1), (35, -19)], 1.5)
@@ -544,13 +741,17 @@ def jrpg_essentials(p):  # treasure chest
     p.l([(0, -2), (0, 3)], 0)
 
 
-def kart_racers(p):  # helmet
-    shell = arc(0, -2, 40, 38, 160, 380) + rounded([(37.6, 11), (33, 27), (-31, 27), (-37.6, 11)], 7, False)[1:-1]
-    p.path(shell, True)
-    with p.inside(shell):
-        p.rr(4, -18, 60, 5, 7)
-        p.l([(-60, -6.5), (4, -6.5)])
-    p.rr(13, 13, 28, 18.5, 2.7)
+def kart_racers(p):  # kart
+    p.rr(-44, -15, -24, -9.5, 2.7, rot=20)  # exhaust pipes
+    p.rr(-44, -10, -24, -4.5, 2.7, rot=20, opaque=True)
+    p.pg([(-30, -19), (-20, -19), (-13, 8), (-27, 8)], 4, opaque=True)  # seat
+    p.l([(9, -4), (15, 9)])  # steering column
+    p.pg([(-28, 13), (1, 13), (8, 5), (17, 5), (38, 11), (44, 20), (42, 30), (-28, 30)], 4, opaque=True)
+    p.rr(2, -7, 16, -1, 3, rot=-25, opaque=True)  # steering wheel
+    p.o(-22, 20, 17, opaque=True)
+    p.o(-22, 20, 7)
+    p.o(25, 25, 12, opaque=True)
+    p.o(25, 25, 4.5)
 
 
 def kirby(p):  # shooting star
@@ -758,12 +959,37 @@ def short_sessions(p):  # hourglass
     p.c([(-14, 38), (-7, 30), (0, 26), (7, 30), (14, 38)])
 
 
-def sonic(p):  # ring
-    p.o(-2, 4, 33, 40)
-    p.o(-6, 4, 22, 30)
-    p.sparkle(36, -36, 10)
-    p.sparkle(42, 34, 5.5)
-    p.sparkle(-40, -40, 5)
+def sonic(p):  # sonic's head, looking down
+    def outline(*runs):  # smooth runs joined at sharp corners
+        pts = []
+        for run in runs:
+            pts += spline(run)[1 if pts else 0:]
+        return pts[:-1]
+
+    top, mid, low = (-20.5, -35), (-46, -5.1), (-40.4, 31.6)
+    n1, n2 = (-11, -19.4), (-23.4, 3.6)
+    ear, snout, chin, nape = (46, 5.3), (22.5, 29.1), (18.8, 31.5), (-6, 23.6)
+    p.path(outline(
+        [top, (-9.3, -33.7), (-3.1, -32.6), (6.5, -29.4), (13.6, -25.7), (22.2, -19.1), (27.5, -13.1), (31.7, -5.6),
+         (34.5, 3.1)],
+        [(34.5, 3.1), (38.2, 3.7), (44.1, 4), ear],
+        [ear, (44.5, 9), (40.6, 13.3), (36.5, 17.2), (32, 21.6), (27.2, 25.8), snout],
+        [snout, (26.2, 30.2), (27.6, 32.4), (25.6, 34.4), (22, 34), chin],
+        [chin, (15, 32.3), (10.9, 32.3), (6.6, 31.4), (1.2, 28.9), (-4.4, 25), nape],
+        [nape, (-9.3, 23.2), (-14.9, 23), (-20.8, 23.7), (-28.7, 26), low],
+        [low, (-40.1, 28.7), (-38.7, 23.6), (-36.4, 17.5), (-34.5, 14), (-29.2, 7.7), n2],
+        [n2, (-27.8, 0.1), (-32.3, -2), (-38, -3.7), mid],
+        [mid, (-43.6, -8.3), (-38.8, -12.9), (-35.4, -15.4), (-30.8, -17.7), (-27.2, -18.9), (-22, -20),
+         (-16.3, -20.1), n1],
+        [n1, (-14, -26.1), top]), True)
+    eye = outline(
+        [(4.7, 1.3), (8, 0.4), (10.8, 1.2), (13.6, 4), (14.7, 6.5), (15.2, 9.2), (15.3, 19.1), (15.7, 22), (16.6, 23.6),
+         (19, 24.7)],
+        [(19, 24.7), (15.9, 24.2), (8.6, 23), (5.3, 21.2), (3.8, 19.3)],
+        [(3.8, 19.3), (6.1, 17.8), (9.2, 14.5), (10.4, 11.9), (10.8, 8.6)],
+        [(10.8, 8.6), (9.2, 8.4), (7.1, 10), (4.2, 13.6), (2, 17.3)],
+        [(2, 17.3), (0.6, 14.2), (0.3, 12.4), (0.4, 9.2), (1.2, 6), (2.6, 3.2), (4.7, 1.3)])
+    p.fill(eye)
 
 
 def star_wars(p):  # laser sword
@@ -846,6 +1072,26 @@ ART = {
     "late-night": (late_night, (58, 48, 120), 0, 1.0, (0, 0)),
     "now-playing": (now_playing, (76, 100, 236), -8, 0.95, (-12, 0)),
     "soundtracks": (soundtracks, (230, 70, 160), -8, 1.0, (-22, 0)),
+    "wishlist": (wishlist, (222, 96, 78), -8, 1.0, (-8, 0)),
+    "recently-added": (recently_added, (52, 152, 110), -6, 1.0, (-30, 0)),
+    "all-time-best": (all_time_best, (110, 62, 160), -6, 1.0, (-20, 0)),
+    "replay": (replay, (48, 130, 190), -45, 1.0, (0, 0)),
+    "on-hold": (on_hold, (112, 118, 130), -6, 1.0, (3, 0)),
+    "party": (party, (232, 92, 150), -4, 1.04, (-10, 0)),
+    "cards": (cards, (30, 110, 84), -6, 1.08, (0, 0)),
+    "mystery": (mystery, (126, 92, 70), 14, 1.0, (-6, 0)),
+    "ninja": (ninja, (50, 54, 78), 18, 1.0, (0, 0)),
+    "mecha": (mecha, (92, 112, 140), -5, 1.0, (-6, 10)),
+    "sci-fi": (sci_fi, (20, 90, 110), -8, 1.0, (-6, 0)),
+    "halloween": (halloween, (98, 50, 130), -5, 1.0, (-4, 0)),
+    "prototypes": (prototypes, (40, 92, 170), -6, 1.0, (-8, 0)),
+    "skate": (skate, (226, 140, 36), -20, 1.08, (0, 0)),
+    "wrestling": (wrestling, (160, 40, 56), -8, 0.9, (-14, 0)),
+    "donkey-kong": (donkey_kong, (134, 84, 48), 10, 1.0, (-12, 0)),
+    "yoshi": (yoshi, (90, 180, 70), 12, 1.0, (0, 0)),
+    "pac-man": (pac_man, (28, 36, 96), -6, 1.0, (-12, 0)),
+    "tetris": (tetris, (40, 170, 200), -5, 1.0, (-36, 0)),
+    "dragon-quest": (dragon_quest, (60, 130, 220), -5, 1.0, (-6, 0)),
     "3d-platformers": (platformers_3d, (240, 150, 40), -4, 1.0, (0, 0)),
     "action-classics": (action_classics, (198, 66, 58), 32, 1.0, (0, 0)),
     "arcade-brawlers": (arcade_brawlers, (206, 84, 44), -8, 1.0, (0, 0)),
@@ -860,7 +1106,7 @@ ART = {
     "handheld-greatest-hits": (handheld_greatest_hits, (120, 170, 60), -8, 1.0, (0, 0)),
     "hidden-gems": (hidden_gems, (40, 160, 150), -6, 1.0, (0, 0)),
     "jrpg-essentials": (jrpg_essentials, (176, 124, 44), -6, 1.0, (0, 0)),
-    "kart-racers": (kart_racers, (224, 76, 64), -8, 1.0, (-14, 0)),
+    "kart-racers": (kart_racers, (224, 76, 64), -8, 0.9, (-32, 0)),
     "kirby": (kirby, (238, 132, 166), 0, 1.0, (-10, 0)),
     "licensed-classics": (licensed_classics, (60, 68, 84), -6, 1.0, (-6, 0)),
     "life-sim": (life_sim, (104, 172, 84), -5, 0.92, (-34, 0)),
@@ -878,7 +1124,7 @@ ART = {
     "run-and-gun": (run_and_gun, (96, 124, 68), 12, 1.0, (0, 0)),
     "shmups": (shmups, (44, 60, 120), 16, 1.0, (0, 0)),
     "short-sessions": (short_sessions, (60, 150, 190), 8, 1.0, (0, 0)),
-    "sonic": (sonic, (36, 96, 200), 8, 1.0, (-12, 0)),
+    "sonic": (sonic, (36, 96, 200), -4, 1.0, (-20, 0)),
     "star-wars": (star_wars, (40, 44, 60), -32, 1.0, (0, 0)),
     "stealth": (stealth, (86, 110, 100), -5, 1.0, (0, 6)),
     "strategy-tactics": (strategy_tactics, (150, 102, 62), 5, 1.0, (0, 0)),
@@ -912,7 +1158,9 @@ def _ink(strokes, rng):
     r = STROKE / 2 * SS
     for pts, closed, opaque, clip in strokes:
         if opaque:
-            ImageDraw.Draw(img).polygon([(x * SS, y * SS) for x, y in pts], fill=0)
+            ImageDraw.Draw(img).polygon([(x * SS, y * SS) for x, y in pts], fill=255 if opaque == "ink" else 0)
+        if opaque == "ink":
+            continue
         layer = Image.new("L", size, 0) if clip else img
         draw = ImageDraw.Draw(layer)
         for x, y in _resample(pts, closed, 0.5):
