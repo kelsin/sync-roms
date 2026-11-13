@@ -596,7 +596,11 @@ def chd_command(args):
                 name = os.path.relpath(jobs[futures[future]][2], root)
                 if error:
                     failed += 1
-                    say(ui.red(f"  ❌ {name}: {error}") + ui.dim(" (kept)"))
+                    line = ui.red(f"  ❌ {name}: {error}") + ui.dim(" (kept)")
+                    if ui.QUIET:
+                        ui.failure(line)
+                    else:
+                        say(line)
                 else:
                     converted += 1
                     say(f"  ✅ {name}")
@@ -613,17 +617,20 @@ def chd_command(args):
             except KeyboardInterrupt:
                 pass
         print(ui.yellow(f"  {converted} done, nothing half-converted; run --cd again to continue"))
-        hint_cache_update(root)
+        hint_cache_update(root, converted)
         return 130
     pool.shutdown()
     bar.clear()
     fix_playlists(roots, False)
-    print((ui.red if failed else ui.green)(f"🎉 Done: {converted} converted, {failed} failed"))
-    hint_cache_update(root)
+    if failed:
+        ui.failure(ui.red(f"🎉 Done: {converted} converted, {failed} failed"))
+    else:
+        print(ui.green(f"🎉 Done: {converted} converted, {failed} failed"))
+    hint_cache_update(root, converted)
     return 1 if failed else 0
 
 
-def hint_cache_update(root):
-    """Say to refresh the storage cache when root is inside the storage folder, whose files convert just changed."""
-    if runtime.ROOT and os.path.commonpath([root, runtime.ROOT]) == runtime.ROOT:
+def hint_cache_update(root, converted):
+    """Say to refresh the storage cache when root is inside the storage folder and a job there succeeded, changing its files."""
+    if converted and runtime.ROOT and os.path.commonpath([root, runtime.ROOT]) == runtime.ROOT:
         print(ui.yellow(f"⚠️  This is in the storage folder, so the storage cache is out of date: run {inventory.UPDATE_HINT}"))

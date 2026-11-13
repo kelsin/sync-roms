@@ -796,8 +796,9 @@ class ChdTest(unittest.TestCase):
             self.assertIsNone(chd.chd_archive(self.tools, CD["chd"], os.path.join(self.dir, "Game.zip"), seen.append))
         self.assertEqual([round(f, 2) for f in seen], [0.2, 0.56, 0.6, 0.96, 1.0])  # unpacked, then each disc half the rest
 
-    def run_on_card(self, root, dry_run=False, answer=None, yes=False):
-        """chd_command on root with a saved card named SD; answer is what the terminal types (None: no terminal)."""
+    def run_on_card(self, root, dry_run=False, answer=None, yes=False, fail=(), quiet=False):
+        """chd_command on root with a saved card named SD; answer is what the terminal types (None: no terminal).
+        fail: the tool steps that fail; quiet runs it under --quiet."""
         def ask(prompt):
             if answer is None:
                 raise EOFError
@@ -805,12 +806,15 @@ class ChdTest(unittest.TestCase):
 
         with mock.patch.object(store, "load_cards", return_value={"SD": {"device": "full"}}), \
                 mock.patch.object(ui, "_input", ask), mock.patch.object(ui, "ASSUME_YES", yes), \
-                mock.patch.object(external, "run_tool", FakeTools()), mock.patch.object(external, "find_tool", lambda t: t), \
+                mock.patch.object(external, "run_tool", FakeTools(fail=fail)), mock.patch.object(external, "find_tool", lambda t: t), \
                 contextlib.redirect_stdout(io.StringIO()) as out, contextlib.redirect_stderr(io.StringIO()) as err:
+            ui.set_output(quiet, False)
             try:
                 code = chd.chd_command(SimpleNamespace(chd=root, dry_run=dry_run))
             except SystemExit as e:
                 code = e.code
+            finally:
+                ui.reset()
         return code, out.getvalue(), err.getvalue()
 
     def test_converting_inside_a_saved_card_asks_first(self):
@@ -850,12 +854,25 @@ class ChdTest(unittest.TestCase):
 
     def test_converting_inside_the_storage_folder_says_to_update_the_cache(self):
         self.touch("psx/Game.iso")
-        for storage, dry_run, hint in ((self.dir, False, True), (self.dir, True, False), (os.path.join(self.dir, "other"), False, False)):
-            with self.subTest(storage=storage, dry_run=dry_run), mock.patch.object(runtime, "ROOT", storage):
-                _, out, _ = self.run_on_card(os.path.join(self.dir, "psx"), dry_run=dry_run)
+        for storage, dry_run, fail, hint in ((self.dir, False, (), True), (self.dir, True, (), False), (self.dir, False, ("verify",), False),
+                                             (os.path.join(self.dir, "other"), False, (), False)):
+            with self.subTest(storage=storage, dry_run=dry_run, fail=fail), mock.patch.object(runtime, "ROOT", storage):
+                _, out, _ = self.run_on_card(os.path.join(self.dir, "psx"), dry_run=dry_run, fail=fail)
                 self.assertEqual("sync-roms cache update" in out, hint)
-                if not dry_run:
+                if hint or storage != self.dir:
                     os.rename(os.path.join(self.dir, "psx", "Game.chd"), os.path.join(self.dir, "psx", "Game.iso"))
+                self.assertEqual(os.listdir(os.path.join(self.dir, "psx")), ["Game.iso"])
+
+    def test_quiet_convert_shows_only_failures(self):
+        self.touch("psx/Game.iso")
+        code, out, err = self.run_on_card(os.path.join(self.dir, "psx"), quiet=True)
+        self.assertEqual((code, out, err), (0, "", ""))
+        self.touch("psx/Bad.iso")
+        code, out, err = self.run_on_card(os.path.join(self.dir, "psx"), fail=("verify",), quiet=True)
+        self.assertEqual(code, 1)
+        self.assertEqual(out, "")
+        self.assertIn("❌ Bad.iso: verify failed", err)
+        self.assertIn("0 converted, 1 failed", err)
 
 
 class UnzipArchiveTest(unittest.TestCase):
