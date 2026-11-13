@@ -12,7 +12,7 @@ VERSION = re.compile(r"\[v(\d+(?:\.\d+)*)\]")
 
 
 def kind(name):
-    """"dlc", "update" or "game", from the tags in a Vita file name."""
+    """The kind of a Vita file by its name: "dlc", "update" or "game"."""
     name = os.path.basename(name)
     if "[DLC-" in name:
         return "dlc"

@@ -5,7 +5,7 @@ holds. Pickers and Surprise show only the games.
 
 ## Why
 
-Storage's `psvita/` folder holds 1,144 files: 183 games, 89 updates and 871 DLC. Today every one is its own row in the
+Storage's `psvita/` folder holds games alongside their updates and DLC. Today each is its own row in the
 game picker, Surprise can pick a DLC zip as a game, and a picked game arrives without its DLC or updates. The user
 wants to pick a game and get all of it.
 
@@ -30,7 +30,6 @@ wants to pick a game and get all of it.
   - update: `... [PCSE00349] [USA] [PATCH] [v1.02] [NoNpDRM].zip`
   - DLC: `5-Level Boost [PCSE00429] [USA] [DLC-ADDCONT049LVL000].zip` (named after the DLC, not the game)
 
-  Each title id has exactly one game today; no DLC or update is orphaned.
 - What storage holds is read only through `inventory.py`.
 - Ignored ROMs stay out: the folder listing that extras come from already leaves them out.
 

@@ -402,7 +402,8 @@ def synced_keys(s):
 
 
 def available_keys(s, have):
-    """Bucket keys to download: every file in the folder for full systems, else the game list.
+    """Bucket keys to download: every file in the folder for full systems, else the game list
+    plus a Vita game's DLC and newest update.
 
     have: {key: size} listing of the system's storage folder.
     """
@@ -413,7 +414,7 @@ def available_keys(s, have):
 
 def list_system(s):
     """{key: size} of what a sync needs from a system's bucket folder. Reading from a folder (e.g. a network share),
-    a system with a game list only stats those games instead of walking the whole folder."""
+    a system with a game list only stats the keys a sync needs (synced_keys) instead of walking the whole folder."""
     if not s.get("full_system") and s3.read_root():
         return inventory.stat(synced_keys(s))
     return inventory.files(s["bucket"] + "/")

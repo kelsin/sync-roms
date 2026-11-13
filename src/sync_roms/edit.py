@@ -109,7 +109,8 @@ def toggle_games(title, rows, extras=None, covered=None, excluded=None, hotkeys=
 
 
 def system_rows(s, in_bucket):
-    """Rows for toggle_games over every file of a system's storage folder plus any listed game that isn't in it."""
+    """Rows for toggle_games over every file of a system's storage folder (Vita DLC and updates only if listed)
+    plus any listed game that isn't in it."""
     listed = {g["bucket"] for g in s["games"] if g.get("bucket")}
     return [(s, k, store.key_title(k),
              k.split("/", 1)[1] + ("" if k in in_bucket else "  ⚠️ not in storage"))
