@@ -41,6 +41,11 @@ class GamesTest(CardCmd):
         self.run_cmd("games", "remove", "gba", "B.zip")
         self.assertNotIn("gba", self.games())
 
+    def test_add_saves_proper_arcade_name(self):
+        raw = {}
+        commands.add_games(raw, "fbneo", ["fbneo/1941j.zip"])
+        self.assertEqual(raw["fbneo"], [{"title": "1941: Counter Attack (Japan)", "bucket": "fbneo/1941j.zip"}])
+
     def test_games_commands_require_a_card(self):
         code, _, err = Cmd.run_cmd(self, "games", "add", "gba", "A.zip")
         self.assertEqual(code, 2)

@@ -83,6 +83,9 @@ def count(picked):
 
 
 class SurprisePickTest(unittest.TestCase):
+    def test_surprise_uses_arcade_name(self):
+        self.assertEqual(surprise._surprise("fbneo", ["fbneo/1941j.zip"])["title"], "1941: Counter Attack (Japan)")
+
     def test_seven_three_split_counts_kept(self):
         pools = {s: pool(s, 20) for s in "abcd"}
         kept = [{"system": "a", "bucket": "a/K1.zip", "title": "K1"},
