@@ -92,7 +92,7 @@ list:
 
 ### Storage
 
-`os/android/drivers/<driver id>.zip` is that driver's current zip and `os/android/drivers/<driver id>.tag` its release
+`os/drivers/<driver id>.zip` is that driver's current zip and `os/drivers/<driver id>.tag` its release
 tag. A new release overwrites both, so nothing is ever deleted. Only sync-roms writes there, without asking (the user
 asked for sync to store new drivers; the same as `themes update` replacing its archive). Reads go through
 `inventory.py` like everything else; writes use `s3.put_file`/`put_text`, which keep the storage cache current.
@@ -102,7 +102,7 @@ On the card a driver is `Drivers/<driver id>-<tag>.zip` (tag made file-name safe
 repos, the tag shows the version in the emulator's file picker, and a new release gets a new name, so the size-only
 "already present" check never keeps a stale zip.
 
-`os/android/drivers/` joins the prefixes `mirroring.mirror_wanted` keeps, so a mirror has them too.
+`os/drivers/` joins the prefixes `mirroring.mirror_wanted` keeps, so a mirror has them too.
 
 ### Sync
 

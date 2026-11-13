@@ -6,7 +6,7 @@
 for newer releases each run and keeping them in storage; a repo skill refreshes the recommendations by PR.
 
 **Architecture:** Repo data (`drivers.json`, a `gpu` field per device) says which drivers each device gets. A new
-`drivers.py` picks releases from the GitHub API, refreshes `os/android/drivers/<id>.zip` + `.tag` in storage, and builds
+`drivers.py` picks releases from the GitHub API, refreshes `os/drivers/<id>.zip` + `.tag` in storage, and builds
 download jobs; `cli.sync` runs it like the APK jobs. A shared `github.py` holds the HTTP helper `themeart` already uses.
 
 **Tech Stack:** Python 3 stdlib (`urllib`, `zipfile`, `re`, `json`), `unittest`, boto3 via the existing `s3.py`.
@@ -15,7 +15,7 @@ download jobs; `cli.sync` runs it like the APK jobs. A shared `github.py` holds 
 
 ## Global Constraints
 
-- Storage keys: `os/android/drivers/<driver id>.zip` and `os/android/drivers/<driver id>.tag` (tag text + `\n`). Upload
+- Storage keys: `os/drivers/<driver id>.zip` and `os/drivers/<driver id>.tag` (tag text + `\n`). Upload
   the `.zip` before the `.tag`. Never delete from storage.
 - Card path: `<card>/Drivers/<driver id>-<safe tag>.zip`; safe tag = tag with every char outside `[A-Za-z0-9._-]`
   replaced by `_`.
@@ -83,7 +83,7 @@ download jobs; `cli.sync` runs it like the APK jobs. A shared `github.py` holds 
 - Produces:
   - `github.get(url: str, accept: str | None = None)` → response context manager (moved `themeart._github`).
   - `github.json(url: str)` → parsed JSON of `get(url, "application/vnd.github+json")`.
-  - `drivers.PREFIX = "os/android/drivers/"`
+  - `drivers.PREFIX = "os/drivers/"`
   - `drivers.load() -> dict` (`store.repo_json("drivers")`)
   - `drivers.for_device(device: dict | None, layout_name: str) -> list[dict]` — driver entries for that device's gpu, in list order; `[]` unless `layout_name == "esde"`.
   - `drivers.pick_release(driver: dict, releases: list[dict]) -> tuple[str, dict]` — (tag, asset dict with `name`, `browser_download_url`, `size`); raises `drivers.NoAsset(message)` when none or more than one asset matches.
@@ -130,7 +130,7 @@ download jobs; `cli.sync` runs it like the APK jobs. A shared `github.py` holds 
   - `test_not_a_zip_keeps_storage`: download returns `b"<html>"` → stored files unchanged, warning names the driver.
   - `test_rate_limit_midway_keeps_earlier_updates`: 3 entries, `github.json` raises `HTTPError(403)` on the 2nd → 1st updated, 3rd still checked and updated, one warning.
   - `test_dry_run_writes_nothing`.
-  - `test_mirror_gets_the_new_zip`: with `runtime._mirror_root` set, the mirror has `os/android/drivers/<id>.zip` and `.tag`.
+  - `test_mirror_gets_the_new_zip`: with `runtime._mirror_root` set, the mirror has `os/drivers/<id>.zip` and `.tag`.
   - `test_can_write`: `runtime.ROOT` set → True; S3 with `ProfileNotFound` patched → False.
 - [ ] **Step 2:** Run `python -m unittest tests.test_drivers -v`. Expected: new tests FAIL.
 - [ ] **Step 3:** Implement `can_write`, `stored_tag`, `refresh`; fix `s3.put_file`.
@@ -167,7 +167,7 @@ download jobs; `cli.sync` runs it like the APK jobs. A shared `github.py` holds 
 ### Task 5: Docs and refresh skill
 
 **Files:**
-- Modify: `CLAUDE.md` (Data files table: `drivers.json` and the `gpu` device field; `~/.sync-roms/cards.json` row: the card's `drivers` list; storage's `os/android/drivers/`)
+- Modify: `CLAUDE.md` (Data files table: `drivers.json` and the `gpu` device field; `~/.sync-roms/cards.json` row: the card's `drivers` list; storage's `os/drivers/`)
 - Modify: `README.md` (what an Android card gets: `Drivers/` and how to import a zip in an emulator's driver manager; check `tests/test_readme.py` for what it enforces)
 - Create: `.claude/skills/refresh-drivers/SKILL.md`
 
