@@ -9,6 +9,12 @@
       "files": [
         "psx/Resident Evil 2 - Dual Shock Ver. (USA) (Disc 1).chd",
         "psx/Resident Evil 2 - Dual Shock Ver. (USA) (Disc 2).chd"
+      ],
+      "variants": [
+        {
+          "bucket": "n64/Resident Evil 2 (USA) (Rev 1).zip",
+          "note": "N64: adds Ex Files documents and randomized items"
+        }
       ]
     },
     {
@@ -19,22 +25,22 @@
     {
       "title": "Resident Evil - Director's Cut - Dual Shock Ver.",
       "system": "psx",
-      "bucket": "psx/Resident Evil - Director's Cut - Dual Shock Ver. (USA).chd"
+      "bucket": "psx/Resident Evil - Director's Cut - Dual Shock Ver. (USA).chd",
+      "variants": [
+        {
+          "bucket": "saturn/Resident Evil (USA).chd",
+          "note": "Saturn: adds Battle Game mode and new enemies"
+        },
+        {
+          "bucket": "nds/Resident Evil - Deadly Silence (USA).zip",
+          "note": "DS: adds Rebirth mode with new puzzles and knife fights"
+        }
+      ]
     },
     {
       "title": "Resident Evil - Survivor",
       "system": "psx",
       "bucket": "psx/Resident Evil - Survivor (USA).chd"
-    },
-    {
-      "title": "Resident Evil",
-      "system": "saturn",
-      "bucket": "saturn/Resident Evil (USA).chd"
-    },
-    {
-      "title": "Resident Evil 2 (Rev 1)",
-      "system": "n64",
-      "bucket": "n64/Resident Evil 2 (USA) (Rev 1).zip"
     },
     {
       "title": "Resident Evil 2",
@@ -45,11 +51,6 @@
       "title": "Resident Evil Gaiden",
       "system": "gbc",
       "bucket": "gbc/Resident Evil Gaiden (USA).zip"
-    },
-    {
-      "title": "Resident Evil - Deadly Silence",
-      "system": "nds",
-      "bucket": "nds/Resident Evil - Deadly Silence (USA).zip"
     },
     {
       "title": "Resident Evil - Revelations (Rev 1)",
@@ -80,22 +81,18 @@
       ]
     },
     {
-      "title": "Resident Evil 2",
-      "system": "gc",
-      "bucket": "gc/Resident Evil 2 (USA).rvz"
-    },
-    {
-      "title": "Resident Evil 3 - Nemesis",
-      "system": "gc",
-      "bucket": "gc/Resident Evil 3 - Nemesis (USA).rvz"
-    },
-    {
-      "title": "Resident Evil - Code - Veronica X",
-      "system": "gc",
-      "bucket": "gc/Resident Evil - Code - Veronica X (USA).m3u",
+      "title": "Resident Evil - Code - Veronica",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Resident Evil - Code - Veronica (USA).m3u",
       "files": [
-        "gc/Resident Evil - Code - Veronica X (USA) (Disc 1).rvz",
-        "gc/Resident Evil - Code - Veronica X (USA) (Disc 2).rvz"
+        "dreamcast/Resident Evil - Code - Veronica (USA) (Disc 1).chd",
+        "dreamcast/Resident Evil - Code - Veronica (USA) (Disc 2).chd"
+      ],
+      "variants": [
+        {
+          "bucket": "gc/Resident Evil - Code - Veronica X (USA).m3u",
+          "note": "GameCube: Code Veronica X adds new cutscenes"
+        }
       ]
     },
     {
@@ -105,35 +102,13 @@
       "files": [
         "gc/Resident Evil 4 (USA) (Disc 1).rvz",
         "gc/Resident Evil 4 (USA) (Disc 2).rvz"
+      ],
+      "variants": [
+        {
+          "bucket": "ps2/Resident Evil 4 (USA).chd",
+          "note": "PS2: adds Separate Ways, Ada's side campaign"
+        }
       ]
-    },
-    {
-      "title": "Resident Evil 2",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Resident Evil 2 (USA).m3u",
-      "files": [
-        "dreamcast/Resident Evil 2 (USA) (Disc 1).chd",
-        "dreamcast/Resident Evil 2 (USA) (Disc 2).chd"
-      ]
-    },
-    {
-      "title": "Resident Evil 3 - Nemesis",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Resident Evil 3 - Nemesis (USA).chd"
-    },
-    {
-      "title": "Resident Evil - Code - Veronica",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Resident Evil - Code - Veronica (USA).m3u",
-      "files": [
-        "dreamcast/Resident Evil - Code - Veronica (USA) (Disc 1).chd",
-        "dreamcast/Resident Evil - Code - Veronica (USA) (Disc 2).chd"
-      ]
-    },
-    {
-      "title": "Resident Evil - Code: Veronica X",
-      "system": "ps2",
-      "bucket": "ps2/Resident Evil - Code - Veronica X (USA).chd"
     },
     {
       "title": "Resident Evil - Dead Aim",
@@ -149,11 +124,6 @@
       "title": "Resident Evil - Outbreak File #2",
       "system": "ps2",
       "bucket": "ps2/Resident Evil - Outbreak - File 2 (USA).chd"
-    },
-    {
-      "title": "Resident Evil 4",
-      "system": "ps2",
-      "bucket": "ps2/Resident Evil 4 (USA).chd"
     }
   ]
 }

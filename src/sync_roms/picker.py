@@ -157,8 +157,8 @@ class _ListModel:
     """filter_list's state and what each key does to it, apart from drawing (the arguments are filter_list's)."""
 
     def __init__(self, title, labels, multi, initial, hint, cursor, extras, locked, locked_note, hotkeys, note_text,
-                 on_note, esc_asks, hidden, status, diff_marks, session, poll, links, on_hotkey, preview=None):
-        self.preview = preview
+                 on_note, esc_asks, hidden, status, diff_marks, session, poll, links, on_hotkey, preview=None, row_note=None):
+        self.preview, self.row_note = preview, row_note
         self.title, self.labels, self.multi, self.hint, self.extras = title, labels, multi, hint, extras
         self.locked_note, self.hotkeys, self.note_text, self.on_note = locked_note, hotkeys, note_text, on_note
         self.esc_asks, self.status, self.diff_marks, self.poll = esc_asks, status, diff_marks, poll
@@ -224,7 +224,7 @@ class _ListModel:
 
     def status_line(self):
         """The bottom row as (text, color or None, cursor index or None): the keep/revert question, the note being
-        typed, or the status (a notice, the highlighted locked row's note, or the counts)."""
+        typed, or the status (a notice, the highlighted locked row's note, its row note, or the counts)."""
         added, removed = self.pending()
         if self.asking:
             return (f"Keep +{added} −{removed} pending change(s)?  y/Enter keep · u revert · any other key keeps editing",
@@ -241,6 +241,8 @@ class _ListModel:
         if not self.revealed and self.hidden_count:
             line += f" · {self.hidden_count} hidden (press z)"
         vis, cur = self.vis, self.cur
+        if vis and self.row_note and (text := self.row_note(vis[cur])):
+            line = text
         if vis and self.locked[vis[cur]]:
             line = f"🔒 {self.locked_note[vis[cur]] if isinstance(self.locked_note, list) else self.locked_note}"
         if self.notice:
@@ -599,7 +601,7 @@ def _draws_images():
 
 def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, extras=None, locked=None, locked_note="",
                 hotkeys=(), note_text=None, on_note=None, esc_asks=True, hidden=None, status=None, diff_marks=True,
-                session=None, poll=None, links=None, on_hotkey=None, preview=None):
+                session=None, poll=None, links=None, on_hotkey=None, preview=None, row_note=None):
     """Modal list: vim keys for moving and acting, Emacs keys for editing the filter.
 
     Normal mode: j/k ↑/↓ ^N/^P move · g/G top/bottom · ^D/^U half page · ^F/^B/PgUp/PgDn/^V page · / filter ·
@@ -630,10 +632,12 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
     preview: optional callable(label index) -> path of an image file, or None; the list then shares the screen with an
     image pane showing the highlighted row's image (blank when there is none), updated as the cursor and filter change.
     Only in a terminal that draws real images (Kitty graphics or Sixel), and not inside tmux; elsewhere there is no pane.
+    row_note: optional callable(label index) -> text; when non-empty for the highlighted row it replaces the status
+    line (below a notice and a locked row's note).
     """
     if preview:
         _app_class()  # first: it sets up Textual's environment
         if not _draws_images():
             preview = None
     return _run(_ListModel(title, labels, multi, initial, hint, cursor, extras, locked, locked_note, hotkeys, note_text,
-                           on_note, esc_asks, hidden, status, diff_marks, session, poll, links, on_hotkey, preview))
+                           on_note, esc_asks, hidden, status, diff_marks, session, poll, links, on_hotkey, preview, row_note))

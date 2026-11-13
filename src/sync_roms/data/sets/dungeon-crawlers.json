@@ -6,13 +6,25 @@
       "title": "Etrian Odyssey",
       "category": "Etrian Odyssey",
       "system": "nds",
-      "bucket": "nds/Etrian Odyssey (USA).zip"
+      "bucket": "nds/Etrian Odyssey (USA).zip",
+      "variants": [
+        {
+          "bucket": "3ds/Etrian Odyssey Untold - The Millennium Girl (USA).zip",
+          "note": "3DS: Untold remake adds a story mode, voice and quality-of-life"
+        }
+      ]
     },
     {
       "title": "Etrian Odyssey II - Heroes of Lagaard",
       "category": "Etrian Odyssey",
       "system": "nds",
-      "bucket": "nds/Etrian Odyssey II - Heroes of Lagaard (USA).zip"
+      "bucket": "nds/Etrian Odyssey II - Heroes of Lagaard (USA).zip",
+      "variants": [
+        {
+          "bucket": "3ds/Etrian Odyssey 2 Untold - The Fafnir Knight (USA).zip",
+          "note": "3DS: Untold remake adds a story mode, voice and quality-of-life"
+        }
+      ]
     },
     {
       "title": "Etrian Odyssey III - The Drowned City",
@@ -25,18 +37,6 @@
       "category": "Etrian Odyssey",
       "system": "3ds",
       "bucket": "3ds/Etrian Odyssey IV - Legends of the Titan (USA).zip"
-    },
-    {
-      "title": "Etrian Odyssey Untold - The Millennium Girl",
-      "category": "Etrian Odyssey",
-      "system": "3ds",
-      "bucket": "3ds/Etrian Odyssey Untold - The Millennium Girl (USA).zip"
-    },
-    {
-      "title": "Etrian Odyssey 2 Untold - The Fafnir Knight",
-      "category": "Etrian Odyssey",
-      "system": "3ds",
-      "bucket": "3ds/Etrian Odyssey 2 Untold - The Fafnir Knight (USA).zip"
     },
     {
       "title": "Etrian Odyssey V - Beyond the Myth",
@@ -117,28 +117,10 @@
       "bucket": "snes/Wizardry I-II-III - Story of Llylgamyn (Japan) (En,Ja) (NP).zip"
     },
     {
-      "title": "Wizardry I, II",
-      "category": "Wizardry",
-      "system": "tg-cd",
-      "bucket": "tg-cd/Wizardry I, II (Japan).chd"
-    },
-    {
       "title": "Wizardry III, IV",
       "category": "Wizardry",
       "system": "tg-cd",
       "bucket": "tg-cd/Wizardry III, IV (Japan).chd"
-    },
-    {
-      "title": "Wizardry V - Heart of the Maelstrom",
-      "category": "Wizardry",
-      "system": "tg-cd",
-      "bucket": "tg-cd/Wizardry V - Heart of the Maelstrom (Japan).chd"
-    },
-    {
-      "title": "Wizardry - Llylgamyn Saga",
-      "category": "Wizardry",
-      "system": "saturn",
-      "bucket": "saturn/Wizardry - Llylgamyn Saga (Japan).chd"
     },
     {
       "title": "Wizardry VI & VII Complete",
@@ -161,12 +143,6 @@
       "category": "Wizardry",
       "system": "gbc",
       "bucket": "gbc/Wizardry I - Proving Grounds of the Mad Overlord (Japan).zip"
-    },
-    {
-      "title": "Wizardry II - Llylgamyn no Isan",
-      "category": "Wizardry",
-      "system": "gbc",
-      "bucket": "gbc/Wizardry II - Llylgamyn no Isan (Japan).zip"
     },
     {
       "title": "Wizardry III - Diamond no Kishi",
@@ -310,13 +286,13 @@
       "title": "Mazes of Fate",
       "category": "First-Person Dungeon RPGs",
       "system": "gba",
-      "bucket": "gba/Mazes of Fate (USA) (En,Fr,De,Es,It).zip"
-    },
-    {
-      "title": "Mazes of Fate DS",
-      "category": "First-Person Dungeon RPGs",
-      "system": "nds",
-      "bucket": "nds/Mazes of Fate DS (USA).zip"
+      "bucket": "gba/Mazes of Fate (USA) (En,Fr,De,Es,It).zip",
+      "variants": [
+        {
+          "bucket": "nds/Mazes of Fate DS (USA).zip",
+          "note": "DS: enhanced port with touch controls and updated graphics"
+        }
+      ]
     },
     {
       "title": "Deep Labyrinth",
@@ -346,7 +322,13 @@
       "title": "Shin Megami Tensei - Strange Journey",
       "category": "First-Person Dungeon RPGs",
       "system": "nds",
-      "bucket": "nds/Shin Megami Tensei - Strange Journey (USA).zip"
+      "bucket": "nds/Shin Megami Tensei - Strange Journey (USA).zip",
+      "variants": [
+        {
+          "bucket": "3ds/Shin Megami Tensei - Strange Journey Redux (USA).zip",
+          "note": "3DS: Redux adds a new dungeon, character and endings"
+        }
+      ]
     },
     {
       "title": "Class of Heroes",
@@ -365,12 +347,6 @@
       "category": "First-Person Dungeon RPGs",
       "system": "3ds",
       "bucket": "3ds/Shin Megami Tensei - Devil Summoner - Soul Hackers (USA).zip"
-    },
-    {
-      "title": "Shin Megami Tensei - Strange Journey Redux",
-      "category": "First-Person Dungeon RPGs",
-      "system": "3ds",
-      "bucket": "3ds/Shin Megami Tensei - Strange Journey Redux (USA).zip"
     },
     {
       "title": "Persona Q - Shadow of the Labyrinth",
@@ -403,22 +379,16 @@
       "bucket": "nes/Ultima - Exodus (USA).zip"
     },
     {
-      "title": "Ultima - Quest of the Avatar",
+      "title": "Ultima IV - Quest of the Avatar",
       "category": "Western CRPGs",
-      "system": "nes",
-      "bucket": "nes/Ultima - Quest of the Avatar (USA).zip"
+      "system": "mastersystem",
+      "bucket": "mastersystem/Ultima IV - Quest of the Avatar (Europe, Brazil) (En).zip"
     },
     {
       "title": "Ultima - Warriors of Destiny",
       "category": "Western CRPGs",
       "system": "nes",
       "bucket": "nes/Ultima - Warriors of Destiny (USA).zip"
-    },
-    {
-      "title": "Ultima IV - Quest of the Avatar",
-      "category": "Western CRPGs",
-      "system": "mastersystem",
-      "bucket": "mastersystem/Ultima IV - Quest of the Avatar (Europe, Brazil) (En).zip"
     },
     {
       "title": "Ultima - The False Prophet",
@@ -442,13 +412,13 @@
       "title": "Ultima - Runes of Virtue II",
       "category": "Western CRPGs",
       "system": "gb",
-      "bucket": "gb/Ultima - Runes of Virtue II (USA).zip"
-    },
-    {
-      "title": "Ultima - Runes of Virtue II",
-      "category": "Western CRPGs",
-      "system": "snes",
-      "bucket": "snes/Ultima - Runes of Virtue II (USA).zip"
+      "bucket": "gb/Ultima - Runes of Virtue II (USA).zip",
+      "variants": [
+        {
+          "bucket": "snes/Ultima - Runes of Virtue II (USA).zip",
+          "note": "SNES: adds color, a bigger view and two-player co-op"
+        }
+      ]
     },
     {
       "title": "Might & Magic - Secret of the Inner Sanctum",
@@ -461,18 +431,6 @@
       "category": "Western CRPGs",
       "system": "genesis",
       "bucket": "genesis/Might and Magic - Gates to Another World (USA, Europe).zip"
-    },
-    {
-      "title": "Might and Magic II",
-      "category": "Western CRPGs",
-      "system": "snes",
-      "bucket": "snes/Might and Magic II (Europe).zip"
-    },
-    {
-      "title": "Might and Magic III - Isles of Terra",
-      "category": "Western CRPGs",
-      "system": "snes",
-      "bucket": "snes/Might and Magic III - Isles of Terra (USA).zip"
     },
     {
       "title": "Might and Magic III - Isles of Terra",
@@ -523,12 +481,6 @@
       "bucket": "tg16/Dungeons & Dragons - Order of the Griffon (USA).zip"
     },
     {
-      "title": "Advanced Dungeons & Dragons - Eye of the Beholder",
-      "category": "Western CRPGs",
-      "system": "snes",
-      "bucket": "snes/Advanced Dungeons & Dragons - Eye of the Beholder (USA).zip"
-    },
-    {
       "title": "Eye of the Beholder",
       "category": "Western CRPGs",
       "system": "segacd",
@@ -577,22 +529,16 @@
       "bucket": "psx/World of Dragon Warrior - Torneko - The Last Hope (USA).chd"
     },
     {
-      "title": "Dragon Quest Characters - Torneko no Daibouken 2 Advance - Fushigi no Dungeon",
-      "category": "Mystery Dungeon",
-      "system": "gba",
-      "bucket": "gba/Dragon Quest Characters - Torneko no Daibouken 2 Advance - Fushigi no Dungeon (Japan).zip"
-    },
-    {
       "title": "Dragon Quest Characters - Torneko no Daibouken 3 Advance - Fushigi no Dungeon",
       "category": "Mystery Dungeon",
       "system": "gba",
       "bucket": "gba/Dragon Quest Characters - Torneko no Daibouken 3 Advance - Fushigi no Dungeon (Japan).zip"
     },
     {
-      "title": "Fushigi no Dungeon 2 - Fuurai no Shiren",
+      "title": "Mystery Dungeon - Shiren the Wanderer",
       "category": "Mystery Dungeon",
-      "system": "snes",
-      "bucket": "snes/Fushigi no Dungeon 2 - Fuurai no Shiren (Japan) (Rev 1) (NP).zip"
+      "system": "nds",
+      "bucket": "nds/Mystery Dungeon - Shiren the Wanderer (USA).zip"
     },
     {
       "title": "BS Fuurai no Shiren - Surara o Sukue - Dai-2-shuu",
@@ -622,25 +568,19 @@
       "title": "Fushigi no Dungeon - Fuurai no Shiren GB 2 - Sabaku no Majou",
       "category": "Mystery Dungeon",
       "system": "gbc",
-      "bucket": "gbc/Fushigi no Dungeon - Fuurai no Shiren GB 2 - Sabaku no Majou (Japan) (BFWJ).zip"
+      "bucket": "gbc/Fushigi no Dungeon - Fuurai no Shiren GB 2 - Sabaku no Majou (Japan) (BFWJ).zip",
+      "variants": [
+        {
+          "bucket": "nds/Fushigi no Dungeon - Fuurai no Shiren DS 2 - Sabaku no Majou (Japan).zip",
+          "note": "DS: remake with updated graphics and added content"
+        }
+      ]
     },
     {
       "title": "Fushigi no Dungeon - Fuurai no Shiren Gaiden - Onna Kenshi Asuka Kenzan!",
       "category": "Mystery Dungeon",
       "system": "dreamcast",
       "bucket": "dreamcast/Fushigi no Dungeon - Fuurai no Shiren Gaiden - Onna Kenshi Asuka Kenzan! (Japan).chd"
-    },
-    {
-      "title": "Mystery Dungeon - Shiren the Wanderer",
-      "category": "Mystery Dungeon",
-      "system": "nds",
-      "bucket": "nds/Mystery Dungeon - Shiren the Wanderer (USA).zip"
-    },
-    {
-      "title": "Fushigi no Dungeon - Fuurai no Shiren DS 2 - Sabaku no Majou",
-      "category": "Mystery Dungeon",
-      "system": "nds",
-      "bucket": "nds/Fushigi no Dungeon - Fuurai no Shiren DS 2 - Sabaku no Majou (Japan).zip"
     },
     {
       "title": "Shiren the Wanderer 3 (English)",
@@ -682,31 +622,29 @@
       "title": "Pokemon Mystery Dungeon - Red Rescue Team",
       "category": "Mystery Dungeon",
       "system": "gba",
-      "bucket": "gba/Pokemon Mystery Dungeon - Red Rescue Team (USA, Australia).zip"
-    },
-    {
-      "title": "Pokemon Mystery Dungeon - Blue Rescue Team",
-      "category": "Mystery Dungeon",
-      "system": "nds",
-      "bucket": "nds/Pokemon Mystery Dungeon - Blue Rescue Team (USA, Australia).zip"
+      "bucket": "gba/Pokemon Mystery Dungeon - Red Rescue Team (USA, Australia).zip",
+      "variants": [
+        {
+          "bucket": "nds/Pokemon Mystery Dungeon - Blue Rescue Team (USA, Australia).zip",
+          "note": "DS: Blue version-exclusive Pokemon"
+        }
+      ]
     },
     {
       "title": "Pokemon Mystery Dungeon - Explorers of Time",
       "category": "Mystery Dungeon",
       "system": "nds",
-      "bucket": "nds/Pokemon Mystery Dungeon - Explorers of Time (USA).zip"
-    },
-    {
-      "title": "Pokemon Mystery Dungeon - Explorers of Darkness",
-      "category": "Mystery Dungeon",
-      "system": "nds",
-      "bucket": "nds/Pokemon Mystery Dungeon - Explorers of Darkness (USA).zip"
-    },
-    {
-      "title": "Pokemon Mystery Dungeon - Explorers of Sky",
-      "category": "Mystery Dungeon",
-      "system": "nds",
-      "bucket": "nds/Pokemon Mystery Dungeon - Explorers of Sky (USA).zip"
+      "bucket": "nds/Pokemon Mystery Dungeon - Explorers of Time (USA).zip",
+      "variants": [
+        {
+          "bucket": "nds/Pokemon Mystery Dungeon - Explorers of Darkness (USA).zip",
+          "note": "DS: Darkness version-exclusive Pokemon"
+        },
+        {
+          "bucket": "nds/Pokemon Mystery Dungeon - Explorers of Sky (USA).zip",
+          "note": "DS: Explorers of Sky adds special episodes, Pokemon and areas"
+        }
+      ]
     },
     {
       "title": "Pokemon Mystery Dungeon - Gates to Infinity",
@@ -731,12 +669,6 @@
       "category": "Mystery Dungeon",
       "system": "3ds",
       "bucket": "3ds/Sekaiju to Fushigi no Dungeon 2 (Japan).zip"
-    },
-    {
-      "title": "Dragon Crystal",
-      "category": "Roguelikes",
-      "system": "mastersystem",
-      "bucket": "mastersystem/Dragon Crystal (Europe, Brazil) (En).zip"
     },
     {
       "title": "Dragon Crystal",
@@ -799,12 +731,6 @@
       "bucket": "ngpc/Evolution - Eternal Dungeons (Europe) (v03).zip"
     },
     {
-      "title": "Evolution Worlds",
-      "category": "Roguelikes",
-      "system": "gc",
-      "bucket": "gc/Evolution Worlds (USA).rvz"
-    },
-    {
       "title": "Dokapon - Monster Hunter",
       "category": "Roguelikes",
       "system": "gba",
@@ -837,50 +763,26 @@
     {
       "title": "Gauntlet",
       "category": "Action Dungeon Crawlers",
-      "system": "nes",
-      "bucket": "nes/Gauntlet (USA).zip"
-    },
-    {
-      "title": "Gauntlet II",
-      "category": "Action Dungeon Crawlers",
-      "system": "nes",
-      "bucket": "nes/Gauntlet II (USA).zip"
-    },
-    {
-      "title": "Gauntlet",
-      "category": "Action Dungeon Crawlers",
-      "system": "mastersystem",
-      "bucket": "mastersystem/Gauntlet (Europe, Brazil) (En).zip"
-    },
-    {
-      "title": "Gauntlet II",
-      "category": "Action Dungeon Crawlers",
-      "system": "gb",
-      "bucket": "gb/Gauntlet II (USA, Europe).zip"
-    },
-    {
-      "title": "Gauntlet - The Third Encounter",
-      "category": "Action Dungeon Crawlers",
-      "system": "atarilynx",
-      "bucket": "atarilynx/Gauntlet - The Third Encounter (World).zip"
-    },
-    {
-      "title": "Gauntlet IV",
-      "category": "Action Dungeon Crawlers",
-      "system": "genesis",
-      "bucket": "genesis/Gauntlet IV (USA, Europe) (En,Ja).zip"
-    },
-    {
-      "title": "Gauntlet",
-      "category": "Action Dungeon Crawlers",
       "system": "fbneo",
-      "bucket": "fbneo/gauntlet.zip"
+      "bucket": "fbneo/gauntlet.zip",
+      "variants": [
+        {
+          "bucket": "genesis/Gauntlet IV (USA, Europe) (En,Ja).zip",
+          "note": "Genesis: adds Quest, Battle and Record modes"
+        }
+      ]
     },
     {
       "title": "Gauntlet II",
       "category": "Action Dungeon Crawlers",
       "system": "fbneo",
       "bucket": "fbneo/gaunt2.zip"
+    },
+    {
+      "title": "Gauntlet - The Third Encounter",
+      "category": "Action Dungeon Crawlers",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Gauntlet - The Third Encounter (World).zip"
     },
     {
       "title": "Gate of Doom",
@@ -921,12 +823,6 @@
     {
       "title": "Immortal, The",
       "category": "Action Dungeon Crawlers",
-      "system": "nes",
-      "bucket": "nes/Immortal, The (USA).zip"
-    },
-    {
-      "title": "Immortal, The",
-      "category": "Action Dungeon Crawlers",
       "system": "genesis",
       "bucket": "genesis/Immortal, The (USA, Europe).zip"
     },
@@ -963,20 +859,14 @@
     {
       "title": "Gauntlet Legends",
       "category": "Action Dungeon Crawlers",
-      "system": "n64",
-      "bucket": "n64/Gauntlet Legends (USA).zip"
-    },
-    {
-      "title": "Gauntlet Legends",
-      "category": "Action Dungeon Crawlers",
-      "system": "psx",
-      "bucket": "psx/Gauntlet Legends (USA).chd"
-    },
-    {
-      "title": "Gauntlet Legends",
-      "category": "Action Dungeon Crawlers",
       "system": "dreamcast",
-      "bucket": "dreamcast/Gauntlet Legends (USA).chd"
+      "bucket": "dreamcast/Gauntlet Legends (USA).chd",
+      "variants": [
+        {
+          "bucket": "gc/Gauntlet - Dark Legacy (USA).rvz",
+          "note": "GameCube: Dark Legacy adds new classes, worlds and bosses"
+        }
+      ]
     },
     {
       "title": "Record of Lodoss War",
@@ -999,29 +889,11 @@
     {
       "title": "Gauntlet - Dark Legacy",
       "category": "Action Dungeon Crawlers",
-      "system": "gc",
-      "bucket": "gc/Gauntlet - Dark Legacy (USA).rvz"
-    },
-    {
-      "title": "Gauntlet - Dark Legacy",
-      "category": "Action Dungeon Crawlers",
-      "system": "ps2",
-      "bucket": "ps2/Gauntlet - Dark Legacy (USA).chd"
-    },
-    {
-      "title": "Gauntlet - Dark Legacy",
-      "category": "Action Dungeon Crawlers",
       "system": "gba",
       "bucket": "gba/Gauntlet - Dark Legacy (USA).zip"
     },
     {
-      "title": "Baldur's Gate - Dark Alliance",
-      "category": "Action Dungeon Crawlers",
-      "system": "gc",
-      "bucket": "gc/Baldur's Gate - Dark Alliance (USA).rvz"
-    },
-    {
-      "title": "Baldur's Gate - Dark Alliance",
+      "title": "Baldur's Gate: Dark Alliance",
       "category": "Action Dungeon Crawlers",
       "system": "ps2",
       "bucket": "ps2/Baldur's Gate - Dark Alliance (USA).chd"
@@ -1042,13 +914,13 @@
       "title": "X-Men Legends II - Rise of Apocalypse",
       "category": "Action Dungeon Crawlers",
       "system": "gc",
-      "bucket": "gc/X-Men Legends II - Rise of Apocalypse (USA).rvz"
-    },
-    {
-      "title": "X-Men Legends II - Rise of Apocalypse",
-      "category": "Action Dungeon Crawlers",
-      "system": "psp",
-      "bucket": "psp/X-Men Legends II - Rise of Apocalypse (USA).chd"
+      "bucket": "gc/X-Men Legends II - Rise of Apocalypse (USA).rvz",
+      "variants": [
+        {
+          "bucket": "psp/X-Men Legends II - Rise of Apocalypse (USA).chd",
+          "note": "PSP: adds exclusive characters and extra missions"
+        }
+      ]
     },
     {
       "title": "Final Fantasy - Crystal Chronicles",
@@ -1180,7 +1052,13 @@
       "title": "Phantasy Star Portable 2",
       "category": "Action Dungeon Crawlers",
       "system": "psp",
-      "bucket": "psp/Phantasy Star Portable 2 (USA).chd"
+      "bucket": "psp/Phantasy Star Portable 2 (USA).chd",
+      "variants": [
+        {
+          "bucket": "psp/Phantasy Star Portable 2 Infinity (Japan) [T-En by JamRules & Weyu v1.7].chd",
+          "note": "PSP: Infinity adds new missions, areas and gear, English patch"
+        }
+      ]
     },
     {
       "title": "Marvel - Ultimate Alliance",

@@ -106,27 +106,6 @@
       "bucket": "psp/Metal Gear Solid - Peace Walker (USA) (En,Fr,Es) (v2.00).chd"
     },
     {
-      "title": "Metal Gear Solid - Snake Eater 3D",
-      "category": "Metal Gear",
-      "system": "3ds",
-      "bucket": "3ds/Metal Gear Solid - Snake Eater 3D (USA) (En,Fr,Es).zip"
-    },
-    {
-      "title": "Metal Gear Solid HD Collection",
-      "category": "Metal Gear",
-      "system": "psvita",
-      "bucket": "psvita/Metal Gear Solid HD [PCSE00020] [USA] [NoNpDRM].zip"
-    },
-    {
-      "title": "Metal Gear Solid - HD Collection",
-      "category": "Metal Gear",
-      "system": "xbox360",
-      "bucket": "xbox360/Metal Gear Solid - HD Collection (USA) (En,Fr,Es) (Disc 1).zar",
-      "files": [
-        "xbox360/Metal Gear Solid - HD Collection (USA) (En,Fr,Es) (Disc 2).zar"
-      ]
-    },
-    {
       "title": "Metal Gear Solid V - Ground Zeroes",
       "category": "Metal Gear",
       "system": "xbox360",
@@ -250,22 +229,10 @@
       "bucket": "gba/Tom Clancy's Splinter Cell - Pandora Tomorrow (USA) (En,Fr,Es).zip"
     },
     {
-      "title": "Tom Clancy's Splinter Cell - Chaos Theory",
-      "category": "Splinter Cell",
-      "system": "nds",
-      "bucket": "nds/Tom Clancy's Splinter Cell - Chaos Theory (USA) (En,Fr,De,Es,It).zip"
-    },
-    {
       "title": "Tom Clancy's Splinter Cell - Essentials",
       "category": "Splinter Cell",
       "system": "psp",
       "bucket": "psp/Tom Clancy's Splinter Cell - Essentials (USA).chd"
-    },
-    {
-      "title": "Tom Clancy's Splinter Cell 3D",
-      "category": "Splinter Cell",
-      "system": "3ds",
-      "bucket": "3ds/Tom Clancy's Splinter Cell 3D (USA) (En,Fr,Es).zip"
     },
     {
       "title": "Tecmo's Deception - Invitation to Darkness",
@@ -302,24 +269,6 @@
       "category": "Other",
       "system": "fbneo",
       "bucket": "fbneo/bnzabros.zip"
-    },
-    {
-      "title": "Bonanza Bros.",
-      "category": "Other",
-      "system": "genesis",
-      "bucket": "genesis/Bonanza Bros. (USA, Europe, Korea) (En) (Rev B).zip"
-    },
-    {
-      "title": "Bonanza Bros.",
-      "category": "Other",
-      "system": "mastersystem",
-      "bucket": "mastersystem/Bonanza Bros. (Europe, Brazil) (En).zip"
-    },
-    {
-      "title": "Bonanza Bros.",
-      "category": "Other",
-      "system": "tg-cd",
-      "bucket": "tg-cd/Bonanza Bros. (Japan).chd"
     },
     {
       "title": "Infiltrator",
@@ -390,8 +339,8 @@
     {
       "title": "Chicken Run",
       "category": "Other",
-      "system": "psx",
-      "bucket": "psx/Chicken Run (USA).chd"
+      "system": "dreamcast",
+      "bucket": "dreamcast/Chicken Run (USA).chd"
     },
     {
       "title": "Grinch, The",
@@ -414,18 +363,6 @@
       "category": "Other",
       "system": "dreamcast",
       "bucket": "dreamcast/Industrial Spy - Operation Espionage (USA).chd"
-    },
-    {
-      "title": "Chicken Run",
-      "category": "Other",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Chicken Run (USA).chd"
-    },
-    {
-      "title": "Grinch, The",
-      "category": "Other",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Grinch, The (USA) (En,Fr,Es).chd"
     },
     {
       "title": "Boktai - The Sun Is in Your Hand",
@@ -472,20 +409,14 @@
     {
       "title": "Beyond Good & Evil",
       "category": "Other",
-      "system": "ps2",
-      "bucket": "ps2/Beyond Good & Evil (USA) (En,Fr,Es).chd"
+      "system": "gc",
+      "bucket": "gc/Beyond Good & Evil (USA) (En,Es).rvz"
     },
     {
       "title": "Bully",
       "category": "Other",
       "system": "ps2",
       "bucket": "ps2/Bully (USA).chd"
-    },
-    {
-      "title": "Beyond Good & Evil",
-      "category": "Other",
-      "system": "gc",
-      "bucket": "gc/Beyond Good & Evil (USA) (En,Es).rvz"
     },
     {
       "title": "Hitman 2 - Silent Assassin",

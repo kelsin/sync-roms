@@ -84,6 +84,23 @@ class SetsTest(unittest.TestCase):
         self.assertEqual([g["bucket"] for g in by["gba"]["games"]], ["gba/Gone.zip"])
         self.assertEqual([g["bucket"] for g in by["gen"]["games"]], ["gen/Zed.zip"])
 
+    def test_toggle_games_shows_variant_notes(self):
+        by = systems()
+        game_set = {"name": "Mix", "games": [
+            {"title": "A", "system": "gba", "bucket": "gba/A.zip",
+             "variants": [{"bucket": "gb/A.gb", "note": "GB: x"}]},
+            {"title": "Zed", "system": "gen", "bucket": "gen/Zed.zip"}]}
+        rows = edit.set_rows(game_set, by, lambda s: set())
+        with mock.patch.object(store, "load_sets", return_value=[game_set]), \
+                mock.patch.object(store, "repo_json", return_value=list(by.values())), \
+                mock.patch.object(picker, "filter_list", return_value=[False, False]) as fl:
+            edit.toggle_games("t", rows)
+        row_note = fl.call_args.kwargs["row_note"]
+        a = [r[1] for r in rows].index("gba/A.zip")
+        z = [r[1] for r in rows].index("gen/Zed.zip")
+        self.assertEqual(row_note(a), "\u21b3 Variant: GB: x")
+        self.assertEqual(row_note(z), "")
+
     def test_toggle_extra_files(self):
         by = systems()
         game_set = {"name": "M", "games": [{"title": "Multi", "system": "gen", "bucket": "gen/M.m3u",
@@ -175,6 +192,48 @@ class SetsTest(unittest.TestCase):
 
     def run_list(self, keys, locked=None, multi=True, hotkeys=()):
         return feed_list(keys, "t", ["x", "y"], multi=multi, locked=locked, hotkeys=hotkeys)
+
+
+VARIANT_SETS = [
+    {"id": "a", "games": [
+        {"system": "snes", "bucket": "snes/CT.zip", "title": "Chrono Trigger",
+         "variants": [{"bucket": "nds/CT.zip", "note": "DS: adds the Lost Sanctum"}]},
+        {"system": "snes", "bucket": "snes/Plain.zip", "title": "Plain"},
+        {"system": "snes", "title": "No bucket", "variants": [{"bucket": "nds/X.zip", "note": "x"}]},
+    ]},
+    {"id": "b", "games": [
+        {"system": "snes", "bucket": "snes/CT.zip", "title": "Chrono Trigger",
+         "variants": [{"bucket": "nds/CT.zip", "note": "DS: adds the Lost Sanctum"},
+                      {"bucket": "psx/CT.chd", "note": "PS1: anime scenes"}]},
+    ]},
+]
+
+
+class VariantTests(unittest.TestCase):
+    def test_variant_index_maps_both_ways(self):
+        variants, parents = store.variant_index(VARIANT_SETS)
+        self.assertEqual(variants["snes/CT.zip"], [{"bucket": "nds/CT.zip", "note": "DS: adds the Lost Sanctum"},
+                                                   {"bucket": "psx/CT.chd", "note": "PS1: anime scenes"}])
+        self.assertEqual(parents["nds/CT.zip"], {"bucket": "snes/CT.zip", "system": "snes", "title": "Chrono Trigger"})
+        self.assertNotIn("snes/Plain.zip", variants)
+        self.assertNotIn("nds/X.zip", parents)
+
+    def test_variant_line_texts(self):
+        variants, parents = store.variant_index(VARIANT_SETS)
+        names = {"snes": "SNES", "nds": "Nintendo DS"}
+        one = {"snes/CT.zip": variants["snes/CT.zip"][:1]}
+        line = lambda key, v=variants, on=None: edit.variant_line(key, v, parents, names, on)  # noqa: E731
+        self.assertEqual(line("snes/CT.zip", one), "↳ Variant: DS: adds the Lost Sanctum")
+        self.assertEqual(line("snes/CT.zip", one, lambda b: False), "↳ Variant: DS: adds the Lost Sanctum (v adds it)")
+        self.assertEqual(line("snes/CT.zip", one, lambda b: True),
+                         "↳ Variant: DS: adds the Lost Sanctum · ✅ on the card (v removes it)")
+        self.assertEqual(line("snes/CT.zip", on=lambda b: False),
+                         "↳ 2 variants (v picks): DS: adds the Lost Sanctum; PS1: anime scenes")
+        self.assertEqual(line("snes/CT.zip"), "↳ Variants: DS: adds the Lost Sanctum; PS1: anime scenes")
+        self.assertEqual(line("nds/CT.zip"), "Variant of SNES — Chrono Trigger")
+        self.assertEqual(line("gba/none.zip"), "")
+        both = {"nds/CT.zip": [{"bucket": "x/Y.zip", "note": "n"}]}
+        self.assertEqual(line("nds/CT.zip", both), "↳ Variant: n")
 
 
 if __name__ == "__main__":

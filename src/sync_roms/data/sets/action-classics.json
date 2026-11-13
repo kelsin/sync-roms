@@ -37,14 +37,9 @@
       "bucket": "ps2/Devil May Cry 3 - Dante's Awakening (USA) (En,Ja) (Special Edition).chd"
     },
     {
-      "title": "Bayonetta",
-      "system": "ps2",
-      "bucket": "ps2/Bayonetta (USA).chd"
-    },
-    {
       "title": "Viewtiful Joe 2",
-      "system": "ps2",
-      "bucket": "ps2/Viewtiful Joe 2 (USA).chd"
+      "system": "gc",
+      "bucket": "gc/Viewtiful Joe 2 (USA).rvz"
     },
     {
       "title": "Okami",
@@ -52,14 +47,15 @@
       "bucket": "ps2/Ookami (USA).chd"
     },
     {
-      "title": "Ookami",
-      "system": "wii",
-      "bucket": "wii/Ookami (USA).rvz"
-    },
-    {
       "title": "Muramasa: The Demon Blade",
       "system": "wii",
-      "bucket": "wii/Muramasa - The Demon Blade (USA).rvz"
+      "bucket": "wii/Muramasa - The Demon Blade (USA).rvz",
+      "variants": [
+        {
+          "bucket": "psvita/Muramasa Rebirth [PCSE00240] [USA] [NoNpDRM].zip",
+          "note": "Vita: new translation, sharper art and Genroku Legends DLC support"
+        }
+      ]
     },
     {
       "title": "Metroid: Other M",
@@ -138,8 +134,8 @@
     },
     {
       "title": "Beyond Good & Evil",
-      "system": "ps2",
-      "bucket": "ps2/Beyond Good & Evil (USA) (En,Fr,Es).chd"
+      "system": "gc",
+      "bucket": "gc/Beyond Good & Evil (USA) (En,Es).rvz"
     },
     {
       "title": "Bully",
@@ -182,14 +178,26 @@
       "bucket": "ps2/Baldur's Gate - Dark Alliance (USA).chd"
     },
     {
-      "title": "Gauntlet: Dark Legacy",
-      "system": "ps2",
-      "bucket": "ps2/Gauntlet - Dark Legacy (USA).chd"
+      "title": "Gauntlet Legends",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Gauntlet Legends (USA).chd",
+      "variants": [
+        {
+          "bucket": "gc/Gauntlet - Dark Legacy (USA).rvz",
+          "note": "GameCube: Dark Legacy adds new classes, worlds and bosses"
+        }
+      ]
     },
     {
       "title": "Viewtiful Joe",
       "system": "gc",
-      "bucket": "gc/Viewtiful Joe (USA).rvz"
+      "bucket": "gc/Viewtiful Joe (USA).rvz",
+      "variants": [
+        {
+          "bucket": "ps2/Viewtiful Joe (USA).chd",
+          "note": "PS2: adds Dante as a playable character"
+        }
+      ]
     },
     {
       "title": "Prince of Persia: The Sands of Time",
@@ -199,7 +207,13 @@
     {
       "title": "Prince of Persia: Warrior Within",
       "system": "gc",
-      "bucket": "gc/Prince of Persia - Warrior Within (USA) (En,Fr,Es).rvz"
+      "bucket": "gc/Prince of Persia - Warrior Within (USA) (En,Fr,Es).rvz",
+      "variants": [
+        {
+          "bucket": "psp/Prince of Persia - Revelations (USA) (En,Fr,Es).chd",
+          "note": "PSP: Revelations adds new areas and a new power"
+        }
+      ]
     },
     {
       "title": "Prince of Persia: The Two Thrones",
@@ -288,11 +302,6 @@
       "title": "Lara Croft Tomb Raider - Legend",
       "system": "gc",
       "bucket": "gc/Lara Croft Tomb Raider - Legend (USA).rvz"
-    },
-    {
-      "title": "Beyond Good & Evil",
-      "system": "gc",
-      "bucket": "gc/Beyond Good & Evil (USA) (En,Es).rvz"
     },
     {
       "title": "BloodRayne",
@@ -423,7 +432,13 @@
     {
       "title": "Luigi's Mansion",
       "system": "gc",
-      "bucket": "gc/Luigi's Mansion (USA).rvz"
+      "bucket": "gc/Luigi's Mansion (USA).rvz",
+      "variants": [
+        {
+          "bucket": "3ds/Luigi's Mansion (USA).zip",
+          "note": "3DS: adds a co-op tower mode, boss rematches and gallery"
+        }
+      ]
     },
     {
       "title": "Dragon's Lair 3D: Return to the Lair",
@@ -434,16 +449,6 @@
       "title": "Gun",
       "system": "gc",
       "bucket": "gc/Gun (USA).rvz"
-    },
-    {
-      "title": "Baldur's Gate: Dark Alliance",
-      "system": "gc",
-      "bucket": "gc/Baldur's Gate - Dark Alliance (USA).rvz"
-    },
-    {
-      "title": "Gauntlet: Dark Legacy",
-      "system": "gc",
-      "bucket": "gc/Gauntlet - Dark Legacy (USA).rvz"
     },
     {
       "title": "Metal Gear Solid",
@@ -481,13 +486,19 @@
     },
     {
       "title": "Strider",
-      "system": "psx",
-      "bucket": "psx/Strider (USA).chd"
+      "system": "fbneo",
+      "bucket": "fbneo/strider.zip",
+      "variants": [
+        {
+          "bucket": "tg-cd/Strider Hiryuu (Japan).chd",
+          "note": "PC Engine CD: adds an exclusive extra stage and cutscenes"
+        }
+      ]
     },
     {
       "title": "Strider 2",
-      "system": "psx",
-      "bucket": "psx/Strider 2 (USA).chd"
+      "system": "mame",
+      "bucket": "mame/strider2.zip"
     },
     {
       "title": "Tenchu 2: Birth of the Stealth Assassins",
@@ -673,8 +684,8 @@
     },
     {
       "title": "Shadow Man",
-      "system": "psx",
-      "bucket": "psx/Shadow Man (USA).chd"
+      "system": "dreamcast",
+      "bucket": "dreamcast/Shadow Man (USA) (Rev A).chd"
     },
     {
       "title": "Skeleton Warriors",
@@ -703,8 +714,8 @@
     },
     {
       "title": "Urban Chaos",
-      "system": "psx",
-      "bucket": "psx/Urban Chaos (USA).chd"
+      "system": "dreamcast",
+      "bucket": "dreamcast/Urban Chaos (USA) (En,Fr).chd"
     },
     {
       "title": "Xena: Warrior Princess",
@@ -777,11 +788,6 @@
       "bucket": "psx/Warriors of Might and Magic (USA).chd"
     },
     {
-      "title": "Gauntlet Legends",
-      "system": "psx",
-      "bucket": "psx/Gauntlet Legends (USA).chd"
-    },
-    {
       "title": "MediEvil: Resurrection",
       "system": "psp",
       "bucket": "psp/MediEvil - Resurrection (USA).chd"
@@ -842,16 +848,6 @@
       "bucket": "psp/Syphon Filter - Logan's Shadow (USA).chd"
     },
     {
-      "title": "Prince of Persia - Revelations",
-      "system": "psp",
-      "bucket": "psp/Prince of Persia - Revelations (USA) (En,Fr,Es).chd"
-    },
-    {
-      "title": "Prince of Persia - Rival Swords",
-      "system": "psp",
-      "bucket": "psp/Prince of Persia - Rival Swords (USA) (En,Fr,Es).chd"
-    },
-    {
       "title": "Prince of Persia - The Forgotten Sands",
       "system": "psp",
       "bucket": "psp/Prince of Persia - The Forgotten Sands (USA) (En,Fr,Es).chd"
@@ -865,11 +861,6 @@
       "title": "Dante's Inferno",
       "system": "psp",
       "bucket": "psp/Dante's Inferno (USA).chd"
-    },
-    {
-      "title": "Lara Croft Tomb Raider - Legend",
-      "system": "psp",
-      "bucket": "psp/Lara Croft Tomb Raider - Legend (USA) (En,Fr,De,Es,It).chd"
     },
     {
       "title": "Lara Croft Tomb Raider - Anniversary",
@@ -928,8 +919,14 @@
     },
     {
       "title": "Grand Theft Auto: Chinatown Wars",
-      "system": "psp",
-      "bucket": "psp/Grand Theft Auto - Chinatown Wars (USA).chd"
+      "system": "nds",
+      "bucket": "nds/Grand Theft Auto - Chinatown Wars (USA) (En,Fr,De,Es,It).zip",
+      "variants": [
+        {
+          "bucket": "psp/Grand Theft Auto - Chinatown Wars (USA).chd",
+          "note": "PSP: adds new missions and sharper graphics"
+        }
+      ]
     },
     {
       "title": "Grand Theft Auto: Liberty City Stories",
@@ -1057,11 +1054,6 @@
       "bucket": "nds/Dragon Ball - Origins 2 (USA) (En,Fr,Es).zip"
     },
     {
-      "title": "Grand Theft Auto: Chinatown Wars",
-      "system": "nds",
-      "bucket": "nds/Grand Theft Auto - Chinatown Wars (USA) (En,Fr,De,Es,It).zip"
-    },
-    {
       "title": "Lunar Knights",
       "system": "nds",
       "bucket": "nds/Lunar Knights (USA) (En,Es).zip"
@@ -1075,11 +1067,6 @@
       "title": "Prince of Persia: The Fallen King",
       "system": "nds",
       "bucket": "nds/Prince of Persia - The Fallen King (USA) (En,Fr,De,Es,It).zip"
-    },
-    {
-      "title": "Tom Clancy's Splinter Cell: Chaos Theory",
-      "system": "nds",
-      "bucket": "nds/Tom Clancy's Splinter Cell - Chaos Theory (USA) (En,Fr,De,Es,It).zip"
     },
     {
       "title": "Tomb Raider: Underworld",
@@ -1127,11 +1114,6 @@
       "bucket": "3ds/Kid Icarus - Uprising (USA) (En,Fr,Es).zip"
     },
     {
-      "title": "Metal Gear Solid - Snake Eater 3D",
-      "system": "3ds",
-      "bucket": "3ds/Metal Gear Solid - Snake Eater 3D (USA) (En,Fr,Es).zip"
-    },
-    {
       "title": "Castlevania - Lords of Shadow - Mirror of Fate",
       "system": "3ds",
       "bucket": "3ds/Castlevania - Lords of Shadow - Mirror of Fate (USA) (En,Fr,Es).zip"
@@ -1167,11 +1149,6 @@
       "bucket": "3ds/Luigi's Mansion - Dark Moon (USA) (En,Fr,Es).zip"
     },
     {
-      "title": "Luigi's Mansion",
-      "system": "3ds",
-      "bucket": "3ds/Luigi's Mansion (USA).zip"
-    },
-    {
       "title": "Shinobi Legions",
       "system": "saturn",
       "bucket": "saturn/Shinobi Legions (USA).chd"
@@ -1202,34 +1179,9 @@
       "bucket": "saturn/Burning Rangers (USA).chd"
     },
     {
-      "title": "Herc's Adventures",
-      "system": "saturn",
-      "bucket": "saturn/Herc's Adventures (USA) (RE).chd"
-    },
-    {
-      "title": "Skeleton Warriors",
-      "system": "saturn",
-      "bucket": "saturn/Skeleton Warriors (USA).chd"
-    },
-    {
-      "title": "Swagman",
-      "system": "saturn",
-      "bucket": "saturn/Swagman (Europe) (En,Fr,De).chd"
-    },
-    {
-      "title": "Tomb Raider",
-      "system": "saturn",
-      "bucket": "saturn/Tomb Raider (USA).chd"
-    },
-    {
       "title": "Kunoichi Torimonochou",
       "system": "saturn",
       "bucket": "saturn/Kunoichi Torimonochou (Japan).chd"
-    },
-    {
-      "title": "DragonHeart: Fire & Steel",
-      "system": "saturn",
-      "bucket": "saturn/DragonHeart - Fire & Steel (USA).chd"
     },
     {
       "title": "Mystical Ninja Starring Goemon",
@@ -1244,12 +1196,13 @@
     {
       "title": "Conker's Bad Fur Day",
       "system": "n64",
-      "bucket": "n64/Conker's Bad Fur Day (USA).zip"
-    },
-    {
-      "title": "Shadow Man",
-      "system": "n64",
-      "bucket": "n64/Shadow Man (USA).zip"
+      "bucket": "n64/Conker's Bad Fur Day (USA).zip",
+      "variants": [
+        {
+          "bucket": "xbox/Conker - Live & Reloaded (USA) (En,Ja,Fr,De,Es,It).iso",
+          "note": "Xbox: remade graphics and new online/class multiplayer; censored"
+        }
+      ]
     },
     {
       "title": "Body Harvest",
@@ -1274,22 +1227,13 @@
     {
       "title": "Castlevania",
       "system": "n64",
-      "bucket": "n64/Castlevania (USA) (Rev 2).zip"
-    },
-    {
-      "title": "Castlevania: Legacy of Darkness",
-      "system": "n64",
-      "bucket": "n64/Castlevania - Legacy of Darkness (USA).zip"
-    },
-    {
-      "title": "Mission: Impossible",
-      "system": "n64",
-      "bucket": "n64/Mission - Impossible (USA).zip"
-    },
-    {
-      "title": "Mortal Kombat Mythologies: Sub-Zero",
-      "system": "n64",
-      "bucket": "n64/Mortal Kombat Mythologies - Sub-Zero (USA).zip"
+      "bucket": "n64/Castlevania (USA) (Rev 2).zip",
+      "variants": [
+        {
+          "bucket": "n64/Castlevania - Legacy of Darkness (USA).zip",
+          "note": "N64: Legacy of Darkness adds Cornell's and Henry's stories"
+        }
+      ]
     },
     {
       "title": "Hybrid Heaven",
@@ -1305,11 +1249,6 @@
       "title": "Hercules: The Legendary Journeys",
       "system": "n64",
       "bucket": "n64/Hercules - The Legendary Journeys (USA).zip"
-    },
-    {
-      "title": "Gauntlet Legends",
-      "system": "n64",
-      "bucket": "n64/Gauntlet Legends (USA).zip"
     },
     {
       "title": "Ninja Gaiden",
@@ -1329,7 +1268,13 @@
     {
       "title": "Bionic Commando",
       "system": "nes",
-      "bucket": "nes/Bionic Commando (USA).zip"
+      "bucket": "nes/Bionic Commando (USA).zip",
+      "variants": [
+        {
+          "bucket": "gb/Bionic Commando (USA).zip",
+          "note": "Game Boy: reworked version with new stages and setting"
+        }
+      ]
     },
     {
       "title": "Rygar",
@@ -1352,19 +1297,19 @@
       "bucket": "nes/Ninja Crusaders (USA).zip"
     },
     {
-      "title": "Legend of Kage, The",
-      "system": "nes",
-      "bucket": "nes/Legend of Kage, The (USA).zip"
+      "title": "The Legend of Kage",
+      "system": "fbneo",
+      "bucket": "fbneo/lkage.zip"
     },
     {
       "title": "Kid Niki - Radical Ninja",
-      "system": "nes",
-      "bucket": "nes/Kid Niki - Radical Ninja (USA) (Rev 1).zip"
+      "system": "fbneo",
+      "bucket": "fbneo/kidnikiu.zip"
     },
     {
-      "title": "Last Ninja, The",
-      "system": "nes",
-      "bucket": "nes/Last Ninja, The (USA).zip"
+      "title": "Ninja Remix (C64)",
+      "system": "c64",
+      "bucket": "c64/Ninja Remix (USA, Europe).zip"
     },
     {
       "title": "Strider",
@@ -1403,8 +1348,8 @@
     },
     {
       "title": "Ghosts'n Goblins",
-      "system": "nes",
-      "bucket": "nes/Ghosts'n Goblins (USA).zip"
+      "system": "fbneo",
+      "bucket": "fbneo/gngt.zip"
     },
     {
       "title": "Gargoyle's Quest II",
@@ -1413,13 +1358,13 @@
     },
     {
       "title": "Prince of Persia",
-      "system": "nes",
-      "bucket": "nes/Prince of Persia (USA).zip"
+      "system": "snes",
+      "bucket": "snes/Prince of Persia (USA).zip"
     },
     {
-      "title": "Kung Fu",
-      "system": "nes",
-      "bucket": "nes/Kung Fu (Japan, USA) (En).zip"
+      "title": "Kung-Fu Master",
+      "system": "fbneo",
+      "bucket": "fbneo/kungfumd.zip"
     },
     {
       "title": "Blaster Master",
@@ -1443,8 +1388,8 @@
     },
     {
       "title": "Rush'n Attack",
-      "system": "nes",
-      "bucket": "nes/Rush'n Attack (USA).zip"
+      "system": "fbneo",
+      "bucket": "fbneo/rushatck.zip"
     },
     {
       "title": "Astyanax",
@@ -1453,8 +1398,8 @@
     },
     {
       "title": "Trojan",
-      "system": "nes",
-      "bucket": "nes/Trojan (USA).zip"
+      "system": "fbneo",
+      "bucket": "fbneo/trojan.zip"
     },
     {
       "title": "Demon Sword",
@@ -1608,8 +1553,8 @@
     },
     {
       "title": "Captain Silver",
-      "system": "nes",
-      "bucket": "nes/Captain Silver (Japan).zip"
+      "system": "mastersystem",
+      "bucket": "mastersystem/Captain Silver (USA).zip"
     },
     {
       "title": "Dragon Buster",
@@ -1647,14 +1592,15 @@
       "bucket": "fds/Ai Senshi Nicol (Japan).zip"
     },
     {
-      "title": "Ninja Gaiden Trilogy",
-      "system": "snes",
-      "bucket": "snes/Ninja Gaiden Trilogy (USA).zip"
-    },
-    {
       "title": "Super Ghouls 'N Ghosts",
       "system": "snes",
-      "bucket": "snes/Super Ghouls 'N Ghosts (USA).zip"
+      "bucket": "snes/Super Ghouls 'N Ghosts (USA).zip",
+      "variants": [
+        {
+          "bucket": "gba/Super Ghouls'n Ghosts (USA, Europe).zip",
+          "note": "GBA: adds an Arrange mode with remixed stages"
+        }
+      ]
     },
     {
       "title": "Demon's Crest",
@@ -1677,11 +1623,6 @@
       "bucket": "snes/Soul Blazer (USA).zip"
     },
     {
-      "title": "Prince of Persia",
-      "system": "snes",
-      "bucket": "snes/Prince of Persia (USA).zip"
-    },
-    {
       "title": "Prince of Persia 2",
       "system": "snes",
       "bucket": "snes/Prince of Persia 2 (USA).zip"
@@ -1693,8 +1634,8 @@
     },
     {
       "title": "Magic Sword",
-      "system": "snes",
-      "bucket": "snes/Magic Sword (USA).zip"
+      "system": "fbneo",
+      "bucket": "fbneo/mswordu.zip"
     },
     {
       "title": "Joe & Mac",
@@ -1759,7 +1700,13 @@
     {
       "title": "Blackthorne",
       "system": "snes",
-      "bucket": "snes/Blackthorne (USA).zip"
+      "bucket": "snes/Blackthorne (USA).zip",
+      "variants": [
+        {
+          "bucket": "sega32x/Blackthorne (USA).zip",
+          "note": "32X: re-rendered graphics"
+        }
+      ]
     },
     {
       "title": "Out of This World",
@@ -1798,8 +1745,8 @@
     },
     {
       "title": "Knights of the Round",
-      "system": "snes",
-      "bucket": "snes/Knights of the Round (USA).zip"
+      "system": "fbneo",
+      "bucket": "fbneo/knightsu.zip"
     },
     {
       "title": "King Arthur & The Knights of Justice",
@@ -1822,9 +1769,9 @@
       "bucket": "snes/Phantom 2040 (USA).zip"
     },
     {
-      "title": "Maui Mallard in Cold Shadow",
-      "system": "snes",
-      "bucket": "snes/Maui Mallard in Cold Shadow (USA).zip"
+      "title": "Donald in Maui Mallard",
+      "system": "genesis",
+      "bucket": "genesis/Donald in Maui Mallard (Europe) (Rev A).zip"
     },
     {
       "title": "The Revenge of Shinobi",
@@ -1842,14 +1789,9 @@
       "bucket": "genesis/Shadow Dancer - The Secret of Shinobi (World).zip"
     },
     {
-      "title": "Strider",
-      "system": "genesis",
-      "bucket": "genesis/Strider (USA, Europe).zip"
-    },
-    {
       "title": "Ghouls'n Ghosts",
-      "system": "genesis",
-      "bucket": "genesis/Ghouls'n Ghosts (Japan, USA) (En).zip"
+      "system": "fbneo",
+      "bucket": "fbneo/ghoulsu.zip"
     },
     {
       "title": "Rocket Knight Adventures",
@@ -1932,14 +1874,9 @@
       "bucket": "genesis/Immortal, The (USA, Europe).zip"
     },
     {
-      "title": "3 Ninjas Kick Back",
-      "system": "genesis",
-      "bucket": "genesis/3 Ninjas Kick Back (USA).zip"
-    },
-    {
       "title": "Golden Axe",
-      "system": "genesis",
-      "bucket": "genesis/Golden Axe (World) (Rev A).zip"
+      "system": "fbneo",
+      "bucket": "fbneo/goldnaxe.zip"
     },
     {
       "title": "Golden Axe II",
@@ -1973,8 +1910,8 @@
     },
     {
       "title": "Shadow of the Beast",
-      "system": "genesis",
-      "bucket": "genesis/Shadow of the Beast (USA, Europe).zip"
+      "system": "tg-cd",
+      "bucket": "tg-cd/Shadow of the Beast (USA).chd"
     },
     {
       "title": "Jewel Master",
@@ -1984,22 +1921,29 @@
     {
       "title": "Ecco the Dolphin",
       "system": "genesis",
-      "bucket": "genesis/Ecco the Dolphin (USA, Europe, Korea) (En).zip"
+      "bucket": "genesis/Ecco the Dolphin (USA, Europe, Korea) (En).zip",
+      "variants": [
+        {
+          "bucket": "segacd/Ecco the Dolphin (USA).chd",
+          "note": "Sega CD: adds extra levels, a CD soundtrack and FMV"
+        }
+      ]
     },
     {
       "title": "Ecco: The Tides of Time",
       "system": "genesis",
-      "bucket": "genesis/Ecco - The Tides of Time (USA).zip"
+      "bucket": "genesis/Ecco - The Tides of Time (USA).zip",
+      "variants": [
+        {
+          "bucket": "segacd/Ecco - The Tides of Time (USA).chd",
+          "note": "Sega CD: adds a CD soundtrack and FMV cutscenes"
+        }
+      ]
     },
     {
-      "title": "Bonanza Bros.",
-      "system": "genesis",
-      "bucket": "genesis/Bonanza Bros. (USA, Europe, Korea) (En) (Rev B).zip"
-    },
-    {
-      "title": "Phantom 2040",
-      "system": "genesis",
-      "bucket": "genesis/Phantom 2040 (USA).zip"
+      "title": "Bonanza Bros",
+      "system": "fbneo",
+      "bucket": "fbneo/bnzabros.zip"
     },
     {
       "title": "Arcus Odyssey",
@@ -2008,33 +1952,24 @@
     },
     {
       "title": "Cadash",
-      "system": "genesis",
-      "bucket": "genesis/Cadash (USA, Korea) (En).zip"
+      "system": "fbneo",
+      "bucket": "fbneo/cadashu.zip"
     },
     {
-      "title": "Prince of Persia",
-      "system": "genesis",
-      "bucket": "genesis/Prince of Persia (USA).zip"
-    },
-    {
-      "title": "Gauntlet IV",
-      "system": "genesis",
-      "bucket": "genesis/Gauntlet IV (USA, Europe) (En,Ja).zip"
-    },
-    {
-      "title": "Blackthorne",
-      "system": "sega32x",
-      "bucket": "sega32x/Blackthorne (USA).zip"
+      "title": "Gauntlet",
+      "system": "fbneo",
+      "bucket": "fbneo/gauntlet.zip",
+      "variants": [
+        {
+          "bucket": "genesis/Gauntlet IV (USA, Europe) (En,Ja).zip",
+          "note": "Genesis: adds Quest, Battle and Record modes"
+        }
+      ]
     },
     {
       "title": "The Revenge of Shinobi",
       "system": "gba",
       "bucket": "gba/Revenge of Shinobi, The (USA).zip"
-    },
-    {
-      "title": "Super Ghouls'n Ghosts",
-      "system": "gba",
-      "bucket": "gba/Super Ghouls'n Ghosts (USA, Europe).zip"
     },
     {
       "title": "Ninja Five-0",
@@ -2167,11 +2102,6 @@
       "bucket": "gb/Kid Icarus - Of Myths and Monsters (USA, Europe).zip"
     },
     {
-      "title": "Bionic Commando",
-      "system": "gb",
-      "bucket": "gb/Bionic Commando (USA).zip"
-    },
-    {
       "title": "Kung-Fu Master",
       "system": "gb",
       "bucket": "gb/Kung-Fu Master (USA, Europe).zip"
@@ -2268,8 +2198,8 @@
     },
     {
       "title": "Shinobi",
-      "system": "mastersystem",
-      "bucket": "mastersystem/Shinobi (USA, Europe, Brazil) (En) (Rev 1).zip"
+      "system": "fbneo",
+      "bucket": "fbneo/shinobi.zip"
     },
     {
       "title": "Alex Kidd in Shinobi World",
@@ -2307,14 +2237,9 @@
       "bucket": "mastersystem/Cyber Shinobi, The (Europe, Brazil) (En).zip"
     },
     {
-      "title": "Shadow Dancer: The Secret of Shinobi",
-      "system": "mastersystem",
-      "bucket": "mastersystem/Shadow Dancer - The Secret of Shinobi (Europe, Brazil) (En).zip"
-    },
-    {
-      "title": "Strider",
-      "system": "mastersystem",
-      "bucket": "mastersystem/Strider (USA, Europe, Brazil) (En).zip"
+      "title": "Shadow Dancer",
+      "system": "fbneo",
+      "bucket": "fbneo/shdancer1.zip"
     },
     {
       "title": "Strider II",
@@ -2327,19 +2252,9 @@
       "bucket": "mastersystem/Lord of the Sword (USA, Europe, Brazil) (En).zip"
     },
     {
-      "title": "Golden Axe",
-      "system": "mastersystem",
-      "bucket": "mastersystem/Golden Axe (USA, Europe, Brazil) (En).zip"
-    },
-    {
       "title": "Danan: The Jungle Fighter",
       "system": "mastersystem",
       "bucket": "mastersystem/Danan - The Jungle Fighter (Europe, Brazil) (En).zip"
-    },
-    {
-      "title": "Captain Silver",
-      "system": "mastersystem",
-      "bucket": "mastersystem/Captain Silver (USA).zip"
     },
     {
       "title": "Cyborg Hunter",
@@ -2350,16 +2265,6 @@
       "title": "Zillion",
       "system": "mastersystem",
       "bucket": "mastersystem/Zillion (USA, Europe) (Rev 1).zip"
-    },
-    {
-      "title": "Bonanza Bros.",
-      "system": "mastersystem",
-      "bucket": "mastersystem/Bonanza Bros. (Europe, Brazil) (En).zip"
-    },
-    {
-      "title": "Prince of Persia",
-      "system": "mastersystem",
-      "bucket": "mastersystem/Prince of Persia (Europe, Brazil) (En).zip"
     },
     {
       "title": "Ninja Princess",
@@ -2388,8 +2293,8 @@
     },
     {
       "title": "Ninja Spirit",
-      "system": "tg16",
-      "bucket": "tg16/Ninja Spirit (USA).zip"
+      "system": "fbneo",
+      "bucket": "fbneo/nspirit.zip"
     },
     {
       "title": "Legendary Axe, The",
@@ -2423,33 +2328,18 @@
     },
     {
       "title": "The Ninja Warriors",
-      "system": "tg16",
-      "bucket": "tg16/Ninja Warriors, The (Japan).zip"
-    },
-    {
-      "title": "Rastan Saga II",
-      "system": "tg16",
-      "bucket": "tg16/Rastan Saga II (Japan).zip"
-    },
-    {
-      "title": "Shinobi",
-      "system": "tg16",
-      "bucket": "tg16/Shinobi (Japan).zip"
+      "system": "fbneo",
+      "bucket": "fbneo/ninjaw.zip"
     },
     {
       "title": "Splatterhouse",
-      "system": "tg16",
-      "bucket": "tg16/Splatterhouse (USA).zip"
+      "system": "fbneo",
+      "bucket": "fbneo/splatter.zip"
     },
     {
       "title": "Tiger Road",
-      "system": "tg16",
-      "bucket": "tg16/Tiger Road (USA).zip"
-    },
-    {
-      "title": "Cadash",
-      "system": "tg16",
-      "bucket": "tg16/Cadash (USA).zip"
+      "system": "fbneo",
+      "bucket": "fbneo/tigeroad.zip"
     },
     {
       "title": "Die Hard",
@@ -2472,26 +2362,6 @@
       "bucket": "tg-cd/Kaze Kiri - Ninja Action (Japan).chd"
     },
     {
-      "title": "Prince of Persia",
-      "system": "tg-cd",
-      "bucket": "tg-cd/Prince of Persia (USA).chd"
-    },
-    {
-      "title": "Shadow of the Beast",
-      "system": "tg-cd",
-      "bucket": "tg-cd/Shadow of the Beast (USA).chd"
-    },
-    {
-      "title": "Golden Axe",
-      "system": "tg-cd",
-      "bucket": "tg-cd/Golden Axe (Japan).chd"
-    },
-    {
-      "title": "Bonanza Bros.",
-      "system": "tg-cd",
-      "bucket": "tg-cd/Bonanza Bros. (Japan).chd"
-    },
-    {
       "title": "Makaimura for WonderSwan",
       "system": "wonderswan",
       "bucket": "wonderswan/Makaimura for WonderSwan (Japan).zip"
@@ -2504,12 +2374,17 @@
     {
       "title": "Ninja Gaiden",
       "system": "xbox",
-      "bucket": "xbox/Ninja Gaiden (USA, Asia) (En,Ja).iso"
-    },
-    {
-      "title": "Ninja Gaiden Black",
-      "system": "xbox",
-      "bucket": "xbox/Ninja Gaiden Black (USA) (En,Ja).iso"
+      "bucket": "xbox/Ninja Gaiden (USA, Asia) (En,Ja).iso",
+      "variants": [
+        {
+          "bucket": "xbox/Ninja Gaiden Black (USA) (En,Ja).iso",
+          "note": "Xbox: Black adds Mission mode, new enemies and difficulty levels"
+        },
+        {
+          "bucket": "psvita/NINJA GAIDEN Σ PLUS [PCSE00021] [USA] [NoNpDRM].zip",
+          "note": "Vita: Sigma Plus, adds playable Rachel chapters and Hero mode"
+        }
+      ]
     },
     {
       "title": "Otogi 2: Immortal Warriors",
@@ -2520,11 +2395,6 @@
       "title": "Brute Force",
       "system": "xbox",
       "bucket": "xbox/Brute Force (USA) (En,Fr,De,Es,It).iso"
-    },
-    {
-      "title": "Conker: Live & Reloaded",
-      "system": "xbox",
-      "bucket": "xbox/Conker - Live & Reloaded (USA) (En,Ja,Fr,De,Es,It).iso"
     },
     {
       "title": "Fable: The Lost Chapters",
@@ -2553,23 +2423,13 @@
     },
     {
       "title": "Ninja Gaiden",
-      "system": "atarilynx",
-      "bucket": "atarilynx/Ninja Gaiden (USA, Europe).zip"
-    },
-    {
-      "title": "Ninja Gaiden III - The Ancient Ship of Doom",
-      "system": "atarilynx",
-      "bucket": "atarilynx/Ninja Gaiden III - The Ancient Ship of Doom (USA, Europe).zip"
+      "system": "fbneo",
+      "bucket": "fbneo/gaiden.zip"
     },
     {
       "title": "Rygar",
-      "system": "atarilynx",
-      "bucket": "atarilynx/Rygar (World).zip"
-    },
-    {
-      "title": "Shadow of the Beast",
-      "system": "atarilynx",
-      "bucket": "atarilynx/Shadow of the Beast (USA, Europe).zip"
+      "system": "fbneo",
+      "bucket": "fbneo/rygar.zip"
     },
     {
       "title": "Karateka",
@@ -2614,7 +2474,13 @@
     {
       "title": "Pitfall II - Lost Caverns",
       "system": "atari2600",
-      "bucket": "atari2600/Pitfall II - Lost Caverns (USA).zip"
+      "bucket": "atari2600/Pitfall II - Lost Caverns (USA).zip",
+      "variants": [
+        {
+          "bucket": "atari5200/David Crane's Pitfall II - Lost Caverns (USA).zip",
+          "note": "Atari 5200: adds a second, harder bonus adventure"
+        }
+      ]
     },
     {
       "title": "H.E.R.O.",
@@ -2623,8 +2489,8 @@
     },
     {
       "title": "Montezuma's Revenge - Featuring Panama Joe",
-      "system": "atari2600",
-      "bucket": "atari2600/Montezuma's Revenge - Featuring Panama Joe (USA).zip"
+      "system": "atari5200",
+      "bucket": "atari5200/Montezuma's Revenge - Featuring Panama Joe (USA).zip"
     },
     {
       "title": "Advanced Dungeons & Dragons",
@@ -2638,8 +2504,8 @@
     },
     {
       "title": "Venture",
-      "system": "colecovision",
-      "bucket": "colecovision/Venture (USA, Europe).zip"
+      "system": "mame",
+      "bucket": "mame/venture.zip"
     },
     {
       "title": "Alcazar - The Forgotten Fortress",
@@ -2667,19 +2533,14 @@
       "bucket": "msx2/Vampire Killer (Japan, Europe) (En).zip"
     },
     {
-      "title": "Rastan Saga",
-      "system": "msx2",
-      "bucket": "msx2/Rastan Saga (Japan).zip"
+      "title": "Rastan",
+      "system": "fbneo",
+      "bucket": "fbneo/rastanu.zip"
     },
     {
       "title": "Dragon Buster",
-      "system": "msx2",
-      "bucket": "msx2/Dragon Buster (Japan).zip"
-    },
-    {
-      "title": "Kung Fu Master (MSX)",
-      "system": "msx",
-      "bucket": "msx/Kung Fu Master (Japan).zip"
+      "system": "fbneo",
+      "bucket": "fbneo/drgnbstr.zip"
     },
     {
       "title": "Knightmare II - The Maze of Galious",
@@ -2692,44 +2553,19 @@
       "bucket": "msx/Yie Ar Kung-Fu II - The Emperor Yie-Gah (Japan).zip"
     },
     {
-      "title": "Ninja Jajamaru-kun",
-      "system": "msx",
-      "bucket": "msx/Ninja Jajamaru-kun (Japan).zip"
-    },
-    {
       "title": "Bruce Lee",
       "system": "msx",
       "bucket": "msx/Bruce Lee (Japan).zip"
     },
     {
-      "title": "Spy Hunter (C64)",
-      "system": "c64",
-      "bucket": "c64/Spy Hunter (USA, Europe).zip"
-    },
-    {
-      "title": "Shadow of the Beast (C64)",
-      "system": "c64",
-      "bucket": "c64/Shadow of the Beast (Europe).zip"
-    },
-    {
-      "title": "Kung-Fu Master (C64)",
-      "system": "c64",
-      "bucket": "c64/Kung-Fu Master (USA, Europe).zip"
-    },
-    {
-      "title": "Ninja Remix (C64)",
-      "system": "c64",
-      "bucket": "c64/Ninja Remix (USA, Europe).zip"
+      "title": "Spy Hunter",
+      "system": "fbneo",
+      "bucket": "fbneo/spyhunt.zip"
     },
     {
       "title": "Myth (C64)",
       "system": "c64",
       "bucket": "c64/Myth (Europe).zip"
-    },
-    {
-      "title": "Wild Guns",
-      "system": "satellaview",
-      "bucket": "satellaview/Wild Guns (Japan).zip"
     },
     {
       "title": "Bayonetta",
@@ -2749,7 +2585,13 @@
     {
       "title": "Hyrule Warriors",
       "system": "wiiu",
-      "bucket": "wiiu/Hyrule Warriors (US) (v208).wua"
+      "bucket": "wiiu/Hyrule Warriors (US) (v208).wua",
+      "variants": [
+        {
+          "bucket": "3ds/Hyrule Warriors Legends (USA).zip",
+          "note": "3DS: adds Linkle, new characters and a new story chapter"
+        }
+      ]
     },
     {
       "title": "Vanquish",
@@ -2764,20 +2606,18 @@
     {
       "title": "Ninja Gaiden II",
       "system": "xbox360",
-      "bucket": "xbox360/Ninja Gaiden II (World) (En,Ja,Fr,De,Es,It,Zh,Ko,Pl,Ru).zar"
+      "bucket": "xbox360/Ninja Gaiden II (World) (En,Ja,Fr,De,Es,It,Zh,Ko,Pl,Ru).zar",
+      "variants": [
+        {
+          "bucket": "psvita/NINJA GAIDEN Σ2 PLUS [PCSE00233] [USA] [NoNpDRM].zip",
+          "note": "Vita: Sigma 2 Plus, adds playable Ayane, Momiji and Rachel"
+        }
+      ]
     },
     {
       "title": "Ninja Gaiden 3",
       "system": "xbox360",
       "bucket": "xbox360/Ninja Gaiden 3 (USA).zar"
-    },
-    {
-      "title": "Metal Gear Solid - HD Collection",
-      "system": "xbox360",
-      "bucket": "xbox360/Metal Gear Solid - HD Collection (USA) (En,Fr,Es) (Disc 1).zar",
-      "files": [
-        "xbox360/Metal Gear Solid - HD Collection (USA) (En,Fr,Es) (Disc 2).zar"
-      ]
     },
     {
       "title": "Metal Gear Solid V - Ground Zeroes",
@@ -2894,26 +2734,6 @@
       "bucket": "xbox360/Mirror's Edge (USA) (En,Fr,Es).zar"
     },
     {
-      "title": "Ninja Gaiden Sigma Plus",
-      "system": "psvita",
-      "bucket": "psvita/NINJA GAIDEN Σ PLUS [PCSE00021] [USA] [NoNpDRM].zip"
-    },
-    {
-      "title": "Ninja Gaiden Sigma 2 Plus",
-      "system": "psvita",
-      "bucket": "psvita/NINJA GAIDEN Σ2 PLUS [PCSE00233] [USA] [NoNpDRM].zip"
-    },
-    {
-      "title": "Metal Gear Solid HD Collection",
-      "system": "psvita",
-      "bucket": "psvita/Metal Gear Solid HD [PCSE00020] [USA] [NoNpDRM].zip"
-    },
-    {
-      "title": "Muramasa Rebirth",
-      "system": "psvita",
-      "bucket": "psvita/Muramasa Rebirth [PCSE00240] [USA] [NoNpDRM].zip"
-    },
-    {
       "title": "Dragon's Crown",
       "system": "psvita",
       "bucket": "psvita/Dragon's Crown [PCSE00019] [USA] [NoNpDRM].zip"
@@ -2929,54 +2749,9 @@
       "bucket": "psvita/GRAVITY RUSH™ [PCSA00011] [USA] [NoNpDRM].zip"
     },
     {
-      "title": "Shinobi",
-      "system": "fbneo",
-      "bucket": "fbneo/shinobi.zip"
-    },
-    {
-      "title": "Shadow Dancer",
-      "system": "fbneo",
-      "bucket": "fbneo/shdancer1.zip"
-    },
-    {
-      "title": "Strider",
-      "system": "fbneo",
-      "bucket": "fbneo/strider.zip"
-    },
-    {
       "title": "Osman",
       "system": "fbneo",
       "bucket": "fbneo/osman.zip"
-    },
-    {
-      "title": "Ninja Spirit",
-      "system": "fbneo",
-      "bucket": "fbneo/nspirit.zip"
-    },
-    {
-      "title": "The Legend of Kage",
-      "system": "fbneo",
-      "bucket": "fbneo/lkage.zip"
-    },
-    {
-      "title": "Kung-Fu Master",
-      "system": "fbneo",
-      "bucket": "fbneo/kungfumd.zip"
-    },
-    {
-      "title": "Ghosts'n Goblins",
-      "system": "fbneo",
-      "bucket": "fbneo/gngt.zip"
-    },
-    {
-      "title": "Ghouls'n Ghosts",
-      "system": "fbneo",
-      "bucket": "fbneo/ghoulsu.zip"
-    },
-    {
-      "title": "Rygar",
-      "system": "fbneo",
-      "bucket": "fbneo/rygar.zip"
     },
     {
       "title": "Bionic Commando",
@@ -2984,19 +2759,9 @@
       "bucket": "fbneo/bionicc1.zip"
     },
     {
-      "title": "Rastan",
-      "system": "fbneo",
-      "bucket": "fbneo/rastanu.zip"
-    },
-    {
       "title": "Black Tiger",
       "system": "fbneo",
       "bucket": "fbneo/blktiger.zip"
-    },
-    {
-      "title": "Magic Sword",
-      "system": "fbneo",
-      "bucket": "fbneo/mswordu.zip"
     },
     {
       "title": "Willow",
@@ -3019,21 +2784,6 @@
       "bucket": "fbneo/crsword.zip"
     },
     {
-      "title": "Spy Hunter",
-      "system": "fbneo",
-      "bucket": "fbneo/spyhunt.zip"
-    },
-    {
-      "title": "Golden Axe",
-      "system": "fbneo",
-      "bucket": "fbneo/goldnaxe.zip"
-    },
-    {
-      "title": "The Ninja Warriors",
-      "system": "fbneo",
-      "bucket": "fbneo/ninjaw.zip"
-    },
-    {
       "title": "Ninja-Kid II",
       "system": "fbneo",
       "bucket": "fbneo/ninjakd2.zip"
@@ -3042,11 +2792,6 @@
       "title": "Ninja-Kun",
       "system": "fbneo",
       "bucket": "fbneo/ninjakun.zip"
-    },
-    {
-      "title": "Tiger Road",
-      "system": "fbneo",
-      "bucket": "fbneo/tigeroad.zip"
     },
     {
       "title": "Sengoku 2",
@@ -3072,11 +2817,6 @@
       "title": "Ganryu",
       "system": "fbneo",
       "bucket": "fbneo/ganryu.zip"
-    },
-    {
-      "title": "Trojan",
-      "system": "fbneo",
-      "bucket": "fbneo/trojan.zip"
     },
     {
       "title": "Gaiapolis",
@@ -3114,11 +2854,6 @@
       "bucket": "fbneo/slyspy.zip"
     },
     {
-      "title": "Gauntlet",
-      "system": "fbneo",
-      "bucket": "fbneo/gauntlet.zip"
-    },
-    {
       "title": "Gauntlet II",
       "system": "fbneo",
       "bucket": "fbneo/gaunt2.zip"
@@ -3148,11 +2883,6 @@
       "bucket": "dreamcast/Industrial Spy - Operation Espionage (USA).chd"
     },
     {
-      "title": "Legacy of Kain: Soul Reaver",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Legacy of Kain - Soul Reaver (USA).chd"
-    },
-    {
       "title": "MDK2",
       "system": "dreamcast",
       "bucket": "dreamcast/MDK2 (USA).chd"
@@ -3161,11 +2891,6 @@
       "title": "Maken X",
       "system": "dreamcast",
       "bucket": "dreamcast/Maken X (USA).chd"
-    },
-    {
-      "title": "Shadow Man",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Shadow Man (USA) (Rev A).chd"
     },
     {
       "title": "Shenmue",
@@ -3194,34 +2919,9 @@
       "bucket": "dreamcast/Sword of the Berserk - Guts' Rage (USA).chd"
     },
     {
-      "title": "Urban Chaos",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Urban Chaos (USA) (En,Fr).chd"
-    },
-    {
       "title": "Ecco the Dolphin: Defender of the Future",
       "system": "dreamcast",
       "bucket": "dreamcast/Ecco the Dolphin - Defender of the Future (USA) (En,Fr,De,Es).chd"
-    },
-    {
-      "title": "Tomb Raider: The Last Revelation",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Tomb Raider - The Last Revelation (USA).chd"
-    },
-    {
-      "title": "Tomb Raider Chronicles",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Tomb Raider Chronicles (USA).chd"
-    },
-    {
-      "title": "Gauntlet Legends",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Gauntlet Legends (USA).chd"
-    },
-    {
-      "title": "Crossed Swords",
-      "system": "neogeocd",
-      "bucket": "neogeocd/Crossed Swords (Japan).chd"
     },
     {
       "title": "Crossed Swords II",
@@ -3229,64 +2929,14 @@
       "bucket": "neogeocd/Crossed Swords II (Japan) (En,Ja).chd"
     },
     {
-      "title": "Magician Lord",
-      "system": "neogeocd",
-      "bucket": "neogeocd/Magician Lord (Japan) (En,Ja).chd"
-    },
-    {
-      "title": "Ninja Combat",
-      "system": "neogeocd",
-      "bucket": "neogeocd/Ninja Combat (Japan) (En,Ja).chd"
-    },
-    {
-      "title": "Ninja Commando",
-      "system": "neogeocd",
-      "bucket": "neogeocd/Ninja Commando (Japan) (En,Ja).chd"
-    },
-    {
       "title": "The Super Spy",
-      "system": "neogeocd",
-      "bucket": "neogeocd/Super Spy, The (Japan) (En,Ja).chd"
-    },
-    {
-      "title": "3 Ninjas Kick Back",
-      "system": "segacd",
-      "bucket": "segacd/3 Ninjas Kick Back (USA).chd"
-    },
-    {
-      "title": "Ecco the Dolphin",
-      "system": "segacd",
-      "bucket": "segacd/Ecco the Dolphin (USA).chd"
-    },
-    {
-      "title": "Ecco: The Tides of Time",
-      "system": "segacd",
-      "bucket": "segacd/Ecco - The Tides of Time (USA).chd"
-    },
-    {
-      "title": "The Ninja Warriors",
-      "system": "segacd",
-      "bucket": "segacd/Ninja Warriors, The (Japan).chd"
-    },
-    {
-      "title": "Prince of Persia",
-      "system": "segacd",
-      "bucket": "segacd/Prince of Persia (USA).chd"
+      "system": "fbneo",
+      "bucket": "fbneo/superspy.zip"
     },
     {
       "title": "The Terminator",
       "system": "segacd",
       "bucket": "segacd/Terminator, The (USA).chd"
-    },
-    {
-      "title": "Golden Axe",
-      "system": "wonderswancolor",
-      "bucket": "wonderswancolor/Golden Axe (Japan).zip"
-    },
-    {
-      "title": "Strider 2",
-      "system": "mame",
-      "bucket": "mame/strider2.zip"
     }
   ]
 }

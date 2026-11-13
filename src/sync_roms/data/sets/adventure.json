@@ -3,24 +3,6 @@
   "description": "Point-and-click, detective and puzzle adventures and visual novels.",
   "games": [
     {
-      "title": "Gyakuten Saiban",
-      "category": "Ace Attorney",
-      "system": "gba",
-      "bucket": "gba/Gyakuten Saiban (Japan) (Rev 1).zip"
-    },
-    {
-      "title": "Gyakuten Saiban 2",
-      "category": "Ace Attorney",
-      "system": "gba",
-      "bucket": "gba/Gyakuten Saiban 2 (Japan).zip"
-    },
-    {
-      "title": "Gyakuten Saiban 3",
-      "category": "Ace Attorney",
-      "system": "gba",
-      "bucket": "gba/Gyakuten Saiban 3 (Japan).zip"
-    },
-    {
       "title": "Phoenix Wright - Ace Attorney",
       "category": "Ace Attorney",
       "system": "nds",
@@ -55,12 +37,6 @@
       "category": "Ace Attorney",
       "system": "nds",
       "bucket": "nds/Gyakuten Kenji 2 (Japan).zip"
-    },
-    {
-      "title": "Gyakuten Saiban 123 - Naruhodo Selection",
-      "category": "Ace Attorney",
-      "system": "3ds",
-      "bucket": "3ds/Gyakuten Saiban 123 - Naruhodo Selection (Japan).zip"
     },
     {
       "title": "Gyakuten Saiban 4",
@@ -159,34 +135,16 @@
       "bucket": "3ds/Zero Escape - Zero Time Dilemma (USA).zip"
     },
     {
-      "title": "Zero Escape - The Nonary Games",
-      "category": "Zero Escape & Danganronpa",
-      "system": "psvita",
-      "bucket": "psvita/Zero Escape The Nonary Games [PCSE01006] [USA] [NoNpDRM].zip"
-    },
-    {
-      "title": "Zero Escape - Virtue's Last Reward",
-      "category": "Zero Escape & Danganronpa",
-      "system": "psvita",
-      "bucket": "psvita/Zero Escape - Virtue's Last Reward [PCSE00085] [USA] [NoNpDRM].zip"
-    },
-    {
-      "title": "Zero Escape - Zero Time Dilemma",
-      "category": "Zero Escape & Danganronpa",
-      "system": "psvita",
-      "bucket": "psvita/Zero Escape - Zero Time Dilemma [PCSE00781] [USA] [NoNpDRM].zip"
-    },
-    {
-      "title": "Danganronpa - Hope's Academy and Despair's Students",
-      "category": "Zero Escape & Danganronpa",
-      "system": "psp",
-      "bucket": "psp/Danganronpa - Hope's Academy and Despair's Students (Japan) [T-En by Project Zetsubou v1.0] [n].chd"
-    },
-    {
       "title": "Danganronpa - Trigger Happy Havoc",
       "category": "Zero Escape & Danganronpa",
       "system": "psvita",
-      "bucket": "psvita/Danganronpa [PCSE00261] [USA] [NoNpDRM].zip"
+      "bucket": "psvita/Danganronpa [PCSE00261] [USA] [NoNpDRM].zip",
+      "variants": [
+        {
+          "bucket": "psp/Danganronpa - Hope's Academy and Despair's Students (Japan) [T-En by Project Zetsubou v1.0] [n].chd",
+          "note": "PSP: the Japanese original with the Project Zetsubou English patch"
+        }
+      ]
     },
     {
       "title": "Danganronpa 2 - Goodbye Despair",
@@ -459,12 +417,6 @@
       "bucket": "mastersystem/King's Quest - Quest for the Crown (USA).zip"
     },
     {
-      "title": "Shadowgate Classic",
-      "category": "Point-and-Click",
-      "system": "gbc",
-      "bucket": "gbc/Shadowgate Classic (USA, Europe) (En,Fr,De,Es,Sv) (GB Compatible).zip"
-    },
-    {
       "title": "Deja Vu I & II - The Casebooks of Ace Harding",
       "category": "Point-and-Click",
       "system": "gbc",
@@ -493,18 +445,6 @@
       "category": "Point-and-Click",
       "system": "genesis",
       "bucket": "genesis/Cosmic Spacehead (USA, Europe) (En,Fr,De,Es).zip"
-    },
-    {
-      "title": "Cosmic Spacehead",
-      "category": "Point-and-Click",
-      "system": "gamegear",
-      "bucket": "gamegear/Cosmic Spacehead (USA, Europe).zip"
-    },
-    {
-      "title": "Cosmic Spacehead",
-      "category": "Point-and-Click",
-      "system": "mastersystem",
-      "bucket": "mastersystem/Cosmic Spacehead (Europe) (En,Fr,De,Es).zip"
     },
     {
       "title": "Secret of Monkey Island, The",
@@ -570,7 +510,13 @@
       "title": "Broken Sword - The Shadow of the Templars",
       "category": "Point-and-Click",
       "system": "psx",
-      "bucket": "psx/Broken Sword - The Shadow of the Templars (USA).chd"
+      "bucket": "psx/Broken Sword - The Shadow of the Templars (USA).chd",
+      "variants": [
+        {
+          "bucket": "nds/Broken Sword - Shadow of the Templars - The Director's Cut (USA) (En,Fr,De,Es,It).zip",
+          "note": "DS: Director's Cut adds new Nico chapters and puzzles"
+        }
+      ]
     },
     {
       "title": "Broken Sword II - The Smoking Mirror",
@@ -696,24 +642,6 @@
       "bucket": "psx/Pajama Sam - You Are What You Eat from Your Head to Your Feet (USA).chd"
     },
     {
-      "title": "Blazing Dragons",
-      "category": "Point-and-Click",
-      "system": "saturn",
-      "bucket": "saturn/Blazing Dragons (USA).chd"
-    },
-    {
-      "title": "Terry Pratchett's Discworld",
-      "category": "Point-and-Click",
-      "system": "saturn",
-      "bucket": "saturn/Terry Pratchett's Discworld (Europe) (En,Fr,De,Es,It).chd"
-    },
-    {
-      "title": "Discworld II - Missing Presumed...!",
-      "category": "Point-and-Click",
-      "system": "saturn",
-      "bucket": "saturn/Discworld II - Missing Presumed...! (Europe) (En,Fr,De,Es,It).chd"
-    },
-    {
       "title": "Atlantis - The Lost Tales",
       "category": "Point-and-Click",
       "system": "saturn",
@@ -767,18 +695,6 @@
       "category": "Point-and-Click",
       "system": "dreamcast",
       "bucket": "dreamcast/Dragon Riders - Chronicles of Pern (USA).chd"
-    },
-    {
-      "title": "Broken Sword - The Shadow of the Templars",
-      "category": "Point-and-Click",
-      "system": "gba",
-      "bucket": "gba/Broken Sword - The Shadow of the Templars (USA) (En,Fr,De,Es,It).zip"
-    },
-    {
-      "title": "Broken Sword - Shadow of the Templars - The Director's Cut",
-      "category": "Point-and-Click",
-      "system": "nds",
-      "bucket": "nds/Broken Sword - Shadow of the Templars - The Director's Cut (USA) (En,Fr,De,Es,It).zip"
     },
     {
       "title": "Syberia",
@@ -884,7 +800,13 @@
       "title": "Double Switch",
       "category": "FMV & CD-ROM Era",
       "system": "segacd",
-      "bucket": "segacd/Double Switch (USA).chd"
+      "bucket": "segacd/Double Switch (USA).chd",
+      "variants": [
+        {
+          "bucket": "saturn/Double Switch (USA).m3u",
+          "note": "Saturn: much better full-screen video"
+        }
+      ]
     },
     {
       "title": "Ground Zero Texas",
@@ -977,20 +899,8 @@
     {
       "title": "Space Ace",
       "category": "FMV & CD-ROM Era",
-      "system": "segacd",
-      "bucket": "segacd/Space Ace (USA).chd"
-    },
-    {
-      "title": "Sherlock Holmes - Consulting Detective",
-      "category": "FMV & CD-ROM Era",
-      "system": "tg-cd",
-      "bucket": "tg-cd/Sherlock Holmes - Consulting Detective (USA).chd"
-    },
-    {
-      "title": "Sherlock Holmes - Consulting Detective - Vol. II",
-      "category": "FMV & CD-ROM Era",
-      "system": "tg-cd",
-      "bucket": "tg-cd/Sherlock Holmes - Consulting Detective - Vol. II (USA).chd"
+      "system": "atarijaguarcd",
+      "bucket": "atarijaguarcd/Space Ace (USA).chd"
     },
     {
       "title": "It Came from the Desert",
@@ -1001,32 +911,24 @@
     {
       "title": "Myst",
       "category": "FMV & CD-ROM Era",
-      "system": "atarijaguarcd",
-      "bucket": "atarijaguarcd/Myst (USA).chd"
-    },
-    {
-      "title": "Dragon's Lair",
-      "category": "FMV & CD-ROM Era",
-      "system": "atarijaguarcd",
-      "bucket": "atarijaguarcd/Dragon's Lair (USA).chd"
-    },
-    {
-      "title": "Space Ace",
-      "category": "FMV & CD-ROM Era",
-      "system": "atarijaguarcd",
-      "bucket": "atarijaguarcd/Space Ace (USA).chd"
+      "system": "psx",
+      "bucket": "psx/Myst (USA).chd",
+      "variants": [
+        {
+          "bucket": "psp/Myst (Europe) (En,Fr,De).chd",
+          "note": "PSP: adds the Rime age"
+        }
+      ]
     },
     {
       "title": "BrainDead 13",
       "category": "FMV & CD-ROM Era",
-      "system": "atarijaguarcd",
-      "bucket": "atarijaguarcd/BrainDead 13 (USA).chd"
-    },
-    {
-      "title": "Myst",
-      "category": "FMV & CD-ROM Era",
       "system": "psx",
-      "bucket": "psx/Myst (USA).chd"
+      "bucket": "psx/BrainDead 13 (USA).m3u",
+      "files": [
+        "psx/BrainDead 13 (USA) (Disc 1).chd",
+        "psx/BrainDead 13 (USA) (Disc 2).chd"
+      ]
     },
     {
       "title": "Riven - The Sequel to Myst",
@@ -1087,47 +989,10 @@
       ]
     },
     {
-      "title": "BrainDead 13",
-      "category": "FMV & CD-ROM Era",
-      "system": "psx",
-      "bucket": "psx/BrainDead 13 (USA).m3u",
-      "files": [
-        "psx/BrainDead 13 (USA) (Disc 1).chd",
-        "psx/BrainDead 13 (USA) (Disc 2).chd"
-      ]
-    },
-    {
       "title": "Cyberia",
       "category": "FMV & CD-ROM Era",
       "system": "psx",
       "bucket": "psx/Cyberia (USA).chd"
-    },
-    {
-      "title": "Myst",
-      "category": "FMV & CD-ROM Era",
-      "system": "saturn",
-      "bucket": "saturn/Myst (USA).chd"
-    },
-    {
-      "title": "Riven - The Sequel to Myst",
-      "category": "FMV & CD-ROM Era",
-      "system": "saturn",
-      "bucket": "saturn/Riven - The Sequel to Myst (Europe).m3u",
-      "files": [
-        "saturn/Riven - The Sequel to Myst (Europe) (Disc 1).chd",
-        "saturn/Riven - The Sequel to Myst (Europe) (Disc 2).chd",
-        "saturn/Riven - The Sequel to Myst (Europe) (Disc 3).chd",
-        "saturn/Riven - The Sequel to Myst (Europe) (Disc 4).chd"
-      ]
-    },
-    {
-      "title": "D",
-      "category": "FMV & CD-ROM Era",
-      "system": "saturn",
-      "bucket": "saturn/D (USA) (Disc I).chd",
-      "files": [
-        "saturn/D (USA) (Disc II).chd"
-      ]
     },
     {
       "title": "Enemy Zero",
@@ -1158,28 +1023,6 @@
       "bucket": "saturn/Mansion of Hidden Souls, The (USA).chd"
     },
     {
-      "title": "Double Switch",
-      "category": "FMV & CD-ROM Era",
-      "system": "saturn",
-      "bucket": "saturn/Double Switch (USA).m3u",
-      "files": [
-        "saturn/Double Switch (USA) (Disc 1).chd",
-        "saturn/Double Switch (USA) (Disc 2).chd"
-      ]
-    },
-    {
-      "title": "BrainDead 13",
-      "category": "FMV & CD-ROM Era",
-      "system": "saturn",
-      "bucket": "saturn/BrainDead 13 (USA).chd"
-    },
-    {
-      "title": "Cyberia",
-      "category": "FMV & CD-ROM Era",
-      "system": "saturn",
-      "bucket": "saturn/Cyberia (USA) (En,Fr,De).chd"
-    },
-    {
       "title": "Frankenstein - Through the Eyes of the Monster",
       "category": "FMV & CD-ROM Era",
       "system": "saturn",
@@ -1204,28 +1047,16 @@
       ]
     },
     {
-      "title": "Myst",
-      "category": "FMV & CD-ROM Era",
-      "system": "nds",
-      "bucket": "nds/Myst (USA) (En,Fr) (Rev 1).zip"
-    },
-    {
-      "title": "Myst",
-      "category": "FMV & CD-ROM Era",
-      "system": "3ds",
-      "bucket": "3ds/Myst (USA) (En,Fr).zip"
-    },
-    {
-      "title": "Myst",
-      "category": "FMV & CD-ROM Era",
-      "system": "psp",
-      "bucket": "psp/Myst (Europe) (En,Fr,De).chd"
-    },
-    {
       "title": "Hakuoki - Demon of the Fleeting Blossom",
       "category": "Visual Novels",
       "system": "psp",
-      "bucket": "psp/Hakuoki - Demon of the Fleeting Blossom (USA).chd"
+      "bucket": "psp/Hakuoki - Demon of the Fleeting Blossom (USA).chd",
+      "variants": [
+        {
+          "bucket": "3ds/Hakuoki - Memories of the Shinsengumi (USA).zip",
+          "note": "3DS: retells the story with added scenes and routes"
+        }
+      ]
     },
     {
       "title": "Sweet Fuse - At Your Side",
@@ -1346,12 +1177,6 @@
       "bucket": "psp/StormLover Kai!! (Japan) [T-En by Jjjewel & Xyz v0.90].chd"
     },
     {
-      "title": "Hakuoki - Memories of the Shinsengumi",
-      "category": "Visual Novels",
-      "system": "3ds",
-      "bucket": "3ds/Hakuoki - Memories of the Shinsengumi (USA).zip"
-    },
-    {
       "title": "Corpse Party",
       "category": "Visual Novels",
       "system": "3ds",
@@ -1417,10 +1242,13 @@
     {
       "title": "Famicom Tantei Club Part II - Ushiro ni Tatsu Shoujo",
       "category": "Japanese Adventure Classics",
-      "system": "fds",
-      "bucket": "fds/Famicom Tantei Club Part II - Ushiro ni Tatsu Shoujo - Zenpen (Japan).zip",
-      "files": [
-        "fds/Famicom Tantei Club Part II - Ushiro ni Tatsu Shoujo - Kouhen (Japan) (DV 3, 4).zip"
+      "system": "snes",
+      "bucket": "snes/Famicom Tantei Club Part II - Ushiro ni Tatsu Shoujo (Japan) (Rev 1) (NP).zip",
+      "variants": [
+        {
+          "bucket": "fds/Famicom Tantei Club Part II - Ushiro ni Tatsu Shoujo - Zenpen (Japan).zip",
+          "note": "FDS: the 1989 original, first half (Zenpen) only"
+        }
       ]
     },
     {
@@ -1431,12 +1259,6 @@
       "files": [
         "fds/Famicom Mukashibanashi - Shin Onigashima - Kouhen (Japan).zip"
       ]
-    },
-    {
-      "title": "Famicom Tantei Club Part II - Ushiro ni Tatsu Shoujo",
-      "category": "Japanese Adventure Classics",
-      "system": "snes",
-      "bucket": "snes/Famicom Tantei Club Part II - Ushiro ni Tatsu Shoujo (Japan) (Rev 1) (NP).zip"
     },
     {
       "title": "Clock Tower",
@@ -1467,12 +1289,6 @@
       "category": "Japanese Adventure Classics",
       "system": "satellaview",
       "bucket": "satellaview/Radical Dreamers - Nusume Nai Houseki (Japan) (2-24).zip"
-    },
-    {
-      "title": "Snatcher",
-      "category": "Japanese Adventure Classics",
-      "system": "saturn",
-      "bucket": "saturn/Snatcher (Japan).chd"
     },
     {
       "title": "Policenauts",
@@ -1526,54 +1342,6 @@
     {
       "title": "Prince of Persia",
       "category": "Cinematic Platformers",
-      "system": "nes",
-      "bucket": "nes/Prince of Persia (USA).zip"
-    },
-    {
-      "title": "Prince of Persia",
-      "category": "Cinematic Platformers",
-      "system": "gb",
-      "bucket": "gb/Prince of Persia (USA).zip"
-    },
-    {
-      "title": "Prince of Persia",
-      "category": "Cinematic Platformers",
-      "system": "gbc",
-      "bucket": "gbc/Prince of Persia (USA, Europe) (En,Fr,De,Es,It) (GB Compatible).zip"
-    },
-    {
-      "title": "Prince of Persia",
-      "category": "Cinematic Platformers",
-      "system": "mastersystem",
-      "bucket": "mastersystem/Prince of Persia (Europe, Brazil) (En).zip"
-    },
-    {
-      "title": "Prince of Persia",
-      "category": "Cinematic Platformers",
-      "system": "gamegear",
-      "bucket": "gamegear/Prince of Persia (USA, Europe).zip"
-    },
-    {
-      "title": "Prince of Persia",
-      "category": "Cinematic Platformers",
-      "system": "genesis",
-      "bucket": "genesis/Prince of Persia (USA).zip"
-    },
-    {
-      "title": "Prince of Persia",
-      "category": "Cinematic Platformers",
-      "system": "segacd",
-      "bucket": "segacd/Prince of Persia (USA).chd"
-    },
-    {
-      "title": "Prince of Persia",
-      "category": "Cinematic Platformers",
-      "system": "tg-cd",
-      "bucket": "tg-cd/Prince of Persia (USA).chd"
-    },
-    {
-      "title": "Prince of Persia",
-      "category": "Cinematic Platformers",
       "system": "snes",
       "bucket": "snes/Prince of Persia (USA).zip"
     },
@@ -1596,12 +1364,6 @@
       "bucket": "snes/Out of This World (USA).zip"
     },
     {
-      "title": "Out of This World",
-      "category": "Cinematic Platformers",
-      "system": "genesis",
-      "bucket": "genesis/Out of This World (USA).zip"
-    },
-    {
       "title": "Heart of the Alien - Out of This World Parts I and II",
       "category": "Cinematic Platformers",
       "system": "segacd",
@@ -1610,44 +1372,20 @@
     {
       "title": "Flashback - The Quest for Identity",
       "category": "Cinematic Platformers",
-      "system": "snes",
-      "bucket": "snes/Flashback - The Quest for Identity (USA) (En,Fr,De).zip"
-    },
-    {
-      "title": "Flashback - The Quest for Identity",
-      "category": "Cinematic Platformers",
       "system": "genesis",
       "bucket": "genesis/Flashback - The Quest for Identity (USA) (En,Fr).zip"
     },
     {
-      "title": "Flashback - The Quest for Identity",
-      "category": "Cinematic Platformers",
-      "system": "segacd",
-      "bucket": "segacd/Flashback - The Quest for Identity (USA).chd"
-    },
-    {
-      "title": "Flashback - The Quest for Identity",
-      "category": "Cinematic Platformers",
-      "system": "atarijaguar",
-      "bucket": "atarijaguar/Flashback - The Quest for Identity (World) (En,Fr).zip"
-    },
-    {
       "title": "Blackthorne",
       "category": "Cinematic Platformers",
       "system": "snes",
-      "bucket": "snes/Blackthorne (USA).zip"
-    },
-    {
-      "title": "Blackthorne",
-      "category": "Cinematic Platformers",
-      "system": "sega32x",
-      "bucket": "sega32x/Blackthorne (USA).zip"
-    },
-    {
-      "title": "Blackthorne",
-      "category": "Cinematic Platformers",
-      "system": "gba",
-      "bucket": "gba/Blackthorne (USA).zip"
+      "bucket": "snes/Blackthorne (USA).zip",
+      "variants": [
+        {
+          "bucket": "sega32x/Blackthorne (USA).zip",
+          "note": "32X: re-rendered graphics"
+        }
+      ]
     },
     {
       "title": "Nosferatu",

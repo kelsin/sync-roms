@@ -84,8 +84,14 @@
     },
     {
       "title": "Dragon Slayer IV - Drasle Family",
-      "system": "msx2",
-      "bucket": "msx2/Dragon Slayer IV - Drasle Family (Japan).zip"
+      "system": "msx",
+      "bucket": "msx/Dragon Slayer IV - Drasle Family (Japan).zip",
+      "variants": [
+        {
+          "bucket": "msx2/Dragon Slayer IV - Drasle Family (Japan).zip",
+          "note": "MSX2: improved graphics"
+        }
+      ]
     },
     {
       "title": "Metroid II - Return of Samus",
@@ -105,7 +111,13 @@
     {
       "title": "Castlevania - Symphony of the Night",
       "system": "psx",
-      "bucket": "psx/Castlevania - Symphony of the Night (USA).chd"
+      "bucket": "psx/Castlevania - Symphony of the Night (USA).chd",
+      "variants": [
+        {
+          "bucket": "saturn/Akumajou Dracula X - Gekka no Yasoukyoku (Japan) (2M).chd",
+          "note": "Saturn: adds playable Maria and two new areas (Japanese)"
+        }
+      ]
     },
     {
       "title": "Tomba!",
@@ -119,8 +131,8 @@
     },
     {
       "title": "Powerslave",
-      "system": "psx",
-      "bucket": "psx/Powerslave (USA).chd"
+      "system": "saturn",
+      "bucket": "saturn/Powerslave (USA).chd"
     },
     {
       "title": "The Divide - Enemies Within",
@@ -131,16 +143,6 @@
       "title": "Blaster Master - Blasting Again",
       "system": "psx",
       "bucket": "psx/Blaster Master - Blasting Again (USA).chd"
-    },
-    {
-      "title": "Akumajou Dracula X - Gekka no Yasoukyoku",
-      "system": "saturn",
-      "bucket": "saturn/Akumajou Dracula X - Gekka no Yasoukyoku (Japan) (2M).chd"
-    },
-    {
-      "title": "Powerslave",
-      "system": "saturn",
-      "bucket": "saturn/Powerslave (USA).chd"
     },
     {
       "title": "Wonder Boy in Monster World",
@@ -154,8 +156,14 @@
     },
     {
       "title": "Todd's Adventures in Slime World",
-      "system": "genesis",
-      "bucket": "genesis/Todd's Adventures in Slime World (USA).zip"
+      "system": "atarilynx",
+      "bucket": "atarilynx/Todd's Adventures in Slime World (World).zip",
+      "variants": [
+        {
+          "bucket": "genesis/Todd's Adventures in Slime World (USA).zip",
+          "note": "Genesis: bigger screen and reworked levels"
+        }
+      ]
     },
     {
       "title": "QuackShot Starring Donald Duck",
@@ -169,8 +177,8 @@
     },
     {
       "title": "Phantom 2040",
-      "system": "genesis",
-      "bucket": "genesis/Phantom 2040 (USA).zip"
+      "system": "snes",
+      "bucket": "snes/Phantom 2040 (USA).zip"
     },
     {
       "title": "Wonder Boy III - The Dragon's Trap",
@@ -193,29 +201,9 @@
       "bucket": "mastersystem/Lord of the Sword (USA, Europe, Brazil) (En).zip"
     },
     {
-      "title": "Wonder Boy in Monster World",
-      "system": "mastersystem",
-      "bucket": "mastersystem/Wonder Boy in Monster World (Europe).zip"
-    },
-    {
-      "title": "Dragon's Curse",
-      "system": "tg16",
-      "bucket": "tg16/Dragon's Curse (USA).zip"
-    },
-    {
-      "title": "Dynastic Hero, The",
-      "system": "tg-cd",
-      "bucket": "tg-cd/Dynastic Hero, The (USA).chd"
-    },
-    {
       "title": "Shape Shifter",
       "system": "tg-cd",
       "bucket": "tg-cd/Shape Shifter (USA).chd"
-    },
-    {
-      "title": "Todd's Adventures in Slime World",
-      "system": "tg-cd",
-      "bucket": "tg-cd/Todd's Adventures in Slime World (Japan).chd"
     },
     {
       "title": "Tails Adventure",
@@ -223,24 +211,15 @@
       "bucket": "gamegear/Tails Adventure (World) (En,Ja).zip"
     },
     {
-      "title": "Wonder Boy - The Dragon's Trap",
-      "system": "gamegear",
-      "bucket": "gamegear/Wonder Boy - The Dragon's Trap (Europe).zip"
-    },
-    {
-      "title": "Phantom 2040",
-      "system": "gamegear",
-      "bucket": "gamegear/Phantom 2040 (USA, Europe).zip"
-    },
-    {
-      "title": "Todd's Adventures in Slime World",
-      "system": "atarilynx",
-      "bucket": "atarilynx/Todd's Adventures in Slime World (World).zip"
-    },
-    {
       "title": "Legend of Zelda, The - A Link to the Past",
       "system": "snes",
-      "bucket": "snes/Legend of Zelda, The - A Link to the Past (USA).zip"
+      "bucket": "snes/Legend of Zelda, The - A Link to the Past (USA).zip",
+      "variants": [
+        {
+          "bucket": "gba/Legend of Zelda, The - A Link to the Past & Four Swords (USA).zip",
+          "note": "GBA: adds Four Swords multiplayer and a bonus dungeon"
+        }
+      ]
     },
     {
       "title": "Demon's Crest",
@@ -251,11 +230,6 @@
       "title": "Super Adventure Island II",
       "system": "snes",
       "bucket": "snes/Super Adventure Island II (USA).zip"
-    },
-    {
-      "title": "Phantom 2040",
-      "system": "snes",
-      "bucket": "snes/Phantom 2040 (USA).zip"
     },
     {
       "title": "Wario Land 3 (En,Ja)",
@@ -418,29 +392,25 @@
       "bucket": "nds/Spider-Man - Shattered Dimensions (USA) (En,Fr).zip"
     },
     {
-      "title": "Scurge - Hive",
-      "system": "nds",
-      "bucket": "nds/Scurge - Hive (USA) (En,Fr,Es).zip"
-    },
-    {
       "title": "Alice in Wonderland",
       "system": "nds",
       "bucket": "nds/Alice in Wonderland (USA) (En,Fr,Es) (NDSi Enhanced).zip"
     },
     {
-      "title": "Kirby Super Star Ultra",
-      "system": "nds",
-      "bucket": "nds/Kirby Super Star Ultra (USA).zip"
+      "title": "Kirby Super Star",
+      "system": "snes",
+      "bucket": "snes/Kirby Super Star (USA).zip",
+      "variants": [
+        {
+          "bucket": "nds/Kirby Super Star Ultra (USA).zip",
+          "note": "DS: adds four new modes and redone graphics"
+        }
+      ]
     },
     {
       "title": "Super Metroid (En,Fr,De)",
       "system": "snes",
       "bucket": "snes/Super Metroid (Japan, USA) (En,Ja).zip"
-    },
-    {
-      "title": "Kirby Super Star",
-      "system": "snes",
-      "bucket": "snes/Kirby Super Star (USA).zip"
     },
     {
       "title": "Castlevania - The Dracula X Chronicles",
@@ -488,24 +458,9 @@
       "bucket": "xbox360/Batman - Arkham Asylum - Game of the Year Edition (USA) (En,Fr,De,Es,It).zar"
     },
     {
-      "title": "Metroid",
-      "system": "fds",
-      "bucket": "fds/Metroid (Japan) (Rev 3).zip"
-    },
-    {
-      "title": "Dracula II - Noroi no Fuuin",
-      "system": "fds",
-      "bucket": "fds/Dracula II - Noroi no Fuuin (Japan).zip"
-    },
-    {
       "title": "Popful Mail",
       "system": "segacd",
       "bucket": "segacd/Popful Mail (USA) (RE).chd"
-    },
-    {
-      "title": "Shadow Man",
-      "system": "n64",
-      "bucket": "n64/Shadow Man (USA).zip"
     },
     {
       "title": "Shadow Man",

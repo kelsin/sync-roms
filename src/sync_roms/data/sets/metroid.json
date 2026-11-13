@@ -8,11 +8,6 @@
       "bucket": "nes/Metroid (USA).zip"
     },
     {
-      "title": "Metroid (Rev 3)",
-      "system": "fds",
-      "bucket": "fds/Metroid (Japan) (Rev 3).zip"
-    },
-    {
       "title": "Metroid II - Return of Samus",
       "system": "gb",
       "bucket": "gb/Metroid II - Return of Samus (World).zip"
@@ -26,11 +21,6 @@
       "title": "Metroid - Zero Mission",
       "system": "gba",
       "bucket": "gba/Metroid - Zero Mission (USA).zip"
-    },
-    {
-      "title": "Classic NES Series - Metroid",
-      "system": "gba",
-      "bucket": "gba/Classic NES Series - Metroid (USA, Europe).zip"
     },
     {
       "title": "Metroid Prime (Rev 2)",

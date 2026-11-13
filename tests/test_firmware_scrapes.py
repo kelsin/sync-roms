@@ -508,13 +508,14 @@ class EsdeExtrasSyncTest(unittest.TestCase):
     def test_mirror_wanted_skips_scrapes_esde_but_keeps_onion_themes(self):
         listings = {"BIOS/": {"BIOS/gba_bios.bin": 1}, "os/onion/Themes/": {"os/onion/Themes/t/a.png": 2},
                     "scrapes/esde/": {"scrapes/esde/themes/t/theme.xml": 3},
+                    "os/drivers/": {"os/drivers/a.zip": 6, "os/drivers/a.tag": 7},
                     "gba/": {"gba/A.zip": 4}, "scrapes/gba/": {"scrapes/gba/covers/A.png": 5}}
         manifest = {"systems": [{"bucket": "gba", "games": [{"bucket": "gba/A.zip"}], "bios": {"files": ["gba_bios.bin"]}}]}
         with mock.patch.object(mirroring.s3, "read_root", return_value=None), \
                 mock.patch.object(mirroring.s3, "list_sizes", side_effect=lambda p, sizes=True: listings.get(p, {})) as ls:
             wanted = mirroring.mirror_wanted(manifest)
         self.assertEqual(wanted, {"gba/A.zip": 4, "scrapes/gba/covers/A.png": 5, "BIOS/gba_bios.bin": 1,
-                                  "os/onion/Themes/t/a.png": 2})
+                                  "os/onion/Themes/t/a.png": 2, "os/drivers/a.zip": 6, "os/drivers/a.tag": 7})
         self.assertNotIn("scrapes/esde/", [c.args[0] for c in ls.call_args_list])
 
 

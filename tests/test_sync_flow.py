@@ -62,10 +62,42 @@ class CleanDirsTest(unittest.TestCase):
         _, out = self.run_clean(boom)
         self.assertIn("Skipped", out)
 
-    def test_retries_dot_clean(self):
-        results = iter([(True, ["/x/._a"]), (True, [])])
-        _, out = self.run_clean(lambda p: next(results))
-        self.assertIn("Retrying dot_clean", out)
+    def run_real_dot_clean(self, removable=True):
+        """clean_dirs with the real dot_clean (its command faked to leave ._a and ._b), counting the card walks and removals."""
+        walks, removed, real_walk, real_remove, real_dot_clean = [], [], os.walk, os.remove, clean.dot_clean
+
+        def walk(path):
+            walks.append(path)
+            return real_walk(path)
+
+        def remove(path):
+            if not removable:
+                raise PermissionError("busy")
+            removed.append(os.path.basename(path))
+            real_remove(path)
+
+        def leave_files(root):
+            os.makedirs(os.path.join(root, "ROMs"), exist_ok=True)
+            for name in ("._a", os.path.join("ROMs", "._b")):
+                open(os.path.join(root, name), "w").close()
+            return real_dot_clean(root)
+        with mock.patch.object(clean.os, "walk", walk), mock.patch.object(clean.os, "remove", remove):
+            _, out = self.run_clean(leave_files, spotlight=False)
+        return walks, removed, out
+
+    def test_a_retry_removes_the_files_dot_clean_left_without_walking_the_card_again(self):
+        walks, removed, out = self.run_real_dot_clean()
+        self.assertEqual(len(walks), 1)
+        self.assertEqual(sorted(removed), ["._a", "._b"])
+        self.assertIn("Removing the 2 ._ file(s) dot_clean left", out)
+        self.assertNotIn("still there", out)
+
+    def test_files_that_cannot_be_removed_are_listed_after_the_retries_without_walking_again(self):
+        with contextlib.redirect_stderr(io.StringIO()):
+            walks, _, out = self.run_real_dot_clean(removable=False)
+        self.assertEqual(len(walks), 1)
+        self.assertEqual(out.count("Removing the 2 ._ file(s) dot_clean left"), clean.DOT_CLEAN_RETRIES)
+        self.assertIn("2 ._ file(s) are still there after dot_clean", out)
 
     def test_sudo_is_skipped_when_spotlight_is_off(self):
         calls, out = self.run_clean(lambda p: (True, []), tty=True, yes=False, spotlight=False)
@@ -93,10 +125,10 @@ class CleanDirsTest(unittest.TestCase):
 
     def test_quiet_lists_the_files_dot_clean_left(self):
         with mock.patch.object(ui, "QUIET", True), contextlib.redirect_stderr(io.StringIO()) as err:
-            _, out = self.run_clean(lambda p: (True, ["/x/._a"]), spotlight=False)
+            _, _, out = self.run_real_dot_clean(removable=False)
         self.assertIn("still there after dot_clean", err.getvalue())
-        self.assertIn("/x/._a", err.getvalue())
-        self.assertNotIn("/x/._a", out)
+        self.assertIn("._b", err.getvalue())
+        self.assertNotIn("._b", out)
 
 
 class DownloadInterruptTest(unittest.TestCase):
@@ -393,6 +425,46 @@ class SyncFlowTest(unittest.TestCase):
         self.assertIn("custom-Favs.cfg", out)
         self.assertFalse(self.after)
         self.assertFalse([u for u in updates if "frontend_collections" in u])
+
+    def put_favs(self, card_dir):
+        """The card as a first sync with FAVS left it: its collection written and enabled."""
+        plan = frontend.plan_collections("esde", card_dir, {"Favs": ["%ROMPATH%/gba/Game.zip"]}, [])
+        frontend.apply_collections(plan, "esde", card_dir)
+
+    def test_a_second_identical_sync_writes_no_collection_and_skips_card_cleaning(self):
+        _, out, updates, root, _ = self.run_sync(cards={"collections": ["favs"], "frontend_collections": ["Favs"]},
+                                                 colls=[FAVS], files=["ROMs/gba/Game.zip"], plan=[], prepare=self.put_favs)
+        self.assertNotIn("collection(s)", out)
+        self.assertIsNone(root)
+        self.assertFalse([u for u in updates if "frontend_collections" in u])
+
+    def test_a_collection_edited_on_the_card_is_written_again_and_cleaned(self):
+        def prepare(card_dir):
+            self.put_favs(card_dir)
+            with open(frontend.collection_path("esde", card_dir, "Favs"), "w") as f:
+                f.write("edited\n")
+        _, out, _, root, _ = self.run_sync(cards={"collections": ["favs"], "frontend_collections": ["Favs"]},
+                                           colls=[FAVS], files=["ROMs/gba/Game.zip"], plan=[], prepare=prepare,
+                                           after=lambda d: read_from(d, "ES-DE", "collections", "custom-Favs.cfg"))
+        self.assertIn("Wrote 1 collection(s)", out)
+        self.assertEqual(self.after, "%ROMPATH%/gba/Game.zip\n")
+        self.assertIsNotNone(root)
+
+    def test_a_collection_unlisted_in_settings_by_hand_is_listed_again_and_cleaned(self):
+        def prepare(card_dir):
+            self.put_favs(card_dir)
+            os.remove(frontend.settings_path("esde", card_dir))
+        _, out, _, root, _ = self.run_sync(cards={"collections": ["favs"], "frontend_collections": ["Favs"]},
+                                           colls=[FAVS], files=["ROMs/gba/Game.zip"], plan=[], prepare=prepare,
+                                           after=lambda d: read_from(d, "ES-DE", "settings", "es_settings.xml"))
+        self.assertNotIn("collection(s)", out)
+        self.assertIn('value="Favs"', self.after)
+        self.assertIsNotNone(root)
+
+    def test_dry_run_does_not_say_an_unchanged_collection_would_be_written(self):
+        _, out, _, _, _ = self.run_sync(cards={"collections": ["favs"], "frontend_collections": ["Favs"]}, colls=[FAVS],
+                                        files=["ROMs/gba/Game.zip"], dry_run=True, prepare=self.put_favs)
+        self.assertNotIn("would write custom-Favs.cfg", out)
 
     def test_a_collection_game_on_a_system_the_device_cant_play_is_ignored(self):
         psx = {"name": "PlayStation", "bucket": "psx", "folders": {"esde": "psx"}, "bios": {"files": []},

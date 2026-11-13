@@ -5,7 +5,13 @@
     {
       "title": "Super Mario 64",
       "system": "n64",
-      "bucket": "n64/Super Mario 64 (USA).zip"
+      "bucket": "n64/Super Mario 64 (USA).zip",
+      "variants": [
+        {
+          "bucket": "nds/Super Mario 64 DS (USA, Australia) (Rev 1).zip",
+          "note": "DS: adds Yoshi, Luigi and Wario, 30 more stars and minigames"
+        }
+      ]
     },
     {
       "title": "Banjo-Kazooie",
@@ -25,12 +31,24 @@
     {
       "title": "Conker's Bad Fur Day",
       "system": "n64",
-      "bucket": "n64/Conker's Bad Fur Day (USA).zip"
+      "bucket": "n64/Conker's Bad Fur Day (USA).zip",
+      "variants": [
+        {
+          "bucket": "xbox/Conker - Live & Reloaded (USA) (En,Ja,Fr,De,Es,It).iso",
+          "note": "Xbox: remade graphics and new online/class multiplayer; censored"
+        }
+      ]
     },
     {
       "title": "Rayman 2: The Great Escape",
       "system": "n64",
-      "bucket": "n64/Rayman 2 - The Great Escape (USA) (En,Fr,De,Es,It).zip"
+      "bucket": "n64/Rayman 2 - The Great Escape (USA) (En,Fr,De,Es,It).zip",
+      "variants": [
+        {
+          "bucket": "dreamcast/Rayman 2 - The Great Escape (USA) (En,Fr,De,Es,It).chd",
+          "note": "Dreamcast: sharper visuals and extra minigames"
+        }
+      ]
     },
     {
       "title": "Rocket: Robot on Wheels",
@@ -48,14 +66,14 @@
       "bucket": "n64/Glover (USA).zip"
     },
     {
-      "title": "Gex 64: Enter the Gecko",
-      "system": "n64",
-      "bucket": "n64/Gex 64 - Enter the Gecko (USA).zip"
+      "title": "Gex: Enter the Gecko",
+      "system": "psx",
+      "bucket": "psx/Gex - Enter the Gecko (USA).chd"
     },
     {
       "title": "Gex 3: Deep Cover Gecko",
-      "system": "n64",
-      "bucket": "n64/Gex 3 - Deep Cover Gecko (USA).zip"
+      "system": "psx",
+      "bucket": "psx/Gex 3 - Deep Cover Gecko (USA).chd"
     },
     {
       "title": "Chameleon Twist",
@@ -99,13 +117,13 @@
     },
     {
       "title": "Donald Duck: Goin' Quackers",
-      "system": "n64",
-      "bucket": "n64/Donald Duck - Goin' Quackers (USA) (En,Fr,De,Es,It).zip"
+      "system": "dreamcast",
+      "bucket": "dreamcast/Disney's Donald Duck - Goin' Quackers (USA).chd"
     },
     {
       "title": "Toy Story 2: Buzz Lightyear to the Rescue!",
-      "system": "n64",
-      "bucket": "n64/Toy Story 2 - Buzz Lightyear to the Rescue! (USA) (Rev 1).zip"
+      "system": "psx",
+      "bucket": "psx/Disney-Pixar Toy Story 2 - Buzz Lightyear to the Rescue! (USA) (Rev 1).chd"
     },
     {
       "title": "Blues Brothers 2000",
@@ -113,9 +131,9 @@
       "bucket": "n64/Blues Brothers 2000 (USA).zip"
     },
     {
-      "title": "A Bug's Life",
-      "system": "n64",
-      "bucket": "n64/Bug's Life, A (USA).zip"
+      "title": "Disney-Pixar A Bug's Life",
+      "system": "psx",
+      "bucket": "psx/Disney-Pixar A Bug's Life (USA).chd"
     },
     {
       "title": "Duck Dodgers Starring Daffy Duck",
@@ -173,16 +191,6 @@
       "bucket": "psx/Croc 2 (USA).chd"
     },
     {
-      "title": "Gex: Enter the Gecko",
-      "system": "psx",
-      "bucket": "psx/Gex - Enter the Gecko (USA).chd"
-    },
-    {
-      "title": "Gex 3: Deep Cover Gecko",
-      "system": "psx",
-      "bucket": "psx/Gex 3 - Deep Cover Gecko (USA).chd"
-    },
-    {
       "title": "Jumping Flash!",
       "system": "psx",
       "bucket": "psx/Jumping Flash! (USA).chd"
@@ -191,11 +199,6 @@
       "title": "Jumping Flash! 2",
       "system": "psx",
       "bucket": "psx/Jumping Flash! 2 (USA).chd"
-    },
-    {
-      "title": "Rayman 2: The Great Escape",
-      "system": "psx",
-      "bucket": "psx/Rayman 2 - The Great Escape (USA) (En,Fr,Es).chd"
     },
     {
       "title": "Pac-Man World",
@@ -258,16 +261,6 @@
       "bucket": "psx/Floating Runner - Quest for the 7 Crystals (USA).chd"
     },
     {
-      "title": "Toy Story 2: Buzz Lightyear to the Rescue!",
-      "system": "psx",
-      "bucket": "psx/Disney-Pixar Toy Story 2 - Buzz Lightyear to the Rescue! (USA) (Rev 1).chd"
-    },
-    {
-      "title": "Donald Duck: Goin' Quackers",
-      "system": "psx",
-      "bucket": "psx/Disney's Donald Duck - Goin' Quackers (USA).chd"
-    },
-    {
       "title": "The Emperor's New Groove",
       "system": "psx",
       "bucket": "psx/Disney's The Emperor's New Groove (USA).chd"
@@ -306,11 +299,6 @@
       "title": "The Lion King: Simba's Mighty Adventure",
       "system": "psx",
       "bucket": "psx/Disney's The Lion King - Simba's Mighty Adventure (USA).chd"
-    },
-    {
-      "title": "Glover",
-      "system": "psx",
-      "bucket": "psx/Glover (USA).chd"
     },
     {
       "title": "The Grinch",
@@ -393,11 +381,6 @@
       "bucket": "saturn/Bug Too! (USA).chd"
     },
     {
-      "title": "Croc: Legend of the Gobbos",
-      "system": "saturn",
-      "bucket": "saturn/Croc - Legend of the Gobbos (USA).chd"
-    },
-    {
       "title": "Willy Wombat",
       "system": "saturn",
       "bucket": "saturn/Willy Wombat (Japan).chd"
@@ -405,17 +388,24 @@
     {
       "title": "Sonic Adventure International",
       "system": "dreamcast",
-      "bucket": "dreamcast/Sonic Adventure International (Japan) (En,Ja,Fr,De,Es).chd"
+      "bucket": "dreamcast/Sonic Adventure International (Japan) (En,Ja,Fr,De,Es).chd",
+      "variants": [
+        {
+          "bucket": "gc/Sonic Adventure DX - Director's Cut (USA) (En,Ja,Fr,De,Es).rvz",
+          "note": "GameCube: adds 60 missions, Metal Sonic and Game Gear games"
+        }
+      ]
     },
     {
       "title": "Sonic Adventure 2",
       "system": "dreamcast",
-      "bucket": "dreamcast/Sonic Adventure 2 (USA) (En,Ja,Fr,De,Es).chd"
-    },
-    {
-      "title": "Rayman 2: The Great Escape",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Rayman 2 - The Great Escape (USA) (En,Fr,De,Es,It).chd"
+      "bucket": "dreamcast/Sonic Adventure 2 (USA) (En,Ja,Fr,De,Es).chd",
+      "variants": [
+        {
+          "bucket": "gc/Sonic Adventure 2 - Battle (USA) (En,Ja,Fr,De,Es).rvz",
+          "note": "GameCube: adds multiplayer characters, modes and Chao features"
+        }
+      ]
     },
     {
       "title": "Super Magnetic Neo",
@@ -428,16 +418,6 @@
       "bucket": "dreamcast/Kao the Kangaroo (USA) (En,Es).chd"
     },
     {
-      "title": "Toy Story 2: Buzz Lightyear to the Rescue!",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Disney-Pixar Toy Story 2 - Buzz Lightyear to the Rescue! (USA).chd"
-    },
-    {
-      "title": "Donald Duck: Goin' Quackers",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Disney's Donald Duck - Goin' Quackers (USA).chd"
-    },
-    {
       "title": "Evil Twin: Cyprien's Chronicles",
       "system": "dreamcast",
       "bucket": "dreamcast/Evil Twin - Cyprien's Chronicles (Europe) (En,Fr,De,Es,It).chd"
@@ -448,19 +428,9 @@
       "bucket": "dreamcast/Napple Tale - Arsia in Daydream (Japan).chd"
     },
     {
-      "title": "102 Dalmatians: Puppies to the Rescue",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Disney's 102 Dalmatians - Puppies to the Rescue (USA).chd"
-    },
-    {
       "title": "Fur Fighters",
       "system": "dreamcast",
       "bucket": "dreamcast/Fur Fighters (USA) (En,Fr,De,Es) (Rev B).chd"
-    },
-    {
-      "title": "The Grinch",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Grinch, The (USA) (En,Fr,Es).chd"
     },
     {
       "title": "Jak and Daxter: The Precursor Legacy",
@@ -514,8 +484,8 @@
     },
     {
       "title": "Sonic Heroes",
-      "system": "ps2",
-      "bucket": "ps2/Sonic Heroes (USA) (En,Ja,Fr,De,Es,It).chd"
+      "system": "gc",
+      "bucket": "gc/Sonic Heroes (USA) (En,Ja,Fr,De,Es,It).rvz"
     },
     {
       "title": "Daxter",
@@ -554,8 +524,8 @@
     },
     {
       "title": "Pac-Man World 3",
-      "system": "psp",
-      "bucket": "psp/Pac-Man World 3 (USA).chd"
+      "system": "gc",
+      "bucket": "gc/Pac-Man World 3 (USA).rvz"
     },
     {
       "title": "Death Jr.",
@@ -579,8 +549,8 @@
     },
     {
       "title": "Super Monkey Ball Adventure",
-      "system": "psp",
-      "bucket": "psp/Super Monkey Ball Adventure (USA).chd"
+      "system": "gc",
+      "bucket": "gc/Super Monkey Ball Adventure (USA).rvz"
     },
     {
       "title": "Gurumin: A Monstrous Adventure",
@@ -601,21 +571,6 @@
       "title": "Super Mario Sunshine",
       "system": "gc",
       "bucket": "gc/Super Mario Sunshine (USA).rvz"
-    },
-    {
-      "title": "Sonic Adventure DX: Director's Cut",
-      "system": "gc",
-      "bucket": "gc/Sonic Adventure DX - Director's Cut (USA) (En,Ja,Fr,De,Es).rvz"
-    },
-    {
-      "title": "Sonic Adventure 2: Battle",
-      "system": "gc",
-      "bucket": "gc/Sonic Adventure 2 - Battle (USA) (En,Ja,Fr,De,Es).rvz"
-    },
-    {
-      "title": "Sonic Heroes",
-      "system": "gc",
-      "bucket": "gc/Sonic Heroes (USA) (En,Ja,Fr,De,Es,It).rvz"
     },
     {
       "title": "Shadow the Hedgehog",
@@ -641,11 +596,6 @@
       "title": "Pac-Man World 2",
       "system": "gc",
       "bucket": "gc/Pac-Man World 2 (USA).rvz"
-    },
-    {
-      "title": "Pac-Man World 3",
-      "system": "gc",
-      "bucket": "gc/Pac-Man World 3 (USA).rvz"
     },
     {
       "title": "Rayman 3: Hoodlum Havoc",
@@ -758,11 +708,6 @@
       "bucket": "gc/Taz - Wanted (USA) (En,Fr,De,Es,It).rvz"
     },
     {
-      "title": "Donald Duck: Goin' Quackers",
-      "system": "gc",
-      "bucket": "gc/Disney's Donald Duck - Goin' Quackers (USA) (En,Fr).rvz"
-    },
-    {
       "title": "Animaniacs: The Great Edgar Hunt",
       "system": "gc",
       "bucket": "gc/Animaniacs - The Great Edgar Hunt (USA).rvz"
@@ -853,11 +798,6 @@
       "bucket": "gc/Scooby-Doo! Unmasked (USA) (En,Fr).rvz"
     },
     {
-      "title": "Super Monkey Ball Adventure",
-      "system": "gc",
-      "bucket": "gc/Super Monkey Ball Adventure (USA).rvz"
-    },
-    {
       "title": "Wallace & Gromit in Project Zoo",
       "system": "gc",
       "bucket": "gc/Wallace & Gromit in Project Zoo (USA).rvz"
@@ -923,11 +863,6 @@
       "bucket": "wii/Disney Epic Mickey 2 - The Power of Two (USA) (En,Fr,Es,Pt).rvz"
     },
     {
-      "title": "Conker: Live & Reloaded",
-      "system": "xbox",
-      "bucket": "xbox/Conker - Live & Reloaded (USA) (En,Ja,Fr,De,Es,It).iso"
-    },
-    {
       "title": "Blinx: The Time Sweeper",
       "system": "xbox",
       "bucket": "xbox/Blinx - The Time Sweeper (USA) (En,Ja) (Rev 1).iso"
@@ -950,17 +885,13 @@
     {
       "title": "Captain Toad: Treasure Tracker",
       "system": "wiiu",
-      "bucket": "wiiu/Captain Toad Treasure Tracker (US) (v16).wua"
-    },
-    {
-      "title": "Super Mario 64 DS",
-      "system": "nds",
-      "bucket": "nds/Super Mario 64 DS (USA, Australia) (Rev 1).zip"
-    },
-    {
-      "title": "Rayman DS",
-      "system": "nds",
-      "bucket": "nds/Rayman DS (USA) (En,Fr,Es).zip"
+      "bucket": "wiiu/Captain Toad Treasure Tracker (US) (v16).wua",
+      "variants": [
+        {
+          "bucket": "3ds/Captain Toad - Treasure Tracker (USA) (En,Fr,Es).zip",
+          "note": "3DS: adds Super Mario Odyssey bonus levels"
+        }
+      ]
     },
     {
       "title": "Crash of the Titans",
@@ -988,29 +919,14 @@
       "bucket": "3ds/Super Mario 3D Land (USA) (En,Fr,Es) (Rev 1).zip"
     },
     {
-      "title": "Rayman 3D",
-      "system": "3ds",
-      "bucket": "3ds/Rayman 3D (USA) (En,Fr,De,Es,It).zip"
-    },
-    {
       "title": "Sonic Lost World",
       "system": "3ds",
       "bucket": "3ds/Sonic Lost World (USA) (En,Fr,Es).zip"
     },
     {
-      "title": "Captain Toad: Treasure Tracker",
-      "system": "3ds",
-      "bucket": "3ds/Captain Toad - Treasure Tracker (USA) (En,Fr,Es).zip"
-    },
-    {
       "title": "Tearaway",
       "system": "psvita",
       "bucket": "psvita/Tearaway™ [PCSA00144] [USA] [NoNpDRM].zip"
-    },
-    {
-      "title": "Epic Mickey 2: The Power of Two",
-      "system": "psvita",
-      "bucket": "psvita/Disney Epic Mickey 2 [PCSA00110] [USA] [NoNpDRM].zip"
     },
     {
       "title": "Alice: Madness Returns",

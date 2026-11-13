@@ -3,9 +3,9 @@
   "description": "Versus fighters across arcade, console and handheld.",
   "games": [
     {
-      "title": "Street Fighter II: The World Warrior",
+      "title": "Street Fighter II': Hyper Fighting",
       "system": "fbneo",
-      "bucket": "fbneo/sf2um.zip"
+      "bucket": "fbneo/sf2hfu.zip"
     },
     {
       "title": "Super Street Fighter II Turbo",
@@ -15,7 +15,13 @@
     {
       "title": "Street Fighter Alpha 3",
       "system": "fbneo",
-      "bucket": "fbneo/sfa3u.zip"
+      "bucket": "fbneo/sfa3u.zip",
+      "variants": [
+        {
+          "bucket": "psp/Street Fighter Alpha 3 Max (USA).chd",
+          "note": "PSP: adds World Tour mode and the full home roster"
+        }
+      ]
     },
     {
       "title": "Mortal Kombat II",
@@ -25,7 +31,13 @@
     {
       "title": "Vampire Savior",
       "system": "fbneo",
-      "bucket": "fbneo/vsavu.zip"
+      "bucket": "fbneo/vsavu.zip",
+      "variants": [
+        {
+          "bucket": "psp/Darkstalkers Chronicle - The Chaos Tower (USA).chd",
+          "note": "PSP: every fighter from all three games, plus Chaos Tower mode"
+        }
+      ]
     },
     {
       "title": "X-Men vs. Street Fighter",
@@ -35,7 +47,13 @@
     {
       "title": "The King of Fighters '98",
       "system": "fbneo",
-      "bucket": "fbneo/kof98.zip"
+      "bucket": "fbneo/kof98.zip",
+      "variants": [
+        {
+          "bucket": "ps2/King of Fighters '98, The - Ultimate Match (USA).chd",
+          "note": "PS2: Ultimate Match, rebalanced with more fighters and modes"
+        }
+      ]
     },
     {
       "title": "The King of Fighters 2002",
@@ -63,21 +81,6 @@
       "bucket": "fbneo/lastblad.zip"
     },
     {
-      "title": "Street Fighter II': Champion Edition",
-      "system": "fbneo",
-      "bucket": "fbneo/sf2ceuc.zip"
-    },
-    {
-      "title": "Street Fighter II': Hyper Fighting",
-      "system": "fbneo",
-      "bucket": "fbneo/sf2hfu.zip"
-    },
-    {
-      "title": "Super Street Fighter II",
-      "system": "fbneo",
-      "bucket": "fbneo/ssf2u.zip"
-    },
-    {
       "title": "Street Fighter Alpha",
       "system": "fbneo",
       "bucket": "fbneo/sfau.zip"
@@ -95,12 +98,24 @@
     {
       "title": "Killer Instinct 2",
       "system": "mame",
-      "bucket": "mame/kinst2.zip"
+      "bucket": "mame/kinst2.zip",
+      "variants": [
+        {
+          "bucket": "n64/Killer Instinct Gold (USA) (Rev 2).zip",
+          "note": "N64: adds team battles, training mode and 3D stages"
+        }
+      ]
     },
     {
       "title": "Street Fighter EX Plus",
       "system": "mame",
-      "bucket": "mame/sfexp.zip"
+      "bucket": "mame/sfexp.zip",
+      "variants": [
+        {
+          "bucket": "psx/Street Fighter EX Plus Alpha (USA).chd",
+          "note": "PS1: adds Dhalsim, Sakura and new modes"
+        }
+      ]
     },
     {
       "title": "Street Fighter EX2 Plus",
@@ -110,32 +125,68 @@
     {
       "title": "Tekken",
       "system": "mame",
-      "bucket": "mame/tekken.zip"
+      "bucket": "mame/tekken.zip",
+      "variants": [
+        {
+          "bucket": "psx/Tekken (USA).chd",
+          "note": "PS1: adds playable bosses and new modes"
+        }
+      ]
     },
     {
       "title": "Tekken 2",
       "system": "mame",
-      "bucket": "mame/tekken2.zip"
+      "bucket": "mame/tekken2.zip",
+      "variants": [
+        {
+          "bucket": "psx/Tekken 2 (USA) (Rev 1).chd",
+          "note": "PS1: adds playable bosses, Survival and Team Battle modes"
+        }
+      ]
     },
     {
       "title": "Tekken 3",
       "system": "mame",
-      "bucket": "mame/tekken3.zip"
+      "bucket": "mame/tekken3.zip",
+      "variants": [
+        {
+          "bucket": "psx/Tekken 3 (USA).chd",
+          "note": "PS1: adds Tekken Force, Tekken Ball and new characters"
+        }
+      ]
     },
     {
       "title": "Tekken Tag Tournament",
       "system": "mame",
-      "bucket": "mame/tekkentt.zip"
+      "bucket": "mame/tekkentt.zip",
+      "variants": [
+        {
+          "bucket": "ps2/Tekken Tag Tournament (USA) (v2.00).chd",
+          "note": "PS2: remastered graphics, plus Tekken Bowl and practice modes"
+        }
+      ]
     },
     {
       "title": "Soul Edge",
       "system": "mame",
-      "bucket": "mame/souledge.zip"
+      "bucket": "mame/souledge.zip",
+      "variants": [
+        {
+          "bucket": "psx/Soul Blade (USA) (Rev 1).chd",
+          "note": "PS1: adds Edge Master mode and extra characters"
+        }
+      ]
     },
     {
       "title": "Soulcalibur",
       "system": "mame",
-      "bucket": "mame/soulclbr.zip"
+      "bucket": "mame/soulclbr.zip",
+      "variants": [
+        {
+          "bucket": "dreamcast/Soulcalibur (USA).chd",
+          "note": "Dreamcast: adds Mission Battle, new characters and remade visuals"
+        }
+      ]
     },
     {
       "title": "Virtua Fighter",
@@ -150,7 +201,13 @@
     {
       "title": "Dead or Alive++",
       "system": "mame",
-      "bucket": "mame/doapp.zip"
+      "bucket": "mame/doapp.zip",
+      "variants": [
+        {
+          "bucket": "psx/Dead or Alive (USA).chd",
+          "note": "PS1: adds Bayman and Raidou, training mode and new costumes"
+        }
+      ]
     },
     {
       "title": "Final Fight Revenge",
@@ -170,7 +227,13 @@
     {
       "title": "Rival Schools: United by Fate",
       "system": "mame",
-      "bucket": "mame/rvschool.zip"
+      "bucket": "mame/rvschool.zip",
+      "variants": [
+        {
+          "bucket": "psx/Rival Schools - United by Fate (USA).m3u",
+          "note": "PS1: adds the Evolution disc and story mode"
+        }
+      ]
     },
     {
       "title": "Star Gladiator",
@@ -180,12 +243,24 @@
     {
       "title": "Tech Romancer",
       "system": "mame",
-      "bucket": "mame/techromn.zip"
+      "bucket": "mame/techromn.zip",
+      "variants": [
+        {
+          "bucket": "dreamcast/Tech Romancer (USA).chd",
+          "note": "Dreamcast: adds a branching story mode"
+        }
+      ]
     },
     {
       "title": "Ehrgeiz",
       "system": "mame",
-      "bucket": "mame/ehrgeiz.zip"
+      "bucket": "mame/ehrgeiz.zip",
+      "variants": [
+        {
+          "bucket": "psx/Ehrgeiz - God Bless the Ring (USA).chd",
+          "note": "PS1: adds the Forsaken Dungeon RPG mode and minigames"
+        }
+      ]
     },
     {
       "title": "Fighting Layer",
@@ -265,7 +340,13 @@
     {
       "title": "Ultimate Mortal Kombat 3",
       "system": "fbneo",
-      "bucket": "fbneo/umk3.zip"
+      "bucket": "fbneo/umk3.zip",
+      "variants": [
+        {
+          "bucket": "nds/Ultimate Mortal Kombat (USA) (En,Fr,De,Es,It).zip",
+          "note": "DS: adds the Puzzle Kombat mini-game"
+        }
+      ]
     },
     {
       "title": "Marvel Super Heroes",
@@ -423,14 +504,15 @@
       "bucket": "fbneo/redearth.zip"
     },
     {
-      "title": "JoJo's Venture",
-      "system": "fbneo",
-      "bucket": "fbneo/jojou.zip"
-    },
-    {
       "title": "JoJo's Bizarre Adventure: Heritage for the Future",
       "system": "fbneo",
-      "bucket": "fbneo/jojoba.zip"
+      "bucket": "fbneo/jojoba.zip",
+      "variants": [
+        {
+          "bucket": "psx/JoJo's Bizarre Adventure (USA).chd",
+          "note": "PlayStation: adds a Super Story mode"
+        }
+      ]
     },
     {
       "title": "Cyberbots: Fullmetal Madness",
@@ -848,61 +930,6 @@
       "bucket": "fbneo/karatour.zip"
     },
     {
-      "title": "Street Fighter Alpha 2",
-      "system": "snes",
-      "bucket": "snes/Street Fighter Alpha 2 (USA).zip"
-    },
-    {
-      "title": "Mortal Kombat II (Rev 1)",
-      "system": "snes",
-      "bucket": "snes/Mortal Kombat II (USA) (Rev 1).zip"
-    },
-    {
-      "title": "Killer Instinct (Rev 1)",
-      "system": "snes",
-      "bucket": "snes/Killer Instinct (USA) (Rev 1).zip"
-    },
-    {
-      "title": "Street Fighter II",
-      "system": "snes",
-      "bucket": "snes/Street Fighter II (USA).zip"
-    },
-    {
-      "title": "Street Fighter II Turbo",
-      "system": "snes",
-      "bucket": "snes/Street Fighter II Turbo (USA) (Rev 1).zip"
-    },
-    {
-      "title": "Super Street Fighter II",
-      "system": "snes",
-      "bucket": "snes/Super Street Fighter II (USA) (Rev 1).zip"
-    },
-    {
-      "title": "Mortal Kombat",
-      "system": "snes",
-      "bucket": "snes/Mortal Kombat (USA) (Rev 1).zip"
-    },
-    {
-      "title": "Ultimate Mortal Kombat 3",
-      "system": "snes",
-      "bucket": "snes/Ultimate Mortal Kombat 3 (USA).zip"
-    },
-    {
-      "title": "Fatal Fury Special",
-      "system": "snes",
-      "bucket": "snes/Fatal Fury Special (USA).zip"
-    },
-    {
-      "title": "Samurai Shodown",
-      "system": "snes",
-      "bucket": "snes/Samurai Shodown (USA).zip"
-    },
-    {
-      "title": "World Heroes 2",
-      "system": "snes",
-      "bucket": "snes/World Heroes 2 (USA).zip"
-    },
-    {
       "title": "Clay Fighter",
       "system": "snes",
       "bucket": "snes/Clay Fighter (USA).zip"
@@ -916,11 +943,6 @@
       "title": "WeaponLord",
       "system": "snes",
       "bucket": "snes/WeaponLord (USA).zip"
-    },
-    {
-      "title": "Fighter's History",
-      "system": "snes",
-      "bucket": "snes/Fighter's History (USA) (Rev 1).zip"
     },
     {
       "title": "Mighty Morphin Power Rangers - The Fighting Edition",
@@ -948,54 +970,20 @@
       "bucket": "snes/Bishoujo Senshi Sailor Moon S - Jougai Rantou! Shuyaku Soudatsusen (Japan).zip"
     },
     {
-      "title": "Art of Fighting",
-      "system": "snes",
-      "bucket": "snes/Art of Fighting (USA).zip"
-    },
-    {
-      "title": "Fatal Fury",
-      "system": "snes",
-      "bucket": "snes/Fatal Fury (USA).zip"
-    },
-    {
-      "title": "Fatal Fury 2",
-      "system": "snes",
-      "bucket": "snes/Fatal Fury 2 (USA).zip"
-    },
-    {
-      "title": "World Heroes",
-      "system": "snes",
-      "bucket": "snes/World Heroes (USA).zip"
-    },
-    {
-      "title": "Mortal Kombat 3",
-      "system": "snes",
-      "bucket": "snes/Mortal Kombat 3 (USA).zip"
-    },
-    {
-      "title": "Primal Rage",
-      "system": "snes",
-      "bucket": "snes/Primal Rage (USA).zip"
-    },
-    {
-      "title": "Saturday Night Slam Masters",
-      "system": "snes",
-      "bucket": "snes/Saturday Night Slam Masters (USA).zip"
-    },
-    {
-      "title": "Power Instinct",
-      "system": "snes",
-      "bucket": "snes/Power Instinct (USA).zip"
-    },
-    {
       "title": "Clay Fighter 2 - Judgment Clay",
       "system": "snes",
       "bucket": "snes/Clay Fighter 2 - Judgment Clay (USA).zip"
     },
     {
       "title": "Brutal - Paws of Fury",
-      "system": "snes",
-      "bucket": "snes/Brutal - Paws of Fury (USA).zip"
+      "system": "genesis",
+      "bucket": "genesis/Brutal - Paws of Fury (USA).zip",
+      "variants": [
+        {
+          "bucket": "sega32x/Brutal - Above the Claw (USA).zip",
+          "note": "32X: Above the Claw adds a playable boss and new moves"
+        }
+      ]
     },
     {
       "title": "Battle Blaze",
@@ -1019,8 +1007,8 @@
     },
     {
       "title": "Shaq-Fu",
-      "system": "snes",
-      "bucket": "snes/Shaq-Fu (USA).zip"
+      "system": "genesis",
+      "bucket": "genesis/Shaq-Fu (USA, Europe).zip"
     },
     {
       "title": "Justice League Task Force",
@@ -1038,9 +1026,9 @@
       "bucket": "snes/Ranma 1-2 - Hard Battle (USA).zip"
     },
     {
-      "title": "Ballz 3D - Fighting at Its Ballziest",
-      "system": "snes",
-      "bucket": "snes/Ballz 3D - Fighting at Its Ballziest (USA).zip"
+      "title": "Ballz 3D - The Battle of the Ballz",
+      "system": "genesis",
+      "bucket": "genesis/Ballz 3D - The Battle of the Ballz (USA, Europe).zip"
     },
     {
       "title": "Street Combat",
@@ -1071,11 +1059,6 @@
       "title": "Dragon Ball Z - Super Butouden 3",
       "system": "snes",
       "bucket": "snes/Dragon Ball Z - Super Butouden 3 (Japan).zip"
-    },
-    {
-      "title": "Ryuuko no Ken 2",
-      "system": "snes",
-      "bucket": "snes/Ryuuko no Ken 2 (Japan).zip"
     },
     {
       "title": "Kidou Butouden G Gundam",
@@ -1153,49 +1136,15 @@
       "bucket": "snes/Hiryuu no Ken S - Golden Fighter (Japan).zip"
     },
     {
-      "title": "Mortal Kombat 3",
-      "system": "genesis",
-      "bucket": "genesis/Mortal Kombat 3 (USA).zip"
-    },
-    {
-      "title": "Street Fighter II' - Special Champion Edition",
-      "system": "genesis",
-      "bucket": "genesis/Street Fighter II' - Special Champion Edition (USA).zip"
-    },
-    {
-      "title": "Mortal Kombat",
-      "system": "genesis",
-      "bucket": "genesis/Mortal Kombat (World).zip"
-    },
-    {
-      "title": "Mortal Kombat II",
-      "system": "genesis",
-      "bucket": "genesis/Mortal Kombat II (World).zip"
-    },
-    {
-      "title": "Ultimate Mortal Kombat 3",
-      "system": "genesis",
-      "bucket": "genesis/Ultimate Mortal Kombat 3 (USA).zip"
-    },
-    {
-      "title": "Super Street Fighter II",
-      "system": "genesis",
-      "bucket": "genesis/Super Street Fighter II (USA).zip"
-    },
-    {
       "title": "Eternal Champions",
       "system": "genesis",
-      "bucket": "genesis/Eternal Champions (USA).zip"
-    },
-    {
-      "title": "Samurai Shodown",
-      "system": "genesis",
-      "bucket": "genesis/Samurai Shodown (USA).zip"
-    },
-    {
-      "title": "Fatal Fury 2",
-      "system": "genesis",
-      "bucket": "genesis/Fatal Fury 2 (USA, Korea) (En).zip"
+      "bucket": "genesis/Eternal Champions (USA).zip",
+      "variants": [
+        {
+          "bucket": "segacd/Eternal Champions - Challenge from the Dark Side (USA) (RE).chd",
+          "note": "Sega CD: adds characters, stages and new finishing moves"
+        }
+      ]
     },
     {
       "title": "Virtua Fighter 2",
@@ -1213,71 +1162,6 @@
       "bucket": "genesis/Yu Yu Hakusho - Makyou Toitsusen (Japan).zip"
     },
     {
-      "title": "WeaponLord",
-      "system": "genesis",
-      "bucket": "genesis/WeaponLord (USA).zip"
-    },
-    {
-      "title": "Art of Fighting",
-      "system": "genesis",
-      "bucket": "genesis/Art of Fighting (USA).zip"
-    },
-    {
-      "title": "Fatal Fury",
-      "system": "genesis",
-      "bucket": "genesis/Fatal Fury (USA).zip"
-    },
-    {
-      "title": "World Heroes",
-      "system": "genesis",
-      "bucket": "genesis/World Heroes (USA).zip"
-    },
-    {
-      "title": "Primal Rage",
-      "system": "genesis",
-      "bucket": "genesis/Primal Rage (USA, Europe).zip"
-    },
-    {
-      "title": "ClayFighter",
-      "system": "genesis",
-      "bucket": "genesis/ClayFighter (USA).zip"
-    },
-    {
-      "title": "Brutal - Paws of Fury",
-      "system": "genesis",
-      "bucket": "genesis/Brutal - Paws of Fury (USA).zip"
-    },
-    {
-      "title": "Shaq-Fu",
-      "system": "genesis",
-      "bucket": "genesis/Shaq-Fu (USA, Europe).zip"
-    },
-    {
-      "title": "Justice League Task Force",
-      "system": "genesis",
-      "bucket": "genesis/Justice League Task Force (World).zip"
-    },
-    {
-      "title": "Double Dragon V - The Shadow Falls",
-      "system": "genesis",
-      "bucket": "genesis/Double Dragon V - The Shadow Falls (USA).zip"
-    },
-    {
-      "title": "Time Killers",
-      "system": "genesis",
-      "bucket": "genesis/Time Killers (USA).zip"
-    },
-    {
-      "title": "Pit-Fighter",
-      "system": "genesis",
-      "bucket": "genesis/Pit-Fighter (World) (En,Ja).zip"
-    },
-    {
-      "title": "Ballz 3D - The Battle of the Ballz",
-      "system": "genesis",
-      "bucket": "genesis/Ballz 3D - The Battle of the Ballz (USA, Europe).zip"
-    },
-    {
       "title": "Deadly Moves",
       "system": "genesis",
       "bucket": "genesis/Deadly Moves (USA).zip"
@@ -1293,11 +1177,6 @@
       "bucket": "genesis/Mighty Morphin Power Rangers (USA).zip"
     },
     {
-      "title": "Dragon - The Bruce Lee Story",
-      "system": "genesis",
-      "bucket": "genesis/Dragon - The Bruce Lee Story (USA).zip"
-    },
-    {
       "title": "Street Smart",
       "system": "genesis",
       "bucket": "genesis/Street Smart (Japan, USA) (En).zip"
@@ -1306,16 +1185,6 @@
       "title": "Dragon Ball Z - Buyuu Retsuden",
       "system": "genesis",
       "bucket": "genesis/Dragon Ball Z - Buyuu Retsuden (Japan).zip"
-    },
-    {
-      "title": "Gouketsuji Ichizoku",
-      "system": "genesis",
-      "bucket": "genesis/Gouketsuji Ichizoku (Japan).zip"
-    },
-    {
-      "title": "Tekken 3",
-      "system": "psx",
-      "bucket": "psx/Tekken 3 (USA).chd"
     },
     {
       "title": "Bushido Blade",
@@ -1328,19 +1197,20 @@
       "bucket": "n64/Super Smash Bros. (USA).zip"
     },
     {
-      "title": "Killer Instinct Gold",
-      "system": "n64",
-      "bucket": "n64/Killer Instinct Gold (USA) (Rev 2).zip"
-    },
-    {
       "title": "Mortal Kombat Trilogy",
-      "system": "n64",
-      "bucket": "n64/Mortal Kombat Trilogy (USA) (Rev 2).zip"
+      "system": "psx",
+      "bucket": "psx/Mortal Kombat Trilogy (USA) (Rev 1).chd"
     },
     {
       "title": "Mortal Kombat 4",
-      "system": "n64",
-      "bucket": "n64/Mortal Kombat 4 (USA).zip"
+      "system": "psx",
+      "bucket": "psx/Mortal Kombat 4 (USA).chd",
+      "variants": [
+        {
+          "bucket": "dreamcast/Mortal Kombat Gold (USA) (Rev 1).chd",
+          "note": "Dreamcast: Gold adds returning fighters and sharper graphics"
+        }
+      ]
     },
     {
       "title": "Fighters Destiny",
@@ -1355,12 +1225,13 @@
     {
       "title": "Clay Fighter 63 1-3",
       "system": "n64",
-      "bucket": "n64/Clay Fighter 63 1-3 (USA).zip"
-    },
-    {
-      "title": "Mace - The Dark Age",
-      "system": "n64",
-      "bucket": "n64/Mace - The Dark Age (USA).zip"
+      "bucket": "n64/Clay Fighter 63 1-3 (USA).zip",
+      "variants": [
+        {
+          "bucket": "n64/Clay Fighter - Sculptor's Cut (USA).zip",
+          "note": "N64: Sculptor's Cut adds four fighters and new moves"
+        }
+      ]
     },
     {
       "title": "Rakugakids",
@@ -1373,19 +1244,9 @@
       "bucket": "n64/Flying Dragon (USA).zip"
     },
     {
-      "title": "Clay Fighter - Sculptor's Cut",
-      "system": "n64",
-      "bucket": "n64/Clay Fighter - Sculptor's Cut (USA).zip"
-    },
-    {
-      "title": "War Gods",
-      "system": "n64",
-      "bucket": "n64/War Gods (USA).zip"
-    },
-    {
       "title": "Bio F.R.E.A.K.S.",
-      "system": "n64",
-      "bucket": "n64/Bio F.R.E.A.K.S. (USA).zip"
+      "system": "psx",
+      "bucket": "psx/Bio F.R.E.A.K.S. (USA).chd"
     },
     {
       "title": "Dark Rift",
@@ -1433,19 +1294,9 @@
       "bucket": "ps2/Tekken 5 (USA).chd"
     },
     {
-      "title": "Tekken Tag Tournament",
-      "system": "ps2",
-      "bucket": "ps2/Tekken Tag Tournament (USA) (v2.00).chd"
-    },
-    {
       "title": "Virtua Fighter 4: Evolution",
       "system": "ps2",
       "bucket": "ps2/Virtua Fighter 4 - Evolution (USA).chd"
-    },
-    {
-      "title": "Guilty Gear X2",
-      "system": "ps2",
-      "bucket": "ps2/Guilty Gear X2 (USA).chd"
     },
     {
       "title": "Guilty Gear XX Accent Core Plus",
@@ -1455,32 +1306,18 @@
     {
       "title": "Capcom vs. SNK 2",
       "system": "ps2",
-      "bucket": "ps2/Capcom vs. SNK 2 - Mark of the Millennium 2001 (USA).chd"
-    },
-    {
-      "title": "The King of Fighters '98 Ultimate Match",
-      "system": "ps2",
-      "bucket": "ps2/King of Fighters '98, The - Ultimate Match (USA).chd"
-    },
-    {
-      "title": "The King of Fighters 2002 Challenge to Ultimate Battle",
-      "system": "ps2",
-      "bucket": "ps2/King of Fighters 2002, The - Challenge to Ultimate Battle (USA).chd"
+      "bucket": "ps2/Capcom vs. SNK 2 - Mark of the Millennium 2001 (USA).chd",
+      "variants": [
+        {
+          "bucket": "gc/Capcom vs. SNK 2 EO (USA).rvz",
+          "note": "GameCube: EO adds simplified one-button special controls"
+        }
+      ]
     },
     {
       "title": "The King of Fighters XI",
       "system": "ps2",
       "bucket": "ps2/King of Fighters XI, The (USA, Canada).chd"
-    },
-    {
-      "title": "Art of Fighting Anthology",
-      "system": "ps2",
-      "bucket": "ps2/Art of Fighting Anthology (USA).chd"
-    },
-    {
-      "title": "Capcom vs. SNK 2 EO",
-      "system": "gc",
-      "bucket": "gc/Capcom vs. SNK 2 EO (USA).rvz"
     },
     {
       "title": "Soulcalibur II",
@@ -1495,7 +1332,13 @@
     {
       "title": "Mortal Kombat - Deception",
       "system": "gc",
-      "bucket": "gc/Mortal Kombat - Deception (USA).rvz"
+      "bucket": "gc/Mortal Kombat - Deception (USA).rvz",
+      "variants": [
+        {
+          "bucket": "psp/Mortal Kombat - Unchained (USA).chd",
+          "note": "PSP: adds Blaze, Frost, Jax and Kitana and an Endurance mode"
+        }
+      ]
     },
     {
       "title": "Mortal Kombat - Deadly Alliance (Rev 1)",
@@ -1573,29 +1416,9 @@
       "bucket": "gc/Battle Stadium D.O.N (Japan).rvz"
     },
     {
-      "title": "King of Fighters Collection, The - The Orochi Saga",
-      "system": "ps2",
-      "bucket": "ps2/King of Fighters Collection, The - The Orochi Saga (USA).chd"
-    },
-    {
-      "title": "Guilty Gear XX Accent Core",
-      "system": "ps2",
-      "bucket": "ps2/Guilty Gear XX Accent Core (USA).chd"
-    },
-    {
-      "title": "Virtua Fighter 4",
-      "system": "ps2",
-      "bucket": "ps2/Virtua Fighter 4 (USA).chd"
-    },
-    {
       "title": "Guilty Gear - Dust Strikers",
       "system": "nds",
       "bucket": "nds/Guilty Gear - Dust Strikers (USA).zip"
-    },
-    {
-      "title": "Ultimate Mortal Kombat",
-      "system": "nds",
-      "bucket": "nds/Ultimate Mortal Kombat (USA) (En,Fr,De,Es,It).zip"
     },
     {
       "title": "Bleach - The Blade of Fate",
@@ -1668,83 +1491,9 @@
       "bucket": "nds/Marvel Nemesis - Rise of the Imperfects (USA).zip"
     },
     {
-      "title": "Night Warriors - Darkstalkers' Revenge",
-      "system": "saturn",
-      "bucket": "saturn/Night Warriors - Darkstalkers' Revenge (USA).chd"
-    },
-    {
-      "title": "Street Fighter Collection",
-      "system": "saturn",
-      "bucket": "saturn/Street Fighter Collection (USA).m3u",
-      "files": [
-        "saturn/Street Fighter Collection (USA) (Disc 1).chd",
-        "saturn/Street Fighter Collection (USA) (Disc 2).chd"
-      ]
-    },
-    {
-      "title": "Street Fighter Alpha - Warriors' Dreams",
-      "system": "saturn",
-      "bucket": "saturn/Street Fighter Alpha - Warriors' Dreams (USA).chd"
-    },
-    {
-      "title": "Street Fighter Alpha 2",
-      "system": "saturn",
-      "bucket": "saturn/Street Fighter Alpha 2 (USA).chd"
-    },
-    {
-      "title": "Street Fighter Zero 3",
-      "system": "saturn",
-      "bucket": "saturn/Street Fighter Zero 3 (Japan).chd"
-    },
-    {
-      "title": "X-Men - Children of the Atom",
-      "system": "saturn",
-      "bucket": "saturn/X-Men - Children of the Atom (USA).chd"
-    },
-    {
-      "title": "Marvel Super Heroes",
-      "system": "saturn",
-      "bucket": "saturn/Marvel Super Heroes (USA).chd"
-    },
-    {
-      "title": "Marvel Super Heroes vs. Street Fighter",
-      "system": "saturn",
-      "bucket": "saturn/Marvel Super Heroes vs. Street Fighter (Japan).chd"
-    },
-    {
-      "title": "X-Men vs. Street Fighter",
-      "system": "saturn",
-      "bucket": "saturn/X-Men vs. Street Fighter (Japan) (3M).chd"
-    },
-    {
-      "title": "Vampire Savior - The Lord of Vampire",
-      "system": "saturn",
-      "bucket": "saturn/Vampire Savior - The Lord of Vampire (Japan).chd"
-    },
-    {
-      "title": "Pocket Fighter",
-      "system": "saturn",
-      "bucket": "saturn/Pocket Fighter (Japan).chd"
-    },
-    {
-      "title": "Cyberbots - Fullmetal Madness",
-      "system": "saturn",
-      "bucket": "saturn/Cyberbots - Fullmetal Madness (Japan) (2M).chd"
-    },
-    {
       "title": "Virtua Fighter 2",
       "system": "saturn",
       "bucket": "saturn/Virtua Fighter 2 (USA) (RE).chd"
-    },
-    {
-      "title": "Virtua Fighter Remix",
-      "system": "saturn",
-      "bucket": "saturn/Virtua Fighter Remix (USA).chd"
-    },
-    {
-      "title": "Virtua Fighter Kids",
-      "system": "saturn",
-      "bucket": "saturn/Virtua Fighter Kids (USA).chd"
     },
     {
       "title": "Fighters Megamix",
@@ -1762,59 +1511,9 @@
       "bucket": "saturn/Last Bronx (USA).chd"
     },
     {
-      "title": "Dead or Alive",
-      "system": "saturn",
-      "bucket": "saturn/Dead or Alive (Japan) (Rev A) (10M).chd"
-    },
-    {
       "title": "Virtual On - Cyber Troopers",
       "system": "saturn",
       "bucket": "saturn/Virtual On - Cyber Troopers (USA).chd"
-    },
-    {
-      "title": "Golden Axe - The Duel",
-      "system": "saturn",
-      "bucket": "saturn/Golden Axe - The Duel (USA).chd"
-    },
-    {
-      "title": "The King of Fighters '95",
-      "system": "saturn",
-      "bucket": "saturn/King of Fighters '95, The (Europe).chd"
-    },
-    {
-      "title": "The King of Fighters '96",
-      "system": "saturn",
-      "bucket": "saturn/King of Fighters '96, The (Japan) (4M, 5M).chd"
-    },
-    {
-      "title": "The King of Fighters '97",
-      "system": "saturn",
-      "bucket": "saturn/King of Fighters '97, The (Japan).chd"
-    },
-    {
-      "title": "Real Bout Fatal Fury Special",
-      "system": "saturn",
-      "bucket": "saturn/Real Bout Garou Densetsu Special (Japan) (Rev A).chd"
-    },
-    {
-      "title": "Samurai Shodown IV",
-      "system": "saturn",
-      "bucket": "saturn/Samurai Spirits - Amakusa Kourin (Japan) (En,Ja,Es,Pt).chd"
-    },
-    {
-      "title": "World Heroes Perfect",
-      "system": "saturn",
-      "bucket": "saturn/World Heroes Perfect (Japan).chd"
-    },
-    {
-      "title": "Waku Waku 7",
-      "system": "saturn",
-      "bucket": "saturn/Waku Waku 7 (Japan).chd"
-    },
-    {
-      "title": "Astra Superstars",
-      "system": "saturn",
-      "bucket": "saturn/Astra Superstars (Japan).chd"
     },
     {
       "title": "Asuka 120% Limited - Burning Fest. Limited",
@@ -1822,69 +1521,30 @@
       "bucket": "saturn/Asuka 120% Limited - Burning Fest. Limited (Japan).chd"
     },
     {
-      "title": "Groove on Fight",
-      "system": "saturn",
-      "bucket": "saturn/Gouketsuji Ichizoku 3 - Groove on Fight (Japan).chd"
-    },
-    {
-      "title": "Ultimate Mortal Kombat 3",
-      "system": "saturn",
-      "bucket": "saturn/Ultimate Mortal Kombat 3 (USA).chd"
-    },
-    {
-      "title": "Mortal Kombat Trilogy",
-      "system": "saturn",
-      "bucket": "saturn/Mortal Kombat Trilogy (USA).chd"
-    },
-    {
       "title": "Dragon Ball Z - Shinbutouden",
       "system": "saturn",
       "bucket": "saturn/Dragon Ball Z - Shinbutouden (Japan).chd"
     },
     {
-      "title": "Final Fight Revenge",
-      "system": "saturn",
-      "bucket": "saturn/Final Fight Revenge (Japan).chd"
-    },
-    {
-      "title": "Mortal Kombat II",
-      "system": "saturn",
-      "bucket": "saturn/Mortal Kombat II (USA).chd"
-    },
-    {
       "title": "Street Fighter - The Movie",
-      "system": "saturn",
-      "bucket": "saturn/Street Fighter - The Movie (USA).chd"
+      "system": "psx",
+      "bucket": "psx/Street Fighter - The Movie (USA).chd"
     },
     {
-      "title": "Street Fighter Zero 2'",
-      "system": "saturn",
-      "bucket": "saturn/Street Fighter Zero 2' (Japan).chd"
-    },
-    {
-      "title": "Capcom Generation - Dai-5-shuu Kakutouka-tachi",
-      "system": "saturn",
-      "bucket": "saturn/Capcom Generation - Dai-5-shuu Kakutouka-tachi (Japan).chd"
-    },
-    {
-      "title": "Primal Rage",
-      "system": "saturn",
-      "bucket": "saturn/Primal Rage (USA).chd"
-    },
-    {
-      "title": "Battle Arena Toshinden Remix",
-      "system": "saturn",
-      "bucket": "saturn/Battle Arena Toshinden Remix (USA).chd"
+      "title": "Battle Arena Toshinden",
+      "system": "psx",
+      "bucket": "psx/Battle Arena Toshinden (USA).chd",
+      "variants": [
+        {
+          "bucket": "saturn/Battle Arena Toshinden Remix (USA).chd",
+          "note": "Saturn: Remix adds Cupido, a story mode and rebalancing"
+        }
+      ]
     },
     {
       "title": "Battle Arena Toshinden URA - Ultimate Revenge Attack",
       "system": "saturn",
       "bucket": "saturn/Battle Arena Toshinden URA - Ultimate Revenge Attack (USA).chd"
-    },
-    {
-      "title": "Galaxy Fight",
-      "system": "saturn",
-      "bucket": "saturn/Galaxy Fight (USA).chd"
     },
     {
       "title": "Dark Legend",
@@ -1898,43 +1558,13 @@
     },
     {
       "title": "Criticom",
-      "system": "saturn",
-      "bucket": "saturn/Criticom (USA).chd"
+      "system": "psx",
+      "bucket": "psx/Criticom (USA).chd"
     },
     {
       "title": "Rise 2 - Resurrection",
-      "system": "saturn",
-      "bucket": "saturn/Rise 2 - Resurrection (USA) (En,Fr,De,Es,It).chd"
-    },
-    {
-      "title": "Garou Densetsu 3 - Road to the Final Victory",
-      "system": "saturn",
-      "bucket": "saturn/Garou Densetsu 3 - Road to the Final Victory (Japan).chd"
-    },
-    {
-      "title": "Real Bout Garou Densetsu",
-      "system": "saturn",
-      "bucket": "saturn/Real Bout Garou Densetsu (Japan) (2M).chd"
-    },
-    {
-      "title": "Samurai Spirits - Zankurou Musouken",
-      "system": "saturn",
-      "bucket": "saturn/Samurai Spirits - Zankurou Musouken (Japan).chd"
-    },
-    {
-      "title": "Shinouken",
-      "system": "saturn",
-      "bucket": "saturn/Shinouken (Japan).chd"
-    },
-    {
-      "title": "Fighter's History Dynamite",
-      "system": "saturn",
-      "bucket": "saturn/Fighter's History Dynamite (Japan).chd"
-    },
-    {
-      "title": "Suiko Enbu - Fuuun Saiki",
-      "system": "saturn",
-      "bucket": "saturn/Suiko Enbu - Fuuun Saiki (Japan).chd"
+      "system": "psx",
+      "bucket": "psx/Rise 2 - Resurrection (USA) (En,Fr,De,Es,It).chd"
     },
     {
       "title": "Zero Divide - The Final Conflict",
@@ -1948,8 +1578,14 @@
     },
     {
       "title": "Advanced V.G.",
-      "system": "saturn",
-      "bucket": "saturn/Advanced V.G. (Japan).chd"
+      "system": "tg-cd",
+      "bucket": "tg-cd/Advanced V.G. (Japan).chd",
+      "variants": [
+        {
+          "bucket": "saturn/Advanced V.G. (Japan).chd",
+          "note": "Saturn: later release with updated graphics and balance"
+        }
+      ]
     },
     {
       "title": "Savaki",
@@ -1982,19 +1618,14 @@
       "bucket": "psp/Tekken - Dark Resurrection (USA) (En,Fr,De,Es,It).chd"
     },
     {
-      "title": "Tekken 6 (En,Ja,Fr,De,Es,It,Ko,Ru)",
-      "system": "psp",
-      "bucket": "psp/Tekken 6 (USA) (En,Ja,Fr,De,Es,It,Ko,Ru).chd"
+      "title": "Tekken 6",
+      "system": "xbox360",
+      "bucket": "xbox360/Tekken 6 (World) (En,Ja,Fr,De,Es,It,Ko,Ru).zar"
     },
     {
       "title": "Soulcalibur - Broken Destiny (En,Ja,Fr,De,Es,It,Ru)",
       "system": "psp",
       "bucket": "psp/Soulcalibur - Broken Destiny (USA) (En,Ja,Fr,De,Es,It,Ru).chd"
-    },
-    {
-      "title": "Darkstalkers Chronicle - The Chaos Tower",
-      "system": "psp",
-      "bucket": "psp/Darkstalkers Chronicle - The Chaos Tower (USA).chd"
     },
     {
       "title": "BlazBlue - Calamity Trigger (En,Ja,Zh,Ko)",
@@ -2004,32 +1635,13 @@
     {
       "title": "BlazBlue - Continuum Shift II (En,Ja,Zh,Ko)",
       "system": "psp",
-      "bucket": "psp/BlazBlue - Continuum Shift II (USA) (En,Ja,Zh,Ko).chd"
-    },
-    {
-      "title": "Samurai Shodown Anthology",
-      "system": "psp",
-      "bucket": "psp/Samurai Shodown Anthology (Europe).chd"
-    },
-    {
-      "title": "Mortal Kombat - Unchained",
-      "system": "psp",
-      "bucket": "psp/Mortal Kombat - Unchained (USA).chd"
-    },
-    {
-      "title": "Power Stone Collection",
-      "system": "psp",
-      "bucket": "psp/Power Stone Collection (USA).chd"
-    },
-    {
-      "title": "Street Fighter Alpha 3 Max",
-      "system": "psp",
-      "bucket": "psp/Street Fighter Alpha 3 Max (USA).chd"
-    },
-    {
-      "title": "Guilty Gear XX Accent Core Plus",
-      "system": "psp",
-      "bucket": "psp/Guilty Gear XX Accent Core Plus (USA).chd"
+      "bucket": "psp/BlazBlue - Continuum Shift II (USA) (En,Ja,Zh,Ko).chd",
+      "variants": [
+        {
+          "bucket": "psp/BlazBlue - Continuum Shift Extend (Japan).chd",
+          "note": "PSP: Japanese Extend update with new story and balance"
+        }
+      ]
     },
     {
       "title": "Guilty Gear Judgment",
@@ -2062,24 +1674,9 @@
       "bucket": "psp/Dissidia 012 - Duodecim Final Fantasy (USA) (En,Fr,De,Es,It).chd"
     },
     {
-      "title": "The King of Fighters Collection - The Orochi Saga",
-      "system": "psp",
-      "bucket": "psp/King of Fighters Collection, The - The Orochi Saga (USA).chd"
-    },
-    {
       "title": "Naruto Shippuden - Ultimate Ninja Heroes 3",
       "system": "psp",
       "bucket": "psp/Naruto Shippuden - Ultimate Ninja Heroes 3 (USA).chd"
-    },
-    {
-      "title": "SNK Arcade Classics Vol. 1",
-      "system": "psp",
-      "bucket": "psp/SNK Arcade Classics Vol. 1 (USA).chd"
-    },
-    {
-      "title": "BlazBlue - Continuum Shift Extend",
-      "system": "psp",
-      "bucket": "psp/BlazBlue - Continuum Shift Extend (Japan).chd"
     },
     {
       "title": "Naruto - Ultimate Ninja Heroes",
@@ -2090,16 +1687,6 @@
       "title": "Naruto - Ultimate Ninja Heroes 2 - The Phantom Fortress",
       "system": "psp",
       "bucket": "psp/Naruto - Ultimate Ninja Heroes 2 - The Phantom Fortress (USA).chd"
-    },
-    {
-      "title": "Def Jam - Fight for NY - The Takeover",
-      "system": "psp",
-      "bucket": "psp/Def Jam - Fight for NY - The Takeover (USA).chd"
-    },
-    {
-      "title": "Marvel Nemesis - Rise of the Imperfects",
-      "system": "psp",
-      "bucket": "psp/Marvel Nemesis - Rise of the Imperfects (USA).chd"
     },
     {
       "title": "Bleach - Heat the Soul 7",
@@ -2142,30 +1729,6 @@
       "bucket": "psp/Mahou Shoujo Lyrical Nanoha A's Portable - The Gears of Destiny (Japan) [T-En by Vivid Translations v20180523].chd"
     },
     {
-      "title": "Tekken 2",
-      "system": "psx",
-      "bucket": "psx/Tekken 2 (USA) (Rev 1).chd"
-    },
-    {
-      "title": "Soul Blade",
-      "system": "psx",
-      "bucket": "psx/Soul Blade (USA) (Rev 1).chd"
-    },
-    {
-      "title": "Darkstalkers 3",
-      "system": "psx",
-      "bucket": "psx/Darkstalkers 3 (USA).chd"
-    },
-    {
-      "title": "Rival Schools: United by Fate",
-      "system": "psx",
-      "bucket": "psx/Rival Schools - United by Fate (USA).m3u",
-      "files": [
-        "psx/Rival Schools - United by Fate (USA) (Disc 1) (Arcade Disc).chd",
-        "psx/Rival Schools - United by Fate (USA) (Disc 2) (Evolution Disc).chd"
-      ]
-    },
-    {
       "title": "Guilty Gear",
       "system": "psx",
       "bucket": "psx/Guilty Gear (USA) (Rev 1).chd"
@@ -2176,14 +1739,15 @@
       "bucket": "psx/Bloody Roar II (USA).chd"
     },
     {
-      "title": "Capcom vs. SNK Pro",
-      "system": "psx",
-      "bucket": "psx/Capcom vs. SNK Pro (USA).chd"
-    },
-    {
-      "title": "Tekken",
-      "system": "psx",
-      "bucket": "psx/Tekken (USA).chd"
+      "title": "Capcom vs. SNK",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Capcom vs. SNK (USA).chd",
+      "variants": [
+        {
+          "bucket": "dreamcast/Capcom vs. SNK - Millennium Fight 2000 Pro (Japan).chd",
+          "note": "Dreamcast: Pro adds Dan and Joe and rebalances (Japanese)"
+        }
+      ]
     },
     {
       "title": "Bushido Blade 2",
@@ -2191,64 +1755,14 @@
       "bucket": "psx/Bushido Blade 2 (USA).chd"
     },
     {
-      "title": "Dead or Alive",
-      "system": "psx",
-      "bucket": "psx/Dead or Alive (USA).chd"
-    },
-    {
-      "title": "Ehrgeiz",
-      "system": "psx",
-      "bucket": "psx/Ehrgeiz - God Bless the Ring (USA).chd"
-    },
-    {
-      "title": "Battle Arena Toshinden",
-      "system": "psx",
-      "bucket": "psx/Battle Arena Toshinden (USA).chd"
-    },
-    {
-      "title": "Battle Arena Toshinden 2",
-      "system": "psx",
-      "bucket": "psx/Battle Arena Toshinden 2 (USA).chd"
-    },
-    {
       "title": "Battle Arena Toshinden 3",
       "system": "psx",
       "bucket": "psx/Battle Arena Toshinden 3 (USA) (En,Ja).chd"
     },
     {
-      "title": "Darkstalkers: The Night Warriors",
-      "system": "psx",
-      "bucket": "psx/Darkstalkers - The Night Warriors (USA).chd"
-    },
-    {
-      "title": "X-Men: Children of the Atom",
-      "system": "psx",
-      "bucket": "psx/X-Men - Children of the Atom (USA).chd"
-    },
-    {
       "title": "Fatal Fury: Wild Ambition",
       "system": "psx",
       "bucket": "psx/Fatal Fury - Wild Ambition (USA).chd"
-    },
-    {
-      "title": "Mortal Kombat Trilogy",
-      "system": "psx",
-      "bucket": "psx/Mortal Kombat Trilogy (USA) (Rev 1).chd"
-    },
-    {
-      "title": "Pocket Fighter",
-      "system": "psx",
-      "bucket": "psx/Pocket Fighter (USA).chd"
-    },
-    {
-      "title": "Star Gladiator",
-      "system": "psx",
-      "bucket": "psx/Star Gladiator - Episode I - Final Crusade (USA).chd"
-    },
-    {
-      "title": "Psychic Force",
-      "system": "psx",
-      "bucket": "psx/Psychic Force (USA).chd"
     },
     {
       "title": "Zero Divide",
@@ -2261,103 +1775,14 @@
       "bucket": "psx/Gundam Battle Assault 2 (USA).chd"
     },
     {
-      "title": "Street Fighter Alpha - Warriors' Dreams",
-      "system": "psx",
-      "bucket": "psx/Street Fighter Alpha - Warriors' Dreams (USA).chd"
-    },
-    {
-      "title": "Street Fighter Alpha 2",
-      "system": "psx",
-      "bucket": "psx/Street Fighter Alpha 2 (USA) (Rev 1).chd"
-    },
-    {
-      "title": "Street Fighter Alpha 3",
-      "system": "psx",
-      "bucket": "psx/Street Fighter Alpha 3 (USA).chd"
-    },
-    {
-      "title": "Street Fighter Collection",
-      "system": "psx",
-      "bucket": "psx/Street Fighter Collection (USA) (Rev 1).m3u",
-      "files": [
-        "psx/Street Fighter Collection (USA) (Disc 1) (Rev 1).chd",
-        "psx/Street Fighter Collection (USA) (Disc 2) (Rev 1).chd"
-      ]
-    },
-    {
-      "title": "Street Fighter Collection 2",
-      "system": "psx",
-      "bucket": "psx/Street Fighter Collection 2 (USA).chd"
-    },
-    {
-      "title": "Street Fighter EX Plus Alpha",
-      "system": "psx",
-      "bucket": "psx/Street Fighter EX Plus Alpha (USA).chd"
-    },
-    {
-      "title": "Street Fighter EX2 Plus",
-      "system": "psx",
-      "bucket": "psx/Street Fighter EX2 Plus (USA).chd"
-    },
-    {
-      "title": "Marvel Super Heroes",
-      "system": "psx",
-      "bucket": "psx/Marvel Super Heroes (USA).chd"
-    },
-    {
-      "title": "Marvel Super Heroes vs. Street Fighter",
-      "system": "psx",
-      "bucket": "psx/Marvel Super Heroes vs. Street Fighter (USA).chd"
-    },
-    {
-      "title": "Marvel vs. Capcom - Clash of Super Heroes",
-      "system": "psx",
-      "bucket": "psx/Marvel vs. Capcom - Clash of Super Heroes (USA).chd"
-    },
-    {
-      "title": "X-Men vs. Street Fighter",
-      "system": "psx",
-      "bucket": "psx/X-Men vs. Street Fighter (USA).chd"
-    },
-    {
-      "title": "JoJo's Bizarre Adventure",
-      "system": "psx",
-      "bucket": "psx/JoJo's Bizarre Adventure (USA).chd"
-    },
-    {
-      "title": "The King of Fighters '95",
-      "system": "psx",
-      "bucket": "psx/King of Fighters '95, The (USA).chd"
-    },
-    {
-      "title": "The King of Fighters '99",
-      "system": "psx",
-      "bucket": "psx/King of Fighters '99, The (USA).chd"
-    },
-    {
-      "title": "Samurai Shodown III - Blades of Blood",
-      "system": "psx",
-      "bucket": "psx/Samurai Shodown III - Blades of Blood (USA).chd"
-    },
-    {
       "title": "Samurai Shodown - Warriors Rage",
       "system": "psx",
       "bucket": "psx/Samurai Shodown - Warriors Rage (USA).chd"
     },
     {
-      "title": "Bloody Roar",
-      "system": "psx",
-      "bucket": "psx/Bloody Roar (USA).chd"
-    },
-    {
       "title": "Tobal No. 1",
       "system": "psx",
       "bucket": "psx/Tobal No. 1 (USA).chd"
-    },
-    {
-      "title": "Mortal Kombat 4",
-      "system": "psx",
-      "bucket": "psx/Mortal Kombat 4 (USA).chd"
     },
     {
       "title": "Gundam Battle Assault",
@@ -2405,49 +1830,14 @@
       "bucket": "psx/Dynasty Warriors (USA).chd"
     },
     {
-      "title": "Mortal Kombat 3",
-      "system": "psx",
-      "bucket": "psx/Mortal Kombat 3 (USA).chd"
-    },
-    {
-      "title": "Street Fighter - The Movie",
-      "system": "psx",
-      "bucket": "psx/Street Fighter - The Movie (USA).chd"
-    },
-    {
-      "title": "Primal Rage",
-      "system": "psx",
-      "bucket": "psx/Primal Rage (USA).chd"
-    },
-    {
-      "title": "War Gods",
-      "system": "psx",
-      "bucket": "psx/War Gods (USA).chd"
-    },
-    {
-      "title": "Bio F.R.E.A.K.S.",
-      "system": "psx",
-      "bucket": "psx/Bio F.R.E.A.K.S. (USA).chd"
-    },
-    {
       "title": "Cardinal Syn",
       "system": "psx",
       "bucket": "psx/Cardinal Syn (USA).chd"
     },
     {
-      "title": "Criticom",
-      "system": "psx",
-      "bucket": "psx/Criticom (USA).chd"
-    },
-    {
       "title": "Killing Zone",
       "system": "psx",
       "bucket": "psx/Killing Zone (USA).chd"
-    },
-    {
-      "title": "Rise 2 - Resurrection",
-      "system": "psx",
-      "bucket": "psx/Rise 2 - Resurrection (USA) (En,Fr,De,Es,It).chd"
     },
     {
       "title": "Star Wars - Masters of Teras Kasi",
@@ -2490,109 +1880,15 @@
       "bucket": "psx/Fighter Maker (USA).chd"
     },
     {
-      "title": "Transformers - Beast Wars Transmetals",
-      "system": "psx",
-      "bucket": "psx/Transformers - Beast Wars Transmetals (USA).chd"
-    },
-    {
-      "title": "The King of Fighters '94",
-      "system": "neogeocd",
-      "bucket": "neogeocd/King of Fighters '94, The (World) (En,Ja) (Rev 1).chd"
-    },
-    {
-      "title": "Art of Fighting",
-      "system": "neogeocd",
-      "bucket": "neogeocd/Ryuuko no Ken ~ Art of Fighting (World) (En,Ja,Es).chd"
-    },
-    {
-      "title": "Art of Fighting 3",
-      "system": "neogeocd",
-      "bucket": "neogeocd/Art of Fighting - Ryuuko no Ken Gaiden ~ The Path of the Warrior - Art of Fighting 3 (World) (En,Ja,Es,Pt).chd"
-    },
-    {
-      "title": "Fatal Fury",
-      "system": "neogeocd",
-      "bucket": "neogeocd/Garou Densetsu - Shukumei no Tatakai ~ Fatal Fury - King of Fighters (Japan) (En,Ja).chd"
-    },
-    {
-      "title": "Fatal Fury Special",
-      "system": "neogeocd",
-      "bucket": "neogeocd/Garou Densetsu Special ~ Fatal Fury Special (World) (En,Ja) (Rev 1).chd"
-    },
-    {
-      "title": "Real Bout Fatal Fury Special",
-      "system": "neogeocd",
-      "bucket": "neogeocd/Real Bout Garou Densetsu Special ~ Real Bout Fatal Fury Special (World) (En,Ja,Es,Pt).chd"
-    },
-    {
-      "title": "Samurai Shodown II",
-      "system": "neogeocd",
-      "bucket": "neogeocd/Shin Samurai Spirits - Haoumaru Jigokuhen ~ Samurai Shodown II (World) (En,Ja).chd"
-    },
-    {
-      "title": "Samurai Shodown IV",
-      "system": "neogeocd",
-      "bucket": "neogeocd/Samurai Spirits - Amakusa Kourin ~ Samurai Shodown IV - Amakusa's Revenge (World) (En,Ja,Es,Pt).chd"
-    },
-    {
-      "title": "The Last Blade 2",
-      "system": "neogeocd",
-      "bucket": "neogeocd/Bakumatsu Roman Daini Maku - Gekka no Kenshi - Tsuki ni Saku Hana, Chiri Yuku Hana ~ The Last Blade 2 (Japan) (En,Ja,Es,Pt).chd"
-    },
-    {
-      "title": "World Heroes 2 Jet",
-      "system": "neogeocd",
-      "bucket": "neogeocd/World Heroes 2 Jet (Japan) (En,Ja).chd"
-    },
-    {
-      "title": "Savage Reign",
-      "system": "neogeocd",
-      "bucket": "neogeocd/Fuuun Mokushiroku - Kakutou Sousei ~ Savage Reign (World) (En,Ja,Es,Pt) (Rev 1).chd"
-    },
-    {
-      "title": "Kabuki Klash",
-      "system": "neogeocd",
-      "bucket": "neogeocd/Far East of Eden - Tengai Makyou Shinden ~ Far East of Eden - Kabuki Klash (Japan) (En,Ja).chd"
-    },
-    {
-      "title": "Galaxy Fight",
-      "system": "neogeocd",
-      "bucket": "neogeocd/Galaxy Fight - Universal Warriors (Japan) (En,Ja,Es).chd"
-    },
-    {
-      "title": "Gowcaizer",
-      "system": "neogeocd",
-      "bucket": "neogeocd/Choujin Gakuen - Gowcaizer ~ Voltage Fighter - Gowcaizer (World) (En,Ja).chd"
-    },
-    {
-      "title": "Fighter's History Dynamite",
-      "system": "neogeocd",
-      "bucket": "neogeocd/Fighter's History Dynamite ~ Karnov's Revenge (World) (En,Ja).chd"
-    },
-    {
-      "title": "Breakers",
-      "system": "neogeocd",
-      "bucket": "neogeocd/Breakers (Japan) (En,Ja).chd"
-    },
-    {
-      "title": "Double Dragon",
-      "system": "neogeocd",
-      "bucket": "neogeocd/ダブル・ドラゴン (Export) (En,Ja).chd"
-    },
-    {
-      "title": "Ninja Master's",
-      "system": "neogeocd",
-      "bucket": "neogeocd/Ninja Master's - Haou Ninpou Chou (Japan) (En,Ja).chd"
-    },
-    {
-      "title": "Aggressors of Dark Kombat",
-      "system": "neogeocd",
-      "bucket": "neogeocd/Tsuukai Gangan Koushinkyoku ~ Aggressors of Dark Kombat (World) (En,Ja).chd"
-    },
-    {
       "title": "Dead or Alive 2",
-      "system": "ps2",
-      "bucket": "ps2/Dead or Alive 2 (Europe) (En,Fr,De,Es,It).chd"
+      "system": "dreamcast",
+      "bucket": "dreamcast/Dead or Alive 2 (USA).chd",
+      "variants": [
+        {
+          "bucket": "xbox/Dead or Alive 2 Ultimate (USA, Japan) (En,Ja).iso",
+          "note": "Xbox: Ultimate remake adds stages, characters and online play"
+        }
+      ]
     },
     {
       "title": "Dragon Ball Z: Budokai 3",
@@ -2620,44 +1916,19 @@
       "bucket": "ps2/Guilty Gear Isuka (USA).chd"
     },
     {
-      "title": "The King of Fighters 2000",
-      "system": "ps2",
-      "bucket": "ps2/King of Fighters 2000, The (USA).chd"
-    },
-    {
-      "title": "The King of Fighters 2001",
-      "system": "ps2",
-      "bucket": "ps2/King of Fighters 2001, The (USA).chd"
-    },
-    {
-      "title": "The King of Fighters 2003",
-      "system": "ps2",
-      "bucket": "ps2/King of Fighters 2003, The (USA).chd"
-    },
-    {
       "title": "The King of Fighters 2006",
       "system": "ps2",
       "bucket": "ps2/King of Fighters 2006, The (USA).chd"
     },
     {
-      "title": "Marvel vs. Capcom 2 - New Age of Heroes",
-      "system": "ps2",
-      "bucket": "ps2/Marvel vs. Capcom 2 - New Age of Heroes (USA).chd"
-    },
-    {
-      "title": "Soulcalibur II",
-      "system": "ps2",
-      "bucket": "ps2/Soulcalibur II (USA).chd"
+      "title": "Marvel vs. Capcom 2",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Marvel vs. Capcom 2 (USA).chd"
     },
     {
       "title": "Street Fighter Alpha Anthology",
       "system": "ps2",
       "bucket": "ps2/Street Fighter Alpha Anthology (USA).chd"
-    },
-    {
-      "title": "Street Fighter Anniversary Collection",
-      "system": "ps2",
-      "bucket": "ps2/Street Fighter Anniversary Collection (USA).chd"
     },
     {
       "title": "Street Fighter EX3",
@@ -2675,39 +1946,9 @@
       "bucket": "wii/Tatsunoko vs. Capcom - Ultimate All-Stars (USA).rvz"
     },
     {
-      "title": "Soulcalibur",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Soulcalibur (USA).chd"
-    },
-    {
-      "title": "Marvel vs. Capcom 2",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Marvel vs. Capcom 2 (USA).chd"
-    },
-    {
-      "title": "Marvel vs. Capcom: Clash of Super Heroes",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Marvel vs. Capcom - Clash of Super Heroes (USA).chd"
-    },
-    {
-      "title": "Capcom vs. SNK",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Capcom vs. SNK (USA).chd"
-    },
-    {
-      "title": "Capcom vs. SNK 2: Millionaire Fighting 2001",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Capcom vs. SNK 2 - Millionaire Fighting 2001 (Japan).chd"
-    },
-    {
       "title": "Project Justice",
       "system": "dreamcast",
       "bucket": "dreamcast/Project Justice (USA).chd"
-    },
-    {
-      "title": "Dead or Alive 2",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Dead or Alive 2 (USA).chd"
     },
     {
       "title": "Power Stone",
@@ -2720,39 +1961,9 @@
       "bucket": "dreamcast/Power Stone 2 (USA).chd"
     },
     {
-      "title": "Fatal Fury: Mark of the Wolves",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Fatal Fury - Mark of the Wolves (USA).chd"
-    },
-    {
-      "title": "The Last Blade 2: Heart of the Samurai",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Last Blade 2, The - Heart of the Samurai (USA).chd"
-    },
-    {
-      "title": "The King of Fighters: Dream Match 1999",
-      "system": "dreamcast",
-      "bucket": "dreamcast/King of Fighters, The - Dream Match 1999 (USA) (En,Ja,Es,Pt).chd"
-    },
-    {
-      "title": "The King of Fighters: Evolution",
-      "system": "dreamcast",
-      "bucket": "dreamcast/King of Fighters, The - Evolution (USA) (En,Ja,Es,Pt).chd"
-    },
-    {
-      "title": "Guilty Gear X",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Guilty Gear X (Japan) (Rev A).chd"
-    },
-    {
       "title": "Virtua Fighter 3tb",
       "system": "dreamcast",
       "bucket": "dreamcast/Virtua Fighter 3tb (USA).chd"
-    },
-    {
-      "title": "JoJo's Bizarre Adventure",
-      "system": "dreamcast",
-      "bucket": "dreamcast/JoJo's Bizarre Adventure (USA).chd"
     },
     {
       "title": "Psychic Force 2012",
@@ -2765,54 +1976,9 @@
       "bucket": "dreamcast/Plasma Sword - Nightmare of Bilstein (USA).chd"
     },
     {
-      "title": "Mortal Kombat Gold",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Mortal Kombat Gold (USA) (Rev 1).chd"
-    },
-    {
       "title": "Ultimate Fighting Championship",
       "system": "dreamcast",
       "bucket": "dreamcast/Ultimate Fighting Championship (USA).chd"
-    },
-    {
-      "title": "Street Fighter Alpha 3",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Street Fighter Alpha 3 (USA).chd"
-    },
-    {
-      "title": "Street Fighter III - Double Impact",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Street Fighter III - Double Impact (USA).chd"
-    },
-    {
-      "title": "Street Fighter III - 3rd Strike",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Street Fighter III - 3rd Strike (USA).chd"
-    },
-    {
-      "title": "Super Street Fighter II X for Matching Service",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Super Street Fighter II X for Matching Service (Japan).chd"
-    },
-    {
-      "title": "Vampire Chronicle for Matching Service",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Vampire Chronicle for Matching Service (Japan).chd"
-    },
-    {
-      "title": "The King of Fighters 2000",
-      "system": "dreamcast",
-      "bucket": "dreamcast/King of Fighters 2000, The (Japan).chd"
-    },
-    {
-      "title": "The King of Fighters 2001",
-      "system": "dreamcast",
-      "bucket": "dreamcast/King of Fighters 2001, The (Japan).chd"
-    },
-    {
-      "title": "The King of Fighters 2002",
-      "system": "dreamcast",
-      "bucket": "dreamcast/King of Fighters 2002, The (Japan) (En,Ja).chd"
     },
     {
       "title": "Fighting Vipers 2",
@@ -2825,29 +1991,9 @@
       "bucket": "dreamcast/Cyber Troopers - Virtual-On - Oratorio Tangram (USA).chd"
     },
     {
-      "title": "Tech Romancer",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Tech Romancer (USA).chd"
-    },
-    {
-      "title": "Capcom vs. SNK - Millennium Fight 2000 Pro",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Capcom vs. SNK - Millennium Fight 2000 Pro (Japan).chd"
-    },
-    {
       "title": "Heavy Metal - Geomatrix",
       "system": "dreamcast",
       "bucket": "dreamcast/Heavy Metal - Geomatrix (USA).chd"
-    },
-    {
-      "title": "Dead or Alive 1 Ultimate",
-      "system": "xbox",
-      "bucket": "xbox/Dead or Alive 1 Ultimate (USA, Japan) (En,Ja).iso"
-    },
-    {
-      "title": "Dead or Alive 2 Ultimate",
-      "system": "xbox",
-      "bucket": "xbox/Dead or Alive 2 Ultimate (USA, Japan) (En,Ja).iso"
     },
     {
       "title": "Dead or Alive 3",
@@ -2855,114 +2001,9 @@
       "bucket": "xbox/Dead or Alive 3 (USA) (En,Ja).iso"
     },
     {
-      "title": "The King of Fighters '96",
-      "system": "neogeocd",
-      "bucket": "neogeocd/King of Fighters '96, The (World) (En,Ja).chd"
-    },
-    {
-      "title": "The King of Fighters '98",
-      "system": "neogeocd",
-      "bucket": "neogeocd/King of Fighters '98, The - Dream Match Never Ends ~ The King of Fighters '98 - The Slugfest (Japan) (En,Ja).chd"
-    },
-    {
-      "title": "The Last Blade",
-      "system": "neogeocd",
-      "bucket": "neogeocd/Bakumatsu Roman - Gekka no Kenshi ~ The Last Blade (Japan) (En,Ja,Es,Pt).chd"
-    },
-    {
-      "title": "Samurai Shodown III",
-      "system": "neogeocd",
-      "bucket": "neogeocd/Samurai Spirits - Zankurou Musouken ~ Samurai Shodown III (World) (En,Ja,Es,Pt).chd"
-    },
-    {
-      "title": "Fatal Fury 2",
-      "system": "neogeocd",
-      "bucket": "neogeocd/Garou Densetsu 2 ~ Fatal Fury 2 (Japan) (En,Ja).chd"
-    },
-    {
-      "title": "Fatal Fury 3",
-      "system": "neogeocd",
-      "bucket": "neogeocd/Garou Densetsu 3 - Road to the Final Victory ~ Fatal Fury 3 - Road to the Final Victory (Export) (En,Ja,Es,Pt) (Rev 3).chd"
-    },
-    {
-      "title": "The King of Fighters '95",
-      "system": "neogeocd",
-      "bucket": "neogeocd/King of Fighters '95, The (World) (En,Ja).chd"
-    },
-    {
-      "title": "The King of Fighters '97",
-      "system": "neogeocd",
-      "bucket": "neogeocd/King of Fighters '97, The (Japan) (En,Ja).chd"
-    },
-    {
-      "title": "The King of Fighters '99",
-      "system": "neogeocd",
-      "bucket": "neogeocd/King of Fighters '99, The ~ The King of Fighters '99 - Millennium Battle (World) (En,Ja,Es,Pt).chd"
-    },
-    {
-      "title": "Real Bout Fatal Fury",
-      "system": "neogeocd",
-      "bucket": "neogeocd/Real Bout Garou Densetsu ~ Real Bout Fatal Fury (World) (En,Ja,Es,Pt).chd"
-    },
-    {
-      "title": "Real Bout Fatal Fury 2",
-      "system": "neogeocd",
-      "bucket": "neogeocd/Real Bout Garou Densetsu 2 - The Newcomers ~ Real Bout Fatal Fury 2 - The Newcomers (Japan) (En,Ja).chd"
-    },
-    {
-      "title": "Art of Fighting 2",
-      "system": "neogeocd",
-      "bucket": "neogeocd/Ryuuko no Ken 2 ~ Art of Fighting 2 (World) (En,Ja,Es).chd"
-    },
-    {
-      "title": "Samurai Shodown",
-      "system": "neogeocd",
-      "bucket": "neogeocd/Samurai Spirits ~ Samurai Shodown (Japan) (En,Ja).chd"
-    },
-    {
-      "title": "World Heroes",
-      "system": "neogeocd",
-      "bucket": "neogeocd/World Heroes (Japan) (En,Ja).chd"
-    },
-    {
-      "title": "World Heroes 2",
-      "system": "neogeocd",
-      "bucket": "neogeocd/World Heroes 2 (Japan) (En,Ja).chd"
-    },
-    {
-      "title": "World Heroes Perfect",
-      "system": "neogeocd",
-      "bucket": "neogeocd/ワールド・ヒーローズ・パーフェクト (Export) (En,Ja) (Rev 1).chd"
-    },
-    {
-      "title": "Ragnagard",
-      "system": "neogeocd",
-      "bucket": "neogeocd/Shinouken ~ Ragnagard (Japan) (En,Ja,Es).chd"
-    },
-    {
-      "title": "Virtua Fighter",
-      "system": "sega32x",
-      "bucket": "sega32x/Virtua Fighter (Japan, USA) (En).zip"
-    },
-    {
-      "title": "Mortal Kombat II",
-      "system": "sega32x",
-      "bucket": "sega32x/Mortal Kombat II (Japan, USA) (En).zip"
-    },
-    {
-      "title": "Primal Rage",
-      "system": "sega32x",
-      "bucket": "sega32x/Primal Rage (USA, Europe).zip"
-    },
-    {
       "title": "Cosmic Carnage",
       "system": "sega32x",
       "bucket": "sega32x/Cosmic Carnage (Japan, USA) (En).zip"
-    },
-    {
-      "title": "Brutal - Above the Claw",
-      "system": "sega32x",
-      "bucket": "sega32x/Brutal - Above the Claw (USA).zip"
     },
     {
       "title": "SNK vs. Capcom: The Match of the Millennium",
@@ -2997,7 +2038,13 @@
     {
       "title": "Super Smash Bros. for Wii U",
       "system": "wiiu",
-      "bucket": "wiiu/Super Smash Bros. (US) (v304).wua"
+      "bucket": "wiiu/Super Smash Bros. (US) (v304).wua",
+      "variants": [
+        {
+          "bucket": "3ds/Super Smash Bros. for Nintendo 3DS (USA) (En,Fr,Es) (Rev 11).zip",
+          "note": "3DS: adds Smash Run and its own handheld-themed stages"
+        }
+      ]
     },
     {
       "title": "Pokken Tournament",
@@ -3015,11 +2062,6 @@
       "bucket": "xbox360/Ultra Street Fighter IV (World) (En,Ja,Fr,De,Es,It,Ko).zar"
     },
     {
-      "title": "Tekken 6",
-      "system": "xbox360",
-      "bucket": "xbox360/Tekken 6 (World) (En,Ja,Fr,De,Es,It,Ko,Ru).zar"
-    },
-    {
       "title": "Tekken Tag Tournament 2",
       "system": "xbox360",
       "bucket": "xbox360/Tekken Tag Tournament 2 (USA, Europe).zar"
@@ -3035,49 +2077,9 @@
       "bucket": "xbox360/Persona 4 Arena (USA).zar"
     },
     {
-      "title": "Eternal Champions - Challenge from the Dark Side",
-      "system": "segacd",
-      "bucket": "segacd/Eternal Champions - Challenge from the Dark Side (USA) (RE).chd"
-    },
-    {
-      "title": "Fatal Fury Special",
-      "system": "segacd",
-      "bucket": "segacd/Fatal Fury Special (USA).chd"
-    },
-    {
-      "title": "Samurai Shodown",
-      "system": "segacd",
-      "bucket": "segacd/Samurai Shodown (USA) (RE).chd"
-    },
-    {
-      "title": "Mortal Kombat",
-      "system": "segacd",
-      "bucket": "segacd/Mortal Kombat (USA).chd"
-    },
-    {
-      "title": "Brutal - Paws of Fury",
-      "system": "segacd",
-      "bucket": "segacd/Brutal - Paws of Fury (USA).chd"
-    },
-    {
-      "title": "Super Street Fighter II Turbo - Revival",
-      "system": "gba",
-      "bucket": "gba/Super Street Fighter II Turbo - Revival (USA).zip"
-    },
-    {
-      "title": "Street Fighter Alpha 3",
-      "system": "gba",
-      "bucket": "gba/Street Fighter Alpha 3 (USA).zip"
-    },
-    {
       "title": "Tekken Advance",
       "system": "gba",
       "bucket": "gba/Tekken Advance (USA).zip"
-    },
-    {
-      "title": "Guilty Gear X - Advance Edition",
-      "system": "gba",
-      "bucket": "gba/Guilty Gear X - Advance Edition (USA).zip"
     },
     {
       "title": "The King of Fighters EX - NeoBlood",
@@ -3108,11 +2110,6 @@
       "title": "Sonic Battle",
       "system": "gba",
       "bucket": "gba/Sonic Battle (USA) (En,Ja,Fr,De,Es,It).zip"
-    },
-    {
-      "title": "Mortal Kombat Advance",
-      "system": "gba",
-      "bucket": "gba/Mortal Kombat Advance (USA).zip"
     },
     {
       "title": "Dragon Ball Z - Taiketsu",
@@ -3150,11 +2147,6 @@
       "bucket": "gba/IK+ (USA).zip"
     },
     {
-      "title": "Street Fighter II",
-      "system": "gb",
-      "bucket": "gb/Street Fighter II (USA, Europe) (Rev 1) (SGB Enhanced).zip"
-    },
-    {
       "title": "The King of Fighters '95",
       "system": "gb",
       "bucket": "gb/King of Fighters '95, The (USA) (SGB Enhanced).zip"
@@ -3165,64 +2157,14 @@
       "bucket": "gb/King of Fighters, The - Heat of Battle (Europe) (SGB Enhanced).zip"
     },
     {
-      "title": "Samurai Shodown",
-      "system": "gb",
-      "bucket": "gb/Samurai Shodown (USA, Europe) (SGB Enhanced).zip"
-    },
-    {
-      "title": "Killer Instinct",
-      "system": "gb",
-      "bucket": "gb/Killer Instinct (USA, Europe) (SGB Enhanced).zip"
-    },
-    {
-      "title": "Mortal Kombat II",
-      "system": "gb",
-      "bucket": "gb/Mortal Kombat II (USA, Europe).zip"
-    },
-    {
       "title": "Battle Arena Toshinden",
       "system": "gb",
       "bucket": "gb/Battle Arena Toshinden (USA) (SGB Enhanced).zip"
     },
     {
-      "title": "World Heroes 2 Jet",
-      "system": "gb",
-      "bucket": "gb/World Heroes 2 Jet (USA, Europe) (SGB Enhanced).zip"
-    },
-    {
-      "title": "Mortal Kombat",
-      "system": "gb",
-      "bucket": "gb/Mortal Kombat (USA, Europe).zip"
-    },
-    {
-      "title": "Mortal Kombat 3",
-      "system": "gb",
-      "bucket": "gb/Mortal Kombat 3 (USA, Europe).zip"
-    },
-    {
-      "title": "Primal Rage",
-      "system": "gb",
-      "bucket": "gb/Primal Rage (USA, Europe).zip"
-    },
-    {
       "title": "Raging Fighter",
       "system": "gb",
       "bucket": "gb/Raging Fighter (USA, Europe).zip"
-    },
-    {
-      "title": "Nettou Garou Densetsu 2 - Aratanaru Tatakai",
-      "system": "gb",
-      "bucket": "gb/Nettou Garou Densetsu 2 - Aratanaru Tatakai (Japan) (SGB Enhanced).zip"
-    },
-    {
-      "title": "Nettou Real Bout Garou Densetsu Special",
-      "system": "gb",
-      "bucket": "gb/Nettou Real Bout Garou Densetsu Special (Japan) (SGB Enhanced).zip"
-    },
-    {
-      "title": "Nettou Samurai Spirits - Zankurou Musouken",
-      "system": "gb",
-      "bucket": "gb/Nettou Samurai Spirits - Zankurou Musouken (Japan) (SGB Enhanced).zip"
     },
     {
       "title": "Super Chinese Fighter GB",
@@ -3233,16 +2175,6 @@
       "title": "Yu Yu Hakusho Dai-3-dan - Makai no Tobira Hen",
       "system": "gb",
       "bucket": "gb/Yu Yu Hakusho Dai-3-dan - Makai no Tobira Hen (Japan).zip"
-    },
-    {
-      "title": "Street Fighter Alpha - Warriors' Dreams",
-      "system": "gbc",
-      "bucket": "gbc/Street Fighter Alpha - Warriors' Dreams (USA).zip"
-    },
-    {
-      "title": "Mortal Kombat 4",
-      "system": "gbc",
-      "bucket": "gbc/Mortal Kombat 4 (USA, Europe) (SGB Enhanced) (GB Compatible).zip"
     },
     {
       "title": "X-Men - Mutant Academy",
@@ -3275,19 +2207,9 @@
       "bucket": "nes/Joy Mech Fight (Japan).zip"
     },
     {
-      "title": "Karate Champ",
-      "system": "nes",
-      "bucket": "nes/Karate Champ (USA) (Rev 1).zip"
-    },
-    {
       "title": "Urban Champion",
       "system": "nes",
       "bucket": "nes/Urban Champion (World).zip"
-    },
-    {
-      "title": "Yie Ar Kung-Fu",
-      "system": "nes",
-      "bucket": "nes/Yie Ar Kung-Fu (Japan) (Rev 1.4).zip"
     },
     {
       "title": "Nekketsu Kakutou Densetsu",
@@ -3295,39 +2217,9 @@
       "bucket": "nes/Nekketsu Kakutou Densetsu (Japan).zip"
     },
     {
-      "title": "Mortal Kombat II",
-      "system": "gamegear",
-      "bucket": "gamegear/Mortal Kombat II (World).zip"
-    },
-    {
-      "title": "Samurai Shodown",
-      "system": "gamegear",
-      "bucket": "gamegear/Samurai Shodown (USA).zip"
-    },
-    {
-      "title": "Fatal Fury Special",
-      "system": "gamegear",
-      "bucket": "gamegear/Fatal Fury Special (USA).zip"
-    },
-    {
       "title": "Virtua Fighter Animation",
       "system": "gamegear",
       "bucket": "gamegear/Virtua Fighter Animation (USA, Europe).zip"
-    },
-    {
-      "title": "Mortal Kombat",
-      "system": "gamegear",
-      "bucket": "gamegear/Mortal Kombat (USA, Europe).zip"
-    },
-    {
-      "title": "Mortal Kombat 3",
-      "system": "gamegear",
-      "bucket": "gamegear/Mortal Kombat 3 (Europe).zip"
-    },
-    {
-      "title": "Primal Rage",
-      "system": "gamegear",
-      "bucket": "gamegear/Primal Rage (USA, Europe).zip"
     },
     {
       "title": "Bishoujo Senshi Sailor Moon S",
@@ -3340,66 +2232,6 @@
       "bucket": "gamegear/Yu Yu Hakusho II - Gekitou! Nanakyou no Tatakai (Japan).zip"
     },
     {
-      "title": "Street Fighter II'",
-      "system": "mastersystem",
-      "bucket": "mastersystem/Street Fighter II' (Brazil) (En).zip"
-    },
-    {
-      "title": "Mortal Kombat II",
-      "system": "mastersystem",
-      "bucket": "mastersystem/Mortal Kombat II (Europe, Brazil) (En).zip"
-    },
-    {
-      "title": "Mortal Kombat",
-      "system": "mastersystem",
-      "bucket": "mastersystem/Mortal Kombat (Europe, Brazil) (En).zip"
-    },
-    {
-      "title": "Mortal Kombat 3",
-      "system": "mastersystem",
-      "bucket": "mastersystem/Mortal Kombat 3 (Brazil) (En).zip"
-    },
-    {
-      "title": "Virtua Fighter Animation",
-      "system": "mastersystem",
-      "bucket": "mastersystem/Virtua Fighter Animation (Brazil) (En).zip"
-    },
-    {
-      "title": "Pit-Fighter",
-      "system": "mastersystem",
-      "bucket": "mastersystem/Pit-Fighter (Europe).zip"
-    },
-    {
-      "title": "Street Fighter II' - Champion Edition",
-      "system": "tg16",
-      "bucket": "tg16/Street Fighter II' - Champion Edition (Japan).zip"
-    },
-    {
-      "title": "Fighting Street",
-      "system": "tg-cd",
-      "bucket": "tg-cd/Fighting Street (USA).chd"
-    },
-    {
-      "title": "Fatal Fury 2",
-      "system": "tg-cd",
-      "bucket": "tg-cd/Garou Densetsu 2 - Aratanaru Tatakai (Japan) (FABT, FACT, FAET, FAFT).chd"
-    },
-    {
-      "title": "Fatal Fury Special",
-      "system": "tg-cd",
-      "bucket": "tg-cd/Garou Densetsu Special (Japan) (FABT).chd"
-    },
-    {
-      "title": "Art of Fighting",
-      "system": "tg-cd",
-      "bucket": "tg-cd/Ryuuko no Ken (Japan) (En,Ja,Es) (FACT).chd"
-    },
-    {
-      "title": "World Heroes 2",
-      "system": "tg-cd",
-      "bucket": "tg-cd/World Heroes 2 (Japan).chd"
-    },
-    {
       "title": "Asuka 120% Maxima - Burning Fest. Maxima",
       "system": "tg-cd",
       "bucket": "tg-cd/Asuka 120% Maxima - Burning Fest. Maxima (Japan).chd"
@@ -3408,16 +2240,6 @@
       "title": "Flash Hiders",
       "system": "tg-cd",
       "bucket": "tg-cd/Flash Hiders (Japan).chd"
-    },
-    {
-      "title": "Advanced V.G.",
-      "system": "tg-cd",
-      "bucket": "tg-cd/Advanced V.G. (Japan).chd"
-    },
-    {
-      "title": "Martial Champion",
-      "system": "tg-cd",
-      "bucket": "tg-cd/Martial Champion (Japan).chd"
     },
     {
       "title": "Kabuki Ittouryoudan",
@@ -3455,11 +2277,6 @@
       "bucket": "ngp/Samurai Shodown! - Pocket Fighting Series (Japan, Europe) (En,Ja).zip"
     },
     {
-      "title": "Pocket Fighter",
-      "system": "wonderswan",
-      "bucket": "wonderswan/Pocket Fighter (Japan).zip"
-    },
-    {
       "title": "Guilty Gear Petit",
       "system": "wonderswancolor",
       "bucket": "wonderswancolor/Guilty Gear Petit (Japan).zip"
@@ -3480,11 +2297,6 @@
       "bucket": "wonderswancolor/Digimon Tamers - Battle Spirit (Japan, Korea) (En,Ja).zip"
     },
     {
-      "title": "Super Street Fighter IV - 3D Edition",
-      "system": "3ds",
-      "bucket": "3ds/Super Street Fighter IV - 3D Edition (USA) (En,Fr,Es).zip"
-    },
-    {
       "title": "Tekken 3D - Prime Edition",
       "system": "3ds",
       "bucket": "3ds/Tekken 3D - Prime Edition (USA) (En,Fr,Es).zip"
@@ -3493,16 +2305,6 @@
       "title": "Dead or Alive - Dimensions",
       "system": "3ds",
       "bucket": "3ds/Dead or Alive - Dimensions (USA) (En,Ja,Fr,De,Es,It).zip"
-    },
-    {
-      "title": "Super Smash Bros. for Nintendo 3DS",
-      "system": "3ds",
-      "bucket": "3ds/Super Smash Bros. for Nintendo 3DS (USA) (En,Fr,Es) (Rev 11).zip"
-    },
-    {
-      "title": "Blazblue - Continuum Shift II",
-      "system": "3ds",
-      "bucket": "3ds/Blazblue - Continuum Shift II (USA) (En,Ja,Zh,Ko) (Rev 1).zip"
     },
     {
       "title": "Dragon Ball Z - Extreme Butoden",
@@ -3543,31 +2345,6 @@
       "title": "Fight for Life",
       "system": "atarijaguar",
       "bucket": "atarijaguar/Fight for Life (USA, Europe).zip"
-    },
-    {
-      "title": "Double Dragon V - The Shadow Falls",
-      "system": "atarijaguar",
-      "bucket": "atarijaguar/Double Dragon V - The Shadow Falls (World).zip"
-    },
-    {
-      "title": "Primal Rage",
-      "system": "atarijaguarcd",
-      "bucket": "atarijaguarcd/Primal Rage (USA).chd"
-    },
-    {
-      "title": "Pit-Fighter",
-      "system": "atarilynx",
-      "bucket": "atarilynx/Pit-Fighter (USA, Europe).zip"
-    },
-    {
-      "title": "Fighters Megamix",
-      "system": "gamecom",
-      "bucket": "gamecom/Fighters Megamix (USA).zip"
-    },
-    {
-      "title": "Mortal Kombat Trilogy",
-      "system": "gamecom",
-      "bucket": "gamecom/Mortal Kombat Trilogy (USA).zip"
     }
   ]
 }

@@ -13,19 +13,15 @@
       "bucket": "nes/Zelda II - The Adventure of Link (USA).zip"
     },
     {
-      "title": "Zelda no Densetsu - The Hyrule Fantasy",
-      "system": "fds",
-      "bucket": "fds/Zelda no Densetsu - The Hyrule Fantasy (Japan) (Collector's Edition).zip"
-    },
-    {
-      "title": "Link no Bouken - The Legend of Zelda 2 (Rev 1)",
-      "system": "fds",
-      "bucket": "fds/Link no Bouken - The Legend of Zelda 2 (Japan) (Rev 1) (Collector's Edition).zip"
-    },
-    {
       "title": "Legend of Zelda, The - A Link to the Past",
       "system": "snes",
-      "bucket": "snes/Legend of Zelda, The - A Link to the Past (USA).zip"
+      "bucket": "snes/Legend of Zelda, The - A Link to the Past (USA).zip",
+      "variants": [
+        {
+          "bucket": "gba/Legend of Zelda, The - A Link to the Past & Four Swords (USA).zip",
+          "note": "GBA: adds Four Swords multiplayer and a bonus dungeon"
+        }
+      ]
     },
     {
       "title": "BS Zelda no Densetsu",
@@ -35,12 +31,13 @@
         "satellaview/BS Zelda no Densetsu - Dai-2-wa (Japan) (SoundLink).zip",
         "satellaview/BS Zelda no Densetsu - Dai-3-wa (Japan) (SoundLink).zip",
         "satellaview/BS Zelda no Densetsu - Dai-4-wa (Japan) (Rerun) (SoundLink).zip"
+      ],
+      "variants": [
+        {
+          "bucket": "satellaview/BS Zelda no Densetsu - Map 2 - Dai-1-wa (Japan) (SoundLink).zip",
+          "note": "Satellaview: Map 2, a new overworld and dungeons"
+        }
       ]
-    },
-    {
-      "title": "BS Zelda no Densetsu - Map 2",
-      "system": "satellaview",
-      "bucket": "satellaview/BS Zelda no Densetsu - Map 2 - Dai-1-wa (Japan) (SoundLink).zip"
     },
     {
       "title": "BS Zelda no Densetsu - Inishie no Sekiban",
@@ -53,11 +50,6 @@
       ]
     },
     {
-      "title": "Zelda no Densetsu - Kamigami no Triforce",
-      "system": "satellaview",
-      "bucket": "satellaview/Zelda no Densetsu - Kamigami no Triforce (Japan) (11-30).zip"
-    },
-    {
       "title": "Picross NP Vol. 5",
       "system": "snes",
       "bucket": "snes/Picross NP Vol. 5 (Japan) (Rev 1) (NP).zip"
@@ -65,12 +57,13 @@
     {
       "title": "Legend of Zelda, The - Link's Awakening (Rev 2)",
       "system": "gb",
-      "bucket": "gb/Legend of Zelda, The - Link's Awakening (USA, Europe) (Rev 2).zip"
-    },
-    {
-      "title": "Legend of Zelda, The - Link's Awakening DX (Rev 2) (SGB Enhanced)",
-      "system": "gbc",
-      "bucket": "gbc/Legend of Zelda, The - Link's Awakening DX (USA, Europe) (Rev 2) (SGB Enhanced) (GB Compatible).zip"
+      "bucket": "gb/Legend of Zelda, The - Link's Awakening (USA, Europe) (Rev 2).zip",
+      "variants": [
+        {
+          "bucket": "gbc/Legend of Zelda, The - Link's Awakening DX (USA, Europe) (Rev 2) (SGB Enhanced) (GB Compatible).zip",
+          "note": "Game Boy Color: adds color and the Color Dungeon"
+        }
+      ]
     },
     {
       "title": "Legend of Zelda, The - Oracle of Ages (En,Fr,De,Es,It)",
@@ -83,59 +76,58 @@
       "bucket": "gbc/Legend of Zelda, The - Oracle of Seasons (USA, Australia).zip"
     },
     {
-      "title": "Legend of Zelda, The - A Link to the Past & Four Swords",
-      "system": "gba",
-      "bucket": "gba/Legend of Zelda, The - A Link to the Past & Four Swords (USA).zip"
-    },
-    {
       "title": "Legend of Zelda, The - The Minish Cap",
       "system": "gba",
       "bucket": "gba/Legend of Zelda, The - The Minish Cap (USA).zip"
     },
     {
-      "title": "Classic NES Series - The Legend of Zelda",
-      "system": "gba",
-      "bucket": "gba/Classic NES Series - The Legend of Zelda (USA, Europe).zip"
-    },
-    {
-      "title": "Classic NES Series - Zelda II - The Adventure of Link",
-      "system": "gba",
-      "bucket": "gba/Classic NES Series - Zelda II - The Adventure of Link (USA, Europe).zip"
-    },
-    {
       "title": "Legend of Zelda, The - Ocarina of Time",
       "system": "n64",
-      "bucket": "n64/Legend of Zelda, The - Ocarina of Time (USA) (Rev 2).zip"
+      "bucket": "n64/Legend of Zelda, The - Ocarina of Time (USA) (Rev 2).zip",
+      "variants": [
+        {
+          "bucket": "3ds/Legend of Zelda, The - Ocarina of Time 3D (USA) (En,Fr,Es) (Rev 1).zip",
+          "note": "3DS: remade graphics, Master Quest and a Boss Challenge mode"
+        }
+      ]
     },
     {
       "title": "Legend of Zelda, The - Majora's Mask",
       "system": "n64",
-      "bucket": "n64/Legend of Zelda, The - Majora's Mask (USA).zip"
+      "bucket": "n64/Legend of Zelda, The - Majora's Mask (USA).zip",
+      "variants": [
+        {
+          "bucket": "3ds/Legend of Zelda, The - Majora's Mask 3D (USA) (En,Fr,Es) (Rev 1).zip",
+          "note": "3DS: remade graphics, reworked bosses, saving and new side content"
+        }
+      ]
     },
     {
       "title": "Legend of Zelda, The - The Wind Waker",
       "system": "gc",
-      "bucket": "gc/Legend of Zelda, The - The Wind Waker (USA).rvz"
+      "bucket": "gc/Legend of Zelda, The - The Wind Waker (USA).rvz",
+      "variants": [
+        {
+          "bucket": "wiiu/The Wind Waker HD (US).wua",
+          "note": "Wii U: HD remaster with the Swift Sail and Hero Mode"
+        }
+      ]
     },
     {
       "title": "Legend of Zelda, The - Twilight Princess",
       "system": "gc",
-      "bucket": "gc/Legend of Zelda, The - Twilight Princess (USA).rvz"
+      "bucket": "gc/Legend of Zelda, The - Twilight Princess (USA).rvz",
+      "variants": [
+        {
+          "bucket": "wiiu/Twilight Princess HD (US) (v81).wua",
+          "note": "Wii U: HD remaster with Hero Mode and quality-of-life tweaks"
+        }
+      ]
     },
     {
       "title": "Legend of Zelda, The - Four Swords Adventures",
       "system": "gc",
       "bucket": "gc/Legend of Zelda, The - Four Swords Adventures (USA).rvz"
-    },
-    {
-      "title": "Legend of Zelda, The - Collector's Edition",
-      "system": "gc",
-      "bucket": "gc/Legend of Zelda, The - Collector's Edition (USA).rvz"
-    },
-    {
-      "title": "Legend of Zelda, The - Ocarina of Time & Master Quest",
-      "system": "gc",
-      "bucket": "gc/Legend of Zelda, The - Ocarina of Time & Master Quest (USA).rvz"
     },
     {
       "title": "Legend of Zelda, The - Phantom Hourglass",
@@ -163,16 +155,6 @@
       "bucket": "nds/Tingle no Balloon Fight DS (Japan) (Club Nintendo).zip"
     },
     {
-      "title": "Legend of Zelda, The - Ocarina of Time 3D (Rev 1)",
-      "system": "3ds",
-      "bucket": "3ds/Legend of Zelda, The - Ocarina of Time 3D (USA) (En,Fr,Es) (Rev 1).zip"
-    },
-    {
-      "title": "Legend of Zelda, The - Majora's Mask 3D (Rev 1)",
-      "system": "3ds",
-      "bucket": "3ds/Legend of Zelda, The - Majora's Mask 3D (USA) (En,Fr,Es) (Rev 1).zip"
-    },
-    {
       "title": "Legend of Zelda, The - A Link Between Worlds",
       "system": "3ds",
       "bucket": "3ds/Legend of Zelda, The - A Link Between Worlds (USA) (En,Fr,Es).zip"
@@ -183,9 +165,15 @@
       "bucket": "3ds/Legend of Zelda, The - Tri Force Heroes (USA) (En,Fr,Es).zip"
     },
     {
-      "title": "Hyrule Warriors Legends",
-      "system": "3ds",
-      "bucket": "3ds/Hyrule Warriors Legends (USA).zip"
+      "title": "Hyrule Warriors",
+      "system": "wiiu",
+      "bucket": "wiiu/Hyrule Warriors (US) (v208).wua",
+      "variants": [
+        {
+          "bucket": "3ds/Hyrule Warriors Legends (USA).zip",
+          "note": "3DS: adds Linkle, new characters and a new story chapter"
+        }
+      ]
     },
     {
       "title": "Legend of Zelda, The - Ocarina of Time - Master Quest",
@@ -196,21 +184,6 @@
       "title": "The Legend of Zelda: Breath of the Wild",
       "system": "wiiu",
       "bucket": "wiiu/Breath of the Wild (US) (v208).wua"
-    },
-    {
-      "title": "The Legend of Zelda: The Wind Waker HD",
-      "system": "wiiu",
-      "bucket": "wiiu/The Wind Waker HD (US).wua"
-    },
-    {
-      "title": "The Legend of Zelda: Twilight Princess HD",
-      "system": "wiiu",
-      "bucket": "wiiu/Twilight Princess HD (US) (v81).wua"
-    },
-    {
-      "title": "Hyrule Warriors",
-      "system": "wiiu",
-      "bucket": "wiiu/Hyrule Warriors (US) (v208).wua"
     }
   ]
 }

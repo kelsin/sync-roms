@@ -5,32 +5,56 @@
     {
       "title": "Final Fantasy",
       "system": "nes",
-      "bucket": "nes/Final Fantasy (USA).zip"
+      "bucket": "nes/Final Fantasy (USA).zip",
+      "variants": [
+        {
+          "bucket": "psp/Final Fantasy - 20th Anniversary Edition (USA) (En,Ja) (FW6.00).chd",
+          "note": "PSP: remake with new graphics, bonus dungeons and easier balance"
+        }
+      ]
     },
     {
-      "title": "Final Fantasy II",
-      "system": "nes",
-      "bucket": "nes/Final Fantasy II (Japan).zip"
+      "title": "Final Fantasy II (En,Ja)",
+      "system": "psp",
+      "bucket": "psp/Final Fantasy II (USA, Canada) (En,Ja).chd"
     },
     {
       "title": "Final Fantasy III",
-      "system": "nes",
-      "bucket": "nes/Final Fantasy III (Japan).zip"
+      "system": "nds",
+      "bucket": "nds/Final Fantasy III (USA).zip"
     },
     {
       "title": "Final Fantasy II (Rev 1)",
       "system": "snes",
-      "bucket": "snes/Final Fantasy II (USA) (Rev 1).zip"
+      "bucket": "snes/Final Fantasy II (USA) (Rev 1).zip",
+      "variants": [
+        {
+          "bucket": "gba/Final Fantasy IV Advance (USA).zip",
+          "note": "GBA: adds a bonus dungeon, party swapping and a new translation"
+        }
+      ]
     },
     {
       "title": "Final Fantasy III (Rev 1)",
       "system": "snes",
-      "bucket": "snes/Final Fantasy III (USA) (Rev 1).zip"
+      "bucket": "snes/Final Fantasy III (USA) (Rev 1).zip",
+      "variants": [
+        {
+          "bucket": "gba/Final Fantasy VI Advance (USA).zip",
+          "note": "GBA: adds the Dragons' Den dungeon, new espers and a new translation"
+        }
+      ]
     },
     {
-      "title": "Final Fantasy V",
-      "system": "snes",
-      "bucket": "snes/Final Fantasy V (Japan).zip"
+      "title": "Final Fantasy Anthology - Final Fantasy V (Rev 1)",
+      "system": "psx",
+      "bucket": "psx/Final Fantasy Anthology - Final Fantasy V (USA) (Rev 1).chd",
+      "variants": [
+        {
+          "bucket": "gba/Final Fantasy V Advance (USA).zip",
+          "note": "GBA: adds four jobs, a bonus dungeon and a better translation"
+        }
+      ]
     },
     {
       "title": "Final Fantasy - Mystic Quest (Rev 1)",
@@ -40,7 +64,13 @@
     {
       "title": "Final Fantasy Legend, The",
       "system": "gb",
-      "bucket": "gb/Final Fantasy Legend, The (USA).zip"
+      "bucket": "gb/Final Fantasy Legend, The (USA).zip",
+      "variants": [
+        {
+          "bucket": "wonderswancolor/Makai Toushi Sa-Ga (Japan).zip",
+          "note": "WonderSwan Color: Japanese-only remake with color graphics"
+        }
+      ]
     },
     {
       "title": "Final Fantasy Legend II",
@@ -55,37 +85,13 @@
     {
       "title": "Final Fantasy Adventure",
       "system": "gb",
-      "bucket": "gb/Final Fantasy Adventure (USA).zip"
-    },
-    {
-      "title": "Final Fantasy",
-      "system": "wonderswancolor",
-      "bucket": "wonderswancolor/Final Fantasy (Japan).zip"
-    },
-    {
-      "title": "Final Fantasy II",
-      "system": "wonderswancolor",
-      "bucket": "wonderswancolor/Final Fantasy II (Japan).zip"
-    },
-    {
-      "title": "Final Fantasy IV",
-      "system": "wonderswancolor",
-      "bucket": "wonderswancolor/Final Fantasy IV (Japan).zip"
-    },
-    {
-      "title": "Final Fantasy Origins (Rev 1)",
-      "system": "psx",
-      "bucket": "psx/Final Fantasy Origins (USA) (Rev 1).chd"
-    },
-    {
-      "title": "Final Fantasy Anthology - Final Fantasy V (Rev 1)",
-      "system": "psx",
-      "bucket": "psx/Final Fantasy Anthology - Final Fantasy V (USA) (Rev 1).chd"
-    },
-    {
-      "title": "Final Fantasy Anthology - Final Fantasy VI (Rev 1)",
-      "system": "psx",
-      "bucket": "psx/Final Fantasy Anthology - Final Fantasy VI (USA) (Rev 1).chd"
+      "bucket": "gb/Final Fantasy Adventure (USA).zip",
+      "variants": [
+        {
+          "bucket": "psvita/Adventures of Mana [PCSE00905] [USA] [NoNpDRM].zip",
+          "note": "Vita: faithful 3D remake with new visuals and music"
+        }
+      ]
     },
     {
       "title": "Final Fantasy VII",
@@ -120,26 +126,6 @@
       ]
     },
     {
-      "title": "Final Fantasy I & II - Dawn of Souls",
-      "system": "gba",
-      "bucket": "gba/Final Fantasy I & II - Dawn of Souls (USA).zip"
-    },
-    {
-      "title": "Final Fantasy IV Advance",
-      "system": "gba",
-      "bucket": "gba/Final Fantasy IV Advance (USA).zip"
-    },
-    {
-      "title": "Final Fantasy V Advance",
-      "system": "gba",
-      "bucket": "gba/Final Fantasy V Advance (USA).zip"
-    },
-    {
-      "title": "Final Fantasy VI Advance",
-      "system": "gba",
-      "bucket": "gba/Final Fantasy VI Advance (USA).zip"
-    },
-    {
       "title": "Final Fantasy Tactics Advance",
       "system": "gba",
       "bucket": "gba/Final Fantasy Tactics Advance (USA).zip"
@@ -163,11 +149,6 @@
       "title": "Final Fantasy XII",
       "system": "ps2",
       "bucket": "ps2/Final Fantasy XII.chd"
-    },
-    {
-      "title": "Final Fantasy III",
-      "system": "nds",
-      "bucket": "nds/Final Fantasy III (USA).zip"
     },
     {
       "title": "Final Fantasy IV",
@@ -235,9 +216,15 @@
       "bucket": "gc/Final Fantasy - Crystal Chronicles (USA).rvz"
     },
     {
-      "title": "Final Fantasy Tactics - The War of the Lions",
-      "system": "psp",
-      "bucket": "psp/Final Fantasy Tactics - The War of the Lions (USA).chd"
+      "title": "Final Fantasy Tactics",
+      "system": "psx",
+      "bucket": "psx/Final Fantasy Tactics (USA).chd",
+      "variants": [
+        {
+          "bucket": "psp/Final Fantasy Tactics - The War of the Lions (USA).chd",
+          "note": "PSP: adds jobs, characters, cutscenes and a new translation"
+        }
+      ]
     },
     {
       "title": "Crisis Core - Final Fantasy VII",
@@ -245,19 +232,9 @@
       "bucket": "psp/Crisis Core - Final Fantasy VII (USA).chd"
     },
     {
-      "title": "Final Fantasy - 20th Anniversary Edition (En,Ja) (FW6.00)",
-      "system": "psp",
-      "bucket": "psp/Final Fantasy - 20th Anniversary Edition (USA) (En,Ja) (FW6.00).chd"
-    },
-    {
       "title": "Dissidia 012 - Duodecim Final Fantasy (En,Fr,De,Es,It)",
       "system": "psp",
       "bucket": "psp/Dissidia 012 - Duodecim Final Fantasy (USA) (En,Fr,De,Es,It).chd"
-    },
-    {
-      "title": "Final Fantasy II (En,Ja)",
-      "system": "psp",
-      "bucket": "psp/Final Fantasy II (USA, Canada) (En,Ja).chd"
     },
     {
       "title": "Final Fantasy IV - The Complete Collection (En,Ja,Fr)",
@@ -280,16 +257,6 @@
       "bucket": "psp/Dragon Quest & Final Fantasy in Itadaki Street Portable (Japan) [T-En by MortoQueiba & Choppasmith Prerelease 3].chd"
     },
     {
-      "title": "Final Fantasy Tactics",
-      "system": "psx",
-      "bucket": "psx/Final Fantasy Tactics (USA).chd"
-    },
-    {
-      "title": "Final Fantasy Chronicles - Final Fantasy IV (Rev 1)",
-      "system": "psx",
-      "bucket": "psx/Final Fantasy Chronicles - Final Fantasy IV (USA) (Rev 1).chd"
-    },
-    {
       "title": "Chocobo Racing",
       "system": "psx",
       "bucket": "psx/Chocobo Racing (USA).chd"
@@ -310,9 +277,15 @@
       "bucket": "wonderswancolor/Hataraku Chocobo (Japan).zip"
     },
     {
-      "title": "Final Fantasy Chronicles - Chrono Trigger",
-      "system": "psx",
-      "bucket": "psx/Final Fantasy Chronicles - Chrono Trigger (USA) (Rev 1).chd"
+      "title": "Chrono Trigger",
+      "system": "snes",
+      "bucket": "snes/Chrono Trigger (USA).zip",
+      "variants": [
+        {
+          "bucket": "nds/Chrono Trigger (USA) (En,Fr).zip",
+          "note": "DS: adds the Lost Sanctum, a bonus dungeon and a new ending"
+        }
+      ]
     },
     {
       "title": "Dirge of Cerberus: Final Fantasy VII",

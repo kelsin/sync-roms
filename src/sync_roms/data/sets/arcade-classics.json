@@ -6,7 +6,13 @@
       "title": "Space Invaders",
       "category": "Golden Age",
       "system": "fbneo",
-      "bucket": "fbneo/invaders.zip"
+      "bucket": "fbneo/invaders.zip",
+      "variants": [
+        {
+          "bucket": "tg16/Space Invaders - Fukkatsu no Hi (Japan).zip",
+          "note": "PC Engine: adds a remixed mode with new enemies and power-ups"
+        }
+      ]
     },
     {
       "title": "Super Breakout",
@@ -216,7 +222,13 @@
       "title": "Ms. Pac-Man",
       "category": "Golden Age",
       "system": "fbneo",
-      "bucket": "fbneo/mspacman.zip"
+      "bucket": "fbneo/mspacman.zip",
+      "variants": [
+        {
+          "bucket": "genesis/Ms. Pac-Man (USA, Europe).zip",
+          "note": "Genesis: adds new maze sets, mini and big mazes and 2-player co-op"
+        }
+      ]
     },
     {
       "title": "New Rally-X",
@@ -558,7 +570,13 @@
       "title": "Gyruss",
       "category": "Golden Age",
       "system": "fbneo",
-      "bucket": "fbneo/gyruss.zip"
+      "bucket": "fbneo/gyruss.zip",
+      "variants": [
+        {
+          "bucket": "nes/Gyruss (USA).zip",
+          "note": "NES: adds bosses, bonus stages and a remixed soundtrack"
+        }
+      ]
     },
     {
       "title": "I, Robot",
@@ -713,8 +731,14 @@
     {
       "title": "Lode Runner",
       "category": "Golden Age",
-      "system": "fbneo",
-      "bucket": "fbneo/ldrun.zip"
+      "system": "c64",
+      "bucket": "c64/Lode Runner (USA, Europe).zip",
+      "variants": [
+        {
+          "bucket": "fbneo/ldrun.zip",
+          "note": "Arcade: Irem's version with its own levels and redrawn graphics"
+        }
+      ]
     },
     {
       "title": "Marble Madness",
@@ -813,10 +837,16 @@
       "bucket": "mame/balonfgt.zip"
     },
     {
-      "title": "Vs. Excitebike",
+      "title": "Excitebike",
       "category": "Golden Age",
-      "system": "mame",
-      "bucket": "mame/excitebk.zip"
+      "system": "nes",
+      "bucket": "nes/Excitebike (Japan, USA) (En).zip",
+      "variants": [
+        {
+          "bucket": "fds/Vs. Excitebike (Japan) (En).zip",
+          "note": "Famicom Disk: Vs. Excitebike, adds 2P split screen and track saving"
+        }
+      ]
     },
     {
       "title": "Vs. Ice Climber",
@@ -936,7 +966,13 @@
       "title": "Point Blank",
       "category": "Namco",
       "system": "fbneo",
-      "bucket": "fbneo/ptblank.zip"
+      "bucket": "fbneo/ptblank.zip",
+      "variants": [
+        {
+          "bucket": "psx/Point Blank (USA).chd",
+          "note": "PS1: adds a Quest mode and new minigames"
+        }
+      ]
     },
     {
       "title": "The Outfoxies",
@@ -966,7 +1002,13 @@
       "title": "Gauntlet",
       "category": "Atari, Midway & Williams",
       "system": "fbneo",
-      "bucket": "fbneo/gauntlet.zip"
+      "bucket": "fbneo/gauntlet.zip",
+      "variants": [
+        {
+          "bucket": "genesis/Gauntlet IV (USA, Europe) (En,Ja).zip",
+          "note": "Genesis: adds Quest, Battle and Record modes"
+        }
+      ]
     },
     {
       "title": "Indiana Jones and the Temple of Doom",
@@ -1137,22 +1179,16 @@
       "bucket": "fbneo/totcarn.zip"
     },
     {
-      "title": "NBA Jam",
+      "title": "NBA Jam Tournament Edition",
       "category": "Atari, Midway & Williams",
       "system": "fbneo",
-      "bucket": "fbneo/nbajam.zip"
+      "bucket": "fbneo/nbajamte.zip"
     },
     {
       "title": "Cruis'n USA",
       "category": "Atari, Midway & Williams",
       "system": "mame",
       "bucket": "mame/crusnusa.zip"
-    },
-    {
-      "title": "NBA Jam Tournament Edition",
-      "category": "Atari, Midway & Williams",
-      "system": "fbneo",
-      "bucket": "fbneo/nbajamte.zip"
     },
     {
       "title": "NHL Open Ice: 2 on 2 Challenge",
@@ -1242,7 +1278,13 @@
       "title": "Super Hang-On",
       "category": "Sega",
       "system": "fbneo",
-      "bucket": "fbneo/shangon.zip"
+      "bucket": "fbneo/shangon.zip",
+      "variants": [
+        {
+          "bucket": "genesis/Super Hang-On (Japan, USA) (En,Ja).zip",
+          "note": "Genesis: adds an Original mode with a career and bike upgrades"
+        }
+      ]
     },
     {
       "title": "Wonder Boy: Monster Land",
@@ -1266,7 +1308,13 @@
       "title": "Gain Ground",
       "category": "Sega",
       "system": "fbneo",
-      "bucket": "fbneo/gground.zip"
+      "bucket": "fbneo/gground.zip",
+      "variants": [
+        {
+          "bucket": "genesis/Gain Ground (USA).zip",
+          "note": "Genesis: adds an extra era of stages and more warriors"
+        }
+      ]
     },
     {
       "title": "Power Drift",
@@ -1362,7 +1410,17 @@
       "title": "Puyo Puyo",
       "category": "Sega",
       "system": "fbneo",
-      "bucket": "fbneo/puyo.zip"
+      "bucket": "fbneo/puyo.zip",
+      "variants": [
+        {
+          "bucket": "snes/Kirby's Avalanche (USA).zip",
+          "note": "SNES: Kirby's Avalanche, the English Kirby reskin"
+        },
+        {
+          "bucket": "genesis/Dr. Robotnik's Mean Bean Machine (USA).zip",
+          "note": "Genesis: Dr. Robotnik's Mean Bean Machine, the English Sonic reskin"
+        }
+      ]
     },
     {
       "title": "Puzzle & Action: Tant-R",
@@ -1392,7 +1450,17 @@
       "title": "Bubble Bobble",
       "category": "Taito",
       "system": "fbneo",
-      "bucket": "fbneo/bublboblr.zip"
+      "bucket": "fbneo/bublboblr.zip",
+      "variants": [
+        {
+          "bucket": "mastersystem/Bubble Bobble (Europe, Brazil) (En).zip",
+          "note": "Master System: 200 rounds with new items and bosses"
+        },
+        {
+          "bucket": "gba/Bubble Bobble - Old & New (USA).zip",
+          "note": "GBA: adds a remixed New mode"
+        }
+      ]
     },
     {
       "title": "KiKi KaiKai",
@@ -1416,7 +1484,13 @@
       "title": "Rainbow Islands",
       "category": "Taito",
       "system": "fbneo",
-      "bucket": "fbneo/rbisland.zip"
+      "bucket": "fbneo/rbisland.zip",
+      "variants": [
+        {
+          "bucket": "fbneo/rbislande.zip",
+          "note": "Arcade: Extra Version remixes enemies and stage order"
+        }
+      ]
     },
     {
       "title": "Rastan",
@@ -1607,14 +1681,20 @@
     {
       "title": "Crime Fighters",
       "category": "Konami",
-      "system": "mame",
-      "bucket": "mame/crimfght.zip"
+      "system": "fbneo",
+      "bucket": "fbneo/crimfghtu.zip"
     },
     {
       "title": "Teenage Mutant Ninja Turtles",
       "category": "Konami",
       "system": "fbneo",
-      "bucket": "fbneo/tmntu.zip"
+      "bucket": "fbneo/tmntu.zip",
+      "variants": [
+        {
+          "bucket": "nes/Teenage Mutant Ninja Turtles II - The Arcade Game (USA).zip",
+          "note": "NES: adds two new stages and new bosses"
+        }
+      ]
     },
     {
       "title": "Aliens",
@@ -1638,7 +1718,13 @@
       "title": "Teenage Mutant Ninja Turtles: Turtles in Time",
       "category": "Konami",
       "system": "fbneo",
-      "bucket": "fbneo/tmnt2.zip"
+      "bucket": "fbneo/tmnt2.zip",
+      "variants": [
+        {
+          "bucket": "snes/Teenage Mutant Ninja Turtles IV - Turtles in Time (USA).zip",
+          "note": "SNES: adds new stages, bosses and Mode 7 throws"
+        }
+      ]
     },
     {
       "title": "The Simpsons",
@@ -1776,7 +1862,13 @@
       "title": "Strider",
       "category": "Capcom",
       "system": "fbneo",
-      "bucket": "fbneo/strider.zip"
+      "bucket": "fbneo/strider.zip",
+      "variants": [
+        {
+          "bucket": "tg-cd/Strider Hiryuu (Japan).chd",
+          "note": "PC Engine CD: adds an exclusive extra stage and cutscenes"
+        }
+      ]
     },
     {
       "title": "Willow",
@@ -1800,7 +1892,13 @@
       "title": "Mercs",
       "category": "Capcom",
       "system": "fbneo",
-      "bucket": "fbneo/mercsu.zip"
+      "bucket": "fbneo/mercsu.zip",
+      "variants": [
+        {
+          "bucket": "genesis/Mercs (World).zip",
+          "note": "Genesis: adds Original Mode, a new solo campaign with shops"
+        }
+      ]
     },
     {
       "title": "Nemo",
@@ -2127,10 +2225,10 @@
       "bucket": "fbneo/goalx3.zip"
     },
     {
-      "title": "Puzzle De Pon!",
+      "title": "Puzzle De Pon! R!",
       "category": "Neo Geo",
       "system": "fbneo",
-      "bucket": "fbneo/puzzledp.zip"
+      "bucket": "fbneo/puzzldpr.zip"
     },
     {
       "title": "Stakes Winner",
@@ -2154,7 +2252,13 @@
       "title": "Metal Slug",
       "category": "Neo Geo",
       "system": "fbneo",
-      "bucket": "fbneo/mslug.zip"
+      "bucket": "fbneo/mslug.zip",
+      "variants": [
+        {
+          "bucket": "saturn/Metal Slug - Super Vehicle-001 (Japan) (Rev A).chd",
+          "note": "Saturn: adds Combat School, a mission mode with ranked challenges"
+        }
+      ]
     },
     {
       "title": "Neo Drift Out - New Technology",
@@ -2229,12 +2333,6 @@
       "bucket": "fbneo/popbounc.zip"
     },
     {
-      "title": "Puzzle De Pon! R!",
-      "category": "Neo Geo",
-      "system": "fbneo",
-      "bucket": "fbneo/puzzldpr.zip"
-    },
-    {
       "title": "Shock Troopers",
       "category": "Neo Geo",
       "system": "fbneo",
@@ -2253,10 +2351,16 @@
       "bucket": "fbneo/flipshot.zip"
     },
     {
-      "title": "Metal Slug 2",
+      "title": "Metal Slug X",
       "category": "Neo Geo",
       "system": "fbneo",
-      "bucket": "fbneo/mslug2.zip"
+      "bucket": "fbneo/mslugx.zip",
+      "variants": [
+        {
+          "bucket": "psx/Metal Slug X (USA).chd",
+          "note": "PlayStation: adds Combat School mission challenges and a gallery"
+        }
+      ]
     },
     {
       "title": "Neo-Geo Cup '98 - The Road to the Victory",
@@ -2275,12 +2379,6 @@
       "category": "Neo Geo",
       "system": "fbneo",
       "bucket": "fbneo/ganryu.zip"
-    },
-    {
-      "title": "Metal Slug X",
-      "category": "Neo Geo",
-      "system": "fbneo",
-      "bucket": "fbneo/mslugx.zip"
     },
     {
       "title": "Metal Slug 3",
@@ -2403,16 +2501,28 @@
       "bucket": "mame/mightybj.zip"
     },
     {
-      "title": "Vs. Super Mario Bros.",
+      "title": "Super Mario Bros.",
       "category": "Other",
-      "system": "mame",
-      "bucket": "mame/suprmrio.zip"
+      "system": "nes",
+      "bucket": "nes/Super Mario Bros. (World).zip",
+      "variants": [
+        {
+          "bucket": "gbc/Super Mario Bros. Deluxe (USA, Europe) (Rev 1).zip",
+          "note": "GBC: adds the Lost Levels, challenges and a 2-player race mode"
+        }
+      ]
     },
     {
       "title": "Double Dragon",
       "category": "Other",
       "system": "fbneo",
-      "bucket": "fbneo/ddragonu.zip"
+      "bucket": "fbneo/ddragonu.zip",
+      "variants": [
+        {
+          "bucket": "gba/Double Dragon Advance (USA).zip",
+          "note": "GBA: expanded remake with new stages, moves and enemies"
+        }
+      ]
     },
     {
       "title": "Guerrilla War",
@@ -2448,7 +2558,13 @@
       "title": "Super Dodge Ball",
       "category": "Other",
       "system": "fbneo",
-      "bucket": "fbneo/spdodgeb.zip"
+      "bucket": "fbneo/spdodgeb.zip",
+      "variants": [
+        {
+          "bucket": "nes/Super Dodge Ball (USA).zip",
+          "note": "NES: adds more teams, a world cup and special shots"
+        }
+      ]
     },
     {
       "title": "Tecmo Bowl",
@@ -2592,7 +2708,13 @@
       "title": "Snow Bros.",
       "category": "Other",
       "system": "fbneo",
-      "bucket": "fbneo/snowbros.zip"
+      "bucket": "fbneo/snowbros.zip",
+      "variants": [
+        {
+          "bucket": "genesis/Snow Bros. - Nick & Tom (Japan).zip",
+          "note": "Genesis: adds extra floors and a new final boss"
+        }
+      ]
     },
     {
       "title": "The Cliffhanger: Edward Randy",

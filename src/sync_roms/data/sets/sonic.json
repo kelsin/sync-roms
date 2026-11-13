@@ -10,7 +10,13 @@
     {
       "title": "Sonic The Hedgehog 3",
       "system": "genesis",
-      "bucket": "genesis/Sonic The Hedgehog 3 (USA).zip"
+      "bucket": "genesis/Sonic The Hedgehog 3 (USA).zip",
+      "variants": [
+        {
+          "bucket": "genesis/Sonic & Knuckles + Sonic The Hedgehog 3 (USA) (Lock-on Combination).zip",
+          "note": "Genesis: Sonic 3 & Knuckles, Sonic 3 joined with Sonic & Knuckles"
+        }
+      ]
     },
     {
       "title": "Sonic & Knuckles",
@@ -20,7 +26,13 @@
     {
       "title": "Sonic 3D Blast (En)",
       "system": "genesis",
-      "bucket": "genesis/Sonic 3D Blast (USA, Europe, Korea) (En).zip"
+      "bucket": "genesis/Sonic 3D Blast (USA, Europe, Korea) (En).zip",
+      "variants": [
+        {
+          "bucket": "saturn/Sonic 3D Blast (USA).chd",
+          "note": "Saturn: new 3D special stages, new soundtrack and better effects"
+        }
+      ]
     },
     {
       "title": "Sonic Spinball",
@@ -64,33 +76,13 @@
     },
     {
       "title": "Sonic Blast",
-      "system": "mastersystem",
-      "bucket": "mastersystem/Sonic Blast (Brazil) (En).zip"
+      "system": "gamegear",
+      "bucket": "gamegear/Sonic Blast (World).zip"
     },
     {
       "title": "Sonic Spinball",
-      "system": "mastersystem",
-      "bucket": "mastersystem/Sonic Spinball (Europe, Brazil) (En).zip"
-    },
-    {
-      "title": "Dr. Robotnik's Mean Bean Machine",
-      "system": "mastersystem",
-      "bucket": "mastersystem/Dr. Robotnik's Mean Bean Machine (Europe, Brazil) (En).zip"
-    },
-    {
-      "title": "Sonic The Hedgehog",
       "system": "gamegear",
-      "bucket": "gamegear/Sonic The Hedgehog (Japan, USA) (En).zip"
-    },
-    {
-      "title": "Sonic The Hedgehog 2",
-      "system": "gamegear",
-      "bucket": "gamegear/Sonic The Hedgehog 2 (World).zip"
-    },
-    {
-      "title": "Sonic Chaos (En)",
-      "system": "gamegear",
-      "bucket": "gamegear/Sonic Chaos (USA, Europe, Brazil) (En).zip"
+      "bucket": "gamegear/Sonic Spinball (USA, Europe, Brazil) (En).zip"
     },
     {
       "title": "Sonic The Hedgehog - Triple Trouble (En)",
@@ -113,11 +105,6 @@
       "bucket": "gamegear/Sonic Labyrinth (World).zip"
     },
     {
-      "title": "Sonic Blast",
-      "system": "gamegear",
-      "bucket": "gamegear/Sonic Blast (World).zip"
-    },
-    {
       "title": "Tails Adventure",
       "system": "gamegear",
       "bucket": "gamegear/Tails Adventure (World) (En,Ja).zip"
@@ -126,16 +113,6 @@
       "title": "Tails no Skypatrol",
       "system": "gamegear",
       "bucket": "gamegear/Tails no Skypatrol (Japan).zip"
-    },
-    {
-      "title": "Dr. Robotnik's Mean Bean Machine",
-      "system": "gamegear",
-      "bucket": "gamegear/Dr. Robotnik's Mean Bean Machine (USA, Europe).zip"
-    },
-    {
-      "title": "Sonic Jam",
-      "system": "saturn",
-      "bucket": "saturn/Sonic Jam (USA).chd"
     },
     {
       "title": "Sonic Advance",
@@ -158,24 +135,31 @@
       "bucket": "gba/Sonic Battle (USA) (En,Ja,Fr,De,Es,It).zip"
     },
     {
-      "title": "Sonic Adventure 2 - Battle",
-      "system": "gc",
-      "bucket": "gc/Sonic Adventure 2 - Battle (USA) (En,Ja,Fr,De,Es).rvz"
+      "title": "Sonic Adventure 2",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Sonic Adventure 2 (USA) (En,Ja,Fr,De,Es).chd",
+      "variants": [
+        {
+          "bucket": "gc/Sonic Adventure 2 - Battle (USA) (En,Ja,Fr,De,Es).rvz",
+          "note": "GameCube: adds multiplayer characters, modes and Chao features"
+        }
+      ]
     },
     {
-      "title": "Sonic Adventure DX - Director's Cut",
-      "system": "gc",
-      "bucket": "gc/Sonic Adventure DX - Director's Cut (USA) (En,Ja,Fr,De,Es).rvz"
+      "title": "Sonic Adventure International",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Sonic Adventure International (Japan) (En,Ja,Fr,De,Es).chd",
+      "variants": [
+        {
+          "bucket": "gc/Sonic Adventure DX - Director's Cut (USA) (En,Ja,Fr,De,Es).rvz",
+          "note": "GameCube: adds 60 missions, Metal Sonic and Game Gear games"
+        }
+      ]
     },
     {
       "title": "Sonic Heroes",
       "system": "gc",
       "bucket": "gc/Sonic Heroes (USA) (En,Ja,Fr,De,Es,It).rvz"
-    },
-    {
-      "title": "Sonic Mega Collection",
-      "system": "gc",
-      "bucket": "gc/Sonic Mega Collection (USA).rvz"
     },
     {
       "title": "Sonic Gems Collection",
@@ -208,19 +192,14 @@
       "bucket": "nds/Sonic Chronicles - The Dark Brotherhood (USA) (En,Fr,De,Es,It).zip"
     },
     {
-      "title": "Sonic Classic Collection",
-      "system": "nds",
-      "bucket": "nds/Sonic Classic Collection (USA) (En,Fr,Es) (NDSi Enhanced).zip"
-    },
-    {
       "title": "Sonic Colors",
       "system": "nds",
       "bucket": "nds/Sonic Colors (USA) (En,Ja,Fr,De,Es,It).zip"
     },
     {
-      "title": "Sonic & SEGA All-Stars Racing",
-      "system": "nds",
-      "bucket": "nds/Sonic & SEGA All-Stars Racing (USA) (En,Fr,Es).zip"
+      "title": "Sonic & Sega All-Stars Racing",
+      "system": "wii",
+      "bucket": "wii/Sonic & Sega All-Stars Racing (USA) (En,Fr,Es).rvz"
     },
     {
       "title": "Mario & Sonic at the Olympic Games",
@@ -268,19 +247,9 @@
       "bucket": "3ds/Mario & Sonic at the Rio 2016 Olympic Games (USA) (En,Fr,Es).zip"
     },
     {
-      "title": "Sonic 3D Blast",
-      "system": "saturn",
-      "bucket": "saturn/Sonic 3D Blast (USA).chd"
-    },
-    {
       "title": "Sonic R",
       "system": "saturn",
       "bucket": "saturn/Sonic R (USA, Brazil).chd"
-    },
-    {
-      "title": "Sonic Spinball",
-      "system": "gamegear",
-      "bucket": "gamegear/Sonic Spinball (USA, Europe, Brazil) (En).zip"
     },
     {
       "title": "Sonic Pinball Party",
@@ -288,29 +257,20 @@
       "bucket": "gba/Sonic Pinball Party (USA) (En,Ja,Fr,De,Es,It).zip"
     },
     {
-      "title": "Sonic The Hedgehog - Genesis",
-      "system": "gba",
-      "bucket": "gba/Sonic The Hedgehog - Genesis (USA).zip"
-    },
-    {
-      "title": "Sonic & Knuckles + Sonic The Hedgehog 3 (Lock-On)",
+      "title": "Sonic The Hedgehog 2 (Rev B)",
       "system": "genesis",
-      "bucket": "genesis/Sonic & Knuckles + Sonic The Hedgehog 3 (USA) (Lock-on Combination).zip"
-    },
-    {
-      "title": "Sonic & Knuckles + Sonic The Hedgehog 2 (Rev A) (Lock-On)",
-      "system": "genesis",
-      "bucket": "genesis/Sonic & Knuckles + Sonic The Hedgehog 2 (World) (Rev A) (Lock-on Combination).zip"
+      "bucket": "genesis/Sonic The Hedgehog 2 (World) (Rev B).zip",
+      "variants": [
+        {
+          "bucket": "genesis/Sonic & Knuckles + Sonic The Hedgehog 2 (World) (Rev A) (Lock-on Combination).zip",
+          "note": "Genesis: Knuckles in Sonic 2, the whole game as Knuckles"
+        }
+      ]
     },
     {
       "title": "Sonic The Hedgehog - Pocket Adventure",
       "system": "ngpc",
       "bucket": "ngpc/Sonic The Hedgehog - Pocket Adventure (World) (En,Ja).zip"
-    },
-    {
-      "title": "Sonic The Hedgehog 2 (Rev B)",
-      "system": "genesis",
-      "bucket": "genesis/Sonic The Hedgehog 2 (World) (Rev B).zip"
     },
     {
       "title": "Sonic & Knuckles + Sonic The Hedgehog",
@@ -326,31 +286,6 @@
       "title": "Sonic Rivals 2",
       "system": "psp",
       "bucket": "psp/Sonic Rivals 2 (USA).chd"
-    },
-    {
-      "title": "Sonic Mega Collection Plus",
-      "system": "ps2",
-      "bucket": "ps2/Sonic Mega Collection Plus (USA).chd"
-    },
-    {
-      "title": "Sonic Heroes",
-      "system": "ps2",
-      "bucket": "ps2/Sonic Heroes (USA) (En,Ja,Fr,De,Es,It).chd"
-    },
-    {
-      "title": "Sonic Riders",
-      "system": "ps2",
-      "bucket": "ps2/Sonic Riders (USA) (En,Ja,Fr,De,Es,It).chd"
-    },
-    {
-      "title": "Sonic Gems Collection",
-      "system": "ps2",
-      "bucket": "ps2/Sonic Gems Collection (Europe, Australia) (En,Fr,De,Es,It).chd"
-    },
-    {
-      "title": "Sonic & Sega All-Stars Racing",
-      "system": "wii",
-      "bucket": "wii/Sonic & Sega All-Stars Racing (USA) (En,Fr,Es).rvz"
     },
     {
       "title": "Sonic and the Black Knight",
@@ -378,16 +313,6 @@
       "bucket": "wii/Sonic Unleashed (USA) (En,Ja,Fr,De,Es,It).rvz"
     },
     {
-      "title": "Sonic Adventure 2",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Sonic Adventure 2 (USA) (En,Ja,Fr,De,Es).chd"
-    },
-    {
-      "title": "Sonic Adventure International",
-      "system": "dreamcast",
-      "bucket": "dreamcast/Sonic Adventure International (Japan) (En,Ja,Fr,De,Es).chd"
-    },
-    {
       "title": "Sonic Shuffle",
       "system": "dreamcast",
       "bucket": "dreamcast/Sonic Shuffle (USA).chd"
@@ -395,7 +320,13 @@
     {
       "title": "ChuChu Rocket!",
       "system": "dreamcast",
-      "bucket": "dreamcast/ChuChu Rocket! (USA) (En,Ja,Fr,De,Es).chd"
+      "bucket": "dreamcast/ChuChu Rocket! (USA) (En,Ja,Fr,De,Es).chd",
+      "variants": [
+        {
+          "bucket": "gba/ChuChu Rocket! (USA) (En,Ja,Fr,De,Es).zip",
+          "note": "GBA: adds a large set of new puzzles"
+        }
+      ]
     },
     {
       "title": "Sonic Jam",

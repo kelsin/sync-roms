@@ -313,6 +313,7 @@
     "id": "anbernic-rg55g1",
     "name": "Anbernic RG55G1",
     "soc": "Snapdragon G1 Gen 2",
+    "gpu": "adreno-a12",
     "screen": "16:9",
     "firmwares": [
       "esde"
@@ -322,6 +323,7 @@
     "id": "ayaneo-konkr-pocket-fit",
     "name": "AYANEO KONKR Pocket Fit",
     "soc": "Snapdragon G3 Gen 3",
+    "gpu": "adreno-g3-gen-3",
     "screen": "16:9",
     "firmwares": [
       "esde"
@@ -331,6 +333,7 @@
     "id": "ayaneo-pocket-ace",
     "name": "AYANEO Pocket ACE",
     "soc": "Snapdragon G3x Gen 2",
+    "gpu": "adreno-a32",
     "screen": "3:2",
     "firmwares": [
       "esde"
@@ -367,6 +370,7 @@
     "id": "ayaneo-pocket-dmg",
     "name": "AYANEO Pocket DMG",
     "soc": "Snapdragon G3x Gen 2",
+    "gpu": "adreno-a32",
     "screen": "31:27",
     "firmwares": [
       "esde"
@@ -376,6 +380,7 @@
     "id": "ayaneo-pocket-ds",
     "name": "AYANEO Pocket DS",
     "soc": "Snapdragon G3x Gen 2",
+    "gpu": "adreno-a32",
     "screen": "16:9",
     "screen2": "4:3",
     "firmwares": [
@@ -386,6 +391,7 @@
     "id": "ayaneo-pocket-evo",
     "name": "AYANEO Pocket EVO",
     "soc": "Snapdragon G3x Gen 2",
+    "gpu": "adreno-a32",
     "screen": "16:9",
     "firmwares": [
       "esde"
@@ -404,6 +410,7 @@
     "id": "ayaneo-pocket-micro-2",
     "name": "AYANEO Pocket Micro 2",
     "soc": "Snapdragon 865",
+    "gpu": "adreno-650",
     "screen": "3:2",
     "firmwares": [
       "esde"
@@ -422,6 +429,7 @@
     "id": "ayaneo-pocket-s",
     "name": "AYANEO Pocket S",
     "soc": "Snapdragon G3x Gen 2",
+    "gpu": "adreno-a32",
     "screen": "16:9",
     "firmwares": [
       "esde"
@@ -431,6 +439,7 @@
     "id": "ayaneo-pocket-s-mini",
     "name": "AYANEO Pocket S Mini",
     "soc": "Snapdragon G3x Gen 2",
+    "gpu": "adreno-a32",
     "screen": "4:3",
     "firmwares": [
       "esde"
@@ -440,6 +449,7 @@
     "id": "ayaneo-pocket-s2",
     "name": "AYANEO Pocket S2",
     "soc": "Snapdragon G3 Gen 3",
+    "gpu": "adreno-g3-gen-3",
     "screen": "16:9",
     "firmwares": [
       "esde"
@@ -449,6 +459,7 @@
     "id": "ayaneo-pocket-s2-pro",
     "name": "AYANEO Pocket S2 Pro",
     "soc": "Snapdragon G3 Gen 3",
+    "gpu": "adreno-g3-gen-3",
     "screen": "16:9",
     "firmwares": [
       "esde"
@@ -458,6 +469,7 @@
     "id": "ayaneo-pocket-vert",
     "name": "AYANEO Pocket Vert",
     "soc": "Snapdragon 8+ Gen 1",
+    "gpu": "adreno-730",
     "screen": "10:9",
     "firmwares": [
       "esde"
@@ -467,6 +479,7 @@
     "id": "ayn-odin",
     "name": "AYN Odin",
     "soc": "Snapdragon 845",
+    "gpu": "adreno-630",
     "screen": "16:9",
     "firmwares": [
       "esde"
@@ -476,6 +489,7 @@
     "id": "ayn-odin-2",
     "name": "AYN Odin 2",
     "soc": "Snapdragon 8 Gen 2",
+    "gpu": "adreno-740",
     "screen": "16:9",
     "firmwares": [
       "esde"
@@ -485,6 +499,7 @@
     "id": "ayn-odin-2-mini",
     "name": "AYN Odin 2 Mini",
     "soc": "Snapdragon 8 Gen 2",
+    "gpu": "adreno-740",
     "screen": "16:9",
     "firmwares": [
       "esde"
@@ -494,6 +509,7 @@
     "id": "ayn-odin-2-portal",
     "name": "AYN Odin 2 Portal",
     "soc": "Snapdragon 8 Gen 2",
+    "gpu": "adreno-740",
     "screen": "16:9",
     "firmwares": [
       "esde"
@@ -503,6 +519,7 @@
     "id": "ayn-odin-3",
     "name": "AYN Odin 3",
     "soc": "Snapdragon 8 Elite",
+    "gpu": "adreno-830",
     "screen": "16:9",
     "firmwares": [
       "esde"
@@ -531,6 +548,7 @@
     "id": "ayn-thor",
     "name": "AYN Thor",
     "soc": "Snapdragon 8 Gen 2",
+    "gpu": "adreno-740",
     "screen": "16:9",
     "screen2": "31:27",
     "firmwares": [
@@ -614,6 +632,7 @@
     "id": "retroid-pocket-5",
     "name": "Retroid Pocket 5",
     "soc": "Snapdragon 865",
+    "gpu": "adreno-650",
     "screen": "16:9",
     "firmwares": [
       "esde"
@@ -623,6 +642,7 @@
     "id": "retroid-pocket-6",
     "name": "Retroid Pocket 6",
     "soc": "Snapdragon 8 Gen 2",
+    "gpu": "adreno-740",
     "screen": "16:9",
     "firmwares": [
       "esde"
@@ -632,6 +652,7 @@
     "id": "retroid-pocket-classic",
     "name": "Retroid Pocket Classic",
     "soc": "Snapdragon G1 Gen 2",
+    "gpu": "adreno-a12",
     "screen": "31:27",
     "firmwares": [
       "esde"
@@ -641,6 +662,7 @@
     "id": "retroid-pocket-duo",
     "name": "Retroid Pocket Duo",
     "soc": "Snapdragon 7 Gen 4",
+    "gpu": "adreno-722",
     "screen": "16:9",
     "screen2": "4:3",
     "firmwares": [
@@ -651,6 +673,7 @@
     "id": "retroid-pocket-duo-lite",
     "name": "Retroid Pocket Duo Lite",
     "soc": "Snapdragon 665",
+    "gpu": "adreno-610",
     "screen": "16:9",
     "screen2": "4:3",
     "firmwares": [
@@ -661,6 +684,7 @@
     "id": "retroid-pocket-duo-lite-plus",
     "name": "Retroid Pocket Duo Lite Plus",
     "soc": "Snapdragon 7 Gen 4",
+    "gpu": "adreno-722",
     "screen": "16:9",
     "screen2": "4:3",
     "firmwares": [
@@ -680,6 +704,7 @@
     "id": "retroid-pocket-flip-2",
     "name": "Retroid Pocket Flip 2",
     "soc": "Snapdragon 865",
+    "gpu": "adreno-650",
     "screen": "16:9",
     "firmwares": [
       "esde"
@@ -689,6 +714,7 @@
     "id": "retroid-pocket-g2",
     "name": "Retroid Pocket G2",
     "soc": "Snapdragon G2 Gen 2",
+    "gpu": "adreno-a22",
     "screen": "16:9",
     "firmwares": [
       "esde"
@@ -698,6 +724,7 @@
     "id": "retroid-pocket-mini",
     "name": "Retroid Pocket Mini",
     "soc": "Snapdragon 865",
+    "gpu": "adreno-650",
     "screen": "4:3",
     "firmwares": [
       "esde"
@@ -707,6 +734,7 @@
     "id": "retroid-pocket-mini-v2",
     "name": "Retroid Pocket Mini V2",
     "soc": "Snapdragon 865",
+    "gpu": "adreno-650",
     "screen": "31:27",
     "firmwares": [
       "esde"
@@ -716,6 +744,7 @@
     "id": "retroid-pocket-nova",
     "name": "Retroid Pocket Nova",
     "soc": "Qualcomm QCS8550 (Snapdragon 8 Gen 2)",
+    "gpu": "adreno-740",
     "screen": "4:3",
     "firmwares": [
       "esde"

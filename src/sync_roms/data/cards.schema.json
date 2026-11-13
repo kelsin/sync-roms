@@ -24,6 +24,11 @@
         "type": "array",
         "items": {"type": "string"}
       },
+      "drivers": {
+        "description": "GPU driver zip names sync-roms copied to the card's Drivers folder",
+        "type": "array",
+        "items": {"type": "string"}
+      },
       "surprise": {"type": "boolean", "description": "false turns Surprise off (absent: on)"},
       "surprises": {
         "type": "array",

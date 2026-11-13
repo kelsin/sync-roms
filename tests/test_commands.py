@@ -86,13 +86,14 @@ class GamesTest(CardCmd):
         from sync_roms import collections
         collections.save_collection({"id": "favs", "name": "Favs", "games": []})
         cards = self.read("cards.json")
-        cards["SD"].update(collections=["favs"], frontend_collections=["Favs"])
+        cards["SD"].update(collections=["favs"], frontend_collections=["Favs"], drivers=["a-v1.zip"])
         self.write_json("cards.json", cards)
-        self.assertEqual(self.run_cmd("games", "export")[1].splitlines(), ["@collections favs", "@frontend_collections Favs"])
+        self.assertEqual(self.run_cmd("games", "export")[1].splitlines(),
+                         ["@collections favs", "@frontend_collections Favs", "@drivers a-v1.zip"])
         self.write_json("cards.json", {"SD": {"device": "full", "layout": "esde"}})
         listing = os.path.join(self.tmp.name, "list.txt")
         with open(listing, "w") as f:
-            f.write("@collections favs\n@collections ghost\n@frontend_collections Favs\n@bogus x\n")
+            f.write("@collections favs\n@collections ghost\n@frontend_collections Favs\n@drivers a-v1.zip\n@bogus x\n")
         code, _, err = self.run_cmd("games", "import", listing, "-n")
         self.assertEqual((code, self.read("cards.json")["SD"].get("collections")), (0, None))
         code, _, err = self.run_cmd("games", "import", listing)
@@ -100,7 +101,7 @@ class GamesTest(CardCmd):
         self.assertIn("ghost", err)
         self.assertIn("@bogus", err)
         entry = self.read("cards.json")["SD"]
-        self.assertEqual((entry["collections"], entry["frontend_collections"]), (["favs"], ["Favs"]))
+        self.assertEqual((entry["collections"], entry["frontend_collections"], entry["drivers"]), (["favs"], ["Favs"], ["a-v1.zip"]))
 
     def test_import_skips_an_empty_frontend_collection_name(self):
         path = self.path("list.txt")
