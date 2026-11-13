@@ -274,7 +274,7 @@ Without a terminal and without those flags the pickers fail with the flag to use
 
 Exit codes: `0` done (or nothing to do, or you declined), `1` some files failed, `2` bad usage, `3` setup problem (credentials, storage, missing tool, unreadable data file), `130` interrupted. Errors go to stderr; `NO_COLOR` and `FORCE_COLOR` control colors.
 
-Before downloading, the sync shows the totals and free space on the card and asks. Local ROMs no longer in the selection are listed and deleted first (after you confirm), so the free space shown is accurate.
+Before downloading, the sync shows the totals and free space on the card and asks. When there isn't enough space and nobody can be asked (`--yes`, or no terminal), the sync fails with exit 1. Local ROMs no longer in the selection are listed and deleted first (after you confirm), so the free space shown is accurate.
 
 On `esde` and `emudeck` cards every Vita game zip in `psvita/` gets a `.psvita` file beside it holding the game's title id (read from the zip's `param.sfo`), which is what ES-DE launches Vita3K with; the zip itself is left as it is for Vita3K to install. The `.psvita` file is kept while its zip is in the selection and deleted with the other unwanted files once it isn't. A synced Vita game also brings its DLC and newest update from `psvita/` (matched by the title id in the file names), on every layout; the editors and Surprise list only games.
 
@@ -316,7 +316,7 @@ On `esde` and `emudeck` cards every Vita game zip in `psvita/` gets a `.psvita` 
 | `--set-credentials` | `scrape`: ask for the ScreenScraper login and developer credentials and save them in `settings.json` |
 | `--full` | `cache update`: in a storage folder, stat every file, not only the ones the cache doesn't have (see Storage cache) |
 | `--bucket-keys` | `check`: also verify with the read-only profile that every game key in your lists and sets exists in storage |
-| `--quiet` | Print only errors, warnings and `--json` data; prompts are asked on stderr |
+| `--quiet` | Print only errors (failed files and a sync's failure count included, and `check`'s problems), warnings and `--json` data, all on stderr except the JSON; prompts are asked on stderr |
 | `--verbose` | Also print the effective settings and where each came from, on stderr |
 | `--profile P`, `--write-profile P`, `--bucket B`, `--root DIR`, `--endpoint URL` | Override those settings for this run. Precedence: flag, then environment variable, then `settings.json`, then the default |
 | `--version` | Print the version |
@@ -507,7 +507,7 @@ On the Cards list, `v` changes a card's device and firmware, `r` renames a card 
 
 ### Editing from scripts
 
-`--card NAME` picks the card and every `games` command needs it; every command takes `--dry-run` and prints what it changed.
+`--card NAME` picks the card and every `games` command needs it; every command that changes the card takes `--dry-run` and prints what it changed (`games list`, `games export` and `games sets list` change nothing and refuse it).
 
 ```bash
 sync-roms games add gba 'Metroid*' --card SD      # a name, SYSTEM/name, or a glob matched against storage

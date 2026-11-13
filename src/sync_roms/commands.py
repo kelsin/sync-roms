@@ -194,7 +194,13 @@ def remove_games(raw, system, keys):
 def games_add(args):
     need_system(args.system)
     raw, save = load_target(args.card)
-    return finish(args, raw, save, add_games(raw, args.system, resolve_keys(args.system, args.keys)))
+    keys = resolve_keys(args.system, args.keys)
+    tree = inventory.current()
+    cached = tree.under(args.system + "/") if tree else {}
+    for key in keys if cached else []:  # a cache without the system's folder says nothing about its files
+        if key not in cached:
+            ui.warn(f"{key} isn't in the storage cache: check the name, or run {inventory.UPDATE_HINT} if it was just added")
+    return finish(args, raw, save, add_games(raw, args.system, keys))
 
 
 def games_remove(args):
@@ -481,6 +487,8 @@ def config_cmd(args):
 
 
 def cache_cmd(args):
+    if args.full and args.action != "update":
+        ui.fail("--full only applies to `cache update`", 2)
     usersettings.ensure_bucket()
     return inventory.update_command(args.full) if args.action == "update" else inventory.status_command()
 
@@ -733,7 +741,7 @@ def check_cmd(args):
     repo_systems = store.repo_json("systems")
     problems = check_data(bucket_lister() if args.bucket_keys else None, repo_systems)
     for p in problems:
-        print(ui.red(f"❌ {p}"))
+        ui.failure(ui.red(f"❌ {p}"))
     for n in check_notices(repo_systems):
         print(ui.yellow(f"⚠️  {n}"))
     if not problems:
@@ -952,5 +960,9 @@ def build_parser():
 
 def run(argv):
     args = build_parser().parse_args(argv)
+    if getattr(args, "dry_run", False) and (args.fn in (games_list, games_export, config_cmd, cache_cmd, doctor_cmd, check_cmd, completion_cmd)
+                                            or (args.fn is games_sets and args.verb == "list")):
+        name = " ".join(w for w in (args.command, getattr(args, "action", None), getattr(args, "verb", None)) if w)
+        ui.fail(f"--dry-run has no effect on `{name}`", 2)
     ui.ASSUME_YES = getattr(args, "yes", False)
     return args.fn(args) or 0

@@ -318,7 +318,7 @@ def main():
     if not sys.stdout.isatty():  # logs and pipes get plain text
         sys.stdout = ui.PlainOut(sys.stdout)
     try:
-        return sync()
+        return sync(reset=False)
     except KeyboardInterrupt:
         print(ui.yellow("\n🛑 Interrupted"), file=sys.stderr)
         return 130
@@ -343,6 +343,7 @@ def main():
         inventory.flush()
         clean.clean_dirs()
         clean.eject()
+        ui.reset()  # after the card finalize, so --quiet hides it too
 
 
 def list_devices(args=None):
@@ -473,11 +474,15 @@ def check_modes(args):
         ui.fail("--replace only works with `upload roms` (--upload)", 2)
     if args.dry_run and mode in ("--edit", "--install-tools", "--clear-mirror", "--devices", "--scrape-missing"):
         ui.fail(f"--dry-run has no effect on {mode}", 2)
+    if args.dry_run and mode == "--scrape-review":
+        ui.fail("--dry-run has no effect on `scrape review`", 2)
     if args.ask and mode:
         ui.fail(f"--ask only applies to syncing a card, not {mode}", 2)
     if (args.device or args.layout or args.no_clean or args.no_eject) and mode:
         ui.fail(f"--device, --layout, --no-clean and --no-eject only apply to syncing a card, not {mode}", 2)
-    if args.base_dir and mode not in (None, "--upload-scrapes", "--clean-scrapes"):
+    if args.base_dir and mode == "--clean-scrapes":
+        ui.fail(f"`clean scrapes` doesn't take a folder ({args.base_dir!r})", 2)
+    if args.base_dir and mode not in (None, "--upload-scrapes"):
         ui.fail(f"{mode} doesn't take a card folder ({args.base_dir!r}); give the directory right after the command", 2)
     if args.device_id and mode != "--devices":
         ui.fail("a device id only applies to `devices`", 2)
@@ -537,7 +542,8 @@ def is_data_command(argv):
     return "--devices" in argv or any(words[:len(d)] == d for d in DATA_COMMANDS)
 
 
-def sync():
+def sync(reset=True):
+    """Run the command in sys.argv. reset=False leaves --quiet/--verbose in place for the caller to undo with ui.reset()."""
     argv, quiet, verbose = extract_globals(sys.argv[1:])
     ui.set_output(quiet and not is_data_command(argv), verbose)
     try:
@@ -547,7 +553,8 @@ def sync():
                 ui.debug(f"{name} = {value} ({source})")
         return run(argv)
     finally:
-        ui.reset()
+        if reset:
+            ui.reset()
 
 
 def run(argv):
@@ -698,7 +705,7 @@ def delete_extras(extras):
             except FileNotFoundError:  # already gone (a duplicate entry, or removed meanwhile)
                 pass
             except OSError as e:
-                print(ui.red(f"  ❌ {path}: {e}"))
+                ui.failure(ui.red(f"  ❌ {path}: {e}"))
         print(ui.green(f"  🧹 Deleted {deleted} file(s)"))
     else:
         print(ui.yellow("  ↩️  Keeping them"))
@@ -716,21 +723,21 @@ def remove_stale_media(stale):
         try:
             os.remove(path)
         except OSError as e:
-            print(ui.red(f"  ❌ {path}: {e}"))
+            ui.failure(ui.red(f"  ❌ {path}: {e}"))
     if stale:
         print(ui.green(f"🧹 Removed {len(stale)} media file(s) for ROMs that aren't on this card"))
 
 
 def report_failures(failures):
-    print(ui.red(f"\n❌ {len(failures)} file(s) failed:"))
+    ui.failure(ui.red(f"\n❌ {len(failures)} file(s) failed:"))
     for key, reason in failures[:20]:
-        print(f"   {key}: {ui.dim(reason)}")
+        ui.failure(f"   {key}: {ui.dim(reason)}")
     if len(failures) > 20:
-        print(ui.dim(f"   … and {len(failures) - 20} more"))
+        ui.failure(ui.dim(f"   … and {len(failures) - 20} more"))
     if all(reason.endswith(downloads.STALE_HINT) for _, reason in failures):
-        print(ui.dim(f"   These are gone from storage since the cache was built: run {inventory.UPDATE_HINT}, then sync again."))
+        ui.failure(ui.dim(f"   These are gone from storage since the cache was built: run {inventory.UPDATE_HINT}, then sync again."))
     else:
-        print(ui.dim("   Files already downloaded are skipped, so run the same command again to retry just these."))
+        ui.failure(ui.dim("   Files already downloaded are skipped, so run the same command again to retry just these."))
 
 
 def sync_card(args):
@@ -1072,7 +1079,10 @@ def sync_card(args):
         size = (saved or {}).get("size")
         print(f"💾 Free on the card: {ui.human_size(free)}" + (f" ({size} card)" if size else ""))
         if need > free:
-            print(ui.red(f"❌ Not enough space: {ui.human_size(need)} to download, {ui.human_size(free)} free"))
+            short = f"Not enough space: {ui.human_size(need)} to download, {ui.human_size(free)} free"
+            if ui.ASSUME_YES or not ui.has_terminal():  # nobody to answer "Try anyway?"
+                ui.fail(short, 1)
+            print(ui.red(f"❌ {short}"))
             if not ui.confirm("Try anyway?", default=False):
                 print(ui.yellow("👋 Cancelled."))
                 return 0
@@ -1096,13 +1106,13 @@ def sync_card(args):
         for path, error in chd.unzip_roms(archives):
             failed += 1
             failures.append((os.path.relpath(path, roms_dir), error))
-            print(ui.red(f"  ❌ {os.path.relpath(path, roms_dir)}: {error}"))
+            ui.failure(ui.red(f"  ❌ {os.path.relpath(path, roms_dir)}: {error}"))
 
     if layout_name in ("esde", "emudeck"):  # ES-DE launches an installed Vita game through its .psvita file
         for path, error in vita.add_psvita_files({dest_of(s) for s in chosen if s["bucket"] == "psvita"}):
             failed += 1
             failures.append((os.path.relpath(path, roms_dir), error))
-            print(ui.red(f"  ❌ {os.path.relpath(path, roms_dir)}: {error}"))
+            ui.failure(ui.red(f"  ❌ {os.path.relpath(path, roms_dir)}: {error}"))
 
     stale = []
     if scrapes:
@@ -1122,7 +1132,10 @@ def sync_card(args):
         report_failures(failures)
     if not failed and not args.no_eject and usersettings.load_settings().get("eject", True) is not False:
         clean._eject_root = base  # after the card tidy, which still needs it mounted
-    print(ui.green("\n🎉 Done!") if not failed else ui.red(f"\n⚠️  Done with {failed} failure(s)"))
+    if failed:
+        ui.failure(ui.red(f"\n⚠️  Done with {failed} failure(s)"))
+    else:
+        print(ui.green("\n🎉 Done!"))
     return 1 if failed else 0
 
 

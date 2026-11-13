@@ -131,7 +131,11 @@ def run_downloads(todo, label, icon, base, failures=None):
                 reason = (getattr(e, 'stderr', None) or str(e)).strip() + failure_hint(e)
                 if failures is not None:
                     failures.append((j[0], reason))
-                bar.say(f"  {prog} ❌ {ui.red(j[0])}: {reason}")
+                line = f"  {prog} ❌ {ui.red(j[0])}: {reason}"
+                if ui.QUIET:
+                    ui.failure(line)
+                else:
+                    bar.say(line)
             bar.draw(i)
     except KeyboardInterrupt:
         ex.shutdown(wait=False, cancel_futures=True)

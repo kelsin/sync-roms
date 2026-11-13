@@ -31,11 +31,12 @@ class SyncSmokeTest(RealDataDirGuard):
         patch.start()
         self.addCleanup(patch.stop)
 
-    def run_sync(self, dry_run, prepare=None, patches=()):
+    def run_sync(self, dry_run, prepare=None, patches=(), yes=True):
+        """The exit code; what went to stderr is in self.err."""
         with tempfile.TemporaryDirectory() as card:
             if prepare:
                 prepare(card)
-            argv = ["sync-roms", card, "--yes"] + (["--dry-run"] if dry_run else [])
+            argv = ["sync-roms", card] + (["--yes"] if yes else []) + (["--dry-run"] if dry_run else [])
             with contextlib.ExitStack() as st:
                 for target, kw in (
                         (sys, {"argv": argv}),
@@ -50,7 +51,11 @@ class SyncSmokeTest(RealDataDirGuard):
                         st.enter_context(mock.patch.object(target, name, value))
                 st.enter_context(mock.patch.object(cli.clean, "_clean_root", None))
                 st.enter_context(contextlib.redirect_stdout(io.StringIO()))
-                return cli.sync()
+                self.err = st.enter_context(contextlib.redirect_stderr(io.StringIO()))
+                try:
+                    return cli.sync()
+                except SystemExit as e:
+                    return e.code
 
     def test_dry_run_with_a_scrape_layout(self):
         self.assertEqual(self.run_sync(True), 0)
@@ -231,8 +236,17 @@ class SyncSmokeTest(RealDataDirGuard):
         self.assertEqual([q for q in asked if q.startswith("Delete these")], ["Delete these 1 local file(s) (0 B)?"])
 
     def test_declining_the_space_prompt_exits_0(self):
-        patches = ((cli, {"free_space": lambda path: 3}), (cli.ui, {"confirm": lambda q, default=True: False}))
-        self.assertEqual(self.run_sync(False, patches=patches), 0)
+        patches = ((cli, {"free_space": lambda path: 3}),
+                   (cli.ui, {"confirm": lambda q, default=True: False, "has_terminal": lambda: True}))
+        self.assertEqual(self.run_sync(False, patches=patches, yes=False), 0)
+
+    def test_not_enough_space_fails_when_it_cannot_ask(self):
+        for yes, terminal in ((True, True), (False, False)):
+            with self.subTest(yes=yes, terminal=terminal):
+                patches = ((cli, {"free_space": lambda path: 3}),
+                           (cli.ui, {"has_terminal": lambda: terminal, "confirm": mock.Mock(side_effect=AssertionError("asked"))}))
+                self.assertEqual(self.run_sync(False, patches=patches, yes=yes), 1)
+                self.assertIn("Not enough space", self.err.getvalue())
 
     def test_vita_game_syncs_its_dlc_and_newest_update_and_drops_the_old_update(self):
         game = "psvita/G [PCSE00349] [USA] [NoNpDRM].zip"
