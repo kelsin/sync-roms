@@ -9,7 +9,7 @@ from unittest import mock
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 from helpers import DataDir, feed_list, pilot_list, screen_lines  # noqa: E402
-from sync_roms import budget, cardedit, collections, edit, inventory, picker, s3, store, surprise, ui  # noqa: E402
+from sync_roms import budget, cardedit, collections, edit, inventory, picker, previews, s3, store, surprise, ui  # noqa: E402
 
 U = budget.Usage
 
@@ -290,6 +290,53 @@ class Flow(DataDir):
         self.assertIn("· 2 file(s)", kw["status"](kw["initial"])[0])  # Ruby here, Red on Game Boy
         extras = self.run_card(returns(None))[0][2]["extras"]
         self.assertIn(("  1 picked", "green"), extras[0])
+
+    def test_system_list_previews_each_system_and_nothing_past_them(self):
+        self.card()
+        kw = self.run_card(returns(None))[0][2]
+        with mock.patch.object(previews, "system", side_effect=lambda s: "art-" + s["bucket"]):
+            self.assertEqual([kw["preview"](i) for i in range(3)], ["art-gb", "art-gba", None])
+
+    def test_collections_list_previews_each_collection_art(self):
+        favs = {"id": "favs", "name": "Favs", "art": "surprise", "games": []}
+        self.card()
+        calls = []
+
+        def look(labels, kw):
+            calls.append(kw["preview"])
+            return None
+        with mock.patch.object(collections, "load_collections", lambda: [favs]), \
+                mock.patch.object(picker, "filter_list", Script(look)), contextlib.redirect_stdout(io.StringIO()):
+            cardedit.pick_collections("c", {"gba"})
+        with mock.patch.object(previews, "collection", side_effect=lambda a: "art-" + str(a)):
+            self.assertEqual([calls[0](0), calls[0](1)], ["art-surprise", None])
+
+    def test_sets_list_previews_each_set_by_its_id(self):
+        kw = {}
+
+        def look(title, labels, **k):
+            kw.update(k)
+            return None
+        with mock.patch.object(picker, "filter_list", look):
+            cardedit.pick_set(GBA, [SET], [], {}, {"gba/Ruby.zip"})
+        with mock.patch.object(previews, "collection", side_effect=lambda a: "art-" + a):
+            self.assertEqual([kw["preview"](0), kw["preview"](1)], ["art-pk", None])
+
+    def test_games_list_previews_each_game_by_key_with_and_without_a_set_filter(self):
+        self.card()
+        seen = []
+
+        def look(labels, kw):
+            with mock.patch.object(previews, "game", side_effect=lambda k: "img-" + k):
+                seen.append([kw["preview"](i) for i in range(len(labels) + 1)])
+            return kw["session"]["sel"]
+
+        def filtered(labels, kw):
+            look(labels, kw)
+            return (cardedit.CLEAR_KEY, 1)
+        self.run_system(returns((cardedit.SET_KEY, 0)), returns(0), filtered, look)
+        self.assertEqual(seen[0], ["img-gba/Ruby.sav", "img-gba/Ruby.zip", None])  # the set's rows, not all of them
+        self.assertEqual(seen[1], ["img-gba/Emerald.zip", "img-gba/Ruby.sav", "img-gba/Ruby.zip", "img-gba/Zelda.zip", None])
 
     def run_card(self, *steps):
         script = Script(*steps)

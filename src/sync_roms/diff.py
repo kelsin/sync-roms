@@ -8,7 +8,7 @@ import zipfile
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
 
-from . import downloads, ignore, inventory, mirroring, picker, runtime, s3, store, ui
+from . import downloads, ignore, inventory, mirroring, picker, previews, runtime, s3, store, ui
 
 
 class RangeReader(io.RawIOBase):
@@ -228,7 +228,8 @@ def diff_command(args):
         i = names.index(args.system) if args.system else guess
     else:
         i = picker.filter_list("🔍 Which system is this folder compared with?", [f"{s['name']}  ({s['bucket']}/)" for s in systems],
-                        cursor=guess or 0, hint="/ filter · j/k move · Enter continue · Esc cancel")
+                        cursor=guess or 0, hint="/ filter · j/k move · Enter continue · Esc cancel",
+                        preview=lambda k: previews.system(systems[k]))
     if i is None:
         print(ui.yellow("👋 Cancelled."))
         return 0

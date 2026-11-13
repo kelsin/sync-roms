@@ -445,7 +445,8 @@ def _app_class():
             yield _ListLines()
             if self.app.model.preview:
                 from textual_image.widget import Image  # already imported (and the terminal probed) by filter_list
-                yield Image(self.app.model.preview_path(), id="preview")
+                # an image that won't load (missing, corrupt) leaves the pane blank
+                yield Image(self.app.model.preview_path(), id="preview", on_error=lambda error: Static(""))
 
         def on_key(self, event):
             event.stop()

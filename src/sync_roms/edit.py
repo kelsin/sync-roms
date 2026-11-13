@@ -3,7 +3,7 @@ import os
 import sys
 from collections import defaultdict
 
-from . import names, picker, runtime, s3, store, ui, vita
+from . import names, picker, previews, runtime, s3, store, ui, vita
 
 
 def note(text):
@@ -78,7 +78,8 @@ def toggle_games(title, rows, extras=None, covered=None, excluded=None, hotkeys=
     session = {"sel": list(initial)}
     state = picker.filter_list(title, [label for *_, label in rows], multi=True, initial=initial, locked=locked,
                                locked_note=[n or "" for n in notes], hint=hint or GAMES_HINT, note_text=note_text,
-                               on_note=on_note, hotkeys=hotkeys, session=session)
+                               on_note=on_note, hotkeys=hotkeys, session=session,
+                               preview=lambda i: previews.game(rows[i][1]) if i < len(rows) else None)
     pressed = state[0] if isinstance(state, tuple) else None
     if pressed:
         state = session["sel"]

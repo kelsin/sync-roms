@@ -4,7 +4,7 @@ import json
 import queue
 import threading
 
-from . import budget, collections as colls, edit, inventory, m3u, metafilter, picker, s3, scrape_plan, store, surprise, themeart, ui, usersettings, vita
+from . import budget, collections as colls, edit, inventory, m3u, metafilter, picker, previews, s3, scrape_plan, store, surprise, themeart, ui, usersettings, vita
 
 FULL_KEY = "f"
 SET_KEY = "s"
@@ -239,7 +239,8 @@ def edit_card(name, setup=None, to_fetch=None):
                                labels, extras=extras, cursor=pos,
                                hotkeys=(FULL_KEY, COLLECTIONS_KEY, SURPRISE_KEY, CLEAR_ALL_KEY), hint=LIST_HINT,
                                status=lambda _state: status_of(view["total"], capacity, view["fetch"]),
-                               on_hotkey=on_hotkey)
+                               on_hotkey=on_hotkey,
+                               preview=lambda i: previews.system(systems[i]) if i < len(systems) else None)
         if i is None:
             return
         if isinstance(i, tuple):
@@ -347,7 +348,8 @@ def pick_collections(name, playable, card_status=None):
     while True:
         i = picker.filter_list(f"💖 Collections on {name} (Space/Enter toggles)", labels, extras=extras, cursor=pos,
                                hotkeys=(" ", "\t"), on_hotkey=on_hotkey,
-                               status=(lambda _state: shown["status"]) if card_status else None)
+                               status=(lambda _state: shown["status"]) if card_status else None,
+                               preview=lambda i: previews.collection(found[i].get("art")) if i < len(found) else None)
         if i is None:
             return
         toggle(i)
@@ -393,7 +395,8 @@ def pick_set(system, sets, games, titles, catalog, current=None, synced=lambda: 
     mark()
     cursor = next((n for n, (x, _) in enumerate(shown) if x["name"] == current), 0)
     i = picker.filter_list(f"📦 Sets with games on {system['name']}", labels, extras=extras, cursor=cursor,
-                           hotkeys=(" ", "\t"), hint=SETS_HINT, on_hotkey=on_hotkey)
+                           hotkeys=(" ", "\t"), hint=SETS_HINT, on_hotkey=on_hotkey,
+                           preview=lambda i: previews.collection(shown[i][0]["id"]) if i < len(shown) else None)
     if i is None:
         return None
     return shown[i][0]
@@ -570,6 +573,7 @@ def edit_system(name, system, setup, to_fetch=None):
                                         extras=extras, hint=GAMES_HINT, hotkeys=(SET_KEY, META_KEY, PAST_SURPRISE_KEY, CLEAR_KEY),
                                         status=status,
                                         session=session, note_text=note_text, on_note=on_note,
+                                        preview=lambda i: previews.game(keys[i]) if i < len(keys) else None,
                                         links=links, locked=[k in locked_from for k in keys],
                                         locked_note=[f"From {locked_from[k]}; take it off the card to remove this game"
                                                      if k in locked_from else "" for k in keys])

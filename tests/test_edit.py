@@ -335,6 +335,26 @@ class TextualList(unittest.TestCase):
                 got = pilot_list(script, "t", self.LABELS, preview=lambda i: paths[i] if i < 2 else None)
         self.assertEqual((got, seen), (2, [paths[0], paths[1], None]))
 
+    def test_preview_image_that_wont_load_shows_nothing(self):
+        from PIL import Image
+        with tempfile.TemporaryDirectory() as tmp:
+            good = os.path.join(tmp, "good.png")
+            Image.new("RGB", (45, 108), "red").save(good)
+            empty = os.path.join(tmp, "empty.png")
+            open(empty, "wb").close()
+            paths = [os.path.join(tmp, "missing.png"), good, empty]
+            seen = []
+
+            async def script(pilot):
+                for _ in range(3):
+                    seen.append(pilot.app.screen.query_one("#preview").image)
+                    await pilot.press("j")
+                await pilot.press("enter")
+            with mock.patch.object(sys, "__stdout__", io.StringIO()), \
+                    mock.patch("sync_roms.picker._draws_images", return_value=True):
+                got = pilot_list(script, "t", self.LABELS, preview=lambda i: paths[i] if i < 3 else None)
+        self.assertEqual((got, seen), (2, [None, good, None]))
+
     def test_no_preview_pane_without_terminal_graphics(self):
         panes = []
 
