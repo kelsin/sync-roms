@@ -219,10 +219,11 @@ TOPICS = {
   `sync-roms cache update`.
 
   cache          where the cache was read from, when it was last updated, and its files and size per folder
-  cache update   read storage again: one listing of a bucket, or a walk of a folder that stats only files the
-                 cache doesn't have; the rest keep their cached size
-  --full         in a folder, stat every file too (catches files replaced under the same name; a bucket listing is
-                 the same either way)
+  cache update   read storage again: one listing of a bucket, or a walk of a folder that lists only subfolders
+                 whose modification time changed and stats only files the cache doesn't have; the rest keep their
+                 cached files and sizes
+  --full         in a folder, list every subfolder and stat every file (catches files replaced under the same name;
+                 a bucket listing is the same either way)
 
   With no cache for the storage in use, the first command that reads storage offers to build it. Saying no is
   remembered (storage_cache_declined in settings.json), and commands then list storage each run.
