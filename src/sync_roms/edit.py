@@ -169,6 +169,26 @@ def cover_notes(sets_by_id, own_set_ids):
     return keys
 
 
+def variant_line(key, variants, parents, system_names, on=None):
+    """The note under a set game row about its variants, or a variant row's canonical game; "" for neither.
+
+    on is None for a read-only view, else a callable(variant bucket) -> bool saying whether it is on the card.
+    """
+    found = variants.get(key)
+    if found:
+        if on is None:
+            notes = "; ".join(v["note"] for v in found)
+            return f"↳ Variants: {notes}" if len(found) > 1 else f"↳ Variant: {notes}"
+        if len(found) > 1:
+            return f"↳ {len(found)} variants (v picks): " + "; ".join(v["note"] for v in found)
+        tail = " · ✅ on the card (v removes it)" if on(found[0]["bucket"]) else " (v adds it)"
+        return f"↳ Variant: {found[0]['note']}{tail}"
+    parent = parents.get(key)
+    if parent:
+        return f"Variant of {system_names.get(parent['system'], parent['system'])} — {parent['title']}"
+    return ""
+
+
 def toggle_set_ref(sets_on, set_id):
     """The set ids with set_id switched on or off."""
     return [i for i in sets_on if i != set_id] if set_id in sets_on else sets_on + [set_id]

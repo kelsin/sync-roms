@@ -25,6 +25,18 @@ class SetDataTest(unittest.TestCase):
                 for k in [g["bucket"]] + g.get("files", []):
                     self.assertTrue(k.startswith(g["system"] + "/"), f"{name}: {k}")
                 self.assertTrue(g["title"], name)
+            entry_buckets = {g["bucket"] for g in data["games"]}
+            for g in data["games"]:
+                seen = set()
+                for v in g.get("variants", []):
+                    system = v["bucket"].split("/")[0]
+                    self.assertIn(system, systems, f"{name}: {v['bucket']}")
+                    self.assertTrue(v["note"].strip(), f"{name}: {v['bucket']}")
+                    for k in v.get("files", []):
+                        self.assertTrue(k.startswith(system + "/"), f"{name}: {k}")
+                    self.assertNotIn(v["bucket"], entry_buckets, f"{name}: {v['bucket']}")
+                    self.assertNotIn(v["bucket"], seen, f"{name}: duplicate variant {v['bucket']}")
+                    seen.add(v["bucket"])
 
 
 if __name__ == "__main__":
