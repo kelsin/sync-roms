@@ -75,10 +75,13 @@ def toggle_games(title, rows, extras=None, covered=None, excluded=None, hotkeys=
             return "Switch the game on and press Enter first, then add its note"
         return "Note saved" if text else "Note cleared"
 
+    variants, parents = store.variant_index(store.load_sets())
+    system_names = {s["bucket"]: s["name"] for s in store.repo_json("systems")}
     session = {"sel": list(initial)}
     state = picker.filter_list(title, [label for *_, label in rows], multi=True, initial=initial, locked=locked,
                                locked_note=[n or "" for n in notes], hint=hint or GAMES_HINT, note_text=note_text,
-                               on_note=on_note, hotkeys=hotkeys, session=session)
+                               on_note=on_note, hotkeys=hotkeys, session=session,
+                               row_note=lambda i: variant_line(rows[i][1], variants, parents, system_names))
     pressed = state[0] if isinstance(state, tuple) else None
     if pressed:
         state = session["sel"]

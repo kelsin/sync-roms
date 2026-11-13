@@ -84,6 +84,23 @@ class SetsTest(unittest.TestCase):
         self.assertEqual([g["bucket"] for g in by["gba"]["games"]], ["gba/Gone.zip"])
         self.assertEqual([g["bucket"] for g in by["gen"]["games"]], ["gen/Zed.zip"])
 
+    def test_toggle_games_shows_variant_notes(self):
+        by = systems()
+        game_set = {"name": "Mix", "games": [
+            {"title": "A", "system": "gba", "bucket": "gba/A.zip",
+             "variants": [{"bucket": "gb/A.gb", "note": "GB: x"}]},
+            {"title": "Zed", "system": "gen", "bucket": "gen/Zed.zip"}]}
+        rows = edit.set_rows(game_set, by, lambda s: set())
+        with mock.patch.object(store, "load_sets", return_value=[game_set]), \
+                mock.patch.object(store, "repo_json", return_value=list(by.values())), \
+                mock.patch.object(picker, "filter_list", return_value=[False, False]) as fl:
+            edit.toggle_games("t", rows)
+        row_note = fl.call_args.kwargs["row_note"]
+        a = [r[1] for r in rows].index("gba/A.zip")
+        z = [r[1] for r in rows].index("gen/Zed.zip")
+        self.assertEqual(row_note(a), "\u21b3 Variant: GB: x")
+        self.assertEqual(row_note(z), "")
+
     def test_toggle_extra_files(self):
         by = systems()
         game_set = {"name": "M", "games": [{"title": "Multi", "system": "gen", "bucket": "gen/M.m3u",
