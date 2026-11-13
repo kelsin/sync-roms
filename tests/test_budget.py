@@ -73,6 +73,9 @@ class Budget(DataDir):
         self.assertEqual(budget.fetch_bytes(VITA, [G], lambda s, keys: asked.extend(keys) or set(keys)), 1320)
         self.assertEqual(sorted(asked), sorted([G, DLC, UPD]))
 
+    def test_fetch_with_no_keys_is_zero(self):
+        self.assertEqual(budget.fetch_bytes(VITA, None, lambda s, keys: set(keys)), 0)
+
     def test_excluded(self):
         u = self.usage({"games": {"sets": ["s"]}, "excluded": {"gba": ["gba/A.zip"]}}, "other")
         self.assertEqual((u.bytes, u.count), (200, 1))

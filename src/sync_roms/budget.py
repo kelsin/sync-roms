@@ -88,9 +88,11 @@ def fetch_bytes(system, keys, to_fetch):
     """ROM bytes of the keys (and a Vita game's extras) that to_fetch(system, keys) says aren't on the card yet,
     from the size cache."""
     sizes = inventory.cached(f"{system['bucket']}/") or {}
+    if not keys:
+        return 0
     keys = list(keys)
     keys += [e for k in vita.extras(keys, sizes).values() for e in k]
-    return sum(sizes.get(k, 0) for k in to_fetch(system, keys)) if keys else 0
+    return sum(sizes.get(k, 0) for k in to_fetch(system, keys))
 
 
 def card_fetch_bytes(card, systems, to_fetch):
