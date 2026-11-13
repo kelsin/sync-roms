@@ -172,20 +172,22 @@ def make_chd(tools, cfg, image, out, report=None):
         os.replace(part, out)
 
 
-def make_xiso(tools, image, out, report=None):
+def make_xiso(tools, image, out, report=None, disposable=False):
     """Write image as an optimized xiso at out; None on success, else the error.
 
-    extract-xiso rewrites a hidden copy, which replaces out only once it lists cleanly, so out (the image itself
-    when converting in place) is never half written.
+    extract-xiso rewrites the image into a hidden folder beside out, and the result replaces out only once it lists
+    cleanly, so out (the image itself when converting in place) is never half written. The image is copied there first
+    unless it is disposable (just unpacked), since the rewrite deletes it.
     """
     xiso = tools["extract-xiso"]
     work = tempfile.mkdtemp(prefix=".xiso-", dir=os.path.dirname(out))
     try:
-        copy = os.path.join(work, os.path.basename(out))
-        shutil.copyfile(image, copy)
+        copy = os.path.join(work, os.path.basename(image))
+        if not disposable:
+            shutil.copyfile(image, copy)
         if report:
             report(0.2)
-        error = external.run_tool([xiso, "-q", "-D", "-d", work, "-r", copy])
+        error = external.run_tool([xiso, "-q", "-D", "-d", work, "-r", image if disposable else copy])
         if report:
             report(0.8)
         error = error or external.run_tool([xiso, "-q", "-l", copy])
@@ -277,12 +279,12 @@ def extracted_files(tmp):
     return [os.path.join(dp, f) for dp, _, fns in os.walk(tmp) for f in sorted(fns) if not os.path.islink(os.path.join(dp, f))]
 
 
-def chd_archive(tools, cfg, path, report=None):
-    """Extract an archive next to itself (and the archives inside it, but not for extract-only systems), then convert
-    its discs (or, for extract-only systems, move its files out).
+def chd_archive(tools, cfg, path, report=None, scratch=None):
+    """Extract an archive into scratch (default: next to itself), and the archives inside it, but not for extract-only
+    systems, then convert its discs beside the archive (or, for extract-only systems, move its files out).
     The archive goes only once everything is done; None on success, else the error."""
     folder = os.path.dirname(path)
-    tmp = tempfile.mkdtemp(prefix=".chd-", dir=folder)
+    tmp = tempfile.mkdtemp(prefix=f".chd-{os.getpid()}-", dir=scratch or folder)
     try:
         error = external.run_tool(extract_command(tools, path, tmp))
         if error:
@@ -308,7 +310,7 @@ def chd_archive(tools, cfg, path, report=None):
             if cfg["mode"] == "xiso":
                 pairs = [(image, os.path.join(folder, os.path.basename(image))) for image in images]
                 error = convert_all(pairs, "two isos in the archive would make the same file",
-                                    lambda image, out: make_xiso(tools, image, out, report))
+                                    lambda image, out: make_xiso(tools, image, out, report, disposable=True))
             else:
                 pairs = [(image, os.path.join(folder, os.path.splitext(os.path.basename(image))[0] + ".zar")) for image in images]
                 error = convert_all(pairs, "two isos in the archive would make the same .zar",
@@ -328,6 +330,79 @@ def chd_archive(tools, cfg, path, report=None):
         os.remove(path)
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
+
+
+def unpacked_size(tools, path):
+    """Bytes a .zip or .7z unpacks to, from its listing; None when that isn't known (a .rar, an archive inside it, which
+    is unpacked too, or a listing that fails)."""
+    try:
+        if path.lower().endswith(".zip"):
+            with zipfile.ZipFile(path) as z:
+                entries = [(i.filename, i.file_size) for i in z.infolist() if not i.is_dir()]
+        elif path.lower().endswith(".7z"):
+            listing = external.tool_output([tools["7z"], "l", "-slt", "--", path])
+            if not listing or "\n----------\n" not in listing:
+                return None
+            blocks = [dict(re.findall(r"^(\w[\w ]*?) = (.*)$", b, re.M)) for b in listing.split("\n----------\n", 1)[1].split("\n\n")]
+            entries = [(b["Path"], int(b.get("Size") or 0)) for b in blocks if "Path" in b and b.get("Folder") != "+"]
+        else:
+            return None
+    except (OSError, ValueError, zipfile.BadZipFile):
+        return None
+    if any(name.lower().endswith(CD_ARCHIVE_EXTS) for name, _ in entries):
+        return None
+    return sum(size for _, size in entries)
+
+
+def job_scratch(tools, jobs):
+    """(per job, the folder its archive unpacks in, None for beside itself; how many jobs can run at once).
+
+    A converting archive whose unpacked size is known unpacks in the system temp folder when that is on another device
+    than the archive and has room for it; plain extraction always unpacks beside the archive. Each job's scratch (its
+    unpacked size, else the archive's size, or a loose image's size) counts on the volume it uses, and only as many jobs
+    run as the biggest ones' scratch fits in each volume's free space, at least one.
+    """
+    temp = tempfile.gettempdir()
+    temp_dev = os.stat(temp).st_dev
+    with ThreadPoolExecutor(min(os.cpu_count() or 4, len(jobs))) as ex:
+        sizes = list(ex.map(lambda job: unpacked_size(tools, job[2]) if job[3] is None else None, jobs))
+    free = {}  # device: free bytes, from the first path seen on it
+    needs = defaultdict(list)  # device: each of its jobs' scratch bytes
+    scratch = []
+    for (system, _, path, owned, *_), size in zip(jobs, sizes):
+        dev = os.stat(os.path.dirname(path)).st_dev
+        free.setdefault(dev, shutil.disk_usage(os.path.dirname(path)).free)
+        local = (owned is None and system["chd"]["mode"] != "extract" and size is not None and dev != temp_dev
+                 and size <= free.setdefault(temp_dev, shutil.disk_usage(temp).free))
+        scratch.append(temp if local else None)
+        if size is None:
+            size = sum(os.path.getsize(f) for f in owned or [path] if os.path.isfile(f))
+        needs[temp_dev if local else dev].append(size)
+    fits = [len(n) for n in needs.values()]
+    for dev, need in needs.items():
+        total = 0
+        for i, size in enumerate(sorted(need, reverse=True)):
+            total += size
+            if total > free[dev]:
+                fits.append(i)
+                break
+    return scratch, max(1, min(fits))
+
+
+def stale_local_scratch():
+    """The .chd-<pid>-* folders in the system temp folder left by a convert run that is no longer running."""
+    temp = tempfile.gettempdir()
+    stale = []
+    for name in os.listdir(temp):
+        match = re.match(r"\.chd-(\d+)-", name)
+        if match:
+            try:
+                os.kill(int(match.group(1)), 0)
+            except ProcessLookupError:
+                stale.append(os.path.join(temp, name))
+            except OSError:
+                pass  # running, as another user
+    return stale
 
 
 def chd_image(tools, cfg, image, owned, report=None):
@@ -399,7 +474,7 @@ def unzip_roms(paths):
 
 
 def remove_stale_chd_temp(folders):
-    """Delete the .chd-* and .xiso-* working folders a killed run left behind (as found by plan_chd)."""
+    """Delete the .chd-* and .xiso-* working folders a killed run left behind (as found by plan_chd and stale_local_scratch)."""
     for folder in folders:
         shutil.rmtree(folder, ignore_errors=True)
 
@@ -443,11 +518,12 @@ def chd_command(args):
         tools[tool] = external.find_tool(tool)
         if needed and not tools[tool]:
             ui.fail(f"{tool} not found; " + (f"{external.MANUAL_TOOLS[tool]}" if tool in external.MANUAL_TOOLS else "run sync-roms --install-tools"), 3)
-    remove_stale_chd_temp(stale)
+    remove_stale_chd_temp(stale + stale_local_scratch())
     cpus = os.cpu_count() or 1
-    workers = min(cpus, len(jobs))
+    scratch, fit = job_scratch(tools, jobs)
+    workers = min(cpus, len(jobs), fit)
     tools["np"] = max(1, cpus // workers)  # cores left for each chdman once the jobs share them
-    print(ui.dim(f"  {workers} at a time, {tools['np']} core(s) each"))
+    print(ui.dim(f"  {workers} at a time, {tools['np']} core(s) each" + (" (limited by free space)" if fit < min(cpus, len(jobs)) else "")))
 
     progress = [0.0] * len(jobs)  # each job's 0-1 progress; the bar is their mean
 
@@ -460,7 +536,7 @@ def chd_command(args):
         try:
             if owned:
                 return chd_image(tools, system["chd"], path, owned, report)
-            return chd_archive(tools, system["chd"], path, report)
+            return chd_archive(tools, system["chd"], path, report, scratch[i])
         finally:
             progress[i] = 1.0
 
