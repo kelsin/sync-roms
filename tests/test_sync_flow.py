@@ -100,11 +100,13 @@ class CleanDirsTest(unittest.TestCase):
 
 
 class DownloadInterruptTest(unittest.TestCase):
-    def run_interrupted(self, draws_that_interrupt):
+    def run_interrupted(self, draws_that_interrupt, fail=False):
         release, n = threading.Event(), []
 
         def download(job, cb, wrote=None):
             release.wait(5)
+            if fail:
+                raise OSError("boom")
 
         def draw(self_, done):
             n.append(done)
@@ -145,6 +147,11 @@ class DownloadInterruptTest(unittest.TestCase):
     def test_in_flight_files_that_finish_after_ctrl_c_are_listed(self):
         self.run_interrupted({1})
         self.assertIn("✅ gba/a.zip", self.out.getvalue().split("Interrupted", 1)[1])
+
+    def test_quiet_shows_an_in_flight_file_that_fails_after_ctrl_c(self):
+        with mock.patch.object(ui, "QUIET", True), contextlib.redirect_stderr(io.StringIO()) as err:
+            self.run_interrupted({1}, fail=True)
+        self.assertIn("gba/a.zip", err.getvalue())
 
     def test_abort_removes_the_part_files_of_unfinished_downloads_and_flushes(self):
         started, release, seen = threading.Semaphore(0), threading.Event(), []

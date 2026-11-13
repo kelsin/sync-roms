@@ -976,10 +976,7 @@ def sync_card(args):
                                for s in chosen}
         if unzip:  # a ROM that's extracted from its archive is on the card under another extension
             present = lambda path, exists=present: exists(path) or downloads.archive_extracted(path)  # noqa: E731
-        plan = scrape_plan.build_scrape_plan(layout_name, chosen, scraped["data"], scraped["rels"], dest_of, es_dir, present, base)
-        for key, _, size in plan["jobs"]:  # sizes read once: the rebuild after the downloads finds them here
-            scraped["data"][key.split("/")[1]][0][key] = size
-        return plan
+        return scrape_plan.build_scrape_plan(layout_name, chosen, scraped["data"], scraped["rels"], dest_of, es_dir, present, base)
 
     # the media of every ROM that will be on the card, so the totals and the space check count it
     planned = build_plan(lambda path: True) if scrapes else None

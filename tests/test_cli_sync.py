@@ -289,6 +289,33 @@ class SyncSmokeTest(RealDataDirGuard):
         self.assertIn("Would download 2 file(s) (2.0 KB)", out)
         self.assertEqual(out.count("Scraped data:"), 1)
 
+    def test_dry_run_counts_the_roms_it_would_delete_as_freed(self):
+        patches = ((cli, {"free_space": lambda path: 1000}), (cli.ui, {"choose": lambda *a, **k: "n"}))
+        self.assertEqual(self.run_sync(True, prepare=self.old_rom(100), patches=patches), 0)
+        self.assertIn("Free on the card: 1.1 KB", self.out.getvalue())
+
+    def test_scraped_media_sizes_are_read_once_in_a_real_run(self):
+        statted = []
+
+        def prepare(card):
+            os.makedirs(os.path.join(card, "ES-DE", "downloaded_media", "gba", "covers"))
+            with open(os.path.join(card, "ES-DE", "downloaded_media", "gba", "covers", "Game.png"), "wb") as f:
+                f.write(b"x" * 3)
+            os.makedirs(os.path.join(card, "ROMs", "gba"))
+            with open(os.path.join(card, "ROMs", "gba", "Game.zip"), "wb") as f:
+                f.write(b"x" * 5)
+        sizes = {"scrapes/gba/covers/Game.png": 3, "scrapes/gba/marquees/Game.png": 4}
+
+        def list_scrapes(prefix, sizes_=True):
+            return {k: None for k in sizes} if prefix == "scrapes/gba/" else list_sizes(prefix)
+
+        def stat_sizes(keys):
+            statted.extend(keys)
+            return {k: sizes[k] for k in keys if k in sizes}
+        patches = ((s3, {"list_sizes": list_scrapes, "stat_sizes": stat_sizes}), (cli, {"free_space": lambda path: 10**9}))
+        self.assertEqual(self.run_sync(False, prepare=prepare, patches=patches), 0)
+        self.assertEqual(sorted(statted), sorted(sizes))
+
     def test_no_android_line_on_a_card_without_android_files(self):
         layouts = {"onion": {"label": "Onion", "roms_dir": "Roms", "bios_dir": "BIOS"}}
         manifest = {**MANIFEST, "layouts": layouts, "systems": [{**SYSTEM, "folders": {"onion": "GBA"}}]}

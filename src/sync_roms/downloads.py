@@ -147,7 +147,12 @@ def run_downloads(todo, label, icon, base, failures=None):
             while running:
                 for j, f in [r for r in running if r[1].done()]:
                     running.remove((j, f))
-                    bar.say(f"  ✅ {j[0]}" if f.exception() is None else f"  ❌ {ui.red(j[0])}: {f.exception()}")
+                    if f.exception() is None:
+                        bar.say(f"  ✅ {j[0]}")
+                    elif ui.QUIET:
+                        ui.failure(f"  ❌ {ui.red(j[0])}: {f.exception()}")
+                    else:
+                        bar.say(f"  ❌ {ui.red(j[0])}: {f.exception()}")
                 bar.draw(sum(f.done() for _, f in futs))
                 time.sleep(ui.POLL)
         except KeyboardInterrupt:
