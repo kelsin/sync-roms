@@ -394,6 +394,46 @@ class SyncFlowTest(unittest.TestCase):
         self.assertFalse(self.after)
         self.assertFalse([u for u in updates if "frontend_collections" in u])
 
+    def put_favs(self, card_dir):
+        """The card as a first sync with FAVS left it: its collection written and enabled."""
+        plan = frontend.plan_collections("esde", card_dir, {"Favs": ["%ROMPATH%/gba/Game.zip"]}, [])
+        frontend.apply_collections(plan, "esde", card_dir)
+
+    def test_a_second_identical_sync_writes_no_collection_and_skips_card_cleaning(self):
+        _, out, updates, root, _ = self.run_sync(cards={"collections": ["favs"], "frontend_collections": ["Favs"]},
+                                                 colls=[FAVS], files=["ROMs/gba/Game.zip"], plan=[], prepare=self.put_favs)
+        self.assertNotIn("collection(s)", out)
+        self.assertIsNone(root)
+        self.assertFalse([u for u in updates if "frontend_collections" in u])
+
+    def test_a_collection_edited_on_the_card_is_written_again_and_cleaned(self):
+        def prepare(card_dir):
+            self.put_favs(card_dir)
+            with open(frontend.collection_path("esde", card_dir, "Favs"), "w") as f:
+                f.write("edited\n")
+        _, out, _, root, _ = self.run_sync(cards={"collections": ["favs"], "frontend_collections": ["Favs"]},
+                                           colls=[FAVS], files=["ROMs/gba/Game.zip"], plan=[], prepare=prepare,
+                                           after=lambda d: read_from(d, "ES-DE", "collections", "custom-Favs.cfg"))
+        self.assertIn("Wrote 1 collection(s)", out)
+        self.assertEqual(self.after, "%ROMPATH%/gba/Game.zip\n")
+        self.assertIsNotNone(root)
+
+    def test_a_collection_unlisted_in_settings_by_hand_is_listed_again_and_cleaned(self):
+        def prepare(card_dir):
+            self.put_favs(card_dir)
+            os.remove(frontend.settings_path("esde", card_dir))
+        _, out, _, root, _ = self.run_sync(cards={"collections": ["favs"], "frontend_collections": ["Favs"]},
+                                           colls=[FAVS], files=["ROMs/gba/Game.zip"], plan=[], prepare=prepare,
+                                           after=lambda d: read_from(d, "ES-DE", "settings", "es_settings.xml"))
+        self.assertNotIn("collection(s)", out)
+        self.assertIn('value="Favs"', self.after)
+        self.assertIsNotNone(root)
+
+    def test_dry_run_does_not_say_an_unchanged_collection_would_be_written(self):
+        _, out, _, _, _ = self.run_sync(cards={"collections": ["favs"], "frontend_collections": ["Favs"]}, colls=[FAVS],
+                                        files=["ROMs/gba/Game.zip"], dry_run=True, prepare=self.put_favs)
+        self.assertNotIn("would write custom-Favs.cfg", out)
+
     def test_a_collection_game_on_a_system_the_device_cant_play_is_ignored(self):
         psx = {"name": "PlayStation", "bucket": "psx", "folders": {"esde": "psx"}, "bios": {"files": []},
                "games": [{"bucket": "psx/FF7.chd"}]}

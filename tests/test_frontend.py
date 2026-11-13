@@ -92,6 +92,22 @@ class Plan(unittest.TestCase):
         plan = frontend.plan_collections("knulli", self.base, {"Favs": ["./roms/gba/A.zip"]}, ["Favs"])
         self.assertEqual(plan["writes"], [(path, "./roms/gba/A.zip\n")])
 
+    def test_an_owned_file_with_the_same_text_is_not_rewritten_but_stays_enabled_and_owned(self):
+        path = frontend.collection_path("esde", self.base, "Favs")
+        self.put(path, "%ROMPATH%/gba/A.zip\n")
+        plan = frontend.plan_collections("esde", self.base, {"Favs": ["%ROMPATH%/gba/A.zip"]}, ["Favs"])
+        self.assertEqual((plan["writes"], plan["enable"], plan["owned"]), ([], {"Favs"}, ["Favs"]))
+
+    def test_an_owned_file_deleted_by_hand_is_written_again(self):
+        path = frontend.collection_path("esde", self.base, "Favs")
+        plan = frontend.plan_collections("esde", self.base, {"Favs": ["%ROMPATH%/gba/A.zip"]}, ["Favs"])
+        self.assertEqual(plan["writes"], [(path, "%ROMPATH%/gba/A.zip\n")])
+
+    def test_apply_says_whether_it_changed_the_settings_file(self):
+        plan = frontend.plan_collections("esde", self.base, {"Favs": ["%ROMPATH%/gba/A.zip"]}, [])
+        self.assertTrue(frontend.apply_collections(plan, "esde", self.base))
+        self.assertFalse(frontend.apply_collections(plan, "esde", self.base))
+
     def test_a_renamed_or_removed_collection_deletes_the_old_file_and_unlists_it(self):
         old = frontend.collection_path("esde", self.base, "Old")
         self.put(old, "x\n")
