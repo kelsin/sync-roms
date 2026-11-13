@@ -391,6 +391,16 @@ def listed(s):
     return [g["bucket"] for g in s.get("games", []) if g.get("bucket") and not ignore.is_ignored(g["bucket"])]
 
 
+def synced_keys(s):
+    """Bucket keys a sync brings for a system: its listed games, plus each Vita game's DLC and newest update."""
+    from . import vita  # imported here: vita imports chd, which imports this module
+    keys = listed(s)
+    if s["bucket"] != vita.BUCKET or not keys:
+        return keys
+    extra = vita.extras(keys, inventory.files(vita.BUCKET + "/", sizes=False))
+    return keys + [k for found in extra.values() for k in found if k not in keys]
+
+
 def available_keys(s, have):
     """Bucket keys to download: every file in the folder for full systems, else the game list.
 
@@ -398,14 +408,14 @@ def available_keys(s, have):
     """
     if s.get("full_system"):
         return sorted(k for k in have if not k.endswith("/"))
-    return listed(s)
+    return synced_keys(s)
 
 
 def list_system(s):
     """{key: size} of what a sync needs from a system's bucket folder. Reading from a folder (e.g. a network share),
     a system with a game list only stats those games instead of walking the whole folder."""
     if not s.get("full_system") and s3.read_root():
-        return inventory.stat(listed(s))
+        return inventory.stat(synced_keys(s))
     return inventory.files(s["bucket"] + "/")
 
 

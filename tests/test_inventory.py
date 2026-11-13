@@ -271,6 +271,47 @@ class StoreUsesTheCacheTest(StorageFolder):
             self.assertEqual(store.list_system({"bucket": "gba", "games": [{"bucket": "gba/a.zip"}]}), {"gba/a.zip": 1})
 
 
+G = "psvita/G [PCSE00349] [USA] [NoNpDRM].zip"
+NEW = "psvita/G [PCSE00349] [USA] [PATCH] [v1.11] [NoNpDRM].zip"
+DLC = "psvita/D [PCSE00349] [USA] [DLC-X].zip"
+VITA = {"bucket": "psvita", "games": [{"bucket": G}]}
+
+
+class VitaSyncKeysTest(StorageFolder):
+    def setUp(self):
+        super().setUp()
+        for key, size in ((G, 4), ("psvita/G [PCSE00349] [USA] [PATCH] [v1.02] [NoNpDRM].zip", 5), (NEW, 6),
+                          (DLC, 7), ("psvita/H [PCSE00001] [USA] [NoNpDRM].zip", 8)):
+            self.put(key, size)
+
+    def test_without_a_cache_extras_are_found_and_statted(self):
+        self.assertEqual(store.synced_keys(VITA), [G, DLC, NEW])
+        self.assertEqual(store.list_system(VITA), {G: 4, DLC: 7, NEW: 6})
+        self.assertEqual(store.available_keys(VITA, {}), [G, DLC, NEW])
+
+    def test_with_a_cache(self):
+        self.build()
+        with mock.patch.object(s3, "list_sizes", side_effect=AssertionError("listed storage")), \
+                mock.patch.object(s3, "stat_sizes", side_effect=AssertionError("statted storage")):
+            self.assertEqual(store.list_system(VITA), {G: 4, DLC: 7, NEW: 6})
+
+    def test_a_listed_dlc_is_not_doubled(self):
+        s = {"bucket": "psvita", "games": [{"bucket": DLC}, {"bucket": G}]}
+        self.assertEqual(store.synced_keys(s), [DLC, G, NEW])
+
+    def test_ignored_dlc_is_not_synced(self):
+        with mock.patch.object(ignore, "_keys", frozenset({DLC})):
+            self.assertEqual(store.synced_keys(VITA), [G, NEW])
+
+    def test_other_systems_do_not_read_the_folder(self):
+        with mock.patch.object(inventory, "files", side_effect=AssertionError("listed")):
+            self.assertEqual(store.synced_keys({"bucket": "gba", "games": [{"bucket": "gba/a.zip"}]}), ["gba/a.zip"])
+
+    def test_scrape_leaves_extras_out(self):
+        from sync_roms import scrape_files
+        self.assertEqual(scrape_files.bucket_roms([VITA])["psvita"], {G.split("/", 1)[1]})
+
+
 if __name__ == "__main__":
     unittest.main()
 
