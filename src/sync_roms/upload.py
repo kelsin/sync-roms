@@ -10,7 +10,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 from botocore.exceptions import BotoCoreError, ClientError
 
-from . import diff, downloads, ignore, inventory, picker, runtime, s3, scrape_plan, store, ui
+from . import diff, downloads, ignore, inventory, mirroring, picker, runtime, s3, scrape_plan, store, ui
 
 
 UPLOAD_MULTIPART_AT = 64 * 1024 * 1024  # files this big go up as parallel parts
@@ -119,6 +119,7 @@ def run_copies(todo):
         except KeyboardInterrupt:
             bar.clear()
             print(ui.red("🛑 Aborted"))
+            s3.remove_parts()
             inventory.flush()  # hard_exit skips the flush as sync-roms exits
             downloads.hard_exit()
         raise
@@ -269,11 +270,12 @@ def replace_command(args, folder, system):
         print("☁️  Listing what's already there...")
         remote = inventory.etags(bucket + "/")
         print("🔍 Matching files by content...")
-        renames, new, changed, only_bucket = diff.plan_replace(
-            local, remote, lambda p: diff.local_fingerprint(os.path.join(folder, *p.split("/"))),
-            lambda p, size, etag: diff.bucket_fingerprint(f"{bucket}/{p}", size, etag),
-            lambda p, etag: "-" not in etag and md5(p) != etag.strip('"'), md5,
-            same)
+        with mirroring.storage_reads():  # turns the mirror off process-wide: entered on the main thread, around the whole check
+            renames, new, changed, only_bucket = diff.plan_replace(
+                local, remote, lambda p: diff.local_fingerprint(os.path.join(folder, *p.split("/"))),
+                lambda p, size, etag: diff.bucket_fingerprint(f"{bucket}/{p}", size, etag),
+                lambda p, etag: "-" not in etag and md5(p) != etag.strip('"'), md5,
+                same)
     except s3.ERRORS as e:
         ui.fail(f"{e}", 3)
     print(f"\n💿 New: {ui.bold(str(len(new)))} ({ui.human_size(sum(local[p] for p in new))})")

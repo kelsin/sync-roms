@@ -419,6 +419,22 @@ class DownloadsTest(unittest.TestCase):
                 self.assertEqual(mirroring.refresh_mirror(root), 1)
             self.assertTrue(os.path.exists(stale))
 
+    def test_mirror_deletes_its_leftover_part_files(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as root:
+            open(os.path.join(root, ".sync-roms-mirror"), "w").close()
+            os.makedirs(os.path.join(root, "gba"))
+            for name in ("Keep.zip", "Keep.zip.part"):
+                open(os.path.join(root, "gba", name), "w").close()
+            with mock.patch.object(mirroring.store, "load_manifest", return_value={}), \
+                    mock.patch.object(mirroring.store, "all_card_names", return_value=[]), \
+                    mock.patch.object(mirroring, "mirror_wanted", return_value={"gba/Keep.zip": 0}), \
+                    mock.patch.object(mirroring.downloads, "run_downloads", return_value=0), \
+                    mock.patch.object(mirroring.ui, "confirm", return_value=True), \
+                    contextlib.redirect_stdout(io.StringIO()):
+                self.assertEqual(mirroring.refresh_mirror(root), 0)
+            self.assertEqual(os.listdir(os.path.join(root, "gba")), ["Keep.zip"])
+
 
 if __name__ == "__main__":
     unittest.main()

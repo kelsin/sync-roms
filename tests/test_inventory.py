@@ -92,6 +92,13 @@ class FolderCacheTest(StorageFolder):
         self.put("gba/.DS_Store", 4)
         self.assertEqual(inventory.files("gba/"), {"gba/a.zip": 1, "gba/b.zip": 2})
 
+    def test_part_files_are_never_cached_or_listed(self):
+        self.put("gba/c.gba.part", 4)
+        self.assertEqual(inventory.files("gba/"), {"gba/a.zip": 1, "gba/b.zip": 2})
+        self.assertEqual(inventory.etags("gba/"), {"a.zip": (1, "-"), "b.zip": (2, "-")})
+        self.assertEqual(self.build(), (3, 0, 0))
+        self.assertNotIn("gba/c.gba.part", inventory.current().files)
+
     def test_the_cache_survives_a_new_run(self):
         self.build()
         inventory.reset()

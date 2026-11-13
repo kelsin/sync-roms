@@ -50,7 +50,7 @@ def refresh_mirror(root, dry_run=False):
     manifest = store.load_manifest(store.all_card_names())
     print("📏 Listing storage...")
     wanted = mirror_wanted(manifest)
-    have = {k: s for k, s in s3.mirror_sizes(root).items() if k != runtime.MIRROR_MARKER}
+    have = {k: s for k, s in s3.mirror_sizes(root, parts=True).items() if k != runtime.MIRROR_MARKER}
     jobs = []
     for k, s in wanted.items():
         try:
