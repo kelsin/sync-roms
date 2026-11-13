@@ -169,8 +169,12 @@ TOPICS = {
   missing            list every ROM with no metadata and why (non-game, not on ScreenScraper, matched but not scraped,
                      not looked up yet); nothing is looked up. --all: every ROM in the storage
   --set-credentials  ask for your ScreenScraper username and password (saved in settings.json,
-                     readable only by you; blank keeps the current value)
-  When ScreenScraper's daily quota runs out the run stops cleanly; run it again tomorrow. Writes use the write profile.
+                     readable only by you; blank keeps the current value), then check them with one request
+                     and show today's quota and threads, or the error
+  A rate-limited request, a server error (HTTP 5xx) or a network failure is tried 3 more times over about a minute.
+  The run stops cleanly, keeping what it finished, when ScreenScraper's daily quota runs out (run it again tomorrow),
+  when ScreenScraper refuses the login, is closed or no longer accepts this version (the message says what to do), or
+  when a whole batch of ROMs can't reach it. Writes use the write profile.
 """,
     "clean": """
   sync-roms clean scrapes [--dry-run]

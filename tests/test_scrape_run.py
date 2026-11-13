@@ -71,6 +71,25 @@ class FakeClient:
             f.write(PNG)
 
 
+class RetryTest(unittest.TestCase):
+    def test_retry_is_bounded_and_ends_when_stopped(self):
+        self.assertGreaterEqual(sum(scrape_online.RETRY_WAIT * 2 ** i for i in range(scrape_online.RETRIES)), 60,
+                                "the waits must outlast a per-minute cap")
+        calls = []
+
+        def down():
+            calls.append(1)
+            raise screenscraper.Transient("down")
+        with mock.patch.object(scrape_online, "RETRY_WAIT", 0), self.assertRaises(screenscraper.Transient):
+            scrape_online._retry(None, down)
+        self.assertEqual(len(calls), scrape_online.RETRIES + 1)
+        stop, calls[:] = threading.Event(), []
+        stop.set()
+        with mock.patch.object(scrape_online, "RETRY_WAIT", 1000), self.assertRaises(screenscraper.Stopped):
+            scrape_online._retry(stop, down)  # returns at once instead of waiting 1000 s
+        self.assertEqual(len(calls), 1)
+
+
 class RunBase(StorageDir):
     systems = [GBA]
 
@@ -239,6 +258,80 @@ class ScrapeRunTest(RunBase):
         self.client.errors = {"a.zip": [screenscraper.RateLimited("429"), screenscraper.RateLimited("429")]}
         self.assertEqual(self.run_scrape(), 0)
         self.assertEqual(self.client.lookups, ["a.zip"] * 3)
+        self.assertEqual(set(self.metadata()), {"a.zip"})
+
+    def test_transient_media_error_is_retried_and_rom_completes(self):
+        self.put("gba/a.zip")
+        real, fails = self.client.download, [screenscraper.Transient("ScreenScraper request failed (HTTP 502)")]
+
+        def download(url, dest, limit=None, stop=None):
+            if url == "http://media/1/ss" and fails:
+                self.client.downloads.append(url)
+                raise fails.pop()
+            return real(url, dest, limit, stop)
+        self.client.download = download
+        self.assertEqual(self.run_scrape(), 0)
+        self.assertEqual(self.client.downloads.count("http://media/1/ss"), 2)
+        self.assertEqual(self.client.lookups, ["a.zip"])
+        self.assertEqual(set(self.metadata()), {"a.zip"})
+        self.assertIn("scrapes/gba/screenshots/a.png", self.stored())
+
+    def test_refused_login_stops_the_run_after_one_rom(self):
+        for r in ("a.zip", "b.zip", "c.zip", "d.zip"):
+            self.put(f"gba/{r}")
+        self.client.threads = 1
+        self.client.errors = {"a.zip": [screenscraper.Refused("ScreenScraper refused the login (HTTP 403); check it with "
+                                                              "`sync-roms scrape --set-credentials`")]}
+        with mock.patch.object(scrape_online, "BATCH", 2):
+            self.assertEqual(self.run_scrape(), 1)
+        self.assertEqual(self.client.lookups, ["a.zip"])
+        self.assertEqual(self.metadata(), {})
+        self.assertFalse(scrape_state.is_unknown("gba", "a.zip"))
+        self.assertEqual(scrape_state.snapshot().not_offered("gba", "a.zip"), set())
+        out = self.out.getvalue()
+        self.assertIn("refused the login", out)
+        self.assertIn("scrape --set-credentials", out)
+        self.assertNotIn("Done", out)
+
+    def test_whole_batch_of_connection_errors_stops_the_run(self):
+        for r in ("a.zip", "b.zip", "c.zip", "d.zip", "e.zip", "f.zip"):
+            self.put(f"gba/{r}")
+        self.client.threads = 1
+        down = lambda: [screenscraper.Transient("ScreenScraper request failed (URLError)") for _ in range(10)]  # noqa: E731
+        self.client.errors = {r: down() for r in ("a.zip", "b.zip", "c.zip", "d.zip")}
+        with mock.patch.object(scrape_online, "BATCH", 2):
+            self.assertEqual(self.run_scrape(), 1)
+        self.assertEqual(self.client.lookups[:8], ["a.zip"] * 4 + ["b.zip"] * 4)  # each tried RETRIES more times
+        self.assertNotIn("e.zip", self.client.lookups)  # the batch after the one in flight never starts
+        self.assertNotIn("f.zip", self.client.lookups)
+        self.assertEqual(self.metadata(), {})
+        self.assertFalse(scrape_state.is_unknown("gba", "a.zip"))
+        out = self.out.getvalue()
+        self.assertIn("couldn't be reached", out)
+        self.assertIn("URLError", out)
+        self.assertIn("again later", out)
+
+    def test_batch_with_one_connection_error_goes_on(self):
+        for r in ("a.zip", "b.zip", "c.zip", "d.zip"):
+            self.put(f"gba/{r}")
+        self.client.errors = {"a.zip": [screenscraper.Transient("ScreenScraper request failed (HTTP 503)") for _ in range(4)]}
+        with mock.patch.object(scrape_online, "BATCH", 2):
+            self.assertEqual(self.run_scrape(), 1)
+        self.assertEqual(set(self.metadata()), {"b.zip", "c.zip", "d.zip"})
+        self.assertIn("a.zip: ScreenScraper request failed (HTTP 503); skipped", self.out.getvalue())
+
+    def test_quota_checked_before_the_confirm(self):
+        self.put("gba/a.zip")
+        self.confirm.side_effect = lambda *a, **k: self.client.quota_calls == 1
+        self.assertEqual(self.run_scrape(), 0)
+        self.assertEqual(set(self.metadata()), {"a.zip"})
+
+    def test_quota_without_account_warns(self):
+        self.put("gba/a.zip")
+        self.client.quota = lambda: None
+        self.assertEqual(self.run_scrape(), 0)
+        self.assertIn("no account details", self.out.getvalue())
+        self.assertIn("--set-credentials", self.out.getvalue())
         self.assertEqual(set(self.metadata()), {"a.zip"})
 
     def test_lookup_result_reused_not_fetched_again(self):

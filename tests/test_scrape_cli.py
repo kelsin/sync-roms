@@ -14,7 +14,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 from realdir_guard import RealDataDirGuard  # noqa: E402
-from sync_roms import cli, scrape_online, store, usersettings  # noqa: E402
+from sync_roms import cli, scrape_online, screenscraper, store, usersettings  # noqa: E402
 from helpers import DataDir, Isolated, script_for  # noqa: E402
 
 
@@ -169,6 +169,10 @@ class SetCredentials(RealDataDirGuard):
         p.start()
         self.addCleanup(p.stop)
         self.path = os.path.join(self.dir, "settings.json")
+        self.quota = mock.Mock(return_value=screenscraper.Quota(2, 123, 20000))
+        p = mock.patch.object(screenscraper, "Client", return_value=mock.Mock(quota=self.quota))  # no request leaves the test
+        self.client_class = p.start()
+        self.addCleanup(p.stop)
 
     def run_it(self, inputs, passwords, saved=None):
         if saved:
@@ -189,6 +193,30 @@ class SetCredentials(RealDataDirGuard):
         for value in saved.values():
             self.assertNotIn(value, out)
         self.assertEqual(stat.S_IMODE(os.stat(self.path).st_mode), 0o600)
+
+    def test_checks_the_saved_login_and_reports_the_quota(self):
+        code, out = self.run_it(["scraper-user"], ["s3cret-pw"])
+        self.assertEqual(code, 0)
+        self.client_class.assert_called_once()
+        self.assertEqual(self.client_class.call_args[0][:2], ("scraper-user", "s3cret-pw"))
+        self.quota.assert_called_once_with()
+        self.assertIn("123/20000 requests used today, 2 thread(s)", out)
+
+    def test_reports_a_failed_login_check(self):
+        for error, words in ((screenscraper.Refused("ScreenScraper refused the login (HTTP 403); check it with "
+                                                    "`sync-roms scrape --set-credentials`"), "refused the login"),
+                             (screenscraper.Transient("ScreenScraper request failed (URLError)"), "URLError"),
+                             (screenscraper.QuotaExceeded("ScreenScraper quota exceeded (HTTP 430)"), "quota exceeded")):
+            self.quota.side_effect = error
+            with self.subTest(error=type(error).__name__):
+                code, out = self.run_it(["me"], ["pw"])
+                self.assertEqual(code, 0)
+                self.assertIn("Saved", out)
+                self.assertIn("Couldn't check the login", out)
+                self.assertIn(words, out)
+        self.quota.side_effect, self.quota.return_value = None, None
+        code, out = self.run_it(["me"], ["pw"])
+        self.assertIn("no account details", out)
 
     def test_blank_keeps_existing(self):
         saved = {"screenscraper_user": "old-user", "screenscraper_password": "s3cret-pw"}
