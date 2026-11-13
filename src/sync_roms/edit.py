@@ -39,7 +39,7 @@ def set_note(s, key, text):
 FULL_SYSTEM_NOTE = "Full system: every file in its folder is synced, so it can't be toggled"
 
 
-def toggle_games(title, rows, extras=None, covered=None, excluded=None, hotkeys=(), hint=None):
+def toggle_games(title, rows, extras=None, covered=None, excluded=None, hotkeys=(), hint=None, place=None):
     """Multi-select over rows of (system, bucket key, game title, label); adds/removes games in each system in place.
 
     extras: {bucket key: [more bucket keys]} added or removed together with that row's key.
@@ -50,7 +50,8 @@ def toggle_games(title, rows, extras=None, covered=None, excluded=None, hotkeys=
     excluded: {system bucket: [keys]}, updated in place. When given, covered rows can be switched off (they start on
     unless listed) and the off ones are recorded there; only full systems stay locked.
     hotkeys/hint: extra keys the list offers (and the hint line to show). The toggles made so far are applied, and the
-    key pressed is returned (None on Enter).
+    key pressed is returned (None on Enter). place: a dict the caller keeps across calls, so a list of the same rows
+    opens where the last one was left (picker.carry_place).
     """
     notes = [FULL_SYSTEM_NOTE if s.get("full_system") else covered(s, key) if covered else None
              for s, key, _, _ in rows]
@@ -78,6 +79,8 @@ def toggle_games(title, rows, extras=None, covered=None, excluded=None, hotkeys=
     variants, parents = store.variant_index(store.load_sets())
     system_names = {s["bucket"]: s["name"] for s in store.repo_json("systems")}
     session = {"sel": list(initial)}
+    if place is not None:
+        picker.carry_place(place, [key for _, key, _, _ in rows], session)
     state = picker.filter_list(title, [label for *_, label in rows], multi=True, initial=initial, locked=locked,
                                locked_note=[n or "" for n in notes], hint=hint or GAMES_HINT, note_text=note_text,
                                on_note=on_note, hotkeys=hotkeys, session=session,
@@ -202,7 +205,7 @@ SETUP_KEY = "v"
 DELETE_KEY = "d"
 RENAME_KEY = "r"
 MENU_HINT = "Enter open · Esc back · v device · r rename · d delete"
-GAMES_HINT = "Space toggle · Enter done · Esc back · / filter · w note · a all · o view"
+GAMES_HINT = "Space toggle · Enter done · / filter · w note · a all · o view"
 
 
 def new_target(label, raw, setup=None):

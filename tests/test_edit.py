@@ -245,9 +245,31 @@ class Keys(unittest.TestCase):
         self.assertEqual(run_list(["b", "enter"], self.LABELS), 0)
         self.assertEqual(run_list(["/", "g", "a", "m", "enter", "enter"], self.LABELS), 2)
 
+    def test_enter_while_typing_picks_in_a_single_list(self):
+        self.assertEqual(run_list(["/", "t", "a", "ctrl+n", "enter"], self.LABELS), 3)  # beta, delta
+        self.assertIsNone(run_list(["/", "x", "enter", "escape", "escape"], self.LABELS))  # nothing shown: Enter only stops typing
+
+    def test_enter_while_typing_keeps_the_filter_in_a_multi_list(self):
+        self.assertEqual(run_list(["/", "t", "a", "enter", "space", "enter"], self.LABELS, multi=True),
+                         [False, True, False, False])
+
+    def test_tab_while_typing_keeps_the_filter(self):
+        self.assertEqual(run_list(["/", "t", "a", "tab", "j", "f"], self.LABELS, hotkeys=("f",)), ("f", 3))
+
     def test_esc_clears_filter_before_going_back(self):
-        self.assertEqual(run_list(["/", "b", "enter", "escape", "enter"], self.LABELS), 0)
-        self.assertIsNone(run_list(["/", "b", "enter", "escape", "escape"], self.LABELS))
+        self.assertEqual(run_list(["/", "b", "tab", "escape", "enter"], self.LABELS), 0)
+        self.assertIsNone(run_list(["/", "b", "tab", "escape", "escape"], self.LABELS))
+
+    def test_session_keeps_the_filter_row_and_scroll(self):
+        session = {}
+        run_list(["/", "t", "a", "enter", "j", "space", "enter"], self.LABELS, multi=True, session=session)
+        self.assertEqual((session["query"], session["row"], session["top"]), ("ta", 3, 0))
+        self.assertEqual(run_list(["space", "enter"], self.LABELS, multi=True, session=dict(session)),
+                         [False, False, False, False])  # starts filtered, on delta: space switches it back off
+        labels = [f"row {n}" for n in range(60)]
+        session = {"row": 40, "top": 30}
+        self.assertEqual(run_list(["enter"], labels, session=session), 40)
+        self.assertEqual(session["top"], 30)  # the row stays where it was on the screen
 
     def test_filter_line_editing(self):
         self.assertEqual(run_list(["/", "x", "y", "ctrl+u", "d", "e", "enter", "enter"], self.LABELS), 3)  # ^U clears
@@ -449,17 +471,78 @@ class TextualList(unittest.TestCase):
         with self.assertRaises(KeyboardInterrupt):
             self.run_keys(["space", "ctrl+c"], multi=True)
 
-    def test_help_closes_on_any_key(self):
-        shown = []
+    def test_help_scrolls_and_closes_on_esc_q_or_question_mark(self):
+        from textual.containers import VerticalScroll
+        seen = []
+
+        async def script(pilot):
+            for close in ("escape", "q", "?"):
+                await pilot.press("?")
+                scroll = pilot.app.screen.query_one(VerticalScroll)
+                footer = pilot.app.screen.query_one("#help-footer")
+                seen.append((footer.region.bottom <= 24, scroll.max_scroll_y > 0))
+                await pilot.press("j", "end")
+                seen.append((type(pilot.app.screen).__name__, scroll.scroll_y > 0))
+                await pilot.press(close)
+                seen.append(type(pilot.app.screen).__name__)
+            await pilot.press("enter")
+        hint = "Space toggle · Enter done · s set · m meta · p past · v variant"
+        help_keys = [(k, f"the {k} key") for k in "smpcvxyz"]  # 26 lines of help on 24 rows
+        self.assertEqual(pilot_list(script, "t", self.LABELS, multi=True, hint=hint, hotkeys=tuple("smpcvxyz"),
+                                    key_help=help_keys, on_note=lambda i, t: "", hidden=[False, False, True]),
+                         [False, False, False])  # the j only scrolled the help
+        self.assertEqual(seen, [(True, True), ("_HelpScreen", True), "_ListScreen"] * 3)
+
+    def test_help_lists_the_default_keys_a_caller_hint_hides_and_the_callers_keys(self):
+        text = []
 
         async def script(pilot):
             await pilot.press("?")
-            shown.append(type(pilot.app.screen).__name__)
-            await pilot.press("j")
-            shown.append(type(pilot.app.screen).__name__)
-            await pilot.press("enter")
-        self.assertEqual(pilot_list(script, "t", self.LABELS), 0)  # the j only closed the help
-        self.assertEqual(shown, ["_HelpScreen", "_ListScreen"])
+            text.append(str(pilot.app.screen.query_one("#help-text").render()))
+            await pilot.press("escape", "enter")
+        pilot_list(script, "t", self.LABELS, multi=True, hint="Space toggle · Enter done · s set", hotkeys=("s",),
+                   key_help=[("s", "narrow the list to a set's games")], on_note=lambda i, t: "")
+        for line in ("a               toggle all shown", "o               view: all / on / changed",
+                     "u               revert this list", "w               edit the row's note", "?               this help",
+                     "s               narrow the list to a set's games"):
+            self.assertIn(line, text[0])
+        self.assertNotIn("Space toggle", text[0])  # the hint isn't repeated once the keys are described
+
+    def test_without_key_help_the_help_lists_the_hint(self):
+        self.assertIn("  d delete", picker.help_lines(False, "Enter open · d delete"))
+
+    def test_every_hint_ends_with_help(self):
+        hints = []
+
+        async def script(pilot):
+            hints.append(" ".join(t for t, _ in screen_lines(pilot.app)[2]))
+            await pilot.press("escape")
+        for kwargs in ({}, {"multi": True, "esc_asks": False}, {"hint": "Enter open · d delete"}):
+            pilot_list(script, "t", self.LABELS, **kwargs)
+        self.assertEqual(len(hints), 3)
+        for hint in hints:
+            self.assertTrue(hint.endswith("· ? help"), hint)
+
+    def test_status_shows_the_row_and_counts_after_a_callers_status(self):
+        rows = []
+
+        async def script(pilot):
+            await pilot.press("/", "e", "ctrl+n")
+            rows.append(" ".join(t for t, _ in screen_lines(pilot.app)[-1]))
+            await pilot.press("escape", "escape")
+        pilot_list(script, "t", self.LABELS + ["delta"], status=lambda _s: "💾 " + "x" * 100)  # longer than the screen
+        self.assertTrue(rows[0].startswith("💾 xxx"), rows[0])
+        self.assertTrue(rows[0].endswith("row 2 · 2/4 shown"), rows[0])  # beta, delta
+
+    def test_status_counts_what_the_filter_shows(self):
+        rows = []
+
+        async def script(pilot):
+            await pilot.press("/", "m", "m")
+            rows.append(" ".join(t for t, _ in screen_lines(pilot.app)[-1]))
+            await pilot.press("escape", "escape")
+        pilot_list(script, "t", self.LABELS)
+        self.assertEqual([r.strip() for r in rows], ["row 1 · 1/3 shown"])
 
     def test_typing_shows_the_cursor_in_the_filter(self):
         lines = []

@@ -99,6 +99,26 @@ class Discs(unittest.TestCase):
         self.assertEqual(collection["games"], [{"title": "FF7", "category": "RPG", "system": "psx",
                                                 "bucket": "psx/FF7.m3u", "files": ["psx/FF7 (Disc 1).chd"]}])
 
+    def test_the_add_games_list_keeps_its_place_when_a_key_lists_the_same_games(self):
+        from sync_roms import surprise
+        collection = {"name": "Favs", "games": []}
+        picks = iter([1, 0, None])  # add from a system, Game Boy Advance, back
+        place = {"row": 1, "query": "z", "view_mode": 2, "top": 0}
+        seen = []
+
+        def fake(title, labels, **kw):
+            if kw.get("multi"):
+                seen.append({k: kw["session"].get(k) for k in place})
+                kw["session"].update(place)
+                return ("p", 1) if len(seen) == 1 else kw["initial"]
+            return next(picks)
+
+        keys = {"gba/Ruby.zip", "gba/Zelda.zip"}
+        with mock.patch.object(picker, "filter_list", fake), mock.patch.object(ui, "ask", return_value=""), \
+                mock.patch.object(surprise, "past_keys", return_value=set()), mock.patch.object(edit, "note"):
+            collectionedit.edit_one(collection, SYSTEMS, lambda bucket: keys if bucket == "gba" else set())
+        self.assertEqual(seen, [dict.fromkeys(place), place])
+
     def test_p_narrows_the_add_games_list_to_past_surprises(self):
         from sync_roms import surprise
         collection = {"name": "Favs", "games": []}

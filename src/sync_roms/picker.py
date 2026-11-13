@@ -73,14 +73,20 @@ def choose_setup(manifest, current=None):
 
 
 SINGLE_HINT = "Enter select · Esc back · j/k ^N/^P move · / filter"
-MULTI_HINT = "Space toggle · Enter done · Esc back · / filter · a all · o view · u revert"
+MULTI_HINT = "Space toggle · Enter done · / filter · a all · o view · u revert"
+HELP_HINT = " · ? help"  # ends every hint line
 TYPING_HINT = "Enter keep filter · Esc clear · ^N/^P move · ^A/^E ^B/^F ^K ^W ^U edit"
+SINGLE_TYPING_HINT = "Enter pick · Tab keep filter · Esc clear · ^N/^P move · ^A/^E ^K ^W ^U edit"
+HELP_FOOTER = "j/k ↑/↓ PgUp/PgDn scroll · Esc/q/? close"
 
 
-def help_lines(multi, hint, hidden_count=False, has_note=False):
-    """Every key a filter_list accepts, then this screen's own hint entries."""
+def help_lines(multi, hint, hidden_count=False, has_note=False, key_help=None):
+    """Every key a filter_list accepts, then this screen's own keys: key_help's (keys, what they do) pairs, or else
+    the hint's entries."""
     lines = ["j/k ↑/↓ ^N/^P   move", "g/G             top / bottom", "^D/^U           half page",
-             "^F/^B PgDn/PgUp page", "/               filter (Enter keeps it, Esc clears it)",
+             "^F/^B PgDn/PgUp page",
+             "/               filter (" + ("Enter or Tab keeps it" if multi else "Enter picks, Tab keeps it")
+             + ", Esc clears it)",
              "Enter           " + ("done" if multi else "pick"), "Esc/q/^G        clear the filter, then go back"]
     if multi:
         lines += ["Space/Tab       toggle the row", "a               toggle all shown", "o               view: all / on / changed",
@@ -90,6 +96,8 @@ def help_lines(multi, hint, hidden_count=False, has_note=False):
     if hidden_count:
         lines.append("z               show / hide hidden rows")
     lines.append("?               this help")
+    if key_help:
+        return lines + ["", "This screen:"] + [f"{k:<15} {what}" for k, what in key_help]
     extra = [e for e in hint.split(" · ") if e] if hint else []
     if extra:
         lines += ["", "This screen:"] + ["  " + e for e in extra]
@@ -157,8 +165,9 @@ class _ListModel:
     """filter_list's state and what each key does to it, apart from drawing (the arguments are filter_list's)."""
 
     def __init__(self, title, labels, multi, initial, hint, cursor, extras, locked, locked_note, hotkeys, note_text,
-                 on_note, esc_asks, hidden, status, diff_marks, session, poll, links, on_hotkey, preview=None, row_note=None):
-        self.preview, self.row_note = preview, row_note
+                 on_note, esc_asks, hidden, status, diff_marks, session, poll, links, on_hotkey, preview=None, row_note=None,
+                 key_help=None):
+        self.preview, self.row_note, self.key_help = preview, row_note, key_help
         self.title, self.labels, self.multi, self.hint, self.extras = title, labels, multi, hint, extras
         self.locked_note, self.hotkeys, self.note_text, self.on_note = locked_note, hotkeys, note_text, on_note
         self.esc_asks, self.status, self.diff_marks, self.poll = esc_asks, status, diff_marks, poll
@@ -173,8 +182,9 @@ class _ListModel:
         self.view_mode = self.session.get("view_mode", 0)  # multi: 0 all rows, 1 only rows that are on, 2 only rows changed
         self.revealed = self.session.get("revealed", False)
         self.restore = self.session.get("row")
-        self.query, self.qpos, self.typing = "", 0, False
-        self.cur, self.top = cursor, 0
+        self.query = self.session.get("query", "")
+        self.qpos, self.typing = len(self.query), False
+        self.cur, self.top = cursor, self.session.get("top", 0)
         self.notice = ""
         self.asking = False  # multi-mode Esc: waiting for keep or revert
         self.note = None  # (text, cursor position) while a note for row note_row is typed after w
@@ -203,13 +213,13 @@ class _ListModel:
         self.restore = None
         self.cur = max(0, min(self.cur, len(vis) - 1))
         self.vis = vis
-        self.session.update(sel=self.state, view_mode=self.view_mode, revealed=self.revealed,
-                            row=vis[self.cur] if vis else None)
         self.view = max(1, self.height - 4)
         if self.cur < self.top:
             self.top = self.cur
         elif self.cur >= self.top + self.view:
             self.top = self.cur - self.view + 1
+        self.session.update(sel=self.state, view_mode=self.view_mode, revealed=self.revealed,
+                            row=vis[self.cur] if vis else None, query=self.query, top=self.top)
         self.line = self.status_line()
 
     def linked(self, rows):
@@ -233,15 +243,17 @@ class _ListModel:
                     "red", None)
         if self.note is not None:
             return NOTE_PROMPT + self.note[0], None, len(NOTE_PROMPT) + self.note[1]
-        line, line_color = self.status(self.state) if self.status else f"{len(self.vis)}/{len(self.labels)} shown", None
+        line, line_color = self.status(self.state) if self.status else "", None
         if isinstance(line, tuple):
             line, line_color = line
+        parts = [line] if line else []
         if self.multi and self.diff_marks:
-            line += f" · +{added} −{removed} pending"
+            parts.append(f"+{added} −{removed} pending")
         if self.multi and (self.diff_marks or self.view_mode):
-            line += f" · view: {('all', 'on only', 'changed only')[self.view_mode]}"
+            parts.append(f"view: {('all', 'on only', 'changed only')[self.view_mode]}")
         if not self.revealed and self.hidden_count:
-            line += f" · {self.hidden_count} hidden (press z)"
+            parts.append(f"{self.hidden_count} hidden (press z)")
+        line = " · ".join(parts)
         vis, cur = self.vis, self.cur
         if vis and self.row_note and (text := self.row_note(vis[cur])):
             line = text
@@ -250,6 +262,14 @@ class _ListModel:
         if self.notice:
             line = self.notice
         return line, line_color, None
+
+    def position(self):
+        """Where the cursor is and how many rows the filter shows, for the right end of the status row ("" while a
+        prompt has the row)."""
+        if self.asking or self.note is not None:
+            return ""
+        shown = f"{len(self.vis)}/{len(self.labels)} shown"
+        return f"row {self.cur + 1} · {shown}" if self.vis else shown
 
     def tick(self):
         """Call poll, unless help or a prompt is up (those wait for a key). Returns KEEP."""
@@ -274,7 +294,8 @@ class _ListModel:
 
     def act(self, k):
         if self.help:
-            self.help = None
+            if k in ("escape", "q", "?", "ctrl+g"):
+                self.help = None
             return KEEP
         if self.asking:
             self.asking = False
@@ -295,8 +316,10 @@ class _ListModel:
         vis, cur = self.vis, self.cur
         if self.typing:
             edited = line_key(self.query, self.qpos, k)
-            if k == "enter":
+            if k in ("enter", "tab"):
                 self.typing = False
+                if k == "enter" and not self.multi and vis:
+                    return vis[cur]
             elif k in ("escape", "ctrl+g"):
                 self.query, self.qpos, self.typing = "", 0, False
                 self.cur = self.top = 0
@@ -319,7 +342,7 @@ class _ListModel:
         elif k == "/":
             self.typing, self.qpos = True, len(self.query)
         elif k == "?":
-            self.help = help_lines(self.multi, self.hint, self.hidden_count, bool(self.on_note))
+            self.help = help_lines(self.multi, self.hint, self.hidden_count, bool(self.on_note), self.key_help)
         elif k == "j":
             self.cur = min(len(vis) - 1, cur + 1)
         elif k == "k":
@@ -397,6 +420,7 @@ def _app_class():
     os.environ.setdefault("ESCDELAY", "25")  # read when Textual is imported: Esc acts at once
     from rich.text import Text
     from textual.app import App
+    from textual.containers import VerticalScroll
     from textual.screen import Screen
     from textual.widget import Widget
     from textual.widgets import Static
@@ -433,11 +457,17 @@ def _app_class():
         def render(self):
             m = self.app.model
             query = Text("🔎 " + m.query)
-            lines = [Text(m.title, "bold cyan"), _with_cursor(query, 2 + m.qpos) if m.typing else query,
-                     Text(TYPING_HINT if m.typing else m.hint or (MULTI_HINT if m.multi else SINGLE_HINT), "dim")]
+            if m.typing:
+                hint = TYPING_HINT if m.multi else SINGLE_TYPING_HINT
+            else:
+                hint = (m.hint or (MULTI_HINT if m.multi else SINGLE_HINT)) + HELP_HINT
+            lines = [Text(m.title, "bold cyan"), _with_cursor(query, 2 + m.qpos) if m.typing else query, Text(hint, "dim")]
             lines += [self.row(m, pos) for pos in range(m.top, min(len(m.vis), m.top + m.view))]
             text, color, at = m.line
             status = Text(text, f"bold {color}" if color else "bold")
+            if position := m.position():  # on the right, after the status cut to fit
+                status.truncate(max(0, self.size.width - len(position) - 2), overflow="ellipsis")
+                status.append(" " * max(2, self.size.width - status.cell_len - len(position)) + position, "bold")
             lines += [Text()] * max(0, self.size.height - len(lines) - 1) + [status if at is None else _with_cursor(status, at)]
             return Text("\n").join(lines)
 
@@ -461,18 +491,29 @@ def _app_class():
 
 
     class _HelpScreen(Screen):
-        """The key list over the list; any key closes it."""
+        """The key list over the list, scrolled by the movement keys; the model closes it on Esc, q or ?."""
+        SCROLL = {"j": "scroll_down", "down": "scroll_down", "ctrl+n": "scroll_down", "k": "scroll_up", "up": "scroll_up",
+                  "ctrl+p": "scroll_up", "pagedown": "scroll_page_down", "ctrl+f": "scroll_page_down",
+                  "ctrl+v": "scroll_page_down", "pageup": "scroll_page_up", "ctrl+b": "scroll_page_up",
+                  "g": "scroll_home", "home": "scroll_home", "G": "scroll_end", "end": "scroll_end"}
 
         def __init__(self, lines):
             super().__init__()
-            self.lines = ["Keybindings", ""] + lines + ["", "Press any key to close"]
+            self.lines = lines
 
         def compose(self):
-            yield Static(Text("\n").join([Text(self.lines[0], "bold")] + [Text(l) for l in self.lines[1:]]))
+            with VerticalScroll():
+                yield Static(Text("\n").join([Text("Keybindings", "bold"), Text()] + [Text(l) for l in self.lines]),
+                             id="help-text")
+            yield Static(Text(HELP_FOOTER, "dim"), id="help-footer")
 
         def on_key(self, event):
             event.stop()
-            self.app.feed(_key_name(event))
+            k = _key_name(event)
+            if k in self.SCROLL:
+                getattr(self.query_one(VerticalScroll), self.SCROLL[k])(animate=False)
+            else:
+                self.app.feed(k)
 
 
     class _ListApp(App, inherit_bindings=False):
@@ -484,6 +525,8 @@ def _app_class():
         _ListScreen { layout: horizontal; }
         _ListScreen #preview { width: auto; max-width: 34%; height: 100%; }
         _HelpScreen { align: center middle; }
+        _HelpScreen VerticalScroll { width: auto; height: auto; max-height: 100%; }
+        _HelpScreen #help-footer { dock: bottom; width: 100%; text-align: center; }
         _HelpScreen Static { width: auto; }
         """
 
@@ -613,13 +656,14 @@ def _draws_images():
 
 def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, extras=None, locked=None, locked_note="",
                 hotkeys=(), note_text=None, on_note=None, esc_asks=True, hidden=None, status=None, diff_marks=True,
-                session=None, poll=None, links=None, on_hotkey=None, preview=None, row_note=None):
+                session=None, poll=None, links=None, on_hotkey=None, preview=None, row_note=None, key_help=None):
     """Modal list: vim keys for moving and acting, Emacs keys for editing the filter.
 
     Normal mode: j/k ↑/↓ ^N/^P move · g/G top/bottom · ^D/^U half page · ^F/^B/PgUp/PgDn/^V page · / filter ·
-    Enter picks · Esc/q/^G clears the filter, then goes back. Multi mode adds Space/Tab toggle · a all/none shown ·
-    o view (all / on / changed) · u revert · w note. After `/`, typed text filters (every
-    space-separated term must appear in a label, case-insensitive); Enter keeps the filter, Esc clears it.
+    Enter picks · Esc/q/^G clears the filter, then goes back · ? help. Multi mode adds Space/Tab toggle · a all/none
+    shown · o view (all / on / changed) · u revert · w note. After `/`, typed text filters (every
+    space-separated term must appear in a label, case-insensitive); Tab keeps the filter, Enter does too in multi
+    mode and picks the highlighted row in single mode, Esc clears it.
 
     Single mode returns the chosen index, or None on Esc. Multi mode returns the list of on/off states on Enter;
     Esc asks whether to keep or revert pending changes (esc_asks=False: it just returns None).
@@ -631,10 +675,13 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
     on_note: optional callable(label index, text) -> message, called with a line typed after `w` on a row (multi mode);
     note_text(label index) gives the text to start from.
     hotkeys: normal-mode keys that return (key, label index) for the highlighted row instead of acting.
+    key_help: optional (keys, what they do) pairs that `?` lists as this screen's keys; without it, it lists the hint's
+    entries. Every hint line ends with "? help".
     hidden: optional per-label flags; those rows are left out (and drawn dim) until `z` reveals them.
-    status(states) -> text, or (text, color): replaces the "N/M shown" status. diff_marks: show ➕/➖ against `initial`
-    (else ✅/⬜ only).
-    session: a dict the caller keeps so selection, view, revealed rows and cursor survive reopening the list.
+    status(states) -> text, or (text, color): the status row's text; its right end always shows the cursor's row and
+    "N/M shown". diff_marks: show ➕/➖ against `initial` (else ✅/⬜ only).
+    session: a dict the caller keeps so selection, view, revealed rows, filter text, cursor and scroll survive reopening
+    the list (carry_place keeps them across passes that list the same rows).
     poll: optional callable, called on the list's thread every POLL_MS while it waits for a key; the list is then redrawn,
     so poll can update extras in place (and status can read what it changed).
     links: optional per-label lists of the label indexes switched together with it (multi mode): Space/Tab and `a`
@@ -652,4 +699,16 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
         if not _draws_images():
             preview = None
     return _run(_ListModel(title, labels, multi, initial, hint, cursor, extras, locked, locked_note, hotkeys, note_text,
-                           on_note, esc_asks, hidden, status, diff_marks, session, poll, links, on_hotkey, preview, row_note))
+                           on_note, esc_asks, hidden, status, diff_marks, session, poll, links, on_hotkey, preview, row_note,
+                           key_help))
+
+
+PLACE = ("row", "query", "view_mode", "top")  # the session entries carry_place keeps
+
+
+def carry_place(place, keys, session):
+    """Start a list's session where its last pass left off (row, filter text, view, scroll) when this pass lists the
+    same keys; place is a dict the caller keeps across passes. Only what is shown is kept, never the rows' states."""
+    if place.get("keys") == keys:
+        session.update({k: v for k, v in place["session"].items() if k in PLACE})
+    place.update(keys=list(keys), session=session)
