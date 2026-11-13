@@ -32,7 +32,7 @@ PAST_SURPRISE_KEY = "p"
 CLEAR_KEY = "c"
 SET_KEY = "s"
 META_KEY = "m"
-GAMES_HINT = "Space toggle · Enter done · / search · s set · m meta · c clear · p past"
+GAMES_HINT = "Space toggle · Enter done · s set · m meta · c clear · p past"
 
 
 # --- Editing the games of one collection -------------------------------------------------------------
@@ -89,6 +89,7 @@ def edit_one(collection, systems, keys_of):
             meta = cardedit.Metadata(s["bucket"])
             titles = {r[1]: r[2] for r in all_rows}
             sets = store.load_sets()
+            place = {}  # where the list was left, kept while a key lists the same games
 
             def keep(key, skip=None):
                 wanted = {f: v for f, v in meta_filt.items() if f != skip}
@@ -102,7 +103,7 @@ def edit_one(collection, systems, keys_of):
                 pressed = edit.toggle_games(
                     f"✏️  {s['name']} — ✅ in {collection['name']}, ⬜ in storage only{where}",
                     [r for r in all_rows if keep(r[1])],
-                    hotkeys=(SET_KEY, META_KEY, PAST_SURPRISE_KEY, CLEAR_KEY), hint=GAMES_HINT)
+                    hotkeys=(SET_KEY, META_KEY, PAST_SURPRISE_KEY, CLEAR_KEY), hint=GAMES_HINT, place=place)
                 if pressed == PAST_SURPRISE_KEY:
                     past = surprise.past_keys(s["bucket"]) or None
                     if past is None:

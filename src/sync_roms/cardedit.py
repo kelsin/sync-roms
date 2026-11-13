@@ -11,15 +11,22 @@ SET_KEY = "s"
 CLEAR_KEY = "c"
 CLEAR_ALL_KEY = "D"
 COLLECTIONS_KEY = "l"
-SURPRISE_KEY = "u"
+SURPRISE_KEY = "S"
 PAST_SURPRISE_KEY = "p"
 META_KEY = "m"
 VARIANT_KEY = "v"
-LIST_HINT = "Enter games · f full · l collections · u surprise menu · D clear all · / filter"
-GAMES_HINT = "Space toggle · Enter done · / search · s set · m meta · p past · v variant"
+LIST_HINT = "Enter games · f full · l collections · S surprise · D clear all"
+GAMES_HINT = "Space toggle · Enter done · s set · m meta · p past · v variant"
 META_HINT = "Enter list its values · Esc back"
 VALUES_HINT = "Enter narrow to it · Esc back · / filter"
-SETS_HINT = "Enter show its games · Space/Tab toggle its games here · Esc back · / filter"
+SETS_HINT = "Enter show its games · Space/Tab toggle its games here · / filter"
+LIST_KEYS = [("Enter", "the system's games"), ("f", "full system: every file in its folder (again to undo)"),
+             ("l", "collections on this card"), ("S", "Surprise menu: turn it on or off, or pick its systems"),
+             ("D", "clear every pick, full system and set from the card")]
+GAMES_KEYS = [("s", "sets on this system: narrow to one, or pick its games"),
+              ("m", "narrow by scraped metadata (developer, genre, year...)"),
+              ("p", "only the games that were surprises lately"), ("v", "the game's variants on other systems"),
+              ("c", "clear the set, metadata and surprise filters")]
 SIZING = "…"
 
 
@@ -245,7 +252,7 @@ def edit_card(name, setup=None, to_fetch=None):
         on = surprise.enabled(store.load_cards().get(name))
         i = picker.filter_list(f"💳 {name} — its systems (⭐ for the device) · 🎁 Surprise {'on' if on else 'off'}",
                                labels, extras=extras, cursor=pos,
-                               hotkeys=(FULL_KEY, COLLECTIONS_KEY, SURPRISE_KEY, CLEAR_ALL_KEY), hint=LIST_HINT,
+                               hotkeys=(FULL_KEY, COLLECTIONS_KEY, SURPRISE_KEY, CLEAR_ALL_KEY), hint=LIST_HINT, key_help=LIST_KEYS,
                                status=lambda _state: status_of(view["total"], capacity, view["fetch"]),
                                on_hotkey=on_hotkey,
                                preview=lambda i: previews.system(systems[i]) if i < len(systems) else None)
@@ -282,7 +289,7 @@ def card_status(name, setup, systems, to_fetch=None):
 
 
 def surprise_menu(name, systems):
-    """u in the system list: turn the card's Surprise on or off, or pick the systems Surprise may use on every card."""
+    """S in the system list: turn the card's Surprise on or off, or pick the systems Surprise may use on every card."""
     on = surprise.enabled(store.load_cards().get(name))
     i = picker.filter_list("🎁 Surprise", [f"Turn Surprise {'off' if on else 'on'} for {name}",
                                           "Systems Surprise may use (every card)"])
@@ -361,6 +368,7 @@ def pick_collections(name, playable, card_status=None):
     while True:
         i = picker.filter_list(f"💖 Collections on {name} (Space/Enter toggles)", labels, extras=extras, cursor=pos,
                                hotkeys=(" ", "\t"), on_hotkey=on_hotkey,
+                               key_help=[("Space/Tab/Enter", "put the collection on the card or take it off")],
                                status=(lambda _state: shown["status"]) if card_status else None,
                                preview=lambda i: previews.collection(found[i].get("art")) if i < len(found) else None)
         if i is None:
@@ -598,6 +606,7 @@ def edit_system(name, system, setup, to_fetch=None, card_usages=None):
         return changed
 
     pending = None  # (rows shown, notes, states before) of the pass on screen, applied if Ctrl-C ends it
+    place = {}  # picker.carry_place's: the last pass's row, filter text, view and scroll
     try:
         while True:
             notes = cover()
@@ -607,6 +616,7 @@ def edit_system(name, system, setup, to_fetch=None, card_usages=None):
             index = {k: i for i, k in enumerate(keys)}
             links = [[index[m] for m in groups.get(k, ()) if m in index] for k in keys]
             session = {"sel": [base[k] for k in keys]}
+            picker.carry_place(place, keys, session)  # where the last pass was, when it listed the same games
             extras = [row_extras(k, notes, st) for k, st in zip(keys, session["sel"])]
 
             def status(state):
@@ -637,6 +647,7 @@ def edit_system(name, system, setup, to_fetch=None, card_usages=None):
             result = picker.filter_list(f"✏️  {system['name']} on {name} — ✅ synced, ⬜ not, 📦 from a set{where}",
                                         [r[3] for r in shown], multi=True, initial=[start[k] for k in keys],
                                         extras=extras, hint=GAMES_HINT, hotkeys=(SET_KEY, META_KEY, PAST_SURPRISE_KEY, CLEAR_KEY, VARIANT_KEY),
+                                        key_help=GAMES_KEYS,
                                         status=status, row_note=lambda i: edit.variant_line(
                                             keys[i], variants, parents, system_names, on_card),
                                         session=session, note_text=note_text, on_note=on_note,

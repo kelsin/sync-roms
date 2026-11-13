@@ -153,10 +153,16 @@ Every list works the same way, vim-style with Emacs line editing:
 | `^D` `^U` | half page |
 | `^F` `^B` `PgUp` `PgDn` `^V` | page |
 | `/` | filter: type words that must all match |
-| `Enter` (while filtering) | keep the filter and go back to moving |
+| `Enter` (while filtering) | pick the highlighted row; in lists with checkboxes, keep the filter and go back to moving |
+| `Tab` (while filtering) | keep the filter and go back to moving |
 | `Esc` / `^G` | clear the filter, then go back / cancel |
 | `Space` `Tab` | toggle (lists with checkboxes) |
 | `a` `o` `u` | all or none shown / cycle view / revert (lists with checkboxes) |
+| `?` | every key of the list, including the list's own (scroll with `j` `k`; `Esc`, `q` or `?` closes it) |
+
+The hint line under the filter starts with `? help`. The bottom line ends with the highlighted row's number and how many
+rows the filter shows (`row 12 · 340/3700 shown`) when the list's own status (a card's size, say) leaves room for it. Leaving a game list for
+`s`, `m`, `p` or `v` and coming back keeps your row, filter and view when the list shows the same games.
 
 While typing a filter (or a note, which `w` opens in the game list): `^A` `^E` start/end of line, `^B` `^F` left/right, `^D` delete a character, `^K` kill to end, `^U` kill to start, `^W` kill a word.
 
@@ -529,7 +535,7 @@ sync-roms --edit
    red above (or over). Opened from a sync, it also shows how much of the card's ROMs aren't on it yet
    (`⬇️  … to download`). Sizes come from the storage cache (see [Storage cache](#storage-cache)); without one they show
    `…` and the total says "not sized". `/` filters, `Enter` opens a system, `l` adds a collection to the card (each shows how many of its games are playable on the card's device, and `Space`/`Enter` toggles the whole collection), `f` makes it a full system (every file in its folder; `f` again brings the
-   game list back), `u` opens a [Surprise](#surprise) menu: turn it on or off for the card (the title says which), or pick the systems it may use on every card. Games save to `cards.json` as you leave a
+   game list back), `S` opens a [Surprise](#surprise) menu: turn it on or off for the card (the title says which), or pick the systems it may use on every card. Games save to `cards.json` as you leave a
    system (the previous file is kept as `cards.json.bak`). `Esc` goes back to the menu.
 2. A system shows every file in its storage folder. `✅` is synced, `⬜` is not; a 📦 next to a game says a set the
    card references syncs it (switching it off excludes it from that set on this card). `/` searches, `Space` (or `Tab`)
@@ -651,7 +657,7 @@ on them are replaced at the next sync.
   the card editor so you can adjust the card (with Surprise off, the editor still opens). Without a terminal, with `--yes` or `--json` it replaces all of them. `--dry-run`
   changes no surprises: it only says whether it would ask or replace all, previews the picks for empty slots and saves nothing.
   The mirror is refreshed a second time only when this step or the editor changed the card's picks.
-- **In the card editor**, `u` in the system list opens a menu: turn Surprise on or off for the card (off removes its surprises
+- **In the card editor**, `S` in the system list opens a menu: turn Surprise on or off for the card (off removes its surprises
   at the next sync), or check the systems Surprise may use (saved as `surprise_excluded_systems`, for every card), and `p` in a game list shows only the games surprised within `surprise_ttl_days`. A surprise shows in the
   game list as 🎁 Surprise and can't be switched off there, like a collection game; it counts in the card's budget and size warning.
 - **History** is kept in `~/.sync-roms/surprises.json` (system, bucket, title, card, ISO date) and pruned past

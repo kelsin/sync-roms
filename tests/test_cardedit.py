@@ -218,6 +218,50 @@ class Flow(DataDir):
         self.assertIn("No past surprises on Game Boy Advance", note.call_args[0][0])
         self.assertEqual(len(calls[1][1]), len(calls[0][1]))
 
+    def test_the_game_list_keeps_its_place_after_a_key_that_lists_the_same_games(self):
+        self.card()
+        place = {"row": 2, "query": "r", "view_mode": 1, "top": 1}
+
+        def move(key):
+            def step(labels, kw):
+                kw["session"].update(place)
+                return (key, 2)
+            return step
+        seen = []
+
+        def look(labels, kw):
+            seen.append({k: kw["session"].get(k) for k in place})
+            return kw["session"]["sel"]
+        with mock.patch.object(surprise, "past_keys", return_value=set()):
+            self.run_system(move(cardedit.META_KEY), returns(None), look)  # m, then Esc in the field list
+            self.run_system(move(cardedit.PAST_SURPRISE_KEY), look)  # p with no past surprises
+            self.run_system(move(cardedit.SET_KEY), returns(None), look)  # s, then Esc in the set list
+        self.assertEqual(seen, [place] * 3)
+
+    def test_the_game_list_starts_over_when_a_key_changes_what_it_lists(self):
+        self.card()
+        seen = []
+
+        def look(labels, kw):
+            seen.append(kw["session"].get("query"))
+            return kw["session"]["sel"]
+
+        def filtered(labels, kw):
+            kw["session"].update(query="r", row=0)
+            return (cardedit.PAST_SURPRISE_KEY, 0)
+        with mock.patch.object(surprise, "past_keys", return_value={"gba/Ruby.zip"}):
+            self.run_system(filtered, look)
+        self.assertEqual(seen, [None])
+
+    def test_surprise_is_not_on_u_so_u_always_reverts(self):
+        self.card()
+        kw = self.run_card(returns(None))[0][2]
+        self.assertEqual(cardedit.SURPRISE_KEY, "S")
+        self.assertIn(cardedit.SURPRISE_KEY, kw["hotkeys"])
+        self.assertNotIn("u", kw["hotkeys"])
+        self.assertIn("S surprise", cardedit.LIST_HINT)
+        self.assertIn(("S", "Surprise menu: turn it on or off, or pick its systems"), kw["key_help"])
+
     def test_surprise_rows_are_locked_in_the_game_list(self):
         self.card(surprises=[{"system": "gba", "bucket": "gba/Zelda.zip", "title": "Zelda"}])
         _, calls = self.run_system(lambda labels, kw: list(kw["initial"]))
@@ -469,7 +513,7 @@ class Flow(DataDir):
             return kw["session"]["sel"]
         self.run_system(step)
         self.assertEqual(cardedit.GAMES_HINT,
-                         "Space toggle · Enter done · / search · s set · m meta · p past · v variant")
+                         "Space toggle · Enter done · s set · m meta · p past · v variant")
 
     def test_v_adds_the_variant_on_its_own_system_and_saves(self):
         self.with_variants(self.RED)
@@ -1149,7 +1193,8 @@ class Poll(unittest.TestCase):
         self.assertEqual(pilot_list(script, "t", ["a"], poll=lambda: polled.append(1),
                                     status=lambda s: ("over", "red")), 0)
         self.assertTrue(polled)
-        self.assertEqual(status, [("over", "bold color(1) on default")])
+        self.assertEqual(status[0], ("over", "bold color(1) on default"))
+        self.assertTrue(status[-1][0].endswith("row 1 · 1/1 shown"))
 
 
 if __name__ == "__main__":

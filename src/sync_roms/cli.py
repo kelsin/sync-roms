@@ -79,7 +79,8 @@ TOPICS = {
 
   --card NAME is required: a card's games are saved in ~/.sync-roms/cards.json with the previous version kept as .bak. Removing only drops a game from the list.
   In the editor: / filters, Space toggles a row, a all/none shown, u reverts the list, o cycles all/on/changed,
-  f toggles a full system; in a system's games, s lists its sets and Space there picks (or unpicks) a set's games.
+  f toggles a full system, S opens the Surprise menu; in a system's games, s lists its sets and Space there picks
+  (or unpicks) a set's games. ? in any list shows all its keys.
 """,
     "sets": """
   sync-roms sets edit                         edit the repo's sets (games, categories, new and deleted sets), then open a PR
@@ -107,6 +108,10 @@ TOPICS = {
 """,
     "edit": """
   sync-roms edit                              main menu: Cards, Sets (opens a PR), Collections, Device systems; same as `games edit`
+
+  ? in any list shows all its keys. In a card's system list: Enter opens a system's games, f makes it a full system,
+  l picks collections, S opens the Surprise menu, D clears the card. In a single-choice list, Enter while typing a
+  filter picks the highlighted row (Tab keeps the filter instead).
 """,
     "cards": """
   sync-roms cards edit                        same as `games edit`
