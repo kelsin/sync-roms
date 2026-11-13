@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.7.0](https://github.com/kelsin/sync-roms/compare/v2.6.0...v2.7.0) (2026-11-13)
+
+
+### :video_game: Features
+
+* **themeart:** add art for the usual kinds of personal collection ([#254](https://github.com/kelsin/sync-roms/issues/254)) ([c3620a9](https://github.com/kelsin/sync-roms/commit/c3620a90f0c73ccddc8aa1f984b4a8dec642f49b))
+* **vita:** sync a game's DLC and newest update with it ([#256](https://github.com/kelsin/sync-roms/issues/256)) ([aff5315](https://github.com/kelsin/sync-roms/commit/aff5315cd7a51fe3af4d1cde04800cf1899ab867))
+
 ## [2.6.0](https://github.com/kelsin/sync-roms/compare/v2.5.0...v2.6.0) (2026-11-12)
 
 
