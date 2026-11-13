@@ -518,6 +518,16 @@
     ]
   },
   {
+    "id": "ayn-thor-lite",
+    "name": "AYN Thor Lite",
+    "soc": "Snapdragon 865",
+    "screen": "16:9",
+    "screen2": "31:27",
+    "firmwares": [
+      "esde"
+    ]
+  },
+  {
     "id": "ayn-thor",
     "name": "AYN Thor",
     "soc": "Snapdragon 8 Gen 2",
