@@ -590,6 +590,32 @@ def check_data(list_keys=None, repo_systems=None):
         for key in ("screen", "screen2"):
             if key in d and not valid_ratio(d[key]):
                 problems.append(f"devices.json: {d['id']}: {key} must look like W:H with whole numbers, not {d[key]!r}")
+    drivers = store.repo_json("drivers")
+    driver_ids = set()
+    for dr in drivers["drivers"]:
+        if not re.fullmatch(r"[a-z0-9-]+", dr["id"]):
+            problems.append(f"drivers.json: driver id {dr['id']!r} must be lowercase letters, digits and dashes")
+        if dr["id"] in driver_ids:
+            problems.append(f"drivers.json: duplicate driver id {dr['id']!r}")
+        driver_ids.add(dr["id"])
+        if not re.fullmatch(r"[\w.-]+/[\w.-]+", dr["repo"]):
+            problems.append(f"drivers.json: {dr['id']}: repo must look like owner/name, not {dr['repo']!r}")
+        try:
+            re.compile(dr["asset"])
+        except re.error as e:
+            problems.append(f"drivers.json: {dr['id']}: asset is not a valid regex ({e})")
+    used = set()
+    for gid, g in drivers["gpus"].items():
+        for i in g["drivers"]:
+            used.add(i)
+            if i not in driver_ids:
+                problems.append(f"drivers.json: {gid}: unknown driver {i!r}")
+    problems.extend(f"drivers.json: driver {i!r} is not used by any gpu" for i in sorted(driver_ids - used))
+    problems.extend(
+        f"devices.json: {d['id']}: unknown gpu {d['gpu']!r}"
+        for d in store.repo_json("devices")
+        if "gpu" in d and d["gpu"] not in drivers["gpus"]
+    )
     devices = {d["id"] for d in store.repo_json("devices")}
     layouts = set(store.repo_json("layouts"))
     sets = {x["id"] for x in store.load_sets()}
