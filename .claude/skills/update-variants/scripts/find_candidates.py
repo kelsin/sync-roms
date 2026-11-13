@@ -73,14 +73,16 @@ def main():
         if clone_parent(key):
             by_family[clone_parent(key)].append(key)
 
-    new = sorted(k for k in stored - referenced if k not in checked and not vita.is_extra(k))
+    unlisted = sorted(k for k in stored - referenced if not vita.is_extra(k))
+    groups = m3u.file_groups(unlisted)
+    # a multi-disc game is checked once any of its files is: a judged one's discs would otherwise come back
+    new = [k for k in unlisted if not any(g in checked for g in groups.get(k, [k]))]
     if "--baseline" in sys.argv[1:]:
         checked.update({k: "baseline: in storage before variants were tracked" for k in new})
         with open(CHECKED, "w") as f:
             json.dump(checked, f, indent=1, ensure_ascii=False, sort_keys=True)
         print(f"Marked {len(new)} unlisted ROM(s) as checked in {CHECKED}")
         return
-    groups = m3u.file_groups(new)
     matches, unmatched, seen = defaultdict(list), 0, set()
     for key in new:
         if key in seen:

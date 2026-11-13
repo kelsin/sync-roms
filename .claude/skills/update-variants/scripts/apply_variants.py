@@ -27,18 +27,19 @@ def main(path):
     missing = sorted({x["game"] for x in add + remove} - listed)
     if missing:
         sys.exit("No set lists these games, nothing was changed: " + ", ".join(missing))
-    touched = set()
+    touched, writes = set(), []
     for game_set in sets:
         changed = False
         for g in game_set["games"]:
             for r in remove:
-                if g.get("bucket") == r["game"]:
-                    kept = [v for v in g.get("variants", []) if v["bucket"] != r["bucket"]]
-                    if len(kept) != len(g.get("variants", [])):
-                        g["variants"] = kept
+                if g.get("bucket") == r["game"] and g.get("variants"):
+                    kept = [v for v in g["variants"] if v["bucket"] != r["bucket"]]
+                    if len(kept) != len(g["variants"]):
+                        if kept:
+                            g["variants"] = kept
+                        else:
+                            del g["variants"]
                         changed = True
-                    if not g["variants"]:
-                        del g["variants"]
             for a in add:
                 if g.get("bucket") == a["game"]:
                     if all(v["bucket"] != a["bucket"] for v in g.get("variants", [])):
@@ -47,9 +48,11 @@ def main(path):
                         changed = True
         if changed:
             set_id = game_set.pop("id")
-            with open(os.path.join(SETS, f"{set_id}.json"), "w") as f:
-                f.write(store.set_text(game_set))
-            touched.add(set_id)
+            writes.append((set_id, store.set_text(game_set)))
+    for set_id, text in writes:  # every edit above succeeded: only now write
+        with open(os.path.join(SETS, f"{set_id}.json"), "w") as f:
+            f.write(text)
+        touched.add(set_id)
     try:
         with open(CHECKED) as f:
             checked = json.load(f)
