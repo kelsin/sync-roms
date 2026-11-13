@@ -1,6 +1,8 @@
 """Download planning, running and local ROM scanning."""
+import contextlib
 import os
 import re
+import sys
 import time
 from concurrent.futures import ThreadPoolExecutor
 
@@ -139,15 +141,22 @@ def run_downloads(todo, label, icon, base, failures=None):
             bar.draw(i)
     except KeyboardInterrupt:
         ex.shutdown(wait=False, cancel_futures=True)
-        running = [f for _, f in futs if f.running()]
+        running = [(j, f) for j, f in futs if not f.done()]
         bar.say(ui.yellow(f"🛑 Interrupted — finishing {len(running)} download(s) in flight (partly downloaded files restart on the next run). ^C again to abort now."))
         try:
-            while any(f.running() for f in running):
+            while running:
+                for j, f in [r for r in running if r[1].done()]:
+                    running.remove((j, f))
+                    bar.say(f"  ✅ {j[0]}" if f.exception() is None else f"  ❌ {ui.red(j[0])}: {f.exception()}")
                 bar.draw(sum(f.done() for _, f in futs))
                 time.sleep(ui.POLL)
         except KeyboardInterrupt:
             bar.clear()
+            for j, _ in running:  # hard_exit skips s3.download's own cleanup
+                with contextlib.suppress(OSError):
+                    os.remove(j[1] + ".part")
             print(ui.red("🛑 Aborted"))
+            sys.stdout.flush()
             hard_exit()
         raise
     finally:
