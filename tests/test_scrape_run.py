@@ -1252,12 +1252,13 @@ class ProgressTest(RunBase):
                 self.assertTrue(release.wait(30))
             return real_lookup(system_id, rom_name, *a, **k)
 
-        def wait(fs, **kw):
+        def wait(fs, **kw):  # 1: a.zip ends; 2: Ctrl-C; 3 on: the drain, after the stop is set, lets b.zip go on
             calls.append(1)
             if len(calls) == 2:
                 self.assertTrue(b_running.wait(30))
                 raise KeyboardInterrupt
-            release.set()
+            if len(calls) > 2:
+                release.set()
             return real_wait(fs, **kw)
         self.client.lookup = lookup
         with mock.patch.object(scrape_online, "wait", wait):
