@@ -1,4 +1,5 @@
 import contextlib
+import hashlib
 import io
 import json
 import os
@@ -10,7 +11,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "src"))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
-from sync_roms import cli, commands, downloads, mirroring, runtime, store, ui  # noqa: E402
+from sync_roms import cli, commands, downloads, inventory, mirroring, runtime, s3, store, themeart, ui  # noqa: E402
 from helpers import Cmd, DataDir  # noqa: E402,F401
 
 
@@ -446,6 +447,104 @@ class DownloadsTest(unittest.TestCase):
                     contextlib.redirect_stdout(io.StringIO()):
                 self.assertEqual(mirroring.refresh_mirror(root), 0)
             self.assertEqual(os.listdir(os.path.join(root, "gba")), ["Keep.zip"])
+
+
+def etag(data):
+    return f'"{hashlib.md5(data).hexdigest()}"'
+
+
+class MirrorThemeUpdateTest(DataDir):
+    """A bucket whose cache and mirror hold the theme archive and its commit file, before `themes update`."""
+    OLD, NEW = b"a" * 40 + b"\n", b"b" * 40 + b"\n"  # a commit file is always 41 bytes
+
+    def setUp(self):
+        super().setUp()
+        inventory.reset()
+        self.addCleanup(inventory.reset)
+        for name, value in (("ROOT", None), ("BUCKET", "roms"), ("ENDPOINT", None), ("_mirror_root", None)):
+            p = mock.patch.object(runtime, name, value)
+            p.start()
+            self.addCleanup(p.stop)
+        client = mock.Mock()
+        client.get_paginator.return_value.paginate.return_value = [{"Contents": [
+            {"Key": themeart.ESDE_ARCHIVE, "Size": 3, "ETag": etag(b"old")},
+            {"Key": themeart.ESDE_COMMIT, "Size": 41, "ETag": etag(self.OLD)}]}]
+        client.put_object.side_effect = lambda **kw: {"ETag": etag(kw["Body"])}
+        p = mock.patch.object(s3, "s3_client", return_value=client)
+        p.start()
+        self.addCleanup(p.stop)
+        with contextlib.redirect_stdout(io.StringIO()):
+            inventory.update()
+        self.mirror = os.path.join(self.tmp.name, "mirror")
+        for key, data in ((runtime.MIRROR_MARKER, b""), (themeart.ESDE_ARCHIVE, b"old"), (themeart.ESDE_COMMIT, self.OLD)):
+            os.makedirs(os.path.dirname(os.path.join(self.mirror, key)), exist_ok=True)
+            with open(os.path.join(self.mirror, key), "wb") as f:
+                f.write(data)
+        self.storage = {themeart.ESDE_ARCHIVE: b"old", themeart.ESDE_COMMIT: self.OLD}  # what the bucket holds
+
+    def themes_update(self, archive=b"newer", commit=NEW):
+        """What `themes update` writes to the bucket."""
+        path = os.path.join(self.tmp.name, "theme.tar.gz")
+        with open(path, "wb") as f:
+            f.write(archive)
+        s3.put_file(themeart.ESDE_ARCHIVE, path)
+        s3.put_text(themeart.ESDE_COMMIT, commit.decode())
+        self.storage = {themeart.ESDE_ARCHIVE: archive, themeart.ESDE_COMMIT: commit}
+
+    def fetched(self, fail=()):
+        """The keys a mirror refresh downloads, in the order of its download batches; the keys in fail fail."""
+        batches = []
+
+        def run_downloads(jobs, label, icon, base, failures=None):
+            batches.append(sorted(k for k, _, _ in jobs))
+            for key, path, _ in jobs:
+                if key in fail:
+                    if failures is not None:
+                        failures.append((key, "boom"))
+                    continue
+                with open(path, "wb") as f:
+                    f.write(self.storage[key])
+            return sum(k in fail for k, _, _ in jobs)
+        with mock.patch.object(mirroring.store, "load_manifest", return_value={"systems": []}), \
+                mock.patch.object(mirroring.store, "all_card_names", return_value=[]), \
+                mock.patch.object(mirroring.downloads, "run_downloads", side_effect=run_downloads), \
+                contextlib.redirect_stdout(io.StringIO()):
+            mirroring.refresh_mirror(self.mirror)
+        return [b for b in batches if b]
+
+    def stored_commit(self):
+        """The commit a card sees, read through the mirror."""
+        with mock.patch.object(runtime, "_mirror_root", self.mirror):
+            return themeart._stored_commit()
+
+    def test_mirror_fetches_the_archive_then_the_commit_after_themes_update(self):
+        self.themes_update()
+        self.assertEqual(self.fetched(), [[themeart.ESDE_ARCHIVE], [themeart.ESDE_COMMIT]])
+        self.assertEqual(self.stored_commit(), self.NEW.decode().strip())
+
+    def test_mirror_fetches_a_same_size_archive_when_the_commit_changed(self):
+        self.themes_update(archive=b"new")
+        self.assertEqual(self.fetched(), [[themeart.ESDE_ARCHIVE], [themeart.ESDE_COMMIT]])
+        with open(os.path.join(self.mirror, themeart.ESDE_ARCHIVE), "rb") as f:
+            self.assertEqual(f.read(), b"new")
+
+    def test_mirror_keeps_the_old_commit_when_the_archive_fails(self):
+        self.themes_update()
+        self.assertEqual(self.fetched(fail={themeart.ESDE_ARCHIVE}), [[themeart.ESDE_ARCHIVE]])
+        self.assertEqual(self.stored_commit(), self.OLD.decode().strip())
+
+    def test_mirror_keeps_a_commit_file_storage_still_has(self):
+        self.assertEqual(self.fetched(), [])
+
+    def test_a_commit_file_with_an_unknown_or_multipart_etag_counts_as_changed_and_is_fetched(self):
+        for tag in (None, '"0123abcd-2"'):
+            with self.subTest(tag=tag):
+                if tag is None:
+                    inventory.current().etags.pop(themeart.ESDE_COMMIT)
+                else:
+                    inventory.current().etags[themeart.ESDE_COMMIT] = tag
+                self.assertEqual(self.fetched(), [[themeart.ESDE_ARCHIVE], [themeart.ESDE_COMMIT]])
+                self.assertEqual(self.stored_commit(), self.OLD.decode().strip())
 
 
 if __name__ == "__main__":

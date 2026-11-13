@@ -160,10 +160,12 @@ def stat_sizes(keys):
 _s3 = {}
 
 
-def s3_client(profile=None, connections=runtime.WORKERS):
-    """Shared boto3 S3 client for a profile (one per connection pool size). Exits if the profile isn't configured."""
+def s3_client(profile=None, connections=None):
+    """Shared boto3 S3 client for a profile (one per connection pool size). Exits if the profile isn't configured.
+    The default pool holds a connection for each ranged GET of the downloads in flight."""
     profile = profile or runtime.PROFILE
-    key = profile if connections == runtime.WORKERS else (profile, connections)
+    key = profile if connections is None else (profile, connections)
+    connections = connections or runtime.WORKERS * DOWNLOAD_PARTS
     if key not in _s3:
         import boto3  # slow to import, and a folder or a mirror never needs it
         try:

@@ -1,9 +1,10 @@
 """Local mirror of storage."""
 import contextlib
+import hashlib
 import os
 from concurrent.futures import ThreadPoolExecutor
 
-from . import downloads, drivers, inventory, runtime, s3, scrape_plan, store, ui, usersettings
+from . import downloads, drivers, inventory, runtime, s3, scrape_plan, store, themeart, ui, usersettings
 
 
 MIRROR_PRUNE_ASK = 25  # delete more unreferenced mirror files than this (or over a tenth of it) only after confirming
@@ -38,9 +39,18 @@ def mirror_wanted(manifest):
     return wanted
 
 
+def commit_changed(path):
+    """Whether the mirror's copy of the theme's commit file differs from storage's. It is always the same size, so its MD5
+    is checked against the ETag the cache has; one that isn't known counts as changed."""
+    name = themeart.ESDE_COMMIT[len(runtime.ESDE_THEMES_PREFIX):]
+    tag = inventory.etags(runtime.ESDE_THEMES_PREFIX).get(name, (None, "-"))[1]
+    with open(path, "rb") as f:
+        return hashlib.md5(f.read(), usedforsecurity=False).hexdigest() != tag.strip('"')
+
+
 def refresh_mirror(root, dry_run=False):
-    """Make root hold exactly what the game lists reference: download what's missing or a different size,
-    delete the rest. Returns the number of failed downloads."""
+    """Make root hold exactly what the game lists reference: download what's missing or a different size (or, for the
+    theme's commit file, different), delete the rest. Returns the number of failed downloads."""
     if not os.path.exists(os.path.join(root, runtime.MIRROR_MARKER)):
         if os.path.isdir(root) and os.listdir(root):
             raise SystemExit(ui.red(f"❌ {root} isn't empty and isn't a sync-roms mirror"))
@@ -58,7 +68,13 @@ def refresh_mirror(root, dry_run=False):
             jobs.append((k, s3.safe_join(root, k), s))
         except ValueError as e:
             print(ui.yellow(f"  ⚠️  skipping {e}"))
-    todo = [j for j in jobs if have.get(j[0]) != j[2]]  # the mirror listing already has every size
+    todo = [j for j in jobs if have.get(j[0]) != j[2]  # the mirror listing already has every size
+            or j[0] == themeart.ESDE_COMMIT and commit_changed(j[1])]
+    commit = next((j for j in todo if j[0] == themeart.ESDE_COMMIT), None)
+    if commit:  # with the archive (even one of the same size), and only once it is in: a card that saw the new commit
+        # with the old archive would keep the old theme
+        todo.remove(commit)
+        todo += [j for j in jobs if j[0] == themeart.ESDE_ARCHIVE and j not in todo] + [commit]
     stale = sorted(set(have) - set(wanted))
     print(f"🪞 Mirror: {ui.bold(str(len(todo)))} to download ({ui.human_size(sum(j[2] for j in todo))}), "
           f"{len(wanted) - len(todo)} up to date, {ui.bold(str(len(stale)))} to delete")
@@ -68,7 +84,10 @@ def refresh_mirror(root, dry_run=False):
         for key in stale:
             print(f"  {ui.red('would delete')} {key}")
         return 0
-    failed = downloads.run_downloads(todo, "Mirror", "🪞", root)
+    failures = []
+    failed = downloads.run_downloads([j for j in todo if j is not commit], "Mirror", "🪞", root, failures)
+    if commit and themeart.ESDE_ARCHIVE not in {k for k, _ in failures}:
+        failed += downloads.run_downloads([commit], "Mirror", "🪞", root)
     if stale and failed:
         print(ui.yellow(f"  ⚠️  Not deleting the {len(stale)} unreferenced file(s): {failed} download(s) failed, so the list may be incomplete"))
         stale = []
