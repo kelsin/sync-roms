@@ -177,17 +177,19 @@ def make_xiso(tools, image, out, report=None, disposable=False):
 
     extract-xiso rewrites the image into a hidden folder beside out, and the result replaces out only once it lists
     cleanly, so out (the image itself when converting in place) is never half written. The image is copied there first
-    unless it is disposable (just unpacked), since the rewrite deletes it.
+    unless it is disposable (just unpacked), since the rewrite deletes it; a disposable image that is already
+    optimized is moved there instead.
     """
     xiso = tools["extract-xiso"]
     work = tempfile.mkdtemp(prefix=".xiso-", dir=os.path.dirname(out))
     try:
         copy = os.path.join(work, os.path.basename(image))
-        if not disposable:
-            shutil.copyfile(image, copy)
+        rewrite = image if disposable and not is_optimized_xiso(image) else copy
+        if rewrite == copy:  # -r skips an image that is already optimized and writes nothing into -d
+            (shutil.move if disposable else shutil.copyfile)(image, copy)
         if report:
             report(0.2)
-        error = external.run_tool([xiso, "-q", "-D", "-d", work, "-r", image if disposable else copy])
+        error = external.run_tool([xiso, "-q", "-D", "-d", work, "-r", rewrite])
         if report:
             report(0.8)
         error = error or external.run_tool([xiso, "-q", "-l", copy])

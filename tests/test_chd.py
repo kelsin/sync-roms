@@ -47,8 +47,8 @@ class FakeTools:
                     f.write(b"zar")
         elif cmd[0] == "extract-xiso":
             mode = cmd[-2]
-            if mode == "-r":  # like the real tool: the rewritten image is written into -d, -D deletes the original
-                out = os.path.join(cmd[cmd.index("-d") + 1], os.path.basename(cmd[-1]))
+            if mode == "-r" and not chd.is_optimized_xiso(cmd[-1]):  # like the real tool: an optimized image is skipped,
+                out = os.path.join(cmd[cmd.index("-d") + 1], os.path.basename(cmd[-1]))  # else rewritten into -d, -D deletes it
                 os.remove(cmd[-1])
                 with open(out, "wb") as f:
                     f.write(XISO_TAG)
@@ -638,6 +638,25 @@ class ChdTest(unittest.TestCase):
         rewrite = next(c for c in fake.calls if "-r" in c)
         self.assertEqual(os.path.dirname(os.path.dirname(rewrite[-1])), local)  # read from scratch, written on the target
         self.assertEqual(os.path.dirname(rewrite[rewrite.index("-d") + 1]), self.dir)
+        self.assertEqual(os.listdir(local), [])
+
+    def test_archive_of_an_optimized_iso_is_moved_out_unchanged(self):
+        self.touch("Game.zip")
+        local = os.path.join(self.dir, "local")
+        os.makedirs(local)
+
+        def fake(cmd, progress=None, tty=False):
+            if cmd[0] == "7z":
+                with open(os.path.join(next(a for a in cmd if a.startswith("-o"))[2:], "Game.iso"), "wb") as f:
+                    f.write(XISO_TAG)
+                return None
+            return FakeTools()(cmd, progress, tty)
+
+        with mock.patch.object(external, "run_tool", fake):
+            error = chd.chd_archive(self.tools, XISO["chd"], os.path.join(self.dir, "Game.zip"), scratch=local)
+        self.assertIsNone(error)
+        self.assertEqual(self.files(), ["Game.iso", "local"])
+        self.assertTrue(chd.is_optimized_xiso(os.path.join(self.dir, "Game.iso")))
         self.assertEqual(os.listdir(local), [])
 
     def test_jobs_at_once_are_capped_by_free_space(self):
