@@ -147,9 +147,10 @@ def usable(layout_name, arts):
 # --- ES-DE ---------------------------------------------------------------------------------------------------------
 
 def esde_wanted(base):
-    """Whether the card's ES-DE uses Art Book Next (the downloaded theme or the card's copy of it)."""
+    """Whether the card's ES-DE uses Art Book Next (the downloaded theme or the card's copy of it) or hasn't picked a
+    theme yet, so a new card has the theme before ES-DE is first set up."""
     theme = frontend.get_string(_read(frontend.settings_path("esde", base)), "Theme")
-    return theme in (ESDE_THEME, ESDE_COPY)
+    return not theme or theme in (ESDE_THEME, ESDE_COPY)
 
 
 def _esde_dir(base):
