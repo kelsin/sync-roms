@@ -86,6 +86,24 @@ class QuietVerboseTest(Isolated):
         self.assertIn("mybucket", err)
         self.assertNotIn("mybucket", out)
 
+    def test_quiet_check_still_shows_its_problems(self):
+        with mock.patch.object(commands, "check_data", return_value=["cards.json: bad"]):
+            code, out, err = self.sync(["check", "--quiet"], {})
+        self.assertEqual((code, out), (1, ""))
+        self.assertIn("cards.json: bad", err)
+
+    def test_quiet_successful_run_prints_nothing_not_even_the_card_finalize(self):
+        from sync_roms import clean
+        for quiet in (True, False):
+            with tempfile.TemporaryDirectory() as tmp, mock.patch.object(clean, "_clean_root", tmp), \
+                    mock.patch.object(clean, "_clean_card", lambda: print("cleaned")), \
+                    mock.patch.object(sys, "argv", ["sync-roms", "--m3u", tmp] + (["--quiet"] if quiet else [])), \
+                    mock.patch.object(usersettings, "load_settings", lambda: {}), \
+                    contextlib.redirect_stdout(io.StringIO()) as out, contextlib.redirect_stderr(io.StringIO()) as err:
+                self.assertEqual(cli.main(), 0)
+            self.assertEqual(("Finalizing card" in out.getvalue(), err.getvalue()), (not quiet, ""))
+            self.assertFalse(ui.QUIET)
+
     def test_quiet_prompts_go_to_stderr(self):
         err = io.StringIO()
         with mock.patch.object(ui, "QUIET", True), mock.patch("builtins.input", return_value="y") as inp, \

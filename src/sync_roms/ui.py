@@ -148,6 +148,11 @@ def emit_json(data):
     (_real_stdout or sys.stdout).write(json.dumps(data, indent=2) + "\n")
 
 
+def failure(text):
+    """Print a line about something that failed: on stdout, or on stderr under --quiet (which discards stdout)."""
+    print(text, file=sys.stderr if QUIET else sys.stdout)
+
+
 def debug(text):
     if VERBOSE:
         print(dim(text), file=sys.stderr)

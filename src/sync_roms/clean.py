@@ -80,12 +80,12 @@ def clean_android_media(base, card, dry_run, ask=False):
             os.remove(path)
             removed += 1
         except OSError as e:
-            print(ui.red(f"  ❌ {path}: {e}"))
+            ui.failure(ui.red(f"  ❌ {path}: {e}"))
     for name in found:
         try:
             open(os.path.join(base, name, ".nomedia"), "a").close()
         except OSError as e:
-            print(ui.red(f"  ❌ {name}/.nomedia: {e}"))
+            ui.failure(ui.red(f"  ❌ {name}/.nomedia: {e}"))
     print(ui.green(f"📵 Removed {removed} file(s) from the Android media folders and added .nomedia to {len(found)} folder(s)"))
 
 
@@ -130,8 +130,10 @@ def _stop_indexing(root):
     if not shutil.which("mdutil") or not spotlight_active(root):
         return
     cmd = f"sudo mdutil -i off {root} && sudo mdutil -X {root}"
-    print(ui.bold(f"\n🔍 Spotlight is indexing the card, which keeps recreating ._ files. Turning it off needs: {cmd}"))
-    if ui.ASSUME_YES or not sys.stdin.isatty():
+    ask = not ui.ASSUME_YES and sys.stdin.isatty()
+    print(ui.bold(f"\n🔍 Spotlight is indexing the card, which keeps recreating ._ files. Turning it off needs: {cmd}"),
+          file=sys.stderr if ask and ui.QUIET else sys.stdout)  # under --quiet the question is on stderr: show what it runs there too
+    if not ask:
         print(ui.yellow("  ↩️  Not asking for sudo's password here: run that command yourself if you want it"))
     elif ui.confirm("Run it now? (sudo asks for your password)"):
         # sudo needs ^C to work at its password prompt
@@ -139,7 +141,7 @@ def _stop_indexing(root):
         for args in (["-i", "off"], ["-X"]):
             r = subprocess.run(["sudo", "mdutil", *args, root], preexec_fn=default_sigint)
             if r.returncode != 0:
-                print(ui.red(f"  ❌ sudo mdutil {' '.join(args)} failed ({r.returncode})"))
+                ui.failure(ui.red(f"  ❌ sudo mdutil {' '.join(args)} failed ({r.returncode})"))
 
 
 def _clean_card():
@@ -162,11 +164,11 @@ def _clean_card():
         print(ui.bold("\n🧼 Retrying dot_clean..."))
         ok, left = dot_clean(_clean_root)
     if left:
-        print(ui.red(f"\n⚠️  {len(left)} ._ file(s) are still there after dot_clean:"))
+        ui.failure(ui.red(f"\n⚠️  {len(left)} ._ file(s) are still there after dot_clean:"))
         for path in left[:10]:
-            print(ui.dim(f"     {path}"))
+            ui.failure(ui.dim(f"     {path}"))
         if len(left) > 10:
-            print(ui.dim(f"     … and {len(left) - 10} more"))
+            ui.failure(ui.dim(f"     … and {len(left) - 10} more"))
 
 
 def card_disk(path):
@@ -198,5 +200,5 @@ def eject():
     if r.returncode == 0:
         print(ui.green("  ✅ Safe to remove the card"))
     else:
-        print(ui.red(f"  ❌ {(r.stderr or r.stdout).strip()}"))
-        print(ui.dim(f"     A shell or app with the card open keeps it busy: close it, then run diskutil unmountDisk {disk}"))
+        ui.failure(ui.red(f"  ❌ {(r.stderr or r.stdout).strip()}"))
+        ui.failure(ui.dim(f"     A shell or app with the card open keeps it busy: close it, then run diskutil unmountDisk {disk}"))

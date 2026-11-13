@@ -46,6 +46,17 @@ class GamesTest(CardCmd):
         commands.add_games(raw, "fbneo", ["fbneo/1941j.zip"])
         self.assertEqual(raw["fbneo"], [{"title": "1941: Counter Attack (Japan)", "bucket": "fbneo/1941j.zip"}])
 
+    def test_add_warns_about_a_name_the_cache_lacks(self):
+        tree = commands.inventory.Tree("s", 0, {"gba/A.zip": 1, "snes/X.zip": 1}, {})
+        with mock.patch.object(commands.inventory, "current", return_value=tree):
+            code, out, err = self.run_cmd("games", "add", "gba", "A.zip", "Typo.zip")
+            self.assertEqual(code, 0)
+            self.assertIn("gba/Typo.zip isn't in the storage cache", err)
+            self.assertNotIn("gba/A.zip", err)
+            self.assertEqual([g["bucket"] for g in self.games()["gba"]], ["gba/A.zip", "gba/Typo.zip"])
+            self.assertEqual(self.run_cmd("games", "add", "nes", "New.zip")[2], "")  # the cache has no nes/ folder
+        self.assertEqual(self.run_cmd("games", "add", "gba", "Other.zip")[2], "")  # no cache
+
     def test_games_commands_require_a_card(self):
         code, _, err = Cmd.run_cmd(self, "games", "add", "gba", "A.zip")
         self.assertEqual(code, 2)

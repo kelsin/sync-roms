@@ -8,7 +8,7 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
-from sync_roms import mirroring, scrape_files, scrape_plan, store  # noqa: E402
+from sync_roms import mirroring, scrape_files, scrape_plan, store, ui  # noqa: E402
 
 GBA = {"name": "Game Boy Advance", "bucket": "gba",
        "folders": {"esde": "gba", "muos": "gba", "slot": "GBA"}, "muos_catalogue": "Nintendo Game Boy Advance"}
@@ -65,6 +65,17 @@ class MuosPlanTest(unittest.TestCase):
             self.assertEqual(len(plan["writes"]), 1)
             scrape_plan.apply_scrape_plan({"jobs": [], "gamelists": {}, "writes": plan["writes"]}, base)
             self.assertEqual(scrape_plan.build_scrape_plan(*args)["writes"], [])
+
+
+class ApplyFailureTest(unittest.TestCase):
+    def test_quiet_still_shows_a_gamelist_that_could_not_be_written(self):
+        plan = {"jobs": [], "gamelists": {"/card/gamelist.xml": {}}, "writes": []}
+        with mock.patch.object(scrape_plan, "update_gamelist", side_effect=OSError("disk full")), \
+                mock.patch.object(ui, "QUIET", True), contextlib.redirect_stdout(io.StringIO()) as out, \
+                contextlib.redirect_stderr(io.StringIO()) as err:
+            self.assertEqual(scrape_plan.apply_scrape_plan(plan, "/card"), 1)
+        self.assertIn("/card/gamelist.xml: disk full", err.getvalue())
+        self.assertNotIn("disk full", out.getvalue())
 
 
 class EmudeckPlanTest(unittest.TestCase):

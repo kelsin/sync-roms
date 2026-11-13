@@ -61,6 +61,47 @@ class EditAliasTest(Isolated):
             run.assert_not_called()
 
 
+class UnhonoredFlagsTest(Isolated):
+    """Flags a command can't honor are refused with exit 2 before it runs."""
+
+    def refused(self, argv, message, **patches):
+        with mock.patch.object(inventory, "update_command", side_effect=AssertionError("ran")), \
+                mock.patch.object(inventory, "status_command", side_effect=AssertionError("ran")), \
+                mock.patch.object(scrape_files, "clean_scrapes", side_effect=AssertionError("ran")), \
+                mock.patch.object(commands, "doctor_cmd", side_effect=AssertionError("ran")):
+            code, out, err = self.sync(argv, {"bucket": "b"}, **patches)
+        self.assertEqual(code, 2, err)
+        self.assertIn(message, err)
+        self.assertEqual(out, "")
+
+    def test_dry_run_is_refused_where_it_changes_nothing_or_is_ignored(self):
+        from sync_roms import scrape_review
+        cases = [(["scrape", "review", "--dry-run"], "scrape review"), (["-n", "scrape", "review", "gba"], "scrape review"),
+                 (["cache", "update", "--dry-run"], "cache update"), (["-n", "cache"], "cache"),
+                 (["config", "-n"], "config show"), (["config", "path", "-n"], "config path"),
+                 (["doctor", "-n"], "doctor"), (["check", "--dry-run"], "check"), (["completion", "bash", "-n"], "completion"),
+                 (["games", "list", "-n", "--card", "SD"], "games list"), (["games", "export", "-n", "--card", "SD"], "games export"),
+                 (["games", "sets", "list", "-n", "--card", "SD"], "games sets list")]
+        for argv, name in cases:
+            with self.subTest(argv=argv):
+                self.refused(argv, f"--dry-run has no effect on `{name}`",
+                             r=(scrape_review, "review_command", mock.Mock(side_effect=AssertionError("ran"))))
+
+    def test_dry_run_is_refused_on_diff(self):
+        from sync_roms import diff
+        with tempfile.TemporaryDirectory() as tmp:
+            for argv in (["diff", tmp, "--dry-run"], ["-n", "diff", tmp], ["--diff", tmp, "-n"]):
+                with self.subTest(argv=argv):
+                    self.refused(argv, "--dry-run has no effect on `diff`",
+                                 d=(diff, "diff_command", mock.Mock(side_effect=AssertionError("ran"))))
+
+    def test_cache_full_needs_update(self):
+        self.refused(["cache", "--full"], "--full only applies to `cache update`")
+
+    def test_clean_scrapes_takes_no_folder(self):
+        self.refused(["clean", "scrapes", "/some/dir"], "`clean scrapes` doesn't take a folder")
+
+
 class ExitCodeTest(Isolated):
     def code_of(self, fn, *a):
         with contextlib.redirect_stderr(io.StringIO()), contextlib.redirect_stdout(io.StringIO()), self.assertRaises(SystemExit) as cm:

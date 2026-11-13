@@ -85,6 +85,19 @@ class CleanDirsTest(unittest.TestCase):
         calls, _ = self.run_clean(lambda p: (False, ["/x/._a"]), tty=True, yes=False)
         self.assertTrue([c for c in calls if c[0] == "sudo"])
 
+    def test_quiet_shows_the_sudo_command_with_its_question(self):
+        with mock.patch.object(ui, "QUIET", True), contextlib.redirect_stderr(io.StringIO()) as err:
+            _, out = self.run_clean(lambda p: (True, []), tty=True, yes=False)
+        self.assertIn("sudo mdutil -i off", err.getvalue())
+        self.assertNotIn("sudo mdutil", out)
+
+    def test_quiet_lists_the_files_dot_clean_left(self):
+        with mock.patch.object(ui, "QUIET", True), contextlib.redirect_stderr(io.StringIO()) as err:
+            _, out = self.run_clean(lambda p: (True, ["/x/._a"]), spotlight=False)
+        self.assertIn("still there after dot_clean", err.getvalue())
+        self.assertIn("/x/._a", err.getvalue())
+        self.assertNotIn("/x/._a", out)
+
 
 class DownloadInterruptTest(unittest.TestCase):
     def run_interrupted(self, draws_that_interrupt):
@@ -194,6 +207,12 @@ class EjectTest(unittest.TestCase):
         _, out = self.run_eject({"Ejectable": True, "ParentWholeDisk": "disk4"}, unmount_code=1)
         self.assertIn("could not be unmounted", out)
         self.assertIn("diskutil unmountDisk disk4", out)
+
+    def test_quiet_still_says_why_a_busy_card_stayed_mounted(self):
+        with mock.patch.object(ui, "QUIET", True), contextlib.redirect_stderr(io.StringIO()) as err:
+            self.run_eject({"Ejectable": True, "ParentWholeDisk": "disk4"}, unmount_code=1)
+        self.assertIn("could not be unmounted", err.getvalue())
+        self.assertIn("diskutil unmountDisk disk4", err.getvalue())
 
     def test_does_nothing_off_a_mac(self):
         calls, _ = self.run_eject({"Ejectable": True, "ParentWholeDisk": "disk4"}, platform="linux")
@@ -511,6 +530,27 @@ class SyncFlowTest(unittest.TestCase):
     def test_a_run_with_failures_keeps_the_card_mounted(self):
         self.run_sync(extra=[(cli.downloads, "run_downloads", lambda todo, *a, **k: len(todo))])
         self.assertIsNone(self.ejected)
+
+    def test_quiet_still_reports_failures_on_stderr(self):
+        def run_downloads(todo, label, icon, base, failures):
+            failures.extend((j[0], "boom") for j in todo)
+            return len(todo)
+        with contextlib.redirect_stderr(io.StringIO()) as err:
+            code, out, *_ = self.run_sync(args=["--quiet"], extra=[(cli.downloads, "run_downloads", run_downloads)])
+        self.assertEqual((code, out), (1, ""))
+        self.assertIn("1 file(s) failed", err.getvalue())
+        self.assertIn("gba/Game.zip: boom", err.getvalue())
+        self.assertIn("Done with 1 failure(s)", err.getvalue())
+
+    def test_quiet_shows_each_failed_download(self):
+        def download(job, *a):
+            raise OSError("boom")
+        with mock.patch.object(s3, "download", download), mock.patch.object(ui, "QUIET", True), \
+                contextlib.redirect_stderr(io.StringIO()) as err:
+            failed, out = captured(downloads.run_downloads, [("gba/a.zip", "/tmp/x/a.zip", 5)], "ROMs", "i", "/tmp/x")
+        self.assertEqual(failed, 1)
+        self.assertIn("gba/a.zip", err.getvalue())
+        self.assertNotIn("boom", out)
 
 
 if __name__ == "__main__":
