@@ -160,11 +160,10 @@ class FirstRunAnswerTest(unittest.TestCase):
         self.assertIn("roms is not an absolute path", out)
 
     def test_home_folder_answer_is_expanded(self):
-        home = os.path.join(os.path.expanduser("~"), "first-run-roms")
-        os.makedirs(home)
-        self.addCleanup(os.rmdir, home)
-        saved, _, _, _ = self.first_run(["~/first-run-roms"])
-        self.assertEqual(saved, {"root": home})
+        with tempfile.TemporaryDirectory() as home, mock.patch.dict(os.environ, {"HOME": home}):
+            os.makedirs(os.path.join(home, "roms"))
+            saved, _, _, _ = self.first_run(["~/roms"])
+        self.assertEqual(saved, {"root": os.path.join(home, "roms")})
 
     def test_bucket_name_is_still_a_bucket(self):
         saved, ask, _, _ = self.first_run(["s3://my-roms/", ""])
