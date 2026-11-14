@@ -536,6 +536,11 @@ class MirrorThemeUpdateTest(DataDir):
     def test_mirror_keeps_a_commit_file_storage_still_has(self):
         self.assertEqual(self.fetched(), [])
 
+    def test_an_unreadable_mirror_copy_of_the_commit_file_counts_as_changed(self):
+        unreadable = os.path.join(self.mirror, "unreadable")
+        os.makedirs(unreadable)  # opening a folder raises an OSError
+        self.assertTrue(mirroring.commit_changed(unreadable))
+
     def test_a_commit_file_with_an_unknown_or_multipart_etag_counts_as_changed_and_is_fetched(self):
         for tag in (None, '"0123abcd-2"'):
             with self.subTest(tag=tag):

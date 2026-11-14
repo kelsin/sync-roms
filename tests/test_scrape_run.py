@@ -715,6 +715,14 @@ class RoundTwoRunTest(RunBase):
         self.assertEqual(self.client.lookups, [])
         self.assertIn("tomorrow", self.out.getvalue())
 
+    def test_refused_login_from_the_first_quota_call_stops_like_mid_run(self):
+        self.put("gba/a.zip")
+        self.client.quota_errors = [screenscraper.Refused("ScreenScraper refused the login (HTTP 403)")]
+        self.assertEqual(self.run_scrape(), 1)
+        self.assertEqual(self.client.quota_calls, 1)
+        self.assertEqual(self.client.lookups, [])
+        self.assertIn("⛔ ScreenScraper refused the login (HTTP 403). Everything scraped so far is saved", self.out.getvalue())
+
     def test_quota_from_a_download(self):
         self.put("gba/a.zip")
         self.client.download_errors["http://media/1/box-2D"] = screenscraper.QuotaExceeded("quota")
@@ -1074,15 +1082,29 @@ class BigFileHashTest(RunBase):
         self.assertEqual(self.sent(), [hashlib.md5(b"abc").hexdigest()])
         self.assertEqual(self.client.lookups, ["a.zip"])
 
+    def test_file_of_exactly_hash_max_is_not_hashed_first(self):
+        self.put("gba/a.zip", b"abc")  # an upload this big is multipart, so a bucket has no MD5 for it either
+        with mock.patch.object(scrape_online, "HASH_MAX", 3):
+            self.assertEqual(self.run_scrape(), 0)
+        self.hash_file.assert_not_called()
+        self.assertEqual(self.sent(), [None])
+
     def test_report_says_name_size_for_big_files_and_how_much_is_read(self):
         self.put("gba/a.zip", b"abcd")
         self.put("gba/b.zip", b"ab")
         self.put("gba/c.zip", b"abc")
-        with mock.patch.object(scrape_online, "HASH_MAX", 3):
+        with mock.patch.object(scrape_online, "HASH_MAX", 4):
             self.assertEqual(self.run_scrape(dry_run=True), 0)
         out = self.out.getvalue()
         self.assertIn("2 by hash, 1 by name+size", out)
         self.assertIn("5 B to read for hashing", out)
+
+    def test_report_has_no_read_line_when_nothing_is_read(self):
+        self.put("gba/a.zip", b"abcd")
+        with mock.patch.object(scrape_online, "HASH_MAX", 3):
+            self.assertEqual(self.run_scrape(dry_run=True), 0)
+        self.assertIn("1 by name+size", self.out.getvalue())
+        self.assertNotIn("to read for hashing", self.out.getvalue())
 
     def test_hashes_are_flushed_on_the_metadata_timer(self):
         self.put("gba/a.zip")

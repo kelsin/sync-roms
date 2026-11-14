@@ -915,6 +915,7 @@ class Flow(DataDir):
             "toggle a game": ({"games": {"gba": [g("gba/Ruby.zip")], "gb": [g("gb/Red.gb")]}},
                               [returns(1), game_view_is_fresh(toggle("Zelda.zip", "Ruby.sav"))]),
             "f on": ({"games": {"gba": [g("gba/Ruby.zip")]}}, [returns((cardedit.FULL_KEY, 1))]),
+            "f off": ({"games": {"gba": {"full_system": True}}}, [returns((cardedit.FULL_KEY, 1))]),
             "add a set's games": ({"games": {"gb": [g("gb/Red.gb")]}},
                                   [returns(1), returns((cardedit.SET_KEY, 0)), returns((" ", 0)), returns(None), keep]),
             "remove a set's games": ({"games": {"gba": [g("gba/Ruby.zip"), g("gba/Ruby.sav")]}},
@@ -972,7 +973,7 @@ class Flow(DataDir):
             self.cache["gb/"] = {"gb/Red.gb": 50}
             version[0] += 1
             return kw["initial"]
-        with mock.patch.object(inventory, "version", lambda: version[0], create=True):
+        with mock.patch.object(inventory, "version", lambda: version[0]), mock.patch.dict(budget._scrapes):
             self.run_card(returns(1), leave, self.same_as_fresh)
 
 

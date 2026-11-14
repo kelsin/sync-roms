@@ -179,7 +179,7 @@ TOPICS = {
   --set-credentials  ask for your ScreenScraper username and password (saved in settings.json,
                      readable only by you; blank keeps the current value), then check them with one request
                      and show today's quota and threads, or the error (exit 1 when ScreenScraper refuses them)
-  A rate-limited request, a server error (HTTP 5xx) or a network failure is tried 3 more times over about a minute.
+  A rate-limited request, a server error (HTTP 5xx) or a network failure is tried 3 more times, waiting 10, 20 and 40 seconds.
   The run stops cleanly, keeping what it finished, when ScreenScraper's daily quota runs out (run it again tomorrow),
   when ScreenScraper refuses the login, is closed or no longer accepts this version (the message says what to do), or
   when 3 ROMs in a row can't reach it. Ctrl-C stops it too: the ROMs that finished are uploaded and saved, it says how
@@ -361,7 +361,7 @@ def main():
             "ExpiredToken": f"the session expired: aws sso login --profile {runtime.PROFILE}",
             "InvalidAccessKeyId": f"the access key is wrong: aws configure --profile {runtime.PROFILE}",
             "SignatureDoesNotMatch": f"the secret key is wrong: aws configure --profile {runtime.PROFILE}",
-            "NoSuchBucket": f"bucket '{runtime.BUCKET}' doesn't exist: check ROMS_BUCKET or {os.path.join(store.data_dir(), 'settings.json')}",
+            "NoSuchBucket": f"bucket '{runtime.BUCKET}' doesn't exist: check --bucket, ROMS_BUCKET or {os.path.join(store.data_dir(), 'settings.json')}",
             "AccessDenied": f"profile '{runtime.PROFILE}' can't read bucket '{runtime.BUCKET}'",
             "403": f"profile '{runtime.PROFILE}' can't read bucket '{runtime.BUCKET}'",
         }.get(code, "")
@@ -521,6 +521,10 @@ def check_modes(args):
         if args.scrape_missing:
             ui.fail("`scrape missing` takes one system: `scrape missing SYSTEM` or `scrape missing --system SYSTEM`", 2)
         args.scrape_missing, args.system = args.system, None
+    given = {"--scrape": args.system, "--scrape-missing": args.scrape_missing, "--scrape-review": args.scrape_review,
+             "--scrape-match": (args.scrape_match or [None])[0]}.get(mode)
+    if given and any(sep and sep in given for sep in (os.sep, os.altsep)):
+        ui.fail(f"`{name}` expects a system id, not a path ({given!r})", 2)
     if args.base_dir and mode not in (None, "--upload-scrapes"):
         ui.fail(f"`{name}` doesn't take a card folder ({args.base_dir!r}); give the directory right after the command", 2)
     if args.device_id and mode != "--devices":

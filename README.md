@@ -416,7 +416,7 @@ request) and you pick a result, while a numeric game id is taken as is, with no 
 nothing is written. `--system ID` limits a run to one storage folder.
 
 **Matching.** A ROM saved with `scrape match` is used as is. Otherwise one lookup sends its hashes together with its
-name and size. In a storage folder a file up to 64 MB is hashed in place (hashes are remembered while its size and
+name and size. In a storage folder a file smaller than 64 MB is hashed in place (hashes are remembered while its size and
 modification time stay the same); a bigger one is looked up by name and size, and hashed for a second lookup only when that
 finds nothing. In S3 the object's MD5 is sent when the bucket has one. ROMs are never downloaded from S3 to be hashed. The
 report counts a match as "by hash" when the ROM ScreenScraper matched has one of the hashes sent, and as "by name+size"
@@ -586,7 +586,7 @@ Removing a game only drops it from the card's games; the file stays in storage.
 
 ### Collections
 
-`sync-roms collections edit` edits your own collections of favourite games. A collection is a file like a set file (`{"name": ..., "games": [...]}`) at `~/.sync-roms/collections/<id>.json`; the editor has the same keys as the set editor and saves straight to that folder when you pick Done (Quit discards). `Ctrl-C` with changes pending asks whether to save them first (a collection with no games is not saved; a second `Ctrl-C` discards). They are personal: they never go to storage or into the repo, and no `git` or `gh` is needed. Deleting a collection that cards use asks first and removes it from those cards. In **Add games from a system**, `p` narrows the list to games that were surprises within the last `surprise_ttl_days` and `c` shows every game again, so a surprise you liked is easy to keep.
+`sync-roms collections edit` edits your own collections of favourite games. A collection is a file like a set file (`{"name": ..., "games": [...]}`) at `~/.sync-roms/collections/<id>.json`; the editor has the same keys as the set editor and saves straight to that folder when you pick Done (Quit discards). `Ctrl-C` with changes pending asks whether to save them first (a collection with no games is not saved; a second `Ctrl-C` discards). They are personal: they never go to storage or into the repo, and no `git` or `gh` is needed. Deleting a collection that cards use asks first and removes it from those cards. **Add games from a system** lists the systems with files in storage by company then name (with a storage cache each shows its file count); there, `p` narrows the list to games that were surprises within the last `surprise_ttl_days` and `c` shows every game again, so a surprise you liked is easy to keep.
 
 #### Theme art for collections
 
@@ -685,7 +685,7 @@ for that card only. In the systems picker, `o` shows only the selected systems.
 
 ## Converting to CHD and xiso (`--cd`, formerly `--chd`)
 
-Run it on a downloaded rom pack, or one system folder of it, before you upload it to storage (see below):
+Run it on a downloaded rom pack, or one system folder of it, before you upload it to storage (see [Uploading ROMs](#uploading-roms---upload)):
 
 ```bash
 sync-roms --install-tools                # once: brew install sevenzip unar rom-tools

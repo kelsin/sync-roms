@@ -41,11 +41,14 @@ def mirror_wanted(manifest):
 
 def commit_changed(path):
     """Whether the mirror's copy of the theme's commit file differs from storage's. It is always the same size, so its MD5
-    is checked against the ETag the cache has; one that isn't known counts as changed."""
+    is checked against the ETag the cache has; one that isn't known, or a copy that can't be read, counts as changed."""
     name = themeart.ESDE_COMMIT[len(runtime.ESDE_THEMES_PREFIX):]
     tag = inventory.etags(runtime.ESDE_THEMES_PREFIX).get(name, (None, "-"))[1]
-    with open(path, "rb") as f:
-        return hashlib.md5(f.read(), usedforsecurity=False).hexdigest() != tag.strip('"')
+    try:
+        with open(path, "rb") as f:
+            return hashlib.md5(f.read(), usedforsecurity=False).hexdigest() != tag.strip('"')
+    except OSError:
+        return True
 
 
 def refresh_mirror(root, dry_run=False):
