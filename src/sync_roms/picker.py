@@ -1,6 +1,7 @@
 """Interactive pickers: full-screen list screens (Textual)."""
 import functools
 import os
+import re
 import unicodedata
 
 from . import ui
