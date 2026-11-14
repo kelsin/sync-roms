@@ -1,5 +1,5 @@
 """Games-list helpers shared by the set and collection editors."""
-from . import edit, inventory, picker, previews, s3, store, ui
+from . import edit, inventory, picker, previews, s3, store, themeart, ui
 
 
 def view(listing, systems):
@@ -82,24 +82,25 @@ def game_label(game, names):
            f" — {game.get('title') or game['bucket']}"
 
 
-def add_from_set(listing, sets, shown, keys_of):
+def add_from_set(listing, sets, shown, keys_of, label):
     """Pick one of sets and toggle its games, across every system, in listing (via shown, a view of it).
+    label is listing's name as shown, with its emoji.
 
     New games get the category asked for (none after Ctrl-C, which keeps the toggles made and is then raised again),
     and the set's extra files (the discs of a multi-disc game)."""
-    j = picker.filter_list("✏️  Add games from which set?", [f"{x['name']}  ({len(x['games'])} games)" for x in sets],
+    j = picker.filter_list("✏️  Add games from which set?", [f"{themeart.set_emoji(x)} {x['name']}  ({len(x['games'])} games)" for x in sets],
                            preview=lambda k: previews.collection(sets[k]["id"]))
     if j is None:
         return
     chosen = sets[j]
     rows = edit.set_rows(chosen, shown, lambda s: keys_of(s["bucket"]))
     if not rows:
-        edit.note(ui.yellow(f"ℹ️  {chosen['name']} has no games on known systems."))
+        edit.note(ui.yellow(f"ℹ️  {themeart.set_emoji(chosen)} {chosen['name']} has no games on known systems."))
         return
     had = {g["bucket"] for s in shown.values() for g in s["games"]}
     interrupted = False
     try:
-        edit.toggle_games(f"✏️  {chosen['name']} — ✅ in {listing['name']}, ⬜ not", rows)
+        edit.toggle_games(f"✏️  {themeart.set_emoji(chosen)} {chosen['name']} — ✅ in {label}, ⬜ not", rows)
     except KeyboardInterrupt:
         interrupted = True
     added = {g["bucket"] for s in shown.values() for g in s["games"]} - had

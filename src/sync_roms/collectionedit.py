@@ -62,7 +62,8 @@ def edit_one(collection, systems, keys_of):
     """Edit one collection: remove games, add games from a system or a set, change categories, rename."""
     names = {s["bucket"]: s["name"] for s in systems}
     while True:
-        i = picker.filter_list(f"{themeart.art_emoji(collection.get('art'))} {collection['name']} (Esc = back)",
+        label = f"{themeart.collection_emoji(collection)} {collection['name']}"  # the art may change below
+        i = picker.filter_list(f"{label} (Esc = back)",
                                [f"Games in this collection ({len(collection['games'])}): switch some off",
                                 "Add games from a system", "Add games from a set", "Change a game's category",
                                 "Rename / change the description",
@@ -76,7 +77,7 @@ def edit_one(collection, systems, keys_of):
                 edit.note(ui.yellow("ℹ️  This collection has no games yet."))
                 continue
             try:
-                edit.toggle_games(f"✏️  {collection['name']} — ✅ in the collection, ⬜ remove it", rows)
+                edit.toggle_games(f"✏️  {label} — ✅ in the collection, ⬜ remove it", rows)
             finally:  # Ctrl-C too: the toggles made are kept
                 collection["games"] = reconcile(collection["games"], shown)
         elif i == 1:
@@ -101,10 +102,10 @@ def edit_one(collection, systems, keys_of):
             interrupted = False
             try:
                 while True:
-                    parts = ([f"📦 {filt[0]} only"] if filt else []) + (["🎁 past surprises only"] if past is not None else []) \
+                    parts = ([f"{filt[2]} {filt[0]} only"] if filt else []) + (["🎁 past surprises only"] if past is not None else []) \
                         + ([metafilter.describe(meta_filt)] if meta_filt else [])
                     pressed = edit.toggle_games(
-                        f"✏️  {s['name']} — ✅ in {collection['name']}, ⬜ in storage only",
+                        f"✏️  {s['name']} — ✅ in {label}, ⬜ in storage only",
                         [r for r in all_rows if keep(r[1])],
                         hotkeys=(SET_KEY, META_KEY, PAST_SURPRISE_KEY, CLEAR_KEY), hint=GAMES_HINT, place=place,
                         filters=f"{' · '.join(parts)} (c shows all)" if parts else "")
@@ -118,7 +119,7 @@ def edit_one(collection, systems, keys_of):
                         chosen = cardedit.pick_set(s, sets, s["games"], titles, set(titles), filt and filt[0],
                                                    lambda: {g.get("bucket") for g in s["games"]})
                         if chosen:
-                            filt = (chosen["name"], cardedit.set_filter(chosen, s))
+                            filt = (chosen["name"], cardedit.set_filter(chosen, s), themeart.set_emoji(chosen))
                     elif pressed == CLEAR_KEY:
                         past, filt = None, None
                         meta_filt.clear()
@@ -136,7 +137,7 @@ def edit_one(collection, systems, keys_of):
             if interrupted:
                 raise KeyboardInterrupt
         elif i == 2:
-            add_from_set(collection, store.load_sets(), shown, keys_of)
+            add_from_set(collection, store.load_sets(), shown, keys_of, label)
         elif i == 3:
             games = [g for g in collection["games"] if g.get("bucket")]
             j = picker.filter_list("✏️  Change which game's category?", [game_label(g, names) for g in games],
@@ -227,7 +228,7 @@ def edit_working(systems, before, working):
         n = len(ids)
         changed = [cid for cid in ids if working[cid] != before.get(cid)]
         deleted = [cid for cid in before if cid not in working]
-        labels = ([f"{themeart.art_emoji(working[x].get('art'))} {working[x]['name']}  ({len(working[x]['games'])} games)" for x in ids]
+        labels = ([f"{themeart.collection_emoji(working[x])} {working[x]['name']}  ({len(working[x]['games'])} games)" for x in ids]
                   + ["➕ New collection", "✅ Done (save)", "🚪 Quit without saving"])
         extras = [[("  " + ("new" if x not in before else "edited"), "cyan")] if x in changed else [] for x in ids] + [[], [], []]
         i = picker.filter_list("✏️  Which collection?  (Esc = save)", labels, extras=extras,
@@ -237,7 +238,7 @@ def edit_working(systems, before, working):
             if i[1] < n:
                 cid = ids[i[1]]
                 names = cards_using(cid)
-                if ui.confirm(f"🗑️  Delete collection {working[cid]['name']}?"
+                if ui.confirm(f"🗑️  Delete collection {themeart.collection_emoji(working[cid])} {working[cid]['name']}?"
                               + (f" Cards {', '.join(names)} use it and lose it too." if names else ""), default=False):
                     del working[cid]
             continue

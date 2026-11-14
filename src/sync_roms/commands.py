@@ -7,7 +7,7 @@ import re
 import sys
 
 from . import collections as colls
-from . import external, inventory, m3u, names, picker, runtime, s3, setedit, store, surprise, ui, usersettings
+from . import external, inventory, m3u, names, picker, runtime, s3, setedit, store, surprise, themeart, ui, usersettings
 
 
 UNKNOWN_SHOWN = 8  # device ids named in an "unknown device" error
@@ -233,7 +233,7 @@ def games_sets(args):
     known = {x["id"]: x for x in store.load_sets()}
     if args.verb == "list":
         on = store.list_sets(raw)
-        ui.table([(f"{'✅' if set_id in on else '⬜'} {set_id}", x["name"]) for set_id, x in known.items()])
+        ui.table([(f"{'✅' if set_id in on else '⬜'} {set_id}", f"{themeart.set_emoji(x)} {x['name']}") for set_id, x in known.items()])
         return 0
     if not args.set_id:
         ui.fail(f"sets {args.verb} needs a set id. Known: {', '.join(known)}", 2)

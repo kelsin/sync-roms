@@ -670,7 +670,7 @@ class Flow(DataDir):
         self.card()
 
         def pick_first_set(labels, kw):
-            self.assertEqual(labels, ["Pokemon  (2 on Game Boy Advance)"])
+            self.assertEqual(labels, ["📦 Pokemon  (2 on Game Boy Advance)"])
             return 0
 
         def filtered(labels, kw):
@@ -694,7 +694,7 @@ class Flow(DataDir):
         other = {"id": "gone", "name": "Gone", "description": "", "games": [{"system": "gba", "bucket": "gba/X.zip"}]}
 
         def offered(labels, kw):
-            self.assertEqual(labels, ["Pokemon  (1 on Game Boy Advance, 1 not in storage)"])  # Gone: nothing to show
+            self.assertEqual(labels, ["📦 Pokemon  (1 on Game Boy Advance, 1 not in storage)"])  # Gone: nothing to show
             return None
         with mock.patch.object(store, "load_sets", return_value=[SET, other]):
             self.run_system(returns((cardedit.SET_KEY, 0)), offered, lambda labels, kw: kw["session"]["sel"])

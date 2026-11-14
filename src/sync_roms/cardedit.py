@@ -388,7 +388,7 @@ def pick_set(system, sets, games, titles, catalog, current=None, synced=lambda: 
     if not shown:
         edit.note(ui.yellow(f"ℹ️  No set has games in storage for {system['name']}."))
         return None
-    labels = [f"{x['name']}  ({len(keys & catalog)} on {system['name']}"
+    labels = [f"{themeart.set_emoji(x)} {x['name']}  ({len(keys & catalog)} on {system['name']}"
               + (f", {len(keys - catalog)} not in storage)" if keys - catalog else ")") for x, keys in shown]
     extras = [[]] * len(shown)
 
@@ -534,7 +534,7 @@ def edit_system(name, system, setup, to_fetch=None, card_usages=None):
             elif sb in other_excluded:
                 other_excluded[sb] = [k for k in other_excluded[sb] if k not in own]
         work_out()
-    filt = None  # (set name, bucket keys) the list is narrowed to
+    filt = None  # (set name, bucket keys, set emoji) the list is narrowed to
     meta_filt = {}  # {metadata field: value} the list is narrowed to as well
     past = None  # bucket keys of the past surprises the list is narrowed to
 
@@ -551,8 +551,8 @@ def edit_system(name, system, setup, to_fetch=None, card_usages=None):
             out.append((f"  🔗 {len(groups[key])} files", "dim"))
         elif key in bundled:
             out.append((f"  🔗 {len(bundled[key]) + 1} files", "dim"))
-        if key in notes:
-            out.append((f"  📦 {notes[key].split(': ', 1)[-1]}", "cyan" if state else "dim"))
+        if key in notes:  # the note ends in the set's emoji and name (edit.cover_notes)
+            out.append((f"  {notes[key].split(': ', 1)[-1]}", "cyan" if state else "dim"))
         if key in locked_from:
             out.append((f"  {locked_from[key]}", "cyan"))
         if key in work["costs"]:
@@ -644,7 +644,7 @@ def edit_system(name, system, setup, to_fetch=None, card_usages=None):
                     return "Switch the game on and press Enter first, then add its note"
                 return "Note saved" if text else "Note cleared"
 
-            parts = ([f"📦 {filt[0]} only"] if filt else []) + (["🎁 past surprises only"] if past is not None else []) + ([metafilter.describe(meta_filt)] if meta_filt else [])
+            parts = ([f"{filt[2]} {filt[0]} only"] if filt else []) + (["🎁 past surprises only"] if past is not None else []) + ([metafilter.describe(meta_filt)] if meta_filt else [])
             pending = (keys, notes, base, session)
             result = picker.filter_list(f"✏️  {system['name']} on {name} — ✅ synced, ⬜ not, 📦 from a set",
                                         [r[3] for r in shown], multi=True, initial=[start[k] for k in keys],
@@ -684,7 +684,7 @@ def edit_system(name, system, setup, to_fetch=None, card_usages=None):
                 chosen = pick_set(system, sets, s["games"], titles, {r[1] for r in rows}, filt and filt[0],
                                   lambda: {k for k, v in states(cover()).items() if v})
                 if chosen:
-                    filt = (chosen["name"], set_filter(chosen, system))
+                    filt = (chosen["name"], set_filter(chosen, system), themeart.set_emoji(chosen))
     except KeyboardInterrupt:  # Ctrl-C: keep the toggles
         if pending:
             keys, notes, base, session = pending

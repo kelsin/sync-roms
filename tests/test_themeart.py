@@ -52,6 +52,16 @@ class Assets(unittest.TestCase):
         self.assertEqual(themeart.art_emoji(None), themeart.DEFAULT_EMOJI)
         self.assertEqual(themeart.art_emoji("nope"), themeart.DEFAULT_EMOJI)
 
+    def test_every_set_has_its_own_emoji_and_a_new_one_gets_the_set_default(self):
+        sets = os.path.join(os.path.dirname(themeart.THEME_DATA), "..", "sets")
+        ids = [n[:-5] for n in os.listdir(sets) if n.endswith(".json")]
+        emoji = [themeart.set_emoji({"id": i}) for i in ids]
+        self.assertEqual(len(set(emoji)), len(ids))
+        self.assertNotIn(themeart.SET_EMOJI, emoji)
+        self.assertEqual(themeart.set_emoji({"id": "new-set"}), themeart.SET_EMOJI)
+        self.assertEqual(themeart.collection_emoji({}), themeart.DEFAULT_EMOJI)
+        self.assertEqual(themeart.collection_emoji({"art": "surprise"}), themeart.art_emoji("surprise"))
+
     def test_every_set_has_art(self):
         sets = os.path.join(os.path.dirname(themeart.THEME_DATA), "..", "sets")
         for name in os.listdir(sets):

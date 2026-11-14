@@ -52,6 +52,18 @@ class Stocked(unittest.TestCase):
             self.assertEqual(self.offered(module, lambda: {"gba", "gb"}, cache, extras), ["Game Boy", "Game Boy Advance"])
             self.assertEqual(extras, [[("  1 file", "dim")], [("  2 files", "dim")]], module.__name__)
 
+    def test_renaming_a_set_changes_the_next_menu_title(self):
+        titles, picks = [], iter([4, None])  # Rename, then back
+        game_set = {"id": "x", "name": "Old", "games": []}
+
+        def fake(title, labels, **k):
+            titles.append(title)
+            return next(picks)
+
+        with mock.patch.object(picker, "filter_list", fake), mock.patch.object(setedit.ui, "ask", side_effect=["New", ""]):
+            setedit.edit_one(game_set, self.SYSTEMS, lambda bucket: set())
+        self.assertEqual(titles, ["✏️  📦 Old (Esc = back)", "✏️  📦 New (Esc = back)"])
+
     def test_add_games_counts_nothing_without_a_cache(self):
         extras = []
         with mock.patch.object(inventory, "files", side_effect=AssertionError("listed a folder")):

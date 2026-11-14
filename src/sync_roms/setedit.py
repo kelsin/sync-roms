@@ -6,7 +6,7 @@ import subprocess
 import tempfile
 import time
 
-from . import edit, picker, previews, s3, store, ui
+from . import edit, picker, previews, s3, store, themeart, ui
 from .listedit import add_from_set, ask_category, file_counts, game_label, insert_game, recategorize, reconcile, stocked, view
 
 
@@ -30,7 +30,8 @@ def edit_one(game_set, systems, keys_of):
     """Edit one set: remove games, add games from a system or another set, change categories, rename."""
     names = {s["bucket"]: s["name"] for s in systems}
     while True:
-        i = picker.filter_list(f"✏️  {game_set['name']} (Esc = back)",
+        label = f"{themeart.set_emoji(game_set)} {game_set['name']}"  # a rename below changes it
+        i = picker.filter_list(f"✏️  {label} (Esc = back)",
                                [f"Games in this set ({len(game_set['games'])}): switch some off",
                                 "Add games from a system", "Add games from a set", "Change a game's category",
                                 "Rename / change the description"])
@@ -43,7 +44,7 @@ def edit_one(game_set, systems, keys_of):
                 edit.note(ui.yellow("ℹ️  This set has no games yet."))
                 continue
             try:
-                edit.toggle_games(f"✏️  {game_set['name']} — ✅ in the set, ⬜ remove it", rows)
+                edit.toggle_games(f"✏️  {label} — ✅ in the set, ⬜ remove it", rows)
             finally:  # Ctrl-C too: the toggles made are kept
                 game_set["games"] = reconcile(game_set["games"], shown)
         elif i == 1:
@@ -56,7 +57,7 @@ def edit_one(game_set, systems, keys_of):
             had = {g["bucket"] for g in s["games"]}
             interrupted = False
             try:
-                edit.toggle_games(f"✏️  {s['name']} — ✅ in {game_set['name']}, ⬜ in storage only",
+                edit.toggle_games(f"✏️  {s['name']} — ✅ in {label}, ⬜ in storage only",
                                   edit.system_rows(s, keys_of(s["bucket"])))
             except KeyboardInterrupt:  # Ctrl-C: the toggles made are kept, with no category
                 interrupted = True
@@ -69,7 +70,7 @@ def edit_one(game_set, systems, keys_of):
             if interrupted:
                 raise KeyboardInterrupt
         elif i == 2:
-            add_from_set(game_set, [x for x in store.load_sets() if x["name"] != game_set["name"]], shown, keys_of)
+            add_from_set(game_set, [x for x in store.load_sets() if x["name"] != game_set["name"]], shown, keys_of, label)
         elif i == 3:
             games = [g for g in game_set["games"] if g.get("bucket")]
             j = picker.filter_list("✏️  Change which game's category?", [game_label(g, names) for g in games],
@@ -237,7 +238,7 @@ def edit_working(systems, before, working, state):
         n = len(ids)
         found = diff_sets(before, working)
         edited = {sid for _, sid, _ in found}
-        labels = ([f"{working[x]['name']}  ({len(working[x]['games'])} games)" for x in ids]
+        labels = ([f"{themeart.set_emoji(working[x])} {working[x]['name']}  ({len(working[x]['games'])} games)" for x in ids]
                   + ["➕ New set", "✅ Done (review & open PR)", "🚪 Quit without saving"])
         extras = [[("  " + ("new" if x not in before else "edited"), "cyan")] if x in edited else [] for x in ids] + [[], [], []]
         i = n + 1 if state["review"] else picker.filter_list("✏️  Which set?  (Esc = review & open PR)", labels, extras=extras,
@@ -248,7 +249,7 @@ def edit_working(systems, before, working, state):
                 sid = ids[i[1]]
                 where = local_references(sid)
                 note = f" Your {', '.join(where)} still reference(s) it." if where else ""
-                if ui.confirm(f"🗑️  Delete set {working[sid]['name']}?{note}", default=False):
+                if ui.confirm(f"🗑️  Delete set {themeart.set_emoji(working[sid])} {working[sid]['name']}?{note}", default=False):
                     del working[sid]
             continue
         if i is not None and i < n:
