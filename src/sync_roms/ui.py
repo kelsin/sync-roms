@@ -161,6 +161,8 @@ def debug(text):
 
 
 terminal_runner = None  # set during an editor session (picker.one_app): runs fn on the normal screen, outside the list app
+prompter = None  # set during an editor session: prompter(question, keys) asks in the list app, or gives NOT_ASKED off its worker
+NOT_ASKED = object()
 
 
 def uses_terminal(fn):
@@ -172,6 +174,22 @@ def uses_terminal(fn):
     return run
 
 
+def in_app(spec):
+    """fn asks a question: during an editor session its worker asks it in the list app instead (prompter), worded as
+    spec(*fn's args) -> (question, keys) says; keys maps keys to answers (None: a line of text). spec gives None for
+    a question that isn't asked (--yes)."""
+    def wrap(fn):
+        @functools.wraps(fn)
+        def run(*args, **kwargs):
+            if prompter and (asked := spec(*args, **kwargs)):
+                got = prompter(*asked)
+                if got is not NOT_ASKED:
+                    return got
+            return fn(*args, **kwargs)
+        return run
+    return wrap
+
+
 def _input(prompt):
     if QUIET:  # stdout is discarded, so the question goes where a person (or log) can still see it
         sys.stderr.write(prompt)
@@ -180,6 +198,7 @@ def _input(prompt):
     return input(prompt)
 
 
+@in_app(lambda prompt: (prompt, None))
 @uses_terminal
 def ask(prompt):
     """input() that gives "" at end of input instead of raising, so a prompt with an empty answer means cancel."""
@@ -190,6 +209,14 @@ def ask(prompt):
         return ""
 
 
+def _confirm_keys(question, default=True):
+    """confirm's question in the list app: y/n, Enter the default, Esc or ^G no."""
+    if not ASSUME_YES:
+        return (f"{question} {'[Y/n]' if default else '[y/N]'} ",
+                {"y": True, "n": False, "enter": default, "escape": False, "ctrl+g": False})
+
+
+@in_app(_confirm_keys)
 @uses_terminal
 def confirm(question, default=True):
     suffix = "[Y/n]" if default else "[y/N]"
@@ -221,6 +248,15 @@ def require_terminal(what, flag):
         fail(f"Can't {what} without a terminal: pass {flag}", 2)
 
 
+def _choose_keys(question, letters, default, legend=""):
+    """choose's question in the list app: one of letters, Enter the default."""
+    if not ASSUME_YES:
+        suffix = "/".join(l.upper() if l == default else l for l in letters)
+        return (f"{question} [{suffix}]{' (' + legend + ')' if legend else ''} ",
+                {**dict(zip(letters, letters)), "enter": default})
+
+
+@in_app(_choose_keys)
 @uses_terminal
 def choose(question, letters, default, legend=""):
     """Ask for one of `letters` (a string of single characters); Enter, --yes and EOF give `default`."""

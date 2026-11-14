@@ -217,6 +217,12 @@ class Discs(unittest.TestCase):
 
 
 class Editor(DataDir):
+    def setUp(self):
+        super().setUp()
+        patch = mock.patch.object(edit, "note")  # what the editor says at its end
+        self.note = patch.start()
+        self.addCleanup(patch.stop)
+
     def run_editor(self, picks, asks=(), confirm=True, edit_one=None):
         picks, confirms = iter(picks), []
 
@@ -228,12 +234,11 @@ class Editor(DataDir):
                 mock.patch.object(picker, "filter_list", lambda *a, **k: answer(next(picks))), \
                 mock.patch.object(ui, "ask", side_effect=list(asks)), \
                 mock.patch.object(ui, "confirm", lambda text, **k: confirms.append(text) or answer(confirm)), \
-                mock.patch.object(edit, "note") as note, \
                 mock.patch.object(collectionedit, "edit_one", edit_one or (lambda c, systems, keys_of: c["games"].append(dict(RUBY)))), \
                 mock.patch("subprocess.run") as run:
             code = collectionedit.edit_collections()
         run.assert_not_called()  # no git, no gh
-        return code, confirms, note
+        return code, confirms, self.note
 
     def test_new_collection_is_saved_on_done(self):
         code, _, _ = self.run_editor([0, 2], asks=["Favs", "my faves"])  # ➕ New, then (one collection) ✅ Done
@@ -265,18 +270,18 @@ class Editor(DataDir):
     def test_ctrl_c_asks_and_saves_the_changes(self):
         collections.save_collection({"id": "old", "name": "Old", "games": [RUBY]})
         self.write_json("cards.json", {"a": {"collections": ["old"]}})
-        with mock.patch("builtins.print") as out, self.assertRaises(KeyboardInterrupt):
+        with mock.patch("builtins.print"), self.assertRaises(KeyboardInterrupt):
             self.run_editor([(edit.DELETE_KEY, 0), 0, KeyboardInterrupt], asks=["Favs", "my faves"])  # delete Old, ➕ New, Ctrl-C
         self.assertEqual(self.read("collections/favs.json"), {"name": "Favs", "description": "my faves", "games": [RUBY]})
         self.assertFalse(os.path.exists(self.path("collections/old.json")))
         self.assertEqual(self.read("cards.json"), {"a": {"collections": []}})
-        self.assertIn("Saved to", str(out.call_args_list))
+        self.assertIn("Saved to", str(self.note.call_args_list))
 
     def test_ctrl_c_saves_an_empty_collection(self):
-        with mock.patch("builtins.print") as out, self.assertRaises(KeyboardInterrupt):
+        with mock.patch("builtins.print"), self.assertRaises(KeyboardInterrupt):
             self.run_editor([0, KeyboardInterrupt], asks=["Empty", ""], edit_one=lambda c, s, k: None)
         self.assertEqual(self.read("collections/empty.json"), {"name": "Empty", "games": []})
-        self.assertIn("Saved to", str(out.call_args_list))
+        self.assertIn("Saved to", str(self.note.call_args_list))
 
     def test_a_second_ctrl_c_at_the_question_discards(self):
         with mock.patch("builtins.print") as out, self.assertRaises(KeyboardInterrupt):
