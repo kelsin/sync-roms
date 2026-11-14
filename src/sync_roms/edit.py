@@ -6,9 +6,15 @@ from collections import defaultdict
 from . import names, picker, previews, runtime, s3, store, themeart, ui, vita
 
 
-@ui.uses_terminal
 def note(text):
-    """Say something outside the list screen and wait, so the next redraw doesn't erase it."""
+    """Say something: on an editor session's worker, on the session's next list's status line; else outside the list
+    screen, waiting so the next redraw doesn't erase it."""
+    if not picker.queue_note(text):
+        _note_and_wait(text)
+
+
+@ui.uses_terminal
+def _note_and_wait(text):
     print(text)
     try:
         input(ui.dim("   Press Enter to continue "))
@@ -426,12 +432,10 @@ def edit_manifest():
             setedit.edit_sets()
         except SystemExit:
             pass  # the reason is already printed
-        note("")  # keep what it printed (a PR link, why it stopped) on screen until the menu redraws
 
     def edit_collections():
         from . import collectionedit
         collectionedit.edit_collections()
-        note("")  # keep what it printed on screen until the menu redraws
 
     def menu():
         """The top menu. Returns True to review and save, False to quit without saving."""

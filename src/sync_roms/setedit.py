@@ -134,12 +134,11 @@ def print_changes(found):
 
 # --- The pull request --------------------------------------------------------------------------------
 
-@ui.uses_terminal  # gh may ask to log in
 def need_tools():
     for tool in ("git", "gh"):
         if not shutil.which(tool):
             ui.fail(f"{tool} isn't installed, and opening a PR needs both git and the GitHub CLI (gh).")
-    if subprocess.run(["gh", "auth", "status"], capture_output=True).returncode:
+    if subprocess.run(["gh", "auth", "status"], capture_output=True, stdin=subprocess.DEVNULL).returncode:
         ui.fail("gh isn't logged in. Run `gh auth login` first.")
 
 

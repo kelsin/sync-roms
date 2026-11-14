@@ -223,7 +223,7 @@ class _ListModel:
         self.query = self.session.get("query", "")
         self.qpos, self.typing = len(self.query), False
         self.cur, self.top = cursor, self.session.get("top", 0)
-        self.notice = ""
+        self.notice = ""  # or (text, color)
         self.asking = False  # multi-mode Esc: waiting for keep or revert
         self.note = None  # (text, cursor position) while a note for row note_row is typed after w
         self.note_row = None
@@ -298,7 +298,7 @@ class _ListModel:
         if vis and self.locked[vis[cur]]:
             line = f"🔒 {self.locked_note[vis[cur]] if isinstance(self.locked_note, list) else self.locked_note}"
         if self.notice:
-            line = self.notice
+            line, line_color = self.notice if isinstance(self.notice, tuple) else (self.notice, line_color)
         return line, line_color, None
 
     def position(self, compact=False):
@@ -438,6 +438,28 @@ class _ListModel:
         return KEEP
 
 
+class _PromptModel:
+    """A question an editor session asks in its app (ui.in_app): the text the editor printed before it (above), the
+    question, and what each key does. keys maps keys (y, enter, ...) to answers, others are ignored; with keys None
+    the answer is a line of text, given by Enter, or "" by Esc or ^G."""
+    poll = preview = help = note = None  # what the app asks of a list's model
+
+    def __init__(self, question, keys, above):
+        self.question, self.keys, self.above = question, keys, above
+        self.typing = keys is None  # pasted text goes in
+        self.text, self.pos = "", 0
+
+    def key(self, k):
+        if not self.typing:
+            return self.keys.get(k.lower() if len(k) == 1 else k, KEEP)
+        if k == "enter":
+            return self.text
+        if k in ("escape", "ctrl+g"):
+            return ""
+        self.text, self.pos = line_key(self.text, self.pos, k) or (self.text, self.pos)
+        return KEEP
+
+
 def _key_name(event):
     """What _ListModel.key takes for a Textual key event: the character for printable keys (but "space"), else its name."""
     c = event.character
@@ -523,7 +545,7 @@ def _app_class():
         """The list; every key goes to the app's model."""
 
         def compose(self):
-            yield _ListLines()
+            yield _ListLines(id="lines")
             if self.app.model.preview:
                 from textual_image.widget import Image  # already imported (and the terminal probed) by filter_list
                 yield Image(self.app.model.preview_path(), id="preview")
@@ -567,6 +589,33 @@ def _app_class():
                 self.app.feed(k)
 
 
+    class _PromptLine(Widget):
+        """A prompt's bottom row: the question, then the answer being typed."""
+
+        def render(self):
+            m = self.app.model
+            line = Text(m.question, "bold")
+            return _with_cursor(line + Text(m.text), len(m.question) + m.pos) if m.typing else line
+
+
+    class _PromptScreen(Screen):
+        """A prompt in an editor session: what the editor printed before it, scrolled to its end, above the question
+        (its keys: _ListApp.session_input)."""
+        SCROLL = {"down": "scroll_down", "up": "scroll_up", "pagedown": "scroll_page_down", "pageup": "scroll_page_up",
+                  "home": "scroll_home", "end": "scroll_end"}
+
+        def compose(self):
+            lines = "".join(text for _, text in self.app.model.above).removesuffix("\n").split("\n")
+            with VerticalScroll():
+                yield Static(Text.from_ansi("\n".join(line.split("\r")[-1] for line in lines)))  # a redraw keeps its last
+            yield _PromptLine(id="lines")
+
+        def on_mount(self):
+            self.call_after_refresh(self.query_one(VerticalScroll).scroll_end, animate=False)  # once laid out
+            if self is self.app.list_screen:
+                self.app.list_ready()
+
+
     class _WorkingScreen(Screen):
         """An editor session's screen between its lists, with the last line the editor printed and, after a Ctrl-C,
         what that does (its keys: _ListApp.session_input)."""
@@ -590,6 +639,8 @@ def _app_class():
         _HelpScreen VerticalScroll { width: auto; height: auto; max-height: 100%; }
         _HelpScreen #help-footer { dock: bottom; width: 100%; text-align: center; }
         _HelpScreen Static { width: auto; }
+        _PromptScreen VerticalScroll { height: 1fr; }
+        _PromptLine { height: 1; text-wrap: nowrap; text-overflow: clip; }
         """
 
         def __init__(self, model, session=None, reply=None):
@@ -619,7 +670,8 @@ def _app_class():
                 self.set_interval(POLL_MS / 1000, lambda: self.step(self.model.tick))
 
         def show(self, model, reply):
-            """Show the next list of the session; its (result, error) goes to reply when it is done."""
+            """Show the next list (or prompt: a _PromptModel) of the session; its (result, error) goes to reply when it
+            is done."""
             if self.deliver(reply):  # a Ctrl-C since the worker asked (just after a prompt's answer, say)
                 return
             if model.preview and self.session.draws is None:  # the terminal is asked once, on the normal screen
@@ -637,7 +689,11 @@ def _app_class():
             self.last_line("")
             self.timer = self.set_interval(POLL_MS / 1000, lambda: self.step(self.model.tick)) if model.poll else None
             self.ready = False
-            self.list_screen = _ListScreen()
+            if isinstance(model, _PromptModel):  # keys typed while the editor worked weren't typed for its question
+                self.typeahead = []
+                self.list_screen = _PromptScreen()
+            else:
+                self.list_screen = _ListScreen()
             self.push_screen(self.list_screen)
 
         def list_ready(self):
@@ -695,8 +751,8 @@ def _app_class():
                 self.typeahead.append(event)
             elif k is None:
                 self.paste(event.text)
-            elif isinstance(self.screen, _HelpScreen) and k in _HelpScreen.SCROLL:
-                getattr(self.screen.query_one(VerticalScroll), _HelpScreen.SCROLL[k])(animate=False)
+            elif isinstance(self.screen, (_HelpScreen, _PromptScreen)) and k in self.screen.SCROLL:
+                getattr(self.screen.query_one(VerticalScroll), self.screen.SCROLL[k])(animate=False)
             else:
                 self.feed(k)
 
@@ -740,9 +796,10 @@ def _app_class():
                 self.stopping()
 
         def request(self, kind, payload, reply):
-            """A request from the session's worker (_Session.ask): show a list, or suspend the app and answer prompts on
-            the normal screen (after what the worker printed meanwhile) until the next list, or the end."""
-            if kind == "list":
+            """A request from the session's worker (_Session.ask): show a list or a prompt, or suspend the app and run
+            calls on the normal screen (after what the worker printed meanwhile) until the next list or prompt, or the
+            end."""
+            if kind != "call":
                 return self.show(payload, reply)
             if self.deliver(reply):
                 return
@@ -811,7 +868,7 @@ def _app_class():
                 self.push_screen(_HelpScreen(self.model.help))
             elif not self.model.help and isinstance(self.screen, _HelpScreen):
                 self.pop_screen()
-            self.list_screen.query_one(_ListLines).refresh()
+            self.list_screen.query_one("#lines").refresh()
             if self.model.preview:
                 pane = self.list_screen.query_one("#preview")
                 path = self.model.preview_path()
@@ -878,11 +935,14 @@ class _Output:
 
 class _Session:
     """One list app for a whole editor run (one_app). The editor runs on a worker thread. The main thread starts the
-    app at the first list and keeps it until the editor is done, with "Working..." between lists. Each list and each
-    prompt is a request the worker hands to the main thread (to the app while it runs) and waits for: prompts run on
-    the main thread with the app suspended until the next list, so input, Ctrl-C and output between prompts work as
-    without a session, and so do commands that may ask (ui.uses_terminal). What the worker prints while the app shows
-    comes out, in order, when the normal screen is back; its last line shows under "Working...". Ctrl-C while the
+    app at the first list (or prompt) and keeps it until the editor is done, with "Working..." between lists. Each
+    list, each prompt (ui.ask, confirm, choose: ui.in_app) and each call is a request the worker hands to the main
+    thread (to the app while it runs) and waits for. Lists and prompts show in the app, a prompt under what the
+    worker printed since its last request was answered; calls (ui.uses_terminal: commands that may ask) run on the
+    main thread with the app suspended until the next list or prompt, so input, Ctrl-C and output between them work
+    as without a session. Notes (edit.note) show on the next list's status line. The rest of what the worker prints
+    while the app shows comes out, in order, when the normal screen is back; its last line shows under "Working...",
+    and the notes no list showed follow it once the app has closed. Ctrl-C while the
     editor works reaches it as KeyboardInterrupt from its next request; another one a second or more later, before
     that request, abandons it: the session ends at once, and the worker, left to itself, gets KeyboardInterrupt from
     every request and prints nothing (interrupt). Nothing is ever raised in the worker but by its own requests."""
@@ -905,12 +965,14 @@ class _Session:
         self.draws = None  # _draws_images(), asked when the first list with a preview comes, on the normal screen
         self.streams = None  # sys.stdout and sys.stderr from before the app started
         self.printed = collections.deque()  # (to stderr, text) the worker printed while the app ran
+        self.answered_at = 0  # how long printed was when the worker's last request was answered
+        self.notes = []  # edit.note's texts for the next list
 
     def run(self, fn, args, kwargs):
         """Run fn(*args, **kwargs) on the worker and serve its requests until it is done; returns or raises what it
         did, once the app is closed. Raises KeyboardInterrupt without waiting for it once it is abandoned."""
         global _session
-        _session, ui.terminal_runner = self, self.outside
+        _session, ui.terminal_runner, ui.prompter = self, self.outside, self.prompt
         handler = signal.signal(signal.SIGINT, self.on_sigint)  # also keeps asyncio.run's own (it would cancel the app)
         outputs = sys.stdout, sys.stderr
         sys.stdout, sys.stderr = _Output(self, sys.stdout), _Output(self, sys.stderr)
@@ -922,9 +984,11 @@ class _Session:
             signal.signal(signal.SIGINT, handler)
             if not self.abandoned:  # else it all stays, for the worker that lives on: its requests raise, its output is dropped
                 sys.stdout, sys.stderr = outputs
-                _session = ui.terminal_runner = None
+                _session = ui.terminal_runner = ui.prompter = None
         if self.abandoned:
             raise KeyboardInterrupt
+        for text in self.notes:  # no list showed them
+            print(text)
         value, error = self.result
         if error is None and self.interrupted:  # Ctrl-C after the last list
             error = KeyboardInterrupt()
@@ -933,13 +997,13 @@ class _Session:
         return value
 
     def prompts(self, request):
-        """On the main thread: answer requests while they are prompts. Returns the first list request (the terminal
-        probed for it if it needs that), or None once the editor is done or abandoned."""
+        """On the main thread: answer requests while they are calls. Returns the first list or prompt request (the
+        terminal probed for it if it needs that), or None once the editor is done or abandoned."""
         while request is not None:
             kind, payload, reply = request
             if self.deliver(reply):
                 pass
-            elif kind == "list":
+            elif kind != "call":
                 _, error = _outcome(lambda: self.at_terminal(self.probe, payload))  # the terminal is still ours here
                 if error is None:
                     return request
@@ -1048,8 +1112,9 @@ class _Session:
         err.flush()
 
     def ask(self, kind, payload):
-        """On the worker: have the main thread show a list (kind "list", payload its model) or run a prompt ("call",
-        payload a callable), and wait. Returns (result, error): at once, with KeyboardInterrupt, once abandoned."""
+        """On the worker: have the main thread show a list (kind "list", payload its model) or a prompt ("prompt", a
+        _PromptModel), or run a call ("call", payload a callable), and wait. Returns (result, error): at once, with
+        KeyboardInterrupt, once abandoned."""
         reply = queue.Queue()
         with self.lock:
             if self.abandoned:
@@ -1063,6 +1128,7 @@ class _Session:
         with self.lock:
             self.waiting = None
             self.working = True
+        self.answered_at = len(self.printed)
         return got
 
     def probe(self, model):
@@ -1083,6 +1149,17 @@ class _Session:
                 if plain.strip():
                     return plain
         return None
+
+    def prompt(self, question, keys):
+        """ui.prompter: on the worker, ask in the app (_PromptModel), under what it printed since its last request was
+        answered, which then is not printed again; elsewhere ui.NOT_ASKED."""
+        if threading.get_ident() != self.worker:
+            return ui.NOT_ASKED
+        above = [self.printed.pop() for _ in range(len(self.printed) - self.answered_at)][::-1]
+        value, error = self.ask("prompt", _PromptModel(question, keys, above))
+        if error is not None:
+            raise error
+        return value
 
     def outside(self, fn, *args, **kwargs):
         """ui.terminal_runner: fn called on the worker runs on the main thread, on the normal screen."""
@@ -1105,9 +1182,23 @@ def one_app(fn):
     return run
 
 
+def queue_note(text):
+    """On an editor session's worker: show text (escape codes dropped, trimmed) on the status line of the session's
+    next list, after any other notes queued for it, and return True. Elsewhere False."""
+    if not _in_session():
+        return False
+    if _ESCAPES.sub("", text).strip():
+        _session.notes.append(text)
+    return True
+
+
 def _run(model):
     """Show the list full screen until it is done; returns its result. Ctrl-C raises KeyboardInterrupt."""
     if _in_session():
+        if _session.notes:
+            model.notice = " · ".join(_ESCAPES.sub("", text).strip() for text in _session.notes), "yellow"
+            model.update()
+            _session.notes = []
         result, error = _session.ask("list", model)
         if error is not None:
             raise error

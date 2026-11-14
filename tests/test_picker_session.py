@@ -1,4 +1,4 @@
-"""picker.one_app: an editor's lists share one Textual app (headless here), prompts run outside it."""
+"""picker.one_app: an editor's lists and prompts share one Textual app (headless here), commands run outside it."""
 import asyncio
 import contextlib
 import io
@@ -27,6 +27,22 @@ def showing(app, title):
     return type(app.screen).__name__ == "_ListScreen" and app.model.title == title and not app.done
 
 
+def prompting(app, question):
+    """Whether app shows the prompt that starts with question."""
+    return type(app.screen).__name__ == "_PromptScreen" and app.model.question.startswith(question) and not app.done
+
+
+def above(app):
+    """The text a prompt shows above its question."""
+    return str(app.screen.query_one("Static").render())
+
+
+@ui.uses_terminal
+def at_terminal(fn, *args, **kwargs):
+    """fn run as a command that may ask (git, gh): on the main thread, on the normal screen, with the app suspended."""
+    return fn(*args, **kwargs)
+
+
 def working(app):
     """Whether app shows "Working..." (no list is up)."""
     return type(app.screen).__name__ == "_WorkingScreen"
@@ -52,6 +68,7 @@ class Session(unittest.TestCase):
                   mock.patch.object(picker, "_now", lambda: self.now),
                   # what a session that ended without its editor (a second Ctrl-C) leaves in place, put back after
                   mock.patch.object(picker, "_session", None), mock.patch.object(ui, "terminal_runner", None),
+                  mock.patch.object(ui, "prompter", None),
                   mock.patch.object(sys, "stdout", sys.stdout), mock.patch.object(sys, "stderr", sys.stderr)):
             p.start()
             self.addCleanup(p.stop)
@@ -119,7 +136,7 @@ class Session(unittest.TestCase):
         self.assertEqual(self.run_editor(editor, script), 0)
         self.assertEqual(seen, ["Working..."])
 
-    def test_a_prompt_suspends_the_app_and_runs_on_the_main_thread(self):
+    def test_a_command_suspends_the_app_and_runs_on_the_main_thread(self):
         main = threading.current_thread()
 
         def answer(prompt=""):
@@ -129,7 +146,7 @@ class Session(unittest.TestCase):
         def editor():
             picker.filter_list("A", ["a0"])
             print("before the prompt")
-            yes = ui.confirm("Go on?")
+            yes = at_terminal(ui.confirm, "Go on?")
             return yes, picker.filter_list("B", ["b0"])
 
         async def script(app, pilot):
@@ -143,16 +160,16 @@ class Session(unittest.TestCase):
         self.assertEqual(len(self.runs), 1)
         self.assertEqual(self.events, ["suspend", ("input", True, "before the prompt\n"), "resume", "app closed"])
 
-    def test_prompts_in_a_row_share_one_suspend(self):
+    def test_commands_in_a_row_share_one_suspend(self):
         def answer(prompt=""):
             self.events.append(("input", out.getvalue()))
             return "x"
 
         def editor():
             picker.filter_list("A", ["a0"])
-            ui.ask("Name: ")
+            at_terminal(ui.ask, "Name: ")
             print("between")
-            ui.ask("Description: ")
+            at_terminal(ui.ask, "Description: ")
             return picker.filter_list("B", ["b0"])
 
         async def script(app, pilot):
@@ -188,7 +205,7 @@ class Session(unittest.TestCase):
             self.assertEqual(self.run_editor(lambda: (sys.stdout.fileno(), sys.stdout.isatty()), None), (7, False))
             self.assertIs(sys.stdout, out)
 
-    def test_a_prompt_before_any_list_starts_no_app(self):
+    def test_a_command_before_any_list_starts_no_app(self):
         main = threading.current_thread()
         threads = []
 
@@ -197,8 +214,155 @@ class Session(unittest.TestCase):
             return "n"
 
         with mock.patch("builtins.input", answer):
-            self.assertFalse(self.run_editor(lambda: ui.confirm("Go on?"), None))
+            self.assertFalse(self.run_editor(lambda: at_terminal(ui.confirm, "Go on?"), None))
         self.assertEqual((threads, self.runs), ([True], []))
+
+    def test_a_prompt_before_any_list_starts_the_app_for_it(self):
+        def editor():
+            return ui.confirm("Go on?"), picker.filter_list("A", ["a0"])
+
+        async def script(app, pilot):
+            await wait_for(pilot, lambda: prompting(app, "Go on? [Y/n]"))
+            await pilot.press("n")
+            await wait_for(pilot, lambda: showing(app, "A"))
+            await pilot.press("enter")
+        self.assertEqual(self.run_editor(editor, script), (False, 0))
+        self.assertEqual(self.events, ["app closed"])
+
+    def test_prompts_are_answered_in_the_app(self):
+        from textual import events
+
+        def editor():
+            picker.filter_list("A", ["a0"])
+            return (ui.confirm("Go on?"), ui.confirm("Delete?", default=False), ui.confirm("Keep?"),
+                    ui.confirm("Save?", default=False), ui.ask("Name: "), ui.ask("Again: "),
+                    ui.choose("Save these?", "sed", "s", "save/edit/discard"), ui.choose("Again?", "sed", "s"))
+
+        async def script(app, pilot):
+            await wait_for(pilot, lambda: showing(app, "A"))
+            await pilot.press("enter")
+            await wait_for(pilot, lambda: prompting(app, "Go on? [Y/n] "))
+            await pilot.press("x", "enter")  # other keys are ignored; Enter gives the default
+            await wait_for(pilot, lambda: prompting(app, "Delete? [y/N] "))
+            await pilot.press("Y")
+            await wait_for(pilot, lambda: prompting(app, "Keep?"))
+            await pilot.press("escape")
+            await wait_for(pilot, lambda: prompting(app, "Save?"))
+            await pilot.press("enter")
+            await wait_for(pilot, lambda: prompting(app, "Name: "))
+            await pilot.press("a", "space", "c", "left", "b", "home")  # home scrolls the text above
+            app.post_message(events.Paste("d\ne"))
+            await pilot.press("enter")
+            await wait_for(pilot, lambda: prompting(app, "Again: "))
+            await pilot.press("x", "escape")
+            await wait_for(pilot, lambda: prompting(app, "Save these? [S/e/d] (save/edit/discard) "))
+            await pilot.press("escape", "x", "e")
+            await wait_for(pilot, lambda: prompting(app, "Again?"))
+            await pilot.press("enter")
+        self.assertEqual(self.run_editor(editor, script), (True, True, False, False, "a bdec", "", "e", "s"))
+        self.assertEqual(self.events, ["app closed"])
+
+    def test_ctrl_c_in_a_prompt_raises_in_the_editor(self):
+        def editor():
+            picker.filter_list("A", ["a0"])
+            try:
+                ui.ask("Name: ")
+            except KeyboardInterrupt:
+                return "interrupted", picker.filter_list("B", ["b0", "b1"], cursor=1)
+
+        async def script(app, pilot):
+            await wait_for(pilot, lambda: showing(app, "A"))
+            await pilot.press("enter")
+            await wait_for(pilot, lambda: prompting(app, "Name: "))
+            await pilot.press("x", "ctrl+c")
+            await wait_for(pilot, lambda: showing(app, "B"))
+            await pilot.press("enter")
+        self.assertEqual(self.run_editor(editor, script), ("interrupted", 1))
+        self.assertEqual(self.events, ["app closed"])
+
+    def test_a_prompt_shows_what_was_printed_since_the_last_answer_instead_of_after_the_session(self):
+        seen = []
+
+        def editor():
+            print("before A")
+            picker.filter_list("A", ["a0"])
+            print("before B")  # printed before the last answer: after the session, as before
+            picker.filter_list("B", ["b0"])
+            print("\x1b[33mchanges:\x1b[0m")
+            for n in range(40):
+                print(f"  line {n}")
+            print("\r50%\r100%", file=sys.stderr)
+            ui.confirm("Save?")
+            print("after")
+
+        async def script(app, pilot):
+            for title in "AB":
+                await wait_for(pilot, lambda: showing(app, title))
+                await pilot.press("enter")
+            await wait_for(pilot, lambda: prompting(app, "Save?"))
+            await pilot.pause()
+            scroll = app.screen.query_one("VerticalScroll")
+            seen.append(scroll.scroll_y == scroll.max_scroll_y > 0)  # scrolled to the end
+            await pilot.press("home")
+            seen.append(scroll.scroll_y)
+            seen.append(app.screen.query_one("Static").render())
+            await pilot.press("y")
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out), contextlib.redirect_stderr(out):
+            self.run_editor(editor, script)
+        self.assertEqual(seen[:2], [True, 0])
+        self.assertEqual(seen[2].plain, "\n".join(["changes:"] + [f"  line {n}" for n in range(40)] + ["100%"]))
+        self.assertEqual(seen[2].spans[0].style.foreground.ansi, 3)  # the colours are kept: yellow
+        self.assertEqual(out.getvalue(), "before A\nbefore B\nafter\n")
+
+    def test_a_note_shows_on_the_next_list_and_is_cleared_by_a_key(self):
+        from sync_roms import edit
+        seen = []
+
+        def editor():
+            picker.filter_list("A", ["a0"])
+            edit.note(ui.yellow("ℹ️  Saved. "))
+            edit.note("")
+            edit.note("Done")
+            ui.confirm("Go on?")  # notes wait for a list
+            picker.filter_list("B", ["b0", "b1"])
+            return picker.filter_list("C", ["c0"])
+
+        async def script(app, pilot):
+            await wait_for(pilot, lambda: showing(app, "A"))
+            await pilot.press("enter")
+            await wait_for(pilot, lambda: prompting(app, "Go on?"))
+            await pilot.press("y")
+            await wait_for(pilot, lambda: showing(app, "B"))
+            seen.append(app.model.line[:2])
+            await pilot.press("j")
+            seen.append(app.model.line[:2])
+            await pilot.press("enter")
+            await wait_for(pilot, lambda: showing(app, "C"))
+            seen.append(app.model.line[:2])
+            await pilot.press("enter")
+        with mock.patch("builtins.input") as asked:
+            self.run_editor(editor, script)
+        asked.assert_not_called()
+        self.assertEqual(seen, [("ℹ️  Saved. · Done", "yellow"), ("", None), ("", None)])
+
+    def test_a_note_no_list_showed_is_printed_after_the_app_closed(self):
+        from sync_roms import edit
+
+        def editor():
+            print("one")
+            picker.filter_list("A", ["a0"])
+            print("two")
+            edit.note(ui.yellow("ℹ️  Saved."))
+
+        async def script(app, pilot):
+            await wait_for(pilot, lambda: showing(app, "A"))
+            await pilot.press("enter")
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out), mock.patch("builtins.input") as asked:
+            self.run_editor(editor, script)
+        asked.assert_not_called()
+        self.assertEqual(out.getvalue(), "one\ntwo\n" + ui.yellow("ℹ️  Saved.") + "\n")
 
     def test_ctrl_c_in_a_list_reaches_the_editor_then_the_caller_after_the_app_closed(self):
         def editor():
@@ -215,11 +379,11 @@ class Session(unittest.TestCase):
             self.run_editor(editor, script)
         self.assertEqual(self.events, ["editor saw it", "app closed"])
 
-    def test_ctrl_c_at_a_prompt_raises_in_the_editor(self):
+    def test_ctrl_c_at_a_commands_prompt_raises_in_the_editor(self):
         def editor():
             picker.filter_list("A", ["a0"])
             try:
-                ui.confirm("Save?")
+                at_terminal(ui.confirm, "Save?")
             except KeyboardInterrupt:
                 return "second Ctrl-C"
 
@@ -254,10 +418,10 @@ class Session(unittest.TestCase):
             await pilot.press("x")
         self.assertEqual(self.run_editor(editor, script), "caught")
 
-    def test_an_editor_that_ends_at_a_prompt_closes_the_app(self):
+    def test_an_editor_that_ends_at_a_command_closes_the_app(self):
         def editor():
             picker.filter_list("A", ["a0"])
-            ui.confirm("Save?")
+            at_terminal(ui.confirm, "Save?")
             print("saved")
 
         async def script(app, pilot):
@@ -317,11 +481,12 @@ class Session(unittest.TestCase):
             await wait_for(pilot, at_work.is_set)
             await pilot.press("ctrl+c")
             go.set()
-        asked = mock.Mock(return_value="y")
-        with mock.patch("builtins.input", asked), mock.patch.object(setedit.subprocess, "run", fake_run):
+            await wait_for(pilot, lambda: prompting(app, "Really?"))
+            self.events.append("asked")
+            await pilot.press("y")
+        with mock.patch.object(setedit.subprocess, "run", fake_run):
             self.assertEqual(self.run_editor(editor, script), ("interrupted", True))
-        self.assertEqual([c.args for c in asked.call_args_list], [("Really? [Y/n] ",)])  # "Save?" was never asked
-        self.assertEqual(self.events, ["suspend", "git", "resume", "app closed"])
+        self.assertEqual(self.events, ["suspend", "git", "resume", "asked", "app closed"])  # "Save?" was never asked
 
     def test_ctrl_c_while_working_interrupts_the_next_command(self):
         from sync_roms import setedit
@@ -382,7 +547,7 @@ class Session(unittest.TestCase):
 
     def test_a_ctrl_c_right_behind_the_one_that_ended_a_list_is_the_same_press(self):
         from textual import events
-        for later, outcome, questions in ((0, ("asked", True), [("Save? [Y/n] ",)]), (1, "the question was interrupted", [])):
+        for later, outcome, questions in ((0, ("asked", True), ["Save? [Y/n] "]), (1, "the question was interrupted", [])):
             with self.subTest(later=later):
                 handling, go = threading.Event(), threading.Event()
 
@@ -405,10 +570,10 @@ class Session(unittest.TestCase):
                     app.post_message(events.Key("ctrl+c", "\x03"))
                     await pilot.pause()
                     go.set()
-                asked = mock.Mock(return_value="y")
-                with mock.patch("builtins.input", asked):
-                    self.assertEqual(self.run_editor(editor, script), outcome)
-                self.assertEqual([c.args for c in asked.call_args_list], questions)
+                    if questions:
+                        await wait_for(pilot, lambda: prompting(app, questions[0]))
+                        await pilot.press("y")
+                self.assertEqual(self.run_editor(editor, script), outcome)
 
     def test_the_same_press_second_ends_at_the_editors_next_request(self):
         from textual import events
@@ -666,7 +831,7 @@ class Session(unittest.TestCase):
             threads[0].join(10)
             print("the command goes on")  # only the editor's thread is silenced
         self.assertFalse(threads[0].is_alive())
-        self.assertEqual(got, ["interrupted"] * 5)
+        self.assertEqual(got, ["interrupted", "interrupted", None, "interrupted", "interrupted"])  # the note is queued
         self.assertEqual(out.getvalue(), "before\nthe command goes on\n")
         self.assertEqual((asked.call_count, ran.call_count, len(self.runs)), (0, 0, 1))
 
@@ -683,10 +848,10 @@ class Session(unittest.TestCase):
             await wait_for(pilot, lambda: showing(app, "A"))
             app.post_message(events.Key("ctrl+c", "\x03"))
             app.post_message(events.Key("ctrl+c", "\x03"))
-            await pilot.pause()
-        with mock.patch("builtins.input", return_value="y"):
-            self.assertIs(self.run_editor(editor, script), True)
-        self.assertEqual(self.events, ["suspend", "resume", "app closed"])
+            await wait_for(pilot, lambda: prompting(app, "Save?"))
+            await pilot.press("y")
+        self.assertIs(self.run_editor(editor, script), True)
+        self.assertEqual(self.events, ["app closed"])
 
     def test_keys_behind_the_one_that_ended_a_list_reach_nothing_but_ctrl_c(self):
         from textual import events
@@ -735,30 +900,32 @@ class Session(unittest.TestCase):
         def editor():
             picker.filter_list("A", ["a0"])
             wait(go)
-            ui.confirm("Go on?")
-            return picker.filter_list("B", ["b0", "b1"])
+            return ui.confirm("Go on?"), picker.filter_list("B", ["b0", "b1"])
 
         async def script(app, pilot):
             await wait_for(pilot, lambda: showing(app, "A"))
             await pilot.press("enter")
             await wait_for(pilot, lambda: working(app))
-            await pilot.press("j", "enter")
+            await pilot.press("n", "j", "enter")
             go.set()
+            await wait_for(pilot, lambda: prompting(app, "Go on?"))
+            await pilot.pause(0.1)
+            self.assertTrue(prompting(app, "Go on?"))
+            await pilot.press("y")
             await wait_for(pilot, lambda: showing(app, "B"))
             await pilot.pause(0.1)
             self.assertTrue(showing(app, "B"))
             await pilot.press("enter")
-        with mock.patch("builtins.input", return_value="y"):
-            self.assertEqual(self.run_editor(editor, script), 0)
+        self.assertEqual(self.run_editor(editor, script), (True, 0))
 
-    def test_ctrl_c_just_after_a_prompt_interrupts_the_next_list_at_once(self):
+    def test_ctrl_c_just_after_a_command_interrupts_the_next_list_at_once(self):
         def answer(prompt=""):
             picker._session.interrupt()  # the SIGINT handler's call for a Ctrl-C just after the answer
             return "n"
 
         def editor():
             picker.filter_list("A", ["a0"])
-            ui.confirm("Delete?", default=False)
+            at_terminal(ui.confirm, "Delete?", default=False)
             try:
                 picker.filter_list("B", ["b0"])
             except KeyboardInterrupt:
@@ -844,7 +1011,7 @@ class Session(unittest.TestCase):
 
         def editor():
             picker.filter_list("A", ["a0"])
-            ui.confirm("Delete?", default=False)
+            at_terminal(ui.confirm, "Delete?", default=False)
             try:
                 picker.filter_list("B", ["b0"])
             except KeyboardInterrupt:
@@ -865,7 +1032,7 @@ class Session(unittest.TestCase):
 
                 def editor():
                     picker.filter_list("A", ["a0"])
-                    ui.confirm("Delete?", default=False)
+                    at_terminal(ui.confirm, "Delete?", default=False)
                     return picker.filter_list("B", ["b0", "b1"])
 
                 async def script(app, pilot):
@@ -878,12 +1045,12 @@ class Session(unittest.TestCase):
                 with mock.patch("builtins.input", return_value="n"):
                     self.assertEqual(self.run_editor(editor, script), 1)
 
-    def test_output_around_prompts_and_later_lists_stays_in_order(self):
+    def test_output_around_commands_and_later_lists_stays_in_order(self):
         def editor():
             print("one")
             picker.filter_list("A", ["a0"])
             print("two")
-            ui.confirm("Go on?")
+            at_terminal(ui.confirm, "Go on?")
             print("three")
             picker.filter_list("B", ["b0"])
             print("four", file=sys.stderr)
@@ -935,7 +1102,7 @@ class Session(unittest.TestCase):
         self.assertEqual(self.run_editor(editor, script), "interrupted")
         self.assertEqual(self.events, ["suspend", "resume", "app closed"])
 
-    def test_sigint_at_a_prompt_raises_in_it(self):
+    def test_sigint_at_a_commands_prompt_raises_in_it(self):
         handler = signal.getsignal(signal.SIGINT)
 
         def answer(prompt=""):
@@ -945,7 +1112,7 @@ class Session(unittest.TestCase):
         def editor():
             picker.filter_list("A", ["a0"])
             try:
-                ui.confirm("Save?")
+                at_terminal(ui.confirm, "Save?")
             except KeyboardInterrupt:
                 return "interrupted"
 
@@ -1046,14 +1213,14 @@ class Session(unittest.TestCase):
         go.set()
         threads[0].join(10)
 
-    def test_a_second_ctrl_c_between_prompts_ends_the_session_without_the_editor(self):
+    def test_a_second_ctrl_c_between_commands_ends_the_session_without_the_editor(self):
         kick = self.kicks()
         go = threading.Event()
         threads = []
 
         def editor():
             picker.filter_list("A", ["a0"])
-            ui.confirm("Go on?")  # the app stays suspended after it, until the next list
+            at_terminal(ui.confirm, "Go on?")  # the app stays suspended after it, until the next list
             threads.append(threading.current_thread())
             kick()
             self.now += 1
@@ -1070,7 +1237,7 @@ class Session(unittest.TestCase):
         go.set()
         threads[0].join(10)
 
-    def test_a_ctrl_c_kept_while_a_prompt_was_up_counts_from_its_answer(self):
+    def test_a_ctrl_c_kept_while_a_commands_prompt_was_up_counts_from_its_answer(self):
         kick = self.kicks()
 
         def answer(prompt=""):
@@ -1080,7 +1247,7 @@ class Session(unittest.TestCase):
 
         def editor():
             picker.filter_list("A", ["a0"])
-            ui.confirm("Go on?")
+            at_terminal(ui.confirm, "Go on?")
             kick()  # the first Ctrl-C on the step after it: not the one that quits
             try:
                 picker.filter_list("B", ["b0"])
@@ -1097,7 +1264,7 @@ class Session(unittest.TestCase):
                 got = "the editor was abandoned"
         self.assertEqual(got, "handler ran")
 
-    def test_ctrl_c_twice_while_the_editor_waits_for_a_prompt_only_interrupts_it(self):
+    def test_ctrl_c_twice_while_the_editor_waits_for_a_command_only_interrupts_it(self):
         def twice(app):  # as the app suspends: the editor is not at work, it waits for the prompt
             app.session.interrupt()
             self.now += 1
@@ -1107,7 +1274,7 @@ class Session(unittest.TestCase):
         def editor():
             picker.filter_list("A", ["a0"])
             try:
-                ui.confirm("Save?")
+                at_terminal(ui.confirm, "Save?")
             except KeyboardInterrupt:
                 return "interrupted", picker.filter_list("B", ["b0", "b1"], cursor=1)
 
@@ -1146,7 +1313,7 @@ class Session(unittest.TestCase):
         self.assertEqual(seen, ["⚠️  slow"])
         self.assertEqual(out.getvalue(), "📡 Listing gba ...\n" + ui.yellow("⚠️  \x1b[2Jslow") + "\n")
 
-    def test_commands_the_set_editor_runs_use_the_normal_screen(self):
+    def test_the_set_editors_commands_use_the_normal_screen_but_its_tool_check(self):
         from sync_roms import setedit
         main = threading.current_thread()
 
@@ -1167,7 +1334,7 @@ class Session(unittest.TestCase):
             await pilot.press("enter")
         with mock.patch.object(setedit.subprocess, "run", fake_run), mock.patch.object(setedit.shutil, "which", return_value="x"):
             self.run_editor(editor, script)
-        self.assertEqual(self.events, ["suspend", ("gh", True), ("git", True), "resume", "app closed"])
+        self.assertEqual(self.events, [("gh", False), "suspend", ("git", True), "resume", "app closed"])  # gh asks nothing
 
     def test_nested_editors_share_the_session(self):
         inner = picker.one_app(lambda: picker.filter_list("B", ["b0"]))
@@ -1237,6 +1404,15 @@ class OutsideASession(unittest.TestCase):
             await pilot.pause(0.2)
         with self.assertRaises(KeyboardInterrupt):
             pilot_list(script, "A", ["a0", "a1"])
+
+    def test_a_note_prints_and_waits_for_enter(self):
+        from sync_roms import edit
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out), mock.patch("builtins.input") as asked:
+            edit.note("ℹ️  Saved.")
+        self.assertEqual(out.getvalue(), "ℹ️  Saved.\n")
+        asked.assert_called_once()
+        self.assertIn("Press Enter", asked.call_args.args[0])
 
     def test_each_list_runs_its_own_app(self):
         runs = []
