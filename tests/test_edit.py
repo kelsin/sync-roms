@@ -520,6 +520,14 @@ class TextualList(unittest.TestCase):
             self.assertIn(line, text[0])
         self.assertNotIn("Space toggle", text[0])  # the hint isn't repeated once the keys are described
 
+    def test_a_key_the_caller_describes_has_one_line(self):
+        lines = picker.help_lines(False, "", key_help=[("Enter", "the system's games")])
+        self.assertEqual([l for l in lines if l.startswith("Enter")], ["Enter           the system's games"])
+        lines = picker.help_lines(True, "", key_help=[("Space/Tab/Enter", "put it on the card or take it off")])
+        self.assertEqual([l for l in lines if l.startswith(("Enter", "Space"))], ["Space/Tab/Enter put it on the card or take it off"])
+        self.assertIn("Esc/q/^G        clear the filter, then go back", lines)
+        self.assertIn("/               filter (Enter or Tab keeps it, Esc clears it)", lines)
+
     def test_without_key_help_the_help_lists_the_hint(self):
         self.assertIn("  d delete", picker.help_lines(False, "Enter open · d delete"))
 
