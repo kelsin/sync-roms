@@ -240,6 +240,7 @@ class MissingStorageOrCardTest(Isolated):
             cli.main()
         self.assertEqual(cm.exception.code, 3)
         self.assertIn(os.path.join(store.data_dir(), "settings.json"), err.getvalue())
+        self.assertIn("--bucket", err.getvalue())
 
     def test_missing_card_path_is_a_usage_error_and_creates_nothing(self):
         storage = os.path.join(self.tmp, "roms")

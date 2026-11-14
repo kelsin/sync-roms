@@ -97,6 +97,16 @@ class Modes(unittest.TestCase):
         self.refused("scrape", "--set-credentials", "--dry-run")
         self.refused("scrape", "gba", "--system", "nes")
 
+    def test_a_path_given_as_the_system_is_refused(self):
+        for argv in (["/Volumes/SD", "--scrape"], ["scrape", "--system", "a/b"], ["scrape", "missing", "/Volumes/SD"],
+                     ["--scrape-missing", "/Volumes/SD"], ["--scrape-review", "/Volumes/SD"],
+                     ["scrape", "match", "/Volumes/SD", "a.zip", "1"]):
+            with self.subTest(argv=argv), mock.patch("sys.stderr", io.StringIO()) as err, self.assertRaises(SystemExit) as cm:
+                self.modes(*argv)
+            self.assertEqual(cm.exception.code, 2)
+            self.assertIn("expects a system id", err.getvalue())
+        self.assertEqual(self.modes("scrape", "match", "gba", "Disc 1/a.cue", "1"), "--scrape-match")  # a ROM may be in a subfolder
+
     def test_skip_media_validated(self):
         with mock.patch("sys.stderr", io.StringIO()) as err, self.assertRaises(SystemExit):
             self.modes("scrape", "--skip-media", "covers,bogus")
