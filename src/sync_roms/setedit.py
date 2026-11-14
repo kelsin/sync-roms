@@ -74,7 +74,8 @@ def edit_one(game_set, systems, keys_of):
         elif i == 3:
             games = [g for g in game_set["games"] if g.get("bucket")]
             j = picker.filter_list("✏️  Change which game's category?", [game_label(g, names) for g in games],
-                                preview=lambda k: previews.game(games[k]["bucket"]) if k < len(games) else None)
+                                preview=lambda k: previews.game_thumb(games[k]["bucket"]) if k < len(games) else None,
+                                preview_width=previews.GAME_WIDTH)
             if j is not None:
                 recategorize(game_set["games"], games[j], ask_category(game_set["games"], games[j].get("title", "it")))
         else:

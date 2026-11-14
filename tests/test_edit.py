@@ -12,7 +12,7 @@ from textual import events
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from helpers import DataDir  # noqa: E402,F401  (re-exported: other test modules still import it from here)
-from helpers import feed_list, pilot_list, screen_lines, screen_text  # noqa: E402
+from helpers import feed_list, pilot_list, screen_lines, screen_text, shown_preview  # noqa: E402
 from sync_roms import edit, picker, runtime, s3, store, ui  # noqa: E402
 
 SETS = {"s": {"id": "s", "name": "Mix", "games": [{"system": "gba", "bucket": "gba/A.zip", "files": ["gba/A2.zip"]}]}}
@@ -373,14 +373,15 @@ class TextualList(unittest.TestCase):
             seen = []
 
             async def script(pilot):
-                seen.append(pilot.app.screen.query_one("#preview").image)
+                seen.append(await shown_preview(pilot, paths[0]))
                 await pilot.press("j")
-                seen.append(pilot.app.screen.query_one("#preview").image)
+                seen.append(await shown_preview(pilot, paths[1]))
                 await pilot.press("j")
+                await pilot.pause(0.1)
                 seen.append(pilot.app.screen.query_one("#preview").image)
                 await pilot.press("enter")
             # not a terminal: textual-image would probe the real one on import
-            with mock.patch.object(sys, "__stdout__", io.StringIO()), \
+            with mock.patch.object(sys, "__stdout__", io.StringIO()), mock.patch.object(picker, "PREVIEW_IDLE_MS", 1), \
                     mock.patch("sync_roms.picker._draws_images", return_value=True):
                 got = pilot_list(script, "t", self.LABELS, preview=lambda i: paths[i] if i < 2 else None)
         self.assertEqual((got, seen), (2, [paths[0], paths[1], None]))
@@ -396,11 +397,16 @@ class TextualList(unittest.TestCase):
             seen = []
 
             async def script(pilot):
-                for _ in range(3):
-                    seen.append(pilot.app.screen.query_one("#preview").image)
+                for i in range(3):
+                    if i == 1:
+                        await shown_preview(pilot, good)
+                    else:
+                        await pilot.pause(0.1)
+                    image = pilot.app.screen.query_one("#preview").image
+                    seen.append(image and image.filename)
                     await pilot.press("j")
                 await pilot.press("enter")
-            with mock.patch.object(sys, "__stdout__", io.StringIO()), \
+            with mock.patch.object(sys, "__stdout__", io.StringIO()), mock.patch.object(picker, "PREVIEW_IDLE_MS", 1), \
                     mock.patch("sync_roms.picker._draws_images", return_value=True):
                 got = pilot_list(script, "t", self.LABELS, preview=lambda i: paths[i] if i < 3 else None)
         self.assertEqual((got, seen), (2, [None, good, None]))
@@ -414,6 +420,61 @@ class TextualList(unittest.TestCase):
         with mock.patch("sync_roms.picker._draws_images", return_value=False):
             got = pilot_list(script, "t", self.LABELS, preview=lambda i: "unused.png")
         self.assertEqual((got, panes), (0, [0]))
+
+    def preview_layout(self, picture, size=(80, 24), resize_to=None, **kwargs):
+        """Lay out a list previewing one picture of size picture (cells 10x20 px); returns per layout (before and
+        after resize_to) the pane's (shown, region, class names), the image's pixel size and the list's width."""
+        from PIL import Image
+        from textual_image._terminal import CellSize
+        seen = []
+
+        async def look(pilot):
+            await pilot.pause()
+            pane = pilot.app.screen.query_one("#preview")
+            seen.append((pane.display, tuple(pane.region) if pane.display else None, sorted(pane.classes),
+                         pane.image.size, pilot.app.screen.query_one("_ListLines").region.width))
+
+        async def script(pilot):
+            await shown_preview(pilot)
+            await look(pilot)
+            if resize_to:
+                await pilot.resize_terminal(*resize_to)
+                await pilot.pause(0.05)
+                await look(pilot)
+            await pilot.press("enter")
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, "a.png")
+            Image.new("RGB", picture, "red").save(path)
+            with mock.patch.object(sys, "__stdout__", io.StringIO()), mock.patch.object(picker, "PREVIEW_IDLE_MS", 1), \
+                    mock.patch("sync_roms.picker._draws_images", return_value=True), \
+                    mock.patch("textual_image._terminal.get_cell_size", return_value=CellSize(10, 20)):
+                pilot_list(script, "t", self.LABELS, size=size, preview=lambda i: path, **kwargs)
+        return seen
+
+    def test_game_preview_is_300px_wide_in_its_own_column_at_the_top_right(self):
+        [(shown, region, classes, pixels, list_width)] = self.preview_layout((600, 400), preview_width=300)
+        self.assertEqual((shown, region, pixels, list_width), (True, (50, 0, 30, 10), (300, 200), 50))  # 300/10, 200/20
+        self.assertIn("fixed", classes)
+
+    def test_game_preview_shows_nothing_when_the_terminal_is_too_narrow_or_too_short(self):
+        for picture, size in (((600, 400), (60, 24)),  # 30 cells leave the list fewer than MIN_LIST_WIDTH
+                              ((300, 480), (80, 24))):  # 24 rows tall: no room above the status line
+            [(shown, _, _, _, list_width)] = self.preview_layout(picture, size=size, preview_width=300)
+            self.assertEqual((shown, list_width), (False, size[0]), (picture, size))
+
+    def test_game_preview_column_comes_and_goes_as_the_terminal_resizes(self):
+        before, after = self.preview_layout((600, 400), size=(60, 24), resize_to=(80, 24), preview_width=300)
+        self.assertEqual((before[0], before[4]), (False, 60))
+        self.assertEqual((after[0], after[1], after[4]), (True, (50, 0, 30, 10), 50))
+
+    def test_other_previews_keep_the_auto_pane_beside_the_list(self):
+        [(shown, region, classes, pixels, list_width)] = self.preview_layout((45, 108))
+        self.assertEqual((shown, pixels, classes), (True, (45, 108), []))  # an 800 px cap doesn't grow it
+        self.assertEqual(region[1:], (0, region[2], 24))  # the whole height
+        self.assertEqual(region[0] + region[2], 80)
+        self.assertEqual(list_width, region[0])
+        pane_css = picker._app_class().CSS
+        self.assertIn("_ListScreen #preview { width: auto; max-width: 34%; height: 100%; }", pane_css)
 
     def test_block_fallbacks_dont_count_as_drawing_images(self):
         from sync_roms import picker
@@ -565,12 +626,15 @@ class TextualList(unittest.TestCase):
         rows = []
 
         async def script(pilot):
+            if preview:
+                await shown_preview(pilot)
+                await pilot.pause()  # laid out beside it
             rows.append(" ".join(t for t, _ in screen_lines(pilot.app)[-1]).strip())
             await pilot.press("escape")
         with tempfile.TemporaryDirectory() as tmp:
             path = os.path.join(tmp, "a.png")
             Image.new("RGB", (45, 108), "red").save(path)
-            with mock.patch.object(sys, "__stdout__", io.StringIO()), \
+            with mock.patch.object(sys, "__stdout__", io.StringIO()), mock.patch.object(picker, "PREVIEW_IDLE_MS", 1), \
                     mock.patch("sync_roms.picker._draws_images", return_value=True):
                 pilot_list(script, "t", self.LABELS, multi=True, esc_asks=False, status=lambda _s: status,
                            preview=(lambda i: path) if preview else None)
@@ -633,13 +697,16 @@ class NarrowRows(unittest.TestCase):
         out = []
 
         async def script(pilot):
+            if preview:
+                await shown_preview(pilot)
+                await pilot.pause()  # laid out beside it
             out.extend(screen_text(pilot.app))
             out.append(pilot.app.screen_stack[0].query_one("_ListLines").size.width)
             await pilot.press("escape")
         with tempfile.TemporaryDirectory() as tmp:
             path = os.path.join(tmp, "a.png")
             Image.new("RGB", (45, 108), "red").save(path)
-            with mock.patch.object(sys, "__stdout__", io.StringIO()), \
+            with mock.patch.object(sys, "__stdout__", io.StringIO()), mock.patch.object(picker, "PREVIEW_IDLE_MS", 1), \
                     mock.patch("sync_roms.picker._draws_images", return_value=True):
                 pilot_list(script, "t", [self.LONG, "Short"], multi=True, esc_asks=False, extras=self.EXTRAS, size=size,
                            preview=(lambda i: path) if preview else None, **kwargs)

@@ -21,6 +21,7 @@ def capture(returns):
 
 
 def art(calls, n, index=0):
+    assert calls[index].get("preview_width") is None, "art and systems keep the pane beside the list"
     with mock.patch.object(previews, "collection", side_effect=lambda a: "art-" + str(a)), \
             mock.patch.object(previews, "system", side_effect=lambda s: "sys-" + s["bucket"]):
         return [calls[index]["preview"](i) for i in range(n)]
@@ -75,7 +76,8 @@ class ListPreviews(unittest.TestCase):
 
 class GamePreviews(unittest.TestCase):
     def games(self, calls, n, index=0):
-        with mock.patch.object(previews, "game", side_effect=lambda k: "img-" + k):
+        assert calls[index]["preview_width"] == previews.GAME_WIDTH == 300, "a game's picture is 300 px wide"
+        with mock.patch.object(previews, "game_thumb", side_effect=lambda k: "img-" + k):
             return [calls[index]["preview"](i) for i in range(n)]
 
     def test_toggle_games_previews_the_row_key_and_nothing_past_the_rows(self):

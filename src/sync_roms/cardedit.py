@@ -653,7 +653,8 @@ def edit_system(name, system, setup, to_fetch=None, card_usages=None):
                                         status=status, row_note=lambda i: edit.variant_line(
                                             keys[i], variants, parents, system_names, on_card),
                                         session=session, note_text=note_text, on_note=on_note,
-                                        preview=lambda i: previews.game(keys[i]) if i < len(keys) else None,
+                                        preview=lambda i: previews.game_thumb(keys[i]) if i < len(keys) else None,
+                                        preview_width=previews.GAME_WIDTH,
                                         links=links, locked=[k in locked_from for k in keys],
                                         locked_note=[f"From {locked_from[k]}; take it off the card to remove this game"
                                                      if k in locked_from else "" for k in keys])
