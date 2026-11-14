@@ -1,5 +1,24 @@
 # Changelog
 
+## [2.9.0](https://github.com/kelsin/sync-roms/compare/v2.8.0...v2.9.0) (2026-11-14)
+
+
+### :video_game: Features
+
+* **edit:** keep prompts and notes inside the editor app ([#300](https://github.com/kelsin/sync-roms/issues/300)) ([0ee7529](https://github.com/kelsin/sync-roms/commit/0ee7529f51e742b009f8ad629788ab64506680b3))
+* **edit:** show each set's emoji next to its name ([#299](https://github.com/kelsin/sync-roms/issues/299)) ([b6a650c](https://github.com/kelsin/sync-roms/commit/b6a650cd21806dabbdfbb6a25aa9562b21afe2b8))
+
+
+### :bug: Bug Fixes
+
+* **collections:** let the editor save a collection with no games ([#297](https://github.com/kelsin/sync-roms/issues/297)) ([acf71e8](https://github.com/kelsin/sync-roms/commit/acf71e8aed5d86ce7f61b6cfc66a979f93608246))
+* **edit:** show mame and fbneo game names in the card editor's rows ([#296](https://github.com/kelsin/sync-roms/issues/296)) ([ec24033](https://github.com/kelsin/sync-roms/commit/ec24033b8a824d41886afdc29c7ef4b67d05ddc6))
+
+
+### :zap: Performance Improvements
+
+* **picker:** load game pictures in the background from a thumbnail cache ([#301](https://github.com/kelsin/sync-roms/issues/301)) ([b9f7aff](https://github.com/kelsin/sync-roms/commit/b9f7aff10becc94c3edfb9cd694a450b08aa9ff2))
+
 ## [2.8.0](https://github.com/kelsin/sync-roms/compare/v2.7.0...v2.8.0) (2026-11-14)
 
 
