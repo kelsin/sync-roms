@@ -1,5 +1,8 @@
 """The Lexaloffle PICO-8 BBS Featured listing: read a page, tell new carts from upgrades."""
+import datetime
 import re
+
+from . import collections, store, surprise
 
 LISTING = "https://www.lexaloffle.com/bbs/?cat=7&sub=2&orderby=featured"
 _CARTS = "https://www.lexaloffle.com/bbs/cposts/"
@@ -104,3 +107,51 @@ def classify(carts, keys, ignored):
         elif rev > held[base][0]:
             upgrades.append((held[base][1], c))
     return new, upgrades
+
+
+def _names(game, key):
+    return isinstance(game, dict) and (game.get("bucket") == key
+                                       or (isinstance(game.get("files"), list) and key in game["files"]))
+
+
+def _move(game, old, new, title):
+    """Rewrite game (a dict) in place when it names old; True when it did."""
+    if not _names(game, old):
+        return False
+    if game.get("bucket") == old:
+        game["bucket"] = new
+    if isinstance(game.get("files"), list):
+        game["files"] = [new if k == old else k for k in game["files"]]
+    game["title"] = title
+    return True
+
+
+def _move_all(games, old, new, title):
+    return sum([_move(g, old, new, title) for g in games if isinstance(g, dict)]) > 0
+
+
+def retarget(old, new, title):
+    """Move every personal reference to the cart key old onto new, retitled: cards' games and surprises, the
+    surprise history and collections, each file saved only when it changed. Returns the ids of the repo sets that
+    still name old, for the caller to warn about."""
+    cards = store.load_cards()
+    changed = False
+    for card in cards.values():
+        if not isinstance(card, dict):
+            continue
+        games = card.get("games")
+        for entries in games.values() if isinstance(games, dict) else ():
+            if isinstance(entries, list):
+                changed |= _move_all(entries, old, new, title)
+        if isinstance(card.get("surprises"), list):
+            changed |= _move_all(card["surprises"], old, new, title)
+    if changed:
+        store.write_cards(cards)
+    history = surprise.load_history()
+    if _move_all(history, old, new, title):
+        surprise.save_history(history, datetime.date.today())
+    for collection in collections.load_collections():
+        if _move_all(collection["games"], old, new, title):
+            collections.save_collection(collection)
+    return [s["id"] for s in store.load_sets()
+            if any(_names(g, old) for g in s["games"])]
