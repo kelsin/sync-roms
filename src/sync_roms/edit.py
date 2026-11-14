@@ -53,6 +53,7 @@ def toggle_games(title, rows, extras=None, covered=None, excluded=None, hotkeys=
     hotkeys/hint: extra keys the list offers (and the hint line to show). The toggles made so far are applied, and the
     key pressed is returned (None on Enter). place: a dict the caller keeps across calls, so a list of the same rows
     opens where the last one was left (picker.carry_place). filters: the caller's filters, for the filter line.
+    Ctrl-C applies the toggles made so far, then raises KeyboardInterrupt.
     """
     notes = [FULL_SYSTEM_NOTE if s.get("full_system") else covered(s, key) if covered else None
              for s, key, _, _ in rows]
@@ -82,11 +83,15 @@ def toggle_games(title, rows, extras=None, covered=None, excluded=None, hotkeys=
     session = {"sel": list(initial)}
     if place is not None:
         picker.carry_place(place, [key for _, key, _, _ in rows], session)
-    state = picker.filter_list(title, [label for *_, label in rows], multi=True, initial=initial, locked=locked,
-                               locked_note=[n or "" for n in notes], hint=hint or GAMES_HINT, note_text=note_text,
-                               on_note=on_note, hotkeys=hotkeys, session=session, filters=filters,
-                               row_note=lambda i: variant_line(rows[i][1], variants, parents, system_names),
-                               preview=lambda i: previews.game(rows[i][1]) if i < len(rows) else None)
+    interrupted = False
+    try:
+        state = picker.filter_list(title, [label for *_, label in rows], multi=True, initial=initial, locked=locked,
+                                   locked_note=[n or "" for n in notes], hint=hint or GAMES_HINT, note_text=note_text,
+                                   on_note=on_note, hotkeys=hotkeys, session=session, filters=filters,
+                                   row_note=lambda i: variant_line(rows[i][1], variants, parents, system_names),
+                                   preview=lambda i: previews.game(rows[i][1]) if i < len(rows) else None)
+    except KeyboardInterrupt:  # Ctrl-C: the toggles made so far are applied, then the caller gets the Ctrl-C
+        interrupted, state = True, session["sel"]
     pressed = state[0] if isinstance(state, tuple) else None
     if pressed:
         state = session["sel"]
@@ -113,6 +118,8 @@ def toggle_games(title, rows, extras=None, covered=None, excluded=None, hotkeys=
     for bucket, keys in removed.items():
         if keys and bucket in systems:
             systems[bucket]["games"] = [g for g in systems[bucket]["games"] if g.get("bucket") not in keys]
+    if interrupted:
+        raise KeyboardInterrupt
     return pressed
 
 

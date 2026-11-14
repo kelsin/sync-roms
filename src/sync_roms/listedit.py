@@ -85,7 +85,8 @@ def game_label(game, names):
 def add_from_set(listing, sets, shown, keys_of):
     """Pick one of sets and toggle its games, across every system, in listing (via shown, a view of it).
 
-    New games get the category asked for, and the set's extra files (the discs of a multi-disc game)."""
+    New games get the category asked for (none after Ctrl-C, which keeps the toggles made and is then raised again),
+    and the set's extra files (the discs of a multi-disc game)."""
     j = picker.filter_list("✏️  Add games from which set?", [f"{x['name']}  ({len(x['games'])} games)" for x in sets],
                            preview=lambda k: previews.collection(sets[k]["id"]))
     if j is None:
@@ -96,11 +97,20 @@ def add_from_set(listing, sets, shown, keys_of):
         edit.note(ui.yellow(f"ℹ️  {chosen['name']} has no games on known systems."))
         return
     had = {g["bucket"] for s in shown.values() for g in s["games"]}
-    edit.toggle_games(f"✏️  {chosen['name']} — ✅ in {listing['name']}, ⬜ not", rows)
+    interrupted = False
+    try:
+        edit.toggle_games(f"✏️  {chosen['name']} — ✅ in {listing['name']}, ⬜ not", rows)
+    except KeyboardInterrupt:
+        interrupted = True
     added = {g["bucket"] for s in shown.values() for g in s["games"]} - had
-    category = ask_category(listing["games"], f"{len(added)} new game(s)") if added else ""
+    try:
+        category = ask_category(listing["games"], f"{len(added)} new game(s)") if added and not interrupted else ""
+    except KeyboardInterrupt:  # Ctrl-C at the question: no category
+        category, interrupted = "", True
     listing["games"] = reconcile(listing["games"], shown, category)
     files = {g["bucket"]: g["files"] for g in chosen["games"] if g.get("bucket") and g.get("files")}
     for g in listing["games"]:
         if g.get("bucket") in added and g["bucket"] in files and "files" not in g:
             g["files"] = list(files[g["bucket"]])
+    if interrupted:
+        raise KeyboardInterrupt
