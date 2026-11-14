@@ -245,6 +245,13 @@ While typing a filter (or a note, which `w` opens in the game list): `^A` `^E` s
    Eden or another emulator that loads custom drivers), choose to install or import a driver and pick the zip from
    `Drivers/`. Drivers load per app, so nothing changes system-wide and no root is needed.
 
+8. PICO-8 (the app itself, not games): put the official PICO-8 Raspberry Pi zip in storage's `os/pico8/` (the newest
+   `pico-8_*_raspi.zip` is used). Each card gets it where its frontend's installer looks, whether or not the card
+   syncs pico8 games: ES-DE `PICO-8/` (pico8-android's zip picker), Knulli `roms/pico8/` (Device Settings →
+   Install Pico-8), muOS `ARCHIVE/<name>.muxzip` (Archive Manager); Onion (`RApp/PICO-8/bin/`) and Allium
+   (`Apps/pico.pak/bin/`) get the extracted `pico8_dyn` and `pico8.dat`. Run the installer once on the device. The
+   card's `pico8` field in `cards.json` records the zip, so it is copied once per zip.
+
    Every sync also creates `.metadata_never_index` in the card root, empties `.fseventsd` and puts a
    `.fseventsd/no_log` file in it (on any OS), so macOS doesn't index or log the card.
 
@@ -260,6 +267,7 @@ Every mode is a command (`sync-roms COMMAND --help` explains one; plain `sync-ro
 | `sets edit` | edit the repo's game sets by hand and open a PR (needs `git` and a logged-in `gh`) | |
 | `collections edit` | edit your collections of favourite games (saved in `~/.sync-roms/collections/`) | |
 | `themes update` | put the latest Art Book Next for ES-DE (for collections' theme art) in storage | |
+| `download pico8` | add the PICO-8 BBS Featured carts storage doesn't have, and newer revisions of those it has (see below) | |
 | `cards list\|new\|set\|rename\|delete` | manage cards | |
 | `devices [ID]` | list devices, or one device's systems (`--json`) | `--devices` |
 | `upload roms [DIR]` / `upload scrapes [CARD]` | upload to storage | `--upload`, `--upload-scrapes` |
@@ -334,6 +342,7 @@ On `esde` and `emudeck` cards every Vita game zip in `psvita/` gets a `.psvita` 
 | `--skip-media TYPES` | `scrape`, `scrape match`: comma-separated media folders not to download (e.g. `manuals,fanart`) |
 | `--set-credentials` | `scrape`: ask for your ScreenScraper username and password and save them in `settings.json` |
 | `--full` | `cache update`: in a storage folder, list every folder and stat every file, not only the changed folders and the files the cache doesn't have (see Storage cache) |
+| `--count N` | `download pico8`: stop after N carts to add or upgrade |
 | `--bucket-keys` | `check`: also verify with the read-only profile that every game key in your lists and sets exists in storage |
 | `--quiet` | Print only errors (failed files and a sync's failure count included, and `check`'s problems), warnings and `--json` data, all on stderr except the JSON; prompts are asked on stderr |
 | `--verbose` | Also print the effective settings and where each came from, on stderr |
@@ -368,6 +377,23 @@ the cursor starts at the top of the list. Esc cancels.
   connection busy. The biggest files start first. `--upload-scrapes` uses the same pool for its media, and
   resizes Onion box art and Slot labels on every CPU core while the other files upload. To a storage folder, 8 files
   are copied at once.
+
+## PICO-8 carts from the BBS (`download pico8`)
+
+`sync-roms download pico8 [--count N] [--dry-run] [--yes]` fills storage's `pico8/` folder from the
+[Lexaloffle BBS](https://www.lexaloffle.com/bbs/?cat=7&sub=2&orderby=featured) Featured listing, with the write
+profile. It reads every page of the listing (`--count N` stops after N carts to add or upgrade), lists the carts
+storage doesn't have (`new:`) and those the BBS has a newer revision of (`upgrade: old → new`), and asks once;
+`--dry-run` lists them and writes nothing.
+
+- Each cart is checked to be a PNG and uploaded as `pico8/<BBS file name>` (`molemole-1.p8.png`), and its title and
+  author go into `scrapes/pico8/metadata.json` right away, so the editors and frontends show the title. Other
+  entries in that file are kept.
+- A cart's revision is its `-<number>` suffix (none is revision 0). An upgrade deletes the old revision, moves its
+  metadata entry and its `scrapes/pico8/` media to the new name, and points your cards, Surprise history and
+  collections at the new file. Repo sets that name the old file are listed as warnings to change by hand.
+- Carts in `ignored.json` are never downloaded.
+- Requests go one at a time. The first HTTP error stops the run with a warning; carts already added stay.
 
 ## Scraped data (`--upload-scrapes`, `--clean-scrapes`)
 

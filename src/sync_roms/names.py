@@ -10,7 +10,7 @@ import threading
 from . import inventory, runtime, s3, scrape_plan, store, ui
 
 KEY = "names.json"
-SYSTEMS = ("mame", "fbneo")
+SYSTEMS = ("mame", "fbneo", "pico8")
 _lock = threading.RLock()
 _scraped = None  # {system: {ROM path: name}}, filled per system on first use this run
 _clones = None
@@ -84,7 +84,8 @@ def _load(system):
 
 
 def title(key):
-    """A storage key's display name: the proper name for a MAME or FBNeo set, else the file name without extension."""
+    """A storage key's display name: the proper name for a MAME or FBNeo set or a PICO-8 cart,
+    else the file name without extension."""
     global _scraped, _clones
     system, _, rest = key.partition("/")
     if system not in SYSTEMS:
@@ -103,7 +104,10 @@ def title(key):
             _scraped = {}
         if system not in _scraped:
             _scraped[system] = _load(system)
-        return _scraped[system].get(rest) or store.key_title(key)
+        fallback = store.key_title(key)
+        if system == "pico8":
+            fallback = fallback.removesuffix(".p8")
+        return _scraped[system].get(rest) or fallback
 
 
 def reset():

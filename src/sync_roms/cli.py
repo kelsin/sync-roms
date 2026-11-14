@@ -10,7 +10,7 @@ from concurrent.futures import ThreadPoolExecutor
 from botocore.exceptions import BotoCoreError, ClientError, NoCredentialsError
 
 from . import __version__, budget, cardedit, clean, commands, downloads, drivers, edit, external, frontend, inventory, m3u, mirroring, picker, runtime, s3, scrape_plan, store
-from . import surprise, themeart, ui, usersettings, vita
+from . import pico8, surprise, themeart, ui, usersettings, vita
 from . import collections as colls
 
 
@@ -21,6 +21,7 @@ SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "sets": ("edit", "edit the repo's game sets by hand and open a PR with the changes"),
     "collections": ("edit", "edit your collections of favourite games (saved in ~/.sync-roms/collections/)"),
     "themes": ("update", "copy the latest Art Book Next for ES-DE from GitHub into storage"),
+    "download": ("pico8", "add the PICO-8 BBS Featured carts storage doesn't have, and newer revisions of those it has"),
     "cards": ("edit|list|new|set|rename|delete", "list and manage the cards you've synced"),
     "devices": ("[ID]", "list the supported devices, or one device's systems"),
     "upload": ("roms [DIR] | scrapes [CARD]", "upload ROMs or a card's scraped data to storage"),
@@ -74,8 +75,8 @@ TOPICS = {
   sync-roms games remove SYSTEM KEY... --card NAME [-n]
   sync-roms games full SYSTEM on|off --card NAME [-n]
   sync-roms games sets list | add ID | remove ID --card NAME [-n]
-  sync-roms games export --card NAME        one SYSTEM/file per line (full systems as 'SYSTEM/*'), then '@collections ID', '@frontend_collections NAME', '@drivers NAME', '@surprise false' (only when Surprise is off) and '@surprises SYSTEM/file' lines
-  sync-roms games import FILE --card NAME [-n]            add the games in such a file; '@' lines replace the card's collections / frontend_collections / drivers / surprises, and set Surprise on or off
+  sync-roms games export --card NAME        one SYSTEM/file per line (full systems as 'SYSTEM/*'), then '@collections ID', '@frontend_collections NAME', '@drivers NAME', '@pico8 ZIP', '@surprise false' (only when Surprise is off) and '@surprises SYSTEM/file' lines
+  sync-roms games import FILE --card NAME [-n]            add the games in such a file; '@' lines replace the card's collections / frontend_collections / drivers / surprises and set pico8, and set Surprise on or off
 
   --card NAME is required: a card's games are saved in ~/.sync-roms/cards.json with the previous version kept as .bak. Removing only drops a game from the list.
   In the editor: / filters, Space toggles a row, a all/none shown, u reverts the list, o cycles all/on/changed,
@@ -105,6 +106,16 @@ TOPICS = {
   Downloads the GitHub archive of the theme's latest commit (about 200 MB) and replaces os/esde/themes/ in storage
   (write profile). Syncs copy it from there onto ES-DE cards that use Art Book Next, so the Surprise collection has its
   art; a card's copy is replaced when storage has a newer commit. Does nothing when storage already has the latest.
+""",
+    "download": """
+  sync-roms download pico8 [--count N] [--dry-run] [--yes]   add the BBS Featured carts to storage's pico8/
+
+  Reads every page of the Lexaloffle BBS Featured PICO-8 listing (--count N: stops after N carts to add or upgrade),
+  lists the carts storage doesn't have and those the BBS has a newer revision of, and asks once (write profile).
+  Each cart goes to pico8/<BBS file name> with its title and author in scrapes/pico8/metadata.json. An upgrade
+  removes the old revision, moves its metadata and scraped media to the new name and points your cards, Surprise
+  history and collections at it; repo sets that name the old file are listed to change by hand. Carts in
+  ignored.json are skipped. Requests go one at a time; the first HTTP error stops it, keeping what was added.
 """,
     "edit": """
   sync-roms edit                              main menu: Cards, Sets (opens a PR), Collections, Device systems; same as `games edit`
@@ -920,8 +931,9 @@ def sync_card(args):
         saved = store.load_cards().get(card)
     chosen = [s for s in systems if available(s)]
     if not chosen:
+        failed = pico8.run(card, layout_name, base, args.dry_run)
         print(ui.yellow(f"👋 {card} has nothing to sync."))
-        return 0
+        return failed
     print(ui.bold(f"\n🔎 Checking {len(chosen)} system(s) against storage..."))
 
     def dest_of(s):
@@ -963,8 +975,10 @@ def sync_card(args):
         dest_discs[dest_of(t)].update(discs_of(t))
         if available(t) and not unzip:
             dest_bios[dest_of(t)].update(rom_bios_names(t))
+    pico8_dests = {os.path.join(roms_dir, t["folders"][layout_name]) for t in systems + dropped
+                   if t["bucket"] == "pico8" and t["folders"].get(layout_name)}
     for dest in sorted({dest_of(s) for s in systems if s["bucket"] in chosen_ids or not available(s)} | dropped_dests):
-        extras += downloads.find_extras(dest, dest_keys[dest], unzip, onion, disc_dir, dest_discs[dest], dest_bios[dest])
+        extras += downloads.find_extras(dest, dest_keys[dest], unzip, onion, disc_dir, dest_discs[dest], dest_bios[dest] | (pico8.keep_in(dest, card) if dest in pico8_dests else set()))
 
     # BIOS for every system with ROMs already on the card too, even when this sync doesn't touch that system
     bios_systems = chosen + [s for s in systems if s["bucket"] not in chosen_ids
@@ -1135,6 +1149,7 @@ def sync_card(args):
             print(f"  {ui.red('would delete')} {path}")
         for name in drivers.prune(card, drivers_dir, [os.path.basename(p) for _, p, _ in driver_jobs], True):
             print(f"  {ui.red('would delete')} {os.path.join(drivers_dir, name)}")
+        pico8.run(card, layout_name, base, True)
         stale_count = 0
         if scrapes:
             stale_count = len(scrape_plan.stale_media(layout_name, manifest['systems'], roms_dir, es_dir, base))
@@ -1179,6 +1194,7 @@ def sync_card(args):
     # also when the card gets no drivers now (another device or layout): the ones sync copied before go
     for name in drivers.prune(card, drivers_dir, [os.path.basename(p) for _, p, _ in driver_jobs], False):
         print(ui.green(f"🧹 Removed old driver {name}"))
+    failed += pico8.run(card, layout_name, base, False)
     if theme_todo:
         failed += downloads.run_downloads(theme_todo, "Themes", "🎨", os.path.join(base, themes_dir), failures)
     for s in chosen:

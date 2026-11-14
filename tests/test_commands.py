@@ -104,6 +104,20 @@ class GamesTest(CardCmd):
         entry = self.read("cards.json")["SD"]
         self.assertEqual((entry["collections"], entry["frontend_collections"], entry["drivers"]), (["favs"], ["Favs"], ["a-v1.zip"]))
 
+    def test_export_and_import_carry_the_pico8_zip(self):
+        cards = self.read("cards.json")
+        cards["SD"]["pico8"] = "pico-8_0.2.7_raspi.zip"
+        self.write_json("cards.json", cards)
+        self.assertEqual(self.run_cmd("games", "export")[1].splitlines(), ["@pico8 pico-8_0.2.7_raspi.zip"])
+        self.write_json("cards.json", {"SD": {"device": "full", "layout": "esde"}})
+        path = self.path("list.txt")
+        with open(path, "w") as f:
+            f.write("@pico8 pico-8_0.2.6_raspi.zip\n@pico8 pico-8_0.2.7_raspi.zip\n@pico8\n")
+        code, _, err = self.run_cmd("games", "import", path)
+        self.assertEqual(code, 0)
+        self.assertIn("@pico8", err)
+        self.assertEqual(self.read("cards.json")["SD"]["pico8"], "pico-8_0.2.7_raspi.zip")
+
     def test_import_skips_an_empty_frontend_collection_name(self):
         path = self.path("list.txt")
         with open(path, "w") as f:
@@ -243,6 +257,13 @@ class DataSafetyTest(Cmd):
         problems = commands.check_data()
         self.assertEqual(len(problems), 3)
 
+    def test_check_flags_a_bad_pico8_name(self):
+        for bad in (3, ""):
+            with self.subTest(bad=bad):
+                with open(self.path("cards.json"), "w") as f:
+                    json.dump({"c": {"device": "full", "layout": "esde", "pico8": bad}}, f)
+                self.assertIn("cards.json: c: 'pico8' must be a file name", commands.check_data())
+
     def test_overlay_save_replaces_and_drops_entries(self):
         dev = store.repo_json("devices")[0]["id"]
         store.save_overlay({dev: (["gba"], ["nes"])})
@@ -326,6 +347,14 @@ class CliTest(unittest.TestCase):
 
 
 class UiTest(unittest.TestCase):
+    def test_download_pico8_count_must_be_positive(self):
+        parse = commands.build_parser().parse_args
+        self.assertEqual(parse(["download", "pico8", "--count", "3"]).count, 3)
+        for bad in ("0", "-2", "x"):
+            with contextlib.redirect_stderr(io.StringIO()) as err, self.assertRaises(SystemExit):
+                parse(["download", "pico8", "--count", bad])
+            self.assertIn("positive", err.getvalue())
+
     def test_confirm_and_choose_take_the_default_on_eof_and_yes(self):
         with mock.patch("builtins.input", side_effect=EOFError), contextlib.redirect_stdout(io.StringIO()):
             self.assertTrue(ui.confirm("q"))

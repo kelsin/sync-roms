@@ -106,5 +106,15 @@ class LocalCopyTest(Names):
             self.assertEqual(names.title("mame/zzstand.zip"), "Stand Alone")
 
 
+class Pico8Title(Names):
+    def test_pico8_uses_scraped_name(self):
+        self.metadata({"molemole-1.p8.png": {"name": "Mole Mole"}}, system="pico8")
+        self.assertEqual(self.lookup("pico8/molemole-1.p8.png")[0], "Mole Mole")
+
+    def test_pico8_fallback_drops_p8(self):
+        self.assertEqual(self.lookup("pico8/molemole-1.p8.png")[0], "molemole-1")
+        self.assertEqual(self.lookup("pico8/celeste.p8")[0], "celeste")
+
+
 if __name__ == "__main__":
     unittest.main()

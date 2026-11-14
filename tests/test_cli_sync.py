@@ -11,7 +11,9 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 
 from realdir_guard import RealDataDirGuard  # noqa: E402
-from sync_roms import cli, downloads, s3, scrape_plan, store, usersettings  # noqa: E402
+from sync_roms import cli, downloads, inventory, s3, scrape_plan, store, usersettings  # noqa: E402
+
+REAL_LOAD_CARDS = store.load_cards
 
 SYSTEM = {"name": "Game Boy Advance", "bucket": "gba", "folders": {"esde": "gba"}, "bios": {"files": []},
           "games": [{"bucket": "gba/Game.zip"}]}
@@ -196,6 +198,79 @@ class SyncSmokeTest(RealDataDirGuard):
         self.run_sync(False, patches=patches)
         self.assertEqual([k for k, _ in got], ["os/android/APKs/Obtainium.apk"])
         self.assertEqual(os.path.basename(os.path.dirname(got[0][1])), "APKs")
+
+    ZIP = "pico-8_0.2.7_raspi.zip"
+
+    def run_pico8(self, games, copied, dry_run=False, prepare=None, asked=None, device=None, extra_systems=()):
+        """Sync a Knulli card with the given pico8 games while storage holds the PICO-8 zip; copied gets the zip's card path."""
+        pico = {"name": "PICO-8", "bucket": "pico8", "folders": {"knulli": "pico8"}, "bios": {"files": []}, "games": games}
+        layouts = {"knulli": {"label": "Knulli", "roms_dir": "roms", "bios_dir": "bios"}}
+        manifest = {**MANIFEST, "layouts": layouts, "systems": [pico, *extra_systems], "devices": [device] if device else MANIFEST.get("devices", [])}
+        files = inventory.files
+        card_dir = []
+
+        def fake_files(prefix, sizes=True):
+            return {"os/pico8/" + self.ZIP: 5} if prefix == "os/pico8/" else files(prefix, sizes)
+
+        def download(job):
+            copied.append(os.path.relpath(job[1], card_dir[0]))
+            os.makedirs(os.path.dirname(job[1]), exist_ok=True)
+            open(job[1], "wb").write(b"x" * 5)
+
+        def prep(card):
+            card_dir.append(card)
+            if prepare:
+                prepare(card)
+        patches = ((store, {"load_manifest": lambda names=(): manifest, "load_cards": REAL_LOAD_CARDS}),
+                   (cli, {"free_space": lambda path: 10**9}),
+                   (cli.picker, {"saved_setup": lambda *a: (device, "knulli")}),
+                   (inventory, {"files": fake_files}),
+                   (s3, {"download": download,
+                         "list_sizes": lambda prefix, sizes=True: {"pico8/a.p8.png": 5} if prefix == "pico8/" else {}}),
+                   (cli.ui, {"choose": lambda q, *a, **k: asked.append(q) or "n" if asked is not None else "n"}))
+        self.run_sync(dry_run, prepare=prep, patches=patches)
+
+    def test_pico8_zip_on_card_with_no_games(self):
+        cards = []
+        self.run_pico8([], cards)
+        self.assertIn(os.path.join("roms", "pico8", self.ZIP), cards)
+
+    def test_pico8_folder_extras_keep_installer_files(self):
+        def prepare(card):
+            folder = os.path.join(card, "roms", "pico8")
+            os.makedirs(folder)
+            for n in ("Splore.png", self.ZIP, "other.p8"):
+                open(os.path.join(folder, n), "w").close()
+            store.update_card(os.path.basename(card), pico8=self.ZIP)
+        asked = []
+        self.run_pico8([{"bucket": "pico8/a.p8.png"}], [], prepare=prepare, asked=asked)
+        text = " ".join(asked) + self.out.getvalue()
+        self.assertIn("other.p8", text)
+        self.assertNotIn("Splore.png", text)
+        self.assertNotIn(self.ZIP, text)
+
+    def test_pico8_installer_files_kept_when_the_device_drops_pico8(self):
+        gba = {"name": "Game Boy Advance", "bucket": "gba", "folders": {"knulli": "gba"}, "bios": {"files": []}, "games": [{"bucket": "gba/Game.zip"}]}
+        device = {"id": "x", "name": "X", "systems": ["gba"], "note": "", "firmwares": ["knulli"]}
+
+        def prepare(card):
+            folder = os.path.join(card, "roms", "pico8")
+            os.makedirs(folder)
+            for n in ("Splore.png", self.ZIP, "other.p8"):
+                open(os.path.join(folder, n), "w").close()
+            store.update_card(os.path.basename(card), pico8=self.ZIP)
+        asked = []
+        self.run_pico8([], [], prepare=prepare, asked=asked, device=device, extra_systems=[gba])
+        text = " ".join(asked) + self.out.getvalue()
+        self.assertIn("other.p8", text)
+        self.assertNotIn("Splore.png", text)
+        self.assertNotIn(self.ZIP, text)
+
+    def test_pico8_dry_run(self):
+        cards = []
+        self.run_pico8([{"bucket": "pico8/a.p8.png"}], cards, dry_run=True)
+        self.assertEqual(cards, [])
+        self.assertIn(os.path.join("roms", "pico8", self.ZIP), self.out.getvalue())
 
     def driver_sync(self, layout, writable=True, dry_run=False, gpu="adreno-650", saved=None):
         """Sync a card with a device with the gpu (an Adreno 650) and the saved drivers list on the card (and in cards.json);

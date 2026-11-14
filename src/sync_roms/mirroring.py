@@ -17,10 +17,10 @@ def mirror_wanted(manifest):
     systems = manifest["systems"]
     todo = [s for s in systems if s.get("full_system") or store.listed(s)]
     with ThreadPoolExecutor(runtime.WORKERS) as ex:
-        others = [ex.submit(inventory.files, prefix) for prefix in ("BIOS/", runtime.THEMES_PREFIX, runtime.ESDE_THEMES_PREFIX, drivers.PREFIX)]
+        others = [ex.submit(inventory.files, prefix) for prefix in ("BIOS/", runtime.THEMES_PREFIX, runtime.ESDE_THEMES_PREFIX, drivers.PREFIX, runtime.PICO8_PREFIX)]
         roms = list(ex.map(store.list_system, todo))
         scrapes = list(ex.map(lambda s: inventory.files(f"{scrape_plan.SCRAPES}/{s['bucket']}/"), todo))
-        bios, themes, esde_themes, driver_zips = (f.result() for f in others)
+        bios, themes, esde_themes, driver_zips, pico8_zips = (f.result() for f in others)
     wanted = {}
     for s, have, scraped in zip(todo, roms, scrapes):
         keys = [k for k in store.available_keys(s, have) if k in have]
@@ -35,7 +35,7 @@ def mirror_wanted(manifest):
         for f in s["bios"]["files"] + s["bios"].get("rom_files", []):
             if "BIOS/" + f in bios:
                 wanted["BIOS/" + f] = bios["BIOS/" + f]
-    wanted.update((k, v) for k, v in {**themes, **esde_themes, **driver_zips}.items() if not k.endswith("/"))
+    wanted.update((k, v) for k, v in {**themes, **esde_themes, **driver_zips, **pico8_zips}.items() if not k.endswith("/"))
     return wanted
 
 
