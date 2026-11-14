@@ -248,8 +248,55 @@ class Download(helpers.StorageDir):
 
     def test_listing_error_keeps_the_pages_read(self):
         code, out, err, _ = self.run_download([PAGE1], errors={bbs.page_url(2)})
+        self.assertEqual(code, 1)
         self.assertIn("503", err)
         self.assertEqual(self.stored(), {"pico8/molemole-1.p8.png", "pico8/x-2.p8.png", META})
+
+    def test_listing_error_on_page_one_fails(self):
+        code, out, err, _ = self.run_download([], errors={bbs.page_url(1)})
+        self.assertEqual(code, 1)
+        self.assertIn("503", err)
+        self.assertNotIn("every Featured", out)
+        self.assertEqual(self.stored(), set())
+
+    def test_file_name_that_isnt_a_plain_name_is_skipped(self):
+        code, out, err, fetched = self.run_download([page(("../../../x", "Bad", "B"), ("a/b", "Bad", "B")), EMPTY])
+        self.assertEqual(code, 0)
+        self.assertIn("plain name", err)
+        self.assertEqual([u for u in fetched if not u.startswith(bbs.LISTING)], [])
+        self.assertEqual(self.stored(), set())
+        with contextlib.redirect_stderr(io.StringIO()):
+            carts = bbs.parse_page(page(("ok-1", "Ok", "O"), ("../x", "Bad", "B")).decode())
+        self.assertEqual([c["file"] for c in carts], ["ok-1.p8.png"])
+
+    def test_failed_delete_of_the_old_revision_keeps_the_new_one_whole(self):
+        self.put("pico8/x-1.p8.png")
+        self.put("scrapes/pico8/covers/x-1.p8.png")
+        with mock.patch.object(bbs, "retarget", return_value=[]) as retarget, \
+                mock.patch.object(bbs.s3, "delete_keys", side_effect=OSError("denied")):
+            code, _, err, _ = self.run_download([page(("x-2", "X Two", "Ex")), EMPTY])
+        self.assertEqual(code, 1)
+        self.assertIn("pico8/x-1.p8.png", err)
+        retarget.assert_called_once_with("pico8/x-1.p8.png", "pico8/x-2.p8.png", "X Two")
+        self.assertEqual(self.meta(), {"x-2.p8.png": {"name": "X Two", "developer": "Ex"}})
+        self.assertEqual(self.stored(), {"pico8/x-1.p8.png", "pico8/x-2.p8.png",
+                                         "scrapes/pico8/covers/x-2.p8.png", META})
+
+    def test_failed_metadata_write_takes_the_cart_back_out(self):
+        put_text = bbs.s3.put_text
+        calls = []
+
+        def flaky(key, text):
+            calls.append(key)
+            if len(calls) == 2:
+                raise OSError("disk full")
+            return put_text(key, text)
+        with mock.patch.object(bbs.s3, "put_text", flaky):
+            code, _, err, _ = self.run_download([PAGE1, EMPTY])
+        self.assertEqual(code, 1)
+        self.assertIn("disk full", err)
+        self.assertEqual(self.stored(), {"pico8/molemole-1.p8.png", META})
+        self.assertEqual(list(self.meta()), ["molemole-1.p8.png"])
 
     def test_failed_cart_keeps_the_ones_before_it(self):
         code, _, err, _ = self.run_download([PAGE1, EMPTY], errors={bbs.cart_url("x-2.p8.png")})
