@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.10.0](https://github.com/kelsin/sync-roms/compare/v2.9.0...v2.10.0) (2026-11-14)
+
+
+### :video_game: Features
+
+* set up official PICO-8 on cards and download BBS Featured carts ([#302](https://github.com/kelsin/sync-roms/issues/302)) ([904b3a3](https://github.com/kelsin/sync-roms/commit/904b3a3d30e56409f13901da55c47b8dc5089b9b))
+
 ## [2.9.0](https://github.com/kelsin/sync-roms/compare/v2.8.0...v2.9.0) (2026-11-14)
 
 
