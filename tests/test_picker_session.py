@@ -16,6 +16,10 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 from sync_roms import picker, ui  # noqa: E402
 
+if os.environ.get("CI") and sys.version_info[:2] == (3, 14):  # TEMPORARY: show where the suite hangs on 3.14
+    import faulthandler
+    faulthandler.dump_traceback_later(120, exit=True)
+
 
 async def wait_for(pilot, cond):
     for _ in range(500):
