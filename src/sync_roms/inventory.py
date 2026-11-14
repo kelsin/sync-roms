@@ -156,6 +156,15 @@ def etags(prefix):
                        if not k.endswith("/")}, prefix)
 
 
+def known(key):
+    """(size, ETag) of one bucket object from the cache, or None when the cache doesn't have both (never reads storage)."""
+    with _lock:
+        tree = current()
+        if tree is not None and key in tree.files and tree.etags.get(key):
+            return tree.files[key], tree.etags[key]
+    return None
+
+
 def tag(key):
     """A tag that changes whenever one storage file's contents do, read live (never from the cache or the mirror): its
     ETag in a bucket, "<mtime_ns>-<size>" in a storage folder. None when the file doesn't exist."""

@@ -3,6 +3,7 @@ import contextlib
 import os
 import shutil
 import stat
+import threading
 import time
 import unicodedata
 from concurrent.futures import ThreadPoolExecutor
@@ -211,6 +212,48 @@ class CountingWriter:
 DOWNLOAD_PARTS = 2  # ranges of one file fetched at once: every download has its own pool, and the client's connections are shared
 
 
+def _download_known(key, f, known, callback, wrote):
+    """Download an object into f given its (size, ETag) from the cache, so no HEAD request goes first (ranged GETs carry
+    If-Match). False when it changed since (S3 answers 412): f is emptied and the bytes reported are taken back."""
+    from boto3.s3.transfer import TransferConfig, create_transfer_manager
+    from s3transfer.exceptions import S3DownloadFailedError
+    from s3transfer.subscribers import BaseSubscriber
+    lock, got = threading.Lock(), [0, 0]  # bytes received and written, to take back on a 412
+
+    def counted(i, report):
+        def add(n):
+            with lock:
+                got[i] += n
+            if report:
+                report(n)
+        return add
+
+    class Known(BaseSubscriber):
+        def on_queued(self, future, **kwargs):
+            future.meta.provide_transfer_size(known[0])
+            future.meta.provide_object_etag(known[1])
+
+        def on_progress(self, bytes_transferred, **kwargs):
+            received(bytes_transferred)
+
+    received = counted(0, callback)
+    try:
+        config = TransferConfig(max_concurrency=DOWNLOAD_PARTS, preferred_transfer_client="classic")  # CRT can't be told
+        with create_transfer_manager(s3_client(), config) as manager:
+            manager.download(runtime.BUCKET, key, CountingWriter(f, counted(1, wrote)), subscribers=[Known()]).result()
+        return True
+    except S3DownloadFailedError as e:
+        cause = e.__context__
+        if not (isinstance(cause, ClientError) and cause.response.get("Error", {}).get("Code") == "PreconditionFailed"):
+            raise
+    for report, n in ((callback, got[0]), (wrote, got[1])):
+        if report and n:
+            report(-n)
+    f.seek(0)
+    f.truncate()
+    return False
+
+
 def download(job, callback=None, wrote=None):
     """callback(bytes) is called as data arrives, wrote(bytes) as it is written to disk."""
     key, path, _ = job
@@ -220,9 +263,12 @@ def download(job, callback=None, wrote=None):
             copy_file(safe_join(read_root(), key), path + ".part", callback, wrote)
         else:
             from boto3.s3.transfer import TransferConfig
+            from . import inventory  # imported here: inventory reads storage through this module
+            known = inventory.known(key)
             with open(path + ".part", "wb") as f:
-                s3_client().download_fileobj(runtime.BUCKET, key, CountingWriter(f, wrote) if wrote else f,
-                                            Callback=callback, Config=TransferConfig(max_concurrency=DOWNLOAD_PARTS))
+                if not (known and _download_known(key, f, known, callback, wrote)):
+                    s3_client().download_fileobj(runtime.BUCKET, key, CountingWriter(f, wrote) if wrote else f,
+                                                Callback=callback, Config=TransferConfig(max_concurrency=DOWNLOAD_PARTS))
         os.replace(path + ".part", path)
     except BaseException:
         with contextlib.suppress(OSError):

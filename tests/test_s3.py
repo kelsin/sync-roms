@@ -4,17 +4,20 @@ import os
 import shutil
 import sys
 import tempfile
+import threading
+import time
 import unicodedata
 import unittest
 from unittest import mock
 
 import boto3
+from botocore.awsrequest import AWSResponse
 from botocore.exceptions import ClientError
 from botocore.stub import Stubber
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
-from sync_roms import runtime, s3, scrape_files, store  # noqa: E402
+from sync_roms import inventory, runtime, s3, scrape_files, store  # noqa: E402
 
 BUCKET = "test-bucket"
 
@@ -186,6 +189,135 @@ class DownloadTest(unittest.TestCase):
                     mock.patch.object(s3, "read_root", return_value=None), self.assertRaises(OSError):
                 s3.download(("gba/g.zip", path, 3))
             self.assertEqual(os.listdir(d), [])
+
+
+class FakeObject:
+    """One bucket object served through a client's events, answering each request by what it asks (so ranged GETs may
+    come in any order): HEAD, GET with Range and If-Match (412 when the ETag isn't the object's), 404 when body is None.
+    calls records (operation, If-Match, Range). After changes GETs, the object becomes after (body, ETag); a 412 is held
+    for wait seconds, so the GETs in flight finish first."""
+    def __init__(self, client, body, etag, changes=None, after=None, wait=0):
+        self.body, self.etag, self.changes, self.after, self.wait, self.calls = body, etag, changes, after, wait, []
+        self.lock = threading.Lock()
+        client.meta.events.register_first("before-call.s3", self.serve, unique_id="fake-object")
+
+    def serve(self, model, params, **kwargs):
+        headers, meta = params["headers"], {"HTTPStatusCode": 200, "HTTPHeaders": {}}
+        with self.lock:
+            self.calls.append((model.name, headers.get("If-Match"), headers.get("Range")))
+            body, etag = self.body, self.etag
+            if model.name == "GetObject" and self.changes is not None:
+                self.changes -= 1
+                if self.changes == 0:
+                    self.body, self.etag = self.after
+        if body is None:
+            return AWSResponse(None, 404, {}, None), {"Error": {"Code": "NoSuchKey", "Message": "gone"}, "ResponseMetadata": meta}
+        if headers.get("If-Match") not in (None, etag):
+            time.sleep(self.wait)
+            return AWSResponse(None, 412, {}, None), {"Error": {"Code": "PreconditionFailed", "Message": "no"}, "ResponseMetadata": meta}
+        if model.name == "HeadObject":
+            return AWSResponse(None, 200, {}, None), {"ContentLength": len(body), "ETag": etag, "ResponseMetadata": meta}
+        start, end = 0, len(body) - 1
+        if headers.get("Range"):
+            a, b = headers["Range"][len("bytes="):].split("-")
+            start, end = int(a), min(int(b) if b else end, end)
+        out = {"Body": io.BytesIO(body[start:end + 1]), "ContentLength": end + 1 - start, "ETag": etag, "ResponseMetadata": meta}
+        if headers.get("Range"):
+            out["ContentRange"] = f"bytes {start}-{end}/{len(body)}"
+        return AWSResponse(None, 200, {}, None), out
+
+
+class CachedDownloadTest(unittest.TestCase):
+    """A bucket download given the object's size and ETag from the cache skips the HEAD request."""
+    BIG = 9 * 1024 * 1024  # over s3transfer's multipart threshold, so the GETs are ranged and carry If-Match
+
+    @classmethod
+    def setUpClass(cls):
+        cls.client = fake_client()
+
+    def setUp(self):
+        self.tmp = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, self.tmp)
+        self.addCleanup(self.client.meta.events.unregister, "before-call.s3", unique_id="fake-object")
+        patches = [mock.patch.object(runtime, "BUCKET", BUCKET), mock.patch.object(runtime, "ROOT", None),
+                   mock.patch.object(runtime, "_mirror_root", None),
+                   mock.patch.dict(s3._s3, {runtime.PROFILE: self.client}, clear=True)]
+        for p in patches:
+            p.start()
+            self.addCleanup(p.stop)
+
+    def download(self, files, etags):
+        """Download gba/a.zip with this cache; returns (file contents, bytes received, bytes written)."""
+        path, got, wrote = os.path.join(self.tmp, "a.zip"), [], []
+        tree = inventory.Tree(f"s3://{BUCKET}", 0, files, etags)
+        with mock.patch.object(inventory, "current", return_value=tree):
+            s3.download(("gba/a.zip", path, None), got.append, wrote.append)
+        with open(path, "rb") as f:
+            data = f.read()
+        self.assertEqual(os.listdir(self.tmp), ["a.zip"])
+        return data, sum(got), sum(wrote)
+
+    def test_cached_size_and_etag_skip_the_head(self):
+        fake = FakeObject(self.client, b"abc", '"e1"')
+        self.assertEqual(self.download({"gba/a.zip": 3}, {"gba/a.zip": '"e1"'}), (b"abc", 3, 3))
+        self.assertEqual(fake.calls, [("GetObject", None, None)])
+
+    def test_multipart_object_gets_ranges_with_if_match_and_no_head(self):
+        body = os.urandom(self.BIG)
+        fake = FakeObject(self.client, body, '"e1-2"')
+        self.assertEqual(self.download({"gba/a.zip": self.BIG}, {"gba/a.zip": '"e1-2"'}), (body, self.BIG, self.BIG))
+        self.assertEqual(sorted(fake.calls), [("GetObject", '"e1-2"', "bytes=0-8388607"),
+                                              ("GetObject", '"e1-2"', "bytes=8388608-")])
+
+    def test_stale_etag_falls_back_to_a_head_once(self):
+        fake = FakeObject(self.client, b"new", '"e2"')
+        self.assertEqual(self.download({"gba/a.zip": self.BIG}, {"gba/a.zip": '"e1"'}), (b"new", 3, 3))
+        self.assertEqual(fake.calls[0][:2], ("GetObject", '"e1"'))
+        self.assertEqual(fake.calls[-2:], [("HeadObject", None, None), ("GetObject", None, None)])
+        self.assertEqual([c for c in fake.calls[:-2] if c != ("GetObject", '"e1"', "bytes=0-8388607")
+                          and c != ("GetObject", '"e1"', "bytes=8388608-")], [])
+
+    def test_change_during_download_restarts_the_file_and_its_progress(self):
+        old, new = os.urandom(self.BIG), b"short"
+        fake = FakeObject(self.client, old, '"e1"', changes=1, after=(new, '"e2"'), wait=0.3)
+        self.assertEqual(self.download({"gba/a.zip": self.BIG}, {"gba/a.zip": '"e1"'}), (new, len(new), len(new)))
+        self.assertEqual([c[0] for c in fake.calls].count("HeadObject"), 1)
+
+    def test_other_errors_do_not_fall_back(self):
+        fake = FakeObject(self.client, None, '"e1"')
+        with self.assertRaises(ClientError) as cm:
+            self.download({"gba/a.zip": 3}, {"gba/a.zip": '"e1"'})
+        self.assertIn("NoSuchKey", str(cm.exception))
+        self.assertEqual(fake.calls, [("GetObject", None, None)])
+        self.assertEqual(os.listdir(self.tmp), [])
+
+    def test_no_cached_etag_downloads_as_before(self):
+        fake = FakeObject(self.client, b"abc", '"e1"')
+        self.assertEqual(self.download({"gba/a.zip": 3}, {}), (b"abc", 3, 3))
+        self.assertEqual(fake.calls, [("HeadObject", None, None), ("GetObject", None, None)])
+
+    def test_no_cache_downloads_as_before(self):
+        fake = FakeObject(self.client, b"abc", '"e1"')
+        path = os.path.join(self.tmp, "a.zip")
+        with mock.patch.object(inventory, "current", return_value=None):
+            s3.download(("gba/a.zip", path, None))
+        with open(path, "rb") as f:
+            self.assertEqual(f.read(), b"abc")
+        self.assertEqual(fake.calls, [("HeadObject", None, None), ("GetObject", None, None)])
+
+    def test_storage_folder_download_never_uses_the_client(self):
+        root = os.path.join(self.tmp, "roms")
+        os.makedirs(os.path.join(root, "gba"))
+        with open(os.path.join(root, "gba", "a.zip"), "wb") as f:
+            f.write(b"abc")
+        tree = inventory.Tree(root, 0, {"gba/a.zip": 3}, {"gba/a.zip": '"e1"'})
+        path = os.path.join(self.tmp, "out", "a.zip")
+        with mock.patch.object(runtime, "ROOT", root), mock.patch.object(inventory, "current", return_value=tree), \
+                mock.patch.object(s3, "s3_client") as client:
+            s3.download(("gba/a.zip", path, None))
+        with open(path, "rb") as f:
+            self.assertEqual(f.read(), b"abc")
+        client.assert_not_called()
 
 
 class SafeJoinTest(unittest.TestCase):
