@@ -279,7 +279,7 @@ def move_groups(moves):
     in its folder. Groups don't touch each other's files. Keys are compared the way a storage folder finds names (any
     case or Unicode form), unless that would make two moves' keys the same."""
     def loose(key):
-        return unicodedata.normalize("NFC", key).casefold()
+        return unicodedata.normalize("NFC", key).lower()
     fold = loose if len({loose(old) for old, _ in moves}) == len(moves) == len({loose(new) for _, new in moves}) else str
     by_old = {fold(old): (old, new) for old, new in moves}
     after = {k: fold(new) for k, (_, new) in by_old.items() if fold(new) != k}  # a case-only rename is a single move
