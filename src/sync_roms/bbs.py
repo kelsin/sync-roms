@@ -257,7 +257,7 @@ def download_pico8(args):
     if args.dry_run:
         print(ui.dim("🧪 Dry run: nothing downloaded or written"))
         return 1 if failed else 0
-    if not ui.confirm(f"Add these to {s3.location()}?"):
+    if not args.yes and not ui.confirm(f"Add these to {s3.location()}?", default=False):
         return 1 if failed else 0
     try:
         meta = _load_metadata()
@@ -304,7 +304,14 @@ def download_pico8(args):
             moves = _media_moves(old_file, file)
             if moves and s3.move_keys(moves):
                 code = 1
-            for set_id in retarget(old, key, c["title"]):
+            try:
+                still = retarget(old, key, c["title"])
+            except OSError as e:  # the references still name the old revision, so it stays
+                ui.warn(f"Couldn't move cards and collections from {old} to {key} ({e}); keeping {old}")
+                code = 1
+                upgraded += 1
+                continue
+            for set_id in still:
                 ui.warn(f"Set {set_id} still names {old}: change it to {key}")
             try:  # last, so a failure here leaves only a duplicate file: the new cart is complete
                 errors = s3.delete_keys([old])

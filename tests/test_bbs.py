@@ -172,13 +172,14 @@ class Download(helpers.StorageDir):
             return (carts or {}).get(url.rsplit("/", 1)[-1], PNG)
         return mock.patch.object(bbs, "_fetch", fetch), fetched
 
-    def run_download(self, pages, count=None, dry_run=False, carts=None, errors=()):
+    def run_download(self, pages, count=None, dry_run=False, carts=None, errors=(), yes=True, answer=None):
         patch, fetched = self.serve(pages, carts, errors)
         out, err = io.StringIO(), io.StringIO()
         with patch, contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
-            ui.ASSUME_YES = True
+            ui.ASSUME_YES = yes
             try:
-                code = bbs.download_pico8(mock.Mock(count=count, dry_run=dry_run, yes=True))
+                with mock.patch.object(ui, "_input", side_effect=answer or EOFError):
+                    code = bbs.download_pico8(mock.Mock(count=count, dry_run=dry_run, yes=yes))
             finally:
                 ui.ASSUME_YES = False
         return code, out.getvalue(), err.getvalue(), fetched
@@ -205,6 +206,20 @@ class Download(helpers.StorageDir):
         self.assertEqual(code, 0)
         self.assertEqual(fetched, [bbs.page_url(1), bbs.cart_url("molemole-1.p8.png")])
         self.assertEqual(self.stored(), {"pico8/molemole-1.p8.png", META})
+
+    def test_confirmation_defaults_to_no(self):
+        code, _, _, _ = self.run_download([PAGE1, EMPTY], yes=False)
+        self.assertEqual(self.stored(), set())
+        code, _, _, _ = self.run_download([PAGE1, EMPTY], yes=False, answer=["y"])
+        self.assertIn("pico8/molemole-1.p8.png", self.stored())
+
+    def test_failed_retarget_keeps_the_old_revision(self):
+        self.put("pico8/x-1.p8.png")
+        with mock.patch.object(bbs, "retarget", side_effect=OSError("disk full")):
+            code, _, err, _ = self.run_download([page(("x-2", "X Two", "Ex")), EMPTY])
+        self.assertEqual(code, 1)
+        self.assertIn("disk full", err)
+        self.assertEqual(self.stored(), {"pico8/x-1.p8.png", "pico8/x-2.p8.png", META})
 
     def test_dry_run_lists_and_writes_nothing(self):
         self.put("pico8/x-1.p8.png")

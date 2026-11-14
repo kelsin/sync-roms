@@ -956,6 +956,16 @@ complete -o filenames -F _sync_roms sync-roms
 
 # --- Dispatch ---------------------------------------------------------------------------------------
 
+def _positive_int(text):
+    try:
+        n = int(text)
+    except ValueError:
+        n = 0
+    if n < 1:
+        raise argparse.ArgumentTypeError(f"{text!r} is not a positive number")
+    return n
+
+
 def build_parser():
     ap = Parser(prog="sync-roms", add_help=False, allow_abbrev=False)
     sub = ap.add_subparsers(dest="command")
@@ -993,7 +1003,7 @@ def build_parser():
     download = sub.add_parser("download", add_help=False, allow_abbrev=False)
     dsub = download.add_subparsers(dest="action", required=True)
     p = dsub.add_parser("pico8", allow_abbrev=False); common(p, card=False)
-    p.add_argument("--count", type=int, metavar="N"); p.set_defaults(fn=download_pico8)
+    p.add_argument("--count", type=_positive_int, metavar="N"); p.set_defaults(fn=download_pico8)
 
     cards = sub.add_parser("cards", add_help=False, allow_abbrev=False)
     csub = cards.add_subparsers(dest="action", required=True)

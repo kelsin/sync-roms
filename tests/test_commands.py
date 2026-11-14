@@ -347,6 +347,14 @@ class CliTest(unittest.TestCase):
 
 
 class UiTest(unittest.TestCase):
+    def test_download_pico8_count_must_be_positive(self):
+        parse = commands.build_parser().parse_args
+        self.assertEqual(parse(["download", "pico8", "--count", "3"]).count, 3)
+        for bad in ("0", "-2", "x"):
+            with contextlib.redirect_stderr(io.StringIO()) as err, self.assertRaises(SystemExit):
+                parse(["download", "pico8", "--count", bad])
+            self.assertIn("positive", err.getvalue())
+
     def test_confirm_and_choose_take_the_default_on_eof_and_yes(self):
         with mock.patch("builtins.input", side_effect=EOFError), contextlib.redirect_stdout(io.StringIO()):
             self.assertTrue(ui.confirm("q"))
