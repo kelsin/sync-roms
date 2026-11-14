@@ -196,11 +196,7 @@ def edit_collections():
         except KeyboardInterrupt:  # a second Ctrl-C discards
             keep = False
         if keep:
-            empty = [cid for cid in changed if not working[cid]["games"]]
-            if empty:
-                print(ui.yellow(f"ℹ️  {', '.join(working[cid]['name'] for cid in empty)} has no games, so it isn't saved."))
-            if len(empty) < len(changed) or deleted:
-                save(working, [cid for cid in changed if cid not in empty], deleted)
+            save(working, changed, deleted)
         elif changed or deleted:
             print(ui.yellow("\n👋 Not saved."))
         raise
@@ -261,9 +257,5 @@ def edit_working(systems, before, working):
         if not (changed or deleted):
             print(ui.yellow("👋 No changes, nothing saved."))
             return 0
-        empty = [working[cid]["name"] for cid in ids if not working[cid]["games"]]
-        if empty:
-            edit.note(ui.yellow(f"ℹ️  {', '.join(empty)} has no games. Add some or delete it first."))
-            continue
         save(working, changed, deleted)
         return 0
