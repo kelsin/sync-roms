@@ -32,11 +32,6 @@ def prompting(app, question):
     return type(app.screen).__name__ == "_PromptScreen" and app.model.question.startswith(question) and not app.done
 
 
-def above(app):
-    """The text a prompt shows above its question."""
-    return str(app.screen.query_one("Static").render())
-
-
 @ui.uses_terminal
 def at_terminal(fn, *args, **kwargs):
     """fn run as a command that may ask (git, gh): on the main thread, on the normal screen, with the app suspended."""
@@ -345,6 +340,59 @@ class Session(unittest.TestCase):
             self.run_editor(editor, script)
         asked.assert_not_called()
         self.assertEqual(seen, [("ℹ️  Saved. · Done", "yellow"), ("", None), ("", None)])
+
+    def test_a_kept_note_is_shown_and_also_printed_after_the_app_closed_once(self):
+        for shown in (True, False):
+            with self.subTest(shown=shown):
+                seen = []
+
+                def editor():
+                    picker.queue_note("🎉 PR opened: url", keep=True)
+                    picker.queue_note("👋 Done.")
+                    if shown:
+                        picker.filter_list("A", ["a0"])
+
+                async def script(app, pilot):
+                    await wait_for(pilot, lambda: showing(app, "A"))
+                    seen.append(app.model.line[0])
+                    await pilot.press("enter")
+                out = io.StringIO()
+                with contextlib.redirect_stdout(out):
+                    self.run_editor(editor, script if shown else None)
+                self.assertEqual(seen, ["🎉 PR opened: url · 👋 Done."] if shown else [])
+                self.assertEqual(out.getvalue(), "🎉 PR opened: url\n" if shown else "🎉 PR opened: url\n👋 Done.\n")
+
+    def test_a_long_prompt_wraps_so_its_legend_and_answer_stay_in_view(self):
+        from textual.geometry import Region
+        question = "💾 Save these changes?"
+        legend = "s save · e keep editing · d discard · l list every change"
+        seen = []
+
+        def editor():
+            picker.filter_list("A", ["a0"])
+            print("changes")
+            return ui.choose(question, "sedl", "s", legend), ui.ask("Name: ")
+
+        async def script(app, pilot):
+            def shown():
+                line = app.screen.query_one("#lines")
+                text = "".join(strip.text for strip in line.render_lines(Region(0, 0, line.size.width, line.size.height)))
+                return line.region.bottom == 24 and " ".join(text.split())
+            await wait_for(pilot, lambda: showing(app, "A"))
+            await pilot.press("enter")
+            await wait_for(pilot, lambda: prompting(app, question))
+            await pilot.pause()
+            seen.append(shown())
+            await pilot.press("e")
+            await wait_for(pilot, lambda: prompting(app, "Name: "))
+            await pilot.press(*"x" * 90)
+            await pilot.pause()
+            seen.append(shown())
+            await pilot.press("enter")
+        with contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(self.run_editor(editor, script), ("e", "x" * 90))
+        self.assertTrue(seen[0].endswith(f"[S/e/d/l] ({legend})"), seen[0])
+        self.assertEqual(seen[1].replace(" ", ""), "Name:" + "x" * 90)  # the cursor's cell is a space
 
     def test_a_note_no_list_showed_is_printed_after_the_app_closed(self):
         from sync_roms import edit

@@ -431,7 +431,7 @@ def edit_manifest():
         try:
             setedit.edit_sets()
         except SystemExit:
-            pass  # the reason is already printed
+            pass  # the reason is a note, on the menu
 
     def edit_collections():
         from . import collectionedit

@@ -175,11 +175,14 @@ class Editor(unittest.TestCase):
                 mock.patch.object(picker, "filter_list", lambda *a, **k: next(picks)), \
                 mock.patch.object(ui, "ask", side_effect=["My Set", "about it"]), \
                 mock.patch.object(ui, "choose", return_value="o"), \
-                mock.patch.object(setedit, "open_pr", lambda after, found: opened.update(after=after, found=found) or "url"):
+                mock.patch.object(setedit, "open_pr", lambda after, found: opened.update(after=after, found=found) or "url"), \
+                mock.patch.object(picker, "queue_note", return_value=True) as queued, mock.patch("builtins.print") as out:
             self.assertEqual(setedit.edit_sets(), 0)
         self.assertEqual([(k, s) for k, s, _ in opened["found"]], [("new", "my-set")])
         self.assertEqual(opened["after"]["my-set"]["description"], "about it")
-        self.assertIn("PR opened: url", self.note.call_args.args[0])
+        self.assertIn("PR opened: url", queued.call_args.args[0])  # on the menu, and printed after the session
+        self.assertEqual(queued.call_args.kwargs, {"keep": True})
+        self.assertNotIn("PR opened", str(out.call_args_list))
 
     def test_ctrl_c_with_changes_goes_to_the_review(self):
         before = {"old": {"name": "Old", "description": "", "games": games()}}

@@ -285,5 +285,7 @@ def edit_working(systems, before, working, state):
         if answer == "d":
             edit.note(ui.yellow("👋 Not opened."))
             return None if state["review"] else 0
-        edit.note(ui.green("🎉 PR opened: ") + open_pr(working, found))
+        opened = ui.green("🎉 PR opened: ") + open_pr(working, found)
+        if not picker.queue_note(opened, keep=True):  # on the menu, and on the normal screen after the editor
+            print(opened)
         return None if state["review"] else 0

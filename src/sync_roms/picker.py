@@ -640,7 +640,7 @@ def _app_class():
         _HelpScreen #help-footer { dock: bottom; width: 100%; text-align: center; }
         _HelpScreen Static { width: auto; }
         _PromptScreen VerticalScroll { height: 1fr; }
-        _PromptLine { height: 1; text-wrap: nowrap; text-overflow: clip; }
+        _PromptLine { dock: bottom; height: auto; }
         """
 
         def __init__(self, model, session=None, reply=None):
@@ -868,7 +868,7 @@ def _app_class():
                 self.push_screen(_HelpScreen(self.model.help))
             elif not self.model.help and isinstance(self.screen, _HelpScreen):
                 self.pop_screen()
-            self.list_screen.query_one("#lines").refresh()
+            self.list_screen.query_one("#lines").refresh(layout=isinstance(self.model, _PromptModel))  # it may wrap
             if self.model.preview:
                 pane = self.list_screen.query_one("#preview")
                 path = self.model.preview_path()
@@ -942,7 +942,7 @@ class _Session:
     main thread with the app suspended until the next list or prompt, so input, Ctrl-C and output between them work
     as without a session. Notes (edit.note) show on the next list's status line. The rest of what the worker prints
     while the app shows comes out, in order, when the normal screen is back; its last line shows under "Working...",
-    and the notes no list showed follow it once the app has closed. Ctrl-C while the
+    and the notes no list showed (and kept ones) follow it once the app has closed. Ctrl-C while the
     editor works reaches it as KeyboardInterrupt from its next request; another one a second or more later, before
     that request, abandons it: the session ends at once, and the worker, left to itself, gets KeyboardInterrupt from
     every request and prints nothing (interrupt). Nothing is ever raised in the worker but by its own requests."""
@@ -966,7 +966,8 @@ class _Session:
         self.streams = None  # sys.stdout and sys.stderr from before the app started
         self.printed = collections.deque()  # (to stderr, text) the worker printed while the app ran
         self.answered_at = 0  # how long printed was when the worker's last request was answered
-        self.notes = []  # edit.note's texts for the next list
+        self.notes = []  # (text, keep) edit.note's texts for the next list
+        self.kept = []  # texts of notes a list showed that are also printed after the app
 
     def run(self, fn, args, kwargs):
         """Run fn(*args, **kwargs) on the worker and serve its requests until it is done; returns or raises what it
@@ -987,7 +988,7 @@ class _Session:
                 _session = ui.terminal_runner = ui.prompter = None
         if self.abandoned:
             raise KeyboardInterrupt
-        for text in self.notes:  # no list showed them
+        for text in self.kept + [text for text, _ in self.notes]:  # no list showed the last ones
             print(text)
         value, error = self.result
         if error is None and self.interrupted:  # Ctrl-C after the last list
@@ -1182,13 +1183,14 @@ def one_app(fn):
     return run
 
 
-def queue_note(text):
+def queue_note(text, keep=False):
     """On an editor session's worker: show text (escape codes dropped, trimmed) on the status line of the session's
-    next list, after any other notes queued for it, and return True. Elsewhere False."""
+    next list, after any other notes queued for it, and return True. Elsewhere False. keep: also print it once the
+    app has closed, even when a list showed it (a link to keep)."""
     if not _in_session():
         return False
     if _ESCAPES.sub("", text).strip():
-        _session.notes.append(text)
+        _session.notes.append((text, keep))
     return True
 
 
@@ -1196,8 +1198,9 @@ def _run(model):
     """Show the list full screen until it is done; returns its result. Ctrl-C raises KeyboardInterrupt."""
     if _in_session():
         if _session.notes:
-            model.notice = " · ".join(_ESCAPES.sub("", text).strip() for text in _session.notes), "yellow"
+            model.notice = " · ".join(_ESCAPES.sub("", text).strip() for text, _ in _session.notes), "yellow"
             model.update()
+            _session.kept += [text for text, keep in _session.notes if keep]
             _session.notes = []
         result, error = _session.ask("list", model)
         if error is not None:
