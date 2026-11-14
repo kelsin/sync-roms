@@ -551,7 +551,7 @@ def edit_system(name, system, setup, to_fetch=None, card_usages=None):
             out.append((f"  🔗 {len(groups[key])} files", "dim"))
         elif key in bundled:
             out.append((f"  🔗 {len(bundled[key]) + 1} files", "dim"))
-        if key in notes:
+        if key in notes:  # the note ends in the set's emoji and name (edit.cover_notes)
             out.append((f"  {notes[key].split(': ', 1)[-1]}", "cyan" if state else "dim"))
         if key in locked_from:
             out.append((f"  {locked_from[key]}", "cyan"))

@@ -29,8 +29,8 @@ set_text = store.set_text  # the format of a set's file lives in store
 def edit_one(game_set, systems, keys_of):
     """Edit one set: remove games, add games from a system or another set, change categories, rename."""
     names = {s["bucket"]: s["name"] for s in systems}
-    label = f"{themeart.set_emoji(game_set)} {game_set['name']}"
     while True:
+        label = f"{themeart.set_emoji(game_set)} {game_set['name']}"  # a rename below changes it
         i = picker.filter_list(f"✏️  {label} (Esc = back)",
                                [f"Games in this set ({len(game_set['games'])}): switch some off",
                                 "Add games from a system", "Add games from a set", "Change a game's category",
