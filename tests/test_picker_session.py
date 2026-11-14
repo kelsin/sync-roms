@@ -442,6 +442,7 @@ class Session(unittest.TestCase):
         from textual import events
         at_work, go = threading.Event(), threading.Event()
         threads = []
+        handler = signal.getsignal(signal.SIGINT)
 
         def editor():
             picker.filter_list("A", ["a0"])
@@ -460,7 +461,7 @@ class Session(unittest.TestCase):
             self.run_editor(editor, script)
         self.assertEqual(self.events, [True, "app closed"])
         self.assertTrue(threads[0].is_alive())  # still in its step
-        self.assertIs(signal.getsignal(signal.SIGINT), signal.default_int_handler)
+        self.assertIs(signal.getsignal(signal.SIGINT), handler)
         go.set()
         threads[0].join(10)
         self.assertFalse(threads[0].is_alive())
@@ -754,6 +755,8 @@ class Session(unittest.TestCase):
         self.assertEqual(self.events, ["app closed"])
 
     def test_sigint_at_a_prompt_raises_in_it(self):
+        handler = signal.getsignal(signal.SIGINT)
+
         def answer(prompt=""):
             signal.raise_signal(signal.SIGINT)
             return "y"
@@ -770,7 +773,7 @@ class Session(unittest.TestCase):
             await pilot.press("enter")
         with mock.patch("builtins.input", answer):
             self.assertEqual(self.run_editor(editor, script), "interrupted")
-        self.assertIs(signal.getsignal(signal.SIGINT), signal.default_int_handler)
+        self.assertIs(signal.getsignal(signal.SIGINT), handler)
 
     def test_a_sigint_while_the_editor_works_counts_as_the_key(self):
         for presses, outcome in ((1, "interrupted"), (2, KeyboardInterrupt)):
