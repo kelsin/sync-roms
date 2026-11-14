@@ -84,7 +84,8 @@ def _load(system):
 
 
 def title(key):
-    """A storage key's display name: the proper name for a MAME or FBNeo set or a PICO-8 cart, else the file name without extension."""
+    """A storage key's display name: the proper name for a MAME or FBNeo set or a PICO-8 cart,
+    else the file name without extension."""
     global _scraped, _clones
     system, _, rest = key.partition("/")
     if system not in SYSTEMS:
