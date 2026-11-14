@@ -201,11 +201,11 @@ class SyncSmokeTest(RealDataDirGuard):
 
     ZIP = "pico-8_0.2.7_raspi.zip"
 
-    def run_pico8(self, games, copied, dry_run=False, prepare=None, asked=None):
+    def run_pico8(self, games, copied, dry_run=False, prepare=None, asked=None, device=None, extra_systems=()):
         """Sync a Knulli card with the given pico8 games while storage holds the PICO-8 zip; copied gets the zip's card path."""
         pico = {"name": "PICO-8", "bucket": "pico8", "folders": {"knulli": "pico8"}, "bios": {"files": []}, "games": games}
         layouts = {"knulli": {"label": "Knulli", "roms_dir": "roms", "bios_dir": "bios"}}
-        manifest = {**MANIFEST, "layouts": layouts, "systems": [pico]}
+        manifest = {**MANIFEST, "layouts": layouts, "systems": [pico, *extra_systems], "devices": [device] if device else MANIFEST.get("devices", [])}
         files = inventory.files
         card_dir = []
 
@@ -223,7 +223,7 @@ class SyncSmokeTest(RealDataDirGuard):
                 prepare(card)
         patches = ((store, {"load_manifest": lambda names=(): manifest, "load_cards": REAL_LOAD_CARDS}),
                    (cli, {"free_space": lambda path: 10**9}),
-                   (cli.picker, {"saved_setup": lambda *a: (None, "knulli")}),
+                   (cli.picker, {"saved_setup": lambda *a: (device, "knulli")}),
                    (inventory, {"files": fake_files}),
                    (s3, {"download": download,
                          "list_sizes": lambda prefix, sizes=True: {"pico8/a.p8.png": 5} if prefix == "pico8/" else {}}),
@@ -244,6 +244,23 @@ class SyncSmokeTest(RealDataDirGuard):
             store.update_card(os.path.basename(card), pico8=self.ZIP)
         asked = []
         self.run_pico8([{"bucket": "pico8/a.p8.png"}], [], prepare=prepare, asked=asked)
+        text = " ".join(asked) + self.out.getvalue()
+        self.assertIn("other.p8", text)
+        self.assertNotIn("Splore.png", text)
+        self.assertNotIn(self.ZIP, text)
+
+    def test_pico8_installer_files_kept_when_the_device_drops_pico8(self):
+        gba = {"name": "Game Boy Advance", "bucket": "gba", "folders": {"knulli": "gba"}, "bios": {"files": []}, "games": [{"bucket": "gba/Game.zip"}]}
+        device = {"id": "x", "name": "X", "systems": ["gba"], "note": "", "firmwares": ["knulli"]}
+
+        def prepare(card):
+            folder = os.path.join(card, "roms", "pico8")
+            os.makedirs(folder)
+            for n in ("Splore.png", self.ZIP, "other.p8"):
+                open(os.path.join(folder, n), "w").close()
+            store.update_card(os.path.basename(card), pico8=self.ZIP)
+        asked = []
+        self.run_pico8([], [], prepare=prepare, asked=asked, device=device, extra_systems=[gba])
         text = " ".join(asked) + self.out.getvalue()
         self.assertIn("other.p8", text)
         self.assertNotIn("Splore.png", text)

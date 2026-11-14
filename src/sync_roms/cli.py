@@ -975,7 +975,8 @@ def sync_card(args):
         dest_discs[dest_of(t)].update(discs_of(t))
         if available(t) and not unzip:
             dest_bios[dest_of(t)].update(rom_bios_names(t))
-    pico8_dests = {dest_of(t) for t in systems if t["bucket"] == "pico8"}
+    pico8_dests = {os.path.join(roms_dir, t["folders"][layout_name]) for t in systems + dropped
+                   if t["bucket"] == "pico8" and t["folders"].get(layout_name)}
     for dest in sorted({dest_of(s) for s in systems if s["bucket"] in chosen_ids or not available(s)} | dropped_dests):
         extras += downloads.find_extras(dest, dest_keys[dest], unzip, onion, disc_dir, dest_discs[dest], dest_bios[dest] | (pico8.keep_in(dest, card) if dest in pico8_dests else set()))
 
