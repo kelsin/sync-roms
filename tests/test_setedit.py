@@ -137,7 +137,30 @@ class PullRequest(unittest.TestCase):
         self.assertFalse(os.path.exists(seen["tmp"]))
 
 
+class NeedTools(unittest.TestCase):
+    def test_a_missing_tool_exits_with_its_reason(self):
+        for in_session, logged_in in ((False, True), (True, True), (True, False)):
+            with self.subTest(in_session=in_session, logged_in=logged_in), \
+                    mock.patch.object(setedit.shutil, "which", return_value=None if logged_in else "x"), \
+                    mock.patch.object(setedit.subprocess, "run", return_value=mock.Mock(returncode=0 if logged_in else 1)), \
+                    mock.patch.object(picker, "queue_note", return_value=in_session) as queued, \
+                    mock.patch.object(ui, "fail", side_effect=SystemExit(3)) as failed, \
+                    self.assertRaises(SystemExit) as stop:
+                setedit.need_tools()
+            self.assertEqual(stop.exception.code, 3)
+            reason = "isn't installed" if logged_in else "isn't logged in"
+            self.assertIn(reason, queued.call_args.args[0])  # in a session: a note on the menu
+            self.assertEqual(failed.called, not in_session)  # else on stderr, as before
+            if not in_session:
+                self.assertIn(reason, failed.call_args.args[0])
+
+
 class Editor(unittest.TestCase):
+    def setUp(self):
+        patch = mock.patch.object(edit, "note")  # what the editor says at its end
+        self.note = patch.start()
+        self.addCleanup(patch.stop)
+
     def test_new_set_flow_opens_a_pr(self):
         before = {"old": {"name": "Old", "description": "", "games": games()}}
         picks = iter([1, None])  # "New set" (after the one existing set), then Esc to review
@@ -156,6 +179,7 @@ class Editor(unittest.TestCase):
             self.assertEqual(setedit.edit_sets(), 0)
         self.assertEqual([(k, s) for k, s, _ in opened["found"]], [("new", "my-set")])
         self.assertEqual(opened["after"]["my-set"]["description"], "about it")
+        self.assertIn("PR opened: url", self.note.call_args.args[0])
 
     def test_ctrl_c_with_changes_goes_to_the_review(self):
         before = {"old": {"name": "Old", "description": "", "games": games()}}

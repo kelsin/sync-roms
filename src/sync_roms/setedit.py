@@ -135,11 +135,16 @@ def print_changes(found):
 # --- The pull request --------------------------------------------------------------------------------
 
 def need_tools():
-    for tool in ("git", "gh"):
-        if not shutil.which(tool):
-            ui.fail(f"{tool} isn't installed, and opening a PR needs both git and the GitHub CLI (gh).")
-    if subprocess.run(["gh", "auth", "status"], capture_output=True, stdin=subprocess.DEVNULL).returncode:
-        ui.fail("gh isn't logged in. Run `gh auth login` first.")
+    """Exit (code 3) unless git and gh are installed and gh is logged in; in an editor session the reason is a note,
+    so the menu the editor returns to shows it."""
+    problem = next((f"{tool} isn't installed, and opening a PR needs both git and the GitHub CLI (gh)."
+                    for tool in ("git", "gh") if not shutil.which(tool)), None)
+    if not problem and subprocess.run(["gh", "auth", "status"], capture_output=True, stdin=subprocess.DEVNULL).returncode:
+        problem = "gh isn't logged in. Run `gh auth login` first."
+    if problem and picker.queue_note(ui.red(f"❌ {problem}")):
+        raise SystemExit(3)
+    if problem:
+        ui.fail(problem)
 
 
 @ui.uses_terminal  # git and gh may ask (a passphrase, a login)
@@ -261,11 +266,11 @@ def edit_working(systems, before, working, state):
             continue
         if i == n + 2:
             if not edited or ui.confirm("Discard your pending changes and quit?", default=False):
-                print(ui.yellow("👋 Quit without saving."))
+                edit.note(ui.yellow("👋 Quit without saving."))
                 return 0
             continue
         if not found:
-            print(ui.yellow("👋 No changes, nothing opened."))
+            edit.note(ui.yellow("👋 No changes, nothing opened."))
             return 0
         empty = [sid for kind, sid, _ in found if kind != "removed" and not working[sid]["games"]]
         if empty:
@@ -278,7 +283,7 @@ def edit_working(systems, before, working, state):
             state["review"] = False
             continue
         if answer == "d":
-            print(ui.yellow("👋 Not opened."))
+            edit.note(ui.yellow("👋 Not opened."))
             return None if state["review"] else 0
-        print(ui.green("🎉 PR opened: ") + open_pr(working, found))
+        edit.note(ui.green("🎉 PR opened: ") + open_pr(working, found))
         return None if state["review"] else 0

@@ -210,7 +210,7 @@ def save(working, changed, deleted):
     for cid in deleted:
         colls.delete_collection(cid)
         colls.remove_from_cards(cid)
-    print(ui.green(f"💖 Saved to {colls.collections_dir()}"))
+    edit.note(ui.green(f"💖 Saved to {colls.collections_dir()}"))
 
 
 def edit_working(systems, before, working):
@@ -252,11 +252,11 @@ def edit_working(systems, before, working):
             continue
         if i == n + 2:
             if not (changed or deleted) or ui.confirm("Discard your pending changes and quit?", default=False):
-                print(ui.yellow("👋 Quit without saving."))
+                edit.note(ui.yellow("👋 Quit without saving."))
                 return 0
             continue
         if not (changed or deleted):
-            print(ui.yellow("👋 No changes, nothing saved."))
+            edit.note(ui.yellow("👋 No changes, nothing saved."))
             return 0
         save(working, changed, deleted)
         return 0
