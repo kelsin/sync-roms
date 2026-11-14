@@ -35,6 +35,7 @@ class Session(unittest.TestCase):
         self.runs = []  # one entry per App.run
         self.events = []
         self.while_suspended = None  # called with the app as it suspends
+        self.while_resuming = None  # called with the app as it resumes
         for p in (mock.patch.object(ui, "has_terminal", return_value=True),
                   mock.patch.object(picker, "_draws_images", return_value=False)):
             p.start()
@@ -60,6 +61,8 @@ class Session(unittest.TestCase):
                 self.while_suspended(app)
             yield
             sys.stdout, sys.stderr = capture
+            if self.while_resuming:
+                self.while_resuming(app)
             self.events.append("resume")
         cls = picker._app_class()
         with mock.patch.object(cls, "run", run), mock.patch.object(cls, "suspend", suspend):
@@ -399,6 +402,61 @@ class Session(unittest.TestCase):
             await wait_for(pilot, lambda: showing(app, "A"))
             await pilot.press("enter")
         with mock.patch("builtins.input", answer):
+            self.assertEqual(self.run_editor(editor, script), "interrupted")
+
+    def test_ctrl_c_on_working_drops_the_keys_typed_ahead(self):
+        def editor():
+            picker.filter_list("A", ["a0"])
+            try:
+                time.sleep(3)
+            except KeyboardInterrupt:  # an editor that goes on to a list after the interrupt
+                pass
+            return picker.filter_list("B", ["b0", "b1"])
+
+        async def script(app, pilot):
+            await wait_for(pilot, lambda: showing(app, "A"))
+            await pilot.press("enter")
+            await wait_for(pilot, lambda: type(app.screen).__name__ == "_WorkingScreen")
+            await pilot.press("j", "enter", "ctrl+c")
+            await wait_for(pilot, lambda: showing(app, "B"))
+            await pilot.pause(0.1)
+            self.assertTrue(showing(app, "B"))
+            await pilot.press("enter")
+        self.assertEqual(self.run_editor(editor, script), 0)
+
+    def test_a_replayed_key_that_opens_help_drops_the_rest(self):
+        def editor():
+            picker.filter_list("A", ["a0"])
+            time.sleep(0.4)
+            return picker.filter_list("B", ["b0", "b1"])
+
+        async def script(app, pilot):
+            await wait_for(pilot, lambda: showing(app, "A"))
+            await pilot.press("enter")
+            await wait_for(pilot, lambda: type(app.screen).__name__ == "_WorkingScreen")
+            await pilot.press("question_mark", "j", "j", "enter")
+            await wait_for(pilot, lambda: type(app.screen).__name__ == "_HelpScreen")
+            await pilot.pause(0.1)
+            await pilot.press("escape")
+            await wait_for(pilot, lambda: showing(app, "B"))
+            await pilot.press("enter")
+        self.assertEqual(self.run_editor(editor, script), 0)
+
+    def test_a_ctrl_c_as_the_app_resumes_interrupts_the_next_list(self):
+        self.while_resuming = lambda app: app.session.interrupt()  # SIGINT as the app comes back, after the prompts
+
+        def editor():
+            picker.filter_list("A", ["a0"])
+            ui.confirm("Delete?", default=False)
+            try:
+                picker.filter_list("B", ["b0"])
+            except KeyboardInterrupt:
+                return "interrupted"
+
+        async def script(app, pilot):
+            await wait_for(pilot, lambda: showing(app, "A"))
+            await pilot.press("enter")
+        with mock.patch("builtins.input", return_value="n"):
             self.assertEqual(self.run_editor(editor, script), "interrupted")
 
     def test_the_worker_always_tells_the_main_thread_it_ended(self):

@@ -637,6 +637,8 @@ def _app_class():
             typed, self.typeahead = self.typeahead, []
             for event in typed:
                 self.session_input(event)
+                if not self.done and self.screen is not self.list_screen:  # it opened help: the rest is dropped
+                    break
 
         def suspending(self):
             """The app has just suspended: what its input read as it stopped, and keys typed ahead, were typed before
@@ -663,7 +665,8 @@ def _app_class():
                     self.late_ctrl_c()
                 return
             if self.done:
-                if k == "ctrl+c":
+                if k == "ctrl+c":  # like a terminal's Ctrl-C, it also discards what was typed ahead
+                    self.typeahead = []
                     self.session.interrupt()
                 elif k == "ctrl+z":
                     self.action_suspend_process()
