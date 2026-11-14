@@ -46,8 +46,10 @@ class Session(unittest.TestCase):
         self.while_resuming = None  # called with the app as it resumes
         self.as_app_starts = None  # called before the app has the terminal
         self.as_app_closes = None  # called with the app once it has closed, before the session notices
+        self.now = 0.0  # the session's clock for Ctrl-C: it only moves when a test moves it
         for p in (mock.patch.object(ui, "has_terminal", return_value=True),
                   mock.patch.object(picker, "_draws_images", return_value=False),
+                  mock.patch.object(picker, "_now", lambda: self.now),
                   # what a session that ended without its editor (a second Ctrl-C) leaves in place, put back after
                   mock.patch.object(picker, "_session", None), mock.patch.object(ui, "terminal_runner", None),
                   mock.patch.object(sys, "stdout", sys.stdout), mock.patch.object(sys, "stderr", sys.stderr)):
@@ -391,6 +393,10 @@ class Session(unittest.TestCase):
             seen.append(lines())
             await pilot.press("ctrl+c")
             seen.append(lines())
+            self.now += 1  # from now on another Ctrl-C quits, and the screen says so
+            app.call_later(app.stopping)
+            await wait_for(pilot, lambda: picker.QUIT_NOW in lines()[1])
+            seen.append(lines())
             go.set()
             await wait_for(pilot, handling.is_set)
             await wait_for(pilot, lambda: not lines()[1])
@@ -398,9 +404,66 @@ class Session(unittest.TestCase):
             handled.set()
         with contextlib.redirect_stdout(io.StringIO()):
             self.run_editor(editor, script)
-        self.assertEqual(seen, [["📡 Listing gba ...", ""], ["📡 Listing gba ...", picker.STOPPING], ["📡 Listing gba ...", ""]])
+        self.assertEqual(seen, [["📡 Listing gba ...", ""], ["📡 Listing gba ...", picker.STOPPING],
+                                ["📡 Listing gba ...", picker.STOPPING + "\n" + picker.QUIT_NOW], ["📡 Listing gba ...", ""]])
         self.assertIn("stopping when this step ends", picker.STOPPING)
-        self.assertIn("Ctrl-C again", picker.STOPPING)
+        self.assertIn("Ctrl-C again to quit now", picker.QUIT_NOW)
+
+    def test_two_ctrl_c_in_one_write_while_working_interrupt_once_and_the_handler_saves(self):
+        from textual import events
+        at_work, go = threading.Event(), threading.Event()
+
+        def editor():
+            picker.filter_list("A", ["a0"])
+            at_work.set()
+            wait(go)
+            try:
+                picker.filter_list("B", ["b0"])
+            except KeyboardInterrupt:  # as the card editor does: it saves the toggles of the list that was open
+                self.events.append("handler saved")
+                return picker.filter_list("C", ["c0", "c1"], cursor=1)
+
+        async def script(app, pilot):
+            await wait_for(pilot, lambda: showing(app, "A"))
+            await pilot.press("enter")
+            await wait_for(pilot, at_work.is_set)
+            app.post_message(events.Key("ctrl+c", "\x03"))
+            app.post_message(events.Key("ctrl+c", "\x03"))
+            await pilot.pause()
+            self.events.append(app.is_running and working(app))
+            go.set()
+            await wait_for(pilot, lambda: showing(app, "C"))
+            await pilot.press("enter")
+        self.assertEqual(self.run_editor(editor, script), 1)
+        self.assertEqual(self.events, [True, "handler saved", "app closed"])
+
+    def test_a_held_ctrl_c_while_working_does_not_quit(self):
+        from textual import events
+        at_work, go = threading.Event(), threading.Event()
+
+        def editor():
+            picker.filter_list("A", ["a0"])
+            at_work.set()
+            wait(go)
+            try:
+                picker.filter_list("B", ["b0"])
+            except KeyboardInterrupt:
+                return "interrupted", picker.filter_list("C", ["c0", "c1"], cursor=1)
+
+        async def script(app, pilot):
+            await wait_for(pilot, lambda: showing(app, "A"))
+            await pilot.press("enter")
+            await wait_for(pilot, at_work.is_set)
+            for _ in range(18):  # the key repeats every 30 ms for half a second
+                app.post_message(events.Key("ctrl+c", "\x03"))
+                await pilot.pause()
+                self.now += 0.03
+            self.events.append(app.is_running and working(app))
+            go.set()
+            await wait_for(pilot, lambda: showing(app, "C"))
+            await pilot.press("enter")
+        self.assertEqual(self.run_editor(editor, script), ("interrupted", 1))
+        self.assertEqual(self.events, [True, "app closed"])
 
     def test_an_editor_that_ends_after_a_ctrl_c_while_working_ends_interrupted(self):
         at_work, go = threading.Event(), threading.Event()
@@ -438,7 +501,7 @@ class Session(unittest.TestCase):
             self.run_editor(editor, script)
         self.assertEqual(self.events, ["editor done", "app closed"])
 
-    def test_a_second_ctrl_c_while_working_ends_the_session_without_the_editor(self):
+    def test_a_second_ctrl_c_a_second_later_while_working_ends_the_session_without_the_editor(self):
         from textual import events
         at_work, go = threading.Event(), threading.Event()
         threads = []
@@ -455,7 +518,10 @@ class Session(unittest.TestCase):
             await pilot.press("enter")
             await wait_for(pilot, at_work.is_set)
             await pilot.press("ctrl+c")
+            self.now = 0.99
+            await pilot.press("ctrl+c")  # within a second of the first: the same gesture
             self.events.append(app.is_running)
+            self.now = 1.0
             app.post_message(events.Key("ctrl+c", "\x03"))
         with self.assertRaises(KeyboardInterrupt):
             self.run_editor(editor, script)
@@ -492,6 +558,7 @@ class Session(unittest.TestCase):
             await pilot.press("enter")
             await wait_for(pilot, at_work.is_set)
             await pilot.press("ctrl+c")
+            self.now += 1
             app.post_message(events.Key("ctrl+c", "\x03"))
         out = io.StringIO()
         with contextlib.redirect_stdout(out), contextlib.redirect_stderr(out), mock.patch("builtins.input") as asked, \
@@ -801,6 +868,7 @@ class Session(unittest.TestCase):
                     if presses == 1:
                         go.set()
                     else:
+                        self.now += 1
                         signal.raise_signal(signal.SIGINT)
                 if outcome == "interrupted":
                     self.assertEqual(self.run_editor(editor, script), outcome)
@@ -837,6 +905,7 @@ class Session(unittest.TestCase):
 
         def editor():
             kick()
+            kick()  # a double press: within a second of the first it is the same gesture
             try:
                 picker.filter_list("A", ["a0"])
             except KeyboardInterrupt:
@@ -852,6 +921,7 @@ class Session(unittest.TestCase):
         def editor():
             threads.append(threading.current_thread())
             kick()
+            self.now += 1
             kick()
             wait(go)
 
@@ -872,6 +942,7 @@ class Session(unittest.TestCase):
             ui.confirm("Go on?")  # the app stays suspended after it, until the next list
             threads.append(threading.current_thread())
             kick()
+            self.now += 1
             kick()
             wait(go)
 
@@ -888,6 +959,7 @@ class Session(unittest.TestCase):
     def test_ctrl_c_twice_while_the_editor_waits_for_a_prompt_only_interrupts_it(self):
         def twice(app):  # as the app suspends: the editor is not at work, it waits for the prompt
             app.session.interrupt()
+            self.now += 1
             app.session.interrupt()
         self.while_suspended = twice
 

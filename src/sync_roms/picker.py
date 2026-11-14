@@ -7,6 +7,7 @@ import re
 import signal
 import sys
 import threading
+import time
 import unicodedata
 
 from . import ui
@@ -84,8 +85,10 @@ HELP_HINT = "? help · "  # starts every hint line, so a narrow list cuts it las
 TYPING_HINT = "Enter keep filter · Esc clear · ^N/^P move · ^A/^E ^B/^F ^K ^W ^U edit"
 SINGLE_TYPING_HINT = "Enter pick · Tab keep filter · Esc clear · ^N/^P move · ^A/^E ^K ^W ^U edit"
 HELP_FOOTER = "j/k ↑/↓ PgUp/PgDn scroll · Esc/q/? close"
-# under "Working..." in an editor session, after a Ctrl-C the editor has not got yet
-STOPPING = "🛑 Ctrl-C: stopping when this step ends. Press Ctrl-C again to quit now: unsaved changes in the open editor are lost."
+# under "Working..." in an editor session, after a Ctrl-C the editor has not got yet; the second line once it is true
+STOPPING = "🛑 Ctrl-C: stopping when this step ends."
+QUIT_NOW = "   Press Ctrl-C again to quit now: unsaved changes in the open editor are lost."
+QUIT_AFTER = 1  # seconds after that Ctrl-C from which another one quits; sooner, it is the same press (a double tap, a held key)
 
 
 def help_lines(multi, hint, hidden_count=False, has_note=False, key_help=None):
@@ -601,6 +604,7 @@ def _app_class():
             self.ended_at = 0  # in a session: when the last list ended (keys stamped earlier were typed for it)
             self.ready = False  # in a session: the list screen is up and composed
             self.typeahead = []  # in a session: keys typed while no list was up yet, for the next one
+            self.quit_timer = None  # in a session: shows the "quit now" line once another Ctrl-C would quit
 
         def get_default_screen(self):
             if self.session:
@@ -705,13 +709,19 @@ def _app_class():
                 self.session.interrupt()
                 self.stopping()
 
-        def stopping(self):
+        def stopping(self, due=False):
             """Show where the session's Ctrl-C stands (_Session.interrupt): its line under "Working..." while the
-            editor has not got it; the end of the app once a second one abandoned the editor."""
+            editor has not got it, and a second line from when another Ctrl-C would quit (due: that time has come);
+            the end of the app once one abandoned the editor."""
             if self.session.abandoned:
                 return self.exit()
+            wait = self.session.quit_wait()
+            text = "" if wait is None else STOPPING if wait and not due else STOPPING + "\n" + QUIT_NOW
             for line in self.screen_stack[0].query("#stopping"):  # none before the working screen is composed
-                line.update(Text(STOPPING if self.session.interrupted else "", "yellow"))
+                line.update(Text(text, "yellow"))
+            if self.quit_timer:
+                self.quit_timer.stop()
+            self.quit_timer = self.set_timer(wait, lambda: self.stopping(True)) if wait and not due else None
 
         def deliver(self, reply):
             """Answer reply with the Ctrl-C that waits for the editor's next request, if one does."""
@@ -832,6 +842,11 @@ _session = None  # the editor session (one_app) running now, if any
 _ESCAPES = re.compile(r"\x1b(\[[0-?]*[ -/]*[@-~]|\][^\x07\x1b]*(\x07|\x1b\\)|[0-~])")  # CSI, OSC, other ESC sequences
 
 
+def _now():
+    """The clock an editor session times Ctrl-C with, in seconds (one function, so tests can set it)."""
+    return time.monotonic()
+
+
 def _in_session():
     """Whether this thread is an editor session's worker."""
     return _session is not None and _session.worker == threading.get_ident()
@@ -860,9 +875,9 @@ class _Session:
     the main thread with the app suspended until the next list, so input, Ctrl-C and output between prompts work as
     without a session, and so do commands that may ask (ui.uses_terminal). What the worker prints while the app shows
     comes out, in order, when the normal screen is back; its last line shows under "Working...". Ctrl-C while the
-    editor works reaches it as KeyboardInterrupt from its next request; a second one before that abandons it: the
-    session ends at once, and the worker, left to itself, gets KeyboardInterrupt from every request and prints
-    nothing (interrupt). Nothing is ever raised in the worker but by its own requests."""
+    editor works reaches it as KeyboardInterrupt from its next request; another one a second or more later, before
+    that request, abandons it: the session ends at once, and the worker, left to itself, gets KeyboardInterrupt from
+    every request and prints nothing (interrupt). Nothing is ever raised in the worker but by its own requests."""
 
     def __init__(self):
         self.requests = queue.SimpleQueue()  # the worker's (kind, payload, reply) while no app takes them; None: no more
@@ -875,7 +890,8 @@ class _Session:
         self.prompting = False  # the main thread runs a prompt (at_terminal): Ctrl-C raises KeyboardInterrupt there
         self.working = True  # the worker runs editor code: it is not waiting for a request's answer, and has not ended
         self.interrupted = False  # a Ctrl-C the worker gets from its next request (or once the editor is done)
-        self.abandoned = False  # a second Ctrl-C ended the session without waiting for the worker
+        self.interrupted_at = 0  # when it came (_now)
+        self.abandoned = False  # a later Ctrl-C ended the session without waiting for the worker
         self.tail = ""  # the worker's printed text after its last newline
         self.draws = None  # _draws_images(), asked when the first list with a preview comes, on the normal screen
         self.streams = None  # sys.stdout and sys.stderr from before the app started
@@ -949,12 +965,19 @@ class _Session:
 
     def interrupt(self):
         """Ctrl-C while neither a list nor a prompt is up (main thread): the worker gets KeyboardInterrupt from its
-        next request. A second one while it is still at work on the same step abandons it: the session ends now."""
+        next request. Another one QUIT_AFTER seconds or more later, while the worker is still at work on the same
+        step, abandons it: the session ends now. One that comes sooner counts as the same press."""
         with self.lock:
-            if self.interrupted and self.working:
+            if not self.interrupted:
+                self.interrupted, self.interrupted_at = True, _now()
+            elif self.working and not self.quit_wait():
                 self.abandoned = True
                 self.requests.put(None)  # for the main thread, if it waits for the worker (safe from a signal handler)
-            self.interrupted = True
+
+    def quit_wait(self):
+        """On the main thread: the seconds until another Ctrl-C quits (0: it does now), or None when no Ctrl-C waits
+        for the worker."""
+        return max(0, self.interrupted_at + QUIT_AFTER - _now()) if self.interrupted else None
 
     def work(self, fn, args, kwargs):
         """The worker: run the editor, then end the app and the main thread's loop."""

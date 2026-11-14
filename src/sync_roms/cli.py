@@ -113,7 +113,8 @@ TOPICS = {
   l picks collections, S opens the Surprise menu, D clears the card. In a single-choice list, Enter while typing a
   filter picks the highlighted row (Tab keeps the filter instead).
   Ctrl-C while an editor is busy between two lists ("Working...") stops it when that step ends, as Ctrl-C in a list
-  does; a second Ctrl-C before that quits at once, and unsaved changes in the open editor are lost.
+  does; another Ctrl-C a second or more later, with the step still running, quits at once, and unsaved changes in
+  the open editor are lost.
 """,
     "cards": """
   sync-roms cards edit                        same as `games edit`
