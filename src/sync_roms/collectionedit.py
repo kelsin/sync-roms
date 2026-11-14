@@ -75,8 +75,10 @@ def edit_one(collection, systems, keys_of):
             if not rows:
                 edit.note(ui.yellow("ℹ️  This collection has no games yet."))
                 continue
-            edit.toggle_games(f"✏️  {collection['name']} — ✅ in the collection, ⬜ remove it", rows)
-            collection["games"] = reconcile(collection["games"], shown)
+            try:
+                edit.toggle_games(f"✏️  {collection['name']} — ✅ in the collection, ⬜ remove it", rows)
+            finally:  # Ctrl-C too: the toggles made are kept
+                collection["games"] = reconcile(collection["games"], shown)
         elif i == 1:
             options = stocked(systems)
             j = picker.filter_list("✏️  Add games from which system?", [s["name"] for s in options], extras=file_counts(options),
@@ -96,14 +98,19 @@ def edit_one(collection, systems, keys_of):
                 return ((filt is None or key in filt[1]) and (past is None or key in past)
                         and (not wanted or metafilter.matches(meta.get().get(key, {}), wanted)))
 
+            interrupted = False
             while True:
                 parts = ([f"📦 {filt[0]} only"] if filt else []) + (["🎁 past surprises only"] if past is not None else []) \
                     + ([metafilter.describe(meta_filt)] if meta_filt else [])
-                pressed = edit.toggle_games(
-                    f"✏️  {s['name']} — ✅ in {collection['name']}, ⬜ in storage only",
-                    [r for r in all_rows if keep(r[1])],
-                    hotkeys=(SET_KEY, META_KEY, PAST_SURPRISE_KEY, CLEAR_KEY), hint=GAMES_HINT, place=place,
-                    filters=f"{' · '.join(parts)} (c shows all)" if parts else "")
+                try:
+                    pressed = edit.toggle_games(
+                        f"✏️  {s['name']} — ✅ in {collection['name']}, ⬜ in storage only",
+                        [r for r in all_rows if keep(r[1])],
+                        hotkeys=(SET_KEY, META_KEY, PAST_SURPRISE_KEY, CLEAR_KEY), hint=GAMES_HINT, place=place,
+                        filters=f"{' · '.join(parts)} (c shows all)" if parts else "")
+                except KeyboardInterrupt:  # Ctrl-C: the toggles made are kept, with no category
+                    interrupted = True
+                    break
                 if pressed == PAST_SURPRISE_KEY:
                     past = surprise.past_keys(s["bucket"]) or None
                     if past is None:
@@ -121,9 +128,11 @@ def edit_one(collection, systems, keys_of):
                 else:
                     break
             added = {g["bucket"] for g in s["games"]} - had
-            category = ask_category(collection["games"], f"{len(added)} new game(s)") if added else ""
+            category = ask_category(collection["games"], f"{len(added)} new game(s)") if added and not interrupted else ""
             collection["games"] = reconcile(collection["games"], shown, category)
             fold_discs(collection["games"], keys_of(s["bucket"]))
+            if interrupted:
+                raise KeyboardInterrupt
         elif i == 2:
             add_from_set(collection, store.load_sets(), shown, keys_of)
         elif i == 3:

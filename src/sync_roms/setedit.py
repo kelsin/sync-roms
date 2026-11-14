@@ -42,8 +42,10 @@ def edit_one(game_set, systems, keys_of):
             if not rows:
                 edit.note(ui.yellow("ℹ️  This set has no games yet."))
                 continue
-            edit.toggle_games(f"✏️  {game_set['name']} — ✅ in the set, ⬜ remove it", rows)
-            game_set["games"] = reconcile(game_set["games"], shown)
+            try:
+                edit.toggle_games(f"✏️  {game_set['name']} — ✅ in the set, ⬜ remove it", rows)
+            finally:  # Ctrl-C too: the toggles made are kept
+                game_set["games"] = reconcile(game_set["games"], shown)
         elif i == 1:
             options = stocked(systems)
             j = picker.filter_list("✏️  Add games from which system?", [s["name"] for s in options], extras=file_counts(options),
@@ -52,11 +54,17 @@ def edit_one(game_set, systems, keys_of):
                 continue
             s = shown[options[j]["bucket"]]
             had = {g["bucket"] for g in s["games"]}
-            edit.toggle_games(f"✏️  {s['name']} — ✅ in {game_set['name']}, ⬜ in storage only",
-                              edit.system_rows(s, keys_of(s["bucket"])))
+            interrupted = False
+            try:
+                edit.toggle_games(f"✏️  {s['name']} — ✅ in {game_set['name']}, ⬜ in storage only",
+                                  edit.system_rows(s, keys_of(s["bucket"])))
+            except KeyboardInterrupt:  # Ctrl-C: the toggles made are kept, with no category
+                interrupted = True
             added = {g["bucket"] for g in s["games"]} - had
-            category = ask_category(game_set["games"], f"{len(added)} new game(s)") if added else ""
+            category = ask_category(game_set["games"], f"{len(added)} new game(s)") if added and not interrupted else ""
             game_set["games"] = reconcile(game_set["games"], shown, category)
+            if interrupted:
+                raise KeyboardInterrupt
         elif i == 2:
             add_from_set(game_set, [x for x in store.load_sets() if x["name"] != game_set["name"]], shown, keys_of)
         elif i == 3:

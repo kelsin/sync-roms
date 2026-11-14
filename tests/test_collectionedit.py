@@ -274,6 +274,68 @@ class Editor(DataDir):
         self.assertFalse(os.path.exists(self.path("collections")))
         self.assertIn("Not saved", str(out.call_args_list))
 
+    def interrupted(self, games, picks, lists, sets=()):
+        """Open collection favs (holding games) in the real collection editor; picks answer the single-choice lists,
+        lists holds per toggle list (labels to switch, what it then does: KeyboardInterrupt or a hotkey). Ctrl-C's save
+        question is answered yes. Returns the confirms asked and the ui.ask mock."""
+        collections.save_collection({"id": "favs", "name": "Favs", "games": games})
+        picks, lists, confirms = iter(picks), iter(lists), []
+        keys = {"gba": {"gba/Ruby.zip", "gba/Zelda.zip"}, "psx": DISCS}
+
+        def fake(title, labels, **kw):
+            if not kw.get("multi"):
+                return next(picks)
+            flip, then = next(lists)
+            kw["session"]["sel"] = [on != (label in flip) for label, on in zip(labels, kw["session"]["sel"])]
+            if then is KeyboardInterrupt:
+                raise KeyboardInterrupt
+            return (then, 0)
+
+        with mock.patch.object(store, "repo_json", return_value=SYSTEMS), mock.patch.object(picker, "filter_list", fake), \
+                mock.patch.object(store, "folder_keys", lambda bucket: keys.get(bucket, set())), \
+                mock.patch.object(store, "load_sets", return_value=list(sets)), \
+                mock.patch.object(inventory, "folders", return_value={"gba", "psx"}), \
+                mock.patch.object(inventory, "cached", return_value=None), \
+                mock.patch.object(collectionedit.cardedit, "Metadata"), \
+                mock.patch.object(ui, "ask") as ask, \
+                mock.patch.object(ui, "confirm", lambda text, **k: confirms.append(text) or True), \
+                mock.patch("builtins.print"), self.assertRaises(KeyboardInterrupt):
+            collectionedit.edit_collections()
+        return confirms, ask
+
+    def test_ctrl_c_keeps_the_open_lists_removals(self):
+        zelda = {"title": "Zelda", "system": "gba", "bucket": "gba/Zelda.zip"}
+        confirms, _ = self.interrupted([RUBY, zelda], [0, 0], [({"Game Boy Advance — Ruby"}, KeyboardInterrupt)])
+        self.assertEqual(len(confirms), 1)
+        self.assertEqual(self.read("collections/favs.json")["games"], [zelda])
+
+    def test_ctrl_c_keeps_the_add_games_lists_toggles_with_no_category(self):
+        # PlayStation: switch Crash on and press c, then switch FF7 on and Ctrl-C
+        confirms, ask = self.interrupted([RUBY], [0, 1, 1], [({"Crash.chd"}, "c"), ({"FF7.m3u"}, KeyboardInterrupt)])
+        ask.assert_not_called()  # no category question
+        self.assertEqual(len(confirms), 1)
+        self.assertEqual(self.read("collections/favs.json")["games"], [
+            RUBY, {"title": "Crash", "system": "psx", "bucket": "psx/Crash.chd"},
+            {"title": "FF7", "system": "psx", "bucket": "psx/FF7.m3u", "files": ["psx/FF7 (Disc 1).chd", "psx/FF7 (Disc 2).chd"]}])
+
+    def test_ctrl_c_keeps_the_add_from_a_set_lists_toggles_with_no_category(self):
+        game_set = {"id": "mix", "name": "Mix", "games": [
+            dict(RUBY), {"title": "FF7", "system": "psx", "bucket": "psx/FF7.m3u", "files": ["psx/FF7 (Disc 1).chd"]}]}
+        confirms, ask = self.interrupted([RUBY], [0, 2, 0], [({"Game Boy Advance — Ruby", "PlayStation — FF7"}, KeyboardInterrupt)],
+                                         sets=[game_set])
+        ask.assert_not_called()
+        self.assertEqual(len(confirms), 1)
+        self.assertEqual(self.read("collections/favs.json")["games"], [
+            {"title": "FF7", "system": "psx", "bucket": "psx/FF7.m3u", "files": ["psx/FF7 (Disc 1).chd"]}])
+
+    def test_ctrl_c_in_a_list_with_nothing_toggled_asks_nothing(self):
+        for picks in ([0, 0], [0, 1, 1], [0, 2, 0]):
+            with self.subTest(picks=picks):
+                game_set = {"id": "mix", "name": "Mix", "games": [dict(RUBY)]}
+                confirms, _ = self.interrupted([RUBY], picks, [(set(), KeyboardInterrupt)], sets=[game_set])
+                self.assertEqual(confirms, [])
+                self.assertEqual(self.read("collections/favs.json")["games"], [RUBY])
+
     def test_ctrl_c_without_changes_asks_nothing(self):
         confirms = []
         with mock.patch.object(ui, "confirm", lambda text, **k: confirms.append(text)), self.assertRaises(KeyboardInterrupt), \

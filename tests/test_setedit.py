@@ -222,6 +222,64 @@ class Editor(unittest.TestCase):
             setedit.edit_sets()
         choose.assert_not_called()
 
+    def interrupted(self, picks, lists, sets=()):
+        """Open set old (games()) in the real set editor; picks answer the single-choice lists, lists holds per toggle
+        list (labels to switch, what it then does: KeyboardInterrupt or a hotkey). The review opens the PR.
+        Returns the review prompts shown, the sets the PR got (None without one) and the ui.ask mock."""
+        before = {"old": {"name": "Old", "description": "", "games": games()}}
+        picks, lists, opened = iter(picks), iter(lists), {}
+        keys = {"gba": {"gba/A.zip", "gba/B.zip", "gba/D.zip", "gba/D2.zip"}, "gen": {"gen/C.zip", "gen/E.zip"}}
+
+        def fake(title, labels, **kw):
+            if not kw.get("multi"):
+                return next(picks)
+            flip, then = next(lists)
+            kw["session"]["sel"] = [on != (label in flip) for label, on in zip(labels, kw["session"]["sel"])]
+            if then is KeyboardInterrupt:
+                raise KeyboardInterrupt
+            return (then, 0)
+
+        with mock.patch.object(setedit, "need_tools"), mock.patch.object(setedit, "repo_sets", return_value=before), \
+                mock.patch.object(store, "repo_json", return_value=SYSTEMS), mock.patch.object(picker, "filter_list", fake), \
+                mock.patch.object(store, "folder_keys", lambda bucket: keys.get(bucket, set())), \
+                mock.patch.object(store, "load_sets", return_value=list(sets)), \
+                mock.patch.object(setedit, "stocked", lambda systems: systems), \
+                mock.patch.object(setedit, "file_counts", lambda systems: None), \
+                mock.patch.object(ui, "ask") as ask, mock.patch.object(ui, "choose", return_value="o") as choose, \
+                mock.patch("builtins.print"), \
+                mock.patch.object(setedit, "open_pr", lambda after, found: opened.update(after=after) or "url"), \
+                self.assertRaises(KeyboardInterrupt):
+            setedit.edit_sets()
+        return choose.call_count, opened.get("after"), ask
+
+    def test_ctrl_c_keeps_the_open_lists_removals(self):
+        reviews, after, _ = self.interrupted([0, 0], [({"Cave — Game Boy Advance — A", "Cave — Genesis — C"}, KeyboardInterrupt)])
+        self.assertEqual(reviews, 1)
+        self.assertEqual([g["bucket"] for g in after["old"]["games"]], ["gba/B.zip", "nes/Odd.zip"])
+
+    def test_ctrl_c_keeps_the_add_games_lists_toggles_with_no_category(self):  # Genesis: E on, C off, Ctrl-C
+        reviews, after, ask = self.interrupted([0, 1, 1], [({"E.zip", "C.zip"}, KeyboardInterrupt)])
+        ask.assert_not_called()  # no category question
+        self.assertEqual(reviews, 1)
+        self.assertEqual(after["old"]["games"], [g for g in games() if g["bucket"] != "gen/C.zip"]
+                         + [{"title": "E", "system": "gen", "bucket": "gen/E.zip"}])
+
+    def test_ctrl_c_keeps_the_add_from_a_set_lists_toggles_with_no_category(self):
+        mix = {"id": "mix", "name": "Mix", "games": [games()[0], {"title": "D", "system": "gba", "bucket": "gba/D.zip",
+                                                                  "files": ["gba/D2.zip"]}]}
+        reviews, after, ask = self.interrupted([0, 2, 0], [({"Cave — Game Boy Advance — A", "Game Boy Advance — D"}, KeyboardInterrupt)],
+                                               sets=[mix])
+        ask.assert_not_called()
+        self.assertEqual(reviews, 1)
+        self.assertEqual(after["old"]["games"], games()[1:] + [{"title": "D", "system": "gba", "bucket": "gba/D.zip",
+                                                                "files": ["gba/D2.zip"]}])
+
+    def test_ctrl_c_in_a_list_with_nothing_toggled_reviews_nothing(self):
+        mix = {"id": "mix", "name": "Mix", "games": [games()[0]]}
+        for picks in ([0, 0], [0, 1, 1], [0, 2, 0]):
+            with self.subTest(picks=picks):
+                self.assertEqual(self.interrupted(picks, [(set(), KeyboardInterrupt)], sets=[mix])[:2], (0, None))
+
     def test_command_is_wired(self):
         with mock.patch.object(setedit, "edit_sets", return_value=0) as run:
             self.assertEqual(commands.run(["sets", "edit"]), 0)
