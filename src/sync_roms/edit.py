@@ -3,7 +3,7 @@ import os
 import sys
 from collections import defaultdict
 
-from . import names, picker, previews, runtime, s3, store, ui, vita
+from . import names, picker, previews, runtime, s3, store, themeart, ui, vita
 
 
 @ui.uses_terminal
@@ -186,7 +186,7 @@ def cover_notes(sets_by_id, own_set_ids):
     keys = {}
     for sid in own_set_ids:
         for g in store.set_games(sets_by_id[sid]) if sid in sets_by_id else []:
-            keys.setdefault(g["bucket"], f"Full set: {sets_by_id[sid]['name']}")
+            keys.setdefault(g["bucket"], f"Full set: {themeart.set_emoji(sets_by_id[sid])} {sets_by_id[sid]['name']}")
     return keys
 
 
@@ -273,7 +273,7 @@ def edit_manifest():
     for game_set in store.load_sets():
         for g in game_set["games"]:
             if g.get("system") not in names:
-                print(ui.yellow(f"⚠️  Set {game_set['name']}: unknown system {g.get('system')!r}, skipped"), file=sys.stderr)
+                print(ui.yellow(f"⚠️  Set {themeart.set_emoji(game_set)} {game_set['name']}: unknown system {g.get('system')!r}, skipped"), file=sys.stderr)
 
     targets = {}  # card name -> {"label", "setup"}: a device/firmware change saved with the review (games save at once)
 

@@ -1,4 +1,4 @@
-"""Art Book Next artwork for custom collections (Surprise and the ones given art) on ES-DE and Knulli cards."""
+"""Art Book Next artwork for custom collections (Surprise and the ones given art) and sets on ES-DE and Knulli cards."""
 import json
 import unicodedata
 import http.client
@@ -14,6 +14,7 @@ from . import frontend, github, runtime, s3, store, ui
 THEME_DATA = os.path.join(store.REPO_DATA, "themes", "art-book-next")
 SURPRISE_ART = "surprise"
 DEFAULT_EMOJI = "💖"  # a collection with no art
+SET_EMOJI = "📦"  # a set with no emoji of its own yet
 # The Outline-style artwork a collection can use, by id: art/<id>.png; art.json has the labels the editor shows.
 # Logos are drawn from the outlines of the theme's logo font (logo-font.json, from Changa One: see OFL.txt).
 
@@ -65,10 +66,20 @@ def art_choices():
         return json.load(f)
 
 
-def art_emoji(art_id):
-    """The emoji that stands for a collection's art in the editors: its own, or DEFAULT_EMOJI when it has no art."""
+def art_emoji(art_id, default=DEFAULT_EMOJI):
+    """The emoji that stands for a piece of art in the editors: its own, or default when it has no art."""
     with open(os.path.join(THEME_DATA, "emoji.json"), encoding="utf-8") as f:
-        return json.load(f).get(art_id, DEFAULT_EMOJI) if art_id else DEFAULT_EMOJI
+        return json.load(f).get(art_id, default) if art_id else default
+
+
+def set_emoji(game_set):
+    """A set's emoji (its id in emoji.json), or SET_EMOJI when it has none. Display only, never stored."""
+    return art_emoji(game_set.get("id"), SET_EMOJI)
+
+
+def collection_emoji(collection):
+    """A collection's art emoji, or DEFAULT_EMOJI. Display only, never stored."""
+    return art_emoji(collection.get("art"))
 
 
 def art_png(art_id):

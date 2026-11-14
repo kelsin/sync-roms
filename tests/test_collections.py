@@ -158,6 +158,8 @@ class Selection(DataDir):
         self.assertEqual(sorted(locked), ["gba", "psx"])
         self.assertEqual(locked["gba"], [{"title": "Ruby", "bucket": "gba/Ruby.zip", "from": "💖 Favs"}])
         self.assertEqual([g["bucket"] for g in locked["psx"]], ["psx/FF7.m3u", "psx/FF7 (Disc 1).chd", "psx/FF7 (Disc 2).chd"])
+        by_id = {"favs": {**self.by_id()["favs"], "art": "surprise"}}
+        self.assertEqual(store.card_locked_games({"collections": ["favs"]}, by_id)["gba"][0]["from"], "🎁 Favs")
         self.assertEqual(store.card_locked_games({}, self.by_id()), {})
 
     def test_load_manifest_adds_them_after_picks_and_excluded_never_drops_them(self):

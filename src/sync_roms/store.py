@@ -240,10 +240,11 @@ def card_locked_games(entry, collections_by_id):
                 if all(g["bucket"] != key for g in seen):
                     seen.append({"title": game.get("title"), "bucket": key, "from": label})
 
+    from . import themeart  # here: themeart imports store
     for cid in ids if isinstance(ids, list) else ():
         coll = collections_by_id.get(cid)
         for game in (coll or {}).get("games", []):
-            add(game, f"💖 {coll['name']}")
+            add(game, f"{themeart.collection_emoji(coll)} {coll['name']}")
     if isinstance(entry, dict) and surprise.enabled(entry):
         picks = entry.get("surprises")
         for game in picks if isinstance(picks, list) else ():

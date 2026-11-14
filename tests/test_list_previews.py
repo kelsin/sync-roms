@@ -58,7 +58,7 @@ class ListPreviews(unittest.TestCase):
         fake, calls = capture([None])
         sets = [{"id": "pk", "name": "Pokemon", "games": []}]
         with mock.patch.object(picker, "filter_list", fake):
-            listedit.add_from_set(None, sets, None, None)
+            listedit.add_from_set(None, sets, None, None, "x")
         self.assertEqual(art(calls, 1), ["art-pk"])
 
     def test_add_games_from_which_system_previews_the_system(self):

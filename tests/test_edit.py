@@ -61,7 +61,7 @@ class Helpers(unittest.TestCase):
 
     def test_cover_notes(self):
         keys = edit.cover_notes(SETS, ["s"])
-        self.assertEqual(keys["gba/A.zip"], "Full set: Mix")
+        self.assertEqual(keys["gba/A.zip"], "Full set: 📦 Mix")
 
 
 class Saving(DataDir):
