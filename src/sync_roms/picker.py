@@ -1,6 +1,8 @@
 """Interactive pickers: full-screen list screens (Textual)."""
 import collections
 import functools
+import io
+import math
 import os
 import queue
 import re
@@ -194,6 +196,11 @@ def move_key(k, cur, last, view):
 
 
 POLL_MS = 200  # how often filter_list calls its poll while it waits for a key
+PREVIEW_IDLE_MS = 150  # how long the highlighted row stays put before its picture loads (holding a key loads none)
+PREVIEW_PX = (800, 800)  # a loaded picture is cut down to this (more than the pane shows) so drawing it is cheap
+PREFETCH_ROWS = 3  # a fixed-width picture's list then loads this many rows' pictures each way into their cache
+MIN_LIST_WIDTH = 40  # a fixed-width picture (preview_width) is left out when it would leave the list fewer cells
+_preview_lock = threading.Lock()  # one picture loads at a time: the preview callables' caches aren't shared safely
 NOTE_PROMPT = "Note (empty clears, Esc cancels): "
 KEEP = object()  # _ListModel.key: the list stays open
 HOTKEY_CHARS = {"space": " ", "tab": "\t"}  # keys callers name in hotkeys by their character
@@ -204,8 +211,9 @@ class _ListModel:
 
     def __init__(self, title, labels, multi, initial, hint, cursor, extras, locked, locked_note, hotkeys, note_text,
                  on_note, esc_asks, hidden, status, diff_marks, session, poll, links, on_hotkey, preview=None, row_note=None,
-                 key_help=None, filters=""):
+                 key_help=None, filters="", preview_width=None):
         self.preview, self.row_note, self.key_help, self.filters = preview, row_note, key_help, filters
+        self.preview_width = preview_width
         self.title, self.labels, self.multi, self.hint, self.extras = title, labels, multi, hint, extras
         self.locked_note, self.hotkeys, self.note_text, self.on_note = locked_note, hotkeys, note_text, on_note
         self.esc_asks, self.status, self.diff_marks, self.poll = esc_asks, status, diff_marks, poll
@@ -230,12 +238,6 @@ class _ListModel:
         self.help = None  # the help lines while they are shown
         self.height = 24  # screen rows; the app sets it
         self.update()
-
-    def preview_path(self):
-        """The image file for the highlighted row, or None (no preview, no row shown, the row has none, or its file
-        won't load: missing or corrupt, which would otherwise crash the image pane)."""
-        path = self.preview(self.vis[self.cur]) if self.preview and self.vis else None
-        return path if path and _image_loads(path) else None
 
     def update(self):
         """Work out the shown rows (vis), keep the cursor on one and in view, save the session and work out the
@@ -492,6 +494,8 @@ def _app_class():
 
         def on_resize(self, event):
             self.app.step(self.app.model.resize, event.size.height)
+            if self.app.model.preview and self.screen is self.app.list_screen:
+                self.app.fit_preview()  # the terminal's size changed, or the picture's column came or went
 
         def row(self, m, pos):
             i = m.vis[pos]
@@ -548,9 +552,13 @@ def _app_class():
             yield _ListLines(id="lines")
             if self.app.model.preview:
                 from textual_image.widget import Image  # already imported (and the terminal probed) by filter_list
-                yield Image(self.app.model.preview_path(), id="preview")
+                fixed = "fixed" if self.app.model.preview_width else None  # sized by the app (fit_preview)
+                yield Image(None, id="preview", classes=fixed)  # the app loads the picture (follow_preview)
 
         def on_mount(self):
+            if self.app.model.preview and self is self.app.list_screen:
+                self.app.fit_preview()
+                self.app.follow_preview()
             if self.app.session and self is self.app.list_screen:
                 self.app.list_ready()
 
@@ -635,6 +643,7 @@ def _app_class():
         _ListLines { width: 1fr; height: 1fr; text-wrap: nowrap; text-overflow: clip; }
         _ListScreen { layout: horizontal; }
         _ListScreen #preview { width: auto; max-width: 34%; height: 100%; }
+        _ListScreen #preview.fixed { max-width: 100%; height: auto; }
         _HelpScreen { align: center middle; }
         _HelpScreen VerticalScroll { width: auto; height: auto; max-height: 100%; }
         _HelpScreen #help-footer { dock: bottom; width: 100%; text-align: center; }
@@ -656,6 +665,9 @@ def _app_class():
             self.ready = False  # in a session: the list screen is up and composed
             self.typeahead = []  # in a session: keys typed while no list was up yet, for the next one
             self.quit_timer = None  # in a session: shows the "quit now" line once another Ctrl-C would quit
+            self.preview_row = None  # the label index whose picture the pane shows or is loading
+            self.preview_timer = None  # starts that load once the row has stayed put
+            self.preview_gen = 0  # bumped when the row or the list changes: a load for an older one is dropped
 
         def get_default_screen(self):
             if self.session:
@@ -686,6 +698,7 @@ def _app_class():
                 model.preview = None
             self.model, self.reply = model, reply
             self.done, self.interrupted, self.error = False, False, None
+            self.preview_row = None
             self.last_line("")
             self.timer = self.set_interval(POLL_MS / 1000, lambda: self.step(self.model.tick)) if model.poll else None
             self.ready = False
@@ -870,13 +883,92 @@ def _app_class():
                 self.pop_screen()
             self.list_screen.query_one("#lines").refresh(layout=isinstance(self.model, _PromptModel))  # it may wrap
             if self.model.preview:
-                pane = self.list_screen.query_one("#preview")
-                path = self.model.preview_path()
-                if path != pane.image:  # the setter re-transmits the image, so only touch it when it changed
-                    pane.image = path
+                self.follow_preview()
+
+        def follow_preview(self):
+            """When the highlighted row changes, clear the pane (no picture beside the wrong row) and load the row's
+            picture once it has stayed put for PREVIEW_IDLE_MS, off the UI thread (load_preview): reading it from the
+            NAS, or downloading it, never holds up a key, and holding one loads nothing."""
+            row = self.model.vis[self.model.cur] if self.model.vis else None
+            if row == self.preview_row:
+                return
+            self.stop_preview()
+            self.preview_row = row
+            pane = self.list_screen.query_one("#preview")
+            if pane.image is not None:  # the setter re-transmits the image, so only touch it when it changed
+                pane.image = None
+                self.fit_preview()
+            if row is not None:
+                gen = self.preview_gen
+                self.preview_timer = self.set_timer(PREVIEW_IDLE_MS / 1000, lambda: self.load_preview(gen, row))
+
+        def stop_preview(self):
+            """Drop the pending or running load of a picture: its row or its list is gone."""
+            self.preview_gen += 1
+            if self.preview_timer:
+                self.preview_timer.stop()
+            self.preview_timer = None
+
+        def load_preview(self, gen, row):
+            """The row has stayed put: load its picture in a thread of its own."""
+            self.preview_timer = None
+            near = []  # a fixed-width picture (a game's) is cached by its callable: the rows the cursor goes to next
+            if self.model.preview_width:
+                vis, cur = self.model.vis, self.model.cur
+                near = [vis[at] for step in range(1, PREFETCH_ROWS + 1) for at in (cur + step, cur - step)
+                        if 0 <= at < len(vis)]
+            threading.Thread(target=self.preview_worker, args=(gen, self.model.preview, row, self.model.preview_width, near),
+                             name="preview", daemon=True).start()
+
+        def preview_worker(self, gen, preview, row, width, near=()):
+            """In its own thread: the picture for row, handed to the UI thread (show_preview), then the pictures of the
+            rows near (results dropped: the callable caches them) while row stays highlighted. The lock is taken per
+            picture and the row checked under it, so a newly highlighted row waits for at most one of those. Previews
+            are cosmetic, so one that fails to come (an error, a missing or corrupt file) just leaves the pane empty."""
+            try:
+                with _preview_lock:
+                    image = _preview_image(preview(row), width)
+            except Exception:
+                image = None
+            if image is not None:
+                try:
+                    self.call_from_thread(self.show_preview, gen, image)
+                except RuntimeError:  # the app has closed meanwhile
+                    return
+            for other in near:
+                with _preview_lock:
+                    if gen != self.preview_gen or self.done:  # the cursor moved on, or the list ended
+                        return
+                    try:
+                        preview(other)
+                    except Exception:
+                        pass
+
+        def show_preview(self, gen, image):
+            if gen == self.preview_gen and not self.done:  # still the highlighted row of the list that is up
+                self.list_screen.query_one("#preview").image = image
+                self.fit_preview()
+
+        def fit_preview(self):
+            """A fixed-width picture (preview_width) gets a column of its own at the top right, as many cells wide as it
+            needs. Without room for it (the list would get fewer than MIN_LIST_WIDTH cells, or the picture is taller than
+            the rows above the status line) there is no column and the list takes the whole width."""
+            if not self.model.preview_width:
+                return
+            from textual_image._terminal import get_cell_size  # cached: textual-image measured it on import
+            cell = get_cell_size()
+            pane = self.list_screen.query_one("#preview")
+            columns = math.ceil(self.model.preview_width / cell.width)
+            rows = math.ceil(pane.image.height / cell.height) if pane.image is not None else 0
+            pane.styles.width = columns
+            shown = self.size.width - columns >= MIN_LIST_WIDTH and rows <= self.size.height - 1
+            if shown and not pane.display:  # textual-image sizes its height from its width as last laid out (none while
+                self.call_after_refresh(pane.refresh, layout=True)  # hidden): lay it out again once it has one
+            pane.display = shown
 
         def finish(self, result):
             self.done = True
+            self.stop_preview()
             if not self.session:
                 return self.exit(result)
             if self.timer:
@@ -1244,15 +1336,21 @@ def _probe_through_tmux():
     return sixel or tgp
 
 
-def _image_loads(path):
-    """Whether path is an image Pillow can read (textual-image's own error handling differs between versions)."""
+def _preview_image(path, width=None):
+    """The picture at path decoded and cut down to PREVIEW_PX, or resized to exactly width px wide (keeping its shape)
+    so the pane barely resizes it again; None when there is none. Raises when it won't load (missing or corrupt:
+    decoding it here keeps it from crashing the image pane)."""
+    if not path:
+        return None
     from PIL import Image  # textual-image depends on Pillow
-    try:
-        with Image.open(path) as image:
-            image.verify()
-        return True
-    except (OSError, ValueError, EOFError, SyntaxError):
-        return False
+    with open(path, "rb") as f:  # one read: Pillow's many small reads are each a slow round trip on a network share
+        image = Image.open(io.BytesIO(f.read()))
+    image.load()
+    image.filename = path
+    if width and image.width != width:
+        return image.resize((width, max(1, round(image.height * width / image.width))))
+    image.thumbnail(PREVIEW_PX)
+    return image
 
 
 def _draws_images():
@@ -1271,7 +1369,8 @@ def _draws_images():
 
 def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, extras=None, locked=None, locked_note="",
                 hotkeys=(), note_text=None, on_note=None, esc_asks=True, hidden=None, status=None, diff_marks=True,
-                session=None, poll=None, links=None, on_hotkey=None, preview=None, row_note=None, key_help=None, filters=""):
+                session=None, poll=None, links=None, on_hotkey=None, preview=None, row_note=None, key_help=None, filters="",
+                preview_width=None):
     """Modal list: vim keys for moving and acting, Emacs keys for editing the filter.
 
     Normal mode: j/k ↑/↓ ^N/^P move · g/G top/bottom · ^D/^U half page · ^F/^B/PgUp/PgDn/^V page · / filter ·
@@ -1307,6 +1406,8 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
     preview: optional callable(label index) -> path of an image file, or None; the list then shares the screen with an
     image pane showing the highlighted row's image (blank when there is none), updated as the cursor and filter change.
     Only in a terminal that draws real images (Kitty graphics or Sixel), and not inside tmux; elsewhere there is no pane.
+    preview_width: with preview, the image is shown preview_width px wide (games' pictures) in a column of its own at the
+    top right instead, and not at all when the terminal has no room for it.
     row_note: optional callable(label index) -> text; when non-empty for the highlighted row it replaces the status
     line (below a notice and a locked row's note).
     """
@@ -1316,7 +1417,7 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
             preview = None
     return _run(_ListModel(title, labels, multi, initial, hint, cursor, extras, locked, locked_note, hotkeys, note_text,
                            on_note, esc_asks, hidden, status, diff_marks, session, poll, links, on_hotkey, preview, row_note,
-                           key_help, filters))
+                           key_help, filters, preview_width))
 
 
 PLACE = ("row", "query", "view_mode", "top")  # the session entries carry_place keeps

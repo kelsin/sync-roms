@@ -1134,6 +1134,40 @@ class Session(unittest.TestCase):
             self.run_editor(lambda: picker.filter_list("A", ["a0"]), lambda app, pilot: pilot.press("enter"))
         self.assertEqual(self.events, ["app closed"])
 
+    def test_a_preview_that_comes_after_its_list_ended_is_dropped(self):
+        import tempfile
+        from PIL import Image
+        started, gate, returned = threading.Event(), threading.Event(), threading.Event()
+        seen = []
+
+        def preview(i):
+            started.set()
+            wait(gate)
+            returned.set()
+            return path
+
+        def editor():
+            picker.filter_list("A", ["a0"], preview=preview)
+            return picker.filter_list("B", ["b0"])
+
+        async def script(app, pilot):
+            await wait_for(pilot, lambda: showing(app, "A"))
+            await wait_for(pilot, started.is_set)
+            await pilot.press("enter")
+            await wait_for(pilot, lambda: showing(app, "B"))
+            gate.set()
+            await wait_for(pilot, returned.is_set)
+            await pilot.pause(0.1)
+            seen.append(app.error)
+            await pilot.press("enter")
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, "a.png")
+            Image.new("RGB", (45, 108), "red").save(path)
+            with mock.patch.object(picker, "_draws_images", return_value=True), \
+                    mock.patch.object(sys, "__stdout__", io.StringIO()), mock.patch.object(picker, "PREVIEW_IDLE_MS", 1):
+                self.assertEqual(self.run_editor(editor, script), 0)
+        self.assertEqual(seen, [None])
+
     def test_a_ctrl_c_as_the_app_comes_back_from_asking_about_images_interrupts_that_list(self):
         self.while_resuming = lambda app: app.session.interrupt()  # SIGINT as the app resumes after the probe
 
@@ -1436,6 +1470,158 @@ class TextualPrintHook(unittest.TestCase):
         before = get_time()
         key = events.Key("enter", "\r")
         self.assertTrue(before <= key.time <= get_time())
+
+
+class Previews(unittest.TestCase):
+    """The image pane loads the highlighted row's picture off the UI thread, once the row has stayed put."""
+
+    def setUp(self):
+        import tempfile
+        from PIL import Image
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        self.paths = [os.path.join(tmp.name, f"{i}.png") for i in range(4)]
+        for path in self.paths:
+            Image.new("RGB", (45, 108), "red").save(path)
+        for p in (mock.patch.object(sys, "__stdout__", io.StringIO()),  # not a terminal: the import would probe it
+                  mock.patch.object(picker, "_draws_images", return_value=True)):
+            p.start()
+            self.addCleanup(p.stop)
+
+    def run_list(self, script, preview):
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        from helpers import pilot_list
+        return pilot_list(script, "A", ["a0", "a1", "a2", "a3"], preview=preview)
+
+    def pane(self, pilot):
+        return pilot.app.screen_stack[0].query_one("#preview")
+
+    def test_only_the_row_the_cursor_rests_on_is_loaded_and_not_on_the_ui_thread(self):
+        from helpers import shown_preview
+        calls = []
+
+        def preview(i):
+            calls.append((i, threading.get_ident()))
+            return self.paths[i]
+
+        async def script(pilot):
+            await pilot.press("j", "j", "j")  # well within the idle time: nothing loads while the cursor moves
+            self.assertIsNone(self.pane(pilot).image)
+            await shown_preview(pilot, self.paths[3])
+            await pilot.press("enter")
+        with mock.patch.object(picker, "PREVIEW_IDLE_MS", 300):
+            self.assertEqual(self.run_list(script, preview), 3)
+        self.assertEqual([i for i, _ in calls], [3])
+        self.assertNotEqual(calls[0][1], threading.get_ident())
+
+    def test_a_slow_preview_doesnt_hold_up_keys_and_a_stale_one_is_not_shown(self):
+        from helpers import shown_preview
+        started = threading.Event()
+        gates = [threading.Event() for _ in self.paths]
+        returned = threading.Event()
+
+        def preview(i):
+            started.set()
+            wait(gates[i])
+            if i == 0:
+                returned.set()
+            return self.paths[i]
+
+        async def script(pilot):
+            await wait_for(pilot, started.is_set)  # row 0's picture is loading
+            await pilot.press("j", "j")  # handled while it still loads
+            self.assertEqual(pilot.app.model.cur, 2)
+            gates[0].set()  # its result comes after the cursor moved on, and is dropped
+            await wait_for(pilot, returned.is_set)
+            await pilot.pause(0.1)
+            self.assertIsNone(self.pane(pilot).image)
+            gates[1].set()
+            gates[2].set()
+            await shown_preview(pilot, self.paths[2])
+            await pilot.press("enter")
+        with mock.patch.object(picker, "PREVIEW_IDLE_MS", 1):
+            self.assertEqual(self.run_list(script, preview), 2)
+
+
+    def run_fixed(self, script, preview, rows=8):
+        from helpers import pilot_list
+        from textual_image._terminal import CellSize
+        with mock.patch("textual_image._terminal.get_cell_size", return_value=CellSize(10, 20)):
+            return pilot_list(script, "A", [f"a{i}" for i in range(rows)], preview=preview, preview_width=300)
+
+    def test_a_fixed_width_preview_prefetches_the_nearby_rows_after_the_current_one(self):
+        calls = []
+
+        def preview(i):
+            calls.append(i)
+            return self.paths[i % 4]
+
+        async def script(pilot):
+            await pilot.press("j", "j", "j")
+            await wait_for(pilot, lambda: len(calls) == 7)
+            await pilot.pause(0.1)
+            await pilot.press("enter")
+        with mock.patch.object(picker, "PREVIEW_IDLE_MS", 300):
+            self.assertEqual(self.run_fixed(script, preview), 3)
+        self.assertEqual(calls, [3, 4, 2, 5, 1, 6, 0])
+
+    def test_moving_stops_the_old_rows_prefetch(self):
+        calls = []
+        reached, hold = threading.Event(), threading.Event()
+
+        def preview(i):
+            calls.append((i, threading.get_ident()))
+            if len(calls) == 2:  # row 0's first neighbour: held while the cursor moves on
+                reached.set()
+                wait(hold)
+            return self.paths[i % 4]
+
+        async def script(pilot):
+            await wait_for(pilot, reached.is_set)
+            await pilot.press("j")
+            await pilot.pause(0.05)
+            hold.set()
+            await wait_for(pilot, lambda: len(calls) == 7)
+            await pilot.pause(0.1)
+            await pilot.press("enter")
+        with mock.patch.object(picker, "PREVIEW_IDLE_MS", 1):
+            self.assertEqual(self.run_fixed(script, preview), 1)
+        first, second = calls[0][1], calls[2][1]
+        self.assertEqual([i for i, t in calls if t == first], [0, 1])
+        self.assertEqual([i for i, t in calls if t == second], [1, 2, 0, 3, 4])
+
+    def test_a_prefetch_error_is_ignored(self):
+        calls = []
+
+        def preview(i):
+            calls.append(i)
+            if i == 1:
+                raise OSError("boom")
+            return self.paths[i % 4]
+
+        async def script(pilot):
+            await wait_for(pilot, lambda: len(calls) == 4)
+            await pilot.press("enter")
+        with mock.patch.object(picker, "PREVIEW_IDLE_MS", 1):
+            self.assertEqual(self.run_fixed(script, preview), 0)
+        self.assertEqual(calls, [0, 1, 2, 3])
+
+    def test_a_preview_without_a_fixed_width_prefetches_nothing(self):
+        from helpers import shown_preview
+        calls = []
+
+        def preview(i):
+            calls.append(i)
+            return self.paths[i]
+
+        async def script(pilot):
+            await pilot.press("j")
+            await shown_preview(pilot, self.paths[1])
+            await pilot.pause(0.2)
+            await pilot.press("enter")
+        with mock.patch.object(picker, "PREVIEW_IDLE_MS", 300):
+            self.assertEqual(self.run_list(script, preview), 1)
+        self.assertEqual(calls, [1])
 
 
 class OutsideASession(unittest.TestCase):

@@ -379,8 +379,9 @@ class Flow(DataDir):
         seen = []
 
         def look(labels, kw):
-            with mock.patch.object(previews, "game", side_effect=lambda k: "img-" + k):
+            with mock.patch.object(previews, "game_thumb", side_effect=lambda k: "img-" + k):
                 seen.append([kw["preview"](i) for i in range(len(labels) + 1)])
+            self.assertEqual(kw["preview_width"], previews.GAME_WIDTH)  # a game's picture: 300 px wide at the top right
             return kw["session"]["sel"]
 
         def filtered(labels, kw):

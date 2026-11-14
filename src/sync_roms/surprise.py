@@ -264,7 +264,8 @@ def run_surprise(card_name, setup, chosen_systems, interactive, dry_run, rng=Non
         states = picker.filter_list("Pick the surprises to replace",
                                     [f"{x.get('title') or x['bucket']}  ({names[x['system']]})" for x in current],
                                     multi=True, initial=[False] * len(current),
-                                    preview=lambda k: previews.game(current[k]["bucket"]) if k < len(current) else None)
+                                    preview=lambda k: previews.game_thumb(current[k]["bucket"]) if k < len(current) else None,
+                                    preview_width=previews.GAME_WIDTH)
         kept = current if states is None else [x for x, replace in zip(current, states) if not replace]
     else:
         kept = []

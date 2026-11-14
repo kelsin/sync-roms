@@ -115,6 +115,126 @@ class PreviewsTests(unittest.TestCase):
         files.assert_called_once_with("scrapes/gba/", sizes=False)
 
 
+
+class GameThumbTests(unittest.TestCase):
+    KEY = "scrapes/gba/covers/G.png"
+
+    def setUp(self):
+        previews.reset()
+        self.addCleanup(previews.reset)
+        cache = os.path.join(store.data_dir(), "preview-cache")
+        shutil.rmtree(cache, ignore_errors=True)
+        self.addCleanup(shutil.rmtree, cache, ignore_errors=True)
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        self.root = tmp.name
+        self.source = os.path.join(self.root, self.KEY)
+        os.makedirs(os.path.dirname(self.source))
+        self.write((600, 900), "RGBA")
+
+    def write(self, size, mode="RGB"):
+        from PIL import Image
+        Image.new(mode, size, (255, 0, 0, 128) if mode == "RGBA" else "red").save(self.source)
+        return os.path.getsize(self.source)
+
+    def thumb(self, size=None, etag=None):
+        size = os.path.getsize(self.source) if size is None else size
+        with mock.patch.object(previews.inventory, "files", return_value={self.KEY: size}), \
+                mock.patch.object(previews.inventory, "known", return_value=(size, etag) if etag else None), \
+                mock.patch.object(s3, "read_root", return_value=self.root):
+            previews.reset()
+            return previews.game_thumb("gba/G.zip")
+
+    def test_makes_a_300_px_wide_webp_keeping_alpha(self):
+        from PIL import Image
+        path = self.thumb()
+        size = os.path.getsize(self.source)
+        self.assertEqual(path, os.path.join(store.data_dir(), "preview-cache", "scrapes/gba/covers", f"G.s{size}.webp"))
+        with Image.open(path) as image:
+            self.assertEqual((image.format, image.size, image.mode), ("WEBP", (300, 450), "RGBA"))
+
+    def test_etag_names_the_thumbnail_when_known(self):
+        self.assertTrue(self.thumb(etag='"abc-2"').endswith("/G.abc-2.webp"))
+
+    def test_a_cached_thumbnail_never_touches_the_source(self):
+        size = os.path.getsize(self.source)
+        first = self.thumb()
+        os.remove(self.source)
+        with mock.patch.object(previews.os.path, "isfile", side_effect=AssertionError("stat")):
+            self.assertEqual(self.thumb(size), first)
+
+    def test_a_changed_tag_makes_a_new_thumbnail_and_removes_the_old(self):
+        old = self.thumb()
+        self.write((300, 300))
+        new = self.thumb()
+        self.assertNotEqual(new, old)
+        self.assertTrue(os.path.exists(new))
+        self.assertFalse(os.path.exists(old))
+        etag = self.thumb(etag='"e1"')
+        self.assertFalse(os.path.exists(new))
+        self.assertTrue(os.path.exists(etag))
+
+    def test_other_games_thumbnails_with_a_similar_name_stay(self):
+        other = os.path.join(store.data_dir(), "preview-cache", "scrapes/gba/covers", "G. Two.s1.webp")
+        os.makedirs(os.path.dirname(other))
+        open(other, "wb").close()
+        self.thumb()
+        self.assertTrue(os.path.exists(other))
+
+    def test_corrupt_or_missing_source_is_none(self):
+        with open(self.source, "wb") as f:
+            f.write(b"not a picture")
+        self.assertIsNone(self.thumb())
+        os.remove(self.source)
+        self.assertIsNone(self.thumb(5))
+        self.assertFalse(os.path.exists(os.path.join(store.data_dir(), "preview-cache")))
+
+    def test_a_source_missing_from_the_storage_folder_is_none_without_a_stat(self):
+        os.remove(self.source)
+        with mock.patch.object(previews.os.path, "isfile", return_value=True) as isfile:
+            self.assertIsNone(self.thumb(5))
+        isfile.assert_not_called()  # game_thumb swallows errors, so a raising stat would pass unseen
+
+    def test_a_source_missing_from_the_mirror_is_read_from_the_storage_folder_without_a_stat(self):
+        from PIL import Image
+        mirror = os.path.join(self.root, "mirror")
+        with mock.patch.object(runtime, "_mirror_root", mirror), mock.patch.object(runtime, "ROOT", self.root), \
+                mock.patch.object(previews.inventory, "files", return_value={self.KEY: 7}), \
+                mock.patch.object(previews.inventory, "known", return_value=None), \
+                mock.patch.object(s3, "read_root", return_value=mirror), \
+                mock.patch.object(previews.os.path, "isfile", return_value=False) as isfile:
+            path = previews.game_thumb("gba/G.zip")
+        isfile.assert_not_called()
+        with Image.open(path) as image:
+            self.assertEqual(image.size, (300, 450))
+
+    def test_no_art_is_none(self):
+        with mock.patch.object(previews.inventory, "files", return_value={}):
+            self.assertIsNone(previews.game_thumb("gba/G.zip"))
+
+    def test_without_a_tag_the_source_is_shown_as_is(self):
+        with mock.patch.object(previews.inventory, "files", return_value={self.KEY: None}), \
+                mock.patch.object(previews.inventory, "known", return_value=None), \
+                mock.patch.object(s3, "read_root", return_value=self.root):
+            self.assertEqual(previews.game_thumb("gba/G.zip"), self.source)
+
+
+class PreviewImageTests(unittest.TestCase):
+    def test_reads_the_file_in_one_go(self):
+        from PIL import Image
+        from sync_roms import picker
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, "a.png")
+            Image.new("RGB", (600, 900), "red").save(path)
+            real = open
+            with mock.patch("builtins.open", side_effect=real) as opened:
+                image = picker._preview_image(path, 300)
+            self.assertEqual(opened.call_count, 1)
+            self.assertEqual(image.size, (300, 450))
+            image = picker._preview_image(path)
+            self.assertEqual((image.size, image.filename), ((533, 800), path))
+
+
 class SystemOutlineTests(unittest.TestCase):
     TOP = "art-book-next-es-de-abc/"
     OUT = "_inc/systems/artwork-outline/"

@@ -95,7 +95,8 @@ def toggle_games(title, rows, extras=None, covered=None, excluded=None, hotkeys=
                                    locked_note=[n or "" for n in notes], hint=hint or GAMES_HINT, note_text=note_text,
                                    on_note=on_note, hotkeys=hotkeys, session=session, filters=filters,
                                    row_note=lambda i: variant_line(rows[i][1], variants, parents, system_names),
-                                   preview=lambda i: previews.game(rows[i][1]) if i < len(rows) else None)
+                                   preview=lambda i: previews.game_thumb(rows[i][1]) if i < len(rows) else None,
+                                   preview_width=previews.GAME_WIDTH)
     except KeyboardInterrupt:  # Ctrl-C: the toggles made so far are applied, then the caller gets the Ctrl-C
         interrupted, state = True, session["sel"]
     pressed = state[0] if isinstance(state, tuple) else None

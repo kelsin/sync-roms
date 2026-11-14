@@ -54,6 +54,17 @@ def pilot_list(script, *args, size=(80, 24), **kwargs):
         return picker.filter_list(*args, **kwargs)
 
 
+async def shown_preview(pilot, path=None):
+    """Wait until the list's image pane shows the picture at path (any picture when path is None, a loaded one is a
+    PIL image) and return its file name (None for a resized one)."""
+    for _ in range(500):
+        image = pilot.app.screen_stack[0].query_one("#preview").image
+        if image is not None and (path is None or image.filename == path):
+            return getattr(image, "filename", None)  # a resized picture (preview_width) has none
+        await pilot.pause(0.01)
+    raise AssertionError("no preview came")
+
+
 def screen_lines(app):
     """The list screen's rows as [(text, Rich style)] runs of non-blank text."""
     lines = app.screen_stack[0].query_one("_ListLines")
