@@ -246,10 +246,9 @@ class Editor(DataDir):
         self.run_editor([(edit.DELETE_KEY, 0), 2], confirm=False)  # still one collection: index 2 is ✅ Done
         self.assertTrue(os.path.exists(self.path("collections/favs.json")))
 
-    def test_an_empty_collection_is_refused_on_done(self):
-        _, _, note = self.run_editor([0, 2, 3], asks=["Empty", ""], edit_one=lambda c, s, k: None, confirm=True)
-        self.assertIn("Empty has no games", note.call_args_list[0][0][0])
-        self.assertFalse(os.path.exists(self.path("collections")))
+    def test_an_empty_collection_is_saved_on_done(self):
+        self.run_editor([0, 2], asks=["Empty", ""], edit_one=lambda c, s, k: None)
+        self.assertEqual(self.read("collections/empty.json"), {"name": "Empty", "games": []})
 
     def test_ctrl_c_asks_and_saves_the_changes(self):
         collections.save_collection({"id": "old", "name": "Old", "games": [RUBY]})
@@ -261,12 +260,11 @@ class Editor(DataDir):
         self.assertEqual(self.read("cards.json"), {"a": {"collections": []}})
         self.assertIn("Saved to", str(out.call_args_list))
 
-    def test_ctrl_c_does_not_save_an_empty_collection_and_says_so(self):
+    def test_ctrl_c_saves_an_empty_collection(self):
         with mock.patch("builtins.print") as out, self.assertRaises(KeyboardInterrupt):
             self.run_editor([0, KeyboardInterrupt], asks=["Empty", ""], edit_one=lambda c, s, k: None)
-        self.assertFalse(os.path.exists(self.path("collections")))
-        self.assertIn("Empty has no games", str(out.call_args_list))
-        self.assertNotIn("Saved to", str(out.call_args_list))
+        self.assertEqual(self.read("collections/empty.json"), {"name": "Empty", "games": []})
+        self.assertIn("Saved to", str(out.call_args_list))
 
     def test_a_second_ctrl_c_at_the_question_discards(self):
         with mock.patch("builtins.print") as out, self.assertRaises(KeyboardInterrupt):
