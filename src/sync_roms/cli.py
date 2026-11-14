@@ -10,7 +10,7 @@ from concurrent.futures import ThreadPoolExecutor
 from botocore.exceptions import BotoCoreError, ClientError, NoCredentialsError
 
 from . import __version__, budget, cardedit, clean, commands, downloads, drivers, edit, external, frontend, inventory, m3u, mirroring, picker, runtime, s3, scrape_plan, store
-from . import surprise, themeart, ui, usersettings, vita
+from . import pico8, surprise, themeart, ui, usersettings, vita
 from . import collections as colls
 
 
@@ -920,8 +920,9 @@ def sync_card(args):
         saved = store.load_cards().get(card)
     chosen = [s for s in systems if available(s)]
     if not chosen:
+        failed = pico8.run(card, layout_name, base, args.dry_run)
         print(ui.yellow(f"👋 {card} has nothing to sync."))
-        return 0
+        return failed
     print(ui.bold(f"\n🔎 Checking {len(chosen)} system(s) against storage..."))
 
     def dest_of(s):
@@ -963,8 +964,9 @@ def sync_card(args):
         dest_discs[dest_of(t)].update(discs_of(t))
         if available(t) and not unzip:
             dest_bios[dest_of(t)].update(rom_bios_names(t))
+    pico8_dests = {dest_of(t) for t in systems if t["bucket"] == "pico8"}
     for dest in sorted({dest_of(s) for s in systems if s["bucket"] in chosen_ids or not available(s)} | dropped_dests):
-        extras += downloads.find_extras(dest, dest_keys[dest], unzip, onion, disc_dir, dest_discs[dest], dest_bios[dest])
+        extras += downloads.find_extras(dest, dest_keys[dest], unzip, onion, disc_dir, dest_discs[dest], dest_bios[dest] | (pico8.keep_in(dest, card) if dest in pico8_dests else set()))
 
     # BIOS for every system with ROMs already on the card too, even when this sync doesn't touch that system
     bios_systems = chosen + [s for s in systems if s["bucket"] not in chosen_ids
@@ -1135,6 +1137,7 @@ def sync_card(args):
             print(f"  {ui.red('would delete')} {path}")
         for name in drivers.prune(card, drivers_dir, [os.path.basename(p) for _, p, _ in driver_jobs], True):
             print(f"  {ui.red('would delete')} {os.path.join(drivers_dir, name)}")
+        pico8.run(card, layout_name, base, True)
         stale_count = 0
         if scrapes:
             stale_count = len(scrape_plan.stale_media(layout_name, manifest['systems'], roms_dir, es_dir, base))
@@ -1179,6 +1182,7 @@ def sync_card(args):
     # also when the card gets no drivers now (another device or layout): the ones sync copied before go
     for name in drivers.prune(card, drivers_dir, [os.path.basename(p) for _, p, _ in driver_jobs], False):
         print(ui.green(f"🧹 Removed old driver {name}"))
+    failed += pico8.run(card, layout_name, base, False)
     if theme_todo:
         failed += downloads.run_downloads(theme_todo, "Themes", "🎨", os.path.join(base, themes_dir), failures)
     for s in chosen:
