@@ -627,7 +627,9 @@ def _app_class():
                     self.suspending()
                     _, error = _outcome(lambda: self.session.at_terminal(self.session.probe, model))
                 if error is not None:  # Ctrl-C while it asked: as in the list
-                    return reply.put((None, error))
+                    return self.answer(reply, (None, error))
+                if self.deliver(reply):  # a Ctrl-C as the app came back
+                    return
             if not self.session.draws:
                 model.preview = None
             self.model, self.reply = model, reply
@@ -725,12 +727,17 @@ def _app_class():
 
         def deliver(self, reply):
             """Answer reply with the Ctrl-C that waits for the editor's next request, if one does."""
-            if not self.session.interrupted:
-                return False
-            self.session.interrupted = False
-            self.stopping()
-            reply.put((None, KeyboardInterrupt()))
-            return True
+            delivered = self.session.deliver(reply)
+            if delivered:
+                self.stopping()
+            return delivered
+
+        def answer(self, reply, outcome, pressed=None):
+            """Give the editor a list's outcome (_Session.answer); a Ctrl-C that still waits for its next request
+            shows as its step starts."""
+            self.session.answer(reply, outcome, pressed)
+            if self.session.interrupted:
+                self.stopping()
 
         def request(self, kind, payload, reply):
             """A request from the session's worker (_Session.ask): show a list, or suspend the app and answer prompts on
@@ -825,7 +832,8 @@ def _app_class():
         def send(self, result):
             """Hand the ended list's result to the worker."""
             reply, self.reply = self.reply, None
-            reply.put((result, self.error or (KeyboardInterrupt() if self.interrupted else None)))
+            self.answer(reply, (result, self.error or (KeyboardInterrupt() if self.interrupted else None)),
+                        _now() if self.interrupted else None)
 
     return _ListApp
 
@@ -890,7 +898,8 @@ class _Session:
         self.prompting = False  # the main thread runs a prompt (at_terminal): Ctrl-C raises KeyboardInterrupt there
         self.working = True  # the worker runs editor code: it is not waiting for a request's answer, and has not ended
         self.interrupted = False  # a Ctrl-C the worker gets from its next request (or once the editor is done)
-        self.interrupted_at = 0  # when it came (_now)
+        self.interrupted_at = 0  # when it came (_now), or when the worker went back to work with it still waiting
+        self.pressed = None  # when the Ctrl-C came that the worker has just got, until its next request
         self.abandoned = False  # a later Ctrl-C ended the session without waiting for the worker
         self.tail = ""  # the worker's printed text after its last newline
         self.draws = None  # _draws_images(), asked when the first list with a preview comes, on the normal screen
@@ -928,23 +937,41 @@ class _Session:
         probed for it if it needs that), or None once the editor is done or abandoned."""
         while request is not None:
             kind, payload, reply = request
-            if self.interrupted:
-                self.interrupted = False
-                reply.put((None, KeyboardInterrupt()))
+            if self.deliver(reply):
+                pass
             elif kind == "list":
                 _, error = _outcome(lambda: self.at_terminal(self.probe, payload))  # the terminal is still ours here
                 if error is None:
                     return request
-                reply.put((None, error))  # Ctrl-C while it asked: as in the list
+                self.answer(reply, (None, error))  # Ctrl-C while it asked: as in the list
             else:
-                reply.put(_outcome(lambda: self.at_terminal(payload)))
+                self.answer(reply, _outcome(lambda: self.at_terminal(payload)))
             request = self.requests.get()
         return None
 
+    def deliver(self, reply):
+        """On the main thread: answer reply with the Ctrl-C that waits for the worker's next request, if one does."""
+        if not self.interrupted:
+            return False
+        self.interrupted = False
+        self.answer(reply, (None, KeyboardInterrupt()), self.interrupted_at)
+        return True
+
+    def answer(self, reply, outcome, pressed=None):
+        """On the main thread: give the worker the outcome of its request, and so send it back to work. pressed: when
+        the Ctrl-C came that the outcome carries (it ended the list, or it waited for this request); until the
+        worker's next request another one less than QUIT_AFTER after it is the same press. A Ctrl-C that still waits
+        (it came while the list or the prompt was up) counts from now, when the step it waits for starts."""
+        with self.lock:
+            self.pressed = pressed
+            if self.interrupted:
+                self.interrupted_at = _now()
+        reply.put(outcome)
+
     def at_terminal(self, fn, *args):
         """Run a prompt (or the image probe) on the main thread, where Ctrl-C raises KeyboardInterrupt in it."""
-        self.prompting = True
         try:
+            self.prompting = True
             return fn(*args)
         finally:
             self.prompting = False
@@ -966,8 +993,11 @@ class _Session:
     def interrupt(self):
         """Ctrl-C while neither a list nor a prompt is up (main thread): the worker gets KeyboardInterrupt from its
         next request. Another one QUIT_AFTER seconds or more later, while the worker is still at work on the same
-        step, abandons it: the session ends now. One that comes sooner counts as the same press."""
+        step, abandons it: the session ends now. One that comes sooner counts as the same press, and so does one
+        that comes that soon after the Ctrl-C the worker has just got (pressed)."""
         with self.lock:
+            if self.pressed is not None and _now() - self.pressed < QUIT_AFTER:
+                return
             if not self.interrupted:
                 self.interrupted, self.interrupted_at = True, _now()
             elif self.working and not self.quit_wait():
@@ -1024,7 +1054,7 @@ class _Session:
         with self.lock:
             if self.abandoned:
                 return None, KeyboardInterrupt()
-            self.working = False
+            self.working, self.pressed = False, None
             if self.app and not self.suspended and self.app.call_later(self.app.request, kind, payload, reply):
                 self.waiting = reply
             else:
