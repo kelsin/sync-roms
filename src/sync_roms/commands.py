@@ -264,7 +264,7 @@ def parse_collection(value):
 # Card-entry list fields that `games export`/`import` carry as `@field value` lines, one per value. CARD_HOOKS gives a
 # field its own parse(value) -> item or None (None skips the line; the hook warns) and format(item) -> text; a field
 # without one uses the text as it is.
-CARD_FIELDS = ("collections", "frontend_collections", "drivers", "surprise", "surprises")
+CARD_FIELDS = ("collections", "frontend_collections", "drivers", "surprise", "surprises", "pico8")
 CARD_HOOKS = {"collections": (parse_collection, str), "surprises": (None, lambda s: s["bucket"])}
 
 
@@ -280,6 +280,10 @@ def games_export(args):
         if field == "surprise":
             if isinstance(card, dict) and not surprise.enabled(card):
                 print("@surprise false")
+            continue
+        if field == "pico8":
+            if isinstance(card, dict) and isinstance(card.get("pico8"), str) and card["pico8"]:
+                print(f"@pico8 {card['pico8']}")
             continue
         values = card.get(field) if isinstance(card, dict) else None
         for value in values if isinstance(values, list) else []:
@@ -326,6 +330,12 @@ def games_import(args):
                 else:
                     ui.warn(f"skipping {line!r}: expected @surprise true or false")
                 continue
+            if field == "pico8":
+                if text.strip():
+                    fields["pico8"] = text.strip()
+                else:
+                    ui.warn(f"skipping {line!r}: expected @pico8 FILE")
+                continue
             if field == "surprises":
                 system, _, name = text.strip().partition("/")
                 if system not in known or not name:
@@ -355,6 +365,9 @@ def games_import(args):
     for system, keys in by_system.items():
         changes += add_games(raw, system, keys)
     for field, values in fields.items():
+        if field == "pico8":
+            changes.append(("+", f"pico8: {values}"))
+            continue
         changes.append(("+", f"{field}: {', '.join(CARD_HOOKS.get(field, (None, str))[1](v) for v in values)}"))
 
     def save_all(raw):
@@ -683,6 +696,8 @@ def check_data(list_keys=None, repo_systems=None):
         names = entry.get("drivers", [])
         if not isinstance(names, list) or not all(isinstance(i, str) for i in names):
             problems.append(f"cards.json: {name}: 'drivers' must be a list of names")
+        if "pico8" in entry and not (isinstance(entry["pico8"], str) and entry["pico8"]):
+            problems.append(f"cards.json: {name}: 'pico8' must be a file name")
         if "surprise" in entry and not isinstance(entry["surprise"], bool):
             problems.append(f"cards.json: {name}: 'surprise' must be true or false")
         picks = entry.get("surprises", [])
