@@ -222,9 +222,10 @@ class Editor(unittest.TestCase):
             setedit.edit_sets()
         choose.assert_not_called()
 
-    def interrupted(self, picks, lists, sets=()):
+    def interrupted(self, picks, lists, sets=(), ask=None):
         """Open set old (games()) in the real set editor; picks answer the single-choice lists, lists holds per toggle
-        list (labels to switch, what it then does: KeyboardInterrupt or a hotkey). The review opens the PR.
+        list (labels to switch, what it then does: KeyboardInterrupt, a hotkey or None for Enter); ask is ui.ask's side_effect.
+        The review opens the PR.
         Returns the review prompts shown, the sets the PR got (None without one) and the ui.ask mock."""
         before = {"old": {"name": "Old", "description": "", "games": games()}}
         picks, lists, opened = iter(picks), iter(lists), {}
@@ -237,7 +238,7 @@ class Editor(unittest.TestCase):
             kw["session"]["sel"] = [on != (label in flip) for label, on in zip(labels, kw["session"]["sel"])]
             if then is KeyboardInterrupt:
                 raise KeyboardInterrupt
-            return (then, 0)
+            return (then, 0) if then else kw["session"]["sel"]
 
         with mock.patch.object(setedit, "need_tools"), mock.patch.object(setedit, "repo_sets", return_value=before), \
                 mock.patch.object(store, "repo_json", return_value=SYSTEMS), mock.patch.object(picker, "filter_list", fake), \
@@ -245,7 +246,7 @@ class Editor(unittest.TestCase):
                 mock.patch.object(store, "load_sets", return_value=list(sets)), \
                 mock.patch.object(setedit, "stocked", lambda systems: systems), \
                 mock.patch.object(setedit, "file_counts", lambda systems: None), \
-                mock.patch.object(ui, "ask") as ask, mock.patch.object(ui, "choose", return_value="o") as choose, \
+                mock.patch.object(ui, "ask", side_effect=ask) as ask, mock.patch.object(ui, "choose", return_value="o") as choose, \
                 mock.patch("builtins.print"), \
                 mock.patch.object(setedit, "open_pr", lambda after, found: opened.update(after=after) or "url"), \
                 self.assertRaises(KeyboardInterrupt):
@@ -273,6 +274,18 @@ class Editor(unittest.TestCase):
         self.assertEqual(reviews, 1)
         self.assertEqual(after["old"]["games"], games()[1:] + [{"title": "D", "system": "gba", "bucket": "gba/D.zip",
                                                                 "files": ["gba/D2.zip"]}])
+
+    def test_ctrl_c_at_the_category_question_keeps_the_games_with_no_category(self):
+        mix = {"id": "mix", "name": "Mix", "games": [games()[0], {"title": "D", "system": "gba", "bucket": "gba/D.zip",
+                                                                  "files": ["gba/D2.zip"]}]}
+        e = {"title": "E", "system": "gen", "bucket": "gen/E.zip"}
+        d = {"title": "D", "system": "gba", "bucket": "gba/D.zip", "files": ["gba/D2.zip"]}
+        for picks, flip, added in (([0, 1, 1], {"E.zip"}, e), ([0, 2, 0], {"Game Boy Advance — D"}, d)):
+            with self.subTest(picks=picks):  # a game on, Enter, Ctrl-C at the category question
+                reviews, after, ask = self.interrupted(picks, [(flip, None)], sets=[mix], ask=KeyboardInterrupt)
+                ask.assert_called_once()
+                self.assertEqual(reviews, 1)
+                self.assertEqual(after["old"]["games"], games() + [added])
 
     def test_ctrl_c_in_a_list_with_nothing_toggled_reviews_nothing(self):
         mix = {"id": "mix", "name": "Mix", "games": [games()[0]]}

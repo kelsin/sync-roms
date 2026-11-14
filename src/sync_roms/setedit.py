@@ -61,7 +61,10 @@ def edit_one(game_set, systems, keys_of):
             except KeyboardInterrupt:  # Ctrl-C: the toggles made are kept, with no category
                 interrupted = True
             added = {g["bucket"] for g in s["games"]} - had
-            category = ask_category(game_set["games"], f"{len(added)} new game(s)") if added and not interrupted else ""
+            try:
+                category = ask_category(game_set["games"], f"{len(added)} new game(s)") if added and not interrupted else ""
+            except KeyboardInterrupt:  # Ctrl-C at the question: no category
+                category, interrupted = "", True
             game_set["games"] = reconcile(game_set["games"], shown, category)
             if interrupted:
                 raise KeyboardInterrupt

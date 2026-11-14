@@ -103,7 +103,10 @@ def add_from_set(listing, sets, shown, keys_of):
     except KeyboardInterrupt:
         interrupted = True
     added = {g["bucket"] for s in shown.values() for g in s["games"]} - had
-    category = ask_category(listing["games"], f"{len(added)} new game(s)") if added and not interrupted else ""
+    try:
+        category = ask_category(listing["games"], f"{len(added)} new game(s)") if added and not interrupted else ""
+    except KeyboardInterrupt:  # Ctrl-C at the question: no category
+        category, interrupted = "", True
     listing["games"] = reconcile(listing["games"], shown, category)
     files = {g["bucket"]: g["files"] for g in chosen["games"] if g.get("bucket") and g.get("files")}
     for g in listing["games"]:

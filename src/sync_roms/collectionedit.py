@@ -99,36 +99,38 @@ def edit_one(collection, systems, keys_of):
                         and (not wanted or metafilter.matches(meta.get().get(key, {}), wanted)))
 
             interrupted = False
-            while True:
-                parts = ([f"📦 {filt[0]} only"] if filt else []) + (["🎁 past surprises only"] if past is not None else []) \
-                    + ([metafilter.describe(meta_filt)] if meta_filt else [])
-                try:
+            try:
+                while True:
+                    parts = ([f"📦 {filt[0]} only"] if filt else []) + (["🎁 past surprises only"] if past is not None else []) \
+                        + ([metafilter.describe(meta_filt)] if meta_filt else [])
                     pressed = edit.toggle_games(
                         f"✏️  {s['name']} — ✅ in {collection['name']}, ⬜ in storage only",
                         [r for r in all_rows if keep(r[1])],
                         hotkeys=(SET_KEY, META_KEY, PAST_SURPRISE_KEY, CLEAR_KEY), hint=GAMES_HINT, place=place,
                         filters=f"{' · '.join(parts)} (c shows all)" if parts else "")
-                except KeyboardInterrupt:  # Ctrl-C: the toggles made are kept, with no category
-                    interrupted = True
-                    break
-                if pressed == PAST_SURPRISE_KEY:
-                    past = surprise.past_keys(s["bucket"]) or None
-                    if past is None:
-                        edit.note(ui.yellow(f"ℹ️  No past surprises on {s['name']}."))
-                elif pressed == META_KEY:
-                    cardedit.pick_meta(s, meta, meta_filt, lambda field: [r[1] for r in all_rows if keep(r[1], field)])
-                elif pressed == SET_KEY:
-                    chosen = cardedit.pick_set(s, sets, s["games"], titles, set(titles), filt and filt[0],
-                                               lambda: {g.get("bucket") for g in s["games"]})
-                    if chosen:
-                        filt = (chosen["name"], cardedit.set_filter(chosen, s))
-                elif pressed == CLEAR_KEY:
-                    past, filt = None, None
-                    meta_filt.clear()
-                else:
-                    break
+                    if pressed == PAST_SURPRISE_KEY:
+                        past = surprise.past_keys(s["bucket"]) or None
+                        if past is None:
+                            edit.note(ui.yellow(f"ℹ️  No past surprises on {s['name']}."))
+                    elif pressed == META_KEY:
+                        cardedit.pick_meta(s, meta, meta_filt, lambda field: [r[1] for r in all_rows if keep(r[1], field)])
+                    elif pressed == SET_KEY:
+                        chosen = cardedit.pick_set(s, sets, s["games"], titles, set(titles), filt and filt[0],
+                                                   lambda: {g.get("bucket") for g in s["games"]})
+                        if chosen:
+                            filt = (chosen["name"], cardedit.set_filter(chosen, s))
+                    elif pressed == CLEAR_KEY:
+                        past, filt = None, None
+                        meta_filt.clear()
+                    else:
+                        break
+            except KeyboardInterrupt:  # Ctrl-C in the list or a picker it opens: the toggles made are kept, with no category
+                interrupted = True
             added = {g["bucket"] for g in s["games"]} - had
-            category = ask_category(collection["games"], f"{len(added)} new game(s)") if added and not interrupted else ""
+            try:
+                category = ask_category(collection["games"], f"{len(added)} new game(s)") if added and not interrupted else ""
+            except KeyboardInterrupt:  # Ctrl-C at the question: no category
+                category, interrupted = "", True
             collection["games"] = reconcile(collection["games"], shown, category)
             fold_discs(collection["games"], keys_of(s["bucket"]))
             if interrupted:
