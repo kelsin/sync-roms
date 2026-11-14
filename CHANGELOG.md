@@ -1,5 +1,65 @@
 # Changelog
 
+## [2.8.0](https://github.com/kelsin/sync-roms/compare/v2.7.0...v2.8.0) (2026-11-14)
+
+
+### :video_game: Features
+
+* **collections:** show an emoji for each collection's art in the editors ([#261](https://github.com/kelsin/sync-roms/issues/261)) ([ac7d710](https://github.com/kelsin/sync-roms/commit/ac7d710283a1cd5dbf06d456ee58393d8e4e603c))
+* **convert:** show time left, print results as they finish and guard cards and storage ([#285](https://github.com/kelsin/sync-roms/issues/285)) ([b88f7ea](https://github.com/kelsin/sync-roms/commit/b88f7ea2362968695355b18ab3d54b50140ea9cb))
+* **devices:** add AYN Thor Lite (Snapdragon 865) ([#273](https://github.com/kelsin/sync-roms/issues/273)) ([465ea32](https://github.com/kelsin/sync-roms/commit/465ea32d5f750396c8043e8e19060cd35c4add1c))
+* **drivers:** sync suggested adreno gpu drivers to android cards ([#279](https://github.com/kelsin/sync-roms/issues/279)) ([40de07e](https://github.com/kelsin/sync-roms/commit/40de07e618eb1f711406eea6810438c404e4bc1f))
+* **edit:** add games from a set across systems in the set and collection editors ([#259](https://github.com/kelsin/sync-roms/issues/259)) ([03a50e4](https://github.com/kelsin/sync-roms/commit/03a50e4d17d2977acb890290100c6b9d00e52618))
+* **edit:** hide systems with no games when adding games ([#260](https://github.com/kelsin/sync-roms/issues/260)) ([4aa399d](https://github.com/kelsin/sync-roms/commit/4aa399d96a1f46f447d740658f49a975678f3e1e))
+* **edit:** show collection, system and game art while browsing lists ([#282](https://github.com/kelsin/sync-roms/issues/282)) ([5dd5f98](https://github.com/kelsin/sync-roms/commit/5dd5f98da8a9c3519c350f6b3f0a5ab1ce64ecd9))
+* **edit:** show proper names for mame and fbneo games ([#264](https://github.com/kelsin/sync-roms/issues/264)) ([e8815da](https://github.com/kelsin/sync-roms/commit/e8815da4c57821a31c357e7278eeccc5a8db79ea))
+* **picker:** show the row, keep your place and make help findable ([#289](https://github.com/kelsin/sync-roms/issues/289)) ([88943de](https://github.com/kelsin/sync-roms/commit/88943de9741c486b4ae2832a7012314260e59264))
+* **scrape:** show each rom, time left and quota, and keep finished roms on ctrl-c ([#286](https://github.com/kelsin/sync-roms/issues/286)) ([8579e20](https://github.com/kelsin/sync-roms/commit/8579e20a5f0e5ceed99249f55fc3b8122f6fc0fb))
+* **scrape:** show the review's position, add quit and step back ([#287](https://github.com/kelsin/sync-roms/issues/287)) ([b2633c2](https://github.com/kelsin/sync-roms/commit/b2633c241c6ab79e52bf48b91adfa6065d75860b))
+* **sets:** keep one version of each game and add variants ([#276](https://github.com/kelsin/sync-roms/issues/276)) ([beda660](https://github.com/kelsin/sync-roms/commit/beda6606fa8f665563729945320baedfbe48bb79))
+* **theme:** add 20 collection pictures and redraw kart and sonic art ([#291](https://github.com/kelsin/sync-roms/issues/291)) ([6143ff6](https://github.com/kelsin/sync-roms/commit/6143ff6b22f8c6fac5c7a4d994871edd6e120f9b))
+* **themes:** install art book next on a new es-de card before es-de is set up ([#263](https://github.com/kelsin/sync-roms/issues/263)) ([1a76778](https://github.com/kelsin/sync-roms/commit/1a767786e5a733666ccb29ff9282511de3093d08))
+
+
+### :bug: Bug Fixes
+
+* **cli:** make --dry-run, --yes and --quiet honest ([#266](https://github.com/kelsin/sync-roms/issues/266)) ([600551f](https://github.com/kelsin/sync-roms/commit/600551f33808c9efcbcaa2d1145f7fe66fe70689))
+* **cli:** make help, usage errors and readme match the code ([#269](https://github.com/kelsin/sync-roms/issues/269)) ([d933600](https://github.com/kelsin/sync-roms/commit/d933600f98b4ca4f605155fe5eb5a7c8529c859f))
+* close small leftovers from the review of the earlier fixes ([#293](https://github.com/kelsin/sync-roms/issues/293)) ([ff65ffd](https://github.com/kelsin/sync-roms/commit/ff65ffd19fc372a6d4ec06ffe6c4239d59a3801b))
+* **edit:** keep collection and set edits on ctrl-c ([#268](https://github.com/kelsin/sync-roms/issues/268)) ([d7f2de6](https://github.com/kelsin/sync-roms/commit/d7f2de67c1e48785c116b16fdac0b9bd269ce380))
+* **edit:** keep the open list's toggles on ctrl-c in the collections and sets editors ([#294](https://github.com/kelsin/sync-roms/issues/294)) ([0f24293](https://github.com/kelsin/sync-roms/commit/0f2429342b706cb9cf4b72d4d11fc541788807e3))
+* **picker:** fit rows and the status to narrow terminals ([#290](https://github.com/kelsin/sync-roms/issues/290)) ([4bca165](https://github.com/kelsin/sync-roms/commit/4bca1656c44af9e07d36e2d503835bd798efa0db))
+* **s3:** refresh the mirror's theme after themes update and size the connection pool ([#288](https://github.com/kelsin/sync-roms/issues/288)) ([6376173](https://github.com/kelsin/sync-roms/commit/6376173a938f8d2fd1e5d49e9c858342b3deb617))
+* **scrape:** retry transient errors and stop on failures that are not about the rom ([#274](https://github.com/kelsin/sync-roms/issues/274)) ([3e45df6](https://github.com/kelsin/sync-roms/commit/3e45df688b09e984ef6f9c5d45d570be38c6011b))
+* **settings:** treat a path answer as a storage folder on first run ([#270](https://github.com/kelsin/sync-roms/issues/270)) ([9f0eb20](https://github.com/kelsin/sync-roms/commit/9f0eb2011363f92c1ff43a1eba534e54f7777b4d))
+* **sync:** count scraped media in the plan and end with a summary ([#267](https://github.com/kelsin/sync-roms/issues/267)) ([d875ddd](https://github.com/kelsin/sync-roms/commit/d875ddd5cecbd6a982204cc29f4d3ba0ade00338))
+* **sync:** fail clearly when the storage folder or card path is missing ([#257](https://github.com/kelsin/sync-roms/issues/257)) ([b88fd0d](https://github.com/kelsin/sync-roms/commit/b88fd0ddd577fef1774a2485477780fea7e8c0c9))
+* **upload:** match renames by content and stop on ctrl-c ([#262](https://github.com/kelsin/sync-roms/issues/262)) ([c822e28](https://github.com/kelsin/sync-roms/commit/c822e285b767090e2bb615b05a0d6fd87128168f))
+* **upload:** run rename chains safely and match diff by content ([#265](https://github.com/kelsin/sync-roms/issues/265)) ([58330d5](https://github.com/kelsin/sync-roms/commit/58330d589c5a699a8854d05e4a7e2af748c80cf6))
+
+
+### :zap: Performance Improvements
+
+* **cache:** skip listing folders that did not change in cache update ([#275](https://github.com/kelsin/sync-roms/issues/275)) ([3572c01](https://github.com/kelsin/sync-roms/commit/3572c01811e937a9c9afce549fbbeafb59c9f82d))
+* **convert:** unpack to local temp and cap jobs by free space ([#284](https://github.com/kelsin/sync-roms/issues/284)) ([2218fe3](https://github.com/kelsin/sync-roms/commit/2218fe330b36715afb7056e0dfad1eea5c65571f))
+* **edit:** recount only the system that changed in the card editor ([#277](https://github.com/kelsin/sync-roms/issues/277)) ([d345b47](https://github.com/kelsin/sync-roms/commit/d345b4780a164b925f0d5b0b472d170afb585060))
+* **picker:** run each editor's lists in one app ([#292](https://github.com/kelsin/sync-roms/issues/292)) ([f25731e](https://github.com/kelsin/sync-roms/commit/f25731e101e07f7463916e1ee076efca262af371))
+* **s3:** skip the head request before a download when the cache has its size and etag ([#295](https://github.com/kelsin/sync-roms/issues/295)) ([b80e0c2](https://github.com/kelsin/sync-roms/commit/b80e0c2529d5f1e3396477f41abf6b1b3d2a9bc4))
+* **scrape:** hash only files up to 64 MB in a storage folder ([#271](https://github.com/kelsin/sync-roms/issues/271)) ([aedca0d](https://github.com/kelsin/sync-roms/commit/aedca0dec05c1404e7412641e9fd97f725479dd7))
+* **scrape:** remember media screenscraper does not offer ([#272](https://github.com/kelsin/sync-roms/issues/272)) ([2243b5f](https://github.com/kelsin/sync-roms/commit/2243b5f8f37559c24299f435505cde6af9627559))
+* **sync:** skip work that cannot change the result ([#280](https://github.com/kelsin/sync-roms/issues/280)) ([6f77f57](https://github.com/kelsin/sync-roms/commit/6f77f57c98f56e84344b7b068f14bed7b3c145c9))
+
+
+### :broom: Chores
+
+* drop python 3.11 support ([#283](https://github.com/kelsin/sync-roms/issues/283)) ([c5329d4](https://github.com/kelsin/sync-roms/commit/c5329d43e014fcb61d855c4b791426b769139b8d))
+
+
+### :book: Documentation
+
+* **theme:** add generated gallery of the art book next collection art ([#278](https://github.com/kelsin/sync-roms/issues/278)) ([94145ea](https://github.com/kelsin/sync-roms/commit/94145ea9bc5c0181be85e87b7b2ec0c009ce0c56))
+* **theme:** top-align the art gallery and credit art book next ([#281](https://github.com/kelsin/sync-roms/issues/281)) ([fd92108](https://github.com/kelsin/sync-roms/commit/fd921087a2aed97371de8f5d984d8730f034c317))
+
 ## [2.7.0](https://github.com/kelsin/sync-roms/compare/v2.6.0...v2.7.0) (2026-11-13)
 
 
