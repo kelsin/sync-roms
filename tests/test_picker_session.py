@@ -325,25 +325,97 @@ class Session(unittest.TestCase):
             self.assertIs(self.run_editor(editor, script), True)
         self.assertEqual(self.events, ["suspend", "resume", "app closed"])
 
-    def test_keys_after_a_list_ended_reach_nothing(self):
+    def test_keys_behind_the_one_that_ended_a_list_reach_nothing_but_ctrl_c(self):
         from textual import events
         for key in ("enter", "escape", "x", "ctrl+c"):
             with self.subTest(key=key):
                 self.events = []
 
                 def editor():
-                    picker.filter_list("A", ["a0"], hotkeys=("x",))
+                    try:
+                        picker.filter_list("A", ["a0"], hotkeys=("x",))
+                    except KeyboardInterrupt:
+                        return "interrupted"  # as without a session: a Ctrl-C right behind Enter turns the pick into it
                     return picker.filter_list("B", ["b0", "b1"])
 
                 async def script(app, pilot):
                     await wait_for(pilot, lambda: showing(app, "A"))
                     app.post_message(events.Key("enter", "\r"))
                     app.post_message(events.Key(key, None))
+                    if key == "ctrl+c":
+                        return
                     await wait_for(pilot, lambda: showing(app, "B"))
                     await pilot.pause(0.1)
                     self.assertTrue(showing(app, "B"))
                     await pilot.press("j", "enter")
-                self.assertEqual(self.run_editor(editor, script), 1)
+                self.assertEqual(self.run_editor(editor, script), "interrupted" if key == "ctrl+c" else 1)
+
+    def test_keys_typed_while_working_reach_the_next_list_in_order(self):
+        def editor():
+            picker.filter_list("A", ["a0"])
+            time.sleep(0.4)
+            return picker.filter_list("B", ["b0", "b1"], multi=True)
+
+        async def script(app, pilot):
+            await wait_for(pilot, lambda: showing(app, "A"))
+            await pilot.press("enter")
+            await wait_for(pilot, lambda: type(app.screen).__name__ == "_WorkingScreen")
+            await pilot.press("j", "space", "enter")
+        self.assertEqual(self.run_editor(editor, script), [False, True])
+
+    def test_keys_typed_while_working_before_a_prompt_are_dropped(self):
+        def editor():
+            picker.filter_list("A", ["a0"])
+            time.sleep(0.4)
+            ui.confirm("Go on?")
+            return picker.filter_list("B", ["b0", "b1"])
+
+        async def script(app, pilot):
+            await wait_for(pilot, lambda: showing(app, "A"))
+            await pilot.press("enter")
+            await wait_for(pilot, lambda: type(app.screen).__name__ == "_WorkingScreen")
+            await pilot.press("j", "enter")
+            await wait_for(pilot, lambda: showing(app, "B"))
+            await pilot.pause(0.1)
+            self.assertTrue(showing(app, "B"))
+            await pilot.press("enter")
+        with mock.patch("builtins.input", return_value="y"):
+            self.assertEqual(self.run_editor(editor, script), 0)
+
+    def test_ctrl_c_just_after_a_prompt_interrupts_the_next_list_at_once(self):
+        def answer(prompt=""):
+            picker._session.interrupt()  # the SIGINT handler's call for a Ctrl-C just after the answer
+            return "n"
+
+        def editor():
+            picker.filter_list("A", ["a0"])
+            ui.confirm("Delete?", default=False)
+            try:
+                picker.filter_list("B", ["b0"])
+            except KeyboardInterrupt:
+                return "interrupted"
+
+        async def script(app, pilot):
+            await wait_for(pilot, lambda: showing(app, "A"))
+            await pilot.press("enter")
+        with mock.patch("builtins.input", answer):
+            self.assertEqual(self.run_editor(editor, script), "interrupted")
+
+    def test_the_worker_always_tells_the_main_thread_it_ended(self):
+        """An interrupt sent exactly as the editor ends (its last step one long call that keeps the interpreter lock)
+        must never kill the worker before it hands the main thread its None."""
+        died = []
+        hook, threading.excepthook = threading.excepthook, lambda args: died.append(args.exc_type)
+        self.addCleanup(setattr, threading, "excepthook", hook)
+        for _ in range(15):
+            session = picker._Session()
+            with mock.patch.object(picker, "_session", session):
+                thread = threading.Thread(target=session.work, args=(lambda: sum(range(3_000_000)), (), {}), daemon=True)
+                thread.start()
+                while thread.is_alive():
+                    session.interrupt()
+                self.assertIsNone(session.requests.get(timeout=2))
+        self.assertEqual(died, [])
 
     def test_keys_typed_while_the_app_suspends_are_dropped(self):
         from textual import events
@@ -617,6 +689,19 @@ class TextualPrintHook(unittest.TestCase):
 
 
 class OutsideASession(unittest.TestCase):
+    def test_a_ctrl_c_right_behind_enter_interrupts_the_list(self):
+        from textual import events
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        from helpers import pilot_list
+
+        async def script(pilot):
+            await pilot.pause()
+            pilot.app.post_message(events.Key("enter", "\r"))
+            pilot.app.post_message(events.Key("ctrl+c", "\x03"))
+            await pilot.pause(0.2)
+        with self.assertRaises(KeyboardInterrupt):
+            pilot_list(script, "A", ["a0", "a1"])
+
     def test_each_list_runs_its_own_app(self):
         runs = []
 

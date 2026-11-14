@@ -449,6 +449,7 @@ def _app_class():
     """The list's Textual app class, built on first use: importing Textual takes a while, and only a list needs it."""
     os.environ.setdefault("ESCDELAY", "25")  # read when Textual is imported: Esc acts at once
     from rich.text import Text
+    from textual import events
     from textual._time import get_time  # the clock Textual stamps events with (pinned by TextualPrintHook tests)
     from textual.app import App
     from textual.containers import VerticalScroll
@@ -519,15 +520,17 @@ def _app_class():
                 from textual_image.widget import Image  # already imported (and the terminal probed) by filter_list
                 yield Image(self.app.model.preview_path(), id="preview")
 
+        def on_mount(self):
+            if self.app.session and self is self.app.list_screen:
+                self.app.list_ready()
+
         def on_key(self, event):
             event.stop()
-            if event.time >= self.app.keys_from:
-                self.app.feed(_key_name(event))
+            self.app.feed(_key_name(event))
 
         def on_paste(self, event):
             event.stop()
-            if event.time >= self.app.keys_from:
-                self.app.paste(event.text)
+            self.app.paste(event.text)
 
 
     class _HelpScreen(Screen):
@@ -550,8 +553,6 @@ def _app_class():
         def on_key(self, event):
             event.stop()
             k = _key_name(event)
-            if event.time < self.app.keys_from:
-                return
             if k in self.SCROLL:
                 getattr(self.query_one(VerticalScroll), self.SCROLL[k])(animate=False)
             else:
@@ -559,21 +560,12 @@ def _app_class():
 
 
     class _WorkingScreen(Screen):
-        """An editor session's screen between its lists, with the last line the editor printed. Ctrl-C here interrupts
-        the editor's work."""
+        """An editor session's screen between its lists, with the last line the editor printed (its keys:
+        _ListApp.session_input)."""
 
         def compose(self):
             yield Static(Text("Working...", "dim"))
             yield Static(id="last")
-
-        def on_key(self, event):
-            event.stop()
-            if event.time < self.app.keys_from:
-                return
-            if event.key == "ctrl+c":
-                self.app.session.interrupt()
-            elif event.key == "ctrl+z":
-                self.app.action_suspend_process()
 
 
     class _ListApp(App, inherit_bindings=False):
@@ -599,7 +591,10 @@ def _app_class():
             self.interrupted = False
             self.error = None  # what a step (a caller's callback, say) raised: filter_list raises it
             self.timer = None
-            self.keys_from = 0  # in a session: keys stamped earlier were typed for a list that is gone, or while suspending
+            self.keys_from = 0  # in a session: keys stamped earlier were read as the app suspended for a prompt
+            self.ended_at = 0  # in a session: when the last list ended (keys stamped earlier were typed for it)
+            self.ready = False  # in a session: the list screen is up and composed
+            self.typeahead = []  # in a session: keys typed while no list was up yet, for the next one
 
         def get_default_screen(self):
             if self.session:
@@ -617,20 +612,81 @@ def _app_class():
             """Show the next list of the session; its (result, error) goes to reply when it is done."""
             if reply in self.session.withdrawn:
                 return
+            if self.session.interrupted:  # a Ctrl-C since the worker asked (just after a prompt's answer, say)
+                self.session.interrupted = False
+                return reply.put((None, KeyboardInterrupt()))
             if model.preview and self.session.draws is None:  # the terminal is asked once, on the normal screen
                 with self.suspend():
+                    self.suspending()
                     _, error = _outcome(lambda: self.session.at_terminal(self.session.probe, model))
                 if error is not None:  # Ctrl-C while it asked: as in the list
                     return reply.put((None, error))
-            self.keys_from = get_time()
             if not self.session.draws:
                 model.preview = None
             self.model, self.reply = model, reply
             self.done, self.interrupted, self.error = False, False, None
             self.last_line("")
             self.timer = self.set_interval(POLL_MS / 1000, lambda: self.step(self.model.tick)) if model.poll else None
+            self.ready = False
             self.list_screen = _ListScreen()
             self.push_screen(self.list_screen)
+
+        def list_ready(self):
+            """The list screen is composed: it takes keys now, the ones typed ahead first."""
+            self.ready = True
+            typed, self.typeahead = self.typeahead, []
+            for event in typed:
+                self.session_input(event)
+
+        def suspending(self):
+            """The app has just suspended: what its input read as it stopped, and keys typed ahead, were typed before
+            what the terminal now shows (a prompt, a command), so none of it reaches a list."""
+            self.keys_from = get_time()
+            self.typeahead = []
+
+        async def on_event(self, event):
+            """In a session every key and paste goes to session_input, in the order they came; outside one, as usual."""
+            if self.session and isinstance(event, (events.Key, events.Paste)) and not event.is_forwarded:
+                return self.session_input(event)
+            await super().on_event(event)
+
+        def session_input(self, event):
+            """A key or paste in a session (in arrival order, so a Ctrl-C right behind the key that ended a list is
+            seen before that list's result is sent): dropped if typed before a prompt; for a list that has just
+            ended, only a Ctrl-C counts (it makes that list's result an interrupt, as without a session); while no
+            list is up, Ctrl-C interrupts the editor's work and other keys wait for the next list."""
+            if event.time < self.keys_from:
+                return
+            k = _key_name(event) if isinstance(event, events.Key) else None
+            if event.time < self.ended_at:
+                if k == "ctrl+c":
+                    self.late_ctrl_c()
+                return
+            if self.done:
+                if k == "ctrl+c":
+                    self.session.interrupt()
+                elif k == "ctrl+z":
+                    self.action_suspend_process()
+                else:
+                    self.typeahead.append(event)
+            elif not self.ready:
+                self.typeahead.append(event)
+            elif k is None:
+                self.paste(event.text)
+            elif isinstance(self.screen, _HelpScreen) and k in _HelpScreen.SCROLL:
+                getattr(self.screen.query_one(VerticalScroll), _HelpScreen.SCROLL[k])(animate=False)
+            else:
+                self.feed(k)
+
+        def late_ctrl_c(self):
+            """A Ctrl-C typed for the list that just ended."""
+            if self.done and self.reply is not None:  # its result is not sent yet: it becomes the interrupt
+                self.interrupted = True
+            elif not self.done:  # the next list is already up: it ends with the interrupt
+                self.interrupted = True
+                self.finish(None)
+            else:
+                self.session.interrupt()
 
         def request(self, kind, payload, reply):
             """A request from the session's worker (_Session.ask): show a list, or suspend the app and answer prompts on
@@ -644,6 +700,7 @@ def _app_class():
                 return self.show(payload, reply)
             session = self.session
             with self.suspend():
+                self.suspending()
                 sys.stdout, sys.stderr = session.streams  # suspend() restores Textual's on the way out
                 session.flush()
                 with session.lock:
@@ -651,7 +708,6 @@ def _app_class():
                 request = session.prompts((kind, payload, reply))
                 with session.lock:
                     session.suspended = False
-            self.keys_from = get_time()  # what the input read while it stopped was typed before the prompt
             if request is None:  # the editor is done
                 session.requests.put(None)  # for _Session.run, once the app has closed
                 self.exit()
@@ -680,8 +736,6 @@ def _app_class():
                 super()._print(text, stderr)
 
         def feed(self, k):
-            if self.done:  # queued for a list that has ended
-                return
             if k == "ctrl+c":
                 self.interrupted = True
                 self.finish(None)
@@ -725,11 +779,16 @@ def _app_class():
                 return self.exit(result)
             if self.timer:
                 self.timer.stop()
-            self.keys_from = get_time()
+            self.ended_at = get_time()
             while len(self.screen_stack) > 1:
                 self.pop_screen()
-            reply, self.reply = self.reply, None
-            reply.put((result, self.error or (KeyboardInterrupt() if self.interrupted else None)))
+            self.call_later(self.send, self.reply, result)  # after the keys already queued (session_input)
+
+        def send(self, reply, result):
+            """Hand the ended list's result to the worker (unless the next list is already up: a withdrawn one's)."""
+            if self.reply is reply:
+                self.reply = None
+                reply.put((result, self.error or (KeyboardInterrupt() if self.interrupted else None)))
 
     return _ListApp
 
@@ -858,17 +917,22 @@ class _Session:
     def work(self, fn, args, kwargs):
         """The worker: run the editor, then end the app and the main thread's loop."""
         self.worker = threading.get_ident()
-        self.result = _outcome(lambda: self.edit(fn, args, kwargs))
-        self.busy = False  # no check between this and the line above, so no interrupt is sent after it
-        for _ in range(2):  # an interrupt that came as the editor ended can only land here, once
-            try:
-                with self.lock:
-                    if self.app and not self.suspended:  # a suspended app ends when its prompts get the None below
-                        self.app.call_later(self.app.exit)
-                self.requests.put(None)
-                return
-            except KeyboardInterrupt:
-                self.result = self.result if self.result[1] else (None, KeyboardInterrupt())
+        late = False
+        try:
+            self.result = _outcome(lambda: self.edit(fn, args, kwargs))
+        finally:
+            while True:  # an interrupt sent as the editor ended may land in here (once): go round until it is through
+                try:
+                    self.busy = False
+                    with self.lock:
+                        if self.app and not self.suspended:  # a suspended app ends when its prompts get the None below
+                            self.app.call_later(self.app.exit)
+                        if late and (self.result is None or self.result[1] is None):
+                            self.result = (None, KeyboardInterrupt())  # Ctrl-C as the editor ended: it still counts
+                    self.requests.put(None)
+                    break
+                except KeyboardInterrupt:
+                    late = True
 
     def edit(self, fn, args, kwargs):
         """The editor, open to interrupt while it runs (the try covers every place an interrupt can land)."""
