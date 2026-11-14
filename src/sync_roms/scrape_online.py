@@ -148,7 +148,7 @@ def match(client, system, rom, size, etag, game_id=None, stop=None):
     """(game id, how) for a ROM; how is "manual", "hash" or "name+size". Raises screenscraper.NotFound.
 
     One lookup sends the hashes, name and size together; it counts as "hash" only when the ROM ScreenScraper
-    matched carries one of the hashes sent. A storage folder's file over HASH_MAX is sent without hashes unless they
+    matched carries one of the hashes sent. A storage folder's file of HASH_MAX or more is sent without hashes unless they
     are cached, and hashed for one more lookup when that finds nothing. game_id: a match given for this run only
     (`scrape match`)."""
     if game_id:
@@ -159,7 +159,7 @@ def match(client, system, rom, size, etag, game_id=None, stop=None):
         return saved, "manual"
     hashes = {}
     if s3.read_root():  # a folder's ETag is a fake "mtime-size" tag; hash the file instead
-        hashes = _hashes(name, rom, size, stop) if size <= HASH_MAX else scrape_state.cached_hashes(name, rom, size, _mtime(name, rom)) or {}
+        hashes = _hashes(name, rom, size, stop) if size < HASH_MAX else scrape_state.cached_hashes(name, rom, size, _mtime(name, rom)) or {}
     elif "-" not in (tag := etag.strip('"')):  # a multipart upload's ETag is not the file's MD5
         hashes = {"md5": tag}
     try:
@@ -196,7 +196,7 @@ def resolve_manual(client, system, query):
 BATCH = 25  # ROMs scraped and uploaded together
 LOOKAHEAD = 2  # batches in the pool at once: the next one is scraped while the last uploads
 HASH_THREADS = 4  # ROMs hashed at once ahead of their lookups
-HASH_MAX = 64 << 20  # bigger files in a storage folder are hashed only when their name and size find nothing (a bucket has no MD5 for them either)
+HASH_MAX = 64 << 20  # files this big or bigger in a storage folder are hashed only when their name and size find nothing (an upload this big is multipart, so a bucket has no MD5 for it either)
 METADATA_INTERVAL = 60  # seconds of scraped ROMs whose entries are written to metadata.json together
 RETRIES = 3  # times a rate-limited or transient request is tried again
 RETRY_WAIT = 10  # seconds before the first retry, doubled each time: 70 s in all, past a per-minute cap
@@ -305,6 +305,9 @@ def set_credentials():
     print(ui.green("✅ Saved ScreenScraper credentials to " + os.path.join(store.data_dir(), "settings.json")))
     try:
         quota = make_client().quota()
+    except KeyboardInterrupt:
+        print(ui.yellow("\n👋 Credentials saved; the login wasn't checked"))
+        return 130
     except screenscraper.Refused as e:
         ui.failure(ui.red(f"❌ Credentials saved, but ScreenScraper refused the check: {e}"))
         return 1
@@ -359,7 +362,7 @@ def planned_match(system, rom, size, etag):
     if scrape_state.manual_match(system, rom) is not None:
         return "manual"
     if s3.read_root():
-        return "hash" if size <= HASH_MAX or _cached(system, rom, size) else "name+size"
+        return "hash" if size < HASH_MAX or _cached(system, rom, size) else "name+size"
     return "hash" if "-" not in etag.strip('"') else "name+size"
 
 
@@ -548,7 +551,7 @@ def start_batch(ex, client, system, batch, skip, stop, index, replace=False, for
     forced = forced or {}
     if hasher is not None and s3.read_root():
         for rom, size, _ in batch:
-            if size <= HASH_MAX and rom not in forced and scrape_state.manual_match(system["bucket"], rom) is None:
+            if size < HASH_MAX and rom not in forced and scrape_state.manual_match(system["bucket"], rom) is None:
                 prefetch_hash(hasher, system["bucket"], rom, size, stop)
     kept = {rom: set() if replace else set(index.get(os.path.splitext(rom)[0], ())) for rom, _, _ in batch}
     tmp = tempfile.mkdtemp()
@@ -840,7 +843,7 @@ def run_scrape(client, systems, todo, skip, ask=True, replace=False, forced=None
     note = f"; the {kept} media file(s) already there are kept" if kept else ""
     try:
         quota = screenscraper.Quota(1, 0, 0) if brief else _retry(None, client.quota)
-    except screenscraper.QuotaExceeded as e:
+    except (screenscraper.QuotaExceeded, screenscraper.Refused) as e:
         ui.failure(ui.yellow(_stop_message(e, rerun)))
         return 1
     except screenscraper.ApiError as e:
@@ -978,7 +981,8 @@ def _scrape_command(args):
     if s3.read_root():
         read = sum(size for name, items in todo.items() for r, size, _ in items
                    if planned[name][r] == "hash" and not _cached(name, r, size))
-        print(f"  📖 {ui.human_size(read)} to read for hashing" + ui.dim(f"  (files over {ui.human_size(HASH_MAX)} only when name+size finds nothing)"))
+        if read:
+            print(f"  📖 {ui.human_size(read)} to read for hashing" + ui.dim(f"  (files of {ui.human_size(HASH_MAX)} or more only when name+size finds nothing)"))
     if args.dry_run:
         print(ui.yellow("\n🧪 Dry run — nothing looked up or written"))
         wanted = sorted(set(screenscraper.MEDIA_MAP.values()) - skip)

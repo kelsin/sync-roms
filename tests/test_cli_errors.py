@@ -218,10 +218,11 @@ class MissingStorageOrCardTest(Isolated):
         prepare.assert_not_called()
 
     def test_editor_still_opens_with_the_storage_folder_missing(self):
-        with mock.patch.object(edit, "edit_manifest", return_value=0) as run:
-            code, _, err = self.sync(["edit"], {"root": os.path.join(self.tmp, "roms")})
-        self.assertEqual((code, err), (0, ""))
-        run.assert_called_once_with()
+        for argv in (["edit"], ["cards", "edit"], ["games", "edit"]):
+            with self.subTest(argv=argv), mock.patch.object(edit, "edit_manifest", return_value=0) as run:
+                code, _, err = self.sync(argv, {"root": os.path.join(self.tmp, "roms")})
+            self.assertEqual((code, err), (0, ""))
+            run.assert_called_once_with()
 
     def test_os_error_mid_run_is_a_message_not_a_traceback(self):
         boom = FileNotFoundError(2, "No such file or directory", "/Volumes/roms/scrapes/gba/metadata.json")
@@ -240,6 +241,7 @@ class MissingStorageOrCardTest(Isolated):
             cli.main()
         self.assertEqual(cm.exception.code, 3)
         self.assertIn(os.path.join(store.data_dir(), "settings.json"), err.getvalue())
+        self.assertIn("--bucket", err.getvalue())
 
     def test_missing_card_path_is_a_usage_error_and_creates_nothing(self):
         storage = os.path.join(self.tmp, "roms")

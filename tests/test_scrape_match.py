@@ -83,6 +83,15 @@ class CandidatesTest(MatchBase):
         self.assertEqual(scrape_online.find_candidates([SYSTEM], roms, meta, fill=fill)["gba"], ["b.zip"])  # b: fanart may be there
         self.assertEqual(scrape_online.find_candidates([SYSTEM], roms, meta, retry=True, fill=fill)["gba"], ["a.zip", "b.zip"])
 
+    def test_fill_media_reads_only_string_items_of_a_hand_edited_not_offered_entry(self):
+        os.makedirs(store.data_dir(), exist_ok=True)
+        with open(os.path.join(store.data_dir(), scrape_state.NOMEDIA), "w") as f:
+            f.write('{"gba/a.zip": ["manuals", ["fanart"], {"x": 1}, 3]}')
+        listing = {"gba": {"scrapes/gba/covers/a.png": 1}}
+        out = scrape_online.find_candidates([SYSTEM], {"gba": {"a.zip"}}, {"gba": {"a.zip": {}}}, fill=({"covers", "manuals"}, listing))
+        self.assertEqual(out["gba"], [])  # manuals not offered, covers there
+        self.assertEqual(scrape_state.snapshot().not_offered("gba", "a.zip"), {"manuals"})
+
     def test_fill_media_still_skips_unknown(self):
         scrape_state.mark_unknown("gba", "b.zip")
         out = scrape_online.find_candidates([SYSTEM], {"gba": {"b.zip"}}, {"gba": {"b.zip": {}}},

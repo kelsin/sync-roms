@@ -89,7 +89,7 @@ HELP_FOOTER = "j/k ↑/↓ PgUp/PgDn scroll · Esc/q/? close"
 
 def help_lines(multi, hint, hidden_count=False, has_note=False, key_help=None):
     """Every key a filter_list accepts, then this screen's own keys: key_help's (keys, what they do) pairs, or else
-    the hint's entries."""
+    the hint's entries. A key key_help describes is listed only there."""
     lines = ["j/k ↑/↓ ^N/^P   move", "g/G             top / bottom", "^D/^U           half page",
              "^F/^B PgDn/PgUp page",
              "/               filter (" + ("Enter or Tab keeps it" if multi else "Enter picks, Tab keeps it")
@@ -104,6 +104,10 @@ def help_lines(multi, hint, hidden_count=False, has_note=False, key_help=None):
         lines.append("z               show / hide hidden rows")
     lines.append("?               this help")
     if key_help:
+        def keys(text):
+            return set(re.split(r"[/ ]", text)) - {""}
+        described = set().union(*(keys(k) for k, _ in key_help))
+        lines = [line for line in lines if not (own := keys(line[:16])) or not own <= described]  # the "/" line's key splits to nothing
         return lines + ["", "This screen:"] + [f"{k:<15} {what}" for k, what in key_help]
     extra = [e for e in hint.split(" · ") if e] if hint else []
     if extra:

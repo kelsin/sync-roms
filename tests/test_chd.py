@@ -863,6 +863,29 @@ class ChdTest(unittest.TestCase):
                     os.rename(os.path.join(self.dir, "psx", "Game.chd"), os.path.join(self.dir, "psx", "Game.iso"))
                 self.assertEqual(os.listdir(os.path.join(self.dir, "psx")), ["Game.iso"])
 
+    def test_an_empty_card_name_matches_no_folder(self):
+        with mock.patch.object(store, "load_cards", return_value={"": {"device": "full"}, "SD": {"device": "full"}}), \
+                mock.patch.object(ui, "failure") as warned:
+            chd.warn_on_card(os.path.join(self.dir, "psx"), True)
+            warned.assert_not_called()
+            chd.warn_on_card(os.path.join(self.dir, "SD", "psx"), True)
+        self.assertIn("card SD", warned.call_args.args[0])
+
+    def test_jobs_that_finish_while_ctrl_c_shuts_down_are_counted(self):
+        self.addCleanup(setattr, external, "_tools_stopped", False)
+        self.touch("psx/Game.iso")
+        real_wait = chd.wait
+
+        def interrupted(fs, **kw):
+            real_wait(fs)  # every job finishes before the interrupt is seen
+            raise KeyboardInterrupt
+
+        with mock.patch.object(chd, "wait", interrupted), mock.patch.object(runtime, "ROOT", self.dir):
+            code, out, _ = self.run_on_card(os.path.join(self.dir, "psx"))
+        self.assertEqual(code, 130)
+        self.assertIn("1 done, nothing half-converted", out)
+        self.assertIn("sync-roms cache update", out)
+
     def test_quiet_convert_shows_only_failures(self):
         self.touch("psx/Game.iso")
         code, out, err = self.run_on_card(os.path.join(self.dir, "psx"), quiet=True)

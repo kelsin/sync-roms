@@ -511,7 +511,7 @@ def fix_playlists(roots, dry_run):
 def warn_on_card(root, dry_run):
     """Warn when root is inside a saved card's folder and, unless a dry run, ask to go on (default no; exits on no)."""
     cards = store.load_cards()
-    card = next((part for part in root.split(os.sep) if part in cards), None)
+    card = next((part for part in root.split(os.sep) if part and part in cards), None)
     if not card:
         return
     ui.failure(ui.yellow(f"⚠️  {root} is on the card {card}: the next sync lists the converted files as not in the game list "
@@ -616,6 +616,7 @@ def chd_command(args):
                 break
             except KeyboardInterrupt:
                 pass
+        converted = sum(1 for f in futures if not f.cancelled() and f.exception() is None and not f.result())  # with the jobs that ended meanwhile
         print(ui.yellow(f"  {converted} done, nothing half-converted; run --cd again to continue"))
         hint_cache_update(root, converted)
         return 130

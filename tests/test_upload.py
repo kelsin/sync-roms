@@ -342,6 +342,25 @@ class RenameChainTest(unittest.TestCase):
         self.assertEqual(s3.move_groups(moves), [moves[::-1]])
         self.assertEqual(s3.move_groups([("gba/a.gba", "gba/A.gba")]), [[("gba/a.gba", "gba/A.gba")]])
 
+    def test_a_chain_of_four_runs_from_its_end(self):
+        moves = [("gba/a.gba", "gba/b.gba"), ("gba/b.gba", "gba/c.gba"), ("gba/c.gba", "gba/d.gba"), ("gba/d.gba", "gba/e.gba")]
+        self.assertEqual(s3.move_groups(moves), [moves[::-1]])
+
+    def test_two_separate_chains_are_two_groups(self):
+        moves = [("gba/a.gba", "gba/b.gba"), ("gba/x.gba", "gba/y.gba"), ("gba/b.gba", "gba/c.gba"), ("gba/y.gba", "gba/z.gba")]
+        self.assertEqual(s3.move_groups(moves), [[("gba/b.gba", "gba/c.gba"), ("gba/a.gba", "gba/b.gba")],
+                                                 [("gba/y.gba", "gba/z.gba"), ("gba/x.gba", "gba/y.gba")]])
+
+    def test_a_chain_and_a_cycle(self):
+        moves = [("gba/a.gba", "gba/b.gba"), ("gba/b.gba", "gba/a.gba"), ("gba/x.gba", "gba/y.gba"), ("gba/y.gba", "gba/z.gba")]
+        self.assertEqual(s3.move_groups(moves), [[("gba/y.gba", "gba/z.gba"), ("gba/x.gba", "gba/y.gba")],
+                                                 [("gba/a.gba", "gba/a.gba.part"), ("gba/b.gba", "gba/a.gba"), ("gba/a.gba.part", "gba/b.gba")]])
+
+    def test_names_that_only_casefold_alike_keep_chains(self):
+        moves = [("gba/Straße.gba", "gba/x.gba"), ("gba/Strasse.gba", "gba/Y.gba"), ("gba/y.gba", "gba/z.gba")]  # ß is not ss in a folder
+        self.assertEqual(s3.move_groups(moves), [[("gba/Straße.gba", "gba/x.gba")],
+                                                 [("gba/y.gba", "gba/z.gba"), ("gba/Strasse.gba", "gba/Y.gba")]])
+
     def loose_folder(self, a, b):
         """True when the storage folder finds name a under name b."""
         with open(os.path.join(self.folder, a), "wb"):
