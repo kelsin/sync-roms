@@ -179,7 +179,7 @@ TOPICS = {
   --set-credentials  ask for your ScreenScraper username and password (saved in settings.json,
                      readable only by you; blank keeps the current value), then check them with one request
                      and show today's quota and threads, or the error (exit 1 when ScreenScraper refuses them)
-  A rate-limited request, a server error (HTTP 5xx) or a network failure is tried 3 more times over about a minute.
+  A rate-limited request, a server error (HTTP 5xx) or a network failure is tried 3 more times, waiting 10, 20 and 40 seconds.
   The run stops cleanly, keeping what it finished, when ScreenScraper's daily quota runs out (run it again tomorrow),
   when ScreenScraper refuses the login, is closed or no longer accepts this version (the message says what to do), or
   when 3 ROMs in a row can't reach it. Ctrl-C stops it too: the ROMs that finished are uploaded and saved, it says how

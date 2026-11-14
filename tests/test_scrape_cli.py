@@ -260,6 +260,13 @@ class SetCredentials(RealDataDirGuard):
         self.assertFalse(os.path.exists(self.path))
         self.assertIn("not saved", out.getvalue())
 
+    def test_ctrl_c_during_the_login_check_keeps_what_was_saved(self):
+        self.quota.side_effect = KeyboardInterrupt
+        code, out = self.run_it(["me"], ["pw"])
+        self.assertEqual(code, 130)
+        self.assertTrue(os.path.exists(self.path))
+        self.assertIn("👋 Credentials saved; the login wasn't checked", out)
+
     def test_eof_saves_nothing_more(self):
         with mock.patch("builtins.input", side_effect=EOFError), mock.patch("sys.stdout", io.StringIO()), mock.patch("sys.stderr", io.StringIO()):
             with self.assertRaises(SystemExit):

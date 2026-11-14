@@ -299,7 +299,7 @@ class _Snapshot:
 
     def not_offered(self, system, rom):
         types = self._nomedia.get(_key(system, rom))
-        return set(types) if isinstance(types, list) else set()
+        return {t for t in types if isinstance(t, str)} if isinstance(types, list) else set()
 
 
 def snapshot():
