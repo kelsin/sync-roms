@@ -49,7 +49,9 @@ class Helpers(unittest.TestCase):
         s = {"bucket": "fbneo", "games": []}
         row = edit.system_rows(s, {"fbneo/1941j.zip"})[0]
         self.assertEqual(row[2], "1941: Counter Attack (Japan)")
-        self.assertIn("1941j.zip", row[3])
+        self.assertEqual(row[3], "1941: Counter Attack (Japan) — 1941j.zip")
+        gba = edit.system_rows({"bucket": "gba", "games": [{"bucket": "gba/B.zip"}]}, {"gba/A.zip"})
+        self.assertEqual([r[3] for r in gba], ["A.zip", "B.zip  ⚠️ not in storage"])
 
     def test_set_rows_keep_saved_title(self):
         s = {"bucket": "fbneo", "name": "FBNeo"}

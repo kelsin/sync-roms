@@ -127,9 +127,15 @@ def system_rows(s, in_bucket):
     """Rows for toggle_games over every file of a system's storage folder (Vita DLC and updates only if listed)
     plus any listed game that isn't in it."""
     listed = {g["bucket"] for g in s["games"] if g.get("bucket")}
-    return [(s, k, names.title(k),
-             k.split("/", 1)[1] + ("" if k in in_bucket else "  ⚠️ not in storage"))
-            for k in sorted(in_bucket | listed, key=str.lower) if not vita.is_extra(k) or k in listed]
+
+    def label(k, title):
+        path = k.split("/", 1)[1]
+        return (path if title == store.key_title(k) else f"{title} — {path}") \
+            + ("" if k in in_bucket else "  ⚠️ not in storage")
+
+    return [(s, k, title, label(k, title))
+            for k in sorted(in_bucket | listed, key=str.lower) if not vita.is_extra(k) or k in listed
+            for title in [names.title(k)]]
 
 
 def edit_card_system(card, bucket, setup):
