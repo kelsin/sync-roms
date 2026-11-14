@@ -46,6 +46,19 @@ class ZipFingerprintTest(unittest.TestCase):
         self.assertEqual(fp, diff.zip_fingerprint(io.BytesIO(data)))
         self.assertEqual(len(reads), 1)
 
+    def test_a_zip_smaller_than_the_tail_is_read_whole_once(self):
+        data = make_zip({"g.nes": b"abc"})
+        self.assertLess(len(data), diff.RangeReader.TAIL)
+        reads = []
+
+        def read_range(key, start, end):
+            reads.append((start, end))
+            return data[start:end]
+        with mock.patch.object(s3, "read_range", read_range):
+            fp = diff.zip_fingerprint(diff.RangeReader("k.zip", len(data)))
+        self.assertEqual(fp, diff.zip_fingerprint(io.BytesIO(data)))
+        self.assertEqual(reads, [(0, len(data))])
+
 
 def Z(x):
     return ("zip", ((x, 0),))
