@@ -556,6 +556,11 @@ sync-roms --edit
 3. When you leave the menu, device/firmware and device-system changes are summarized, then **save**, **keep
    editing**, **discard**, or **list every change**. Nothing is uploaded.
 
+While an editor is busy between two lists (the screen says `Working...`), `Ctrl-C` takes effect when that step ends:
+the editor then stops as it does for `Ctrl-C` in a list. Another `Ctrl-C` a second or more later, with the step
+still running, quits at once, and unsaved changes in the open editor are lost (the screen says when; a double press
+or a held key counts as one). The same goes for the set and collection editors.
+
 On the Cards list, `v` changes a card's device and firmware, `r` renames a card and `d` deletes one (both ask first, and act at once). **🧩 Device systems** edits which systems a device can play: it is saved as the `add`/`remove` overlay in `device-systems.json`, relative to the repo defaults. A file that isn't valid JSON is never overwritten: sync-roms says so and leaves it for you to fix (`sync-roms check` lists the problems).
 
 ### Editing from scripts

@@ -1,6 +1,7 @@
 """Terminal colors, prompts and progress output."""
 import collections
 import contextlib
+import functools
 import json
 import os
 import queue
@@ -159,6 +160,18 @@ def debug(text):
         print(dim(text), file=sys.stderr)
 
 
+terminal_runner = None  # set during an editor session (picker.one_app): runs fn on the normal screen, outside the list app
+
+
+def uses_terminal(fn):
+    """fn uses the terminal (asks, or runs a command that may print or ask): during an editor session it runs through
+    terminal_runner."""
+    @functools.wraps(fn)
+    def run(*args, **kwargs):
+        return terminal_runner(fn, *args, **kwargs) if terminal_runner else fn(*args, **kwargs)
+    return run
+
+
 def _input(prompt):
     if QUIET:  # stdout is discarded, so the question goes where a person (or log) can still see it
         sys.stderr.write(prompt)
@@ -167,6 +180,7 @@ def _input(prompt):
     return input(prompt)
 
 
+@uses_terminal
 def ask(prompt):
     """input() that gives "" at end of input instead of raising, so a prompt with an empty answer means cancel."""
     try:
@@ -176,6 +190,7 @@ def ask(prompt):
         return ""
 
 
+@uses_terminal
 def confirm(question, default=True):
     suffix = "[Y/n]" if default else "[y/N]"
     if ASSUME_YES:
@@ -206,6 +221,7 @@ def require_terminal(what, flag):
         fail(f"Can't {what} without a terminal: pass {flag}", 2)
 
 
+@uses_terminal
 def choose(question, letters, default, legend=""):
     """Ask for one of `letters` (a string of single characters); Enter, --yes and EOF give `default`."""
     suffix = "/".join(l.upper() if l == default else l for l in letters)

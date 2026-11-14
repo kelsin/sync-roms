@@ -1,7 +1,13 @@
 """Interactive pickers: full-screen list screens (Textual)."""
+import collections
 import functools
 import os
+import queue
 import re
+import signal
+import sys
+import threading
+import time
 import unicodedata
 
 from . import ui
@@ -79,6 +85,10 @@ HELP_HINT = "? help · "  # starts every hint line, so a narrow list cuts it las
 TYPING_HINT = "Enter keep filter · Esc clear · ^N/^P move · ^A/^E ^B/^F ^K ^W ^U edit"
 SINGLE_TYPING_HINT = "Enter pick · Tab keep filter · Esc clear · ^N/^P move · ^A/^E ^K ^W ^U edit"
 HELP_FOOTER = "j/k ↑/↓ PgUp/PgDn scroll · Esc/q/? close"
+# under "Working..." in an editor session, after a Ctrl-C the editor has not got yet; the second line once it is true
+STOPPING = "🛑 Ctrl-C: stopping when this step ends."
+QUIT_NOW = "   Press Ctrl-C again to quit now: unsaved changes in the open editor are lost."
+QUIT_AFTER = 1  # seconds after that Ctrl-C from which another one quits; sooner, it is the same press (a double tap, a held key)
 
 
 def help_lines(multi, hint, hidden_count=False, has_note=False, key_help=None):
@@ -447,6 +457,8 @@ def _app_class():
     """The list's Textual app class, built on first use: importing Textual takes a while, and only a list needs it."""
     os.environ.setdefault("ESCDELAY", "25")  # read when Textual is imported: Esc acts at once
     from rich.text import Text
+    from textual import events
+    from textual._time import get_time  # the clock Textual stamps events with (pinned by TextualPrintHook tests)
     from textual.app import App
     from textual.containers import VerticalScroll
     from textual.screen import Screen
@@ -516,6 +528,10 @@ def _app_class():
                 from textual_image.widget import Image  # already imported (and the terminal probed) by filter_list
                 yield Image(self.app.model.preview_path(), id="preview")
 
+        def on_mount(self):
+            if self.app.session and self is self.app.list_screen:
+                self.app.list_ready()
+
         def on_key(self, event):
             event.stop()
             self.app.feed(_key_name(event))
@@ -551,9 +567,20 @@ def _app_class():
                 self.app.feed(k)
 
 
+    class _WorkingScreen(Screen):
+        """An editor session's screen between its lists, with the last line the editor printed and, after a Ctrl-C,
+        what that does (its keys: _ListApp.session_input)."""
+
+        def compose(self):
+            yield Static(Text("Working...", "dim"))
+            yield Static(id="last")
+            yield Static(id="stopping")
+
+
     class _ListApp(App, inherit_bindings=False):
         """filter_list full screen: draws a _ListModel, feeds it keys and polls it. No bindings of its own, so ^P, ^Q,
-        Tab and the rest reach the list; Ctrl-C ends it (interrupted)."""
+        Tab and the rest reach the list; Ctrl-C ends it (interrupted). In an editor session (session: a _Session) it
+        shows one list after another, and "Working..." between them, until the session ends it."""
         ENABLE_COMMAND_PALETTE = False
         CSS = """
         _ListLines { width: 1fr; height: 1fr; text-wrap: nowrap; text-overflow: clip; }
@@ -565,19 +592,193 @@ def _app_class():
         _HelpScreen Static { width: auto; }
         """
 
-        def __init__(self, model):
+        def __init__(self, model, session=None, reply=None):
             super().__init__(ansi_color=True)
             self.model = model
-            self.done = False
+            self.session, self.reply = session, reply  # in a session: the queue that gets the list's (result, error)
+            self.done = session is not None  # in a session no list is up until show
             self.interrupted = False
             self.error = None  # what a step (a caller's callback, say) raised: filter_list raises it
+            self.timer = None
+            self.keys_from = 0  # in a session: keys stamped earlier were read as the app suspended for a prompt
+            self.ended_at = 0  # in a session: when the last list ended (keys stamped earlier were typed for it)
+            self.ready = False  # in a session: the list screen is up and composed
+            self.typeahead = []  # in a session: keys typed while no list was up yet, for the next one
+            self.quit_timer = None  # in a session: shows the "quit now" line once another Ctrl-C would quit
 
         def get_default_screen(self):
-            return _ListScreen()
+            if self.session:
+                return _WorkingScreen()
+            self.list_screen = _ListScreen()
+            return self.list_screen
 
         def on_mount(self):
-            if self.model.poll:
+            if self.session:
+                self.request("list", self.model, self.reply)
+            elif self.model.poll:
                 self.set_interval(POLL_MS / 1000, lambda: self.step(self.model.tick))
+
+        def show(self, model, reply):
+            """Show the next list of the session; its (result, error) goes to reply when it is done."""
+            if self.deliver(reply):  # a Ctrl-C since the worker asked (just after a prompt's answer, say)
+                return
+            if model.preview and self.session.draws is None:  # the terminal is asked once, on the normal screen
+                with self.suspend():
+                    self.suspending()
+                    _, error = _outcome(lambda: self.session.at_terminal(self.session.probe, model))
+                if error is not None:  # Ctrl-C while it asked: as in the list
+                    return self.answer(reply, (None, error))
+                if self.deliver(reply):  # a Ctrl-C as the app came back
+                    return
+            if not self.session.draws:
+                model.preview = None
+            self.model, self.reply = model, reply
+            self.done, self.interrupted, self.error = False, False, None
+            self.last_line("")
+            self.timer = self.set_interval(POLL_MS / 1000, lambda: self.step(self.model.tick)) if model.poll else None
+            self.ready = False
+            self.list_screen = _ListScreen()
+            self.push_screen(self.list_screen)
+
+        def list_ready(self):
+            """The list screen is composed: it takes keys now, the ones typed ahead first."""
+            self.ready = True
+            typed, self.typeahead = self.typeahead, []
+            for event in typed:
+                self.session_input(event)
+                if not self.done and self.screen is not self.list_screen:  # it opened help: the rest is dropped
+                    break
+
+        def suspending(self):
+            """The app has just suspended: what its input read as it stopped, and keys typed ahead, were typed before
+            what the terminal now shows (a prompt, a command), so none of it reaches a list."""
+            self.keys_from = get_time()
+            self.typeahead = []
+
+        async def on_event(self, event):
+            """In a session every key and paste goes to session_input, in the order they came; outside one, as usual."""
+            if self.session and isinstance(event, (events.Key, events.Paste)) and not event.is_forwarded:
+                return self.session_input(event)
+            await super().on_event(event)
+
+        def post_message(self, message):
+            """As Textual's. In a session, a Ctrl-C the app no longer takes (read as it closes: typed during the
+            editor's last step) still counts for the session."""
+            posted = super().post_message(message)
+            if not posted and self.session and isinstance(message, events.Key) and _key_name(message) == "ctrl+c":
+                self.session.interrupt()
+            return posted
+
+        def session_input(self, event):
+            """A key or paste in a session (in arrival order, so a Ctrl-C right behind the key that ended a list is
+            seen before that list's result is sent): dropped if typed before a prompt; for a list that has just
+            ended, only a Ctrl-C counts (it makes that list's result an interrupt, as without a session); while no
+            list is up, Ctrl-C is for the editor's next request (or, the second time, ends the session) and other
+            keys wait for the next list."""
+            if event.time < self.keys_from:
+                return
+            k = _key_name(event) if isinstance(event, events.Key) else None
+            if event.time < self.ended_at:
+                if k == "ctrl+c":
+                    self.late_ctrl_c()
+                return
+            if self.done:
+                if k == "ctrl+c":  # like a terminal's Ctrl-C, it also discards what was typed ahead
+                    self.typeahead = []
+                    self.session.interrupt()
+                    self.stopping()
+                elif k == "ctrl+z":
+                    self.action_suspend_process()
+                else:
+                    self.typeahead.append(event)
+            elif not self.ready:
+                self.typeahead.append(event)
+            elif k is None:
+                self.paste(event.text)
+            elif isinstance(self.screen, _HelpScreen) and k in _HelpScreen.SCROLL:
+                getattr(self.screen.query_one(VerticalScroll), _HelpScreen.SCROLL[k])(animate=False)
+            else:
+                self.feed(k)
+
+        def late_ctrl_c(self):
+            """A Ctrl-C typed for the list that just ended."""
+            if self.done and self.reply is not None:  # its result is not sent yet: it becomes the interrupt
+                self.interrupted = True
+            elif not self.done:  # the next list is already up: it ends with the interrupt
+                self.interrupted = True
+                self.finish(None)
+            else:
+                self.session.interrupt()
+                self.stopping()
+
+        def stopping(self, due=False):
+            """Show where the session's Ctrl-C stands (_Session.interrupt): its line under "Working..." while the
+            editor has not got it, and a second line from when another Ctrl-C would quit (due: that time has come);
+            the end of the app once one abandoned the editor."""
+            if self.session.abandoned:
+                return self.exit()
+            wait = self.session.quit_wait()
+            text = "" if wait is None else STOPPING if wait and not due else STOPPING + "\n" + QUIT_NOW
+            for line in self.screen_stack[0].query("#stopping"):  # none before the working screen is composed
+                line.update(Text(text, "yellow"))
+            if self.quit_timer:
+                self.quit_timer.stop()
+            self.quit_timer = self.set_timer(wait, lambda: self.stopping(True)) if wait and not due else None
+
+        def deliver(self, reply):
+            """Answer reply with the Ctrl-C that waits for the editor's next request, if one does."""
+            delivered = self.session.deliver(reply)
+            if delivered:
+                self.stopping()
+            return delivered
+
+        def answer(self, reply, outcome, pressed=None):
+            """Give the editor a list's outcome (_Session.answer); a Ctrl-C that still waits for its next request
+            shows as its step starts."""
+            self.session.answer(reply, outcome, pressed)
+            if self.session.interrupted:
+                self.stopping()
+
+        def request(self, kind, payload, reply):
+            """A request from the session's worker (_Session.ask): show a list, or suspend the app and answer prompts on
+            the normal screen (after what the worker printed meanwhile) until the next list, or the end."""
+            if kind == "list":
+                return self.show(payload, reply)
+            if self.deliver(reply):
+                return
+            session = self.session
+            with self.suspend():
+                self.suspending()
+                sys.stdout, sys.stderr = session.streams  # suspend() restores Textual's on the way out
+                session.flush()
+                with session.lock:
+                    session.suspended = True
+                request = session.prompts((kind, payload, reply))
+                with session.lock:
+                    session.suspended = False
+            if request is None:  # the editor is done, or abandoned
+                session.requests.put(None)  # for _Session.run, once the app has closed
+                self.exit()
+            else:
+                self.show(*request[1:])
+
+        def last_line(self, line):
+            for last in self.screen_stack[0].query("#last"):  # none before the working screen is composed
+                last.update(Text(line, "dim"))
+
+        def _print(self, text, stderr=False):
+            """What the worker prints while the app runs is kept for the normal screen, and its last line shown under
+            "Working..."; other threads' goes to Textual. Overrides Textual's private App._print, which its print
+            capture calls with every write while the app runs (TextualPrintHook tests pin that)."""
+            if self.session and threading.get_ident() == self.session.worker:
+                if self.session.abandoned:
+                    return
+                self.session.printed.append((stderr, text))
+                line = self.session.last_line(text)
+                if line is not None:
+                    self.call_later(self.last_line, line)
+            else:
+                super()._print(text, stderr)
 
         def feed(self, k):
             if k == "ctrl+c":
@@ -610,22 +811,307 @@ def _app_class():
                 self.push_screen(_HelpScreen(self.model.help))
             elif not self.model.help and isinstance(self.screen, _HelpScreen):
                 self.pop_screen()
-            self.screen_stack[0].query_one(_ListLines).refresh()
+            self.list_screen.query_one(_ListLines).refresh()
             if self.model.preview:
-                pane = self.screen_stack[0].query_one("#preview")
+                pane = self.list_screen.query_one("#preview")
                 path = self.model.preview_path()
                 if path != pane.image:  # the setter re-transmits the image, so only touch it when it changed
                     pane.image = path
 
         def finish(self, result):
             self.done = True
-            self.exit(result)
+            if not self.session:
+                return self.exit(result)
+            if self.timer:
+                self.timer.stop()
+            self.ended_at = get_time()
+            while len(self.screen_stack) > 1:
+                self.pop_screen()
+            self.call_later(self.send, result)  # after the keys already queued (session_input)
+
+        def send(self, result):
+            """Hand the ended list's result to the worker."""
+            reply, self.reply = self.reply, None
+            self.answer(reply, (result, self.error or (KeyboardInterrupt() if self.interrupted else None)),
+                        _now() if self.interrupted else None)
 
     return _ListApp
 
 
+def _outcome(call):
+    """(what call() returns, None), or (None, what it raised)."""
+    try:
+        return call(), None
+    except BaseException as error:  # noqa: BLE001 -- handed to the thread waiting for it, which raises it
+        return None, error
+
+
+_session = None  # the editor session (one_app) running now, if any
+_ESCAPES = re.compile(r"\x1b(\[[0-?]*[ -/]*[@-~]|\][^\x07\x1b]*(\x07|\x1b\\)|[0-~])")  # CSI, OSC, other ESC sequences
+
+
+def _now():
+    """The clock an editor session times Ctrl-C with, in seconds (one function, so tests can set it)."""
+    return time.monotonic()
+
+
+def _in_session():
+    """Whether this thread is an editor session's worker."""
+    return _session is not None and _session.worker == threading.get_ident()
+
+
+class _Output:
+    """sys.stdout or sys.stderr (stream) during an editor session: all of it, except what the session's worker writes
+    once the session is abandoned, which goes nowhere."""
+
+    def __init__(self, session, stream):
+        self.session, self.stream = session, stream
+
+    def write(self, text):
+        if self.session.abandoned and threading.get_ident() == self.session.worker:
+            return len(text)
+        return self.stream.write(text)
+
+    def __getattr__(self, name):
+        return getattr(self.stream, name)
+
+
+class _Session:
+    """One list app for a whole editor run (one_app). The editor runs on a worker thread. The main thread starts the
+    app at the first list and keeps it until the editor is done, with "Working..." between lists. Each list and each
+    prompt is a request the worker hands to the main thread (to the app while it runs) and waits for: prompts run on
+    the main thread with the app suspended until the next list, so input, Ctrl-C and output between prompts work as
+    without a session, and so do commands that may ask (ui.uses_terminal). What the worker prints while the app shows
+    comes out, in order, when the normal screen is back; its last line shows under "Working...". Ctrl-C while the
+    editor works reaches it as KeyboardInterrupt from its next request; another one a second or more later, before
+    that request, abandons it: the session ends at once, and the worker, left to itself, gets KeyboardInterrupt from
+    every request and prints nothing (interrupt). Nothing is ever raised in the worker but by its own requests."""
+
+    def __init__(self):
+        self.requests = queue.SimpleQueue()  # the worker's (kind, payload, reply) while no app takes them; None: no more
+        self.lock = threading.RLock()  # app, suspended, waiting, working, abandoned: for both threads (re-entrant: on_sigint)
+        self.app = None  # the running app
+        self.suspended = False  # the app is suspended for prompts: the main thread takes requests from the queue
+        self.waiting = None  # the reply the worker waits for from the app
+        self.worker = None  # the worker's thread id, while it runs
+        self.result = None  # the editor's _outcome
+        self.prompting = False  # the main thread runs a prompt (at_terminal): Ctrl-C raises KeyboardInterrupt there
+        self.working = True  # the worker runs editor code: it is not waiting for a request's answer, and has not ended
+        self.interrupted = False  # a Ctrl-C the worker gets from its next request (or once the editor is done)
+        self.interrupted_at = 0  # when it came (_now), or when the worker went back to work with it still waiting
+        self.pressed = None  # when the Ctrl-C came that the worker has just got, until its next request
+        self.abandoned = False  # a later Ctrl-C ended the session without waiting for the worker
+        self.tail = ""  # the worker's printed text after its last newline
+        self.draws = None  # _draws_images(), asked when the first list with a preview comes, on the normal screen
+        self.streams = None  # sys.stdout and sys.stderr from before the app started
+        self.printed = collections.deque()  # (to stderr, text) the worker printed while the app ran
+
+    def run(self, fn, args, kwargs):
+        """Run fn(*args, **kwargs) on the worker and serve its requests until it is done; returns or raises what it
+        did, once the app is closed. Raises KeyboardInterrupt without waiting for it once it is abandoned."""
+        global _session
+        _session, ui.terminal_runner = self, self.outside
+        handler = signal.signal(signal.SIGINT, self.on_sigint)  # also keeps asyncio.run's own (it would cancel the app)
+        outputs = sys.stdout, sys.stderr
+        sys.stdout, sys.stderr = _Output(self, sys.stdout), _Output(self, sys.stderr)
+        try:
+            threading.Thread(target=self.work, args=(fn, args, kwargs), name="editor", daemon=True).start()
+            while (request := self.prompts(self.requests.get())) is not None:
+                self.serve(*request[1:])
+        finally:
+            signal.signal(signal.SIGINT, handler)
+            if not self.abandoned:  # else it all stays, for the worker that lives on: its requests raise, its output is dropped
+                sys.stdout, sys.stderr = outputs
+                _session = ui.terminal_runner = None
+        if self.abandoned:
+            raise KeyboardInterrupt
+        value, error = self.result
+        if error is None and self.interrupted:  # Ctrl-C after the last list
+            error = KeyboardInterrupt()
+        if error is not None:
+            raise error
+        return value
+
+    def prompts(self, request):
+        """On the main thread: answer requests while they are prompts. Returns the first list request (the terminal
+        probed for it if it needs that), or None once the editor is done or abandoned."""
+        while request is not None:
+            kind, payload, reply = request
+            if self.deliver(reply):
+                pass
+            elif kind == "list":
+                _, error = _outcome(lambda: self.at_terminal(self.probe, payload))  # the terminal is still ours here
+                if error is None:
+                    return request
+                self.answer(reply, (None, error))  # Ctrl-C while it asked: as in the list
+            else:
+                self.answer(reply, _outcome(lambda: self.at_terminal(payload)))
+            request = self.requests.get()
+        return None
+
+    def deliver(self, reply):
+        """On the main thread: answer reply with the Ctrl-C that waits for the worker's next request, if one does."""
+        if not self.interrupted:
+            return False
+        self.interrupted = False
+        self.answer(reply, (None, KeyboardInterrupt()), self.interrupted_at)
+        return True
+
+    def answer(self, reply, outcome, pressed=None):
+        """On the main thread: give the worker the outcome of its request, and so send it back to work. pressed: when
+        the Ctrl-C came that the outcome carries (it ended the list, or it waited for this request); until the
+        worker's next request another one less than QUIT_AFTER after it is the same press. A Ctrl-C that still waits
+        (it came while the list or the prompt was up) counts from now, when the step it waits for starts."""
+        with self.lock:
+            self.pressed = pressed
+            if self.interrupted:
+                self.interrupted_at = _now()
+        reply.put(outcome)
+
+    def at_terminal(self, fn, *args):
+        """Run a prompt (or the image probe) on the main thread, where Ctrl-C raises KeyboardInterrupt in it."""
+        try:
+            self.prompting = True
+            return fn(*args)
+        finally:
+            self.prompting = False
+
+    def on_sigint(self, signum, frame):
+        """The session's SIGINT handler (main thread): KeyboardInterrupt in a prompt, else interrupt; never an
+        exception in the session's own code."""
+        if self.prompting:
+            raise KeyboardInterrupt
+        self.interrupt()
+        app = self.app
+        if app:  # the app shows it (stopping) from its loop: a signal handler runs inside that loop and must not post to it
+            import asyncio
+            try:
+                asyncio.get_running_loop().call_soon_threadsafe(app.call_later, app.stopping)
+            except RuntimeError:  # the loop is not running: the app is starting, or has closed
+                pass
+
+    def interrupt(self):
+        """Ctrl-C while neither a list nor a prompt is up (main thread): the worker gets KeyboardInterrupt from its
+        next request. Another one QUIT_AFTER seconds or more later, while the worker is still at work on the same
+        step, abandons it: the session ends now. One that comes sooner counts as the same press, and so does one
+        that comes that soon after the Ctrl-C the worker has just got (pressed)."""
+        with self.lock:
+            if self.pressed is not None and _now() - self.pressed < QUIT_AFTER:
+                return
+            if not self.interrupted:
+                self.interrupted, self.interrupted_at = True, _now()
+            elif self.working and not self.quit_wait():
+                self.abandoned = True
+                self.requests.put(None)  # for the main thread, if it waits for the worker (safe from a signal handler)
+
+    def quit_wait(self):
+        """On the main thread: the seconds until another Ctrl-C quits (0: it does now), or None when no Ctrl-C waits
+        for the worker."""
+        return max(0, self.interrupted_at + QUIT_AFTER - _now()) if self.interrupted else None
+
+    def work(self, fn, args, kwargs):
+        """The worker: run the editor, then end the app and the main thread's loop."""
+        self.worker = threading.get_ident()
+        self.result = _outcome(lambda: fn(*args, **kwargs))
+        with self.lock:
+            self.working = False
+            if self.app and not self.suspended:  # a suspended app ends when its prompts get the None below
+                self.app.call_later(self.app.exit)
+        self.requests.put(None)
+        self.worker = None  # another thread may get its id (an abandoned session stays in place)
+
+    def serve(self, model, reply):
+        """Run the app, showing model first, until the editor is done. If the app fails instead, the worker's pending
+        request fails the way _run does without a session."""
+        cls = _app_class()
+        app = cls(model, self, reply)
+        self.streams = sys.stdout, sys.stderr
+        with self.lock:
+            self.app = app
+        try:
+            app.run(mouse=False)
+        finally:
+            with self.lock:
+                self.app = None
+                pending = [r for r in (app.reply, self.waiting) if r is not None]
+            self.flush()
+        for r in pending:
+            r.put((None, SystemExit(app.return_code or 1)))
+
+    def flush(self):
+        """Write out what the worker printed while the app showed (main thread)."""
+        out, err = self.streams
+        while self.printed:
+            to_err, text = self.printed.popleft()
+            (err if to_err else out).write(text)
+        out.flush()
+        err.flush()
+
+    def ask(self, kind, payload):
+        """On the worker: have the main thread show a list (kind "list", payload its model) or run a prompt ("call",
+        payload a callable), and wait. Returns (result, error): at once, with KeyboardInterrupt, once abandoned."""
+        reply = queue.Queue()
+        with self.lock:
+            if self.abandoned:
+                return None, KeyboardInterrupt()
+            self.working, self.pressed = False, None
+            if self.app and not self.suspended and self.app.call_later(self.app.request, kind, payload, reply):
+                self.waiting = reply
+            else:
+                self.requests.put((kind, payload, reply))
+        got = reply.get()
+        with self.lock:
+            self.waiting = None
+            self.working = True
+        return got
+
+    def probe(self, model):
+        """Ask the terminal whether it draws images, once, when the first list with a preview comes (main thread, with
+        the terminal not taken by the app)."""
+        if model.preview and self.draws is None:
+            _app_class()
+            self.draws = _draws_images()
+
+    def last_line(self, text):
+        """On the worker: the last complete line once text is printed, as plain text (escape sequences and control
+        characters dropped), or None when text completes no line with something in it."""
+        lines = (self.tail + text).split("\n")
+        self.tail = lines.pop()[-1000:]  # a line that never ends (a progress bar's redraws) is never shown
+        for line in reversed(lines):
+            for part in reversed(line.split("\r")):  # a progress line redraws itself after \r
+                plain = "".join(c for c in _ESCAPES.sub("", part) if c.isprintable()).rstrip()
+                if plain.strip():
+                    return plain
+        return None
+
+    def outside(self, fn, *args, **kwargs):
+        """ui.terminal_runner: fn called on the worker runs on the main thread, on the normal screen."""
+        if threading.get_ident() != self.worker:
+            return fn(*args, **kwargs)
+        value, error = self.ask("call", functools.partial(fn, *args, **kwargs))
+        if error is not None:
+            raise error
+        return value
+
+
+def one_app(fn):
+    """An editor (fn) whose lists all show in one app (_Session) instead of one app each. Only with a terminal; inside
+    another editor's session it just runs."""
+    @functools.wraps(fn)
+    def run(*args, **kwargs):
+        if _session or not ui.has_terminal() or threading.current_thread() is not threading.main_thread():
+            return fn(*args, **kwargs)
+        return _Session().run(fn, args, kwargs)
+    return run
+
+
 def _run(model):
     """Show the list full screen until it is done; returns its result. Ctrl-C raises KeyboardInterrupt."""
+    if _in_session():
+        result, error = _session.ask("list", model)
+        if error is not None:
+            raise error
+        return result
     app = _app_class()(model)
     result = app.run(mouse=False)
     if app.error:
@@ -730,7 +1216,7 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
     row_note: optional callable(label index) -> text; when non-empty for the highlighted row it replaces the status
     line (below a notice and a locked row's note).
     """
-    if preview:
+    if preview and not _in_session():  # a session asks the terminal once, before its app starts
         _app_class()  # first: it sets up Textual's environment
         if not _draws_images():
             preview = None

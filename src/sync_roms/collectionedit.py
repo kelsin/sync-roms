@@ -180,6 +180,7 @@ def new_collection(working):
     return cid
 
 
+@picker.one_app
 def edit_collections():
     """Edit your collections, then save the changes locally. Returns the exit code."""
     systems = sorted(store.repo_json("systems"), key=lambda s: s["name"].lower())

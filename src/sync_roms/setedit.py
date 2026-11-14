@@ -133,6 +133,7 @@ def print_changes(found):
 
 # --- The pull request --------------------------------------------------------------------------------
 
+@ui.uses_terminal  # gh may ask to log in
 def need_tools():
     for tool in ("git", "gh"):
         if not shutil.which(tool):
@@ -141,6 +142,7 @@ def need_tools():
         ui.fail("gh isn't logged in. Run `gh auth login` first.")
 
 
+@ui.uses_terminal  # git and gh may ask (a passphrase, a login)
 def run(cmd, cwd=None):
     done = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True)
     if done.returncode:
@@ -197,6 +199,7 @@ def new_set(working):
     return sid
 
 
+@picker.one_app
 def edit_sets():
     """Edit the repo's sets, then open a PR with the changes. Returns the exit code."""
     need_tools()
