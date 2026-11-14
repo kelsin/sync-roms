@@ -11,7 +11,7 @@ from . import external, inventory, m3u, names, picker, runtime, s3, setedit, sto
 
 
 UNKNOWN_SHOWN = 8  # device ids named in an "unknown device" error
-COMMANDS = {"games", "sets", "collections", "themes", "cards", "cache", "config", "doctor", "check", "completion"}
+COMMANDS = {"games", "sets", "collections", "themes", "download", "cards", "cache", "config", "doctor", "check", "completion"}
 
 
 class Parser(argparse.ArgumentParser):
@@ -880,6 +880,11 @@ def themes_update(args):
     return themeart.update_storage(args.dry_run)
 
 
+def download_pico8(args):
+    from . import bbs
+    return bbs.download_pico8(args)
+
+
 def second_words():
     """{command: the words that can follow it} for the commands that have subcommands."""
     from . import cli
@@ -891,6 +896,7 @@ def second_words():
     words["sets"] = ["edit"]
     words["collections"] = ["edit"]
     words["themes"] = ["update"]
+    words["download"] = ["pico8"]
     words["cards"] = ["edit", "list", "new", "set", "rename", "delete"]
     words["config"] = ["show", "path"]
     words["cache"] = ["update"]
@@ -983,6 +989,11 @@ def build_parser():
     themes = sub.add_parser("themes", add_help=False, allow_abbrev=False)
     tsub = themes.add_subparsers(dest="action", required=True)
     p = tsub.add_parser("update", allow_abbrev=False); common(p, card=False); p.set_defaults(fn=themes_update)
+
+    download = sub.add_parser("download", add_help=False, allow_abbrev=False)
+    dsub = download.add_subparsers(dest="action", required=True)
+    p = dsub.add_parser("pico8", allow_abbrev=False); common(p, card=False)
+    p.add_argument("--count", type=int, metavar="N"); p.set_defaults(fn=download_pico8)
 
     cards = sub.add_parser("cards", add_help=False, allow_abbrev=False)
     csub = cards.add_subparsers(dest="action", required=True)

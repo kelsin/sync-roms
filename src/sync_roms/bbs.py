@@ -1,13 +1,27 @@
 """The Lexaloffle PICO-8 BBS Featured listing: read a page, tell new carts from upgrades."""
 import datetime
+import http.client
+import json
+import os
 import re
+import tempfile
 
-from . import collections, store, surprise
+from . import collections, drivers, github, ignore, inventory, names, runtime, s3, scrape_plan, store, surprise, ui, usersettings
 
 LISTING = "https://www.lexaloffle.com/bbs/?cat=7&sub=2&orderby=featured"
 _CARTS = "https://www.lexaloffle.com/bbs/cposts/"
 _THUMB = re.compile(r"/pico8_(.+)\.png$")
 _NAME = re.compile(r"^(.*?)(?:-(\d+))?\.p8\.png$")
+_PNG = b"\x89PNG\r\n\x1a\n"
+_HTTP_ERRORS = (OSError, http.client.HTTPException)
+META = f"{scrape_plan.SCRAPES}/pico8/metadata.json"
+MEDIA = f"{scrape_plan.SCRAPES}/pico8/"
+
+
+def _fetch(url):
+    """The body at url: the only request this module makes."""
+    with github.get(url) as r:
+        return r.read()
 
 
 def page_url(n):
@@ -155,3 +169,129 @@ def retarget(old, new, title):
             collections.save_collection(collection)
     return [s["id"] for s in store.load_sets()
             if any(_names(g, old) for g in s["games"])]
+
+
+# --- sync-roms download pico8 ---------------------------------------------------------------------------------------
+
+def _read_listing(keys, ignored, count):
+    """(new, upgrades) from the listing's pages, read in turn until a page has no rows, an HTTP error (a warning; the
+    pages read are kept) or, with count, enough carts."""
+    carts, n = [], 1
+    while True:
+        try:
+            rows = parse_page(_fetch(page_url(n)).decode("utf-8", "replace"))
+        except _HTTP_ERRORS as e:
+            ui.warn(f"Couldn't read page {n} of the PICO-8 BBS Featured listing ({e}); using the {n - 1} page(s) read")
+            break
+        if not rows:
+            break
+        carts += rows
+        new, upgrades = classify(carts, keys, ignored)
+        if count is not None and len(new) + len(upgrades) >= count:
+            break
+        n += 1
+    return classify(carts, keys, ignored), carts
+
+
+def _load_metadata():
+    """storage's scrapes/pico8/metadata.json, read from storage itself; {} when there is none."""
+    if inventory.tag(META) is None:
+        return {}
+    data = json.loads(names._read(META))
+    if not isinstance(data, dict):
+        raise ValueError(f"{META} isn't a JSON object")
+    return data
+
+
+def _media_moves(old_file, new_file):
+    """(old key, new key) of the scrapes/pico8/ media named after old_file's stem."""
+    old_stem, new_stem = os.path.splitext(old_file)[0], os.path.splitext(new_file)[0]
+    moves = []
+    for key in inventory.files(MEDIA, sizes=False):
+        folder, _, name = key[len(MEDIA):].rpartition("/")
+        stem, ext = os.path.splitext(name)
+        if folder and stem == old_stem:
+            moves.append((key, f"{MEDIA}{folder}/{new_stem}{ext}"))
+    return moves
+
+
+def _download(cart, tmp):
+    """The cart's .p8.png saved in tmp; None (a warning) when what came isn't a PNG."""
+    data = _fetch(cart_url(cart["file"]))
+    if not data.startswith(_PNG):
+        ui.warn(f"{cart['file']} from the BBS isn't a PNG; skipped")
+        return None
+    path = os.path.join(tmp, cart["file"])
+    with open(path, "wb") as f:
+        f.write(data)
+    return path
+
+
+def download_pico8(args):
+    """Add the BBS Featured carts storage doesn't have to pico8/, and newer revisions of those it has. Exit code."""
+    usersettings.ensure_bucket()
+    if runtime.ROOT and not os.path.isdir(runtime.ROOT):
+        ui.warn(f"The storage folder {runtime.ROOT} isn't there (is it mounted?)")
+        return 1
+    if not args.dry_run and not drivers.can_write():
+        ui.fail(f"No write access to {s3.location()}: `download pico8` adds files to storage")
+    keys = set(inventory.files("pico8/", sizes=False))
+    (new, upgrades), carts = _read_listing(keys, ignore.keys(), args.count)
+    order = {c["file"]: i for i, c in enumerate(carts)}
+    todo = sorted([(None, c) for c in new] + upgrades, key=lambda job: order[job[1]["file"]])[:args.count]
+    if not todo:
+        print(ui.green(f"✅ storage has every Featured PICO-8 cart ({len(carts)} listed)"))
+        return 0
+    print(ui.bold(f"🕹️  PICO-8 BBS Featured: {len(carts)} carts listed"))
+    for old, c in todo:
+        print(f"  new: {c['file']}" if old is None else f"  upgrade: {old} → {c['file']}")
+    print(f"  {sum(old is None for old, _ in todo)} new, {sum(old is not None for old, _ in todo)} upgrade(s)")
+    if args.dry_run:
+        print(ui.dim("🧪 Dry run: nothing downloaded or written"))
+        return 0
+    if not ui.confirm(f"Add these to {s3.location()}?"):
+        return 0
+    try:
+        meta = _load_metadata()
+    except (*s3.ERRORS, ValueError) as e:
+        ui.warn(f"Couldn't read {META} ({e})")
+        return 1
+    added = upgraded = 0
+    code = 0
+    with tempfile.TemporaryDirectory() as tmp:
+        for old, c in todo:
+            file, key = c["file"], f"pico8/{c['file']}"
+            try:
+                path = _download(c, tmp)
+            except _HTTP_ERRORS as e:
+                ui.warn(f"Couldn't download {file} from the BBS ({e}); stopping")
+                code = 1
+                break
+            if path is None:
+                continue
+            try:
+                s3.put_file(key, path)
+                entry = {"name": c["title"], "developer": c["author"]}
+                if old is not None:
+                    old_file = old[len("pico8/"):]
+                    entry = {**meta.pop(old_file, {}), **entry}
+                    if s3.delete_keys([old]):
+                        ui.warn(f"Couldn't delete {old} from storage")
+                        code = 1
+                meta = scrape_plan.merge_metadata(meta, {file: entry})
+                s3.put_text(META, scrape_plan.dump_json(meta))
+            except s3.ERRORS as e:
+                ui.warn(f"Couldn't write {file} to {s3.location()} ({e}); stopping")
+                code = 1
+                break
+            if old is None:
+                added += 1
+                continue
+            moves = _media_moves(old_file, file)
+            if moves and s3.move_keys(moves):
+                code = 1
+            for set_id in retarget(old, key, c["title"]):
+                ui.warn(f"Set {set_id} still names {old}: change it to {key}")
+            upgraded += 1
+    print(ui.green(f"✅ Added {added} and upgraded {upgraded} PICO-8 cart(s) in {s3.location()}"))
+    return code

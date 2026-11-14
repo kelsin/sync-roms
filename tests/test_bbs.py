@@ -1,12 +1,17 @@
+import contextlib
 import datetime
+import io
 import json
 import os
+import sys
 import unittest
+import urllib.error
 from unittest import mock
 
-import helpers
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import helpers  # noqa: E402
 
-from sync_roms import bbs, store
+from sync_roms import bbs, ignore, store, ui, usersettings  # noqa: E402
 
 FIXTURE = os.path.join(os.path.dirname(__file__), "fixtures", "bbs-featured.html")
 
@@ -127,6 +132,131 @@ class Retarget(helpers.StorageDir):
         with mock.patch.object(store, "load_sets", return_value=[]):
             self.assertEqual(bbs.retarget(OLD, NEW, "T"), [])
         self.assertEqual(os.stat(path).st_mtime, 1)
+
+
+PNG = b"\x89PNG\r\n\x1a\n" + b"cart"
+META = "scrapes/pico8/metadata.json"
+
+
+def page(*rows):
+    """A listing page whose pdat rows are (file stem, title, author)."""
+    body = ",\n".join(f"['{i}', 1, `{title}`, '/bbs/thumbs/pico8_{stem}.png', 0, 0, 'd', 7, '{author}']"
+                      for i, (stem, title, author) in enumerate(rows))
+    return f"<html>pdat=[\n{body},\n];</html>".encode()
+
+
+PAGE1 = page(("molemole-1", "Mole Mole", "Adam Atomic"), ("x-2", "X Two", "Ex"))
+PAGE2 = page(("pico8tetris", "Tetris", "T"))
+EMPTY = page()
+
+
+class Download(helpers.StorageDir):
+    def setUp(self):
+        super().setUp()
+        for p in (mock.patch.object(usersettings, "ensure_bucket"),
+                  mock.patch.object(ignore, "keys", return_value=frozenset())):
+            p.start()
+            self.addCleanup(p.stop)
+
+    def serve(self, pages, carts=None, errors=()):
+        """bbs._fetch serving listing pages in turn and carts by URL (PNG by default); URLs in errors raise."""
+        listing = list(pages)
+        fetched = []
+
+        def fetch(url):
+            fetched.append(url)
+            if url in errors:
+                raise urllib.error.HTTPError(url, 503, "busy", None, None)
+            if url.startswith(bbs.LISTING):
+                return listing.pop(0)
+            return (carts or {}).get(url.rsplit("/", 1)[-1], PNG)
+        return mock.patch.object(bbs, "_fetch", fetch), fetched
+
+    def run_download(self, pages, count=None, dry_run=False, carts=None, errors=()):
+        patch, fetched = self.serve(pages, carts, errors)
+        out, err = io.StringIO(), io.StringIO()
+        with patch, contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+            ui.ASSUME_YES = True
+            try:
+                code = bbs.download_pico8(mock.Mock(count=count, dry_run=dry_run, yes=True))
+            finally:
+                ui.ASSUME_YES = False
+        return code, out.getvalue(), err.getvalue(), fetched
+
+    def stored(self):
+        found = set()
+        for dp, _, fns in os.walk(self.root):
+            found |= {os.path.relpath(os.path.join(dp, f), self.root) for f in fns}
+        return found
+
+    def meta(self):
+        with open(os.path.join(self.root, META)) as f:
+            return json.load(f)
+
+    def test_reads_every_page_until_an_empty_one(self):
+        code, out, _, fetched = self.run_download([PAGE1, PAGE2, EMPTY], dry_run=True)
+        self.assertEqual(code, 0)
+        self.assertEqual(fetched, [bbs.page_url(1), bbs.page_url(2), bbs.page_url(3)])
+        for file in ("molemole-1.p8.png", "x-2.p8.png", "pico8tetris.p8.png"):
+            self.assertIn(f"new: {file}", out)
+
+    def test_count_stops_after_that_many_carts(self):
+        code, out, _, fetched = self.run_download([PAGE1, PAGE2, EMPTY], count=1)
+        self.assertEqual(code, 0)
+        self.assertEqual(fetched, [bbs.page_url(1), bbs.cart_url("molemole-1.p8.png")])
+        self.assertEqual(self.stored(), {"pico8/molemole-1.p8.png", META})
+
+    def test_dry_run_lists_and_writes_nothing(self):
+        self.put("pico8/x-1.p8.png")
+        self.put("pico8/pico8tetris.p8.png")
+        code, out, _, fetched = self.run_download([PAGE1, PAGE2, EMPTY], dry_run=True)
+        self.assertEqual(code, 0)
+        self.assertIn("new: molemole-1.p8.png", out)
+        self.assertIn("upgrade: pico8/x-1.p8.png → x-2.p8.png", out)
+        self.assertNotIn("pico8tetris", out)
+        self.assertEqual(self.stored(), {"pico8/x-1.p8.png", "pico8/pico8tetris.p8.png"})
+        self.assertFalse(any(not u.startswith(bbs.LISTING) for u in fetched))
+
+    def test_new_cart_uploaded_with_its_metadata(self):
+        self.put(META, json.dumps({"other.p8.png": {"name": "Other", "genre": "g"}}).encode())
+        code, _, _, _ = self.run_download([page(("molemole-1", "Mole Mole", "Adam Atomic")), EMPTY])
+        self.assertEqual(code, 0)
+        with open(os.path.join(self.root, "pico8/molemole-1.p8.png"), "rb") as f:
+            self.assertEqual(f.read(), PNG)
+        self.assertEqual(self.meta(), {"other.p8.png": {"name": "Other", "genre": "g"},
+                                       "molemole-1.p8.png": {"name": "Mole Mole", "developer": "Adam Atomic"}})
+
+    def test_upgrade_replaces_the_old_revision(self):
+        self.put("pico8/x-1.p8.png")
+        self.put("scrapes/pico8/covers/x-1.p8.png")
+        self.put("scrapes/pico8/covers/x-10.p8.png")
+        self.put(META, json.dumps({"x-1.p8.png": {"name": "X", "developer": "old", "genre": "g"}}).encode())
+        with mock.patch.object(bbs, "retarget", return_value=["s1"]) as retarget:
+            code, _, err, _ = self.run_download([page(("x-2", "X Two", "Ex")), EMPTY])
+        self.assertEqual(code, 0)
+        retarget.assert_called_once_with("pico8/x-1.p8.png", "pico8/x-2.p8.png", "X Two")
+        self.assertIn("s1", err)
+        self.assertEqual(self.stored(), {"pico8/x-2.p8.png", "scrapes/pico8/covers/x-2.p8.png",
+                                         "scrapes/pico8/covers/x-10.p8.png", META})
+        self.assertEqual(self.meta(), {"x-2.p8.png": {"name": "X Two", "developer": "Ex", "genre": "g"}})
+
+    def test_not_a_png_is_skipped(self):
+        code, _, err, _ = self.run_download([PAGE1, EMPTY], carts={"molemole-1.p8.png": b"<html>"})
+        self.assertIn("molemole-1.p8.png", err)
+        self.assertEqual(self.stored(), {"pico8/x-2.p8.png", META})
+        self.assertEqual(list(self.meta()), ["x-2.p8.png"])
+
+    def test_listing_error_keeps_the_pages_read(self):
+        code, out, err, _ = self.run_download([PAGE1], errors={bbs.page_url(2)})
+        self.assertIn("503", err)
+        self.assertEqual(self.stored(), {"pico8/molemole-1.p8.png", "pico8/x-2.p8.png", META})
+
+    def test_failed_cart_keeps_the_ones_before_it(self):
+        code, _, err, _ = self.run_download([PAGE1, EMPTY], errors={bbs.cart_url("x-2.p8.png")})
+        self.assertEqual(code, 1)
+        self.assertIn("x-2.p8.png", err)
+        self.assertEqual(self.stored(), {"pico8/molemole-1.p8.png", META})
+        self.assertEqual(self.meta(), {"molemole-1.p8.png": {"name": "Mole Mole", "developer": "Adam Atomic"}})
 
 
 if __name__ == "__main__":

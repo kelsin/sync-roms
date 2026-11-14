@@ -21,6 +21,7 @@ SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "sets": ("edit", "edit the repo's game sets by hand and open a PR with the changes"),
     "collections": ("edit", "edit your collections of favourite games (saved in ~/.sync-roms/collections/)"),
     "themes": ("update", "copy the latest Art Book Next for ES-DE from GitHub into storage"),
+    "download": ("pico8", "add the PICO-8 BBS Featured carts storage doesn't have, and newer revisions of those it has"),
     "cards": ("edit|list|new|set|rename|delete", "list and manage the cards you've synced"),
     "devices": ("[ID]", "list the supported devices, or one device's systems"),
     "upload": ("roms [DIR] | scrapes [CARD]", "upload ROMs or a card's scraped data to storage"),
@@ -105,6 +106,16 @@ TOPICS = {
   Downloads the GitHub archive of the theme's latest commit (about 200 MB) and replaces os/esde/themes/ in storage
   (write profile). Syncs copy it from there onto ES-DE cards that use Art Book Next, so the Surprise collection has its
   art; a card's copy is replaced when storage has a newer commit. Does nothing when storage already has the latest.
+""",
+    "download": """
+  sync-roms download pico8 [--count N] [--dry-run] [--yes]   add the BBS Featured carts to storage's pico8/
+
+  Reads every page of the Lexaloffle BBS Featured PICO-8 listing (--count N: stops after N carts to add or upgrade),
+  lists the carts storage doesn't have and those the BBS has a newer revision of, and asks once (write profile).
+  Each cart goes to pico8/<BBS file name> with its title and author in scrapes/pico8/metadata.json. An upgrade
+  removes the old revision, moves its metadata and scraped media to the new name and points your cards, Surprise
+  history and collections at it; repo sets that name the old file are listed to change by hand. Carts in
+  ignored.json are skipped. Requests go one at a time; the first HTTP error stops it, keeping what was added.
 """,
     "edit": """
   sync-roms edit                              main menu: Cards, Sets (opens a PR), Collections, Device systems; same as `games edit`
