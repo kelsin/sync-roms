@@ -1,5 +1,18 @@
 # Changelog
 
+## [2.11.0](https://github.com/kelsin/sync-roms/compare/v2.10.0...v2.11.0) (2026-11-15)
+
+
+### :video_game: Features
+
+* **collections:** drop categories from collections ([#307](https://github.com/kelsin/sync-roms/issues/307)) ([c38cd0c](https://github.com/kelsin/sync-roms/commit/c38cd0c084ae6d737d8380d175c541ef8b4e96d0))
+* **scrape:** default the scrape confirmation to yes ([#304](https://github.com/kelsin/sync-roms/issues/304)) ([72c6593](https://github.com/kelsin/sync-roms/commit/72c6593d11c318ed016601bf50563eb119e722c7))
+
+
+### :bug: Bug Fixes
+
+* **picker:** make enter leave the search in every list ([#306](https://github.com/kelsin/sync-roms/issues/306)) ([60f6478](https://github.com/kelsin/sync-roms/commit/60f64789c3a03493cde1f0d7e2a7d02d4fbcc232))
+
 ## [2.10.0](https://github.com/kelsin/sync-roms/compare/v2.9.0...v2.10.0) (2026-11-14)
 
 
