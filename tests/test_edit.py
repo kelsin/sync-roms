@@ -248,9 +248,13 @@ class Keys(unittest.TestCase):
         self.assertEqual(run_list(["b", "enter"], self.LABELS), 0)
         self.assertEqual(run_list(["/", "g", "a", "m", "enter", "enter"], self.LABELS), 2)
 
-    def test_enter_while_typing_picks_in_a_single_list(self):
-        self.assertEqual(run_list(["/", "t", "a", "ctrl+n", "enter"], self.LABELS), 3)  # beta, delta
+    def test_enter_while_typing_keeps_the_filter_in_a_single_list(self):
+        self.assertEqual(run_list(["/", "t", "a", "ctrl+n", "enter", "enter"], self.LABELS), 3)  # beta, delta
+        self.assertEqual(run_list(["/", "t", "a", "enter", "j", "enter"], self.LABELS), 3)  # j moves: no longer typing
         self.assertIsNone(run_list(["/", "x", "enter", "escape", "escape"], self.LABELS))  # nothing shown: Enter only stops typing
+
+    def test_escape_while_typing_clears_the_filter(self):
+        self.assertEqual(run_list(["/", "t", "a", "escape", "j", "enter"], self.LABELS), 1)
 
     def test_enter_while_typing_keeps_the_filter_in_a_multi_list(self):
         self.assertEqual(run_list(["/", "t", "a", "enter", "space", "enter"], self.LABELS, multi=True),

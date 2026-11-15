@@ -121,8 +121,8 @@ TOPICS = {
   sync-roms edit                              main menu: Cards, Sets (opens a PR), Collections, Device systems; same as `games edit`
 
   ? in any list shows all its keys. In a card's system list: Enter opens a system's games, f makes it a full system,
-  l picks collections, S opens the Surprise menu, D clears the card. In a single-choice list, Enter while typing a
-  filter picks the highlighted row (Tab keeps the filter instead).
+  l picks collections, S opens the Surprise menu, D clears the card. After / in any list, Enter keeps the filter and
+  goes back to moving; Esc clears it.
   Ctrl-C while an editor is busy between two lists ("Working...") stops it when that step ends, as Ctrl-C in a list
   does; another Ctrl-C a second or more later, with the step still running, quits at once, and unsaved changes in
   the open editor are lost.
