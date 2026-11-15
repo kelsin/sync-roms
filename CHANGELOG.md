@@ -1,5 +1,14 @@
 # Changelog
 
+## [2.12.0](https://github.com/kelsin/sync-roms/compare/v2.11.0...v2.12.0) (2026-11-15)
+
+
+### :video_game: Features
+
+* **cardedit:** show each system's size as a full system ([#311](https://github.com/kelsin/sync-roms/issues/311)) ([9f91dcd](https://github.com/kelsin/sync-roms/commit/9f91dcd0370c0170842a657294576c581133c723))
+* **picker:** show every list as a left-aligned table ([#310](https://github.com/kelsin/sync-roms/issues/310)) ([887c0c8](https://github.com/kelsin/sync-roms/commit/887c0c8ab296b75e937ba5a90f4bd425472b59e7))
+* **surprise:** pick surprises from full systems too ([#308](https://github.com/kelsin/sync-roms/issues/308)) ([58c48f3](https://github.com/kelsin/sync-roms/commit/58c48f3cf25b907d1d512d594287904382d82791))
+
 ## [2.11.0](https://github.com/kelsin/sync-roms/compare/v2.10.0...v2.11.0) (2026-11-15)
 
 
