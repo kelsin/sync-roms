@@ -3,7 +3,7 @@ import copy
 
 from . import collections as colls
 from . import cardedit, edit, m3u, metafilter, picker, previews, s3, store, surprise, themeart, ui
-from .listedit import add_from_set, ask_category, file_counts, game_label, reconcile, recategorize, stocked, view
+from .listedit import add_from_set, file_counts, reconcile, stocked, view
 
 
 # --- Multi-disc games --------------------------------------------------------------------------------
@@ -59,14 +59,12 @@ def pick_art(collection):
 
 
 def edit_one(collection, systems, keys_of):
-    """Edit one collection: remove games, add games from a system or a set, change categories, rename."""
-    names = {s["bucket"]: s["name"] for s in systems}
+    """Edit one collection: remove games, add games from a system or a set, rename."""
     while True:
         label = f"{themeart.collection_emoji(collection)} {collection['name']}"  # the art may change below
         i = picker.filter_list(f"{label} (Esc = back)",
                                [f"Games in this collection ({len(collection['games'])}): switch some off",
-                                "Add games from a system", "Add games from a set", "Change a game's category",
-                                "Rename / change the description",
+                                "Add games from a system", "Add games from a set", "Rename / change the description",
                                 f"{themeart.art_emoji(collection.get('art'))} Theme art: {art_label(collection.get('art'))}"])
         if i is None:
             return
@@ -87,7 +85,6 @@ def edit_one(collection, systems, keys_of):
             if j is None:
                 continue
             s = shown[options[j]["bucket"]]
-            had = {g["bucket"] for g in s["games"]}
             all_rows, past, filt, meta_filt = system_rows(s, keys_of(s["bucket"])), None, None, {}
             meta = cardedit.Metadata(s["bucket"])
             titles = {r[1]: r[2] for r in all_rows}
@@ -125,27 +122,15 @@ def edit_one(collection, systems, keys_of):
                         meta_filt.clear()
                     else:
                         break
-            except KeyboardInterrupt:  # Ctrl-C in the list or a picker it opens: the toggles made are kept, with no category
+            except KeyboardInterrupt:  # Ctrl-C in the list or a picker it opens: the toggles made are kept
                 interrupted = True
-            added = {g["bucket"] for g in s["games"]} - had
-            try:
-                category = ask_category(collection["games"], f"{len(added)} new game(s)") if added and not interrupted else ""
-            except KeyboardInterrupt:  # Ctrl-C at the question: no category
-                category, interrupted = "", True
-            collection["games"] = reconcile(collection["games"], shown, category)
+            collection["games"] = reconcile(collection["games"], shown)
             fold_discs(collection["games"], keys_of(s["bucket"]))
             if interrupted:
                 raise KeyboardInterrupt
         elif i == 2:
-            add_from_set(collection, store.load_sets(), shown, keys_of, label)
-        elif i == 3:
-            games = [g for g in collection["games"] if g.get("bucket")]
-            j = picker.filter_list("✏️  Change which game's category?", [game_label(g, names) for g in games],
-                                preview=lambda k: previews.game_thumb(games[k]["bucket"]) if k < len(games) else None,
-                                preview_width=previews.GAME_WIDTH)
-            if j is not None:
-                recategorize(collection["games"], games[j], ask_category(collection["games"], games[j].get("title", "it")))
-        elif i == 5:
+            add_from_set(collection, store.load_sets(), shown, keys_of, label, categories=False)
+        elif i == 4:
             pick_art(collection)
         else:
             name = ui.ask(f"Name [{collection['name']}] (empty keeps it): ").strip()

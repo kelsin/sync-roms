@@ -89,7 +89,7 @@ class GamePreviews(unittest.TestCase):
         self.assertEqual(self.games(calls, 3), ["img-gba/A.zip", "img-gba/B.zip", None])
 
     def test_change_category_lists_preview_the_game_bucket_skipping_rows_without_one(self):
-        for module, edit_one in ((setedit, setedit.edit_one), (collectionedit, collectionedit.edit_one)):
+        for module, edit_one in ((setedit, setedit.edit_one),):
             fake, calls = capture([3, None, None])  # "change which game's category?", then Esc, then back
             thing = {"name": "X", "games": [{"system": "gba", "bucket": "gba/A.zip"}, {"title": "no bucket"},
                                             {"system": "psx", "bucket": "psx/B.bin"}]}
