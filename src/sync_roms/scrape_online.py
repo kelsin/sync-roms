@@ -859,7 +859,7 @@ def run_scrape(client, systems, todo, skip, ask=True, replace=False, forced=None
             print(ui.yellow(f"  ⚠️  This may use up today's quota: the run then stops, keeping what it finished, and `{rerun}` "
                             "continues tomorrow"))
     if ask and not ui.confirm(f"🖼️  Scrape {count} ROM(s) from ScreenScraper and write their media and metadata to "
-                              f"{s3.location()}/{scrape_plan.SCRAPES}/{note} ?", default=False):
+                              f"{s3.location()}/{scrape_plan.SCRAPES}/{note} ?", default=True):
         print(ui.yellow("👋 Cancelled."))
         return 0
     shrink = scrape_plan.can_shrink()
