@@ -693,7 +693,7 @@ class TextualList(unittest.TestCase):
 
 class NarrowRows(unittest.TestCase):
     LONG = "Pocket Monsters - Super Long Adventure (Japan) (Rev 1) (Virtual Console) [T-En by Someone]"  # 90
-    EXTRAS = [[("  📦 Shmups", "cyan"), ("  1.2 GB", "dim")], [("  12 MB", "dim")]]
+    EXTRAS = [[("  📦 Shmups", "cyan"), ("  1.2 GB", "dim")], [("", "cyan"), ("  12 MB", "dim")]]
 
     def rendered(self, size=(80, 24), preview=False, **kwargs):
         """The list's lines as plain text (title, filter and hint first), and the list's width."""
@@ -716,7 +716,7 @@ class NarrowRows(unittest.TestCase):
                            preview=(lambda i: path) if preview else None, **kwargs)
         return out[:-1], out[-1]
 
-    def test_a_long_label_is_cut_with_an_ellipsis_and_the_extras_end_at_the_right_edge(self):
+    def test_a_long_label_is_cut_with_an_ellipsis_and_the_extras_are_columns_after_it(self):
         for size, preview in (((80, 24), False), ((80, 24), True), ((100, 24), False)):
             lines, width = self.rendered(size, preview)
             long_row, short_row = lines[3], lines[4]
@@ -726,19 +726,20 @@ class NarrowRows(unittest.TestCase):
             self.assertTrue(long_row.endswith("…  📦 Shmups  1.2 GB"), long_row)  # the label gives way, the size stays last
             self.assertEqual(cell_len(short_row), width)
             self.assertTrue(short_row.startswith("⬜ Short "), short_row)
-            self.assertTrue(short_row.endswith(" 12 MB"), short_row)  # sizes line up on the right
+            self.assertEqual(cell_len(short_row[:short_row.index("12 MB")]), cell_len(long_row[:long_row.index("1.2 GB")]),
+                             short_row)  # the sizes are one column, left-aligned
 
-    def test_a_label_that_fits_is_whole_and_padded_to_the_extras(self):
+    def test_rows_are_a_left_aligned_table_when_the_labels_fit(self):
         lines, width = self.rendered((120, 24))
         self.assertEqual(width, 120)
-        self.assertEqual(lines[3], "⬜ " + self.LONG + " " * 8 + "  📦 Shmups  1.2 GB")
-        self.assertEqual(lines[4], "⬜ Short" + " " * 105 + "  12 MB")
+        self.assertEqual(lines[3].rstrip(), "⬜ " + self.LONG + "  📦 Shmups  1.2 GB")
+        self.assertEqual(lines[4].rstrip(), "⬜ Short" + " " * 85 + " " * 11 + "  12 MB")  # label column, empty set column
 
     def test_the_cut_counts_cells_and_never_splits_a_wide_character(self):
         from rich.text import Text
         label = "⬜ ポケットモンスター 金 (Japan) (Rev 1)"
         for width in range(28, 60):  # from 28 the label keeps its MIN_LABEL cells with the size beside it
-            row = picker.fit_row(Text(label), Text("  1.2 GB"), width)
+            row = picker.fit_row(Text(label), Text("  1.2 GB"), width, label_width=width)  # a column as wide as it goes
             self.assertEqual(row.cell_len, width, width)
             self.assertTrue(row.plain.endswith("  1.2 GB"), row.plain)
             self.assertTrue(row.plain.startswith("⬜ ポケ"), row.plain)

@@ -135,16 +135,32 @@ def _cut(text, width):
         text.append("…")
 
 
-def fit_row(label, extras, width):
-    """A row of width cells (Rich Texts, cells as Textual counts them): label, then extras right-aligned. The label is
-    cut with "…" to the room the extras leave, but keeps MIN_LABEL cells (all of a shorter one); a row still too wide
-    is cut at its end."""
+def fit_row(label, extras, width, label_width=0):
+    """A row of width cells (Rich Texts, cells as Textual counts them): label padded to label_width cells (the table's
+    label column), then extras, then blanks to the end. The label is cut with "…" to the room the extras leave, but
+    keeps MIN_LABEL cells (all of a shorter one); a row still too wide is cut at its end."""
     label.rstrip()
-    _cut(label, max(width - extras.cell_len, min(label.cell_len, MIN_LABEL)))
-    label.append(" " * max(0, width - label.cell_len - extras.cell_len))  # in the row's style: the highlight spans it
+    room = max(width - extras.cell_len, min(label.cell_len, MIN_LABEL))
+    _cut(label, room)
+    label.append(" " * max(0, min(label_width, room) - label.cell_len))  # in the row's style: the highlight spans it
     label.append_text(extras)
+    label.append(" " * max(0, width - label.cell_len))
     _cut(label, width)
     return label
+
+
+def extras_widths(extras):
+    """Cells of each extras column, the widest of its rows: a row's (text, color) parts are its columns, in order."""
+    from rich.cells import cell_len
+    widths = []
+    for parts in extras or ():
+        for j, (text, _) in enumerate(parts):
+            n = cell_len(text)
+            if j == len(widths):
+                widths.append(n)
+            elif n > widths[j]:
+                widths[j] = n
+    return widths
 
 
 def line_key(text, pos, k):
@@ -221,6 +237,8 @@ class _ListModel:
         self.locked = locked or [False] * len(labels)
         self.hidden = hidden or [False] * len(labels)
         self.hidden_count = sum(self.hidden)
+        marked = multi or any(self.locked)  # each label then follows a 3-cell mark (✅ or 🔒 and a space)
+        self.label_width = max((cell_width(l) for l in labels), default=0) + (3 if marked else 0)
         self.session = {} if session is None else session
         self.state = list(self.session["sel"]) if "sel" in self.session else list(self.start)
         self.view_mode = self.session.get("view_mode", 0)  # multi: 0 all rows, 1 only rows that are on, 2 only rows changed
@@ -476,6 +494,7 @@ def _with_cursor(text, at):
 def _app_class():
     """The list's Textual app class, built on first use: importing Textual takes a while, and only a list needs it."""
     os.environ.setdefault("ESCDELAY", "25")  # read when Textual is imported: Esc acts at once
+    from rich.cells import cell_len
     from rich.text import Text
     from textual import events
     from textual._time import get_time  # the clock Textual stamps events with (pinned by TextualPrintHook tests)
@@ -493,7 +512,7 @@ def _app_class():
             if self.app.model.preview and self.screen is self.app.list_screen:
                 self.app.fit_preview()  # the terminal's size changed, or the picture's column came or went
 
-        def row(self, m, pos):
+        def row(self, m, pos, columns):
             i = m.vis[pos]
             style = ["reverse"] if pos == m.cur else []
             if m.locked[i]:
@@ -512,11 +531,14 @@ def _app_class():
             if m.hidden[i]:
                 style.append("dim")
             text, extras = Text(line, " ".join(style)), Text()
-            for part, color in (m.extras[i] if m.extras else []):
+            parts = m.extras[i] if m.extras else []
+            for j, w in enumerate(columns):  # every column padded, so the next one lines up
+                part, color = parts[j] if j < len(parts) else ("", "")
                 extras.append(part, " ".join(style + [color]))
+                extras.append(" " * (w - cell_len(part)), " ".join(style))
             if self.size.width < 1:  # not laid out yet
                 return text.append_text(extras)
-            return fit_row(text, extras, self.size.width)
+            return fit_row(text, extras, self.size.width, m.label_width)
 
         def render(self):
             m = self.app.model
@@ -530,7 +552,8 @@ def _app_class():
             if m.filters:
                 query.append("  " + m.filters, "cyan")
             lines = [Text(m.title, "bold cyan"), query, Text(hint, "dim")]
-            lines += [self.row(m, pos) for pos in range(m.top, min(len(m.vis), m.top + m.view))]
+            columns = extras_widths(m.extras)  # every row's, not just the shown ones: columns stay put while filtering
+            lines += [self.row(m, pos, columns) for pos in range(m.top, min(len(m.vis), m.top + m.view))]
             text, color, at = m.line
             status = Text(text, f"bold {color}" if color else "bold")
             for position in (m.position(), m.position(compact=True)):  # on the right, the first form the status leaves room for
@@ -1377,7 +1400,8 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
     Single mode returns the chosen index, or None on Esc. Multi mode returns the list of on/off states on Enter;
     Esc asks whether to keep or revert pending changes (esc_asks=False: it just returns None).
     cursor: index the highlight starts on.
-    extras: per label, a list of (text, color) drawn after it, right-aligned (color: green, red, cyan or dim); a long
+    extras: per label, a list of (text, color) drawn after it (color: green, red, cyan or dim); the rows are a
+    left-aligned table, each part a column by position, so a row without a column's part passes ("", color); a long
     label is cut with "…" to leave them room. They are not matched by the filter.
     locked: optional per-label flags; those rows are greyed out, can't be toggled, and show locked_note
     (one string, or one per label).

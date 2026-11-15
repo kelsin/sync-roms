@@ -424,8 +424,10 @@ def status_command():
         count, size = totals.get(top, (0, 0))
         totals[top] = (count + 1, size + n)
     print(f"   {len(tree.files):,} files · {ui.human_size(sum(tree.files.values()))}\n")
-    width = max((len(name) for name in totals), default=0) + 1
-    for name, (count, size) in sorted(totals.items()):
-        print(f"   {(name + '/') if name else '(top level)':<{width + 1}} {count:>9,} files  {ui.human_size(size):>10}")
+    rows = [((name + "/") if name else "(top level)", f"{count:,} files", ui.human_size(size))
+            for name, (count, size) in sorted(totals.items())]
+    widths = [max((len(r[i]) for r in rows), default=0) for i in range(2)]
+    for name, count, size in rows:
+        print(f"   {name:<{widths[0]}}  {count:<{widths[1]}}  {size}")
     print(ui.dim(f"\n   Refresh it after changing storage outside sync-roms: {UPDATE_HINT}"))
     return 0

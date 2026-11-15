@@ -77,7 +77,7 @@ class Pure(unittest.TestCase):
         self.assertTrue(labels[1].startswith("⭐ "))
         self.assertEqual(extras[0], [("  4 picked", "green"), ("  2 GB", "dim")])
         self.assertEqual(extras[1], [])
-        self.assertEqual(extras[2], [("  🗂️  full system", "cyan"), ("  … picked", "green"), ("  …", "dim")])
+        self.assertEqual(extras[2], [("  … picked", "green"), ("  …", "dim"), ("  🗂️  full system", "cyan")])
 
     def test_set_filter_is_one_system(self):
         self.assertEqual(cardedit.set_filter(SET, GBA), {"gba/Ruby.zip", "gba/Ruby.sav"})
@@ -297,8 +297,8 @@ class Flow(DataDir):
         with mock.patch.dict(CATALOG, systems=CATALOG["systems"] + [nds]), \
                 mock.patch.dict(DEVICE, systems=["gba", "gb", "nds"]):
             calls = self.run_card(returns((cardedit.COLLECTIONS_KEY, 0)), returns((" ", 0)), returns(None), returns(None))
-        self.assertEqual(calls[1][1], ["💖 Favs  (2 playable, 2 not playable)"])
-        self.assertEqual(calls[1][2]["extras"], [[("  ✅ on the card", "green")]])
+        self.assertEqual(calls[1][1], ["💖 Favs"])
+        self.assertEqual(calls[1][2]["extras"], [[("  ✅ on the card", "green"), ("  2 playable, 2 not playable", "dim")]])
         self.assertEqual(self.read("cards.json")["c"]["collections"], ["favs"])
 
     def test_collections_hotkey_skips_malformed_games(self):
@@ -306,7 +306,7 @@ class Flow(DataDir):
         self.card()
         with contextlib.redirect_stderr(io.StringIO()):
             calls = self.run_card(returns((cardedit.COLLECTIONS_KEY, 0)), returns(None), returns(None))
-        self.assertEqual(calls[1][1], ["💖 Favs  (2 playable, 1 not playable)"])
+        self.assertEqual(calls[1][2]["extras"][0][1], ("  2 playable, 1 not playable", "dim"))
 
     def test_enter_toggles_a_collection_off_again(self):
         self.favs()
@@ -522,7 +522,7 @@ class Flow(DataDir):
         changed, calls = self.run_system(toggle("Ruby.zip"))
         _, labels, kw = calls[0]
         self.assertEqual(kw["initial"], [False, True, True, False])
-        self.assertEqual(kw["extras"][labels.index("Ruby.zip")][0], ("  📦 Pokemon", "cyan"))
+        self.assertEqual(kw["extras"][labels.index("Ruby.zip")][1], ("  📦 Pokemon", "cyan"))
         self.assertTrue(changed)
         entry = self.read("cards.json")["c"]
         self.assertEqual(entry["excluded"], {"gba": ["gba/Ruby.zip"]})

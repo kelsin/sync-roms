@@ -49,7 +49,7 @@ def show_devices(devices, systems, device_id=None, as_json=False):
                        "firmwares": d["firmwares"]} for d in devices])
         return 0
     rows = [(d["name"], d["soc"], str(len(d["systems"])), d["id"]) for d in devices]
-    ui.table(rows, ("Device", "Chip", "Systems", "Id"), right=(2,))
+    ui.table(rows, ("Device", "Chip", "Systems", "Id"))
     return 0
 
 
