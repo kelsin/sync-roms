@@ -85,7 +85,6 @@ SINGLE_HINT = "Enter select · Esc back · j/k ^N/^P move · / filter"
 MULTI_HINT = "Space toggle · Enter done · / filter · a all · o view · u revert"
 HELP_HINT = "? help · "  # starts every hint line, so a narrow list cuts it last
 TYPING_HINT = "Enter keep filter · Esc clear · ^N/^P move · ^A/^E ^B/^F ^K ^W ^U edit"
-SINGLE_TYPING_HINT = "Enter pick · Tab keep filter · Esc clear · ^N/^P move · ^A/^E ^K ^W ^U edit"
 HELP_FOOTER = "j/k ↑/↓ PgUp/PgDn scroll · Esc/q/? close"
 # under "Working..." in an editor session, after a Ctrl-C the editor has not got yet; the second line once it is true
 STOPPING = "🛑 Ctrl-C: stopping when this step ends."
@@ -98,8 +97,7 @@ def help_lines(multi, hint, hidden_count=False, has_note=False, key_help=None):
     the hint's entries. A key key_help describes is listed only there."""
     lines = ["j/k ↑/↓ ^N/^P   move", "g/G             top / bottom", "^D/^U           half page",
              "^F/^B PgDn/PgUp page",
-             "/               filter (" + ("Enter or Tab keeps it" if multi else "Enter picks, Tab keeps it")
-             + ", Esc clears it)",
+             "/               filter (Enter or Tab keeps it, Esc clears it)",
              "Enter           " + ("done" if multi else "pick"), "Esc/q/^G        clear the filter, then go back"]
     if multi:
         lines += ["Space/Tab       toggle the row", "a               toggle all shown", "o               view: all / on / changed",
@@ -358,8 +356,6 @@ class _ListModel:
             edited = line_key(self.query, self.qpos, k)
             if k in ("enter", "tab"):
                 self.typing = False
-                if k == "enter" and not self.multi and vis:
-                    return vis[cur]
             elif k in ("escape", "ctrl+g"):
                 self.query, self.qpos, self.typing = "", 0, False
                 self.cur = self.top = 0
@@ -526,7 +522,7 @@ def _app_class():
             m = self.app.model
             query = Text("🔎 " + m.query)
             if m.typing:
-                hint = TYPING_HINT if m.multi else SINGLE_TYPING_HINT
+                hint = TYPING_HINT
             else:
                 hint = HELP_HINT + (m.hint or (MULTI_HINT if m.multi else SINGLE_HINT))
             if m.typing:
@@ -1376,8 +1372,7 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
     Normal mode: j/k ↑/↓ ^N/^P move · g/G top/bottom · ^D/^U half page · ^F/^B/PgUp/PgDn/^V page · / filter ·
     Enter picks · Esc/q/^G clears the filter, then goes back · ? help. Multi mode adds Space/Tab toggle · a all/none
     shown · o view (all / on / changed) · u revert · w note. After `/`, typed text filters (every
-    space-separated term must appear in a label, case-insensitive); Tab keeps the filter, Enter does too in multi
-    mode and picks the highlighted row in single mode, Esc clears it.
+    space-separated term must appear in a label, case-insensitive); Enter or Tab keeps the filter, Esc clears it.
 
     Single mode returns the chosen index, or None on Esc. Multi mode returns the list of on/off states on Enter;
     Esc asks whether to keep or revert pending changes (esc_asks=False: it just returns None).
