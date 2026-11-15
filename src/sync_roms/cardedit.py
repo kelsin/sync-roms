@@ -74,21 +74,20 @@ def status_of(usage, capacity, fetch=None, count=True):
 
 def system_labels(card, systems, recommended, usages):
     """(labels, extras) for the system list, in the given order: recommended systems get a ⭐; each picked system
-    shows its count and size (… while not sized)."""
+    shows its count and size (… while not sized), then 🗂️ on a full system (columns: blank where a row has none)."""
     games = card.get("games") or {}
     labels, extras = [], []
     for s in systems:
         rec = s["bucket"] in recommended
         labels.append(("⭐ " if rec else "   ") + s["name"])
         u = usages.get(s["bucket"])
-        row = []
+        row = [("", "green"), ("", "dim")]
+        if u and budget.picked(u):
+            row = [(f"  {u.count or SIZING} picked", "green"), (f"  {SIZING if u.partial else size_text(u.bytes)}", "dim")]
         entry = games.get(s["bucket"])
         if isinstance(entry, dict) and entry.get("full_system"):
             row.append(("  🗂️  full system", "cyan"))
-        if u and budget.picked(u):
-            row.append((f"  {u.count or SIZING} picked", "green"))
-            row.append((f"  {SIZING if u.partial else size_text(u.bytes)}", "dim"))
-        extras.append(row)
+        extras.append(row if any(text for text, _ in row) else [])
     return labels, extras
 
 
@@ -340,16 +339,17 @@ def pick_collections(name, playable, card_status=None):
     entry = store.load_cards().get(name)
     saved = entry.get("collections") if isinstance(entry, dict) else None
     ids = [i for i in saved if isinstance(i, str)] if isinstance(saved, list) else []
-    labels = []
+    labels, counts = [], []
     for c in found:
         p = sum(1 for g in colls.collection_games(c) if g.get("system") in playable)
         n = len(colls.collection_games(c)) - p
-        labels.append(f"{themeart.art_emoji(c.get('art'))} {c['name']}  ({p} playable" + (f", {n} not playable)" if n else ")"))
+        labels.append(f"{themeart.art_emoji(c.get('art'))} {c['name']}")
+        counts.append((f"  {p} playable" + (f", {n} not playable" if n else ""), "dim"))
     extras = [[] for _ in found]
     shown = {}
 
     def mark():
-        extras[:] = [[("  ✅ on the card", "green")] if c["id"] in ids else [] for c in found]
+        extras[:] = [[("  ✅ on the card" if c["id"] in ids else "", "green"), count] for c, count in zip(found, counts)]
         shown["status"] = card_status() if card_status else None
 
     def toggle(idx):
@@ -546,19 +546,20 @@ def edit_system(name, system, setup, to_fetch=None, card_usages=None):
                 and (not wanted or metafilter.matches(meta.get().get(key, {}), wanted)))
 
     def row_extras(key, notes, state):
-        out = []
+        """The row's columns: files, set note, lock, size (blank where it has none)."""
+        out = [("", "dim"), ("", "dim"), ("", "cyan"), ("", "dim")]
         if key in groups:
-            out.append((f"  🔗 {len(groups[key])} files", "dim"))
+            out[0] = (f"  🔗 {len(groups[key])} files", "dim")
         elif key in bundled:
-            out.append((f"  🔗 {len(bundled[key]) + 1} files", "dim"))
+            out[0] = (f"  🔗 {len(bundled[key]) + 1} files", "dim")
         if key in notes:  # the note ends in the set's emoji and name (edit.cover_notes)
-            out.append((f"  {notes[key].split(': ', 1)[-1]}", "cyan" if state else "dim"))
+            out[1] = (f"  {notes[key].split(': ', 1)[-1]}", "cyan" if state else "dim")
         if key in locked_from:
-            out.append((f"  {locked_from[key]}", "cyan"))
+            out[2] = (f"  {locked_from[key]}", "cyan")
         if key in work["costs"]:
-            out.append((f"  {size_text(work['costs'][key])}", "dim"))
+            out[3] = (f"  {size_text(work['costs'][key])}", "dim")
         elif key in in_storage:
-            out.append((f"  {SIZING}", "dim"))
+            out[3] = (f"  {SIZING}", "dim")
         return out
 
     def changes(keys, base, state):
