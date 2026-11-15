@@ -72,21 +72,29 @@ def status_of(usage, capacity, fetch=None, count=True):
     return (text, "red" if over or share >= FULL_AT else "yellow" if share >= WARN_AT else "green")
 
 
-def system_labels(card, systems, recommended, usages):
+def system_labels(card, systems, recommended, usages, full_sizes):
     """(labels, extras) for the system list, in the given order: recommended systems get a ⭐; each picked system
-    shows its count and size (… while not sized), then 🗂️ on a full system (columns: blank where a row has none)."""
+    shows its count and size (… while not sized), then each system its size as a full system (full_sizes: {bucket:
+    budget.full_usage}, a missing one not worked out yet; an empty folder shows none). A full system shows its files
+    and full size instead of its picks, then 🗂️ (columns: blank where a row has none)."""
     games = card.get("games") or {}
     labels, extras = [], []
     for s in systems:
         rec = s["bucket"] in recommended
         labels.append(("⭐ " if rec else "   ") + s["name"])
-        u = usages.get(s["bucket"])
-        row = [("", "green"), ("", "dim")]
-        if u and budget.picked(u):
-            row = [(f"  {u.count or SIZING} picked", "green"), (f"  {SIZING if u.partial else size_text(u.bytes)}", "dim")]
+        u, f = usages.get(s["bucket"]), full_sizes.get(s["bucket"])
+        unknown = f is None or f.partial
+        row = [("", "green"), ("", "dim"), ("", "dim")]
         entry = games.get(s["bucket"])
         if isinstance(entry, dict) and entry.get("full_system"):
-            row.append(("  🗂️  full system", "cyan"))
+            files = SIZING if unknown else f.count
+            row = [(f"  {files} file" + ("" if files == 1 else "s"), "green"),
+                   (f"  {SIZING if unknown else size_text(f.bytes)}", "dim"), ("  🗂️  full system", "cyan")]
+        else:
+            if u and budget.picked(u):
+                row[:2] = [(f"  {u.count or SIZING} picked", "green"), (f"  {SIZING if u.partial else size_text(u.bytes)}", "dim")]
+            if unknown or f.count:
+                row[2] = (f"  🗂️  {SIZING if unknown else size_text(f.bytes)} full", "dim")
         extras.append(row if any(text for text, _ in row) else [])
     return labels, extras
 
@@ -175,6 +183,38 @@ def pick_meta(system, meta, filters, keys):
             return
 
 
+class FullSizes:
+    """Each system's budget.full_usage on a card, worked out on a background thread (the worker never touches the
+    screen) and again when the storage cache changes. sizes: {bucket: Usage} of what has arrived."""
+
+    def __init__(self, card, systems):
+        self.card, self.systems = card, systems
+        self.version, self.done, self.sizes = LOADING, None, {}
+
+    def _load(self, done):
+        try:
+            with ui.silent_thread():
+                for s in self.systems:
+                    done.put((s["bucket"], budget.full_usage(self.card, s)))
+        except (Exception, SystemExit):  # storage can't be read: the rest stay not worked out
+            pass
+
+    def update(self):
+        """Take in what the worker has handed over, starting it first when the cache is new. Whether sizes changed;
+        never waits."""
+        changed, version = False, inventory.version()
+        if version != self.version:
+            self.version, self.done, self.sizes, changed = version, queue.Queue(), {}, True
+            _spawn(lambda done=self.done: self._load(done))
+        while True:
+            try:
+                bucket, usage = self.done.get_nowait()
+            except queue.Empty:
+                return changed
+            self.sizes[bucket] = usage
+            changed = True
+
+
 def card_entry(name, setup, cards=None):
     """A card's saved entry, with the layout of the setup being edited (it may not be saved yet)."""
     entry = (store.load_cards() if cards is None else cards).get(name)
@@ -220,6 +260,7 @@ def edit_card(name, setup=None, to_fetch=None):
     systems = [s for s in systems  # a missing or empty folder has nothing to pick, unless it already has picks
                if budget.picked(usages[s["bucket"]])
                or (folders is None or s["bucket"] in folders) and inventory.cached(f"{s['bucket']}/") != {}]
+    full = FullSizes({"layout": setup[1]}, systems)  # each system's size as a full system, kept for the session
     pos = 0
     changed = None  # what the last pass changed: one system, ALL (any system may have) or None
     while True:
@@ -231,14 +272,20 @@ def edit_card(name, setup=None, to_fetch=None):
         changed = None
         capacity = budget.card_capacity(card)
         view = {}
+        full.update()
 
         def work_out():
             card = card_entry(name, setup)
             view["total"] = budget.card_usage(card, systems, usages)
             view["fetch"] = budget.card_fetch_bytes(card, systems, to_fetch) if to_fetch else None
-            return system_labels(card, systems, recommended, usages)
+            return system_labels(card, systems, recommended, usages, full.sizes)
 
         labels, extras = work_out()
+
+        def poll():
+            """Fill in the full sizes as the worker hands them over."""
+            if full.update():
+                extras[:] = system_labels(card_entry(name, setup), systems, recommended, usages, full.sizes)[1]
 
         def on_hotkey(key, idx):
             """f switches full system in place, so the screen isn't torn down and redrawn."""
@@ -254,7 +301,7 @@ def edit_card(name, setup=None, to_fetch=None):
                                labels, extras=extras, cursor=pos,
                                hotkeys=(FULL_KEY, COLLECTIONS_KEY, SURPRISE_KEY, CLEAR_ALL_KEY), hint=LIST_HINT, key_help=LIST_KEYS,
                                status=lambda _state: status_of(view["total"], capacity, view["fetch"]),
-                               on_hotkey=on_hotkey,
+                               on_hotkey=on_hotkey, poll=poll,
                                preview=lambda i: previews.system(systems[i]) if i < len(systems) else None)
         if i is None:
             return

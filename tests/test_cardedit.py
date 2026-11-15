@@ -72,12 +72,26 @@ class Pure(unittest.TestCase):
     def test_system_labels(self):
         card = {"games": {"psx": {"full_system": True}}}
         usages = {"gba": U(2 * 10 ** 9, 4, False), "gb": U(0, 0, False), "psx": U(0, 0, True)}
-        labels, extras = cardedit.system_labels(card, [GBA, GB, PSX], {"gb"}, usages)
+        full = {"gba": U(9 * 10 ** 9, 30, False), "gb": U(45 * 10 ** 9, 1234, False), "psx": U(7 * 10 ** 9, 1, False)}
+        labels, extras = cardedit.system_labels(card, [GBA, GB, PSX], {"gb"}, usages, full)
         self.assertEqual([l.strip() for l in labels], ["Game Boy Advance", "⭐ Game Boy", "PlayStation"])  # the given order
         self.assertTrue(labels[1].startswith("⭐ "))
-        self.assertEqual(extras[0], [("  4 picked", "green"), ("  2 GB", "dim")])
-        self.assertEqual(extras[1], [])
-        self.assertEqual(extras[2], [("  … picked", "green"), ("  …", "dim"), ("  🗂️  full system", "cyan")])
+        self.assertEqual(extras[0], [("  4 picked", "green"), ("  2 GB", "dim"), ("  🗂️  9 GB full", "dim")])
+        self.assertEqual(extras[1], [("", "green"), ("", "dim"), ("  🗂️  45 GB full", "dim")])  # nothing picked
+        self.assertEqual(extras[2], [("  1 file", "green"), ("  7 GB", "dim"), ("  🗂️  full system", "cyan")])
+
+    def test_system_labels_while_full_sizes_are_unknown(self):
+        card = {"games": {"psx": {"full_system": True}}}
+        usages = {"gba": U(2 * 10 ** 9, 4, False), "gb": U(0, 0, False), "psx": U(0, 0, True)}
+        for full in ({}, {"gba": U(0, 0, True), "gb": U(5, 0, True), "psx": U(0, 0, True)}):  # not worked out, no cache
+            extras = cardedit.system_labels(card, [GBA, GB, PSX], set(), usages, full)[1]
+            self.assertEqual(extras[0], [("  4 picked", "green"), ("  2 GB", "dim"), ("  🗂️  … full", "dim")])
+            self.assertEqual(extras[1], [("", "green"), ("", "dim"), ("  🗂️  … full", "dim")])
+            self.assertEqual(extras[2], [("  … files", "green"), ("  …", "dim"), ("  🗂️  full system", "cyan")])
+
+    def test_an_empty_folder_shows_no_full_size(self):
+        extras = cardedit.system_labels({}, [GB], set(), {"gb": U(0, 0, False)}, {"gb": U(16, 0, False)})[1]
+        self.assertEqual(extras, [[]])
 
     def test_set_filter_is_one_system(self):
         self.assertEqual(cardedit.set_filter(SET, GBA), {"gba/Ruby.zip", "gba/Ruby.sav"})
@@ -459,8 +473,32 @@ class Flow(DataDir):
             calls = self.run_card(returns(None))
         title, labels, kw = calls[0]
         self.assertEqual([l.strip() for l in labels], ["⭐ Game Boy", "Game Boy Advance"])
-        self.assertEqual(kw["extras"][1], [("  1 picked", "green"), ("  5 B", "dim")])  # the ROM
+        self.assertEqual(kw["extras"][1], [("  1 picked", "green"), ("  5 B", "dim"), ("  🗂️  … full", "dim")])  # the ROM
         self.assertEqual(kw["status"](None), ("💾 21 B / 1 GB · 1 GB free · 1 file", "green"))  # ROM and the GBA BIOS
+
+    def test_full_sizes_fill_in_when_the_worker_hands_them_over(self):
+        self.card(games={"gba": [g("gba/Ruby.zip")]})
+        self.cache = {"gba/": self.files["gba/"], "gb/": self.files["gb/"], "scrapes/gba/": {}, "scrapes/gb/": {},
+                      "BIOS/": {"BIOS/gba_bios.bin": 16, "BIOS/gb_bios.bin": 1000}}
+        workers = []
+
+        def check(labels, kw):
+            self.assertEqual(kw["extras"], [[("", "green"), ("", "dim"), ("  🗂️  … full", "dim")],
+                                            [("  1 picked", "green"), ("  5 B", "dim"), ("  🗂️  … full", "dim")]])
+            kw["poll"]()  # nothing handed over yet
+            self.assertIn(("  🗂️  … full", "dim"), kw["extras"][0])
+            workers.pop()()
+            kw["poll"]()
+            self.assertEqual(kw["extras"], [[("", "green"), ("", "dim"), ("  🗂️  1 KB full", "dim")],  # Red.gb and the Game Boy BIOS
+                                            [("  1 picked", "green"), ("  5 B", "dim"), ("  🗂️  32 B full", "dim")]])
+            return (cardedit.FULL_KEY, 1)  # in place: the full system shows its files from the kept sizes
+
+        def full_on(labels, kw):
+            self.assertEqual(kw["extras"][1], [("  4 files", "green"), ("  32 B", "dim"), ("  🗂️  full system", "cyan")])
+            return None
+        with mock.patch.object(cardedit, "_spawn", workers.append):
+            self.run_card(check, full_on)
+        self.assertEqual(workers, [])  # worked out once for the session
 
     def test_full_system_hotkey_saves_and_restores_the_list(self):
         self.card(games={"gba": [g("gba/Ruby.zip")]})
@@ -890,8 +928,16 @@ class Flow(DataDir):
         count, as the system list shows it)."""
         card = cardedit.card_entry("c", (DEVICE, "esde"))
         usages = budget.system_usages(card, [GB, GBA])
+        full = {s["bucket"]: budget.full_usage(card, s) for s in (GB, GBA)}
         return (cardedit.status_of(budget.card_usage(card, [GB, GBA], usages), budget.card_capacity(card), count=count),
-                cardedit.system_labels(card, [GB, GBA], set(), usages)[1])
+                cardedit.system_labels(card, [GB, GBA], set(), usages, full)[1])
+
+    @contextlib.contextmanager
+    def workers_run_at_once(self):
+        """Background work runs as it is started (no metadata to read), so the full sizes are in from the first draw."""
+        with mock.patch.object(cardedit, "_spawn", lambda fn: fn()), \
+                mock.patch.object(s3, "get_text", side_effect=FileNotFoundError("metadata.json")):
+            yield
 
     def same_as_fresh(self, labels, kw):
         status, extras = self.fresh()
@@ -930,7 +976,7 @@ class Flow(DataDir):
             "exclude a set game": ({"games": {"sets": ["pk"]}}, [returns(1), game_view_is_fresh(toggle("Ruby.zip"))]),
         }
         for case, (entry, steps) in cases.items():
-            with self.subTest(case), mock.patch.object(ui, "confirm", return_value=True):
+            with self.subTest(case), mock.patch.object(ui, "confirm", return_value=True), self.workers_run_at_once():
                 self.card(size="1 GB", **entry)
                 self.sized()
                 before = self.fresh()
@@ -974,7 +1020,8 @@ class Flow(DataDir):
             self.cache["gb/"] = {"gb/Red.gb": 50}
             version[0] += 1
             return kw["initial"]
-        with mock.patch.object(inventory, "version", lambda: version[0]), mock.patch.dict(budget._scrapes):
+        with mock.patch.object(inventory, "version", lambda: version[0]), mock.patch.dict(budget._scrapes), \
+                self.workers_run_at_once():
             self.run_card(returns(1), leave, self.same_as_fresh)
 
 

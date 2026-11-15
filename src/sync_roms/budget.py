@@ -16,8 +16,9 @@ def _scrapes_by_stem(bucket):
     version = inventory.version()
     if version is None or version != _scrapes["version"]:
         _scrapes.update(version=version, by_stem={})
-    if bucket in _scrapes["by_stem"]:
-        return _scrapes["by_stem"][bucket]
+    kept = _scrapes["by_stem"]  # read once: the full-size worker in cardedit may reset it from another thread
+    if bucket in kept:
+        return kept[bucket]
     listing = inventory.cached(f"{scrape_plan.SCRAPES}/{bucket}/")
     if listing is None:
         return None
@@ -27,7 +28,7 @@ def _scrapes_by_stem(bucket):
         if entry:
             by_stem[entry[0]][key] = size
     if version is not None:
-        _scrapes["by_stem"][bucket] = by_stem
+        kept[bucket] = by_stem
     return by_stem
 
 
@@ -136,6 +137,17 @@ def bios_usage(systems):
         return Usage(0, 0, True)
     keys = [k for k in (f"BIOS/{f}" for f in files) if k in sizes]
     return Usage(sum(sizes[k] for k in keys), len(keys), False)
+
+
+def full_usage(card, system):
+    """Usage of a system on the card as a full system, whatever is picked: every file in its folder with the scrapes
+    the card's layout installs, plus the system's own BIOS. count is its files. Partial while any of them isn't cached."""
+    keys = _system_keys(card, system, {"full_system": True}, None)
+    bios = bios_usage([system])
+    if keys is None:
+        return Usage(bios.bytes, 0, True)
+    costs, partial = game_costs(card, system, keys)
+    return Usage(sum(costs.values()) + bios.bytes, len(keys), partial or bios.partial)
 
 
 def picked(usage):

@@ -556,7 +556,8 @@ sync-roms --edit
    firmware, like the first sync does, and saves the card). On a card, `v` changes its device and firmware instead of opening it (saved with the review at the end) and drops the card's games for systems the new device or firmware doesn't use. Each card's row shows its current device and firmware.
 1. A card opens on every system its device can play, in the usual order. Systems recommended for the device's screen
    are marked ⭐; each system with picks shows how many games and how much space they take (ROMs plus the scraped
-   files the card's firmware installs). The bottom line shows the card's total (games, scrapes and the BIOS files of
+   files the card's firmware installs), and every system shows its size as a full system (🗂️, all its files, scrapes
+   and BIOS). The bottom line shows the card's total (games, scrapes and the BIOS files of
    the systems it syncs) against its size and the free space, in green below 70% of the card, yellow below 90% and
    red above (or over). Opened from a sync, it also shows how much of the card's ROMs aren't on it yet
    (`⬇️  … to download`). Sizes come from the storage cache (see [Storage cache](#storage-cache)); without one they show
