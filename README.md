@@ -679,7 +679,7 @@ Every card gets up to 10 surprises: random full English games (no BIOS, prototyp
 compilations; a multi-disc game counts as one) from the systems of the run, in addition to the games you picked. It is on by default. Seven of the ten come from
 the systems recommended for the card's device and three from the others, spread evenly over the systems; a system with no
 candidates passes its slots on. Games never surprised, then games surprised before, then games another card currently
-holds are used in that order. Full systems are left out, and so is any game already on the card. Systems listed in
+holds are used in that order. Full systems are used too, but any other game already on the card is left out. Systems listed in
 `surprise_excluded_systems` in `settings.json` (system ids, for every card) are never used, and a card's current surprises
 on them are replaced at the next sync.
 

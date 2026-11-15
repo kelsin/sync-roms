@@ -356,12 +356,12 @@ class Step(StorageCase):
             got = surprise.run_surprise("SD", (None, "esde"), self.chosen(), False, False, rng=random.Random(5))
         self.assertEqual([g["bucket"] for g in got if g["system"] == "gba"], ["gba/G14 (USA).zip"])
 
-    def test_full_systems_are_left_out_of_the_pools(self):
+    def test_full_systems_are_in_the_pools(self):
         self.card(games={"gb": {"full_system": True}})
         with self.patched(filter_list=self.fail_call, edit_card=self.fail_call):
             got = surprise.run_surprise("SD", (None, "esde"), self.chosen(), False, False, rng=random.Random(7))
         self.assertEqual(len(got), 10)
-        self.assertEqual({g["system"] for g in got}, {"gba"})
+        self.assertEqual({g["system"] for g in got}, {"gba", "gb"})
 
     def test_off_clears_surprises_keeps_history_and_picks_nothing(self):
         self.card(surprise=False, surprises=[self.surprise("gba", 0)])

@@ -204,9 +204,8 @@ def pick(pools, kept, need, recommended, recent, others_current, rng):
 
 
 def _pools(chosen_systems, taken):
-    """{system bucket: [units]} of the candidates in storage for the run's systems, past the mirror. Full systems are
-    left out (they sync everything already), and so is every unit sharing a key with taken. None when storage
-    couldn't be listed."""
+    """{system bucket: [units]} of the candidates in storage for the run's systems, past the mirror, full systems
+    included. Every unit sharing a key with taken is left out. None when storage couldn't be listed."""
     with mirroring.storage_reads():
         try:
             folders = inventory.folders()
@@ -217,7 +216,7 @@ def _pools(chosen_systems, taken):
         pools = {}
         for s in chosen_systems:
             bucket = s["bucket"]
-            if bucket not in folders or s.get("full_system"):
+            if bucket not in folders:
                 continue
             try:
                 keys = inventory.files(f"{bucket}/", sizes=False)
