@@ -91,6 +91,16 @@ class Budget(DataDir):
         u = self.usage({"games": {"sets": ["s"]}, "excluded": {"gba": ["gba/A.zip"]}}, "other")
         self.assertEqual((u.bytes, u.count), (200, 1))
 
+    def test_full_usage_is_every_file_its_scrapes_and_the_system_bios(self):
+        self.cache["BIOS/"] = {"BIOS/gba_bios.bin": 16, "BIOS/other.bin": 99}
+        gba = {**GBA, "bios": {"files": ["gba_bios.bin"]}}
+        card = {"layout": "esde", "games": {"gba": [g("gba/A.zip")]}, "excluded": {"gba": ["gba/B.zip"]}}
+        self.assertEqual(tuple(budget.full_usage(card, gba)), (700 + 10 + 20 + 16, 3, False))  # picks don't matter
+        self.cache.pop("BIOS/")
+        self.assertEqual(tuple(budget.full_usage(card, gba)), (730, 3, True))
+        self.cache.pop("gba/")
+        self.assertEqual(tuple(budget.full_usage(card, GBA)), (0, 0, True))
+
     def test_full_system_ignores_exclusions_like_sync(self):
         u = self.usage({"games": {"gba": {"full_system": True}}, "excluded": {"gba": ["gba/A.zip"]}}, "other")
         self.assertEqual((u.bytes, u.count), (700, 3))
