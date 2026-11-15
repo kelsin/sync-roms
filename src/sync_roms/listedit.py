@@ -82,12 +82,12 @@ def game_label(game, names):
            f" — {game.get('title') or game['bucket']}"
 
 
-def add_from_set(listing, sets, shown, keys_of, label):
+def add_from_set(listing, sets, shown, keys_of, label, categories=True):
     """Pick one of sets and toggle its games, across every system, in listing (via shown, a view of it).
     label is listing's name as shown, with its emoji.
 
-    New games get the category asked for (none after Ctrl-C, which keeps the toggles made and is then raised again),
-    and the set's extra files (the discs of a multi-disc game)."""
+    New games get the category asked for when categories is true (none after Ctrl-C, which keeps the toggles made and
+    is then raised again), and the set's extra files (the discs of a multi-disc game)."""
     j = picker.filter_list("✏️  Add games from which set?", [f"{themeart.set_emoji(x)} {x['name']}  ({len(x['games'])} games)" for x in sets],
                            preview=lambda k: previews.collection(sets[k]["id"]))
     if j is None:
@@ -105,7 +105,7 @@ def add_from_set(listing, sets, shown, keys_of, label):
         interrupted = True
     added = {g["bucket"] for s in shown.values() for g in s["games"]} - had
     try:
-        category = ask_category(listing["games"], f"{len(added)} new game(s)") if added and not interrupted else ""
+        category = ask_category(listing["games"], f"{len(added)} new game(s)") if categories and added and not interrupted else ""
     except KeyboardInterrupt:  # Ctrl-C at the question: no category
         category, interrupted = "", True
     listing["games"] = reconcile(listing["games"], shown, category)

@@ -129,11 +129,12 @@ class Discs(unittest.TestCase):
             return next(picks)
 
         keys = {"gba": {"gba/Ruby.zip"}, "psx": DISCS}
-        with mock.patch.object(picker, "filter_list", fake), mock.patch.object(ui, "ask", return_value="RPG"), \
+        with mock.patch.object(picker, "filter_list", fake), mock.patch.object(ui, "ask") as ask, \
                 mock.patch("builtins.print"), mock.patch.object(store, "load_sets", return_value=[game_set]):
             collectionedit.edit_one(collection, SYSTEMS, lambda bucket: keys.get(bucket, set()))
+        ask.assert_not_called()  # collections have no categories
         self.assertEqual(lists, [["Game Boy Advance — Ruby", "PlayStation — FF7"]])
-        self.assertEqual(collection["games"], [{"title": "FF7", "category": "RPG", "system": "psx",
+        self.assertEqual(collection["games"], [{"title": "FF7", "system": "psx",
                                                 "bucket": "psx/FF7.m3u", "files": ["psx/FF7 (Disc 1).chd"]}])
 
     def test_the_add_games_list_keeps_its_place_when_a_key_lists_the_same_games(self):
@@ -291,6 +292,7 @@ class Editor(DataDir):
 
     def interrupted(self, games, picks, lists, sets=(), ask=None):
         """Open collection favs (holding games) in the real collection editor; picks answer the single-choice lists,
+        KeyboardInterrupt in picks is Ctrl-C there;
         lists holds per toggle list (labels to switch, what it then does: KeyboardInterrupt, a hotkey or None for Enter);
         ask is ui.ask's side_effect. Ctrl-C's save question is answered yes. Returns the confirms asked and the ui.ask mock."""
         collections.save_collection({"id": "favs", "name": "Favs", "games": games})
@@ -299,7 +301,10 @@ class Editor(DataDir):
 
         def fake(title, labels, **kw):
             if not kw.get("multi"):
-                return next(picks)
+                pick = next(picks)
+                if pick is KeyboardInterrupt:
+                    raise KeyboardInterrupt
+                return pick
             flip, then = next(lists)
             kw["session"]["sel"] = [on != (label in flip) for label, on in zip(labels, kw["session"]["sel"])]
             if then is KeyboardInterrupt:
@@ -324,16 +329,16 @@ class Editor(DataDir):
         self.assertEqual(len(confirms), 1)
         self.assertEqual(self.read("collections/favs.json")["games"], [zelda])
 
-    def test_ctrl_c_keeps_the_add_games_lists_toggles_with_no_category(self):
+    def test_ctrl_c_keeps_the_add_games_lists_toggles(self):
         # PlayStation: switch Crash on and press c, then switch FF7 on and Ctrl-C
         confirms, ask = self.interrupted([RUBY], [0, 1, 1], [({"Crash.chd"}, "c"), ({"FF7.m3u"}, KeyboardInterrupt)])
-        ask.assert_not_called()  # no category question
+        ask.assert_not_called()
         self.assertEqual(len(confirms), 1)
         self.assertEqual(self.read("collections/favs.json")["games"], [
             RUBY, {"title": "Crash", "system": "psx", "bucket": "psx/Crash.chd"},
             {"title": "FF7", "system": "psx", "bucket": "psx/FF7.m3u", "files": ["psx/FF7 (Disc 1).chd", "psx/FF7 (Disc 2).chd"]}])
 
-    def test_ctrl_c_keeps_the_add_from_a_set_lists_toggles_with_no_category(self):
+    def test_ctrl_c_keeps_the_add_from_a_set_lists_toggles(self):
         game_set = {"id": "mix", "name": "Mix", "games": [
             dict(RUBY), {"title": "FF7", "system": "psx", "bucket": "psx/FF7.m3u", "files": ["psx/FF7 (Disc 1).chd"]}]}
         confirms, ask = self.interrupted([RUBY], [0, 2, 0], [({"Game Boy Advance — Ruby", "PlayStation — FF7"}, KeyboardInterrupt)],
@@ -367,14 +372,14 @@ class Editor(DataDir):
                 self.assertEqual(confirms, [])
                 self.assertEqual(self.read("collections/favs.json")["games"], [RUBY])
 
-    def test_ctrl_c_at_the_category_question_keeps_the_games_with_no_category(self):
+    def test_adding_games_asks_no_category(self):
         game_set = {"id": "mix", "name": "Mix", "games": [
             dict(RUBY), {"title": "FF7", "system": "psx", "bucket": "psx/FF7.m3u", "files": ["psx/FF7 (Disc 1).chd"]}]}
         for picks, flip, ff7 in (([0, 1, 1], {"FF7.m3u"}, ["psx/FF7 (Disc 1).chd", "psx/FF7 (Disc 2).chd"]),
                                  ([0, 2, 0], {"PlayStation — FF7"}, ["psx/FF7 (Disc 1).chd"])):
-            with self.subTest(picks=picks):  # FF7 on, Enter, Ctrl-C at the category question
-                confirms, ask = self.interrupted([RUBY], picks, [(flip, None)], sets=[game_set], ask=KeyboardInterrupt)
-                ask.assert_called_once()
+            with self.subTest(picks=picks):  # FF7 on, Enter, then Ctrl-C at the add menu
+                confirms, ask = self.interrupted([RUBY], picks + [KeyboardInterrupt], [(flip, None)], sets=[game_set])
+                ask.assert_not_called()
                 self.assertEqual(len(confirms), 1)
                 self.assertEqual(self.read("collections/favs.json")["games"],
                                  [RUBY, {"title": "FF7", "system": "psx", "bucket": "psx/FF7.m3u", "files": ff7}])
