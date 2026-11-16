@@ -49,6 +49,12 @@ class Main(StorageDir):
         self.assertIn("snes/A (T).zip: A → A - Translated", out)
         self.assertEqual(open(self.path, "rb").read(), before)
 
+    def test_dry_run_names_an_entry_without_a_name(self):
+        self.put(KEY, scrape_plan.dump_json({"C (T).zip": {"desc": "x"}}).encode())
+        code, out = self.run_main([])
+        self.assertIn("snes/C (T).zip: (no name) → translated", out)
+        self.assertNotIn("None", out)
+
     def test_write_updates_file(self):
         code, out = self.run_main(["--write"])
         self.assertEqual(code, 0)

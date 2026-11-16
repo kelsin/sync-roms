@@ -44,7 +44,8 @@ def main(argv=None):
         if not found:
             continue
         for rom, new in found.items():
-            print(f"{name}/{rom}: {metadata[rom].get('name')} → {new.get('name')}")
+            old_name = metadata[rom].get("name")
+            print(f"{name}/{rom}: {old_name or '(no name)'} → {new.get('name') or 'translated'}")
         total += len(found)
         if args.write:
             s3.put_text(scrape_online.metadata_key(name), scrape_plan.dump_json({**metadata, **found}))
