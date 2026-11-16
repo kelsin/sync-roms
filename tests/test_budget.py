@@ -10,7 +10,7 @@ from sync_roms import budget, ignore, inventory, store  # noqa: E402
 
 GBA = {"bucket": "gba", "name": "GBA"}
 SIZES = {"gba/A.zip": 100, "gba/B.zip": 200, "gba/C.zip": 400}
-SCRAPES = {"scrapes/gba/screenshots/A.png": 10, "scrapes/gba/onion/A.png": 3, "scrapes/gba/slot/A.png": 5,
+SCRAPES = {"scrapes/gba/screenshots/A.png": 10, "scrapes/gba/onion/A.png": 3,
            "scrapes/gba/screenshots/B.png": 20}
 VITA = {"bucket": "psvita", "name": "Vita"}
 G = "psvita/G [PCSE00349] [USA] [NoNpDRM].zip"
@@ -35,13 +35,12 @@ class Budget(DataDir):
         p.start()
         self.addCleanup(p.stop)
 
-    def usage(self, card, layout="slot"):
+    def usage(self, card, layout="onion"):
         return budget.system_usage({"layout": layout, **card}, GBA)
 
     def test_rom_plus_layout_scrapes(self):
-        self.assertEqual(tuple(self.usage({"games": {"gba": [g("gba/A.zip")]}}, "slot")), (105, 1, False))
+        self.assertEqual(tuple(self.usage({"games": {"gba": [g("gba/A.zip")]}}, "onion")), (103, 1, False))
         self.assertEqual(self.usage({"games": {"gba": [g("gba/A.zip")]}}, "esde").bytes, 110)
-        self.assertEqual(self.usage({"games": {"gba": [g("gba/A.zip")]}}, "onion").bytes, 103)
 
     def test_layout_without_scrapes(self):
         self.assertEqual(self.usage({"games": {"gba": [g("gba/A.zip")]}}, "other").bytes, 100)
@@ -144,29 +143,29 @@ class Budget(DataDir):
     def test_picked_game_not_in_storage_costs_nothing_and_is_not_partial(self):
         u = self.usage({"games": {"gba": [g("gba/A.zip"), g("gba/Gone.zip")]}}, "other")
         self.assertEqual(tuple(u), (100, 2, False))
-        u = self.usage({"games": {"gba": [g("gba/A.zip"), g("gba/Gone.zip")]}}, "slot")
-        self.assertEqual(tuple(u), (105, 2, False))
+        u = self.usage({"games": {"gba": [g("gba/A.zip"), g("gba/Gone.zip")]}}, "onion")
+        self.assertEqual(tuple(u), (103, 2, False))
 
     def test_nothing_picked_is_not_partial(self):
         self.cache.clear()
         self.assertEqual(tuple(self.usage({})), (0, 0, False))
 
     def test_game_costs(self):
-        costs, missing = budget.game_costs({"layout": "slot"}, GBA, ["gba/A.zip", "gba/B.zip", "gba/Z.zip"])
-        self.assertEqual((costs, missing), ({"gba/A.zip": 105, "gba/B.zip": 200}, False))
+        costs, missing = budget.game_costs({"layout": "onion"}, GBA, ["gba/A.zip", "gba/B.zip", "gba/Z.zip"])
+        self.assertEqual((costs, missing), ({"gba/A.zip": 103, "gba/B.zip": 200}, False))
         self.cache.pop("scrapes/gba/")
         self.assertEqual(budget.game_costs({"layout": "esde"}, GBA, ["gba/A.zip"]), ({"gba/A.zip": 100}, True))
 
     def test_system_usages_expands_the_sets_once(self):
         gb = {"bucket": "gb", "name": "GB"}
         self.cache["gb/"] = {"gb/T.gb": 7}
-        card = {"layout": "slot", "games": {"gba": [g("gba/C.zip")], "gb": [g("gb/T.gb")], "sets": ["s"]}}
+        card = {"layout": "onion", "games": {"gba": [g("gba/C.zip")], "gb": [g("gb/T.gb")], "sets": ["s"]}}
         real, calls = store.merge_lists, []
         with mock.patch.object(store, "merge_lists", lambda *a: calls.append(a) or real(*a)):
             usages = budget.system_usages(card, [GBA, gb])
         self.assertEqual(len(calls), 1)
         self.assertEqual(usages, {"gba": budget.system_usage(card, GBA), "gb": budget.system_usage(card, gb)})
-        self.assertEqual(tuple(usages["gba"]), (100 + 5 + 200 + 400, 3, False))
+        self.assertEqual(tuple(usages["gba"]), (100 + 3 + 200 + 400, 3, False))
 
     def test_capacity(self):
         self.assertEqual(budget.card_capacity({"size": "512 GB"}), 512 * 10 ** 9)
@@ -192,23 +191,23 @@ class ScrapeIndex(DataDir):
             self.addCleanup(p.stop)
 
     def costs(self, *keys):
-        return budget.game_costs({"layout": "slot"}, GBA, list(keys))[0]
+        return budget.game_costs({"layout": "onion"}, GBA, list(keys))[0]
 
     def test_scrapes_are_split_once_per_cache(self):
-        self.assertEqual(self.costs("gba/A.zip", "gba/B.zip"), {"gba/A.zip": 105, "gba/B.zip": 200})
-        self.assertEqual(self.costs("gba/A.zip"), {"gba/A.zip": 105})
+        self.assertEqual(self.costs("gba/A.zip", "gba/B.zip"), {"gba/A.zip": 103, "gba/B.zip": 200})
+        self.assertEqual(self.costs("gba/A.zip"), {"gba/A.zip": 103})
         self.assertEqual(self.asked.count("scrapes/gba/"), 1)
 
     def test_a_patch_drops_the_kept_scrapes(self):
         self.assertEqual(self.costs("gba/C.zip"), {"gba/C.zip": 400})
-        inventory.wrote("scrapes/gba/slot/C.png", 9)
+        inventory.wrote("scrapes/gba/onion/C.png", 9)
         self.assertEqual(self.costs("gba/C.zip"), {"gba/C.zip": 409})
-        inventory.removed(["scrapes/gba/slot/A.png"])
+        inventory.removed(["scrapes/gba/onion/A.png"])
         self.assertEqual(self.costs("gba/A.zip"), {"gba/A.zip": 100})
 
     def test_a_cache_read_again_drops_the_kept_scrapes(self):
         self.assertEqual(self.costs("gba/B.zip"), {"gba/B.zip": 200})
-        self.tree = inventory.Tree("s", 0, {**SIZES, **SCRAPES, "scrapes/gba/slot/B.png": 4}, {})  # reset or update
+        self.tree = inventory.Tree("s", 0, {**SIZES, **SCRAPES, "scrapes/gba/onion/B.png": 4}, {})  # reset or update
         self.assertEqual(self.costs("gba/B.zip"), {"gba/B.zip": 204})
 
 

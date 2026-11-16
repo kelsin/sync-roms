@@ -12,33 +12,15 @@ from . import external, inventory, runtime, s3, ui
 STALE_HINT = " (not in storage any more: run sync-roms cache update)"  # a file the cache lists is gone from the storage folder
 
 
-def rom_rel(key, flat, disc_dir=None, discs=()):
-    """A ROM's path inside its system folder: the bucket key without its system, or just the file name if flat.
+def rom_rel(key, disc_dir=None, discs=()):
+    """A ROM's path inside its system folder: the bucket key without its system.
 
     disc_dir: the folder the layout keeps multi-disc games' discs in (those keys are in discs) beside their playlist.
     """
     rel = key.split("/", 1)[1]
     if disc_dir and key in discs and "/" not in rel:
         return disc_dir + "/" + rel
-    return os.path.basename(rel) if flat else rel
-
-
-def archive_extracted(path, listings=None):
-    """Whether an archive's ROM is already beside it: a file with the archive's name and another extension.
-
-    listings: a dict a caller keeps across calls, so each folder is listed once.
-    """
-    stem, ext = os.path.splitext(os.path.basename(path))
-    folder = os.path.dirname(path)
-    if ext.lower() not in external.ARCHIVE_EXTS:
-        return False
-    stems = listings.get(folder) if listings is not None else None
-    if stems is None:
-        stems = ({os.path.splitext(f)[0] for f in os.listdir(folder) if not f.lower().endswith(external.ARCHIVE_EXTS)}
-                 if os.path.isdir(folder) else set())
-        if listings is not None:
-            listings[folder] = stems
-    return stem in stems
+    return rel
 
 
 def is_current(path, size, disc_dir=None):
@@ -63,12 +45,9 @@ def with_sizes(jobs):
     return [(k, p, have[k] if size is None else size) for k, p, size in jobs if size is not None or k in have]
 
 
-def plan_downloads(jobs, unzip=False, disc_dir=None):
-    """jobs: list of (s3_key, local_path, expected_size). Drops files already present, and with unzip the
-    archives whose ROM was already extracted."""
-    listings = {}
-    return [(k, p, s) for k, p, s in jobs
-            if not is_current(p, s, disc_dir) and not (unzip and archive_extracted(p, listings))]
+def plan_downloads(jobs, disc_dir=None):
+    """jobs: list of (s3_key, local_path, expected_size). Drops files already present."""
+    return [(k, p, s) for k, p, s in jobs if not is_current(p, s, disc_dir)]
 
 
 def hide_discs(dest, disc_dir, discs, dry_run=False):
@@ -204,7 +183,7 @@ def walk_roms(dest, keep_dotfiles=False, skip_db=False):
     """os.walk over dest that yields only real ROM-folder content (no frontend/OS leftovers).
 
     keep_dotfiles: keep dotfiles that are real content, dropping only OS litter (.DS_Store, ._*, ...) and sync-roms's
-    own temp names (.chd-*, .xiso-*, .unzip-*, external.own_temp).
+    own temp names (.chd-*, .xiso-*, external.own_temp).
     skip_db: drop *.db files (Onion's ROM list caches, named like _cache2.db or cache6.db).
     """
     def hidden(name):
@@ -228,17 +207,15 @@ def has_local_files(dest, skip_db=False, ignore=()):
                if not (f in ignore and os.path.normpath(root) == os.path.normpath(dest)))
 
 
-def find_extras(dest, wanted_keys, unzip=False, skip_db=False, disc_dir=None, discs=(), keep=()):
+def find_extras(dest, wanted_keys, skip_db=False, disc_dir=None, discs=(), keep=()):
     """Local files under dest that aren't in the system's ROM list (frontend files and dotfiles are ignored;
     a .psvita file is kept while its .zip is listed).
 
-    unzip: the layout extracts archives flat, so a listed archive's extracted ROM isn't an extra.
     disc_dir: the layout's folder for multi-disc games' discs (discs: their keys); its files are checked too.
     keep: paths inside dest that are expected too (BIOS files that go in the ROM folder).
     """
-    rels = [rom_rel(k, unzip, disc_dir, discs) for k in wanted_keys]
+    rels = [rom_rel(k, disc_dir, discs) for k in wanted_keys]
     expected = {os.path.normpath(r) for r in rels} | {os.path.normpath(r) for r in keep}
-    stems = {os.path.splitext(r)[0] for r in rels if r.lower().endswith(external.ARCHIVE_EXTS)} if unzip else set()
     extras = []
     walks = list(walk_roms(dest, skip_db=skip_db))
     if disc_dir:  # walk_roms skips dot folders, but the discs live in one
@@ -247,7 +224,7 @@ def find_extras(dest, wanted_keys, unzip=False, skip_db=False, disc_dir=None, di
         for f in files:
             path = os.path.join(root, f)
             rel = os.path.normpath(os.path.relpath(path, dest))
-            if rel not in expected and os.path.splitext(rel)[0] not in stems:
+            if rel not in expected:
                 if rel.lower().endswith(".psvita") and os.path.splitext(rel)[0] + ".zip" in expected:
                     continue  # a Vita game's title id file lives and dies with its zip
                 extras.append(path)

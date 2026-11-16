@@ -169,7 +169,7 @@ TOPICS = {
   sync-roms scrape --set-credentials
 
   Looks up every available ROM with no entry in scrapes/<system>/metadata.json on ScreenScraper and writes its
-  metadata and media (and the Onion/Slot images) to storage. The ROMs and how each will be
+  metadata and media (and the Onion images) to storage. The ROMs and how each will be
   looked up are listed first, then the most requests the run can make against what is left of today's quota. ROMs
   ScreenScraper doesn't know are remembered and skipped until --retry. Each batch of ROMs shows today's requests and
   the time elapsed and left; each ROM gets a line as it ends (the game it matched, how, and its media count).
@@ -806,7 +806,6 @@ def report_failures(failures):
 
 
 def sync_card(args):
-    from . import chd
     store.preload_repo_data()
     base = os.path.abspath(os.path.expanduser(args.base_dir or os.getcwd()))
     if not os.path.isdir(base):
@@ -833,7 +832,6 @@ def sync_card(args):
         return 0
     device, layout_name, dirs = chosen_setup
     layout = layouts[layout_name]
-    unzip = layout.get("unzip", False)  # ROMs go in flat and unzipped (Slot)
     disc_dir = layout.get("disc_dir")  # multi-disc games' discs go in this hidden folder, their playlist beside it (Onion)
     onion = layout_name in scrape_plan.ONION_LAYOUTS
     roms_dir, bios_dir = dirs
@@ -902,12 +900,12 @@ def sync_card(args):
             for k in todo:
                 try:
                     path = s3.safe_join(os.path.join(roms_dir, s["folders"][layout_name]),
-                                        downloads.rom_rel(k, unzip, disc_dir, disc_keys))
+                                        downloads.rom_rel(k, disc_dir, disc_keys))
                 except ValueError:
                     seen[k] = False
                     continue
                 jobs.append((k, path, sizes.get(k)))
-            need = {j[0] for j in downloads.plan_downloads(jobs, unzip, disc_dir)}
+            need = {j[0] for j in downloads.plan_downloads(jobs, disc_dir)}
             seen.update((k, k in need) for k, _, _ in jobs)
         return {k for k in keys if seen[k]}
 
@@ -963,7 +961,7 @@ def sync_card(args):
         for key in wanted:
             if key in have:
                 try:
-                    rom_jobs.append((key, s3.safe_join(dest, downloads.rom_rel(key, unzip, disc_dir, disc_keys)), have[key]))
+                    rom_jobs.append((key, s3.safe_join(dest, downloads.rom_rel(key, disc_dir, disc_keys)), have[key]))
                 except ValueError as e:
                     print(ui.yellow(f"  ⚠️  skipping {e}"))
             else:
@@ -978,12 +976,12 @@ def sync_card(args):
     for t in systems:
         dest_keys[dest_of(t)] += available(t)
         dest_discs[dest_of(t)].update(discs_of(t))
-        if available(t) and not unzip:
+        if available(t):
             dest_bios[dest_of(t)].update(rom_bios_names(t))
     pico8_dests = {os.path.join(roms_dir, t["folders"][layout_name]) for t in systems + dropped
                    if t["bucket"] == "pico8" and t["folders"].get(layout_name)}
     for dest in sorted({dest_of(s) for s in systems if s["bucket"] in chosen_ids or not available(s)} | dropped_dests):
-        extras += downloads.find_extras(dest, dest_keys[dest], unzip, onion, disc_dir, dest_discs[dest], dest_bios[dest] | (pico8.keep_in(dest, card) if dest in pico8_dests else set()))
+        extras += downloads.find_extras(dest, dest_keys[dest], onion, disc_dir, dest_discs[dest], dest_bios[dest] | (pico8.keep_in(dest, card) if dest in pico8_dests else set()))
 
     # BIOS for every system with ROMs already on the card too, even when this sync doesn't touch that system
     bios_systems = chosen + [s for s in systems if s["bucket"] not in chosen_ids
@@ -991,7 +989,7 @@ def sync_card(args):
     # (bucket key, folder, path in it) of each BIOS file: in the BIOS folder, or in the ROM folder of a system with ROMs to sync
     bios_dests = {("BIOS/" + f, bios_dir, f) for s in bios_systems for f in s["bios"]["files"]}
     bios_dests |= {("BIOS/" + f, dest_of(s), os.path.basename(f))
-                   for s in bios_systems if available(s) and not unzip for f in s["bios"].get("rom_files", [])}
+                   for s in bios_systems if available(s) for f in s["bios"].get("rom_files", [])}
     bios_keys = sorted({k for k, _, _ in bios_dests})
     bios_have = (inventory.stat(bios_keys) if s3.read_root() else inventory.files("BIOS/")) if bios_keys else {}
     bios_jobs = []
@@ -1032,7 +1030,7 @@ def sync_card(args):
 
     theme_jobs = downloads.with_sizes(theme_jobs)
 
-    rom_todo, bios_todo = downloads.plan_downloads(rom_jobs, unzip, disc_dir), downloads.plan_downloads(bios_jobs)
+    rom_todo, bios_todo = downloads.plan_downloads(rom_jobs, disc_dir), downloads.plan_downloads(bios_jobs)
     apk_todo = downloads.plan_downloads(apk_jobs)
     driver_todo = downloads.plan_downloads(driver_jobs)
     theme_todo = downloads.plan_downloads(theme_jobs)
@@ -1061,8 +1059,6 @@ def sync_card(args):
             scraped["data"] = scrape_plan.load_scrape_data(chosen)
             scraped["rels"] = {s["bucket"]: [k.split("/", 1)[1] for k in available(s) if k in listings[s["bucket"]]]
                                for s in chosen}
-        if unzip:  # a ROM that's extracted from its archive is on the card under another extension
-            present = lambda path, exists=present: exists(path) or downloads.archive_extracted(path)  # noqa: E731
         plan = scrape_plan.build_scrape_plan(layout_name, chosen, scraped["data"], scraped["rels"], dest_of, es_dir, present, base)
         if esde_problem and plan["gamelists"]:
             skipped()
@@ -1115,7 +1111,7 @@ def sync_card(args):
         if esde_problem:
             skipped()
             return
-        coming = {(s["bucket"], downloads.rom_rel(k, False)) for s in chosen
+        coming = {(s["bucket"], downloads.rom_rel(k)) for s in chosen
                   for k in available(s) if k in listings[s["bucket"]]} if dry_run else set()
 
         def on_card(s, rel):
@@ -1166,9 +1162,6 @@ def sync_card(args):
         short = space(free) if todo_all else None
         if short:
             ui.failure(ui.red(f"❌ {short}"))
-        if unzip:
-            pending = {j[1] for j in rom_todo} | set(chd.card_archives({dest_of(s) for s in chosen}))
-            print(f"📦 Archives to extract: {len([p for p in pending if p.lower().endswith(external.ARCHIVE_EXTS)])}")
         for path in extras:
             print(f"  {ui.red('would delete')} {path}")
         for name in drivers.prune(card, drivers_dir, [os.path.basename(p) for _, p, _ in driver_jobs], True):
@@ -1224,13 +1217,6 @@ def sync_card(args):
     for s in chosen:
         if disc_dir and available(s):
             m3u.prefix_playlists(dest_of(s), disc_dir)
-    if unzip:
-        # also archives already on the card (not just new downloads), e.g. from an interrupted run
-        archives = sorted({j[1] for j in rom_todo} | set(chd.card_archives({dest_of(s) for s in chosen})))
-        for path, error in chd.unzip_roms(archives):
-            failed += 1
-            failures.append((os.path.relpath(path, roms_dir), error))
-            ui.failure(ui.red(f"  ❌ {os.path.relpath(path, roms_dir)}: {error}"))
 
     if layout_name in ("esde", "emudeck"):  # ES-DE launches an installed Vita game through its .psvita file
         for path, error in vita.add_psvita_files({dest_of(s) for s in chosen if s["bucket"] == "psvita"}):

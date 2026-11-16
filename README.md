@@ -113,7 +113,6 @@ You pick a device, then the firmware it runs (a device with only one isn't asked
 | `esde` | `ROMs/` `BIOS/` | Android devices with ES-DE |
 | `knulli` | `roms/` `bios/` (SD card SHARE partition, `/userdata`) | Default for the Anbernic H700, RG Vita Pro and Miyoo Flip V2 handhelds |
 | `muos` | `ROMS/` `MUOS/bios/` | [muOS](https://muos.dev/) on the Anbernic H700 handhelds, RG CubeXX and RG Vita Pro. Folder names are matched ignoring case and separators |
-| `slot` | `Games/` `BIOS/` | [slot](https://slot-cfw.fyi) on the RG SP, RG34XX, RG34XX SP, RG35XX SP, RG35XX Plus, RG28XX and RG35XX H. Game Boy, Game Boy Color and Game Boy Advance only. ROMs are extracted from their archives and go straight into the system folder, never subfolders |
 | `onion` | `Roms/` `BIOS/` | Miyoo Mini Flip, on [Onion](https://onionui.github.io/) |
 | `allium` | `Roms/` `BIOS/` | Miyoo Mini Flip, on [Allium](https://github.com/goweiwen/Allium). Same folders and `Imgs/` box art as `onion`, but with a full `gamelist.xml` |
 | `emudeck` | `Emulation/roms/` `Emulation/bios/` | [EmuDeck](https://emudeck.github.io/) on the Steam Deck and Steam Machine. Wii U, Xbox 360 and Model 2 ROMs go in a `roms/` subfolder of their system folder. Scraped media on the card; gamelists and collections in `~/ES-DE` on the machine running the sync |
@@ -187,7 +186,6 @@ While typing a filter (or a note, which `w` opens in the game list): `^A` `^E` s
    | `onion` | `<system>/Imgs/Game.png`, the 250x360 box art made when scraping | `<system>/miyoogamelist.xml` with name and image |
    | `allium` | same `Imgs/` box art as `onion` | `<system>/gamelist.xml` with name, image, rating, date, developer, publisher and genre |
    | `muos` | `MUOS/info/catalogue/<system>/box/Game.png` (cover, then 3D box) and `preview/Game.png` (screenshot, then title screen), as uploaded | `text/Game.txt` with the description |
-   | `slot` | `Labels/<system>/Game.png`, the cart label made when scraping | none |
    | `emudeck` | `Emulation/tools/downloaded_media/<system>/<type>/…` (every type) | `~/ES-DE/gamelists/<system>/gamelist.xml` on the machine running the sync (see below) |
 
    EmuDeck's ES-DE keeps its gamelists on the machine, not the card, so they go into `~/ES-DE/gamelists` (or
@@ -197,7 +195,7 @@ While typing a filter (or a note, which `w` opens in the game list): `^A` `^E` s
    the media still goes on the card.
 
    For `esde` and `emudeck`, `<system>` is the system's ES-DE folder name (`sg-1000`, `n3ds`): systems that share a
-   ROM folder, like `3ds` and `n3ds`, share its media and gamelist folders. muOS and Slot keep their media in folders of their own, flat even for ROMs in subfolders. An existing
+   ROM folder, like `3ds` and `n3ds`, share its media and gamelist folders. muOS keeps its media in folders of its own, flat even for ROMs in subfolders. An existing
    `.txt` is rewritten only when the description differs.
 
    Knulli's main image is the miximage, or the screenshot if there is none. Onion's picture is made
@@ -206,9 +204,7 @@ While typing a filter (or a note, which `w` opens in the game list): `^A` `^E` s
    sync just downloads it. Resizing needs Pillow or macOS `sips` on the machine that scrapes. Existing
    gamelists are updated in place: only these tags are set, so favorites, play counts and an
    `<alternativeEmulator>` block stay. Existing files with the same size aren't downloaded again.
-   ROMs in subfolders get no Onion art. Slot's labels are made the same way (cover, then 3D box, then
-   screenshot) as a PNG that fits the cart's label: 1280x661 for Game Boy Advance, 1024x901 for Game Boy
-   and Game Boy Color, stored as `scrapes/<system>/slot/<ROM>.png`.
+   ROMs in subfolders get no Onion art.
 
    On `esde`, `knulli`, `onion` and `allium`, `mame` and `fbneo` clones are named after their variant, e.g. `1942 (Revision A)`,
    from `src/sync_roms/data/clones.json` (MAME and FBNeo parent/clone data), replacing the scraped name. On `esde` a
@@ -221,8 +217,7 @@ While typing a filter (or a note, which `w` opens in the game list): `^A` `^E` s
    This assumes the card's art comes from this app: on muOS it removes `box`, `preview` and `text` files in
    `MUOS/info/catalogue/<system>/` (names compared ignoring case; systems that share a catalogue folder, like
    the arcade ones, are judged together; `grid`, `manual`, `overlay` and the other catalogue areas are left
-   alone), and on Slot the labels in `Labels/GBA`, `GB` and `GBC` (names compared the way Slot does, ignoring
-   case and bracketed tags). A muOS or Slot folder whose ROM folders hold no ROMs is skipped, so art isn't
+   alone). A muOS folder whose ROM folders hold no ROMs is skipped, so art isn't
    wiped from a card whose ROMs are elsewhere (muOS can keep them on SD2). Art you add by hand or install
    from a `.muxcat` set for ROMs that aren't on the card is removed too.
 7. For the `esde` (Android) layout, everything in storage's `os/android/APKs/` folder (APKs, the Obtainium app list) is
@@ -439,7 +434,7 @@ ScreenScraper game id, or a name to search for and pick from. After you confirm,
 choice is saved only once that worked; a game id ScreenScraper doesn't have saves nothing and exits with an error. A saved
 match whose game later disappears from ScreenScraper is forgotten and the ROM is marked unknown. When the ROM already has
 metadata, the prompt lists the files involved and asks to replace it: the entry is replaced, and the old game's
-scraper-written media (including its Onion and Slot images) is overwritten or deleted after the new entry is written.
+scraper-written media (including its Onion images) is overwritten or deleted after the new entry is written.
 `custom/` and the `--skip-media` types are left as they are. ROMs that share the name without extension (`Game.zip`,
 `Game.7z`) share their media files; the prompt warns about them.
 `--translated` says the ROM is a fan translation: its entry is titled `<name> - Translated` and marked
@@ -496,11 +491,11 @@ is skipped at once, without retries.
 
 **What is written** under `scrapes/<system>/`: the entry in `metadata.json` (merged with what is there) and one folder per media
 type (`3dboxes`, `backcovers`, `covers`, `fanart`, `manuals`, `marquees`, `miximages`, `physicalmedia`, `screenshots`,
-`titlescreens`, `videos`), plus the Onion and Slot images made the same way as when uploading (they need Pillow or macOS
+`titlescreens`, `videos`), plus the Onion images made the same way as when uploading (they need Pillow or macOS
 `sips`). Media a ROM already has there (for example from an earlier `scrape`) is kept: those types aren't downloaded, and the
-confirm says how many files are kept. Onion and Slot images are made only from art downloaded in the same run, from the
+confirm says how many files are kept. Onion images are made only from art downloaded in the same run, from the
 first of covers, 3D boxes and screenshots the ROM has; when that art is already in storage, or the ROM already has the
-Onion or Slot image, none is made. Media is downloaded only over https from screenscraper.fr, and only images and PDF manuals
+Onion image, none is made. Media is downloaded only over https from screenscraper.fr, and only images and PDF manuals
 (up to 50 MiB each) and MP4 videos (up to 512 MiB) are stored; a file over its limit or outside screenscraper.fr is
 skipped with a warning and the ROM keeps its other media. `--skip-media TYPES` takes a comma-separated list of those
 folder names and downloads none of them.
@@ -778,7 +773,6 @@ An old `~/.sync-roms/sizes.json` is no longer read; delete it.
 - Some systems share a local folder on a device (Onion: `WS` = WonderSwan + Color,
   `NGP` = Neo Geo Pocket + Color). A folder's expected files are the
   union of all those systems' lists, so syncing one never offers the other's ROMs for deletion.
-- Slot can't read archives or subfolders, so a Slot sync extracts each downloaded `.zip` (and `.7z`, which needs `7z`, see `--install-tools`) into the system folder and deletes the archive. It assumes the archive is named like the ROM inside; an archive whose ROM has another name is downloaded again each sync.
 - Every BIOS file listed for a synced system is downloaded; there is no required/optional distinction.
   BIOS lists come from the ES-DE default libretro cores, so they may not match what Knulli
   or Onion use; on Knulli check Game Settings > Missing Bios Check.

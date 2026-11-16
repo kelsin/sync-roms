@@ -10,7 +10,7 @@ from collections import defaultdict
 from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
 from types import SimpleNamespace
 
-from . import downloads, external, inventory, m3u, runtime, store, ui
+from . import external, inventory, m3u, runtime, store, ui
 
 
 def chd_folders(systems):
@@ -447,52 +447,6 @@ def chd_image(tools, cfg, image, owned, report=None):
             if os.path.normcase(f).lower() != os.path.normcase(out).lower() and os.path.exists(f):
                 os.remove(f)
     return error
-
-
-def unzip_archive(path):
-    """Extract an archive's files next to it, without subfolders, and delete it. None on success, else the error."""
-    folder = os.path.dirname(path)
-    tmp = tempfile.mkdtemp(prefix=".unzip-", dir=folder)
-    try:
-        if path.lower().endswith(".zip"):
-            with zipfile.ZipFile(path) as z:
-                z.extractall(tmp)
-        else:
-            tool = external.find_tool("7z")
-            if not tool:
-                return "needs 7z to extract (see --install-tools)"
-            error = external.run_tool([tool, "x", "-y", "-bso0", "-bsp0", f"-o{tmp}", "--", path])
-            if error:
-                return error
-        error = move_flat([(os.path.join(dp, n), os.path.join(folder, n)) for dp, _, ns in os.walk(tmp)
-                           for n in sorted(ns) if not os.path.islink(os.path.join(dp, n))])
-        if error:
-            return error
-        os.remove(path)
-    except (OSError, zipfile.BadZipFile) as e:
-        return str(e)
-    finally:
-        shutil.rmtree(tmp, ignore_errors=True)
-
-
-def card_archives(dests):
-    """Archives still sitting in the given ROM folders, e.g. left by an interrupted run."""
-    return [os.path.join(root, f) for dest in dests if os.path.isdir(dest)
-            for root, files in downloads.walk_roms(dest) for f in files if f.lower().endswith(external.ARCHIVE_EXTS)]
-
-
-def unzip_roms(paths):
-    """Extract the archives among the downloaded paths, a few at a time. Returns [(path, error)] for the ones that failed."""
-    archives = [p for p in paths if p.lower().endswith(external.ARCHIVE_EXTS) and os.path.exists(p)]
-    failures = []
-    if archives:
-        print(ui.bold(f"\n📦 Extracting {len(archives)} archive(s)"), flush=True)
-    with ThreadPoolExecutor(min(4, len(archives) or 1)) as ex:
-        for i, (path, error) in enumerate(zip(archives, ex.map(unzip_archive, archives)), 1):
-            print(f"  {ui.dim(f'[{i}/{len(archives)}]')} {ui.red('❌') if error else '✅'} {os.path.basename(path)}", flush=True)
-            if error:
-                failures.append((path, error))
-    return failures
 
 
 def remove_stale_chd_temp(folders):

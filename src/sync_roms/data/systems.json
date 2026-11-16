@@ -11,7 +11,6 @@
       "onion": "ARCADE",
       "allium": "ARCADE",
       "muos": "mame",
-      "slot": null,
       "emudeck": "mame"
     },
     "muos_catalogue": "Arcade",
@@ -32,7 +31,6 @@
       "onion": "ATARI",
       "allium": "ATARI",
       "muos": "atari2600",
-      "slot": null,
       "emudeck": "atari2600"
     },
     "muos_catalogue": "Atari 2600",
@@ -53,7 +51,6 @@
       "onion": "FIFTYTWOHUNDRED",
       "allium": "FIFTYTWOHUNDRED",
       "muos": "atari5200",
-      "slot": null,
       "emudeck": "atari5200"
     },
     "muos_catalogue": "Atari 5200",
@@ -78,7 +75,6 @@
       "onion": "SEVENTYEIGHTHUNDRED",
       "allium": "SEVENTYEIGHTHUNDRED",
       "muos": "atari7800",
-      "slot": null,
       "emudeck": "atari7800"
     },
     "muos_catalogue": "Atari 7800",
@@ -103,7 +99,6 @@
       "onion": null,
       "allium": null,
       "muos": "atari800",
-      "slot": null,
       "emudeck": "atari800"
     },
     "muos_catalogue": "Atari 800",
@@ -132,7 +127,6 @@
       "onion": "LYNX",
       "allium": "LYNX",
       "muos": "lynx",
-      "slot": null,
       "emudeck": "atarilynx"
     },
     "muos_catalogue": "Atari Lynx",
@@ -157,7 +151,6 @@
       "onion": null,
       "allium": null,
       "muos": "atarist",
-      "slot": null,
       "emudeck": "atarist"
     },
     "muos_catalogue": "Atari ST-STE-TT-Falcon",
@@ -184,7 +177,6 @@
       "onion": "COLECO",
       "allium": "COLECO",
       "muos": "colecovision",
-      "slot": null,
       "emudeck": "colecovision"
     },
     "muos_catalogue": "ColecoVision",
@@ -217,7 +209,6 @@
       "onion": "GBA",
       "allium": "GBA",
       "muos": "gba",
-      "slot": "GBA",
       "emudeck": "gba"
     },
     "muos_catalogue": "Nintendo Game Boy Advance",
@@ -245,7 +236,6 @@
       "onion": "GBC",
       "allium": "GBC",
       "muos": "gbc",
-      "slot": "GBC",
       "emudeck": "gbc"
     },
     "muos_catalogue": "Nintendo Game Boy Color",
@@ -275,7 +265,6 @@
       "onion": "GB",
       "allium": "GB",
       "muos": "gb",
-      "slot": "GB",
       "emudeck": "gb"
     },
     "muos_catalogue": "Nintendo Game Boy",
@@ -305,7 +294,6 @@
       "onion": "INTELLIVISION",
       "allium": "INTELLIVISION",
       "muos": "intellivision",
-      "slot": null,
       "emudeck": "intellivision"
     },
     "muos_catalogue": "Mattel Intellivision",
@@ -334,7 +322,6 @@
       "onion": "NEOGEO",
       "allium": "NEOGEO",
       "muos": "neogeo",
-      "slot": null,
       "emudeck": "neogeo"
     },
     "muos_catalogue": "SNK Neo Geo",
@@ -382,7 +369,6 @@
       "onion": "FC",
       "allium": "FC",
       "muos": "nes",
-      "slot": null,
       "emudeck": "nes"
     },
     "muos_catalogue": "Nintendo NES - Famicom",
@@ -403,7 +389,6 @@
       "onion": "FDS",
       "allium": "FDS",
       "muos": "fds",
-      "slot": null,
       "emudeck": "fds"
     },
     "muos_catalogue": "Nintendo Family Computer Disk System",
@@ -432,7 +417,6 @@
       "onion": null,
       "allium": null,
       "muos": "n64",
-      "slot": null,
       "emudeck": "n64"
     },
     "muos_catalogue": "Nintendo N64",
@@ -453,7 +437,6 @@
       "onion": "NDS",
       "allium": "NDS",
       "muos": "nds",
-      "slot": null,
       "emudeck": "nds"
     },
     "muos_catalogue": "Nintendo DS",
@@ -486,7 +469,6 @@
       "onion": "ODYSSEY",
       "allium": "ODYSSEY",
       "muos": "odyssey2",
-      "slot": null,
       "emudeck": "odyssey2"
     },
     "muos_catalogue": "Magnavox Odyssey - VideoPac",
@@ -515,7 +497,6 @@
       "onion": null,
       "allium": null,
       "muos": "pcfx",
-      "slot": null,
       "emudeck": "pcfx"
     },
     "muos_catalogue": "NEC PC-FX",
@@ -544,7 +525,6 @@
       "onion": null,
       "allium": null,
       "muos": null,
-      "slot": null,
       "emudeck": "pc98"
     },
     "bios": {
@@ -584,7 +564,6 @@
       "onion": "THIRTYTWOX",
       "allium": "THIRTYTWOX",
       "muos": "sega32x",
-      "slot": null,
       "emudeck": "sega32x"
     },
     "muos_catalogue": "Sega 32X",
@@ -614,7 +593,6 @@
       "onion": "SEGACD",
       "allium": "SEGACD",
       "muos": "megacd",
-      "slot": null,
       "emudeck": "segacd"
     },
     "muos_catalogue": "Sega Mega CD - Sega CD",
@@ -654,7 +632,6 @@
       "onion": null,
       "allium": null,
       "muos": "dreamcast",
-      "slot": null,
       "emudeck": "dreamcast"
     },
     "muos_catalogue": "Sega Dreamcast",
@@ -692,7 +669,6 @@
       "onion": "GG",
       "allium": "GG",
       "muos": "gamegear",
-      "slot": null,
       "emudeck": "gamegear"
     },
     "muos_catalogue": "Sega Game Gear",
@@ -729,7 +705,6 @@
       "onion": "MD",
       "allium": "MD",
       "muos": "megadrive",
-      "slot": null,
       "emudeck": "genesis"
     },
     "muos_catalogue": "Sega Mega Drive - Genesis",
@@ -766,7 +741,6 @@
       "onion": "MS",
       "allium": "MS",
       "muos": "mastersystem",
-      "slot": null,
       "emudeck": "mastersystem"
     },
     "muos_catalogue": "Sega Master System",
@@ -803,7 +777,6 @@
       "onion": null,
       "allium": null,
       "muos": "saturn",
-      "slot": null,
       "emudeck": "saturn"
     },
     "muos_catalogue": "Sega Saturn",
@@ -838,7 +811,6 @@
       "onion": "SFC",
       "allium": "SFC",
       "muos": "snes",
-      "slot": null,
       "emudeck": "snes"
     },
     "muos_catalogue": "Nintendo SNES - SFC",
@@ -882,7 +854,6 @@
       "onion": "PCE",
       "allium": "PCE",
       "muos": "pcengine",
-      "slot": null,
       "emudeck": "tg16"
     },
     "muos_catalogue": "NEC PC Engine",
@@ -913,7 +884,6 @@
       "onion": "PCECD",
       "allium": "PCECD",
       "muos": "pcenginecd",
-      "slot": null,
       "emudeck": "tg-cd"
     },
     "muos_catalogue": "NEC PC Engine CD",
@@ -947,7 +917,6 @@
       "onion": "VECTREX",
       "allium": "VECTREX",
       "muos": "vectrex",
-      "slot": null,
       "emudeck": "vectrex"
     },
     "muos_catalogue": "GCE Vectrex",
@@ -971,7 +940,6 @@
       "onion": "VB",
       "allium": "VB",
       "muos": "virtualboy",
-      "slot": null,
       "emudeck": "virtualboy"
     },
     "muos_catalogue": "Nintendo Virtual Boy",
@@ -994,7 +962,6 @@
       "onion": "WS",
       "allium": "WS",
       "muos": "wonderswan",
-      "slot": null,
       "emudeck": "wonderswan"
     },
     "muos_catalogue": "Bandai WonderSwan Color",
@@ -1017,7 +984,6 @@
       "onion": "WS",
       "allium": "WS",
       "muos": "wonderswancolor",
-      "slot": null,
       "emudeck": "wonderswancolor"
     },
     "muos_catalogue": "Bandai WonderSwan Color",
@@ -1040,7 +1006,6 @@
       "onion": null,
       "allium": null,
       "muos": null,
-      "slot": null,
       "emudeck": "mame-advmame"
     },
     "bios": {
@@ -1060,7 +1025,6 @@
       "onion": null,
       "allium": null,
       "muos": "arcade",
-      "slot": null,
       "emudeck": "arcade"
     },
     "muos_catalogue": "Arcade",
@@ -1081,7 +1045,6 @@
       "onion": null,
       "allium": null,
       "muos": "arduboy",
-      "slot": null,
       "emudeck": "arduboy"
     },
     "muos_catalogue": "Arduboy",
@@ -1102,7 +1065,6 @@
       "onion": null,
       "allium": null,
       "muos": "atomiswave",
-      "slot": null,
       "emudeck": "atomiswave"
     },
     "muos_catalogue": "Sega Atomiswave Naomi",
@@ -1132,7 +1094,6 @@
       "onion": null,
       "allium": null,
       "muos": "chailove",
-      "slot": null,
       "emudeck": "chailove"
     },
     "muos_catalogue": "ChaiLove",
@@ -1153,7 +1114,6 @@
       "onion": "FAIRCHILD",
       "allium": "FAIRCHILD",
       "muos": "channelf",
-      "slot": null,
       "emudeck": "channelf"
     },
     "muos_catalogue": "Fairchild Channel F",
@@ -1179,7 +1139,6 @@
       "onion": "CPS1",
       "allium": "CPS1",
       "muos": "cps1",
-      "slot": null,
       "emudeck": "cps1"
     },
     "muos_catalogue": "Arcade",
@@ -1199,7 +1158,6 @@
       "onion": "CPS2",
       "allium": "CPS2",
       "muos": "cps2",
-      "slot": null,
       "emudeck": "cps2"
     },
     "muos_catalogue": "Arcade",
@@ -1219,7 +1177,6 @@
       "onion": "CPS3",
       "allium": "CPS3",
       "muos": "cps3",
-      "slot": null,
       "emudeck": "cps3"
     },
     "muos_catalogue": "Arcade",
@@ -1240,7 +1197,6 @@
       "onion": null,
       "allium": null,
       "muos": null,
-      "slot": null,
       "emudeck": "daphne"
     },
     "bios": {
@@ -1259,7 +1215,6 @@
       "onion": null,
       "allium": null,
       "muos": "doom",
-      "slot": null,
       "emudeck": "doom"
     },
     "muos_catalogue": "Doom",
@@ -1279,7 +1234,6 @@
       "onion": null,
       "allium": null,
       "muos": "easyrpg",
-      "slot": null,
       "emudeck": "easyrpg"
     },
     "muos_catalogue": "RPG Maker 2000 - 2003",
@@ -1300,7 +1254,6 @@
       "onion": "FBNEO",
       "allium": "FBNEO",
       "muos": "fbneo",
-      "slot": null,
       "emudeck": "fbneo"
     },
     "muos_catalogue": "Arcade",
@@ -1353,7 +1306,6 @@
       "onion": null,
       "allium": null,
       "muos": "lowresnx",
-      "slot": null,
       "emudeck": "lowresnx"
     },
     "muos_catalogue": "LowRes NX",
@@ -1372,7 +1324,6 @@
       "onion": null,
       "allium": null,
       "muos": null,
-      "slot": null,
       "emudeck": "lutro"
     },
     "bios": {
@@ -1392,7 +1343,6 @@
       "onion": "MEGADUCK",
       "allium": "MEGADUCK",
       "muos": "megaduck",
-      "slot": null,
       "emudeck": "megaduck"
     },
     "muos_catalogue": "Mega Duck - Cougar Boy",
@@ -1412,7 +1362,6 @@
       "onion": null,
       "allium": null,
       "muos": "n64dd",
-      "slot": null,
       "emudeck": "n64dd"
     },
     "muos_catalogue": "Nintendo N64",
@@ -1439,7 +1388,6 @@
       "onion": null,
       "allium": null,
       "muos": "naomi",
-      "slot": null,
       "emudeck": "naomi"
     },
     "muos_catalogue": "Sega Atomiswave Naomi",
@@ -1471,7 +1419,6 @@
       "onion": "NEOCD",
       "allium": "NEOCD",
       "muos": "neogeocd",
-      "slot": null,
       "emudeck": "neogeocd"
     },
     "muos_catalogue": "SNK Neo Geo CD",
@@ -1510,7 +1457,6 @@
       "onion": "NGP",
       "allium": "NGP",
       "muos": "ngp",
-      "slot": null,
       "emudeck": "ngp"
     },
     "muos_catalogue": "SNK Neo Geo Pocket",
@@ -1533,7 +1479,6 @@
       "onion": "NGP",
       "allium": "NGP",
       "muos": "ngpc",
-      "slot": null,
       "emudeck": "ngpc"
     },
     "muos_catalogue": "SNK Neo Geo Pocket - Color",
@@ -1555,7 +1500,6 @@
       "onion": null,
       "allium": null,
       "muos": "openbor",
-      "slot": null,
       "emudeck": "openbor"
     },
     "muos_catalogue": "OpenBOR",
@@ -1576,7 +1520,6 @@
       "onion": null,
       "allium": null,
       "muos": "3do",
-      "slot": null,
       "emudeck": "3do"
     },
     "muos_catalogue": "The 3DO Company - 3DO",
@@ -1618,7 +1561,6 @@
       "onion": "PICO",
       "allium": "PICO",
       "muos": "pico8",
-      "slot": null,
       "emudeck": "pico8"
     },
     "muos_catalogue": "PICO-8",
@@ -1639,7 +1581,6 @@
       "onion": "POKE",
       "allium": "POKE",
       "muos": "pokemini",
-      "slot": null,
       "emudeck": "pokemini"
     },
     "muos_catalogue": "Nintendo Pokemon Mini",
@@ -1658,7 +1599,6 @@
       "onion": "PORTS",
       "allium": "PORTS",
       "muos": null,
-      "slot": null,
       "emudeck": "ports"
     },
     "bios": {
@@ -1678,7 +1618,6 @@
       "onion": "PS",
       "allium": "PS",
       "muos": "psx",
-      "slot": null,
       "emudeck": "psx"
     },
     "muos_catalogue": "Sony PlayStation",
@@ -1726,7 +1665,6 @@
       "onion": null,
       "allium": null,
       "muos": "psp",
-      "slot": null,
       "emudeck": "psp"
     },
     "muos_catalogue": "Sony PlayStation Portable",
@@ -1754,7 +1692,6 @@
       "onion": "SATELLAVIEW",
       "allium": "SATELLAVIEW",
       "muos": "satellaview",
-      "slot": null,
       "emudeck": "satellaview"
     },
     "muos_catalogue": "Nintendo SNES - SFC",
@@ -1797,7 +1734,6 @@
       "onion": "SCUMMVM",
       "allium": "SCUMMVM",
       "muos": "scummvm",
-      "slot": null,
       "emudeck": "scummvm"
     },
     "muos_catalogue": "ScummVM",
@@ -1818,7 +1754,6 @@
       "onion": "SGFX",
       "allium": "SGFX",
       "muos": "supergrafx",
-      "slot": null,
       "emudeck": "supergrafx"
     },
     "muos_catalogue": "NEC PC Engine SuperGrafx",
@@ -1848,7 +1783,6 @@
       "onion": "SGB",
       "allium": "SGB",
       "muos": null,
-      "slot": null,
       "emudeck": "sgb"
     },
     "bios": {
@@ -1900,7 +1834,6 @@
       "onion": "SUFAMI",
       "allium": "SUFAMI",
       "muos": "sufami",
-      "slot": null,
       "emudeck": "sufami"
     },
     "muos_catalogue": "Nintendo SNES - SFC",
@@ -1944,7 +1877,6 @@
       "onion": "SUPERVISION",
       "allium": "SUPERVISION",
       "muos": "supervision",
-      "slot": null,
       "emudeck": "supervision"
     },
     "muos_catalogue": "Watara Supervision",
@@ -1965,7 +1897,6 @@
       "onion": "TIC",
       "allium": "TIC",
       "muos": "tic80",
-      "slot": null,
       "emudeck": "tic80"
     },
     "muos_catalogue": "TIC-80",
@@ -1985,7 +1916,6 @@
       "onion": null,
       "allium": null,
       "muos": "quake",
-      "slot": null,
       "emudeck": "quake"
     },
     "muos_catalogue": "Quake",
@@ -2005,7 +1935,6 @@
       "onion": null,
       "allium": null,
       "muos": "uzebox",
-      "slot": null,
       "emudeck": "uzebox"
     },
     "muos_catalogue": "Uzebox",
@@ -2026,7 +1955,6 @@
       "onion": null,
       "allium": null,
       "muos": "jaguar",
-      "slot": null,
       "emudeck": "atarijaguar"
     },
     "muos_catalogue": "Atari Jaguar",
@@ -2047,7 +1975,6 @@
       "onion": null,
       "allium": null,
       "muos": null,
-      "slot": null,
       "emudeck": "atarijaguarcd"
     },
     "bios": {
@@ -2067,7 +1994,6 @@
       "onion": null,
       "allium": null,
       "muos": "cdi",
-      "slot": null,
       "emudeck": "cdimono1"
     },
     "muos_catalogue": "Philips CDi",
@@ -2094,7 +2020,6 @@
       "onion": null,
       "allium": null,
       "muos": null,
-      "slot": null,
       "emudeck": "gc"
     },
     "bios": {
@@ -2127,7 +2052,6 @@
       "onion": null,
       "allium": null,
       "muos": null,
-      "slot": null,
       "emudeck": "mark3"
     },
     "bios": {
@@ -2162,7 +2086,6 @@
       "onion": null,
       "allium": null,
       "muos": null,
-      "slot": null,
       "emudeck": "model2/roms"
     },
     "bios": {
@@ -2181,7 +2104,6 @@
       "onion": null,
       "allium": null,
       "muos": null,
-      "slot": null,
       "emudeck": "model3"
     },
     "bios": {
@@ -2201,7 +2123,6 @@
       "onion": null,
       "allium": null,
       "muos": "3ds",
-      "slot": null,
       "emudeck": "n3ds"
     },
     "muos_catalogue": "Nintendo 3DS",
@@ -2222,7 +2143,6 @@
       "onion": null,
       "allium": null,
       "muos": "3ds",
-      "slot": null,
       "emudeck": "n3ds"
     },
     "muos_catalogue": "Nintendo 3DS",
@@ -2242,7 +2162,6 @@
       "onion": null,
       "allium": null,
       "muos": null,
-      "slot": null,
       "emudeck": "naomi2"
     },
     "bios": {
@@ -2272,7 +2191,6 @@
       "onion": null,
       "allium": null,
       "muos": null,
-      "slot": null,
       "emudeck": "naomigd"
     },
     "bios": {
@@ -2303,7 +2221,6 @@
       "onion": null,
       "allium": null,
       "muos": null,
-      "slot": null,
       "emudeck": "ps2"
     },
     "bios": {
@@ -2335,7 +2252,6 @@
       "onion": null,
       "allium": null,
       "muos": null,
-      "slot": null,
       "emudeck": "ps3"
     },
     "bios": {
@@ -2364,7 +2280,6 @@
       "onion": null,
       "allium": null,
       "muos": null,
-      "slot": null,
       "emudeck": null
     },
     "bios": {
@@ -2384,7 +2299,6 @@
       "onion": null,
       "allium": null,
       "muos": null,
-      "slot": null,
       "emudeck": "psvita"
     },
     "bios": {
@@ -2403,7 +2317,6 @@
       "onion": null,
       "allium": null,
       "muos": null,
-      "slot": null,
       "emudeck": "stv"
     },
     "bios": {
@@ -2423,7 +2336,6 @@
       "onion": null,
       "allium": null,
       "muos": null,
-      "slot": null,
       "emudeck": "switch"
     },
     "bios": {
@@ -2445,7 +2357,6 @@
       "onion": null,
       "allium": null,
       "muos": null,
-      "slot": null,
       "emudeck": "triforce"
     },
     "bios": {
@@ -2464,7 +2375,6 @@
       "onion": null,
       "allium": null,
       "muos": null,
-      "slot": null,
       "emudeck": "type-x"
     },
     "bios": {
@@ -2484,7 +2394,6 @@
       "onion": null,
       "allium": null,
       "muos": null,
-      "slot": null,
       "emudeck": "wii"
     },
     "bios": {
@@ -2507,7 +2416,6 @@
       "onion": null,
       "allium": null,
       "muos": null,
-      "slot": null,
       "emudeck": "wiiu/roms"
     },
     "bios": {
@@ -2527,7 +2435,6 @@
       "onion": null,
       "allium": null,
       "muos": null,
-      "slot": null,
       "emudeck": "xbox"
     },
     "bios": {
@@ -2567,7 +2474,6 @@
       "onion": null,
       "allium": null,
       "muos": null,
-      "slot": null,
       "emudeck": "xbox360/roms"
     },
     "bios": {
@@ -2590,7 +2496,6 @@
       "onion": null,
       "allium": null,
       "muos": null,
-      "slot": null,
       "emudeck": null
     },
     "bios": {
@@ -2610,7 +2515,6 @@
       "onion": null,
       "allium": null,
       "muos": null,
-      "slot": null,
       "emudeck": "sg-1000"
     },
     "bios": {
@@ -2632,7 +2536,6 @@
       "onion": null,
       "allium": null,
       "muos": null,
-      "slot": null,
       "emudeck": "msx"
     },
     "bios": {
@@ -2983,7 +2886,6 @@
       "onion": null,
       "allium": null,
       "muos": null,
-      "slot": null,
       "emudeck": "msx2"
     },
     "bios": {
@@ -3334,7 +3236,6 @@
       "onion": null,
       "allium": null,
       "muos": null,
-      "slot": null,
       "emudeck": "arcadia"
     },
     "bios": {
@@ -3356,7 +3257,6 @@
       "onion": null,
       "allium": null,
       "muos": null,
-      "slot": null,
       "emudeck": "gamate"
     },
     "bios": {
@@ -3379,7 +3279,6 @@
       "onion": null,
       "allium": null,
       "muos": null,
-      "slot": null,
       "emudeck": "gamecom"
     },
     "bios": {
@@ -3402,7 +3301,6 @@
       "onion": null,
       "allium": null,
       "muos": null,
-      "slot": null,
       "emudeck": "c64"
     },
     "bios": {

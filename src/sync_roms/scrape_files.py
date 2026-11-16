@@ -30,14 +30,12 @@ def rom_stems(roms):
 
 
 def derived_art(system, stem, found):
-    """[(key, source path or None, (max width, max height))] of the Onion box art and Slot label a ROM gets.
+    """[(key, source path or None, (max width, max height))] of the Onion box art a ROM gets.
 
     found: {media type: local path} of the ROM's art. Onion's Imgs folder is flat, so ROMs in subfolders get
-    none; Slot labels are only made for the systems in SLOT_LABEL_MAX.
+    none.
     """
     wanted = [(scrape_plan.ONION_TYPE, scrape_plan.ONION_ART, scrape_plan.ONION_MAX)] if "/" not in stem else []
-    if system in scrape_plan.SLOT_LABEL_MAX:
-        wanted.append((scrape_plan.SLOT_TYPE, scrape_plan.SLOT_ART, scrape_plan.SLOT_LABEL_MAX[system]))
     return [(f"{scrape_plan.SCRAPES}/{system}/{kind}/{stem}.png", next((found[t] for t in order if t in found), None), box)
             for kind, order, box in wanted]
 

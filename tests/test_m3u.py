@@ -134,9 +134,9 @@ class HiddenDiscsTest(unittest.TestCase):
 
     def test_rom_rel_puts_discs_in_the_disc_folder(self):
         discs = {"psx/" + f for f in FAH}
-        self.assertEqual(downloads.rom_rel("psx/" + FAH[0], False, ".multi-disc", discs), ".multi-disc/" + FAH[0])
-        self.assertEqual(downloads.rom_rel("psx/Fahrenheit.m3u", False, ".multi-disc", discs), "Fahrenheit.m3u")
-        self.assertEqual(downloads.rom_rel("psx/" + FAH[0], False), FAH[0])
+        self.assertEqual(downloads.rom_rel("psx/" + FAH[0], ".multi-disc", discs), ".multi-disc/" + FAH[0])
+        self.assertEqual(downloads.rom_rel("psx/Fahrenheit.m3u", ".multi-disc", discs), "Fahrenheit.m3u")
+        self.assertEqual(downloads.rom_rel("psx/" + FAH[0]), FAH[0])
 
     def test_hide_discs_moves_loose_discs(self):
         self.touch(*FAH)

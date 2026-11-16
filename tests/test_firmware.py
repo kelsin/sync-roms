@@ -4,13 +4,12 @@ import os
 import sys
 import tempfile
 import unittest
-import zipfile
 from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 from sync_roms import cli  # noqa: E402
-from sync_roms import chd, downloads, picker, store  # noqa: E402
+from sync_roms import downloads, picker, store  # noqa: E402
 
 
 def repo(name):
@@ -34,10 +33,6 @@ class ShippedDataTest(unittest.TestCase):
         layouts = repo("layouts.json")
         for s in repo("systems.json"):
             self.assertEqual(set(s["folders"]), set(layouts), s["bucket"])
-
-    def test_slot_only_has_game_boy_systems(self):
-        folders = {s["bucket"]: s["folders"]["slot"] for s in repo("systems.json") if s["folders"]["slot"]}
-        self.assertEqual(folders, {"gba": "GBA", "gb": "GB", "gbc": "GBC"})
 
     def test_muos_bios_dir_is_nested(self):
         self.assertEqual(repo("layouts.json")["muos"]["bios_dir"], "MUOS/bios")
@@ -104,27 +99,7 @@ def touch(path, data=b"x"):
         f.write(data)
 
 
-class UnzipTest(unittest.TestCase):
-    def test_rom_rel_flattens_only_when_unzipping(self):
-        self.assertEqual(downloads.rom_rel("gba/Hacks/A.zip", False), "Hacks/A.zip")
-        self.assertEqual(downloads.rom_rel("gba/Hacks/A.zip", True), "A.zip")
-
-    def test_extracted_archive_is_not_downloaded_again(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            zip_path = os.path.join(tmp, "A.zip")
-            jobs = [("gba/A.zip", zip_path, 10)]
-            self.assertEqual(downloads.plan_downloads(jobs, unzip=True), jobs)
-            touch(os.path.join(tmp, "A.gba"))
-            self.assertEqual(downloads.plan_downloads(jobs, unzip=True), [])
-            self.assertEqual(downloads.plan_downloads(jobs), jobs)  # other layouts still want the archive
-
-    def test_extracted_roms_are_not_extras_but_stray_files_are(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            for name in ("A.gba", "B.gba", "Old.gba"):
-                touch(os.path.join(tmp, name))
-            extras = downloads.find_extras(tmp, ["gba/A.zip", "gba/sub/B.zip"], unzip=True)
-            self.assertEqual([os.path.basename(p) for p in extras], ["Old.gba"])
-
+class FindExtrasTest(unittest.TestCase):
     def test_psvita_file_goes_with_its_zip(self):
         with tempfile.TemporaryDirectory() as tmp:
             for name in ("A.zip", "A.psvita", "Gone.psvita", "Other.psvita", "Other.zip"):
@@ -132,7 +107,7 @@ class UnzipTest(unittest.TestCase):
             extras = downloads.find_extras(tmp, ["psvita/A.zip"])
             self.assertEqual(sorted(os.path.basename(p) for p in extras), ["Gone.psvita", "Other.psvita", "Other.zip"])
 
-    def test_without_unzip_extracted_files_are_extras(self):
+    def test_extracted_files_are_extras(self):
         with tempfile.TemporaryDirectory() as tmp:
             touch(os.path.join(tmp, "A.gba"))
             self.assertEqual(len(downloads.find_extras(tmp, ["gba/A.zip"])), 1)
@@ -144,42 +119,6 @@ class UnzipTest(unittest.TestCase):
             self.assertEqual(downloads.find_extras(tmp, [], skip_db=True), [])
             self.assertTrue(downloads.has_local_files(tmp))
             self.assertFalse(downloads.has_local_files(tmp, skip_db=True))
-
-    def test_unzip_roms_extracts_flat_and_removes_the_archive(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            path = os.path.join(tmp, "A.zip")
-            with zipfile.ZipFile(path, "w") as z:
-                z.writestr("inner/A.gba", b"rom")
-                z.writestr("inner/", b"")
-            self.assertEqual(chd.unzip_roms([path, os.path.join(tmp, "B.gba")]), [])
-            self.assertEqual(sorted(os.listdir(tmp)), ["A.gba"])
-            with open(os.path.join(tmp, "A.gba"), "rb") as f:
-                self.assertEqual(f.read(), b"rom")
-
-    def test_card_archives_finds_leftover_archives(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            touch(os.path.join(tmp, "A.zip"))
-            touch(os.path.join(tmp, "B.gba"))
-            touch(os.path.join(tmp, "C.7z"))
-            found = chd.card_archives([tmp, os.path.join(tmp, "missing")])
-            self.assertEqual(sorted(os.path.basename(p) for p in found), ["A.zip", "C.7z"])
-
-    def test_unzip_roms_keeps_a_bad_archive_and_reports_it(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            path = os.path.join(tmp, "A.zip")
-            touch(path, b"not a zip")
-            failures = chd.unzip_roms([path])
-            self.assertEqual([p for p, _ in failures], [path])
-            self.assertTrue(os.path.exists(path))
-
-    def test_unzip_roms_reports_a_7z_without_the_tool(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            path = os.path.join(tmp, "A.7z")
-            touch(path)
-            with mock.patch.object(chd.shutil, "which", return_value=None):
-                failures = chd.unzip_roms([path])
-            self.assertEqual([p for p, _ in failures], [path])
-            self.assertTrue(os.path.exists(path))
 
 
 if __name__ == "__main__":

@@ -108,7 +108,7 @@ class OwnTempTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as root:
             touch(root, "a.gba")
             touch(root, ".hack.gba")
-            for rel in (".chd-1/a.bin", ".xiso-2/b.iso", ".unzip-3/c.gba", "Disc/.unzip-4/d.gba"):
+            for rel in (".chd-1/a.bin", ".xiso-2/b.iso", "Disc/.chd-3/d.gba"):
                 touch(root, rel)
             new, _, _ = upload.plan_rom_upload(root, "gba", {})
             self.assertEqual(sorted(k for k, _, _ in new), ["gba/.hack.gba", "gba/a.gba"])

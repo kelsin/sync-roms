@@ -533,23 +533,21 @@ class FinalReviewTest(RunBase):
         self.put("gba/a.zip")
         self.put("scrapes/gba/covers/a.jpg", b"old cover")
         self.put("scrapes/gba/onion/a.png", b"old onion")
-        self.put("scrapes/gba/slot/a.png", b"old slot")
         self.assertEqual(self.run_scrape(), 0)
         self.assertNotIn("http://media/1/box-2D", self.client.downloads)
         self.assertIn("http://media/1/ss", self.client.downloads)
         self.assertEqual(self.read("scrapes/gba/covers/a.jpg"), b"old cover")
         self.assertEqual(self.read("scrapes/gba/onion/a.png"), b"old onion")
-        self.assertEqual(self.read("scrapes/gba/slot/a.png"), b"old slot")
         self.assertNotIn("scrapes/gba/covers/a.png", self.stored())
         self.assertIn("scrapes/gba/screenshots/a.png", self.stored())
         self.assertEqual(self.metadata(), {"a.zip": {"name": "Alpha"}})
-        self.assertIn("3 media file(s) already there are kept", self.confirm.call_args.args[0])
+        self.assertIn("2 media file(s) already there are kept", self.confirm.call_args.args[0])
 
     def test_derived_art_not_made_from_a_lesser_image_when_the_cover_exists(self):
         self.put("gba/a.zip")
         self.put("scrapes/gba/covers/a.png", b"old cover")
         self.assertEqual(self.run_scrape(), 0)
-        self.assertFalse(any("/onion/" in k or "/slot/" in k for k in self.stored()))
+        self.assertFalse(any("/onion/" in k for k in self.stored()))
 
     def test_bodies_that_are_not_media_are_not_stored(self):
         self.put("gba/a.zip")
@@ -869,7 +867,7 @@ class RoundTwoRunTest(RunBase):
         self.assertEqual(self.metadata(), {"Game v1.1 (USA).zip": {"name": "Dotted"}, "Disc 1/Saga.zip": {"name": "Saga"}})
         have = self.stored()
         self.assertLessEqual({"scrapes/gba/covers/Game v1.1 (USA).png", "scrapes/gba/screenshots/Disc 1/Saga.png",
-                              "scrapes/gba/onion/Game v1.1 (USA).png", "scrapes/gba/slot/Disc 1/Saga.png"}, have)
+                              "scrapes/gba/onion/Game v1.1 (USA).png"}, have)
         self.assertNotIn("scrapes/gba/onion/Disc 1/Saga.png", have)
 
     def test_videos_get_the_video_size_limit(self):
@@ -959,7 +957,7 @@ class MatchRoundTwoTest(RunBase):
     def existing(self):
         self.put("gba/a.zip")
         self.put("scrapes/gba/metadata.json", json.dumps({"a.zip": {"name": "Wrong", "desc": "old"}}).encode())
-        for key in ("covers/a.png", "fanart/a.png", "custom/a.png", "onion/a.png", "slot/a.png"):
+        for key in ("covers/a.png", "fanart/a.png", "custom/a.png", "onion/a.png"):
             self.put(f"scrapes/gba/{key}", b"old " + key.encode())
         self.client.games["x"] = game(7, "Seven")
 
@@ -967,14 +965,13 @@ class MatchRoundTwoTest(RunBase):
         with open(os.path.join(self.root, key), "rb") as f:
             return f.read()
 
-    def test_replace_keeps_custom_and_overwrites_onion_and_slot(self):
+    def test_replace_keeps_custom_and_overwrites_onion(self):
         self.existing()
         self.assertEqual(self.run_match(), 0)
         have = self.stored()
         self.assertEqual(self.read("scrapes/gba/custom/a.png"), b"old custom/a.png")
         self.assertNotIn("scrapes/gba/fanart/a.png", have)
         self.assertNotEqual(self.read("scrapes/gba/onion/a.png"), b"old onion/a.png")
-        self.assertNotEqual(self.read("scrapes/gba/slot/a.png"), b"old slot/a.png")
         self.assertEqual(self.metadata(), {"a.zip": {"name": "Seven"}})
 
     def test_replace_leaves_skipped_types(self):
@@ -988,7 +985,7 @@ class MatchRoundTwoTest(RunBase):
         self.run_match()
         question = self.confirm.call_args.args[0]
         self.assertIn(f"{self.root}/scrapes/", question)
-        self.assertIn("4 file(s)", question)
+        self.assertIn("3 file(s)", question)
         self.assertIn("scrapes/gba/fanart/a.png", self.out.getvalue())
         self.assertNotIn("scrapes/gba/custom/a.png", self.out.getvalue())
 
@@ -1058,25 +1055,22 @@ class MatchRoundTwoTest(RunBase):
 class SystemsTest(RunBase):
     systems = [GBA, NES, {"name": "No Id", "bucket": "noid", "full_system": True, "folders": {}}]
 
-    def test_onion_and_slot_jobs_created_for_art(self):
+    def test_onion_jobs_created_for_art(self):
         self.put("gba/a.zip")
         self.put("gba/sub/b.zip")
         self.put("nes/c.zip")
         self.assertEqual(self.run_scrape(), 0)
         have = self.stored()
         self.assertIn("scrapes/gba/onion/a.png", have)
-        self.assertIn("scrapes/gba/slot/a.png", have)
-        self.assertIn("scrapes/gba/slot/sub/b.png", have)
         self.assertNotIn("scrapes/gba/onion/sub/b.png", have)
         self.assertIn("scrapes/nes/onion/c.png", have)
-        self.assertFalse(any(k.startswith("scrapes/nes/slot/") for k in have))
 
     def test_no_derived_art_without_shrink_tool(self):
         self.put("gba/a.zip")
         with mock.patch.object(scrape_plan, "can_shrink", return_value=False):
             self.assertEqual(self.run_scrape(), 0)
         have = self.stored()
-        self.assertFalse(any("/onion/" in k or "/slot/" in k for k in have))
+        self.assertFalse(any("/onion/" in k for k in have))
         self.assertIn("Pillow", self.out.getvalue())
         self.assertEqual(set(self.metadata()), {"a.zip"})
 

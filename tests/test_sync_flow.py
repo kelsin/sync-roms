@@ -411,7 +411,7 @@ class SyncFlowTest(unittest.TestCase):
                                  "update_card": lambda name, **v: updates.append(v)}),
                         (s3, {"list_sizes": list_sizes, "fetch_texts": lambda keys: {}, "get_text": lambda key: ""}),
                         (cli.picker, {"saved_setup": lambda *a: setup}),
-                        (cli.downloads, {"run_downloads": lambda *a: 0, "plan_downloads": lambda jobs, unzip=False, disc_dir=None: plan if plan is not None else jobs}),
+                        (cli.downloads, {"run_downloads": lambda *a: 0, "plan_downloads": lambda jobs, disc_dir=None: plan if plan is not None else jobs}),
                         (cli.clean, {"clean_android_media": lambda *a: None}),
                         (scrape_plan, {"stale_media": lambda *a: [os.path.join(card_dir, s) for s in stale]}),
                         (collections_mod, {"load_collections": lambda: list(colls)})):
