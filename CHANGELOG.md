@@ -1,5 +1,17 @@
 # Changelog
 
+## [2.16.0](https://github.com/kelsin/sync-roms/compare/v2.15.0...v2.16.0) (2026-11-16)
+
+
+### :video_game: Features
+
+* **scrape:** title fan translations "&lt;name&gt; - Translated" ([#320](https://github.com/kelsin/sync-roms/issues/320)) ([fe60f42](https://github.com/kelsin/sync-roms/commit/fe60f428c48e94052b87fbacdd6cec72fd8eec82))
+
+
+### :bug: Bug Fixes
+
+* **convert:** unzip an archive that holds a chd and keep the chd ([#318](https://github.com/kelsin/sync-roms/issues/318)) ([f5a5ea9](https://github.com/kelsin/sync-roms/commit/f5a5ea93130faefc5247537ec21adf9abe3f6449))
+
 ## [2.15.0](https://github.com/kelsin/sync-roms/compare/v2.14.0...v2.15.0) (2026-11-16)
 
 
