@@ -4,7 +4,7 @@ import os
 import re
 import sys
 import time
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
 
 from . import external, inventory, runtime, s3, ui
 
@@ -116,30 +116,43 @@ def run_downloads(todo, label, icon, base, failures=None):
     futs = []
     ex = ThreadPoolExecutor(runtime.WORKERS)
     moved = ui.ByteProgress([j[2] for j in todo])
-    bar = ui.ProgressBar(len(todo), moved.fraction, moved.total, io=moved)
+    names = [j[0] for j in todo]
+    bar = ui.ProgressBar(len(todo), moved.fraction, moved.total, io=moved, active=lambda: moved.active(names))
+
+    def fetch(i, j):
+        moved.start(i)
+        s3.download(j, lambda n: moved.add(i, n), moved.wrote)
+
     try:
-        futs += [(j, ex.submit(s3.download, j, lambda n, i=i: moved.add(i, n), moved.wrote)) for i, j in enumerate(todo)]
-        for i, (j, f) in enumerate(futs, 1):
-            prog = ui.dim(f"[{i}/{len(todo)}]")
-            try:
-                ui.wait_drawing(bar, i - 1, f.result)
-                moved.finish(i - 1)
-                src = j[0].split("/", 1)[0]
-                rel = os.path.relpath(j[1], base)
-                shown = j[0] if rel.split(os.sep, 1)[0] == src else f"{src} → {rel}"
-                bar.say(f"  {prog} ✅ {shown}")
-            except Exception as e:
-                failed += 1
-                moved.finish(i - 1)
-                reason = (getattr(e, 'stderr', None) or str(e)).strip() + failure_hint(e)
-                if failures is not None:
-                    failures.append((j[0], reason))
-                line = f"  {prog} ❌ {ui.red(j[0])}: {reason}"
-                if ui.QUIET:
-                    ui.failure(line)
-                else:
-                    bar.say(line)
-            bar.draw(i)
+        futs += [(j, ex.submit(fetch, i, j)) for i, j in enumerate(todo)]
+        index = {f: i for i, (_, f) in enumerate(futs)}
+        pending, finished = set(index), 0
+        while pending:
+            done, pending = wait(pending, timeout=ui.POLL, return_when=FIRST_COMPLETED)
+            if not done:
+                bar.draw(finished)
+            for f in sorted(done, key=index.get):
+                j = todo[index[f]]
+                finished += 1
+                prog = ui.dim(f"[{finished}/{len(todo)}]")
+                moved.finish(index[f])
+                try:
+                    f.result()
+                    src = j[0].split("/", 1)[0]
+                    rel = os.path.relpath(j[1], base)
+                    shown = j[0] if rel.split(os.sep, 1)[0] == src else f"{src} → {rel}"
+                    bar.say(f"  {prog} ✅ {shown}")
+                except Exception as e:
+                    failed += 1
+                    reason = (getattr(e, 'stderr', None) or str(e)).strip() + failure_hint(e)
+                    if failures is not None:
+                        failures.append((j[0], reason))
+                    line = f"  {prog} ❌ {ui.red(j[0])}: {reason}"
+                    if ui.QUIET:
+                        ui.failure(line)
+                    else:
+                        bar.say(line)
+                bar.draw(finished)
     except KeyboardInterrupt:
         ex.shutdown(wait=False, cancel_futures=True)
         running = [(j, f) for j, f in futs if not f.done()]

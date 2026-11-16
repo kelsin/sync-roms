@@ -172,7 +172,9 @@ While typing a filter (or a note, which `w` opens in the game list): `^A` `^E` s
    the card's systems download into its BIOS folder (RetroArch system-dir layout). A system's
    `rom_files` (MAME-style BIOS zips such as `gamate.zip`) are kept in storage's `BIOS/` too, but copied
    into that system's ROM folder instead, while it has ROMs to sync.
-   Each finished file prints as `[i/N] ✅ gba/Game.gba`. When the local folder name
+   Each file prints as soon as it finishes, as `[i/N] ✅ gba/Game.gba` (`i` is the count finished so far,
+   not the file's place in the queue); in a terminal the files downloading right now are listed under the
+   progress bar (fewer when the terminal is short). When the local folder name
    differs from storage's (e.g. a Knulli device), it prints
    `[i/N] ✅ genesis → megadrive/Game.md` (storage folder → local folder/file).
 5. Scraped data for the card's games is installed from storage's `scrapes/` folder (see

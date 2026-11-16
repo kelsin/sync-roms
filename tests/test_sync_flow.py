@@ -131,6 +131,61 @@ class CleanDirsTest(unittest.TestCase):
         self.assertNotIn("._b", out)
 
 
+class CompletionOrderTest(unittest.TestCase):
+    def test_a_file_that_finishes_first_prints_first_while_a_slow_one_is_listed(self):
+        jobs = [("gba/slow.zip", "/tmp/x/gba/slow.zip", 5), ("gba/fast.zip", "/tmp/x/gba/fast.zip", 5)]
+        fast_printed, seen = threading.Event(), []
+        real_say = ui.ProgressBar.say
+
+        def say(self_, line):
+            if "fast.zip" in line:
+                seen.append([n for n, _, _ in self_.active()])
+                fast_printed.set()
+            real_say(self_, line)
+
+        def download(job, callback=None, wrote=None):
+            if "slow" in job[0]:
+                assert fast_printed.wait(5)
+
+        with mock.patch.object(s3, "download", download), mock.patch.object(ui.ProgressBar, "say", say), \
+                mock.patch.object(ui, "POLL", 0.001):
+            failed, out = captured(downloads.run_downloads, jobs, "ROMs", "i", "/tmp/x")
+        self.assertEqual(failed, 0)
+        lines = [l for l in out.splitlines() if "✅" in l]
+        self.assertIn("[1/2]", lines[0]); self.assertIn("gba/fast.zip", lines[0])
+        self.assertIn("[2/2]", lines[1]); self.assertIn("gba/slow.zip", lines[1])
+        self.assertEqual(seen, [["gba/slow.zip"]])
+
+    def test_many_instant_files_each_print_once(self):
+        jobs = [(f"gba/{n}.zip", f"/tmp/x/gba/{n}.zip", 1) for n in range(20)]
+        with mock.patch.object(s3, "download", lambda *a, **k: None), mock.patch.object(ui, "POLL", 0.001):
+            _, out = captured(downloads.run_downloads, jobs, "ROMs", "i", "/tmp/x")
+        for n in range(20):
+            self.assertEqual(out.count(f"gba/{n}.zip"), 1)
+        self.assertIn("[20/20]", out)
+
+    def test_a_failure_prints_when_it_happens(self):
+        jobs = [("gba/slow.zip", "/tmp/x/gba/slow.zip", 5), ("gba/bad.zip", "/tmp/x/gba/bad.zip", 5)]
+        bad_printed = threading.Event()
+        real_say = ui.ProgressBar.say
+
+        def say(self_, line):
+            if "bad.zip" in line:
+                bad_printed.set()
+            real_say(self_, line)
+
+        def download(job, callback=None, wrote=None):
+            if "bad" in job[0]:
+                raise OSError("boom")
+            assert bad_printed.wait(5)
+
+        with mock.patch.object(s3, "download", download), mock.patch.object(ui.ProgressBar, "say", say), \
+                mock.patch.object(ui, "POLL", 0.001):
+            failed, out = captured(downloads.run_downloads, jobs, "ROMs", "i", "/tmp/x")
+        self.assertEqual(failed, 1)
+        self.assertLess(out.index("bad.zip"), out.index("✅"))
+
+
 class DownloadInterruptTest(unittest.TestCase):
     def run_interrupted(self, draws_that_interrupt, fail=False):
         release, n = threading.Event(), []
