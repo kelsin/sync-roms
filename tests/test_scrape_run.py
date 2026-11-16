@@ -635,6 +635,36 @@ class TranslatedRecordTest(RunBase):
         self.assertEqual(self.metadata()["Game (T).zip"]["name"], "One - Translated")
 
 
+class QualifierRecordTest(RunBase):
+    scrape = TranslatedRecordTest.scrape
+
+    def old(self, rom, **entry):
+        self.put("scrapes/gba/metadata.json", json.dumps({rom: {"name": "Old (Japan)", "qualifier": "Japan", **entry}}).encode())
+
+    def test_rescrape_keeps_qualifier(self):
+        self.old("Game.zip")
+        self.assertEqual(self.scrape("Game.zip"), 0)
+        entry = self.metadata()["Game.zip"]
+        self.assertEqual((entry["name"], entry["qualifier"]), ("One (Japan)", "Japan"))
+
+    def test_replace_keeps_qualifier(self):
+        self.old("Game.zip", desc="old")
+        self.assertEqual(self.scrape("Game.zip", replace=True), 0)
+        entry = self.metadata()["Game.zip"]
+        self.assertEqual((entry["name"], entry["qualifier"]), ("One (Japan)", "Japan"))
+        self.assertNotIn("desc", entry)
+
+    def test_translated_keeps_qualifier_before_suffix(self):
+        self.old("Game (T).zip", name="Old (Japan) - Translated", translated=True)
+        self.assertEqual(self.scrape("Game (T).zip", replace=True), 0)
+        self.assertEqual(self.metadata()["Game (T).zip"]["name"], "One (Japan) - Translated")
+
+    def test_fill_keeps_one_qualifier(self):
+        self.old("Game (T).zip", name="One (Japan) - Translated", translated=True)
+        self.assertEqual(self.scrape("Game (T).zip", fill=True), 0)
+        self.assertEqual(self.metadata()["Game (T).zip"]["name"], "One (Japan) - Translated")
+
+
 class MatchReplaceTest(RunBase):
     def run_match(self, rom="a.zip", game_q="7", **kw):
         args = SimpleNamespace(**{"system": "gba", "rom": rom, "game": game_q, "skip_media": [], "dry_run": False, **kw})
