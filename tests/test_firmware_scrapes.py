@@ -11,10 +11,10 @@ import isolate  # noqa: E402,F401
 from sync_roms import mirroring, scrape_files, scrape_plan, store, ui  # noqa: E402
 
 GBA = {"name": "Game Boy Advance", "bucket": "gba",
-       "folders": {"esde": "gba", "muos": "gba", "slot": "GBA"}, "muos_catalogue": "Nintendo Game Boy Advance"}
+       "folders": {"esde": "gba", "muos": "gba"}, "muos_catalogue": "Nintendo Game Boy Advance"}
 LISTING = {
     "scrapes/gba/covers/A.png": 5, "scrapes/gba/screenshots/A.jpg": 6, "scrapes/gba/3dboxes/A.png": 7,
-    "scrapes/gba/slot/A.png": 8, "scrapes/gba/covers/hacks/B.png": 9, "scrapes/gba/slot/hacks/B.png": 3,
+    "scrapes/gba/covers/hacks/B.png": 9,
 }
 META = {"A.zip": {"name": "A", "desc": "An adventure."}}
 
@@ -142,36 +142,14 @@ class EmudeckPlanTest(unittest.TestCase):
                              [os.path.join(media, "sg1000", "covers", "A.png")])
 
 
-class SlotPlanTest(unittest.TestCase):
-    def test_label_goes_in_labels_named_after_the_rom(self):
-        with tempfile.TemporaryDirectory() as root:
-            jobs, entries, texts = scrape_plan.plan_scrapes("slot", ["A.zip", "hacks/B.zip", "C.zip"], LISTING, META, root,
-                                                    "/x", lambda rom: True)
-        self.assertEqual(sorted((k, os.path.relpath(p, root)) for k, p, _ in jobs),
-                         [("scrapes/gba/slot/A.png", "A.png"), ("scrapes/gba/slot/hacks/B.png", "B.png")])
-        self.assertEqual((entries, texts), ({}, []))
-
-    def test_a_subfolder_rom_is_found_flat_on_the_card(self):
-        with tempfile.TemporaryDirectory() as base:
-            card = os.path.join(base, "Games", "GBA")
-            data = {"gba": (LISTING, META)}
-            asked = []
-            plan = scrape_plan.build_scrape_plan("slot", [GBA], data, {"gba": ["hacks/B.zip"]}, lambda s: card,
-                                         os.path.join(base, "ES-DE"), lambda p: asked.append(p) or True, base)
-        self.assertEqual(asked, [os.path.join(card, "B.zip")])
-        self.assertEqual([j[1] for j in plan["jobs"]], [os.path.join(base, "Labels", "GBA", "B.png")])
-
-    def test_media_root_is_labels_by_slot_folder(self):
-        self.assertEqual(scrape_plan.media_root_of("slot", GBA, "/card", "/card/ES-DE"), os.path.join("/card", "Labels", "GBA"))
-
 def touch(path):
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, "wb") as f:
         f.write(b"x")
 
 
-def sysdef(bucket, muos=None, catalogue=None, slot=None):
-    return {"bucket": bucket, "folders": {"muos": muos, "slot": slot}, **({"muos_catalogue": catalogue} if catalogue else {})}
+def sysdef(bucket, muos=None, catalogue=None):
+    return {"bucket": bucket, "folders": {"muos": muos}, **({"muos_catalogue": catalogue} if catalogue else {})}
 
 
 class StaleMediaTest(unittest.TestCase):
@@ -270,21 +248,6 @@ class StaleMediaTest(unittest.TestCase):
         self.assertEqual(self.run_stale("muos", [sysdef("gba", "gba", "Nintendo Game Boy Advance")],
                                         [f"{cat}/box/Other.png"], ["ROMS/gba/.keep"]), [])
 
-    def test_slot_removes_labels_for_roms_that_are_gone(self):
-        stale = self.run_stale("slot", [sysdef("gba", slot="GBA")], ["Labels/GBA/Keep.png", "Labels/GBA/Gone.png"],
-                               ["Games/GBA/Keep.gba"])
-        self.assertEqual(stale, [os.path.join("Labels", "GBA", "Gone.png")])
-
-    def test_slot_matches_names_like_slot_does(self):
-        files = ["Labels/GBA/metroid fusion.png", "Labels/GBA/Metroid Fusion (USA, Europe).png"]
-        self.assertEqual(self.run_stale("slot", [sysdef("gba", slot="GBA")], files,
-                                        ["Games/GBA/Metroid Fusion (USA) [!].gba"]), [])
-
-    def test_slot_leaves_other_label_files_and_folders_alone(self):
-        files = ["Labels/cart_shell.txt", "Labels/GBAV/Gone.png", "Labels/GBC/Gone.png"]
-        self.assertEqual(self.run_stale("slot", [sysdef("gba", slot="GBA"), sysdef("gbc", slot="GBC")], files,
-                                        ["Games/GBA/Keep.gba"]), [])
-
 
 def system_of(bucket):
     return next(s for s in systems() if s["bucket"] == bucket)
@@ -329,20 +292,11 @@ class DerivedArtTest(unittest.TestCase):
     def derived(self, found, system="gba", stem="A"):
         return [(k, src, box) for k, src, box in scrape_files.derived_art(system, stem, found)]
 
-    def test_game_boy_art_makes_onion_and_slot_art(self):
-        self.assertEqual([(k, box) for k, _, box in self.derived({"covers": "c.png"})],
-                         [("scrapes/gba/onion/A.png", (250, 360)), ("scrapes/gba/slot/A.png", (1280, 661))])
+    def test_art_makes_onion_art(self):
+        self.assertEqual([(k, box) for k, _, box in self.derived({"covers": "c.png"})], [("scrapes/gba/onion/A.png", (250, 360))])
 
-    def test_game_boy_and_color_labels_are_the_cart_size(self):
-        for system in ("gb", "gbc"):
-            slot = [box for k, _, box in self.derived({"covers": "c.png"}, system) if "/slot/" in k]
-            self.assertEqual(slot, [(1024, 901)])
-
-    def test_a_rom_in_a_subfolder_gets_slot_art_only(self):
-        self.assertEqual([k for k, *_ in self.derived({"covers": "c.png"}, stem="hacks/B")], ["scrapes/gba/slot/hacks/B.png"])
-
-    def test_other_systems_get_no_slot_art(self):
-        self.assertEqual([k for k, *_ in self.derived({"covers": "c.png"}, "snes")], ["scrapes/snes/onion/A.png"])
+    def test_a_rom_in_a_subfolder_gets_no_onion_art(self):
+        self.assertEqual(self.derived({"covers": "c.png"}, stem="hacks/B"), [])
 
     def test_cover_is_preferred_over_a_screenshot(self):
         self.assertEqual({src for _, src, _ in self.derived({"screenshots": "s.png", "covers": "c.png"})}, {"c.png"})

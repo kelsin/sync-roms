@@ -906,56 +906,5 @@ class ChdTest(unittest.TestCase):
         self.assertIn("0 converted, 1 failed", err)
 
 
-class UnzipArchiveTest(unittest.TestCase):
-    def setUp(self):
-        self._tmp = tempfile.TemporaryDirectory()
-        self.dir = os.path.realpath(self._tmp.name)
-        self.addCleanup(self._tmp.cleanup)
-
-    def touch(self, name, text=""):
-        with open(os.path.join(self.dir, name), "w") as f:
-            f.write(text)
-
-    def make_zip(self, **files):
-        path = os.path.join(self.dir, "a.zip")
-        with zipfile.ZipFile(path, "w") as z:
-            for name, data in files.items():
-                z.writestr(name, data)
-        return path
-
-    def test_existing_file_is_not_overwritten(self):
-        path = self.make_zip(**{"G.iso": "new"})
-        self.touch("G.iso", "older")
-        self.assertEqual(chd.unzip_archive(path), "G.iso already exists")
-        with open(os.path.join(self.dir, "G.iso")) as f:
-            self.assertEqual(f.read(), "older")
-        self.assertTrue(os.path.exists(path))
-
-    def test_leftover_archive_is_removed_when_already_extracted(self):
-        path = self.make_zip(**{"G.iso": "same"})
-        self.touch("G.iso", "same")
-        self.assertIsNone(chd.unzip_archive(path))
-        self.assertFalse(os.path.exists(path))
-        self.assertEqual(os.listdir(self.dir), ["G.iso"])
-
-    def test_duplicate_basenames_in_an_archive_fail(self):
-        path = self.make_zip(**{"a/G.iso": "1", "b/G.iso": "2"})
-        self.assertEqual(chd.unzip_archive(path), "G.iso appears more than once in the archive")
-        self.assertTrue(os.path.exists(path))
-        self.assertEqual(os.listdir(self.dir), ["a.zip"])
-
-    def test_symlinks_in_an_archive_are_skipped(self):
-        path = os.path.join(self.dir, "a.7z")
-        open(path, "w").close()
-
-        def fake(cmd, progress=None):
-            out = next(a for a in cmd if a.startswith("-o"))[2:]
-            with open(os.path.join(out, "G.iso"), "w") as f:
-                f.write("x")
-            os.symlink(os.path.join(out, "G.iso"), os.path.join(out, "link.iso"))
-        with mock.patch.object(external, "find_tool", return_value="7z"), mock.patch.object(external, "run_tool", fake):
-            self.assertIsNone(chd.unzip_archive(path))
-        self.assertEqual(sorted(os.listdir(self.dir)), ["G.iso"])
-
 if __name__ == "__main__":
     unittest.main()

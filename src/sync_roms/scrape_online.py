@@ -207,7 +207,7 @@ CREDENTIALS = ("screenscraper_user", "screenscraper_password")
 ROM_ERRORS = (screenscraper.ApiError, OSError, ValueError, http.client.HTTPException)
 IMAGE_MAGIC = ((b"\x89PNG", ".png"), (b"\xff\xd8\xff", ".jpg"), (b"GIF8", ".gif"))
 SHOWN = 10
-SCRAPER_TYPES = set(screenscraper.MEDIA_MAP.values()) | {scrape_plan.ONION_TYPE, scrape_plan.SLOT_TYPE}  # never custom/
+SCRAPER_TYPES = set(screenscraper.MEDIA_MAP.values()) | {scrape_plan.ONION_TYPE}  # never custom/
 
 
 class _RomClient:
@@ -530,7 +530,7 @@ def _batches(items):
 
 
 def _media_keys(listing, system, stem):
-    """{key: media type} of every media file (Onion and Slot images included) a ROM stem has in a scrapes/<system>/
+    """{key: media type} of every media file (Onion images included) a ROM stem has in a scrapes/<system>/
     listing."""
     out = {}
     for key in listing:

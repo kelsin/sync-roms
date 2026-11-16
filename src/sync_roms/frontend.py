@@ -172,7 +172,7 @@ def wanted_collections(layout_name, collections, systems, on_card):
             system = by_bucket.get(game["system"])
             if not system:
                 continue
-            rel = downloads.rom_rel(game["bucket"], False)
+            rel = downloads.rom_rel(game["bucket"])
             if on_card(system, rel):
                 lines.append(collection_line(layout_name, system["folders"][layout_name], rel))
         if name and lines:

@@ -23,7 +23,7 @@ def find_tool(tool):
 
 def own_temp(name):
     """True for what --cd itself leaves hidden (extraction folders, .part files) and macOS ._ junk; other dot names are real."""
-    return name.startswith((".chd-", ".xiso-", ".unzip-", "._")) or name.endswith(".part")
+    return name.startswith((".chd-", ".xiso-", "._")) or name.endswith(".part")
 
 
 _tool_procs = set()  # running tools, so an interrupt can stop them
