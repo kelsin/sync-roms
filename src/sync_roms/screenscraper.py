@@ -187,10 +187,10 @@ def _release_date(text):
     return f"{y}-{m:0>2}-{d:0>2}" if m.isdigit() and d.isdigit() else f"{y}-01-01"
 
 
-# A whole (...) or [...] tag that marks a fan translation: T, T-En/T+En with any
+# A whole (...) or [...] tag that marks a fan translation: T (capital only: [t] is a trainer), T-En/T+En with any
 # trailing text, English v<version>, or any tag with the word Translation.
 _TRANSLATION_TAG = re.compile(
-    r"[(\[](?:T|T[-+]En[^)\]]*|English v[^)\]]*|[^)\]]*\bTranslation\b[^)\]]*)[)\]]",
+    r"[(\[](?:(?-i:T)|T[-+]En[^)\]]*|English v[^)\]]*|[^)\]]*\bTranslation\b[^)\]]*)[)\]]",
     re.IGNORECASE,
 )
 TRANSLATED = " - Translated"

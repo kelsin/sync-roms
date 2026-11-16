@@ -164,6 +164,7 @@ class TranslationTest(unittest.TestCase):
             "Thracia 776 - Lil' Manster (v1.08).zip",
             "Tetris (USA).zip",
             "(T) Folder/Game (USA).zip",
+            "Contra (U) [t].nes",
         ):
             with self.subTest(rom=rom):
                 self.assertFalse(ss.is_translation(rom))
