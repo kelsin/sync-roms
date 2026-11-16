@@ -290,8 +290,9 @@ def eta(seconds):
 
 
 class ProgressBar:
-    """One line under the log: say() prints a line above it, draw() refreshes it. Does nothing but print on a non-tty."""
-    def __init__(self, count, fraction, total_bytes=None, io=None):
+    """One line under the log, then a line per file in flight: say() prints a line above it, draw() refreshes it. Does nothing but print on a non-tty."""
+    def __init__(self, count, fraction, total_bytes=None, io=None, active=None):
+        self.active = active  # () -> [(name, moved, size)] of the files in flight, shown under the bar
         self.io = io  # a ByteProgress that also counts bytes written, to tell a slow network from a slow disk
         self.count, self.fraction = count, fraction  # fraction() is the 0-1 progress of the whole run
         self.of = f" of {human_size(total_bytes)}" if total_bytes else ""  # the bar is by size, the count is by file
@@ -302,7 +303,7 @@ class ProgressBar:
         self.samples = collections.deque()  # (time, bytes moved, bytes written) over the last SPEED_WINDOW seconds
 
     def say(self, line):
-        print(("\r\033[K" if self.shown else "") + line)
+        print(("\r\033[J" if self.shown else "") + line)  # \033[J also wipes the block under the bar
 
     def draw(self, done):
         if not self.shown:  # no terminal to redraw on: a plain line every PLAIN_INTERVAL seconds
@@ -331,12 +332,36 @@ class ProgressBar:
             head = f"{done}/{self.count} files done  {fraction:4.0%}{self.of}"
             room = shutil.get_terminal_size().columns - 1 - 2 - 24 - 1 - len(head)  # one column spare so the line never wraps
             speed = next((t for t in tiers if len(t) <= room), "")
-            sys.stdout.write(f"\r\033[K  {cyan('█' * filled)}{dim('░' * (24 - filled))} {head}{speed}")
+            sys.stdout.write(f"\r\033[J  {cyan('█' * filled)}{dim('░' * (24 - filled))} {head}{speed}")
+            block = self.block()
+            for line in block:
+                sys.stdout.write("\n" + dim(line))
+            if block:
+                sys.stdout.write(f"\033[{len(block)}A\r")  # back on the bar line
             sys.stdout.flush()
+
+    def block(self):
+        """The lines under the bar, none wider than the terminal: a file each, or fewer and "… and N more" when the terminal is short."""
+        active = self.active() if self.active else []
+        size = shutil.get_terminal_size()
+        room, width = size.lines - 2, size.columns - 1
+        if room <= 0 or not active:
+            return []
+        shown = active if len(active) <= room else active[:room - 1]
+        lines = []
+        for name, moved, total in shown:
+            tail = f"  {moved / total:4.0%} of {human_size(total)}"
+            fit = width - len("    ↓ ") - len(tail)
+            if len(name) > fit:
+                name = name[:max(0, fit - 1)] + "…"
+            lines.append(f"    ↓ {name}{tail}"[:width])
+        if len(shown) < len(active):
+            lines.append(f"    … and {len(active) - len(shown)} more")
+        return lines
 
     def clear(self):
         if self.shown:
-            sys.stdout.write("\r\033[K")
+            sys.stdout.write("\r\033[J")
             sys.stdout.flush()
 
 
@@ -357,9 +382,22 @@ class ByteProgress:
         self.total, self.done = sum(self.size), 0  # bytes in all jobs, and moved so far (kept as a running sum)
         self.received = self.written = 0  # totals across all jobs; written stays 0 unless the job reports it
         self.lock = threading.Lock()
+        self.started, self.finished = {}, set()  # in flight (job -> None, in start order), and done for good
+
+    def start(self, i):
+        with self.lock:
+            if i not in self.finished:
+                self.started.setdefault(i, None)
+
+    def active(self, names):
+        """(name, moved, size) of each job in flight, oldest start first."""
+        with self.lock:
+            return [(names[i], self.moved[i], self.size[i]) for i in self.started]
 
     def add(self, i, n):
         with self.lock:
+            if i not in self.finished:
+                self.started.setdefault(i, None)  # uploads have no start hook: first bytes are the start
             step = min(self.size[i] - self.moved[i], n)
             self.moved[i] += step
             self.done += step
@@ -373,6 +411,8 @@ class ByteProgress:
         with self.lock:
             self.done += self.size[i] - self.moved[i]
             self.moved[i] = self.size[i]
+            self.started.pop(i, None)
+            self.finished.add(i)
 
     def fraction(self):
         return self.done / self.total
