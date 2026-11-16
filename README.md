@@ -470,6 +470,8 @@ scraper-written media (including its Onion and Slot images) is overwritten or de
 `--translated` says the ROM is a fan translation: its entry is titled `<name> - Translated` and marked
 `"translated": true`. A ROM in `ignored.json` is taken off that list first so it can be matched; without `--translated`
 an ignored ROM can't be.
+The mark sticks across re-scrapes; to remove it, edit the entry in storage's `scrapes/<system>/metadata.json` (delete
+`"translated"` and the suffix).
 
 **Unknown ROMs.** A ROM ScreenScraper doesn't know is remembered and skipped on later runs. `--retry` tries them again;
 `sync-roms scrape review [SYSTEM]` goes through them with non-games (see below), so you can search each one under
@@ -486,11 +488,10 @@ a terminal you're asked whether to review them now; `sync-roms scrape review [SY
 ROMs, any time (an unknown ROM that has a metadata entry by now, or is gone from storage, is dropped; an unmounted
 share fails and drops nothing). A run that leaves ROMs unmatched ends with both commands. Each ROM shows its position
 (`3 of 120`); `i` ignores it, `s` searches ScreenScraper under another name (Enter takes the suggested name) and
-scrapes the game you pick (with the review's login, no quota check and no results list), `t` searches like `s` and scrapes the pick as a fan
-translation (`--translated`), `k` (the default) leaves it
-for later (ROMs kept for later come after the others in the next review), `b` takes back the last `i` and goes back to
-that ROM (a search already scraped stays: `scrape match` changes it), `q` stops, and `I` ignores it and every one
-after it. Ignores are written when the review ends, by `q`, Ctrl-C or the last ROM. Ignored ROMs are listed in
+scrapes the game you pick (with the review's login, no quota check and no results list), `t` searches like `s` and
+scrapes the pick as a fan translation (`--translated`), `k` (the default) leaves it for later (ROMs kept for later come
+after the others in the next review), `b` takes back the last `i` and goes back to that ROM (a search already scraped
+stays: `scrape match` changes it), `q` stops, and `I` ignores it and every one after it. Ignores are written when the review ends, by `q`, Ctrl-C or the last ROM. Ignored ROMs are listed in
 `ignored.json` at the root of storage, shared by everyone using that storage: sync-roms never shows, syncs, uploads or
 scrapes them, and never deletes their files. Each run checks the file and keeps a copy in the data folder. To stop
 ignoring a ROM, remove it from `ignored.json` in storage.

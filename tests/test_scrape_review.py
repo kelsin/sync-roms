@@ -101,7 +101,7 @@ class ReviewTest(ReviewBase):
         self.assertEqual(seen, {"query": "a", "game": "42"})
         self.assertEqual(self.pending(), ["gb/b.zip", "gb/c.zip"])
 
-    def test_translated_search_marks_entry(self):
+    def test_translated_search_passes_flag(self):
         self.answers("t", "", "k", "k")
         seen = {}
 
