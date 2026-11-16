@@ -1,5 +1,29 @@
 # Changelog
 
+## [3.0.0](https://github.com/kelsin/sync-roms/compare/v2.16.0...v3.0.0) (2026-11-16)
+
+
+### ⚠ BREAKING CHANGES
+
+* remove the slot layout ([#323](https://github.com/kelsin/sync-roms/issues/323))
+* **upload:** drop upload scrapes now that scraping is native ([#321](https://github.com/kelsin/sync-roms/issues/321))
+
+### :video_game: Features
+
+* **scrape:** add dedup-names skill and a qualifier for same-named ROMs ([#325](https://github.com/kelsin/sync-roms/issues/325)) ([93839df](https://github.com/kelsin/sync-roms/commit/93839df245b0a757873bb5b8717ecfdc040b5e5a))
+* **skills:** add match-translations skill for fan-translated scrape reviews ([#324](https://github.com/kelsin/sync-roms/issues/324)) ([6e603fd](https://github.com/kelsin/sync-roms/commit/6e603fdde2270ff3ef6c0443096f7a28e28702f4))
+* **upload:** drop upload scrapes now that scraping is native ([#321](https://github.com/kelsin/sync-roms/issues/321)) ([eb22b9b](https://github.com/kelsin/sync-roms/commit/eb22b9bf573ec0d7dbcf5672f0068120a8850f21))
+
+
+### :book: Documentation
+
+* document the Claude Code skills in the readme ([#326](https://github.com/kelsin/sync-roms/issues/326)) ([f0c979c](https://github.com/kelsin/sync-roms/commit/f0c979c2859301e94951dc706d5e0dfd49086e03))
+
+
+### :hammer_and_wrench: Code Refactoring
+
+* remove the slot layout ([#323](https://github.com/kelsin/sync-roms/issues/323)) ([5e2c4e3](https://github.com/kelsin/sync-roms/commit/5e2c4e3e3d6a731a7ee6b3e238e179827acd75ea))
+
 ## [2.16.0](https://github.com/kelsin/sync-roms/compare/v2.15.0...v2.16.0) (2026-11-16)
 
 
