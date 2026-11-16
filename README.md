@@ -752,6 +752,19 @@ turns minutes of listing and stat calls into an instant read.
 
 An old `~/.sync-roms/sizes.json` is no longer read; delete it.
 
+## Claude Code skills
+
+The repo ships [Claude Code](https://claude.com/claude-code) skills in `.claude/skills/` for upkeep that needs
+judgment. Run one from the repo root with `/<name>`, or just describe the task. The storage skills show what they
+would change and write nothing until you approve.
+
+| Skill | Use it to |
+|---|---|
+| `dedup-names` | Find ROMs of one system shown under the same scraped name (fan translations, regional releases, mis-scrapes) and give each a qualifier, or re-scrape the ones matched to the wrong game. Only edits `scrapes/<system>/metadata.json`. |
+| `match-translations` | Match the fan-translated (`[T-En]`) ROMs waiting in `sync-roms scrape review` to ScreenScraper games under their original Japanese titles, titled `<name> - Translated`. |
+| `refresh-drivers` | Re-research the suggested Adreno GPU (turnip) drivers in `drivers.json` and the devices' `gpu` ids, and open a PR if anything changed. |
+| `update-variants` | After new uploads, find ROMs that are variants of set games (remasters, enhanced ports, translations) and add them to the games' `variants`; also flags variants no longer in storage. Remembers judged ROMs in `~/.sync-roms/variants-checked.json`. |
+
 ## How it works
 
 - Reads the systems, layouts, devices and BIOS requirements from `src/sync_roms/data/` in the package, each device's
