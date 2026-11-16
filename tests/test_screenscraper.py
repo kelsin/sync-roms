@@ -141,6 +141,52 @@ class CappedResp(Resp):
         self.headers = {"Content-Length": str(length)} if length is not None else {}
 
 
+class TranslationTest(unittest.TestCase):
+    def test_tags_detected(self):
+        for rom in (
+            "Cave Noire (T).zip",
+            "X [T].zip",
+            ".hack-Link (Japan) [T-En by Dothackers v1.0.2].chd",
+            "X [T+Eng].zip",
+            "X (T-En).zip",
+            "Mother 3 (English v1.3a).zip",
+            "Pokemon Card GB2 (English Fan Translation).zip",
+            "River City Girls Zero (USA) (RCG Translation, Switch).zip",
+            "Disc 1/Game [T-En].cue",
+        ):
+            with self.subTest(rom=rom):
+                self.assertTrue(ss.is_translation(rom))
+
+    def test_lookalikes_not_detected(self):
+        for rom in (
+            "Klax (USA, Europe) (Tengen).zip",
+            "Just in Time Translations - Say It in 6 Languages (USA) (En,Ja,Fr,De,Es,It,Zh).zip",
+            "Thracia 776 - Lil' Manster (v1.08).zip",
+            "Tetris (USA).zip",
+            "(T) Folder/Game (USA).zip",
+        ):
+            with self.subTest(rom=rom):
+                self.assertFalse(ss.is_translation(rom))
+
+    def test_mark_adds_suffix_and_flag(self):
+        self.assertEqual(
+            ss.mark_translated({"name": "Sakura Taisen", "genre": "RPG"}),
+            {"name": "Sakura Taisen - Translated", "genre": "RPG", "translated": True},
+        )
+
+    def test_mark_is_idempotent(self):
+        once = ss.mark_translated({"name": "Sakura Taisen"})
+        self.assertEqual(ss.mark_translated(once), once)
+
+    def test_mark_without_name(self):
+        self.assertEqual(ss.mark_translated({"desc": "d"}), {"desc": "d", "translated": True})
+
+    def test_mark_does_not_change_input(self):
+        entry = {"name": "A"}
+        ss.mark_translated(entry)
+        self.assertEqual(entry, {"name": "A"})
+
+
 class TextTests(unittest.TestCase):
     def test_control_characters_stripped(self):
         raw = {"noms": [{"region": "wor", "text": "Ga\x00me\x1f \ufffeOne\x0b"}], "synopsis": [{"langue": "en", "text": "a\tb\nc\x07"}]}

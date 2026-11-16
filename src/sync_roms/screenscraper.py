@@ -187,6 +187,34 @@ def _release_date(text):
     return f"{y}-{m:0>2}-{d:0>2}" if m.isdigit() and d.isdigit() else f"{y}-01-01"
 
 
+# A whole (...) or [...] tag that marks a fan translation: T, T-En/T+En with any
+# trailing text, English v<version>, or any tag with the word Translation.
+_TRANSLATION_TAG = re.compile(
+    r"[(\[](?:T|T[-+]En[^)\]]*|English v[^)\]]*|[^)\]]*\bTranslation\b[^)\]]*)[)\]]",
+    re.IGNORECASE,
+)
+TRANSLATED = " - Translated"
+
+
+def is_translation(rom):
+    """Whether the ROM's file name (after the last `/`) carries a fan-translation tag.
+
+    Counts `(T)`, `[T]`, `T-En...`/`T+En...` tags, `(English v...)` and any tag
+    containing the word Translation. Other tags like `(Tengen)` and title words
+    like "Translations" do not count.
+    """
+    return bool(_TRANSLATION_TAG.search(rom.rsplit("/", 1)[-1]))
+
+
+def mark_translated(entry):
+    """A copy of a metadata entry flagged `translated`, its name ending in " - Translated"."""
+    out = dict(entry, translated=True)
+    name = out.get("name")
+    if name and not name.endswith(TRANSLATED):
+        out["name"] = name + TRANSLATED
+    return out
+
+
 def _meta(raw, regions):
     """The metadata fields of an unwrapped game dict."""
     prefs = tuple(regions) + FALLBACK_NAME_REGIONS
