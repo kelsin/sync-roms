@@ -101,6 +101,31 @@ class ReviewTest(ReviewBase):
         self.assertEqual(seen, {"query": "a", "game": "42"})
         self.assertEqual(self.pending(), ["gb/b.zip", "gb/c.zip"])
 
+    def test_translated_search_passes_flag(self):
+        self.answers("t", "", "k", "k")
+        seen = {}
+
+        def match(args):
+            seen["translated"] = args.translated
+            scrape_state.save_match(args.system, args.rom, 42)
+            return 0
+        self.patch(scrape_online, "resolve_manual", lambda *a: 42)
+        self.patch(scrape_online, "match_command", match)
+        self.review()
+        self.assertEqual(seen, {"translated": True})
+        self.assertEqual(self.pending(), ["gb/b.zip", "gb/c.zip"])
+
+    def test_search_is_not_translated(self):
+        self.answers("s", "", "k", "k", "k")
+        seen = []
+        self.patch(scrape_online, "resolve_manual", lambda *a: 42)
+        self.patch(scrape_online, "match_command", lambda args: seen.append(args.translated) or 1)
+        self.review()
+        self.assertEqual(seen, [False])
+
+    def test_prompt_lists_translated(self):
+        self.assertIn("[t]ranslated", scrape_review.PROMPT)
+
     def test_search_scrapes_without_asking_again(self):
         self.answers("s", "", "k", "k", "k")
         seen = []

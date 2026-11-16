@@ -126,6 +126,25 @@ class AddTest(IgnoreList):
         self.assertTrue(ignore.is_ignored("gb/c.zip"))
 
 
+class RemoveTest(IgnoreList):
+    def test_remove_drops_paths_and_empty_systems(self):
+        self.store_list({"gb": ["a.zip"], "snes": ["b.zip", "c.zip"]})
+        self.assertTrue(ignore.is_ignored("gb/a.zip"))
+        self.assertEqual(ignore.remove({"gb": ["a.zip"], "snes": ["b.zip"]}), 2)
+        with open(os.path.join(self.root.name, ignore.KEY)) as f:
+            self.assertEqual(json.load(f), {"snes": ["c.zip"]})
+        self.assertFalse(ignore.is_ignored("gb/a.zip"))
+        self.assertTrue(ignore.is_ignored("snes/c.zip"))
+        self.assertEqual(self.local()["ignored"], {"snes": ["c.zip"]})
+
+    def test_remove_unknown_path_counts_zero(self):
+        self.store_list({"gb": ["a.zip"]})
+        self.assertEqual(ignore.remove({"gb": ["x.zip"], "nes": ["y.zip"]}), 0)
+        with open(os.path.join(self.root.name, ignore.KEY)) as f:
+            self.assertEqual(json.load(f), {"gb": ["a.zip"]})
+        self.assertTrue(ignore.is_ignored("gb/a.zip"))
+
+
 class TagTest(StorageFolder):
     def test_tag_for_folder_changes_with_content(self):
         self.put("gba/t.zip", 2)

@@ -18,7 +18,7 @@ from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
 
 from botocore.exceptions import ClientError
 
-from . import inventory, runtime, s3, scrape_files, scrape_plan, scrape_state, screenscraper, store, ui, upload, usersettings
+from . import ignore, inventory, runtime, s3, scrape_files, scrape_plan, scrape_state, screenscraper, store, ui, upload, usersettings
 
 CHUNK = 8 << 20
 
@@ -702,10 +702,11 @@ def _read_metadata(name, rerun):
     return (None, why) if why else (remote, None)
 
 
-def record(system, pending, outcomes, listing, index, skip, replace=False, rerun=RERUN, fill=False):
+def record(system, pending, outcomes, listing, index, skip, replace=False, rerun=RERUN, fill=False, translated=frozenset()):
     """Write pending's entries (see run_batch) to the system's metadata.json, one read and one write for all of them,
     and empty pending. With replace the entries replace the old ones and the old scraper media they leave behind is
     deleted. fill: ROMs that already have an entry keep its fields; ScreenScraper's only add the missing ones.
+    translated: ROMs marked translated (see screenscraper.mark_translated) besides those whose tags or old entry say so.
     Returns (failures, whether the system's remaining ROMs must be skipped)."""
     name = system["bucket"]
     scrape_state.flush_unknown()
@@ -720,6 +721,8 @@ def record(system, pending, outcomes, listing, index, skip, replace=False, rerun
     for rom, (_, meta, _) in done.items():  # remote is ours: changed in place
         old = remote.get(rom, {})
         remote[rom] = dict(meta) if replace else {**old, **({**meta, **old} if fill else meta)}
+        if rom in translated or screenscraper.is_translation(rom) or old.get("translated"):
+            remote[rom] = screenscraper.mark_translated(remote[rom])
     try:
         s3.put_text(metadata_key(name), scrape_plan.dump_json(remote))
     except s3.ERRORS as e:
@@ -761,12 +764,13 @@ def _stems(batch):
 
 
 def scrape_system(client, system, items, threads, skip, shrink, outcomes, listing, index, replace=False, forced=None,
-                  rerun=RERUN, fill=False, metadata=None):
+                  rerun=RERUN, fill=False, metadata=None, translated=frozenset()):
     """Scrape one system's ROMs on one pool of threads, in batches: the next batch is scraped while the last one uploads,
     so no thread waits for a batch's slowest ROM. Entries are written to metadata.json every METADATA_INTERVAL seconds, when
     the system is done and when the run stops. Returns (failures, the error that stopped the run or None: a KeyboardInterrupt
     on Ctrl-C, once what finished is saved; a second Ctrl-C is raised). Arguments: see run_batch;
-    index: scrape_plan.scrape_index(listing); metadata: the system's metadata.json if the caller already loaded it."""
+    index: scrape_plan.scrape_index(listing); metadata: the system's metadata.json if the caller already loaded it;
+    translated: see record."""
     name = system["bucket"]
     # a metadata.json that can't be used fails before any quota is spent
     why = _read_metadata(name, rerun)[1] if metadata is None else _bad_entries(name, metadata)
@@ -799,18 +803,18 @@ def scrape_system(client, system, items, threads, skip, shrink, outcomes, listin
                 scrape_state.flush_nomedia()
                 last_write = time.monotonic()
                 if pending:
-                    n, halt = record(system, pending, outcomes, listing, index, skip, replace, rerun, fill)
+                    n, halt = record(system, pending, outcomes, listing, index, skip, replace, rerun, fill, translated=translated)
                     failed += n
                     if halt:
                         return failed, halted
-        n, _ = record(system, pending, outcomes, listing, index, skip, replace, rerun, fill)
+        n, _ = record(system, pending, outcomes, listing, index, skip, replace, rerun, fill, translated=translated)
         return failed + n, halted
     except BaseException:  # Ctrl-C, a storage failure: queued ROMs never start, running ones stop at their next stop check
         stop.set()
         ex.shutdown(wait=True, cancel_futures=True)
         hasher.shutdown(wait=True, cancel_futures=True)
         with contextlib.suppress(SystemExit):  # what was uploaded still gets its entries
-            record(system, pending, outcomes, listing, index, skip, replace, rerun, fill)
+            record(system, pending, outcomes, listing, index, skip, replace, rerun, fill, translated=translated)
         raise
     finally:
         stop.set()
@@ -824,9 +828,9 @@ def scrape_system(client, system, items, threads, skip, shrink, outcomes, listin
 
 
 def run_scrape(client, systems, todo, skip, ask=True, replace=False, forced=None, rerun=RERUN, outcomes=None, fill=False,
-               listings=None, metadata=None, brief=False):
+               listings=None, metadata=None, brief=False, translated=frozenset()):
     """Confirm (unless not ask), then scrape todo ({system: [(ROM, size, etag)]}) in batches. Returns the exit code.
-    replace, forced, rerun, fill: see run_batch and record. outcomes: filled with {system: {ROM: how, or None when unknown}}.
+    replace, forced, rerun, fill, translated: see run_batch and record. outcomes: filled with {system: {ROM: how, or None when unknown}}.
     listings: {system: {key: size} of scrapes/<system>/} and metadata: {system: its metadata.json} the caller already has.
     brief: a search from `scrape review`: no quota request (one thread) and no results block."""
     count = sum(len(v) for v in todo.values())
@@ -870,7 +874,7 @@ def run_scrape(client, systems, todo, skip, ask=True, replace=False, forced=None
     for name, items in sorted(todo.items()):
         outcomes[name] = {}
         n, halted = scrape_system(client, systems[name], items, max(1, quota.max_threads), skip, shrink, outcomes[name],
-                                  listings[name], indexes[name], replace, forced, rerun, fill, metadata.get(name))
+                                  listings[name], indexes[name], replace, forced, rerun, fill, metadata.get(name), translated)
         failed += n
         if halted:
             break
@@ -1003,7 +1007,8 @@ def match_command(args):
     """`scrape match SYSTEM ROM GAME`: save which ScreenScraper game a ROM is (GAME is a game id, or a name to search
     and pick from), then scrape that ROM.
 
-    args: system (storage folder name), rom (ROM path in it, e.g. "Game (USA).zip"), game, and optionally skip_media
+    args: system (storage folder name), rom (ROM path in it, e.g. "Game (USA).zip"), game, and optionally skip_media,
+    translated (a fan translation: titled "<name> - Translated", and taken off ignored.json first when it is there)
     and dry_run (resolve the game, save and write nothing), confirmed (don't ask) and client (the client of `scrape
     review`, whose search this is: the run makes no quota request and prints no results block).
     """
@@ -1012,14 +1017,23 @@ def match_command(args):
     name = system["bucket"]
     if "screenscraper" not in system:
         ui.fail(f"{name} has no ScreenScraper system id, so it can't be scraped", 2)
+    translated, dry_run = getattr(args, "translated", False), getattr(args, "dry_run", False)
     try:
+        key = f"{name}/{args.rom}"
+        unignore = translated and ignore.is_ignored(key) and inventory.tag(key) is not None
+        if unignore and not dry_run:
+            ignore.remove({name: [args.rom]})  # before the listing, which leaves ignored ROMs out
+            print(f"🙉 Took {key} off {ignore.KEY}")
         listing = inventory.etags(name + "/")
     except s3.ERRORS as e:
         ui.fail(f"{e}", 3)
-    if args.rom not in listing:
+    if unignore and dry_run:
+        print(ui.yellow(f"🧪 Dry run — would take {key} off {ignore.KEY}"))
+    elif args.rom not in listing:
         ui.fail(f"No {name}/{args.rom} in {s3.location()}", 2)
     client = getattr(args, "client", None) or make_client()
-    rerun = "sync-roms scrape match " + shlex.join([name, args.rom, args.game])
+    flags = ["--translated"] if translated else []
+    rerun = "sync-roms scrape match " + shlex.join([name, args.rom, args.game, *flags])
     try:
         game_id = resolve_manual(_RomClient(client), system, args.game)
     except screenscraper.NotFound as e:
@@ -1032,8 +1046,8 @@ def match_command(args):
         return 1
     except screenscraper.ApiError as e:
         ui.fail(f"{e}", 3)
-    rerun = "sync-roms scrape match " + shlex.join([name, args.rom, str(game_id)])
-    if getattr(args, "dry_run", False):
+    rerun = "sync-roms scrape match " + shlex.join([name, args.rom, str(game_id), *flags])
+    if dry_run:
         print(ui.yellow(f"🧪 Dry run — would match {name}/{args.rom} to ScreenScraper game {game_id} and scrape it"))
         return 0
     stem = os.path.splitext(args.rom)[0]
@@ -1071,7 +1085,7 @@ def match_command(args):
     outcomes = {}
     code = run_scrape(client, {name: system}, {name: [(args.rom, size, etag)]}, skip, ask=False, replace=replace,
                       forced={args.rom: game_id}, rerun=rerun, outcomes=outcomes, listings={name: media}, metadata={name: data},
-                      brief=getattr(args, "client", None) is not None)
+                      brief=getattr(args, "client", None) is not None, translated={args.rom} if translated else frozenset())
     how = outcomes.get(name, {}).get(args.rom, "")
     if how == "manual":  # saved only once the ROM is scraped as that game
         scrape_state.save_match(name, args.rom, game_id)
