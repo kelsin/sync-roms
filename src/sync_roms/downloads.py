@@ -1,10 +1,11 @@
 """Download planning, running and local ROM scanning."""
 import contextlib
 import os
+import queue
 import re
 import sys
 import time
-from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
+from concurrent.futures import ThreadPoolExecutor
 
 from . import external, inventory, runtime, s3, ui
 
@@ -124,35 +125,33 @@ def run_downloads(todo, label, icon, base, failures=None):
         s3.download(j, lambda n: moved.add(i, n), moved.wrote)
 
     try:
+        finishing = queue.Queue()  # each future queues itself as it ends: a wait() per file would be O(files in flight)
         futs += [(j, ex.submit(fetch, i, j)) for i, j in enumerate(todo)]
         index = {f: i for i, (_, f) in enumerate(futs)}
-        pending, finished = set(index), 0
-        while pending:
-            done, pending = wait(pending, timeout=ui.POLL, return_when=FIRST_COMPLETED)
-            if not done:
-                bar.draw(finished)
-            for f in sorted(done, key=index.get):
-                j = todo[index[f]]
-                finished += 1
-                prog = ui.dim(f"[{finished}/{len(todo)}]")
-                moved.finish(index[f])
-                try:
-                    f.result()
-                    src = j[0].split("/", 1)[0]
-                    rel = os.path.relpath(j[1], base)
-                    shown = j[0] if rel.split(os.sep, 1)[0] == src else f"{src} → {rel}"
-                    bar.say(f"  {prog} ✅ {shown}")
-                except Exception as e:
-                    failed += 1
-                    reason = (getattr(e, 'stderr', None) or str(e)).strip() + failure_hint(e)
-                    if failures is not None:
-                        failures.append((j[0], reason))
-                    line = f"  {prog} ❌ {ui.red(j[0])}: {reason}"
-                    if ui.QUIET:
-                        ui.failure(line)
-                    else:
-                        bar.say(line)
-                bar.draw(finished)
+        for _, f in futs:
+            f.add_done_callback(finishing.put)
+        for finished in range(1, len(todo) + 1):
+            f = ui.wait_drawing(bar, finished - 1, finishing.get)
+            j = todo[index[f]]
+            prog = ui.dim(f"[{finished}/{len(todo)}]")
+            moved.finish(index[f])
+            try:
+                f.result()
+                src = j[0].split("/", 1)[0]
+                rel = os.path.relpath(j[1], base)
+                shown = j[0] if rel.split(os.sep, 1)[0] == src else f"{src} → {rel}"
+                bar.say(f"  {prog} ✅ {shown}")
+            except Exception as e:
+                failed += 1
+                reason = (getattr(e, 'stderr', None) or str(e)).strip() + failure_hint(e)
+                if failures is not None:
+                    failures.append((j[0], reason))
+                line = f"  {prog} ❌ {ui.red(j[0])}: {reason}"
+                if ui.QUIET:
+                    ui.failure(line)
+                else:
+                    bar.say(line)
+            bar.draw(finished)
     except KeyboardInterrupt:
         ex.shutdown(wait=False, cancel_futures=True)
         running = [(j, f) for j, f in futs if not f.done()]

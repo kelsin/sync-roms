@@ -6,7 +6,7 @@ import queue
 import tempfile
 import threading
 import time
-from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
+from concurrent.futures import ThreadPoolExecutor
 
 from botocore.exceptions import BotoCoreError, ClientError
 
@@ -100,25 +100,23 @@ def run_copies(todo, quiet=False):
     failed, futs = 0, []
     ex = ThreadPoolExecutor(runtime.WORKERS)
     try:
+        finishing = queue.Queue()  # each future queues itself as it ends: a wait() per file would be O(files in flight)
         futs += [ex.submit(copy, n) for n in range(len(order))]
         index = {f: n for n, f in enumerate(futs)}
-        pending, finished = set(index), 0
-        while pending:
-            done, pending = wait(pending, timeout=ui.POLL, return_when=FIRST_COMPLETED)
-            if not done:
-                bar.draw(finished)
-            for f in sorted(done, key=index.get):
-                job, error = f.result()
-                finished += 1
-                moved.finish(index[f])
-                prog = ui.dim(f"[{finished}/{len(todo)}]")
-                if error is None:
-                    if not quiet:
-                        bar.say(f"  {prog} ✅ {job[0]}")
-                else:
-                    failed += 1
-                    _say_failure(bar, quiet, f"  {prog} ❌ {ui.red(job[0])}: {str(error).strip()}")
-                bar.draw(finished)
+        for f in futs:
+            f.add_done_callback(finishing.put)
+        for finished in range(1, len(todo) + 1):
+            f = ui.wait_drawing(bar, finished - 1, finishing.get)
+            job, error = f.result()
+            moved.finish(index[f])
+            prog = ui.dim(f"[{finished}/{len(todo)}]")
+            if error is None:
+                if not quiet:
+                    bar.say(f"  {prog} ✅ {job[0]}")
+            else:
+                failed += 1
+                _say_failure(bar, quiet, f"  {prog} ❌ {ui.red(job[0])}: {str(error).strip()}")
+            bar.draw(finished)
     except KeyboardInterrupt:
         ex.shutdown(wait=False, cancel_futures=True)
         running = [f for f in futs if f.running()]
