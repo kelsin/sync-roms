@@ -506,6 +506,39 @@ class CopyInterruptTest(unittest.TestCase):
         self.assertIsInstance(error, SystemExit)
         self.assertEqual(exits, [1])
 
+    def test_a_copy_that_finishes_after_ctrl_c_leaves_the_in_flight_list(self):
+        started, release_a, release_b = threading.Semaphore(0), threading.Event(), threading.Event()
+        after, interrupted = [], []
+
+        def write_file(key, write):
+            started.release()
+            (release_a if "a.gba" in key else release_b).wait(5)
+
+        def draw(self_, done):
+            if not interrupted:
+                started.acquire(timeout=5)
+                started.acquire(timeout=5)
+                interrupted.append(1)
+                raise KeyboardInterrupt
+            release_a.set()  # only once the in-flight list is taken, so a.gba is still in it
+            if done == 1:
+                after.append([n for n, _, _ in self_.active()])
+                if len(after) >= 2:
+                    release_b.set()
+
+        todo = [("gba/a.gba", "/x/a.gba", 2), ("gba/b.gba", "/x/b.gba", 1)]
+        with contextlib.ExitStack() as st:
+            st.enter_context(mock.patch.object(s3, "write_file", write_file))
+            st.enter_context(mock.patch.object(ui.ProgressBar, "draw", draw))
+            st.enter_context(mock.patch.object(upload.time, "sleep", lambda s: None))
+            st.enter_context(mock.patch.object(runtime, "ROOT", "/storage"))
+            st.enter_context(mock.patch.object(runtime, "WORKERS", 2))
+            st.enter_context(mock.patch.object(ui, "POLL", 0.001))
+            st.enter_context(contextlib.redirect_stdout(io.StringIO()))
+            with self.assertRaises(KeyboardInterrupt):
+                upload.run_copies(todo)
+        self.assertEqual(after[-1], ["gba/b.gba"])  # a draw can land between a.gba ending and its finish; the next one can't
+
 
 class CopyOrderTest(unittest.TestCase):
     def test_a_copy_that_finishes_first_prints_first_while_a_slow_one_is_listed(self):

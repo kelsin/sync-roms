@@ -240,6 +240,45 @@ class DownloadInterruptTest(unittest.TestCase):
             self.run_interrupted({1}, fail=True)
         self.assertIn("gba/a.zip", err.getvalue())
 
+    def test_a_file_that_finishes_after_ctrl_c_leaves_the_in_flight_list(self):
+        started, release_a, release_b, a_said = threading.Semaphore(0), threading.Event(), threading.Event(), threading.Event()
+        after, interrupted, real_say = [], [], ui.ProgressBar.say
+
+        def download(job, cb, wrote=None):
+            started.release()
+            (release_a if "a.zip" in job[0] else release_b).wait(5)
+
+        def say(self_, line):
+            if "✅ gba/a.zip" in line:
+                a_said.set()
+            real_say(self_, line)
+
+        def draw(self_, done):
+            if not interrupted:
+                started.acquire(timeout=5)
+                started.acquire(timeout=5)
+                interrupted.append(1)
+                raise KeyboardInterrupt
+            release_a.set()  # only once the in-flight list is taken, so a.zip is still in it
+            if a_said.is_set():
+                after.append([n for n, _, _ in self_.active()])
+                if len(after) >= 2:
+                    release_b.set()
+
+        with contextlib.ExitStack() as st:
+            st.enter_context(mock.patch.object(s3, "download", download))
+            st.enter_context(mock.patch.object(ui.ProgressBar, "say", say))
+            st.enter_context(mock.patch.object(ui.ProgressBar, "draw", draw))
+            st.enter_context(mock.patch.object(downloads.time, "sleep", lambda s: None))
+            st.enter_context(mock.patch.object(runtime, "WORKERS", 2))
+            st.enter_context(mock.patch.object(ui, "POLL", 0.001))
+            st.enter_context(contextlib.redirect_stdout(io.StringIO()))
+            jobs = [("gba/a.zip", "/tmp/x/a.zip", 5), ("gba/b.zip", "/tmp/x/b.zip", 5)]
+            with self.assertRaises(KeyboardInterrupt):
+                downloads.run_downloads(jobs, "ROMs", "i", "/tmp/x")
+        self.assertTrue(after)
+        self.assertEqual(after[0], ["gba/b.zip"])
+
     def test_abort_removes_the_part_files_of_unfinished_downloads_and_flushes(self):
         started, release, seen = threading.Semaphore(0), threading.Event(), []
 

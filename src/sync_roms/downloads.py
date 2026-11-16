@@ -154,12 +154,13 @@ def run_downloads(todo, label, icon, base, failures=None):
             bar.draw(finished)
     except KeyboardInterrupt:
         ex.shutdown(wait=False, cancel_futures=True)
-        running = [(j, f) for j, f in futs if not f.done()]
+        running = [(i, j, f) for i, (j, f) in enumerate(futs) if not f.done()]
         bar.say(ui.yellow(f"🛑 Interrupted — finishing {len(running)} download(s) in flight (partly downloaded files restart on the next run). ^C again to abort now."))
         try:
             while running:
-                for j, f in [r for r in running if r[1].done()]:
-                    running.remove((j, f))
+                for i, j, f in [r for r in running if r[2].done()]:
+                    running.remove((i, j, f))
+                    moved.finish(i)
                     if f.exception() is None:
                         bar.say(f"  ✅ {j[0]}")
                     elif ui.QUIET:
@@ -170,7 +171,7 @@ def run_downloads(todo, label, icon, base, failures=None):
                 time.sleep(ui.POLL)
         except KeyboardInterrupt:
             bar.clear()
-            for j, _ in running:  # hard_exit skips s3.download's own cleanup
+            for _, j, _ in running:  # hard_exit skips s3.download's own cleanup
                 with contextlib.suppress(OSError):
                     os.remove(j[1] + ".part")
             print(ui.red("🛑 Aborted"))

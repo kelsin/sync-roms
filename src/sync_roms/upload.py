@@ -119,10 +119,13 @@ def run_copies(todo, quiet=False):
             bar.draw(finished)
     except KeyboardInterrupt:
         ex.shutdown(wait=False, cancel_futures=True)
-        running = [f for f in futs if f.running()]
+        running = [(n, f) for n, f in enumerate(futs) if f.running()]
         bar.say(ui.yellow(f"🛑 Interrupted — finishing {len(running)} copy(ies) in flight. ^C again to abort now."))
         try:
-            while any(f.running() for f in running):
+            while running:
+                for n, f in [r for r in running if r[1].done()]:
+                    running.remove((n, f))
+                    moved.finish(n)
                 bar.draw(sum(f.done() for f in futs))
                 time.sleep(ui.POLL)
         except KeyboardInterrupt:
