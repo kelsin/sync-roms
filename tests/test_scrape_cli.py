@@ -97,6 +97,17 @@ class Modes(unittest.TestCase):
         self.refused("scrape", "--set-credentials", "--dry-run")
         self.refused("scrape", "gba", "--system", "nes")
 
+    def test_translated_only_applies_to_scrape_match(self):
+        self.assertEqual(self.modes("scrape", "match", "gba", "a.zip", "7", "--translated"), "--scrape-match")
+        self.assertEqual(self.modes("scrape", "match", "--translated", "gba", "a.zip", "7"), "--scrape-match")
+        for argv in (["--translated"], ["scrape", "--translated"], ["scrape", "review", "--translated"],
+                     ["scrape", "missing", "--translated"], ["upload", "roms", "--translated"]):
+            err = io.StringIO()
+            with self.assertRaises(SystemExit) as cm, mock.patch("sys.stderr", err):
+                self.modes(*argv)
+            self.assertEqual(cm.exception.code, 2)
+            self.assertIn("--translated only applies to `scrape match`", err.getvalue())
+
     def test_a_path_given_as_the_system_is_refused(self):
         for argv in (["/Volumes/SD", "--scrape"], ["scrape", "--system", "a/b"], ["scrape", "missing", "/Volumes/SD"],
                      ["--scrape-missing", "/Volumes/SD"], ["--scrape-review", "/Volumes/SD"],
@@ -148,6 +159,15 @@ class Dispatch(Isolated):
                                ens=(usersettings, "ensure_bucket", mock.Mock()))
         self.assertEqual(code, 0)
         self.assertEqual((seen["system"], seen["rom"], seen["game"]), ("gba", "a.zip", "Metroid"))
+        self.assertFalse(seen["translated"])
+
+    def test_match_runs_with_translated(self):
+        seen = {}
+        code, _, _ = self.sync(["scrape", "match", "gba", "a.zip", "7", "--translated"],
+                               cmd=(scrape_online, "match_command", lambda a: seen.update(vars(a)) or 0),
+                               ens=(usersettings, "ensure_bucket", mock.Mock()))
+        self.assertEqual(code, 0)
+        self.assertEqual((seen["system"], seen["rom"], seen["game"], seen["translated"]), ("gba", "a.zip", "7", True))
 
     def test_scrape_and_scrape_missing_take_the_system_either_way(self):
         for argv, fn in ((["scrape", "gba"], "scrape_command"), (["scrape", "--system", "gba"], "scrape_command"),
@@ -299,7 +319,7 @@ class Completion(unittest.TestCase):
         commands_line = re.search(r'-eq 1 \].*?compgen -W "([^"]*)"', text).group(1).split()
         self.assertIn("scrape", commands_line)
         self.assertIn('scrape) COMPREPLY=($(compgen -W "match review missing"', text)
-        for word in ("--retry", "--all", "--skip-media", "--set-credentials"):
+        for word in ("--retry", "--all", "--skip-media", "--set-credentials", "--translated"):
             self.assertIn(word, text)
 
 

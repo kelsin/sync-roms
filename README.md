@@ -348,6 +348,7 @@ On `esde` and `emudeck` cards every Vita game zip in `psvita/` gets a `.psvita` 
 | `--retry` | `scrape`: also try the ROMs ScreenScraper didn't know before (ROMs whose lookup failed are always tried again; non-games never are); with `--fill-media`, also the ROMs missing only media ScreenScraper didn't offer |
 | `--fill-media` | `scrape`: also scrape ROMs that have metadata but lack some media type in storage; their metadata is kept. Media types ScreenScraper didn't offer for a ROM are remembered, and a ROM missing only those isn't asked for again until `--retry` |
 | `--skip-media TYPES` | `scrape`, `scrape match`: comma-separated media folders not to download (e.g. `manuals,fanart`) |
+| `--translated` | `scrape match`: the ROM is a fan translation: its title becomes `<name> - Translated` and it is marked `"translated": true`; a ROM in `ignored.json` is taken off it first |
 | `--set-credentials` | `scrape`: ask for your ScreenScraper username and password and save them in `settings.json` |
 | `--full` | `cache update`: in a storage folder, list every folder and stat every file, not only the changed folders and the files the cache doesn't have (see Storage cache) |
 | `--count N` | `download pico8`: stop after N carts to add or upgrade |
@@ -466,6 +467,9 @@ metadata, the prompt lists the files involved and asks to replace it: the entry 
 scraper-written media (including its Onion and Slot images) is overwritten or deleted after the new entry is written.
 `custom/` and the `--skip-media` types are left as they are. ROMs that share the name without extension (`Game.zip`,
 `Game.7z`) share their media files; the prompt warns about them.
+`--translated` says the ROM is a fan translation: its entry is titled `<name> - Translated` and marked
+`"translated": true`. A ROM in `ignored.json` is taken off that list first so it can be matched; without `--translated`
+an ignored ROM can't be.
 
 **Unknown ROMs.** A ROM ScreenScraper doesn't know is remembered and skipped on later runs. `--retry` tries them again;
 `sync-roms scrape review [SYSTEM]` goes through them with non-games (see below), so you can search each one under

@@ -106,6 +106,30 @@ def add(entries):
         return len(_keys - before)
 
 
+def remove(entries):
+    """Drop {system: [ROM paths]} from the storage file (read fresh) and the local copy; a system left empty goes too.
+    Returns how many were removed."""
+    global _keys
+    with _lock:
+        try:
+            data = _clean(json.loads(_read()))
+        except s3.ERRORS as e:
+            if not s3.missing(e):
+                raise
+            data = {}
+        before = _flat(data)
+        for system, paths in entries.items():
+            if system in data:
+                data[system] = [p for p in data[system] if p not in set(paths)]
+        data = {system: data[system] for system in sorted(data) if data[system]}
+        removed = len(before - _flat(data))
+        if removed:
+            s3.put_text(KEY, json.dumps(data, indent=2, ensure_ascii=False) + "\n")
+            _save_local(inventory.tag(KEY), data)
+        _keys = _flat(data)
+        return removed
+
+
 def reset():
     """Forget the loaded list, so the next keys() checks storage again."""
     global _keys

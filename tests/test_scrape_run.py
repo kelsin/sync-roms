@@ -14,7 +14,7 @@ from unittest import mock
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 from helpers import StorageDir  # noqa: E402
-from sync_roms import s3, scrape_online, scrape_plan, scrape_review, scrape_state, screenscraper, store, ui, upload, usersettings  # noqa: E402
+from sync_roms import ignore, s3, scrape_online, scrape_plan, scrape_review, scrape_state, screenscraper, store, ui, upload, usersettings  # noqa: E402
 
 GBA = {"name": "Game Boy Advance", "bucket": "gba", "screenscraper": 12, "full_system": True, "folders": {}}
 NES = {"name": "NES", "bucket": "nes", "screenscraper": 3, "full_system": True, "folders": {}}
@@ -638,8 +638,8 @@ class TranslatedRecordTest(RunBase):
 
 
 class MatchReplaceTest(RunBase):
-    def run_match(self, rom="a.zip", game_q="7"):
-        args = SimpleNamespace(system="gba", rom=rom, game=game_q, skip_media=[], dry_run=False)
+    def run_match(self, rom="a.zip", game_q="7", **kw):
+        args = SimpleNamespace(**{"system": "gba", "rom": rom, "game": game_q, "skip_media": [], "dry_run": False, **kw})
         with contextlib.redirect_stdout(self.out), contextlib.redirect_stderr(self.err):
             return scrape_online.match_command(args)
 
@@ -679,6 +679,60 @@ class MatchReplaceTest(RunBase):
         self.assertNotIn("scrapes/gba/fanart/a.png", have)
         self.assertIn("scrapes/gba/covers/b.png", have)
         self.assertEqual(scrape_state.manual_match("gba", "a.zip"), 7)
+
+    def ignore_a(self):
+        os.makedirs(self.data, exist_ok=True)
+        self.put(ignore.KEY, json.dumps({"gba": ["a.zip"], "gb": ["x.zip"]}).encode())
+        ignore.reset()
+        self.addCleanup(setattr, ignore, "_keys", frozenset())
+
+    def ignored_file(self):
+        with open(os.path.join(self.root, ignore.KEY), "rb") as f:
+            return f.read()
+
+    def test_match_translated_marks_entry(self):
+        self.put("gba/a.zip")
+        self.client.games["x"] = game(7, "Seven")
+        self.assertEqual(self.run_match(translated=True), 0)
+        self.assertEqual(self.metadata()["a.zip"], {"name": "Seven - Translated", "translated": True})
+
+    def test_match_translated_unignores(self):
+        self.put("gba/a.zip")
+        self.ignore_a()
+        self.client.games["x"] = game(7, "Seven")
+        self.assertEqual(self.run_match(translated=True), 0)
+        self.assertIn("Took gba/a.zip off ignored.json", self.out.getvalue())
+        self.assertEqual(json.loads(self.ignored_file()), {"gb": ["x.zip"]})
+        self.assertEqual(self.metadata()["a.zip"]["name"], "Seven - Translated")
+
+    def test_match_translated_dry_run_leaves_ignore_file(self):
+        self.put("gba/a.zip")
+        self.ignore_a()
+        before = self.ignored_file()
+        self.client.games["x"] = game(7, "Seven")
+        self.assertEqual(self.run_match(translated=True, dry_run=True), 0)
+        self.assertIn("would take gba/a.zip off ignored.json", self.out.getvalue())
+        self.assertEqual(self.ignored_file(), before)
+        self.assertEqual(self.metadata(), {})
+
+    def test_match_ignored_without_translated_still_fails(self):
+        self.put("gba/a.zip")
+        self.ignore_a()
+        before = self.ignored_file()
+        with self.assertRaises(SystemExit) as cm:
+            self.run_match()
+        self.assertEqual(cm.exception.code, 2)
+        self.assertIn("No gba/a.zip", self.err.getvalue())
+        self.assertEqual(self.ignored_file(), before)
+
+    def test_match_translated_missing_rom_leaves_ignore_file(self):
+        self.ignore_a()
+        before = self.ignored_file()
+        with self.assertRaises(SystemExit) as cm:
+            self.run_match(translated=True)
+        self.assertEqual(cm.exception.code, 2)
+        self.assertIn("No gba/a.zip", self.err.getvalue())
+        self.assertEqual(self.ignored_file(), before)
 
 
 class RoundTwoRunTest(RunBase):

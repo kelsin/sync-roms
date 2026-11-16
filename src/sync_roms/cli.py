@@ -164,7 +164,7 @@ TOPICS = {
 """,
     "scrape": """
   sync-roms scrape [SYSTEM | --system ID] [--all] [--retry] [--fill-media] [--skip-media TYPES] [--dry-run]
-  sync-roms scrape match SYSTEM ROM GAME_ID_OR_NAME [--skip-media TYPES] [--dry-run]
+  sync-roms scrape match SYSTEM ROM GAME_ID_OR_NAME [--skip-media TYPES] [--translated] [--dry-run]
   sync-roms scrape review [SYSTEM]
   sync-roms scrape missing [SYSTEM | --system ID] [--all]
   sync-roms scrape --set-credentials
@@ -186,7 +186,9 @@ TOPICS = {
   --dry-run          list the ROMs and the metadata and media folders that would be written; no ScreenScraper
                      credentials or requests (scrape match --dry-run does look the game up)
   match              say which ScreenScraper game a ROM is (a game id, or a name to search and pick from), then scrape it;
-                     for a ROM that already has metadata it asks before replacing the entry and deleting its old media
+                     for a ROM that already has metadata it asks before replacing the entry and deleting its old media.
+                     --translated: the ROM is a fan translation: title '<name> - Translated'; an ignored ROM is taken
+                     off ignored.json first
   review             go through the ROMs ScreenScraper calls non-games or doesn't know, each with its position (3 of
                      120): i ignore, s search under another name and scrape the game picked, k keep for later (listed
                      after the others next time), b take back the last ignore, q quit, I ignore all the rest
@@ -428,7 +430,8 @@ LEGACY = {
 }
 WORDS = {flags[0]: " ".join(words) for words, flags in LEGACY.items() if flags}  # mode flag -> its command, for messages
 BOOL_FLAGS = {"-n", "--dry-run", "-y", "--yes", "-a", "--ask"}
-PLAIN_FLAGS = BOOL_FLAGS | {"--replace", "--json", "--no-clean", "--no-eject", "--retry", "--all", "--fill-media", "--set-credentials"}
+PLAIN_FLAGS = BOOL_FLAGS | {"--replace", "--json", "--no-clean", "--no-eject", "--retry", "--all", "--fill-media", "--set-credentials",
+                            "--translated"}
 VALUE_FLAGS = {"--system", "--device", "--layout", "--device-id", "--skip-media"}
 
 
@@ -484,6 +487,7 @@ def build_parser():
     ap.add_argument("--all", action="store_true")
     ap.add_argument("--fill-media", action="store_true")
     ap.add_argument("--skip-media")
+    ap.add_argument("--translated", action="store_true")
     ap.add_argument("--set-credentials", action="store_true")
     ap.add_argument("--diff", nargs="?", const="")
     ap.add_argument("--m3u", nargs="?", const="")
@@ -557,6 +561,8 @@ def check_modes(args):
         ui.fail("--fill-media only applies to `scrape`", 2)
     if args.set_credentials and (mode != "--scrape" or args.system or args.retry or args.all or args.fill_media or args.skip_media or args.dry_run):
         ui.fail("--set-credentials only goes with `scrape`, on its own", 2)
+    if args.translated and mode != "--scrape-match":
+        ui.fail("--translated only applies to `scrape match`", 2)
     if args.skip_media is not None:
         if mode not in ("--scrape", "--scrape-match"):
             ui.fail("--skip-media only applies to `scrape` and `scrape match`", 2)
