@@ -507,6 +507,36 @@ class CopyInterruptTest(unittest.TestCase):
         self.assertEqual(exits, [1])
 
 
+class CopyOrderTest(unittest.TestCase):
+    def test_a_copy_that_finishes_first_prints_first_while_a_slow_one_is_listed(self):
+        # sizes put big.zip first in the biggest-first order
+        todo = [("gba/big.zip", "/src/big.zip", 100), ("gba/small.zip", "/src/small.zip", 1)]
+        small_printed, seen = threading.Event(), []
+        real_say = ui.ProgressBar.say
+
+        def say(self_, line):
+            if "small.zip" in line:
+                seen.append([n for n, _, _ in self_.active()])
+                small_printed.set()
+            real_say(self_, line)
+
+        def write_file(key, write):
+            if "big" in key:
+                assert small_printed.wait(5)
+
+        with mock.patch.object(upload.s3, "write_file", write_file), mock.patch.object(ui.ProgressBar, "say", say), \
+                mock.patch.object(runtime, "ROOT", "/storage"), mock.patch.object(runtime, "WORKERS", 2), \
+                mock.patch.object(ui, "POLL", 0.001):
+            out = io.StringIO()
+            with contextlib.redirect_stdout(out):
+                failed = upload.run_copies(todo)
+        self.assertEqual(failed, 0)
+        lines = [l for l in out.getvalue().splitlines() if "\u2705" in l]
+        self.assertIn("[1/2]", lines[0]); self.assertIn("gba/small.zip", lines[0])
+        self.assertIn("gba/big.zip", lines[1])
+        self.assertEqual(seen, [["gba/big.zip"]])
+
+
 class MoveInterruptTest(unittest.TestCase):
     """Ctrl-C during s3.move_keys stops the queued moves; the moves that finished are recorded in the cache."""
 

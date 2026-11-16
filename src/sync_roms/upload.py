@@ -6,7 +6,7 @@ import queue
 import tempfile
 import threading
 import time
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
 
 from botocore.exceptions import BotoCoreError, ClientError
 
@@ -80,10 +80,12 @@ def run_copies(todo, quiet=False):
 
     order = sorted(todo, key=lambda j: -j[2])
     moved = ui.ByteProgress([j[2] for j in order])
-    bar = ui.ProgressBar(len(todo), moved.fraction, moved.total)
+    names = [j[0] for j in order]
+    bar = ui.ProgressBar(len(todo), moved.fraction, moved.total, active=lambda: moved.active(names))
 
     def copy(n):
         job = order[n]
+        moved.start(n)
         try:
             def write(tmp):
                 if len(job) > 3:
@@ -99,17 +101,24 @@ def run_copies(todo, quiet=False):
     ex = ThreadPoolExecutor(runtime.WORKERS)
     try:
         futs += [ex.submit(copy, n) for n in range(len(order))]
-        for i, f in enumerate(futs, 1):
-            job, error = ui.wait_drawing(bar, i - 1, f.result)
-            moved.finish(i - 1)
-            prog = ui.dim(f"[{i}/{len(todo)}]")
-            if error is None:
-                if not quiet:
-                    bar.say(f"  {prog} ✅ {job[0]}")
-            else:
-                failed += 1
-                _say_failure(bar, quiet, f"  {prog} ❌ {ui.red(job[0])}: {str(error).strip()}")
-            bar.draw(i)
+        index = {f: n for n, f in enumerate(futs)}
+        pending, finished = set(index), 0
+        while pending:
+            done, pending = wait(pending, timeout=ui.POLL, return_when=FIRST_COMPLETED)
+            if not done:
+                bar.draw(finished)
+            for f in sorted(done, key=index.get):
+                job, error = f.result()
+                finished += 1
+                moved.finish(index[f])
+                prog = ui.dim(f"[{finished}/{len(todo)}]")
+                if error is None:
+                    if not quiet:
+                        bar.say(f"  {prog} ✅ {job[0]}")
+                else:
+                    failed += 1
+                    _say_failure(bar, quiet, f"  {prog} ❌ {ui.red(job[0])}: {str(error).strip()}")
+                bar.draw(finished)
     except KeyboardInterrupt:
         ex.shutdown(wait=False, cancel_futures=True)
         running = [f for f in futs if f.running()]
@@ -160,7 +169,8 @@ def run_uploads(todo, quiet=False):
     done, failed = queue.Queue(), 0
     order = sorted(todo, key=lambda j: -j[2])
     moved = ui.ByteProgress([j[2] for j in order])
-    bar = ui.ProgressBar(len(todo), moved.fraction, moved.total)
+    names = [j[0] for j in order]
+    bar = ui.ProgressBar(len(todo), moved.fraction, moved.total, active=lambda: moved.active(names))
     try:
         with tempfile.TemporaryDirectory() as tmp, ThreadPoolExecutor(os.cpu_count() or 4) as shrinkers, \
                 create_transfer_manager(client, config) as manager:
@@ -173,6 +183,7 @@ def run_uploads(todo, quiet=False):
                                [queue_when_done_class()(done, n, job, lambda b: moved.add(n, b))])
 
             def shrink_and_send(job, n):
+                moved.start(n)
                 try:
                     art = os.path.join(tmp, f"{n}.png")
                     scrape_plan.shrink_png(job[1], art, job[3])
