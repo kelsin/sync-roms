@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.13.0](https://github.com/kelsin/sync-roms/compare/v2.12.0...v2.13.0) (2026-11-16)
+
+
+### :video_game: Features
+
+* **sync:** print transfers as they finish and list the ones in flight ([#312](https://github.com/kelsin/sync-roms/issues/312)) ([f851d47](https://github.com/kelsin/sync-roms/commit/f851d4716adaa70e8d74818a01c3d2dbb9c076a1))
+
 ## [2.12.0](https://github.com/kelsin/sync-roms/compare/v2.11.0...v2.12.0) (2026-11-15)
 
 
