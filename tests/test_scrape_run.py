@@ -599,6 +599,44 @@ class FinalReviewTest(RunBase):
             self.assertTrue(all(os.path.exists(p) for p in list(one.values()) + list(two.values())))
 
 
+class TranslatedRecordTest(RunBase):
+    def scrape(self, rom, **kw):
+        self.put(f"gba/{rom}")
+        self.client.games[rom] = game(1, "One")
+        with contextlib.redirect_stdout(self.out), contextlib.redirect_stderr(self.err):
+            return scrape_online.run_scrape(self.client, {"gba": GBA}, {"gba": [(rom, 1, "e")]}, set(), ask=False, **kw)
+
+    def test_tagged_rom_gets_suffix(self):
+        self.assertEqual(self.scrape("Game (T).zip"), 0)
+        entry = self.metadata()["Game (T).zip"]
+        self.assertEqual(entry["name"], "One - Translated")
+        self.assertIs(entry["translated"], True)
+
+    def test_untagged_rom_unchanged(self):
+        self.assertEqual(self.scrape("Game.zip"), 0)
+        entry = self.metadata()["Game.zip"]
+        self.assertEqual(entry["name"], "One")
+        self.assertNotIn("translated", entry)
+
+    def test_forced_translated(self):
+        self.assertEqual(self.scrape("Game.zip", translated={"Game.zip"}), 0)
+        entry = self.metadata()["Game.zip"]
+        self.assertEqual(entry["name"], "One - Translated")
+        self.assertIs(entry["translated"], True)
+
+    def test_replace_keeps_old_flag(self):
+        self.put("scrapes/gba/metadata.json", json.dumps({"Game.zip": {"name": "One - Translated", "translated": True}}).encode())
+        self.assertEqual(self.scrape("Game.zip", replace=True), 0)
+        entry = self.metadata()["Game.zip"]
+        self.assertEqual(entry["name"], "One - Translated")
+        self.assertIs(entry["translated"], True)
+
+    def test_fill_keeps_one_suffix(self):
+        self.put("scrapes/gba/metadata.json", json.dumps({"Game (T).zip": {"name": "One - Translated", "translated": True}}).encode())
+        self.assertEqual(self.scrape("Game (T).zip", fill=True), 0)
+        self.assertEqual(self.metadata()["Game (T).zip"]["name"], "One - Translated")
+
+
 class MatchReplaceTest(RunBase):
     def run_match(self, rom="a.zip", game_q="7"):
         args = SimpleNamespace(system="gba", rom=rom, game=game_q, skip_media=[], dry_run=False)
