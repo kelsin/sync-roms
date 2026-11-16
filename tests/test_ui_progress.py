@@ -118,10 +118,6 @@ class BottleneckTest(unittest.TestCase):
             self.assertLess(len(plain), columns)
 
 
-if __name__ == "__main__":
-    unittest.main()
-
-
 class ActiveTest(unittest.TestCase):
     def test_active_is_in_start_order_and_drops_finished_jobs(self):
         moved = ui.ByteProgress([10, 20, 30])
@@ -196,3 +192,7 @@ class BlockTest(unittest.TestCase):
         with contextlib.redirect_stdout(out):
             bar.draw(0)
         self.assertNotIn("gba/a.zip", out.getvalue())
+
+
+if __name__ == "__main__":
+    unittest.main()
