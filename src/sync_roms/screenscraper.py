@@ -215,6 +215,36 @@ def mark_translated(entry):
     return out
 
 
+def _split_translated(name):
+    """(name without a trailing " - Translated", that suffix or "")."""
+    return (name[:-len(TRANSLATED)], TRANSLATED) if name.endswith(TRANSLATED) else (name, "")
+
+
+def qualify(entry):
+    """A copy of a metadata entry whose name carries its `qualifier`: "<name> (<qualifier>)", before " - Translated".
+    Unchanged when there is no qualifier or name, or the name already carries it."""
+    out, qualifier, name = dict(entry), entry.get("qualifier"), entry.get("name")
+    if qualifier and name:
+        base, suffix = _split_translated(name)
+        if not base.endswith(f" ({qualifier})"):
+            out["name"] = f"{base} ({qualifier}){suffix}"
+    return out
+
+
+def set_qualifier(entry, qualifier):
+    """A copy of a metadata entry with its old qualifier taken out of the name and the new one set (see qualify);
+    None or "" removes the qualifier."""
+    out = dict(entry)
+    old, name = out.pop("qualifier", None), out.get("name")
+    if old and name:
+        base, suffix = _split_translated(name)
+        if base.endswith(f" ({old})"):
+            out["name"] = base[:-len(f" ({old})")] + suffix
+    if qualifier:
+        out["qualifier"] = qualifier
+    return qualify(out)
+
+
 def _meta(raw, regions):
     """The metadata fields of an unwrapped game dict."""
     prefs = tuple(regions) + FALLBACK_NAME_REGIONS

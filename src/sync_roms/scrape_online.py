@@ -707,6 +707,7 @@ def record(system, pending, outcomes, listing, index, skip, replace=False, rerun
     and empty pending. With replace the entries replace the old ones and the old scraper media they leave behind is
     deleted. fill: ROMs that already have an entry keep its fields; ScreenScraper's only add the missing ones.
     translated: ROMs marked translated (see screenscraper.mark_translated) besides those whose tags or old entry say so.
+    An old entry's qualifier is kept and put back in the name (see screenscraper.qualify).
     Returns (failures, whether the system's remaining ROMs must be skipped)."""
     name = system["bucket"]
     scrape_state.flush_unknown()
@@ -721,6 +722,8 @@ def record(system, pending, outcomes, listing, index, skip, replace=False, rerun
     for rom, (_, meta, _) in done.items():  # remote is ours: changed in place
         old = remote.get(rom, {})
         remote[rom] = dict(meta) if replace else {**old, **({**meta, **old} if fill else meta)}
+        if old.get("qualifier"):  # a name set apart by the dedup-names skill survives the re-scrape
+            remote[rom] = screenscraper.qualify({**remote[rom], "qualifier": old["qualifier"]})
         if rom in translated or screenscraper.is_translation(rom) or old.get("translated"):
             remote[rom] = screenscraper.mark_translated(remote[rom])
     try:
