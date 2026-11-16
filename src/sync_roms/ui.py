@@ -10,6 +10,7 @@ import shutil
 import sys
 import threading
 import time
+import unicodedata
 from concurrent.futures import TimeoutError as FutureTimeout
 
 from . import runtime
@@ -351,10 +352,10 @@ class ProgressBar:
         lines = []
         for name, moved, total in shown:
             tail = f"  {moved / total:4.0%} of {human_size(total)}"
-            fit = width - len("    ↓ ") - len(tail)
-            if len(name) > fit:
-                name = name[:max(0, fit - 1)] + "…"
-            lines.append(f"    ↓ {name}{tail}"[:width])
+            fit = width - cell_width("    ↓ ") - cell_width(tail)
+            if cell_width(name) > fit:
+                name = cut_cells(name, max(0, fit - 1)) + "…"
+            lines.append(cut_cells(f"    ↓ {name}{tail}", width))
         if len(shown) < len(active):
             lines.append(f"    … and {len(active) - len(shown)} more")
         return lines
@@ -363,6 +364,21 @@ class ProgressBar:
         if self.shown:
             sys.stdout.write("\r\033[J")
             sys.stdout.flush()
+
+
+def cell_width(text):
+    """Terminal cells text takes up (emoji and CJK are two wide)."""
+    return sum(2 if unicodedata.east_asian_width(c) in "WF" else 1 for c in text)
+
+
+def cut_cells(text, width):
+    """The start of text that fits in width cells (a wide character is never split)."""
+    used = 0
+    for n, c in enumerate(text):
+        used += cell_width(c)
+        if used > width:
+            return text[:n]
+    return text
 
 
 def wait_drawing(bar, done, get):

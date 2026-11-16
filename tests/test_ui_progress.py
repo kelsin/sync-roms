@@ -172,6 +172,12 @@ class BlockTest(unittest.TestCase):
             self.assertLessEqual(len(line), 39)
         self.assertIn("…", self.lines(out)[1])
 
+    def test_wide_names_are_cut_by_terminal_cells(self):
+        out = self.draw([("psx/" + "ファイナルファンタジー" * 6 + ".chd", 5, 10)], columns=40)
+        for line in self.lines(out)[1:]:
+            self.assertLessEqual(ui.cell_width(line), 39)
+            self.assertTrue(line.endswith("50% of 10 B"), line)
+
     def test_no_active_draws_just_the_bar(self):
         out = self.draw([])
         self.assertEqual(len(self.lines(out)), 1)

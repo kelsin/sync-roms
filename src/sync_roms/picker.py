@@ -10,7 +10,6 @@ import signal
 import sys
 import threading
 import time
-import unicodedata
 
 from . import ui
 
@@ -117,11 +116,6 @@ def help_lines(multi, hint, hidden_count=False, has_note=False, key_help=None):
     if extra:
         lines += ["", "This screen:"] + ["  " + e for e in extra]
     return lines
-
-
-def cell_width(text):
-    """Terminal cells text takes up (emoji and CJK are two wide)."""
-    return sum(2 if unicodedata.east_asian_width(c) in "WF" else 1 for c in text)
 
 
 MIN_LABEL = 20  # cells a cut row keeps of its label; past that, the row's end (its extras) is cut instead
@@ -238,7 +232,7 @@ class _ListModel:
         self.hidden = hidden or [False] * len(labels)
         self.hidden_count = sum(self.hidden)
         marked = multi or any(self.locked)  # each label then follows a 3-cell mark (✅ or 🔒 and a space)
-        self.label_width = max((cell_width(l) for l in labels), default=0) + (3 if marked else 0)
+        self.label_width = max((ui.cell_width(l) for l in labels), default=0) + (3 if marked else 0)
         self.session = {} if session is None else session
         self.state = list(self.session["sel"]) if "sel" in self.session else list(self.start)
         self.view_mode = self.session.get("view_mode", 0)  # multi: 0 all rows, 1 only rows that are on, 2 only rows changed
