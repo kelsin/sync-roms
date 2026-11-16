@@ -7,7 +7,7 @@ import re
 import sys
 
 from . import collections as colls
-from . import external, inventory, m3u, names, picker, runtime, s3, setedit, store, surprise, themeart, ui, usersettings
+from . import cardshare, external, inventory, m3u, names, picker, runtime, s3, setedit, store, surprise, themeart, ui, usersettings
 
 
 UNKNOWN_SHOWN = 8  # device ids named in an "unknown device" error
@@ -477,6 +477,61 @@ def cards_delete(args):
     return 0
 
 
+def cards_export(args):
+    cards = store.load_cards()
+    if not cards:
+        ui.fail("No cards yet", 2)
+    chosen = cardshare.pick_export(sorted(cards))
+    if not chosen:
+        print(ui.yellow("↩️  Nothing exported"))
+        return 0
+    if args.dry_run:
+        print(ui.yellow(f"🧪 Would export {len(chosen)} card(s) to {args.file}"))
+        return 0
+    if os.path.exists(args.file) and not args.yes and not ui.confirm(f"Overwrite {args.file}?", default=False):
+        print(ui.yellow("↩️  Kept"))
+        return 0
+    by_id = {c["id"]: c for c in colls.load_collections()}
+    try:
+        with open(args.file, "w") as f:
+            f.write(json.dumps({name: cardshare.export_entry(cards[name], by_id) for name in chosen}, indent=2) + "\n")
+    except OSError as e:
+        ui.fail(f"Couldn't write {args.file}: {e}", 3)
+    print(ui.green(f"💾 Exported {len(chosen)} card(s) to {args.file}"))
+    return 0
+
+
+def cards_import(args):
+    try:
+        with open(args.file) as f:
+            data = json.load(f)
+    except (OSError, ValueError) as e:
+        ui.fail(f"Can't read {args.file}: {e}", 2)
+    if not isinstance(data, dict):
+        ui.fail(f"{args.file} isn't a cards file ({{name: card}})", 2)
+    source = {name: entry for name, entry in data.items() if isinstance(entry, dict)}
+    if not source:
+        ui.fail(f"No cards in {args.file}", 2)
+    if not store.cards_readable():
+        ui.fail(f"{os.path.join(store.data_dir(), 'cards.json')} isn't valid JSON, so no card can be saved. Fix or move it first.", 3)
+    cards = store.load_cards()
+    manifest = store.load_catalog()
+    chosen = cardshare.pick_import(source, set(cards), {d["id"] for d in manifest["devices"]}, set(manifest["layouts"]))
+    if not chosen:
+        print(ui.yellow("↩️  Nothing imported"))
+        return 0
+    shown = ", ".join(new if new == old else f"{old} → {new}" for new, old in chosen.items())
+    if args.dry_run:
+        print(ui.yellow(f"🧪 Would import: {shown}"))
+        return 0
+    for new, old in chosen.items():
+        cards[new] = cardshare.import_entry(source[old])
+    if not store.write_cards(cards):
+        return 3
+    print(ui.green(f"💾 Imported: {shown}"))
+    return 0
+
+
 # --- config, check, doctor ---------------------------------------------------------------------------
 
 def effective_settings():
@@ -897,7 +952,7 @@ def second_words():
     words["collections"] = ["edit"]
     words["themes"] = ["update"]
     words["download"] = ["pico8"]
-    words["cards"] = ["edit", "list", "new", "set", "rename", "delete"]
+    words["cards"] = ["edit", "list", "new", "set", "rename", "delete", "export", "import"]
     words["config"] = ["show", "path"]
     words["cache"] = ["update"]
     words["completion"] = ["bash", "zsh", "fish"]
@@ -1013,6 +1068,8 @@ def build_parser():
         p.add_argument("--device"); p.add_argument("--layout"); p.add_argument("--size", help="the card's size, e.g. 256, 512GB, 1TB"); p.set_defaults(fn=lambda a, c=create: cards_save_setup(a, c))
     p = csub.add_parser("rename", allow_abbrev=False); common(p, card=False); p.add_argument("old"); p.add_argument("new"); p.set_defaults(fn=cards_rename)
     p = csub.add_parser("delete", allow_abbrev=False); common(p, card=False); p.add_argument("name"); p.set_defaults(fn=cards_delete)
+    p = csub.add_parser("export", allow_abbrev=False); common(p, card=False); p.add_argument("file"); p.set_defaults(fn=cards_export)
+    p = csub.add_parser("import", allow_abbrev=False); common(p, card=False); p.add_argument("file"); p.set_defaults(fn=cards_import)
 
     p = sub.add_parser("config", allow_abbrev=False); common(p, card=False); p.add_argument("action", choices=["show", "path"], nargs="?", default="show"); p.set_defaults(fn=config_cmd)
     p = sub.add_parser("cache", allow_abbrev=False); common(p, card=False); p.add_argument("action", choices=["update"], nargs="?"); p.add_argument("--full", action="store_true"); p.set_defaults(fn=cache_cmd)

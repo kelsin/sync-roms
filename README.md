@@ -276,7 +276,7 @@ Every mode is a command (`sync-roms COMMAND --help` explains one; plain `sync-ro
 | `collections edit` | edit your collections of favourite games (saved in `~/.sync-roms/collections/`) | |
 | `themes update` | put the latest Art Book Next for ES-DE (for collections' theme art) in storage | |
 | `download pico8` | add the PICO-8 BBS Featured carts storage doesn't have, and newer revisions of those it has (see below) | |
-| `cards list\|new\|set\|rename\|delete` | manage cards | |
+| `cards list\|new\|set\|rename\|delete\|export\|import` | manage cards; `export FILE` flattens surprises and collections into games, `import FILE` keeps size, device, layout, games and excluded and turns Surprise off (`r` renames, `p` prefixes all) | |
 | `devices [ID]` | list devices, or one device's systems (`--json`) | `--devices` |
 | `upload roms [DIR]` / `upload scrapes [CARD]` | upload to storage | `--upload`, `--upload-scrapes` |
 | `diff [DIR]` | compare a folder with storage | `--diff` |
