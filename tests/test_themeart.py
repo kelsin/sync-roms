@@ -98,6 +98,8 @@ class Usable(unittest.TestCase):
             self.assertEqual(list(themeart.usable("esde", {"RPG Faves": "rpg", "Rpg Faves": "horror"})), ["RPG Faves"])
         with mock.patch.object(ui, "warn", lambda *a: None):
             self.assertEqual(list(themeart.usable("knulli", {"Lightgun": "shmups"})), [])
+        with mock.patch.object(ui, "warn", lambda *a: None):
+            self.assertEqual(list(themeart.usable("emudeck", {"SNES": "rpg", "Favs": "rpg"})), ["Favs"])
 
 
 class Settings(unittest.TestCase):
@@ -219,6 +221,44 @@ class EsdeOwnArt(Esde):
         self.assertIn("Steam", self.warned[0])
         self.assertFalse(os.path.exists(self.copy("_inc", "systems", "artwork-outline", "steam.png")))
         self.assertIn("<systemName>My Shmups</systemName>", read(self.copy("_inc", "systems", "_metadata-global", "my shmups.xml")))
+
+
+class Emudeck(Esde):
+    """An EmuDeck card: the theme goes into ES-DE's folder on this computer, not on the card."""
+    def setUp(self):
+        super().setUp()
+        appdata = tempfile.TemporaryDirectory()
+        self.addCleanup(appdata.cleanup)
+        self.appdata = appdata.name
+        patcher = mock.patch.dict(os.environ, {"ESDE_APPDATA_DIR": self.appdata})
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def test_the_theme_and_art_go_into_es_de_on_this_computer_and_are_selected(self):
+        self.store("abc", {"theme.xml": b"<theme/>"})
+        with contextlib.redirect_stdout(io.StringIO()) as out:
+            self.assertTrue(themeart.install("emudeck", self.base, {**SURPRISE, "My Shmups": "shmups"}))
+        copy = os.path.join(self.appdata, "themes", themeart.ESDE_COPY)
+        self.assertIn(os.path.join(os.path.basename(self.appdata), "themes", themeart.ESDE_COPY), out.getvalue())
+        self.assertTrue(os.path.exists(os.path.join(copy, "_inc", "systems", "artwork-outline", "surprise.png")))
+        self.assertTrue(os.path.exists(os.path.join(copy, "my shmups", "theme.xml")))
+        self.assertIn(f'<string name="Theme" value="{themeart.ESDE_COPY}" />',
+                      read(os.path.join(self.appdata, "settings", "es_settings.xml")))
+        self.assertEqual(os.listdir(self.base), [])
+
+    def test_the_dry_run_names_es_de_on_this_computer(self):
+        self.store("abc", {"theme.xml": b"<theme/>"})
+        with contextlib.redirect_stdout(io.StringIO()) as out:
+            themeart.describe("emudeck", self.base, SURPRISE)
+        self.assertIn(f"{os.path.basename(self.appdata)}/themes/{themeart.ESDE_COPY}", out.getvalue())
+
+    def test_another_theme_is_left_alone(self):
+        self.store("abc", {"theme.xml": b"<theme/>"})
+        write(os.path.join(self.appdata, "settings", "es_settings.xml"),
+              '<?xml version="1.0"?>\n<string name="Theme" value="linear-es-de" />\n')
+        with contextlib.redirect_stdout(io.StringIO()):
+            self.assertFalse(themeart.install("emudeck", self.base, SURPRISE))
+        self.assertFalse(os.path.exists(os.path.join(self.appdata, "themes")))
 
 
 class Update(Esde):

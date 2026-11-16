@@ -513,6 +513,39 @@ class SyncFlowTest(unittest.TestCase):
         self.assertEqual(cfg, "./roms/gba/Game.zip\n")
         self.assertIn("<config>", settings)
 
+    def run_emudeck(self, appdata, **kw):
+        """A sync of an EmuDeck card with FAVS, ES-DE's data folder on this computer at appdata."""
+        manifest = {**MANIFEST, "systems": [{**MANIFEST["systems"][0], "folders": {"emudeck": "gba"}}],
+                    "layouts": {"emudeck": {"label": "EmuDeck", "roms_dir": "Emulation/roms", "bios_dir": "Emulation/bios"}}}
+        with mock.patch.dict(os.environ, {"ESDE_APPDATA_DIR": appdata}):
+            return self.run_sync(cards={"collections": ["favs"]}, colls=[FAVS], manifest=manifest,
+                                 setup=(None, "emudeck"), files=["Emulation/roms/gba/Game.zip"],
+                                 extra=[(ui, "warn", self.warned.append)], **kw)
+
+    def test_emudeck_card_writes_its_collection_into_es_de_on_this_computer(self):
+        self.warned = []
+        with tempfile.TemporaryDirectory() as appdata:
+            _, _, updates, root, _ = self.run_emudeck(appdata, plan=[], after=lambda d: os.listdir(d))
+            self.assertEqual(read_from(appdata, "collections", "custom-Favs.cfg"), "%ROMPATH%/gba/Game.zip\n")
+            self.assertIn('<string name="CollectionSystemsCustom" value="Favs" />',
+                          read_from(appdata, "settings", "es_settings.xml"))
+        self.assertEqual(self.after, ["Emulation"])
+        self.assertIn({"frontend_collections": ["Favs"]}, updates)
+        self.assertIsNone(root)  # nothing was written on the card
+        self.assertFalse(self.warned)
+
+    def test_emudeck_card_without_es_de_on_this_computer_warns_and_writes_nothing(self):
+        for dry_run in (False, True):
+            self.warned = []
+            with tempfile.TemporaryDirectory() as tmp:
+                appdata = os.path.join(tmp, "ES-DE")
+                _, out, updates, _, _ = self.run_emudeck(appdata, dry_run=dry_run)
+                self.assertFalse(os.path.exists(appdata))
+            self.assertEqual(self.warned, [f"ES-DE isn't set up on this computer (no {appdata}), so the card's "
+                                           "collections were skipped; sync on the Steam Machine or Steam Deck to get them"])
+            self.assertNotIn("custom-Favs.cfg", out)
+            self.assertFalse([u for u in updates if "frontend_collections" in u])
+
     def test_dry_run_describes_and_writes_nothing(self):
         _, out, updates, _, _ = self.run_sync(cards={"collections": ["favs"]}, colls=[FAVS], dry_run=True,
                                                  after=lambda d: os.path.exists(os.path.join(d, "ES-DE", "collections")))

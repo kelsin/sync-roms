@@ -629,7 +629,7 @@ RPG and Horror, and ones for the usual kinds of personal collection (Favorites, 
 Kids & Family, Hard Mode, Late Night & Chill, Great Soundtracks, ROM Hacks & Homebrew, Imports, Years & Decades,
 Holidays, Device Benchmarks), drawn in the Outline style of the
 [Art Book Next](https://github.com/anthonycaccese/art-book-next-es-de) theme (`src/sync_roms/data/themes/art-book-next/art/`;
-the collection file gets `"art": "<id>"`). `tools/gen_theme_art.py` draws them (it needs Pillow). When an ES-DE or Knulli card using that theme gets the collection, it shows on
+the collection file gets `"art": "<id>"`). `tools/gen_theme_art.py` draws them (it needs Pillow). When an ES-DE, Knulli or EmuDeck card using that theme gets the collection, it shows on
 its own in the system carousel with that art and a logo of its name, drawn with the theme's logo font (Changa One, SIL
 Open Font License: `OFL.txt` there). The Surprise collection always gets the gift-box art. A collection named like a
 system or one of the frontend's own collections gets no art, and a name the font can't draw (accents are dropped first)
@@ -641,6 +641,8 @@ gets no logo, so the frontend shows it as text.
   lower case) and sets `Theme` to that copy. `sync-roms themes update` puts the theme's latest commit in storage; a
   card's copy is replaced when storage has a newer one. ES-DE's theme downloader doesn't update the copy, and its menu
   lists both copies as Art Book Next. The art is for the Outline color schemes; others show the theme's default art.
+- **EmuDeck**: the same as ES-DE, but in ES-DE's folder on the machine running the sync (see
+  [Collections in ES-DE, Knulli and EmuDeck](#collections-in-es-de-knulli-and-emudeck)).
 - **Knulli** (when `ThemeSet` in `es_settings.cfg` is unset or Art Book Next): the built-in theme is read-only, so the
   art goes to `theme-customizations/art-book-next/artwork/<Name>.png` and `logos/<Name>.svg`, and `es_settings.cfg`
   gets `subset.<Name>.system-view-artwork` and `subset.<Name>.system-logos` set to `custom`, so only that collection
@@ -696,8 +698,8 @@ on them are replaced at the next sync.
   game list as 🎁 Surprise and can't be switched off there, like a collection game; it counts in the card's budget and size warning.
 - **History** is kept in `~/.sync-roms/surprises.json` (system, bucket, title, card, ISO date) and pruned past
   `surprise_ttl_days` in `settings.json` (default 183) whenever it is written. It is how a game comes around again only later.
-- **Frontends**: ES-DE and Knulli cards get the surprises as a custom collection named `Surprise`, written like any
-  other [collection](#collections-in-es-de-and-knulli); that name is reserved, so a collection can't be called Surprise.
+- **Frontends**: ES-DE, Knulli and EmuDeck cards get the surprises as a custom collection named `Surprise`, written
+  like any other [collection](#collections-in-es-de-knulli-and-emudeck); that name is reserved, so a collection can't be called Surprise.
 - **Art Book Next**: Surprise gets a gift-box artwork and logo in the theme's Outline style, like any
   [collection with theme art](#theme-art-for-collections).
 - **Mirror**: picks are made from storage itself, not the mirror, so they can be games the mirror doesn't have yet.
@@ -794,9 +796,9 @@ An old `~/.sync-roms/sizes.json` is no longer read; delete it.
   BIOS lists come from the ES-DE default libretro cores, so they may not match what Knulli
   or Onion use; on Knulli check Game Settings > Missing Bios Check.
 
-### Collections in ES-DE and Knulli
+### Collections in ES-DE, Knulli and EmuDeck
 
-Only ES-DE and Knulli cards get them. Each sync writes the card's collections (see [Collections](#collections)) as the
+Only ES-DE, Knulli and EmuDeck cards get them. Each sync writes the card's collections (see [Collections](#collections)) as the
 frontend's custom collections, listing the collection games that are on the card; games on systems the card doesn't
 sync are left out. `--dry-run` lists what would be written.
 
@@ -815,6 +817,9 @@ sync are left out. `--dry-run` lists what would be written.
   its old file deleted and its name unlisted.
 - The files are rewritten each sync, so edits made to them in the frontend are lost.
 - Close the frontend before syncing: it rewrites its settings file from memory.
+- **EmuDeck**: ES-DE keeps its data on the machine, not the card, so the files (and the theme art) go into `~/ES-DE`
+  (or `$ESDE_APPDATA_DIR`) on the machine running the sync, laid out as in the ES-DE column. Sync the card on the Steam
+  Machine or Steam Deck to get them; when ES-DE isn't set up there, sync skips them with a warning.
 
 ## Troubleshooting
 

@@ -1,12 +1,13 @@
-"""ES-DE/Knulli custom collection files."""
+"""ES-DE/Knulli/EmuDeck custom collection files."""
 import os
 import re
 from xml.sax import saxutils
 
 from . import downloads, ui
 
-FRONTEND_LAYOUTS = {"esde", "knulli"}
-_LABELS = {"esde": "ES-DE", "knulli": "Knulli"}
+FRONTEND_LAYOUTS = {"esde", "knulli", "emudeck"}
+_LABELS = {"esde": "ES-DE", "knulli": "Knulli", "emudeck": "EmuDeck"}
+_ESDE = {"esde", "emudeck"}  # layouts whose frontend is ES-DE
 _DROPPED = '*",./:;<>\\|\n\t\r'  # characters ES-DE rejects in a collection name
 _UNESCAPE = {"&quot;": '"', "&apos;": "'"}
 _ESCAPE = {'"': "&quot;", "'": "&apos;"}
@@ -17,22 +18,31 @@ def safe_name(name):
     return "".join(c for c in name if c not in _DROPPED).strip()
 
 
-def _root(layout_name):
-    return "ES-DE" if layout_name == "esde" else os.path.join("system", "configs", "emulationstation")
+def esde_dir(layout_name, base):
+    """ES-DE's data folder: on the card for esde; on this computer for emudeck (EmuDeck's ES-DE keeps it there)."""
+    if layout_name == "emudeck":
+        return os.environ.get("ESDE_APPDATA_DIR") or os.path.expanduser("~/ES-DE")
+    return os.path.join(base, "ES-DE")
+
+
+def _root(layout_name, base):
+    if layout_name in _ESDE:
+        return esde_dir(layout_name, base)
+    return os.path.join(base, "system", "configs", "emulationstation")
 
 
 def collection_path(layout_name, base, name):
-    return os.path.join(base, _root(layout_name), "collections", f"custom-{name}.cfg")
+    return os.path.join(_root(layout_name, base), "collections", f"custom-{name}.cfg")
 
 
 def settings_path(layout_name, base):
-    if layout_name == "esde":
-        return os.path.join(base, "ES-DE", "settings", "es_settings.xml")
-    return os.path.join(base, _root(layout_name), "es_settings.cfg")
+    if layout_name in _ESDE:
+        return os.path.join(_root(layout_name, base), "settings", "es_settings.xml")
+    return os.path.join(_root(layout_name, base), "es_settings.cfg")
 
 
 def collection_line(layout_name, folder, rel):
-    return f"%ROMPATH%/{folder}/{rel}" if layout_name == "esde" else f"./roms/{folder}/{rel}"
+    return f"%ROMPATH%/{folder}/{rel}" if layout_name in _ESDE else f"./roms/{folder}/{rel}"
 
 
 def _string_setting(name):
@@ -60,7 +70,7 @@ def set_string(text, layout_name, name, value):
     line = f'<string name="{name}" value="{saxutils.escape(value, _ESCAPE)}" />'
     if match:
         return text[:match.start()] + line + text[match.end():]
-    if layout_name == "esde":
+    if layout_name in _ESDE:
         if text and not text.endswith("\n"):
             text += "\n"
         return (text or '<?xml version="1.0"?>\n') + line + "\n"

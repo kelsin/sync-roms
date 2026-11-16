@@ -2,6 +2,7 @@ import os
 import sys
 import tempfile
 import unittest
+from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
@@ -25,6 +26,18 @@ class Names(unittest.TestCase):
         self.assertEqual(frontend.settings_path("knulli", "/c"), j("/c", "system", "configs", "emulationstation", "es_settings.cfg"))
         self.assertEqual(frontend.collection_line("esde", "gba", "Sub/A.zip"), "%ROMPATH%/gba/Sub/A.zip")
         self.assertEqual(frontend.collection_line("knulli", "gba", "Sub/A.zip"), "./roms/gba/Sub/A.zip")
+
+    def test_emudeck_uses_es_de_on_this_computer(self):
+        j = os.path.join
+        with tempfile.TemporaryDirectory() as appdata, mock.patch.dict(os.environ, {"ESDE_APPDATA_DIR": appdata}):
+            self.assertEqual(frontend.esde_dir("emudeck", "/c"), appdata)
+            self.assertEqual(frontend.collection_path("emudeck", "/c", "Favs"), j(appdata, "collections", "custom-Favs.cfg"))
+            self.assertEqual(frontend.settings_path("emudeck", "/c"), j(appdata, "settings", "es_settings.xml"))
+        self.assertEqual(frontend.collection_line("emudeck", "wiiu/roms", "A.wua"), "%ROMPATH%/wiiu/roms/A.wua")
+        with mock.patch.dict(os.environ, {"ESDE_APPDATA_DIR": ""}):
+            self.assertEqual(frontend.esde_dir("emudeck", "/c"), os.path.expanduser("~/ES-DE"))
+        self.assertEqual(frontend.esde_dir("esde", "/c"), j("/c", "ES-DE"))
+        self.assertEqual(frontend.set_string("", "emudeck", "Theme", "x"), frontend.set_string("", "esde", "Theme", "x"))
 
 
 class Enabled(unittest.TestCase):

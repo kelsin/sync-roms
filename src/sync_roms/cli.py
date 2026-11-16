@@ -1073,7 +1073,7 @@ def sync_card(args):
         return f"Not enough space: {ui.human_size(need)} to download, {ui.human_size(free)} free" if need > free else None
 
     def frontend_step(dry_run):
-        """Write the card's collections as the frontend's custom collections (ES-DE, Knulli)."""
+        """Write the card's collections as the frontend's custom collections (ES-DE, Knulli, EmuDeck's ES-DE)."""
         if layout_name not in frontend.FRONTEND_LAYOUTS:
             return
         entry = store.load_cards().get(card)
@@ -1091,6 +1091,11 @@ def sync_card(args):
             card_colls.append({"name": surprise.COLLECTION, "games": surprises})  # its art is added below
         owned = names("frontend_collections")
         if not card_colls and not owned:
+            return
+        es_dir = frontend.esde_dir(layout_name, base)
+        if layout_name == "emudeck" and not os.path.isdir(es_dir):
+            ui.warn(f"ES-DE isn't set up on this computer (no {es_dir}), so the card's collections were skipped; "
+                    "sync on the Steam Machine or Steam Deck to get them")
             return
         coming = {(s["bucket"], downloads.rom_rel(k, False)) for s in chosen
                   for k in available(s) if k in listings[s["bucket"]]} if dry_run else set()
@@ -1115,7 +1120,8 @@ def sync_card(args):
         if plan["owned"] != owned:
             store.update_card(card, frontend_collections=plan["owned"])
         art = bool(arts) and themeart.install(layout_name, base, arts)
-        if clean_card and (plan["writes"] or plan["deletes"] or listed or art):
+        # EmuDeck's ES-DE is on this computer, not the card, so its writes leave the card as it was
+        if clean_card and layout_name != "emudeck" and (plan["writes"] or plan["deletes"] or listed or art):
             clean._clean_root = base
         if plan["writes"]:
             print(ui.green(f"💖 Wrote {len(plan['writes'])} collection(s) for {layout['label']}"))
