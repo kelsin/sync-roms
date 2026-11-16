@@ -486,7 +486,8 @@ a terminal you're asked whether to review them now; `sync-roms scrape review [SY
 ROMs, any time (an unknown ROM that has a metadata entry by now, or is gone from storage, is dropped; an unmounted
 share fails and drops nothing). A run that leaves ROMs unmatched ends with both commands. Each ROM shows its position
 (`3 of 120`); `i` ignores it, `s` searches ScreenScraper under another name (Enter takes the suggested name) and
-scrapes the game you pick (with the review's login, no quota check and no results list), `k` (the default) leaves it
+scrapes the game you pick (with the review's login, no quota check and no results list), `t` searches like `s` and scrapes the pick as a fan
+translation (`--translated`), `k` (the default) leaves it
 for later (ROMs kept for later come after the others in the next review), `b` takes back the last `i` and goes back to
 that ROM (a search already scraped stays: `scrape match` changes it), `q` stops, and `I` ignores it and every one
 after it. Ignores are written when the review ends, by `q`, Ctrl-C or the last ROM. Ignored ROMs are listed in

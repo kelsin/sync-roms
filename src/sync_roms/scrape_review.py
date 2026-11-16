@@ -8,7 +8,7 @@ import sys
 
 from . import ignore, inventory, s3, scrape_online, scrape_state, screenscraper, ui
 
-PROMPT = "[i]gnore · [s]earch · [k]eep for later · [b]ack · [q]uit · [I]gnore all the rest  (k): "
+PROMPT = "[i]gnore · [s]earch · [t]ranslated · [k]eep for later · [b]ack · [q]uit · [I]gnore all the rest  (k): "
 NOTHING = "No non-game or unknown ROMs to review ✨"
 _TAGS = re.compile(r"\s*[\(\[][^\)\]]*[\)\]]")
 
@@ -46,8 +46,9 @@ def _clear(key):
     scrape_state.flush_unknown()
 
 
-def _search(system, rom, client):
-    """Whether the ROM was matched to a game and scraped (its saved match is the game picked)."""
+def _search(system, rom, client, translated=False):
+    """Whether the ROM was matched to a game and scraped (its saved match is the game picked); translated: as a fan
+    translation."""
     name = system["bucket"]
     suggestion = search_name(rom)
     query = ui.ask(f"   Search name [{suggestion}]: ").strip() or suggestion
@@ -57,7 +58,8 @@ def _search(system, rom, client):
         print(ui.yellow(f"   {e}"), file=_out())
         return False
     code = scrape_online.match_command(argparse.Namespace(system=name, rom=rom, game=str(game_id), skip_media=None,
-                                                          dry_run=False, confirmed=True, client=client))
+                                                          dry_run=False, confirmed=True, client=client,
+                                                          translated=translated))
     if code == 0 and scrape_state.manual_match(name, rom) == game_id:
         return True
     print(ui.yellow(f"   {name}/{rom} was not scraped as game {game_id}"), file=_out())
@@ -106,10 +108,10 @@ def review(systems, keys, sizes, client=None):
                         queued += rest
                         return 0
                     continue
-                if answer == "s":
+                if answer in ("s", "t"):
                     if client is None:
                         client = scrape_online.make_client()
-                    if _search(systems[name], rom, client):
+                    if _search(systems[name], rom, client, translated=answer == "t"):
                         _clear(key)
                         searched.add(key)
                         i += 1

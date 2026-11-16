@@ -190,7 +190,8 @@ TOPICS = {
                      --translated: the ROM is a fan translation: title '<name> - Translated'; an ignored ROM is taken
                      off ignored.json first
   review             go through the ROMs ScreenScraper calls non-games or doesn't know, each with its position (3 of
-                     120): i ignore, s search under another name and scrape the game picked, k keep for later (listed
+                     120): i ignore, s search under another name and scrape the game picked, t search like s and scrape the pick as a fan
+                     translation, k keep for later (listed
                      after the others next time), b take back the last ignore, q quit, I ignore all the rest
   missing            list every ROM with no metadata and why (non-game, not on ScreenScraper, matched but not scraped,
                      not looked up yet); nothing is looked up. --all: every ROM in the storage
