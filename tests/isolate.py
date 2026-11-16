@@ -34,6 +34,7 @@ if not os.environ.get(TEST_HOME_VAR):
     for var in list(os.environ):
         if var.startswith(("SYNC_ROMS_", "ROMS_", "AWS_")) and var not in (TEST_HOME_VAR, REAL_VAR):
             del os.environ[var]
+    os.environ.pop("ESDE_APPDATA_DIR", None)  # EmuDeck's ES-DE folder resolves into the throwaway home
     # a missing file, not the real one, if some code reads these directly
     os.environ["AWS_CONFIG_FILE"] = os.path.join(_home, ".aws", "config")
     os.environ["AWS_SHARED_CREDENTIALS_FILE"] = os.path.join(_home, ".aws", "credentials")

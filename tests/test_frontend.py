@@ -2,6 +2,7 @@ import os
 import sys
 import tempfile
 import unittest
+from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
@@ -25,6 +26,33 @@ class Names(unittest.TestCase):
         self.assertEqual(frontend.settings_path("knulli", "/c"), j("/c", "system", "configs", "emulationstation", "es_settings.cfg"))
         self.assertEqual(frontend.collection_line("esde", "gba", "Sub/A.zip"), "%ROMPATH%/gba/Sub/A.zip")
         self.assertEqual(frontend.collection_line("knulli", "gba", "Sub/A.zip"), "./roms/gba/Sub/A.zip")
+
+    def test_emudeck_uses_es_de_on_this_computer(self):
+        j = os.path.join
+        with tempfile.TemporaryDirectory() as appdata, mock.patch.dict(os.environ, {"ESDE_APPDATA_DIR": appdata}):
+            self.assertEqual(frontend.esde_dir("emudeck", "/c"), appdata)
+            self.assertEqual(frontend.collection_path("emudeck", "/c", "Favs"), j(appdata, "collections", "custom-Favs.cfg"))
+            self.assertEqual(frontend.settings_path("emudeck", "/c"), j(appdata, "settings", "es_settings.xml"))
+        self.assertEqual(frontend.collection_line("emudeck", "wiiu/roms", "A.wua"), "%ROMPATH%/wiiu/roms/A.wua")
+        with mock.patch.dict(os.environ, {"ESDE_APPDATA_DIR": ""}):
+            self.assertEqual(frontend.esde_dir("emudeck", "/c"), os.path.expanduser("~/ES-DE"))
+        self.assertEqual(frontend.esde_dir("esde", "/c"), j("/c", "ES-DE"))
+        self.assertEqual(frontend.set_string("", "emudeck", "Theme", "x"), frontend.set_string("", "esde", "Theme", "x"))
+
+    def test_emudeck_problem_says_why_this_computer_s_es_de_does_not_serve_the_card(self):
+        with tempfile.TemporaryDirectory() as tmp, tempfile.TemporaryDirectory() as card:
+            appdata, roms = os.path.join(tmp, "ES-DE"), os.path.join(card, "Emulation", "roms")
+            with mock.patch.dict(os.environ, {"ESDE_APPDATA_DIR": appdata}):
+                self.assertEqual(frontend.emudeck_problem(card, roms), f"ES-DE isn't set up on this computer (no {appdata})")
+                other = (f"ES-DE on this computer ({appdata}) doesn't use this card's ROMs "
+                         f"(its ROMDirectory isn't {roms})")
+                os.makedirs(os.path.join(appdata, "settings"))
+                self.assertEqual(frontend.emudeck_problem(card, roms), other)  # no settings file
+                path = frontend.settings_path("emudeck", card)
+                for used, problem in (("", other), ("/elsewhere/roms", other), (roms + "/", None), (roms, None)):
+                    with open(path, "w") as f:
+                        f.write(frontend.set_string("", "emudeck", "ROMDirectory", used) if used else '<?xml version="1.0"?>\n')
+                    self.assertEqual(frontend.emudeck_problem(card, roms), problem, used)
 
 
 class Enabled(unittest.TestCase):

@@ -1035,7 +1035,18 @@ def sync_card(args):
         rom_todo = [j for j in rom_todo if j[1] not in moved]
     elif moved:
         print(ui.dim(f"  📦 Moved {len(moved)} loose disc file(s) into {disc_dir}/"))
-    es_dir = os.path.join(base, "ES-DE")
+    es_dir = frontend.esde_dir(layout_name, base)
+    # EmuDeck's ES-DE is on this computer: the card's gamelists and collections go there only when it uses the card's ROMs
+    esde_problem = frontend.emudeck_problem(base, os.path.join(base, layout["roms_dir"])) if layout_name == "emudeck" else None
+    stale_es_dir = None if esde_problem else es_dir
+    warned = []
+
+    def skipped():
+        """Say (once) that the card's gamelists and collections were skipped, and why."""
+        if not warned:
+            warned.append(esde_problem)
+            ui.warn(f"{esde_problem}, so the card's gamelists and collections were skipped; "
+                    "sync on the Steam Machine or Steam Deck to get them")
     scrapes = layout_name in scrape_plan.SCRAPE_LAYOUTS
     scraped = {}
 
@@ -1047,7 +1058,11 @@ def sync_card(args):
                                for s in chosen}
         if unzip:  # a ROM that's extracted from its archive is on the card under another extension
             present = lambda path, exists=present: exists(path) or downloads.archive_extracted(path)  # noqa: E731
-        return scrape_plan.build_scrape_plan(layout_name, chosen, scraped["data"], scraped["rels"], dest_of, es_dir, present, base)
+        plan = scrape_plan.build_scrape_plan(layout_name, chosen, scraped["data"], scraped["rels"], dest_of, es_dir, present, base)
+        if esde_problem and plan["gamelists"]:
+            skipped()
+            plan["gamelists"] = {}
+        return plan
 
     # the media of every ROM that will be on the card, so the totals and the space check count it
     planned = build_plan(lambda path: True) if scrapes else None
@@ -1073,7 +1088,7 @@ def sync_card(args):
         return f"Not enough space: {ui.human_size(need)} to download, {ui.human_size(free)} free" if need > free else None
 
     def frontend_step(dry_run):
-        """Write the card's collections as the frontend's custom collections (ES-DE, Knulli)."""
+        """Write the card's collections as the frontend's custom collections (ES-DE, Knulli, EmuDeck's ES-DE)."""
         if layout_name not in frontend.FRONTEND_LAYOUTS:
             return
         entry = store.load_cards().get(card)
@@ -1091,6 +1106,9 @@ def sync_card(args):
             card_colls.append({"name": surprise.COLLECTION, "games": surprises})  # its art is added below
         owned = names("frontend_collections")
         if not card_colls and not owned:
+            return
+        if esde_problem:
+            skipped()
             return
         coming = {(s["bucket"], downloads.rom_rel(k, False)) for s in chosen
                   for k in available(s) if k in listings[s["bucket"]]} if dry_run else set()
@@ -1115,7 +1133,8 @@ def sync_card(args):
         if plan["owned"] != owned:
             store.update_card(card, frontend_collections=plan["owned"])
         art = bool(arts) and themeart.install(layout_name, base, arts)
-        if clean_card and (plan["writes"] or plan["deletes"] or listed or art):
+        # EmuDeck's ES-DE is on this computer, not the card, so its writes leave the card as it was
+        if clean_card and layout_name != "emudeck" and (plan["writes"] or plan["deletes"] or listed or art):
             clean._clean_root = base
         if plan["writes"]:
             print(ui.green(f"💖 Wrote {len(plan['writes'])} collection(s) for {layout['label']}"))
@@ -1152,7 +1171,7 @@ def sync_card(args):
         pico8.run(card, layout_name, base, True)
         stale_count = 0
         if scrapes:
-            stale_count = len(scrape_plan.stale_media(layout_name, manifest['systems'], roms_dir, es_dir, base))
+            stale_count = len(scrape_plan.stale_media(layout_name, manifest['systems'], roms_dir, stale_es_dir, base))
             print(f"🧹 Media on the card for ROMs it doesn't have: {stale_count} file(s) to remove")
         frontend_step(True)
         if layout_name == "esde":
@@ -1218,10 +1237,11 @@ def sync_card(args):
     if scrapes:
         plan = build_plan(os.path.exists)
         scrape_todo = plan["jobs"]
-        if clean_card and (plan["jobs"] or plan["writes"] or plan["gamelists"]):
+        # EmuDeck's gamelists are on this computer, not the card
+        if clean_card and (plan["jobs"] or plan["writes"] or (plan["gamelists"] and layout_name != "emudeck")):
             clean._clean_root = base
         failed += scrape_plan.apply_scrape_plan(plan, base, failures)
-        stale = scrape_plan.stale_media(layout_name, manifest["systems"], roms_dir, es_dir, base)
+        stale = scrape_plan.stale_media(layout_name, manifest["systems"], roms_dir, stale_es_dir, base)
     remove_stale_media(stale)
     for folder in scrape_plan.prune_empty_systems(layout_name, manifest["systems"], roms_dir):
         print(ui.green(f"🧹 Removed empty system folder {os.path.relpath(folder, base)}"))

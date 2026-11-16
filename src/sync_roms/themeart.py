@@ -1,4 +1,5 @@
-"""Art Book Next artwork for custom collections (Surprise and the ones given art) and sets on ES-DE and Knulli cards."""
+"""Art Book Next artwork for custom collections (Surprise and the ones given art) and sets on ES-DE, Knulli and EmuDeck
+cards."""
 import json
 import unicodedata
 import http.client
@@ -156,19 +157,24 @@ def usable(layout_name, arts):
 
 # --- ES-DE ---------------------------------------------------------------------------------------------------------
 
-def esde_wanted(base):
+def esde_wanted(layout_name, base):
     """Whether the card's ES-DE uses Art Book Next (the downloaded theme or the card's copy of it) or hasn't picked a
     theme yet, so a new card has the theme before ES-DE is first set up."""
-    theme = frontend.get_string(_read(frontend.settings_path("esde", base)), "Theme")
+    theme = frontend.get_string(_read(frontend.settings_path(layout_name, base)), "Theme")
     return not theme or theme in (ESDE_THEME, ESDE_COPY)
 
 
-def _esde_dir(base):
-    return os.path.join(base, "ES-DE", "themes", ESDE_COPY)
+def _esde_dir(layout_name, base):
+    return os.path.join(frontend.esde_dir(layout_name, base), "themes", ESDE_COPY)
 
 
-def _card_commit(base):
-    return _read(os.path.join(_esde_dir(base), ESDE_MARKER)).strip()
+def _shown(layout_name, base):
+    """The theme copy's path from ES-DE's data folder's parent, for messages."""
+    return os.path.relpath(_esde_dir(layout_name, base), os.path.dirname(os.path.normpath(frontend.esde_dir(layout_name, base))))
+
+
+def _card_commit(layout_name, base):
+    return _read(os.path.join(_esde_dir(layout_name, base), ESDE_MARKER)).strip()
 
 
 def _stored_commit():
@@ -237,11 +243,11 @@ def _theme_has(dest, folder):
     return folder not in owned and os.path.exists(os.path.join(dest, "_inc", "systems", "_metadata-global", f"{folder}.xml"))
 
 
-def install_esde(base, arts):
-    """Put Art Book Next with the collections' art on the card and select it. Returns whether anything changed."""
-    if not esde_wanted(base) or not arts:
+def install_esde(layout_name, base, arts):
+    """Put Art Book Next with the collections' art in the card's ES-DE and select it. Returns whether anything changed."""
+    if not esde_wanted(layout_name, base) or not arts:
         return False
-    dest = _esde_dir(base)
+    dest = _esde_dir(layout_name, base)
     commit = _stored_commit()
     changed = False
     if not commit:
@@ -249,8 +255,8 @@ def install_esde(base, arts):
             ui.warn("Storage has no copy of Art Book Next for ES-DE, so collections have no art; "
                     "run `sync-roms themes update` to add one")
             return False
-    elif commit != _card_commit(base):
-        print(f"🎨 Copying Art Book Next for ES-DE ({commit[:7]}) into {os.path.relpath(dest, base)}...")
+    elif commit != _card_commit(layout_name, base):
+        print(f"🎨 Copying Art Book Next for ES-DE ({commit[:7]}) into {_shown(layout_name, base)}...")
         try:
             with tempfile.TemporaryDirectory() as tmp:
                 path = os.path.join(tmp, "theme.tar.gz")
@@ -267,19 +273,19 @@ def install_esde(base, arts):
     changed |= _put(os.path.join(dest, ESDE_OWNED), "".join(f"{n}\n" for n in sorted(owned)).encode())
     for rel, data in _esde_files(arts).items():
         changed |= _put(s3.safe_join(dest, rel), data)
-    _write_settings(frontend.settings_path("esde", base), "esde", {"Theme": ESDE_COPY})
+    _write_settings(frontend.settings_path(layout_name, base), layout_name, {"Theme": ESDE_COPY})
     return changed
 
 
-def describe_esde(base, arts):
-    if not esde_wanted(base) or not arts:
+def describe_esde(layout_name, base, arts):
+    if not esde_wanted(layout_name, base) or not arts:
         return
     commit = _stored_commit()
-    if not commit and not os.path.exists(os.path.join(_esde_dir(base), ESDE_MARKER)):
+    if not commit and not os.path.exists(os.path.join(_esde_dir(layout_name, base), ESDE_MARKER)):
         print(ui.dim("🎨 storage has no copy of Art Book Next for ES-DE (`sync-roms themes update` adds one)"))
         return
-    if commit and commit != _card_commit(base):
-        print(ui.dim(f"🎨 would copy Art Book Next ({commit[:7]}) into ES-DE/themes/{ESDE_COPY}"))
+    if commit and commit != _card_commit(layout_name, base):
+        print(ui.dim(f"🎨 would copy Art Book Next ({commit[:7]}) into {_shown(layout_name, base).replace(os.sep, '/')}"))
     print(ui.dim(f"🎨 would add art for {', '.join(arts)} to it and select it as the ES-DE theme"))
 
 
@@ -365,9 +371,9 @@ def install(layout_name, base, arts):
     """Give the custom collections in arts ({name: art id}) their art in the frontend's theme. Returns whether files
     changed."""
     arts = usable(layout_name, arts)
-    return install_esde(base, arts) if layout_name == "esde" else install_knulli(base, arts)
+    return install_esde(layout_name, base, arts) if layout_name in ("esde", "emudeck") else install_knulli(base, arts)
 
 
 def describe(layout_name, base, arts):
     arts = usable(layout_name, arts)
-    describe_esde(base, arts) if layout_name == "esde" else describe_knulli(base, arts)
+    describe_esde(layout_name, base, arts) if layout_name in ("esde", "emudeck") else describe_knulli(base, arts)

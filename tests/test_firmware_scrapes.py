@@ -79,16 +79,26 @@ class ApplyFailureTest(unittest.TestCase):
 
 
 class EmudeckPlanTest(unittest.TestCase):
-    def test_media_goes_in_emulation_tools_with_no_gamelist(self):
-        with tempfile.TemporaryDirectory() as base:
+    def test_media_goes_in_emulation_tools_and_the_gamelist_in_es_de_on_this_computer(self):
+        with tempfile.TemporaryDirectory() as base, tempfile.TemporaryDirectory() as appdata:
             data = {"gba": (LISTING, META)}
-            plan = scrape_plan.build_scrape_plan("emudeck", [GBA], data, {"gba": ["A.zip"]}, lambda s: "/x",
-                                                 os.path.join(base, "ES-DE"), lambda p: True, base)
+            system = {**GBA, "folders": {**GBA["folders"], "emudeck": "gba"}}
+            plan = scrape_plan.build_scrape_plan("emudeck", [system], data, {"gba": ["A.zip"]}, lambda s: "/x",
+                                                 appdata, lambda p: True, base)
             media = os.path.join(base, "Emulation", "tools", "downloaded_media", "gba")
             self.assertEqual(sorted(j[1] for j in plan["jobs"]),
                              sorted([os.path.join(media, "covers", "A.png"), os.path.join(media, "screenshots", "A.jpg"),
                                      os.path.join(media, "3dboxes", "A.png")]))
-        self.assertEqual((plan["gamelists"], plan["writes"]), ({}, []))
+            self.assertEqual(dict(plan["gamelists"]),
+                             {os.path.join(appdata, "gamelists", "gba", "gamelist.xml"): {"A.zip": {"name": "A", "desc": "An adventure."}}})
+        self.assertEqual(plan["writes"], [])
+
+    def test_emudeck_gamelist_folder_is_es_de_name(self):
+        with tempfile.TemporaryDirectory() as base:
+            system = {"bucket": "wiiu", "folders": {"emudeck": "wiiu/roms"}}
+            plan = scrape_plan.build_scrape_plan("emudeck", [system], {"wiiu": ({}, {"A.wua": {"name": "A"}})},
+                                                 {"wiiu": ["A.wua"]}, lambda s: "/x", "/appdata", lambda p: True, base)
+        self.assertEqual(list(plan["gamelists"]), [os.path.join("/appdata", "gamelists", "wiiu", "gamelist.xml")])
 
     def test_stale_media_is_found_in_the_emudeck_media_folder(self):
         with tempfile.TemporaryDirectory() as base:
@@ -114,6 +124,22 @@ class EmudeckPlanTest(unittest.TestCase):
             self.assertEqual(sorted(os.path.relpath(p, es) for p in stale),
                              [os.path.join("downloaded_media", "sg1000", "covers", "A.png"),
                               os.path.join("gamelists", "sg1000", "gamelist.xml")])
+
+
+    def test_stale_media_clears_the_older_bucket_named_emudeck_gamelist_only_with_es_de(self):
+        with tempfile.TemporaryDirectory() as base, tempfile.TemporaryDirectory() as appdata:
+            media = os.path.join(base, "Emulation", "tools", "downloaded_media")
+            touch(os.path.join(media, "sg-1000", "covers", "A.png"))
+            touch(os.path.join(media, "sg1000", "covers", "A.png"))  # from before the rename
+            touch(os.path.join(appdata, "gamelists", "sg1000", "gamelist.xml"))
+            touch(os.path.join(base, "Emulation", "roms", "sg-1000", "A.sg"))
+            system = {"bucket": "sg1000", "folders": {"emudeck": "sg-1000"}}
+            roms = os.path.join(base, "Emulation", "roms")
+            self.assertEqual(sorted(scrape_plan.stale_media("emudeck", [system], roms, appdata, base)),
+                             sorted([os.path.join(media, "sg1000", "covers", "A.png"),
+                                     os.path.join(appdata, "gamelists", "sg1000", "gamelist.xml")]))
+            self.assertEqual(scrape_plan.stale_media("emudeck", [system], roms, None, base),
+                             [os.path.join(media, "sg1000", "covers", "A.png")])
 
 
 class SlotPlanTest(unittest.TestCase):
