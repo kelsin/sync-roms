@@ -336,7 +336,7 @@ def chd_archive(tools, cfg, path, report=None, scratch=None):
                                     lambda image, out: make_zar(tools, image, out, disc(image)))
         else:
             images = disc_images(extracted, strict=False)
-            kept = [f for f in extracted if f.lower().endswith(tuple(cfg.get("keep", ())))]
+            kept = [f for f in extracted if f.lower().endswith((".chd", *cfg.get("keep", ())))]  # an archived chd is just unzipped
             if not images and not kept:
                 return "no disc image in the archive"
             pairs = [(image, os.path.join(folder, os.path.splitext(os.path.basename(image))[0] + ".chd")) for image, _ in images]

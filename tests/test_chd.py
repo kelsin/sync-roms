@@ -280,6 +280,14 @@ class ChdTest(unittest.TestCase):
         self.assertEqual([(j[2], j[3]) for j in jobs], [(os.path.join(self.dir, "ps3", "Game.rar"), None)])
         self.assertNotIn(".rar", external.ARCHIVE_EXTS)
 
+    def test_archive_of_a_chd_is_unzipped_to_the_chd(self):
+        self.touch("Game.zip")
+        with mock.patch.object(external, "run_tool", FakeTools(archive=["Game.chd", "readme.txt"])) as fake:
+            error = chd.chd_archive(self.tools, CD["chd"], os.path.join(self.dir, "Game.zip"))
+        self.assertIsNone(error)
+        self.assertEqual(self.files(), ["Game.chd"])
+        self.assertFalse([c for c in fake.calls if c[0] == "chdman"])
+
     def test_archive_without_a_disc_image_is_kept(self):
         self.touch("Game.zip")
         with mock.patch.object(external, "run_tool", FakeTools(archive=["readme.txt"])):
