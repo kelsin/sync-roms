@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.15.0](https://github.com/kelsin/sync-roms/compare/v2.14.0...v2.15.0) (2026-11-16)
+
+
+### :video_game: Features
+
+* **cards:** add cards export and cards import ([#316](https://github.com/kelsin/sync-roms/issues/316)) ([cd72ee2](https://github.com/kelsin/sync-roms/commit/cd72ee20fed8d6c0df0bd80e202f92c6c30c7ede))
+
 ## [2.14.0](https://github.com/kelsin/sync-roms/compare/v2.13.0...v2.14.0) (2026-11-16)
 
 
