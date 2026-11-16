@@ -6,7 +6,7 @@ from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
 
 
-from . import inventory, runtime, s3, scrape_plan, store, ui, upload, vita
+from . import inventory, runtime, s3, scrape_plan, screenscraper, store, ui, upload, vita
 
 
 def bucket_roms(systems, all_files=False):
@@ -119,6 +119,9 @@ def plan_upload(es_dir, roms, existing, remote_texts):
                 plan["warnings"].append(f"{key} in storage isn't valid JSON, skipped")
                 continue
             merged = scrape_plan.merge_metadata(remote, local)
+            for rom in local:  # a card synced before the marking has the plain title
+                if merged[rom].get("translated") or screenscraper.is_translation(rom):
+                    merged[rom] = screenscraper.mark_translated(merged[rom])
             text = scrape_plan.dump_json(merged) if local else old
             if local and text != old:
                 new = len(set(merged) - set(remote))
