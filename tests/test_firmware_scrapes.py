@@ -286,67 +286,6 @@ class StaleMediaTest(unittest.TestCase):
                                         ["Games/GBA/Keep.gba"]), [])
 
 
-class SlotLabelUploadTest(unittest.TestCase):
-    SYSTEMS = [sysdef("gba", slot="GBA"), sysdef("gb", slot="GB")]
-
-    def plan(self, files, roms, existing=None):
-        with tempfile.TemporaryDirectory() as labels:
-            for f in files:
-                touch(os.path.join(labels, f))
-            files, present, unmatched = scrape_files.plan_slot_upload(labels, self.SYSTEMS, roms, existing or {})
-            return [k for k, *_ in files], present, [os.path.relpath(u, labels) for u in unmatched]
-
-    def test_labels_named_after_a_rom_go_to_the_slot_folder(self):
-        keys, present, unmatched = self.plan(["GBA/A.png", "GB/B.png", "GBA/Nope.png", "GBA/A.txt"],
-                                             {"gba": {"A.zip"}, "gb": {"B.gb"}})
-        self.assertEqual(sorted(keys), ["scrapes/gb/slot/B.png", "scrapes/gba/slot/A.png"])
-        self.assertEqual((present, unmatched), (0, ["GBA/Nope.png"]))
-
-    def test_same_size_is_present_and_a_different_size_is_replaced(self):
-        keys, present, _ = self.plan(["GBA/A.png", "GBA/B.png"], {"gba": {"A.zip", "B.zip"}},
-                                     {"scrapes/gba/slot/A.png": 1, "scrapes/gba/slot/B.png": 99})
-        self.assertEqual((keys, present), (["scrapes/gba/slot/B.png"], 1))
-
-
-class SlotLabelCommandTest(unittest.TestCase):
-    SYSTEMS = [sysdef("gba", slot="GBA"), sysdef("genesis")]
-
-    def run_upload(self, files, folders=("Labels",), dry_run=False, confirm=True):
-        with tempfile.TemporaryDirectory() as card:
-            for f in files:
-                touch(os.path.join(card, f))
-            args = mock.Mock(base_dir=card, dry_run=dry_run)
-            with mock.patch.object(scrape_files.store, "load_manifest", return_value={"systems": self.SYSTEMS}), \
-                    mock.patch.object(scrape_files, "bucket_roms", return_value={"gba": {"A.zip"}}) as roms, \
-                    mock.patch.object(scrape_files.s3, "list_sizes", return_value={}), \
-                    mock.patch.object(scrape_files.ui, "confirm", return_value=confirm), \
-                    mock.patch.object(scrape_files.upload, "run_uploads", return_value=0) as run, \
-                    contextlib.redirect_stdout(io.StringIO()):
-                code = scrape_files.upload_scrapes(args)
-        return code, roms, run
-
-    def test_uploads_the_labels_of_slot_systems_only(self):
-        code, roms, run = self.run_upload(["Labels/GBA/A.png"])
-        self.assertEqual(code, 0)
-        self.assertEqual([s["bucket"] for s in roms.call_args[0][0]], ["gba"])
-        self.assertEqual([j[0] for j in run.call_args[0][0]], ["scrapes/gba/slot/A.png"])
-
-    def test_dry_run_and_cancel_upload_nothing(self):
-        self.assertFalse(self.run_upload(["Labels/GBA/A.png"], dry_run=True)[2].called)
-        self.assertFalse(self.run_upload(["Labels/GBA/A.png"], confirm=False)[2].called)
-
-    def test_an_es_de_folder_takes_the_scrape_path(self):
-        with tempfile.TemporaryDirectory() as card:
-            touch(os.path.join(card, "ES-DE", "gamelists", "x"))
-            touch(os.path.join(card, "Labels", "GBA", "A.png"))
-            with mock.patch.object(scrape_files, "upload_slot_labels") as slot, \
-                    mock.patch.object(scrape_files.store, "load_cards", return_value={}), \
-                    mock.patch.object(scrape_files.store, "load_manifest", side_effect=SystemExit("scrape path")):
-                with self.assertRaises(SystemExit):
-                    scrape_files.upload_scrapes(mock.Mock(base_dir=card, dry_run=True))
-            slot.assert_not_called()
-
-
 def system_of(bucket):
     return next(s for s in systems() if s["bucket"] == bucket)
 
@@ -386,121 +325,30 @@ class SharedFolderTest(unittest.TestCase):
                                             os.path.join(base, "ROMs"), es, base)
         self.assertEqual([os.path.basename(p) for p in stale], ["Gone.png"])
 
-    def test_upload_splits_the_shared_folder_by_system(self):
-        gamelist = ("<gameList><game><path>./A.3ds</path><name>A</name></game>"
-                    "<game><path>./B.3ds</path><name>B</name></game></gameList>")
-        with tempfile.TemporaryDirectory() as es:
-            touch(os.path.join(es, "downloaded_media", "n3ds", "covers", "A.png"))
-            touch(os.path.join(es, "downloaded_media", "n3ds", "covers", "B.png"))
-            os.makedirs(os.path.join(es, "gamelists", "n3ds"))
-            with open(os.path.join(es, "gamelists", "n3ds", "gamelist.xml"), "w") as f:
-                f.write(gamelist)
-            roms = {"3ds": {"A.3ds"}, "n3ds": {"B.3ds"}}
-            plan = scrape_files.plan_upload(es, roms, {}, {})
-            wanted = scrape_files._upload_text_keys(es, {"scrapes/3ds/metadata.json": 1,
-                                                         "scrapes/n3ds/metadata.json": 1}, roms)
-        self.assertEqual(sorted(k for k, *_ in plan["files"]),
-                         ["scrapes/3ds/covers/A.png", "scrapes/n3ds/covers/B.png"])
-        self.assertEqual(sorted(k for k, *_ in plan["texts"]), ["scrapes/3ds/metadata.json", "scrapes/n3ds/metadata.json"])
-        self.assertEqual(sorted(wanted), ["scrapes/3ds/metadata.json", "scrapes/n3ds/metadata.json"])
-
-
-class StaleFolderUploadTest(unittest.TestCase):
-    """A bucket-named folder an older sync left (3ds) next to the ES-DE-named one (n3ds)."""
-
-    def plan(self, folders):
-        with tempfile.TemporaryDirectory() as es:
-            for name, size in folders:
-                path = os.path.join(es, "downloaded_media", name, "covers", "A.png")
-                os.makedirs(os.path.dirname(path))
-                with open(path, "wb") as f:
-                    f.write(b"x" * size)
-                os.makedirs(os.path.join(es, "gamelists", name))
-                with open(os.path.join(es, "gamelists", name, "gamelist.xml"), "w") as f:
-                    f.write(f"<gameList><game><path>./A.3ds</path><name>A from {name}</name></game></gameList>")
-            plan = scrape_files.plan_upload(es, {"3ds": {"A.3ds"}}, {}, {})
-        return plan
-
-    def test_the_old_folder_is_skipped_when_the_new_one_is_there(self):
-        plan = self.plan([("3ds", 1), ("n3ds", 2)])
-        self.assertEqual([(k, size) for k, _, size in plan["files"]], [("scrapes/3ds/covers/A.png", 2)])
-        self.assertEqual([k for k, *_ in plan["texts"]], ["scrapes/3ds/metadata.json"])
-        self.assertIn("A from n3ds", plan["texts"][0][1])
-        self.assertEqual(len({k for k, *_ in plan["derived"]}), len(plan["derived"]))
-        self.assertTrue(all("n3ds" in src for _, src, _, _ in plan["derived"]))
-        self.assertEqual(sorted(plan["warnings"]), ["downloaded_media/3ds is from an older sync and was skipped; remove it",
-                                                    "gamelists/3ds is from an older sync and was skipped; remove it"])
-
-    def test_only_the_old_folder_still_uploads(self):
-        plan = self.plan([("3ds", 1)])
-        self.assertEqual([(k, size) for k, _, size in plan["files"]], [("scrapes/3ds/covers/A.png", 1)])
-        self.assertIn("A from 3ds", plan["texts"][0][1])
-        self.assertEqual(plan["warnings"], [])
-
-
-class DerivedUploadTest(unittest.TestCase):
-    def derived(self, files, system="gba", roms=("A.zip", "hacks/B.zip"), existing=None):
-        with tempfile.TemporaryDirectory() as es:
-            for f in files:
-                touch(os.path.join(es, "downloaded_media", system, f))
-            plan = scrape_files.plan_upload(es, {system: set(roms)}, existing or {}, {})
-        return plan
+class DerivedArtTest(unittest.TestCase):
+    def derived(self, found, system="gba", stem="A"):
+        return [(k, src, box) for k, src, box in scrape_files.derived_art(system, stem, found)]
 
     def test_game_boy_art_makes_onion_and_slot_art(self):
-        plan = self.derived(["covers/A.png"])
-        self.assertEqual(sorted((k, box) for k, _, _, box in plan["derived"]),
+        self.assertEqual([(k, box) for k, _, box in self.derived({"covers": "c.png"})],
                          [("scrapes/gba/onion/A.png", (250, 360)), ("scrapes/gba/slot/A.png", (1280, 661))])
 
     def test_game_boy_and_color_labels_are_the_cart_size(self):
         for system in ("gb", "gbc"):
-            plan = self.derived(["covers/A.png"], system, ("A.gb",))
-            slot = [d for d in plan["derived"] if "/slot/" in d[0]]
-            self.assertEqual([d[3] for d in slot], [(1024, 901)])
+            slot = [box for k, _, box in self.derived({"covers": "c.png"}, system) if "/slot/" in k]
+            self.assertEqual(slot, [(1024, 901)])
 
     def test_a_rom_in_a_subfolder_gets_slot_art_only(self):
-        plan = self.derived(["covers/hacks/B.png"])
-        self.assertEqual([k for k, *_ in plan["derived"]], ["scrapes/gba/slot/hacks/B.png"])
+        self.assertEqual([k for k, *_ in self.derived({"covers": "c.png"}, stem="hacks/B")], ["scrapes/gba/slot/hacks/B.png"])
 
     def test_other_systems_get_no_slot_art(self):
-        plan = self.derived(["covers/A.png"], "snes", ("A.sfc",))
-        self.assertEqual([k for k, *_ in plan["derived"]], ["scrapes/snes/onion/A.png"])
-
-    def test_existing_art_is_counted_not_recreated(self):
-        plan = self.derived(["covers/A.png"], existing={"scrapes/gba/slot/A.png": 1})
-        self.assertEqual([k for k, *_ in plan["derived"]], ["scrapes/gba/onion/A.png"])
-        self.assertEqual(plan["derived_present"], 1)
-
-    def test_empty_placeholder_art_is_skipped(self):
-        with tempfile.TemporaryDirectory() as es:
-            touch(os.path.join(es, "downloaded_media", "snes", "screenshots", "A.png"))
-            empty = os.path.join(es, "downloaded_media", "snes", "covers", "A.png")
-            os.makedirs(os.path.dirname(empty))
-            open(empty, "wb").close()
-            plan = scrape_files.plan_upload(es, {"snes": {"A.sfc"}}, {}, {})
-        self.assertEqual([k for k, *_ in plan["files"]], ["scrapes/snes/screenshots/A.png"])
-        self.assertTrue(all(src.endswith(os.path.join("screenshots", "A.png")) for _, src, _, _ in plan["derived"]))
+        self.assertEqual([k for k, *_ in self.derived({"covers": "c.png"}, "snes")], ["scrapes/snes/onion/A.png"])
 
     def test_cover_is_preferred_over_a_screenshot(self):
-        plan = self.derived(["screenshots/A.png", "covers/A.png"])
-        self.assertTrue(all(src.endswith(os.path.join("covers", "A.png")) for _, src, _, _ in plan["derived"]))
+        self.assertEqual({src for _, src, _ in self.derived({"screenshots": "s.png", "covers": "c.png"})}, {"c.png"})
 
 
-class EsdeExtrasUploadTest(unittest.TestCase):
-    def test_themes_collections_and_settings_are_not_uploaded(self):
-        with tempfile.TemporaryDirectory() as es:
-            touch(os.path.join(es, "themes", "my-theme", "theme.xml"))
-            touch(os.path.join(es, "downloaded_media", "snes", "covers", "A.png"))
-            os.makedirs(os.path.join(es, "collections"))
-            with open(os.path.join(es, "collections", "custom-Fav.cfg"), "w") as f:
-                f.write("%ROMPATH%/snes/A.sfc\n")
-            os.makedirs(os.path.join(es, "settings"))
-            with open(os.path.join(es, "settings", "es_settings.xml"), "w") as f:
-                f.write('<?xml version="1.0"?>\n<bool name="ScraperRegionFallback" value="true" />\n')
-            plan = scrape_files.plan_upload(es, {"snes": {"A.sfc"}}, {}, {})
-        self.assertEqual([k for k, *_ in plan["files"]], ["scrapes/snes/covers/A.png"])
-        self.assertEqual(plan["texts"], [])
-        self.assertFalse(any("/esde/" in k for k, *_ in plan["files"] + plan["texts"] + plan["derived"]))
-
+class EsdeExtrasCleanTest(unittest.TestCase):
     def test_text_keys_are_metadata_only(self):
         existing = {"scrapes/gba/metadata.json": 1, "scrapes/esde/collections/custom-Fav.cfg": 1,
                     "scrapes/esde/settings.json": 1, "scrapes/gba/covers/A.png": 1}

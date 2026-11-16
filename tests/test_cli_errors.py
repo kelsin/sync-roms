@@ -33,16 +33,6 @@ class ErrorsTest(Isolated):
         self.assertLess(len(err.getvalue()), 400)
         self.assertIn("sync-roms devices", err.getvalue())
 
-    def test_short_u_is_deprecated_but_works(self):
-        code, _, err = self.sync(["-u"], {"bucket": "b"}, u=(scrape_files, "upload_scrapes", lambda args: 0))
-        self.assertEqual(code, 0)
-        self.assertIn("deprecated", err)
-        self.assertIn("upload scrapes", err)
-
-    def test_long_upload_scrapes_does_not_warn(self):
-        code, _, err = self.sync(["--upload-scrapes"], {"bucket": "b"}, u=(scrape_files, "upload_scrapes", lambda args: 0))
-        self.assertEqual((code, err), (0, ""))
-
 
 class EditAliasTest(Isolated):
     def test_every_edit_spelling_opens_the_main_menu(self):
@@ -174,10 +164,6 @@ class ExitCodeTest(Isolated):
         for fn in (upload.upload_command, diff.diff_command, m3u.m3u_command, chd.chd_command):
             with self.subTest(fn=fn.__name__):
                 self.assertEqual(self.code_of(fn, args), 2)
-
-    def test_no_es_de_folder_is_a_usage_error(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            self.assertEqual(self.code_of(scrape_files.upload_scrapes, mock.Mock(base_dir=tmp)), 2)
 
     def test_s3_errors_are_setup_problems(self):
         from botocore.exceptions import ClientError

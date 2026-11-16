@@ -257,7 +257,7 @@ def notgame_info(raw):
 
 
 def parse_game(raw, regions):
-    """(metadata fields as parse_gamelist makes them, {ES-DE media folder: url}) from a game dict."""
+    """(metadata fields (scrape_plan.TEXT_FIELDS plus rating and releasedate), {ES-DE media folder: url}) from a game dict."""
     raw = _unwrap(raw)
     if is_notgame(raw):
         return {}, {}

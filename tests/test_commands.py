@@ -293,7 +293,8 @@ class CheckShapesTest(Cmd):
 class CliTest(unittest.TestCase):
     def test_translate_maps_subcommands_to_flags(self):
         t = cli.translate
-        self.assertEqual(t(["upload", "roms", "x", "--replace"]), ["--upload", "x", "--replace"])
+        self.assertEqual(t(["upload", "x", "--replace"]), ["--upload", "x", "--replace"])
+        self.assertEqual(t(["upload"]), ["--upload"])
         self.assertEqual(t(["-n", "mirror", "use", "d"]), ["-n", "--use-mirror", "d"])
         self.assertEqual(t(["mirror", "d"]), ["--mirror", "d"])
         self.assertEqual(t(["convert"]), ["--cd"])
@@ -322,7 +323,6 @@ class CliTest(unittest.TestCase):
         with contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit) as cm:
             cli.check_modes(args)
         self.assertEqual(cm.exception.code, 2)
-        cli.check_modes(cli.build_parser().parse_args(["--upload-scrapes", "/card"]))
 
     def test_commands_after_global_flags_route_to_commands_run(self):
         for argv, expect in ((["-y", "check"], ["check", "-y"]), (["-n", "doctor"], ["doctor", "-n"]),
