@@ -118,6 +118,11 @@ def _read(path):
         return None
 
 
+def read_text(path):
+    """path's text, or "" when it can't be read."""
+    return _read(path) or ""
+
+
 def apply_collections(plan, layout_name, base):
     """Write and delete plan's collection files and list or unlist them in the settings file; True when that file changed."""
     for path, text in plan["writes"]:

@@ -1097,6 +1097,13 @@ def sync_card(args):
             ui.warn(f"ES-DE isn't set up on this computer (no {es_dir}), so the card's collections were skipped; "
                     "sync on the Steam Machine or Steam Deck to get them")
             return
+        if layout_name == "emudeck":
+            roms = os.path.join(base, layout["roms_dir"])
+            used = frontend.get_string(frontend.read_text(frontend.settings_path(layout_name, base)), "ROMDirectory")
+            if not used or os.path.realpath(used) != os.path.realpath(roms):
+                ui.warn(f"ES-DE on this computer ({es_dir}) doesn't use this card's ROMs (its ROMDirectory isn't "
+                        f"{roms}), so the card's collections were skipped")
+                return
         coming = {(s["bucket"], downloads.rom_rel(k, False)) for s in chosen
                   for k in available(s) if k in listings[s["bucket"]]} if dry_run else set()
 

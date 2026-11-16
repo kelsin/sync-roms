@@ -170,7 +170,7 @@ def _esde_dir(layout_name, base):
 
 def _shown(layout_name, base):
     """The theme copy's path from ES-DE's data folder's parent, for messages."""
-    return os.path.relpath(_esde_dir(layout_name, base), os.path.dirname(frontend.esde_dir(layout_name, base)))
+    return os.path.relpath(_esde_dir(layout_name, base), os.path.dirname(os.path.normpath(frontend.esde_dir(layout_name, base))))
 
 
 def _card_commit(layout_name, base):

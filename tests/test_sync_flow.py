@@ -513,13 +513,22 @@ class SyncFlowTest(unittest.TestCase):
         self.assertEqual(cfg, "./roms/gba/Game.zip\n")
         self.assertIn("<config>", settings)
 
-    def run_emudeck(self, appdata, **kw):
-        """A sync of an EmuDeck card with FAVS, ES-DE's data folder on this computer at appdata."""
+    def run_emudeck(self, appdata, rom_dir=lambda d: os.path.join(d, "Emulation", "roms") + "/", **kw):
+        """A sync of an EmuDeck card with FAVS, ES-DE's data folder on this computer at appdata, its ROMDirectory
+        rom_dir(card folder) (no settings file when rom_dir is None, no ROMDirectory when it returns None)."""
         manifest = {**MANIFEST, "systems": [{**MANIFEST["systems"][0], "folders": {"emudeck": "gba"}}],
                     "layouts": {"emudeck": {"label": "EmuDeck", "roms_dir": "Emulation/roms", "bios_dir": "Emulation/bios"}}}
+
+        def prepare(card_dir):
+            if rom_dir:
+                used = rom_dir(card_dir)
+                line = f'<string name="ROMDirectory" value="{used}" />\n' if used else ""
+                os.makedirs(os.path.join(appdata, "settings"), exist_ok=True)
+                with open(os.path.join(appdata, "settings", "es_settings.xml"), "w") as f:
+                    f.write('<?xml version="1.0"?>\n' + line)
         with mock.patch.dict(os.environ, {"ESDE_APPDATA_DIR": appdata}):
             return self.run_sync(cards={"collections": ["favs"]}, colls=[FAVS], manifest=manifest,
-                                 setup=(None, "emudeck"), files=["Emulation/roms/gba/Game.zip"],
+                                 setup=(None, "emudeck"), files=["Emulation/roms/gba/Game.zip"], prepare=prepare,
                                  extra=[(ui, "warn", self.warned.append)], **kw)
 
     def test_emudeck_card_writes_its_collection_into_es_de_on_this_computer(self):
@@ -539,12 +548,27 @@ class SyncFlowTest(unittest.TestCase):
             self.warned = []
             with tempfile.TemporaryDirectory() as tmp:
                 appdata = os.path.join(tmp, "ES-DE")
-                _, out, updates, _, _ = self.run_emudeck(appdata, dry_run=dry_run)
+                _, out, updates, _, _ = self.run_emudeck(appdata, rom_dir=None, dry_run=dry_run)
                 self.assertFalse(os.path.exists(appdata))
             self.assertEqual(self.warned, [f"ES-DE isn't set up on this computer (no {appdata}), so the card's "
                                            "collections were skipped; sync on the Steam Machine or Steam Deck to get them"])
             self.assertNotIn("custom-Favs.cfg", out)
             self.assertFalse([u for u in updates if "frontend_collections" in u])
+
+    def test_emudeck_card_with_an_es_de_using_other_roms_warns_and_writes_nothing(self):
+        for rom_dir in (lambda d: "/elsewhere/roms", lambda d: None):
+            for dry_run in (False, True):
+                self.warned, cards = [], []
+                with tempfile.TemporaryDirectory() as appdata:
+                    _, out, updates, _, _ = self.run_emudeck(appdata, rom_dir=rom_dir, dry_run=dry_run,
+                                                             after=lambda d: cards.append(d))
+                    self.assertEqual(sorted(os.listdir(appdata)), ["settings"])
+                    self.assertNotIn("CollectionSystemsCustom", read_from(appdata, "settings", "es_settings.xml"))
+                roms = os.path.join(cards[0], "Emulation/roms")
+                self.assertEqual(self.warned, [f"ES-DE on this computer ({appdata}) doesn't use this card's ROMs (its "
+                                               f"ROMDirectory isn't {roms}), so the card's collections were skipped"])
+                self.assertNotIn("custom-Favs.cfg", out)
+                self.assertFalse([u for u in updates if "frontend_collections" in u])
 
     def test_dry_run_describes_and_writes_nothing(self):
         _, out, updates, _, _ = self.run_sync(cards={"collections": ["favs"]}, colls=[FAVS], dry_run=True,

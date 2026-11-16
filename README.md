@@ -819,7 +819,8 @@ sync are left out. `--dry-run` lists what would be written.
 - Close the frontend before syncing: it rewrites its settings file from memory.
 - **EmuDeck**: ES-DE keeps its data on the machine, not the card, so the files (and the theme art) go into `~/ES-DE`
   (or `$ESDE_APPDATA_DIR`) on the machine running the sync, laid out as in the ES-DE column. Sync the card on the Steam
-  Machine or Steam Deck to get them; when ES-DE isn't set up there, sync skips them with a warning.
+  Machine or Steam Deck to get them. Sync skips them with a warning when ES-DE isn't set up there, or when that ES-DE's
+  `ROMDirectory` (in `settings/es_settings.xml`) isn't the card's `Emulation/roms`, as EmuDeck sets it.
 
 ## Troubleshooting
 
