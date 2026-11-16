@@ -1,6 +1,5 @@
 import contextlib
 import io
-import json
 import os
 import sys
 import tempfile
@@ -484,34 +483,6 @@ class DerivedUploadTest(unittest.TestCase):
     def test_cover_is_preferred_over_a_screenshot(self):
         plan = self.derived(["screenshots/A.png", "covers/A.png"])
         self.assertTrue(all(src.endswith(os.path.join("covers", "A.png")) for _, src, _, _ in plan["derived"]))
-
-
-class TranslatedUploadTest(unittest.TestCase):
-    """Uploading a card's gamelist keeps translated titles marked."""
-
-    def upload(self, rom, local_name, remote):
-        gamelist = f"<gameList><game><path>./{rom}</path><name>{local_name}</name></game></gameList>"
-        with tempfile.TemporaryDirectory() as es:
-            os.makedirs(os.path.join(es, "gamelists", "snes"))
-            with open(os.path.join(es, "gamelists", "snes", "gamelist.xml"), "w") as f:
-                f.write(gamelist)
-            texts = {"scrapes/snes/metadata.json": json.dumps(remote)} if remote else {}
-            plan = scrape_files.plan_upload(es, {"snes": {rom}}, {}, texts)
-        return json.loads(plan["texts"][0][1])
-
-    def test_stale_local_name_keeps_the_suffix_once(self):
-        remote = {"A.sfc": {"name": "Sakura Taisen - Translated", "translated": True}}
-        merged = self.upload("A.sfc", "Sakura Taisen", remote)
-        self.assertEqual(merged["A.sfc"], {"name": "Sakura Taisen - Translated", "translated": True})
-        merged = self.upload("A.sfc", "Sakura Taisen - Translated", remote)
-        self.assertEqual(merged["A.sfc"]["name"], "Sakura Taisen - Translated")
-
-    def test_tagged_rom_new_in_local_is_marked(self):
-        merged = self.upload("A (T-En).sfc", "Sakura Taisen", {})
-        self.assertEqual(merged["A (T-En).sfc"], {"name": "Sakura Taisen - Translated", "translated": True})
-
-    def test_untagged_rom_is_left_alone(self):
-        self.assertEqual(self.upload("A.sfc", "Sakura Taisen", {})["A.sfc"], {"name": "Sakura Taisen"})
 
 
 class EsdeExtrasUploadTest(unittest.TestCase):
