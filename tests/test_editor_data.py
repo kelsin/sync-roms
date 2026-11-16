@@ -9,7 +9,7 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
-from sync_roms import cardedit, collectionedit, commands, edit, picker, store  # noqa: E402
+from sync_roms import cardedit, collectionedit, commands, edit, picker, store, ui  # noqa: E402
 from helpers import Cmd, DataDir, feed_list  # noqa: E402
 
 
@@ -155,8 +155,8 @@ class Hints(unittest.TestCase):
                  edit.MENU_HINT, edit.GAMES_HINT, cardedit.LIST_HINT, cardedit.GAMES_HINT, cardedit.SETS_HINT,
                  cardedit.META_HINT, cardedit.VALUES_HINT, collectionedit.GAMES_HINT]
         for h in hints:
-            self.assertLessEqual(picker.cell_width(picker.HELP_HINT + h), 80, h)  # the list adds "? help ·"
-        self.assertLessEqual(picker.cell_width(picker.TYPING_HINT), 80)
+            self.assertLessEqual(ui.cell_width(picker.HELP_HINT + h), 80, h)  # the list adds "? help ·"
+        self.assertLessEqual(ui.cell_width(picker.TYPING_HINT), 80)
         self.assertTrue(picker.MULTI_HINT.startswith("Space toggle · Enter done"))
         self.assertTrue(edit.MENU_HINT.startswith("Enter open"))
 

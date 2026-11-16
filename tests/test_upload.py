@@ -506,6 +506,69 @@ class CopyInterruptTest(unittest.TestCase):
         self.assertIsInstance(error, SystemExit)
         self.assertEqual(exits, [1])
 
+    def test_a_copy_that_finishes_after_ctrl_c_leaves_the_in_flight_list(self):
+        started, release_a, release_b = threading.Semaphore(0), threading.Event(), threading.Event()
+        after, interrupted = [], []
+
+        def write_file(key, write):
+            started.release()
+            (release_a if "a.gba" in key else release_b).wait(5)
+
+        def draw(self_, done):
+            if not interrupted:
+                started.acquire(timeout=5)
+                started.acquire(timeout=5)
+                interrupted.append(1)
+                raise KeyboardInterrupt
+            release_a.set()  # only once the in-flight list is taken, so a.gba is still in it
+            if done == 1:
+                after.append([n for n, _, _ in self_.active()])
+                if len(after) >= 2:
+                    release_b.set()
+
+        todo = [("gba/a.gba", "/x/a.gba", 2), ("gba/b.gba", "/x/b.gba", 1)]
+        with contextlib.ExitStack() as st:
+            st.enter_context(mock.patch.object(s3, "write_file", write_file))
+            st.enter_context(mock.patch.object(ui.ProgressBar, "draw", draw))
+            st.enter_context(mock.patch.object(upload.time, "sleep", lambda s: None))
+            st.enter_context(mock.patch.object(runtime, "ROOT", "/storage"))
+            st.enter_context(mock.patch.object(runtime, "WORKERS", 2))
+            st.enter_context(mock.patch.object(ui, "POLL", 0.001))
+            st.enter_context(contextlib.redirect_stdout(io.StringIO()))
+            with self.assertRaises(KeyboardInterrupt):
+                upload.run_copies(todo)
+        self.assertEqual(after[-1], ["gba/b.gba"])  # a draw can land between a.gba ending and its finish; the next one can't
+
+
+class CopyOrderTest(unittest.TestCase):
+    def test_a_copy_that_finishes_first_prints_first_while_a_slow_one_is_listed(self):
+        # sizes put big.zip first in the biggest-first order
+        todo = [("gba/big.zip", "/src/big.zip", 100), ("gba/small.zip", "/src/small.zip", 1)]
+        small_printed, seen = threading.Event(), []
+        real_say = ui.ProgressBar.say
+
+        def say(self_, line):
+            if "small.zip" in line:
+                seen.append([n for n, _, _ in self_.active()])
+                small_printed.set()
+            real_say(self_, line)
+
+        def write_file(key, write):
+            if "big" in key:
+                assert small_printed.wait(5)
+
+        with mock.patch.object(upload.s3, "write_file", write_file), mock.patch.object(ui.ProgressBar, "say", say), \
+                mock.patch.object(runtime, "ROOT", "/storage"), mock.patch.object(runtime, "WORKERS", 2), \
+                mock.patch.object(ui, "POLL", 0.001):
+            out = io.StringIO()
+            with contextlib.redirect_stdout(out):
+                failed = upload.run_copies(todo)
+        self.assertEqual(failed, 0)
+        lines = [l for l in out.getvalue().splitlines() if "\u2705" in l]
+        self.assertIn("[1/2]", lines[0]); self.assertIn("gba/small.zip", lines[0])
+        self.assertIn("gba/big.zip", lines[1])
+        self.assertEqual(seen, [["gba/big.zip"]])
+
 
 class MoveInterruptTest(unittest.TestCase):
     """Ctrl-C during s3.move_keys stops the queued moves; the moves that finished are recorded in the cache."""

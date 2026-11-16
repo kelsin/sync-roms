@@ -80,10 +80,12 @@ def run_copies(todo, quiet=False):
 
     order = sorted(todo, key=lambda j: -j[2])
     moved = ui.ByteProgress([j[2] for j in order])
-    bar = ui.ProgressBar(len(todo), moved.fraction, moved.total)
+    names = [j[0] for j in order]
+    bar = ui.ProgressBar(len(todo), moved.fraction, moved.total, active=lambda: moved.active(names))
 
     def copy(n):
         job = order[n]
+        moved.start(n)
         try:
             def write(tmp):
                 if len(job) > 3:
@@ -98,24 +100,32 @@ def run_copies(todo, quiet=False):
     failed, futs = 0, []
     ex = ThreadPoolExecutor(runtime.WORKERS)
     try:
+        finishing = queue.Queue()  # each future queues itself as it ends: a wait() per file would be O(files in flight)
         futs += [ex.submit(copy, n) for n in range(len(order))]
-        for i, f in enumerate(futs, 1):
-            job, error = ui.wait_drawing(bar, i - 1, f.result)
-            moved.finish(i - 1)
-            prog = ui.dim(f"[{i}/{len(todo)}]")
+        index = {f: n for n, f in enumerate(futs)}
+        for f in futs:
+            f.add_done_callback(finishing.put)
+        for finished in range(1, len(todo) + 1):
+            f = ui.wait_drawing(bar, finished - 1, finishing.get)
+            job, error = f.result()
+            moved.finish(index[f])
+            prog = ui.dim(f"[{finished}/{len(todo)}]")
             if error is None:
                 if not quiet:
                     bar.say(f"  {prog} ✅ {job[0]}")
             else:
                 failed += 1
                 _say_failure(bar, quiet, f"  {prog} ❌ {ui.red(job[0])}: {str(error).strip()}")
-            bar.draw(i)
+            bar.draw(finished)
     except KeyboardInterrupt:
         ex.shutdown(wait=False, cancel_futures=True)
-        running = [f for f in futs if f.running()]
+        running = [(n, f) for n, f in enumerate(futs) if f.running()]
         bar.say(ui.yellow(f"🛑 Interrupted — finishing {len(running)} copy(ies) in flight. ^C again to abort now."))
         try:
-            while any(f.running() for f in running):
+            while running:
+                for n, f in [r for r in running if r[1].done()]:
+                    running.remove((n, f))
+                    moved.finish(n)
                 bar.draw(sum(f.done() for f in futs))
                 time.sleep(ui.POLL)
         except KeyboardInterrupt:
@@ -160,7 +170,8 @@ def run_uploads(todo, quiet=False):
     done, failed = queue.Queue(), 0
     order = sorted(todo, key=lambda j: -j[2])
     moved = ui.ByteProgress([j[2] for j in order])
-    bar = ui.ProgressBar(len(todo), moved.fraction, moved.total)
+    names = [j[0] for j in order]
+    bar = ui.ProgressBar(len(todo), moved.fraction, moved.total, active=lambda: moved.active(names))
     try:
         with tempfile.TemporaryDirectory() as tmp, ThreadPoolExecutor(os.cpu_count() or 4) as shrinkers, \
                 create_transfer_manager(client, config) as manager:
@@ -173,6 +184,7 @@ def run_uploads(todo, quiet=False):
                                [queue_when_done_class()(done, n, job, lambda b: moved.add(n, b))])
 
             def shrink_and_send(job, n):
+                moved.start(n)
                 try:
                     art = os.path.join(tmp, f"{n}.png")
                     scrape_plan.shrink_png(job[1], art, job[3])

@@ -131,6 +131,61 @@ class CleanDirsTest(unittest.TestCase):
         self.assertNotIn("._b", out)
 
 
+class CompletionOrderTest(unittest.TestCase):
+    def test_a_file_that_finishes_first_prints_first_while_a_slow_one_is_listed(self):
+        jobs = [("gba/slow.zip", "/tmp/x/gba/slow.zip", 5), ("gba/fast.zip", "/tmp/x/gba/fast.zip", 5)]
+        fast_printed, seen = threading.Event(), []
+        real_say = ui.ProgressBar.say
+
+        def say(self_, line):
+            if "fast.zip" in line:
+                seen.append([n for n, _, _ in self_.active()])
+                fast_printed.set()
+            real_say(self_, line)
+
+        def download(job, callback=None, wrote=None):
+            if "slow" in job[0]:
+                assert fast_printed.wait(5)
+
+        with mock.patch.object(s3, "download", download), mock.patch.object(ui.ProgressBar, "say", say), \
+                mock.patch.object(ui, "POLL", 0.001):
+            failed, out = captured(downloads.run_downloads, jobs, "ROMs", "i", "/tmp/x")
+        self.assertEqual(failed, 0)
+        lines = [l for l in out.splitlines() if "✅" in l]
+        self.assertIn("[1/2]", lines[0]); self.assertIn("gba/fast.zip", lines[0])
+        self.assertIn("[2/2]", lines[1]); self.assertIn("gba/slow.zip", lines[1])
+        self.assertEqual(seen, [["gba/slow.zip"]])
+
+    def test_many_instant_files_each_print_once(self):
+        jobs = [(f"gba/{n}.zip", f"/tmp/x/gba/{n}.zip", 1) for n in range(20)]
+        with mock.patch.object(s3, "download", lambda *a, **k: None), mock.patch.object(ui, "POLL", 0.001):
+            _, out = captured(downloads.run_downloads, jobs, "ROMs", "i", "/tmp/x")
+        for n in range(20):
+            self.assertEqual(out.count(f"gba/{n}.zip"), 1)
+        self.assertIn("[20/20]", out)
+
+    def test_a_failure_prints_when_it_happens(self):
+        jobs = [("gba/slow.zip", "/tmp/x/gba/slow.zip", 5), ("gba/bad.zip", "/tmp/x/gba/bad.zip", 5)]
+        bad_printed = threading.Event()
+        real_say = ui.ProgressBar.say
+
+        def say(self_, line):
+            if "bad.zip" in line:
+                bad_printed.set()
+            real_say(self_, line)
+
+        def download(job, callback=None, wrote=None):
+            if "bad" in job[0]:
+                raise OSError("boom")
+            assert bad_printed.wait(5)
+
+        with mock.patch.object(s3, "download", download), mock.patch.object(ui.ProgressBar, "say", say), \
+                mock.patch.object(ui, "POLL", 0.001):
+            failed, out = captured(downloads.run_downloads, jobs, "ROMs", "i", "/tmp/x")
+        self.assertEqual(failed, 1)
+        self.assertLess(out.index("bad.zip"), out.index("✅"))
+
+
 class DownloadInterruptTest(unittest.TestCase):
     def run_interrupted(self, draws_that_interrupt, fail=False):
         release, n = threading.Event(), []
@@ -184,6 +239,45 @@ class DownloadInterruptTest(unittest.TestCase):
         with mock.patch.object(ui, "QUIET", True), contextlib.redirect_stderr(io.StringIO()) as err:
             self.run_interrupted({1}, fail=True)
         self.assertIn("gba/a.zip", err.getvalue())
+
+    def test_a_file_that_finishes_after_ctrl_c_leaves_the_in_flight_list(self):
+        started, release_a, release_b, a_said = threading.Semaphore(0), threading.Event(), threading.Event(), threading.Event()
+        after, interrupted, real_say = [], [], ui.ProgressBar.say
+
+        def download(job, cb, wrote=None):
+            started.release()
+            (release_a if "a.zip" in job[0] else release_b).wait(5)
+
+        def say(self_, line):
+            if "✅ gba/a.zip" in line:
+                a_said.set()
+            real_say(self_, line)
+
+        def draw(self_, done):
+            if not interrupted:
+                started.acquire(timeout=5)
+                started.acquire(timeout=5)
+                interrupted.append(1)
+                raise KeyboardInterrupt
+            release_a.set()  # only once the in-flight list is taken, so a.zip is still in it
+            if a_said.is_set():
+                after.append([n for n, _, _ in self_.active()])
+                if len(after) >= 2:
+                    release_b.set()
+
+        with contextlib.ExitStack() as st:
+            st.enter_context(mock.patch.object(s3, "download", download))
+            st.enter_context(mock.patch.object(ui.ProgressBar, "say", say))
+            st.enter_context(mock.patch.object(ui.ProgressBar, "draw", draw))
+            st.enter_context(mock.patch.object(downloads.time, "sleep", lambda s: None))
+            st.enter_context(mock.patch.object(runtime, "WORKERS", 2))
+            st.enter_context(mock.patch.object(ui, "POLL", 0.001))
+            st.enter_context(contextlib.redirect_stdout(io.StringIO()))
+            jobs = [("gba/a.zip", "/tmp/x/a.zip", 5), ("gba/b.zip", "/tmp/x/b.zip", 5)]
+            with self.assertRaises(KeyboardInterrupt):
+                downloads.run_downloads(jobs, "ROMs", "i", "/tmp/x")
+        self.assertTrue(after)
+        self.assertEqual(after[0], ["gba/b.zip"])
 
     def test_abort_removes_the_part_files_of_unfinished_downloads_and_flushes(self):
         started, release, seen = threading.Semaphore(0), threading.Event(), []

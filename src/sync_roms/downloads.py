@@ -1,6 +1,7 @@
 """Download planning, running and local ROM scanning."""
 import contextlib
 import os
+import queue
 import re
 import sys
 import time
@@ -116,21 +117,32 @@ def run_downloads(todo, label, icon, base, failures=None):
     futs = []
     ex = ThreadPoolExecutor(runtime.WORKERS)
     moved = ui.ByteProgress([j[2] for j in todo])
-    bar = ui.ProgressBar(len(todo), moved.fraction, moved.total, io=moved)
+    names = [j[0] for j in todo]
+    bar = ui.ProgressBar(len(todo), moved.fraction, moved.total, io=moved, active=lambda: moved.active(names))
+
+    def fetch(i, j):
+        moved.start(i)
+        s3.download(j, lambda n: moved.add(i, n), moved.wrote)
+
     try:
-        futs += [(j, ex.submit(s3.download, j, lambda n, i=i: moved.add(i, n), moved.wrote)) for i, j in enumerate(todo)]
-        for i, (j, f) in enumerate(futs, 1):
-            prog = ui.dim(f"[{i}/{len(todo)}]")
+        finishing = queue.Queue()  # each future queues itself as it ends: a wait() per file would be O(files in flight)
+        futs += [(j, ex.submit(fetch, i, j)) for i, j in enumerate(todo)]
+        index = {f: i for i, (_, f) in enumerate(futs)}
+        for _, f in futs:
+            f.add_done_callback(finishing.put)
+        for finished in range(1, len(todo) + 1):
+            f = ui.wait_drawing(bar, finished - 1, finishing.get)
+            j = todo[index[f]]
+            prog = ui.dim(f"[{finished}/{len(todo)}]")
+            moved.finish(index[f])
             try:
-                ui.wait_drawing(bar, i - 1, f.result)
-                moved.finish(i - 1)
+                f.result()
                 src = j[0].split("/", 1)[0]
                 rel = os.path.relpath(j[1], base)
                 shown = j[0] if rel.split(os.sep, 1)[0] == src else f"{src} → {rel}"
                 bar.say(f"  {prog} ✅ {shown}")
             except Exception as e:
                 failed += 1
-                moved.finish(i - 1)
                 reason = (getattr(e, 'stderr', None) or str(e)).strip() + failure_hint(e)
                 if failures is not None:
                     failures.append((j[0], reason))
@@ -139,15 +151,16 @@ def run_downloads(todo, label, icon, base, failures=None):
                     ui.failure(line)
                 else:
                     bar.say(line)
-            bar.draw(i)
+            bar.draw(finished)
     except KeyboardInterrupt:
         ex.shutdown(wait=False, cancel_futures=True)
-        running = [(j, f) for j, f in futs if not f.done()]
+        running = [(i, j, f) for i, (j, f) in enumerate(futs) if not f.done()]
         bar.say(ui.yellow(f"🛑 Interrupted — finishing {len(running)} download(s) in flight (partly downloaded files restart on the next run). ^C again to abort now."))
         try:
             while running:
-                for j, f in [r for r in running if r[1].done()]:
-                    running.remove((j, f))
+                for i, j, f in [r for r in running if r[2].done()]:
+                    running.remove((i, j, f))
+                    moved.finish(i)
                     if f.exception() is None:
                         bar.say(f"  ✅ {j[0]}")
                     elif ui.QUIET:
@@ -158,7 +171,7 @@ def run_downloads(todo, label, icon, base, failures=None):
                 time.sleep(ui.POLL)
         except KeyboardInterrupt:
             bar.clear()
-            for j, _ in running:  # hard_exit skips s3.download's own cleanup
+            for _, j, _ in running:  # hard_exit skips s3.download's own cleanup
                 with contextlib.suppress(OSError):
                     os.remove(j[1] + ".part")
             print(ui.red("🛑 Aborted"))
