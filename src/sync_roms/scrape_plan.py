@@ -29,44 +29,10 @@ SLOT_ART = ("covers", "3dboxes", "screenshots")
 SLOT_LABEL_MAX = {"gba": (1280, 661), "gb": (1024, 901), "gbc": (1024, 901)}
 BUCKET_MEDIA = MEDIA_TYPES | {ONION_TYPE, SLOT_TYPE}
 TEXT_FIELDS = ("name", "desc", "developer", "publisher", "genre", "players")
-UNKNOWN_FIELDS = {"developer", "publisher", "genre", "players"}  # ES-DE writes "unknown" for these
 
 
 def dump_json(data):
     return json.dumps(data, indent=1, ensure_ascii=False, sort_keys=True) + "\n"
-
-
-def parse_gamelist(text):
-    """{ROM path: safe fields} from an ES-DE gamelist.xml. Raises ET.ParseError if it is malformed.
-
-    Only the <gameList> block is read: ES-DE can write an <alternativeEmulator> element before it,
-    which leaves two top-level elements. Only the scraped fields are kept (no favorites, play
-    counts, emulator choices or media tags), and values ES-DE writes for "nothing" are dropped.
-    """
-    m = re.search(r"<gameList\b.*</gameList>", text, re.S)
-    games = {}
-    if not m:
-        return games
-    for g in ET.fromstring(m.group(0)).findall("game"):
-        path = (g.findtext("path") or "").strip()
-        if not path.startswith("./"):
-            continue
-        fields = {}
-        for f in TEXT_FIELDS:
-            v = (g.findtext(f) or "").strip()
-            if v and not (f in UNKNOWN_FIELDS and v.lower() == "unknown"):
-                fields[f] = v
-        try:
-            rating = round(float(g.findtext("rating") or 0), 2)
-        except ValueError:
-            rating = 0
-        if rating > 0:
-            fields["rating"] = rating
-        d = (g.findtext("releasedate") or "").strip()
-        if re.match(r"\d{8}T", d) and not d.startswith("1970"):
-            fields["releasedate"] = f"{d[:4]}-{d[4:6]}-{d[6:8]}"
-        games[path[2:]] = fields
-    return games
 
 
 def merge_metadata(remote, local):

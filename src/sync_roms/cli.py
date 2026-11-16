@@ -24,7 +24,7 @@ SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "download": ("pico8", "add the PICO-8 BBS Featured carts storage doesn't have, and newer revisions of those it has"),
     "cards": ("edit|list|new|set|rename|delete|export|import", "list and manage the cards you've synced"),
     "devices": ("[ID]", "list the supported devices, or one device's systems"),
-    "upload": ("roms [DIR] | scrapes [CARD]", "upload ROMs or a card's scraped data to storage"),
+    "upload": ("[DIR]", "upload ROMs to the storage folder of a system you pick"),
     "diff": ("[DIR]", "list the ROMs in only DIR or only the bucket, ignoring renames"),
     "scrape": ("[SYSTEM | match SYSTEM ROM GAME | review [SYSTEM] | missing [SYSTEM]]", "scrape the ROMs that have no metadata from ScreenScraper into storage's scrapes/ folder"),
     "clean": ("scrapes", "remove scrapes/ media and metadata for ROMs that aren't in storage"),
@@ -145,8 +145,7 @@ TOPICS = {
   Without an ID: every device with its chip and system count. With one: its firmwares, note and systems.
 """,
     "upload": """
-  sync-roms upload roms [DIR] [--replace] [--dry-run]    upload the ROMs in DIR (default: current directory) to storage folder of a system you pick
-  sync-roms upload scrapes [CARD] [--dry-run]            upload CARD/ES-DE scraped data to storage's scrapes/ folder, merging with what's there
+  sync-roms upload [DIR] [--replace] [--dry-run]    upload the ROMs in DIR (default: current directory) to storage folder of a system you pick
 
   The system is guessed from the folder name; same-size files are skipped, a different size overwrites after you confirm.
   --replace makes the storage folder match DIR: renamed files are moved by content (big bucket files without an MD5 are
@@ -157,7 +156,7 @@ TOPICS = {
   sync-roms diff [DIR] [--system ID] [--json]
 
   Lists the ROMs in only one of DIR and storage folder of a system you pick. Same path and size is the same file;
-  the rest are matched by content (the CRCs inside zips, the bytes of other files, as upload roms --replace does).
+  the rest are matched by content (the CRCs inside zips, the bytes of other files, as upload --replace does).
   It only reads, so --dry-run is refused.
   --system ID   compare with that storage folder instead of picking one
   --json        print the result as one JSON document (needs --system unless DIR is named after a system)
@@ -318,9 +317,9 @@ def help_text(topic=None):
   sync-roms /Volumes/SD                          sync the card
   sync-roms sync /Volumes/SD --device anbernic-rg35xx-sp --layout knulli --yes --dry-run
   sync-roms games add gba 'Metroid*' --card SD   add games to a card
-  sync-roms upload roms ~/roms/gba               upload ROMs to storage
+  sync-roms upload ~/roms/gba                    upload ROMs to storage
 
-  {ui.dim('The old flags (--edit, --upload, --upload-scrapes, --clean-scrapes, --diff, --scrape, --scrape-match, --scrape-review,')}
+  {ui.dim('The old flags (--edit, --upload, --clean-scrapes, --diff, --scrape, --scrape-match, --scrape-review,')}
   {ui.dim('--scrape-missing, --m3u, --cd, --install-tools, --mirror, --use-mirror, --clear-mirror, --devices) still work.')}
   {ui.dim('A card folder named like a command: write ./edit.')}
 """
@@ -425,7 +424,7 @@ LEGACY = {
     ("tools", "install"): ["--install-tools"], ("clean", "scrapes"): ["--clean-scrapes"],
     ("scrape", "match"): ["--scrape-match"], ("scrape", "review"): ["--scrape-review"],
     ("scrape", "missing"): ["--scrape-missing"], ("scrape",): ["--scrape"],
-    ("upload", "roms"): ["--upload"], ("upload", "scrapes"): ["--upload-scrapes"],
+    ("upload",): ["--upload"],
     ("mirror", "use"): ["--use-mirror"], ("mirror", "clear"): ["--clear-mirror"], ("mirror",): ["--mirror"],
     ("games", "edit"): ["--edit"], ("cards", "edit"): ["--edit"], ("edit",): ["--edit"],
 }
@@ -463,7 +462,7 @@ def translate(argv):
                 value = ["--device-id", tail[n]] if name == "devices" else [tail[n]]
                 return head + flags + value + tail[:n] + tail[n + 1:]
             return head + flags + tail
-    if name == "upload" or name == "clean" or name == "tools":
+    if name == "clean" or name == "tools":
         ui.fail(f"'{name}' needs a subcommand: " + ", ".join(
             f"{w[0]} {w[1]}" for w in LEGACY if w[0] == name and len(w) > 1), 2)
     return argv
@@ -476,7 +475,6 @@ def build_parser():
     ap.add_argument("-y", "--yes", action="store_true")
     ap.add_argument("-e", "--edit", action="store_true")
     ap.add_argument("-a", "--ask", action="store_true")
-    ap.add_argument("-u", "--upload-scrapes", action="store_true")
     ap.add_argument("-c", "--clean-scrapes", action="store_true")
     ap.add_argument("--upload", nargs="?", const="")
     ap.add_argument("--replace", action="store_true")
@@ -514,7 +512,7 @@ def check_modes(args):
     """Refuse flag combinations that would silently do nothing. Returns the active mode's name (None for a plain sync)."""
     modes = [name for name, on in (
         ("--edit", args.edit), ("--upload", args.upload is not None), ("--diff", args.diff is not None),
-        ("--upload-scrapes", args.upload_scrapes), ("--clean-scrapes", args.clean_scrapes),
+        ("--clean-scrapes", args.clean_scrapes),
         ("--scrape", args.scrape), ("--scrape-match", args.scrape_match is not None),
         ("--scrape-review", args.scrape_review is not None), ("--scrape-missing", args.scrape_missing is not None),
         ("--mirror", args.mirror is not None), ("--use-mirror", bool(args.use_mirror)), ("--clear-mirror", args.clear_mirror),
@@ -525,7 +523,7 @@ def check_modes(args):
     mode = modes[0] if modes else None
     name = WORDS.get(mode)
     if args.replace and mode != "--upload":
-        ui.fail("--replace only works with `upload roms` (--upload)", 2)
+        ui.fail("--replace only works with `upload` (--upload)", 2)
     if args.dry_run and mode in ("--edit", "--install-tools", "--clear-mirror", "--devices", "--scrape-missing", "--scrape-review", "--diff"):
         ui.fail(f"--dry-run has no effect on `{name}`", 2)
     if args.ask and mode:
@@ -546,7 +544,7 @@ def check_modes(args):
              "--scrape-match": (args.scrape_match or [None])[0]}.get(mode)
     if given and any(sep and sep in given for sep in (os.sep, os.altsep)):
         ui.fail(f"`{name}` expects a system id, not a path ({given!r})", 2)
-    if args.base_dir and mode not in (None, "--upload-scrapes"):
+    if args.base_dir and mode is not None:
         ui.fail(f"`{name}` doesn't take a card folder ({args.base_dir!r}); give the directory right after the command", 2)
     if args.device_id and mode != "--devices":
         ui.fail("a device id only applies to `devices`", 2)
@@ -624,8 +622,6 @@ def sync(reset=True):
 
 
 def run(argv):
-    if "-u" in argv:
-        ui.warn("-u is deprecated: it means --upload-scrapes, not --upload. Use `sync-roms upload scrapes` instead.")
     lead = 0
     while lead < len(argv) and argv[lead] in BOOL_FLAGS:
         lead += 1
@@ -703,12 +699,12 @@ def dispatch_mode(args, mode):
     if args.mirror is not None or args.use_mirror or args.clear_mirror:
         from . import mirroring
         return True, mirroring.mirror_command(args)
-    if args.edit or args.upload_scrapes or args.clean_scrapes:
+    if args.edit or args.clean_scrapes:
         if args.edit:
             code = edit.edit_manifest()
         else:
             from . import scrape_files
-            code = scrape_files.upload_scrapes(args) if args.upload_scrapes else scrape_files.clean_scrapes(args)
+            code = scrape_files.clean_scrapes(args)
         mirror = usersettings.load_settings().get("mirror")
         if mirror and not code and not args.dry_run:  # pick up the games just added
             from . import mirroring

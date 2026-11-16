@@ -136,7 +136,7 @@ def _systems(name):
 
 
 def _scraped(keys):
-    """The keys of unknown ROMs that have a metadata entry by now (from `upload scrapes`, say)."""
+    """The keys of unknown ROMs that have a metadata entry by now (from another scrape, say)."""
     out = set()
     for system in sorted({k.split("/", 1)[0] for k in keys}):
         try:

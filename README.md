@@ -72,7 +72,7 @@ aws configure --profile roms
 These `s3` settings are read by the `aws s3 cp`/`sync` commands, not by `sync-roms`
 itself (which uses boto3 and its own worker pool). Set them if you also move files with
 the AWS CLI. The defaults are 10 concurrent requests and 8MB multipart chunks. `--upload` and
-`--upload-scrapes` size their own parallelism from your CPU cores and don't need them.
+`scrape` size their own parallelism from your CPU cores and don't need them.
 
 ```bash
 for p in roms-readonly roms; do
@@ -178,16 +178,16 @@ While typing a filter (or a note, which `w` opens in the game list): `^A` `^E` s
    differs from storage's (e.g. a Knulli device), it prints
    `[i/N] ✅ genesis → megadrive/Game.md` (storage folder → local folder/file).
 5. Scraped data for the card's games is installed from storage's `scrapes/` folder (see
-   [Scraped data](#scraped-data---upload-scrapes---clean-scrapes)), converted for the layout:
+   [Scraping from ScreenScraper](#scraping-from-screenscraper-scrape)), converted for the layout:
 
    | Firmware | Media | Metadata |
    | --- | --- | --- |
    | `esde` | `ES-DE/downloaded_media/<system>/<type>/…` (every type) | `ES-DE/gamelists/<system>/gamelist.xml` |
    | `knulli` | `<system>/images`, `videos`, `manuals`, named `Game-image.png`, `-thumb`, `-marquee`, `-fanart`, `-boxback`, `-titleshot`, `-video`, `-manual` | `<system>/gamelist.xml` with name, description, rating, date and the media tags |
-   | `onion` | `<system>/Imgs/Game.png`, the 250x360 box art prepared at upload | `<system>/miyoogamelist.xml` with name and image |
+   | `onion` | `<system>/Imgs/Game.png`, the 250x360 box art made when scraping | `<system>/miyoogamelist.xml` with name and image |
    | `allium` | same `Imgs/` box art as `onion` | `<system>/gamelist.xml` with name, image, rating, date, developer, publisher and genre |
    | `muos` | `MUOS/info/catalogue/<system>/box/Game.png` (cover, then 3D box) and `preview/Game.png` (screenshot, then title screen), as uploaded | `text/Game.txt` with the description |
-   | `slot` | `Labels/<system>/Game.png`, the cart label prepared at upload | none |
+   | `slot` | `Labels/<system>/Game.png`, the cart label made when scraping | none |
    | `emudeck` | `Emulation/tools/downloaded_media/<system>/<type>/…` (every type) | `~/ES-DE/gamelists/<system>/gamelist.xml` on the machine running the sync (see below) |
 
    EmuDeck's ES-DE keeps its gamelists on the machine, not the card, so they go into `~/ES-DE/gamelists` (or
@@ -197,23 +197,18 @@ While typing a filter (or a note, which `w` opens in the game list): `^A` `^E` s
    the media still goes on the card.
 
    For `esde` and `emudeck`, `<system>` is the system's ES-DE folder name (`sg-1000`, `n3ds`): systems that share a
-   ROM folder, like `3ds` and `n3ds`, share its media and gamelist folders, and an upload sends each file back to the
-   system whose ROM it matches. muOS and Slot keep their media in folders of their own, flat even for ROMs in subfolders. An existing
+   ROM folder, like `3ds` and `n3ds`, share its media and gamelist folders. muOS and Slot keep their media in folders of their own, flat even for ROMs in subfolders. An existing
    `.txt` is rewritten only when the description differs.
 
    Knulli's main image is the miximage, or the screenshot if there is none. Onion's picture is made
-   when the data is uploaded: `--upload-scrapes` resizes the cover (then the 3D box, then the
+   when the ROM is scraped: `scrape` resizes the cover (then the 3D box, then the
    screenshot) to a PNG that fits 250x360 and stores it as `scrapes/<system>/onion/<ROM>.png`, so a
-   sync just downloads it. The upload also creates any missing Onion art for images that were already
-   uploaded earlier. Resizing needs Pillow or macOS `sips` on the machine that uploads. Existing
+   sync just downloads it. Resizing needs Pillow or macOS `sips` on the machine that scrapes. Existing
    gamelists are updated in place: only these tags are set, so favorites, play counts and an
    `<alternativeEmulator>` block stay. Existing files with the same size aren't downloaded again.
    ROMs in subfolders get no Onion art. Slot's labels are made the same way (cover, then 3D box, then
    screenshot) as a PNG that fits the cart's label: 1280x661 for Game Boy Advance, 1024x901 for Game Boy
-   and Game Boy Color, stored as `scrapes/<system>/slot/<ROM>.png`. Labels made in Cart Studio can be uploaded
-   straight from a Slot card with `--upload-scrapes CARD`: its `Labels/GB`, `GBC` and `GBA` PNGs named after a ROM
-   in storage go to the same place as they are, replacing a label of a different size (the derived one is only
-   made when none exists). `--mirror` and a Slot sync pick them up like any other label.
+   and Game Boy Color, stored as `scrapes/<system>/slot/<ROM>.png`.
 
    On `esde`, `knulli`, `onion` and `allium`, `mame` and `fbneo` clones are named after their variant, e.g. `1942 (Revision A)`,
    from `src/sync_roms/data/clones.json` (MAME and FBNeo parent/clone data), replacing the scraped name. On `esde` a
@@ -278,7 +273,7 @@ Every mode is a command (`sync-roms COMMAND --help` explains one; plain `sync-ro
 | `download pico8` | add the PICO-8 BBS Featured carts storage doesn't have, and newer revisions of those it has (see below) | |
 | `cards list\|new\|set\|rename\|delete\|export\|import` | manage cards; `export FILE` flattens surprises and collections into games, `import FILE` keeps size, device, layout, games and excluded and turns Surprise off (`r` renames, `p` prefixes all) | |
 | `devices [ID]` | list devices, or one device's systems (`--json`) | `--devices` |
-| `upload roms [DIR]` / `upload scrapes [CARD]` | upload to storage | `--upload`, `--upload-scrapes` |
+| `upload [DIR]` | upload ROMs to storage | `--upload` |
 | `diff [DIR]` | compare a folder with storage | `--diff` |
 | `scrape [SYSTEM \| match SYSTEM ROM GAME \| review [SYSTEM] \| missing [SYSTEM]]` / `scrape --set-credentials` | scrape ROMs with no metadata from ScreenScraper, review the non-game and unknown ones, or list them all | `--scrape`, `--scrape-match`, `--scrape-review`, `--scrape-missing` |
 | `clean scrapes` | remove scrapes of ROMs not in storage | `--clean-scrapes` |
@@ -292,7 +287,7 @@ Every mode is a command (`sync-roms COMMAND --help` explains one; plain `sync-ro
 | `check` | validate your JSON data files | |
 | `completion bash\|zsh\|fish` | shell completion script | |
 
-The old flags keep working. Flags that make no sense for a command (`--dry-run` with `games edit`, `--replace` without `upload roms`) are refused rather than ignored, and abbreviations like `--up` are not accepted. A card folder named like a command: write `./edit`.
+The old flags keep working. Flags that make no sense for a command (`--dry-run` with `games edit`, `--replace` without `upload`) are refused rather than ignored, and abbreviations like `--up` are not accepted. A card folder named like a command: write `./edit`.
 
 ### Unattended use
 
@@ -320,7 +315,6 @@ On `esde` and `emudeck` cards every Vita game zip in `psvita/` gets a `.psvita` 
 | `-n`, `--dry-run` | Show what would be downloaded (with total sizes), download nothing. With `--mirror`/`--use-mirror`, show what the mirror would download and delete. Commands that only read (`diff`, `check`, `doctor`, `cache`, `config`, `completion`, `games list`/`export`/`sets list`) or can't honor it (`edit`, `scrape review`, `scrape missing`, ...) refuse it with exit 2 |
 | `-e`, `--edit` | Add/remove games in a card's list, then save (see below) |
 | `-a`, `--ask` | Confirm saved settings (device and layout, Android media folders) instead of using them silently. Answering no asks the question again and saves the new answer |
-| `-u`, `--upload-scrapes` | (`-u` is deprecated: it is not `--upload`) Upload `BASE_DIR/ES-DE` scraped data to storage (see below) |
 | `--upload [DIR]` | Upload the ROMs in `DIR` and its subfolders (default: current directory) to storage folder of a system you pick; the system is guessed from the folder name (see below) |
 | `-c`, `--clean-scrapes` | Remove scraped data in storage for ROMs that aren't available (see below) |
 | `--m3u [DIR]` | Create or fix the `.m3u` playlist of every multi-disc game (`Name (Disc 1) (Extra).chd`, `Name (Disc 2).chd`) in `DIR` and its subfolders (default: current directory). The playlist is named after the title without `(Disc N)` or tags the discs don't share (`Name (Sega CD).m3u`). Playlists with the wrong discs are rewritten, ones with some missing files lose those lines, ones with no files left are deleted after asking, and ones listing exactly a game's discs under another name are renamed. Local only; `--dry-run` previews |
@@ -330,7 +324,7 @@ On `esde` and `emudeck` cards every Vita game zip in `psvita/` gets a `.psvita` 
 | `--use-mirror DIR` | Same as `--mirror DIR`, then save `DIR` as the local mirror |
 | `--clear-mirror` | Forget the saved mirror (its files are left alone) |
 | `--diff [DIR]` | Compare a folder with a bucket system's folder (the old form of `diff`; see `--system`) |
-| `--replace` | `upload roms` only: make the storage folder match `DIR`. Renamed files are moved by content (big bucket files without an MD5 are compared on samples, and those renames are marked) and left-over storage files are listed so you pick which to delete |
+| `--replace` | `upload` only: make the storage folder match `DIR`. Renamed files are moved by content (big bucket files without an MD5 are compared on samples, and those renames are marked) and left-over storage files are listed so you pick which to delete |
 | `--devices` | List the supported devices with their chip and the number of systems each one gets, then exit |
 | `-y`, `--yes` | Answer prompts with their default |
 | `--device ID\|full`, `--layout NAME` | Sync: choose the setup without the picker (it is saved for the card) |
@@ -365,7 +359,7 @@ On `esde` and `emudeck` cards every Vita game zip in `psvita/` gets a `.psvita` 
 | `ROMS_ROOT` | Folder (e.g. a mounted network share) used instead of storage. Overrides `root` in `settings.json`; wins over a bucket setting. Needs no AWS profile |
 | `ROMS_ENDPOINT` | Custom S3 endpoint URL. Overrides `endpoint` in `settings.json` (default: AWS) |
 | `ROMS_PROFILE` | AWS profile to use. Overrides `profile` in `settings.json` (default `roms-readonly`) |
-| `ROMS_WRITE_PROFILE` | AWS profile used to write in `--upload`, `--upload-scrapes`, `--clean-scrapes` and `scrape` modes. Overrides `write_profile` in `settings.json` (default `roms`) |
+| `ROMS_WRITE_PROFILE` | AWS profile used to write in `--upload`, `--clean-scrapes` and `scrape` modes. Overrides `write_profile` in `settings.json` (default `roms`) |
 | `NO_COLOR` | Disable colors |
 
 ## Uploading ROMs (`--upload`)
@@ -383,8 +377,7 @@ the cursor starts at the top of the list. Esc cancels.
   dotfiles are.
 - It uploads with the `ROMS_WRITE_PROFILE` profile (default `roms`) through one shared pool of requests, four per CPU
   core (at most 16), so many small files and the parts of big ones (64MB and up go as 32MB parts) all keep the
-  connection busy. The biggest files start first. `--upload-scrapes` uses the same pool for its media, and
-  resizes Onion box art and Slot labels on every CPU core while the other files upload. To a storage folder, 8 files
+  connection busy. The biggest files start first. To a storage folder, 8 files
   are copied at once.
 
 ## PICO-8 carts from the BBS (`download pico8`)
@@ -404,25 +397,7 @@ storage doesn't have (`new:`) and those the BBS has a newer revision of (`upgrad
 - Carts in `ignored.json` are never downloaded.
 - Requests go one at a time. The first HTTP error stops the run with a warning; carts already added stay.
 
-## Scraped data (`--upload-scrapes`, `--clean-scrapes`)
-
-`sync-roms --upload-scrapes [BASE_DIR]` uploads the ES-DE data folder at `BASE_DIR/ES-DE`
-(the card root) to `s3://YOUR-BUCKET/scrapes/`. It only reads the ES-DE folder, never
-changes it, and never deletes anything in storage. Add `--dry-run` to see the plan first;
-a real upload asks before it starts (default no).
-
-What goes up, and how it is stored:
-
-| Local | Storage | Notes |
-| --- | --- | --- |
-| `gamelists/<system>/gamelist.xml` | `scrapes/<system>/metadata.json` | JSON keyed by ROM path. Only `name`, `desc`, `rating` (0-1), `releasedate` (ISO), `developer`, `publisher`, `genre`, `players`. Favorites, play counts, emulator choices and media tags are dropped. Merged with storage's file: local values win, entries only in storage stay |
-| `downloaded_media/<system>/<type>/…` | `scrapes/<system>/<type>/…` | Only files whose ROM name matches an available ROM. `._` files, dotfiles and `CLEANUP/` are skipped. Uploaded when new or a different size |
-| (made from the cover, 3D box or screenshot) | `scrapes/<system>/onion/<ROM>.png` | Onion box art, a PNG that fits 250x360. Created whenever it is missing from storage, even if its source image was already uploaded. Not made for ROMs in subfolders. Needs Pillow or `sips` |
-| (a Slot card's `Labels/`, or made from the cover, 3D box or screenshot) | `scrapes/<system>/slot/<ROM>.png` | Slot cart label for the Game Boy systems, a PNG that fits 1280x661 (GBA) or 1024x901 (GB, GBC). A card's label is uploaded as is and replaces one of a different size; a derived one is created only when none exists, subfolders included, and needs Pillow or `sips` |
-
-For uploads, "available ROMs" are the games your cards list that exist in storage, which is
-what a sync installs. Scraped files for any other ROM are left out. A `gamelist.xml` that can't be read
-is skipped with a warning.
+## Cleaning scraped data (`--clean-scrapes`)
 
 `sync-roms --clean-scrapes` (or `-c`) needs no folder. It compares storage's `scrapes/` media and
 `metadata.json` entries with every ROM file in storage's system folders (not only the games
@@ -522,7 +497,7 @@ is skipped at once, without retries.
 **What is written** under `scrapes/<system>/`: the entry in `metadata.json` (merged with what is there) and one folder per media
 type (`3dboxes`, `backcovers`, `covers`, `fanart`, `manuals`, `marquees`, `miximages`, `physicalmedia`, `screenshots`,
 `titlescreens`, `videos`), plus the Onion and Slot images made the same way as when uploading (they need Pillow or macOS
-`sips`). Media a ROM already has there (for example from `upload scrapes`) is kept: those types aren't downloaded, and the
+`sips`). Media a ROM already has there (for example from an earlier `scrape`) is kept: those types aren't downloaded, and the
 confirm says how many files are kept. Onion and Slot images are made only from art downloaded in the same run, from the
 first of covers, 3D boxes and screenshots the ROM has; when that art is already in storage, or the ROM already has the
 Onion or Slot image, none is made. Media is downloaded only over https from screenscraper.fr, and only images and PDF manuals
@@ -549,10 +524,10 @@ bucket) is deleted. `--dry-run` shows the plan. A non-empty folder that isn't al
 folder (next to `cards.json`). From then on every sync refreshes the mirror from storage first
 (if storage can't be reached it warns and uses what the mirror has), then does its usual job
 with files copied from the mirror instead of downloaded. If `DIR` is missing (an unplugged drive)
-it uses storage. `--upload`, `--upload-scrapes` and `--clean-scrapes` always work on storage itself, and `--edit` lists it;
-when `--edit`, `--upload-scrapes` or `--clean-scrapes` finishes successfully (not with `--dry-run`) the saved mirror is refreshed afterwards, so it picks up the change.
+it uses storage. `--upload` and `--clean-scrapes` always work on storage itself, and `--edit` lists it;
+when `--edit` or `--clean-scrapes` finishes successfully (not with `--dry-run`) the saved mirror is refreshed afterwards, so it picks up the change.
 `sync-roms --clear-mirror` removes the setting (the mirror's files stay); `sync-roms --mirror` alone
-refreshes the saved mirror. Each flag is its own mode and can't be combined with `--edit`, `--upload`, `--upload-scrapes`
+refreshes the saved mirror. Each flag is its own mode and can't be combined with `--edit`, `--upload`
 or `--clean-scrapes`.
 
 ## Editing the game list (`--edit`)
