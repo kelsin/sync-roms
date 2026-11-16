@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.14.0](https://github.com/kelsin/sync-roms/compare/v2.13.0...v2.14.0) (2026-11-16)
+
+
+### :video_game: Features
+
+* **emudeck:** write custom collections and gamelists into ES-DE's data folder ([#314](https://github.com/kelsin/sync-roms/issues/314)) ([963a50f](https://github.com/kelsin/sync-roms/commit/963a50fbc130f0b39c6a2fa8684bdbe82a548818))
+
 ## [2.13.0](https://github.com/kelsin/sync-roms/compare/v2.12.0...v2.13.0) (2026-11-16)
 
 
