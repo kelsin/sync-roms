@@ -20,6 +20,12 @@ class VariantTags(unittest.TestCase):
                          {"name": "1942 (Revision B)", "sortname": "1942"})
         self.assertEqual(scrape_plan.variant_tags("esde", FAMILY, "pacman")["sortname"], "Puck Man - Pac-Man (Midway)")
 
+    def test_emudeck_gets_the_es_de_tags(self):
+        for stem in ("1942a", "1942", "pacman"):
+            self.assertEqual(scrape_plan.variant_tags("emudeck", FAMILY, stem), scrape_plan.variant_tags("esde", FAMILY, stem))
+        _, entries, _ = scrape_plan.plan_scrapes("emudeck", ["1942a.zip"], {}, {}, "/m", "/r", lambda rom: True, FAMILY)
+        self.assertEqual(entries, {"1942a.zip": {"name": "1942 (Revision A)", "sortname": "1942 - 1942 (Revision A)"}})
+
     def test_knulli_and_onion_get_name_only(self):
         self.assertEqual(scrape_plan.variant_tags("knulli", FAMILY, "1942a"), {"name": "1942 (Revision A)"})
         self.assertEqual(scrape_plan.variant_tags("onion", FAMILY, "1942a"), {"name": "1942 (Revision A)"})

@@ -39,6 +39,21 @@ class Names(unittest.TestCase):
         self.assertEqual(frontend.esde_dir("esde", "/c"), j("/c", "ES-DE"))
         self.assertEqual(frontend.set_string("", "emudeck", "Theme", "x"), frontend.set_string("", "esde", "Theme", "x"))
 
+    def test_emudeck_problem_says_why_this_computer_s_es_de_does_not_serve_the_card(self):
+        with tempfile.TemporaryDirectory() as tmp, tempfile.TemporaryDirectory() as card:
+            appdata, roms = os.path.join(tmp, "ES-DE"), os.path.join(card, "Emulation", "roms")
+            with mock.patch.dict(os.environ, {"ESDE_APPDATA_DIR": appdata}):
+                self.assertEqual(frontend.emudeck_problem(card, roms), f"ES-DE isn't set up on this computer (no {appdata})")
+                other = (f"ES-DE on this computer ({appdata}) doesn't use this card's ROMs "
+                         f"(its ROMDirectory isn't {roms})")
+                os.makedirs(os.path.join(appdata, "settings"))
+                self.assertEqual(frontend.emudeck_problem(card, roms), other)  # no settings file
+                path = frontend.settings_path("emudeck", card)
+                for used, problem in (("", other), ("/elsewhere/roms", other), (roms + "/", None), (roms, None)):
+                    with open(path, "w") as f:
+                        f.write(frontend.set_string("", "emudeck", "ROMDirectory", used) if used else '<?xml version="1.0"?>\n')
+                    self.assertEqual(frontend.emudeck_problem(card, roms), problem, used)
+
 
 class Enabled(unittest.TestCase):
     def test_set_enabled_keeps_other_names_and_the_rest_of_the_file(self):

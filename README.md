@@ -116,7 +116,7 @@ You pick a device, then the firmware it runs (a device with only one isn't asked
 | `slot` | `Games/` `BIOS/` | [slot](https://slot-cfw.fyi) on the RG SP, RG34XX, RG34XX SP, RG35XX SP, RG35XX Plus, RG28XX and RG35XX H. Game Boy, Game Boy Color and Game Boy Advance only. ROMs are extracted from their archives and go straight into the system folder, never subfolders |
 | `onion` | `Roms/` `BIOS/` | Miyoo Mini Flip, on [Onion](https://onionui.github.io/) |
 | `allium` | `Roms/` `BIOS/` | Miyoo Mini Flip, on [Allium](https://github.com/goweiwen/Allium). Same folders and `Imgs/` box art as `onion`, but with a full `gamelist.xml` |
-| `emudeck` | `Emulation/roms/` `Emulation/bios/` | [EmuDeck](https://emudeck.github.io/) on the Steam Deck and Steam Machine. Wii U, Xbox 360 and Model 2 ROMs go in a `roms/` subfolder of their system folder. Scraped media only, no gamelists |
+| `emudeck` | `Emulation/roms/` `Emulation/bios/` | [EmuDeck](https://emudeck.github.io/) on the Steam Deck and Steam Machine. Wii U, Xbox 360 and Model 2 ROMs go in a `roms/` subfolder of their system folder. Scraped media on the card; gamelists and collections in `~/ES-DE` on the machine running the sync |
 
 Folder names are case-sensitive. Folders that don't exist are shown as
 "will be created" and are created after you confirm. If they can't be created
@@ -188,7 +188,13 @@ While typing a filter (or a note, which `w` opens in the game list): `^A` `^E` s
    | `allium` | same `Imgs/` box art as `onion` | `<system>/gamelist.xml` with name, image, rating, date, developer, publisher and genre |
    | `muos` | `MUOS/info/catalogue/<system>/box/Game.png` (cover, then 3D box) and `preview/Game.png` (screenshot, then title screen), as uploaded | `text/Game.txt` with the description |
    | `slot` | `Labels/<system>/Game.png`, the cart label prepared at upload | none |
-   | `emudeck` | `Emulation/tools/downloaded_media/<system>/<type>/…` (every type) | none: ES-DE keeps gamelists in `~/ES-DE`, off the card |
+   | `emudeck` | `Emulation/tools/downloaded_media/<system>/<type>/…` (every type) | `~/ES-DE/gamelists/<system>/gamelist.xml` on the machine running the sync (see below) |
+
+   EmuDeck's ES-DE keeps its gamelists on the machine, not the card, so they go into `~/ES-DE/gamelists` (or
+   `$ESDE_APPDATA_DIR/gamelists`) on the machine running the sync, as written for `esde`. Sync the card on the Steam
+   Machine or Steam Deck to get them. As for [collections](#collections-in-es-de-knulli-and-emudeck), sync skips them
+   with a warning when ES-DE isn't set up there, or when that ES-DE's `ROMDirectory` isn't the card's `Emulation/roms`;
+   the media still goes on the card.
 
    For `esde` and `emudeck`, `<system>` is the system's ES-DE folder name (`sg-1000`, `n3ds`): systems that share a
    ROM folder, like `3ds` and `n3ds`, share its media and gamelist folders, and an upload sends each file back to the

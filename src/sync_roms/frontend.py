@@ -123,6 +123,17 @@ def read_text(path):
     return _read(path) or ""
 
 
+def emudeck_problem(base, roms):
+    """None when this computer's ES-DE serves the emudeck card at base (roms: its ROM folder), else why it doesn't."""
+    es_dir = esde_dir("emudeck", base)
+    if not os.path.isdir(es_dir):
+        return f"ES-DE isn't set up on this computer (no {es_dir})"
+    used = get_string(read_text(settings_path("emudeck", base)), "ROMDirectory")
+    if not used or os.path.realpath(used) != os.path.realpath(roms):
+        return f"ES-DE on this computer ({es_dir}) doesn't use this card's ROMs (its ROMDirectory isn't {roms})"
+    return None
+
+
 def apply_collections(plan, layout_name, base):
     """Write and delete plan's collection files and list or unlist them in the settings file; True when that file changed."""
     for path, text in plan["writes"]:

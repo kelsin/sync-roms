@@ -19,6 +19,8 @@ from helpers import MANIFEST, list_sizes  # noqa: E402
 GAME = {"title": "Game", "system": "gba", "bucket": "gba/Game.zip"}
 FAVS = {"id": "favs", "name": "Favs", "games": [GAME]}
 REAL_LOAD_COLLECTIONS = collections_mod.load_collections
+REAL_BUILD_SCRAPE_PLAN, REAL_APPLY_SCRAPE_PLAN = scrape_plan.build_scrape_plan, scrape_plan.apply_scrape_plan
+SCRAPED = {"gba": ({"scrapes/gba/covers/Game.png": 5}, {"Game.zip": {"name": "The Game"}})}
 
 
 def read_from(card_dir, *parts):
@@ -513,11 +515,14 @@ class SyncFlowTest(unittest.TestCase):
         self.assertEqual(cfg, "./roms/gba/Game.zip\n")
         self.assertIn("<config>", settings)
 
-    def run_emudeck(self, appdata, rom_dir=lambda d: os.path.join(d, "Emulation", "roms") + "/", **kw):
-        """A sync of an EmuDeck card with FAVS, ES-DE's data folder on this computer at appdata, its ROMDirectory
-        rom_dir(card folder) (no settings file when rom_dir is None, no ROMDirectory when it returns None)."""
+    def run_emudeck(self, appdata, rom_dir=lambda d: os.path.join(d, "Emulation", "roms") + "/", colls=True,
+                    scrape=False, **kw):
+        """A sync of an EmuDeck card, with FAVS when colls, ES-DE's data folder on this computer at appdata, its
+        ROMDirectory rom_dir(card folder) (no settings file when rom_dir is None, no ROMDirectory when it returns None).
+        With scrape, the card gets SCRAPED's media and gamelist; the downloads asked for go in self.fetched."""
         manifest = {**MANIFEST, "systems": [{**MANIFEST["systems"][0], "folders": {"emudeck": "gba"}}],
                     "layouts": {"emudeck": {"label": "EmuDeck", "roms_dir": "Emulation/roms", "bios_dir": "Emulation/bios"}}}
+        self.fetched = []
 
         def prepare(card_dir):
             if rom_dir:
@@ -526,10 +531,19 @@ class SyncFlowTest(unittest.TestCase):
                 os.makedirs(os.path.join(appdata, "settings"), exist_ok=True)
                 with open(os.path.join(appdata, "settings", "es_settings.xml"), "w") as f:
                     f.write('<?xml version="1.0"?>\n' + line)
+        scraping = [(scrape_plan, "SCRAPE_LAYOUTS", {"emudeck"}), (scrape_plan, "load_scrape_data", lambda systems: SCRAPED),
+                    (scrape_plan, "build_scrape_plan", REAL_BUILD_SCRAPE_PLAN),
+                    (scrape_plan, "apply_scrape_plan", REAL_APPLY_SCRAPE_PLAN),
+                    (cli.downloads, "run_downloads", lambda todo, *a: self.fetched.extend(todo) or 0)] if scrape else []
         with mock.patch.dict(os.environ, {"ESDE_APPDATA_DIR": appdata}):
-            return self.run_sync(cards={"collections": ["favs"]}, colls=[FAVS], manifest=manifest,
+            return self.run_sync(cards={"collections": ["favs"]} if colls else {}, colls=[FAVS], manifest=manifest,
                                  setup=(None, "emudeck"), files=["Emulation/roms/gba/Game.zip"], prepare=prepare,
-                                 extra=[(ui, "warn", self.warned.append)], **kw)
+                                 extra=[(ui, "warn", self.warned.append)] + scraping, **kw)
+
+    @staticmethod
+    def skipped(reason):
+        return (f"{reason}, so the card's gamelists and collections were skipped; "
+                "sync on the Steam Machine or Steam Deck to get them")
 
     def test_emudeck_card_writes_its_collection_into_es_de_on_this_computer(self):
         self.warned = []
@@ -550,8 +564,7 @@ class SyncFlowTest(unittest.TestCase):
                 appdata = os.path.join(tmp, "ES-DE")
                 _, out, updates, _, _ = self.run_emudeck(appdata, rom_dir=None, dry_run=dry_run)
                 self.assertFalse(os.path.exists(appdata))
-            self.assertEqual(self.warned, [f"ES-DE isn't set up on this computer (no {appdata}), so the card's "
-                                           "collections were skipped; sync on the Steam Machine or Steam Deck to get them"])
+            self.assertEqual(self.warned, [self.skipped(f"ES-DE isn't set up on this computer (no {appdata})")])
             self.assertNotIn("custom-Favs.cfg", out)
             self.assertFalse([u for u in updates if "frontend_collections" in u])
 
@@ -565,10 +578,48 @@ class SyncFlowTest(unittest.TestCase):
                     self.assertEqual(sorted(os.listdir(appdata)), ["settings"])
                     self.assertNotIn("CollectionSystemsCustom", read_from(appdata, "settings", "es_settings.xml"))
                 roms = os.path.join(cards[0], "Emulation/roms")
-                self.assertEqual(self.warned, [f"ES-DE on this computer ({appdata}) doesn't use this card's ROMs (its "
-                                               f"ROMDirectory isn't {roms}), so the card's collections were skipped"])
+                self.assertEqual(self.warned, [self.skipped(f"ES-DE on this computer ({appdata}) doesn't use this "
+                                                            f"card's ROMs (its ROMDirectory isn't {roms})")])
                 self.assertNotIn("custom-Favs.cfg", out)
                 self.assertFalse([u for u in updates if "frontend_collections" in u])
+
+    def test_emudeck_card_writes_its_gamelist_into_es_de_on_this_computer(self):
+        self.warned = []
+        with tempfile.TemporaryDirectory() as appdata:
+            _, _, _, root, _ = self.run_emudeck(appdata, colls=False, scrape=True, plan=[])
+            gamelist = read_from(appdata, "gamelists", "gba", "gamelist.xml")
+        self.assertIn("<path>./Game.zip</path>", gamelist)
+        self.assertIn("<name>The Game</name>", gamelist)
+        self.assertIsNone(root)  # the gamelist isn't on the card
+        self.assertFalse(self.warned)
+
+    def test_emudeck_card_skips_its_gamelist_with_one_warning_when_es_de_does_not_serve_it(self):
+        for colls in (False, True):
+            for dry_run in (False, True):
+                self.warned, cards = [], []
+                with tempfile.TemporaryDirectory() as tmp:
+                    appdata = os.path.join(tmp, "ES-DE")
+                    self.run_emudeck(appdata, rom_dir=None, colls=colls, scrape=True, dry_run=dry_run)
+                    self.assertFalse(os.path.exists(appdata))
+                self.assertEqual(self.warned, [self.skipped(f"ES-DE isn't set up on this computer (no {appdata})")])
+                with tempfile.TemporaryDirectory() as appdata:
+                    _, out, _, _, _ = self.run_emudeck(appdata, rom_dir=lambda d: "/elsewhere/roms", colls=colls,
+                                                       scrape=True, dry_run=dry_run, after=lambda d: cards.append(d))
+                    self.assertEqual(os.listdir(appdata), ["settings"])
+                roms = os.path.join(cards[0], "Emulation/roms")
+                self.assertEqual(self.warned[1:], [self.skipped(f"ES-DE on this computer ({appdata}) doesn't use this "
+                                                                f"card's ROMs (its ROMDirectory isn't {roms})")])
+                if dry_run:
+                    self.assertIn("0 gamelist file(s) to update", out)
+                else:  # the media still goes on the card
+                    self.assertIn(os.path.join(cards[0], "Emulation", "tools", "downloaded_media", "gba", "covers", "Game.png"),
+                                  [p for _, p, _ in self.fetched])
+
+    def test_emudeck_card_with_nothing_to_skip_does_not_warn(self):
+        self.warned = []
+        with tempfile.TemporaryDirectory() as tmp:
+            self.run_emudeck(os.path.join(tmp, "ES-DE"), rom_dir=None, colls=False)
+        self.assertFalse(self.warned)
 
     def test_dry_run_describes_and_writes_nothing(self):
         _, out, updates, _, _ = self.run_sync(cards={"collections": ["favs"]}, colls=[FAVS], dry_run=True,

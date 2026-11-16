@@ -105,13 +105,14 @@ KNULLI_MEDIA = (
 )
 KNULLI_SUFFIXES = {"image", "thumb", "marquee", "fanart", "boxback", "titleshot", "bezel", "boxart",
                    "cartridge", "mix", "wheel", "map", "video", "manual", "magazine", "music"}
-GAMELIST_FILES = {"esde": "gamelist.xml", "knulli": "gamelist.xml", "onion": "miyoogamelist.xml", "allium": "gamelist.xml"}
+GAMELIST_FILES = {"esde": "gamelist.xml", "emudeck": "gamelist.xml", "knulli": "gamelist.xml", "onion": "miyoogamelist.xml",
+                  "allium": "gamelist.xml"}
 ONION_ONLY_LISTS = ("recentlist-hidden.json", "favorite.json")  # in the root of Onion's roms folder
 ONION_LAYOUTS = ("onion", "allium")  # both keep box art in a flat Imgs/ folder
 # muOS catalogue art, MUOS/info/catalogue/<system's muos_catalogue>/<folder>/<ROM name>.<ext>, and the media types that fill it
 MUOS_MEDIA = (("box", ("covers", "3dboxes")), ("preview", ("screenshots", "titlescreens")))
-# EmuDeck gets media only: ES-DE keeps its gamelists in the home folder, which is not on the card
-SCRAPE_LAYOUTS = set(GAMELIST_FILES) | {"muos", "slot", "emudeck"}
+# EmuDeck's media goes on the card; its gamelists go in ES-DE's data folder on the computer running the sync
+SCRAPE_LAYOUTS = set(GAMELIST_FILES) | {"muos", "slot"}
 EMUDECK_MEDIA = os.path.join("Emulation", "tools", "downloaded_media")
 
 
@@ -158,7 +159,7 @@ def index_drop(index, key):
 def variant_tags(layout_name, family, stem):
     """name (and, for ES-DE, sortname) tags that identify a MAME/FBNeo set by its variant, from the clones.json
     {"parents": {...}, "clones": {...}} of its system. Parents sort first, then their clones, so a family stays together."""
-    if layout_name not in ("esde", "knulli", *ONION_LAYOUTS):
+    if layout_name not in ("esde", "emudeck", "knulli", *ONION_LAYOUTS):
         return {}
     if stem in family["clones"]:
         parent, title = family["clones"][stem]
@@ -169,7 +170,7 @@ def variant_tags(layout_name, family, stem):
         sort = re.sub(r"\s*\([^()]*\)$", "", title)
     else:
         return {}
-    return {"name": title, "sortname": sort} if layout_name == "esde" else {"name": title}
+    return {"name": title, "sortname": sort} if layout_name in ("esde", "emudeck") else {"name": title}
 
 
 def plan_scrapes(layout_name, rom_rels, listing, meta, media_root, rom_dir, present, family=None):
@@ -215,8 +216,6 @@ def plan_scrapes(layout_name, rom_rels, listing, meta, media_root, rom_dir, pres
             for mtype, (key, size) in found.items():
                 if mtype in MEDIA_TYPES:  # not the Onion-only art
                     add(key, media_root, f"{mtype}/{key.split('/', 3)[3]}", size)
-            if layout_name == "emudeck":
-                tags = {}
         elif layout_name == "knulli":
             for tag, folder, suffix, types in KNULLI_MEDIA:
                 mtype = next((t for t in types if t in found), None)
@@ -363,7 +362,9 @@ def media_root_of(layout_name, system, base, es_dir):
 
 
 def build_scrape_plan(layout_name, systems, data, rom_rels, dest_of, es_dir, present, base):
-    """Everything a sync installs from scrapes/: media jobs, gamelist entries per file, text files."""
+    """Everything a sync installs from scrapes/: media jobs, gamelist entries per file, text files.
+
+    es_dir: ES-DE's data folder, where esde and emudeck gamelists go (for emudeck, the one on this computer)."""
     plan = {"jobs": [], "gamelists": defaultdict(dict), "writes": []}
     clones = store.repo_json("clones")
     for s in systems:
@@ -383,7 +384,8 @@ def build_scrape_plan(layout_name, systems, data, rom_rels, dest_of, es_dir, pre
             if not os.path.exists(path) or read_text(path) != text:
                 plan["writes"].append((path, text))
         if entries:
-            gl = (os.path.join(es_dir, "gamelists", esde_name(s)) if layout_name == "esde" else rom_dir)
+            gl = (os.path.join(es_dir, "gamelists", esde_name(s, layout_name)) if layout_name in ("esde", "emudeck")
+                  else rom_dir)
             plan["gamelists"][os.path.join(gl, GAMELIST_FILES[layout_name])].update(entries)
     return plan
 
@@ -453,7 +455,8 @@ def stale_firmware_media(layout_name, systems, roms_dir, base):
 
 def stale_media(layout_name, systems, roms_dir, es_dir, base=None):
     """Media files on the card whose ROM isn't in the system's ROM folder, for every system in the
-    layout (not just the ones being synced). Systems with no ROM folder are left alone."""
+    layout (not just the ones being synced). Systems with no ROM folder are left alone. es_dir: ES-DE's data folder
+    (for emudeck, the one on this computer, or None when it doesn't serve the card: its gamelists are left alone)."""
     stale, seen = [], set()
     if layout_name in ("muos", "slot"):
         return stale_firmware_media(layout_name, systems, roms_dir, base)
@@ -473,8 +476,8 @@ def stale_media(layout_name, systems, roms_dir, es_dir, base=None):
             old = s["bucket"]  # an older sync named the folders after the bucket: all of it is stale once the ES-DE one exists
             if old != esde_name(s, layout_name) and old not in named and os.path.isdir(media_root_of(layout_name, s, base, es_dir)):
                 stale += [full for _, full in walk_files(media_root_of(layout_name, {"folders": {}, "bucket": old}, base, es_dir))]
-                if layout_name == "esde":
-                    stale += [path for path in [os.path.join(es_dir, "gamelists", old, GAMELIST_FILES["esde"])]
+                if es_dir:
+                    stale += [path for path in [os.path.join(es_dir, "gamelists", old, GAMELIST_FILES[layout_name])]
                               if os.path.isfile(path)]
         elif layout_name == "knulli":
             for sub in ("images", "videos", "manuals"):
