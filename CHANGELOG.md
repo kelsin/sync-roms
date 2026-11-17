@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.0.2](https://github.com/kelsin/sync-roms/compare/v3.0.1...v3.0.2) (2026-11-17)
+
+
+### :bug: Bug Fixes
+
+* **m3u:** group discs labelled with letters or roman numerals ([#330](https://github.com/kelsin/sync-roms/issues/330)) ([583416f](https://github.com/kelsin/sync-roms/commit/583416f1d8f8e49d00018a20acc397477eac2f53))
+
 ## [3.0.1](https://github.com/kelsin/sync-roms/compare/v3.0.0...v3.0.1) (2026-11-17)
 
 
