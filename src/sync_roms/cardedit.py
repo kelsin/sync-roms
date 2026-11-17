@@ -482,8 +482,10 @@ def pick_set(system, sets, games, titles, catalog, current=None, synced=lambda: 
     if not shown:
         edit.note(ui.yellow(f"ℹ️  No set has games in storage for {system['name']}."))
         return None
-    labels = [f"{themeart.set_emoji(x)} {x['name']}  ({len(keys & catalog)} on {system['name']}"
-              + (f", {len(keys - catalog)} not in storage)" if keys - catalog else ")") for x, keys in shown]
+    mains = [{g["bucket"] for g in x["games"] if g.get("system") == system["bucket"] and g.get("bucket")}
+             for x, _ in shown]  # each game once, without its extra files (the other discs of a multi-disc game)
+    labels = [f"{themeart.set_emoji(x)} {x['name']}  ({len(m & catalog)} on {system['name']}"
+              + (f", {len(m - catalog)} not in storage)" if m - catalog else ")") for (x, _), m in zip(shown, mains)]
     extras = [[]] * len(shown)
 
     def mark():
@@ -492,7 +494,7 @@ def pick_set(system, sets, games, titles, catalog, current=None, synced=lambda: 
             have, total = len(keys & catalog & done), len(keys & catalog)
             return "➖" if total == 0 else "✅" if have == total else f"{have}/{total}"
 
-        extras[:] = [[(f"  {count(keys)}", "cyan")] for _, keys in shown]
+        extras[:] = [[(f"  {count(m)}", "cyan")] for m in mains]
 
     def on_hotkey(_key, idx):
         """Toggles in place, so the screen isn't torn down and redrawn."""

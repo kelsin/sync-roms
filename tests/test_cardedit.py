@@ -389,6 +389,18 @@ class Flow(DataDir):
         with mock.patch.object(previews, "collection", side_effect=lambda a: "art-" + a):
             self.assertEqual([kw["preview"](0), kw["preview"](1)], ["art-pk", None])
 
+    def test_sets_list_counts_games_not_their_extra_files(self):
+        seen = []
+
+        def look(title, labels, extras=None, **k):
+            seen.append((labels, [list(e) for e in extras]))
+            return None
+        with mock.patch.object(picker, "filter_list", look):
+            cardedit.pick_set(GBA, [SET], [], {}, {"gba/Ruby.zip", "gba/Ruby.sav"}, synced=lambda: {"gba/Ruby.zip", "gba/Ruby.sav"})
+            cardedit.pick_set(GBA, [SET], [], {}, {"gba/Ruby.sav"})
+        self.assertEqual(seen[0], ([themeart.set_emoji(SET) + " Pokemon  (1 on Game Boy Advance)"], [[("  ✅", "cyan")]]))
+        self.assertEqual(seen[1][0], [themeart.set_emoji(SET) + " Pokemon  (0 on Game Boy Advance, 1 not in storage)"])
+
     def test_games_list_previews_each_game_by_key_with_and_without_a_set_filter(self):
         self.card()
         seen = []
@@ -742,7 +754,7 @@ class Flow(DataDir):
         self.card()
 
         def pick_first_set(labels, kw):
-            self.assertEqual(labels, ["📦 Pokemon  (2 on Game Boy Advance)"])
+            self.assertEqual(labels, [themeart.set_emoji(SET) + " Pokemon  (1 on Game Boy Advance)"])
             return 0
 
         def filtered(labels, kw):
@@ -766,7 +778,7 @@ class Flow(DataDir):
         other = {"id": "gone", "name": "Gone", "description": "", "games": [{"system": "gba", "bucket": "gba/X.zip"}]}
 
         def offered(labels, kw):
-            self.assertEqual(labels, ["📦 Pokemon  (1 on Game Boy Advance, 1 not in storage)"])  # Gone: nothing to show
+            self.assertEqual(labels, [themeart.set_emoji(SET) + " Pokemon  (1 on Game Boy Advance)"])  # its extra file missing is not a missing game; Gone: nothing to show
             return None
         with mock.patch.object(store, "load_sets", return_value=[SET, other]):
             self.run_system(returns((cardedit.SET_KEY, 0)), offered, lambda labels, kw: kw["session"]["sel"])
@@ -788,7 +800,7 @@ class Flow(DataDir):
         self.card()
 
         def removed(labels, kw):
-            self.assertEqual(kw["extras"], [[("  0/2", "cyan")]])
+            self.assertEqual(kw["extras"], [[("  0/1", "cyan")]])
             return None
         self.run_system(returns((cardedit.SET_KEY, 0)), returns((" ", 0)), returns((" ", 0)), removed,
                         lambda labels, kw: kw["session"]["sel"])
