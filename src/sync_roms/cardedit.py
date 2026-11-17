@@ -375,7 +375,7 @@ def toggle_surprise(name):
 
 
 def pick_collections(name, playable, card_status=None):
-    """Toggle the collections a card includes (Space/Tab in place, Enter toggles and reopens on that row), saving each
+    """Toggle the collections a card includes (Space/Tab/Enter, in place), saving each
     toggle at once. Each is shown with how many of its games are on systems in playable (system buckets the card syncs).
     card_status(): the card's size status, worked out again after each toggle."""
     found = colls.load_collections()
@@ -415,7 +415,7 @@ def pick_collections(name, playable, card_status=None):
     pos = 0
     while True:
         i = picker.filter_list(f"💖 Collections on {name} (Space/Enter toggles)", labels, extras=extras, cursor=pos,
-                               hotkeys=(" ", "\t"), on_hotkey=on_hotkey,
+                               hotkeys=(" ", "\t", "enter"), on_hotkey=on_hotkey,
                                key_help=[("Space/Tab/Enter", "put the collection on the card or take it off")],
                                status=(lambda _state: shown["status"]) if card_status else None,
                                preview=lambda i: previews.collection(found[i].get("art")) if i < len(found) else None)

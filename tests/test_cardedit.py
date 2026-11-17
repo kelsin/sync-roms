@@ -815,6 +815,21 @@ class Flow(DataDir):
             cardedit.edit_system("c", GBA, (DEVICE, "esde"), to_fetch)
         self.assertTrue(statuses[1].endswith("⬇️  5 B to download"), statuses)
 
+    def test_collections_screen_toggles_with_enter_in_place(self):
+        favs = {"id": "favs", "name": "Favs", "games": []}
+        self.card()
+        seen = {}
+
+        def look(labels, kw):
+            seen.update(kw)
+            self.assertTrue(kw["on_hotkey"]("enter", 0))  # handled in the list: it isn't torn down and reopened
+            return None
+        with mock.patch.object(collections, "load_collections", lambda: [favs]), \
+                mock.patch.object(picker, "filter_list", Script(look)), contextlib.redirect_stdout(io.StringIO()):
+            cardedit.pick_collections("c", {"gba"})
+        self.assertIn("enter", seen["hotkeys"])
+        self.assertEqual(store.load_cards()["c"]["collections"], ["favs"])
+
     def test_collections_screen_shows_the_card_status_after_each_toggle(self):
         favs = {"id": "favs", "name": "Favs", "games": [{"system": "gba", "bucket": "gba/Zelda.zip", "title": "Zelda"}]}
         self.card()

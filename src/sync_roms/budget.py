@@ -7,7 +7,8 @@ from . import collections as colls, commands, inventory, scrape_plan, store, vit
 Usage = namedtuple("Usage", "bytes count partial")
 
 
-_scrapes = {"version": None, "by_stem": {}}  # each system's scrapes listing split by ROM, for one cache version
+# each system's scrapes listing split by ROM, and each ROM's scrape bytes per (layout, system), for one cache version
+_scrapes = {"version": None, "by_stem": {}, "costs": {}}
 
 
 def _scrapes_by_stem(bucket):
@@ -15,7 +16,7 @@ def _scrapes_by_stem(bucket):
     cache changes (a patch, or a cache read again or rebuilt)."""
     version = inventory.version()
     if version is None or version != _scrapes["version"]:
-        _scrapes.update(version=version, by_stem={})
+        _scrapes.update(version=version, by_stem={}, costs={})
     kept = _scrapes["by_stem"]  # read once: the full-size worker in cardedit may reset it from another thread
     if bucket in kept:
         return kept[bucket]
@@ -56,8 +57,11 @@ def game_costs(card, system, keys):
     scrapes = _scrapes_by_stem(bucket)
     if scrapes is None:
         return roms, True
-    extra = scrape_costs(layout, system, [k[len(bucket) + 1:] for k in sized], scrapes)
-    return {k: roms[k] + extra[k[len(bucket) + 1:]] for k in sized}, partial
+    rels = [k[len(bucket) + 1:] for k in sized]
+    # kept for the cache version, so a recount after a change prices only ROMs it hasn't seen (scrape_cost is slow)
+    known = _scrapes["costs"].setdefault((layout, bucket), {}) if inventory.version() is not None else {}
+    known.update(scrape_costs(layout, system, [r for r in rels if r not in known], scrapes))
+    return {k: roms[k] + known[k[len(bucket) + 1:]] for k in sized}, partial
 
 
 def _merged(card, systems, sets):
