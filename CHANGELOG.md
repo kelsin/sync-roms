@@ -1,5 +1,19 @@
 # Changelog
 
+## [3.1.0](https://github.com/kelsin/sync-roms/compare/v3.0.2...v3.1.0) (2026-11-17)
+
+
+### :video_game: Features
+
+* **cli:** add layouts command to list firmware layouts ([#333](https://github.com/kelsin/sync-roms/issues/333)) ([92ea906](https://github.com/kelsin/sync-roms/commit/92ea906ff04a15f0558f7e6ebee7cd213227b68c))
+* **cli:** make list the default cards subcommand ([#336](https://github.com/kelsin/sync-roms/issues/336)) ([262e464](https://github.com/kelsin/sync-roms/commit/262e464de2a0cea50c927bbc8cd46db6f3fe7fd8))
+* **devices:** rename miyoo flip and add miyoo mini and mini plus ([#332](https://github.com/kelsin/sync-roms/issues/332)) ([a0b8b0e](https://github.com/kelsin/sync-roms/commit/a0b8b0e34e740858f36e6838825ef58d8ab44c7d))
+
+
+### :traffic_light: Tests
+
+* **upload:** wait for the second move before the first ctrl-c in the abort test ([#335](https://github.com/kelsin/sync-roms/issues/335)) ([3f0939e](https://github.com/kelsin/sync-roms/commit/3f0939e9e2903bbd6ddd5dcb5aa018b9e088059e))
+
 ## [3.0.2](https://github.com/kelsin/sync-roms/compare/v3.0.1...v3.0.2) (2026-11-17)
 
 
