@@ -1,5 +1,6 @@
 """Art Book Next artwork for custom collections (Surprise and the ones given art) and sets on ES-DE, Knulli and EmuDeck
 cards."""
+import functools
 import json
 import unicodedata
 import http.client
@@ -67,10 +68,16 @@ def art_choices():
         return json.load(f)
 
 
+@functools.cache
+def _emoji():
+    """emoji.json, read once per run: it is repo data, and the size recount looks it up once per collection game."""
+    with open(os.path.join(THEME_DATA, "emoji.json"), encoding="utf-8") as f:
+        return json.load(f)
+
+
 def art_emoji(art_id, default=DEFAULT_EMOJI):
     """The emoji that stands for a piece of art in the editors: its own, or default when it has no art."""
-    with open(os.path.join(THEME_DATA, "emoji.json"), encoding="utf-8") as f:
-        return json.load(f).get(art_id, default) if art_id else default
+    return _emoji().get(art_id, default) if art_id else default
 
 
 def set_emoji(game_set):

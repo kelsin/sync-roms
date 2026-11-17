@@ -6,7 +6,7 @@ from unittest import mock
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 from helpers import DataDir  # noqa: E402
-from sync_roms import budget, ignore, inventory, store  # noqa: E402
+from sync_roms import budget, ignore, inventory, scrape_plan, store  # noqa: E402
 
 GBA = {"bucket": "gba", "name": "GBA"}
 SIZES = {"gba/A.zip": 100, "gba/B.zip": 200, "gba/C.zip": 400}
@@ -197,6 +197,14 @@ class ScrapeIndex(DataDir):
         self.assertEqual(self.costs("gba/A.zip", "gba/B.zip"), {"gba/A.zip": 103, "gba/B.zip": 200})
         self.assertEqual(self.costs("gba/A.zip"), {"gba/A.zip": 103})
         self.assertEqual(self.asked.count("scrapes/gba/"), 1)
+
+    def test_each_roms_scrape_bytes_are_priced_once_per_cache(self):
+        priced = []
+        real = scrape_plan.scrape_cost
+        with mock.patch.object(scrape_plan, "scrape_cost", lambda *a: priced.append(a[2]) or real(*a)):
+            self.costs("gba/A.zip")
+            self.assertEqual(self.costs("gba/A.zip", "gba/B.zip"), {"gba/A.zip": 103, "gba/B.zip": 200})
+        self.assertEqual(priced, ["A.zip", "B.zip"])
 
     def test_a_patch_drops_the_kept_scrapes(self):
         self.assertEqual(self.costs("gba/C.zip"), {"gba/C.zip": 400})
