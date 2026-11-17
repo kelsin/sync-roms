@@ -1,5 +1,20 @@
 # Changelog
 
+## [3.2.0](https://github.com/kelsin/sync-roms/compare/v3.1.0...v3.2.0) (2026-11-17)
+
+
+### :video_game: Features
+
+* **cli:** add cards copy to merge one card's selections into another ([#340](https://github.com/kelsin/sync-roms/issues/340)) ([e63d529](https://github.com/kelsin/sync-roms/commit/e63d529b9fe0820ee4eb57d57bf976d4058f6c28))
+* **cli:** show each card's planned space and picks in cards list ([#341](https://github.com/kelsin/sync-roms/issues/341)) ([6d8bb61](https://github.com/kelsin/sync-roms/commit/6d8bb61d3bc75db7a9fbb1b72ca0190f438e7984))
+* **edit:** show multi-disc games as their playlist only ([#337](https://github.com/kelsin/sync-roms/issues/337)) ([7680ce5](https://github.com/kelsin/sync-roms/commit/7680ce52d8919592bfa054088fd32552f52641df))
+* **edit:** view a set's games across a card's systems ([#342](https://github.com/kelsin/sync-roms/issues/342)) ([f7bf762](https://github.com/kelsin/sync-roms/commit/f7bf76298073f8d9118c7aa61721922af860963e))
+
+
+### :bug: Bug Fixes
+
+* **sync:** flush large downloads to the card as they go ([#339](https://github.com/kelsin/sync-roms/issues/339)) ([0ad70e3](https://github.com/kelsin/sync-roms/commit/0ad70e3668431ef059a483beb19cc530f167909b))
+
 ## [3.1.0](https://github.com/kelsin/sync-roms/compare/v3.0.2...v3.1.0) (2026-11-17)
 
 
