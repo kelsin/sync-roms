@@ -558,8 +558,8 @@
     ]
   },
   {
-    "id": "miyoo-flip-v2",
-    "name": "Miyoo Flip V2",
+    "id": "miyoo-flip",
+    "name": "Miyoo Flip",
     "soc": "Rockchip RK3566",
     "screen": "4:3",
     "firmwares": [
@@ -567,8 +567,28 @@
     ]
   },
   {
+    "id": "miyoo-mini",
+    "name": "Miyoo Mini",
+    "soc": "SigmaStar SSD202D",
+    "screen": "4:3",
+    "firmwares": [
+      "onion",
+      "allium"
+    ]
+  },
+  {
     "id": "miyoo-mini-flip",
     "name": "Miyoo Mini Flip",
+    "soc": "SigmaStar SSD202D",
+    "screen": "4:3",
+    "firmwares": [
+      "onion",
+      "allium"
+    ]
+  },
+  {
+    "id": "miyoo-mini-plus",
+    "name": "Miyoo Mini Plus",
     "soc": "SigmaStar SSD202D",
     "screen": "4:3",
     "firmwares": [
