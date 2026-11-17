@@ -22,7 +22,7 @@ SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "collections": ("edit", "edit your collections of favourite games (saved in ~/.sync-roms/collections/)"),
     "themes": ("update", "copy the latest Art Book Next for ES-DE from GitHub into storage"),
     "download": ("pico8", "add the PICO-8 BBS Featured carts storage doesn't have, and newer revisions of those it has"),
-    "cards": ("edit|list|new|set|rename|delete|export|import", "list and manage the cards you've synced"),
+    "cards": ("[edit|list|new|set|rename|delete|export|import]", "list and manage the cards you've synced"),
     "devices": ("[ID]", "list the supported devices, or one device's systems"),
     "layouts": ("[ID]", "list the firmware card layouts, or one layout's folders and devices"),
     "upload": ("[DIR]", "upload ROMs to the storage folder of a system you pick"),
@@ -130,7 +130,7 @@ TOPICS = {
 """,
     "cards": """
   sync-roms cards edit                        same as `games edit`
-  sync-roms cards list [--json]
+  sync-roms cards [list] [--json]             list is the default
   sync-roms cards new NAME --device ID|full --layout NAME [--size 512GB]
   sync-roms cards set NAME [--device ID|full] [--layout NAME] [--size 512GB]
   sync-roms cards rename OLD NEW
@@ -610,7 +610,7 @@ def extract_globals(argv):
 def is_data_command(argv):
     """Whether the command's stdout is its result (so --quiet must not discard it)."""
     words = tuple(a for a in argv if not a.startswith("-"))
-    return "--devices" in argv or any(words[:len(d)] == d for d in DATA_COMMANDS)
+    return "--devices" in argv or words == ("cards",) or any(words[:len(d)] == d for d in DATA_COMMANDS)
 
 
 def sync(reset=True):
