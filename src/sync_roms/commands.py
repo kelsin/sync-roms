@@ -508,6 +508,36 @@ def cards_delete(args):
     return 0
 
 
+def cards_copy(args):
+    if not store.cards_readable():
+        ui.fail(f"{os.path.join(store.data_dir(), 'cards.json')} isn't valid JSON, so no card can be saved. Fix or move it first.", 3)
+    cards = store.load_cards()
+    for name in (args.src, args.dst):
+        if name not in cards:
+            ui.fail(f"No card named {name!r}", 2)
+    if args.src == args.dst:
+        ui.fail("Pick two different cards", 2)
+    catalog = store.load_catalog()
+    setup = picker.saved_setup(cards[args.dst], catalog["devices"], catalog["layouts"], args.dst)
+    if setup is None:
+        ui.fail(f"Card {args.dst!r} has no usable device and layout", 2)
+    playable = {s["bucket"] for s in catalog["systems"] if store.system_applies(s, *setup)}
+    dst_synced = {s["bucket"]: set(store.listed(s)) for s in store.load_manifest([args.dst])["systems"]}
+    cards = store.load_cards()  # load_manifest may have pruned unknown sets from cards.json
+    entry, counts, skipped = cardshare.copy_selections(cards[args.src], cards[args.dst], playable, dst_synced)
+    shown = f"{counts['games']} games, {counts['full']} full systems, {counts['sets']} sets, {counts['collections']} collections, {counts['excluded']} exclusions"
+    if args.dry_run:
+        print(ui.yellow(f"🧪 Would copy from {args.src} to {args.dst}: {shown}"))
+    else:
+        cards[args.dst] = entry
+        if not store.write_cards(cards):
+            return 3
+        print(ui.green(f"📋 Copied from {args.src} to {args.dst}: {shown}"))
+    if skipped:
+        print(ui.dim(f"  skipped ({args.dst} can't play them): {', '.join(skipped)}"))
+    return 0
+
+
 def cards_export(args):
     cards = store.load_cards()
     if not cards:
@@ -983,7 +1013,7 @@ def second_words():
     words["collections"] = ["edit"]
     words["themes"] = ["update"]
     words["download"] = ["pico8"]
-    words["cards"] = ["edit", "list", "new", "set", "rename", "delete", "export", "import"]
+    words["cards"] = ["edit", "list", "new", "set", "rename", "delete", "copy", "export", "import"]
     words["config"] = ["show", "path"]
     words["cache"] = ["update"]
     words["completion"] = ["bash", "zsh", "fish"]
@@ -1099,6 +1129,7 @@ def build_parser():
         p.add_argument("--device"); p.add_argument("--layout"); p.add_argument("--size", help="the card's size, e.g. 256, 512GB, 1TB"); p.set_defaults(fn=lambda a, c=create: cards_save_setup(a, c))
     p = csub.add_parser("rename", allow_abbrev=False); common(p, card=False); p.add_argument("old"); p.add_argument("new"); p.set_defaults(fn=cards_rename)
     p = csub.add_parser("delete", allow_abbrev=False); common(p, card=False); p.add_argument("name"); p.set_defaults(fn=cards_delete)
+    p = csub.add_parser("copy", allow_abbrev=False); common(p, card=False); p.add_argument("src"); p.add_argument("dst"); p.set_defaults(fn=cards_copy)
     p = csub.add_parser("export", allow_abbrev=False); common(p, card=False); p.add_argument("file"); p.set_defaults(fn=cards_export)
     p = csub.add_parser("import", allow_abbrev=False); common(p, card=False); p.add_argument("file"); p.set_defaults(fn=cards_import)
 

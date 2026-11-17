@@ -1,7 +1,7 @@
 """Exporting and importing cards: the plain data a card shares with another person's machine."""
 import copy
 
-from . import picker, ui
+from . import picker, store, ui
 
 KEPT = ("size", "device", "layout", "games", "excluded")
 RENAME_KEY = "r"
@@ -52,6 +52,95 @@ def export_entry(entry, collections_by_id):
     if not games:
         out.pop("games", None)
     return out
+
+
+def _system_games(entry):
+    """(full, games) of a system's entry in a card's games: a list, or a full_system dict (its stashed list); None when
+    it is neither."""
+    if isinstance(entry, list):
+        return False, [g for g in entry if isinstance(g, dict)]
+    if isinstance(entry, dict) and entry.get("full_system"):
+        stashed = entry.get("games")
+        return True, [g for g in stashed if isinstance(g, dict)] if isinstance(stashed, list) else []
+    return None
+
+
+def _ids(value):
+    return [i for i in value if isinstance(i, str)] if isinstance(value, list) else []
+
+
+def copy_selections(src, dst, playable, dst_synced):
+    """(new DST entry, counts, skipped) of copying SRC's picks into DST. Games of the `playable` systems are added by
+    bucket (DST's entry wins); either side full makes the system full, its list under "games". Set and collection ids
+    are unioned. SRC's exclusions for playable systems are added unless DST syncs the game (`dst_synced`, {system: bucket
+    keys} before the copy, or its merged picks). A copied game is removed from DST's exclusions. counts: newly added "games" (not into a
+    full system, whose list sync ignores), "full" (systems made full by SRC), "sets", "collections", "excluded";
+    skipped: SRC's systems not in `playable`, or whose DST entry is malformed, sorted. Everything else of DST stays; neither input is changed."""
+    out = copy.deepcopy(dst)
+    counts = dict.fromkeys(("games", "full", "sets", "collections", "excluded"), 0)
+    src_games = src.get("games") if isinstance(src.get("games"), dict) else {}
+    src_excluded = src.get("excluded") if isinstance(src.get("excluded"), dict) else {}
+    skipped = {s for s in (*src_games, *src_excluded) if s != store.SETS_KEY and s not in playable}
+    excluded = dict(out["excluded"]) if isinstance(out.get("excluded"), dict) else {}
+    games = out.get("games") if isinstance(out.get("games"), dict) else {}
+    for system, entry in src_games.items():
+        if system == store.SETS_KEY or system not in playable:
+            continue
+        theirs = _system_games(entry)
+        mine = _system_games(games.get(system, []))
+        if not theirs:
+            continue
+        if not mine:
+            skipped.add(system)
+            continue
+        full = mine[0] or theirs[0]
+        have = {g.get("bucket") for g in mine[1]}
+        merged = list(mine[1])
+        for game in theirs[1]:
+            if game.get("bucket") not in have:
+                have.add(game.get("bucket"))
+                merged.append(copy.deepcopy(game))
+                counts["games"] += not full
+        buckets = {g.get("bucket") for g in theirs[1]}
+        left = [b for b in _ids(excluded.get(system)) if b not in buckets]
+        if left:
+            excluded[system] = left
+        elif system in excluded:
+            del excluded[system]
+        if full:
+            counts["full"] += not mine[0]
+            games[system] = {"full_system": True, **({"games": merged} if merged else {})}
+        else:
+            games[system] = merged
+    sets = _ids(games.get(store.SETS_KEY))
+    new_sets = list(dict.fromkeys(i for i in _ids(src_games.get(store.SETS_KEY)) if i not in sets))
+    if new_sets:
+        games[store.SETS_KEY] = sets + new_sets
+        counts["sets"] = len(new_sets)
+    if games or "games" in out:
+        out["games"] = store.sorted_list(games)
+    collections = _ids(out.get("collections"))
+    new_colls = list(dict.fromkeys(i for i in _ids(src.get("collections")) if i not in collections))
+    if new_colls:
+        out["collections"] = collections + new_colls
+        counts["collections"] = len(new_colls)
+    for system, buckets in src_excluded.items():
+        if system not in playable:
+            continue
+        picked = _system_games(games.get(system, []))
+        skip = set(dst_synced.get(system, ())) | ({g.get("bucket") for g in picked[1]} if picked else set())
+        mine = list(excluded.get(system, [])) if isinstance(excluded.get(system), list) else []
+        for bucket in _ids(buckets):
+            if bucket not in mine and bucket not in skip:
+                mine.append(bucket)
+                counts["excluded"] += 1
+        if mine:
+            excluded[system] = mine
+    if excluded:
+        out["excluded"] = excluded
+    elif isinstance(out.get("excluded"), dict):
+        del out["excluded"]
+    return out, counts, sorted(skipped)
 
 
 def import_entry(entry):

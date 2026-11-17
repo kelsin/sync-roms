@@ -1,3 +1,4 @@
+import copy
 import json
 import os
 import sys
@@ -192,3 +193,101 @@ class ExportExcludedTest(unittest.TestCase):
     def test_excluded_dropped_when_empty(self):
         entry = {"excluded": {"gba": ["gba/B.zip"]}, "surprises": [{"system": "gba", "bucket": "gba/B.zip", "title": "B"}]}
         self.assertNotIn("excluded", cardshare.export_entry(entry, {}))
+
+
+def _g(name, note=None):
+    return {"title": name, "bucket": f"gba/{name}.zip", **({"note": note} if note else {})}
+
+
+class CopySelectionsTest(unittest.TestCase):
+    def copy(self, src, dst, playable=("gba",), synced=None):
+        return cardshare.copy_selections(src, dst, set(playable), synced or {})
+
+    def test_merges_games_dst_wins(self):
+        src = {"games": {"gba": [_g("A", "src"), _g("B")]}}
+        dst = {"games": {"gba": [_g("A", "dst")]}, "surprise": True}
+        out, counts, skipped = self.copy(src, dst)
+        self.assertEqual(out["games"]["gba"], [_g("A", "dst"), _g("B")])
+        self.assertEqual(counts["games"], 1)
+        self.assertTrue(out["surprise"])
+        self.assertEqual(skipped, [])
+
+    def test_skips_unplayable_systems(self):
+        src = {"games": {"gba": [_g("A")], "psx": [{"title": "P", "bucket": "psx/P.cue"}]},
+               "excluded": {"psx": ["psx/X.cue"]}}
+        out, _, skipped = self.copy(src, {})
+        self.assertEqual(set(out["games"]), {"gba"})
+        self.assertNotIn("excluded", out)
+        self.assertEqual(skipped, ["psx"])
+
+    def test_src_full_makes_dst_full(self):
+        src = {"games": {"gba": {"full_system": True, "games": [_g("B")]}}}
+        out, _, _ = self.copy(src, {"games": {"gba": [_g("A")]}})
+        self.assertEqual(out["games"]["gba"], {"full_system": True, "games": [_g("A"), _g("B")]})
+
+    def test_dst_full_keeps_full(self):
+        out, _, _ = self.copy({"games": {"gba": [_g("B")]}}, {"games": {"gba": {"full_system": True}}})
+        self.assertEqual(out["games"]["gba"], {"full_system": True, "games": [_g("B")]})
+
+    def test_sets_and_collections_union(self):
+        src = {"games": {"sets": ["a", "b"]}, "collections": ["x", "y"]}
+        dst = {"games": {"sets": ["b"]}, "collections": ["y"]}
+        out, counts, _ = self.copy(src, dst)
+        self.assertEqual(out["games"]["sets"], ["a", "b"])
+        self.assertEqual(out["collections"], ["y", "x"])
+        self.assertEqual((counts["sets"], counts["collections"]), (1, 1))
+
+    def test_exclusion_not_copied_when_dst_syncs_it(self):
+        src = {"games": {"gba": [_g("B")]}, "excluded": {"gba": ["gba/A.zip", "gba/C.zip"]}}
+        out, counts, _ = self.copy(src, {"games": {"gba": [_g("B")]}}, synced={"gba": {"gba/A.zip"}})
+        self.assertEqual(out["excluded"], {"gba": ["gba/C.zip"]})
+        self.assertEqual(counts["excluded"], 1)
+
+    def test_surprises_not_copied(self):
+        src = {"surprise": True, "surprises": [{"system": "gba", "bucket": "gba/A.zip"}]}
+        out, _, _ = self.copy(src, {"surprise": False})
+        self.assertEqual(out, {"surprise": False})
+
+    def test_second_copy_adds_nothing(self):
+        src = {"games": {"gba": [_g("B")], "sets": ["a"]}, "collections": ["x"], "excluded": {"gba": ["gba/C.zip"]}}
+        once, _, _ = self.copy(src, {"games": {"gba": [_g("A")]}})
+        twice, counts, _ = self.copy(src, once)
+        self.assertEqual(twice, once)
+        self.assertEqual(counts, {"games": 0, "full": 0, "sets": 0, "collections": 0, "excluded": 0})
+
+    def test_inputs_not_mutated(self):
+        src = {"games": {"gba": [_g("B")], "sets": ["a"]}, "collections": ["x"], "excluded": {"gba": ["gba/C.zip"]}}
+        dst = {"games": {"gba": [_g("A")]}, "excluded": {"gba": ["gba/D.zip"]}}
+        before = copy.deepcopy((src, dst))
+        self.copy(src, dst)
+        self.assertEqual((src, dst), before)
+
+    def test_copied_game_unexcludes(self):
+        src = {"games": {"gba": [{"bucket": "gba/a.zip"}]}}
+        dst = {"games": {"sets": ["x"]}, "excluded": {"gba": ["gba/a.zip"]}}
+        out, _, _ = self.copy(src, dst)
+        self.assertNotIn("excluded", out)
+        dst["excluded"] = {"gba": ["gba/a.zip", "gba/b.zip"], "psx": ["psx/c"]}
+        out, _, _ = self.copy(src, dst)
+        self.assertEqual(out["excluded"], {"gba": ["gba/b.zip"], "psx": ["psx/c"]})
+
+    def test_excluded_check_includes_synced_union_picks(self):
+        src = {"games": {"gba": [_g("B")]}, "excluded": {"gba": ["gba/A.zip", "gba/B.zip"]}}
+        out, _, _ = self.copy(src, {}, synced={"gba": {"gba/A.zip"}})
+        self.assertNotIn("excluded", out)
+
+    def test_malformed_dst_system_is_skipped(self):
+        out, _, skipped = self.copy({"games": {"gba": [_g("A")]}}, {"games": {"gba": "x"}})
+        self.assertEqual(skipped, ["gba"])
+
+    def test_full_count(self):
+        src = {"games": {"gba": {"full_system": True, "games": [_g("B")]}}}
+        out, counts, _ = self.copy(src, {"games": {"gba": [_g("A")]}})
+        self.assertEqual((counts["full"], counts["games"]), (1, 0))
+        _, counts, _ = self.copy(src, {"games": {"gba": {"full_system": True}}})
+        self.assertEqual((counts["full"], counts["games"]), (0, 0))
+
+    def test_malformed_src_is_skipped(self):
+        out, counts, _ = self.copy({"games": {"gba": "x", "sets": 3}, "collections": "y", "excluded": []}, {})
+        self.assertEqual(out, {})
+        self.assertEqual(sum(counts.values()), 0)
