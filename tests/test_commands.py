@@ -226,6 +226,35 @@ class CardsTest(Cmd):
         self.assertEqual(self.read("cards.json"), {})
         self.assertTrue(os.path.exists(self.path("cards.json.bak")))
 
+    def _two_cards(self):
+        for name in ("A", "B"):
+            self.run_cmd("cards", "new", name, "--device", "full", "--layout", "esde")
+        cards = self.read("cards.json")
+        cards["A"]["games"] = {"gba": [{"title": "X", "bucket": "gba/X.zip"}], "sets": []}
+        cards["A"]["collections"] = ["c"]
+        with open(self.path("cards.json"), "w") as f:
+            json.dump(cards, f)
+        return cards
+
+    def test_copy_merges_into_target(self):
+        self._two_cards()
+        self.assertEqual(self.run_cmd("cards", "copy", "A", "B")[0], 0)
+        b = self.read("cards.json")["B"]
+        self.assertEqual(b["games"]["gba"], [{"title": "X", "bucket": "gba/X.zip"}])
+        self.assertEqual(b["collections"], ["c"])
+        self.assertEqual((b["device"], b["layout"]), ("full", "esde"))
+
+    def test_copy_dry_run_writes_nothing(self):
+        before = self._two_cards()
+        self.assertEqual(self.run_cmd("cards", "copy", "A", "B", "--dry-run")[0], 0)
+        self.assertEqual(self.read("cards.json"), before)
+
+    def test_copy_errors(self):
+        self._two_cards()
+        self.assertEqual(self.run_cmd("cards", "copy", "Z", "B")[0], 2)
+        self.assertEqual(self.run_cmd("cards", "copy", "A", "Z")[0], 2)
+        self.assertEqual(self.run_cmd("cards", "copy", "A", "A")[0], 2)
+
     def test_bad_layout_for_device_is_refused(self):
         device = store.repo_json("devices")[0]
         other = next(n for n in store.repo_json("layouts") if n not in device["firmwares"])
