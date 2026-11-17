@@ -112,6 +112,23 @@ class Discs(unittest.TestCase):
         self.assertEqual(collection["games"], [{"title": "FF7", "system": "psx", "bucket": "psx/FF7.m3u",
                                                 "files": ["psx/FF7 (Disc 1).chd", "psx/FF7 (Disc 2).chd"]}])
 
+    def test_adding_a_multi_disc_game_to_a_set_stores_its_discs(self):
+        game_set = {"name": "Favs", "games": []}
+        picks = iter([1, 1, None])  # add from a system, PlayStation, back
+        rows = []
+
+        def toggle(title, shown_rows, **k):  # switch on the FF7 row
+            rows.extend(r[1] for r in shown_rows)
+            s, key, title, _ = shown_rows[1]
+            s["games"].append({"bucket": key, "title": title})
+
+        with mock.patch.object(picker, "filter_list", lambda *a, **k: next(picks)), \
+                mock.patch.object(edit, "toggle_games", toggle), mock.patch.object(ui, "ask", return_value=""):
+            setedit.edit_one(game_set, SYSTEMS, lambda bucket: DISCS if bucket == "psx" else set())
+        self.assertEqual(rows, ["psx/Crash.chd", "psx/FF7.m3u"])
+        self.assertEqual(game_set["games"], [{"title": "FF7", "system": "psx", "bucket": "psx/FF7.m3u",
+                                              "files": ["psx/FF7 (Disc 1).chd", "psx/FF7 (Disc 2).chd"]}])
+
 
     def test_adding_from_a_set_spans_systems_and_keeps_discs(self):
         collection = {"name": "Favs", "games": [dict(RUBY)]}

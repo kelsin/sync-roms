@@ -7,7 +7,7 @@ import tempfile
 import time
 
 from . import edit, picker, previews, s3, store, themeart, ui
-from .listedit import add_from_set, ask_category, file_counts, game_label, insert_game, recategorize, reconcile, stocked, view
+from .listedit import add_from_set, ask_category, file_counts, fold_discs, game_label, insert_game, recategorize, reconcile, stocked, system_rows, view
 
 
 REPO = "kelsin/sync-roms"
@@ -58,7 +58,7 @@ def edit_one(game_set, systems, keys_of):
             interrupted = False
             try:
                 edit.toggle_games(f"✏️  {s['name']} — ✅ in {label}, ⬜ in storage only",
-                                  edit.system_rows(s, keys_of(s["bucket"])))
+                                  system_rows(s, keys_of(s["bucket"])))
             except KeyboardInterrupt:  # Ctrl-C: the toggles made are kept, with no category
                 interrupted = True
             added = {g["bucket"] for g in s["games"]} - had
@@ -67,6 +67,7 @@ def edit_one(game_set, systems, keys_of):
             except KeyboardInterrupt:  # Ctrl-C at the question: no category
                 category, interrupted = "", True
             game_set["games"] = reconcile(game_set["games"], shown, category)
+            fold_discs(game_set["games"], keys_of(s["bucket"]))
             if interrupted:
                 raise KeyboardInterrupt
         elif i == 2:

@@ -1,5 +1,27 @@
 """Games-list helpers shared by the set and collection editors."""
-from . import edit, inventory, picker, previews, s3, store, themeart, ui
+from . import edit, inventory, m3u, picker, previews, s3, store, themeart, ui
+
+
+# --- Multi-disc games --------------------------------------------------------------------------------
+
+def playlist_groups(in_storage):
+    """{.m3u key: its game's keys, playlist first} for the multi-disc games whose playlist is in storage."""
+    return {group[0]: group for group in m3u.file_groups(in_storage).values()
+            if group[0].lower().endswith(".m3u") and group[0] in in_storage}
+
+
+def system_rows(entry, in_storage):
+    """edit.system_rows without the discs of multi-disc games that have a playlist: the playlist is the game's row."""
+    discs = {k for group in playlist_groups(in_storage).values() for k in group[1:]}
+    return [row for row in edit.system_rows(entry, in_storage) if row[1] not in discs]
+
+
+def fold_discs(games, in_storage):
+    """Give each game whose bucket is a playlist in storage, and that has no files yet, its discs as files."""
+    groups = playlist_groups(in_storage)
+    for g in games:
+        if g.get("bucket") in groups and "files" not in g:
+            g["files"] = groups[g["bucket"]][1:]
 
 
 def view(listing, systems):

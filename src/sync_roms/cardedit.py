@@ -4,7 +4,7 @@ import json
 import queue
 import threading
 
-from . import budget, collections as colls, edit, inventory, m3u, metafilter, names, picker, previews, s3, scrape_plan, store, surprise, themeart, ui, usersettings, vita
+from . import budget, collections as colls, edit, inventory, listedit, m3u, metafilter, names, picker, previews, s3, scrape_plan, store, surprise, themeart, ui, usersettings, vita
 
 FULL_KEY = "f"
 SET_KEY = "s"
@@ -506,6 +506,7 @@ def edit_system(name, system, setup, to_fetch=None, card_usages=None):
     rows = edit.system_rows(s, in_storage)
     titles = {k: title for _, k, title, _ in rows}
     groups = m3u.file_groups(in_storage)  # a multi-disc game's files are switched on and off together
+    playlist_of = {k: g[0] for g in listedit.playlist_groups(in_storage).values() for k in g[1:]}
     bundled = vita.extras(in_storage, in_storage)  # a Vita game's DLC and update sync with it
     others = [x for x in can_play(store.repo_json("systems"), setup) if x["bucket"] != bucket]
     capacity = budget.card_capacity(card_entry(name, setup, cards))
@@ -662,7 +663,8 @@ def edit_system(name, system, setup, to_fetch=None, card_usages=None):
         while True:
             notes = cover()
             base = states(notes)
-            shown = [r for r in rows if keep(r[1])]
+            kept = {r[1] for r in rows if keep(r[1])}
+            shown = [r for r in rows if r[1] in kept and playlist_of.get(r[1]) not in kept]  # a shown playlist hides its discs
             keys = [r[1] for r in shown]
             index = {k: i for i, k in enumerate(keys)}
             links = [[index[m] for m in groups.get(k, ()) if m in index] for k in keys]
