@@ -22,7 +22,8 @@ VALUES_HINT = "Enter narrow to it · Esc back · / filter"
 SETS_HINT = "Enter show its games · Space/Tab toggle its games here · / filter"
 SET_GAMES_HINT = "Space toggle · Enter done · w note · v variant"
 LIST_KEYS = [("Enter", "the system's games"), ("f", "full system: every file in its folder (again to undo)"),
-             ("s", "a set's games across this card's systems"), ("l", "collections on this card"), ("S", "Surprise menu: turn it on or off, or pick its systems"),
+             ("s", "a set's games across this card's systems"), ("l", "collections on this card"),
+             ("S", "Surprise menu: turn it on or off, or pick its systems"),
              ("D", "clear every pick, full system and set from the card")]
 GAMES_KEYS = [("s", "sets on this system: narrow to one, or pick its games"),
               ("m", "narrow by scraped metadata (developer, genre, year...)"),
@@ -301,7 +302,8 @@ def edit_card(name, setup=None, to_fetch=None):
         on = surprise.enabled(store.load_cards().get(name))
         i = picker.filter_list(f"💳 {name} — its systems (⭐ for the device) · 🎁 Surprise {'on' if on else 'off'}",
                                labels, extras=extras, cursor=pos,
-                               hotkeys=(FULL_KEY, SET_KEY, COLLECTIONS_KEY, SURPRISE_KEY, CLEAR_ALL_KEY), hint=LIST_HINT, key_help=LIST_KEYS,
+                               hotkeys=(FULL_KEY, SET_KEY, COLLECTIONS_KEY, SURPRISE_KEY, CLEAR_ALL_KEY),
+                               hint=LIST_HINT, key_help=LIST_KEYS,
                                status=lambda _state: status_of(view["total"], capacity, view["fetch"]),
                                on_hotkey=on_hotkey, poll=poll,
                                preview=lambda i: previews.system(systems[i]) if i < len(systems) else None)
@@ -437,18 +439,23 @@ def pick_card_set(name, setup, systems, current=None):
     """The set to open as a card's set view, or None: single-select, the sets with a game in storage on systems (the
     card editor's list), starting on the one named current, each with how many of those games the card syncs."""
     picks = cardpicks.CardPicks(name, setup)
-    in_storage = {}
+    views = [(x, set_view_keys(x, systems)) for x in store.load_sets()]
+    in_storage = {}  # {system bucket: its keys, or True for a full system} of the systems with set games
     try:
-        for s in systems:
-            in_storage[s["bucket"]] = picks.full(s["bucket"]) or {
-                k for k in inventory.files(f"{s['bucket']}/", sizes=False) if not k.endswith("/")}
+        for s in {s["bucket"]: s for _, view in views for s, _, _ in view}.values():
+            if picks.full(s["bucket"]):
+                in_storage[s["bucket"]] = True
+                continue
+            if inventory.current() is None:
+                print(ui.dim(f"📡 Listing {s3.location()}/{s['bucket']}/ ..."))
+            in_storage[s["bucket"]] = {k for k in inventory.files(f"{s['bucket']}/", sizes=False)
+                                       if not k.endswith("/")}
     except s3.ERRORS as e:
         edit.note(ui.yellow(f"⚠️  Couldn't list storage: {e}"))
         return None
     shown = []
-    for x in store.load_sets():
-        keys = [k for s, k, _ in set_view_keys(x, systems)
-                if in_storage[s["bucket"]] is True or k in in_storage[s["bucket"]]]
+    for x, view in views:
+        keys = [k for s, k, _ in view if in_storage[s["bucket"]] is True or k in in_storage[s["bucket"]]]
         if keys:
             shown.append((x, keys))
     if not shown:
@@ -718,7 +725,8 @@ def edit_set(name, game_set, setup, to_fetch=None, card_usages=None):
         except s3.ERRORS as e:
             edit.note(ui.yellow(f"⚠️  Couldn't list {s['name']} in storage: {e}"))
             return False
-    kept = [(s, key, files) for s, key, files in found if s["bucket"] not in sps or key in sps[s["bucket"]].in_storage]
+    kept = [(s, key, files) for s, key, files in found  # a row of its system (not an unlisted Vita DLC), in storage
+            if s["bucket"] not in sps or key in sps[s["bucket"]].titles and key in sps[s["bucket"]].in_storage]
     files_of = {key: files for _, key, files in kept}
     present = {k for key, files in files_of.items() for k in (key, *files)}  # the rest are left out: no warning
     rows = edit.set_rows({"games": [g for g in game_set["games"] if g.get("bucket") in files_of]},

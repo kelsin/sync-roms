@@ -20,6 +20,7 @@ def system(bucket, name, bios=(), company="Nintendo"):
 
 GBA, GB, PSX = system("gba", "Game Boy Advance", ["gba_bios.bin"]), system("gb", "Game Boy", ["gb_bios.bin"]), system("psx", "PlayStation", company="Sony")
 DEVICE = {"id": "d", "name": "D", "firmwares": ["esde"], "systems": ["gba", "gb"]}
+PSX_DEVICE = {**DEVICE, "systems": ["gba", "gb", "psx"]}
 CATALOG = {"systems": [GBA, GB, PSX], "devices": [DEVICE],
            "layouts": {"esde": {"label": "ES-DE", "roms_dir": "ROMs", "bios_dir": "BIOS"}}}
 SET = {"id": "pk", "name": "Pokemon", "description": "", "games": [
@@ -1309,10 +1310,10 @@ class MetaFlow(Flow):
 class SetFlow(Flow):
     """A set's games over every system the card can play, in one list."""
 
-    def run_set(self, *steps, game_set=SET):
+    def run_set(self, *steps, game_set=SET, device=DEVICE, to_fetch=None):
         script = Script(*steps)
         with mock.patch.object(picker, "filter_list", script), contextlib.redirect_stdout(io.StringIO()):
-            changed = cardedit.edit_set("c", game_set, (DEVICE, "esde"))
+            changed = cardedit.edit_set("c", game_set, (device, "esde"), to_fetch)
         return changed, script.calls
 
     def test_set_view_keys_are_the_playable_games_once_in_file_order(self):
@@ -1391,6 +1392,111 @@ class SetFlow(Flow):
         with mock.patch.object(cardedit, "status_of", side_effect=lambda u, c, fetch=None, count=True: seen.append((u.bytes, count))):
             self.run_set(step)
         self.assertEqual(seen, [(0, False), (22, False)])
+
+    def test_a_multi_disc_game_switches_all_its_discs(self):
+        self.files["psx/"] = {k: 10 for k in DISCS[1:3]}  # two discs, no playlist
+        discs = {"id": "md", "name": "Discs", "description": "", "games": [
+            {"system": "psx", "bucket": DISCS[1]}, {"system": "psx", "bucket": DISCS[2]}]}
+        self.card()
+
+        def step(labels, kw):
+            self.assertEqual(labels, ["PlayStation — A (USA) (Disc 1)", "PlayStation — A (USA) (Disc 2)"])
+            self.assertEqual(kw["links"], [[0, 1], [0, 1]])
+            return [True, False]  # one row on: the whole game is
+        self.run_set(step, game_set=discs, device=PSX_DEVICE)
+        self.assertEqual(sorted(x["bucket"] for x in store.card_games("c")["psx"]), DISCS[1:3])
+
+    def test_a_playlist_in_the_set_hides_its_discs(self):
+        self.files["psx/"] = {k: 10 for k in DISCS[:3]}
+        playlist = {"id": "pl", "name": "Playlist", "description": "", "games": [
+            {"system": "psx", "bucket": DISCS[0]}, {"system": "psx", "bucket": DISCS[1]}]}
+        self.card()
+
+        def step(labels, kw):
+            self.assertEqual(labels, ["PlayStation — A (USA)"])
+            return [True]
+        self.run_set(step, game_set=playlist, device=PSX_DEVICE)
+        self.assertEqual(sorted(x["bucket"] for x in store.card_games("c")["psx"]), sorted(DISCS[:3]))
+
+    def test_status_counts_what_is_not_on_the_card_yet_to_download(self):
+        self.card()
+        self.cache = {"gba/": self.files["gba/"], "gb/": self.files["gb/"], "scrapes/gba/": {}, "scrapes/gb/": {},
+                      "BIOS/": {}}
+        on_card = {"gba/Ruby.zip", "gba/Ruby.sav"}
+        seen = []
+
+        def step(labels, kw):
+            kw["status"]([False, False])
+            kw["status"]([True, True])  # Red (2) to download; Ruby is on the card
+            return [False, False]
+        with mock.patch.object(cardedit, "status_of", side_effect=lambda u, c, fetch=None, count=True: seen.append(fetch)):
+            self.run_set(step, to_fetch=lambda s, keys: {k for k in keys if k not in on_card})
+        self.assertEqual(seen, [0, 2])
+
+    def test_w_saves_a_picked_games_note(self):
+        self.card(games={"gba": [g("gba/Ruby.zip"), g("gba/Ruby.sav")]})
+
+        def step(labels, kw):
+            self.assertEqual(kw["on_note"](labels.index("Game Boy — Red"), "x"),
+                             "Switch the game on and press Enter first, then add its note")
+            self.assertEqual(kw["on_note"](labels.index("Game Boy Advance — Ruby"), "best one"), "Note saved")
+            self.assertEqual(kw["note_text"](labels.index("Game Boy Advance — Ruby")), "best one")
+            return kw["session"]["sel"]
+        self.assertTrue(self.run_set(step)[0])
+        self.assertEqual(self.read("cards.json")["c"]["games"]["gba"],
+                         [{**g("gba/Ruby.sav")}, {**g("gba/Ruby.zip"), "note": "best one"}])
+
+    def test_v_adds_the_variant_to_the_card(self):
+        vset = {**SET, "games": [{**SET["games"][0], "variants": [{"bucket": "gba/Emerald.zip", "note": "more"}]},
+                                 SET["games"][1]]}
+        self.card()
+
+        def press_v(labels, kw):
+            return (cardedit.VARIANT_KEY, labels.index("Game Boy Advance — Ruby"))
+
+        def now_on(labels, kw):
+            self.assertTrue(kw["row_note"](labels.index("Game Boy Advance — Ruby")).endswith("✅ on the card (v removes it)"))
+            return kw["session"]["sel"]
+        with mock.patch.object(store, "load_sets", return_value=[vset]):
+            changed, _ = self.run_set(press_v, now_on, game_set=vset)
+        self.assertTrue(changed)
+        self.assertEqual(store.card_games("c"), {"gba": [g("gba/Emerald.zip")]})
+
+    def test_one_pass_changes_two_systems(self):
+        self.card(games={"gba": [g("gba/Zelda.zip")], store.SETS_KEY: ["pk"]}, excluded={"gba": ["gba/Ruby.zip"]})
+
+        def step(labels, kw):
+            self.assertEqual(kw["initial"], [True, False])
+            return toggle("Game Boy — Red", "Game Boy Advance — Ruby")(labels, kw)
+        self.assertTrue(self.run_set(step)[0])
+        self.assertEqual(store.card_games("c"), {"gba": [g("gba/Zelda.zip")], store.SETS_KEY: ["pk"]})
+        self.assertEqual(store.card_excluded("c"), {"gb": ["gb/Red.gb"]})
+
+    def test_a_vita_dlc_in_the_set_is_not_a_row(self):
+        self.files["psvita/"] = {G: 10, DLC: 1}
+        vita = {"name": "Sony PlayStation Vita", "bucket": "psvita", "folders": {"esde": "psvita"}, "bios": {"files": []}}
+        catalog = {**CATALOG, "systems": CATALOG["systems"] + [vita]}
+        game_set = {"id": "v", "name": "Vita", "description": "", "games": [
+            {"system": "psvita", "bucket": G}, {"system": "psvita", "bucket": DLC}]}
+        self.card()
+        with mock.patch.object(store, "repo_json", lambda name: catalog[name]):
+            _, calls = self.run_set(returns([True]), game_set=game_set, device={**DEVICE, "systems": ["psvita"]})
+        self.assertEqual(calls[0][1], ["Sony PlayStation Vita — G [PCSE00349] [USA] [NoNpDRM]"])
+        self.assertEqual(store.card_games("c"), {"psvita": [g(G)]})
+
+    def test_the_set_list_lists_only_systems_with_set_games(self):
+        self.card()
+        listed = []
+
+        def files(prefix, sizes=True):
+            listed.append(prefix)
+            return self.files.get(prefix, {})
+        out = io.StringIO()
+        with mock.patch.object(inventory, "current", return_value=None), mock.patch.object(inventory, "files", files), \
+                mock.patch.object(picker, "filter_list", Script(returns(None))), contextlib.redirect_stdout(out):
+            cardedit.pick_card_set("c", (DEVICE, "esde"), [GBA, GB, PSX])
+        self.assertEqual(sorted(listed), ["gb/", "gba/"])  # no Pokemon game on PSX
+        self.assertEqual(out.getvalue().count("📡 Listing"), 2, out.getvalue())
 
 
 class SetupChange(DataDir):
