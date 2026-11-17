@@ -8,6 +8,7 @@ import threading
 import time
 import unicodedata
 import unittest
+from concurrent.futures import ThreadPoolExecutor
 from unittest import mock
 
 import boto3
@@ -191,6 +192,71 @@ class DownloadTest(unittest.TestCase):
             self.assertEqual(os.listdir(d), [])
 
 
+class FlushTest(unittest.TestCase):
+    """Downloads fsync every FLUSH_BYTES (patched small here) and report bytes as written only once flushed."""
+    def setUp(self):
+        self.tmp = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, self.tmp)
+        self.events = []  # ("wrote", n) and ("fsync", bytes on disk so far)
+        for p in (mock.patch.object(s3, "FLUSH_BYTES", 10), mock.patch.object(os, "fsync", self.fsync),
+                  mock.patch.object(s3, "read_root", return_value=self.tmp)):
+            p.start()
+            self.addCleanup(p.stop)
+
+    def fsync(self, fd):
+        self.events.append(("fsync", os.fstat(fd).st_size))
+
+    def download(self, size):
+        with open(os.path.join(self.tmp, "src"), "wb") as f:
+            f.write(b"x" * size)
+        with mock.patch("builtins.open", self.small_reads(open)):
+            s3.download(("src", os.path.join(self.tmp, "out", "a"), None), None, lambda n: self.events.append(("wrote", n)))
+        self.assertEqual(os.path.getsize(os.path.join(self.tmp, "out", "a")), size)
+        self.assertEqual(sum(n for e, n in self.events if e == "wrote"), size)
+
+    @staticmethod
+    def small_reads(real_open):
+        """open whose reads return at most 4 bytes, so a tiny file takes several chunks."""
+        def opener(path, mode="r", *args, **kwargs):
+            f = real_open(path, mode, *args, **kwargs)
+            if mode == "rb":
+                read = f.read
+                f.read = lambda n=-1: read(4)
+            return f
+        return opener
+
+    def test_small_file_is_never_fsynced_and_reports_each_write(self):
+        self.download(9)
+        self.assertEqual(self.events, [("wrote", 4), ("wrote", 4), ("wrote", 1)])
+
+    def test_big_file_reports_only_after_each_fsync(self):
+        self.download(25)
+        self.assertEqual(self.events, [("fsync", 12), ("wrote", 12), ("fsync", 24), ("wrote", 12),
+                                       ("fsync", 25), ("wrote", 1)])
+
+    def test_at_most_flushers_fsync_at_once(self):
+        lock, now, peak = threading.Lock(), [0], [0]
+
+        def slow_fsync(fd):
+            with lock:
+                now[0] += 1
+                peak[0] = max(peak[0], now[0])
+            time.sleep(0.02)
+            with lock:
+                now[0] -= 1
+
+        def write_one(i):
+            with open(os.path.join(self.tmp, f"f{i}"), "wb") as f:
+                out = s3.FlushingWriter(f, None, 100)
+                for _ in range(5):
+                    out.write(b"x" * 10)
+                out.finish()
+
+        with mock.patch.object(os, "fsync", slow_fsync), ThreadPoolExecutor(8) as ex:
+            list(ex.map(write_one, range(8)))
+        self.assertEqual(peak[0], s3.FLUSHERS)
+
+
 class FakeObject:
     """One bucket object served through a client's events, answering each request by what it asks (so ranged GETs may
     come in any order): HEAD, GET with Range and If-Match (412 when the ETag isn't the object's), 404 when body is None.
@@ -281,6 +347,14 @@ class CachedDownloadTest(unittest.TestCase):
         old, new = os.urandom(self.BIG), b"short"
         fake = FakeObject(self.client, old, '"e1"', changes=1, after=(new, '"e2"'), wait=0.3)
         self.assertEqual(self.download({"gba/a.zip": self.BIG}, {"gba/a.zip": '"e1"'}), (new, len(new), len(new)))
+        self.assertEqual([c[0] for c in fake.calls].count("HeadObject"), 1)
+
+    def test_fsynced_download_reports_every_byte_once_across_a_restart(self):
+        old, new = os.urandom(self.BIG), os.urandom(self.BIG + 5)
+        fake = FakeObject(self.client, old, '"e1"', changes=1, after=(new, '"e2"'), wait=0.3)
+        with mock.patch.object(s3, "FLUSH_BYTES", 1024 * 1024), mock.patch.object(os, "fsync") as fsync:
+            self.assertEqual(self.download({"gba/a.zip": self.BIG}, {"gba/a.zip": '"e1"'}), (new, len(new), len(new)))
+        self.assertGreaterEqual(fsync.call_count, 9)
         self.assertEqual([c[0] for c in fake.calls].count("HeadObject"), 1)
 
     def test_other_errors_do_not_fall_back(self):

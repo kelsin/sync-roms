@@ -189,15 +189,46 @@ def copy_file(src, dst, callback=None, wrote=None):
                 wrote(len(chunk))
 
 
-class CountingWriter:
-    """A seekable file wrapper that reports each write to on_write(bytes), so downloads can still write ranges in parallel."""
-    def __init__(self, f, on_write):
-        self.f, self.on_write = f, on_write
+FLUSH_BYTES = 32 * 1024 * 1024  # a download is fsynced after this much is written, so close() doesn't stall on a card
+FLUSHERS = 2  # downloads fsynced at once: more scatters writes across the card
+_flushing = threading.Semaphore(FLUSHERS)
+
+
+class FlushingWriter:
+    """A seekable file wrapper for a download (so ranges can still be written in parallel) that fsyncs f every
+    FLUSH_BYTES and reports bytes to wrote(bytes) once they are on disk: a file under FLUSH_BYTES is never fsynced and
+    reports each write; one of size FLUSH_BYTES or more, or once fsynced, reports after each fsync. finish() fsyncs
+    the rest of such a file."""
+    def __init__(self, f, wrote, size=None):
+        self.f, self.wrote, self.hold = f, wrote, (size or 0) >= FLUSH_BYTES
+        self.dirty = self.pending = 0  # bytes since the last fsync, and not yet reported
 
     def write(self, data):
         n = self.f.write(data)
-        self.on_write(len(data))
+        self.dirty += len(data)
+        self.pending += len(data)
+        if self.dirty >= FLUSH_BYTES:
+            self.sync()
+        elif not self.hold:
+            self.report()
         return n
+
+    def sync(self):
+        self.f.flush()
+        with _flushing:
+            os.fsync(self.f.fileno())
+        self.dirty, self.hold = 0, True
+        self.report()
+
+    def report(self):
+        if self.wrote and self.pending:
+            self.wrote(self.pending)
+        self.pending = 0
+
+    def finish(self):
+        if self.hold and self.dirty:
+            self.sync()
+        self.report()
 
     def seek(self, *args):
         return self.f.seek(*args)
@@ -240,7 +271,9 @@ def _download_known(key, f, known, callback, wrote):
     try:
         config = TransferConfig(max_concurrency=DOWNLOAD_PARTS, preferred_transfer_client="classic")  # CRT can't be told
         with create_transfer_manager(s3_client(), config) as manager:
-            manager.download(runtime.BUCKET, key, CountingWriter(f, counted(1, wrote)), subscribers=[Known()]).result()
+            out = FlushingWriter(f, counted(1, wrote), known[0])
+            manager.download(runtime.BUCKET, key, out, subscribers=[Known()]).result()
+        out.finish()
         return True
     except S3DownloadFailedError as e:
         cause = e.__context__
@@ -256,19 +289,27 @@ def _download_known(key, f, known, callback, wrote):
 
 def download(job, callback=None, wrote=None):
     """callback(bytes) is called as data arrives, wrote(bytes) as it is written to disk."""
-    key, path, _ = job
+    key, path, size = job
     os.makedirs(os.path.dirname(path), exist_ok=True)
     try:
         if read_root():
-            copy_file(safe_join(read_root(), key), path + ".part", callback, wrote)
+            with open(safe_join(read_root(), key), "rb") as fin, open(path + ".part", "wb") as f:
+                out = FlushingWriter(f, wrote, os.fstat(fin.fileno()).st_size)
+                while chunk := fin.read(1024 * 1024):
+                    if callback:
+                        callback(len(chunk))
+                    out.write(chunk)
+                out.finish()
         else:
             from boto3.s3.transfer import TransferConfig
             from . import inventory  # imported here: inventory reads storage through this module
             known = inventory.known(key)
             with open(path + ".part", "wb") as f:
                 if not (known and _download_known(key, f, known, callback, wrote)):
-                    s3_client().download_fileobj(runtime.BUCKET, key, CountingWriter(f, wrote) if wrote else f,
-                                                Callback=callback, Config=TransferConfig(max_concurrency=DOWNLOAD_PARTS))
+                    out = FlushingWriter(f, wrote, size)
+                    s3_client().download_fileobj(runtime.BUCKET, key, out, Callback=callback,
+                                                Config=TransferConfig(max_concurrency=DOWNLOAD_PARTS))
+                    out.finish()
         os.replace(path + ".part", path)
     except BaseException:
         with contextlib.suppress(OSError):
