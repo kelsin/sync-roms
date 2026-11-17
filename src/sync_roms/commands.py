@@ -1113,6 +1113,8 @@ def build_parser():
 
 
 def run(argv):
+    if argv[0] == "cards" and (len(argv) == 1 or argv[1].startswith("-")):  # bare `cards` is `cards list`
+        argv = ["cards", "list", *argv[1:]]
     ap = build_parser()
     ap.prog = f"sync-roms {argv[0]}"  # its errors (unrecognized arguments) point at the command's help
     args = ap.parse_args(argv)

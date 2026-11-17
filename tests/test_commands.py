@@ -394,6 +394,7 @@ class CardSizeTest(Cmd):
         self.run_cmd("cards", "new", "SD2", "--device", "full", "--layout", "esde", "--size", "1 tb")
         rows = {r["name"]: r["size"] for r in json.loads(self.run_cmd("cards", "list", "--json")[1])}
         self.assertEqual(rows, {"SD": "512 GB", "SD2": "1 TB"})
+        self.assertEqual(self.run_cmd("cards", "--json"), self.run_cmd("cards", "list", "--json"))
         self.run_cmd("cards", "set", "SD", "--size", "256")
         self.assertEqual(self.read("cards.json")["SD"]["size"], "256 GB")
 
