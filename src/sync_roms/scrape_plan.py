@@ -134,20 +134,22 @@ def variant_tags(layout_name, family, stem):
     return {"name": title, "sortname": sort} if layout_name in ("esde", "emudeck") else {"name": title}
 
 
-def plan_scrapes(layout_name, rom_rels, listing, meta, media_root, rom_dir, present, family=None):
+def plan_scrapes(layout_name, rom_rels, listing, meta, media_root, rom_dir, present, family=None, join=s3.safe_join, index=None):
     """Media downloads, gamelist entries and text files for one system's ROMs.
 
     rom_rels: ROM paths in the system folder; media_root: the system's media folder (esde's downloaded_media
     folder or muOS's catalogue folder); rom_dir: the system's ROM folder on the card;
-    present(rom): is that ROM (going to be) on the card; family: the system's clones.json entry, if it has one.
+    present(rom): is that ROM (going to be) on the card; family: the system's clones.json entry, if it has one;
+    join(root, rel): a job's local path (scrape_cost, which only adds up sizes, skips the path checks);
+    index: scrape_index(listing) when already built (listing is then not read).
     Returns (jobs [(key, local path, size)], entries {ROM path: {gamelist tag: text}}, texts [(local path, text)]).
     """
-    index = scrape_index(listing)
+    index = scrape_index(listing) if index is None else index
     jobs, entries, texts = [], {}, []
 
     def add(key, root, rel, size):
         try:
-            jobs.append((key, s3.safe_join(root, rel), size))
+            jobs.append((key, join(root, rel), size))
         except ValueError as e:
             print(ui.yellow(f"  ⚠️  skipping {e}"))
     for rom in sorted(rom_rels):
@@ -197,12 +199,14 @@ def plan_scrapes(layout_name, rom_rels, listing, meta, media_root, rom_dir, pres
     return jobs, entries, texts
 
 
-def scrape_cost(layout_name, system, rom_rel, listing):
+def scrape_cost(layout_name, system, rom_rel, listing, index=None):
     """Bytes of scraped files a sync would install for one ROM (rom_rel: its path in the system folder) under a
-    layout, from a listing of scrapes/<system>/ with sizes; 0 for a layout without scrapes or a ROM with none."""
+    layout, from a listing of scrapes/<system>/ with sizes (or its scrape_index); 0 for a layout without scrapes or a
+    ROM with none."""
     if layout_name not in SCRAPE_LAYOUTS:
         return 0
-    jobs, _, _ = plan_scrapes(layout_name, [rom_rel], listing, {}, "/media", "/roms", lambda rom: True)
+    jobs, _, _ = plan_scrapes(layout_name, [rom_rel], listing, {}, "/media", "/roms", lambda rom: True,
+                              join=lambda root, rel: None, index=index)
     return sum(size or 0 for _, _, size in jobs)
 
 

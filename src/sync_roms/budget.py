@@ -1,19 +1,18 @@
 """How much of a card's space its games take: ROM files plus the scraped files its layout installs, from the size cache."""
-import os
-from collections import defaultdict, namedtuple
+from collections import namedtuple
 
 from . import collections as colls, commands, inventory, scrape_plan, store, vita
 
 Usage = namedtuple("Usage", "bytes count partial")
 
 
-# each system's scrapes listing split by ROM, and each ROM's scrape bytes per (layout, system), for one cache version
+# each system's scrapes listing indexed by ROM, and each ROM's scrape bytes per (layout, system), for one cache version
 _scrapes = {"version": None, "by_stem": {}, "costs": {}}
 
 
 def _scrapes_by_stem(bucket):
-    """{ROM stem: {key: size}} of the system's scrapes listing, or None when it isn't cached. Kept for the run until the
-    cache changes (a patch, or a cache read again or rebuilt)."""
+    """The scrape_plan.scrape_index ({ROM stem: {media type: (key, size)}}) of the system's scrapes listing, or None
+    when it isn't cached. Kept for the run until the cache changes (a patch, or a cache read again or rebuilt)."""
     version = inventory.version()
     if version is None or version != _scrapes["version"]:
         _scrapes.update(version=version, by_stem={}, costs={})
@@ -23,20 +22,16 @@ def _scrapes_by_stem(bucket):
     listing = inventory.cached(f"{scrape_plan.SCRAPES}/{bucket}/")
     if listing is None:
         return None
-    by_stem = defaultdict(dict)
-    for key, size in listing.items():
-        entry = scrape_plan._index_entry(key)
-        if entry:
-            by_stem[entry[0]][key] = size
+    by_stem = scrape_plan.scrape_index(listing)
     if version is not None:
         kept[bucket] = by_stem
     return by_stem
 
 
 def scrape_costs(layout, system, rels, by_stem):
-    """{ROM path in the system folder: scrape bytes} for many ROMs, from the scrapes listing split by ROM
-    (_scrapes_by_stem) so each scrape_cost call only sees that ROM's files."""
-    return {rel: scrape_plan.scrape_cost(layout, system, rel, by_stem.get(os.path.splitext(rel)[0], {})) for rel in rels}
+    """{ROM path in the system folder: scrape bytes} for many ROMs, from the system's scrapes index (_scrapes_by_stem),
+    built once so no scrape_cost call parses the listing again."""
+    return {rel: scrape_plan.scrape_cost(layout, system, rel, {}, index=by_stem) for rel in rels}
 
 
 def game_costs(card, system, keys):

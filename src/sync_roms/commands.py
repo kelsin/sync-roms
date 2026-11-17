@@ -430,19 +430,43 @@ def parse_size(text):
 
 
 def cards_list(args):
+    from . import budget, cardedit  # both import this module
     cards = store.load_cards()
     manifest = store.load_catalog()
     rows = []
     for name in sorted(cards):
         setup = picker.saved_setup(cards[name], manifest["devices"], manifest["layouts"])
-        extras = sum(len(v) if isinstance(v, list) else 1 for v in store.card_games(name, cards).values())
+        games = store.card_games(name, cards)
+        extras = sum(len(v) if isinstance(v, list) else 1 for v in games.values())
+        usage = full = picked = None
+        if setup:
+            # what a sync of the picks puts on the card (ROMs, the layout's scrapes, BIOS), from the size cache
+            entry, systems = cardedit.card_entry(name, setup, cards), cardedit.can_play(manifest["systems"], setup)
+            usages = budget.system_usages(entry, systems)
+            usage = budget.card_usage(entry, systems, usages)
+            full = {b for b in usages if isinstance(games.get(b), dict) and games[b].get("full_system")}
+            picked = sum(u.count for b, u in usages.items() if b not in full)  # direct, set and collection games
         rows.append({"name": name, "device": (setup[0]["id"] if setup[0] else "full") if setup else None,
                      "layout": setup[1] if setup else None, "size": cards[name].get("size") if isinstance(cards[name], dict) else None,
-                     "extras": extras})
+                     "used": usage.bytes if usage else None, "sized": not usage.partial if usage else None,
+                     "full_systems": len(full) if setup else None, "games": picked, "extras": extras})
     if args.json:
         ui.emit_json(rows)
         return 0
-    ui.table([(r["name"], r["device"] or "(no device set)", r["layout"] or "", r["size"] or "", f"{r['extras']} game entries") for r in rows])
+
+    def used(r):
+        if r["used"] is None:
+            return r["size"] or ""
+        text = cardedit.size_text(r["used"]) + (f" / {r['size']}" if r["size"] else " used")
+        return text if r["sized"] else f"{text} (not sized)"
+
+    def picks(r):
+        if r["games"] is None:
+            return f"{r['extras']} game entries"
+        plural = lambda n, word: f"{n} {word}" + ("" if n == 1 else "s")
+        return f"{plural(r['full_systems'], 'full system')} · {plural(r['games'], 'game')}"
+
+    ui.table([(r["name"], r["device"] or "(no device set)", r["layout"] or "", used(r), picks(r)) for r in rows])
     return 0
 
 
