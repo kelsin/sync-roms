@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.0.1](https://github.com/kelsin/sync-roms/compare/v3.0.0...v3.0.1) (2026-11-17)
+
+
+### :bug: Bug Fixes
+
+* **cardedit:** toggle collections in place without a slow recount ([#327](https://github.com/kelsin/sync-roms/issues/327)) ([9bcc4c2](https://github.com/kelsin/sync-roms/commit/9bcc4c2dad39eda1c3307ef4ea32c14eff980a22))
+* **m3u:** keep bracket tags after (Disc N) in playlist grouping and names ([#329](https://github.com/kelsin/sync-roms/issues/329)) ([794b108](https://github.com/kelsin/sync-roms/commit/794b1080241555c14bf99f76702650a5cdb726e2))
+
 ## [3.0.0](https://github.com/kelsin/sync-roms/compare/v2.16.0...v3.0.0) (2026-11-16)
 
 
