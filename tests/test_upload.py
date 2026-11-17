@@ -680,10 +680,11 @@ class AbortKeepsCacheTest(StorageFolder):
 
     def test_second_ctrl_c_during_moves_aborts_and_saves_finished_moves(self):
         self.build()
-        real_replace, release, printed = os.replace, threading.Event(), []
+        real_replace, release, b_moving, printed = os.replace, threading.Event(), threading.Event(), []
 
         def replace(src, dst):  # the cache file is saved with os.replace too
             if src.endswith("b.zip"):
+                b_moving.set()
                 release.wait(5)
             else:
                 real_replace(src, dst)
@@ -691,6 +692,7 @@ class AbortKeepsCacheTest(StorageFolder):
         def fake_print(*a, **k):
             printed.append(" ".join(map(str, a)))
             if len(printed) == 2:  # the first move's line
+                b_moving.wait(5)  # else b's move may not have started, gets cancelled, and there is nothing to wait for
                 raise KeyboardInterrupt
 
         def sleep(s):
