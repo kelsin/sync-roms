@@ -1084,43 +1084,44 @@ class DiscFlow(Flow):
     def psx(self, *steps):
         return self.run_system(*steps, bucket="psx")
 
-    def test_rows_are_linked_and_marked(self):
+    def test_the_playlist_is_the_games_only_row(self):
         self.card()
-        _, calls = self.psx(returns([False] * 5))
+        _, calls = self.psx(returns([False, False]))
         _, labels, kw = calls[0]
-        self.assertEqual(labels, ["A (USA) (Disc 1).chd", "A (USA) (Disc 2).chd", "A (USA) (Disc 3).chd",
-                                  "A (USA).m3u", "B (USA).chd"])
-        self.assertEqual(kw["links"], [[3, 0, 1, 2]] * 4 + [[]])
+        self.assertEqual(labels, ["A (USA).m3u", "B (USA).chd"])
         self.assertEqual(kw["extras"][0][0], ("  🔗 4 files", "dim"))
 
-    def test_toggling_the_playlist_adds_every_disc(self):
+    def test_discs_without_a_playlist_in_storage_are_rows(self):
+        self.files["psx/"] = {k: 10 for k in DISCS[1:] + ["psx/B (USA).chd"]}
+        self.card()
+        _, calls = self.psx(returns([False] * 4))
+        _, labels, kw = calls[0]
+        self.assertEqual(labels, ["A (USA) (Disc 1).chd", "A (USA) (Disc 2).chd", "A (USA) (Disc 3).chd", "B (USA).chd"])
+        self.assertEqual(kw["links"], [[0, 1, 2]] * 3 + [[]])
+
+    def test_toggling_the_playlist_adds_every_disc_and_untoggling_removes_them(self):
         self.card()
         self.psx(toggle("A (USA).m3u"))
         self.assertEqual(sorted(store.card_games("c")["psx"], key=lambda x: x["bucket"]),
                          sorted((g(k) for k in DISCS), key=lambda x: x["bucket"]))
-
-    def test_toggling_a_later_disc_adds_the_whole_game_and_untoggling_removes_it(self):
-        self.card()
-        self.psx(toggle("A (USA) (Disc 2).chd"))
-        self.assertEqual(sorted(x["bucket"] for x in store.card_games("c")["psx"]), sorted(DISCS))
-        self.psx(toggle("A (USA) (Disc 3).chd"))
+        self.psx(toggle("A (USA).m3u"))
         self.assertEqual(store.card_games("c"), {})
 
     def test_status_counts_the_whole_game(self):
         self.card()
 
         def step(labels, kw):
-            state = [True, False, False, False, False]  # only Disc 1 switched (as a script would)
+            state = [True, False]  # the playlist switched on
             self.assertEqual(counted(kw, state), 4)
             return state
         self.psx(step)
 
-    def test_a_partial_pick_is_kept_until_a_member_is_toggled(self):
+    def test_a_partial_pick_is_kept_until_the_playlist_is_toggled(self):
         self.card(games={"psx": [g(DISCS[1])]})
-        self.psx(returns([True, False, False, False, False]))
+        self.psx(returns([False, False]))
         self.assertEqual(store.card_games("c"), {"psx": [g(DISCS[1])]})
-        self.psx(toggle("A (USA) (Disc 1).chd"))  # Disc 1 off: the whole game is off
-        self.assertEqual(store.card_games("c"), {})
+        self.psx(toggle("A (USA).m3u"))  # the playlist on: the whole game is on
+        self.assertEqual(sorted(x["bucket"] for x in store.card_games("c")["psx"]), sorted(DISCS))
 
     def test_a_set_filter_showing_one_disc_still_switches_the_whole_game(self):
         self.card()
