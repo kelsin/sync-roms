@@ -43,6 +43,14 @@ class M3uTest(unittest.TestCase):
             "Chrono Cross (USA).m3u": ["Chrono Cross (USA) (Disc 1).chd", "Chrono Cross (USA) (Disc 2).chd"],
             "FF IX (USA) (Rev 1).m3u": ["FF IX (USA) (Disc 1) (Rev 1).chd", "FF IX (USA) (Disc 2) (Rev 1).chd"]})
 
+    def test_lettered_and_roman_discs(self):
+        d = ["D (USA) (Disc II).chd", "D (USA) (Disc I).chd"]
+        yuno = ["Yu-No (Japan) (Disc C).chd", "Yu-No (Japan) (Disc A).chd", "Yu-No (Japan) (Disc B).chd"]
+        wan = ["WanChai (Japan) (Disc A).chd", "WanChai (Japan) (Disc B) (3A, 3C).chd"]
+        self.assertEqual(m3u.disc_groups(d + yuno + wan), {
+            "D (USA).m3u": ["D (USA) (Disc I).chd", "D (USA) (Disc II).chd"],
+            "Yu-No (Japan).m3u": sorted(yuno), "WanChai (Japan).m3u": wan})
+
     def test_bracket_tags_after_disc_are_their_own_game(self):
         base = ["Grandia (Japan) (Disc 1) (4M).chd", "Grandia (Japan) (Disc 2) (4M).chd"]
         tl = ["Grandia (Japan) (Disc 1) [T-En by X v1.1].chd", "Grandia (Japan) (Disc 2) [T-En by X v1.1].chd"]

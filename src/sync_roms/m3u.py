@@ -7,9 +7,24 @@ from collections import defaultdict
 from . import external, ui
 
 
-DISC_RE = re.compile(r" \(Disc (\d+)\)")
+DISC_RE = re.compile(r" \(Disc (\d+|[A-Z]|[IVX]+)\)")  # "Disc 1", "Disc A" or "Disc II"
+ROMAN = {"I": 1, "V": 5, "X": 10}
 TAG_RE = re.compile(r"\[[^\]]*\]|\([^)]*\)")  # a bracket tag may hold parentheses: "[Hack v0 (09-04-2017)]"
 DISC_EXTS = {".chd", ".rvz",".cue", ".iso", ".pbp", ".gdi", ".cso", ".ccd"}
+
+
+def _roman(s):
+    values = [ROMAN[c] for c in s]
+    return sum(-v if v < w else v for v, w in zip(values, values[1:] + [0]))
+
+
+def _disc_number(label, labels):
+    """A disc label's number: 1 for "1", "A" or "I". A game's labels are Roman numerals only when all of them are."""
+    if label.isdigit():
+        return int(label)
+    if all(set(n) <= set(ROMAN) for n in labels):
+        return _roman(label)
+    return ord(label) - ord("A") + 1 if len(label) == 1 else 0
 
 
 def disc_groups(files):
@@ -26,10 +41,10 @@ def disc_groups(files):
         if m and ext.lower() in DISC_EXTS:
             tags = TAG_RE.findall(stem[m.end():])
             brackets = tuple(t for t in tags if t.startswith("["))
-            games[(stem[:m.start()], brackets, ext.lower())].append((int(m.group(1)), tags, f))
+            games[(stem[:m.start()], brackets, ext.lower())].append((m.group(1), tags, f))
     groups = {}
     for (title, _, _), discs in games.items():
-        discs.sort()
+        discs = sorted((_disc_number(n, {n for n, _, _ in discs}), tags, f) for n, tags, f in discs)
         if len(discs) < 2 or len({n for n, _, _ in discs}) < len(discs):
             continue
         shared = [t for t in discs[0][1] if all(t in tags for _, tags, _ in discs)]
