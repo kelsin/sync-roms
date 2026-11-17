@@ -91,7 +91,7 @@ QUIT_NOW = "   Press Ctrl-C again to quit now: unsaved changes in the open edito
 QUIT_AFTER = 1  # seconds after that Ctrl-C from which another one quits; sooner, it is the same press (a double tap, a held key)
 
 
-def help_lines(multi, hint, hidden_count=False, has_note=False, key_help=None):
+def help_lines(multi, hint, hidden_count=False, has_note=False, key_help=None, select_all=True):
     """Every key a filter_list accepts, then this screen's own keys: key_help's (keys, what they do) pairs, or else
     the hint's entries. A key key_help describes is listed only there."""
     lines = ["j/k ↑/↓ ^N/^P   move", "g/G             top / bottom", "^D/^U           half page",
@@ -99,8 +99,8 @@ def help_lines(multi, hint, hidden_count=False, has_note=False, key_help=None):
              "/               filter (Enter or Tab keeps it, Esc clears it)",
              "Enter           " + ("done" if multi else "pick"), "Esc/q/^G        clear the filter, then go back"]
     if multi:
-        lines += ["Space/Tab       toggle the row", "a               toggle all shown", "o               view: all / on / changed",
-                  "u               revert this list"]
+        lines += ["Space/Tab       toggle the row", *(["a               toggle all shown"] if select_all else []),
+                  "o               view: all / on / changed", "u               revert this list"]
         if has_note:
             lines.append("w               edit the row's note")
     if hidden_count:
@@ -219,9 +219,9 @@ class _ListModel:
 
     def __init__(self, title, labels, multi, initial, hint, cursor, extras, locked, locked_note, hotkeys, note_text,
                  on_note, esc_asks, hidden, status, diff_marks, session, poll, links, on_hotkey, preview=None, row_note=None,
-                 key_help=None, filters="", preview_width=None):
+                 key_help=None, filters="", preview_width=None, select_all=True):
         self.preview, self.row_note, self.key_help, self.filters = preview, row_note, key_help, filters
-        self.preview_width = preview_width
+        self.preview_width, self.select_all = preview_width, select_all
         self.title, self.labels, self.multi, self.hint, self.extras = title, labels, multi, hint, extras
         self.locked_note, self.hotkeys, self.note_text, self.on_note = locked_note, hotkeys, note_text, on_note
         self.esc_asks, self.status, self.diff_marks, self.poll = esc_asks, status, diff_marks, poll
@@ -390,7 +390,8 @@ class _ListModel:
         elif k == "/":
             self.typing, self.qpos = True, len(self.query)
         elif k == "?":
-            self.help = help_lines(self.multi, self.hint, self.hidden_count, bool(self.on_note), self.key_help)
+            self.help = help_lines(self.multi, self.hint, self.hidden_count, bool(self.on_note), self.key_help,
+                                   self.select_all)
         elif k == "j":
             self.cur = min(len(vis) - 1, cur + 1)
         elif k == "k":
@@ -440,7 +441,7 @@ class _ListModel:
         elif k == "w" and vis and self.on_note and not self.locked[vis[cur]]:
             text = self.note_text(vis[cur]) if self.note_text else ""
             self.note, self.note_row = (text, len(text)), vis[cur]
-        elif k in ("a", "ctrl+a") and vis:
+        elif k in ("a", "ctrl+a") and vis and self.select_all:
             free = [i for i in vis if not self.locked[i]]
             target = not all(self.state[i] for i in free)
             for i in self.linked(free):
@@ -1383,7 +1384,7 @@ def _draws_images():
 def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, extras=None, locked=None, locked_note="",
                 hotkeys=(), note_text=None, on_note=None, esc_asks=True, hidden=None, status=None, diff_marks=True,
                 session=None, poll=None, links=None, on_hotkey=None, preview=None, row_note=None, key_help=None, filters="",
-                preview_width=None):
+                preview_width=None, select_all=True):
     """Modal list: vim keys for moving and acting, Emacs keys for editing the filter.
 
     Normal mode: j/k ↑/↓ ^N/^P move · g/G top/bottom · ^D/^U half page · ^F/^B/PgUp/PgDn/^V page · / filter ·
@@ -1423,6 +1424,7 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
     top right instead, and not at all when the terminal has no room for it.
     row_note: optional callable(label index) -> text; when non-empty for the highlighted row it replaces the status
     line (below a notice and a locked row's note).
+    select_all: False turns `a` (toggle all shown) off.
     """
     if preview and not _in_session():  # a session asks the terminal once, before its app starts
         _app_class()  # first: it sets up Textual's environment
@@ -1430,7 +1432,7 @@ def filter_list(title, labels, multi=False, initial=None, hint="", cursor=0, ext
             preview = None
     return _run(_ListModel(title, labels, multi, initial, hint, cursor, extras, locked, locked_note, hotkeys, note_text,
                            on_note, esc_asks, hidden, status, diff_marks, session, poll, links, on_hotkey, preview, row_note,
-                           key_help, filters, preview_width))
+                           key_help, filters, preview_width, select_all))
 
 
 PLACE = ("row", "query", "view_mode", "top")  # the session entries carry_place keeps
