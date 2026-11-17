@@ -43,6 +43,18 @@ class M3uTest(unittest.TestCase):
             "Chrono Cross (USA).m3u": ["Chrono Cross (USA) (Disc 1).chd", "Chrono Cross (USA) (Disc 2).chd"],
             "FF IX (USA) (Rev 1).m3u": ["FF IX (USA) (Disc 1) (Rev 1).chd", "FF IX (USA) (Disc 2) (Rev 1).chd"]})
 
+    def test_bracket_tags_after_disc_are_their_own_game(self):
+        base = ["Grandia (Japan) (Disc 1) (4M).chd", "Grandia (Japan) (Disc 2) (4M).chd"]
+        tl = ["Grandia (Japan) (Disc 1) [T-En by X v1.1].chd", "Grandia (Japan) (Disc 2) [T-En by X v1.1].chd"]
+        sub = ["Brig (Japan) (Disc 1) [T-En v8] [Subs v2].chd", "Brig (Japan) (Disc 2) [T-En v8] [Subs v2].chd"]
+        plain = ["Brig (Japan) (Disc 1) [T-En v8].chd", "Brig (Japan) (Disc 2) [T-En v8].chd"]
+        dated = ["Lunar (USA) (Disc 1) [Hack by S (09-04-2017)].chd", "Lunar (USA) (Disc 2) [Hack by S (09-04-2017)].chd"]
+        rmj = ["RMJ (Japan) (Disc 1) (Part A) [T-En by B].chd", "RMJ (Japan) (Disc 2) (Part B) [T-En by B].chd"]
+        self.assertEqual(m3u.disc_groups(base + tl + sub + plain + dated + rmj), {
+            "Grandia (Japan) (4M).m3u": base, "Grandia (Japan) [T-En by X v1.1].m3u": tl,
+            "Brig (Japan) [T-En v8] [Subs v2].m3u": sub, "Brig (Japan) [T-En v8].m3u": plain,
+            "Lunar (USA) [Hack by S (09-04-2017)].m3u": dated, "RMJ (Japan) [T-En by B].m3u": rmj})
+
     def test_creates_missing(self):
         self.touch(*FAH)
         self.run_cmd()

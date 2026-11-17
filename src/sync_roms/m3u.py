@@ -8,6 +8,7 @@ from . import external, ui
 
 
 DISC_RE = re.compile(r" \(Disc (\d+)\)")
+TAG_RE = re.compile(r"\[[^\]]*\]|\([^)]*\)")  # a bracket tag may hold parentheses: "[Hack v0 (09-04-2017)]"
 DISC_EXTS = {".chd", ".rvz",".cue", ".iso", ".pbp", ".gdi", ".cso", ".ccd"}
 
 
@@ -16,15 +17,18 @@ def disc_groups(files):
 
     "Name (Disc 1) (Key Disc) (Sega CD).chd" and "Name (Disc 2) (Sega CD).chd" are one game; the playlist is named
     after the title with "(Disc N)" and any tags the discs don't all share removed: "Name (Sega CD).m3u".
+    "[...]" tags after "(Disc N)" (translations, hacks) make a game of their own and are always kept in the name.
     """
     games = defaultdict(list)
     for f in files:
         stem, ext = os.path.splitext(f)
         m = DISC_RE.search(stem)
         if m and ext.lower() in DISC_EXTS:
-            games[(stem[:m.start()], ext.lower())].append((int(m.group(1)), re.findall(r"\([^)]*\)", stem[m.end():]), f))
+            tags = TAG_RE.findall(stem[m.end():])
+            brackets = tuple(t for t in tags if t.startswith("["))
+            games[(stem[:m.start()], brackets, ext.lower())].append((int(m.group(1)), tags, f))
     groups = {}
-    for (title, _), discs in games.items():
+    for (title, _, _), discs in games.items():
         discs.sort()
         if len(discs) < 2 or len({n for n, _, _ in discs}) < len(discs):
             continue
