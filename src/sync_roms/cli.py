@@ -24,6 +24,7 @@ SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "download": ("pico8", "add the PICO-8 BBS Featured carts storage doesn't have, and newer revisions of those it has"),
     "cards": ("edit|list|new|set|rename|delete|export|import", "list and manage the cards you've synced"),
     "devices": ("[ID]", "list the supported devices, or one device's systems"),
+    "layouts": ("[ID]", "list the firmware card layouts, or one layout's folders and devices"),
     "upload": ("[DIR]", "upload ROMs to the storage folder of a system you pick"),
     "diff": ("[DIR]", "list the ROMs in only DIR or only the bucket, ignoring renames"),
     "scrape": ("[SYSTEM | match SYSTEM ROM GAME | review [SYSTEM] | missing [SYSTEM]]", "scrape the ROMs that have no metadata from ScreenScraper into storage's scrapes/ folder"),
@@ -143,6 +144,12 @@ TOPICS = {
   sync-roms devices [ID] [--json]
 
   Without an ID: every device with its chip and system count. With one: its firmwares, note and systems.
+""",
+    "layouts": """
+  sync-roms layouts [ID] [--json]
+
+  Without an ID: every firmware layout with its ROMs and BIOS folders and how many devices run it.
+  With one: its folders, note and the devices that run it (marked where it's their default firmware).
 """,
     "upload": """
   sync-roms upload [DIR] [--replace] [--dry-run]    upload the ROMs in DIR (default: current directory) to storage folder of a system you pick
@@ -301,7 +308,7 @@ def help_text(topic=None):
   {ui.yellow('-n, --dry-run')}   show what would happen, change nothing (commands that can't honor it refuse it)
   {ui.yellow('-y, --yes')}       answer prompts with their default (deleting stays "no")
   {ui.yellow('--quiet')}         print only errors, warnings and --json data (prompts go to stderr)      {ui.yellow('--verbose')}   also print the effective settings
-  {ui.yellow('--json')}          machine-readable output for devices, diff, games list, cards list and `sync --dry-run` (use --device/--layout to skip the pickers)
+  {ui.yellow('--json')}          machine-readable output for devices, layouts, diff, games list, cards list and `sync --dry-run` (use --device/--layout to skip the pickers)
   {ui.yellow('--profile P')} {ui.yellow('--write-profile P')} {ui.yellow('--bucket B')} {ui.yellow('--root DIR')} {ui.yellow('--endpoint URL')}   override those settings for this run
   {ui.yellow('-a, --ask')}       sync: confirm the saved device/firmware and Android media choice instead of using it silently
   {ui.yellow('--version')}       print the version      {ui.yellow('-h, --help')}   this screen
@@ -572,7 +579,7 @@ def check_modes(args):
 
 
 GLOBAL_VALUE_FLAGS = {"--profile": "profile", "--write-profile": "write_profile", "--bucket": "bucket", "--root": "root", "--endpoint": "endpoint"}
-DATA_COMMANDS = {("devices",), ("completion",), ("games", "list"), ("games", "export"), ("cards", "list"), ("config", "path")}
+DATA_COMMANDS = {("devices",), ("layouts",), ("completion",), ("games", "list"), ("games", "export"), ("cards", "list"), ("config", "path")}
 
 
 def extract_globals(argv):

@@ -1,4 +1,4 @@
-"""Scriptable subcommands: games, cards, config, doctor, check and completion; plus helpers the sync flow uses."""
+"""Scriptable subcommands: games, cards, layouts, config, doctor, check and completion; plus helpers the sync flow uses."""
 import argparse
 import datetime
 import json
@@ -11,7 +11,7 @@ from . import cardshare, external, inventory, m3u, names, picker, runtime, s3, s
 
 
 UNKNOWN_SHOWN = 8  # device ids named in an "unknown device" error
-COMMANDS = {"games", "sets", "collections", "themes", "download", "cards", "cache", "config", "doctor", "check", "completion"}
+COMMANDS = {"games", "sets", "collections", "themes", "download", "cards", "layouts", "cache", "config", "doctor", "check", "completion"}
 
 
 class Parser(argparse.ArgumentParser):
@@ -51,6 +51,37 @@ def show_devices(devices, systems, device_id=None, as_json=False):
     rows = [(d["name"], d["soc"], str(len(d["systems"])), d["id"]) for d in devices]
     ui.table(rows, ("Device", "Chip", "Systems", "Id"))
     return 0
+
+
+def show_layouts(layouts, devices, layout_id=None, as_json=False):
+    """Print the firmware layout table, or one layout's folders, note and devices."""
+    runs = {name: [d for d in devices if name in d["firmwares"]] for name in layouts}
+    if layout_id:
+        if layout_id not in layouts:
+            ui.fail(f"Unknown layout {layout_id!r}. Known: {', '.join(layouts)}\n   `sync-roms layouts` lists them all.", 2)
+        layout, users = layouts[layout_id], runs[layout_id]
+        if as_json:
+            ui.emit_json({"id": layout_id, **layout, "devices": [d["id"] for d in users]})
+            return 0
+        print(ui.bold(f"💾 {layout['label']}") + ui.dim(f"  ({layout_id})"))
+        for key, value in layout.items():
+            if key.endswith("_dir"):
+                print(f"  {key[:-4]}: {value}/")
+        if layout.get("note"):
+            print(ui.dim(f"  {layout['note']}"))
+        for d in users:
+            print(f"  {d['id']:<28} {d['name']}" + (ui.dim("  (default)") if d["firmwares"][0] == layout_id else ""))
+        return 0
+    if as_json:
+        ui.emit_json([{"id": name, **layout, "devices": [d["id"] for d in runs[name]]} for name, layout in layouts.items()])
+        return 0
+    rows = [(layout["label"], layout["roms_dir"], layout["bios_dir"], str(len(runs[name])), name) for name, layout in layouts.items()]
+    ui.table(rows, ("Firmware", "ROMs", "BIOS", "Devices", "Id"))
+    return 0
+
+
+def layouts_cmd(args):
+    return show_layouts(store.repo_json("layouts"), store.repo_json("devices"), args.layout_id, args.json)
 
 
 def setup_from_flags(manifest, current, device_id, layout):
@@ -1071,6 +1102,7 @@ def build_parser():
     p = csub.add_parser("export", allow_abbrev=False); common(p, card=False); p.add_argument("file"); p.set_defaults(fn=cards_export)
     p = csub.add_parser("import", allow_abbrev=False); common(p, card=False); p.add_argument("file"); p.set_defaults(fn=cards_import)
 
+    p = sub.add_parser("layouts", allow_abbrev=False); common(p, card=False); p.add_argument("layout_id", nargs="?"); p.add_argument("--json", action="store_true"); p.set_defaults(fn=layouts_cmd)
     p = sub.add_parser("config", allow_abbrev=False); common(p, card=False); p.add_argument("action", choices=["show", "path"], nargs="?", default="show"); p.set_defaults(fn=config_cmd)
     p = sub.add_parser("cache", allow_abbrev=False); common(p, card=False); p.add_argument("action", choices=["update"], nargs="?"); p.add_argument("--full", action="store_true"); p.set_defaults(fn=cache_cmd)
     p = sub.add_parser("doctor", allow_abbrev=False); common(p, card=False); p.set_defaults(fn=doctor_cmd)
@@ -1084,7 +1116,7 @@ def run(argv):
     ap = build_parser()
     ap.prog = f"sync-roms {argv[0]}"  # its errors (unrecognized arguments) point at the command's help
     args = ap.parse_args(argv)
-    if getattr(args, "dry_run", False) and (args.fn in (games_list, games_export, config_cmd, cache_cmd, doctor_cmd, check_cmd, completion_cmd)
+    if getattr(args, "dry_run", False) and (args.fn in (games_list, games_export, layouts_cmd, config_cmd, cache_cmd, doctor_cmd, check_cmd, completion_cmd)
                                             or (args.fn is games_sets and args.verb == "list")):
         name = " ".join(w for w in (args.command, getattr(args, "action", None), getattr(args, "verb", None)) if w)
         ui.fail(f"--dry-run has no effect on `{name}`", 2)
