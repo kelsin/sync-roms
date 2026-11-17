@@ -9,7 +9,7 @@ from unittest import mock
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 from helpers import DataDir, feed_list, pilot_list, screen_lines  # noqa: E402
-from sync_roms import budget, cardedit, collections, edit, inventory, picker, previews, s3, store, surprise, ui  # noqa: E402
+from sync_roms import budget, cardedit, collections, edit, inventory, picker, previews, s3, store, surprise, themeart, ui  # noqa: E402
 
 U = budget.Usage
 
@@ -438,6 +438,38 @@ class Flow(DataDir):
         with mock.patch.object(picker, "filter_list", script), contextlib.redirect_stdout(io.StringIO()):
             cardedit.edit_card("c")
         return script.calls
+
+    def test_s_opens_a_set_then_its_games(self):
+        self.card()
+        calls = self.run_card(returns((cardedit.SET_KEY, 0)), returns(0), toggle("Game Boy — Red"), returns(None))
+        self.assertTrue(calls[1][1][0].startswith(f"{themeart.set_emoji(SET)} Pokemon"))
+        self.assertEqual({x["bucket"] for x in store.card_games("c")["gb"]}, {"gb/Red.gb"})
+
+    def test_s_says_when_no_set_has_games_here(self):
+        self.card()
+        notes = []
+        only_psx = {"id": "x", "name": "X", "description": "", "games": [{"system": "psx", "bucket": "psx/X.chd"}]}
+        with mock.patch.object(store, "load_sets", return_value=[only_psx]), \
+                mock.patch.object(edit, "note", notes.append):
+            calls = self.run_card(returns((cardedit.SET_KEY, 0)), returns(None))
+        self.assertEqual(len(calls), 2)  # the system list twice, no set list
+        self.assertEqual(notes, ["ℹ️  No set has games in storage for this card's systems."])
+
+    def test_set_list_counts_synced_games(self):
+        self.card(games={"gb": [g("gb/Red.gb")]})
+        calls = self.run_card(returns((cardedit.SET_KEY, 0)), returns(None), returns(None))
+        self.assertEqual(calls[1][2]["extras"], [[("  1/2", "cyan")]])
+        self.assertEqual(calls[1][1], [f"{themeart.set_emoji(SET)} Pokemon  (2 games)"])
+
+    def test_s_is_in_the_hint_and_help(self):
+        self.assertIn("s set", cardedit.LIST_HINT)
+        self.assertIn(cardedit.SET_KEY, [k for k, _ in cardedit.LIST_KEYS])
+
+    def test_esc_on_the_set_list_returns_to_systems(self):
+        self.card()
+        calls = self.run_card(returns((cardedit.SET_KEY, 0)), returns(None), returns(None))
+        self.assertEqual(len(calls), 3)
+        self.assertIn("its systems", calls[2][0])
 
     def run_system(self, *steps, bucket="gba"):
         script = Script(*steps)

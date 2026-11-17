@@ -15,14 +15,14 @@ SURPRISE_KEY = "S"
 PAST_SURPRISE_KEY = "p"
 META_KEY = "m"
 VARIANT_KEY = "v"
-LIST_HINT = "Enter games · f full · l collections · S surprise · D clear all"
+LIST_HINT = "Enter games · f full · s set · l collections · S surprise · D clear all"
 GAMES_HINT = "Space toggle · Enter done · s set · m meta · p past · v variant"
 META_HINT = "Enter list its values · Esc back"
 VALUES_HINT = "Enter narrow to it · Esc back · / filter"
 SETS_HINT = "Enter show its games · Space/Tab toggle its games here · / filter"
 SET_GAMES_HINT = "Space toggle · Enter done · w note · v variant"
 LIST_KEYS = [("Enter", "the system's games"), ("f", "full system: every file in its folder (again to undo)"),
-             ("l", "collections on this card"), ("S", "Surprise menu: turn it on or off, or pick its systems"),
+             ("s", "a set's games across this card's systems"), ("l", "collections on this card"), ("S", "Surprise menu: turn it on or off, or pick its systems"),
              ("D", "clear every pick, full system and set from the card")]
 GAMES_KEYS = [("s", "sets on this system: narrow to one, or pick its games"),
               ("m", "narrow by scraped metadata (developer, genre, year...)"),
@@ -263,7 +263,7 @@ def edit_card(name, setup=None, to_fetch=None):
                if budget.picked(usages[s["bucket"]])
                or (folders is None or s["bucket"] in folders) and inventory.cached(f"{s['bucket']}/") != {}]
     full = FullSizes({"layout": setup[1]}, systems)  # each system's size as a full system, kept for the session
-    pos = 0
+    pos, set_pos = 0, None  # set_pos: the name of the set last opened
     changed = None  # what the last pass changed: one system, ALL (any system may have) or None
     while True:
         card = card_entry(name, setup)
@@ -301,7 +301,7 @@ def edit_card(name, setup=None, to_fetch=None):
         on = surprise.enabled(store.load_cards().get(name))
         i = picker.filter_list(f"💳 {name} — its systems (⭐ for the device) · 🎁 Surprise {'on' if on else 'off'}",
                                labels, extras=extras, cursor=pos,
-                               hotkeys=(FULL_KEY, COLLECTIONS_KEY, SURPRISE_KEY, CLEAR_ALL_KEY), hint=LIST_HINT, key_help=LIST_KEYS,
+                               hotkeys=(FULL_KEY, SET_KEY, COLLECTIONS_KEY, SURPRISE_KEY, CLEAR_ALL_KEY), hint=LIST_HINT, key_help=LIST_KEYS,
                                status=lambda _state: status_of(view["total"], capacity, view["fetch"]),
                                on_hotkey=on_hotkey, poll=poll,
                                preview=lambda i: previews.system(systems[i]) if i < len(systems) else None)
@@ -312,6 +312,12 @@ def edit_card(name, setup=None, to_fetch=None):
             if key == FULL_KEY:
                 toggle_full(name, systems[pos]["bucket"])
                 changed = systems[pos]
+            elif key == SET_KEY:
+                chosen = pick_card_set(name, setup, systems, set_pos)
+                if chosen:
+                    set_pos = chosen["name"]
+                    edit_set(name, chosen, setup, to_fetch, usages)
+                    changed = ALL
             elif key == COLLECTIONS_KEY:
                 pick_collections(name, {s["bucket"] for s in can_play(catalog["systems"], setup)},
                                  lambda: card_status(name, setup, systems, to_fetch))
@@ -425,6 +431,38 @@ def pick_collections(name, playable, card_status=None):
             return
         toggle(i)
         pos = i
+
+
+def pick_card_set(name, setup, systems, current=None):
+    """The set to open as a card's set view, or None: single-select, the sets with a game in storage on systems (the
+    card editor's list), starting on the one named current, each with how many of those games the card syncs."""
+    picks = cardpicks.CardPicks(name, setup)
+    in_storage = {}
+    try:
+        for s in systems:
+            in_storage[s["bucket"]] = picks.full(s["bucket"]) or {
+                k for k in inventory.files(f"{s['bucket']}/", sizes=False) if not k.endswith("/")}
+    except s3.ERRORS as e:
+        edit.note(ui.yellow(f"⚠️  Couldn't list storage: {e}"))
+        return None
+    shown = []
+    for x in store.load_sets():
+        keys = [k for s, k, _ in set_view_keys(x, systems)
+                if in_storage[s["bucket"]] is True or k in in_storage[s["bucket"]]]
+        if keys:
+            shown.append((x, keys))
+    if not shown:
+        edit.note("ℹ️  No set has games in storage for this card's systems.")
+        return None
+    labels = [f"{themeart.set_emoji(x)} {x['name']}  ({len(keys)} games)" for x, keys in shown]
+    extras = []
+    for _, keys in shown:
+        have = sum(1 for k in keys if picks.on_card(k))
+        extras.append([(f"  {'✅' if have == len(keys) else f'{have}/{len(keys)}'}", "cyan")])
+    cursor = next((n for n, (x, _) in enumerate(shown) if x["name"] == current), 0)
+    i = picker.filter_list(f"📦 Sets on {name}'s systems", labels, extras=extras, cursor=cursor,
+                           preview=lambda i: previews.collection(shown[i][0]["id"]) if i < len(shown) else None)
+    return None if i is None else shown[i][0]
 
 
 def pick_set(system, sets, games, titles, catalog, current=None, synced=lambda: set()):
