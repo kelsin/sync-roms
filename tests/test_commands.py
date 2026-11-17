@@ -427,6 +427,24 @@ class CardSizeTest(Cmd):
         self.run_cmd("cards", "set", "SD", "--size", "256")
         self.assertEqual(self.read("cards.json")["SD"]["size"], "256 GB")
 
+    def test_list_shows_the_space_the_picks_take(self):
+        self.run_cmd("cards", "new", "SD", "--device", "full", "--layout", "esde", "--size", "512gb")
+        self.run_cmd("cards", "new", "SD2", "--device", "full", "--layout", "esde")
+        self.run_cmd("games", "add", "gba", "A.zip", "B.zip", "--card", "SD")
+        store.update_card("SD", games={**store.card_games("SD"), "nes": {"full_system": True}})
+        cache = {"gba/": {"gba/A.zip": 1_000_000_000, "gba/B.zip": 400_000_000}, "scrapes/gba/": {},
+                 "nes/": {"nes/X.zip": 50_000_000, "nes/Y.zip": 50_000_000}, "scrapes/nes/": {}, "BIOS/": {}}
+        with mock.patch.object(inventory, "cached", cache.get):
+            rows = {r["name"]: (r["used"], r["sized"], r["full_systems"], r["games"])
+                    for r in json.loads(self.run_cmd("cards", "list", "--json")[1])}
+            text = self.run_cmd("cards", "list")[1]
+        self.assertEqual(rows, {"SD": (1_500_000_000, True, 1, 2), "SD2": (0, True, 0, 0)})
+        self.assertIn("1.5 GB / 512 GB", text)
+        self.assertIn("1 full system · 2 games", text)
+        self.assertIn("0 full systems · 0 games", text)
+        with mock.patch.object(inventory, "cached", lambda p: None):
+            self.assertIn("not sized", self.run_cmd("cards", "list")[1])
+
     def test_bad_size_exits_2(self):
         self.assertEqual(self.run_cmd("cards", "new", "SD", "--device", "full", "--layout", "esde", "--size", "big")[0], 2)
 

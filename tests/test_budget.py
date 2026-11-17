@@ -201,7 +201,7 @@ class ScrapeIndex(DataDir):
     def test_each_roms_scrape_bytes_are_priced_once_per_cache(self):
         priced = []
         real = scrape_plan.scrape_cost
-        with mock.patch.object(scrape_plan, "scrape_cost", lambda *a: priced.append(a[2]) or real(*a)):
+        with mock.patch.object(scrape_plan, "scrape_cost", lambda *a, **kw: priced.append(a[2]) or real(*a, **kw)):
             self.costs("gba/A.zip")
             self.assertEqual(self.costs("gba/A.zip", "gba/B.zip"), {"gba/A.zip": 103, "gba/B.zip": 200})
         self.assertEqual(priced, ["A.zip", "B.zip"])
