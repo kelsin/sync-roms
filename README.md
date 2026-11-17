@@ -111,10 +111,10 @@ You pick a device, then the firmware it runs (a device with only one isn't asked
 | Firmware | ROMs / BIOS folders | Notes |
 | --- | --- | --- |
 | `esde` | `ROMs/` `BIOS/` | Android devices with ES-DE |
-| `knulli` | `roms/` `bios/` (SD card SHARE partition, `/userdata`) | Default for the Anbernic H700, RG Vita Pro and Miyoo Flip V2 handhelds |
+| `knulli` | `roms/` `bios/` (SD card SHARE partition, `/userdata`) | Default for the Anbernic H700, RG Vita Pro and Miyoo Flip handhelds |
 | `muos` | `ROMS/` `MUOS/bios/` | [muOS](https://muos.dev/) on the Anbernic H700 handhelds, RG CubeXX and RG Vita Pro. Folder names are matched ignoring case and separators |
-| `onion` | `Roms/` `BIOS/` | Miyoo Mini Flip, on [Onion](https://onionui.github.io/) |
-| `allium` | `Roms/` `BIOS/` | Miyoo Mini Flip, on [Allium](https://github.com/goweiwen/Allium). Same folders and `Imgs/` box art as `onion`, but with a full `gamelist.xml` |
+| `onion` | `Roms/` `BIOS/` | Miyoo Mini, Mini Plus and Mini Flip, on [Onion](https://onionui.github.io/) |
+| `allium` | `Roms/` `BIOS/` | Miyoo Mini, Mini Plus and Mini Flip, on [Allium](https://github.com/goweiwen/Allium). Same folders and `Imgs/` box art as `onion`, but with a full `gamelist.xml` |
 | `emudeck` | `Emulation/roms/` `Emulation/bios/` | [EmuDeck](https://emudeck.github.io/) on the Steam Deck and Steam Machine. Wii U, Xbox 360 and Model 2 ROMs go in a `roms/` subfolder of their system folder. Scraped media on the card; gamelists and collections in `~/ES-DE` on the machine running the sync |
 
 Folder names are case-sensitive. Folders that don't exist are shown as
@@ -771,7 +771,7 @@ would change and write nothing until you approve.
   playable systems (`device-systems.json`) too, and your cards (`cards.json`) from `~/.sync-roms/`, never from
   storage. An optional
   `~/.sync-roms/device-systems.json` adjusts the systems a device can play:
-  `{"miyoo-flip-v2": {"add": ["psx"], "remove": ["gba"]}}` (system ids as in `systems.json`; the package's
+  `{"miyoo-flip": {"add": ["psx"], "remove": ["gba"]}}` (system ids as in `systems.json`; the package's
   order is kept and notes always come from the package). An old full-copy `device-systems.json` from before the overlay does nothing; delete it. BIOS files are always `BIOS/<file>` in storage.
 - System folders in storage use the ES-DE system name (e.g. `gba/`, `dreamcast/`).
 - Reads each synced system's files from the storage cache and compares file sizes, so only
