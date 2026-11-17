@@ -1274,6 +1274,93 @@ class MetaFlow(Flow):
         self.assertEqual(store.card_games("c"), {"gba": [g("gba/Zelda.zip")]})
 
 
+class SetFlow(Flow):
+    """A set's games over every system the card can play, in one list."""
+
+    def run_set(self, *steps, game_set=SET):
+        script = Script(*steps)
+        with mock.patch.object(picker, "filter_list", script), contextlib.redirect_stdout(io.StringIO()):
+            changed = cardedit.edit_set("c", game_set, (DEVICE, "esde"))
+        return changed, script.calls
+
+    def test_set_view_keys_are_the_playable_games_once_in_file_order(self):
+        game_set = {"games": [*SET["games"], {"system": "psx", "bucket": "psx/X.chd"}, {"system": "gb", "bucket": "gb/Red.gb"}]}
+        self.assertEqual(cardedit.set_view_keys(game_set, [GB, GBA]),
+                         [(GBA, "gba/Ruby.zip", ["gba/Ruby.sav"]), (GB, "gb/Red.gb", [])])
+
+    def test_lists_the_sets_games_from_every_system(self):
+        self.card()
+        _, calls = self.run_set(returns([False, False]))
+        title, labels, kw = calls[0]
+        self.assertEqual(labels, ["Game Boy — Red", "Game Boy Advance — Ruby"])
+        self.assertEqual(title, "📦 Pokemon on c — ✅ synced, ⬜ not, 📦 from a set")
+        self.assertEqual(kw["initial"], [False, False])
+
+    def test_toggling_a_game_with_files_picks_its_files_too(self):
+        self.card()
+        changed, _ = self.run_set(toggle("Game Boy Advance — Ruby"))
+        self.assertTrue(changed)
+        games = store.card_games("c")
+        self.assertEqual({x["bucket"] for x in games["gba"]}, {"gba/Ruby.zip", "gba/Ruby.sav"})
+        self.assertNotIn("gb", games)
+
+    def test_switching_off_a_set_reference_game_excludes_it(self):
+        self.card(games={store.SETS_KEY: ["pk"]})
+
+        def step(labels, kw):
+            self.assertTrue(kw["initial"][0])
+            return toggle("Game Boy — Red")(labels, kw)
+        self.run_set(step)
+        self.assertEqual(store.card_excluded("c"), {"gb": ["gb/Red.gb"]})
+
+    def test_full_system_rows_are_locked_on(self):
+        self.card(games={"gb": {"full_system": True}})
+
+        def step(labels, kw):
+            self.assertTrue(kw["locked"][0])
+            self.assertTrue(kw["initial"][0])
+            self.assertEqual(kw["locked_note"][0], edit.FULL_SYSTEM_NOTE)
+            return flip(0)(labels, kw)
+        self.assertFalse(self.run_set(step)[0])
+        self.assertEqual(store.card_games("c"), {"gb": {"full_system": True}})
+
+    def test_games_not_in_storage_or_unplayable_are_hidden(self):
+        self.card()
+        game_set = {**SET, "games": [*SET["games"], {"system": "psx", "bucket": "psx/X.chd"},
+                                     {"system": "gba", "bucket": "gba/Gone.zip"}]}
+        _, calls = self.run_set(returns([False, False]), game_set=game_set)
+        self.assertEqual(calls[0][1], ["Game Boy — Red", "Game Boy Advance — Ruby"])
+
+    def test_ctrl_c_keeps_the_toggles(self):
+        self.card()
+
+        def interrupted(labels, kw):
+            kw["session"]["sel"] = [False, True]
+            raise KeyboardInterrupt
+        with self.assertRaises(KeyboardInterrupt):
+            self.run_set(interrupted)
+        self.assertIn("gba/Ruby.zip", {x["bucket"] for x in self.read("cards.json")["c"]["games"]["gba"]})
+
+    def test_no_select_all(self):
+        self.card()
+        _, calls = self.run_set(returns([False, False]))
+        self.assertIs(calls[0][2]["select_all"], False)
+
+    def test_status_counts_picked_games_and_their_bios(self):
+        self.card()
+        self.cache = {"gba/": self.files["gba/"], "gb/": self.files["gb/"], "scrapes/gba/": {}, "scrapes/gb/": {},
+                      "BIOS/": {"BIOS/gb_bios.bin": 1000, "BIOS/gba_bios.bin": 16}}
+        seen = []
+
+        def step(labels, kw):
+            kw["status"]([False, False])
+            kw["status"]([False, True])  # Ruby (5 + 1) and the GBA BIOS (16)
+            return [False, False]
+        with mock.patch.object(cardedit, "status_of", side_effect=lambda u, c, fetch=None, count=True: seen.append((u.bytes, count))):
+            self.run_set(step)
+        self.assertEqual(seen, [(0, False), (22, False)])
+
+
 class SetupChange(DataDir):
     def test_changing_the_device_drops_games_it_cannot_play_at_save(self):
         self.write_json("cards.json", {"c": {"device": "full", "layout": "esde",

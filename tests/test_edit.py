@@ -256,6 +256,12 @@ class Keys(unittest.TestCase):
     def test_escape_while_typing_clears_the_filter(self):
         self.assertEqual(run_list(["/", "t", "a", "escape", "j", "enter"], self.LABELS), 1)
 
+    def test_a_does_nothing_without_select_all(self):
+        initial = [True, False, False, False]
+        for key in ("a", "ctrl+a"):
+            self.assertEqual(run_list([key, "enter"], self.LABELS, multi=True, initial=initial, select_all=False), initial)
+        self.assertEqual(run_list(["a", "enter"], self.LABELS, multi=True, initial=initial), [True] * 4)
+
     def test_enter_while_typing_keeps_the_filter_in_a_multi_list(self):
         self.assertEqual(run_list(["/", "t", "a", "enter", "space", "enter"], self.LABELS, multi=True),
                          [False, True, False, False])

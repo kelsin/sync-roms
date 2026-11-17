@@ -20,6 +20,7 @@ GAMES_HINT = "Space toggle · Enter done · s set · m meta · p past · v varia
 META_HINT = "Enter list its values · Esc back"
 VALUES_HINT = "Enter narrow to it · Esc back · / filter"
 SETS_HINT = "Enter show its games · Space/Tab toggle its games here · / filter"
+SET_GAMES_HINT = "Space toggle · Enter done · w note · v variant"
 LIST_KEYS = [("Enter", "the system's games"), ("f", "full system: every file in its folder (again to undo)"),
              ("l", "collections on this card"), ("S", "Surprise menu: turn it on or off, or pick its systems"),
              ("D", "clear every pick, full system and set from the card")]
@@ -27,6 +28,7 @@ GAMES_KEYS = [("s", "sets on this system: narrow to one, or pick its games"),
               ("m", "narrow by scraped metadata (developer, genre, year...)"),
               ("p", "only the games that were surprises lately"), ("v", "the game's variants on other systems"),
               ("c", "clear the set, metadata and surprise filters")]
+SET_GAMES_KEYS = [("v", "the game's variants on other systems")]
 SIZING = "…"
 
 
@@ -471,6 +473,83 @@ def pick_set(system, sets, games, titles, catalog, current=None, synced=lambda: 
     return shown[i][0]
 
 
+def _work_out(picks, shown, others, card_usages, to_fetch):
+    """What a games list's status adds its rows to, from the card as edited so far: the systems it doesn't show
+    (others: their usage without BIOS, and those with something picked) and each shown SystemPicks' game costs.
+    card_usages: as for edit_system."""
+    card = picks.card()  # with the picks, set references and exclusions as edited so far
+    usages = budget.system_usages(card, others) if card_usages is None else {x["bucket"]: card_usages[x["bucket"]] for x in others}
+    parts = list(usages.values())  # without BIOS: it is added once, with the shown systems', in _status
+    costs = {sp.bucket: budget.game_costs(card, sp.system, [r[1] for r in sp.rows]) for sp in shown}
+    return {"others": budget.Usage(sum(p.bytes for p in parts), sum(p.count for p in parts), any(p.partial for p in parts)),
+            "picked": [x for x in others if budget.picked(usages[x["bucket"]])],
+            "costs": {b: c for b, (c, _) in costs.items()}, "partial": {b: p for b, (_, p) in costs.items()},
+            "fetch": budget.card_fetch_bytes(card, others, to_fetch) if to_fetch else None}
+
+
+def _status(work, now, capacity, to_fetch):
+    """A games list's status_of: _work_out's rest of the card plus the shown systems as they are now, now being
+    [(SystemPicks, {bucket key: synced})], with the BIOS of every system with something picked counted once."""
+    picked = [(sp, [k for k, st in states.items() if st]) for sp, states in now]
+    bios = budget.bios_usage(work["picked"] + [sp.system for sp, keys in picked if keys])
+    mine = sum(work["costs"][sp.bucket].get(k, 0) for sp, keys in picked for k in keys)
+    partial = work["others"].partial or bios.partial or any(keys and work["partial"][sp.bucket] for sp, keys in picked)
+    total = budget.Usage(work["others"].bytes + mine + bios.bytes,
+                         work["others"].count + sum(len(keys) for _, keys in picked), partial)
+    fetch = None if to_fetch is None else work["fetch"] + sum(budget.fetch_bytes(sp.system, keys, to_fetch)
+                                                              for sp, keys in picked)
+    return status_of(total, capacity, fetch, count=False)  # the whole card's file count says little here
+
+
+def _row_extras(sp, work, key, notes, state):
+    """A game row's columns: files, set note, lock, size (blank where it has none)."""
+    out = [("", "dim"), ("", "dim"), ("", "cyan"), ("", "dim")]
+    costs = work["costs"][sp.bucket]
+    if key in sp.groups:
+        out[0] = (f"  🔗 {len(sp.groups[key])} files", "dim")
+    elif key in sp.bundled:
+        out[0] = (f"  🔗 {len(sp.bundled[key]) + 1} files", "dim")
+    if key in notes:  # the note ends in the set's emoji and name (edit.cover_notes)
+        out[1] = (f"  {notes[key].split(': ', 1)[-1]}", "cyan" if state else "dim")
+    if key in sp.locked_from:
+        out[2] = (f"  {sp.locked_from[key]}", "cyan")
+    if key in costs:
+        out[3] = (f"  {size_text(costs[key])}", "dim")
+    elif key in sp.in_storage:
+        out[3] = (f"  {SIZING}", "dim")
+    return out
+
+
+def _locked_note(sp, key):
+    """Why a collection or surprise game row can't be switched off ("" for any other row)."""
+    return f"From {sp.locked_from[key]}; take it off the card to remove this game" if key in sp.locked_from else ""
+
+
+def _note_text(sp, key):
+    """The note of a game picked on its system ("" when it has none)."""
+    game = next((g for g in sp.games if g.get("bucket") == key), None)
+    return game.get("note", "") if game else ""
+
+
+def _on_note(sp, key, text):
+    """Save a game's note (`w`); the message the list shows."""
+    if not edit.set_note({"games": sp.games}, key, text):
+        return "Switch the game on and press Enter first, then add its note"
+    return "Note saved" if text else "Note cleared"
+
+
+def _toggle_variant(picks, key, title):
+    """v on a game row: toggle its variant on the card, picked from a list when it has several. Whether one was."""
+    found = picks.variants.get(key, [])
+    if len(found) > 1:
+        i = picker.filter_list(f"Variants of {title}",
+                               [f"{'✅' if picks.on_card(v['bucket']) else '⬜'} {v['note']}" for v in found])
+        found = [] if i is None else [found[i]]
+    if found:
+        picks.toggle_variant(found[0])
+    return bool(found)
+
+
 def edit_system(name, system, setup, to_fetch=None, card_usages=None):
     """A card's games of one system: the whole storage folder, searchable, filterable to a set's games and by scraped
     metadata. Saves to cards.json when left; returns whether anything changed. to_fetch: as for edit_card.
@@ -493,25 +572,8 @@ def edit_system(name, system, setup, to_fetch=None, card_usages=None):
         return False
     others = [x for x in can_play(store.repo_json("systems"), setup) if x["bucket"] != bucket]
     capacity = budget.card_capacity(card_entry(name, setup, cards))
-    work = {}
-
-    def work_out():
-        card = picks.card()  # with the picks, set references and exclusions as edited so far
-        usages = budget.system_usages(card, others) if card_usages is None else {x["bucket"]: card_usages[x["bucket"]] for x in others}
-        parts = list(usages.values())  # without BIOS: it is added once, with this system's, in status
-        work["others"] = budget.Usage(sum(p.bytes for p in parts), sum(p.count for p in parts),
-                                      any(p.partial for p in parts))
-        picked = [x for x in others if budget.picked(usages[x["bucket"]])]
-        work["bios"] = (budget.bios_usage(picked), budget.bios_usage(picked + [system]))
-        work["costs"], work["partial"] = budget.game_costs(card, system, [r[1] for r in sp.rows])
-        work["fetch"] = budget.card_fetch_bytes(card, others, to_fetch) if to_fetch else None
-
-    work_out()
+    work = _work_out(picks, [sp], others, card_usages, to_fetch)
     start = sp.states(picks.cover())
-
-    def toggle_variant(v):
-        picks.toggle_variant(v)
-        work_out()
     filt = None  # (set name, bucket keys, set emoji) the list is narrowed to
     meta_filt = {}  # {metadata field: value} the list is narrowed to as well
     past = None  # bucket keys of the past surprises the list is narrowed to
@@ -522,23 +584,6 @@ def edit_system(name, system, setup, to_fetch=None, card_usages=None):
         return ((filt is None or key in filt[1])
                 and (past is None or key in past)
                 and (not wanted or metafilter.matches(meta.get().get(key, {}), wanted)))
-
-    def row_extras(key, notes, state):
-        """The row's columns: files, set note, lock, size (blank where it has none)."""
-        out = [("", "dim"), ("", "dim"), ("", "cyan"), ("", "dim")]
-        if key in sp.groups:
-            out[0] = (f"  🔗 {len(sp.groups[key])} files", "dim")
-        elif key in sp.bundled:
-            out[0] = (f"  🔗 {len(sp.bundled[key]) + 1} files", "dim")
-        if key in notes:  # the note ends in the set's emoji and name (edit.cover_notes)
-            out[1] = (f"  {notes[key].split(': ', 1)[-1]}", "cyan" if state else "dim")
-        if key in sp.locked_from:
-            out[2] = (f"  {sp.locked_from[key]}", "cyan")
-        if key in work["costs"]:
-            out[3] = (f"  {size_text(work['costs'][key])}", "dim")
-        elif key in sp.in_storage:
-            out[3] = (f"  {SIZING}", "dim")
-        return out
 
     pending = None  # (rows shown, notes, states before) of the pass on screen, applied if Ctrl-C ends it
     place = {}  # picker.carry_place's: the last pass's row, filter text, view and scroll
@@ -553,29 +598,12 @@ def edit_system(name, system, setup, to_fetch=None, card_usages=None):
             links = [[index[m] for m in sp.groups.get(k, ()) if m in index] for k in keys]
             session = {"sel": [base[k] for k in keys]}
             picker.carry_place(place, keys, session)  # where the last pass was, when it listed the same games
-            extras = [row_extras(k, notes, st) for k, st in zip(keys, session["sel"])]
+            extras = [_row_extras(sp, work, k, notes, st) for k, st in zip(keys, session["sel"])]
 
             def status(state):
                 now = dict(base)
                 now.update(sp.changes(keys, base, state))
-                picked = [k for k, st in now.items() if st]
-                mine = sum(work["costs"].get(k, 0) for k in picked)
-                bios = work["bios"][1 if picked else 0]
-                partial = (work["others"].partial or bios.partial
-                           or bool(picked) and work["partial"])
-                total = budget.Usage(work["others"].bytes + mine + bios.bytes, work["others"].count + len(picked),
-                                     partial)
-                fetch = None if to_fetch is None else work["fetch"] + budget.fetch_bytes(system, picked, to_fetch)
-                return status_of(total, capacity, fetch, count=False)  # the whole card's file count says little here
-
-            def note_text(i):
-                game = next((g for g in sp.games if g.get("bucket") == keys[i]), None)
-                return game.get("note", "") if game else ""
-
-            def on_note(i, text):
-                if not edit.set_note({"games": sp.games}, keys[i], text):
-                    return "Switch the game on and press Enter first, then add its note"
-                return "Note saved" if text else "Note cleared"
+                return _status(work, [(sp, now)], capacity, to_fetch)
 
             parts = ([f"{filt[2]} {filt[0]} only"] if filt else []) + (["🎁 past surprises only"] if past is not None else []) + ([metafilter.describe(meta_filt)] if meta_filt else [])
             pending = (keys, notes, base, session)
@@ -585,12 +613,12 @@ def edit_system(name, system, setup, to_fetch=None, card_usages=None):
                                         key_help=GAMES_KEYS, filters=f"{' · '.join(parts)} (c shows all)" if parts else "",
                                         status=status, row_note=lambda i: edit.variant_line(
                                             keys[i], picks.variants, picks.parents, picks.system_names, picks.on_card),
-                                        session=session, note_text=note_text, on_note=on_note,
+                                        session=session, note_text=lambda i: _note_text(sp, keys[i]),
+                                        on_note=lambda i, text: _on_note(sp, keys[i], text),
                                         preview=lambda i: previews.game_thumb(keys[i]) if i < len(keys) else None,
                                         preview_width=previews.GAME_WIDTH,
                                         links=links, locked=[k in sp.locked_from for k in keys],
-                                        locked_note=[f"From {sp.locked_from[k]}; take it off the card to remove this game"
-                                                     if k in sp.locked_from else "" for k in keys])
+                                        locked_note=[_locked_note(sp, k) for k in keys])
             pending = None
             sp.apply(keys, notes, base, session["sel"] if isinstance(result, tuple) else result)
             if not isinstance(result, tuple):
@@ -605,13 +633,8 @@ def edit_system(name, system, setup, to_fetch=None, card_usages=None):
                     past = None
                     edit.note(ui.yellow(f"ℹ️  No past surprises on {system['name']}."))
             elif result[0] == VARIANT_KEY:
-                found = picks.variants.get(keys[result[1]], []) if result[1] is not None else []
-                if len(found) > 1:
-                    i = picker.filter_list(f"Variants of {sp.titles[keys[result[1]]]}",
-                                           [f"{'✅' if picks.on_card(v['bucket']) else '⬜'} {v['note']}" for v in found])
-                    found = [] if i is None else [found[i]]
-                if found:
-                    toggle_variant(found[0])
+                if result[1] is not None and _toggle_variant(picks, keys[result[1]], sp.titles[keys[result[1]]]):
+                    work = _work_out(picks, [sp], others, card_usages, to_fetch)
             elif result[0] == META_KEY:
                 pick_meta(system, meta, meta_filt, lambda field: [r[1] for r in sp.rows if keep(r[1], field)])
             else:
@@ -623,6 +646,120 @@ def edit_system(name, system, setup, to_fetch=None, card_usages=None):
         if pending:
             keys, notes, base, session = pending
             sp.apply(keys, notes, base, session["sel"])
+        picks.save()
+        raise
+    return picks.save()
+
+
+def set_view_keys(game_set, systems):
+    """[(system, bucket key, files)] of a set's games on the systems, in file order, each key once."""
+    by_bucket = {s["bucket"]: s for s in systems}
+    out, seen = [], set()
+    for g in game_set["games"]:
+        s, key = by_bucket.get(g.get("system")), g.get("bucket")
+        if s and key and key not in seen:
+            seen.add(key)
+            out.append((s, key, list(g.get("files", []))))
+    return out
+
+
+def edit_set(name, game_set, setup, to_fetch=None, card_usages=None):
+    """A card's games of one set over every system it can play, in one list (category, then system and title), toggled
+    as in edit_system; games not in storage are left out, a full system's are on and locked. Saves to cards.json when
+    left; returns whether anything changed. to_fetch, card_usages: as for edit_system."""
+    cards = store.load_cards()
+    picks = cardpicks.CardPicks(name, setup, cards)
+    playable = can_play(store.repo_json("systems"), setup)
+    found = set_view_keys(game_set, playable)
+    sps = {}  # {system bucket: SystemPicks} of the systems with set games, but full ones
+    for s in {s["bucket"]: s for s, _, _ in found if not picks.full(s["bucket"])}.values():
+        if inventory.current() is None:
+            print(ui.dim(f"📡 Listing {s3.location()}/{s['bucket']}/ ..."))
+        try:
+            sps[s["bucket"]] = picks.system(s)
+        except s3.ERRORS as e:
+            edit.note(ui.yellow(f"⚠️  Couldn't list {s['name']} in storage: {e}"))
+            return False
+    kept = [(s, key, files) for s, key, files in found if s["bucket"] not in sps or key in sps[s["bucket"]].in_storage]
+    files_of = {key: files for _, key, files in kept}
+    present = {k for key, files in files_of.items() for k in (key, *files)}  # the rest are left out: no warning
+    rows = edit.set_rows({"games": [g for g in game_set["games"] if g.get("bucket") in files_of]},
+                         {s["bucket"]: s for s in playable}, lambda _s: present)
+    shown = [r for r in rows if r[0]["bucket"] not in sps  # a shown playlist hides its discs
+             or sps[r[0]["bucket"]].playlist_of.get(r[1]) not in files_of]
+    keys = [r[1] for r in shown]
+    sp_of = [sps.get(r[0]["bucket"]) for r in shown]  # None on a full system
+    index = {k: i for i, k in enumerate(keys)}
+    links = [[index[m] for m in sp.groups.get(k, ()) if m in index] if sp else [] for k, sp in zip(keys, sp_of)]
+    others = [x for x in playable if x["bucket"] not in sps]
+    capacity = budget.card_capacity(card_entry(name, setup, cards))
+    work = _work_out(picks, list(sps.values()), others, card_usages, to_fetch)
+
+    def row_states(bases):
+        """{bucket key: synced} for every row, from each system's SystemPicks.states."""
+        return {key: s["bucket"] not in sps or bases[s["bucket"]][key] for s, key, _, _ in rows}
+    start = row_states({b: sp.states(picks.cover()) for b, sp in sps.items()})
+    pending = None  # (apply, session) of the pass on screen, applied if Ctrl-C ends it
+    place = {}  # picker.carry_place's: the last pass's row, filter text, view and scroll
+    try:
+        while True:
+            notes = picks.cover()
+            bases = {b: sp.states(notes) for b, sp in sps.items()}
+            base = row_states(bases)
+            session = {"sel": [base[k] for k in keys]}
+            picker.carry_place(place, keys, session)
+            extras = [_row_extras(sp, work, k, notes, st) if sp else []
+                      for k, sp, st in zip(keys, sp_of, session["sel"])]
+
+            def switched(state):
+                """{system bucket: (keys, states)} of the rows this pass switched, each with its files."""
+                out = {}
+                for k, sp, want in zip(keys, sp_of, state):
+                    if sp and want != base[k]:
+                        ks, ws = out.setdefault(sp.bucket, ([], []))
+                        for f in (k, *files_of[k]):
+                            if f in bases[sp.bucket]:
+                                ks.append(f)
+                                ws.append(want)
+                return out
+
+            def status(state):
+                moved = switched(state)
+                now = []
+                for b, sp in sps.items():
+                    states = dict(bases[b])
+                    if b in moved:
+                        states.update(sp.changes(moved[b][0], bases[b], moved[b][1]))
+                    now.append((sp, states))
+                return _status(work, now, capacity, to_fetch)
+
+            def apply(state):
+                for b, (ks, ws) in switched(state).items():
+                    sps[b].apply(ks, notes, bases[b], ws)
+
+            pending = (apply, session)
+            result = picker.filter_list(
+                f"{themeart.set_emoji(game_set)} {game_set['name']} on {name} — ✅ synced, ⬜ not, 📦 from a set",
+                [r[3] for r in shown], multi=True, initial=[start[k] for k in keys], extras=extras,
+                hint=SET_GAMES_HINT, hotkeys=(VARIANT_KEY,), key_help=SET_GAMES_KEYS, status=status,
+                row_note=lambda i: edit.variant_line(keys[i], picks.variants, picks.parents, picks.system_names,
+                                                     picks.on_card),
+                session=session, note_text=lambda i: _note_text(sp_of[i], keys[i]),
+                on_note=lambda i, text: _on_note(sp_of[i], keys[i], text),
+                preview=lambda i: previews.game_thumb(keys[i]) if i < len(keys) else None,
+                preview_width=previews.GAME_WIDTH, links=links, select_all=False,
+                locked=[sp is None or k in sp.locked_from for k, sp in zip(keys, sp_of)],
+                locked_note=[edit.FULL_SYSTEM_NOTE if sp is None else _locked_note(sp, k) for k, sp in zip(keys, sp_of)])
+            pending = None
+            apply(session["sel"] if isinstance(result, tuple) else result)
+            if not isinstance(result, tuple):
+                break
+            if result[1] is not None and _toggle_variant(picks, keys[result[1]], shown[result[1]][2]):
+                work = _work_out(picks, list(sps.values()), others, card_usages, to_fetch)
+    except KeyboardInterrupt:  # Ctrl-C: keep the toggles
+        if pending:
+            apply, session = pending
+            apply(session["sel"])
         picks.save()
         raise
     return picks.save()
