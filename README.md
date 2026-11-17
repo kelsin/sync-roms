@@ -268,6 +268,7 @@ Every mode is a command (`sync-roms COMMAND --help` explains one; plain `sync-ro
 | `download pico8` | add the PICO-8 BBS Featured carts storage doesn't have, and newer revisions of those it has (see below) | |
 | `cards list\|new\|set\|rename\|delete\|export\|import` | manage cards; `export FILE` flattens surprises and collections into games, `import FILE` keeps size, device, layout, games and excluded and turns Surprise off (`r` renames, `p` prefixes all) | |
 | `devices [ID]` | list devices, or one device's systems (`--json`) | `--devices` |
+| `layouts [ID]` | list firmware layouts, or one layout's folders and the devices that run it (`--json`) | |
 | `upload [DIR]` | upload ROMs to storage | `--upload` |
 | `diff [DIR]` | compare a folder with storage | `--diff` |
 | `scrape [SYSTEM \| match SYSTEM ROM GAME \| review [SYSTEM] \| missing [SYSTEM]]` / `scrape --set-credentials` | scrape ROMs with no metadata from ScreenScraper, review the non-game and unknown ones, or list them all | `--scrape`, `--scrape-match`, `--scrape-review`, `--scrape-missing` |
@@ -326,7 +327,7 @@ On `esde` and `emudeck` cards every Vita game zip in `psvita/` gets a `.psvita` 
 | `--size SIZE` | `cards new` / `cards set`: the card's size as people read it (`256`, `512GB`, `1TB`), saved in `cards.json` and shown by `cards list` and on sync |
 | `--no-clean` | Sync: skip the end-of-run card tidy |
 | `--no-eject` | Sync: leave the card mounted. By default, on a Mac, a run with no failures ends with `diskutil unmountDisk` on the card's disk (removable or external disks only), so every volume on it is unmounted and the card can be pulled. `"eject": false` in `settings.json` turns it off for every run |
-| `--json` | `devices`, `games list`, `cards list`, `diff` and `sync --dry-run`: one JSON document on stdout, nothing else (pass `--device`/`--layout` so no picker is needed; `diff` also needs `--system ID` unless the folder is named after a system) |
+| `--json` | `devices`, `layouts`, `games list`, `cards list`, `diff` and `sync --dry-run`: one JSON document on stdout, nothing else (pass `--device`/`--layout` so no picker is needed; `diff` also needs `--system ID` unless the folder is named after a system) |
 | `--card NAME` | `games` commands: the card whose games to change (required; see Editing from scripts) |
 | `--system ID` | `diff`: the system to compare with, instead of the picker. `scrape`, `scrape missing`: only that storage folder (the same as `scrape SYSTEM`) |
 | `--scrape` | Scrape the ROMs that have no metadata from ScreenScraper (the old form of `scrape`; see Scraping from ScreenScraper) |

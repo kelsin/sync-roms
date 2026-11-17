@@ -113,6 +113,63 @@ class QuietVerboseTest(Isolated):
         self.assertIn("Go?", err.getvalue())
 
 
+class LayoutsTest(Isolated):
+    LAYOUTS = {"esde": {"label": "ES-DE", "roms_dir": "ROMs", "bios_dir": "BIOS", "note": "ES-DE names."},
+               "onion": {"label": "Onion", "roms_dir": "Roms", "bios_dir": "BIOS", "disc_dir": ".multi-disc", "note": "Miyoo."}}
+    DEVICES = [{"id": "dev-a", "name": "Device A", "firmwares": ["esde"]},
+               {"id": "dev-b", "name": "Device B", "firmwares": ["onion", "esde"]}]
+
+    def run_layouts(self, argv):
+        data = {"layouts": self.LAYOUTS, "devices": self.DEVICES}
+        with mock.patch("builtins.input", side_effect=AssertionError("asked")):
+            return self.sync(argv, {}, repo=(store, "repo_json", lambda name: json.loads(json.dumps(data[name]))))
+
+    def test_table_counts_devices_in_file_order(self):
+        code, out, _ = self.run_layouts(["layouts"])
+        self.assertEqual(code, 0)
+        lines = out.splitlines()
+        self.assertEqual(lines[0].split(), ["Firmware", "ROMs", "BIOS", "Devices", "Id"])
+        self.assertEqual(lines[1].split(), ["ES-DE", "ROMs", "BIOS", "2", "esde"])
+        self.assertEqual(lines[2].split(), ["Onion", "Roms", "BIOS", "1", "onion"])
+
+    def test_one_layout_shows_folders_note_and_devices(self):
+        code, out, _ = self.run_layouts(["layouts", "onion"])
+        self.assertEqual(code, 0)
+        self.assertIn("Onion", out.splitlines()[0])
+        for text in ("roms: Roms/", "bios: BIOS/", "disc: .multi-disc/", "Miyoo."):
+            self.assertIn(text, out)
+        self.assertRegex(out, r"dev-b\s+Device B\s+\(default\)")
+        self.assertNotIn("dev-a", out)
+        _, out, _ = self.run_layouts(["layouts", "esde"])
+        self.assertRegex(out, r"dev-a\s+Device A\s+\(default\)")
+        self.assertRegex(out, r"dev-b\s+Device B\n")
+
+    def test_json(self):
+        code, out, _ = self.run_layouts(["layouts", "--json", "--quiet"])
+        self.assertEqual(code, 0)
+        self.assertEqual(json.loads(out), [{"id": "esde", **self.LAYOUTS["esde"], "devices": ["dev-a", "dev-b"]},
+                                           {"id": "onion", **self.LAYOUTS["onion"], "devices": ["dev-b"]}])
+        code, out, _ = self.run_layouts(["layouts", "onion", "--json"])
+        self.assertEqual((code, json.loads(out)), (0, {"id": "onion", **self.LAYOUTS["onion"], "devices": ["dev-b"]}))
+
+    def test_unknown_layout_is_a_usage_error(self):
+        code, _, err = self.run_layouts(["layouts", "nope"])
+        self.assertEqual(code, 2)
+        self.assertIn("esde, onion", err)
+        self.assertIn("sync-roms layouts", err)
+
+    def test_dry_run_is_refused(self):
+        code, _, err = self.run_layouts(["layouts", "--dry-run"])
+        self.assertEqual(code, 2)
+        self.assertIn("--dry-run has no effect on `layouts`", err)
+
+    def test_real_data_needs_no_bucket(self):
+        with mock.patch("builtins.input", side_effect=AssertionError("asked")):
+            code, out, _ = self.sync(["layouts", "knulli"], {})
+        self.assertEqual(code, 0)
+        self.assertIn("Knulli", out)
+
+
 class DiffJsonTest(Isolated):
     def test_diff_json(self):
         manifest = {"systems": [{"name": "GBA", "bucket": "gba", "folders": {}, "bios": {"files": []}}]}
