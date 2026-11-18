@@ -10,7 +10,7 @@ from unittest import mock
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import helpers  # noqa: E402,F401
 from test_inventory import StorageFolder  # noqa: E402
-from sync_roms import ignore, inventory, runtime  # noqa: E402
+from sync_roms import ignore, inventory, runtime, shared  # noqa: E402
 
 
 class IgnoreList(StorageFolder):
@@ -27,7 +27,8 @@ class IgnoreList(StorageFolder):
             os.utime(path, ns=(mtime, mtime))
 
     def local(self):
-        return self.read(ignore.KEY)
+        with open(shared.local_path(ignore.KEY)) as f:
+            return json.load(f)
 
     def load(self):
         err = io.StringIO()
@@ -39,13 +40,13 @@ class IgnoreList(StorageFolder):
 class LoadTest(IgnoreList):
     def test_no_file_in_storage_means_nothing_ignored(self):
         self.assertEqual(ignore.keys(), frozenset())
-        self.assertFalse(os.path.exists(self.path(ignore.KEY)))
+        self.assertFalse(os.path.exists(shared.local_path(ignore.KEY)))
 
     def test_reads_storage_file_and_saves_local_copy(self):
         self.store_list({"fbneo": ["bubsys.zip"]})
         self.assertTrue(ignore.is_ignored("fbneo/bubsys.zip"))
         self.assertFalse(ignore.is_ignored("fbneo/sf2.zip"))
-        self.assertEqual(self.local()["ignored"], {"fbneo": ["bubsys.zip"]})
+        self.assertEqual(self.local(), {"fbneo": ["bubsys.zip"]})
 
     def test_reads_storage_not_mirror(self):
         self.store_list({"gb": ["x.zip"]})
@@ -56,7 +57,7 @@ class LoadTest(IgnoreList):
         self.store_list({"gb": ["x.zip"]})
         ignore.keys()
         ignore.reset()
-        with mock.patch.object(ignore, "_read", side_effect=AssertionError("read again")) as read:
+        with mock.patch.object(shared, "read", side_effect=AssertionError("read again")) as read:
             self.assertEqual(ignore.keys(), frozenset({"gb/x.zip"}))
         read.assert_not_called()
 
@@ -83,7 +84,7 @@ class LoadTest(IgnoreList):
         with mock.patch.object(runtime, "ROOT", os.path.join(self.root.name, "not-mounted")):
             keys, err = self.load()
         self.assertEqual(keys, frozenset({"gb/a.zip"}))
-        self.assertTrue(os.path.exists(self.path(ignore.KEY)))
+        self.assertTrue(os.path.exists(shared.local_path(ignore.KEY)))
         self.assertIn("ignored.json", err)
 
     def test_storage_error_without_local_copy_is_empty(self):
@@ -109,7 +110,7 @@ class LoadTest(IgnoreList):
         os.remove(os.path.join(self.root.name, ignore.KEY))
         ignore.reset()
         self.assertEqual(ignore.keys(), frozenset())
-        self.assertFalse(os.path.exists(self.path(ignore.KEY)))
+        self.assertFalse(os.path.exists(shared.local_path(ignore.KEY)))
 
 
 class AddTest(IgnoreList):
@@ -119,7 +120,7 @@ class AddTest(IgnoreList):
         with open(os.path.join(self.root.name, ignore.KEY)) as f:
             self.assertEqual(json.load(f), {"gb": ["c.zip"], "nds": ["a.zip", "b.zip"]})
         self.assertTrue(ignore.is_ignored("nds/a.zip"))
-        self.assertEqual(self.local()["ignored"], {"gb": ["c.zip"], "nds": ["a.zip", "b.zip"]})
+        self.assertEqual(self.local(), {"gb": ["c.zip"], "nds": ["a.zip", "b.zip"]})
 
     def test_add_creates_the_file(self):
         self.assertEqual(ignore.add({"gb": ["c.zip"]}), 1)
@@ -135,7 +136,7 @@ class RemoveTest(IgnoreList):
             self.assertEqual(json.load(f), {"snes": ["c.zip"]})
         self.assertFalse(ignore.is_ignored("gb/a.zip"))
         self.assertTrue(ignore.is_ignored("snes/c.zip"))
-        self.assertEqual(self.local()["ignored"], {"snes": ["c.zip"]})
+        self.assertEqual(self.local(), {"snes": ["c.zip"]})
 
     def test_remove_unknown_path_counts_zero(self):
         self.store_list({"gb": ["a.zip"]})
