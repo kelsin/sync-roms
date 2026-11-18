@@ -566,6 +566,10 @@ def _mirror_set(key):
         return None
 
 
+def _why(e):
+    return "see the error above" if isinstance(e, SystemExit) else e
+
+
 def _read_sets():
     """Every set in storage, through its local copy (shared.py). When storage can't be listed or checked, the local
     copies are used, with one warning, and sets_from_fallback says so."""
@@ -577,8 +581,8 @@ def _read_sets():
             raise FileNotFoundError(f"{runtime.ROOT} is missing")
         with mirroring.storage_reads():  # a sync's local mirror of storage doesn't hold the sets
             keys = [k for k in inventory.files(SETS, sizes=False) if _set_id(k)]
-    except s3.ERRORS as e:
-        ui.warn(f"Couldn't list {SETS} in storage ({e}); using the local copies")
+    except (*s3.ERRORS, SystemExit) as e:  # SystemExit: ui.fail, e.g. a missing AWS profile (its error is printed)
+        ui.warn(f"Couldn't list {SETS} in storage ({_why(e)}); using the local copies")
         try:
             names = os.listdir(shared.local_path(SETS.rstrip("/")))
         except OSError:
@@ -590,8 +594,8 @@ def _read_sets():
         if reachable:
             try:
                 data = shared.load(key, _set_file, gone, fallback=False)
-            except s3.ERRORS as e:
-                ui.warn(f"Couldn't check {SETS} in storage ({e}); using the local copies")
+            except (*s3.ERRORS, SystemExit) as e:
+                ui.warn(f"Couldn't check {SETS} in storage ({_why(e)}); using the local copies")
                 reachable = False
         if not reachable:
             data = _mirror_set(key)
@@ -632,10 +636,9 @@ def skipped_sets():
 
 
 def sets_from_fallback():
-    """Whether the sets read this run (read now if they weren't) came, even in part, from the local copies because
+    """Whether the last read of the sets (set_files; False before one) came, even in part, from the local copies because
     storage couldn't be listed or checked: they may be older than storage's, so they must not be written back."""
     with _sets_lock:
-        set_files()
         return _fallback
 
 

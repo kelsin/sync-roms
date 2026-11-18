@@ -1,3 +1,5 @@
+import io
+import contextlib
 import copy
 import os
 import sys
@@ -178,14 +180,19 @@ class Save(StorageDir):
         self.assertEqual(setedit.diff_sets(before, after), [])
 
     def test_a_storage_error_at_the_review_is_a_note_and_the_edits_are_kept(self):
-        store.set_files()  # read while mounted, as the editor's start was
         picks = iter([3, None, 6])  # New set (after Edit, Gone, Keep), Esc to review (fails), then Quit (a set more now)
-        with mock.patch.object(setedit, "edit_one", lambda g, s, k: g["games"].append({"title": "X", "system": "gba", "bucket": "gba/X.zip"})), \
+
+        def add_then_unmount(game_set, systems, keys_of):  # the share goes away after the editor read the sets
+            game_set["games"].append({"title": "X", "system": "gba", "bucket": "gba/X.zip"})
+            unmount = mock.patch.object(runtime, "ROOT", self.root + "-unmounted")
+            unmount.start()
+            self.addCleanup(unmount.stop)
+        with mock.patch.object(setedit, "edit_one", add_then_unmount), \
                 mock.patch.object(store, "repo_json", return_value=SYSTEMS), \
                 mock.patch.object(picker, "filter_list", lambda *a, **k: next(picks)), \
                 mock.patch.object(ui, "ask", side_effect=["New", ""]), \
                 mock.patch.object(ui, "choose", return_value="s"), mock.patch.object(ui, "confirm", return_value=True) as confirm, \
-                mock.patch.object(runtime, "ROOT", self.root + "-unmounted"), mock.patch("builtins.print"):
+                mock.patch("builtins.print"):
             self.assertEqual(setedit.edit_sets(), 0)
         notes = [c.args[0] for c in self.note.call_args_list]
         self.assertIn("Couldn't save", notes[0])
@@ -236,12 +243,68 @@ class SaveStale(StorageDir):
                 start = self.listing()
                 with self.assertRaises(setedit.Stale) as e, mock.patch("builtins.print"):
                     setedit.save_sets(before, after, found)
-                self.assertIn(f"{sid} changed in storage", str(e.exception))
+                self.assertIn(f"{sid} already in storage" if sid == "new" else f"{sid} changed in storage", str(e.exception))
                 self.assertEqual(self.listing(), start)
                 storage_sets(self, {"keep": {"name": "Keep", "games": games()}, "edit": {"name": "Edit", "games": games()},
                                     "gone": {"name": "Gone", "games": games()}}, self.root)
                 if os.path.exists(self.path("new")):
                     os.remove(self.path("new"))
+
+    def test_a_new_set_another_machine_added_names_the_cache_update(self):
+        before = setedit.repo_sets()
+        after, found = self.changes(before)
+        with open(self.path("new"), "w", encoding="utf-8") as f:
+            f.write(store.set_text({"name": "New", "games": []}))
+        with self.assertRaises(setedit.Stale) as e, mock.patch("builtins.print"):
+            setedit.save_sets(before, after, found)
+        self.assertIn("new already in storage", str(e.exception))
+        self.assertIn("sync-roms cache update", str(e.exception))
+
+    def run_editor(self, picks, edit_one, choose="s"):
+        picks = iter(picks)
+        with mock.patch.object(setedit, "edit_one", edit_one), mock.patch.object(store, "repo_json", return_value=SYSTEMS), \
+                mock.patch.object(picker, "filter_list", lambda *a, **k: next(picks)), \
+                mock.patch.object(ui, "choose", return_value=choose), \
+                mock.patch.object(ui, "confirm", return_value=True) as confirm, \
+                mock.patch.object(picker, "queue_note", return_value=False), mock.patch("builtins.print"):
+            code = setedit.edit_sets()
+        return code, confirm
+
+    def test_after_a_stale_refusal_reopening_the_editor_saves(self):
+        theirs = games()[:2]
+
+        def edit_and_race(game_set, systems, keys_of):  # another machine saves Edit while this one edits it
+            game_set["games"] = game_set["games"][1:]
+            with open(self.path("edit"), "w", encoding="utf-8") as f:
+                f.write(store.set_text({"name": "Edit", "games": theirs}))
+        code, confirm = self.run_editor([0, None, 5], edit_and_race)  # open Edit, Esc to review (refused), Quit
+        self.assertEqual(code, 0)
+        self.assertIn("changed in storage", self.note.call_args_list[0].args[0])
+        self.assertIn("reopen the sets editor", self.note.call_args_list[0].args[0])
+        confirm.assert_called_once()  # the edits were still pending
+
+        def drop_first(game_set, systems, keys_of):
+            game_set["games"] = game_set["games"][1:]
+        code, _ = self.run_editor([0, None], drop_first)  # reopened in the same run: storage's Edit, saved
+        self.assertEqual(code, 0)
+        with open(self.path("edit"), encoding="utf-8") as f:
+            self.assertEqual(f.read(), store.set_text({"name": "Edit", "games": theirs[1:]}))
+
+    def test_a_failing_write_profile_keeps_the_edits_and_writes_nothing(self):
+        from sync_roms import s3
+
+        def no_profile(*a, **k):
+            ui.fail("AWS profile 'roms' not found; define it in ~/.aws/config and ~/.aws/credentials", 3)
+
+        def drop_first(game_set, systems, keys_of):
+            game_set["games"] = game_set["games"][1:]
+        start = self.listing()
+        with mock.patch.object(s3, "put_text", no_profile), contextlib.redirect_stderr(io.StringIO()):
+            code, confirm = self.run_editor([0, None, 5], drop_first)  # open Edit, Esc to review (fails), Quit
+        self.assertEqual(code, 0)
+        self.assertIn("Couldn't save the sets to storage", self.note.call_args_list[0].args[0])
+        confirm.assert_called_once()  # the edits were still pending
+        self.assertEqual(self.listing(), start)
 
     def test_sets_read_from_the_local_copies_save_nothing(self):
         before = setedit.repo_sets()
@@ -344,6 +407,7 @@ class Editor(unittest.TestCase):
         patch = mock.patch.object(edit, "note")  # what the editor says at its end
         self.note = patch.start()
         self.addCleanup(patch.stop)
+        self.addCleanup(setattr, store, "_sets", "[]")  # edit_sets resets the sets; back to none, as isolate leaves it
 
     def test_new_set_flow_saves(self):
         before = {"old": {"name": "Old", "description": "", "games": games()}}

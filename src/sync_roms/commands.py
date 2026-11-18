@@ -268,9 +268,10 @@ def games_sets(args):
         return 0
     if not args.set_id:
         ui.fail(f"sets {args.verb} needs a set id. Known: {', '.join(known)}", 2)
-    if args.set_id not in known:
-        ui.fail(f"Unknown set {args.set_id!r}. Known: {', '.join(known)}", 2)
     on = list(store.list_sets(raw))
+    if args.set_id not in known and not (args.verb == "remove" and args.set_id in on):  # a card may name a gone set
+        ui.fail(f"Unknown set {args.set_id!r} (run `{inventory.UPDATE_HINT}` if another machine added it). "
+                f"Known: {', '.join(known)}", 2)
     if args.verb == "add" and args.set_id not in on:
         raw[store.SETS_KEY] = on + [args.set_id]
         return finish(args, raw, save, [("+", f"set {args.set_id}")])
@@ -830,7 +831,8 @@ def check_data(list_keys=None, repo_systems=None):
                 if not isinstance(entry, list) or not all(isinstance(i, str) for i in entry):
                     problems.append(f"{where}: 'sets' must be a list of set ids")
                 else:
-                    problems.extend(f"{where}: unknown set {i!r}" for i in entry if i not in sets)
+                    problems.extend(f"{where}: unknown set {i!r} (run `{inventory.UPDATE_HINT}` if another machine "
+                                    "added it)" for i in entry if i not in sets)
             elif key not in systems:
                 problems.append(f"{where}: unknown system {key!r}")
             elif isinstance(entry, list):
@@ -1004,7 +1006,7 @@ def doctor_cmd(args):
             boto3.Session(profile_name=runtime.WRITE_PROFILE)
             line(True, f"write profile {runtime.WRITE_PROFILE} exists")
         except ProfileNotFound:
-            line(None, f"write profile {runtime.WRITE_PROFILE} not found", "only needed for upload and clean")
+            line(None, f"write profile {runtime.WRITE_PROFILE} not found", "only needed for upload, clean, saving sets and saving scrape state")
     for tool in ("7z", "chdman", "extract-xiso", "iso2zar"):
         found = external.find_tool(tool)
         line(True if found else None, f"{tool}: {found or 'not installed'}",

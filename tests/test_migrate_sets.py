@@ -131,8 +131,8 @@ class MigrateSetsTest(StorageDir):
         self.assertEqual(self.tree(), [os.path.join(self.root, "sets", "a.json")])
 
     def test_default_source_is_the_repos_sets(self):
-        names = migrate.load_sources(migrate.DEFAULT_FROM)
-        self.assertGreater(len(names), 40)
+        repo = os.path.dirname(os.path.dirname(os.path.abspath(migrate.__file__)))
+        self.assertEqual(os.path.realpath(migrate.DEFAULT_FROM), os.path.realpath(os.path.join(repo, "src", "sync_roms", "data", "sets")))
 
 
 if __name__ == "__main__":

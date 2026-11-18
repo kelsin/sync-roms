@@ -1,7 +1,7 @@
 """`sync-roms sets edit`: edit the game sets in storage by hand and save the changes there."""
 import copy
 
-from . import cardedit, edit, picker, previews, s3, store, themeart, ui
+from . import cardedit, edit, inventory, picker, previews, runtime, s3, store, themeart, ui
 from .listedit import add_from_set, ask_category, file_counts, fold_discs, game_label, insert_game, recategorize, reconcile, series_keys, set_series, stocked, system_rows, view
 
 
@@ -154,6 +154,10 @@ def save_sets(before, after, found, from_fallback=False):
     if from_fallback:
         raise Stale("The sets were read from the local copies (storage couldn't be checked)")
     changed = [sid for _, sid, _ in found if store.set_changed(sid, before.get(sid))]
+    added = [sid for sid in changed if sid not in before]
+    if added:
+        raise Stale(f"{', '.join(added)} already in storage (another machine added it; run `{inventory.UPDATE_HINT}` so "
+                    "the editor lists it)")
     if changed:
         raise Stale(f"{', '.join(changed)} changed in storage since you opened the editor (another machine?)")
     for kind, sid, _ in found:
@@ -194,6 +198,7 @@ def new_set(working):
 def edit_sets():
     """Edit the sets in storage, then save the changes there. Returns the exit code."""
     systems = sorted(store.repo_json("systems"), key=lambda s: s["name"].lower())
+    store.reset_sets()  # storage's sets as they are now, not as an earlier part of this run read them
     before = repo_sets()
     working = copy.deepcopy(before)
     state = {"review": False, "fallback": store.sets_from_fallback()}
@@ -227,12 +232,12 @@ def edit_working(systems, before, working, state):
         n = len(ids)
         found = diff_sets(before, working)
         edited = {sid for _, sid, _ in found}
-        labels = ([f"{themeart.set_emoji(working[x])} {working[x]['name']}  ({len(working[x]['games'])} games)" for x in ids]
+        labels = ([f"{themeart.set_emoji({**working[x], 'id': x})} {working[x]['name']}  ({len(working[x]['games'])} games)" for x in ids]
                   + ["➕ New set", "✅ Done (review & save)", "🚪 Quit without saving"])
         extras = [[("  " + ("new" if x not in before else "edited"), "cyan")] if x in edited else [] for x in ids] + [[], [], []]
         i = n + 1 if state["review"] else picker.filter_list("✏️  Which set?  (Esc = review & save)", labels, extras=extras,
                                                     hotkeys=(edit.DELETE_KEY,), hint="/ filter · Enter open · d delete · Esc review",
-                                                    preview=lambda k: previews.collection(ids[k]) if k < n else None)
+                                                    preview=lambda k: previews.collection(themeart.set_art({**working[ids[k]], "id": ids[k]})) if k < n else None)
         if isinstance(i, tuple):
             if i[1] < n:
                 sid = ids[i[1]]
@@ -273,7 +278,12 @@ def edit_working(systems, before, working, state):
         try:
             save_sets(before, working, found, state["fallback"])
         except Stale as e:
-            edit.note(ui.red(f"❌ {e}; nothing was saved. Quit and reopen the editor to start from storage's sets."))
+            edit.note(ui.red(f"❌ {e}; nothing was saved. Quit and reopen the sets editor: it starts from storage's sets."))
+            state["review"] = False
+            continue
+        except SystemExit:  # ui.fail, e.g. no write profile: its error is printed; the edits stay pending
+            need = "" if runtime.ROOT else f" (saving needs the write profile {runtime.WRITE_PROFILE!r})"
+            edit.note(ui.red(f"❌ Couldn't save the sets to storage{need}: see the error above. Nothing more was saved."))
             state["review"] = False
             continue
         except s3.ERRORS as e:  # e.g. an unmounted storage folder: back to the menu with what is left still pending

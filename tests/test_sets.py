@@ -196,6 +196,25 @@ class UnknownCardSetsTest(StorageDir):
             store.load_manifest(["SD"])
         self.assert_cards_unchanged()
 
+    def test_games_sets_remove_drops_an_unknown_set_from_the_card(self):
+        storage_sets(self, {"mix": SET}, self.root)
+        with contextlib.redirect_stderr(io.StringIO()), contextlib.redirect_stdout(io.StringIO()):
+            code = commands.games_sets(mock.Mock(card="SD", verb="remove", set_id="gone", dry_run=False))
+        self.assertEqual(code, 0)
+        with open(self.cards, encoding="utf-8") as f:
+            card = json.load(f)["SD"]
+        self.assertEqual(card["games"], {"gba": [{"title": "B", "bucket": "gba/B.zip"}], "sets": ["mix"]})
+        self.assertEqual({k: v for k, v in card.items() if k != "games"},
+                         {k: v for k, v in self.CARDS["SD"].items() if k != "games"})
+
+    def test_games_sets_add_refuses_an_unknown_set_and_names_the_cache_update(self):
+        storage_sets(self, {"mix": SET}, self.root)
+        err = io.StringIO()
+        with contextlib.redirect_stderr(err), contextlib.redirect_stdout(io.StringIO()), self.assertRaises(SystemExit):
+            commands.games_sets(mock.Mock(card="SD", verb="add", set_id="other", dry_run=False))
+        self.assertIn("sync-roms cache update", err.getvalue())
+        self.assert_cards_unchanged()
+
     def test_budget_listing_and_check_take_an_unknown_set(self):
         from sync_roms import budget
         storage_sets(self, {"mix": SET}, self.root)
@@ -217,16 +236,31 @@ class StaleSetsTest(StorageDir):
         storage_sets(self, {"mix": SET}, self.root)
 
     def test_a_read_from_the_local_copies_is_flagged_until_read_again(self):
+        store.set_files()
         self.assertFalse(store.sets_from_fallback())
         store.reset_sets()
         with mock.patch.object(runtime, "ROOT", self.root + "-unmounted"), contextlib.redirect_stderr(io.StringIO()):
+            store.set_files()
             self.assertTrue(store.sets_from_fallback())
         store.reset_sets()
         self.assertFalse(store.sets_from_fallback())
 
+    def test_a_missing_aws_profile_reads_the_local_copies(self):
+        store.set_files()  # local copies saved
+        store.reset_sets()
+        err = io.StringIO()
+        with mock.patch.object(inventory, "files", side_effect=SystemExit(3)), contextlib.redirect_stderr(err):
+            self.assertEqual([s["id"] for s in store.set_files()], ["mix"])
+            self.assertTrue(store.sets_from_fallback())
+        self.assertIn("Couldn't list sets/ in storage (see the error above)", err.getvalue())
+        store.reset_sets()
+        with mock.patch.object(inventory, "tag", side_effect=SystemExit(3)), contextlib.redirect_stderr(io.StringIO()):
+            self.assertEqual([s["id"] for s in store.set_files()], ["mix"])
+
     def test_a_storage_error_while_checking_a_set_is_flagged(self):
         store.reset_sets()
         with mock.patch.object(inventory, "tag", side_effect=OSError("timed out")), contextlib.redirect_stderr(io.StringIO()):
+            store.set_files()
             self.assertTrue(store.sets_from_fallback())
 
     def test_set_changed_reads_storage_itself(self):
