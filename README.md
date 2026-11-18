@@ -211,15 +211,7 @@ While typing a filter (or a note, which `w` opens in the game list): `^A` `^E` s
 7. For the `esde` (Android) layout, everything in storage's `os/android/APKs/` folder (APKs, the Obtainium app list) is
    copied to an `APKs/` folder on the card so the apps can be installed from the device. For the `onion` layout
    (not Allium), everything under storage's `os/onion/Themes/` is copied to the card's `Themes/` the same way,
-   skipping files already there with the same size and never deleting anything. Also, files in the card's Android media folders (`Alarms`, `Audiobooks`, `DCIM`,
-   `Documents`, `Download`, `Movies`, `Music`, `Notifications`, `Pictures`, `Podcasts`, `Recordings`,
-   `Ringtones`) are removed and an empty `.nomedia` is put in each of those folders that exists, so Android
-   stops indexing them. Missing folders are not created, and `.nomedia` files don't count as files. The first
-   time files are found it asks (default no) and remembers the answer for that card name in the same
-   `cards.json` as the layout, as `"android_media": "always"` or `"never"`. With `always` it runs every sync
-   without asking, even if the folders are already empty; with `never` it is skipped. Saved settings are used
-   without asking; with `--ask` they are confirmed first, and answering no asks the question again and saves
-   the new answer (or delete that `android_media` entry from `cards.json`).
+   skipping files already there with the same size and never deleting anything.
 
    Android cards also get suggested GPU drivers. Each Adreno device in `devices.json` has a `gpu`, and
    `drivers.json` lists the custom drivers (Turnip builds and similar) suggested for each GPU. Every sync checks
@@ -275,7 +267,7 @@ The old flags keep working. Flags that make no sense for a command (`--dry-run` 
 
 ### Unattended use
 
-`--yes` answers every prompt with its default (deleting local files stays "no"). A first sync can skip the setup picker:
+`--yes` answers every prompt with its default (deleting local files stays "no"; `clean` commands do delete with it). A first sync can skip the setup picker:
 
 ```bash
 sync-roms sync /Volumes/SD --device anbernic-rg35xx-sp --layout knulli --yes
@@ -298,7 +290,7 @@ On `esde` and `emudeck` cards every Vita game zip in `psvita/` gets a `.psvita` 
 | --- | --- |
 | `-n`, `--dry-run` | Show what would be downloaded (with total sizes), download nothing. With `--mirror`/`--use-mirror`, show what the mirror would download and delete. Commands that only read (`diff`, `check`, `doctor`, `cache`, `config`, `completion`, `games list`/`export`/`sets list`) or can't honor it (`edit`, `scrape review`, `scrape missing`, ...) refuse it with exit 2 |
 | `-e`, `--edit` | Add/remove games in a card's list, then save (see below) |
-| `-a`, `--ask` | Confirm saved settings (device and layout, Android media folders) instead of using them silently. Answering no asks the question again and saves the new answer |
+| `-a`, `--ask` | Confirm saved settings (device and layout) instead of using them silently. Answering no asks the question again and saves the new answer |
 | `--upload [DIR]` | Upload the ROMs in `DIR` and its subfolders (default: current directory) to storage folder of a system you pick; the system is guessed from the folder name (see below) |
 | `-c`, `--clean-scrapes` | Remove scraped data in storage for ROMs that aren't available (see below) |
 | `--m3u [DIR]` | Create or fix the `.m3u` playlist of every multi-disc game (`Name (Disc 1) (Extra).chd`, `Name (Disc 2).chd`) in `DIR` and its subfolders (default: current directory). The playlist is named after the title without `(Disc N)` or tags the discs don't share (`Name (Sega CD).m3u`). Playlists with the wrong discs are rewritten, ones with some missing files lose those lines, ones with no files left are deleted after asking, and ones listing exactly a game's discs under another name are renamed. Local only; `--dry-run` previews |

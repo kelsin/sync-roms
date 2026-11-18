@@ -1,4 +1,4 @@
-"""Cleaning junk files and Android media folders off the card."""
+"""Cleaning junk files off the card."""
 import os
 import plistlib
 import shutil
@@ -7,7 +7,7 @@ import subprocess
 import sys
 import time
 
-from . import store, ui
+from . import ui
 
 
 _clean_root = None
@@ -37,68 +37,6 @@ def remove_left(paths):
     left = [p for p in paths if os.path.lexists(p)]
     print(f"  {'❌' if left else '✅'} removed {len(paths) - len(left)} of {len(paths)}")
     return left
-
-
-ANDROID_MEDIA_DIRS = ("Alarms", "Audiobooks", "DCIM", "Documents", "Download", "Movies", "Music",
-                      "Notifications", "Pictures", "Podcasts", "Recordings", "Ringtones")
-
-
-def android_media_files(base):
-    """{folder: files} for the Android media folders that exist in base (files other than .nomedia)."""
-    found = {}
-    for name in ANDROID_MEDIA_DIRS:
-        folder = os.path.join(base, name)
-        if os.path.isdir(folder):
-            found[name] = [os.path.join(root, f) for root, _, files in os.walk(folder) for f in files if f != ".nomedia"]
-    return found
-
-
-def clean_android_media(base, card, dry_run, ask=False):
-    """Empty the Android media folders on the card and put a .nomedia in each, as the card's saved setting says.
-
-    The setting (android_media in cards.json) is "always" or "never" and is used without asking. Without
-    one, ask when any of the folders has files, and remember the answer. Folders that don't exist are not
-    created. With ask, the saved setting is confirmed first; declining it asks the question again and
-    saves the new answer.
-    """
-    found = android_media_files(base)
-    files = [f for fs in found.values() for f in fs]
-    setting = (store.load_cards().get(card) or {}).get("android_media")
-    redo = False
-    if ask and not dry_run and setting in ("always", "never"):
-        what = "remove the files in the Android media folders and add .nomedia" if setting == "always" else "leave the Android media folders alone"
-        if not ui.confirm(f"Use the saved setting for {card}: {what}?"):
-            setting, redo = None, True
-    if not redo and (not found or setting == "never" or (setting != "always" and not files)):
-        return
-    counts = ", ".join(f"{name} ({len(fs)})" for name, fs in found.items() if fs)
-    if dry_run:
-        print(f"📵 Android media folders: {len(files)} file(s) would be removed and .nomedia added "
-              f"({'setting: always' if setting == 'always' else 'would ask first'}){': ' + counts if counts else ''}")
-        return
-    if setting != "always":
-        size = sum(os.path.getsize(f) for f in files if os.path.exists(f))
-        print(ui.bold(f"\n📵 Android media folders on {card} have {len(files)} file(s) ({ui.human_size(size)})"
-                   + (f": {counts}" if counts else "")))
-        answer = ui.confirm("Remove them and add a .nomedia file to each folder? Your answer is remembered for this card name.",
-                         default=False)
-        store.update_card(card, android_media="always" if answer else "never")
-        if not answer:
-            print(ui.yellow("  ↩️  Keeping them (not asking again for this card)"))
-            return
-    removed = 0
-    for path in files:
-        try:
-            os.remove(path)
-            removed += 1
-        except OSError as e:
-            ui.failure(ui.red(f"  ❌ {path}: {e}"))
-    for name in found:
-        try:
-            open(os.path.join(base, name, ".nomedia"), "a").close()
-        except OSError as e:
-            ui.failure(ui.red(f"  ❌ {name}/.nomedia: {e}"))
-    print(ui.green(f"📵 Removed {removed} file(s) from the Android media folders and added .nomedia to {len(found)} folder(s)"))
 
 
 def quiet_fseventsd(root):

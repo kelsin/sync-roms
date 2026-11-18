@@ -209,8 +209,7 @@ class DryRunJsonTest(Isolated):
                              c=(store, "load_cards", lambda: {}),
                              l=(s3, "list_sizes", lambda prefix, sizes=True: {"gba/Game.zip": 5} if prefix == "gba/" else {}),
                              t=(s3, "fetch_texts", lambda keys: {}),
-                             s=(cli.picker, "saved_setup", lambda *a: (None, "esde")),
-                             a=(cli.clean, "clean_android_media", lambda *a: None))
+                             s=(cli.picker, "saved_setup", lambda *a: (None, "esde")))
 
     def test_dry_run_json_is_one_document(self):
         code, out, _ = self.run_plan(["--dry-run", "--json", "--yes"])
