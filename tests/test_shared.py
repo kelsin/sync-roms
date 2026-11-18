@@ -78,6 +78,15 @@ class LoadTest(SharedTest):
         with mock.patch.object(runtime, "_mirror_root", self.root.name + "-mirror"):
             self.assertEqual(self.load()[0], {"a": 1})
 
+    def test_without_fallback_a_storage_error_is_raised_and_not_warned(self):
+        self.store_file("x.json", '{"a": 1}')
+        self.load()
+        err = io.StringIO()
+        with mock.patch.object(inventory, "tag", side_effect=OSError("down")), contextlib.redirect_stderr(err), \
+                self.assertRaises(OSError):
+            shared.load("x.json", parse, {}, fallback=False)
+        self.assertEqual(err.getvalue(), "")
+
     def test_storage_error_falls_back_to_mirror_with_warning(self):
         self.store_file("x.json", '{"a": 1}')
         self.load()

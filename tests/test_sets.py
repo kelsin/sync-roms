@@ -118,6 +118,77 @@ class StorageSetsTest(StorageDir):
             sets, err = self.load()
         self.assertEqual(sets, [])
         self.assertIn("Couldn't list sets/", err)
+        self.assertFalse(store.sets_complete())
+
+
+    def test_dot_files_are_not_sets(self):
+        storage_sets(self, {"mix": SET, "._mix": "\x00\x05junk", ".hidden": SET}, self.root)
+        sets, err = self.load()
+        self.assertEqual(([x["id"] for x in sets], err), (["mix"], ""))
+        self.assertTrue(store.sets_complete())
+
+    def test_sets_are_listed_past_a_syncs_local_mirror(self):
+        storage_sets(self, {"mix": SET}, self.root)
+        empty_mirror = os.path.join(self.tmp.name, "mirror")
+        os.makedirs(empty_mirror)
+        with mock.patch.object(runtime, "_mirror_root", empty_mirror):
+            self.assertEqual([x["id"] for x in self.load()[0]], ["mix"])
+        self.assertEqual(runtime._mirror_root, None)
+
+    def test_a_storage_error_while_checking_warns_once_and_uses_the_local_copies(self):
+        storage_sets(self, {"a": SET, "b": SET, "c": SET}, self.root)
+        self.load()  # leaves the local copies
+        store.reset_sets()
+        with mock.patch.object(inventory, "tag", side_effect=OSError("down")):
+            sets, err = self.load()
+            self.assertFalse(store.sets_complete())
+        self.assertEqual([x["id"] for x in sets], ["a", "b", "c"])
+        self.assertEqual(err.count("\n"), 1, err)
+        self.assertIn("Couldn't check sets/ in storage", err)
+
+    def test_completeness(self):
+        storage_sets(self, {"mix": SET}, self.root)
+        self.load()
+        self.assertTrue(store.sets_complete())
+        storage_sets(self, {"bad": "{oops"}, self.root)
+        self.load()
+        self.assertFalse(store.sets_complete())
+
+
+class PruneAfterCompleteReadTest(StorageDir):
+    """load_manifest drops a card's set ids only when the sets read this run are all of storage's."""
+
+    def setUp(self):
+        super().setUp()
+        os.makedirs(self.data)
+        write_json(os.path.join(self.data, "cards.json"),
+                   {"SD": {"device": "full", "layout": "esde", "games": {"sets": ["gone", "mix"]}}})
+
+    def card_sets(self, sets):
+        storage_sets(self, sets, self.root)
+        with contextlib.redirect_stderr(io.StringIO()):
+            store.load_manifest(["SD"])
+        with open(os.path.join(self.data, "cards.json")) as f:
+            return json.load(f)["SD"]["games"].get("sets")
+
+    def test_no_sets_in_storage_keeps_the_references(self):
+        self.assertEqual(self.card_sets({}), ["gone", "mix"])
+
+    def test_one_malformed_set_file_keeps_every_reference(self):
+        self.assertEqual(self.card_sets({"mix": SET, "other": SET, "bad": "{oops"}), ["gone", "mix"])
+
+    def test_unmounted_storage_keeps_the_references(self):
+        storage_sets(self, {"mix": SET}, self.root)
+        store.load_sets()  # leaves a local copy
+        with mock.patch.object(runtime, "ROOT", self.root + "-unmounted"):
+            self.assertEqual(self.card_sets({}), ["gone", "mix"])
+
+    def test_a_storage_error_while_checking_keeps_the_references(self):
+        with mock.patch.object(inventory, "tag", side_effect=OSError("down")):
+            self.assertEqual(self.card_sets({"mix": SET}), ["gone", "mix"])
+
+    def test_a_complete_read_drops_a_deleted_set(self):
+        self.assertEqual(self.card_sets({"mix": SET}), ["mix"])
 
 
 class SetsTest(unittest.TestCase):

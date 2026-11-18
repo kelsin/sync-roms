@@ -72,11 +72,12 @@ def _drop_mirror(key):
         _save_tags(tags)
 
 
-def load(key, parse, empty):
+def load(key, parse, empty, fallback=True):
     """The storage file's parsed value, `empty` when it isn't in storage.
 
     parse(text) returns the value and raises ValueError when the text is malformed. The mirror is used when its tag
-    matches storage's; on a storage error (or a malformed storage file) the mirror is used with a warning."""
+    matches storage's; on a storage error (or a malformed storage file) the mirror is used with a warning, or, without
+    fallback, the error is raised."""
     local_tag, local = _load_tags().get(key), empty
     try:
         with open(local_path(key), encoding="utf-8") as f:
@@ -95,6 +96,8 @@ def load(key, parse, empty):
         text = read(key)
         data = parse(text)
     except (*s3.ERRORS, ValueError) as e:
+        if not fallback:
+            raise
         ui.warn(f"Couldn't check {key} in storage ({e}); using the local copy")
         return local
     try:
