@@ -4,11 +4,13 @@
   "games": [
     {
       "title": "Sonic The Hedgehog",
+      "series": "Sonic",
       "system": "genesis",
       "bucket": "genesis/Sonic The Hedgehog (Japan, Europe, Korea) (En).zip"
     },
     {
       "title": "Sonic The Hedgehog 3",
+      "series": "Sonic",
       "system": "genesis",
       "bucket": "genesis/Sonic The Hedgehog 3 (USA).zip",
       "variants": [
@@ -20,11 +22,13 @@
     },
     {
       "title": "Sonic & Knuckles",
+      "series": "Sonic",
       "system": "genesis",
       "bucket": "genesis/Sonic & Knuckles (World).zip"
     },
     {
       "title": "Sonic 3D Blast (En)",
+      "series": "Sonic",
       "system": "genesis",
       "bucket": "genesis/Sonic 3D Blast (USA, Europe, Korea) (En).zip",
       "variants": [
@@ -36,6 +40,7 @@
     },
     {
       "title": "Sonic Spinball",
+      "series": "Sonic",
       "system": "genesis",
       "bucket": "genesis/Sonic Spinball (USA).zip"
     },
@@ -46,61 +51,73 @@
     },
     {
       "title": "Sonic Eraser",
+      "series": "Sonic",
       "system": "genesis",
       "bucket": "genesis/Sonic Eraser (Japan) (SegaNet) [T-En by Roebloz v1.0.0].zip"
     },
     {
       "title": "Sonic CD (RE125)",
+      "series": "Sonic",
       "system": "segacd",
       "bucket": "segacd/Sonic CD (USA) (RE125).chd"
     },
     {
       "title": "Knuckles' Chaotix",
+      "series": "Sonic",
       "system": "sega32x",
       "bucket": "sega32x/Knuckles' Chaotix (Japan, USA) (En).zip"
     },
     {
       "title": "Sonic The Hedgehog (En)",
+      "series": "Sonic",
       "system": "mastersystem",
       "bucket": "mastersystem/Sonic The Hedgehog (USA, Europe, Brazil) (En).zip"
     },
     {
       "title": "Sonic The Hedgehog 2 (Rev 1)",
+      "series": "Sonic",
       "system": "mastersystem",
       "bucket": "mastersystem/Sonic The Hedgehog 2 (Europe, Brazil) (En) (Rev 1).zip"
     },
     {
       "title": "Sonic Chaos",
+      "series": "Sonic",
       "system": "mastersystem",
       "bucket": "mastersystem/Sonic Chaos (Europe, Brazil) (En).zip"
     },
     {
       "title": "Sonic Blast",
+      "series": "Sonic",
       "system": "gamegear",
       "bucket": "gamegear/Sonic Blast (World).zip"
     },
     {
       "title": "Sonic Spinball",
+      "series": "Sonic",
       "system": "gamegear",
       "bucket": "gamegear/Sonic Spinball (USA, Europe, Brazil) (En).zip"
     },
     {
       "title": "Sonic The Hedgehog - Triple Trouble (En)",
+      "series": "Sonic",
       "system": "gamegear",
       "bucket": "gamegear/Sonic The Hedgehog - Triple Trouble (USA, Europe, Brazil) (En).zip"
     },
     {
       "title": "Sonic Drift",
+      "series": "Sonic",
       "system": "gamegear",
       "bucket": "gamegear/Sonic Drift (Japan) (En).zip"
     },
     {
       "title": "Sonic Drift 2",
+      "series": "Sonic",
       "system": "gamegear",
       "bucket": "gamegear/Sonic Drift 2 (World).zip"
     },
     {
       "title": "Sonic Labyrinth",
+      "series": "Sonic",
       "system": "gamegear",
       "bucket": "gamegear/Sonic Labyrinth (World).zip"
     },
@@ -116,26 +133,31 @@
     },
     {
       "title": "Sonic Advance",
+      "series": "Sonic",
       "system": "gba",
       "bucket": "gba/Sonic Advance (USA) (En,Ja).zip"
     },
     {
       "title": "Sonic Advance 2",
+      "series": "Sonic",
       "system": "gba",
       "bucket": "gba/Sonic Advance 2 (USA) (En,Ja,Fr,De,Es,It).zip"
     },
     {
       "title": "Sonic Advance 3",
+      "series": "Sonic",
       "system": "gba",
       "bucket": "gba/Sonic Advance 3 (USA) (En,Ja,Fr,De,Es,It).zip"
     },
     {
       "title": "Sonic Battle",
+      "series": "Sonic",
       "system": "gba",
       "bucket": "gba/Sonic Battle (USA) (En,Ja,Fr,De,Es,It).zip"
     },
     {
       "title": "Sonic Adventure 2",
+      "series": "Sonic",
       "system": "dreamcast",
       "bucket": "dreamcast/Sonic Adventure 2 (USA) (En,Ja,Fr,De,Es).chd",
       "variants": [
@@ -147,6 +169,7 @@
     },
     {
       "title": "Sonic Adventure International",
+      "series": "Sonic",
       "system": "dreamcast",
       "bucket": "dreamcast/Sonic Adventure International (Japan) (En,Ja,Fr,De,Es).chd",
       "variants": [
@@ -158,16 +181,19 @@
     },
     {
       "title": "Sonic Heroes",
+      "series": "Sonic",
       "system": "gc",
       "bucket": "gc/Sonic Heroes (USA) (En,Ja,Fr,De,Es,It).rvz"
     },
     {
       "title": "Sonic Gems Collection",
+      "series": "Sonic",
       "system": "gc",
       "bucket": "gc/Sonic Gems Collection (USA).rvz"
     },
     {
       "title": "Sonic Riders",
+      "series": "Sonic",
       "system": "gc",
       "bucket": "gc/Sonic Riders (USA) (En,Ja,Fr,De,Es,It).rvz"
     },
@@ -178,86 +204,103 @@
     },
     {
       "title": "Sonic Rush",
+      "series": "Sonic",
       "system": "nds",
       "bucket": "nds/Sonic Rush (USA) (En,Ja,Fr,De,Es,It).zip"
     },
     {
       "title": "Sonic Rush Adventure",
+      "series": "Sonic",
       "system": "nds",
       "bucket": "nds/Sonic Rush Adventure (USA) (En,Ja,Fr,De,Es,It).zip"
     },
     {
       "title": "Sonic Chronicles - The Dark Brotherhood",
+      "series": "Sonic",
       "system": "nds",
       "bucket": "nds/Sonic Chronicles - The Dark Brotherhood (USA) (En,Fr,De,Es,It).zip"
     },
     {
       "title": "Sonic Colors",
+      "series": "Sonic",
       "system": "nds",
       "bucket": "nds/Sonic Colors (USA) (En,Ja,Fr,De,Es,It).zip"
     },
     {
       "title": "Sonic & Sega All-Stars Racing",
+      "series": "Sonic",
       "system": "wii",
       "bucket": "wii/Sonic & Sega All-Stars Racing (USA) (En,Fr,Es).rvz"
     },
     {
       "title": "Mario & Sonic at the Olympic Games",
+      "series": "Mario & Sonic",
       "system": "nds",
       "bucket": "nds/Mario & Sonic at the Olympic Games (USA) (En,Fr,De,Es,It).zip"
     },
     {
       "title": "Mario & Sonic at the Olympic Winter Games",
+      "series": "Mario & Sonic",
       "system": "nds",
       "bucket": "nds/Mario & Sonic at the Olympic Winter Games (USA) (En,Fr,Es).zip"
     },
     {
       "title": "Sonic Generations (Rev 1)",
+      "series": "Sonic",
       "system": "3ds",
       "bucket": "3ds/Sonic Generations (USA) (En,Fr,Es) (Rev 1).zip"
     },
     {
       "title": "Sonic Lost World",
+      "series": "Sonic",
       "system": "3ds",
       "bucket": "3ds/Sonic Lost World (USA) (En,Fr,Es).zip"
     },
     {
       "title": "Sonic Boom - Shattered Crystal",
+      "series": "Sonic",
       "system": "3ds",
       "bucket": "3ds/Sonic Boom - Shattered Crystal (USA).zip"
     },
     {
       "title": "Sonic Boom - Fire & Ice",
+      "series": "Sonic",
       "system": "3ds",
       "bucket": "3ds/Sonic Boom - Fire & Ice (USA) (En,Fr,Es).zip"
     },
     {
       "title": "Sonic & All-Stars Racing Transformed",
+      "series": "Sonic",
       "system": "3ds",
       "bucket": "3ds/Sonic & All-Stars Racing Transformed (USA) (En,Fr,Es).zip"
     },
     {
       "title": "Mario & Sonic at the London 2012 Olympic Games (Rev 1)",
+      "series": "Mario & Sonic",
       "system": "3ds",
       "bucket": "3ds/Mario & Sonic at the London 2012 Olympic Games (USA) (En,Fr,Es) (Rev 1).zip"
     },
     {
       "title": "Mario & Sonic at the Rio 2016 Olympic Games",
+      "series": "Mario & Sonic",
       "system": "3ds",
       "bucket": "3ds/Mario & Sonic at the Rio 2016 Olympic Games (USA) (En,Fr,Es).zip"
     },
     {
       "title": "Sonic R",
+      "series": "Sonic",
       "system": "saturn",
       "bucket": "saturn/Sonic R (USA, Brazil).chd"
     },
     {
       "title": "Sonic Pinball Party",
+      "series": "Sonic",
       "system": "gba",
       "bucket": "gba/Sonic Pinball Party (USA) (En,Ja,Fr,De,Es,It).zip"
     },
     {
       "title": "Sonic The Hedgehog 2 (Rev B)",
+      "series": "Sonic",
       "system": "genesis",
       "bucket": "genesis/Sonic The Hedgehog 2 (World) (Rev B).zip",
       "variants": [
@@ -269,51 +312,61 @@
     },
     {
       "title": "Sonic The Hedgehog - Pocket Adventure",
+      "series": "Sonic",
       "system": "ngpc",
       "bucket": "ngpc/Sonic The Hedgehog - Pocket Adventure (World) (En,Ja).zip"
     },
     {
       "title": "Sonic & Knuckles + Sonic The Hedgehog",
+      "series": "Sonic",
       "system": "genesis",
       "bucket": "genesis/Sonic & Knuckles + Sonic The Hedgehog (USA, Europe) (Lock-on Combination).zip"
     },
     {
       "title": "Sonic Rivals",
+      "series": "Sonic",
       "system": "psp",
       "bucket": "psp/Sonic Rivals (USA).chd"
     },
     {
       "title": "Sonic Rivals 2",
+      "series": "Sonic",
       "system": "psp",
       "bucket": "psp/Sonic Rivals 2 (USA).chd"
     },
     {
       "title": "Sonic and the Black Knight",
+      "series": "Sonic",
       "system": "wii",
       "bucket": "wii/Sonic and the Black Knight (USA) (En,Ja,Fr,De,Es,It).rvz"
     },
     {
       "title": "Sonic and the Secret Rings",
+      "series": "Sonic",
       "system": "wii",
       "bucket": "wii/Sonic and the Secret Rings (USA) (En,Ja,Fr,De,Es,It).rvz"
     },
     {
       "title": "Sonic Colors",
+      "series": "Sonic",
       "system": "wii",
       "bucket": "wii/Sonic Colors (USA) (En,Ja,Fr,De,Es,It).rvz"
     },
     {
       "title": "Sonic Riders: Zero Gravity",
+      "series": "Sonic",
       "system": "wii",
       "bucket": "wii/Sonic Riders - Zero Gravity (USA) (En,Ja,Fr,De,Es,It).rvz"
     },
     {
       "title": "Sonic Unleashed",
+      "series": "Sonic",
       "system": "wii",
       "bucket": "wii/Sonic Unleashed (USA) (En,Ja,Fr,De,Es,It).rvz"
     },
     {
       "title": "Sonic Shuffle",
+      "series": "Sonic",
       "system": "dreamcast",
       "bucket": "dreamcast/Sonic Shuffle (USA).chd"
     },
@@ -330,21 +383,25 @@
     },
     {
       "title": "Sonic Jam",
+      "series": "Sonic",
       "system": "gamecom",
       "bucket": "gamecom/Sonic Jam (USA).zip"
     },
     {
       "title": "SegaSonic The Hedgehog",
+      "series": "Sonic",
       "system": "fbneo",
       "bucket": "fbneo/sonic.zip"
     },
     {
       "title": "SegaSonic Cosmo Fighter",
+      "series": "Sonic",
       "system": "fbneo",
       "bucket": "fbneo/sonicfgt.zip"
     },
     {
       "title": "SegaSonic Bros.",
+      "series": "Sonic",
       "system": "fbneo",
       "bucket": "fbneo/ssonicbr.zip"
     },

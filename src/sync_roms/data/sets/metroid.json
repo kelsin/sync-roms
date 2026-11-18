@@ -4,51 +4,61 @@
   "games": [
     {
       "title": "Metroid",
+      "series": "Metroid",
       "system": "nes",
       "bucket": "nes/Metroid (USA).zip"
     },
     {
       "title": "Metroid II - Return of Samus",
+      "series": "Metroid",
       "system": "gb",
       "bucket": "gb/Metroid II - Return of Samus (World).zip"
     },
     {
       "title": "Metroid Fusion",
+      "series": "Metroid",
       "system": "gba",
       "bucket": "gba/Metroid Fusion (USA).zip"
     },
     {
       "title": "Metroid - Zero Mission",
+      "series": "Metroid",
       "system": "gba",
       "bucket": "gba/Metroid - Zero Mission (USA).zip"
     },
     {
       "title": "Metroid Prime (Rev 2)",
+      "series": "Metroid",
       "system": "gc",
       "bucket": "gc/Metroid Prime (USA) (Rev 2).rvz"
     },
     {
       "title": "Metroid Prime 2 - Echoes",
+      "series": "Metroid",
       "system": "gc",
       "bucket": "gc/Metroid Prime 2 - Echoes (USA).rvz"
     },
     {
       "title": "Metroid Prime - Hunters (Rev 1)",
+      "series": "Metroid",
       "system": "nds",
       "bucket": "nds/Metroid Prime - Hunters (USA) (Rev 1).zip"
     },
     {
       "title": "Metroid Prime Pinball",
+      "series": "Metroid",
       "system": "nds",
       "bucket": "nds/Metroid Prime Pinball (USA).zip"
     },
     {
       "title": "Metroid - Samus Returns",
+      "series": "Metroid",
       "system": "3ds",
       "bucket": "3ds/Metroid - Samus Returns (USA) (En,Fr,Es).zip"
     },
     {
       "title": "Metroid Prime - Federation Force",
+      "series": "Metroid",
       "system": "3ds",
       "bucket": "3ds/Metroid Prime - Federation Force (USA) (En,Fr,Es).zip"
     },
@@ -59,11 +69,13 @@
     },
     {
       "title": "Metroid: Other M",
+      "series": "Metroid",
       "system": "wii",
       "bucket": "wii/Metroid - Other M (USA) (En,Fr,Es).rvz"
     },
     {
       "title": "Metroid Prime Trilogy",
+      "series": "Metroid",
       "system": "wii",
       "bucket": "wii/Metroid Prime Trilogy (USA).rvz"
     }

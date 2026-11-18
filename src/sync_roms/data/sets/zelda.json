@@ -4,6 +4,7 @@
   "games": [
     {
       "title": "Legend of Zelda, The (Rev 1)",
+      "series": "Zelda",
       "system": "nes",
       "bucket": "nes/Legend of Zelda, The (USA) (Rev 1).zip",
       "variants": [
@@ -15,11 +16,13 @@
     },
     {
       "title": "Zelda II - The Adventure of Link",
+      "series": "Zelda",
       "system": "nes",
       "bucket": "nes/Zelda II - The Adventure of Link (USA).zip"
     },
     {
       "title": "Legend of Zelda, The - A Link to the Past",
+      "series": "Zelda",
       "system": "snes",
       "bucket": "snes/Legend of Zelda, The - A Link to the Past (USA).zip",
       "variants": [
@@ -35,6 +38,7 @@
     },
     {
       "title": "BS Zelda no Densetsu",
+      "series": "Zelda",
       "system": "snes",
       "bucket": "snes/BS Legend of Zelda, The (Japan) (SoundLink) [T-En by MottZilla v0.95] [n].zip",
       "variants": [
@@ -46,16 +50,19 @@
     },
     {
       "title": "BS Zelda no Densetsu - Inishie no Sekiban",
+      "series": "Zelda",
       "system": "snes",
       "bucket": "snes/BS Legend of Zelda, The - Ancient Stone Tablets - Chapter 1 (Japan) (SoundLink) [T-En by Euclid v1.0] [n].zip"
     },
     {
       "title": "Picross NP Vol. 5",
+      "series": "Picross",
       "system": "snes",
       "bucket": "snes/Picross NP Vol. 5 (Japan) (Rev 1) (NP).zip"
     },
     {
       "title": "Legend of Zelda, The - Link's Awakening (Rev 2)",
+      "series": "Zelda",
       "system": "gb",
       "bucket": "gb/Legend of Zelda, The - Link's Awakening (USA, Europe) (Rev 2).zip",
       "variants": [
@@ -67,21 +74,25 @@
     },
     {
       "title": "Legend of Zelda, The - Oracle of Ages (En,Fr,De,Es,It)",
+      "series": "Zelda",
       "system": "gbc",
       "bucket": "gbc/Legend of Zelda, The - Oracle of Ages (USA, Australia).zip"
     },
     {
       "title": "Legend of Zelda, The - Oracle of Seasons (En,Fr,De,Es,It)",
+      "series": "Zelda",
       "system": "gbc",
       "bucket": "gbc/Legend of Zelda, The - Oracle of Seasons (USA, Australia).zip"
     },
     {
       "title": "Legend of Zelda, The - The Minish Cap",
+      "series": "Zelda",
       "system": "gba",
       "bucket": "gba/Legend of Zelda, The - The Minish Cap (USA).zip"
     },
     {
       "title": "Legend of Zelda, The - Ocarina of Time",
+      "series": "Zelda",
       "system": "n64",
       "bucket": "n64/Legend of Zelda, The - Ocarina of Time (USA) (Rev 2).zip",
       "variants": [
@@ -93,6 +104,7 @@
     },
     {
       "title": "Legend of Zelda, The - Majora's Mask",
+      "series": "Zelda",
       "system": "n64",
       "bucket": "n64/Legend of Zelda, The - Majora's Mask (USA).zip",
       "variants": [
@@ -104,6 +116,7 @@
     },
     {
       "title": "Legend of Zelda, The - The Wind Waker",
+      "series": "Zelda",
       "system": "gc",
       "bucket": "gc/Legend of Zelda, The - The Wind Waker (USA).rvz",
       "variants": [
@@ -115,6 +128,7 @@
     },
     {
       "title": "Legend of Zelda, The - Twilight Princess",
+      "series": "Zelda",
       "system": "gc",
       "bucket": "gc/Legend of Zelda, The - Twilight Princess (USA).rvz",
       "variants": [
@@ -126,16 +140,19 @@
     },
     {
       "title": "Legend of Zelda, The - Four Swords Adventures",
+      "series": "Zelda",
       "system": "gc",
       "bucket": "gc/Legend of Zelda, The - Four Swords Adventures (USA).rvz"
     },
     {
       "title": "Legend of Zelda, The - Phantom Hourglass",
+      "series": "Zelda",
       "system": "nds",
       "bucket": "nds/Legend of Zelda, The - Phantom Hourglass (USA) (En,Fr,Es).zip"
     },
     {
       "title": "Legend of Zelda, The - Spirit Tracks (Rev 1)",
+      "series": "Zelda",
       "system": "nds",
       "bucket": "nds/Legend of Zelda, The - Spirit Tracks (USA) (En,Fr,Es) (Rev 1).zip"
     },
@@ -156,11 +173,13 @@
     },
     {
       "title": "Legend of Zelda, The - A Link Between Worlds",
+      "series": "Zelda",
       "system": "3ds",
       "bucket": "3ds/Legend of Zelda, The - A Link Between Worlds (USA) (En,Fr,Es).zip"
     },
     {
       "title": "Legend of Zelda, The - Tri Force Heroes",
+      "series": "Zelda",
       "system": "3ds",
       "bucket": "3ds/Legend of Zelda, The - Tri Force Heroes (USA) (En,Fr,Es).zip"
     },
@@ -177,11 +196,13 @@
     },
     {
       "title": "Legend of Zelda, The - Ocarina of Time - Master Quest",
+      "series": "Zelda",
       "system": "n64",
       "bucket": "n64/Legend of Zelda, The - Ocarina of Time - Master Quest (USA) (GameCube).zip"
     },
     {
       "title": "The Legend of Zelda: Breath of the Wild",
+      "series": "Zelda",
       "system": "wiiu",
       "bucket": "wiiu/Breath of the Wild (US) (v208).wua"
     }

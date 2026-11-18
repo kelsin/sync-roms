@@ -32,6 +32,12 @@ def g(key):
 
 
 class Pure(unittest.TestCase):
+    def test_pick_series_is_a_filterable_list(self):
+        game_set = {"name": "S", "games": [{"series": "Alpha"}, {"series": "Alpha"}, {"series": "Beta"}]}
+        with mock.patch.object(picker, "filter_list", return_value=0) as fl:
+            self.assertEqual(cardedit.pick_series(game_set), "Alpha")
+        self.assertEqual(fl.call_args[0][1], ["Alpha  (2 games)"])
+
     def test_size_text_is_decimal(self):
         self.assertEqual(cardedit.size_text(512 * 10 ** 9), "512 GB")
         self.assertEqual(cardedit.size_text(1_500_000_000), "1.5 GB")

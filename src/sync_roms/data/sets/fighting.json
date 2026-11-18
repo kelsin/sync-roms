@@ -4,16 +4,19 @@
   "games": [
     {
       "title": "Street Fighter II': Hyper Fighting",
+      "series": "Street Fighter",
       "system": "fbneo",
       "bucket": "fbneo/sf2hfu.zip"
     },
     {
       "title": "Super Street Fighter II Turbo",
+      "series": "Street Fighter",
       "system": "fbneo",
       "bucket": "fbneo/ssf2tu.zip"
     },
     {
       "title": "Street Fighter Alpha 3",
+      "series": "Street Fighter",
       "system": "fbneo",
       "bucket": "fbneo/sfa3u.zip",
       "variants": [
@@ -25,11 +28,13 @@
     },
     {
       "title": "Mortal Kombat II",
+      "series": "Mortal Kombat",
       "system": "fbneo",
       "bucket": "fbneo/mk2.zip"
     },
     {
       "title": "Vampire Savior",
+      "series": "Darkstalkers",
       "system": "fbneo",
       "bucket": "fbneo/vsavu.zip",
       "variants": [
@@ -41,11 +46,13 @@
     },
     {
       "title": "X-Men vs. Street Fighter",
+      "series": "X-Men",
       "system": "fbneo",
       "bucket": "fbneo/xmvsfu.zip"
     },
     {
       "title": "The King of Fighters '98",
+      "series": "King of Fighters",
       "system": "fbneo",
       "bucket": "fbneo/kof98.zip",
       "variants": [
@@ -57,46 +64,55 @@
     },
     {
       "title": "The King of Fighters 2002",
+      "series": "King of Fighters",
       "system": "fbneo",
       "bucket": "fbneo/kof2002.zip"
     },
     {
       "title": "The King of Fighters 2000",
+      "series": "King of Fighters",
       "system": "fbneo",
       "bucket": "fbneo/kof2000.zip"
     },
     {
       "title": "Real Bout Fatal Fury 2",
+      "series": "Fatal Fury",
       "system": "fbneo",
       "bucket": "fbneo/rbff2.zip"
     },
     {
       "title": "Garou: Mark of the Wolves",
+      "series": "Fatal Fury",
       "system": "fbneo",
       "bucket": "fbneo/garou.zip"
     },
     {
       "title": "The Last Blade",
+      "series": "Last Blade",
       "system": "fbneo",
       "bucket": "fbneo/lastblad.zip"
     },
     {
       "title": "Street Fighter Alpha",
+      "series": "Street Fighter",
       "system": "fbneo",
       "bucket": "fbneo/sfau.zip"
     },
     {
       "title": "Street Fighter III: 3rd Strike",
+      "series": "Street Fighter",
       "system": "fbneo",
       "bucket": "fbneo/sfiii3u.zip"
     },
     {
       "title": "Killer Instinct",
+      "series": "Killer Instinct",
       "system": "mame",
       "bucket": "mame/kinst.zip"
     },
     {
       "title": "Killer Instinct 2",
+      "series": "Killer Instinct",
       "system": "mame",
       "bucket": "mame/kinst2.zip",
       "variants": [
@@ -108,6 +124,7 @@
     },
     {
       "title": "Street Fighter EX Plus",
+      "series": "Street Fighter",
       "system": "mame",
       "bucket": "mame/sfexp.zip",
       "variants": [
@@ -119,11 +136,13 @@
     },
     {
       "title": "Street Fighter EX2 Plus",
+      "series": "Street Fighter",
       "system": "mame",
       "bucket": "mame/sfex2p.zip"
     },
     {
       "title": "Tekken",
+      "series": "Tekken",
       "system": "mame",
       "bucket": "mame/tekken.zip",
       "variants": [
@@ -135,6 +154,7 @@
     },
     {
       "title": "Tekken 2",
+      "series": "Tekken",
       "system": "mame",
       "bucket": "mame/tekken2.zip",
       "variants": [
@@ -146,6 +166,7 @@
     },
     {
       "title": "Tekken 3",
+      "series": "Tekken",
       "system": "mame",
       "bucket": "mame/tekken3.zip",
       "variants": [
@@ -157,6 +178,7 @@
     },
     {
       "title": "Tekken Tag Tournament",
+      "series": "Tekken",
       "system": "mame",
       "bucket": "mame/tekkentt.zip",
       "variants": [
@@ -168,6 +190,7 @@
     },
     {
       "title": "Soul Edge",
+      "series": "Soulcalibur",
       "system": "mame",
       "bucket": "mame/souledge.zip",
       "variants": [
@@ -179,6 +202,7 @@
     },
     {
       "title": "Soulcalibur",
+      "series": "Soulcalibur",
       "system": "mame",
       "bucket": "mame/soulclbr.zip",
       "variants": [
@@ -190,6 +214,7 @@
     },
     {
       "title": "Virtua Fighter",
+      "series": "Virtua Fighter",
       "system": "mame",
       "bucket": "mame/vf.zip"
     },
@@ -200,6 +225,7 @@
     },
     {
       "title": "Dead or Alive++",
+      "series": "Dead or Alive",
       "system": "mame",
       "bucket": "mame/doapp.zip",
       "variants": [
@@ -211,6 +237,7 @@
     },
     {
       "title": "Final Fight Revenge",
+      "series": "Final Fight",
       "system": "mame",
       "bucket": "mame/ffreveng.zip"
     },
@@ -237,6 +264,7 @@
     },
     {
       "title": "Star Gladiator",
+      "series": "Star Gladiator",
       "system": "mame",
       "bucket": "mame/starglad.zip"
     },
@@ -274,6 +302,7 @@
     },
     {
       "title": "Battle Arena Toshinden 2",
+      "series": "Battle Arena Toshinden",
       "system": "mame",
       "bucket": "mame/ts2.zip"
     },
@@ -284,16 +313,19 @@
     },
     {
       "title": "Golden Axe: The Duel",
+      "series": "Golden Axe",
       "system": "mame",
       "bucket": "mame/gaxeduel.zip"
     },
     {
       "title": "Virtua Fighter Kids",
+      "series": "Virtua Fighter",
       "system": "mame",
       "bucket": "mame/vfkids.zip"
     },
     {
       "title": "Virtua Fighter Remix",
+      "series": "Virtua Fighter",
       "system": "mame",
       "bucket": "mame/vfremix.zip"
     },
@@ -329,16 +361,19 @@
     },
     {
       "title": "Mortal Kombat",
+      "series": "Mortal Kombat",
       "system": "fbneo",
       "bucket": "fbneo/mk.zip"
     },
     {
       "title": "Mortal Kombat 3",
+      "series": "Mortal Kombat",
       "system": "fbneo",
       "bucket": "fbneo/mk3.zip"
     },
     {
       "title": "Ultimate Mortal Kombat 3",
+      "series": "Mortal Kombat",
       "system": "fbneo",
       "bucket": "fbneo/umk3.zip",
       "variants": [
@@ -350,106 +385,127 @@
     },
     {
       "title": "Marvel Super Heroes",
+      "series": "Marvel",
       "system": "fbneo",
       "bucket": "fbneo/mshu.zip"
     },
     {
       "title": "The King of Fighters '95",
+      "series": "King of Fighters",
       "system": "fbneo",
       "bucket": "fbneo/kof95.zip"
     },
     {
       "title": "The King of Fighters '96",
+      "series": "King of Fighters",
       "system": "fbneo",
       "bucket": "fbneo/kof96.zip"
     },
     {
       "title": "The King of Fighters '97",
+      "series": "King of Fighters",
       "system": "fbneo",
       "bucket": "fbneo/kof97.zip"
     },
     {
       "title": "The King of Fighters '99",
+      "series": "King of Fighters",
       "system": "fbneo",
       "bucket": "fbneo/kof99.zip"
     },
     {
       "title": "The King of Fighters 2001",
+      "series": "King of Fighters",
       "system": "fbneo",
       "bucket": "fbneo/kof2001.zip"
     },
     {
       "title": "The King of Fighters 2003",
+      "series": "King of Fighters",
       "system": "fbneo",
       "bucket": "fbneo/kof2003.zip"
     },
     {
       "title": "Samurai Shodown",
+      "series": "Samurai Shodown",
       "system": "fbneo",
       "bucket": "fbneo/samsho.zip"
     },
     {
       "title": "Samurai Shodown III",
+      "series": "Samurai Shodown",
       "system": "fbneo",
       "bucket": "fbneo/samsho3.zip"
     },
     {
       "title": "Samurai Shodown V",
+      "series": "Samurai Shodown",
       "system": "fbneo",
       "bucket": "fbneo/samsho5.zip"
     },
     {
       "title": "Art of Fighting 2",
+      "series": "Art of Fighting",
       "system": "fbneo",
       "bucket": "fbneo/aof2.zip"
     },
     {
       "title": "Fatal Fury 2",
+      "series": "Fatal Fury",
       "system": "fbneo",
       "bucket": "fbneo/fatfury2.zip"
     },
     {
       "title": "Fatal Fury 3",
+      "series": "Fatal Fury",
       "system": "fbneo",
       "bucket": "fbneo/fatfury3.zip"
     },
     {
       "title": "Real Bout Fatal Fury",
+      "series": "Fatal Fury",
       "system": "fbneo",
       "bucket": "fbneo/rbff1.zip"
     },
     {
       "title": "World Heroes",
+      "series": "World Heroes",
       "system": "fbneo",
       "bucket": "fbneo/wh1.zip"
     },
     {
       "title": "World Heroes 2",
+      "series": "World Heroes",
       "system": "fbneo",
       "bucket": "fbneo/wh2.zip"
     },
     {
       "title": "Street Fighter",
+      "series": "Street Fighter",
       "system": "fbneo",
       "bucket": "fbneo/sf.zip"
     },
     {
       "title": "Hyper Street Fighter II: The Anniversary Edition",
+      "series": "Street Fighter",
       "system": "fbneo",
       "bucket": "fbneo/hsf2.zip"
     },
     {
       "title": "Street Fighter Alpha 2",
+      "series": "Street Fighter",
       "system": "fbneo",
       "bucket": "fbneo/sfa2u.zip"
     },
     {
       "title": "Street Fighter III: New Generation",
+      "series": "Street Fighter",
       "system": "fbneo",
       "bucket": "fbneo/sfiiiu.zip"
     },
     {
       "title": "Street Fighter III 2nd Impact: Giant Attack",
+      "series": "Street Fighter",
       "system": "fbneo",
       "bucket": "fbneo/sfiii2.zip"
     },
@@ -460,41 +516,49 @@
     },
     {
       "title": "Street Fighter: The Movie",
+      "series": "Street Fighter",
       "system": "fbneo",
       "bucket": "fbneo/sftm.zip"
     },
     {
       "title": "Darkstalkers: The Night Warriors",
+      "series": "Darkstalkers",
       "system": "fbneo",
       "bucket": "fbneo/dstlku.zip"
     },
     {
       "title": "Night Warriors: Darkstalkers' Revenge",
+      "series": "Darkstalkers",
       "system": "fbneo",
       "bucket": "fbneo/nwarru.zip"
     },
     {
       "title": "Vampire Hunter 2",
+      "series": "Darkstalkers",
       "system": "fbneo",
       "bucket": "fbneo/vhunt2.zip"
     },
     {
       "title": "Vampire Savior 2",
+      "series": "Darkstalkers",
       "system": "fbneo",
       "bucket": "fbneo/vsav2.zip"
     },
     {
       "title": "X-Men: Children of the Atom",
+      "series": "X-Men",
       "system": "fbneo",
       "bucket": "fbneo/xmcotau.zip"
     },
     {
       "title": "Marvel Super Heroes vs. Street Fighter",
+      "series": "Marvel",
       "system": "fbneo",
       "bucket": "fbneo/mshvsfu.zip"
     },
     {
       "title": "Marvel vs. Capcom: Clash of Super Heroes",
+      "series": "Marvel",
       "system": "fbneo",
       "bucket": "fbneo/mvscu.zip"
     },
@@ -505,6 +569,7 @@
     },
     {
       "title": "JoJo's Bizarre Adventure: Heritage for the Future",
+      "series": "JoJo",
       "system": "fbneo",
       "bucket": "fbneo/jojoba.zip",
       "variants": [
@@ -531,66 +596,79 @@
     },
     {
       "title": "The King of Fighters '94",
+      "series": "King of Fighters",
       "system": "fbneo",
       "bucket": "fbneo/kof94.zip"
     },
     {
       "title": "Fatal Fury: King of Fighters",
+      "series": "Fatal Fury",
       "system": "fbneo",
       "bucket": "fbneo/fatfury1.zip"
     },
     {
       "title": "Fatal Fury Special",
+      "series": "Fatal Fury",
       "system": "fbneo",
       "bucket": "fbneo/fatfursp.zip"
     },
     {
       "title": "Real Bout Fatal Fury Special",
+      "series": "Fatal Fury",
       "system": "fbneo",
       "bucket": "fbneo/rbffspec.zip"
     },
     {
       "title": "Art of Fighting",
+      "series": "Art of Fighting",
       "system": "fbneo",
       "bucket": "fbneo/aof.zip"
     },
     {
       "title": "Art of Fighting 3",
+      "series": "Art of Fighting",
       "system": "fbneo",
       "bucket": "fbneo/aof3.zip"
     },
     {
       "title": "Samurai Shodown II",
+      "series": "Samurai Shodown",
       "system": "fbneo",
       "bucket": "fbneo/samsho2.zip"
     },
     {
       "title": "Samurai Shodown IV",
+      "series": "Samurai Shodown",
       "system": "fbneo",
       "bucket": "fbneo/samsho4.zip"
     },
     {
       "title": "Samurai Shodown V Special",
+      "series": "Samurai Shodown",
       "system": "fbneo",
       "bucket": "fbneo/samsh5sp.zip"
     },
     {
       "title": "World Heroes 2 Jet",
+      "series": "World Heroes",
       "system": "fbneo",
       "bucket": "fbneo/wh2j.zip"
     },
     {
       "title": "World Heroes Perfect",
+      "series": "World Heroes",
       "system": "fbneo",
       "bucket": "fbneo/whp.zip"
     },
     {
       "title": "The Last Blade 2",
+      "series": "Last Blade",
       "system": "fbneo",
       "bucket": "fbneo/lastbld2.zip"
     },
     {
       "title": "SNK vs. Capcom: SVC Chaos",
+      "series": "Capcom vs. SNK",
       "system": "fbneo",
       "bucket": "fbneo/svc.zip"
     },
@@ -641,6 +719,7 @@
     },
     {
       "title": "Double Dragon",
+      "series": "Double Dragon",
       "system": "fbneo",
       "bucket": "fbneo/doubledr.zip"
     },
@@ -716,6 +795,7 @@
     },
     {
       "title": "Mobile Suit Gundam: EX Revue",
+      "series": "Gundam",
       "system": "fbneo",
       "bucket": "fbneo/gundamex.zip"
     },
@@ -761,16 +841,19 @@
     },
     {
       "title": "Street Fighter Zero 2 Alpha",
+      "series": "Street Fighter",
       "system": "fbneo",
       "bucket": "fbneo/sfz2alj.zip"
     },
     {
       "title": "Dragon Ball Z",
+      "series": "Dragon Ball",
       "system": "fbneo",
       "bucket": "fbneo/dbz.zip"
     },
     {
       "title": "Dragon Ball Z 2: Super Battle",
+      "series": "Dragon Ball",
       "system": "fbneo",
       "bucket": "fbneo/dbz2.zip"
     },
@@ -791,6 +874,7 @@
     },
     {
       "title": "Avengers in Galactic Storm",
+      "series": "Marvel",
       "system": "fbneo",
       "bucket": "fbneo/avengrgs.zip"
     },
@@ -906,6 +990,7 @@
     },
     {
       "title": "Mobile Suit Gundam",
+      "series": "Gundam",
       "system": "fbneo",
       "bucket": "fbneo/msgundam.zip"
     },
@@ -931,11 +1016,13 @@
     },
     {
       "title": "Clay Fighter",
+      "series": "Clay Fighter",
       "system": "snes",
       "bucket": "snes/Clay Fighter (USA).zip"
     },
     {
       "title": "Teenage Mutant Ninja Turtles - Tournament Fighters",
+      "series": "Teenage Mutant Ninja Turtles",
       "system": "snes",
       "bucket": "snes/Teenage Mutant Ninja Turtles - Tournament Fighters (USA).zip"
     },
@@ -946,31 +1033,37 @@
     },
     {
       "title": "Mighty Morphin Power Rangers - The Fighting Edition",
+      "series": "Mighty Morphin Power Rangers",
       "system": "snes",
       "bucket": "snes/Mighty Morphin Power Rangers - The Fighting Edition (USA).zip"
     },
     {
       "title": "Gundam Wing: Endless Duel",
+      "series": "Gundam",
       "system": "snes",
       "bucket": "snes/Mobile Suit Gundam Wing - Endless Duel (Japan) [T-En by Aeon Genesis v1.00] [n].zip"
     },
     {
       "title": "Dragon Ball Z - Super Butouden 2",
+      "series": "Dragon Ball",
       "system": "snes",
       "bucket": "snes/Dragon Ball Z - Super Butouden 2 (Japan) (Rev 1).zip"
     },
     {
       "title": "Dragon Ball Z - Hyper Dimension",
+      "series": "Dragon Ball",
       "system": "snes",
       "bucket": "snes/Dragon Ball Z - Hyper Dimension (Japan) [T-En by Twilight Translations v1.00].zip"
     },
     {
       "title": "Bishoujo Senshi Sailor Moon S - Jougai Rantou! Shuyaku Soudatsusen",
+      "series": "Sailor Moon",
       "system": "snes",
       "bucket": "snes/Bishoujo Senshi Sailor Moon S - Jougai Rantou! Shuyaku Soudatsusen (Japan).zip"
     },
     {
       "title": "Clay Fighter 2 - Judgment Clay",
+      "series": "Clay Fighter",
       "system": "snes",
       "bucket": "snes/Clay Fighter 2 - Judgment Clay (USA).zip"
     },
@@ -1002,6 +1095,7 @@
     },
     {
       "title": "Doomsday Warrior",
+      "series": "Doom",
       "system": "snes",
       "bucket": "snes/Doomsday Warrior (USA).zip"
     },
@@ -1017,11 +1111,13 @@
     },
     {
       "title": "Double Dragon V - The Shadow Falls",
+      "series": "Double Dragon",
       "system": "snes",
       "bucket": "snes/Double Dragon V - The Shadow Falls (USA).zip"
     },
     {
       "title": "Ranma 1-2 - Hard Battle",
+      "series": "Ranma 1/2",
       "system": "snes",
       "bucket": "snes/Ranma 1-2 - Hard Battle (USA).zip"
     },
@@ -1042,6 +1138,7 @@
     },
     {
       "title": "Ultraman",
+      "series": "Ultraman",
       "system": "snes",
       "bucket": "snes/Ultraman (USA).zip"
     },
@@ -1052,16 +1149,19 @@
     },
     {
       "title": "Dragon Ball Z - Super Butouden",
+      "series": "Dragon Ball",
       "system": "snes",
       "bucket": "snes/Dragon Ball Z - La Legende Saien (France) [T-En by Commando Ginew v1.0] [i].zip"
     },
     {
       "title": "Dragon Ball Z - Super Butouden 3",
+      "series": "Dragon Ball",
       "system": "snes",
       "bucket": "snes/Dragon Ball Z - Ultime Menace (France) [T-En by Saiya Translations & Vice Translations v1.01] [i].zip"
     },
     {
       "title": "Kidou Butouden G Gundam",
+      "series": "Gundam",
       "system": "snes",
       "bucket": "snes/Mobile Fighter G Gundam (Japan) [T-En by Aeon Genesis v1.00] [n].zip"
     },
@@ -1072,21 +1172,25 @@
     },
     {
       "title": "Yu Yu Hakusho 2 - Kakutou no Shou",
+      "series": "Yu Yu Hakusho",
       "system": "snes",
       "bucket": "snes/Yu Yu Hakusho 2 - Kakutou no Shou (Japan).zip"
     },
     {
       "title": "Yu Yu Hakusho Final - Makai Saikyou Retsuden",
+      "series": "Yu Yu Hakusho",
       "system": "snes",
       "bucket": "snes/Yu Yu Hakusho Final - Makai Saikyou Retsuden (Japan).zip"
     },
     {
       "title": "Bishoujo Senshi Sailor Moon SuperS - Zenin Sanka!! Shuyaku Soudatsusen",
+      "series": "Sailor Moon",
       "system": "snes",
       "bucket": "snes/Bishoujo Senshi Sailor Moon SuperS - Zenin Sanka!! Shuyaku Soudatsusen (Japan).zip"
     },
     {
       "title": "Ranma 1-2 - Chougi Ranbu Hen",
+      "series": "Ranma 1/2",
       "system": "snes",
       "bucket": "snes/Ranma 1-2 - Hard Battle II Super Move Hustle (Japan) [T-En by Dynamic Designs v1.10] [n].zip"
     },
@@ -1117,6 +1221,7 @@
     },
     {
       "title": "Super Chinese Fighter",
+      "series": "Chinese Hero",
       "system": "snes",
       "bucket": "snes/Super Chinese Fighter (Japan) [T-En by DDSTranslation v1.0].zip"
     },
@@ -1148,16 +1253,19 @@
     },
     {
       "title": "Virtua Fighter 2",
+      "series": "Virtua Fighter",
       "system": "genesis",
       "bucket": "genesis/Virtua Fighter 2 (USA, Europe).zip"
     },
     {
       "title": "Teenage Mutant Ninja Turtles - Tournament Fighters",
+      "series": "Teenage Mutant Ninja Turtles",
       "system": "genesis",
       "bucket": "genesis/Teenage Mutant Ninja Turtles - Tournament Fighters (USA).zip"
     },
     {
       "title": "Yu Yu Hakusho - Makyou Toitsusen",
+      "series": "Yu Yu Hakusho",
       "system": "genesis",
       "bucket": "genesis/Yu Yu Hakusho - Makyou Toitsusen (Japan) [T-En by M.I.J.E.T. v071113].zip"
     },
@@ -1173,6 +1281,7 @@
     },
     {
       "title": "Mighty Morphin Power Rangers",
+      "series": "Mighty Morphin Power Rangers",
       "system": "genesis",
       "bucket": "genesis/Mighty Morphin Power Rangers (USA).zip"
     },
@@ -1183,6 +1292,7 @@
     },
     {
       "title": "Dragon Ball Z - Buyuu Retsuden",
+      "series": "Dragon Ball",
       "system": "genesis",
       "bucket": "genesis/Dragon Ball Z - L'Appel du Destin (France) [T-En by DBZ Game v0.95A].zip"
     },
@@ -1193,16 +1303,19 @@
     },
     {
       "title": "Super Smash Bros.",
+      "series": "Smash Bros",
       "system": "n64",
       "bucket": "n64/Super Smash Bros. (USA).zip"
     },
     {
       "title": "Mortal Kombat Trilogy",
+      "series": "Mortal Kombat",
       "system": "psx",
       "bucket": "psx/Mortal Kombat Trilogy (USA) (Rev 1).chd"
     },
     {
       "title": "Mortal Kombat 4",
+      "series": "Mortal Kombat",
       "system": "psx",
       "bucket": "psx/Mortal Kombat 4 (USA).chd",
       "variants": [
@@ -1224,6 +1337,7 @@
     },
     {
       "title": "Clay Fighter 63 1-3",
+      "series": "Clay Fighter",
       "system": "n64",
       "bucket": "n64/Clay Fighter 63 1-3 (USA).zip",
       "variants": [
@@ -1275,36 +1389,43 @@
     },
     {
       "title": "Super Robot Spirits",
+      "series": "Super Robot Wars",
       "system": "n64",
       "bucket": "n64/Super Robot Spirits (Japan).zip"
     },
     {
       "title": "Soulcalibur III",
+      "series": "Soulcalibur",
       "system": "ps2",
       "bucket": "ps2/Soulcalibur III (USA).chd"
     },
     {
       "title": "Tekken 4",
+      "series": "Tekken",
       "system": "ps2",
       "bucket": "ps2/Tekken 4 (USA).chd"
     },
     {
       "title": "Tekken 5",
+      "series": "Tekken",
       "system": "ps2",
       "bucket": "ps2/Tekken 5 (USA).chd"
     },
     {
       "title": "Virtua Fighter 4: Evolution",
+      "series": "Virtua Fighter",
       "system": "ps2",
       "bucket": "ps2/Virtua Fighter 4 - Evolution (USA).chd"
     },
     {
       "title": "Guilty Gear XX Accent Core Plus",
+      "series": "Guilty Gear",
       "system": "ps2",
       "bucket": "ps2/Guilty Gear XX Accent Core Plus (USA).chd"
     },
     {
       "title": "Capcom vs. SNK 2",
+      "series": "Capcom vs. SNK",
       "system": "ps2",
       "bucket": "ps2/Capcom vs. SNK 2 - Mark of the Millennium 2001 (USA).chd",
       "variants": [
@@ -1316,21 +1437,25 @@
     },
     {
       "title": "The King of Fighters XI",
+      "series": "King of Fighters",
       "system": "ps2",
       "bucket": "ps2/King of Fighters XI, The (USA, Canada).chd"
     },
     {
       "title": "Soulcalibur II",
+      "series": "Soulcalibur",
       "system": "gc",
       "bucket": "gc/Soulcalibur II (USA).rvz"
     },
     {
       "title": "Super Smash Bros. Melee (Rev 2)",
+      "series": "Smash Bros",
       "system": "gc",
       "bucket": "gc/Super Smash Bros. Melee (USA) (En,Ja) (Rev 2).rvz"
     },
     {
       "title": "Mortal Kombat - Deception",
+      "series": "Mortal Kombat",
       "system": "gc",
       "bucket": "gc/Mortal Kombat - Deception (USA).rvz",
       "variants": [
@@ -1342,11 +1467,13 @@
     },
     {
       "title": "Mortal Kombat - Deadly Alliance (Rev 1)",
+      "series": "Mortal Kombat",
       "system": "gc",
       "bucket": "gc/Mortal Kombat - Deadly Alliance (USA) (Rev 1).rvz"
     },
     {
       "title": "Bloody Roar - Primal Fury",
+      "series": "Bloody Roar",
       "system": "gc",
       "bucket": "gc/Bloody Roar - Primal Fury (USA).rvz"
     },
@@ -1357,41 +1484,49 @@
     },
     {
       "title": "Dragon Ball Z - Budokai",
+      "series": "Dragon Ball",
       "system": "gc",
       "bucket": "gc/Dragon Ball Z - Budokai (USA).rvz"
     },
     {
       "title": "Dragon Ball Z - Budokai 2",
+      "series": "Dragon Ball",
       "system": "gc",
       "bucket": "gc/Dragon Ball Z - Budokai 2 (USA).rvz"
     },
     {
       "title": "Naruto - Clash of Ninja",
+      "series": "Naruto",
       "system": "gc",
       "bucket": "gc/Naruto - Clash of Ninja (USA).rvz"
     },
     {
       "title": "Naruto - Clash of Ninja 2",
+      "series": "Naruto",
       "system": "gc",
       "bucket": "gc/Naruto - Clash of Ninja 2 (USA).rvz"
     },
     {
       "title": "Digimon Rumble Arena 2",
+      "series": "Digimon",
       "system": "gc",
       "bucket": "gc/Digimon Rumble Arena 2 (USA).rvz"
     },
     {
       "title": "Godzilla - Destroy All Monsters Melee",
+      "series": "Godzilla",
       "system": "gc",
       "bucket": "gc/Godzilla - Destroy All Monsters Melee (USA).rvz"
     },
     {
       "title": "X-Men - Next Dimension",
+      "series": "X-Men",
       "system": "gc",
       "bucket": "gc/X-Men - Next Dimension (USA).rvz"
     },
     {
       "title": "Marvel Nemesis - Rise of the Imperfects",
+      "series": "Marvel",
       "system": "gc",
       "bucket": "gc/Marvel Nemesis - Rise of the Imperfects (USA).rvz"
     },
@@ -1417,16 +1552,19 @@
     },
     {
       "title": "Guilty Gear - Dust Strikers",
+      "series": "Guilty Gear",
       "system": "nds",
       "bucket": "nds/Guilty Gear - Dust Strikers (USA).zip"
     },
     {
       "title": "Bleach - The Blade of Fate",
+      "series": "Bleach",
       "system": "nds",
       "bucket": "nds/Bleach - The Blade of Fate (USA).zip"
     },
     {
       "title": "Bleach - Dark Souls",
+      "series": "Bleach",
       "system": "nds",
       "bucket": "nds/Bleach - Dark Souls (USA).zip"
     },
@@ -1437,6 +1575,7 @@
     },
     {
       "title": "Dragon Ball Z - Supersonic Warriors 2",
+      "series": "Dragon Ball",
       "system": "nds",
       "bucket": "nds/Dragon Ball Z - Supersonic Warriors 2 (USA).zip"
     },
@@ -1452,46 +1591,55 @@
     },
     {
       "title": "Naruto - Ninja Destiny",
+      "series": "Naruto",
       "system": "nds",
       "bucket": "nds/Naruto - Ninja Destiny (USA) (En,Fr).zip"
     },
     {
       "title": "Naruto Shippuden - Ninja Destiny 2",
+      "series": "Naruto",
       "system": "nds",
       "bucket": "nds/Naruto Shippuden - Ninja Destiny 2 (USA).zip"
     },
     {
       "title": "Naruto Shippuden - Shinobi Rumble!!",
+      "series": "Naruto",
       "system": "nds",
       "bucket": "nds/Naruto Shippuden - Shinobi Rumble!! (USA).zip"
     },
     {
       "title": "One Piece - Gigant Battle!",
+      "series": "One Piece",
       "system": "nds",
       "bucket": "nds/One Piece - Gigant Battle! (Europe).zip"
     },
     {
       "title": "One Piece - Gear Spirit",
+      "series": "One Piece",
       "system": "nds",
       "bucket": "nds/One Piece - Gear Spirit (Japan).zip"
     },
     {
       "title": "Bleach DS 4th - Flame Bringer",
+      "series": "Bleach",
       "system": "nds",
       "bucket": "nds/Bleach DS 4th - Flame Bringer (Japan).zip"
     },
     {
       "title": "Dragon Ball Kai - Ultimate Butou Den",
+      "series": "Dragon Ball",
       "system": "nds",
       "bucket": "nds/Dragon Ball Kai - Ultimate Butou Den (Japan).zip"
     },
     {
       "title": "Marvel Nemesis - Rise of the Imperfects",
+      "series": "Marvel",
       "system": "nds",
       "bucket": "nds/Marvel Nemesis - Rise of the Imperfects (USA).zip"
     },
     {
       "title": "Virtua Fighter 2",
+      "series": "Virtua Fighter",
       "system": "saturn",
       "bucket": "saturn/Virtua Fighter 2 (USA) (RE).chd"
     },
@@ -1522,16 +1670,19 @@
     },
     {
       "title": "Dragon Ball Z - Shinbutouden",
+      "series": "Dragon Ball",
       "system": "saturn",
       "bucket": "saturn/Dragon Ball Z - Shinbutouden (Japan).chd"
     },
     {
       "title": "Street Fighter - The Movie",
+      "series": "Street Fighter",
       "system": "psx",
       "bucket": "psx/Street Fighter - The Movie (USA).chd"
     },
     {
       "title": "Battle Arena Toshinden",
+      "series": "Battle Arena Toshinden",
       "system": "psx",
       "bucket": "psx/Battle Arena Toshinden (USA).chd",
       "variants": [
@@ -1543,6 +1694,7 @@
     },
     {
       "title": "Battle Arena Toshinden URA - Ultimate Revenge Attack",
+      "series": "Battle Arena Toshinden",
       "system": "saturn",
       "bucket": "saturn/Battle Arena Toshinden URA - Ultimate Revenge Attack (USA).chd"
     },
@@ -1568,6 +1720,7 @@
     },
     {
       "title": "Zero Divide - The Final Conflict",
+      "series": "Zero Divide",
       "system": "saturn",
       "bucket": "saturn/Zero Divide - The Final Conflict (Japan).chd"
     },
@@ -1604,36 +1757,43 @@
     },
     {
       "title": "Bishoujo Senshi Sailor Moon SuperS - Various Emotion",
+      "series": "Sailor Moon",
       "system": "saturn",
       "bucket": "saturn/Bishoujo Senshi Sailor Moon SuperS - Various Emotion (Japan).chd"
     },
     {
       "title": "Dragon Ball Z - Idainaru Dragon Ball Densetsu",
+      "series": "Dragon Ball",
       "system": "saturn",
       "bucket": "saturn/Dragon Ball Z - Idainaru Dragon Ball Densetsu (Japan).chd"
     },
     {
       "title": "Tekken - Dark Resurrection (En,Fr,De,Es,It)",
+      "series": "Tekken",
       "system": "psp",
       "bucket": "psp/Tekken - Dark Resurrection (USA) (En,Fr,De,Es,It).chd"
     },
     {
       "title": "Tekken 6",
+      "series": "Tekken",
       "system": "xbox360",
       "bucket": "xbox360/Tekken 6 (World) (En,Ja,Fr,De,Es,It,Ko,Ru).zar"
     },
     {
       "title": "Soulcalibur - Broken Destiny (En,Ja,Fr,De,Es,It,Ru)",
+      "series": "Soulcalibur",
       "system": "psp",
       "bucket": "psp/Soulcalibur - Broken Destiny (USA) (En,Ja,Fr,De,Es,It,Ru).chd"
     },
     {
       "title": "BlazBlue - Calamity Trigger (En,Ja,Zh,Ko)",
+      "series": "BlazBlue",
       "system": "psp",
       "bucket": "psp/BlazBlue - Calamity Trigger (USA) (En,Ja,Zh,Ko).chd"
     },
     {
       "title": "BlazBlue - Continuum Shift II (En,Ja,Zh,Ko)",
+      "series": "BlazBlue",
       "system": "psp",
       "bucket": "psp/BlazBlue - Continuum Shift II (USA) (En,Ja,Zh,Ko).chd",
       "variants": [
@@ -1645,26 +1805,31 @@
     },
     {
       "title": "Guilty Gear Judgment",
+      "series": "Guilty Gear",
       "system": "psp",
       "bucket": "psp/Guilty Gear Judgment (USA).chd"
     },
     {
       "title": "Dragon Ball Z - Shin Budokai",
+      "series": "Dragon Ball",
       "system": "psp",
       "bucket": "psp/Dragon Ball Z - Shin Budokai (USA).chd"
     },
     {
       "title": "Dragon Ball Z - Shin Budokai - Another Road",
+      "series": "Dragon Ball",
       "system": "psp",
       "bucket": "psp/Dragon Ball Z - Shin Budokai - Another Road (USA).chd"
     },
     {
       "title": "Dragon Ball Z - Tenkaichi Tag Team",
+      "series": "Dragon Ball",
       "system": "psp",
       "bucket": "psp/Dragon Ball Z - Tenkaichi Tag Team (USA) (En,Fr,Es).chd"
     },
     {
       "title": "Dissidia Final Fantasy",
+      "series": "Final Fantasy",
       "system": "psp",
       "bucket": "psp/Dissidia Final Fantasy (USA).chd"
     },
@@ -1675,21 +1840,25 @@
     },
     {
       "title": "Naruto Shippuden - Ultimate Ninja Heroes 3",
+      "series": "Naruto",
       "system": "psp",
       "bucket": "psp/Naruto Shippuden - Ultimate Ninja Heroes 3 (USA).chd"
     },
     {
       "title": "Naruto - Ultimate Ninja Heroes",
+      "series": "Naruto",
       "system": "psp",
       "bucket": "psp/Naruto - Ultimate Ninja Heroes (USA).chd"
     },
     {
       "title": "Naruto - Ultimate Ninja Heroes 2 - The Phantom Fortress",
+      "series": "Naruto",
       "system": "psp",
       "bucket": "psp/Naruto - Ultimate Ninja Heroes 2 - The Phantom Fortress (USA).chd"
     },
     {
       "title": "Bleach - Heat the Soul 7",
+      "series": "Bleach",
       "system": "psp",
       "bucket": "psp/Bleach - Heat the Soul 7 (Japan).chd"
     },
@@ -1700,26 +1869,31 @@
     },
     {
       "title": "Tales of VS",
+      "series": "Tales of",
       "system": "psp",
       "bucket": "psp/Tales of VS (Japan).chd"
     },
     {
       "title": "Hokuto no Ken - Raoh Gaiden - Ten no Haoh",
+      "series": "Fist of the North Star",
       "system": "psp",
       "bucket": "psp/Hokuto no Ken - Raoh Gaiden - Ten no Haoh (Japan).chd"
     },
     {
       "title": "Ultraman Fighting Evolution Zero",
+      "series": "Ultraman",
       "system": "psp",
       "bucket": "psp/Ultraman Fighting Evolution Zero (Japan).chd"
     },
     {
       "title": "Soul Eater - Battle Resonance",
+      "series": "Soul Eater",
       "system": "psp",
       "bucket": "psp/Soul Eater - Battle Resonance (Japan) [T-En by Anime Game Translations Team v1.0].chd"
     },
     {
       "title": "Kidou Senshi Gundam - Gundam vs. Gundam NEXT PLUS",
+      "series": "Gundam",
       "system": "psp",
       "bucket": "psp/Kidou Senshi Gundam - Gundam vs. Gundam NEXT PLUS (Japan) [T-En by DaTeHaCKs Team v1.5].chd"
     },
@@ -1730,16 +1904,19 @@
     },
     {
       "title": "Guilty Gear",
+      "series": "Guilty Gear",
       "system": "psx",
       "bucket": "psx/Guilty Gear (USA) (Rev 1).chd"
     },
     {
       "title": "Bloody Roar II",
+      "series": "Bloody Roar",
       "system": "psx",
       "bucket": "psx/Bloody Roar II (USA).chd"
     },
     {
       "title": "Capcom vs. SNK",
+      "series": "Capcom vs. SNK",
       "system": "dreamcast",
       "bucket": "dreamcast/Capcom vs. SNK (USA).chd",
       "variants": [
@@ -1756,26 +1933,31 @@
     },
     {
       "title": "Battle Arena Toshinden 3",
+      "series": "Battle Arena Toshinden",
       "system": "psx",
       "bucket": "psx/Battle Arena Toshinden 3 (USA) (En,Ja).chd"
     },
     {
       "title": "Fatal Fury: Wild Ambition",
+      "series": "Fatal Fury",
       "system": "psx",
       "bucket": "psx/Fatal Fury - Wild Ambition (USA).chd"
     },
     {
       "title": "Zero Divide",
+      "series": "Zero Divide",
       "system": "psx",
       "bucket": "psx/Zero Divide (USA).chd"
     },
     {
       "title": "Gundam Battle Assault 2",
+      "series": "Gundam",
       "system": "psx",
       "bucket": "psx/Gundam Battle Assault 2 (USA).chd"
     },
     {
       "title": "Samurai Shodown - Warriors Rage",
+      "series": "Samurai Shodown",
       "system": "psx",
       "bucket": "psx/Samurai Shodown - Warriors Rage (USA).chd"
     },
@@ -1786,6 +1968,7 @@
     },
     {
       "title": "Gundam Battle Assault",
+      "series": "Gundam",
       "system": "psx",
       "bucket": "psx/Gundam Battle Assault (USA).chd"
     },
@@ -1806,26 +1989,31 @@
     },
     {
       "title": "Dragon Ball GT - Final Bout",
+      "series": "Dragon Ball",
       "system": "psx",
       "bucket": "psx/Dragon Ball GT - Final Bout (USA).chd"
     },
     {
       "title": "X-Men - Mutant Academy",
+      "series": "X-Men",
       "system": "psx",
       "bucket": "psx/X-Men - Mutant Academy (USA).chd"
     },
     {
       "title": "X-Men - Mutant Academy 2",
+      "series": "X-Men",
       "system": "psx",
       "bucket": "psx/X-Men - Mutant Academy 2 (USA).chd"
     },
     {
       "title": "Digimon Rumble Arena",
+      "series": "Digimon",
       "system": "psx",
       "bucket": "psx/Digimon Rumble Arena (USA).chd"
     },
     {
       "title": "Dynasty Warriors",
+      "series": "Dynasty Warriors",
       "system": "psx",
       "bucket": "psx/Dynasty Warriors (USA).chd"
     },
@@ -1841,6 +2029,7 @@
     },
     {
       "title": "Star Wars - Masters of Teras Kasi",
+      "series": "Star Wars",
       "system": "psx",
       "bucket": "psx/Star Wars - Masters of Teras Kasi (USA).chd"
     },
@@ -1861,11 +2050,13 @@
     },
     {
       "title": "Advanced Dungeons & Dragons - Iron & Blood - Warriors of Ravenloft",
+      "series": "Dungeons & Dragons",
       "system": "psx",
       "bucket": "psx/Advanced Dungeons & Dragons - Iron & Blood - Warriors of Ravenloft (USA).chd"
     },
     {
       "title": "Dragon Ball Z - Ultimate Battle 22",
+      "series": "Dragon Ball",
       "system": "psx",
       "bucket": "psx/Dragon Ball Z - Ultimate Battle 22 (USA).chd"
     },
@@ -1881,6 +2072,7 @@
     },
     {
       "title": "Dead or Alive 2",
+      "series": "Dead or Alive",
       "system": "dreamcast",
       "bucket": "dreamcast/Dead or Alive 2 (USA).chd",
       "variants": [
@@ -1892,51 +2084,61 @@
     },
     {
       "title": "Dragon Ball Z: Budokai 3",
+      "series": "Dragon Ball",
       "system": "ps2",
       "bucket": "ps2/Dragon Ball Z - Budokai 3 (USA).chd"
     },
     {
       "title": "Mortal Kombat: Armageddon",
+      "series": "Mortal Kombat",
       "system": "ps2",
       "bucket": "ps2/Mortal Kombat - Armageddon (USA).chd"
     },
     {
       "title": "Samurai Shodown Anthology",
+      "series": "Samurai Shodown",
       "system": "ps2",
       "bucket": "ps2/Samurai Shodown Anthology (USA, Canada).chd"
     },
     {
       "title": "Guilty Gear X",
+      "series": "Guilty Gear",
       "system": "ps2",
       "bucket": "ps2/Guilty Gear X (USA).chd"
     },
     {
       "title": "Guilty Gear Isuka",
+      "series": "Guilty Gear",
       "system": "ps2",
       "bucket": "ps2/Guilty Gear Isuka (USA).chd"
     },
     {
       "title": "The King of Fighters 2006",
+      "series": "King of Fighters",
       "system": "ps2",
       "bucket": "ps2/King of Fighters 2006, The (USA).chd"
     },
     {
       "title": "Marvel vs. Capcom 2",
+      "series": "Marvel",
       "system": "dreamcast",
       "bucket": "dreamcast/Marvel vs. Capcom 2 (USA).chd"
     },
     {
       "title": "Street Fighter Alpha Anthology",
+      "series": "Street Fighter",
       "system": "ps2",
       "bucket": "ps2/Street Fighter Alpha Anthology (USA).chd"
     },
     {
       "title": "Street Fighter EX3",
+      "series": "Street Fighter",
       "system": "ps2",
       "bucket": "ps2/Street Fighter EX3 (USA).chd"
     },
     {
       "title": "Super Smash Bros. Brawl",
+      "series": "Smash Bros",
       "system": "wii",
       "bucket": "wii/Super Smash Bros. Brawl (USA) (Rev 2).rvz"
     },
@@ -1952,16 +2154,19 @@
     },
     {
       "title": "Power Stone",
+      "series": "Power Stone",
       "system": "dreamcast",
       "bucket": "dreamcast/Power Stone (USA).chd"
     },
     {
       "title": "Power Stone 2",
+      "series": "Power Stone",
       "system": "dreamcast",
       "bucket": "dreamcast/Power Stone 2 (USA).chd"
     },
     {
       "title": "Virtua Fighter 3tb",
+      "series": "Virtua Fighter",
       "system": "dreamcast",
       "bucket": "dreamcast/Virtua Fighter 3tb (USA).chd"
     },
@@ -1997,6 +2202,7 @@
     },
     {
       "title": "Dead or Alive 3",
+      "series": "Dead or Alive",
       "system": "xbox",
       "bucket": "xbox/Dead or Alive 3 (USA) (En,Ja).iso"
     },
@@ -2007,26 +2213,31 @@
     },
     {
       "title": "SNK vs. Capcom: The Match of the Millennium",
+      "series": "Capcom vs. SNK",
       "system": "ngpc",
       "bucket": "ngpc/SNK vs. Capcom - The Match of the Millennium (World) (En,Ja).zip"
     },
     {
       "title": "King of Fighters R-2",
+      "series": "King of Fighters",
       "system": "ngpc",
       "bucket": "ngpc/King of Fighters R-2 - Pocket Fighting Series (World) (En,Ja).zip"
     },
     {
       "title": "Samurai Shodown! 2",
+      "series": "Samurai Shodown",
       "system": "ngpc",
       "bucket": "ngpc/Samurai Shodown! 2 - Pocket Fighting Series (World) (En,Ja).zip"
     },
     {
       "title": "The Last Blade: Beyond the Destiny",
+      "series": "Last Blade",
       "system": "ngpc",
       "bucket": "ngpc/Last Blade, The - Beyond the Destiny (USA, Europe).zip"
     },
     {
       "title": "Fatal Fury F-Contact - Pocket Fighting Series",
+      "series": "Fatal Fury",
       "system": "ngpc",
       "bucket": "ngpc/Fatal Fury F-Contact - Pocket Fighting Series (World) (En,Ja).zip"
     },
@@ -2037,6 +2248,7 @@
     },
     {
       "title": "Super Smash Bros. for Wii U",
+      "series": "Smash Bros",
       "system": "wiiu",
       "bucket": "wiiu/Super Smash Bros. (US) (v304).wua",
       "variants": [
@@ -2058,66 +2270,79 @@
     },
     {
       "title": "Ultra Street Fighter IV",
+      "series": "Street Fighter",
       "system": "xbox360",
       "bucket": "xbox360/Ultra Street Fighter IV (World) (En,Ja,Fr,De,Es,It,Ko).zar"
     },
     {
       "title": "Tekken Tag Tournament 2",
+      "series": "Tekken",
       "system": "xbox360",
       "bucket": "xbox360/Tekken Tag Tournament 2 (USA, Europe).zar"
     },
     {
       "title": "Virtua Fighter 5 Online",
+      "series": "Virtua Fighter",
       "system": "xbox360",
       "bucket": "xbox360/Virtua Fighter 5 Online ~ Virtua Fighter 5 (USA, Europe) (En,Ja,Fr,De,Es,It).zar"
     },
     {
       "title": "Persona 4 Arena",
+      "series": "Persona",
       "system": "xbox360",
       "bucket": "xbox360/Persona 4 Arena (USA).zar"
     },
     {
       "title": "Tekken Advance",
+      "series": "Tekken",
       "system": "gba",
       "bucket": "gba/Tekken Advance (USA).zip"
     },
     {
       "title": "The King of Fighters EX - NeoBlood",
+      "series": "King of Fighters",
       "system": "gba",
       "bucket": "gba/King of Fighters EX, The - NeoBlood (USA) (Rev 1).zip"
     },
     {
       "title": "The King of Fighters EX 2 - Howling Blood",
+      "series": "King of Fighters",
       "system": "gba",
       "bucket": "gba/King of Fighters EX 2, The - Howling Blood (USA).zip"
     },
     {
       "title": "Mortal Kombat - Deadly Alliance",
+      "series": "Mortal Kombat",
       "system": "gba",
       "bucket": "gba/Mortal Kombat - Deadly Alliance (USA) (En,Fr,De,Es,It).zip"
     },
     {
       "title": "Mortal Kombat - Tournament Edition",
+      "series": "Mortal Kombat",
       "system": "gba",
       "bucket": "gba/Mortal Kombat - Tournament Edition (USA) (En,Fr,De,Es,It).zip"
     },
     {
       "title": "Dragon Ball Z - Supersonic Warriors",
+      "series": "Dragon Ball",
       "system": "gba",
       "bucket": "gba/Dragon Ball Z - Supersonic Warriors (USA).zip"
     },
     {
       "title": "Sonic Battle",
+      "series": "Sonic",
       "system": "gba",
       "bucket": "gba/Sonic Battle (USA) (En,Ja,Fr,De,Es,It).zip"
     },
     {
       "title": "Dragon Ball Z - Taiketsu",
+      "series": "Dragon Ball",
       "system": "gba",
       "bucket": "gba/Dragon Ball Z - Taiketsu (USA).zip"
     },
     {
       "title": "Mobile Suit Gundam Seed - Battle Assault",
+      "series": "Gundam",
       "system": "gba",
       "bucket": "gba/Mobile Suit Gundam Seed - Battle Assault (USA).zip"
     },
@@ -2148,16 +2373,19 @@
     },
     {
       "title": "The King of Fighters '95",
+      "series": "King of Fighters",
       "system": "gb",
       "bucket": "gb/King of Fighters '95, The (USA) (SGB Enhanced).zip"
     },
     {
       "title": "The King of Fighters - Heat of Battle",
+      "series": "King of Fighters",
       "system": "gb",
       "bucket": "gb/King of Fighters, The - Heat of Battle (Europe) (SGB Enhanced).zip"
     },
     {
       "title": "Battle Arena Toshinden",
+      "series": "Battle Arena Toshinden",
       "system": "gb",
       "bucket": "gb/Battle Arena Toshinden (USA) (SGB Enhanced).zip"
     },
@@ -2168,16 +2396,19 @@
     },
     {
       "title": "Super Chinese Fighter GB",
+      "series": "Chinese Hero",
       "system": "gb",
       "bucket": "gb/Super Chinese Fighter GB (Japan) (SGB Enhanced).zip"
     },
     {
       "title": "Yu Yu Hakusho Dai-3-dan - Makai no Tobira Hen",
+      "series": "Yu Yu Hakusho",
       "system": "gb",
       "bucket": "gb/Yu Yu Hakusho Dai-3-dan - Makai no Tobira Hen (Japan).zip"
     },
     {
       "title": "X-Men - Mutant Academy",
+      "series": "X-Men",
       "system": "gbc",
       "bucket": "gbc/X-Men - Mutant Academy (USA, Europe) (Rev 1).zip"
     },
@@ -2188,6 +2419,7 @@
     },
     {
       "title": "Super Chinese Fighter EX",
+      "series": "Chinese Hero",
       "system": "gbc",
       "bucket": "gbc/Super Chinese Fighter EX (Japan) [T-En by Some Good Shit Translations v0.99].zip"
     },
@@ -2198,6 +2430,7 @@
     },
     {
       "title": "Teenage Mutant Ninja Turtles - Tournament Fighters",
+      "series": "Teenage Mutant Ninja Turtles",
       "system": "nes",
       "bucket": "nes/Teenage Mutant Ninja Turtles - Tournament Fighters (USA).zip"
     },
@@ -2213,21 +2446,25 @@
     },
     {
       "title": "Nekketsu Kakutou Densetsu",
+      "series": "Kunio-kun",
       "system": "nes",
       "bucket": "nes/Kunio Tournament (Japan) [T-En by ReptilianCicilian v1.1] [n].zip"
     },
     {
       "title": "Virtua Fighter Animation",
+      "series": "Virtua Fighter",
       "system": "gamegear",
       "bucket": "gamegear/Virtua Fighter Animation (USA, Europe).zip"
     },
     {
       "title": "Bishoujo Senshi Sailor Moon S",
+      "series": "Sailor Moon",
       "system": "gamegear",
       "bucket": "gamegear/Pretty Soldier Sailor Moon S (Japan) [T-En by Supper v1.1] [n].zip"
     },
     {
       "title": "Yu Yu Hakusho II - Gekitou! Nanakyou no Tatakai",
+      "series": "Yu Yu Hakusho",
       "system": "gamegear",
       "bucket": "gamegear/Yu Yu Hakusho II - Battle of the 7 Fighters (Japan) [T-En by Gaijin Productions v1.10] [n].zip"
     },
@@ -2253,6 +2490,7 @@
     },
     {
       "title": "Ranma 1-2 - Datou, Ganso Musabetsu Kakutou-ryuu!",
+      "series": "Ranma 1/2",
       "system": "tg-cd",
       "bucket": "tg-cd/Ranma 1-2 - Datou, Ganso Musabetsu Kakutou-ryuu! (Japan).chd"
     },
@@ -2263,36 +2501,43 @@
     },
     {
       "title": "Godzilla",
+      "series": "Godzilla",
       "system": "tg-cd",
       "bucket": "tg-cd/Godzilla (USA).chd"
     },
     {
       "title": "King of Fighters R-1 - Pocket Fighting Series",
+      "series": "King of Fighters",
       "system": "ngp",
       "bucket": "ngp/King of Fighters R-1 - Pocket Fighting Series (Japan, Europe) (En,Ja).zip"
     },
     {
       "title": "Samurai Shodown! - Pocket Fighting Series",
+      "series": "Samurai Shodown",
       "system": "ngp",
       "bucket": "ngp/Samurai Shodown! - Pocket Fighting Series (Japan, Europe) (En,Ja).zip"
     },
     {
       "title": "Guilty Gear Petit",
+      "series": "Guilty Gear",
       "system": "wonderswancolor",
       "bucket": "wonderswancolor/Guilty Gear Petit (Japan).zip"
     },
     {
       "title": "Guilty Gear Petit 2",
+      "series": "Guilty Gear",
       "system": "wonderswancolor",
       "bucket": "wonderswancolor/Guilty Gear Petit 2 (Japan).zip"
     },
     {
       "title": "One Piece: Grand Battle Swan Colosseum",
+      "series": "One Piece",
       "system": "wonderswancolor",
       "bucket": "wonderswancolor/From TV Animation One Piece - Grand Battle Swan Colosseum (Japan).zip"
     },
     {
       "title": "Digimon Tamers - Battle Spirit",
+      "series": "Digimon",
       "system": "wonderswancolor",
       "bucket": "wonderswancolor/Digimon Tamers - Battle Spirit (Japan, Korea) (En,Ja).zip",
       "variants": [
@@ -2304,26 +2549,31 @@
     },
     {
       "title": "Tekken 3D - Prime Edition",
+      "series": "Tekken",
       "system": "3ds",
       "bucket": "3ds/Tekken 3D - Prime Edition (USA) (En,Fr,Es).zip"
     },
     {
       "title": "Dead or Alive - Dimensions",
+      "series": "Dead or Alive",
       "system": "3ds",
       "bucket": "3ds/Dead or Alive - Dimensions (USA) (En,Ja,Fr,De,Es,It).zip"
     },
     {
       "title": "Dragon Ball Z - Extreme Butoden",
+      "series": "Dragon Ball",
       "system": "3ds",
       "bucket": "3ds/Dragon Ball Z - Extreme Butoden (USA).zip"
     },
     {
       "title": "One Piece - Dai Kaizoku Colosseum",
+      "series": "One Piece",
       "system": "3ds",
       "bucket": "3ds/One Piece - Dai Kaizoku Colosseum (Japan).zip"
     },
     {
       "title": "Cartoon Network - Punch Time Explosion",
+      "series": "Cartoon Network",
       "system": "3ds",
       "bucket": "3ds/Cartoon Network - Punch Time Explosion (USA).zip"
     },
@@ -2359,16 +2609,19 @@
     },
     {
       "title": "One Piece Gigant Battle 2 - Shin Sekai",
+      "series": "One Piece",
       "system": "nds",
       "bucket": "nds/One Piece Gigant Battle 2 - Shin Sekai (Japan) (Rev 1).zip"
     },
     {
       "title": "Star Gladiator 2: Nightmare of Bilstein",
+      "series": "Star Gladiator",
       "system": "mame",
       "bucket": "mame/sg2j.zip"
     },
     {
       "title": "Dragon Ball Z V.r.v.s.",
+      "series": "Dragon Ball",
       "system": "fbneo",
       "bucket": "fbneo/dbzvrvs.zip"
     },
@@ -2394,6 +2647,7 @@
     },
     {
       "title": "BLAZBLUE CP EXTEND",
+      "series": "BlazBlue",
       "system": "psvita",
       "bucket": "psvita/BLAZBLUE CP EXTEND [PCSE00677] [USA] [NoNpDRM].zip"
     },
@@ -2434,6 +2688,7 @@
     },
     {
       "title": "Touhou Kobuto V - Burst Battle",
+      "series": "Touhou",
       "system": "psvita",
       "bucket": "psvita/Touhou Kobuto V - Burst Battle [PCSE01104] [USA] [NoNpDRM].zip"
     },
@@ -2454,11 +2709,13 @@
     },
     {
       "title": "DreamWorks Shrek - SuperSlam",
+      "series": "DreamWorks",
       "system": "gc",
       "bucket": "gc/DreamWorks Shrek - SuperSlam (USA).rvz"
     },
     {
       "title": "Viewtiful Joe - Red Hot Rumble",
+      "series": "Viewtiful Joe",
       "system": "gc",
       "bucket": "gc/Viewtiful Joe - Red Hot Rumble (USA).rvz"
     }

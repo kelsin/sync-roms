@@ -4,6 +4,7 @@
   "games": [
     {
       "title": "Resident Evil 2 - Dual Shock Ver.",
+      "series": "Resident Evil",
       "system": "psx",
       "bucket": "psx/Resident Evil 2 - Dual Shock Ver. (USA).m3u",
       "files": [
@@ -19,11 +20,13 @@
     },
     {
       "title": "Resident Evil 3 - Nemesis",
+      "series": "Resident Evil",
       "system": "psx",
       "bucket": "psx/Resident Evil 3 - Nemesis (USA).chd"
     },
     {
       "title": "Resident Evil - Director's Cut - Dual Shock Ver.",
+      "series": "Resident Evil",
       "system": "psx",
       "bucket": "psx/Resident Evil - Director's Cut - Dual Shock Ver. (USA).chd",
       "variants": [
@@ -39,31 +42,37 @@
     },
     {
       "title": "Resident Evil - Survivor",
+      "series": "Resident Evil",
       "system": "psx",
       "bucket": "psx/Resident Evil - Survivor (USA).chd"
     },
     {
       "title": "Resident Evil 2",
+      "series": "Resident Evil",
       "system": "gamecom",
       "bucket": "gamecom/Resident Evil 2 (USA).zip"
     },
     {
       "title": "Resident Evil Gaiden",
+      "series": "Resident Evil",
       "system": "gbc",
       "bucket": "gbc/Resident Evil Gaiden (USA).zip"
     },
     {
       "title": "Resident Evil - Revelations (Rev 1)",
+      "series": "Resident Evil",
       "system": "3ds",
       "bucket": "3ds/Resident Evil - Revelations (USA) (En,Ja,Fr,De,Es,It) (Rev 1).zip"
     },
     {
       "title": "Resident Evil - The Mercenaries 3D (Rev 1)",
+      "series": "Resident Evil",
       "system": "3ds",
       "bucket": "3ds/Resident Evil - The Mercenaries 3D (USA) (En,Fr) (Rev 1).zip"
     },
     {
       "title": "Resident Evil",
+      "series": "Resident Evil",
       "system": "gc",
       "bucket": "gc/Resident Evil (USA).m3u",
       "files": [
@@ -73,6 +82,7 @@
     },
     {
       "title": "Resident Evil Zero",
+      "series": "Resident Evil",
       "system": "gc",
       "bucket": "gc/Resident Evil Zero (USA).m3u",
       "files": [
@@ -82,6 +92,7 @@
     },
     {
       "title": "Resident Evil - Code - Veronica",
+      "series": "Resident Evil",
       "system": "dreamcast",
       "bucket": "dreamcast/Resident Evil - Code - Veronica (USA).m3u",
       "files": [
@@ -105,6 +116,7 @@
     },
     {
       "title": "Resident Evil 4",
+      "series": "Resident Evil",
       "system": "gc",
       "bucket": "gc/Resident Evil 4 (USA).m3u",
       "files": [
@@ -120,21 +132,25 @@
     },
     {
       "title": "Resident Evil - Dead Aim",
+      "series": "Resident Evil",
       "system": "ps2",
       "bucket": "ps2/Resident Evil - Dead Aim (USA).chd"
     },
     {
       "title": "Resident Evil - Outbreak",
+      "series": "Resident Evil",
       "system": "ps2",
       "bucket": "ps2/Resident Evil - Outbreak (USA) (v2.00).chd"
     },
     {
       "title": "Resident Evil - Outbreak File #2",
+      "series": "Resident Evil",
       "system": "ps2",
       "bucket": "ps2/Resident Evil - Outbreak - File 2 (USA).chd"
     },
     {
       "title": "Resident Evil - Revelations 2",
+      "series": "Resident Evil",
       "system": "psvita",
       "bucket": "psvita/Resident Evil - Revelations 2 [PCSE00608] [USA] [NoNpDRM].zip"
     }

@@ -5,12 +5,14 @@
     {
       "title": "Mother 3",
       "category": "RPG",
+      "series": "EarthBound / Mother",
       "system": "gba",
       "bucket": "gba/Mother 3 (English v1.3a).zip"
     },
     {
       "title": "Shin Megami Tensei 1",
       "category": "RPG",
+      "series": "Shin Megami Tensei",
       "system": "snes",
       "bucket": "snes/Shin Megami Tensei 1 (English Addendum 1.0)[Automap].zip",
       "variants": [
@@ -27,60 +29,70 @@
     {
       "title": "Shin Megami Tensei II",
       "category": "RPG",
+      "series": "Shin Megami Tensei",
       "system": "snes",
       "bucket": "snes/Shin Megami Tensei II (English v1.00 - NameFixes).zip"
     },
     {
       "title": "Shin Megami Tensei if...",
       "category": "RPG",
+      "series": "Shin Megami Tensei",
       "system": "snes",
       "bucket": "snes/Shin Megami Tensei if... (Eng. patched v1.0).zip"
     },
     {
       "title": "7th Dragon 2020",
       "category": "RPG",
+      "series": "7th Dragon",
       "system": "psp",
       "bucket": "psp/7th Dragon 2020 (Japan) [T-En by Geoff Embree v0.91].chd"
     },
     {
       "title": "7th Dragon 2020-II",
       "category": "RPG",
+      "series": "7th Dragon",
       "system": "psp",
       "bucket": "psp/7th Dragon 2020-II (Japan) [T-En by Geoff Embree v0.91].chd"
     },
     {
       "title": "Legend of Heroes, The - Zero no Kiseki",
       "category": "RPG",
+      "series": "The Legend of Heroes",
       "system": "psp",
       "bucket": "psp/Legend of Heroes, The - Zero no Kiseki (Japan) [T-En by Zerker & Guren v1.0.2].chd"
     },
     {
       "title": "Legend of Heroes, The - Ao no Kiseki",
       "category": "RPG",
+      "series": "The Legend of Heroes",
       "system": "psp",
       "bucket": "psp/Legend of Heroes, The - Ao no Kiseki (Japan) [T-En by Flame & Guren v15] [n].chd"
     },
     {
       "title": "Tales of Phantasia - Full Voice Edition",
       "category": "RPG",
+      "series": "Tales of",
       "system": "psp",
       "bucket": "psp/Tales of Phantasia - Full Voice Edition (English v1.2)[QoL].chd"
     },
     {
       "title": "Tales of Phantasia - Narikiri Dungeon X",
       "category": "RPG",
+      "series": "Tales of",
       "system": "psp",
       "bucket": "psp/Tales of Phantasia - Narikiri Dungeon X (English v1.2).chd"
     },
     {
       "title": "Tales of the World - Radiant Mythology 2",
       "category": "RPG",
+      "series": "Tales of",
       "system": "psp",
       "bucket": "psp/Tales of the World - Radiant Mythology 2 (English 31-08).chd"
     },
     {
       "title": "Tales of the World - Radiant Mythology 3",
       "category": "RPG",
+      "series": "Tales of",
       "system": "psp",
       "bucket": "psp/Tales of the World - Radiant Mythology 3 (English v1.02).chd"
     },
@@ -111,24 +123,28 @@
     {
       "title": "Genso Suikoden Tsumugareshi Hyakunen no Toki",
       "category": "RPG",
+      "series": "Suikoden",
       "system": "psp",
       "bucket": "psp/Genso Suikoden Tsumugareshi Hyakunen no Toki (English v1.0.2).chd"
     },
     {
       "title": "One Piece - Romance Dawn",
       "category": "RPG",
+      "series": "One Piece",
       "system": "psp",
       "bucket": "psp/One Piece - Romance Dawn (Japan) [T-En by ______ vBeta R2].chd"
     },
     {
       "title": "Digimon Adventure",
       "category": "RPG",
+      "series": "Digimon",
       "system": "psp",
       "bucket": "psp/Digimon Adventure (Japan) [T-En by Kazari v1.2].chd"
     },
     {
       "title": "Digimon World - Re-Digitize",
       "category": "RPG",
+      "series": "Digimon",
       "system": "psp",
       "bucket": "psp/Digimon World - Re-Digitize (Japan) [T-En by Operation Decoded v1.1] [Dub version].chd"
     },
@@ -141,6 +157,7 @@
     {
       "title": "Shiren the Wanderer 3",
       "category": "RPG",
+      "series": "Mystery Dungeon",
       "system": "psp",
       "bucket": "psp/Shiren the Wanderer 3 (Japan) [T-En by Aka Translations v0.01] [n].chd"
     },
@@ -159,6 +176,7 @@
     {
       "title": "Advanced Dungeons & Dragons - Dragons of Flame",
       "category": "RPG",
+      "series": "Dungeons & Dragons",
       "system": "nes",
       "bucket": "nes/Advanced Dungeons & Dragons - Dragons of Flame (Japan) [T-En by DvD Translations v1.03].zip"
     },
@@ -327,78 +345,91 @@
     {
       "title": "Diablo II",
       "category": "RPG",
+      "series": "Diablo",
       "system": "nes",
       "bucket": "nes/Diablo II (China) (Aftermarket) (Pirate) [T-En by Pacnsacdave v1.0] [n].zip"
     },
     {
       "title": "Digital Devil Story - Megami Tensei",
       "category": "RPG",
+      "series": "Shin Megami Tensei",
       "system": "nes",
       "bucket": "nes/Digital Devil Story - Megami Tensei (Japan) [T-En by EsperKnight & Stardust Crusaders & Tom v1.0] [Add by Masaru v1.0].zip"
     },
     {
       "title": "Digital Devil Story - Megami Tensei II",
       "category": "RPG",
+      "series": "Shin Megami Tensei",
       "system": "nes",
       "bucket": "nes/Digital Devil Story - Megami Tensei II (Japan) (Rev A) [T-En by Stardust Crusaders v1.04].zip"
     },
     {
       "title": "Doraemon - The Revenge of Giga Zombie",
       "category": "RPG",
+      "series": "Doraemon",
       "system": "nes",
       "bucket": "nes/Doraemon - The Revenge of Giga Zombie (Japan) [T-En by WakdHacks v1.0] [n].zip"
     },
     {
       "title": "Dragon Ball 3 - Gokuu Den",
       "category": "RPG",
+      "series": "Dragon Ball",
       "system": "nes",
       "bucket": "nes/Dragon Ball 3 - Gokuu Den (Japan) [T-En by Dodgy Translations v0.15] [i].zip"
     },
     {
       "title": "Dragon Ball - Revival of the Dark Lord",
       "category": "RPG",
+      "series": "Dragon Ball",
       "system": "nes",
       "bucket": "nes/Dragon Ball - Revival of the Dark Lord (Japan) [T-En by Stardust Crusaders v1.0] [n].zip"
     },
     {
       "title": "Dragon Ball Z - Assault of the Saiyans",
       "category": "RPG",
+      "series": "Dragon Ball",
       "system": "nes",
       "bucket": "nes/Dragon Ball Z - Assault of the Saiyans (Japan) [T-En by Twilight Translations v1.01] [n].zip"
     },
     {
       "title": "Dragon Ball Z Gaiden - Plan to Eliminate the Saiyans",
       "category": "RPG",
+      "series": "Dragon Ball",
       "system": "nes",
       "bucket": "nes/Dragon Ball Z Gaiden - Plan to Eliminate the Saiyans (Japan) [T-En by Twilight Translations v1.00] [n].zip"
     },
     {
       "title": "Dragon Ball Z II - Tyrant Freeza!!",
       "category": "RPG",
+      "series": "Dragon Ball",
       "system": "nes",
       "bucket": "nes/Dragon Ball Z II - Tyrant Freeza!! (Japan) [T-En by Gyroballer v1.02] [n].zip"
     },
     {
       "title": "Dragon Ball Z III - Killer Androids",
       "category": "RPG",
+      "series": "Dragon Ball",
       "system": "nes",
       "bucket": "nes/Dragon Ball Z III - Killer Androids (Japan) [T-En by Twilight Translations v1.00] [n].zip"
     },
     {
       "title": "Dragon Ball Z - Super Gokuu Den - Kakusei Hen",
       "category": "RPG",
+      "series": "Dragon Ball",
       "system": "snes",
       "bucket": "snes/Dragon Ball Z - Super Gokuu Den - Kakusei Hen (Japan) [T-En by Commando Ginew v1.0] [i].zip"
     },
     {
       "title": "Dragon Ball Z - Super Gokuu Den - Totsugeki Hen",
       "category": "RPG",
+      "series": "Dragon Ball",
       "system": "snes",
       "bucket": "snes/Dragon Ball Z - Super Gokuu Den - Totsugeki Hen (Japan) [T-En by Kakkoii Translations v3.13] [i].zip"
     },
     {
       "title": "Dragon Ball Z - Super Saiya Densetsu",
       "category": "RPG",
+      "series": "Dragon Ball",
       "system": "snes",
       "bucket": "snes/Dragon Ball Z - Super Saiya Densetsu (Japan) (Rev 1) [T-En by Klepto Software v1.02].zip"
     },
@@ -489,36 +520,42 @@
     {
       "title": "Ganbare Goemon Gaiden 2 - Treasures of the World",
       "category": "RPG",
+      "series": "Ganbare Goemon",
       "system": "nes",
       "bucket": "nes/Ganbare Goemon Gaiden 2 - Treasures of the World (Japan) [T-En by Adventurous Translations v1.01] [n].zip"
     },
     {
       "title": "Ganbare Goemon Gaiden - The Missing Golden Pipe",
       "category": "RPG",
+      "series": "Ganbare Goemon",
       "system": "nes",
       "bucket": "nes/Ganbare Goemon Gaiden - The Missing Golden Pipe (Japan) [T-En by Adventurous Translations v0.99c] [Add by FlashPV] [n].zip"
     },
     {
       "title": "Glory of Heracles II, The - Titans' Downfall",
       "category": "RPG",
+      "series": "Glory of Heracles",
       "system": "nes",
       "bucket": "nes/Glory of Heracles II, The - Titans' Downfall (Japan) [T-En by The Spoony Bard v1.31] [n].zip"
     },
     {
       "title": "Glory of Heracles III, The - Silence of the Gods",
       "category": "RPG",
+      "series": "Glory of Heracles",
       "system": "snes",
       "bucket": "snes/Glory of Heracles III, The - Silence of the Gods (Japan) [T-En by DQ Translations v1.1a] [n].zip"
     },
     {
       "title": "Glory of Heracles IV, The - Gift from the Gods",
       "category": "RPG",
+      "series": "Glory of Heracles",
       "system": "snes",
       "bucket": "snes/Glory of Heracles IV, The - Gift from the Gods (Japan) [T-En by Translation Corporation v1.1] [n].zip"
     },
     {
       "title": "Glory of Heracles, The - Labors of the Divine Hero",
       "category": "RPG",
+      "series": "Glory of Heracles",
       "system": "nes",
       "bucket": "nes/Glory of Heracles, The - Labors of the Divine Hero (Japan) [T-En by DvD Translations Rev B] [n].zip"
     },
@@ -555,6 +592,7 @@
     {
       "title": "Jojo's Bizarre Adventure",
       "category": "RPG",
+      "series": "JoJo",
       "system": "snes",
       "bucket": "snes/Jojo's Bizarre Adventure (Japan) [T-En by Aeon Genesis v1.00] [Add by brkmnly v1.2] [n].zip"
     },
@@ -615,6 +653,7 @@
     {
       "title": "Last Bible III",
       "category": "RPG",
+      "series": "Shin Megami Tensei",
       "system": "snes",
       "bucket": "snes/Last Bible III (Japan) [T-En by Tom v7.0].zip"
     },
@@ -675,6 +714,7 @@
     {
       "title": "Madou Monogatari - Big Kindergarten Kids",
       "category": "RPG",
+      "series": "Madou Monogatari",
       "system": "snes",
       "bucket": "snes/Madou Monogatari - Big Kindergarten Kids (Japan) [T-En by Aeon Genesis v1.01] [n].zip"
     },
@@ -687,6 +727,7 @@
     {
       "title": "Magic Knight Rayearth",
       "category": "RPG",
+      "series": "Magic Knight Rayearth",
       "system": "snes",
       "bucket": "snes/Magic Knight Rayearth (Japan) [T-En by RPGe v1.01] [Add by MTeam v1.02].zip"
     },
@@ -705,30 +746,35 @@
     {
       "title": "Marvelous - Another Treasure Island",
       "category": "RPG",
+      "series": "Marvel",
       "system": "snes",
       "bucket": "snes/Marvelous - Another Treasure Island (Japan) [T-En by Tashi] [Add by DackR v1.07] [n].zip"
     },
     {
       "title": "Megami Tensei - The Old Testament",
       "category": "RPG",
+      "series": "Shin Megami Tensei",
       "system": "snes",
       "bucket": "snes/Megami Tensei - The Old Testament (Japan) [T-En by DDSTranslation v1.1] [n].zip"
     },
     {
       "title": "Metal Max",
       "category": "RPG",
+      "series": "Metal Max",
       "system": "nes",
       "bucket": "nes/Metal Max (Japan) [T-En by Supper v1.0].zip"
     },
     {
       "title": "Metal Max Returns",
       "category": "RPG",
+      "series": "Metal Max",
       "system": "snes",
       "bucket": "snes/Metal Max Returns (Japan) [T-En by Aeon Genesis v1.00].zip"
     },
     {
       "title": "Might and Magic - Book II",
       "category": "RPG",
+      "series": "Might and Magic",
       "system": "snes",
       "bucket": "snes/Might and Magic - Book II (Japan) [T-En by MrRichard999 & D.D.S. & Dr. Floppy & AgentOrange v1.02].zip"
     },
@@ -765,6 +811,7 @@
     {
       "title": "Ninja Jajamaru - The Ninja Scrolls",
       "category": "RPG",
+      "series": "Ninja Jajamaru",
       "system": "nes",
       "bucket": "nes/Ninja Jajamaru - The Ninja Scrolls (Japan) [T-En by Aishsha & Stardust Crusaders v1.02] [n].zip"
     },
@@ -783,6 +830,7 @@
     {
       "title": "Pretty Soldier Sailor Moon - Another Story",
       "category": "RPG",
+      "series": "Sailor Moon",
       "system": "snes",
       "bucket": "snes/Pretty Soldier Sailor Moon - Another Story (Japan) [T-En by BST v2.08] [n].zip"
     },
@@ -801,6 +849,7 @@
     {
       "title": "Ranma 1-2 - Treasure of the Red Cat Gang",
       "category": "RPG",
+      "series": "Ranma 1/2",
       "system": "snes",
       "bucket": "snes/Ranma 1-2 - Treasure of the Red Cat Gang (Japan) [T-En by Dynamic Designs v1.00] [Anime] [n].zip"
     },
@@ -837,6 +886,7 @@
     {
       "title": "SD Gundam Story - Knight Gundam Legend",
       "category": "RPG",
+      "series": "Gundam",
       "system": "nes",
       "bucket": "nes/SD Gundam Story - Knight Gundam Legend (Japan) [T-En by Aishsha & Stardust Crusaders v1.03] [n] [FCE Ultra].zip"
     },
@@ -921,24 +971,28 @@
     {
       "title": "Super Chinese 2 - Dragon Kid",
       "category": "RPG",
+      "series": "Chinese Hero",
       "system": "nes",
       "bucket": "nes/Super Chinese 2 - Dragon Kid (Japan) [T-En by DDSTranslation v1] [n].zip"
     },
     {
       "title": "Super Chinese World",
       "category": "RPG",
+      "series": "Chinese Hero",
       "system": "snes",
       "bucket": "snes/Super Chinese World (Japan) [T-En by DDSTranslation v1] [n].zip"
     },
     {
       "title": "Super Chinese World 2 - The Interstellar Battle Arena",
       "category": "RPG",
+      "series": "Chinese Hero",
       "system": "snes",
       "bucket": "snes/Super Chinese World 2 - The Interstellar Battle Arena (Japan) [T-En by DDSTranslation v2] [n].zip"
     },
     {
       "title": "Super Chinese World 3",
       "category": "RPG",
+      "series": "Chinese Hero",
       "system": "snes",
       "bucket": "snes/Super Chinese World 3 (Japan) [T-En by DDSTranslation v2] [n].zip"
     },
@@ -1011,6 +1065,7 @@
     {
       "title": "Ultraman Club - Great Kaiju Battle!!",
       "category": "RPG",
+      "series": "Ultraman",
       "system": "nes",
       "bucket": "nes/Ultraman Club - Great Kaiju Battle!! (Japan) [T-En by Ccmar & Eric Engel v1.0] [n].zip"
     },
@@ -1035,24 +1090,28 @@
     {
       "title": "Wizardry Gaiden IV - Taima no Kodou",
       "category": "RPG",
+      "series": "Wizardry",
       "system": "snes",
       "bucket": "snes/Wizardry Gaiden IV - Taima no Kodou (Japan) (Rev 1) [T-En by AgentOrange & DDS & Helly & MrRichard999 v1.02].zip"
     },
     {
       "title": "Wizardry I-II-III - Story of Llylgamyn",
       "category": "RPG",
+      "series": "Wizardry",
       "system": "snes",
       "bucket": "snes/Wizardry I-II-III - Story of Llylgamyn (Japan) (NP) [T-En by Aeon Genesis v1.00] [Add by Hengki Kusuma Adi v1.2].zip"
     },
     {
       "title": "Wizardry II - Legacy of Llylgamyn",
       "category": "RPG",
+      "series": "Wizardry",
       "system": "nes",
       "bucket": "nes/Wizardry II - Legacy of Llylgamyn (Japan) [T-En by MrRichard999 v1.1].zip"
     },
     {
       "title": "Wizardry VI - Bane of the Cosmic Forge",
       "category": "RPG",
+      "series": "Wizardry",
       "system": "snes",
       "bucket": "snes/Wizardry VI - Bane of the Cosmic Forge (Japan) [T-En by TiCo v0.99] [Add by MrRichard999] [n].zip"
     },
@@ -1071,24 +1130,28 @@
     {
       "title": "Xak - The Art of Visual Stage",
       "category": "RPG",
+      "series": "Xak",
       "system": "snes",
       "bucket": "snes/Xak - The Art of Visual Stage (Japan) [T-En by Dynamic Designs v1.10].zip"
     },
     {
       "title": "Ys IV - Mask of the Sun",
       "category": "RPG",
+      "series": "Ys",
       "system": "snes",
       "bucket": "snes/Ys IV - Mask of the Sun (Japan) [T-En by Aeon Genesis v2.10].zip"
     },
     {
       "title": "Ys V - Kefin, Lost Kingdom of Sand",
       "category": "RPG",
+      "series": "Ys",
       "system": "snes",
       "bucket": "snes/Ys V - Kefin, Lost Kingdom of Sand (Japan) [T-En by Aeon Genesis v1.00] [n].zip"
     },
     {
       "title": "7th Dragon",
       "category": "RPG",
+      "series": "7th Dragon",
       "system": "nds",
       "bucket": "nds/7th Dragon (Japan) [T-En by Geoff Embree v1.01].zip"
     },
@@ -1119,30 +1182,35 @@
     {
       "title": "Digimon Story - Lost Evolution",
       "category": "RPG",
+      "series": "Digimon",
       "system": "nds",
       "bucket": "nds/Digimon Story - Lost Evolution (Japan) [T-En by Operation Decoded v1.1].zip"
     },
     {
       "title": "Dragon Ball Z - Gokuu Gekitouden",
       "category": "RPG",
+      "series": "Dragon Ball",
       "system": "gb",
       "bucket": "gb/Dragon Ball Z - Gokuu Gekitouden (Japan) (SGB Enhanced) [T-En by WyndCrosser v0.05] [i].zip"
     },
     {
       "title": "Dragon Quest Monsters",
       "category": "RPG",
+      "series": "Dragon Quest",
       "system": "gbc",
       "bucket": "gbc/Dragon Quest Monsters (USA, Europe) (SGB Enhanced) (GB Compatible) [T-En by Translation Quest v1.08] [Relocalized] [n].zip"
     },
     {
       "title": "Dragon Quest Monsters 2 - Cobi and Tara's Marvelous Mysterious Key",
       "category": "RPG",
+      "series": "Dragon Quest",
       "system": "3ds",
       "bucket": "3ds/Dragon Quest Monsters 2 - Cobi and Tara's Marvelous Mysterious Key (Japan) [T-En by Dackst & Ich73 v1.2] [n].zip"
     },
     {
       "title": "Dragon Quest Monsters - Terry's Wonderland 3D",
       "category": "RPG",
+      "series": "Dragon Quest",
       "system": "3ds",
       "bucket": "3ds/Dragon Quest Monsters - Terry's Wonderland 3D (Japan) [T-En by Team TW3D v1.2] [n].zip"
     },
@@ -1167,18 +1235,21 @@
     {
       "title": "Fullmetal Alchemist - Sonata of Memories",
       "category": "RPG",
+      "series": "Fullmetal Alchemist",
       "system": "gba",
       "bucket": "gba/Fullmetal Alchemist - Sonata of Memories (Japan) [T-En by Iredc v1.0] [n].zip"
     },
     {
       "title": "Fullmetal Alchemist - Stray Rondo",
       "category": "RPG",
+      "series": "Fullmetal Alchemist",
       "system": "gba",
       "bucket": "gba/Fullmetal Alchemist - Stray Rondo (Japan) [T-En by Mz v0.02] [n].zip"
     },
     {
       "title": "Glory of Heracles, The - The Olympus Offensive - The Snap-Story",
       "category": "RPG",
+      "series": "Glory of Heracles",
       "system": "gb",
       "bucket": "gb/Glory of Heracles, The - The Olympus Offensive - The Snap-Story (Japan) [T-En by Aishsha & Stardust Crusaders v1.01] [n].zip"
     },
@@ -1197,6 +1268,7 @@
     {
       "title": "Harry Potter & the Mystical Halo",
       "category": "RPG",
+      "series": "Harry Potter",
       "system": "gbc",
       "bucket": "gbc/Harry Potter & the Mystical Halo (Asia) (Unl) [T-En by Neo Fuji v1.0] [n].zip"
     },
@@ -1209,12 +1281,14 @@
     {
       "title": "Magic Knight Rayearth",
       "category": "RPG",
+      "series": "Magic Knight Rayearth",
       "system": "gb",
       "bucket": "gb/Magic Knight Rayearth (Japan) (SGB Enhanced) [T-En by LIPEMCO! Translations v1.0].zip"
     },
     {
       "title": "Magic Knight Rayearth 2nd. - The Missing Colors",
       "category": "RPG",
+      "series": "Magic Knight Rayearth",
       "system": "gb",
       "bucket": "gb/Magic Knight Rayearth 2nd. - The Missing Colors (Japan) (SGB Enhanced) [T-En by Pearse Hillock v0.99] [i].zip"
     },
@@ -1227,24 +1301,28 @@
     {
       "title": "Medarot 3 - Kabuto Version",
       "category": "RPG",
+      "series": "Medabots",
       "system": "gbc",
       "bucket": "gbc/Medarot 3 - Kabuto Version (Japan) [T-En by Cash Medal Chameleon v20240304].zip"
     },
     {
       "title": "Medarot - Kabuto Version",
       "category": "RPG",
+      "series": "Medabots",
       "system": "gb",
       "bucket": "gb/Medarot - Kabuto Version (Japan) (Rev 1) (SGB Enhanced) [T-En by Cash Medal Chameleon v20240408].zip"
     },
     {
       "title": "Metal Max 2 - Reloaded",
       "category": "RPG",
+      "series": "Metal Max",
       "system": "nds",
       "bucket": "nds/Metal Max 2 - Reloaded (Japan) [T-En by Metal Dreamers v1.0].zip"
     },
     {
       "title": "Metal Max 3",
       "category": "RPG",
+      "series": "Metal Max",
       "system": "nds",
       "bucket": "nds/Metal Max 3 (Japan) [T-En by Metal Dreamers v1.0].zip"
     },
@@ -1305,12 +1383,14 @@
     {
       "title": "Pokemon Mystery Dungeon - Go for it! Radiant Adventure Squad",
       "category": "RPG",
+      "series": "Pokemon",
       "system": "wii",
       "bucket": "wii/Pokemon Mystery Dungeon - Go for it! Radiant Adventure Squad (Japan) (WiiWare) [T-En by Higsby & MegaMinerd & SpecialAgentApe v1.03] [n].wad"
     },
     {
       "title": "Sanrio Timenet - Mirai Hen",
       "category": "RPG",
+      "series": "Sanrio",
       "system": "gbc",
       "bucket": "gbc/Sanrio Timenet - Mirai Hen (Japan) (SGB Enhanced) (GB Compatible) [T-En by Katalyst Translations v0.8] [i].zip"
     },
@@ -1323,6 +1403,7 @@
     {
       "title": "Summon Night X - Tears Crown",
       "category": "RPG",
+      "series": "Summon Night",
       "system": "nds",
       "bucket": "nds/Summon Night X - Tears Crown (Japan) [T-En by Englishsubs4all v0.951] [i].zip"
     },
@@ -1335,24 +1416,28 @@
     {
       "title": "Yu-Gi-Oh! - Monster Capsule GB",
       "category": "RPG",
+      "series": "Yu-Gi-Oh!",
       "system": "gbc",
       "bucket": "gbc/Yu-Gi-Oh! - Monster Capsule GB (Japan) (SGB Enhanced) (GB Compatible) [T-En by Bownly v1.1].zip"
     },
     {
       "title": "Zoids Saga DS - Legend of Arcadia",
       "category": "RPG",
+      "series": "Zoids",
       "system": "nds",
       "bucket": "nds/Zoids Saga DS - Legend of Arcadia (Japan) [T-En by Snowboundmage v1.3] [i].zip"
     },
     {
       "title": "Zoids Saga - Fuzors",
       "category": "RPG",
+      "series": "Zoids",
       "system": "gba",
       "bucket": "gba/Zoids Saga - Fuzors (Japan) [T-En by Gared531 v20210831] [i].zip"
     },
     {
       "title": "Zoids - Shirogane no Juukishin Liger Zero",
       "category": "RPG",
+      "series": "Zoids",
       "system": "gbc",
       "bucket": "gbc/Zoids - Shirogane no Juukishin Liger Zero (Japan) [T-En by Tsukuru v0.2] [i].zip"
     },
@@ -1365,36 +1450,42 @@
     {
       "title": "Dragon Quest Characters - Torneko no Daibouken 3 Advance - Fushigi no Dungeon",
       "category": "RPG",
+      "series": "Dragon Quest",
       "system": "gba",
       "bucket": "gba/Dragon Quest Characters - Torneko no Daibouken 3 Advance - Fushigi no Dungeon (Japan) [T-En by Sam Steel v0.05] [i].zip"
     },
     {
       "title": "Dragon Quest Monsters - Caravan Heart",
       "category": "RPG",
+      "series": "Dragon Quest",
       "system": "gba",
       "bucket": "gba/Dragon Quest Monsters - Caravan Heart (Japan) [T-En by The Translation Team v1.0].zip"
     },
     {
       "title": "Grandia - Parallel Trippers",
       "category": "RPG",
+      "series": "Grandia",
       "system": "gbc",
       "bucket": "gbc/Grandia - Parallel Trippers (Japan) [T-En by Adventurous Translations v1.03].zip"
     },
     {
       "title": "Mega Man Battle Network 4.5 - Real Operation",
       "category": "RPG",
+      "series": "Mega Man",
       "system": "gba",
       "bucket": "gba/Mega Man Battle Network 4.5 - Real Operation (Japan) [T-En by The Rockman EXE Zone v1.1] [NA] [n].zip"
     },
     {
       "title": "MegaMan Battle Network - Operate Star Force",
       "category": "RPG",
+      "series": "Mega Man",
       "system": "nds",
       "bucket": "nds/MegaMan Battle Network - Operate Star Force (Japan) [T-En by Greiga Master v1.0] [n].zip"
     },
     {
       "title": "Megaten Gaiden - Last Bible II",
       "category": "RPG",
+      "series": "Shin Megami Tensei",
       "system": "gbc",
       "bucket": "gbc/Megaten Gaiden - Last Bible II (Japan) (SGB Enhanced) (GB Compatible) [T-En by EsperKnight v1.0] [n].zip"
     },
@@ -1407,108 +1498,126 @@
     {
       "title": "Pokemon - Green Version",
       "category": "RPG",
+      "series": "Pokemon",
       "system": "gb",
       "bucket": "gb/Pokemon - Green Version (USA, Europe) (SGB Enhanced) [T-En by Skeetendo Inc. v3.0] [n].zip"
     },
     {
       "title": "SaGa 2 - Legend of the Relics - Goddess of Destiny",
       "category": "RPG",
+      "series": "SaGa",
       "system": "nds",
       "bucket": "nds/SaGa 2 - Legend of the Relics - Goddess of Destiny (Japan) [T-En by Crimson Nocturnal v2.12] [n].zip"
     },
     {
       "title": "SaGa 3 - Champions of Time and Space - Shadow or Light",
       "category": "RPG",
+      "series": "SaGa",
       "system": "nds",
       "bucket": "nds/SaGa 3 - Champions of Time and Space - Shadow or Light (Japan) [T-En by Cain & Easton West v2.0.830 Beta] [n].zip"
     },
     {
       "title": "Shin Megami Tensei Devil Children - Kuro no Sho",
       "category": "RPG",
+      "series": "Shin Megami Tensei",
       "system": "gbc",
       "bucket": "gbc/Shin Megami Tensei Devil Children - Kuro no Sho (Japan) (SGB Enhanced) (GB Compatible) [T-En by Higsby & SpecialAgentApe v1.2].zip"
     },
     {
       "title": "Shiren the Wanderer 2 - Oni Invasion! Shiren Castle!",
       "category": "RPG",
+      "series": "Mystery Dungeon",
       "system": "n64",
       "bucket": "n64/Shiren the Wanderer 2 - Oni Invasion! Shiren Castle! (Japan) [T-En by SharkSnack & Ozidual & KmbTos v1.02] [n].zip"
     },
     {
       "title": "Star Ocean - Blue Sphere",
       "category": "RPG",
+      "series": "Star Ocean",
       "system": "gbc",
       "bucket": "gbc/Star Ocean - Blue Sphere (Japan) (SGB Enhanced) (GB Compatible) [T-En by Lokai20 v0.1] [Add by 4l3j4ndr0 v1.0] [i].zip"
     },
     {
       "title": "Tales of Innocence",
       "category": "RPG",
+      "series": "Tales of",
       "system": "nds",
       "bucket": "nds/Tales of Innocence (Japan) [T-En by Absolute Zero v1.0].zip"
     },
     {
       "title": "Tales of the Tempest",
       "category": "RPG",
+      "series": "Tales of",
       "system": "nds",
       "bucket": "nds/Tales of the Tempest (Japan) [T-En by Absolute Zero v1.0].zip"
     },
     {
       "title": "Tales of the World - Narikiri Dungeon 2",
       "category": "RPG",
+      "series": "Tales of",
       "system": "gba",
       "bucket": "gba/Tales of the World - Narikiri Dungeon 2 (Japan) [T-En by Kajitani-Eizan v2.30] [i].zip"
     },
     {
       "title": "Tales of the World - Narikiri Dungeon 3",
       "category": "RPG",
+      "series": "Tales of",
       "system": "gba",
       "bucket": "gba/Tales of the World - Narikiri Dungeon 3 (Japan) [T-En by Kajitani-Eizan v1.11] [i].zip"
     },
     {
       "title": "Wizardry Empire - The Emperor of Naraka",
       "category": "RPG",
+      "series": "Wizardry",
       "system": "gbc",
       "bucket": "gbc/Wizardry Empire - The Emperor of Naraka (Japan) (Rev 1) [T-En by AgentOrange & Helly & MrRichard999 v1.03] [n].zip"
     },
     {
       "title": "Wizardry Empire - The Staff of Resurrection",
       "category": "RPG",
+      "series": "Wizardry",
       "system": "gbc",
       "bucket": "gbc/Wizardry Empire - The Staff of Resurrection (Japan) [T-En by Helly & MrRichard999 v1.16] [n].zip"
     },
     {
       "title": "Wizardry Gaiden II - Curse of the Ancient Emperor",
       "category": "RPG",
+      "series": "Wizardry",
       "system": "gb",
       "bucket": "gb/Wizardry Gaiden II - Curse of the Ancient Emperor (Japan) [T-En by MrRichard999 & Tangyi_Chang v1.1] [n].zip"
     },
     {
       "title": "Wizardry Gaiden III - Scripture of the Dark",
       "category": "RPG",
+      "series": "Wizardry",
       "system": "gb",
       "bucket": "gb/Wizardry Gaiden III - Scripture of the Dark (Japan) [T-En by Tangyi_Chang v1.03] [n].zip"
     },
     {
       "title": "Wizardry Gaiden - Suffering of the Queen",
       "category": "RPG",
+      "series": "Wizardry",
       "system": "gb",
       "bucket": "gb/Wizardry Gaiden - Suffering of the Queen (Japan) [T-En by Tangyi_Chang v1.1] [n].zip"
     },
     {
       "title": "Wizardry I - Proving Grounds of the Mad Overlord",
       "category": "RPG",
+      "series": "Wizardry",
       "system": "gbc",
       "bucket": "gbc/Wizardry I - Proving Grounds of the Mad Overlord (Japan) [T-En by Opus v1.0].zip"
     },
     {
       "title": "Wizardry III - Knight of Diamonds",
       "category": "RPG",
+      "series": "Wizardry",
       "system": "gbc",
       "bucket": "gbc/Wizardry III - Knight of Diamonds (Japan) [T-En by Opus v1.0] [n].zip"
     },
     {
       "title": "Wizardry - Inochi no Kusabi",
       "category": "RPG",
+      "series": "Wizardry",
       "system": "nds",
       "bucket": "nds/Wizardry - Inochi no Kusabi (Japan) [T-En by Faramir v30102015] [i].zip"
     },
@@ -1555,6 +1664,7 @@
     {
       "title": "Atelier Marie+Elie - The Alchemists of Salburg - Episodes 1 & 2",
       "category": "RPG",
+      "series": "Atelier",
       "system": "ps2",
       "bucket": "ps2/Atelier Marie+Elie - The Alchemists of Salburg - Episodes 1 & 2 [T-En by Atelier Traduction v1.01] [n].chd"
     },
@@ -1579,6 +1689,7 @@
     {
       "title": "Bomberman Wars",
       "category": "RPG",
+      "series": "Bomberman",
       "system": "psx",
       "bucket": "psx/Bomberman Wars (Japan, Asia) [T-En by Denim v1.0].chd"
     },
@@ -1597,12 +1708,14 @@
     {
       "title": "Chocobo no Fushigi na Dungeon",
       "category": "RPG",
+      "series": "Final Fantasy",
       "system": "psx",
       "bucket": "psx/Chocobo no Fushigi na Dungeon (Japan) [T-En by Higsby & SpecialAgentApe v1.0].chd"
     },
     {
       "title": "Chocobo no Fushigi na Dungeon for WonderSwan",
       "category": "RPG",
+      "series": "Final Fantasy",
       "system": "wonderswan",
       "bucket": "wonderswan/Chocobo no Fushigi na Dungeon for WonderSwan (Japan) (Rev 2) [T-En by Higsby & SpecialAgentApe v1.1].zip"
     },
@@ -1639,18 +1752,21 @@
     {
       "title": "Digimon 02 - D1 Tamers",
       "category": "RPG",
+      "series": "Digimon",
       "system": "wonderswancolor",
       "bucket": "wonderswancolor/Digimon 02 - D1 Tamers (Japan) [T-En by NikcDC v0.97] [n].zip"
     },
     {
       "title": "Digimon 02 - Tag Tamers",
       "category": "RPG",
+      "series": "Digimon",
       "system": "wonderswan",
       "bucket": "wonderswan/Digimon 02 - Tag Tamers (Japan) [T-En by NikcDC v1.4.5] [n].zip"
     },
     {
       "title": "Digital Devil Story - Megami Tensei",
       "category": "RPG",
+      "series": "Shin Megami Tensei",
       "system": "msx",
       "bucket": "msx/Digital Devil Story - Megami Tensei (Japan) [T-En by Kaisaan v1.0] [n] (Cartridge).zip"
     },
@@ -1663,6 +1779,7 @@
     {
       "title": "Dot Hack Fraegment",
       "category": "RPG",
+      "series": "Dot Hack",
       "system": "ps2",
       "bucket": "ps2/Dot Hack Fraegment (Japan) [T-En by Dothackers v3.7] [i].chd"
     },
@@ -1681,6 +1798,7 @@
     {
       "title": "Dungeon Master Nexus",
       "category": "RPG",
+      "series": "Dungeons & Dragons",
       "system": "saturn",
       "bucket": "saturn/Dungeon Master Nexus (Japan) [T-En by ChristopheF v2].chd"
     },
@@ -1733,6 +1851,7 @@
     {
       "title": "Fushigi no Dungeon - Fuurai no Shiren Gaiden - Onna Kenshi Asuka Kenzan!",
       "category": "RPG",
+      "series": "Mystery Dungeon",
       "system": "dreamcast",
       "bucket": "dreamcast/Fushigi no Dungeon - Fuurai no Shiren Gaiden - Onna Kenshi Asuka Kenzan! (Japan) [T-En by SharkSnack v0.16] [i].chd"
     },
@@ -1775,6 +1894,7 @@
     {
       "title": "King's Field",
       "category": "RPG",
+      "series": "King's Field",
       "system": "psx",
       "bucket": "psx/King's Field (Japan) [T-En by John Osborne v1.0] [save bug fix].chd"
     },
@@ -1799,24 +1919,28 @@
     {
       "title": "Lunar - Sanposuru Gakuen",
       "category": "RPG",
+      "series": "Lunar",
       "system": "gamegear",
       "bucket": "gamegear/Lunar - Sanposuru Gakuen (Japan) [T-En by Aeon Genesis & Some Good Shit Translations v1.00].zip"
     },
     {
       "title": "Madou Monogatari 2",
       "category": "RPG",
+      "series": "Madou Monogatari",
       "system": "pc98",
       "bucket": "pc98/Madou Monogatari 2 (Japan) (Disk 1) (System Disk) [T-En by Yuvi & SnowAria v1.0].d88"
     },
     {
       "title": "Madou Monogatari 3",
       "category": "RPG",
+      "series": "Madou Monogatari",
       "system": "pc98",
       "bucket": "pc98/Madou Monogatari 3 (Japan) (Disk 1) (System Disk) [T-En by Yuvi & SnowAria v1.0].d88"
     },
     {
       "title": "Madou Monogatari I",
       "category": "RPG",
+      "series": "Madou Monogatari",
       "system": "pc98",
       "bucket": "pc98/Madou Monogatari I (Japan) (System disk) [T-En by SnowyAria & Yuvi v1.0].d88",
       "variants": [
@@ -1833,36 +1957,42 @@
     {
       "title": "Madou Monogatari I - 3 Magic Spheres",
       "category": "RPG",
+      "series": "Madou Monogatari",
       "system": "gamegear",
       "bucket": "gamegear/Madou Monogatari I - 3 Magic Spheres (Japan) [T-En by Filler & SSTranslations v1.0] [n].zip"
     },
     {
       "title": "Magic Knight Rayearth",
       "category": "RPG",
+      "series": "Magic Knight Rayearth",
       "system": "gamegear",
       "bucket": "gamegear/Magic Knight Rayearth (Japan) [T-En by Filler v1.0].zip"
     },
     {
       "title": "Magic Knight Rayearth 2 - Making of Magic Knight",
       "category": "RPG",
+      "series": "Magic Knight Rayearth",
       "system": "gamegear",
       "bucket": "gamegear/Magic Knight Rayearth 2 - Making of Magic Knight (Japan) [T-En by Pearse Hillock v0.5] [i].zip"
     },
     {
       "title": "Medarot R",
       "category": "RPG",
+      "series": "Medabots",
       "system": "psx",
       "bucket": "psx/Medarot R (Japan) [T-En by Star Trinket Beta v1].chd"
     },
     {
       "title": "Megami Tensei Gaiden - Last Bible",
       "category": "RPG",
+      "series": "Shin Megami Tensei",
       "system": "gamegear",
       "bucket": "gamegear/Megami Tensei Gaiden - Last Bible (Japan) [T-En by Supper v3.0].zip"
     },
     {
       "title": "Megaten Gaiden - Last Bible Special",
       "category": "RPG",
+      "series": "Shin Megami Tensei",
       "system": "gamegear",
       "bucket": "gamegear/Megaten Gaiden - Last Bible Special (Japan) [T-En by MrRichard999 & SSTranslations & Tom v1.02] [n].zip"
     },
@@ -1905,6 +2035,7 @@
     {
       "title": "Phantasy Star Gaiden",
       "category": "RPG",
+      "series": "Phantasy Star",
       "system": "gamegear",
       "bucket": "gamegear/Phantasy Star Gaiden (Japan) [T-En by Magic Translations v1.00].zip"
     },
@@ -1928,18 +2059,21 @@
     {
       "title": "Rance",
       "category": "RPG",
+      "series": "Rance / Alice Soft",
       "system": "pc98",
       "bucket": "pc98/Rance (Japan) [T-En by Alpharobo & BabaJeanmel v1.1].hdi"
     },
     {
       "title": "Rance 2 - The Rebellious Maidens",
       "category": "RPG",
+      "series": "Rance / Alice Soft",
       "system": "pc98",
       "bucket": "pc98/Rance 2 - The Rebellious Maidens (Japan) [T-En by Alpharobo & BabaJeanmel v1.1] [n].hdi"
     },
     {
       "title": "Rance III - The Fall of Leazas",
       "category": "RPG",
+      "series": "Rance / Alice Soft",
       "system": "pc98",
       "bucket": "pc98/Rance III - The Fall of Leazas (Japan) [T-En by Alpharobo & BabaJeanmel v1.0] [n].hdi"
     },
@@ -1964,6 +2098,7 @@
     {
       "title": "Samurai Spirits - Tales of the Bushido",
       "category": "RPG",
+      "series": "Samurai Shodown",
       "system": "neogeocd",
       "bucket": "neogeocd/Samurai Spirits - Tales of the Bushido (Japan) [T-En by Jeff Nussbaum v1.10] [n].chd"
     },
@@ -1982,6 +2117,7 @@
     {
       "title": "Shiren the Wanderer 4 Plus - The Eye of God and the Devil's Navel",
       "category": "RPG",
+      "series": "Mystery Dungeon",
       "system": "psp",
       "bucket": "psp/Shiren the Wanderer 4 Plus - The Eye of God and the Devil's Navel (Japan) [T-En by SharkSnack v1.0.1] [n].chd"
     },
@@ -1994,18 +2130,21 @@
     {
       "title": "Sorcery Saga II - Arle, Age 16",
       "category": "RPG",
+      "series": "Sorcery Saga",
       "system": "gamegear",
       "bucket": "gamegear/Sorcery Saga II - Arle, Age 16 (Japan) [T-En by Supper v1.2] [n].zip"
     },
     {
       "title": "Sorcery Saga III - The Ultimate Queen",
       "category": "RPG",
+      "series": "Sorcery Saga",
       "system": "gamegear",
       "bucket": "gamegear/Sorcery Saga III - The Ultimate Queen (Japan) [T-En by Supper v1.2] [n].zip"
     },
     {
       "title": "Sorcery Saga A - Vivacious Vacation",
       "category": "RPG",
+      "series": "Sorcery Saga",
       "system": "gamegear",
       "bucket": "gamegear/Sorcery Saga A - Vivacious Vacation (Japan) [T-En by Supper v1.0] [n].zip"
     },
@@ -2030,12 +2169,14 @@
     {
       "title": "Tales of Destiny 2",
       "category": "RPG",
+      "series": "Tales of",
       "system": "ps2",
       "bucket": "ps2/Tales of Destiny 2 (English v1.3.4).chd"
     },
     {
       "title": "Tales of Destiny Directors Cut",
       "category": "RPG",
+      "series": "Tales of",
       "system": "ps2",
       "bucket": "ps2/Tales of Destiny Directors Cut (English v1.6).chd"
     },
@@ -2072,6 +2213,7 @@
     {
       "title": "Kingdom Hearts",
       "category": "Action RPG",
+      "series": "Kingdom Hearts",
       "system": "ps2",
       "bucket": "ps2/Kingdom Hearts (USA).chd",
       "variants": [
@@ -2084,6 +2226,7 @@
     {
       "title": "Kingdom Hearts II",
       "category": "Action RPG",
+      "series": "Kingdom Hearts",
       "system": "ps2",
       "bucket": "ps2/Kingdom Hearts II (USA).chd",
       "variants": [
@@ -2096,6 +2239,7 @@
     {
       "title": "Kingdom Hearts - Birth by Sleep",
       "category": "Action RPG",
+      "series": "Kingdom Hearts",
       "system": "psp",
       "bucket": "psp/Kingdom Hearts - Birth by Sleep (USA) (En,Fr,Es).chd",
       "variants": [
@@ -2108,6 +2252,7 @@
     {
       "title": "Final Fantasy Type-0",
       "category": "Action RPG",
+      "series": "Final Fantasy",
       "system": "psp",
       "bucket": "psp/Final Fantasy Type-0 (English Patched v2).chd"
     },
@@ -2120,6 +2265,7 @@
     {
       "title": "Phantasy Star Portable 2",
       "category": "Action RPG",
+      "series": "Phantasy Star",
       "system": "psp",
       "bucket": "psp/Phantasy Star Portable 2 (USA).chd",
       "variants": [
@@ -2132,6 +2278,7 @@
     {
       "title": "Monster Hunter Portable 3rd",
       "category": "Action RPG",
+      "series": "Monster Hunter",
       "system": "psp",
       "bucket": "psp/Monster Hunter Portable 3rd (Japan) [T-En by Team Maverick One v5.0] [PPSSPP HD version].chd"
     },
@@ -2168,12 +2315,14 @@
     {
       "title": "Kidou Senshi Gundam AGE Cosmic Drive",
       "category": "Action RPG",
+      "series": "Gundam",
       "system": "psp",
       "bucket": "psp/Kidou Senshi Gundam AGE Cosmic Drive (Japan) [T-En by Maxtram & CrashmanX v1.0].chd"
     },
     {
       "title": "Kidou Senshi Gundam AGE Universe Accel",
       "category": "Action RPG",
+      "series": "Gundam",
       "system": "psp",
       "bucket": "psp/Kidou Senshi Gundam AGE Universe Accel (Japan) [T-En by Maxtram & CrashmanX v1.0].chd"
     },
@@ -2192,6 +2341,7 @@
     {
       "title": "Brandish 2 - The Planet Buster",
       "category": "Action RPG",
+      "series": "Brandish",
       "system": "snes",
       "bucket": "snes/Brandish 2 - The Planet Buster (Japan) [T-En by Synchronicity v1.0].zip"
     },
@@ -2204,6 +2354,7 @@
     {
       "title": "Hydlide 3 - Visitor from the Dark",
       "category": "Action RPG",
+      "series": "Hydlide",
       "system": "nes",
       "bucket": "nes/Hydlide 3 - Visitor from the Dark (Japan) [T-En by Pacnsacdave v1.0] [n].zip"
     },
@@ -2228,30 +2379,35 @@
     {
       "title": "Ninja Jajamaru - Legend of a Demon's Attack - Castle of Dreams",
       "category": "Action RPG",
+      "series": "Ninja Jajamaru",
       "system": "nes",
       "bucket": "nes/Ninja Jajamaru - Legend of a Demon's Attack - Castle of Dreams (Japan) [T-En by Aishsha & Stardust Crusaders v1.0] [Add by Proveaux v1.01] [n].zip"
     },
     {
       "title": "Seiken Densetsu 3",
       "category": "Action RPG",
+      "series": "Mana",
       "system": "snes",
       "bucket": "snes/Seiken Densetsu 3 (Japan) [T-En by LNF & Neill Corlett & SoM2Freak v1.01].zip"
     },
     {
       "title": "Super Chinese 3",
       "category": "Action RPG",
+      "series": "Chinese Hero",
       "system": "nes",
       "bucket": "nes/Super Chinese 3 (Japan) [T-En by DDSTranslation v1] [n].zip"
     },
     {
       "title": "Ultima - The Savage Empire",
       "category": "Action RPG",
+      "series": "Ultima",
       "system": "snes",
       "bucket": "snes/Ultima - The Savage Empire (Japan) [T-En by Nytegard v1.01] [i] [n].zip"
     },
     {
       "title": "Zoids - Battle of Central Continent",
       "category": "Action RPG",
+      "series": "Zoids",
       "system": "nes",
       "bucket": "nes/Zoids - Battle of Central Continent (Japan) [T-En by Filler v1.0] [n].zip"
     },
@@ -2264,18 +2420,21 @@
     {
       "title": "Bomberman Jetters - Densetsu no Bomberman",
       "category": "Action RPG",
+      "series": "Bomberman",
       "system": "gba",
       "bucket": "gba/Bomberman Jetters - Densetsu no Bomberman (Japan) [T-En by Bomberman Jetters Translation Project] [i].zip"
     },
     {
       "title": "Custom Robo",
       "category": "Action RPG",
+      "series": "Custom Robo",
       "system": "n64",
       "bucket": "n64/Custom Robo (Japan) [T-En by Star Trinket v1.0].zip"
     },
     {
       "title": "Custom Robo GX",
       "category": "Action RPG",
+      "series": "Custom Robo",
       "system": "gba",
       "bucket": "gba/Custom Robo GX (Japan) [T-En by hmsong v0.3] [i].zip"
     },
@@ -2294,6 +2453,7 @@
     {
       "title": "Klonoa Heroes - The Legendary Star Medal",
       "category": "Action RPG",
+      "series": "Klonoa",
       "system": "gba",
       "bucket": "gba/Klonoa Heroes - The Legendary Star Medal (Japan) [T-En by Klonoa Mega Chat Translation Team v1.1.9] [n].zip"
     },
@@ -2318,6 +2478,7 @@
     {
       "title": "Summon Night - Swordcraft Story 3 - The Stone of Beginnings",
       "category": "Action RPG",
+      "series": "Summon Night",
       "system": "gba",
       "bucket": "gba/Summon Night - Swordcraft Story 3 - The Stone of Beginnings (Japan) [T-En by Higsby & Normmatt & Teod & Unknownbrackets v0.9] [i] [n].zip"
     },
@@ -2348,6 +2509,7 @@
     {
       "title": "Dragon Slayer V - Sorcerian",
       "category": "Action RPG",
+      "series": "Dragon Slayer",
       "system": "msx2",
       "bucket": "msx2/Dragon Slayer V - Sorcerian (Japan) [T-En by Delta Soft v1.0] (Floppy).zip"
     },
@@ -2378,6 +2540,7 @@
     {
       "title": "Hydlide II - Shine of Darkness",
       "category": "Action RPG",
+      "series": "Hydlide",
       "system": "msx",
       "bucket": "msx/Hydlide II - Shine of Darkness (Japan) [T-En by Rieks Warendorp Torringa] (Cartridge).zip"
     },
@@ -2390,18 +2553,21 @@
     {
       "title": "Monster Hunter",
       "category": "Action RPG",
+      "series": "Monster Hunter",
       "system": "ps2",
       "bucket": "ps2/Monster Hunter (Japan) [T-En v20200424_v6].chd"
     },
     {
       "title": "Monster Hunter 2",
       "category": "Action RPG",
+      "series": "Monster Hunter",
       "system": "ps2",
       "bucket": "ps2/Monster Hunter 2 (Japan) [T-En by Break Arts v1.02].chd"
     },
     {
       "title": "Monster Hunter G",
       "category": "Action RPG",
+      "series": "Monster Hunter",
       "system": "ps2",
       "bucket": "ps2/Monster Hunter G (Japan) [T-En by amaillo Rev13v5].chd"
     },
@@ -2426,6 +2592,7 @@
     {
       "title": "Shining Blade",
       "category": "Action RPG",
+      "series": "Shining",
       "system": "psp",
       "bucket": "psp/Shining Blade (Japan) [T-En by cyberakuma & Gil Unx v20240418].chd"
     },
@@ -2438,6 +2605,7 @@
     {
       "title": "Star Ocean - Integrity and Faithlessness",
       "category": "Action RPG",
+      "series": "Star Ocean",
       "system": "ps3",
       "bucket": "ps3/Star Ocean - Integrity and Faithlessness (Japan) [T-En by RikuKH3 & Haxxxen v18-09-2020].chd"
     },
@@ -2462,6 +2630,7 @@
     {
       "title": "Tales of Berseria",
       "category": "Action RPG",
+      "series": "Tales of",
       "system": "ps3",
       "bucket": "ps3/Tales of Berseria (Japan) [T-En by Temple of Tale translations v1.2].chd"
     },
@@ -2474,24 +2643,28 @@
     {
       "title": "Xak II - Rising of the Red Moon",
       "category": "Action RPG",
+      "series": "Xak",
       "system": "msx2",
       "bucket": "msx2/Xak II - Rising of the Red Moon (Japan) [T-En by Oasis v1.0] (Floppy).zip"
     },
     {
       "title": "Xak III - The Eternal Recurrence",
       "category": "Action RPG",
+      "series": "Xak",
       "system": "tg-cd",
       "bucket": "tg-cd/Xak III - The Eternal Recurrence (Japan) [T-En by NightWolve v1.00].chd"
     },
     {
       "title": "Xak Precious Package - The Tower of Gazzel",
       "category": "Action RPG",
+      "series": "Xak",
       "system": "msx2",
       "bucket": "msx2/Xak Precious Package - The Tower of Gazzel (Japan) [T-En by Oasis v1.0] (Floppy).zip"
     },
     {
       "title": "Ys IV - The Dawn of Ys",
       "category": "Action RPG",
+      "series": "Ys",
       "system": "tg-cd",
       "bucket": "tg-cd/Ys IV - The Dawn of Ys (Japan) [T-En by NightWolve v0.95].chd"
     },
@@ -2504,6 +2677,7 @@
     {
       "title": "Fire Emblem - Shadow Dragon and the Blade of Light",
       "category": "Strategy RPG",
+      "series": "Fire Emblem",
       "system": "nes",
       "bucket": "nes/Fire Emblem Shadow Dragon and the Blade of Light (English v1.4.1).zip",
       "variants": [
@@ -2516,6 +2690,7 @@
     {
       "title": "Fire Emblem Gaiden",
       "category": "Strategy RPG",
+      "series": "Fire Emblem",
       "system": "nes",
       "bucket": "nes/Fire Emblem Gaiden (English v1.01)[Names+Font Fix].zip",
       "variants": [
@@ -2528,54 +2703,63 @@
     {
       "title": "Fire Emblem - Akaneia Saga - Episode 1",
       "category": "Strategy RPG",
+      "series": "Fire Emblem",
       "system": "satellaview",
       "bucket": "satellaview/Fire Emblem - Akaneia Saga - Episode 1 (English v1.01).zip"
     },
     {
       "title": "Fire Emblem - Akaneia Saga - Episode 2",
       "category": "Strategy RPG",
+      "series": "Fire Emblem",
       "system": "satellaview",
       "bucket": "satellaview/Fire Emblem - Akaneia Saga - Episode 2 (English v1.01).zip"
     },
     {
       "title": "Fire Emblem - Akaneia Saga - Episode 3",
       "category": "Strategy RPG",
+      "series": "Fire Emblem",
       "system": "satellaview",
       "bucket": "satellaview/Fire Emblem - Akaneia Saga - Episode 3 (English v1.01).zip"
     },
     {
       "title": "Fire Emblem - Akaneia Saga - Episode 4",
       "category": "Strategy RPG",
+      "series": "Fire Emblem",
       "system": "satellaview",
       "bucket": "satellaview/Fire Emblem - Akaneia Saga - Episode 4 (English v1.01).zip"
     },
     {
       "title": "Fire Emblem - Seisen no Keifu",
       "category": "Strategy RPG",
+      "series": "Fire Emblem",
       "system": "snes",
       "bucket": "snes/Fire Emblem - Seisen no Keifu (English v1.01)[Lil-Nordion].zip"
     },
     {
       "title": "Fire Emblem - Thracia 776",
       "category": "Strategy RPG",
+      "series": "Fire Emblem",
       "system": "snes",
       "bucket": "snes/Fire Emblem - Thracia 776 (English v108).zip"
     },
     {
       "title": "Fire Emblem - Fuuin no Tsurugi",
       "category": "Strategy RPG",
+      "series": "Fire Emblem",
       "system": "gba",
       "bucket": "gba/Fire Emblem - Fuuin no Tsurugi (English v1.2.1).zip"
     },
     {
       "title": "Fire Emblem - Souen no Kiseki",
       "category": "Strategy RPG",
+      "series": "Fire Emblem",
       "system": "gc",
       "bucket": "gc/Fire Emblem - Souen no Kiseki (Eng tran).rvz"
     },
     {
       "title": "Fire Emblem - New Mystery of the Emblem - Heroes of Light and Shadow",
       "category": "Strategy RPG",
+      "series": "Fire Emblem",
       "system": "nds",
       "bucket": "nds/Fire Emblem True Mystery Of The Emblem Heroes of Light and Shadow (English v3.01)[Beta 2.1].zip"
     },
@@ -2594,6 +2778,7 @@
     {
       "title": "Sakura Wars",
       "category": "Strategy RPG",
+      "series": "Sakura Wars",
       "system": "saturn",
       "bucket": "saturn/Sakura Wars (Japan) [T-En].m3u",
       "files": [
@@ -2604,6 +2789,7 @@
     {
       "title": "Sakura Wars 2",
       "category": "Strategy RPG",
+      "series": "Sakura Wars",
       "system": "saturn",
       "bucket": "saturn/Sakura Wars 2 (Japan) [T-En].m3u",
       "files": [
@@ -2615,36 +2801,42 @@
     {
       "title": "Super Robot Taisen GC",
       "category": "Strategy RPG",
+      "series": "Super Robot Wars",
       "system": "gc",
       "bucket": "gc/Super Robot Taisen GC (Eng tran).rvz"
     },
     {
       "title": "Super Robot Wars A Portable",
       "category": "Strategy RPG",
+      "series": "Super Robot Wars",
       "system": "psp",
       "bucket": "psp/Super Robot Wars A Portable (Japan) [T-En by Steel Soul v1.01] [n].chd"
     },
     {
       "title": "Super Robot Taisen - Operation Extend",
       "category": "Strategy RPG",
+      "series": "Super Robot Wars",
       "system": "psp",
       "bucket": "psp/Super Robot Taisen - Operation Extend (Japan) [T-En by CrashmanX].chd"
     },
     {
       "title": "SD Gundam - G Generation Over World",
       "category": "Strategy RPG",
+      "series": "Gundam",
       "system": "psp",
       "bucket": "psp/SD Gundam - G Generation Over World (Japan) [T-En by Izzul95 v1.1].chd"
     },
     {
       "title": "R-Type Tactics II - Operation Bitter Chocolate",
       "category": "Strategy RPG",
+      "series": "R-Type",
       "system": "psp",
       "bucket": "psp/R-Type Tactics II - Operation Bitter Chocolate (Japan) [T-En by Isourou-san v1.1].chd"
     },
     {
       "title": "Valkyria Chronicles 3",
       "category": "Strategy RPG",
+      "series": "Valkyria Chronicles",
       "system": "psp",
       "bucket": "psp/Valkyria Chronicles 3 (English v1.0.8).chd",
       "variants": [
@@ -2705,12 +2897,14 @@
     {
       "title": "Daisenryaku",
       "category": "Strategy RPG",
+      "series": "Daisenryaku",
       "system": "nes",
       "bucket": "nes/Daisenryaku (Japan) [T-En by Aeon Genesis v1.0].zip"
     },
     {
       "title": "Daisenryaku Expert WWII - War in Europe",
       "category": "Strategy RPG",
+      "series": "Daisenryaku",
       "system": "snes",
       "bucket": "snes/Daisenryaku Expert WWII - War in Europe (Japan) [T-En by Gc8tech v0.1] [i].zip"
     },
@@ -2729,6 +2923,7 @@
     {
       "title": "Famicom Wars",
       "category": "Strategy RPG",
+      "series": "Famicom Wars",
       "system": "nes",
       "bucket": "nes/Famicom Wars (Japan) [T-En by Aka Translations v1.11] [Add by Pacnsacdave v1.0] [n].zip"
     },
@@ -2771,24 +2966,28 @@
     {
       "title": "Majin Tensei",
       "category": "Strategy RPG",
+      "series": "Shin Megami Tensei",
       "system": "snes",
       "bucket": "snes/Majin Tensei (Japan) [T-En by DDSTranslation v4.0] [Add by Badnest v1.0].zip"
     },
     {
       "title": "Majin Tensei II - Spiral Nemesis",
       "category": "Strategy RPG",
+      "series": "Shin Megami Tensei",
       "system": "snes",
       "bucket": "snes/Majin Tensei II - Spiral Nemesis (Japan) [T-En by DDSTranslation v1.0].zip"
     },
     {
       "title": "Mobile Suit Gundam - Cross Dimension 0079",
       "category": "Strategy RPG",
+      "series": "Gundam",
       "system": "snes",
       "bucket": "snes/Mobile Suit Gundam - Cross Dimension 0079 (Japan) [T-En by Aeon Genesis v1.00] [n].zip"
     },
     {
       "title": "Mobile Suit Gundam F91 - Formula Wars 0122",
       "category": "Strategy RPG",
+      "series": "Gundam",
       "system": "snes",
       "bucket": "snes/Mobile Suit Gundam F91 - Formula Wars 0122 (Japan) [T-En by Twilight Translations v1.00] [n].zip"
     },
@@ -2819,18 +3018,21 @@
     {
       "title": "SD Gundam - Gachapon Senshi 3 - Hero Warrior",
       "category": "Strategy RPG",
+      "series": "Gundam",
       "system": "nes",
       "bucket": "nes/SD Gundam - Gachapon Senshi 3 - Hero Warrior (Japan) [T-En by MrRichard999 v1.0] [n].zip"
     },
     {
       "title": "SD Gundam - Gachapon Soldier 2 - Capsule War",
       "category": "Strategy RPG",
+      "series": "Gundam",
       "system": "nes",
       "bucket": "nes/SD Gundam - Gachapon Soldier 2 - Capsule War (Japan) [T-En by MrRichard999 v1.0] [n].zip"
     },
     {
       "title": "SD Gundam - Gachapon Soldier 4 - NewType Story",
       "category": "Strategy RPG",
+      "series": "Gundam",
       "system": "nes",
       "bucket": "nes/SD Gundam - Gachapon Soldier 4 - NewType Story (Japan) [T-En by MrRichard999 & Proveaux v1.01] [n].zip"
     },
@@ -2843,36 +3045,42 @@
     {
       "title": "Super Famicom Wars",
       "category": "Strategy RPG",
+      "series": "Famicom Wars",
       "system": "snes",
       "bucket": "snes/Super Famicom Wars (Japan) (NP) [T-En by Optiroc v1.1].zip"
     },
     {
       "title": "Super Gachapon World - SD Gundam X",
       "category": "Strategy RPG",
+      "series": "Gundam",
       "system": "snes",
       "bucket": "snes/Super Gachapon World - SD Gundam X (Japan) [T-En by MrRichard999 v0.98].zip"
     },
     {
       "title": "Super Robot Wars 2",
       "category": "Strategy RPG",
+      "series": "Super Robot Wars",
       "system": "nes",
       "bucket": "nes/Super Robot Wars 2 (Japan) [T-En by Aeon Genesis v1.00] [n].zip"
     },
     {
       "title": "Super Robot Wars 3",
       "category": "Strategy RPG",
+      "series": "Super Robot Wars",
       "system": "snes",
       "bucket": "snes/Super Robot Wars 3 (Japan) [T-En by Aeon Genesis v2.00m2] [n].zip"
     },
     {
       "title": "Super Robot Wars EX",
       "category": "Strategy RPG",
+      "series": "Super Robot Wars",
       "system": "snes",
       "bucket": "snes/Super Robot Wars EX (Japan) [T-En by Aeon Genesis v1.00] [n].zip"
     },
     {
       "title": "Super Robot Wars Gaiden - The Elemental Lords",
       "category": "Strategy RPG",
+      "series": "Super Robot Wars",
       "system": "snes",
       "bucket": "snes/Super Robot Wars Gaiden - The Elemental Lords (Japan) [T-En by Aeon Genesis v1.05] [n].zip"
     },
@@ -2903,12 +3111,14 @@
     {
       "title": "Zoids Apocalypse",
       "category": "Strategy RPG",
+      "series": "Zoids",
       "system": "nes",
       "bucket": "nes/Zoids Apocalypse (Japan) [T-En by MrRichard999 v1.3] [n].zip"
     },
     {
       "title": "Fire Emblem - Mystery of the Emblem",
       "category": "Strategy RPG",
+      "series": "Fire Emblem",
       "system": "snes",
       "bucket": "snes/Fire Emblem 3 (Akaneia Refined v1.2).zip"
     },
@@ -2939,6 +3149,7 @@
     {
       "title": "Fire Emblem - The Reincarnation of Light and Dark",
       "category": "Strategy RPG",
+      "series": "Fire Emblem",
       "system": "gbc",
       "bucket": "gbc/Fire Emblem - The Reincarnation of Light and Dark (Asia) (Unl) [T-En by Darrman v0.1 [i] [n].zip"
     },
@@ -2951,6 +3162,7 @@
     {
       "title": "Luminous Arc 3 - Eyes",
       "category": "Strategy RPG",
+      "series": "Luminous Arc",
       "system": "nds",
       "bucket": "nds/Luminous Arc 3 - Eyes (Japan) [T-En by Asakura & Buster Gundo & CheshireCat & Jaumander & Plasturion v1.0].zip"
     },
@@ -2969,66 +3181,77 @@
     {
       "title": "Yu-Gi-Oh! - The Falsebound Kingdom",
       "category": "Strategy RPG",
+      "series": "Yu-Gi-Oh!",
       "system": "gc",
       "bucket": "gc/Yu-Gi-Oh! - The Falsebound Kingdom (USA) [T-En by DrakeyC v2.0] [Relocalized].rvz"
     },
     {
       "title": "Game Boy Wars",
       "category": "Strategy RPG",
+      "series": "Famicom Wars",
       "system": "gb",
       "bucket": "gb/Game Boy Wars (Japan) [T-En by Nezz v1.01].zip"
     },
     {
       "title": "Game Boy Wars 2",
       "category": "Strategy RPG",
+      "series": "Famicom Wars",
       "system": "gbc",
       "bucket": "gbc/Game Boy Wars 2 (Japan) (SGB Enhanced) (GB Compatible) [T-En by TransBRC v1.02] [i].zip"
     },
     {
       "title": "Game Boy Wars 3",
       "category": "Strategy RPG",
+      "series": "Famicom Wars",
       "system": "gbc",
       "bucket": "gbc/Game Boy Wars 3 (Japan) [T-En by Master Knight DH v0.96] [i].zip"
     },
     {
       "title": "Game Boy Wars Turbo",
       "category": "Strategy RPG",
+      "series": "Famicom Wars",
       "system": "gb",
       "bucket": "gb/Game Boy Wars Turbo (Japan) (SGB Enhanced) [T-En by TransBRC v0.91] [i].zip"
     },
     {
       "title": "SD Gundam - Dimension War",
       "category": "Strategy RPG",
+      "series": "Gundam",
       "system": "virtualboy",
       "bucket": "virtualboy/SD Gundam - Dimension War (Japan) [T-En by Greg Stevens & Benjamin Stevens v1.0].zip"
     },
     {
       "title": "Super Robot Taisen D",
       "category": "Strategy RPG",
+      "series": "Super Robot Wars",
       "system": "gba",
       "bucket": "gba/Super Robot Taisen D (Japan) [T-En by Snesmaster40 v0.5] [i].zip"
     },
     {
       "title": "Super Robot Taisen R",
       "category": "Strategy RPG",
+      "series": "Super Robot Wars",
       "system": "gba",
       "bucket": "gba/Super Robot Taisen R (Japan) [T-En by Shadownall v090202] [i].zip"
     },
     {
       "title": "Super Robot Wars",
       "category": "Strategy RPG",
+      "series": "Super Robot Wars",
       "system": "gb",
       "bucket": "gb/Super Robot Wars (Japan) [T-En by Aeon Genesis v1.00] [n].zip"
     },
     {
       "title": "Super Robot Wars J",
       "category": "Strategy RPG",
+      "series": "Super Robot Wars",
       "system": "gba",
       "bucket": "gba/Super Robot Wars J (Japan) [T-En by The Romhacking Aerie v1.0] [n].zip"
     },
     {
       "title": "Super Robot Wars W",
       "category": "Strategy RPG",
+      "series": "Super Robot Wars",
       "system": "nds",
       "bucket": "nds/Super Robot Wars W (Japan) [T-En by Brunom1 & Fei & Kingcom v1.1] [n].zip"
     },
@@ -3059,6 +3282,7 @@
     {
       "title": "Daisenryaku II - Campaign Version",
       "category": "Strategy RPG",
+      "series": "Daisenryaku",
       "system": "msx2",
       "bucket": "msx2/Daisenryaku II - Campaign Version (Japan) [T-En by Takamichi Suzukawa & Trunks & Victor Martinez v1.0] (Floppy).zip"
     },
@@ -3071,42 +3295,49 @@
     {
       "title": "Dragon Force II - The Godforsaken Land",
       "category": "Strategy RPG",
+      "series": "Dragon Force",
       "system": "saturn",
       "bucket": "saturn/Dragon Force II - The Godforsaken Land (Japan) [T-En by Verve Fanworks v1.04] [n].chd"
     },
     {
       "title": "Farland Story",
       "category": "Strategy RPG",
+      "series": "Farland Story",
       "system": "pc98",
       "bucket": "pc98/Farland Story (Japan) (Disk A) [T-En by BTAxis v1.0].d88"
     },
     {
       "title": "Farland Story 2",
       "category": "Strategy RPG",
+      "series": "Farland Story",
       "system": "pc98",
       "bucket": "pc98/Farland Story 2 (Japan) [T-En by BTAxis v1.0].hdi"
     },
     {
       "title": "Farland Story 3",
       "category": "Strategy RPG",
+      "series": "Farland Story",
       "system": "pc98",
       "bucket": "pc98/Farland Story 3 (Japan) [T-En by BTAxis v1.0].hdi"
     },
     {
       "title": "Farland Story 4",
       "category": "Strategy RPG",
+      "series": "Farland Story",
       "system": "pc98",
       "bucket": "pc98/Farland Story 4 (Japan) [T-En by BTAxis v1.0].hdi"
     },
     {
       "title": "Farland Story 5",
       "category": "Strategy RPG",
+      "series": "Farland Story",
       "system": "pc98",
       "bucket": "pc98/Farland Story 5 (Japan) [T-En by BTAxis v1.0].hdi"
     },
     {
       "title": "Farland Story 6",
       "category": "Strategy RPG",
+      "series": "Farland Story",
       "system": "pc98",
       "bucket": "pc98/Farland Story 6 (Japan) [T-En by BTAxis v1.0].hdi"
     },
@@ -3119,18 +3350,21 @@
     {
       "title": "Front Mission 2",
       "category": "Strategy RPG",
+      "series": "Front Mission",
       "system": "psx",
       "bucket": "psx/Front Mission 2 (Japan) [T-En by Front Mission 5 Team Patch F].chd"
     },
     {
       "title": "Front Mission 5 - Scars of the War",
       "category": "Strategy RPG",
+      "series": "Front Mission",
       "system": "ps2",
       "bucket": "ps2/Front Mission 5 - Scars of the War (Japan) [T-En by Front Mission 5 Team v4b].chd"
     },
     {
       "title": "Godzilla - Monsters Attack",
       "category": "Strategy RPG",
+      "series": "Godzilla",
       "system": "gamegear",
       "bucket": "gamegear/Godzilla - Monsters Attack (Japan) [T-En by Supper v1.1] [n].zip"
     },
@@ -3143,6 +3377,7 @@
     {
       "title": "Growlanser VI - Precarious World",
       "category": "Strategy RPG",
+      "series": "Growlanser",
       "system": "ps2",
       "bucket": "ps2/Growlanser VI - Precarious World (Japan) [T-En by Risae v2024-01-23].chd"
     },
@@ -3161,18 +3396,21 @@
     {
       "title": "Kidou Senshi Gundam - Gihren no Yabou - Axis no Kyoui V",
       "category": "Strategy RPG",
+      "series": "Gundam",
       "system": "psp",
       "bucket": "psp/Kidou Senshi Gundam - Gihren no Yabou - Axis no Kyoui V (Japan) [T-En by GihrensTranslator v8] [req PPSSPP Gihren Type 24].chd"
     },
     {
       "title": "Langrisser III",
       "category": "Strategy RPG",
+      "series": "Langrisser",
       "system": "saturn",
       "bucket": "saturn/Langrisser III (Japan) [T-En by Cyber Warrior X v0.2] [i].chd"
     },
     {
       "title": "Langrisser IV",
       "category": "Strategy RPG",
+      "series": "Langrisser",
       "system": "psx",
       "bucket": "psx/Langrisser IV (Japan) [T-En by Kil v1.3].chd"
     },
@@ -3191,6 +3429,7 @@
     {
       "title": "Ogre Battle Gaiden - The Prince of Zenobia",
       "category": "Strategy RPG",
+      "series": "Ogre Battle",
       "system": "ngpc",
       "bucket": "ngpc/Ogre Battle Gaiden - The Prince of Zenobia (Japan) [T-En by FFaddic v1.0] [i] [n].zip"
     },
@@ -3209,24 +3448,28 @@
     {
       "title": "Rune Master",
       "category": "Strategy RPG",
+      "series": "Rune Master",
       "system": "msx2",
       "bucket": "msx2/Rune Master (Japan) [T-En by Oasis v1.0] (Floppy).zip"
     },
     {
       "title": "Rune Master II",
       "category": "Strategy RPG",
+      "series": "Rune Master",
       "system": "msx2",
       "bucket": "msx2/Rune Master II (Japan) [T-En by Oasis v1.0] (Floppy).zip"
     },
     {
       "title": "Rune Master III - Sangoku Eiketsuden",
       "category": "Strategy RPG",
+      "series": "Rune Master",
       "system": "msx2",
       "bucket": "msx2/Rune Master III - Sangoku Eiketsuden (Japan) [T-En by Oasis v1.0] (Floppy).zip"
     },
     {
       "title": "SD Gundam - Gachapon Senshi 2 - Capsule Senki",
       "category": "Strategy RPG",
+      "series": "Gundam",
       "system": "msx2",
       "bucket": "msx2/SD Gundam - Gachapon Senshi 2 - Capsule Senki (Japan) [T-En by Django v1.0] (Floppy).zip"
     },
@@ -3245,18 +3488,21 @@
     {
       "title": "Shining Force Gaiden - Final Conflict",
       "category": "Strategy RPG",
+      "series": "Shining Force",
       "system": "gamegear",
       "bucket": "gamegear/Shining Force Gaiden - Final Conflict (Japan) [T-En by Shining Force Central v070606 Final].zip"
     },
     {
       "title": "Shining Force III - Scenario 2 - Target - Child of God",
       "category": "Strategy RPG",
+      "series": "Shining Force",
       "system": "saturn",
       "bucket": "saturn/Shining Force III - Scenario 2 - Target - Child of God (Japan) [T-En by Shining Force III Translation Project v25] [n].chd"
     },
     {
       "title": "Shining Force III - Scenario 3 - Bulzome Rising",
       "category": "Strategy RPG",
+      "series": "Shining Force",
       "system": "saturn",
       "bucket": "saturn/Shining Force III - Scenario 3 - Bulzome Rising (Japan) [T-En by Shining Force III Translation Project v25] [n].chd"
     },
@@ -3281,12 +3527,14 @@
     {
       "title": "Super Robot Wars Alpha Gaiden",
       "category": "Strategy RPG",
+      "series": "Super Robot Wars",
       "system": "psx",
       "bucket": "psx/Super Robot Wars Alpha Gaiden (Japan) [T-En by Aeon Genesis v0.95b] [i] [n].chd"
     },
     {
       "title": "Super Robot Wars OG - Original Generations",
       "category": "Strategy RPG",
+      "series": "Super Robot Wars",
       "system": "ps2",
       "bucket": "ps2/Super Robot Wars OG - Original Generations (Japan) [T-En by Black & Dewgrass & Kingcom & Ngram Prisken v1.2] [n].chd"
     },
@@ -3335,6 +3583,7 @@
     {
       "title": "Berserk Millennium Falcon",
       "category": "Action",
+      "series": "Berserk",
       "system": "dreamcast",
       "bucket": "dreamcast/Berserk Millennium Falcon (English v1.1).chd"
     },
@@ -3365,18 +3614,21 @@
     {
       "title": "Shin Sangoku Musou - Multi Raid 2",
       "category": "Action",
+      "series": "Dynasty Warriors",
       "system": "psp",
       "bucket": "psp/Shin Sangoku Musou - Multi Raid 2 (Japan) [T-En by Yuu Ho v3].chd"
     },
     {
       "title": "Kidou Senshi Gundam - Gundam vs. Gundam NEXT PLUS",
       "category": "Action",
+      "series": "Gundam",
       "system": "psp",
       "bucket": "psp/Kidou Senshi Gundam - Gundam vs. Gundam NEXT PLUS (Japan) [T-En by DaTeHaCKs Team v1.5].chd"
     },
     {
       "title": "Ys vs. Sora no Kiseki - Alternative Saga",
       "category": "Action",
+      "series": "Ys",
       "system": "psp",
       "bucket": "psp/Ys vs. Sora no Kiseki - Alternative Saga (Japan) [T-En by Flame v2] [i].chd"
     },
@@ -3449,12 +3701,14 @@
     {
       "title": "Front Mission Series - Gun Hazard",
       "category": "Action",
+      "series": "Front Mission",
       "system": "snes",
       "bucket": "snes/Front Mission Series - Gun Hazard (Japan) [T-En by Aeon Genesis v1.01].zip"
     },
     {
       "title": "Godzilla",
       "category": "Action",
+      "series": "Godzilla",
       "system": "nes",
       "bucket": "nes/Godzilla (Japan) [T-En by Stardust Crusaders v1.01] [n].zip"
     },
@@ -3509,6 +3763,7 @@
     {
       "title": "Ninja Jajamaru - Galactic Battle",
       "category": "Action",
+      "series": "Ninja Jajamaru",
       "system": "nes",
       "bucket": "nes/Ninja Jajamaru - Galactic Battle (Japan) [T-En by HTI v1.00] [n].zip"
     },
@@ -3521,6 +3776,7 @@
     {
       "title": "Sanrio World Smash Ball!",
       "category": "Action",
+      "series": "Sanrio",
       "system": "snes",
       "bucket": "snes/Sanrio World Smash Ball! (Japan) [T-En by Suicidal Translations v1.00].zip"
     },
@@ -3539,24 +3795,28 @@
     {
       "title": "Super Bomberman 4",
       "category": "Action",
+      "series": "Bomberman",
       "system": "snes",
       "bucket": "snes/Super Bomberman 4 (Japan) [T-En by Svambo v1.0].zip"
     },
     {
       "title": "Super Bomberman 5",
       "category": "Action",
+      "series": "Bomberman",
       "system": "snes",
       "bucket": "snes/Super Bomberman 5 (Japan) [T-En by Psyklax Beta] [Add by Svambo v1.0] [i].zip"
     },
     {
       "title": "Super Contra 7",
       "category": "Action",
+      "series": "Contra",
       "system": "nes",
       "bucket": "nes/Super Contra 7 (Asia) (Unl) [T-En by Pacnsacdave v1.0] [n].zip"
     },
     {
       "title": "Super Contra X",
       "category": "Action",
+      "series": "Contra",
       "system": "nes",
       "bucket": "nes/Super Contra X (Asia) (Unl) [T-En by Pacnsacdave v1.0] [n].zip"
     },
@@ -3575,6 +3835,7 @@
     {
       "title": "Bishoujo Senshi Sailor Moon",
       "category": "Action",
+      "series": "Sailor Moon",
       "system": "gb",
       "bucket": "gb/Bishoujo Senshi Sailor Moon (Japan) [T-En by EsperKnight & Some Good Shit Translations v0.95] [i].zip"
     },
@@ -3629,12 +3890,14 @@
     {
       "title": "Soul Eater - Medusa's Plot",
       "category": "Action",
+      "series": "Soul Eater",
       "system": "nds",
       "bucket": "nds/Soul Eater - Medusa's Plot (Japan) [T-En by Anime Game Translations Team v1.2] [n].zip"
     },
     {
       "title": "Soul Eater - Monotone Princess",
       "category": "Action",
+      "series": "Soul Eater",
       "system": "wii",
       "bucket": "wii/Soul Eater - Monotone Princess (Japan) [T-En by Anime Game Translations Team v1.0].rvz"
     },
@@ -3653,6 +3916,7 @@
     {
       "title": "Ultraman - Legend of the Super Warrior",
       "category": "Action",
+      "series": "Ultraman",
       "system": "gb",
       "bucket": "gb/Ultraman - Legend of the Super Warrior (Japan) (SGB Enhanced) [T-En by Gorgyrip v1.0] [n].zip"
     },
@@ -3671,6 +3935,7 @@
     {
       "title": "Dragon Quest Heroes - Rocket Slime 3",
       "category": "Action",
+      "series": "Dragon Quest",
       "system": "3ds",
       "bucket": "3ds/Dragon Quest Heroes - Rocket Slime 3 (Japan) [T-En by Fan Translators International v1.0 RC1] [n].zip"
     },
@@ -3689,18 +3954,21 @@
     {
       "title": "Ultraman Ball",
       "category": "Action",
+      "series": "Ultraman",
       "system": "gb",
       "bucket": "gb/Ultraman Ball (Japan) (SGB Enhanced) [T-En by Suicidal Translations v0.99] [i].zip"
     },
     {
       "title": "Berserk - Millennium Falcon Arc - Falcon of the Millenium Empire - Chapter of the Holy Demon War",
       "category": "Action",
+      "series": "Berserk",
       "system": "ps2",
       "bucket": "ps2/Berserk - Millennium Falcon Arc - Falcon of the Millenium Empire - Chapter of the Holy Demon War (Japan) [T-En by Wesker90 v1.1] [n].chd"
     },
     {
       "title": "Berserk - Millennium Falcon Arc - Flowers of Oblivion Chapter",
       "category": "Action",
+      "series": "Berserk",
       "system": "dreamcast",
       "bucket": "dreamcast/Berserk - Millennium Falcon Arc - Flowers of Oblivion Chapter (Japan) [T-En by Catasplurge & Vimiani & Gem v1.1] [n].chd"
     },
@@ -3737,6 +4005,7 @@
     {
       "title": "Ganbare Goemon - Space Pirate Akogingu",
       "category": "Action",
+      "series": "Ganbare Goemon",
       "system": "psx",
       "bucket": "psx/Ganbare Goemon - Space Pirate Akogingu (Japan) (Rev 1) [T-En by Adventurous Translations v0.96] [n].chd"
     },
@@ -3761,6 +4030,7 @@
     {
       "title": "JoJo's Bizarre Adventure - Golden Wind",
       "category": "Action",
+      "series": "JoJo",
       "system": "ps2",
       "bucket": "ps2/JoJo's Bizarre Adventure - Golden Wind (Japan) [T-En by Hudgyn Sasdarl v3.003] [n].chd"
     },
@@ -3815,6 +4085,7 @@
     {
       "title": "Metal Gear 2 - Solid Snake",
       "category": "Action",
+      "series": "Metal Gear",
       "system": "msx2",
       "bucket": "msx2/Metal Gear 2 - Solid Snake (Japan) [T-En by Maarten ter Huurne & Takamichi Suzukawa v1.2] (Cartridge).zip"
     },
@@ -3833,6 +4104,7 @@
     {
       "title": "Mobile Suit Gundam",
       "category": "Action",
+      "series": "Gundam",
       "system": "saturn",
       "bucket": "saturn/Mobile Suit Gundam (Japan) [T-En by ShadowMask v0.6] [i].chd"
     },
@@ -3911,12 +4183,14 @@
     {
       "title": "Danganronpa - Hope's Academy and Despair's Students",
       "category": "Visual Novel",
+      "series": "Danganronpa",
       "system": "psp",
       "bucket": "psp/Danganronpa - Hope's Academy and Despair's Students (Japan) [T-En by Project Zetsubou v1.0] [n].chd"
     },
     {
       "title": "Steins;Gate",
       "category": "Visual Novel",
+      "series": "Steins;Gate",
       "system": "psp",
       "bucket": "psp/Steins;Gate (Japan) [T-En by HaselLoyance v1.0.1].chd"
     },
@@ -3965,6 +4239,7 @@
     {
       "title": "Evangelion - Girlfriend of Steel 2nd",
       "category": "Visual Novel",
+      "series": "Evangelion",
       "system": "psp",
       "bucket": "psp/Evangelion - Girlfriend of Steel 2nd (Japan) [T-En by Blacklabel Translations v1.01] [n].chd"
     },
@@ -4017,6 +4292,7 @@
     {
       "title": "Tokimeki Memorial Girl's Side Premium - 3rd Story",
       "category": "Visual Novel",
+      "series": "Tokimeki Memorial",
       "system": "psp",
       "bucket": "psp/Tokimeki Memorial Girl's Side Premium - 3rd Story (Japan) [T-En by Jjjewel v1.00].chd"
     },
@@ -4089,24 +4365,28 @@
     {
       "title": "Spice & Wolf - My Year with Holo",
       "category": "Visual Novel",
+      "series": "Spice and Wolf",
       "system": "nds",
       "bucket": "nds/Spice & Wolf - My Year with Holo (Japan) [T-En by Anime Game Translations Team v1.3] [n].zip"
     },
     {
       "title": "Spice & Wolf - The Wind that spans the Sea",
       "category": "Visual Novel",
+      "series": "Spice and Wolf",
       "system": "nds",
       "bucket": "nds/Spice & Wolf - The Wind that spans the Sea (Japan) [T-En by Anime Game Translations Team v1.0] [n].zip"
     },
     {
       "title": "Tokimeki Memorial Girl's Side - 1st Love Plus",
       "category": "Visual Novel",
+      "series": "Tokimeki Memorial",
       "system": "nds",
       "bucket": "nds/Tokimeki Memorial Girl's Side - 1st Love Plus (Japan) [T-En by TMGS1 Translation Team v1.0].zip"
     },
     {
       "title": "Tokimeki Memorial Girl's Side - 2nd Season",
       "category": "Visual Novel",
+      "series": "Tokimeki Memorial",
       "system": "nds",
       "bucket": "nds/Tokimeki Memorial Girl's Side - 2nd Season (Japan) [T-En by Gokusaishiki v6].zip"
     },
@@ -4177,6 +4457,7 @@
     {
       "title": "Evangelion - Girlfriend of Steel Portable",
       "category": "Visual Novel",
+      "series": "Evangelion",
       "system": "psp",
       "bucket": "psp/Evangelion - Girlfriend of Steel Portable (Japan) [T-En by Mugi & Xyz v1.01] [n].chd"
     },
@@ -4279,18 +4560,21 @@
     {
       "title": "Steins;Gate - My Darling's Embrace",
       "category": "Visual Novel",
+      "series": "Steins;Gate",
       "system": "psp",
       "bucket": "psp/Steins;Gate - My Darling's Embrace (Japan) [T-En by Spazzery v0.5] [n].chd"
     },
     {
       "title": "Suikogaiden Vol. 1 - Swordsman of Harmonia",
       "category": "Visual Novel",
+      "series": "Suikoden",
       "system": "psx",
       "bucket": "psx/Suikogaiden Vol. 1 - Swordsman of Harmonia (Japan) [T-En by Suikogaiden Translation Project v1.1] [n].chd"
     },
     {
       "title": "Suikogaiden Vol. 2 - Duel at Crystal Valley",
       "category": "Visual Novel",
+      "series": "Suikoden",
       "system": "psx",
       "bucket": "psx/Suikogaiden Vol. 2 - Duel at Crystal Valley (Japan) [T-En by Suikogaiden Translation Project v1.1] [n].chd"
     },
@@ -4321,60 +4605,70 @@
     {
       "title": "Hatsune Miku - Project Diva",
       "category": "Rhythm & Idol",
+      "series": "Hatsune Miku",
       "system": "psp",
       "bucket": "psp/Hatsune Miku - Project Diva (Japan) [T-En by Diva Fan Project v1.0].chd"
     },
     {
       "title": "Hatsune Miku - Project Diva 2nd",
       "category": "Rhythm & Idol",
+      "series": "Hatsune Miku",
       "system": "psp",
       "bucket": "psp/Hatsune Miku - Project Diva 2nd (Japan) [T-En by Diva Fan Project v3.0].chd"
     },
     {
       "title": "Hatsune Miku - Project Diva Extend",
       "category": "Rhythm & Idol",
+      "series": "Hatsune Miku",
       "system": "psp",
       "bucket": "psp/Hatsune Miku - Project Diva Extend (Japan) [T-En by Diva Fan Project v2.0].chd"
     },
     {
       "title": "Idol Master SP, The - Perfect Sun",
       "category": "Rhythm & Idol",
+      "series": "Idolmaster",
       "system": "psp",
       "bucket": "psp/Idol Master SP, The - Perfect Sun (Japan) [T-En by VN Translations v12-14-12].chd"
     },
     {
       "title": "Idol Master SP, The - Missing Moon",
       "category": "Rhythm & Idol",
+      "series": "Idolmaster",
       "system": "psp",
       "bucket": "psp/Idol Master SP, The - Missing Moon (Japan) [T-En by VN Translations v12-14-12].chd"
     },
     {
       "title": "Idolmaster SP, The - Wandering Star",
       "category": "Rhythm & Idol",
+      "series": "Idolmaster",
       "system": "psp",
       "bucket": "psp/Idolmaster SP, The - Wandering Star (Japan) [T-En by VN Translations v12-14-12].chd"
     },
     {
       "title": "Idol Master SP, The - Shiny Festa - Honey Sound",
       "category": "Rhythm & Idol",
+      "series": "Idolmaster",
       "system": "psp",
       "bucket": "psp/Idol Master SP, The - Shiny Festa - Honey Sound (Japan) [T-En by zzzzzzzzz].chd"
     },
     {
       "title": "Idol Master SP, The - Shiny Festa - Funky Note",
       "category": "Rhythm & Idol",
+      "series": "Idolmaster",
       "system": "psp",
       "bucket": "psp/Idol Master SP, The - Shiny Festa - Funky Note (Japan) [T-En by zzzzzzzzz].chd"
     },
     {
       "title": "Idol Master SP, The - Shiny Festa - Groovy Tune",
       "category": "Rhythm & Idol",
+      "series": "Idolmaster",
       "system": "psp",
       "bucket": "psp/Idol Master SP, The - Shiny Festa - Groovy Tune (Japan) [T-En by zzzzzzzzz].chd"
     },
     {
       "title": "Donkey Konga 3 - Tabehoudai! Haru Mogitate 50-kyoku",
       "category": "Rhythm & Idol",
+      "series": "Donkey Kong",
       "system": "gc",
       "bucket": "gc/Donkey Konga 3 - Tabehoudai! Haru Mogitate 50-kyoku (Japan) [T-En by DOL-Translations v0.1.1] [i].rvz"
     },
@@ -4387,6 +4681,7 @@
     {
       "title": "Rhythm Tengoku",
       "category": "Rhythm & Idol",
+      "series": "Rhythm Heaven",
       "system": "gba",
       "bucket": "gba/Rhythm Tengoku (Japan) [T-En by ShaffySwitcher v20230620] [i].zip"
     },
@@ -4411,6 +4706,7 @@
     {
       "title": "Dance Dance Revolution - Club Version - Dreamcast Edition",
       "category": "Rhythm & Idol",
+      "series": "Dance Dance Revolution",
       "system": "dreamcast",
       "bucket": "dreamcast/Dance Dance Revolution - Club Version - Dreamcast Edition (Japan) [T-En by Topping Translations v1.0] [i].chd"
     },
@@ -4429,24 +4725,28 @@
     {
       "title": "Yu-Gi-Oh! 5D's Tag Force 6",
       "category": "Card, Board & Sports",
+      "series": "Yu-Gi-Oh!",
       "system": "psp",
       "bucket": "psp/Yu-Gi-Oh! 5D's Tag Force 6 (Japan) [T-En by Clickclaxer01 v2.0].chd"
     },
     {
       "title": "Yu-Gi-Oh! ARC-V Tag Force Special",
       "category": "Card, Board & Sports",
+      "series": "Yu-Gi-Oh!",
       "system": "psp",
       "bucket": "psp/Yu-Gi-Oh! ARC-V Tag Force Special (Japan) [T-En by FLS Gaming Projects v2.1].chd"
     },
     {
       "title": "Dragon Quest & Final Fantasy in Itadaki Street Portable",
       "category": "Card, Board & Sports",
+      "series": "Dragon Quest",
       "system": "psp",
       "bucket": "psp/Dragon Quest & Final Fantasy in Itadaki Street Portable (Japan) [T-En by MortoQueiba & Choppasmith Prerelease 3].chd"
     },
     {
       "title": "World Soccer Winning Eleven 6 - Final Evolution",
       "category": "Card, Board & Sports",
+      "series": "Winning Eleven / Pro Evolution Soccer",
       "system": "gc",
       "bucket": "gc/World Soccer Winning Eleven 6 - Final Evolution (Eng tran).rvz"
     },
@@ -4495,18 +4795,21 @@
     {
       "title": "Captain Tsubasa",
       "category": "Card, Board & Sports",
+      "series": "Captain Tsubasa",
       "system": "nes",
       "bucket": "nes/Captain Tsubasa (Japan) [T-En by Lestat v1.0] [Add by knighTeen87 v1.5] [i].zip"
     },
     {
       "title": "Captain Tsubasa III - Challenge of Kaiser",
       "category": "Card, Board & Sports",
+      "series": "Captain Tsubasa",
       "system": "snes",
       "bucket": "snes/Captain Tsubasa III - Challenge of Kaiser (Japan) [T-En by Pianohombre v1.0] [Add by Morhamms357 v0.9] [n].zip"
     },
     {
       "title": "Captain Tsubasa Vol. II - Super Striker",
       "category": "Card, Board & Sports",
+      "series": "Captain Tsubasa",
       "system": "nes",
       "bucket": "nes/Captain Tsubasa Vol. II - Super Striker (Japan) [T-En by Hayabusakun v1.0] [Add by Pacnsacdave v1.0] [n].zip"
     },
@@ -4531,18 +4834,21 @@
     {
       "title": "Dokapon 3-2-1 - From Friendship to Mayhem",
       "category": "Card, Board & Sports",
+      "series": "Dokapon",
       "system": "snes",
       "bucket": "snes/Dokapon 3-2-1 - From Friendship to Mayhem (Japan) [T-En by Krokodyl v1.4] [n].zip"
     },
     {
       "title": "Dokapon Gaiden - Fiery Audition",
       "category": "Card, Board & Sports",
+      "series": "Dokapon",
       "system": "snes",
       "bucket": "snes/Dokapon Gaiden - Fiery Audition (Japan) [T-En by Krokodyl v1.0] [n].zip"
     },
     {
       "title": "Donald Duck",
       "category": "Card, Board & Sports",
+      "series": "Disney",
       "system": "nes",
       "bucket": "nes/Donald Duck (Japan) [T-En by Chronix v1.0].zip"
     },
@@ -4591,36 +4897,42 @@
     {
       "title": "Famista '89 - Opening Game!!",
       "category": "Card, Board & Sports",
+      "series": "Famista",
       "system": "nes",
       "bucket": "nes/Famista '89 - Opening Game!! (Japan) [T-En by MrRichard999 & TheMajinZenki & AgentOrange & FlashPV v0.91] [n].zip"
     },
     {
       "title": "Famista '90",
       "category": "Card, Board & Sports",
+      "series": "Famista",
       "system": "nes",
       "bucket": "nes/Famista '90 (Japan) [T-En by MrRichard999 & TheMajinZenki & FlashPV v0.92] [n].zip"
     },
     {
       "title": "Famista '91",
       "category": "Card, Board & Sports",
+      "series": "Famista",
       "system": "nes",
       "bucket": "nes/Famista '91 (Japan) [T-En by MrRichard999 & TheMajinZenki & Jink640 & FlashPV v0.991] [n].zip"
     },
     {
       "title": "Famista '92",
       "category": "Card, Board & Sports",
+      "series": "Famista",
       "system": "nes",
       "bucket": "nes/Famista '92 (Japan) [T-En by MrRichard999 & TheMajinZenki & Jink640 & FlashPV v1.01] [n].zip"
     },
     {
       "title": "Famista '93",
       "category": "Card, Board & Sports",
+      "series": "Famista",
       "system": "nes",
       "bucket": "nes/Famista '93 (Japan) [T-En by MrRichard999 & TheMajinZenki & Jink640 & FlashPV v0.991] [n].zip"
     },
     {
       "title": "Famista '94",
       "category": "Card, Board & Sports",
+      "series": "Famista",
       "system": "nes",
       "bucket": "nes/Famista '94 (Japan) [T-En by MrRichard999 & TheMajinZenki & FlashPV v1.01] [n].zip"
     },
@@ -4735,12 +5047,14 @@
     {
       "title": "Kunio-Kun's Nekketsu Soccer League",
       "category": "Card, Board & Sports",
+      "series": "Kunio-kun",
       "system": "nes",
       "bucket": "nes/Kunio-Kun's Nekketsu Soccer League (Japan) [T-En by PentarouZero v1.2] [Add by Lipetsk v1.0] [n].zip"
     },
     {
       "title": "Kunio's Dodge Ball",
       "category": "Card, Board & Sports",
+      "series": "Kunio-kun",
       "system": "snes",
       "bucket": "snes/Kunio's Dodge Ball (Japan) [T-En by Azelistic v1.0] [n].zip"
     },
@@ -4771,12 +5085,14 @@
     {
       "title": "Namco Classic II",
       "category": "Card, Board & Sports",
+      "series": "Namco Museum",
       "system": "nes",
       "bucket": "nes/Namco Classic II (Japan) [T-En by MrRichard999 v0.80] [i] [n].zip"
     },
     {
       "title": "Nekketsu! Street Basket - Go for it, Dunk Heroes!",
       "category": "Card, Board & Sports",
+      "series": "Kunio-kun",
       "system": "nes",
       "bucket": "nes/Nekketsu! Street Basket - Go for it, Dunk Heroes! (Japan) [T-En by Farid v1.2] [n].zip"
     },
@@ -4819,6 +5135,7 @@
     {
       "title": "Sanrio Cup - Pon Pon Volley",
       "category": "Card, Board & Sports",
+      "series": "Sanrio",
       "system": "nes",
       "bucket": "nes/Sanrio Cup - Pon Pon Volley (Japan) [T-En by Gaijin Productions v1.00] [n].zip"
     },
@@ -4861,12 +5178,14 @@
     {
       "title": "Super Fire Pro Wrestling - Queen's Special",
       "category": "Card, Board & Sports",
+      "series": "Fire Pro Wrestling",
       "system": "snes",
       "bucket": "snes/Super Fire Pro Wrestling - Queen's Special (Japan) [T-En by Phil v1.0].zip"
     },
     {
       "title": "Super Fire Pro Wrestling X Premium",
       "category": "Card, Board & Sports",
+      "series": "Fire Pro Wrestling",
       "system": "snes",
       "bucket": "snes/Super Fire Pro Wrestling X Premium (Japan) [T-En by Sydra v7].zip"
     },
@@ -4945,6 +5264,7 @@
     {
       "title": "Final Fire Pro Wrestling - Yume no Dantai Unei!",
       "category": "Card, Board & Sports",
+      "series": "Fire Pro Wrestling",
       "system": "gba",
       "bucket": "gba/Final Fire Pro Wrestling - Yume no Dantai Unei! (Japan) [T-En by Fat Dave Beta 1] [i].zip"
     },
@@ -4999,6 +5319,7 @@
     {
       "title": "Ui-Ire - World Soccer Winning Eleven",
       "category": "Card, Board & Sports",
+      "series": "Winning Eleven / Pro Evolution Soccer",
       "system": "gba",
       "bucket": "gba/Ui-Ire - World Soccer Winning Eleven (Japan) [T-En by knighTeen87 v0.99].zip"
     },
@@ -5011,18 +5332,21 @@
     {
       "title": "Yu-Gi-Oh! Duel Monsters",
       "category": "Card, Board & Sports",
+      "series": "Yu-Gi-Oh!",
       "system": "gb",
       "bucket": "gb/Yu-Gi-Oh! Duel Monsters (Japan) (SGB Enhanced) [T-En by Darrman v1.0].zip"
     },
     {
       "title": "Yu-Gi-Oh! Duel Monsters 4 - Battle of Great Duelist - Kaiba Deck",
       "category": "Card, Board & Sports",
+      "series": "Yu-Gi-Oh!",
       "system": "gbc",
       "bucket": "gbc/Yu-Gi-Oh! Duel Monsters 4 - Battle of Great Duelist - Kaiba Deck (Japan) [T-En by Chris Judah v0.70] [i].zip"
     },
     {
       "title": "Chocobo Land - A Game of Dice",
       "category": "Card, Board & Sports",
+      "series": "Final Fantasy",
       "system": "gba",
       "bucket": "gba/Chocobo Land - A Game of Dice (Japan) [T-En by Nezz v1.0].zip"
     },
@@ -5041,6 +5365,7 @@
     {
       "title": "Pokemon Trading Card Game 2 - The Invasion of Team GR!",
       "category": "Card, Board & Sports",
+      "series": "Pokemon",
       "system": "gbc",
       "bucket": "gbc/Pokemon Trading Card Game 2 - The Invasion of Team GR! (Japan) [T-En by Artemis251 & Jazz v1.0] [n].zip"
     },
@@ -5053,6 +5378,7 @@
     {
       "title": "Suikoden Card Stories",
       "category": "Card, Board & Sports",
+      "series": "Suikoden",
       "system": "gba",
       "bucket": "gba/Suikoden Card Stories (Japan) [T-En by Pokeytax v1.00] [n].zip"
     },
@@ -5101,24 +5427,28 @@
     {
       "title": "Fire Pro Gaiden Blazing Tornado",
       "category": "Card, Board & Sports",
+      "series": "Fire Pro Wrestling",
       "system": "saturn",
       "bucket": "saturn/Fire Pro Gaiden Blazing Tornado (Japan) [T-En by Malenko v0.91] [i].chd"
     },
     {
       "title": "Fire Pro Wrestling D",
       "category": "Card, Board & Sports",
+      "series": "Fire Pro Wrestling",
       "system": "dreamcast",
       "bucket": "dreamcast/Fire Pro Wrestling D (Japan) [T-En by Irvgotti452].chd"
     },
     {
       "title": "Fire Pro Wrestling Z",
       "category": "Card, Board & Sports",
+      "series": "Fire Pro Wrestling",
       "system": "ps2",
       "bucket": "ps2/Fire Pro Wrestling Z (Japan) [T-En by Fatman Dave v0.5b] [i] (CD).chd"
     },
     {
       "title": "Fire Prowrestling S - 6Men Scramble",
       "category": "Card, Board & Sports",
+      "series": "Fire Pro Wrestling",
       "system": "saturn",
       "bucket": "saturn/Fire Prowrestling S - 6Men Scramble (Japan) [T-En by Malenko v0.91] [i].chd"
     },
@@ -5143,24 +5473,28 @@
     {
       "title": "J. League Jikkyou Winning Eleven 2000",
       "category": "Card, Board & Sports",
+      "series": "Winning Eleven / Pro Evolution Soccer",
       "system": "psx",
       "bucket": "psx/J. League Jikkyou Winning Eleven 2000 (Japan) [T-En by Walxer v0.85] [i].chd"
     },
     {
       "title": "J. League Jikkyou Winning Eleven 2001",
       "category": "Card, Board & Sports",
+      "series": "Winning Eleven / Pro Evolution Soccer",
       "system": "psx",
       "bucket": "psx/J. League Jikkyou Winning Eleven 2001 (Japan) [T-En by Walxer v0.81] [i].chd"
     },
     {
       "title": "J. League Winning Eleven 10 + Europe League '06-'07",
       "category": "Card, Board & Sports",
+      "series": "Winning Eleven / Pro Evolution Soccer",
       "system": "ps2",
       "bucket": "ps2/J. League Winning Eleven 10 + Europe League '06-'07 (Japan) (v1.03) [T-En by Fernando fk v2.70].chd"
     },
     {
       "title": "J.League Winning Eleven 8 - Asia Championship",
       "category": "Card, Board & Sports",
+      "series": "Winning Eleven / Pro Evolution Soccer",
       "system": "ps2",
       "bucket": "ps2/J.League Winning Eleven 8 - Asia Championship (Japan) [T-En by Albiore v0.9].chd"
     },
@@ -5173,6 +5507,7 @@
     {
       "title": "SNK vs. Capcom - Card Fighters 2 - Expand Edition",
       "category": "Card, Board & Sports",
+      "series": "Capcom vs. SNK",
       "system": "ngpc",
       "bucket": "ngpc/SNK vs. Capcom - Card Fighters 2 - Expand Edition (Japan) [T-En by CFC2 Translation Team v20170125].zip"
     },
@@ -5191,12 +5526,14 @@
     {
       "title": "World Soccer Jikkyou Winning Eleven 2000 - U-23 Medal e no Chousen",
       "category": "Card, Board & Sports",
+      "series": "Winning Eleven / Pro Evolution Soccer",
       "system": "psx",
       "bucket": "psx/World Soccer Jikkyou Winning Eleven 2000 - U-23 Medal e no Chousen (Japan) [T-En by Walxer v0.83] [i].chd"
     },
     {
       "title": "World Soccer Winning Eleven 2002",
       "category": "Card, Board & Sports",
+      "series": "Winning Eleven / Pro Evolution Soccer",
       "system": "psx",
       "bucket": "psx/World Soccer Winning Eleven 2002 (Japan) [T-En by PoliPoli v2].chd"
     },
@@ -5227,18 +5564,21 @@
     {
       "title": "F-1 Grand Prix - Part II",
       "category": "Racing",
+      "series": "Formula 1",
       "system": "snes",
       "bucket": "snes/F-1 Grand Prix - Part II (Japan) [T-En by MrRichard999 v0.50] [i].zip"
     },
     {
       "title": "F-1 Grand Prix - Part III",
       "category": "Racing",
+      "series": "Formula 1",
       "system": "snes",
       "bucket": "snes/F-1 Grand Prix - Part III (Japan) [T-En by MrRichard999 v0.50] [i].zip"
     },
     {
       "title": "F1 Circus",
       "category": "Racing",
+      "series": "Formula 1",
       "system": "nes",
       "bucket": "nes/F1 Circus (Japan) [T-En by MrRichard999 v1.0].zip"
     },
@@ -5311,48 +5651,56 @@
     {
       "title": "Choro Q 64 2 - Hacha Mecha Grand Prix Race",
       "category": "Racing",
+      "series": "Choro Q",
       "system": "n64",
       "bucket": "n64/Choro Q 64 2 - Hacha Mecha Grand Prix Race (Japan) [T-En by Zoinkity v1.0].zip"
     },
     {
       "title": "Doraemon Kart",
       "category": "Racing",
+      "series": "Doraemon",
       "system": "gb",
       "bucket": "gb/Doraemon Kart (Japan) (SGB Enhanced) [T-En by Magecraft Translations v1.01] [i].zip"
     },
     {
       "title": "F-Zero - Climax",
       "category": "Racing",
+      "series": "F-Zero",
       "system": "gba",
       "bucket": "gba/F-Zero - Climax (Japan) [T-En by F-Zero Climax Translation Project Team v1.1].zip"
     },
     {
       "title": "Pokemon Race Mini",
       "category": "Racing",
+      "series": "Pokemon",
       "system": "pokemini",
       "bucket": "pokemini/Pokemon Race Mini (Japan) [T-En by Snesy & Wa & Mr. Blinky & JustBurn v1.0].zip"
     },
     {
       "title": "Choro Q 2",
       "category": "Racing",
+      "series": "Choro Q",
       "system": "psx",
       "bucket": "psx/Choro Q 2 (Japan) [T-En by M. Z. v0.01].chd"
     },
     {
       "title": "Choro Q 3",
       "category": "Racing",
+      "series": "Choro Q",
       "system": "psx",
       "bucket": "psx/Choro Q 3 (Japan) [T-En by M. Z. v0.01].chd"
     },
     {
       "title": "Choro Q Wonderful!",
       "category": "Racing",
+      "series": "Choro Q",
       "system": "psx",
       "bucket": "psx/Choro Q Wonderful! (Japan) [T-En by Robert Allen v1.2].chd"
     },
     {
       "title": "F1 Douchuuki",
       "category": "Racing",
+      "series": "Formula 1",
       "system": "msx2",
       "bucket": "msx2/F1 Douchuuki (Japan) [T-En by Django v1.0] (Floppy).zip"
     },
@@ -5365,12 +5713,14 @@
     {
       "title": "Initial D - Extreme Stage",
       "category": "Racing",
+      "series": "Initial D",
       "system": "ps3",
       "bucket": "ps3/Initial D - Extreme Stage (Japan) [T-En by Froid_san v1.0] [i].chd"
     },
     {
       "title": "Initial D - Special Stage",
       "category": "Racing",
+      "series": "Initial D",
       "system": "ps2",
       "bucket": "ps2/Initial D - Special Stage (Japan) [T-En by Alexvgz v1.3] [i].chd"
     },
@@ -5383,6 +5733,7 @@
     {
       "title": "OutRun 2",
       "category": "Racing",
+      "series": "OutRun",
       "system": "xbox",
       "bucket": "xbox/OutRun 2 (Japan) [T-En by Justin Gibbins v1.0].iso"
     },
@@ -5395,12 +5746,14 @@
     {
       "title": "SD Gundam - Winner's History",
       "category": "Racing",
+      "series": "Gundam",
       "system": "gamegear",
       "bucket": "gamegear/SD Gundam - Winner's History (Japan) [T-En by Gaijin Productions v0.99].zip"
     },
     {
       "title": "Sega Rally 2006",
       "category": "Racing",
+      "series": "Sega Rally",
       "system": "ps2",
       "bucket": "ps2/Sega Rally 2006 (Japan) [T-En by Astraxis v1.0].chd"
     },
@@ -5431,12 +5784,14 @@
     {
       "title": "Adventure Island 4",
       "category": "Platformer",
+      "series": "Adventure Island",
       "system": "nes",
       "bucket": "nes/Adventure Island 4 (Japan) [T-En by Demiforce v1.00] [n].zip"
     },
     {
       "title": "Amazing Spider-Man, The - Lethal Foes",
       "category": "Platformer",
+      "series": "Spider-Man",
       "system": "snes",
       "bucket": "snes/Amazing Spider-Man, The - Lethal Foes (Japan) [T-En by Gorgyrip v1.0].zip"
     },
@@ -5467,24 +5822,28 @@
     {
       "title": "BS Super Mario USA - Power Challenge - Dai-1-kai",
       "category": "Platformer",
+      "series": "Super Mario",
       "system": "snes",
       "bucket": "snes/BS Super Mario USA - Power Challenge - Dai-1-kai (Japan) (SoundLink) [Hack by Conn & Duke Serkol v1.1] [T-En by Pacnsacdave v1.0].zip"
     },
     {
       "title": "BS Super Mario USA - Power Challenge - Dai-2-kai",
       "category": "Platformer",
+      "series": "Super Mario",
       "system": "snes",
       "bucket": "snes/BS Super Mario USA - Power Challenge - Dai-2-kai (Japan) (SoundLink) [Hack by Conn & Duke Serkol v1.1] [T-En by Pacnsacdave v1.0].zip"
     },
     {
       "title": "BS Super Mario USA - Power Challenge - Dai-3-kai",
       "category": "Platformer",
+      "series": "Super Mario",
       "system": "snes",
       "bucket": "snes/BS Super Mario USA - Power Challenge - Dai-3-kai (Japan) (SoundLink) [Hack by Conn & Duke Serkol v1.1] [T-En by Pacnsacdave v1.0].zip"
     },
     {
       "title": "BS Super Mario USA - Power Challenge - Dai-4-kai",
       "category": "Platformer",
+      "series": "Super Mario",
       "system": "snes",
       "bucket": "snes/BS Super Mario USA - Power Challenge - Dai-4-kai (Japan) (SoundLink) [Hack by Conn & Duke Serkol v1.1] [T-En by Pacnsacdave v1.0].zip"
     },
@@ -5497,6 +5856,7 @@
     {
       "title": "Castlevania Special - Kid Dracula",
       "category": "Platformer",
+      "series": "Castlevania",
       "system": "nes",
       "bucket": "nes/Castlevania Special - Kid Dracula (Japan) [T-En by Chronix v1.0] [n].zip"
     },
@@ -5575,18 +5935,21 @@
     {
       "title": "Donald Duck and the Magical Hat",
       "category": "Platformer",
+      "series": "Disney",
       "system": "snes",
       "bucket": "snes/Donald Duck and the Magical Hat (Japan) [T-En by Gorgyrip v1.0] [n].zip"
     },
     {
       "title": "Doraemon",
       "category": "Platformer",
+      "series": "Doraemon",
       "system": "nes",
       "bucket": "nes/Doraemon (Japan) [T-En by Neokid v1.1].zip"
     },
     {
       "title": "Doraemon 4 - In the Moon Kingdom",
       "category": "Platformer",
+      "series": "Doraemon",
       "system": "snes",
       "bucket": "snes/Doraemon 4 - In the Moon Kingdom (Japan) [T-En by Sgt. Bowhack v0.94b] [n].zip"
     },
@@ -5611,6 +5974,7 @@
     {
       "title": "Ganbare Goemon!",
       "category": "Platformer",
+      "series": "Ganbare Goemon",
       "system": "nes",
       "bucket": "nes/Ganbare Goemon! (Japan) [T-En by Spinner 8 and friends v1.01] [n].zip"
     },
@@ -5665,18 +6029,21 @@
     {
       "title": "Go Go Ackman",
       "category": "Platformer",
+      "series": "Go Go Ackman",
       "system": "snes",
       "bucket": "snes/Go Go Ackman (Japan) [T-En by Ackman Translations v1.0].zip"
     },
     {
       "title": "Go Go Ackman 2",
       "category": "Platformer",
+      "series": "Go Go Ackman",
       "system": "snes",
       "bucket": "snes/Go Go Ackman 2 (Japan) [T-En by Anime_World & Bunkai & Retroman_X v1.1].zip"
     },
     {
       "title": "Go Go Ackman 3",
       "category": "Platformer",
+      "series": "Go Go Ackman",
       "system": "snes",
       "bucket": "snes/Go Go Ackman 3 (Japan) [T-En by Reld v20200105] [Add by Reld v20191227].zip"
     },
@@ -5689,12 +6056,14 @@
     {
       "title": "Hello Kitty's Flower Shop",
       "category": "Platformer",
+      "series": "Sanrio",
       "system": "nes",
       "bucket": "nes/Hello Kitty's Flower Shop (Japan) [T-En by Suicidal Translations v1.00] [n].zip"
     },
     {
       "title": "Hello Kitty World",
       "category": "Platformer",
+      "series": "Sanrio",
       "system": "nes",
       "bucket": "nes/Hello Kitty World (Japan) [T-En by Hello Kitty Kicks Ass Translations v1.00] [n].zip"
     },
@@ -5761,6 +6130,7 @@
     {
       "title": "Kero Kero Keroppi's Great Big Adventure 2 - Trouble in Donut Pond",
       "category": "Platformer",
+      "series": "Kero Kero Keroppi",
       "system": "nes",
       "bucket": "nes/Kero Kero Keroppi's Great Big Adventure 2 - Trouble in Donut Pond (Japan) [T-En by The Spoony Bard v1.0] [n].zip"
     },
@@ -5791,6 +6161,7 @@
     {
       "title": "Lion King Legend, The",
       "category": "Platformer",
+      "series": "Disney",
       "system": "nes",
       "bucket": "nes/Lion King Legend, The (Asia) (Unl) [T-En by Pacnsacdave v1.0] [n].zip"
     },
@@ -5809,6 +6180,7 @@
     {
       "title": "Lupin the 3rd - Pandora's Legacy",
       "category": "Platformer",
+      "series": "Lupin III",
       "system": "nes",
       "bucket": "nes/Lupin the 3rd - Pandora's Legacy (Japan) [T-En by Vice Translations v1.00] [n].zip"
     },
@@ -5827,6 +6199,7 @@
     {
       "title": "Mappy Kids",
       "category": "Platformer",
+      "series": "Mappy",
       "system": "nes",
       "bucket": "nes/Mappy Kids (Japan) [T-En by Zynk Oxhyde v1.0].zip"
     },
@@ -5845,18 +6218,21 @@
     {
       "title": "Mickey & Donald - Magical Adventure 3",
       "category": "Platformer",
+      "series": "Disney",
       "system": "snes",
       "bucket": "snes/Mickey & Donald - Magical Adventure 3 (Japan) [T-En by RPGOne v1.5] [n].zip"
     },
     {
       "title": "Mickey Mouse III - Dream Balloon",
       "category": "Platformer",
+      "series": "Disney",
       "system": "nes",
       "bucket": "nes/Mickey Mouse III - Dream Balloon (Japan) [T-En by NikcDC v1.1] [n].zip"
     },
     {
       "title": "Mickey's Great Adventure in Tokyo Disneyland",
       "category": "Platformer",
+      "series": "Disney",
       "system": "snes",
       "bucket": "snes/Mickey's Great Adventure in Tokyo Disneyland (Japan) [T-En by Svambo & Anonymousse v1.0] [n].zip"
     },
@@ -5905,24 +6281,28 @@
     {
       "title": "Ninja Jajamaru",
       "category": "Platformer",
+      "series": "Ninja Jajamaru",
       "system": "nes",
       "bucket": "nes/Ninja Jajamaru (Japan) [T-En by Aishsha & Stardust Crusaders v1.00] [n].zip"
     },
     {
       "title": "Ninja Jajamaru in Asura's Wrath",
       "category": "Platformer",
+      "series": "Ninja Jajamaru",
       "system": "nes",
       "bucket": "nes/Ninja Jajamaru in Asura's Wrath (Japan) [T-En by Aishsha v1.0] [n].zip"
     },
     {
       "title": "Ninja - Jajamaru in the Castle of Evil",
       "category": "Platformer",
+      "series": "Ninja Jajamaru",
       "system": "nes",
       "bucket": "nes/Ninja - Jajamaru in the Castle of Evil (Japan) [T-En by Aishsha v1.0] [n].zip"
     },
     {
       "title": "Ninja Jajamaru's Big Adventure",
       "category": "Platformer",
+      "series": "Ninja Jajamaru",
       "system": "nes",
       "bucket": "nes/Ninja Jajamaru's Big Adventure (Japan) [T-En by Aishsha & Stardust Crusaders v1.00] [n].zip"
     },
@@ -6043,6 +6423,7 @@
     {
       "title": "Star Wars",
       "category": "Platformer",
+      "series": "Star Wars",
       "system": "nes",
       "bucket": "nes/Star Wars (Japan) (Namco) [T-En by Mukimuki & Shinta v2.00].zip"
     },
@@ -6109,6 +6490,7 @@
     {
       "title": "TwinBee - Rainbow Bell Adventure",
       "category": "Platformer",
+      "series": "Twinbee",
       "system": "snes",
       "bucket": "snes/TwinBee - Rainbow Bell Adventure (Japan) [T-En by Aeon Genesis v1.01].zip"
     },
@@ -6121,12 +6503,14 @@
     {
       "title": "Urusei Yatsura - Lum's Wedding Bell",
       "category": "Platformer",
+      "series": "Urusei Yatsura",
       "system": "nes",
       "bucket": "nes/Urusei Yatsura - Lum's Wedding Bell (Japan) [T-En by Stardust Crusaders v1.0] [n].zip"
     },
     {
       "title": "Valis - The Fantasm Soldier",
       "category": "Platformer",
+      "series": "Valis",
       "system": "nes",
       "bucket": "nes/Valis - The Fantasm Soldier (Japan) [T-En by Satsu & Sliver X v1.1] [n].zip"
     },
@@ -6139,24 +6523,28 @@
     {
       "title": "Wagyan Land",
       "category": "Platformer",
+      "series": "Wagyan Land",
       "system": "nes",
       "bucket": "nes/Wagyan Land (Japan) [T-En by AlanMidas wag.yan] [n].zip"
     },
     {
       "title": "Wagyan Land 2",
       "category": "Platformer",
+      "series": "Wagyan Land",
       "system": "nes",
       "bucket": "nes/Wagyan Land 2 (Japan) [T-En by Abstract Crouton Productions v1.0] [Add by Terminus Traduction v1.0] [i] [n].zip"
     },
     {
       "title": "Wai Wai World",
       "category": "Platformer",
+      "series": "Wai Wai World",
       "system": "nes",
       "bucket": "nes/Wai Wai World (Japan) [T-En by Demiforce v3.00].zip"
     },
     {
       "title": "Wai Wai World 2 - S.O.S. from Parsley Castle",
       "category": "Platformer",
+      "series": "Wai Wai World",
       "system": "nes",
       "bucket": "nes/Wai Wai World 2 - S.O.S. from Parsley Castle (Japan) [T-En by Vice Translations v1.01] [Add by Proveaux v1.0] [n].zip"
     },
@@ -6211,6 +6599,7 @@
     {
       "title": "I'm Jajamaru! The Great World Adventure",
       "category": "Platformer",
+      "series": "Ninja Jajamaru",
       "system": "gb",
       "bucket": "gb/I'm Jajamaru! The Great World Adventure (Japan) [T-En by Stardust Crusaders v1.01] [n].zip"
     },
@@ -6283,6 +6672,7 @@
     {
       "title": "Castlevania - Rondo of Blood",
       "category": "Platformer",
+      "series": "Castlevania",
       "system": "tg-cd",
       "bucket": "tg-cd/Castlevania - Rondo of Blood (Japan) [T-En by Burnt Lasagna & Cubanraul v1.01] [n].chd"
     },
@@ -6307,18 +6697,21 @@
     {
       "title": "Goemon - The Successor for a New Generation",
       "category": "Platformer",
+      "series": "Ganbare Goemon",
       "system": "psx",
       "bucket": "psx/Goemon - The Successor for a New Generation (Japan) [T-En by Acediez & FlashPV & Frank ''Bo'' deWindt II & Tom v1.0] [n].chd"
     },
     {
       "title": "Klonoa - Moonlight Museum",
       "category": "Platformer",
+      "series": "Klonoa",
       "system": "wonderswan",
       "bucket": "wonderswan/Klonoa - Moonlight Museum (Japan) [T-En by PowerStone05 & RayCarrot & Rcs709 & StarryScarab v1.1] [n].zip"
     },
     {
       "title": "Lupin III - Babylon's Gold Legend",
       "category": "Platformer",
+      "series": "Lupin III",
       "system": "msx2",
       "bucket": "msx2/Lupin III - Babylon's Gold Legend (Japan) [T-En by Django] [Use ASCII 8 mapper] [n] (Cartridge).zip"
     },
@@ -6337,6 +6730,7 @@
     {
       "title": "Mega Man Battle Network WS",
       "category": "Platformer",
+      "series": "Mega Man",
       "system": "wonderswancolor",
       "bucket": "wonderswancolor/Mega Man Battle Network WS (Japan) [T-En by Boco & Greiga Master & Megarockexe v1.0] [n].zip"
     },
@@ -6367,12 +6761,14 @@
     {
       "title": "Rainbow Islands - Putty's Party",
       "category": "Platformer",
+      "series": "Bubble Bobble",
       "system": "wonderswan",
       "bucket": "wonderswan/Rainbow Islands - Putty's Party (Japan) [T-En by USC v1.1].zip"
     },
     {
       "title": "Rockman & Forte - Challenger from the Future",
       "category": "Platformer",
+      "series": "Mega Man",
       "system": "wonderswan",
       "bucket": "wonderswan/Rockman & Forte - Challenger from the Future (Japan) [T-En by NikcDC v1.2.1] [n].zip"
     },
@@ -6385,6 +6781,7 @@
     {
       "title": "Valis IV",
       "category": "Platformer",
+      "series": "Valis",
       "system": "tg-cd",
       "bucket": "tg-cd/Valis IV (Japan) [T-En by Sideside v1.0] [i].chd"
     },
@@ -6445,12 +6842,14 @@
     {
       "title": "Dezaemon",
       "category": "Shooter",
+      "series": "Dezaemon",
       "system": "nes",
       "bucket": "nes/Dezaemon (Japan) [T-En by Aeon Genesis v1.1] [n].zip"
     },
     {
       "title": "Dezaemon",
       "category": "Shooter",
+      "series": "Dezaemon",
       "system": "snes",
       "bucket": "snes/Dezaemon (Japan) [T-En by Aeon Genesis v1.00] [Add by Mwksoul v1.0] [n].zip"
     },
@@ -6517,6 +6916,7 @@
     {
       "title": "Super Xevious - The Riddle of GAMP",
       "category": "Shooter",
+      "series": "Xevious",
       "system": "nes",
       "bucket": "nes/Super Xevious - The Riddle of GAMP (Japan) [T-En by Psyklax v1.0] [n].zip"
     },
@@ -6535,6 +6935,7 @@
     {
       "title": "TwinBee 3 - The Terror Trunk",
       "category": "Shooter",
+      "series": "Twinbee",
       "system": "nes",
       "bucket": "nes/TwinBee 3 - The Terror Trunk (Japan) [T-En by Pennywise v1.02] [n].zip"
     },
@@ -6553,6 +6954,7 @@
     {
       "title": "Mobile Suit Gundam 0079",
       "category": "Shooter",
+      "series": "Gundam",
       "system": "wii",
       "bucket": "wii/Mobile Suit Gundam 0079 (Japan) [T-En by PTwr v0.6.1] [i] [n].rvz"
     },
@@ -6577,12 +6979,14 @@
     {
       "title": "Zoids Legends",
       "category": "Shooter",
+      "series": "Zoids",
       "system": "gb",
       "bucket": "gb/Zoids Legends (Japan) [T-En by MrRichard999 v1.0] [n].zip"
     },
     {
       "title": "Zoids Vs. III",
       "category": "Shooter",
+      "series": "Zoids",
       "system": "gc",
       "bucket": "gc/Zoids Vs. III (Japan) [T-En by Traceytrace v1.00].rvz"
     },
@@ -6607,6 +7011,7 @@
     {
       "title": "Ketsui Death Label - Kizuna Jigoku-tachi",
       "category": "Shooter",
+      "series": "DonPachi",
       "system": "nds",
       "bucket": "nds/Ketsui Death Label - Kizuna Jigoku-tachi (Japan) [T-En by Z3tzilla v0.2] [i].zip"
     },
@@ -6619,6 +7024,7 @@
     {
       "title": "Space Invaders - Virtual Collection",
       "category": "Shooter",
+      "series": "Space Invaders",
       "system": "virtualboy",
       "bucket": "virtualboy/Space Invaders - Virtual Collection (Japan) [T-En by Thunderstruck v1.0].zip"
     },
@@ -6689,6 +7095,7 @@
     {
       "title": "Death Crimson 2 - Altar of Melanito",
       "category": "Shooter",
+      "series": "Death Crimson",
       "system": "dreamcast",
       "bucket": "dreamcast/Death Crimson 2 - Altar of Melanito (Japan) [T-En by Derek Pascarella v1.0] [n].chd"
     },
@@ -6749,6 +7156,7 @@
     {
       "title": "Mobile Suit Gundam - Operation - Troy",
       "category": "Shooter",
+      "series": "Gundam",
       "system": "xbox360",
       "bucket": "xbox360/Mobile Suit Gundam - Operation - Troy (Japan) [T-En by Yuvi & SnowyAria v1.0].zar"
     },
@@ -6767,6 +7175,7 @@
     {
       "title": "Otomedius Gorgeous!",
       "category": "Shooter",
+      "series": "Otomedius",
       "system": "xbox360",
       "bucket": "xbox360/Otomedius Gorgeous! (Japan) [T-En by GameStone v1.8].zar"
     },
@@ -6779,6 +7188,7 @@
     {
       "title": "Parodius",
       "category": "Shooter",
+      "series": "Gradius",
       "system": "msx",
       "bucket": "msx/Parodius (Japan) [T-En by A&L Software v1.0] (Cartridge).zip"
     },
@@ -6827,30 +7237,35 @@
     {
       "title": "Touhou Fuumaroku",
       "category": "Shooter",
+      "series": "Touhou",
       "system": "pc98",
       "bucket": "pc98/Touhou Fuumaroku (Japan) [T-En by xJeePx v1.00].hdi"
     },
     {
       "title": "Touhou Gensoukyou - Lotus Land Story",
       "category": "Shooter",
+      "series": "Touhou",
       "system": "pc98",
       "bucket": "pc98/Touhou Gensoukyou - Lotus Land Story (Japan) [T-En by xJeePx v1.00].hdi"
     },
     {
       "title": "Touhou Kaikidan - Mystic Square",
       "category": "Shooter",
+      "series": "Touhou",
       "system": "pc98",
       "bucket": "pc98/Touhou Kaikidan - Mystic Square (Japan) [T-En by xJeePx v1.00].hdi"
     },
     {
       "title": "Touhou Reiiden - The Highly Responsive to Prayers",
       "category": "Shooter",
+      "series": "Touhou",
       "system": "pc98",
       "bucket": "pc98/Touhou Reiiden - The Highly Responsive to Prayers (Japan) [T-En by xJeePx v1.00].hdi"
     },
     {
       "title": "Touhou Yumejikuu - The Phantasmagoria of Dim. Dream",
       "category": "Shooter",
+      "series": "Touhou",
       "system": "pc98",
       "bucket": "pc98/Touhou Yumejikuu - The Phantasmagoria of Dim. Dream (Japan) [T-En by xJeePx v1.00].hdi"
     },
@@ -6923,36 +7338,42 @@
     {
       "title": "BS Legend of Zelda, The",
       "category": "Adventure",
+      "series": "Zelda",
       "system": "snes",
       "bucket": "snes/BS Legend of Zelda, The (Japan) (SoundLink) [T-En by MottZilla v0.95] [n].zip"
     },
     {
       "title": "BS Legend of Zelda, The - Ancient Stone Tablets - Chapter 1",
       "category": "Adventure",
+      "series": "Zelda",
       "system": "snes",
       "bucket": "snes/BS Legend of Zelda, The - Ancient Stone Tablets - Chapter 1 (Japan) (SoundLink) [T-En by Euclid v1.0] [n].zip"
     },
     {
       "title": "BS Legend of Zelda, The - Ancient Stone Tablets - Chapter 2",
       "category": "Adventure",
+      "series": "Zelda",
       "system": "snes",
       "bucket": "snes/BS Legend of Zelda, The - Ancient Stone Tablets - Chapter 2 (Japan) (SoundLink) [T-En by Euclid v1.0] [n].zip"
     },
     {
       "title": "BS Legend of Zelda, The - Ancient Stone Tablets - Chapter 3",
       "category": "Adventure",
+      "series": "Zelda",
       "system": "snes",
       "bucket": "snes/BS Legend of Zelda, The - Ancient Stone Tablets - Chapter 3 (Japan) (SoundLink) [T-En by Euclid v1.0] [n].zip"
     },
     {
       "title": "BS Legend of Zelda, The - Ancient Stone Tablets - Chapter 4",
       "category": "Adventure",
+      "series": "Zelda",
       "system": "snes",
       "bucket": "snes/BS Legend of Zelda, The - Ancient Stone Tablets - Chapter 4 (Japan) (SoundLink) [T-En by Euclid v1.0] [n].zip"
     },
     {
       "title": "Clock Tower",
       "category": "Adventure",
+      "series": "Clock Tower",
       "system": "snes",
       "bucket": "snes/Clock Tower (Japan) [T-En by Aeon Genesis v1.01].zip"
     },
@@ -6971,6 +7392,7 @@
     {
       "title": "Dragon Slayer Jr. - Romancia",
       "category": "Adventure",
+      "series": "Dragon Slayer",
       "system": "nes",
       "bucket": "nes/Dragon Slayer Jr. - Romancia (Japan) [T-En by DvD Translations Rev A] [n].zip"
     },
@@ -6995,6 +7417,7 @@
     {
       "title": "Fist of the North Star 3",
       "category": "Adventure",
+      "series": "Fist of the North Star",
       "system": "nes",
       "bucket": "nes/Fist of the North Star 3 (Japan) [T-En by BlackPaladin v1.0] [n].zip"
     },
@@ -7139,6 +7562,7 @@
     {
       "title": "Sherlock Holmes - The Kidnapped Countess",
       "category": "Adventure",
+      "series": "Sherlock Holmes",
       "system": "nes",
       "bucket": "nes/Sherlock Holmes - The Kidnapped Countess (Japan) [T-En by Psyklax v1.1] [n].zip"
     },
@@ -7193,6 +7617,7 @@
     {
       "title": "Ace Attorney Investigations - Miles Edgeworth - Prosecutor's Path",
       "category": "Adventure",
+      "series": "Ace Attorney",
       "system": "nds",
       "bucket": "nds/Ace Attorney Investigations - Miles Edgeworth - Prosecutor's Path (Japan) [T-En by Auryn v20022015] [n].zip"
     },
@@ -7211,24 +7636,28 @@
     {
       "title": "Detective Conan & Kindaichi Case Files - Chance Encounter of 2 Great Detectives",
       "category": "Adventure",
+      "series": "Detective Conan",
       "system": "nds",
       "bucket": "nds/Detective Conan & Kindaichi Case Files - Chance Encounter of 2 Great Detectives (Japan) [T-En by DCTP v1.0] [n].zip"
     },
     {
       "title": "Detective Conan - The Legendary Treasure of Strange Rock Island",
       "category": "Adventure",
+      "series": "Detective Conan",
       "system": "gbc",
       "bucket": "gbc/Detective Conan - The Legendary Treasure of Strange Rock Island (Japan) (SGB Enhanced) (GB Compatible) [T-En by Mz v0.04] [n].zip"
     },
     {
       "title": "Detective Conan - The Mechanical Temple Murder Case",
       "category": "Adventure",
+      "series": "Detective Conan",
       "system": "gbc",
       "bucket": "gbc/Detective Conan - The Mechanical Temple Murder Case (Japan) (SGB Enhanced) (GB Compatible) [T-En by Psyklax v1.0] [n].zip"
     },
     {
       "title": "Fatal Frame 4 - Mask of the Lunar Eclipse",
       "category": "Adventure",
+      "series": "Fatal Frame",
       "system": "wii",
       "bucket": "wii/Fatal Frame 4 - Mask of the Lunar Eclipse (Japan) [T-En by Tempus v1.0+update] [n].rvz"
     },
@@ -7241,6 +7670,7 @@
     {
       "title": "Lupin III - Lost Treasure Under the Sea",
       "category": "Adventure",
+      "series": "Lupin III",
       "system": "gc",
       "bucket": "gc/Lupin III - Lost Treasure Under the Sea (Japan) [T-En by DOL-Translations v0.5.0] [i] [n].m3u",
       "files": [
@@ -7257,6 +7687,7 @@
     {
       "title": "Sakura Wars GB - Go Forth, Young Cadet!",
       "category": "Adventure",
+      "series": "Sakura Wars",
       "system": "gbc",
       "bucket": "gbc/Sakura Wars GB - Go Forth, Young Cadet! (Japan) [T-En by MattoBii & Co v0.0.1] [n].zip"
     },
@@ -7269,6 +7700,7 @@
     {
       "title": "Survival Kids 2 - Dasshutsu!! Futago-Jima!",
       "category": "Adventure",
+      "series": "Survival Kids",
       "system": "gbc",
       "bucket": "gbc/Survival Kids 2 - Dasshutsu!! Futago-Jima! (Japan) (SGB Enhanced) (GB Compatible) [T-En by Hattontown & NikcDC v0.9].zip"
     },
@@ -7281,12 +7713,14 @@
     {
       "title": "Touch Detective Rising 3 - Does Fungi Dream of Bananas",
       "category": "Adventure",
+      "series": "Touch Detective",
       "system": "3ds",
       "bucket": "3ds/Touch Detective Rising 3 - Does Fungi Dream of Bananas (Japan) [T-En by Kekkyoku] [n].zip"
     },
     {
       "title": "Urusei Yatsura - Miss Tomobiki o Sagase!",
       "category": "Adventure",
+      "series": "Urusei Yatsura",
       "system": "gb",
       "bucket": "gb/Urusei Yatsura - Miss Tomobiki o Sagase! (Japan) [T-En by Razor-X Translations v0.05] [i].zip"
     },
@@ -7355,6 +7789,7 @@
     {
       "title": "Bishoujo Senshi Sailor Moon",
       "category": "Adventure",
+      "series": "Sailor Moon",
       "system": "tg-cd",
       "bucket": "tg-cd/Bishoujo Senshi Sailor Moon (Japan) [T-En by Supper & TheMajinZenki v1.1].chd"
     },
@@ -7538,54 +7973,63 @@
     {
       "title": "Phantasy Star Adventure",
       "category": "Adventure",
+      "series": "Phantasy Star",
       "system": "gamegear",
       "bucket": "gamegear/Phantasy Star Adventure (Japan) [T-En by Aeon Genesis v1.00].zip"
     },
     {
       "title": "Phantasy Star II - Amia's Adventure",
       "category": "Adventure",
+      "series": "Phantasy Star",
       "system": "genesis",
       "bucket": "genesis/Phantasy Star II - Amia's Adventure (Japan) (SegaNet) [T-En by M.I.J.E.T. v100710].zip"
     },
     {
       "title": "Phantasy Star II - Anne's Adventure",
       "category": "Adventure",
+      "series": "Phantasy Star",
       "system": "genesis",
       "bucket": "genesis/Phantasy Star II - Anne's Adventure (Japan) (SegaNet) [T-En by M.I.J.E.T. v100710].zip"
     },
     {
       "title": "Phantasy Star II - Eusis's Adventure",
       "category": "Adventure",
+      "series": "Phantasy Star",
       "system": "genesis",
       "bucket": "genesis/Phantasy Star II - Eusis's Adventure (Japan) (SegaNet) [T-En by M.I.J.E.T. v100710] [n].zip"
     },
     {
       "title": "Phantasy Star II - Huey's Adventure",
       "category": "Adventure",
+      "series": "Phantasy Star",
       "system": "genesis",
       "bucket": "genesis/Phantasy Star II - Huey's Adventure (Japan) (SegaNet) [T-En by M.I.J.E.T. v100710].zip"
     },
     {
       "title": "Phantasy Star II - Kinds's Adventure",
       "category": "Adventure",
+      "series": "Phantasy Star",
       "system": "genesis",
       "bucket": "genesis/Phantasy Star II - Kinds's Adventure (Japan) (SegaNet) [T-En by M.I.J.E.T. v100710].zip"
     },
     {
       "title": "Phantasy Star II - Nei's Adventure",
       "category": "Adventure",
+      "series": "Phantasy Star",
       "system": "genesis",
       "bucket": "genesis/Phantasy Star II - Nei's Adventure (Japan) (SegaNet) [T-En by M.I.J.E.T. v100710].zip"
     },
     {
       "title": "Phantasy Star II - Rudger's Adventure",
       "category": "Adventure",
+      "series": "Phantasy Star",
       "system": "genesis",
       "bucket": "genesis/Phantasy Star II - Rudger's Adventure (Japan) (SegaNet) [T-En by M.I.J.E.T. v100710].zip"
     },
     {
       "title": "Phantasy Star II - Shilka's Adventure",
       "category": "Adventure",
+      "series": "Phantasy Star",
       "system": "genesis",
       "bucket": "genesis/Phantasy Star II - Shilka's Adventure (Japan) (SegaNet) [T-En by M.I.J.E.T. v100710].zip"
     },
@@ -7749,18 +8193,21 @@
     {
       "title": "Dragon Ball Z - Hyper Dimension",
       "category": "Fighting & Brawler",
+      "series": "Dragon Ball",
       "system": "snes",
       "bucket": "snes/Dragon Ball Z - Hyper Dimension (Japan) [T-En by Twilight Translations v1.00].zip"
     },
     {
       "title": "Dragon Ball Z - La Legende Saien",
       "category": "Fighting & Brawler",
+      "series": "Dragon Ball",
       "system": "snes",
       "bucket": "snes/Dragon Ball Z - La Legende Saien (France) [T-En by Commando Ginew v1.0] [i].zip"
     },
     {
       "title": "Dragon Ball Z - Ultime Menace",
       "category": "Fighting & Brawler",
+      "series": "Dragon Ball",
       "system": "snes",
       "bucket": "snes/Dragon Ball Z - Ultime Menace (France) [T-En by Saiya Translations & Vice Translations v1.01] [i].zip"
     },
@@ -7779,6 +8226,7 @@
     {
       "title": "Fist of the North Star - Hokuto no Ken",
       "category": "Fighting & Brawler",
+      "series": "Fist of the North Star",
       "system": "nes",
       "bucket": "nes/Fist of the North Star - Hokuto no Ken (Japan) [T-En by Stardust Crusaders v1.01] [n].zip"
     },
@@ -7833,6 +8281,7 @@
     {
       "title": "Hokuto no Ken 2",
       "category": "Fighting & Brawler",
+      "series": "Fist of the North Star",
       "system": "nes",
       "bucket": "nes/Hokuto no Ken 2 (Japan) [T-En by Extreme Fun Translations v0.50] [i].zip"
     },
@@ -7863,6 +8312,7 @@
     {
       "title": "Kunio Tournament",
       "category": "Fighting & Brawler",
+      "series": "Kunio-kun",
       "system": "nes",
       "bucket": "nes/Kunio Tournament (Japan) [T-En by ReptilianCicilian v1.1] [n].zip"
     },
@@ -7875,36 +8325,42 @@
     {
       "title": "Mobile Fighter G Gundam",
       "category": "Fighting & Brawler",
+      "series": "Gundam",
       "system": "snes",
       "bucket": "snes/Mobile Fighter G Gundam (Japan) [T-En by Aeon Genesis v1.00] [n].zip"
     },
     {
       "title": "Mobile Suit Gundam Wing - Endless Duel",
       "category": "Fighting & Brawler",
+      "series": "Gundam",
       "system": "snes",
       "bucket": "snes/Mobile Suit Gundam Wing - Endless Duel (Japan) [T-En by Aeon Genesis v1.00] [n].zip"
     },
     {
       "title": "Mobile Suit V Gundam",
       "category": "Fighting & Brawler",
+      "series": "Gundam",
       "system": "snes",
       "bucket": "snes/Mobile Suit V Gundam (Japan) [T-En by Twilight Translations v1.00] [n].zip"
     },
     {
       "title": "Pretty Soldier Sailor Moon",
       "category": "Fighting & Brawler",
+      "series": "Sailor Moon",
       "system": "snes",
       "bucket": "snes/Pretty Soldier Sailor Moon (Japan) [T-En by Flamepurge & Mziab v1.01] [n].zip"
     },
     {
       "title": "Pretty Soldier Sailor Moon R",
       "category": "Fighting & Brawler",
+      "series": "Sailor Moon",
       "system": "snes",
       "bucket": "snes/Pretty Soldier Sailor Moon R (Japan) [T-En by FuSoYa v1.00] [n].zip"
     },
     {
       "title": "Ranma 1-2 - Hard Battle II Super Move Hustle",
       "category": "Fighting & Brawler",
+      "series": "Ranma 1/2",
       "system": "snes",
       "bucket": "snes/Ranma 1-2 - Hard Battle II Super Move Hustle (Japan) [T-En by Dynamic Designs v1.10] [n].zip"
     },
@@ -7917,6 +8373,7 @@
     {
       "title": "Shin Nekketsu Kouha - Kunio-tachi no Banka",
       "category": "Fighting & Brawler",
+      "series": "Kunio-kun",
       "system": "snes",
       "bucket": "snes/Shin Nekketsu Kouha - Kunio-tachi no Banka (Japan) [T-En by Aeon Genesis v1.00].zip"
     },
@@ -7929,6 +8386,7 @@
     {
       "title": "Super Chinese Fighter",
       "category": "Fighting & Brawler",
+      "series": "Chinese Hero",
       "system": "snes",
       "bucket": "snes/Super Chinese Fighter (Japan) [T-En by DDSTranslation v1.0].zip"
     },
@@ -7947,6 +8405,7 @@
     {
       "title": "Yu Yu Hakusho - Dark Tournament Rumble",
       "category": "Fighting & Brawler",
+      "series": "Yu Yu Hakusho",
       "system": "nes",
       "bucket": "nes/Yu Yu Hakusho - Dark Tournament Rumble (Japan) [T-En by Stardust Crusaders v1.01] [Add by Wangsitan v1.5] [n].zip"
     },
@@ -7959,6 +8418,7 @@
     {
       "title": "Bleach - Versus Crusade",
       "category": "Fighting & Brawler",
+      "series": "Bleach",
       "system": "wii",
       "bucket": "wii/Bleach - Versus Crusade (Japan) [T-En by Sixfortyfive v1.0] [i].rvz"
     },
@@ -7971,12 +8431,14 @@
     {
       "title": "Naruto - Clash of Ninja 4",
       "category": "Fighting & Brawler",
+      "series": "Naruto",
       "system": "gc",
       "bucket": "gc/Naruto - Clash of Ninja 4 (Japan) [T-En by NicholasMoser v1.7.1] [n].rvz"
     },
     {
       "title": "Nekketsu High - Hot Blooded! Kunio Kun's Final Battle",
       "category": "Fighting & Brawler",
+      "series": "Kunio-kun",
       "system": "gb",
       "bucket": "gb/Nekketsu High - Hot Blooded! Kunio Kun's Final Battle (Japan) [T-En by Ice Translations v0.99] [i] [n].zip"
     },
@@ -8007,6 +8469,7 @@
     {
       "title": "Super Chinese Fighter EX",
       "category": "Fighting & Brawler",
+      "series": "Chinese Hero",
       "system": "gbc",
       "bucket": "gbc/Super Chinese Fighter EX (Japan) [T-En by Some Good Shit Translations v0.99].zip"
     },
@@ -8025,12 +8488,14 @@
     {
       "title": "Dragon Ball Z - L'Appel du Destin",
       "category": "Fighting & Brawler",
+      "series": "Dragon Ball",
       "system": "genesis",
       "bucket": "genesis/Dragon Ball Z - L'Appel du Destin (France) [T-En by DBZ Game v0.95A].zip"
     },
     {
       "title": "Fist of the North Star",
       "category": "Fighting & Brawler",
+      "series": "Fist of the North Star",
       "system": "mastersystem",
       "bucket": "mastersystem/Fist of the North Star - Hokuto no Ken (Japan) [T-En by PhalanX v1.0] [n].zip"
     },
@@ -8049,6 +8514,7 @@
     {
       "title": "JoJo's Bizarre Adventure - Phantom Blood",
       "category": "Fighting & Brawler",
+      "series": "JoJo",
       "system": "ps2",
       "bucket": "ps2/JoJo's Bizarre Adventure - Phantom Blood (Japan) [T-En by Penguino & Hudgyn Sasdarl v1.1] [n].chd"
     },
@@ -8073,6 +8539,7 @@
     {
       "title": "Nekketsu Oyako",
       "category": "Fighting & Brawler",
+      "series": "Kunio-kun",
       "system": "psx",
       "bucket": "psx/Nekketsu Oyako (Japan) [T-En by PentarouZero v1.0d] [Add by SCO v1.0].chd"
     },
@@ -8085,6 +8552,7 @@
     {
       "title": "Pretty Soldier Sailor Moon S",
       "category": "Fighting & Brawler",
+      "series": "Sailor Moon",
       "system": "gamegear",
       "bucket": "gamegear/Pretty Soldier Sailor Moon S (Japan) [T-En by Supper v1.1] [n].zip"
     },
@@ -8097,6 +8565,7 @@
     {
       "title": "Rockman - Battle & Fighters",
       "category": "Fighting & Brawler",
+      "series": "Mega Man",
       "system": "ngpc",
       "bucket": "ngpc/Rockman - Battle & Fighters (Japan) [T-En by Marc_max v1.0] [i].zip"
     },
@@ -8109,6 +8578,7 @@
     {
       "title": "Soul Eater - Battle Resonance",
       "category": "Fighting & Brawler",
+      "series": "Soul Eater",
       "system": "psp",
       "bucket": "psp/Soul Eater - Battle Resonance (Japan) [T-En by Anime Game Translations Team v1.0].chd"
     },
@@ -8127,12 +8597,14 @@
     {
       "title": "Yu Yu Hakusho II - Battle of the 7 Fighters",
       "category": "Fighting & Brawler",
+      "series": "Yu Yu Hakusho",
       "system": "gamegear",
       "bucket": "gamegear/Yu Yu Hakusho II - Battle of the 7 Fighters (Japan) [T-En by Gaijin Productions v1.10] [n].zip"
     },
     {
       "title": "Yu Yu Hakusho - Makyou Toitsusen",
       "category": "Fighting & Brawler",
+      "series": "Yu Yu Hakusho",
       "system": "genesis",
       "bucket": "genesis/Yu Yu Hakusho - Makyou Toitsusen (Japan) [T-En by M.I.J.E.T. v071113].zip"
     },
@@ -8175,6 +8647,7 @@
     {
       "title": "Chibi-Robo! - Clean Sweep!",
       "category": "Simulation",
+      "series": "Chibi-Robo",
       "system": "nds",
       "bucket": "nds/Chibi-Robo! - Clean Sweep! (Japan) [T-En by Cjuub v1.1] [n].zip"
     },
@@ -8217,6 +8690,7 @@
     {
       "title": "SimCity 64",
       "category": "Simulation",
+      "series": "Sims",
       "system": "n64",
       "bucket": "n64/SimCity 64 (Japan) (64DD) [Hack by Zoinkity v1.1] [T-En by Ozidual v0.6.38].zip"
     },
@@ -8229,12 +8703,14 @@
     {
       "title": "Pokemon Breeder Mini",
       "category": "Simulation",
+      "series": "Pokemon",
       "system": "pokemini",
       "bucket": "pokemini/Pokemon Breeder Mini (Japan) [T-En by Snesy & Wa & Mr. Blinky v1.0] [n].zip"
     },
     {
       "title": "Tomodachi Collection",
       "category": "Simulation",
+      "series": "Tomodachi",
       "system": "nds",
       "bucket": "nds/Tomodachi Collection (Japan) (Rev 1) [T-En by Jjjewel v0.80] [i].zip"
     },
@@ -8277,6 +8753,7 @@
     {
       "title": "Neon Genesis Evangelion - Angel Raising Project",
       "category": "Simulation",
+      "series": "Evangelion",
       "system": "wonderswan",
       "bucket": "wonderswan/Neon Genesis Evangelion - Angel Raising Project (Japan) [T-En by Anime Game Translations Team v1.0] [n].zip"
     },
@@ -8289,6 +8766,7 @@
     {
       "title": "Princess Maker",
       "category": "Simulation",
+      "series": "Princess Maker",
       "system": "msx2",
       "bucket": "msx2/Princess Maker (Japan) [T-En by Teo Lopez del Castillo v1.0] (Floppy).zip"
     },
@@ -8355,6 +8833,7 @@
     {
       "title": "Crayon Shin-chan - Ora to Poi Poi",
       "category": "Puzzle",
+      "series": "Crayon Shin-chan",
       "system": "nes",
       "bucket": "nes/Crayon Shin-chan - Ora to Poi Poi (Japan) [T-En by Alcy v0.1] [i] [n].zip"
     },
@@ -8373,6 +8852,7 @@
     {
       "title": "Eggerland - Revival of the Labyrinth",
       "category": "Puzzle",
+      "series": "Eggerland",
       "system": "nes",
       "bucket": "nes/Eggerland - Revival of the Labyrinth (Japan) [T-En by Kapow v1.0] [n].zip"
     },
@@ -8391,12 +8871,14 @@
     {
       "title": "Kero Kero Keroppi's Big Adventure 1",
       "category": "Puzzle",
+      "series": "Kero Kero Keroppi",
       "system": "nes",
       "bucket": "nes/Kero Kero Keroppi's Big Adventure 1 (Japan) [T-En by Gaijin Productions v1.00] [n].zip"
     },
     {
       "title": "Kirby's Super Star Stacker",
       "category": "Puzzle",
+      "series": "Kirby",
       "system": "snes",
       "bucket": "snes/Kirby's Super Star Stacker (Japan) [T-En by TheDanaAddams v1.1] [n].zip"
     },
@@ -8421,6 +8903,7 @@
     {
       "title": "Magical Drop",
       "category": "Puzzle",
+      "series": "Magical Drop",
       "system": "snes",
       "bucket": "snes/Magical Drop (Japan) [T-En by Aeon Genesis v0.95b].zip"
     },
@@ -8487,18 +8970,21 @@
     {
       "title": "Sailor Moon Super S - Floating Panic",
       "category": "Puzzle",
+      "series": "Sailor Moon",
       "system": "snes",
       "bucket": "snes/Sailor Moon Super S - Floating Panic (Japan) [T-En by Dynamic Designs v1.01] [n].zip"
     },
     {
       "title": "Sanrio Carnival",
       "category": "Puzzle",
+      "series": "Sanrio",
       "system": "nes",
       "bucket": "nes/Sanrio Carnival (Japan) [T-En by Zynk Oxhyde v1.1] [n].zip"
     },
     {
       "title": "Sanrio Carnival 2",
       "category": "Puzzle",
+      "series": "Sanrio",
       "system": "nes",
       "bucket": "nes/Sanrio Carnival 2 (Japan) [T-En by Suicidal Translations v1.00] [n].zip"
     },
@@ -8553,6 +9039,7 @@
     {
       "title": "Sutte Hakkun",
       "category": "Puzzle",
+      "series": "Sutte Hakkun",
       "system": "snes",
       "bucket": "snes/Sutte Hakkun (Japan) [T-En by Raccoon Sam v1.0] [n].zip"
     },
@@ -8565,6 +9052,7 @@
     {
       "title": "Tetris Battle Spin Off",
       "category": "Puzzle",
+      "series": "Tetris",
       "system": "snes",
       "bucket": "snes/Tetris Battle Spin Off (Japan) [T-En by DDSTranslation v1.0] [Add by Docrow v1.1] [n].zip"
     },
@@ -8583,6 +9071,7 @@
     {
       "title": "Wrecking Crew '98",
       "category": "Puzzle",
+      "series": "Wrecking Crew",
       "system": "snes",
       "bucket": "snes/Wrecking Crew '98 (Japan) [T-En by ShadowOne333 v2.0].zip"
     },
@@ -8595,12 +9084,14 @@
     {
       "title": "Hello Kitty no Magical Museum",
       "category": "Puzzle",
+      "series": "Sanrio",
       "system": "gbc",
       "bucket": "gbc/Hello Kitty no Magical Museum (Japan) (SGB Enhanced) (GB Compatible) [T-En by Doki Doki Translations v1.0].zip"
     },
     {
       "title": "Kururin Squash!",
       "category": "Puzzle",
+      "series": "Kururin",
       "system": "gc",
       "bucket": "gc/Kururin Squash! (Japan) [T-En by DOL-Translations v2.0.0].rvz"
     },
@@ -8619,12 +9110,14 @@
     {
       "title": "Pokemon Picross",
       "category": "Puzzle",
+      "series": "Pokemon",
       "system": "gbc",
       "bucket": "gbc/Pokemon Picross (Japan) (Proto) [T-En by LeonarthCG v1.2].zip"
     },
     {
       "title": "Puzzle Series Vol. 12 - Akari",
       "category": "Puzzle",
+      "series": "Puzzle Series (Hudson)",
       "system": "nds",
       "bucket": "nds/Puzzle Series Vol. 12 - Akari (Japan) [T-En T-Tudor v1.0] [n].zip"
     },
@@ -8661,12 +9154,14 @@
     {
       "title": "Kururin Paradise",
       "category": "Puzzle",
+      "series": "Kururin",
       "system": "gba",
       "bucket": "gba/Kururin Paradise (Japan) [T-En by Dimedime v1.0].zip"
     },
     {
       "title": "Mr. Driller A - Fushigi na Pacteria",
       "category": "Puzzle",
+      "series": "Mr. Driller",
       "system": "gba",
       "bucket": "gba/Mr. Driller A - Fushigi na Pacteria (Japan) [T-En by Keep Smiling International v1.0] [i].zip"
     },
@@ -8679,36 +9174,42 @@
     {
       "title": "Picross 2",
       "category": "Puzzle",
+      "series": "Picross",
       "system": "gb",
       "bucket": "gb/Picross 2 (Japan) (SGB Enhanced) [T-En by Zed v1.0].zip"
     },
     {
       "title": "Pokemon Puzzle Collection Vol. 2",
       "category": "Puzzle",
+      "series": "Pokemon",
       "system": "pokemini",
       "bucket": "pokemini/Pokemon Puzzle Collection Vol. 2 (Japan) [T-En by Mr. Blinky & Wa v1.2].zip"
     },
     {
       "title": "Puyo Puyo! - 15th Anniversary",
       "category": "Puzzle",
+      "series": "Puyo Puyo",
       "system": "nds",
       "bucket": "nds/Puyo Puyo! - 15th Anniversary (Japan) (Rev 1) [T-En by Puyo Nexus v1.2] [n].zip"
     },
     {
       "title": "Puyo Puyo!! - 20th Anniversary",
       "category": "Puzzle",
+      "series": "Puyo Puyo",
       "system": "nds",
       "bucket": "nds/Puyo Puyo!! - 20th Anniversary (Japan) [T-En by Precise Museum v1.2] [n].zip"
     },
     {
       "title": "Puyo Puyo 7",
       "category": "Puzzle",
+      "series": "Puyo Puyo",
       "system": "nds",
       "bucket": "nds/Puyo Puyo 7 (Japan) [T-En by Puyo Nexus v1.0].zip"
     },
     {
       "title": "Puzzle Series Vol. 5 - Slither Link",
       "category": "Puzzle",
+      "series": "Puzzle Series (Hudson)",
       "system": "nds",
       "bucket": "nds/Puzzle Series Vol. 5 - Slither Link (Japan) [T-En by T-Tudor v0.7].zip"
     },
@@ -8775,12 +9276,14 @@
     {
       "title": "Puyo Puyo 4",
       "category": "Puzzle",
+      "series": "Puyo Puyo",
       "system": "dreamcast",
       "bucket": "dreamcast/Puyo Puyo 4 (Japan) [T-En by Precise Museum v1.0] [n].chd"
     },
     {
       "title": "Sakura Wars - Columns 2",
       "category": "Puzzle",
+      "series": "Sakura Wars",
       "system": "dreamcast",
       "bucket": "dreamcast/Sakura Wars - Columns 2 (Japan) [T-En by Derek Pascarella v1.2] [n].chd"
     },
@@ -8793,6 +9296,7 @@
     {
       "title": "Sonic Eraser",
       "category": "Puzzle",
+      "series": "Sonic",
       "system": "genesis",
       "bucket": "genesis/Sonic Eraser (Japan) (SegaNet) [T-En by Roebloz v1.0.0].zip"
     },
@@ -8841,30 +9345,35 @@
     {
       "title": "Elementary Math Grade 1 - Improvement Game",
       "category": "Other",
+      "series": "Elementary Math",
       "system": "nes",
       "bucket": "nes/Elementary Math Grade 1 - Improvement Game (Japan) [T-En by Pikachumanson v1.0] [n].zip"
     },
     {
       "title": "Elementary Math Grade 2 - Improvement Game",
       "category": "Other",
+      "series": "Elementary Math",
       "system": "nes",
       "bucket": "nes/Elementary Math Grade 2 - Improvement Game (Japan) [T-En by Pikachumanson v1.0] [n].zip"
     },
     {
       "title": "Elementary Math Grade 3 - Calculation Game",
       "category": "Other",
+      "series": "Elementary Math",
       "system": "nes",
       "bucket": "nes/Elementary Math Grade 3 - Calculation Game (Japan) [T-En by Pikachumanson v1.0] [n].zip"
     },
     {
       "title": "Elementary Math Grade 4 - Improvement Game",
       "category": "Other",
+      "series": "Elementary Math",
       "system": "nes",
       "bucket": "nes/Elementary Math Grade 4 - Improvement Game (Japan) [T-En by Pikachumanson v1.0] [n].zip"
     },
     {
       "title": "Elementary Math Grades 5-6 - Calculation Game",
       "category": "Other",
+      "series": "Elementary Math",
       "system": "nes",
       "bucket": "nes/Elementary Math Grades 5-6 - Calculation Game (Japan) [T-En by Pikachumanson v1.0] [n].zip"
     },
@@ -8985,24 +9494,28 @@
     {
       "title": "Mario Artist - Paint Studio",
       "category": "Other",
+      "series": "Super Mario",
       "system": "n64",
       "bucket": "n64/Mario Artist - Paint Studio (Japan) (64DD) [Hack by Zoinkity v1.2] [T-En by LuigiBlood & Cauterize v2.1].zip"
     },
     {
       "title": "Mario Artist - Polygon Studio",
       "category": "Other",
+      "series": "Super Mario",
       "system": "n64",
       "bucket": "n64/Mario Artist - Polygon Studio (Japan) (64DD) [Hack by Zoinkity v1.2] [T-En by LuigiBlood v3.0].zip"
     },
     {
       "title": "Mario Artist - Talent Studio",
       "category": "Other",
+      "series": "Super Mario",
       "system": "n64",
       "bucket": "n64/Mario Artist - Talent Studio (Japan) (64DD) [T-En by LuigiBlood v2.1].zip"
     },
     {
       "title": "Ninja Boy Rantarou 64 Game Gallery",
       "category": "Other",
+      "series": "Ninja Kid / Ninja Boy",
       "system": "n64",
       "bucket": "n64/Ninja Boy Rantarou 64 Game Gallery (Japan) [T-En by Zoinkity v1.0] [n].zip"
     },
@@ -9027,6 +9540,7 @@
     {
       "title": "Sailor Moon - The Shining Moon",
       "category": "Other",
+      "series": "Sailor Moon",
       "system": "nds",
       "bucket": "nds/Sailor Moon - The Shining Moon (Italy) [T-En by Jonko & Tokko Tomcat & Lizmelo & Sailor Moon Italy v1.0] [n].zip"
     },
@@ -9075,6 +9589,7 @@
     {
       "title": "Crayon Shin-Chan - Showdown! Quantum Panic!!",
       "category": "Other",
+      "series": "Crayon Shin-chan",
       "system": "gamegear",
       "bucket": "gamegear/Crayon Shin-Chan - Showdown! Quantum Panic!! (Japan) [T-En by Psyklax v1.0] [n].zip"
     },
@@ -9105,12 +9620,14 @@
     {
       "title": "Neon Genesis Evangelion - Typing Project Advanced",
       "category": "Other",
+      "series": "Evangelion",
       "system": "dreamcast",
       "bucket": "dreamcast/Neon Genesis Evangelion - Typing Project Advanced (Japan) [T-En by Derek Pascarella v1.0] [n].chd"
     },
     {
       "title": "Neon Genesis Evangelion - Typing Project E",
       "category": "Other",
+      "series": "Evangelion",
       "system": "dreamcast",
       "bucket": "dreamcast/Neon Genesis Evangelion - Typing Project E (Japan) [T-En by Derek Pascarella v2.0] [n].chd"
     },

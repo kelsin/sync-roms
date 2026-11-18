@@ -64,6 +64,7 @@
     },
     {
       "title": "Sonic Spinball",
+      "series": "Sonic",
       "system": "genesis",
       "bucket": "genesis/Sonic Spinball (USA).zip"
     },
@@ -99,6 +100,7 @@
     },
     {
       "title": "Sonic Spinball",
+      "series": "Sonic",
       "system": "gamegear",
       "bucket": "gamegear/Sonic Spinball (USA, Europe, Brazil) (En).zip"
     },
@@ -124,6 +126,7 @@
     },
     {
       "title": "Kirby's Pinball Land",
+      "series": "Kirby",
       "system": "gb",
       "bucket": "gb/Kirby's Pinball Land (USA, Europe).zip"
     },
@@ -149,6 +152,7 @@
     },
     {
       "title": "Pokémon Pinball",
+      "series": "Pokemon",
       "system": "gbc",
       "bucket": "gbc/Pokemon Pinball (USA, Australia) (Rumble Version) (SGB Enhanced) (GB Compatible).zip"
     },
@@ -184,16 +188,19 @@
     },
     {
       "title": "Sonic Pinball Party",
+      "series": "Sonic",
       "system": "gba",
       "bucket": "gba/Sonic Pinball Party (USA) (En,Ja,Fr,De,Es,It).zip"
     },
     {
       "title": "Pokémon Pinball: Ruby & Sapphire",
+      "series": "Pokemon",
       "system": "gba",
       "bucket": "gba/Pokemon Pinball - Ruby & Sapphire (USA).zip"
     },
     {
       "title": "Pac-Man Pinball Advance",
+      "series": "Pac-Man",
       "system": "gba",
       "bucket": "gba/Pac-Man Pinball Advance (USA).zip"
     },
@@ -234,6 +241,7 @@
     },
     {
       "title": "Metroid Prime Pinball",
+      "series": "Metroid",
       "system": "nds",
       "bucket": "nds/Metroid Prime Pinball (USA).zip"
     },
@@ -329,6 +337,7 @@
     },
     {
       "title": "Power Rangers Zeo: Full Tilt Battle Pinball",
+      "series": "Mighty Morphin Power Rangers",
       "system": "psx",
       "bucket": "psx/Saban's Power Rangers Zeo - Full Tilt Battle Pinball (USA).chd"
     },
@@ -409,6 +418,7 @@
     },
     {
       "title": "Kirby no Omochabako - Pinball",
+      "series": "Kirby",
       "system": "satellaview",
       "bucket": "satellaview/Kirby no Omochabako - Pinball (Japan).zip"
     },
@@ -419,6 +429,7 @@
     },
     {
       "title": "Pokémon Pinball Mini",
+      "series": "Pokemon",
       "system": "pokemini",
       "bucket": "pokemini/Pokemon Pinball Mini (USA, Europe).zip"
     },
@@ -509,6 +520,7 @@
     },
     {
       "title": "Star Wars Pinball",
+      "series": "Star Wars",
       "system": "psvita",
       "bucket": "psvita/Star Wars Pinball [PCSE00221] [USA] [NoNpDRM].zip"
     },
@@ -539,6 +551,7 @@
     },
     {
       "title": "Williams Pinball Classics",
+      "series": "Williams Arcade",
       "system": "xbox360",
       "bucket": "xbox360/Williams Pinball Classics (Europe).zar"
     },

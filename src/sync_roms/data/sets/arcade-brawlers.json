@@ -4,6 +4,7 @@
   "games": [
     {
       "title": "Final Fight",
+      "series": "Final Fight",
       "system": "fbneo",
       "bucket": "fbneo/ffightuc.zip"
     },
@@ -24,6 +25,7 @@
     },
     {
       "title": "Double Dragon",
+      "series": "Double Dragon",
       "system": "fbneo",
       "bucket": "fbneo/ddragonu.zip",
       "variants": [
@@ -35,6 +37,7 @@
     },
     {
       "title": "Teenage Mutant Ninja Turtles: Turtles in Time",
+      "series": "Teenage Mutant Ninja Turtles",
       "system": "fbneo",
       "bucket": "fbneo/tmnt2.zip",
       "variants": [
@@ -51,16 +54,19 @@
     },
     {
       "title": "The Punisher",
+      "series": "Marvel",
       "system": "fbneo",
       "bucket": "fbneo/punisheru.zip"
     },
     {
       "title": "The Simpsons",
+      "series": "The Simpsons",
       "system": "fbneo",
       "bucket": "fbneo/simpsons.zip"
     },
     {
       "title": "Teenage Mutant Ninja Turtles",
+      "series": "Teenage Mutant Ninja Turtles",
       "system": "fbneo",
       "bucket": "fbneo/tmntu.zip",
       "variants": [
@@ -77,11 +83,13 @@
     },
     {
       "title": "Double Dragon II: The Revenge",
+      "series": "Double Dragon",
       "system": "fbneo",
       "bucket": "fbneo/ddragon2u.zip"
     },
     {
       "title": "Golden Axe",
+      "series": "Golden Axe",
       "system": "fbneo",
       "bucket": "fbneo/goldnaxe.zip"
     },
@@ -97,11 +105,13 @@
     },
     {
       "title": "Alien vs. Predator",
+      "series": "Alien",
       "system": "fbneo",
       "bucket": "fbneo/avspu.zip"
     },
     {
       "title": "X-Men",
+      "series": "X-Men",
       "system": "fbneo",
       "bucket": "fbneo/xmen.zip"
     },
@@ -117,11 +127,13 @@
     },
     {
       "title": "Dungeons & Dragons: Tower of Doom",
+      "series": "Dungeons & Dragons",
       "system": "fbneo",
       "bucket": "fbneo/ddtodu.zip"
     },
     {
       "title": "Dungeons & Dragons: Shadow over Mystara",
+      "series": "Dungeons & Dragons",
       "system": "fbneo",
       "bucket": "fbneo/ddsomu.zip"
     },
@@ -132,6 +144,7 @@
     },
     {
       "title": "Double Dragon 3: The Rosetta Stone",
+      "series": "Double Dragon",
       "system": "fbneo",
       "bucket": "fbneo/ddragon3.zip"
     },
@@ -152,6 +165,7 @@
     },
     {
       "title": "Golden Axe: The Revenge of Death Adder",
+      "series": "Golden Axe",
       "system": "fbneo",
       "bucket": "fbneo/ga2u.zip"
     },
@@ -177,6 +191,7 @@
     },
     {
       "title": "Spider-Man: The Videogame",
+      "series": "Spider-Man",
       "system": "fbneo",
       "bucket": "fbneo/spidmanu.zip"
     },
@@ -202,6 +217,7 @@
     },
     {
       "title": "Asterix",
+      "series": "Asterix",
       "system": "fbneo",
       "bucket": "fbneo/asterix.zip"
     },
@@ -222,11 +238,13 @@
     },
     {
       "title": "Captain America and the Avengers",
+      "series": "Marvel",
       "system": "fbneo",
       "bucket": "fbneo/captavenu.zip"
     },
     {
       "title": "Splatterhouse",
+      "series": "Splatterhouse",
       "system": "fbneo",
       "bucket": "fbneo/splatter.zip"
     },
@@ -267,6 +285,7 @@
     },
     {
       "title": "Ninja Gaiden",
+      "series": "Ninja Gaiden",
       "system": "fbneo",
       "bucket": "fbneo/gaiden.zip"
     },
@@ -322,6 +341,7 @@
     },
     {
       "title": "Sengoku 3",
+      "series": "Sengoku",
       "system": "fbneo",
       "bucket": "fbneo/sengoku3.zip"
     },
@@ -357,11 +377,13 @@
     },
     {
       "title": "Battletoads",
+      "series": "Battletoads",
       "system": "fbneo",
       "bucket": "fbneo/btoads.zip"
     },
     {
       "title": "Pretty Soldier Sailor Moon",
+      "series": "Sailor Moon",
       "system": "fbneo",
       "bucket": "fbneo/sailormnnu.zip"
     },
@@ -422,6 +444,7 @@
     },
     {
       "title": "Sengoku 2",
+      "series": "Sengoku",
       "system": "fbneo",
       "bucket": "fbneo/sengoku2.zip"
     },
@@ -522,11 +545,13 @@
     },
     {
       "title": "Avengers",
+      "series": "Marvel",
       "system": "fbneo",
       "bucket": "fbneo/avengers.zip"
     },
     {
       "title": "Superman",
+      "series": "Superman",
       "system": "fbneo",
       "bucket": "fbneo/supermanu.zip"
     },
@@ -547,16 +572,19 @@
     },
     {
       "title": "Streets of Rage (Rev A)",
+      "series": "Streets of Rage",
       "system": "genesis",
       "bucket": "genesis/Streets of Rage (World) (Rev A).zip"
     },
     {
       "title": "Streets of Rage 2",
+      "series": "Streets of Rage",
       "system": "genesis",
       "bucket": "genesis/Streets of Rage 2 (USA).zip"
     },
     {
       "title": "Streets of Rage 3",
+      "series": "Streets of Rage",
       "system": "genesis",
       "bucket": "genesis/Streets of Rage 3 (USA).zip",
       "variants": [
@@ -568,41 +596,49 @@
     },
     {
       "title": "Golden Axe II",
+      "series": "Golden Axe",
       "system": "genesis",
       "bucket": "genesis/Golden Axe II (World).zip"
     },
     {
       "title": "Final Fight 2",
+      "series": "Final Fight",
       "system": "snes",
       "bucket": "snes/Final Fight 2 (USA).zip"
     },
     {
       "title": "Final Fight 3",
+      "series": "Final Fight",
       "system": "snes",
       "bucket": "snes/Final Fight 3 (USA).zip"
     },
     {
       "title": "Batman Returns",
+      "series": "Batman",
       "system": "snes",
       "bucket": "snes/Batman Returns (USA).zip"
     },
     {
       "title": "Capcom Classics Collection Vol. 2",
+      "series": "Capcom Classics",
       "system": "ps2",
       "bucket": "ps2/Capcom Classics Collection Vol. 2 (USA).chd"
     },
     {
       "title": "Teenage Mutant Ninja Turtles",
+      "series": "Teenage Mutant Ninja Turtles",
       "system": "gc",
       "bucket": "gc/Teenage Mutant Ninja Turtles (USA).rvz"
     },
     {
       "title": "TMNT - Mutant Melee",
+      "series": "Teenage Mutant Ninja Turtles",
       "system": "gc",
       "bucket": "gc/TMNT - Mutant Melee (USA).rvz"
     },
     {
       "title": "Teenage Mutant Ninja Turtles 3 - Mutant Nightmare",
+      "series": "Teenage Mutant Ninja Turtles",
       "system": "gc",
       "bucket": "gc/Teenage Mutant Ninja Turtles 3 - Mutant Nightmare (USA).m3u",
       "files": [
@@ -612,11 +648,13 @@
     },
     {
       "title": "Midway Arcade Treasures",
+      "series": "Midway Arcade",
       "system": "gc",
       "bucket": "gc/Midway Arcade Treasures (USA).rvz"
     },
     {
       "title": "Teenage Mutant Ninja Turtles 2 - Battle Nexus",
+      "series": "Teenage Mutant Ninja Turtles",
       "system": "gc",
       "bucket": "gc/Teenage Mutant Ninja Turtles 2 - Battle Nexus (USA).m3u",
       "files": [
@@ -636,16 +674,19 @@
     },
     {
       "title": "Baldur's Gate: Dark Alliance",
+      "series": "Baldur's Gate",
       "system": "ps2",
       "bucket": "ps2/Baldur's Gate - Dark Alliance (USA).chd"
     },
     {
       "title": "X-Men Legends",
+      "series": "X-Men",
       "system": "gc",
       "bucket": "gc/X-Men Legends (USA).rvz"
     },
     {
       "title": "Viewtiful Joe",
+      "series": "Viewtiful Joe",
       "system": "gc",
       "bucket": "gc/Viewtiful Joe (USA).rvz",
       "variants": [
@@ -657,11 +698,13 @@
     },
     {
       "title": "Viewtiful Joe 2",
+      "series": "Viewtiful Joe",
       "system": "gc",
       "bucket": "gc/Viewtiful Joe 2 (USA).rvz"
     },
     {
       "title": "X-Men Legends II - Rise of Apocalypse",
+      "series": "X-Men",
       "system": "gc",
       "bucket": "gc/X-Men Legends II - Rise of Apocalypse (USA).rvz",
       "variants": [
@@ -673,6 +716,7 @@
     },
     {
       "title": "TMNT",
+      "series": "Teenage Mutant Ninja Turtles",
       "system": "gc",
       "bucket": "gc/TMNT (USA) (En,Fr,Es).rvz"
     },
@@ -683,6 +727,7 @@
     },
     {
       "title": "Batman - Rise of Sin Tzu",
+      "series": "Batman",
       "system": "gc",
       "bucket": "gc/Batman - Rise of Sin Tzu (USA) (En,Fr,Es).rvz"
     },
@@ -698,6 +743,7 @@
     },
     {
       "title": "River City Ransom",
+      "series": "Kunio-kun",
       "system": "nes",
       "bucket": "nes/River City Ransom (USA).zip",
       "variants": [
@@ -713,6 +759,7 @@
     },
     {
       "title": "Teenage Mutant Ninja Turtles",
+      "series": "Teenage Mutant Ninja Turtles",
       "system": "gba",
       "bucket": "gba/Teenage Mutant Ninja Turtles (USA).zip"
     },
@@ -728,6 +775,7 @@
     },
     {
       "title": "TMNT",
+      "series": "Teenage Mutant Ninja Turtles",
       "system": "gba",
       "bucket": "gba/TMNT (USA) (En,Fr,Es).zip"
     },
@@ -738,11 +786,13 @@
     },
     {
       "title": "Dragon Ball - Advanced Adventure",
+      "series": "Dragon Ball",
       "system": "gba",
       "bucket": "gba/Dragon Ball - Advanced Adventure (USA).zip"
     },
     {
       "title": "Dragon Ball GT - Transformation",
+      "series": "Dragon Ball",
       "system": "gba",
       "bucket": "gba/Dragon Ball GT - Transformation (USA).zip"
     },
@@ -758,6 +808,7 @@
     },
     {
       "title": "Teenage Mutant Ninja Turtles 2 - Battle Nexus",
+      "series": "Teenage Mutant Ninja Turtles",
       "system": "gba",
       "bucket": "gba/Teenage Mutant Ninja Turtles 2 - Battle Nexus (USA).zip"
     },
@@ -773,31 +824,37 @@
     },
     {
       "title": "X-Men - Reign of Apocalypse",
+      "series": "X-Men",
       "system": "gba",
       "bucket": "gba/X-Men - Reign of Apocalypse (USA, Europe).zip"
     },
     {
       "title": "Star Wars - Episode III - Revenge of the Sith",
+      "series": "Star Wars",
       "system": "gba",
       "bucket": "gba/Star Wars - Episode III - Revenge of the Sith (USA) (En,Fr,Es).zip"
     },
     {
       "title": "Batman - Rise of Sin Tzu",
+      "series": "Batman",
       "system": "gba",
       "bucket": "gba/Batman - Rise of Sin Tzu (USA) (En,Fr,Es).zip"
     },
     {
       "title": "Battletoads-Double Dragon",
+      "series": "Battletoads",
       "system": "nes",
       "bucket": "nes/Battletoads-Double Dragon (USA).zip"
     },
     {
       "title": "Spider-Man - Venom - Maximum Carnage",
+      "series": "Spider-Man",
       "system": "snes",
       "bucket": "snes/Spider-Man - Venom - Maximum Carnage (USA).zip"
     },
     {
       "title": "Golden Axe III",
+      "series": "Golden Axe",
       "system": "genesis",
       "bucket": "genesis/Golden Axe III (Japan) (En).zip"
     },
@@ -808,26 +865,31 @@
     },
     {
       "title": "Teenage Mutant Ninja Turtles - The Hyperstone Heist",
+      "series": "Teenage Mutant Ninja Turtles",
       "system": "genesis",
       "bucket": "genesis/Teenage Mutant Ninja Turtles - The Hyperstone Heist (USA).zip"
     },
     {
       "title": "Splatterhouse 2",
+      "series": "Splatterhouse",
       "system": "genesis",
       "bucket": "genesis/Splatterhouse 2 (USA).zip"
     },
     {
       "title": "Splatterhouse 3",
+      "series": "Splatterhouse",
       "system": "genesis",
       "bucket": "genesis/Splatterhouse 3 (USA).zip"
     },
     {
       "title": "Mighty Morphin Power Rangers - The Movie",
+      "series": "Mighty Morphin Power Rangers",
       "system": "genesis",
       "bucket": "genesis/Mighty Morphin Power Rangers - The Movie (USA).zip"
     },
     {
       "title": "Battletoads",
+      "series": "Battletoads",
       "system": "nes",
       "bucket": "nes/Battletoads (USA).zip"
     },
@@ -853,6 +915,7 @@
     },
     {
       "title": "Venom - Spider-Man - Separation Anxiety",
+      "series": "Spider-Man",
       "system": "snes",
       "bucket": "snes/Venom - Spider-Man - Separation Anxiety (USA).zip"
     },
@@ -863,6 +926,7 @@
     },
     {
       "title": "Bishoujo Senshi Sailor Moon",
+      "series": "Sailor Moon",
       "system": "genesis",
       "bucket": "genesis/Pretty Soldier Sailor Moon (Japan) [T-En by Supper v1.0] [n].zip"
     },
@@ -905,16 +969,19 @@
     },
     {
       "title": "Battletoads in Battlemaniacs",
+      "series": "Battletoads",
       "system": "snes",
       "bucket": "snes/Battletoads in Battlemaniacs (USA).zip"
     },
     {
       "title": "Sonic Blast Man",
+      "series": "Sonic",
       "system": "snes",
       "bucket": "snes/Sonic Blast Man (USA).zip"
     },
     {
       "title": "Mighty Morphin Power Rangers",
+      "series": "Mighty Morphin Power Rangers",
       "system": "snes",
       "bucket": "snes/Mighty Morphin Power Rangers (USA).zip"
     },
@@ -940,36 +1007,43 @@
     },
     {
       "title": "Bishoujo Senshi Sailor Moon R",
+      "series": "Sailor Moon",
       "system": "snes",
       "bucket": "snes/Pretty Soldier Sailor Moon R (Japan) [T-En by FuSoYa v1.00] [n].zip"
     },
     {
       "title": "River City Girls Zero",
+      "series": "Kunio-kun",
       "system": "snes",
       "bucket": "snes/River City Girls Zero (USA) (RCG Translation, Switch).zip"
     },
     {
       "title": "X-Men - Mutant Apocalypse",
+      "series": "X-Men",
       "system": "snes",
       "bucket": "snes/X-Men - Mutant Apocalypse (USA).zip"
     },
     {
       "title": "Marvel Super Heroes in War of the Gems",
+      "series": "Marvel",
       "system": "snes",
       "bucket": "snes/Marvel Super Heroes in War of the Gems (USA).zip"
     },
     {
       "title": "Alien vs Predator",
+      "series": "Alien",
       "system": "snes",
       "bucket": "snes/Alien vs Predator (USA).zip"
     },
     {
       "title": "Mighty Morphin Power Rangers - The Movie",
+      "series": "Mighty Morphin Power Rangers",
       "system": "snes",
       "bucket": "snes/Mighty Morphin Power Rangers - The Movie (USA).zip"
     },
     {
       "title": "Sonic Blast Man II",
+      "series": "Sonic",
       "system": "snes",
       "bucket": "snes/Sonic Blast Man II (USA).zip"
     },
@@ -1000,6 +1074,7 @@
     },
     {
       "title": "Bishoujo Senshi Sailor Moon",
+      "series": "Sailor Moon",
       "system": "snes",
       "bucket": "snes/Pretty Soldier Sailor Moon (Japan) [T-En by Flamepurge & Mziab v1.01] [n].zip"
     },
@@ -1015,21 +1090,25 @@
     },
     {
       "title": "Streets of Rage",
+      "series": "Streets of Rage",
       "system": "mastersystem",
       "bucket": "mastersystem/Streets of Rage (Europe, Brazil) (En).zip"
     },
     {
       "title": "Streets of Rage 2",
+      "series": "Streets of Rage",
       "system": "gamegear",
       "bucket": "gamegear/Streets of Rage 2 (World).zip"
     },
     {
       "title": "Teenage Mutant Ninja Turtles III - Radical Rescue",
+      "series": "Teenage Mutant Ninja Turtles",
       "system": "gb",
       "bucket": "gb/Teenage Mutant Ninja Turtles III - Radical Rescue (USA).zip"
     },
     {
       "title": "Double Dragon II",
+      "series": "Double Dragon",
       "system": "gb",
       "bucket": "gb/Double Dragon II (USA, Europe).zip"
     },
@@ -1040,11 +1119,13 @@
     },
     {
       "title": "Teenage Mutant Ninja Turtles - Fall of the Foot Clan",
+      "series": "Teenage Mutant Ninja Turtles",
       "system": "gb",
       "bucket": "gb/Teenage Mutant Ninja Turtles - Fall of the Foot Clan (USA).zip"
     },
     {
       "title": "Teenage Mutant Ninja Turtles II - Back from the Sewers",
+      "series": "Teenage Mutant Ninja Turtles",
       "system": "gb",
       "bucket": "gb/Teenage Mutant Ninja Turtles II - Back from the Sewers (USA).zip"
     },
@@ -1070,6 +1151,7 @@
     },
     {
       "title": "Batman Forever",
+      "series": "Batman",
       "system": "mame",
       "bucket": "mame/batmanfr.zip"
     },
@@ -1085,6 +1167,7 @@
     },
     {
       "title": "Gauntlet Legends",
+      "series": "Gauntlet",
       "system": "dreamcast",
       "bucket": "dreamcast/Gauntlet Legends (USA).chd",
       "variants": [
@@ -1126,16 +1209,19 @@
     },
     {
       "title": "Sega Smash Pack - Volume 1",
+      "series": "Sega Classics Collections",
       "system": "dreamcast",
       "bucket": "dreamcast/Sega Smash Pack - Volume 1 (USA).chd"
     },
     {
       "title": "Double Dragon",
+      "series": "Double Dragon",
       "system": "nes",
       "bucket": "nes/Double Dragon (USA).zip"
     },
     {
       "title": "Double Dragon II - The Revenge",
+      "series": "Double Dragon",
       "system": "nes",
       "bucket": "nes/Double Dragon II - The Revenge (USA) (Rev 1).zip",
       "variants": [
@@ -1147,6 +1233,7 @@
     },
     {
       "title": "Double Dragon III - The Sacred Stones",
+      "series": "Double Dragon",
       "system": "nes",
       "bucket": "nes/Double Dragon III - The Sacred Stones (USA).zip",
       "variants": [
@@ -1163,6 +1250,7 @@
     },
     {
       "title": "Teenage Mutant Ninja Turtles III - The Manhattan Project",
+      "series": "Teenage Mutant Ninja Turtles",
       "system": "nes",
       "bucket": "nes/Teenage Mutant Ninja Turtles III - The Manhattan Project (USA).zip"
     },
@@ -1189,6 +1277,7 @@
     },
     {
       "title": "Batman Returns",
+      "series": "Batman",
       "system": "nes",
       "bucket": "nes/Batman Returns (USA).zip"
     },
@@ -1229,6 +1318,7 @@
     },
     {
       "title": "Die Hard Arcade",
+      "series": "Die Hard",
       "system": "mame",
       "bucket": "mame/diehard.zip"
     },
@@ -1239,6 +1329,7 @@
     },
     {
       "title": "Nekketsu Oyako",
+      "series": "Kunio-kun",
       "system": "psx",
       "bucket": "psx/Nekketsu Oyako (Japan) [T-En by PentarouZero v1.0d] [Add by SCO v1.0].chd"
     },
@@ -1254,11 +1345,13 @@
     },
     {
       "title": "Batman Beyond - Return of the Joker",
+      "series": "Batman",
       "system": "n64",
       "bucket": "n64/Batman Beyond - Return of the Joker (USA).zip"
     },
     {
       "title": "Guilty Gear Judgment",
+      "series": "Guilty Gear",
       "system": "psp",
       "bucket": "psp/Guilty Gear Judgment (USA).chd"
     },
@@ -1274,11 +1367,13 @@
     },
     {
       "title": "Teenage Mutant Ninja Turtles - Arcade Attack",
+      "series": "Teenage Mutant Ninja Turtles",
       "system": "nds",
       "bucket": "nds/Teenage Mutant Ninja Turtles - Arcade Attack (USA) (En,Fr,Es).zip"
     },
     {
       "title": "Viewtiful Joe - Double Trouble!",
+      "series": "Viewtiful Joe",
       "system": "nds",
       "bucket": "nds/Viewtiful Joe - Double Trouble! (USA).zip"
     },
@@ -1289,6 +1384,7 @@
     },
     {
       "title": "Batman - The Brave and the Bold - The Videogame",
+      "series": "Batman",
       "system": "nds",
       "bucket": "nds/Batman - The Brave and the Bold - The Videogame (USA) (En,Fr,Es).zip"
     },
@@ -1299,21 +1395,25 @@
     },
     {
       "title": "Star Wars - Episode III - Revenge of the Sith",
+      "series": "Star Wars",
       "system": "nds",
       "bucket": "nds/Star Wars - Episode III - Revenge of the Sith (USA) (En,Fr,De,Es,It,Nl).zip"
     },
     {
       "title": "Teenage Mutant Ninja Turtles 3 - Mutant Nightmare",
+      "series": "Teenage Mutant Ninja Turtles",
       "system": "nds",
       "bucket": "nds/Teenage Mutant Ninja Turtles 3 - Mutant Nightmare (USA).zip"
     },
     {
       "title": "River City - Tokyo Rumble",
+      "series": "Kunio-kun",
       "system": "3ds",
       "bucket": "3ds/River City - Tokyo Rumble (USA).zip"
     },
     {
       "title": "River City - Rival Showdown",
+      "series": "Kunio-kun",
       "system": "3ds",
       "bucket": "3ds/River City - Rival Showdown (USA).zip"
     },
@@ -1324,11 +1424,13 @@
     },
     {
       "title": "Senran Kagura Burst",
+      "series": "Senran Kagura",
       "system": "3ds",
       "bucket": "3ds/Senran Kagura Burst (Europe).zip"
     },
     {
       "title": "Senran Kagura 2 - Deep Crimson",
+      "series": "Senran Kagura",
       "system": "3ds",
       "bucket": "3ds/Senran Kagura 2 - Deep Crimson (USA).zip"
     },
@@ -1355,16 +1457,19 @@
     },
     {
       "title": "Golden Axe - Beast Rider",
+      "series": "Golden Axe",
       "system": "xbox360",
       "bucket": "xbox360/Golden Axe - Beast Rider (USA, Europe) (En,Fr,Es,It).zar"
     },
     {
       "title": "Teenage Mutant Ninja Turtles - Mutants in Manhattan",
+      "series": "Teenage Mutant Ninja Turtles",
       "system": "xbox360",
       "bucket": "xbox360/Teenage Mutant Ninja Turtles - Mutants in Manhattan (USA, Europe).zar"
     },
     {
       "title": "Shin Nekketsu Kouha - Kunio-tachi no Banka",
+      "series": "Kunio-kun",
       "system": "snes",
       "bucket": "snes/Shin Nekketsu Kouha - Kunio-tachi no Banka (Japan) [T-En by Aeon Genesis v1.00].zip"
     },
@@ -1380,16 +1485,19 @@
     },
     {
       "title": "Nekketsu High - Hot Blooded! Kunio Kun's Final Battle",
+      "series": "Kunio-kun",
       "system": "gb",
       "bucket": "gb/Nekketsu High - Hot Blooded! Kunio Kun's Final Battle (Japan) [T-En by Ice Translations v0.99] [i] [n].zip"
     },
     {
       "title": "Downtown Nekketsu Jidaigeki",
+      "series": "Kunio-kun",
       "system": "3ds",
       "bucket": "3ds/Downtown Nekketsu Jidaigeki (Japan).zip"
     },
     {
       "title": "Nekketsu Kouha Kunio-Kun Special",
+      "series": "Kunio-kun",
       "system": "3ds",
       "bucket": "3ds/Nekketsu Kouha Kunio-Kun Special (Japan).zip"
     },
@@ -1400,11 +1508,13 @@
     },
     {
       "title": "SENRAN KAGURA EV",
+      "series": "Senran Kagura",
       "system": "psvita",
       "bucket": "psvita/SENRAN KAGURA EV [PCSE00787] [USA] [NoNpDRM].zip"
     },
     {
       "title": "SENRAN KAGURA SV",
+      "series": "Senran Kagura",
       "system": "psvita",
       "bucket": "psvita/SENRAN KAGURA SV [PCSE00398] [USA] [NoNpDRM].zip"
     },
@@ -1420,6 +1530,7 @@
     },
     {
       "title": "Teenage Mutant Ninja Turtles in: Shredder's Prevenge APRIL UPDATE",
+      "series": "Teenage Mutant Ninja Turtles",
       "system": "pico8",
       "bucket": "pico8/tmnt_sp_start-0.p8.png"
     }

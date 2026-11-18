@@ -125,6 +125,7 @@
     {
       "title": "Steel Gunner",
       "category": "Arcade Light Gun",
+      "series": "Steel Gunner",
       "system": "fbneo",
       "bucket": "fbneo/sgunner.zip"
     },
@@ -143,12 +144,14 @@
     {
       "title": "Steel Gunner 2",
       "category": "Arcade Light Gun",
+      "series": "Steel Gunner",
       "system": "fbneo",
       "bucket": "fbneo/sgunner2.zip"
     },
     {
       "title": "Terminator 2: Judgment Day",
       "category": "Arcade Light Gun",
+      "series": "Terminator",
       "system": "fbneo",
       "bucket": "fbneo/term2.zip"
     },
@@ -167,6 +170,7 @@
     {
       "title": "Lethal Enforcers",
       "category": "Arcade Light Gun",
+      "series": "Lethal Enforcers",
       "system": "fbneo",
       "bucket": "fbneo/lethalen.zip"
     },
@@ -179,6 +183,7 @@
     {
       "title": "Alien 3: The Gun",
       "category": "Arcade Light Gun",
+      "series": "Alien",
       "system": "fbneo",
       "bucket": "fbneo/alien3u.zip"
     },
@@ -191,6 +196,7 @@
     {
       "title": "Jurassic Park",
       "category": "Arcade Light Gun",
+      "series": "Jurassic Park",
       "system": "fbneo",
       "bucket": "fbneo/jpark.zip"
     },
@@ -203,6 +209,7 @@
     {
       "title": "Lethal Enforcers II - Gun Fighters",
       "category": "Arcade Light Gun",
+      "series": "Lethal Enforcers",
       "system": "mame",
       "bucket": "mame/le2.zip"
     },
@@ -227,6 +234,7 @@
     {
       "title": "Point Blank",
       "category": "Arcade Light Gun",
+      "series": "Point Blank",
       "system": "fbneo",
       "bucket": "fbneo/ptblank.zip",
       "variants": [
@@ -251,6 +259,7 @@
     {
       "title": "Mobile Suit Gundam Final Shooting",
       "category": "Arcade Light Gun",
+      "series": "Gundam",
       "system": "fbneo",
       "bucket": "fbneo/gdfs.zip"
     },
@@ -407,6 +416,7 @@
     {
       "title": "Hang On & Safari Hunt",
       "category": "Console Light Gun",
+      "series": "Hang-On",
       "system": "mastersystem",
       "bucket": "mastersystem/Hang On & Safari Hunt (USA).zip"
     },
@@ -503,6 +513,7 @@
     {
       "title": "Yoshi's Safari",
       "category": "Console Light Gun",
+      "series": "Yoshi",
       "system": "snes",
       "bucket": "snes/Yoshi's Safari (USA).zip"
     },
@@ -539,18 +550,21 @@
     {
       "title": "Virtua Cop",
       "category": "Console Light Gun",
+      "series": "Virtua Cop",
       "system": "saturn",
       "bucket": "saturn/Virtua Cop (USA) (8S, 12S).chd"
     },
     {
       "title": "Virtua Cop 2",
       "category": "Console Light Gun",
+      "series": "Virtua Cop",
       "system": "dreamcast",
       "bucket": "dreamcast/Virtua Cop 2 (Japan) [T-En by Derek Pascarella v1.0].chd"
     },
     {
       "title": "House of the Dead, The",
       "category": "Console Light Gun",
+      "series": "House of the Dead",
       "system": "saturn",
       "bucket": "saturn/House of the Dead, The (USA).chd"
     },
@@ -575,6 +589,7 @@
     {
       "title": "Die Hard Trilogy",
       "category": "Console Light Gun",
+      "series": "Die Hard",
       "system": "psx",
       "bucket": "psx/Die Hard Trilogy (USA) (Rev 1).chd"
     },
@@ -593,6 +608,7 @@
     {
       "title": "Death Crimson",
       "category": "Console Light Gun",
+      "series": "Death Crimson",
       "system": "saturn",
       "bucket": "saturn/Death Crimson (Japan).chd"
     },
@@ -605,24 +621,28 @@
     {
       "title": "Time Crisis",
       "category": "Console Light Gun",
+      "series": "Time Crisis",
       "system": "psx",
       "bucket": "psx/Time Crisis (USA).chd"
     },
     {
       "title": "Time Crisis - Project Titan",
       "category": "Console Light Gun",
+      "series": "Time Crisis",
       "system": "psx",
       "bucket": "psx/Time Crisis - Project Titan (USA).chd"
     },
     {
       "title": "Point Blank 2",
       "category": "Console Light Gun",
+      "series": "Point Blank",
       "system": "psx",
       "bucket": "psx/Point Blank 2 (USA).chd"
     },
     {
       "title": "Point Blank 3",
       "category": "Console Light Gun",
+      "series": "Point Blank",
       "system": "psx",
       "bucket": "psx/Point Blank 3 (USA).chd"
     },
@@ -635,6 +655,7 @@
     {
       "title": "Die Hard Trilogy 2 - Viva Las Vegas",
       "category": "Console Light Gun",
+      "series": "Die Hard",
       "system": "psx",
       "bucket": "psx/Die Hard Trilogy 2 - Viva Las Vegas (USA).chd"
     },
@@ -653,6 +674,7 @@
     {
       "title": "Resident Evil - Survivor",
       "category": "Console Light Gun",
+      "series": "Resident Evil",
       "system": "psx",
       "bucket": "psx/Resident Evil - Survivor (USA).chd"
     },
@@ -665,6 +687,7 @@
     {
       "title": "House of the Dead 2, The",
       "category": "Console Light Gun",
+      "series": "House of the Dead",
       "system": "dreamcast",
       "bucket": "dreamcast/House of the Dead 2, The (USA).chd"
     },
@@ -683,24 +706,28 @@
     {
       "title": "Death Crimson 2",
       "category": "Console Light Gun",
+      "series": "Death Crimson",
       "system": "dreamcast",
       "bucket": "dreamcast/Death Crimson 2 - Altar of Melanito (Japan) [T-En by Derek Pascarella v1.0] [n].chd"
     },
     {
       "title": "Death Crimson OX",
       "category": "Console Light Gun",
+      "series": "Death Crimson",
       "system": "dreamcast",
       "bucket": "dreamcast/Death Crimson OX (USA).chd"
     },
     {
       "title": "Resident Evil - Dead Aim",
       "category": "Console Light Gun",
+      "series": "Resident Evil",
       "system": "ps2",
       "bucket": "ps2/Resident Evil - Dead Aim (USA).chd"
     },
     {
       "title": "Point Blank DS",
       "category": "Console Light Gun",
+      "series": "Point Blank",
       "system": "nds",
       "bucket": "nds/Point Blank DS (USA).zip"
     },
@@ -799,6 +826,7 @@
     {
       "title": "Star Wars - Rebel Assault",
       "category": "FMV Shooters",
+      "series": "Star Wars",
       "system": "segacd",
       "bucket": "segacd/Star Wars - Rebel Assault (USA).chd"
     },
@@ -839,6 +867,7 @@
     {
       "title": "Star Wars - Rebel Assault II - The Hidden Empire",
       "category": "FMV Shooters",
+      "series": "Star Wars",
       "system": "psx",
       "bucket": "psx/Star Wars - Rebel Assault II - The Hidden Empire (USA).m3u",
       "files": [
@@ -943,6 +972,7 @@
     {
       "title": "Punisher, The",
       "category": "Cabal-Style",
+      "series": "Marvel",
       "system": "nes",
       "bucket": "nes/Punisher, The (USA).zip"
     },
@@ -961,6 +991,7 @@
     {
       "title": "Star Wars",
       "category": "Rail Shooters",
+      "series": "Star Wars",
       "system": "fbneo",
       "bucket": "fbneo/starwars.zip"
     },
@@ -973,6 +1004,7 @@
     {
       "title": "Space Harrier",
       "category": "Rail Shooters",
+      "series": "Space Harrier",
       "system": "fbneo",
       "bucket": "fbneo/sharrier.zip"
     },
@@ -985,6 +1017,7 @@
     {
       "title": "After Burner II",
       "category": "Rail Shooters",
+      "series": "After Burner",
       "system": "fbneo",
       "bucket": "fbneo/aburner2.zip"
     },
@@ -1039,18 +1072,21 @@
     {
       "title": "G.I. Joe",
       "category": "Rail Shooters",
+      "series": "G.I. Joe",
       "system": "fbneo",
       "bucket": "fbneo/gijoeu.zip"
     },
     {
       "title": "Space Harrier 3-D",
       "category": "Rail Shooters",
+      "series": "Space Harrier",
       "system": "mastersystem",
       "bucket": "mastersystem/Space Harrier 3-D (USA, Europe, Brazil) (En).zip"
     },
     {
       "title": "Zaxxon 3-D",
       "category": "Rail Shooters",
+      "series": "Zaxxon",
       "system": "mastersystem",
       "bucket": "mastersystem/Zaxxon 3-D (World).zip"
     },
@@ -1075,6 +1111,7 @@
     {
       "title": "Space Harrier II",
       "category": "Rail Shooters",
+      "series": "Space Harrier",
       "system": "genesis",
       "bucket": "genesis/Space Harrier II (World).zip"
     },
@@ -1093,18 +1130,21 @@
     {
       "title": "Panzer Dragoon Mini",
       "category": "Rail Shooters",
+      "series": "Panzer Dragoon",
       "system": "gamegear",
       "bucket": "gamegear/Panzer Dragoon Mini (Japan).zip"
     },
     {
       "title": "Star Wars Arcade",
       "category": "Rail Shooters",
+      "series": "Star Wars",
       "system": "sega32x",
       "bucket": "sega32x/Star Wars Arcade (USA).zip"
     },
     {
       "title": "After Burner III",
       "category": "Rail Shooters",
+      "series": "After Burner",
       "system": "segacd",
       "bucket": "segacd/After Burner III (USA).chd"
     },
@@ -1123,12 +1163,14 @@
     {
       "title": "Star Fox",
       "category": "Rail Shooters",
+      "series": "Star Fox",
       "system": "snes",
       "bucket": "snes/Star Fox (USA) (Rev 2).zip"
     },
     {
       "title": "Star Fox 2",
       "category": "Rail Shooters",
+      "series": "Star Fox",
       "system": "snes",
       "bucket": "snes/Star Fox 2 (USA, Europe) (Classic Mini, Switch Online).zip"
     },
@@ -1147,12 +1189,14 @@
     {
       "title": "Panzer Dragoon",
       "category": "Rail Shooters",
+      "series": "Panzer Dragoon",
       "system": "saturn",
       "bucket": "saturn/Panzer Dragoon (USA) (5S).chd"
     },
     {
       "title": "Panzer Dragoon II Zwei",
       "category": "Rail Shooters",
+      "series": "Panzer Dragoon",
       "system": "saturn",
       "bucket": "saturn/Panzer Dragoon II Zwei (USA).chd"
     },
@@ -1201,6 +1245,7 @@
     {
       "title": "Star Fox 64",
       "category": "Rail Shooters",
+      "series": "Star Fox",
       "system": "n64",
       "bucket": "n64/Star Fox 64 (USA) (Rev 1).zip",
       "variants": [
@@ -1213,6 +1258,7 @@
     {
       "title": "Pokemon Snap",
       "category": "Rail Shooters",
+      "series": "Pokemon",
       "system": "n64",
       "bucket": "n64/Pokemon Snap (USA).zip"
     },
@@ -1255,18 +1301,21 @@
     {
       "title": "Star Fox - Assault",
       "category": "Rail Shooters",
+      "series": "Star Fox",
       "system": "gc",
       "bucket": "gc/Star Fox - Assault (USA).rvz"
     },
     {
       "title": "Panzer Dragoon Orta",
       "category": "Rail Shooters",
+      "series": "Panzer Dragoon",
       "system": "xbox",
       "bucket": "xbox/Panzer Dragoon Orta (USA).iso"
     },
     {
       "title": "After Burner - Black Falcon",
       "category": "Rail Shooters",
+      "series": "After Burner",
       "system": "psp",
       "bucket": "psp/After Burner - Black Falcon (USA) (En,Fr,De,Es,It).chd"
     },
@@ -1279,12 +1328,14 @@
     {
       "title": "Kid Icarus - Uprising",
       "category": "Rail Shooters",
+      "series": "Kid Icarus",
       "system": "3ds",
       "bucket": "3ds/Kid Icarus - Uprising (USA) (En,Fr,Es).zip"
     },
     {
       "title": "Star Fox Zero",
       "category": "Rail Shooters",
+      "series": "Star Fox",
       "system": "wiiu",
       "bucket": "wiiu/Star Fox Zero (US) (v16).wua"
     },

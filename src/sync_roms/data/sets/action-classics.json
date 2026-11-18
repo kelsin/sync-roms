@@ -4,11 +4,13 @@
   "games": [
     {
       "title": "God of War",
+      "series": "God of War",
       "system": "ps2",
       "bucket": "ps2/God of War (USA).chd"
     },
     {
       "title": "God of War II",
+      "series": "God of War",
       "system": "ps2",
       "bucket": "ps2/God of War II (USA).chd"
     },
@@ -19,11 +21,13 @@
     },
     {
       "title": "Devil May Cry",
+      "series": "Devil May Cry",
       "system": "ps2",
       "bucket": "ps2/Devil May Cry (USA).chd"
     },
     {
       "title": "Devil May Cry 2",
+      "series": "Devil May Cry",
       "system": "ps2",
       "bucket": "ps2/Devil May Cry 2 (USA).m3u",
       "files": [
@@ -33,11 +37,13 @@
     },
     {
       "title": "Devil May Cry 3: Dante's Awakening Special Edition",
+      "series": "Devil May Cry",
       "system": "ps2",
       "bucket": "ps2/Devil May Cry 3 - Dante's Awakening (USA) (En,Ja) (Special Edition).chd"
     },
     {
       "title": "Viewtiful Joe 2",
+      "series": "Viewtiful Joe",
       "system": "gc",
       "bucket": "gc/Viewtiful Joe 2 (USA).rvz"
     },
@@ -59,6 +65,7 @@
     },
     {
       "title": "Metroid: Other M",
+      "series": "Metroid",
       "system": "wii",
       "bucket": "wii/Metroid - Other M (USA) (En,Fr,Es).rvz"
     },
@@ -69,11 +76,13 @@
     },
     {
       "title": "Metal Gear Solid 2: Substance",
+      "series": "Metal Gear",
       "system": "ps2",
       "bucket": "ps2/Metal Gear Solid 2 - Substance (USA).chd"
     },
     {
       "title": "Metal Gear Solid 3: Subsistence",
+      "series": "Metal Gear",
       "system": "ps2",
       "bucket": "ps2/Metal Gear Solid 3 - Subsistence (USA) (En,Es).m3u",
       "files": [
@@ -84,26 +93,31 @@
     },
     {
       "title": "Onimusha: Warlords",
+      "series": "Onimusha",
       "system": "ps2",
       "bucket": "ps2/Onimusha - Warlords (USA).chd"
     },
     {
       "title": "Onimusha 2 - Samurai's Destiny",
+      "series": "Onimusha",
       "system": "ps2",
       "bucket": "ps2/Onimusha 2 - Samurai's Destiny (USA).chd"
     },
     {
       "title": "Onimusha 3 - Demon Siege",
+      "series": "Onimusha",
       "system": "ps2",
       "bucket": "ps2/Onimusha 3 - Demon Siege (USA).chd"
     },
     {
       "title": "Castlevania - Lament of Innocence",
+      "series": "Castlevania",
       "system": "ps2",
       "bucket": "ps2/Castlevania - Lament of Innocence (USA).chd"
     },
     {
       "title": "Castlevania - Curse of Darkness",
+      "series": "Castlevania",
       "system": "ps2",
       "bucket": "ps2/Castlevania - Curse of Darkness (USA).chd"
     },
@@ -144,41 +158,49 @@
     },
     {
       "title": "Grand Theft Auto: San Andreas",
+      "series": "Grand Theft Auto",
       "system": "ps2",
       "bucket": "ps2/Grand Theft Auto - San Andreas (USA) (v3.00).chd"
     },
     {
       "title": "Grand Theft Auto: Vice City",
+      "series": "Grand Theft Auto",
       "system": "ps2",
       "bucket": "ps2/Grand Theft Auto - Vice City (USA) (v4.00).chd"
     },
     {
       "title": "Grand Theft Auto III",
+      "series": "Grand Theft Auto",
       "system": "ps2",
       "bucket": "ps2/Grand Theft Auto III (USA).chd"
     },
     {
       "title": "Sly 2: Band of Thieves",
+      "series": "Sly Cooper",
       "system": "ps2",
       "bucket": "ps2/Sly 2 - Band of Thieves (USA).chd"
     },
     {
       "title": "Sly 3: Honor Among Thieves",
+      "series": "Sly Cooper",
       "system": "ps2",
       "bucket": "ps2/Sly 3 - Honor Among Thieves (USA).chd"
     },
     {
       "title": "Sly Cooper and the Thievius Raccoonus",
+      "series": "Sly Cooper",
       "system": "ps2",
       "bucket": "ps2/Sly Cooper and the Thievius Raccoonus (USA).chd"
     },
     {
       "title": "Baldur's Gate: Dark Alliance",
+      "series": "Baldur's Gate",
       "system": "ps2",
       "bucket": "ps2/Baldur's Gate - Dark Alliance (USA).chd"
     },
     {
       "title": "Gauntlet Legends",
+      "series": "Gauntlet",
       "system": "dreamcast",
       "bucket": "dreamcast/Gauntlet Legends (USA).chd",
       "variants": [
@@ -190,6 +212,7 @@
     },
     {
       "title": "Viewtiful Joe",
+      "series": "Viewtiful Joe",
       "system": "gc",
       "bucket": "gc/Viewtiful Joe (USA).rvz",
       "variants": [
@@ -201,11 +224,13 @@
     },
     {
       "title": "Prince of Persia: The Sands of Time",
+      "series": "Prince of Persia",
       "system": "gc",
       "bucket": "gc/Prince of Persia - The Sands of Time (USA) (En,Fr,Es) (Rev 1).rvz"
     },
     {
       "title": "Prince of Persia: Warrior Within",
+      "series": "Prince of Persia",
       "system": "gc",
       "bucket": "gc/Prince of Persia - Warrior Within (USA) (En,Fr,Es).rvz",
       "variants": [
@@ -217,11 +242,13 @@
     },
     {
       "title": "Prince of Persia: The Two Thrones",
+      "series": "Prince of Persia",
       "system": "gc",
       "bucket": "gc/Prince of Persia - The Two Thrones (USA) (En,Fr,Es).rvz"
     },
     {
       "title": "Metal Gear Solid: The Twin Snakes",
+      "series": "Metal Gear",
       "system": "gc",
       "bucket": "gc/Metal Gear Solid - The Twin Snakes (USA).m3u",
       "files": [
@@ -236,16 +263,19 @@
     },
     {
       "title": "Tom Clancy's Splinter Cell",
+      "series": "Tom Clancy",
       "system": "gc",
       "bucket": "gc/Tom Clancy's Splinter Cell (USA).rvz"
     },
     {
       "title": "Tom Clancy's Splinter Cell - Pandora Tomorrow",
+      "series": "Tom Clancy",
       "system": "gc",
       "bucket": "gc/Tom Clancy's Splinter Cell - Pandora Tomorrow (USA).rvz"
     },
     {
       "title": "Tom Clancy's Splinter Cell - Chaos Theory",
+      "series": "Tom Clancy",
       "system": "gc",
       "bucket": "gc/Tom Clancy's Splinter Cell - Chaos Theory (USA) (En,Fr,Es).m3u",
       "files": [
@@ -265,6 +295,7 @@
     },
     {
       "title": "Star Fox Adventures",
+      "series": "Star Fox",
       "system": "gc",
       "bucket": "gc/Star Fox Adventures (USA) (Rev 1).rvz"
     },
@@ -324,6 +355,7 @@
     },
     {
       "title": "Tom Clancy's Splinter Cell: Double Agent",
+      "series": "Tom Clancy",
       "system": "gc",
       "bucket": "gc/Tom Clancy's Splinter Cell - Double Agent (USA) (En,Fr,Es).m3u",
       "files": [
@@ -353,6 +385,7 @@
     },
     {
       "title": "Star Wars: Bounty Hunter",
+      "series": "Star Wars",
       "system": "gc",
       "bucket": "gc/Star Wars - Bounty Hunter (USA).rvz"
     },
@@ -373,11 +406,13 @@
     },
     {
       "title": "True Crime: New York City",
+      "series": "True Crime",
       "system": "gc",
       "bucket": "gc/True Crime - New York City (USA).rvz"
     },
     {
       "title": "True Crime: Streets of LA",
+      "series": "True Crime",
       "system": "gc",
       "bucket": "gc/True Crime - Streets of LA (USA).rvz"
     },
@@ -392,11 +427,13 @@
     },
     {
       "title": "Batman Begins",
+      "series": "Batman",
       "system": "gc",
       "bucket": "gc/Batman Begins (USA).rvz"
     },
     {
       "title": "Batman: Vengeance",
+      "series": "Batman",
       "system": "gc",
       "bucket": "gc/Batman - Vengeance (USA) (En,Fr,Es).rvz"
     },
@@ -426,11 +463,13 @@
     },
     {
       "title": "Terminator 3: The Redemption",
+      "series": "Terminator",
       "system": "gc",
       "bucket": "gc/Terminator 3 - The Redemption (USA).rvz"
     },
     {
       "title": "Luigi's Mansion",
+      "series": "Luigi's Mansion",
       "system": "gc",
       "bucket": "gc/Luigi's Mansion (USA).rvz",
       "variants": [
@@ -452,6 +491,7 @@
     },
     {
       "title": "Metal Gear Solid",
+      "series": "Metal Gear",
       "system": "psx",
       "bucket": "psx/Metal Gear Solid (USA) (Rev 1).m3u",
       "files": [
@@ -461,6 +501,7 @@
     },
     {
       "title": "Metal Gear Solid - VR Missions",
+      "series": "Metal Gear",
       "system": "psx",
       "bucket": "psx/Metal Gear Solid - VR Missions (USA).chd"
     },
@@ -476,16 +517,19 @@
     },
     {
       "title": "MediEvil",
+      "series": "MediEvil",
       "system": "psx",
       "bucket": "psx/MediEvil (USA).chd"
     },
     {
       "title": "MediEvil II",
+      "series": "MediEvil",
       "system": "psx",
       "bucket": "psx/MediEvil II (USA).chd"
     },
     {
       "title": "Strider",
+      "series": "Strider",
       "system": "fbneo",
       "bucket": "fbneo/strider.zip",
       "variants": [
@@ -497,21 +541,25 @@
     },
     {
       "title": "Strider 2",
+      "series": "Strider",
       "system": "mame",
       "bucket": "mame/strider2.zip"
     },
     {
       "title": "Tenchu 2: Birth of the Stealth Assassins",
+      "series": "Tenchu",
       "system": "psx",
       "bucket": "psx/Tenchu 2 - Birth of the Stealth Assassins (USA).chd"
     },
     {
       "title": "Syphon Filter",
+      "series": "Syphon Filter",
       "system": "psx",
       "bucket": "psx/Syphon Filter (USA) (Rev 1).chd"
     },
     {
       "title": "Syphon Filter 2",
+      "series": "Syphon Filter",
       "system": "psx",
       "bucket": "psx/Syphon Filter 2 (USA).m3u",
       "files": [
@@ -521,41 +569,49 @@
     },
     {
       "title": "Syphon Filter 3",
+      "series": "Syphon Filter",
       "system": "psx",
       "bucket": "psx/Syphon Filter 3 (USA).chd"
     },
     {
       "title": "Tomb Raider",
+      "series": "Tomb Raider",
       "system": "psx",
       "bucket": "psx/Tomb Raider (USA) (Rev 6).chd"
     },
     {
       "title": "Tomb Raider II",
+      "series": "Tomb Raider",
       "system": "psx",
       "bucket": "psx/Tomb Raider II - Starring Lara Croft (USA) (Rev 3).chd"
     },
     {
       "title": "Tomb Raider III - Adventures of Lara Croft",
+      "series": "Tomb Raider",
       "system": "psx",
       "bucket": "psx/Tomb Raider III - Adventures of Lara Croft (USA) (Rev 2).chd"
     },
     {
       "title": "Tomb Raider - The Last Revelation",
+      "series": "Tomb Raider",
       "system": "psx",
       "bucket": "psx/Tomb Raider - The Last Revelation (USA) (Rev 1).chd"
     },
     {
       "title": "Tomb Raider Chronicles",
+      "series": "Tomb Raider",
       "system": "psx",
       "bucket": "psx/Tomb Raider Chronicles (USA) (Rev 1).chd"
     },
     {
       "title": "Oddworld - Abe's Oddysee",
+      "series": "Oddworld",
       "system": "psx",
       "bucket": "psx/Oddworld - Abe's Oddysee (USA) (Rev 2).chd"
     },
     {
       "title": "Oddworld - Abe's Exoddus",
+      "series": "Oddworld",
       "system": "psx",
       "bucket": "psx/Oddworld - Abe's Exoddus (USA).m3u",
       "files": [
@@ -574,6 +630,7 @@
     },
     {
       "title": "Fear Effect",
+      "series": "Fear Effect",
       "system": "psx",
       "bucket": "psx/Fear Effect (USA).m3u",
       "files": [
@@ -585,6 +642,7 @@
     },
     {
       "title": "Fear Effect 2 - Retro Helix",
+      "series": "Fear Effect",
       "system": "psx",
       "bucket": "psx/Fear Effect 2 - Retro Helix (USA) (Rev 1).m3u",
       "files": [
@@ -659,11 +717,13 @@
     },
     {
       "title": "Mortal Kombat Mythologies: Sub-Zero",
+      "series": "Mortal Kombat",
       "system": "psx",
       "bucket": "psx/Mortal Kombat Mythologies - Sub-Zero (USA).chd"
     },
     {
       "title": "Mortal Kombat: Special Forces",
+      "series": "Mortal Kombat",
       "system": "psx",
       "bucket": "psx/Mortal Kombat - Special Forces (USA).chd"
     },
@@ -699,6 +759,7 @@
     },
     {
       "title": "Star Wars: Episode I - The Phantom Menace",
+      "series": "Star Wars",
       "system": "psx",
       "bucket": "psx/Star Wars - Episode I - The Phantom Menace (USA) (Rev 1).chd"
     },
@@ -729,11 +790,13 @@
     },
     {
       "title": "Mega Man Legends",
+      "series": "Mega Man",
       "system": "psx",
       "bucket": "psx/Mega Man Legends (USA).chd"
     },
     {
       "title": "Mega Man Legends 2",
+      "series": "Mega Man",
       "system": "psx",
       "bucket": "psx/Mega Man Legends 2 (USA).chd"
     },
@@ -744,16 +807,19 @@
     },
     {
       "title": "Grand Theft Auto",
+      "series": "Grand Theft Auto",
       "system": "psx",
       "bucket": "psx/Grand Theft Auto (USA).chd"
     },
     {
       "title": "Grand Theft Auto 2",
+      "series": "Grand Theft Auto",
       "system": "psx",
       "bucket": "psx/Grand Theft Auto 2 (USA).chd"
     },
     {
       "title": "Duke Nukem: Land of the Babes",
+      "series": "Duke Nukem",
       "system": "psx",
       "bucket": "psx/Duke Nukem - Land of the Babes (USA).chd"
     },
@@ -774,6 +840,7 @@
     },
     {
       "title": "Diablo",
+      "series": "Diablo",
       "system": "psx",
       "bucket": "psx/Diablo (USA) (En,Fr,De,Sv).chd"
     },
@@ -789,71 +856,85 @@
     },
     {
       "title": "MediEvil: Resurrection",
+      "series": "MediEvil",
       "system": "psp",
       "bucket": "psp/MediEvil - Resurrection (USA).chd"
     },
     {
       "title": "God of War - Chains of Olympus",
+      "series": "God of War",
       "system": "psp",
       "bucket": "psp/God of War - Chains of Olympus (USA).chd"
     },
     {
       "title": "God of War - Ghost of Sparta",
+      "series": "God of War",
       "system": "psp",
       "bucket": "psp/God of War - Ghost of Sparta (USA) (En,Fr,Es).chd"
     },
     {
       "title": "Metal Gear Solid: Peace Walker",
+      "series": "Metal Gear",
       "system": "psp",
       "bucket": "psp/Metal Gear Solid - Peace Walker (USA) (En,Fr,Es) (v2.00).chd"
     },
     {
       "title": "Metal Gear Solid - Portable Ops",
+      "series": "Metal Gear",
       "system": "psp",
       "bucket": "psp/Metal Gear Solid - Portable Ops (USA).chd"
     },
     {
       "title": "Metal Gear Acid",
+      "series": "Metal Gear",
       "system": "psp",
       "bucket": "psp/Metal Gear Acid (USA).chd"
     },
     {
       "title": "Metal Gear Acid 2",
+      "series": "Metal Gear",
       "system": "psp",
       "bucket": "psp/Metal Gear Acid 2 (USA).chd"
     },
     {
       "title": "Tenchu: Shadow Assassins",
+      "series": "Tenchu",
       "system": "psp",
       "bucket": "psp/Tenchu - Shadow Assassins (USA).chd"
     },
     {
       "title": "Tenchu - Time of the Assassins",
+      "series": "Tenchu",
       "system": "psp",
       "bucket": "psp/Tenchu - Time of the Assassins (Europe) (En,Fr,De,Es,It).chd"
     },
     {
       "title": "Shinobido - Tales of the Ninja",
+      "series": "Shinobi",
       "system": "psp",
       "bucket": "psp/Shinobido - Tales of the Ninja (Europe) (En,Fr,De,Es,It).chd"
     },
     {
       "title": "Syphon Filter - Dark Mirror",
+      "series": "Syphon Filter",
       "system": "psp",
       "bucket": "psp/Syphon Filter - Dark Mirror (USA).chd"
     },
     {
       "title": "Syphon Filter - Logan's Shadow",
+      "series": "Syphon Filter",
       "system": "psp",
       "bucket": "psp/Syphon Filter - Logan's Shadow (USA).chd"
     },
     {
       "title": "Prince of Persia - The Forgotten Sands",
+      "series": "Prince of Persia",
       "system": "psp",
       "bucket": "psp/Prince of Persia - The Forgotten Sands (USA) (En,Fr,Es).chd"
     },
     {
       "title": "Assassin's Creed - Bloodlines",
+      "series": "Assassin's Creed",
       "system": "psp",
       "bucket": "psp/Assassin's Creed - Bloodlines (USA) (En,Fr,De,Es,It).chd"
     },
@@ -874,6 +955,7 @@
     },
     {
       "title": "Prinny - Can I Really Be the Hero",
+      "series": "Disgaea",
       "system": "psp",
       "bucket": "psp/Prinny - Can I Really Be the Hero (USA).chd"
     },
@@ -889,26 +971,31 @@
     },
     {
       "title": "Dynasty Warriors",
+      "series": "Dynasty Warriors",
       "system": "psp",
       "bucket": "psp/Dynasty Warriors (USA).chd"
     },
     {
       "title": "Dynasty Warriors: Strikeforce",
+      "series": "Dynasty Warriors",
       "system": "psp",
       "bucket": "psp/Dynasty Warriors - Strikeforce (USA) (En,Fr).chd"
     },
     {
       "title": "Dynasty Warriors Vol. 2",
+      "series": "Dynasty Warriors",
       "system": "psp",
       "bucket": "psp/Dynasty Warriors Vol. 2 (USA).chd"
     },
     {
       "title": "Warriors Orochi",
+      "series": "Dynasty Warriors",
       "system": "psp",
       "bucket": "psp/Warriors Orochi (USA).chd"
     },
     {
       "title": "Warriors Orochi 2",
+      "series": "Dynasty Warriors",
       "system": "psp",
       "bucket": "psp/Warriors Orochi 2 (USA) (En,Fr).chd"
     },
@@ -919,6 +1006,7 @@
     },
     {
       "title": "Grand Theft Auto: Chinatown Wars",
+      "series": "Grand Theft Auto",
       "system": "nds",
       "bucket": "nds/Grand Theft Auto - Chinatown Wars (USA) (En,Fr,De,Es,It).zip",
       "variants": [
@@ -930,11 +1018,13 @@
     },
     {
       "title": "Grand Theft Auto: Liberty City Stories",
+      "series": "Grand Theft Auto",
       "system": "psp",
       "bucket": "psp/Grand Theft Auto - Liberty City Stories (USA) (En,Fr,De,Es,It) (v3.00).chd"
     },
     {
       "title": "Grand Theft Auto: Vice City Stories",
+      "series": "Grand Theft Auto",
       "system": "psp",
       "bucket": "psp/Grand Theft Auto - Vice City Stories (USA).chd"
     },
@@ -945,6 +1035,7 @@
     },
     {
       "title": "Naruto Shippuden: Legends - Akatsuki Rising",
+      "series": "Naruto",
       "system": "psp",
       "bucket": "psp/Naruto Shippuden - Legends - Akatsuki Rising (USA).chd"
     },
@@ -960,11 +1051,13 @@
     },
     {
       "title": "Tom Clancy's Splinter Cell: Essentials",
+      "series": "Tom Clancy",
       "system": "psp",
       "bucket": "psp/Tom Clancy's Splinter Cell - Essentials (USA).chd"
     },
     {
       "title": "Star Wars: The Force Unleashed",
+      "series": "Star Wars",
       "system": "psp",
       "bucket": "psp/Star Wars - The Force Unleashed (USA) (En,Fr).chd"
     },
@@ -985,11 +1078,13 @@
     },
     {
       "title": "X-Men Origins: Wolverine",
+      "series": "X-Men",
       "system": "psp",
       "bucket": "psp/X-Men Origins - Wolverine (USA) (En,Fr).chd"
     },
     {
       "title": "Indiana Jones and the Staff of Kings",
+      "series": "Indiana Jones",
       "system": "psp",
       "bucket": "psp/Indiana Jones and the Staff of Kings (USA) (En,Fr).chd"
     },
@@ -1000,6 +1095,7 @@
     },
     {
       "title": "Ninja Gaiden: Dragon Sword",
+      "series": "Ninja Gaiden",
       "system": "nds",
       "bucket": "nds/Ninja Gaiden - Dragon Sword (USA).zip"
     },
@@ -1010,11 +1106,13 @@
     },
     {
       "title": "Viewtiful Joe: Double Trouble!",
+      "series": "Viewtiful Joe",
       "system": "nds",
       "bucket": "nds/Viewtiful Joe - Double Trouble! (USA).zip"
     },
     {
       "title": "Tenchu: Dark Secret",
+      "series": "Tenchu",
       "system": "nds",
       "bucket": "nds/Tenchu - Dark Secret (USA).zip"
     },
@@ -1030,11 +1128,13 @@
     },
     {
       "title": "Assassin's Creed II - Discovery",
+      "series": "Assassin's Creed",
       "system": "nds",
       "bucket": "nds/Assassin's Creed II - Discovery (USA) (En,Fr,Es) (NDSi Enhanced).zip"
     },
     {
       "title": "Assassin's Creed: Altair's Chronicles",
+      "series": "Assassin's Creed",
       "system": "nds",
       "bucket": "nds/Assassin's Creed - Altair's Chronicles (USA) (En,Fr,Es).zip"
     },
@@ -1045,16 +1145,19 @@
     },
     {
       "title": "Dragon Ball: Origins",
+      "series": "Dragon Ball",
       "system": "nds",
       "bucket": "nds/Dragon Ball - Origins (USA).zip"
     },
     {
       "title": "Dragon Ball: Origins 2",
+      "series": "Dragon Ball",
       "system": "nds",
       "bucket": "nds/Dragon Ball - Origins 2 (USA) (En,Fr,Es).zip"
     },
     {
       "title": "Lunar Knights",
+      "series": "Lunar",
       "system": "nds",
       "bucket": "nds/Lunar Knights (USA) (En,Es).zip"
     },
@@ -1065,16 +1168,19 @@
     },
     {
       "title": "Prince of Persia: The Fallen King",
+      "series": "Prince of Persia",
       "system": "nds",
       "bucket": "nds/Prince of Persia - The Fallen King (USA) (En,Fr,De,Es,It).zip"
     },
     {
       "title": "Tomb Raider: Underworld",
+      "series": "Tomb Raider",
       "system": "nds",
       "bucket": "nds/Tomb Raider - Underworld (USA) (En,Fr,Es).zip"
     },
     {
       "title": "Star Wars: The Force Unleashed",
+      "series": "Star Wars",
       "system": "nds",
       "bucket": "nds/Star Wars - The Force Unleashed (USA) (En,Fr,De,Es,It).zip"
     },
@@ -1085,16 +1191,19 @@
     },
     {
       "title": "Indiana Jones and the Staff of Kings",
+      "series": "Indiana Jones",
       "system": "nds",
       "bucket": "nds/Indiana Jones and the Staff of Kings (USA) (En,Fr).zip"
     },
     {
       "title": "Dynasty Warriors DS: Fighter's Battle",
+      "series": "Dynasty Warriors",
       "system": "nds",
       "bucket": "nds/Dynasty Warriors DS - Fighter's Battle (USA).zip"
     },
     {
       "title": "X-Men Origins: Wolverine",
+      "series": "X-Men",
       "system": "nds",
       "bucket": "nds/X-Men Origins - Wolverine (USA) (En,Fr).zip"
     },
@@ -1105,16 +1214,19 @@
     },
     {
       "title": "Shinobi",
+      "series": "Shinobi",
       "system": "3ds",
       "bucket": "3ds/Shinobi (USA) (En,Fr,Es).zip"
     },
     {
       "title": "Kid Icarus - Uprising",
+      "series": "Kid Icarus",
       "system": "3ds",
       "bucket": "3ds/Kid Icarus - Uprising (USA) (En,Fr,Es).zip"
     },
     {
       "title": "Castlevania - Lords of Shadow - Mirror of Fate",
+      "series": "Castlevania",
       "system": "3ds",
       "bucket": "3ds/Castlevania - Lords of Shadow - Mirror of Fate (USA) (En,Fr,Es).zip"
     },
@@ -1130,26 +1242,31 @@
     },
     {
       "title": "Senran Kagura 2: Deep Crimson",
+      "series": "Senran Kagura",
       "system": "3ds",
       "bucket": "3ds/Senran Kagura 2 - Deep Crimson (USA).zip"
     },
     {
       "title": "Senran Kagura Burst",
+      "series": "Senran Kagura",
       "system": "3ds",
       "bucket": "3ds/Senran Kagura Burst (Europe).zip"
     },
     {
       "title": "Samurai Warriors: Chronicles",
+      "series": "Dynasty Warriors",
       "system": "3ds",
       "bucket": "3ds/Samurai Warriors - Chronicles (USA).zip"
     },
     {
       "title": "Luigi's Mansion: Dark Moon",
+      "series": "Luigi's Mansion",
       "system": "3ds",
       "bucket": "3ds/Luigi's Mansion - Dark Moon (USA) (En,Fr,Es).zip"
     },
     {
       "title": "Shinobi Legions",
+      "series": "Shinobi",
       "system": "saturn",
       "bucket": "saturn/Shinobi Legions (USA).chd"
     },
@@ -1190,11 +1307,13 @@
     },
     {
       "title": "Goemon's Great Adventure",
+      "series": "Ganbare Goemon",
       "system": "n64",
       "bucket": "n64/Goemon's Great Adventure (USA).zip"
     },
     {
       "title": "Conker's Bad Fur Day",
+      "series": "Conker",
       "system": "n64",
       "bucket": "n64/Conker's Bad Fur Day (USA).zip",
       "variants": [
@@ -1221,11 +1340,13 @@
     },
     {
       "title": "Indiana Jones and the Infernal Machine",
+      "series": "Indiana Jones",
       "system": "n64",
       "bucket": "n64/Indiana Jones and the Infernal Machine (USA).zip"
     },
     {
       "title": "Castlevania",
+      "series": "Castlevania",
       "system": "n64",
       "bucket": "n64/Castlevania (USA) (Rev 2).zip",
       "variants": [
@@ -1242,31 +1363,37 @@
     },
     {
       "title": "Star Wars: Shadows of the Empire",
+      "series": "Star Wars",
       "system": "n64",
       "bucket": "n64/Star Wars - Shadows of the Empire (USA) (Rev 2).zip"
     },
     {
       "title": "Hercules: The Legendary Journeys",
+      "series": "Disney",
       "system": "n64",
       "bucket": "n64/Hercules - The Legendary Journeys (USA).zip"
     },
     {
       "title": "Ninja Gaiden",
+      "series": "Ninja Gaiden",
       "system": "nes",
       "bucket": "nes/Ninja Gaiden (USA).zip"
     },
     {
       "title": "Ninja Gaiden II: The Dark Sword of Chaos",
+      "series": "Ninja Gaiden",
       "system": "nes",
       "bucket": "nes/Ninja Gaiden II - The Dark Sword of Chaos (USA).zip"
     },
     {
       "title": "Ninja Gaiden III: The Ancient Ship of Doom",
+      "series": "Ninja Gaiden",
       "system": "nes",
       "bucket": "nes/Ninja Gaiden III - The Ancient Ship of Doom (USA).zip"
     },
     {
       "title": "Bionic Commando",
+      "series": "Bionic Commando",
       "system": "nes",
       "bucket": "nes/Bionic Commando (USA).zip",
       "variants": [
@@ -1323,16 +1450,19 @@
     },
     {
       "title": "Strider",
+      "series": "Strider",
       "system": "nes",
       "bucket": "nes/Strider (USA).zip"
     },
     {
       "title": "Kid Icarus",
+      "series": "Kid Icarus",
       "system": "nes",
       "bucket": "nes/Kid Icarus (USA, Europe) (Rev 1).zip"
     },
     {
       "title": "Metal Gear",
+      "series": "Metal Gear",
       "system": "nes",
       "bucket": "nes/Metal Gear (USA).zip"
     },
@@ -1380,6 +1510,7 @@
     },
     {
       "title": "Prince of Persia",
+      "series": "Prince of Persia",
       "system": "snes",
       "bucket": "snes/Prince of Persia (USA).zip"
     },
@@ -1390,6 +1521,7 @@
     },
     {
       "title": "Blaster Master",
+      "series": "Blaster Master",
       "system": "nes",
       "bucket": "nes/Blaster Master (USA).zip",
       "variants": [
@@ -1401,6 +1533,7 @@
     },
     {
       "title": "Batman - The Video Game",
+      "series": "Batman",
       "system": "nes",
       "bucket": "nes/Batman - The Video Game (USA).zip"
     },
@@ -1442,6 +1575,7 @@
     },
     {
       "title": "Wizards & Warriors",
+      "series": "Wizards & Warriors",
       "system": "nes",
       "bucket": "nes/Wizards & Warriors (USA) (Rev 1).zip"
     },
@@ -1513,6 +1647,7 @@
     },
     {
       "title": "Die Hard",
+      "series": "Die Hard",
       "system": "nes",
       "bucket": "nes/Die Hard (USA).zip"
     },
@@ -1533,21 +1668,25 @@
     },
     {
       "title": "Jajamaru Gekimaden: Maboroshi no Kinmajou",
+      "series": "Ninja Jajamaru",
       "system": "nes",
       "bucket": "nes/Ninja Jajamaru - Legend of a Demon's Attack - Castle of Dreams (Japan) [T-En by Aishsha & Stardust Crusaders v1.0] [Add by Proveaux v1.01] [n].zip"
     },
     {
       "title": "Jajamaru no Daibouken",
+      "series": "Ninja Jajamaru",
       "system": "nes",
       "bucket": "nes/Ninja Jajamaru's Big Adventure (Japan) [T-En by Aishsha & Stardust Crusaders v1.00] [n].zip"
     },
     {
       "title": "Ninja Jajamaru-kun",
+      "series": "Ninja Jajamaru",
       "system": "nes",
       "bucket": "nes/Ninja Jajamaru (Japan) [T-En by Aishsha & Stardust Crusaders v1.00] [n].zip"
     },
     {
       "title": "Ninja Kid",
+      "series": "Ninja Kid / Ninja Boy",
       "system": "nes",
       "bucket": "nes/Ninja Kid (USA).zip"
     },
@@ -1625,6 +1764,7 @@
     },
     {
       "title": "Teenage Mutant Ninja Turtles",
+      "series": "Teenage Mutant Ninja Turtles",
       "system": "nes",
       "bucket": "nes/Teenage Mutant Ninja Turtles (USA).zip"
     },
@@ -1635,6 +1775,7 @@
     },
     {
       "title": "Kiki Kaikai - Dotou Hen",
+      "series": "Kiki Kaikai",
       "system": "fds",
       "bucket": "fds/Kiki Kaikai - Dotou Hen (Japan) (Rev 1) (Disk Writer).zip"
     },
@@ -1694,6 +1835,7 @@
     },
     {
       "title": "Prince of Persia 2",
+      "series": "Prince of Persia",
       "system": "snes",
       "bucket": "snes/Prince of Persia 2 (USA).zip"
     },
@@ -1709,11 +1851,13 @@
     },
     {
       "title": "Joe & Mac",
+      "series": "Joe & Mac",
       "system": "snes",
       "bucket": "snes/Joe & Mac (USA).zip"
     },
     {
       "title": "Joe & Mac 2 - Lost in the Tropics",
+      "series": "Joe & Mac",
       "system": "snes",
       "bucket": "snes/Joe & Mac 2 - Lost in the Tropics (USA).zip"
     },
@@ -1755,21 +1899,25 @@
     },
     {
       "title": "Pocky & Rocky",
+      "series": "Pocky & Rocky",
       "system": "snes",
       "bucket": "snes/Pocky & Rocky (USA).zip"
     },
     {
       "title": "Pocky & Rocky 2",
+      "series": "Pocky & Rocky",
       "system": "snes",
       "bucket": "snes/Pocky & Rocky 2 (USA).zip"
     },
     {
       "title": "Adventures of Batman & Robin, The",
+      "series": "Batman",
       "system": "snes",
       "bucket": "snes/Adventures of Batman & Robin, The (USA).zip"
     },
     {
       "title": "Indiana Jones' Greatest Adventures",
+      "series": "Indiana Jones",
       "system": "snes",
       "bucket": "snes/Indiana Jones' Greatest Adventures (USA).zip"
     },
@@ -1856,11 +2004,13 @@
     },
     {
       "title": "Shinobi III: Return of the Ninja Master",
+      "series": "Shinobi",
       "system": "genesis",
       "bucket": "genesis/Shinobi III - Return of the Ninja Master (USA).zip"
     },
     {
       "title": "Shadow Dancer: The Secret of Shinobi",
+      "series": "Shadow Dancer",
       "system": "genesis",
       "bucket": "genesis/Shadow Dancer - The Secret of Shinobi (World).zip"
     },
@@ -1937,6 +2087,7 @@
     },
     {
       "title": "Batman - The Video Game",
+      "series": "Batman",
       "system": "genesis",
       "bucket": "genesis/Batman - The Video Game (USA).zip"
     },
@@ -1957,21 +2108,25 @@
     },
     {
       "title": "Golden Axe",
+      "series": "Golden Axe",
       "system": "fbneo",
       "bucket": "fbneo/goldnaxe.zip"
     },
     {
       "title": "Golden Axe II",
+      "series": "Golden Axe",
       "system": "genesis",
       "bucket": "genesis/Golden Axe II (World).zip"
     },
     {
       "title": "Golden Axe III",
+      "series": "Golden Axe",
       "system": "genesis",
       "bucket": "genesis/Golden Axe III (Japan) (En).zip"
     },
     {
       "title": "Rastan Saga II",
+      "series": "Rastan",
       "system": "genesis",
       "bucket": "genesis/Rastan Saga II (USA).zip"
     },
@@ -1997,11 +2152,13 @@
     },
     {
       "title": "Jewel Master",
+      "series": "Jewel Master",
       "system": "genesis",
       "bucket": "genesis/Jewel Master (USA, Europe).zip"
     },
     {
       "title": "Ecco the Dolphin",
+      "series": "Ecco",
       "system": "genesis",
       "bucket": "genesis/Ecco the Dolphin (USA, Europe, Korea) (En).zip",
       "variants": [
@@ -2013,6 +2170,7 @@
     },
     {
       "title": "Ecco: The Tides of Time",
+      "series": "Ecco",
       "system": "genesis",
       "bucket": "genesis/Ecco - The Tides of Time (USA).zip",
       "variants": [
@@ -2039,6 +2197,7 @@
     },
     {
       "title": "Gauntlet",
+      "series": "Gauntlet",
       "system": "fbneo",
       "bucket": "fbneo/gauntlet.zip",
       "variants": [
@@ -2060,16 +2219,19 @@
     },
     {
       "title": "Prince of Persia: The Sands of Time",
+      "series": "Prince of Persia",
       "system": "gba",
       "bucket": "gba/Prince of Persia - The Sands of Time (USA) (En,Fr,Es) (Rev 1).zip"
     },
     {
       "title": "Boktai - The Sun Is in Your Hand",
+      "series": "Boktai",
       "system": "gba",
       "bucket": "gba/Boktai - The Sun Is in Your Hand (USA).zip"
     },
     {
       "title": "Boktai 2 - Solar Boy Django",
+      "series": "Boktai",
       "system": "gba",
       "bucket": "gba/Boktai 2 - Solar Boy Django (USA).zip"
     },
@@ -2085,26 +2247,31 @@
     },
     {
       "title": "Dynasty Warriors Advance",
+      "series": "Dynasty Warriors",
       "system": "gba",
       "bucket": "gba/Dynasty Warriors Advance (USA).zip"
     },
     {
       "title": "Tom Clancy's Splinter Cell",
+      "series": "Tom Clancy",
       "system": "gba",
       "bucket": "gba/Tom Clancy's Splinter Cell (USA) (En,Fr,Es).zip"
     },
     {
       "title": "Tom Clancy's Splinter Cell: Pandora Tomorrow",
+      "series": "Tom Clancy",
       "system": "gba",
       "bucket": "gba/Tom Clancy's Splinter Cell - Pandora Tomorrow (USA) (En,Fr,Es).zip"
     },
     {
       "title": "Naruto: Ninja Council",
+      "series": "Naruto",
       "system": "gba",
       "bucket": "gba/Naruto - Ninja Council (USA).zip"
     },
     {
       "title": "Naruto: Ninja Council 2",
+      "series": "Naruto",
       "system": "gba",
       "bucket": "gba/Naruto - Ninja Council 2 (USA).zip"
     },
@@ -2155,6 +2322,7 @@
     },
     {
       "title": "Batman: Vengeance",
+      "series": "Batman",
       "system": "gba",
       "bucket": "gba/Batman - Vengeance (USA) (En,Fr,Es).zip"
     },
@@ -2181,11 +2349,13 @@
     },
     {
       "title": "Ninja Gaiden Shadow",
+      "series": "Ninja Gaiden",
       "system": "gb",
       "bucket": "gb/Ninja Gaiden Shadow (USA).zip"
     },
     {
       "title": "Kid Icarus - Of Myths and Monsters",
+      "series": "Kid Icarus",
       "system": "gb",
       "bucket": "gb/Kid Icarus - Of Myths and Monsters (USA, Europe).zip"
     },
@@ -2196,6 +2366,7 @@
     },
     {
       "title": "Batman - The Video Game",
+      "series": "Batman",
       "system": "gb",
       "bucket": "gb/Batman - The Video Game (World).zip"
     },
@@ -2206,11 +2377,13 @@
     },
     {
       "title": "Ninja Boy",
+      "series": "Ninja Kid / Ninja Boy",
       "system": "gb",
       "bucket": "gb/Ninja Boy (USA, Europe).zip"
     },
     {
       "title": "Ninja Boy 2",
+      "series": "Ninja Kid / Ninja Boy",
       "system": "gb",
       "bucket": "gb/Ninja Boy 2 (USA, Europe).zip"
     },
@@ -2231,16 +2404,19 @@
     },
     {
       "title": "Ganbare Goemon: Sarawareta Ebisumaru",
+      "series": "Ganbare Goemon",
       "system": "gb",
       "bucket": "gb/Ganbare Goemon - Sarawareta Ebisumaru (Japan).zip"
     },
     {
       "title": "Metal Gear Solid",
+      "series": "Metal Gear",
       "system": "gbc",
       "bucket": "gbc/Metal Gear Solid (USA).zip"
     },
     {
       "title": "Bionic Commando - Elite Forces",
+      "series": "Bionic Commando",
       "system": "gbc",
       "bucket": "gbc/Bionic Commando - Elite Forces (USA, Australia).zip"
     },
@@ -2251,11 +2427,13 @@
     },
     {
       "title": "Tomb Raider",
+      "series": "Tomb Raider",
       "system": "gbc",
       "bucket": "gbc/Tomb Raider (USA, Europe) (En,Fr,De,Es,It).zip"
     },
     {
       "title": "Indiana Jones and the Infernal Machine",
+      "series": "Indiana Jones",
       "system": "gbc",
       "bucket": "gbc/Indiana Jones and the Infernal Machine (USA, Europe) (En,Fr,De).zip"
     },
@@ -2266,6 +2444,7 @@
     },
     {
       "title": "Tomb Raider: Curse of the Sword",
+      "series": "Tomb Raider",
       "system": "gbc",
       "bucket": "gbc/Tomb Raider - Curse of the Sword (USA, Europe).zip"
     },
@@ -2286,11 +2465,13 @@
     },
     {
       "title": "Shinobi",
+      "series": "Shinobi",
       "system": "fbneo",
       "bucket": "fbneo/shinobi.zip"
     },
     {
       "title": "Alex Kidd in Shinobi World",
+      "series": "Alex Kidd",
       "system": "mastersystem",
       "bucket": "mastersystem/Alex Kidd in Shinobi World (USA, Europe, Brazil) (En).zip"
     },
@@ -2301,6 +2482,7 @@
     },
     {
       "title": "Ninja Gaiden",
+      "series": "Ninja Gaiden",
       "system": "mastersystem",
       "bucket": "mastersystem/Ninja Gaiden (Europe, Brazil) (En).zip"
     },
@@ -2316,6 +2498,7 @@
     },
     {
       "title": "Golden Axe Warrior",
+      "series": "Golden Axe",
       "system": "mastersystem",
       "bucket": "mastersystem/Golden Axe Warrior (USA, Europe, Brazil) (En).zip"
     },
@@ -2326,11 +2509,13 @@
     },
     {
       "title": "Shadow Dancer",
+      "series": "Shadow Dancer",
       "system": "fbneo",
       "bucket": "fbneo/shdancer1.zip"
     },
     {
       "title": "Strider II",
+      "series": "Strider",
       "system": "mastersystem",
       "bucket": "mastersystem/Strider II (Europe, Brazil) (En).zip"
     },
@@ -2361,16 +2546,19 @@
     },
     {
       "title": "Shinobi II: The Silent Fury",
+      "series": "Shinobi",
       "system": "gamegear",
       "bucket": "gamegear/Shinobi II - The Silent Fury (World).zip"
     },
     {
       "title": "Shinobi",
+      "series": "Shinobi",
       "system": "gamegear",
       "bucket": "gamegear/Shinobi (World) (Rev A).zip"
     },
     {
       "title": "Ninja Gaiden",
+      "series": "Ninja Gaiden",
       "system": "gamegear",
       "bucket": "gamegear/Ninja Gaiden (USA, Europe, Brazil) (En).zip"
     },
@@ -2396,11 +2584,13 @@
     },
     {
       "title": "Neutopia",
+      "series": "Neutopia",
       "system": "tg16",
       "bucket": "tg16/Neutopia (USA).zip"
     },
     {
       "title": "Neutopia II",
+      "series": "Neutopia",
       "system": "tg16",
       "bucket": "tg16/Neutopia II (USA).zip"
     },
@@ -2411,6 +2601,7 @@
     },
     {
       "title": "Dungeon Explorer",
+      "series": "Dungeon Explorer",
       "system": "tg16",
       "bucket": "tg16/Dungeon Explorer (USA).zip"
     },
@@ -2421,6 +2612,7 @@
     },
     {
       "title": "Splatterhouse",
+      "series": "Splatterhouse",
       "system": "fbneo",
       "bucket": "fbneo/splatter.zip"
     },
@@ -2431,11 +2623,13 @@
     },
     {
       "title": "Die Hard",
+      "series": "Die Hard",
       "system": "tg16",
       "bucket": "tg16/Die Hard (Japan).zip"
     },
     {
       "title": "Valis II",
+      "series": "Valis",
       "system": "tg-cd",
       "bucket": "tg-cd/Valis II (USA).chd",
       "variants": [
@@ -2447,6 +2641,7 @@
     },
     {
       "title": "Valis III",
+      "series": "Valis",
       "system": "tg-cd",
       "bucket": "tg-cd/Valis III (USA).chd"
     },
@@ -2467,6 +2662,7 @@
     },
     {
       "title": "Ninja Gaiden",
+      "series": "Ninja Gaiden",
       "system": "xbox",
       "bucket": "xbox/Ninja Gaiden (USA, Asia) (En,Ja).iso",
       "variants": [
@@ -2507,16 +2703,19 @@
     },
     {
       "title": "Oddworld - Stranger's Wrath",
+      "series": "Oddworld",
       "system": "xbox",
       "bucket": "xbox/Oddworld - Stranger's Wrath (USA).iso"
     },
     {
       "title": "Star Wars: Jedi Knight - Jedi Academy",
+      "series": "Star Wars",
       "system": "xbox",
       "bucket": "xbox/Star Wars - Jedi Knight - Jedi Academy (USA) (En,Fr,De).iso"
     },
     {
       "title": "Ninja Gaiden",
+      "series": "Ninja Gaiden",
       "system": "fbneo",
       "bucket": "fbneo/gaiden.zip"
     },
@@ -2547,6 +2746,7 @@
     },
     {
       "title": "Superman",
+      "series": "Superman",
       "system": "atari2600",
       "bucket": "atari2600/Superman (USA).zip"
     },
@@ -2562,11 +2762,13 @@
     },
     {
       "title": "Pitfall! - Pitfall Harry's Jungle Adventure",
+      "series": "Pitfall",
       "system": "atari2600",
       "bucket": "atari2600/Pitfall! - Pitfall Harry's Jungle Adventure (USA).zip"
     },
     {
       "title": "Pitfall II - Lost Caverns",
+      "series": "Pitfall",
       "system": "atari2600",
       "bucket": "atari2600/Pitfall II - Lost Caverns (USA).zip",
       "variants": [
@@ -2578,21 +2780,25 @@
     },
     {
       "title": "H.E.R.O.",
+      "series": "H.E.R.O.",
       "system": "atari2600",
       "bucket": "atari2600/H.E.R.O. (USA).zip"
     },
     {
       "title": "Montezuma's Revenge - Featuring Panama Joe",
+      "series": "Montezuma's Revenge",
       "system": "atari5200",
       "bucket": "atari5200/Montezuma's Revenge - Featuring Panama Joe (USA).zip"
     },
     {
       "title": "Advanced Dungeons & Dragons",
+      "series": "Dungeons & Dragons",
       "system": "intellivision",
       "bucket": "intellivision/Advanced Dungeons & Dragons (USA, Europe).zip"
     },
     {
       "title": "Advanced Dungeons & Dragons - Treasure of Tarmin",
+      "series": "Dungeons & Dragons",
       "system": "intellivision",
       "bucket": "intellivision/Advanced Dungeons & Dragons - Treasure of Tarmin (USA, Europe).zip"
     },
@@ -2608,6 +2814,7 @@
     },
     {
       "title": "Metal Gear (MSX2)",
+      "series": "Metal Gear",
       "system": "msx2",
       "bucket": "msx2/Metal Gear (Europe).zip",
       "variants": [
@@ -2619,6 +2826,7 @@
     },
     {
       "title": "Metal Gear 2 - Solid Snake",
+      "series": "Metal Gear",
       "system": "msx2",
       "bucket": "msx2/Metal Gear 2 - Solid Snake (Japan) [T-En by Maarten ter Huurne & Takamichi Suzukawa v1.2] (Cartridge).zip"
     },
@@ -2629,11 +2837,13 @@
     },
     {
       "title": "Vampire Killer",
+      "series": "Castlevania",
       "system": "msx2",
       "bucket": "msx2/Vampire Killer (Japan, Europe) (En).zip"
     },
     {
       "title": "Rastan",
+      "series": "Rastan",
       "system": "fbneo",
       "bucket": "fbneo/rastanu.zip"
     },
@@ -2659,6 +2869,7 @@
     },
     {
       "title": "Spy Hunter",
+      "series": "Spy Hunter",
       "system": "fbneo",
       "bucket": "fbneo/spyhunt.zip"
     },
@@ -2669,11 +2880,13 @@
     },
     {
       "title": "Bayonetta",
+      "series": "Bayonetta",
       "system": "wiiu",
       "bucket": "wiiu/BAYONETTA (US).wua"
     },
     {
       "title": "Bayonetta 2",
+      "series": "Bayonetta",
       "system": "wiiu",
       "bucket": "wiiu/BAYONETTA 2 (US).wua"
     },
@@ -2700,11 +2913,13 @@
     },
     {
       "title": "Metal Gear Rising: Revengeance",
+      "series": "Metal Gear",
       "system": "xbox360",
       "bucket": "xbox360/Metal Gear Rising - Revengeance (USA, Europe) (En,Ja,Fr,De,Es,It,Pt).zar"
     },
     {
       "title": "Ninja Gaiden II",
+      "series": "Ninja Gaiden",
       "system": "xbox360",
       "bucket": "xbox360/Ninja Gaiden II (World) (En,Ja,Fr,De,Es,It,Zh,Ko,Pl,Ru).zar",
       "variants": [
@@ -2716,16 +2931,19 @@
     },
     {
       "title": "Ninja Gaiden 3",
+      "series": "Ninja Gaiden",
       "system": "xbox360",
       "bucket": "xbox360/Ninja Gaiden 3 (USA).zar"
     },
     {
       "title": "Metal Gear Solid V - Ground Zeroes",
+      "series": "Metal Gear",
       "system": "xbox360",
       "bucket": "xbox360/Metal Gear Solid V - Ground Zeroes (USA, Europe) (En,Ja,Fr,De,Es,It,Pt,Ru).zar"
     },
     {
       "title": "Metal Gear Solid V - The Phantom Pain",
+      "series": "Metal Gear",
       "system": "xbox360",
       "bucket": "xbox360/Metal Gear Solid V - The Phantom Pain (USA, Europe) (En,Ja,Fr,De,Es,It,Pt,Ru) (Disc 1).zar",
       "files": [
@@ -2734,11 +2952,13 @@
     },
     {
       "title": "Batman - Arkham Asylum - Game of the Year Edition",
+      "series": "Batman",
       "system": "xbox360",
       "bucket": "xbox360/Batman - Arkham Asylum - Game of the Year Edition (USA) (En,Fr,De,Es,It).zar"
     },
     {
       "title": "Batman - Arkham City - Game of the Year Edition",
+      "series": "Batman",
       "system": "xbox360",
       "bucket": "xbox360/Batman - Arkham City - Game of the Year Edition (USA, Europe) (En,Ja,Fr,De,Es,It,Pt,Ko,Pl,Ru) (Disc 1).zar",
       "files": [
@@ -2747,6 +2967,7 @@
     },
     {
       "title": "Batman - Arkham Origins",
+      "series": "Batman",
       "system": "xbox360",
       "bucket": "xbox360/Batman - Arkham Origins (USA, Europe) (En,Fr,De,Es,It,Ko,Pl,Ru) (Disc 1).zar",
       "files": [
@@ -2755,11 +2976,13 @@
     },
     {
       "title": "Prince of Persia",
+      "series": "Prince of Persia",
       "system": "xbox360",
       "bucket": "xbox360/Prince of Persia (USA, Europe) (En,Fr,De,Es,It,Nl).zar"
     },
     {
       "title": "Prince of Persia - The Forgotten Sands",
+      "series": "Prince of Persia",
       "system": "xbox360",
       "bucket": "xbox360/Prince of Persia - The Forgotten Sands (USA, Europe) (En,Fr,De,Es,It,Nl).zar"
     },
@@ -2775,21 +2998,25 @@
     },
     {
       "title": "Dead Rising",
+      "series": "Dead Rising",
       "system": "xbox360",
       "bucket": "xbox360/Dead Rising (USA) (Rev 1).zar"
     },
     {
       "title": "Dead Rising 2: Off the Record",
+      "series": "Dead Rising",
       "system": "xbox360",
       "bucket": "xbox360/Dead Rising 2 - Off the Record (World) (En,Ja,Fr,Es,It,Ko).zar"
     },
     {
       "title": "Golden Axe: Beast Rider",
+      "series": "Golden Axe",
       "system": "xbox360",
       "bucket": "xbox360/Golden Axe - Beast Rider (USA, Europe) (En,Fr,Es,It).zar"
     },
     {
       "title": "Grand Theft Auto IV",
+      "series": "Grand Theft Auto",
       "system": "xbox360",
       "bucket": "xbox360/Grand Theft Auto IV (USA) (En,Fr,De,Es,It).zar"
     },
@@ -2805,21 +3032,25 @@
     },
     {
       "title": "Saints Row",
+      "series": "Saints Row",
       "system": "xbox360",
       "bucket": "xbox360/Saints Row (World) (En,Fr,De,Es,It).zar"
     },
     {
       "title": "Saints Row 2",
+      "series": "Saints Row",
       "system": "xbox360",
       "bucket": "xbox360/Saints Row 2 (USA, Europe) (En,Fr,De,Es,It,Nl,Sv,Da).zar"
     },
     {
       "title": "Saints Row: The Third",
+      "series": "Saints Row",
       "system": "xbox360",
       "bucket": "xbox360/Saints Row - The Third (USA, Europe).zar"
     },
     {
       "title": "Teenage Mutant Ninja Turtles: Mutants in Manhattan",
+      "series": "Teenage Mutant Ninja Turtles",
       "system": "xbox360",
       "bucket": "xbox360/Teenage Mutant Ninja Turtles - Mutants in Manhattan (USA, Europe).zar"
     },
@@ -2840,6 +3071,7 @@
     },
     {
       "title": "Uncharted - Golden Abyss",
+      "series": "Uncharted",
       "system": "psvita",
       "bucket": "psvita/Uncharted - Golden Abyss™ [PCSA00029] [USA] [NoNpDRM].zip"
     },
@@ -2855,6 +3087,7 @@
     },
     {
       "title": "Bionic Commando",
+      "series": "Bionic Commando",
       "system": "fbneo",
       "bucket": "fbneo/bionicc1.zip"
     },
@@ -2895,11 +3128,13 @@
     },
     {
       "title": "Sengoku 2",
+      "series": "Sengoku",
       "system": "fbneo",
       "bucket": "fbneo/sengoku2.zip"
     },
     {
       "title": "Sengoku 3",
+      "series": "Sengoku",
       "system": "fbneo",
       "bucket": "fbneo/sengoku3.zip"
     },
@@ -2935,26 +3170,31 @@
     },
     {
       "title": "Rolling Thunder",
+      "series": "Rolling Thunder",
       "system": "fbneo",
       "bucket": "fbneo/rthunder.zip"
     },
     {
       "title": "Rolling Thunder 2",
+      "series": "Rolling Thunder",
       "system": "fbneo",
       "bucket": "fbneo/rthun2.zip"
     },
     {
       "title": "Elevator Action",
+      "series": "Elevator Action",
       "system": "fbneo",
       "bucket": "fbneo/elevator.zip"
     },
     {
       "title": "Sly Spy",
+      "series": "Sly Cooper",
       "system": "fbneo",
       "bucket": "fbneo/slyspy.zip"
     },
     {
       "title": "Gauntlet II",
+      "series": "Gauntlet",
       "system": "fbneo",
       "bucket": "fbneo/gaunt2.zip"
     },
@@ -2994,6 +3234,7 @@
     },
     {
       "title": "Shenmue",
+      "series": "Shenmue",
       "system": "dreamcast",
       "bucket": "dreamcast/Shenmue (USA).m3u",
       "files": [
@@ -3004,6 +3245,7 @@
     },
     {
       "title": "Shenmue II",
+      "series": "Shenmue",
       "system": "dreamcast",
       "bucket": "dreamcast/Shenmue II (Europe) (En,Fr,De,Es).m3u",
       "files": [
@@ -3020,6 +3262,7 @@
     },
     {
       "title": "Ecco the Dolphin: Defender of the Future",
+      "series": "Ecco",
       "system": "dreamcast",
       "bucket": "dreamcast/Ecco the Dolphin - Defender of the Future (USA) (En,Fr,De,Es).chd"
     },
@@ -3050,11 +3293,13 @@
     },
     {
       "title": "Wai Wai World",
+      "series": "Wai Wai World",
       "system": "nes",
       "bucket": "nes/Wai Wai World (Japan) [T-En by Demiforce v3.00].zip"
     },
     {
       "title": "Wizards & Warriors III - Kuros...Visions of Power",
+      "series": "Wizards & Warriors",
       "system": "nes",
       "bucket": "nes/Wizards & Warriors III - Kuros...Visions of Power (USA).zip"
     },
@@ -3085,6 +3330,7 @@
     },
     {
       "title": "Fire Emblem Warriors",
+      "series": "Fire Emblem",
       "system": "n3ds",
       "bucket": "n3ds/Fire Emblem Warriors (USA).3ds"
     },
@@ -3100,6 +3346,7 @@
     },
     {
       "title": "BERSERK and the Band of the Hawk",
+      "series": "Berserk",
       "system": "psvita",
       "bucket": "psvita/BERSERK and the Band of the Hawk [PCSE01034] [USA] [NoNpDRM].zip"
     },
@@ -3115,6 +3362,7 @@
     },
     {
       "title": "DYNASTY WARRIORS NEXT",
+      "series": "Dynasty Warriors",
       "system": "psvita",
       "bucket": "psvita/DYNASTY WARRIORS NEXT [PCSE00014] [USA] [NoNpDRM].zip"
     },
@@ -3135,6 +3383,7 @@
     },
     {
       "title": "ONE PIECE -  PW3",
+      "series": "One Piece",
       "system": "psvita",
       "bucket": "psvita/ONE PIECE -  PW3 [PCSE00638] [USA] [NoNpDRM].zip"
     },
@@ -3145,16 +3394,19 @@
     },
     {
       "title": "SAMURAI WARRIORS 4",
+      "series": "Dynasty Warriors",
       "system": "psvita",
       "bucket": "psvita/SAMURAI WARRIORS 4 [PCSE00503] [USA] [NoNpDRM].zip"
     },
     {
       "title": "SENRAN KAGURA EV",
+      "series": "Senran Kagura",
       "system": "psvita",
       "bucket": "psvita/SENRAN KAGURA EV [PCSE00787] [USA] [NoNpDRM].zip"
     },
     {
       "title": "SENRAN KAGURA SV",
+      "series": "Senran Kagura",
       "system": "psvita",
       "bucket": "psvita/SENRAN KAGURA SV [PCSE00398] [USA] [NoNpDRM].zip"
     },
@@ -3165,11 +3417,13 @@
     },
     {
       "title": "Shinobido 2",
+      "series": "Shinobi",
       "system": "psvita",
       "bucket": "psvita/Shinobido 2 [PCSE00015] [USA] [NoNpDRM].zip"
     },
     {
       "title": "Sly Cooper - Thieves in Time™",
+      "series": "Sly Cooper",
       "system": "psvita",
       "bucket": "psvita/Sly Cooper - Thieves in Time™ [PCSA00068] [USA] [NoNpDRM].zip"
     },
@@ -3190,16 +3444,19 @@
     },
     {
       "title": "WARRIORS OROCHI 3 Ultimate",
+      "series": "Dynasty Warriors",
       "system": "psvita",
       "bucket": "psvita/WARRIORS OROCHI 3 Ultimate [PCSE00448] [USA] [NoNpDRM].zip"
     },
     {
       "title": "Dark Souls",
+      "series": "Dark Souls",
       "system": "ps3",
       "bucket": "ps3/Dark Souls (USA) (En,Fr,Es).chd"
     },
     {
       "title": "Dark Souls II - Scholar of the First Sin",
+      "series": "Dark Souls",
       "system": "ps3",
       "bucket": "ps3/Dark Souls II - Scholar of the First Sin (USA) (En,Fr,Es,Pt).chd"
     },
@@ -3210,6 +3467,7 @@
     },
     {
       "title": "God of War III",
+      "series": "God of War",
       "system": "ps3",
       "bucket": "ps3/God of War III (USA) (v02.00).chd"
     },
@@ -3220,16 +3478,19 @@
     },
     {
       "title": "Uncharted - Drake's Fortune",
+      "series": "Uncharted",
       "system": "ps3",
       "bucket": "ps3/Uncharted - Drake's Fortune (USA) (En,Fr,De,Es,It,Nl,Pt,Sv,No,Da,Fi).chd"
     },
     {
       "title": "Uncharted 2 - Among Thieves",
+      "series": "Uncharted",
       "system": "ps3",
       "bucket": "ps3/Uncharted 2 - Among Thieves (USA) (En,Fr,Es).chd"
     },
     {
       "title": "Uncharted 3 - Drake's Deception - Game of the Year Edition",
+      "series": "Uncharted",
       "system": "ps3",
       "bucket": "ps3/Uncharted 3 - Drake's Deception - Game of the Year Edition (USA) (En,Fr,Es,Pt).chd"
     },
@@ -3240,11 +3501,13 @@
     },
     {
       "title": "Hotline Miami",
+      "series": "Hotline Miami",
       "system": "psvita",
       "bucket": "psvita/Hotline Miami [PCSE00249] [USA] [NoNpDRM].zip"
     },
     {
       "title": "Hotline Miami 2 - Wrong Number",
+      "series": "Hotline Miami",
       "system": "psvita",
       "bucket": "psvita/Hotline Miami 2 [PCSE00402] [USA] [NoNpDRM].zip"
     },
@@ -3260,6 +3523,7 @@
     },
     {
       "title": "Valis",
+      "series": "Valis",
       "system": "genesis",
       "bucket": "genesis/Valis (USA).zip"
     },
@@ -3270,6 +3534,7 @@
     },
     {
       "title": "Valis IV",
+      "series": "Valis",
       "system": "tg-cd",
       "bucket": "tg-cd/Valis IV (Japan) [T-En by Sideside v1.0] [i].chd"
     },
@@ -3280,6 +3545,7 @@
     },
     {
       "title": "Castlevania - Lords of Shadow",
+      "series": "Castlevania",
       "system": "xbox360",
       "bucket": "xbox360/Castlevania - Lords of Shadow (USA, Europe) (En,Fr,De,Es,It) (Disc 1).zar"
     },
@@ -3295,11 +3561,13 @@
     },
     {
       "title": "Grand Theft Auto V",
+      "series": "Grand Theft Auto",
       "system": "xbox360",
       "bucket": "xbox360/Grand Theft Auto V (World) (En,Fr,De,Es,It,Pt,Zh,Ko,Pl,Ru) (Disc 2) (Play).zar"
     },
     {
       "title": "Saints Row IV - National Treasure Edition",
+      "series": "Saints Row",
       "system": "xbox360",
       "bucket": "xbox360/Saints Row IV - National Treasure Edition (USA, Europe) (Disc 2).zar"
     },

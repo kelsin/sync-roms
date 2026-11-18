@@ -4,6 +4,7 @@
   "games": [
     {
       "title": "Contra",
+      "series": "Contra",
       "system": "nes",
       "bucket": "nes/Contra (USA).zip",
       "variants": [
@@ -15,6 +16,7 @@
     },
     {
       "title": "Teenage Mutant Ninja Turtles",
+      "series": "Teenage Mutant Ninja Turtles",
       "system": "fbneo",
       "bucket": "fbneo/tmntu.zip",
       "variants": [
@@ -26,6 +28,7 @@
     },
     {
       "title": "Double Dragon II - The Revenge (Rev 1)",
+      "series": "Double Dragon",
       "system": "nes",
       "bucket": "nes/Double Dragon II - The Revenge (USA) (Rev 1).zip",
       "variants": [
@@ -37,6 +40,7 @@
     },
     {
       "title": "Super Mario Bros. 3 (Rev 1)",
+      "series": "Super Mario",
       "system": "nes",
       "bucket": "nes/Super Mario Bros. 3 (USA) (Rev 1).zip",
       "variants": [
@@ -52,6 +56,7 @@
     },
     {
       "title": "Bubble Bobble",
+      "series": "Bubble Bobble",
       "system": "fbneo",
       "bucket": "fbneo/bublboblr.zip",
       "variants": [
@@ -72,6 +77,7 @@
     },
     {
       "title": "Double Dragon III - The Sacred Stones",
+      "series": "Double Dragon",
       "system": "nes",
       "bucket": "nes/Double Dragon III - The Sacred Stones (USA).zip",
       "variants": [
@@ -83,6 +89,7 @@
     },
     {
       "title": "River City Ransom",
+      "series": "Kunio-kun",
       "system": "nes",
       "bucket": "nes/River City Ransom (USA).zip",
       "variants": [
@@ -98,26 +105,31 @@
     },
     {
       "title": "Teenage Mutant Ninja Turtles III - The Manhattan Project",
+      "series": "Teenage Mutant Ninja Turtles",
       "system": "nes",
       "bucket": "nes/Teenage Mutant Ninja Turtles III - The Manhattan Project (USA).zip"
     },
     {
       "title": "Battletoads",
+      "series": "Battletoads",
       "system": "nes",
       "bucket": "nes/Battletoads (USA).zip"
     },
     {
       "title": "Battletoads-Double Dragon",
+      "series": "Battletoads",
       "system": "nes",
       "bucket": "nes/Battletoads-Double Dragon (USA).zip"
     },
     {
       "title": "Chip 'n Dale - Rescue Rangers",
+      "series": "Disney",
       "system": "nes",
       "bucket": "nes/Chip 'n Dale - Rescue Rangers (USA).zip"
     },
     {
       "title": "Chip 'n Dale - Rescue Rangers 2",
+      "series": "Disney",
       "system": "nes",
       "bucket": "nes/Chip 'n Dale - Rescue Rangers 2 (USA).zip"
     },
@@ -133,11 +145,13 @@
     },
     {
       "title": "Mario Bros.",
+      "series": "Super Mario",
       "system": "fbneo",
       "bucket": "fbneo/mario.zip"
     },
     {
       "title": "Life Force",
+      "series": "Gradius",
       "system": "nes",
       "bucket": "nes/Life Force (USA).zip"
     },
@@ -148,11 +162,13 @@
     },
     {
       "title": "Gauntlet II",
+      "series": "Gauntlet",
       "system": "fbneo",
       "bucket": "fbneo/gaunt2.zip"
     },
     {
       "title": "Snow Bros.",
+      "series": "Snow Bros",
       "system": "fbneo",
       "bucket": "fbneo/snowbros.zip",
       "variants": [
@@ -169,6 +185,7 @@
     },
     {
       "title": "Ikari Warriors",
+      "series": "Ikari Warriors",
       "system": "fbneo",
       "bucket": "fbneo/ikari.zip"
     },
@@ -201,11 +218,13 @@
     },
     {
       "title": "Bomberman II",
+      "series": "Bomberman",
       "system": "nes",
       "bucket": "nes/Bomberman II (USA).zip"
     },
     {
       "title": "Tecmo Super Bowl",
+      "series": "NFL",
       "system": "nes",
       "bucket": "nes/Tecmo Super Bowl (USA).zip"
     },
@@ -221,6 +240,7 @@
     },
     {
       "title": "Dr. Mario (Rev 1)",
+      "series": "Super Mario",
       "system": "nes",
       "bucket": "nes/Dr. Mario (Japan, USA) (En) (Rev 1).zip",
       "variants": [
@@ -237,6 +257,7 @@
     },
     {
       "title": "Bubble Bobble Part 2",
+      "series": "Bubble Bobble",
       "system": "nes",
       "bucket": "nes/Bubble Bobble Part 2 (USA).zip"
     },
@@ -247,6 +268,7 @@
     },
     {
       "title": "Rampage",
+      "series": "Rampage",
       "system": "fbneo",
       "bucket": "fbneo/rampage.zip"
     },
@@ -267,26 +289,31 @@
     },
     {
       "title": "Vs. Excitebike",
+      "series": "Excitebike",
       "system": "fds",
       "bucket": "fds/Vs. Excitebike (Japan) (En).zip"
     },
     {
       "title": "Contra III - The Alien Wars",
+      "series": "Contra",
       "system": "snes",
       "bucket": "snes/Contra III - The Alien Wars (USA).zip"
     },
     {
       "title": "Super Mario Kart",
+      "series": "Mario Kart",
       "system": "snes",
       "bucket": "snes/Super Mario Kart (USA).zip"
     },
     {
       "title": "Super Bomberman 2",
+      "series": "Bomberman",
       "system": "snes",
       "bucket": "snes/Super Bomberman 2 (USA).zip"
     },
     {
       "title": "Teenage Mutant Ninja Turtles: Turtles in Time",
+      "series": "Teenage Mutant Ninja Turtles",
       "system": "fbneo",
       "bucket": "fbneo/tmnt2.zip",
       "variants": [
@@ -298,6 +325,7 @@
     },
     {
       "title": "Secret of Mana",
+      "series": "Mana",
       "system": "snes",
       "bucket": "snes/Secret of Mana (USA).zip",
       "variants": [
@@ -309,21 +337,25 @@
     },
     {
       "title": "Donkey Kong Country 2 - Diddy's Kong Quest (En,Fr) (Rev 1)",
+      "series": "Donkey Kong",
       "system": "snes",
       "bucket": "snes/Donkey Kong Country 2 - Diddy's Kong Quest (USA) (En,Fr) (Rev 1).zip"
     },
     {
       "title": "Super Mario All-Stars + Super Mario World",
+      "series": "Super Mario",
       "system": "snes",
       "bucket": "snes/Super Mario All-Stars + Super Mario World (USA).zip"
     },
     {
       "title": "Streets of Rage 2",
+      "series": "Streets of Rage",
       "system": "genesis",
       "bucket": "genesis/Streets of Rage 2 (USA).zip"
     },
     {
       "title": "Streets of Rage 3",
+      "series": "Streets of Rage",
       "system": "genesis",
       "bucket": "genesis/Streets of Rage 3 (USA).zip",
       "variants": [
@@ -335,21 +367,25 @@
     },
     {
       "title": "Gunstar Heroes",
+      "series": "Gunstar",
       "system": "genesis",
       "bucket": "genesis/Gunstar Heroes (USA).zip"
     },
     {
       "title": "Golden Axe",
+      "series": "Golden Axe",
       "system": "fbneo",
       "bucket": "fbneo/goldnaxe.zip"
     },
     {
       "title": "Contra - Hard Corps",
+      "series": "Contra",
       "system": "genesis",
       "bucket": "genesis/Contra - Hard Corps (USA, Korea) (En).zip"
     },
     {
       "title": "The Simpsons",
+      "series": "The Simpsons",
       "system": "fbneo",
       "bucket": "fbneo/simpsons.zip"
     },
@@ -370,16 +406,19 @@
     },
     {
       "title": "Alien vs. Predator",
+      "series": "Alien",
       "system": "fbneo",
       "bucket": "fbneo/avspu.zip"
     },
     {
       "title": "X-Men",
+      "series": "X-Men",
       "system": "fbneo",
       "bucket": "fbneo/xmen.zip"
     },
     {
       "title": "Final Fight",
+      "series": "Final Fight",
       "system": "fbneo",
       "bucket": "fbneo/ffightuc.zip"
     },
@@ -390,16 +429,19 @@
     },
     {
       "title": "The Punisher",
+      "series": "Marvel",
       "system": "fbneo",
       "bucket": "fbneo/punisheru.zip"
     },
     {
       "title": "Dungeons & Dragons: Shadow over Mystara",
+      "series": "Dungeons & Dragons",
       "system": "fbneo",
       "bucket": "fbneo/ddsomu.zip"
     },
     {
       "title": "Dungeons & Dragons: Tower of Doom",
+      "series": "Dungeons & Dragons",
       "system": "fbneo",
       "bucket": "fbneo/ddtodu.zip"
     },
@@ -420,11 +462,13 @@
     },
     {
       "title": "Battletoads",
+      "series": "Battletoads",
       "system": "fbneo",
       "bucket": "fbneo/btoads.zip"
     },
     {
       "title": "Double Dragon",
+      "series": "Double Dragon",
       "system": "fbneo",
       "bucket": "fbneo/ddragonu.zip",
       "variants": [
@@ -436,11 +480,13 @@
     },
     {
       "title": "Double Dragon II: The Revenge",
+      "series": "Double Dragon",
       "system": "fbneo",
       "bucket": "fbneo/ddragon2u.zip"
     },
     {
       "title": "Golden Axe: The Revenge of Death Adder",
+      "series": "Golden Axe",
       "system": "fbneo",
       "bucket": "fbneo/ga2u.zip"
     },
@@ -456,11 +502,13 @@
     },
     {
       "title": "Aliens",
+      "series": "Alien",
       "system": "fbneo",
       "bucket": "fbneo/aliensu.zip"
     },
     {
       "title": "Gauntlet",
+      "series": "Gauntlet",
       "system": "fbneo",
       "bucket": "fbneo/gauntlet.zip",
       "variants": [
@@ -472,6 +520,7 @@
     },
     {
       "title": "Metal Slug",
+      "series": "Metal Slug",
       "system": "fbneo",
       "bucket": "fbneo/mslug.zip",
       "variants": [
@@ -483,6 +532,7 @@
     },
     {
       "title": "Metal Slug X",
+      "series": "Metal Slug",
       "system": "fbneo",
       "bucket": "fbneo/mslugx.zip",
       "variants": [
@@ -494,16 +544,19 @@
     },
     {
       "title": "Metal Slug 3",
+      "series": "Metal Slug",
       "system": "fbneo",
       "bucket": "fbneo/mslug3.zip"
     },
     {
       "title": "Contra",
+      "series": "Contra",
       "system": "fbneo",
       "bucket": "fbneo/contra.zip"
     },
     {
       "title": "Super Contra",
+      "series": "Contra",
       "system": "fbneo",
       "bucket": "fbneo/scontra.zip"
     },
@@ -545,11 +598,13 @@
     },
     {
       "title": "Captain America and the Avengers",
+      "series": "Marvel",
       "system": "fbneo",
       "bucket": "fbneo/captavenu.zip"
     },
     {
       "title": "Spider-Man: The Video Game",
+      "series": "Spider-Man",
       "system": "fbneo",
       "bucket": "fbneo/spidmanu.zip"
     },
@@ -580,6 +635,7 @@
     },
     {
       "title": "Elevator Action Returns",
+      "series": "Elevator Action",
       "system": "fbneo",
       "bucket": "fbneo/elvactr.zip"
     },
@@ -590,16 +646,19 @@
     },
     {
       "title": "NBA Jam Tournament Edition",
+      "series": "NBA",
       "system": "fbneo",
       "bucket": "fbneo/nbajamte.zip"
     },
     {
       "title": "NBA Hangtime",
+      "series": "NBA",
       "system": "fbneo",
       "bucket": "fbneo/nbahangt.zip"
     },
     {
       "title": "WWF WrestleFest",
+      "series": "WWE",
       "system": "fbneo",
       "bucket": "fbneo/wwfwfestu.zip"
     },
@@ -610,6 +669,7 @@
     },
     {
       "title": "Neo Bomberman",
+      "series": "Bomberman",
       "system": "fbneo",
       "bucket": "fbneo/neobombe.zip"
     },
@@ -625,11 +685,13 @@
     },
     {
       "title": "Magical Drop III",
+      "series": "Magical Drop",
       "system": "fbneo",
       "bucket": "fbneo/magdrop3.zip"
     },
     {
       "title": "Puzzle Bobble 2",
+      "series": "Puzzle Bobble",
       "system": "fbneo",
       "bucket": "fbneo/pbobble2.zip"
     },
@@ -640,6 +702,7 @@
     },
     {
       "title": "Sengoku 3",
+      "series": "Sengoku",
       "system": "fbneo",
       "bucket": "fbneo/sengoku3.zip"
     },
@@ -655,31 +718,37 @@
     },
     {
       "title": "Mario Kart 64",
+      "series": "Mario Kart",
       "system": "n64",
       "bucket": "n64/Mario Kart 64 (USA).zip"
     },
     {
       "title": "Super Smash Bros.",
+      "series": "Smash Bros",
       "system": "n64",
       "bucket": "n64/Super Smash Bros. (USA).zip"
     },
     {
       "title": "GoldenEye 007",
+      "series": "James Bond 007",
       "system": "n64",
       "bucket": "n64/GoldenEye 007 (USA).zip"
     },
     {
       "title": "Mario Party 2",
+      "series": "Mario Party",
       "system": "n64",
       "bucket": "n64/Mario Party 2 (USA).zip"
     },
     {
       "title": "Mario Party",
+      "series": "Mario Party",
       "system": "n64",
       "bucket": "n64/Mario Party (USA).zip"
     },
     {
       "title": "Mario Party 3",
+      "series": "Mario Party",
       "system": "n64",
       "bucket": "n64/Mario Party 3 (USA).zip"
     },
@@ -701,26 +770,31 @@
     },
     {
       "title": "Mario Tennis",
+      "series": "Mario Golf & Tennis",
       "system": "n64",
       "bucket": "n64/Mario Tennis (USA).zip"
     },
     {
       "title": "Mario Golf",
+      "series": "Mario Golf & Tennis",
       "system": "n64",
       "bucket": "n64/Mario Golf (USA).zip"
     },
     {
       "title": "Pokemon Stadium (Rev 2)",
+      "series": "Pokemon",
       "system": "n64",
       "bucket": "n64/Pokemon Stadium (USA) (Rev 2).zip"
     },
     {
       "title": "Pokemon Stadium 2",
+      "series": "Pokemon",
       "system": "n64",
       "bucket": "n64/Pokemon Stadium 2 (USA).zip"
     },
     {
       "title": "Conker's Bad Fur Day",
+      "series": "Conker",
       "system": "n64",
       "bucket": "n64/Conker's Bad Fur Day (USA).zip",
       "variants": [
@@ -732,6 +806,7 @@
     },
     {
       "title": "Star Fox 64 (Rev 1)",
+      "series": "Star Fox",
       "system": "n64",
       "bucket": "n64/Star Fox 64 (USA) (Rev 1).zip",
       "variants": [
@@ -743,6 +818,7 @@
     },
     {
       "title": "F-Zero X",
+      "series": "F-Zero",
       "system": "n64",
       "bucket": "n64/F-Zero X (USA).zip",
       "variants": [
@@ -759,6 +835,7 @@
     },
     {
       "title": "Wave Race 64 - Kawasaki Jet Ski (Rev 1)",
+      "series": "Wave Race",
       "system": "n64",
       "bucket": "n64/Wave Race 64 - Kawasaki Jet Ski (USA) (Rev 1).zip",
       "variants": [
@@ -770,21 +847,25 @@
     },
     {
       "title": "Bomberman 64",
+      "series": "Bomberman",
       "system": "n64",
       "bucket": "n64/Bomberman 64 (USA).zip"
     },
     {
       "title": "WWF No Mercy (Rev 1)",
+      "series": "WWE",
       "system": "n64",
       "bucket": "n64/WWF No Mercy (USA) (Rev 1).zip"
     },
     {
       "title": "NFL Blitz 2000 (Rev 1)",
+      "series": "NFL",
       "system": "mame",
       "bucket": "mame/blitz2k.zip"
     },
     {
       "title": "Gauntlet Legends",
+      "series": "Gauntlet",
       "system": "dreamcast",
       "bucket": "dreamcast/Gauntlet Legends (USA).chd",
       "variants": [
@@ -801,21 +882,25 @@
     },
     {
       "title": "Banjo-Tooie",
+      "series": "Banjo-Kazooie",
       "system": "n64",
       "bucket": "n64/Banjo-Tooie (USA).zip"
     },
     {
       "title": "Donkey Kong 64",
+      "series": "Donkey Kong",
       "system": "n64",
       "bucket": "n64/Donkey Kong 64 (USA).zip"
     },
     {
       "title": "007 - The World Is Not Enough",
+      "series": "James Bond 007",
       "system": "n64",
       "bucket": "n64/007 - The World Is Not Enough (USA).zip"
     },
     {
       "title": "Star Wars Episode I - Racer",
+      "series": "Star Wars",
       "system": "n64",
       "bucket": "n64/Star Wars Episode I - Racer (USA).zip"
     },
@@ -826,11 +911,13 @@
     },
     {
       "title": "Snowboard Kids",
+      "series": "Snowboard Kids",
       "system": "n64",
       "bucket": "n64/Snowboard Kids (USA).zip"
     },
     {
       "title": "Worms Armageddon",
+      "series": "Worms",
       "system": "dreamcast",
       "bucket": "dreamcast/Worms Armageddon (USA) (En,Fr,De,Nl,Sv,No,Da).chd",
       "variants": [
@@ -842,11 +929,13 @@
     },
     {
       "title": "Kirby 64 - The Crystal Shards",
+      "series": "Kirby",
       "system": "n64",
       "bucket": "n64/Kirby 64 - The Crystal Shards (USA).zip"
     },
     {
       "title": "Excitebike 64 (Rev 1)",
+      "series": "Excitebike",
       "system": "n64",
       "bucket": "n64/Excitebike 64 (USA) (Rev 1).zip"
     },
@@ -857,26 +946,31 @@
     },
     {
       "title": "Mickey's Speedway USA",
+      "series": "Disney",
       "system": "n64",
       "bucket": "n64/Mickey's Speedway USA (USA).zip"
     },
     {
       "title": "Tony Hawk's Pro Skater 2",
+      "series": "Tony Hawk",
       "system": "psx",
       "bucket": "psx/Tony Hawk's Pro Skater 2 (USA).chd"
     },
     {
       "title": "Pokemon Puzzle League",
+      "series": "Pokemon",
       "system": "n64",
       "bucket": "n64/Pokemon Puzzle League (USA).zip"
     },
     {
       "title": "New Tetris, The",
+      "series": "Tetris",
       "system": "n64",
       "bucket": "n64/New Tetris, The (USA).zip"
     },
     {
       "title": "Duke Nukem 3D",
+      "series": "Duke Nukem",
       "system": "saturn",
       "bucket": "saturn/Duke Nukem 3D (USA).chd",
       "variants": [
@@ -888,11 +982,13 @@
     },
     {
       "title": "Goemon's Great Adventure",
+      "series": "Ganbare Goemon",
       "system": "n64",
       "bucket": "n64/Goemon's Great Adventure (USA).zip"
     },
     {
       "title": "Baldur's Gate: Dark Alliance",
+      "series": "Baldur's Gate",
       "system": "ps2",
       "bucket": "ps2/Baldur's Gate - Dark Alliance (USA).chd"
     },
@@ -903,106 +999,127 @@
     },
     {
       "title": "Super Smash Bros. Melee (Rev 2)",
+      "series": "Smash Bros",
       "system": "gc",
       "bucket": "gc/Super Smash Bros. Melee (USA) (En,Ja) (Rev 2).rvz"
     },
     {
       "title": "Mario Kart - Double Dash!!",
+      "series": "Mario Kart",
       "system": "gc",
       "bucket": "gc/Mario Kart - Double Dash!! (USA).rvz"
     },
     {
       "title": "Mario Party 5",
+      "series": "Mario Party",
       "system": "gc",
       "bucket": "gc/Mario Party 5 (USA).rvz"
     },
     {
       "title": "Legend of Zelda, The - Four Swords Adventures",
+      "series": "Zelda",
       "system": "gc",
       "bucket": "gc/Legend of Zelda, The - Four Swords Adventures (USA).rvz"
     },
     {
       "title": "Kirby Air Ride",
+      "series": "Kirby",
       "system": "gc",
       "bucket": "gc/Kirby Air Ride (USA).rvz"
     },
     {
       "title": "Super Monkey Ball 2",
+      "series": "Super Monkey Ball",
       "system": "gc",
       "bucket": "gc/Super Monkey Ball 2 (USA).rvz"
     },
     {
       "title": "LEGO Star Wars II - The Original Trilogy",
+      "series": "Star Wars",
       "system": "gc",
       "bucket": "gc/LEGO Star Wars II - The Original Trilogy (USA).rvz"
     },
     {
       "title": "TimeSplitters 2",
+      "series": "TimeSplitters",
       "system": "gc",
       "bucket": "gc/TimeSplitters 2 (USA).rvz"
     },
     {
       "title": "TMNT - Mutant Melee",
+      "series": "Teenage Mutant Ninja Turtles",
       "system": "gc",
       "bucket": "gc/TMNT - Mutant Melee (USA).rvz"
     },
     {
       "title": "Crazy Taxi",
+      "series": "Crazy Taxi",
       "system": "dreamcast",
       "bucket": "dreamcast/Crazy Taxi (USA).chd"
     },
     {
       "title": "Pac-Man Vs.",
+      "series": "Pac-Man",
       "system": "gc",
       "bucket": "gc/Pac-Man Vs. (USA).rvz"
     },
     {
       "title": "Super Mario Strikers",
+      "series": "Super Mario",
       "system": "gc",
       "bucket": "gc/Super Mario Strikers (USA).rvz"
     },
     {
       "title": "Mario Power Tennis (Rev 1)",
+      "series": "Mario Golf & Tennis",
       "system": "gc",
       "bucket": "gc/Mario Power Tennis (USA) (Rev 1).rvz"
     },
     {
       "title": "Mario Party 6",
+      "series": "Mario Party",
       "system": "gc",
       "bucket": "gc/Mario Party 6 (USA).rvz"
     },
     {
       "title": "Mario Party 7 (Rev 1)",
+      "series": "Mario Party",
       "system": "gc",
       "bucket": "gc/Mario Party 7 (USA) (Rev 1).rvz"
     },
     {
       "title": "LEGO Star Wars - The Video Game",
+      "series": "Star Wars",
       "system": "gc",
       "bucket": "gc/LEGO Star Wars - The Video Game (USA).rvz"
     },
     {
       "title": "Rampage - Total Destruction",
+      "series": "Rampage",
       "system": "gc",
       "bucket": "gc/Rampage - Total Destruction (USA).rvz"
     },
     {
       "title": "Mario Party 4 (Rev 1)",
+      "series": "Mario Party",
       "system": "gc",
       "bucket": "gc/Mario Party 4 (USA) (Rev 1).rvz"
     },
     {
       "title": "Super Monkey Ball",
+      "series": "Super Monkey Ball",
       "system": "gc",
       "bucket": "gc/Super Monkey Ball (USA).rvz"
     },
     {
       "title": "F-Zero GX",
+      "series": "F-Zero",
       "system": "gc",
       "bucket": "gc/F-Zero GX (USA).rvz"
     },
     {
       "title": "Mario Golf - Toadstool Tour",
+      "series": "Mario Golf & Tennis",
       "system": "gc",
       "bucket": "gc/Mario Golf - Toadstool Tour (USA).rvz"
     },
@@ -1013,6 +1130,7 @@
     },
     {
       "title": "WarioWare, Inc. - Mega Microgame$!",
+      "series": "Wario",
       "system": "gba",
       "bucket": "gba/WarioWare, Inc. - Mega Microgame$! (USA).zip",
       "variants": [
@@ -1024,21 +1142,25 @@
     },
     {
       "title": "Bomberman Generation (Rev 1)",
+      "series": "Bomberman",
       "system": "gc",
       "bucket": "gc/Bomberman Generation (USA) (Rev 1).rvz"
     },
     {
       "title": "Bomberman Jetters",
+      "series": "Bomberman",
       "system": "gc",
       "bucket": "gc/Bomberman Jetters (USA).rvz"
     },
     {
       "title": "Final Fantasy - Crystal Chronicles",
+      "series": "Final Fantasy",
       "system": "gc",
       "bucket": "gc/Final Fantasy - Crystal Chronicles (USA).rvz"
     },
     {
       "title": "Tales of Symphonia",
+      "series": "Tales of",
       "system": "gc",
       "bucket": "gc/Tales of Symphonia (USA).m3u",
       "files": [
@@ -1048,31 +1170,37 @@
     },
     {
       "title": "Phantasy Star Online Episode I & II Plus (Rev 2)",
+      "series": "Phantasy Star",
       "system": "gc",
       "bucket": "gc/Phantasy Star Online Episode I & II Plus (USA) (En,Ja,Fr,De,Es) (Rev 2).rvz"
     },
     {
       "title": "Pikmin 2",
+      "series": "Pikmin",
       "system": "gc",
       "bucket": "gc/Pikmin 2 (USA).rvz"
     },
     {
       "title": "Donkey Konga",
+      "series": "Donkey Kong",
       "system": "gc",
       "bucket": "gc/Donkey Konga (USA).rvz"
     },
     {
       "title": "Donkey Konga 2",
+      "series": "Donkey Kong",
       "system": "gc",
       "bucket": "gc/Donkey Konga 2 (USA).rvz"
     },
     {
       "title": "Star Fox - Assault",
+      "series": "Star Fox",
       "system": "gc",
       "bucket": "gc/Star Fox - Assault (USA).rvz"
     },
     {
       "title": "Sonic Adventure 2",
+      "series": "Sonic",
       "system": "dreamcast",
       "bucket": "dreamcast/Sonic Adventure 2 (USA) (En,Ja,Fr,De,Es).chd",
       "variants": [
@@ -1084,31 +1212,37 @@
     },
     {
       "title": "Custom Robo",
+      "series": "Custom Robo",
       "system": "gc",
       "bucket": "gc/Custom Robo (USA).rvz"
     },
     {
       "title": "SSX Tricky",
+      "series": "SSX",
       "system": "ps2",
       "bucket": "ps2/SSX Tricky (USA).chd"
     },
     {
       "title": "Burnout 2 - Point of Impact",
+      "series": "Burnout",
       "system": "gc",
       "bucket": "gc/Burnout 2 - Point of Impact (USA).rvz"
     },
     {
       "title": "NBA Street Vol. 2",
+      "series": "NBA",
       "system": "gc",
       "bucket": "gc/NBA Street Vol. 2 (USA).rvz"
     },
     {
       "title": "Teenage Mutant Ninja Turtles",
+      "series": "Teenage Mutant Ninja Turtles",
       "system": "gc",
       "bucket": "gc/Teenage Mutant Ninja Turtles (USA).rvz"
     },
     {
       "title": "Teenage Mutant Ninja Turtles 2 - Battle Nexus",
+      "series": "Teenage Mutant Ninja Turtles",
       "system": "gc",
       "bucket": "gc/Teenage Mutant Ninja Turtles 2 - Battle Nexus (USA).m3u",
       "files": [
@@ -1118,6 +1252,7 @@
     },
     {
       "title": "Teenage Mutant Ninja Turtles 3 - Mutant Nightmare",
+      "series": "Teenage Mutant Ninja Turtles",
       "system": "gc",
       "bucket": "gc/Teenage Mutant Ninja Turtles 3 - Mutant Nightmare (USA).m3u",
       "files": [
@@ -1127,11 +1262,13 @@
     },
     {
       "title": "X-Men Legends",
+      "series": "X-Men",
       "system": "gc",
       "bucket": "gc/X-Men Legends (USA).rvz"
     },
     {
       "title": "X-Men Legends II - Rise of Apocalypse",
+      "series": "X-Men",
       "system": "gc",
       "bucket": "gc/X-Men Legends II - Rise of Apocalypse (USA).rvz",
       "variants": [
@@ -1153,16 +1290,19 @@
     },
     {
       "title": "TimeSplitters - Future Perfect",
+      "series": "TimeSplitters",
       "system": "gc",
       "bucket": "gc/TimeSplitters - Future Perfect (USA).rvz"
     },
     {
       "title": "007 - Nightfire",
+      "series": "James Bond 007",
       "system": "gc",
       "bucket": "gc/007 - Nightfire (USA).rvz"
     },
     {
       "title": "Star Wars - Rogue Squadron III - Rebel Strike",
+      "series": "Star Wars",
       "system": "gc",
       "bucket": "gc/Star Wars - Rogue Squadron III - Rebel Strike (USA).rvz"
     },
@@ -1173,11 +1313,13 @@
     },
     {
       "title": "Dance Dance Revolution - Mario Mix",
+      "series": "Dance Dance Revolution",
       "system": "gc",
       "bucket": "gc/Dance Dance Revolution - Mario Mix (USA).rvz"
     },
     {
       "title": "Viewtiful Joe - Red Hot Rumble",
+      "series": "Viewtiful Joe",
       "system": "gc",
       "bucket": "gc/Viewtiful Joe - Red Hot Rumble (USA).rvz"
     },
@@ -1188,16 +1330,19 @@
     },
     {
       "title": "NFL Blitz 2003",
+      "series": "NFL",
       "system": "gc",
       "bucket": "gc/NFL Blitz 2003 (USA).rvz"
     },
     {
       "title": "NHL Hitz 2003",
+      "series": "NHL",
       "system": "gc",
       "bucket": "gc/NHL Hitz 2003 (USA).rvz"
     },
     {
       "title": "Puyo Puyo Fever",
+      "series": "Puyo Puyo",
       "system": "dreamcast",
       "bucket": "dreamcast/Puyo Puyo Fever (Japan) (En,Ja).chd",
       "variants": [
@@ -1219,6 +1364,7 @@
     },
     {
       "title": "Wave Race - Blue Storm",
+      "series": "Wave Race",
       "system": "gc",
       "bucket": "gc/Wave Race - Blue Storm (USA).rvz"
     },
@@ -1229,16 +1375,19 @@
     },
     {
       "title": "Crash Nitro Kart",
+      "series": "Crash Bandicoot",
       "system": "gc",
       "bucket": "gc/Crash Nitro Kart (USA).rvz"
     },
     {
       "title": "Digimon Rumble Arena 2",
+      "series": "Digimon",
       "system": "gc",
       "bucket": "gc/Digimon Rumble Arena 2 (USA).rvz"
     },
     {
       "title": "Tom Clancy's Splinter Cell - Chaos Theory",
+      "series": "Tom Clancy",
       "system": "gc",
       "bucket": "gc/Tom Clancy's Splinter Cell - Chaos Theory (USA) (En,Fr,Es).m3u",
       "files": [
@@ -1248,21 +1397,25 @@
     },
     {
       "title": "Tom Clancy's Ghost Recon",
+      "series": "Tom Clancy",
       "system": "gc",
       "bucket": "gc/Tom Clancy's Ghost Recon (USA).rvz"
     },
     {
       "title": "New Super Mario Bros.",
+      "series": "Super Mario",
       "system": "nds",
       "bucket": "nds/New Super Mario Bros. (USA, Australia).zip"
     },
     {
       "title": "Mario Kart DS",
+      "series": "Mario Kart",
       "system": "nds",
       "bucket": "nds/Mario Kart DS (USA, Australia) (En,Fr,De,Es,It).zip"
     },
     {
       "title": "LEGO Star Wars II - The Original Trilogy (Rev 1)",
+      "series": "Star Wars",
       "system": "nds",
       "bucket": "nds/LEGO Star Wars II - The Original Trilogy (USA) (Rev 1).zip",
       "variants": [
@@ -1274,26 +1427,31 @@
     },
     {
       "title": "Contra 4",
+      "series": "Contra",
       "system": "nds",
       "bucket": "nds/Contra 4 (USA).zip"
     },
     {
       "title": "Mario Party DS (Rev 2)",
+      "series": "Mario Party",
       "system": "nds",
       "bucket": "nds/Mario Party DS (USA) (Rev 2).zip"
     },
     {
       "title": "Bomberman",
+      "series": "Bomberman",
       "system": "nds",
       "bucket": "nds/Bomberman (USA).zip"
     },
     {
       "title": "Bomberman Land Touch! 2",
+      "series": "Bomberman",
       "system": "nds",
       "bucket": "nds/Bomberman Land Touch! 2 (USA).zip"
     },
     {
       "title": "Kirby Super Star",
+      "series": "Kirby",
       "system": "snes",
       "bucket": "snes/Kirby Super Star (USA).zip",
       "variants": [
@@ -1305,31 +1463,37 @@
     },
     {
       "title": "Final Fantasy Crystal Chronicles - Ring of Fates",
+      "series": "Final Fantasy",
       "system": "nds",
       "bucket": "nds/Final Fantasy Crystal Chronicles - Ring of Fates (USA) (En,Es).zip"
     },
     {
       "title": "Final Fantasy Crystal Chronicles - Echoes of Time",
+      "series": "Final Fantasy",
       "system": "nds",
       "bucket": "nds/Final Fantasy Crystal Chronicles - Echoes of Time (USA) (En,Fr,Es).zip"
     },
     {
       "title": "Phantasy Star 0",
+      "series": "Phantasy Star",
       "system": "nds",
       "bucket": "nds/Phantasy Star 0 (USA).zip"
     },
     {
       "title": "Dragon Quest IX - Sentinels of the Starry Skies",
+      "series": "Dragon Quest",
       "system": "nds",
       "bucket": "nds/Dragon Quest IX - Sentinels of the Starry Skies (USA) (En,Fr,Es).zip"
     },
     {
       "title": "Metroid Prime - Hunters (Rev 1)",
+      "series": "Metroid",
       "system": "nds",
       "bucket": "nds/Metroid Prime - Hunters (USA) (Rev 1).zip"
     },
     {
       "title": "Tetris DS",
+      "series": "Tetris",
       "system": "nds",
       "bucket": "nds/Tetris DS (USA, Australia).zip"
     },
@@ -1340,6 +1504,7 @@
     },
     {
       "title": "Super Mario 64",
+      "series": "Super Mario",
       "system": "n64",
       "bucket": "n64/Super Mario 64 (USA).zip",
       "variants": [
@@ -1351,6 +1516,7 @@
     },
     {
       "title": "Children of Mana",
+      "series": "Mana",
       "system": "nds",
       "bucket": "nds/Children of Mana (USA, Australia).zip"
     },
@@ -1361,6 +1527,7 @@
     },
     {
       "title": "Bleach - The Blade of Fate",
+      "series": "Bleach",
       "system": "nds",
       "bucket": "nds/Bleach - The Blade of Fate (USA).zip"
     },
@@ -1371,11 +1538,13 @@
     },
     {
       "title": "Mario Kart 7 (Rev 1)",
+      "series": "Mario Kart",
       "system": "3ds",
       "bucket": "3ds/Mario Kart 7 (USA) (En,Fr,Es) (Rev 1).zip"
     },
     {
       "title": "Super Smash Bros. for Wii U",
+      "series": "Smash Bros",
       "system": "wiiu",
       "bucket": "wiiu/Super Smash Bros. (US) (v304).wua",
       "variants": [
@@ -1387,26 +1556,31 @@
     },
     {
       "title": "New Super Mario Bros. 2",
+      "series": "Super Mario",
       "system": "3ds",
       "bucket": "3ds/New Super Mario Bros. 2 (USA) (En,Fr,Es).zip"
     },
     {
       "title": "Luigi's Mansion - Dark Moon",
+      "series": "Luigi's Mansion",
       "system": "3ds",
       "bucket": "3ds/Luigi's Mansion - Dark Moon (USA) (En,Fr,Es).zip"
     },
     {
       "title": "Legend of Zelda, The - Tri Force Heroes",
+      "series": "Zelda",
       "system": "3ds",
       "bucket": "3ds/Legend of Zelda, The - Tri Force Heroes (USA) (En,Fr,Es).zip"
     },
     {
       "title": "Monster Hunter 4 Ultimate",
+      "series": "Monster Hunter",
       "system": "3ds",
       "bucket": "3ds/Monster Hunter 4 Ultimate (USA).zip"
     },
     {
       "title": "Monster Hunter Generations",
+      "series": "Monster Hunter",
       "system": "3ds",
       "bucket": "3ds/Monster Hunter Generations (USA).zip",
       "variants": [
@@ -1422,6 +1596,7 @@
     },
     {
       "title": "Monster Hunter Tri",
+      "series": "Monster Hunter",
       "system": "wii",
       "bucket": "wii/Monster Hunter Tri (USA) (En,Fr,Es).rvz",
       "variants": [
@@ -1433,46 +1608,55 @@
     },
     {
       "title": "Kirby - Triple Deluxe",
+      "series": "Kirby",
       "system": "3ds",
       "bucket": "3ds/Kirby - Triple Deluxe (USA) (En,Fr,Es).zip"
     },
     {
       "title": "Kirby - Planet Robobot",
+      "series": "Kirby",
       "system": "3ds",
       "bucket": "3ds/Kirby - Planet Robobot (USA).zip"
     },
     {
       "title": "Kirby Battle Royale (Rev 2)",
+      "series": "Kirby",
       "system": "3ds",
       "bucket": "3ds/Kirby Battle Royale (USA) (En,Ja,Fr,De,Es,It,Nl,Ko) (Rev 2).zip"
     },
     {
       "title": "Mario Party - Island Tour",
+      "series": "Mario Party",
       "system": "3ds",
       "bucket": "3ds/Mario Party - Island Tour (USA) (En,Fr,Es).zip"
     },
     {
       "title": "Mario Party - Star Rush",
+      "series": "Mario Party",
       "system": "3ds",
       "bucket": "3ds/Mario Party - Star Rush (USA) (En,Fr,Es).zip"
     },
     {
       "title": "Mario Party - The Top 100",
+      "series": "Mario Party",
       "system": "3ds",
       "bucket": "3ds/Mario Party - The Top 100 (USA).zip"
     },
     {
       "title": "Mario Tennis Open (Rev 1)",
+      "series": "Mario Golf & Tennis",
       "system": "3ds",
       "bucket": "3ds/Mario Tennis Open (USA) (En,Fr,Es) (Rev 1).zip"
     },
     {
       "title": "Mario Golf - World Tour",
+      "series": "Mario Golf & Tennis",
       "system": "3ds",
       "bucket": "3ds/Mario Golf - World Tour (USA) (En,Fr,Es).zip"
     },
     {
       "title": "Kid Icarus - Uprising",
+      "series": "Kid Icarus",
       "system": "3ds",
       "bucket": "3ds/Kid Icarus - Uprising (USA) (En,Fr,Es).zip"
     },
@@ -1483,46 +1667,55 @@
     },
     {
       "title": "Final Fantasy Explorers",
+      "series": "Final Fantasy",
       "system": "3ds",
       "bucket": "3ds/Final Fantasy Explorers (USA).zip"
     },
     {
       "title": "Resident Evil - The Mercenaries 3D (Rev 1)",
+      "series": "Resident Evil",
       "system": "3ds",
       "bucket": "3ds/Resident Evil - The Mercenaries 3D (USA) (En,Fr) (Rev 1).zip"
     },
     {
       "title": "Resident Evil - Revelations (Rev 1)",
+      "series": "Resident Evil",
       "system": "3ds",
       "bucket": "3ds/Resident Evil - Revelations (USA) (En,Ja,Fr,De,Es,It) (Rev 1).zip"
     },
     {
       "title": "Metroid Prime - Federation Force",
+      "series": "Metroid",
       "system": "3ds",
       "bucket": "3ds/Metroid Prime - Federation Force (USA) (En,Fr,Es).zip"
     },
     {
       "title": "Sonic & All-Stars Racing Transformed",
+      "series": "Sonic",
       "system": "3ds",
       "bucket": "3ds/Sonic & All-Stars Racing Transformed (USA) (En,Fr,Es).zip"
     },
     {
       "title": "Tetris Ultimate",
+      "series": "Tetris",
       "system": "3ds",
       "bucket": "3ds/Tetris Ultimate (USA) (En,Fr,Es,Pt).zip"
     },
     {
       "title": "Yo-Kai Watch Blasters - Red Cat Corps",
+      "series": "Yo-kai Watch",
       "system": "3ds",
       "bucket": "3ds/Yo-Kai Watch Blasters - Red Cat Corps (USA).zip"
     },
     {
       "title": "River City - Tokyo Rumble",
+      "series": "Kunio-kun",
       "system": "3ds",
       "bucket": "3ds/River City - Tokyo Rumble (USA).zip"
     },
     {
       "title": "Sonic The Hedgehog 2 (Rev B)",
+      "series": "Sonic",
       "system": "genesis",
       "bucket": "genesis/Sonic The Hedgehog 2 (World) (Rev B).zip",
       "variants": [
@@ -1534,11 +1727,13 @@
     },
     {
       "title": "Kirby & The Amazing Mirror",
+      "series": "Kirby",
       "system": "gba",
       "bucket": "gba/Kirby & The Amazing Mirror (USA).zip"
     },
     {
       "title": "Legend of Zelda, The - A Link to the Past",
+      "series": "Zelda",
       "system": "snes",
       "bucket": "snes/Legend of Zelda, The - A Link to the Past (USA).zip",
       "variants": [
@@ -1554,36 +1749,43 @@
     },
     {
       "title": "Mario Kart - Super Circuit",
+      "series": "Mario Kart",
       "system": "gba",
       "bucket": "gba/Mario Kart - Super Circuit (USA).zip"
     },
     {
       "title": "Bomberman Tournament",
+      "series": "Bomberman",
       "system": "gba",
       "bucket": "gba/Bomberman Tournament (USA, Europe).zip"
     },
     {
       "title": "Teenage Mutant Ninja Turtles",
+      "series": "Teenage Mutant Ninja Turtles",
       "system": "gba",
       "bucket": "gba/Teenage Mutant Ninja Turtles (USA).zip"
     },
     {
       "title": "Advance Wars (Rev 1)",
+      "series": "Advance Wars",
       "system": "gba",
       "bucket": "gba/Advance Wars (USA) (Rev 1).zip"
     },
     {
       "title": "Advance Wars 2 - Black Hole Rising",
+      "series": "Advance Wars",
       "system": "gba",
       "bucket": "gba/Advance Wars 2 - Black Hole Rising (USA).zip"
     },
     {
       "title": "Sonic Advance 3",
+      "series": "Sonic",
       "system": "gba",
       "bucket": "gba/Sonic Advance 3 (USA) (En,Ja,Fr,De,Es,It).zip"
     },
     {
       "title": "Shining Soul II",
+      "series": "Shining Soul",
       "system": "gba",
       "bucket": "gba/Shining Soul II (USA).zip"
     },
@@ -1594,6 +1796,7 @@
     },
     {
       "title": "Super Mario Bros. 2 (Rev 1)",
+      "series": "Super Mario",
       "system": "nes",
       "bucket": "nes/Super Mario Bros. 2 (USA) (Rev 1).zip",
       "variants": [
@@ -1613,36 +1816,43 @@
     },
     {
       "title": "Double Dragon 3: The Rosetta Stone",
+      "series": "Double Dragon",
       "system": "fbneo",
       "bucket": "fbneo/ddragon3.zip"
     },
     {
       "title": "Streets of Rage (Rev A)",
+      "series": "Streets of Rage",
       "system": "genesis",
       "bucket": "genesis/Streets of Rage (World) (Rev A).zip"
     },
     {
       "title": "Golden Axe II",
+      "series": "Golden Axe",
       "system": "genesis",
       "bucket": "genesis/Golden Axe II (World).zip"
     },
     {
       "title": "Golden Axe III",
+      "series": "Golden Axe",
       "system": "genesis",
       "bucket": "genesis/Golden Axe III (Japan) (En).zip"
     },
     {
       "title": "ToeJam & Earl",
+      "series": "Toejam & Earl",
       "system": "genesis",
       "bucket": "genesis/ToeJam & Earl (USA, Europe, Korea) (En).zip"
     },
     {
       "title": "ToeJam & Earl in Panic on Funkotron",
+      "series": "Toejam & Earl",
       "system": "genesis",
       "bucket": "genesis/ToeJam & Earl in Panic on Funkotron (USA).zip"
     },
     {
       "title": "Sonic The Hedgehog 3",
+      "series": "Sonic",
       "system": "genesis",
       "bucket": "genesis/Sonic The Hedgehog 3 (USA).zip",
       "variants": [
@@ -1659,6 +1869,7 @@
     },
     {
       "title": "Teenage Mutant Ninja Turtles - The Hyperstone Heist",
+      "series": "Teenage Mutant Ninja Turtles",
       "system": "genesis",
       "bucket": "genesis/Teenage Mutant Ninja Turtles - The Hyperstone Heist (USA).zip"
     },
@@ -1669,16 +1880,19 @@
     },
     {
       "title": "Bomberman '94",
+      "series": "Bomberman",
       "system": "tg16",
       "bucket": "tg16/Bomberman '94 (World) (Wii U Virtual Console).zip"
     },
     {
       "title": "Micro Machines - Turbo Tournament 96",
+      "series": "Micro Machines",
       "system": "genesis",
       "bucket": "genesis/Micro Machines - Turbo Tournament 96 (Europe) (Rev 1) (J-Cart).zip"
     },
     {
       "title": "NHL '94",
+      "series": "NHL",
       "system": "genesis",
       "bucket": "genesis/NHL '94 (USA, Europe).zip"
     },
@@ -1689,6 +1903,7 @@
     },
     {
       "title": "Road Rash II",
+      "series": "Road Rash",
       "system": "genesis",
       "bucket": "genesis/Road Rash II (USA, Europe) (RR206).zip"
     },
@@ -1720,6 +1935,7 @@
     },
     {
       "title": "Puyo Puyo",
+      "series": "Puyo Puyo",
       "system": "fbneo",
       "bucket": "fbneo/puyo.zip",
       "variants": [
@@ -1751,26 +1967,31 @@
     },
     {
       "title": "Bomberman '93",
+      "series": "Bomberman",
       "system": "tg16",
       "bucket": "tg16/Bomberman '93 (USA).zip"
     },
     {
       "title": "Dungeon Explorer",
+      "series": "Dungeon Explorer",
       "system": "tg16",
       "bucket": "tg16/Dungeon Explorer (USA).zip"
     },
     {
       "title": "Moto Roader",
+      "series": "Moto Roader",
       "system": "tg16",
       "bucket": "tg16/Moto Roader (USA).zip"
     },
     {
       "title": "Battle Lode Runner",
+      "series": "Lode Runner",
       "system": "tg16",
       "bucket": "tg16/Battle Lode Runner (Japan).zip"
     },
     {
       "title": "Parasol Stars - The Story of Bubble Bobble III",
+      "series": "Bubble Bobble",
       "system": "tg16",
       "bucket": "tg16/Parasol Stars - The Story of Bubble Bobble III (USA).zip"
     },
@@ -1781,6 +2002,7 @@
     },
     {
       "title": "Dungeon Explorer II",
+      "series": "Dungeon Explorer",
       "system": "tg-cd",
       "bucket": "tg-cd/Dungeon Explorer II (USA).chd"
     },
@@ -1796,31 +2018,37 @@
     },
     {
       "title": "Streets of Rage",
+      "series": "Streets of Rage",
       "system": "mastersystem",
       "bucket": "mastersystem/Streets of Rage (Europe, Brazil) (En).zip"
     },
     {
       "title": "Super Bomberman",
+      "series": "Bomberman",
       "system": "snes",
       "bucket": "snes/Super Bomberman (USA).zip"
     },
     {
       "title": "Super Bomberman 3",
+      "series": "Bomberman",
       "system": "snes",
       "bucket": "snes/Super Bomberman 3 (Europe).zip"
     },
     {
       "title": "Super Bomberman 4",
+      "series": "Bomberman",
       "system": "snes",
       "bucket": "snes/Super Bomberman 4 (Japan) [T-En by Svambo v1.0].zip"
     },
     {
       "title": "Super Bomberman 5",
+      "series": "Bomberman",
       "system": "snes",
       "bucket": "snes/Super Bomberman 5 (Japan) [T-En by Psyklax Beta] [Add by Svambo v1.0] [i].zip"
     },
     {
       "title": "Donkey Kong Country (Rev 2)",
+      "series": "Donkey Kong",
       "system": "snes",
       "bucket": "snes/Donkey Kong Country (USA) (Rev 2).zip",
       "variants": [
@@ -1832,6 +2060,7 @@
     },
     {
       "title": "Donkey Kong Country 3 - Dixie Kong's Double Trouble!",
+      "series": "Donkey Kong",
       "system": "snes",
       "bucket": "snes/Donkey Kong Country 3 - Dixie Kong's Double Trouble! (USA) (En,Fr).zip",
       "variants": [
@@ -1843,11 +2072,13 @@
     },
     {
       "title": "Kirby's Dream Land 3",
+      "series": "Kirby",
       "system": "snes",
       "bucket": "snes/Kirby's Dream Land 3 (USA).zip"
     },
     {
       "title": "Tetris Attack",
+      "series": "Tetris",
       "system": "snes",
       "bucket": "snes/Tetris Attack (USA) (En,Ja).zip",
       "variants": [
@@ -1859,6 +2090,7 @@
     },
     {
       "title": "Final Fight 3",
+      "series": "Final Fight",
       "system": "snes",
       "bucket": "snes/Final Fight 3 (USA).zip"
     },
@@ -1875,11 +2107,13 @@
     },
     {
       "title": "Pocky & Rocky",
+      "series": "Pocky & Rocky",
       "system": "snes",
       "bucket": "snes/Pocky & Rocky (USA).zip"
     },
     {
       "title": "Pocky & Rocky 2",
+      "series": "Pocky & Rocky",
       "system": "snes",
       "bucket": "snes/Pocky & Rocky 2 (USA).zip"
     },
@@ -1890,16 +2124,19 @@
     },
     {
       "title": "Goof Troop",
+      "series": "Disney",
       "system": "snes",
       "bucket": "snes/Goof Troop (USA).zip"
     },
     {
       "title": "Joe & Mac",
+      "series": "Joe & Mac",
       "system": "snes",
       "bucket": "snes/Joe & Mac (USA).zip"
     },
     {
       "title": "Battletoads in Battlemaniacs",
+      "series": "Battletoads",
       "system": "snes",
       "bucket": "snes/Battletoads in Battlemaniacs (USA).zip"
     },
@@ -1910,11 +2147,13 @@
     },
     {
       "title": "Top Gear",
+      "series": "Top Gear",
       "system": "snes",
       "bucket": "snes/Top Gear (USA).zip"
     },
     {
       "title": "Trials of Mana",
+      "series": "Mana",
       "system": "snes",
       "bucket": "snes/Trials of Mana (World) (Rev 1) (Collection of Mana).zip"
     },
@@ -1925,6 +2164,7 @@
     },
     {
       "title": "Pop'n TwinBee",
+      "series": "Pop'n TwinBee",
       "system": "snes",
       "bucket": "snes/Pop'n TwinBee (Europe).zip"
     },
@@ -1941,6 +2181,7 @@
     },
     {
       "title": "Raiden",
+      "series": "Raiden",
       "system": "fbneo",
       "bucket": "fbneo/raidenu.zip",
       "variants": [
@@ -1952,6 +2193,7 @@
     },
     {
       "title": "International Superstar Soccer",
+      "series": "International Superstar Soccer",
       "system": "snes",
       "bucket": "snes/International Superstar Soccer (USA).zip"
     },
@@ -1962,11 +2204,13 @@
     },
     {
       "title": "Final Fight 2",
+      "series": "Final Fight",
       "system": "snes",
       "bucket": "snes/Final Fight 2 (USA).zip"
     },
     {
       "title": "Ganbare Goemon 2 - Kiteretsu Shougun Magginesu",
+      "series": "Ganbare Goemon",
       "system": "snes",
       "bucket": "snes/Ganbare! Goemon 2 - The Strange General McGuinness (Japan) [T-En by DDSTranslation v3.0] [Add by Djungelurban v1.0] [n].zip"
     },
@@ -1992,6 +2236,7 @@
     },
     {
       "title": "Micro Machines V3",
+      "series": "Micro Machines",
       "system": "psx",
       "bucket": "psx/Micro Machines V3 (USA).chd",
       "variants": [
@@ -2003,51 +2248,61 @@
     },
     {
       "title": "Bomberman Party Edition",
+      "series": "Bomberman",
       "system": "psx",
       "bucket": "psx/Bomberman - Party Edition (USA).chd"
     },
     {
       "title": "Rampage World Tour",
+      "series": "Rampage",
       "system": "fbneo",
       "bucket": "fbneo/rmpgwt.zip"
     },
     {
       "title": "Rampage: Through Time",
+      "series": "Rampage",
       "system": "psx",
       "bucket": "psx/Rampage - Through Time (USA).chd"
     },
     {
       "title": "Rampage 2: Universal Tour",
+      "series": "Rampage",
       "system": "psx",
       "bucket": "psx/Rampage 2 - Universal Tour (USA).chd"
     },
     {
       "title": "Diablo",
+      "series": "Diablo",
       "system": "psx",
       "bucket": "psx/Diablo (USA) (En,Fr,De,Sv).chd"
     },
     {
       "title": "NFL Blitz",
+      "series": "NFL",
       "system": "n64",
       "bucket": "n64/NFL Blitz (USA).zip"
     },
     {
       "title": "Time Crisis",
+      "series": "Time Crisis",
       "system": "psx",
       "bucket": "psx/Time Crisis (USA).chd"
     },
     {
       "title": "Point Blank 2",
+      "series": "Point Blank",
       "system": "psx",
       "bucket": "psx/Point Blank 2 (USA).chd"
     },
     {
       "title": "Point Blank 3",
+      "series": "Point Blank",
       "system": "psx",
       "bucket": "psx/Point Blank 3 (USA).chd"
     },
     {
       "title": "Hot Shots Golf",
+      "series": "Hot Shots",
       "system": "psx",
       "bucket": "psx/Hot Shots Golf (USA).chd"
     },
@@ -2058,11 +2313,13 @@
     },
     {
       "title": "Twisted Metal 2",
+      "series": "Twisted Metal",
       "system": "psx",
       "bucket": "psx/Twisted Metal 2 (USA).chd"
     },
     {
       "title": "Puzzle Bobble 4",
+      "series": "Puzzle Bobble",
       "system": "fbneo",
       "bucket": "fbneo/pbobble4.zip"
     },
@@ -2088,11 +2345,13 @@
     },
     {
       "title": "Tales of Destiny",
+      "series": "Tales of",
       "system": "psx",
       "bucket": "psx/Tales of Destiny (USA).chd"
     },
     {
       "title": "Legend of Mana",
+      "series": "Mana",
       "system": "psx",
       "bucket": "psx/Legend of Mana (USA).chd"
     },
@@ -2103,36 +2362,43 @@
     },
     {
       "title": "Bomberman World",
+      "series": "Bomberman",
       "system": "psx",
       "bucket": "psx/Bomberman World (USA).chd"
     },
     {
       "title": "Bomberman Fantasy Race",
+      "series": "Bomberman",
       "system": "psx",
       "bucket": "psx/Bomberman Fantasy Race (USA).chd"
     },
     {
       "title": "Chocobo Racing",
+      "series": "Final Fantasy",
       "system": "psx",
       "bucket": "psx/Chocobo Racing (USA).chd"
     },
     {
       "title": "Vigilante 8 - 2nd Offense",
+      "series": "Vigilante 8",
       "system": "psx",
       "bucket": "psx/Vigilante 8 - 2nd Offense (USA).chd"
     },
     {
       "title": "NBA Showtime - NBA on NBC",
+      "series": "NBA",
       "system": "dreamcast",
       "bucket": "dreamcast/NBA Showtime - NBA on NBC (USA).chd"
     },
     {
       "title": "Hot Shots Golf 2",
+      "series": "Hot Shots",
       "system": "psx",
       "bucket": "psx/Hot Shots Golf 2 (USA).chd"
     },
     {
       "title": "Point Blank",
+      "series": "Point Blank",
       "system": "fbneo",
       "bucket": "fbneo/ptblank.zip",
       "variants": [
@@ -2164,11 +2430,13 @@
     },
     {
       "title": "Saturn Bomberman",
+      "series": "Bomberman",
       "system": "saturn",
       "bucket": "saturn/Saturn Bomberman (USA) (1S).chd"
     },
     {
       "title": "Saturn Bomberman Fight!!",
+      "series": "Bomberman",
       "system": "saturn",
       "bucket": "saturn/Saturn Bomberman Fight!! (Japan).chd"
     },
@@ -2184,31 +2452,37 @@
     },
     {
       "title": "Die Hard Arcade",
+      "series": "Die Hard",
       "system": "mame",
       "bucket": "mame/diehard.zip"
     },
     {
       "title": "Virtua Cop",
+      "series": "Virtua Cop",
       "system": "saturn",
       "bucket": "saturn/Virtua Cop (USA) (8S, 12S).chd"
     },
     {
       "title": "Virtua Cop 2",
+      "series": "Virtua Cop",
       "system": "dreamcast",
       "bucket": "dreamcast/Virtua Cop 2 (Japan) [T-En by Derek Pascarella v1.0].chd"
     },
     {
       "title": "House of the Dead, The",
+      "series": "House of the Dead",
       "system": "saturn",
       "bucket": "saturn/House of the Dead, The (USA).chd"
     },
     {
       "title": "Sega Rally Championship Plus Netlink Edition",
+      "series": "Sega Rally",
       "system": "saturn",
       "bucket": "saturn/Sega Rally Championship Plus Netlink Edition (USA).chd"
     },
     {
       "title": "Daytona USA C.C.E. Net Link Edition",
+      "series": "Daytona USA",
       "system": "saturn",
       "bucket": "saturn/Daytona USA C.C.E. Net Link Edition (USA).chd"
     },
@@ -2219,6 +2493,7 @@
     },
     {
       "title": "Sonic R",
+      "series": "Sonic",
       "system": "saturn",
       "bucket": "saturn/Sonic R (USA, Brazil).chd"
     },
@@ -2229,11 +2504,13 @@
     },
     {
       "title": "Puzzle Bobble 3",
+      "series": "Puzzle Bobble",
       "system": "fbneo",
       "bucket": "fbneo/pbobble3.zip"
     },
     {
       "title": "Puyo Puyo Sun",
+      "series": "Puyo Puyo",
       "system": "mame",
       "bucket": "mame/puyosun.zip"
     },
@@ -2265,6 +2542,7 @@
     },
     {
       "title": "DoDonPachi",
+      "series": "DonPachi",
       "system": "fbneo",
       "bucket": "fbneo/ddonpach.zip"
     },
@@ -2275,16 +2553,19 @@
     },
     {
       "title": "Darius Gaiden",
+      "series": "Darius",
       "system": "fbneo",
       "bucket": "fbneo/dariusg.zip"
     },
     {
       "title": "Strikers 1945 (World)",
+      "series": "Strikers 1945",
       "system": "fbneo",
       "bucket": "fbneo/s1945.zip"
     },
     {
       "title": "Gunbird (World)",
+      "series": "Gunbird",
       "system": "fbneo",
       "bucket": "fbneo/gunbird.zip"
     },
@@ -2315,21 +2596,25 @@
     },
     {
       "title": "Worms",
+      "series": "Worms",
       "system": "psx",
       "bucket": "psx/Worms (USA).chd"
     },
     {
       "title": "Super Sidekicks",
+      "series": "Super Sidekicks",
       "system": "fbneo",
       "bucket": "fbneo/ssideki.zip"
     },
     {
       "title": "Super Sidekicks 2",
+      "series": "Super Sidekicks",
       "system": "neogeocd",
       "bucket": "neogeocd/Tokuten-ou 2 ~ Super Sidekicks 2 - The World Championship (Japan) (En,Ja,Es).chd"
     },
     {
       "title": "Super Sidekicks 3",
+      "series": "Super Sidekicks",
       "system": "neogeocd",
       "bucket": "neogeocd/Tokuten-ou 3 - Eikou e no Chousen ~ Super Sidekicks 3 - The Next Glory (World) (En,Ja,Fr,Es,It,Pt).chd"
     },
@@ -2340,6 +2625,7 @@
     },
     {
       "title": "Baseball Stars 2",
+      "series": "Baseball Stars",
       "system": "fbneo",
       "bucket": "fbneo/bstars2.zip"
     },
@@ -2380,6 +2666,7 @@
     },
     {
       "title": "Sengoku 2",
+      "series": "Sengoku",
       "system": "fbneo",
       "bucket": "fbneo/sengoku2.zip"
     },
@@ -2410,6 +2697,7 @@
     },
     {
       "title": "Puzzle Bobble",
+      "series": "Puzzle Bobble",
       "system": "fbneo",
       "bucket": "fbneo/pbobblen.zip"
     },
@@ -2430,21 +2718,25 @@
     },
     {
       "title": "Aero Fighters 2",
+      "series": "Aero Fighters",
       "system": "fbneo",
       "bucket": "fbneo/sonicwi2.zip"
     },
     {
       "title": "Burnout 3 - Takedown",
+      "series": "Burnout",
       "system": "ps2",
       "bucket": "ps2/Burnout 3 - Takedown (USA).chd"
     },
     {
       "title": "Capcom Classics Collection Vol. 2",
+      "series": "Capcom Classics",
       "system": "ps2",
       "bucket": "ps2/Capcom Classics Collection Vol. 2 (USA).chd"
     },
     {
       "title": "Gradius V",
+      "series": "Gradius",
       "system": "ps2",
       "bucket": "ps2/Gradius V (USA).chd"
     },
@@ -2455,16 +2747,19 @@
     },
     {
       "title": "Ratchet & Clank - Up Your Arsenal",
+      "series": "Ratchet & Clank",
       "system": "ps2",
       "bucket": "ps2/Ratchet & Clank - Up Your Arsenal (USA) (En,Fr,Es).chd"
     },
     {
       "title": "Tony Hawk's Pro Skater 3 (Rev 1)",
+      "series": "Tony Hawk",
       "system": "ps2",
       "bucket": "ps2/Tony Hawk's Pro Skater 3 (USA) (Rev 1).chd"
     },
     {
       "title": "Raiden III",
+      "series": "Raiden",
       "system": "ps2",
       "bucket": "ps2/Raiden III (USA).chd"
     },
@@ -2475,6 +2770,7 @@
     },
     {
       "title": "Donkey Kong Country Returns",
+      "series": "Donkey Kong",
       "system": "wii",
       "bucket": "wii/Donkey Kong Country Returns (USA) (En,Fr,Es).rvz",
       "variants": [
@@ -2486,6 +2782,7 @@
     },
     {
       "title": "Kirby's Epic Yarn",
+      "series": "Kirby",
       "system": "wii",
       "bucket": "wii/Kirby's Epic Yarn (USA) (En,Fr,Es).rvz",
       "variants": [
@@ -2497,11 +2794,13 @@
     },
     {
       "title": "Kirby's Return to Dream Land",
+      "series": "Kirby",
       "system": "wii",
       "bucket": "wii/Kirby's Return to Dream Land (USA) (En,Fr,Es).rvz"
     },
     {
       "title": "Mario Kart Wii",
+      "series": "Mario Kart",
       "system": "wii",
       "bucket": "wii/Mario Kart Wii (USA) (En,Fr,Es).rvz"
     },
@@ -2512,26 +2811,31 @@
     },
     {
       "title": "New Super Mario Bros. Wii",
+      "series": "Super Mario",
       "system": "wii",
       "bucket": "wii/New Super Mario Bros. Wii (USA) (En,Fr,Es) (Rev 2).rvz"
     },
     {
       "title": "Rayman Origins",
+      "series": "Rayman",
       "system": "wii",
       "bucket": "wii/Rayman Origins (USA) (En,Fr,Es).rvz"
     },
     {
       "title": "Super Smash Bros. Brawl",
+      "series": "Smash Bros",
       "system": "wii",
       "bucket": "wii/Super Smash Bros. Brawl (USA) (Rev 2).rvz"
     },
     {
       "title": "Sonic & Sega All-Stars Racing",
+      "series": "Sonic",
       "system": "wii",
       "bucket": "wii/Sonic & Sega All-Stars Racing (USA) (En,Fr,Es).rvz"
     },
     {
       "title": "Disney Epic Mickey 2 - The Power of Two",
+      "series": "Disney",
       "system": "wii",
       "bucket": "wii/Disney Epic Mickey 2 - The Power of Two (USA) (En,Fr,Es,Pt).rvz"
     },
@@ -2542,11 +2846,13 @@
     },
     {
       "title": "Power Stone",
+      "series": "Power Stone",
       "system": "dreamcast",
       "bucket": "dreamcast/Power Stone (USA).chd"
     },
     {
       "title": "Power Stone 2",
+      "series": "Power Stone",
       "system": "dreamcast",
       "bucket": "dreamcast/Power Stone 2 (USA).chd"
     },
@@ -2563,11 +2869,13 @@
     },
     {
       "title": "Sonic Shuffle",
+      "series": "Sonic",
       "system": "dreamcast",
       "bucket": "dreamcast/Sonic Shuffle (USA).chd"
     },
     {
       "title": "Bomberman Online",
+      "series": "Bomberman",
       "system": "dreamcast",
       "bucket": "dreamcast/Bomberman Online (USA).chd"
     },
@@ -2584,6 +2892,7 @@
     },
     {
       "title": "Virtua Tennis",
+      "series": "Virtua Tennis",
       "system": "dreamcast",
       "bucket": "dreamcast/Virtua Tennis (USA).chd"
     },
@@ -2599,11 +2908,13 @@
     },
     {
       "title": "NFL 2K2",
+      "series": "NFL",
       "system": "dreamcast",
       "bucket": "dreamcast/NFL 2K2 (USA).chd"
     },
     {
       "title": "NBA 2K2",
+      "series": "NBA",
       "system": "dreamcast",
       "bucket": "dreamcast/NBA 2K2 (USA).chd"
     },
@@ -2619,11 +2930,13 @@
     },
     {
       "title": "Daytona USA",
+      "series": "Daytona USA",
       "system": "dreamcast",
       "bucket": "dreamcast/Daytona USA (USA).chd"
     },
     {
       "title": "Sega Rally 2",
+      "series": "Sega Rally",
       "system": "dreamcast",
       "bucket": "dreamcast/Sega Rally 2 (USA).chd"
     },
@@ -2649,6 +2962,7 @@
     },
     {
       "title": "Quake III - Arena",
+      "series": "Quake",
       "system": "dreamcast",
       "bucket": "dreamcast/Quake III - Arena (USA).chd"
     },
@@ -2684,6 +2998,7 @@
     },
     {
       "title": "House of the Dead 2, The",
+      "series": "House of the Dead",
       "system": "dreamcast",
       "bucket": "dreamcast/House of the Dead 2, The (USA).chd"
     },
@@ -2724,6 +3039,7 @@
     },
     {
       "title": "Gunbird 2",
+      "series": "Gunbird",
       "system": "fbneo",
       "bucket": "fbneo/gunbird2.zip",
       "variants": [
@@ -2756,11 +3072,13 @@
     },
     {
       "title": "Halo: Combat Evolved",
+      "series": "Halo",
       "system": "xbox",
       "bucket": "xbox/Halo - Combat Evolved (USA) (Rev 2).iso"
     },
     {
       "title": "Halo 2",
+      "series": "Halo",
       "system": "xbox",
       "bucket": "xbox/Halo 2 (USA, Europe) (En,Ja,Fr,De,Es,It,Zh,Ko).iso"
     },
@@ -2776,6 +3094,7 @@
     },
     {
       "title": "Dead or Alive Xtreme Beach Volleyball",
+      "series": "Dead or Alive",
       "system": "xbox",
       "bucket": "xbox/Dead or Alive Xtreme Beach Volleyball (USA) (En,Ja).iso"
     },
@@ -2791,6 +3110,7 @@
     },
     {
       "title": "Project Gotham Racing 2",
+      "series": "Project Gotham",
       "system": "xbox",
       "bucket": "xbox/Project Gotham Racing 2 (USA, Japan) (En,Ja,Fr,De,Es,It,Zh,Ko).iso"
     },
@@ -2836,6 +3156,7 @@
     },
     {
       "title": "Joust",
+      "series": "Joust",
       "system": "fbneo",
       "bucket": "fbneo/joust.zip"
     },
@@ -2876,6 +3197,7 @@
     },
     {
       "title": "Atari Karts",
+      "series": "Atari Collection",
       "system": "atarijaguar",
       "bucket": "atarijaguar/Atari Karts (World).zip"
     },
@@ -2897,6 +3219,7 @@
     },
     {
       "title": "Bomberman Special",
+      "series": "Bomberman",
       "system": "msx",
       "bucket": "msx/Bomberman Special (Japan).zip"
     },
@@ -2922,6 +3245,7 @@
     },
     {
       "title": "Knuckles' Chaotix",
+      "series": "Sonic",
       "system": "sega32x",
       "bucket": "sega32x/Knuckles' Chaotix (Japan, USA) (En).zip"
     },
@@ -2947,26 +3271,31 @@
     },
     {
       "title": "Super Mario 3D World",
+      "series": "Super Mario",
       "system": "wiiu",
       "bucket": "wiiu/SUPER MARIO 3D WORLD (US).wua"
     },
     {
       "title": "New Super Mario Bros. U",
+      "series": "Super Mario",
       "system": "wiiu",
       "bucket": "wiiu/New SUPER MARIO BROS. U (US) (v64).wua"
     },
     {
       "title": "Mario Kart 8",
+      "series": "Mario Kart",
       "system": "wiiu",
       "bucket": "wiiu/MARIO KART 8 (US) (v81).wua"
     },
     {
       "title": "Rayman Legends",
+      "series": "Rayman",
       "system": "wiiu",
       "bucket": "wiiu/Rayman Legends (US).wua"
     },
     {
       "title": "Donkey Kong Country: Tropical Freeze",
+      "series": "Donkey Kong",
       "system": "wiiu",
       "bucket": "wiiu/DKC Tropical Freeze (US) (v16).wua"
     },
@@ -2983,11 +3312,13 @@
     },
     {
       "title": "Pikmin 3",
+      "series": "Pikmin",
       "system": "wiiu",
       "bucket": "wiiu/PIKMIN 3 (US) (v96).wua"
     },
     {
       "title": "Yoshi's Woolly World",
+      "series": "Yoshi",
       "system": "wiiu",
       "bucket": "wiiu/Yoshi's Woolly World (US) (v32).wua",
       "variants": [
@@ -3004,46 +3335,55 @@
     },
     {
       "title": "Kirby and the Rainbow Curse",
+      "series": "Kirby",
       "system": "wiiu",
       "bucket": "wiiu/Kirby and the Rainbow Curse (US) (v16).wua"
     },
     {
       "title": "Gears of War 3",
+      "series": "Gears of War",
       "system": "xbox360",
       "bucket": "xbox360/Gears of War 3 (World) (En,Fr,Pt,Zh,Ko,Pl,Ru,Cs,Hu).zar"
     },
     {
       "title": "Borderlands 2",
+      "series": "Borderlands",
       "system": "xbox360",
       "bucket": "xbox360/Borderlands 2 (World) (En,Ja,Fr,De,Es,It).zar"
     },
     {
       "title": "Gears of War",
+      "series": "Gears of War",
       "system": "xbox360",
       "bucket": "xbox360/Gears of War (World) (En,Fr,De,Es,It,Zh,Ko).zar"
     },
     {
       "title": "Gears of War 2",
+      "series": "Gears of War",
       "system": "xbox360",
       "bucket": "xbox360/Gears of War 2 (USA) (En,Fr,De,Es,It,Zh,Ko,Pl,Ru,Cs,Hu).zar"
     },
     {
       "title": "Gears of War - Judgment",
+      "series": "Gears of War",
       "system": "xbox360",
       "bucket": "xbox360/Gears of War - Judgment (USA, Europe) (En,Fr,Es,Nl,No,Da,Fi,Zh,Ko,Pl,Ru,Cs).zar"
     },
     {
       "title": "Halo 3",
+      "series": "Halo",
       "system": "xbox360",
       "bucket": "xbox360/Halo 3 (USA, Europe) (En,Ja,Fr,De,Es,It,Pt,Zh,Ko).zar"
     },
     {
       "title": "Halo - Reach",
+      "series": "Halo",
       "system": "xbox360",
       "bucket": "xbox360/Halo - Reach (World) (En,Ja,Fr,De,Es,It,Pt,Zh,Ko).zar"
     },
     {
       "title": "Halo 4",
+      "series": "Halo",
       "system": "xbox360",
       "bucket": "xbox360/Halo 4 (World) (En,Ja,Fr,De,Es,It,Nl,Pt,No,Da,Fi,Zh,Ko,Pl,Ru) (Disc 1).zar",
       "files": [
@@ -3057,6 +3397,7 @@
     },
     {
       "title": "Borderlands",
+      "series": "Borderlands",
       "system": "xbox360",
       "bucket": "xbox360/Borderlands (World) (En,Fr,De,Es,It).zar"
     },
@@ -3067,6 +3408,7 @@
     },
     {
       "title": "Deathsmiles",
+      "series": "Mushihime-sama",
       "system": "fbneo",
       "bucket": "fbneo/deathsml.zip",
       "variants": [
@@ -3078,11 +3420,13 @@
     },
     {
       "title": "Burnout Revenge",
+      "series": "Burnout",
       "system": "xbox360",
       "bucket": "xbox360/Burnout Revenge (USA).zar"
     },
     {
       "title": "Monster Hunter Freedom 2",
+      "series": "Monster Hunter",
       "system": "psp",
       "bucket": "psp/Monster Hunter Freedom 2 (USA).chd",
       "variants": [
@@ -3094,11 +3438,13 @@
     },
     {
       "title": "Metal Gear Solid - Peace Walker (v2.00)",
+      "series": "Metal Gear",
       "system": "psp",
       "bucket": "psp/Metal Gear Solid - Peace Walker (USA) (En,Fr,Es) (v2.00).chd"
     },
     {
       "title": "Phantasy Star Portable 2",
+      "series": "Phantasy Star",
       "system": "psp",
       "bucket": "psp/Phantasy Star Portable 2 (USA).chd",
       "variants": [
@@ -3121,11 +3467,13 @@
     },
     {
       "title": "Patapon 3",
+      "series": "Patapon",
       "system": "psp",
       "bucket": "psp/Patapon 3 (USA) (En,Fr,Es,Pt).chd"
     },
     {
       "title": "LittleBigPlanet",
+      "series": "LittleBigPlanet",
       "system": "psp",
       "bucket": "psp/LittleBigPlanet (USA) (En,Fr,De,Es,It,Pt).chd"
     },
@@ -3141,6 +3489,7 @@
     },
     {
       "title": "LittleBigPlanet Marvel Edition",
+      "series": "LittleBigPlanet",
       "system": "psvita",
       "bucket": "psvita/LittleBigPlanet™ Marvel Edition [PCSA00549] [USA] [NoNpDRM].zip"
     },
@@ -3151,11 +3500,13 @@
     },
     {
       "title": "Major League Baseball",
+      "series": "MLB",
       "system": "intellivision",
       "bucket": "intellivision/Major League Baseball (World).zip"
     },
     {
       "title": "NFL Football",
+      "series": "NFL",
       "system": "intellivision",
       "bucket": "intellivision/NFL Football (World).zip"
     },
@@ -3192,11 +3543,13 @@
     },
     {
       "title": "NHL Hockey",
+      "series": "NHL",
       "system": "intellivision",
       "bucket": "intellivision/NHL Hockey (World).zip"
     },
     {
       "title": "NBA Basketball",
+      "series": "NBA",
       "system": "intellivision",
       "bucket": "intellivision/NBA Basketball (USA, Europe).zip"
     },
@@ -3312,16 +3665,19 @@
     },
     {
       "title": "Contra Force",
+      "series": "Contra",
       "system": "nes",
       "bucket": "nes/Contra Force (USA).zip"
     },
     {
       "title": "TwinBee 3 - Poko Poko Daimaou",
+      "series": "Twinbee",
       "system": "nes",
       "bucket": "nes/TwinBee 3 - Poko Poko Daimaou (Japan).zip"
     },
     {
       "title": "Metal Slug 2 - Super Vehicle-001/II (NGM-2410 ~ NGH-2410)",
+      "series": "Metal Slug",
       "system": "fbneo",
       "bucket": "fbneo/mslug2.zip"
     },
@@ -3342,6 +3698,7 @@
     },
     {
       "title": "Fire Emblem Warriors",
+      "series": "Fire Emblem",
       "system": "n3ds",
       "bucket": "n3ds/Fire Emblem Warriors (USA).3ds"
     },
@@ -3357,16 +3714,19 @@
     },
     {
       "title": "Baldur's Gate - Dark Alliance II",
+      "series": "Baldur's Gate",
       "system": "xbox",
       "bucket": "xbox/Baldur's Gate - Dark Alliance II (USA).iso"
     },
     {
       "title": "Dungeons & Dragons - Heroes",
+      "series": "Dungeons & Dragons",
       "system": "xbox",
       "bucket": "xbox/Dungeons & Dragons - Heroes (USA).iso"
     },
     {
       "title": "Diablo 2 Resurrected",
+      "series": "Diablo",
       "system": "switch",
       "bucket": "switch/Diablo 2 Resurrected.nsp"
     },

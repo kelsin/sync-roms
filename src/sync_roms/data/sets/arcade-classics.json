@@ -5,6 +5,7 @@
     {
       "title": "Space Invaders",
       "category": "Golden Age",
+      "series": "Space Invaders",
       "system": "fbneo",
       "bucket": "fbneo/invaders.zip",
       "variants": [
@@ -29,6 +30,7 @@
     {
       "title": "Galaxian",
       "category": "Golden Age",
+      "series": "Galaga",
       "system": "fbneo",
       "bucket": "fbneo/galaxian.zip"
     },
@@ -41,6 +43,7 @@
     {
       "title": "Space Invaders Part II",
       "category": "Golden Age",
+      "series": "Space Invaders",
       "system": "mame",
       "bucket": "mame/invadpt2.zip"
     },
@@ -53,6 +56,7 @@
     {
       "title": "Battlezone",
       "category": "Golden Age",
+      "series": "Battlezone",
       "system": "fbneo",
       "bucket": "fbneo/bzone.zip"
     },
@@ -101,6 +105,7 @@
     {
       "title": "Pac-Man",
       "category": "Golden Age",
+      "series": "Pac-Man",
       "system": "fbneo",
       "bucket": "fbneo/pacman.zip"
     },
@@ -137,6 +142,7 @@
     {
       "title": "Tempest",
       "category": "Golden Age",
+      "series": "Tempest",
       "system": "fbneo",
       "bucket": "fbneo/tempest.zip"
     },
@@ -161,6 +167,7 @@
     {
       "title": "Donkey Kong",
       "category": "Golden Age",
+      "series": "Donkey Kong",
       "system": "fbneo",
       "bucket": "fbneo/dkong.zip"
     },
@@ -173,12 +180,14 @@
     {
       "title": "Frogger",
       "category": "Golden Age",
+      "series": "Frogger",
       "system": "fbneo",
       "bucket": "fbneo/frogger.zip"
     },
     {
       "title": "Galaga",
       "category": "Golden Age",
+      "series": "Galaga",
       "system": "fbneo",
       "bucket": "fbneo/galaga.zip"
     },
@@ -221,6 +230,7 @@
     {
       "title": "Ms. Pac-Man",
       "category": "Golden Age",
+      "series": "Pac-Man",
       "system": "fbneo",
       "bucket": "fbneo/mspacman.zip",
       "variants": [
@@ -251,6 +261,7 @@
     {
       "title": "Qix",
       "category": "Golden Age",
+      "series": "Qix",
       "system": "fbneo",
       "bucket": "fbneo/qix.zip"
     },
@@ -335,18 +346,21 @@
     {
       "title": "BurgerTime",
       "category": "Golden Age",
+      "series": "Burgertime",
       "system": "fbneo",
       "bucket": "fbneo/btime3.zip"
     },
     {
       "title": "Dig Dug",
       "category": "Golden Age",
+      "series": "Dig Dug",
       "system": "fbneo",
       "bucket": "fbneo/digdug.zip"
     },
     {
       "title": "Donkey Kong Junior",
       "category": "Golden Age",
+      "series": "Donkey Kong",
       "system": "fbneo",
       "bucket": "fbneo/dkongjr.zip"
     },
@@ -377,6 +391,7 @@
     {
       "title": "Joust",
       "category": "Golden Age",
+      "series": "Joust",
       "system": "fbneo",
       "bucket": "fbneo/joust.zip"
     },
@@ -407,6 +422,7 @@
     {
       "title": "Mr. Do!",
       "category": "Golden Age",
+      "series": "Mr. Do!",
       "system": "fbneo",
       "bucket": "fbneo/mrdo.zip"
     },
@@ -419,6 +435,7 @@
     {
       "title": "Pac-Man Plus",
       "category": "Golden Age",
+      "series": "Pac-Man",
       "system": "fbneo",
       "bucket": "fbneo/pacplus.zip"
     },
@@ -431,6 +448,7 @@
     {
       "title": "Pole Position",
       "category": "Golden Age",
+      "series": "Pole Position",
       "system": "mame",
       "bucket": "mame/polepos.zip"
     },
@@ -449,12 +467,14 @@
     {
       "title": "Q*bert",
       "category": "Golden Age",
+      "series": "Q*bert",
       "system": "fbneo",
       "bucket": "fbneo/qbert.zip"
     },
     {
       "title": "Robotron: 2084",
       "category": "Golden Age",
+      "series": "Robotron",
       "system": "fbneo",
       "bucket": "fbneo/robotron.zip"
     },
@@ -467,6 +487,7 @@
     {
       "title": "Star Trek",
       "category": "Golden Age",
+      "series": "Star Trek",
       "system": "fbneo",
       "bucket": "fbneo/startrek.zip"
     },
@@ -479,6 +500,7 @@
     {
       "title": "Time Pilot",
       "category": "Golden Age",
+      "series": "Time Pilot",
       "system": "fbneo",
       "bucket": "fbneo/timeplt.zip"
     },
@@ -497,12 +519,14 @@
     {
       "title": "Xevious",
       "category": "Golden Age",
+      "series": "Xevious",
       "system": "fbneo",
       "bucket": "fbneo/xevious.zip"
     },
     {
       "title": "Zaxxon",
       "category": "Golden Age",
+      "series": "Zaxxon",
       "system": "fbneo",
       "bucket": "fbneo/zaxxon.zip"
     },
@@ -533,6 +557,7 @@
     {
       "title": "Congo Bongo",
       "category": "Golden Age",
+      "series": "Congo Bongo",
       "system": "fbneo",
       "bucket": "fbneo/congo.zip"
     },
@@ -551,12 +576,14 @@
     {
       "title": "Donkey Kong 3",
       "category": "Golden Age",
+      "series": "Donkey Kong",
       "system": "fbneo",
       "bucket": "fbneo/dkong3.zip"
     },
     {
       "title": "Elevator Action",
       "category": "Golden Age",
+      "series": "Elevator Action",
       "system": "fbneo",
       "bucket": "fbneo/elevator.zip"
     },
@@ -611,18 +638,21 @@
     {
       "title": "Mappy",
       "category": "Golden Age",
+      "series": "Mappy",
       "system": "fbneo",
       "bucket": "fbneo/mappy.zip"
     },
     {
       "title": "Mario Bros.",
       "category": "Golden Age",
+      "series": "Super Mario",
       "system": "fbneo",
       "bucket": "fbneo/mario.zip"
     },
     {
       "title": "Mr. Do's Castle",
       "category": "Golden Age",
+      "series": "Mr. Do!",
       "system": "fbneo",
       "bucket": "fbneo/docastle.zip"
     },
@@ -635,6 +665,7 @@
     {
       "title": "Pole Position II",
       "category": "Golden Age",
+      "series": "Pole Position",
       "system": "mame",
       "bucket": "mame/polepos2.zip"
     },
@@ -647,12 +678,14 @@
     {
       "title": "Spy Hunter",
       "category": "Golden Age",
+      "series": "Spy Hunter",
       "system": "fbneo",
       "bucket": "fbneo/spyhunt.zip"
     },
     {
       "title": "Star Wars",
       "category": "Golden Age",
+      "series": "Star Wars",
       "system": "fbneo",
       "bucket": "fbneo/starwars.zip"
     },
@@ -665,6 +698,7 @@
     {
       "title": "Track & Field",
       "category": "Golden Age",
+      "series": "Track & Field",
       "system": "fbneo",
       "bucket": "fbneo/trackfld.zip"
     },
@@ -677,6 +711,7 @@
     {
       "title": "1942",
       "category": "Golden Age",
+      "series": "1941 / 1942 (Capcom)",
       "system": "fbneo",
       "bucket": "fbneo/1942.zip"
     },
@@ -719,6 +754,7 @@
     {
       "title": "Hyper Sports",
       "category": "Golden Age",
+      "series": "Hyper Sports",
       "system": "fbneo",
       "bucket": "fbneo/hyperspt.zip"
     },
@@ -731,6 +767,7 @@
     {
       "title": "Lode Runner",
       "category": "Golden Age",
+      "series": "Lode Runner",
       "system": "c64",
       "bucket": "c64/Lode Runner (USA, Europe).zip",
       "variants": [
@@ -761,6 +798,7 @@
     {
       "title": "Pac-Land",
       "category": "Golden Age",
+      "series": "Pac-Man",
       "system": "fbneo",
       "bucket": "fbneo/pacland.zip"
     },
@@ -827,6 +865,7 @@
     {
       "title": "Time Pilot '84",
       "category": "Golden Age",
+      "series": "Time Pilot",
       "system": "fbneo",
       "bucket": "fbneo/tp84.zip"
     },
@@ -839,6 +878,7 @@
     {
       "title": "Excitebike",
       "category": "Golden Age",
+      "series": "Excitebike",
       "system": "nes",
       "bucket": "nes/Excitebike (Japan, USA) (En).zip",
       "variants": [
@@ -869,6 +909,7 @@
     {
       "title": "Q*bert's Qubes",
       "category": "Golden Age",
+      "series": "Q*bert",
       "system": "fbneo",
       "bucket": "fbneo/qbertqub.zip"
     },
@@ -893,6 +934,7 @@
     {
       "title": "Dig Dug II",
       "category": "Namco",
+      "series": "Dig Dug",
       "system": "fbneo",
       "bucket": "fbneo/digdug2.zip"
     },
@@ -911,6 +953,7 @@
     {
       "title": "Rolling Thunder",
       "category": "Namco",
+      "series": "Rolling Thunder",
       "system": "fbneo",
       "bucket": "fbneo/rthunder.zip"
     },
@@ -923,12 +966,14 @@
     {
       "title": "Final Lap",
       "category": "Namco",
+      "series": "Final Lap",
       "system": "fbneo",
       "bucket": "fbneo/finallap.zip"
     },
     {
       "title": "Pac-Mania",
       "category": "Namco",
+      "series": "Pac-Man",
       "system": "fbneo",
       "bucket": "fbneo/pacmania.zip"
     },
@@ -953,12 +998,14 @@
     {
       "title": "Splatterhouse",
       "category": "Namco",
+      "series": "Splatterhouse",
       "system": "fbneo",
       "bucket": "fbneo/splatter.zip"
     },
     {
       "title": "Marvel Land",
       "category": "Namco",
+      "series": "Marvel",
       "system": "fbneo",
       "bucket": "fbneo/marvland.zip"
     },
@@ -971,6 +1018,7 @@
     {
       "title": "Rolling Thunder 2",
       "category": "Namco",
+      "series": "Rolling Thunder",
       "system": "fbneo",
       "bucket": "fbneo/rthun2.zip"
     },
@@ -989,6 +1037,7 @@
     {
       "title": "Point Blank",
       "category": "Namco",
+      "series": "Point Blank",
       "system": "fbneo",
       "bucket": "fbneo/ptblank.zip",
       "variants": [
@@ -1013,12 +1062,14 @@
     {
       "title": "Mr. Driller",
       "category": "Namco",
+      "series": "Mr. Driller",
       "system": "mame",
       "bucket": "mame/mrdrillr.zip"
     },
     {
       "title": "Mr. Driller 2",
       "category": "Namco",
+      "series": "Mr. Driller",
       "system": "mame",
       "bucket": "mame/mrdrilr2.zip"
     },
@@ -1061,6 +1112,7 @@
     {
       "title": "Gauntlet",
       "category": "Atari, Midway & Williams",
+      "series": "Gauntlet",
       "system": "fbneo",
       "bucket": "fbneo/gauntlet.zip",
       "variants": [
@@ -1073,12 +1125,14 @@
     {
       "title": "Indiana Jones and the Temple of Doom",
       "category": "Atari, Midway & Williams",
+      "series": "Indiana Jones",
       "system": "mame",
       "bucket": "mame/indytemp.zip"
     },
     {
       "title": "Road Runner",
       "category": "Atari, Midway & Williams",
+      "series": "Looney Tunes",
       "system": "mame",
       "bucket": "mame/roadrunn.zip"
     },
@@ -1103,18 +1157,21 @@
     {
       "title": "Gauntlet II",
       "category": "Atari, Midway & Williams",
+      "series": "Gauntlet",
       "system": "fbneo",
       "bucket": "fbneo/gaunt2.zip"
     },
     {
       "title": "Joust 2: Survival of the Fittest",
       "category": "Atari, Midway & Williams",
+      "series": "Joust",
       "system": "mame",
       "bucket": "mame/joust2.zip"
     },
     {
       "title": "Rampage",
       "category": "Atari, Midway & Williams",
+      "series": "Rampage",
       "system": "fbneo",
       "bucket": "fbneo/rampage.zip"
     },
@@ -1175,6 +1232,7 @@
     {
       "title": "Tetris (Atari)",
       "category": "Atari, Midway & Williams",
+      "series": "Tetris",
       "system": "fbneo",
       "bucket": "fbneo/atetris.zip"
     },
@@ -1241,30 +1299,35 @@
     {
       "title": "NBA Jam Tournament Edition",
       "category": "Atari, Midway & Williams",
+      "series": "NBA",
       "system": "fbneo",
       "bucket": "fbneo/nbajamte.zip"
     },
     {
       "title": "Cruis'n USA",
       "category": "Atari, Midway & Williams",
+      "series": "Cruis'n",
       "system": "mame",
       "bucket": "mame/crusnusa.zip"
     },
     {
       "title": "NHL Open Ice: 2 on 2 Challenge",
       "category": "Atari, Midway & Williams",
+      "series": "NHL",
       "system": "fbneo",
       "bucket": "fbneo/openice.zip"
     },
     {
       "title": "NBA Hangtime",
       "category": "Atari, Midway & Williams",
+      "series": "NBA",
       "system": "fbneo",
       "bucket": "fbneo/nbahangt.zip"
     },
     {
       "title": "Rampage World Tour",
       "category": "Atari, Midway & Williams",
+      "series": "Rampage",
       "system": "fbneo",
       "bucket": "fbneo/rmpgwt.zip"
     },
@@ -1301,30 +1364,35 @@
     {
       "title": "Choplifter",
       "category": "Sega",
+      "series": "Choplifter",
       "system": "fbneo",
       "bucket": "fbneo/choplift.zip"
     },
     {
       "title": "Hang-On",
       "category": "Sega",
+      "series": "Hang-On",
       "system": "fbneo",
       "bucket": "fbneo/hangon.zip"
     },
     {
       "title": "Pitfall II",
       "category": "Sega",
+      "series": "Pitfall",
       "system": "fbneo",
       "bucket": "fbneo/pitfall2.zip"
     },
     {
       "title": "Space Harrier",
       "category": "Sega",
+      "series": "Space Harrier",
       "system": "fbneo",
       "bucket": "fbneo/sharrier.zip"
     },
     {
       "title": "Alex Kidd: The Lost Stars",
       "category": "Sega",
+      "series": "Alex Kidd",
       "system": "fbneo",
       "bucket": "fbneo/alexkidd.zip"
     },
@@ -1337,6 +1405,7 @@
     {
       "title": "Out Run",
       "category": "Sega",
+      "series": "OutRun",
       "system": "fbneo",
       "bucket": "fbneo/outrun.zip"
     },
@@ -1349,18 +1418,21 @@
     {
       "title": "Wonder Boy",
       "category": "Sega",
+      "series": "Wonder Boy",
       "system": "fbneo",
       "bucket": "fbneo/wboy.zip"
     },
     {
       "title": "After Burner II",
       "category": "Sega",
+      "series": "After Burner",
       "system": "fbneo",
       "bucket": "fbneo/aburner2.zip"
     },
     {
       "title": "Shinobi",
       "category": "Sega",
+      "series": "Shinobi",
       "system": "fbneo",
       "bucket": "fbneo/shinobi.zip"
     },
@@ -1379,6 +1451,7 @@
     {
       "title": "Wonder Boy: Monster Land",
       "category": "Sega",
+      "series": "Wonder Boy",
       "system": "fbneo",
       "bucket": "fbneo/wbml.zip"
     },
@@ -1415,12 +1488,14 @@
     {
       "title": "Tetris (Sega)",
       "category": "Sega",
+      "series": "Tetris",
       "system": "fbneo",
       "bucket": "fbneo/tetris.zip"
     },
     {
       "title": "Wonder Boy III: Monster Lair",
       "category": "Sega",
+      "series": "Wonder Boy",
       "system": "fbneo",
       "bucket": "fbneo/wb3.zip"
     },
@@ -1439,12 +1514,14 @@
     {
       "title": "Golden Axe",
       "category": "Sega",
+      "series": "Golden Axe",
       "system": "fbneo",
       "bucket": "fbneo/goldnaxe.zip"
     },
     {
       "title": "Shadow Dancer",
       "category": "Sega",
+      "series": "Shadow Dancer",
       "system": "fbneo",
       "bucket": "fbneo/shdancer1.zip"
     },
@@ -1469,6 +1546,7 @@
     {
       "title": "Columns",
       "category": "Sega",
+      "series": "Columns",
       "system": "fbneo",
       "bucket": "fbneo/columns.zip"
     },
@@ -1481,24 +1559,28 @@
     {
       "title": "Spider-Man: The Videogame",
       "category": "Sega",
+      "series": "Spider-Man",
       "system": "fbneo",
       "bucket": "fbneo/spidmanu.zip"
     },
     {
       "title": "Golden Axe: The Revenge of Death Adder",
       "category": "Sega",
+      "series": "Golden Axe",
       "system": "fbneo",
       "bucket": "fbneo/ga2u.zip"
     },
     {
       "title": "OutRunners",
       "category": "Sega",
+      "series": "OutRun",
       "system": "fbneo",
       "bucket": "fbneo/orunnersu.zip"
     },
     {
       "title": "Puyo Puyo",
       "category": "Sega",
+      "series": "Puyo Puyo",
       "system": "fbneo",
       "bucket": "fbneo/puyo.zip",
       "variants": [
@@ -1521,30 +1603,35 @@
     {
       "title": "SegaSonic The Hedgehog",
       "category": "Sega",
+      "series": "Sonic",
       "system": "fbneo",
       "bucket": "fbneo/sonic.zip"
     },
     {
       "title": "Puyo Puyo 2",
       "category": "Sega",
+      "series": "Puyo Puyo",
       "system": "fbneo",
       "bucket": "fbneo/puyopuy2.zip"
     },
     {
       "title": "OutRun 2",
       "category": "Sega",
+      "series": "OutRun",
       "system": "xbox",
       "bucket": "xbox/OutRun 2 (Japan) [T-En by Justin Gibbins v1.0].iso"
     },
     {
       "title": "Arkanoid",
       "category": "Taito",
+      "series": "Arkanoid",
       "system": "fbneo",
       "bucket": "fbneo/arkanoidu.zip"
     },
     {
       "title": "Bubble Bobble",
       "category": "Taito",
+      "series": "Bubble Bobble",
       "system": "fbneo",
       "bucket": "fbneo/bublboblr.zip",
       "variants": [
@@ -1561,12 +1648,14 @@
     {
       "title": "KiKi KaiKai",
       "category": "Taito",
+      "series": "Kiki Kaikai",
       "system": "fbneo",
       "bucket": "fbneo/kikikai.zip"
     },
     {
       "title": "Arkanoid: Revenge of Doh",
       "category": "Taito",
+      "series": "Arkanoid",
       "system": "fbneo",
       "bucket": "fbneo/arknoid2u.zip"
     },
@@ -1579,6 +1668,7 @@
     {
       "title": "Rainbow Islands",
       "category": "Taito",
+      "series": "Bubble Bobble",
       "system": "fbneo",
       "bucket": "fbneo/rbisland.zip",
       "variants": [
@@ -1591,6 +1681,7 @@
     {
       "title": "Rastan",
       "category": "Taito",
+      "series": "Rastan",
       "system": "fbneo",
       "bucket": "fbneo/rastanu.zip"
     },
@@ -1609,6 +1700,7 @@
     {
       "title": "Chase H.Q.",
       "category": "Taito",
+      "series": "Chase H.Q.",
       "system": "fbneo",
       "bucket": "fbneo/chasehqu.zip"
     },
@@ -1687,12 +1779,14 @@
     {
       "title": "Bubble Bobble II",
       "category": "Taito",
+      "series": "Bubble Bobble",
       "system": "fbneo",
       "bucket": "fbneo/bublbob2.zip"
     },
     {
       "title": "Elevator Action Returns",
       "category": "Taito",
+      "series": "Elevator Action",
       "system": "fbneo",
       "bucket": "fbneo/elvactr.zip"
     },
@@ -1705,6 +1799,7 @@
     {
       "title": "Puzzle Bobble 2",
       "category": "Taito",
+      "series": "Puzzle Bobble",
       "system": "fbneo",
       "bucket": "fbneo/pbobble2.zip"
     },
@@ -1717,6 +1812,7 @@
     {
       "title": "Arkanoid Returns (Ver 2.02O 1997/02/10)",
       "category": "Taito",
+      "series": "Arkanoid",
       "system": "fbneo",
       "bucket": "fbneo/arkretrn.zip"
     },
@@ -1753,6 +1849,7 @@
     {
       "title": "Contra",
       "category": "Konami",
+      "series": "Contra",
       "system": "fbneo",
       "bucket": "fbneo/contra.zip"
     },
@@ -1777,6 +1874,7 @@
     {
       "title": "Super Contra",
       "category": "Konami",
+      "series": "Contra",
       "system": "fbneo",
       "bucket": "fbneo/scontra.zip"
     },
@@ -1789,6 +1887,7 @@
     {
       "title": "Teenage Mutant Ninja Turtles",
       "category": "Konami",
+      "series": "Teenage Mutant Ninja Turtles",
       "system": "fbneo",
       "bucket": "fbneo/tmntu.zip",
       "variants": [
@@ -1801,6 +1900,7 @@
     {
       "title": "Aliens",
       "category": "Konami",
+      "series": "Alien",
       "system": "fbneo",
       "bucket": "fbneo/aliensu.zip"
     },
@@ -1819,6 +1919,7 @@
     {
       "title": "Teenage Mutant Ninja Turtles: Turtles in Time",
       "category": "Konami",
+      "series": "Teenage Mutant Ninja Turtles",
       "system": "fbneo",
       "bucket": "fbneo/tmnt2.zip",
       "variants": [
@@ -1831,6 +1932,7 @@
     {
       "title": "The Simpsons",
       "category": "Konami",
+      "series": "The Simpsons",
       "system": "fbneo",
       "bucket": "fbneo/simpsons.zip"
     },
@@ -1843,6 +1945,7 @@
     {
       "title": "Asterix",
       "category": "Konami",
+      "series": "Asterix",
       "system": "fbneo",
       "bucket": "fbneo/asterix.zip"
     },
@@ -1855,6 +1958,7 @@
     {
       "title": "G.I. Joe",
       "category": "Konami",
+      "series": "G.I. Joe",
       "system": "fbneo",
       "bucket": "fbneo/gijoeu.zip"
     },
@@ -1867,6 +1971,7 @@
     {
       "title": "X-Men",
       "category": "Konami",
+      "series": "X-Men",
       "system": "fbneo",
       "bucket": "fbneo/xmen.zip"
     },
@@ -1933,6 +2038,7 @@
     {
       "title": "Bionic Commando",
       "category": "Capcom",
+      "series": "Bionic Commando",
       "system": "fbneo",
       "bucket": "fbneo/bionicc1.zip"
     },
@@ -1963,12 +2069,14 @@
     {
       "title": "Final Fight",
       "category": "Capcom",
+      "series": "Final Fight",
       "system": "fbneo",
       "bucket": "fbneo/ffightuc.zip"
     },
     {
       "title": "Strider",
       "category": "Capcom",
+      "series": "Strider",
       "system": "fbneo",
       "bucket": "fbneo/strider.zip",
       "variants": [
@@ -2059,6 +2167,7 @@
     {
       "title": "Dungeons & Dragons: Tower of Doom",
       "category": "Capcom",
+      "series": "Dungeons & Dragons",
       "system": "fbneo",
       "bucket": "fbneo/ddtodu.zip"
     },
@@ -2071,12 +2180,14 @@
     {
       "title": "The Punisher",
       "category": "Capcom",
+      "series": "Marvel",
       "system": "fbneo",
       "bucket": "fbneo/punisheru.zip"
     },
     {
       "title": "Alien vs. Predator",
       "category": "Capcom",
+      "series": "Alien",
       "system": "fbneo",
       "bucket": "fbneo/avspu.zip"
     },
@@ -2095,6 +2206,7 @@
     {
       "title": "Dungeons & Dragons: Shadow over Mystara",
       "category": "Capcom",
+      "series": "Dungeons & Dragons",
       "system": "fbneo",
       "bucket": "fbneo/ddsomu.zip"
     },
@@ -2119,6 +2231,7 @@
     {
       "title": "Puzz Loop 2",
       "category": "Capcom",
+      "series": "Puzz Loop",
       "system": "fbneo",
       "bucket": "fbneo/pzloop2.zip"
     },
@@ -2131,6 +2244,7 @@
     {
       "title": "Baseball Stars Professional",
       "category": "Neo Geo",
+      "series": "Baseball Stars",
       "system": "fbneo",
       "bucket": "fbneo/bstars.zip"
     },
@@ -2245,6 +2359,7 @@
     {
       "title": "Baseball Stars 2",
       "category": "Neo Geo",
+      "series": "Baseball Stars",
       "system": "fbneo",
       "bucket": "fbneo/bstars2.zip"
     },
@@ -2269,6 +2384,7 @@
     {
       "title": "Super Sidekicks",
       "category": "Neo Geo",
+      "series": "Super Sidekicks",
       "system": "fbneo",
       "bucket": "fbneo/ssideki.zip"
     },
@@ -2281,6 +2397,7 @@
     {
       "title": "Sengoku 2",
       "category": "Neo Geo",
+      "series": "Sengoku",
       "system": "fbneo",
       "bucket": "fbneo/sengoku2.zip"
     },
@@ -2305,6 +2422,7 @@
     {
       "title": "Puzzle Bobble",
       "category": "Neo Geo",
+      "series": "Puzzle Bobble",
       "system": "fbneo",
       "bucket": "fbneo/pbobblen.zip"
     },
@@ -2317,6 +2435,7 @@
     {
       "title": "Super Sidekicks 2 - The World Championship",
       "category": "Neo Geo",
+      "series": "Super Sidekicks",
       "system": "fbneo",
       "bucket": "fbneo/ssideki2.zip"
     },
@@ -2353,18 +2472,21 @@
     {
       "title": "Super Sidekicks 3 - The Next Glory",
       "category": "Neo Geo",
+      "series": "Super Sidekicks",
       "system": "fbneo",
       "bucket": "fbneo/ssideki3.zip"
     },
     {
       "title": "Magical Drop II",
       "category": "Neo Geo",
+      "series": "Magical Drop",
       "system": "fbneo",
       "bucket": "fbneo/magdrop2.zip"
     },
     {
       "title": "Metal Slug",
       "category": "Neo Geo",
+      "series": "Metal Slug",
       "system": "fbneo",
       "bucket": "fbneo/mslug.zip",
       "variants": [
@@ -2383,6 +2505,7 @@
     {
       "title": "Neo Mr. Do!",
       "category": "Neo Geo",
+      "series": "Mr. Do!",
       "system": "fbneo",
       "bucket": "fbneo/neomrdo.zip"
     },
@@ -2425,6 +2548,7 @@
     {
       "title": "Magical Drop III",
       "category": "Neo Geo",
+      "series": "Magical Drop",
       "system": "fbneo",
       "bucket": "fbneo/magdrop3.zip"
     },
@@ -2437,6 +2561,7 @@
     {
       "title": "Neo Bomberman",
       "category": "Neo Geo",
+      "series": "Bomberman",
       "system": "fbneo",
       "bucket": "fbneo/neobombe.zip"
     },
@@ -2467,6 +2592,7 @@
     {
       "title": "Metal Slug X",
       "category": "Neo Geo",
+      "series": "Metal Slug",
       "system": "fbneo",
       "bucket": "fbneo/mslugx.zip",
       "variants": [
@@ -2497,6 +2623,7 @@
     {
       "title": "Metal Slug 3",
       "category": "Neo Geo",
+      "series": "Metal Slug",
       "system": "fbneo",
       "bucket": "fbneo/mslug3.zip"
     },
@@ -2509,6 +2636,7 @@
     {
       "title": "Sengoku 3",
       "category": "Neo Geo",
+      "series": "Sengoku",
       "system": "fbneo",
       "bucket": "fbneo/sengoku3.zip"
     },
@@ -2521,12 +2649,14 @@
     {
       "title": "Metal Slug 4",
       "category": "Neo Geo",
+      "series": "Metal Slug",
       "system": "fbneo",
       "bucket": "fbneo/mslug4.zip"
     },
     {
       "title": "Metal Slug 5",
       "category": "Neo Geo",
+      "series": "Metal Slug",
       "system": "fbneo",
       "bucket": "fbneo/mslug5.zip"
     },
@@ -2539,6 +2669,7 @@
     {
       "title": "Metal Slug 2 - Super Vehicle-001/II (NGM-2410 ~ NGH-2410)",
       "category": "Neo Geo",
+      "series": "Metal Slug",
       "system": "fbneo",
       "bucket": "fbneo/mslug2.zip"
     },
@@ -2581,6 +2712,7 @@
     {
       "title": "Ikari Warriors",
       "category": "Other",
+      "series": "Ikari Warriors",
       "system": "fbneo",
       "bucket": "fbneo/ikari.zip"
     },
@@ -2623,6 +2755,7 @@
     {
       "title": "Super Mario Bros.",
       "category": "Other",
+      "series": "Super Mario",
       "system": "nes",
       "bucket": "nes/Super Mario Bros. (World).zip",
       "variants": [
@@ -2635,6 +2768,7 @@
     {
       "title": "Double Dragon",
       "category": "Other",
+      "series": "Double Dragon",
       "system": "fbneo",
       "bucket": "fbneo/ddragonu.zip",
       "variants": [
@@ -2689,6 +2823,7 @@
     {
       "title": "Tecmo Bowl",
       "category": "Other",
+      "series": "NFL",
       "system": "fbneo",
       "bucket": "fbneo/tbowl.zip"
     },
@@ -2707,12 +2842,14 @@
     {
       "title": "Double Dragon II: The Revenge",
       "category": "Other",
+      "series": "Double Dragon",
       "system": "fbneo",
       "bucket": "fbneo/ddragon2u.zip"
     },
     {
       "title": "Ninja Gaiden",
       "category": "Other",
+      "series": "Ninja Gaiden",
       "system": "fbneo",
       "bucket": "fbneo/gaiden.zip"
     },
@@ -2731,6 +2868,7 @@
     {
       "title": "RoboCop",
       "category": "Other",
+      "series": "Robocop",
       "system": "fbneo",
       "bucket": "fbneo/robocopu.zip"
     },
@@ -2761,6 +2899,7 @@
     {
       "title": "Sly Spy",
       "category": "Other",
+      "series": "Sly Cooper",
       "system": "fbneo",
       "bucket": "fbneo/slyspy.zip"
     },
@@ -2785,6 +2924,7 @@
     {
       "title": "WWF Superstars",
       "category": "Other",
+      "series": "WWE",
       "system": "fbneo",
       "bucket": "fbneo/wwfsstaru4.zip"
     },
@@ -2797,6 +2937,7 @@
     {
       "title": "Double Dragon 3: The Rosetta Stone",
       "category": "Other",
+      "series": "Double Dragon",
       "system": "fbneo",
       "bucket": "fbneo/ddragon3.zip"
     },
@@ -2809,6 +2950,7 @@
     {
       "title": "Hammerin' Harry",
       "category": "Other",
+      "series": "Hammerin' Harry",
       "system": "fbneo",
       "bucket": "fbneo/hharryu.zip"
     },
@@ -2827,6 +2969,7 @@
     {
       "title": "Snow Bros.",
       "category": "Other",
+      "series": "Snow Bros",
       "system": "fbneo",
       "bucket": "fbneo/snowbros.zip",
       "variants": [
@@ -2869,6 +3012,7 @@
     {
       "title": "Captain America and The Avengers",
       "category": "Other",
+      "series": "Marvel",
       "system": "fbneo",
       "bucket": "fbneo/captavenu.zip"
     },
@@ -2887,6 +3031,7 @@
     {
       "title": "RoboCop 2",
       "category": "Other",
+      "series": "Robocop",
       "system": "fbneo",
       "bucket": "fbneo/robocop2u.zip"
     },
@@ -2905,6 +3050,7 @@
     {
       "title": "WWF WrestleFest",
       "category": "Other",
+      "series": "WWE",
       "system": "fbneo",
       "bucket": "fbneo/wwfwfestu.zip"
     },
@@ -2947,12 +3093,14 @@
     {
       "title": "Snow Bros. 2",
       "category": "Other",
+      "series": "Snow Bros",
       "system": "fbneo",
       "bucket": "fbneo/snowbro2.zip"
     },
     {
       "title": "Tetris Plus",
       "category": "Other",
+      "series": "Tetris",
       "system": "fbneo",
       "bucket": "fbneo/tetrisp.zip"
     }

@@ -4,26 +4,31 @@
   "games": [
     {
       "title": "Street Fighter",
+      "series": "Street Fighter",
       "system": "fbneo",
       "bucket": "fbneo/sf.zip"
     },
     {
       "title": "Street Fighter II': Hyper Fighting",
+      "series": "Street Fighter",
       "system": "fbneo",
       "bucket": "fbneo/sf2hfu.zip"
     },
     {
       "title": "Super Street Fighter II Turbo",
+      "series": "Street Fighter",
       "system": "fbneo",
       "bucket": "fbneo/ssf2tu.zip"
     },
     {
       "title": "Street Fighter Alpha 2",
+      "series": "Street Fighter",
       "system": "fbneo",
       "bucket": "fbneo/sfa2u.zip"
     },
     {
       "title": "Street Fighter Alpha 3",
+      "series": "Street Fighter",
       "system": "fbneo",
       "bucket": "fbneo/sfa3u.zip",
       "variants": [
@@ -35,21 +40,25 @@
     },
     {
       "title": "Street Fighter Zero 2 Alpha",
+      "series": "Street Fighter",
       "system": "fbneo",
       "bucket": "fbneo/sfz2alj.zip"
     },
     {
       "title": "X-Men vs. Street Fighter",
+      "series": "X-Men",
       "system": "fbneo",
       "bucket": "fbneo/xmvsfu.zip"
     },
     {
       "title": "Marvel Super Heroes Vs. Street Fighter (USA)",
+      "series": "Marvel",
       "system": "fbneo",
       "bucket": "fbneo/mshvsfu.zip"
     },
     {
       "title": "Marvel Vs. Capcom: Clash of Super Heroes",
+      "series": "Marvel",
       "system": "fbneo",
       "bucket": "fbneo/mvscu.zip"
     },
@@ -60,36 +69,43 @@
     },
     {
       "title": "Hyper Street Fighter II: The Anniversary Edition",
+      "series": "Street Fighter",
       "system": "fbneo",
       "bucket": "fbneo/hsf2.zip"
     },
     {
       "title": "Street Fighter Alpha",
+      "series": "Street Fighter",
       "system": "fbneo",
       "bucket": "fbneo/sfau.zip"
     },
     {
       "title": "Street Fighter III: New Generation",
+      "series": "Street Fighter",
       "system": "fbneo",
       "bucket": "fbneo/sfiiiu.zip"
     },
     {
       "title": "Street Fighter III 2nd Impact: Giant Attack",
+      "series": "Street Fighter",
       "system": "fbneo",
       "bucket": "fbneo/sfiii2.zip"
     },
     {
       "title": "Street Fighter III: 3rd Strike",
+      "series": "Street Fighter",
       "system": "fbneo",
       "bucket": "fbneo/sfiii3u.zip"
     },
     {
       "title": "Street Fighter EX",
+      "series": "Street Fighter",
       "system": "mame",
       "bucket": "mame/sfex.zip"
     },
     {
       "title": "Street Fighter EX Plus",
+      "series": "Street Fighter",
       "system": "mame",
       "bucket": "mame/sfexp.zip",
       "variants": [
@@ -101,26 +117,31 @@
     },
     {
       "title": "Street Fighter EX2",
+      "series": "Street Fighter",
       "system": "mame",
       "bucket": "mame/sfex2.zip"
     },
     {
       "title": "Street Fighter EX2 Plus",
+      "series": "Street Fighter",
       "system": "mame",
       "bucket": "mame/sfex2p.zip"
     },
     {
       "title": "Marvel Super Heroes",
+      "series": "Marvel",
       "system": "fbneo",
       "bucket": "fbneo/mshu.zip"
     },
     {
       "title": "X-Men: Children of the Atom",
+      "series": "X-Men",
       "system": "fbneo",
       "bucket": "fbneo/xmcotau.zip"
     },
     {
       "title": "Street Fighter: The Movie",
+      "series": "Street Fighter",
       "system": "fbneo",
       "bucket": "fbneo/sftm.zip"
     },
@@ -136,26 +157,31 @@
     },
     {
       "title": "SNK vs. Capcom: SVC Chaos",
+      "series": "Capcom vs. SNK",
       "system": "fbneo",
       "bucket": "fbneo/svc.zip"
     },
     {
       "title": "Street Fighter 2010 - The Final Fight",
+      "series": "Street Fighter",
       "system": "nes",
       "bucket": "nes/Street Fighter 2010 - The Final Fight (USA).zip"
     },
     {
       "title": "Street Fighter Alpha Anthology",
+      "series": "Street Fighter",
       "system": "ps2",
       "bucket": "ps2/Street Fighter Alpha Anthology (USA).chd"
     },
     {
       "title": "Street Fighter EX3",
+      "series": "Street Fighter",
       "system": "ps2",
       "bucket": "ps2/Street Fighter EX3 (USA).chd"
     },
     {
       "title": "Capcom vs. SNK 2",
+      "series": "Capcom vs. SNK",
       "system": "ps2",
       "bucket": "ps2/Capcom vs. SNK 2 - Mark of the Millennium 2001 (USA).chd",
       "variants": [
@@ -167,46 +193,55 @@
     },
     {
       "title": "Marvel vs. Capcom 2",
+      "series": "Marvel",
       "system": "dreamcast",
       "bucket": "dreamcast/Marvel vs. Capcom 2 (USA).chd"
     },
     {
       "title": "SNK vs. Capcom - The Match of the Millennium",
+      "series": "Capcom vs. SNK",
       "system": "ngpc",
       "bucket": "ngpc/SNK vs. Capcom - The Match of the Millennium (World) (En,Ja).zip"
     },
     {
       "title": "SNK vs. Capcom - Card Fighters' Clash - Capcom Version",
+      "series": "Capcom vs. SNK",
       "system": "ngpc",
       "bucket": "ngpc/SNK vs. Capcom - Card Fighters' Clash - Capcom Version (USA, Europe).zip"
     },
     {
       "title": "SNK vs. Capcom - Card Fighters' Clash - SNK Version",
+      "series": "Capcom vs. SNK",
       "system": "ngpc",
       "bucket": "ngpc/SNK vs. Capcom - Card Fighters' Clash - SNK Version (USA, Europe).zip"
     },
     {
       "title": "SNK vs. Capcom - Card Fighters 2 - Expand Edition",
+      "series": "Capcom vs. SNK",
       "system": "ngpc",
       "bucket": "ngpc/SNK vs. Capcom - Card Fighters 2 - Expand Edition (Japan) [T-En by CFC2 Translation Team v20170125].zip"
     },
     {
       "title": "SNK vs. Capcom - Card Fighters DS",
+      "series": "Capcom vs. SNK",
       "system": "nds",
       "bucket": "nds/SNK vs. Capcom - Card Fighters DS (USA) (Rev 1).zip"
     },
     {
       "title": "Night Warriors: Darkstalkers' Revenge",
+      "series": "Darkstalkers",
       "system": "fbneo",
       "bucket": "fbneo/nwarru.zip"
     },
     {
       "title": "Street Fighter - The Movie",
+      "series": "Street Fighter",
       "system": "psx",
       "bucket": "psx/Street Fighter - The Movie (USA).chd"
     },
     {
       "title": "Street Fighter II Movie",
+      "series": "Street Fighter",
       "system": "saturn",
       "bucket": "saturn/Street Fighter II Movie (Japan).m3u",
       "files": [
@@ -216,6 +251,7 @@
     },
     {
       "title": "Capcom vs. SNK",
+      "series": "Capcom vs. SNK",
       "system": "dreamcast",
       "bucket": "dreamcast/Capcom vs. SNK (USA).chd",
       "variants": [
@@ -232,6 +268,7 @@
     },
     {
       "title": "Ultra Street Fighter IV",
+      "series": "Street Fighter",
       "system": "xbox360",
       "bucket": "xbox360/Ultra Street Fighter IV (World) (En,Ja,Fr,De,Es,It,Ko).zar"
     },
@@ -242,11 +279,13 @@
     },
     {
       "title": "Street Fighter II: The World Warrior (USA 920312)",
+      "series": "Street Fighter",
       "system": "fbneo",
       "bucket": "fbneo/sf2um.zip"
     },
     {
       "title": "Super Street Fighter II: The New Challengers (USA 930911)",
+      "series": "Street Fighter",
       "system": "fbneo",
       "bucket": "fbneo/ssf2u.zip"
     },
