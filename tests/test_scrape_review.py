@@ -1,6 +1,7 @@
 import argparse
 import contextlib
 import io
+import json
 import os
 import sys
 import unittest
@@ -8,7 +9,7 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
-from helpers import DataDir  # noqa: E402
+from helpers import StorageDir  # noqa: E402
 from test_scrape_run import GBA, RunBase, game  # noqa: E402
 from sync_roms import ignore, inventory, runtime, s3, scrape_files, scrape_online, scrape_review, scrape_state, screenscraper, ui  # noqa: E402
 
@@ -17,7 +18,7 @@ INFO = {"name": "Study Cart", "genre": "Educational", "year": "1999", "desc": "A
 KEYS = ["gb/a.zip", "gb/b.zip", "gb/c.zip"]
 
 
-class ReviewBase(DataDir):
+class ReviewBase(StorageDir):
     def setUp(self):
         super().setUp()
         for key in KEYS:
@@ -262,7 +263,8 @@ class ReviewTest(ReviewBase):
         self.assertIn("gb/a.zip was not scraped", self.quiet_review())
 
     def test_kept_list_with_bad_entries_is_read_as_its_strings(self):
-        self.write_json("scrape-notgames.json", {**scrape_state.notgames(), "kept": [["x"], {"y": 1}, 3, "gb/a.zip"]})
+        self.put("scrapes/notgames.json", json.dumps({**scrape_state.notgames(), "kept": [["x"], {"y": 1}, 3, "gb/a.zip"]}).encode())
+        scrape_state.reset()
         self.assertEqual(scrape_state.kept(), {"gb/a.zip"})
         self.answers("q")
         self.review()
@@ -323,6 +325,8 @@ class ReviewCommandTest(ReviewBase):
         self.assertEqual(self.pending(), ["gb/b.zip"])
 
     def test_review_command_bucket_without_cache_lists_sizes(self):
+        scrape_state.unknown()  # the scrape state is the storage folder's, read before the switch
+        self.patch(scrape_review, "_clear", lambda key: None)  # it would be written to the bucket
         self.patch(runtime, "ROOT", None)
         self.patch(runtime, "_mirror_root", None)
         self.patch(inventory, "current", lambda: None)
@@ -439,7 +443,7 @@ class ReviewRunTest(RunBase):
         self.assertNotIn("scrape review", self.out.getvalue())
 
 
-class MissingCommandTest(DataDir):
+class MissingCommandTest(StorageDir):
     def run_cmd(self, systems, roms, metadata):
         out = io.StringIO()
         with mock.patch.object(scrape_online, "_pick_systems", lambda name: systems), \
