@@ -71,9 +71,9 @@ class PreviewsTests(unittest.TestCase):
 
     def test_mirror_miss_with_a_bucket_downloads(self):
         key = "scrapes/gba/covers/G.png"
-        path = os.path.join(store.data_dir(), "previews", key)
-        shutil.rmtree(os.path.join(store.data_dir(), "previews"), ignore_errors=True)
-        self.addCleanup(shutil.rmtree, os.path.join(store.data_dir(), "previews"), ignore_errors=True)
+        path = os.path.join(store.cache_dir(), "previews", key)
+        shutil.rmtree(os.path.join(store.cache_dir(), "previews"), ignore_errors=True)
+        self.addCleanup(shutil.rmtree, os.path.join(store.cache_dir(), "previews"), ignore_errors=True)
 
         def fake(job):
             self.assertIsNone(runtime._mirror_root)  # read past the mirror
@@ -91,7 +91,7 @@ class PreviewsTests(unittest.TestCase):
 
     def test_bucket_downloads_once_into_previews(self):
         key = "scrapes/gba/covers/G.png"
-        path = os.path.join(store.data_dir(), "previews", key)
+        path = os.path.join(store.cache_dir(), "previews", key)
 
         def fake(job):
             os.makedirs(os.path.dirname(job[1]), exist_ok=True)
@@ -122,7 +122,7 @@ class GameThumbTests(unittest.TestCase):
     def setUp(self):
         previews.reset()
         self.addCleanup(previews.reset)
-        cache = os.path.join(store.data_dir(), "preview-cache")
+        cache = os.path.join(store.cache_dir(), "preview-cache")
         shutil.rmtree(cache, ignore_errors=True)
         self.addCleanup(shutil.rmtree, cache, ignore_errors=True)
         tmp = tempfile.TemporaryDirectory()
@@ -149,7 +149,7 @@ class GameThumbTests(unittest.TestCase):
         from PIL import Image
         path = self.thumb()
         size = os.path.getsize(self.source)
-        self.assertEqual(path, os.path.join(store.data_dir(), "preview-cache", "scrapes/gba/covers", f"G.s{size}.webp"))
+        self.assertEqual(path, os.path.join(store.cache_dir(), "preview-cache", "scrapes/gba/covers", f"G.s{size}.webp"))
         with Image.open(path) as image:
             self.assertEqual((image.format, image.size, image.mode), ("WEBP", (300, 450), "RGBA"))
 
@@ -175,7 +175,7 @@ class GameThumbTests(unittest.TestCase):
         self.assertTrue(os.path.exists(etag))
 
     def test_other_games_thumbnails_with_a_similar_name_stay(self):
-        other = os.path.join(store.data_dir(), "preview-cache", "scrapes/gba/covers", "G. Two.s1.webp")
+        other = os.path.join(store.cache_dir(), "preview-cache", "scrapes/gba/covers", "G. Two.s1.webp")
         os.makedirs(os.path.dirname(other))
         open(other, "wb").close()
         self.thumb()
@@ -187,7 +187,7 @@ class GameThumbTests(unittest.TestCase):
         self.assertIsNone(self.thumb())
         os.remove(self.source)
         self.assertIsNone(self.thumb(5))
-        self.assertFalse(os.path.exists(os.path.join(store.data_dir(), "preview-cache")))
+        self.assertFalse(os.path.exists(os.path.join(store.cache_dir(), "preview-cache")))
 
     def test_a_source_missing_from_the_storage_folder_is_none_without_a_stat(self):
         os.remove(self.source)
@@ -253,7 +253,7 @@ class SystemOutlineTests(unittest.TestCase):
                 info = tarfile.TarInfo(self.TOP + name)
                 info.size = len(data)
                 t.addfile(info, io.BytesIO(data))
-        self.base = os.path.join(store.data_dir(), "theme-art")
+        self.base = os.path.join(store.cache_dir(), "theme-art")
         shutil.rmtree(self.base, ignore_errors=True)
         self.addCleanup(shutil.rmtree, self.base, ignore_errors=True)
 

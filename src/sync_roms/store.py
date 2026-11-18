@@ -451,6 +451,11 @@ def data_dir():
     return os.path.join(xdg, "sync-roms") if xdg else os.path.expanduser("~/.sync-roms")
 
 
+def cache_dir():
+    """Per-user folder for caches that can be rebuilt from storage."""
+    return os.path.join(data_dir(), "cache")
+
+
 def load_cards():
     """Saved {root folder name: {"device": device id or "full", "layout": layout name, "size": readable card size like "512 GB", "android_media": "always" or "never", "systems": [system ids last picked]}}."""
     try:

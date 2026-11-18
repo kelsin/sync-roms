@@ -246,6 +246,7 @@ class FolderMtimeTest(StorageFolder):
         self.assertEqual(self.update(), ((0, 0, 0), []))
 
     def test_an_old_cache_without_dirs_loads_and_lists_everything(self):
+        os.makedirs(store.cache_dir(), exist_ok=True)
         store.write_json(inventory.path(), {"source": self.root.name, "updated": 1, "files": {"gba/a.zip": 1}})
         self.assertEqual(inventory.current().files, {"gba/a.zip": 1})
         self.assertEqual(inventory.current().dirs, {})
@@ -305,6 +306,7 @@ class FolderMtimeTest(StorageFolder):
         with open(inventory.path()) as f:
             data = json.load(f)
         data["files"]["gba/c.gba.part"] = 4  # from an older sync-roms that cached .part files
+        os.makedirs(store.cache_dir(), exist_ok=True)
         store.write_json(inventory.path(), data)
         inventory.reset()
         self.assertEqual(self.update(), ((0, 1, 0), []))
@@ -359,6 +361,7 @@ class FolderMtimeTest(StorageFolder):
         self.assertEqual(inventory.files("new/"), {"new/z.zip": 9})
 
     def test_a_dirs_value_that_is_not_a_whole_number_loads_as_none(self):
+        os.makedirs(store.cache_dir(), exist_ok=True)
         store.write_json(inventory.path(), {"source": self.root.name, "updated": 1, "files": {"gba/a.zip": 1},
                                             "dirs": {"": 5, "gba": "x", "BIOS": 1.5}})
         self.assertEqual(inventory.current().dirs, {"": 5, "gba": None, "BIOS": None})
@@ -567,7 +570,10 @@ class IgnoredTest(StorageFolder):
 
     def test_cache_file_still_holds_ignored(self):
         self.build()
-        self.assertIn("gba/b.zip", self.read("storage-cache.json")["files"])
+        self.assertIn("gba/b.zip", self.read("cache/storage-cache.json")["files"])
+
+    def test_cache_file_is_in_the_cache_folder(self):
+        self.assertEqual(inventory.path(), os.path.join(store.cache_dir(), "storage-cache.json"))
 
     def test_listed_drops_ignored(self):
         self.assertEqual(store.listed({"games": [{"bucket": "gba/a.zip"}, {"bucket": "gba/b.zip"}]}), ["gba/a.zip"])
