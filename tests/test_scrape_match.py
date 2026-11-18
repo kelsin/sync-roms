@@ -96,6 +96,25 @@ class CandidatesTest(MatchBase):
                                             fill=({"covers"}, {"gba": {}}))
         self.assertEqual(out["gba"], [])
 
+    def test_pico8_cart_with_entry_and_no_picture_is_taken_without_fill(self):
+        pico = {"bucket": "pico8", "screenscraper": 234}
+        roms = {"pico8": {"a.p8.png", "b.p8.png", "c.p8.png", "d.p8.png"}}
+        meta = {"pico8": {r: {"name": "x"} for r in roms["pico8"]}}
+        listing = {"pico8": {"scrapes/pico8/miximages/a.p8.png": 1, "scrapes/pico8/screenshots/b.p8.png": 1}}
+        scrape_state.mark_nomedia("pico8", "d.p8.png", {"miximages"})
+        out = scrape_online.find_candidates([pico], roms, meta, listings=listing)
+        self.assertEqual(out["pico8"], ["b.p8.png", "c.p8.png"])
+        out = scrape_online.find_candidates([pico], roms, meta, retry=True, listings=listing)
+        self.assertEqual(out["pico8"], ["b.p8.png", "c.p8.png", "d.p8.png"])
+
+    def test_pico8_without_picture_still_skips_unknown_and_other_systems_unchanged(self):
+        pico = {"bucket": "pico8", "screenscraper": 234}
+        scrape_state.mark_unknown("pico8", "b.p8.png")
+        roms = {"pico8": {"a.p8.png", "b.p8.png"}, "gba": {"a.zip"}}
+        meta = {"pico8": {"a.p8.png": {}, "b.p8.png": {}}, "gba": {"a.zip": {}}}
+        out = scrape_online.find_candidates([pico, SYSTEM], roms, meta, listings={"pico8": {}, "gba": {}})
+        self.assertEqual(out, {"pico8": ["a.p8.png"], "gba": []})
+
 
 class HashAndMatchTest(MatchBase):
     def test_folder_backend_hashes_file_and_caches(self):
