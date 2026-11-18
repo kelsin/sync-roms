@@ -567,6 +567,12 @@ def _row_extras(sp, work, key, notes, state):
     return out
 
 
+def _variant_mark(picks, key):
+    """The row column marking a game one of whose variants is on the card (blank otherwise)."""
+    on = any(picks.on_card(v["bucket"]) for v in picks.variants.get(key, ()))
+    return ("  🔀 variant", "cyan") if on else ("", "dim")
+
+
 def _locked_note(sp, key):
     """Why a collection or surprise game row can't be switched off ("" for any other row)."""
     return f"From {sp.locked_from[key]}; take it off the card to remove this game" if key in sp.locked_from else ""
@@ -645,7 +651,8 @@ def edit_system(name, system, setup, to_fetch=None, card_usages=None):
             links = [[index[m] for m in sp.groups.get(k, ()) if m in index] for k in keys]
             session = {"sel": [base[k] for k in keys]}
             picker.carry_place(place, keys, session)  # where the last pass was, when it listed the same games
-            extras = [_row_extras(sp, work, k, notes, st) for k, st in zip(keys, session["sel"])]
+            extras = [_row_extras(sp, work, k, notes, st) + [_variant_mark(picks, k)]
+                      for k, st in zip(keys, session["sel"])]
 
             def status(state):
                 now = dict(base)
@@ -757,7 +764,7 @@ def edit_set(name, game_set, setup, to_fetch=None, card_usages=None):
             base = row_states(bases)
             session = {"sel": [base[k] for k in keys]}
             picker.carry_place(place, keys, session)
-            extras = [_row_extras(sp, work, k, notes, st) if sp else []
+            extras = [_row_extras(sp, work, k, notes, st) + [_variant_mark(picks, k)] if sp else []
                       for k, sp, st in zip(keys, sp_of, session["sel"])]
 
             def switched(state):

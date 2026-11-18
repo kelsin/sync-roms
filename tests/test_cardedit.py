@@ -635,6 +635,21 @@ class Flow(DataDir):
         self.assertEqual(cardedit.GAMES_HINT,
                          "Space toggle · Enter done · s set · m meta · p past · v variant")
 
+    def test_a_game_with_its_variant_on_the_card_is_marked_in_the_list(self):
+        self.with_variants(self.RED)
+        self.card(games={"gba": [g("gba/Zelda.zip")], "psx": [g("psx/x.chd")], "sets": ["vs"]},
+                  excluded={"gba": ["gba/Ruby.zip"]})
+
+        def press_v(labels, kw):
+            self.assertEqual(kw["extras"][labels.index("Ruby.zip")][-1][0], "")
+            return (cardedit.VARIANT_KEY, labels.index("Ruby.zip"))
+
+        def marked(labels, kw):
+            self.assertIn("🔀", kw["extras"][labels.index("Ruby.zip")][-1][0])
+            self.assertEqual(kw["extras"][labels.index("Zelda.zip")][-1][0], "")
+            return kw["session"]["sel"]
+        self.run_system(press_v, marked)
+
     def test_v_adds_the_variant_on_its_own_system_and_saves(self):
         self.with_variants(self.RED)
         self.card(games={"gba": [g("gba/Zelda.zip")], "psx": [g("psx/x.chd")], "sets": ["vs"]},
