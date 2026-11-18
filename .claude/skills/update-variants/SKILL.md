@@ -27,7 +27,7 @@ The output has:
   are in its `files`.
 - `stale`: variants whose ROM is no longer in storage.
 - `unmatched`: how many new ROMs matched no set game. They are not judged or recorded; mention the count.
-- `checked_file`: `~/.sync-roms/variants-checked.json`, the ROMs already judged; they are never offered again.
+- `checked_file`: storage's `variants-checked.json`, the ROMs already judged; they are never offered again.
 
 No matches and no stale variants: tell the user there is nothing to update and stop.
 
