@@ -84,9 +84,7 @@ class CandidatesTest(MatchBase):
         self.assertEqual(scrape_online.find_candidates([SYSTEM], roms, meta, retry=True, fill=fill)["gba"], ["a.zip", "b.zip"])
 
     def test_fill_media_reads_only_string_items_of_a_hand_edited_not_offered_entry(self):
-        os.makedirs(store.data_dir(), exist_ok=True)
-        with open(os.path.join(store.data_dir(), scrape_state.NOMEDIA), "w") as f:
-            f.write('{"gba/a.zip": ["manuals", ["fanart"], {"x": 1}, 3]}')
+        self.put("scrapes/gba/nomedia.json", b'{"a.zip": ["manuals", ["fanart"], {"x": 1}, 3]}')
         listing = {"gba": {"scrapes/gba/covers/a.png": 1}}
         out = scrape_online.find_candidates([SYSTEM], {"gba": {"a.zip"}}, {"gba": {"a.zip": {}}}, fill=({"covers", "manuals"}, listing))
         self.assertEqual(out["gba"], [])  # manuals not offered, covers there
@@ -141,6 +139,7 @@ class HashAndMatchTest(MatchBase):
         self.put("gba/a.zip", b"abcde")
         stop = mock.Mock()
         stop.is_set.return_value = False
+        scrape_state.cached_hashes("gba", "a.zip", 5, 5)  # the hash state is read before the count starts
         with mock.patch.object(scrape_online, "CHUNK", 2), mock.patch("builtins.open", wraps=open) as op:
             h = scrape_online.hash_file("gba", "a.zip", 5, 5, stop)
         self.assertEqual(stop.is_set.call_count, 3)  # chunks of 2, 2 and 1
@@ -149,6 +148,7 @@ class HashAndMatchTest(MatchBase):
 
     def test_s3_uses_etag_md5_only_when_single_part(self):
         client = FakeClient()
+        scrape_state.manual_match("gba", "a.zip")  # the scrape state is the storage folder's, read before the switch
         with mock.patch.object(runtime, "ROOT", None), mock.patch.object(s3, "read_root", return_value=None):
             self.assertEqual(scrape_online.match(client, SYSTEM, "a.zip", 3, '"900150983cd24fb0d6963f7d28e17f72"'), (77, "hash"))
         self.assertEqual(client.calls[0]["md5"], "900150983cd24fb0d6963f7d28e17f72")
@@ -182,6 +182,8 @@ class HashAndMatchTest(MatchBase):
         path = self.put("gba/a.zip", b"abc")
         os.utime(path, (1000, 1000))
         client = FakeClient()
+        scrape_state.manual_match("gba", "a.zip")  # the scrape state is the storage folder's, read before the switch
+        scrape_state.cached_hashes("gba", "a.zip", 3, 1000)
         with mock.patch.object(runtime, "ROOT", None), mock.patch.object(runtime, "_mirror_root", self.root):
             scrape_online.match(client, SYSTEM, "a.zip", 3, '"d41d8cd98f00b204e9800998ecf8427e"')
             self.assertEqual(client.calls[0]["md5"], "900150983cd24fb0d6963f7d28e17f72")

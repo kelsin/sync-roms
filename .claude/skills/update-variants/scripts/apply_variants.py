@@ -12,13 +12,14 @@ import json
 import os
 import sys
 
-from sync_roms import store
+from sync_roms import shared, store, usersettings
 
 SETS = os.path.join(store.REPO_DATA, "sets")
-CHECKED = os.path.join(store.data_dir(), "variants-checked.json")
+CHECKED = "variants-checked.json"  # a storage key
 
 
 def main(path):
+    usersettings.apply_settings()  # where storage is, as the CLI reads it
     with open(path) as f:
         decisions = json.load(f)
     add, remove = decisions.get("add", []), decisions.get("remove", [])
@@ -53,17 +54,14 @@ def main(path):
         with open(os.path.join(SETS, f"{set_id}.json"), "w") as f:
             f.write(text)
         touched.add(set_id)
-    try:
-        with open(CHECKED) as f:
-            checked = json.load(f)
-    except FileNotFoundError:
-        checked = {}
-    checked.update(decisions.get("checked", {}))
-    for a in add:
-        for k in [a["bucket"], *a.get("files", [])]:
-            checked[k] = f"variant of {a['game']}"
-    with open(CHECKED, "w") as f:
-        json.dump(checked, f, indent=1, ensure_ascii=False, sort_keys=True)
+    def change(checked):
+        checked.update(decisions.get("checked", {}))
+        for a in add:
+            for k in [a["bucket"], *a.get("files", [])]:
+                checked[k] = f"variant of {a['game']}"
+
+    shared.update(CHECKED, json.loads, {}, change,
+                  lambda c: json.dumps(c, indent=1, ensure_ascii=False, sort_keys=True))
     print(f"Sets changed: {', '.join(sorted(touched)) or 'none'}")
 
 

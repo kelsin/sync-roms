@@ -10,10 +10,14 @@ import re
 import sys
 from collections import defaultdict
 
-from sync_roms import inventory, m3u, names, store, usersettings, vita
+from sync_roms import inventory, m3u, names, shared, store, usersettings, vita
 
-CHECKED = os.path.join(store.data_dir(), "variants-checked.json")
+CHECKED = "variants-checked.json"  # a storage key
 REISSUE = re.compile(r"^(classic nes series|famicom mini \d*|nes classics|sega ages( \d+)?)\s*[-:]\s*", re.I)
+
+
+def _dump(checked):
+    return json.dumps(checked, indent=1, ensure_ascii=False, sort_keys=True)
 
 
 def norm(title):
@@ -35,11 +39,7 @@ def main():
     usersettings.apply_settings()  # where storage is, as the CLI reads it
     if inventory.current() is None:
         sys.exit("No storage cache for the storage in use: run `sync-roms cache update` first.")
-    try:
-        with open(CHECKED) as f:
-            checked = json.load(f)
-    except FileNotFoundError:
-        checked = {}
+    checked = shared.load(CHECKED, json.loads, {})
 
     games, referenced = {}, set()
     for game_set in store.repo_set_files():
@@ -71,10 +71,9 @@ def main():
     # a multi-disc game is checked once any of its files is: a judged one's discs would otherwise come back
     new = [k for k in unlisted if not any(g in checked for g in groups.get(k, [k]))]
     if "--baseline" in sys.argv[1:]:
-        checked.update({k: "baseline: in storage before variants were tracked" for k in new})
-        with open(CHECKED, "w") as f:
-            json.dump(checked, f, indent=1, ensure_ascii=False, sort_keys=True)
-        print(f"Marked {len(new)} unlisted ROM(s) as checked in {CHECKED}")
+        shared.update(CHECKED, json.loads, {}, lambda c: c.update(
+            {k: "baseline: in storage before variants were tracked" for k in new}), _dump)
+        print(f"Marked {len(new)} unlisted ROM(s) as checked in storage's {CHECKED}")
         return
     matches, unmatched, seen = defaultdict(list), 0, set()
     for key in new:

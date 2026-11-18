@@ -102,6 +102,8 @@ def remove_parts():
 
 def write_file(key, write):
     """Create the file for a key under the storage folder; write(tmp_path) fills a temporary file that then replaces it."""
+    if not os.path.isdir(runtime.ROOT):  # an unmounted share: never create the file on the local disk
+        raise FileNotFoundError(f"{runtime.ROOT} is missing")
     path = safe_join(runtime.ROOT, key)
     os.makedirs(os.path.dirname(path), exist_ok=True)
     _writing.add(key)

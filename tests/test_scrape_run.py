@@ -20,6 +20,7 @@ GBA = {"name": "Game Boy Advance", "bucket": "gba", "screenscraper": 12, "full_s
 NES = {"name": "NES", "bucket": "nes", "screenscraper": 3, "full_system": True, "folders": {}}
 PNG = b"\x89PNG\r\n\x1a\n" + b"x" * 8
 CREDS = {"screenscraper_user": "me", "screenscraper_password": "hunter2"}
+STATE = ("/matches.json", "/unknown.json", "/nomedia.json", "/hashes.json", "scrapes/notgames.json")
 
 
 def game(gid, name, media=("box-2D", "ss")):
@@ -136,7 +137,8 @@ class RunBase(StorageDir):
             return json.load(f)
 
     def stored(self, prefix="scrapes/"):
-        return set(s3.list_sizes(prefix))
+        """The media and metadata keys under prefix (not the scrape state files)."""
+        return {k for k in s3.list_sizes(prefix) if not k.endswith(STATE)}
 
 
 class ScrapeRunTest(RunBase):
@@ -156,7 +158,8 @@ class ScrapeRunTest(RunBase):
         real_put = s3.put_text
 
         def put_text(key, text):
-            order.append(("metadata", key, set(s3.list_sizes("scrapes/gba/covers/"))))
+            if key.endswith("/metadata.json"):
+                order.append(("metadata", key, set(s3.list_sizes("scrapes/gba/covers/"))))
             return real_put(key, text)
         with mock.patch.object(upload, "run_uploads", wraps=upload.run_uploads) as ru, \
                 mock.patch.object(s3, "put_text", side_effect=put_text):
@@ -943,8 +946,8 @@ class FillMediaLedgerTest(RunBase):
     def test_second_fill_run_skips_rom_whose_missing_types_were_not_offered(self):
         self.put("gba/a.zip")
         self.assertEqual(self.run_scrape(), 0)
-        with open(os.path.join(self.data, scrape_state.NOMEDIA)) as f:
-            self.assertIn("manuals", json.load(f)["gba/a.zip"])  # written by the end of the run
+        with open(os.path.join(self.root, "scrapes/gba/nomedia.json")) as f:
+            self.assertIn("manuals", json.load(f)["a.zip"])  # written by the end of the run
         self.client.lookups.clear()
         self.assertEqual(self.run_scrape(fill_media=True), 0)
         self.assertEqual(self.client.lookups, [])
@@ -1225,12 +1228,12 @@ class BigFileHashTest(RunBase):
     def test_hashes_are_flushed_on_the_metadata_timer(self):
         self.put("gba/a.zip")
         self.put("gba/b.zip")
-        hashes_file = os.path.join(store.data_dir(), scrape_state.HASHES)
+        hashes_file = os.path.join(self.root, "scrapes/gba/hashes.json")
         seen = []
         real = s3.put_text
 
         def put_text(key, text):
-            if not seen:
+            if not seen and key.endswith("/metadata.json"):
                 try:
                     with open(hashes_file) as f:
                         seen.append(set(json.load(f)))
@@ -1240,7 +1243,7 @@ class BigFileHashTest(RunBase):
         with mock.patch.object(scrape_online, "BATCH", 1), mock.patch.object(scrape_online, "METADATA_INTERVAL", 0), \
                 mock.patch.object(s3, "put_text", side_effect=put_text):
             self.assertEqual(self.run_scrape(), 0)
-        self.assertIn("gba/a.zip", seen[0])  # written before the first batch's entries, not only when the run ends
+        self.assertIn("a.zip", seen[0])  # written before the first batch's entries, not only when the run ends
 
 
 class ProgressTest(RunBase):

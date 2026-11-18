@@ -146,5 +146,43 @@ class WriteTest(SharedTest):
             shared.read("nope.json")
 
 
+class UpdateTest(SharedTest):
+    def update(self, change, key="x.json"):
+        return shared.update(key, parse, {}, change, lambda d: json.dumps(d))
+
+    def test_creates_a_missing_file(self):
+        self.assertEqual(self.update(lambda d: d.update(a=1)), {"a": 1})
+        self.assertEqual(self.mirror("x.json"), '{"a": 1}')
+        self.assertEqual(self.tags()["x.json"], inventory.tag("x.json"))
+
+    def test_merges_into_storage_changed_after_the_mirror_was_saved(self):
+        self.store_file("x.json", '{"a": 1}', mtime=1_000_000_000_000_000_000)
+        self.load()
+        self.store_file("x.json", '{"a": 1, "b": 2}', mtime=1_000_000_001_000_000_000)
+        self.assertEqual(self.update(lambda d: d.update(c=3)), {"a": 1, "b": 2, "c": 3})
+        self.assertEqual(self.mirror("x.json"), '{"a": 1, "b": 2, "c": 3}')
+
+    def test_change_may_return_a_new_value(self):
+        self.store_file("x.json", '{"a": 1}')
+        self.assertEqual(self.update(lambda d: {"z": 0}), {"z": 0})
+        self.assertEqual(self.mirror("x.json"), '{"z": 0}')
+
+    def test_writes_nothing_when_unchanged(self):
+        self.store_file("x.json", '{"a": 1}')
+        with mock.patch.object(shared, "write", side_effect=AssertionError("wrote")):
+            self.assertEqual(self.update(lambda d: d.update(a=1)), {"a": 1})
+
+    def test_empty_change_still_creates_a_missing_file(self):
+        self.update(lambda d: None)
+        self.assertEqual(self.mirror("x.json"), "{}")
+
+    def test_unmounted_storage_folder_raises_and_writes_nothing(self):
+        missing = os.path.join(self.root.name, "unmounted")
+        with mock.patch.object(runtime, "ROOT", missing), self.assertRaises(FileNotFoundError):
+            shared.update("x.json", parse, {}, lambda d: d.update(a=1), json.dumps)
+        self.assertFalse(os.path.exists(missing))
+        self.assertFalse(os.path.exists(shared.local_path("x.json")))
+
+
 if __name__ == "__main__":
     unittest.main()

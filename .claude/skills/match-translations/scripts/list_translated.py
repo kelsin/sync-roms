@@ -1,7 +1,8 @@
 """Print, as JSON, the fan-translated ROMs waiting for `sync-roms scrape review` (non-games and unknowns).
 
 Run from the repo root: uv run --frozen python .claude/skills/match-translations/scripts/list_translated.py [SYSTEM]
-Read-only; makes no ScreenScraper request. Reads storage only through the storage cache (sync-roms cache update).
+Read-only; makes no ScreenScraper request. Lists storage through the storage cache (sync-roms cache update); the
+non-game and unknown lists are read from storage's scrapes/ files through their local copies (live tag checks).
 """
 import json
 import sys
