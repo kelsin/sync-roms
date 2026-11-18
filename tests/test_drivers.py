@@ -9,6 +9,7 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
+from helpers import touch  # noqa: E402
 from sync_roms import drivers, github, runtime, s3, store, ui  # noqa: E402
 
 
@@ -260,7 +261,7 @@ class Prune(unittest.TestCase):
 
     def touch(self, *names):
         for n in names:
-            open(os.path.join(self.dir, n), "w").close()
+            touch(os.path.join(self.dir, n), "")
 
     def test_prune_removes_only_recorded_names(self):
         self.cards["SD"]["drivers"] = ["a-v1.zip"]

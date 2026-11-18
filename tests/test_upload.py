@@ -11,7 +11,8 @@ from unittest import mock
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 import argparse  # noqa: E402
-from test_inventory import StorageFolder  # noqa: E402
+import helpers  # noqa: E402
+from helpers import StorageFolder  # noqa: E402
 from sync_roms import downloads, ignore, inventory, runtime, s3, scrape_plan, store, ui, upload, usersettings  # noqa: E402
 
 SYSTEMS = [
@@ -23,10 +24,7 @@ SYSTEMS = [
 
 
 def touch(root, rel, size=1):
-    path = os.path.join(root, *rel.split("/"))
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-    with open(path, "wb") as f:
-        f.write(b"x" * size)
+    helpers.touch(os.path.join(root, *rel.split("/")), b"x" * size)
 
 
 class GuessSystemTest(unittest.TestCase):

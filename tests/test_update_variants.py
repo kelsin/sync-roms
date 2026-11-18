@@ -1,5 +1,4 @@
 import contextlib
-import importlib.util
 import io
 import itertools
 import json
@@ -11,22 +10,15 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
-from helpers import StorageDir, storage_sets  # noqa: E402
+from helpers import StorageDir, load_script, storage_sets  # noqa: E402
 
 from sync_roms import inventory, runtime, shared, store, usersettings  # noqa: E402
 
 SCRIPTS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".claude", "skills", "update-variants", "scripts")
 
 
-def load(name):
-    spec = importlib.util.spec_from_file_location(name, os.path.join(SCRIPTS, f"{name}.py"))
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
-
-
-find_candidates = load("find_candidates")
-apply_variants = load("apply_variants")
+find_candidates = load_script(os.path.join(SCRIPTS, "find_candidates.py"))
+apply_variants = load_script(os.path.join(SCRIPTS, "apply_variants.py"))
 
 
 class CheckedInStorage(StorageDir):

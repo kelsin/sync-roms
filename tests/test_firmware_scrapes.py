@@ -8,6 +8,7 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
+from helpers import touch  # noqa: E402
 from sync_roms import mirroring, scrape_files, scrape_plan, store, ui  # noqa: E402
 
 GBA = {"name": "Game Boy Advance", "bucket": "gba",
@@ -103,12 +104,6 @@ class EmudeckPlanTest(unittest.TestCase):
                                      os.path.join(appdata, "gamelists", "sg1000", "gamelist.xml")]))
             self.assertEqual(scrape_plan.stale_media("emudeck", [system], roms, None, base),
                              [os.path.join(media, "sg1000", "covers", "A.png")])
-
-
-def touch(path):
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-    with open(path, "wb") as f:
-        f.write(b"x")
 
 
 class StaleMediaTest(unittest.TestCase):

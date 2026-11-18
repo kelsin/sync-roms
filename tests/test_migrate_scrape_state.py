@@ -1,5 +1,4 @@
 import contextlib
-import importlib.util
 import io
 import json
 import os
@@ -9,14 +8,11 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
-from helpers import StorageDir  # noqa: E402
+from helpers import StorageDir, load_script  # noqa: E402
 
 from sync_roms import inventory, runtime, scrape_state, usersettings  # noqa: E402
 
-spec = importlib.util.spec_from_file_location(
-    "migrate_scrape_state", os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "tools", "migrate_scrape_state.py"))
-migrate = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(migrate)
+migrate = load_script(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "tools", "migrate_scrape_state.py"))
 
 
 class MigrateTest(StorageDir):

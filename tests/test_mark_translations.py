@@ -1,5 +1,4 @@
 import contextlib
-import importlib.util
 import io
 import os
 import sys
@@ -8,14 +7,12 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
-from helpers import StorageDir  # noqa: E402
+from helpers import StorageDir, load_script  # noqa: E402
 
 from sync_roms import scrape_plan, usersettings  # noqa: E402
 
 _PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "tools", "mark_translations.py")
-_spec = importlib.util.spec_from_file_location("mark_translations", _PATH)
-mark_translations = importlib.util.module_from_spec(_spec)
-_spec.loader.exec_module(mark_translations)
+mark_translations = load_script(_PATH)
 
 KEY = "scrapes/snes/metadata.json"
 DATA = {"A (T).zip": {"name": "A", "desc": "x"}, "B.zip": {"name": "B"}}

@@ -8,7 +8,7 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import helpers  # noqa: E402,F401
-from test_inventory import StorageFolder  # noqa: E402
+from helpers import StorageFolder  # noqa: E402
 from sync_roms import inventory, runtime, s3, shared, store  # noqa: E402
 
 

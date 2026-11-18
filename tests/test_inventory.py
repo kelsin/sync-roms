@@ -4,7 +4,6 @@ import json
 import os
 import stat as statmode
 import sys
-import tempfile
 import threading
 import unicodedata
 import unittest
@@ -22,33 +21,7 @@ def quiet(fn, *args):
     return result, out.getvalue()
 
 
-class StorageFolder(helpers.DataDir):
-    """runtime.ROOT is a throwaway storage folder holding gba/a.zip (1 byte), gba/b.zip (2) and BIOS/x.bin (3)."""
-
-    def setUp(self):
-        super().setUp()
-        inventory.reset()
-        self.addCleanup(inventory.reset)
-        self.root = tempfile.TemporaryDirectory()
-        self.addCleanup(self.root.cleanup)
-        for key, size in (("gba/a.zip", 1), ("gba/b.zip", 2), ("BIOS/x.bin", 3)):
-            self.put(key, size)
-        for name, value in (("ROOT", self.root.name), ("BUCKET", None), ("ENDPOINT", None), ("_mirror_root", None)):
-            p = mock.patch.object(runtime, name, value)
-            p.start()
-            self.addCleanup(p.stop)
-
-    def put(self, key, size):
-        path = os.path.join(self.root.name, key)
-        os.makedirs(os.path.dirname(path), exist_ok=True)
-        with open(path, "wb") as f:
-            f.write(b"x" * size)
-
-    def build(self, full=True):
-        return quiet(inventory.update, full)[0]
-
-
-class NoCacheTest(StorageFolder):
+class NoCacheTest(helpers.StorageFolder):
     def test_reads_go_to_storage_without_a_cache(self):
         self.assertIsNone(inventory.current())
         self.assertIsNone(inventory.cached("gba/"))
@@ -65,7 +38,7 @@ class NoCacheTest(StorageFolder):
             live.assert_called_once()
 
 
-class FolderCacheTest(StorageFolder):
+class FolderCacheTest(helpers.StorageFolder):
     def test_update_reads_every_file_and_reads_come_from_the_cache(self):
         self.assertEqual(self.build(), (3, 0, 0))
         with mock.patch.object(s3, "list_sizes", side_effect=AssertionError("listed storage")), \
@@ -184,7 +157,7 @@ class BucketCacheTest(helpers.DataDir):
             self.assertIsNone(inventory.current())
 
 
-class FolderMtimeTest(StorageFolder):
+class FolderMtimeTest(helpers.StorageFolder):
     """The default update lists only folders whose mtime changed since the cache stored it."""
 
     def setUp(self):
@@ -437,7 +410,7 @@ class FolderMtimeTest(StorageFolder):
         self.assertEqual(inventory.current().files, {"gba/a.zip": 1, "gba/b.zip": 2, "BIOS": 6})
 
 
-class PatchTest(StorageFolder):
+class PatchTest(helpers.StorageFolder):
     def test_writes_moves_and_deletes_patch_the_cache_and_flush_saves_them(self):
         self.build()
         s3.write_file("gba/new.zip", lambda tmp: open(tmp, "wb").write(b"12345"))
@@ -467,7 +440,7 @@ class PatchTest(StorageFolder):
         self.assertFalse(os.path.exists(inventory.path()))
 
 
-class PrepareTest(StorageFolder):
+class PrepareTest(helpers.StorageFolder):
     def prepare(self, tty=True, answer=True):
         with mock.patch.object(sys.stdin, "isatty", return_value=tty), \
                 mock.patch.object(ui, "confirm", return_value=answer) as asked:
@@ -493,7 +466,7 @@ class PrepareTest(StorageFolder):
         self.prepare().assert_not_called()
 
 
-class CacheCommandTest(StorageFolder):
+class CacheCommandTest(helpers.StorageFolder):
     def run_cmd(self, *argv):
         with mock.patch.object(usersettings, "ensure_bucket"):
             return quiet(commands.run, list(argv))
@@ -538,7 +511,7 @@ class FolderKeysTest(unittest.TestCase):
         self.assertEqual(asked, [("gba/", False)])  # each size would be a stat on a share
 
 
-class StoreUsesTheCacheTest(StorageFolder):
+class StoreUsesTheCacheTest(helpers.StorageFolder):
     def test_list_system_and_folder_keys(self):
         self.build()
         with mock.patch.object(s3, "list_sizes", side_effect=AssertionError("listed storage")), \
@@ -553,7 +526,7 @@ DLC = "psvita/D [PCSE00349] [USA] [DLC-X].zip"
 VITA = {"bucket": "psvita", "games": [{"bucket": G}]}
 
 
-class VitaSyncKeysTest(StorageFolder):
+class VitaSyncKeysTest(helpers.StorageFolder):
     def setUp(self):
         super().setUp()
         for key, size in ((G, 4), ("psvita/G [PCSE00349] [USA] [PATCH] [v1.02] [NoNpDRM].zip", 5), (NEW, 6),
@@ -597,7 +570,7 @@ if __name__ == "__main__":
     unittest.main()
 
 
-class IgnoredTest(StorageFolder):
+class IgnoredTest(helpers.StorageFolder):
     """gba/b.zip is ignored: every read leaves it out, with or without a cache, but the cache file keeps it."""
 
     def setUp(self):

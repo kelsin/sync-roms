@@ -1,6 +1,5 @@
 import argparse
 import contextlib
-import importlib.util
 import io
 import json
 import os
@@ -11,22 +10,15 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
-from helpers import StorageDir  # noqa: E402
+from helpers import StorageDir, load_script  # noqa: E402
 
 from sync_roms import scrape_online, scrape_plan, usersettings  # noqa: E402
 
 SCRIPTS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".claude", "skills", "dedup-names", "scripts")
 
 
-def load(name):
-    spec = importlib.util.spec_from_file_location(name, os.path.join(SCRIPTS, f"{name}.py"))
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
-
-
-find_duplicates = load("find_duplicates")
-apply_names = load("apply_names")
+find_duplicates = load_script(os.path.join(SCRIPTS, "find_duplicates.py"))
+apply_names = load_script(os.path.join(SCRIPTS, "apply_names.py"))
 
 
 def find(metadata, stored):

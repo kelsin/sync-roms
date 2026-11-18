@@ -9,6 +9,7 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
+from helpers import touch  # noqa: E402
 from sync_roms import downloads, m3u, ui  # noqa: E402
 
 FAH = ["Fahrenheit (USA) (Disc 1) (Key Disc) (Sega CD).chd", "Fahrenheit (USA) (Disc 2) (Sega CD).chd"]
@@ -22,8 +23,7 @@ class M3uTest(unittest.TestCase):
 
     def touch(self, *names, text=""):
         for n in names:
-            with open(os.path.join(self.dir, n), "w") as f:
-                f.write(text)
+            touch(os.path.join(self.dir, n), text)
 
     def read(self, name):
         with open(os.path.join(self.dir, name)) as f:
@@ -136,8 +136,7 @@ class HiddenDiscsTest(unittest.TestCase):
 
     def touch(self, *names, text=""):
         for n in names:
-            with open(os.path.join(self.dir, n), "w") as f:
-                f.write(text)
+            touch(os.path.join(self.dir, n), text)
 
     def read(self, name):
         with open(os.path.join(self.dir, name)) as f:

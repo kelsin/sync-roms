@@ -8,6 +8,7 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
+from helpers import touch  # noqa: E402
 from sync_roms import cli  # noqa: E402
 from sync_roms import downloads, picker, store  # noqa: E402
 
@@ -88,12 +89,6 @@ class PrepareDirsTest(unittest.TestCase):
             self.assertTrue(os.path.isdir(os.path.join(tmp, "Emulation", "roms")))
             self.assertTrue(os.path.isdir(os.path.join(tmp, "Emulation", "bios")))
             self.assertEqual(bios, os.path.join(tmp, "Emulation", "bios"))
-
-
-def touch(path, data=b"x"):
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-    with open(path, "wb") as f:
-        f.write(data)
 
 
 class FindExtrasTest(unittest.TestCase):
