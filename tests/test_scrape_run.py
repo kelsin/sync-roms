@@ -638,6 +638,32 @@ class TranslatedRecordTest(RunBase):
         self.assertEqual(self.metadata()["Game (T).zip"]["name"], "One - Translated")
 
 
+class Pico8RecordTest(RunBase):
+    PICO = {**GBA, "bucket": "pico8"}
+
+    def scrape(self, rom, **kw):
+        self.put(f"pico8/{rom}")
+        self.client.games[rom] = {**game(1, "One"), "synopsis": [{"langue": "en", "text": "A cart"}]}
+        with contextlib.redirect_stdout(self.out), contextlib.redirect_stderr(self.err):
+            return scrape_online.run_scrape(self.client, {"pico8": self.PICO}, {"pico8": [(rom, 1, "e")]}, set(), ask=False, **kw)
+
+    def test_a_scrape_keeps_the_bbs_title_and_author_and_adds_the_rest(self):
+        self.put("scrapes/pico8/metadata.json", json.dumps({"a.p8.png": {"name": "BBS Title", "developer": "Zep"}}).encode())
+        self.assertEqual(self.scrape("a.p8.png"), 0)
+        entry = self.metadata("pico8")["a.p8.png"]
+        self.assertEqual((entry["name"], entry["developer"]), ("BBS Title", "Zep"))
+        self.assertIn("desc", entry)
+
+    def test_replace_does_not_drop_them_either(self):
+        self.put("scrapes/pico8/metadata.json", json.dumps({"a.p8.png": {"name": "BBS Title", "developer": "Zep"}}).encode())
+        self.assertEqual(self.scrape("a.p8.png", replace=True), 0)
+        self.assertEqual(self.metadata("pico8")["a.p8.png"]["name"], "BBS Title")
+
+    def test_a_cart_with_no_entry_gets_the_scraped_one(self):
+        self.assertEqual(self.scrape("a.p8.png"), 0)
+        self.assertEqual(self.metadata("pico8")["a.p8.png"]["name"], "One")
+
+
 class QualifierRecordTest(RunBase):
     scrape = TranslatedRecordTest.scrape
 

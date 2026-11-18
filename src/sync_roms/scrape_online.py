@@ -23,21 +23,31 @@ from . import ignore, inventory, runtime, s3, scrape_files, scrape_plan, scrape_
 CHUNK = 8 << 20
 
 
-def find_candidates(systems, roms, metadata, retry=False, fill=None):
+PICO8_PICTURES = {"miximages", scrape_plan.ONION_TYPE}  # what sync uses instead of a pico8 cart's own picture
+
+
+def find_candidates(systems, roms, metadata, retry=False, fill=None, listings=None):
     """{system folder: sorted ROM paths} with no entry in that system's metadata.json (and, unless retry, not marked
     unknown; a saved manual match overrides the unknown mark). Non-games waiting for review are never taken.
 
     fill: (wanted media types, {system folder: scrapes/<system>/ listing}); also takes the ROMs that have an entry
-    but lack some wanted type in storage that ScreenScraper's last answer offered (unless retry, any type)."""
+    but lack some wanted type in storage that ScreenScraper's last answer offered (unless retry, any type).
+    listings: {system folder: scrapes/<system>/ listing}; pico8 carts with an entry but no picture there (and whose
+    miximages ScreenScraper's last answer didn't rule out, unless retry) are taken too: BBS carts always have an entry."""
     out, state = {}, scrape_state.snapshot()
     for s in systems:
         system = s["bucket"]
         have = metadata.get(system, {})
         index = scrape_plan.scrape_index(fill[1].get(system, {})) if fill else {}
+        pictures = scrape_plan.scrape_index(listings[system]) if system == "pico8" and listings and system in listings else None
 
         def wanted(r):
-            return r not in have or (fill and fill[0] - set(index.get(os.path.splitext(r)[0], ()))
-                                     - (set() if retry else state.not_offered(system, r)))
+            if r not in have:
+                return True
+            if pictures is not None and not PICO8_PICTURES & set(pictures.get(os.path.splitext(r)[0], ())) \
+                    and (retry or "miximages" not in state.not_offered(system, r)):
+                return True
+            return fill and fill[0] - set(index.get(os.path.splitext(r)[0], ())) - (set() if retry else state.not_offered(system, r))
         out[system] = sorted(r for r in roms.get(system, ())
                              if wanted(r) and not state.is_notgame(system, r)
                              and (retry or state.manual_match(system, r) is not None or not state.is_unknown(system, r)))
@@ -721,7 +731,8 @@ def record(system, pending, outcomes, listing, index, skip, replace=False, rerun
         return len(done), True
     for rom, (_, meta, _) in done.items():  # remote is ours: changed in place
         old = remote.get(rom, {})
-        remote[rom] = dict(meta) if replace else {**old, **({**meta, **old} if fill else meta)}
+        gaps = fill or name == "pico8"  # pico8's entries also hold the BBS titles and authors: a scrape only adds to them
+        remote[rom] = dict(meta) if replace and name != "pico8" else {**old, **({**meta, **old} if gaps else meta)}
         if old.get("qualifier"):  # a name set apart by the dedup-names skill survives the re-scrape
             remote[rom] = screenscraper.qualify({**remote[rom], "qualifier": old["qualifier"]})
         if rom in translated or screenscraper.is_translation(rom) or old.get("translated"):
@@ -969,7 +980,10 @@ def _scrape_command(args):
         if getattr(args, "fill_media", False):
             have = _each(lambda name: inventory.files(f"{scrape_plan.SCRAPES}/{name}/", sizes=False), [s["bucket"] for s in listed])
             fill = (set(screenscraper.MEDIA_MAP.values()) - skip, have)
-        candidates = find_candidates(listed, roms, metadata, retry=args.retry, fill=fill)
+        have = fill[1] if fill else {}
+        if "pico8" in metadata and "pico8" not in have:  # its carts without a picture are scraped too
+            have = {"pico8": inventory.files(f"{scrape_plan.SCRAPES}/pico8/", sizes=False)}
+        candidates = find_candidates(listed, roms, metadata, retry=args.retry, fill=fill, listings=have)
         for s in listed:
             if candidates.get(s["bucket"]) and "screenscraper" not in s:
                 print(ui.yellow(f"  ⚠️  {s['bucket']} has no ScreenScraper system id; skipping its {len(candidates[s['bucket']])} ROM(s)"))
@@ -1003,7 +1017,7 @@ def _scrape_command(args):
         return 0
     client = make_client()
     return run_scrape(client, {s["bucket"]: s for s in systems}, todo, skip, fill=fill is not None,
-                      listings=fill[1] if fill else None, metadata=metadata)
+                      listings=have, metadata=metadata)
 
 
 def match_command(args):

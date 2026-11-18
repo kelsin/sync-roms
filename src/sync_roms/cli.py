@@ -177,7 +177,8 @@ TOPICS = {
   sync-roms scrape --set-credentials
 
   Looks up every available ROM with no entry in scrapes/<system>/metadata.json on ScreenScraper and writes its
-  metadata and media (and the Onion images) to storage. The ROMs and how each will be
+  metadata and media (and the Onion images) to storage; pico8 carts with an entry but no scraped picture are taken
+  too (their BBS title and author are kept). The ROMs and how each will be
   looked up are listed first, then the most requests the run can make against what is left of today's quota. ROMs
   ScreenScraper doesn't know are remembered and skipped until --retry. Each batch of ROMs shows today's requests and
   the time elapsed and left; each ROM gets a line as it ends (the game it matched, how, and its media count).

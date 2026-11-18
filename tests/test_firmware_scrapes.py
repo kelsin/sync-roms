@@ -268,12 +268,12 @@ if __name__ == "__main__":
 
 class Pico8CartImageTest(unittest.TestCase):
     PICO = {"name": "PICO-8", "bucket": "pico8", "folders": {l: "pico8" for l in ("esde", "knulli", "onion", "allium")}}
-    LISTING = {"scrapes/pico8/miximages/a.p8.png": 1}
+    LISTING = {}
 
-    def plan(self, layout, rels):
+    def plan(self, layout, rels, listing=None, meta=None):
         with tempfile.TemporaryDirectory() as base:
             with mock.patch.object(scrape_plan.downloads.inventory, "stat", return_value={f"pico8/{r}": 3 for r in rels}):
-                plan = scrape_plan.build_scrape_plan(layout, [self.PICO], {"pico8": (dict(self.LISTING), {})}, {"pico8": rels},
+                plan = scrape_plan.build_scrape_plan(layout, [self.PICO], {"pico8": (dict(self.LISTING if listing is None else listing), meta or {})}, {"pico8": rels},
                                                      lambda s: os.path.join(base, "ROMs", "pico8"), os.path.join(base, "ES-DE"),
                                                      lambda p: True, base)
             jobs = [(k, os.path.relpath(p, base)) for k, p, _ in plan["jobs"]]
@@ -295,5 +295,17 @@ class Pico8CartImageTest(unittest.TestCase):
             self.assertEqual(entries["a.p8.png"]["image"], "./Imgs/a.p8.png")
             self.assertNotIn("sub/c.p8.png", entries)
 
-    def test_pico8_is_not_scraped(self):
-        self.assertNotIn("screenscraper", next(s for s in systems() if s["bucket"] == "pico8"))
+    def test_pico8_is_scraped(self):
+        self.assertEqual(next(s for s in systems() if s["bucket"] == "pico8")["screenscraper"], 234)
+
+    def test_a_scraped_picture_replaces_the_cart(self):
+        meta = {"a.p8.png": {"name": "A"}}
+        jobs, _ = self.plan("esde", ["a.p8.png", "b.p8.png"], {"scrapes/pico8/miximages/a.p8.png": 1}, meta)
+        self.assertEqual([k for k, _ in jobs], ["scrapes/pico8/miximages/a.p8.png", "pico8/b.p8.png"])
+        jobs, entries = self.plan("knulli", ["a.p8.png", "b.p8.png"], {"scrapes/pico8/miximages/a.p8.png": 1}, meta)
+        self.assertEqual([k for k, _ in jobs], ["scrapes/pico8/miximages/a.p8.png"])
+        self.assertEqual(entries["a.p8.png"], {"name": "A", "image": "./images/a.p8-image.png"})
+        self.assertEqual(entries["b.p8.png"], {"image": "./b.p8.png"})
+        jobs, entries = self.plan("onion", ["a.p8.png", "b.p8.png"], {"scrapes/pico8/onion/a.p8.png": 1}, meta)
+        self.assertEqual([k for k, _ in jobs], ["scrapes/pico8/onion/a.p8.png", "pico8/b.p8.png"])
+        self.assertEqual(entries["a.p8.png"]["image"], "./Imgs/a.p8.png")
