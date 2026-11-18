@@ -454,19 +454,26 @@ def cards_list(args):
         ui.emit_json(rows)
         return 0
 
+    # numbers are right-aligned within their column so sizes and counts line up
+    width = lambda values: max((len(v) for v in values), default=0)
+    used_w = width([cardedit.size_text(r["used"]) for r in rows if r["used"] is not None])
+    size_w = width([r["size"] for r in rows if r["size"]])
+    full_w = width([str(r["full_systems"]) for r in rows if r["games"] is not None])
+    games_w = width([str(r["games"] if r["games"] is not None else r["extras"]) for r in rows])
+    plural = lambda n, w, word: f"{n:>{w}} {word}" + ("" if n == 1 else "s")
+
     def used(r):
         if r["used"] is None:
-            return r["size"] or ""
-        text = cardedit.size_text(r["used"]) + (f" / {r['size']}" if r["size"] else " used")
+            return " " * (used_w + 3) + (r["size"] or "").rjust(size_w) if r["size"] else ""
+        text = cardedit.size_text(r["used"]).rjust(used_w) + (f" / {r['size']:>{size_w}}" if r["size"] else " used")
         return text if r["sized"] else f"{text} (not sized)"
 
     def picks(r):
         if r["games"] is None:
-            return f"{r['extras']} game entries"
-        plural = lambda n, word: f"{n} {word}" + ("" if n == 1 else "s")
-        return f"{plural(r['full_systems'], 'full system')} · {plural(r['games'], 'game')}"
+            return ("", f"{r['extras']:>{games_w}} game entries")
+        return (plural(r["full_systems"], full_w, "full system"), plural(r["games"], games_w, "game"))
 
-    ui.table([(r["name"], r["device"] or "(no device set)", r["layout"] or "", used(r), picks(r)) for r in rows])
+    ui.table([(r["name"], r["device"] or "(no device set)", r["layout"] or "", used(r), *picks(r)) for r in rows])
     return 0
 
 

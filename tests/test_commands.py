@@ -440,8 +440,8 @@ class CardSizeTest(Cmd):
             text = self.run_cmd("cards", "list")[1]
         self.assertEqual(rows, {"SD": (1_500_000_000, True, 1, 2), "SD2": (0, True, 0, 0)})
         self.assertIn("1.5 GB / 512 GB", text)
-        self.assertIn("1 full system · 2 games", text)
-        self.assertIn("0 full systems · 0 games", text)
+        self.assertEqual(text.splitlines(), ["SD   full  esde  1.5 GB / 512 GB  1 full system   2 games",
+                                             "SD2  full  esde     0 B used      0 full systems  0 games"])
         with mock.patch.object(inventory, "cached", lambda p: None):
             self.assertIn("not sized", self.run_cmd("cards", "list")[1])
 
