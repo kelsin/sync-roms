@@ -133,6 +133,17 @@ class AddTest(IgnoreList):
         self.assertFalse(os.path.exists(missing))
         self.assertFalse(os.path.exists(shared.local_path(ignore.KEY)))
 
+    def test_add_without_anything_new_skips_the_write(self):
+        self.store_list({"nds": ["b.zip", "a.zip"]})
+        with mock.patch.object(shared, "write") as write:
+            self.assertEqual(ignore.add({"nds": ["a.zip"]}), 0)
+        write.assert_not_called()
+
+    def test_remove_on_an_unmounted_share_refuses(self):
+        missing = os.path.join(self.root.name, "unmounted")
+        with mock.patch.object(runtime, "ROOT", missing), self.assertRaises(FileNotFoundError):
+            ignore.remove({"gb": ["c.zip"]})
+
 
 class RemoveTest(IgnoreList):
     def test_remove_drops_paths_and_empty_systems(self):

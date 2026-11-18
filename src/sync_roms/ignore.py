@@ -5,7 +5,7 @@ and is downloaded again once per run when the storage file's tag changes. ROM fi
 import json
 import threading
 
-from . import s3, shared
+from . import shared
 
 KEY = "ignored.json"
 _lock = threading.RLock()
@@ -28,18 +28,8 @@ def _parse(text):
     return _clean(json.loads(text))
 
 
-def _fresh():
-    """The storage file's contents, read now ({} when it isn't there)."""
-    try:
-        return _parse(shared.read(KEY))
-    except s3.ERRORS as e:
-        if not s3.missing(e):
-            raise
-        return {}
-
-
-def _write(data):
-    shared.write(KEY, json.dumps(data, indent=2, ensure_ascii=False) + "\n")
+def _dump(data):
+    return json.dumps(data, indent=2, ensure_ascii=False) + "\n"
 
 
 def keys():
@@ -56,35 +46,41 @@ def is_ignored(key):
 
 
 def add(entries):
-    """Merge {system: [ROM paths]} into the storage file (read fresh) and the local copy. Returns how many were new."""
+    """Merge {system: [ROM paths]} into the storage file (read fresh) and the local copy. Returns how many were new;
+    nothing is written when none were."""
     global _keys
-    with _lock:
-        data = _fresh()
+    counted = []
+
+    def change(data):
         before = _flat(data)
+        merged = dict(data)
         for system, paths in entries.items():
-            data[system] = sorted(set(data.get(system, [])) | set(paths))
-        data = {system: data[system] for system in sorted(data)}
-        _write(data)
-        _keys = _flat(data)
-        return len(_keys - before)
+            merged[system] = sorted(set(data.get(system, [])) | set(paths))
+        merged = {system: merged[system] for system in sorted(merged)}
+        counted.append(len(_flat(merged) - before))
+        return merged if counted[0] else None
+
+    with _lock:
+        _keys = _flat(shared.update(KEY, _parse, {}, change, _dump))
+        return counted[0]
 
 
 def remove(entries):
     """Drop {system: [ROM paths]} from the storage file (read fresh) and the local copy; a system left empty goes too.
-    Returns how many were removed."""
+    Returns how many were removed; nothing is written when none were."""
     global _keys
-    with _lock:
-        data = _fresh()
+    counted = []
+
+    def change(data):
         before = _flat(data)
-        for system, paths in entries.items():
-            if system in data:
-                data[system] = [p for p in data[system] if p not in set(paths)]
-        data = {system: data[system] for system in sorted(data) if data[system]}
-        removed = len(before - _flat(data))
-        if removed:
-            _write(data)
-        _keys = _flat(data)
-        return removed
+        kept = {system: [p for p in data[system] if p not in set(entries.get(system, ()))] for system in sorted(data)}
+        kept = {system: paths for system, paths in kept.items() if paths}
+        counted.append(len(before - _flat(kept)))
+        return kept if counted[0] else None
+
+    with _lock:
+        _keys = _flat(shared.update(KEY, _parse, {}, change, _dump))
+        return counted[0]
 
 
 def reset():
