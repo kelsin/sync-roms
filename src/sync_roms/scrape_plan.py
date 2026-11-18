@@ -75,6 +75,7 @@ MUOS_MEDIA = (("box", ("covers", "3dboxes")), ("preview", ("screenshots", "title
 # EmuDeck's media goes on the card; its gamelists go in ES-DE's data folder on the computer running the sync
 SCRAPE_LAYOUTS = set(GAMELIST_FILES) | {"muos"}
 EMUDECK_MEDIA = os.path.join("Emulation", "tools", "downloaded_media")
+CART_LAYOUTS = ("esde", "emudeck", "knulli") + ONION_LAYOUTS  # a PICO-8 cart is a picture of itself: these show it as its image
 
 
 def gamelist_fields(meta):
@@ -309,8 +310,27 @@ def build_scrape_plan(layout_name, systems, data, rom_rels, dest_of, es_dir, pre
         listing, meta = data[s["bucket"]]
         rom_dir = dest_of(s)
         media_root = media_root_of(layout_name, s, base, es_dir)
-        jobs, entries, texts = plan_scrapes(layout_name, rom_rels.get(s["bucket"], ()), listing, meta, media_root,
-                                            rom_dir, lambda rom, d=rom_dir: present(os.path.join(d, rom)))
+        carts = s["bucket"] == "pico8" and layout_name in CART_LAYOUTS
+        jobs, entries, texts = plan_scrapes(layout_name, rom_rels.get(s["bucket"], ()), {} if carts else listing, meta,
+                                            media_root, rom_dir, lambda rom, d=rom_dir: present(os.path.join(d, rom)))
+        if carts:
+            for rom in sorted(rom_rels.get(s["bucket"], ())):
+                if not rom.endswith(".p8.png") or not present(os.path.join(rom_dir, rom)):
+                    continue
+                if layout_name == "knulli":  # the cart is already in the ROM folder
+                    entries.setdefault(rom, {})["image"] = f"./{rom}"
+                    continue
+                if layout_name in ONION_LAYOUTS:
+                    if "/" in rom:  # Imgs is flat
+                        continue
+                    root, rel = rom_dir, f"Imgs/{rom}"
+                    entries.setdefault(rom, {})["image"] = f"./Imgs/{rom}"
+                else:
+                    root, rel = media_root, f"miximages/{rom}"
+                try:
+                    jobs.append((f"{s['bucket']}/{rom}", s3.safe_join(root, rel), None))
+                except ValueError as e:
+                    print(ui.yellow(f"  ⚠️  skipping {e}"))
         jobs = downloads.with_sizes(jobs)  # sizes only for media that could be installed
         listing.update((k, size) for k, _, size in jobs)  # kept, so a rebuild of the plan reads none of them again
         plan["jobs"] += downloads.plan_downloads(jobs)
