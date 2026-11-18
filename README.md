@@ -258,7 +258,7 @@ Every mode is a command (`sync-roms COMMAND --help` explains one; plain `sync-ro
 | `tools install` | install 7z and chdman | `--install-tools` |
 | `mirror [DIR]` / `mirror use DIR` / `mirror clear` | local mirror | `--mirror`, `--use-mirror`, `--clear-mirror` |
 | `cache [update [--full]]` | show the storage cache, or read all of storage into it (see below) | |
-| `config show\|path` | effective settings and where each came from | |
+| `config show\|path` / `config set NAME VALUE` / `config unset NAME` | effective settings and where each came from; change or remove one in `settings.json` (see below) | |
 | `doctor` | check AWS profile, storage, tools and data files | |
 | `check` | validate your JSON data files | |
 | `completion bash\|zsh\|fish` | shell completion script | |
@@ -337,6 +337,17 @@ On `esde` and `emudeck` cards every Vita game zip in `psvita/` gets a `.psvita` 
 | `ROMS_PROFILE` | AWS profile to use. Overrides `profile` in `settings.json` (default `roms-readonly`) |
 | `ROMS_WRITE_PROFILE` | AWS profile used to write in `--upload`, `--clean-scrapes` and `scrape` modes. Overrides `write_profile` in `settings.json` (default `roms`) |
 | `NO_COLOR` | Disable colors |
+
+### Settings (`config`)
+
+`sync-roms config set NAME VALUE` saves one setting in `settings.json` and `sync-roms config unset NAME` removes it
+(it then falls back to its default). The names are `bucket`, `root`, `endpoint`, `profile`, `write_profile`, `mirror`,
+`screenscraper_user` and `screenscraper_password` (text), `eject` and `storage_cache_declined` (`true` or `false`),
+`surprise_ttl_days` (a positive number of days) and `surprise_excluded_systems` (comma-separated system ids, e.g.
+`gba,snes`). Other names and values that don't fit are refused (exit 2) with the valid ones. The password is saved but
+never printed (`scrape --set-credentials` asks for it without echoing it, and keeps it out of your shell history). A
+`settings.json` that can't be parsed is never overwritten (exit 3). Flags and environment variables still override
+the saved `bucket`, `root`, `endpoint`, `profile` and `write_profile`.
 
 ## Uploading ROMs (`--upload`)
 

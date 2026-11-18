@@ -647,7 +647,57 @@ def effective_settings():
     return out
 
 
+CONFIG_KINDS = {"bucket": str, "root": str, "endpoint": str, "profile": str, "write_profile": str, "mirror": str,
+                "eject": bool, "storage_cache_declined": bool, "surprise_ttl_days": int, "surprise_excluded_systems": list,
+                "screenscraper_user": str, "screenscraper_password": str}  # the settings `config set` and `config unset` take
+HIDDEN = {"screenscraper_password"}  # set, never printed
+
+
+def config_value(name, text):
+    """The JSON value `config set NAME TEXT` saves; exits 2 when TEXT doesn't fit the setting."""
+    kind = CONFIG_KINDS[name]
+    if kind is bool:
+        if text not in ("true", "false"):
+            ui.fail(f"{name} is true or false, not {text!r}", 2)
+        return text == "true"
+    if kind is int:
+        try:
+            return _positive_int(text)
+        except argparse.ArgumentTypeError as e:
+            ui.fail(f"{name}: {e}", 2)
+    if kind is list:
+        ids = [i.strip() for i in text.split(",") if i.strip()]
+        unknown = [i for i in ids if i not in system_ids()]
+        if unknown or not ids:
+            ui.fail(f"{name} takes comma-separated system ids; unknown: {', '.join(unknown) or '(none given)'}\n"
+                    "   `sync-roms completion list systems` lists them.", 2)
+        return ids
+    if not text:
+        ui.fail(f"{name} can't be empty: `sync-roms config unset {name}` removes it", 2)
+    return text
+
+
 def config_cmd(args):
+    name, value = getattr(args, "name", None), getattr(args, "value", None)
+    if args.action in ("set", "unset"):
+        if name not in CONFIG_KINDS:
+            ui.fail((f"Unknown setting {name!r}" if name else f"`config {args.action}` needs a setting's name")
+                    + f". Known: {', '.join(CONFIG_KINDS)}", 2)
+        if args.action == "unset":
+            if value is not None:
+                ui.fail(f"`config unset` takes only the setting's name ({value!r})", 2)
+            usersettings.save_setting(name, None)
+            print(ui.green(f"💾 Removed {name} from settings.json"))
+            return 0
+        if value is None:
+            ui.fail(f"`config set {name}` needs a value", 2)
+        saved = config_value(name, value)
+        usersettings.save_setting(name, saved)
+        shown = ",".join(saved) if isinstance(saved, list) else saved if isinstance(saved, str) else json.dumps(saved)
+        print(ui.green(f"💾 Saved {name} = {'(not shown)' if name in HIDDEN else shown} in settings.json"))
+        return 0
+    if name is not None:
+        ui.fail(f"`config {args.action}` takes no arguments ({name!r})", 2)
     if args.action == "path":
         print(store.data_dir())
         return 0
@@ -1088,7 +1138,7 @@ def second_words():
     words["themes"] = ["update"]
     words["download"] = ["pico8"]
     words["cards"] = ["edit", "list", "new", "set", "rename", "delete", "copy", "export", "import"]
-    words["config"] = ["show", "path"]
+    words["config"] = ["show", "path", "set", "unset"]
     words["cache"] = ["update"]
     words["completion"] = ["bash", "zsh", "fish"]
     return words
@@ -1103,6 +1153,7 @@ def completion_cmd(args):
     flag_list = all_flags()
     flags = " ".join(flag_list)
     second = second_words()
+    settings = " ".join(CONFIG_KINDS)
     if args.shell in ("bash", "zsh"):
         cases = "\n".join(f"      {name}) COMPREPLY=($(compgen -W \"{' '.join(w)}\" -- \"$cur\")); return;;" for name, w in second.items())
         script = f'''_sync_roms() {{
@@ -1124,6 +1175,9 @@ def completion_cmd(args):
   if [ "$COMP_CWORD" -eq 3 ] && [ "$cmd" = games ]; then
     case "${{COMP_WORDS[2]}}" in add|remove|full) COMPREPLY=($(compgen -W "$(sync-roms completion list systems)" -- "$cur")); return;; esac
   fi
+  if [ "$COMP_CWORD" -eq 3 ] && [ "$cmd" = config ]; then
+    case "${{COMP_WORDS[2]}}" in set|unset) COMPREPLY=($(compgen -W "{settings}" -- "$cur")); return;; esac
+  fi
   COMPREPLY=($(compgen -f -- "$cur"))
 }}
 complete -o filenames -F _sync_roms sync-roms
@@ -1133,6 +1187,7 @@ complete -o filenames -F _sync_roms sync-roms
         lines = [f'complete -c sync-roms -f -n __fish_use_subcommand -a "{subs}"']
         for name, w in second.items():
             lines.append(f'complete -c sync-roms -f -n "__fish_seen_subcommand_from {name}; and not __fish_seen_subcommand_from {" ".join(w)}" -a "{" ".join(w)}"')
+        lines.append(f'complete -c sync-roms -f -n "__fish_seen_subcommand_from config; and __fish_seen_subcommand_from set unset" -a "{settings}"')
         values = {"card": "cards", "device": "devices", "layout": "layouts", "system": "systems"}
         for flag in (f for f in flag_list if f.startswith("--")):
             name = flag[2:]
@@ -1208,7 +1263,8 @@ def build_parser():
     p = csub.add_parser("import", allow_abbrev=False); common(p, card=False); p.add_argument("file"); p.set_defaults(fn=cards_import)
 
     p = sub.add_parser("layouts", allow_abbrev=False); common(p, card=False); p.add_argument("layout_id", nargs="?"); p.add_argument("--json", action="store_true"); p.set_defaults(fn=layouts_cmd)
-    p = sub.add_parser("config", allow_abbrev=False); common(p, card=False); p.add_argument("action", choices=["show", "path"], nargs="?", default="show"); p.set_defaults(fn=config_cmd)
+    p = sub.add_parser("config", allow_abbrev=False); common(p, card=False); p.add_argument("action", choices=["show", "path", "set", "unset"], nargs="?", default="show")
+    p.add_argument("name", nargs="?"); p.add_argument("value", nargs="?"); p.set_defaults(fn=config_cmd)
     p = sub.add_parser("cache", allow_abbrev=False); common(p, card=False); p.add_argument("action", choices=["update"], nargs="?"); p.add_argument("--full", action="store_true"); p.set_defaults(fn=cache_cmd)
     p = sub.add_parser("doctor", allow_abbrev=False); common(p, card=False); p.set_defaults(fn=doctor_cmd)
     p = sub.add_parser("check", allow_abbrev=False); common(p, card=False); p.add_argument("--bucket-keys", action="store_true"); p.set_defaults(fn=check_cmd)

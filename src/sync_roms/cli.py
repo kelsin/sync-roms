@@ -35,7 +35,7 @@ SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "tools": ("install", "brew install the 7z, unar and chdman that `convert` needs"),
     "mirror": ("[DIR] | use DIR | clear", "make or refresh a local copy of everything your lists reference"),
     "cache": ("[update [--full]]", "show the storage cache every command reads file lists and sizes from, or update it"),
-    "config": ("show|path", "show the effective settings and where each comes from"),
+    "config": ("show|path|set NAME VALUE|unset NAME", "show the effective settings and where each comes from, or change one"),
     "doctor": ("", "check the AWS profile, storage access, tools and your data files"),
     "check": ("", "validate cards.json, surprises.json, the device overlay, the sets and your collections"),
     "completion": ("bash|zsh|fish", "print a shell completion script"),
@@ -247,8 +247,15 @@ TOPICS = {
   Files no longer referenced are deleted (after confirming when it is a lot).
 """,
     "config": """
-  sync-roms config show      the effective bucket, endpoint, profiles and mirror, and where each came from
-  sync-roms config path      the data folder
+  sync-roms config show                 the effective bucket, endpoint, profiles and mirror, and where each came from
+  sync-roms config path                 the data folder
+  sync-roms config set NAME VALUE       save one setting in settings.json
+  sync-roms config unset NAME           remove it (back to its default)
+
+  NAME is bucket, root, endpoint, profile, write_profile, mirror, screenscraper_user or screenscraper_password (text),
+  eject or storage_cache_declined (true or false), surprise_ttl_days (a positive number of days) or
+  surprise_excluded_systems (comma-separated system ids, e.g. gba,snes). The password is saved but never printed;
+  `scrape --set-credentials` asks for it without echoing it.
 """,
     "cache": """
   sync-roms cache [update [--full]]
