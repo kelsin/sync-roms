@@ -1,5 +1,14 @@
 # Changelog
 
+## [3.9.0](https://github.com/kelsin/sync-roms/compare/v3.8.0...v3.9.0) (2026-11-18)
+
+
+### :video_game: Features
+
+* **surprise:** default surprise off on layouts without collections ([#378](https://github.com/kelsin/sync-roms/issues/378)) ([3eb9ef0](https://github.com/kelsin/sync-roms/commit/3eb9ef0eb8eac58a2093e3d2bf5b5ddc57115699))
+* **surprise:** pick from every system the device supports ([#376](https://github.com/kelsin/sync-roms/issues/376)) ([6b553b5](https://github.com/kelsin/sync-roms/commit/6b553b5ba24dcf33770c402db198533989addff5))
+* **ui:** show a mini progress bar for each file in flight ([#379](https://github.com/kelsin/sync-roms/issues/379)) ([be2218b](https://github.com/kelsin/sync-roms/commit/be2218b8c23f667c88ba3061e49e1142f4391714))
+
 ## [3.8.0](https://github.com/kelsin/sync-roms/compare/v3.7.0...v3.8.0) (2026-11-18)
 
 
