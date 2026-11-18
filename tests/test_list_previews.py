@@ -66,7 +66,7 @@ class ListPreviews(unittest.TestCase):
         for module, edit_one in ((setedit, setedit.edit_one), (collectionedit, collectionedit.edit_one)):
             fake, calls = capture([1, None, None])  # "add games from a system", then Esc, then back
             thing = {"name": "X", "games": []}
-            with mock.patch.object(picker, "filter_list", fake), mock.patch.object(module, "stocked", return_value=SYSTEMS):
+            with mock.patch.object(picker, "filter_list", fake), mock.patch.object(listedit, "stocked", return_value=SYSTEMS):
                 try:
                     edit_one(thing, SYSTEMS, lambda bucket: set())
                 except StopIteration:
@@ -93,7 +93,7 @@ class GamePreviews(unittest.TestCase):
             fake, calls = capture([3, None, None])  # "change which game's category?", then Esc, then back
             thing = {"name": "X", "games": [{"system": "gba", "bucket": "gba/A.zip"}, {"title": "no bucket"},
                                             {"system": "psx", "bucket": "psx/B.bin"}]}
-            with mock.patch.object(picker, "filter_list", fake), mock.patch.object(module, "stocked", return_value=SYSTEMS):
+            with mock.patch.object(picker, "filter_list", fake), mock.patch.object(listedit, "stocked", return_value=SYSTEMS):
                 try:
                     edit_one(thing, SYSTEMS, lambda bucket: set())
                 except StopIteration:

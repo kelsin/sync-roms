@@ -2,14 +2,10 @@
 import copy
 
 from . import collections as colls
-from . import cardedit, edit, metafilter, picker, previews, s3, store, surprise, themeart, ui
-from .listedit import add_from_set, file_counts, fold_discs, reconcile, stocked, system_rows, view
+from . import cardedit, edit, picker, previews, store, themeart, ui
+from .listedit import add_from_set, add_from_system, folder_lister, reconcile, view
 
 
-PAST_SURPRISE_KEY = "p"
-CLEAR_KEY = "c"
-SET_KEY = "s"
-META_KEY = "m"
 GAMES_HINT = "Space toggle · Enter done · s set · m meta · c clear · p past"
 
 
@@ -36,6 +32,20 @@ def pick_art(collection):
         collection.pop("art", None)
 
 
+def toggle_filtered(s, title, rows):
+    """edit.toggle_games over a system's rows (s is its entry in a view), narrowed by the card editor's game filters."""
+    filters = cardedit.GameFilters(s)
+    titles = {r[1]: r[2] for r in rows}
+    sets = store.load_sets()
+    place = {}  # where the list was left, kept while a key lists the same games
+    while True:
+        pressed = edit.toggle_games(title, [r for r in rows if filters.keep(r[1])], hotkeys=cardedit.GameFilters.KEYS,
+                                    hint=GAMES_HINT, place=place, filters=filters.describe())
+        if not filters.handle(pressed, [r[1] for r in rows], place, lambda current: cardedit.pick_set(
+                s, sets, s["games"], titles, set(titles), current, lambda: {g.get("bucket") for g in s["games"]})):
+            return
+
+
 def edit_one(collection, systems, keys_of):
     """Edit one collection: remove games, add games from a system or a set, rename."""
     while True:
@@ -57,56 +67,7 @@ def edit_one(collection, systems, keys_of):
             finally:  # Ctrl-C too: the toggles made are kept
                 collection["games"] = reconcile(collection["games"], shown)
         elif i == 1:
-            options = stocked(systems)
-            j = picker.filter_list("✏️  Add games from which system?", [s["name"] for s in options], extras=file_counts(options),
-                                 preview=lambda k: previews.system(options[k]) if k < len(options) else None)
-            if j is None:
-                continue
-            s = shown[options[j]["bucket"]]
-            all_rows, past, filt, meta_filt = system_rows(s, keys_of(s["bucket"])), None, None, {}
-            meta = cardedit.Metadata(s["bucket"])
-            titles = {r[1]: r[2] for r in all_rows}
-            sets = store.load_sets()
-            place = {}  # where the list was left, kept while a key lists the same games
-
-            def keep(key, skip=None):
-                wanted = {f: v for f, v in meta_filt.items() if f != skip}
-                return ((filt is None or key in filt[1]) and (past is None or key in past)
-                        and (not wanted or metafilter.matches(meta.get().get(key, {}), wanted)))
-
-            interrupted = False
-            try:
-                while True:
-                    parts = ([f"{filt[2]} {filt[0]} only"] if filt else []) + (["🎁 past surprises only"] if past is not None else []) \
-                        + ([metafilter.describe(meta_filt)] if meta_filt else [])
-                    pressed = edit.toggle_games(
-                        f"✏️  {s['name']} — ✅ in {label}, ⬜ in storage only",
-                        [r for r in all_rows if keep(r[1])],
-                        hotkeys=(SET_KEY, META_KEY, PAST_SURPRISE_KEY, CLEAR_KEY), hint=GAMES_HINT, place=place,
-                        filters=f"{' · '.join(parts)} (c shows all)" if parts else "")
-                    if pressed == PAST_SURPRISE_KEY:
-                        past = surprise.past_keys(s["bucket"]) or None
-                        if past is None:
-                            edit.note(ui.yellow(f"ℹ️  No past surprises on {s['name']}."))
-                    elif pressed == META_KEY:
-                        cardedit.pick_meta(s, meta, meta_filt, lambda field: [r[1] for r in all_rows if keep(r[1], field)])
-                    elif pressed == SET_KEY:
-                        chosen = cardedit.pick_set(s, sets, s["games"], titles, set(titles), filt and filt[0],
-                                                   lambda: {g.get("bucket") for g in s["games"]})
-                        if chosen:
-                            filt = (chosen["name"], cardedit.set_filter(chosen, s), themeart.set_emoji(chosen))
-                    elif pressed == CLEAR_KEY:
-                        past, filt = None, None
-                        meta_filt.clear()
-                        place.get("session", {}).pop("query", None)  # the / filter too
-                    else:
-                        break
-            except KeyboardInterrupt:  # Ctrl-C in the list or a picker it opens: the toggles made are kept
-                interrupted = True
-            collection["games"] = reconcile(collection["games"], shown)
-            fold_discs(collection["games"], keys_of(s["bucket"]))
-            if interrupted:
-                raise KeyboardInterrupt
+            add_from_system(collection, systems, shown, keys_of, label, categories=False, toggle=toggle_filtered)
         elif i == 2:
             add_from_set(collection, store.load_sets(), shown, keys_of, label, categories=False)
         elif i == 4:
@@ -141,7 +102,7 @@ def new_collection(working):
         if not problem:
             break
         print(ui.yellow(f"  {problem}"))
-    cid = colls.slug(name)
+    cid = store.slug(name)
     working[cid] = {"name": name, "description": ui.ask("   One-line description (optional): ").strip(), "games": []}
     return cid
 
@@ -180,13 +141,7 @@ def save(working, changed, deleted):
 
 def edit_working(systems, before, working):
     """The collections menu over working; saves it at Done. Returns the exit code."""
-    listed = {}
-
-    def keys_of(bucket):
-        if bucket not in listed:
-            print(ui.dim(f"📡 Listing {s3.location()}/{bucket}/ ..."))
-            listed[bucket] = store.folder_keys(bucket)
-        return listed[bucket]
+    keys_of = folder_lister()
 
     while True:
         ids = sorted(working, key=lambda x: working[x]["name"].lower())

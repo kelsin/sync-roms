@@ -1,6 +1,6 @@
 """A card's picks as the card editor edits them: the card loaded once, each system's games listed from storage when
 first shown, and every edit saved to cards.json together."""
-from . import collections as colls, edit, inventory, listedit, m3u, names, store, vita
+from . import collections as colls, edit, listedit, m3u, names, store, vita
 
 
 class SystemPicks:
@@ -83,7 +83,7 @@ class CardPicks:
         folder's sized listing stats every file). s3.ERRORS propagate."""
         bucket = system["bucket"]
         if bucket not in self._systems:
-            in_storage = {k for k in inventory.files(f"{bucket}/", sizes=False) if not k.endswith("/")}
+            in_storage = store.folder_keys(bucket)
             games = self.picks_of(bucket, writing=True)
             excluded = self.excluded_of(bucket)
             self._picks.pop(bucket)

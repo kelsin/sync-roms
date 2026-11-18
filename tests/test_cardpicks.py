@@ -1,6 +1,7 @@
 import os
 import sys
 import unittest
+from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
@@ -15,6 +16,12 @@ def load_tests(loader, tests, pattern):
 
 
 class Picks(Flow):
+    def setUp(self):
+        super().setUp()
+        p = mock.patch("builtins.print")  # without a storage cache, listing a folder says so
+        p.start()
+        self.addCleanup(p.stop)
+
     def picks(self):
         return CardPicks("c", (DEVICE, "esde"))
 

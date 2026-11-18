@@ -43,6 +43,17 @@ def stocked(systems):
                    and inventory.cached(f"{s['bucket']}/") != {}), key=store.system_sort_key)
 
 
+def folder_lister():
+    """keys_of(bucket): store.folder_keys of a system's folder, listed once per bucket."""
+    listed = {}
+
+    def keys_of(bucket):
+        if bucket not in listed:
+            listed[bucket] = store.folder_keys(bucket)
+        return listed[bucket]
+    return keys_of
+
+
 def file_counts(systems):
     """Per system, its file count in storage as filter_list extras; none without a storage cache (counting would list
     every folder)."""
@@ -130,6 +141,41 @@ def game_label(game, names):
     """A game's row label; names: {system bucket: system name}."""
     return f"{game.get('category') + ' — ' if game.get('category') else ''}{names.get(game.get('system'), game.get('system'))}" \
            f" — {game.get('title') or game['bucket']}"
+
+
+def add_from_system(listing, systems, shown, keys_of, label, categories=True, toggle=None):
+    """Pick one of systems with files in storage and toggle its games in listing (via shown, a view of it).
+    label is listing's name as shown, with its emoji.
+
+    toggle(s, title, rows) shows the system's rows (s is its entry in shown) instead of a plain edit.toggle_games.
+    New games get the category asked for when categories is true (none after Ctrl-C, which keeps the toggles made and
+    is then raised again), and the discs of a multi-disc game whose playlist is in storage."""
+    options = stocked(systems)
+    j = picker.filter_list("✏️  Add games from which system?", [s["name"] for s in options], extras=file_counts(options),
+                           preview=lambda k: previews.system(options[k]) if k < len(options) else None)
+    if j is None:
+        return
+    s = shown[options[j]["bucket"]]
+    rows = system_rows(s, keys_of(s["bucket"]))
+    had = {g["bucket"] for g in s["games"]}
+    title = f"✏️  {s['name']} — ✅ in {label}, ⬜ in storage only"
+    interrupted = False
+    try:
+        if toggle:
+            toggle(s, title, rows)
+        else:
+            edit.toggle_games(title, rows)
+    except KeyboardInterrupt:  # Ctrl-C in the list or a picker it opens: the toggles made are kept, with no category
+        interrupted = True
+    added = {g["bucket"] for g in s["games"]} - had
+    try:
+        category = ask_category(listing["games"], f"{len(added)} new game(s)") if categories and added and not interrupted else ""
+    except KeyboardInterrupt:  # Ctrl-C at the question: no category
+        category, interrupted = "", True
+    listing["games"] = reconcile(listing["games"], shown, category)
+    fold_discs(listing["games"], keys_of(s["bucket"]))
+    if interrupted:
+        raise KeyboardInterrupt
 
 
 def add_from_set(listing, sets, shown, keys_of, label, categories=True):

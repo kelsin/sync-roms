@@ -9,7 +9,7 @@ from unittest import mock
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 from helpers import StorageDir, storage_sets  # noqa: E402
-from sync_roms import commands, edit, picker, runtime, setedit, shared, store, ui  # noqa: E402
+from sync_roms import commands, edit, listedit, picker, runtime, setedit, shared, store, ui  # noqa: E402
 
 SYSTEMS = [{"name": "Game Boy Advance", "bucket": "gba"}, {"name": "Genesis", "bucket": "gen"}]
 
@@ -519,8 +519,8 @@ class Editor(unittest.TestCase):
                 mock.patch.object(store, "repo_json", return_value=SYSTEMS), mock.patch.object(picker, "filter_list", fake), \
                 mock.patch.object(store, "folder_keys", lambda bucket: keys.get(bucket, set())), \
                 mock.patch.object(store, "load_sets", return_value=list(sets)), \
-                mock.patch.object(setedit, "stocked", lambda systems: systems), \
-                mock.patch.object(setedit, "file_counts", lambda systems: None), \
+                mock.patch.object(listedit, "stocked", lambda systems: systems), \
+                mock.patch.object(listedit, "file_counts", lambda systems: None), \
                 mock.patch.object(ui, "ask", side_effect=ask) as ask, mock.patch.object(ui, "choose", return_value="s") as choose, \
                 mock.patch("builtins.print"), \
                 mock.patch.object(setedit, "save_sets", lambda before, after, found, from_fallback: saved.update(after=after)), \

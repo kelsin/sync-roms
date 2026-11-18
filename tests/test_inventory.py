@@ -534,7 +534,7 @@ class FolderKeysTest(unittest.TestCase):
             asked.append((prefix, sizes))
             return {"gba/a.zip": None, "gba/sub/": None}
         with mock.patch.object(inventory, "current", return_value=None), mock.patch.object(s3, "list_sizes", list_sizes):
-            self.assertEqual(store.folder_keys("gba"), {"gba/a.zip"})
+            self.assertEqual(store.folder_keys("gba", say=False), {"gba/a.zip"})
         self.assertEqual(asked, [("gba/", False)])  # each size would be a stat on a share
 
 
@@ -635,3 +635,14 @@ class IgnoredTest(StorageFolder):
 
     def test_listed_drops_ignored(self):
         self.assertEqual(store.listed({"games": [{"bucket": "gba/a.zip"}, {"bucket": "gba/b.zip"}]}), ["gba/a.zip"])
+
+
+class FolderKeysSaysTest(unittest.TestCase):
+    def test_it_says_it_is_listing_only_without_a_cache_and_when_asked(self):
+        for tree, say, said in ((None, True, True), (None, False, False), (mock.Mock(), True, False)):
+            out = io.StringIO()
+            with mock.patch.object(inventory, "current", return_value=tree), \
+                    mock.patch.object(inventory, "files", lambda p, sizes=True: {"gba/a.zip": None}), \
+                    contextlib.redirect_stdout(out):
+                self.assertEqual(store.folder_keys("gba", say=say), {"gba/a.zip"})
+            self.assertEqual("📡 Listing" in out.getvalue(), said, (tree, say))

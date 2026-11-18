@@ -1,7 +1,6 @@
 """The user's collections: one file per collection in ~/.sync-roms/collections/ (never in the repo or storage)."""
 import json
 import os
-import re
 
 from . import frontend, store, ui
 
@@ -10,10 +9,6 @@ SURPRISE = "surprise"
 
 def collections_dir():
     return os.path.join(store.data_dir(), "collections")
-
-
-def slug(name):
-    return re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")
 
 
 def _clean_games(games):
@@ -82,7 +77,7 @@ def delete_collection(collection_id):
 
 def collection_problem(name, existing_ids):
     """Why name can't be a new collection's name, or None."""
-    sid = slug(name)
+    sid = store.slug(name)
     if not sid:
         return "A collection needs a name with letters or digits."
     if frontend.safe_name(name).lower() == SURPRISE:

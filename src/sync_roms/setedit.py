@@ -2,7 +2,7 @@
 import copy
 
 from . import cardedit, edit, inventory, picker, previews, runtime, s3, store, themeart, ui
-from .listedit import add_from_set, ask_category, file_counts, fold_discs, game_label, insert_game, recategorize, reconcile, series_keys, set_series, stocked, system_rows, view
+from .listedit import add_from_set, add_from_system, ask_category, folder_lister, game_label, insert_game, recategorize, reconcile, series_keys, set_series, view
 
 
 # --- Set files ---------------------------------------------------------------------------------------
@@ -52,28 +52,7 @@ def edit_one(game_set, systems, keys_of):
             finally:  # Ctrl-C too: the toggles made are kept (rows hidden by the series stay as they were)
                 game_set["games"] = reconcile(game_set["games"], shown)
         elif i == 1:
-            options = stocked(systems)
-            j = picker.filter_list("✏️  Add games from which system?", [s["name"] for s in options], extras=file_counts(options),
-                                 preview=lambda k: previews.system(options[k]) if k < len(options) else None)
-            if j is None:
-                continue
-            s = shown[options[j]["bucket"]]
-            had = {g["bucket"] for g in s["games"]}
-            interrupted = False
-            try:
-                edit.toggle_games(f"✏️  {s['name']} — ✅ in {label}, ⬜ in storage only",
-                                  system_rows(s, keys_of(s["bucket"])))
-            except KeyboardInterrupt:  # Ctrl-C: the toggles made are kept, with no category
-                interrupted = True
-            added = {g["bucket"] for g in s["games"]} - had
-            try:
-                category = ask_category(game_set["games"], f"{len(added)} new game(s)") if added and not interrupted else ""
-            except KeyboardInterrupt:  # Ctrl-C at the question: no category
-                category, interrupted = "", True
-            game_set["games"] = reconcile(game_set["games"], shown, category)
-            fold_discs(game_set["games"], keys_of(s["bucket"]))
-            if interrupted:
-                raise KeyboardInterrupt
+            add_from_system(game_set, systems, shown, keys_of, label)
         elif i == 2:
             add_from_set(game_set, [x for x in store.load_sets() if x["name"] != game_set["name"]], shown, keys_of, label)
         elif i == 3:
@@ -183,7 +162,7 @@ def new_set(working):
         name = ui.ask("📦 Name for the new set (empty to cancel): ").strip()
         if not name:
             return None
-        sid = store.set_slug(name)
+        sid = store.slug(name)
         if not sid:
             print(ui.yellow("  A set needs a name with letters or digits."))
         elif sid in working:
@@ -219,13 +198,7 @@ def edit_sets():
 def edit_working(systems, before, working, state):
     """The sets menu over working; Done reviews it and saves it to storage. state["review"] starts at that review and stays
     true until the user goes back to editing; when that review ends the editor, returns None. Returns the exit code."""
-    listed = {}
-
-    def keys_of(bucket):
-        if bucket not in listed:
-            print(ui.dim(f"📡 Listing {s3.location()}/{bucket}/ ..."))
-            listed[bucket] = store.folder_keys(bucket)
-        return listed[bucket]
+    keys_of = folder_lister()
 
     while True:
         ids = sorted(working, key=lambda x: working[x]["name"].lower())

@@ -47,8 +47,11 @@ def key_title(key):
     return os.path.splitext(key.split("/", 1)[-1])[0]
 
 
-def folder_keys(bucket):
-    """Bucket keys of the files in a system's storage folder (names only: without a cache, a size is a stat per file)."""
+def folder_keys(bucket, say=True):
+    """Bucket keys of the files in a system's storage folder (names only: without a cache, a size is a stat per file).
+    say: print that the folder is being listed when there is no storage cache to read it from."""
+    if say and inventory.current() is None:
+        print(ui.dim(f"📡 Listing {s3.location()}/{bucket}/ ..."))
     return {k for k in inventory.files(bucket + "/", sizes=False) if not k.endswith("/")}
 
 
@@ -700,7 +703,7 @@ def delete_set(set_id):
     reset_sets()
 
 
-def set_slug(name):
+def slug(name):
     return re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")
 
 

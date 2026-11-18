@@ -1650,3 +1650,60 @@ class Poll(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class GameFiltersTest(unittest.TestCase):
+    GBA = {"bucket": "gba", "name": "Game Boy Advance"}
+    KEYS = ["gba/A.zip", "gba/B.zip", "gba/C.zip"]
+
+    def filters(self):
+        with mock.patch.object(cardedit, "_spawn", lambda fn: None), mock.patch.object(cardedit, "_metadata", {"gba": None}):
+            return cardedit.GameFilters(self.GBA)
+
+    def test_nothing_narrows_the_list_at_first(self):
+        f = self.filters()
+        self.assertTrue(all(f.keep(k) for k in self.KEYS))
+        self.assertEqual(f.describe(), "")
+
+    def test_a_set_narrows_the_list_and_c_clears_every_filter(self):
+        f = self.filters()
+        game_set = {"name": "Picks", "games": [{"system": "gba", "bucket": "gba/A.zip"}]}
+        current = []
+        self.assertTrue(f.handle(cardedit.SET_KEY, self.KEYS, {}, lambda name: current.append(name) or game_set))
+        self.assertEqual([k for k in self.KEYS if f.keep(k)], ["gba/A.zip"])
+        self.assertIn("Picks only", f.describe())
+        self.assertTrue(f.describe().endswith("(c shows all)"))
+        f.handle(cardedit.SET_KEY, self.KEYS, {}, lambda name: current.append(name))  # cancelled: the set stays
+        self.assertEqual(current, [None, "Picks"])
+        self.assertEqual([k for k in self.KEYS if f.keep(k)], ["gba/A.zip"])
+        with mock.patch.object(surprise, "past_keys", return_value={"gba/B.zip"}):
+            f.handle(cardedit.PAST_SURPRISE_KEY, self.KEYS, {}, None)
+        self.assertEqual([k for k in self.KEYS if f.keep(k)], [])
+        self.assertIn("past surprises only", f.describe())
+        place = {"session": {"query": "zel"}}
+        self.assertTrue(f.handle(cardedit.CLEAR_KEY, self.KEYS, place, None))
+        self.assertEqual(place, {"session": {}})  # the / filter too
+        self.assertTrue(all(f.keep(k) for k in self.KEYS))
+        self.assertEqual(f.describe(), "")
+
+    def test_no_past_surprises_leaves_the_list_and_says_so(self):
+        f, notes = self.filters(), []
+        with mock.patch.object(surprise, "past_keys", return_value=set()), mock.patch.object(edit, "note", notes.append):
+            self.assertTrue(f.handle(cardedit.PAST_SURPRISE_KEY, self.KEYS, {}, None))
+        self.assertIsNone(f.past)
+        self.assertIn("No past surprises on Game Boy Advance", notes[0])
+
+    def test_m_offers_the_keys_the_other_filters_keep(self):
+        f, offered = self.filters(), []
+        f.past = {"gba/B.zip", "gba/C.zip"}
+
+        def pick_meta(system, meta, meta_filt, keys):
+            offered.append(keys("genre"))
+        with mock.patch.object(cardedit, "pick_meta", pick_meta):
+            self.assertTrue(f.handle(cardedit.META_KEY, self.KEYS, {}, None))
+        self.assertEqual(offered, [["gba/B.zip", "gba/C.zip"]])
+
+    def test_other_keys_are_not_filter_keys(self):
+        f = self.filters()
+        for pressed in (None, cardedit.VARIANT_KEY):
+            self.assertFalse(f.handle(pressed, self.KEYS, {}, None))
