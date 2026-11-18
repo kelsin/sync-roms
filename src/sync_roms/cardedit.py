@@ -4,7 +4,7 @@ import json
 import queue
 import threading
 
-from . import budget, cardpicks, collections as colls, edit, inventory, metafilter, picker, previews, s3, scrape_plan, store, surprise, themeart, ui, usersettings
+from . import budget, cardpicks, collections as colls, edit, inventory, listedit, metafilter, picker, previews, s3, scrape_plan, store, surprise, themeart, ui, usersettings
 
 FULL_KEY = "f"
 SET_KEY = "s"
@@ -15,12 +15,13 @@ SURPRISE_KEY = "S"
 PAST_SURPRISE_KEY = "p"
 META_KEY = "m"
 VARIANT_KEY = "v"
+SERIES_KEY = "r"
 LIST_HINT = "Enter games · f full · s set · l collections · S surprise · D clear all"
 GAMES_HINT = "Space toggle · Enter done · s set · m meta · p past · v variant"
 META_HINT = "Enter list its values · Esc back"
 VALUES_HINT = "Enter narrow to it · Esc back · / filter"
 SETS_HINT = "Enter show its games · Space/Tab toggle its games here · / filter"
-SET_GAMES_HINT = "Space toggle · Enter done · w note · v variant"
+SET_GAMES_HINT = "Space toggle · Enter done · w note · v variant · r series"
 LIST_KEYS = [("Enter", "the system's games"), ("f", "full system: every file in its folder (again to undo)"),
              ("s", "a set's games across this card's systems"), ("l", "collections on this card"),
              ("S", "Surprise menu: turn it on or off, or pick its systems"),
@@ -29,7 +30,8 @@ GAMES_KEYS = [("s", "sets on this system: narrow to one, or pick its games"),
               ("m", "narrow by scraped metadata (developer, genre, year...)"),
               ("p", "only the games that were surprises lately"), ("v", "the game's variants on other systems"),
               ("c", "clear the search, set, metadata and surprise filters")]
-SET_GAMES_KEYS = [("v", "the game's variants on other systems")]
+SET_GAMES_KEYS = [("v", "the game's variants on other systems"), ("r", "narrow to one series of games"),
+                  ("c", "show every game again")]
 SIZING = "…"
 
 
@@ -718,6 +720,18 @@ def set_view_keys(game_set, systems):
     return out
 
 
+def pick_series(game_set, current=None):
+    """The series of the set's games picked from a list (with its game count), or None; notes when the set has none."""
+    found = listedit.series_of(game_set)
+    if not found:
+        edit.note(ui.yellow(f"ℹ️  {game_set['name']} has no series."))
+        return None
+    labels = [f"{n}  ({c} games)" for n, c in found]
+    i = picker.filter_list(f"🎮 Series in {game_set['name']}", labels,
+                           cursor=next((j for j, (n, _) in enumerate(found) if n == current), 0))
+    return None if i is None else found[i][0]
+
+
 def edit_set(name, game_set, setup, to_fetch=None, card_usages=None):
     """A card's games of one set over every system it can play, in one list (category, then system and title), toggled
     as in edit_system; games not in storage are left out, a full system's are on and locked. Saves to cards.json when
@@ -741,12 +755,9 @@ def edit_set(name, game_set, setup, to_fetch=None, card_usages=None):
     present = {k for key, files in files_of.items() for k in (key, *files)}  # the rest are left out: no warning
     rows = edit.set_rows({"games": [g for g in game_set["games"] if g.get("bucket") in files_of]},
                          {s["bucket"]: s for s in playable}, lambda _s: present)
-    shown = [r for r in rows if r[0]["bucket"] not in sps  # a shown playlist hides its discs
-             or sps[r[0]["bucket"]].playlist_of.get(r[1]) not in files_of]
-    keys = [r[1] for r in shown]
-    sp_of = [sps.get(r[0]["bucket"]) for r in shown]  # None on a full system
-    index = {k: i for i, k in enumerate(keys)}
-    links = [[index[m] for m in sp.groups.get(k, ()) if m in index] if sp else [] for k, sp in zip(keys, sp_of)]
+    listed = [r for r in rows if r[0]["bucket"] not in sps  # a shown playlist hides its discs
+              or sps[r[0]["bucket"]].playlist_of.get(r[1]) not in files_of]
+    series_filter = None  # the series the list is narrowed to
     others = [x for x in playable if x["bucket"] not in sps]
     capacity = budget.card_capacity(card_entry(name, setup, cards))
     work = _work_out(picks, list(sps.values()), others, card_usages, to_fetch)
@@ -762,6 +773,12 @@ def edit_set(name, game_set, setup, to_fetch=None, card_usages=None):
             notes = picks.cover()
             bases = {b: sp.states(notes) for b, sp in sps.items()}
             base = row_states(bases)
+            wanted = listedit.series_keys(game_set, series_filter) if series_filter else None
+            shown = [r for r in listed if wanted is None or r[1] in wanted]
+            keys = [r[1] for r in shown]
+            sp_of = [sps.get(r[0]["bucket"]) for r in shown]  # None on a full system
+            index = {k: i for i, k in enumerate(keys)}
+            links = [[index[m] for m in sp.groups.get(k, ()) if m in index] if sp else [] for k, sp in zip(keys, sp_of)]
             session = {"sel": [base[k] for k in keys]}
             picker.carry_place(place, keys, session)
             extras = [_row_extras(sp, work, k, notes, st) + [_variant_mark(picks, k)] if sp else []
@@ -797,7 +814,8 @@ def edit_set(name, game_set, setup, to_fetch=None, card_usages=None):
             result = picker.filter_list(
                 f"{themeart.set_emoji(game_set)} {game_set['name']} on {name} — ✅ synced, ⬜ not, 📦 from a set",
                 [r[3] for r in shown], multi=True, initial=[start[k] for k in keys], extras=extras,
-                hint=SET_GAMES_HINT, hotkeys=(VARIANT_KEY,), key_help=SET_GAMES_KEYS, status=status,
+                hint=SET_GAMES_HINT, hotkeys=(VARIANT_KEY, SERIES_KEY, CLEAR_KEY), key_help=SET_GAMES_KEYS, status=status,
+                filters=f"{series_filter} (c shows all)" if series_filter else "",
                 row_note=lambda i: edit.variant_line(keys[i], picks.variants, picks.parents, picks.system_names,
                                                      picks.on_card),
                 session=session, note_text=lambda i: _note_text(sp_of[i], keys[i]),
@@ -810,7 +828,11 @@ def edit_set(name, game_set, setup, to_fetch=None, card_usages=None):
             apply(session["sel"] if isinstance(result, tuple) else result)
             if not isinstance(result, tuple):
                 break
-            if result[1] is not None and _toggle_variant(picks, keys[result[1]], shown[result[1]][2]):
+            if result[0] == CLEAR_KEY:
+                series_filter = None
+            elif result[0] == SERIES_KEY:
+                series_filter = pick_series(game_set, series_filter) or series_filter
+            elif result[1] is not None and _toggle_variant(picks, keys[result[1]], shown[result[1]][2]):
                 work = _work_out(picks, list(sps.values()), others, card_usages, to_fetch)
     except KeyboardInterrupt:  # Ctrl-C: keep the toggles
         if pending:
