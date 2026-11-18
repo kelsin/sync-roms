@@ -203,10 +203,11 @@ _flushing = threading.Semaphore(FLUSHERS)
 
 
 class FlushingWriter:
-    """A seekable file wrapper for a download (so ranges can still be written in parallel) that fsyncs f every
-    FLUSH_BYTES and reports bytes to wrote(bytes) once they are on disk: a file under FLUSH_BYTES is never fsynced and
-    reports each write; one of size FLUSH_BYTES or more, or once fsynced, reports after each fsync. finish() fsyncs
-    the rest of such a file."""
+    """A non-seekable file wrapper for a download, so s3transfer writes it in order (ranges are still fetched in
+    parallel): a write past the end of a FAT/exFAT file makes the card zero-fill the gap, which is then written again.
+    It fsyncs f every FLUSH_BYTES and reports bytes to wrote(bytes) once they are on disk: a file under FLUSH_BYTES is
+    never fsynced and reports each write; one of size FLUSH_BYTES or more, or once fsynced, reports after each fsync.
+    finish() fsyncs the rest of such a file."""
     def __init__(self, f, wrote, size=None):
         self.f, self.wrote, self.hold = f, wrote, (size or 0) >= FLUSH_BYTES
         self.dirty = self.pending = 0  # bytes since the last fsync, and not yet reported
@@ -238,17 +239,11 @@ class FlushingWriter:
             self.sync()
         self.report()
 
-    def seek(self, *args):
-        return self.f.seek(*args)
-
-    def tell(self):
-        return self.f.tell()
-
     def seekable(self):
-        return True
+        return False
 
 
-DOWNLOAD_PARTS = 2  # ranges of one file fetched at once: every download has its own pool, and the client's connections are shared
+DOWNLOAD_PARTS = 2  # ranges of one file fetched at once (written in order): every download has its own pool, and the client's connections are shared
 
 
 def _download_known(key, f, known, callback, wrote):

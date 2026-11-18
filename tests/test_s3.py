@@ -167,7 +167,6 @@ class DownloadTest(unittest.TestCase):
             path, wrote = os.path.join(d, "g.zip"), []
 
             def fake_download(bucket, key, fileobj, Callback=None, Config=None):
-                fileobj.seek(0)
                 fileobj.write(b"abc")
                 Callback(3)
 
@@ -257,13 +256,19 @@ class FlushTest(unittest.TestCase):
         self.assertEqual(peak[0], s3.FLUSHERS)
 
 
+class FlushingWriterTest(unittest.TestCase):
+    def test_is_not_seekable_so_s3transfer_writes_in_order(self):
+        self.assertFalse(s3.FlushingWriter(io.BytesIO(), None).seekable())
+
+
 class FakeObject:
     """One bucket object served through a client's events, answering each request by what it asks (so ranged GETs may
     come in any order): HEAD, GET with Range and If-Match (412 when the ETag isn't the object's), 404 when body is None.
     calls records (operation, If-Match, Range). After changes GETs, the object becomes after (body, ETag); a 412 is held
     for wait seconds, so the GETs in flight finish first."""
-    def __init__(self, client, body, etag, changes=None, after=None, wait=0):
+    def __init__(self, client, body, etag, changes=None, after=None, wait=0, slow_first=0):
         self.body, self.etag, self.changes, self.after, self.wait, self.calls = body, etag, changes, after, wait, []
+        self.slow_first = slow_first  # seconds the range starting at 0 is held, so the later range arrives first
         self.lock = threading.Lock()
         client.meta.events.register_first("before-call.s3", self.serve, unique_id="fake-object")
 
@@ -287,6 +292,8 @@ class FakeObject:
         if headers.get("Range"):
             a, b = headers["Range"][len("bytes="):].split("-")
             start, end = int(a), min(int(b) if b else end, end)
+        if start == 0 and headers.get("Range"):
+            time.sleep(self.slow_first)
         out = {"Body": io.BytesIO(body[start:end + 1]), "ContentLength": end + 1 - start, "ETag": etag, "ResponseMetadata": meta}
         if headers.get("Range"):
             out["ContentRange"] = f"bytes {start}-{end}/{len(body)}"
@@ -334,6 +341,21 @@ class CachedDownloadTest(unittest.TestCase):
         self.assertEqual(self.download({"gba/a.zip": self.BIG}, {"gba/a.zip": '"e1-2"'}), (body, self.BIG, self.BIG))
         self.assertEqual(sorted(fake.calls), [("GetObject", '"e1-2"', "bytes=0-8388607"),
                                               ("GetObject", '"e1-2"', "bytes=8388608-")])
+
+    def test_ranges_arriving_out_of_order_are_written_in_order(self):
+        body = os.urandom(self.BIG)
+        FakeObject(self.client, body, '"e1-2"', slow_first=0.3)
+        writes, path = [], os.path.join(self.tmp, "a.zip")
+
+        class Recorder(io.FileIO):
+            def write(self, data):
+                writes.append(bytes(data))
+                return super().write(data)
+
+        tree = inventory.Tree(f"s3://{BUCKET}", 0, {"gba/a.zip": self.BIG}, {"gba/a.zip": '"e1-2"'})
+        with mock.patch.object(inventory, "current", return_value=tree), mock.patch("builtins.open", Recorder):
+            s3.download(("gba/a.zip", path, None))
+        self.assertEqual(b"".join(writes), body)  # the first byte written is the file's first byte, and so on
 
     def test_stale_etag_falls_back_to_a_head_once(self):
         fake = FakeObject(self.client, b"new", '"e2"')
