@@ -169,7 +169,8 @@ def review_command(args):
         sizes = {}
         for system in sorted({k.split("/", 1)[0] for k in keys}):
             sizes.update(inventory.files(system + "/"))
-        sizes = {k: n for k, n in sizes.items() if k in keys}
+        wanted = set(keys)
+        sizes = {k: n for k, n in sizes.items() if k in wanted}
     if not sizes and inventory.current() is None and s3.read_root() and not os.path.isdir(s3.read_root()):
         ui.fail(f"{s3.read_root()} isn't there (is the share mounted?); nothing reviewed", 3)  # keep every mark
     for key in keys:
