@@ -6,6 +6,7 @@ import shutil
 import sys
 import tempfile
 import threading
+from concurrent.futures import ThreadPoolExecutor
 
 from . import inventory, s3, ui
 
@@ -592,12 +593,24 @@ def _read_sets():
         keys, reachable = [SETS + n for n in names if _set_id(SETS + n)], False
     out = []
     _skipped.clear()
-    for key in sorted(keys):
+    keys = sorted(keys)
+
+    def fetch(key):
+        try:
+            return shared.load(key, _set_file, gone, fallback=False)
+        except (*s3.ERRORS, SystemExit) as e:
+            return e
+    fetched = {}
+    if reachable and keys:  # the first on its own: storage that can't be checked fails (and says why) once
+        fetched[keys[0]] = fetch(keys[0])
+        if not isinstance(fetched[keys[0]], BaseException):
+            with ThreadPoolExecutor(s3.STAT_WORKERS) as ex:
+                fetched.update(zip(keys[1:], ex.map(fetch, keys[1:])))
+    for key in keys:
         if reachable:
-            try:
-                data = shared.load(key, _set_file, gone, fallback=False)
-            except (*s3.ERRORS, SystemExit) as e:
-                ui.warn(f"Couldn't check {SETS} in storage ({_why(e)}); using the local copies")
+            data = fetched[key]
+            if isinstance(data, BaseException):
+                ui.warn(f"Couldn't check {SETS} in storage ({_why(data)}); using the local copies")
                 reachable = False
         if not reachable:
             data = _mirror_set(key)

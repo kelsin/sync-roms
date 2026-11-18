@@ -5,10 +5,12 @@ The mirror of storage key K is <data_dir>/storage/K (the storage file's exact te
 import copy
 import json
 import os
+import threading
 
 from . import inventory, runtime, s3, store, ui
 
 _TAGS = ".tags.json"
+_tags_lock = threading.Lock()  # the sets are loaded on several threads, and each load may change the tags
 
 
 def local_path(key):
@@ -45,17 +47,19 @@ def _save_mirror(key, tag, text):
     path = local_path(key)
     os.makedirs(os.path.dirname(path), exist_ok=True)
     store.write_text(path, text)
-    tags = _load_tags()
-    tags[key] = tag
-    _save_tags(tags)
+    with _tags_lock:
+        tags = _load_tags()
+        tags[key] = tag
+        _save_tags(tags)
 
 
 def _drop_mirror(key):
     if os.path.exists(local_path(key)):
         os.remove(local_path(key))
-    tags = _load_tags()
-    if tags.pop(key, None) is not None:
-        _save_tags(tags)
+    with _tags_lock:
+        tags = _load_tags()
+        if tags.pop(key, None) is not None:
+            _save_tags(tags)
 
 
 def load(key, parse, empty, fallback=True):
