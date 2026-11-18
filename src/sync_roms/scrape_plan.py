@@ -73,7 +73,7 @@ ONION_LAYOUTS = ("onion", "allium")  # both keep box art in a flat Imgs/ folder
 # EmuDeck's media goes on the card; its gamelists go in ES-DE's data folder on the computer running the sync
 SCRAPE_LAYOUTS = set(GAMELIST_FILES)
 EMUDECK_MEDIA = os.path.join("Emulation", "tools", "downloaded_media")
-CART_LAYOUTS = ("esde", "emudeck", "knulli") + ONION_LAYOUTS  # a PICO-8 cart is a picture of itself: these show it as its image
+CART_LAYOUTS = ("esde", "emudeck", "knulli") + ONION_LAYOUTS  # a PICO-8 cart with no scraped picture is its own: these show it as its image
 
 
 def gamelist_fields(meta):
@@ -298,21 +298,26 @@ def build_scrape_plan(layout_name, systems, data, rom_rels, dest_of, es_dir, pre
         rom_dir = dest_of(s)
         media_root = media_root_of(layout_name, s, base, es_dir)
         carts = s["bucket"] == "pico8" and layout_name in CART_LAYOUTS
-        jobs, entries, texts = plan_scrapes(layout_name, rom_rels.get(s["bucket"], ()), {} if carts else listing, meta,
+        jobs, entries, texts = plan_scrapes(layout_name, rom_rels.get(s["bucket"], ()), listing, meta,
                                             media_root, rom_dir, lambda rom, d=rom_dir: present(os.path.join(d, rom)))
-        if carts:
+        if carts:  # a cart without a scraped picture is its own picture
+            index = scrape_index(listing)
             for rom in sorted(rom_rels.get(s["bucket"], ())):
                 if not rom.endswith(".p8.png") or not present(os.path.join(rom_dir, rom)):
                     continue
+                found = index.get(os.path.splitext(rom)[0], {})
                 if layout_name == "knulli":  # the cart is already in the ROM folder
-                    entries.setdefault(rom, {})["image"] = f"./{rom}"
+                    if "image" not in entries.get(rom, {}):
+                        entries.setdefault(rom, {})["image"] = f"./{rom}"
                     continue
                 if layout_name in ONION_LAYOUTS:
-                    if "/" in rom:  # Imgs is flat
+                    if "/" in rom or ONION_TYPE in found:  # Imgs is flat
                         continue
                     root, rel = rom_dir, f"Imgs/{rom}"
                     entries.setdefault(rom, {})["image"] = f"./Imgs/{rom}"
                 else:
+                    if "miximages" in found:
+                        continue
                     root, rel = media_root, f"miximages/{rom}"
                 try:
                     jobs.append((f"{s['bucket']}/{rom}", s3.safe_join(root, rel), None))

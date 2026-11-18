@@ -721,7 +721,8 @@ def record(system, pending, outcomes, listing, index, skip, replace=False, rerun
         return len(done), True
     for rom, (_, meta, _) in done.items():  # remote is ours: changed in place
         old = remote.get(rom, {})
-        remote[rom] = dict(meta) if replace else {**old, **({**meta, **old} if fill else meta)}
+        gaps = fill or name == "pico8"  # pico8's entries also hold the BBS titles and authors: a scrape only adds to them
+        remote[rom] = dict(meta) if replace and name != "pico8" else {**old, **({**meta, **old} if gaps else meta)}
         if old.get("qualifier"):  # a name set apart by the dedup-names skill survives the re-scrape
             remote[rom] = screenscraper.qualify({**remote[rom], "qualifier": old["qualifier"]})
         if rom in translated or screenscraper.is_translation(rom) or old.get("translated"):
