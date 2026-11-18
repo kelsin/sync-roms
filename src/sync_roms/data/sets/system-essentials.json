@@ -126,7 +126,13 @@
       "title": "Danganronpa 2 - Goodbye Despair",
       "category": "PS Vita",
       "system": "psvita",
-      "bucket": "psvita/Danganronpa2 [PCSE00399] [USA] [NoNpDRM].zip"
+      "bucket": "psvita/Danganronpa2 [PCSE00399] [USA] [NoNpDRM].zip",
+      "variants": [
+        {
+          "bucket": "psp/Super Dangan-Ronpa 2 - Sayonara Zetsubou Gakuen (Japan) [T-En by The Porting Dude v0.5a].chd",
+          "note": "PSP: original release, fan translated"
+        }
+      ]
     },
     {
       "title": "Zero Escape - Virtue's Last Reward",
@@ -189,6 +195,12 @@
       "bucket": "psvita/Undertale [PCSE01116] [USA] [NoNpDRM].zip"
     },
     {
+      "title": "Severed",
+      "category": "PS Vita",
+      "system": "psvita",
+      "bucket": "psvita/Severed [PCSE00589] [USA] [NoNpDRM].zip"
+    },
+    {
       "title": "Legend of Zelda, The - A Link Between Worlds",
       "category": "3DS",
       "system": "3ds",
@@ -240,13 +252,25 @@
       "title": "Fire Emblem Fates - Birthright",
       "category": "3DS",
       "system": "3ds",
-      "bucket": "3ds/Fire Emblem Fates - Birthright (USA).zip"
+      "bucket": "3ds/Fire Emblem Fates - Birthright (USA).zip",
+      "variants": [
+        {
+          "bucket": "3ds/Fire Emblem If - Byakuya Oukoku (Japan) [T-En by Team If v4.2].zip",
+          "note": "3DS: fan translation of the uncensored Japanese release"
+        }
+      ]
     },
     {
       "title": "Fire Emblem Fates - Conquest",
       "category": "3DS",
       "system": "3ds",
-      "bucket": "3ds/Fire Emblem Fates - Conquest (USA).zip"
+      "bucket": "3ds/Fire Emblem Fates - Conquest (USA).zip",
+      "variants": [
+        {
+          "bucket": "3ds/Fire Emblem If - Anya Oukoku (Japan) [T-En by Team If v4.2].zip",
+          "note": "3DS: fan translation of the uncensored Japanese release"
+        }
+      ]
     },
     {
       "title": "Fire Emblem Echoes - Shadows of Valentia",
@@ -402,7 +426,13 @@
       "title": "Monster Hunter Generations",
       "category": "3DS",
       "system": "3ds",
-      "bucket": "3ds/Monster Hunter Generations (USA).zip"
+      "bucket": "3ds/Monster Hunter Generations (USA).zip",
+      "variants": [
+        {
+          "bucket": "3ds/Monster Hunter XX - Double Cross (Japan) [T-En by Dasding v5] [Add by Crosshex v2] [i].zip",
+          "note": "3DS: expanded Double Cross edition with G-rank"
+        }
+      ]
     },
     {
       "title": "Shin Megami Tensei IV",
@@ -558,13 +588,25 @@
       "title": "F-Zero X",
       "category": "Nintendo 64",
       "system": "n64",
-      "bucket": "n64/F-Zero X (USA).zip"
+      "bucket": "n64/F-Zero X (USA).zip",
+      "variants": [
+        {
+          "bucket": "n64/F-Zero X - Expansion Kit (Japan) (64DD) [Hack by Zoinkity v2] [T-En by LuigiBlood v2].zip",
+          "note": "N64: 64DD Expansion Kit with course and machine editors"
+        }
+      ]
     },
     {
       "title": "Wave Race 64 - Kawasaki Jet Ski",
       "category": "Nintendo 64",
       "system": "n64",
-      "bucket": "n64/Wave Race 64 - Kawasaki Jet Ski (USA) (Rev 1).zip"
+      "bucket": "n64/Wave Race 64 - Kawasaki Jet Ski (USA) (Rev 1).zip",
+      "variants": [
+        {
+          "bucket": "n64/Wave Race 64 - Kawasaki Jet Ski (Japan) (Rev 2) (Shindou Edition) [T-En by Zoinkity v1.1].zip",
+          "note": "N64: Shindou Edition with Rumble Pak support"
+        }
+      ]
     },
     {
       "title": "1080 Snowboarding",
@@ -714,7 +756,7 @@
       "title": "Sin and Punishment - Hoshi no Keishousha",
       "category": "Nintendo 64",
       "system": "n64",
-      "bucket": "n64/Tsumi to Batsu - Hoshi no Keishousha (Japan).zip"
+      "bucket": "n64/Tsumi to Batsu - Hoshi no Keishousha (Japan) [T-En by Zoinkity v1.0].zip"
     },
     {
       "title": "Bomberman 64",
@@ -1014,7 +1056,7 @@
       "title": "Vampire Savior - The Lord of Vampire",
       "category": "Saturn",
       "system": "saturn",
-      "bucket": "saturn/Vampire Savior - The Lord of Vampire (Japan).chd"
+      "bucket": "saturn/Vampire Savior (Japan) [T-En by Paul_met v1.0].chd"
     },
     {
       "title": "X-Men - Children of the Atom",
@@ -1126,13 +1168,13 @@
       "title": "Shippuu Mahou Daisakusen - Kingdom-Grandprix",
       "category": "Saturn",
       "system": "saturn",
-      "bucket": "saturn/Shippuu Mahou Daisakusen - Kingdom-Grandprix (Japan).chd"
+      "bucket": "saturn/Kingdom Grandprix (Japan) [T-En by Malenko v2024.02.04-01] [original] [n].chd"
     },
     {
       "title": "Akumajou Dracula X - Gekka no Yasoukyoku",
       "category": "Saturn",
       "system": "saturn",
-      "bucket": "saturn/Akumajou Dracula X - Gekka no Yasoukyoku (Japan) (2M).chd"
+      "bucket": "saturn/Dracula X - Nocturne in the Moonlight (Japan) [T-En by Paul_met v1.1] [Ultimate] [n].chd"
     },
     {
       "title": "Princess Crown",
@@ -1156,7 +1198,17 @@
       "title": "Shining Force III",
       "category": "Saturn",
       "system": "saturn",
-      "bucket": "saturn/Shining Force III (USA).chd"
+      "bucket": "saturn/Shining Force III (USA).chd",
+      "variants": [
+        {
+          "bucket": "saturn/Shining Force III Premium Disc (Japan) [T-En by Shining Force III Translation Project v25].chd",
+          "note": "Saturn: Premium Disc bonus battles, fan translated"
+        },
+        {
+          "bucket": "saturn/Shining Force III - Scenario 1 - The Titan of Aspia (USA) [T-En by Shining Force III Translation Project v25] [n].chd",
+          "note": "Saturn: Scenario 1 retranslated to match Scenarios 2 and 3"
+        }
+      ]
     },
     {
       "title": "Dragon Force",
@@ -1174,13 +1226,13 @@
       "title": "Lunar - Silver Star Story Complete",
       "category": "Saturn",
       "system": "saturn",
-      "bucket": "saturn/Lunar - Silver Star Story Complete (Japan).chd"
+      "bucket": "saturn/Lunar - Silver Star Story Complete (Japan) [T-En by Mr Conan v0.75] [req Video CD Card].chd"
     },
     {
       "title": "Vandal Hearts - Ushinawareta Kodai Bunmei",
       "category": "Saturn",
       "system": "saturn",
-      "bucket": "saturn/Vandal Hearts - Ushinawareta Kodai Bunmei (Japan).chd"
+      "bucket": "saturn/Vandal Hearts - The Lost Civilization (Japan) [T-En by Paul_met & Stardust Crusaders v1.5] [n].chd"
     },
     {
       "title": "Sakura Wars",
@@ -1196,11 +1248,11 @@
       "title": "Policenauts",
       "category": "Saturn",
       "system": "saturn",
-      "bucket": "saturn/Policenauts (Japan).m3u",
+      "bucket": "saturn/Policenauts (Japan) [T-En by JunkerHQ v1.0.1].m3u",
       "files": [
-        "saturn/Policenauts (Japan) (Disc 1).chd",
-        "saturn/Policenauts (Japan) (Disc 2).chd",
-        "saturn/Policenauts (Japan) (Disc 3).chd"
+        "saturn/Policenauts (Disc 1) (Japan) [T-En by JunkerHQ v1.0.1].chd",
+        "saturn/Policenauts (Disc 2) (Japan) [T-En by JunkerHQ v1.0.1].chd",
+        "saturn/Policenauts (Disc 3) (Japan) [T-En by JunkerHQ v1.0.1].chd"
       ]
     },
     {
@@ -1375,13 +1427,29 @@
       "title": "Phantasy Star",
       "category": "Master System",
       "system": "mastersystem",
-      "bucket": "mastersystem/Phantasy Star (USA, Europe) (Rev A).zip"
+      "bucket": "mastersystem/Phantasy Star (USA, Europe) (Rev A).zip",
+      "variants": [
+        {
+          "bucket": "mastersystem/Phantasy Star (Japan) [T-En by SMS Power! v2.4].zip",
+          "note": "Master System: fan retranslation of the Japanese release"
+        },
+        {
+          "bucket": "ps2/Sega Ages 2500 Series Vol. 1 - Phantasy Star Generation-1 (Japan) [T-En by Kyence v2.10] (CD).chd",
+          "note": "PS2: Generation:1 full remake, fan translated"
+        }
+      ]
     },
     {
       "title": "Ys - The Vanished Omens",
       "category": "Master System",
       "system": "mastersystem",
-      "bucket": "mastersystem/Ys - The Vanished Omens (USA, Europe, Brazil) (En).zip"
+      "bucket": "mastersystem/Ys - The Vanished Omens (USA, Europe, Brazil) (En).zip",
+      "variants": [
+        {
+          "bucket": "nes/Ys (Japan) [T-En by David Mullen v1.0] [Add by Minucce v11c].zip",
+          "note": "NES: Famicom port with its own map and music, translated"
+        }
+      ]
     },
     {
       "title": "Miracle Warriors - Seal of The Dark Lord",
@@ -1765,25 +1833,57 @@
       "title": "Akumajou Dracula X - Chi no Rondo",
       "category": "PC Engine CD",
       "system": "tg-cd",
-      "bucket": "tg-cd/Akumajou Dracula X - Chi no Rondo (Japan).chd"
+      "bucket": "tg-cd/Castlevania - Rondo of Blood (Japan) [T-En by Burnt Lasagna & Cubanraul v1.01] [n].chd"
     },
     {
       "title": "Ys Book I & II",
       "category": "PC Engine CD",
       "system": "tg-cd",
-      "bucket": "tg-cd/Ys Book I & II (USA).chd"
+      "bucket": "tg-cd/Ys Book I & II (USA).chd",
+      "variants": [
+        {
+          "bucket": "nes/Ys II - Ancient Ys Vanished - The Final Chapter (Japan) [T-En by David Mullen v1.0].zip",
+          "note": "NES: Famicom port of Ys II, translated"
+        },
+        {
+          "bucket": "saturn/Falcom Classics (Japan) [T-En by Murzik & CrawdKenny v0.763] [Ancient Ys Vanished Omen] [i].chd",
+          "note": "Saturn: Falcom Classics Ys I remake, fan translated"
+        },
+        {
+          "bucket": "msx2/Ys - Ancient Ys Vanished Omen (Japan) [T-En by Oasis v1.0] (Floppy).zip",
+          "note": "MSX2: original Ys I computer version, fan translated"
+        },
+        {
+          "bucket": "msx2/Ys II - Ancient Ys Vanished - The Final Chapter (Japan) [T-En by Oasis v1.0] [i] (Floppy).zip",
+          "note": "MSX2: original Ys II computer version, fan translated"
+        }
+      ]
     },
     {
       "title": "Ys III - Wanderers from Ys",
       "category": "PC Engine CD",
       "system": "tg-cd",
-      "bucket": "tg-cd/Ys III - Wanderers from Ys (USA).chd"
+      "bucket": "tg-cd/Ys III - Wanderers from Ys (USA).chd",
+      "variants": [
+        {
+          "bucket": "nes/Ys III - Wanderers from Ys (Japan) [T-En by Vice Translations v1.00].zip",
+          "note": "NES: Famicom port, translated"
+        },
+        {
+          "bucket": "genesis/Ys III (USA) [T-En by Plombo v1.1] [Relocalized].zip",
+          "note": "Genesis: relocalized fan retranslation"
+        },
+        {
+          "bucket": "msx2/Ys III - Wanderers from Ys (Japan) [T-En by Oasis v1.0] (Floppy).zip",
+          "note": "MSX2: original computer version, fan translated"
+        }
+      ]
     },
     {
       "title": "Ys IV - The Dawn of Ys",
       "category": "PC Engine CD",
       "system": "tg-cd",
-      "bucket": "tg-cd/Ys IV - The Dawn of Ys (Japan) (Rev 4).chd"
+      "bucket": "tg-cd/Ys IV - The Dawn of Ys (Japan) [T-En by NightWolve v0.95].chd"
     },
     {
       "title": "Snatcher CD-ROMantic",
@@ -1862,6 +1962,12 @@
       "category": "PC Engine CD",
       "system": "tg-cd",
       "bucket": "tg-cd/Ginga Fukei Densetsu Sapphire (Japan).chd"
+    },
+    {
+      "title": "Far East of Eden - Tengai Makyou II - Manji Maru",
+      "category": "PC Engine CD",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Far East of Eden - Tengai Makyou II - Manji Maru (Japan).chd"
     },
     {
       "title": "Zelda no Densetsu - The Hyrule Fantasy",
@@ -2086,7 +2192,7 @@
       "title": "Ninja Princess",
       "category": "SG-1000",
       "system": "sg1000",
-      "bucket": "sg1000/Ninja Princess (Japan, Australia) (Ja).zip"
+      "bucket": "sg1000/Ninja Princess (Japan) [T-En by Goldenband v1.0].zip"
     },
     {
       "title": "Doki Doki Penguin Land",
@@ -2188,7 +2294,7 @@
       "title": "Kaze no Klonoa - Moonlight Museum",
       "category": "WonderSwan",
       "system": "wonderswan",
-      "bucket": "wonderswan/Kaze no Klonoa - Moonlight Museum (Japan).zip"
+      "bucket": "wonderswan/Klonoa - Moonlight Museum (Japan) [T-En by PowerStone05 & RayCarrot & Rcs709 & StarryScarab v1.1] [n].zip"
     },
     {
       "title": "Makaimura for WonderSwan",
@@ -2200,7 +2306,7 @@
       "title": "Rockman & Forte - Mirai Kara no Chousensha",
       "category": "WonderSwan",
       "system": "wonderswan",
-      "bucket": "wonderswan/Rockman & Forte - Mirai Kara no Chousensha (Japan).zip"
+      "bucket": "wonderswan/Rockman & Forte - Challenger from the Future (Japan) [T-En by NikcDC v1.2.1] [n].zip"
     },
     {
       "title": "Buffers Evolution",
@@ -2224,13 +2330,13 @@
       "title": "Chocobo no Fushigi na Dungeon for WonderSwan",
       "category": "WonderSwan",
       "system": "wonderswan",
-      "bucket": "wonderswan/Chocobo no Fushigi na Dungeon for WonderSwan (Japan) (Rev 3).zip"
+      "bucket": "wonderswan/Chocobo no Fushigi na Dungeon for WonderSwan (Japan) (Rev 2) [T-En by Higsby & SpecialAgentApe v1.1].zip"
     },
     {
       "title": "Neon Genesis Evangelion - Shito Ikusei",
       "category": "WonderSwan",
       "system": "wonderswan",
-      "bucket": "wonderswan/Neon Genesis Evangelion - Shito Ikusei (Japan).zip"
+      "bucket": "wonderswan/Neon Genesis Evangelion - Angel Raising Project (Japan) [T-En by Anime Game Translations Team v1.0] [n].zip"
     },
     {
       "title": "GunPey",
@@ -2254,7 +2360,7 @@
       "title": "Rainbow Islands - Putty's Party",
       "category": "WonderSwan",
       "system": "wonderswan",
-      "bucket": "wonderswan/Rainbow Islands - Putty's Party (Japan).zip"
+      "bucket": "wonderswan/Rainbow Islands - Putty's Party (Japan) [T-En by USC v1.1].zip"
     },
     {
       "title": "Lode Runner for WonderSwan",
@@ -2314,7 +2420,7 @@
       "title": "Mr. Driller",
       "category": "WonderSwan",
       "system": "wonderswancolor",
-      "bucket": "wonderswancolor/Mr. Driller (Japan).zip"
+      "bucket": "wonderswancolor/Mr. Driller (Japan) [T-En by PmHacks v0.70] [i].zip"
     },
     {
       "title": "Golden Axe",
@@ -2332,7 +2438,7 @@
       "title": "Final Fantasy IV",
       "category": "WonderSwan",
       "system": "wonderswancolor",
-      "bucket": "wonderswancolor/Final Fantasy IV (Japan).zip"
+      "bucket": "wonderswancolor/Final Fantasy IV (Japan) [T-En by MottZilla v0.5] [i].zip"
     },
     {
       "title": "Front Mission",
@@ -2422,7 +2528,7 @@
       "title": "Rockman - Battle & Fighters",
       "category": "Neo Geo Pocket",
       "system": "ngpc",
-      "bucket": "ngpc/Rockman - Battle & Fighters (Japan).zip"
+      "bucket": "ngpc/Rockman - Battle & Fighters (Japan) [T-En by Marc_max v1.0] [i].zip"
     },
     {
       "title": "Metal Slug - 1st Mission",
@@ -2470,7 +2576,7 @@
       "title": "SNK vs. Capcom - Card Fighters 2 - Expand Edition",
       "category": "Neo Geo Pocket",
       "system": "ngpc",
-      "bucket": "ngpc/SNK vs. Capcom - Card Fighters 2 - Expand Edition (Japan).zip"
+      "bucket": "ngpc/SNK vs. Capcom - Card Fighters 2 - Expand Edition (Japan) [T-En by CFC2 Translation Team v20170125].zip"
     },
     {
       "title": "Faselei!",
@@ -2494,7 +2600,7 @@
       "title": "Densetsu no Ogre Battle Gaiden - Zenobia no Ouji",
       "category": "Neo Geo Pocket",
       "system": "ngpc",
-      "bucket": "ngpc/Densetsu no Ogre Battle Gaiden - Zenobia no Ouji (Japan).zip"
+      "bucket": "ngpc/Ogre Battle Gaiden - The Prince of Zenobia (Japan) [T-En by FFaddic v1.0] [i] [n].zip"
     },
     {
       "title": "Dive Alert - Becky's Version",

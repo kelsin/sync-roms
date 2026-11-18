@@ -5,7 +5,13 @@
     {
       "title": "Legend of Zelda, The (Rev 1)",
       "system": "nes",
-      "bucket": "nes/Legend of Zelda, The (USA) (Rev 1).zip"
+      "bucket": "nes/Legend of Zelda, The (USA) (Rev 1).zip",
+      "variants": [
+        {
+          "bucket": "nes/Legend of Zelda, The (USA) [T-En by SimpleDanny v1.1] [Relocalized].zip",
+          "note": "NES: fan retranslation of the script"
+        }
+      ]
     },
     {
       "title": "Zelda II - The Adventure of Link",
@@ -20,18 +26,17 @@
         {
           "bucket": "gba/Legend of Zelda, The - A Link to the Past & Four Swords (USA).zip",
           "note": "GBA: adds Four Swords multiplayer and a bonus dungeon"
+        },
+        {
+          "bucket": "snes/Legend of Zelda, The - A Link to the Past (USA) [T-En by ShadowOne333 & Translation Quest v10.2.3] [Relocalized].zip",
+          "note": "SNES: retranslation closer to the Japanese script"
         }
       ]
     },
     {
       "title": "BS Zelda no Densetsu",
-      "system": "satellaview",
-      "bucket": "satellaview/BS Zelda no Densetsu - Dai-1-wa (Japan) (Rerun) (SoundLink).zip",
-      "files": [
-        "satellaview/BS Zelda no Densetsu - Dai-2-wa (Japan) (SoundLink).zip",
-        "satellaview/BS Zelda no Densetsu - Dai-3-wa (Japan) (SoundLink).zip",
-        "satellaview/BS Zelda no Densetsu - Dai-4-wa (Japan) (Rerun) (SoundLink).zip"
-      ],
+      "system": "snes",
+      "bucket": "snes/BS Legend of Zelda, The (Japan) (SoundLink) [T-En by MottZilla v0.95] [n].zip",
       "variants": [
         {
           "bucket": "satellaview/BS Zelda no Densetsu - Map 2 - Dai-1-wa (Japan) (SoundLink).zip",
@@ -41,13 +46,8 @@
     },
     {
       "title": "BS Zelda no Densetsu - Inishie no Sekiban",
-      "system": "satellaview",
-      "bucket": "satellaview/BS Zelda no Densetsu - Inishie no Sekiban - Dai-1-wa (Japan) (SoundLink).zip",
-      "files": [
-        "satellaview/BS Zelda no Densetsu - Inishie no Sekiban - Dai-2-wa (Japan) (SoundLink).zip",
-        "satellaview/BS Zelda no Densetsu - Inishie no Sekiban - Dai-3-wa (Japan) (SoundLink).zip",
-        "satellaview/BS Zelda no Densetsu - Inishie no Sekiban - Dai-4-wa (Japan) (SoundLink).zip"
-      ]
+      "system": "snes",
+      "bucket": "snes/BS Legend of Zelda, The - Ancient Stone Tablets - Chapter 1 (Japan) (SoundLink) [T-En by Euclid v1.0] [n].zip"
     },
     {
       "title": "Picross NP Vol. 5",
@@ -147,7 +147,7 @@
     {
       "title": "Irozuki Tingle no Koi no Balloon Trip",
       "system": "nds",
-      "bucket": "nds/Irozuki Tingle no Koi no Balloon Trip (Japan).zip"
+      "bucket": "nds/Ripened Tingle's Balloon Trip of Love (Japan) [T-En by Team Tingle v1.1] [n].zip"
     },
     {
       "title": "Tingle no Balloon Fight DS",

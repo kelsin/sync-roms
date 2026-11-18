@@ -273,6 +273,24 @@
       "bucket": "mame/dunkmnia.zip"
     },
     {
+      "title": "Run and Gun (US ver. UAB)",
+      "category": "Basketball",
+      "system": "mame",
+      "bucket": "mame/rungunu.zip"
+    },
+    {
+      "title": "Hard Dunk (World)",
+      "category": "Basketball",
+      "system": "fbneo",
+      "bucket": "fbneo/harddunk.zip"
+    },
+    {
+      "title": "Arch Rivals",
+      "category": "Basketball",
+      "system": "fbneo",
+      "bucket": "fbneo/archrivl.zip"
+    },
+    {
       "title": "Tecmo Bowl",
       "category": "Football",
       "system": "nes",
@@ -497,8 +515,8 @@
     {
       "title": "NFL Blitz 2000 (Rev 1)",
       "category": "Football",
-      "system": "dreamcast",
-      "bucket": "dreamcast/NFL Blitz 2000 (USA) (Rev 1).chd"
+      "system": "mame",
+      "bucket": "mame/blitz2k.zip"
     },
     {
       "title": "NFL Blitz 2001",
@@ -613,6 +631,24 @@
       "category": "Football",
       "system": "intellivision",
       "bucket": "intellivision/NFL Football (World).zip"
+    },
+    {
+      "title": "NFL Blitz '99 (ver 1.30, Sep 22 1998)",
+      "category": "Football",
+      "system": "mame",
+      "bucket": "mame/blitz99.zip"
+    },
+    {
+      "title": "High Impact Football (rev LA5 02/15/91)",
+      "category": "Football",
+      "system": "fbneo",
+      "bucket": "fbneo/hiimpact.zip"
+    },
+    {
+      "title": "Super High Impact (rev LA2 10/22/91)",
+      "category": "Football",
+      "system": "fbneo",
+      "bucket": "fbneo/shimpact.zip"
     },
     {
       "title": "Baseball",
@@ -915,6 +951,12 @@
       "bucket": "fbneo/stadhero.zip"
     },
     {
+      "title": "World Series Baseball II",
+      "category": "Baseball",
+      "system": "saturn",
+      "bucket": "saturn/World Series Baseball II (USA) (2S).chd"
+    },
+    {
       "title": "Ice Hockey",
       "category": "Hockey",
       "system": "nes",
@@ -1170,7 +1212,13 @@
       "title": "ISS Pro Evolution",
       "category": "Soccer",
       "system": "psx",
-      "bucket": "psx/ISS Pro Evolution (USA).chd"
+      "bucket": "psx/ISS Pro Evolution (USA).chd",
+      "variants": [
+        {
+          "bucket": "psx/World Soccer Jikkyou Winning Eleven 4 (Japan) [T-En by Walxer v0.89] [i].chd",
+          "note": "PS1: original Japanese Winning Eleven 4, fan translated"
+        }
+      ]
     },
     {
       "title": "International Superstar Soccer 2",
@@ -1411,6 +1459,72 @@
       "category": "Soccer",
       "system": "fbneo",
       "bucket": "fbneo/htherou.zip"
+    },
+    {
+      "title": "Inazuma Eleven",
+      "category": "Soccer",
+      "system": "nds",
+      "bucket": "nds/Inazuma Eleven (Europe).zip"
+    },
+    {
+      "title": "Inazuma Eleven 2 - Blizzard",
+      "category": "Soccer",
+      "system": "nds",
+      "bucket": "nds/Inazuma Eleven 2 - Blizzard (Europe).zip"
+    },
+    {
+      "title": "Captain Tsubasa",
+      "category": "Soccer",
+      "system": "nes",
+      "bucket": "nes/Captain Tsubasa (Japan) [T-En by Lestat v1.0] [i].zip"
+    },
+    {
+      "title": "Captain Tsubasa Vol. II - Super Striker",
+      "category": "Soccer",
+      "system": "nes",
+      "bucket": "nes/Captain Tsubasa Vol. II - Super Striker (Japan) [T-En by Hayabusakun v1.0].zip"
+    },
+    {
+      "title": "Seibu Cup Soccer",
+      "category": "Soccer",
+      "system": "mame",
+      "bucket": "mame/cupsoc.zip"
+    },
+    {
+      "title": "Taito Power Goal (Ver 2.5O 1994/11/03)",
+      "category": "Soccer",
+      "system": "fbneo",
+      "bucket": "fbneo/pwrgoal.zip"
+    },
+    {
+      "title": "Super Cup Finals (Ver 2.2O 1994/01/13, single PCB)",
+      "category": "Soccer",
+      "system": "fbneo",
+      "bucket": "fbneo/scfinals.zip"
+    },
+    {
+      "title": "Prime Goal Ex",
+      "category": "Soccer",
+      "system": "mame",
+      "bucket": "mame/primglex.zip"
+    },
+    {
+      "title": "Inazuma Eleven 3 - Lightning Bolt",
+      "category": "Soccer",
+      "system": "3ds",
+      "bucket": "3ds/Inazuma Eleven 3 - Lightning Bolt (Europe) (En,Fr,De).zip"
+    },
+    {
+      "title": "Inazuma Eleven GO - Chrono Stones - Wildfire",
+      "category": "Soccer",
+      "system": "3ds",
+      "bucket": "3ds/Inazuma Eleven GO - Chrono Stones - Wildfire (Europe) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Inazuma Eleven Go - Light",
+      "category": "Soccer",
+      "system": "3ds",
+      "bucket": "3ds/Inazuma Eleven Go - Light (Europe) (En,Fr,De,Es,It).zip"
     },
     {
       "title": "Golf",
@@ -1737,6 +1851,54 @@
       "category": "Golf & Tennis",
       "system": "nds",
       "bucket": "nds/SEGA Superstars Tennis (USA) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Kirby's Dream Course",
+      "category": "Golf & Tennis",
+      "system": "snes",
+      "bucket": "snes/Kirby's Dream Course (USA).zip"
+    },
+    {
+      "title": "Special Tee Shot",
+      "category": "Golf & Tennis",
+      "system": "satellaview",
+      "bucket": "satellaview/Special Tee Shot (Japan).zip"
+    },
+    {
+      "title": "Passing Shot (World, 2 Players) (FD1094 317-0080)",
+      "category": "Golf & Tennis",
+      "system": "fbneo",
+      "bucket": "fbneo/passsht.zip"
+    },
+    {
+      "title": "Hot Shots Golf - World Invitational",
+      "category": "Golf & Tennis",
+      "system": "psvita",
+      "bucket": "psvita/Hot Shots Golf - World Invitational [PCSA00009] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Virtua Tennis 4",
+      "category": "Golf & Tennis",
+      "system": "psvita",
+      "bucket": "psvita/Virtua Tennis 4 [PCSE00003] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Battle Golfer Yui",
+      "category": "Golf & Tennis",
+      "system": "genesis",
+      "bucket": "genesis/Battle Golfer Yui (Japan) [T-En by Filler v0.9].zip"
+    },
+    {
+      "title": "Leader Board - Pro Golf Simulator",
+      "category": "Golf & Tennis",
+      "system": "c64",
+      "bucket": "c64/Leader Board - Pro Golf Simulator (USA, Europe).zip"
+    },
+    {
+      "title": "Golf Sunday",
+      "category": "Golf & Tennis",
+      "system": "pico8",
+      "bucket": "pico8/golfsunday-0.p8.png"
     },
     {
       "title": "Tony Hawk's Pro Skater",
@@ -2078,7 +2240,13 @@
       "title": "Wave Race 64 - Kawasaki Jet Ski",
       "category": "Extreme",
       "system": "n64",
-      "bucket": "n64/Wave Race 64 - Kawasaki Jet Ski (USA) (Rev 1).zip"
+      "bucket": "n64/Wave Race 64 - Kawasaki Jet Ski (USA) (Rev 1).zip",
+      "variants": [
+        {
+          "bucket": "n64/Wave Race 64 - Kawasaki Jet Ski (Japan) (Rev 2) (Shindou Edition) [T-En by Zoinkity v1.1].zip",
+          "note": "N64: Shindou Edition with Rumble Pak support"
+        }
+      ]
     },
     {
       "title": "Wave Race - Blue Storm",
@@ -2109,6 +2277,18 @@
       "category": "Extreme",
       "system": "n64",
       "bucket": "n64/Excitebike 64 (USA) (Rev 1).zip"
+    },
+    {
+      "title": "OlliOlli",
+      "category": "Extreme",
+      "system": "psvita",
+      "bucket": "psvita/OlliOlli [PCSE00341] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "OlliOlli2",
+      "category": "Extreme",
+      "system": "psvita",
+      "bucket": "psvita/OlliOlli2 [PCSE00479] [USA] [NoNpDRM].zip"
     },
     {
       "title": "Punch-Out!!",
@@ -2228,7 +2408,7 @@
       "title": "Hajime no Ippo - The Fighting!",
       "category": "Boxing & Wrestling",
       "system": "gba",
-      "bucket": "gba/Hajime no Ippo - The Fighting! (Japan).zip"
+      "bucket": "gba/Hajime no Ippo - The Fighting! (Japan) [T-En by Markliujy v1.0].zip"
     },
     {
       "title": "Boxing",
@@ -2330,7 +2510,7 @@
       "title": "Super Fire Pro Wrestling X Premium",
       "category": "Boxing & Wrestling",
       "system": "snes",
-      "bucket": "snes/Super Fire Pro Wrestling X Premium (Japan).zip"
+      "bucket": "snes/Super Fire Pro Wrestling X Premium (Japan) [T-En by Sydra v7].zip"
     },
     {
       "title": "Fire Pro Wrestling - Combination Tag",
@@ -2354,13 +2534,13 @@
       "title": "Fire Prowrestling S - 6Men Scramble",
       "category": "Boxing & Wrestling",
       "system": "saturn",
-      "bucket": "saturn/Fire Prowrestling S - 6Men Scramble (Japan) (2M).chd"
+      "bucket": "saturn/Fire Prowrestling S - 6Men Scramble (Japan) [T-En by Malenko v0.91] [i].chd"
     },
     {
       "title": "Fire Pro Wrestling D",
       "category": "Boxing & Wrestling",
       "system": "dreamcast",
-      "bucket": "dreamcast/Fire Pro Wrestling D (Japan).chd"
+      "bucket": "dreamcast/Fire Pro Wrestling D (Japan) [T-En by Irvgotti452].chd"
     },
     {
       "title": "Fire Pro Wrestling",
@@ -2408,13 +2588,13 @@
       "title": "Virtual Pro Wrestling 64",
       "category": "Boxing & Wrestling",
       "system": "n64",
-      "bucket": "n64/Virtual Pro Wrestling 64 (Japan).zip"
+      "bucket": "n64/Virtual Pro Wrestling 64 (Japan) [T-En by Star Trinket v1.77 beta].zip"
     },
     {
       "title": "Virtual Pro Wrestling 2 - Oudou Keishou",
       "category": "Boxing & Wrestling",
       "system": "n64",
-      "bucket": "n64/Virtual Pro Wrestling 2 - Oudou Keishou (Japan).zip"
+      "bucket": "n64/Virtual Pro Wrestling 2 - Oudou Keishou (Japan) [T-En by VPW 2 Dojo Beta 3].zip"
     },
     {
       "title": "WWF War Zone",
@@ -2591,6 +2771,36 @@
       "bucket": "fbneo/robowres.zip"
     },
     {
+      "title": "The Main Event (4 Players ver. Y)",
+      "category": "Boxing & Wrestling",
+      "system": "fbneo",
+      "bucket": "fbneo/mainevt.zip"
+    },
+    {
+      "title": "Blazing Tornado",
+      "category": "Boxing & Wrestling",
+      "system": "fbneo",
+      "bucket": "fbneo/blzntrnd.zip"
+    },
+    {
+      "title": "WWF WrestleFest",
+      "category": "Boxing & Wrestling",
+      "system": "fbneo",
+      "bucket": "fbneo/wwfwfestu.zip"
+    },
+    {
+      "title": "UFC Undisputed 2010",
+      "category": "Boxing & Wrestling",
+      "system": "psp",
+      "bucket": "psp/UFC Undisputed 2010 (USA) (En,Fr).chd"
+    },
+    {
+      "title": "Wrestling Universe - Fire Pro Joshi - Dome Choujo Taisen - Zenjo vs. JWP",
+      "category": "Boxing & Wrestling",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Wrestling Universe - Fire Pro Joshi - Dome Choujo Taisen - Zenjo vs. JWP (Japan).chd"
+    },
+    {
       "title": "Super Dodge Ball",
       "category": "Kunio & Technos",
       "system": "fbneo",
@@ -2624,7 +2834,7 @@
       "title": "Kunio-kun no Dodge Ball Da yo Zenin Shuugou!",
       "category": "Kunio & Technos",
       "system": "snes",
-      "bucket": "snes/Kunio-kun no Dodge Ball Da yo Zenin Shuugou! (Japan).zip"
+      "bucket": "snes/Kunio's Dodge Ball (Japan) [T-En by Azelistic v1.0] [n].zip"
     },
     {
       "title": "Nekketsu Koukou Dodgeball-bu - Kyouteki! Dodge Soldier no Maki",
@@ -2636,13 +2846,19 @@
       "title": "Nintendo World Cup",
       "category": "Kunio & Technos",
       "system": "nes",
-      "bucket": "nes/Nintendo World Cup (USA) (Rev 1).zip"
+      "bucket": "nes/Nintendo World Cup (USA) (Rev 1).zip",
+      "variants": [
+        {
+          "bucket": "nes/Nekketsu Highschool Dodgeball Club - Soccer Edition (Japan) [T-En by Ghost-Tank v0.9] [i] [n].zip",
+          "note": "NES: Japanese Kunio-kun version, translated"
+        }
+      ]
     },
     {
       "title": "Kunio-kun no Nekketsu Soccer League",
       "category": "Kunio & Technos",
       "system": "nes",
-      "bucket": "nes/Kunio-kun no Nekketsu Soccer League (Japan).zip"
+      "bucket": "nes/Kunio-Kun's Nekketsu Soccer League (Japan) [T-En by PentarouZero v1.2] [Add by Lipetsk v1.0] [n].zip"
     },
     {
       "title": "River City - Soccer Hooligans",
@@ -2654,7 +2870,13 @@
       "title": "Crash 'n' the Boys - Street Challenge",
       "category": "Kunio & Technos",
       "system": "nes",
-      "bucket": "nes/Crash 'n' the Boys - Street Challenge (USA).zip"
+      "bucket": "nes/Crash 'n' the Boys - Street Challenge (USA).zip",
+      "variants": [
+        {
+          "bucket": "nes/Nekketu Cross-Country (Japan) [T-En by Disconnected Translations v0.15] [i] [n].zip",
+          "note": "NES: Japanese Kunio-kun version, partly translated"
+        }
+      ]
     },
     {
       "title": "Bikkuri Nekketsu Shin Kiroku! - Dokodemo Kin Medal",
@@ -2678,13 +2900,13 @@
       "title": "Ike Ike! Nekketsu Hockey-bu - Subette Koronde Dairantou",
       "category": "Kunio & Technos",
       "system": "nes",
-      "bucket": "nes/Ike Ike! Nekketsu Hockey-bu - Subette Koronde Dairantou (Japan).zip"
+      "bucket": "nes/Go Go! Nekketu Hockey Club - Multi-Sport Battle (Japan) [T-En by Disconnected Translations v0.99] [Add by GAFF Translations v1.00] [n].zip"
     },
     {
       "title": "Nekketsu! Street Basket - Ganbare Dunk Heroes",
       "category": "Kunio & Technos",
       "system": "nes",
-      "bucket": "nes/Nekketsu! Street Basket - Ganbare Dunk Heroes (Japan).zip"
+      "bucket": "nes/Nekketsu! Street Basket - Go for it, Dunk Heroes! (Japan) [T-En by Farid v1.2] [n].zip"
     },
     {
       "title": "Downtown - Nekketsu Baseball Monogatari - Yakyuu de Shoubu da! Kunio-kun",
@@ -2703,6 +2925,24 @@
       "category": "Kunio & Technos",
       "system": "fbneo",
       "bucket": "fbneo/vball.zip"
+    },
+    {
+      "title": "Nekketsu Koukou Dodgeball-bu - Soccer Hen MD",
+      "category": "Kunio & Technos",
+      "system": "genesis",
+      "bucket": "genesis/Nekketsu Koukou Dodgeball-bu - Soccer Hen MD (Japan).zip"
+    },
+    {
+      "title": "Nekketsu Koukou Dodgeball-bu - PC Bangai Hen",
+      "category": "Kunio & Technos",
+      "system": "tg16",
+      "bucket": "tg16/Nekketsu Koukou Dodgeball-bu - PC Bangai Hen (Japan).zip"
+    },
+    {
+      "title": "Nekketsu Koukou Dodgeball-bu - PC Soccer Hen",
+      "category": "Kunio & Technos",
+      "system": "tg16",
+      "bucket": "tg16/Nekketsu Koukou Dodgeball-bu - PC Soccer Hen (Japan).zip"
     },
     {
       "title": "Baseball Stars Professional",
@@ -3077,6 +3317,18 @@
       "bucket": "fbneo/csclub.zip"
     },
     {
+      "title": "Mach Breakers",
+      "category": "Olympic & Multi-event",
+      "system": "fbneo",
+      "bucket": "fbneo/machbrkr.zip"
+    },
+    {
+      "title": "Combat School",
+      "category": "Olympic & Multi-event",
+      "system": "fbneo",
+      "bucket": "fbneo/combatsc.zip"
+    },
+    {
       "title": "Volleyball",
       "category": "Other Sports",
       "system": "nes",
@@ -3194,7 +3446,7 @@
       "title": "Shufflepuck Cafe",
       "category": "Other Sports",
       "system": "nes",
-      "bucket": "nes/Shufflepuck Cafe (Japan).zip"
+      "bucket": "nes/Shufflepuck Cafe (Japan) [T-En by MadHacker v1.0].zip"
     }
   ]
 }

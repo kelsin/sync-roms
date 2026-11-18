@@ -425,7 +425,7 @@
     {
       "title": "Napple Tale: Arsia in Daydream",
       "system": "dreamcast",
-      "bucket": "dreamcast/Napple Tale - Arsia in Daydream (Japan).chd"
+      "bucket": "dreamcast/Napple Tale - Arsia in Daydream (Japan) [T-En by Cargodin v1.0].chd"
     },
     {
       "title": "Fur Fighters",
@@ -590,7 +590,13 @@
     {
       "title": "Chibi-Robo! Plug into Adventure!",
       "system": "gc",
-      "bucket": "gc/Chibi-Robo! Plug into Adventure! (USA).rvz"
+      "bucket": "gc/Chibi-Robo! Plug into Adventure! (USA).rvz",
+      "variants": [
+        {
+          "bucket": "wii/Chibi Robo! (Japan) [T-En by Brand Newman v1.00] [n].rvz",
+          "note": "Wii: Japan-only Wii version with pointer controls"
+        }
+      ]
     },
     {
       "title": "Pac-Man World 2",
@@ -932,6 +938,21 @@
       "title": "Alice: Madness Returns",
       "system": "xbox360",
       "bucket": "xbox360/Alice - Madness Returns (USA, Europe) (En,Fr,De,Es,It).zar"
+    },
+    {
+      "title": "Sly Cooper - Thieves in Time™",
+      "system": "psvita",
+      "bucket": "psvita/Sly Cooper - Thieves in Time™ [PCSA00068] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Ganbare Goemon - Space Pirate Akogingu",
+      "system": "psx",
+      "bucket": "psx/Ganbare Goemon - Space Pirate Akogingu (Japan) (Rev 1) [T-En by Adventurous Translations v0.96] [n].chd"
+    },
+    {
+      "title": "Goemon - The Successor for a New Generation",
+      "system": "psx",
+      "bucket": "psx/Goemon - The Successor for a New Generation (Japan) [T-En by Acediez & FlashPV & Frank ''Bo'' deWindt II & Tom v1.0] [n].chd"
     }
   ]
 }

@@ -5,7 +5,13 @@
     {
       "title": "Contra",
       "system": "nes",
-      "bucket": "nes/Contra (USA).zip"
+      "bucket": "nes/Contra (USA).zip",
+      "variants": [
+        {
+          "bucket": "nes/Contra (Japan) [T-En by Stardust Crusaders v1.01] [n].zip",
+          "note": "NES: Japanese version with cutscenes and stage maps"
+        }
+      ]
     },
     {
       "title": "Super C",
@@ -647,7 +653,7 @@
     {
       "title": "Twinkle Tale",
       "system": "genesis",
-      "bucket": "genesis/Twinkle Tale (Japan).zip"
+      "bucket": "genesis/Twinkle Tale (Japan) [T-En by M.I.J.E.T. v070328].zip"
     },
     {
       "title": "Contra Force",
@@ -662,13 +668,23 @@
         {
           "bucket": "gb/Bionic Commando (USA).zip",
           "note": "Game Boy: reworked version with new stages and setting"
+        },
+        {
+          "bucket": "nes/Bionic Commando - Return of Hitler (Japan) [T-En by Stardust Crusaders v1.04] [n].zip",
+          "note": "NES: Japanese Top Secret with its original story, translated"
         }
       ]
     },
     {
       "title": "Blaster Master",
       "system": "nes",
-      "bucket": "nes/Blaster Master (USA).zip"
+      "bucket": "nes/Blaster Master (USA).zip",
+      "variants": [
+        {
+          "bucket": "nes/Super Planetary War Chronicle - MetaFight (Japan) [T-En by BlackPaladin v1.0] [n].zip",
+          "note": "NES: Japanese MetaFight with its original story, translated"
+        }
+      ]
     },
     {
       "title": "Shatterhand",
@@ -688,7 +704,13 @@
     {
       "title": "Vice - Project Doom",
       "system": "nes",
-      "bucket": "nes/Vice - Project Doom (USA).zip"
+      "bucket": "nes/Vice - Project Doom (USA).zip",
+      "variants": [
+        {
+          "bucket": "nes/Gun-Dec (Japan) [T-En by Stardust Crusaders v1.00].zip",
+          "note": "NES: Japanese Gun-Dec with its original story, translated"
+        }
+      ]
     },
     {
       "title": "Gun.Smoke",
@@ -708,7 +730,13 @@
     {
       "title": "Metal Storm",
       "system": "nes",
-      "bucket": "nes/Metal Storm (USA).zip"
+      "bucket": "nes/Metal Storm (USA).zip",
+      "variants": [
+        {
+          "bucket": "nes/Gravity Armor Metal Storm (Japan) [T-En by Sliver X v1.1] [n].zip",
+          "note": "NES: Japanese release, translated"
+        }
+      ]
     },
     {
       "title": "Super Turrican",
@@ -748,7 +776,13 @@
     {
       "title": "Cybernator",
       "system": "snes",
-      "bucket": "snes/Cybernator (USA).zip"
+      "bucket": "snes/Cybernator (USA).zip",
+      "variants": [
+        {
+          "bucket": "snes/Assault Suits Valken (Japan) [T-En by Aeon Genesis v1.00] [n].zip",
+          "note": "SNES: Japanese version with uncut story scenes, translated"
+        }
+      ]
     },
     {
       "title": "Rendering Ranger R2",
@@ -773,7 +807,7 @@
     {
       "title": "Front Mission Series - Gun Hazard",
       "system": "snes",
-      "bucket": "snes/Front Mission Series - Gun Hazard (Japan).zip"
+      "bucket": "snes/Front Mission Series - Gun Hazard (Japan) [T-En by Aeon Genesis v1.01].zip"
     },
     {
       "title": "Pocky & Rocky",
@@ -843,7 +877,7 @@
     {
       "title": "Ikari no Yousai 2",
       "system": "gb",
-      "bucket": "gb/Ikari no Yousai 2 (Japan).zip"
+      "bucket": "gb/Fortress of Fury 2 (Japan) [T-En by Stardust Crusaders v1.00] [n].zip"
     },
     {
       "title": "Metal Slug Advance",
@@ -963,7 +997,13 @@
     {
       "title": "Silhouette Mirage",
       "system": "psx",
-      "bucket": "psx/Silhouette Mirage (USA).chd"
+      "bucket": "psx/Silhouette Mirage (USA).chd",
+      "variants": [
+        {
+          "bucket": "saturn/Silhouette Mirage (Japan) (Rev A) [T-En by Rasputin3000 v0.999].chd",
+          "note": "Saturn: original release, fan translated"
+        }
+      ]
     },
     {
       "title": "Apocalypse",
@@ -1048,7 +1088,13 @@
     {
       "title": "Cave Story 3D",
       "system": "3ds",
-      "bucket": "3ds/Cave Story 3D (USA).zip"
+      "bucket": "3ds/Cave Story 3D (USA).zip",
+      "variants": [
+        {
+          "bucket": "3ds/Cave Story 3D (USA) [T-En by Aeon Genesis v0.96 RC2] [Relocalized].zip",
+          "note": "3DS: Aeon Genesis relocalized script"
+        }
+      ]
     },
     {
       "title": "Azure Striker Gunvolt - Striker Pack",
@@ -1083,7 +1129,7 @@
     {
       "title": "Sin and Punishment",
       "system": "n64",
-      "bucket": "n64/Tsumi to Batsu - Hoshi no Keishousha (Japan).zip"
+      "bucket": "n64/Tsumi to Batsu - Hoshi no Keishousha (Japan) [T-En by Zoinkity v1.0].zip"
     },
     {
       "title": "Blowout",
@@ -1134,6 +1180,91 @@
       "title": "Thexder",
       "system": "msx",
       "bucket": "msx/Thexder (Japan).zip"
+    },
+    {
+      "title": "Metal Slug 2 - Super Vehicle-001/II (NGM-2410 ~ NGH-2410)",
+      "system": "fbneo",
+      "bucket": "fbneo/mslug2.zip"
+    },
+    {
+      "title": "Xeno Crisis",
+      "system": "fbneo",
+      "bucket": "fbneo/xenocrisis.zip"
+    },
+    {
+      "title": "Dead Connection (World)",
+      "system": "fbneo",
+      "bucket": "fbneo/deadconx.zip"
+    },
+    {
+      "title": "T.N.K III (US)",
+      "system": "fbneo",
+      "bucket": "fbneo/tnk3.zip"
+    },
+    {
+      "title": "S.P.Y. - Special Project Y (US ver. M)",
+      "system": "fbneo",
+      "bucket": "fbneo/spyu.zip"
+    },
+    {
+      "title": "Nitro Ball",
+      "system": "fbneo",
+      "bucket": "fbneo/nitrobal.zip"
+    },
+    {
+      "title": "Smash T.V.",
+      "system": "fbneo",
+      "bucket": "fbneo/smashtv.zip"
+    },
+    {
+      "title": "Crack Down",
+      "system": "fbneo",
+      "bucket": "fbneo/crkdownu.zip"
+    },
+    {
+      "title": "Quartet",
+      "system": "fbneo",
+      "bucket": "fbneo/quartet.zip"
+    },
+    {
+      "title": "The Speed Rumbler",
+      "system": "fbneo",
+      "bucket": "fbneo/srumbler.zip"
+    },
+    {
+      "title": "Crimsonland",
+      "system": "psvita",
+      "bucket": "psvita/Crimsonland [PCSE00453] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Dead Nation™",
+      "system": "psvita",
+      "bucket": "psvita/Dead Nation™ [PCSA00151] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Gunslugs",
+      "system": "psvita",
+      "bucket": "psvita/Gunslugs [PCSE00340] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Mercenary Kings",
+      "system": "psvita",
+      "bucket": "psvita/Mercenary Kings [PCSE00956] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Neon Chrome",
+      "system": "psvita",
+      "bucket": "psvita/Neon Chrome [PCSE00835] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Nuclear Throne",
+      "system": "psvita",
+      "bucket": "psvita/Nuclear Throne [PCSE00828] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Helldivers",
+      "system": "psvita",
+      "bucket": "psvita/HELLDIVERS™ [PCSA00134] [USA] [NoNpDRM].zip"
     }
   ]
 }

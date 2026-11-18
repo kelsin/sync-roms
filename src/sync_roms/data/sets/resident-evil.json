@@ -92,6 +92,14 @@
         {
           "bucket": "gc/Resident Evil - Code - Veronica X (USA).m3u",
           "note": "GameCube: Code Veronica X adds new cutscenes"
+        },
+        {
+          "bucket": "dreamcast/Resident Evil - Code Veronica X (Japan) [T-En by Truemaster1] [n].m3u",
+          "note": "Dreamcast: Code Veronica X with added scenes, fan translated",
+          "files": [
+            "dreamcast/Resident Evil - Code Veronica X (Japan) (Disc 1) [T-En by Truemaster1] [n].chd",
+            "dreamcast/Resident Evil - Code Veronica X (Japan) (Disc 2) [T-En by Truemaster1] [n].chd"
+          ]
         }
       ]
     },
@@ -124,6 +132,11 @@
       "title": "Resident Evil - Outbreak File #2",
       "system": "ps2",
       "bucket": "ps2/Resident Evil - Outbreak - File 2 (USA).chd"
+    },
+    {
+      "title": "Resident Evil - Revelations 2",
+      "system": "psvita",
+      "bucket": "psvita/Resident Evil - Revelations 2 [PCSE00608] [USA] [NoNpDRM].zip"
     }
   ]
 }

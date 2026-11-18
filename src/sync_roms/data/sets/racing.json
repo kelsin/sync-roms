@@ -1640,7 +1640,13 @@
     {
       "title": "Tokyo Xtreme Racer 2",
       "system": "dreamcast",
-      "bucket": "dreamcast/Tokyo Xtreme Racer 2 (USA).chd"
+      "bucket": "dreamcast/Tokyo Xtreme Racer 2 (USA).chd",
+      "variants": [
+        {
+          "bucket": "dreamcast/Shutokou Battle 2 (Japan) [T-En by SGGG v20221128] [i].chd",
+          "note": "Dreamcast: Japanese Shutokou Battle 2, fan translated"
+        }
+      ]
     },
     {
       "title": "POD: Speedzone",
@@ -2417,7 +2423,7 @@
     {
       "title": "Drift King Shutokou Battle '97",
       "system": "saturn",
-      "bucket": "saturn/Drift King Shutokou Battle '97 - Tsuchiya Keiichi & Bandou Masaaki (Japan).chd"
+      "bucket": "saturn/Tokyo Highway Battle '97 (Japan) [T-En by Malenko v1.02] [n].chd"
     },
     {
       "title": "F1 Challenge",
@@ -2568,7 +2574,7 @@
     {
       "title": "F1 Circus",
       "system": "nes",
-      "bucket": "nes/F1 Circus (Japan).zip"
+      "bucket": "nes/F1 Circus (Japan) [T-En by MrRichard999 v1.0].zip"
     },
     {
       "title": "F1 Race",
@@ -2578,7 +2584,7 @@
     {
       "title": "Family Circuit",
       "system": "nes",
-      "bucket": "nes/Family Circuit (Japan).zip"
+      "bucket": "nes/Family Circuit (Japan) [T-En by MrRichard999 v0.95] [n].zip"
     },
     {
       "title": "Final Lap",
@@ -2603,7 +2609,7 @@
     {
       "title": "Motocross Champion",
       "system": "nes",
-      "bucket": "nes/Motocross Champion (Japan).zip"
+      "bucket": "nes/Motocross Champion (Japan) [T-En by Suicidal Translations v1.00] [n].zip"
     },
     {
       "title": "Motor City Patrol",
@@ -2613,7 +2619,7 @@
     {
       "title": "Paris-Dakar Rally Special",
       "system": "nes",
-      "bucket": "nes/Paris-Dakar Rally Special (Japan).zip"
+      "bucket": "nes/Paris-Dakar Rally Special (Japan) [T-En by MrRichard999 v1.02] [n].zip"
     },
     {
       "title": "Racer Mini Yonku: Japan Cup",
@@ -2909,12 +2915,24 @@
     {
       "title": "F-Zero X",
       "system": "n64",
-      "bucket": "n64/F-Zero X (USA).zip"
+      "bucket": "n64/F-Zero X (USA).zip",
+      "variants": [
+        {
+          "bucket": "n64/F-Zero X - Expansion Kit (Japan) (64DD) [Hack by Zoinkity v2] [T-En by LuigiBlood v2].zip",
+          "note": "N64: 64DD Expansion Kit with course and machine editors"
+        }
+      ]
     },
     {
       "title": "Wave Race 64",
       "system": "n64",
-      "bucket": "n64/Wave Race 64 - Kawasaki Jet Ski (USA) (Rev 1).zip"
+      "bucket": "n64/Wave Race 64 - Kawasaki Jet Ski (USA) (Rev 1).zip",
+      "variants": [
+        {
+          "bucket": "n64/Wave Race 64 - Kawasaki Jet Ski (Japan) (Rev 2) (Shindou Edition) [T-En by Zoinkity v1.1].zip",
+          "note": "N64: Shindou Edition with Rumble Pak support"
+        }
+      ]
     },
     {
       "title": "1080 Snowboarding",
@@ -3090,7 +3108,7 @@
     {
       "title": "Choro Q 64 2: Hacha Mecha Grand Prix Race",
       "system": "n64",
-      "bucket": "n64/Choro Q 64 2 - Hacha Mecha Grand Prix Race (Japan).zip"
+      "bucket": "n64/Choro Q 64 2 - Hacha Mecha Grand Prix Race (Japan) [T-En by Zoinkity v1.0].zip"
     },
     {
       "title": "F1 Pole Position 64",
@@ -3445,7 +3463,7 @@
     {
       "title": "F-Zero: Climax",
       "system": "gba",
-      "bucket": "gba/F-Zero - Climax (Japan).zip"
+      "bucket": "gba/F-Zero - Climax (Japan) [T-En by F-Zero Climax Translation Project Team v1.1].zip"
     },
     {
       "title": "Konami Krazy Racers",
@@ -3455,7 +3473,13 @@
     {
       "title": "Crash Nitro Kart",
       "system": "gba",
-      "bucket": "gba/Crash Nitro Kart (USA).zip"
+      "bucket": "gba/Crash Nitro Kart (USA).zip",
+      "variants": [
+        {
+          "bucket": "gba/Crash Nitro Kart (Japan) [T-En by Cornholio309 v3.5] [n].zip",
+          "note": "GBA: translated Japanese release with its changes"
+        }
+      ]
     },
     {
       "title": "Banjo-Pilot",
@@ -4536,6 +4560,161 @@
       "title": "Final Lap Special: GT & Formula Machine",
       "system": "wonderswancolor",
       "bucket": "wonderswancolor/Final Lap Special - GT & Formula Machine (Japan).zip"
+    },
+    {
+      "title": "BS F-Zero Grand Prix - Dai-1-shuu - Knight League",
+      "system": "satellaview",
+      "bucket": "satellaview/BS F-Zero Grand Prix - Dai-1-shuu - Knight League (Japan) (11-1) (SoundLink).zip"
+    },
+    {
+      "title": "Excitebike - Bunbun Mario Battle - Stadium 1",
+      "system": "satellaview",
+      "bucket": "satellaview/Excitebike - Bunbun Mario Battle - Stadium 1 (Japan) (6-30) (SoundLink).zip"
+    },
+    {
+      "title": "Rad Mobile (US)",
+      "system": "fbneo",
+      "bucket": "fbneo/radmu.zip"
+    },
+    {
+      "title": "Rad Rally (US)",
+      "system": "fbneo",
+      "bucket": "fbneo/radru.zip"
+    },
+    {
+      "title": "Great 1000 Miles Rally: U.S.A Version! (94/09/06)",
+      "system": "fbneo",
+      "bucket": "fbneo/gtmrusa.zip"
+    },
+    {
+      "title": "Great 1000 Miles Rally 2 USA (95/07/11)",
+      "system": "fbneo",
+      "bucket": "fbneo/gtmr2u.zip"
+    },
+    {
+      "title": "F1 Exhaust Note (US, Rev A)",
+      "system": "fbneo",
+      "bucket": "fbneo/f1enu.zip"
+    },
+    {
+      "title": "Super Chase - Criminal Termination (US)",
+      "system": "fbneo",
+      "bucket": "fbneo/superchsu.zip"
+    },
+    {
+      "title": "Top Speed (US)",
+      "system": "fbneo",
+      "bucket": "fbneo/topspeedu.zip"
+    },
+    {
+      "title": "Ground Effects / Super Ground Effects",
+      "system": "fbneo",
+      "bucket": "fbneo/groundfx.zip"
+    },
+    {
+      "title": "Suzuka 8 Hours 2 (World, Rev B)",
+      "system": "fbneo",
+      "bucket": "fbneo/suzuk8h2.zip"
+    },
+    {
+      "title": "Racing Hero (FD1094 317-0144)",
+      "system": "fbneo",
+      "bucket": "fbneo/rachero.zip"
+    },
+    {
+      "title": "Stadium Cross (US)",
+      "system": "fbneo",
+      "bucket": "fbneo/scrossu.zip"
+    },
+    {
+      "title": "Moto Frenzy",
+      "system": "mame",
+      "bucket": "mame/motofren.zip"
+    },
+    {
+      "title": "Demolition Derby",
+      "system": "fbneo",
+      "bucket": "fbneo/demoderb.zip"
+    },
+    {
+      "title": "Big Run (11th Rallye version, US?)",
+      "system": "fbneo",
+      "bucket": "fbneo/bigrunu.zip"
+    },
+    {
+      "title": "Led Storm Rally 2011 (US)",
+      "system": "fbneo",
+      "bucket": "fbneo/leds2011u.zip"
+    },
+    {
+      "title": "Four Trax (US?, censored banners)",
+      "system": "fbneo",
+      "bucket": "fbneo/fourtraxa.zip"
+    },
+    {
+      "title": "World Rally Championship",
+      "system": "fbneo",
+      "bucket": "fbneo/wrallyat.zip"
+    },
+    {
+      "title": "Continental Circus",
+      "system": "fbneo",
+      "bucket": "fbneo/contcircu.zip"
+    },
+    {
+      "title": "Joe Danger",
+      "system": "psvita",
+      "bucket": "psvita/Joe Danger [PCSE00478] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Joe Danger 2",
+      "system": "psvita",
+      "bucket": "psvita/Joe Danger 2 [PCSE00477] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "MOTORSTORM® RC",
+      "system": "psvita",
+      "bucket": "psvita/MOTORSTORM® RC [PCSA00027] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "NFS Most Wanted",
+      "system": "psvita",
+      "bucket": "psvita/NFS Most Wanted [PCSE00089] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Racing Lagoon",
+      "system": "psx",
+      "bucket": "psx/Racing Lagoon (Japan, Asia) [T-En by Hilltop v1.1].chd"
+    },
+    {
+      "title": "4x4 Evo",
+      "system": "dreamcast",
+      "bucket": "dreamcast/4x4 Evo (USA).chd"
+    },
+    {
+      "title": "Zero 4 Champ II",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Zero 4 Champ II (Japan).chd"
+    },
+    {
+      "title": "OutRun 2",
+      "system": "xbox",
+      "bucket": "xbox/OutRun 2 (Japan) [T-En by Justin Gibbins v1.0].iso"
+    },
+    {
+      "title": "Mot's Grand Prix",
+      "system": "pico8",
+      "bucket": "pico8/mot_grandprix2-0.p8.png"
+    },
+    {
+      "title": "Driftmania",
+      "system": "pico8",
+      "bucket": "pico8/driftmania-5.p8.png"
+    },
+    {
+      "title": "Ard-Drivin",
+      "system": "arduboy",
+      "bucket": "arduboy/Ard-Drivin (World) (Erwin's Collection).zip"
     }
   ]
 }

@@ -250,7 +250,7 @@
     {
       "title": "Moai-kun",
       "system": "nes",
-      "bucket": "nes/Moai-kun (Japan).zip"
+      "bucket": "nes/Moai-kun (Japan) [T-En by Suicidal Translations v1.0] [n].zip"
     },
     {
       "title": "Puyo Puyo",
@@ -270,12 +270,12 @@
     {
       "title": "Banana",
       "system": "nes",
-      "bucket": "nes/Banana (Japan).zip"
+      "bucket": "nes/Banana (Japan) [T-En by KingMike's Translations v1.0].zip"
     },
     {
       "title": "Eggerland: Meikyuu no Fukkatsu",
       "system": "nes",
-      "bucket": "nes/Eggerland - Meikyuu no Fukkatsu (Japan).zip"
+      "bucket": "nes/Eggerland - Revival of the Labyrinth (Japan) [T-En by Kapow v1.0] [n].zip"
     },
     {
       "title": "Shanghai",
@@ -305,7 +305,7 @@
     {
       "title": "Egypt",
       "system": "nes",
-      "bucket": "nes/Egypt (Japan).zip"
+      "bucket": "nes/Egypt (Japan) [T-En by BlackPaladin v1.0a].zip"
     },
     {
       "title": "Puyo Puyo",
@@ -335,7 +335,13 @@
     {
       "title": "Tetris Attack (En,Ja)",
       "system": "snes",
-      "bucket": "snes/Tetris Attack (USA) (En,Ja).zip"
+      "bucket": "snes/Tetris Attack (USA) (En,Ja).zip",
+      "variants": [
+        {
+          "bucket": "snes/Panel de Pon (Japan) [T-En by Zuqkeo v1.0].zip",
+          "note": "SNES: Panel de Pon with its original fairy cast, translated"
+        }
+      ]
     },
     {
       "title": "Super Bomberman",
@@ -380,7 +386,7 @@
     {
       "title": "Tetris Battle Gaiden",
       "system": "snes",
-      "bucket": "snes/Tetris Battle Gaiden (Japan).zip"
+      "bucket": "snes/Tetris Battle Spin Off (Japan) [T-En by DDSTranslation v1.0] [Add by Docrow v1.1] [n].zip"
     },
     {
       "title": "Super Tetris 3",
@@ -405,7 +411,13 @@
     {
       "title": "Hebereke's Popoitto",
       "system": "snes",
-      "bucket": "snes/Hebereke's Popoitto (Europe).zip"
+      "bucket": "snes/Hebereke's Popoitto (Europe).zip",
+      "variants": [
+        {
+          "bucket": "snes/Magic Poipoi Poitto! (Japan) [T-En by KingMike's Translations v1.0] [n].zip",
+          "note": "SNES: Japanese release, translated"
+        }
+      ]
     },
     {
       "title": "Super Bomberman - Panic Bomber W",
@@ -415,17 +427,17 @@
     {
       "title": "Mario's Super Picross",
       "system": "snes",
-      "bucket": "snes/Mario no Super Picross (Japan).zip"
+      "bucket": "snes/Mario's Super Picross (Japan) [T-En by FCandChill & Kumori v1.5] [n].zip"
     },
     {
       "title": "Sutte Hakkun",
       "system": "snes",
-      "bucket": "snes/Sutte Hakkun (Japan).zip"
+      "bucket": "snes/Sutte Hakkun (Japan) [T-En by Raccoon Sam v1.0] [n].zip"
     },
     {
       "title": "Wrecking Crew '98",
       "system": "snes",
-      "bucket": "snes/Wrecking Crew '98 (Japan).zip"
+      "bucket": "snes/Wrecking Crew '98 (Japan) [T-En by ShadowOne333 v2.0].zip"
     },
     {
       "title": "Lemmings 2 - The Tribes",
@@ -487,12 +499,12 @@
     {
       "title": "Super Bomberman 4",
       "system": "snes",
-      "bucket": "snes/Super Bomberman 4 (Japan).zip"
+      "bucket": "snes/Super Bomberman 4 (Japan) [T-En by Svambo v1.0].zip"
     },
     {
       "title": "Super Bomberman 5",
       "system": "snes",
-      "bucket": "snes/Super Bomberman 5 (Japan).zip"
+      "bucket": "snes/Super Bomberman 5 (Japan) [T-En by Psyklax Beta] [Add by Svambo v1.0] [i].zip"
     },
     {
       "title": "The Brainies",
@@ -637,22 +649,22 @@
     {
       "title": "Clockwerx",
       "system": "snes",
-      "bucket": "snes/Clockwerx (Japan).zip"
+      "bucket": "snes/Clockwerx (Japan) [T-En by MrRichard999 v0.75] [i].zip"
     },
     {
       "title": "Dossun! Ganseki Battle",
       "system": "snes",
-      "bucket": "snes/Dossun! Ganseki Battle (Japan).zip"
+      "bucket": "snes/Dossun! Ganseki Battle (Japan) [T-En by Aeon Genesis v1.00].zip"
     },
     {
       "title": "Pikiinya!",
       "system": "snes",
-      "bucket": "snes/Pikiinya! (Japan).zip"
+      "bucket": "snes/Pikiinya! (Japan) [T-En by LucianoTheWindowsFan v0.1] [i].zip"
     },
     {
       "title": "Tsuyoshi Shikkari Shinasai: Taisen Puzzle Dama",
       "system": "snes",
-      "bucket": "snes/Tsuyoshi Shikkari Shinasai - Taisen Puzzle Dama (Japan).zip"
+      "bucket": "snes/Tsuyoshi Shikkari Shinasai - Taisen Puzzle Dama (Japan) [T-En by Bankbank v0.1] [i].zip"
     },
     {
       "title": "Nontan to Issho: Kurukuru Puzzle",
@@ -727,7 +739,7 @@
     {
       "title": "Solomon no Kagi: Oujo Rihita no Namida",
       "system": "mastersystem",
-      "bucket": "mastersystem/Solomon no Kagi - Oujo Rihita no Namida (Japan).zip"
+      "bucket": "mastersystem/Solomon's Key - Tears of Princess Lihita (Japan) [T-En by FlashPV v1.0] [n].zip"
     },
     {
       "title": "Tangram",
@@ -1113,7 +1125,13 @@
     {
       "title": "Puyo Puyo Fever",
       "system": "dreamcast",
-      "bucket": "dreamcast/Puyo Puyo Fever (Japan) (En,Ja).chd"
+      "bucket": "dreamcast/Puyo Puyo Fever (Japan) (En,Ja).chd",
+      "variants": [
+        {
+          "bucket": "gba/Puyo Puyo Fever (Japan) (En,Ja,Fr,De,Es,It) [T-En by Tasos500 v1.0] [Relocalized].zip",
+          "note": "GBA: handheld port, relocalized"
+        }
+      ]
     },
     {
       "title": "Super Monkey Ball",
@@ -1230,7 +1248,13 @@
     {
       "title": "Magical Tetris Challenge",
       "system": "n64",
-      "bucket": "n64/Magical Tetris Challenge (USA).zip"
+      "bucket": "n64/Magical Tetris Challenge (USA).zip",
+      "variants": [
+        {
+          "bucket": "n64/Magical Tetris Challenge (Japan) (Aleck 64) [T-En by Zoinkity v1.1] [n].zip",
+          "note": "Aleck64: arcade version"
+        }
+      ]
     },
     {
       "title": "Hexcite - The Shapes of Victory",
@@ -1398,7 +1422,7 @@
     {
       "title": "Puyo Puyo~n",
       "system": "dreamcast",
-      "bucket": "dreamcast/Puyo Puyoon (Japan).chd"
+      "bucket": "dreamcast/Puyo Puyo 4 (Japan) [T-En by Precise Museum v1.0] [n].chd"
     },
     {
       "title": "Susume! Taisen Puzzle Dama - Toukon! Marutama Chou",
@@ -1458,17 +1482,17 @@
     {
       "title": "Puyo Puyo! - Puyopuyo 15th Anniversary",
       "system": "nds",
-      "bucket": "nds/Puyo Puyo! - Puyopuyo 15th Anniversary (Japan) (Rev 3).zip"
+      "bucket": "nds/Puyo Puyo! - 15th Anniversary (Japan) (Rev 1) [T-En by Puyo Nexus v1.2] [n].zip"
     },
     {
       "title": "Puyo Puyo 7",
       "system": "nds",
-      "bucket": "nds/Puyo Puyo 7 (Japan).zip"
+      "bucket": "nds/Puyo Puyo 7 (Japan) [T-En by Puyo Nexus v1.0].zip"
     },
     {
       "title": "Puyo Puyo!! - Puyopuyo 20th Anniversary",
       "system": "nds",
-      "bucket": "nds/Puyo Puyo!! - Puyopuyo 20th Anniversary (Japan).zip"
+      "bucket": "nds/Puyo Puyo!! - 20th Anniversary (Japan) [T-En by Precise Museum v1.2] [n].zip"
     },
     {
       "title": "Zoo Keeper",
@@ -1594,7 +1618,7 @@
     {
       "title": "Slitherlink",
       "system": "nds",
-      "bucket": "nds/Puzzle Series Vol. 5 - Slither Link (Japan).zip"
+      "bucket": "nds/Puzzle Series Vol. 5 - Slither Link (Japan) [T-En by T-Tudor v0.7].zip"
     },
     {
       "title": "Sudoku Gridmaster",
@@ -2275,7 +2299,7 @@
     {
       "title": "Picross 2",
       "system": "gb",
-      "bucket": "gb/Picross 2 (Japan) (SGB Enhanced).zip"
+      "bucket": "gb/Picross 2 (Japan) (SGB Enhanced) [T-En by Zed v1.0].zip"
     },
     {
       "title": "Donkey Kong",
@@ -2450,7 +2474,7 @@
     {
       "title": "Mr. Driller A - Fushigi na Pacteria",
       "system": "gba",
-      "bucket": "gba/Mr. Driller A - Fushigi na Pacteria (Japan).zip"
+      "bucket": "gba/Mr. Driller A - Fushigi na Pacteria (Japan) [T-En by Keep Smiling International v1.0] [i].zip"
     },
     {
       "title": "Polarium Advance",
@@ -2481,7 +2505,7 @@
     {
       "title": "Kururin Paradise",
       "system": "gba",
-      "bucket": "gba/Kururin Paradise (Japan).zip"
+      "bucket": "gba/Kururin Paradise (Japan) [T-En by Dimedime v1.0].zip"
     },
     {
       "title": "Guru Logic Champ",
@@ -2501,7 +2525,7 @@
     {
       "title": "Rhythm Tengoku",
       "system": "gba",
-      "bucket": "gba/Rhythm Tengoku (Japan) (Rev 1).zip"
+      "bucket": "gba/Rhythm Tengoku (Japan) [T-En by ShaffySwitcher v20230620] [i].zip"
     },
     {
       "title": "bit Generations - Boundish",
@@ -3017,7 +3041,7 @@
     {
       "title": "Sakura Taisen - Hanagumi Taisen Columns 2",
       "system": "dreamcast",
-      "bucket": "dreamcast/Sakura Taisen - Hanagumi Taisen Columns 2 (Japan).chd"
+      "bucket": "dreamcast/Sakura Wars - Columns 2 (Japan) [T-En by Derek Pascarella v1.2] [n].chd"
     },
     {
       "title": "Plus Plumb",
@@ -3237,7 +3261,7 @@
     {
       "title": "Virtual Lab",
       "system": "virtualboy",
-      "bucket": "virtualboy/Virtual Lab (Japan).zip"
+      "bucket": "virtualboy/Virtual Lab (Japan) [T-En by Thunderstruck v1.0].zip"
     },
     {
       "title": "Pokemon Puzzle Collection",
@@ -3252,7 +3276,7 @@
     {
       "title": "Pokemon Puzzle Collection Vol. 2",
       "system": "pokemini",
-      "bucket": "pokemini/Pokemon Puzzle Collection Vol. 2 (Japan).zip"
+      "bucket": "pokemini/Pokemon Puzzle Collection Vol. 2 (Japan) [T-En by Mr. Blinky & Wa v1.2].zip"
     },
     {
       "title": "Jewelriss",
@@ -3298,6 +3322,276 @@
       "title": "Lights Out",
       "system": "gamecom",
       "bucket": "gamecom/Lights Out (USA).zip"
+    },
+    {
+      "title": "Bomberman 2",
+      "system": "nds",
+      "bucket": "nds/Bomberman 2 (Europe) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Crazy Machines 2",
+      "system": "nds",
+      "bucket": "nds/Crazy Machines 2 (Europe) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Max & the Magic Marker",
+      "system": "nds",
+      "bucket": "nds/Max & the Magic Marker (USA) (En,Fr,De,Es,Nl).zip"
+    },
+    {
+      "title": "Nervous Brickdown",
+      "system": "nds",
+      "bucket": "nds/Nervous Brickdown (USA) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Puzzle Kingdoms",
+      "system": "nds",
+      "bucket": "nds/Puzzle Kingdoms (USA) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Steal Princess",
+      "system": "nds",
+      "bucket": "nds/Steal Princess (USA).zip"
+    },
+    {
+      "title": "Super Monkey Ball - Touch & Roll",
+      "system": "nds",
+      "bucket": "nds/Super Monkey Ball - Touch & Roll (USA) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Kirby's Super Star Stacker",
+      "system": "snes",
+      "bucket": "snes/Kirby's Super Star Stacker (Japan) [T-En by TheDanaAddams v1.1] [n].zip"
+    },
+    {
+      "title": "Super Gussun Oyoyo",
+      "system": "snes",
+      "bucket": "snes/Super Gussun Oyoyo (Japan).zip"
+    },
+    {
+      "title": "Egger Land - Souzou e no Tabidachi",
+      "system": "fds",
+      "bucket": "fds/Egger Land - Souzou e no Tabidachi (Japan) (Disk Writer).zip"
+    },
+    {
+      "title": "Kirby no Kirakira Kids",
+      "system": "snes",
+      "bucket": "snes/Kirby no Kirakira Kids (Japan).zip"
+    },
+    {
+      "title": "Mario to Wario",
+      "system": "snes",
+      "bucket": "snes/Mario to Wario (Japan) (En).zip"
+    },
+    {
+      "title": "From Below",
+      "system": "nes",
+      "bucket": "nes/From Below.zip"
+    },
+    {
+      "title": "Bloxeed (US, C System, Rev A)",
+      "system": "fbneo",
+      "bucket": "fbneo/bloxeedu.zip"
+    },
+    {
+      "title": "Puzz Loop (Europe)",
+      "system": "mame",
+      "bucket": "mame/puzzloop.zip"
+    },
+    {
+      "title": "Columns '97",
+      "system": "mame",
+      "bucket": "mame/colmns97.zip"
+    },
+    {
+      "title": "Puzzle! Mushihime-Tama (2005/09/09.MASTER VER)",
+      "system": "fbneo",
+      "bucket": "fbneo/mushitam.zip"
+    },
+    {
+      "title": "Lode Runner II - The Bungeling Strikes Back",
+      "system": "fbneo",
+      "bucket": "fbneo/ldrun2.zip"
+    },
+    {
+      "title": "Lode Runner - The Dig Fight (ver. B)",
+      "system": "fbneo",
+      "bucket": "fbneo/loderndf.zip"
+    },
+    {
+      "title": "Plotting",
+      "system": "fbneo",
+      "bucket": "fbneo/plottingu.zip"
+    },
+    {
+      "title": "Cameltry",
+      "system": "fbneo",
+      "bucket": "fbneo/cameltryau.zip"
+    },
+    {
+      "title": "Super Qix",
+      "system": "fbneo",
+      "bucket": "fbneo/sqixu.zip"
+    },
+    {
+      "title": "Volfied",
+      "system": "fbneo",
+      "bucket": "fbneo/volfiedu.zip"
+    },
+    {
+      "title": "Ataxx",
+      "system": "mame",
+      "bucket": "mame/ataxx.zip"
+    },
+    {
+      "title": "Apotris",
+      "system": "gba",
+      "bucket": "gba/Apotris.zip"
+    },
+    {
+      "title": "Bomberman GB 3",
+      "system": "gb",
+      "bucket": "gb/Bomberman GB 3 (Japan) (SGB Enhanced).zip"
+    },
+    {
+      "title": "Bust-A-Move 4",
+      "system": "gbc",
+      "bucket": "gbc/Bust-A-Move 4 (USA, Europe) (GB Compatible).zip"
+    },
+    {
+      "title": "Magical Drop",
+      "system": "gbc",
+      "bucket": "gbc/Magical Drop (USA).zip"
+    },
+    {
+      "title": "Pokemon Picross",
+      "system": "gbc",
+      "bucket": "gbc/Pokemon Picross (English).zip"
+    },
+    {
+      "title": "A Rose in the Twilight",
+      "system": "psvita",
+      "bucket": "psvita/A Rose in the Twilight [PCSE01046] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "A Virus Named TOM",
+      "system": "psvita",
+      "bucket": "psvita/A Virus Named TOM [PCSE00501] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Dokuro",
+      "system": "psvita",
+      "bucket": "psvita/Dokuro [PCSE00124] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Escape Plan™",
+      "system": "psvita",
+      "bucket": "psvita/Escape Plan™ [PCSA00004] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Hitman GO - Definitive Edition",
+      "system": "psvita",
+      "bucket": "psvita/Hitman GO - Definitive Edition [PCSE00846] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "LaraCroft Go",
+      "system": "psvita",
+      "bucket": "psvita/LaraCroft Go [PCSE00985] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Lemmings™ Touch",
+      "system": "psvita",
+      "bucket": "psvita/Lemmings™ Touch [PCSA00138] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Monkey Ball",
+      "system": "psvita",
+      "bucket": "psvita/Monkey Ball  [PCSE00017] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Papers, Please",
+      "system": "psvita",
+      "bucket": "psvita/Papers, Please [PCSE01056] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Pix The Cat",
+      "system": "psvita",
+      "bucket": "psvita/Pix The Cat [PCSE00553] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Quell Memento",
+      "system": "psvita",
+      "bucket": "psvita/Quell Memento [PCSE00143] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Slayaway Camp - Butcher's Cut",
+      "system": "psvita",
+      "bucket": "psvita/Slayaway Camp - Butcher's Cut [PCSE01310] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Stealth Inc.",
+      "system": "psvita",
+      "bucket": "psvita/Stealth Inc. [PCSE00280] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Stealth Inc 2",
+      "system": "psvita",
+      "bucket": "psvita/Stealth Inc 2 [PCSE00575] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "The Bridge",
+      "system": "psvita",
+      "bucket": "psvita/The Bridge [PCSE00525] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "The Swapper",
+      "system": "psvita",
+      "bucket": "psvita/The Swapper [PCSE00387] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Thomas Was Alone",
+      "system": "psvita",
+      "bucket": "psvita/Thomas Was Alone [PCSE00258] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Touch My Katamari",
+      "system": "psvita",
+      "bucket": "psvita/Touch My Katamari [PCSE00016] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Catherine",
+      "system": "ps3",
+      "bucket": "ps3/Catherine (USA).chd"
+    },
+    {
+      "title": "Dinolympics",
+      "system": "atarilynx",
+      "bucket": "atarilynx/Dinolympics (USA, Europe).zip"
+    },
+    {
+      "title": "Castle Excellent",
+      "system": "msx",
+      "bucket": "msx/Castle Excellent (Japan).zip"
+    },
+    {
+      "title": "Kururin Squash!",
+      "system": "gc",
+      "bucket": "gc/Kururin Squash! (Japan) [T-En by DOL-Translations v2.0.0].rvz"
+    },
+    {
+      "title": "Picolumia v1.2",
+      "system": "pico8",
+      "bucket": "pico8/picolumia-0.p8.png"
+    },
+    {
+      "title": "Pico de Pon",
+      "system": "pico8",
+      "bucket": "pico8/picodepon-2.p8.png"
+    },
+    {
+      "title": "Orange Box, The",
+      "system": "xbox360",
+      "bucket": "xbox360/Orange Box, The (World) (En,Fr,De).zar"
     }
   ]
 }

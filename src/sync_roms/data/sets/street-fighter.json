@@ -188,7 +188,7 @@
     {
       "title": "SNK vs. Capcom - Card Fighters 2 - Expand Edition",
       "system": "ngpc",
-      "bucket": "ngpc/SNK vs. Capcom - Card Fighters 2 - Expand Edition (Japan).zip"
+      "bucket": "ngpc/SNK vs. Capcom - Card Fighters 2 - Expand Edition (Japan) [T-En by CFC2 Translation Team v20170125].zip"
     },
     {
       "title": "SNK vs. Capcom - Card Fighters DS",
@@ -239,6 +239,21 @@
       "title": "Ultimate Marvel vs. Capcom 3",
       "system": "xbox360",
       "bucket": "xbox360/Ultimate Marvel vs. Capcom 3 (USA, Japan) (En,Ja,Fr,De,Es,It).zar"
+    },
+    {
+      "title": "Street Fighter II: The World Warrior (USA 920312)",
+      "system": "fbneo",
+      "bucket": "fbneo/sf2um.zip"
+    },
+    {
+      "title": "Super Street Fighter II: The New Challengers (USA 930911)",
+      "system": "fbneo",
+      "bucket": "fbneo/ssf2u.zip"
+    },
+    {
+      "title": "SFxTK",
+      "system": "psvita",
+      "bucket": "psvita/SFxTK [PCSE00005] [USA] [NoNpDRM].zip"
     }
   ]
 }

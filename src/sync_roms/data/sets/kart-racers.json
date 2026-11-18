@@ -72,7 +72,13 @@
       "title": "Crash Nitro Kart",
       "category": "Kart & Mascot",
       "system": "gba",
-      "bucket": "gba/Crash Nitro Kart (USA).zip"
+      "bucket": "gba/Crash Nitro Kart (USA).zip",
+      "variants": [
+        {
+          "bucket": "gba/Crash Nitro Kart (Japan) [T-En by Cornholio309 v3.5] [n].zip",
+          "note": "GBA: translated Japanese release with its changes"
+        }
+      ]
     },
     {
       "title": "Crash Nitro Kart",
@@ -442,7 +448,7 @@
       "title": "Choro Q 64 2 - Hacha Mecha Grand Prix Race",
       "category": "Kart & Mascot",
       "system": "n64",
-      "bucket": "n64/Choro Q 64 2 - Hacha Mecha Grand Prix Race (Japan).zip"
+      "bucket": "n64/Choro Q 64 2 - Hacha Mecha Grand Prix Race (Japan) [T-En by Zoinkity v1.0].zip"
     },
     {
       "title": "Gadget Racers",
@@ -472,7 +478,7 @@
       "title": "Doraemon Kart",
       "category": "Kart & Mascot",
       "system": "gb",
-      "bucket": "gb/Doraemon Kart (Japan) (SGB Enhanced).zip"
+      "bucket": "gb/Doraemon Kart (Japan) (SGB Enhanced) [T-En by Magecraft Translations v1.01] [i].zip"
     },
     {
       "title": "Doraemon Kart 2",
@@ -535,6 +541,12 @@
       "bucket": "snes/Uchuu Race - Astro Go! Go! (Japan) (En).zip"
     },
     {
+      "title": "PicoKart",
+      "category": "Kart & Mascot",
+      "system": "pico8",
+      "bucket": "pico8/picokart2_082-0.p8.png"
+    },
+    {
       "title": "F-Zero",
       "category": "Futuristic",
       "system": "snes",
@@ -544,7 +556,13 @@
       "title": "F-Zero X",
       "category": "Futuristic",
       "system": "n64",
-      "bucket": "n64/F-Zero X (USA).zip"
+      "bucket": "n64/F-Zero X (USA).zip",
+      "variants": [
+        {
+          "bucket": "n64/F-Zero X - Expansion Kit (Japan) (64DD) [Hack by Zoinkity v2] [T-En by LuigiBlood v2].zip",
+          "note": "N64: 64DD Expansion Kit with course and machine editors"
+        }
+      ]
     },
     {
       "title": "F-Zero - Maximum Velocity",
@@ -562,7 +580,7 @@
       "title": "F-Zero - Climax",
       "category": "Futuristic",
       "system": "gba",
-      "bucket": "gba/F-Zero - Climax (Japan).zip"
+      "bucket": "gba/F-Zero - Climax (Japan) [T-En by F-Zero Climax Translation Project Team v1.1].zip"
     },
     {
       "title": "F-Zero GX",
@@ -833,6 +851,18 @@
       "category": "Futuristic",
       "system": "saturn",
       "bucket": "saturn/Scorcher (USA) (RE).chd"
+    },
+    {
+      "title": "BS F-Zero Grand Prix - Dai-1-shuu - Knight League",
+      "category": "Futuristic",
+      "system": "satellaview",
+      "bucket": "satellaview/BS F-Zero Grand Prix - Dai-1-shuu - Knight League (Japan) (11-1) (SoundLink).zip"
+    },
+    {
+      "title": "BS F-Zero Grand Prix 2",
+      "category": "Futuristic",
+      "system": "satellaview",
+      "bucket": "satellaview/BS F-Zero Grand Prix 2 - Practice (Japan) (6-7).zip"
     },
     {
       "title": "Twisted Metal",
@@ -1321,6 +1351,24 @@
       "bucket": "psx/Assault Rigs (USA).chd"
     },
     {
+      "title": "Super Chase - Criminal Termination (US)",
+      "category": "Combat",
+      "system": "fbneo",
+      "bucket": "fbneo/superchsu.zip"
+    },
+    {
+      "title": "Chase Bombers (World)",
+      "category": "Combat",
+      "system": "fbneo",
+      "bucket": "fbneo/cbombers.zip"
+    },
+    {
+      "title": "Demolition Derby",
+      "category": "Combat",
+      "system": "fbneo",
+      "bucket": "fbneo/demoderb.zip"
+    },
+    {
       "title": "R.C. Pro-Am",
       "category": "Top-down & RC",
       "system": "nes",
@@ -1642,7 +1690,7 @@
       "title": "Family Circuit",
       "category": "Top-down & RC",
       "system": "nes",
-      "bucket": "nes/Family Circuit (Japan).zip"
+      "bucket": "nes/Family Circuit (Japan) [T-En by MrRichard999 v0.95] [n].zip"
     },
     {
       "title": "Rally Bike",
@@ -1661,6 +1709,18 @@
       "category": "Top-down & RC",
       "system": "gb",
       "bucket": "gb/Dirty Racing (Japan).zip"
+    },
+    {
+      "title": "MOTORSTORM® RC",
+      "category": "Top-down & RC",
+      "system": "psvita",
+      "bucket": "psvita/MOTORSTORM® RC [PCSA00027] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Table Top Racing",
+      "category": "Top-down & RC",
+      "system": "psvita",
+      "bucket": "psvita/Table Top Racing [PCSE00323] [USA] [NoNpDRM].zip"
     }
   ]
 }

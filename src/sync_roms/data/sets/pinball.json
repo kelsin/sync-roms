@@ -175,7 +175,7 @@
     {
       "title": "Super Robot Pinball",
       "system": "gbc",
-      "bucket": "gbc/Super Robot Pinball (Japan).zip"
+      "bucket": "gbc/Super Robot Pinball (Japan) [T-En by Kurenaikurai & Luis16bits & Marc_max v1.0].zip"
     },
     {
       "title": "Mario Pinball Land",
@@ -476,6 +476,81 @@
       "title": "Pinball Challenge",
       "system": "channelf",
       "bucket": "channelf/Pinball Challenge (USA).zip"
+    },
+    {
+      "title": "American Battle Dome",
+      "system": "snes",
+      "bucket": "snes/American Battle Dome (Japan).zip"
+    },
+    {
+      "title": "Moonball Magic",
+      "system": "fds",
+      "bucket": "fds/Moonball Magic (Japan) (Disk Writer).zip"
+    },
+    {
+      "title": "Family Pinball",
+      "system": "nes",
+      "bucket": "nes/Family Pinball (Japan) [T-En by Suicidal Translations v1.00] [n].zip"
+    },
+    {
+      "title": "Rock 'n' Ball",
+      "system": "nes",
+      "bucket": "nes/Rock 'n' Ball (USA).zip"
+    },
+    {
+      "title": "Pinball Arcade",
+      "system": "psvita",
+      "bucket": "psvita/Pinball Arcade [PCSE00065] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Pinball Heroes™ - Complete",
+      "system": "psvita",
+      "bucket": "psvita/Pinball Heroes™ - Complete [PCSA00109] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Star Wars Pinball",
+      "system": "psvita",
+      "bucket": "psvita/Star Wars Pinball [PCSE00221] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "ZEN Pinball 2",
+      "system": "psvita",
+      "bucket": "psvita/ZEN Pinball 2 [PCSE00050] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Rollers of the Realm",
+      "system": "psvita",
+      "bucket": "psvita/Rollers of the Realm [PCSE00513] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Neo Golden Logres",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Neo Golden Logres (Japan) (En,Ja).chd"
+    },
+    {
+      "title": "Roller Ball",
+      "system": "msx",
+      "bucket": "msx/Roller Ball (Japan).zip"
+    },
+    {
+      "title": "Fire Ball",
+      "system": "msx2",
+      "bucket": "msx2/Fire Ball (Japan).zip"
+    },
+    {
+      "title": "Williams Pinball Classics",
+      "system": "xbox360",
+      "bucket": "xbox360/Williams Pinball Classics (Europe).zar"
+    },
+    {
+      "title": "Terra Nova Pinball v1.1.0",
+      "system": "pico8",
+      "bucket": "pico8/terra_nova_pinball-2.p8.png"
+    },
+    {
+      "title": "pinballvania!",
+      "system": "pico8",
+      "bucket": "pico8/pinballvania-2.p8.png"
     }
   ]
 }

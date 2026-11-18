@@ -105,7 +105,13 @@
     {
       "title": "Gargoyle's Quest",
       "system": "gb",
-      "bucket": "gb/Gargoyle's Quest (USA, Europe).zip"
+      "bucket": "gb/Gargoyle's Quest (USA, Europe).zip",
+      "variants": [
+        {
+          "bucket": "gb/Firebrand - A Ghosts 'n Goblins Tale (Japan) [T-En by Stardust Crusaders v1.00] [n].zip",
+          "note": "GB: retranslation of the Japanese release"
+        }
+      ]
     },
     {
       "title": "Kid Dracula",
@@ -165,7 +171,13 @@
     {
       "title": "Donkey Kong Land III",
       "system": "gb",
-      "bucket": "gb/Donkey Kong Land III (USA, Europe) (Rev 1) (SGB Enhanced).zip"
+      "bucket": "gb/Donkey Kong Land III (USA, Europe) (Rev 1) (SGB Enhanced).zip",
+      "variants": [
+        {
+          "bucket": "gbc/Donkey Kong Land III (Japan) [T-En by Blaziken257 v1.3] [n].zip",
+          "note": "GBC: Japan-only color version"
+        }
+      ]
     },
     {
       "title": "Catrap",
@@ -230,12 +242,24 @@
     {
       "title": "Final Fantasy Legend, The",
       "system": "gb",
-      "bucket": "gb/Final Fantasy Legend, The (USA).zip"
+      "bucket": "gb/Final Fantasy Legend, The (USA).zip",
+      "variants": [
+        {
+          "bucket": "wonderswancolor/Spirit World Tower Warrior Sa-Ga (Japan) [T-En by Tower Reversed v1.3] [n].zip",
+          "note": "WonderSwan Color: color remake, fan translated"
+        }
+      ]
     },
     {
       "title": "Final Fantasy Legend III",
       "system": "gb",
-      "bucket": "gb/Final Fantasy Legend III (USA).zip"
+      "bucket": "gb/Final Fantasy Legend III (USA).zip",
+      "variants": [
+        {
+          "bucket": "gb/Sa-Ga 3 - Champions of Time and Space (Japan) [T-En by Granz v0.5] [i] [n].zip",
+          "note": "GB: retranslation with the original SaGa 3 names"
+        }
+      ]
     },
     {
       "title": "Bubble Bobble",
@@ -245,7 +269,7 @@
     {
       "title": "Picross 2",
       "system": "gb",
-      "bucket": "gb/Picross 2 (Japan) (SGB Enhanced).zip"
+      "bucket": "gb/Picross 2 (Japan) (SGB Enhanced) [T-En by Zed v1.0].zip"
     },
     {
       "title": "Batman - The Video Game",
@@ -355,7 +379,7 @@
     {
       "title": "Bomberman GB 3",
       "system": "gb",
-      "bucket": "gb/Bomberman GB 3 (Japan) (SGB Enhanced).zip"
+      "bucket": "gb/Bomber Man GB 3 (Japan) (SGB Enhanced) [T-En by David Mullen & Duke Serkol v1.0] [i].zip"
     },
     {
       "title": "Tennis",
@@ -565,7 +589,13 @@
     {
       "title": "Pokemon - Crystal Version (Rev 1)",
       "system": "gbc",
-      "bucket": "gbc/Pokemon - Crystal Version (USA, Europe) (Rev 1).zip"
+      "bucket": "gbc/Pokemon - Crystal Version (USA, Europe) (Rev 1).zip",
+      "variants": [
+        {
+          "bucket": "gbc/Pocket Monsters - Crystal Version (Japan) [T-En by Unknown v1.0].zip",
+          "note": "GBC: Japanese release with the Mobile Adapter content"
+        }
+      ]
     },
     {
       "title": "Pokemon - Gold Version",
@@ -760,12 +790,24 @@
     {
       "title": "Mega Man Battle Network 2",
       "system": "gba",
-      "bucket": "gba/Megaman - Battle Network 2 (USA).zip"
+      "bucket": "gba/Megaman - Battle Network 2 (USA).zip",
+      "variants": [
+        {
+          "bucket": "gba/Megaman - Battle Network 2 (USA) [T-En by Vgperson v1.01] [Relocalized].zip",
+          "note": "GBA: vgperson relocalization of the script"
+        }
+      ]
     },
     {
       "title": "Mega Man Battle Network 3 - Blue Version",
       "system": "gba",
-      "bucket": "gba/Megaman - Battle Network 3 - Blue Version (USA).zip"
+      "bucket": "gba/Megaman - Battle Network 3 - Blue Version (USA).zip",
+      "variants": [
+        {
+          "bucket": "gba/Megaman - Battle Network 3 - Blue Version (USA) [T-En by Vgperson v1.0] [Relocalized].zip",
+          "note": "GBA: vgperson relocalization of the script"
+        }
+      ]
     },
     {
       "title": "Sonic The Hedgehog 2",
@@ -875,7 +917,13 @@
     {
       "title": "Dynamite Headdy",
       "system": "gamegear",
-      "bucket": "gamegear/Dynamite Headdy (USA, Europe).zip"
+      "bucket": "gamegear/Dynamite Headdy (USA, Europe).zip",
+      "variants": [
+        {
+          "bucket": "genesis/Dynamite Headdy (Japan) [T-En by M.I.J.E.T. v070428].zip",
+          "note": "Genesis: Japanese release with its changes, translated"
+        }
+      ]
     },
     {
       "title": "Tempo Jr.",
@@ -905,7 +953,7 @@
     {
       "title": "Coca-Cola Kid",
       "system": "gamegear",
-      "bucket": "gamegear/Coca-Cola Kid (Japan).zip"
+      "bucket": "gamegear/Coca-Cola Kid (Japan) [T-En by Filler v1.1].zip"
     },
     {
       "title": "Bubble Bobble",
@@ -1170,7 +1218,13 @@
     {
       "title": "Phoenix Wright - Ace Attorney",
       "system": "nds",
-      "bucket": "nds/Phoenix Wright - Ace Attorney (USA).zip"
+      "bucket": "nds/Phoenix Wright - Ace Attorney (USA).zip",
+      "variants": [
+        {
+          "bucket": "gba/Phoenix Wright - Ace Attorney (Japan) [T-En by H3rmit & Spazzery v006] [n].zip",
+          "note": "GBA: the original Game Boy Advance release"
+        }
+      ]
     },
     {
       "title": "Phoenix Wright - Ace Attorney - Justice for All",
@@ -1180,7 +1234,13 @@
     {
       "title": "Phoenix Wright - Ace Attorney - Trials and Tribulations",
       "system": "nds",
-      "bucket": "nds/Phoenix Wright - Ace Attorney - Trials and Tribulations (USA).zip"
+      "bucket": "nds/Phoenix Wright - Ace Attorney - Trials and Tribulations (USA).zip",
+      "variants": [
+        {
+          "bucket": "gba/Phoenix Wright - Ace Attorney – Trials and Tribulations (Japan) [T-En by H3rmit v015.8] [n].zip",
+          "note": "GBA: the original Game Boy Advance release"
+        }
+      ]
     },
     {
       "title": "999 - Nine Hours, Nine Persons, Nine Doors",
@@ -1195,17 +1255,39 @@
     {
       "title": "Dragon Quest IV - Chapters of the Chosen",
       "system": "nds",
-      "bucket": "nds/Dragon Quest IV - Chapters of the Chosen (USA) (En,Fr,Es).zip"
+      "bucket": "nds/Dragon Quest IV - Chapters of the Chosen (USA) (En,Fr,Es).zip",
+      "variants": [
+        {
+          "bucket": "nds/Dragon Quest IV - Michibikareshi Mono-tachi (Japan) [T-En by Concreted v20210703].zip",
+          "note": "DS: translated Japanese release with the party chat"
+        }
+      ]
     },
     {
       "title": "Dragon Quest V - Hand of the Heavenly Bride",
       "system": "nds",
-      "bucket": "nds/Dragon Quest V - Hand of the Heavenly Bride (USA) (En,Fr,Es).zip"
+      "bucket": "nds/Dragon Quest V - Hand of the Heavenly Bride (USA) (En,Fr,Es).zip",
+      "variants": [
+        {
+          "bucket": "snes/Dragon Quest V - Tenkuu no Hanayome (Japan) [T-En by DeJap & Partial Translations v2.01].zip",
+          "note": "SNES: original Super Famicom version, fan translated"
+        },
+        {
+          "bucket": "ps2/Dragon Quest V - Tenkuu no Hanayome (Japan) [T-En by DQ Translations v1.2] [Dragon Quest VIII Style Names].chd",
+          "note": "PS2: 3D remake, fan translated"
+        }
+      ]
     },
     {
       "title": "Dragon Quest VI - Realms of Revelation",
       "system": "nds",
-      "bucket": "nds/Dragon Quest VI - Realms of Revelation (USA) (En,Fr,Es).zip"
+      "bucket": "nds/Dragon Quest VI - Realms of Revelation (USA) (En,Fr,Es).zip",
+      "variants": [
+        {
+          "bucket": "snes/Dragon Quest VI - Realms of Revelation (Japan) [T-En by NoPrgress v0.90b2] [n].zip",
+          "note": "SNES: original Super Famicom version, fan translated"
+        }
+      ]
     },
     {
       "title": "Dragon Quest IX - Sentinels of the Starry Skies",
@@ -1220,7 +1302,13 @@
     {
       "title": "Final Fantasy III",
       "system": "nds",
-      "bucket": "nds/Final Fantasy III (USA).zip"
+      "bucket": "nds/Final Fantasy III (USA).zip",
+      "variants": [
+        {
+          "bucket": "nes/Final Fantasy III (Japan) [T-En by Chaos Rush v1.3].zip",
+          "note": "NES: original Famicom version, fan translated"
+        }
+      ]
     },
     {
       "title": "Final Fantasy IV",
@@ -1495,7 +1583,13 @@
     {
       "title": "Final Fantasy V Advance",
       "system": "gba",
-      "bucket": "gba/Final Fantasy V Advance (USA).zip"
+      "bucket": "gba/Final Fantasy V Advance (USA).zip",
+      "variants": [
+        {
+          "bucket": "snes/Final Fantasy V (Japan) [T-En by J121 v1.16] [GBA Script Port] [Bugfixes].zip",
+          "note": "SNES: original version with the GBA script and bug fixes"
+        }
+      ]
     },
     {
       "title": "Final Fantasy I & II - Dawn of Souls",
@@ -1655,7 +1749,7 @@
     {
       "title": "Rhythm Tengoku",
       "system": "gba",
-      "bucket": "gba/Rhythm Tengoku (Japan) (Rev 1).zip"
+      "bucket": "gba/Rhythm Tengoku (Japan) [T-En by ShaffySwitcher v20230620] [i].zip"
     },
     {
       "title": "Kurukuru Kururin",
@@ -1745,12 +1839,24 @@
     {
       "title": "Dragon Warrior I & II",
       "system": "gbc",
-      "bucket": "gbc/Dragon Warrior I & II (USA) (SGB Enhanced) (GB Compatible).zip"
+      "bucket": "gbc/Dragon Warrior I & II (USA) (SGB Enhanced) (GB Compatible).zip",
+      "variants": [
+        {
+          "bucket": "snes/Dragon Quest I & II (Japan) [T-En by RPGOne v2.0 DQ].zip",
+          "note": "SNES: Super Famicom remake of both games, fan translated"
+        }
+      ]
     },
     {
       "title": "Dragon Warrior III",
       "system": "gbc",
-      "bucket": "gbc/Dragon Warrior III (USA).zip"
+      "bucket": "gbc/Dragon Warrior III (USA).zip",
+      "variants": [
+        {
+          "bucket": "snes/Dragon Quest III (Japan) [T-En by DQ Translations v1.1] [Add by Rod M‚rida v1.0c] [n].zip",
+          "note": "SNES: Super Famicom remake, fan translated"
+        }
+      ]
     },
     {
       "title": "Dragon Warrior Monsters",
@@ -1985,7 +2091,13 @@
     {
       "title": "Kingdom Hearts - Birth by Sleep",
       "system": "psp",
-      "bucket": "psp/Kingdom Hearts - Birth by Sleep (USA) (En,Fr,Es).chd"
+      "bucket": "psp/Kingdom Hearts - Birth by Sleep (USA) (En,Fr,Es).chd",
+      "variants": [
+        {
+          "bucket": "psp/Kingdom Hearts - Birth by Sleep (Japan) (Final Mix) [T-En by Truthkey v1.0.12].chd",
+          "note": "Final Mix: adds bosses, abilities and modes, English patch"
+        }
+      ]
     },
     {
       "title": "Shin Megami Tensei - Persona 3 Portable",
@@ -2000,12 +2112,28 @@
     {
       "title": "Shin Megami Tensei - Persona 2 - Innocent Sin",
       "system": "psp",
-      "bucket": "psp/Shin Megami Tensei - Persona 2 - Innocent Sin (USA).chd"
+      "bucket": "psp/Shin Megami Tensei - Persona 2 - Innocent Sin (USA).chd",
+      "variants": [
+        {
+          "bucket": "psx/Persona 2 - Tsumi - Innocent Sin (Japan) [T-En by Devil Hackers v1.0a].chd",
+          "note": "PS1: original release, fan translated"
+        }
+      ]
     },
     {
       "title": "Monster Hunter Freedom Unite (En,Fr,De,Es,It)",
       "system": "psp",
-      "bucket": "psp/Monster Hunter Freedom Unite (USA) (En,Fr,De,Es,It).chd"
+      "bucket": "psp/Monster Hunter Freedom Unite (USA) (En,Fr,De,Es,It).chd",
+      "variants": [
+        {
+          "bucket": "psp/Monster Hunter Freedom Unite (USA) (En,Fr,De,Es,It) [T-En by Amaillo & Sky & Kenta & TeamHGG v1.2] [Dedummyfied].chd",
+          "note": "PSP: restores content cut from the English release"
+        },
+        {
+          "bucket": "psp/Monster Hunter Portable 2nd G (Japan) [T-En by Rozalin & ShadyFigure v1.4.0].chd",
+          "note": "PSP: Japanese Portable 2nd G, fan translated"
+        }
+      ]
     },
     {
       "title": "Metal Gear Solid - Peace Walker (En,Fr,Es) (v2.00)",
@@ -2030,7 +2158,13 @@
     {
       "title": "Tactics Ogre - Let Us Cling Together",
       "system": "psp",
-      "bucket": "psp/Tactics Ogre - Let Us Cling Together (USA).chd"
+      "bucket": "psp/Tactics Ogre - Let Us Cling Together (USA).chd",
+      "variants": [
+        {
+          "bucket": "snes/Tactics Ogre - Let Us Cling Together (Japan) (Rev 2) [T-En by Aeon Genesis v1.00b].zip",
+          "note": "SNES: original Super Famicom version, fan translated"
+        }
+      ]
     },
     {
       "title": "Jeanne d'Arc",
@@ -2065,7 +2199,13 @@
     {
       "title": "Star Ocean - First Departure",
       "system": "psp",
-      "bucket": "psp/Star Ocean - First Departure (USA).chd"
+      "bucket": "psp/Star Ocean - First Departure (USA).chd",
+      "variants": [
+        {
+          "bucket": "snes/Star Ocean (Japan) [T-En by DeJap v1.0].zip",
+          "note": "SNES: original Super Famicom version, fan translated"
+        }
+      ]
     },
     {
       "title": "Star Ocean - Second Evolution",
@@ -2080,7 +2220,13 @@
     {
       "title": "Phantasy Star Portable 2",
       "system": "psp",
-      "bucket": "psp/Phantasy Star Portable 2 (USA).chd"
+      "bucket": "psp/Phantasy Star Portable 2 (USA).chd",
+      "variants": [
+        {
+          "bucket": "psp/Phantasy Star Portable 2 Infinity (Japan) [T-En by JamRules & Weyu v1.7].chd",
+          "note": "PSP: Infinity adds new missions, areas and gear, English patch"
+        }
+      ]
     },
     {
       "title": "Z.H.P. - Unlosing Ranger vs. Darkdeath Evilman",
@@ -2440,7 +2586,7 @@
     {
       "title": "Rockman: Battle & Fighters",
       "system": "ngpc",
-      "bucket": "ngpc/Rockman - Battle & Fighters (Japan).zip"
+      "bucket": "ngpc/Rockman - Battle & Fighters (Japan) [T-En by Marc_max v1.0] [i].zip"
     },
     {
       "title": "SNK vs. Capcom: The Match of the Millennium",
@@ -2600,27 +2746,27 @@
     {
       "title": "Space Squash",
       "system": "virtualboy",
-      "bucket": "virtualboy/Space Squash (Japan).zip"
+      "bucket": "virtualboy/Space Squash (Japan) [T-En by Feel & Greg Stevens & Benjamin Stevens & Thunderstruck v2.0].zip"
     },
     {
       "title": "Mr. Driller",
       "system": "wonderswancolor",
-      "bucket": "wonderswancolor/Mr. Driller (Japan).zip"
+      "bucket": "wonderswancolor/Mr. Driller (Japan) [T-En by PmHacks v0.70] [i].zip"
     },
     {
       "title": "Final Fantasy",
       "system": "wonderswancolor",
-      "bucket": "wonderswancolor/Final Fantasy (Japan).zip"
+      "bucket": "wonderswancolor/Final Fantasy (Japan) [T-En by Kalas v0.91] [i].zip"
     },
     {
       "title": "Final Fantasy II",
       "system": "wonderswancolor",
-      "bucket": "wonderswancolor/Final Fantasy II (Japan).zip"
+      "bucket": "wonderswancolor/Final Fantasy II (Japan) [T-En by RPGOne v0.97].zip"
     },
     {
       "title": "Final Fantasy IV",
       "system": "wonderswancolor",
-      "bucket": "wonderswancolor/Final Fantasy IV (Japan).zip"
+      "bucket": "wonderswancolor/Final Fantasy IV (Japan) [T-En by MottZilla v0.5] [i].zip"
     },
     {
       "title": "Judgement Silversword",
@@ -2630,7 +2776,7 @@
     {
       "title": "Dicing Knight.",
       "system": "wonderswancolor",
-      "bucket": "wonderswancolor/Dicing Knight. (Japan).zip"
+      "bucket": "wonderswancolor/Dicing Knight. (Japan) [T-En by Aeon Genesis v1.00].zip"
     },
     {
       "title": "Rhyme Rider Kerorican",
@@ -2690,7 +2836,7 @@
     {
       "title": "Klonoa: Moonlight Museum",
       "system": "wonderswan",
-      "bucket": "wonderswan/Kaze no Klonoa - Moonlight Museum (Japan).zip"
+      "bucket": "wonderswan/Klonoa - Moonlight Museum (Japan) [T-En by PowerStone05 & RayCarrot & Rcs709 & StarryScarab v1.1] [n].zip"
     },
     {
       "title": "Makaimura for WonderSwan",
@@ -2700,7 +2846,7 @@
     {
       "title": "Rockman & Forte - Mirai Kara no Chousensha",
       "system": "wonderswan",
-      "bucket": "wonderswan/Rockman & Forte - Mirai Kara no Chousensha (Japan).zip"
+      "bucket": "wonderswan/Rockman & Forte - Challenger from the Future (Japan) [T-En by NikcDC v1.2.1] [n].zip"
     },
     {
       "title": "Magical Drop for WonderSwan",
@@ -2715,7 +2861,7 @@
     {
       "title": "Rainbow Islands - Putty's Party",
       "system": "wonderswan",
-      "bucket": "wonderswan/Rainbow Islands - Putty's Party (Japan).zip"
+      "bucket": "wonderswan/Rainbow Islands - Putty's Party (Japan) [T-En by USC v1.1].zip"
     },
     {
       "title": "beatmania for WonderSwan",
@@ -2770,7 +2916,7 @@
     {
       "title": "Pokemon Race Mini",
       "system": "pokemini",
-      "bucket": "pokemini/Pokemon Race Mini (Japan).zip"
+      "bucket": "pokemini/Pokemon Race Mini (Japan) [T-En by Snesy & Wa & Mr. Blinky & JustBurn v1.0].zip"
     },
     {
       "title": "Pokemon Tetris",
@@ -2915,7 +3061,13 @@
     {
       "title": "Fire Emblem Fates - Special Edition",
       "system": "3ds",
-      "bucket": "3ds/Fire Emblem Fates - Special Edition (USA).zip"
+      "bucket": "3ds/Fire Emblem Fates - Special Edition (USA).zip",
+      "variants": [
+        {
+          "bucket": "3ds/Fire Emblem If - Special Edition (Japan) [T-En by Team If v4.2].zip",
+          "note": "3DS: fan translation of the uncensored Japanese release"
+        }
+      ]
     },
     {
       "title": "Fire Emblem Echoes - Shadows of Valentia",
@@ -2940,7 +3092,13 @@
     {
       "title": "Monster Hunter Generations",
       "system": "3ds",
-      "bucket": "3ds/Monster Hunter Generations (USA).zip"
+      "bucket": "3ds/Monster Hunter Generations (USA).zip",
+      "variants": [
+        {
+          "bucket": "3ds/Monster Hunter XX - Double Cross (Japan) [T-En by Dasding v5] [Add by Crosshex v2] [i].zip",
+          "note": "3DS: expanded Double Cross edition with G-rank"
+        }
+      ]
     },
     {
       "title": "Bravely Default",
@@ -3155,7 +3313,13 @@
     {
       "title": "Danganronpa 2 - Goodbye Despair",
       "system": "psvita",
-      "bucket": "psvita/Danganronpa2 [PCSE00399] [USA] [NoNpDRM].zip"
+      "bucket": "psvita/Danganronpa2 [PCSE00399] [USA] [NoNpDRM].zip",
+      "variants": [
+        {
+          "bucket": "psp/Super Dangan-Ronpa 2 - Sayonara Zetsubou Gakuen (Japan) [T-En by The Porting Dude v0.5a].chd",
+          "note": "PSP: original release, fan translated"
+        }
+      ]
     },
     {
       "title": "Zero Escape - The Nonary Games",

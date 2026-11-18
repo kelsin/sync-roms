@@ -6,13 +6,25 @@
       "title": "Dragon Warrior",
       "category": "Dragon Quest",
       "system": "nes",
-      "bucket": "nes/Dragon Warrior (USA) (Rev 1).zip"
+      "bucket": "nes/Dragon Warrior (USA) (Rev 1).zip",
+      "variants": [
+        {
+          "bucket": "nes/Dragon Quest (USA) [T-En by Translation Quest v1.18] [Relocalized] [n].zip",
+          "note": "NES: fan relocalization with Dragon Quest names"
+        }
+      ]
     },
     {
       "title": "Dragon Warrior II",
       "category": "Dragon Quest",
       "system": "nes",
-      "bucket": "nes/Dragon Warrior II (USA).zip"
+      "bucket": "nes/Dragon Warrior II (USA).zip",
+      "variants": [
+        {
+          "bucket": "nes/Dragon Quest II (USA) [T-En by Translation Quest v1.19] [Relocalized] [n].zip",
+          "note": "NES: fan relocalization with Dragon Quest names"
+        }
+      ]
     },
     {
       "title": "Dragon Warrior III",
@@ -23,6 +35,10 @@
         {
           "bucket": "gbc/Dragon Warrior III (USA).zip",
           "note": "GBC: remake adds a new class, a bonus dungeon and monster medals"
+        },
+        {
+          "bucket": "nes/Dragon Quest III (USA) [T-En by Translation Quest v1.06] [Relocalized] [n].zip",
+          "note": "NES: fan relocalization with Dragon Quest names"
         }
       ]
     },
@@ -42,13 +58,29 @@
       "title": "Dragon Quest V - Hand of the Heavenly Bride",
       "category": "Dragon Quest",
       "system": "nds",
-      "bucket": "nds/Dragon Quest V - Hand of the Heavenly Bride (USA) (En,Fr,Es).zip"
+      "bucket": "nds/Dragon Quest V - Hand of the Heavenly Bride (USA) (En,Fr,Es).zip",
+      "variants": [
+        {
+          "bucket": "snes/Dragon Quest V - Tenkuu no Hanayome (Japan) [T-En by DeJap & Partial Translations v2.01].zip",
+          "note": "SNES: original Super Famicom version, fan translated"
+        },
+        {
+          "bucket": "ps2/Dragon Quest V - Tenkuu no Hanayome (Japan) [T-En by DQ Translations v1.2] [Dragon Quest VIII Style Names].chd",
+          "note": "PS2: 3D remake, fan translated"
+        }
+      ]
     },
     {
       "title": "Dragon Quest VI - Realms of Revelation",
       "category": "Dragon Quest",
       "system": "nds",
-      "bucket": "nds/Dragon Quest VI - Realms of Revelation (USA) (En,Fr,Es).zip"
+      "bucket": "nds/Dragon Quest VI - Realms of Revelation (USA) (En,Fr,Es).zip",
+      "variants": [
+        {
+          "bucket": "snes/Dragon Quest VI - Realms of Revelation (Japan) [T-En by NoPrgress v0.90b2] [n].zip",
+          "note": "SNES: original Super Famicom version, fan translated"
+        }
+      ]
     },
     {
       "title": "Dragon Warrior VII",
@@ -122,7 +154,7 @@
       "title": "Dragon Quest Monsters - Caravan Heart",
       "category": "Dragon Quest",
       "system": "gba",
-      "bucket": "gba/Dragon Quest Monsters - Caravan Heart (Japan).zip"
+      "bucket": "gba/Dragon Quest Monsters - Caravan Heart (Japan) [T-En by The Translation Team v1.0].zip"
     },
     {
       "title": "Dragon Quest Monsters - Joker",
@@ -152,7 +184,7 @@
       "title": "Torneko no Daibouken - Fushigi no Dungeon",
       "category": "Dragon Quest",
       "system": "snes",
-      "bucket": "snes/Torneko no Daibouken - Fushigi no Dungeon (Japan) (Rev 1).zip"
+      "bucket": "snes/Torneco no Daibouken - Fushigi no Dungeon (Japan) [T-En by Dynamic Designs v0.99].zip"
     },
     {
       "title": "World of Dragon Warrior - Torneko - The Last Hope",
@@ -164,7 +196,7 @@
       "title": "Dragon Quest Characters - Torneko no Daibouken 3 Advance - Fushigi no Dungeon",
       "category": "Dragon Quest",
       "system": "gba",
-      "bucket": "gba/Dragon Quest Characters - Torneko no Daibouken 3 Advance - Fushigi no Dungeon (Japan).zip"
+      "bucket": "gba/Dragon Quest Characters - Torneko no Daibouken 3 Advance - Fushigi no Dungeon (Japan) [T-En by Sam Steel v0.05] [i].zip"
     },
     {
       "title": "Slime Morimori Dragon Quest - Shougeki no Shippo Dan",
@@ -182,7 +214,7 @@
       "title": "Slime Mori Mori Dragon Quest 3 - Daikaizoku to Shippo Dan",
       "category": "Dragon Quest",
       "system": "3ds",
-      "bucket": "3ds/Slime Mori Mori Dragon Quest 3 - Daikaizoku to Shippo Dan (Japan).zip"
+      "bucket": "3ds/Dragon Quest Heroes - Rocket Slime 3 (Japan) [T-En by Fan Translators International v1.0 RC1] [n].zip"
     },
     {
       "title": "Itadaki Street DS - Dragon Quest Super Mario",
@@ -212,31 +244,41 @@
       "title": "Digital Devil Monogatari Megami Tensei",
       "category": "Shin Megami Tensei & Persona",
       "system": "msx",
-      "bucket": "msx/Digital Devil Monogatari Megami Tensei (Japan).zip"
+      "bucket": "msx/Digital Devil Story - Megami Tensei (Japan) [T-En by Kaisaan v1.0] [n] (Cartridge).zip"
     },
     {
       "title": "Digital Devil Story - Megami Tensei",
       "category": "Shin Megami Tensei & Persona",
       "system": "nes",
-      "bucket": "nes/Digital Devil Story - Megami Tensei (Japan).zip"
+      "bucket": "nes/Digital Devil Story - Megami Tensei (Japan) [T-En by EsperKnight & Stardust Crusaders & Tom v1.0] [Add by Masaru v1.0].zip"
     },
     {
       "title": "Digital Devil Story - Megami Tensei II",
       "category": "Shin Megami Tensei & Persona",
       "system": "nes",
-      "bucket": "nes/Digital Devil Story - Megami Tensei II (Japan) (Rev 1).zip"
+      "bucket": "nes/Digital Devil Story - Megami Tensei II (Japan) (Rev A) [T-En by Stardust Crusaders v1.04].zip"
     },
     {
       "title": "Kyuuyaku Megami Tensei",
       "category": "Shin Megami Tensei & Persona",
       "system": "snes",
-      "bucket": "snes/Kyuuyaku Megami Tensei (Japan) (Rev 1).zip"
+      "bucket": "snes/Megami Tensei - The Old Testament (Japan) [T-En by DDSTranslation v1.1] [n].zip"
     },
     {
       "title": "Shin Megami Tensei (English)",
       "category": "Shin Megami Tensei & Persona",
       "system": "snes",
-      "bucket": "snes/Shin Megami Tensei 1 (English Addendum 1.0)[Automap].zip"
+      "bucket": "snes/Shin Megami Tensei 1 (English Addendum 1.0)[Automap].zip",
+      "variants": [
+        {
+          "bucket": "gba/Shin Megami Tensei (Japan) [T-En by Gymzatan v1.3b] [iOS Localized].zip",
+          "note": "GBA: port with the iOS version's script"
+        },
+        {
+          "bucket": "psx/Shin Megami Tensei (Japan) [T-En by Tom & FlashPV & Fothsid v1.1].chd",
+          "note": "PS1: remake with new graphics and music, fan translated"
+        }
+      ]
     },
     {
       "title": "Shin Megami Tensei II (English)",
@@ -254,7 +296,13 @@
       "title": "Shin Megami Tensei - Nocturne",
       "category": "Shin Megami Tensei & Persona",
       "system": "ps2",
-      "bucket": "ps2/Shin Megami Tensei - Nocturne (USA).chd"
+      "bucket": "ps2/Shin Megami Tensei - Nocturne (USA).chd",
+      "variants": [
+        {
+          "bucket": "ps2/Shin Megami Tensei III - Nocturne Maniax - Chronicle Edition (Japan) [T-En by E.F Jang & Krisan Thyme v1.1.3].chd",
+          "note": "PS2: Chronicle Edition with Raidou instead of Dante"
+        }
+      ]
     },
     {
       "title": "Shin Megami Tensei - Strange Journey",
@@ -283,8 +331,8 @@
     {
       "title": "Megami Tensei Gaiden - Last Bible",
       "category": "Shin Megami Tensei & Persona",
-      "system": "gb",
-      "bucket": "gb/Megami Tensei Gaiden - Last Bible (Japan).zip",
+      "system": "gamegear",
+      "bucket": "gamegear/Megami Tensei Gaiden - Last Bible (Japan) [T-En by Supper v3.0].zip",
       "variants": [
         {
           "bucket": "gamegear/Megami Tensei Gaiden - Last Bible (Japan).zip",
@@ -295,8 +343,8 @@
     {
       "title": "Megami Tensei Gaiden - Last Bible II",
       "category": "Shin Megami Tensei & Persona",
-      "system": "gb",
-      "bucket": "gb/Megami Tensei Gaiden - Last Bible II (Japan).zip",
+      "system": "gbc",
+      "bucket": "gbc/Megaten Gaiden - Last Bible II (Japan) (SGB Enhanced) (GB Compatible) [T-En by EsperKnight v1.0] [n].zip",
       "variants": [
         {
           "bucket": "gbc/Megami Tensei Gaiden - Last Bible II (Japan) (SGB Enhanced) (GB Compatible).zip",
@@ -308,25 +356,25 @@
       "title": "Megami Tensei Gaiden - Last Bible Special",
       "category": "Shin Megami Tensei & Persona",
       "system": "gamegear",
-      "bucket": "gamegear/Megami Tensei Gaiden - Last Bible Special (Japan).zip"
+      "bucket": "gamegear/Megaten Gaiden - Last Bible Special (Japan) [T-En by MrRichard999 & SSTranslations & Tom v1.02] [n].zip"
     },
     {
       "title": "Last Bible III",
       "category": "Shin Megami Tensei & Persona",
       "system": "snes",
-      "bucket": "snes/Last Bible III (Japan).zip"
+      "bucket": "snes/Last Bible III (Japan) [T-En by Tom v7.0].zip"
     },
     {
       "title": "Majin Tensei",
       "category": "Shin Megami Tensei & Persona",
       "system": "snes",
-      "bucket": "snes/Majin Tensei (Japan) (Rev 2).zip"
+      "bucket": "snes/Majin Tensei (Japan) [T-En by DDSTranslation v4.0] [Add by Badnest v1.0].zip"
     },
     {
       "title": "Majin Tensei II - Spiral Nemesis",
       "category": "Shin Megami Tensei & Persona",
       "system": "snes",
-      "bucket": "snes/Majin Tensei II - Spiral Nemesis (Japan).zip"
+      "bucket": "snes/Majin Tensei II - Spiral Nemesis (Japan) [T-En by DDSTranslation v1.0].zip"
     },
     {
       "title": "Jack Bros.",
@@ -398,7 +446,7 @@
       "title": "Shin Megami Tensei Devil Children - Kuro no Sho",
       "category": "Shin Megami Tensei & Persona",
       "system": "gbc",
-      "bucket": "gbc/Shin Megami Tensei Devil Children - Kuro no Sho (Japan) (Rev 1) (SGB Enhanced) (GB Compatible).zip"
+      "bucket": "gbc/Shin Megami Tensei Devil Children - Kuro no Sho (Japan) (SGB Enhanced) (GB Compatible) [T-En by Higsby & SpecialAgentApe v1.2].zip"
     },
     {
       "title": "Shin Megami Tensei Devil Children - Aka no Sho",
@@ -470,13 +518,25 @@
       "title": "Persona 2 - Eternal Punishment",
       "category": "Shin Megami Tensei & Persona",
       "system": "psx",
-      "bucket": "psx/Persona 2 - Eternal Punishment (USA).chd"
+      "bucket": "psx/Persona 2 - Eternal Punishment (USA).chd",
+      "variants": [
+        {
+          "bucket": "psp/Persona 2 - Eternal Punishment (Japan) [T-En by DarTisD & Eiowlta & Sayucchi v1.0].chd",
+          "note": "PSP: remake with a new scenario, fan translated"
+        }
+      ]
     },
     {
       "title": "Shin Megami Tensei - Persona 2 - Innocent Sin",
       "category": "Shin Megami Tensei & Persona",
       "system": "psp",
-      "bucket": "psp/Shin Megami Tensei - Persona 2 - Innocent Sin (USA).chd"
+      "bucket": "psp/Shin Megami Tensei - Persona 2 - Innocent Sin (USA).chd",
+      "variants": [
+        {
+          "bucket": "psx/Persona 2 - Tsumi - Innocent Sin (Japan) [T-En by Devil Hackers v1.0a].chd",
+          "note": "PS1: original release, fan translated"
+        }
+      ]
     },
     {
       "title": "Shin Megami Tensei - Persona 3",
@@ -537,6 +597,24 @@
       "bucket": "wiiu/Tokyo Mirage Sessions #FE (US) (v16).wua"
     },
     {
+      "title": "P3D",
+      "category": "Shin Megami Tensei & Persona",
+      "system": "psvita",
+      "bucket": "psvita/P3D [PCSE01274] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "P5D",
+      "category": "Shin Megami Tensei & Persona",
+      "system": "psvita",
+      "bucket": "psvita/P5D [PCSE01275] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Giten Megami Tensei - Tokyo Mokushiroku",
+      "category": "Shin Megami Tensei & Persona",
+      "system": "pc98",
+      "bucket": "pc98/Giten Megami Tensei - Tokyo Mokushiroku (Japan) [T-En by sneikkimies v0.21] [i].hdi"
+    },
+    {
       "title": "Tales of Phantasia",
       "category": "Tales",
       "system": "gba",
@@ -545,6 +623,10 @@
         {
           "bucket": "psp/Tales of Phantasia - Full Voice Edition (English v1.2)[QoL].chd",
           "note": "PSP: PS1-based remake with full voice and new art, English patch"
+        },
+        {
+          "bucket": "snes/Tales of Phantasia (Japan) [T-En by DeJap v1.2].zip",
+          "note": "SNES: original Super Famicom version, fan translated"
         }
       ]
     },
@@ -591,13 +673,13 @@
       "title": "Tales of the Tempest",
       "category": "Tales",
       "system": "nds",
-      "bucket": "nds/Tales of the Tempest (Japan).zip"
+      "bucket": "nds/Tales of the Tempest (Japan) [T-En by Absolute Zero v1.0].zip"
     },
     {
       "title": "Tales of Innocence",
       "category": "Tales",
       "system": "nds",
-      "bucket": "nds/Tales of Innocence (Japan).zip"
+      "bucket": "nds/Tales of Innocence (Japan) [T-En by Absolute Zero v1.0].zip"
     },
     {
       "title": "Tales of Hearts R",
@@ -609,7 +691,13 @@
       "title": "Tales of Vesperia",
       "category": "Tales",
       "system": "xbox360",
-      "bucket": "xbox360/Tales of Vesperia (USA).zar"
+      "bucket": "xbox360/Tales of Vesperia (USA).zar",
+      "variants": [
+        {
+          "bucket": "ps3/Tales of Vesperia (Japan) [T-En by Pikachu025 v1.0].chd",
+          "note": "PS3: adds Patty and playable Flynn, fan translated"
+        }
+      ]
     },
     {
       "title": "Tales of Phantasia - Narikiri Dungeon X",
@@ -621,13 +709,13 @@
       "title": "Tales of the World - Narikiri Dungeon 2",
       "category": "Tales",
       "system": "gba",
-      "bucket": "gba/Tales of the World - Narikiri Dungeon 2 (Japan).zip"
+      "bucket": "gba/Tales of the World - Narikiri Dungeon 2 (Japan) [T-En by Kajitani-Eizan v2.30] [i].zip"
     },
     {
       "title": "Tales of the World - Narikiri Dungeon 3",
       "category": "Tales",
       "system": "gba",
-      "bucket": "gba/Tales of the World - Narikiri Dungeon 3 (Japan).zip"
+      "bucket": "gba/Tales of the World - Narikiri Dungeon 3 (Japan) [T-En by Kajitani-Eizan v1.11] [i].zip"
     },
     {
       "title": "Tales of the World - Summoner's Lineage",
@@ -672,6 +760,54 @@
       "bucket": "3ds/Tales of the World - Reve Unitia (Japan).zip"
     },
     {
+      "title": "Tales of Phantasia - Narikiri Dungeon",
+      "category": "Tales",
+      "system": "gbc",
+      "bucket": "gbc/Tales of Phantasia - Narikiri Dungeon (Japan) (SGB Enhanced) (GB Compatible) [T-En by ChangeV v0.009m] [i].zip"
+    },
+    {
+      "title": "Tales of Destiny 2",
+      "category": "Tales",
+      "system": "psp",
+      "bucket": "psp/Tales of Destiny 2 (English v0.3.6).chd"
+    },
+    {
+      "title": "Tales of Berseria",
+      "category": "Tales",
+      "system": "ps3",
+      "bucket": "ps3/Tales of Berseria (Japan) [T-En by Temple of Tale translations v1.2].chd"
+    },
+    {
+      "title": "Tales of Graces f",
+      "category": "Tales",
+      "system": "ps3",
+      "bucket": "ps3/Tales of Graces f (USA).chd"
+    },
+    {
+      "title": "Tales of Symphonia Chronicles",
+      "category": "Tales",
+      "system": "ps3",
+      "bucket": "ps3/Tales of Symphonia Chronicles (USA) (En,Fr,De,Es,It).chd"
+    },
+    {
+      "title": "Tales of Xillia",
+      "category": "Tales",
+      "system": "ps3",
+      "bucket": "ps3/Tales of Xillia (USA) (En,Fr,Es).chd"
+    },
+    {
+      "title": "Tales of Xillia 2",
+      "category": "Tales",
+      "system": "ps3",
+      "bucket": "ps3/Tales of Xillia 2 (USA) (En,Fr,Es).chd"
+    },
+    {
+      "title": "Tales of Zestiria",
+      "category": "Tales",
+      "system": "ps3",
+      "bucket": "ps3/Tales of Zestiria (USA) (En,Fr,De,Es,It).chd"
+    },
+    {
       "title": "Final Fantasy Adventure",
       "category": "Mana",
       "system": "gb",
@@ -687,7 +823,13 @@
       "title": "Secret of Mana",
       "category": "Mana",
       "system": "snes",
-      "bucket": "snes/Secret of Mana (USA).zip"
+      "bucket": "snes/Secret of Mana (USA).zip",
+      "variants": [
+        {
+          "bucket": "snes/Secret of Mana (USA) [T-En by The SAP Team v2.0] [Relocalized].zip",
+          "note": "SNES: fan retranslation of the script"
+        }
+      ]
     },
     {
       "title": "Trials of Mana",
@@ -734,6 +876,10 @@
         {
           "bucket": "wonderswancolor/Makai Toushi Sa-Ga (Japan).zip",
           "note": "WonderSwan Color: Japanese-only remake with color graphics"
+        },
+        {
+          "bucket": "wonderswancolor/Spirit World Tower Warrior Sa-Ga (Japan) [T-En by Tower Reversed v1.3] [n].zip",
+          "note": "WonderSwan Color: color remake, fan translated"
         }
       ]
     },
@@ -747,37 +893,61 @@
       "title": "Final Fantasy Legend III",
       "category": "SaGa",
       "system": "gb",
-      "bucket": "gb/Final Fantasy Legend III (USA).zip"
+      "bucket": "gb/Final Fantasy Legend III (USA).zip",
+      "variants": [
+        {
+          "bucket": "gb/Sa-Ga 3 - Champions of Time and Space (Japan) [T-En by Granz v0.5] [i] [n].zip",
+          "note": "GB: retranslation with the original SaGa 3 names"
+        }
+      ]
     },
     {
       "title": "SaGa 2 - Hihou Densetsu - Goddess of Destiny",
       "category": "SaGa",
       "system": "nds",
-      "bucket": "nds/SaGa 2 - Hihou Densetsu - Goddess of Destiny (Japan).zip"
+      "bucket": "nds/SaGa 2 - Legend of the Relics - Goddess of Destiny (Japan) [T-En by Crimson Nocturnal v2.12] [n].zip"
     },
     {
       "title": "SaGa 3 - Jikuu no Hasha - Shadow or Light",
       "category": "SaGa",
       "system": "nds",
-      "bucket": "nds/SaGa 3 - Jikuu no Hasha - Shadow or Light (Japan).zip"
+      "bucket": "nds/SaGa 3 - Champions of Time and Space - Shadow or Light (Japan) [T-En by Cain & Easton West v2.0.830 Beta] [n].zip"
     },
     {
       "title": "Romancing SaGa",
       "category": "SaGa",
       "system": "ps2",
-      "bucket": "ps2/Romancing SaGa (USA).chd"
+      "bucket": "ps2/Romancing SaGa (USA).chd",
+      "variants": [
+        {
+          "bucket": "snes/Romancing Sa-Ga (Japan) (Rev 1) [T-En by DDSTranslation v1.2].zip",
+          "note": "SNES: original Super Famicom version, fan translated"
+        }
+      ]
     },
     {
       "title": "Romancing SaGa 2",
       "category": "SaGa",
       "system": "psvita",
-      "bucket": "psvita/Romancing SaGa 2 [PCSE01094] [USA] [NoNpDRM].zip"
+      "bucket": "psvita/Romancing SaGa 2 [PCSE01094] [USA] [NoNpDRM].zip",
+      "variants": [
+        {
+          "bucket": "snes/Romancing Sa-Ga 2 (Japan) [T-En by Gilhide v0.05c] [i].zip",
+          "note": "SNES: original Super Famicom version, partial fan translation"
+        }
+      ]
     },
     {
       "title": "Romancing SaGa 3",
       "category": "SaGa",
       "system": "psvita",
-      "bucket": "psvita/Romancing SaGa 3 [PCSE01337] [USA] [NoNpDRM].zip"
+      "bucket": "psvita/Romancing SaGa 3 [PCSE01337] [USA] [NoNpDRM].zip",
+      "variants": [
+        {
+          "bucket": "snes/Romancing Sa-Ga 3 (Japan) (Rev 1) [T-En by Mana Sword v0.30].zip",
+          "note": "SNES: original Super Famicom version, partial fan translation"
+        }
+      ]
     },
     {
       "title": "SaGa Frontier",
@@ -800,14 +970,18 @@
         {
           "bucket": "nds/Chrono Trigger (USA) (En,Fr).zip",
           "note": "DS: adds the Lost Sanctum, a bonus dungeon and a new ending"
+        },
+        {
+          "bucket": "snes/Chrono Trigger (USA) [T-En by Wakkoswami v1.11] [Relocalized].zip",
+          "note": "SNES: fan retranslation of the script"
         }
       ]
     },
     {
       "title": "Radical Dreamers - Nusume Nai Houseki",
       "category": "Chrono",
-      "system": "satellaview",
-      "bucket": "satellaview/Radical Dreamers - Nusume Nai Houseki (Japan) (2-24).zip"
+      "system": "snes",
+      "bucket": "snes/BS Radical Dreamers - Le Tresor Interdit (Japan) [T-En by Demiforce v1.4] [n].zip"
     },
     {
       "title": "Chrono Cross",
@@ -818,6 +992,12 @@
         "psx/Chrono Cross (USA) (Disc 1).chd",
         "psx/Chrono Cross (USA) (Disc 2).chd"
       ]
+    },
+    {
+      "title": "Chrono Trigger - Jet Bike Special",
+      "category": "Chrono",
+      "system": "satellaview",
+      "bucket": "satellaview/Chrono Trigger - Jet Bike Special (Japan).zip"
     },
     {
       "title": "Kingdom Hearts",
@@ -925,7 +1105,7 @@
       "title": "Gensou Suikoden - Card Stories",
       "category": "Suikoden",
       "system": "gba",
-      "bucket": "gba/Gensou Suikoden - Card Stories (Japan).zip"
+      "bucket": "gba/Suikoden Card Stories (Japan) [T-En by Pokeytax v1.00] [n].zip"
     },
     {
       "title": "Suikoden - Tierkreis",
@@ -938,6 +1118,18 @@
       "category": "Suikoden",
       "system": "psp",
       "bucket": "psp/Genso Suikoden Tsumugareshi Hyakunen no Toki (English v1.0.2).chd"
+    },
+    {
+      "title": "Suikogaiden Vol. 1 - Swordsman of Harmonia",
+      "category": "Suikoden",
+      "system": "psx",
+      "bucket": "psx/Suikogaiden Vol. 1 - Swordsman of Harmonia (Japan) [T-En by Suikogaiden Translation Project v1.1] [n].chd"
+    },
+    {
+      "title": "Suikogaiden Vol. 2 - Duel at Crystal Valley",
+      "category": "Suikoden",
+      "system": "psx",
+      "bucket": "psx/Suikogaiden Vol. 2 - Duel at Crystal Valley (Japan) [T-En by Suikogaiden Translation Project v1.1] [n].chd"
     },
     {
       "title": "Breath of Fire",
@@ -960,6 +1152,10 @@
         {
           "bucket": "gba/Breath of Fire II (USA).zip",
           "note": "GBA: new translation, a dash button and quick saves"
+        },
+        {
+          "bucket": "snes/Breath of Fire II - The Fated Child (USA) [T-En by Watercrown Productions v1.2b] [n].zip",
+          "note": "SNES: fan retranslation of the script"
         }
       ]
     },
@@ -985,67 +1181,99 @@
       "title": "Phantasy Star",
       "category": "Phantasy Star",
       "system": "mastersystem",
-      "bucket": "mastersystem/Phantasy Star (USA, Europe) (Rev A).zip"
+      "bucket": "mastersystem/Phantasy Star (USA, Europe) (Rev A).zip",
+      "variants": [
+        {
+          "bucket": "mastersystem/Phantasy Star (Japan) [T-En by SMS Power! v2.4].zip",
+          "note": "Master System: fan retranslation of the Japanese release"
+        },
+        {
+          "bucket": "ps2/Sega Ages 2500 Series Vol. 1 - Phantasy Star Generation-1 (Japan) [T-En by Kyence v2.10] (CD).chd",
+          "note": "PS2: Generation:1 full remake, fan translated"
+        }
+      ]
     },
     {
       "title": "Phantasy Star II",
       "category": "Phantasy Star",
       "system": "genesis",
-      "bucket": "genesis/Phantasy Star II (USA, Europe) (Rev A).zip"
+      "bucket": "genesis/Phantasy Star II (USA, Europe) (Rev A).zip",
+      "variants": [
+        {
+          "bucket": "genesis/Phantasy Star II (USA, Europe) (Rev A) [T-En by Naflign & Rebecca Capowski v18].zip",
+          "note": "Genesis: expanded fan retranslation"
+        },
+        {
+          "bucket": "ps2/Sega Ages 2500 Series Vol. 17 - Phantasy Star Generation-2 (Japan) [T-En by Goldenboy v2f] (CD).chd",
+          "note": "PS2: Generation:2 full remake, fan translated"
+        }
+      ]
     },
     {
       "title": "Phantasy Star III - Generations of Doom",
       "category": "Phantasy Star",
       "system": "genesis",
-      "bucket": "genesis/Phantasy Star III - Generations of Doom (USA, Europe, Korea) (En).zip"
+      "bucket": "genesis/Phantasy Star III - Generations of Doom (USA, Europe, Korea) (En).zip",
+      "variants": [
+        {
+          "bucket": "genesis/Phantasy Star III - Generations of Doom (USA, Europe, Korea) [T-En by Peaches v1.2] [Add by FlamePurge v1.2-CN3].zip",
+          "note": "Genesis: fan retranslation with fixes"
+        }
+      ]
     },
     {
       "title": "Phantasy Star IV",
       "category": "Phantasy Star",
       "system": "genesis",
-      "bucket": "genesis/Phantasy Star IV (USA).zip"
+      "bucket": "genesis/Phantasy Star IV (USA).zip",
+      "variants": [
+        {
+          "bucket": "genesis/Phantasy Star IV (USA) [T-En by GhaleonUnlimited v8.5] [Relocalized] [Purist].zip",
+          "note": "Genesis: relocalized fan retranslation"
+        }
+      ]
     },
     {
       "title": "Phantasy Star II - Amia's Adventure",
       "category": "Phantasy Star",
       "system": "genesis",
-      "bucket": "genesis/Phantasy Star II - Amia's Adventure (Japan) (SegaNet).zip"
+      "bucket": "genesis/Phantasy Star II - Amia's Adventure (Japan) (SegaNet) [T-En by M.I.J.E.T. v100710].zip"
     },
     {
       "title": "Phantasy Star II - Anne's Adventure",
       "category": "Phantasy Star",
       "system": "genesis",
-      "bucket": "genesis/Phantasy Star II - Anne's Adventure (Japan) (SegaNet).zip"
+      "bucket": "genesis/Phantasy Star II - Anne's Adventure (Japan) (SegaNet) [T-En by M.I.J.E.T. v100710].zip"
     },
     {
       "title": "Phantasy Star II - Huey's Adventure",
       "category": "Phantasy Star",
       "system": "genesis",
-      "bucket": "genesis/Phantasy Star II - Huey's Adventure (Japan) (SegaNet).zip"
+      "bucket": "genesis/Phantasy Star II - Huey's Adventure (Japan) (SegaNet) [T-En by M.I.J.E.T. v100710].zip"
     },
     {
       "title": "Phantasy Star II - Kinds's Adventure",
       "category": "Phantasy Star",
       "system": "genesis",
-      "bucket": "genesis/Phantasy Star II - Kinds's Adventure (Japan) (SegaNet).zip"
+      "bucket": "genesis/Phantasy Star II - Kinds's Adventure (Japan) (SegaNet) [T-En by M.I.J.E.T. v100710].zip"
     },
     {
       "title": "Phantasy Star II - Nei's Adventure",
       "category": "Phantasy Star",
       "system": "genesis",
-      "bucket": "genesis/Phantasy Star II - Nei's Adventure (Japan) (SegaNet).zip"
+      "bucket": "genesis/Phantasy Star II - Nei's Adventure (Japan) (SegaNet) [T-En by M.I.J.E.T. v100710].zip"
     },
     {
       "title": "Phantasy Star II - Rudger's Adventure",
       "category": "Phantasy Star",
       "system": "genesis",
-      "bucket": "genesis/Phantasy Star II - Rudger's Adventure (Japan) (SegaNet).zip"
+      "bucket": "genesis/Phantasy Star II - Rudger's Adventure (Japan) (SegaNet) [T-En by M.I.J.E.T. v100710].zip"
     },
     {
       "title": "Phantasy Star II - Shilka's Adventure",
       "category": "Phantasy Star",
       "system": "genesis",
-      "bucket": "genesis/Phantasy Star II - Shilka's Adventure (Japan) (SegaNet).zip"
+      "bucket": "genesis/Phantasy Star II - Shilka's Adventure (Japan) (SegaNet) [T-En by M.I.J.E.T. v100710].zip"
     },
     {
       "title": "Phantasy Star II - Yushis's Adventure",
@@ -1057,13 +1285,13 @@
       "title": "Phantasy Star Adventure",
       "category": "Phantasy Star",
       "system": "gamegear",
-      "bucket": "gamegear/Phantasy Star Adventure (Japan).zip"
+      "bucket": "gamegear/Phantasy Star Adventure (Japan) [T-En by Aeon Genesis v1.00].zip"
     },
     {
       "title": "Phantasy Star Gaiden",
       "category": "Phantasy Star",
       "system": "gamegear",
-      "bucket": "gamegear/Phantasy Star Gaiden (Japan).zip"
+      "bucket": "gamegear/Phantasy Star Gaiden (Japan) [T-En by Magic Translations v1.00].zip"
     },
     {
       "title": "Phantasy Star Online Ver. 2",
@@ -1114,6 +1342,12 @@
       ]
     },
     {
+      "title": "Phantasy Star II - Eusis's Adventure",
+      "category": "Phantasy Star",
+      "system": "genesis",
+      "bucket": "genesis/Phantasy Star II - Eusis's Adventure (Japan) (SegaNet) [T-En by M.I.J.E.T. v100710] [n].zip"
+    },
+    {
       "title": "Ys Book I & II",
       "category": "Ys",
       "system": "tg-cd",
@@ -1122,6 +1356,22 @@
         {
           "bucket": "psp/Ys I & II Chronicles (USA).chd",
           "note": "PSP: Chronicles adds remastered art, new music and extras"
+        },
+        {
+          "bucket": "nes/Ys II - Ancient Ys Vanished - The Final Chapter (Japan) [T-En by David Mullen v1.0].zip",
+          "note": "NES: Famicom port of Ys II, translated"
+        },
+        {
+          "bucket": "saturn/Falcom Classics (Japan) [T-En by Murzik & CrawdKenny v0.763] [Ancient Ys Vanished Omen] [i].chd",
+          "note": "Saturn: Falcom Classics Ys I remake, fan translated"
+        },
+        {
+          "bucket": "msx2/Ys - Ancient Ys Vanished Omen (Japan) [T-En by Oasis v1.0] (Floppy).zip",
+          "note": "MSX2: original Ys I computer version, fan translated"
+        },
+        {
+          "bucket": "msx2/Ys II - Ancient Ys Vanished - The Final Chapter (Japan) [T-En by Oasis v1.0] [i] (Floppy).zip",
+          "note": "MSX2: original Ys II computer version, fan translated"
         }
       ]
     },
@@ -1129,13 +1379,27 @@
       "title": "Ys III - Wanderers from Ys",
       "category": "Ys",
       "system": "tg-cd",
-      "bucket": "tg-cd/Ys III - Wanderers from Ys (USA).chd"
+      "bucket": "tg-cd/Ys III - Wanderers from Ys (USA).chd",
+      "variants": [
+        {
+          "bucket": "nes/Ys III - Wanderers from Ys (Japan) [T-En by Vice Translations v1.00].zip",
+          "note": "NES: Famicom port, translated"
+        },
+        {
+          "bucket": "genesis/Ys III (USA) [T-En by Plombo v1.1] [Relocalized].zip",
+          "note": "Genesis: relocalized fan retranslation"
+        },
+        {
+          "bucket": "msx2/Ys III - Wanderers from Ys (Japan) [T-En by Oasis v1.0] (Floppy).zip",
+          "note": "MSX2: original computer version, fan translated"
+        }
+      ]
     },
     {
       "title": "Ys IV - The Dawn of Ys",
       "category": "Ys",
       "system": "tg-cd",
-      "bucket": "tg-cd/Ys IV - The Dawn of Ys (Japan) (Rev 4).chd"
+      "bucket": "tg-cd/Ys IV - The Dawn of Ys (Japan) [T-En by NightWolve v0.95].chd"
     },
     {
       "title": "Ys - Memories of Celceta",
@@ -1147,7 +1411,7 @@
       "title": "Ys V - Ushinawareta Suna no Miyako Kefin",
       "category": "Ys",
       "system": "snes",
-      "bucket": "snes/Ys V - Ushinawareta Suna no Miyako Kefin (Japan).zip"
+      "bucket": "snes/Ys V - Kefin, Lost Kingdom of Sand (Japan) [T-En by Aeon Genesis v1.00] [n].zip"
     },
     {
       "title": "Ys Strategy",
@@ -1192,10 +1456,22 @@
       "bucket": "psvita/Ys VIII [PCSE01103] [USA] [NoNpDRM].zip"
     },
     {
+      "title": "Ys IV - Mask of the Sun",
+      "category": "Ys",
+      "system": "snes",
+      "bucket": "snes/Ys IV - Mask of the Sun (Japan) [T-En by Aeon Genesis v2.10].zip"
+    },
+    {
       "title": "Dragon Slayer - The Legend of Heroes",
       "category": "The Legend of Heroes",
       "system": "tg-cd",
-      "bucket": "tg-cd/Dragon Slayer - The Legend of Heroes (USA).chd"
+      "bucket": "tg-cd/Dragon Slayer - The Legend of Heroes (USA).chd",
+      "variants": [
+        {
+          "bucket": "msx2/Dragon Slayer - The Legend of Heroes (Japan) [T-En by Oasis & Randam v1.0] (Floppy).zip",
+          "note": "MSX2: original computer version, fan translated"
+        }
+      ]
     },
     {
       "title": "Dragon Slayer - The Legend of Heroes II",
@@ -1282,6 +1558,10 @@
         {
           "bucket": "psp/Lunar - Silver Star Harmony (USA).chd",
           "note": "PSP: Silver Star Harmony, redrawn art, widescreen and a new prologue"
+        },
+        {
+          "bucket": "saturn/Lunar - Silver Star Story (Japan) [T-En by TrekkiesUnite118 v1.5.1] [Sub Edition].chd",
+          "note": "Saturn: original Silver Star Story release, fan translated"
         }
       ]
     },
@@ -1306,7 +1586,7 @@
       "title": "Lunar - Sanposuru Gakuen",
       "category": "Lunar",
       "system": "gamegear",
-      "bucket": "gamegear/Lunar - Sanposuru Gakuen (Japan).zip"
+      "bucket": "gamegear/Lunar - Sanposuru Gakuen (Japan) [T-En by Aeon Genesis & Some Good Shit Translations v1.00].zip"
     },
     {
       "title": "Lunar - Dragon Song",
@@ -1315,16 +1595,28 @@
       "bucket": "nds/Lunar - Dragon Song (USA).zip"
     },
     {
+      "title": "Lunar Legend",
+      "category": "Lunar",
+      "system": "gba",
+      "bucket": "gba/Lunar Legend (USA).zip"
+    },
+    {
       "title": "Star Ocean - First Departure",
       "category": "Star Ocean",
       "system": "psp",
-      "bucket": "psp/Star Ocean - First Departure (USA).chd"
+      "bucket": "psp/Star Ocean - First Departure (USA).chd",
+      "variants": [
+        {
+          "bucket": "snes/Star Ocean (Japan) [T-En by DeJap v1.0].zip",
+          "note": "SNES: original Super Famicom version, fan translated"
+        }
+      ]
     },
     {
       "title": "Star Ocean - Blue Sphere",
       "category": "Star Ocean",
       "system": "gbc",
-      "bucket": "gbc/Star Ocean - Blue Sphere (Japan) (SGB Enhanced) (GB Compatible).zip"
+      "bucket": "gbc/Star Ocean - Blue Sphere (Japan) (SGB Enhanced) (GB Compatible) [T-En by Lokai20 v0.1] [Add by 4l3j4ndr0 v1.0] [i].zip"
     },
     {
       "title": "Star Ocean - The Second Story",
@@ -1351,6 +1643,18 @@
         "ps2/Star Ocean - Till the End of Time (USA) (Disc 1).chd",
         "ps2/Star Ocean - Till the End of Time (USA) (Disc 2).chd"
       ]
+    },
+    {
+      "title": "Star Ocean - Integrity and Faithlessness",
+      "category": "Star Ocean",
+      "system": "ps3",
+      "bucket": "ps3/Star Ocean - Integrity and Faithlessness (Japan) [T-En by RikuKH3 & Haxxxen v18-09-2020].chd"
+    },
+    {
+      "title": "Star Ocean - The Last Hope",
+      "category": "Star Ocean",
+      "system": "xbox360",
+      "bucket": "xbox360/Star Ocean - The Last Hope (USA) (Disc 1).zar"
     },
     {
       "title": "Wild Arms",
@@ -1406,6 +1710,16 @@
       "files": [
         "psx/Grandia (USA) (Disc 1).chd",
         "psx/Grandia (USA) (Disc 2).chd"
+      ],
+      "variants": [
+        {
+          "bucket": "saturn/Grandia (Japan) [T-En by TrekkiesUnite118 v1.1.1].m3u",
+          "note": "Saturn: original release, fan translated",
+          "files": [
+            "saturn/Grandia (Japan) (Disc 1) [T-En by TrekkiesUnite118 v1.1.1].chd",
+            "saturn/Grandia (Japan) (Disc 2) [T-En by TrekkiesUnite118 v1.1.1].chd"
+          ]
+        }
       ]
     },
     {
@@ -1418,7 +1732,7 @@
       "title": "Grandia - Parallel Trippers",
       "category": "Grandia",
       "system": "gbc",
-      "bucket": "gbc/Grandia - Parallel Trippers (Japan).zip"
+      "bucket": "gbc/Grandia - Parallel Trippers (Japan) [T-En by Adventurous Translations v1.03].zip"
     },
     {
       "title": "Grandia II",
@@ -1813,6 +2127,10 @@
         {
           "bucket": "3ds/Monster Hunter XX - Double Cross (Japan).zip",
           "note": "3DS: Japanese-only expansion with G-rank, new styles and monsters"
+        },
+        {
+          "bucket": "3ds/Monster Hunter XX - Double Cross (Japan) [T-En by Dasding v5] [Add by Crosshex v2] [i].zip",
+          "note": "3DS: expanded Double Cross edition with G-rank"
         }
       ]
     },
@@ -1821,6 +2139,12 @@
       "category": "Monster Hunter",
       "system": "3ds",
       "bucket": "3ds/Monster Hunter Stories (USA).zip"
+    },
+    {
+      "title": "MonHun Nikki - Poka Poka Ailu Mura DX",
+      "category": "Monster Hunter",
+      "system": "3ds",
+      "bucket": "3ds/MonHun Nikki - Poka Poka Ailu Mura DX (Japan).zip"
     },
     {
       "title": "Etrian Odyssey",

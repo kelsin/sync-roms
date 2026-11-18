@@ -93,7 +93,13 @@
     {
       "title": "Tetris Attack (En,Ja)",
       "system": "snes",
-      "bucket": "snes/Tetris Attack (USA) (En,Ja).zip"
+      "bucket": "snes/Tetris Attack (USA) (En,Ja).zip",
+      "variants": [
+        {
+          "bucket": "snes/Panel de Pon (Japan) [T-En by Zuqkeo v1.0].zip",
+          "note": "SNES: Panel de Pon with its original fairy cast, translated"
+        }
+      ]
     },
     {
       "title": "Yoshi",
@@ -361,7 +367,7 @@
           "note": "FDS: Doki Doki Panic, the Japanese original with its own cast"
         },
         {
-          "bucket": "satellaview/BS Super Mario USA - Power Challenge - Dai-1-kai (Japan) (SoundLink).zip",
+          "bucket": "snes/BS Super Mario USA - Power Challenge - Dai-1-kai (Japan) (SoundLink) [Hack by Conn & Duke Serkol v1.1] [T-En by Pacnsacdave v1.0].zip",
           "note": "Satellaview: broadcast challenge episodes on the All-Stars version"
         }
       ]
@@ -409,7 +415,7 @@
     {
       "title": "Kururin Paradise",
       "system": "gba",
-      "bucket": "gba/Kururin Paradise (Japan).zip"
+      "bucket": "gba/Kururin Paradise (Japan) [T-En by Dimedime v1.0].zip"
     },
     {
       "title": "Super Monkey Ball Jr.",
@@ -445,7 +451,7 @@
     {
       "title": "Rhythm Tengoku (Rev 1)",
       "system": "gba",
-      "bucket": "gba/Rhythm Tengoku (Japan) (Rev 1).zip"
+      "bucket": "gba/Rhythm Tengoku (Japan) [T-En by ShaffySwitcher v20230620] [i].zip"
     },
     {
       "title": "Polarium Advance",
@@ -724,7 +730,13 @@
     {
       "title": "Space Megaforce",
       "system": "snes",
-      "bucket": "snes/Space Megaforce (USA).zip"
+      "bucket": "snes/Space Megaforce (USA).zip",
+      "variants": [
+        {
+          "bucket": "snes/Super Aleste (Japan) [T-En by Asiwish v1.2].zip",
+          "note": "SNES: Japanese Super Aleste, translated"
+        }
+      ]
     },
     {
       "title": "Axelay",
@@ -802,12 +814,12 @@
     {
       "title": "Mario no Super Picross",
       "system": "snes",
-      "bucket": "snes/Mario no Super Picross (Japan).zip"
+      "bucket": "snes/Mario's Super Picross (Japan) [T-En by FCandChill & Kumori v1.5] [n].zip"
     },
     {
       "title": "Umihara Kawase",
       "system": "snes",
-      "bucket": "snes/Umihara Kawase (Japan).zip",
+      "bucket": "snes/Umihara Kawase (Japan) [T-En by Satsu v0.90] [Add by Green Jerry v1.0] [Add by Burning Loaf v1.0].zip",
       "variants": [
         {
           "bucket": "psp/Umihara Kawase Portable (Japan).chd",
@@ -833,12 +845,24 @@
     {
       "title": "F-Zero X",
       "system": "n64",
-      "bucket": "n64/F-Zero X (USA).zip"
+      "bucket": "n64/F-Zero X (USA).zip",
+      "variants": [
+        {
+          "bucket": "n64/F-Zero X - Expansion Kit (Japan) (64DD) [Hack by Zoinkity v2] [T-En by LuigiBlood v2].zip",
+          "note": "N64: 64DD Expansion Kit with course and machine editors"
+        }
+      ]
     },
     {
       "title": "Wave Race 64 - Kawasaki Jet Ski (Rev 1)",
       "system": "n64",
-      "bucket": "n64/Wave Race 64 - Kawasaki Jet Ski (USA) (Rev 1).zip"
+      "bucket": "n64/Wave Race 64 - Kawasaki Jet Ski (USA) (Rev 1).zip",
+      "variants": [
+        {
+          "bucket": "n64/Wave Race 64 - Kawasaki Jet Ski (Japan) (Rev 2) (Shindou Edition) [T-En by Zoinkity v1.1].zip",
+          "note": "N64: Shindou Edition with Rumble Pak support"
+        }
+      ]
     },
     {
       "title": "1080 Snowboarding",
@@ -940,8 +964,8 @@
     },
     {
       "title": "NFL Blitz 2000 (Rev 1)",
-      "system": "dreamcast",
-      "bucket": "dreamcast/NFL Blitz 2000 (USA) (Rev 1).chd"
+      "system": "mame",
+      "bucket": "mame/blitz2k.zip"
     },
     {
       "title": "Tony Hawk's Pro Skater 2",
@@ -966,7 +990,7 @@
     {
       "title": "Sin and Punishment",
       "system": "n64",
-      "bucket": "n64/Tsumi to Batsu - Hoshi no Keishousha (Japan).zip"
+      "bucket": "n64/Tsumi to Batsu - Hoshi no Keishousha (Japan) [T-En by Zoinkity v1.0].zip"
     },
     {
       "title": "Bangai-O",
@@ -1267,7 +1291,17 @@
     {
       "title": "Mega Man 2",
       "system": "nes",
-      "bucket": "nes/Mega Man 2 (USA).zip"
+      "bucket": "nes/Mega Man 2 (USA).zip",
+      "variants": [
+        {
+          "bucket": "nes/Rockman 2 - Dr. Wily's Riddle (Japan) [T-En by Aeon Genesis v1.0] [n].zip",
+          "note": "NES: Japanese Rockman 2 with its single difficulty, translated"
+        },
+        {
+          "bucket": "psx/Rockman 2 - Dr. Wily no Nazo (Japan) [T-En by AfroJackX v0.3] [i].chd",
+          "note": "PS1: Complete Works remaster with remixed music, fan translated"
+        }
+      ]
     },
     {
       "title": "Mike Tyson's Punch-Out!!",
@@ -1322,7 +1356,13 @@
     {
       "title": "Contra",
       "system": "nes",
-      "bucket": "nes/Contra (USA).zip"
+      "bucket": "nes/Contra (USA).zip",
+      "variants": [
+        {
+          "bucket": "nes/Contra (Japan) [T-En by Stardust Crusaders v1.01] [n].zip",
+          "note": "NES: Japanese version with cutscenes and stage maps"
+        }
+      ]
     },
     {
       "title": "Super C",
@@ -1332,7 +1372,13 @@
     {
       "title": "Mega Man 3",
       "system": "nes",
-      "bucket": "nes/Mega Man 3 (USA).zip"
+      "bucket": "nes/Mega Man 3 (USA).zip",
+      "variants": [
+        {
+          "bucket": "psx/Rockman 3 - Dr. Wily no Saigo! (Japan) [T-En by AfroJackX v0.3] [i].chd",
+          "note": "PS1: Complete Works remaster with remixed music, fan translated"
+        }
+      ]
     },
     {
       "title": "Tecmo Super Bowl",
@@ -2332,7 +2378,13 @@
     {
       "title": "Puyo Puyo Fever",
       "system": "dreamcast",
-      "bucket": "dreamcast/Puyo Puyo Fever (Japan) (En,Ja).chd"
+      "bucket": "dreamcast/Puyo Puyo Fever (Japan) (En,Ja).chd",
+      "variants": [
+        {
+          "bucket": "gba/Puyo Puyo Fever (Japan) (En,Ja,Fr,De,Es,It) [T-En by Tasos500 v1.0] [Relocalized].zip",
+          "note": "GBA: handheld port, relocalized"
+        }
+      ]
     },
     {
       "title": "Mr. Driller - Drill Spirits",
@@ -2408,7 +2460,7 @@
     {
       "title": "Ketsui Death Label - Kizuna Jigoku-tachi",
       "system": "nds",
-      "bucket": "nds/Ketsui Death Label - Kizuna Jigoku-tachi (Japan).zip"
+      "bucket": "nds/Ketsui Death Label - Kizuna Jigoku-tachi (Japan) [T-En by Z3tzilla v0.2] [i].zip"
     },
     {
       "title": "Big Bang Mini",
@@ -3505,7 +3557,7 @@
     {
       "title": "Virtua Cop 2",
       "system": "dreamcast",
-      "bucket": "dreamcast/Virtua Cop 2 (Japan).chd"
+      "bucket": "dreamcast/Virtua Cop 2 (Japan) [T-En by Derek Pascarella v1.0].chd"
     },
     {
       "title": "House of the Dead, The",
@@ -3767,7 +3819,13 @@
     {
       "title": "Samba de Amigo",
       "system": "dreamcast",
-      "bucket": "dreamcast/Samba de Amigo (USA).chd"
+      "bucket": "dreamcast/Samba de Amigo (USA).chd",
+      "variants": [
+        {
+          "bucket": "dreamcast/Samba de Amigo Ver. 2000 (Japan) [T-En by Dukeblooders v0.9.1].chd",
+          "note": "Dreamcast: Ver. 2000 adds songs and modes, fan translated"
+        }
+      ]
     },
     {
       "title": "Giga Wing",
@@ -3819,7 +3877,7 @@
     {
       "title": "Under Defeat",
       "system": "dreamcast",
-      "bucket": "dreamcast/Under Defeat (Japan).chd"
+      "bucket": "dreamcast/Under Defeat (Japan) [T-En by TapamN v1.0].chd"
     },
     {
       "title": "Virtua Tennis",
@@ -4293,7 +4351,7 @@
     {
       "title": "Aleste",
       "system": "msx2",
-      "bucket": "msx2/Aleste (Japan).zip"
+      "bucket": "msx2/Aleste (Japan) [T-En by Tsunami v1.0] (Cartridge).zip"
     },
     {
       "title": "Mystic Balloon",
@@ -4453,7 +4511,7 @@
     {
       "title": "Rockman - Battle & Fighters",
       "system": "ngpc",
-      "bucket": "ngpc/Rockman - Battle & Fighters (Japan).zip"
+      "bucket": "ngpc/Rockman - Battle & Fighters (Japan) [T-En by Marc_max v1.0] [i].zip"
     },
     {
       "title": "Last Blade, The - Beyond the Destiny",
@@ -4498,7 +4556,7 @@
     {
       "title": "Kaze no Klonoa - Moonlight Museum",
       "system": "wonderswan",
-      "bucket": "wonderswan/Kaze no Klonoa - Moonlight Museum (Japan).zip"
+      "bucket": "wonderswan/Klonoa - Moonlight Museum (Japan) [T-En by PowerStone05 & RayCarrot & Rcs709 & StarryScarab v1.1] [n].zip"
     },
     {
       "title": "Buffers Evolution",
@@ -4508,7 +4566,7 @@
     {
       "title": "Rainbow Islands - Putty's Party",
       "system": "wonderswan",
-      "bucket": "wonderswan/Rainbow Islands - Putty's Party (Japan).zip"
+      "bucket": "wonderswan/Rainbow Islands - Putty's Party (Japan) [T-En by USC v1.1].zip"
     },
     {
       "title": "Super Gem Fighter Mini Mix",
@@ -4553,7 +4611,7 @@
     {
       "title": "Dicing Knight.",
       "system": "wonderswancolor",
-      "bucket": "wonderswancolor/Dicing Knight. (Japan).zip"
+      "bucket": "wonderswancolor/Dicing Knight. (Japan) [T-En by Aeon Genesis v1.00].zip"
     },
     {
       "title": "Rhyme Rider Kerorican",
@@ -4648,7 +4706,7 @@
     {
       "title": "Space Squash",
       "system": "virtualboy",
-      "bucket": "virtualboy/Space Squash (Japan).zip"
+      "bucket": "virtualboy/Space Squash (Japan) [T-En by Feel & Greg Stevens & Benjamin Stevens & Thunderstruck v2.0].zip"
     },
     {
       "title": "Mouse Trap",
@@ -4788,7 +4846,7 @@
     {
       "title": "Ninja Princess",
       "system": "sg1000",
-      "bucket": "sg1000/Ninja Princess (Japan, Australia) (Ja).zip"
+      "bucket": "sg1000/Ninja Princess (Japan) [T-En by Goldenband v1.0].zip"
     },
     {
       "title": "Doki Doki Penguin Land",
@@ -4819,6 +4877,86 @@
       "title": "Monaco GP",
       "system": "sg1000",
       "bucket": "sg1000/Monaco GP (Japan, Europe) (Ja) (Rev 2).zip"
+    },
+    {
+      "title": "Apotris",
+      "system": "gba",
+      "bucket": "gba/Apotris.zip"
+    },
+    {
+      "title": "Downwell",
+      "system": "gba",
+      "bucket": "gba/Downwell.zip"
+    },
+    {
+      "title": "10 Second Ninja X",
+      "system": "psvita",
+      "bucket": "psvita/10 Second Ninja X [PCSE00890] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Geometry Wars³ - Dimensions",
+      "system": "psvita",
+      "bucket": "psvita/Geometry Wars³ - Dimensions [PCSE00655] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Hot Shots Golf - World Invitational",
+      "system": "psvita",
+      "bucket": "psvita/Hot Shots Golf - World Invitational [PCSA00009] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "LUFTRAUSERS",
+      "system": "psvita",
+      "bucket": "psvita/LUFTRAUSERS [PCSE00247] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "OlliOlli",
+      "system": "psvita",
+      "bucket": "psvita/OlliOlli [PCSE00341] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "OlliOlli2",
+      "system": "psvita",
+      "bucket": "psvita/OlliOlli2 [PCSE00479] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Spelunky",
+      "system": "psvita",
+      "bucket": "psvita/Spelunky [PCSE00288] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "TxK",
+      "system": "psvita",
+      "bucket": "psvita/TxK [PCSE00397] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Splatoon",
+      "system": "wiiu",
+      "bucket": "wiiu/Splatoon (US) (v288).wua"
+    },
+    {
+      "title": "Celeste Classic",
+      "system": "pico8",
+      "bucket": "pico8/celeste.p8.png"
+    },
+    {
+      "title": "celeste classic 2",
+      "system": "pico8",
+      "bucket": "pico8/celeste_classic_2-5.p8.png"
+    },
+    {
+      "title": "Porklike",
+      "system": "pico8",
+      "bucket": "pico8/porklike-2.p8.png"
+    },
+    {
+      "title": "Driftmania",
+      "system": "pico8",
+      "bucket": "pico8/driftmania-5.p8.png"
+    },
+    {
+      "title": "Super Disc Box",
+      "system": "pico8",
+      "bucket": "pico8/superdiscbox-0.p8.png"
     }
   ]
 }

@@ -207,10 +207,32 @@
       "bucket": "3ds/Farming Simulator 18 (USA).zip"
     },
     {
+      "title": "Stardew Valley",
+      "category": "Farming",
+      "system": "psvita",
+      "bucket": "psvita/Stardew Valley [PCSE01235] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Rune Factory - Oceans",
+      "category": "Farming",
+      "system": "ps3",
+      "bucket": "ps3/Rune Factory - Oceans (Europe) (En,Fr,De) [Undub by Hien].chd"
+    },
+    {
       "title": "Animal Crossing",
       "category": "Life",
       "system": "gc",
-      "bucket": "gc/Animal Crossing (USA).rvz"
+      "bucket": "gc/Animal Crossing (USA).rvz",
+      "variants": [
+        {
+          "bucket": "n64/Animal Forest (Japan) [T-En by Zoinkity v021210] [i] [n].zip",
+          "note": "N64: the original Japan-only release"
+        },
+        {
+          "bucket": "gc/Animal Forest e+ (Japan) [T-En by Animal Forest e+ English Translation Project v23] [i] [n].rvz",
+          "note": "GameCube: Japan-only e+ edition with added content"
+        }
+      ]
     },
     {
       "title": "Animal Crossing - Wild World",
@@ -234,7 +256,7 @@
       "title": "Tomodachi Collection",
       "category": "Life",
       "system": "nds",
-      "bucket": "nds/Tomodachi Collection (Japan) (Rev 1).zip"
+      "bucket": "nds/Tomodachi Collection (Japan) (Rev 1) [T-En by Jjjewel v0.80] [i].zip"
     },
     {
       "title": "Tomodachi Life",
@@ -402,7 +424,13 @@
       "title": "Chibi-Robo! Plug into Adventure!",
       "category": "Life",
       "system": "gc",
-      "bucket": "gc/Chibi-Robo! Plug into Adventure! (USA).rvz"
+      "bucket": "gc/Chibi-Robo! Plug into Adventure! (USA).rvz",
+      "variants": [
+        {
+          "bucket": "wii/Chibi Robo! (Japan) [T-En by Brand Newman v1.00] [n].rvz",
+          "note": "Wii: Japan-only Wii version with pointer controls"
+        }
+      ]
     },
     {
       "title": "Chibi-Robo! - Park Patrol",
@@ -451,6 +479,24 @@
       "category": "Life",
       "system": "nds",
       "bucket": "nds/Lost in Blue 3 (USA).zip"
+    },
+    {
+      "title": "Chibi-Robo! - Clean Sweep!",
+      "category": "Life",
+      "system": "nds",
+      "bucket": "nds/Chibi-Robo! - Clean Sweep! (Japan) [T-En by Cjuub v1.1] [n].zip"
+    },
+    {
+      "title": "Survival Kids 2 - Dasshutsu!! Futago-Jima!",
+      "category": "Life",
+      "system": "gbc",
+      "bucket": "gbc/Survival Kids 2 - Dasshutsu!! Futago-Jima! (Japan) (SGB Enhanced) (GB Compatible) [T-En by Hattontown & NikcDC v0.9].zip"
+    },
+    {
+      "title": "Tokimeki Memorial",
+      "category": "Life",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Tokimeki Memorial (Japan) (Rev 3).chd"
     },
     {
       "title": "SimCity",
@@ -603,6 +649,30 @@
       "bucket": "nds/Fish Tycoon (USA).zip"
     },
     {
+      "title": "Take the A-Train",
+      "category": "City & Tycoon",
+      "system": "msx2",
+      "bucket": "msx2/Take the A-Train (Japan) [T-En by Django v1.0] [n] (Cartridge).zip"
+    },
+    {
+      "title": "A.III. - A Ressha de Ikou III",
+      "category": "City & Tycoon",
+      "system": "tg-cd",
+      "bucket": "tg-cd/A.III. - A Ressha de Ikou III (Japan).chd"
+    },
+    {
+      "title": "Utopia",
+      "category": "City & Tycoon",
+      "system": "intellivision",
+      "bucket": "intellivision/Utopia (USA, Europe).zip"
+    },
+    {
+      "title": "MicroCity",
+      "category": "City & Tycoon",
+      "system": "arduboy",
+      "bucket": "arduboy/MicroCity (World) (Erwin's Collection).zip"
+    },
+    {
       "title": "Nobunaga's Ambition",
       "category": "Koei Historical",
       "system": "snes",
@@ -723,6 +793,24 @@
       ]
     },
     {
+      "title": "Nobunaga no Yabou - Haouden",
+      "category": "Koei Historical",
+      "system": "snes",
+      "bucket": "snes/Nobunaga no Yabou - Haouden (Japan) (Rev 1).zip"
+    },
+    {
+      "title": "Nobunaga no Yabou - Tenshouki",
+      "category": "Koei Historical",
+      "system": "snes",
+      "bucket": "snes/Nobunaga no Yabou - Tenshouki (Japan) (Rev 1).zip"
+    },
+    {
+      "title": "Super Sangokushi",
+      "category": "Koei Historical",
+      "system": "snes",
+      "bucket": "snes/Super Sangokushi (Japan).zip"
+    },
+    {
       "title": "Populous",
       "category": "God Games & Evolution",
       "system": "genesis",
@@ -774,13 +862,25 @@
       "title": "ActRaiser",
       "category": "God Games & Evolution",
       "system": "snes",
-      "bucket": "snes/ActRaiser (USA).zip"
+      "bucket": "snes/ActRaiser (USA).zip",
+      "variants": [
+        {
+          "bucket": "snes/Actraiser (Japan) [T-En by Aeon Genesis v1.00].zip",
+          "note": "SNES: translation of the Japanese release with uncensored text"
+        }
+      ]
     },
     {
       "title": "Doshin the Giant",
       "category": "God Games & Evolution",
       "system": "gc",
-      "bucket": "gc/Doshin the Giant (Europe) (En,Fr,De,Es,It).rvz"
+      "bucket": "gc/Doshin the Giant (Europe) (En,Fr,De,Es,It).rvz",
+      "variants": [
+        {
+          "bucket": "n64/Doshin the Giant 1 (Japan) (64DD) [Hack by Zoinkity v1.1] [T-En by Ozidual v2018-06] [i] [n].zip",
+          "note": "N64: the original 64DD release"
+        }
+      ]
     },
     {
       "title": "Baldies",
@@ -822,7 +922,13 @@
       "title": "Cubivore",
       "category": "God Games & Evolution",
       "system": "gc",
-      "bucket": "gc/Cubivore (USA).rvz"
+      "bucket": "gc/Cubivore (USA).rvz",
+      "variants": [
+        {
+          "bucket": "n64/Cubivore (Japan) (Proto) [T-En by Zoinkity v1.0] [n].zip",
+          "note": "N64: the unreleased original N64 version"
+        }
+      ]
     },
     {
       "title": "Seventh Cross Evolution",
@@ -835,6 +941,12 @@
       "category": "God Games & Evolution",
       "system": "nds",
       "bucket": "nds/Spore Creatures (USA) (En,Fr,De,Es,It,Nl).zip"
+    },
+    {
+      "title": "E.V.O. - The Theory of Evolution",
+      "category": "God Games & Evolution",
+      "system": "pc98",
+      "bucket": "pc98/E.V.O. - The Theory of Evolution (Japan) (Disk 1) [T-En by 46 OkuMen v1.1.2] [n].d88"
     },
     {
       "title": "Monster Rancher",
@@ -984,19 +1096,37 @@
       "title": "Wonder Project J - Kikai no Shounen Pino",
       "category": "Virtual Pets & Monster Raising",
       "system": "snes",
-      "bucket": "snes/Wonder Project J - Kikai no Shounen Pino (Japan).zip"
+      "bucket": "snes/Wonder Project J - Mechanical Boy Pino (Japan) [T-En by WakdHacks v1.04] [n].zip"
     },
     {
       "title": "Wonder Project J2 - Koruro no Mori no Jozet",
       "category": "Virtual Pets & Monster Raising",
       "system": "n64",
-      "bucket": "n64/Wonder Project J2 - Koruro no Mori no Jozet (Japan).zip"
+      "bucket": "n64/Wonder Project J2 - Koruro no Mori no Jozet (Japan) [T-En by Ryu v1.0].zip"
     },
     {
       "title": "Princess Maker 2",
       "category": "Virtual Pets & Monster Raising",
       "system": "saturn",
       "bucket": "saturn/Princess Maker 2 (Japan) (4M).chd"
+    },
+    {
+      "title": "Digimon World DS",
+      "category": "Virtual Pets & Monster Raising",
+      "system": "nds",
+      "bucket": "nds/Digimon World DS (USA).zip"
+    },
+    {
+      "title": "Digimon World - Dawn",
+      "category": "Virtual Pets & Monster Raising",
+      "system": "nds",
+      "bucket": "nds/Digimon World - Dawn (USA).zip"
+    },
+    {
+      "title": "Princess Maker",
+      "category": "Virtual Pets & Monster Raising",
+      "system": "msx2",
+      "bucket": "msx2/Princess Maker (Japan) [T-En by Teo Lopez del Castillo v1.0] (Floppy).zip"
     },
     {
       "title": "Atelier Annie - Alchemists of Sera Island",
@@ -1069,6 +1199,12 @@
       "category": "Alchemy & Crafting",
       "system": "3ds",
       "bucket": "3ds/Terraria (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Don't Starve - Giant Edition",
+      "category": "Alchemy & Crafting",
+      "system": "psvita",
+      "bucket": "psvita/Don't Starve - Giant Edition [PCSE00450] [USA] [NoNpDRM].zip"
     },
     {
       "title": "Mario Paint",

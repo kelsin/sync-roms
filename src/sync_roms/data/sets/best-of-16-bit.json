@@ -15,6 +15,10 @@
         {
           "bucket": "gba/Legend of Zelda, The - A Link to the Past & Four Swords (USA).zip",
           "note": "GBA: adds Four Swords multiplayer and a bonus dungeon"
+        },
+        {
+          "bucket": "snes/Legend of Zelda, The - A Link to the Past (USA) [T-En by ShadowOne333 & Translation Quest v10.2.3] [Relocalized].zip",
+          "note": "SNES: retranslation closer to the Japanese script"
         }
       ]
     },
@@ -26,6 +30,10 @@
         {
           "bucket": "nds/Chrono Trigger (USA) (En,Fr).zip",
           "note": "DS: adds the Lost Sanctum, a bonus dungeon and a new ending"
+        },
+        {
+          "bucket": "snes/Chrono Trigger (USA) [T-En by Wakkoswami v1.11] [Relocalized].zip",
+          "note": "SNES: fan retranslation of the script"
         }
       ]
     },
@@ -69,6 +77,10 @@
         {
           "bucket": "gba/Final Fantasy VI Advance (USA).zip",
           "note": "GBA: adds the Dragons' Den dungeon, new espers and a new translation"
+        },
+        {
+          "bucket": "snes/Final Fantasy VI (Japan) [T-En by RPGOne v1.2b] [All Bugs Fix].zip",
+          "note": "SNES: fan retranslation of Final Fantasy VI with bug fixes"
         }
       ]
     },
@@ -80,6 +92,10 @@
         {
           "bucket": "gba/Final Fantasy IV Advance (USA).zip",
           "note": "GBA: adds a bonus dungeon, party swapping and a new translation"
+        },
+        {
+          "bucket": "snes/Final Fantasy IV (Japan) (Rev 1) [T-En by J2e Translations v3.21] [Add by Spooniest v1.0].zip",
+          "note": "SNES: uncut Japanese Final Fantasy IV, fan translated"
         }
       ]
     },
@@ -112,17 +128,35 @@
     {
       "title": "Secret of Mana",
       "system": "snes",
-      "bucket": "snes/Secret of Mana (USA).zip"
+      "bucket": "snes/Secret of Mana (USA).zip",
+      "variants": [
+        {
+          "bucket": "snes/Secret of Mana (USA) [T-En by The SAP Team v2.0] [Relocalized].zip",
+          "note": "SNES: fan retranslation of the script"
+        }
+      ]
     },
     {
       "title": "Mega Man X (Rev 1)",
       "system": "snes",
-      "bucket": "snes/Mega Man X (USA) (Rev 1).zip"
+      "bucket": "snes/Mega Man X (USA) (Rev 1).zip",
+      "variants": [
+        {
+          "bucket": "snes/Rockman X (Japan) (Rev 1) [T-En by Her-Saki v1.5].zip",
+          "note": "SNES: Japanese Rockman X, retranslated"
+        }
+      ]
     },
     {
       "title": "Mega Man X2",
       "system": "snes",
-      "bucket": "snes/Mega Man X2 (USA).zip"
+      "bucket": "snes/Mega Man X2 (USA).zip",
+      "variants": [
+        {
+          "bucket": "snes/Rockman X2 (Japan) [T-En by Her-Saki v1.1].zip",
+          "note": "SNES: Japanese Rockman X2, retranslated"
+        }
+      ]
     },
     {
       "title": "Mega Man X3",
@@ -132,13 +166,23 @@
         {
           "bucket": "saturn/Mega Man X3 (Europe).chd",
           "note": "Saturn: adds animated cutscenes and a CD soundtrack"
+        },
+        {
+          "bucket": "snes/Rockman X3 (Japan) [T-En by Her-Saki v1.1].zip",
+          "note": "SNES: Japanese Rockman X3, retranslated"
         }
       ]
     },
     {
       "title": "Mega Man 7",
       "system": "snes",
-      "bucket": "snes/Mega Man 7 (USA).zip"
+      "bucket": "snes/Mega Man 7 (USA).zip",
+      "variants": [
+        {
+          "bucket": "snes/Rockman 7 - Shukumei no Taiketsu! (Japan) [T-En by Zynk Oxhyde v1.0].zip",
+          "note": "SNES: Japanese Rockman 7, translated"
+        }
+      ]
     },
     {
       "title": "Contra III - The Alien Wars",
@@ -190,7 +234,13 @@
     {
       "title": "ActRaiser",
       "system": "snes",
-      "bucket": "snes/ActRaiser (USA).zip"
+      "bucket": "snes/ActRaiser (USA).zip",
+      "variants": [
+        {
+          "bucket": "snes/Actraiser (Japan) [T-En by Aeon Genesis v1.00].zip",
+          "note": "SNES: translation of the Japanese release with uncensored text"
+        }
+      ]
     },
     {
       "title": "Illusion of Gaia",
@@ -200,7 +250,13 @@
     {
       "title": "Super Mario RPG - Legend of the Seven Stars",
       "system": "snes",
-      "bucket": "snes/Super Mario RPG - Legend of the Seven Stars (USA).zip"
+      "bucket": "snes/Super Mario RPG - Legend of the Seven Stars (USA).zip",
+      "variants": [
+        {
+          "bucket": "snes/Super Mario RPG - Legend of the Seven Stars (USA) [T-En by LiThL vLH] [Relocalized].zip",
+          "note": "SNES: fan retranslation of the script"
+        }
+      ]
     },
     {
       "title": "Mario Paint",
@@ -225,7 +281,13 @@
     {
       "title": "Tetris Attack (En,Ja)",
       "system": "snes",
-      "bucket": "snes/Tetris Attack (USA) (En,Ja).zip"
+      "bucket": "snes/Tetris Attack (USA) (En,Ja).zip",
+      "variants": [
+        {
+          "bucket": "snes/Panel de Pon (Japan) [T-En by Zuqkeo v1.0].zip",
+          "note": "SNES: Panel de Pon with its original fairy cast, translated"
+        }
+      ]
     },
     {
       "title": "Earthworm Jim",
@@ -246,6 +308,10 @@
         {
           "bucket": "gba/Breath of Fire II (USA).zip",
           "note": "GBA: new translation, a dash button and quick saves"
+        },
+        {
+          "bucket": "snes/Breath of Fire II - The Fated Child (USA) [T-En by Watercrown Productions v1.2b] [n].zip",
+          "note": "SNES: fan retranslation of the script"
         }
       ]
     },
@@ -267,7 +333,13 @@
     {
       "title": "Ogre Battle - The March of the Black Queen",
       "system": "snes",
-      "bucket": "snes/Ogre Battle - The March of the Black Queen (USA).zip"
+      "bucket": "snes/Ogre Battle - The March of the Black Queen (USA).zip",
+      "variants": [
+        {
+          "bucket": "snes/Densetsu no Ogre Battle - The March of the Black Queen (Japan) (NP) [T-En by FinS v1.2].zip",
+          "note": "SNES: Japanese release, fan translated"
+        }
+      ]
     },
     {
       "title": "Harvest Moon",
@@ -307,7 +379,13 @@
     {
       "title": "Demon's Crest",
       "system": "snes",
-      "bucket": "snes/Demon's Crest (USA).zip"
+      "bucket": "snes/Demon's Crest (USA).zip",
+      "variants": [
+        {
+          "bucket": "snes/Demon's Crest (USA) [T-En by CF v1.0] [Relocalized].zip",
+          "note": "SNES: fan retranslation of the script"
+        }
+      ]
     },
     {
       "title": "Wild Guns",
@@ -322,7 +400,13 @@
     {
       "title": "Legend of the Mystical Ninja, The",
       "system": "snes",
-      "bucket": "snes/Legend of the Mystical Ninja, The (USA).zip"
+      "bucket": "snes/Legend of the Mystical Ninja, The (USA).zip",
+      "variants": [
+        {
+          "bucket": "snes/Go for it! Goemon - The Rescue of Princess Yuki (Japan) (Rev 2) [T-En by DDSTranslation v2.0] [n].zip",
+          "note": "SNES: Japanese release, fan translated"
+        }
+      ]
     },
     {
       "title": "R-Type III",
@@ -337,12 +421,24 @@
     {
       "title": "Space Megaforce",
       "system": "snes",
-      "bucket": "snes/Space Megaforce (USA).zip"
+      "bucket": "snes/Space Megaforce (USA).zip",
+      "variants": [
+        {
+          "bucket": "snes/Super Aleste (Japan) [T-En by Asiwish v1.2].zip",
+          "note": "SNES: Japanese Super Aleste, translated"
+        }
+      ]
     },
     {
       "title": "U.N. Squadron",
       "system": "snes",
-      "bucket": "snes/U.N. Squadron (USA).zip"
+      "bucket": "snes/U.N. Squadron (USA).zip",
+      "variants": [
+        {
+          "bucket": "snes/Area 88 (USA) [T-En by Blizzz v1.03] [Relocalized] [n].zip",
+          "note": "SNES: Japanese Area 88 version, fan translated"
+        }
+      ]
     },
     {
       "title": "Stunt Race FX",
@@ -454,12 +550,28 @@
     {
       "title": "Phantasy Star IV",
       "system": "genesis",
-      "bucket": "genesis/Phantasy Star IV (USA).zip"
+      "bucket": "genesis/Phantasy Star IV (USA).zip",
+      "variants": [
+        {
+          "bucket": "genesis/Phantasy Star IV (USA) [T-En by GhaleonUnlimited v8.5] [Relocalized] [Purist].zip",
+          "note": "Genesis: relocalized fan retranslation"
+        }
+      ]
     },
     {
       "title": "Phantasy Star II",
       "system": "genesis",
-      "bucket": "genesis/Phantasy Star II (USA, Europe) (Rev A).zip"
+      "bucket": "genesis/Phantasy Star II (USA, Europe) (Rev A).zip",
+      "variants": [
+        {
+          "bucket": "genesis/Phantasy Star II (USA, Europe) (Rev A) [T-En by Naflign & Rebecca Capowski v18].zip",
+          "note": "Genesis: expanded fan retranslation"
+        },
+        {
+          "bucket": "ps2/Sega Ages 2500 Series Vol. 17 - Phantasy Star Generation-2 (Japan) [T-En by Goldenboy v2f] (CD).chd",
+          "note": "PS2: Generation:2 full remake, fan translated"
+        }
+      ]
     },
     {
       "title": "Shining Force II",
@@ -525,12 +637,24 @@
     {
       "title": "Beyond Oasis",
       "system": "genesis",
-      "bucket": "genesis/Beyond Oasis (USA).zip"
+      "bucket": "genesis/Beyond Oasis (USA).zip",
+      "variants": [
+        {
+          "bucket": "genesis/Beyond Oasis (USA) [T-En by Eien Ni Hen & Husky v1.0].zip",
+          "note": "Genesis: retranslation of the Japanese script"
+        }
+      ]
     },
     {
       "title": "Streets of Rage 3",
       "system": "genesis",
-      "bucket": "genesis/Streets of Rage 3 (USA).zip"
+      "bucket": "genesis/Streets of Rage 3 (USA).zip",
+      "variants": [
+        {
+          "bucket": "genesis/Bare Knuckle III (Japan) [T-En by Twilight Translations v1.0].zip",
+          "note": "Genesis: Bare Knuckle III, the uncut Japanese version, translated"
+        }
+      ]
     },
     {
       "title": "Aladdin",
@@ -612,7 +736,13 @@
     {
       "title": "Castle of Illusion Starring Mickey Mouse",
       "system": "genesis",
-      "bucket": "genesis/Castle of Illusion Starring Mickey Mouse (USA, Europe).zip"
+      "bucket": "genesis/Castle of Illusion Starring Mickey Mouse (USA, Europe).zip",
+      "variants": [
+        {
+          "bucket": "genesis/Castle of Illusion Starring Mickey Mouse (Japan) [T-En by RadioTails v1.0] [n].zip",
+          "note": "Genesis: Japanese release, fan translated"
+        }
+      ]
     },
     {
       "title": "World of Illusion Starring Mickey Mouse and Donald Duck",
@@ -632,7 +762,7 @@
     {
       "title": "Pulseman",
       "system": "genesis",
-      "bucket": "genesis/Pulseman (Japan).zip"
+      "bucket": "genesis/Pulseman (Japan) [T-En by M.I.J.E.T. v070226].zip"
     },
     {
       "title": "Wonder Boy in Monster World",
@@ -642,7 +772,13 @@
     {
       "title": "Monster World IV",
       "system": "genesis",
-      "bucket": "genesis/Monster World IV (USA) (Genesis Mini).zip"
+      "bucket": "genesis/Monster World IV (USA) (Genesis Mini).zip",
+      "variants": [
+        {
+          "bucket": "genesis/Monster World IV (Japan) [T-En by DeJap & Demiforce v1.02] [Add by Michele Di Somma v2.2] [Add by Jackic v1.1].zip",
+          "note": "Genesis: fan translation of the Japanese release"
+        }
+      ]
     },
     {
       "title": "Teenage Mutant Ninja Turtles - The Hyperstone Heist",
@@ -983,7 +1119,21 @@
     {
       "title": "Ys III - Wanderers from Ys",
       "system": "tg-cd",
-      "bucket": "tg-cd/Ys III - Wanderers from Ys (USA).chd"
+      "bucket": "tg-cd/Ys III - Wanderers from Ys (USA).chd",
+      "variants": [
+        {
+          "bucket": "nes/Ys III - Wanderers from Ys (Japan) [T-En by Vice Translations v1.00].zip",
+          "note": "NES: Famicom port, translated"
+        },
+        {
+          "bucket": "genesis/Ys III (USA) [T-En by Plombo v1.1] [Relocalized].zip",
+          "note": "Genesis: relocalized fan retranslation"
+        },
+        {
+          "bucket": "msx2/Ys III - Wanderers from Ys (Japan) [T-En by Oasis v1.0] (Floppy).zip",
+          "note": "MSX2: original computer version, fan translated"
+        }
+      ]
     },
     {
       "title": "Mega Man Soccer",
@@ -998,7 +1148,13 @@
     {
       "title": "Cybernator",
       "system": "snes",
-      "bucket": "snes/Cybernator (USA).zip"
+      "bucket": "snes/Cybernator (USA).zip",
+      "variants": [
+        {
+          "bucket": "snes/Assault Suits Valken (Japan) [T-En by Aeon Genesis v1.00] [n].zip",
+          "note": "SNES: Japanese version with uncut story scenes, translated"
+        }
+      ]
     },
     {
       "title": "Metal Warriors",
@@ -1024,7 +1180,13 @@
     {
       "title": "Soul Blazer",
       "system": "snes",
-      "bucket": "snes/Soul Blazer (USA).zip"
+      "bucket": "snes/Soul Blazer (USA).zip",
+      "variants": [
+        {
+          "bucket": "snes/Soul Blazer (USA) [T-En by Steppolo Steppi v1.1] [Relocalized].zip",
+          "note": "SNES: fan retranslation of the script"
+        }
+      ]
     },
     {
       "title": "Arcana",
@@ -1050,12 +1212,18 @@
     {
       "title": "Ghost Chaser Densei",
       "system": "snes",
-      "bucket": "snes/Ghost Chaser Densei (Japan).zip"
+      "bucket": "snes/Ghost Chaser Densei (Japan) [T-En by MrRichard999 & AgentOrange & Rainponcho v1.0].zip"
     },
     {
       "title": "Smart Ball",
       "system": "snes",
-      "bucket": "snes/Smart Ball (USA).zip"
+      "bucket": "snes/Smart Ball (USA).zip",
+      "variants": [
+        {
+          "bucket": "snes/Jerry Boy (Japan) [T-En by Chris Covell v1.0].zip",
+          "note": "SNES: Japanese Jerry Boy, translated"
+        }
+      ]
     },
     {
       "title": "Super Bonk",
@@ -1070,7 +1238,7 @@
     {
       "title": "Go Go Ackman",
       "system": "snes",
-      "bucket": "snes/Go Go Ackman (Japan).zip"
+      "bucket": "snes/Go Go Ackman (Japan) [T-En by Ackman Translations v1.0].zip"
     },
     {
       "title": "Final Fight 2",
@@ -1100,7 +1268,7 @@
     {
       "title": "Tetris Battle Gaiden",
       "system": "snes",
-      "bucket": "snes/Tetris Battle Gaiden (Japan).zip"
+      "bucket": "snes/Tetris Battle Spin Off (Japan) [T-En by DDSTranslation v1.0] [Add by Docrow v1.1] [n].zip"
     },
     {
       "title": "Skyblazer",
@@ -1125,32 +1293,32 @@
     {
       "title": "Ganpuru - Gunman's Proof",
       "system": "snes",
-      "bucket": "snes/Ganpuru - Gunman's Proof (Japan).zip"
+      "bucket": "snes/Ganpuru - Gunman's Proof (Japan) [T-En by Aeon Genesis v1.03].zip"
     },
     {
       "title": "Ganbare Goemon 3 - Shishi Juurokubee no Karakuri Manjigatame",
       "system": "snes",
-      "bucket": "snes/Ganbare Goemon 3 - Shishi Juurokubee no Karakuri Manjigatame (Japan) (Rev 2).zip"
+      "bucket": "snes/Ganbare! Goemon 3 - The Mecha Leg Hold of Jurokube Shishi (Japan) [T-En by DDSTranslation v4.0] [Add by Djungelurban v1.0] [n].zip"
     },
     {
       "title": "Ganbare Goemon 2 - Kiteretsu Shougun Magginesu",
       "system": "snes",
-      "bucket": "snes/Ganbare Goemon 2 - Kiteretsu Shougun Magginesu (Japan).zip"
+      "bucket": "snes/Ganbare! Goemon 2 - The Strange General McGuinness (Japan) [T-En by DDSTranslation v3.0] [Add by Djungelurban v1.0] [n].zip"
     },
     {
       "title": "Mario no Super Picross",
       "system": "snes",
-      "bucket": "snes/Mario no Super Picross (Japan).zip"
+      "bucket": "snes/Mario's Super Picross (Japan) [T-En by FCandChill & Kumori v1.5] [n].zip"
     },
     {
       "title": "Ganbare Goemon Kirakira Douchuu - Boku ga Dancer ni Natta Wake",
       "system": "snes",
-      "bucket": "snes/Ganbare Goemon Kirakira Douchuu - Boku ga Dancer ni Natta Wake (Japan) (Rev 2).zip"
+      "bucket": "snes/Ganbare! Goemon - The Twinkling Journey - The Reason I became a Dancer (Japan) [T-En by DDSTranslation v3.0] [Add by Djungelurban v1.0] [n].zip"
     },
     {
       "title": "Hameln no Violin Hiki",
       "system": "snes",
-      "bucket": "snes/Hameln no Violin Hiki (Japan).zip"
+      "bucket": "snes/Violinist of Hameln, The (Japan) [T-En by J2e Translations v1.00] [n].zip"
     },
     {
       "title": "Sonic The Hedgehog 2 (Rev B)",
@@ -1176,7 +1344,13 @@
     {
       "title": "Warsong",
       "system": "genesis",
-      "bucket": "genesis/Warsong (USA).zip"
+      "bucket": "genesis/Warsong (USA).zip",
+      "variants": [
+        {
+          "bucket": "genesis/Langrisser (USA) [T-En by D v20010219] [Add by Jon Najar v070103] [n].zip",
+          "note": "Genesis: retranslated as Langrisser with restored names"
+        }
+      ]
     },
     {
       "title": "Alisia Dragoon",
@@ -1221,13 +1395,29 @@
         {
           "bucket": "psp/Ys I & II Chronicles (USA).chd",
           "note": "PSP: Chronicles adds remastered art, new music and extras"
+        },
+        {
+          "bucket": "nes/Ys II - Ancient Ys Vanished - The Final Chapter (Japan) [T-En by David Mullen v1.0].zip",
+          "note": "NES: Famicom port of Ys II, translated"
+        },
+        {
+          "bucket": "saturn/Falcom Classics (Japan) [T-En by Murzik & CrawdKenny v0.763] [Ancient Ys Vanished Omen] [i].chd",
+          "note": "Saturn: Falcom Classics Ys I remake, fan translated"
+        },
+        {
+          "bucket": "msx2/Ys - Ancient Ys Vanished Omen (Japan) [T-En by Oasis v1.0] (Floppy).zip",
+          "note": "MSX2: original Ys I computer version, fan translated"
+        },
+        {
+          "bucket": "msx2/Ys II - Ancient Ys Vanished - The Final Chapter (Japan) [T-En by Oasis v1.0] [i] (Floppy).zip",
+          "note": "MSX2: original Ys II computer version, fan translated"
         }
       ]
     },
     {
       "title": "Akumajou Dracula X - Chi no Rondo",
       "system": "tg-cd",
-      "bucket": "tg-cd/Akumajou Dracula X - Chi no Rondo (Japan).chd"
+      "bucket": "tg-cd/Castlevania - Rondo of Blood (Japan) [T-En by Burnt Lasagna & Cubanraul v1.01] [n].chd"
     },
     {
       "title": "Gate of Thunder",
@@ -1262,7 +1452,13 @@
     {
       "title": "Dragon Slayer - The Legend of Heroes",
       "system": "tg-cd",
-      "bucket": "tg-cd/Dragon Slayer - The Legend of Heroes (USA).chd"
+      "bucket": "tg-cd/Dragon Slayer - The Legend of Heroes (USA).chd",
+      "variants": [
+        {
+          "bucket": "msx2/Dragon Slayer - The Legend of Heroes (Japan) [T-En by Oasis & Randam v1.0] (Floppy).zip",
+          "note": "MSX2: original computer version, fan translated"
+        }
+      ]
     },
     {
       "title": "Sylphia",
@@ -1322,7 +1518,13 @@
     {
       "title": "Snatcher",
       "system": "segacd",
-      "bucket": "segacd/Snatcher (USA).chd"
+      "bucket": "segacd/Snatcher (USA).chd",
+      "variants": [
+        {
+          "bucket": "msx2/Snatcher (Japan) [T-En by Fudeba Software v0.6.0] (Floppy).zip",
+          "note": "MSX2: original release, fan translated"
+        }
+      ]
     },
     {
       "title": "Popful Mail",

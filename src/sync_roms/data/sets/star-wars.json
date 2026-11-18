@@ -30,7 +30,7 @@
     {
       "title": "Star Wars (Namco)",
       "system": "nes",
-      "bucket": "nes/Star Wars (Japan) (Namco).zip"
+      "bucket": "nes/Star Wars (Japan) (Namco) [T-En by Mukimuki & Shinta v2.00].zip"
     },
     {
       "title": "Super Star Wars (Rev 1)",
@@ -332,6 +332,11 @@
       "title": "Star Wars - Return of the Jedi - Death Star Battle",
       "system": "atari2600",
       "bucket": "atari2600/Star Wars - Return of the Jedi - Death Star Battle (USA).zip"
+    },
+    {
+      "title": "Star Wars Pinball",
+      "system": "psvita",
+      "bucket": "psvita/Star Wars Pinball [PCSE00221] [USA] [NoNpDRM].zip"
     }
   ]
 }

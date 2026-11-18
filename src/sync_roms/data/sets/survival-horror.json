@@ -10,7 +10,7 @@
     {
       "title": "Sweet Home",
       "system": "nes",
-      "bucket": "nes/Sweet Home (Japan).zip"
+      "bucket": "nes/Sweet Home (Japan) [T-En by TheSiege v2.0] [n].zip"
     },
     {
       "title": "Friday the 13th",
@@ -20,7 +20,7 @@
     {
       "title": "Clock Tower",
       "system": "snes",
-      "bucket": "snes/Clock Tower (Japan).zip"
+      "bucket": "snes/Clock Tower (Japan) [T-En by Aeon Genesis v1.01].zip"
     },
     {
       "title": "Resident Evil (Director's Cut)",
@@ -332,6 +332,14 @@
         {
           "bucket": "gc/Resident Evil - Code - Veronica X (USA).m3u",
           "note": "GameCube: Code Veronica X adds new cutscenes"
+        },
+        {
+          "bucket": "dreamcast/Resident Evil - Code Veronica X (Japan) [T-En by Truemaster1] [n].m3u",
+          "note": "Dreamcast: Code Veronica X with added scenes, fan translated",
+          "files": [
+            "dreamcast/Resident Evil - Code Veronica X (Japan) (Disc 1) [T-En by Truemaster1] [n].chd",
+            "dreamcast/Resident Evil - Code Veronica X (Japan) (Disc 2) [T-En by Truemaster1] [n].chd"
+          ]
         }
       ]
     },
@@ -462,12 +470,12 @@
     {
       "title": "Nanashi no Geemu",
       "system": "nds",
-      "bucket": "nds/Nanashi no Geemu (Japan).zip"
+      "bucket": "nds/Nameless Game, The (Japan) [T-En by Nagato & Ryusui & Summvs v1.2] [n].zip"
     },
     {
       "title": "Nanashi no Geemu Me",
       "system": "nds",
-      "bucket": "nds/Nanashi no Geemu Me (Japan).zip"
+      "bucket": "nds/Nameless Game, The - Eye (Japan) [T-En by Nagato v1.13] [n].zip"
     },
     {
       "title": "Touch the Dead",
@@ -538,6 +546,76 @@
       "title": "Ghost House",
       "system": "mastersystem",
       "bucket": "mastersystem/Ghost House (USA, Europe, Brazil) (En).zip"
+    },
+    {
+      "title": "Deadeus",
+      "system": "gb",
+      "bucket": "gb/Deadeus.zip"
+    },
+    {
+      "title": "Corpse Party BLOOD DRIVE",
+      "system": "psvita",
+      "bucket": "psvita/Corpse Party BLOOD DRIVE [PCSE00708] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Death Mark",
+      "system": "psvita",
+      "bucket": "psvita/Death Mark [PCSE01279] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Lone Survivor",
+      "system": "psvita",
+      "bucket": "psvita/Lone Survivor [PCSE00301] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Neverending Nightmares",
+      "system": "psvita",
+      "bucket": "psvita/Neverending Nightmares [PCSE00847] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Resident Evil - Revelations 2",
+      "system": "psvita",
+      "bucket": "psvita/Resident Evil - Revelations 2 [PCSE00608] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Silent Hill - Book of Memories",
+      "system": "psvita",
+      "bucket": "psvita/Silent Hill - Book of Memories [PCSE00011] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "YOMAWARI",
+      "system": "psvita",
+      "bucket": "psvita/YOMAWARI [PCSE00909] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "YOMAWARI - MS",
+      "system": "psvita",
+      "bucket": "psvita/YOMAWARI - MS [PCSE01139] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Last of Us, The",
+      "system": "ps3",
+      "bucket": "ps3/Last of Us, The (USA) (En,Fr,Es,Pt).chd"
+    },
+    {
+      "title": "Echo Night - The Lord of Nightmares",
+      "system": "psx",
+      "bucket": "psx/Echo Night - The Lord of Nightmares (Japan) [T-En by Devil Hackers v1.0a] [n].chd"
+    },
+    {
+      "title": "Seven Mansions - Ghastly Smile",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Seven Mansions - Ghastly Smile (Japan) [T-En by ArcaneAria & MrNobody v1.3] [n].chd"
+    },
+    {
+      "title": "Shiryou Sensen 2 - War of the Dead Part 2",
+      "system": "msx2",
+      "bucket": "msx2/Shiryou Sensen 2 - War of the Dead Part 2 (Japan) [T-En by Oasis v1.0] (Floppy).zip"
+    },
+    {
+      "title": "Dead of the Brain",
+      "system": "pc98",
+      "bucket": "pc98/Dead of the Brain (Japan) [T-En by WINE v1.0].hdi"
     }
   ]
 }

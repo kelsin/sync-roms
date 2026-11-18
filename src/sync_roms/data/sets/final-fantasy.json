@@ -10,18 +10,34 @@
         {
           "bucket": "psp/Final Fantasy - 20th Anniversary Edition (USA) (En,Ja) (FW6.00).chd",
           "note": "PSP: remake with new graphics, bonus dungeons and easier balance"
+        },
+        {
+          "bucket": "nes/Final Fantasy (Japan) (Rev B) [T-En by Chaos Rush v1.3].zip",
+          "note": "NES: retranslation of the Japanese version"
         }
       ]
     },
     {
       "title": "Final Fantasy II (En,Ja)",
       "system": "psp",
-      "bucket": "psp/Final Fantasy II (USA, Canada) (En,Ja).chd"
+      "bucket": "psp/Final Fantasy II (USA, Canada) (En,Ja).chd",
+      "variants": [
+        {
+          "bucket": "nes/Final Fantasy II (Japan) [T-En by Demiforce v1.03] [Add by Chaos Rush v2.2b].zip",
+          "note": "NES: original Famicom version, fan translated"
+        }
+      ]
     },
     {
       "title": "Final Fantasy III",
       "system": "nds",
-      "bucket": "nds/Final Fantasy III (USA).zip"
+      "bucket": "nds/Final Fantasy III (USA).zip",
+      "variants": [
+        {
+          "bucket": "nes/Final Fantasy III (Japan) [T-En by Chaos Rush v1.3].zip",
+          "note": "NES: original Famicom version, fan translated"
+        }
+      ]
     },
     {
       "title": "Final Fantasy II (Rev 1)",
@@ -31,6 +47,10 @@
         {
           "bucket": "gba/Final Fantasy IV Advance (USA).zip",
           "note": "GBA: adds a bonus dungeon, party swapping and a new translation"
+        },
+        {
+          "bucket": "snes/Final Fantasy IV (Japan) (Rev 1) [T-En by J2e Translations v3.21] [Add by Spooniest v1.0].zip",
+          "note": "SNES: uncut Japanese Final Fantasy IV, fan translated"
         }
       ]
     },
@@ -42,6 +62,10 @@
         {
           "bucket": "gba/Final Fantasy VI Advance (USA).zip",
           "note": "GBA: adds the Dragons' Den dungeon, new espers and a new translation"
+        },
+        {
+          "bucket": "snes/Final Fantasy VI (Japan) [T-En by RPGOne v1.2b] [All Bugs Fix].zip",
+          "note": "SNES: fan retranslation of Final Fantasy VI with bug fixes"
         }
       ]
     },
@@ -69,6 +93,10 @@
         {
           "bucket": "wonderswancolor/Makai Toushi Sa-Ga (Japan).zip",
           "note": "WonderSwan Color: Japanese-only remake with color graphics"
+        },
+        {
+          "bucket": "wonderswancolor/Spirit World Tower Warrior Sa-Ga (Japan) [T-En by Tower Reversed v1.3] [n].zip",
+          "note": "WonderSwan Color: color remake, fan translated"
         }
       ]
     },
@@ -80,7 +108,13 @@
     {
       "title": "Final Fantasy Legend III",
       "system": "gb",
-      "bucket": "gb/Final Fantasy Legend III (USA).zip"
+      "bucket": "gb/Final Fantasy Legend III (USA).zip",
+      "variants": [
+        {
+          "bucket": "gb/Sa-Ga 3 - Champions of Time and Space (Japan) [T-En by Granz v0.5] [i] [n].zip",
+          "note": "GB: retranslation with the original SaGa 3 names"
+        }
+      ]
     },
     {
       "title": "Final Fantasy Adventure",
@@ -101,6 +135,17 @@
         "psx/Final Fantasy VII (USA) (Disc 1).chd",
         "psx/Final Fantasy VII (USA) (Disc 2).chd",
         "psx/Final Fantasy VII (USA) (Disc 3).chd"
+      ],
+      "variants": [
+        {
+          "bucket": "psx/Final Fantasy VII (USA) [T-En by GreenGoblin R06g v08-06-2021] [Relocalized].m3u",
+          "note": "PS1: relocalized fan retranslation",
+          "files": [
+            "psx/Final Fantasy VII (USA) (Disc 1) [T-En by GreenGoblin R06g v08-06-2021] [Relocalized].chd",
+            "psx/Final Fantasy VII (USA) (Disc 2) [T-En by GreenGoblin R06g v08-06-2021] [Relocalized].chd",
+            "psx/Final Fantasy VII (USA) (Disc 3) [T-En by GreenGoblin R06g v08-06-2021] [Relocalized].chd"
+          ]
+        }
       ]
     },
     {
@@ -133,7 +178,7 @@
     {
       "title": "Chocobo Land - A Game of Dice",
       "system": "gba",
-      "bucket": "gba/Chocobo Land - A Game of Dice (Japan).zip"
+      "bucket": "gba/Chocobo Land - A Game of Dice (Japan) [T-En by Nezz v1.0].zip"
     },
     {
       "title": "Final Fantasy X",
@@ -143,12 +188,24 @@
     {
       "title": "Final Fantasy X-2",
       "system": "ps2",
-      "bucket": "ps2/Final Fantasy X-2 (USA, Canada).chd"
+      "bucket": "ps2/Final Fantasy X-2 (USA, Canada).chd",
+      "variants": [
+        {
+          "bucket": "ps2/Final Fantasy X-2 International + Last Mission (Japan) [T-En by Pbirdman v1.5] [i].chd",
+          "note": "PS2: International adds Last Mission and creature capture"
+        }
+      ]
     },
     {
       "title": "Final Fantasy XII",
       "system": "ps2",
-      "bucket": "ps2/Final Fantasy XII.chd"
+      "bucket": "ps2/Final Fantasy XII.chd",
+      "variants": [
+        {
+          "bucket": "ps2/Final Fantasy XII International - Zodiac Job System (Japan) [T-En by ffgriever v0.23].chd",
+          "note": "PS2: International Zodiac Job System rebalance"
+        }
+      ]
     },
     {
       "title": "Final Fantasy IV",
@@ -269,7 +326,7 @@
     {
       "title": "Chocobo no Fushigi na Dungeon for WonderSwan (Rev 3)",
       "system": "wonderswan",
-      "bucket": "wonderswan/Chocobo no Fushigi na Dungeon for WonderSwan (Japan) (Rev 3).zip"
+      "bucket": "wonderswan/Chocobo no Fushigi na Dungeon for WonderSwan (Japan) (Rev 2) [T-En by Higsby & SpecialAgentApe v1.1].zip"
     },
     {
       "title": "Hataraku Chocobo",
@@ -284,6 +341,10 @@
         {
           "bucket": "nds/Chrono Trigger (USA) (En,Fr).zip",
           "note": "DS: adds the Lost Sanctum, a bonus dungeon and a new ending"
+        },
+        {
+          "bucket": "snes/Chrono Trigger (USA) [T-En by Wakkoswami v1.11] [Relocalized].zip",
+          "note": "SNES: fan retranslation of the script"
         }
       ]
     },
@@ -291,6 +352,26 @@
       "title": "Dirge of Cerberus: Final Fantasy VII",
       "system": "ps2",
       "bucket": "ps2/Dirge of Cerberus - Final Fantasy VII (USA).chd"
+    },
+    {
+      "title": "World of Final Fantasy",
+      "system": "psvita",
+      "bucket": "psvita/World of Final Fantasy.rar"
+    },
+    {
+      "title": "Final Fantasy XIII",
+      "system": "xbox360",
+      "bucket": "xbox360/Final Fantasy XIII (USA, Europe) (En,Fr,De,Es,It) (Disc 1).zar"
+    },
+    {
+      "title": "Final Fantasy XIII-2",
+      "system": "xbox360",
+      "bucket": "xbox360/Final Fantasy XIII-2 (USA).zar"
+    },
+    {
+      "title": "Lightning Returns - Final Fantasy XIII",
+      "system": "xbox360",
+      "bucket": "xbox360/Lightning Returns - Final Fantasy XIII (USA).zar"
     }
   ]
 }

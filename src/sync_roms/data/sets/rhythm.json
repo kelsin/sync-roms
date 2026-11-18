@@ -120,7 +120,7 @@
       "title": "Dance Dance Revolution - Club Version - Dreamcast Edition",
       "category": "Bemani",
       "system": "dreamcast",
-      "bucket": "dreamcast/Dance Dance Revolution - Club Version - Dreamcast Edition (Japan).chd"
+      "bucket": "dreamcast/Dance Dance Revolution - Club Version - Dreamcast Edition (Japan) [T-En by Topping Translations v1.0] [i].chd"
     },
     {
       "title": "Dance Dance Revolution GB",
@@ -195,10 +195,58 @@
       "bucket": "psp/Pop'n Music Portable 2 (Japan).chd"
     },
     {
+      "title": "Beatmania",
+      "category": "Bemani",
+      "system": "mame",
+      "bucket": "mame/bm1stmix.zip"
+    },
+    {
+      "title": "beatmania 2nd MIX (ver JA-B)",
+      "category": "Bemani",
+      "system": "mame",
+      "bucket": "mame/bm2ndmix.zip"
+    },
+    {
+      "title": "Beatmania 4th Mix",
+      "category": "Bemani",
+      "system": "mame",
+      "bucket": "mame/bm4thmix.zip"
+    },
+    {
+      "title": "beatmania complete MIX (ver JA-B)",
+      "category": "Bemani",
+      "system": "mame",
+      "bucket": "mame/bmcompmx.zip"
+    },
+    {
+      "title": "Beatmania Complete Mix 2",
+      "category": "Bemani",
+      "system": "mame",
+      "bucket": "mame/hmcompm2.zip"
+    },
+    {
+      "title": "Beatmania Core Remix",
+      "category": "Bemani",
+      "system": "mame",
+      "bucket": "mame/bmcorerm.zip"
+    },
+    {
+      "title": "Beatmania Featuring Dreams Come True",
+      "category": "Bemani",
+      "system": "mame",
+      "bucket": "mame/bmdct.zip"
+    },
+    {
+      "title": "Ohasuta Dance Dance Revolution GB",
+      "category": "Bemani",
+      "system": "gbc",
+      "bucket": "gbc/Ohasuta Dance Dance Revolution GB (Japan).zip"
+    },
+    {
       "title": "Rhythm Tengoku",
       "category": "Nintendo",
       "system": "gba",
-      "bucket": "gba/Rhythm Tengoku (Japan) (Rev 1).zip"
+      "bucket": "gba/Rhythm Tengoku (Japan) [T-En by ShaffySwitcher v20230620] [i].zip"
     },
     {
       "title": "Rhythm Heaven",
@@ -288,7 +336,7 @@
       "title": "Space Channel 5 Part 2",
       "category": "Sega",
       "system": "dreamcast",
-      "bucket": "dreamcast/Space Channel 5 Part 2 (Japan).chd"
+      "bucket": "dreamcast/Space Channel 5 Part 2 (Japan) [T-En by BrAzE v20110418].chd"
     },
     {
       "title": "Space Channel 5 - Special Edition",
@@ -310,7 +358,13 @@
       "title": "Samba de Amigo",
       "category": "Sega",
       "system": "dreamcast",
-      "bucket": "dreamcast/Samba de Amigo (USA).chd"
+      "bucket": "dreamcast/Samba de Amigo (USA).chd",
+      "variants": [
+        {
+          "bucket": "dreamcast/Samba de Amigo Ver. 2000 (Japan) [T-En by Dukeblooders v0.9.1].chd",
+          "note": "Dreamcast: Ver. 2000 adds songs and modes, fan translated"
+        }
+      ]
     },
     {
       "title": "Rez",
@@ -415,6 +469,18 @@
       "bucket": "psvita/Persona 4 - Dancing All Night [PCSE00764] [USA] [NoNpDRM].zip"
     },
     {
+      "title": "P3D",
+      "category": "Vocaloid & idol",
+      "system": "psvita",
+      "bucket": "psvita/P3D [PCSE01274] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "P5D",
+      "category": "Vocaloid & idol",
+      "system": "psvita",
+      "bucket": "psvita/P5D [PCSE01275] [USA] [NoNpDRM].zip"
+    },
+    {
       "title": "Taiko no Tatsujin DS - Touch de Dokodon!",
       "category": "Taiko",
       "system": "nds",
@@ -454,13 +520,19 @@
       "title": "Taiko no Tatsujin - Don to Katsu no Jikuu Daibouken",
       "category": "Taiko",
       "system": "3ds",
-      "bucket": "3ds/Taiko no Tatsujin - Don to Katsu no Jikuu Daibouken (Japan).zip"
+      "bucket": "3ds/Taiko Drum Master - Adventures through Time and Space (Japan) [T-En by Team Full Combo! v1.1] [i] [n].zip"
     },
     {
       "title": "Taiko no Tatsujin - Doko Don! Mystery Adventure",
       "category": "Taiko",
       "system": "3ds",
       "bucket": "3ds/Taiko no Tatsujin - Doko Don! Mystery Adventure (Japan).zip"
+    },
+    {
+      "title": "Taiko no Tatsujin - Chibi Dragon to Fushigi na Orb",
+      "category": "Taiko",
+      "system": "3ds",
+      "bucket": "3ds/Taiko no Tatsujin - Chibi Dragon to Fushigi na Orb (Japan) (Rev 1).zip"
     },
     {
       "title": "Guitar Hero - On Tour",
@@ -628,13 +700,13 @@
       "title": "Cool Cool Toon",
       "category": "Other",
       "system": "dreamcast",
-      "bucket": "dreamcast/Cool Cool Toon (Japan).chd"
+      "bucket": "dreamcast/Cool Cool Toon (Japan) [T-En by Derek Pascarella v1.1].chd"
     },
     {
       "title": "Jung Rhythm",
       "category": "Other",
       "system": "saturn",
-      "bucket": "saturn/Jung Rhythm (Japan).chd"
+      "bucket": "saturn/Jung Rhythm (Japan) [T-En by Derek Pascarella v1.0].chd"
     },
     {
       "title": "DJ Wars",
@@ -755,6 +827,102 @@
       "category": "Other",
       "system": "gba",
       "bucket": "gba/Pocket Music (Europe) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Ontamarama",
+      "category": "Other",
+      "system": "nds",
+      "bucket": "nds/Ontamarama (USA).zip"
+    },
+    {
+      "title": "Paca Paca Passion",
+      "category": "Other",
+      "system": "mame",
+      "bucket": "mame/pacapp.zip"
+    },
+    {
+      "title": "Theatrhythm Dragon Quest",
+      "category": "Other",
+      "system": "3ds",
+      "bucket": "3ds/Theatrhythm Dragon Quest (Japan).zip"
+    },
+    {
+      "title": "Crypt of the NecroDancer",
+      "category": "Other",
+      "system": "psvita",
+      "bucket": "psvita/Crypt of the NecroDancer [PCSE00806] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "DEEMO",
+      "category": "Other",
+      "system": "psvita",
+      "bucket": "psvita/DEEMO [PCSE01041] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "DJMAX TECHNIKA TUNE",
+      "category": "Other",
+      "system": "psvita",
+      "bucket": "psvita/DJMAX TECHNIKA TUNE [PCSE00208] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "KickBeat",
+      "category": "Other",
+      "system": "psvita",
+      "bucket": "psvita/KickBeat [PCSE00113] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "MUSYNX",
+      "category": "Other",
+      "system": "psvita",
+      "bucket": "psvita/MUSYNX [PCSE01184] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "orgarhythm",
+      "category": "Other",
+      "system": "psvita",
+      "bucket": "psvita/orgarhythm [PCSE00116] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Runner2",
+      "category": "Other",
+      "system": "psvita",
+      "bucket": "psvita/Runner2 [PCSE00302] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "DJ Max Emotional Sense P - Black Square",
+      "category": "Other",
+      "system": "psp",
+      "bucket": "psp/DJ Max Emotional Sense P - Black Square (Korea) (En,Ja,Ko).chd"
+    },
+    {
+      "title": "DJ Max Emotional Sense P - Clazziquai Edition",
+      "category": "Other",
+      "system": "psp",
+      "bucket": "psp/DJ Max Emotional Sense P - Clazziquai Edition (Korea) (En,Ja,Ko).chd"
+    },
+    {
+      "title": "DJ Max Emotional Sense P 2 - Sound Miracle",
+      "category": "Other",
+      "system": "psp",
+      "bucket": "psp/DJ Max Emotional Sense P 2 - Sound Miracle (Korea) (En,Ja,Ko).chd"
+    },
+    {
+      "title": "DJ Max Portable - Hot Tunes",
+      "category": "Other",
+      "system": "psp",
+      "bucket": "psp/DJ Max Portable - Hot Tunes (Korea) (En,Ja,Ko).chd"
+    },
+    {
+      "title": "Child of Eden",
+      "category": "Other",
+      "system": "xbox360",
+      "bucket": "xbox360/Child of Eden (USA, Europe).zar"
+    },
+    {
+      "title": "Pico Night Punkin' - FNF Demake",
+      "category": "Other",
+      "system": "pico8",
+      "bucket": "pico8/fnf_menu-6.p8.png"
     }
   ]
 }
