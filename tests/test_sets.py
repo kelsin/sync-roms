@@ -1,3 +1,5 @@
+import contextlib
+import io
 import json
 import os
 import sys
@@ -7,8 +9,8 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
-from helpers import feed_list, write_json  # noqa: E402
-from sync_roms import commands, edit, listedit, picker, store  # noqa: E402
+from helpers import StorageDir, feed_list, storage_sets, write_json  # noqa: E402
+from sync_roms import commands, edit, inventory, listedit, picker, runtime, shared, store  # noqa: E402
 
 
 def systems():
@@ -29,17 +31,96 @@ SET = {"name": "Mix", "games": [
 ]}
 
 
-class SetsTest(unittest.TestCase):
-    def test_load_sets(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            os.mkdir(os.path.join(tmp, "sets"))
-            with open(os.path.join(tmp, "sets", "mix.json"), "w") as f:
-                json.dump(SET, f)
-            with mock.patch.object(store, "REPO_DATA", tmp):
-                sets = store.load_sets()
-        self.assertEqual([x["name"] for x in sets], ["Mix"])
-        self.assertEqual(len(sets[0]["games"]), 5)
+class StorageSetsTest(StorageDir):
+    def load(self):
+        err = io.StringIO()
+        with contextlib.redirect_stderr(err):
+            sets = store.load_sets()
+        return sets, err.getvalue()
 
+    def test_a_fresh_storage_has_no_sets(self):
+        store.reset_sets()
+        self.addCleanup(setattr, store, "_sets", "[]")
+        self.assertEqual(self.load(), ([], ""))
+
+    def test_sets_load_sorted_by_name_with_ids_from_file_names(self):
+        storage_sets(self, {"mix": SET, "b-side": {"name": "another", "description": "d", "games": []}}, self.root)
+        sets, err = self.load()
+        self.assertEqual(err, "")
+        self.assertEqual([(x["id"], x["name"]) for x in sets], [("b-side", "another"), ("mix", "Mix")])
+        self.assertEqual(sets[0]["description"], "d")
+        self.assertEqual(sets[1]["games"], SET["games"])
+        self.assertNotIn("art", sets[1])
+        self.assertEqual([x["id"] for x in store.set_files()], ["b-side", "mix"])  # file-name order
+
+    def test_only_json_files_directly_under_sets_are_sets(self):
+        storage_sets(self, {"mix": SET}, self.root)
+        self.put("sets/notes.txt")
+        self.put("sets/old/x.json", store.set_text(SET).encode())
+        self.assertEqual([x["id"] for x in self.load()[0]], ["mix"])
+
+    def test_art_round_trips_and_is_written_only_when_set(self):
+        with_art = {"name": "Mix", "description": "d", "art": "shmups", "games": SET["games"]}
+        text = store.set_text(with_art)
+        self.assertEqual(list(json.loads(text)), ["name", "description", "art", "games"])
+        self.assertNotIn('"art"', store.set_text({"name": "Mix", "games": []}))
+        storage_sets(self, {"mix": text}, self.root)
+        loaded = self.load()[0][0]
+        self.assertEqual(loaded["art"], "shmups")
+        self.assertEqual(store.set_text(loaded), text)  # byte for byte
+
+    def test_a_malformed_set_file_is_skipped_with_a_warning(self):
+        storage_sets(self, {"mix": SET, "bad": "{oops", "list": "[]", "nogames": '{"name": "X"}'}, self.root)
+        sets, err = self.load()
+        self.assertEqual([x["id"] for x in sets], ["mix"])
+        for key in ("sets/bad.json", "sets/list.json", "sets/nogames.json"):
+            self.assertIn(key, err)
+
+    def test_sets_are_read_once_per_run_and_reset_reads_them_again(self):
+        storage_sets(self, {"mix": SET}, self.root)
+        self.load()
+        self.put("sets/new.json", store.set_text({"name": "New", "games": []}).encode())
+        with mock.patch.object(shared, "load", side_effect=AssertionError("read again")), \
+                mock.patch.object(inventory, "files", side_effect=AssertionError("listed again")):
+            self.assertEqual([x["id"] for x in self.load()[0]], ["mix"])
+        store.reset_sets()
+        self.assertEqual([x["id"] for x in self.load()[0]], ["mix", "new"])
+
+    def test_callers_get_their_own_copy(self):
+        storage_sets(self, {"mix": SET}, self.root)
+        store.load_sets()[0]["games"].clear()
+        store.set_files()[0].pop("id")
+        self.assertEqual(store.load_sets()[0]["id"], "mix")
+        self.assertEqual(len(store.load_sets()[0]["games"]), 5)
+
+    def test_writing_a_set_puts_it_in_storage_and_reads_the_sets_again(self):
+        storage_sets(self, {"mix": SET}, self.root)
+        self.load()
+        store.write_set("new", {"name": "New", "games": [], "art": "shmups"})
+        with open(os.path.join(self.root, "sets", "new.json"), encoding="utf-8") as f:
+            self.assertEqual(f.read(), store.set_text({"name": "New", "art": "shmups", "games": []}))
+        self.assertEqual([x["id"] for x in self.load()[0]], ["mix", "new"])
+
+    def test_a_storage_error_falls_back_to_the_local_copies(self):
+        storage_sets(self, {"mix": SET}, self.root)
+        self.load()  # leaves the local copies
+        store.reset_sets()
+        with mock.patch.object(runtime, "ROOT", self.root + "-unmounted"):
+            sets, err = self.load()
+        self.assertEqual([x["name"] for x in sets], ["Mix"])
+        self.assertIn("Couldn't list sets/", err)
+        self.assertEqual(err.count("\n"), 1)  # one warning, not one per set
+
+    def test_a_listing_error_with_no_local_copies_gives_no_sets(self):
+        store.reset_sets()
+        self.addCleanup(setattr, store, "_sets", "[]")
+        with mock.patch.object(inventory, "files", side_effect=OSError("down")):
+            sets, err = self.load()
+        self.assertEqual(sets, [])
+        self.assertIn("Couldn't list sets/", err)
+
+
+class SetsTest(unittest.TestCase):
     def test_rows_sorted_by_system_skip_unknown(self):
         rows = edit.set_rows(SET, systems(), lambda s: {"gba/A.zip", "gen/Zed.zip"})
         self.assertEqual([r[1] for r in rows], ["ful/Skip.zip", "gba/A.zip", "gba/Gone.zip", "gen/Zed.zip"])

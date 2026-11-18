@@ -23,7 +23,7 @@ def main(path):
     with open(path) as f:
         decisions = json.load(f)
     add, remove = decisions.get("add", []), decisions.get("remove", [])
-    sets = store.repo_set_files()
+    sets = store.set_files()
     listed = {g.get("bucket") for game_set in sets for g in game_set["games"]}
     missing = sorted({x["game"] for x in add + remove} - listed)
     if missing:

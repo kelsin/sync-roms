@@ -81,8 +81,9 @@ def art_emoji(art_id, default=DEFAULT_EMOJI):
 
 
 def set_emoji(game_set):
-    """A set's emoji (its id in emoji.json), or SET_EMOJI when it has none. Display only, never stored."""
-    return art_emoji(game_set.get("id"), SET_EMOJI)
+    """A set's emoji: its art's in emoji.json (its "art", else its id), or SET_EMOJI when it has none. Display only,
+    never stored."""
+    return art_emoji(game_set.get("art") or game_set.get("id"), SET_EMOJI)
 
 
 def collection_emoji(collection):

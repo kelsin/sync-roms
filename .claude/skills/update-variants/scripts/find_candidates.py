@@ -42,7 +42,7 @@ def main():
     checked = shared.load(CHECKED, json.loads, {})
 
     games, referenced = {}, set()
-    for game_set in store.repo_set_files():
+    for game_set in store.set_files():
         for g in game_set["games"]:
             key = g.get("bucket")
             if not key:

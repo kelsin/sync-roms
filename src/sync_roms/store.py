@@ -6,7 +6,7 @@ import shutil
 import sys
 import tempfile
 
-from . import inventory, s3, ui
+from . import inventory, runtime, s3, ui
 
 
 REPO_DATA = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
@@ -522,10 +522,12 @@ PRETTY = {"indent": 2, "ensure_ascii": False, "trailing_newline": True}  # write
 
 
 def set_data(game_set):
-    """A set as it is written to its file: name, description (when there is one), games."""
+    """A set as it is written to its file: name, description and art (when it has them), games."""
     data = {"name": game_set["name"]}
     if game_set.get("description"):
         data["description"] = game_set["description"]
+    if game_set.get("art"):
+        data["art"] = game_set["art"]
     data["games"] = game_set["games"]
     return data
 
@@ -535,31 +537,101 @@ def set_text(game_set):
     return json.dumps(set_data(game_set), indent=2, ensure_ascii=False) + "\n"
 
 
-def read_set_file(path, set_id):
-    with open(path) as f:
-        data = json.load(f)
-    return {"id": set_id, "name": data.get("name", set_id),
-            "description": data.get("description", ""), "games": data.get("games", [])}
+SETS = "sets/"  # storage folder of the game sets, one sets/<id>.json each
+_sets = None  # JSON text of the sets read from storage this run, in file-name order (json.loads of it is faster than
+# deep-copying the parse, and load_sets is called many times a run); None until read
 
 
-def repo_set_files():
-    """The repo's own sets (data/sets/*.json) as read_set_file dicts, in file-name order."""
-    folder = os.path.join(REPO_DATA, "sets")
-    if not os.path.isdir(folder):
-        return []
-    return [read_set_file(os.path.join(folder, name), name[:-5]) for name in sorted(os.listdir(folder))
-            if name.endswith(".json")]
+def _set_file(text):
+    """A set file's JSON object, or None when it isn't one with a games list."""
+    try:
+        data = json.loads(text)
+    except ValueError:
+        return None
+    return data if isinstance(data, dict) and isinstance(data.get("games"), list) else None
+
+
+def _set_dict(set_id, data):
+    out = {"id": set_id, "name": data.get("name", set_id), "description": data.get("description", ""),
+           "games": data["games"]}
+    if isinstance(data.get("art"), str):
+        out["art"] = data["art"]
+    return out
+
+
+def _set_id(key):
+    """The set id of a storage key of the sets folder, or None for anything but sets/<id>.json."""
+    name = key[len(SETS):]
+    return name[:-5] if key.startswith(SETS) and name.endswith(".json") and "/" not in name and name != ".json" else None
+
+
+def _read_sets():
+    """Every set in storage, through its local copy (shared.py); when storage can't be listed, the local copies."""
+    from . import shared  # imported here: shared uses this module
+    try:
+        if runtime.ROOT and not os.path.isdir(runtime.ROOT):  # an unmounted share, not an empty one
+            raise FileNotFoundError(f"{runtime.ROOT} is missing")
+        keys = [k for k in inventory.files(SETS, sizes=False) if _set_id(k)]
+    except s3.ERRORS as e:
+        ui.warn(f"Couldn't list {SETS} in storage ({e}); using the local copies")
+        try:
+            names = os.listdir(shared.local_path(SETS.rstrip("/")))
+        except OSError:
+            names = []
+        keys = [SETS + n for n in names if _set_id(SETS + n)]
+
+        def load(key):
+            try:
+                with open(shared.local_path(key), encoding="utf-8") as f:
+                    return _set_file(f.read())
+            except OSError:
+                return None
+    else:
+        gone = object()  # not there any more, or unreadable (shared.load warned)
+        load = lambda key: shared.load(key, _set_file, gone)  # noqa: E731
+    out = []
+    for key in sorted(keys):
+        data = load(key)
+        if data is None:
+            ui.warn(f"{key} isn't a set (a JSON object with a games list); skipped")
+        elif isinstance(data, dict):
+            out.append(_set_dict(_set_id(key), data))
+    return out
+
+
+def reset_sets():
+    """Forget the sets read this run, so the next read lists and checks storage again."""
+    global _sets
+    _sets = None
+
+
+def set_files():
+    """The sets in storage as {"id", "name", "description", "games", "art" (when set)} dicts, in file-name order.
+
+    Read once per run (reset_sets and write_set read them again); each call returns a copy the caller may change."""
+    global _sets
+    if _sets is None:
+        _sets = json.dumps(_read_sets(), ensure_ascii=False)
+    return json.loads(_sets)
 
 
 def load_sets():
-    """Game sets from the repo's data/sets/*.json, sorted by name.
+    """Game sets from storage's sets/*.json, sorted by name.
 
-    Each file is {"name", "description" (optional), "games": [{"title", "system", "bucket", "files" (optional)}]}.
+    Each file is {"name", "description" (optional), "art" (optional, an art.json id), "games": [{"title", "system",
+    "bucket", "files" (optional)}]}; its id is its file name.
     "category" (optional) groups games in the set editor.
     "series" (optional) names the game's series (one of data/series.json), to narrow the editors to it.
     "files" are extra bucket keys (e.g. the discs of a multi-disc game) toggled together with "bucket".
     """
-    return sorted(repo_set_files(), key=lambda x: x["name"].lower())
+    return sorted(set_files(), key=lambda x: x["name"].lower())
+
+
+def write_set(set_id, game_set):
+    """Put a set's file in storage (and its local copy); the sets are read again on next use."""
+    from . import shared  # imported here: shared uses this module
+    shared.write(SETS + set_id + ".json", set_text(game_set))
+    reset_sets()
 
 
 def set_slug(name):

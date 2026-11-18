@@ -12,7 +12,7 @@ sys.path.insert(0, os.path.join(ROOT, "src"))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 from sync_roms import cli, commands, downloads, inventory, mirroring, names, runtime, s3, store, themeart, ui  # noqa: E402
-from helpers import Cmd, DataDir  # noqa: E402,F401
+from helpers import Cmd, DataDir, storage_sets  # noqa: E402,F401
 
 
 
@@ -188,7 +188,8 @@ class GamesTest(CardCmd):
         self.assertEqual(self.read("cards.json")["SD"]["layout"], "esde")
 
     def test_sets_add_remove(self):
-        set_id = store.load_sets()[0]["id"]
+        storage_sets(self, {"mix": {"name": "Mix", "games": [{"title": "A", "system": "gba", "bucket": "gba/A.zip"}]}})
+        set_id = "mix"
         self.run_cmd("games", "sets", "add", set_id)
         self.assertEqual(self.games()["sets"], [set_id])
         self.run_cmd("games", "sets", "remove", set_id)

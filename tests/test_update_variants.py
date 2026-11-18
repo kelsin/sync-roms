@@ -67,7 +67,7 @@ class FindCandidates(CheckedInStorage):
         with mock.patch.object(sys, "argv", ["find_candidates.py", *argv]), \
                 mock.patch.object(inventory, "current", side_effect=itertools.chain([object()], itertools.repeat(None))), \
                 mock.patch.object(inventory, "files", side_effect=lambda p, sizes=True: stored if p == "gba/" else []), \
-                mock.patch.object(store, "repo_set_files", return_value=[]), \
+                mock.patch.object(store, "set_files", return_value=[]), \
                 contextlib.redirect_stdout(io.StringIO()) as out:
             find_candidates.main()
         return out.getvalue()

@@ -18,7 +18,7 @@ SETS_DIR = os.path.join("src", "sync_roms", "data", "sets")
 
 def repo_sets():
     """The repo's own sets as {id: {"name", "description", "games"}}."""
-    return {game_set.pop("id"): game_set for game_set in store.repo_set_files()}
+    return {game_set.pop("id"): game_set for game_set in store.set_files()}
 
 
 set_text = store.set_text  # the format of a set's file lives in store

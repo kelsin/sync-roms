@@ -5,6 +5,7 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
+from helpers import StorageDir, storage_sets  # noqa: E402
 from sync_roms import commands, edit, picker, setedit, store, ui  # noqa: E402
 
 SYSTEMS = [{"name": "Game Boy Advance", "bucket": "gba"}, {"name": "Genesis", "bucket": "gen"}]
@@ -26,13 +27,17 @@ def shown_without(keys, add=()):
     return shown
 
 
-class Files(unittest.TestCase):
-    def test_every_repo_set_round_trips_to_its_file(self):
-        folder = os.path.join(store.REPO_DATA, "sets")
+class Files(StorageDir):
+    def test_every_set_round_trips_to_its_file(self):
+        texts = {"plain": store.set_text({"name": "Plain", "games": games()}),
+                 "full": store.set_text({"name": "Full ★", "description": "All of it", "art": "shmups", "games": [
+                     {"title": "A", "category": "Cave", "series": "Alpha", "system": "gba", "bucket": "gba/A.zip",
+                      "files": ["gba/A2.zip"], "variants": [{"bucket": "gb/A.gb", "note": "GB: x"}]}]})}
+        storage_sets(self, texts, self.root)
         sets = setedit.repo_sets()
-        self.assertTrue(sets)
+        self.assertEqual(sorted(sets), ["full", "plain"])
         for sid, game_set in sets.items():
-            with open(os.path.join(folder, sid + ".json"), encoding="utf-8") as f:
+            with open(os.path.join(self.root, "sets", sid + ".json"), encoding="utf-8") as f:
                 self.assertEqual(setedit.set_text(game_set), f.read(), sid)
 
 
