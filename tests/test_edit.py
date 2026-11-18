@@ -189,7 +189,7 @@ class MenuActions(EditBase):
     def test_top_menu_entries_are_exactly_cards_sets_collections_and_device_systems(self):
         top = self.top_titles([None])[0][1]
         self.assertEqual(top, ["💳 Cards", "📦 Sets", "💖 Collections", "🧩 Device systems",
-                               "✅ Done (review & save)", "🚪 Quit without saving"])
+                               "✅ Done (review & save)", "🚪 Quit (card games are already saved)"])
 
     def test_choosing_sets_calls_edit_sets_and_a_failure_returns_to_the_menu(self):
         from sync_roms import setedit
@@ -768,9 +768,9 @@ class NarrowRows(unittest.TestCase):
         self.assertTrue(all("reverse" in str(s.style) for s in row.spans) and row.style == "reverse")
 
     def test_filters_show_on_the_filter_line(self):
-        lines, _ = self.rendered(filters="📦 Shmups only (c shows all)")
+        lines, _ = self.rendered(filters="📦 Shmups only (c clear filters)")
         self.assertEqual(lines[0].rstrip(), "t")
-        self.assertEqual(lines[1].rstrip(), "🔎   📦 Shmups only (c shows all)")
+        self.assertEqual(lines[1].rstrip(), "🔎   📦 Shmups only (c clear filters)")
 
     def test_a_restored_scroll_is_clamped_so_the_list_is_filled(self):
         seen = []

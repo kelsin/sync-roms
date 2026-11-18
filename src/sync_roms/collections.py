@@ -72,7 +72,10 @@ def save_collection(collection):
 
 
 def delete_collection(collection_id):
-    os.remove(os.path.join(collections_dir(), collection_id + ".json"))
+    """Remove the collection's file, keeping it as <id>.json.bak."""
+    path = os.path.join(collections_dir(), collection_id + ".json")
+    store.backup(path)
+    os.remove(path)
 
 
 def collection_problem(name, existing_ids):

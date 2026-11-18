@@ -94,10 +94,10 @@ TOPICS = {
     "collections": """
   sync-roms collections edit                  edit your collections of favourite games
 
-  Your own lists of games (like a set, but personal), saved straight to ~/.sync-roms/collections/<id>.json when you pick
-  Done; Quit discards. No git or gh needed, and nothing goes to storage or the repo. Same keys as the set editor.
-  Deleting a collection that cards use asks first, then removes it from them. In a card's system list, l adds a
-  collection to that card. Theme art picks the picture (Action, RPG, ...) the collection gets on ES-DE and Knulli cards
+  Your own lists of games (like a set, but personal), saved to ~/.sync-roms/collections/<id>.json after Done or Esc
+  shows the changes; Quit discards. No git or gh needed, and nothing goes to storage or the repo. Same keys as the set
+  editor. Deleting a collection that cards use asks first, then removes it from them (the file is kept as
+  <id>.json.bak). In a card's system list, l adds a collection to that card. Theme art picks the picture (Action, RPG, ...) the collection gets on ES-DE and Knulli cards
   that use Art Book Next.
 """,
     "themes": """

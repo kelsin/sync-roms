@@ -2,7 +2,7 @@
 import copy
 
 from . import cardedit, edit, inventory, picker, previews, runtime, s3, store, themeart, ui
-from .listedit import add_from_set, add_from_system, ask_category, folder_lister, game_label, insert_game, recategorize, reconcile, series_keys, set_series, view
+from .listedit import add_from_set, add_from_system, ask_category, diff_lists, edit_menu, folder_lister, game_label, insert_game, recategorize, reconcile, series_keys, set_series, view
 
 
 # --- Set files ---------------------------------------------------------------------------------------
@@ -16,6 +16,9 @@ set_text = store.set_text  # the format of a set's file lives in store
 
 
 # --- Editing the games of one set --------------------------------------------------------------------
+
+GAMES_KEYS = [k for k in cardedit.SET_GAMES_KEYS if k[0] != cardedit.VARIANT_KEY]  # what ? lists in a set's games list
+
 
 def edit_one(game_set, systems, keys_of):
     """Edit one set: remove games, add games from a system or another set, change categories, rename."""
@@ -41,8 +44,8 @@ def edit_one(game_set, systems, keys_of):
                     narrowed = [r for r in rows if r[1] in series_keys(game_set, series_filter)] if series_filter else rows
                     pressed = edit.toggle_games(
                         f"✏️  {label} — ✅ in the set, ⬜ remove it", narrowed,
-                        hotkeys=(cardedit.SERIES_KEY, cardedit.CLEAR_KEY), hint=edit.GAMES_HINT + " · r series · c all",
-                        filters=f"{series_filter} (c shows all)" if series_filter else "")
+                        hotkeys=(cardedit.SERIES_KEY, cardedit.CLEAR_KEY), hint=edit.GAMES_HINT + " · r series · c clear filters",
+                        key_help=GAMES_KEYS, filters=f"{series_filter} (c clear filters)" if series_filter else "")
                     if pressed == cardedit.CLEAR_KEY:
                         series_filter = None
                     elif pressed == cardedit.SERIES_KEY:
@@ -79,43 +82,6 @@ def edit_one(game_set, systems, keys_of):
             desc = ui.ask("Description (empty keeps it): ").strip()
             game_set["name"] = name or game_set["name"]
             game_set["description"] = desc or game_set.get("description", "")
-
-
-# --- What changed ------------------------------------------------------------------------------------
-
-def game_line(game):
-    return f"{game.get('title') or game['bucket']} ({game['bucket']})"
-
-
-def diff_sets(before, after):
-    """[(kind, set id, [lines])] for every set that was created, removed or changed; kind is new, removed or changed."""
-    found = []
-    for sid in sorted(set(before) | set(after)):
-        a, b = before.get(sid), after.get(sid)
-        if a is None:
-            found.append(("new", sid, [f"+ {game_line(g)}" for g in b["games"] if g.get("bucket")]))
-        elif b is None:
-            found.append(("removed", sid, [f"{len(a['games'])} game(s)"]))
-        elif a != b:
-            lines = [f"name: {a['name']} → {b['name']}"] if a["name"] != b["name"] else []
-            if a.get("description", "") != b.get("description", ""):
-                lines.append("description changed")
-            old = {g["bucket"]: g for g in a["games"] if g.get("bucket")}
-            new = {g["bucket"]: g for g in b["games"] if g.get("bucket")}
-            lines += [f"+ {game_line(new[k])}" for k in new if k not in old]
-            lines += [f"- {game_line(old[k])}" for k in old if k not in new]
-            lines += [f"~ {game_line(new[k])}: category {old[k].get('category') or 'none'} → {new[k].get('category') or 'none'}"
-                      for k in new if k in old and (old[k].get("category") or "") != (new[k].get("category") or "")]
-            found.append(("changed", sid, lines or ["edited"]))
-    return found
-
-
-def print_changes(found):
-    print(ui.bold("\n📝 Changes"))
-    for kind, sid, lines in found:
-        print(ui.bold(f"  {sid}") + ui.dim(f"  ({kind})"))
-        for line in lines:
-            print((ui.green if line.startswith("+") else ui.red if line.startswith("-") else str)(f"    {line}"))
 
 
 # --- Saving -----------------------------------------------------------------------------------------
@@ -185,7 +151,7 @@ def edit_sets():
         try:
             code = edit_working(systems, before, working, state)
         except KeyboardInterrupt:  # Ctrl-C: review the changes as Done does, then stop as before
-            if state["review"] or not diff_sets(before, working):  # Ctrl-C at that review itself, or nothing to review
+            if state["review"] or not diff_lists(before, working):  # Ctrl-C at that review itself, or nothing to review
                 raise
             print(ui.yellow("\n🛑 Interrupted — review your changes before leaving."))
             state["review"] = True
@@ -200,70 +166,28 @@ def edit_working(systems, before, working, state):
     true until the user goes back to editing; when that review ends the editor, returns None. Returns the exit code."""
     keys_of = folder_lister()
 
-    while True:
-        ids = sorted(working, key=lambda x: working[x]["name"].lower())
-        n = len(ids)
-        found = diff_sets(before, working)
-        edited = {sid for _, sid, _ in found}
-        labels = ([f"{themeart.set_emoji({**working[x], 'id': x})} {working[x]['name']}  ({len(working[x]['games'])} games)" for x in ids]
-                  + ["➕ New set", "✅ Done (review & save)", "🚪 Quit without saving"])
-        extras = [[("  " + ("new" if x not in before else "edited"), "cyan")] if x in edited else [] for x in ids] + [[], [], []]
-        i = n + 1 if state["review"] else picker.filter_list("✏️  Which set?  (Esc = review & save)", labels, extras=extras,
-                                                    hotkeys=(edit.DELETE_KEY,), hint="/ filter · Enter open · d delete · Esc review",
-                                                    preview=lambda k: previews.collection(themeart.set_art({**working[ids[k]], "id": ids[k]})) if k < n else None)
-        if isinstance(i, tuple):
-            if i[1] < n:
-                sid = ids[i[1]]
-                where = local_references(sid)
-                note = f" Your {', '.join(where)} still reference(s) it." if where else ""
-                if ui.confirm(f"🗑️  Delete set {themeart.set_emoji(working[sid])} {working[sid]['name']}?{note}", default=False):
-                    del working[sid]
-            continue
-        if i is not None and i < n:
-            edit_one(working[ids[i]], systems, keys_of)
-            continue
-        if i == n:
-            sid = new_set(working)
-            if sid:
-                edit_one(working[sid], systems, keys_of)
-            continue
-        if i == n + 2:
-            if not edited or ui.confirm("Discard your pending changes and quit?", default=False):
-                edit.note(ui.yellow("👋 Quit without saving."))
-                return 0
-            continue
-        if not found:
-            edit.note(ui.yellow("👋 No changes, nothing saved."))
-            return 0
-        empty = [sid for kind, sid, _ in found if kind != "removed" and not working[sid]["games"]]
-        if empty:
-            edit.note(ui.yellow(f"ℹ️  {', '.join(empty)} has no games. Add some or delete it first."))
-            state["review"] = False
-            continue
-        print_changes(found)
-        answer = ui.choose("💾 Save these changes to storage?", "sed", "s", "s save · e keep editing · d discard")
-        if answer == "e":
-            state["review"] = False
-            continue
-        if answer == "d":
-            edit.note(ui.yellow("👋 Not saved."))
-            return None if state["review"] else 0
+    def delete_note(sid):
+        where = local_references(sid)
+        return f" Your {', '.join(where)} still reference(s) it." if where else ""
+
+    def save(found):
         try:
             save_sets(before, working, found, state["fallback"])
         except Stale as e:
             edit.note(ui.red(f"❌ {e}; nothing was saved. Quit and reopen the sets editor: it starts from storage's sets."))
-            state["review"] = False
-            continue
+            return False
         except SystemExit:  # ui.fail, e.g. no write profile: its error is printed; the edits stay pending
             need = "" if runtime.ROOT else f" (saving needs the write profile {runtime.WRITE_PROFILE!r})"
             edit.note(ui.red(f"❌ Couldn't save the sets to storage{need}: see the error above. Nothing more was saved."))
-            state["review"] = False
-            continue
+            return False
         except s3.ERRORS as e:  # e.g. an unmounted storage folder: back to the menu with what is left still pending
             edit.note(ui.red(f"❌ Couldn't save the sets to storage: {e}"))
-            state["review"] = False
-            continue
+            return False
         saved = ui.green(f"💾 Saved {len(found)} set(s) to storage.")
         if not picker.queue_note(saved, keep=True):  # on the menu, and on the normal screen after the editor
             print(saved)
-        return None if state["review"] else 0
+        return True
+
+    return edit_menu("set", before, working, state, themeart.set_emoji, themeart.set_art, delete_note, new_set,
+                     lambda game_set: edit_one(game_set, systems, keys_of), save, "💾 Save these changes to storage?",
+                     empty_ok=False)

@@ -85,6 +85,8 @@ class Files(DataDir):
         collections.save_collection({"id": "favs", **FAVS})
         collections.delete_collection("favs")
         self.assertFalse(os.path.exists(self.path("collections/favs.json")))
+        self.assertTrue(os.path.exists(self.path("collections/favs.json.bak")))  # kept, and never loaded
+        self.assertEqual(collections.load_collections(), [])
 
     def test_collection_problem(self):
         self.assertEqual(collections.collection_problem(" ** ", []), "A collection needs a name with letters or digits.")

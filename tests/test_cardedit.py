@@ -235,7 +235,7 @@ class Flow(DataDir):
             _, calls = self.run_system(returns((cardedit.PAST_SURPRISE_KEY, 0)), returns((cardedit.CLEAR_KEY, 0)),
                                        lambda labels, kw: [False] * len(labels))
         self.assertEqual(calls[1][1], ["Ruby.zip"])
-        self.assertEqual(calls[1][2]["filters"], "🎁 past surprises only (c shows all)")  # on the filter line
+        self.assertEqual(calls[1][2]["filters"], "🎁 past surprises only (c clear filters)")  # on the filter line
         self.assertNotIn("past surprises", calls[1][0])
         self.assertEqual(len(calls[2][1]), len(calls[0][1]))
 
@@ -440,7 +440,7 @@ class Flow(DataDir):
         filter_list = picker.filter_list  # the real list, driven by keys without a screen
 
         def take_all(labels, kw):
-            self.assertEqual(kw["filters"], "📦 Pokemon only (c shows all)")
+            self.assertEqual(kw["filters"], "📦 Pokemon only (c clear filters)")
             self.assertNotIn("Pokemon", calls[-1][0])
             with mock.patch.object(picker, "_run", lambda model: [model.key(k) for k in ("a", "enter")][-1]), \
                     mock.patch.object(picker, "_draws_images", return_value=False):
@@ -1291,9 +1291,9 @@ class MetaFlow(Flow):
         _, calls = self.run_system(self.opens_meta, fields, genres, platform, fields_again, years, both, returns(0),
                                    with_set, everything)
         filters = [c[2].get("filters", "") for c in calls]
-        self.assertEqual("genre: Platform (c shows all)", filters[3])
-        self.assertEqual("genre: Platform · year: 2001 (c shows all)", filters[6])
-        self.assertEqual("📦 Pokemon only · genre: Platform · year: 2001 (c shows all)", filters[8])
+        self.assertEqual("genre: Platform (c clear filters)", filters[3])
+        self.assertEqual("genre: Platform · year: 2001 (c clear filters)", filters[6])
+        self.assertEqual("📦 Pokemon only · genre: Platform · year: 2001 (c clear filters)", filters[8])
         self.assertEqual("", filters[9])
         self.assertNotIn("genre", calls[8][0])
         self.assertEqual(store.card_games("c"), {"gba": [g("gba/Zelda.zip")]})
@@ -1431,7 +1431,7 @@ class SetFlow(Flow):
         self.assertEqual(lists, [["Gen 1  (2 games)"]])  # "Other" has one game: left out
         self.assertEqual(calls[0][2]["hotkeys"], keys)
         self.assertEqual(calls[0][2]["filters"], "")
-        self.assertEqual(calls[1][2]["filters"], "Gen 1 (c shows all)")
+        self.assertEqual(calls[1][2]["filters"], "Gen 1 (c clear filters)")
         self.assertEqual(calls[1][1], ["Game Boy — Red", "Game Boy Advance — Ruby"])
         self.assertEqual(calls[2][2]["filters"], "")
 
@@ -1672,7 +1672,7 @@ class GameFiltersTest(unittest.TestCase):
         self.assertTrue(f.handle(cardedit.SET_KEY, self.KEYS, {}, lambda name: current.append(name) or game_set))
         self.assertEqual([k for k in self.KEYS if f.keep(k)], ["gba/A.zip"])
         self.assertIn("Picks only", f.describe())
-        self.assertTrue(f.describe().endswith("(c shows all)"))
+        self.assertTrue(f.describe().endswith("(c clear filters)"))
         f.handle(cardedit.SET_KEY, self.KEYS, {}, lambda name: current.append(name))  # cancelled: the set stays
         self.assertEqual(current, [None, "Picks"])
         self.assertEqual([k for k in self.KEYS if f.keep(k)], ["gba/A.zip"])

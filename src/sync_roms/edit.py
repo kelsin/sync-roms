@@ -46,7 +46,8 @@ def set_note(s, key, text):
 FULL_SYSTEM_NOTE = "Full system: every file in its folder is synced, so it can't be toggled"
 
 
-def toggle_games(title, rows, extras=None, covered=None, excluded=None, hotkeys=(), hint=None, place=None, filters=""):
+def toggle_games(title, rows, extras=None, covered=None, excluded=None, hotkeys=(), hint=None, place=None, filters="",
+                 key_help=None):
     """Multi-select over rows of (system, bucket key, game title, label); adds/removes games in each system in place.
 
     extras: {bucket key: [more bucket keys]} added or removed together with that row's key.
@@ -56,8 +57,8 @@ def toggle_games(title, rows, extras=None, covered=None, excluded=None, hotkeys=
     with that note (e.g. games a set reference already syncs).
     excluded: {system bucket: [keys]}, updated in place. When given, covered rows can be switched off (they start on
     unless listed) and the off ones are recorded there; only full systems stay locked.
-    hotkeys/hint: extra keys the list offers (and the hint line to show). The toggles made so far are applied, and the
-    key pressed is returned (None on Enter). place: a dict the caller keeps across calls, so a list of the same rows
+    hotkeys/hint/key_help: extra keys the list offers (the hint line to show, and the (keys, what they do) pairs ?
+    lists). The toggles made so far are applied, and the key pressed is returned (None on Enter). place: a dict the caller keeps across calls, so a list of the same rows
     opens where the last one was left (picker.carry_place). filters: the caller's filters, for the filter line.
     Ctrl-C applies the toggles made so far, then raises KeyboardInterrupt.
     """
@@ -92,7 +93,7 @@ def toggle_games(title, rows, extras=None, covered=None, excluded=None, hotkeys=
     interrupted = False
     try:
         state = picker.filter_list(title, [label for *_, label in rows], multi=True, initial=initial, locked=locked,
-                                   locked_note=[n or "" for n in notes], hint=hint or GAMES_HINT, note_text=note_text,
+                                   locked_note=[n or "" for n in notes], hint=hint or GAMES_HINT, key_help=key_help, note_text=note_text,
                                    on_note=on_note, hotkeys=hotkeys, session=session, filters=filters,
                                    row_note=lambda i: variant_line(rows[i][1], variants, parents, system_names),
                                    preview=lambda i: previews.game_thumb(rows[i][1]) if i < len(rows) else None,
@@ -442,7 +443,7 @@ def edit_manifest():
         """The top menu. Returns True to review and save, False to quit without saving."""
         try:
             while True:
-                options = ["💳 Cards", "📦 Sets", "💖 Collections", "🧩 Device systems", "✅ Done (review & save)", "🚪 Quit without saving"]
+                options = ["💳 Cards", "📦 Sets", "💖 Collections", "🧩 Device systems", "✅ Done (review & save)", "🚪 Quit (card games are already saved)"]
                 extras = [[("  " + str(len(targets)) + " pending", "cyan")] if targets else [],
                           [], [], [("  " + str(len(overlay_pending)) + " edited", "cyan")] if overlay_pending else [], [], []]
                 i = picker.filter_list("✏️  What do you want to edit?  (Esc = review & save)", options, extras=extras,
@@ -491,7 +492,7 @@ def edit_manifest():
 
     while True:
         if not menu():
-            print(ui.yellow("👋 Quit without saving the device changes (card games were saved as you edited them)."))
+            print(ui.yellow("👋 Quit without saving the device changes (card games are already saved)."))
             return 0
         changed = changed_targets()
         if not changed and not overlay_pending:

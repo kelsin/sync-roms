@@ -31,7 +31,7 @@ GAMES_KEYS = [("s", "sets on this system: narrow to one, or pick its games"),
               ("p", "only the games that were surprises lately"), ("v", "the game's variants on other systems"),
               ("c", "clear the search, set, metadata and surprise filters")]
 SET_GAMES_KEYS = [("v", "the game's variants on other systems"), ("r", "narrow to one series of games"),
-                  ("c", "show every game again")]
+                  ("c", "clear the series filter")]
 SIZING = "…"
 
 
@@ -543,7 +543,7 @@ class GameFilters:
         parts = ([f"{self.set[2]} {self.set[0]} only"] if self.set else []) \
             + (["🎁 past surprises only"] if self.past is not None else []) \
             + ([metafilter.describe(self.meta_filt)] if self.meta_filt else [])
-        return f"{' · '.join(parts)} (c shows all)" if parts else ""
+        return f"{' · '.join(parts)} (c clear filters)" if parts else ""
 
     def handle(self, pressed, keys, place, choose_set):
         """Apply a filter hotkey; returns whether pressed was one. keys: every row's bucket key; place: the list's
@@ -832,7 +832,7 @@ def edit_set(name, game_set, setup, to_fetch=None, card_usages=None):
                 f"{themeart.set_emoji(game_set)} {game_set['name']} on {name} — ✅ synced, ⬜ not, 📦 from a set",
                 [r[3] for r in shown], multi=True, initial=[start[k] for k in keys], extras=extras,
                 hint=SET_GAMES_HINT, hotkeys=(VARIANT_KEY, SERIES_KEY, CLEAR_KEY), key_help=SET_GAMES_KEYS, status=status,
-                filters=f"{series_filter} (c shows all)" if series_filter else "",
+                filters=f"{series_filter} (c clear filters)" if series_filter else "",
                 row_note=lambda i: edit.variant_line(keys[i], picks.variants, picks.parents, picks.system_names,
                                                      picks.on_card),
                 session=session, note_text=lambda i: _note_text(sp_of[i], keys[i]),
