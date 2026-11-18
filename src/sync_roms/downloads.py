@@ -9,7 +9,7 @@ import unicodedata
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
 
-from . import external, inventory, runtime, s3, ui
+from . import cardfs, external, inventory, runtime, s3, ui
 
 STALE_HINT = " (not in storage any more: run sync-roms cache update)"  # a file the cache lists is gone from the storage folder
 
@@ -29,14 +29,17 @@ def is_current(path, size, disc_dir=None):
     """Whether path is already storage's file; a playlist pointing into disc_dir is storage's with that prefix added."""
     if size is None:
         return False
-    try:
-        if os.stat(path).st_size == size:
-            return True
-    except OSError:
+    have = cardfs.size(path)
+    if have is None:
         return False
+    if have == size:
+        return True
     if disc_dir and path.lower().endswith(".m3u"):
-        with open(path, "rb") as f:
-            return len(f.read().replace(disc_dir.encode() + b"/", b"")) == size
+        try:
+            with open(path, "rb") as f:
+                return len(f.read().replace(disc_dir.encode() + b"/", b"")) == size
+        except OSError:
+            return False
     return False
 
 
@@ -193,7 +196,7 @@ def rename_temp(name):
 
 
 def walk_roms(dest, keep_dotfiles=False, skip_db=False, rename_temps=False):
-    """os.walk over dest that yields only real ROM-folder content (no frontend/OS leftovers).
+    """A walk over dest that yields only real ROM-folder content (no frontend/OS leftovers).
 
     keep_dotfiles: keep dotfiles that are real content, dropping only OS litter (.DS_Store, ._*, ...) and sync-roms's
     own temp names (.chd-*, .xiso-*, external.own_temp).
@@ -205,7 +208,7 @@ def walk_roms(dest, keep_dotfiles=False, skip_db=False, rename_temps=False):
             return False
         return not keep_dotfiles or name.lower() in SYSTEM_DOT_NAMES or external.own_temp(name)
 
-    for root, dirs, files in os.walk(dest):
+    for root, dirs, files in cardfs.walk(dest):
         at_root = os.path.normpath(root) == os.path.normpath(dest)
         dirs[:] = [d for d in dirs
                    if not hidden(d) and not (at_root and d.lower() in IGNORED_ROOT_DIRS)]

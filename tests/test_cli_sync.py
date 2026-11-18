@@ -620,6 +620,64 @@ class SyncSmokeTest(RealDataDirGuard):
         self.assertEqual(sorted(checked[0]), ["covers", "marquees"])
         self.assertEqual(checked[1], ["marquees"])  # the cover found current before the downloads is not looked at again
 
+    def scrape_sync_io(self, dry_run):
+        """An ES-DE sync with scrapes of gba/Game.zip (on the card, with its cover) and gba/New.zip: ({card folder:
+        times listed}, card files given to os.stat, the card's files after the sync)."""
+        manifest = {**MANIFEST, "systems": [{**SYSTEM, "games": SYSTEM["games"] + [{"bucket": "gba/New.zip"}]}]}
+        sizes = {"gba/Game.zip": 5, "gba/New.zip": 5, "scrapes/gba/covers/Game.png": 3, "scrapes/gba/covers/New.png": 3}
+        scans, stats, files, card, walking = {}, [], [], [], []
+        real_scandir, real_stat = os.scandir, os.stat
+
+        def prepare(root):
+            card.append(root)
+            for rel, size in (("ROMs/gba/Game.zip", 5), ("ES-DE/downloaded_media/gba/covers/Game.png", 3)):
+                os.makedirs(os.path.dirname(os.path.join(root, rel)), exist_ok=True)
+                with open(os.path.join(root, rel), "wb") as f:
+                    f.write(b"x" * size)
+
+        def scandir(path="."):
+            if card and str(path).startswith(card[0]) and not walking:
+                rel = os.path.relpath(path, card[0])
+                scans[rel] = scans.get(rel, 0) + 1
+            return real_scandir(path)
+
+        def stat(path, *a, **k):
+            if card and str(path).startswith(card[0]) and os.path.splitext(str(path))[1]:  # a card file, not a folder
+                stats.append(os.path.relpath(path, card[0]))
+            return real_stat(path, *a, **k)
+
+        def download(job, *a):
+            os.makedirs(os.path.dirname(job[1]), exist_ok=True)
+            with open(job[1], "wb") as f:
+                f.write(b"x" * job[2])
+
+        def cards():  # the sync's last step reads the cards too: the files then are the ones it leaves
+            walking.append(True)
+            files[:] = sorted(os.path.relpath(os.path.join(root, f), card[0]) for root, _, names in os.walk(card[0]) for f in names)
+            walking.clear()
+            return {}
+        patches = ((store, {"load_manifest": lambda names=(): manifest, "load_cards": cards}),
+                   (s3, {"list_sizes": lambda prefix, sizes_=True: {k: v for k, v in sizes.items() if k.startswith(prefix)}}),
+                   (cli, {"free_space": lambda path: 10**9, "report_failures": lambda f: None}),
+                   (cli.downloads, {"run_downloads": downloads.run_downloads}), (cli.s3, {"download": download}),
+                   (os, {"scandir": scandir, "stat": stat}))
+        self.assertEqual(self.run_sync(dry_run, prepare=prepare, patches=patches), 0)
+        return scans, stats, files
+
+    def test_a_dry_run_lists_each_card_folder_once_and_stats_no_card_file(self):
+        scans, stats, files = self.scrape_sync_io(True)
+        for folder in ("ROMs/gba", "ES-DE/downloaded_media/gba/covers"):
+            self.assertEqual(scans.get(folder), 1, folder)
+        self.assertEqual(set(scans.values()), {1})
+        self.assertEqual(stats, [])
+        self.assertNotIn(os.path.join("ROMs", "gba", "New.zip"), files)
+
+    def test_a_rom_downloaded_by_the_sync_gets_its_media_and_keeps_it(self):
+        scans, _, files = self.scrape_sync_io(False)
+        self.assertIn(os.path.join("ES-DE", "downloaded_media", "gba", "covers", "New.png"), files)
+        self.assertIn(os.path.join("ROMs", "gba", "New.zip"), files)
+        self.assertLessEqual(max(scans.values()), 3)  # planning, after the downloads, after the scraped data
+
     def test_no_android_line_on_a_card_without_android_files(self):
         layouts = {"onion": {"label": "Onion", "roms_dir": "Roms", "bios_dir": "BIOS"}}
         manifest = {**MANIFEST, "layouts": layouts, "systems": [{**SYSTEM, "folders": {"onion": "GBA"}}]}
