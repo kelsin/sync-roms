@@ -3,7 +3,7 @@ import os
 import re
 from xml.sax import saxutils
 
-from . import downloads, ui
+from . import downloads, store, ui
 
 FRONTEND_LAYOUTS = {"esde", "knulli", "emudeck"}
 _LABELS = {"esde": "ES-DE", "knulli": "Knulli", "emudeck": "EmuDeck"}
@@ -138,8 +138,7 @@ def apply_collections(plan, layout_name, base):
     """Write and delete plan's collection files and list or unlist them in the settings file; True when that file changed."""
     for path, text in plan["writes"]:
         os.makedirs(os.path.dirname(path), exist_ok=True)
-        with open(path, "w", encoding="utf-8", newline="\n") as f:
-            f.write(text)
+        store.replace_file(path, text, newline="\n")
     for path in plan["deletes"]:
         try:
             os.remove(path)
@@ -155,8 +154,7 @@ def apply_collections(plan, layout_name, base):
     new = set_enabled(old, layout_name, plan["enable"], plan["disable"])
     if new != old:
         os.makedirs(os.path.dirname(path), exist_ok=True)
-        with open(path, "w", encoding="utf-8", newline="\n") as f:
-            f.write(new)
+        store.replace_file(path, new, newline="\n")
         return True
     return False
 

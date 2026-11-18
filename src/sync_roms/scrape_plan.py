@@ -269,8 +269,7 @@ def update_gamelist(path, entries):
         return False
     ET.indent(root, space="\t")
     os.makedirs(os.path.dirname(path), exist_ok=True)
-    with open(path, "w", encoding="utf-8", newline="") as f:
-        f.write(prefix + ET.tostring(root, encoding="unicode") + "\n")
+    store.replace_file(path, prefix + ET.tostring(root, encoding="unicode") + "\n", newline="")
     return True
 
 
@@ -377,8 +376,7 @@ def apply_scrape_plan(plan, base, failures=None):
             ui.failure(ui.red(f"  ❌ {path}: {e}"))
     for path, text in plan["writes"]:
         os.makedirs(os.path.dirname(path), exist_ok=True)
-        with open(path, "w", encoding="utf-8", newline="") as f:
-            f.write(text)
+        store.replace_file(path, text, newline="")
     return failed
 
 

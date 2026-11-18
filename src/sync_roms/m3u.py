@@ -4,7 +4,7 @@ import posixpath
 import re
 from collections import defaultdict
 
-from . import external, ui
+from . import external, store, ui
 
 
 DISC_RE = re.compile(r" \(Disc (\d+|[A-Z]|[IVX]+)\)")  # "Disc 1", "Disc A" or "Disc II"
@@ -86,8 +86,7 @@ def prefix_playlists(dest, disc_dir):
         fixed = [posixpath.join(disc_dir, e) if "/" not in e and os.path.exists(os.path.join(dest, disc_dir, e)) else e
                  for e in entries]
         if fixed != entries:
-            with open(path, "w", encoding="utf-8", newline="\n") as f:
-                f.write("".join(line + "\n" for line in fixed))
+            store.replace_file(path, "".join(line + "\n" for line in fixed), newline="\n")
             rewritten += 1
     return rewritten
 
@@ -161,7 +160,6 @@ def m3u_command(args):
         elif action == "rename":
             os.rename(path, lines)
         else:
-            with open(path, "w", encoding="utf-8", newline="\n") as f:
-                f.write("".join(line + "\n" for line in lines))
+            store.replace_file(path, "".join(line + "\n" for line in lines), newline="\n")
     print(ui.green(f"🎉 Done: {len(plan) - kept} change(s)"))
     return 0

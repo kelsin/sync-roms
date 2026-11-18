@@ -50,8 +50,7 @@ def _write_settings(path, layout_name, values, only_if_unset=()):
         new = frontend.set_string(new, layout_name, name, value)
     if new != old:
         os.makedirs(os.path.dirname(path), exist_ok=True)
-        with open(path, "w", encoding="utf-8", newline="\n") as f:
-            f.write(new)
+        store.replace_file(path, new, newline="\n")
 
 
 def _read(path):
@@ -135,8 +134,7 @@ def _put(path, data):
     except FileNotFoundError:
         pass
     os.makedirs(os.path.dirname(path), exist_ok=True)
-    with open(path, "wb") as f:
-        f.write(data)
+    store.replace_file(path, data)
     return True
 
 
