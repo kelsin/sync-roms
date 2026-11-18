@@ -146,6 +146,10 @@ class AddTest(IgnoreList):
 
 
 class RemoveTest(IgnoreList):
+    def test_remove_with_no_file_creates_nothing(self):
+        self.assertEqual(ignore.remove({"gb": ["c.zip"]}), 0)
+        self.assertFalse(os.path.exists(os.path.join(self.root.name, ignore.KEY)))
+
     def test_remove_drops_paths_and_empty_systems(self):
         self.store_list({"gb": ["a.zip"], "snes": ["b.zip", "c.zip"]})
         self.assertTrue(ignore.is_ignored("gb/a.zip"))

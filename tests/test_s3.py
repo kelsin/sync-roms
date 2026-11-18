@@ -487,6 +487,11 @@ class LoadMetadataTest(unittest.TestCase):
             with mock.patch.object(target, name, side_effect=err), mock.patch.object(s3, "check_root"):
                 self.assertEqual(scrape_plan.load_metadata("gba", fresh=fresh), {})
 
+    def test_fresh_on_an_unmounted_share_raises(self):
+        with tempfile.TemporaryDirectory() as tmp, mock.patch.object(runtime, "ROOT", os.path.join(tmp, "gone")):
+            with self.assertRaises(FileNotFoundError):
+                scrape_plan.load_metadata("pico8", fresh=True)
+
     def test_other_errors_are_raised(self):
         err = ClientError({"Error": {"Code": "AccessDenied"}}, "GetObject")
         with mock.patch.object(s3, "get_text", side_effect=err), self.assertRaises(ClientError):

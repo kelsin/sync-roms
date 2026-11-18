@@ -25,9 +25,9 @@ def load_metadata(system, fresh=False):
     """A system's metadata.json from storage ({} when there is none), read through the local mirror when a sync has one,
     or with fresh from storage itself. Raises ValueError if it isn't a JSON object."""
     key = metadata_key(system)
+    if fresh:
+        s3.check_root()  # an unmounted share, not a missing file
     try:
-        if fresh:
-            s3.check_root()  # an unmounted share, not a missing file
         text = shared.read(key) if fresh else s3.get_text(key)
     except s3.ERRORS as e:
         if not s3.missing(e):

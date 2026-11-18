@@ -5,7 +5,7 @@ and is downloaded again once per run when the storage file's tag changes. ROM fi
 import json
 import threading
 
-from . import shared
+from . import inventory, shared
 
 KEY = "ignored.json"
 _lock = threading.RLock()
@@ -79,6 +79,9 @@ def remove(entries):
         return kept if counted[0] else None
 
     with _lock:
+        if inventory.tag(KEY) is None:  # no file (an unmounted share raises): nothing to remove, nothing to create
+            _keys = frozenset()
+            return 0
         _keys = _flat(shared.update(KEY, _parse, {}, change, _dump))
         return counted[0]
 
