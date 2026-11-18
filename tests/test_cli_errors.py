@@ -114,6 +114,11 @@ class UsageHelpTest(Isolated):
                 self.assertEqual(code, 2)
                 self.assertIn(f"Try 'sync-roms {name} --help'.", err)
 
+    def test_global_help_gives_quiet_and_verbose_a_line_each(self):
+        lines = [line.strip() for line in cli.help_text().splitlines()]
+        self.assertTrue(any(line.startswith("--quiet") and "--verbose" not in line for line in lines))
+        self.assertTrue(any(line.startswith("--verbose") for line in lines))
+
     def test_config_show_prints_eject_as_a_word(self):
         code, out, _ = self.sync(["config", "show"], {"eject": False})
         self.assertEqual(code, 0)

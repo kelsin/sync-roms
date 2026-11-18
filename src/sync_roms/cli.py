@@ -309,7 +309,8 @@ def help_text(topic=None):
 {ui.bold('GLOBAL OPTIONS')}
   {ui.yellow('-n, --dry-run')}   show what would happen, change nothing (commands that can't honor it refuse it)
   {ui.yellow('-y, --yes')}       answer prompts with their default (deleting stays "no", except in clean commands)
-  {ui.yellow('--quiet')}         print only errors, warnings and --json data (prompts go to stderr)      {ui.yellow('--verbose')}   also print the effective settings
+  {ui.yellow('--quiet')}         print only errors, warnings and --json data (prompts go to stderr)
+  {ui.yellow('--verbose')}       also print the effective settings
   {ui.yellow('--json')}          machine-readable output for devices, layouts, diff, games list, cards list and `sync --dry-run` (use --device/--layout to skip the pickers)
   {ui.yellow('--profile P')} {ui.yellow('--write-profile P')} {ui.yellow('--bucket B')} {ui.yellow('--root DIR')} {ui.yellow('--endpoint URL')}   override those settings for this run
   {ui.yellow('-a, --ask')}       sync: confirm the saved device/firmware instead of using it silently
