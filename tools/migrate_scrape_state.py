@@ -17,7 +17,7 @@ import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src"))
 
-from sync_roms import s3, scrape_plan, scrape_state, shared, store, ui, usersettings  # noqa: E402
+from sync_roms import runtime, s3, scrape_plan, scrape_state, shared, store, ui, usersettings  # noqa: E402
 
 KINDS = {"scrape-matches.json": scrape_state.MATCHES, "scrape-unknown.json": scrape_state.UNKNOWN,
          "scrape-nomedia.json": scrape_state.NOMEDIA, "scrape-hashes.json": scrape_state.HASHES}
@@ -69,11 +69,15 @@ def plan():
     """[(storage key, old entries, change)] for everything the old files hold."""
     out = []
     for name, kind in KINDS.items():
-        per_system = {}
+        per_system, skipped = {}, 0
         for key, value in _old(name).items():
             system, _, rom = key.partition("/")
-            if rom:
+            if system and rom:
                 per_system.setdefault(system, {})[rom] = value
+            else:
+                skipped += 1
+        if skipped:
+            print(f"skipped {skipped} malformed key(s) in {name}")
         for system, entries in sorted(per_system.items()):
             out.append((f"{scrape_plan.SCRAPES}/{system}/{kind}", entries, _add_missing(entries)))
     for key, entries, change in ((scrape_state.NOTGAMES, _old(NOTGAMES), _add_notgames),
@@ -93,10 +97,12 @@ def _current(key):
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(description=__doc__.split("\n")[0], epilog="Entries already in storage are kept.")
+    parser = argparse.ArgumentParser(description=__doc__.split("\n")[0], epilog="Entries already in storage are kept; the notgames \"kept\" list is unioned.")
     parser.add_argument("--apply", action="store_true", help="write to storage (default: only print what would change)")
     args = parser.parse_args(argv)
     usersettings.apply_settings()
+    if runtime.ROOT and not os.path.isdir(runtime.ROOT):  # an unmounted share, not an empty storage
+        ui.fail(f"{runtime.ROOT} is missing", 1)
     try:
         steps = plan()
     except ValueError as e:

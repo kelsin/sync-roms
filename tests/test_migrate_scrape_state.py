@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 from helpers import StorageDir  # noqa: E402
 
-from sync_roms import usersettings  # noqa: E402
+from sync_roms import runtime, usersettings  # noqa: E402
 
 spec = importlib.util.spec_from_file_location(
     "migrate_scrape_state", os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "tools", "migrate_scrape_state.py"))
@@ -103,6 +103,27 @@ class MigrateTest(StorageDir):
             f.write("[")
         with contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit):
             self.run_main("--apply")
+        self.assertEqual(self.tree(), [])
+
+    def test_rom_path_with_slash_stays_whole(self):
+        self.write_old("scrape-matches.json", {"psx/Game (Disc 1)/track.bin": 3})
+        self.run_main("--apply")
+        self.assertEqual(self.stored("scrapes/psx/matches.json"), {"Game (Disc 1)/track.bin": 3})
+
+    def test_malformed_keys_are_counted(self):
+        self.write_old("scrape-unknown.json", {"nokey": True, "gba/": True, "gba/u.zip": True})
+        _, out = self.run_main()
+        self.assertIn("skipped 2 malformed key(s) in scrape-unknown.json", out)
+        self.assertEqual(self.tree(), [])
+
+    def test_unmounted_storage_fails(self):
+        missing = os.path.join(self.tmp.name, "gone")
+        with mock.patch.object(runtime, "ROOT", missing):
+            for args in ((), ("--apply",)):
+                with contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit) as c:
+                    self.run_main(*args)
+                self.assertEqual(c.exception.code, 1)
+        self.assertFalse(os.path.exists(missing))
         self.assertEqual(self.tree(), [])
 
 
