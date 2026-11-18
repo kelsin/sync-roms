@@ -8,7 +8,7 @@ from unittest import mock
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 from helpers import feed_list, write_json  # noqa: E402
-from sync_roms import edit, picker, store  # noqa: E402
+from sync_roms import commands, edit, listedit, picker, store  # noqa: E402
 
 
 def systems():
@@ -238,3 +238,34 @@ class VariantTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class SeriesTest(unittest.TestCase):
+    GAMES = {"games": [
+        {"title": "A", "system": "gba", "bucket": "gba/A.zip", "series": "Mario"},
+        {"title": "B", "system": "gba", "bucket": "gba/B.zip"},
+        {"title": "C", "system": "gba", "bucket": "gba/C.zip", "series": "Zelda"},
+        {"title": "D", "system": "gba", "bucket": "gba/D.zip", "series": "Mario", "files": ["gba/D2.zip"]},
+        {"title": "E", "system": "gba", "bucket": "gba/E.zip", "series": "Metroid"},
+        {"title": "F", "system": "gba", "bucket": "gba/F.zip", "series": "Metroid"},
+        {"title": "G", "system": "gba", "bucket": "gba/G.zip", "series": "Zelda"},
+    ]}
+
+    def test_series_of_skips_small_series_in_file_order(self):
+        self.assertEqual(listedit.series_of(self.GAMES), [("Mario", 2), ("Zelda", 2), ("Metroid", 2)])
+        self.assertEqual(listedit.series_of({"games": self.GAMES["games"][:3]}), [])
+        self.assertEqual(listedit.series_of({"games": self.GAMES["games"][:3]}, min_games=1),
+                         [("Mario", 1), ("Zelda", 1)])
+
+    def test_series_keys_include_files(self):
+        self.assertEqual(listedit.series_keys(self.GAMES, "Mario"), {"gba/A.zip", "gba/D.zip", "gba/D2.zip"})
+        self.assertEqual(listedit.series_keys(self.GAMES, "None"), set())
+
+    def test_check_game_file_rejects_non_string_series(self):
+        with tempfile.TemporaryDirectory() as d:
+            path = os.path.join(d, "s.json")
+            write_json(path, {"name": "S", "games": [
+                {"title": "A", "system": "gba", "bucket": "gba/A.zip", "series": 3}]})
+            problems = []
+            commands.check_game_file(problems, path, "s.json", {"gba"})
+        self.assertEqual(problems, ["s.json: gba/A.zip: 'series' must be a string"])
