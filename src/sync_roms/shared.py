@@ -5,7 +5,6 @@ The mirror of storage key K is <data_dir>/storage/K (the storage file's exact te
 import copy
 import json
 import os
-import tempfile
 
 from . import inventory, runtime, s3, store, ui
 
@@ -42,23 +41,10 @@ def _save_tags(tags):
     store.write_json(_tags_path(), tags, indent=2)
 
 
-def _save_text(path, text):
-    """Write text to path in one atomic step, making its folders."""
-    folder = os.path.dirname(path)
-    os.makedirs(folder, exist_ok=True)
-    fd, tmp = tempfile.mkstemp(dir=folder, prefix="." + os.path.basename(path) + "-", suffix=".tmp")
-    try:
-        with os.fdopen(fd, "w", encoding="utf-8") as f:
-            f.write(text)
-        os.replace(tmp, path)
-        tmp = None
-    finally:
-        if tmp and os.path.exists(tmp):
-            os.remove(tmp)
-
-
 def _save_mirror(key, tag, text):
-    _save_text(local_path(key), text)
+    path = local_path(key)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    store.write_text(path, text)
     tags = _load_tags()
     tags[key] = tag
     _save_tags(tags)

@@ -16,6 +16,19 @@ def parse(text):
     return json.loads(text)
 
 
+class WriteTextTest(unittest.TestCase):
+    def test_writes_utf8_and_leaves_no_temp_file(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, "a.txt")
+            store.write_text(path, "héllo ✓")
+            with open(path, "rb") as f:
+                self.assertEqual(f.read(), "héllo ✓".encode("utf-8"))
+            self.assertEqual(os.listdir(tmp), ["a.txt"])
+            store.write_text(path, "second", backup=True)
+            self.assertEqual(sorted(os.listdir(tmp)), ["a.txt", "a.txt.bak"])
+
+
 class SharedTest(StorageFolder):
     def store_file(self, key, text, mtime=None):
         path = os.path.join(self.root.name, *key.split("/"))

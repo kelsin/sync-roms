@@ -61,11 +61,11 @@ def _keep_backup(path):
     backup(path)
 
 
-def write_json(path, data, *, backup=False, mode=None, trailing_newline=False, **dump_kw):
-    """Write data to path as JSON in one atomic step (temp file in the same folder, then a rename).
+def write_text(path, text, *, backup=False, mode=None):
+    """Write text (UTF-8) to path in one atomic step (temp file in the same folder, then a rename).
 
     backup: keep the file's contents from before this run as <name>.bak first. mode: permission bits for the file
-    (default: those of the existing file, else 0o666 minus the umask). dump_kw goes to json.dump. Raises OSError on failure."""
+    (default: those of the existing file, else 0o666 minus the umask). Raises OSError on failure."""
     folder = os.path.dirname(path) or "."
     if backup:
         _keep_backup(path)
@@ -76,10 +76,8 @@ def write_json(path, data, *, backup=False, mode=None, trailing_newline=False, *
             mode = 0o666 & ~_UMASK
     fd, tmp = tempfile.mkstemp(dir=folder, prefix="." + os.path.basename(path) + "-", suffix=".tmp")
     try:
-        with os.fdopen(fd, "w") as f:
-            json.dump(data, f, **dump_kw)
-            if trailing_newline:
-                f.write("\n")
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            f.write(text)
             f.flush()
             os.fsync(f.fileno())
         if mode != 0o600 and sys.platform != "win32":  # mkstemp already made the file 600
@@ -89,6 +87,11 @@ def write_json(path, data, *, backup=False, mode=None, trailing_newline=False, *
     finally:
         if tmp and os.path.exists(tmp):
             os.remove(tmp)
+
+
+def write_json(path, data, *, backup=False, mode=None, trailing_newline=False, **dump_kw):
+    """Write data to path as JSON with write_text. dump_kw goes to json.dumps."""
+    write_text(path, json.dumps(data, **dump_kw) + ("\n" if trailing_newline else ""), backup=backup, mode=mode)
 
 
 def device_defaults(systems=None):
