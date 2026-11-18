@@ -963,15 +963,11 @@ def sync_card(args):
         saved = store.load_cards().get(card)
 
     # surprises come in two steps: which ones to replace first (then the card editor, which shows the ones kept), and
-    # the empty slots last, right before the sync, from all the systems on the card
-    surprise.run_surprise(card, (device, layout_name), [s for s in systems if available(s)],
-                          interactive, args.dry_run, to_fetch=to_fetch)
+    # the empty slots last, right before the sync, from every system the card's device supports, games picked or not
+    surprise.run_surprise(card, (device, layout_name), systems, interactive, args.dry_run, to_fetch=to_fetch)
     if not args.dry_run:  # the step (and the card editor it opens) may have changed the card's games
         reload_changes()
-    fresh = not (saved or {}).get("surprises") and not any(s["games"] or s.get("full_system") for s in systems)
-    # a card with no games and no surprises yet has no systems with ROMs: draw its first surprises from all its systems
-    surprise.fill_surprises(card, (device, layout_name), systems if fresh else [s for s in systems if available(s)],
-                            args.dry_run)
+    surprise.fill_surprises(card, (device, layout_name), systems, args.dry_run)
     if not args.dry_run:
         reload_changes()
     chosen = [s for s in systems if available(s)]

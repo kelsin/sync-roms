@@ -82,7 +82,22 @@ class SyncSmokeTest(RealDataDirGuard):
                    (cli.surprise, {"run_surprise": run_surprise}),
                    (cli.inventory, {"cached": lambda prefix: {"gba/Game.zip": 5, "gba/New.zip": 7}}))
         self.assertEqual(self.run_sync(False, prepare=prepare, patches=patches), 0)
-        self.assertEqual(calls, [(["gba"], {"gba/New.zip"})])
+        self.assertEqual(calls, [(["gba", "vectrex"], {"gba/New.zip"})])
+
+    def test_surprises_are_filled_from_systems_without_games_too(self):
+        empty = {"name": "GCE Vectrex", "bucket": "vectrex", "folders": {"esde": "vectrex"}, "bios": {"files": []}, "games": []}
+        manifest = {**MANIFEST, "systems": [SYSTEM, empty]}
+        surprises = [{"system": "gba", "bucket": "gba/Other.zip", "title": "Other"}]
+
+        class Cards(dict):  # every card name has surprises already, so the card is not a fresh one
+            def get(self, name, default=None):
+                return {"surprises": surprises}
+        calls = []
+        patches = ((store, {"load_manifest": lambda names=(): manifest, "load_cards": Cards}),
+                   (cli.surprise, {"fill_surprises": lambda card, setup, chosen, dry_run: calls.append(
+                       [s["bucket"] for s in chosen]) or []}))
+        self.assertEqual(self.run_sync(False, patches=patches), 0)
+        self.assertEqual(calls, [["gba", "vectrex"]])
 
     def test_card_with_no_picks_syncs_no_games_and_says_so(self):
         empty = {**SYSTEM, "games": []}
