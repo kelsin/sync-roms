@@ -1,5 +1,17 @@
 # Changelog
 
+## [3.6.0](https://github.com/kelsin/sync-roms/compare/v3.5.0...v3.6.0) (2026-11-18)
+
+
+### :video_game: Features
+
+* **cards:** show a footnote marker for unsized cards in cards list ([#365](https://github.com/kelsin/sync-roms/issues/365)) ([77e0c5d](https://github.com/kelsin/sync-roms/commit/77e0c5dbc8ca5fd5c40f58ec070df45c0ef1bdc0))
+
+
+### :bug: Bug Fixes
+
+* **scrape:** default the clean scrapes delete prompt to yes ([#364](https://github.com/kelsin/sync-roms/issues/364)) ([a6509a9](https://github.com/kelsin/sync-roms/commit/a6509a9a4af64accf874d6f0c7ea7240f18d1164))
+
 ## [3.5.0](https://github.com/kelsin/sync-roms/compare/v3.4.0...v3.5.0) (2026-11-18)
 
 
