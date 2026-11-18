@@ -108,6 +108,28 @@ class MigrateSetsTest(StorageDir):
                 self.assertEqual(c.exception.code, 1)
         self.assertFalse(os.path.exists(missing))
 
+    def test_copy_is_byte_exact_with_non_ascii_and_crlf(self):
+        self.src_file("c.json", '{"name": "Pok\u00e9mon ゲーム",\r\n "games": []}\r\n')
+        self.run_main("--apply")
+        with open(os.path.join(self.root, "sets", "c.json"), "rb") as f:
+            with open(os.path.join(self.src, "c.json"), "rb") as g:
+                self.assertEqual(f.read(), g.read())
+
+    def test_dotfiles_subfolders_and_other_files_are_ignored(self):
+        self.src_file("._a.json", "\x00binary")
+        self.src_file("notes.txt", "x")
+        os.makedirs(os.path.join(self.src, "sub.json"))
+        self.src_file(os.path.join("sub.json", "d.json"), B)
+        self.run_main("--apply")
+        self.assertEqual(sorted(os.listdir(os.path.join(self.root, "sets"))), ["a.json", "b.json"])
+
+    def test_non_utf8_storage_file_fails_cleanly(self):
+        self.put("sets/a.json", b"\xff\xfe")
+        with contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit) as c:
+            self.run_main("--apply")
+        self.assertEqual(c.exception.code, 1)
+        self.assertEqual(self.tree(), [os.path.join(self.root, "sets", "a.json")])
+
     def test_default_source_is_the_repos_sets(self):
         names = migrate.load_sources(migrate.DEFAULT_FROM)
         self.assertGreater(len(names), 40)

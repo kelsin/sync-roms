@@ -24,7 +24,8 @@ DEFAULT_FROM = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "s
 def load_sources(folder):
     """[(file name, text)] of the *.json files in folder; ValueError when one isn't a set file."""
     try:
-        names = sorted(n for n in os.listdir(folder) if n.endswith(".json"))
+        names = sorted(n for n in os.listdir(folder)
+                       if n.endswith(".json") and not n.startswith(".") and os.path.isfile(os.path.join(folder, n)))
     except OSError as e:
         raise ValueError(f"{folder}: {e}")
     out = []
@@ -74,7 +75,7 @@ def main(argv=None):
                     continue
                 if args.apply:
                     shared.write(key, text)
-            except (*s3.ERRORS, OSError) as e:
+            except (*s3.ERRORS, OSError, ValueError) as e:  # ValueError: a bad key or a non-UTF-8 storage file
                 ui.fail(f"{key}: {e}", 1)
             new += 1
             print(f"{key}" + (" (written)" if args.apply else ""))
