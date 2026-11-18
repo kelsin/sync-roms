@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.3.1](https://github.com/kelsin/sync-roms/compare/v3.3.0...v3.3.1) (2026-11-18)
+
+
+### :bug: Bug Fixes
+
+* **sync:** steady the progress bar's time left ([#347](https://github.com/kelsin/sync-roms/issues/347)) ([8cc571b](https://github.com/kelsin/sync-roms/commit/8cc571be5e9acc24e89140641d10ec1b6c9edc57))
+
 ## [3.3.0](https://github.com/kelsin/sync-roms/compare/v3.2.0...v3.3.0) (2026-11-18)
 
 
