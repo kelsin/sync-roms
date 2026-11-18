@@ -2,6 +2,7 @@
 
 The mirror of storage key K is <data_dir>/storage/K (the storage file's exact text); each mirror's tag is kept in
 <data_dir>/storage/.tags.json as {key: tag} (never in storage). A mirror is downloaded again only when the tag changes."""
+import copy
 import json
 import os
 import tempfile
@@ -107,3 +108,24 @@ def write(key, text):
     """Put text in storage, then save the mirror and its tag."""
     s3.put_text(key, text)
     _save_mirror(key, inventory.tag(key), text)
+
+
+def update(key, parse, empty, change, dump):
+    """Change a storage file from its fresh content (not the mirror) and write it back. Returns the new value.
+
+    A missing file counts as `empty` (and is created). change(data) mutates data or returns the new value; when it
+    leaves an existing file's data equal to what was read, nothing is written."""
+    try:
+        data, existed = parse(read(key)), True
+    except s3.ERRORS as e:
+        if not s3.missing(e):
+            raise
+        data, existed = copy.deepcopy(empty), False
+    before = copy.deepcopy(data)
+    result = change(data)
+    if result is not None:
+        data = result
+    if existed and data == before:
+        return data
+    write(key, dump(data))
+    return data
