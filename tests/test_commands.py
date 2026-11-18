@@ -11,7 +11,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "src"))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
-from sync_roms import cli, commands, downloads, inventory, mirroring, runtime, s3, store, themeart, ui  # noqa: E402
+from sync_roms import cli, commands, downloads, inventory, mirroring, names, runtime, s3, store, themeart, ui  # noqa: E402
 from helpers import Cmd, DataDir  # noqa: E402,F401
 
 
@@ -44,7 +44,8 @@ class GamesTest(CardCmd):
 
     def test_add_saves_proper_arcade_name(self):
         raw = {}
-        commands.add_games(raw, "fbneo", ["fbneo/1941j.zip"])
+        with mock.patch.object(names, "_scraped", {"fbneo": {"1941j.zip": "1941: Counter Attack (Japan)"}}):
+            commands.add_games(raw, "fbneo", ["fbneo/1941j.zip"])
         self.assertEqual(raw["fbneo"], [{"title": "1941: Counter Attack (Japan)", "bucket": "fbneo/1941j.zip"}])
 
     def test_add_warns_about_a_name_the_cache_lacks(self):

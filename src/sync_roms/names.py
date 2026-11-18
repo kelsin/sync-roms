@@ -1,7 +1,6 @@
 """Proper game names for MAME and FBNeo sets, whose file names are short codes ("1941j.zip").
 
-A set's name comes from clones.json (the DAT name), else from the system's scraped metadata.json in storage, else the
-file name. A copy of each metadata file's names is kept in the data folder with the storage file's tag, and the file is
+A set's name comes from the system's scraped metadata.json in storage, else the file name. A copy of each metadata file's names is kept in the data folder with the storage file's tag, and the file is
 downloaded again once per run when that tag changes."""
 import json
 import os
@@ -13,7 +12,6 @@ KEY = "names.json"
 SYSTEMS = ("mame", "fbneo", "pico8")
 _lock = threading.RLock()
 _scraped = None  # {system: {ROM path: name}}, filled per system on first use this run
-_clones = None
 
 
 def _local_path():
@@ -87,20 +85,12 @@ def _load(system):
 def title(key):
     """A storage key's display name: the proper name for a MAME or FBNeo set or a PICO-8 cart,
     else the file name without extension."""
-    global _scraped, _clones
+    global _scraped
     system, _, rest = key.partition("/")
     if system not in SYSTEMS:
         return store.key_title(key)
     stem = os.path.splitext(os.path.basename(rest))[0]
     with _lock:
-        if _clones is None:
-            _clones = store.repo_json("clones")
-        family = _clones.get(system, {})
-        clone = family.get("clones", {}).get(stem)
-        if clone:
-            return clone[1]
-        if stem in family.get("parents", {}):
-            return family["parents"][stem]
         if _scraped is None:
             _scraped = {}
         if system not in _scraped:
@@ -113,7 +103,6 @@ def title(key):
 
 def reset():
     """Forget what was loaded, so the next lookup checks storage again."""
-    global _scraped, _clones
+    global _scraped
     with _lock:
         _scraped = None
-        _clones = None
