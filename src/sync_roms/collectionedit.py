@@ -98,6 +98,7 @@ def edit_one(collection, systems, keys_of):
                     elif pressed == CLEAR_KEY:
                         past, filt = None, None
                         meta_filt.clear()
+                        place.get("session", {}).pop("query", None)  # the / filter too
                     else:
                         break
             except KeyboardInterrupt:  # Ctrl-C in the list or a picker it opens: the toggles made are kept
