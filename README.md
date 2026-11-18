@@ -656,7 +656,7 @@ and switching one off excludes it on that card. Unknown set names are kept and s
 ### Surprise
 
 Every card gets up to 10 surprises: random full English games (no BIOS, prototypes, betas, demos, hacks, re-releases or
-compilations; a multi-disc game counts as one) from the systems of the run, in addition to the games you picked. It is on by default. Seven of the ten come from
+compilations; a multi-disc game counts as one) from every system the card's device supports, whether or not it has games picked, in addition to the games you picked. It is on by default. Seven of the ten come from
 the systems recommended for the card's device and three from the others, spread evenly over the systems; a system with no
 candidates passes its slots on. Games never surprised, then games surprised before, then games another card currently
 holds are used in that order. Full systems are used too, but any other game already on the card is left out. Systems listed in
@@ -666,7 +666,7 @@ on them are replaced at the next sync.
 - **In a sync** the surprises are handled in two steps. First, before anything downloads, it asks which of the card's current
   surprises to replace (`Esc` there behaves as it does in any picker: it keeps them all) and keeps the others, then opens
   the card editor so you can adjust the card (the kept ones show as 🎁 Surprise; with Surprise off, the editor still opens). Last, when the editor is
-  done and the sync starts, the empty slots (out of 10) are filled at random from every system on the card, full systems included. Without a terminal, with `--yes` or `--json` it replaces all of them.
+  done and the sync starts, the empty slots (out of 10) are filled at random from every system the card's device supports (except excluded ones), whether or not it has games picked, full systems included. Without a terminal, with `--yes` or `--json` it replaces all of them.
   `--dry-run` changes no surprises: it only says whether it would ask or replace all, previews the picks for empty slots and saves nothing.
   The mirror is refreshed again only when the editor or the new picks changed the card's picks.
 - **In the card editor**, `S` in the system list opens a menu: turn Surprise on or off for the card (off removes its surprises
