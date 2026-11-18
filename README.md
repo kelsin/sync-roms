@@ -489,9 +489,10 @@ Onion image, none is made. Media is downloaded only over https from screenscrape
 skipped with a warning and the ROM keeps its other media. `--skip-media TYPES` takes a comma-separated list of those
 folder names and downloads none of them.
 
-**Local state** in the data folder (`~/.sync-roms/`): `scrape-hashes.json` (file hashes), `scrape-matches.json` (your manual
-matches), `scrape-unknown.json` (the ROMs ScreenScraper didn't know), `scrape-nomedia.json` (the media types
-ScreenScraper didn't offer for each ROM) and `scrape-notgames.json` (the non-games waiting for review, and the ROMs the review kept for later). Delete one to forget it.
+**Shared state** in storage's `scrapes/`, so every machine sees it: per system `scrapes/<system>/matches.json` (your manual
+matches), `unknown.json` (the ROMs ScreenScraper didn't know), `nomedia.json` (the media types ScreenScraper didn't offer
+for each ROM) and `hashes.json` (file hashes), and `scrapes/notgames.json` (the non-games waiting for review, and the ROMs
+the review kept for later). Each is read through a copy in `~/.sync-roms/storage/`, and a write merges into the file in storage rather than replacing it.
 
 ## Local mirror (`--mirror`, `--use-mirror`, `--clear-mirror`)
 
@@ -753,7 +754,7 @@ would change and write nothing until you approve.
 | `dedup-names` | Find ROMs of one system shown under the same scraped name (fan translations, regional releases, mis-scrapes) and give each a qualifier, or re-scrape the ones matched to the wrong game. Only edits `scrapes/<system>/metadata.json`. |
 | `match-translations` | Match the fan-translated (`[T-En]`) ROMs waiting in `sync-roms scrape review` to ScreenScraper games under their original Japanese titles, titled `<name> - Translated`. |
 | `refresh-drivers` | Re-research the suggested Adreno GPU (turnip) drivers in `drivers.json` and the devices' `gpu` ids, and open a PR if anything changed. |
-| `update-variants` | After new uploads, find ROMs that are variants of set games (remasters, enhanced ports, translations) and add them to the games' `variants`; also flags variants no longer in storage. Remembers judged ROMs in `~/.sync-roms/variants-checked.json`. |
+| `update-variants` | After new uploads, find ROMs that are variants of set games (remasters, enhanced ports, translations) and add them to the games' `variants`; also flags variants no longer in storage. Remembers judged ROMs in storage's `variants-checked.json`. |
 
 ## How it works
 
