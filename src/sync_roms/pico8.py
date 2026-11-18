@@ -9,7 +9,6 @@ from . import inventory, runtime, s3, store, ui
 TARGETS = {
     "esde": ("zip", "PICO-8/{name}"),
     "knulli": ("zip", "roms/pico8/{name}"),
-    "muos": ("zip", "ARCHIVE/{stem}.muxzip"),
     "onion": ("extract", "RApp/PICO-8/bin"),
     "allium": ("extract", "Apps/pico.pak/bin"),
 }
@@ -32,7 +31,7 @@ def newest_zip():
 
 def _path(base, layout_name, name):
     kind, template = TARGETS[layout_name]
-    return kind, os.path.join(base, *template.format(name=name, stem=name[:-4] if name.endswith(".zip") else name).split("/"))
+    return kind, os.path.join(base, *template.format(name=name).split("/"))
 
 
 def _extract(key, size, folder):

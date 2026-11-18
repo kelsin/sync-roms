@@ -66,13 +66,13 @@ class Pico8(helpers.StorageDir):
 
     def test_newer_zip_replaces_old(self):
         self.put(f"os/pico8/{NEW}")
-        old = self.card_path("ARCHIVE", OLD.replace(".zip", ".muxzip"))
+        old = self.card_path("roms", "pico8", OLD)
         os.makedirs(os.path.dirname(old))
         open(old, "wb").close()
         store.update_card("c", pico8=OLD)
-        self.run_setup("muos")
+        self.run_setup("knulli")
         self.assertFalse(os.path.exists(old))
-        self.assertTrue(os.path.isfile(self.card_path("ARCHIVE", NEW.replace(".zip", ".muxzip"))))
+        self.assertTrue(os.path.isfile(self.card_path("roms", "pico8", NEW)))
         self.assertEqual(self.recorded(), NEW)
 
     def test_onion_extracts_two_files(self):
