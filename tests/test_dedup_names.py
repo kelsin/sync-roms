@@ -28,11 +28,9 @@ def load(name):
 find_duplicates = load("find_duplicates")
 apply_names = load("apply_names")
 
-CLONES = {"mame": {"parents": {"sf2": "Street Fighter II (World)"}, "clones": {"sf2j": ["sf2", "Japan"]}}}
-
 
 def find(metadata, stored):
-    return find_duplicates.find(metadata, set(stored), CLONES)
+    return find_duplicates.find(metadata, set(stored))
 
 
 class FindDuplicates(unittest.TestCase):
@@ -78,14 +76,6 @@ class FindDuplicates(unittest.TestCase):
             out = find({"psvita": {"A.zip": {"name": "X"}, "A DLC.zip": {"name": "X"}}}, ["psvita/A.zip", "psvita/A DLC.zip"])
         self.assertEqual(out["groups"], [])
         self.assertEqual(out["skipped"]["vita_extras"], 1)
-
-    def test_clone_families_skipped(self):
-        stored = ["mame/sf2.zip", "mame/sf2j.zip", "mame/other.zip", "mame/other2.zip"]
-        meta = {"mame": {"sf2.zip": {"name": "SF2"}, "sf2j.zip": {"name": "SF2"},
-                         "other.zip": {"name": "Other"}, "other2.zip": {"name": "Other"}}}
-        out = find(meta, stored)
-        self.assertEqual([[r["rom"] for r in g["roms"]] for g in out["groups"]], [["other.zip", "other2.zip"]])
-        self.assertEqual(out["skipped"]["clones"], 2)
 
     def test_entry_without_name_ignored(self):
         out = find({"gba": {"A.zip": {"desc": "x"}, "B.zip": {"desc": "y"}}}, ["gba/A.zip", "gba/B.zip"])

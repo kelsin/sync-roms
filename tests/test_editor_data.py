@@ -205,12 +205,12 @@ class RepoDataSurvivesRemoval(unittest.TestCase):
 
     def test_preloaded_file_is_served_after_it_is_removed(self):
         with tempfile.TemporaryDirectory() as tmp:
-            with open(os.path.join(tmp, "clones.json"), "w") as f:
+            with open(os.path.join(tmp, "systems.json"), "w") as f:
                 json.dump({"mame": {}}, f)
             with mock.patch.object(store, "REPO_DATA", tmp):
                 store.preload_repo_data()
-                os.remove(os.path.join(tmp, "clones.json"))
-                self.assertEqual(store.repo_json("clones"), {"mame": {}})
+                os.remove(os.path.join(tmp, "systems.json"))
+                self.assertEqual(store.repo_json("systems"), {"mame": {}})
                 with self.assertRaises(FileNotFoundError):
                     store.repo_json("never-there")
 

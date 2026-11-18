@@ -9,7 +9,6 @@ import os
 import re
 import sys
 from collections import defaultdict
-from functools import cache
 
 from sync_roms import inventory, m3u, names, store, usersettings, vita
 
@@ -25,17 +24,11 @@ def norm(title):
     return " ".join(w for w in t.split() if w not in ("the", "a"))
 
 
-@cache
-def clones(system):
-    return store.repo_json("clones").get(system, {}).get("clones", {})
-
-
 def clone_parent(key):
     """An arcade set's family (system:parent), or None off MAME/FBNeo."""
     system, _, rest = key.partition("/")
     stem = os.path.splitext(rest)[0]
-    clones_ = clones(system)
-    return f"{system}:{clones_[stem][0] if stem in clones_ else stem}" if system in names.SYSTEMS else None
+    return f"{system}:{stem}" if system in names.SYSTEMS else None
 
 
 def main():

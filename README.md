@@ -206,11 +206,6 @@ While typing a filter (or a note, which `w` opens in the game list): `^A` `^E` s
    `<alternativeEmulator>` block stay. Existing files with the same size aren't downloaded again.
    ROMs in subfolders get no Onion art.
 
-   On `esde`, `knulli`, `onion` and `allium`, `mame` and `fbneo` clones are named after their variant, e.g. `1942 (Revision A)`,
-   from `src/sync_roms/data/clones.json` (MAME and FBNeo parent/clone data), replacing the scraped name. On `esde` a
-   `sortname` also keeps each parent followed by its clones. ES-DE's "strip extra MAME info" option hides the variant
-   in parentheses. Regenerate the file with `tools/gen_clones.py MAME.xml FBNEO.dat` (MAME's `-listxml` output and
-   FBNeo's arcade DAT).
 6. Finally, media on the card for ROMs the card doesn't have is removed, with no confirmation. It looks at
    every system in the layout, not only the ones you synced, and leaves systems whose ROM folder doesn't
    exist, and folders that aren't systems in `src/sync_roms/data/systems.json` (like ES-DE's `androidapps`), alone.

@@ -24,8 +24,7 @@ The output has:
 - `groups`: `system`, the shared `name` and its `roms` (`rom`, `name`, `qualifier`, `translated`, `developer`,
   `releasedate`). Only ROMs shown as a game count: discs of a multi-disc game (its `.m3u` stands for them), files
   in a set's folder and Vita extras are left out.
-- `skipped`: counts of what was left out. `clones` are MAME/FBNeo sets in a `clones.json` family, which frontends
-  name from `clones.json`; mention the counts.
+- `skipped`: counts of what was left out; mention the counts.
 
 No groups: tell the user there is nothing to fix and stop.
 
