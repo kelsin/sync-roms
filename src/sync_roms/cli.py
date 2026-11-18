@@ -115,7 +115,7 @@ TOPICS = {
   lists the carts storage doesn't have and those the BBS has a newer revision of, and asks once (write profile).
   Each cart goes to pico8/<BBS file name> with its title and author in scrapes/pico8/metadata.json. An upgrade
   removes the old revision, moves its metadata and scraped media to the new name and points your cards, Surprise
-  history and collections at it; repo sets that name the old file are listed to change by hand. Carts in
+  history and collections at it; sets that name the old file are listed to change with sets edit. Carts in
   ignored.json are skipped. Requests go one at a time; the first HTTP error stops it, keeping what was added.
 """,
     "edit": """

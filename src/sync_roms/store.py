@@ -529,6 +529,7 @@ _sets = None  # JSON text of the sets read from storage this run, in file-name o
 # deep-copying the parse, and load_sets is called many times a run); None until read
 _warned_cards = set()  # cards already warned about this read of the sets (warn_unknown_sets)
 _skipped = []  # keys of the files in sets/ this read skipped as not being sets (skipped_sets)
+_fallback = False  # whether this read used local copies because storage couldn't be listed or checked
 
 
 def _set_file(text):
@@ -567,7 +568,8 @@ def _mirror_set(key):
 
 def _read_sets():
     """Every set in storage, through its local copy (shared.py). When storage can't be listed or checked, the local
-    copies are used, with one warning."""
+    copies are used, with one warning, and sets_from_fallback says so."""
+    global _fallback
     from . import mirroring, shared  # imported here: both use this module
     reachable, gone = True, object()  # reachable: storage answers (else the local copies are read)
     try:
@@ -598,14 +600,16 @@ def _read_sets():
             _skipped.append(key)
         elif data is not gone:
             out.append(_set_dict(_set_id(key), data))
+    _fallback = not reachable
     return out
 
 
 def reset_sets():
     """Forget the sets read this run, so the next read lists and checks storage again."""
-    global _sets
+    global _sets, _fallback
     with _sets_lock:
         _sets = None
+        _fallback = False
         _warned_cards.clear()
         _skipped.clear()
 
@@ -625,6 +629,32 @@ def skipped_sets():
     """The keys of the files in sets/ the last read of the sets skipped because they aren't sets."""
     with _sets_lock:
         return list(_skipped)
+
+
+def sets_from_fallback():
+    """Whether the sets read this run (read now if they weren't) came, even in part, from the local copies because
+    storage couldn't be listed or checked: they may be older than storage's, so they must not be written back."""
+    with _sets_lock:
+        set_files()
+        return _fallback
+
+
+def set_changed(set_id, loaded):
+    """Whether storage's file of a set, read from storage itself (never the local copy), no longer holds loaded: the
+    set as set_files gave it ("id" is ignored), or None for a set that wasn't there. Raises the storage errors, an
+    unmounted storage folder included (never taken for a missing file)."""
+    from . import shared  # imported here: shared uses this module
+    if runtime.ROOT and not os.path.isdir(runtime.ROOT):
+        raise FileNotFoundError(f"{runtime.ROOT} is missing")
+    try:
+        data = _set_file(shared.read(SETS + set_id + ".json"))
+    except s3.ERRORS as e:
+        if not s3.missing(e):
+            raise
+        return loaded is not None
+    if data is None or loaded is None:
+        return True
+    return {**_set_dict(set_id, data), "id": None} != {**loaded, "id": None}
 
 
 def load_sets():

@@ -165,7 +165,8 @@ def storage_sets(test, sets, root=None):
         with open(os.path.join(root, "sets", set_id + ".json"), "w", encoding="utf-8") as f:
             f.write(game_set if isinstance(game_set, str) else store.set_text(game_set))
     store.reset_sets()
-    test.addCleanup(setattr, store, "_sets", "[]")  # back to no sets, as isolate leaves it
+    test.addCleanup(setattr, store, "_sets", "[]")  # back to no sets, as isolate leaves it (last: cleanups run in reverse)
+    test.addCleanup(store.reset_sets)  # nothing of this read (its fallback flag, skipped files) outlives the test
     return root
 
 

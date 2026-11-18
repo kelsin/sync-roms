@@ -103,6 +103,42 @@ class ApplyVariantsToSets(CheckedInStorage):
         self.assertFalse(os.path.exists(self.root + "-unmounted"))
 
 
+class ApplyVariantsStale(ApplyVariantsToSets):
+    ADD = {"add": [{"game": "gba/A.zip", "bucket": "gba/A DX.zip", "note": "GBA: adds colour"}], "checked": {"gba/B.zip": "no"}}
+
+    def test_sets_read_from_the_local_copies_change_nothing(self):
+        before = self.text("s")
+        with mock.patch.object(store, "sets_from_fallback", return_value=True), self.assertRaises(SystemExit) as e:
+            self.run_apply(self.ADD)
+        self.assertIn("local copies", str(e.exception))
+        self.assertEqual(self.text("s"), before)
+        self.assertFalse(os.path.exists(os.path.join(self.root, "variants-checked.json")))
+
+    def test_a_set_changed_in_storage_while_it_ran_changes_nothing(self):
+        theirs = store.set_text({"name": "S", "games": [{"title": "A", "system": "gba", "bucket": "gba/A.zip"},
+                                                        {"title": "B", "system": "gba", "bucket": "gba/B.zip"}]})
+        real = store.set_files
+
+        def read_then_change():  # another machine saves the set after this run read it
+            out = real()
+            with open(os.path.join(self.root, "sets", "s.json"), "w", encoding="utf-8") as f:
+                f.write(theirs)
+            return out
+        with mock.patch.object(store, "set_files", side_effect=read_then_change), self.assertRaises(SystemExit) as e:
+            self.run_apply(self.ADD)
+        self.assertIn("s changed in storage", str(e.exception))
+        self.assertEqual(self.text("s"), theirs)
+        self.assertFalse(os.path.exists(os.path.join(self.root, "variants-checked.json")))
+
+    def test_a_storage_error_while_checking_changes_nothing(self):
+        before = self.text("s")
+        store.set_files()  # read (and their local copies saved) before storage stops answering
+        with mock.patch.object(shared, "read", side_effect=OSError("timed out")), self.assertRaises(SystemExit) as e:
+            self.run_apply(self.ADD)
+        self.assertIn("timed out", str(e.exception))
+        self.assertEqual(self.text("s"), before)
+
+
 class FindCandidates(CheckedInStorage):
     def run_find(self, *argv):
         # only main()'s own check sees a cache; later calls (the cache patch after a write) see none

@@ -12,7 +12,7 @@ import json
 import os
 import sys
 
-from sync_roms import runtime, shared, store, usersettings
+from sync_roms import runtime, s3, shared, store, usersettings
 
 CHECKED = "variants-checked.json"  # a storage key
 
@@ -25,6 +25,9 @@ def main(path):
         decisions = json.load(f)
     add, remove = decisions.get("add", []), decisions.get("remove", [])
     sets = store.set_files()
+    if store.sets_from_fallback():  # older than storage's, maybe: editing them would undo another machine's changes
+        sys.exit("The sets were read from the local copies (storage couldn't be checked), nothing was changed")
+    loaded = {game_set["id"]: game_set for game_set in store.set_files()}  # as read, before the edits below
     listed = {g.get("bucket") for game_set in sets for g in game_set["games"]}
     missing = sorted({x["game"] for x in add + remove} - listed)
     if missing:
@@ -51,7 +54,13 @@ def main(path):
         if changed:
             set_id = game_set.pop("id")
             writes.append((set_id, game_set))
-    for set_id, game_set in writes:  # every edit above succeeded: only now write
+    try:
+        changed = [set_id for set_id, _ in writes if store.set_changed(set_id, loaded[set_id])]
+    except s3.ERRORS as e:
+        sys.exit(f"Couldn't check the sets in storage ({e}), nothing was changed")
+    if changed:
+        sys.exit(f"{', '.join(changed)} changed in storage while this ran (another machine?), nothing was changed")
+    for set_id, game_set in writes:  # every edit above succeeded and no set changed in storage: only now write
         store.write_set(set_id, game_set)
         touched.add(set_id)
     def change(checked):

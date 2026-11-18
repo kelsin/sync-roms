@@ -141,9 +141,21 @@ def print_changes(found):
 
 # --- Saving -----------------------------------------------------------------------------------------
 
-def save_sets(before, after, found):
+class Stale(Exception):
+    """The sets the editor loaded may be older than storage's: nothing was saved."""
+
+
+def save_sets(before, after, found, from_fallback=False):
     """Write the new and changed sets in found to storage and delete the removed ones, one at a time; before follows
-    each one saved, so after a storage error (s3.ERRORS propagate) only what is left is still a change."""
+    each one saved, so after a storage error (s3.ERRORS propagate) only what is left is still a change.
+
+    Raises Stale, writing nothing, when the sets were read from the local copies (from_fallback) or a set in found no
+    longer holds in storage what before has (another machine saved it meanwhile)."""
+    if from_fallback:
+        raise Stale("The sets were read from the local copies (storage couldn't be checked)")
+    changed = [sid for _, sid, _ in found if store.set_changed(sid, before.get(sid))]
+    if changed:
+        raise Stale(f"{', '.join(changed)} changed in storage since you opened the editor (another machine?)")
     for kind, sid, _ in found:
         if kind == "removed":
             store.delete_set(sid)
@@ -184,7 +196,7 @@ def edit_sets():
     systems = sorted(store.repo_json("systems"), key=lambda s: s["name"].lower())
     before = repo_sets()
     working = copy.deepcopy(before)
-    state = {"review": False}
+    state = {"review": False, "fallback": store.sets_from_fallback()}
     while True:
         try:
             code = edit_working(systems, before, working, state)
@@ -259,7 +271,11 @@ def edit_working(systems, before, working, state):
             edit.note(ui.yellow("👋 Not saved."))
             return None if state["review"] else 0
         try:
-            save_sets(before, working, found)
+            save_sets(before, working, found, state["fallback"])
+        except Stale as e:
+            edit.note(ui.red(f"❌ {e}; nothing was saved. Quit and reopen the editor to start from storage's sets."))
+            state["review"] = False
+            continue
         except s3.ERRORS as e:  # e.g. an unmounted storage folder: back to the menu with what is left still pending
             edit.note(ui.red(f"❌ Couldn't save the sets to storage: {e}"))
             state["review"] = False

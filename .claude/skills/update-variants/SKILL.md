@@ -78,7 +78,7 @@ sync-roms check
 ```
 
 The apply script adds each variant to the game in every set that lists it, writes the changed sets to storage and
-records every judged ROM as checked. It changes nothing when the storage folder isn't mounted. Rejected candidates go
+records every judged ROM as checked. It changes nothing when the storage folder isn't mounted, when the sets could only be read from their local copies, or when a set it would write changed in storage while it ran (run it again). Rejected candidates go
 in `checked` so later runs skip them; candidates the user wants to decide later are left out. There is nothing to
 commit: report the sets it changed (the last line of its output) and any problems `sync-roms check` shows.
 

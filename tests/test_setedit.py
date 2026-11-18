@@ -1,3 +1,4 @@
+import copy
 import os
 import sys
 import unittest
@@ -194,6 +195,80 @@ class Save(StorageDir):
         self.assertFalse(os.path.exists(os.path.join(self.root + "-unmounted")))
 
 
+class SaveStale(StorageDir):
+    """Saving never writes back sets that may be older than storage's."""
+    path = Save.path
+
+    def setUp(self):
+        super().setUp()
+        storage_sets(self, {"keep": {"name": "Keep", "games": games()}, "edit": {"name": "Edit", "games": games()},
+                            "gone": {"name": "Gone", "games": games()}}, self.root)
+        patch = mock.patch.object(edit, "note")
+        self.note = patch.start()
+        self.addCleanup(patch.stop)
+
+    def listing(self):
+        folder = os.path.join(self.root, "sets")
+        out = {}
+        for n in os.listdir(folder):
+            with open(os.path.join(folder, n), encoding="utf-8") as f:
+                out[n] = f.read()
+        return out
+
+    def changes(self, before):
+        after = {**copy.deepcopy(before), "edit": {"name": "Edit", "description": "", "games": games()[1:]},
+                 "new": {"name": "New", "description": "", "games": games()}}
+        del after["gone"]
+        return after, setedit.diff_sets(before, after)
+
+    def test_a_set_another_machine_changed_saves_nothing(self):
+        for sid, text in (("edit", store.set_text({"name": "Edit", "games": games()[2:]})),  # changed
+                          ("gone", None),  # already deleted
+                          ("new", store.set_text({"name": "New", "games": []}))):  # created meanwhile
+            with self.subTest(sid=sid):
+                before = setedit.repo_sets()
+                after, found = self.changes(before)
+                if text is None:
+                    os.remove(self.path(sid))
+                else:
+                    with open(self.path(sid), "w", encoding="utf-8") as f:
+                        f.write(text)
+                start = self.listing()
+                with self.assertRaises(setedit.Stale) as e, mock.patch("builtins.print"):
+                    setedit.save_sets(before, after, found)
+                self.assertIn(f"{sid} changed in storage", str(e.exception))
+                self.assertEqual(self.listing(), start)
+                storage_sets(self, {"keep": {"name": "Keep", "games": games()}, "edit": {"name": "Edit", "games": games()},
+                                    "gone": {"name": "Gone", "games": games()}}, self.root)
+                if os.path.exists(self.path("new")):
+                    os.remove(self.path("new"))
+
+    def test_sets_read_from_the_local_copies_save_nothing(self):
+        before = setedit.repo_sets()
+        after, found = self.changes(before)
+        start = self.listing()
+        with self.assertRaises(setedit.Stale) as e:
+            setedit.save_sets(before, after, found, from_fallback=True)
+        self.assertIn("local copies", str(e.exception))
+        self.assertEqual(self.listing(), start)
+
+    def test_the_editor_notes_a_stale_read_and_keeps_the_edits(self):
+        picks = iter([3, None, 6])  # New set (after Edit, Gone, Keep), Esc to review (refused), then Quit
+        with mock.patch.object(setedit, "edit_one", lambda g, s, k: g["games"].append({"title": "X", "system": "gba", "bucket": "gba/X.zip"})), \
+                mock.patch.object(store, "repo_json", return_value=SYSTEMS), \
+                mock.patch.object(store, "sets_from_fallback", return_value=True), \
+                mock.patch.object(picker, "filter_list", lambda *a, **k: next(picks)), \
+                mock.patch.object(ui, "ask", side_effect=["New", ""]), \
+                mock.patch.object(ui, "choose", return_value="s"), mock.patch.object(ui, "confirm", return_value=True) as confirm, \
+                mock.patch("builtins.print"):
+            self.assertEqual(setedit.edit_sets(), 0)
+        note = self.note.call_args_list[0].args[0]
+        self.assertIn("local copies", note)
+        self.assertIn("nothing was saved", note)
+        confirm.assert_called_once()  # quitting asks: the edits are still pending
+        self.assertEqual(sorted(os.listdir(os.path.join(self.root, "sets"))), ["edit.json", "gone.json", "keep.json"])
+
+
 class DeleteSet(StorageDir):
     def test_deletes_only_that_object_its_copy_and_rereads(self):
         storage_sets(self, {"a": {"name": "A", "games": games()}, "b": {"name": "B", "games": games()}}, self.root)
@@ -284,7 +359,7 @@ class Editor(unittest.TestCase):
                 mock.patch.object(picker, "filter_list", lambda *a, **k: next(picks)), \
                 mock.patch.object(ui, "ask", side_effect=["My Set", "about it"]), \
                 mock.patch.object(ui, "choose", return_value="s"), \
-                mock.patch.object(setedit, "save_sets", lambda before, after, found: saved.update(after=after, found=found)), \
+                mock.patch.object(setedit, "save_sets", lambda before, after, found, from_fallback: saved.update(after=after, found=found)), \
                 mock.patch.object(picker, "queue_note", return_value=True) as queued, mock.patch("builtins.print") as out:
             self.assertEqual(setedit.edit_sets(), 0)
         self.assertEqual([(k, s) for k, s, _ in saved["found"]], [("new", "my-set")])
@@ -313,7 +388,7 @@ class Editor(unittest.TestCase):
                 mock.patch.object(picker, "filter_list", pick), \
                 mock.patch.object(ui, "ask", side_effect=["My Set", "about it"]), \
                 mock.patch.object(ui, "choose", side_effect=["e", "s"]) as choose, mock.patch("builtins.print"), \
-                mock.patch.object(setedit, "save_sets", lambda before, after, found: saved.update(after=after, found=found)):
+                mock.patch.object(setedit, "save_sets", lambda before, after, found, from_fallback: saved.update(after=after, found=found)):
             self.assertEqual(setedit.edit_sets(), 0)  # keep editing ended the interrupt: the later Done ends normally
         self.assertEqual(choose.call_count, 2)
         self.assertEqual([(k, s) for k, s, _ in saved["found"]], [("new", "my-set")])
@@ -334,7 +409,7 @@ class Editor(unittest.TestCase):
                 mock.patch.object(picker, "filter_list", pick), \
                 mock.patch.object(ui, "ask", side_effect=["My Set", ""]), \
                 mock.patch.object(ui, "choose", side_effect=answers) as choose, mock.patch("builtins.print"), \
-                mock.patch.object(setedit, "save_sets", lambda before, after, found: saved.append(found)), \
+                mock.patch.object(setedit, "save_sets", lambda before, after, found, from_fallback: saved.append(found)), \
                 self.assertRaises(KeyboardInterrupt):
             setedit.edit_sets()
         return choose.call_count, len(saved)
@@ -384,7 +459,7 @@ class Editor(unittest.TestCase):
                 mock.patch.object(setedit, "file_counts", lambda systems: None), \
                 mock.patch.object(ui, "ask", side_effect=ask) as ask, mock.patch.object(ui, "choose", return_value="s") as choose, \
                 mock.patch("builtins.print"), \
-                mock.patch.object(setedit, "save_sets", lambda before, after, found: saved.update(after=after)), \
+                mock.patch.object(setedit, "save_sets", lambda before, after, found, from_fallback: saved.update(after=after)), \
                 self.assertRaises(KeyboardInterrupt):
             setedit.edit_sets()
         return choose.call_count, saved.get("after"), ask

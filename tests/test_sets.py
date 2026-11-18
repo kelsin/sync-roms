@@ -41,6 +41,7 @@ class StorageSetsTest(StorageDir):
     def test_a_fresh_storage_has_no_sets(self):
         store.reset_sets()
         self.addCleanup(setattr, store, "_sets", "[]")
+        self.addCleanup(store.reset_sets)  # first: no fallback flag outlives the test
         self.assertEqual(self.load(), ([], ""))
 
     def test_sets_load_sorted_by_name_with_ids_from_file_names(self):
@@ -114,6 +115,7 @@ class StorageSetsTest(StorageDir):
     def test_a_listing_error_with_no_local_copies_gives_no_sets(self):
         store.reset_sets()
         self.addCleanup(setattr, store, "_sets", "[]")
+        self.addCleanup(store.reset_sets)  # first: no fallback flag outlives the test
         with mock.patch.object(inventory, "files", side_effect=OSError("down")):
             sets, err = self.load()
         self.assertEqual(sets, [])
@@ -209,6 +211,37 @@ class UnknownCardSetsTest(StorageDir):
         self.assert_cards_unchanged()
 
 
+class StaleSetsTest(StorageDir):
+    def setUp(self):
+        super().setUp()
+        storage_sets(self, {"mix": SET}, self.root)
+
+    def test_a_read_from_the_local_copies_is_flagged_until_read_again(self):
+        self.assertFalse(store.sets_from_fallback())
+        store.reset_sets()
+        with mock.patch.object(runtime, "ROOT", self.root + "-unmounted"), contextlib.redirect_stderr(io.StringIO()):
+            self.assertTrue(store.sets_from_fallback())
+        store.reset_sets()
+        self.assertFalse(store.sets_from_fallback())
+
+    def test_a_storage_error_while_checking_a_set_is_flagged(self):
+        store.reset_sets()
+        with mock.patch.object(inventory, "tag", side_effect=OSError("timed out")), contextlib.redirect_stderr(io.StringIO()):
+            self.assertTrue(store.sets_from_fallback())
+
+    def test_set_changed_reads_storage_itself(self):
+        loaded = store.set_files()[0]
+        self.assertFalse(store.set_changed("mix", loaded))
+        self.assertTrue(store.set_changed("mix", {**loaded, "name": "Other"}))
+        self.assertTrue(store.set_changed("mix", None))  # a new set whose id storage now has
+        self.assertFalse(store.set_changed("new", None))
+        self.assertTrue(store.set_changed("new", loaded))  # deleted meanwhile
+        self.put("sets/bad.json", b"{")
+        self.assertTrue(store.set_changed("bad", loaded))
+        with mock.patch.object(runtime, "ROOT", self.root + "-unmounted"), self.assertRaises(FileNotFoundError):
+            store.set_changed("new", None)  # an unmounted folder isn't a missing file
+
+
 class CheckStorageSetsTest(StorageDir):
     def check(self, sets):
         if sets is not None:
@@ -216,6 +249,7 @@ class CheckStorageSetsTest(StorageDir):
         else:
             store.reset_sets()
             self.addCleanup(setattr, store, "_sets", "[]")
+            self.addCleanup(store.reset_sets)  # first: no fallback flag outlives the test
         problems = []
         with contextlib.redirect_stderr(io.StringIO()):
             keys = commands.check_sets(problems, {"gba", "gen"})
