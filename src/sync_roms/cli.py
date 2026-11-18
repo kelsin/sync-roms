@@ -156,7 +156,7 @@ TOPICS = {
 
   The system is guessed from the folder name; same-size files are skipped, a different size overwrites after you confirm.
   --replace makes the storage folder match DIR: renamed files are moved by content (big bucket files without an MD5 are
-  compared on samples, and those renames are marked), and left-over storage files are listed so you pick which to delete.
+  compared on samples, and those renames are marked), and left-over storage files are listed so you tick which to delete (none are ticked at first).
   Uploads use the write profile (ROMS_WRITE_PROFILE, default 'roms').
 """,
     "diff": """
