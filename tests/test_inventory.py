@@ -368,6 +368,18 @@ class FolderMtimeTest(helpers.StorageFolder):
         self.later()
         self.assertEqual(self.update(), ((0, 0, 0), ["BIOS", os.path.join("BIOS", "sub"), "gba", os.path.join("gba", "new")]))
 
+    def test_a_write_finishing_after_another_untrusted_its_folder_keeps_it_untrusted(self):
+        self.update()
+
+        def fill(tmp):  # a parallel upload creates gba/new while this write is under way
+            s3.write_file("gba/new/z.zip", lambda t: open(t, "wb").write(b"1"))
+            open(tmp, "wb").write(b"1234")
+        s3.write_file("gba/c.zip", fill)
+        self.assertIsNone(inventory.current().dirs["gba"])
+        self.later()
+        self.assertEqual(self.update(), ((0, 0, 0), ["gba", os.path.join("gba", "new")]))
+        self.assertIn("gba/new/z.zip", inventory.files("gba/"))
+
     def test_a_delete_given_as_a_generator_drops_the_folder_mtime(self):
         self.update()
         inventory.removed(k for k in ["gba/a.zip"])

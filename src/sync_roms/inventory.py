@@ -201,20 +201,22 @@ def _mtime(folder):
 
 
 def trusted(keys):
-    """Called before sync-roms writes, moves or deletes keys in a storage folder: the folders holding them (as the cache
-    spells them) whose mtime is still the one the cache trusts. After the write, _patch stores their new mtime instead
-    of dropping it, so the next update needn't list them (unless it runs within FRESH seconds). The race is accepted:
-    another machine writing to one of them between this stat and the one after the write goes unseen until that folder
-    changes again. Empty for a bucket."""
+    """Called before sync-roms writes, moves or deletes keys in a storage folder: {folder: cached mtime} of the folders
+    holding them (as the cache spells them) whose mtime is still the one the cache trusts. After the write, _patch
+    stores their new mtime instead of dropping it, so the next update needn't list them (unless it runs within FRESH
+    seconds), but only if the cache still holds the mtime seen here: a parallel write that dropped it in between wins.
+    The race is accepted: another machine writing to one of them between this stat and the one after the write goes
+    unseen until that folder changes again, and so does one writing right after the stat after the write when the share
+    keeps coarse mtimes (1 to 2 seconds) and both land in the same tick. Empty for a bucket."""
     tree = current()
     if not runtime.ROOT or tree is None:
-        return set()
-    out = set()
+        return {}
+    out = {}
     for k in keys:
         folder = k.rpartition("/")[0]
         for name in _spellings(folder) & tree.dirs.keys():
             if tree.dirs[name] is not None and _mtime(name) == tree.dirs[name]:
-                out.add(name)
+                out[name] = tree.dirs[name]
     return out
 
 
@@ -222,7 +224,7 @@ def _patch(change, keys, before=()):
     """Apply change to the cache, and stop trusting the mtimes of the keys' folders (spelled as given, NFC or NFD: a share
     may store a name decomposed), or of the nearest folder above that the cache knows, for a folder the write created:
     the next update lists them. A folder in before (from trusted(), taken before the write) holding a key gets its
-    new mtime instead."""
+    new mtime instead, if the cache still holds the mtime trusted() saw."""
     global _dirty
     after = {name: _mtime(name) for name in before}  # outside the lock: each stat is a round trip on a network share
     with _lock:
@@ -236,7 +238,7 @@ def _patch(change, keys, before=()):
                     folder = folder.rpartition("/")[0]
                     names = _spellings(folder) & tree.dirs.keys()
                     for name in names:
-                        mtime = after.get(name) if direct else None
+                        mtime = after[name] if direct and name in after and tree.dirs[name] == before[name] else None
                         marks[name] = mtime if marks.get(name, mtime) == mtime else None
                     if names:
                         break
