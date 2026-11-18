@@ -225,15 +225,22 @@ def _pools(chosen_systems, taken):
     return pools
 
 
-def run_surprise(card_name, setup, chosen_systems, interactive, dry_run, rng=None, today=None, to_fetch=None):
-    """The sync step: replace some or all of a card's surprises (asking which when interactive), fill the empty slots,
-    save the card and the history, then open the card editor when interactive (with Surprise off too). Systems in
-    excluded_systems() are left out, and their current surprises replaced. A dry run
-    changes nothing and only previews the empty slots; when storage can't be listed nothing is replaced or saved.
-    Returns the card's surprises after the step (on a dry run, the saved ones). to_fetch: passed to the card editor
-    for its download preview."""
-    rng = rng or random.Random()
-    today = today or datetime.date.today()
+def _current(entry, chosen_systems):
+    """(systems' names by bucket, the entry's saved surprises that are on those systems), systems in excluded_systems()
+    left out."""
+    excluded = excluded_systems()
+    names = {s["bucket"]: s["name"] for s in chosen_systems if s["bucket"] not in excluded}
+    saved = entry.get("surprises")
+    return names, [x for x in (saved if isinstance(saved, list) else ())
+                   if isinstance(x, dict) and x.get("system") in names and isinstance(x.get("bucket"), str)]
+
+
+def run_surprise(card_name, setup, chosen_systems, interactive, dry_run, to_fetch=None):
+    """The sync step that comes first: ask which of a card's surprises to replace (all of them when not interactive),
+    keep the others and save them (the empty slots are filled later, by fill_surprises, after the card editor), then
+    open the card editor when interactive (with Surprise off too). Systems in excluded_systems() are left out, and
+    their current surprises dropped. A dry run changes nothing. Returns the surprises kept (on a dry run, the saved
+    ones). to_fetch: passed to the card editor for its download preview."""
     cards = store.load_cards()
     entry = cards.get(card_name)
     entry = entry if isinstance(entry, dict) else {}
@@ -245,12 +252,7 @@ def run_surprise(card_name, setup, chosen_systems, interactive, dry_run, rng=Non
             from . import cardedit  # cardedit imports much of the package
             cardedit.edit_card(card_name, setup, to_fetch)
         return []
-    excluded = excluded_systems()
-    chosen_systems = [s for s in chosen_systems if s["bucket"] not in excluded]
-    names = {s["bucket"]: s["name"] for s in chosen_systems}
-    saved = entry.get("surprises")
-    current = [x for x in (saved if isinstance(saved, list) else ())
-               if isinstance(x, dict) and x.get("system") in names and isinstance(x.get("bucket"), str)]
+    names, current = _current(entry, chosen_systems)
     if dry_run:
         kept = current
         if current:
@@ -265,32 +267,49 @@ def run_surprise(card_name, setup, chosen_systems, interactive, dry_run, rng=Non
         kept = current if states is None else [x for x, replace in zip(current, states) if not replace]
     else:
         kept = []
+    if not dry_run:
+        if kept != entry.get("surprises"):
+            store.update_card(card_name, surprises=kept)
+        if interactive:
+            from . import cardedit  # cardedit imports much of the package
+            cardedit.edit_card(card_name, setup, to_fetch)
+    return kept
+
+
+def fill_surprises(card_name, setup, chosen_systems, dry_run, rng=None, today=None):
+    """The sync step that comes last before copying: pick the card's empty surprise slots (out of SLOTS) at random from
+    chosen_systems (full systems included), save the card and the history. A dry run changes nothing and only previews
+    the picks; when storage can't be listed nothing is picked. Returns the card's surprises after the step."""
+    rng = rng or random.Random()
+    today = today or datetime.date.today()
+    cards = store.load_cards()
+    entry = cards.get(card_name)
+    entry = entry if isinstance(entry, dict) else {}
+    if not enabled(entry):
+        return []
+    names, kept = _current(entry, chosen_systems)
     need = max(SLOTS - len(kept), 0)
-    new, pools = [], {}
-    if need:
-        taken = {g["bucket"] for s in chosen_systems for g in s.get("games", ()) if g.get("bucket")}
-        taken |= {k for x in kept for k in [x["bucket"]] + list(x.get("files", ()))}
-        recommended = store.recommended_systems(setup[0], store.repo_json("systems")) if setup[0] else set()
-        others_current = {x.get("bucket") for name, other in cards.items() if name != card_name and isinstance(other, dict)
-                          and enabled(other) and isinstance(other.get("surprises"), list)
-                          for x in other["surprises"] if isinstance(x, dict)}
-        pools = _pools(chosen_systems, taken)
-        new = pick(pools or {}, kept, need, recommended, recent(load_history(), today, ttl_days()),
-                   others_current, rng)
+    if not need:
+        return kept
+    chosen_systems = [s for s in chosen_systems if s["bucket"] in names]
+    taken = {g["bucket"] for s in chosen_systems for g in s.get("games", ()) if g.get("bucket")}
+    taken |= {k for x in kept for k in [x["bucket"]] + list(x.get("files", ()))}
+    recommended = store.recommended_systems(setup[0], store.repo_json("systems")) if setup[0] else set()
+    others_current = {x.get("bucket") for name, other in cards.items() if name != card_name and isinstance(other, dict)
+                      and enabled(other) and isinstance(other.get("surprises"), list)
+                      for x in other["surprises"] if isinstance(x, dict)}
+    pools = _pools(chosen_systems, taken)
+    if pools is None:  # storage couldn't be listed: pick nothing
+        return kept
+    new = pick(pools, kept, need, recommended, recent(load_history(), today, ttl_days()), others_current, rng)
     if new:
         print(f"\U0001F381 Surprise: {len(new)} new pick(s)" + (ui.dim(" (dry run: not saved)") if dry_run else ""))
         for x in new:
             print(f"  {x['title']}  {ui.dim(names[x['system']])}")
     if dry_run:
-        return current
-    if pools is None:  # storage couldn't be listed: replace nothing
-        result = current
-    else:
-        result = kept + new
-        store.update_card(card_name, surprises=result)
-        save_history(load_history() + [{"system": x["system"], "bucket": x["bucket"], "title": x["title"],
-                                        "card": card_name, "date": today.isoformat()} for x in new], today)
-    if interactive:
-        from . import cardedit  # cardedit imports much of the package
-        cardedit.edit_card(card_name, setup, to_fetch)
+        return kept
+    result = kept + new
+    store.update_card(card_name, surprises=result)
+    save_history(load_history() + [{"system": x["system"], "bucket": x["bucket"], "title": x["title"],
+                                    "card": card_name, "date": today.isoformat()} for x in new], today)
     return result

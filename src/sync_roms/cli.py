@@ -920,11 +920,10 @@ def sync_card(args):
 
     relist()
     interactive = not (ui.ASSUME_YES or args.json) and ui.has_terminal()
-    fresh = not (saved or {}).get("surprises") and not any(s["games"] or s.get("full_system") for s in systems)
-    # a card with no games and no surprises yet has no systems with ROMs: draw its first surprises from all its systems
-    surprise.run_surprise(card, (device, layout_name), systems if fresh else [s for s in systems if available(s)],
-                          interactive, args.dry_run, to_fetch=to_fetch)
-    if not args.dry_run:  # the step (and the card editor it opens) may have changed the card's games
+    def reload_changes():
+        """Pick up the card's games as saved now: refresh the mirror and the listings for the systems that changed."""
+        nonlocal systems, saved
+
         def picks(s):
             return s.get("full_system"), store.listed(s)
         before = {s["bucket"]: picks(s) for s in systems}
@@ -943,6 +942,19 @@ def sync_card(args):
             listings.pop(bucket, None)
         relist()
         saved = store.load_cards().get(card)
+
+    # surprises come in two steps: which ones to replace first (then the card editor, which shows the ones kept), and
+    # the empty slots last, right before the sync, from all the systems on the card
+    surprise.run_surprise(card, (device, layout_name), [s for s in systems if available(s)],
+                          interactive, args.dry_run, to_fetch=to_fetch)
+    if not args.dry_run:  # the step (and the card editor it opens) may have changed the card's games
+        reload_changes()
+    fresh = not (saved or {}).get("surprises") and not any(s["games"] or s.get("full_system") for s in systems)
+    # a card with no games and no surprises yet has no systems with ROMs: draw its first surprises from all its systems
+    surprise.fill_surprises(card, (device, layout_name), systems if fresh else [s for s in systems if available(s)],
+                            args.dry_run)
+    if not args.dry_run:
+        reload_changes()
     chosen = [s for s in systems if available(s)]
     if not chosen:
         failed = pico8.run(card, layout_name, base, args.dry_run)
