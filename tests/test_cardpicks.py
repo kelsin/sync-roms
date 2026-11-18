@@ -37,6 +37,16 @@ class Picks(Flow):
         self.assertTrue(p.save())
         self.assertEqual(store.card_excluded("c"), {"gba": ["gba/Ruby.zip"]})
 
+    def test_one_pass_turning_several_games_on_and_off_keeps_the_card_order(self):
+        self.card(games={"gba": [g("gba/Emerald.zip"), g("gba/Ruby.sav"), g("gba/Ruby.zip")]})
+        p = self.picks()
+        sp, notes = p.system(GBA), p.cover()
+        keys = ["gba/Emerald.zip", "gba/Ruby.zip", "gba/Zelda.zip"]
+        sp.apply(keys, notes, sp.states(notes), [False, False, True])
+        self.assertEqual([x["bucket"] for x in sp.games], ["gba/Ruby.sav", "gba/Zelda.zip"])
+        sp.apply(keys, notes, sp.states(notes), [True, False, True])
+        self.assertEqual([x["bucket"] for x in sp.games], ["gba/Ruby.sav", "gba/Zelda.zip", "gba/Emerald.zip"])
+
     def test_save_without_changes_returns_false(self):
         self.card(games={"gba": [g("gba/Zelda.zip")]})
         p = self.picks()

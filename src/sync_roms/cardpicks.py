@@ -35,19 +35,23 @@ class SystemPicks:
     def apply(self, keys, notes, base, state):
         """Fold one pass's on/off states into the card being edited. On: not excluded, and picked directly unless a
         referenced set covers it. Off: not picked directly, and excluded only while a referenced set covers it."""
+        direct, off = {g.get("bucket") for g in self.games}, set()
         for key, want in self.changes(keys, base, state).items():
             if want == base[key] or key in self.locked_from:
                 continue
             if want:
                 self.excluded.discard(key)
-                if key not in notes and all(g.get("bucket") != key for g in self.games):
+                if key not in notes and key not in direct:
                     self.games.append({"title": self.titles[key], "bucket": key})
+                    direct.add(key)
             else:
-                self.games = [g for g in self.games if g.get("bucket") != key]
+                off.add(key)
                 if key in notes:
                     self.excluded.add(key)
                 else:
                     self.excluded.discard(key)
+        if off:
+            self.games = [g for g in self.games if g.get("bucket") not in off]
 
 
 class CardPicks:
