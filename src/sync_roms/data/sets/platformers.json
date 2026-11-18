@@ -222,7 +222,13 @@
       "title": "Spyro - Season of Ice",
       "category": "Crash & Spyro",
       "system": "gba",
-      "bucket": "gba/Spyro - Season of Ice (USA).zip"
+      "bucket": "gba/Spyro - Season of Ice (USA).zip",
+      "variants": [
+        {
+          "bucket": "gba/Spyro - Season of Ice (Japan) [T-En by Cornholio309 & RayCarrot v1.0] [n].zip",
+          "note": "GBA: Japanese version with its redesigned art"
+        }
+      ]
     },
     {
       "title": "Spyro - Enter the Dragonfly",
@@ -735,6 +741,12 @@
       "bucket": "dreamcast/Super Magnetic Neo (USA).chd"
     },
     {
+      "title": "Sly Cooper - Thieves in Time™",
+      "category": "Rare & 3D Mascots",
+      "system": "psvita",
+      "bucket": "psvita/Sly Cooper - Thieves in Time™ [PCSA00068] [USA] [NoNpDRM].zip"
+    },
+    {
       "title": "DuckTales",
       "category": "Disney",
       "system": "nes",
@@ -936,13 +948,13 @@
       "title": "Mickey no Tokyo Disneyland Daibouken",
       "category": "Disney",
       "system": "snes",
-      "bucket": "snes/Mickey no Tokyo Disneyland Daibouken (Japan).zip"
+      "bucket": "snes/Mickey's Great Adventure in Tokyo Disneyland (Japan) [T-En by Svambo & Anonymousse v1.0] [n].zip"
     },
     {
       "title": "Donald Duck no Mahou no Boushi",
       "category": "Disney",
       "system": "snes",
-      "bucket": "snes/Donald Duck no Mahou no Boushi (Japan).zip"
+      "bucket": "snes/Donald Duck and the Magical Hat (Japan) [T-En by Gorgyrip v1.0] [n].zip"
     },
     {
       "title": "Bonkers",
@@ -966,7 +978,13 @@
       "title": "Castle of Illusion Starring Mickey Mouse",
       "category": "Disney",
       "system": "genesis",
-      "bucket": "genesis/Castle of Illusion Starring Mickey Mouse (USA, Europe).zip"
+      "bucket": "genesis/Castle of Illusion Starring Mickey Mouse (USA, Europe).zip",
+      "variants": [
+        {
+          "bucket": "genesis/Castle of Illusion Starring Mickey Mouse (Japan) [T-En by RadioTails v1.0] [n].zip",
+          "note": "Genesis: Japanese release, fan translated"
+        }
+      ]
     },
     {
       "title": "Castle of Illusion Starring Mickey Mouse",
@@ -1293,6 +1311,12 @@
       "bucket": "3ds/Disney Epic Mickey - Power of Illusion (USA) (En,Fr,Es,Pt).zip"
     },
     {
+      "title": "Mickey to Donald - Magical Adventure 3",
+      "category": "Disney",
+      "system": "snes",
+      "bucket": "snes/Mickey to Donald - Magical Adventure 3 (Japan).zip"
+    },
+    {
       "title": "Alex Kidd - High-Tech World",
       "category": "Sega Mascots",
       "system": "mastersystem",
@@ -1356,7 +1380,13 @@
       "title": "Monster World IV",
       "category": "Sega Mascots",
       "system": "genesis",
-      "bucket": "genesis/Monster World IV (USA) (Genesis Mini).zip"
+      "bucket": "genesis/Monster World IV (USA) (Genesis Mini).zip",
+      "variants": [
+        {
+          "bucket": "genesis/Monster World IV (Japan) [T-En by DeJap & Demiforce v1.02] [Add by Michele Di Somma v2.2] [Add by Jackic v1.1].zip",
+          "note": "Genesis: fan translation of the Japanese release"
+        }
+      ]
     },
     {
       "title": "Psycho Fox",
@@ -1398,7 +1428,7 @@
       "title": "Pulseman",
       "category": "Sega Mascots",
       "system": "genesis",
-      "bucket": "genesis/Pulseman (Japan).zip"
+      "bucket": "genesis/Pulseman (Japan) [T-En by M.I.J.E.T. v070226].zip"
     },
     {
       "title": "ToeJam & Earl in Panic on Funkotron",
@@ -1512,7 +1542,7 @@
       "title": "Super Genjin 2",
       "category": "Hudson",
       "system": "snes",
-      "bucket": "snes/Super Genjin 2 (Japan).zip"
+      "bucket": "snes/Super Genjin 2 (Japan) [T-En by Gaijin Productions v1.00] [i].zip"
     },
     {
       "title": "GB Genjin Land - Viva! Chikkun Oukoku",
@@ -1572,7 +1602,7 @@
       "title": "Takahashi Meijin no Bouken-jima IV",
       "category": "Hudson",
       "system": "nes",
-      "bucket": "nes/Takahashi Meijin no Bouken-jima IV (Japan).zip"
+      "bucket": "nes/Adventure Island 4 (Japan) [T-En by Demiforce v1.00] [n].zip"
     },
     {
       "title": "Milon's Secret Castle",
@@ -1584,7 +1614,7 @@
       "title": "DoReMi Fantasy - Milon no Dokidoki Daibouken",
       "category": "Hudson",
       "system": "snes",
-      "bucket": "snes/DoReMi Fantasy - Milon no Dokidoki Daibouken (Japan).zip"
+      "bucket": "snes/Do-Re-Mi Fantasy - Milon's Quest (Japan) [T-En by Gaijin Productions & RPGOne v1.3] [n].zip"
     },
     {
       "title": "Felix the Cat",
@@ -1621,6 +1651,12 @@
       "category": "Hudson",
       "system": "tg16",
       "bucket": "tg16/Momotarou Katsugeki (Japan).zip"
+    },
+    {
+      "title": "Bonk's Adventure - Arcade Version",
+      "category": "Hudson",
+      "system": "fbneo",
+      "bucket": "fbneo/bonkadv.zip"
     },
     {
       "title": "Earthworm Jim",
@@ -1962,7 +1998,13 @@
       "title": "Smart Ball",
       "category": "16-bit Mascots",
       "system": "snes",
-      "bucket": "snes/Smart Ball (USA).zip"
+      "bucket": "snes/Smart Ball (USA).zip",
+      "variants": [
+        {
+          "bucket": "snes/Jerry Boy (Japan) [T-En by Chris Covell v1.0].zip",
+          "note": "SNES: Japanese Jerry Boy, translated"
+        }
+      ]
     },
     {
       "title": "Spanky's Quest",
@@ -2320,7 +2362,7 @@
       "title": "Rainbow Islands - Putty's Party",
       "category": "Single-Screen",
       "system": "wonderswan",
-      "bucket": "wonderswan/Rainbow Islands - Putty's Party (Japan).zip"
+      "bucket": "wonderswan/Rainbow Islands - Putty's Party (Japan) [T-En by USC v1.1].zip"
     },
     {
       "title": "Rainbow Islands Revolution",
@@ -2344,7 +2386,7 @@
       "title": "Don Doko Don 2",
       "category": "Single-Screen",
       "system": "nes",
-      "bucket": "nes/Don Doko Don 2 (Japan).zip"
+      "bucket": "nes/Don Doko Don 2 (Japan) [T-En by MrRichard999 v1.0].zip"
     },
     {
       "title": "Ice Climber",
@@ -2381,6 +2423,24 @@
       "category": "Single-Screen",
       "system": "nes",
       "bucket": "nes/Door Door (Japan).zip"
+    },
+    {
+      "title": "Diet Go Go (USA v1.1 1992.09.26)",
+      "category": "Single-Screen",
+      "system": "fbneo",
+      "bucket": "fbneo/dietgou.zip"
+    },
+    {
+      "title": "Super Burger Time (World, set 1)",
+      "category": "Single-Screen",
+      "system": "fbneo",
+      "bucket": "fbneo/supbtime.zip"
+    },
+    {
+      "title": "Peter Pepper's Ice Cream Factory (DECO Cassette) (US) (set 1)",
+      "category": "Single-Screen",
+      "system": "fbneo",
+      "bucket": "fbneo/cppicf.zip"
     },
     {
       "title": "Pac-Land",
@@ -2551,6 +2611,18 @@
       "bucket": "fbneo/congo.zip"
     },
     {
+      "title": "Clockwork Aquario",
+      "category": "Arcade",
+      "system": "fbneo",
+      "bucket": "fbneo/aquario.zip"
+    },
+    {
+      "title": "Big Karnak (ver. 1.0, checksum 1e38c94)",
+      "category": "Arcade",
+      "system": "fbneo",
+      "bucket": "fbneo/bigkarnk.zip"
+    },
+    {
       "title": "Little Samson",
       "category": "Other 8-bit",
       "system": "nes",
@@ -2560,7 +2632,13 @@
       "title": "Mr. Gimmick",
       "category": "Other 8-bit",
       "system": "nes",
-      "bucket": "nes/Mr. Gimmick (Europe).zip"
+      "bucket": "nes/Mr. Gimmick (Europe).zip",
+      "variants": [
+        {
+          "bucket": "nes/Gimmick! (Japan) [T-En by LucianoTheWindowsFan v1.0].zip",
+          "note": "NES: Japanese release, translated"
+        }
+      ]
     },
     {
       "title": "Kid Icarus",
@@ -2638,7 +2716,7 @@
       "title": "Akumajou Special - Boku Dracula-kun",
       "category": "Other 8-bit",
       "system": "nes",
-      "bucket": "nes/Akumajou Special - Boku Dracula-kun (Japan).zip"
+      "bucket": "nes/Castlevania Special - Kid Dracula (Japan) [T-En by Chronix v1.0] [n].zip"
     },
     {
       "title": "Kid Klown in Night Mayor World",
@@ -2716,43 +2794,49 @@
       "title": "Ufouria - The Saga",
       "category": "Other 8-bit",
       "system": "nes",
-      "bucket": "nes/Ufouria - The Saga (Europe).zip"
+      "bucket": "nes/Ufouria - The Saga (Europe).zip",
+      "variants": [
+        {
+          "bucket": "nes/Hebereke (Japan) [T-En by BMF54123 v1.0].zip",
+          "note": "NES: Japanese Hebereke, translated"
+        }
+      ]
     },
     {
       "title": "Yume Penguin Monogatari",
       "category": "Other 8-bit",
       "system": "nes",
-      "bucket": "nes/Yume Penguin Monogatari (Japan).zip"
+      "bucket": "nes/Dream Penguin Adventure - The Quest for Penko's Heart (Japan) [T-En by Vice Translations v1.021] [n].zip"
     },
     {
       "title": "Bio Miracle Bokutte Upa",
       "category": "Other 8-bit",
       "system": "nes",
-      "bucket": "nes/Bio Miracle Bokutte Upa (Japan).zip"
+      "bucket": "nes/Bio Miracle Baby Upa!! (Japan) [T-En by Vice Translations v1.00] [n].zip"
     },
     {
       "title": "Moon Crystal",
       "category": "Other 8-bit",
       "system": "nes",
-      "bucket": "nes/Moon Crystal (Japan).zip"
+      "bucket": "nes/Moon Crystal (Japan) [T-En by Alex W. Jackson v1.0].zip"
     },
     {
       "title": "Wagyan Land",
       "category": "Other 8-bit",
       "system": "nes",
-      "bucket": "nes/Wagyan Land (Japan).zip"
+      "bucket": "nes/Wagyan Land (Japan) [T-En by AlanMidas wag.yan] [n].zip"
     },
     {
       "title": "Ganbare Goemon! - Karakuri Douchuu",
       "category": "Other 8-bit",
       "system": "nes",
-      "bucket": "nes/Ganbare Goemon! - Karakuri Douchuu (Japan).zip"
+      "bucket": "nes/Ganbare Goemon! (Japan) [T-En by Spinner 8 and friends v1.01] [n].zip"
     },
     {
       "title": "Ganbare Goemon 2",
       "category": "Other 8-bit",
       "system": "nes",
-      "bucket": "nes/Ganbare Goemon 2 (Japan).zip"
+      "bucket": "nes/Go for it! Goemon 2 (Japan) [T-En by Stardust Crusaders v2.00] [n].zip"
     },
     {
       "title": "Bionic Commando",
@@ -2763,6 +2847,10 @@
         {
           "bucket": "gb/Bionic Commando (USA).zip",
           "note": "Game Boy: reworked version with new stages and setting"
+        },
+        {
+          "bucket": "nes/Bionic Commando - Return of Hitler (Japan) [T-En by Stardust Crusaders v1.04] [n].zip",
+          "note": "NES: Japanese Top Secret with its original story, translated"
         }
       ]
     },
@@ -2890,7 +2978,7 @@
       "title": "Coca-Cola Kid",
       "category": "Other 8-bit",
       "system": "gamegear",
-      "bucket": "gamegear/Coca-Cola Kid (Japan).zip"
+      "bucket": "gamegear/Coca-Cola Kid (Japan) [T-En by Filler v1.1].zip"
     },
     {
       "title": "Trip World",
@@ -2938,13 +3026,25 @@
       "title": "Gargoyle's Quest",
       "category": "Other 8-bit",
       "system": "gb",
-      "bucket": "gb/Gargoyle's Quest (USA, Europe).zip"
+      "bucket": "gb/Gargoyle's Quest (USA, Europe).zip",
+      "variants": [
+        {
+          "bucket": "gb/Firebrand - A Ghosts 'n Goblins Tale (Japan) [T-En by Stardust Crusaders v1.00] [n].zip",
+          "note": "GB: retranslation of the Japanese release"
+        }
+      ]
     },
     {
       "title": "Gargoyle's Quest II",
       "category": "Other 8-bit",
       "system": "nes",
-      "bucket": "nes/Gargoyle's Quest II (USA).zip"
+      "bucket": "nes/Gargoyle's Quest II (USA).zip",
+      "variants": [
+        {
+          "bucket": "gb/Gargoyle's Quest II - The Demon Darkness (Japan) [T-En by Bailli v1.0] [n].zip",
+          "note": "GB: Japan-only Game Boy port"
+        }
+      ]
     },
     {
       "title": "Shantae",
@@ -3019,28 +3119,136 @@
       "bucket": "gb/Ganbare Goemon - Sarawareta Ebisumaru (Japan).zip"
     },
     {
+      "title": "Böbl",
+      "category": "Other 8-bit",
+      "system": "nes",
+      "bucket": "nes/Böbl.zip"
+    },
+    {
+      "title": "Micro Mages",
+      "category": "Other 8-bit",
+      "system": "nes",
+      "bucket": "nes/Micro Mages.zip"
+    },
+    {
+      "title": "Spacegulls",
+      "category": "Other 8-bit",
+      "system": "nes",
+      "bucket": "nes/Spacegulls.zip"
+    },
+    {
+      "title": "Wai Wai World 2 - S.O.S. from Parsley Castle",
+      "category": "Other 8-bit",
+      "system": "nes",
+      "bucket": "nes/Wai Wai World 2 - S.O.S. from Parsley Castle (Japan) [T-En by Vice Translations v1.01] [n].zip"
+    },
+    {
+      "title": "Wagyan Land 2",
+      "category": "Other 8-bit",
+      "system": "nes",
+      "bucket": "nes/Wagyan Land 2 (Japan) [T-En by Abstract Crouton Productions v1.0] [i].zip"
+    },
+    {
+      "title": "Wagyan Land 3",
+      "category": "Other 8-bit",
+      "system": "nes",
+      "bucket": "nes/Wagyan Land 3 (Japan).zip"
+    },
+    {
+      "title": "Krion Conquest, The",
+      "category": "Other 8-bit",
+      "system": "nes",
+      "bucket": "nes/Krion Conquest, The (USA).zip"
+    },
+    {
+      "title": "Mitsume ga Tooru",
+      "category": "Other 8-bit",
+      "system": "nes",
+      "bucket": "nes/Mitsume ga Tooru (Japan).zip"
+    },
+    {
+      "title": "Monster Party",
+      "category": "Other 8-bit",
+      "system": "nes",
+      "bucket": "nes/Monster Party (USA).zip"
+    },
+    {
+      "title": "Cocoron",
+      "category": "Other 8-bit",
+      "system": "nes",
+      "bucket": "nes/Cocoron (Japan).zip"
+    },
+    {
+      "title": "Splatterhouse - Wanpaku Graffiti",
+      "category": "Other 8-bit",
+      "system": "nes",
+      "bucket": "nes/Splatterhouse - Wanpaku Graffiti (Japan).zip"
+    },
+    {
+      "title": "Tobu Tobu Girl - Deluxe",
+      "category": "Other 8-bit",
+      "system": "gbc",
+      "bucket": "gbc/Tobu Tobu Girl - Deluxe.zip"
+    },
+    {
+      "title": "Pitfall! - Pitfall Harry's Jungle Adventure",
+      "category": "Other 8-bit",
+      "system": "atari2600",
+      "bucket": "atari2600/Pitfall! - Pitfall Harry's Jungle Adventure (USA).zip"
+    },
+    {
+      "title": "Penguin Adventure",
+      "category": "Other 8-bit",
+      "system": "msx",
+      "bucket": "msx/Penguin Adventure (Japan, Europe) (En).zip"
+    },
+    {
+      "title": "Treasure of Usas, The",
+      "category": "Other 8-bit",
+      "system": "msx2",
+      "bucket": "msx2/Treasure of Usas, The (Japan, Europe) (En).zip"
+    },
+    {
+      "title": "Celeste Classic",
+      "category": "Other 8-bit",
+      "system": "pico8",
+      "bucket": "pico8/celeste.p8.png"
+    },
+    {
+      "title": "celeste classic 2",
+      "category": "Other 8-bit",
+      "system": "pico8",
+      "bucket": "pico8/celeste_classic_2-5.p8.png"
+    },
+    {
       "title": "Legend of the Mystical Ninja, The",
       "category": "Other 16-bit",
       "system": "snes",
-      "bucket": "snes/Legend of the Mystical Ninja, The (USA).zip"
+      "bucket": "snes/Legend of the Mystical Ninja, The (USA).zip",
+      "variants": [
+        {
+          "bucket": "snes/Go for it! Goemon - The Rescue of Princess Yuki (Japan) (Rev 2) [T-En by DDSTranslation v2.0] [n].zip",
+          "note": "SNES: Japanese release, fan translated"
+        }
+      ]
     },
     {
       "title": "Ganbare Goemon 2 - Kiteretsu Shougun Magginesu",
       "category": "Other 16-bit",
       "system": "snes",
-      "bucket": "snes/Ganbare Goemon 2 - Kiteretsu Shougun Magginesu (Japan).zip"
+      "bucket": "snes/Ganbare! Goemon 2 - The Strange General McGuinness (Japan) [T-En by DDSTranslation v3.0] [Add by Djungelurban v1.0] [n].zip"
     },
     {
       "title": "Ganbare Goemon 3 - Shishi Juurokubee no Karakuri Manjigatame",
       "category": "Other 16-bit",
       "system": "snes",
-      "bucket": "snes/Ganbare Goemon 3 - Shishi Juurokubee no Karakuri Manjigatame (Japan) (Rev 2).zip"
+      "bucket": "snes/Ganbare! Goemon 3 - The Mecha Leg Hold of Jurokube Shishi (Japan) [T-En by DDSTranslation v4.0] [Add by Djungelurban v1.0] [n].zip"
     },
     {
       "title": "Ganbare Goemon Kirakira Douchuu - Boku ga Dancer ni Natta Wake",
       "category": "Other 16-bit",
       "system": "snes",
-      "bucket": "snes/Ganbare Goemon Kirakira Douchuu - Boku ga Dancer ni Natta Wake (Japan) (Rev 2).zip"
+      "bucket": "snes/Ganbare! Goemon - The Twinkling Journey - The Reason I became a Dancer (Japan) [T-En by DDSTranslation v3.0] [Add by Djungelurban v1.0] [n].zip"
     },
     {
       "title": "Pop'n TwinBee - Rainbow Bell Adventures",
@@ -3052,13 +3260,13 @@
       "title": "Magical Pop'n",
       "category": "Other 16-bit",
       "system": "snes",
-      "bucket": "snes/Magical Pop'n (Japan).zip"
+      "bucket": "snes/Magical Pop'n (Japan) [T-En by Aeon Genesis v1.01].zip"
     },
     {
       "title": "Umihara Kawase",
       "category": "Other 16-bit",
       "system": "snes",
-      "bucket": "snes/Umihara Kawase (Japan).zip",
+      "bucket": "snes/Umihara Kawase (Japan) [T-En by Satsu v0.90] [Add by Green Jerry v1.0] [Add by Burning Loaf v1.0].zip",
       "variants": [
         {
           "bucket": "psp/Umihara Kawase Portable (Japan).chd",
@@ -3361,6 +3569,42 @@
       "bucket": "segacd/Wild Woody (USA).chd"
     },
     {
+      "title": "Tanglewood",
+      "category": "Other 16-bit",
+      "system": "genesis",
+      "bucket": "genesis/Tanglewood.zip"
+    },
+    {
+      "title": "Demons of Asteborg",
+      "category": "Other 16-bit",
+      "system": "genesis",
+      "bucket": "genesis/Demons of Asteborg.zip"
+    },
+    {
+      "title": "Magical Kid Taruruto",
+      "category": "Other 16-bit",
+      "system": "genesis",
+      "bucket": "genesis/Magical Kid Taruruto (Japan) (En,Fr,Ja) [T-En by Akualung & Ghanmi & JumpingRyle & Tryphon alpha-ml] [n].zip"
+    },
+    {
+      "title": "Son Son II",
+      "category": "Other 16-bit",
+      "system": "tg16",
+      "bucket": "tg16/Son Son II (Japan).zip"
+    },
+    {
+      "title": "Makai Prince Dorabocchan",
+      "category": "Other 16-bit",
+      "system": "tg16",
+      "bucket": "tg16/Makai Prince Dorabocchan (Japan).zip"
+    },
+    {
+      "title": "Dragon Egg!",
+      "category": "Other 16-bit",
+      "system": "tg16",
+      "bucket": "tg16/Dragon Egg! (Japan).zip"
+    },
+    {
       "title": "Klonoa - Door to Phantomile",
       "category": "Other 32-bit and Later",
       "system": "psx",
@@ -3382,7 +3626,7 @@
       "title": "Kaze no Klonoa - Moonlight Museum",
       "category": "Other 32-bit and Later",
       "system": "wonderswan",
-      "bucket": "wonderswan/Kaze no Klonoa - Moonlight Museum (Japan).zip"
+      "bucket": "wonderswan/Klonoa - Moonlight Museum (Japan) [T-En by PowerStone05 & RayCarrot & Rcs709 & StarryScarab v1.1] [n].zip"
     },
     {
       "title": "Tomba!",
@@ -3516,7 +3760,7 @@
       "title": "Densetsu no Stafy",
       "category": "Other 32-bit and Later",
       "system": "gba",
-      "bucket": "gba/Densetsu no Stafy (Japan).zip"
+      "bucket": "gba/Legendary Starfy, The (Japan) [T-En by Starfy Translation Team v1.1] [n].zip"
     },
     {
       "title": "Densetsu no Stafy 2",
@@ -3636,7 +3880,13 @@
       "title": "Cave Story 3D",
       "category": "Other 32-bit and Later",
       "system": "3ds",
-      "bucket": "3ds/Cave Story 3D (USA).zip"
+      "bucket": "3ds/Cave Story 3D (USA).zip",
+      "variants": [
+        {
+          "bucket": "3ds/Cave Story 3D (USA) [T-En by Aeon Genesis v0.96 RC2] [Relocalized].zip",
+          "note": "3DS: Aeon Genesis relocalized script"
+        }
+      ]
     },
     {
       "title": "Chibi-Robo! Zip Lash",
@@ -3739,6 +3989,114 @@
       "category": "Other 32-bit and Later",
       "system": "psvita",
       "bucket": "psvita/Sound Shapes™ [PCSA00003] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Chronos Twin",
+      "category": "Other 32-bit and Later",
+      "system": "nds",
+      "bucket": "nds/Chronos Twin (Europe) (En,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Sayonara Umihara Kawase",
+      "category": "Other 32-bit and Later",
+      "system": "3ds",
+      "bucket": "3ds/Sayonara Umihara Kawase (Japan).zip"
+    },
+    {
+      "title": "Runbow Pocket Deluxe Edition",
+      "category": "Other 32-bit and Later",
+      "system": "n3ds",
+      "bucket": "n3ds/Runbow Pocket Deluxe Edition (USA).3ds"
+    },
+    {
+      "title": "10 Second Ninja X",
+      "category": "Other 32-bit and Later",
+      "system": "psvita",
+      "bucket": "psvita/10 Second Ninja X [PCSE00890] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "1001 Spikes",
+      "category": "Other 32-bit and Later",
+      "system": "psvita",
+      "bucket": "psvita/1001 Spikes [PCSE00349] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "A Boy and His Blob",
+      "category": "Other 32-bit and Later",
+      "system": "psvita",
+      "bucket": "psvita/A Boy and His Blob [PCSE00726] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Curse of the Moon",
+      "category": "Other 32-bit and Later",
+      "system": "psvita",
+      "bucket": "psvita/Curse of the Moon [PCSE01262] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Downwell",
+      "category": "Other 32-bit and Later",
+      "system": "psvita",
+      "bucket": "psvita/Downwell [PCSE00873] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Dustforce",
+      "category": "Other 32-bit and Later",
+      "system": "psvita",
+      "bucket": "psvita/Dustforce [PCSE00332] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Mutant Blobs Attack",
+      "category": "Other 32-bit and Later",
+      "system": "psvita",
+      "bucket": "psvita/Mutant Blobs Attack [PCSE00034] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Mutant Mudds Deluxe",
+      "category": "Other 32-bit and Later",
+      "system": "psvita",
+      "bucket": "psvita/Mutant Mudds Deluxe [PCSE00380] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Runner2",
+      "category": "Other 32-bit and Later",
+      "system": "psvita",
+      "bucket": "psvita/Runner2 [PCSE00302] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Sayonara UmiharaKawase +",
+      "category": "Other 32-bit and Later",
+      "system": "psvita",
+      "bucket": "psvita/Sayonara UmiharaKawase + [PCSE00683] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Shantae - HGH",
+      "category": "Other 32-bit and Later",
+      "system": "psvita",
+      "bucket": "psvita/Shantae - HGH [PCSE00950] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Spelunky",
+      "category": "Other 32-bit and Later",
+      "system": "psvita",
+      "bucket": "psvita/Spelunky [PCSE00288] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Super Meat Boy!",
+      "category": "Other 32-bit and Later",
+      "system": "psvita",
+      "bucket": "psvita/Super Meat Boy! [PCSE00769] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Volgarr",
+      "category": "Other 32-bit and Later",
+      "system": "psvita",
+      "bucket": "psvita/Volgarr [PCSE00913] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Go for it! Goemon - The Grand Cycle of Oedo",
+      "category": "Other 32-bit and Later",
+      "system": "psx",
+      "bucket": "psx/Go for it! Goemon - The Grand Cycle of Oedo (Japan) [T-En by acediez & Tom v1.3] [n].chd"
     }
   ]
 }

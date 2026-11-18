@@ -5,7 +5,13 @@
     {
       "title": "Contra",
       "system": "nes",
-      "bucket": "nes/Contra (USA).zip"
+      "bucket": "nes/Contra (USA).zip",
+      "variants": [
+        {
+          "bucket": "nes/Contra (Japan) [T-En by Stardust Crusaders v1.01] [n].zip",
+          "note": "NES: Japanese version with cutscenes and stage maps"
+        }
+      ]
     },
     {
       "title": "Teenage Mutant Ninja Turtles",
@@ -67,7 +73,13 @@
     {
       "title": "Double Dragon III - The Sacred Stones",
       "system": "nes",
-      "bucket": "nes/Double Dragon III - The Sacred Stones (USA).zip"
+      "bucket": "nes/Double Dragon III - The Sacred Stones (USA).zip",
+      "variants": [
+        {
+          "bucket": "nes/Double Dragon III - The Rosetta Stone (Japan) [T-En by Pacnsacdave v1.0].zip",
+          "note": "NES: Japanese version with a shop and rebalanced difficulty"
+        }
+      ]
     },
     {
       "title": "River City Ransom",
@@ -77,6 +89,10 @@
         {
           "bucket": "gba/River City Ransom EX (USA).zip",
           "note": "GBA: adds move customization and new techniques"
+        },
+        {
+          "bucket": "nes/River City Ransom Zero (Japan) [T-En by Vice Translations v1.01] [n].zip",
+          "note": "NES: Japanese Kunio-kun version, translated"
         }
       ]
     },
@@ -175,7 +191,13 @@
     {
       "title": "Nintendo World Cup (Rev 1)",
       "system": "nes",
-      "bucket": "nes/Nintendo World Cup (USA) (Rev 1).zip"
+      "bucket": "nes/Nintendo World Cup (USA) (Rev 1).zip",
+      "variants": [
+        {
+          "bucket": "nes/Nekketsu Highschool Dodgeball Club - Soccer Edition (Japan) [T-En by Ghost-Tank v0.9] [i] [n].zip",
+          "note": "NES: Japanese Kunio-kun version, translated"
+        }
+      ]
     },
     {
       "title": "Bomberman II",
@@ -277,7 +299,13 @@
     {
       "title": "Secret of Mana",
       "system": "snes",
-      "bucket": "snes/Secret of Mana (USA).zip"
+      "bucket": "snes/Secret of Mana (USA).zip",
+      "variants": [
+        {
+          "bucket": "snes/Secret of Mana (USA) [T-En by The SAP Team v2.0] [Relocalized].zip",
+          "note": "SNES: fan retranslation of the script"
+        }
+      ]
     },
     {
       "title": "Donkey Kong Country 2 - Diddy's Kong Quest (En,Fr) (Rev 1)",
@@ -297,7 +325,13 @@
     {
       "title": "Streets of Rage 3",
       "system": "genesis",
-      "bucket": "genesis/Streets of Rage 3 (USA).zip"
+      "bucket": "genesis/Streets of Rage 3 (USA).zip",
+      "variants": [
+        {
+          "bucket": "genesis/Bare Knuckle III (Japan) [T-En by Twilight Translations v1.0].zip",
+          "note": "Genesis: Bare Knuckle III, the uncut Japanese version, translated"
+        }
+      ]
     },
     {
       "title": "Gunstar Heroes",
@@ -710,7 +744,13 @@
     {
       "title": "F-Zero X",
       "system": "n64",
-      "bucket": "n64/F-Zero X (USA).zip"
+      "bucket": "n64/F-Zero X (USA).zip",
+      "variants": [
+        {
+          "bucket": "n64/F-Zero X - Expansion Kit (Japan) (64DD) [Hack by Zoinkity v2] [T-En by LuigiBlood v2].zip",
+          "note": "N64: 64DD Expansion Kit with course and machine editors"
+        }
+      ]
     },
     {
       "title": "1080 Snowboarding",
@@ -720,7 +760,13 @@
     {
       "title": "Wave Race 64 - Kawasaki Jet Ski (Rev 1)",
       "system": "n64",
-      "bucket": "n64/Wave Race 64 - Kawasaki Jet Ski (USA) (Rev 1).zip"
+      "bucket": "n64/Wave Race 64 - Kawasaki Jet Ski (USA) (Rev 1).zip",
+      "variants": [
+        {
+          "bucket": "n64/Wave Race 64 - Kawasaki Jet Ski (Japan) (Rev 2) (Shindou Edition) [T-En by Zoinkity v1.1].zip",
+          "note": "N64: Shindou Edition with Rumble Pak support"
+        }
+      ]
     },
     {
       "title": "Bomberman 64",
@@ -734,8 +780,8 @@
     },
     {
       "title": "NFL Blitz 2000 (Rev 1)",
-      "system": "dreamcast",
-      "bucket": "dreamcast/NFL Blitz 2000 (USA) (Rev 1).chd"
+      "system": "mame",
+      "bucket": "mame/blitz2k.zip"
     },
     {
       "title": "Gauntlet Legends",
@@ -1153,7 +1199,13 @@
     {
       "title": "Puyo Puyo Fever",
       "system": "dreamcast",
-      "bucket": "dreamcast/Puyo Puyo Fever (Japan) (En,Ja).chd"
+      "bucket": "dreamcast/Puyo Puyo Fever (Japan) (En,Ja).chd",
+      "variants": [
+        {
+          "bucket": "gba/Puyo Puyo Fever (Japan) (En,Ja,Fr,De,Es,It) [T-En by Tasos500 v1.0] [Relocalized].zip",
+          "note": "GBA: handheld port, relocalized"
+        }
+      ]
     },
     {
       "title": "Beach Spikers - Virtua Beach Volleyball",
@@ -1315,7 +1367,7 @@
     {
       "title": "Jump Ultimate Stars",
       "system": "nds",
-      "bucket": "nds/Jump Ultimate Stars (Japan).zip"
+      "bucket": "nds/Jump Ultimate Stars (Japan) [T-En by JUS Translation v030508].zip"
     },
     {
       "title": "Mario Kart 7 (Rev 1)",
@@ -1361,6 +1413,10 @@
         {
           "bucket": "3ds/Monster Hunter XX - Double Cross (Japan).zip",
           "note": "3DS: Japanese-only expansion with G-rank, new styles and monsters"
+        },
+        {
+          "bucket": "3ds/Monster Hunter XX - Double Cross (Japan) [T-En by Dasding v5] [Add by Crosshex v2] [i].zip",
+          "note": "3DS: expanded Double Cross edition with G-rank"
         }
       ]
     },
@@ -1489,6 +1545,10 @@
         {
           "bucket": "gba/Legend of Zelda, The - A Link to the Past & Four Swords (USA).zip",
           "note": "GBA: adds Four Swords multiplayer and a bonus dungeon"
+        },
+        {
+          "bucket": "snes/Legend of Zelda, The - A Link to the Past (USA) [T-En by ShadowOne333 & Translation Quest v10.2.3] [Relocalized].zip",
+          "note": "SNES: retranslation closer to the Japanese script"
         }
       ]
     },
@@ -1546,7 +1606,7 @@
           "note": "FDS: Doki Doki Panic, the Japanese original with its own cast"
         },
         {
-          "bucket": "satellaview/BS Super Mario USA - Power Challenge - Dai-1-kai (Japan) (SoundLink).zip",
+          "bucket": "snes/BS Super Mario USA - Power Challenge - Dai-1-kai (Japan) (SoundLink) [Hack by Conn & Duke Serkol v1.1] [T-En by Pacnsacdave v1.0].zip",
           "note": "Satellaview: broadcast challenge episodes on the All-Stars version"
         }
       ]
@@ -1752,12 +1812,12 @@
     {
       "title": "Super Bomberman 4",
       "system": "snes",
-      "bucket": "snes/Super Bomberman 4 (Japan).zip"
+      "bucket": "snes/Super Bomberman 4 (Japan) [T-En by Svambo v1.0].zip"
     },
     {
       "title": "Super Bomberman 5",
       "system": "snes",
-      "bucket": "snes/Super Bomberman 5 (Japan).zip"
+      "bucket": "snes/Super Bomberman 5 (Japan) [T-En by Psyklax Beta] [Add by Svambo v1.0] [i].zip"
     },
     {
       "title": "Donkey Kong Country (Rev 2)",
@@ -1789,7 +1849,13 @@
     {
       "title": "Tetris Attack",
       "system": "snes",
-      "bucket": "snes/Tetris Attack (USA) (En,Ja).zip"
+      "bucket": "snes/Tetris Attack (USA) (En,Ja).zip",
+      "variants": [
+        {
+          "bucket": "snes/Panel de Pon (Japan) [T-En by Zuqkeo v1.0].zip",
+          "note": "SNES: Panel de Pon with its original fairy cast, translated"
+        }
+      ]
     },
     {
       "title": "Final Fight 3",
@@ -1799,7 +1865,13 @@
     {
       "title": "Legend of the Mystical Ninja, The",
       "system": "snes",
-      "bucket": "snes/Legend of the Mystical Ninja, The (USA).zip"
+      "bucket": "snes/Legend of the Mystical Ninja, The (USA).zip",
+      "variants": [
+        {
+          "bucket": "snes/Go for it! Goemon - The Rescue of Princess Yuki (Japan) (Rev 2) [T-En by DDSTranslation v2.0] [n].zip",
+          "note": "SNES: Japanese release, fan translated"
+        }
+      ]
     },
     {
       "title": "Pocky & Rocky",
@@ -1896,12 +1968,12 @@
     {
       "title": "Ganbare Goemon 2 - Kiteretsu Shougun Magginesu",
       "system": "snes",
-      "bucket": "snes/Ganbare Goemon 2 - Kiteretsu Shougun Magginesu (Japan).zip"
+      "bucket": "snes/Ganbare! Goemon 2 - The Strange General McGuinness (Japan) [T-En by DDSTranslation v3.0] [Add by Djungelurban v1.0] [n].zip"
     },
     {
       "title": "Ghost Chaser Densei",
       "system": "snes",
-      "bucket": "snes/Ghost Chaser Densei (Japan).zip"
+      "bucket": "snes/Ghost Chaser Densei (Japan) [T-En by MrRichard999 & AgentOrange & Rainponcho v1.0].zip"
     },
     {
       "title": "Poi Poi Ninja World",
@@ -2123,7 +2195,7 @@
     {
       "title": "Virtua Cop 2",
       "system": "dreamcast",
-      "bucket": "dreamcast/Virtua Cop 2 (Japan).chd"
+      "bucket": "dreamcast/Virtua Cop 2 (Japan) [T-En by Derek Pascarella v1.0].chd"
     },
     {
       "title": "House of the Dead, The",
@@ -2323,8 +2395,8 @@
     },
     {
       "title": "King of the Monsters 2",
-      "system": "neogeocd",
-      "bucket": "neogeocd/Next Thing, The - King of the Monsters 2 (World) (En,Ja).chd"
+      "system": "fbneo",
+      "bucket": "fbneo/kotm2.zip"
     },
     {
       "title": "Crossed Swords II",
@@ -2481,7 +2553,13 @@
     {
       "title": "Samba de Amigo",
       "system": "dreamcast",
-      "bucket": "dreamcast/Samba de Amigo (USA).chd"
+      "bucket": "dreamcast/Samba de Amigo (USA).chd",
+      "variants": [
+        {
+          "bucket": "dreamcast/Samba de Amigo Ver. 2000 (Japan) [T-En by Dukeblooders v0.9.1].chd",
+          "note": "Dreamcast: Ver. 2000 adds songs and modes, fan translated"
+        }
+      ]
     },
     {
       "title": "Sonic Shuffle",
@@ -2674,7 +2752,7 @@
     {
       "title": "Under Defeat",
       "system": "dreamcast",
-      "bucket": "dreamcast/Under Defeat (Japan).chd"
+      "bucket": "dreamcast/Under Defeat (Japan) [T-En by TapamN v1.0].chd"
     },
     {
       "title": "Halo: Combat Evolved",
@@ -3221,6 +3299,81 @@
       "title": "Heads-Up - Action Soccer",
       "system": "vectrex",
       "bucket": "vectrex/Heads-Up - Action Soccer (World).zip"
+    },
+    {
+      "title": "Micro Mages",
+      "system": "nes",
+      "bucket": "nes/Micro Mages.zip"
+    },
+    {
+      "title": "Spacegulls",
+      "system": "nes",
+      "bucket": "nes/Spacegulls.zip"
+    },
+    {
+      "title": "Contra Force",
+      "system": "nes",
+      "bucket": "nes/Contra Force (USA).zip"
+    },
+    {
+      "title": "TwinBee 3 - Poko Poko Daimaou",
+      "system": "nes",
+      "bucket": "nes/TwinBee 3 - Poko Poko Daimaou (Japan).zip"
+    },
+    {
+      "title": "Metal Slug 2 - Super Vehicle-001/II (NGM-2410 ~ NGH-2410)",
+      "system": "fbneo",
+      "bucket": "fbneo/mslug2.zip"
+    },
+    {
+      "title": "Xeno Crisis",
+      "system": "fbneo",
+      "bucket": "fbneo/xenocrisis.zip"
+    },
+    {
+      "title": "Escape From The Planet Of The Robot Monsters",
+      "system": "fbneo",
+      "bucket": "fbneo/eprom.zip"
+    },
+    {
+      "title": "Atomic Punk",
+      "system": "fbneo",
+      "bucket": "fbneo/atompunk.zip"
+    },
+    {
+      "title": "Fire Emblem Warriors",
+      "system": "n3ds",
+      "bucket": "n3ds/Fire Emblem Warriors (USA).3ds"
+    },
+    {
+      "title": "Crackdown ~ Riot Act",
+      "system": "xbox360",
+      "bucket": "xbox360/Crackdown ~ Riot Act (World) (En,Ja,Fr,De,Es,It,Zh,Ko,Cs,Hu).zar"
+    },
+    {
+      "title": "Sacred 2 - Fallen Angel",
+      "system": "xbox360",
+      "bucket": "xbox360/Sacred 2 - Fallen Angel (USA, Europe) (En,Fr,De,Es,It,Pl).zar"
+    },
+    {
+      "title": "Baldur's Gate - Dark Alliance II",
+      "system": "xbox",
+      "bucket": "xbox/Baldur's Gate - Dark Alliance II (USA).iso"
+    },
+    {
+      "title": "Dungeons & Dragons - Heroes",
+      "system": "xbox",
+      "bucket": "xbox/Dungeons & Dragons - Heroes (USA).iso"
+    },
+    {
+      "title": "Diablo 2 Resurrected",
+      "system": "switch",
+      "bucket": "switch/Diablo 2 Resurrected.nsp"
+    },
+    {
+      "title": "Bun Bun Samurai",
+      "system": "pico8",
+      "bucket": "pico8/bunbunsamurai-13.p8.png"
     }
   ]
 }

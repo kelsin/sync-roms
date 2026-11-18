@@ -5,47 +5,103 @@
     {
       "title": "Mega Man",
       "system": "nes",
-      "bucket": "nes/Mega Man (USA).zip"
+      "bucket": "nes/Mega Man (USA).zip",
+      "variants": [
+        {
+          "bucket": "psx/Rockman (Japan) [T-En by AfroJackX v0.3] [i].chd",
+          "note": "PS1: Complete Works remaster with remixed music, fan translated"
+        }
+      ]
     },
     {
       "title": "Mega Man 2",
       "system": "nes",
-      "bucket": "nes/Mega Man 2 (USA).zip"
+      "bucket": "nes/Mega Man 2 (USA).zip",
+      "variants": [
+        {
+          "bucket": "nes/Rockman 2 - Dr. Wily's Riddle (Japan) [T-En by Aeon Genesis v1.0] [n].zip",
+          "note": "NES: Japanese Rockman 2 with its single difficulty, translated"
+        },
+        {
+          "bucket": "psx/Rockman 2 - Dr. Wily no Nazo (Japan) [T-En by AfroJackX v0.3] [i].chd",
+          "note": "PS1: Complete Works remaster with remixed music, fan translated"
+        }
+      ]
     },
     {
       "title": "Mega Man 3",
       "system": "nes",
-      "bucket": "nes/Mega Man 3 (USA).zip"
+      "bucket": "nes/Mega Man 3 (USA).zip",
+      "variants": [
+        {
+          "bucket": "psx/Rockman 3 - Dr. Wily no Saigo! (Japan) [T-En by AfroJackX v0.3] [i].chd",
+          "note": "PS1: Complete Works remaster with remixed music, fan translated"
+        }
+      ]
     },
     {
       "title": "Mega Man 4 (Rev 1)",
       "system": "nes",
-      "bucket": "nes/Mega Man 4 (USA) (Rev 1).zip"
+      "bucket": "nes/Mega Man 4 (USA) (Rev 1).zip",
+      "variants": [
+        {
+          "bucket": "psx/Megaman 4 - A New Ambition!! (Japan) [T-En by AfroJackX v0.3] [i] [n].chd",
+          "note": "PS1: Complete Works remaster with remixed music, fan translated"
+        }
+      ]
     },
     {
       "title": "Mega Man 5",
       "system": "nes",
-      "bucket": "nes/Mega Man 5 (USA).zip"
+      "bucket": "nes/Mega Man 5 (USA).zip",
+      "variants": [
+        {
+          "bucket": "psx/Megaman 5 - Proto Man's Trap! (Japan) [T-En by AfroJackX v0.3] [i] [n].chd",
+          "note": "PS1: Complete Works remaster with remixed music, fan translated"
+        }
+      ]
     },
     {
       "title": "Mega Man 6",
       "system": "nes",
-      "bucket": "nes/Mega Man 6 (USA).zip"
+      "bucket": "nes/Mega Man 6 (USA).zip",
+      "variants": [
+        {
+          "bucket": "nes/Rockman 6 - The Greatest Battle in History!! (Japan) [T-En by Her-Saki v1.1] [n].zip",
+          "note": "NES: Japanese Rockman 6, translated"
+        },
+        {
+          "bucket": "psx/Megaman 6 - The Greatest Battle Ever!! (Japan) [T-En by AfroJackX v0.3] [i] [n].chd",
+          "note": "PS1: Complete Works remaster with remixed music, fan translated"
+        }
+      ]
     },
     {
       "title": "Wily & Right no Rockboard - That's Paradise",
       "system": "nes",
-      "bucket": "nes/Wily & Right no Rockboard - That's Paradise (Japan).zip"
+      "bucket": "nes/Wily & Right's Rockboard - That's Paradise!! (Japan) [T-En by Interordi Software v1.1] [Mega Man names][n].zip"
     },
     {
       "title": "Mega Man X (Rev 1)",
       "system": "snes",
-      "bucket": "snes/Mega Man X (USA) (Rev 1).zip"
+      "bucket": "snes/Mega Man X (USA) (Rev 1).zip",
+      "variants": [
+        {
+          "bucket": "snes/Rockman X (Japan) (Rev 1) [T-En by Her-Saki v1.5].zip",
+          "note": "SNES: Japanese Rockman X, retranslated"
+        }
+      ]
     },
     {
       "title": "Mega Man X2",
       "system": "snes",
-      "bucket": "snes/Mega Man X2 (USA).zip"
+      "bucket": "snes/Mega Man X2 (USA).zip",
+      "variants": [
+        {
+          "bucket": "snes/Rockman X2 (Japan) [T-En by Her-Saki v1.1].zip",
+          "note": "SNES: Japanese Rockman X2, retranslated"
+        }
+      ]
     },
     {
       "title": "Mega Man X3",
@@ -55,13 +111,23 @@
         {
           "bucket": "saturn/Mega Man X3 (Europe).chd",
           "note": "Saturn: adds animated cutscenes and a CD soundtrack"
+        },
+        {
+          "bucket": "snes/Rockman X3 (Japan) [T-En by Her-Saki v1.1].zip",
+          "note": "SNES: Japanese Rockman X3, retranslated"
         }
       ]
     },
     {
       "title": "Mega Man 7",
       "system": "snes",
-      "bucket": "snes/Mega Man 7 (USA).zip"
+      "bucket": "snes/Mega Man 7 (USA).zip",
+      "variants": [
+        {
+          "bucket": "snes/Rockman 7 - Shukumei no Taiketsu! (Japan) [T-En by Zynk Oxhyde v1.0].zip",
+          "note": "SNES: Japanese Rockman 7, translated"
+        }
+      ]
     },
     {
       "title": "Mega Man & Bass",
@@ -69,7 +135,7 @@
       "bucket": "gba/Megaman & Bass (USA).zip",
       "variants": [
         {
-          "bucket": "snes/Rockman & Forte (Japan).zip",
+          "bucket": "snes/Mega Man & Bass (Japan) [T-En by Aeon Genesis v1.00] [n].zip",
           "note": "SNES: the original with the full screen and better sound (Japanese)"
         }
       ]
@@ -117,7 +183,13 @@
     {
       "title": "Mega Man X4",
       "system": "psx",
-      "bucket": "psx/Mega Man X4 (USA).chd"
+      "bucket": "psx/Mega Man X4 (USA).chd",
+      "variants": [
+        {
+          "bucket": "psx/Mega Man X4 (USA) [T-En by NectarHime] [Undub by Acediez v1.13] [Relocalized].chd",
+          "note": "PS1: undubbed fan retranslation"
+        }
+      ]
     },
     {
       "title": "Mega Man X5",
@@ -183,12 +255,24 @@
     {
       "title": "Megaman - Battle Network 2",
       "system": "gba",
-      "bucket": "gba/Megaman - Battle Network 2 (USA).zip"
+      "bucket": "gba/Megaman - Battle Network 2 (USA).zip",
+      "variants": [
+        {
+          "bucket": "gba/Megaman - Battle Network 2 (USA) [T-En by Vgperson v1.01] [Relocalized].zip",
+          "note": "GBA: vgperson relocalization of the script"
+        }
+      ]
     },
     {
       "title": "Mega Man Battle Network 3 - Blue Version",
       "system": "gba",
-      "bucket": "gba/Megaman - Battle Network 3 - Blue Version (USA).zip"
+      "bucket": "gba/Megaman - Battle Network 3 - Blue Version (USA).zip",
+      "variants": [
+        {
+          "bucket": "gba/Megaman - Battle Network 3 - Blue Version (USA) [T-En by Vgperson v1.0] [Relocalized].zip",
+          "note": "GBA: vgperson relocalization of the script"
+        }
+      ]
     },
     {
       "title": "Mega Man Battle Network 5: Team Protoman",
@@ -268,32 +352,62 @@
     {
       "title": "Rockman EXE - Operate Shooting Star",
       "system": "nds",
-      "bucket": "nds/Rockman EXE - Operate Shooting Star (Japan).zip"
+      "bucket": "nds/MegaMan Battle Network - Operate Star Force (Japan) [T-En by Greiga Master v1.0] [n].zip"
     },
     {
       "title": "Mega Man - Battle Network 3 - White Version",
       "system": "gba",
-      "bucket": "gba/Megaman - Battle Network 3 - White Version (USA).zip"
+      "bucket": "gba/Megaman - Battle Network 3 - White Version (USA).zip",
+      "variants": [
+        {
+          "bucket": "gba/Megaman - Battle Network 3 - White Version (USA) [T-En by Vgperson v1.0] [Relocalized].zip",
+          "note": "GBA: vgperson relocalization of the script"
+        }
+      ]
     },
     {
       "title": "Mega Man - Battle Network 4 - Red Sun",
       "system": "gba",
-      "bucket": "gba/Megaman - Battle Network 4 - Red Sun (USA).zip"
+      "bucket": "gba/Megaman - Battle Network 4 - Red Sun (USA).zip",
+      "variants": [
+        {
+          "bucket": "gba/Megaman - Battle Network 4 - Red Sun (USA) [T-En by vgperson v1l.0.0] [Relocalized].zip",
+          "note": "GBA: vgperson relocalization of the script"
+        }
+      ]
     },
     {
       "title": "Mega Man - Battle Network 4 - Blue Moon",
       "system": "gba",
-      "bucket": "gba/Megaman - Battle Network 4 - Blue Moon (USA).zip"
+      "bucket": "gba/Megaman - Battle Network 4 - Blue Moon (USA).zip",
+      "variants": [
+        {
+          "bucket": "gba/Megaman - Battle Network 4 - Blue Moon (USA) [T-En by vgperson v1l.0.0] [Relocalized].zip",
+          "note": "GBA: vgperson relocalization of the script"
+        }
+      ]
     },
     {
       "title": "Mega Man - Battle Network 6 - Cybeast Gregar",
       "system": "gba",
-      "bucket": "gba/Megaman - Battle Network 6 - Cybeast Gregar (USA).zip"
+      "bucket": "gba/Megaman - Battle Network 6 - Cybeast Gregar (USA).zip",
+      "variants": [
+        {
+          "bucket": "gba/Mega Man Battle Network 6 - Cybeast Gregar (Japan) [T-En by Exeguy11 v1.1] [Wii U features] [n].zip",
+          "note": "GBA: Japanese version with content cut from the US release"
+        }
+      ]
     },
     {
       "title": "Mega Man - Battle Network 6 - Cybeast Falzar",
       "system": "gba",
-      "bucket": "gba/Megaman - Battle Network 6 - Cybeast Falzar (USA).zip"
+      "bucket": "gba/Megaman - Battle Network 6 - Cybeast Falzar (USA).zip",
+      "variants": [
+        {
+          "bucket": "gba/Mega Man Battle Network 6 - Cybeast Falzar (Japan) [T-En by Exeguy11 v1.8] [Wii U features] [n].zip",
+          "note": "GBA: Japanese version with content cut from the US release"
+        }
+      ]
     },
     {
       "title": "Mega Man - Battle Chip Challenge",
@@ -303,7 +417,7 @@
     {
       "title": "Rockman EXE 4.5 - Real Operation",
       "system": "gba",
-      "bucket": "gba/Rockman EXE 4.5 - Real Operation (Japan).zip"
+      "bucket": "gba/Mega Man Battle Network 4.5 - Real Operation (Japan) [T-En by The Rockman EXE Zone v1.1] [NA] [n].zip"
     },
     {
       "title": "Rockman EXE WS",
@@ -363,12 +477,12 @@
     {
       "title": "Rockman: Battle & Fighters",
       "system": "ngpc",
-      "bucket": "ngpc/Rockman - Battle & Fighters (Japan).zip"
+      "bucket": "ngpc/Rockman - Battle & Fighters (Japan) [T-En by Marc_max v1.0] [i].zip"
     },
     {
       "title": "Rockman & Forte - Mirai Kara no Chousensha",
       "system": "wonderswan",
-      "bucket": "wonderswan/Rockman & Forte - Mirai Kara no Chousensha (Japan).zip"
+      "bucket": "wonderswan/Rockman & Forte - Challenger from the Future (Japan) [T-En by NikcDC v1.2.1] [n].zip"
     },
     {
       "title": "Mega Man - The Power Battle",
@@ -383,12 +497,20 @@
     {
       "title": "Mega Man 9",
       "system": "ps3",
-      "bucket": "ps3/Mega Man 9 PSN [NPUB-30036].rar"
+      "bucket": "ps3/Mega-Man-9_Full.pkg",
+      "files": [
+        "ps3/Mega-Man-9_Crack.pkg",
+        "ps3/Mega-Man-9_Crack-4.21.pkg"
+      ]
     },
     {
       "title": "Mega Man 10",
       "system": "ps3",
-      "bucket": "ps3/Mega Man 10 PSN [NPUB-30114].rar"
+      "bucket": "ps3/Mega-Man-10_Full.pkg",
+      "files": [
+        "ps3/Mega-Man-10_Crack.pkg",
+        "ps3/Mega-Man-10_Crack-4.21.pkg"
+      ]
     }
   ]
 }

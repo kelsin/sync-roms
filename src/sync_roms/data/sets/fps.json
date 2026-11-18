@@ -69,6 +69,12 @@
       "bucket": "dreamcast/Quake III - Arena (USA).chd"
     },
     {
+      "title": "POOM",
+      "category": "Doom & id Tech",
+      "system": "pico8",
+      "bucket": "pico8/poom_0-9.p8.png"
+    },
+    {
       "title": "Duke Nukem 3D",
       "category": "Duke Nukem & Build Engine",
       "system": "saturn",
@@ -764,6 +770,12 @@
       "bucket": "wiiu/ZombiU (US) (v32).wua"
     },
     {
+      "title": "Gungriffon II",
+      "category": "Sci-Fi & Horror",
+      "system": "saturn",
+      "bucket": "saturn/Gungriffon II (Japan) [T-En by Gungriffon II Localization Team v0.97.5] [i].chd"
+    },
+    {
       "title": "Ecks vs Sever",
       "category": "Handheld",
       "system": "gba",
@@ -852,6 +864,18 @@
       "category": "Handheld",
       "system": "3ds",
       "bucket": "3ds/Metroid Prime - Federation Force (USA) (En,Fr,Es).zip"
+    },
+    {
+      "title": "Call of Duty® Black Ops - Declassified",
+      "category": "Handheld",
+      "system": "psvita",
+      "bucket": "psvita/Call of Duty® Black Ops - Declassified [PCSE00097] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Resistance - Burning Skies™",
+      "category": "Handheld",
+      "system": "psvita",
+      "bucket": "psvita/Resistance - Burning Skies™ [PCSA00008] [USA] [NoNpDRM].zip"
     }
   ]
 }

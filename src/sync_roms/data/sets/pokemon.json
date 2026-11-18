@@ -21,7 +21,7 @@
     {
       "title": "Pocket Monsters - Midori (Rev 1)",
       "system": "gb",
-      "bucket": "gb/Pocket Monsters - Midori (Japan) (Rev 1) (SGB Enhanced).zip"
+      "bucket": "gb/Pokemon - Green Version (USA, Europe) (SGB Enhanced) [T-En by Skeetendo Inc. v3.0] [n].zip"
     },
     {
       "title": "Pokemon - Gold Version (SGB Enhanced)",
@@ -37,7 +37,13 @@
     {
       "title": "Pokemon - Crystal Version (Rev 1)",
       "system": "gbc",
-      "bucket": "gbc/Pokemon - Crystal Version (USA, Europe) (Rev 1).zip"
+      "bucket": "gbc/Pokemon - Crystal Version (USA, Europe) (Rev 1).zip",
+      "variants": [
+        {
+          "bucket": "gbc/Pocket Monsters - Crystal Version (Japan) [T-En by Unknown v1.0].zip",
+          "note": "GBC: Japanese release with the Mobile Adapter content"
+        }
+      ]
     },
     {
       "title": "Pokemon Trading Card Game (En,Es,It) (Rev 1) (SGB Enhanced)",
@@ -216,7 +222,7 @@
     {
       "title": "Pokemon Puzzle Collection Vol. 2",
       "system": "pokemini",
-      "bucket": "pokemini/Pokemon Puzzle Collection Vol. 2 (Japan).zip"
+      "bucket": "pokemini/Pokemon Puzzle Collection Vol. 2 (Japan) [T-En by Mr. Blinky & Wa v1.2].zip"
     },
     {
       "title": "Pokemon Zany Cards",
@@ -231,22 +237,22 @@
     {
       "title": "Pokemon Race Mini",
       "system": "pokemini",
-      "bucket": "pokemini/Pokemon Race Mini (Japan).zip"
+      "bucket": "pokemini/Pokemon Race Mini (Japan) [T-En by Snesy & Wa & Mr. Blinky & JustBurn v1.0].zip"
     },
     {
       "title": "Pokemon Sodateyasan Mini",
       "system": "pokemini",
-      "bucket": "pokemini/Pokemon Sodateyasan Mini (Japan).zip"
+      "bucket": "pokemini/Pokemon Breeder Mini (Japan) [T-En by Snesy & Wa & Mr. Blinky v1.0] [n].zip"
     },
     {
       "title": "Pichu Bros. Mini",
       "system": "pokemini",
-      "bucket": "pokemini/Pichu Bros. Mini (Japan).zip"
+      "bucket": "pokemini/Pichu Bros. Mini (Japan) [T-En by NikcDC v1.0].zip"
     },
     {
       "title": "Togepi no Daibouken",
       "system": "pokemini",
-      "bucket": "pokemini/Togepi no Daibouken (Japan).zip"
+      "bucket": "pokemini/Togepi's Great Adventure (Japan) [T-En by Mr. Blinky & Snesy v1.0] [n].zip"
     },
     {
       "title": "Pokemon Puzzle League",
@@ -271,7 +277,7 @@
     {
       "title": "Pokemon Card GB 2 - GR Dan Sanjou!",
       "system": "gbc",
-      "bucket": "gbc/Pokemon Card GB 2 - GR Dan Sanjou! (Japan).zip"
+      "bucket": "gbc/Pokemon Trading Card Game 2 - The Invasion of Team GR! (Japan) [T-En by Artemis251 & Jazz v1.0] [n].zip"
     },
     {
       "title": "Picross NP Vol. 1",
@@ -373,6 +379,11 @@
       "title": "Pokkén Tournament",
       "system": "wiiu",
       "bucket": "wiiu/POKKÉN TOURNAMENT (US) (v64).wua"
+    },
+    {
+      "title": "Pokemon Picross",
+      "system": "gbc",
+      "bucket": "gbc/Pokemon Picross (English).zip"
     }
   ]
 }

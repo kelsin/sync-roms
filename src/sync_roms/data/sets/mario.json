@@ -27,7 +27,7 @@
           "note": "FDS: Doki Doki Panic, the Japanese original with its own cast"
         },
         {
-          "bucket": "satellaview/BS Super Mario USA - Power Challenge - Dai-1-kai (Japan) (SoundLink).zip",
+          "bucket": "snes/BS Super Mario USA - Power Challenge - Dai-1-kai (Japan) (SoundLink) [Hack by Conn & Duke Serkol v1.1] [T-En by Pacnsacdave v1.0].zip",
           "note": "Satellaview: broadcast challenge episodes on the All-Stars version"
         }
       ]
@@ -82,7 +82,13 @@
     {
       "title": "Super Mario RPG - Legend of the Seven Stars",
       "system": "snes",
-      "bucket": "snes/Super Mario RPG - Legend of the Seven Stars (USA).zip"
+      "bucket": "snes/Super Mario RPG - Legend of the Seven Stars (USA).zip",
+      "variants": [
+        {
+          "bucket": "snes/Super Mario RPG - Legend of the Seven Stars (USA) [T-En by LiThL vLH] [Relocalized].zip",
+          "note": "SNES: fan retranslation of the script"
+        }
+      ]
     },
     {
       "title": "Yoshi's Cookie",
@@ -630,13 +636,17 @@
         {
           "bucket": "gbc/Donkey Kong GB - Dinky Kong & Dixie Kong (Japan).zip",
           "note": "GBC: Japan-only full-color version"
+        },
+        {
+          "bucket": "gbc/Donkey Kong Land III (Japan) [T-En by Blaziken257 v1.3] [n].zip",
+          "note": "GBC: Japan-only color version"
         }
       ]
     },
     {
       "title": "Mobile Golf",
       "system": "gbc",
-      "bucket": "gbc/Mobile Golf (Japan).zip"
+      "bucket": "gbc/Mobile Golf (Japan) [T-En by ProstatePunch & Darkshade & REON Dev Team & Marc_Max v1.2b].zip"
     },
     {
       "title": "Jaguar Mishin Sashi Senyou Soft - Mario Family",
@@ -671,7 +681,7 @@
     {
       "title": "Mario no Photopie",
       "system": "n64",
-      "bucket": "n64/Mario no Photopie (Japan).zip"
+      "bucket": "n64/Mario's Photo Studio (Japan) [T-En by Zoinkity v1.0] [n].zip"
     },
     {
       "title": "Mario Paint (Japan, USA)",
@@ -811,12 +821,18 @@
     {
       "title": "Picross 2",
       "system": "gb",
-      "bucket": "gb/Picross 2 (Japan) (SGB Enhanced).zip"
+      "bucket": "gb/Picross 2 (Japan) (SGB Enhanced) [T-En by Zed v1.0].zip"
     },
     {
       "title": "Tetris Attack (En,Ja)",
       "system": "snes",
-      "bucket": "snes/Tetris Attack (USA) (En,Ja).zip"
+      "bucket": "snes/Tetris Attack (USA) (En,Ja).zip",
+      "variants": [
+        {
+          "bucket": "snes/Panel de Pon (Japan) [T-En by Zuqkeo v1.0].zip",
+          "note": "SNES: Panel de Pon with its original fairy cast, translated"
+        }
+      ]
     },
     {
       "title": "Alleyway",
@@ -862,7 +878,7 @@
     {
       "title": "Mario no Super Picross",
       "system": "snes",
-      "bucket": "snes/Mario no Super Picross (Japan).zip"
+      "bucket": "snes/Mario's Super Picross (Japan) [T-En by FCandChill & Kumori v1.5] [n].zip"
     },
     {
       "title": "Picross NP Vol. 2",
@@ -887,7 +903,7 @@
     {
       "title": "Wrecking Crew '98",
       "system": "snes",
-      "bucket": "snes/Wrecking Crew '98 (Japan).zip"
+      "bucket": "snes/Wrecking Crew '98 (Japan) [T-En by ShadowOne333 v2.0].zip"
     },
     {
       "title": "Undake 30 - Same Game Daisakusen - Mario Version",
@@ -993,6 +1009,31 @@
       "title": "Vs. Wrecking Crew",
       "system": "mame",
       "bucket": "mame/wrecking.zip"
+    },
+    {
+      "title": "BS Super Mario USA - Power Challenge - Dai-2-kai",
+      "system": "snes",
+      "bucket": "snes/BS Super Mario USA - Power Challenge - Dai-2-kai (Japan) (SoundLink) [Hack by Conn & Duke Serkol v1.1] [T-En by Pacnsacdave v1.0].zip"
+    },
+    {
+      "title": "BS Super Mario USA - Power Challenge - Dai-3-kai",
+      "system": "snes",
+      "bucket": "snes/BS Super Mario USA - Power Challenge - Dai-3-kai (Japan) (SoundLink) [Hack by Conn & Duke Serkol v1.1] [T-En by Pacnsacdave v1.0].zip"
+    },
+    {
+      "title": "BS Super Mario USA - Power Challenge - Dai-4-kai",
+      "system": "snes",
+      "bucket": "snes/BS Super Mario USA - Power Challenge - Dai-4-kai (Japan) (SoundLink) [Hack by Conn & Duke Serkol v1.1] [T-En by Pacnsacdave v1.0].zip"
+    },
+    {
+      "title": "Kaettekita Mario Bros.",
+      "system": "fds",
+      "bucket": "fds/Kaettekita Mario Bros. (Japan) (Disk Writer).zip"
+    },
+    {
+      "title": "Vs. Super Mario Bros.",
+      "system": "mame",
+      "bucket": "mame/suprmrio.zip"
     }
   ]
 }

@@ -20,7 +20,13 @@
     {
       "title": "Demon's Crest",
       "system": "snes",
-      "bucket": "snes/Demon's Crest (USA).zip"
+      "bucket": "snes/Demon's Crest (USA).zip",
+      "variants": [
+        {
+          "bucket": "snes/Demon's Crest (USA) [T-En by CF v1.0] [Relocalized].zip",
+          "note": "SNES: fan retranslation of the script"
+        }
+      ]
     },
     {
       "title": "GunForce",
@@ -35,12 +41,24 @@
     {
       "title": "Cybernator",
       "system": "snes",
-      "bucket": "snes/Cybernator (USA).zip"
+      "bucket": "snes/Cybernator (USA).zip",
+      "variants": [
+        {
+          "bucket": "snes/Assault Suits Valken (Japan) [T-En by Aeon Genesis v1.00] [n].zip",
+          "note": "SNES: Japanese version with uncut story scenes, translated"
+        }
+      ]
     },
     {
       "title": "Rival Turf!",
       "system": "snes",
-      "bucket": "snes/Rival Turf! (USA).zip"
+      "bucket": "snes/Rival Turf! (USA).zip",
+      "variants": [
+        {
+          "bucket": "snes/Rushing Beat (Japan) [T-En by FlashPV v1.0].zip",
+          "note": "SNES: Japanese Rushing Beat, translated"
+        }
+      ]
     },
     {
       "title": "E.V.O. - Search for Eden",
@@ -55,7 +73,13 @@
     {
       "title": "Soul Blazer",
       "system": "snes",
-      "bucket": "snes/Soul Blazer (USA).zip"
+      "bucket": "snes/Soul Blazer (USA).zip",
+      "variants": [
+        {
+          "bucket": "snes/Soul Blazer (USA) [T-En by Steppolo Steppi v1.1] [Relocalized].zip",
+          "note": "SNES: fan retranslation of the script"
+        }
+      ]
     },
     {
       "title": "Brain Lord",
@@ -140,12 +164,18 @@
     {
       "title": "Space Megaforce",
       "system": "snes",
-      "bucket": "snes/Space Megaforce (USA).zip"
+      "bucket": "snes/Space Megaforce (USA).zip",
+      "variants": [
+        {
+          "bucket": "snes/Super Aleste (Japan) [T-En by Asiwish v1.2].zip",
+          "note": "SNES: Japanese Super Aleste, translated"
+        }
+      ]
     },
     {
       "title": "Umihara Kawase",
       "system": "snes",
-      "bucket": "snes/Umihara Kawase (Japan).zip",
+      "bucket": "snes/Umihara Kawase (Japan) [T-En by Satsu v0.90] [Add by Green Jerry v1.0] [Add by Burning Loaf v1.0].zip",
       "variants": [
         {
           "bucket": "psp/Umihara Kawase Portable (Japan).chd",
@@ -156,22 +186,22 @@
     {
       "title": "DoReMi Fantasy - Milon no Dokidoki Daibouken",
       "system": "snes",
-      "bucket": "snes/DoReMi Fantasy - Milon no Dokidoki Daibouken (Japan).zip"
+      "bucket": "snes/Do-Re-Mi Fantasy - Milon's Quest (Japan) [T-En by Gaijin Productions & RPGOne v1.3] [n].zip"
     },
     {
       "title": "Magical Pop'n",
       "system": "snes",
-      "bucket": "snes/Magical Pop'n (Japan).zip"
+      "bucket": "snes/Magical Pop'n (Japan) [T-En by Aeon Genesis v1.01].zip"
     },
     {
       "title": "Majuu Ou",
       "system": "snes",
-      "bucket": "snes/Majuu Ou (Japan).zip"
+      "bucket": "snes/King of Demons (Japan) [T-En by Aeon Genesis v1.01] [n].zip"
     },
     {
       "title": "Sutte Hakkun",
       "system": "snes",
-      "bucket": "snes/Sutte Hakkun (Japan).zip"
+      "bucket": "snes/Sutte Hakkun (Japan) [T-En by Raccoon Sam v1.0] [n].zip"
     },
     {
       "title": "Metal Marines",
@@ -181,7 +211,13 @@
     {
       "title": "Der Langrisser",
       "system": "snes",
-      "bucket": "snes/Der Langrisser (English v1.3.1)[Near-D].zip"
+      "bucket": "snes/Der Langrisser (English v1.3.1)[Near-D].zip",
+      "variants": [
+        {
+          "bucket": "genesis/Langrisser II (Japan) (Rev B) [T-En by M.I.J.E.T. v110701].zip",
+          "note": "Genesis: original Langrisser II, fan translated"
+        }
+      ]
     },
     {
       "title": "Lost Vikings, The",
@@ -202,7 +238,7 @@
     {
       "title": "Clock Tower",
       "system": "snes",
-      "bucket": "snes/Clock Tower (Japan).zip"
+      "bucket": "snes/Clock Tower (Japan) [T-En by Aeon Genesis v1.01].zip"
     },
     {
       "title": "Breath of Fire II",
@@ -212,6 +248,10 @@
         {
           "bucket": "gba/Breath of Fire II (USA).zip",
           "note": "GBA: new translation, a dash button and quick saves"
+        },
+        {
+          "bucket": "snes/Breath of Fire II - The Fated Child (USA) [T-En by Watercrown Productions v1.2b] [n].zip",
+          "note": "SNES: fan retranslation of the script"
         }
       ]
     },
@@ -223,7 +263,13 @@
     {
       "title": "U.N. Squadron",
       "system": "snes",
-      "bucket": "snes/U.N. Squadron (USA).zip"
+      "bucket": "snes/U.N. Squadron (USA).zip",
+      "variants": [
+        {
+          "bucket": "snes/Area 88 (USA) [T-En by Blizzz v1.03] [Relocalized] [n].zip",
+          "note": "SNES: Japanese Area 88 version, fan translated"
+        }
+      ]
     },
     {
       "title": "Super Adventure Island II",
@@ -238,12 +284,24 @@
     {
       "title": "Ogre Battle - The March of the Black Queen",
       "system": "snes",
-      "bucket": "snes/Ogre Battle - The March of the Black Queen (USA).zip"
+      "bucket": "snes/Ogre Battle - The March of the Black Queen (USA).zip",
+      "variants": [
+        {
+          "bucket": "snes/Densetsu no Ogre Battle - The March of the Black Queen (Japan) (NP) [T-En by FinS v1.2].zip",
+          "note": "SNES: Japanese release, fan translated"
+        }
+      ]
     },
     {
       "title": "Tetris Attack",
       "system": "snes",
-      "bucket": "snes/Tetris Attack (USA) (En,Ja).zip"
+      "bucket": "snes/Tetris Attack (USA) (En,Ja).zip",
+      "variants": [
+        {
+          "bucket": "snes/Panel de Pon (Japan) [T-En by Zuqkeo v1.0].zip",
+          "note": "SNES: Panel de Pon with its original fairy cast, translated"
+        }
+      ]
     },
     {
       "title": "Boogerman - A Pick and Flick Adventure",
@@ -273,12 +331,32 @@
     {
       "title": "Ys III - Wanderers from Ys",
       "system": "tg-cd",
-      "bucket": "tg-cd/Ys III - Wanderers from Ys (USA).chd"
+      "bucket": "tg-cd/Ys III - Wanderers from Ys (USA).chd",
+      "variants": [
+        {
+          "bucket": "nes/Ys III - Wanderers from Ys (Japan) [T-En by Vice Translations v1.00].zip",
+          "note": "NES: Famicom port, translated"
+        },
+        {
+          "bucket": "genesis/Ys III (USA) [T-En by Plombo v1.1] [Relocalized].zip",
+          "note": "Genesis: relocalized fan retranslation"
+        },
+        {
+          "bucket": "msx2/Ys III - Wanderers from Ys (Japan) [T-En by Oasis v1.0] (Floppy).zip",
+          "note": "MSX2: original computer version, fan translated"
+        }
+      ]
     },
     {
       "title": "Legend of the Mystical Ninja, The",
       "system": "snes",
-      "bucket": "snes/Legend of the Mystical Ninja, The (USA).zip"
+      "bucket": "snes/Legend of the Mystical Ninja, The (USA).zip",
+      "variants": [
+        {
+          "bucket": "snes/Go for it! Goemon - The Rescue of Princess Yuki (Japan) (Rev 2) [T-En by DDSTranslation v2.0] [n].zip",
+          "note": "SNES: Japanese release, fan translated"
+        }
+      ]
     },
     {
       "title": "Mega Man Soccer",
@@ -314,7 +392,13 @@
     {
       "title": "ActRaiser",
       "system": "snes",
-      "bucket": "snes/ActRaiser (USA).zip"
+      "bucket": "snes/ActRaiser (USA).zip",
+      "variants": [
+        {
+          "bucket": "snes/Actraiser (Japan) [T-En by Aeon Genesis v1.00].zip",
+          "note": "SNES: translation of the Japanese release with uncensored text"
+        }
+      ]
     },
     {
       "title": "Illusion of Gaia",
@@ -365,7 +449,13 @@
     {
       "title": "Smart Ball",
       "system": "snes",
-      "bucket": "snes/Smart Ball (USA).zip"
+      "bucket": "snes/Smart Ball (USA).zip",
+      "variants": [
+        {
+          "bucket": "snes/Jerry Boy (Japan) [T-En by Chris Covell v1.0].zip",
+          "note": "SNES: Japanese Jerry Boy, translated"
+        }
+      ]
     },
     {
       "title": "Spanky's Quest",
@@ -405,7 +495,13 @@
     {
       "title": "Beyond Oasis",
       "system": "genesis",
-      "bucket": "genesis/Beyond Oasis (USA).zip"
+      "bucket": "genesis/Beyond Oasis (USA).zip",
+      "variants": [
+        {
+          "bucket": "genesis/Beyond Oasis (USA) [T-En by Eien Ni Hen & Husky v1.0].zip",
+          "note": "Genesis: retranslation of the Japanese script"
+        }
+      ]
     },
     {
       "title": "Dynamite Headdy",
@@ -520,6 +616,22 @@
         {
           "bucket": "psp/Ys I & II Chronicles (USA).chd",
           "note": "PSP: Chronicles adds remastered art, new music and extras"
+        },
+        {
+          "bucket": "nes/Ys II - Ancient Ys Vanished - The Final Chapter (Japan) [T-En by David Mullen v1.0].zip",
+          "note": "NES: Famicom port of Ys II, translated"
+        },
+        {
+          "bucket": "saturn/Falcom Classics (Japan) [T-En by Murzik & CrawdKenny v0.763] [Ancient Ys Vanished Omen] [i].chd",
+          "note": "Saturn: Falcom Classics Ys I remake, fan translated"
+        },
+        {
+          "bucket": "msx2/Ys - Ancient Ys Vanished Omen (Japan) [T-En by Oasis v1.0] (Floppy).zip",
+          "note": "MSX2: original Ys I computer version, fan translated"
+        },
+        {
+          "bucket": "msx2/Ys II - Ancient Ys Vanished - The Final Chapter (Japan) [T-En by Oasis v1.0] [i] (Floppy).zip",
+          "note": "MSX2: original Ys II computer version, fan translated"
         }
       ]
     },
@@ -541,7 +653,17 @@
     {
       "title": "Shining Force III",
       "system": "saturn",
-      "bucket": "saturn/Shining Force III (USA).chd"
+      "bucket": "saturn/Shining Force III (USA).chd",
+      "variants": [
+        {
+          "bucket": "saturn/Shining Force III Premium Disc (Japan) [T-En by Shining Force III Translation Project v25].chd",
+          "note": "Saturn: Premium Disc bonus battles, fan translated"
+        },
+        {
+          "bucket": "saturn/Shining Force III - Scenario 1 - The Titan of Aspia (USA) [T-En by Shining Force III Translation Project v25] [n].chd",
+          "note": "Saturn: Scenario 1 retranslated to match Scenarios 2 and 3"
+        }
+      ]
     },
     {
       "title": "NiGHTS into Dreams... (with 3D Control Pad) (RE)",
@@ -708,12 +830,12 @@
     {
       "title": "Linkle Liver Story",
       "system": "saturn",
-      "bucket": "saturn/Linkle Liver Story (Japan).chd"
+      "bucket": "saturn/Linkle Liver Story (Japan) [T-En by Aishsha v1.0].chd"
     },
     {
       "title": "Baroque",
       "system": "saturn",
-      "bucket": "saturn/Baroque (Japan).chd"
+      "bucket": "saturn/Baroque (Japan) [T-En by Plissken v1.0.0].chd"
     },
     {
       "title": "Enemy Zero",
@@ -774,12 +896,18 @@
     {
       "title": "Silhouette Mirage",
       "system": "psx",
-      "bucket": "psx/Silhouette Mirage (USA).chd"
+      "bucket": "psx/Silhouette Mirage (USA).chd",
+      "variants": [
+        {
+          "bucket": "saturn/Silhouette Mirage (Japan) (Rev A) [T-En by Rasputin3000 v0.999].chd",
+          "note": "Saturn: original release, fan translated"
+        }
+      ]
     },
     {
       "title": "Bulk Slash",
       "system": "saturn",
-      "bucket": "saturn/Bulk Slash (Japan).chd"
+      "bucket": "saturn/Bulk Slash (Japan) [T-En by Bulk Slash English Localization Team v1.001].chd"
     },
     {
       "title": "Assault Suit Leynos 2",
@@ -856,7 +984,13 @@
     {
       "title": "Cotton 2",
       "system": "mame",
-      "bucket": "mame/cotton2.zip"
+      "bucket": "mame/cotton2.zip",
+      "variants": [
+        {
+          "bucket": "saturn/Magical Night Dreams - Cotton 2 (Japan) [T-En by Nanashi v0.9].chd",
+          "note": "Saturn: port with story scenes, fan translated"
+        }
+      ]
     },
     {
       "title": "Cotton Boomerang",
@@ -1294,7 +1428,13 @@
     {
       "title": "Chibi-Robo! Plug into Adventure!",
       "system": "gc",
-      "bucket": "gc/Chibi-Robo! Plug into Adventure! (USA).rvz"
+      "bucket": "gc/Chibi-Robo! Plug into Adventure! (USA).rvz",
+      "variants": [
+        {
+          "bucket": "wii/Chibi Robo! (Japan) [T-En by Brand Newman v1.00] [n].rvz",
+          "note": "Wii: Japan-only Wii version with pointer controls"
+        }
+      ]
     },
     {
       "title": "Eternal Darkness - Sanity's Requiem",
@@ -1304,7 +1444,13 @@
     {
       "title": "Cubivore",
       "system": "gc",
-      "bucket": "gc/Cubivore (USA).rvz"
+      "bucket": "gc/Cubivore (USA).rvz",
+      "variants": [
+        {
+          "bucket": "n64/Cubivore (Japan) (Proto) [T-En by Zoinkity v1.0] [n].zip",
+          "note": "N64: the unreleased original N64 version"
+        }
+      ]
     },
     {
       "title": "Ikaruga",
@@ -1428,7 +1574,13 @@
     {
       "title": "Doshin the Giant",
       "system": "gc",
-      "bucket": "gc/Doshin the Giant (Europe) (En,Fr,De,Es,It).rvz"
+      "bucket": "gc/Doshin the Giant (Europe) (En,Fr,De,Es,It).rvz",
+      "variants": [
+        {
+          "bucket": "n64/Doshin the Giant 1 (Japan) (64DD) [Hack by Zoinkity v1.1] [T-En by Ozidual v2018-06] [i] [n].zip",
+          "note": "N64: the original 64DD release"
+        }
+      ]
     },
     {
       "title": "Mega Man - Network Transmission",
@@ -1671,12 +1823,18 @@
     {
       "title": "Soma Bringer",
       "system": "nds",
-      "bucket": "nds/Soma Bringer (Japan).zip"
+      "bucket": "nds/Soma Bringer (Japan) [T-En by DarthNemesis v2009.02.02].zip"
     },
     {
       "title": "Mystery Dungeon - Shiren the Wanderer",
       "system": "nds",
-      "bucket": "nds/Mystery Dungeon - Shiren the Wanderer (USA).zip"
+      "bucket": "nds/Mystery Dungeon - Shiren the Wanderer (USA).zip",
+      "variants": [
+        {
+          "bucket": "snes/Mysterious Dungeon 2 - Shiren the Wanderer (Japan) [T-En by Aeon Genesis v1.00] [n].zip",
+          "note": "SNES: original Super Famicom version, fan translated"
+        }
+      ]
     },
     {
       "title": "Contact",
@@ -1811,7 +1969,7 @@
     {
       "title": "Jump Ultimate Stars",
       "system": "nds",
-      "bucket": "nds/Jump Ultimate Stars (Japan).zip"
+      "bucket": "nds/Jump Ultimate Stars (Japan) [T-En by JUS Translation v030508].zip"
     },
     {
       "title": "Game Center CX - Arino no Chousenjou 2",
@@ -1916,7 +2074,13 @@
     {
       "title": "Gargoyle's Quest",
       "system": "gb",
-      "bucket": "gb/Gargoyle's Quest (USA, Europe).zip"
+      "bucket": "gb/Gargoyle's Quest (USA, Europe).zip",
+      "variants": [
+        {
+          "bucket": "gb/Firebrand - A Ghosts 'n Goblins Tale (Japan) [T-En by Stardust Crusaders v1.00] [n].zip",
+          "note": "GB: retranslation of the Japanese release"
+        }
+      ]
     },
     {
       "title": "Trip World",
@@ -1941,17 +2105,17 @@
     {
       "title": "X",
       "system": "gb",
-      "bucket": "gb/X (Japan).zip"
+      "bucket": "gb/X (Japan) [T-En by Anthropogon v0.9].zip"
     },
     {
       "title": "Kaeru no Tame ni Kane wa Naru",
       "system": "gb",
-      "bucket": "gb/Kaeru no Tame ni Kane wa Naru (Japan).zip"
+      "bucket": "gb/For the Frog the Bell Tolls (Japan) [T-En by Ryanbgstl v1.0] [n].zip"
     },
     {
       "title": "Cave Noire",
       "system": "gb",
-      "bucket": "gb/Cave Noire (Japan).zip"
+      "bucket": "gb/Cave Noire (Japan) [T-En by Aeon Genesis v1.00].zip"
     },
     {
       "title": "Amazing Penguin",
@@ -2058,12 +2222,12 @@
     {
       "title": "Ikari no Yousai 2",
       "system": "gb",
-      "bucket": "gb/Ikari no Yousai 2 (Japan).zip"
+      "bucket": "gb/Fortress of Fury 2 (Japan) [T-En by Stardust Crusaders v1.00] [n].zip"
     },
     {
       "title": "Banishing Racer",
       "system": "gb",
-      "bucket": "gb/Banishing Racer (Japan).zip"
+      "bucket": "gb/Banishing Racer (Japan) [T-En by Stardust Crusaders v1.00].zip"
     },
     {
       "title": "Spanky's Quest",
@@ -2078,12 +2242,12 @@
     {
       "title": "Ultraman Ball",
       "system": "gb",
-      "bucket": "gb/Ultraman Ball (Japan) (SGB Enhanced).zip"
+      "bucket": "gb/Ultraman Ball (Japan) (SGB Enhanced) [T-En by Suicidal Translations v0.99] [i].zip"
     },
     {
       "title": "Noobow",
       "system": "gb",
-      "bucket": "gb/Noobow (Japan).zip"
+      "bucket": "gb/Noobow (Japan) [T-En by Stardust Crusaders v1.00].zip"
     },
     {
       "title": "Heiankyo Alien",
@@ -2093,7 +2257,7 @@
     {
       "title": "Booby Boys",
       "system": "gb",
-      "bucket": "gb/Booby Boys (Japan).zip"
+      "bucket": "gb/Booby Boys (Japan) [T-En by HTI v1.00].zip"
     },
     {
       "title": "Dr. Franken",
@@ -2198,7 +2362,7 @@
     {
       "title": "Painter Momopie",
       "system": "gb",
-      "bucket": "gb/Painter Momopie (Japan).zip"
+      "bucket": "gb/Painter Momopie (Japan) [T-En by Stardust Crusaders v1.00].zip"
     },
     {
       "title": "Shanghai",
@@ -2400,7 +2564,7 @@
     {
       "title": "Chalvo 55 - Super Puzzle Action",
       "system": "gb",
-      "bucket": "gb/Chalvo 55 - Super Puzzle Action (Japan).zip"
+      "bucket": "gb/Chalvo 55 - Super Puzzle Action (Japan) [T-En by Lame Boy v1.0].zip"
     },
     {
       "title": "Pinball - Revenge of the 'Gator",
@@ -2415,7 +2579,7 @@
     {
       "title": "Gamera - Daikaijuu Kuuchuu Kessen",
       "system": "gb",
-      "bucket": "gb/Gamera - Daikaijuu Kuuchuu Kessen (Japan) (SGB Enhanced).zip"
+      "bucket": "gb/Gamera - The Guardian of the Universe (Japan) (SGB Enhanced) [T-En by Stardust Crusaders v1.01] [n].zip"
     },
     {
       "title": "Miner 2049er Starring Bounty Bob",
@@ -2514,12 +2678,12 @@
     {
       "title": "Kururin Paradise",
       "system": "gba",
-      "bucket": "gba/Kururin Paradise (Japan).zip"
+      "bucket": "gba/Kururin Paradise (Japan) [T-En by Dimedime v1.0].zip"
     },
     {
       "title": "Rhythm Tengoku",
       "system": "gba",
-      "bucket": "gba/Rhythm Tengoku (Japan) (Rev 1).zip"
+      "bucket": "gba/Rhythm Tengoku (Japan) [T-En by ShaffySwitcher v20230620] [i].zip"
     },
     {
       "title": "Mother 3",
@@ -2626,6 +2790,10 @@
         {
           "bucket": "gba/River City Ransom EX (USA).zip",
           "note": "GBA: adds move customization and new techniques"
+        },
+        {
+          "bucket": "nes/River City Ransom Zero (Japan) [T-En by Vice Translations v1.01] [n].zip",
+          "note": "NES: Japanese Kunio-kun version, translated"
         }
       ]
     },
@@ -2763,7 +2931,13 @@
     {
       "title": "Magi Nation",
       "system": "gbc",
-      "bucket": "gbc/Magi Nation (USA).zip"
+      "bucket": "gbc/Magi Nation (USA).zip",
+      "variants": [
+        {
+          "bucket": "gba/Magi Nation (Japan) [T-En by Aplier v1.01].zip",
+          "note": "GBA: Japan-only Game Boy Advance version"
+        }
+      ]
     },
     {
       "title": "Lufia - The Legend Returns",
@@ -2843,7 +3017,7 @@
     {
       "title": "Balloon Fight GB",
       "system": "gbc",
-      "bucket": "gbc/Balloon Fight GB (Japan) (SGB Enhanced, GB Compatible) (NP).zip"
+      "bucket": "gbc/Balloon Kid (Japan) (SGB Enhanced, GB Compatible) (NP) [T-En by DACE v1.0] [n].zip"
     },
     {
       "title": "Tweety's High-Flying Adventure",
@@ -2963,7 +3137,7 @@
     {
       "title": "Magical Chase GB - Minarai Mahoutsukai Kenja no Tani e",
       "system": "gbc",
-      "bucket": "gbc/Magical Chase GB - Minarai Mahoutsukai Kenja no Tani e (Japan).zip"
+      "bucket": "gbc/Magical Chase GB - Minarai Mahoutsukai Kenja no Tani e (Japan) [T-En by Gaijin Productions v1.00].zip"
     },
     {
       "title": "Inspector Gadget - Operation Madkactus",
@@ -3058,17 +3232,17 @@
     {
       "title": "Advanced Busterhawk Gley Lancer",
       "system": "genesis",
-      "bucket": "genesis/Advanced Busterhawk Gley Lancer (Japan).zip"
+      "bucket": "genesis/Advanced Busterhawk Gleylancer (Japan) [T-En by M.I.J.E.T. v061023].zip"
     },
     {
       "title": "Panorama Cotton",
       "system": "genesis",
-      "bucket": "genesis/Panorama Cotton (Japan).zip"
+      "bucket": "genesis/Panorama Cotton (Japan) [T-En by Malias v1.0.1].zip"
     },
     {
       "title": "Battle Mania Daiginjou",
       "system": "genesis",
-      "bucket": "genesis/Battle Mania Daiginjou (Japan, Korea) (Ja).zip"
+      "bucket": "genesis/Battle Mania Daiginjou (Japan, Korea) [T-En by M.I.J.E.T. v061029].zip"
     },
     {
       "title": "Trouble Shooter",
@@ -3108,12 +3282,18 @@
     {
       "title": "Pulseman",
       "system": "genesis",
-      "bucket": "genesis/Pulseman (Japan).zip"
+      "bucket": "genesis/Pulseman (Japan) [T-En by M.I.J.E.T. v070226].zip"
     },
     {
       "title": "Monster World IV",
       "system": "genesis",
-      "bucket": "genesis/Monster World IV (USA) (Genesis Mini).zip"
+      "bucket": "genesis/Monster World IV (USA) (Genesis Mini).zip",
+      "variants": [
+        {
+          "bucket": "genesis/Monster World IV (Japan) [T-En by DeJap & Demiforce v1.02] [Add by Michele Di Somma v2.2] [Add by Jackic v1.1].zip",
+          "note": "Genesis: fan translation of the Japanese release"
+        }
+      ]
     },
     {
       "title": "Mega Man - The Wily Wars",
@@ -3138,7 +3318,13 @@
     {
       "title": "Warsong",
       "system": "genesis",
-      "bucket": "genesis/Warsong (USA).zip"
+      "bucket": "genesis/Warsong (USA).zip",
+      "variants": [
+        {
+          "bucket": "genesis/Langrisser (USA) [T-En by D v20010219] [Add by Jon Najar v070103] [n].zip",
+          "note": "Genesis: retranslated as Langrisser with restored names"
+        }
+      ]
     },
     {
       "title": "Starflight",
@@ -3385,7 +3571,7 @@
     {
       "title": "Yu Yu Hakusho - Makyou Toitsusen",
       "system": "genesis",
-      "bucket": "genesis/Yu Yu Hakusho - Makyou Toitsusen (Japan).zip"
+      "bucket": "genesis/Yu Yu Hakusho - Makyou Toitsusen (Japan) [T-En by M.I.J.E.T. v071113].zip"
     },
     {
       "title": "Patapon",
@@ -3503,7 +3689,13 @@
     {
       "title": "Tactics Ogre - Let Us Cling Together",
       "system": "psp",
-      "bucket": "psp/Tactics Ogre - Let Us Cling Together (USA).chd"
+      "bucket": "psp/Tactics Ogre - Let Us Cling Together (USA).chd",
+      "variants": [
+        {
+          "bucket": "snes/Tactics Ogre - Let Us Cling Together (Japan) (Rev 2) [T-En by Aeon Genesis v1.00b].zip",
+          "note": "SNES: original Super Famicom version, fan translated"
+        }
+      ]
     },
     {
       "title": "Wild Arms XF",
@@ -3574,7 +3766,13 @@
     {
       "title": "Shin Megami Tensei - Persona 2 - Innocent Sin",
       "system": "psp",
-      "bucket": "psp/Shin Megami Tensei - Persona 2 - Innocent Sin (USA).chd"
+      "bucket": "psp/Shin Megami Tensei - Persona 2 - Innocent Sin (USA).chd",
+      "variants": [
+        {
+          "bucket": "psx/Persona 2 - Tsumi - Innocent Sin (Japan) [T-En by Devil Hackers v1.0a].chd",
+          "note": "PS1: original release, fan translated"
+        }
+      ]
     },
     {
       "title": "Final Fantasy Type-0",
@@ -3852,7 +4050,17 @@
     {
       "title": "Brigandine: The Legend of Forsena",
       "system": "psx",
-      "bucket": "psx/Brigandine - The Legend of Forsena (USA).chd"
+      "bucket": "psx/Brigandine - The Legend of Forsena (USA).chd",
+      "variants": [
+        {
+          "bucket": "psx/Brigandine - Grand Edition (Japan) [T-En by John Osborne v8].m3u",
+          "note": "PS1: Grand Edition with more units and scenarios",
+          "files": [
+            "psx/Brigandine - Grand Edition (Japan) (Disc 1) [T-En by John Osborne v8].chd",
+            "psx/Brigandine - Grand Edition (Japan) (Disc 2) [T-En by John Osborne v8].chd"
+          ]
+        }
+      ]
     },
     {
       "title": "Alundra",
@@ -4261,7 +4469,13 @@
     {
       "title": "Persona 2 - Eternal Punishment",
       "system": "psx",
-      "bucket": "psx/Persona 2 - Eternal Punishment (USA).chd"
+      "bucket": "psx/Persona 2 - Eternal Punishment (USA).chd",
+      "variants": [
+        {
+          "bucket": "psp/Persona 2 - Eternal Punishment (Japan) [T-En by DarTisD & Eiowlta & Sayucchi v1.0].chd",
+          "note": "PSP: remake with a new scenario, fan translated"
+        }
+      ]
     },
     {
       "title": "Thousand Arms",
@@ -4447,7 +4661,13 @@
     {
       "title": "Shin Megami Tensei - Nocturne",
       "system": "ps2",
-      "bucket": "ps2/Shin Megami Tensei - Nocturne (USA).chd"
+      "bucket": "ps2/Shin Megami Tensei - Nocturne (USA).chd",
+      "variants": [
+        {
+          "bucket": "ps2/Shin Megami Tensei III - Nocturne Maniax - Chronicle Edition (Japan) [T-En by E.F Jang & Krisan Thyme v1.1.3].chd",
+          "note": "PS2: Chronicle Edition with Raidou instead of Dante"
+        }
+      ]
     },
     {
       "title": "Shin Megami Tensei - Digital Devil Saga",
@@ -4614,7 +4834,7 @@
     {
       "title": "Space Channel 5 Part 2",
       "system": "dreamcast",
-      "bucket": "dreamcast/Space Channel 5 Part 2 (Japan).chd"
+      "bucket": "dreamcast/Space Channel 5 Part 2 (Japan) [T-En by BrAzE v20110418].chd"
     },
     {
       "title": "Jet Set Radio",
@@ -4629,7 +4849,13 @@
     {
       "title": "Samba de Amigo",
       "system": "dreamcast",
-      "bucket": "dreamcast/Samba de Amigo (USA).chd"
+      "bucket": "dreamcast/Samba de Amigo (USA).chd",
+      "variants": [
+        {
+          "bucket": "dreamcast/Samba de Amigo Ver. 2000 (Japan) [T-En by Dukeblooders v0.9.1].chd",
+          "note": "Dreamcast: Ver. 2000 adds songs and modes, fan translated"
+        }
+      ]
     },
     {
       "title": "Metal Wolf",
@@ -4644,7 +4870,7 @@
     {
       "title": "Napple Tale: Arsia in Daydream",
       "system": "dreamcast",
-      "bucket": "dreamcast/Napple Tale - Arsia in Daydream (Japan).chd"
+      "bucket": "dreamcast/Napple Tale - Arsia in Daydream (Japan) [T-En by Cargodin v1.0].chd"
     },
     {
       "title": "Maken X",
@@ -4669,7 +4895,7 @@
     {
       "title": "Cool Cool Toon",
       "system": "dreamcast",
-      "bucket": "dreamcast/Cool Cool Toon (Japan).chd"
+      "bucket": "dreamcast/Cool Cool Toon (Japan) [T-En by Derek Pascarella v1.1].chd"
     },
     {
       "title": "MDK2",
@@ -4740,12 +4966,12 @@
     {
       "title": "Under Defeat",
       "system": "dreamcast",
-      "bucket": "dreamcast/Under Defeat (Japan).chd"
+      "bucket": "dreamcast/Under Defeat (Japan) [T-En by TapamN v1.0].chd"
     },
     {
       "title": "Rainbow Cotton",
       "system": "dreamcast",
-      "bucket": "dreamcast/Rainbow Cotton (Japan).chd"
+      "bucket": "dreamcast/Rainbow Cotton (Japan) [T-En by Derek Pascarella v1.0].chd"
     },
     {
       "title": "Cosmic Smash",
@@ -4826,7 +5052,7 @@
     {
       "title": "L.O.L. - Lack of Love",
       "system": "dreamcast",
-      "bucket": "dreamcast/L.O.L. - Lack of Love (Japan).chd"
+      "bucket": "dreamcast/L.O.L. - Lack of Love (Japan) [T-En by Rolly & RafaGam v1.1].chd"
     },
     {
       "title": "Armada",
@@ -5223,8 +5449,8 @@
     },
     {
       "title": "Knightmare II - The Maze of Galious",
-      "system": "msx",
-      "bucket": "msx/Knightmare II - The Maze of Galious (Japan).zip"
+      "system": "msx2",
+      "bucket": "msx2/Knightmare II - The Maze of Galious (Japan) [T-En by 232 Translations v1.04] [Enhanced] (Cartridge).zip"
     },
     {
       "title": "Penguin Adventure",
@@ -5284,7 +5510,7 @@
     {
       "title": "Knightmare III - Shalom",
       "system": "msx",
-      "bucket": "msx/Knightmare III - Shalom (Japan).zip"
+      "bucket": "msx/Knightmare III - Shalom (Japan) [T-En by Ricardo Bittencourt & SLotman v1.0b4] (Cartridge).zip"
     },
     {
       "title": "F-1 Spirit - The Way to Formula-1",
@@ -5304,7 +5530,7 @@
     {
       "title": "Metal Gear 2 - Solid Snake",
       "system": "msx2",
-      "bucket": "msx2/Metal Gear 2 - Solid Snake (Japan).zip"
+      "bucket": "msx2/Metal Gear 2 - Solid Snake (Japan) [T-En by Maarten ter Huurne & Takamichi Suzukawa v1.2] (Cartridge).zip"
     },
     {
       "title": "Vampire Killer",
@@ -5314,12 +5540,12 @@
     {
       "title": "Aleste",
       "system": "msx2",
-      "bucket": "msx2/Aleste (Japan).zip"
+      "bucket": "msx2/Aleste (Japan) [T-En by Tsunami v1.0] (Cartridge).zip"
     },
     {
       "title": "Hinotori - Houou Hen",
       "system": "msx2",
-      "bucket": "msx2/Hinotori - Houou Hen (Japan).zip"
+      "bucket": "msx2/Hinotori - Firebird Phoenix (Japan) [T-En by Django v2.0] [n] (Cartridge).zip"
     },
     {
       "title": "Ouke no Tani - El Giza no Fuuin",
@@ -5328,8 +5554,8 @@
     },
     {
       "title": "Dragon Slayer IV - Drasle Family",
-      "system": "msx",
-      "bucket": "msx/Dragon Slayer IV - Drasle Family (Japan).zip",
+      "system": "msx2",
+      "bucket": "msx2/Dragon Slayer IV - Draslay Family (Japan) [T-En by MSX Translations v1.0.0] [n] (Cartridge).zip",
       "variants": [
         {
           "bucket": "msx2/Dragon Slayer IV - Drasle Family (Japan).zip",
@@ -5340,7 +5566,7 @@
     {
       "title": "Zombie Hunter",
       "system": "msx2",
-      "bucket": "msx2/Zombie Hunter (Japan).zip"
+      "bucket": "msx2/Zombie Hunter (Japan) [T-En by Django v2015xxxx] (Cartridge).zip"
     },
     {
       "title": "Yaksa",
@@ -5349,18 +5575,18 @@
     },
     {
       "title": "Treasure Conflix",
-      "system": "satellaview",
-      "bucket": "satellaview/Treasure Conflix (Japan).zip"
+      "system": "snes",
+      "bucket": "snes/Treasure Conflix (Japan) [T-En by Krokodyl v1.1] [req BS-X bios].zip"
     },
     {
       "title": "Radical Dreamers",
-      "system": "satellaview",
-      "bucket": "satellaview/Radical Dreamers - Nusume Nai Houseki (Japan) (2-24).zip"
+      "system": "snes",
+      "bucket": "snes/BS Radical Dreamers - Le Tresor Interdit (Japan) [T-En by Demiforce v1.4] [n].zip"
     },
     {
       "title": "BS Zelda - Inishie no Sekiban",
-      "system": "satellaview",
-      "bucket": "satellaview/BS Zelda no Densetsu - Inishie no Sekiban - Dai-1-wa (Japan) (SoundLink).zip"
+      "system": "snes",
+      "bucket": "snes/BS Legend of Zelda, The - Ancient Stone Tablets - Chapter 1 (Japan) (SoundLink) [T-En by Euclid v1.0] [n].zip"
     },
     {
       "title": "Excitebike - Bunbun Mario Battle - Stadium 1",
@@ -5384,8 +5610,8 @@
     },
     {
       "title": "Dynami Tracer",
-      "system": "satellaview",
-      "bucket": "satellaview/Dynami Tracer (Japan).zip"
+      "system": "snes",
+      "bucket": "snes/Dynami Tracer (Japan) [T-En by Krokodyl v1.0] [req BS-X bios].zip"
     },
     {
       "title": "BS Fire Emblem - Akaneia Senki Hen - Dai-1-wa - Palace Kanraku",
@@ -5406,7 +5632,7 @@
           "note": "FDS: Doki Doki Panic, the Japanese original with its own cast"
         },
         {
-          "bucket": "satellaview/BS Super Mario USA - Power Challenge - Dai-1-kai (Japan) (SoundLink).zip",
+          "bucket": "snes/BS Super Mario USA - Power Challenge - Dai-1-kai (Japan) (SoundLink) [Hack by Conn & Duke Serkol v1.1] [T-En by Pacnsacdave v1.0].zip",
           "note": "Satellaview: broadcast challenge episodes on the All-Stars version"
         }
       ]
@@ -5469,17 +5695,17 @@
     {
       "title": "Touhou Fuumaroku - The Story of Eastern Wonderland",
       "system": "pc98",
-      "bucket": "pc98/Touhou Fuumaroku - The Story of Eastern Wonderland (Japan).hdi"
+      "bucket": "pc98/Touhou Fuumaroku (Japan) [T-En by xJeePx v1.00].hdi"
     },
     {
       "title": "Touhou Gensoukyou - Lotus Land Story",
       "system": "pc98",
-      "bucket": "pc98/Touhou Gensoukyou - Lotus Land Story (Japan).hdi"
+      "bucket": "pc98/Touhou Gensoukyou - Lotus Land Story (Japan) [T-En by xJeePx v1.00].hdi"
     },
     {
       "title": "Touhou Kaikidan - Mystic Square",
       "system": "pc98",
-      "bucket": "pc98/Touhou Kaikidan - Mystic Square (Japan).hdi"
+      "bucket": "pc98/Touhou Kaikidan - Mystic Square (Japan) [T-En by xJeePx v1.00].hdi"
     },
     {
       "title": "Keio Flying Squadron",
@@ -5539,7 +5765,13 @@
     {
       "title": "Snatcher",
       "system": "segacd",
-      "bucket": "segacd/Snatcher (USA).chd"
+      "bucket": "segacd/Snatcher (USA).chd",
+      "variants": [
+        {
+          "bucket": "msx2/Snatcher (Japan) [T-En by Fudeba Software v0.6.0] (Floppy).zip",
+          "note": "MSX2: original release, fan translated"
+        }
+      ]
     },
     {
       "title": "Rise of the Dragon",
@@ -5596,7 +5828,7 @@
     {
       "title": "Akumajou Dracula X - Chi no Rondo",
       "system": "tg-cd",
-      "bucket": "tg-cd/Akumajou Dracula X - Chi no Rondo (Japan).chd"
+      "bucket": "tg-cd/Castlevania - Rondo of Blood (Japan) [T-En by Burnt Lasagna & Cubanraul v1.01] [n].chd"
     },
     {
       "title": "Gate of Thunder",
@@ -5682,7 +5914,13 @@
     {
       "title": "Dragon Slayer - The Legend of Heroes",
       "system": "tg-cd",
-      "bucket": "tg-cd/Dragon Slayer - The Legend of Heroes (USA).chd"
+      "bucket": "tg-cd/Dragon Slayer - The Legend of Heroes (USA).chd",
+      "variants": [
+        {
+          "bucket": "msx2/Dragon Slayer - The Legend of Heroes (Japan) [T-En by Oasis & Randam v1.0] (Floppy).zip",
+          "note": "MSX2: original computer version, fan translated"
+        }
+      ]
     },
     {
       "title": "Exile",
@@ -5767,7 +6005,7 @@
     {
       "title": "Densetsu no Ogre Battle Gaiden - Zenobia no Ouji",
       "system": "ngpc",
-      "bucket": "ngpc/Densetsu no Ogre Battle Gaiden - Zenobia no Ouji (Japan).zip"
+      "bucket": "ngpc/Ogre Battle Gaiden - The Prince of Zenobia (Japan) [T-En by FFaddic v1.0] [i] [n].zip"
     },
     {
       "title": "Puzzle Link 2",
@@ -5832,7 +6070,7 @@
     {
       "title": "Klonoa: Moonlight Museum",
       "system": "wonderswan",
-      "bucket": "wonderswan/Kaze no Klonoa - Moonlight Museum (Japan).zip"
+      "bucket": "wonderswan/Klonoa - Moonlight Museum (Japan) [T-En by PowerStone05 & RayCarrot & Rcs709 & StarryScarab v1.1] [n].zip"
     },
     {
       "title": "Makaimura for WonderSwan",
@@ -5842,7 +6080,7 @@
     {
       "title": "Rockman & Forte - Mirai Kara no Chousensha",
       "system": "wonderswan",
-      "bucket": "wonderswan/Rockman & Forte - Mirai Kara no Chousensha (Japan).zip"
+      "bucket": "wonderswan/Rockman & Forte - Challenger from the Future (Japan) [T-En by NikcDC v1.2.1] [n].zip"
     },
     {
       "title": "Buffers Evolution",
@@ -5862,7 +6100,7 @@
     {
       "title": "Dicing Knight.",
       "system": "wonderswancolor",
-      "bucket": "wonderswancolor/Dicing Knight. (Japan).zip"
+      "bucket": "wonderswancolor/Dicing Knight. (Japan) [T-En by Aeon Genesis v1.00].zip"
     },
     {
       "title": "Rhyme Rider Kerorican",
@@ -5931,7 +6169,13 @@
     {
       "title": "Tales of Vesperia",
       "system": "xbox360",
-      "bucket": "xbox360/Tales of Vesperia (USA).zar"
+      "bucket": "xbox360/Tales of Vesperia (USA).zar",
+      "variants": [
+        {
+          "bucket": "ps3/Tales of Vesperia (Japan) [T-En by Pikachu025 v1.0].chd",
+          "note": "PS3: adds Patty and playable Flynn, fan translated"
+        }
+      ]
     },
     {
       "title": "Brutal Legend",
@@ -6061,7 +6305,7 @@
     {
       "title": "Sin and Punishment",
       "system": "n64",
-      "bucket": "n64/Tsumi to Batsu - Hoshi no Keishousha (Japan).zip"
+      "bucket": "n64/Tsumi to Batsu - Hoshi no Keishousha (Japan) [T-En by Zoinkity v1.0].zip"
     },
     {
       "title": "Ogre Battle 64 - Person of Lordly Caliber",
@@ -6229,7 +6473,13 @@
     {
       "title": "Mr. Gimmick",
       "system": "nes",
-      "bucket": "nes/Mr. Gimmick (Europe).zip"
+      "bucket": "nes/Mr. Gimmick (Europe).zip",
+      "variants": [
+        {
+          "bucket": "nes/Gimmick! (Japan) [T-En by LucianoTheWindowsFan v1.0].zip",
+          "note": "NES: Japanese release, translated"
+        }
+      ]
     },
     {
       "title": "Kabuki - Quantum Fighter",
@@ -6244,7 +6494,13 @@
     {
       "title": "Vice - Project Doom",
       "system": "nes",
-      "bucket": "nes/Vice - Project Doom (USA).zip"
+      "bucket": "nes/Vice - Project Doom (USA).zip",
+      "variants": [
+        {
+          "bucket": "nes/Gun-Dec (Japan) [T-En by Stardust Crusaders v1.00].zip",
+          "note": "NES: Japanese Gun-Dec with its original story, translated"
+        }
+      ]
     },
     {
       "title": "Journey to Silius",
@@ -6254,7 +6510,13 @@
     {
       "title": "Metal Storm",
       "system": "nes",
-      "bucket": "nes/Metal Storm (USA).zip"
+      "bucket": "nes/Metal Storm (USA).zip",
+      "variants": [
+        {
+          "bucket": "nes/Gravity Armor Metal Storm (Japan) [T-En by Sliver X v1.1] [n].zip",
+          "note": "NES: Japanese release, translated"
+        }
+      ]
     },
     {
       "title": "Guardian Legend, The",
@@ -6264,7 +6526,13 @@
     {
       "title": "Faxanadu",
       "system": "nes",
-      "bucket": "nes/Faxanadu (USA) (Rev 1).zip"
+      "bucket": "nes/Faxanadu (USA) (Rev 1).zip",
+      "variants": [
+        {
+          "bucket": "nes/Faxanadu (Japan) [T-En by Unsavory Maggot v1.04].zip",
+          "note": "NES: translation of the Japanese release"
+        }
+      ]
     },
     {
       "title": "StarTropics",
@@ -6289,7 +6557,13 @@
     {
       "title": "Power Blade",
       "system": "nes",
-      "bucket": "nes/Power Blade (USA).zip"
+      "bucket": "nes/Power Blade (USA).zip",
+      "variants": [
+        {
+          "bucket": "nes/Power Blazer (Japan) [T-En by Stardust Crusaders v1.0] [n].zip",
+          "note": "NES: Japanese Power Blazer with different levels and hero"
+        }
+      ]
     },
     {
       "title": "Shadow of the Ninja",
@@ -6314,7 +6588,13 @@
     {
       "title": "Gargoyle's Quest II",
       "system": "nes",
-      "bucket": "nes/Gargoyle's Quest II (USA).zip"
+      "bucket": "nes/Gargoyle's Quest II (USA).zip",
+      "variants": [
+        {
+          "bucket": "gb/Gargoyle's Quest II - The Demon Darkness (Japan) [T-En by Bailli v1.0] [n].zip",
+          "note": "GB: Japan-only Game Boy port"
+        }
+      ]
     },
     {
       "title": "Clash at Demonhead",
@@ -6349,7 +6629,13 @@
     {
       "title": "Ufouria - The Saga",
       "system": "nes",
-      "bucket": "nes/Ufouria - The Saga (Europe).zip"
+      "bucket": "nes/Ufouria - The Saga (Europe).zip",
+      "variants": [
+        {
+          "bucket": "nes/Hebereke (Japan) [T-En by BMF54123 v1.0].zip",
+          "note": "NES: Japanese Hebereke, translated"
+        }
+      ]
     },
     {
       "title": "Magic of Scheherazade, The",
@@ -6364,7 +6650,13 @@
     {
       "title": "S.C.A.T. - Special Cybernetic Attack Team",
       "system": "nes",
-      "bucket": "nes/S.C.A.T. - Special Cybernetic Attack Team (USA).zip"
+      "bucket": "nes/S.C.A.T. - Special Cybernetic Attack Team (USA).zip",
+      "variants": [
+        {
+          "bucket": "nes/Final Mission (Japan) [T-En by Stardust Crusaders v1.01].zip",
+          "note": "NES: Japanese Final Mission, translated"
+        }
+      ]
     },
     {
       "title": "Bubble Bobble Part 2",
@@ -6389,12 +6681,12 @@
     {
       "title": "Crisis Force",
       "system": "nes",
-      "bucket": "nes/Crisis Force (Japan).zip"
+      "bucket": "nes/Crisis Force (Japan) [T-En by Stardust Crusaders v1.0].zip"
     },
     {
       "title": "Summer Carnival '92 - Recca",
       "system": "nes",
-      "bucket": "nes/Summer Carnival '92 - Recca (Japan) (En).zip"
+      "bucket": "nes/Summer Carnival '92 - Recca (Japan) [T-En by Aeon Genesis v1.00] [Add by FlashPV v1.1] [n].zip"
     },
     {
       "title": "Gradius II",
@@ -6404,42 +6696,42 @@
     {
       "title": "Cocoron",
       "system": "nes",
-      "bucket": "nes/Cocoron (Japan).zip"
+      "bucket": "nes/Cocoron (Japan) [T-En by Akujin & Dynamic Designs v1.0].zip"
     },
     {
       "title": "Moon Crystal",
       "system": "nes",
-      "bucket": "nes/Moon Crystal (Japan).zip"
+      "bucket": "nes/Moon Crystal (Japan) [T-En by Alex W. Jackson v1.0].zip"
     },
     {
       "title": "Holy Diver",
       "system": "nes",
-      "bucket": "nes/Holy Diver (Japan).zip"
+      "bucket": "nes/Holy Diver (Japan) [T-En by Monaco v1.0] [Add by MottZilla R1].zip"
     },
     {
       "title": "Getsu Fuuma Den",
       "system": "nes",
-      "bucket": "nes/Getsu Fuuma Den (Japan).zip"
+      "bucket": "nes/Legend of Getsu Fuma, The (Japan) [T-En by RPGe v1.00] [Add by Pacnsacdave v1.0] [n].zip"
     },
     {
       "title": "Akumajou Special - Boku Dracula-kun",
       "system": "nes",
-      "bucket": "nes/Akumajou Special - Boku Dracula-kun (Japan).zip"
+      "bucket": "nes/Castlevania Special - Kid Dracula (Japan) [T-En by Chronix v1.0] [n].zip"
     },
     {
       "title": "Splatterhouse - Wanpaku Graffiti",
       "system": "nes",
-      "bucket": "nes/Splatterhouse - Wanpaku Graffiti (Japan).zip"
+      "bucket": "nes/Splatter House - Super Deformed (Japan) [T-En by Spinner 8 and friends v2.00] [n].zip"
     },
     {
       "title": "Mitsume ga Tooru",
       "system": "nes",
-      "bucket": "nes/Mitsume ga Tooru (Japan).zip"
+      "bucket": "nes/Mitsume ga Tooru (Japan) [T-En by The Spoony Bard v1.01].zip"
     },
     {
       "title": "Joy Mech Fight",
       "system": "nes",
-      "bucket": "nes/Joy Mech Fight (Japan).zip"
+      "bucket": "nes/Joy Mech Fight (Japan) [T-En by AlanMidas joy.mech] [n].zip"
     },
     {
       "title": "Wario's Woods",
@@ -6499,7 +6791,13 @@
     {
       "title": "Gun Nac",
       "system": "nes",
-      "bucket": "nes/Gun Nac (USA).zip"
+      "bucket": "nes/Gun Nac (USA).zip",
+      "variants": [
+        {
+          "bucket": "nes/Gun Nac (Japan) [T-En by Zynk Oxhyde v1.1].zip",
+          "note": "NES: translation of the Japanese release"
+        }
+      ]
     },
     {
       "title": "Ikari Warriors",
@@ -6549,7 +6847,13 @@
     {
       "title": "Princess Tomato in the Salad Kingdom",
       "system": "nes",
-      "bucket": "nes/Princess Tomato in the Salad Kingdom (USA).zip"
+      "bucket": "nes/Princess Tomato in the Salad Kingdom (USA).zip",
+      "variants": [
+        {
+          "bucket": "nes/Princess Tomato in the Salad Kingdom (Japan) [T-En by Stardust Crusaders v1.03] [n].zip",
+          "note": "NES: translation of the Japanese release"
+        }
+      ]
     },
     {
       "title": "Wurm - Journey to the Center of the Earth!",
@@ -6589,7 +6893,7 @@
     {
       "title": "Bio Miracle Bokutte Upa",
       "system": "nes",
-      "bucket": "nes/Bio Miracle Bokutte Upa (Japan).zip"
+      "bucket": "nes/Bio Miracle Baby Upa!! (Japan) [T-En by Vice Translations v1.00] [n].zip"
     },
     {
       "title": "Esper Dream",
@@ -6690,7 +6994,7 @@
     {
       "title": "Ninja Princess",
       "system": "sg1000",
-      "bucket": "sg1000/Ninja Princess (Japan, Australia) (Ja).zip"
+      "bucket": "sg1000/Ninja Princess (Japan) [T-En by Goldenband v1.0].zip"
     },
     {
       "title": "Gulkave",
@@ -6745,12 +7049,12 @@
     {
       "title": "Royal Stone - Hirakareshi Toki no Tobira",
       "system": "gamegear",
-      "bucket": "gamegear/Royal Stone - Hirakareshi Toki no Tobira (Japan).zip"
+      "bucket": "gamegear/Royal Stone (Japan) [T-En by Aeon Genesis v1.00] [n].zip"
     },
     {
       "title": "Sylvan Tale",
       "system": "gamegear",
-      "bucket": "gamegear/Sylvan Tale (Japan).zip"
+      "bucket": "gamegear/Sylvan Tale (Japan) [T-En by Aeon Genesis v1.01].zip"
     },
     {
       "title": "Panzer Dragoon Mini",
@@ -6760,7 +7064,7 @@
     {
       "title": "Coca-Cola Kid",
       "system": "gamegear",
-      "bucket": "gamegear/Coca-Cola Kid (Japan).zip"
+      "bucket": "gamegear/Coca-Cola Kid (Japan) [T-En by Filler v1.1].zip"
     },
     {
       "title": "Magical Puzzle Popils",
@@ -6915,7 +7219,13 @@
     {
       "title": "Cave Story 3D",
       "system": "3ds",
-      "bucket": "3ds/Cave Story 3D (USA).zip"
+      "bucket": "3ds/Cave Story 3D (USA).zip",
+      "variants": [
+        {
+          "bucket": "3ds/Cave Story 3D (USA) [T-En by Aeon Genesis v0.96 RC2] [Relocalized].zip",
+          "note": "3DS: Aeon Genesis relocalized script"
+        }
+      ]
     },
     {
       "title": "Andro Dunos 2",
@@ -6965,7 +7275,7 @@
     {
       "title": "E.X. Troopers",
       "system": "3ds",
-      "bucket": "3ds/E.X. Troopers (Japan).zip"
+      "bucket": "3ds/E.X. Troopers (Japan) [T-En by Fan Translators International v1.0.2].zip"
     },
     {
       "title": "Hometown Story",
@@ -7101,22 +7411,22 @@
     {
       "title": "Space Squash",
       "system": "virtualboy",
-      "bucket": "virtualboy/Space Squash (Japan).zip"
+      "bucket": "virtualboy/Space Squash (Japan) [T-En by Feel & Greg Stevens & Benjamin Stevens & Thunderstruck v2.0].zip"
     },
     {
       "title": "Insmouth no Yakata",
       "system": "virtualboy",
-      "bucket": "virtualboy/Insmouth no Yakata (Japan).zip"
+      "bucket": "virtualboy/Insmouth Mansion (Japan) [T-En by Thunderstruck v1.0] [n].zip"
     },
     {
       "title": "Pokemon Race Mini",
       "system": "pokemini",
-      "bucket": "pokemini/Pokemon Race Mini (Japan).zip"
+      "bucket": "pokemini/Pokemon Race Mini (Japan) [T-En by Snesy & Wa & Mr. Blinky & JustBurn v1.0].zip"
     },
     {
       "title": "Togepi no Daibouken",
       "system": "pokemini",
-      "bucket": "pokemini/Togepi no Daibouken (Japan).zip"
+      "bucket": "pokemini/Togepi's Great Adventure (Japan) [T-En by Mr. Blinky & Snesy v1.0] [n].zip"
     },
     {
       "title": "Legend of Dragon Knight",
@@ -7302,6 +7612,191 @@
       "title": "Moondust",
       "system": "c64",
       "bucket": "c64/Moondust (USA, Europe).zip"
+    },
+    {
+      "title": "Firemen, The",
+      "system": "snes",
+      "bucket": "snes/Firemen, The (Europe) (En,Fr,De).zip"
+    },
+    {
+      "title": "Live A Live",
+      "system": "snes",
+      "bucket": "snes/Live A Live (Japan) [T-En by Aeon Genesis v2.00 Deluxe].zip"
+    },
+    {
+      "title": "Bahamut Lagoon",
+      "system": "snes",
+      "bucket": "snes/Bahamut Lagoon (Japan) [T-En by Tom & Near v1.2].zip"
+    },
+    {
+      "title": "Treasure of the Rudras",
+      "system": "snes",
+      "bucket": "snes/Treasure of the Rudras (Japan) [T-En by Aeon Genesis v2.10] [n].zip"
+    },
+    {
+      "title": "Alcahest",
+      "system": "snes",
+      "bucket": "snes/Alcahest (Japan) [T-En by FH v1.0b] [Add by KingMike].zip"
+    },
+    {
+      "title": "Esper Dream 2",
+      "system": "nes",
+      "bucket": "nes/Esper Dream 2 (Japan) [T-En by Aeon Genesis v1.0] [n].zip"
+    },
+    {
+      "title": "Lagrange Point",
+      "system": "nes",
+      "bucket": "nes/Lagrange Point (Japan) [T-En by Aeon Genesis v1.01].zip"
+    },
+    {
+      "title": "Metal Max",
+      "system": "nes",
+      "bucket": "nes/Metal Max (Japan) [T-En by Supper v1.0].zip"
+    },
+    {
+      "title": "Clockwork Aquario",
+      "system": "fbneo",
+      "bucket": "fbneo/aquario.zip"
+    },
+    {
+      "title": "Tomato Adventure",
+      "system": "gba",
+      "bucket": "gba/Tomato Adventure (Japan) [T-En by Unknown W. Brackets v1.1.1].zip"
+    },
+    {
+      "title": "Crypt of the NecroDancer",
+      "system": "psvita",
+      "bucket": "psvita/Crypt of the NecroDancer [PCSE00806] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Dokuro",
+      "system": "psvita",
+      "bucket": "psvita/Dokuro [PCSE00124] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "LA-MULANA EX",
+      "system": "psvita",
+      "bucket": "psvita/LA-MULANA EX [PCSE00567] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Mutant Blobs Attack",
+      "system": "psvita",
+      "bucket": "psvita/Mutant Blobs Attack [PCSE00034] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Oreshika™",
+      "system": "psvita",
+      "bucket": "psvita/Oreshika™ [PCSA00155] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "The House in Fata Morgana",
+      "system": "psvita",
+      "bucket": "psvita/The House in Fata Morgana [PCSE01305] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Harvey Birdman - Attorney at Law",
+      "system": "psp",
+      "bucket": "psp/Harvey Birdman - Attorney at Law (USA).chd"
+    },
+    {
+      "title": "Shadow of Destiny",
+      "system": "psp",
+      "bucket": "psp/Shadow of Destiny (USA).chd"
+    },
+    {
+      "title": "Sid Meier's Pirates!",
+      "system": "psp",
+      "bucket": "psp/Sid Meier's Pirates! (USA).chd"
+    },
+    {
+      "title": "Valkyria Chronicles",
+      "system": "ps3",
+      "bucket": "ps3/Valkyria Chronicles (USA).chd"
+    },
+    {
+      "title": "Harmful Park",
+      "system": "psx",
+      "bucket": "psx/Harmful Park (Japan) [T-En by Hilltop v1.1].chd"
+    },
+    {
+      "title": "LSD - Dream Emulator",
+      "system": "psx",
+      "bucket": "psx/LSD - Dream Emulator (Japan) [T-En by Mr. Nobody & ArcaneAria v1].chd"
+    },
+    {
+      "title": "Mizzurna Falls",
+      "system": "psx",
+      "bucket": "psx/Mizzurna Falls (Japan) [T-En by Owl v20210330 beta].chd"
+    },
+    {
+      "title": "Moon - Remix RPG Adventure",
+      "system": "psx",
+      "bucket": "psx/Moon - Remix RPG Adventure (Japan) [T-En by EsperKnight & CJ_Iwakura v2019 Beta].chd"
+    },
+    {
+      "title": "Rent a Hero No.1",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Rent a Hero No.1 (Japan) [T-En by Rent-A-Modders Team v1.0].chd"
+    },
+    {
+      "title": "SD Snatcher",
+      "system": "msx2",
+      "bucket": "msx2/SD Snatcher (Japan) [T-En by Oasis v1.0] (Floppy).zip"
+    },
+    {
+      "title": "Legend of Xanadu - Kaze no Densetsu Xanadu",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Legend of Xanadu - Kaze no Densetsu Xanadu (Japan).chd"
+    },
+    {
+      "title": "Catherine",
+      "system": "xbox360",
+      "bucket": "xbox360/Catherine (USA).zar"
+    },
+    {
+      "title": "Dragon's Dogma - Dark Arisen",
+      "system": "xbox360",
+      "bucket": "xbox360/Dragon's Dogma - Dark Arisen (World) (Disc 1) (Game Disc).zar"
+    },
+    {
+      "title": "Nier",
+      "system": "xbox360",
+      "bucket": "xbox360/Nier (USA, Europe) (En,Ja,Fr,De).zar"
+    },
+    {
+      "title": "Alpha Protocol",
+      "system": "xbox360",
+      "bucket": "xbox360/Alpha Protocol (USA, Europe) (En,Fr,De,Es,It).zar"
+    },
+    {
+      "title": "Metal Wolf Chaos",
+      "system": "xbox",
+      "bucket": "xbox/Metal Wolf Chaos (Japan) [T-En by NemsMole v1.0].iso"
+    },
+    {
+      "title": "Celeste Classic",
+      "system": "pico8",
+      "bucket": "pico8/celeste.p8.png"
+    },
+    {
+      "title": "Dank Tomb is out!",
+      "system": "pico8",
+      "bucket": "pico8/dank_tomb-0.p8.png"
+    },
+    {
+      "title": "POOM",
+      "system": "pico8",
+      "bucket": "pico8/poom_0-9.p8.png"
+    },
+    {
+      "title": "Arduventure - Trial of the Blade",
+      "system": "arduboy",
+      "bucket": "arduboy/Arduventure - Trial of the Blade (World) (v1.01).zip"
+    },
+    {
+      "title": "Ardynia",
+      "system": "arduboy",
+      "bucket": "arduboy/Ardynia (World).zip"
     }
   ]
 }

@@ -952,7 +952,7 @@
     {
       "title": "Gundam Wing: Endless Duel",
       "system": "snes",
-      "bucket": "snes/Shin Kidou Senki Gundam W - Endless Duel (Japan).zip"
+      "bucket": "snes/Mobile Suit Gundam Wing - Endless Duel (Japan) [T-En by Aeon Genesis v1.00] [n].zip"
     },
     {
       "title": "Dragon Ball Z - Super Butouden 2",
@@ -962,7 +962,7 @@
     {
       "title": "Dragon Ball Z - Hyper Dimension",
       "system": "snes",
-      "bucket": "snes/Dragon Ball Z - Hyper Dimension (Japan).zip"
+      "bucket": "snes/Dragon Ball Z - Hyper Dimension (Japan) [T-En by Twilight Translations v1.00].zip"
     },
     {
       "title": "Bishoujo Senshi Sailor Moon S - Jougai Rantou! Shuyaku Soudatsusen",
@@ -1053,17 +1053,17 @@
     {
       "title": "Dragon Ball Z - Super Butouden",
       "system": "snes",
-      "bucket": "snes/Dragon Ball Z - Super Butouden (Japan).zip"
+      "bucket": "snes/Dragon Ball Z - La Legende Saien (France) [T-En by Commando Ginew v1.0] [i].zip"
     },
     {
       "title": "Dragon Ball Z - Super Butouden 3",
       "system": "snes",
-      "bucket": "snes/Dragon Ball Z - Super Butouden 3 (Japan).zip"
+      "bucket": "snes/Dragon Ball Z - Ultime Menace (France) [T-En by Saiya Translations & Vice Translations v1.01] [i].zip"
     },
     {
       "title": "Kidou Butouden G Gundam",
       "system": "snes",
-      "bucket": "snes/Kidou Butouden G Gundam (Japan).zip"
+      "bucket": "snes/Mobile Fighter G Gundam (Japan) [T-En by Aeon Genesis v1.00] [n].zip"
     },
     {
       "title": "Super Variable Geo",
@@ -1088,7 +1088,7 @@
     {
       "title": "Ranma 1-2 - Chougi Ranbu Hen",
       "system": "snes",
-      "bucket": "snes/Ranma 1-2 - Chougi Ranbu Hen (Japan).zip"
+      "bucket": "snes/Ranma 1-2 - Hard Battle II Super Move Hustle (Japan) [T-En by Dynamic Designs v1.10] [n].zip"
     },
     {
       "title": "Fighter's History - Mizoguchi Kikiippatsu!!",
@@ -1113,17 +1113,17 @@
     {
       "title": "Bastard!! - Ankoku no Hakaishin",
       "system": "snes",
-      "bucket": "snes/Bastard!! - Ankoku no Hakaishin (Japan).zip"
+      "bucket": "snes/Bastard!! - Dark God of Destruction (Japan) [T-En by DeJap v1.0] [Add by Docrow v1.0] [n].zip"
     },
     {
       "title": "Super Chinese Fighter",
       "system": "snes",
-      "bucket": "snes/Super Chinese Fighter (Japan).zip"
+      "bucket": "snes/Super Chinese Fighter (Japan) [T-En by DDSTranslation v1.0].zip"
     },
     {
       "title": "Sugoi Hebereke",
       "system": "snes",
-      "bucket": "snes/Sugoi Hebereke (Japan).zip"
+      "bucket": "snes/Amazing Hebereke (Japan) [T-En by LucianoTheWindowsFan v0.1] [i] [n].zip"
     },
     {
       "title": "Makeruna! Makendou 2 - Kimero! Youkai Souridaijin",
@@ -1159,7 +1159,7 @@
     {
       "title": "Yu Yu Hakusho - Makyou Toitsusen",
       "system": "genesis",
-      "bucket": "genesis/Yu Yu Hakusho - Makyou Toitsusen (Japan).zip"
+      "bucket": "genesis/Yu Yu Hakusho - Makyou Toitsusen (Japan) [T-En by M.I.J.E.T. v071113].zip"
     },
     {
       "title": "Deadly Moves",
@@ -1184,7 +1184,7 @@
     {
       "title": "Dragon Ball Z - Buyuu Retsuden",
       "system": "genesis",
-      "bucket": "genesis/Dragon Ball Z - Buyuu Retsuden (Japan).zip"
+      "bucket": "genesis/Dragon Ball Z - L'Appel du Destin (France) [T-En by DBZ Game v0.95A].zip"
     },
     {
       "title": "Bushido Blade",
@@ -1412,8 +1412,8 @@
     },
     {
       "title": "Battle Stadium D.O.N",
-      "system": "gc",
-      "bucket": "gc/Battle Stadium D.O.N (Japan).rvz"
+      "system": "ps2",
+      "bucket": "ps2/Battle Stadium D.O.N (Japan) [T-En by Lord Izen v20230906].chd"
     },
     {
       "title": "Guilty Gear - Dust Strikers",
@@ -1433,7 +1433,7 @@
     {
       "title": "Jump Ultimate Stars",
       "system": "nds",
-      "bucket": "nds/Jump Ultimate Stars (Japan).zip"
+      "bucket": "nds/Jump Ultimate Stars (Japan) [T-En by JUS Translation v030508].zip"
     },
     {
       "title": "Dragon Ball Z - Supersonic Warriors 2",
@@ -1716,7 +1716,7 @@
     {
       "title": "Soul Eater - Battle Resonance",
       "system": "psp",
-      "bucket": "psp/Soul Eater - Battle Resonance (Japan).chd"
+      "bucket": "psp/Soul Eater - Battle Resonance (Japan) [T-En by Anime Game Translations Team v1.0].chd"
     },
     {
       "title": "Kidou Senshi Gundam - Gundam vs. Gundam NEXT PLUS",
@@ -2189,7 +2189,7 @@
     {
       "title": "Super Chinese Fighter EX",
       "system": "gbc",
-      "bucket": "gbc/Super Chinese Fighter EX (Japan).zip"
+      "bucket": "gbc/Super Chinese Fighter EX (Japan) [T-En by Some Good Shit Translations v0.99].zip"
     },
     {
       "title": "Hiryuu no Ken - Retsuden GB",
@@ -2204,7 +2204,7 @@
     {
       "title": "Joy Mech Fight",
       "system": "nes",
-      "bucket": "nes/Joy Mech Fight (Japan).zip"
+      "bucket": "nes/Joy Mech Fight (Japan) [T-En by AlanMidas joy.mech] [n].zip"
     },
     {
       "title": "Urban Champion",
@@ -2214,7 +2214,7 @@
     {
       "title": "Nekketsu Kakutou Densetsu",
       "system": "nes",
-      "bucket": "nes/Nekketsu Kakutou Densetsu (Japan).zip"
+      "bucket": "nes/Kunio Tournament (Japan) [T-En by ReptilianCicilian v1.1] [n].zip"
     },
     {
       "title": "Virtua Fighter Animation",
@@ -2224,12 +2224,12 @@
     {
       "title": "Bishoujo Senshi Sailor Moon S",
       "system": "gamegear",
-      "bucket": "gamegear/Bishoujo Senshi Sailor Moon S (Japan).zip"
+      "bucket": "gamegear/Pretty Soldier Sailor Moon S (Japan) [T-En by Supper v1.1] [n].zip"
     },
     {
       "title": "Yu Yu Hakusho II - Gekitou! Nanakyou no Tatakai",
       "system": "gamegear",
-      "bucket": "gamegear/Yu Yu Hakusho II - Gekitou! Nanakyou no Tatakai (Japan).zip"
+      "bucket": "gamegear/Yu Yu Hakusho II - Battle of the 7 Fighters (Japan) [T-En by Gaijin Productions v1.10] [n].zip"
     },
     {
       "title": "Asuka 120% Maxima - Burning Fest. Maxima",
@@ -2294,7 +2294,13 @@
     {
       "title": "Digimon Tamers - Battle Spirit",
       "system": "wonderswancolor",
-      "bucket": "wonderswancolor/Digimon Tamers - Battle Spirit (Japan, Korea) (En,Ja).zip"
+      "bucket": "wonderswancolor/Digimon Tamers - Battle Spirit (Japan, Korea) (En,Ja).zip",
+      "variants": [
+        {
+          "bucket": "wonderswancolor/Digimon Tamers - Battle Spirit Ver. 1.5 (Japan) [T-En by Ashley & Buckwheat v1.0] [i].zip",
+          "note": "WonderSwan Color: Ver. 1.5 update with more fighters"
+        }
+      ]
     },
     {
       "title": "Tekken 3D - Prime Edition",
@@ -2345,6 +2351,116 @@
       "title": "Fight for Life",
       "system": "atarijaguar",
       "bucket": "atarijaguar/Fight for Life (USA, Europe).zip"
+    },
+    {
+      "title": "Custom Beat Battle - Draglade 2",
+      "system": "nds",
+      "bucket": "nds/Custom Beat Battle - Draglade 2 (Japan).zip"
+    },
+    {
+      "title": "One Piece Gigant Battle 2 - Shin Sekai",
+      "system": "nds",
+      "bucket": "nds/One Piece Gigant Battle 2 - Shin Sekai (Japan) (Rev 1).zip"
+    },
+    {
+      "title": "Star Gladiator 2: Nightmare of Bilstein",
+      "system": "mame",
+      "bucket": "mame/sg2j.zip"
+    },
+    {
+      "title": "Dragon Ball Z V.r.v.s.",
+      "system": "fbneo",
+      "bucket": "fbneo/dbzvrvs.zip"
+    },
+    {
+      "title": "Biofreaks",
+      "system": "mame",
+      "bucket": "mame/biofreak.zip"
+    },
+    {
+      "title": "King of the Monsters 2 - The Next Thing (NGM-039 ~ NGH-039)",
+      "system": "fbneo",
+      "bucket": "fbneo/kotm2.zip"
+    },
+    {
+      "title": "King of the Monsters",
+      "system": "fbneo",
+      "bucket": "fbneo/kotm.zip"
+    },
+    {
+      "title": "Arcana Heart 3 LOVE MAX!!!!!",
+      "system": "psvita",
+      "bucket": "psvita/Arcana Heart 3 LOVE MAX!!!!! [PCSE00427] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "BLAZBLUE CP EXTEND",
+      "system": "psvita",
+      "bucket": "psvita/BLAZBLUE CP EXTEND [PCSE00677] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Dengeki Bunko - Fighting Climax",
+      "system": "psvita",
+      "bucket": "psvita/Dengeki Bunko - Fighting Climax [PCSE00639] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Divekick",
+      "system": "psvita",
+      "bucket": "psvita/Divekick [PCSE00281] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "DOA5 PLUS",
+      "system": "psvita",
+      "bucket": "psvita/DOA5 PLUS [PCSE00235] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "J-STARS Victory VS+",
+      "system": "psvita",
+      "bucket": "psvita/J-STARS Victory VS+ [PCSE00595] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Nidhogg",
+      "system": "psvita",
+      "bucket": "psvita/Nidhogg [PCSE00514] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "PlayStation® All-Stars",
+      "system": "psvita",
+      "bucket": "psvita/PlayStation® All-Stars [PCSA00069] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "SFxTK",
+      "system": "psvita",
+      "bucket": "psvita/SFxTK [PCSE00005] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Touhou Kobuto V - Burst Battle",
+      "system": "psvita",
+      "bucket": "psvita/Touhou Kobuto V - Burst Battle [PCSE01104] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Tobal 2",
+      "system": "psx",
+      "bucket": "psx/Tobal 2 (Japan) (Rev 1) [T-En by Infinite Lupine Translations v1.00b] [i].chd"
+    },
+    {
+      "title": "Frame Gride",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Frame Gride (Japan) [T-En by DCHQ Final].chd"
+    },
+    {
+      "title": "WarTech - Senko no Ronde",
+      "system": "xbox360",
+      "bucket": "xbox360/WarTech - Senko no Ronde (World) (En,Ja).zar"
+    },
+    {
+      "title": "DreamWorks Shrek - SuperSlam",
+      "system": "gc",
+      "bucket": "gc/DreamWorks Shrek - SuperSlam (USA).rvz"
+    },
+    {
+      "title": "Viewtiful Joe - Red Hot Rumble",
+      "system": "gc",
+      "bucket": "gc/Viewtiful Joe - Red Hot Rumble (USA).rvz"
     }
   ]
 }

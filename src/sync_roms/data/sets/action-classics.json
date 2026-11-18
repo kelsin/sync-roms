@@ -77,7 +77,7 @@
       "system": "ps2",
       "bucket": "ps2/Metal Gear Solid 3 - Subsistence (USA) (En,Es).m3u",
       "files": [
-        "ps2/Metal Gear Solid 3 - Subsistence (USA) (En,Es) (Disc 1) (Subsistence Disc).chd",
+        "ps2/Metal Gear Solid 3 - Subsistence (USA) (En,Es) (Disc 1) (Subsistence).chd",
         "ps2/Metal Gear Solid 3 - Subsistence (USA) (En,Es) (Disc 2) (Persistence).chd",
         "ps2/Metal Gear Solid 3 - Subsistence (USA) (En,Es) (Disc 3) (Existence) (Limited Edition).chd"
       ]
@@ -1273,13 +1273,23 @@
         {
           "bucket": "gb/Bionic Commando (USA).zip",
           "note": "Game Boy: reworked version with new stages and setting"
+        },
+        {
+          "bucket": "nes/Bionic Commando - Return of Hitler (Japan) [T-En by Stardust Crusaders v1.04] [n].zip",
+          "note": "NES: Japanese Top Secret with its original story, translated"
         }
       ]
     },
     {
       "title": "Rygar",
       "system": "nes",
-      "bucket": "nes/Rygar (USA) (Rev 1).zip"
+      "bucket": "nes/Rygar (USA) (Rev 1).zip",
+      "variants": [
+        {
+          "bucket": "nes/Argos no Senshi - Hachamecha Daishingeki (Japan) [T-En by CF v1.0].zip",
+          "note": "NES: Japanese Argos no Senshi, fan translated"
+        }
+      ]
     },
     {
       "title": "Shadow of the Ninja",
@@ -1339,7 +1349,13 @@
     {
       "title": "Power Blade",
       "system": "nes",
-      "bucket": "nes/Power Blade (USA).zip"
+      "bucket": "nes/Power Blade (USA).zip",
+      "variants": [
+        {
+          "bucket": "nes/Power Blazer (Japan) [T-En by Stardust Crusaders v1.0] [n].zip",
+          "note": "NES: Japanese Power Blazer with different levels and hero"
+        }
+      ]
     },
     {
       "title": "Power Blade 2",
@@ -1354,7 +1370,13 @@
     {
       "title": "Gargoyle's Quest II",
       "system": "nes",
-      "bucket": "nes/Gargoyle's Quest II (USA).zip"
+      "bucket": "nes/Gargoyle's Quest II (USA).zip",
+      "variants": [
+        {
+          "bucket": "gb/Gargoyle's Quest II - The Demon Darkness (Japan) [T-En by Bailli v1.0] [n].zip",
+          "note": "GB: Japan-only Game Boy port"
+        }
+      ]
     },
     {
       "title": "Prince of Persia",
@@ -1369,7 +1391,13 @@
     {
       "title": "Blaster Master",
       "system": "nes",
-      "bucket": "nes/Blaster Master (USA).zip"
+      "bucket": "nes/Blaster Master (USA).zip",
+      "variants": [
+        {
+          "bucket": "nes/Super Planetary War Chronicle - MetaFight (Japan) [T-En by BlackPaladin v1.0] [n].zip",
+          "note": "NES: Japanese MetaFight with its original story, translated"
+        }
+      ]
     },
     {
       "title": "Batman - The Video Game",
@@ -1379,7 +1407,13 @@
     {
       "title": "Vice - Project Doom",
       "system": "nes",
-      "bucket": "nes/Vice - Project Doom (USA).zip"
+      "bucket": "nes/Vice - Project Doom (USA).zip",
+      "variants": [
+        {
+          "bucket": "nes/Gun-Dec (Japan) [T-En by Stardust Crusaders v1.00].zip",
+          "note": "NES: Japanese Gun-Dec with its original story, translated"
+        }
+      ]
     },
     {
       "title": "Kabuki - Quantum Fighter",
@@ -1444,12 +1478,18 @@
     {
       "title": "Getsu Fuuma Den",
       "system": "nes",
-      "bucket": "nes/Getsu Fuuma Den (Japan).zip"
+      "bucket": "nes/Legend of Getsu Fuma, The (Japan) [T-En by RPGe v1.00] [Add by Pacnsacdave v1.0] [n].zip"
     },
     {
       "title": "8 Eyes",
       "system": "nes",
-      "bucket": "nes/8 Eyes (USA).zip"
+      "bucket": "nes/8 Eyes (USA).zip",
+      "variants": [
+        {
+          "bucket": "nes/8 Eyes (Japan) [T-En by Stardust Crusaders v1.00].zip",
+          "note": "NES: translation of the Japanese release"
+        }
+      ]
     },
     {
       "title": "Arkista's Ring",
@@ -1494,17 +1534,17 @@
     {
       "title": "Jajamaru Gekimaden: Maboroshi no Kinmajou",
       "system": "nes",
-      "bucket": "nes/Jajamaru Gekimaden - Maboroshi no Kinmajou (Japan).zip"
+      "bucket": "nes/Ninja Jajamaru - Legend of a Demon's Attack - Castle of Dreams (Japan) [T-En by Aishsha & Stardust Crusaders v1.0] [Add by Proveaux v1.01] [n].zip"
     },
     {
       "title": "Jajamaru no Daibouken",
       "system": "nes",
-      "bucket": "nes/Jajamaru no Daibouken (Japan).zip"
+      "bucket": "nes/Ninja Jajamaru's Big Adventure (Japan) [T-En by Aishsha & Stardust Crusaders v1.00] [n].zip"
     },
     {
       "title": "Ninja Jajamaru-kun",
       "system": "nes",
-      "bucket": "nes/Ninja Jajamaru-kun (Japan).zip"
+      "bucket": "nes/Ninja Jajamaru (Japan) [T-En by Aishsha & Stardust Crusaders v1.00] [n].zip"
     },
     {
       "title": "Ninja Kid",
@@ -1514,7 +1554,13 @@
     {
       "title": "Legacy of the Wizard",
       "system": "nes",
-      "bucket": "nes/Legacy of the Wizard (USA).zip"
+      "bucket": "nes/Legacy of the Wizard (USA).zip",
+      "variants": [
+        {
+          "bucket": "nes/Dragon Slayer IV - Drasle Family (Japan) [T-En by Asiwish v1.0].zip",
+          "note": "NES: Japanese Dragon Slayer IV, fan translated"
+        }
+      ]
     },
     {
       "title": "The Magic of Scheherazade",
@@ -1569,7 +1615,13 @@
     {
       "title": "Faxanadu",
       "system": "nes",
-      "bucket": "nes/Faxanadu (USA) (Rev 1).zip"
+      "bucket": "nes/Faxanadu (USA) (Rev 1).zip",
+      "variants": [
+        {
+          "bucket": "nes/Faxanadu (Japan) [T-En by Unsavory Maggot v1.04].zip",
+          "note": "NES: translation of the Japanese release"
+        }
+      ]
     },
     {
       "title": "Teenage Mutant Ninja Turtles",
@@ -1605,12 +1657,24 @@
     {
       "title": "Demon's Crest",
       "system": "snes",
-      "bucket": "snes/Demon's Crest (USA).zip"
+      "bucket": "snes/Demon's Crest (USA).zip",
+      "variants": [
+        {
+          "bucket": "snes/Demon's Crest (USA) [T-En by CF v1.0] [Relocalized].zip",
+          "note": "SNES: fan retranslation of the script"
+        }
+      ]
     },
     {
       "title": "ActRaiser",
       "system": "snes",
-      "bucket": "snes/ActRaiser (USA).zip"
+      "bucket": "snes/ActRaiser (USA).zip",
+      "variants": [
+        {
+          "bucket": "snes/Actraiser (Japan) [T-En by Aeon Genesis v1.00].zip",
+          "note": "SNES: translation of the Japanese release with uncensored text"
+        }
+      ]
     },
     {
       "title": "ActRaiser 2",
@@ -1620,7 +1684,13 @@
     {
       "title": "Soul Blazer",
       "system": "snes",
-      "bucket": "snes/Soul Blazer (USA).zip"
+      "bucket": "snes/Soul Blazer (USA).zip",
+      "variants": [
+        {
+          "bucket": "snes/Soul Blazer (USA) [T-En by Steppolo Steppi v1.1] [Relocalized].zip",
+          "note": "SNES: fan retranslation of the script"
+        }
+      ]
     },
     {
       "title": "Prince of Persia 2",
@@ -1660,7 +1730,13 @@
     {
       "title": "Legend of the Mystical Ninja, The",
       "system": "snes",
-      "bucket": "snes/Legend of the Mystical Ninja, The (USA).zip"
+      "bucket": "snes/Legend of the Mystical Ninja, The (USA).zip",
+      "variants": [
+        {
+          "bucket": "snes/Go for it! Goemon - The Rescue of Princess Yuki (Japan) (Rev 2) [T-En by DDSTranslation v2.0] [n].zip",
+          "note": "SNES: Japanese release, fan translated"
+        }
+      ]
     },
     {
       "title": "Skyblazer",
@@ -1721,7 +1797,7 @@
     {
       "title": "Majuu Ou",
       "system": "snes",
-      "bucket": "snes/Majuu Ou (Japan).zip"
+      "bucket": "snes/King of Demons (Japan) [T-En by Aeon Genesis v1.01] [n].zip"
     },
     {
       "title": "3 Ninjas Kick Back",
@@ -1806,7 +1882,13 @@
     {
       "title": "Beyond Oasis",
       "system": "genesis",
-      "bucket": "genesis/Beyond Oasis (USA).zip"
+      "bucket": "genesis/Beyond Oasis (USA).zip",
+      "variants": [
+        {
+          "bucket": "genesis/Beyond Oasis (USA) [T-En by Eien Ni Hen & Husky v1.0].zip",
+          "note": "Genesis: retranslation of the Japanese script"
+        }
+      ]
     },
     {
       "title": "Landstalker",
@@ -2089,7 +2171,13 @@
     {
       "title": "Gargoyle's Quest",
       "system": "gb",
-      "bucket": "gb/Gargoyle's Quest (USA, Europe).zip"
+      "bucket": "gb/Gargoyle's Quest (USA, Europe).zip",
+      "variants": [
+        {
+          "bucket": "gb/Firebrand - A Ghosts 'n Goblins Tale (Japan) [T-En by Stardust Crusaders v1.00] [n].zip",
+          "note": "GB: retranslation of the Japanese release"
+        }
+      ]
     },
     {
       "title": "Ninja Gaiden Shadow",
@@ -2269,7 +2357,7 @@
     {
       "title": "Ninja Princess",
       "system": "sg1000",
-      "bucket": "sg1000/Ninja Princess (Japan, Australia) (Ja).zip"
+      "bucket": "sg1000/Ninja Princess (Japan) [T-En by Goldenband v1.0].zip"
     },
     {
       "title": "Shinobi II: The Silent Fury",
@@ -2349,7 +2437,13 @@
     {
       "title": "Valis II",
       "system": "tg-cd",
-      "bucket": "tg-cd/Valis II (USA).chd"
+      "bucket": "tg-cd/Valis II (USA).chd",
+      "variants": [
+        {
+          "bucket": "msx2/Valis - The Fantasm Soldier II (Japan) [T-En by Manuel Pazos & Theo Wilderbeek v20210116] (Floppy).zip",
+          "note": "MSX2: original computer version, fan translated"
+        }
+      ]
     },
     {
       "title": "Valis III",
@@ -2515,12 +2609,18 @@
     {
       "title": "Metal Gear (MSX2)",
       "system": "msx2",
-      "bucket": "msx2/Metal Gear (Europe).zip"
+      "bucket": "msx2/Metal Gear (Europe).zip",
+      "variants": [
+        {
+          "bucket": "msx2/Metal Gear (Japan) [T-En by Nekura_Hoka & Jon Taylor & Takamichi Suzukawa v1.995] (Cartridge).zip",
+          "note": "MSX2: fan retranslation of the Japanese release"
+        }
+      ]
     },
     {
       "title": "Metal Gear 2 - Solid Snake",
       "system": "msx2",
-      "bucket": "msx2/Metal Gear 2 - Solid Snake (Japan).zip"
+      "bucket": "msx2/Metal Gear 2 - Solid Snake (Japan) [T-En by Maarten ter Huurne & Takamichi Suzukawa v1.2] (Cartridge).zip"
     },
     {
       "title": "Treasure of Usas, The",
@@ -2544,8 +2644,8 @@
     },
     {
       "title": "Knightmare II - The Maze of Galious",
-      "system": "msx",
-      "bucket": "msx/Knightmare II - The Maze of Galious (Japan).zip"
+      "system": "msx2",
+      "bucket": "msx2/Knightmare II - The Maze of Galious (Japan) [T-En by 232 Translations v1.04] [Enhanced] (Cartridge).zip"
     },
     {
       "title": "Yie Ar Kung-Fu II",
@@ -2937,6 +3037,291 @@
       "title": "The Terminator",
       "system": "segacd",
       "bucket": "segacd/Terminator, The (USA).chd"
+    },
+    {
+      "title": "Firemen, The",
+      "system": "snes",
+      "bucket": "snes/Firemen, The (Europe) (En,Fr,De).zip"
+    },
+    {
+      "title": "Alcahest",
+      "system": "snes",
+      "bucket": "snes/Alcahest (Japan) [T-En by FH v1.0b] [Add by KingMike].zip"
+    },
+    {
+      "title": "Wai Wai World",
+      "system": "nes",
+      "bucket": "nes/Wai Wai World (Japan) [T-En by Demiforce v3.00].zip"
+    },
+    {
+      "title": "Wizards & Warriors III - Kuros...Visions of Power",
+      "system": "nes",
+      "bucket": "nes/Wizards & Warriors III - Kuros...Visions of Power (USA).zip"
+    },
+    {
+      "title": "Holy Diver",
+      "system": "nes",
+      "bucket": "nes/Holy Diver (Japan).zip"
+    },
+    {
+      "title": "Genpei ToumaDen",
+      "system": "fbneo",
+      "bucket": "fbneo/genpeitd.zip"
+    },
+    {
+      "title": "Valkyrie no Densetsu",
+      "system": "fbneo",
+      "bucket": "fbneo/valkyrie.zip"
+    },
+    {
+      "title": "Shin Bokura no Taiyou - Gyakushuu no Sabata",
+      "system": "gba",
+      "bucket": "gba/Shin Bokura no Taiyou - Gyakushuu no Sabata (Japan) [T-En by DarthNemesis & Lordhuffnpuff & SpikeMan v0.7b] [i].zip"
+    },
+    {
+      "title": "Shakedown - Hawaii",
+      "system": "3ds",
+      "bucket": "3ds/Shakedown - Hawaii (USA) (Rev 1).zip"
+    },
+    {
+      "title": "Fire Emblem Warriors",
+      "system": "n3ds",
+      "bucket": "n3ds/Fire Emblem Warriors (USA).3ds"
+    },
+    {
+      "title": "AC ® III Liberation",
+      "system": "psvita",
+      "bucket": "psvita/AC ® III Liberation [PCSE00053] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Attack on Titan",
+      "system": "psvita",
+      "bucket": "psvita/Attack on Titan [PCSE00812] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "BERSERK and the Band of the Hawk",
+      "system": "psvita",
+      "bucket": "psvita/BERSERK and the Band of the Hawk [PCSE01034] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Cursed Castilla",
+      "system": "psvita",
+      "bucket": "psvita/Cursed Castilla [PCSE01152] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "DW8 - Xtreme Legends CE",
+      "system": "psvita",
+      "bucket": "psvita/DW8 - Xtreme Legends CE [PCSE00405] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "DYNASTY WARRIORS NEXT",
+      "system": "psvita",
+      "bucket": "psvita/DYNASTY WARRIORS NEXT [PCSE00014] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Fate Extella",
+      "system": "psvita",
+      "bucket": "psvita/Fate Extella [PCSE00928] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "FateEXTELLA LINK",
+      "system": "psvita",
+      "bucket": "psvita/FateEXTELLA LINK [PCSE01254] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Oceanhorn",
+      "system": "psvita",
+      "bucket": "psvita/Oceanhorn [PCSE01097] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "ONE PIECE -  PW3",
+      "system": "psvita",
+      "bucket": "psvita/ONE PIECE -  PW3 [PCSE00638] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Retro City Rampage™ DX",
+      "system": "psvita",
+      "bucket": "psvita/Retro City Rampage™ DX [PCSE00546] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "SAMURAI WARRIORS 4",
+      "system": "psvita",
+      "bucket": "psvita/SAMURAI WARRIORS 4 [PCSE00503] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "SENRAN KAGURA EV",
+      "system": "psvita",
+      "bucket": "psvita/SENRAN KAGURA EV [PCSE00787] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "SENRAN KAGURA SV",
+      "system": "psvita",
+      "bucket": "psvita/SENRAN KAGURA SV [PCSE00398] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Severed",
+      "system": "psvita",
+      "bucket": "psvita/Severed [PCSE00589] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Shinobido 2",
+      "system": "psvita",
+      "bucket": "psvita/Shinobido 2 [PCSE00015] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Sly Cooper - Thieves in Time™",
+      "system": "psvita",
+      "bucket": "psvita/Sly Cooper - Thieves in Time™ [PCSA00068] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Titan Souls",
+      "system": "psvita",
+      "bucket": "psvita/Titan Souls [PCSE00597] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Ultra Despair Girls",
+      "system": "psvita",
+      "bucket": "psvita/Ultra Despair Girls [PCSE00692] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Volgarr",
+      "system": "psvita",
+      "bucket": "psvita/Volgarr [PCSE00913] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "WARRIORS OROCHI 3 Ultimate",
+      "system": "psvita",
+      "bucket": "psvita/WARRIORS OROCHI 3 Ultimate [PCSE00448] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Dark Souls",
+      "system": "ps3",
+      "bucket": "ps3/Dark Souls (USA) (En,Fr,Es).chd"
+    },
+    {
+      "title": "Dark Souls II - Scholar of the First Sin",
+      "system": "ps3",
+      "bucket": "ps3/Dark Souls II - Scholar of the First Sin (USA) (En,Fr,Es,Pt).chd"
+    },
+    {
+      "title": "Demon's Souls",
+      "system": "ps3",
+      "bucket": "ps3/Demon's Souls (USA).chd"
+    },
+    {
+      "title": "God of War III",
+      "system": "ps3",
+      "bucket": "ps3/God of War III (USA) (v02.00).chd"
+    },
+    {
+      "title": "Last of Us, The",
+      "system": "ps3",
+      "bucket": "ps3/Last of Us, The (USA) (En,Fr,Es,Pt).chd"
+    },
+    {
+      "title": "Uncharted - Drake's Fortune",
+      "system": "ps3",
+      "bucket": "ps3/Uncharted - Drake's Fortune (USA) (En,Fr,De,Es,It,Nl,Pt,Sv,No,Da,Fi).chd"
+    },
+    {
+      "title": "Uncharted 2 - Among Thieves",
+      "system": "ps3",
+      "bucket": "ps3/Uncharted 2 - Among Thieves (USA) (En,Fr,Es).chd"
+    },
+    {
+      "title": "Uncharted 3 - Drake's Deception - Game of the Year Edition",
+      "system": "ps3",
+      "bucket": "ps3/Uncharted 3 - Drake's Deception - Game of the Year Edition (USA) (En,Fr,Es,Pt).chd"
+    },
+    {
+      "title": "Bastion",
+      "system": "psvita",
+      "bucket": "psvita/Bastion [PCSE00790] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Hotline Miami",
+      "system": "psvita",
+      "bucket": "psvita/Hotline Miami [PCSE00249] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Hotline Miami 2 - Wrong Number",
+      "system": "psvita",
+      "bucket": "psvita/Hotline Miami 2 [PCSE00402] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Salt and Sanctuary",
+      "system": "psvita",
+      "bucket": "psvita/Salt and Sanctuary [PCSE01023] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Crusader - No Remorse",
+      "system": "psx",
+      "bucket": "psx/Crusader - No Remorse (USA).chd"
+    },
+    {
+      "title": "Valis",
+      "system": "genesis",
+      "bucket": "genesis/Valis (USA).zip"
+    },
+    {
+      "title": "Rusty",
+      "system": "pc98",
+      "bucket": "pc98/Rusty (Japan) [T-En by 46 OkuMen v1.0.3].hdi"
+    },
+    {
+      "title": "Valis IV",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Valis IV (Japan) [T-En by Sideside v1.0] [i].chd"
+    },
+    {
+      "title": "Mugen Senshi Valis - The Legend of a Fantasm Soldier",
+      "system": "tg-cd",
+      "bucket": "tg-cd/Mugen Senshi Valis - The Legend of a Fantasm Soldier (Japan).chd"
+    },
+    {
+      "title": "Castlevania - Lords of Shadow",
+      "system": "xbox360",
+      "bucket": "xbox360/Castlevania - Lords of Shadow (USA, Europe) (En,Fr,De,Es,It) (Disc 1).zar"
+    },
+    {
+      "title": "Fable II - Game of the Year Edition",
+      "system": "xbox360",
+      "bucket": "xbox360/Fable II - Game of the Year Edition (USA, Europe) (En,Zh,Ko,Pl,Cs,Hu).zar"
+    },
+    {
+      "title": "Red Dead Redemption - Game of the Year Edition",
+      "system": "xbox360",
+      "bucket": "xbox360/Red Dead Redemption - Game of the Year Edition (USA, Europe) (En,Fr,De,Es,It) (Disc 2) (Undead Nightmare and Multiplayer).zar"
+    },
+    {
+      "title": "Grand Theft Auto V",
+      "system": "xbox360",
+      "bucket": "xbox360/Grand Theft Auto V (World) (En,Fr,De,Es,It,Pt,Zh,Ko,Pl,Ru) (Disc 2) (Play).zar"
+    },
+    {
+      "title": "Saints Row IV - National Treasure Edition",
+      "system": "xbox360",
+      "bucket": "xbox360/Saints Row IV - National Treasure Edition (USA, Europe) (Disc 2).zar"
+    },
+    {
+      "title": "Crackdown ~ Riot Act",
+      "system": "xbox360",
+      "bucket": "xbox360/Crackdown ~ Riot Act (World) (En,Ja,Fr,De,Es,It,Zh,Ko,Cs,Hu).zar"
+    },
+    {
+      "title": "Deus Ex - Human Revolution - Director's Cut",
+      "system": "xbox360",
+      "bucket": "xbox360/Deus Ex - Human Revolution - Director's Cut (USA, Europe) (En,Fr,De,Es,It) (Disc 1).zar"
+    },
+    {
+      "title": "Kingdoms of Amalur - Reckoning",
+      "system": "xbox360",
+      "bucket": "xbox360/Kingdoms of Amalur - Reckoning (World) (En,Fr,De,Es,It).zar"
+    },
+    {
+      "title": "Metal Wolf Chaos",
+      "system": "xbox",
+      "bucket": "xbox/Metal Wolf Chaos (Japan) [T-En by NemsMole v1.0].iso"
     }
   ]
 }

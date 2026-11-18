@@ -867,6 +867,30 @@
       "bucket": "fbneo/vulgus.zip"
     },
     {
+      "title": "Q*bert's Qubes",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/qbertqub.zip"
+    },
+    {
+      "title": "Mad Planets",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/mplanets.zip"
+    },
+    {
+      "title": "Krull",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/krull.zip"
+    },
+    {
+      "title": "Red Baron (revised hardware)",
+      "category": "Golden Age",
+      "system": "fbneo",
+      "bucket": "fbneo/redbaron.zip"
+    },
+    {
       "title": "Dig Dug II",
       "category": "Namco",
       "system": "fbneo",
@@ -997,6 +1021,42 @@
       "category": "Namco",
       "system": "mame",
       "bucket": "mame/mrdrilr2.zip"
+    },
+    {
+      "title": "Hopping Mappy",
+      "category": "Namco",
+      "system": "fbneo",
+      "bucket": "fbneo/hopmappy.zip"
+    },
+    {
+      "title": "Tank Battalion",
+      "category": "Namco",
+      "system": "mame",
+      "bucket": "mame/tankbatt.zip"
+    },
+    {
+      "title": "Motos",
+      "category": "Namco",
+      "system": "fbneo",
+      "bucket": "fbneo/motos.zip"
+    },
+    {
+      "title": "Marchen Maze (Japan)",
+      "category": "Namco",
+      "system": "fbneo",
+      "bucket": "fbneo/mmaze.zip"
+    },
+    {
+      "title": "Alien Sector",
+      "category": "Namco",
+      "system": "fbneo",
+      "bucket": "fbneo/aliensec.zip"
+    },
+    {
+      "title": "Cyber Sled",
+      "category": "Namco",
+      "system": "mame",
+      "bucket": "mame/cybsled.zip"
     },
     {
       "title": "Gauntlet",
@@ -1207,6 +1267,36 @@
       "category": "Atari, Midway & Williams",
       "system": "fbneo",
       "bucket": "fbneo/rmpgwt.zip"
+    },
+    {
+      "title": "Cloak & Dagger (rev 5)",
+      "category": "Atari, Midway & Williams",
+      "system": "fbneo",
+      "bucket": "fbneo/cloak.zip"
+    },
+    {
+      "title": "Liberator (set 1)",
+      "category": "Atari, Midway & Williams",
+      "system": "mame",
+      "bucket": "mame/liberatr.zip"
+    },
+    {
+      "title": "Escape From The Planet Of The Robot Monsters",
+      "category": "Atari, Midway & Williams",
+      "system": "fbneo",
+      "bucket": "fbneo/eprom.zip"
+    },
+    {
+      "title": "Blaster",
+      "category": "Atari, Midway & Williams",
+      "system": "fbneo",
+      "bucket": "fbneo/blaster.zip"
+    },
+    {
+      "title": "Splat!",
+      "category": "Atari, Midway & Williams",
+      "system": "fbneo",
+      "bucket": "fbneo/splat.zip"
     },
     {
       "title": "Choplifter",
@@ -1441,6 +1531,12 @@
       "bucket": "fbneo/puyopuy2.zip"
     },
     {
+      "title": "OutRun 2",
+      "category": "Sega",
+      "system": "xbox",
+      "bucket": "xbox/OutRun 2 (Japan) [T-En by Justin Gibbins v1.0].iso"
+    },
+    {
       "title": "Arkanoid",
       "category": "Taito",
       "system": "fbneo",
@@ -1619,6 +1715,12 @@
       "bucket": "fbneo/cleopatr.zip"
     },
     {
+      "title": "Arkanoid Returns (Ver 2.02O 1997/02/10)",
+      "category": "Taito",
+      "system": "fbneo",
+      "bucket": "fbneo/arkretrn.zip"
+    },
+    {
       "title": "Kicker",
       "category": "Konami",
       "system": "fbneo",
@@ -1791,6 +1893,12 @@
       "category": "Konami",
       "system": "fbneo",
       "bucket": "fbneo/viostorm.zip"
+    },
+    {
+      "title": "S.P.Y. - Special Project Y (US ver. M)",
+      "category": "Konami",
+      "system": "fbneo",
+      "bucket": "fbneo/spyu.zip"
     },
     {
       "title": "Commando",
@@ -2013,6 +2121,12 @@
       "category": "Capcom",
       "system": "fbneo",
       "bucket": "fbneo/pzloop2.zip"
+    },
+    {
+      "title": "Block Block (World 911219 Joystick)",
+      "category": "Capcom",
+      "system": "fbneo",
+      "bucket": "fbneo/block.zip"
     },
     {
       "title": "Baseball Stars Professional",
@@ -2421,6 +2535,12 @@
       "category": "Neo Geo",
       "system": "fbneo",
       "bucket": "fbneo/pnyaa.zip"
+    },
+    {
+      "title": "Metal Slug 2 - Super Vehicle-001/II (NGM-2410 ~ NGH-2410)",
+      "category": "Neo Geo",
+      "system": "fbneo",
+      "bucket": "fbneo/mslug2.zip"
     },
     {
       "title": "Arm Wrestling",

@@ -321,6 +321,24 @@
       "bucket": "fbneo/deerhunt.zip"
     },
     {
+      "title": "Carnevil",
+      "category": "Arcade Light Gun",
+      "system": "mame",
+      "bucket": "mame/carnevil.zip"
+    },
+    {
+      "title": "Turkey Shoot",
+      "category": "Arcade Light Gun",
+      "system": "mame",
+      "bucket": "mame/tshoot.zip"
+    },
+    {
+      "title": "Lucky & Wild",
+      "category": "Arcade Light Gun",
+      "system": "fbneo",
+      "bucket": "fbneo/luckywld.zip"
+    },
+    {
       "title": "Wild Gunman",
       "category": "Console Light Gun",
       "system": "nes",
@@ -360,7 +378,13 @@
       "title": "Adventures of Bayou Billy, The",
       "category": "Console Light Gun",
       "system": "nes",
-      "bucket": "nes/Adventures of Bayou Billy, The (USA).zip"
+      "bucket": "nes/Adventures of Bayou Billy, The (USA).zip",
+      "variants": [
+        {
+          "bucket": "nes/Mad City (Japan) [T-En by Stardust Crusaders v1.0] [n].zip",
+          "note": "NES: Japanese Mad City with easier difficulty, translated"
+        }
+      ]
     },
     {
       "title": "Lone Ranger, The",
@@ -522,7 +546,7 @@
       "title": "Virtua Cop 2",
       "category": "Console Light Gun",
       "system": "dreamcast",
-      "bucket": "dreamcast/Virtua Cop 2 (Japan).chd"
+      "bucket": "dreamcast/Virtua Cop 2 (Japan) [T-En by Derek Pascarella v1.0].chd"
     },
     {
       "title": "House of the Dead, The",
@@ -539,8 +563,8 @@
     {
       "title": "Maximum Force",
       "category": "Console Light Gun",
-      "system": "psx",
-      "bucket": "psx/Maximum Force (USA).chd"
+      "system": "mame",
+      "bucket": "mame/maxforce.zip"
     },
     {
       "title": "Crypt Killer",
@@ -660,7 +684,7 @@
       "title": "Death Crimson 2",
       "category": "Console Light Gun",
       "system": "dreamcast",
-      "bucket": "dreamcast/Death Crimson 2 (Japan).chd"
+      "bucket": "dreamcast/Death Crimson 2 - Altar of Melanito (Japan) [T-En by Derek Pascarella v1.0] [n].chd"
     },
     {
       "title": "Death Crimson OX",
@@ -1040,13 +1064,13 @@
       "title": "Attack Animal Gakuen",
       "category": "Rail Shooters",
       "system": "nes",
-      "bucket": "nes/Attack Animal Gakuen (Japan) (Famicom 3D System).zip"
+      "bucket": "nes/Attack Animal Academy (Japan) [T-En by PentarouZero v1.0] [n].zip"
     },
     {
       "title": "Cosmic Epsilon",
       "category": "Rail Shooters",
       "system": "nes",
-      "bucket": "nes/Cosmic Epsilon (Japan) (Famicom 3D System).zip"
+      "bucket": "nes/Cosmic Epsilon (Japan) [T-En by Stardust Crusaders v1.0].zip"
     },
     {
       "title": "Space Harrier II",
@@ -1064,7 +1088,7 @@
       "title": "Panorama Cotton",
       "category": "Rail Shooters",
       "system": "genesis",
-      "bucket": "genesis/Panorama Cotton (Japan).zip"
+      "bucket": "genesis/Panorama Cotton (Japan) [T-En by Malias v1.0.1].zip"
     },
     {
       "title": "Panzer Dragoon Mini",
@@ -1202,7 +1226,7 @@
       "title": "Tsumi to Batsu - Hoshi no Keishousha",
       "category": "Rail Shooters",
       "system": "n64",
-      "bucket": "n64/Tsumi to Batsu - Hoshi no Keishousha (Japan).zip"
+      "bucket": "n64/Tsumi to Batsu - Hoshi no Keishousha (Japan) [T-En by Zoinkity v1.0].zip"
     },
     {
       "title": "Rez",
@@ -1214,7 +1238,7 @@
       "title": "Rainbow Cotton",
       "category": "Rail Shooters",
       "system": "dreamcast",
-      "bucket": "dreamcast/Rainbow Cotton (Japan).chd"
+      "bucket": "dreamcast/Rainbow Cotton (Japan) [T-En by Derek Pascarella v1.0].chd"
     },
     {
       "title": "Iridion 3D",
@@ -1263,6 +1287,12 @@
       "category": "Rail Shooters",
       "system": "wiiu",
       "bucket": "wiiu/Star Fox Zero (US) (v16).wua"
+    },
+    {
+      "title": "GalGun Double Peace",
+      "category": "Rail Shooters",
+      "system": "psvita",
+      "bucket": "psvita/GalGun Double Peace [PCSE00881] [USA] [NoNpDRM].zip"
     }
   ]
 }

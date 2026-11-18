@@ -558,7 +558,13 @@
     {
       "title": "Streets of Rage 3",
       "system": "genesis",
-      "bucket": "genesis/Streets of Rage 3 (USA).zip"
+      "bucket": "genesis/Streets of Rage 3 (USA).zip",
+      "variants": [
+        {
+          "bucket": "genesis/Bare Knuckle III (Japan) [T-En by Twilight Translations v1.0].zip",
+          "note": "Genesis: Bare Knuckle III, the uncut Japanese version, translated"
+        }
+      ]
     },
     {
       "title": "Golden Axe II",
@@ -698,6 +704,10 @@
         {
           "bucket": "gba/River City Ransom EX (USA).zip",
           "note": "GBA: adds move customization and new techniques"
+        },
+        {
+          "bucket": "nes/River City Ransom Zero (Japan) [T-En by Vice Translations v1.01] [n].zip",
+          "note": "NES: Japanese Kunio-kun version, translated"
         }
       ]
     },
@@ -854,12 +864,18 @@
     {
       "title": "Bishoujo Senshi Sailor Moon",
       "system": "genesis",
-      "bucket": "genesis/Bishoujo Senshi Sailor Moon (Japan).zip"
+      "bucket": "genesis/Pretty Soldier Sailor Moon (Japan) [T-En by Supper v1.0] [n].zip"
     },
     {
       "title": "Last Battle",
       "system": "genesis",
-      "bucket": "genesis/Last Battle (USA, Europe, Korea) (En).zip"
+      "bucket": "genesis/Last Battle (USA, Europe, Korea) (En).zip",
+      "variants": [
+        {
+          "bucket": "genesis/Hokuto no Ken - Shin Seikimatsu Kyuuseishu Densetsu (Japan) [T-En by Ernani S. Costa v1.5].zip",
+          "note": "Genesis: uncensored Hokuto no Ken original, fan translated"
+        }
+      ]
     },
     {
       "title": "Super Double Dragon",
@@ -869,7 +885,13 @@
     {
       "title": "Rival Turf!",
       "system": "snes",
-      "bucket": "snes/Rival Turf! (USA).zip"
+      "bucket": "snes/Rival Turf! (USA).zip",
+      "variants": [
+        {
+          "bucket": "snes/Rushing Beat (Japan) [T-En by FlashPV v1.0].zip",
+          "note": "SNES: Japanese Rushing Beat, translated"
+        }
+      ]
     },
     {
       "title": "Brawl Brothers",
@@ -914,12 +936,12 @@
     {
       "title": "Ghost Chaser Densei",
       "system": "snes",
-      "bucket": "snes/Ghost Chaser Densei (Japan).zip"
+      "bucket": "snes/Ghost Chaser Densei (Japan) [T-En by MrRichard999 & AgentOrange & Rainponcho v1.0].zip"
     },
     {
       "title": "Bishoujo Senshi Sailor Moon R",
       "system": "snes",
-      "bucket": "snes/Bishoujo Senshi Sailor Moon R (Japan).zip"
+      "bucket": "snes/Pretty Soldier Sailor Moon R (Japan) [T-En by FuSoYa v1.00] [n].zip"
     },
     {
       "title": "River City Girls Zero",
@@ -979,7 +1001,7 @@
     {
       "title": "Bishoujo Senshi Sailor Moon",
       "system": "snes",
-      "bucket": "snes/Bishoujo Senshi Sailor Moon (Japan).zip"
+      "bucket": "snes/Pretty Soldier Sailor Moon (Japan) [T-En by Flamepurge & Mziab v1.01] [n].zip"
     },
     {
       "title": "Shounen Ninja Sasuke",
@@ -1126,7 +1148,13 @@
     {
       "title": "Double Dragon III - The Sacred Stones",
       "system": "nes",
-      "bucket": "nes/Double Dragon III - The Sacred Stones (USA).zip"
+      "bucket": "nes/Double Dragon III - The Sacred Stones (USA).zip",
+      "variants": [
+        {
+          "bucket": "nes/Double Dragon III - The Rosetta Stone (Japan) [T-En by Pacnsacdave v1.0].zip",
+          "note": "NES: Japanese version with a shop and rebalanced difficulty"
+        }
+      ]
     },
     {
       "title": "Mighty Final Fight",
@@ -1141,12 +1169,18 @@
     {
       "title": "Downtown Special - Kunio-kun no Jidaigeki Da yo Zenin Shuugou!",
       "system": "nes",
-      "bucket": "nes/Downtown Special - Kunio-kun no Jidaigeki Da yo Zenin Shuugou! (Japan).zip"
+      "bucket": "nes/Technos Samurai - Downtown Special! (Japan) [T-En by Technos Samurai Translation Project v1.0] [n].zip"
     },
     {
       "title": "The Adventures of Bayou Billy",
       "system": "nes",
-      "bucket": "nes/Adventures of Bayou Billy, The (USA).zip"
+      "bucket": "nes/Adventures of Bayou Billy, The (USA).zip",
+      "variants": [
+        {
+          "bucket": "nes/Mad City (Japan) [T-En by Stardust Crusaders v1.0] [n].zip",
+          "note": "NES: Japanese Mad City with easier difficulty, translated"
+        }
+      ]
     },
     {
       "title": "Target - Renegade",
@@ -1161,7 +1195,7 @@
     {
       "title": "Spartan X 2",
       "system": "nes",
-      "bucket": "nes/Spartan X 2 (Japan).zip"
+      "bucket": "nes/Kung Fu 2 (Japan) [T-En by Abstract Crouton Productions v1.0] [n].zip"
     },
     {
       "title": "Black Belt",
@@ -1205,8 +1239,8 @@
     },
     {
       "title": "Nekketsu Oyako",
-      "system": "saturn",
-      "bucket": "saturn/Nekketsu Oyako (Japan).chd"
+      "system": "psx",
+      "bucket": "psx/Nekketsu Oyako (Japan) [T-En by PentarouZero v1.0d] [Add by SCO v1.0].chd"
     },
     {
       "title": "Tenchi o Kurau II - Sekiheki no Tatakai",
@@ -1328,6 +1362,66 @@
       "title": "Teenage Mutant Ninja Turtles - Mutants in Manhattan",
       "system": "xbox360",
       "bucket": "xbox360/Teenage Mutant Ninja Turtles - Mutants in Manhattan (USA, Europe).zar"
+    },
+    {
+      "title": "Shin Nekketsu Kouha - Kunio-tachi no Banka",
+      "system": "snes",
+      "bucket": "snes/Shin Nekketsu Kouha - Kunio-tachi no Banka (Japan) [T-En by Aeon Genesis v1.00].zip"
+    },
+    {
+      "title": "Shodai Nekketsu Kouha Kunio-kun",
+      "system": "snes",
+      "bucket": "snes/Shodai Nekketsu Kouha Kunio-kun (Japan) [T-En by Aeon Genesis v1.00].zip"
+    },
+    {
+      "title": "Age of Heroes - Silkroad 2",
+      "system": "fbneo",
+      "bucket": "fbneo/aoh.zip"
+    },
+    {
+      "title": "Nekketsu High - Hot Blooded! Kunio Kun's Final Battle",
+      "system": "gb",
+      "bucket": "gb/Nekketsu High - Hot Blooded! Kunio Kun's Final Battle (Japan) [T-En by Ice Translations v0.99] [i] [n].zip"
+    },
+    {
+      "title": "Downtown Nekketsu Jidaigeki",
+      "system": "3ds",
+      "bucket": "3ds/Downtown Nekketsu Jidaigeki (Japan).zip"
+    },
+    {
+      "title": "Nekketsu Kouha Kunio-Kun Special",
+      "system": "3ds",
+      "bucket": "3ds/Nekketsu Kouha Kunio-Kun Special (Japan).zip"
+    },
+    {
+      "title": "Foul Play",
+      "system": "psvita",
+      "bucket": "psvita/Foul Play [PCSE00484] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "SENRAN KAGURA EV",
+      "system": "psvita",
+      "bucket": "psvita/SENRAN KAGURA EV [PCSE00787] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "SENRAN KAGURA SV",
+      "system": "psvita",
+      "bucket": "psvita/SENRAN KAGURA SV [PCSE00398] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "99Vidas",
+      "system": "psvita",
+      "bucket": "psvita/99Vidas [PCSE00914] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Annett Futatabi",
+      "system": "segacd",
+      "bucket": "segacd/Annett Futatabi (Japan).chd"
+    },
+    {
+      "title": "Teenage Mutant Ninja Turtles in: Shredder's Prevenge APRIL UPDATE",
+      "system": "pico8",
+      "bucket": "pico8/tmnt_sp_start-0.p8.png"
     }
   ]
 }

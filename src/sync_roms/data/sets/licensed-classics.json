@@ -126,7 +126,13 @@
       "title": "Castle of Illusion Starring Mickey Mouse",
       "category": "Disney",
       "system": "genesis",
-      "bucket": "genesis/Castle of Illusion Starring Mickey Mouse (USA, Europe).zip"
+      "bucket": "genesis/Castle of Illusion Starring Mickey Mouse (USA, Europe).zip",
+      "variants": [
+        {
+          "bucket": "genesis/Castle of Illusion Starring Mickey Mouse (Japan) [T-En by RadioTails v1.0] [n].zip",
+          "note": "Genesis: Japanese release, fan translated"
+        }
+      ]
     },
     {
       "title": "Castle of Illusion Starring Mickey Mouse",
@@ -475,6 +481,36 @@
       "category": "Disney",
       "system": "3ds",
       "bucket": "3ds/Disney Magical World 2 (USA).zip"
+    },
+    {
+      "title": "Mickey to Donald - Magical Adventure 3",
+      "category": "Disney",
+      "system": "snes",
+      "bucket": "snes/Mickey to Donald - Magical Adventure 3 (Japan).zip"
+    },
+    {
+      "title": "Donald Duck no Mahou no Boushi",
+      "category": "Disney",
+      "system": "snes",
+      "bucket": "snes/Donald Duck no Mahou no Boushi (Japan).zip"
+    },
+    {
+      "title": "Mickey no Tokyo Disneyland Daibouken",
+      "category": "Disney",
+      "system": "snes",
+      "bucket": "snes/Mickey no Tokyo Disneyland Daibouken (Japan).zip"
+    },
+    {
+      "title": "Beauty and the Beast",
+      "category": "Disney",
+      "system": "snes",
+      "bucket": "snes/Beauty and the Beast (USA).zip"
+    },
+    {
+      "title": "Pinocchio",
+      "category": "Disney",
+      "system": "snes",
+      "bucket": "snes/Pinocchio (USA).zip"
     },
     {
       "title": "Tiny Toon Adventures",
@@ -1297,6 +1333,18 @@
       "category": "Looney Tunes & Cartoons",
       "system": "gba",
       "bucket": "gba/Astro Boy - Omega Factor (USA) (En,Ja,Fr,De,Es,It).zip"
+    },
+    {
+      "title": "Looney Tunes - Duck Amuck",
+      "category": "Looney Tunes & Cartoons",
+      "system": "nds",
+      "bucket": "nds/Looney Tunes - Duck Amuck (USA).zip"
+    },
+    {
+      "title": "Peanuts Movie, The - Snoopy's Grand Adventure",
+      "category": "Looney Tunes & Cartoons",
+      "system": "3ds",
+      "bucket": "3ds/Peanuts Movie, The - Snoopy's Grand Adventure (USA).zip"
     },
     {
       "title": "Teenage Mutant Ninja Turtles",
@@ -3039,6 +3087,24 @@
       "bucket": "genesis/Star Trek - The Next Generation - Echoes from the Past (USA) (Rev A).zip"
     },
     {
+      "title": "Addams Family Values",
+      "category": "Movies & TV",
+      "system": "snes",
+      "bucket": "snes/Addams Family Values (USA) (En,Fr,De).zip"
+    },
+    {
+      "title": "American Tail, An - Fievel Goes West",
+      "category": "Movies & TV",
+      "system": "snes",
+      "bucket": "snes/American Tail, An - Fievel Goes West (USA).zip"
+    },
+    {
+      "title": "South Park - The Stick of Truth",
+      "category": "Movies & TV",
+      "system": "xbox360",
+      "bucket": "xbox360/South Park - The Stick of Truth (USA) (En,Fr,De,Es,It,Pt).zar"
+    },
+    {
       "title": "Cool Spot",
       "category": "Brands & Mascots",
       "system": "genesis",
@@ -3114,7 +3180,7 @@
       "title": "Coca-Cola Kid",
       "category": "Brands & Mascots",
       "system": "gamegear",
-      "bucket": "gamegear/Coca-Cola Kid (Japan).zip"
+      "bucket": "gamegear/Coca-Cola Kid (Japan) [T-En by Filler v1.1].zip"
     }
   ]
 }

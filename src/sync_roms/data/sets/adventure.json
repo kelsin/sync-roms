@@ -6,7 +6,13 @@
       "title": "Phoenix Wright - Ace Attorney",
       "category": "Ace Attorney",
       "system": "nds",
-      "bucket": "nds/Phoenix Wright - Ace Attorney (USA).zip"
+      "bucket": "nds/Phoenix Wright - Ace Attorney (USA).zip",
+      "variants": [
+        {
+          "bucket": "gba/Phoenix Wright - Ace Attorney (Japan) [T-En by H3rmit & Spazzery v006] [n].zip",
+          "note": "GBA: the original Game Boy Advance release"
+        }
+      ]
     },
     {
       "title": "Phoenix Wright - Ace Attorney - Justice for All",
@@ -18,7 +24,13 @@
       "title": "Phoenix Wright - Ace Attorney - Trials and Tribulations",
       "category": "Ace Attorney",
       "system": "nds",
-      "bucket": "nds/Phoenix Wright - Ace Attorney - Trials and Tribulations (USA).zip"
+      "bucket": "nds/Phoenix Wright - Ace Attorney - Trials and Tribulations (USA).zip",
+      "variants": [
+        {
+          "bucket": "gba/Phoenix Wright - Ace Attorney – Trials and Tribulations (Japan) [T-En by H3rmit v015.8] [n].zip",
+          "note": "GBA: the original Game Boy Advance release"
+        }
+      ]
     },
     {
       "title": "Apollo Justice - Ace Attorney",
@@ -150,13 +162,25 @@
       "title": "Danganronpa 2 - Goodbye Despair",
       "category": "Zero Escape & Danganronpa",
       "system": "psvita",
-      "bucket": "psvita/Danganronpa2 [PCSE00399] [USA] [NoNpDRM].zip"
+      "bucket": "psvita/Danganronpa2 [PCSE00399] [USA] [NoNpDRM].zip",
+      "variants": [
+        {
+          "bucket": "psp/Super Dangan-Ronpa 2 - Sayonara Zetsubou Gakuen (Japan) [T-En by The Porting Dude v0.5a].chd",
+          "note": "PSP: original release, fan translated"
+        }
+      ]
     },
     {
       "title": "Danganronpa V3 - Killing Harmony",
       "category": "Zero Escape & Danganronpa",
       "system": "psvita",
       "bucket": "psvita/Danganronpa V3 [PCSE01100] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Ultra Despair Girls",
+      "category": "Zero Escape & Danganronpa",
+      "system": "psvita",
+      "bucket": "psvita/Ultra Despair Girls [PCSE00692] [USA] [NoNpDRM].zip"
     },
     {
       "title": "Trace Memory",
@@ -363,6 +387,52 @@
       "bucket": "tg-cd/J. B. Harold Murder Club (USA) (En,Ja).chd"
     },
     {
+      "title": "Touch Detective Rising 3 - Does Fungi Dream of Bananas",
+      "category": "Detective & Mystery",
+      "system": "3ds",
+      "bucket": "3ds/Touch Detective Rising 3 - Does Fungi Dream of Bananas (Japan) [T-En by Kekkyoku] [n].zip"
+    },
+    {
+      "title": "√Letter",
+      "category": "Detective & Mystery",
+      "system": "psvita",
+      "bucket": "psvita/√Letter [PCSE00963] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Harvey Birdman - Attorney at Law",
+      "category": "Detective & Mystery",
+      "system": "psp",
+      "bucket": "psp/Harvey Birdman - Attorney at Law (USA).chd"
+    },
+    {
+      "title": "Shadow of Destiny",
+      "category": "Detective & Mystery",
+      "system": "psp",
+      "bucket": "psp/Shadow of Destiny (USA).chd"
+    },
+    {
+      "title": "Heavy Rain - Director's Cut",
+      "category": "Detective & Mystery",
+      "system": "ps3",
+      "bucket": "ps3/Heavy Rain - Director's Cut (USA) (En,Fr,Es,Pt).chd"
+    },
+    {
+      "title": "Mizzurna Falls",
+      "category": "Detective & Mystery",
+      "system": "psx",
+      "bucket": "psx/Mizzurna Falls (Japan) [T-En by Owl v20210330 beta].chd"
+    },
+    {
+      "title": "J. B. Harold - Blue Chicago Blues",
+      "category": "Detective & Mystery",
+      "system": "saturn",
+      "bucket": "saturn/J. B. Harold - Blue Chicago Blues (Japan) [T-En by Collin ''Arjak'' Pierce & Kate ''MossstarMoon'' Pierce v1.00].m3u",
+      "files": [
+        "saturn/J. B. Harold - Blue Chicago Blues (Japan) (Disc 1) [T-En by Collin ''Arjak'' Pierce & Kate ''MossstarMoon'' Pierce v1.00].chd",
+        "saturn/J. B. Harold - Blue Chicago Blues (Japan) (Disc 2) [T-En by Collin ''Arjak'' Pierce & Kate ''MossstarMoon'' Pierce v1.00].chd"
+      ]
+    },
+    {
       "title": "Maniac Mansion",
       "category": "Point-and-Click",
       "system": "nes",
@@ -396,7 +466,13 @@
       "title": "Princess Tomato in the Salad Kingdom",
       "category": "Point-and-Click",
       "system": "nes",
-      "bucket": "nes/Princess Tomato in the Salad Kingdom (USA).zip"
+      "bucket": "nes/Princess Tomato in the Salad Kingdom (USA).zip",
+      "variants": [
+        {
+          "bucket": "nes/Princess Tomato in the Salad Kingdom (Japan) [T-En by Stardust Crusaders v1.03] [n].zip",
+          "note": "NES: translation of the Japanese release"
+        }
+      ]
     },
     {
       "title": "Nightshade",
@@ -468,7 +544,13 @@
       "title": "Snatcher",
       "category": "Point-and-Click",
       "system": "segacd",
-      "bucket": "segacd/Snatcher (USA).chd"
+      "bucket": "segacd/Snatcher (USA).chd",
+      "variants": [
+        {
+          "bucket": "msx2/Snatcher (Japan) [T-En by Fudeba Software v0.6.0] (Floppy).zip",
+          "note": "MSX2: original release, fan translated"
+        }
+      ]
     },
     {
       "title": "Space Adventure, The - Cobra - The Legendary Bandit",
@@ -787,6 +869,54 @@
       "bucket": "xbox360/Wolf Among Us, The - A Telltale Games Series (USA, Europe).zar"
     },
     {
+      "title": "Broken Sword 5",
+      "category": "Point-and-Click",
+      "system": "psvita",
+      "bucket": "psvita/Broken Sword 5 [PCSE00413] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Broken Sword 5 Ep2",
+      "category": "Point-and-Click",
+      "system": "psvita",
+      "bucket": "psvita/Broken Sword 5 Ep2 [PCSE00586] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Day of the Tentacle",
+      "category": "Point-and-Click",
+      "system": "psvita",
+      "bucket": "psvita/Day of the Tentacle [PCSE00658] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Full Throttle",
+      "category": "Point-and-Click",
+      "system": "psvita",
+      "bucket": "psvita/Full Throttle [PCSE01000] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Grim Fandango Remastered",
+      "category": "Point-and-Click",
+      "system": "psvita",
+      "bucket": "psvita/Grim Fandango Remastered [PCSE00547] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Machinarium",
+      "category": "Point-and-Click",
+      "system": "psvita",
+      "bucket": "psvita/Machinarium [PCSE00212] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Echo Night - The Lord of Nightmares",
+      "category": "Point-and-Click",
+      "system": "psx",
+      "bucket": "psx/Echo Night - The Lord of Nightmares (Japan) [T-En by Devil Hackers v1.0a] [n].chd"
+    },
+    {
+      "title": "Prisoner of Ice - Jashin Kourin",
+      "category": "Point-and-Click",
+      "system": "psx",
+      "bucket": "psx/Prisoner of Ice - Jashin Kourin (Japan) [T-En by Plissken v1.0].chd"
+    },
+    {
       "title": "Night Trap",
       "category": "FMV & CD-ROM Era",
       "system": "segacd",
@@ -1047,6 +1177,22 @@
       ]
     },
     {
+      "title": "Phantasmagoria",
+      "category": "FMV & CD-ROM Era",
+      "system": "saturn",
+      "bucket": "saturn/Phantasmagoria (Japan) [T-En by Delta-Islands Team v1.50 final revu] [n].m3u",
+      "files": [
+        "saturn/Phantasmagoria (Japan) (Disc 1) [T-En by Delta-Islands Team v1.50 final revu] [n].chd",
+        "saturn/Phantasmagoria (Japan) (Disc 2) [T-En by Delta-Islands Team v1.50 final revu] [n].chd",
+        "saturn/Phantasmagoria (Japan) (Disc 3) [T-En by Delta-Islands Team v1.50 final revu] [n].chd",
+        "saturn/Phantasmagoria (Japan) (Disc 4) [T-En by Delta-Islands Team v1.50 final revu] [n].chd",
+        "saturn/Phantasmagoria (Japan) (Disc 5) [T-En by Delta-Islands Team v1.50 final revu] [n].chd",
+        "saturn/Phantasmagoria (Japan) (Disc 6) [T-En by Delta-Islands Team v1.50 final revu] [n].chd",
+        "saturn/Phantasmagoria (Japan) (Disc 7) [T-En by Delta-Islands Team v1.50 final revu] [n].chd",
+        "saturn/Phantasmagoria (Japan) (Disc 8) [T-En by Delta-Islands Team v1.50 final revu] [n].chd"
+      ]
+    },
+    {
       "title": "Hakuoki - Demon of the Fleeting Blossom",
       "category": "Visual Novels",
       "system": "psp",
@@ -1213,10 +1359,142 @@
       "bucket": "psvita/Hatoful Boyfriend 2 [PCSE00776] [USA] [NoNpDRM].zip"
     },
     {
+      "title": "Amnesia - Memories",
+      "category": "Visual Novels",
+      "system": "psvita",
+      "bucket": "psvita/Amnesia - Memories [PCSE00647] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "CHAOS;CHILD",
+      "category": "Visual Novels",
+      "system": "psvita",
+      "bucket": "psvita/CHAOS;CHILD [PCSE01022] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Collar×Malice",
+      "category": "Visual Novels",
+      "system": "psvita",
+      "bucket": "psvita/Collar×Malice [PCSE01011] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Corpse Party BLOOD DRIVE",
+      "category": "Visual Novels",
+      "system": "psvita",
+      "bucket": "psvita/Corpse Party BLOOD DRIVE [PCSE00708] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Death Mark",
+      "category": "Visual Novels",
+      "system": "psvita",
+      "bucket": "psvita/Death Mark [PCSE01279] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Muv-Luv",
+      "category": "Visual Novels",
+      "system": "psvita",
+      "bucket": "psvita/Muv-Luv [PCSE01259] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Muv-Luv Alternative",
+      "category": "Visual Novels",
+      "system": "psvita",
+      "bucket": "psvita/Muv-Luv Alternative [PCSE01260] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Psychedelica AH",
+      "category": "Visual Novels",
+      "system": "psvita",
+      "bucket": "psvita/Psychedelica AH [PCSE01166] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Psychedelica BB",
+      "category": "Visual Novels",
+      "system": "psvita",
+      "bucket": "psvita/Psychedelica BB [PCSE01164] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "PSYCHO-PASS",
+      "category": "Visual Novels",
+      "system": "psvita",
+      "bucket": "psvita/PSYCHO-PASS [PCSE00904] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Root Double -BCAD- Xe",
+      "category": "Visual Novels",
+      "system": "psvita",
+      "bucket": "psvita/Root Double -BCAD- Xe [PCSE01055] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Spirit Hunter - NG",
+      "category": "Visual Novels",
+      "system": "psvita",
+      "bucket": "psvita/Spirit Hunter - NG [PCSE01407] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "STEINS;GATE 0",
+      "category": "Visual Novels",
+      "system": "psvita",
+      "bucket": "psvita/STEINS;GATE 0 [PCSE00949] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "The House in Fata Morgana",
+      "category": "Visual Novels",
+      "system": "psvita",
+      "bucket": "psvita/The House in Fata Morgana [PCSE01305] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Utawarerumono - Mask of Deception",
+      "category": "Visual Novels",
+      "system": "psvita",
+      "bucket": "psvita/Utawarerumono - Mask of Deception [PCSE00959] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Utawarerumono - Mask of Truth",
+      "category": "Visual Novels",
+      "system": "psvita",
+      "bucket": "psvita/Utawarerumono - Mask of Truth [PCSE01102] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "VA-11 HALL-A",
+      "category": "Visual Novels",
+      "system": "psvita",
+      "bucket": "psvita/VA-11 HALL-A [PCSE00756] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "XBLAZE CODE  - EMBRYO",
+      "category": "Visual Novels",
+      "system": "psvita",
+      "bucket": "psvita/XBLAZE CODE  - EMBRYO [PCSE00346] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "XBLAZE LM",
+      "category": "Visual Novels",
+      "system": "psvita",
+      "bucket": "psvita/XBLAZE LM [PCSE00627] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Suikogaiden Vol. 1 - Swordsman of Harmonia",
+      "category": "Visual Novels",
+      "system": "psx",
+      "bucket": "psx/Suikogaiden Vol. 1 - Swordsman of Harmonia (Japan) [T-En by Suikogaiden Translation Project v1.1] [n].chd"
+    },
+    {
+      "title": "Suikogaiden Vol. 2 - Duel at Crystal Valley",
+      "category": "Visual Novels",
+      "system": "psx",
+      "bucket": "psx/Suikogaiden Vol. 2 - Duel at Crystal Valley (Japan) [T-En by Suikogaiden Translation Project v1.1] [n].chd"
+    },
+    {
+      "title": "Nakoruru - The Gift She Gave Me",
+      "category": "Visual Novels",
+      "system": "dreamcast",
+      "bucket": "dreamcast/Nakoruru - The Gift She Gave Me (Japan) [T-En by Derek Pascarella v1.2] [n].chd"
+    },
+    {
       "title": "Portopia Renzoku Satsujin Jiken",
       "category": "Japanese Adventure Classics",
       "system": "nes",
-      "bucket": "nes/Portopia Renzoku Satsujin Jiken (Japan).zip"
+      "bucket": "nes/Portopia Serial Murder Case, The (Japan) [T-En by DvD Translations Rev B] [n].zip"
     },
     {
       "title": "Hokkaidou Rensa Satsujin - Okhotsk ni Kiyu",
@@ -1228,7 +1506,7 @@
       "title": "Metal Slader Glory",
       "category": "Japanese Adventure Classics",
       "system": "nes",
-      "bucket": "nes/Metal Slader Glory (Japan).zip"
+      "bucket": "nes/Metal Slader Glory (Japan) [T-En by FCandChill & Her-Saki v1.1].zip"
     },
     {
       "title": "Famicom Tantei Club - Kieta Koukeisha",
@@ -1243,7 +1521,7 @@
       "title": "Famicom Tantei Club Part II - Ushiro ni Tatsu Shoujo",
       "category": "Japanese Adventure Classics",
       "system": "snes",
-      "bucket": "snes/Famicom Tantei Club Part II - Ushiro ni Tatsu Shoujo (Japan) (Rev 1) (NP).zip",
+      "bucket": "snes/Famicom Detective Club Part II (Japan) (NP) [T-En by Demiforce v1.00] [n].zip",
       "variants": [
         {
           "bucket": "fds/Famicom Tantei Club Part II - Ushiro ni Tatsu Shoujo - Zenpen (Japan).zip",
@@ -1264,13 +1542,13 @@
       "title": "Clock Tower",
       "category": "Japanese Adventure Classics",
       "system": "snes",
-      "bucket": "snes/Clock Tower (Japan).zip"
+      "bucket": "snes/Clock Tower (Japan) [T-En by Aeon Genesis v1.01].zip"
     },
     {
       "title": "Otogirisou",
       "category": "Japanese Adventure Classics",
       "system": "snes",
-      "bucket": "snes/Otogirisou (Japan).zip"
+      "bucket": "snes/Otogirisou (Japan) [T-En by Tom & FlashPV & DDS v1.0].zip"
     },
     {
       "title": "Kamaitachi no Yoru",
@@ -1282,23 +1560,23 @@
       "title": "Ihatovo Monogatari",
       "category": "Japanese Adventure Classics",
       "system": "snes",
-      "bucket": "snes/Ihatovo Monogatari (Japan).zip"
+      "bucket": "snes/Stories of Ihatovo, The (Japan) [T-En by Tom & FlashPV & DDSTranslation v2.0] [n].zip"
     },
     {
       "title": "Radical Dreamers - Nusume Nai Houseki",
       "category": "Japanese Adventure Classics",
-      "system": "satellaview",
-      "bucket": "satellaview/Radical Dreamers - Nusume Nai Houseki (Japan) (2-24).zip"
+      "system": "snes",
+      "bucket": "snes/BS Radical Dreamers - Le Tresor Interdit (Japan) [T-En by Demiforce v1.4] [n].zip"
     },
     {
       "title": "Policenauts",
       "category": "Japanese Adventure Classics",
       "system": "saturn",
-      "bucket": "saturn/Policenauts (Japan).m3u",
+      "bucket": "saturn/Policenauts (Japan) [T-En by JunkerHQ v1.0.1].m3u",
       "files": [
-        "saturn/Policenauts (Japan) (Disc 1).chd",
-        "saturn/Policenauts (Japan) (Disc 2).chd",
-        "saturn/Policenauts (Japan) (Disc 3).chd"
+        "saturn/Policenauts (Disc 1) (Japan) [T-En by JunkerHQ v1.0.1].chd",
+        "saturn/Policenauts (Disc 2) (Japan) [T-En by JunkerHQ v1.0.1].chd",
+        "saturn/Policenauts (Disc 3) (Japan) [T-En by JunkerHQ v1.0.1].chd"
       ]
     },
     {
@@ -1338,6 +1616,96 @@
       "category": "Japanese Adventure Classics",
       "system": "3ds",
       "bucket": "3ds/Time Travelers (Japan).zip"
+    },
+    {
+      "title": "Famicom Mukashibanashi - Yuuyuuki - Kouhen",
+      "category": "Japanese Adventure Classics",
+      "system": "fds",
+      "bucket": "fds/Famicom Mukashibanashi - Yuuyuuki - Kouhen (Japan).zip"
+    },
+    {
+      "title": "Famicom Mukashibanashi - Yuuyuuki - Zenpen",
+      "category": "Japanese Adventure Classics",
+      "system": "fds",
+      "bucket": "fds/Famicom Mukashibanashi - Yuuyuuki - Zenpen (Japan).zip"
+    },
+    {
+      "title": "Tantei Jinguuji Saburou - Shinjuku Chuuou Kouen Satsujin Jiken",
+      "category": "Japanese Adventure Classics",
+      "system": "fds",
+      "bucket": "fds/Tantei Jinguuji Saburou - Shinjuku Chuuou Kouen Satsujin Jiken (Japan) (Rev 1) (Disk Writer).zip"
+    },
+    {
+      "title": "Tantei Jinguuji Saburou - Kiken na Futari - Kouhen",
+      "category": "Japanese Adventure Classics",
+      "system": "fds",
+      "bucket": "fds/Tantei Jinguuji Saburou - Kiken na Futari - Kouhen (Japan).zip"
+    },
+    {
+      "title": "Tantei Jinguuji Saburou - Kiken na Futari - Zenpen",
+      "category": "Japanese Adventure Classics",
+      "system": "fds",
+      "bucket": "fds/Tantei Jinguuji Saburou - Kiken na Futari - Zenpen (Japan).zip"
+    },
+    {
+      "title": "BS Tantei Club - Yuki ni Kieta Kako - Chuuhen",
+      "category": "Japanese Adventure Classics",
+      "system": "satellaview",
+      "bucket": "satellaview/BS Tantei Club - Yuki ni Kieta Kako - Chuuhen (Japan) (6-14).zip"
+    },
+    {
+      "title": "BS Tantei Club - Yuki ni Kieta Kako - Kouhen",
+      "category": "Japanese Adventure Classics",
+      "system": "satellaview",
+      "bucket": "satellaview/BS Tantei Club - Yuki ni Kieta Kako - Kouhen (Japan) (SoundLink).zip"
+    },
+    {
+      "title": "BS Tantei Club - Yuki ni Kieta Kako - Zenpen",
+      "category": "Japanese Adventure Classics",
+      "system": "satellaview",
+      "bucket": "satellaview/BS Tantei Club - Yuki ni Kieta Kako - Zenpen (Japan) (SoundLink).zip"
+    },
+    {
+      "title": "Tantei Jinguuji Saburou - Yokohamakou Renzoku Satsujin Jiken",
+      "category": "Japanese Adventure Classics",
+      "system": "nes",
+      "bucket": "nes/Tantei Jinguuji Saburou - Yokohamakou Renzoku Satsujin Jiken (Japan).zip"
+    },
+    {
+      "title": "Tantei Jinguuji Saburou - Toki no Sugiyuku Mama ni",
+      "category": "Japanese Adventure Classics",
+      "system": "nes",
+      "bucket": "nes/Tantei Jinguuji Saburou - Toki no Sugiyuku Mama ni (Japan).zip"
+    },
+    {
+      "title": "Catherine",
+      "category": "Japanese Adventure Classics",
+      "system": "ps3",
+      "bucket": "ps3/Catherine (USA).chd"
+    },
+    {
+      "title": "Moon - Remix RPG Adventure",
+      "category": "Japanese Adventure Classics",
+      "system": "psx",
+      "bucket": "psx/Moon - Remix RPG Adventure (Japan) [T-En by EsperKnight & CJ_Iwakura v2019 Beta].chd"
+    },
+    {
+      "title": "Psy-O-Blade",
+      "category": "Japanese Adventure Classics",
+      "system": "genesis",
+      "bucket": "genesis/Psy-O-Blade (Japan) [T-En by Eien Ni Hen & Tryphon v1.1].zip"
+    },
+    {
+      "title": "Nadia - The Secret of Blue Water",
+      "category": "Japanese Adventure Classics",
+      "system": "genesis",
+      "bucket": "genesis/Nadia - The Secret of Blue Water (Japan) [T-En by Eien Ni Hen & KingMike v1.1] [n].zip"
+    },
+    {
+      "title": "Dead of the Brain",
+      "category": "Japanese Adventure Classics",
+      "system": "pc98",
+      "bucket": "pc98/Dead of the Brain (Japan) [T-En by WINE v1.0].hdi"
     },
     {
       "title": "Prince of Persia",
@@ -1442,6 +1810,18 @@
         "psx/Heart of Darkness (USA) (Disc 1).chd",
         "psx/Heart of Darkness (USA) (Disc 2).chd"
       ]
+    },
+    {
+      "title": "Limbo",
+      "category": "Cinematic Platformers",
+      "system": "psvita",
+      "bucket": "psvita/Limbo [PCSE00268] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Beyond - Two Souls",
+      "category": "Cinematic Platformers",
+      "system": "ps3",
+      "bucket": "ps3/Beyond - Two Souls (USA) (En,Fr).chd"
     }
   ]
 }

@@ -10,22 +10,46 @@
     {
       "title": "Castlevania II - Simon's Quest",
       "system": "nes",
-      "bucket": "nes/Castlevania II - Simon's Quest (USA).zip"
+      "bucket": "nes/Castlevania II - Simon's Quest (USA).zip",
+      "variants": [
+        {
+          "bucket": "nes/Castlevania II - Simon's Quest (USA) [T-En by Bisqwit v2.12.0.1] [Relocalized].zip",
+          "note": "NES: retranslation with clearer clues"
+        }
+      ]
     },
     {
       "title": "Faxanadu (Rev 1)",
       "system": "nes",
-      "bucket": "nes/Faxanadu (USA) (Rev 1).zip"
+      "bucket": "nes/Faxanadu (USA) (Rev 1).zip",
+      "variants": [
+        {
+          "bucket": "nes/Faxanadu (Japan) [T-En by Unsavory Maggot v1.04].zip",
+          "note": "NES: translation of the Japanese release"
+        }
+      ]
     },
     {
       "title": "Blaster Master",
       "system": "nes",
-      "bucket": "nes/Blaster Master (USA).zip"
+      "bucket": "nes/Blaster Master (USA).zip",
+      "variants": [
+        {
+          "bucket": "nes/Super Planetary War Chronicle - MetaFight (Japan) [T-En by BlackPaladin v1.0] [n].zip",
+          "note": "NES: Japanese MetaFight with its original story, translated"
+        }
+      ]
     },
     {
       "title": "Rygar",
       "system": "nes",
-      "bucket": "nes/Rygar (USA) (Rev 1).zip"
+      "bucket": "nes/Rygar (USA) (Rev 1).zip",
+      "variants": [
+        {
+          "bucket": "nes/Argos no Senshi - Hachamecha Daishingeki (Japan) [T-En by CF v1.0].zip",
+          "note": "NES: Japanese Argos no Senshi, fan translated"
+        }
+      ]
     },
     {
       "title": "Goonies II, The",
@@ -35,7 +59,13 @@
     {
       "title": "Legacy of the Wizard",
       "system": "nes",
-      "bucket": "nes/Legacy of the Wizard (USA).zip"
+      "bucket": "nes/Legacy of the Wizard (USA).zip",
+      "variants": [
+        {
+          "bucket": "nes/Dragon Slayer IV - Drasle Family (Japan) [T-En by Asiwish v1.0].zip",
+          "note": "NES: Japanese Dragon Slayer IV, fan translated"
+        }
+      ]
     },
     {
       "title": "Battle of Olympus, The",
@@ -55,7 +85,13 @@
     {
       "title": "Ufouria - The Saga",
       "system": "nes",
-      "bucket": "nes/Ufouria - The Saga (Europe).zip"
+      "bucket": "nes/Ufouria - The Saga (Europe).zip",
+      "variants": [
+        {
+          "bucket": "nes/Hebereke (Japan) [T-En by BMF54123 v1.0].zip",
+          "note": "NES: Japanese Hebereke, translated"
+        }
+      ]
     },
     {
       "title": "Ghoul School",
@@ -65,12 +101,12 @@
     {
       "title": "Getsu Fuuma Den",
       "system": "nes",
-      "bucket": "nes/Getsu Fuuma Den (Japan).zip"
+      "bucket": "nes/Legend of Getsu Fuma, The (Japan) [T-En by RPGe v1.00] [Add by Pacnsacdave v1.0] [n].zip"
     },
     {
       "title": "Knightmare II - The Maze of Galious",
-      "system": "msx",
-      "bucket": "msx/Knightmare II - The Maze of Galious (Japan).zip"
+      "system": "msx2",
+      "bucket": "msx2/Knightmare II - The Maze of Galious (Japan) [T-En by 232 Translations v1.04] [Enhanced] (Cartridge).zip"
     },
     {
       "title": "Dragon Slayer II - Xanadu",
@@ -84,8 +120,8 @@
     },
     {
       "title": "Dragon Slayer IV - Drasle Family",
-      "system": "msx",
-      "bucket": "msx/Dragon Slayer IV - Drasle Family (Japan).zip",
+      "system": "msx2",
+      "bucket": "msx2/Dragon Slayer IV - Draslay Family (Japan) [T-En by MSX Translations v1.0.0] [n] (Cartridge).zip",
       "variants": [
         {
           "bucket": "msx2/Dragon Slayer IV - Drasle Family (Japan).zip",
@@ -114,8 +150,12 @@
       "bucket": "psx/Castlevania - Symphony of the Night (USA).chd",
       "variants": [
         {
-          "bucket": "saturn/Akumajou Dracula X - Gekka no Yasoukyoku (Japan) (2M).chd",
+          "bucket": "saturn/Dracula X - Nocturne in the Moonlight (Japan) [T-En by Paul_met v1.1] [Ultimate] [n].chd",
           "note": "Saturn: adds playable Maria and two new areas (Japanese)"
+        },
+        {
+          "bucket": "psx/Akumajou Dracula X - Gekka no Yasoukyoku (Japan) (Rev 2) [T-En by Devil Hackers v1.0].chd",
+          "note": "PS1: fan translation of the Japanese release"
         }
       ]
     },
@@ -152,7 +192,13 @@
     {
       "title": "Monster World IV",
       "system": "genesis",
-      "bucket": "genesis/Monster World IV (USA) (Genesis Mini).zip"
+      "bucket": "genesis/Monster World IV (USA) (Genesis Mini).zip",
+      "variants": [
+        {
+          "bucket": "genesis/Monster World IV (Japan) [T-En by DeJap & Demiforce v1.02] [Add by Michele Di Somma v2.2] [Add by Jackic v1.1].zip",
+          "note": "Genesis: fan translation of the Japanese release"
+        }
+      ]
     },
     {
       "title": "Todd's Adventures in Slime World",
@@ -218,13 +264,23 @@
         {
           "bucket": "gba/Legend of Zelda, The - A Link to the Past & Four Swords (USA).zip",
           "note": "GBA: adds Four Swords multiplayer and a bonus dungeon"
+        },
+        {
+          "bucket": "snes/Legend of Zelda, The - A Link to the Past (USA) [T-En by ShadowOne333 & Translation Quest v10.2.3] [Relocalized].zip",
+          "note": "SNES: retranslation closer to the Japanese script"
         }
       ]
     },
     {
       "title": "Demon's Crest",
       "system": "snes",
-      "bucket": "snes/Demon's Crest (USA).zip"
+      "bucket": "snes/Demon's Crest (USA).zip",
+      "variants": [
+        {
+          "bucket": "snes/Demon's Crest (USA) [T-En by CF v1.0] [Relocalized].zip",
+          "note": "SNES: fan retranslation of the script"
+        }
+      ]
     },
     {
       "title": "Super Adventure Island II",
@@ -435,7 +491,13 @@
     {
       "title": "Cave Story 3D",
       "system": "3ds",
-      "bucket": "3ds/Cave Story 3D (USA).zip"
+      "bucket": "3ds/Cave Story 3D (USA).zip",
+      "variants": [
+        {
+          "bucket": "3ds/Cave Story 3D (USA) [T-En by Aeon Genesis v0.96 RC2] [Relocalized].zip",
+          "note": "3DS: Aeon Genesis relocalized script"
+        }
+      ]
     },
     {
       "title": "Batman - Arkham Origins Blackgate",
@@ -466,6 +528,91 @@
       "title": "Shadow Man",
       "system": "dreamcast",
       "bucket": "dreamcast/Shadow Man (USA) (Rev A).chd"
+    },
+    {
+      "title": "Böbl",
+      "system": "nes",
+      "bucket": "nes/Böbl.zip"
+    },
+    {
+      "title": "Alwa's Awakening",
+      "system": "nes",
+      "bucket": "nes/Alwa's Awakening.zip"
+    },
+    {
+      "title": "Axiom Verge",
+      "system": "psvita",
+      "bucket": "psvita/Axiom Verge [PCSE00651] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Exile's End",
+      "system": "psvita",
+      "bucket": "psvita/Exile's End [PCSE00941] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Guacamelee!",
+      "system": "psvita",
+      "bucket": "psvita/Guacamelee! [PCSE00033] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Iconoclasts",
+      "system": "psvita",
+      "bucket": "psvita/Iconoclasts [PCSE01177] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Knytt Underground",
+      "system": "psvita",
+      "bucket": "psvita/Knytt Underground [PCSE00092] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "LA-MULANA EX",
+      "system": "psvita",
+      "bucket": "psvita/LA-MULANA EX [PCSE00567] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Rabi-Ribi",
+      "system": "psvita",
+      "bucket": "psvita/Rabi-Ribi [PCSE01111] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "SteamWorld Dig",
+      "system": "psvita",
+      "bucket": "psvita/SteamWorld Dig [PCSE00430] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "SteamWorld Dig 2",
+      "system": "psvita",
+      "bucket": "psvita/SteamWorld Dig 2 [PCSE01101] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Teslagrad",
+      "system": "psvita",
+      "bucket": "psvita/Teslagrad [PCSE00814] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Timespinner",
+      "system": "psvita",
+      "bucket": "psvita/Timespinner [PCSE01246] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "TOUHOU DOUBLE FOCUS",
+      "system": "psvita",
+      "bucket": "psvita/TOUHOU DOUBLE FOCUS [PCSE01015] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Unepic",
+      "system": "psvita",
+      "bucket": "psvita/Unepic [PCSE00840] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "Xeodrifter™",
+      "system": "psvita",
+      "bucket": "psvita/Xeodrifter™ [PCSE00694] [USA] [NoNpDRM].zip"
+    },
+    {
+      "title": "MetroCUBEvania",
+      "system": "pico8",
+      "bucket": "pico8/cubevania12-0.p8.png"
     }
   ]
 }
