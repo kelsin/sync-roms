@@ -1,5 +1,18 @@
 # Changelog
 
+## [3.3.0](https://github.com/kelsin/sync-roms/compare/v3.2.0...v3.3.0) (2026-11-18)
+
+
+### :video_game: Features
+
+* **sets:** fill sets from storage and add every fan translation ([#345](https://github.com/kelsin/sync-roms/issues/345)) ([88e924b](https://github.com/kelsin/sync-roms/commit/88e924b79eed1e7c3734ded35632abe056cf67bc))
+
+
+### :bug: Bug Fixes
+
+* **cli:** align the columns of cards list ([#346](https://github.com/kelsin/sync-roms/issues/346)) ([3913bf6](https://github.com/kelsin/sync-roms/commit/3913bf6a2878b833d2d4a21c06a3d5a64d6df30e))
+* **edit:** count a set's games, not their files, in the system sets list ([#343](https://github.com/kelsin/sync-roms/issues/343)) ([778a469](https://github.com/kelsin/sync-roms/commit/778a4696d62ac925d8fd44b2155f8bd92341d8e6))
+
 ## [3.2.0](https://github.com/kelsin/sync-roms/compare/v3.1.0...v3.2.0) (2026-11-17)
 
 
