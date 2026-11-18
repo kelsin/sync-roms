@@ -919,8 +919,10 @@ def sync_card(args):
 
     relist()
     interactive = not (ui.ASSUME_YES or args.json) and ui.has_terminal()
-    surprise.run_surprise(card, (device, layout_name), [s for s in systems if available(s)], interactive, args.dry_run,
-                          to_fetch=to_fetch)
+    fresh = not (saved or {}).get("surprises") and not any(s["games"] or s.get("full_system") for s in systems)
+    # a card with no games and no surprises yet has no systems with ROMs: draw its first surprises from all its systems
+    surprise.run_surprise(card, (device, layout_name), systems if fresh else [s for s in systems if available(s)],
+                          interactive, args.dry_run, to_fetch=to_fetch)
     if not args.dry_run:  # the step (and the card editor it opens) may have changed the card's games
         def picks(s):
             return s.get("full_system"), store.listed(s)
