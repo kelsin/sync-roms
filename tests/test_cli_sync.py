@@ -465,6 +465,46 @@ class SyncSmokeTest(RealDataDirGuard):
         self.assertEqual((got, deletes), (["gba/Game.zip"], ["Delete these 1 local file(s) (3 B)?"]))
         self.assertEqual(files, [])
 
+    def test_a_move_that_fails_is_downloaded_instead(self):
+        real_replace = os.replace
+
+        def replace(src, dst):
+            if os.path.join("ROMs", "vectrex") in src:
+                raise PermissionError("busy")
+            return real_replace(src, dst)
+        with mock.patch.object(cli.os, "replace", replace):
+            got, _, _, _ = self.sync_card_files(os.path.join("vectrex", "Game.zip"), 5)
+        self.assertEqual(got, ["gba/Game.zip"])
+        self.assertIn("busy", self.out.getvalue())
+
+    def test_a_rename_that_fails_is_a_failure(self):
+        def fail(path, new):
+            raise PermissionError("busy")
+        with mock.patch.object(cli.downloads, "rename_on_card", fail):
+            empty = {"name": "GCE Vectrex", "bucket": "vectrex", "folders": {"esde": "vectrex"}, "bios": {"files": []}, "games": []}
+            patches = ((store, {"load_manifest": lambda names=(): {**MANIFEST, "systems": [SYSTEM, empty]}}),
+                       (cli, {"free_space": lambda path: 10**9}))
+            code = self.run_sync(False, prepare=self.card_rom(os.path.join("gba", "GAME.zip"), 5), patches=patches)
+        self.assertEqual(code, 1)
+        self.assertIn("busy", self.out.getvalue())
+
+    def test_a_dry_run_does_not_delete_loose_discs_the_real_run_tucks_away(self):
+        discs = ["Fahrenheit (USA) (Disc 1) (Sega CD).chd", "Fahrenheit (USA) (Disc 2) (Sega CD).chd"]
+        psx = {"name": "PlayStation", "bucket": "psx", "folders": {"esde": "psx"}, "bios": {"files": []},
+               "games": [{"bucket": "psx/" + d} for d in discs]}
+        layouts = {"esde": {**MANIFEST["layouts"]["esde"], "disc_dir": ".multi-disc"}}
+        manifest = {**MANIFEST, "systems": [psx], "layouts": layouts}
+
+        def prepare(card):
+            for d in discs:
+                self.card_rom(os.path.join("psx", d), 4)(card)
+        emitted = []
+        patches = ((store, {"load_manifest": lambda names=(): manifest}),
+                   (cli.s3, {"list_sizes": lambda prefix, sizes=True: {"psx/" + d: 4 for d in discs} if prefix == "psx/" else {}}),
+                   (cli.ui, {"emit_json": emitted.append}))
+        self.assertEqual(self.run_sync(True, prepare=prepare, patches=patches, args=["--json"]), 0)
+        self.assertEqual((emitted[0]["downloads"], emitted[0]["delete"], emitted[0]["rename"]), ([], [], []))
+
     def test_declining_the_space_prompt_exits_0(self):
         patches = ((cli, {"free_space": lambda path: 3}),
                    (cli.ui, {"confirm": lambda q, default=True: False, "has_terminal": lambda: True}))

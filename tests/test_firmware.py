@@ -147,6 +147,15 @@ class FindExtrasTest(unittest.TestCase):
         with self.walk("a.PSVITA", "A.zip"):
             self.assertEqual(downloads.find_extras("/card", ["psvita/A.zip"]), [])
 
+    def test_a_rename_left_half_done_is_an_extra(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            touch(os.path.join(tmp, ".Game.zip.rename"))
+            touch(os.path.join(tmp, ".multi-disc", ".A (Disc 1).chd.rename"))
+            touch(os.path.join(tmp, ".hidden"))
+            self.assertEqual(sorted(downloads.find_extras(tmp, [], disc_dir=".multi-disc")),
+                             [os.path.join(tmp, ".Game.zip.rename"), os.path.join(tmp, ".multi-disc", ".A (Disc 1).chd.rename")])
+            self.assertFalse(downloads.has_local_files(tmp))
+
     def test_a_case_only_rename_changes_the_name_on_the_card(self):
         with tempfile.TemporaryDirectory() as tmp:
             touch(os.path.join(tmp, "GAME.zip"), b"abc")

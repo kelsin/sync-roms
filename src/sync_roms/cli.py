@@ -1072,8 +1072,9 @@ def sync_card(args):
     apk_todo = downloads.plan_downloads(apk_jobs)
     driver_todo = downloads.plan_downloads(driver_jobs)
     theme_todo = downloads.plan_downloads(theme_jobs)
-    if args.dry_run:  # the real run moves these first, so they are already there
+    if args.dry_run:  # the real run moves these first, so they are already there and not extras
         rom_todo = [j for j in rom_todo if j[1] not in moved]
+        extras = [p for p in extras if not moved or os.path.join(os.path.dirname(p), disc_dir, os.path.basename(p)) not in moved]
     elif moved:
         print(ui.dim(f"  📦 Moved {len(moved)} loose disc file(s) into {disc_dir}/"))
     # card files spelled differently from storage are renamed, and unwanted ones that match a missing file are moved

@@ -184,12 +184,21 @@ SYSTEM_DOT_NAMES = {".ds_store", ".localized", ".nomedia", ".appledouble", ".spo
                     ".fseventsd", ".temporaryitems", ".documentrevisions-v100", ".volumeicon.icns"}
 
 
-def walk_roms(dest, keep_dotfiles=False, skip_db=False):
+RENAME_TEMP = ".rename"  # rename_on_card's temporary name ends with it, after a leading dot
+
+
+def rename_temp(name):
+    """Whether name is rename_on_card's temporary name, left behind when a rename was cut short."""
+    return name.startswith(".") and name.endswith(RENAME_TEMP) and len(name) > len(RENAME_TEMP) + 1
+
+
+def walk_roms(dest, keep_dotfiles=False, skip_db=False, rename_temps=False):
     """os.walk over dest that yields only real ROM-folder content (no frontend/OS leftovers).
 
     keep_dotfiles: keep dotfiles that are real content, dropping only OS litter (.DS_Store, ._*, ...) and sync-roms's
     own temp names (.chd-*, .xiso-*, external.own_temp).
     skip_db: drop *.db files (Onion's ROM list caches, named like _cache2.db or cache6.db).
+    rename_temps: keep rename_on_card's temporary names.
     """
     def hidden(name):
         if not name.startswith("."):
@@ -201,7 +210,7 @@ def walk_roms(dest, keep_dotfiles=False, skip_db=False):
         dirs[:] = [d for d in dirs
                    if not hidden(d) and not (at_root and d.lower() in IGNORED_ROOT_DIRS)]
         files = [f for f in files
-                 if not hidden(f) and f.lower() not in IGNORED_FILES and not (skip_db and f.lower().endswith(".db")) and not TEMP_DOWNLOAD.search(f)
+                 if (rename_temps and rename_temp(f)) or not hidden(f) and f.lower() not in IGNORED_FILES and not (skip_db and f.lower().endswith(".db")) and not TEMP_DOWNLOAD.search(f)
                  and not (at_root and f.lower() in IGNORED_ROOT_FILES)]
         yield root, files
 
@@ -231,9 +240,9 @@ def find_extras(dest, wanted_keys, skip_db=False, disc_dir=None, discs=(), keep=
     spellings = defaultdict(list)  # {name_key: the expected paths with it}
     for rel in expected:
         spellings[name_key(rel)].append(rel)
-    walks = list(walk_roms(dest, skip_db=skip_db))
+    walks = list(walk_roms(dest, skip_db=skip_db, rename_temps=True))
     if disc_dir:  # walk_roms skips dot folders, but the discs live in one
-        walks += walk_roms(os.path.join(dest, disc_dir))
+        walks += walk_roms(os.path.join(dest, disc_dir), rename_temps=True)
     found = [(os.path.join(root, f), os.path.normpath(os.path.relpath(os.path.join(root, f), dest)))
              for root, files in walks for f in files]
     on_card = defaultdict(list)  # {name_key: the card's paths with it}
@@ -241,6 +250,9 @@ def find_extras(dest, wanted_keys, skip_db=False, disc_dir=None, discs=(), keep=
         on_card[name_key(rel)].append(rel)
     extras = []
     for path, rel in found:
+        if rename_temp(os.path.basename(rel)):
+            extras.append(path)  # a rename cut short: its file is downloaded again
+            continue
         if rel in expected:
             continue
         key = name_key(rel)
@@ -261,7 +273,7 @@ def rename_on_card(path, new):
     case-insensitive card."""
     folder = os.path.dirname(new)
     os.makedirs(folder, exist_ok=True)
-    temp = os.path.join(folder, f".{os.path.basename(new)}.rename")
+    temp = os.path.join(folder, f".{os.path.basename(new)}{RENAME_TEMP}")
     os.replace(path, temp)
     os.replace(temp, new)
 
