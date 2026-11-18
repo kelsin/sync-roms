@@ -16,7 +16,10 @@ COMMANDS = {"games", "sets", "collections", "themes", "download", "cards", "layo
 
 class Parser(argparse.ArgumentParser):
     def error(self, message):
-        ui.fail(f"{message}\n   Try 'sync-roms {self.prog.split()[1]} --help'.", 2)
+        name = self.prog.split()[1]
+        if message == "the following arguments are required: action":  # a command typed without its subcommand
+            ui.fail(f"'{name}' needs a subcommand: " + ", ".join(f"{name} {w}" for w in second_words()[name]), 2)
+        ui.fail(f"{message}\n   Try 'sync-roms {name} --help'.", 2)
 
 
 # --- Helpers the sync flow uses ----------------------------------------------------------------------

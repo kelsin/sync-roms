@@ -126,6 +126,16 @@ class UsageHelpTest(Isolated):
         _, _, err = self.sync(["scrape", "match", "gba"])
         self.assertIn("`scrape match`: expected 3 arguments", err)
 
+    def test_commands_without_their_action_name_the_actions(self):
+        for argv, listed in ((["sets"], "sets edit"), (["collections"], "collections edit"), (["themes", "-n"], "themes update"),
+                             (["download"], "download pico8"), (["games"], "games add")):
+            with self.subTest(argv=argv):
+                code, _, err = self.sync(argv)
+                self.assertEqual(code, 2)
+                self.assertIn(f"'{argv[0]}' needs a subcommand: ", err)
+                self.assertIn(listed, err)
+                self.assertNotIn("required: action", err)
+
     def test_legacy_flag_errors_keep_the_flag(self):
         code, _, err = self.sync(["--use-mirror"])
         self.assertEqual(code, 2)
