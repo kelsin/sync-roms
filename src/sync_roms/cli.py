@@ -372,6 +372,7 @@ def prepare_dirs(base, layout, dry_run, ask=True):
 
 
 def main():
+    os.environ["COPYFILE_DISABLE"] = "1"  # macOS: no ._ AppleDouble files on non-HFS volumes, also for child tools
     if not sys.stdout.isatty():  # logs and pipes get plain text
         sys.stdout = ui.PlainOut(sys.stdout)
     try:
