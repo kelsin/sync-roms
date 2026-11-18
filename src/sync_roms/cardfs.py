@@ -84,6 +84,18 @@ def _entry(path):
     return entries[names[0]] if len(names) == 1 and os.path.lexists(path) else None
 
 
+def read(path):
+    """path's bytes, read once while caching() keeps them (raises OSError when it can't be read)."""
+    key = ("read", os.path.normpath(path))
+    if _cache is not None and key in _cache:
+        return _cache[key]
+    with open(path, "rb") as f:
+        data = f.read()
+    if _cache is not None:
+        _cache[key] = data
+    return data
+
+
 def exists(path):
     return _entry(path) is not None
 

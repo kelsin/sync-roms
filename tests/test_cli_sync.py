@@ -505,6 +505,64 @@ class SyncSmokeTest(RealDataDirGuard):
         self.assertEqual(self.run_sync(True, prepare=prepare, patches=patches, args=["--json"]), 0)
         self.assertEqual((emitted[0]["downloads"], emitted[0]["delete"], emitted[0]["rename"]), ([], [], []))
 
+    def playlist_sync(self, on_card=None):
+        """A real-run ES-DE sync (disc folder .multi-disc) of a two-disc game; returns the playlists written through
+        store.replace_file as {name: text} (a list of names when written twice). on_card: {card file: text} there before the sync."""
+        discs = ["Fahrenheit (USA) (Disc 1) (Sega CD).chd", "Fahrenheit (USA) (Disc 2) (Sega CD).chd"]
+        m3u_name, text = "Fahrenheit (USA) (Sega CD).m3u", "".join(d + "\n" for d in discs)
+        keys = ["psx/" + d for d in discs] + ["psx/" + m3u_name]
+        psx = {"name": "PlayStation", "bucket": "psx", "folders": {"esde": "psx"}, "bios": {"files": []},
+               "games": [{"bucket": k} for k in keys]}
+        layouts = {"esde": {**MANIFEST["layouts"]["esde"], "disc_dir": ".multi-disc"}}
+        manifest = {**MANIFEST, "systems": [psx], "layouts": layouts}
+        sizes = {"psx/" + d: 4 for d in discs}
+        sizes["psx/" + m3u_name] = len(text)
+        writes, card = [], []
+        self.direct = []  # playlists downloaded straight onto the card
+
+        def prepare(root):
+            card.append(root)
+            for rel, content in (on_card or {}).items():
+                os.makedirs(os.path.dirname(os.path.join(root, rel)), exist_ok=True)
+                with open(os.path.join(root, rel), "w") as f:
+                    f.write(content)
+
+        def download(job, *a):
+            if job[1].endswith(".m3u") and job[1].startswith(card[0]):
+                self.direct.append(job[1])
+            os.makedirs(os.path.dirname(job[1]), exist_ok=True)
+            with open(job[1], "w") as f:
+                f.write(text if job[1].endswith(".m3u") else "x" * job[2])
+        real_replace = store.replace_file
+
+        def replace_file(path, data, **kw):
+            writes.append((os.path.basename(path), data))
+            return real_replace(path, data, **kw)
+        patches = ((store, {"load_manifest": lambda names=(): manifest, "replace_file": replace_file}),
+                   (cli.s3, {"list_sizes": lambda prefix, sizes_=True: sizes if prefix == "psx/" else {}, "download": download}),
+                   (cli, {"free_space": lambda path: 10**9}), (cli.downloads, {"run_downloads": downloads.run_downloads}))
+        self.assertEqual(self.run_sync(False, prepare=prepare, patches=patches), 0)
+        return [w for w in writes if w[0].endswith(".m3u")]
+
+    def test_a_playlist_is_written_once_already_prefixed(self):
+        discs = ["Fahrenheit (USA) (Disc 1) (Sega CD).chd", "Fahrenheit (USA) (Disc 2) (Sega CD).chd"]
+        self.assertEqual(self.playlist_sync(), [("Fahrenheit (USA) (Sega CD).m3u", "".join(f".multi-disc/{d}\n" for d in discs))])
+        self.assertEqual(self.direct, [])
+
+    def test_an_old_unprefixed_playlist_is_still_fixed(self):
+        discs = ["Fahrenheit (USA) (Disc 1) (Sega CD).chd", "Fahrenheit (USA) (Disc 2) (Sega CD).chd"]
+        name = "Fahrenheit (USA) (Sega CD).m3u"
+        card = {f"ROMs/psx/.multi-disc/{d}": "xxxx" for d in discs}
+        card["ROMs/psx/" + name] = "".join(d + "\n" for d in discs)
+        self.assertEqual(self.playlist_sync(card), [(name, "".join(f".multi-disc/{d}\n" for d in discs))])
+
+    def test_an_already_prefixed_playlist_is_left_alone(self):
+        discs = ["Fahrenheit (USA) (Disc 1) (Sega CD).chd", "Fahrenheit (USA) (Disc 2) (Sega CD).chd"]
+        name = "Fahrenheit (USA) (Sega CD).m3u"
+        card = {f"ROMs/psx/.multi-disc/{d}": "xxxx" for d in discs}
+        card["ROMs/psx/" + name] = "".join(f".multi-disc/{d}\n" for d in discs)
+        self.assertEqual(self.playlist_sync(card), [])
+
     def test_declining_the_space_prompt_exits_0(self):
         patches = ((cli, {"free_space": lambda path: 3}),
                    (cli.ui, {"confirm": lambda q, default=True: False, "has_terminal": lambda: True}))
@@ -705,7 +763,7 @@ class SyncSmokeTest(RealDataDirGuard):
         self.assertRegex(self.out.getvalue().splitlines()[-1], r"^🎉 Done: downloaded 0 file\(s\) \(0 B\) in \d+m\d\ds$")
 
     def test_a_run_with_failures_ends_with_them_and_what_did_download(self):
-        def run_downloads(todo, label, icon, base, failures=None):
+        def run_downloads(todo, label, icon, base, failures=None, *a):
             failures.extend((j[0], "boom") for j in todo)
             return len(todo)
         patches = ((cli, {"free_space": lambda path: 10**9}), (cli.downloads, {"run_downloads": run_downloads}))

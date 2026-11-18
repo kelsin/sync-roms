@@ -4,12 +4,13 @@ import os
 import queue
 import re
 import sys
+import tempfile
 import time
 import unicodedata
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
 
-from . import cardfs, external, inventory, runtime, s3, ui
+from . import cardfs, external, inventory, m3u, runtime, s3, store, ui
 
 STALE_HINT = " (not in storage any more: run sync-roms cache update)"  # a file the cache lists is gone from the storage folder
 
@@ -36,8 +37,7 @@ def is_current(path, size, disc_dir=None):
         return True
     if disc_dir and path.lower().endswith(".m3u"):
         try:
-            with open(path, "rb") as f:
-                return len(f.read().replace(disc_dir.encode() + b"/", b"")) == size
+            return len(cardfs.read(path).replace(disc_dir.encode() + b"/", b"")) == size
         except OSError:
             return False
     return False
@@ -94,8 +94,22 @@ def hard_exit():
     os._exit(130)
 
 
-def run_downloads(todo, label, icon, base, failures=None):
-    """Download the jobs; returns the number that failed. failures, if given, collects (key, reason) for each."""
+def download_playlist(job, disc_dir, coming, callback=None, wrote=None):
+    """Write a playlist to its path once, its entries already pointing into disc_dir (m3u.prefixed_entries; coming: the
+    paths this sync downloads)."""
+    key, path, size = job
+    with tempfile.TemporaryDirectory() as tmp:
+        temp = os.path.join(tmp, "playlist.m3u")
+        s3.download((key, temp, size), callback, wrote)
+        entries = m3u.m3u_entries(temp)
+    fixed = m3u.prefixed_entries(entries, os.path.dirname(path), disc_dir, coming)
+    store.replace_file(path, "".join(line + "\n" for line in fixed), newline="\n")
+
+
+def run_downloads(todo, label, icon, base, failures=None, disc_dirs=None):
+    """Download the jobs; returns the number that failed. failures, if given, collects (key, reason) for each.
+
+    disc_dirs: {ROM folder: its layout's disc folder}; a playlist directly in one is written with its entries pointing there."""
     if not todo:
         print(ui.green(f"{icon} {label}: nothing to download ✨"))
         return 0
@@ -107,9 +121,15 @@ def run_downloads(todo, label, icon, base, failures=None):
     names = [j[0] for j in todo]
     bar = ui.ProgressBar(len(todo), moved.fraction, moved.total, io=moved, active=lambda: moved.active(names))
 
+    coming = {os.path.normpath(j[1]) for j in todo} if disc_dirs else ()
+
     def fetch(i, j):
         moved.start(i)
-        s3.download(j, lambda n: moved.add(i, n), moved.wrote)
+        disc_dir = disc_dirs and j[1].lower().endswith(".m3u") and disc_dirs.get(os.path.normpath(os.path.dirname(j[1])))
+        if disc_dir:
+            download_playlist(j, disc_dir, coming, lambda n: moved.add(i, n), moved.wrote)
+        else:
+            s3.download(j, lambda n: moved.add(i, n), moved.wrote)
 
     try:
         finishing = queue.Queue()  # each future queues itself as it ends: a wait() per file would be O(files in flight)

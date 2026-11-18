@@ -902,7 +902,7 @@ class SyncFlowTest(unittest.TestCase):
         self.assertIsNone(self.ejected)
 
     def test_quiet_still_reports_failures_on_stderr(self):
-        def run_downloads(todo, label, icon, base, failures):
+        def run_downloads(todo, label, icon, base, failures, *a):
             failures.extend((j[0], "boom") for j in todo)
             return len(todo)
         with contextlib.redirect_stderr(io.StringIO()) as err:

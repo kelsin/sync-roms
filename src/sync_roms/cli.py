@@ -1277,7 +1277,8 @@ def sync_card(args):
         clean._clean_root = base
     started = time.monotonic()
     failures = []
-    failed = move_failed + downloads.run_downloads(rom_todo, "ROMs", "💿", roms_dir, failures) + downloads.run_downloads(bios_todo, "BIOS", "🧠", bios_dir, failures)
+    disc_dirs = {os.path.normpath(dest_of(s)): disc_dir for s in chosen if available(s)} if disc_dir else None
+    failed = move_failed + downloads.run_downloads(rom_todo, "ROMs", "💿", roms_dir, failures, disc_dirs) + downloads.run_downloads(bios_todo, "BIOS", "🧠", bios_dir, failures)
     if apk_jobs:
         failed += downloads.run_downloads(apk_todo, "Android", "🤖", apk_dir, failures)
     if driver_entries:
@@ -1290,7 +1291,7 @@ def sync_card(args):
         failed += downloads.run_downloads(theme_todo, "Themes", "🎨", os.path.join(base, themes_dir), failures)
     for s in chosen:
         if disc_dir and available(s):
-            m3u.prefix_playlists(dest_of(s), disc_dir)
+            m3u.prefix_playlists(dest_of(s), disc_dir, [p for _, p, _ in rom_todo if p.lower().endswith(".m3u")])
     cardfs.clear()
 
     if layout_name in frontend.ESDE_LAYOUTS:  # ES-DE launches an installed Vita game through its .psvita file

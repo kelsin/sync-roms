@@ -75,16 +75,25 @@ def file_groups(keys):
     return out
 
 
-def prefix_playlists(dest, disc_dir):
-    """Point the playlists directly in dest at their discs in dest/disc_dir. Returns how many it rewrote."""
+def prefixed_entries(entries, dest, disc_dir, coming=()):
+    """entries with each bare disc name whose file is in dest/disc_dir (or is in coming, paths a sync is about to write)
+    pointed into disc_dir."""
+    return [posixpath.join(disc_dir, e) if "/" not in e and (os.path.exists(os.path.join(dest, disc_dir, e))
+                                                            or os.path.normpath(os.path.join(dest, disc_dir, e)) in coming) else e
+            for e in entries]
+
+
+def prefix_playlists(dest, disc_dir, skip=()):
+    """Point the playlists directly in dest at their discs in dest/disc_dir, except those in skip (paths written already
+    prefixed). Returns how many it rewrote."""
     rewritten = 0
+    skip = {os.path.normpath(p) for p in skip}
     for name in sorted(os.listdir(dest)):
         path = os.path.join(dest, name)
-        if not name.lower().endswith(".m3u") or not os.path.isfile(path):
+        if not name.lower().endswith(".m3u") or os.path.normpath(path) in skip or not os.path.isfile(path):
             continue
         entries = m3u_entries(path)
-        fixed = [posixpath.join(disc_dir, e) if "/" not in e and os.path.exists(os.path.join(dest, disc_dir, e)) else e
-                 for e in entries]
+        fixed = prefixed_entries(entries, dest, disc_dir)
         if fixed != entries:
             store.replace_file(path, "".join(line + "\n" for line in fixed), newline="\n")
             rewritten += 1
