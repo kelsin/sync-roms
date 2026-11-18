@@ -64,10 +64,11 @@ def _parse(text):
 def _load(key):
     data = shared.load(key, _object, {})
     if data is None:
-        if key.endswith("/" + MATCHES) and key not in _warned:
+        if key not in _warned and (key.endswith("/" + MATCHES) or key == NOTGAMES):
             _warned.add(key)
-            ui.warn(f"{key} isn't a valid JSON object; its manual matches are ignored, "
-                    "and the next `scrape match` replaces it")
+            what = ("its manual matches are ignored, and the next `scrape match` replaces it" if key != NOTGAMES else
+                    "its non-games and kept-for-later marks are ignored, and the next change to them replaces it")
+            ui.warn(f"{key} isn't a valid JSON object; {what}")
         return {}
     return data
 
@@ -123,12 +124,15 @@ def _notgames():
     return _state[NOTGAMES]
 
 
-def _write(key, change):
-    """Apply change to the storage file (read fresh) and write it; a storage error only warns."""
+def _write(key, change, removes_only=False):
+    """Apply change to the storage file (read fresh) and write it; a storage error only warns. A change that only
+    removes entries is skipped when the file isn't there (it would only create an empty one)."""
     try:
+        if removes_only and inventory.tag(key) is None:
+            return
         shared.update(key, _parse, {}, change, scrape_plan.dump_json)
     except (*s3.ERRORS, ValueError) as e:
-        ui.warn(f"Couldn't save {key} in storage ({e}); this run's changes to it are not kept")
+        ui.warn(f"Couldn't save {key} ({e}); this run's changes to it may not be in storage")
 
 
 def _apply(data, changes):
@@ -140,14 +144,18 @@ def _apply(data, changes):
 
 
 def _mark(name, system, rom, value):
-    """Change one ROM's entry in memory; it is written by the kind's flush."""
+    """Change one ROM's entry in memory; it is written by the kind's flush. Removing an entry that isn't there does
+    nothing."""
+    if value is _GONE and rom not in _ledger(name, system):
+        return
     _apply(_ledger(name, system), {rom: value})
     _pending.setdefault(name, {}).setdefault(system, {})[rom] = value
 
 
 def _flush(name):
     for system, changes in sorted(_pending.pop(name, {}).items()):
-        _write(_key(system, name), lambda data, changes=changes: _apply(data, changes))
+        _write(_key(system, name), lambda data, changes=changes: _apply(data, changes),
+               removes_only=all(v is _GONE for v in changes.values()))
 
 
 def _get(name, system, rom):
@@ -227,7 +235,7 @@ def clear_unknown(system=None, rom=None):
         for s in [system] if system is not None else sorted(_every(UNKNOWN)):
             _ledger(UNKNOWN, s).clear()
             pending.pop(s, None)
-            _write(_key(s, UNKNOWN), lambda data: data.clear())
+            _write(_key(s, UNKNOWN), lambda data: data.clear(), removes_only=True)
 
 
 def flush_unknown():

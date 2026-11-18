@@ -232,6 +232,34 @@ class ScrapeStateTest(StorageDir):
         self.assertIn("scrapes/gba/matches.json isn't a valid JSON object", warn.call_args.args[0])
         self.assertIn("the next `scrape match` replaces it", warn.call_args.args[0])
 
+    def test_corrupt_notgames_file_warns_once_and_is_replaced(self):
+        self.store("scrapes/notgames.json", "[1]")
+        with mock.patch.object(scrape_state.ui, "warn") as warn:
+            self.assertEqual(scrape_state.notgames(), {})
+            self.assertEqual(scrape_state.kept(), set())
+        warn.assert_called_once()
+        self.assertIn("scrapes/notgames.json isn't a valid JSON object", warn.call_args.args[0])
+        scrape_state.mark_notgame("gba", "n.zip", INFO)
+        self.assertEqual(self.stored("scrapes/notgames.json"), {"gba/n.zip": INFO})
+
+    def test_removals_never_create_an_empty_file(self):
+        scrape_state.clear_unknown("gba", "found.zip")  # what a scraped ROM gets
+        scrape_state.mark_unknown("gba", "x.zip")
+        scrape_state.clear_unknown("gba", "x.zip")  # a mark, then a clear, in one run
+        scrape_state.flush_unknown()
+        scrape_state.mark_nomedia("gba", "found.zip", set())
+        scrape_state.flush_nomedia()
+        scrape_state.clear_unknown("nes")
+        self.assertEqual(os.listdir(self.root), [])
+
+    def test_failed_write_does_not_claim_the_changes_are_lost(self):
+        with mock.patch.object(shared, "_save_mirror", side_effect=OSError("disk full")), \
+                mock.patch.object(scrape_state.ui, "warn") as warn:
+            scrape_state.save_match("gba", "a.zip", 5)
+        self.assertEqual(self.stored("scrapes/gba/matches.json"), {"a.zip": 5})
+        self.assertNotIn("not kept", warn.call_args.args[0])
+        self.assertIn("may not be in storage", warn.call_args.args[0])
+
     def test_corrupt_file_reads_as_empty_and_is_replaced(self):
         for name in ("hashes", "matches", "unknown", "nomedia"):
             self.store(f"scrapes/gba/{name}.json", "{nope")

@@ -17,7 +17,7 @@ import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "src"))
 
-from sync_roms import runtime, s3, scrape_plan, scrape_state, shared, store, ui, usersettings  # noqa: E402
+from sync_roms import inventory, runtime, s3, scrape_plan, scrape_state, shared, store, ui, usersettings  # noqa: E402
 
 KINDS = {"scrape-matches.json": scrape_state.MATCHES, "scrape-unknown.json": scrape_state.UNKNOWN,
          "scrape-nomedia.json": scrape_state.NOMEDIA, "scrape-hashes.json": scrape_state.HASHES}
@@ -96,21 +96,12 @@ def _current(key):
         raise
 
 
-def main(argv=None):
-    parser = argparse.ArgumentParser(description=__doc__.split("\n")[0], epilog="Entries already in storage are kept; the notgames \"kept\" list is unioned.")
-    parser.add_argument("--apply", action="store_true", help="write to storage (default: only print what would change)")
-    args = parser.parse_args(argv)
-    usersettings.apply_settings()
-    if runtime.ROOT and not os.path.isdir(runtime.ROOT):  # an unmounted share, not an empty storage
-        ui.fail(f"{runtime.ROOT} is missing", 1)
-    try:
-        steps = plan()
-    except ValueError as e:
-        ui.fail(str(e), 1)
+def _run(steps, apply):
+    """Print (and with apply, write) each step; returns how many files change."""
     total = 0
     for key, entries, change in steps:
         try:
-            if args.apply:
+            if apply:
                 before = _current(key)
                 after = shared.update(key, _object, {}, change, scrape_plan.dump_json)
             else:
@@ -122,8 +113,27 @@ def main(argv=None):
         added = sum(1 for k in after if k not in before)
         changed = after != before
         total += changed
-        print(f"{key}: {len(entries)} old, {added} new" + (" (written)" if args.apply and changed else "")
+        print(f"{key}: {len(entries)} old, {added} new" + (" (written)" if apply and changed else "")
               + ("" if changed else " (nothing to change)"))
+    return total
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__.split("\n")[0], epilog="Entries already in storage are kept; the notgames \"kept\" list is unioned.")
+    parser.add_argument("--apply", action="store_true", help="write to storage (default: only print what would change)")
+    args = parser.parse_args(argv)
+    usersettings.apply_settings()
+    if runtime.ROOT and not os.path.isdir(runtime.ROOT):  # an unmounted share, not an empty storage
+        ui.fail(f"{runtime.ROOT} is missing", 1)
+    try:
+        steps = plan()
+    except ValueError as e:
+        ui.fail(str(e), 1)
+    try:
+        total = _run(steps, args.apply)
+    finally:
+        if args.apply:
+            inventory.flush()  # the storage cache lists the files written (the CLI does this as it exits)
     if not args.apply and total:
         print(f"Dry run: {total} file(s) would change. Run again with --apply to write them.")
     return 0

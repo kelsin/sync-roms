@@ -67,7 +67,7 @@ Storage's `os/pico8/` holds the official PICO-8 Raspberry Pi zips. `pico8.py` us
 
 What storage holds (keys, sizes, a bucket's ETags) is read only through `inventory.py`, from `~/.sync-roms/cache/storage-cache.json` (built by `sync-roms cache update`, patched by sync-roms's own writes in `s3.py`); never call `s3.list_sizes`/`stat_sizes`/`list_with_etags`/`list_folders` from elsewhere. Only file contents come from storage.
 
-`~/.sync-roms/storage/` mirrors files that live in storage and are shared (today `ignored.json`) at their storage path, with each mirror's storage tag in `storage/.tags.json` (`shared.py`). `~/.sync-roms/cache/` holds what can be rebuilt: `storage-cache.json`, `preview-cache/`, `previews/`, `theme-art/` and `names.json`. Neither is ever written to storage.
+`~/.sync-roms/storage/` mirrors files that live in storage and are shared (`ignored.json`, the scrape state files under `scrapes/` and `variants-checked.json`) at their storage path, with each mirror's storage tag in `storage/.tags.json` (`shared.py`). `~/.sync-roms/cache/` holds what can be rebuilt: `storage-cache.json`, `preview-cache/`, `previews/`, `theme-art/` and `names.json`. Neither is ever written to storage.
 
 There is no personal core list: a card's `games` is the only games list, and a card with no picks syncs no games. An old `~/.sync-roms/games.json` is left on disk and never read. Old personal sets in `~/.sync-roms/sets/` are left on disk and never read; sets only come from the repo. `device-systems.json` is a shared default read from the repo (never copied); users adjust it with the optional add/remove overlay. Never put a real game list in the repo.
 

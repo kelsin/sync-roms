@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 from helpers import StorageDir  # noqa: E402
 
-from sync_roms import runtime, usersettings  # noqa: E402
+from sync_roms import inventory, runtime, scrape_state, usersettings  # noqa: E402
 
 spec = importlib.util.spec_from_file_location(
     "migrate_scrape_state", os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "tools", "migrate_scrape_state.py"))
@@ -115,6 +115,16 @@ class MigrateTest(StorageDir):
         _, out = self.run_main()
         self.assertIn("skipped 2 malformed key(s) in scrape-unknown.json", out)
         self.assertEqual(self.tree(), [])
+
+    def test_apply_saves_the_storage_cache(self):
+        quiet = contextlib.redirect_stdout(io.StringIO())
+        with quiet:
+            inventory.update()  # a cache exists before the migration
+        self.run_main("--apply")
+        inventory.reset()  # the next run reads the cache file again
+        scrape_state.reset()
+        self.assertIn("scrapes/gba/unknown.json", inventory.files("scrapes/"))
+        self.assertEqual(scrape_state.unknown(), {"gba/u.zip"})
 
     def test_unmounted_storage_fails(self):
         missing = os.path.join(self.tmp.name, "gone")
