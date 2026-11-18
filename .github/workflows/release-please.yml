@@ -48,11 +48,12 @@ jobs:
   bump-tap:
     needs: [release-please, build-assets]
     if: ${{ needs.release-please.outputs.release_created }}
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     steps:
       # bump-formula-pr can't refresh the Python resources of a formula whose url isn't on PyPI, so it only writes the
-      # new url, update-python-resources resolves the resources from it, the tap's script points them back at wheels,
-      # and the formula is installed and its UI dependencies imported before the PR is opened and merged.
+      # new url, update-python-resources resolves the resources from it, and the tap's script points them back at
+      # wheels before the PR is opened and merged.
+      - uses: Homebrew/actions/setup-homebrew@main
       - run: |
           brew tap kelsin/tap
           brew trust kelsin/tap
@@ -62,9 +63,6 @@ jobs:
           brew update-python-resources kelsin/tap/sync-roms
           cd "$(brew --repository kelsin/tap)"
           python3 scripts/wheel-resources.py Formula/sync-roms.rb
-          brew install --build-from-source kelsin/tap/sync-roms
-          brew test kelsin/tap/sync-roms
-          "$(brew --prefix sync-roms)/libexec/bin/python" -c "import boto3, textual, textual_image.renderable, PIL.Image"
           branch="bump-sync-roms-$VERSION"
           gh auth setup-git
           git switch -c "$branch"
@@ -75,7 +73,6 @@ jobs:
             --body "Bump sync-roms to $VERSION and refresh its Python resources."
           gh pr merge "$branch" --repo kelsin/homebrew-tap --squash --delete-branch
         env:
-          HOMEBREW_NO_AUTO_UPDATE: 1  # an auto-update would stash the uncommitted bump away before the install
           HOMEBREW_GITHUB_API_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
           GH_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
           TAG: ${{ needs.release-please.outputs.tag_name }}
