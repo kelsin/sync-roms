@@ -984,7 +984,7 @@ def sync_card(args):
         """The names the system's ROM-folder BIOS files have on the card."""
         return {os.path.basename(f) for f in s["bios"].get("rom_files", [])}
 
-    rom_jobs, missing, extras, moved = [], [], [], set()
+    rom_jobs, missing, extras, moved, renames = [], [], [], set(), []
     for s in chosen:
         wanted = available(s)
         if not wanted:
@@ -1019,7 +1019,7 @@ def sync_card(args):
     pico8_dests = {os.path.join(roms_dir, t["folders"][layout_name]) for t in systems + dropped
                    if t["bucket"] == "pico8" and t["folders"].get(layout_name)}
     for dest in sorted({dest_of(s) for s in systems if s["bucket"] in chosen_ids or not available(s)} | dropped_dests):
-        extras += downloads.find_extras(dest, dest_keys[dest], onion, disc_dir, dest_discs[dest], dest_bios[dest] | (pico8.keep_in(dest, card) if dest in pico8_dests else set()))
+        extras += downloads.find_extras(dest, dest_keys[dest], onion, disc_dir, dest_discs[dest], dest_bios[dest] | (pico8.keep_in(dest, card) if dest in pico8_dests else set()), renames=renames)
 
     # BIOS for every system with ROMs already on the card too, even when this sync doesn't touch that system
     bios_systems = chosen + [s for s in systems if s["bucket"] not in chosen_ids
@@ -1076,6 +1076,14 @@ def sync_card(args):
         rom_todo = [j for j in rom_todo if j[1] not in moved]
     elif moved:
         print(ui.dim(f"  📦 Moved {len(moved)} loose disc file(s) into {disc_dir}/"))
+    # card files spelled differently from storage are renamed, and unwanted ones that match a missing file are moved
+    # there, before the downloads: neither is downloaded or deleted
+    rom_todo, bios_todo = downloads.after_renames(rom_todo, renames, disc_dir), downloads.after_renames(bios_todo, renames)
+    card_moves = downloads.plan_moves(rom_todo + bios_todo, {p: os.path.getsize(p) for p in extras})
+    moved_jobs, moved_from = {j for _, j in card_moves}, {p for p, _ in card_moves}
+    bios_moves = moved_jobs.intersection(bios_todo)
+    extras = [p for p in extras if p not in moved_from]
+    rom_todo, bios_todo = [j for j in rom_todo if j not in moved_jobs], [j for j in bios_todo if j not in moved_jobs]
     es_dir = frontend.esde_dir(layout_name, base)
     # EmuDeck's ES-DE is on this computer: the card's gamelists and collections go there only when it uses the card's ROMs
     esde_problem = frontend.emudeck_problem(base, os.path.join(base, layout["roms_dir"])) if layout_name == "emudeck" else None
@@ -1118,6 +1126,8 @@ def sync_card(args):
         scrape_plan.describe_scrape_plan(planned)
     if extras:
         print(f"🗑️  Local ROMs no longer in the selection: {ui.bold(str(len(extras)))}")
+    if renames or card_moves:
+        print(f"📦 Card files to rename or move instead of downloading: {ui.bold(str(len(renames) + len(card_moves)))}")
     todo_all = rom_todo + bios_todo + apk_todo + driver_todo + theme_todo + scrape_todo
     size = (saved or {}).get("size")
 
@@ -1194,13 +1204,18 @@ def sync_card(args):
                           for kind, todo in (("rom", rom_todo), ("bios", bios_todo), ("android", apk_todo), ("driver", driver_todo),
                                           ("theme", theme_todo), ("scrape", scrape_todo))
                           for key, path, size in todo],
-            "delete": list(extras), "missing": {"roms": missing, "bios": [k for k in bios_keys if k not in bios_have]},
+            "delete": list(extras), "rename": [{"from": a, "to": b} for a, b in renames + [(p, j[1]) for p, j in card_moves]],
+            "missing": {"roms": missing, "bios": [k for k in bios_keys if k not in bios_have]},
             "free_space": free}
         for key, path, _ in todo_all:
             print(f"  {key} {ui.dim('→')} {path}")
         short = space(free) if todo_all else None
         if short:
             ui.failure(ui.red(f"❌ {short}"))
+        for path, new in renames:
+            print(f"  {ui.yellow('would rename')} {path} {ui.dim('→')} {new}")
+        for path, job in card_moves:
+            print(f"  {ui.yellow('would move')} {path} {ui.dim('→')} {job[1]}")
         for path in extras:
             print(f"  {ui.red('would delete')} {path}")
         for name in drivers.prune(card, drivers_dir, [os.path.basename(p) for _, p, _ in driver_jobs], True):
@@ -1219,6 +1234,24 @@ def sync_card(args):
         print(ui.bold(f"\n🧪 Would download {len(todo_all)} file(s) ({ui.human_size(total_bytes(todo_all))}), "
                       f"delete {len(extras)} local ROM(s) and {stale_count} media file(s); {len(missing)} listed ROM(s) not in storage"))
         return 0
+
+    move_failed = 0
+    for path, new in renames:
+        try:
+            downloads.rename_on_card(path, new)
+        except OSError as e:
+            move_failed += 1
+            ui.failure(ui.red(f"  ❌ {path}: {e}"))
+    for path, job in card_moves:
+        try:
+            os.makedirs(os.path.dirname(job[1]), exist_ok=True)
+            os.replace(path, job[1])
+        except OSError as e:  # downloaded instead
+            ui.failure(ui.red(f"  ❌ {path}: {e}"))
+            (bios_todo if job in bios_moves else rom_todo).append(job)
+            todo_all.append(job)
+    if clean_card and (renames or card_moves):
+        clean._clean_root = base
 
     if extras:  # cleared first so the free space shown below is what the downloads really get
         delete_extras(extras)
@@ -1240,7 +1273,7 @@ def sync_card(args):
         clean._clean_root = base
     started = time.monotonic()
     failures = []
-    failed = downloads.run_downloads(rom_todo, "ROMs", "💿", roms_dir, failures) + downloads.run_downloads(bios_todo, "BIOS", "🧠", bios_dir, failures)
+    failed = move_failed + downloads.run_downloads(rom_todo, "ROMs", "💿", roms_dir, failures) + downloads.run_downloads(bios_todo, "BIOS", "🧠", bios_dir, failures)
     if apk_jobs:
         failed += downloads.run_downloads(apk_todo, "Android", "🤖", apk_dir, failures)
     if driver_entries:

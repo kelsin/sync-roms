@@ -401,6 +401,70 @@ class SyncSmokeTest(RealDataDirGuard):
         self.run_sync(False, prepare=prepare, patches=patches)
         self.assertEqual([q for q in asked if q.startswith("Delete these")], ["Delete these 1 local file(s) (0 B)?"])
 
+    def card_rom(self, rel, size):
+        """A prepare that puts a file of size bytes at ROMs/rel on the card, keeping the card's path in self.card."""
+        def prepare(card):
+            self.card = card
+            os.makedirs(os.path.join(card, "ROMs", os.path.dirname(rel)), exist_ok=True)
+            with open(os.path.join(card, "ROMs", rel), "wb") as f:
+                f.write(b"x" * size)
+        return prepare
+
+    def sync_card_files(self, rel, size, dry_run=False, args=()):
+        """Sync gba/Game.zip (5 bytes) to a card holding ROMs/rel and an empty vectrex system: (downloaded keys, delete
+        prompts, what --json printed, the card's files after the sync)."""
+        empty = {"name": "GCE Vectrex", "bucket": "vectrex", "folders": {"esde": "vectrex"}, "bios": {"files": []}, "games": []}
+        manifest = {**MANIFEST, "systems": [SYSTEM, empty]}
+        got, asked, emitted, files = [], [], [], []
+
+        def after(*a):
+            files.extend(sorted(os.path.relpath(os.path.join(root, f), os.path.join(self.card, "ROMs"))
+                                for root, _, names in os.walk(os.path.join(self.card, "ROMs")) for f in names))
+            return 0
+        patches = ((store, {"load_manifest": lambda names=(): manifest}),
+                   (cli, {"free_space": lambda path: 10**9}),
+                   (cli.downloads, {"run_downloads": lambda todo, *a: got.extend(k for k, _, _ in todo) or 0}),
+                   (cli.vita, {"add_psvita_files": lambda dests: after() or []}),
+                   (cli.ui, {"choose": lambda q, *a, **k: asked.append(q) or "y", "emit_json": emitted.append}))
+        if dry_run:
+            patches += ((cli.pico8, {"run": lambda *a: after()}),)
+        self.assertEqual(self.run_sync(dry_run, prepare=self.card_rom(rel, size), patches=patches, args=args), 0)
+        return got, [q for q in asked if q.startswith("Delete these")], emitted, files
+
+    def test_a_card_file_in_another_case_is_renamed_not_deleted_or_downloaded(self):
+        got, deletes, _, files = self.sync_card_files(os.path.join("gba", "GAME.zip"), 5)
+        self.assertEqual((got, deletes), ([], []))
+        self.assertEqual(files, [os.path.join("gba", "Game.zip")])
+
+    def test_a_dry_run_reports_the_rename_and_changes_nothing(self):
+        got, _, emitted, files = self.sync_card_files(os.path.join("gba", "GAME.zip"), 5, dry_run=True, args=["--json"])
+        self.assertEqual(files, [os.path.join("gba", "GAME.zip")])
+        roms = os.path.join(self.card, "ROMs", "gba")
+        self.assertEqual(emitted[0]["rename"], [{"from": os.path.join(roms, "GAME.zip"), "to": os.path.join(roms, "Game.zip")}])
+        self.assertEqual((emitted[0]["downloads"], emitted[0]["delete"]), ([], []))
+        self.sync_card_files(os.path.join("gba", "GAME.zip"), 5, dry_run=True)
+        self.assertIn(f"would rename {os.path.join(self.card, 'ROMs', 'gba', 'GAME.zip')}", self.out.getvalue())
+
+    def test_a_file_of_the_same_name_and_size_elsewhere_is_moved_not_downloaded(self):
+        got, deletes, _, files = self.sync_card_files(os.path.join("vectrex", "game.zip"), 5)
+        self.assertEqual((got, deletes), ([], []))
+        self.assertEqual(files, [os.path.join("gba", "Game.zip")])
+
+    def test_a_dry_run_reports_the_move_as_neither_a_download_nor_a_delete(self):
+        _, _, emitted, files = self.sync_card_files(os.path.join("vectrex", "Game.zip"), 5, dry_run=True, args=["--json"])
+        self.assertEqual(files, [os.path.join("vectrex", "Game.zip")])
+        roms = os.path.join(self.card, "ROMs")
+        self.assertEqual(emitted[0]["rename"], [{"from": os.path.join(roms, "vectrex", "Game.zip"),
+                                                 "to": os.path.join(roms, "gba", "Game.zip")}])
+        self.assertEqual((emitted[0]["downloads"], emitted[0]["delete"], emitted[0]["totals"]["files"]), ([], [], 0))
+        self.sync_card_files(os.path.join("vectrex", "Game.zip"), 5, dry_run=True)
+        self.assertIn(f"would move {os.path.join(self.card, 'ROMs', 'vectrex', 'Game.zip')}", self.out.getvalue())
+
+    def test_a_file_of_the_same_name_and_another_size_is_deleted_and_downloaded(self):
+        got, deletes, _, files = self.sync_card_files(os.path.join("vectrex", "Game.zip"), 3)
+        self.assertEqual((got, deletes), (["gba/Game.zip"], ["Delete these 1 local file(s) (3 B)?"]))
+        self.assertEqual(files, [])
+
     def test_declining_the_space_prompt_exits_0(self):
         patches = ((cli, {"free_space": lambda path: 3}),
                    (cli.ui, {"confirm": lambda q, default=True: False, "has_terminal": lambda: True}))

@@ -5,6 +5,8 @@ import queue
 import re
 import sys
 import time
+import unicodedata
+from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
 
 from . import external, inventory, runtime, s3, ui
@@ -210,25 +212,81 @@ def has_local_files(dest, skip_db=False, ignore=()):
                if not (f in ignore and os.path.normpath(root) == os.path.normpath(dest)))
 
 
-def find_extras(dest, wanted_keys, skip_db=False, disc_dir=None, discs=(), keep=()):
+def name_key(path):
+    """A card path as a case-insensitive card compares names: case and Unicode form left out."""
+    return unicodedata.normalize("NFC", os.path.normpath(path)).casefold()
+
+
+def find_extras(dest, wanted_keys, skip_db=False, disc_dir=None, discs=(), keep=(), renames=None):
     """Local files under dest that aren't in the system's ROM list (frontend files and dotfiles are ignored;
     a .psvita file is kept while its .zip is listed).
 
     disc_dir: the layout's folder for multi-disc games' discs (discs: their keys); its files are checked too.
     keep: paths inside dest that are expected too (BIOS files that go in the ROM folder).
+    renames: if given, gets (path, storage's spelling) for each file that is an expected one spelled differently (case,
+    Unicode form). Such a file is never an extra, unless the expected spelling is on the card too (a case-sensitive card).
     """
     rels = [rom_rel(k, disc_dir, discs) for k in wanted_keys]
     expected = {os.path.normpath(r) for r in rels} | {os.path.normpath(r) for r in keep}
-    extras = []
+    spellings = defaultdict(list)  # {name_key: the expected paths with it}
+    for rel in expected:
+        spellings[name_key(rel)].append(rel)
     walks = list(walk_roms(dest, skip_db=skip_db))
     if disc_dir:  # walk_roms skips dot folders, but the discs live in one
         walks += walk_roms(os.path.join(dest, disc_dir))
-    for root, files in walks:
-        for f in files:
-            path = os.path.join(root, f)
-            rel = os.path.normpath(os.path.relpath(path, dest))
-            if rel not in expected:
-                if rel.lower().endswith(".psvita") and os.path.splitext(rel)[0] + ".zip" in expected:
-                    continue  # a Vita game's title id file lives and dies with its zip
-                extras.append(path)
+    found = [(os.path.join(root, f), os.path.normpath(os.path.relpath(os.path.join(root, f), dest)))
+             for root, files in walks for f in files]
+    on_card = defaultdict(list)  # {name_key: the card's paths with it}
+    for _, rel in found:
+        on_card[name_key(rel)].append(rel)
+    extras = []
+    for path, rel in found:
+        if rel in expected:
+            continue
+        key = name_key(rel)
+        if key in spellings:
+            if any(r in expected for r in on_card[key]):
+                extras.append(path)  # a second file beside the expected one
+            elif renames is not None and len(spellings[key]) == 1 and len(on_card[key]) == 1:
+                renames.append((path, os.path.join(dest, spellings[key][0])))
+            continue  # more than one way to match it: kept as it is, never deleted
+        if rel.lower().endswith(".psvita") and name_key(os.path.splitext(rel)[0] + ".zip") in spellings:
+            continue  # a Vita game's title id file lives and dies with its zip
+        extras.append(path)
     return extras
+
+
+def rename_on_card(path, new):
+    """Rename path to new through a temporary name in new's folder: a case-only rename straight to new does nothing on a
+    case-insensitive card."""
+    folder = os.path.dirname(new)
+    os.makedirs(folder, exist_ok=True)
+    temp = os.path.join(folder, f".{os.path.basename(new)}.rename")
+    os.replace(path, temp)
+    os.replace(temp, new)
+
+
+def after_renames(todo, renames, disc_dir=None):
+    """todo once renames ((path, new path) pairs) are done: a job for a renamed file writes to its new spelling, and is
+    dropped when the renamed file is already storage's (a case-sensitive card, where the download plan missed it)."""
+    renamed = {name_key(new): (path, new) for path, new in renames}
+    out = []
+    for key, path, size in todo:
+        old, new = renamed.get(name_key(path), (None, path))
+        if old is None or not is_current(old, size, disc_dir):
+            out.append((key, new, size))
+    return out
+
+
+def plan_moves(todo, extra_sizes):
+    """(extra path, job) pairs: a job's file that an unwanted card file can become instead of being downloaded, matched by
+    base name (case and Unicode form left out) and size, never by content. extra_sizes: {extra path: size}. A name and size
+    that more than one extra or more than one job has moves nothing."""
+    extras, jobs = defaultdict(list), defaultdict(list)
+    for path, size in extra_sizes.items():
+        extras[name_key(os.path.basename(path)), size].append(path)
+    for job in todo:
+        if job[2] is not None:
+            jobs[name_key(os.path.basename(job[1])), job[2]].append(job)
+    return [(extras[match][0], found[0]) for match, found in jobs.items()
+            if len(found) == 1 and len(extras.get(match, ())) == 1]
