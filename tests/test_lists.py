@@ -55,10 +55,10 @@ class MergeLists(unittest.TestCase):
                        [{"id": "s", "games": [{"system": "gba", "bucket": "gba/A.zip"}]}])
         self.assertEqual(len(by["gba"]["games"]), 1)
 
-    def test_unknown_set_warns(self):
-        by, err = merged([{"sets": ["nope"]}], [MULTI])
-        self.assertIn("nope", err)
-        self.assertEqual(by["ps2"]["games"], [])
+    def test_unknown_set_is_skipped_quietly(self):  # load_manifest warns once per card (budget merges it often)
+        by, err = merged([{"sets": ["nope", "multi"]}], [MULTI])
+        self.assertEqual(err, "")
+        self.assertEqual(len(by["ps2"]["games"]), 3)
 
     def test_bad_shapes_ignored(self):
         for raw in ({"sets": "multi"}, {"sets": [1, None]}, {"gba": None}, {"gba": 5}):

@@ -114,12 +114,15 @@ def write(key, text):
 
 
 def delete(key):
-    """Delete the storage file, then its mirror and tag."""
+    """Delete the storage file, then its mirror and tag. A file that is already gone counts as deleted."""
     if runtime.ROOT and not os.path.isdir(runtime.ROOT):  # an unmounted share: nothing to delete there
         raise FileNotFoundError(f"{runtime.ROOT} is missing")
-    errors = s3.delete_keys([key])
-    if errors:
-        raise OSError(f"{key}: {errors[0].get('Message', errors[0])}")
+    if runtime.ROOT and inventory.tag(key) is None:  # already deleted (another machine did it): only the cache knew it
+        inventory.removed([key])
+    else:  # deleting a missing bucket object isn't an error
+        errors = s3.delete_keys([key])
+        if errors:
+            raise OSError(f"{key}: {errors[0].get('Message', errors[0])}")
     _drop_mirror(key)
 
 

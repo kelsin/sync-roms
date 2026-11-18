@@ -193,5 +193,37 @@ class UpdateTest(SharedTest):
         self.assertFalse(os.path.exists(shared.local_path("x.json")))
 
 
+class DeleteTest(SharedTest):
+    def delete(self, key):
+        with contextlib.redirect_stdout(io.StringIO()):
+            shared.delete(key)
+
+    def test_deletes_the_file_its_mirror_and_tag(self):
+        self.store_file("sets/a.json", "{}")
+        self.load("sets/a.json")
+        self.delete("sets/a.json")
+        self.assertFalse(os.path.exists(os.path.join(self.root.name, "sets", "a.json")))
+        self.assertFalse(os.path.exists(shared.local_path("sets/a.json")))
+        self.assertNotIn("sets/a.json", self.tags())
+
+    def test_a_file_already_gone_counts_as_deleted_and_drops_the_mirror_and_tag(self):
+        self.store_file("sets/a.json", "{}")
+        self.load("sets/a.json")
+        self.store_file("sets/b.json", "{}")
+        self.load("sets/b.json")
+        os.remove(os.path.join(self.root.name, "sets", "a.json"))  # another machine deleted it
+        self.delete("sets/a.json")
+        self.assertFalse(os.path.exists(shared.local_path("sets/a.json")))
+        self.assertEqual(set(self.tags()), {"sets/b.json"})
+
+    def test_a_delete_error_is_raised_and_keeps_the_mirror(self):
+        self.store_file("sets/a.json", "{}")
+        self.load("sets/a.json")
+        with mock.patch.object(s3, "delete_keys", return_value=[{"Key": "sets/a.json", "Message": "denied"}]), \
+                self.assertRaisesRegex(OSError, "denied"):
+            self.delete("sets/a.json")
+        self.assertIn("sets/a.json", self.tags())
+
+
 if __name__ == "__main__":
     unittest.main()
