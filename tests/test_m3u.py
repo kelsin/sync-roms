@@ -178,6 +178,8 @@ class HiddenDiscsTest(unittest.TestCase):
         self.assertTrue(downloads.is_current(path, size, ".multi-disc"))
         self.assertFalse(downloads.is_current(path, size + 1, ".multi-disc"))
         self.assertFalse(downloads.is_current(path, size))
+        self.assertFalse(downloads.is_current(os.path.join(self.dir, "Gone.m3u"), size, ".multi-disc"))
+        self.assertFalse(downloads.is_current(path, None))
 
     def test_find_extras_looks_in_the_disc_folder(self):
         self.disc_folder()

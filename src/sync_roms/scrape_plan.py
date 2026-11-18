@@ -309,10 +309,11 @@ def media_root_of(layout_name, system, base, es_dir):
     return os.path.join(es_dir, "downloaded_media", esde_name(system))
 
 
-def build_scrape_plan(layout_name, systems, data, rom_rels, dest_of, es_dir, present, base):
+def build_scrape_plan(layout_name, systems, data, rom_rels, dest_of, es_dir, present, base, recheck=None):
     """Everything a sync installs from scrapes/: media jobs, gamelist entries per file, text files.
 
-    es_dir: ES-DE's data folder, where esde and emudeck gamelists go (for emudeck, the one on this computer)."""
+    es_dir: ES-DE's data folder, where esde and emudeck gamelists go (for emudeck, the one on this computer).
+    recheck: the local paths of an earlier plan's media jobs; the media it found current are left out unchecked."""
     plan = {"jobs": [], "gamelists": defaultdict(dict), "writes": []}
     for s in systems:
         listing, meta = data[s["bucket"]]
@@ -346,7 +347,7 @@ def build_scrape_plan(layout_name, systems, data, rom_rels, dest_of, es_dir, pre
                     print(ui.yellow(f"  ⚠️  skipping {e}"))
         jobs = downloads.with_sizes(jobs)  # sizes only for media that could be installed
         listing.update((k, size) for k, _, size in jobs)  # kept, so a rebuild of the plan reads none of them again
-        plan["jobs"] += downloads.plan_downloads(jobs)
+        plan["jobs"] += downloads.plan_downloads(jobs if recheck is None else [j for j in jobs if j[1] in recheck])
         for path, text in texts:  # only the ones that would change
             if not os.path.exists(path) or read_text(path) != text:
                 plan["writes"].append((path, text))

@@ -1077,13 +1077,14 @@ def sync_card(args):
     scrapes = layout_name in scrape_plan.SCRAPE_LAYOUTS
     scraped = {}
 
-    def build_plan(present):
+    def build_plan(present, recheck=None):
         if not scraped:
             print("🖼️  Reading scraped data...")
             scraped["data"] = scrape_plan.load_scrape_data(chosen)
             scraped["rels"] = {s["bucket"]: [k.split("/", 1)[1] for k in available(s) if k in listings[s["bucket"]]]
                                for s in chosen}
-        plan = scrape_plan.build_scrape_plan(layout_name, chosen, scraped["data"], scraped["rels"], dest_of, es_dir, present, base)
+        plan = scrape_plan.build_scrape_plan(layout_name, chosen, scraped["data"], scraped["rels"], dest_of, es_dir, present, base,
+                                             recheck=recheck)
         if esde_problem and plan["gamelists"]:
             skipped()
             plan["gamelists"] = {}
@@ -1248,7 +1249,7 @@ def sync_card(args):
 
     stale = []
     if scrapes:
-        plan = build_plan(os.path.exists)
+        plan = build_plan(os.path.exists, {path for _, path, _ in planned["jobs"]})  # media found current then still are
         scrape_todo = plan["jobs"]
         # EmuDeck's gamelists are on this computer, not the card
         if clean_card and (plan["jobs"] or plan["writes"] or (plan["gamelists"] and layout_name != "emudeck")):
