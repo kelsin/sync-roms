@@ -54,6 +54,44 @@ class SpeedWindowTest(unittest.TestCase):
             bar.draw(0)
         return out.getvalue()
 
+    def bar(self):
+        with mock.patch.object(ui.time, "monotonic", return_value=0):
+            return ui.ProgressBar(1, lambda: 0, 1000 * 1024 * 1024)
+
+    def test_time_left_uses_the_last_minute_not_the_last_seconds(self):
+        bar = self.bar()
+        self.draw_at(bar, 0, 0.0)
+        self.draw_at(bar, 30, 0.25)
+        line = self.draw_at(bar, 32, 0.5)  # 250 MB in the last 2s, but 500 MB in 32s
+        self.assertIn("125.0 MB/s", line)
+        self.assertIn("0m32s left", line)  # the 2s speed alone would say 0m04s
+
+    def test_no_time_left_in_the_first_seconds(self):
+        bar = self.bar()
+        self.draw_at(bar, 0, 0.0)
+        line = self.draw_at(bar, 4, 0.4)
+        self.assertIn("100.0 MB/s", line)
+        self.assertNotIn("left", line)
+        self.assertIn("0m05s left", self.draw_at(bar, 5, 0.5))
+
+    def test_short_stall_keeps_the_time_left(self):
+        bar = self.bar()
+        self.draw_at(bar, 0, 0.0)
+        self.draw_at(bar, 10, 0.5)
+        self.draw_at(bar, 16, 0.5)
+        line = self.draw_at(bar, 20, 0.5)
+        self.assertIn("0 B/s", line)
+        self.assertIn("0m20s left", line)
+
+    def test_time_left_goes_when_nothing_moved_for_a_minute(self):
+        bar = self.bar()
+        self.draw_at(bar, 0, 0.0)
+        self.draw_at(bar, 10, 0.5)
+        self.draw_at(bar, 68, 0.5)
+        line = self.draw_at(bar, 71, 0.5)
+        self.assertIn("0 B/s", line)
+        self.assertNotIn("left", line)
+
     def test_speed_is_the_recent_rate_not_the_run_average(self):
         with mock.patch.object(ui.time, "monotonic", return_value=0):
             bar = ui.ProgressBar(1, lambda: 0, 1000 * 1024 * 1024)
@@ -83,6 +121,8 @@ class BottleneckTest(unittest.TestCase):
         out = io.StringIO()
         bar.shown = True
         with contextlib.redirect_stdout(out), mock.patch.object(ui.shutil, "get_terminal_size", return_value=os.terminal_size((columns, 24))):
+            with mock.patch.object(ui.time, "monotonic", return_value=-10):
+                bar.draw(0)
             with mock.patch.object(ui.time, "monotonic", return_value=0):
                 bar.draw(0)
             io_.add(0, 20 * 1024 * 1024)

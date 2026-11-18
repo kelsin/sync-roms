@@ -17,6 +17,8 @@ from . import runtime
 
 
 SPEED_WINDOW = 5  # seconds the current speed is averaged over
+ETA_WINDOW = 60  # seconds the time left is averaged over
+ETA_MIN = 5  # seconds of progress before a time left is shown
 BACKLOG = 64 * 1024 * 1024  # bytes received but not yet written before the disk counts as the bottleneck
 POLL = 0.25  # seconds between redraws of the progress bar while waiting on a job
 PLAIN_INTERVAL = 30  # seconds between progress lines when stdout is not a terminal
@@ -301,7 +303,7 @@ class ProgressBar:
         self.total = total_bytes or 0
         self.started = time.monotonic()
         self.last_line = self.started
-        self.samples = collections.deque()  # (time, bytes moved, bytes written) over the last SPEED_WINDOW seconds
+        self.samples = collections.deque()  # (time, bytes moved, bytes written) over the last ETA_WINDOW seconds
 
     def say(self, line):
         print(("\r\033[J" if self.shown else "") + line)  # \033[J also wipes the block under the bar
@@ -317,16 +319,19 @@ class ProgressBar:
             filled = int(fraction * 24)
             now = time.monotonic()
             self.samples.append((now, self.total * fraction, self.io.written if self.io else 0))
-            while len(self.samples) > 1 and now - self.samples[0][0] > SPEED_WINDOW:
+            while len(self.samples) > 1 and now - self.samples[0][0] > ETA_WINDOW:
                 self.samples.popleft()
             tiers = [""]  # speed text, fullest first; the line drops detail until it fits the terminal
-            span = now - self.samples[0][0]
+            recent = next(s for s in self.samples if now - s[0] <= SPEED_WINDOW)  # the newest sample always qualifies
+            span = now - recent[0]
             if self.total and span >= 1:
-                rate = (self.samples[-1][1] - self.samples[0][1]) / span  # current speed, not the run's average
-                left = f", {eta(self.total * (1 - fraction) / rate)} left" if rate > 0 else ""
+                rate = (self.samples[-1][1] - recent[1]) / span  # current speed, not the run's average
+                long_span = now - self.samples[0][0]
+                long_rate = (self.samples[-1][1] - self.samples[0][1]) / long_span  # steadier, for the time left
+                left = f", {eta(self.total * (1 - fraction) / long_rate)} left" if long_span >= ETA_MIN and long_rate > 0 else ""
                 tiers = [f"  {human_size(rate)}/s{left}"]
                 if self.io and self.io.written:
-                    disk = (self.samples[-1][2] - self.samples[0][2]) / span
+                    disk = (self.samples[-1][2] - recent[2]) / span
                     net = f"  net {human_size(rate)}/s · disk {human_size(disk)}/s{left}"
                     waiting = " · waiting on " + ("disk" if self.io.received - self.io.written > BACKLOG else "network")
                     tiers = [net + waiting, net] + tiers
