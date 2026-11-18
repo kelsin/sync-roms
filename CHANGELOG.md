@@ -1,5 +1,18 @@
 # Changelog
 
+## [3.8.0](https://github.com/kelsin/sync-roms/compare/v3.7.0...v3.8.0) (2026-11-18)
+
+
+### :video_game: Features
+
+* add config set, review collections before saving, and speed up cache and sync ([#374](https://github.com/kelsin/sync-roms/issues/374)) ([c4e3154](https://github.com/kelsin/sync-roms/commit/c4e31549df6c1cd6641529bca196bf3e063c8c5d))
+* **cardedit:** narrow a system's set filter to one series with r ([#375](https://github.com/kelsin/sync-roms/issues/375)) ([c156383](https://github.com/kelsin/sync-roms/commit/c15638391d9acd6684bd3b4b771cff3ac95cb381))
+
+
+### :bug: Bug Fixes
+
+* stop overwriting a broken settings.json and drop android media cleanup ([#372](https://github.com/kelsin/sync-roms/issues/372)) ([ef39090](https://github.com/kelsin/sync-roms/commit/ef390902a2b1ce06fe69dee609abaed2fb70aa33))
+
 ## [3.7.0](https://github.com/kelsin/sync-roms/compare/v3.6.1...v3.7.0) (2026-11-18)
 
 
