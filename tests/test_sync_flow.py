@@ -427,6 +427,7 @@ class SyncFlowTest(unittest.TestCase):
                                                    {"jobs": [], "gamelists": {}, "writes": []}))
                 st.enter_context(mock.patch.object(scrape_plan, "apply_scrape_plan", lambda *a: 0))
                 st.enter_context(mock.patch.object(cli.surprise, "run_surprise", lambda *a, **k: []))
+                st.enter_context(mock.patch.object(cli.surprise, "fill_surprises", lambda *a, **k: []))
                 st.enter_context(mock.patch.object(runtime, "_mirror_root", None))
                 for target, name, value in extra:
                     st.enter_context(mock.patch.object(target, name, value))

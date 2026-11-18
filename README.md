@@ -671,11 +671,12 @@ holds are used in that order. Full systems are used too, but any other game alre
 `surprise_excluded_systems` in `settings.json` (system ids, for every card) are never used, and a card's current surprises
 on them are replaced at the next sync.
 
-- **In a sync** the step runs before anything downloads, over the systems with games picked. Interactively it first asks which of the card's current
-  surprises to replace (`Esc` there behaves as it does in any picker: it keeps them all), fills the empty slots, and opens
-  the card editor so you can adjust the card (with Surprise off, the editor still opens). Without a terminal, with `--yes` or `--json` it replaces all of them. `--dry-run`
-  changes no surprises: it only says whether it would ask or replace all, previews the picks for empty slots and saves nothing.
-  The mirror is refreshed a second time only when this step or the editor changed the card's picks.
+- **In a sync** the surprises are handled in two steps. First, before anything downloads, it asks which of the card's current
+  surprises to replace (`Esc` there behaves as it does in any picker: it keeps them all) and keeps the others, then opens
+  the card editor so you can adjust the card (the kept ones show as 🎁 Surprise; with Surprise off, the editor still opens). Last, when the editor is
+  done and the sync starts, the empty slots (out of 10) are filled at random from every system on the card, full systems included. Without a terminal, with `--yes` or `--json` it replaces all of them.
+  `--dry-run` changes no surprises: it only says whether it would ask or replace all, previews the picks for empty slots and saves nothing.
+  The mirror is refreshed again only when the editor or the new picks changed the card's picks.
 - **In the card editor**, `S` in the system list opens a menu: turn Surprise on or off for the card (off removes its surprises
   at the next sync), or check the systems Surprise may use (saved as `surprise_excluded_systems`, for every card), and `p` in a game list shows only the games surprised within `surprise_ttl_days`. A surprise shows in the
   game list as 🎁 Surprise and can't be switched off there, like a collection game; it counts in the card's budget and size warning.

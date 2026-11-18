@@ -278,11 +278,16 @@ class Step(StorageCase):
         quiet.__enter__()
         self.addCleanup(quiet.__exit__, None, None, None)
 
+    def both(self, interactive, dry_run, seed):
+        """The step that asks, then the one that fills the empty slots (what a sync runs, with the editor between)."""
+        surprise.run_surprise("SD", (None, "esde"), self.chosen(), interactive, dry_run)
+        return surprise.fill_surprises("SD", (None, "esde"), self.chosen(), dry_run, rng=random.Random(seed))
+
     def run_step(self, interactive, dry_run, seed):
-        """run_surprise on the dry-run tests, with its printed lines."""
+        """Both steps on the dry-run tests, with their printed lines."""
         out = io.StringIO()
         with contextlib.redirect_stdout(out):
-            got = surprise.run_surprise("SD", (None, "esde"), self.chosen(), interactive, dry_run, rng=random.Random(seed))
+            got = self.both(interactive, dry_run, seed)
         return got, out.getvalue()
 
     def test_interactive_asks_which_to_replace_then_opens_the_editor(self):
@@ -291,7 +296,7 @@ class Step(StorageCase):
         lists, edits = [], []
         with self.patched(filter_list=lambda title, labels, **kw: lists.append((title, labels, kw)) or [True] + [False] * 9,
                           edit_card=lambda name, setup=None, to_fetch=None: edits.append(name)):
-            got = surprise.run_surprise("SD", (None, "esde"), self.chosen(), True, False, rng=random.Random(1))
+            got = self.both(True, False, 1)
         title, labels, kw = lists[0]
         self.assertEqual(title, "Pick the surprises to replace")
         self.assertEqual(kw["initial"], [False] * 10)
@@ -305,14 +310,14 @@ class Step(StorageCase):
     def test_surprises_outside_the_run_are_dropped(self):
         self.card(surprises=[self.surprise("gba", 0), self.surprise("psx", 0)])
         with self.patched(filter_list=lambda t, labels, **kw: [False] * len(labels)):
-            got = surprise.run_surprise("SD", (None, "esde"), self.chosen(), True, False, rng=random.Random(2))
+            got = self.both(True, False, 2)
         self.assertNotIn("psx", {g["system"] for g in got})
         self.assertIn(self.surprise("gba", 0), got)
 
     def test_excluded_systems_are_never_picked_and_their_surprises_are_replaced(self):
         usersettings.save_setting("surprise_excluded_systems", ["gb"])
         self.card(surprises=[self.surprise("gba", 0), self.surprise("gb", 0)])
-        got = surprise.run_surprise("SD", (None, "esde"), self.chosen(), False, False, rng=random.Random(3))
+        got = self.both(False, False, 3)
         self.assertEqual(len(got), 10)
         self.assertEqual({g["system"] for g in got}, {"gba"})
 
@@ -341,25 +346,27 @@ class Step(StorageCase):
 
     def test_unattended_replaces_all_ten_and_saves(self):
         current = [self.surprise("gba", i) for i in range(5)] + [self.surprise("gb", i) for i in range(5)]
-        self.card(surprises=current)
+        self.card(surprises=current)  # as picked before, so in the history and not drawn again while others are free
+        today = datetime.date.today().isoformat()
+        surprise.save_history([{**c, "card": "SD", "date": today} for c in current], datetime.date.today())
         with self.patched(filter_list=self.fail_call, edit_card=self.fail_call):
-            got = surprise.run_surprise("SD", (None, "esde"), self.chosen(), False, False, rng=random.Random(4))
+            got = self.both(False, False, 4)
         self.assertEqual(len(got), 10)
         self.assertFalse(any(c in got for c in current))
         self.assertEqual(store.load_cards()["SD"]["surprises"], got)
-        self.assertEqual(len(surprise.load_history()), 10)
+        self.assertEqual(len(surprise.load_history()), 20)  # the ten before and the ten drawn now
 
     def test_card_selection_and_other_cards_current_are_respected(self):
         picks = {"gba": [{"bucket": f"gba/G{i} (USA).zip"} for i in range(14)]}  # one GBA game left unpicked
         self.card(games=picks)
         with self.patched(filter_list=self.fail_call, edit_card=self.fail_call):
-            got = surprise.run_surprise("SD", (None, "esde"), self.chosen(), False, False, rng=random.Random(5))
+            got = self.both(False, False, 5)
         self.assertEqual([g["bucket"] for g in got if g["system"] == "gba"], ["gba/G14 (USA).zip"])
 
     def test_full_systems_are_in_the_pools(self):
         self.card(games={"gb": {"full_system": True}})
         with self.patched(filter_list=self.fail_call, edit_card=self.fail_call):
-            got = surprise.run_surprise("SD", (None, "esde"), self.chosen(), False, False, rng=random.Random(7))
+            got = self.both(False, False, 7)
         self.assertEqual(len(got), 10)
         self.assertEqual({g["system"] for g in got}, {"gba", "gb"})
 
@@ -383,10 +390,10 @@ class Step(StorageCase):
         current = [self.surprise("gba", i) for i in range(12)]
         self.card(surprises=current)
         with self.patched(filter_list=lambda t, labels, **kw: [False] * len(labels)):
-            got = surprise.run_surprise("SD", (None, "esde"), self.chosen(), True, False, rng=random.Random(8))
+            got = self.both(True, False, 8)
         self.assertEqual(got, current)
 
-    def test_storage_listing_failure_keeps_the_surprises(self):
+    def test_storage_listing_failure_fills_nothing(self):
         current = [self.surprise("gba", i) for i in range(5)] + [self.surprise("gb", i) for i in range(5)]
         self.card(surprises=current)
         surprise.save_history([{**self.surprise("gba", 0), "card": "SD", "date": "2026-11-01"}], datetime.date(2026, 11, 11))
@@ -396,12 +403,12 @@ class Step(StorageCase):
             raise SystemExit("offline")
         with mock.patch.object(surprise.s3, "list_folders", down), contextlib.redirect_stderr(io.StringIO()), \
                 self.patched(filter_list=self.fail_call, edit_card=self.fail_call):
-            got = surprise.run_surprise("SD", (None, "esde"), self.chosen(), False, False, rng=random.Random(9))
-        self.assertEqual(got, current)
-        self.assertEqual(self.read_cards(), before)
+            got = self.both(False, False, 9)
+        self.assertEqual(got, [])  # the unattended step replaced them all; nothing could be drawn
+        self.assertEqual(store.load_cards()["SD"]["surprises"], [])
         self.assertEqual(surprise.load_history(), history)
 
-    def test_storage_listing_failure_interactive_keeps_them_and_opens_the_editor(self):
+    def test_storage_listing_failure_interactive_keeps_the_ones_not_replaced_and_opens_the_editor(self):
         current = [self.surprise("gba", i) for i in range(10)]
         self.card(surprises=current)
         edits = []
@@ -409,18 +416,18 @@ class Step(StorageCase):
         def down(*a, **k):
             raise SystemExit("offline")
         with mock.patch.object(surprise.s3, "list_folders", down), contextlib.redirect_stderr(io.StringIO()), \
-                self.patched(filter_list=lambda t, labels, **kw: [True] * len(labels),
+                self.patched(filter_list=lambda t, labels, **kw: [True] + [False] * (len(labels) - 1),
                              edit_card=lambda name, setup=None, to_fetch=None: edits.append(name)):
-            got = surprise.run_surprise("SD", (None, "esde"), self.chosen(), True, False, rng=random.Random(9))
-        self.assertEqual(got, current)
-        self.assertEqual(store.load_cards()["SD"]["surprises"], current)
+            got = self.both(True, False, 9)
+        self.assertEqual(got, current[1:])
+        self.assertEqual(store.load_cards()["SD"]["surprises"], current[1:])
         self.assertEqual(edits, ["SD"])
 
     def test_candidates_come_from_storage_not_the_mirror(self):
         mirror = os.path.join(self.tmp.name, "mirror")  # holds nothing
         os.makedirs(mirror)
         with mock.patch.object(runtime, "_mirror_root", mirror), self.patched(filter_list=self.fail_call, edit_card=self.fail_call):
-            got = surprise.run_surprise("SD", (None, "esde"), self.chosen(), False, False, rng=random.Random(6))
+            got = self.both(False, False, 6)
             self.assertEqual(runtime._mirror_root, mirror)  # restored after the step
         self.assertEqual(len(got), 10)
 
