@@ -793,6 +793,61 @@ class Flow(DataDir):
         self.assertIn("Pokemon only", calls[2][2]["filters"])
         self.assertEqual(store.card_games("c"), {"gba": [g("gba/Ruby.zip")]})
 
+    def series_set(self):
+        """SET with Ruby and Emerald in series A on gba, and Red in A on gb (not counted on gba)."""
+        return {**SET, "games": [{**SET["games"][0], "series": "A"}, {"system": "gba", "bucket": "gba/Emerald.zip", "series": "A"},
+                                 {"system": "gba", "bucket": "gba/Zelda.zip", "series": "B"}, {**SET["games"][1], "series": "B"}]}
+
+    def run_system_series(self, game_set, *steps):
+        """Drives edit_system with store's sets as [game_set]; the series list (no multi mode, no hotkeys) answers 0."""
+        script, lists = Script(*steps), []
+
+        def fake(title, labels, **kw):
+            if "multi" in kw or "hotkeys" in kw:
+                return script(title, labels, **kw)
+            lists.append(list(labels))
+            return 0
+        with mock.patch.object(store, "load_sets", return_value=[game_set]), \
+                mock.patch.object(picker, "filter_list", fake), contextlib.redirect_stdout(io.StringIO()):
+            edit.edit_card_system("c", "gba", (DEVICE, "esde"))
+        return script.calls, lists
+
+    def test_r_after_a_set_narrows_to_one_of_its_series_on_this_system(self):
+        self.card()
+        calls, lists = self.run_system_series(
+            self.series_set(), returns((cardedit.SET_KEY, 0)), returns(0), returns((cardedit.SERIES_KEY, 0)),
+            returns((cardedit.CLEAR_KEY, 0)), lambda labels, kw: kw["session"]["sel"])
+        self.assertIn(cardedit.SERIES_KEY, calls[0][2]["hotkeys"])
+        self.assertEqual(lists, [["A  (2 games)"]])  # Ruby and Emerald; B has one game on gba
+        self.assertEqual(calls[3][1], ["Emerald.zip", "Ruby.sav", "Ruby.zip"])
+        self.assertIn("🎮 A", calls[3][2]["filters"])
+        self.assertEqual(len(calls[4][1]), 4)  # c clears the series with the set
+
+    def test_r_without_a_set_notes_and_lists_again(self):
+        self.card()
+        with mock.patch.object(edit, "note") as note:
+            calls, lists = self.run_system_series(
+                self.series_set(), returns((cardedit.SERIES_KEY, 0)), lambda labels, kw: kw["session"]["sel"])
+        self.assertIn("to a set with s first", note.call_args[0][0])
+        self.assertEqual(lists, [])
+        self.assertEqual(calls[1][1], calls[0][1])
+
+    def test_picking_another_set_drops_the_series(self):
+        self.card()
+        other = {"id": "o", "name": "Other", "description": "", "games": [{"system": "gba", "bucket": "gba/Zelda.zip"}]}
+        script, calls = Script(returns((cardedit.SET_KEY, 0)), returns(0), returns((cardedit.SERIES_KEY, 0)),
+                               returns((cardedit.SET_KEY, 0)), returns(1), lambda labels, kw: kw["session"]["sel"]), []
+
+        def fake(title, labels, **kw):
+            if "multi" in kw or "hotkeys" in kw:
+                return script(title, labels, **kw)
+            return 0
+        with mock.patch.object(store, "load_sets", return_value=[self.series_set(), other]), \
+                mock.patch.object(picker, "filter_list", fake), contextlib.redirect_stdout(io.StringIO()):
+            edit.edit_card_system("c", "gba", (DEVICE, "esde"))
+        self.assertEqual(script.calls[-1][1], ["Zelda.zip"])
+        self.assertNotIn("🎮", script.calls[-1][2]["filters"])
+
     def test_set_list_counts_what_is_in_storage(self):
         self.card()
         self.files["gba/"].pop("gba/Ruby.sav")
