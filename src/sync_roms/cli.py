@@ -1,6 +1,7 @@
 """Download ROMs and BIOS files from your ROM storage."""
 import argparse
 import os
+import re
 import shutil
 import sys
 import time
@@ -416,6 +417,10 @@ class Parser(argparse.ArgumentParser):
     literal = frozenset()  # the values after --scrape-match that start with a dash: values, never options
 
     def error(self, message):
+        if TYPED:  # name the command the user typed, not the legacy flag translate() made of it
+            words, flag = TYPED
+            message = message if flag is None else re.sub(rf"argument {re.escape(flag)}(/\S+)?:", f"`{words}`:", message)
+            ui.fail(f"{message}\n   Try 'sync-roms {words.split()[0]} --help'.", 2)
         ui.fail(f"{message}\n   Try 'sync-roms --help'.", 2)
 
     def parse_known_args(self, args=None, namespace=None):
@@ -440,6 +445,7 @@ LEGACY = {
     ("games", "edit"): ["--edit"], ("cards", "edit"): ["--edit"], ("edit",): ["--edit"],
 }
 WORDS = {flags[0]: " ".join(words) for words, flags in LEGACY.items() if flags}  # mode flag -> its command, for messages
+TYPED = None  # (command words, mode flag) of the command translate() last rewrote, for Parser.error
 BOOL_FLAGS = {"-n", "--dry-run", "-y", "--yes", "-a", "--ask"}
 PLAIN_FLAGS = BOOL_FLAGS | {"--replace", "--json", "--no-clean", "--no-eject", "--retry", "--all", "--fill-media", "--set-credentials",
                             "--translated"}
@@ -448,6 +454,8 @@ VALUE_FLAGS = {"--system", "--device", "--layout", "--device-id", "--skip-media"
 
 def translate(argv):
     """Rewrite `sync-roms COMMAND ...` into the flag form the rest of the code reads. Global flags may come first."""
+    global TYPED
+    TYPED = None
     i = 0
     while i < len(argv) and argv[i] in BOOL_FLAGS | {"--json"}:
         i += 1
@@ -459,6 +467,7 @@ def translate(argv):
         if words[0] == name and tuple(rest[:len(words) - 1]) == words[1:]:
             tail = rest[len(words) - 1:]
             flags = LEGACY[words]
+            TYPED = (" ".join(words), flags[0] if flags else None)
             if not flags:
                 return head + tail
             if words == ("scrape", "match"):  # three values that must stay together, behind the flag
