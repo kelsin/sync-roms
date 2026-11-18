@@ -2,8 +2,10 @@ import contextlib
 import io
 import json
 import os
+import stat as statmode
 import sys
 import tempfile
+import threading
 import unicodedata
 import unittest
 from unittest import mock
@@ -336,6 +338,19 @@ class FolderMtimeTest(StorageFolder):
         inventory.reset()
         self.assertEqual(self.update(), ((1, 2, 0), ["BIOS", "gba"]))
         self.assertEqual(inventory.files(""), {"gba/a.zip": 1, "gba/b.zip": 2, "BIOS/x.bin": 3})
+
+    def test_known_folders_are_statted_in_parallel(self):
+        self.update()
+        threads, real = set(), os.stat
+
+        def spy(p, *a, **kw):
+            st = real(p, *a, **kw)
+            if statmode.S_ISDIR(st.st_mode) and str(p).startswith(self.root.name):
+                threads.add(threading.current_thread())
+            return st
+        with mock.patch.object(os, "stat", side_effect=spy), mock.patch.object(s3, "check_root"):
+            self.assertEqual(self.update(), ((0, 0, 0), []))
+        self.assertNotIn(threading.main_thread(), threads)
 
     def test_a_delete_given_as_a_generator_drops_the_folder_mtime(self):
         self.update()

@@ -290,8 +290,8 @@ def _read_folder(root, old=None):
     mtime is the one old stored isn't listed: its files and subfolders come from old (a folder's mtime changes when an
     entry is added to, removed from or renamed in it, not when a subfolder changes). The others are listed as os.walk
     would (a symlinked folder isn't followed), and a listing error raises. A file old has keeps its cached size; the rest
-    are statted (in parallel: each is a round trip on a network share). A folder's mtime is taken before it is listed,
-    and isn't kept when it is within FRESH seconds of now."""
+    are statted (in parallel: each is a round trip on a network share), and so are the folders old has, before the walk.
+    A folder's mtime is taken before it is listed, and isn't kept when it is within FRESH seconds of now."""
     known, stored, inside = (old.files, old.dirs, {}) if old else ({}, {}, {})
     if stored:  # folder: ([file keys], [subfolders]) in old
         for k in known:
@@ -299,12 +299,21 @@ def _read_folder(root, old=None):
         for d in stored:
             if d:
                 inside.setdefault(d.rpartition("/")[0], ([], []))[1].append(d)
+
+    def stat(folder):
+        """(now, the folder's stat) or, when the stat fails, None: the walk stats it again and raises."""
+        try:
+            return _clock(), os.stat(os.path.join(root, folder) if folder else root)
+        except OSError:
+            return None
+
+    with ThreadPoolExecutor(s3.STAT_WORKERS) as ex:  # the folders old knows, up front: each is a round trip
+        ahead = dict(zip(stored, ex.map(stat, stored)))
     paths, out, dirs, stack, listed = [], {}, {}, [""], 0
     while stack:
         folder = stack.pop()
         path = os.path.join(root, folder) if folder else root
-        now = _clock()
-        st = os.stat(path)
+        now, st = ahead.get(folder) or (_clock(), os.stat(path))
         if statmode.S_ISDIR(st.st_mode) and stored.get(folder) == st.st_mtime_ns:
             keys, subfolders = inside.get(folder, ([], []))
             out.update((k, known[k]) for k in keys if not s3.junk(k))
