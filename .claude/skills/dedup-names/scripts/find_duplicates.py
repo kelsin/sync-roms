@@ -25,28 +25,25 @@ def set_folder_files(stored):
     return {k for k in stored for d in [posixpath.dirname(k)] if posixpath.basename(d) in stems[posixpath.dirname(d)]}
 
 
-def why_skipped(system, rom, stored, discs, in_sets, clones):
+def why_skipped(system, rom, stored, discs, in_sets):
     """Why a ROM with a metadata entry isn't shown as its own game under that name, or None."""
     key = f"{system}/{rom}"
-    family = clones.get(system, {})
-    stem = posixpath.splitext(rom)[0]
     for reason, hit in (("not_stored", key not in stored), ("vita_extras", vita.is_extra(key)), ("discs", key in discs),
-                        ("set_folders", key in in_sets),
-                        ("clones", stem in family.get("parents", {}) or stem in family.get("clones", {}))):
+                        ("set_folders", key in in_sets)):
         if hit:
             return reason
     return None
 
 
-def find(metadata, stored, clones):
-    """{"groups": [...], "skipped": {reason: count}} from {system: metadata.json}, the stored keys and clones.json."""
+def find(metadata, stored):
+    """{"groups": [...], "skipped": {reason: count}} from {system: metadata.json}, and the stored keys."""
     discs, in_sets, skipped, groups = m3u.disc_keys(stored), set_folder_files(stored), Counter(), []
     for system, entries in sorted(metadata.items()):
         by_name = defaultdict(list)
         for rom, entry in sorted(entries.items()):
             if not isinstance(entry, dict) or not entry.get("name"):
                 continue
-            reason = why_skipped(system, rom, stored, discs, in_sets, clones)
+            reason = why_skipped(system, rom, stored, discs, in_sets)
             if reason:
                 skipped[reason] += 1
                 continue
@@ -71,7 +68,7 @@ def main():
             metadata[name] = scrape_online.load_metadata(name)
         except ValueError as e:
             ui.warn(f"Skipping {name}: {e}")
-    json.dump(find(metadata, stored, store.repo_json("clones")), sys.stdout, indent=1, ensure_ascii=False)
+    json.dump(find(metadata, stored), sys.stdout, indent=1, ensure_ascii=False)
     print()
 
 

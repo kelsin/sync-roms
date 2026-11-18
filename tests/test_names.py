@@ -34,11 +34,12 @@ class Names(StorageFolder):
 
 
 class TitleTest(Names):
-    def test_clone_gets_dat_name(self):
-        self.assertEqual(names.title("fbneo/1941j.zip"), "1941: Counter Attack (Japan)")
+    def test_arcade_set_with_scraped_metadata_gets_scraped_name(self):
+        self.metadata({"1942.zip": {"name": "1942"}}, system="fbneo")
+        self.assertEqual(names.title("fbneo/1942.zip"), "1942")
 
-    def test_parent_gets_dat_name(self):
-        self.assertEqual(names.title("mame/1942.zip"), "1942 (set 1)")
+    def test_arcade_set_without_metadata_gets_file_name(self):
+        self.assertEqual(names.title("fbneo/1941j.zip"), "1941j")
 
     def test_scraped_name_for_standalone_set(self):
         self.metadata({"zzstand.zip": {"name": "Stand Alone"}})

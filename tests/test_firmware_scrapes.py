@@ -29,6 +29,13 @@ class DataTest(unittest.TestCase):
             self.assertEqual(bool(s["folders"]["muos"]), "muos_catalogue" in s, s["bucket"])
 
 
+class ArcadeGamelistTest(unittest.TestCase):
+    def test_mame_entries_take_their_name_from_metadata(self):
+        meta = {"1942.zip": {"name": "1942", "desc": "d"}}
+        _, entries, _ = scrape_plan.plan_scrapes("esde", ["1942.zip", "x.zip"], {}, meta, "/m", "/r", lambda rom: True)
+        self.assertEqual(entries, {"1942.zip": {"name": "1942", "desc": "d"}})
+
+
 class MuosPlanTest(unittest.TestCase):
     def plan(self, rels, root, **kw):
         return scrape_plan.plan_scrapes("muos", rels, LISTING, kw.get("meta", META), root, "/card/ROMS/gba", lambda rom: True)

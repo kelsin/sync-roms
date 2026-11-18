@@ -13,7 +13,7 @@ from textual import events
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from helpers import DataDir  # noqa: E402,F401  (re-exported: other test modules still import it from here)
 from helpers import feed_list, pilot_list, screen_lines, screen_text, shown_preview  # noqa: E402
-from sync_roms import edit, picker, runtime, s3, store, ui  # noqa: E402
+from sync_roms import edit, names, picker, runtime, s3, store, ui  # noqa: E402
 
 SETS = {"s": {"id": "s", "name": "Mix", "games": [{"system": "gba", "bucket": "gba/A.zip", "files": ["gba/A2.zip"]}]}}
 
@@ -47,7 +47,8 @@ class Helpers(unittest.TestCase):
 
     def test_system_rows_use_arcade_names(self):
         s = {"bucket": "fbneo", "games": []}
-        row = edit.system_rows(s, {"fbneo/1941j.zip"})[0]
+        with mock.patch.object(names, "_scraped", {"fbneo": {"1941j.zip": "1941: Counter Attack (Japan)"}}):
+            row = edit.system_rows(s, {"fbneo/1941j.zip"})[0]
         self.assertEqual(row[2], "1941: Counter Attack (Japan)")
         self.assertEqual(row[3], "1941: Counter Attack (Japan) — 1941j.zip")
         gba = edit.system_rows({"bucket": "gba", "games": [{"bucket": "gba/B.zip"}]}, {"gba/A.zip"})

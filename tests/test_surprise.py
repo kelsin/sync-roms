@@ -38,11 +38,11 @@ H = "psvita/H [PCSE00001] [USA] [NoNpDRM].zip"
 class SurpriseRulesTest(unittest.TestCase):
     def test_full_english_names(self):
         bios = {"gba_bios.bin"}
-        self.assertEqual([n for n in IN if not surprise.is_candidate("gba/" + n, GBA, None, bios)], [])
-        self.assertEqual([n for n in OUT if surprise.is_candidate("gba/" + n, GBA, None, bios)], [])
+        self.assertEqual([n for n in IN if not surprise.is_candidate("gba/" + n, GBA, bios)], [])
+        self.assertEqual([n for n in OUT if surprise.is_candidate("gba/" + n, GBA, bios)], [])
 
     def test_unlisted_regions_are_not_english_and_more_rules(self):
-        ok = lambda n: surprise.is_candidate("gba/" + n, GBA, None, set())
+        ok = lambda n: surprise.is_candidate("gba/" + n, GBA, set())
         for n in ("Game (Denmark).zip", "Game (Spain).zip", "Game (China).zip", "Game (Mexico, Portugal).zip",
                   "Game (Ukraine).zip", "Game (Thailand).zip"):
             self.assertFalse(ok(n), n)
@@ -52,26 +52,32 @@ class SurpriseRulesTest(unittest.TestCase):
         self.assertTrue(ok("Game (USA) [!].zip"))
         self.assertFalse(ok("Game (USA) (QUByte Classics).zip"))
 
-    def test_arcade_parents_only_and_not_japan(self):
-        family = {"parents": {"10yard": "10-Yard Fight (World, set 1)", "armedf": "Armed F (Japan)",
-                              "1943j2": "1943 Kai (Japan 900227)"},
-                  "clones": {"10yardj": ["10yard", "10-Yard Fight (Japan)"]}}
-        mame = {"bucket": "mame", "bios": {"files": []}}
-        got = {k: surprise.is_candidate(f"mame/{k}.zip", mame, family, set())
-               for k in ("10yard", "armedf", "1943j2", "10yardj", "neogeo")}
-        self.assertEqual(got, {"10yard": True, "armedf": False, "1943j2": False, "10yardj": False, "neogeo": False})
+    def test_arcade_judged_by_scraped_title(self):
+        titles = {"10yard": "10-Yard Fight (World, set 1)", "armedf": "Armed F (Japan)",
+                  "10yardj": "10-Yard Fight (Japan)", "proto": "Some Game (World, prototype) (Proto)"}
+        mame = {"bucket": "mame", "bios": {"files": ["neogeo.zip"]}}
+        with mock.patch.object(surprise.names, "title", lambda k: titles.get(k.split("/")[1][:-4], k.split("/")[1][:-4])):
+            got = {k: surprise.is_candidate(f"mame/{k}.zip", mame, {"neogeo.zip"})
+                   for k in ("10yard", "armedf", "10yardj", "proto", "standalone", "neogeo")}
+        self.assertEqual(got, {"10yard": True, "armedf": False, "10yardj": False, "proto": False,
+                               "standalone": True, "neogeo": False})
+
+    def test_arcade_bios_excluded_even_when_scraped(self):
+        fbneo = {"bucket": "fbneo", "bios": {"files": []}}
+        with mock.patch.object(surprise.names, "title", lambda k: "Neo Geo (World)"):
+            self.assertFalse(surprise.is_candidate("fbneo/[BIOS] neogeo.zip", fbneo, set()))
 
     def test_multi_disc_game_is_one_unit_playlist_first(self):
         psx = {"bucket": "psx", "bios": {"files": []}}
         keys = {"psx/FF7 (USA) (Disc 1).chd", "psx/FF7 (USA) (Disc 2).chd", "psx/FF7 (USA).m3u",
                 "psx/Spyro (USA).chd", "psx/Demo Disc (USA) (Demo).chd", "psx/sub/"}
-        self.assertEqual(sorted(surprise.units(psx, keys, None, set())),
+        self.assertEqual(sorted(surprise.units(psx, keys, set())),
                          [["psx/FF7 (USA).m3u", "psx/FF7 (USA) (Disc 1).chd", "psx/FF7 (USA) (Disc 2).chd"],
                           ["psx/Spyro (USA).chd"]])
 
     def test_vita_dlc_and_updates_are_never_units(self):
         vita_sys = {"bucket": "psvita", "bios": {"files": []}}
-        self.assertEqual(surprise.units(vita_sys, {G, DLC, NEW}, None, set()), [[G]])
+        self.assertEqual(surprise.units(vita_sys, {G, DLC, NEW}, set()), [[G]])
 
 
 def pool(system, n):
@@ -84,7 +90,8 @@ def count(picked):
 
 class SurprisePickTest(unittest.TestCase):
     def test_surprise_uses_arcade_name(self):
-        self.assertEqual(surprise._surprise("fbneo", ["fbneo/1941j.zip"])["title"], "1941: Counter Attack (Japan)")
+        with mock.patch.object(surprise.names, "title", lambda k: "1941: Counter Attack (Japan)"):
+            self.assertEqual(surprise._surprise("fbneo", ["fbneo/1941j.zip"])["title"], "1941: Counter Attack (Japan)")
 
     def test_seven_three_split_counts_kept(self):
         pools = {s: pool(s, 20) for s in "abcd"}
