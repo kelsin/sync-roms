@@ -253,7 +253,7 @@ TOPICS = {
   sync-roms cache [update [--full]]
 
   Every command reads what storage holds (file names, sizes and, for a bucket, ETags) from a cache in
-  ~/.sync-roms/storage-cache.json; only the files themselves are downloaded from storage. Nothing refreshes it on its
+  ~/.sync-roms/cache/storage-cache.json; only the files themselves are downloaded from storage. Nothing refreshes it on its
   own: sync-roms's own uploads, moves and deletes keep it up to date, and after changing storage any other way run
   `sync-roms cache update`.
 

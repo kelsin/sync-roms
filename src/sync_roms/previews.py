@@ -105,7 +105,7 @@ def game_thumb(key):
         tag = known[1].strip('"') if known else (None if size is None else f"s{size}")
         if not tag:
             return _source(image)
-        folder, name = os.path.split(s3.safe_join(os.path.join(store.data_dir(), "preview-cache"), image))
+        folder, name = os.path.split(s3.safe_join(os.path.join(store.cache_dir(), "preview-cache"), image))
         stem = os.path.splitext(name)[0]
         path = os.path.join(folder, f"{stem}.{tag}.webp")
         if os.path.exists(path):
@@ -137,7 +137,7 @@ def game_thumb(key):
 
 
 def _download(image):
-    path = os.path.join(store.data_dir(), "previews", image)
+    path = os.path.join(store.cache_dir(), "previews", image)
     if not os.path.exists(path):
         s3.download((image, path, None))
     return path
@@ -160,7 +160,7 @@ def _resolve_outlines():
     commit = themeart._stored_commit()
     if not commit:
         return None
-    base = os.path.join(store.data_dir(), "theme-art")
+    base = os.path.join(store.cache_dir(), "theme-art")
     folder = os.path.join(base, commit)
     if os.path.isdir(folder):
         return folder

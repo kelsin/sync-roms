@@ -17,7 +17,7 @@ _clones = None
 
 
 def _local_path():
-    return os.path.join(store.data_dir(), KEY)
+    return os.path.join(store.cache_dir(), KEY)
 
 
 def _load_local():
@@ -31,6 +31,7 @@ def _load_local():
 
 def _save_local(data):
     try:
+        os.makedirs(store.cache_dir(), exist_ok=True)
         store.write_json(_local_path(), data, indent=2)
     except OSError as e:
         ui.warn(f"Couldn't save the local copy of {KEY} ({e})")

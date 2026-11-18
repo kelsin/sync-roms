@@ -62,7 +62,7 @@ class Tree:
 
 
 def path():
-    return os.path.join(store.data_dir(), "storage-cache.json")
+    return os.path.join(store.cache_dir(), "storage-cache.json")
 
 
 def source():
@@ -245,6 +245,7 @@ def moved(old, new):
 
 def _save(tree):
     files = dict(sorted(tree.files.items()))
+    os.makedirs(store.cache_dir(), exist_ok=True)
     store.write_json(path(), {"source": tree.source, "updated": tree.updated, "files": files,
                               "etags": {k: tree.etags[k] for k in files if k in tree.etags},
                               "dirs": dict(sorted(tree.dirs.items()))}, separators=(",", ":"))

@@ -10,7 +10,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import helpers  # noqa: E402,F401
 from test_inventory import StorageFolder  # noqa: E402
 import tempfile  # noqa: E402
-from sync_roms import inventory, names, runtime  # noqa: E402
+from sync_roms import inventory, names, runtime, store  # noqa: E402
 
 
 class Names(StorageFolder):
@@ -61,10 +61,13 @@ class TitleTest(Names):
 
 
 class LocalCopyTest(Names):
+    def test_local_copy_is_in_the_cache_folder(self):
+        self.assertEqual(names._local_path(), os.path.join(store.cache_dir(), names.KEY))
+
     def test_saves_local_copy_and_reuses_it_on_same_tag(self):
         self.metadata({"zzstand.zip": {"name": "Stand Alone"}})
         names.title("mame/zzstand.zip")
-        self.assertEqual(self.read(names.KEY)["mame"]["names"], {"zzstand.zip": "Stand Alone"})
+        self.assertEqual(self.read(f"cache/{names.KEY}")["mame"]["names"], {"zzstand.zip": "Stand Alone"})
         names.reset()
         with mock.patch.object(names, "_read", side_effect=AssertionError("read again")):
             self.assertEqual(names.title("mame/zzstand.zip"), "Stand Alone")
@@ -82,7 +85,7 @@ class LocalCopyTest(Names):
         os.remove(os.path.join(self.root.name, "scrapes", "mame", "metadata.json"))
         names.reset()
         self.assertEqual(names.title("mame/zzstand.zip"), "zzstand")
-        self.assertNotIn("mame", self.read(names.KEY))
+        self.assertNotIn("mame", self.read(f"cache/{names.KEY}"))
 
     def test_storage_error_uses_local_copy_with_warning(self):
         self.metadata({"zzstand.zip": {"name": "Stand Alone"}})
