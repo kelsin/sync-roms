@@ -28,7 +28,7 @@ LIST_KEYS = [("Enter", "the system's games"), ("f", "full system: every file in 
 GAMES_KEYS = [("s", "sets on this system: narrow to one, or pick its games"),
               ("m", "narrow by scraped metadata (developer, genre, year...)"),
               ("p", "only the games that were surprises lately"), ("v", "the game's variants on other systems"),
-              ("c", "clear the set, metadata and surprise filters")]
+              ("c", "clear the search, set, metadata and surprise filters")]
 SET_GAMES_KEYS = [("v", "the game's variants on other systems")]
 SIZING = "…"
 
@@ -674,6 +674,7 @@ def edit_system(name, system, setup, to_fetch=None, card_usages=None):
                 filt = None
                 past = None
                 meta_filt.clear()
+                place.get("session", {}).pop("query", None)  # the / filter too
             elif result[0] == PAST_SURPRISE_KEY:
                 past = surprise.past_keys(bucket)
                 if not past:
