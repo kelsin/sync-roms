@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.6.1](https://github.com/kelsin/sync-roms/compare/v3.6.0...v3.6.1) (2026-11-18)
+
+
+### :gear: Continuous Integration
+
+* run bump-tap on ubuntu without the install check ([#367](https://github.com/kelsin/sync-roms/issues/367)) ([2ee8d7c](https://github.com/kelsin/sync-roms/commit/2ee8d7cca82ebd3cfe825e78812695e0ae06e630))
+
 ## [3.6.0](https://github.com/kelsin/sync-roms/compare/v3.5.0...v3.6.0) (2026-11-18)
 
 
