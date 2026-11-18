@@ -12,6 +12,7 @@ SLOTS = 10
 RECOMMENDED_SHARE = 2 / 3
 DEFAULT_TTL_DAYS = 183
 COLLECTION = "Surprise"
+ARCADE = ("mame", "fbneo")
 
 ENGLISH_REGIONS = {"USA", "World", "Europe", "UK", "United Kingdom", "Australia", "Canada"}
 REGIONS = ENGLISH_REGIONS | {
@@ -122,15 +123,12 @@ def _english(name):
     return True
 
 
-def is_candidate(key, system, family, bios):
+def is_candidate(key, system, bios):
     """Whether the bucket key is a full English game: no BIOS, prototype, beta, demo, hack, re-release or compilation."""
     base = posixpath.basename(key)
-    stem = posixpath.splitext(base)[0]
     if base in bios or "[BIOS]" in base:
         return False
-    if family is not None:
-        title = family["parents"].get(stem)
-        return title is not None and not any(parts[0].split()[:1] == ["Japan"] for parts in _paren_groups(title))
+    stem = names.title(key) if system["bucket"] in ARCADE else posixpath.splitext(base)[0]
     if re.search(r"\[[bh][^\]]*\]", stem, re.I):
         return False
     groups = _paren_groups(stem)
@@ -141,7 +139,7 @@ def is_candidate(key, system, family, bios):
     return _english(stem)
 
 
-def units(system, keys, family, bios):
+def units(system, keys, bios):
     """The candidate games among keys, each a list of its keys (a multi-disc game's playlist first, then its discs)."""
     keys = sorted(k for k in keys if not k.endswith("/") and not vita.is_extra(k))
     groups = m3u.file_groups(keys)
@@ -150,7 +148,7 @@ def units(system, keys, family, bios):
         unit = groups.get(k, [k])
         if tuple(unit) not in seen:
             seen.add(tuple(unit))
-            if is_candidate(unit[0], system, family, bios):
+            if is_candidate(unit[0], system, bios):
                 out.append(unit)
     return out
 
@@ -212,7 +210,6 @@ def _pools(chosen_systems, taken):
         except (*s3.ERRORS, SystemExit) as e:
             ui.warn(f"Couldn't list storage for surprises, keeping the current ones: {e}")
             return None
-        clones = store.repo_json("clones")
         pools = {}
         for s in chosen_systems:
             bucket = s["bucket"]
@@ -223,7 +220,7 @@ def _pools(chosen_systems, taken):
             except s3.ERRORS as e:
                 ui.warn(f"Couldn't list {bucket} for surprises: {e}")
                 continue
-            found = units(s, keys, clones.get(bucket), set(s["bios"]["files"]))
+            found = units(s, keys, set(s["bios"]["files"]))
             pools[bucket] = [u for u in found if not taken.intersection(u)]
     return pools
 
