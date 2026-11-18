@@ -254,7 +254,8 @@ TOPICS = {
 
   NAME is bucket, root, endpoint, profile, write_profile, mirror, screenscraper_user or screenscraper_password (text),
   eject or storage_cache_declined (true or false), surprise_ttl_days (a positive number of days) or
-  surprise_excluded_systems (comma-separated system ids, e.g. gba,snes). The password is saved but never printed;
+  surprise_excluded_systems (comma-separated system ids, e.g. gba,snes). root and mirror must be absolute
+  paths (~ is expanded). The password is saved but never printed;
   `scrape --set-credentials` asks for it without echoing it.
 """,
     "cache": """

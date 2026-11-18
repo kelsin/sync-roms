@@ -344,7 +344,7 @@ On `esde` and `emudeck` cards every Vita game zip in `psvita/` gets a `.psvita` 
 (it then falls back to its default). The names are `bucket`, `root`, `endpoint`, `profile`, `write_profile`, `mirror`,
 `screenscraper_user` and `screenscraper_password` (text), `eject` and `storage_cache_declined` (`true` or `false`),
 `surprise_ttl_days` (a positive number of days) and `surprise_excluded_systems` (comma-separated system ids, e.g.
-`gba,snes`). Other names and values that don't fit are refused (exit 2) with the valid ones. The password is saved but
+`gba,snes`); `root` and `mirror` must be absolute paths (`~` is expanded). Other names and values that don't fit are refused (exit 2) with the valid ones. The password is saved but
 never printed (`scrape --set-credentials` asks for it without echoing it, and keeps it out of your shell history). A
 `settings.json` that can't be parsed is never overwritten (exit 3). Flags and environment variables still override
 the saved `bucket`, `root`, `endpoint`, `profile` and `write_profile`.

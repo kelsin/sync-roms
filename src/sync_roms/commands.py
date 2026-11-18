@@ -674,6 +674,10 @@ def config_value(name, text):
         return ids
     if not text:
         ui.fail(f"{name} can't be empty: `sync-roms config unset {name}` removes it", 2)
+    if name in ("root", "mirror"):  # saved absolute, as the first-run prompt and `mirror use` do, so it doesn't move with the cwd
+        text = os.path.expanduser(text)
+        if not os.path.isabs(text):
+            ui.fail(f"{text} is not an absolute path: give the whole folder path, e.g. /Volumes/roms", 2)
     return text
 
 
@@ -685,7 +689,10 @@ def config_cmd(args):
                     + f". Known: {', '.join(CONFIG_KINDS)}", 2)
         if args.action == "unset":
             if value is not None:
-                ui.fail(f"`config unset` takes only the setting's name ({value!r})", 2)
+                ui.fail("`config unset` takes only the setting's name", 2)
+            if name not in usersettings.load_settings():
+                print(ui.dim(f"{name} wasn't set in settings.json"))
+                return 0
             usersettings.save_setting(name, None)
             print(ui.green(f"💾 Removed {name} from settings.json"))
             return 0
@@ -1282,6 +1289,8 @@ def run(argv):
     if getattr(args, "dry_run", False) and (args.fn in (games_list, games_export, layouts_cmd, config_cmd, cache_cmd, doctor_cmd, check_cmd, completion_cmd)
                                             or (args.fn is games_sets and args.verb == "list")):
         name = " ".join(w for w in (args.command, getattr(args, "action", None), getattr(args, "verb", None)) if w)
+        if args.fn is config_cmd and args.action in ("set", "unset"):
+            ui.fail(f"--dry-run can't preview `{name}`: run it without --dry-run to change settings.json", 2)
         ui.fail(f"--dry-run has no effect on `{name}`", 2)
     ui.ASSUME_YES = getattr(args, "yes", False)
     return args.fn(args) or 0

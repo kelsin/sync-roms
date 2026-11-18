@@ -63,6 +63,37 @@ class ConfigSetTest(Cmd):
             with self.subTest(argv=argv):
                 self.assertEqual(self.run_cmd("config", *argv)[0], 2)
 
+    def test_paths_are_expanded_and_must_be_absolute(self):
+        for name in ("root", "mirror"):
+            with self.subTest(name=name):
+                code, _, err = self.run_cmd("config", "set", name, "~/roms")
+                self.assertEqual((code, err), (0, ""))
+                self.assertEqual(self.settings()[name], os.path.expanduser("~/roms"))
+                code, _, err = self.run_cmd("config", "set", name, "roms")
+                self.assertEqual(code, 2)
+                self.assertIn("roms is not an absolute path: give the whole folder path, e.g. /Volumes/roms", err)
+                self.assertEqual(self.settings()[name], os.path.expanduser("~/roms"))
+
+    def test_unset_of_a_missing_setting_says_so(self):
+        code, out, _ = self.run_cmd("config", "unset", "eject")
+        self.assertEqual(code, 0)
+        self.assertIn("eject wasn't set", out)
+        self.assertNotIn("Removed", out)
+
+    def test_unset_with_a_value_never_echoes_it(self):
+        code, out, err = self.run_cmd("config", "unset", "screenscraper_password", "secret4")
+        self.assertEqual(code, 2)
+        self.assertNotIn("secret4", out + err)
+
+    def test_dry_run_says_it_cant_preview_the_change(self):
+        for action in (["set", "eject", "false"], ["unset", "eject"]):
+            with self.subTest(action=action):
+                code, _, err = self.run_cmd("config", *action, "-n")
+                self.assertEqual(code, 2)
+                self.assertIn(f"--dry-run can't preview `config {action[0]}`", err)
+                self.assertNotIn("has no effect", err)
+        self.assertEqual(self.settings(), {})
+
     def test_password_is_saved_but_never_shown(self):
         code, out, err = self.run_cmd("config", "set", "screenscraper_password", "p-secret")
         self.assertEqual(code, 0)
