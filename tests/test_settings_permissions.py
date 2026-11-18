@@ -47,20 +47,44 @@ class SettingsPermissionsTest(RealDataDirGuard):
         usersettings.save_setting("bucket", "b")
         self.assertEqual(self.mode(), 0o600)
 
-    def test_save_over_loose_invalid_file_is_never_written_loose(self):
+    def broken(self, text="{not json"):
         with open(self.path, "w") as f:
-            f.write("{not json")
+            f.write(text)
         os.chmod(self.path, 0o644)
-        modes = []
-        real = usersettings.json.dump
+        with open(self.path, "rb") as f:
+            return f.read()
 
-        def dump(obj, f, **kw):
-            modes.append(stat.S_IMODE(os.fstat(f.fileno()).st_mode))
-            return real(obj, f, **kw)
-        with mock.patch.object(usersettings.json, "dump", side_effect=dump):
-            usersettings.save_setting("screenscraper_password", "p-secret")
-        self.assertEqual(modes, [0o600])
-        self.assertEqual(self.mode(), 0o600)
+    def fails(self, fn, *args):
+        err = io.StringIO()
+        with mock.patch("sys.stderr", err), self.assertRaises(SystemExit) as e:
+            fn(*args)
+        self.assertEqual(e.exception.code, 3)
+        return err.getvalue()
+
+    def test_save_over_invalid_file_fails_and_leaves_it_untouched(self):
+        before = self.broken('{"screenscraper_password": "p-secret",}')
+        for fn, args in ((usersettings.save_setting, ("bucket", "b")), (usersettings.save_settings, ({"bucket": "b"},))):
+            with self.subTest(fn=fn.__name__):
+                self.assertRegex(self.fails(fn, *args), r"isn't valid JSON \(line 1, column \d+\): fix or move it")
+                with open(self.path, "rb") as f:
+                    self.assertEqual(f.read(), before)
+        self.assertEqual(os.listdir(self.tmp.name), ["settings.json"])
+
+    def test_first_run_question_is_not_asked_over_invalid_file(self):
+        before = self.broken()
+        with mock.patch("builtins.input", side_effect=AssertionError("asked")):
+            self.assertIn(self.path, self.fails(usersettings.ensure_bucket))
+        with open(self.path, "rb") as f:
+            self.assertEqual(f.read(), before)
+
+    def test_save_keeps_backup_600(self):
+        usersettings.save_settings({"screenscraper_password": "p-secret"})
+        os.chmod(self.path, 0o644)
+        usersettings.save_settings({"bucket": "b"})
+        with open(self.path + ".bak") as f:
+            self.assertIn("p-secret", f.read())
+        if sys.platform != "win32":
+            self.assertEqual(stat.S_IMODE(os.stat(self.path + ".bak").st_mode), 0o600)
 
     def test_save_skips_chmod_on_windows(self):
         with mock.patch.object(usersettings.sys, "platform", "win32"), \
@@ -75,7 +99,7 @@ class SettingsPermissionsTest(RealDataDirGuard):
                 mock.patch("sys.stderr", io.StringIO()), self.assertRaises(SystemExit):
             usersettings.save_setting("bucket", "new")
         self.assertEqual(usersettings.load_settings(), {"bucket": "old"})
-        self.assertEqual(os.listdir(self.tmp.name), ["settings.json"])
+        self.assertEqual(sorted(os.listdir(self.tmp.name)), ["settings.json", "settings.json.bak"])
 
     def test_save_settings_writes_many_keys_once(self):
         with mock.patch.object(usersettings.os, "replace", wraps=os.replace) as rep:
@@ -84,27 +108,39 @@ class SettingsPermissionsTest(RealDataDirGuard):
         self.assertEqual(usersettings.load_settings(), {"bucket": "b", "root": "/r"})
         self.assertEqual(self.mode(), 0o600)
 
-    def test_valid_json_not_an_object_loads_empty(self):
-        with open(self.path, "w") as f:
-            f.write("[1, 2]")
-        self.assertEqual(usersettings.load_settings(), {})
+    def test_valid_json_not_an_object_fails(self):
+        before = self.broken("[1, 2]")
+        self.assertIn(f"{self.path} isn't a JSON object: fix or move it", self.fails(usersettings.load_settings))
+        with open(self.path, "rb") as f:
+            self.assertEqual(f.read(), before)
 
     @unittest.skipIf(os.name != "posix" or os.geteuid() == 0, "needs a non-root POSIX user")
-    def test_unreadable_file_loads_empty(self):
+    def test_unreadable_file_fails(self):
         with open(self.path, "w") as f:
             f.write('{"bucket": "b"}')
         os.chmod(self.path, 0)
         self.addCleanup(os.chmod, self.path, 0o600)
-        self.assertEqual(usersettings.load_settings(), {})
+        self.assertIn(self.path, self.fails(usersettings.load_settings))
 
-    def test_load_missing_or_bad_json_is_empty_and_does_not_create_file(self):
+    def test_load_missing_is_empty_and_does_not_create_file(self):
         self.assertEqual(usersettings.load_settings(), {})
         self.assertFalse(os.path.exists(self.path))
-        with open(self.path, "w") as f:
-            f.write("{not json")
-        self.assertEqual(usersettings.load_settings(), {})
-        with open(self.path) as f:
-            self.assertEqual(f.read(), "{not json")
+
+    def test_load_bad_json_fails_and_leaves_it_untouched(self):
+        before = self.broken('{"bucket": "b",\n}')
+        self.assertIn(f"{self.path} isn't valid JSON (line ", self.fails(usersettings.load_settings))
+        with open(self.path, "rb") as f:
+            self.assertEqual(f.read(), before)
+        self.assertEqual(stat.S_IMODE(os.stat(self.path).st_mode), 0o644)
+
+    def test_doctor_reports_invalid_file(self):
+        self.broken()
+        out = io.StringIO()
+        with mock.patch.object(commands.runtime, "ROOT", self.tmp.name), mock.patch.object(commands, "check_data", lambda: []), \
+                mock.patch.object(commands.external, "find_tool", lambda tool: "/bin/" + tool), contextlib.redirect_stdout(out):
+            code = commands.doctor_cmd(SimpleNamespace())
+        self.assertEqual(code, 1)
+        self.assertIn(f"❌ {self.path} isn't valid JSON (line 1, column 2): fix or move it", out.getvalue())
 
     def test_credentials_round_trip(self):
         for name, value in CREDENTIALS.items():

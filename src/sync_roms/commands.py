@@ -985,7 +985,10 @@ def doctor_cmd(args):
         bad += ok is False
         print(f"{'✅' if ok else '⚠️ ' if ok is None else '❌'} {text}" + (ui.dim(f"  → {hint}") if hint and not ok else ""))
 
-    settings = dict((n, v) for n, v, _ in effective_settings())
+    problem = usersettings.settings_problem()
+    if problem:
+        line(False, problem)
+    settings = {"bucket": runtime.BUCKET} if problem else dict((n, v) for n, v, _ in effective_settings())
     if runtime.ROOT:
         line(os.path.isdir(runtime.ROOT), f"storage folder: {runtime.ROOT}", "is the network share mounted?")
         if os.path.isdir(runtime.ROOT):

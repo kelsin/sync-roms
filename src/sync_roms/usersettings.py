@@ -19,23 +19,52 @@ def _private(path):
         pass
 
 
-def load_settings():
-    """Saved global settings: {"bucket": S3 bucket name, "root": folder used instead of a bucket, "endpoint": custom S3 endpoint URL, "profile"/"write_profile": aws profiles, "mirror": folder of the local mirror, "surprise_ttl_days": days before a surprise may repeat (default 183), "surprise_excluded_systems": system ids Surprise never picks from, "screenscraper_user"/"screenscraper_password": ScreenScraper login (never shown by config show)}."""
+def _read():
+    """(settings, problem): settings.json's contents ({} when missing), and why it can't be used, or None."""
     path = os.path.join(store.data_dir(), "settings.json")
     try:
         with open(path) as f:
             settings = json.load(f)
-    except (OSError, ValueError):
-        return {}
+    except FileNotFoundError:
+        return {}, None
+    except OSError as e:
+        return {}, f"Can't read {path} ({e.strerror}): fix or move it"
+    except ValueError as e:
+        where = f" (line {e.lineno}, column {e.colno})" if isinstance(e, json.JSONDecodeError) else ""
+        return {}, f"{path} isn't valid JSON{where}: fix or move it"
+    if not isinstance(settings, dict):
+        return {}, f"{path} isn't a JSON object: fix or move it"
     _private(path)
-    return settings if isinstance(settings, dict) else {}
+    return settings, None
+
+
+def settings_problem():
+    """Why settings.json can't be used, or None when it is fine or missing."""
+    return _read()[1]
+
+
+def load_settings():
+    """Saved global settings: {"bucket": S3 bucket name, "root": folder used instead of a bucket, "endpoint": custom S3 endpoint URL, "profile"/"write_profile": aws profiles, "mirror": folder of the local mirror, "surprise_ttl_days": days before a surprise may repeat (default 183), "surprise_excluded_systems": system ids Surprise never picks from, "screenscraper_user"/"screenscraper_password": ScreenScraper login (never shown by config show)}.
+    {} when the file is missing; stops (exit 3) when it is there but unreadable, so it is never overwritten."""
+    settings, problem = _read()
+    if problem:
+        ui.fail(problem, 3)
+    return settings
 
 
 def save_settings(settings):
-    """Replace settings.json with settings in one atomic write: a mode 600 temp file in the same folder, then a rename."""
+    """Replace settings.json with settings in one atomic write: a mode 600 temp file in the same folder, then a rename.
+    The file from before this run is kept as settings.json.bak, also mode 600. Stops when the file can't be parsed."""
+    problem = settings_problem()
+    if problem:
+        ui.fail(problem, 3)
+    path = os.path.join(store.data_dir(), "settings.json")
     try:
         os.makedirs(store.data_dir(), exist_ok=True)
-        store.write_json(os.path.join(store.data_dir(), "settings.json"), settings, mode=0o600, indent=2, sort_keys=True)
+        if os.path.exists(path) and sys.platform != "win32":  # the copy keeps the .bak's mode, so make it 600 first
+            os.close(os.open(path + ".bak", os.O_WRONLY | os.O_CREAT, 0o600))
+            _private(path + ".bak")
+        store.write_json(path, settings, backup=True, mode=0o600, indent=2, sort_keys=True)
     except OSError as e:
         ui.fail(f"Couldn't save the setting: {e}", 3)
 
@@ -54,9 +83,10 @@ SETTINGS = (("bucket", "ROMS_BUCKET", None), ("root", "ROMS_ROOT", None), ("endp
             ("profile", "ROMS_PROFILE", "roms-readonly"), ("write_profile", "ROMS_WRITE_PROFILE", "roms"))
 
 
-def resolve_settings():
-    """{name: (value, source)} for bucket, root, endpoint, profile and write_profile: flag, then environment, then settings.json, then default."""
-    saved = load_settings()
+def resolve_settings(saved=None):
+    """{name: (value, source)} for bucket, root, endpoint, profile and write_profile: flag, then environment, then settings.json, then default.
+    saved: settings to use instead of reading settings.json."""
+    saved = load_settings() if saved is None else saved
     out = {}
     for name, env, default in SETTINGS:
         if runtime.OVERRIDES.get(name):
@@ -71,8 +101,9 @@ def resolve_settings():
 
 
 def apply_settings():
-    """Set runtime.BUCKET, ROOT, ENDPOINT, PROFILE and WRITE_PROFILE from resolve_settings(); never prompts."""
-    resolved = {name: value for name, (value, _) in resolve_settings().items()}
+    """Set runtime.BUCKET, ROOT, ENDPOINT, PROFILE and WRITE_PROFILE from resolve_settings(); never prompts.
+    A settings.json that can't be parsed is skipped here (so `doctor` can report it) and stops load_settings() callers."""
+    resolved = {name: value for name, (value, _) in (resolve_settings({}) if settings_problem() else resolve_settings()).items()}
     runtime.PROFILE, runtime.WRITE_PROFILE = resolved["profile"], resolved["write_profile"]
     runtime.BUCKET, runtime.ENDPOINT = resolved["bucket"], resolved["endpoint"] or None
     runtime.ROOT = os.path.abspath(os.path.expanduser(resolved["root"])) if resolved["root"] else None  # a root wins over a bucket
@@ -80,6 +111,7 @@ def apply_settings():
 
 def ensure_bucket():
     """Apply the settings, asking for the bucket (and an optional endpoint) or a storage folder on first run."""
+    load_settings()  # stops on a settings.json that can't be parsed before asking anything
     apply_settings()
     while not (runtime.BUCKET or runtime.ROOT):
         try:

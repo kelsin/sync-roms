@@ -66,8 +66,7 @@ TOPICS = {
               "eject": false in settings.json turns that off for every run)
 
   A finished run (not --dry-run) creates .metadata_never_index in CARD, empties its .fseventsd, and on a Mac runs
-  dot_clean (falling back to sudo mdutil, which asks for your password). ES-DE: files in the Android media folders
-  are removed and a .nomedia added after asking once per card name (the answer is remembered; --ask confirms it).
+  dot_clean (falling back to sudo mdutil, which asks for your password).
 """,
     "games": """
   sync-roms games edit                        interactive editor (cards, sets, device systems)
@@ -309,11 +308,11 @@ def help_text(topic=None):
 
 {ui.bold('GLOBAL OPTIONS')}
   {ui.yellow('-n, --dry-run')}   show what would happen, change nothing (commands that can't honor it refuse it)
-  {ui.yellow('-y, --yes')}       answer prompts with their default (deleting stays "no")
+  {ui.yellow('-y, --yes')}       answer prompts with their default (deleting stays "no", except in clean commands)
   {ui.yellow('--quiet')}         print only errors, warnings and --json data (prompts go to stderr)      {ui.yellow('--verbose')}   also print the effective settings
   {ui.yellow('--json')}          machine-readable output for devices, layouts, diff, games list, cards list and `sync --dry-run` (use --device/--layout to skip the pickers)
   {ui.yellow('--profile P')} {ui.yellow('--write-profile P')} {ui.yellow('--bucket B')} {ui.yellow('--root DIR')} {ui.yellow('--endpoint URL')}   override those settings for this run
-  {ui.yellow('-a, --ask')}       sync: confirm the saved device/firmware and Android media choice instead of using it silently
+  {ui.yellow('-a, --ask')}       sync: confirm the saved device/firmware instead of using it silently
   {ui.yellow('--version')}       print the version      {ui.yellow('-h, --help')}   this screen
 
 {ui.bold('ENVIRONMENT')}
@@ -1197,8 +1196,6 @@ def sync_card(args):
             stale_count = len(scrape_plan.stale_media(layout_name, manifest['systems'], roms_dir, stale_es_dir, base))
             print(f"🧹 Media on the card for ROMs it doesn't have: {stale_count} file(s) to remove")
         frontend_step(True)
-        if layout_name == "esde":
-            clean.clean_android_media(base, card, True, args.ask)
         plan_json["stale_media"] = stale_count
         plan_json["totals"] = {"files": len(todo_all), "bytes": total_bytes(todo_all), "delete": len(extras),
                                "stale_media": stale_count, "missing": len(missing)}
@@ -1262,8 +1259,6 @@ def sync_card(args):
     for folder in scrape_plan.prune_empty_systems(layout_name, manifest["systems"], roms_dir):
         print(ui.green(f"🧹 Removed empty system folder {os.path.relpath(folder, base)}"))
     frontend_step(False)
-    if layout_name == "esde":  # only Android cards have these folders; a Knulli card's "music" must stay
-        clean.clean_android_media(base, card, False, args.ask)
     if failures:
         report_failures(failures)
     if not failed and not args.no_eject and usersettings.load_settings().get("eject", True) is not False:
