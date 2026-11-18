@@ -34,7 +34,7 @@ class ListPreviews(unittest.TestCase):
             raise KeyboardInterrupt
         for module, args, expect in (
                 (collectionedit, (), ["art-surprise", "art-None", None, None, None]),
-                (setedit, ({"review": False},), ["art-a", "art-b", None, None, None])):
+                (setedit, ({"review": False},), ["art-surprise", "art-b", None, None, None])):
             calls = []
             working = {"a": {"name": "A", "art": "surprise", "games": []}, "b": {"name": "B", "games": []}}
             with mock.patch.object(picker, "filter_list", stop):

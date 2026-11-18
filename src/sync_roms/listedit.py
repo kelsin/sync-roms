@@ -139,7 +139,7 @@ def add_from_set(listing, sets, shown, keys_of, label, categories=True):
     New games get the category asked for when categories is true (none after Ctrl-C, which keeps the toggles made and
     is then raised again), and the set's extra files (the discs of a multi-disc game)."""
     j = picker.filter_list("✏️  Add games from which set?", [f"{themeart.set_emoji(x)} {x['name']}  ({len(x['games'])} games)" for x in sets],
-                           preview=lambda k: previews.collection(sets[k]["id"]))
+                           preview=lambda k: previews.collection(themeart.set_art(sets[k])))
     if j is None:
         return
     chosen = sets[j]

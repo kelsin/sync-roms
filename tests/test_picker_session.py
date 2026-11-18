@@ -4,6 +4,7 @@ import contextlib
 import io
 import os
 import signal
+import subprocess
 import sys
 import threading
 import unittest
@@ -506,7 +507,6 @@ class Session(unittest.TestCase):
         self.assertEqual(self.events, [True, "app closed"])
 
     def test_ctrl_c_while_working_interrupts_the_next_prompt_once(self):
-        from sync_roms import setedit
         at_work, go = threading.Event(), threading.Event()
 
         def fake_run(cmd, **kwargs):
@@ -520,7 +520,7 @@ class Session(unittest.TestCase):
             try:
                 ui.confirm("Save?")
             except KeyboardInterrupt:
-                setedit.run(["git", "push"])  # a command after it runs
+                at_terminal(subprocess.run, ["git", "push"])  # a command after it runs
                 return "interrupted", ui.confirm("Really?")
 
         async def script(app, pilot):
@@ -532,12 +532,11 @@ class Session(unittest.TestCase):
             await wait_for(pilot, lambda: prompting(app, "Really?"))
             self.events.append("asked")
             await pilot.press("y")
-        with mock.patch.object(setedit.subprocess, "run", fake_run):
+        with mock.patch.object(subprocess, "run", fake_run):
             self.assertEqual(self.run_editor(editor, script), ("interrupted", True))
         self.assertEqual(self.events, ["suspend", "git", "resume", "asked", "app closed"])  # "Save?" was never asked
 
     def test_ctrl_c_while_working_interrupts_the_next_command(self):
-        from sync_roms import setedit
         at_work, go = threading.Event(), threading.Event()
 
         def editor():
@@ -545,7 +544,7 @@ class Session(unittest.TestCase):
             at_work.set()
             wait(go)
             try:
-                setedit.run(["git", "push"])
+                at_terminal(subprocess.run, ["git", "push"])
             except KeyboardInterrupt:
                 return "interrupted"
 
@@ -555,7 +554,7 @@ class Session(unittest.TestCase):
             await wait_for(pilot, at_work.is_set)
             await pilot.press("ctrl+c")
             go.set()
-        with mock.patch.object(setedit.subprocess, "run") as ran:
+        with mock.patch.object(subprocess, "run") as ran:
             self.assertEqual(self.run_editor(editor, script), "interrupted")
         ran.assert_not_called()
 
@@ -844,7 +843,7 @@ class Session(unittest.TestCase):
 
     def test_an_abandoned_editor_gets_ctrl_c_from_every_call_and_prints_nothing(self):
         from textual import events
-        from sync_roms import edit, setedit
+        from sync_roms import edit
         at_work, go = threading.Event(), threading.Event()
         threads, got = [], []
 
@@ -857,7 +856,7 @@ class Session(unittest.TestCase):
             print("after")
             print("warned", file=sys.stderr)
             for call in (lambda: picker.filter_list("B", ["b0"]), lambda: ui.confirm("Save?"), lambda: edit.note("ℹ️  Saved."),
-                         lambda: setedit.run(["git", "push"]), lambda: picker.one_app(lambda: picker.filter_list("C", ["c0"]))()):
+                         lambda: at_terminal(subprocess.run, ["git", "push"]), lambda: picker.one_app(lambda: picker.filter_list("C", ["c0"]))()):
                 try:
                     got.append(call())
                 except KeyboardInterrupt:
@@ -872,7 +871,7 @@ class Session(unittest.TestCase):
             app.post_message(events.Key("ctrl+c", "\x03"))
         out = io.StringIO()
         with contextlib.redirect_stdout(out), contextlib.redirect_stderr(out), mock.patch("builtins.input") as asked, \
-                mock.patch.object(setedit.subprocess, "run") as ran:
+                mock.patch.object(subprocess, "run") as ran:
             with self.assertRaises(KeyboardInterrupt):
                 self.run_editor(editor, script)
             go.set()
@@ -1394,29 +1393,6 @@ class Session(unittest.TestCase):
             self.assertEqual(self.run_editor(editor, script), 0)
         self.assertEqual(seen, ["⚠️  slow"])
         self.assertEqual(out.getvalue(), "📡 Listing gba ...\n" + ui.yellow("⚠️  \x1b[2Jslow") + "\n")
-
-    def test_the_set_editors_commands_use_the_normal_screen_but_its_tool_check(self):
-        from sync_roms import setedit
-        main = threading.current_thread()
-
-        def fake_run(cmd, **kwargs):
-            self.events.append((cmd[0], threading.current_thread() is main))
-            return mock.Mock(returncode=0, stdout="ok\n", stderr="")
-
-        def editor():
-            picker.filter_list("A", ["a0"])
-            setedit.need_tools()
-            setedit.run(["git", "push"])
-            return picker.filter_list("B", ["b0"])
-
-        async def script(app, pilot):
-            await wait_for(pilot, lambda: showing(app, "A"))
-            await pilot.press("enter")
-            await wait_for(pilot, lambda: showing(app, "B"))
-            await pilot.press("enter")
-        with mock.patch.object(setedit.subprocess, "run", fake_run), mock.patch.object(setedit.shutil, "which", return_value="x"):
-            self.run_editor(editor, script)
-        self.assertEqual(self.events, [("gh", False), "suspend", ("git", True), "resume", "app closed"])  # gh asks nothing
 
     def test_nested_editors_share_the_session(self):
         inner = picker.one_app(lambda: picker.filter_list("B", ["b0"]))

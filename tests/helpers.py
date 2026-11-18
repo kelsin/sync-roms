@@ -143,6 +143,33 @@ class StorageDir(RealDataDirGuard):
         return path
 
 
+def storage_sets(test, sets, root=None):
+    """Put game sets in storage as sets/<id>.json and make store.load_sets() read them (once, as a run does).
+
+    sets: {id: set (written with store.set_text) or str (the file's exact text)}. root: the storage folder already
+    wired in as runtime.ROOT (a StorageDir's); without it a throwaway one is made and wired in, its local copies going
+    to store.data_dir() (patch that first). Returns the storage folder."""
+    from sync_roms import inventory
+    if root is None:
+        tmp = tempfile.TemporaryDirectory()
+        test.addCleanup(tmp.cleanup)
+        root = tmp.name
+        for name, value in (("ROOT", root), ("BUCKET", None), ("ENDPOINT", None), ("_mirror_root", None)):
+            p = mock.patch.object(runtime, name, value)
+            p.start()
+            test.addCleanup(p.stop)
+        inventory.reset()
+        test.addCleanup(inventory.reset)
+    os.makedirs(os.path.join(root, "sets"), exist_ok=True)
+    for set_id, game_set in sets.items():
+        with open(os.path.join(root, "sets", set_id + ".json"), "w", encoding="utf-8") as f:
+            f.write(game_set if isinstance(game_set, str) else store.set_text(game_set))
+    store.reset_sets()
+    test.addCleanup(setattr, store, "_sets", "[]")  # back to no sets, as isolate leaves it (last: cleanups run in reverse)
+    test.addCleanup(store.reset_sets)  # nothing of this read (its fallback flag, skipped files) outlives the test
+    return root
+
+
 class Isolated(RealDataDirGuard):
     """Runs cli.sync() with a given argv and settings.json, leaving the process-wide settings as they were."""
 

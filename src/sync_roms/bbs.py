@@ -152,7 +152,7 @@ def _move_all(games, old, new, title):
 
 def retarget(old, new, title):
     """Move every personal reference to the cart key old onto new, retitled: cards' games and surprises, the
-    surprise history and collections, each file saved only when it changed. Returns the ids of the repo sets that
+    surprise history and collections, each file saved only when it changed. Returns the ids of the sets that
     still name old, for the caller to warn about."""
     cards = store.load_cards()
     changed = False

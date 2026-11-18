@@ -5,8 +5,9 @@ import re
 import shutil
 import sys
 import tempfile
+import threading
 
-from . import inventory, s3, ui
+from . import inventory, runtime, s3, ui
 
 
 REPO_DATA = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
@@ -342,8 +343,7 @@ def merge_lists(systems, lists, sets):
                         add(s, g)
     for raw in lists:
         for set_id in list_sets(raw):
-            if set_id not in by_id:
-                print(f"warning: games: unknown set {set_id!r}, skipped", file=sys.stderr)
+            if set_id not in by_id:  # not in storage: skipped (load_manifest warns about it once per card)
                 continue
             for g in set_games(by_id[set_id]):
                 if g["system"] in by_bucket:
@@ -351,29 +351,16 @@ def merge_lists(systems, lists, sets):
     return systems
 
 
-def prune_unknown_sets(sets, cards=None):
-    """Drop set ids that no longer exist from every card's games, rewriting only what changes.
-    cards: cards.json already loaded. Returns whether anything was rewritten."""
-    cards_in = load_cards() if cards is None else cards
+def warn_unknown_sets(sets, cards):
+    """Warn, once per card per read of the sets, about the set ids a card references that aren't in storage. cards.json
+    is never changed: the storage cache may just not list a set another machine added yet."""
     known = {x["id"] for x in sets}
-
-    def pruned(raw):
-        ids = raw.get(SETS_KEY) if isinstance(raw, dict) else None
-        if not isinstance(ids, list) or all(i in known for i in ids if isinstance(i, str)):
-            return None
-        gone = [i for i in ids if isinstance(i, str) and i not in known]
-        out = {k: v for k, v in raw.items() if k != SETS_KEY}
-        keep = [i for i in ids if not isinstance(i, str) or i in known]
-        if keep:
-            out[SETS_KEY] = keep
-        return out, gone
-
-    changed = {n: p for n in all_card_names(cards_in) if (p := pruned(card_games(n, cards_in)))}
-    for n, p in changed.items():
-        ui.warn(f"card {n}: removed sets that no longer exist: {', '.join(p[1])}")
-    if changed:
-        save_lists({n: p[0] for n, p in changed.items()})
-    return bool(changed)
+    for n in all_card_names(cards):
+        unknown = [i for i in list_sets(card_games(n, cards)) if i not in known]
+        if unknown and n not in _warned_cards:
+            _warned_cards.add(n)
+            ui.warn(f"card {n}: sets that aren't in storage (run `{inventory.UPDATE_HINT}` if another machine added "
+                    f"them): {', '.join(unknown)}")
 
 
 def load_catalog():
@@ -390,8 +377,7 @@ def load_manifest(card_names=()):
     surprises) and the device-system overlay. No cards means no games."""
     sets = load_sets()
     cards = load_cards()
-    if prune_unknown_sets(sets, cards):
-        cards = load_cards()
+    warn_unknown_sets(sets, cards)
     manifest = {name: repo_json(name) for name in ("layouts", "systems", "devices")}
     lists = [card_games(n, cards) for n in card_names]
     merge_lists(manifest["systems"], lists, sets)
@@ -522,10 +508,12 @@ PRETTY = {"indent": 2, "ensure_ascii": False, "trailing_newline": True}  # write
 
 
 def set_data(game_set):
-    """A set as it is written to its file: name, description (when there is one), games."""
+    """A set as it is written to its file: name, description and art (when it has them), games."""
     data = {"name": game_set["name"]}
     if game_set.get("description"):
         data["description"] = game_set["description"]
+    if game_set.get("art"):
+        data["art"] = game_set["art"]
     data["games"] = game_set["games"]
     return data
 
@@ -535,31 +523,167 @@ def set_text(game_set):
     return json.dumps(set_data(game_set), indent=2, ensure_ascii=False) + "\n"
 
 
-def read_set_file(path, set_id):
-    with open(path) as f:
-        data = json.load(f)
-    return {"id": set_id, "name": data.get("name", set_id),
-            "description": data.get("description", ""), "games": data.get("games", [])}
+SETS = "sets/"  # storage folder of the game sets, one sets/<id>.json each
+_sets_lock = threading.RLock()  # editors read the sets from several threads
+_sets = None  # JSON text of the sets read from storage this run, in file-name order (json.loads of it is faster than
+# deep-copying the parse, and load_sets is called many times a run); None until read
+_warned_cards = set()  # cards already warned about this read of the sets (warn_unknown_sets)
+_skipped = []  # keys of the files in sets/ this read skipped as not being sets (skipped_sets)
+_fallback = False  # whether this read used local copies because storage couldn't be listed or checked
 
 
-def repo_set_files():
-    """The repo's own sets (data/sets/*.json) as read_set_file dicts, in file-name order."""
-    folder = os.path.join(REPO_DATA, "sets")
-    if not os.path.isdir(folder):
-        return []
-    return [read_set_file(os.path.join(folder, name), name[:-5]) for name in sorted(os.listdir(folder))
-            if name.endswith(".json")]
+def _set_file(text):
+    """A set file's JSON object, or None when it isn't one with a games list."""
+    try:
+        data = json.loads(text)
+    except ValueError:
+        return None
+    return data if isinstance(data, dict) and isinstance(data.get("games"), list) else None
+
+
+def _set_dict(set_id, data):
+    out = {"id": set_id, "name": data.get("name", set_id), "description": data.get("description", ""),
+           "games": data["games"]}
+    if isinstance(data.get("art"), str):
+        out["art"] = data["art"]
+    return out
+
+
+def _set_id(key):
+    """The set id of a storage key of the sets folder, or None for anything but sets/<id>.json (dot-files too, like
+    macOS's ._<name> files)."""
+    name = key[len(SETS):]
+    ok = key.startswith(SETS) and name.endswith(".json") and "/" not in name and not name.startswith(".")
+    return name[:-5] if ok else None
+
+
+def _mirror_set(key):
+    from . import shared  # imported here: shared uses this module
+    try:
+        with open(shared.local_path(key), encoding="utf-8") as f:
+            return _set_file(f.read())
+    except OSError:
+        return None
+
+
+def _why(e):
+    return "see the error above" if isinstance(e, SystemExit) else e
+
+
+def _read_sets():
+    """Every set in storage, through its local copy (shared.py). When storage can't be listed or checked, the local
+    copies are used, with one warning, and sets_from_fallback says so."""
+    global _fallback
+    from . import mirroring, shared  # imported here: both use this module
+    reachable, gone = True, object()  # reachable: storage answers (else the local copies are read)
+    try:
+        if runtime.ROOT and not os.path.isdir(runtime.ROOT):  # an unmounted share, not an empty one
+            raise FileNotFoundError(f"{runtime.ROOT} is missing")
+        with mirroring.storage_reads():  # a sync's local mirror of storage doesn't hold the sets
+            keys = [k for k in inventory.files(SETS, sizes=False) if _set_id(k)]
+    except (*s3.ERRORS, SystemExit) as e:  # SystemExit: ui.fail, e.g. a missing AWS profile (its error is printed)
+        ui.warn(f"Couldn't list {SETS} in storage ({_why(e)}); using the local copies")
+        try:
+            names = os.listdir(shared.local_path(SETS.rstrip("/")))
+        except OSError:
+            names = []
+        keys, reachable = [SETS + n for n in names if _set_id(SETS + n)], False
+    out = []
+    _skipped.clear()
+    for key in sorted(keys):
+        if reachable:
+            try:
+                data = shared.load(key, _set_file, gone, fallback=False)
+            except (*s3.ERRORS, SystemExit) as e:
+                ui.warn(f"Couldn't check {SETS} in storage ({_why(e)}); using the local copies")
+                reachable = False
+        if not reachable:
+            data = _mirror_set(key)
+        if data is None:
+            ui.warn(f"{key} isn't a set (a JSON object with a games list); skipped")
+            _skipped.append(key)
+        elif data is not gone:
+            out.append(_set_dict(_set_id(key), data))
+    _fallback = not reachable
+    return out
+
+
+def reset_sets():
+    """Forget the sets read this run, so the next read lists and checks storage again."""
+    global _sets, _fallback
+    with _sets_lock:
+        _sets = None
+        _fallback = False
+        _warned_cards.clear()
+        _skipped.clear()
+
+
+def set_files():
+    """The sets in storage as {"id", "name", "description", "games", "art" (when set)} dicts, in file-name order.
+
+    Read once per run (reset_sets and write_set read them again); each call returns a copy the caller may change."""
+    global _sets
+    with _sets_lock:
+        if _sets is None:
+            _sets = json.dumps(_read_sets(), ensure_ascii=False)
+        return json.loads(_sets)
+
+
+def skipped_sets():
+    """The keys of the files in sets/ the last read of the sets skipped because they aren't sets."""
+    with _sets_lock:
+        return list(_skipped)
+
+
+def sets_from_fallback():
+    """Whether the last read of the sets (set_files; False before one) came, even in part, from the local copies because
+    storage couldn't be listed or checked: they may be older than storage's, so they must not be written back."""
+    with _sets_lock:
+        return _fallback
+
+
+def set_changed(set_id, loaded):
+    """Whether storage's file of a set, read from storage itself (never the local copy), no longer holds loaded: the
+    set as set_files gave it ("id" is ignored), or None for a set that wasn't there. Raises the storage errors, an
+    unmounted storage folder included (never taken for a missing file)."""
+    from . import shared  # imported here: shared uses this module
+    if runtime.ROOT and not os.path.isdir(runtime.ROOT):
+        raise FileNotFoundError(f"{runtime.ROOT} is missing")
+    try:
+        data = _set_file(shared.read(SETS + set_id + ".json"))
+    except s3.ERRORS as e:
+        if not s3.missing(e):
+            raise
+        return loaded is not None
+    if data is None or loaded is None:
+        return True
+    return {**_set_dict(set_id, data), "id": None} != {**loaded, "id": None}
 
 
 def load_sets():
-    """Game sets from the repo's data/sets/*.json, sorted by name.
+    """Game sets from storage's sets/*.json, sorted by name.
 
-    Each file is {"name", "description" (optional), "games": [{"title", "system", "bucket", "files" (optional)}]}.
+    Each file is {"name", "description" (optional), "art" (optional, an art.json id), "games": [{"title", "system",
+    "bucket", "files" (optional)}]}; its id is its file name.
     "category" (optional) groups games in the set editor.
     "series" (optional) names the game's series (one of data/series.json), to narrow the editors to it.
     "files" are extra bucket keys (e.g. the discs of a multi-disc game) toggled together with "bucket".
     """
-    return sorted(repo_set_files(), key=lambda x: x["name"].lower())
+    return sorted(set_files(), key=lambda x: x["name"].lower())
+
+
+def write_set(set_id, game_set):
+    """Put a set's file in storage (and its local copy); the sets are read again on next use."""
+    from . import shared  # imported here: shared uses this module
+    shared.write(SETS + set_id + ".json", set_text(game_set))
+    reset_sets()
+
+
+def delete_set(set_id):
+    """Delete a set's file from storage (and its local copy); the sets are read again on next use."""
+    from . import shared  # imported here: shared uses this module
+    shared.delete(SETS + set_id + ".json")
+    reset_sets()
 
 
 def set_slug(name):

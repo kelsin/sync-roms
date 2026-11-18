@@ -1200,13 +1200,8 @@ def render(art_id):
 
 def write_readme():
     """Write art/README.md, a gallery of every picture so they can be browsed on GitHub. Sync never copies it."""
-    data = os.path.join(OUT, "..", "..", "..")
     with open(os.path.join(OUT, "..", "art.json")) as f:
         names = {"surprise": "Surprise", **json.load(f)}
-    for file in os.listdir(os.path.join(data, "sets")):
-        if file.endswith(".json"):
-            with open(os.path.join(data, "sets", file)) as f:
-                names.setdefault(file[:-5], json.load(f)["name"])
     ids = sorted(f[:-4] for f in os.listdir(OUT) if f.endswith(".png"))
     cell = '<td align="center" valign="top"><img src="{0}.png" width="120" alt="{1}"><br><sub>{1}<br><code>{0}</code></sub></td>'
     rows = ["<tr>" + "".join(cell.format(i, html.escape(names.get(i, i))) for i in ids[n:n + 6]) + "</tr>" for n in range(0, len(ids), 6)]

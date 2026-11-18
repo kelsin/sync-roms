@@ -1,4 +1,4 @@
-"""Apply approved variant changes to every set listing each game, and remember the ROMs that were judged.
+"""Apply approved variant changes to every set in storage listing each game, and remember the ROMs that were judged.
 
 Run from the repo root: uv run --frozen python .claude/skills/update-variants/scripts/apply_variants.py decisions.json
 
@@ -12,18 +12,22 @@ import json
 import os
 import sys
 
-from sync_roms import shared, store, usersettings
+from sync_roms import runtime, s3, shared, store, usersettings
 
-SETS = os.path.join(store.REPO_DATA, "sets")
 CHECKED = "variants-checked.json"  # a storage key
 
 
 def main(path):
     usersettings.apply_settings()  # where storage is, as the CLI reads it
+    if runtime.ROOT and not os.path.isdir(runtime.ROOT):  # an unmounted share: change nothing rather than some sets
+        sys.exit(f"The storage folder {runtime.ROOT} is missing (is the share mounted?), nothing was changed")
     with open(path) as f:
         decisions = json.load(f)
     add, remove = decisions.get("add", []), decisions.get("remove", [])
-    sets = store.repo_set_files()
+    sets = store.set_files()
+    if store.sets_from_fallback():  # older than storage's, maybe: editing them would undo another machine's changes
+        sys.exit("The sets were read from the local copies (storage couldn't be checked), nothing was changed")
+    loaded = {game_set["id"]: game_set for game_set in store.set_files()}  # as read, before the edits below
     listed = {g.get("bucket") for game_set in sets for g in game_set["games"]}
     missing = sorted({x["game"] for x in add + remove} - listed)
     if missing:
@@ -49,10 +53,15 @@ def main(path):
                         changed = True
         if changed:
             set_id = game_set.pop("id")
-            writes.append((set_id, store.set_text(game_set)))
-    for set_id, text in writes:  # every edit above succeeded: only now write
-        with open(os.path.join(SETS, f"{set_id}.json"), "w") as f:
-            f.write(text)
+            writes.append((set_id, game_set))
+    try:
+        changed = [set_id for set_id, _ in writes if store.set_changed(set_id, loaded[set_id])]
+    except s3.ERRORS as e:
+        sys.exit(f"Couldn't check the sets in storage ({e}), nothing was changed")
+    if changed:
+        sys.exit(f"{', '.join(changed)} changed in storage while this ran (another machine?), nothing was changed")
+    for set_id, game_set in writes:  # every edit above succeeded and no set changed in storage: only now write
+        store.write_set(set_id, game_set)
         touched.add(set_id)
     def change(checked):
         checked.update(decisions.get("checked", {}))

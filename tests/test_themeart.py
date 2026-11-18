@@ -52,21 +52,16 @@ class Assets(unittest.TestCase):
         self.assertEqual(themeart.art_emoji(None), themeart.DEFAULT_EMOJI)
         self.assertEqual(themeart.art_emoji("nope"), themeart.DEFAULT_EMOJI)
 
-    def test_every_set_has_its_own_emoji_and_a_new_one_gets_the_set_default(self):
-        sets = os.path.join(os.path.dirname(themeart.THEME_DATA), "..", "sets")
-        ids = [n[:-5] for n in os.listdir(sets) if n.endswith(".json")]
-        emoji = [themeart.set_emoji({"id": i}) for i in ids]
-        self.assertEqual(len(set(emoji)), len(ids))
-        self.assertNotIn(themeart.SET_EMOJI, emoji)
+    def test_a_set_has_the_emoji_of_its_art_else_of_its_id_else_the_set_default(self):
+        art = [i for i in themeart.art_choices() if i != "surprise"][:2]
+        self.assertEqual(themeart.set_emoji({"id": art[0]}), themeart.art_emoji(art[0]))
+        self.assertEqual(themeart.set_emoji({"id": art[0], "art": art[1]}), themeart.art_emoji(art[1]))
+        self.assertEqual(themeart.set_emoji({"id": "new-set", "art": art[1]}), themeart.art_emoji(art[1]))
         self.assertEqual(themeart.set_emoji({"id": "new-set"}), themeart.SET_EMOJI)
+        self.assertEqual(themeart.set_emoji({"id": "new-set", "art": "nope"}), themeart.SET_EMOJI)
+        self.assertNotIn(themeart.SET_EMOJI, [themeart.art_emoji(i) for i in themeart.art_choices()])
         self.assertEqual(themeart.collection_emoji({}), themeart.DEFAULT_EMOJI)
         self.assertEqual(themeart.collection_emoji({"art": "surprise"}), themeart.art_emoji("surprise"))
-
-    def test_every_set_has_art(self):
-        sets = os.path.join(os.path.dirname(themeart.THEME_DATA), "..", "sets")
-        for name in os.listdir(sets):
-            png = themeart.art_png(name.removesuffix(".json"))
-            self.assertTrue(png and os.path.isfile(png), name)
 
     def test_a_logo_spells_the_name_in_capitals_and_fits(self):
         svg = themeart.logo_svg("Shmups 2!")

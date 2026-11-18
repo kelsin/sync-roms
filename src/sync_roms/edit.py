@@ -269,7 +269,7 @@ def target_changes(t):
 
 @picker.one_app
 def edit_manifest():
-    """The editor's top menu: Cards (each opens the card editor, which saves games as they change), Sets (opens a PR),
+    """The editor's top menu: Cards (each opens the card editor, which saves games as they change), Sets (saved to storage at its review),
     Collections (saved as you leave the collection editor), Device systems; device/firmware and device-system changes are reviewed and saved at the end."""
     print(ui.bold("✏️  Edit mode") + ui.dim(f"  {s3.access()}"))
     if not store.cards_readable():
@@ -427,7 +427,7 @@ def edit_manifest():
                 add_card()
 
     def edit_sets():
-        """The repo's sets; opens a PR and needs git and gh, so a missing tool returns here instead of ending the editor."""
+        """The sets in storage, saved there at the set editor's review; a failure (SystemExit) returns here instead of ending the editor."""
         from . import setedit
         try:
             setedit.edit_sets()

@@ -470,7 +470,7 @@ def pick_card_set(name, setup, systems, current=None):
         extras.append([(f"  {'✅' if have == len(keys) else f'{have}/{len(keys)}'}", "cyan")])
     cursor = next((n for n, (x, _) in enumerate(shown) if x["name"] == current), 0)
     i = picker.filter_list(f"📦 Sets on {name}'s systems", labels, extras=extras, cursor=cursor,
-                           preview=lambda i: previews.collection(shown[i][0]["id"]) if i < len(shown) else None)
+                           preview=lambda i: previews.collection(themeart.set_art(shown[i][0])) if i < len(shown) else None)
     return None if i is None else shown[i][0]
 
 
@@ -516,7 +516,7 @@ def pick_set(system, sets, games, titles, catalog, current=None, synced=lambda: 
     cursor = next((n for n, (x, _) in enumerate(shown) if x["name"] == current), 0)
     i = picker.filter_list(f"📦 Sets with games on {system['name']}", labels, extras=extras, cursor=cursor,
                            hotkeys=(" ", "\t"), hint=SETS_HINT, on_hotkey=on_hotkey,
-                           preview=lambda i: previews.collection(shown[i][0]["id"]) if i < len(shown) else None)
+                           preview=lambda i: previews.collection(themeart.set_art(shown[i][0])) if i < len(shown) else None)
     if i is None:
         return None
     return shown[i][0]

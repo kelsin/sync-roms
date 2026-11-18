@@ -10,7 +10,7 @@ from unittest import mock
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 from sync_roms import cardedit, collectionedit, commands, edit, picker, store, ui  # noqa: E402
-from helpers import Cmd, DataDir, feed_list  # noqa: E402
+from helpers import Cmd, DataDir, feed_list, storage_sets  # noqa: E402
 
 
 def target(games):
@@ -23,10 +23,11 @@ class NoPersonalSets(DataDir):
         os.makedirs(self.path("sets"))
         self.write_json("sets/mine.json", {"name": "Mine", "games": []})
         self.write_json("sets/pinball.json", {"name": "Fake", "games": []})
+        storage_sets(self, {"pinball": {"name": "Pinball", "games": []}, "shmups": {"name": "Shmups", "games": []}})
         err = io.StringIO()
         with contextlib.redirect_stderr(err):
             sets = store.load_sets()
-        self.assertEqual(sorted(x["id"] for x in sets), sorted(x["id"] for x in store.repo_set_files()))
+        self.assertEqual(sorted(x["id"] for x in sets), ["pinball", "shmups"])
         self.assertEqual([x["name"] for x in sets if x["id"] == "pinball"], ["Pinball"])
         self.assertEqual(err.getvalue(), "")
 
@@ -137,10 +138,12 @@ class CheckBucketKeys(Cmd):
 
     def test_flag_uses_the_readonly_profile_and_refuses_the_write_profile(self):
         from sync_roms import runtime, s3
+        with open(self.path("cards.json"), "w") as f:
+            json.dump({"c": {"device": "full", "layout": "esde", "games": {"gba": [{"title": "A", "bucket": "gba/A.zip"}]}}}, f)
         with mock.patch.object(s3, "list_sizes", return_value={}) as ls, \
                 mock.patch.object(runtime, "PROFILE", "roms-readonly"), mock.patch.object(runtime, "WRITE_PROFILE", "roms"):
             code, _, _ = self.run_cmd("check", "--bucket-keys")
-        self.assertEqual(code, 1)  # every key of the shipped sets is "missing" from an empty listing
+        self.assertEqual(code, 1)  # the card's game is "missing" from an empty listing
         self.assertTrue(ls.called)
         with mock.patch.object(s3, "list_sizes", return_value={}) as ls, \
                 mock.patch.object(runtime, "PROFILE", "roms"), mock.patch.object(runtime, "WRITE_PROFILE", "roms"):

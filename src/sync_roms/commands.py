@@ -268,9 +268,10 @@ def games_sets(args):
         return 0
     if not args.set_id:
         ui.fail(f"sets {args.verb} needs a set id. Known: {', '.join(known)}", 2)
-    if args.set_id not in known:
-        ui.fail(f"Unknown set {args.set_id!r}. Known: {', '.join(known)}", 2)
     on = list(store.list_sets(raw))
+    if args.set_id not in known and not (args.verb == "remove" and args.set_id in on):  # a card may name a gone set
+        ui.fail(f"Unknown set {args.set_id!r} (run `{inventory.UPDATE_HINT}` if another machine added it). "
+                f"Known: {', '.join(known)}", 2)
     if args.verb == "add" and args.set_id not in on:
         raw[store.SETS_KEY] = on + [args.set_id]
         return finish(args, raw, save, [("+", f"set {args.set_id}")])
@@ -663,6 +664,11 @@ def check_game_file(problems, path, where, systems):
     except (OSError, ValueError) as e:
         problems.append(f"{where}: not valid JSON ({e})")
         return None
+    return check_game_data(problems, data, where, systems)
+
+
+def check_game_data(problems, data, where, systems):
+    """check_game_file's checks of a file's parsed JSON."""
     games = data.get("games") if isinstance(data, dict) else None
     if not isinstance(games, list):
         problems.append(f"{where}: must be an object with a 'games' list")
@@ -708,10 +714,31 @@ def check_folder(problems, folder, prefix, systems):
 
 
 def check_sets(problems, systems):
-    """Check every repo set file and return the keys each one lists as {set id: [(system, key)]}.
+    """Check every set in storage and return the keys each one lists as {"sets/<id>.json": [(system, key)]}.
 
     systems: the set of known system ids."""
-    return check_folder(problems, store.REPO_DATA + "/sets", "", systems)
+    sets = store.set_files()
+    problems.extend(f"{key}: isn't a set (a JSON object with a games list)" for key in store.skipped_sets())
+    art = themeart.art_choices()
+    keys = {}
+    for game_set in sets:
+        where = f"{store.SETS}{game_set['id']}.json"
+        keys[where] = check_game_data(problems, game_set, where, systems)
+        if game_set.get("art") and game_set["art"] not in art:
+            problems.append(f"{where}: unknown art {game_set['art']!r}")
+    return keys
+
+
+def check_set_notices():
+    """Sets with no art of their own, or showing the same art as another set, as notices."""
+    art, by_art = themeart.art_choices(), {}
+    for game_set in store.set_files():
+        by_art.setdefault(game_set.get("art") or game_set["id"], []).append(game_set["id"])
+    bare = sorted(i for a, ids in by_art.items() if a not in art for i in ids)
+    out = [f"sets: {len(bare)} set(s) have no art in art.json, so they show {themeart.SET_EMOJI} and get no picture: "
+           + ", ".join(bare)] if bare else []
+    return out + [f"sets: {', '.join(sorted(ids))} share the art {a!r}"
+                  for a, ids in sorted(by_art.items()) if a in art and len(ids) > 1]
 
 
 def check_collections(problems, systems):
@@ -804,7 +831,8 @@ def check_data(list_keys=None, repo_systems=None):
                 if not isinstance(entry, list) or not all(isinstance(i, str) for i in entry):
                     problems.append(f"{where}: 'sets' must be a list of set ids")
                 else:
-                    problems.extend(f"{where}: unknown set {i!r}" for i in entry if i not in sets)
+                    problems.extend(f"{where}: unknown set {i!r} (run `{inventory.UPDATE_HINT}` if another machine "
+                                    "added it)" for i in entry if i not in sets)
             elif key not in systems:
                 problems.append(f"{where}: unknown system {key!r}")
             elif isinstance(entry, list):
@@ -935,7 +963,7 @@ def check_cmd(args):
     problems = check_data(bucket_lister() if args.bucket_keys else None, repo_systems)
     for p in problems:
         ui.failure(ui.red(f"❌ {p}"))
-    for n in check_notices(repo_systems):
+    for n in check_notices(repo_systems) + check_set_notices():
         print(ui.yellow(f"⚠️  {n}"))
     if not problems:
         print(ui.green("✅ cards.json, surprises.json, device-systems.json, the sets and your collections look fine"))
@@ -978,7 +1006,7 @@ def doctor_cmd(args):
             boto3.Session(profile_name=runtime.WRITE_PROFILE)
             line(True, f"write profile {runtime.WRITE_PROFILE} exists")
         except ProfileNotFound:
-            line(None, f"write profile {runtime.WRITE_PROFILE} not found", "only needed for upload and clean")
+            line(None, f"write profile {runtime.WRITE_PROFILE} not found", "only needed for upload, clean, saving sets and saving scrape state")
     for tool in ("7z", "chdman", "extract-xiso", "iso2zar"):
         found = external.find_tool(tool)
         line(True if found else None, f"{tool}: {found or 'not installed'}",
