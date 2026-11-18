@@ -341,13 +341,13 @@ class ProgressBar:
             sys.stdout.write(f"\r\033[J  {cyan('█' * filled)}{dim('░' * (24 - filled))} {head}{speed}")
             block = self.block()
             for line in block:
-                sys.stdout.write("\n" + dim(line))
+                sys.stdout.write("\n" + line)
             if block:
                 sys.stdout.write(f"\033[{len(block)}A\r")  # back on the bar line
             sys.stdout.flush()
 
     def block(self):
-        """The lines under the bar, none wider than the terminal: a file each, or fewer and "… and N more" when the terminal is short."""
+        """The lines under the bar, colored and none wider than the terminal: a file each, or fewer and "… and N more" when the terminal is short."""
         active = self.active() if self.active else []
         size = shutil.get_terminal_size()
         room, width = size.lines - 2, size.columns - 1
@@ -356,13 +356,15 @@ class ProgressBar:
         shown = active if len(active) <= room else active[:room - 1]
         lines = []
         for name, moved, total in shown:
+            filled = int(moved / total * 10)
             tail = f"  {moved / total:4.0%} of {human_size(total)}"
-            fit = width - cell_width("    ↓ ") - cell_width(tail)
+            fit = width - cell_width("    ↓ ") - 11 - cell_width(tail)  # 11: the file's bar and a space
             if cell_width(name) > fit:
                 name = cut_cells(name, max(0, fit - 1)) + "…"
-            lines.append(cut_cells(f"    ↓ {name}{tail}", width))
+            line = cut_cells(f"    ↓ {'█' * filled}{'░' * (10 - filled)} {name}{tail}", width)  # cut plain, then colored
+            lines.append(dim(line[:6]) + cyan(line[6:6 + filled]) + dim(line[6 + filled:]))
         if len(shown) < len(active):
-            lines.append(f"    … and {len(active) - len(shown)} more")
+            lines.append(dim(f"    … and {len(active) - len(shown)} more"))
         return lines
 
     def clear(self):

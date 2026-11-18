@@ -218,6 +218,31 @@ class BlockTest(unittest.TestCase):
             self.assertLessEqual(ui.cell_width(line), 39)
             self.assertTrue(line.endswith("50% of 10 B"), line)
 
+    def test_each_file_has_a_ten_cell_bar_after_the_arrow(self):
+        out = self.draw([("gba/a.zip", 0, 100), ("gba/b.zip", 42, 100), ("gba/c.zip", 100, 100)])
+        below = self.lines(out)[1:]
+        self.assertTrue(below[0].startswith("    ↓ ░░░░░░░░░░ gba/a.zip"), below[0])
+        self.assertTrue(below[1].startswith("    ↓ ████░░░░░░ gba/b.zip"), below[1])
+        self.assertTrue(below[2].startswith("    ↓ ██████████ gba/c.zip"), below[2])
+
+    def test_file_bar_is_cyan_and_the_rest_dim(self):
+        with mock.patch.object(ui, "_COLOR", True):
+            out = self.draw([("gba/b.zip", 42, 100), ("gba/c.zip", 0, 1)] + [("x", 0, 1)] * 30, rows=4)
+        below = out.split("\n")[1:]
+        self.assertTrue(below[0].startswith("\x1b[2m    ↓ \x1b[0m\x1b[36m████\x1b[0m\x1b[2m░░░░░░ gba/b.zip"), below[0])
+        self.assertTrue(below[-1].startswith("\x1b[2m    … and 31 more\x1b[0m"), below[-1])
+
+    def test_long_names_leave_room_for_the_file_bar(self):
+        for columns in (33, 40, 80):  # 33: the narrowest that still fits the bar, "…" and the tail
+            out = self.draw([("psx/" + "x" * 300 + ".chd", 5, 10)], columns=columns)
+            line = self.lines(out)[1]
+            self.assertLessEqual(len(line), columns - 1)
+            self.assertTrue(line.endswith("50% of 10 B"), line)
+
+    def test_more_line_has_no_bar(self):
+        out = self.draw([(f"gba/{n}.zip", 0, 1) for n in range(8)], rows=5)
+        self.assertEqual(self.lines(out)[3], "    … and 6 more")
+
     def test_no_active_draws_just_the_bar(self):
         out = self.draw([])
         self.assertEqual(len(self.lines(out)), 1)
