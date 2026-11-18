@@ -373,15 +373,14 @@ def pick_surprise_systems(systems):
 
 
 def toggle_surprise(name):
-    """Switch a card's Surprise on or off (on is the absence of the field); returns the new state."""
+    """Switch a card's Surprise on or off (see surprise.set_enabled); returns the new state."""
     cards = store.load_cards()
     entry = cards.get(name)
     if not isinstance(entry, dict):
-        return True
-    if entry.get("surprise") is False:
-        entry.pop("surprise")
-    else:
-        entry["surprise"] = False
+        return surprise.enabled(entry)
+    on = not surprise.enabled(entry)
+    surprise.set_enabled(entry, on)
+    if not on:
         entry.pop("surprises", None)  # off clears the current picks
     store.write_cards(cards)
     return surprise.enabled(entry)
