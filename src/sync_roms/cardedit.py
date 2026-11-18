@@ -27,9 +27,10 @@ LIST_KEYS = [("Enter", "the system's games"), ("f", "full system: every file in 
              ("S", "Surprise menu: turn it on or off, or pick its systems"),
              ("D", "clear every pick, full system and set from the card")]
 GAMES_KEYS = [("s", "sets on this system: narrow to one, or pick its games"),
+              ("r", "narrow the set picked with s to one series of games"),
               ("m", "narrow by scraped metadata (developer, genre, year...)"),
               ("p", "only the games that were surprises lately"), ("v", "the game's variants on other systems"),
-              ("c", "clear the search, set, metadata and surprise filters")]
+              ("c", "clear the search, set, series, metadata and surprise filters")]
 SET_GAMES_KEYS = [("v", "the game's variants on other systems"), ("r", "narrow to one series of games"),
                   ("c", "clear the series filter")]
 SIZING = "…"
@@ -520,14 +521,16 @@ def pick_set(system, sets, games, titles, catalog, current=None, synced=lambda: 
 
 
 class GameFilters:
-    """What a system's games list is narrowed to (a set's games, past surprises, scraped metadata) and the hotkeys that
-    change it, for the card and collection editors. system is a systems.json entry or its view in a games list."""
-    KEYS = (SET_KEY, META_KEY, PAST_SURPRISE_KEY, CLEAR_KEY)
+    """What a system's games list is narrowed to (a set's games and one of its series, past surprises, scraped metadata)
+    and the hotkeys that change it, for the card and collection editors. system is a systems.json entry or its view in a games list."""
+    KEYS = (SET_KEY, SERIES_KEY, META_KEY, PAST_SURPRISE_KEY, CLEAR_KEY)
 
     def __init__(self, system):
         self.system = system
         self.meta = Metadata(system["bucket"])
         self.set = None  # (set name, bucket keys, set emoji) the list is narrowed to
+        self.set_games = None  # the set self.set narrows to, its games on this system only
+        self.series = None  # the series of set_games the list is narrowed to as well
         self.meta_filt = {}  # {metadata field: value} the list is narrowed to as well
         self.past = None  # bucket keys of the past surprises the list is narrowed to
 
@@ -535,12 +538,14 @@ class GameFilters:
         """Whether the filters (all but the skip field's metadata one) show a row."""
         wanted = {f: v for f, v in self.meta_filt.items() if f != skip}
         return ((self.set is None or key in self.set[1])
+                and (self.series is None or key in listedit.series_keys(self.set_games, self.series))
                 and (self.past is None or key in self.past)
                 and (not wanted or metafilter.matches(self.meta.get().get(key, {}), wanted)))
 
     def describe(self):
         """The filters line of the list: what it is narrowed to, or empty."""
         parts = ([f"{self.set[2]} {self.set[0]} only"] if self.set else []) \
+            + ([f"🎮 {self.series}"] if self.series else []) \
             + (["🎁 past surprises only"] if self.past is not None else []) \
             + ([metafilter.describe(self.meta_filt)] if self.meta_filt else [])
         return f"{' · '.join(parts)} (c clear filters)" if parts else ""
@@ -549,19 +554,28 @@ class GameFilters:
         """Apply a filter hotkey; returns whether pressed was one. keys: every row's bucket key; place: the list's
         picker.carry_place (c clears its / filter too); choose_set(current set name): pick_set's chosen set, or None."""
         if pressed == CLEAR_KEY:
-            self.set = self.past = None
+            self.set = self.set_games = self.series = self.past = None
             self.meta_filt.clear()
             place.get("session", {}).pop("query", None)  # the / filter too
         elif pressed == PAST_SURPRISE_KEY:
             self.past = surprise.past_keys(self.system["bucket"]) or None
             if self.past is None:
                 edit.note(ui.yellow(f"ℹ️  No past surprises on {self.system['name']}."))
+        elif pressed == SERIES_KEY:
+            if self.set_games is None:
+                edit.note(ui.yellow(f"ℹ️  Narrow {self.system['name']} to a set with s first, then pick one of its series."))
+            else:
+                self.series = pick_series(self.set_games, self.series) or self.series
         elif pressed == META_KEY:
             pick_meta(self.system, self.meta, self.meta_filt, lambda field: [k for k in keys if self.keep(k, field)])
         elif pressed == SET_KEY:
             chosen = choose_set(self.set and self.set[0])
             if chosen:
+                if chosen["name"] != (self.set and self.set[0]):
+                    self.series = None
                 self.set = (chosen["name"], set_filter(chosen, self.system), themeart.set_emoji(chosen))
+                self.set_games = {"name": chosen["name"],
+                                  "games": [g for g in chosen["games"] if g.get("system") == self.system["bucket"]]}
         else:
             return False
         return True
