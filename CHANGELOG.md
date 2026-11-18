@@ -1,5 +1,19 @@
 # Changelog
 
+## [3.4.0](https://github.com/kelsin/sync-roms/compare/v3.3.1...v3.4.0) (2026-11-18)
+
+
+### :video_game: Features
+
+* **cardedit:** mark games with a variant on the card ([#350](https://github.com/kelsin/sync-roms/issues/350)) ([57374e3](https://github.com/kelsin/sync-roms/commit/57374e3f164178b955d8ed8039229994e36a0e2f))
+* **sets:** filter set games by series ([#353](https://github.com/kelsin/sync-roms/issues/353)) ([d0fbfee](https://github.com/kelsin/sync-roms/commit/d0fbfeefc3d6799fc9036f28d57225b224f11c4e))
+
+
+### :bug: Bug Fixes
+
+* **edit:** clear the search text with c along with the other filters ([#349](https://github.com/kelsin/sync-roms/issues/349)) ([5976256](https://github.com/kelsin/sync-roms/commit/597625675600308508187f866a097b316675f006))
+* **surprise:** draw a fresh card's surprises from all its systems ([#352](https://github.com/kelsin/sync-roms/issues/352)) ([a55e174](https://github.com/kelsin/sync-roms/commit/a55e17436624cb732bc5821fdc69009ccd06c1eb))
+
 ## [3.3.1](https://github.com/kelsin/sync-roms/compare/v3.3.0...v3.3.1) (2026-11-18)
 
 
