@@ -9,7 +9,7 @@ import json
 import os
 import threading
 
-from . import inventory, runtime, s3, scrape_plan, shared, store, ui
+from . import inventory, s3, scrape_plan, shared, store, ui
 
 _lock = threading.RLock()  # scrape runs match ROMs on several threads
 _GONE = object()  # a pending change that removes the ROM's entry
@@ -126,8 +126,6 @@ def _notgames():
 def _write(key, change):
     """Apply change to the storage file (read fresh) and write it; a storage error only warns."""
     try:
-        if runtime.ROOT and not os.path.isdir(runtime.ROOT):  # an unmounted share: never create the file outside it
-            raise FileNotFoundError(f"{runtime.ROOT} is missing")
         shared.update(key, _parse, {}, change, scrape_plan.dump_json)
     except (*s3.ERRORS, ValueError) as e:
         ui.warn(f"Couldn't save {key} in storage ({e}); this run's changes to it are not kept")
@@ -330,8 +328,8 @@ def clear_notgame(system, rom):
 
 
 class _Snapshot:
-    """manual_match, is_unknown, is_notgame and not_offered for checking many ROMs (each system's files are read once
-    per run anyway)."""
+    """manual_match, is_unknown, is_notgame and not_offered for checking many ROMs. Only the non-games are read when it
+    is made; each system's matches, unknown and not-offered files are read when first asked about (once per run)."""
 
     def __init__(self):
         self._notgames = set(notgames())

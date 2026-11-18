@@ -73,6 +73,7 @@ class Refresh(unittest.TestCase):
         self.addCleanup(tmp.cleanup)
         self.storage = os.path.join(tmp.name, "storage")
         self.mirror = os.path.join(tmp.name, "mirror")
+        os.makedirs(self.storage)  # a storage folder that isn't there is an unmounted share
         self.warned, self.calls, self.downloads, self.order = [], [], [], []
         self.real_put_file, self.real_put_text = s3.put_file, s3.put_text
         self.releases = {}  # repo -> release list or an exception

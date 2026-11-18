@@ -7,7 +7,7 @@ from unittest import mock
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 from helpers import StorageDir  # noqa: E402
-from sync_roms import s3, scrape_files, scrape_state, shared  # noqa: E402
+from sync_roms import runtime, s3, scrape_files, scrape_state, shared  # noqa: E402
 
 H = {"md5": "a", "sha1": "b", "crc": "c"}
 INFO = {"name": "Bios", "genre": "", "year": "1985", "desc": ""}
@@ -174,6 +174,13 @@ class ScrapeStateTest(StorageDir):
         self.assertFalse(scrape_state.is_unknown("nes", "c.zip"))
         self.assertEqual(self.stored("scrapes/nes/unknown.json"), {})
 
+    def test_clear_unknown_of_a_system_also_clears_entries_another_machine_added(self):
+        self.store("scrapes/gba/unknown.json", {"a.zip": True})
+        self.assertTrue(scrape_state.is_unknown("gba", "a.zip"))  # loaded
+        self.store("scrapes/gba/unknown.json", {"a.zip": True, "theirs.zip": True})
+        scrape_state.clear_unknown("gba")  # clears the system, not only the entries this run knew
+        self.assertEqual(self.stored("scrapes/gba/unknown.json"), {})
+
     def test_clear_unknown_one_rom_only(self):
         scrape_state.mark_unknown("gba", "a.zip")
         scrape_state.mark_unknown("gba", "b.zip")
@@ -201,7 +208,7 @@ class ScrapeStateTest(StorageDir):
     def test_unmounted_share_is_not_written(self):
         scrape_state.manual_match("gba", "a.zip")
         missing = os.path.join(self.tmp.name, "unmounted")
-        with mock.patch.object(scrape_state.runtime, "ROOT", missing), mock.patch.object(scrape_state.ui, "warn") as warn:
+        with mock.patch.object(runtime, "ROOT", missing), mock.patch.object(scrape_state.ui, "warn") as warn:
             scrape_state.save_match("gba", "a.zip", 5)
         self.assertIn("is missing", warn.call_args.args[0])
         self.assertFalse(os.path.exists(missing))
@@ -244,7 +251,7 @@ class ScrapeStateTest(StorageDir):
     def test_reads_come_from_the_mirror_once_per_run(self):
         self.store("scrapes/gba/matches.json", {"a.zip": 3})
         self.assertEqual(scrape_state.manual_match("gba", "a.zip"), 3)
-        scrape_state.snapshot()  # loads the other kinds
+        scrape_state.snapshot()  # reads notgames.json
         with mock.patch.object(shared, "load", side_effect=AssertionError("loaded again")):
             self.assertEqual(scrape_state.manual_match("gba", "b.zip"), None)
             scrape_state.snapshot()

@@ -115,6 +115,8 @@ def update(key, parse, empty, change, dump):
 
     A missing file counts as `empty` (and is created). change(data) mutates data or returns the new value; when it
     leaves an existing file's data equal to what was read, nothing is written."""
+    if runtime.ROOT and not os.path.isdir(runtime.ROOT):  # an unmounted share, not a missing file
+        raise FileNotFoundError(f"{runtime.ROOT} is missing")
     try:
         data, existed = parse(read(key)), True
     except s3.ERRORS as e:

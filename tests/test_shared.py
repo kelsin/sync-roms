@@ -146,10 +146,6 @@ class WriteTest(SharedTest):
             shared.read("nope.json")
 
 
-if __name__ == "__main__":
-    unittest.main()
-
-
 class UpdateTest(SharedTest):
     def update(self, change, key="x.json"):
         return shared.update(key, parse, {}, change, lambda d: json.dumps(d))
@@ -179,3 +175,14 @@ class UpdateTest(SharedTest):
     def test_empty_change_still_creates_a_missing_file(self):
         self.update(lambda d: None)
         self.assertEqual(self.mirror("x.json"), "{}")
+
+    def test_unmounted_storage_folder_raises_and_writes_nothing(self):
+        missing = os.path.join(self.root.name, "unmounted")
+        with mock.patch.object(runtime, "ROOT", missing), self.assertRaises(FileNotFoundError):
+            shared.update("x.json", parse, {}, lambda d: d.update(a=1), json.dumps)
+        self.assertFalse(os.path.exists(missing))
+        self.assertFalse(os.path.exists(shared.local_path("x.json")))
+
+
+if __name__ == "__main__":
+    unittest.main()
