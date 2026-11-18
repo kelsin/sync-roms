@@ -258,7 +258,7 @@ Every mode is a command (`sync-roms COMMAND --help` explains one; plain `sync-ro
 | `tools install` | install 7z and chdman | `--install-tools` |
 | `mirror [DIR]` / `mirror use DIR` / `mirror clear` | local mirror | `--mirror`, `--use-mirror`, `--clear-mirror` |
 | `cache [update [--full]]` | show the storage cache, or read all of storage into it (see below) | |
-| `config show\|path` | effective settings and where each came from | |
+| `config show\|path` / `config set NAME VALUE` / `config unset NAME` | effective settings and where each came from; change or remove one in `settings.json` (see below) | |
 | `doctor` | check AWS profile, storage, tools and data files | |
 | `check` | validate your JSON data files | |
 | `completion bash\|zsh\|fish` | shell completion script | |
@@ -300,7 +300,7 @@ On `esde` and `emudeck` cards every Vita game zip in `psvita/` gets a `.psvita` 
 | `--use-mirror DIR` | Same as `--mirror DIR`, then save `DIR` as the local mirror |
 | `--clear-mirror` | Forget the saved mirror (its files are left alone) |
 | `--diff [DIR]` | Compare a folder with a bucket system's folder (the old form of `diff`; see `--system`) |
-| `--replace` | `upload` only: make the storage folder match `DIR`. Renamed files are moved by content (big bucket files without an MD5 are compared on samples, and those renames are marked) and left-over storage files are listed so you pick which to delete |
+| `--replace` | `upload` only: make the storage folder match `DIR`. Renamed files are moved by content (big bucket files without an MD5 are compared on samples, and those renames are marked) and left-over storage files are listed so you tick which to delete (none are ticked at first) |
 | `--devices` | List the supported devices with their chip and the number of systems each one gets, then exit |
 | `-y`, `--yes` | Answer prompts with their default |
 | `--device ID\|full`, `--layout NAME` | Sync: choose the setup without the picker (it is saved for the card) |
@@ -337,6 +337,17 @@ On `esde` and `emudeck` cards every Vita game zip in `psvita/` gets a `.psvita` 
 | `ROMS_PROFILE` | AWS profile to use. Overrides `profile` in `settings.json` (default `roms-readonly`) |
 | `ROMS_WRITE_PROFILE` | AWS profile used to write in `--upload`, `--clean-scrapes` and `scrape` modes. Overrides `write_profile` in `settings.json` (default `roms`) |
 | `NO_COLOR` | Disable colors |
+
+### Settings (`config`)
+
+`sync-roms config set NAME VALUE` saves one setting in `settings.json` and `sync-roms config unset NAME` removes it
+(it then falls back to its default). The names are `bucket`, `root`, `endpoint`, `profile`, `write_profile`, `mirror`,
+`screenscraper_user` and `screenscraper_password` (text), `eject` and `storage_cache_declined` (`true` or `false`),
+`surprise_ttl_days` (a positive number of days) and `surprise_excluded_systems` (comma-separated system ids, e.g.
+`gba,snes`); `root` and `mirror` must be absolute paths (`~` is expanded). Other names and values that don't fit are refused (exit 2) with the valid ones. The password is saved but
+never printed (`scrape --set-credentials` asks for it without echoing it, and keeps it out of your shell history). A
+`settings.json` that can't be parsed is never overwritten (exit 3). Flags and environment variables still override
+the saved `bucket`, `root`, `endpoint`, `profile` and `write_profile`.
 
 ## Uploading ROMs (`--upload`)
 
@@ -584,7 +595,7 @@ The sets live in storage as `sets/<id>.json`, so everyone using that storage sha
 
 ### Collections
 
-`sync-roms collections edit` edits your own collections of favourite games. A collection is a file like a set file (`{"name": ..., "games": [...]}`) at `~/.sync-roms/collections/<id>.json`; the editor has the same keys as the set editor and saves straight to that folder when you pick Done (Quit discards). `Ctrl-C` with changes pending asks whether to save them first (a collection with no games is not saved; a second `Ctrl-C` discards); the toggles of a games list open at that moment (or just left for its category question) count, and the games it adds get no category. They are personal: they never go to storage or into the repo, and no `git` or `gh` is needed. Deleting a collection that cards use asks first and removes it from those cards. **Add games from a system** lists the systems with files in storage by company then name (with a storage cache each shows its file count); there, `p` narrows the list to games that were surprises within the last `surprise_ttl_days` and `c` shows every game again, so a surprise you liked is easy to keep.
+`sync-roms collections edit` edits your own collections of favourite games. A collection is a file like a set file (`{"name": ..., "games": [...]}`) at `~/.sync-roms/collections/<id>.json`; the editor has the same keys as the set editor, and Done or Esc shows the changes; confirming saves them to that folder (Quit discards). `Ctrl-C` with changes pending asks whether to save them first (a second `Ctrl-C` discards); the toggles of a games list open at that moment (or just left for its category question) count, and the games it adds get no category. They are personal: they never go to storage or into the repo, and no `git` or `gh` is needed. Deleting a collection that cards use asks first and removes it from those cards; the deleted file is kept as `<id>.json.bak`. **Add games from a system** lists the systems with files in storage by company then name (with a storage cache each shows its file count); there, `p` narrows the list to games that were surprises within the last `surprise_ttl_days` and `c` clears the filters, so a surprise you liked is easy to keep.
 
 #### Theme art for collections
 

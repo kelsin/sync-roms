@@ -7,7 +7,7 @@ from . import downloads, ui
 
 FRONTEND_LAYOUTS = {"esde", "knulli", "emudeck"}
 _LABELS = {"esde": "ES-DE", "knulli": "Knulli", "emudeck": "EmuDeck"}
-_ESDE = {"esde", "emudeck"}  # layouts whose frontend is ES-DE
+ESDE_LAYOUTS = ("esde", "emudeck")  # layouts whose frontend is ES-DE
 _DROPPED = '*",./:;<>\\|\n\t\r'  # characters ES-DE rejects in a collection name
 _UNESCAPE = {"&quot;": '"', "&apos;": "'"}
 _ESCAPE = {'"': "&quot;", "'": "&apos;"}
@@ -26,7 +26,7 @@ def esde_dir(layout_name, base):
 
 
 def _root(layout_name, base):
-    if layout_name in _ESDE:
+    if layout_name in ESDE_LAYOUTS:
         return esde_dir(layout_name, base)
     return os.path.join(base, "system", "configs", "emulationstation")
 
@@ -36,13 +36,13 @@ def collection_path(layout_name, base, name):
 
 
 def settings_path(layout_name, base):
-    if layout_name in _ESDE:
+    if layout_name in ESDE_LAYOUTS:
         return os.path.join(_root(layout_name, base), "settings", "es_settings.xml")
     return os.path.join(_root(layout_name, base), "es_settings.cfg")
 
 
 def collection_line(layout_name, folder, rel):
-    return f"%ROMPATH%/{folder}/{rel}" if layout_name in _ESDE else f"./roms/{folder}/{rel}"
+    return f"%ROMPATH%/{folder}/{rel}" if layout_name in ESDE_LAYOUTS else f"./roms/{folder}/{rel}"
 
 
 def _string_setting(name):
@@ -70,7 +70,7 @@ def set_string(text, layout_name, name, value):
     line = f'<string name="{name}" value="{saxutils.escape(value, _ESCAPE)}" />'
     if match:
         return text[:match.start()] + line + text[match.end():]
-    if layout_name in _ESDE:
+    if layout_name in ESDE_LAYOUTS:
         if text and not text.endswith("\n"):
             text += "\n"
         return (text or '<?xml version="1.0"?>\n') + line + "\n"

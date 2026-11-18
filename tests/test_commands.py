@@ -16,6 +16,100 @@ from helpers import Cmd, DataDir, storage_sets  # noqa: E402,F401
 
 
 
+class ConfigSetTest(Cmd):
+    def settings(self):
+        return self.read("settings.json") if os.path.exists(self.path("settings.json")) else {}
+
+    def test_sets_each_kind_of_setting(self):
+        for argv, saved in ((["bucket", "b"], {"bucket": "b"}), (["eject", "false"], {"eject": False}),
+                            (["storage_cache_declined", "true"], {"storage_cache_declined": True}),
+                            (["surprise_ttl_days", "30"], {"surprise_ttl_days": 30}),
+                            (["surprise_excluded_systems", "gba, snes"], {"surprise_excluded_systems": ["gba", "snes"]})):
+            with self.subTest(argv=argv):
+                code, out, err = self.run_cmd("config", "set", *argv)
+                self.assertEqual((code, err), (0, ""))
+                self.assertEqual({k: self.settings()[k] for k in saved}, saved)
+                self.assertIn(argv[0], out)
+
+    def test_unset_removes_the_setting(self):
+        self.write_json("settings.json", {"bucket": "b", "eject": False})
+        code, _, err = self.run_cmd("config", "unset", "eject")
+        self.assertEqual((code, err), (0, ""))
+        self.assertEqual(self.settings(), {"bucket": "b"})
+
+    def test_bad_values_are_refused(self):
+        for argv, message in ((["eject", "no"], "true or false"), (["surprise_ttl_days", "0"], "positive"),
+                              (["surprise_ttl_days", "x"], "positive"), (["surprise_excluded_systems", "gba,nope"], "nope"),
+                              (["bucket", ""], "bucket"), (["eject"], "needs a value")):
+            with self.subTest(argv=argv):
+                code, _, err = self.run_cmd("config", "set", *argv)
+                self.assertEqual(code, 2)
+                self.assertIn(message, err)
+        self.assertEqual(self.settings(), {})
+
+    def test_unknown_names_list_the_known_ones(self):
+        for action in ("set", "unset"):
+            with self.subTest(action=action):
+                code, _, err = self.run_cmd("config", action, "nope", *(["x"] if action == "set" else []))
+                self.assertEqual(code, 2)
+                self.assertIn("'nope'", err)
+                self.assertIn("surprise_ttl_days", err)
+        code, _, err = self.run_cmd("config", "set")
+        self.assertEqual(code, 2)
+        self.assertIn("`config set` needs a setting's name. Known: bucket", err)
+
+    def test_extra_arguments_are_refused(self):
+        for argv in (["show", "bucket"], ["path", "x"], ["unset", "eject", "x"]):
+            with self.subTest(argv=argv):
+                self.assertEqual(self.run_cmd("config", *argv)[0], 2)
+
+    def test_paths_are_expanded_and_must_be_absolute(self):
+        for name in ("root", "mirror"):
+            with self.subTest(name=name):
+                code, _, err = self.run_cmd("config", "set", name, "~/roms")
+                self.assertEqual((code, err), (0, ""))
+                self.assertEqual(self.settings()[name], os.path.expanduser("~/roms"))
+                code, _, err = self.run_cmd("config", "set", name, "roms")
+                self.assertEqual(code, 2)
+                self.assertIn("roms is not an absolute path: give the whole folder path, e.g. /Volumes/roms", err)
+                self.assertEqual(self.settings()[name], os.path.expanduser("~/roms"))
+
+    def test_unset_of_a_missing_setting_says_so(self):
+        code, out, _ = self.run_cmd("config", "unset", "eject")
+        self.assertEqual(code, 0)
+        self.assertIn("eject wasn't set", out)
+        self.assertNotIn("Removed", out)
+
+    def test_unset_with_a_value_never_echoes_it(self):
+        code, out, err = self.run_cmd("config", "unset", "screenscraper_password", "secret4")
+        self.assertEqual(code, 2)
+        self.assertNotIn("secret4", out + err)
+
+    def test_dry_run_says_it_cant_preview_the_change(self):
+        for action in (["set", "eject", "false"], ["unset", "eject"]):
+            with self.subTest(action=action):
+                code, _, err = self.run_cmd("config", *action, "-n")
+                self.assertEqual(code, 2)
+                self.assertIn(f"--dry-run can't preview `config {action[0]}`", err)
+                self.assertNotIn("has no effect", err)
+        self.assertEqual(self.settings(), {})
+
+    def test_password_is_saved_but_never_shown(self):
+        code, out, err = self.run_cmd("config", "set", "screenscraper_password", "p-secret")
+        self.assertEqual(code, 0)
+        self.assertEqual(self.settings(), {"screenscraper_password": "p-secret"})
+        self.assertIn("screenscraper_password", out)
+        self.assertNotIn("p-secret", out + err)
+
+    def test_broken_settings_file_is_not_overwritten(self):
+        with open(self.path("settings.json"), "w") as f:
+            f.write("{not json")
+        code, _, err = self.run_cmd("config", "set", "bucket", "b")
+        self.assertEqual(code, 3)
+        with open(self.path("settings.json")) as f:
+            self.assertEqual(f.read(), "{not json")
+
+
 class CardCmd(Cmd):
     """Cmd with a card SD saved, so `games` commands can name it."""
 

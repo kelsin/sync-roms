@@ -1,6 +1,7 @@
 import os
 import sys
 import unittest
+from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
@@ -15,6 +16,12 @@ def load_tests(loader, tests, pattern):
 
 
 class Picks(Flow):
+    def setUp(self):
+        super().setUp()
+        p = mock.patch("builtins.print")  # without a storage cache, listing a folder says so
+        p.start()
+        self.addCleanup(p.stop)
+
     def picks(self):
         return CardPicks("c", (DEVICE, "esde"))
 
@@ -36,6 +43,16 @@ class Picks(Flow):
         self.switch(p, "gba/Ruby.zip", False)
         self.assertTrue(p.save())
         self.assertEqual(store.card_excluded("c"), {"gba": ["gba/Ruby.zip"]})
+
+    def test_one_pass_turning_several_games_on_and_off_keeps_the_card_order(self):
+        self.card(games={"gba": [g("gba/Emerald.zip"), g("gba/Ruby.sav"), g("gba/Ruby.zip")]})
+        p = self.picks()
+        sp, notes = p.system(GBA), p.cover()
+        keys = ["gba/Emerald.zip", "gba/Ruby.zip", "gba/Zelda.zip"]
+        sp.apply(keys, notes, sp.states(notes), [False, False, True])
+        self.assertEqual([x["bucket"] for x in sp.games], ["gba/Ruby.sav", "gba/Zelda.zip"])
+        sp.apply(keys, notes, sp.states(notes), [True, False, True])
+        self.assertEqual([x["bucket"] for x in sp.games], ["gba/Ruby.sav", "gba/Zelda.zip", "gba/Emerald.zip"])
 
     def test_save_without_changes_returns_false(self):
         self.card(games={"gba": [g("gba/Zelda.zip")]})

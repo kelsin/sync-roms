@@ -15,8 +15,13 @@ RUBY = {"title": "Ruby", "system": "gba", "bucket": "gba/Ruby.zip"}
 
 class Shared(unittest.TestCase):
     def test_set_editor_uses_the_shared_helpers(self):
-        for name in ("view", "stocked", "insert_game", "reconcile", "recategorize", "ask_category", "game_label", "add_from_set"):
+        for name in ("view", "add_from_system", "folder_lister", "insert_game", "reconcile", "recategorize", "ask_category", "game_label", "add_from_set"):
             self.assertIs(getattr(setedit, name), getattr(listedit, name))
+
+    def test_both_editors_share_the_menu_and_its_review(self):
+        for module in (setedit, collectionedit):
+            self.assertIs(module.edit_menu, listedit.edit_menu)
+            self.assertIs(module.diff_lists, listedit.diff_lists)
 
 
 class Stocked(unittest.TestCase):
@@ -89,9 +94,9 @@ class Stocked(unittest.TestCase):
 class Discs(unittest.TestCase):
     def test_a_multi_disc_game_is_one_row_and_keeps_its_discs(self):
         entry = {"bucket": "psx", "name": "PlayStation", "full_system": False, "games": []}
-        self.assertEqual([r[1] for r in collectionedit.system_rows(entry, DISCS)], ["psx/Crash.chd", "psx/FF7.m3u"])
+        self.assertEqual([r[1] for r in listedit.system_rows(entry, DISCS)], ["psx/Crash.chd", "psx/FF7.m3u"])
         games = [{"title": "FF7", "system": "psx", "bucket": "psx/FF7.m3u"}, {"title": "Crash", "system": "psx", "bucket": "psx/Crash.chd"}]
-        collectionedit.fold_discs(games, DISCS)
+        listedit.fold_discs(games, DISCS)
         self.assertEqual(games[0]["files"], ["psx/FF7 (Disc 1).chd", "psx/FF7 (Disc 2).chd"])
         self.assertNotIn("files", games[1])
 
@@ -182,7 +187,7 @@ class Discs(unittest.TestCase):
 
         def fake(title, labels, **kw):
             if kw.get("multi"):
-                lists.append((title, list(labels), kw.get("filters", "")))
+                lists.append((title, list(labels), kw.get("filters", ""), kw.get("hint"), kw.get("key_help")))
                 steps = [("p", 0), ("c", 0), kw["initial"]]
                 return steps[len(lists) - 1]
             return next(picks)
@@ -192,7 +197,9 @@ class Discs(unittest.TestCase):
                 mock.patch.object(surprise, "past_keys", return_value={"gba/Ruby.zip"}):
             collectionedit.edit_one(collection, SYSTEMS, lambda bucket: keys if bucket == "gba" else set())
         self.assertEqual(lists[1][1], ["Ruby.zip"])
-        self.assertEqual("🎁 past surprises only (c shows all)", lists[1][2])
+        self.assertEqual("🎁 past surprises only (c clear filters)", lists[1][2])
+        self.assertIn("c clear filters", lists[0][3])
+        self.assertEqual([k for k, _ in lists[0][4]], ["s", "m", "p", "c"])  # what ? lists
         self.assertNotIn("past surprises", lists[1][0])
         self.assertEqual(len(lists[2][1]), 2)
 
@@ -234,15 +241,101 @@ class Discs(unittest.TestCase):
         self.assertEqual(len(lists[3][1]), 3)
 
 
+class AddFromSystem(unittest.TestCase):
+    """listedit.add_from_system, shared by the set and collection editors."""
+
+    def add(self, listing, toggle_games=None, ask=None, **kw):
+        picks = iter([1])  # PlayStation
+        shown = listedit.view(listing, SYSTEMS)
+        with mock.patch.object(listedit, "stocked", lambda systems: systems), \
+                mock.patch.object(listedit, "file_counts", lambda systems: [[] for _ in systems]), \
+                mock.patch.object(picker, "filter_list", lambda *a, **k: next(picks)), \
+                mock.patch.object(edit, "toggle_games", toggle_games or (lambda *a, **k: None)), \
+                mock.patch.object(ui, "ask", side_effect=ask or [""]), mock.patch("builtins.print"):
+            listedit.add_from_system(listing, SYSTEMS, shown, lambda bucket: DISCS if bucket == "psx" else set(),
+                                     "📦 Favs", **kw)
+
+    @staticmethod
+    def switch_on(rows, i):
+        s, key, title, _ = rows[i]
+        s["games"].append({"bucket": key, "title": title})
+
+    def test_new_games_get_the_category_asked_for(self):
+        listing = {"name": "Favs", "games": [{"title": "Ruby", "category": "Cave", "system": "gba", "bucket": "gba/Ruby.zip"}]}
+        titles = []
+
+        def toggle(title, rows, **k):
+            titles.append(title)
+            self.switch_on(rows, 0)
+        self.add(listing, toggle, ask=["cave"])
+        self.assertEqual(titles, ["✏️  PlayStation — ✅ in 📦 Favs, ⬜ in storage only"])
+        self.assertEqual(listing["games"][1], {"title": "Crash", "category": "Cave", "system": "psx", "bucket": "psx/Crash.chd"})
+
+    def test_without_categories_nothing_is_asked_and_toggle_shows_the_rows(self):
+        listing = {"name": "Favs", "games": []}
+        seen = []
+
+        def toggle(s, title, rows):
+            seen.append((s["bucket"], [r[1] for r in rows]))
+            self.switch_on(rows, 1)
+        self.add(listing, mock.Mock(side_effect=AssertionError("plain list")), ask=AssertionError("asked"),
+                 categories=False, toggle=toggle)
+        self.assertEqual(seen, [("psx", ["psx/Crash.chd", "psx/FF7.m3u"])])
+        self.assertEqual(listing["games"], [{"title": "FF7", "system": "psx", "bucket": "psx/FF7.m3u",
+                                             "files": ["psx/FF7 (Disc 1).chd", "psx/FF7 (Disc 2).chd"]}])
+
+    def test_ctrl_c_keeps_the_toggles_without_a_category_and_is_raised_again(self):
+        listing = {"name": "Favs", "games": []}
+
+        def toggle(title, rows, **k):
+            self.switch_on(rows, 0)
+            raise KeyboardInterrupt
+        with self.assertRaises(KeyboardInterrupt):
+            self.add(listing, toggle, ask=AssertionError("asked"))
+        self.assertEqual(listing["games"], [{"title": "Crash", "system": "psx", "bucket": "psx/Crash.chd"}])
+
+    def test_ctrl_c_at_the_category_question_adds_them_without_one(self):
+        listing = {"name": "Favs", "games": []}
+        with self.assertRaises(KeyboardInterrupt):
+            self.add(listing, lambda title, rows, **k: self.switch_on(rows, 0), ask=KeyboardInterrupt)
+        self.assertEqual(listing["games"], [{"title": "Crash", "system": "psx", "bucket": "psx/Crash.chd"}])
+
+    def test_esc_at_the_system_list_changes_nothing(self):
+        listing = {"name": "Favs", "games": []}
+        with mock.patch.object(listedit, "stocked", lambda systems: systems), \
+                mock.patch.object(listedit, "file_counts", lambda systems: []), \
+                mock.patch.object(picker, "filter_list", return_value=None):
+            listedit.add_from_system(listing, SYSTEMS, listedit.view(listing, SYSTEMS), AssertionError, "📦 Favs")
+        self.assertEqual(listing["games"], [])
+
+
+class FolderLister(unittest.TestCase):
+    def test_each_folder_is_listed_once(self):
+        asked = []
+
+        def folder_keys(bucket):
+            asked.append(bucket)
+            return {bucket + "/a.zip"}
+        with mock.patch.object(store, "folder_keys", folder_keys):
+            keys_of = listedit.folder_lister()
+            self.assertEqual(keys_of("gba"), {"gba/a.zip"})
+            self.assertEqual(keys_of("gba"), {"gba/a.zip"})
+            self.assertEqual(keys_of("psx"), {"psx/a.zip"})
+            self.assertEqual(listedit.folder_lister()("gba"), {"gba/a.zip"})  # a new lister lists again
+        self.assertEqual(asked, ["gba", "psx", "gba"])
+
+
 class Editor(DataDir):
     def setUp(self):
         super().setUp()
         patch = mock.patch.object(edit, "note")  # what the editor says at its end
         self.note = patch.start()
         self.addCleanup(patch.stop)
+        self.asked, self.reviewed = [], []  # the review's questions, and the changes it showed
 
-    def run_editor(self, picks, asks=(), confirm=True, edit_one=None):
-        picks, confirms = iter(picks), []
+    def run_editor(self, picks, asks=(), confirm=True, edit_one=None, choose=()):
+        """choose: the review's answers (s save, e keep editing, d discard); save once they run out."""
+        picks, confirms, choose = iter(picks), [], iter(choose)
 
         def answer(value):  # KeyboardInterrupt in picks or as confirm is Ctrl-C there
             if value is KeyboardInterrupt:
@@ -252,6 +345,8 @@ class Editor(DataDir):
                 mock.patch.object(picker, "filter_list", lambda *a, **k: answer(next(picks))), \
                 mock.patch.object(ui, "ask", side_effect=list(asks)), \
                 mock.patch.object(ui, "confirm", lambda text, **k: confirms.append(text) or answer(confirm)), \
+                mock.patch.object(ui, "choose", lambda question, *a: self.asked.append(question) or next(choose, "s")), \
+                mock.patch.object(listedit, "print_changes", lambda found: self.reviewed.append(found)), \
                 mock.patch.object(collectionedit, "edit_one", edit_one or (lambda c, systems, keys_of: c["games"].append(dict(RUBY)))), \
                 mock.patch("subprocess.run") as run:
             code = collectionedit.edit_collections()
@@ -262,6 +357,39 @@ class Editor(DataDir):
         code, _, _ = self.run_editor([0, 2], asks=["Favs", "my faves"])  # ➕ New, then (one collection) ✅ Done
         self.assertEqual(code, 0)
         self.assertEqual(self.read("collections/favs.json"), {"name": "Favs", "description": "my faves", "games": [RUBY]})
+
+    def test_esc_reviews_and_saves(self):
+        code, _, _ = self.run_editor([0, None], asks=["Favs", ""])  # ➕ New, then Esc
+        self.assertEqual(code, 0)
+        self.assertEqual(self.asked, ["💾 Save these changes?"])
+        self.assertEqual(self.reviewed, [[("new", "favs", ["+ Ruby (gba/Ruby.zip)"])]])
+        self.assertEqual(self.read("collections/favs.json"), {"name": "Favs", "games": [RUBY]})
+
+    def test_keep_editing_goes_back_to_the_menu_and_discard_saves_nothing(self):
+        code, _, note = self.run_editor([0, None, None], asks=["Favs", ""], choose=["e", "d"])  # ➕ New, Esc, e, Esc, d
+        self.assertEqual(code, 0)
+        self.assertEqual(self.asked, ["💾 Save these changes?"] * 2)
+        self.assertFalse(os.path.exists(self.path("collections")))
+        self.assertIn("Not saved", str(note.call_args_list))
+
+    def test_esc_without_changes_saves_nothing(self):
+        collections.save_collection({"id": "favs", "name": "Favs", "games": [RUBY]})
+        code, _, note = self.run_editor([None])
+        self.assertEqual((code, self.asked), (0, []))
+        self.assertIn("No changes, nothing saved", str(note.call_args_list))
+
+    def test_the_menu_says_esc_reviews(self):
+        seen = []
+
+        def fake(title, labels, **kw):
+            seen.append((title, labels, kw.get("hint")))
+            return None
+        with mock.patch.object(store, "repo_json", return_value=SYSTEMS), mock.patch.object(picker, "filter_list", fake):
+            collectionedit.edit_collections()
+        title, labels, hint = seen[0]
+        self.assertEqual(title, "✏️  Which collection?  (Esc = review & save)")
+        self.assertEqual(labels, ["➕ New collection", "✅ Done (review & save)", "🚪 Quit without saving"])
+        self.assertIn("Esc review", hint)
 
     def test_quit_discards_everything(self):
         collections.save_collection({"id": "favs", "name": "Favs", "games": [RUBY]})
@@ -274,6 +402,7 @@ class Editor(DataDir):
         _, confirms, _ = self.run_editor([(edit.DELETE_KEY, 0), 1])  # delete, then ✅ Done
         self.assertIn("a, b", confirms[0])
         self.assertFalse(os.path.exists(self.path("collections/favs.json")))
+        self.assertEqual(self.read("collections/favs.json.bak"), {"name": "Favs", "games": [RUBY]})
         self.assertEqual(self.read("cards.json"), {"a": {"collections": ["x"]}, "b": {"collections": []}, "c": {}})
 
     def test_declined_delete_keeps_it(self):

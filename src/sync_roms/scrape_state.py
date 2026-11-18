@@ -101,11 +101,13 @@ def _mirrored():
 
 
 def _ledger(name, system):
-    """{rom: value} of one kind for one system, loaded once per run."""
+    """{rom: value} of one kind for one system, loaded once per run. A storage cache older than another machine's first
+    file of this kind treats it as empty until `cache update` (writes still merge with the file in storage)."""
     _check_where()
     loaded = _state.setdefault(name, {})
-    if system not in loaded:
-        loaded[system] = _load(_key(system, name))
+    if system not in loaded:  # a file the storage cache says isn't there isn't looked for
+        absent = inventory.current() is not None and system not in _listed(name)
+        loaded[system] = {} if absent else _load(_key(system, name))
     return loaded[system]
 
 

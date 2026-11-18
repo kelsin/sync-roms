@@ -31,7 +31,7 @@ GAMES_KEYS = [("s", "sets on this system: narrow to one, or pick its games"),
               ("p", "only the games that were surprises lately"), ("v", "the game's variants on other systems"),
               ("c", "clear the search, set, metadata and surprise filters")]
 SET_GAMES_KEYS = [("v", "the game's variants on other systems"), ("r", "narrow to one series of games"),
-                  ("c", "show every game again")]
+                  ("c", "clear the series filter")]
 SIZING = "…"
 
 
@@ -137,7 +137,7 @@ class Metadata:
     def _load(self):
         try:
             with ui.silent_thread():
-                text = s3.get_text(f"{scrape_plan.SCRAPES}/{self.bucket}/metadata.json")
+                text = s3.get_text(scrape_plan.metadata_key(self.bucket))
             result = metafilter.index(json.loads(text), self.bucket)
         except (Exception, SystemExit):  # missing, unreadable or not JSON: no metadata
             result = None
@@ -448,10 +448,7 @@ def pick_card_set(name, setup, systems, current=None):
             if picks.full(s["bucket"]):
                 in_storage[s["bucket"]] = True
                 continue
-            if inventory.current() is None:
-                print(ui.dim(f"📡 Listing {s3.location()}/{s['bucket']}/ ..."))
-            in_storage[s["bucket"]] = {k for k in inventory.files(f"{s['bucket']}/", sizes=False)
-                                       if not k.endswith("/")}
+            in_storage[s["bucket"]] = store.folder_keys(s["bucket"])
     except s3.ERRORS as e:
         edit.note(ui.yellow(f"⚠️  Couldn't list storage: {e}"))
         return None
@@ -520,6 +517,54 @@ def pick_set(system, sets, games, titles, catalog, current=None, synced=lambda: 
     if i is None:
         return None
     return shown[i][0]
+
+
+class GameFilters:
+    """What a system's games list is narrowed to (a set's games, past surprises, scraped metadata) and the hotkeys that
+    change it, for the card and collection editors. system is a systems.json entry or its view in a games list."""
+    KEYS = (SET_KEY, META_KEY, PAST_SURPRISE_KEY, CLEAR_KEY)
+
+    def __init__(self, system):
+        self.system = system
+        self.meta = Metadata(system["bucket"])
+        self.set = None  # (set name, bucket keys, set emoji) the list is narrowed to
+        self.meta_filt = {}  # {metadata field: value} the list is narrowed to as well
+        self.past = None  # bucket keys of the past surprises the list is narrowed to
+
+    def keep(self, key, skip=None):
+        """Whether the filters (all but the skip field's metadata one) show a row."""
+        wanted = {f: v for f, v in self.meta_filt.items() if f != skip}
+        return ((self.set is None or key in self.set[1])
+                and (self.past is None or key in self.past)
+                and (not wanted or metafilter.matches(self.meta.get().get(key, {}), wanted)))
+
+    def describe(self):
+        """The filters line of the list: what it is narrowed to, or empty."""
+        parts = ([f"{self.set[2]} {self.set[0]} only"] if self.set else []) \
+            + (["🎁 past surprises only"] if self.past is not None else []) \
+            + ([metafilter.describe(self.meta_filt)] if self.meta_filt else [])
+        return f"{' · '.join(parts)} (c clear filters)" if parts else ""
+
+    def handle(self, pressed, keys, place, choose_set):
+        """Apply a filter hotkey; returns whether pressed was one. keys: every row's bucket key; place: the list's
+        picker.carry_place (c clears its / filter too); choose_set(current set name): pick_set's chosen set, or None."""
+        if pressed == CLEAR_KEY:
+            self.set = self.past = None
+            self.meta_filt.clear()
+            place.get("session", {}).pop("query", None)  # the / filter too
+        elif pressed == PAST_SURPRISE_KEY:
+            self.past = surprise.past_keys(self.system["bucket"]) or None
+            if self.past is None:
+                edit.note(ui.yellow(f"ℹ️  No past surprises on {self.system['name']}."))
+        elif pressed == META_KEY:
+            pick_meta(self.system, self.meta, self.meta_filt, lambda field: [k for k in keys if self.keep(k, field)])
+        elif pressed == SET_KEY:
+            chosen = choose_set(self.set and self.set[0])
+            if chosen:
+                self.set = (chosen["name"], set_filter(chosen, self.system), themeart.set_emoji(chosen))
+        else:
+            return False
+        return True
 
 
 def _work_out(picks, shown, others, card_usages, to_fetch):
@@ -617,9 +662,7 @@ def edit_system(name, system, setup, to_fetch=None, card_usages=None):
         edit.note(ui.yellow(f"ℹ️  {system['name']} is a full system: every file in its storage folder is downloaded, "
                             "so there is no game list to edit."))
         return False
-    meta = Metadata(bucket)
-    if inventory.current() is None:
-        print(ui.dim(f"📡 Listing {s3.location()}/{bucket}/ ..."))
+    filters = GameFilters(system)
     try:
         sp = picks.system(system)
     except s3.ERRORS as e:
@@ -629,16 +672,6 @@ def edit_system(name, system, setup, to_fetch=None, card_usages=None):
     capacity = budget.card_capacity(card_entry(name, setup, cards))
     work = _work_out(picks, [sp], others, card_usages, to_fetch)
     start = sp.states(picks.cover())
-    filt = None  # (set name, bucket keys, set emoji) the list is narrowed to
-    meta_filt = {}  # {metadata field: value} the list is narrowed to as well
-    past = None  # bucket keys of the past surprises the list is narrowed to
-
-    def keep(key, skip=None):
-        """Whether the filters (all but the skip field's metadata one) show a row."""
-        wanted = {f: v for f, v in meta_filt.items() if f != skip}
-        return ((filt is None or key in filt[1])
-                and (past is None or key in past)
-                and (not wanted or metafilter.matches(meta.get().get(key, {}), wanted)))
 
     pending = None  # (rows shown, notes, states before) of the pass on screen, applied if Ctrl-C ends it
     place = {}  # picker.carry_place's: the last pass's row, filter text, view and scroll
@@ -646,7 +679,7 @@ def edit_system(name, system, setup, to_fetch=None, card_usages=None):
         while True:
             notes = picks.cover()
             base = sp.states(notes)
-            kept = {r[1] for r in sp.rows if keep(r[1])}
+            kept = {r[1] for r in sp.rows if filters.keep(r[1])}
             shown = [r for r in sp.rows if r[1] in kept and sp.playlist_of.get(r[1]) not in kept]  # a shown playlist hides its discs
             keys = [r[1] for r in shown]
             index = {k: i for i, k in enumerate(keys)}
@@ -661,12 +694,11 @@ def edit_system(name, system, setup, to_fetch=None, card_usages=None):
                 now.update(sp.changes(keys, base, state))
                 return _status(work, [(sp, now)], capacity, to_fetch)
 
-            parts = ([f"{filt[2]} {filt[0]} only"] if filt else []) + (["🎁 past surprises only"] if past is not None else []) + ([metafilter.describe(meta_filt)] if meta_filt else [])
             pending = (keys, notes, base, session)
             result = picker.filter_list(f"✏️  {system['name']} on {name} — ✅ synced, ⬜ not, 📦 from a set",
                                         [r[3] for r in shown], multi=True, initial=[start[k] for k in keys],
-                                        extras=extras, hint=GAMES_HINT, hotkeys=(SET_KEY, META_KEY, PAST_SURPRISE_KEY, CLEAR_KEY, VARIANT_KEY),
-                                        key_help=GAMES_KEYS, filters=f"{' · '.join(parts)} (c shows all)" if parts else "",
+                                        extras=extras, hint=GAMES_HINT, hotkeys=(*GameFilters.KEYS, VARIANT_KEY),
+                                        key_help=GAMES_KEYS, filters=filters.describe(),
                                         status=status, row_note=lambda i: edit.variant_line(
                                             keys[i], picks.variants, picks.parents, picks.system_names, picks.on_card),
                                         session=session, note_text=lambda i: _note_text(sp, keys[i]),
@@ -679,26 +711,13 @@ def edit_system(name, system, setup, to_fetch=None, card_usages=None):
             sp.apply(keys, notes, base, session["sel"] if isinstance(result, tuple) else result)
             if not isinstance(result, tuple):
                 break
-            if result[0] == CLEAR_KEY:
-                filt = None
-                past = None
-                meta_filt.clear()
-                place.get("session", {}).pop("query", None)  # the / filter too
-            elif result[0] == PAST_SURPRISE_KEY:
-                past = surprise.past_keys(bucket)
-                if not past:
-                    past = None
-                    edit.note(ui.yellow(f"ℹ️  No past surprises on {system['name']}."))
-            elif result[0] == VARIANT_KEY:
+            if result[0] == VARIANT_KEY:
                 if result[1] is not None and _toggle_variant(picks, keys[result[1]], sp.titles[keys[result[1]]]):
                     work = _work_out(picks, [sp], others, card_usages, to_fetch)
-            elif result[0] == META_KEY:
-                pick_meta(system, meta, meta_filt, lambda field: [r[1] for r in sp.rows if keep(r[1], field)])
             else:
-                chosen = pick_set(system, list(picks.sets_by_id.values()), sp.games, sp.titles, {r[1] for r in sp.rows}, filt and filt[0],
-                                  lambda: {k for k, v in sp.states(picks.cover()).items() if v})
-                if chosen:
-                    filt = (chosen["name"], set_filter(chosen, system), themeart.set_emoji(chosen))
+                filters.handle(result[0], [r[1] for r in sp.rows], place, lambda current: pick_set(
+                    system, list(picks.sets_by_id.values()), sp.games, sp.titles, {r[1] for r in sp.rows}, current,
+                    lambda: {k for k, v in sp.states(picks.cover()).items() if v}))
     except KeyboardInterrupt:  # Ctrl-C: keep the toggles
         if pending:
             keys, notes, base, session = pending
@@ -742,8 +761,6 @@ def edit_set(name, game_set, setup, to_fetch=None, card_usages=None):
     found = set_view_keys(game_set, playable)
     sps = {}  # {system bucket: SystemPicks} of the systems with set games, but full ones
     for s in {s["bucket"]: s for s, _, _ in found if not picks.full(s["bucket"])}.values():
-        if inventory.current() is None:
-            print(ui.dim(f"📡 Listing {s3.location()}/{s['bucket']}/ ..."))
         try:
             sps[s["bucket"]] = picks.system(s)
         except s3.ERRORS as e:
@@ -815,7 +832,7 @@ def edit_set(name, game_set, setup, to_fetch=None, card_usages=None):
                 f"{themeart.set_emoji(game_set)} {game_set['name']} on {name} — ✅ synced, ⬜ not, 📦 from a set",
                 [r[3] for r in shown], multi=True, initial=[start[k] for k in keys], extras=extras,
                 hint=SET_GAMES_HINT, hotkeys=(VARIANT_KEY, SERIES_KEY, CLEAR_KEY), key_help=SET_GAMES_KEYS, status=status,
-                filters=f"{series_filter} (c shows all)" if series_filter else "",
+                filters=f"{series_filter} (c clear filters)" if series_filter else "",
                 row_note=lambda i: edit.variant_line(keys[i], picks.variants, picks.parents, picks.system_names,
                                                      picks.on_card),
                 session=session, note_text=lambda i: _note_text(sp_of[i], keys[i]),

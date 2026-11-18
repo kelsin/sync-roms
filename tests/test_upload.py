@@ -11,7 +11,8 @@ from unittest import mock
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 import argparse  # noqa: E402
-from test_inventory import StorageFolder  # noqa: E402
+import helpers  # noqa: E402
+from helpers import StorageFolder  # noqa: E402
 from sync_roms import downloads, ignore, inventory, runtime, s3, scrape_plan, store, ui, upload, usersettings  # noqa: E402
 
 SYSTEMS = [
@@ -23,10 +24,7 @@ SYSTEMS = [
 
 
 def touch(root, rel, size=1):
-    path = os.path.join(root, *rel.split("/"))
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-    with open(path, "wb") as f:
-        f.write(b"x" * size)
+    helpers.touch(os.path.join(root, *rel.split("/")), b"x" * size)
 
 
 class GuessSystemTest(unittest.TestCase):
@@ -214,6 +212,19 @@ class RenameChainTest(unittest.TestCase):
     def test_cycle_of_three(self):
         self.replace({"b.gba": b"X" * 5, "c.gba": b"Y" * 7, "a.gba": b"Z" * 9},
                      {"a.gba": b"X" * 5, "b.gba": b"Y" * 7, "c.gba": b"Z" * 9})
+
+    def test_storage_only_files_start_unticked(self):
+        with open(os.path.join(self.folder, "old.gba"), "wb") as f:
+            f.write(b"O" * 3)
+        pick = mock.Mock(return_value=[False])
+        with tempfile.TemporaryDirectory() as root, mock.patch.object(upload.picker, "filter_list", pick), \
+                mock.patch.object(ui, "confirm", lambda *a, **k: False), contextlib.redirect_stdout(io.StringIO()):
+            with open(os.path.join(root, "new.gba"), "wb") as f:
+                f.write(b"N" * 5)
+            upload.replace_command(argparse.Namespace(dry_run=False), root, SYSTEMS[0])
+        self.assertEqual(pick.call_args.kwargs["initial"], [False])
+        self.assertIn("tick to delete", pick.call_args.args[0])
+        self.assertEqual(self.stored(), {"old.gba": b"O" * 3})
 
     def test_a_failed_move_stops_the_ones_that_would_overwrite_its_file(self):
         for name, data in (("a.gba", b"X"), ("b.gba", b"Y")):
@@ -596,7 +607,7 @@ class MoveInterruptTest(unittest.TestCase):
             st.enter_context(mock.patch.object(runtime, "WORKERS", 2))
             st.enter_context(mock.patch.object(s3.os, "replace", replace))
             st.enter_context(mock.patch.object(s3, "print", fake_print, create=True))
-            st.enter_context(mock.patch.object(inventory, "moved", lambda old, new: recorded.append(old)))
+            st.enter_context(mock.patch.object(inventory, "moved", lambda old, new, before=(): recorded.append(old)))
             st.enter_context(mock.patch.object(ui, "POLL", 0.001))
             with self.assertRaises(KeyboardInterrupt):
                 s3.move_keys(moves)

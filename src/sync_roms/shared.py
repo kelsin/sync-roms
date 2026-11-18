@@ -5,11 +5,12 @@ The mirror of storage key K is <data_dir>/storage/K (the storage file's exact te
 import copy
 import json
 import os
-import tempfile
+import threading
 
 from . import inventory, runtime, s3, store, ui
 
 _TAGS = ".tags.json"
+_tags_lock = threading.Lock()  # the sets are loaded on several threads, and each load may change the tags
 
 
 def local_path(key):
@@ -42,34 +43,23 @@ def _save_tags(tags):
     store.write_json(_tags_path(), tags, indent=2)
 
 
-def _save_text(path, text):
-    """Write text to path in one atomic step, making its folders."""
-    folder = os.path.dirname(path)
-    os.makedirs(folder, exist_ok=True)
-    fd, tmp = tempfile.mkstemp(dir=folder, prefix="." + os.path.basename(path) + "-", suffix=".tmp")
-    try:
-        with os.fdopen(fd, "w", encoding="utf-8") as f:
-            f.write(text)
-        os.replace(tmp, path)
-        tmp = None
-    finally:
-        if tmp and os.path.exists(tmp):
-            os.remove(tmp)
-
-
 def _save_mirror(key, tag, text):
-    _save_text(local_path(key), text)
-    tags = _load_tags()
-    tags[key] = tag
-    _save_tags(tags)
+    path = local_path(key)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    store.write_text(path, text)
+    with _tags_lock:
+        tags = _load_tags()
+        tags[key] = tag
+        _save_tags(tags)
 
 
 def _drop_mirror(key):
     if os.path.exists(local_path(key)):
         os.remove(local_path(key))
-    tags = _load_tags()
-    if tags.pop(key, None) is not None:
-        _save_tags(tags)
+    with _tags_lock:
+        tags = _load_tags()
+        if tags.pop(key, None) is not None:
+            _save_tags(tags)
 
 
 def load(key, parse, empty, fallback=True):
@@ -85,8 +75,7 @@ def load(key, parse, empty, fallback=True):
     except (OSError, ValueError):
         local_tag = None
     try:
-        if runtime.ROOT and not os.path.isdir(runtime.ROOT):
-            raise FileNotFoundError(f"{runtime.ROOT} is missing")
+        s3.check_root()
         tag = inventory.tag(key)
         if tag is None:
             _drop_mirror(key)
@@ -115,8 +104,7 @@ def write(key, text):
 
 def delete(key):
     """Delete the storage file, then its mirror and tag. A file that is already gone counts as deleted."""
-    if runtime.ROOT and not os.path.isdir(runtime.ROOT):  # an unmounted share: nothing to delete there
-        raise FileNotFoundError(f"{runtime.ROOT} is missing")
+    s3.check_root()  # an unmounted share: nothing to delete there
     if runtime.ROOT and inventory.tag(key) is None:  # already deleted (another machine did it): only the cache knew it
         inventory.removed([key])
     else:  # deleting a missing bucket object isn't an error
@@ -131,8 +119,7 @@ def update(key, parse, empty, change, dump):
 
     A missing file counts as `empty` (and is created). change(data) mutates data or returns the new value; when it
     leaves an existing file's data equal to what was read, nothing is written."""
-    if runtime.ROOT and not os.path.isdir(runtime.ROOT):  # an unmounted share, not a missing file
-        raise FileNotFoundError(f"{runtime.ROOT} is missing")
+    s3.check_root()  # an unmounted share, not a missing file
     try:
         data, existed = parse(read(key)), True
     except s3.ERRORS as e:

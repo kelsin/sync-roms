@@ -1,6 +1,7 @@
 """Shared test bases and helpers. Importing this module imports isolate first, so the run is hermetic."""
 import asyncio
 import contextlib
+import importlib.util
 import io
 import json
 import os
@@ -11,7 +12,7 @@ from unittest import mock
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 from realdir_guard import RealDataDirGuard  # noqa: E402
-from sync_roms import cli, commands, picker, runtime, store, ui, usersettings  # noqa: E402
+from sync_roms import cli, commands, inventory, picker, runtime, store, ui, usersettings  # noqa: E402
 
 SYSTEM = {"name": "Game Boy Advance", "bucket": "gba", "folders": {"esde": "gba"}, "bios": {"files": []},
           "games": [{"bucket": "gba/Game.zip"}]}
@@ -26,6 +27,22 @@ def list_sizes(prefix, sizes=True):
 def write_json(path, data):
     with open(path, "w") as f:
         json.dump(data, f)
+
+
+def touch(path, data=b"x"):
+    """Write data (bytes, or text for a str) to path, making its folders."""
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "wb" if isinstance(data, bytes) else "w") as f:
+        f.write(data)
+
+
+def load_script(path):
+    """Import the Python file at path as a module named after it (a skill or tools script, which isn't a package)."""
+    name = os.path.splitext(os.path.basename(path))[0]
+    spec = importlib.util.spec_from_file_location(name, path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
 
 
 def feed_list(keys, *args, **kwargs):
@@ -118,6 +135,30 @@ class Cmd(DataDir):
             finally:
                 ui.ASSUME_YES = False
         return code, out.getvalue(), err.getvalue()
+
+
+class StorageFolder(DataDir):
+    """runtime.ROOT is a throwaway storage folder holding gba/a.zip (1 byte), gba/b.zip (2) and BIOS/x.bin (3)."""
+
+    def setUp(self):
+        super().setUp()
+        inventory.reset()
+        self.addCleanup(inventory.reset)
+        self.root = tempfile.TemporaryDirectory()
+        self.addCleanup(self.root.cleanup)
+        for key, size in (("gba/a.zip", 1), ("gba/b.zip", 2), ("BIOS/x.bin", 3)):
+            self.put(key, size)
+        for name, value in (("ROOT", self.root.name), ("BUCKET", None), ("ENDPOINT", None), ("_mirror_root", None)):
+            p = mock.patch.object(runtime, name, value)
+            p.start()
+            self.addCleanup(p.stop)
+
+    def put(self, key, size):
+        touch(os.path.join(self.root.name, key), b"x" * size)
+
+    def build(self, full=True):
+        with contextlib.redirect_stdout(io.StringIO()):
+            return inventory.update(full)
 
 
 class StorageDir(RealDataDirGuard):

@@ -145,6 +145,32 @@ class StorageSetsTest(StorageDir):
         self.assertEqual(err.count("\n"), 1, err)
         self.assertIn("Couldn't check sets/ in storage", err)
 
+    def test_a_storage_error_on_a_later_set_uses_its_local_copy_and_warns_once(self):
+        storage_sets(self, {"a": SET, "b": SET, "c": SET}, self.root)
+        self.load()  # leaves the local copies
+        store.reset_sets()
+        for i in "abc":
+            with open(os.path.join(self.root, "sets", f"{i}.json"), "w", encoding="utf-8") as f:
+                f.write(store.set_text({**SET, "name": f"New {i}"}))
+        real_tag = inventory.tag
+
+        def tag(key):
+            if key == "sets/b.json":
+                raise OSError("down")
+            return real_tag(key)
+        with mock.patch.object(inventory, "tag", tag):
+            sets, err = self.load()
+        # c was read at the same time as b, so its local copy is already storage's
+        self.assertEqual({x["id"]: x["name"] for x in sets}, {"a": "New a", "b": "Mix", "c": "New c"})
+        self.assertEqual(err.count("\n"), 1, err)
+        self.assertTrue(store.sets_from_fallback())
+
+    def test_sets_read_at_once_keep_every_local_copys_tag(self):
+        storage_sets(self, {f"s{i:02}": SET for i in range(40)}, self.root)
+        self.assertEqual([x["id"] for x in self.load()[0]], [f"s{i:02}" for i in range(40)])
+        with open(os.path.join(self.data, "storage", ".tags.json"), encoding="utf-8") as f:
+            self.assertEqual(sorted(json.load(f)), [f"sets/s{i:02}.json" for i in range(40)])
+
 
 class UnknownCardSetsTest(StorageDir):
     """A card's set ids that aren't in storage are warned about and skipped; cards.json is never changed for them."""

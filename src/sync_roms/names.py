@@ -6,7 +6,7 @@ import json
 import os
 import threading
 
-from . import inventory, runtime, s3, scrape_plan, store, ui
+from . import inventory, s3, scrape_plan, shared, store, ui
 
 KEY = "names.json"
 SYSTEMS = ("mame", "fbneo", "pico8")
@@ -35,14 +35,6 @@ def _save_local(data):
         ui.warn(f"Couldn't save the local copy of {KEY} ({e})")
 
 
-def _read(key):
-    """A storage file's text, from storage itself (never the local mirror, which holds only what syncs need)."""
-    if runtime.ROOT:
-        with open(s3.safe_join(runtime.ROOT, key), encoding="utf-8") as f:
-            return f.read()
-    return s3.s3_client().get_object(Bucket=runtime.BUCKET, Key=key)["Body"].read().decode("utf-8")
-
-
 def _entry_names(entry):
     names = entry.get("names") if isinstance(entry, dict) else None
     if not isinstance(names, dict):
@@ -54,11 +46,11 @@ def _load(system):
     local = _load_local()
     entry = local.get(system)
     try:
-        key = f"{scrape_plan.SCRAPES}/{system}/metadata.json"
+        key = scrape_plan.metadata_key(system)
         tag = inventory.tag(key)
         if tag is not None and not (isinstance(entry, dict) and entry.get("tag") == tag):
             try:
-                text = _read(key)
+                text = shared.read(key)
             except s3.ERRORS as e:
                 if not s3.missing(e):
                     raise

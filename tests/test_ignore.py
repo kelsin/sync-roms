@@ -9,7 +9,7 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import helpers  # noqa: E402,F401
-from test_inventory import StorageFolder  # noqa: E402
+from helpers import StorageFolder  # noqa: E402
 from sync_roms import ignore, inventory, runtime, shared  # noqa: E402
 
 
@@ -133,8 +133,23 @@ class AddTest(IgnoreList):
         self.assertFalse(os.path.exists(missing))
         self.assertFalse(os.path.exists(shared.local_path(ignore.KEY)))
 
+    def test_add_without_anything_new_skips_the_write(self):
+        self.store_list({"nds": ["b.zip", "a.zip"]})
+        with mock.patch.object(shared, "write") as write:
+            self.assertEqual(ignore.add({"nds": ["a.zip"]}), 0)
+        write.assert_not_called()
+
+    def test_remove_on_an_unmounted_share_refuses(self):
+        missing = os.path.join(self.root.name, "unmounted")
+        with mock.patch.object(runtime, "ROOT", missing), self.assertRaises(FileNotFoundError):
+            ignore.remove({"gb": ["c.zip"]})
+
 
 class RemoveTest(IgnoreList):
+    def test_remove_with_no_file_creates_nothing(self):
+        self.assertEqual(ignore.remove({"gb": ["c.zip"]}), 0)
+        self.assertFalse(os.path.exists(os.path.join(self.root.name, ignore.KEY)))
+
     def test_remove_drops_paths_and_empty_systems(self):
         self.store_list({"gb": ["a.zip"], "snes": ["b.zip", "c.zip"]})
         self.assertTrue(ignore.is_ignored("gb/a.zip"))

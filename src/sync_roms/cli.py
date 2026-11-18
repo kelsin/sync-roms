@@ -1,6 +1,7 @@
 """Download ROMs and BIOS files from your ROM storage."""
 import argparse
 import os
+import re
 import shutil
 import sys
 import time
@@ -34,7 +35,7 @@ SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "tools": ("install", "brew install the 7z, unar and chdman that `convert` needs"),
     "mirror": ("[DIR] | use DIR | clear", "make or refresh a local copy of everything your lists reference"),
     "cache": ("[update [--full]]", "show the storage cache every command reads file lists and sizes from, or update it"),
-    "config": ("show|path", "show the effective settings and where each comes from"),
+    "config": ("show|path|set NAME VALUE|unset NAME", "show the effective settings and where each comes from, or change one"),
     "doctor": ("", "check the AWS profile, storage access, tools and your data files"),
     "check": ("", "validate cards.json, surprises.json, the device overlay, the sets and your collections"),
     "completion": ("bash|zsh|fish", "print a shell completion script"),
@@ -94,10 +95,10 @@ TOPICS = {
     "collections": """
   sync-roms collections edit                  edit your collections of favourite games
 
-  Your own lists of games (like a set, but personal), saved straight to ~/.sync-roms/collections/<id>.json when you pick
-  Done; Quit discards. No git or gh needed, and nothing goes to storage or the repo. Same keys as the set editor.
-  Deleting a collection that cards use asks first, then removes it from them. In a card's system list, l adds a
-  collection to that card. Theme art picks the picture (Action, RPG, ...) the collection gets on ES-DE and Knulli cards
+  Your own lists of games (like a set, but personal), saved to ~/.sync-roms/collections/<id>.json after Done or Esc
+  shows the changes; Quit discards. No git or gh needed, and nothing goes to storage or the repo. Same keys as the set
+  editor. Deleting a collection that cards use asks first, then removes it from them (the file is kept as
+  <id>.json.bak). In a card's system list, l adds a collection to that card. Theme art picks the picture (Action, RPG, ...) the collection gets on ES-DE and Knulli cards
   that use Art Book Next.
 """,
     "themes": """
@@ -156,7 +157,7 @@ TOPICS = {
 
   The system is guessed from the folder name; same-size files are skipped, a different size overwrites after you confirm.
   --replace makes the storage folder match DIR: renamed files are moved by content (big bucket files without an MD5 are
-  compared on samples, and those renames are marked), and left-over storage files are listed so you pick which to delete.
+  compared on samples, and those renames are marked), and left-over storage files are listed so you tick which to delete (none are ticked at first).
   Uploads use the write profile (ROMS_WRITE_PROFILE, default 'roms').
 """,
     "diff": """
@@ -246,8 +247,16 @@ TOPICS = {
   Files no longer referenced are deleted (after confirming when it is a lot).
 """,
     "config": """
-  sync-roms config show      the effective bucket, endpoint, profiles and mirror, and where each came from
-  sync-roms config path      the data folder
+  sync-roms config show                 the effective bucket, endpoint, profiles and mirror, and where each came from
+  sync-roms config path                 the data folder
+  sync-roms config set NAME VALUE       save one setting in settings.json
+  sync-roms config unset NAME           remove it (back to its default)
+
+  NAME is bucket, root, endpoint, profile, write_profile, mirror, screenscraper_user or screenscraper_password (text),
+  eject or storage_cache_declined (true or false), surprise_ttl_days (a positive number of days) or
+  surprise_excluded_systems (comma-separated system ids, e.g. gba,snes). root and mirror must be absolute
+  paths (~ is expanded). The password is saved but never printed;
+  `scrape --set-credentials` asks for it without echoing it.
 """,
     "cache": """
   sync-roms cache [update [--full]]
@@ -309,7 +318,8 @@ def help_text(topic=None):
 {ui.bold('GLOBAL OPTIONS')}
   {ui.yellow('-n, --dry-run')}   show what would happen, change nothing (commands that can't honor it refuse it)
   {ui.yellow('-y, --yes')}       answer prompts with their default (deleting stays "no", except in clean commands)
-  {ui.yellow('--quiet')}         print only errors, warnings and --json data (prompts go to stderr)      {ui.yellow('--verbose')}   also print the effective settings
+  {ui.yellow('--quiet')}         print only errors, warnings and --json data (prompts go to stderr)
+  {ui.yellow('--verbose')}       also print the effective settings
   {ui.yellow('--json')}          machine-readable output for devices, layouts, diff, games list, cards list and `sync --dry-run` (use --device/--layout to skip the pickers)
   {ui.yellow('--profile P')} {ui.yellow('--write-profile P')} {ui.yellow('--bucket B')} {ui.yellow('--root DIR')} {ui.yellow('--endpoint URL')}   override those settings for this run
   {ui.yellow('-a, --ask')}       sync: confirm the saved device/firmware instead of using it silently
@@ -415,6 +425,10 @@ class Parser(argparse.ArgumentParser):
     literal = frozenset()  # the values after --scrape-match that start with a dash: values, never options
 
     def error(self, message):
+        if TYPED:  # name the command the user typed, not the legacy flag translate() made of it
+            words, flag = TYPED
+            message = message if flag is None else re.sub(rf"argument {re.escape(flag)}(/\S+)?:", f"`{words}`:", message)
+            ui.fail(f"{message}\n   Try 'sync-roms {words.split()[0]} --help'.", 2)
         ui.fail(f"{message}\n   Try 'sync-roms --help'.", 2)
 
     def parse_known_args(self, args=None, namespace=None):
@@ -439,6 +453,7 @@ LEGACY = {
     ("games", "edit"): ["--edit"], ("cards", "edit"): ["--edit"], ("edit",): ["--edit"],
 }
 WORDS = {flags[0]: " ".join(words) for words, flags in LEGACY.items() if flags}  # mode flag -> its command, for messages
+TYPED = None  # (command words, mode flag) of the command translate() last rewrote, for Parser.error
 BOOL_FLAGS = {"-n", "--dry-run", "-y", "--yes", "-a", "--ask"}
 PLAIN_FLAGS = BOOL_FLAGS | {"--replace", "--json", "--no-clean", "--no-eject", "--retry", "--all", "--fill-media", "--set-credentials",
                             "--translated"}
@@ -447,6 +462,8 @@ VALUE_FLAGS = {"--system", "--device", "--layout", "--device-id", "--skip-media"
 
 def translate(argv):
     """Rewrite `sync-roms COMMAND ...` into the flag form the rest of the code reads. Global flags may come first."""
+    global TYPED
+    TYPED = None
     i = 0
     while i < len(argv) and argv[i] in BOOL_FLAGS | {"--json"}:
         i += 1
@@ -458,6 +475,7 @@ def translate(argv):
         if words[0] == name and tuple(rest[:len(words) - 1]) == words[1:]:
             tail = rest[len(words) - 1:]
             flags = LEGACY[words]
+            TYPED = (" ".join(words), flags[0] if flags else None)
             if not flags:
                 return head + tail
             if words == ("scrape", "match"):  # three values that must stay together, behind the flag
@@ -1077,13 +1095,14 @@ def sync_card(args):
     scrapes = layout_name in scrape_plan.SCRAPE_LAYOUTS
     scraped = {}
 
-    def build_plan(present):
+    def build_plan(present, recheck=None):
         if not scraped:
             print("🖼️  Reading scraped data...")
             scraped["data"] = scrape_plan.load_scrape_data(chosen)
             scraped["rels"] = {s["bucket"]: [k.split("/", 1)[1] for k in available(s) if k in listings[s["bucket"]]]
                                for s in chosen}
-        plan = scrape_plan.build_scrape_plan(layout_name, chosen, scraped["data"], scraped["rels"], dest_of, es_dir, present, base)
+        plan = scrape_plan.build_scrape_plan(layout_name, chosen, scraped["data"], scraped["rels"], dest_of, es_dir, present, base,
+                                             recheck=recheck)
         if esde_problem and plan["gamelists"]:
             skipped()
             plan["gamelists"] = {}
@@ -1240,7 +1259,7 @@ def sync_card(args):
         if disc_dir and available(s):
             m3u.prefix_playlists(dest_of(s), disc_dir)
 
-    if layout_name in ("esde", "emudeck"):  # ES-DE launches an installed Vita game through its .psvita file
+    if layout_name in frontend.ESDE_LAYOUTS:  # ES-DE launches an installed Vita game through its .psvita file
         for path, error in vita.add_psvita_files({dest_of(s) for s in chosen if s["bucket"] == "psvita"}):
             failed += 1
             failures.append((os.path.relpath(path, roms_dir), error))
@@ -1248,7 +1267,7 @@ def sync_card(args):
 
     stale = []
     if scrapes:
-        plan = build_plan(os.path.exists)
+        plan = build_plan(os.path.exists, {path for _, path, _ in planned["jobs"]})  # media found current then still are
         scrape_todo = plan["jobs"]
         # EmuDeck's gamelists are on this computer, not the card
         if clean_card and (plan["jobs"] or plan["writes"] or (plan["gamelists"] and layout_name != "emudeck")):

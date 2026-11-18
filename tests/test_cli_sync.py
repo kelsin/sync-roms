@@ -407,7 +407,7 @@ class SyncSmokeTest(RealDataDirGuard):
 
     def scrape_patches(self, loads=None):
         """Patches that make the card's scraped data one 2000-byte cover for Game.zip."""
-        def build(layout, systems, data, rels, dest_of, es_dir, present, base):
+        def build(layout, systems, data, rels, dest_of, es_dir, present, base, recheck=None):
             return {"jobs": [("scrapes/gba/covers/Game.png", os.path.join(es_dir, "downloaded_media", "gba", "covers", "Game.png"), 2000)],
                     "gamelists": {}, "writes": []}
 
@@ -466,6 +466,40 @@ class SyncSmokeTest(RealDataDirGuard):
         patches = ((s3, {"list_sizes": list_scrapes, "stat_sizes": stat_sizes}), (cli, {"free_space": lambda path: 10**9}))
         self.assertEqual(self.run_sync(False, prepare=prepare, patches=patches), 0)
         self.assertEqual(sorted(statted), sorted(sizes))
+
+    def test_the_media_plan_after_the_downloads_is_the_full_plan_without_rechecking_current_media(self):
+        def prepare(card):
+            os.makedirs(os.path.join(card, "ES-DE", "downloaded_media", "gba", "covers"))
+            with open(os.path.join(card, "ES-DE", "downloaded_media", "gba", "covers", "Game.png"), "wb") as f:
+                f.write(b"x" * 3)
+            os.makedirs(os.path.join(card, "ROMs", "gba"))
+            with open(os.path.join(card, "ROMs", "gba", "Game.zip"), "wb") as f:
+                f.write(b"x" * 5)
+        sizes = {"scrapes/gba/covers/Game.png": 3, "scrapes/gba/marquees/Game.png": 4}
+        real_build, real_current = scrape_plan.build_scrape_plan, downloads.is_current
+        plans, checked = [], []
+
+        def build(*a, recheck=None):
+            checked.append([])
+            plan = real_build(*a, recheck=recheck)
+            if recheck is not None:
+                checked.append([])
+                plans.append((plan, real_build(*a)))  # what a plan that checks every media file has
+            return plan
+
+        def is_current(path, *a):
+            if "downloaded_media" in path:
+                checked[-1].append(os.path.basename(os.path.dirname(path)))
+            return real_current(path, *a)
+        patches = ((s3, {"list_sizes": lambda prefix, sizes_=True: dict(sizes) if prefix == "scrapes/gba/" else list_sizes(prefix)}),
+                   (scrape_plan, {"build_scrape_plan": build}), (downloads, {"is_current": is_current}),
+                   (cli, {"free_space": lambda path: 10**9}))
+        self.assertEqual(self.run_sync(False, prepare=prepare, patches=patches), 0)
+        (plan, full), = plans
+        self.assertEqual(plan, full)
+        self.assertEqual([k for k, _, _ in plan["jobs"]], ["scrapes/gba/marquees/Game.png"])
+        self.assertEqual(sorted(checked[0]), ["covers", "marquees"])
+        self.assertEqual(checked[1], ["marquees"])  # the cover found current before the downloads is not looked at again
 
     def test_no_android_line_on_a_card_without_android_files(self):
         layouts = {"onion": {"label": "Onion", "roms_dir": "Roms", "bios_dir": "BIOS"}}

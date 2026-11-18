@@ -224,7 +224,7 @@ class DryRunJsonTest(Isolated):
     def test_dry_run_json_has_the_scraped_media_and_the_free_space(self):
         cover = ("scrapes/gba/covers/Game.png", "/card/ES-DE/downloaded_media/gba/covers/Game.png", 7)
         code, out, _ = self.run_plan(["--dry-run", "--json", "--yes"],
-                                     b=(scrape_plan, "build_scrape_plan", lambda *a: {"jobs": [cover], "gamelists": {}, "writes": []}),
+                                     b=(scrape_plan, "build_scrape_plan", lambda *a, **k: {"jobs": [cover], "gamelists": {}, "writes": []}),
                                      f=(cli, "free_space", lambda path: 1000))
         self.assertEqual(code, 0)
         plan = json.loads(out)

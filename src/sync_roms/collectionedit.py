@@ -2,15 +2,12 @@
 import copy
 
 from . import collections as colls
-from . import cardedit, edit, metafilter, picker, previews, s3, store, surprise, themeart, ui
-from .listedit import add_from_set, file_counts, fold_discs, reconcile, stocked, system_rows, view
+from . import cardedit, edit, picker, store, themeart, ui
+from .listedit import add_from_set, add_from_system, diff_lists, edit_menu, folder_lister, reconcile, view
 
 
-PAST_SURPRISE_KEY = "p"
-CLEAR_KEY = "c"
-SET_KEY = "s"
-META_KEY = "m"
-GAMES_HINT = "Space toggle · Enter done · s set · m meta · c clear · p past"
+GAMES_HINT = "Space toggle · Enter done · s set · m meta · c clear filters · p past"
+GAMES_KEYS = [k for k in cardedit.GAMES_KEYS if k[0] != cardedit.VARIANT_KEY]  # what ? lists in a system's games list
 
 
 # --- Editing the games of one collection -------------------------------------------------------------
@@ -36,6 +33,21 @@ def pick_art(collection):
         collection.pop("art", None)
 
 
+def toggle_filtered(s, title, rows):
+    """edit.toggle_games over a system's rows (s is its entry in a view), narrowed by the card editor's game filters."""
+    filters = cardedit.GameFilters(s)
+    titles = {r[1]: r[2] for r in rows}
+    sets = store.load_sets()
+    place = {}  # where the list was left, kept while a key lists the same games
+    while True:
+        pressed = edit.toggle_games(title, [r for r in rows if filters.keep(r[1])], hotkeys=cardedit.GameFilters.KEYS,
+                                    hint=GAMES_HINT, key_help=GAMES_KEYS, place=place,
+                                    filters=filters.describe())
+        if not filters.handle(pressed, [r[1] for r in rows], place, lambda current: cardedit.pick_set(
+                s, sets, s["games"], titles, set(titles), current, lambda: {g.get("bucket") for g in s["games"]})):
+            return
+
+
 def edit_one(collection, systems, keys_of):
     """Edit one collection: remove games, add games from a system or a set, rename."""
     while True:
@@ -57,56 +69,7 @@ def edit_one(collection, systems, keys_of):
             finally:  # Ctrl-C too: the toggles made are kept
                 collection["games"] = reconcile(collection["games"], shown)
         elif i == 1:
-            options = stocked(systems)
-            j = picker.filter_list("✏️  Add games from which system?", [s["name"] for s in options], extras=file_counts(options),
-                                 preview=lambda k: previews.system(options[k]) if k < len(options) else None)
-            if j is None:
-                continue
-            s = shown[options[j]["bucket"]]
-            all_rows, past, filt, meta_filt = system_rows(s, keys_of(s["bucket"])), None, None, {}
-            meta = cardedit.Metadata(s["bucket"])
-            titles = {r[1]: r[2] for r in all_rows}
-            sets = store.load_sets()
-            place = {}  # where the list was left, kept while a key lists the same games
-
-            def keep(key, skip=None):
-                wanted = {f: v for f, v in meta_filt.items() if f != skip}
-                return ((filt is None or key in filt[1]) and (past is None or key in past)
-                        and (not wanted or metafilter.matches(meta.get().get(key, {}), wanted)))
-
-            interrupted = False
-            try:
-                while True:
-                    parts = ([f"{filt[2]} {filt[0]} only"] if filt else []) + (["🎁 past surprises only"] if past is not None else []) \
-                        + ([metafilter.describe(meta_filt)] if meta_filt else [])
-                    pressed = edit.toggle_games(
-                        f"✏️  {s['name']} — ✅ in {label}, ⬜ in storage only",
-                        [r for r in all_rows if keep(r[1])],
-                        hotkeys=(SET_KEY, META_KEY, PAST_SURPRISE_KEY, CLEAR_KEY), hint=GAMES_HINT, place=place,
-                        filters=f"{' · '.join(parts)} (c shows all)" if parts else "")
-                    if pressed == PAST_SURPRISE_KEY:
-                        past = surprise.past_keys(s["bucket"]) or None
-                        if past is None:
-                            edit.note(ui.yellow(f"ℹ️  No past surprises on {s['name']}."))
-                    elif pressed == META_KEY:
-                        cardedit.pick_meta(s, meta, meta_filt, lambda field: [r[1] for r in all_rows if keep(r[1], field)])
-                    elif pressed == SET_KEY:
-                        chosen = cardedit.pick_set(s, sets, s["games"], titles, set(titles), filt and filt[0],
-                                                   lambda: {g.get("bucket") for g in s["games"]})
-                        if chosen:
-                            filt = (chosen["name"], cardedit.set_filter(chosen, s), themeart.set_emoji(chosen))
-                    elif pressed == CLEAR_KEY:
-                        past, filt = None, None
-                        meta_filt.clear()
-                        place.get("session", {}).pop("query", None)  # the / filter too
-                    else:
-                        break
-            except KeyboardInterrupt:  # Ctrl-C in the list or a picker it opens: the toggles made are kept
-                interrupted = True
-            collection["games"] = reconcile(collection["games"], shown)
-            fold_discs(collection["games"], keys_of(s["bucket"]))
-            if interrupted:
-                raise KeyboardInterrupt
+            add_from_system(collection, systems, shown, keys_of, label, categories=False, toggle=toggle_filtered)
         elif i == 2:
             add_from_set(collection, store.load_sets(), shown, keys_of, label, categories=False)
         elif i == 4:
@@ -141,7 +104,7 @@ def new_collection(working):
         if not problem:
             break
         print(ui.yellow(f"  {problem}"))
-    cid = colls.slug(name)
+    cid = store.slug(name)
     working[cid] = {"name": name, "description": ui.ask("   One-line description (optional): ").strip(), "games": []}
     return cid
 
@@ -155,73 +118,39 @@ def edit_collections():
     try:
         return edit_working(systems, before, working)
     except KeyboardInterrupt:  # Ctrl-C: offer to save the changes, then stop as before
-        changed = [cid for cid in working if working[cid] != before.get(cid)]
-        deleted = [cid for cid in before if cid not in working]
+        found = diff_lists(before, working)
         try:
-            keep = bool(changed or deleted) and ui.confirm("\n💾 Save your collection changes?", default=True)
+            keep = bool(found) and ui.confirm("\n💾 Save your collection changes?", default=True)
         except KeyboardInterrupt:  # a second Ctrl-C discards
             keep = False
         if keep:
-            save(working, changed, deleted)
-        elif changed or deleted:
+            save(working, found)
+        elif found:
             print(ui.yellow("\n👋 Not saved."))
         raise
 
 
-def save(working, changed, deleted):
-    """Write the changed collections and remove the deleted ones (and their place on cards)."""
-    for cid in changed:
-        colls.save_collection({"id": cid, **working[cid]})
-    for cid in deleted:
-        colls.delete_collection(cid)
-        colls.remove_from_cards(cid)
+def save(working, found):
+    """Write the new and changed collections in found (diff_lists) and remove the deleted ones (and their place on
+    cards); returns True."""
+    for kind, cid, _ in found:
+        if kind == "removed":
+            colls.delete_collection(cid)
+            colls.remove_from_cards(cid)
+        else:
+            colls.save_collection({"id": cid, **working[cid]})
     edit.note(ui.green(f"💖 Saved to {colls.collections_dir()}"))
+    return True
 
 
 def edit_working(systems, before, working):
-    """The collections menu over working; saves it at Done. Returns the exit code."""
-    listed = {}
+    """The collections menu over working; Done and Esc review it and save it locally. Returns the exit code."""
+    keys_of = folder_lister()
 
-    def keys_of(bucket):
-        if bucket not in listed:
-            print(ui.dim(f"📡 Listing {s3.location()}/{bucket}/ ..."))
-            listed[bucket] = store.folder_keys(bucket)
-        return listed[bucket]
+    def delete_note(cid):
+        names = cards_using(cid)
+        return f" Cards {', '.join(names)} use it and lose it too." if names else ""
 
-    while True:
-        ids = sorted(working, key=lambda x: working[x]["name"].lower())
-        n = len(ids)
-        changed = [cid for cid in ids if working[cid] != before.get(cid)]
-        deleted = [cid for cid in before if cid not in working]
-        labels = ([f"{themeart.collection_emoji(working[x])} {working[x]['name']}  ({len(working[x]['games'])} games)" for x in ids]
-                  + ["➕ New collection", "✅ Done (save)", "🚪 Quit without saving"])
-        extras = [[("  " + ("new" if x not in before else "edited"), "cyan")] if x in changed else [] for x in ids] + [[], [], []]
-        i = picker.filter_list("✏️  Which collection?  (Esc = save)", labels, extras=extras,
-                               hotkeys=(edit.DELETE_KEY,), hint="/ filter · Enter open · d delete · Esc save",
-                               preview=lambda k: previews.collection(working[ids[k]].get("art")) if k < n else None)
-        if isinstance(i, tuple):
-            if i[1] < n:
-                cid = ids[i[1]]
-                names = cards_using(cid)
-                if ui.confirm(f"🗑️  Delete collection {themeart.collection_emoji(working[cid])} {working[cid]['name']}?"
-                              + (f" Cards {', '.join(names)} use it and lose it too." if names else ""), default=False):
-                    del working[cid]
-            continue
-        if i is not None and i < n:
-            edit_one(working[ids[i]], systems, keys_of)
-            continue
-        if i == n:
-            cid = new_collection(working)
-            if cid:
-                edit_one(working[cid], systems, keys_of)
-            continue
-        if i == n + 2:
-            if not (changed or deleted) or ui.confirm("Discard your pending changes and quit?", default=False):
-                edit.note(ui.yellow("👋 Quit without saving."))
-                return 0
-            continue
-        if not (changed or deleted):
-            edit.note(ui.yellow("👋 No changes, nothing saved."))
-            return 0
-        save(working, changed, deleted)
-        return 0
+    return edit_menu("collection", before, working, {"review": False}, themeart.collection_emoji, lambda c: c.get("art"),
+                     delete_note, new_collection, lambda collection: edit_one(collection, systems, keys_of),
+                     lambda found: save(working, found), "💾 Save these changes?")

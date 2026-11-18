@@ -27,5 +27,16 @@ class ReadmeOptions(unittest.TestCase):
         self.assertEqual(sorted(readme - parser), [], "README Options flags the parser doesn't accept")
 
 
+class ReadmeSettings(unittest.TestCase):
+    def test_config_set_names_every_setting(self):
+        from sync_roms import cli
+        text = open(README, encoding="utf-8").read()
+        section = text.split("### Settings (`config`)", 1)[1].split("\n## ", 1)[0]
+        for name in commands.CONFIG_KINDS:
+            with self.subTest(name=name):
+                self.assertIn(f"`{name}`", section)
+                self.assertIn(name, cli.TOPICS["config"])
+
+
 if __name__ == "__main__":
     unittest.main()

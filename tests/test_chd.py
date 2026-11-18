@@ -12,6 +12,7 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
+from helpers import touch  # noqa: E402
 from sync_roms import chd, external, m3u, runtime, store, ui  # noqa: E402
 
 CD = {"chd": {"mode": "cd"}}
@@ -72,10 +73,7 @@ class ChdTest(unittest.TestCase):
 
     def touch(self, *names, text=""):
         for n in names:
-            path = os.path.join(self.dir, n)
-            os.makedirs(os.path.dirname(path), exist_ok=True)
-            with open(path, "w") as f:
-                f.write(text)
+            touch(os.path.join(self.dir, n), text)
 
     def files(self):
         return sorted(os.listdir(self.dir))

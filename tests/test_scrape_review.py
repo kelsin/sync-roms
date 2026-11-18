@@ -330,7 +330,7 @@ class ReviewCommandTest(ReviewBase):
         self.patch(runtime, "ROOT", None)
         self.patch(runtime, "_mirror_root", None)
         self.patch(inventory, "current", lambda: None)
-        self.patch(s3, "list_sizes", lambda prefix, sizes=True: {"gb/a.zip": 7} if prefix == "gb/" else {})
+        self.patch(s3, "list_sizes", lambda prefix, sizes=True: {"gb/a.zip": 7, "gb/other.zip": 1} if prefix == "gb/" else {})
         self.patch(scrape_review, "_systems", lambda name: {"gb": GB})
         seen = []
         self.patch(scrape_review, "review", lambda systems, keys, sizes, client=None: seen.append(sizes) or 0)

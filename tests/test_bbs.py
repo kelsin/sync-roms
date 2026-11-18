@@ -3,6 +3,7 @@ import datetime
 import io
 import json
 import os
+import shutil
 import sys
 import unittest
 import urllib.error
@@ -297,21 +298,56 @@ class Download(helpers.StorageDir):
         self.assertEqual(self.stored(), {"pico8/x-1.p8.png", "pico8/x-2.p8.png",
                                          "scrapes/pico8/covers/x-2.p8.png", META})
 
-    def test_failed_metadata_write_takes_the_cart_back_out(self):
-        put_text = bbs.s3.put_text
-        calls = []
+    def flaky_meta(self, failing):
+        """s3.put_text failing on its failing-th call (1-based); the keys it was called with go in self.writes."""
+        put_text, self.writes = bbs.s3.put_text, []
 
         def flaky(key, text):
-            calls.append(key)
-            if len(calls) == 2:
+            self.writes.append(key)
+            if len(self.writes) == failing:
                 raise OSError("disk full")
             return put_text(key, text)
-        with mock.patch.object(bbs.s3, "put_text", flaky):
-            code, _, err, _ = self.run_download([PAGE1, EMPTY])
+        return mock.patch.object(bbs.s3, "put_text", flaky)
+
+    def test_metadata_is_written_once_per_batch_and_at_the_end(self):
+        for every, writes in ((25, 1), (2, 2)):
+            shutil.rmtree(self.root)
+            os.makedirs(self.root)
+            with self.subTest(every=every), mock.patch.object(bbs, "META_EVERY", every), self.flaky_meta(0):
+                code, _, _, _ = self.run_download([PAGE1, PAGE2, EMPTY])
+                self.assertEqual(code, 0)
+                self.assertEqual(self.writes, [META] * writes)
+                self.assertEqual(sorted(self.meta()), ["molemole-1.p8.png", "pico8tetris.p8.png", "x-2.p8.png"])
+
+    def test_failed_metadata_write_takes_the_batchs_carts_back_out(self):
+        with mock.patch.object(bbs, "META_EVERY", 2), self.flaky_meta(2):
+            code, _, err, _ = self.run_download([PAGE1, PAGE2, EMPTY])
         self.assertEqual(code, 1)
         self.assertIn("disk full", err)
-        self.assertEqual(self.stored(), {"pico8/molemole-1.p8.png", META})
-        self.assertEqual(list(self.meta()), ["molemole-1.p8.png"])
+        self.assertEqual(self.stored(), {"pico8/molemole-1.p8.png", "pico8/x-2.p8.png", META})
+        self.assertEqual(sorted(self.meta()), ["molemole-1.p8.png", "x-2.p8.png"])
+
+    def test_failed_metadata_write_keeps_the_old_revision_and_its_metadata(self):
+        self.put("pico8/x-1.p8.png")
+        self.put(META, json.dumps({"x-1.p8.png": {"name": "X", "developer": "old"}}).encode())
+        with mock.patch.object(bbs, "retarget", side_effect=AssertionError("retargeted")), self.flaky_meta(1):
+            code, _, err, _ = self.run_download([PAGE1, EMPTY])
+        self.assertEqual(code, 1)
+        self.assertEqual(self.stored(), {"pico8/x-1.p8.png", META})
+        self.assertEqual(self.meta(), {"x-1.p8.png": {"name": "X", "developer": "old"}})
+
+    def test_ctrl_c_still_writes_the_metadata_of_the_carts_put_in_storage(self):
+        fetch = self.serve([PAGE1, PAGE2, EMPTY])[0].new
+
+        def interrupted(url):
+            if url == bbs.cart_url("pico8tetris.p8.png"):
+                raise KeyboardInterrupt
+            return fetch(url)
+        with mock.patch.object(bbs, "_fetch", interrupted), contextlib.redirect_stdout(io.StringIO()), \
+                mock.patch.object(ui, "ASSUME_YES", True), self.assertRaises(KeyboardInterrupt):
+            bbs.download_pico8(mock.Mock(count=None, dry_run=False, yes=True))
+        self.assertEqual(self.stored(), {"pico8/molemole-1.p8.png", "pico8/x-2.p8.png", META})
+        self.assertEqual(sorted(self.meta()), ["molemole-1.p8.png", "x-2.p8.png"])
 
     def test_failed_cart_keeps_the_ones_before_it(self):
         code, _, err, _ = self.run_download([PAGE1, EMPTY], errors={bbs.cart_url("x-2.p8.png")})

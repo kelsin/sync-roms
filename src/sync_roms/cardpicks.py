@@ -1,6 +1,6 @@
 """A card's picks as the card editor edits them: the card loaded once, each system's games listed from storage when
 first shown, and every edit saved to cards.json together."""
-from . import collections as colls, edit, inventory, listedit, m3u, names, store, vita
+from . import collections as colls, edit, listedit, m3u, names, store, vita
 
 
 class SystemPicks:
@@ -35,19 +35,23 @@ class SystemPicks:
     def apply(self, keys, notes, base, state):
         """Fold one pass's on/off states into the card being edited. On: not excluded, and picked directly unless a
         referenced set covers it. Off: not picked directly, and excluded only while a referenced set covers it."""
+        direct, off = {g.get("bucket") for g in self.games}, set()
         for key, want in self.changes(keys, base, state).items():
             if want == base[key] or key in self.locked_from:
                 continue
             if want:
                 self.excluded.discard(key)
-                if key not in notes and all(g.get("bucket") != key for g in self.games):
+                if key not in notes and key not in direct:
                     self.games.append({"title": self.titles[key], "bucket": key})
+                    direct.add(key)
             else:
-                self.games = [g for g in self.games if g.get("bucket") != key]
+                off.add(key)
                 if key in notes:
                     self.excluded.add(key)
                 else:
                     self.excluded.discard(key)
+        if off:
+            self.games = [g for g in self.games if g.get("bucket") not in off]
 
 
 class CardPicks:
@@ -79,7 +83,7 @@ class CardPicks:
         folder's sized listing stats every file). s3.ERRORS propagate."""
         bucket = system["bucket"]
         if bucket not in self._systems:
-            in_storage = {k for k in inventory.files(f"{bucket}/", sizes=False) if not k.endswith("/")}
+            in_storage = store.folder_keys(bucket)
             games = self.picks_of(bucket, writing=True)
             excluded = self.excluded_of(bucket)
             self._picks.pop(bucket)

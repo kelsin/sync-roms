@@ -7,7 +7,7 @@ from unittest import mock
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 from helpers import StorageDir  # noqa: E402
-from sync_roms import runtime, s3, scrape_files, scrape_state, shared  # noqa: E402
+from sync_roms import inventory, runtime, s3, scrape_files, scrape_state, shared  # noqa: E402
 
 H = {"md5": "a", "sha1": "b", "crc": "c"}
 INFO = {"name": "Bios", "genre": "", "year": "1985", "desc": ""}
@@ -284,6 +284,22 @@ class ScrapeStateTest(StorageDir):
             self.assertEqual(scrape_state.manual_match("gba", "b.zip"), None)
             scrape_state.snapshot()
         self.assertTrue(os.path.exists(shared.local_path("scrapes/gba/matches.json")))
+
+    def test_a_file_the_storage_cache_does_not_list_is_not_looked_for(self):
+        self.store("scrapes/gba/matches.json", {"a.zip": 3})
+        tree = inventory.Tree(inventory.source(), 0, {"scrapes/gba/matches.json": 12}, {})
+        with mock.patch.object(inventory, "current", return_value=tree), \
+                mock.patch.object(inventory, "files", lambda prefix, sizes=True: tree.under(prefix)):
+            self.assertEqual(scrape_state.manual_match("gba", "a.zip"), 3)
+            with mock.patch.object(shared, "load", side_effect=AssertionError("looked for")):
+                self.assertIsNone(scrape_state.manual_match("gb", "a.zip"))
+                self.assertFalse(scrape_state.is_unknown("gba", "a.zip"))
+
+    def test_without_a_storage_cache_every_file_is_looked_for(self):
+        self.store("scrapes/gb/matches.json", {"a.zip": 4})
+        with mock.patch.object(inventory, "current", return_value=None), \
+                mock.patch.object(inventory, "files", side_effect=AssertionError("listed")):
+            self.assertEqual(scrape_state.manual_match("gb", "a.zip"), 4)
 
     def test_another_data_folder_starts_afresh(self):
         scrape_state.save_match("gba", "a.zip", 3)

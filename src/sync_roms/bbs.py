@@ -2,12 +2,11 @@
 import contextlib
 import datetime
 import http.client
-import json
 import os
 import re
 import tempfile
 
-from . import collections, drivers, github, ignore, inventory, names, runtime, s3, scrape_plan, store, surprise, ui, usersettings
+from . import collections, drivers, github, ignore, inventory, runtime, s3, scrape_plan, store, surprise, ui, usersettings
 
 LISTING = "https://www.lexaloffle.com/bbs/?cat=7&sub=2&orderby=featured"
 _CARTS = "https://www.lexaloffle.com/bbs/cposts/"
@@ -16,8 +15,9 @@ _NAME = re.compile(r"^(.*?)(?:-(\d+))?\.p8\.png$")
 _FILE = re.compile(r"[A-Za-z0-9_][A-Za-z0-9_.-]*\.p8\.png")
 _PNG = b"\x89PNG\r\n\x1a\n"
 _HTTP_ERRORS = (OSError, http.client.HTTPException)
-META = f"{scrape_plan.SCRAPES}/pico8/metadata.json"
+META = scrape_plan.metadata_key("pico8")
 MEDIA = f"{scrape_plan.SCRAPES}/pico8/"
+META_EVERY = 25  # carts put in storage between writes of META
 
 
 def _fetch(url):
@@ -200,16 +200,6 @@ def _read_listing(keys, ignored, count):
     return classify(carts, keys, ignored), carts, failed
 
 
-def _load_metadata():
-    """storage's scrapes/pico8/metadata.json, read from storage itself; {} when there is none."""
-    if inventory.tag(META) is None:
-        return {}
-    data = json.loads(names._read(META))
-    if not isinstance(data, dict):
-        raise ValueError(f"{META} isn't a JSON object")
-    return data
-
-
 def _media_moves(old_file, new_file):
     """(old key, new key) of the scrapes/pico8/ media named after old_file's stem."""
     old_stem, new_stem = os.path.splitext(old_file)[0], os.path.splitext(new_file)[0]
@@ -260,48 +250,37 @@ def download_pico8(args):
     if not args.yes and not ui.confirm(f"Add these to {s3.location()}?", default=False):
         return 1 if failed else 0
     try:
-        meta = _load_metadata()
+        meta = scrape_plan.load_metadata("pico8", fresh=True)
     except (*s3.ERRORS, ValueError) as e:
         ui.warn(f"Couldn't read {META} ({e})")
         return 1
     added = upgraded = 0
     code = 1 if failed else 0
-    with tempfile.TemporaryDirectory() as tmp:
-        for old, c in todo:
-            file, key = c["file"], f"pico8/{c['file']}"
-            try:
-                path = _download(c, tmp)
-            except _HTTP_ERRORS as e:
-                ui.warn(f"Couldn't download {file} from the BBS ({e}); stopping")
-                code = 1
-                break
-            if path is None:
-                continue
-            try:
-                s3.put_file(key, path)
-            except s3.ERRORS as e:
-                ui.warn(f"Couldn't write {file} to {s3.location()} ({e}); stopping")
-                code = 1
-                break
-            entry = {"name": c["title"], "developer": c["author"]}
-            updated = dict(meta)
-            if old is not None:
-                old_file = old[len("pico8/"):]
-                entry = {**updated.pop(old_file, {}), **entry}
-            updated = scrape_plan.merge_metadata(updated, {file: entry})
-            try:
-                s3.put_text(META, scrape_plan.dump_json(updated))
-            except s3.ERRORS as e:  # take the cart back out, so the next run adds it again with its title
-                ui.warn(f"Couldn't write {META} ({e}); removing {key} again and stopping")
-                with contextlib.suppress(*s3.ERRORS):
-                    s3.delete_keys([key])
-                code = 1
-                break
-            meta = updated
+    pending = []  # (old key or None, cart, key) of the carts put in storage since META was last written
+
+    def finish():
+        """Write META with the pending carts, then move the upgrades off their old revisions. False, with the pending
+        carts taken back out (so the next run adds them again with their titles), when META couldn't be written."""
+        nonlocal added, upgraded, code
+        if not pending:
+            return True
+        done = pending[:]
+        pending.clear()
+        try:
+            s3.put_text(META, scrape_plan.dump_json(meta))
+        except s3.ERRORS as e:
+            keys = [key for _, _, key in done]
+            ui.warn(f"Couldn't write {META} ({e}); removing {', '.join(keys)} again and stopping")
+            with contextlib.suppress(*s3.ERRORS):
+                s3.delete_keys(keys)
+            code = 1
+            return False
+        for old, c, key in done:
             if old is None:
                 added += 1
                 continue
-            moves = _media_moves(old_file, file)
+            old_file = old[len("pico8/"):]
+            moves = _media_moves(old_file, c["file"])
             if moves and s3.move_keys(moves):
                 code = 1
             try:
@@ -321,5 +300,33 @@ def download_pico8(args):
                 ui.warn(f"Couldn't delete {old} from storage ({errors[0]}); delete it by hand")
                 code = 1
             upgraded += 1
+        return True
+    with tempfile.TemporaryDirectory() as tmp:
+        try:  # a stop (or Ctrl-C) still writes META for the carts already put in storage
+            for old, c in todo:
+                file, key = c["file"], f"pico8/{c['file']}"
+                try:
+                    path = _download(c, tmp)
+                except _HTTP_ERRORS as e:
+                    ui.warn(f"Couldn't download {file} from the BBS ({e}); stopping")
+                    code = 1
+                    break
+                if path is None:
+                    continue
+                try:
+                    s3.put_file(key, path)
+                except s3.ERRORS as e:
+                    ui.warn(f"Couldn't write {file} to {s3.location()} ({e}); stopping")
+                    code = 1
+                    break
+                entry = {"name": c["title"], "developer": c["author"]}
+                if old is not None:
+                    entry = {**meta.pop(old[len("pico8/"):], {}), **entry}
+                meta = scrape_plan.merge_metadata(meta, {file: entry})
+                pending.append((old, c, key))
+                if len(pending) >= META_EVERY and not finish():
+                    break
+        finally:
+            finish()
     print(ui.green(f"✅ Added {added} and upgraded {upgraded} PICO-8 cart(s) in {s3.location()}"))
     return code

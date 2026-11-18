@@ -8,12 +8,25 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import helpers  # noqa: E402,F401
-from test_inventory import StorageFolder  # noqa: E402
+from helpers import StorageFolder  # noqa: E402
 from sync_roms import inventory, runtime, s3, shared, store  # noqa: E402
 
 
 def parse(text):
     return json.loads(text)
+
+
+class WriteTextTest(unittest.TestCase):
+    def test_writes_utf8_and_leaves_no_temp_file(self):
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            path = os.path.join(tmp, "a.txt")
+            store.write_text(path, "héllo ✓")
+            with open(path, "rb") as f:
+                self.assertEqual(f.read(), "héllo ✓".encode("utf-8"))
+            self.assertEqual(os.listdir(tmp), ["a.txt"])
+            store.write_text(path, "second", backup=True)
+            self.assertEqual(sorted(os.listdir(tmp)), ["a.txt", "a.txt.bak"])
 
 
 class SharedTest(StorageFolder):

@@ -2,8 +2,9 @@ import contextlib
 import io
 import json
 import os
+import stat as statmode
 import sys
-import tempfile
+import threading
 import unicodedata
 import unittest
 from unittest import mock
@@ -20,33 +21,7 @@ def quiet(fn, *args):
     return result, out.getvalue()
 
 
-class StorageFolder(helpers.DataDir):
-    """runtime.ROOT is a throwaway storage folder holding gba/a.zip (1 byte), gba/b.zip (2) and BIOS/x.bin (3)."""
-
-    def setUp(self):
-        super().setUp()
-        inventory.reset()
-        self.addCleanup(inventory.reset)
-        self.root = tempfile.TemporaryDirectory()
-        self.addCleanup(self.root.cleanup)
-        for key, size in (("gba/a.zip", 1), ("gba/b.zip", 2), ("BIOS/x.bin", 3)):
-            self.put(key, size)
-        for name, value in (("ROOT", self.root.name), ("BUCKET", None), ("ENDPOINT", None), ("_mirror_root", None)):
-            p = mock.patch.object(runtime, name, value)
-            p.start()
-            self.addCleanup(p.stop)
-
-    def put(self, key, size):
-        path = os.path.join(self.root.name, key)
-        os.makedirs(os.path.dirname(path), exist_ok=True)
-        with open(path, "wb") as f:
-            f.write(b"x" * size)
-
-    def build(self, full=True):
-        return quiet(inventory.update, full)[0]
-
-
-class NoCacheTest(StorageFolder):
+class NoCacheTest(helpers.StorageFolder):
     def test_reads_go_to_storage_without_a_cache(self):
         self.assertIsNone(inventory.current())
         self.assertIsNone(inventory.cached("gba/"))
@@ -63,7 +38,7 @@ class NoCacheTest(StorageFolder):
             live.assert_called_once()
 
 
-class FolderCacheTest(StorageFolder):
+class FolderCacheTest(helpers.StorageFolder):
     def test_update_reads_every_file_and_reads_come_from_the_cache(self):
         self.assertEqual(self.build(), (3, 0, 0))
         with mock.patch.object(s3, "list_sizes", side_effect=AssertionError("listed storage")), \
@@ -182,7 +157,7 @@ class BucketCacheTest(helpers.DataDir):
             self.assertIsNone(inventory.current())
 
 
-class FolderMtimeTest(StorageFolder):
+class FolderMtimeTest(helpers.StorageFolder):
     """The default update lists only folders whose mtime changed since the cache stored it."""
 
     def setUp(self):
@@ -337,6 +312,74 @@ class FolderMtimeTest(StorageFolder):
         self.assertEqual(self.update(), ((1, 2, 0), ["BIOS", "gba"]))
         self.assertEqual(inventory.files(""), {"gba/a.zip": 1, "gba/b.zip": 2, "BIOS/x.bin": 3})
 
+    def later(self):
+        """Run the rest of the test an hour from now, when every mtime set now is old enough to trust."""
+        p = mock.patch.object(inventory, "_clock", return_value=inventory._clock() + 3600)
+        p.start()
+        self.addCleanup(p.stop)
+
+    def mtime(self, folder):
+        return os.stat(os.path.join(self.root.name, folder)).st_mtime_ns
+
+    def test_known_folders_are_statted_in_parallel(self):
+        self.update()
+        threads, real = set(), os.stat
+
+        def spy(p, *a, **kw):
+            st = real(p, *a, **kw)
+            if statmode.S_ISDIR(st.st_mode) and str(p).startswith(self.root.name):
+                threads.add(threading.current_thread())
+            return st
+        with mock.patch.object(os, "stat", side_effect=spy), mock.patch.object(s3, "check_root"):
+            self.assertEqual(self.update(), ((0, 0, 0), []))
+        self.assertNotIn(threading.main_thread(), threads)
+
+    def test_own_writes_into_trusted_folders_keep_them_trusted(self):
+        self.update()
+        s3.write_file("gba/c.zip", lambda tmp: open(tmp, "wb").write(b"1234"))
+        quiet(s3.move_keys, [("gba/a.zip", "gba/m.zip")])
+        quiet(s3.delete_keys, ["BIOS/x.bin"])
+        self.assertEqual(inventory.current().dirs["gba"], self.mtime("gba"))
+        self.assertEqual(inventory.current().dirs["BIOS"], self.mtime("BIOS"))
+        self.later()
+        self.assertEqual(self.update(), ((0, 0, 0), []))
+        self.assertEqual(inventory.files(""), {"gba/b.zip": 2, "gba/c.zip": 4, "gba/m.zip": 1})
+
+    def test_a_trusted_folder_written_within_five_minutes_is_listed(self):
+        self.update()
+        s3.write_file("gba/c.zip", lambda tmp: open(tmp, "wb").write(b"1234"))
+        self.assertEqual(self.update(), ((0, 0, 0), ["gba"]))
+
+    def test_a_folder_another_machine_changed_before_our_write_is_listed(self):
+        self.update()
+        self.put("gba/other.zip", 7)  # another machine: gba's mtime is no longer the cached one
+        s3.write_file("gba/c.zip", lambda tmp: open(tmp, "wb").write(b"1234"))
+        self.assertIsNone(inventory.current().dirs["gba"])
+        self.later()
+        self.assertEqual(self.update(), ((1, 0, 0), ["gba"]))
+        self.assertEqual(inventory.files("gba/")["gba/other.zip"], 7)
+
+    def test_a_write_into_a_new_subfolder_keeps_the_parent_untrusted(self):
+        self.update()
+        s3.write_file("gba/new/z.zip", lambda tmp: open(tmp, "wb").write(b"1"))
+        quiet(s3.move_keys, [("BIOS/x.bin", "BIOS/sub/x.bin")])
+        self.assertIsNone(inventory.current().dirs["gba"])
+        self.assertIsNone(inventory.current().dirs["BIOS"])
+        self.later()
+        self.assertEqual(self.update(), ((0, 0, 0), ["BIOS", os.path.join("BIOS", "sub"), "gba", os.path.join("gba", "new")]))
+
+    def test_a_write_finishing_after_another_untrusted_its_folder_keeps_it_untrusted(self):
+        self.update()
+
+        def fill(tmp):  # a parallel upload creates gba/new while this write is under way
+            s3.write_file("gba/new/z.zip", lambda t: open(t, "wb").write(b"1"))
+            open(tmp, "wb").write(b"1234")
+        s3.write_file("gba/c.zip", fill)
+        self.assertIsNone(inventory.current().dirs["gba"])
+        self.later()
+        self.assertEqual(self.update(), ((0, 0, 0), ["gba", os.path.join("gba", "new")]))
+        self.assertIn("gba/new/z.zip", inventory.files("gba/"))
+
     def test_a_delete_given_as_a_generator_drops_the_folder_mtime(self):
         self.update()
         inventory.removed(k for k in ["gba/a.zip"])
@@ -379,7 +422,7 @@ class FolderMtimeTest(StorageFolder):
         self.assertEqual(inventory.current().files, {"gba/a.zip": 1, "gba/b.zip": 2, "BIOS": 6})
 
 
-class PatchTest(StorageFolder):
+class PatchTest(helpers.StorageFolder):
     def test_writes_moves_and_deletes_patch_the_cache_and_flush_saves_them(self):
         self.build()
         s3.write_file("gba/new.zip", lambda tmp: open(tmp, "wb").write(b"12345"))
@@ -409,7 +452,7 @@ class PatchTest(StorageFolder):
         self.assertFalse(os.path.exists(inventory.path()))
 
 
-class PrepareTest(StorageFolder):
+class PrepareTest(helpers.StorageFolder):
     def prepare(self, tty=True, answer=True):
         with mock.patch.object(sys.stdin, "isatty", return_value=tty), \
                 mock.patch.object(ui, "confirm", return_value=answer) as asked:
@@ -435,7 +478,7 @@ class PrepareTest(StorageFolder):
         self.prepare().assert_not_called()
 
 
-class CacheCommandTest(StorageFolder):
+class CacheCommandTest(helpers.StorageFolder):
     def run_cmd(self, *argv):
         with mock.patch.object(usersettings, "ensure_bucket"):
             return quiet(commands.run, list(argv))
@@ -476,11 +519,11 @@ class FolderKeysTest(unittest.TestCase):
             asked.append((prefix, sizes))
             return {"gba/a.zip": None, "gba/sub/": None}
         with mock.patch.object(inventory, "current", return_value=None), mock.patch.object(s3, "list_sizes", list_sizes):
-            self.assertEqual(store.folder_keys("gba"), {"gba/a.zip"})
+            self.assertEqual(store.folder_keys("gba", say=False), {"gba/a.zip"})
         self.assertEqual(asked, [("gba/", False)])  # each size would be a stat on a share
 
 
-class StoreUsesTheCacheTest(StorageFolder):
+class StoreUsesTheCacheTest(helpers.StorageFolder):
     def test_list_system_and_folder_keys(self):
         self.build()
         with mock.patch.object(s3, "list_sizes", side_effect=AssertionError("listed storage")), \
@@ -495,7 +538,7 @@ DLC = "psvita/D [PCSE00349] [USA] [DLC-X].zip"
 VITA = {"bucket": "psvita", "games": [{"bucket": G}]}
 
 
-class VitaSyncKeysTest(StorageFolder):
+class VitaSyncKeysTest(helpers.StorageFolder):
     def setUp(self):
         super().setUp()
         for key, size in ((G, 4), ("psvita/G [PCSE00349] [USA] [PATCH] [v1.02] [NoNpDRM].zip", 5), (NEW, 6),
@@ -539,7 +582,7 @@ if __name__ == "__main__":
     unittest.main()
 
 
-class IgnoredTest(StorageFolder):
+class IgnoredTest(helpers.StorageFolder):
     """gba/b.zip is ignored: every read leaves it out, with or without a cache, but the cache file keeps it."""
 
     def setUp(self):
@@ -577,3 +620,14 @@ class IgnoredTest(StorageFolder):
 
     def test_listed_drops_ignored(self):
         self.assertEqual(store.listed({"games": [{"bucket": "gba/a.zip"}, {"bucket": "gba/b.zip"}]}), ["gba/a.zip"])
+
+
+class FolderKeysSaysTest(unittest.TestCase):
+    def test_it_says_it_is_listing_only_without_a_cache_and_when_asked(self):
+        for tree, say, said in ((None, True, True), (None, False, False), (mock.Mock(), True, False)):
+            out = io.StringIO()
+            with mock.patch.object(inventory, "current", return_value=tree), \
+                    mock.patch.object(inventory, "files", lambda p, sizes=True: {"gba/a.zip": None}), \
+                    contextlib.redirect_stdout(out):
+                self.assertEqual(store.folder_keys("gba", say=say), {"gba/a.zip"})
+            self.assertEqual("📡 Listing" in out.getvalue(), said, (tree, say))

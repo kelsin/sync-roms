@@ -114,6 +114,39 @@ class UsageHelpTest(Isolated):
                 self.assertEqual(code, 2)
                 self.assertIn(f"Try 'sync-roms {name} --help'.", err)
 
+    def test_translated_command_errors_name_the_words_typed(self):
+        for argv, words, flag in ((["scrape", "match", "gba"], "scrape match", "--scrape-match"),
+                                  (["mirror", "use"], "mirror use", "--use-mirror"),
+                                  (["-n", "upload", "--bogus"], "upload", "--upload"), (["sync", "a", "b"], "sync", "--edit")):
+            with self.subTest(argv=argv):
+                code, _, err = self.sync(argv)
+                self.assertEqual(code, 2)
+                self.assertNotIn(flag, err)
+                self.assertIn(f"Try 'sync-roms {words.split()[0]} --help'.", err)
+        _, _, err = self.sync(["scrape", "match", "gba"])
+        self.assertIn("`scrape match`: expected 3 arguments", err)
+
+    def test_commands_without_their_action_name_the_actions(self):
+        for argv, listed in ((["sets"], "sets edit"), (["collections"], "collections edit"), (["themes", "-n"], "themes update"),
+                             (["download"], "download pico8"), (["games"], "games add")):
+            with self.subTest(argv=argv):
+                code, _, err = self.sync(argv)
+                self.assertEqual(code, 2)
+                self.assertIn(f"'{argv[0]}' needs a subcommand: ", err)
+                self.assertIn(listed, err)
+                self.assertNotIn("required: action", err)
+
+    def test_legacy_flag_errors_keep_the_flag(self):
+        code, _, err = self.sync(["--use-mirror"])
+        self.assertEqual(code, 2)
+        self.assertIn("argument --use-mirror: expected one argument", err)
+        self.assertIn("Try 'sync-roms --help'.", err)
+
+    def test_global_help_gives_quiet_and_verbose_a_line_each(self):
+        lines = [line.strip() for line in cli.help_text().splitlines()]
+        self.assertTrue(any(line.startswith("--quiet") and "--verbose" not in line for line in lines))
+        self.assertTrue(any(line.startswith("--verbose") for line in lines))
+
     def test_config_show_prints_eject_as_a_word(self):
         code, out, _ = self.sync(["config", "show"], {"eject": False})
         self.assertEqual(code, 0)

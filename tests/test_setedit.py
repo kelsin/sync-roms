@@ -9,7 +9,7 @@ from unittest import mock
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 from helpers import StorageDir, storage_sets  # noqa: E402
-from sync_roms import commands, edit, picker, runtime, setedit, shared, store, ui  # noqa: E402
+from sync_roms import commands, edit, listedit, picker, runtime, setedit, shared, store, ui  # noqa: E402
 
 SYSTEMS = [{"name": "Game Boy Advance", "bucket": "gba"}, {"name": "Genesis", "bucket": "gen"}]
 
@@ -81,7 +81,7 @@ class Changes(unittest.TestCase):
         before = {"a": {"name": "A", "description": "", "games": games()}, "gone": {"name": "G", "description": "", "games": games()}}
         after = {"a": {"name": "A", "description": "", "games": setedit.reconcile(games(), shown_without({"gba/A.zip"}))},
                  "fresh": {"name": "Fresh", "description": "", "games": games()[:1]}}
-        found = setedit.diff_sets(before, after)
+        found = listedit.diff_lists(before, after)
         self.assertEqual([(k, s) for k, s, _ in found], [("changed", "a"), ("new", "fresh"), ("removed", "gone")])
         self.assertEqual(found[0][2], ["- A (gba/A.zip)"])
 
@@ -89,7 +89,7 @@ class Changes(unittest.TestCase):
         before = {"a": {"name": "A", "description": "", "games": games()}}
         moved = games()
         setedit.recategorize(moved, moved[1], "Cave")
-        lines = setedit.diff_sets(before, {"a": {"name": "A", "description": "", "games": moved}})[0][2]
+        lines = listedit.diff_lists(before, {"a": {"name": "A", "description": "", "games": moved}})[0][2]
         self.assertEqual(lines, ["~ B (gba/B.zip): category Other → Cave"])
 
 
@@ -173,11 +173,11 @@ class Save(StorageDir):
     def test_save_sets_keeps_before_in_step_with_what_was_saved(self):
         before = setedit.repo_sets()
         after = {"edit": {"name": "Edit", "description": "", "games": games()[1:]}, "keep": before["keep"]}
-        found = setedit.diff_sets(before, after)
+        found = listedit.diff_lists(before, after)
         with mock.patch("builtins.print"):
             setedit.save_sets(before, after, found)
         self.assertEqual(before, after)
-        self.assertEqual(setedit.diff_sets(before, after), [])
+        self.assertEqual(listedit.diff_lists(before, after), [])
 
     def test_a_storage_error_at_the_review_is_a_note_and_the_edits_are_kept(self):
         picks = iter([3, None, 6])  # New set (after Edit, Gone, Keep), Esc to review (fails), then Quit (a set more now)
@@ -226,7 +226,7 @@ class SaveStale(StorageDir):
         after = {**copy.deepcopy(before), "edit": {"name": "Edit", "description": "", "games": games()[1:]},
                  "new": {"name": "New", "description": "", "games": games()}}
         del after["gone"]
-        return after, setedit.diff_sets(before, after)
+        return after, listedit.diff_lists(before, after)
 
     def test_a_set_another_machine_changed_saves_nothing(self):
         for sid, text in (("edit", store.set_text({"name": "Edit", "games": games()[2:]})),  # changed
@@ -364,7 +364,7 @@ class SeriesEditor(unittest.TestCase):
             if not kw.get("multi"):
                 return next(picks)
             flip, then = next(lists)
-            seen.append((list(labels), kw.get("filters"), kw.get("hotkeys"), kw.get("hint")))
+            seen.append((list(labels), kw.get("filters"), kw.get("hotkeys"), kw.get("hint"), kw.get("key_help")))
             kw["session"]["sel"] = [on != (label in flip) for label, on in zip(labels, kw["session"]["sel"])]
             return (then, 0) if then else kw["session"]["sel"]
 
@@ -389,6 +389,9 @@ class SeriesEditor(unittest.TestCase):
         self.assertEqual(seen[2][1], "")
         self.assertEqual(seen[0][2], (setedit.cardedit.SERIES_KEY, setedit.cardedit.CLEAR_KEY))
         self.assertIn("series", seen[0][3])
+        self.assertIn("c clear filters", seen[0][3])
+        self.assertEqual(seen[1][1], "Alpha (c clear filters)")
+        self.assertEqual([k for k, _ in seen[0][4]], ["r", "c"])  # what ? lists
         self.assertEqual([g["bucket"] for g in game_set["games"]], ["gba/A.zip", "gen/C.zip"])  # B off, C kept
         self.assertEqual(game_set["games"][0]["series"], "Alpha")
 
@@ -519,8 +522,8 @@ class Editor(unittest.TestCase):
                 mock.patch.object(store, "repo_json", return_value=SYSTEMS), mock.patch.object(picker, "filter_list", fake), \
                 mock.patch.object(store, "folder_keys", lambda bucket: keys.get(bucket, set())), \
                 mock.patch.object(store, "load_sets", return_value=list(sets)), \
-                mock.patch.object(setedit, "stocked", lambda systems: systems), \
-                mock.patch.object(setedit, "file_counts", lambda systems: None), \
+                mock.patch.object(listedit, "stocked", lambda systems: systems), \
+                mock.patch.object(listedit, "file_counts", lambda systems: None), \
                 mock.patch.object(ui, "ask", side_effect=ask) as ask, mock.patch.object(ui, "choose", return_value="s") as choose, \
                 mock.patch("builtins.print"), \
                 mock.patch.object(setedit, "save_sets", lambda before, after, found, from_fallback: saved.update(after=after)), \

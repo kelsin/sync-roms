@@ -25,10 +25,13 @@ def rom_rel(key, disc_dir=None, discs=()):
 
 def is_current(path, size, disc_dir=None):
     """Whether path is already storage's file; a playlist pointing into disc_dir is storage's with that prefix added."""
-    if size is None or not os.path.exists(path):
+    if size is None:
         return False
-    if os.path.getsize(path) == size:
-        return True
+    try:
+        if os.stat(path).st_size == size:
+            return True
+    except OSError:
+        return False
     if disc_dir and path.lower().endswith(".m3u"):
         with open(path, "rb") as f:
             return len(f.read().replace(disc_dir.encode() + b"/", b"")) == size

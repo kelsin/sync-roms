@@ -43,6 +43,17 @@ def stocked(systems):
                    and inventory.cached(f"{s['bucket']}/") != {}), key=store.system_sort_key)
 
 
+def folder_lister():
+    """keys_of(bucket): store.folder_keys of a system's folder, listed once per bucket."""
+    listed = {}
+
+    def keys_of(bucket):
+        if bucket not in listed:
+            listed[bucket] = store.folder_keys(bucket)
+        return listed[bucket]
+    return keys_of
+
+
 def file_counts(systems):
     """Per system, its file count in storage as filter_list extras; none without a storage cache (counting would list
     every folder)."""
@@ -132,6 +143,41 @@ def game_label(game, names):
            f" — {game.get('title') or game['bucket']}"
 
 
+def add_from_system(listing, systems, shown, keys_of, label, categories=True, toggle=None):
+    """Pick one of systems with files in storage and toggle its games in listing (via shown, a view of it).
+    label is listing's name as shown, with its emoji.
+
+    toggle(s, title, rows) shows the system's rows (s is its entry in shown) instead of a plain edit.toggle_games.
+    New games get the category asked for when categories is true (none after Ctrl-C, which keeps the toggles made and
+    is then raised again), and the discs of a multi-disc game whose playlist is in storage."""
+    options = stocked(systems)
+    j = picker.filter_list("✏️  Add games from which system?", [s["name"] for s in options], extras=file_counts(options),
+                           preview=lambda k: previews.system(options[k]) if k < len(options) else None)
+    if j is None:
+        return
+    s = shown[options[j]["bucket"]]
+    rows = system_rows(s, keys_of(s["bucket"]))
+    had = {g["bucket"] for g in s["games"]}
+    title = f"✏️  {s['name']} — ✅ in {label}, ⬜ in storage only"
+    interrupted = False
+    try:
+        if toggle:
+            toggle(s, title, rows)
+        else:
+            edit.toggle_games(title, rows)
+    except KeyboardInterrupt:  # Ctrl-C in the list or a picker it opens: the toggles made are kept, with no category
+        interrupted = True
+    added = {g["bucket"] for g in s["games"]} - had
+    try:
+        category = ask_category(listing["games"], f"{len(added)} new game(s)") if categories and added and not interrupted else ""
+    except KeyboardInterrupt:  # Ctrl-C at the question: no category
+        category, interrupted = "", True
+    listing["games"] = reconcile(listing["games"], shown, category)
+    fold_discs(listing["games"], keys_of(s["bucket"]))
+    if interrupted:
+        raise KeyboardInterrupt
+
+
 def add_from_set(listing, sets, shown, keys_of, label, categories=True):
     """Pick one of sets and toggle its games, across every system, in listing (via shown, a view of it).
     label is listing's name as shown, with its emoji.
@@ -165,3 +211,105 @@ def add_from_set(listing, sets, shown, keys_of, label, categories=True):
             g["files"] = list(files[g["bucket"]])
     if interrupted:
         raise KeyboardInterrupt
+
+
+# --- What changed ------------------------------------------------------------------------------------
+
+def game_line(game):
+    return f"{game.get('title') or game['bucket']} ({game['bucket']})"
+
+
+def diff_lists(before, after):
+    """[(kind, id, [lines])] for every games list (set or collection) that was created, removed or changed; kind is new,
+    removed or changed."""
+    found = []
+    for sid in sorted(set(before) | set(after)):
+        a, b = before.get(sid), after.get(sid)
+        if a is None:
+            found.append(("new", sid, [f"+ {game_line(g)}" for g in b["games"] if g.get("bucket")]))
+        elif b is None:
+            found.append(("removed", sid, [f"{len(a['games'])} game(s)"]))
+        elif a != b:
+            lines = [f"name: {a['name']} → {b['name']}"] if a["name"] != b["name"] else []
+            if a.get("description", "") != b.get("description", ""):
+                lines.append("description changed")
+            old = {g["bucket"]: g for g in a["games"] if g.get("bucket")}
+            new = {g["bucket"]: g for g in b["games"] if g.get("bucket")}
+            lines += [f"+ {game_line(new[k])}" for k in new if k not in old]
+            lines += [f"- {game_line(old[k])}" for k in old if k not in new]
+            lines += [f"~ {game_line(new[k])}: category {old[k].get('category') or 'none'} → {new[k].get('category') or 'none'}"
+                      for k in new if k in old and (old[k].get("category") or "") != (new[k].get("category") or "")]
+            found.append(("changed", sid, lines or ["edited"]))
+    return found
+
+
+def print_changes(found):
+    print(ui.bold("\n📝 Changes"))
+    for kind, sid, lines in found:
+        print(ui.bold(f"  {sid}") + ui.dim(f"  ({kind})"))
+        for line in lines:
+            print((ui.green if line.startswith("+") else ui.red if line.startswith("-") else str)(f"    {line}"))
+
+
+# --- The sets and collections menu -------------------------------------------------------------------
+
+def edit_menu(noun, before, working, state, emoji, art, delete_note, new_item, open_item, save, question, empty_ok=True):
+    """The menu of the games lists in working ({id: list}, before as loaded) for the set or collection editor (noun);
+    Done and Esc review the changes and ask question (save, keep editing or discard). state["review"] starts at that
+    review and stays true until the user goes back to editing; when that review ends the editor, returns None.
+    Returns the exit code.
+
+    emoji(item) and art(item) of a list with its "id"; delete_note(id): what else deleting it does, as a sentence
+    starting with a space (or ""); new_item(working) asks for a new list, adds it and returns its id (None when
+    cancelled); open_item(item) edits one; save(found) saves the reviewed changes (diff_lists) and returns whether it
+    did (False, its error noted, goes back to the menu). Without empty_ok, a list with no games can't be saved."""
+    while True:
+        ids = sorted(working, key=lambda x: working[x]["name"].lower())
+        n = len(ids)
+        found = diff_lists(before, working)
+        edited = {x for _, x, _ in found}
+        labels = ([f"{emoji({**working[x], 'id': x})} {working[x]['name']}  ({len(working[x]['games'])} games)" for x in ids]
+                  + [f"➕ New {noun}", "✅ Done (review & save)", "🚪 Quit without saving"])
+        extras = [[("  " + ("new" if x not in before else "edited"), "cyan")] if x in edited else [] for x in ids] + [[], [], []]
+        i = n + 1 if state["review"] else picker.filter_list(f"✏️  Which {noun}?  (Esc = review & save)", labels, extras=extras,
+                                                    hotkeys=(edit.DELETE_KEY,), hint="/ filter · Enter open · d delete · Esc review",
+                                                    preview=lambda k: previews.collection(art({**working[ids[k]], "id": ids[k]})) if k < n else None)
+        if isinstance(i, tuple):
+            if i[1] < n:
+                x = ids[i[1]]
+                if ui.confirm(f"🗑️  Delete {noun} {emoji({**working[x], 'id': x})} {working[x]['name']}?{delete_note(x)}", default=False):
+                    del working[x]
+            continue
+        if i is not None and i < n:
+            open_item(working[ids[i]])
+            continue
+        if i == n:
+            x = new_item(working)
+            if x:
+                open_item(working[x])
+            continue
+        if i == n + 2:
+            if not edited or ui.confirm("Discard your pending changes and quit?", default=False):
+                edit.note(ui.yellow("👋 Quit without saving."))
+                return 0
+            continue
+        if not found:
+            edit.note(ui.yellow("👋 No changes, nothing saved."))
+            return 0
+        empty = [] if empty_ok else [x for kind, x, _ in found if kind != "removed" and not working[x]["games"]]
+        if empty:
+            edit.note(ui.yellow(f"ℹ️  {', '.join(empty)} has no games. Add some or delete it first."))
+            state["review"] = False
+            continue
+        print_changes(found)
+        answer = ui.choose(question, "sed", "s", "s save · e keep editing · d discard")
+        if answer == "e":
+            state["review"] = False
+            continue
+        if answer == "d":
+            edit.note(ui.yellow("👋 Not saved."))
+            return None if state["review"] else 0
+        if not save(found):
+            state["review"] = False
+            continue
+        return None if state["review"] else 0

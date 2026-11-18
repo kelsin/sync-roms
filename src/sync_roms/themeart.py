@@ -383,9 +383,9 @@ def install(layout_name, base, arts):
     """Give the custom collections in arts ({name: art id}) their art in the frontend's theme. Returns whether files
     changed."""
     arts = usable(layout_name, arts)
-    return install_esde(layout_name, base, arts) if layout_name in ("esde", "emudeck") else install_knulli(base, arts)
+    return install_esde(layout_name, base, arts) if layout_name in frontend.ESDE_LAYOUTS else install_knulli(base, arts)
 
 
 def describe(layout_name, base, arts):
     arts = usable(layout_name, arts)
-    describe_esde(layout_name, base, arts) if layout_name in ("esde", "emudeck") else describe_knulli(base, arts)
+    describe_esde(layout_name, base, arts) if layout_name in frontend.ESDE_LAYOUTS else describe_knulli(base, arts)

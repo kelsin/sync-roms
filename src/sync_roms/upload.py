@@ -329,8 +329,8 @@ def replace_command(args, folder, system):
         return 0
     delete = []
     if only_bucket:
-        picked = picker.filter_list(f"🗑️  Delete from {s3.location()}/{bucket}/ (they match no local file) — untick to keep",
-                             only_bucket, multi=True, initial=[True] * len(only_bucket),
+        picked = picker.filter_list(f"🗑️  Delete from {s3.location()}/{bucket}/ (they match no local file) — tick to delete",
+                             only_bucket, multi=True, initial=[False] * len(only_bucket),
                              extras=[[(ui.human_size(remote[p][0]), "dim")] for p in only_bucket],
                              hint="/ filter · j/k move · Space toggle · a toggle all shown · Enter done",
                              preview=lambda k: previews.game_thumb(f"{bucket}/{only_bucket[k]}") if k < len(only_bucket) else None,

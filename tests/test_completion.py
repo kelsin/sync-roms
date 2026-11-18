@@ -73,6 +73,8 @@ class BashCompletion(unittest.TestCase):
         self.assertIn("sets", self.complete("sync-roms", "games", ""))
         self.assertEqual(self.complete("sync-roms", "clean", "s"), ["scrapes"])
         self.assertEqual(self.complete("sync-roms", "games", "add", "gb"), ["gba", "gbc"])
+        self.assertEqual(self.complete("sync-roms", "config", "s"), ["show", "set"])
+        self.assertEqual(self.complete("sync-roms", "config", "unset", "surprise_t"), ["surprise_ttl_days"])
 
 
 class OtherShells(unittest.TestCase):
@@ -83,6 +85,7 @@ class OtherShells(unittest.TestCase):
         text = script_for("fish")
         self.assertIn('-l card -x -a "(sync-roms completion list cards)"', text)
         self.assertIn('-l system -x -a "(sync-roms completion list systems)"', text)
+        self.assertIn('"__fish_seen_subcommand_from config; and __fish_seen_subcommand_from set unset" -a "bucket ', text)
         for flag in commands.all_flags():
             if flag.startswith("--"):
                 self.assertIn(f"-l {flag[2:]}", text)

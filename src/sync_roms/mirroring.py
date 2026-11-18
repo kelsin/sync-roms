@@ -28,7 +28,7 @@ def mirror_wanted(manifest):
         stems = {os.path.splitext(k.split("/", 1)[1])[0] for k in keys}
         for key, size in scraped.items():
             parts = key.split("/")
-            if key == f"{scrape_plan.SCRAPES}/{s['bucket']}/metadata.json" or (
+            if key == scrape_plan.metadata_key(s["bucket"]) or (
                     len(parts) > 3 and parts[2] in scrape_plan.BUCKET_MEDIA and os.path.splitext("/".join(parts[3:]))[0] in stems):
                 wanted[key] = size
     for s in systems:
