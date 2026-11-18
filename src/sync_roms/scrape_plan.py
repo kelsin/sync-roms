@@ -15,6 +15,15 @@ from . import downloads, frontend, inventory, runtime, s3, shared, store, ui
 # Lives in storage under scrapes/. Metadata is neutral JSON with only the fields that are safe
 # to share; media keeps ES-DE's media type folder names.
 SCRAPES = "scrapes"
+MEDIA_TYPES = {"3dboxes", "backcovers", "covers", "custom", "fanart", "manuals", "marquees",
+               "miximages", "physicalmedia", "screenshots", "titlescreens", "videos"}
+# Onion's box art is made at upload time (PNG, at most 250x360) from the first of ONION_ART found locally
+# and stored as scrapes/<system>/onion/<ROM name>.png, so a sync only downloads it.
+ONION_TYPE = "onion"
+ONION_ART = ("covers", "3dboxes", "screenshots")
+ONION_MAX = (250, 360)
+BUCKET_MEDIA = MEDIA_TYPES | {ONION_TYPE}
+TEXT_FIELDS = ("name", "desc", "developer", "publisher", "genre", "players")
 
 
 def metadata_key(system):
@@ -37,15 +46,6 @@ def load_metadata(system, fresh=False):
     if not isinstance(data, dict):
         raise ValueError(f"{key} isn't a JSON object")
     return data
-MEDIA_TYPES = {"3dboxes", "backcovers", "covers", "custom", "fanart", "manuals", "marquees",
-               "miximages", "physicalmedia", "screenshots", "titlescreens", "videos"}
-# Onion's box art is made at upload time (PNG, at most 250x360) from the first of ONION_ART found locally
-# and stored as scrapes/<system>/onion/<ROM name>.png, so a sync only downloads it.
-ONION_TYPE = "onion"
-ONION_ART = ("covers", "3dboxes", "screenshots")
-ONION_MAX = (250, 360)
-BUCKET_MEDIA = MEDIA_TYPES | {ONION_TYPE}
-TEXT_FIELDS = ("name", "desc", "developer", "publisher", "genre", "players")
 
 
 def dump_json(data):
