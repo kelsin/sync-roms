@@ -250,7 +250,7 @@ Every mode is a command (`sync-roms COMMAND --help` explains one; plain `sync-ro
 | `sync [CARD]` | download ROMs, BIOS and scraped data to a card | (default) |
 | `edit`, `games edit`, `cards edit` | interactive list editor | `--edit` |
 | `games list\|add\|remove\|full\|sets\|export\|import` | edit lists from scripts, see below | |
-| `sets edit` | edit the repo's game sets by hand and open a PR (needs `git` and a logged-in `gh`) | |
+| `sets edit` | edit the game sets in storage by hand and save them there | |
 | `collections edit` | edit your collections of favourite games (saved in `~/.sync-roms/collections/`) | |
 | `themes update` | put the latest Art Book Next for ES-DE (for collections' theme art) in storage | |
 | `download pico8` | add the PICO-8 BBS Featured carts storage doesn't have, and newer revisions of those it has (see below) | |
@@ -377,7 +377,7 @@ storage doesn't have (`new:`) and those the BBS has a newer revision of (`upgrad
   entries in that file are kept.
 - A cart's revision is its `-<number>` suffix (none is revision 0). An upgrade deletes the old revision, moves its
   metadata entry and its `scrapes/pico8/` media to the new name, and points your cards, Surprise history and
-  collections at the new file. Repo sets that name the old file are listed as warnings to change by hand.
+  collections at the new file. Sets that name the old file are listed as warnings to change by hand (`sync-roms sets edit`).
 - Carts in `ignored.json` are never downloaded.
 - Requests go one at a time. The first HTTP error stops the run with a warning; carts already added stay.
 
@@ -526,7 +526,7 @@ read to show what is in it, so the read-only profile is enough. No folders are n
 sync-roms --edit
 ```
 
-0. The menu has **Cards**, **Sets**, **Collections** and **Device systems**. **Sets** is `sync-roms sets edit` (see below; it needs `git` and a logged-in `gh`, and returns here if they are missing). **Collections** is `sync-roms collections edit` (see below). **Device systems** is described at the end of this section. Under **Cards**, pick one of your cards, or **➕ New card** (asks for its folder name, then its device and
+0. The menu has **Cards**, **Sets**, **Collections** and **Device systems**. **Sets** is `sync-roms sets edit` (see below). **Collections** is `sync-roms collections edit` (see below). **Device systems** is described at the end of this section. Under **Cards**, pick one of your cards, or **➕ New card** (asks for its folder name, then its device and
    firmware, like the first sync does, and saves the card). On a card, `v` changes its device and firmware instead of opening it (saved with the review at the end) and drops the card's games for systems the new device or firmware doesn't use. Each card's row shows its current device and firmware.
 1. A card opens on every system its device can play, in the usual order. Systems recommended for the device's screen
    are marked ⭐; each system with picks shows how many games and how much space they take (ROMs plus the scraped
@@ -579,16 +579,16 @@ sync-roms games import list.txt --card SD         # a field with @ lines in the 
 sync-roms cards new SD --device anbernic-rg35xx-sp --layout knulli --size 256GB   # --size is optional; shown in `cards list` and on sync
 ```
 
-A set file (in the package's `data/sets/`) is `{"name": ..., "description": ..., "games": [{"title": ..., "system": "gba", "bucket": "gba/Game.zip"}]}`.
+A set file (storage's `sets/<id>.json`; its id is the file name) is `{"name": ..., "description": ..., "games": [{"title": ..., "system": "gba", "bucket": "gba/Game.zip"}]}`, with an optional `"art": "<id>"` picking its theme art (see below; without it a set uses the art under its own id).
 A multi-disc game adds `"files": [...]` with its other storage keys (the discs); `bucket` is the playlist (`.m3u`) or disc 1.
 Toggling the game adds or removes every file, one card entry each.
 Entries for an unknown system are skipped with a warning. A full system has no game list to edit: every file is always synced, so opening it in the card editor only says so (press `f` on it in the system list to turn the list back on).
 
 Removing a game only drops it from the card's games; the file stays in storage.
 
-### Editing the built-in sets
+### Editing the sets
 
-`sync-roms sets edit` edits the sets in this repo's `data/sets/` and opens a PR with the changes, so it works from any install. Pick a set to switch games off, add games from a system (those with files in storage, by company then name; with a storage cache each shows its file count) or from another set across all its systems (you're asked for a category; existing ones are listed), change a game's category, or rename it. **➕ New set** creates a set and `d` deletes the highlighted one (it warns if a card still references it). Esc shows the changes; confirming clones `kelsin/sync-roms` to a temporary folder, writes the changed set files, pushes a branch and runs `gh pr create`. `Ctrl-C` with changes pending shows the same review first; the toggles of a games list open at that moment (or just left for its category question) count, and the games it adds get no category. It needs `git` and a logged-in `gh`, and writes nothing to storage or to `~/.sync-roms`.
+The sets live in storage as `sets/<id>.json`, so everyone using that storage shares them; each machine keeps a copy in `~/.sync-roms/storage/sets/`, checked against storage once a run. A set another machine added shows up after `sync-roms cache update`. `sync-roms sets edit` edits them. Pick a set to switch games off, add games from a system (those with files in storage, by company then name; with a storage cache each shows its file count) or from another set across all its systems (you're asked for a category; existing ones are listed), change a game's category, or rename it. **➕ New set** creates a set and `d` deletes the highlighted one (it warns if a card still references it). Esc shows the changes; confirming writes the new and changed set files to storage and deletes the deleted ones (an unmounted storage folder shows an error and keeps the edits pending). `Ctrl-C` with changes pending shows the same review first; the toggles of a games list open at that moment (or just left for its category question) count, and the games it adds get no category. It writes nothing else to storage or to `~/.sync-roms`.
 
 ### Collections
 
@@ -596,7 +596,7 @@ Removing a game only drops it from the card's games; the file stays in storage.
 
 #### Theme art for collections
 
-In the collection editor, **Theme art** picks a picture for the collection: one for every set (under the set's id),
+In the collection editor, **Theme art** picks a picture for the collection: one for each set (under the set's id in `art.json`),
 RPG and Horror, and ones for the usual kinds of personal collection (Favorites, Now Playing, Backlog, Completed,
 Kids & Family, Hard Mode, Late Night & Chill, Great Soundtracks, ROM Hacks & Homebrew, Imports, Years & Decades,
 Holidays, Device Benchmarks), drawn in the Outline style of the
@@ -638,17 +638,17 @@ toggle it (🗂️). A full system's games can't be toggled one by one.
 
 ### Full sets
 
-A list can sync every game of a set (from `data/sets/*.json`) without listing the games, with a `"sets"` key
-holding the set file names without `.json`:
+A list can sync every game of a set (storage's `sets/<id>.json`) without listing the games, with a `"sets"` key
+holding the set ids (file names without `.json`):
 
 ```json
 { "sets": ["mario", "zelda"], "gba": [ { "title": "Game", "bucket": "gba/Game.zip" } ] }
 ```
 
 It works in a card's `games` entry in `cards.json`. A set reference is live: games added
-to the set in a later release are synced too, for the systems the card has enabled. `sync-roms games sets add ID --card NAME` adds one
+to the set later are synced too, for the systems the card has enabled. `sync-roms games sets add ID --card NAME` adds one
 (the card editor's `s` picks a set's games one by one instead); in `--edit` the games a referenced set syncs show 📦,
-and switching one off excludes it on that card. Unknown set names are skipped with a warning.
+and switching one off excludes it on that card. Unknown set names are kept and skipped with a warning (run `sync-roms cache update` if another machine added the set).
 
 ### Surprise
 

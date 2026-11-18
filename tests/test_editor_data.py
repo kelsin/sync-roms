@@ -138,10 +138,12 @@ class CheckBucketKeys(Cmd):
 
     def test_flag_uses_the_readonly_profile_and_refuses_the_write_profile(self):
         from sync_roms import runtime, s3
+        with open(self.path("cards.json"), "w") as f:
+            json.dump({"c": {"device": "full", "layout": "esde", "games": {"gba": [{"title": "A", "bucket": "gba/A.zip"}]}}}, f)
         with mock.patch.object(s3, "list_sizes", return_value={}) as ls, \
                 mock.patch.object(runtime, "PROFILE", "roms-readonly"), mock.patch.object(runtime, "WRITE_PROFILE", "roms"):
             code, _, _ = self.run_cmd("check", "--bucket-keys")
-        self.assertEqual(code, 1)  # every key of the shipped sets is "missing" from an empty listing
+        self.assertEqual(code, 1)  # the card's game is "missing" from an empty listing
         self.assertTrue(ls.called)
         with mock.patch.object(s3, "list_sizes", return_value={}) as ls, \
                 mock.patch.object(runtime, "PROFILE", "roms"), mock.patch.object(runtime, "WRITE_PROFILE", "roms"):

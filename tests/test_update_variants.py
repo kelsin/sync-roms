@@ -11,9 +11,9 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
-from helpers import StorageDir  # noqa: E402
+from helpers import StorageDir, storage_sets  # noqa: E402
 
-from sync_roms import inventory, store, usersettings  # noqa: E402
+from sync_roms import inventory, runtime, shared, store, usersettings  # noqa: E402
 
 SCRIPTS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".claude", "skills", "update-variants", "scripts")
 
@@ -58,6 +58,49 @@ class ApplyVariants(CheckedInStorage):
         self.put("variants-checked.json", json.dumps({"gba/Old.zip": "old"}).encode())
         self.run_apply({"checked": {"gba/A.zip": "x"}})
         self.assertEqual(self.checked(), {"gba/A.zip": "x", "gba/Old.zip": "old"})
+
+
+class ApplyVariantsToSets(CheckedInStorage):
+    SET = {"name": "S", "games": [{"title": "A", "system": "gba", "bucket": "gba/A.zip"}]}
+
+    def setUp(self):
+        super().setUp()
+        storage_sets(self, {"s": self.SET, "t": {"name": "T", "games": []}}, self.root)
+
+    def text(self, set_id):
+        with open(os.path.join(self.root, "sets", f"{set_id}.json"), encoding="utf-8") as f:
+            return f.read()
+
+    def run_apply(self, decisions):
+        path = os.path.join(self.tmp.name, "decisions.json")
+        with open(path, "w") as f:
+            json.dump(decisions, f)
+        with contextlib.redirect_stdout(io.StringIO()) as out, contextlib.redirect_stderr(io.StringIO()):
+            apply_variants.main(path)
+        return out.getvalue()
+
+    def test_a_variant_is_written_to_the_set_in_storage_and_its_local_copy(self):
+        before = self.text("t")
+        out = self.run_apply({"add": [{"game": "gba/A.zip", "bucket": "gba/A DX.zip", "note": "GBA: adds colour"}]})
+        want = {**self.SET, "games": [{**self.SET["games"][0],
+                                       "variants": [{"bucket": "gba/A DX.zip", "note": "GBA: adds colour"}]}]}
+        self.assertEqual(self.text("s"), store.set_text(want))
+        with open(shared.local_path("sets/s.json"), encoding="utf-8") as f:
+            self.assertEqual(f.read(), store.set_text(want))
+        self.assertEqual(self.text("t"), before)
+        self.assertIn("Sets changed: s", out)
+        self.assertEqual(store.set_files()[0]["games"], want["games"])
+        self.assertEqual(self.checked(), {"gba/A DX.zip": "variant of gba/A.zip"})
+
+    def test_an_unmounted_storage_folder_writes_nothing(self):
+        before = self.text("s")
+        with mock.patch.object(runtime, "ROOT", self.root + "-unmounted"), self.assertRaises(SystemExit) as e:
+            self.run_apply({"add": [{"game": "gba/A.zip", "bucket": "gba/A DX.zip", "note": "GBA: adds colour"}],
+                            "checked": {"gba/B.zip": "no"}})
+        self.assertIn("is missing", str(e.exception))
+        self.assertEqual(self.text("s"), before)
+        self.assertFalse(os.path.exists(os.path.join(self.root, "variants-checked.json")))
+        self.assertFalse(os.path.exists(self.root + "-unmounted"))
 
 
 class FindCandidates(CheckedInStorage):

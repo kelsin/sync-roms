@@ -10,7 +10,7 @@ from unittest import mock
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 from helpers import StorageDir, feed_list, storage_sets, write_json  # noqa: E402
-from sync_roms import commands, edit, inventory, listedit, picker, runtime, shared, store  # noqa: E402
+from sync_roms import commands, edit, inventory, listedit, picker, runtime, shared, store, themeart  # noqa: E402
 
 
 def systems():
@@ -207,6 +207,65 @@ class UnknownCardSetsTest(StorageDir):
             problems = commands.check_data()
         self.assertIn("cards.json: SD: unknown set 'gone'", "\n".join(problems))
         self.assert_cards_unchanged()
+
+
+class CheckStorageSetsTest(StorageDir):
+    def check(self, sets):
+        if sets is not None:
+            storage_sets(self, sets, self.root)
+        else:
+            store.reset_sets()
+            self.addCleanup(setattr, store, "_sets", "[]")
+        problems = []
+        with contextlib.redirect_stderr(io.StringIO()):
+            keys = commands.check_sets(problems, {"gba", "gen"})
+            notices = commands.check_set_notices()
+        return problems, keys, notices
+
+    def art(self, n):
+        return [i for i in themeart.art_choices()][n]
+
+    def test_a_fresh_storage_has_nothing_to_check(self):
+        self.assertEqual(self.check(None), ([], {}, []))
+
+    def test_storage_sets_are_checked_with_the_set_file_rules(self):
+        problems, keys, _ = self.check({self.art(0): {"name": "Good", "games": [
+            {"title": "A", "system": "gba", "bucket": "gba/A.zip", "files": ["gba/A2.zip"]}]},
+            "bad": {"name": "Bad", "games": [{"title": "", "system": "gba", "bucket": "gba/B.zip"},
+                                             {"title": "N", "system": "nes", "bucket": "nes/N.zip"},
+                                             {"title": "W", "system": "gen", "bucket": "gba/W.zip"}]}})
+        self.assertEqual(problems, ["sets/bad.json: gba/B.zip: missing 'title'",
+                                    "sets/bad.json: nes/N.zip: unknown system 'nes'",
+                                    "sets/bad.json: 'gba/W.zip' isn't under gen/"])
+        self.assertEqual(keys, {f"sets/{self.art(0)}.json": [("gba", "gba/A.zip"), ("gba", "gba/A2.zip")],
+                                "sets/bad.json": [("gba", "gba/B.zip")]})
+
+    def test_a_file_that_isnt_a_set_is_a_problem(self):
+        problems, keys, _ = self.check({"broken": "{not json", "list": "[]"})
+        self.assertEqual(problems, ["sets/broken.json: isn't a set (a JSON object with a games list)",
+                                    "sets/list.json: isn't a set (a JSON object with a games list)"])
+        self.assertEqual(keys, {})
+
+    def test_unknown_art_is_a_problem(self):
+        problems, _, _ = self.check({"s": {"name": "S", "art": "nope", "games": []}})
+        self.assertEqual(problems, ["sets/s.json: unknown art 'nope'"])
+
+    def test_sets_without_art_or_sharing_art_are_noticed(self):
+        a, b = self.art(0), self.art(1)
+        problems, _, notices = self.check({a: {"name": "A", "games": []}, "new": {"name": "N", "games": []},
+                                           "other": {"name": "O", "art": a, "games": []},
+                                           "picked": {"name": "P", "art": b, "games": []}})
+        self.assertEqual(problems, [])
+        self.assertEqual(notices, [f"sets: 1 set(s) have no art in art.json, so they show {themeart.SET_EMOJI} "
+                                   "and get no picture: new",
+                                   f"sets: {', '.join(sorted([a, 'other']))} share the art {a!r}"])
+
+    def test_storage_set_keys_are_checked_against_storage(self):
+        storage_sets(self, {"s": {"name": "S", "games": [{"title": "A", "system": "gba", "bucket": "gba/A.zip"}]}},
+                     self.root)
+        with contextlib.redirect_stderr(io.StringIO()):
+            problems = commands.check_data(lambda system: set())
+        self.assertIn("sets/s.json: 'gba/A.zip' isn't in storage", problems)
 
 
 class SetsTest(unittest.TestCase):

@@ -528,6 +528,7 @@ _sets_lock = threading.RLock()  # editors read the sets from several threads
 _sets = None  # JSON text of the sets read from storage this run, in file-name order (json.loads of it is faster than
 # deep-copying the parse, and load_sets is called many times a run); None until read
 _warned_cards = set()  # cards already warned about this read of the sets (warn_unknown_sets)
+_skipped = []  # keys of the files in sets/ this read skipped as not being sets (skipped_sets)
 
 
 def _set_file(text):
@@ -582,6 +583,7 @@ def _read_sets():
             names = []
         keys, reachable = [SETS + n for n in names if _set_id(SETS + n)], False
     out = []
+    _skipped.clear()
     for key in sorted(keys):
         if reachable:
             try:
@@ -593,6 +595,7 @@ def _read_sets():
             data = _mirror_set(key)
         if data is None:
             ui.warn(f"{key} isn't a set (a JSON object with a games list); skipped")
+            _skipped.append(key)
         elif data is not gone:
             out.append(_set_dict(_set_id(key), data))
     return out
@@ -604,6 +607,7 @@ def reset_sets():
     with _sets_lock:
         _sets = None
         _warned_cards.clear()
+        _skipped.clear()
 
 
 def set_files():
@@ -615,6 +619,12 @@ def set_files():
         if _sets is None:
             _sets = json.dumps(_read_sets(), ensure_ascii=False)
         return json.loads(_sets)
+
+
+def skipped_sets():
+    """The keys of the files in sets/ the last read of the sets skipped because they aren't sets."""
+    with _sets_lock:
+        return list(_skipped)
 
 
 def load_sets():

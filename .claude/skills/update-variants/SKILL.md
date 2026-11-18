@@ -6,10 +6,11 @@ description: Use when new ROMs were uploaded to storage and the sets' game varia
 # Update variants
 
 A set game's `variants` (see "Data files" in CLAUDE.md) list other versions of the same game that add something.
-This skill finds new ROMs in storage that are variants of set games and adds them, after the user approves.
+This skill finds new ROMs in storage that are variants of set games and adds them, after the user approves. The sets
+are storage's `sets/<id>.json`; the scripts read and write them there, never in the repo.
 
 **It only edits `variants`.** It never adds, removes or swaps set entries, and never changes which version a set
-uses: the user edits sets by hand. When a new ROM looks like a better main version than the set's entry, say so in
+uses: the user edits sets with `sync-roms sets edit`. When a new ROM looks like a better main version than the set's entry, say so in
 the report and leave the set alone.
 
 Run every command from the repo root.
@@ -73,12 +74,13 @@ Write the approved decisions to `<scratchpad>/decisions.json`:
 
 ```bash
 uv run --frozen python .claude/skills/update-variants/scripts/apply_variants.py <scratchpad>/decisions.json
-uv run --frozen python -m unittest tests.test_set_data
+sync-roms check
 ```
 
-The apply script adds each variant to the game in every set that lists it and records every judged ROM as checked.
-Rejected candidates go in `checked` so later runs skip them; candidates the user wants to decide later are left out.
-Show `git diff --stat` and commit only when asked (Conventional Commits, e.g. `feat(sets): add variants for new uploads`).
+The apply script adds each variant to the game in every set that lists it, writes the changed sets to storage and
+records every judged ROM as checked. It changes nothing when the storage folder isn't mounted. Rejected candidates go
+in `checked` so later runs skip them; candidates the user wants to decide later are left out. There is nothing to
+commit: report the sets it changed (the last line of its output) and any problems `sync-roms check` shows.
 
 `find_candidates.py --baseline` marks every ROM no set lists as checked without judging it. Use it only when the user
 asks to skip the backlog.

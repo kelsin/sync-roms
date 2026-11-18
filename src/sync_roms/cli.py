@@ -277,8 +277,9 @@ TOPICS = {
     "check": """
   sync-roms check [--bucket-keys]
 
-  Validates cards.json, surprises.json, device-systems.json and the sets: bad JSON,
-  unknown systems, devices and sets. Exits 1 if anything is wrong.
+  Validates cards.json, surprises.json, device-systems.json, the sets in storage and your collections: bad JSON,
+  unknown systems, devices, sets and art. Exits 1 if anything is wrong. Sets with no art of their own, or sharing
+  art, are noted without failing.
   --bucket-keys also lists storage (read-only profile) and reports every game or set file it doesn't have.
 """,
     "completion": """
