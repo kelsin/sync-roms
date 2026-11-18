@@ -109,7 +109,7 @@ def clean_scrapes(args):
     if args.dry_run:
         print(ui.yellow("\n🧪 Dry run — nothing deleted"))
         return 0
-    if not ui.confirm(f"🗑️  Permanently delete {len(delete)} object(s) and rewrite {len(rewrites)} metadata file(s)?", default=False):
+    if not ui.confirm(f"🗑️  Permanently delete {len(delete)} object(s) and rewrite {len(rewrites)} metadata file(s)?"):
         print(ui.yellow("↩️  Keeping everything"))
         return 0
     failed = 0
