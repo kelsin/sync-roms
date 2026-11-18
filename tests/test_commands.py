@@ -260,6 +260,21 @@ class GamesTest(CardCmd):
         self.assertEqual(self.run_cmd("games", "import", path)[0], 0)
         self.assertNotIn("surprise", self.read("cards.json")["SD"])
 
+    def test_onion_surprise_state_round_trips(self):
+        self.write_json("cards.json", {"SD": {"device": "full", "layout": "onion", "surprise": True}})
+        self.assertEqual(self.run_cmd("games", "export")[1].splitlines(), ["@surprise true"])
+        self.write_json("cards.json", {"SD": {"device": "full", "layout": "onion"}})
+        self.assertEqual(self.run_cmd("games", "export")[1].splitlines(), [])
+        path = self.path("list.txt")
+        with open(path, "w") as f:
+            f.write("@surprise true\n")
+        self.assertEqual(self.run_cmd("games", "import", path)[0], 0)
+        self.assertIs(self.read("cards.json")["SD"]["surprise"], True)
+        with open(path, "w") as f:
+            f.write("@surprise false\n")
+        self.assertEqual(self.run_cmd("games", "import", path)[0], 0)
+        self.assertNotIn("surprise", self.read("cards.json")["SD"])
+
     def test_multi_disc_surprise_round_trips(self):
         ff7 = {"system": "psx", "bucket": "psx/FF7 (USA).m3u", "title": "FF7 (USA)",
                "files": ["psx/FF7 (USA) (Disc 1).chd", "psx/FF7 (USA) (Disc 2).chd"]}

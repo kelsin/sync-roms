@@ -189,6 +189,13 @@ class Flow(DataDir):
         self.run_card(returns((cardedit.SURPRISE_KEY, 0)), returns(0), returns(None))
         self.assertIs(self.read("cards.json")["c"]["surprise"], False)
 
+    def test_u_on_an_onion_card_saves_true_and_off_drops_it(self):
+        self.write_json("cards.json", {"c": {"device": "d", "layout": "onion"}})
+        self.assertTrue(cardedit.toggle_surprise("c"))
+        self.assertIs(self.read("cards.json")["c"]["surprise"], True)
+        self.assertFalse(cardedit.toggle_surprise("c"))
+        self.assertNotIn("surprise", self.read("cards.json")["c"])
+
     def test_u_esc_changes_nothing(self):
         self.card(size="1 GB")
         self.run_card(returns((cardedit.SURPRISE_KEY, 0)), returns(None), returns(None))

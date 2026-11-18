@@ -313,8 +313,8 @@ def games_export(args):
     card = store.load_cards()[args.card]
     for field in CARD_FIELDS:
         if field == "surprise":
-            if isinstance(card, dict) and not surprise.enabled(card):
-                print("@surprise false")
+            if isinstance(card, dict) and surprise.enabled(card) != surprise.default_on(card):
+                print(f"@surprise {'true' if surprise.enabled(card) else 'false'}")
             continue
         if field == "pico8":
             if isinstance(card, dict) and isinstance(card.get("pico8"), str) and card["pico8"]:
@@ -409,15 +409,17 @@ def games_import(args):
         if save(raw) is False:
             return False
         values = dict(fields)
-        if surprise_state is False:
-            values["surprise"] = False
         if surprise_keys:
             values["surprises"] = surprise_entries(surprise_keys)
-        if surprise_state:
+        if values and store.update_card(args.card, **values) is False:
+            return False
+        if surprise_state is not None:
             cards = store.load_cards()
-            if isinstance(cards.get(args.card), dict) and cards[args.card].pop("surprise", None) is not None:
-                store.write_cards(cards)
-        return store.update_card(args.card, **values) if values else None
+            entry = cards.setdefault(args.card, {})
+            if isinstance(entry, dict):
+                surprise.set_enabled(entry, surprise_state)
+                return store.write_cards(cards)
+        return None
 
     return finish(args, raw, save_all, changes)
 

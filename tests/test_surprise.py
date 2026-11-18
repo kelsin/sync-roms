@@ -239,6 +239,19 @@ class History(helpers.DataDir):
         self.assertEqual(surprise.past_keys("gba"), {"gba/A.zip"})
 
 
+class Enabled(unittest.TestCase):
+    def test_default_follows_the_layout(self):
+        for layout in ("esde", "knulli", "emudeck"):
+            self.assertTrue(surprise.enabled({"layout": layout}))
+        for layout in ("onion", "allium"):
+            self.assertFalse(surprise.enabled({"layout": layout}))
+        self.assertTrue(surprise.enabled({}))  # a card not synced yet has no layout
+
+    def test_the_field_wins(self):
+        self.assertFalse(surprise.enabled({"layout": "esde", "surprise": False}))
+        self.assertTrue(surprise.enabled({"layout": "onion", "surprise": True}))
+
+
 class Locked(unittest.TestCase):
     def test_card_locked_games_adds_surprises_only_when_on(self):
         s = {"system": "gba", "bucket": "gba/A (USA).zip", "title": "A (USA)"}

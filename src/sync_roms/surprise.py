@@ -6,7 +6,7 @@ import posixpath
 import random
 import re
 
-from . import inventory, m3u, mirroring, names, picker, previews, s3, store, ui, usersettings, vita
+from . import frontend, inventory, m3u, mirroring, names, picker, previews, s3, store, ui, usersettings, vita
 
 SLOTS = 10
 RECOMMENDED_SHARE = 2 / 3
@@ -33,9 +33,23 @@ LANGUAGE = re.compile(r"^[A-Z][a-z](-[A-Za-z]+)?$")
 LABEL = "\U0001F381 Surprise"
 
 
+def default_on(entry):
+    """Surprise's default for a card's cards.json entry: on where the layout has frontend collections (or isn't known yet)."""
+    layout = entry.get("layout") if isinstance(entry, dict) else None
+    return layout is None or layout in frontend.FRONTEND_LAYOUTS
+
+
 def enabled(entry):
-    """Whether Surprise is on for a card's cards.json entry (on unless 'surprise' is false)."""
-    return not (isinstance(entry, dict) and entry.get("surprise") is False)
+    """Whether Surprise is on for a card's cards.json entry: its 'surprise' field when that is a bool, else default_on."""
+    on = entry.get("surprise") if isinstance(entry, dict) else None
+    return on if isinstance(on, bool) else default_on(entry)
+
+
+def set_enabled(entry, on):
+    """Save Surprise on or off in a cards.json entry: the layout's default as the field's absence, else the bool."""
+    entry.pop("surprise", None)
+    if on != default_on(entry):
+        entry["surprise"] = on
 
 
 def ttl_days():
