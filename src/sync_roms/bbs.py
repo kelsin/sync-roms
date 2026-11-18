@@ -2,12 +2,11 @@
 import contextlib
 import datetime
 import http.client
-import json
 import os
 import re
 import tempfile
 
-from . import collections, drivers, github, ignore, inventory, names, runtime, s3, scrape_plan, store, surprise, ui, usersettings
+from . import collections, drivers, github, ignore, inventory, runtime, s3, scrape_plan, store, surprise, ui, usersettings
 
 LISTING = "https://www.lexaloffle.com/bbs/?cat=7&sub=2&orderby=featured"
 _CARTS = "https://www.lexaloffle.com/bbs/cposts/"
@@ -16,7 +15,7 @@ _NAME = re.compile(r"^(.*?)(?:-(\d+))?\.p8\.png$")
 _FILE = re.compile(r"[A-Za-z0-9_][A-Za-z0-9_.-]*\.p8\.png")
 _PNG = b"\x89PNG\r\n\x1a\n"
 _HTTP_ERRORS = (OSError, http.client.HTTPException)
-META = f"{scrape_plan.SCRAPES}/pico8/metadata.json"
+META = scrape_plan.metadata_key("pico8")
 MEDIA = f"{scrape_plan.SCRAPES}/pico8/"
 
 
@@ -200,16 +199,6 @@ def _read_listing(keys, ignored, count):
     return classify(carts, keys, ignored), carts, failed
 
 
-def _load_metadata():
-    """storage's scrapes/pico8/metadata.json, read from storage itself; {} when there is none."""
-    if inventory.tag(META) is None:
-        return {}
-    data = json.loads(names._read(META))
-    if not isinstance(data, dict):
-        raise ValueError(f"{META} isn't a JSON object")
-    return data
-
-
 def _media_moves(old_file, new_file):
     """(old key, new key) of the scrapes/pico8/ media named after old_file's stem."""
     old_stem, new_stem = os.path.splitext(old_file)[0], os.path.splitext(new_file)[0]
@@ -260,7 +249,7 @@ def download_pico8(args):
     if not args.yes and not ui.confirm(f"Add these to {s3.location()}?", default=False):
         return 1 if failed else 0
     try:
-        meta = _load_metadata()
+        meta = scrape_plan.load_metadata("pico8", fresh=True)
     except (*s3.ERRORS, ValueError) as e:
         ui.warn(f"Couldn't read {META} ({e})")
         return 1

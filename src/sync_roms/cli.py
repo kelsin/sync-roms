@@ -1240,7 +1240,7 @@ def sync_card(args):
         if disc_dir and available(s):
             m3u.prefix_playlists(dest_of(s), disc_dir)
 
-    if layout_name in ("esde", "emudeck"):  # ES-DE launches an installed Vita game through its .psvita file
+    if layout_name in frontend.ESDE_LAYOUTS:  # ES-DE launches an installed Vita game through its .psvita file
         for path, error in vita.add_psvita_files({dest_of(s) for s in chosen if s["bucket"] == "psvita"}):
             failed += 1
             failures.append((os.path.relpath(path, roms_dir), error))

@@ -137,7 +137,7 @@ class Metadata:
     def _load(self):
         try:
             with ui.silent_thread():
-                text = s3.get_text(f"{scrape_plan.SCRAPES}/{self.bucket}/metadata.json")
+                text = s3.get_text(scrape_plan.metadata_key(self.bucket))
             result = metafilter.index(json.loads(text), self.bucket)
         except (Exception, SystemExit):  # missing, unreadable or not JSON: no metadata
             result = None

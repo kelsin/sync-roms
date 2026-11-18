@@ -85,8 +85,7 @@ def load(key, parse, empty, fallback=True):
     except (OSError, ValueError):
         local_tag = None
     try:
-        if runtime.ROOT and not os.path.isdir(runtime.ROOT):
-            raise FileNotFoundError(f"{runtime.ROOT} is missing")
+        s3.check_root()
         tag = inventory.tag(key)
         if tag is None:
             _drop_mirror(key)
@@ -115,8 +114,7 @@ def write(key, text):
 
 def delete(key):
     """Delete the storage file, then its mirror and tag. A file that is already gone counts as deleted."""
-    if runtime.ROOT and not os.path.isdir(runtime.ROOT):  # an unmounted share: nothing to delete there
-        raise FileNotFoundError(f"{runtime.ROOT} is missing")
+    s3.check_root()  # an unmounted share: nothing to delete there
     if runtime.ROOT and inventory.tag(key) is None:  # already deleted (another machine did it): only the cache knew it
         inventory.removed([key])
     else:  # deleting a missing bucket object isn't an error
@@ -131,8 +129,7 @@ def update(key, parse, empty, change, dump):
 
     A missing file counts as `empty` (and is created). change(data) mutates data or returns the new value; when it
     leaves an existing file's data equal to what was read, nothing is written."""
-    if runtime.ROOT and not os.path.isdir(runtime.ROOT):  # an unmounted share, not a missing file
-        raise FileNotFoundError(f"{runtime.ROOT} is missing")
+    s3.check_root()  # an unmounted share, not a missing file
     try:
         data, existed = parse(read(key)), True
     except s3.ERRORS as e:

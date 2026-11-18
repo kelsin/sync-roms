@@ -10,7 +10,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import helpers  # noqa: E402,F401
 from test_inventory import StorageFolder  # noqa: E402
 import tempfile  # noqa: E402
-from sync_roms import inventory, names, runtime, store  # noqa: E402
+from sync_roms import inventory, names, runtime, shared, store  # noqa: E402
 
 
 class Names(StorageFolder):
@@ -70,7 +70,7 @@ class LocalCopyTest(Names):
         names.title("mame/zzstand.zip")
         self.assertEqual(self.read(f"cache/{names.KEY}")["mame"]["names"], {"zzstand.zip": "Stand Alone"})
         names.reset()
-        with mock.patch.object(names, "_read", side_effect=AssertionError("read again")):
+        with mock.patch.object(shared, "read", side_effect=AssertionError("read again")):
             self.assertEqual(names.title("mame/zzstand.zip"), "Stand Alone")
 
     def test_rereads_on_tag_change(self):
@@ -99,7 +99,7 @@ class LocalCopyTest(Names):
 
     def test_metadata_read_once_per_run(self):
         self.metadata({"zzstand.zip": {"name": "Stand Alone"}})
-        with mock.patch.object(names, "_read", wraps=names._read) as read:
+        with mock.patch.object(shared, "read", wraps=shared.read) as read:
             for _ in range(20):
                 names.title("mame/zzstand.zip")
         read.assert_called_once()

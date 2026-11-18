@@ -16,8 +16,6 @@ import zlib
 from collections import Counter, deque, namedtuple
 from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
 
-from botocore.exceptions import ClientError
-
 from . import ignore, inventory, runtime, s3, scrape_files, scrape_plan, scrape_state, screenscraper, store, ui, upload, usersettings
 
 CHUNK = 8 << 20
@@ -347,24 +345,7 @@ def _each(fn, names):
         return dict(zip(names, ex.map(fn, names)))
 
 
-def metadata_key(system):
-    return f"{scrape_plan.SCRAPES}/{system}/metadata.json"
-
-
-def load_metadata(system):
-    """A system's metadata.json from storage ({} when there is none). Raises ValueError if it isn't a JSON object."""
-    try:
-        text = s3.get_text(metadata_key(system))
-    except FileNotFoundError:
-        return {}
-    except ClientError as e:
-        if e.response.get("Error", {}).get("Code") in ("NoSuchKey", "404"):
-            return {}
-        raise
-    data = json.loads(text)
-    if not isinstance(data, dict):
-        raise ValueError(f"{metadata_key(system)} isn't a JSON object")
-    return data
+metadata_key, load_metadata = scrape_plan.metadata_key, scrape_plan.load_metadata
 
 
 def planned_match(system, rom, size, etag):

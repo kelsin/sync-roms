@@ -7,7 +7,7 @@ import sys
 import tempfile
 import threading
 
-from . import inventory, runtime, s3, ui
+from . import inventory, s3, ui
 
 
 REPO_DATA = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
@@ -577,8 +577,7 @@ def _read_sets():
     from . import mirroring, shared  # imported here: both use this module
     reachable, gone = True, object()  # reachable: storage answers (else the local copies are read)
     try:
-        if runtime.ROOT and not os.path.isdir(runtime.ROOT):  # an unmounted share, not an empty one
-            raise FileNotFoundError(f"{runtime.ROOT} is missing")
+        s3.check_root()  # an unmounted share, not an empty one
         with mirroring.storage_reads():  # a sync's local mirror of storage doesn't hold the sets
             keys = [k for k in inventory.files(SETS, sizes=False) if _set_id(k)]
     except (*s3.ERRORS, SystemExit) as e:  # SystemExit: ui.fail, e.g. a missing AWS profile (its error is printed)
@@ -647,8 +646,7 @@ def set_changed(set_id, loaded):
     set as set_files gave it ("id" is ignored), or None for a set that wasn't there. Raises the storage errors, an
     unmounted storage folder included (never taken for a missing file)."""
     from . import shared  # imported here: shared uses this module
-    if runtime.ROOT and not os.path.isdir(runtime.ROOT):
-        raise FileNotFoundError(f"{runtime.ROOT} is missing")
+    s3.check_root()
     try:
         data = _set_file(shared.read(SETS + set_id + ".json"))
     except s3.ERRORS as e:

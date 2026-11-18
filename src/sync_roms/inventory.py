@@ -168,8 +168,7 @@ def known(key):
 def tag(key):
     """A tag that changes whenever one storage file's contents do, read live (never from the cache or the mirror): its
     ETag in a bucket, "<mtime_ns>-<size>" in a storage folder. None when the file doesn't exist."""
-    if runtime.ROOT and not os.path.isdir(runtime.ROOT):  # an unmounted share, not a missing file
-        raise FileNotFoundError(f"{runtime.ROOT} is missing")
+    s3.check_root()  # an unmounted share, not a missing file
     try:
         if runtime.ROOT:
             st = os.stat(s3.safe_join(runtime.ROOT, key))
@@ -353,8 +352,7 @@ def update(full=False):
     global _tree, _tree_path, _dirty
     src = source()
     if runtime.ROOT:
-        if not os.path.isdir(runtime.ROOT):
-            raise FileNotFoundError(f"{runtime.ROOT} is missing")
+        s3.check_root()
         (sizes, dirs), tags = _read_folder(runtime.ROOT, None if full else current()), {}
     else:
         (sizes, tags), dirs = _read_bucket(), {}

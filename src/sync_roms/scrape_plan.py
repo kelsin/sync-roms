@@ -8,13 +8,35 @@ import xml.etree.ElementTree as ET
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
 
-from . import downloads, inventory, runtime, s3, store, ui
+from . import downloads, frontend, inventory, runtime, s3, shared, store, ui
 
 
 # --- Scraped data (media, metadata) --------------------------------
 # Lives in storage under scrapes/. Metadata is neutral JSON with only the fields that are safe
 # to share; media keeps ES-DE's media type folder names.
 SCRAPES = "scrapes"
+
+
+def metadata_key(system):
+    return f"{SCRAPES}/{system}/metadata.json"
+
+
+def load_metadata(system, fresh=False):
+    """A system's metadata.json from storage ({} when there is none), read through the local mirror when a sync has one,
+    or with fresh from storage itself. Raises ValueError if it isn't a JSON object."""
+    key = metadata_key(system)
+    try:
+        if fresh:
+            s3.check_root()  # an unmounted share, not a missing file
+        text = shared.read(key) if fresh else s3.get_text(key)
+    except s3.ERRORS as e:
+        if not s3.missing(e):
+            raise
+        return {}
+    data = json.loads(text)
+    if not isinstance(data, dict):
+        raise ValueError(f"{key} isn't a JSON object")
+    return data
 MEDIA_TYPES = {"3dboxes", "backcovers", "covers", "custom", "fanart", "manuals", "marquees",
                "miximages", "physicalmedia", "screenshots", "titlescreens", "videos"}
 # Onion's box art is made at upload time (PNG, at most 250x360) from the first of ONION_ART found locally
@@ -73,7 +95,7 @@ ONION_LAYOUTS = ("onion", "allium")  # both keep box art in a flat Imgs/ folder
 # EmuDeck's media goes on the card; its gamelists go in ES-DE's data folder on the computer running the sync
 SCRAPE_LAYOUTS = set(GAMELIST_FILES)
 EMUDECK_MEDIA = os.path.join("Emulation", "tools", "downloaded_media")
-CART_LAYOUTS = ("esde", "emudeck", "knulli") + ONION_LAYOUTS  # a PICO-8 cart with no scraped picture is its own: these show it as its image
+CART_LAYOUTS = (*frontend.ESDE_LAYOUTS, "knulli") + ONION_LAYOUTS  # a PICO-8 cart with no scraped picture is its own: these show it as its image
 
 
 def gamelist_fields(meta):
@@ -141,7 +163,7 @@ def plan_scrapes(layout_name, rom_rels, listing, meta, media_root, rom_dir, pres
         found = index.get(stem, {})
         tags = gamelist_fields(meta.get(rom, {}))
         base = os.path.basename(stem)
-        if layout_name in ("esde", "emudeck"):
+        if layout_name in frontend.ESDE_LAYOUTS:
             for mtype, (key, size) in found.items():
                 if mtype in MEDIA_TYPES:  # not the Onion-only art
                     add(key, media_root, f"{mtype}/{key.split('/', 3)[3]}", size)
@@ -256,12 +278,11 @@ def load_scrape_data(systems):
     """The storage's scrape data for the chosen systems: {storage folder: (listing, metadata)}."""
     with ThreadPoolExecutor(runtime.WORKERS) as ex:
         listings = list(ex.map(lambda s: inventory.files(f"{SCRAPES}/{s['bucket']}/", sizes=False), systems))
-    meta_keys = [f"{SCRAPES}/{s['bucket']}/metadata.json" for s, l in zip(systems, listings)
-                 if f"{SCRAPES}/{s['bucket']}/metadata.json" in l]
+    meta_keys = [metadata_key(s["bucket"]) for s, l in zip(systems, listings) if metadata_key(s["bucket"]) in l]
     texts = s3.fetch_texts(meta_keys)
     data = {}
     for s, listing in zip(systems, listings):
-        key = f"{SCRAPES}/{s['bucket']}/metadata.json"
+        key = metadata_key(s["bucket"])
         try:
             meta = json.loads(texts[key]) if key in texts else {}
         except ValueError:
@@ -330,7 +351,7 @@ def build_scrape_plan(layout_name, systems, data, rom_rels, dest_of, es_dir, pre
             if not os.path.exists(path) or read_text(path) != text:
                 plan["writes"].append((path, text))
         if entries:
-            gl = (os.path.join(es_dir, "gamelists", esde_name(s, layout_name)) if layout_name in ("esde", "emudeck")
+            gl = (os.path.join(es_dir, "gamelists", esde_name(s, layout_name)) if layout_name in frontend.ESDE_LAYOUTS
                   else rom_dir)
             plan["gamelists"][os.path.join(gl, GAMELIST_FILES[layout_name])].update(entries)
     return plan
@@ -382,8 +403,8 @@ def stale_media(layout_name, systems, roms_dir, es_dir, base=None):
         if not rom_dir or rom_dir in seen or not os.path.isdir(rom_dir):
             continue
         seen.add(rom_dir)
-        stems = card_stems(rom_dir, layout_name not in ("esde", "emudeck"), layout_name in ONION_LAYOUTS)
-        if layout_name in ("esde", "emudeck"):
+        stems = card_stems(rom_dir, layout_name not in frontend.ESDE_LAYOUTS, layout_name in ONION_LAYOUTS)
+        if layout_name in frontend.ESDE_LAYOUTS:
             for mtype in sorted(MEDIA_TYPES):
                 media = os.path.join(media_root_of(layout_name, s, base, es_dir), mtype)
                 stale += [full for rel, full in walk_files(media) if os.path.splitext(rel)[0] not in stems] \

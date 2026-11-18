@@ -18,7 +18,7 @@ from botocore.stub import Stubber
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
-from sync_roms import inventory, runtime, s3, scrape_files, store  # noqa: E402
+from sync_roms import inventory, runtime, s3, scrape_files, scrape_plan, shared, store  # noqa: E402
 
 BUCKET = "test-bucket"
 
@@ -461,6 +461,45 @@ class AccentedNameTest(unittest.TestCase):
         with mock.patch.object(runtime, "ROOT", self.root), decomposing_share(), self.assertRaises(OSError):
             s3.write_file(COMPOSED, fail)
         self.assertEqual(os.listdir(os.path.join(self.root, "psvita")), [])
+
+
+class CheckRootTest(unittest.TestCase):
+    def test_unset_root_is_fine(self):
+        with mock.patch.object(runtime, "ROOT", None):
+            s3.check_root()
+
+    def test_existing_folder_is_fine(self):
+        with tempfile.TemporaryDirectory() as tmp, mock.patch.object(runtime, "ROOT", tmp):
+            s3.check_root()
+
+    def test_missing_folder_raises(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            gone = os.path.join(tmp, "gone")
+            with mock.patch.object(runtime, "ROOT", gone), self.assertRaisesRegex(FileNotFoundError, "gone is missing"):
+                s3.check_root()
+
+
+class LoadMetadataTest(unittest.TestCase):
+    def test_not_found_means_no_metadata(self):
+        err = ClientError({"Error": {"Code": "NotFound"}}, "HeadObject")
+        for fresh, name in ((False, "get_text"), (True, "read")):
+            target = s3 if name == "get_text" else shared
+            with mock.patch.object(target, name, side_effect=err), mock.patch.object(s3, "check_root"):
+                self.assertEqual(scrape_plan.load_metadata("gba", fresh=fresh), {})
+
+    def test_other_errors_are_raised(self):
+        err = ClientError({"Error": {"Code": "AccessDenied"}}, "GetObject")
+        with mock.patch.object(s3, "get_text", side_effect=err), self.assertRaises(ClientError):
+            scrape_plan.load_metadata("gba")
+
+    def test_not_an_object_raises(self):
+        with mock.patch.object(s3, "get_text", return_value="[]"), self.assertRaises(ValueError):
+            scrape_plan.load_metadata("gba")
+
+    def test_fresh_reads_storage_not_the_mirror(self):
+        with mock.patch.object(shared, "read", return_value='{"a": {}}'), mock.patch.object(s3, "check_root"), \
+                mock.patch.object(s3, "get_text", side_effect=AssertionError("mirror")):
+            self.assertEqual(scrape_plan.load_metadata("pico8", fresh=True), {"a": {}})
 
 
 if __name__ == "__main__":

@@ -74,6 +74,12 @@ def missing(e):
         isinstance(e, ClientError) and e.response.get("Error", {}).get("Code") in ("404", "NoSuchKey", "NotFound"))
 
 
+def check_root():
+    """Raise FileNotFoundError when the storage folder is set but missing (an unmounted share, not a missing file)."""
+    if runtime.ROOT and not os.path.isdir(runtime.ROOT):
+        raise FileNotFoundError(f"{runtime.ROOT} is missing")
+
+
 def read_root():
     """The folder reads come from (the local mirror, else the storage folder), or None when they come from storage."""
     return runtime._mirror_root or runtime.ROOT
@@ -102,8 +108,7 @@ def remove_parts():
 
 def write_file(key, write):
     """Create the file for a key under the storage folder; write(tmp_path) fills a temporary file that then replaces it."""
-    if not os.path.isdir(runtime.ROOT):  # an unmounted share: never create the file on the local disk
-        raise FileNotFoundError(f"{runtime.ROOT} is missing")
+    check_root()  # an unmounted share: never create the file on the local disk
     path = safe_join(runtime.ROOT, key)
     os.makedirs(os.path.dirname(path), exist_ok=True)
     _writing.add(key)
@@ -320,6 +325,7 @@ def download(job, callback=None, wrote=None):
 
 
 def get_text(key):
+    """A storage file's text, through the local mirror when a sync has one (see shared.read for storage itself)."""
     if read_root():
         with open(safe_join(read_root(), key), encoding="utf-8") as f:
             return f.read()
