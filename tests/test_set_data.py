@@ -12,6 +12,7 @@ class SetDataTest(unittest.TestCase):
     def test_shipped_sets_are_well_formed(self):
         systems = {s["bucket"] for s in store.repo_json("systems")}
         folder = os.path.join(store.REPO_DATA, "sets")
+        series = set(store.repo_json("series"))
         names = [n for n in os.listdir(folder) if n.endswith(".json")]
         self.assertTrue(names)
         for name in names:
@@ -25,6 +26,8 @@ class SetDataTest(unittest.TestCase):
                 for k in [g["bucket"]] + g.get("files", []):
                     self.assertTrue(k.startswith(g["system"] + "/"), f"{name}: {k}")
                 self.assertTrue(g["title"], name)
+                if "series" in g:
+                    self.assertIn(g["series"], series, f"{name}: {g['bucket']}")
             entry_buckets = {g["bucket"] for g in data["games"]}
             for g in data["games"]:
                 seen = set()

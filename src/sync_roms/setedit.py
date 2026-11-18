@@ -6,8 +6,8 @@ import subprocess
 import tempfile
 import time
 
-from . import edit, picker, previews, s3, store, themeart, ui
-from .listedit import add_from_set, ask_category, file_counts, fold_discs, game_label, insert_game, recategorize, reconcile, stocked, system_rows, view
+from . import cardedit, edit, picker, previews, s3, store, themeart, ui
+from .listedit import add_from_set, ask_category, file_counts, fold_discs, game_label, insert_game, recategorize, reconcile, series_keys, set_series, stocked, system_rows, view
 
 
 REPO = "kelsin/sync-roms"
@@ -34,6 +34,7 @@ def edit_one(game_set, systems, keys_of):
         i = picker.filter_list(f"✏️  {label} (Esc = back)",
                                [f"Games in this set ({len(game_set['games'])}): switch some off",
                                 "Add games from a system", "Add games from a set", "Change a game's category",
+                                "Set a game's series",
                                 "Rename / change the description"])
         if i is None:
             return
@@ -43,9 +44,21 @@ def edit_one(game_set, systems, keys_of):
             if not rows:
                 edit.note(ui.yellow("ℹ️  This set has no games yet."))
                 continue
+            series_filter = None  # the series the list is narrowed to
             try:
-                edit.toggle_games(f"✏️  {label} — ✅ in the set, ⬜ remove it", rows)
-            finally:  # Ctrl-C too: the toggles made are kept
+                while True:
+                    narrowed = [r for r in rows if r[1] in series_keys(game_set, series_filter)] if series_filter else rows
+                    pressed = edit.toggle_games(
+                        f"✏️  {label} — ✅ in the set, ⬜ remove it", narrowed,
+                        hotkeys=(cardedit.SERIES_KEY, cardedit.CLEAR_KEY), hint=edit.GAMES_HINT + " · r series · c all",
+                        filters=f"{series_filter} (c shows all)" if series_filter else "")
+                    if pressed == cardedit.CLEAR_KEY:
+                        series_filter = None
+                    elif pressed == cardedit.SERIES_KEY:
+                        series_filter = cardedit.pick_series(game_set, series_filter) or series_filter
+                    else:
+                        break
+            finally:  # Ctrl-C too: the toggles made are kept (rows hidden by the series stay as they were)
                 game_set["games"] = reconcile(game_set["games"], shown)
         elif i == 1:
             options = stocked(systems)
@@ -79,6 +92,18 @@ def edit_one(game_set, systems, keys_of):
                                 preview_width=previews.GAME_WIDTH)
             if j is not None:
                 recategorize(game_set["games"], games[j], ask_category(game_set["games"], games[j].get("title", "it")))
+        elif i == 4:
+            games = [g for g in game_set["games"] if g.get("bucket")]
+            j = picker.filter_list("✏️  Set which game's series?", [game_label(g, names) for g in games],
+                                preview=lambda k: previews.game_thumb(games[k]["bucket"]) if k < len(games) else None,
+                                preview_width=previews.GAME_WIDTH)
+            if j is not None:
+                known = list(dict.fromkeys([*(n if isinstance(n, str) else n.get("name", "") for n in store.repo_json("series")),
+                                            *(g["series"] for g in game_set["games"] if g.get("series"))]))
+                if known:
+                    print(ui.dim(f"  Series: {', '.join(known)}"))
+                typed = ui.ask(f"🎮 Series for {games[j].get('title', 'it')} (empty for none): ").strip()
+                set_series(game_set["games"], games[j], next((n for n in known if n.casefold() == typed.casefold()), typed))
         else:
             name = ui.ask(f"Name [{game_set['name']}] (empty keeps it): ").strip()
             desc = ui.ask("Description (empty keeps it): ").strip()

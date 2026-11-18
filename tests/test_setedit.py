@@ -155,6 +155,58 @@ class NeedTools(unittest.TestCase):
                 self.assertIn(reason, failed.call_args.args[0])
 
 
+class SeriesEditor(unittest.TestCase):
+    def series_games(self):
+        return [{"title": "A", "category": "Cave", "series": "Alpha", "system": "gba", "bucket": "gba/A.zip"},
+                {"title": "B", "series": "Alpha", "system": "gba", "bucket": "gba/B.zip"},
+                {"title": "C", "system": "gen", "bucket": "gen/C.zip"}]
+
+    def run_editor(self, picks, lists, ask=()):
+        game_set = {"name": "S", "games": self.series_games()}
+        picks, lists, seen = iter(picks), iter(lists), []
+
+        def fake(title, labels, **kw):
+            if not kw.get("multi"):
+                return next(picks)
+            flip, then = next(lists)
+            seen.append((list(labels), kw.get("filters"), kw.get("hotkeys"), kw.get("hint")))
+            kw["session"]["sel"] = [on != (label in flip) for label, on in zip(labels, kw["session"]["sel"])]
+            return (then, 0) if then else kw["session"]["sel"]
+
+        keys = {"gba": {"gba/A.zip", "gba/B.zip"}, "gen": {"gen/C.zip"}}
+        with mock.patch.object(picker, "filter_list", fake), mock.patch.object(edit, "note"), \
+                mock.patch.object(store, "repo_json", side_effect=lambda n: [] if n == "series" else SYSTEMS), \
+                mock.patch.object(ui, "ask", side_effect=list(ask)), mock.patch("builtins.print"), \
+                mock.patch.object(setedit.cardedit, "pick_series", return_value="Alpha"):
+            try:
+                setedit.edit_one(game_set, SYSTEMS, lambda b: keys[b])
+            except StopIteration:
+                pass
+        return game_set, seen
+
+    def test_r_narrows_to_the_series_c_clears_and_hidden_games_are_kept(self):
+        game_set, seen = self.run_editor([0, None], [(set(), setedit.cardedit.SERIES_KEY), ({"Game Boy Advance — B"}, setedit.cardedit.CLEAR_KEY),
+                                                     (set(), None)])
+        self.assertEqual(len(seen[0][0]), 3)
+        self.assertEqual(len(seen[1][0]), 2)  # narrowed to Alpha
+        self.assertIn("Alpha", seen[1][1])
+        self.assertEqual(len(seen[2][0]), 3)  # cleared
+        self.assertEqual(seen[2][1], "")
+        self.assertEqual(seen[0][2], (setedit.cardedit.SERIES_KEY, setedit.cardedit.CLEAR_KEY))
+        self.assertIn("series", seen[0][3])
+        self.assertEqual([g["bucket"] for g in game_set["games"]], ["gba/A.zip", "gen/C.zip"])  # B off, C kept
+        self.assertEqual(game_set["games"][0]["series"], "Alpha")
+
+    def test_set_a_games_series_keeps_key_order_and_empty_clears(self):
+        game_set, _ = self.run_editor([4, 2, 4, 0, None], [], ask=["Beta", ""])
+        c = game_set["games"][2]
+        self.assertEqual(c["series"], "Beta")
+        self.assertEqual(list(c), ["title", "series", "system", "bucket"])
+        self.assertNotIn("series", game_set["games"][0])  # A's cleared by the empty answer
+        self.assertEqual(setedit.set_series(game_set["games"], game_set["games"][0], "Gamma")["series"], "Gamma")
+        self.assertEqual(list(game_set["games"][0]), ["title", "category", "series", "system", "bucket"])
+
+
 class Editor(unittest.TestCase):
     def setUp(self):
         patch = mock.patch.object(edit, "note")  # what the editor says at its end

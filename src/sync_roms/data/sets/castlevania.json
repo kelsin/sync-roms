@@ -4,11 +4,13 @@
   "games": [
     {
       "title": "Castlevania (Rev 1)",
+      "series": "Castlevania",
       "system": "nes",
       "bucket": "nes/Castlevania (USA) (Rev 1).zip"
     },
     {
       "title": "Castlevania II - Simon's Quest",
+      "series": "Castlevania",
       "system": "nes",
       "bucket": "nes/Castlevania II - Simon's Quest (USA).zip",
       "variants": [
@@ -20,6 +22,7 @@
     },
     {
       "title": "Castlevania III - Dracula's Curse",
+      "series": "Castlevania",
       "system": "nes",
       "bucket": "nes/Castlevania III - Dracula's Curse (USA).zip",
       "variants": [
@@ -36,31 +39,37 @@
     },
     {
       "title": "Castlevania - Dracula X",
+      "series": "Castlevania",
       "system": "snes",
       "bucket": "snes/Castlevania - Dracula X (USA).zip"
     },
     {
       "title": "Castlevania - Bloodlines",
+      "series": "Castlevania",
       "system": "genesis",
       "bucket": "genesis/Castlevania - Bloodlines (USA).zip"
     },
     {
       "title": "Castlevania - The Adventure",
+      "series": "Castlevania",
       "system": "gb",
       "bucket": "gb/Castlevania - The Adventure (USA).zip"
     },
     {
       "title": "Castlevania II - Belmont's Revenge",
+      "series": "Castlevania",
       "system": "gb",
       "bucket": "gb/Castlevania II - Belmont's Revenge (USA, Europe).zip"
     },
     {
       "title": "Castlevania Legends (SGB Enhanced)",
+      "series": "Castlevania",
       "system": "gb",
       "bucket": "gb/Castlevania Legends (USA, Europe) (SGB Enhanced).zip"
     },
     {
       "title": "Castlevania - Symphony of the Night",
+      "series": "Castlevania",
       "system": "psx",
       "bucket": "psx/Castlevania - Symphony of the Night (USA).chd",
       "variants": [
@@ -76,21 +85,25 @@
     },
     {
       "title": "Castlevania - Circle of the Moon",
+      "series": "Castlevania",
       "system": "gba",
       "bucket": "gba/Castlevania - Circle of the Moon (USA).zip"
     },
     {
       "title": "Castlevania - Harmony of Dissonance",
+      "series": "Castlevania",
       "system": "gba",
       "bucket": "gba/Castlevania - Harmony of Dissonance (USA).zip"
     },
     {
       "title": "Castlevania - Aria of Sorrow",
+      "series": "Castlevania",
       "system": "gba",
       "bucket": "gba/Castlevania - Aria of Sorrow (USA).zip"
     },
     {
       "title": "Castlevania",
+      "series": "Castlevania",
       "system": "n64",
       "bucket": "n64/Castlevania (USA) (Rev 2).zip",
       "variants": [
@@ -102,61 +115,73 @@
     },
     {
       "title": "Castlevania: Lament of Innocence",
+      "series": "Castlevania",
       "system": "ps2",
       "bucket": "ps2/Castlevania - Lament of Innocence (USA).chd"
     },
     {
       "title": "Castlevania: Curse of Darkness",
+      "series": "Castlevania",
       "system": "ps2",
       "bucket": "ps2/Castlevania - Curse of Darkness (USA).chd"
     },
     {
       "title": "Castlevania - Dawn of Sorrow",
+      "series": "Castlevania",
       "system": "nds",
       "bucket": "nds/Castlevania - Dawn of Sorrow (USA).zip"
     },
     {
       "title": "Castlevania - Portrait of Ruin",
+      "series": "Castlevania",
       "system": "nds",
       "bucket": "nds/Castlevania - Portrait of Ruin (USA).zip"
     },
     {
       "title": "Castlevania - Order of Ecclesia",
+      "series": "Castlevania",
       "system": "nds",
       "bucket": "nds/Castlevania - Order of Ecclesia (USA) (En,Fr).zip"
     },
     {
       "title": "Castlevania - Lords of Shadow - Mirror of Fate",
+      "series": "Castlevania",
       "system": "3ds",
       "bucket": "3ds/Castlevania - Lords of Shadow - Mirror of Fate (USA) (En,Fr,Es).zip"
     },
     {
       "title": "Kid Dracula",
+      "series": "Castlevania",
       "system": "gb",
       "bucket": "gb/Kid Dracula (USA, Europe).zip"
     },
     {
       "title": "Akumajou Special - Boku Dracula-kun",
+      "series": "Castlevania",
       "system": "nes",
       "bucket": "nes/Castlevania Special - Kid Dracula (Japan) [T-En by Chronix v1.0] [n].zip"
     },
     {
       "title": "Castlevania - The Dracula X Chronicles",
+      "series": "Castlevania",
       "system": "psp",
       "bucket": "psp/Castlevania - The Dracula X Chronicles (USA).chd"
     },
     {
       "title": "Castlevania Chronicles",
+      "series": "Castlevania",
       "system": "psx",
       "bucket": "psx/Castlevania Chronicles (USA).chd"
     },
     {
       "title": "Vampire Killer",
+      "series": "Castlevania",
       "system": "msx2",
       "bucket": "msx2/Vampire Killer (Japan, Europe) (En).zip"
     },
     {
       "title": "Akumajou Dracula X: Rondo of Blood",
+      "series": "Castlevania",
       "system": "tg-cd",
       "bucket": "tg-cd/Castlevania - Rondo of Blood (Japan) [T-En by Burnt Lasagna & Cubanraul v1.01] [n].chd"
     },
@@ -167,11 +192,13 @@
     },
     {
       "title": "Castlevania - Lords of Shadow",
+      "series": "Castlevania",
       "system": "xbox360",
       "bucket": "xbox360/Castlevania - Lords of Shadow (USA, Europe) (En,Fr,De,Es,It) (Disc 1).zar"
     },
     {
       "title": "Castlevania - Lords of Shadow 2",
+      "series": "Castlevania",
       "system": "xbox360",
       "bucket": "xbox360/Castlevania - Lords of Shadow 2 (USA, Europe) (En,Fr,De,Es,It,Pt).zar"
     }

@@ -4,6 +4,7 @@
   "games": [
     {
       "title": "Mega Man",
+      "series": "Mega Man",
       "system": "nes",
       "bucket": "nes/Mega Man (USA).zip",
       "variants": [
@@ -15,6 +16,7 @@
     },
     {
       "title": "Mega Man 2",
+      "series": "Mega Man",
       "system": "nes",
       "bucket": "nes/Mega Man 2 (USA).zip",
       "variants": [
@@ -30,6 +32,7 @@
     },
     {
       "title": "Mega Man 3",
+      "series": "Mega Man",
       "system": "nes",
       "bucket": "nes/Mega Man 3 (USA).zip",
       "variants": [
@@ -41,6 +44,7 @@
     },
     {
       "title": "Mega Man 4 (Rev 1)",
+      "series": "Mega Man",
       "system": "nes",
       "bucket": "nes/Mega Man 4 (USA) (Rev 1).zip",
       "variants": [
@@ -52,6 +56,7 @@
     },
     {
       "title": "Mega Man 5",
+      "series": "Mega Man",
       "system": "nes",
       "bucket": "nes/Mega Man 5 (USA).zip",
       "variants": [
@@ -63,6 +68,7 @@
     },
     {
       "title": "Mega Man 6",
+      "series": "Mega Man",
       "system": "nes",
       "bucket": "nes/Mega Man 6 (USA).zip",
       "variants": [
@@ -83,6 +89,7 @@
     },
     {
       "title": "Mega Man X (Rev 1)",
+      "series": "Mega Man",
       "system": "snes",
       "bucket": "snes/Mega Man X (USA) (Rev 1).zip",
       "variants": [
@@ -94,6 +101,7 @@
     },
     {
       "title": "Mega Man X2",
+      "series": "Mega Man",
       "system": "snes",
       "bucket": "snes/Mega Man X2 (USA).zip",
       "variants": [
@@ -105,6 +113,7 @@
     },
     {
       "title": "Mega Man X3",
+      "series": "Mega Man",
       "system": "snes",
       "bucket": "snes/Mega Man X3 (USA).zip",
       "variants": [
@@ -120,6 +129,7 @@
     },
     {
       "title": "Mega Man 7",
+      "series": "Mega Man",
       "system": "snes",
       "bucket": "snes/Mega Man 7 (USA).zip",
       "variants": [
@@ -131,6 +141,7 @@
     },
     {
       "title": "Mega Man & Bass",
+      "series": "Mega Man",
       "system": "gba",
       "bucket": "gba/Megaman & Bass (USA).zip",
       "variants": [
@@ -142,46 +153,55 @@
     },
     {
       "title": "Mega Man - The Wily Wars",
+      "series": "Mega Man",
       "system": "genesis",
       "bucket": "genesis/Mega Man - The Wily Wars (Europe).zip"
     },
     {
       "title": "Mega Man - Dr. Wily's Revenge",
+      "series": "Mega Man",
       "system": "gb",
       "bucket": "gb/Mega Man - Dr. Wily's Revenge (USA).zip"
     },
     {
       "title": "Mega Man II",
+      "series": "Mega Man",
       "system": "gb",
       "bucket": "gb/Mega Man II (USA).zip"
     },
     {
       "title": "Mega Man III",
+      "series": "Mega Man",
       "system": "gb",
       "bucket": "gb/Mega Man III (USA).zip"
     },
     {
       "title": "Mega Man IV",
+      "series": "Mega Man",
       "system": "gb",
       "bucket": "gb/Mega Man IV (USA).zip"
     },
     {
       "title": "Mega Man V (SGB Enhanced)",
+      "series": "Mega Man",
       "system": "gb",
       "bucket": "gb/Mega Man V (USA) (SGB Enhanced).zip"
     },
     {
       "title": "Mega Man Xtreme",
+      "series": "Mega Man",
       "system": "gbc",
       "bucket": "gbc/Mega Man Xtreme (USA, Europe) (GB Compatible).zip"
     },
     {
       "title": "Mega Man Xtreme 2",
+      "series": "Mega Man",
       "system": "gbc",
       "bucket": "gbc/Mega Man Xtreme 2 (USA, Europe).zip"
     },
     {
       "title": "Mega Man X4",
+      "series": "Mega Man",
       "system": "psx",
       "bucket": "psx/Mega Man X4 (USA).chd",
       "variants": [
@@ -193,16 +213,19 @@
     },
     {
       "title": "Mega Man X5",
+      "series": "Mega Man",
       "system": "psx",
       "bucket": "psx/Mega Man X5 (USA).chd"
     },
     {
       "title": "Mega Man X6 (Rev 1)",
+      "series": "Mega Man",
       "system": "psx",
       "bucket": "psx/Mega Man X6 (USA) (Rev 1).chd"
     },
     {
       "title": "Mega Man 8",
+      "series": "Mega Man",
       "system": "psx",
       "bucket": "psx/Mega Man 8 (USA).chd",
       "variants": [
@@ -214,6 +237,7 @@
     },
     {
       "title": "Super Adventure Rockman",
+      "series": "Mega Man",
       "system": "saturn",
       "bucket": "saturn/Super Adventure Rockman (Japan) (1M).m3u",
       "files": [
@@ -224,36 +248,43 @@
     },
     {
       "title": "Mega Man Legends",
+      "series": "Mega Man",
       "system": "psx",
       "bucket": "psx/Mega Man Legends (USA).chd"
     },
     {
       "title": "Mega Man Zero",
+      "series": "Mega Man",
       "system": "gba",
       "bucket": "gba/Megaman Zero (USA, Europe).zip"
     },
     {
       "title": "Mega Man Zero 2",
+      "series": "Mega Man",
       "system": "gba",
       "bucket": "gba/Megaman Zero 2 (USA).zip"
     },
     {
       "title": "Mega Man Zero 3",
+      "series": "Mega Man",
       "system": "gba",
       "bucket": "gba/Megaman Zero 3 (USA).zip"
     },
     {
       "title": "Mega Man Zero 4",
+      "series": "Mega Man",
       "system": "gba",
       "bucket": "gba/Megaman Zero 4 (USA).zip"
     },
     {
       "title": "Mega Man Battle Network",
+      "series": "Mega Man",
       "system": "gba",
       "bucket": "gba/Megaman - Battle Network (USA).zip"
     },
     {
       "title": "Megaman - Battle Network 2",
+      "series": "Mega Man",
       "system": "gba",
       "bucket": "gba/Megaman - Battle Network 2 (USA).zip",
       "variants": [
@@ -265,6 +296,7 @@
     },
     {
       "title": "Mega Man Battle Network 3 - Blue Version",
+      "series": "Mega Man",
       "system": "gba",
       "bucket": "gba/Megaman - Battle Network 3 - Blue Version (USA).zip",
       "variants": [
@@ -276,6 +308,7 @@
     },
     {
       "title": "Mega Man Battle Network 5: Team Protoman",
+      "series": "Mega Man",
       "system": "gba",
       "bucket": "gba/Megaman - Battle Network 5 - Team Protoman (USA).zip",
       "variants": [
@@ -291,71 +324,85 @@
     },
     {
       "title": "Mega Man X Collection",
+      "series": "Mega Man",
       "system": "gc",
       "bucket": "gc/Mega Man X Collection (USA).rvz"
     },
     {
       "title": "Mega Man X - Command Mission",
+      "series": "Mega Man",
       "system": "gc",
       "bucket": "gc/Mega Man X - Command Mission (USA).rvz"
     },
     {
       "title": "Mega Man - Network Transmission",
+      "series": "Mega Man",
       "system": "gc",
       "bucket": "gc/Mega Man - Network Transmission (USA).rvz"
     },
     {
       "title": "Mega Man ZX",
+      "series": "Mega Man",
       "system": "nds",
       "bucket": "nds/Mega Man ZX (USA).zip"
     },
     {
       "title": "Mega Man ZX - Advent",
+      "series": "Mega Man",
       "system": "nds",
       "bucket": "nds/Mega Man ZX - Advent (USA).zip"
     },
     {
       "title": "Mega Man Star Force - Dragon",
+      "series": "Mega Man",
       "system": "nds",
       "bucket": "nds/Mega Man Star Force - Dragon (USA).zip"
     },
     {
       "title": "Mega Man Star Force - Leo",
+      "series": "Mega Man",
       "system": "nds",
       "bucket": "nds/Mega Man Star Force - Leo (USA).zip"
     },
     {
       "title": "Mega Man Star Force - Pegasus",
+      "series": "Mega Man",
       "system": "nds",
       "bucket": "nds/Mega Man Star Force - Pegasus (USA).zip"
     },
     {
       "title": "Mega Man Star Force 2 - Zerker x Ninja",
+      "series": "Mega Man",
       "system": "nds",
       "bucket": "nds/Mega Man Star Force 2 - Zerker x Ninja (USA).zip"
     },
     {
       "title": "Mega Man Star Force 2 - Zerker x Saurian",
+      "series": "Mega Man",
       "system": "nds",
       "bucket": "nds/Mega Man Star Force 2 - Zerker x Saurian (USA).zip"
     },
     {
       "title": "Mega Man Star Force 3 - Black Ace",
+      "series": "Mega Man",
       "system": "nds",
       "bucket": "nds/Mega Man Star Force 3 - Black Ace (USA).zip"
     },
     {
       "title": "Mega Man Star Force 3 - Red Joker",
+      "series": "Mega Man",
       "system": "nds",
       "bucket": "nds/Mega Man Star Force 3 - Red Joker (USA).zip"
     },
     {
       "title": "Rockman EXE - Operate Shooting Star",
+      "series": "Mega Man",
       "system": "nds",
       "bucket": "nds/MegaMan Battle Network - Operate Star Force (Japan) [T-En by Greiga Master v1.0] [n].zip"
     },
     {
       "title": "Mega Man - Battle Network 3 - White Version",
+      "series": "Mega Man",
       "system": "gba",
       "bucket": "gba/Megaman - Battle Network 3 - White Version (USA).zip",
       "variants": [
@@ -367,6 +414,7 @@
     },
     {
       "title": "Mega Man - Battle Network 4 - Red Sun",
+      "series": "Mega Man",
       "system": "gba",
       "bucket": "gba/Megaman - Battle Network 4 - Red Sun (USA).zip",
       "variants": [
@@ -378,6 +426,7 @@
     },
     {
       "title": "Mega Man - Battle Network 4 - Blue Moon",
+      "series": "Mega Man",
       "system": "gba",
       "bucket": "gba/Megaman - Battle Network 4 - Blue Moon (USA).zip",
       "variants": [
@@ -389,6 +438,7 @@
     },
     {
       "title": "Mega Man - Battle Network 6 - Cybeast Gregar",
+      "series": "Mega Man",
       "system": "gba",
       "bucket": "gba/Megaman - Battle Network 6 - Cybeast Gregar (USA).zip",
       "variants": [
@@ -400,6 +450,7 @@
     },
     {
       "title": "Mega Man - Battle Network 6 - Cybeast Falzar",
+      "series": "Mega Man",
       "system": "gba",
       "bucket": "gba/Megaman - Battle Network 6 - Cybeast Falzar (USA).zip",
       "variants": [
@@ -411,51 +462,61 @@
     },
     {
       "title": "Mega Man - Battle Chip Challenge",
+      "series": "Mega Man",
       "system": "gba",
       "bucket": "gba/Megaman - Battle Chip Challenge (USA).zip"
     },
     {
       "title": "Rockman EXE 4.5 - Real Operation",
+      "series": "Mega Man",
       "system": "gba",
       "bucket": "gba/Mega Man Battle Network 4.5 - Real Operation (Japan) [T-En by The Rockman EXE Zone v1.1] [NA] [n].zip"
     },
     {
       "title": "Rockman EXE WS",
+      "series": "Mega Man",
       "system": "wonderswancolor",
       "bucket": "wonderswancolor/Rockman EXE WS (Japan).zip"
     },
     {
       "title": "Rockman EXE - N1 Battle (Rev 1)",
+      "series": "Mega Man",
       "system": "wonderswancolor",
       "bucket": "wonderswancolor/Rockman EXE - N1 Battle (Japan) (Rev 1).zip"
     },
     {
       "title": "Mega Man 64",
+      "series": "Mega Man",
       "system": "n64",
       "bucket": "n64/Mega Man 64 (USA).zip"
     },
     {
       "title": "Mega Man",
+      "series": "Mega Man",
       "system": "gamegear",
       "bucket": "gamegear/Mega Man (USA).zip"
     },
     {
       "title": "Mega Man Soccer",
+      "series": "Mega Man",
       "system": "snes",
       "bucket": "snes/Mega Man Soccer (USA).zip"
     },
     {
       "title": "Mega Man - Maverick Hunter X",
+      "series": "Mega Man",
       "system": "psp",
       "bucket": "psp/Mega Man - Maverick Hunter X (USA).chd"
     },
     {
       "title": "Mega Man - Powered Up",
+      "series": "Mega Man",
       "system": "psp",
       "bucket": "psp/Mega Man - Powered Up (USA).chd"
     },
     {
       "title": "Mega Man Legends 2",
+      "series": "Mega Man",
       "system": "psx",
       "bucket": "psx/Mega Man Legends 2 (USA).chd"
     },
@@ -466,36 +527,43 @@
     },
     {
       "title": "Mega Man X7",
+      "series": "Mega Man",
       "system": "ps2",
       "bucket": "ps2/Mega Man X7 (USA).chd"
     },
     {
       "title": "Mega Man X8",
+      "series": "Mega Man",
       "system": "ps2",
       "bucket": "ps2/Mega Man X8 (USA).chd"
     },
     {
       "title": "Rockman: Battle & Fighters",
+      "series": "Mega Man",
       "system": "ngpc",
       "bucket": "ngpc/Rockman - Battle & Fighters (Japan) [T-En by Marc_max v1.0] [i].zip"
     },
     {
       "title": "Rockman & Forte - Mirai Kara no Chousensha",
+      "series": "Mega Man",
       "system": "wonderswan",
       "bucket": "wonderswan/Rockman & Forte - Challenger from the Future (Japan) [T-En by NikcDC v1.2.1] [n].zip"
     },
     {
       "title": "Mega Man - The Power Battle",
+      "series": "Mega Man",
       "system": "fbneo",
       "bucket": "fbneo/megaman.zip"
     },
     {
       "title": "Mega Man 2 - The Power Fighters",
+      "series": "Mega Man",
       "system": "fbneo",
       "bucket": "fbneo/megaman2.zip"
     },
     {
       "title": "Mega Man 9",
+      "series": "Mega Man",
       "system": "ps3",
       "bucket": "ps3/Mega-Man-9_Full.pkg",
       "files": [
@@ -505,6 +573,7 @@
     },
     {
       "title": "Mega Man 10",
+      "series": "Mega Man",
       "system": "ps3",
       "bucket": "ps3/Mega-Man-10_Full.pkg",
       "files": [

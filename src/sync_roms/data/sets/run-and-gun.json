@@ -4,6 +4,7 @@
   "games": [
     {
       "title": "Contra",
+      "series": "Contra",
       "system": "nes",
       "bucket": "nes/Contra (USA).zip",
       "variants": [
@@ -20,26 +21,31 @@
     },
     {
       "title": "Contra III - The Alien Wars",
+      "series": "Contra",
       "system": "snes",
       "bucket": "snes/Contra III - The Alien Wars (USA).zip"
     },
     {
       "title": "Gunstar Heroes",
+      "series": "Gunstar",
       "system": "genesis",
       "bucket": "genesis/Gunstar Heroes (USA).zip"
     },
     {
       "title": "Gunstar Super Heroes",
+      "series": "Gunstar",
       "system": "gba",
       "bucket": "gba/Gunstar Super Heroes (USA).zip"
     },
     {
       "title": "Operation C",
+      "series": "Contra",
       "system": "gb",
       "bucket": "gb/Operation C (USA).zip"
     },
     {
       "title": "Metal Slug",
+      "series": "Metal Slug",
       "system": "fbneo",
       "bucket": "fbneo/mslug.zip",
       "variants": [
@@ -51,6 +57,7 @@
     },
     {
       "title": "Metal Slug X",
+      "series": "Metal Slug",
       "system": "fbneo",
       "bucket": "fbneo/mslugx.zip",
       "variants": [
@@ -62,16 +69,19 @@
     },
     {
       "title": "Metal Slug 3",
+      "series": "Metal Slug",
       "system": "fbneo",
       "bucket": "fbneo/mslug3.zip"
     },
     {
       "title": "Metal Slug 5",
+      "series": "Metal Slug",
       "system": "fbneo",
       "bucket": "fbneo/mslug5.zip"
     },
     {
       "title": "Contra",
+      "series": "Contra",
       "system": "fbneo",
       "bucket": "fbneo/contra.zip"
     },
@@ -87,16 +97,19 @@
     },
     {
       "title": "Rolling Thunder",
+      "series": "Rolling Thunder",
       "system": "fbneo",
       "bucket": "fbneo/rthunder.zip"
     },
     {
       "title": "Metal Slug 4",
+      "series": "Metal Slug",
       "system": "fbneo",
       "bucket": "fbneo/mslug4.zip"
     },
     {
       "title": "Super Contra",
+      "series": "Contra",
       "system": "fbneo",
       "bucket": "fbneo/scontra.zip"
     },
@@ -122,6 +135,7 @@
     },
     {
       "title": "Rolling Thunder 2",
+      "series": "Rolling Thunder",
       "system": "fbneo",
       "bucket": "fbneo/rthun2.zip"
     },
@@ -137,6 +151,7 @@
     },
     {
       "title": "Elevator Action Returns",
+      "series": "Elevator Action",
       "system": "fbneo",
       "bucket": "fbneo/elvactr.zip"
     },
@@ -162,6 +177,7 @@
     },
     {
       "title": "Aliens",
+      "series": "Alien",
       "system": "fbneo",
       "bucket": "fbneo/aliensu.zip"
     },
@@ -177,6 +193,7 @@
     },
     {
       "title": "Ikari Warriors",
+      "series": "Ikari Warriors",
       "system": "fbneo",
       "bucket": "fbneo/ikari.zip"
     },
@@ -238,6 +255,7 @@
     },
     {
       "title": "RoboCop",
+      "series": "Robocop",
       "system": "fbneo",
       "bucket": "fbneo/robocopu.zip"
     },
@@ -253,6 +271,7 @@
     },
     {
       "title": "Bionic Commando",
+      "series": "Bionic Commando",
       "system": "fbneo",
       "bucket": "fbneo/bionicc1.zip"
     },
@@ -268,6 +287,7 @@
     },
     {
       "title": "Sly Spy",
+      "series": "Sly Cooper",
       "system": "fbneo",
       "bucket": "fbneo/slyspy.zip"
     },
@@ -368,6 +388,7 @@
     },
     {
       "title": "G.I. Joe",
+      "series": "G.I. Joe",
       "system": "fbneo",
       "bucket": "fbneo/gijoeu.zip"
     },
@@ -393,6 +414,7 @@
     },
     {
       "title": "Ikari III: The Rescue",
+      "series": "Ikari Warriors",
       "system": "fbneo",
       "bucket": "fbneo/ikari3u.zip"
     },
@@ -473,11 +495,13 @@
     },
     {
       "title": "Contra 4",
+      "series": "Contra",
       "system": "nds",
       "bucket": "nds/Contra 4 (USA).zip"
     },
     {
       "title": "Metal Slug 7",
+      "series": "Metal Slug",
       "system": "nds",
       "bucket": "nds/Metal Slug 7 (USA).zip",
       "variants": [
@@ -489,11 +513,13 @@
     },
     {
       "title": "Mega Man ZX",
+      "series": "Mega Man",
       "system": "nds",
       "bucket": "nds/Mega Man ZX (USA).zip"
     },
     {
       "title": "Mega Man ZX - Advent",
+      "series": "Mega Man",
       "system": "nds",
       "bucket": "nds/Mega Man ZX - Advent (USA).zip"
     },
@@ -509,26 +535,31 @@
     },
     {
       "title": "Super Turrican",
+      "series": "Turrican",
       "system": "snes",
       "bucket": "snes/Super Turrican (USA).zip"
     },
     {
       "title": "Mega Turrican",
+      "series": "Turrican",
       "system": "genesis",
       "bucket": "genesis/Mega Turrican (USA).zip"
     },
     {
       "title": "Contra - Hard Corps",
+      "series": "Contra",
       "system": "genesis",
       "bucket": "genesis/Contra - Hard Corps (USA, Korea) (En).zip"
     },
     {
       "title": "Rolling Thunder 3",
+      "series": "Rolling Thunder",
       "system": "genesis",
       "bucket": "genesis/Rolling Thunder 3 (USA).zip"
     },
     {
       "title": "Strider",
+      "series": "Strider",
       "system": "fbneo",
       "bucket": "fbneo/strider.zip",
       "variants": [
@@ -545,11 +576,13 @@
     },
     {
       "title": "Vectorman",
+      "series": "Vectorman",
       "system": "genesis",
       "bucket": "genesis/Vectorman (USA, Europe).zip"
     },
     {
       "title": "Vectorman 2",
+      "series": "Vectorman",
       "system": "genesis",
       "bucket": "genesis/Vectorman 2 (USA).zip"
     },
@@ -565,11 +598,13 @@
     },
     {
       "title": "The Adventures of Batman & Robin",
+      "series": "Batman",
       "system": "genesis",
       "bucket": "genesis/Adventures of Batman & Robin, The (USA).zip"
     },
     {
       "title": "Earthworm Jim",
+      "series": "Earthworm Jim",
       "system": "genesis",
       "bucket": "genesis/Earthworm Jim (USA).zip",
       "variants": [
@@ -581,6 +616,7 @@
     },
     {
       "title": "Earthworm Jim 2",
+      "series": "Earthworm Jim",
       "system": "genesis",
       "bucket": "genesis/Earthworm Jim 2 (USA).zip"
     },
@@ -596,6 +632,7 @@
     },
     {
       "title": "RoboCop Versus The Terminator",
+      "series": "Robocop",
       "system": "genesis",
       "bucket": "genesis/RoboCop Versus The Terminator (USA).zip"
     },
@@ -606,11 +643,13 @@
     },
     {
       "title": "Doom Troopers",
+      "series": "Doom",
       "system": "snes",
       "bucket": "snes/Doom Troopers (USA).zip"
     },
     {
       "title": "Alien 3",
+      "series": "Alien",
       "system": "genesis",
       "bucket": "genesis/Alien 3 (USA, Europe) (Rev A).zip"
     },
@@ -657,11 +696,13 @@
     },
     {
       "title": "Contra Force",
+      "series": "Contra",
       "system": "nes",
       "bucket": "nes/Contra Force (USA).zip"
     },
     {
       "title": "Bionic Commando",
+      "series": "Bionic Commando",
       "system": "nes",
       "bucket": "nes/Bionic Commando (USA).zip",
       "variants": [
@@ -677,6 +718,7 @@
     },
     {
       "title": "Blaster Master",
+      "series": "Blaster Master",
       "system": "nes",
       "bucket": "nes/Blaster Master (USA).zip",
       "variants": [
@@ -693,11 +735,13 @@
     },
     {
       "title": "Ninja Gaiden",
+      "series": "Ninja Gaiden",
       "system": "nes",
       "bucket": "nes/Ninja Gaiden (USA).zip"
     },
     {
       "title": "Ninja Gaiden III - The Ancient Ship of Doom",
+      "series": "Ninja Gaiden",
       "system": "nes",
       "bucket": "nes/Ninja Gaiden III - The Ancient Ship of Doom (USA).zip"
     },
@@ -740,6 +784,7 @@
     },
     {
       "title": "Super Turrican",
+      "series": "Turrican",
       "system": "nes",
       "bucket": "nes/Super Turrican (Europe).zip"
     },
@@ -750,16 +795,19 @@
     },
     {
       "title": "G.I. Joe - A Real American Hero",
+      "series": "G.I. Joe",
       "system": "nes",
       "bucket": "nes/G.I. Joe - A Real American Hero (USA).zip"
     },
     {
       "title": "G.I. Joe - The Atlantis Factor",
+      "series": "G.I. Joe",
       "system": "nes",
       "bucket": "nes/G.I. Joe - The Atlantis Factor (USA).zip"
     },
     {
       "title": "Super Turrican 2",
+      "series": "Turrican",
       "system": "snes",
       "bucket": "snes/Super Turrican 2 (USA).zip"
     },
@@ -791,31 +839,37 @@
     },
     {
       "title": "Super Star Wars",
+      "series": "Star Wars",
       "system": "snes",
       "bucket": "snes/Super Star Wars (USA) (Rev 1).zip"
     },
     {
       "title": "Super Star Wars - The Empire Strikes Back",
+      "series": "Star Wars",
       "system": "snes",
       "bucket": "snes/Super Star Wars - The Empire Strikes Back (USA) (Rev 1).zip"
     },
     {
       "title": "Super Star Wars - Return of the Jedi",
+      "series": "Star Wars",
       "system": "snes",
       "bucket": "snes/Super Star Wars - Return of the Jedi (USA) (Rev 1).zip"
     },
     {
       "title": "Front Mission Series - Gun Hazard",
+      "series": "Front Mission",
       "system": "snes",
       "bucket": "snes/Front Mission Series - Gun Hazard (Japan) [T-En by Aeon Genesis v1.01].zip"
     },
     {
       "title": "Pocky & Rocky",
+      "series": "Pocky & Rocky",
       "system": "snes",
       "bucket": "snes/Pocky & Rocky (USA).zip"
     },
     {
       "title": "Pocky & Rocky 2",
+      "series": "Pocky & Rocky",
       "system": "snes",
       "bucket": "snes/Pocky & Rocky 2 (USA).zip"
     },
@@ -831,11 +885,13 @@
     },
     {
       "title": "Alien 3",
+      "series": "Alien",
       "system": "snes",
       "bucket": "snes/Alien 3 (USA) (Rev 1).zip"
     },
     {
       "title": "Jurassic Park Part 2 - The Chaos Continues",
+      "series": "Jurassic Park",
       "system": "snes",
       "bucket": "snes/Jurassic Park Part 2 - The Chaos Continues (USA) (En,Fr,De,It).zip"
     },
@@ -851,11 +907,13 @@
     },
     {
       "title": "Turrican",
+      "series": "Turrican",
       "system": "tg16",
       "bucket": "tg16/Turrican (USA).zip"
     },
     {
       "title": "Ninja Gaiden Shadow",
+      "series": "Ninja Gaiden",
       "system": "gb",
       "bucket": "gb/Ninja Gaiden Shadow (USA).zip"
     },
@@ -866,6 +924,7 @@
     },
     {
       "title": "Batman - The Video Game",
+      "series": "Batman",
       "system": "gb",
       "bucket": "gb/Batman - The Video Game (World).zip"
     },
@@ -876,31 +935,37 @@
     },
     {
       "title": "Ikari no Yousai 2",
+      "series": "Ikari Warriors",
       "system": "gb",
       "bucket": "gb/Fortress of Fury 2 (Japan) [T-En by Stardust Crusaders v1.00] [n].zip"
     },
     {
       "title": "Metal Slug Advance",
+      "series": "Metal Slug",
       "system": "gba",
       "bucket": "gba/Metal Slug Advance (USA).zip"
     },
     {
       "title": "CT Special Forces",
+      "series": "CT Special Forces",
       "system": "gba",
       "bucket": "gba/CT Special Forces (USA) (En,Fr,De,Es,It,Nl).zip"
     },
     {
       "title": "CT Special Forces 2 - Back in the Trenches",
+      "series": "CT Special Forces",
       "system": "gba",
       "bucket": "gba/CT Special Forces 2 - Back in the Trenches (USA) (En,Fr,De,Es,It,Nl).zip"
     },
     {
       "title": "CT Special Forces 3 - Bioterror",
+      "series": "CT Special Forces",
       "system": "gba",
       "bucket": "gba/CT Special Forces 3 - Bioterror (Europe) (En,Fr,De,Es,It,Nl).zip"
     },
     {
       "title": "Medal of Honor - Infiltrator",
+      "series": "Medal of Honor",
       "system": "gba",
       "bucket": "gba/Medal of Honor - Infiltrator (USA, Europe) (En,Fr,De).zip"
     },
@@ -916,11 +981,13 @@
     },
     {
       "title": "Lilo & Stitch",
+      "series": "Lilo & Stitch",
       "system": "gba",
       "bucket": "gba/Lilo & Stitch (USA).zip"
     },
     {
       "title": "Turok - Evolution",
+      "series": "Turok",
       "system": "gba",
       "bucket": "gba/Turok - Evolution (USA).zip"
     },
@@ -931,11 +998,13 @@
     },
     {
       "title": "Metal Slug - 1st Mission",
+      "series": "Metal Slug",
       "system": "ngpc",
       "bucket": "ngpc/Metal Slug - 1st Mission (World) (En,Ja).zip"
     },
     {
       "title": "Metal Slug - 2nd Mission",
+      "series": "Metal Slug",
       "system": "ngpc",
       "bucket": "ngpc/Metal Slug - 2nd Mission (World) (En,Ja).zip"
     },
@@ -946,6 +1015,7 @@
     },
     {
       "title": "Bionic Commando - Elite Forces",
+      "series": "Bionic Commando",
       "system": "gbc",
       "bucket": "gbc/Bionic Commando - Elite Forces (USA, Australia).zip"
     },
@@ -956,6 +1026,7 @@
     },
     {
       "title": "Duke Nukem",
+      "series": "Duke Nukem",
       "system": "gbc",
       "bucket": "gbc/Duke Nukem (USA) (En,Fr,De,Es,It).zip"
     },
@@ -971,21 +1042,25 @@
     },
     {
       "title": "Die Hard",
+      "series": "Die Hard",
       "system": "tg16",
       "bucket": "tg16/Die Hard (Japan).zip"
     },
     {
       "title": "Metal Slug Anthology",
+      "series": "Metal Slug",
       "system": "psp",
       "bucket": "psp/Metal Slug Anthology (USA).chd"
     },
     {
       "title": "Strider 2",
+      "series": "Strider",
       "system": "mame",
       "bucket": "mame/strider2.zip"
     },
     {
       "title": "Contra: Legacy of War",
+      "series": "Contra",
       "system": "psx",
       "bucket": "psx/Contra - Legacy of War (USA).chd"
     },
@@ -1017,6 +1092,7 @@
     },
     {
       "title": "Iron Man & X-O Manowar in Heavy Metal",
+      "series": "Marvel",
       "system": "psx",
       "bucket": "psx/Iron Man & X-O Manowar in Heavy Metal (USA).chd"
     },
@@ -1052,6 +1128,7 @@
     },
     {
       "title": "Contra (MSX2)",
+      "series": "Contra",
       "system": "msx2",
       "bucket": "msx2/Contra (Japan) (Wii U Virtual Console).zip"
     },
@@ -1072,6 +1149,7 @@
     },
     {
       "title": "Gunstar Heroes",
+      "series": "Gunstar",
       "system": "gamegear",
       "bucket": "gamegear/Gunstar Heroes (Japan).zip"
     },
@@ -1183,6 +1261,7 @@
     },
     {
       "title": "Metal Slug 2 - Super Vehicle-001/II (NGM-2410 ~ NGH-2410)",
+      "series": "Metal Slug",
       "system": "fbneo",
       "bucket": "fbneo/mslug2.zip"
     },

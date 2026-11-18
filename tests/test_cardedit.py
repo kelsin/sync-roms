@@ -32,6 +32,12 @@ def g(key):
 
 
 class Pure(unittest.TestCase):
+    def test_pick_series_is_a_filterable_list(self):
+        game_set = {"name": "S", "games": [{"series": "Alpha"}, {"series": "Alpha"}, {"series": "Beta"}]}
+        with mock.patch.object(picker, "filter_list", return_value=0) as fl:
+            self.assertEqual(cardedit.pick_series(game_set), "Alpha")
+        self.assertEqual(fl.call_args[0][1], ["Alpha  (2 games)"])
+
     def test_size_text_is_decimal(self):
         self.assertEqual(cardedit.size_text(512 * 10 ** 9), "512 GB")
         self.assertEqual(cardedit.size_text(1_500_000_000), "1.5 GB")
@@ -1400,6 +1406,62 @@ class SetFlow(Flow):
         with self.assertRaises(KeyboardInterrupt):
             self.run_set(interrupted)
         self.assertIn("gba/Ruby.zip", {x["bucket"] for x in self.read("cards.json")["c"]["games"]["gba"]})
+
+    def run_series(self, game_set, pick, *steps):
+        """Drives edit_set; the series list (no multi mode) answers with the index pick, and its labels are kept."""
+        script, lists = Script(*steps), []
+
+        def fake(title, labels, **kw):
+            if "multi" in kw:
+                return script(title, labels, **kw)
+            lists.append(list(labels))
+            return pick
+        with mock.patch.object(picker, "filter_list", fake), contextlib.redirect_stdout(io.StringIO()):
+            cardedit.edit_set("c", game_set, (DEVICE, "esde"))
+        return script.calls, lists
+
+    def test_series_key_filters_the_rows_and_c_shows_all(self):
+        self.files["gb/"]["gb/Blue.gb"] = 5
+        self.card()
+        game_set = {**SET, "games": [{**SET["games"][0], "series": "Gen 1"}, {**SET["games"][1], "series": "Gen 1"},
+                                     {"system": "gb", "bucket": "gb/Blue.gb", "series": "Other"}]}
+        keys = (cardedit.VARIANT_KEY, cardedit.SERIES_KEY, cardedit.CLEAR_KEY)
+        calls, lists = self.run_series(
+            game_set, 0, returns((cardedit.SERIES_KEY, None)), returns((cardedit.CLEAR_KEY, None)), lambda labels, kw: kw["session"]["sel"])
+        self.assertEqual(lists, [["Gen 1  (2 games)"]])  # "Other" has one game: left out
+        self.assertEqual(calls[0][2]["hotkeys"], keys)
+        self.assertEqual(calls[0][2]["filters"], "")
+        self.assertEqual(calls[1][2]["filters"], "Gen 1 (c shows all)")
+        self.assertEqual(calls[1][1], ["Game Boy — Red", "Game Boy Advance — Ruby"])
+        self.assertEqual(calls[2][2]["filters"], "")
+
+    def test_series_key_filters_to_the_picked_series(self):
+        self.files["gb/"]["gb/Blue.gb"] = 5
+        self.card()
+        game_set = {**SET, "games": [{**SET["games"][0], "series": "A"}, {**SET["games"][1], "series": "B"},
+                                     {"system": "gb", "bucket": "gb/Blue.gb", "series": "B"}]}
+        calls, _ = self.run_series(game_set, 0, returns((cardedit.SERIES_KEY, None)), lambda labels, kw: kw["session"]["sel"])
+        self.assertEqual(calls[1][1], ["Game Boy — Blue", "Game Boy — Red"])
+        self.assertEqual(len(calls[1][2]["initial"]), 2)
+
+    def test_series_key_applies_toggles_made_before_it(self):
+        self.card()
+        game_set = {**SET, "games": [{**SET["games"][0], "series": "A"}, {**SET["games"][1], "series": "A"}]}
+
+        def toggles_then_series(labels, kw):
+            kw["session"]["sel"][labels.index("Game Boy Advance — Ruby")] = True
+            return (cardedit.SERIES_KEY, None)
+        self.run_series(game_set, 0, toggles_then_series, lambda labels, kw: kw["session"]["sel"])
+        self.assertIn("gba/Ruby.zip", {x["bucket"] for x in store.card_games("c")["gba"]})
+
+    def test_series_key_without_series_notes_and_lists_again(self):
+        self.card()
+        notes = []
+        with mock.patch.object(edit, "note", notes.append):
+            calls, lists = self.run_series(SET, 0, returns((cardedit.SERIES_KEY, None)), lambda labels, kw: kw["session"]["sel"])
+        self.assertEqual(lists, [])
+        self.assertEqual(len(notes), 1)
+        self.assertEqual(calls[1][1], calls[0][1])
 
     def test_no_select_all(self):
         self.card()

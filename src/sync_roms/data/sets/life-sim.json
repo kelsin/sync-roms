@@ -5,12 +5,14 @@
     {
       "title": "Harvest Moon",
       "category": "Farming",
+      "series": "Harvest Moon",
       "system": "snes",
       "bucket": "snes/Harvest Moon (USA).zip"
     },
     {
       "title": "Harvest Moon GB",
       "category": "Farming",
+      "series": "Harvest Moon",
       "system": "gb",
       "bucket": "gb/Harvest Moon GB (USA) (SGB Enhanced).zip",
       "variants": [
@@ -23,30 +25,35 @@
     {
       "title": "Harvest Moon 2 GBC",
       "category": "Farming",
+      "series": "Harvest Moon",
       "system": "gbc",
       "bucket": "gbc/Harvest Moon 2 GBC (USA) (SGB Enhanced) (GB Compatible).zip"
     },
     {
       "title": "Harvest Moon 3 GBC",
       "category": "Farming",
+      "series": "Harvest Moon",
       "system": "gbc",
       "bucket": "gbc/Harvest Moon 3 GBC (USA).zip"
     },
     {
       "title": "Harvest Moon 64",
       "category": "Farming",
+      "series": "Harvest Moon",
       "system": "n64",
       "bucket": "n64/Harvest Moon 64 (USA).zip"
     },
     {
       "title": "Harvest Moon - Back to Nature",
       "category": "Farming",
+      "series": "Harvest Moon",
       "system": "psx",
       "bucket": "psx/Harvest Moon - Back to Nature (USA).chd"
     },
     {
       "title": "Harvest Moon - Friends of Mineral Town",
       "category": "Farming",
+      "series": "Harvest Moon",
       "system": "gba",
       "bucket": "gba/Harvest Moon - Friends of Mineral Town (USA).zip",
       "variants": [
@@ -59,18 +66,21 @@
     {
       "title": "Harvest Moon - A Wonderful Life",
       "category": "Farming",
+      "series": "Harvest Moon",
       "system": "gc",
       "bucket": "gc/Harvest Moon - A Wonderful Life (USA).rvz"
     },
     {
       "title": "Harvest Moon - Magical Melody",
       "category": "Farming",
+      "series": "Harvest Moon",
       "system": "gc",
       "bucket": "gc/Harvest Moon - Magical Melody (USA).rvz"
     },
     {
       "title": "Harvest Moon - Hero of Leaf Valley",
       "category": "Farming",
+      "series": "Harvest Moon",
       "system": "psp",
       "bucket": "psp/Harvest Moon - Hero of Leaf Valley (USA).chd"
     },
@@ -83,30 +93,35 @@
     {
       "title": "Harvest Moon DS",
       "category": "Farming",
+      "series": "Harvest Moon",
       "system": "nds",
       "bucket": "nds/Harvest Moon DS (USA) (Rev 1).zip"
     },
     {
       "title": "Harvest Moon DS - Island of Happiness",
       "category": "Farming",
+      "series": "Harvest Moon",
       "system": "nds",
       "bucket": "nds/Harvest Moon DS - Island of Happiness (USA).zip"
     },
     {
       "title": "Harvest Moon DS - Sunshine Islands",
       "category": "Farming",
+      "series": "Harvest Moon",
       "system": "nds",
       "bucket": "nds/Harvest Moon DS - Sunshine Islands (USA).zip"
     },
     {
       "title": "Harvest Moon DS - Grand Bazaar",
       "category": "Farming",
+      "series": "Harvest Moon",
       "system": "nds",
       "bucket": "nds/Harvest Moon DS - Grand Bazaar (USA).zip"
     },
     {
       "title": "Harvest Moon DS - The Tale of Two Towns",
       "category": "Farming",
+      "series": "Harvest Moon",
       "system": "nds",
       "bucket": "nds/Harvest Moon DS - The Tale of Two Towns (USA).zip",
       "variants": [
@@ -119,54 +134,63 @@
     {
       "title": "Rune Factory - A Fantasy Harvest Moon",
       "category": "Farming",
+      "series": "Harvest Moon",
       "system": "nds",
       "bucket": "nds/Rune Factory - A Fantasy Harvest Moon (USA).zip"
     },
     {
       "title": "Rune Factory 2 - A Fantasy Harvest Moon",
       "category": "Farming",
+      "series": "Harvest Moon",
       "system": "nds",
       "bucket": "nds/Rune Factory 2 - A Fantasy Harvest Moon (USA).zip"
     },
     {
       "title": "Rune Factory 3 - A Fantasy Harvest Moon",
       "category": "Farming",
+      "series": "Harvest Moon",
       "system": "nds",
       "bucket": "nds/Rune Factory 3 - A Fantasy Harvest Moon (USA).zip"
     },
     {
       "title": "Harvest Moon 3D - A New Beginning",
       "category": "Farming",
+      "series": "Harvest Moon",
       "system": "3ds",
       "bucket": "3ds/Harvest Moon 3D - A New Beginning (USA).zip"
     },
     {
       "title": "Harvest Moon 3D - The Lost Valley",
       "category": "Farming",
+      "series": "Harvest Moon",
       "system": "3ds",
       "bucket": "3ds/Harvest Moon 3D - The Lost Valley (USA).zip"
     },
     {
       "title": "Harvest Moon - Skytree Village",
       "category": "Farming",
+      "series": "Harvest Moon",
       "system": "3ds",
       "bucket": "3ds/Harvest Moon - Skytree Village (USA).zip"
     },
     {
       "title": "Story of Seasons",
       "category": "Farming",
+      "series": "Harvest Moon",
       "system": "3ds",
       "bucket": "3ds/Story of Seasons (USA).zip"
     },
     {
       "title": "Story of Seasons - Trio of Towns",
       "category": "Farming",
+      "series": "Harvest Moon",
       "system": "3ds",
       "bucket": "3ds/Story of Seasons - Trio of Towns (USA).zip"
     },
     {
       "title": "Rune Factory 4",
       "category": "Farming",
+      "series": "Harvest Moon",
       "system": "3ds",
       "bucket": "3ds/Rune Factory 4 (USA).zip"
     },
@@ -215,12 +239,14 @@
     {
       "title": "Rune Factory - Oceans",
       "category": "Farming",
+      "series": "Harvest Moon",
       "system": "ps3",
       "bucket": "ps3/Rune Factory - Oceans (Europe) (En,Fr,De) [Undub by Hien].chd"
     },
     {
       "title": "Animal Crossing",
       "category": "Life",
+      "series": "Animal Crossing",
       "system": "gc",
       "bucket": "gc/Animal Crossing (USA).rvz",
       "variants": [
@@ -237,30 +263,35 @@
     {
       "title": "Animal Crossing - Wild World",
       "category": "Life",
+      "series": "Animal Crossing",
       "system": "nds",
       "bucket": "nds/Animal Crossing - Wild World (USA) (Rev 1).zip"
     },
     {
       "title": "Animal Crossing - New Leaf - Welcome Amiibo",
       "category": "Life",
+      "series": "Animal Crossing",
       "system": "3ds",
       "bucket": "3ds/Animal Crossing - New Leaf - Welcome Amiibo (USA).zip"
     },
     {
       "title": "Animal Crossing - Happy Home Designer",
       "category": "Life",
+      "series": "Animal Crossing",
       "system": "3ds",
       "bucket": "3ds/Animal Crossing - Happy Home Designer (USA) (En,Fr,Es) (Rev 1).zip"
     },
     {
       "title": "Tomodachi Collection",
       "category": "Life",
+      "series": "Tomodachi",
       "system": "nds",
       "bucket": "nds/Tomodachi Collection (Japan) (Rev 1) [T-En by Jjjewel v0.80] [i].zip"
     },
     {
       "title": "Tomodachi Life",
       "category": "Life",
+      "series": "Tomodachi",
       "system": "3ds",
       "bucket": "3ds/Tomodachi Life (USA) (Rev 1).zip"
     },
@@ -273,12 +304,14 @@
     {
       "title": "Disney Magical World",
       "category": "Life",
+      "series": "Disney",
       "system": "3ds",
       "bucket": "3ds/Disney Magical World (USA).zip"
     },
     {
       "title": "Disney Magical World 2",
       "category": "Life",
+      "series": "Disney",
       "system": "3ds",
       "bucket": "3ds/Disney Magical World 2 (USA).zip"
     },
@@ -291,12 +324,14 @@
     {
       "title": "Sims, The",
       "category": "Life",
+      "series": "Sims",
       "system": "gc",
       "bucket": "gc/Sims, The (USA).rvz"
     },
     {
       "title": "Sims, The - Bustin' Out",
       "category": "Life",
+      "series": "Sims",
       "system": "gc",
       "bucket": "gc/Sims, The - Bustin' Out (USA).rvz"
     },
@@ -309,18 +344,21 @@
     {
       "title": "Sims 2, The",
       "category": "Life",
+      "series": "Sims",
       "system": "gc",
       "bucket": "gc/Sims 2, The (USA).rvz"
     },
     {
       "title": "Sims 2, The - Pets",
       "category": "Life",
+      "series": "Sims",
       "system": "gc",
       "bucket": "gc/Sims 2, The - Pets (USA).rvz"
     },
     {
       "title": "Sims, The - Bustin' Out",
       "category": "Life",
+      "series": "Sims",
       "system": "gba",
       "bucket": "gba/Sims, The - Bustin' Out (USA) (En,Fr,De,Es,It,Nl) (Rev 1).zip"
     },
@@ -333,96 +371,112 @@
     {
       "title": "Sims 2, The",
       "category": "Life",
+      "series": "Sims",
       "system": "gba",
       "bucket": "gba/Sims 2, The (USA, Europe) (En,Fr,De,Es,It,Nl).zip"
     },
     {
       "title": "Sims 2, The - Pets",
       "category": "Life",
+      "series": "Sims",
       "system": "gba",
       "bucket": "gba/Sims 2, The - Pets (USA, Europe).zip"
     },
     {
       "title": "Sims 2, The",
       "category": "Life",
+      "series": "Sims",
       "system": "nds",
       "bucket": "nds/Sims 2, The (USA) (En,Fr,De,Es,It).zip"
     },
     {
       "title": "Sims 2, The - Pets",
       "category": "Life",
+      "series": "Sims",
       "system": "nds",
       "bucket": "nds/Sims 2, The - Pets (USA) (En,Fr,De,Es,It,Nl).zip"
     },
     {
       "title": "Sims 2, The - Castaway",
       "category": "Life",
+      "series": "Sims",
       "system": "nds",
       "bucket": "nds/Sims 2, The - Castaway (USA) (En,Fr,De,Es,It,Nl,Pt).zip"
     },
     {
       "title": "Sims 2, The - Apartment Pets",
       "category": "Life",
+      "series": "Sims",
       "system": "nds",
       "bucket": "nds/Sims 2, The - Apartment Pets (USA) (En,Fr,De,Es,It,Nl).zip"
     },
     {
       "title": "Sims 3, The",
       "category": "Life",
+      "series": "Sims",
       "system": "nds",
       "bucket": "nds/Sims 3, The (USA) (En,Fr,Es) (NDSi Enhanced).zip"
     },
     {
       "title": "Sims 2, The",
       "category": "Life",
+      "series": "Sims",
       "system": "psp",
       "bucket": "psp/Sims 2, The (USA).chd"
     },
     {
       "title": "Sims 2, The - Pets",
       "category": "Life",
+      "series": "Sims",
       "system": "psp",
       "bucket": "psp/Sims 2, The - Pets (USA).chd"
     },
     {
       "title": "Sims 2, The - Castaway",
       "category": "Life",
+      "series": "Sims",
       "system": "psp",
       "bucket": "psp/Sims 2, The - Castaway (USA) (En,Fr,De,Es,It,Nl,Pt).chd"
     },
     {
       "title": "Sims 3, The",
       "category": "Life",
+      "series": "Sims",
       "system": "3ds",
       "bucket": "3ds/Sims 3, The (USA) (En,Fr,Es).zip"
     },
     {
       "title": "Sims 3, The - Pets",
       "category": "Life",
+      "series": "Sims",
       "system": "3ds",
       "bucket": "3ds/Sims 3, The - Pets (USA) (En,Fr,Es).zip"
     },
     {
       "title": "MySims",
       "category": "Life",
+      "series": "Sims",
       "system": "nds",
       "bucket": "nds/MySims (USA) (En,Fr,Es).zip"
     },
     {
       "title": "MySims - Kingdom",
       "category": "Life",
+      "series": "Sims",
       "system": "nds",
       "bucket": "nds/MySims - Kingdom (USA) (En,Fr,Es).zip"
     },
     {
       "title": "MySims - Agents",
       "category": "Life",
+      "series": "Sims",
       "system": "nds",
       "bucket": "nds/MySims - Agents (USA) (En,Fr,Es).zip"
     },
     {
       "title": "Chibi-Robo! Plug into Adventure!",
       "category": "Life",
+      "series": "Chibi-Robo",
       "system": "gc",
       "bucket": "gc/Chibi-Robo! Plug into Adventure! (USA).rvz",
       "variants": [
@@ -435,90 +489,105 @@
     {
       "title": "Chibi-Robo! - Park Patrol",
       "category": "Life",
+      "series": "Chibi-Robo",
       "system": "nds",
       "bucket": "nds/Chibi-Robo! - Park Patrol (USA).zip"
     },
     {
       "title": "Style Savvy",
       "category": "Life",
+      "series": "Style Savvy",
       "system": "nds",
       "bucket": "nds/Style Savvy (USA).zip"
     },
     {
       "title": "Style Savvy - Trendsetters",
       "category": "Life",
+      "series": "Style Savvy",
       "system": "3ds",
       "bucket": "3ds/Style Savvy - Trendsetters (USA).zip"
     },
     {
       "title": "Style Savvy - Fashion Forward",
       "category": "Life",
+      "series": "Style Savvy",
       "system": "3ds",
       "bucket": "3ds/Style Savvy - Fashion Forward (USA).zip"
     },
     {
       "title": "Survival Kids",
       "category": "Life",
+      "series": "Survival Kids",
       "system": "gbc",
       "bucket": "gbc/Survival Kids (USA) (SGB Enhanced) (GB Compatible).zip"
     },
     {
       "title": "Lost in Blue",
       "category": "Life",
+      "series": "Lost in Blue",
       "system": "nds",
       "bucket": "nds/Lost in Blue (USA).zip"
     },
     {
       "title": "Lost in Blue 2",
       "category": "Life",
+      "series": "Lost in Blue",
       "system": "nds",
       "bucket": "nds/Lost in Blue 2 (USA) (En,Ja,Fr,De,Es,It).zip"
     },
     {
       "title": "Lost in Blue 3",
       "category": "Life",
+      "series": "Lost in Blue",
       "system": "nds",
       "bucket": "nds/Lost in Blue 3 (USA).zip"
     },
     {
       "title": "Chibi-Robo! - Clean Sweep!",
       "category": "Life",
+      "series": "Chibi-Robo",
       "system": "nds",
       "bucket": "nds/Chibi-Robo! - Clean Sweep! (Japan) [T-En by Cjuub v1.1] [n].zip"
     },
     {
       "title": "Survival Kids 2 - Dasshutsu!! Futago-Jima!",
       "category": "Life",
+      "series": "Survival Kids",
       "system": "gbc",
       "bucket": "gbc/Survival Kids 2 - Dasshutsu!! Futago-Jima! (Japan) (SGB Enhanced) (GB Compatible) [T-En by Hattontown & NikcDC v0.9].zip"
     },
     {
       "title": "Tokimeki Memorial",
       "category": "Life",
+      "series": "Tokimeki Memorial",
       "system": "tg-cd",
       "bucket": "tg-cd/Tokimeki Memorial (Japan) (Rev 3).chd"
     },
     {
       "title": "SimCity",
       "category": "City & Tycoon",
+      "series": "Sims",
       "system": "snes",
       "bucket": "snes/SimCity (USA).zip"
     },
     {
       "title": "SimCity 2000",
       "category": "City & Tycoon",
+      "series": "Sims",
       "system": "saturn",
       "bucket": "saturn/SimCity 2000 (USA).chd"
     },
     {
       "title": "SimCity DS",
       "category": "City & Tycoon",
+      "series": "Sims",
       "system": "nds",
       "bucket": "nds/SimCity DS (USA) (En,Fr,De,Es,It,Nl).zip"
     },
     {
       "title": "SimCity - Creator",
       "category": "City & Tycoon",
+      "series": "Sims",
       "system": "nds",
       "bucket": "nds/SimCity - Creator (USA) (En,Fr,Es).zip"
     },
@@ -579,24 +648,28 @@
     {
       "title": "Jurassic Park III - Park Builder",
       "category": "City & Tycoon",
+      "series": "Jurassic Park",
       "system": "gba",
       "bucket": "gba/Jurassic Park III - Park Builder (USA).zip"
     },
     {
       "title": "Thrillville",
       "category": "City & Tycoon",
+      "series": "Thrillville",
       "system": "psp",
       "bucket": "psp/Thrillville (USA).chd"
     },
     {
       "title": "Thrillville - Off the Rails",
       "category": "City & Tycoon",
+      "series": "Thrillville",
       "system": "psp",
       "bucket": "psp/Thrillville - Off the Rails (USA).chd"
     },
     {
       "title": "Thrillville - Off the Rails",
       "category": "City & Tycoon",
+      "series": "Thrillville",
       "system": "nds",
       "bucket": "nds/Thrillville - Off the Rails (USA) (En,Fr,Es).zip"
     },
@@ -675,24 +748,28 @@
     {
       "title": "Nobunaga's Ambition",
       "category": "Koei Historical",
+      "series": "Nobunaga's Ambition",
       "system": "snes",
       "bucket": "snes/Nobunaga's Ambition (USA).zip"
     },
     {
       "title": "Nobunaga's Ambition II",
       "category": "Koei Historical",
+      "series": "Nobunaga's Ambition",
       "system": "nes",
       "bucket": "nes/Nobunaga's Ambition II (USA).zip"
     },
     {
       "title": "Romance of the Three Kingdoms",
       "category": "Koei Historical",
+      "series": "Romance of the Three Kingdoms",
       "system": "nes",
       "bucket": "nes/Romance of the Three Kingdoms (USA).zip"
     },
     {
       "title": "Romance of the Three Kingdoms II",
       "category": "Koei Historical",
+      "series": "Romance of the Three Kingdoms",
       "system": "snes",
       "bucket": "snes/Romance of the Three Kingdoms II (USA).zip"
     },
@@ -717,24 +794,28 @@
     {
       "title": "Uncharted Waters",
       "category": "Koei Historical",
+      "series": "Uncharted Waters",
       "system": "snes",
       "bucket": "snes/Uncharted Waters (USA).zip"
     },
     {
       "title": "Nobunaga's Ambition - Lord of Darkness",
       "category": "Koei Historical",
+      "series": "Nobunaga's Ambition",
       "system": "snes",
       "bucket": "snes/Lord of Darkness (USA).zip"
     },
     {
       "title": "Romance of the Three Kingdoms III - Dragon of Destiny",
       "category": "Koei Historical",
+      "series": "Romance of the Three Kingdoms",
       "system": "snes",
       "bucket": "snes/Romance of the Three Kingdoms III - Dragon of Destiny (USA).zip"
     },
     {
       "title": "Romance of the Three Kingdoms IV - Wall of Fire",
       "category": "Koei Historical",
+      "series": "Romance of the Three Kingdoms",
       "system": "snes",
       "bucket": "snes/Romance of the Three Kingdoms IV - Wall of Fire (USA).zip"
     },
@@ -753,6 +834,7 @@
     {
       "title": "Uncharted Waters - New Horizons",
       "category": "Koei Historical",
+      "series": "Uncharted Waters",
       "system": "snes",
       "bucket": "snes/New Horizons (USA).zip"
     },
@@ -783,6 +865,7 @@
     {
       "title": "Romance of the Three Kingdoms VI - Awakening of the Dragon",
       "category": "Koei Historical",
+      "series": "Romance of the Three Kingdoms",
       "system": "psx",
       "bucket": "psx/Romance of the Three Kingdoms VI - Awakening of the Dragon (USA).chd",
       "variants": [
@@ -795,12 +878,14 @@
     {
       "title": "Nobunaga no Yabou - Haouden",
       "category": "Koei Historical",
+      "series": "Nobunaga's Ambition",
       "system": "snes",
       "bucket": "snes/Nobunaga no Yabou - Haouden (Japan) (Rev 1).zip"
     },
     {
       "title": "Nobunaga no Yabou - Tenshouki",
       "category": "Koei Historical",
+      "series": "Nobunaga's Ambition",
       "system": "snes",
       "bucket": "snes/Nobunaga no Yabou - Tenshouki (Japan) (Rev 1).zip"
     },
@@ -813,6 +898,7 @@
     {
       "title": "Populous",
       "category": "God Games & Evolution",
+      "series": "Populous",
       "system": "genesis",
       "bucket": "genesis/Populous (Europe).zip",
       "variants": [
@@ -825,18 +911,21 @@
     {
       "title": "Populous II - Trials of the Olympian Gods",
       "category": "God Games & Evolution",
+      "series": "Populous",
       "system": "snes",
       "bucket": "snes/Populous II - Trials of the Olympian Gods (Europe).zip"
     },
     {
       "title": "Populous - The Beginning",
       "category": "God Games & Evolution",
+      "series": "Populous",
       "system": "psx",
       "bucket": "psx/Populous - The Beginning (USA).chd"
     },
     {
       "title": "Populous DS",
       "category": "God Games & Evolution",
+      "series": "Populous",
       "system": "nds",
       "bucket": "nds/Populous DS (USA).zip"
     },
@@ -951,84 +1040,98 @@
     {
       "title": "Monster Rancher",
       "category": "Virtual Pets & Monster Raising",
+      "series": "Monster Rancher",
       "system": "psx",
       "bucket": "psx/Monster Rancher (USA).chd"
     },
     {
       "title": "Monster Rancher 2",
       "category": "Virtual Pets & Monster Raising",
+      "series": "Monster Rancher",
       "system": "psx",
       "bucket": "psx/Monster Rancher 2 (USA).chd"
     },
     {
       "title": "Monster Rancher Battle Card - Episode II",
       "category": "Virtual Pets & Monster Raising",
+      "series": "Monster Rancher",
       "system": "psx",
       "bucket": "psx/Monster Rancher Battle Card - Episode II (USA).chd"
     },
     {
       "title": "Monster Rancher Battle Card GB",
       "category": "Virtual Pets & Monster Raising",
+      "series": "Monster Rancher",
       "system": "gbc",
       "bucket": "gbc/Monster Rancher Battle Card GB (USA) (SGB Enhanced) (GB Compatible).zip"
     },
     {
       "title": "Monster Rancher Advance",
       "category": "Virtual Pets & Monster Raising",
+      "series": "Monster Rancher",
       "system": "gba",
       "bucket": "gba/Monster Rancher Advance (USA).zip"
     },
     {
       "title": "Monster Rancher Advance 2",
       "category": "Virtual Pets & Monster Raising",
+      "series": "Monster Rancher",
       "system": "gba",
       "bucket": "gba/Monster Rancher Advance 2 (USA).zip"
     },
     {
       "title": "Monster Rancher DS",
       "category": "Virtual Pets & Monster Raising",
+      "series": "Monster Rancher",
       "system": "nds",
       "bucket": "nds/Monster Rancher DS (USA).zip"
     },
     {
       "title": "Digimon World",
       "category": "Virtual Pets & Monster Raising",
+      "series": "Digimon",
       "system": "psx",
       "bucket": "psx/Digimon World (USA).chd"
     },
     {
       "title": "Digimon World - Re-Digitize",
       "category": "Virtual Pets & Monster Raising",
+      "series": "Digimon",
       "system": "psp",
       "bucket": "psp/Digimon World - Re-Digitize (Japan) [T-En by Operation Decoded v1.1] [Dub version].chd"
     },
     {
       "title": "Digimon World Championship",
       "category": "Virtual Pets & Monster Raising",
+      "series": "Digimon",
       "system": "nds",
       "bucket": "nds/Digimon World Championship (USA).zip"
     },
     {
       "title": "Tamagotchi",
       "category": "Virtual Pets & Monster Raising",
+      "series": "Tamagotchi",
       "system": "gb",
       "bucket": "gb/Tamagotchi (USA, Europe) (SGB Enhanced).zip"
     },
     {
       "title": "Tamagotchi Connection - Corner Shop",
       "category": "Virtual Pets & Monster Raising",
+      "series": "Tamagotchi",
       "system": "nds",
       "bucket": "nds/Tamagotchi Connection - Corner Shop (USA).zip"
     },
     {
       "title": "Tamagotchi Connection - Corner Shop 2",
       "category": "Virtual Pets & Monster Raising",
+      "series": "Tamagotchi",
       "system": "nds",
       "bucket": "nds/Tamagotchi Connection - Corner Shop 2 (USA).zip"
     },
     {
       "title": "Tamagotchi Connection - Corner Shop 3",
       "category": "Virtual Pets & Monster Raising",
+      "series": "Tamagotchi",
       "system": "nds",
       "bucket": "nds/Tamagotchi Connection - Corner Shop 3 (USA).zip"
     },
@@ -1041,6 +1144,7 @@
     {
       "title": "Pokemon Channel",
       "category": "Virtual Pets & Monster Raising",
+      "series": "Pokemon",
       "system": "gc",
       "bucket": "gc/Pokemon Channel (USA).rvz"
     },
@@ -1065,12 +1169,14 @@
     {
       "title": "Nintendogs - Lab & Friends",
       "category": "Virtual Pets & Monster Raising",
+      "series": "Nintendogs",
       "system": "nds",
       "bucket": "nds/Nintendogs - Lab & Friends (USA, Australia).zip"
     },
     {
       "title": "Nintendogs + Cats - Golden Retriever & New Friends",
       "category": "Virtual Pets & Monster Raising",
+      "series": "Nintendogs",
       "system": "3ds",
       "bucket": "3ds/Nintendogs + Cats - Golden Retriever & New Friends (USA) (En,Fr,Es) (Rev 2).zip"
     },
@@ -1107,84 +1213,98 @@
     {
       "title": "Princess Maker 2",
       "category": "Virtual Pets & Monster Raising",
+      "series": "Princess Maker",
       "system": "saturn",
       "bucket": "saturn/Princess Maker 2 (Japan) (4M).chd"
     },
     {
       "title": "Digimon World DS",
       "category": "Virtual Pets & Monster Raising",
+      "series": "Digimon",
       "system": "nds",
       "bucket": "nds/Digimon World DS (USA).zip"
     },
     {
       "title": "Digimon World - Dawn",
       "category": "Virtual Pets & Monster Raising",
+      "series": "Digimon",
       "system": "nds",
       "bucket": "nds/Digimon World - Dawn (USA).zip"
     },
     {
       "title": "Princess Maker",
       "category": "Virtual Pets & Monster Raising",
+      "series": "Princess Maker",
       "system": "msx2",
       "bucket": "msx2/Princess Maker (Japan) [T-En by Teo Lopez del Castillo v1.0] (Floppy).zip"
     },
     {
       "title": "Atelier Annie - Alchemists of Sera Island",
       "category": "Alchemy & Crafting",
+      "series": "Atelier",
       "system": "nds",
       "bucket": "nds/Atelier Annie - Alchemists of Sera Island (USA).zip"
     },
     {
       "title": "Atelier Rorona Plus",
       "category": "Alchemy & Crafting",
+      "series": "Atelier",
       "system": "psvita",
       "bucket": "psvita/Atelier Rorona Plus [PCSE00466] [USA] [NoNpDRM].zip"
     },
     {
       "title": "Atelier Totori Plus",
       "category": "Alchemy & Crafting",
+      "series": "Atelier",
       "system": "psvita",
       "bucket": "psvita/Atelier Totori Plus [PCSE00231] [USA] [NoNpDRM].zip"
     },
     {
       "title": "Atelier Meruru Plus",
       "category": "Alchemy & Crafting",
+      "series": "Atelier",
       "system": "psvita",
       "bucket": "psvita/Atelier Meruru Plus [PCSE00296] [USA] [NoNpDRM].zip"
     },
     {
       "title": "Atelier Ayesha Plus",
       "category": "Alchemy & Crafting",
+      "series": "Atelier",
       "system": "psvita",
       "bucket": "psvita/Atelier Ayesha Plus [PCSE00584] [USA] [NoNpDRM].zip"
     },
     {
       "title": "Atelier Escha & Logy Plus",
       "category": "Alchemy & Crafting",
+      "series": "Atelier",
       "system": "psvita",
       "bucket": "psvita/Atelier Escha & Logy Plus [PCSE00826] [USA] [NoNpDRM].zip"
     },
     {
       "title": "Atelier Shallie Plus",
       "category": "Alchemy & Crafting",
+      "series": "Atelier",
       "system": "psvita",
       "bucket": "psvita/Atelier Shallie Plus [PCSE00998] [USA] [NoNpDRM].zip"
     },
     {
       "title": "Atelier Sophie",
       "category": "Alchemy & Crafting",
+      "series": "Atelier",
       "system": "psvita",
       "bucket": "psvita/Atelier Sophie [PCSE00892] [USA] [NoNpDRM].zip"
     },
     {
       "title": "Atelier Firis",
       "category": "Alchemy & Crafting",
+      "series": "Atelier",
       "system": "psvita",
       "bucket": "psvita/Atelier Firis [PCSE01044] [USA] [NoNpDRM].zip"
     },
     {
       "title": "Dragon Quest Builders",
       "category": "Alchemy & Crafting",
+      "series": "Dragon Quest",
       "system": "psvita",
       "bucket": "psvita/DRAGON QUEST BUILDERS [PCSE00912] [USA] [NoNpDRM].zip"
     },
@@ -1209,6 +1329,7 @@
     {
       "title": "Mario Paint",
       "category": "Creative",
+      "series": "Super Mario",
       "system": "snes",
       "bucket": "snes/Mario Paint (Japan, USA) (En).zip"
     },
@@ -1239,24 +1360,28 @@
     {
       "title": "WarioWare - D.I.Y.",
       "category": "Creative",
+      "series": "Wario",
       "system": "nds",
       "bucket": "nds/WarioWare - D.I.Y. (USA).zip"
     },
     {
       "title": "Drawn to Life",
       "category": "Creative",
+      "series": "Drawn to Life",
       "system": "nds",
       "bucket": "nds/Drawn to Life (USA) (En,Fr).zip"
     },
     {
       "title": "Drawn to Life - The Next Chapter",
       "category": "Creative",
+      "series": "Drawn to Life",
       "system": "nds",
       "bucket": "nds/Drawn to Life - The Next Chapter (USA) (En,Fr) (Rev 1).zip"
     },
     {
       "title": "Drawn to Life - SpongeBob SquarePants Edition",
       "category": "Creative",
+      "series": "Drawn to Life",
       "system": "nds",
       "bucket": "nds/Drawn to Life - SpongeBob SquarePants Edition (USA) (En,Fr).zip"
     },
@@ -1275,12 +1400,14 @@
     {
       "title": "Pokemon Art Academy",
       "category": "Creative",
+      "series": "Pokemon",
       "system": "3ds",
       "bucket": "3ds/Pokemon Art Academy (USA) (En,Fr,Es) (Rev 2).zip"
     },
     {
       "title": "Disney Art Academy",
       "category": "Creative",
+      "series": "Disney",
       "system": "3ds",
       "bucket": "3ds/Disney Art Academy (USA).zip"
     },
@@ -1317,6 +1444,7 @@
     {
       "title": "Super Mario Maker",
       "category": "Creative",
+      "series": "Super Mario",
       "system": "wiiu",
       "bucket": "wiiu/Super Mario Maker (US) (v272).wua",
       "variants": [

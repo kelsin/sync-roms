@@ -4,6 +4,7 @@
   "games": [
     {
       "title": "Final Fantasy",
+      "series": "Final Fantasy",
       "system": "nes",
       "bucket": "nes/Final Fantasy (USA).zip",
       "variants": [
@@ -19,6 +20,7 @@
     },
     {
       "title": "Final Fantasy II (En,Ja)",
+      "series": "Final Fantasy",
       "system": "psp",
       "bucket": "psp/Final Fantasy II (USA, Canada) (En,Ja).chd",
       "variants": [
@@ -30,6 +32,7 @@
     },
     {
       "title": "Final Fantasy III",
+      "series": "Final Fantasy",
       "system": "nds",
       "bucket": "nds/Final Fantasy III (USA).zip",
       "variants": [
@@ -41,6 +44,7 @@
     },
     {
       "title": "Final Fantasy II (Rev 1)",
+      "series": "Final Fantasy",
       "system": "snes",
       "bucket": "snes/Final Fantasy II (USA) (Rev 1).zip",
       "variants": [
@@ -56,6 +60,7 @@
     },
     {
       "title": "Final Fantasy III (Rev 1)",
+      "series": "Final Fantasy",
       "system": "snes",
       "bucket": "snes/Final Fantasy III (USA) (Rev 1).zip",
       "variants": [
@@ -71,6 +76,7 @@
     },
     {
       "title": "Final Fantasy Anthology - Final Fantasy V (Rev 1)",
+      "series": "Final Fantasy",
       "system": "psx",
       "bucket": "psx/Final Fantasy Anthology - Final Fantasy V (USA) (Rev 1).chd",
       "variants": [
@@ -82,11 +88,13 @@
     },
     {
       "title": "Final Fantasy - Mystic Quest (Rev 1)",
+      "series": "Final Fantasy",
       "system": "snes",
       "bucket": "snes/Final Fantasy - Mystic Quest (USA) (Rev 1).zip"
     },
     {
       "title": "Final Fantasy Legend, The",
+      "series": "Final Fantasy",
       "system": "gb",
       "bucket": "gb/Final Fantasy Legend, The (USA).zip",
       "variants": [
@@ -102,11 +110,13 @@
     },
     {
       "title": "Final Fantasy Legend II",
+      "series": "Final Fantasy",
       "system": "gb",
       "bucket": "gb/Final Fantasy Legend II (USA).zip"
     },
     {
       "title": "Final Fantasy Legend III",
+      "series": "Final Fantasy",
       "system": "gb",
       "bucket": "gb/Final Fantasy Legend III (USA).zip",
       "variants": [
@@ -118,6 +128,7 @@
     },
     {
       "title": "Final Fantasy Adventure",
+      "series": "Mana",
       "system": "gb",
       "bucket": "gb/Final Fantasy Adventure (USA).zip",
       "variants": [
@@ -129,6 +140,7 @@
     },
     {
       "title": "Final Fantasy VII",
+      "series": "Final Fantasy",
       "system": "psx",
       "bucket": "psx/Final Fantasy VII (USA).m3u",
       "files": [
@@ -150,6 +162,7 @@
     },
     {
       "title": "Final Fantasy VIII",
+      "series": "Final Fantasy",
       "system": "psx",
       "bucket": "psx/Final Fantasy VIII (USA).m3u",
       "files": [
@@ -161,6 +174,7 @@
     },
     {
       "title": "Final Fantasy IX",
+      "series": "Final Fantasy",
       "system": "psx",
       "bucket": "psx/Final Fantasy IX (USA, Canada) (Rev 1).m3u",
       "files": [
@@ -172,21 +186,25 @@
     },
     {
       "title": "Final Fantasy Tactics Advance",
+      "series": "Final Fantasy",
       "system": "gba",
       "bucket": "gba/Final Fantasy Tactics Advance (USA).zip"
     },
     {
       "title": "Chocobo Land - A Game of Dice",
+      "series": "Final Fantasy",
       "system": "gba",
       "bucket": "gba/Chocobo Land - A Game of Dice (Japan) [T-En by Nezz v1.0].zip"
     },
     {
       "title": "Final Fantasy X",
+      "series": "Final Fantasy",
       "system": "ps2",
       "bucket": "ps2/Final Fantasy X.chd"
     },
     {
       "title": "Final Fantasy X-2",
+      "series": "Final Fantasy",
       "system": "ps2",
       "bucket": "ps2/Final Fantasy X-2 (USA, Canada).chd",
       "variants": [
@@ -198,6 +216,7 @@
     },
     {
       "title": "Final Fantasy XII",
+      "series": "Final Fantasy",
       "system": "ps2",
       "bucket": "ps2/Final Fantasy XII.chd",
       "variants": [
@@ -209,41 +228,49 @@
     },
     {
       "title": "Final Fantasy IV",
+      "series": "Final Fantasy",
       "system": "nds",
       "bucket": "nds/Final Fantasy IV (USA) (En,Fr,Es).zip"
     },
     {
       "title": "Final Fantasy - The 4 Heroes of Light",
+      "series": "Final Fantasy",
       "system": "nds",
       "bucket": "nds/Final Fantasy - The 4 Heroes of Light (USA).zip"
     },
     {
       "title": "Final Fantasy Tactics A2 - Grimoire of the Rift",
+      "series": "Final Fantasy",
       "system": "nds",
       "bucket": "nds/Final Fantasy Tactics A2 - Grimoire of the Rift (USA) (En,Fr,Es).zip"
     },
     {
       "title": "Final Fantasy XII - Revenant Wings",
+      "series": "Final Fantasy",
       "system": "nds",
       "bucket": "nds/Final Fantasy XII - Revenant Wings (USA).zip"
     },
     {
       "title": "Final Fantasy Crystal Chronicles - Ring of Fates",
+      "series": "Final Fantasy",
       "system": "nds",
       "bucket": "nds/Final Fantasy Crystal Chronicles - Ring of Fates (USA) (En,Es).zip"
     },
     {
       "title": "Final Fantasy Crystal Chronicles - Echoes of Time",
+      "series": "Final Fantasy",
       "system": "nds",
       "bucket": "nds/Final Fantasy Crystal Chronicles - Echoes of Time (USA) (En,Fr,Es).zip"
     },
     {
       "title": "Final Fantasy Fables - Chocobo Tales",
+      "series": "Final Fantasy",
       "system": "nds",
       "bucket": "nds/Final Fantasy Fables - Chocobo Tales (USA).zip"
     },
     {
       "title": "Chocobo to Mahou no Ehon - Majo to Shoujo to 5-nin no Yuusha",
+      "series": "Final Fantasy",
       "system": "nds",
       "bucket": "nds/Chocobo to Mahou no Ehon - Majo to Shoujo to 5-nin no Yuusha (Japan).zip"
     },
@@ -254,26 +281,31 @@
     },
     {
       "title": "Theatrhythm Final Fantasy",
+      "series": "Final Fantasy",
       "system": "3ds",
       "bucket": "3ds/Theatrhythm Final Fantasy (USA).zip"
     },
     {
       "title": "Theatrhythm Final Fantasy - Curtain Call",
+      "series": "Final Fantasy",
       "system": "3ds",
       "bucket": "3ds/Theatrhythm Final Fantasy - Curtain Call (USA).zip"
     },
     {
       "title": "Final Fantasy Explorers",
+      "series": "Final Fantasy",
       "system": "3ds",
       "bucket": "3ds/Final Fantasy Explorers (USA).zip"
     },
     {
       "title": "Final Fantasy - Crystal Chronicles",
+      "series": "Final Fantasy",
       "system": "gc",
       "bucket": "gc/Final Fantasy - Crystal Chronicles (USA).rvz"
     },
     {
       "title": "Final Fantasy Tactics",
+      "series": "Final Fantasy",
       "system": "psx",
       "bucket": "psx/Final Fantasy Tactics (USA).chd",
       "variants": [
@@ -295,36 +327,43 @@
     },
     {
       "title": "Final Fantasy IV - The Complete Collection (En,Ja,Fr)",
+      "series": "Final Fantasy",
       "system": "psp",
       "bucket": "psp/Final Fantasy IV - The Complete Collection (USA) (En,Ja,Fr).chd"
     },
     {
       "title": "Dissidia Final Fantasy",
+      "series": "Final Fantasy",
       "system": "psp",
       "bucket": "psp/Dissidia Final Fantasy (USA).chd"
     },
     {
       "title": "Final Fantasy Type-0 (English Patched v2)",
+      "series": "Final Fantasy",
       "system": "psp",
       "bucket": "psp/Final Fantasy Type-0 (English Patched v2).chd"
     },
     {
       "title": "Dragon Quest & Final Fantasy in Itadaki Street Portable (English Prerelease 3)",
+      "series": "Dragon Quest",
       "system": "psp",
       "bucket": "psp/Dragon Quest & Final Fantasy in Itadaki Street Portable (Japan) [T-En by MortoQueiba & Choppasmith Prerelease 3].chd"
     },
     {
       "title": "Chocobo Racing",
+      "series": "Final Fantasy",
       "system": "psx",
       "bucket": "psx/Chocobo Racing (USA).chd"
     },
     {
       "title": "Chocobo's Dungeon 2",
+      "series": "Final Fantasy",
       "system": "psx",
       "bucket": "psx/Chocobo's Dungeon 2 (USA).chd"
     },
     {
       "title": "Chocobo no Fushigi na Dungeon for WonderSwan (Rev 3)",
+      "series": "Final Fantasy",
       "system": "wonderswan",
       "bucket": "wonderswan/Chocobo no Fushigi na Dungeon for WonderSwan (Japan) (Rev 2) [T-En by Higsby & SpecialAgentApe v1.1].zip"
     },
@@ -335,6 +374,7 @@
     },
     {
       "title": "Chrono Trigger",
+      "series": "Chrono",
       "system": "snes",
       "bucket": "snes/Chrono Trigger (USA).zip",
       "variants": [
@@ -360,11 +400,13 @@
     },
     {
       "title": "Final Fantasy XIII",
+      "series": "Final Fantasy",
       "system": "xbox360",
       "bucket": "xbox360/Final Fantasy XIII (USA, Europe) (En,Fr,De,Es,It) (Disc 1).zar"
     },
     {
       "title": "Final Fantasy XIII-2",
+      "series": "Final Fantasy",
       "system": "xbox360",
       "bucket": "xbox360/Final Fantasy XIII-2 (USA).zar"
     },

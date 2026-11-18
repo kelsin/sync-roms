@@ -90,6 +90,34 @@ def recategorize(games, game, category):
     insert_game(games, moved)
 
 
+def set_series(games, game, series):
+    """Give game a series (empty removes it), keeping it after the title and category; returns game."""
+    moved = {}
+    for k, v in game.items():
+        if k != "series":
+            moved[k] = v
+        if series and k == ("category" if "category" in game else "title"):
+            moved["series"] = series
+    game.clear()
+    game.update(moved)
+    return game
+
+
+def series_of(game_set, min_games=2):
+    """[(series, game count)] of a set's games in file order of first appearance, leaving out series with fewer than
+    min_games games."""
+    counts = {}
+    for g in game_set["games"]:
+        if g.get("series"):
+            counts[g["series"]] = counts.get(g["series"], 0) + 1
+    return [(name, n) for name, n in counts.items() if n >= min_games]
+
+
+def series_keys(game_set, series):
+    """The bucket keys (with each game's files) of the set's games in series."""
+    return {k for g in game_set["games"] if g.get("series") == series for k in [g["bucket"], *g.get("files", [])]}
+
+
 def ask_category(games, what):
     cats = list(dict.fromkeys(g["category"] for g in games if g.get("category")))
     if cats:

@@ -551,6 +551,7 @@ def load_sets():
 
     Each file is {"name", "description" (optional), "games": [{"title", "system", "bucket", "files" (optional)}]}.
     "category" (optional) groups games in the set editor.
+    "series" (optional) names the game's series (one of data/series.json), to narrow the editors to it.
     "files" are extra bucket keys (e.g. the discs of a multi-disc game) toggled together with "bucket".
     """
     return sorted(repo_set_files(), key=lambda x: x["name"].lower())
