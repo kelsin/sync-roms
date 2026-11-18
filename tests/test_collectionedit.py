@@ -53,7 +53,7 @@ class Stocked(unittest.TestCase):
             self.assertEqual(extras, [[("  1 file", "dim")], [("  2 files", "dim")]], module.__name__)
 
     def test_renaming_a_set_changes_the_next_menu_title(self):
-        titles, picks = [], iter([4, None])  # Rename, then back
+        titles, picks = [], iter([5, None])  # Rename, then back
         game_set = {"id": "x", "name": "Old", "games": []}
 
         def fake(title, labels, **k):

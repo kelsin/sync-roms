@@ -90,6 +90,19 @@ def recategorize(games, game, category):
     insert_game(games, moved)
 
 
+def set_series(games, game, series):
+    """Give game a series (empty removes it), keeping it after the title and category; returns game."""
+    moved = {}
+    for k, v in game.items():
+        if k != "series":
+            moved[k] = v
+        if series and k == ("category" if "category" in game else "title"):
+            moved["series"] = series
+    game.clear()
+    game.update(moved)
+    return game
+
+
 def series_of(game_set, min_games=2):
     """[(series, game count)] of a set's games in file order of first appearance, leaving out series with fewer than
     min_games games."""
