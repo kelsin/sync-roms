@@ -356,3 +356,36 @@ class EsdeExtrasSyncTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class Pico8CartImageTest(unittest.TestCase):
+    PICO = {"name": "PICO-8", "bucket": "pico8", "folders": {l: "pico8" for l in ("esde", "knulli", "onion", "allium")}}
+    LISTING = {"scrapes/pico8/miximages/a.p8.png": 1}
+
+    def plan(self, layout, rels):
+        with tempfile.TemporaryDirectory() as base:
+            with mock.patch.object(scrape_plan.downloads.inventory, "stat", return_value={f"pico8/{r}": 3 for r in rels}):
+                plan = scrape_plan.build_scrape_plan(layout, [self.PICO], {"pico8": (dict(self.LISTING), {})}, {"pico8": rels},
+                                                     lambda s: os.path.join(base, "ROMs", "pico8"), os.path.join(base, "ES-DE"),
+                                                     lambda p: True, base)
+            jobs = [(k, os.path.relpath(p, base)) for k, p, _ in plan["jobs"]]
+            return jobs, {r: e for g in plan["gamelists"].values() for r, e in g.items()}
+
+    def test_esde_uses_the_cart_as_the_mix_image(self):
+        jobs, _ = self.plan("esde", ["a.p8.png", "b.p8"])
+        self.assertEqual(jobs, [("pico8/a.p8.png", os.path.join("ES-DE", "downloaded_media", "pico8", "miximages", "a.p8.png"))])
+
+    def test_knulli_points_its_image_at_the_cart(self):
+        jobs, entries = self.plan("knulli", ["a.p8.png", "b.p8", "sub/c.p8.png"])
+        self.assertEqual(jobs, [])
+        self.assertEqual(entries, {"a.p8.png": {"image": "./a.p8.png"}, "sub/c.p8.png": {"image": "./sub/c.p8.png"}})
+
+    def test_onion_and_allium_copy_the_cart_into_imgs(self):
+        for layout in ("onion", "allium"):
+            jobs, entries = self.plan(layout, ["a.p8.png", "sub/c.p8.png"])
+            self.assertEqual(jobs, [("pico8/a.p8.png", os.path.join("ROMs", "pico8", "Imgs", "a.p8.png"))])
+            self.assertEqual(entries["a.p8.png"]["image"], "./Imgs/a.p8.png")
+            self.assertNotIn("sub/c.p8.png", entries)
+
+    def test_pico8_is_not_scraped(self):
+        self.assertNotIn("screenscraper", next(s for s in systems() if s["bucket"] == "pico8"))
