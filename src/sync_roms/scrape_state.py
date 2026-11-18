@@ -104,8 +104,9 @@ def _ledger(name, system):
     """{rom: value} of one kind for one system, loaded once per run."""
     _check_where()
     loaded = _state.setdefault(name, {})
-    if system not in loaded:
-        loaded[system] = _load(_key(system, name))
+    if system not in loaded:  # a file the storage cache says isn't there isn't looked for
+        absent = inventory.current() is not None and system not in _listed(name)
+        loaded[system] = {} if absent else _load(_key(system, name))
     return loaded[system]
 
 
