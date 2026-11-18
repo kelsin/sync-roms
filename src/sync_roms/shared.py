@@ -110,6 +110,16 @@ def write(key, text):
     _save_mirror(key, inventory.tag(key), text)
 
 
+def delete(key):
+    """Delete the storage file, then its mirror and tag."""
+    if runtime.ROOT and not os.path.isdir(runtime.ROOT):  # an unmounted share: nothing to delete there
+        raise FileNotFoundError(f"{runtime.ROOT} is missing")
+    errors = s3.delete_keys([key])
+    if errors:
+        raise OSError(f"{key}: {errors[0].get('Message', errors[0])}")
+    _drop_mirror(key)
+
+
 def update(key, parse, empty, change, dump):
     """Change a storage file from its fresh content (not the mirror) and write it back. Returns the new value.
 

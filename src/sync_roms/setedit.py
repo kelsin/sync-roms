@@ -1,23 +1,14 @@
-"""`sync-roms sets edit`: edit the repo's game sets by hand and open a PR with the changes."""
+"""`sync-roms sets edit`: edit the game sets in storage by hand and save the changes there."""
 import copy
-import os
-import shutil
-import subprocess
-import tempfile
-import time
 
 from . import cardedit, edit, picker, previews, s3, store, themeart, ui
 from .listedit import add_from_set, ask_category, file_counts, fold_discs, game_label, insert_game, recategorize, reconcile, series_keys, set_series, stocked, system_rows, view
 
 
-REPO = "kelsin/sync-roms"
-SETS_DIR = os.path.join("src", "sync_roms", "data", "sets")
-
-
 # --- Set files ---------------------------------------------------------------------------------------
 
 def repo_sets():
-    """The repo's own sets as {id: {"name", "description", "games"}}."""
+    """The sets in storage as {id: {"name", "description", "games"}}."""
     return {game_set.pop("id"): game_set for game_set in store.set_files()}
 
 
@@ -140,17 +131,6 @@ def diff_sets(before, after):
     return found
 
 
-def commit_title(found):
-    if len(found) == 1:
-        kind, sid, _ = found[0]
-        return f"feat(sets): {'add' if kind == 'new' else 'remove' if kind == 'removed' else 'update'} {sid}"
-    return f"feat(sets): update {len(found)} sets"
-
-
-def pr_body(found):
-    return "\n\n".join(f"### {sid} ({kind})\n" + "\n".join(f"- {line}" for line in lines) for kind, sid, lines in found)
-
-
 def print_changes(found):
     print(ui.bold("\n📝 Changes"))
     for kind, sid, lines in found:
@@ -159,51 +139,18 @@ def print_changes(found):
             print((ui.green if line.startswith("+") else ui.red if line.startswith("-") else str)(f"    {line}"))
 
 
-# --- The pull request --------------------------------------------------------------------------------
+# --- Saving -----------------------------------------------------------------------------------------
 
-def need_tools():
-    """Exit (code 3) unless git and gh are installed and gh is logged in; in an editor session the reason is a note,
-    so the menu the editor returns to shows it."""
-    problem = next((f"{tool} isn't installed, and opening a PR needs both git and the GitHub CLI (gh)."
-                    for tool in ("git", "gh") if not shutil.which(tool)), None)
-    if not problem and subprocess.run(["gh", "auth", "status"], capture_output=True, stdin=subprocess.DEVNULL).returncode:
-        problem = "gh isn't logged in. Run `gh auth login` first."
-    if problem and picker.queue_note(ui.red(f"❌ {problem}")):
-        raise SystemExit(3)
-    if problem:
-        ui.fail(problem)
-
-
-@ui.uses_terminal  # git and gh may ask (a passphrase, a login)
-def run(cmd, cwd=None):
-    done = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True)
-    if done.returncode:
-        ui.fail(f"{' '.join(cmd[:2])} failed: {(done.stderr or done.stdout).strip()}", 1)
-    return done.stdout.strip()
-
-
-def open_pr(after, found):
-    """Clone the repo to a temp folder, write the changed sets, and push a branch with a PR. Returns the PR's URL."""
-    tmp = tempfile.mkdtemp(prefix="sync-roms-pr-")
-    try:
-        print(ui.dim(f"📥 Cloning {REPO} ..."))
-        run(["gh", "repo", "clone", REPO, tmp, "--", "--depth", "1"])
-        branch = "sets-edit-" + time.strftime("%Y%m%d-%H%M%S")
-        run(["git", "checkout", "-b", branch], tmp)
-        for kind, sid, _ in found:
-            path = os.path.join(tmp, SETS_DIR, sid + ".json")
-            if kind == "removed":
-                os.remove(path)
-            else:
-                with open(path, "w", encoding="utf-8") as f:
-                    f.write(set_text(after[sid]))
-        title = commit_title(found)
-        run(["git", "add", "-A"], tmp)
-        run(["git", "commit", "-m", title], tmp)
-        run(["git", "push", "-u", "origin", branch], tmp)
-        return run(["gh", "pr", "create", "--title", title, "--body", pr_body(found), "--head", branch], tmp).splitlines()[-1]
-    finally:
-        shutil.rmtree(tmp, ignore_errors=True)
+def save_sets(before, after, found):
+    """Write the new and changed sets in found to storage and delete the removed ones, one at a time; before follows
+    each one saved, so after a storage error (s3.ERRORS propagate) only what is left is still a change."""
+    for kind, sid, _ in found:
+        if kind == "removed":
+            store.delete_set(sid)
+            del before[sid]
+        else:
+            store.write_set(sid, after[sid])
+            before[sid] = copy.deepcopy(after[sid])
 
 
 # --- The editor --------------------------------------------------------------------------------------
@@ -233,8 +180,7 @@ def new_set(working):
 
 @picker.one_app
 def edit_sets():
-    """Edit the repo's sets, then open a PR with the changes. Returns the exit code."""
-    need_tools()
+    """Edit the sets in storage, then save the changes there. Returns the exit code."""
     systems = sorted(store.repo_json("systems"), key=lambda s: s["name"].lower())
     before = repo_sets()
     working = copy.deepcopy(before)
@@ -254,7 +200,7 @@ def edit_sets():
 
 
 def edit_working(systems, before, working, state):
-    """The sets menu over working; Done reviews it and opens a PR. state["review"] starts at that review and stays
+    """The sets menu over working; Done reviews it and saves it to storage. state["review"] starts at that review and stays
     true until the user goes back to editing; when that review ends the editor, returns None. Returns the exit code."""
     listed = {}
 
@@ -270,9 +216,9 @@ def edit_working(systems, before, working, state):
         found = diff_sets(before, working)
         edited = {sid for _, sid, _ in found}
         labels = ([f"{themeart.set_emoji(working[x])} {working[x]['name']}  ({len(working[x]['games'])} games)" for x in ids]
-                  + ["➕ New set", "✅ Done (review & open PR)", "🚪 Quit without saving"])
+                  + ["➕ New set", "✅ Done (review & save)", "🚪 Quit without saving"])
         extras = [[("  " + ("new" if x not in before else "edited"), "cyan")] if x in edited else [] for x in ids] + [[], [], []]
-        i = n + 1 if state["review"] else picker.filter_list("✏️  Which set?  (Esc = review & open PR)", labels, extras=extras,
+        i = n + 1 if state["review"] else picker.filter_list("✏️  Which set?  (Esc = review & save)", labels, extras=extras,
                                                     hotkeys=(edit.DELETE_KEY,), hint="/ filter · Enter open · d delete · Esc review",
                                                     preview=lambda k: previews.collection(ids[k]) if k < n else None)
         if isinstance(i, tuple):
@@ -297,7 +243,7 @@ def edit_working(systems, before, working, state):
                 return 0
             continue
         if not found:
-            edit.note(ui.yellow("👋 No changes, nothing opened."))
+            edit.note(ui.yellow("👋 No changes, nothing saved."))
             return 0
         empty = [sid for kind, sid, _ in found if kind != "removed" and not working[sid]["games"]]
         if empty:
@@ -305,14 +251,20 @@ def edit_working(systems, before, working, state):
             state["review"] = False
             continue
         print_changes(found)
-        answer = ui.choose("🔀 Open a PR with these changes?", "oed", "o", "o open · e keep editing · d discard")
+        answer = ui.choose("💾 Save these changes to storage?", "sed", "s", "s save · e keep editing · d discard")
         if answer == "e":
             state["review"] = False
             continue
         if answer == "d":
-            edit.note(ui.yellow("👋 Not opened."))
+            edit.note(ui.yellow("👋 Not saved."))
             return None if state["review"] else 0
-        opened = ui.green("🎉 PR opened: ") + open_pr(working, found)
-        if not picker.queue_note(opened, keep=True):  # on the menu, and on the normal screen after the editor
-            print(opened)
+        try:
+            save_sets(before, working, found)
+        except s3.ERRORS as e:  # e.g. an unmounted storage folder: back to the menu with what is left still pending
+            edit.note(ui.red(f"❌ Couldn't save the sets to storage: {e}"))
+            state["review"] = False
+            continue
+        saved = ui.green(f"💾 Saved {len(found)} set(s) to storage.")
+        if not picker.queue_note(saved, keep=True):  # on the menu, and on the normal screen after the editor
+            print(saved)
         return None if state["review"] else 0

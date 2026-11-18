@@ -18,7 +18,7 @@ SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "sync": ("[CARD]", "download the ROMs, BIOS and scraped data for a card (this is what plain `sync-roms CARD` does)"),
     "edit": ("", "interactive editor: cards, sets, collections, device systems (same as `games edit`)"),
     "games": ("edit|list|add|remove|full|sets|export|import", "edit a card's games, interactively or from scripts"),
-    "sets": ("edit", "edit the repo's game sets by hand and open a PR with the changes"),
+    "sets": ("edit", "edit the game sets in storage by hand and save the changes there"),
     "collections": ("edit", "edit your collections of favourite games (saved in ~/.sync-roms/collections/)"),
     "themes": ("update", "copy the latest Art Book Next for ES-DE from GitHub into storage"),
     "download": ("pico8", "add the PICO-8 BBS Featured carts storage doesn't have, and newer revisions of those it has"),
@@ -85,12 +85,12 @@ TOPICS = {
   (or unpicks) a set's games. ? in any list shows all its keys.
 """,
     "sets": """
-  sync-roms sets edit                         edit the repo's sets (games, categories, new and deleted sets), then open a PR
+  sync-roms sets edit                         edit the sets in storage (games, categories, new and deleted sets), then save them
 
-  Needs git and the GitHub CLI (gh, logged in). Your edits are written to a temporary clone of kelsin/sync-roms, pushed
-  as a branch and opened as a PR; nothing is written to storage or to ~/.sync-roms.
+  The sets are shared by everyone using this storage: each set is storage's sets/<id>.json. Saving writes the new and
+  changed sets there and deletes the deleted ones; nothing else in storage or ~/.sync-roms changes.
   Pick a set to switch games off, add games from a system or from another set across its systems (you're asked for a
-  category), change a game's category or rename it. ➕ New set creates one; d deletes the highlighted one. Esc reviews the changes before the PR is opened.
+  category), change a game's category or rename it. ➕ New set creates one; d deletes the highlighted one. Esc reviews the changes before they're saved.
 """,
     "collections": """
   sync-roms collections edit                  edit your collections of favourite games
@@ -119,7 +119,7 @@ TOPICS = {
   ignored.json are skipped. Requests go one at a time; the first HTTP error stops it, keeping what was added.
 """,
     "edit": """
-  sync-roms edit                              main menu: Cards, Sets (opens a PR), Collections, Device systems; same as `games edit`
+  sync-roms edit                              main menu: Cards, Sets (saved to storage), Collections, Device systems; same as `games edit`
 
   ? in any list shows all its keys. In a card's system list: Enter opens a system's games, f makes it a full system,
   l picks collections, S opens the Surprise menu, D clears the card. After / in any list, Enter keeps the filter and

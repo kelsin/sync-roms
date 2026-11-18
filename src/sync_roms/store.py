@@ -634,6 +634,13 @@ def write_set(set_id, game_set):
     reset_sets()
 
 
+def delete_set(set_id):
+    """Delete a set's file from storage (and its local copy); the sets are read again on next use."""
+    from . import shared  # imported here: shared uses this module
+    shared.delete(SETS + set_id + ".json")
+    reset_sets()
+
+
 def set_slug(name):
     return re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")
 
