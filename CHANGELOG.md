@@ -1,5 +1,32 @@
 # Changelog
 
+## [3.5.0](https://github.com/kelsin/sync-roms/compare/v3.4.0...v3.5.0) (2026-11-18)
+
+
+### :video_game: Features
+
+* **pico8:** use each cart as its own image instead of scraping ([#359](https://github.com/kelsin/sync-roms/issues/359)) ([9f6b5ee](https://github.com/kelsin/sync-roms/commit/9f6b5eeacfebea5526b8aed6446d6e388f13e4cc))
+* **scrape:** keep scrape state in storage ([#361](https://github.com/kelsin/sync-roms/issues/361)) ([d6fb677](https://github.com/kelsin/sync-roms/commit/d6fb677cae612558d3e23a7b2bcf3435d180d4fe))
+* **sets:** keep game sets in storage ([#362](https://github.com/kelsin/sync-roms/issues/362)) ([82898a7](https://github.com/kelsin/sync-roms/commit/82898a7c4536a5669f938123d485aa613fb97c4d))
+* **surprise:** fill empty surprise slots at the end, after the card editor ([#358](https://github.com/kelsin/sync-roms/issues/358)) ([6c1d32a](https://github.com/kelsin/sync-roms/commit/6c1d32a85ad3c100f6b5d992f3b3b16a57168b63))
+
+
+### :bug: Bug Fixes
+
+* disable macOS AppleDouble file creation during syncing ([#357](https://github.com/kelsin/sync-roms/issues/357)) ([7ff8906](https://github.com/kelsin/sync-roms/commit/7ff890605894552baf3142860b7ca7fe94d3f439))
+
+
+### :broom: Chores
+
+* **sets:** remove the repo copy of the game sets ([#363](https://github.com/kelsin/sync-roms/issues/363)) ([f6bad85](https://github.com/kelsin/sync-roms/commit/f6bad8559bccda929d27fdd1efeda9e3a9eec47a))
+
+
+### :hammer_and_wrench: Code Refactoring
+
+* drop clones.json and name arcade sets from scraped metadata ([#356](https://github.com/kelsin/sync-roms/issues/356)) ([8717771](https://github.com/kelsin/sync-roms/commit/87177712a92234ece8b1e982a0ab9ec6267b4082))
+* keep shared storage files and caches in their own folders ([#354](https://github.com/kelsin/sync-roms/issues/354)) ([10b42c1](https://github.com/kelsin/sync-roms/commit/10b42c1ea27834697f90aa11459ee2e692c9cd4d))
+* remove muOS support ([#360](https://github.com/kelsin/sync-roms/issues/360)) ([16febdc](https://github.com/kelsin/sync-roms/commit/16febdc878fffcce451195d5d08e6a154d828fef))
+
 ## [3.4.0](https://github.com/kelsin/sync-roms/compare/v3.3.1...v3.4.0) (2026-11-18)
 
 
