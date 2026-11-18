@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.7.0](https://github.com/kelsin/sync-roms/compare/v3.6.1...v3.7.0) (2026-11-18)
+
+
+### :video_game: Features
+
+* **scrape:** scrape pico8 carts, cart picture only as fallback ([#369](https://github.com/kelsin/sync-roms/issues/369)) ([d7c233e](https://github.com/kelsin/sync-roms/commit/d7c233ee271cb32bf16eec12b3f96527b72745dc))
+
 ## [3.6.1](https://github.com/kelsin/sync-roms/compare/v3.6.0...v3.6.1) (2026-11-18)
 
 
