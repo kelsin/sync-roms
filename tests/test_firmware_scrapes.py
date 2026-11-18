@@ -37,9 +37,32 @@ class ApplyFailureTest(unittest.TestCase):
         with mock.patch.object(scrape_plan, "update_gamelist", side_effect=OSError("disk full")), \
                 mock.patch.object(ui, "QUIET", True), contextlib.redirect_stdout(io.StringIO()) as out, \
                 contextlib.redirect_stderr(io.StringIO()) as err:
-            self.assertEqual(scrape_plan.apply_scrape_plan(plan, "/card"), 1)
+            self.assertEqual(scrape_plan.apply_scrape_plan(plan, "/card"), (1, False))
         self.assertIn("/card/gamelist.xml: disk full", err.getvalue())
         self.assertNotIn("disk full", out.getvalue())
+
+
+class ApplyWroteTest(unittest.TestCase):
+    def apply(self, gamelists, base="/card", jobs=(), failed=0):
+        plan = {"jobs": list(jobs), "gamelists": gamelists, "writes": []}
+        with mock.patch.object(scrape_plan, "update_gamelist", lambda path, entries: path.endswith("new.xml")), \
+                mock.patch.object(scrape_plan.downloads, "run_downloads", lambda *a: failed), \
+                contextlib.redirect_stdout(io.StringIO()):
+            return scrape_plan.apply_scrape_plan(plan, base)
+
+    def test_unchanged_gamelists_are_not_a_write(self):
+        self.assertEqual(self.apply({"/card/gba/old.xml": {}}), (0, False))
+
+    def test_a_written_gamelist_on_the_card_is_a_write(self):
+        self.assertEqual(self.apply({"/card/gba/new.xml": {}}), (0, True))
+
+    def test_a_gamelist_off_the_card_is_not_a_write(self):
+        self.assertEqual(self.apply({"/home/me/ES-DE/new.xml": {}}), (0, False))
+
+    def test_a_download_that_succeeded_is_a_write_and_all_failing_is_not(self):
+        job = ("k", "/card/x", 1)
+        self.assertEqual(self.apply({}, jobs=[job, job], failed=1), (1, True))
+        self.assertEqual(self.apply({}, jobs=[job], failed=1), (1, False))
 
 
 class EmudeckPlanTest(unittest.TestCase):

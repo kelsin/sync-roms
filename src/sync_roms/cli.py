@@ -62,12 +62,12 @@ TOPICS = {
 
   --dry-run   show what would be downloaded and deleted, change nothing
   --yes       answer every prompt with its default (a default-no prompt, like deleting files, stays no)
-  --no-clean  skip the end-of-run card tidy (.metadata_never_index, .fseventsd, dot_clean)
+  --no-clean  skip the end-of-run card tidy (.metadata_never_index, .fseventsd, ._ files)
   --no-eject  leave the card mounted (by default a Mac unmounts all of its volumes after a run with no failures;
               "eject": false in settings.json turns that off for every run)
 
-  A finished run (not --dry-run) creates .metadata_never_index in CARD, empties its .fseventsd, and on a Mac runs
-  dot_clean (falling back to sudo mdutil, which asks for your password).
+  A run that wrote to the card (not --dry-run) creates .metadata_never_index in CARD, empties its .fseventsd, and on a Mac deletes
+  its ._ files (and offers sudo mdutil to turn Spotlight off, which asks for your password).
 """,
     "games": """
   sync-roms games edit                        interactive editor (cards, sets, device systems)
@@ -1265,10 +1265,10 @@ def sync_card(args):
     if scrapes:
         plan = build_plan(os.path.exists, {path for _, path, _ in planned["jobs"]})  # media found current then still are
         scrape_todo = plan["jobs"]
-        # EmuDeck's gamelists are on this computer, not the card
-        if clean_card and (plan["jobs"] or plan["writes"] or (plan["gamelists"] and layout_name != "emudeck")):
+        scrape_failed, wrote = scrape_plan.apply_scrape_plan(plan, base, failures)
+        failed += scrape_failed
+        if clean_card and wrote:
             clean._clean_root = base
-        failed += scrape_plan.apply_scrape_plan(plan, base, failures)
         stale = scrape_plan.stale_media(layout_name, manifest["systems"], roms_dir, stale_es_dir, base)
     remove_stale_media(stale)
     for folder in scrape_plan.prune_empty_systems(layout_name, manifest["systems"], roms_dir):

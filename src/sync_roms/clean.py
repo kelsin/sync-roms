@@ -12,23 +12,35 @@ from . import ui
 
 _clean_root = None
 _eject_root = None  # the card to unmount once the run is over (see eject)
-DOT_CLEAN_RETRIES = 2
+DELETE_RETRIES = 2
+SKIPPED_FOLDERS = {".Spotlight-V100", ".fseventsd", ".Trashes"}  # macOS keeps these; no ._ files to delete in them
 
 
-def dot_clean(path):
-    """Run dot_clean on path (always delete ._ files, even orphans, without merging their attributes), which should delete every ._* file. Returns (exit ok, ._* files still there)."""
-    r = subprocess.run(["dot_clean", "-mn", "--keep=native", path], capture_output=True, text=True)
-    # dot_clean exits 0 even when a merge fails, so also look for ._* files it left behind
-    left = [os.path.join(root, f) for root, _, files in os.walk(path) for f in files if f.startswith("._")]
-    ok = r.returncode == 0 and not left
-    print(f"  {'✅' if ok else '❌'} {path}"
-          + (ui.dim(f" ({len(left)} ._ file(s) left)") if left else "")
-          + ("" if r.returncode == 0 else ui.red(f": {r.stderr.strip()}")))
-    return r.returncode == 0, left
+def delete_appledouble(path):
+    """Delete every ._* file under path in one walk, except in the folders macOS keeps for itself. Returns the ones it couldn't delete."""
+    left = []
+    stack = [path]
+    while stack:
+        try:
+            with os.scandir(stack.pop()) as it:
+                entries = list(it)
+        except OSError:
+            continue
+        for e in entries:
+            if e.is_dir(follow_symlinks=False):
+                if e.name not in SKIPPED_FOLDERS:
+                    stack.append(e.path)
+            elif e.name.startswith("._"):
+                try:
+                    os.remove(e.path)
+                except OSError:
+                    left.append(e.path)
+    print(f"  {'❌' if left else '✅'} {path}" + (ui.dim(f" ({len(left)} ._ file(s) left)") if left else ""))
+    return left
 
 
 def remove_left(paths):
-    """Delete the ._* files dot_clean left (paths) and return the ones still there, without walking the card again."""
+    """Delete the ._* files an earlier pass couldn't delete (paths) and return the ones still there, without walking the card again."""
     for path in paths:
         try:
             os.remove(path)
@@ -40,8 +52,10 @@ def remove_left(paths):
 
 
 def quiet_fseventsd(root):
-    """Empty the root's .fseventsd folder (macOS's file event log) and add .fseventsd/no_log so it isn't written again."""
+    """Empty the root's .fseventsd folder (macOS's file event log) and add .fseventsd/no_log so it isn't written again (nothing to do once it is there)."""
     log_dir = os.path.join(root, ".fseventsd")
+    if os.path.lexists(os.path.join(log_dir, "no_log")):
+        return
     try:
         os.makedirs(log_dir, exist_ok=True)
         for name in os.listdir(log_dir):
@@ -54,7 +68,7 @@ def quiet_fseventsd(root):
 
 
 def clean_dirs():
-    """Mark the root folder as not to be indexed, then merge/remove macOS AppleDouble (._*) files under it (macOS only).
+    """Mark the root folder as not to be indexed, then delete macOS AppleDouble (._*) files under it (macOS only).
 
     ^C skips the rest of the cleaning (it can be done by running sync again).
     """
@@ -95,26 +109,28 @@ def _stop_indexing(root):
 
 
 def _clean_card():
+    marker = os.path.join(_clean_root, ".metadata_never_index")
     try:  # on any OS: it keeps Spotlight from indexing the card when it is next used on a Mac
-        open(os.path.join(_clean_root, ".metadata_never_index"), "a").close()
+        if not os.path.lexists(marker):
+            open(marker, "a").close()
     except OSError as e:
         print(ui.yellow(f"  ⚠️  Couldn't create .metadata_never_index in {_clean_root}: {e}"))
     quiet_fseventsd(_clean_root)
-    if not shutil.which("dot_clean"):
+    if sys.platform != "darwin":
         return
     _stop_indexing(_clean_root)
-    print(ui.bold("\n🧼 Running dot_clean..."))
-    _, left = dot_clean(_clean_root)
+    print(ui.bold("\n🧼 Deleting ._ files..."))
+    left = delete_appledouble(_clean_root)
     # A first pass often leaves files behind (the card is still settling); deleting those a moment later
     # usually finishes the job.
-    for _ in range(DOT_CLEAN_RETRIES):
+    for _ in range(DELETE_RETRIES):
         if not left:
             break
         time.sleep(2)
-        print(ui.bold(f"\n🧼 Removing the {len(left)} ._ file(s) dot_clean left..."))
+        print(ui.bold(f"\n🧼 Removing the {len(left)} ._ file(s) left..."))
         left = remove_left(left)
     if left:
-        ui.failure(ui.red(f"\n⚠️  {len(left)} ._ file(s) are still there after dot_clean:"))
+        ui.failure(ui.red(f"\n⚠️  {len(left)} ._ file(s) are still there after deleting:"))
         for path in left[:10]:
             ui.failure(ui.dim(f"     {path}"))
         if len(left) > 10:

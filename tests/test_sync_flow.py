@@ -39,12 +39,13 @@ def captured(fn, *a, **kw):
 
 
 class CleanDirsTest(unittest.TestCase):
-    def run_clean(self, dot_clean, tty=False, yes=True, spotlight=True):
+    def run_clean(self, delete, tty=False, yes=True, spotlight=True):
         calls = []
         with tempfile.TemporaryDirectory() as root, contextlib.ExitStack() as st:
             st.enter_context(mock.patch.object(clean, "_clean_root", root))
-            st.enter_context(mock.patch.object(clean.shutil, "which", lambda n: "/usr/bin/dot_clean"))
-            st.enter_context(mock.patch.object(clean, "dot_clean", dot_clean))
+            st.enter_context(mock.patch.object(clean.sys, "platform", "darwin"))
+            st.enter_context(mock.patch.object(clean.shutil, "which", lambda n: "/usr/bin/mdutil"))
+            st.enter_context(mock.patch.object(clean, "delete_appledouble", delete))
             st.enter_context(mock.patch.object(clean, "spotlight_active", lambda p: spotlight))
             st.enter_context(mock.patch.object(clean.time, "sleep", lambda s: None))
             st.enter_context(mock.patch.object(clean.subprocess, "run", lambda *a, **k: calls.append(a[0]) or mock.Mock(returncode=0)))
@@ -55,7 +56,7 @@ class CleanDirsTest(unittest.TestCase):
         return calls, out
 
     def test_announces_finalizing_card(self):
-        _, out = self.run_clean(lambda p: (True, []))
+        _, out = self.run_clean(lambda p: [])
         self.assertIn("Finalizing card", out)
 
     def test_ctrl_c_during_cleaning_is_caught(self):
@@ -64,13 +65,14 @@ class CleanDirsTest(unittest.TestCase):
         _, out = self.run_clean(boom)
         self.assertIn("Skipped", out)
 
-    def run_real_dot_clean(self, removable=True):
-        """clean_dirs with the real dot_clean (its command faked to leave ._a and ._b), counting the card walks and removals."""
-        walks, removed, real_walk, real_remove, real_dot_clean = [], [], os.walk, os.remove, clean.dot_clean
+    def run_real_walk(self, removable=True):
+        """clean_dirs with the real walk over a card holding ._a and ROMs/._b, counting the card walks and removals."""
+        walks, removed, real_scandir, real_remove, real_delete = [], [], os.scandir, os.remove, clean.delete_appledouble
 
-        def walk(path):
-            walks.append(path)
-            return real_walk(path)
+        def scandir(path):
+            if isinstance(path, str):  # os.listdir also goes through scandir, by file descriptor
+                walks.append(path)
+            return real_scandir(path)
 
         def remove(path):
             if not removable:
@@ -78,57 +80,91 @@ class CleanDirsTest(unittest.TestCase):
             removed.append(os.path.basename(path))
             real_remove(path)
 
-        def leave_files(root):
+        def with_files(root):
             os.makedirs(os.path.join(root, "ROMs"), exist_ok=True)
             for name in ("._a", os.path.join("ROMs", "._b")):
                 open(os.path.join(root, name), "w").close()
-            return real_dot_clean(root)
-        with mock.patch.object(clean.os, "walk", walk), mock.patch.object(clean.os, "remove", remove):
-            _, out = self.run_clean(leave_files, spotlight=False)
+            return real_delete(root)
+        with mock.patch.object(clean.os, "scandir", scandir), mock.patch.object(clean.os, "remove", remove):
+            _, out = self.run_clean(with_files, spotlight=False)
         return walks, removed, out
 
-    def test_a_retry_removes_the_files_dot_clean_left_without_walking_the_card_again(self):
-        walks, removed, out = self.run_real_dot_clean()
-        self.assertEqual(len(walks), 1)
+    def test_the_walk_deletes_nested_files_and_skips_the_folders_macos_keeps(self):
+        with tempfile.TemporaryDirectory() as root:
+            kept = [os.path.join(root, d, "._k") for d in (".Spotlight-V100", ".fseventsd", ".Trashes")]
+            gone = [os.path.join(root, "._a"), os.path.join(root, "ROMs", "gba", "._b")]
+            for path in kept + gone + [os.path.join(root, "ROMs", "game.zip")]:
+                os.makedirs(os.path.dirname(path), exist_ok=True)
+                open(path, "w").close()
+            link = os.path.join(root, "link")
+            os.symlink(os.path.join(root, "ROMs"), link)
+            left, _ = captured(clean.delete_appledouble, root)
+            self.assertEqual(left, [])
+            self.assertEqual([os.path.exists(p) for p in gone], [False, False])
+            self.assertEqual([os.path.exists(p) for p in kept], [True] * 3)
+            self.assertTrue(os.path.exists(os.path.join(root, "ROMs", "game.zip")))
+
+    def test_the_walk_returns_the_files_it_could_not_delete(self):
+        with tempfile.TemporaryDirectory() as root:
+            open(os.path.join(root, "._a"), "w").close()
+            with mock.patch.object(clean.os, "remove", side_effect=PermissionError("busy")):
+                left, _ = captured(clean.delete_appledouble, root)
+            self.assertEqual(left, [os.path.join(root, "._a")])
+
+    def test_a_card_that_already_has_the_guard_files_is_not_written_to(self):
+        with tempfile.TemporaryDirectory() as root:
+            os.makedirs(os.path.join(root, ".fseventsd"))
+            for name in (".metadata_never_index", os.path.join(".fseventsd", "no_log")):
+                open(os.path.join(root, name), "w").close()
+            stale_log = os.path.join(root, ".fseventsd", "0000")
+            open(stale_log, "w").close()
+            with mock.patch.object(clean, "_clean_root", root), mock.patch.object(clean.sys, "platform", "linux"), \
+                    mock.patch("builtins.open", side_effect=AssertionError("wrote")), \
+                    mock.patch.object(clean.os, "remove", side_effect=AssertionError("removed")):
+                clean._clean_card()
+            self.assertTrue(os.path.exists(stale_log))
+
+    def test_a_retry_removes_the_files_left_without_walking_the_card_again(self):
+        walks, removed, out = self.run_real_walk()
+        self.assertEqual(len(walks), 2)  # the root and ROMs, in the one walk
         self.assertEqual(sorted(removed), ["._a", "._b"])
-        self.assertIn("Removing the 2 ._ file(s) dot_clean left", out)
         self.assertNotIn("still there", out)
 
     def test_files_that_cannot_be_removed_are_listed_after_the_retries_without_walking_again(self):
         with contextlib.redirect_stderr(io.StringIO()):
-            walks, _, out = self.run_real_dot_clean(removable=False)
-        self.assertEqual(len(walks), 1)
-        self.assertEqual(out.count("Removing the 2 ._ file(s) dot_clean left"), clean.DOT_CLEAN_RETRIES)
-        self.assertIn("2 ._ file(s) are still there after dot_clean", out)
+            walks, _, out = self.run_real_walk(removable=False)
+        self.assertEqual(len(walks), 2)
+        self.assertEqual(out.count("Removing the 2 ._ file(s) left"), clean.DELETE_RETRIES)
+        self.assertIn("2 ._ file(s) are still there after deleting", out)
 
     def test_sudo_is_skipped_when_spotlight_is_off(self):
-        calls, out = self.run_clean(lambda p: (True, []), tty=True, yes=False, spotlight=False)
+        calls, out = self.run_clean(lambda p: [], tty=True, yes=False, spotlight=False)
         self.assertFalse([c for c in calls if c[0] == "sudo"])
         self.assertNotIn("sudo mdutil", out)
 
     def test_sudo_is_not_run_without_a_terminal(self):
-        calls, out = self.run_clean(lambda p: (False, ["/x/._a"]))
+        calls, out = self.run_clean(lambda p: ["/x/._a"])
         self.assertFalse([c for c in calls if c[0] == "sudo"])
         self.assertIn("sudo mdutil", out)
 
     def test_sudo_is_not_run_with_yes(self):
-        calls, _ = self.run_clean(lambda p: (False, ["/x/._a"]), tty=True)
+        calls, _ = self.run_clean(lambda p: ["/x/._a"], tty=True)
         self.assertFalse([c for c in calls if c[0] == "sudo"])
 
     def test_sudo_runs_on_a_terminal(self):
-        calls, _ = self.run_clean(lambda p: (False, ["/x/._a"]), tty=True, yes=False)
+        calls, _ = self.run_clean(lambda p: ["/x/._a"], tty=True, yes=False)
         self.assertTrue([c for c in calls if c[0] == "sudo"])
 
     def test_quiet_shows_the_sudo_command_with_its_question(self):
         with mock.patch.object(ui, "QUIET", True), contextlib.redirect_stderr(io.StringIO()) as err:
-            _, out = self.run_clean(lambda p: (True, []), tty=True, yes=False)
+            _, out = self.run_clean(lambda p: [], tty=True, yes=False)
         self.assertIn("sudo mdutil -i off", err.getvalue())
         self.assertNotIn("sudo mdutil", out)
 
-    def test_quiet_lists_the_files_dot_clean_left(self):
+    def test_quiet_lists_the_files_left(self):
         with mock.patch.object(ui, "QUIET", True), contextlib.redirect_stderr(io.StringIO()) as err:
-            _, _, out = self.run_real_dot_clean(removable=False)
-        self.assertIn("still there after dot_clean", err.getvalue())
+            _, _, out = self.run_real_walk(removable=False)
+        self.assertIn("still there after deleting", err.getvalue())
         self.assertIn("._b", err.getvalue())
         self.assertNotIn("._b", out)
 
@@ -424,7 +460,7 @@ class SyncFlowTest(unittest.TestCase):
                 st.enter_context(mock.patch.object(scrape_plan, "build_scrape_plan",
                                                    lambda layout, systems, data, rels, dest_of, es_dir, present, base, recheck=None:
                                                    {"jobs": [], "gamelists": {}, "writes": []}))
-                st.enter_context(mock.patch.object(scrape_plan, "apply_scrape_plan", lambda *a: 0))
+                st.enter_context(mock.patch.object(scrape_plan, "apply_scrape_plan", lambda *a: (0, False)))
                 st.enter_context(mock.patch.object(cli.surprise, "run_surprise", lambda *a, **k: []))
                 st.enter_context(mock.patch.object(cli.surprise, "fill_surprises", lambda *a, **k: []))
                 st.enter_context(mock.patch.object(runtime, "_mirror_root", None))
@@ -478,6 +514,19 @@ class SyncFlowTest(unittest.TestCase):
     def test_nothing_downloaded_skips_card_cleaning(self):
         _, _, _, root, _ = self.run_sync(plan=[])
         self.assertIsNone(root)
+
+    def scrape_sync(self, wrote):
+        plan = {"jobs": [], "gamelists": {"/card/gamelist.xml": {}}, "writes": []}
+        _, _, _, root, _ = self.run_sync(plan=[], extra=[
+            (scrape_plan, "build_scrape_plan", lambda *a, **k: plan),
+            (scrape_plan, "apply_scrape_plan", lambda *a: (0, wrote))])
+        return root
+
+    def test_a_scrape_that_wrote_nothing_skips_card_cleaning(self):
+        self.assertIsNone(self.scrape_sync(False))
+
+    def test_a_scrape_that_wrote_marks_the_card_for_cleaning(self):
+        self.assertIsNotNone(self.scrape_sync(True))
 
     def test_download_marks_the_card_for_cleaning(self):
         _, _, _, root, _ = self.run_sync()

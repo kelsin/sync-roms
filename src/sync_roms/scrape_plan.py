@@ -365,19 +365,23 @@ def describe_scrape_plan(plan):
 
 
 def apply_scrape_plan(plan, base, failures=None):
-    """Download the media, then write the gamelists and text files. Returns failures; failures, if given, collects
-    (key, reason) for each failed download."""
+    """Download the media, then write the gamelists and text files. Returns (failures, whether anything was written
+    to the card at base); failures, if given, collects (key, reason) for each failed download."""
     failed = downloads.run_downloads(plan["jobs"], "Scraped data", "🖼️", base, failures) if plan["jobs"] else 0
+    wrote = failed < len(plan["jobs"])
     for path, entries in plan["gamelists"].items():
         try:
-            update_gamelist(path, entries)
+            # EmuDeck's gamelists are on this computer, not the card
+            if update_gamelist(path, entries) and os.path.realpath(path).startswith(os.path.realpath(base) + os.sep):
+                wrote = True
         except (ET.ParseError, OSError, UnicodeDecodeError) as e:
             failed += 1
             ui.failure(ui.red(f"  ❌ {path}: {e}"))
     for path, text in plan["writes"]:
         os.makedirs(os.path.dirname(path), exist_ok=True)
         store.replace_file(path, text, newline="")
-    return failed
+        wrote = True
+    return failed, wrote
 
 
 def card_stems(rom_dir, flat, skip_db=False):
