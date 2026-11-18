@@ -109,6 +109,8 @@ def remove_parts():
 def write_file(key, write):
     """Create the file for a key under the storage folder; write(tmp_path) fills a temporary file that then replaces it."""
     check_root()  # an unmounted share: never create the file on the local disk
+    from . import inventory  # imported here: inventory reads storage through this module
+    before = inventory.trusted([key])
     path = safe_join(runtime.ROOT, key)
     os.makedirs(os.path.dirname(path), exist_ok=True)
     _writing.add(key)
@@ -123,8 +125,7 @@ def write_file(key, write):
     finally:
         _writing.discard(key)
     path = safe_join(runtime.ROOT, key)
-    from . import inventory  # imported here: inventory reads storage through this module
-    inventory.wrote(key, os.path.getsize(path))
+    inventory.wrote(key, os.path.getsize(path), before=before)
 
 
 def read_range(key, start, end):
@@ -410,6 +411,7 @@ def move_keys(moves):
     def move(job):
         old, new = job
         try:
+            before = inventory.trusted([old, new])
             if runtime.ROOT:
                 dest = safe_join(runtime.ROOT, new)
                 os.makedirs(os.path.dirname(dest), exist_ok=True)
@@ -417,7 +419,7 @@ def move_keys(moves):
             else:
                 client.copy({"Bucket": runtime.BUCKET, "Key": old}, runtime.BUCKET, new)
                 client.delete_object(Bucket=runtime.BUCKET, Key=old)
-            inventory.moved(old, new)  # here, not in the loop below, so a move that finishes after ^C is recorded too
+            inventory.moved(old, new, before)  # here, not in the loop below, so a move that finishes after ^C is recorded too
             return job, None
         except ERRORS as e:
             return job, e
@@ -498,8 +500,9 @@ def delete_keys(keys):
         if runtime.ROOT:
             for k in batch:
                 try:
+                    before = inventory.trusted([k])
                     os.remove(safe_join(runtime.ROOT, k))
-                    inventory.removed([k])
+                    inventory.removed([k], before)
                 except OSError as e:
                     errors.append({"Key": k, "Message": str(e)})
             print(ui.dim(f"  deleted {min(i + 1000, len(keys))}/{len(keys)}"))

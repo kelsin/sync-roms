@@ -188,40 +188,76 @@ def folders():
 
 # --- Patches from sync-roms's own writes ----------------------------------------------------------------------------
 
-def _patch(change, keys):
+def _spellings(folder):
+    return {folder, unicodedata.normalize("NFC", folder), unicodedata.normalize("NFD", folder)}
+
+
+def _mtime(folder):
+    """The storage folder's st_mtime_ns, or None when it can't be statted."""
+    try:
+        return os.stat(s3.safe_join(runtime.ROOT, folder) if folder else runtime.ROOT).st_mtime_ns
+    except (OSError, ValueError):
+        return None
+
+
+def trusted(keys):
+    """Called before sync-roms writes, moves or deletes keys in a storage folder: the folders holding them (as the cache
+    spells them) whose mtime is still the one the cache trusts. After the write, _patch stores their new mtime instead
+    of dropping it, so the next update needn't list them (unless it runs within FRESH seconds). The race is accepted:
+    another machine writing to one of them between this stat and the one after the write goes unseen until that folder
+    changes again. Empty for a bucket."""
+    tree = current()
+    if not runtime.ROOT or tree is None:
+        return set()
+    out = set()
+    for k in keys:
+        folder = k.rpartition("/")[0]
+        for name in _spellings(folder) & tree.dirs.keys():
+            if tree.dirs[name] is not None and _mtime(name) == tree.dirs[name]:
+                out.add(name)
+    return out
+
+
+def _patch(change, keys, before=()):
     """Apply change to the cache, and stop trusting the mtimes of the keys' folders (spelled as given, NFC or NFD: a share
     may store a name decomposed), or of the nearest folder above that the cache knows, for a folder the write created:
-    the next update lists them."""
+    the next update lists them. A folder in before (from trusted(), taken before the write) holding a key gets its
+    new mtime instead."""
     global _dirty
+    after = {name: _mtime(name) for name in before}  # outside the lock: each stat is a round trip on a network share
     with _lock:
         tree = current()
         if tree is not None:
             change(tree)
+            marks = {}
             for k in keys:
-                folder = k
+                folder, direct = k, True
                 while folder:
                     folder = folder.rpartition("/")[0]
-                    names = {folder, unicodedata.normalize("NFC", folder), unicodedata.normalize("NFD", folder)} & tree.dirs.keys()
+                    names = _spellings(folder) & tree.dirs.keys()
                     for name in names:
-                        tree.dirs[name] = None
+                        mtime = after.get(name) if direct else None
+                        marks[name] = mtime if marks.get(name, mtime) == mtime else None
                     if names:
                         break
+                    direct = False
+            tree.dirs.update(marks)
             tree.changed()
             _dirty = True
 
 
-def wrote(key, size, etag=None):
-    """A file was written to storage (its ETag, when known)."""
+def wrote(key, size, etag=None, before=()):
+    """A file was written to storage (its ETag, when known); before is what trusted() gave before the write."""
     def change(tree):
         tree.files[key] = size
         if etag:
             tree.etags[key] = etag
         else:
             tree.etags.pop(key, None)
-    _patch(change, [key])
+    _patch(change, [key], before)
 
 
-def removed(keys):
+def removed(keys, before=()):
     """Files were deleted from storage."""
     keys = list(keys)
 
@@ -229,17 +265,17 @@ def removed(keys):
         for k in keys:
             tree.files.pop(k, None)
             tree.etags.pop(k, None)
-    _patch(change, keys)
+    _patch(change, keys, before)
 
 
-def moved(old, new):
+def moved(old, new, before=()):
     """A file was moved in storage (its ETag is dropped: a copy can change it)."""
     def change(tree):
         if old in tree.files:
             tree.files[new] = tree.files.pop(old)
             tree.etags.pop(old, None)
             tree.etags.pop(new, None)
-    _patch(change, [old, new])
+    _patch(change, [old, new], before)
 
 
 def _save(tree):
@@ -291,7 +327,8 @@ def _read_folder(root, old=None):
     entry is added to, removed from or renamed in it, not when a subfolder changes). The others are listed as os.walk
     would (a symlinked folder isn't followed), and a listing error raises. A file old has keeps its cached size; the rest
     are statted (in parallel: each is a round trip on a network share), and so are the folders old has, before the walk.
-    A folder's mtime is taken before it is listed, and isn't kept when it is within FRESH seconds of now."""
+    A folder's mtime is taken before it is listed, and isn't kept, or trusted, when it is within FRESH seconds of now (as
+    one stored after sync-roms's own write can be)."""
     known, stored, inside = (old.files, old.dirs, {}) if old else ({}, {}, {})
     if stored:  # folder: ([file keys], [subfolders]) in old
         for k in known:
@@ -314,7 +351,7 @@ def _read_folder(root, old=None):
         folder = stack.pop()
         path = os.path.join(root, folder) if folder else root
         now, st = ahead.get(folder) or (_clock(), os.stat(path))
-        if statmode.S_ISDIR(st.st_mode) and stored.get(folder) == st.st_mtime_ns:
+        if statmode.S_ISDIR(st.st_mode) and stored.get(folder) == st.st_mtime_ns and st.st_mtime_ns < (now - FRESH) * 1e9:
             keys, subfolders = inside.get(folder, ([], []))
             out.update((k, known[k]) for k in keys if not s3.junk(k))
             stack.extend(subfolders)

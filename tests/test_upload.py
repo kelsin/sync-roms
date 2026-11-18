@@ -596,7 +596,7 @@ class MoveInterruptTest(unittest.TestCase):
             st.enter_context(mock.patch.object(runtime, "WORKERS", 2))
             st.enter_context(mock.patch.object(s3.os, "replace", replace))
             st.enter_context(mock.patch.object(s3, "print", fake_print, create=True))
-            st.enter_context(mock.patch.object(inventory, "moved", lambda old, new: recorded.append(old)))
+            st.enter_context(mock.patch.object(inventory, "moved", lambda old, new, before=(): recorded.append(old)))
             st.enter_context(mock.patch.object(ui, "POLL", 0.001))
             with self.assertRaises(KeyboardInterrupt):
                 s3.move_keys(moves)

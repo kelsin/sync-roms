@@ -451,7 +451,7 @@ class AccentedNameTest(unittest.TestCase):
             s3.write_file(COMPOSED, lambda tmp: share_write(tmp, b"abc"))
         names = [unicodedata.normalize("NFC", n) for n in os.listdir(os.path.join(self.root, "psvita"))]
         self.assertEqual(names, [os.path.basename(COMPOSED)])
-        wrote.assert_called_once_with(COMPOSED, 3)
+        wrote.assert_called_once_with(COMPOSED, 3, before=set())
 
     def test_failed_write_leaves_no_part_file(self):
         def fail(tmp):

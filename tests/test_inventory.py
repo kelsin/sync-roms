@@ -339,6 +339,15 @@ class FolderMtimeTest(StorageFolder):
         self.assertEqual(self.update(), ((1, 2, 0), ["BIOS", "gba"]))
         self.assertEqual(inventory.files(""), {"gba/a.zip": 1, "gba/b.zip": 2, "BIOS/x.bin": 3})
 
+    def later(self):
+        """Run the rest of the test an hour from now, when every mtime set now is old enough to trust."""
+        p = mock.patch.object(inventory, "_clock", return_value=inventory._clock() + 3600)
+        p.start()
+        self.addCleanup(p.stop)
+
+    def mtime(self, folder):
+        return os.stat(os.path.join(self.root.name, folder)).st_mtime_ns
+
     def test_known_folders_are_statted_in_parallel(self):
         self.update()
         threads, real = set(), os.stat
@@ -351,6 +360,40 @@ class FolderMtimeTest(StorageFolder):
         with mock.patch.object(os, "stat", side_effect=spy), mock.patch.object(s3, "check_root"):
             self.assertEqual(self.update(), ((0, 0, 0), []))
         self.assertNotIn(threading.main_thread(), threads)
+
+    def test_own_writes_into_trusted_folders_keep_them_trusted(self):
+        self.update()
+        s3.write_file("gba/c.zip", lambda tmp: open(tmp, "wb").write(b"1234"))
+        quiet(s3.move_keys, [("gba/a.zip", "gba/m.zip")])
+        quiet(s3.delete_keys, ["BIOS/x.bin"])
+        self.assertEqual(inventory.current().dirs["gba"], self.mtime("gba"))
+        self.assertEqual(inventory.current().dirs["BIOS"], self.mtime("BIOS"))
+        self.later()
+        self.assertEqual(self.update(), ((0, 0, 0), []))
+        self.assertEqual(inventory.files(""), {"gba/b.zip": 2, "gba/c.zip": 4, "gba/m.zip": 1})
+
+    def test_a_trusted_folder_written_within_five_minutes_is_listed(self):
+        self.update()
+        s3.write_file("gba/c.zip", lambda tmp: open(tmp, "wb").write(b"1234"))
+        self.assertEqual(self.update(), ((0, 0, 0), ["gba"]))
+
+    def test_a_folder_another_machine_changed_before_our_write_is_listed(self):
+        self.update()
+        self.put("gba/other.zip", 7)  # another machine: gba's mtime is no longer the cached one
+        s3.write_file("gba/c.zip", lambda tmp: open(tmp, "wb").write(b"1234"))
+        self.assertIsNone(inventory.current().dirs["gba"])
+        self.later()
+        self.assertEqual(self.update(), ((1, 0, 0), ["gba"]))
+        self.assertEqual(inventory.files("gba/")["gba/other.zip"], 7)
+
+    def test_a_write_into_a_new_subfolder_keeps_the_parent_untrusted(self):
+        self.update()
+        s3.write_file("gba/new/z.zip", lambda tmp: open(tmp, "wb").write(b"1"))
+        quiet(s3.move_keys, [("BIOS/x.bin", "BIOS/sub/x.bin")])
+        self.assertIsNone(inventory.current().dirs["gba"])
+        self.assertIsNone(inventory.current().dirs["BIOS"])
+        self.later()
+        self.assertEqual(self.update(), ((0, 0, 0), ["BIOS", os.path.join("BIOS", "sub"), "gba", os.path.join("gba", "new")]))
 
     def test_a_delete_given_as_a_generator_drops_the_folder_mtime(self):
         self.update()
