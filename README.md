@@ -112,7 +112,6 @@ You pick a device, then the firmware it runs (a device with only one isn't asked
 | --- | --- | --- |
 | `esde` | `ROMs/` `BIOS/` | Android devices with ES-DE |
 | `knulli` | `roms/` `bios/` (SD card SHARE partition, `/userdata`) | Default for the Anbernic H700, RG Vita Pro and Miyoo Flip handhelds |
-| `muos` | `ROMS/` `MUOS/bios/` | [muOS](https://muos.dev/) on the Anbernic H700 handhelds, RG CubeXX and RG Vita Pro. Folder names are matched ignoring case and separators |
 | `onion` | `Roms/` `BIOS/` | Miyoo Mini, Mini Plus and Mini Flip, on [Onion](https://onionui.github.io/) |
 | `allium` | `Roms/` `BIOS/` | Miyoo Mini, Mini Plus and Mini Flip, on [Allium](https://github.com/goweiwen/Allium). Same folders and `Imgs/` box art as `onion`, but with a full `gamelist.xml` |
 | `emudeck` | `Emulation/roms/` `Emulation/bios/` | [EmuDeck](https://emudeck.github.io/) on the Steam Deck and Steam Machine. Wii U, Xbox 360 and Model 2 ROMs go in a `roms/` subfolder of their system folder. Scraped media on the card; gamelists and collections in `~/ES-DE` on the machine running the sync |
@@ -185,7 +184,6 @@ While typing a filter (or a note, which `w` opens in the game list): `^A` `^E` s
    | `knulli` | `<system>/images`, `videos`, `manuals`, named `Game-image.png`, `-thumb`, `-marquee`, `-fanart`, `-boxback`, `-titleshot`, `-video`, `-manual` | `<system>/gamelist.xml` with name, description, rating, date and the media tags |
    | `onion` | `<system>/Imgs/Game.png`, the 250x360 box art made when scraping | `<system>/miyoogamelist.xml` with name and image |
    | `allium` | same `Imgs/` box art as `onion` | `<system>/gamelist.xml` with name, image, rating, date, developer, publisher and genre |
-   | `muos` | `MUOS/info/catalogue/<system>/box/Game.png` (cover, then 3D box) and `preview/Game.png` (screenshot, then title screen), as uploaded | `text/Game.txt` with the description |
    | `emudeck` | `Emulation/tools/downloaded_media/<system>/<type>/…` (every type) | `~/ES-DE/gamelists/<system>/gamelist.xml` on the machine running the sync (see below) |
 
    EmuDeck's ES-DE keeps its gamelists on the machine, not the card, so they go into `~/ES-DE/gamelists` (or
@@ -195,7 +193,7 @@ While typing a filter (or a note, which `w` opens in the game list): `^A` `^E` s
    the media still goes on the card.
 
    For `esde` and `emudeck`, `<system>` is the system's ES-DE folder name (`sg-1000`, `n3ds`): systems that share a
-   ROM folder, like `3ds` and `n3ds`, share its media and gamelist folders. muOS keeps its media in folders of its own, flat even for ROMs in subfolders. An existing
+   ROM folder, like `3ds` and `n3ds`, share its media and gamelist folders. An existing
    `.txt` is rewritten only when the description differs.
 
    Knulli's main image is the miximage, or the screenshot if there is none. Onion's picture is made
@@ -209,12 +207,7 @@ While typing a filter (or a note, which `w` opens in the game list): `^A` `^E` s
 6. Finally, media on the card for ROMs the card doesn't have is removed, with no confirmation. It looks at
    every system in the layout, not only the ones you synced, and leaves systems whose ROM folder doesn't
    exist, and folders that aren't systems in `src/sync_roms/data/systems.json` (like ES-DE's `androidapps`), alone.
-   This assumes the card's art comes from this app: on muOS it removes `box`, `preview` and `text` files in
-   `MUOS/info/catalogue/<system>/` (names compared ignoring case; systems that share a catalogue folder, like
-   the arcade ones, are judged together; `grid`, `manual`, `overlay` and the other catalogue areas are left
-   alone). A muOS folder whose ROM folders hold no ROMs is skipped, so art isn't
-   wiped from a card whose ROMs are elsewhere (muOS can keep them on SD2). Art you add by hand or install
-   from a `.muxcat` set for ROMs that aren't on the card is removed too.
+   This assumes the card's art comes from this app: art you add by hand for ROMs that aren't on the card is removed too.
 7. For the `esde` (Android) layout, everything in storage's `os/android/APKs/` folder (APKs, the Obtainium app list) is
    copied to an `APKs/` folder on the card so the apps can be installed from the device. For the `onion` layout
    (not Allium), everything under storage's `os/onion/Themes/` is copied to the card's `Themes/` the same way,
@@ -241,7 +234,7 @@ While typing a filter (or a note, which `w` opens in the game list): `^A` `^E` s
 8. PICO-8 (the app itself, not games): put the official PICO-8 Raspberry Pi zip in storage's `os/pico8/` (the newest
    `pico-8_*_raspi.zip` is used). Each card gets it where its frontend's installer looks, whether or not the card
    syncs pico8 games: ES-DE `PICO-8/` (pico8-android's zip picker), Knulli `roms/pico8/` (Device Settings →
-   Install Pico-8), muOS `ARCHIVE/<name>.muxzip` (Archive Manager); Onion (`RApp/PICO-8/bin/`) and Allium
+   Install Pico-8); Onion (`RApp/PICO-8/bin/`) and Allium
    (`Apps/pico.pak/bin/`) get the extracted `pico8_dyn` and `pico8.dat`. Run the installer once on the device. The
    card's `pico8` field in `cards.json` records the zip, so it is copied once per zip.
 
@@ -688,7 +681,7 @@ on them are replaced at the next sync.
 ### A card's games in `cards.json`
 
 ```json
-{ "RGSP": { "device": "anbernic-rg-sp", "layout": "muos", "games": { "gba": { "full_system": true } } } }
+{ "RGSP": { "device": "anbernic-rg-sp", "layout": "knulli", "games": { "gba": { "full_system": true } } } }
 ```
 
 `games` maps system ids to games (or `{"full_system": true}`), and may hold `"sets"`. A card is identified by its folder name, so

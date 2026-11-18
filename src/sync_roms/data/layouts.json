@@ -26,12 +26,6 @@
     "disc_dir": ".multi-disc",
     "note": "Miyoo Mini family (SigmaStar SSD202D) running Allium, which uses the Onion card layout and matches systems by file extension first, so the folders are the same as Onion's. Allium reads a gamelist.xml (path, name, image, rating, releasedate, developer, publisher, genre) in each ROM folder and finds box art in Imgs/. Sources: https://github.com/goweiwen/Allium/wiki/2.-Add-your-Games!, https://github.com/goweiwen/Allium"
   },
-  "muos": {
-    "label": "muOS",
-    "roms_dir": "ROMS",
-    "bios_dir": "MUOS/bios",
-    "note": "MustardOS on Anbernic H700 handhelds (and the RG Vita Pro). Card root is the games partition (exFAT or FAT32). muOS matches folder names to systems ignoring case, spaces, hyphens and underscores, so the names here are the Knulli ones where muOS knows them. Systems with muos = null have no muOS system. Source: https://muos.dev/systems/cores"
-  },
   "emudeck": {
     "label": "EmuDeck",
     "roms_dir": "Emulation/roms",

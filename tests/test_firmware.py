@@ -16,8 +16,8 @@ def repo(name):
     return store.repo_json(os.path.splitext(name)[0])
 
 
-LAYOUTS = {"esde": {"label": "ES-DE"}, "knulli": {"label": "Knulli"}, "muos": {"label": "muOS"}}
-DEVICES = [{"id": "a", "firmwares": ["knulli", "muos"]}, {"id": "b", "firmwares": ["esde"]}]
+LAYOUTS = {"esde": {"label": "ES-DE"}, "knulli": {"label": "Knulli"}, "onion": {"label": "Onion"}}
+DEVICES = [{"id": "a", "firmwares": ["knulli", "onion"]}, {"id": "b", "firmwares": ["esde"]}]
 
 
 class ShippedDataTest(unittest.TestCase):
@@ -34,23 +34,20 @@ class ShippedDataTest(unittest.TestCase):
         for s in repo("systems.json"):
             self.assertEqual(set(s["folders"]), set(layouts), s["bucket"])
 
-    def test_muos_bios_dir_is_nested(self):
-        self.assertEqual(repo("layouts.json")["muos"]["bios_dir"], "MUOS/bios")
-
 
 class SetupTest(unittest.TestCase):
     def test_device_layouts_keep_the_devices_order(self):
-        self.assertEqual(list(picker.device_layouts(DEVICES[0], LAYOUTS)), ["knulli", "muos"])
+        self.assertEqual(list(picker.device_layouts(DEVICES[0], LAYOUTS)), ["knulli", "onion"])
 
     def test_saved_setup_resolves_a_current_card(self):
-        saved = {"device": "a", "layout": "muos", "android_media": "never"}
-        self.assertEqual(picker.saved_setup(saved, DEVICES, LAYOUTS), (DEVICES[0], "muos"))
+        saved = {"device": "a", "layout": "onion", "android_media": "never"}
+        self.assertEqual(picker.saved_setup(saved, DEVICES, LAYOUTS), (DEVICES[0], "onion"))
 
     def test_saved_setup_from_before_firmwares_still_loads(self):
         self.assertEqual(picker.saved_setup({"device": "b", "layout": "esde"}, DEVICES, LAYOUTS), (DEVICES[1], "esde"))
 
     def test_saved_setup_full_accepts_any_layout(self):
-        self.assertEqual(picker.saved_setup({"device": "full", "layout": "muos"}, DEVICES, LAYOUTS), (None, "muos"))
+        self.assertEqual(picker.saved_setup({"device": "full", "layout": "onion"}, DEVICES, LAYOUTS), (None, "onion"))
 
     def test_saved_setup_rejects_a_firmware_the_device_lacks(self):
         self.assertIsNone(picker.saved_setup({"device": "b", "layout": "knulli"}, DEVICES, LAYOUTS))
@@ -69,10 +66,10 @@ class SetupTest(unittest.TestCase):
     def test_choose_setup_offers_only_the_devices_firmwares_default_first(self):
         manifest = {"devices": DEVICES, "layouts": LAYOUTS}
         with mock.patch.object(picker, "pick_device", return_value=DEVICES[0]), \
-                mock.patch.object(picker, "pick_layout", return_value="muos") as pick:
-            self.assertEqual(picker.choose_setup(manifest), (DEVICES[0], "muos"))
+                mock.patch.object(picker, "pick_layout", return_value="onion") as pick:
+            self.assertEqual(picker.choose_setup(manifest), (DEVICES[0], "onion"))
         offered, default = pick.call_args[0]
-        self.assertEqual(list(offered), ["knulli", "muos"])
+        self.assertEqual(list(offered), ["knulli", "onion"])
         self.assertEqual(default, "knulli")
 
     def test_choose_setup_full_offers_every_layout(self):
@@ -84,13 +81,13 @@ class SetupTest(unittest.TestCase):
 
 
 class PrepareDirsTest(unittest.TestCase):
-    def test_creates_the_nested_muos_bios_folder(self):
-        layout = repo("layouts.json")["muos"]
+    def test_creates_the_nested_emudeck_bios_folder(self):
+        layout = repo("layouts.json")["emudeck"]
         with tempfile.TemporaryDirectory() as tmp, contextlib.redirect_stdout(io.StringIO()):
             roms, bios = cli.prepare_dirs(tmp, layout, False, ask=False)
-            self.assertTrue(os.path.isdir(os.path.join(tmp, "ROMS")))
-            self.assertTrue(os.path.isdir(os.path.join(tmp, "MUOS", "bios")))
-            self.assertEqual(bios, os.path.join(tmp, "MUOS", "bios"))
+            self.assertTrue(os.path.isdir(os.path.join(tmp, "Emulation", "roms")))
+            self.assertTrue(os.path.isdir(os.path.join(tmp, "Emulation", "bios")))
+            self.assertEqual(bios, os.path.join(tmp, "Emulation", "bios"))
 
 
 def touch(path, data=b"x"):

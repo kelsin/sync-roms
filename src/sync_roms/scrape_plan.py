@@ -70,10 +70,8 @@ GAMELIST_FILES = {"esde": "gamelist.xml", "emudeck": "gamelist.xml", "knulli": "
                   "allium": "gamelist.xml"}
 ONION_ONLY_LISTS = ("recentlist-hidden.json", "favorite.json")  # in the root of Onion's roms folder
 ONION_LAYOUTS = ("onion", "allium")  # both keep box art in a flat Imgs/ folder
-# muOS catalogue art, MUOS/info/catalogue/<system's muos_catalogue>/<folder>/<ROM name>.<ext>, and the media types that fill it
-MUOS_MEDIA = (("box", ("covers", "3dboxes")), ("preview", ("screenshots", "titlescreens")))
 # EmuDeck's media goes on the card; its gamelists go in ES-DE's data folder on the computer running the sync
-SCRAPE_LAYOUTS = set(GAMELIST_FILES) | {"muos"}
+SCRAPE_LAYOUTS = set(GAMELIST_FILES)
 EMUDECK_MEDIA = os.path.join("Emulation", "tools", "downloaded_media")
 
 
@@ -121,7 +119,7 @@ def plan_scrapes(layout_name, rom_rels, listing, meta, media_root, rom_dir, pres
     """Media downloads, gamelist entries and text files for one system's ROMs.
 
     rom_rels: ROM paths in the system folder; media_root: the system's media folder (esde's downloaded_media
-    folder or muOS's catalogue folder); rom_dir: the system's ROM folder on the card;
+    folder); rom_dir: the system's ROM folder on the card;
     present(rom): is that ROM (going to be) on the card;
     join(root, rel): a job's local path (scrape_cost, which only adds up sizes, skips the path checks);
     index: scrape_index(listing) when already built (listing is then not read).
@@ -142,15 +140,6 @@ def plan_scrapes(layout_name, rom_rels, listing, meta, media_root, rom_dir, pres
         found = index.get(stem, {})
         tags = gamelist_fields(meta.get(rom, {}))
         base = os.path.basename(stem)
-        if layout_name == "muos":  # the catalogue is flat, even when the ROM is in a subfolder
-            for folder, types in MUOS_MEDIA:
-                mtype = next((t for t in types if t in found), None)
-                if mtype:
-                    key, size = found[mtype]
-                    add(key, media_root, f"{folder}/{base}{os.path.splitext(key)[1]}", size)
-            if meta.get(rom, {}).get("desc"):
-                texts.append((os.path.join(media_root, "text", base + ".txt"), meta[rom]["desc"] + "\n"))
-            continue
         if layout_name in ("esde", "emudeck"):
             for mtype, (key, size) in found.items():
                 if mtype in MEDIA_TYPES:  # not the Onion-only art
@@ -293,8 +282,6 @@ def esde_name(system, layout_name="esde"):
 
 def media_root_of(layout_name, system, base, es_dir):
     """The folder a system's scraped media goes in, for layouts that keep it apart from the ROMs."""
-    if layout_name == "muos":
-        return os.path.join(base, "MUOS", "info", "catalogue", system["muos_catalogue"])
     if layout_name == "emudeck":
         return os.path.join(base, EMUDECK_MEDIA, esde_name(system, "emudeck"))
     return os.path.join(es_dir, "downloaded_media", esde_name(system))
@@ -358,40 +345,11 @@ def card_stems(rom_dir, flat, skip_db=False):
     return stems
 
 
-def media_name(layout_name, name):
-    """How a firmware compares art names with ROM names: muOS ignores case."""
-    return name.strip().lower()
-
-
-def stale_firmware_media(layout_name, systems, roms_dir, base):
-    """Art files in muOS's catalogue (box, preview and text) whose ROM isn't on the card.
-
-    Systems that share a catalogue folder are judged together. A folder whose ROM folders hold no ROMs is left alone.
-    """
-    groups = defaultdict(list)
-    for s in systems:
-        if s["folders"].get(layout_name):
-            groups[media_root_of(layout_name, s, base, "")].append(os.path.join(roms_dir, s["folders"][layout_name]))
-    stale = []
-    for root, rom_dirs in sorted(groups.items()):
-        stems = {media_name(layout_name, stem) for d in set(rom_dirs) if os.path.isdir(d) for stem in card_stems(d, True, layout_name in ONION_LAYOUTS)}
-        if not stems:
-            continue
-        for sub in ("box", "preview", "text"):
-            folder = os.path.normpath(os.path.join(root, sub))
-            for rel, full in walk_files(folder) if os.path.isdir(folder) else []:
-                if media_name(layout_name, os.path.splitext(os.path.basename(rel))[0]) not in stems:
-                    stale.append(full)
-    return stale
-
-
 def stale_media(layout_name, systems, roms_dir, es_dir, base=None):
     """Media files on the card whose ROM isn't in the system's ROM folder, for every system in the
     layout (not just the ones being synced). Systems with no ROM folder are left alone. es_dir: ES-DE's data folder
     (for emudeck, the one on this computer, or None when it doesn't serve the card: its gamelists are left alone)."""
     stale, seen = [], set()
-    if layout_name == "muos":
-        return stale_firmware_media(layout_name, systems, roms_dir, base)
     named = {esde_name(x, layout_name) for x in systems}
     for s in systems:
         folder = s["folders"].get(layout_name)
