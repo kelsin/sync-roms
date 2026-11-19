@@ -147,8 +147,10 @@ TOPICS = {
   sync-roms saves apply [CARD] [--retroarch DIR] [--dry-run]    copy picked stashed ones onto the card
 
   CARD is the card's folder (default: the current directory); it needs a layout (`sync-roms cards set NAME --layout`).
-  stash lists the card's games that have RetroArch saves (.srm) or states (.state, .stateN, .state.auto and their
+  stash lists the card's games that have RetroArch saves (.srm and .rtc) or states (.state, .stateN, .state.auto and their
   .png), then their files, and copies them to ~/.sync-roms/saves/<system>/<game>/<time>-<card>/ (with stash.json).
+  On layouts sorted by core and flat folders a save whose game isn't on the card is skipped; on Knulli the folder
+  gives the system.
   apply lists the stashes of systems the card syncs (one per game) and copies them into the card's RetroArch folders.
   A different file already there is only overwritten after you confirm (default no); identical ones are skipped.
   A stash without a core going to a layout sorted by core asks which core folder to use (skipped with --yes).
@@ -162,7 +164,7 @@ TOPICS = {
 
   --retroarch DIR   read or write that folder instead of the card's RetroArch folder: a copy of Android's internal
                     /storage/emulated/0/RetroArch for ES-DE, or the real folder EmuDeck's symlinks point to.
-  States only load in the core they were made with; .srm saves usually work in any core of the system.
+  States only load in the core they were made with; .srm (and .rtc) saves usually work in any core of the system.
 """,
     "devices": """
   sync-roms devices [ID] [--json]

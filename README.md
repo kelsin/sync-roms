@@ -706,10 +706,11 @@ sync-roms saves apply /Volumes/RGSP      # copy stashed ones onto another card
 
 Both take the card's folder (default: the current directory), which must be a card with a layout
 (`sync-roms cards set NAME --layout NAME`), and need a terminal. `stash` lists the card's games that have RetroArch
-saves (`.srm`) or states (`.state`, `.stateN`, `.state.auto`, with their `.png` thumbnails), none picked, then the
+saves (`.srm`, and Gambatte's `.rtc` clock files) or states (`.state`, `.stateN`, `.state.auto`, with their `.png` thumbnails), none picked, then the
 picked games' files, all picked, and copies them to `~/.sync-roms/saves/<system>/<game>/<YYYYMMDD-HHMMSS>-<card>/`
 with a `stash.json` saying what they are and where they came from. Each run adds new stashes and never replaces one.
-A save whose game's ROM isn't on the card (or is in several systems' folders) is skipped and counted.
+On layouts sorted by core (and EmuDeck's flat folders) a save whose game's ROM isn't on the card (or is in several
+systems' folders) is skipped and counted; on Knulli the folder gives the system.
 
 `apply` lists the stashes of the systems the card syncs (newest first; one per game can be picked), marking games
 whose ROM isn't on the card, and copies them into the folders the card's firmware reads. Identical files are
@@ -729,7 +730,7 @@ RetroArch on Android keeps its saves in internal storage (`/storage/emulated/0/R
 point its save folders at the card's `RetroArch/saves` and `RetroArch/states`, or copy that folder off the device and
 pass it with `--retroarch DIR`. EmuDeck's folders are symlinks that only resolve on the Deck; elsewhere pass the real
 folder with `--retroarch`. States only load in the core they were made with (`gpSP` states don't load in `mGBA`);
-`.srm` saves usually work in any core of the system.
+`.srm` saves (and `.rtc`) usually work in any core of the system.
 
 ## Converting to CHD and xiso (`--cd`, formerly `--chd`)
 

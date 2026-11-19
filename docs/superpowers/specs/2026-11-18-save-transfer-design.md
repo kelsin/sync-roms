@@ -2,7 +2,7 @@
 
 ## Why
 
-A game started on one handheld should continue on another. Each firmware keeps RetroArch's save files (`.srm`) and
+A game started on one handheld should continue on another. Each firmware keeps RetroArch's save files (`.srm`, and Gambatte's `.rtc` clock) and
 save states (`.state`, `.stateN`, `.state.auto`, with `.png` thumbnails) in its own folders, so moving them by hand
 means knowing every layout's paths. `sync-roms saves stash CARD` copies chosen saves off a card into the user data
 folder; `sync-roms saves apply CARD` puts chosen ones on another card, in the folders that card's firmware reads.
@@ -14,7 +14,7 @@ folder; `sync-roms saves apply CARD` puts chosen ones on another card, in the fo
 - `saves apply [CARD]`: list the stashed saves of games in systems the card syncs, pick them, and copy them into the
   card's RetroArch folders for its layout.
 - Every layout (`esde`, `knulli`, `onion`, `allium`, `emudeck`) both ways.
-- Save files (`.srm`) as well as states.
+- Save files (`.srm`, `.rtc`) as well as states.
 
 ## Non-goals
 
@@ -32,7 +32,7 @@ folder; `sync-roms saves apply CARD` puts chosen ones on another card, in the fo
 ## Where RetroArch keeps them
 
 RetroArch names every file after the loaded content's stem (the file name cut at the last dot; an `.m3u`'s own stem
-for multi-disc games): `<stem>.srm`, `<stem>.state` (slot 0), `<stem>.stateN`, `<stem>.state.auto`, and a thumbnail
+for multi-disc games): `<stem>.srm` (Gambatte also `<stem>.rtc`), `<stem>.state` (slot 0), `<stem>.stateN`, `<stem>.state.auto`, and a thumbnail
 `<state file>.png`. With "sort by core" on, each goes in a subfolder named after the core's library name (`mGBA`,
 `gpSP`, `Snes9x`, `PCSX-ReARMed`, ...).
 
@@ -64,7 +64,7 @@ OnionUI `static/configs/RetroArch/.retroarch/retroarch.cfg`, EmuDeck `emuDeckRet
 - The card is the folder's basename in `cards.json`; it must have a layout (else exit 2, naming `cards set`).
 - The card's ROMs: every file under each system's ROM folder (recursively, hidden folders included), indexed by stem.
 - Save files: walk each `saves`/`states` folder. `{core}` folders: each subfolder is a core. `{system}` folders: one
-  per system with a folder in the layout. Classify by name: `.srm` save, `.state`/`.stateN`/`.state.auto` state,
+  per system with a folder in the layout. Classify by name: `.srm`/`.rtc` save, `.state`/`.stateN`/`.state.auto` state,
   `<state>.png` thumbnail (follows its state). Anything else is ignored.
 - A file's game is (system, stem): a `{system}` folder gives the system; otherwise the system whose ROM folder has a
   file of that stem. A stem found in no system, or in more than one, is skipped and counted in a dim note.

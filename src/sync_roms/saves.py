@@ -14,9 +14,18 @@ STASH_KEYS = ("system", "game", "card", "layout", "core", "stashed", "files")
 
 
 def classify(name):
-    """(stem, kind) of a RetroArch file name (save, state or thumbnail), or None for anything else."""
-    if name.endswith(".srm") and len(name) > 4:
-        return name[:-4], "save"
+    """(stem, kind) of a RetroArch file name (save, state or thumbnail), or None for anything else. A save is
+    `.srm` or Gambatte's `.rtc` (a game's clock); macOS `._` files are none."""
+    if name.startswith("._"):
+        return None
+    c = _classify(name)
+    return c if c and c[0] not in ("", ".", "..") else None
+
+
+def _classify(name):
+    for ext in (".srm", ".rtc"):
+        if name.endswith(ext):
+            return name[:-4], "save"
     m = STATE.match(name)
     if m:
         return m.group("stem"), "state"
@@ -25,6 +34,35 @@ def classify(name):
         if m:
             return m.group("stem"), "thumbnail"
     return None
+
+
+def _listdir(folder):
+    """Sorted names in folder; a folder that can't be read is warned about and counts as empty."""
+    try:
+        return sorted(os.listdir(folder))
+    except OSError as e:
+        ui.warn(f"Can't read {folder}: {e.strerror or e}")
+        return []
+
+
+def broken_links(base, layout, retroarch_dir=None):
+    """Paths on the way to the layout's saves and states folders (the RetroArch folder and each folder before a
+    {core} or {system}) that exist but aren't folders, typically a symlink to somewhere not on this machine."""
+    root = _base(base, layout, retroarch_dir)
+    found = [root]
+    for template in (layout["retroarch"]["saves"], layout["retroarch"]["states"]):
+        path = root
+        for part in template.split("/"):
+            if "{" in part:
+                break
+            path = os.path.join(path, part)
+            found.append(path)
+    return sorted({p for p in found if os.path.lexists(p) and not os.path.isdir(p)})
+
+
+def _broken_hint(paths):
+    return (f"{', '.join(paths)} is a link to somewhere that isn't a folder here; pass the real folder with "
+            "`--retroarch DIR`")
 
 
 def _base(base, layout, retroarch_dir):
@@ -41,6 +79,8 @@ def rom_stems(base, layout_name, layout, systems):
         root = os.path.join(base, *layout["roms_dir"].split("/"), folder)
         for dirpath, _, files in os.walk(root, followlinks=True):
             for f in files:
+                if f.startswith("._"):
+                    continue
                 stems.setdefault(os.path.splitext(f)[0], set()).add(s["bucket"])
     return stems
 
@@ -52,7 +92,7 @@ def _folders(root, template, systems, layout_name):
         parent = os.path.join(root, *template.split("{core}")[0].split("/"))
         if not os.path.isdir(parent):
             return []
-        return [(parent, None, None)] + [(os.path.join(parent, c), None, c) for c in sorted(os.listdir(parent))
+        return [(parent, None, None)] + [(os.path.join(parent, c), None, c) for c in _listdir(parent)
                                          if os.path.isdir(os.path.join(parent, c))]
     if "{system}" in template:
         # a folder shared by several systems is scanned once, for the first in systems order
@@ -74,7 +114,7 @@ def scan(base, layout_name, layout, systems, retroarch_dir=None):
             if folder in seen or not os.path.isdir(folder):
                 continue
             seen.add(folder)
-            for name in sorted(os.listdir(folder)):
+            for name in _listdir(folder):
                 path = os.path.join(folder, name)
                 c = classify(name)
                 if not c or not os.path.isfile(path):
@@ -131,6 +171,11 @@ def load_stashes(systems=None):
             continue
         if not isinstance(data, dict) or any(k not in data for k in STASH_KEYS):
             continue
+        if not all(isinstance(data[k], str) for k in ("game", "system", "stashed")) \
+                or not isinstance(data["files"], list) \
+                or any(not isinstance(f, dict) or not isinstance(f.get("name"), str)
+                       or any(c and c in f["name"] for c in ("/", os.sep, os.altsep)) for f in data["files"]):
+            continue
         if systems is None or data["system"] in systems:
             out.append({"dir": dirpath, **data})
     out.sort(key=lambda s: s["stashed"], reverse=True)
@@ -159,7 +204,7 @@ def core_folders(base, layout, retroarch_dir=None):
             continue
         parent = os.path.join(root, *template.split("{core}")[0].split("/"))
         if os.path.isdir(parent):
-            names.update(c for c in os.listdir(parent) if os.path.isdir(os.path.join(parent, c)))
+            names.update(c for c in _listdir(parent) if os.path.isdir(os.path.join(parent, c)))
     return sorted(names)
 
 
@@ -250,6 +295,9 @@ def stash_command(args):
     systems = catalog["systems"]
     games, skipped = scan(base, layout_name, layout, systems, args.retroarch)
     note = ui.dim(f"  skipped {_plural(skipped, 'file')} whose game isn't on the card (no ROM, or in several systems)")
+    broken = broken_links(base, layout, args.retroarch)
+    if broken:
+        ui.warn(_broken_hint(broken))
     if not games:
         print(ui.yellow(f"↩️  No RetroArch saves or states on {card}"))
         if skipped:
@@ -347,10 +395,20 @@ def apply_command(args):
     if not chosen:
         print(ui.yellow("↩️  Nothing applied"))
         return 0
+    broken = broken_links(base, layout, args.retroarch)
+    if broken:
+        ui.fail(_broken_hint(broken), 2)
     needs_core = any("{core}" in layout["retroarch"][k] for k in ("saves", "states"))
     cores, plan = {}, []
     for i in chosen:
         stash, system = rows[i]
+        present = [f for f in stash["files"] if os.path.isfile(os.path.join(stash["dir"], f["name"]))]
+        for f in stash["files"]:
+            if f not in present:
+                ui.warn(f"Skipped {f['name']} of {stash['game']}: missing from {stash['dir']}")
+        if not present:
+            continue
+        stash = dict(stash, files=present)
         core = stash["core"]
         if core is None and needs_core:
             if system["bucket"] not in cores:

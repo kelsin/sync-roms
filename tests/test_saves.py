@@ -36,6 +36,14 @@ class ClassifyTest(unittest.TestCase):
             self.assertIsNone(saves.classify(n), n)
 
 
+    def test_rtc_is_a_save(self):
+        self.assertEqual(saves.classify("Crystal.rtc"), ("Crystal", "save"))
+
+    def test_appledouble_and_empty_stems(self):
+        for n in ("._Game.srm", "._Game.state", "._Game.state.png", "._Game.rtc", ".srm", ".rtc", "..srm", ".state"):
+            self.assertIsNone(saves.classify(n), n)
+
+
 class ScanTest(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
@@ -121,6 +129,34 @@ class ScanTest(unittest.TestCase):
         stems = saves.rom_stems(self.base, "onion", LAYOUTS["onion"], SYSTEMS)
         self.assertEqual(stems, {"Disc": {"gba"}, "A.b": {"gba"}})
 
+    def test_appledouble_rom_skipped(self):
+        helpers.touch(self.p("Roms", "GBA", "._Game.zip"), "r")
+        self.assertEqual(saves.rom_stems(self.base, "onion", LAYOUTS["onion"], SYSTEMS), {})
+
+    def test_unreadable_folder_warned_and_skipped(self):
+        helpers.touch(self.p("Roms", "GBA", "Game.zip"), "r")
+        helpers.touch(self.p("Saves/CurrentProfile/saves/gpSP/Game.srm"), "s")
+        real = os.listdir
+
+        def fake(path="."):
+            if str(path).endswith("gpSP"):
+                raise OSError(5, "Input/output error")
+            return real(path)
+        with mock.patch.object(os, "listdir", fake), mock.patch.object(ui, "warn") as warn:
+            games, _ = saves.scan(self.base, "onion", LAYOUTS["onion"], SYSTEMS)
+        self.assertEqual(games, {})
+        self.assertIn("gpSP", warn.call_args[0][0])
+
+    def test_broken_links(self):
+        ra = self.p("Emulation/saves/retroarch")
+        os.makedirs(ra)
+        self.assertEqual(saves.broken_links(self.base, LAYOUTS["emudeck"]), [])
+        os.symlink(self.p("nowhere"), os.path.join(ra, "saves"))
+        helpers.touch(os.path.join(ra, "states"), "file")
+        self.assertEqual(saves.broken_links(self.base, LAYOUTS["emudeck"]),
+                         [os.path.join(ra, "saves"), os.path.join(ra, "states")])
+        self.assertEqual(saves.broken_links(self.base, LAYOUTS["emudeck"], retroarch_dir=self.p("x")), [])
+
     def test_missing_folders(self):
         self.assertEqual(saves.scan(self.base, "esde", LAYOUTS["esde"], SYSTEMS), ({}, 0))
 
@@ -192,6 +228,17 @@ class StashTest(unittest.TestCase):
                          [("alpha", "gb", "A"), ("alpha", "gba", "B"), ("alpha", "gba", "A"),
                           ("Zed", "gba", "A")])
         self.assertEqual({s["system"] for s in saves.load_stashes({"gb"})}, {"gb"})
+
+    def test_load_skips_unsafe(self):
+        d = saves.write_stash("A", "onion", "gba", "Good", None, self.entries(), now=self.now)
+        with open(os.path.join(d, "stash.json")) as f:
+            good = json.load(f)
+        for i, change in enumerate(({"files": [{"name": "../x.srm", "kind": "save"}]},
+                                    {"files": [{"name": "a/b.srm", "kind": "save"}]},
+                                    {"game": 5}, {"system": None}, {"stashed": 1})):
+            helpers.touch(os.path.join(saves.stash_root(), "gba", f"bad{i}", "stash.json"),
+                          json.dumps({**good, **change}))
+        self.assertEqual([s["game"] for s in saves.load_stashes()], ["Good"])
 
 
 class TargetTest(unittest.TestCase):
@@ -372,6 +419,15 @@ class StashCommandTest(CommandTest):
         self.assertIn("Would stash 4 file(s) of 2 game(s)", out)
         self.assertFalse(os.path.exists(saves.stash_root()))
 
+    def test_broken_link_warned(self):
+        base = self.card("DECK", "emudeck")
+        os.makedirs(os.path.join(base, "Emulation/saves/retroarch"))
+        os.symlink("/nonexistent/saves", os.path.join(base, "Emulation/saves/retroarch/saves"))
+        code, out, err = self.run_cmd("saves", "stash", base)
+        self.assertEqual(code, 0)
+        self.assertIn("--retroarch", err)
+        self.assertIn("No RetroArch saves", out)
+
     def test_no_saves(self):
         base = self.card("EMPTY", "onion")
         code, out, _ = self.run_cmd("saves", "stash", base)
@@ -412,6 +468,30 @@ class StashCommandTest(CommandTest):
 
 
 class ApplyCommandTest(CommandTest):
+    def test_broken_link_fails_before_copying(self):
+        self.stash(files={"Game.srm": "save"})
+        base = self.card("DECK", "emudeck")
+        helpers.touch(os.path.join(base, "Emulation/roms/gba/Game.zip"), "r")
+        os.makedirs(os.path.join(base, "Emulation/saves/retroarch"))
+        os.symlink("/nonexistent/saves", os.path.join(base, "Emulation/saves/retroarch/saves"))
+        self.lists([True])
+        code, _, err = self.run_cmd("saves", "apply", base)
+        self.assertEqual(code, 2)
+        self.assertIn("--retroarch", err)
+        self.assertFalse(os.path.lexists(os.path.join(base, "Emulation/saves/retroarch/states")))
+
+    def test_missing_stash_file_skipped(self):
+        d = self.stash()
+        os.remove(os.path.join(d, "Game.state.auto"))
+        base = self.card("NEW", "knulli")
+        helpers.touch(os.path.join(base, "roms/gba/Game.zip"), "r")
+        self.lists([True])
+        code, out, err = self.run_cmd("saves", "apply", base)
+        self.assertEqual(code, 0, err)
+        self.assertIn("Game.state.auto", err)
+        self.assertEqual(self.read_file(base, "saves/gba/Game.srm"), "save")
+        self.assertFalse(os.path.exists(os.path.join(base, "saves/gba/Game.state.auto")))
+
     def test_onto_knulli(self):
         self.stash()
         base = self.card("NEW", "knulli")
