@@ -3,15 +3,17 @@ import argparse
 import datetime
 import json
 import os
+import pathlib
 import re
 import sys
+import webbrowser
 
 from . import collections as colls
 from . import cardshare, external, inventory, m3u, names, picker, runtime, s3, setedit, store, surprise, themeart, ui, usersettings
 
 
 UNKNOWN_SHOWN = 8  # device ids named in an "unknown device" error
-COMMANDS = {"games", "sets", "collections", "themes", "download", "cards", "saves", "layouts", "cache", "config", "doctor", "check", "completion"}
+COMMANDS = {"games", "sets", "collections", "themes", "download", "cards", "saves", "layouts", "cache", "config", "doctor", "guide", "check", "completion"}
 
 
 class Parser(argparse.ArgumentParser):
@@ -1039,6 +1041,15 @@ def check_cmd(args):
     return 1 if problems else 0
 
 
+def guide_cmd(args):
+    """Open the device setup guide, a page inside the package, in the default browser."""
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "setup-guide.html")
+    print(path)
+    if not webbrowser.open(pathlib.Path(path).as_uri()):
+        ui.fail("Couldn't open a browser: open the file above yourself", 1)
+    return 0
+
+
 def doctor_cmd(args):
     bad = 0
 
@@ -1293,6 +1304,7 @@ def build_parser():
     p.add_argument("name", nargs="?"); p.add_argument("value", nargs="?"); p.set_defaults(fn=config_cmd)
     p = sub.add_parser("cache", allow_abbrev=False); common(p, card=False); p.add_argument("action", choices=["update"], nargs="?"); p.add_argument("--full", action="store_true"); p.set_defaults(fn=cache_cmd)
     p = sub.add_parser("doctor", allow_abbrev=False); common(p, card=False); p.set_defaults(fn=doctor_cmd)
+    p = sub.add_parser("guide", allow_abbrev=False); common(p, card=False); p.set_defaults(fn=guide_cmd)
     p = sub.add_parser("check", allow_abbrev=False); common(p, card=False); p.add_argument("--bucket-keys", action="store_true"); p.set_defaults(fn=check_cmd)
     p = sub.add_parser("completion", allow_abbrev=False); common(p, card=False); p.add_argument("shell", choices=["bash", "zsh", "fish", "list"])
     p.add_argument("what", nargs="?"); p.set_defaults(fn=completion_cmd)
@@ -1305,7 +1317,7 @@ def run(argv):
     ap = build_parser()
     ap.prog = f"sync-roms {argv[0]}"  # its errors (unrecognized arguments) point at the command's help
     args = ap.parse_args(argv)
-    if getattr(args, "dry_run", False) and (args.fn in (games_list, games_export, layouts_cmd, config_cmd, cache_cmd, doctor_cmd, check_cmd, completion_cmd)
+    if getattr(args, "dry_run", False) and (args.fn in (games_list, games_export, layouts_cmd, config_cmd, cache_cmd, doctor_cmd, guide_cmd, check_cmd, completion_cmd)
                                             or (args.fn is games_sets and args.verb == "list")):
         name = " ".join(w for w in (args.command, getattr(args, "action", None), getattr(args, "verb", None)) if w)
         if args.fn is config_cmd and args.action in ("set", "unset"):

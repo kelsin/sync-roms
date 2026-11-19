@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Copy the device list from src/sync_roms/data/devices.json into docs/setup-guide.html.
+"""Copy the device list from src/sync_roms/data/devices.json into src/sync_roms/data/setup-guide.html.
 
     tools/update_setup_guide.py
 """
@@ -9,7 +9,7 @@ import re
 
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 DEVICES = os.path.join(ROOT, "src", "sync_roms", "data", "devices.json")
-GUIDE = os.path.join(ROOT, "docs", "setup-guide.html")
+GUIDE = os.path.join(ROOT, "src", "sync_roms", "data", "setup-guide.html")
 KEYS = ("id", "name", "soc", "screen", "screen2", "firmwares")
 BLOCK = re.compile(r'(<script type="application/json" id="devices-data">\n)(.*?)(\n</script>)', re.S)
 

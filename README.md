@@ -11,7 +11,7 @@ folder, never a bucket name. With no terminal to ask on, set `ROMS_BUCKET` or `R
 size) are skipped, so re-running it only fetches what's new or missing. It can also keep a
 [local mirror](#local-mirror---mirror---use-mirror---clear-mirror) of storage and sync from that.
 
-The [device setup guide](docs/setup-guide.html) (open it in a browser) lists the steps to finish a device by hand
+The device setup guide (`sync-roms guide` opens it in a browser) lists the steps to finish a device by hand
 once its card is synced: apps to install and the frontend, RetroArch and emulator settings to change, for the device
 and layout you pick.
 
@@ -264,6 +264,7 @@ Every mode is a command (`sync-roms COMMAND --help` explains one; plain `sync-ro
 | `mirror [DIR]` / `mirror use DIR` / `mirror clear` | local mirror | `--mirror`, `--use-mirror`, `--clear-mirror` |
 | `cache [update [--full]]` | show the storage cache, or read all of storage into it (see below) | |
 | `config show\|path` / `config set NAME VALUE` / `config unset NAME` | effective settings and where each came from; change or remove one in `settings.json` (see below) | |
+| `guide` | open the device setup guide in a browser | |
 | `doctor` | check AWS profile, storage, tools and data files | |
 | `check` | validate your JSON data files | |
 | `completion bash\|zsh\|fish` | shell completion script | |
@@ -293,7 +294,7 @@ On `esde` and `emudeck` cards every Vita game zip in `psvita/` gets a `.psvita` 
 
 | Flag | Description |
 | --- | --- |
-| `-n`, `--dry-run` | Show what would be downloaded (with total sizes), download nothing. With `--mirror`/`--use-mirror`, show what the mirror would download and delete. Commands that only read (`diff`, `check`, `doctor`, `cache`, `config`, `completion`, `games list`/`export`/`sets list`) or can't honor it (`edit`, `scrape review`, `scrape missing`, ...) refuse it with exit 2 |
+| `-n`, `--dry-run` | Show what would be downloaded (with total sizes), download nothing. With `--mirror`/`--use-mirror`, show what the mirror would download and delete. Commands that only read (`diff`, `check`, `doctor`, `guide`, `cache`, `config`, `completion`, `games list`/`export`/`sets list`) or can't honor it (`edit`, `scrape review`, `scrape missing`, ...) refuse it with exit 2 |
 | `-e`, `--edit` | Add/remove games in a card's list, then save (see below) |
 | `-a`, `--ask` | Confirm saved settings (device and layout) instead of using them silently. Answering no asks the question again and saves the new answer |
 | `--upload [DIR]` | Upload the ROMs in `DIR` and its subfolders (default: current directory) to storage folder of a system you pick; the system is guessed from the folder name (see below) |
