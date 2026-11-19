@@ -13,7 +13,7 @@ from . import cardshare, external, inventory, m3u, names, picker, runtime, s3, s
 
 
 UNKNOWN_SHOWN = 8  # device ids named in an "unknown device" error
-COMMANDS = {"games", "sets", "collections", "themes", "download", "cards", "saves", "layouts", "cache", "config", "doctor", "guide", "check", "completion"}
+COMMANDS = {"games", "sets", "collections", "themes", "download", "flash", "cards", "saves", "layouts", "cache", "config", "doctor", "guide", "check", "completion"}
 
 
 class Parser(argparse.ArgumentParser):
@@ -1157,6 +1157,11 @@ def saves_apply(args):
     return saves.apply_command(args)
 
 
+def flash_cmd(args):
+    from . import flash
+    return flash.run(args)
+
+
 def second_words():
     """{command: the words that can follow it} for the commands that have subcommands."""
     from . import cli
@@ -1282,6 +1287,8 @@ def build_parser():
     dsub = download.add_subparsers(dest="action", required=True)
     p = dsub.add_parser("pico8", allow_abbrev=False); common(p, card=False)
     p.add_argument("--count", type=_positive_int, metavar="N"); p.set_defaults(fn=download_pico8)
+
+    p = sub.add_parser("flash", add_help=False, allow_abbrev=False); common(p, card=False); p.set_defaults(fn=flash_cmd)
 
     cards = sub.add_parser("cards", add_help=False, allow_abbrev=False)
     csub = cards.add_subparsers(dest="action", required=True)
