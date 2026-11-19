@@ -255,13 +255,17 @@ def _sudo():
     return True
 
 
-def _progress(label):
+LABEL_WIDTH = 17  # "verifying disk10": every bar starts in the same column
+
+
+def _progress(emoji, label):
     """A progress(fraction) callback redrawing one line on a terminal (nothing elsewhere), and a done() ending it."""
     shown = sys.stdout.isatty()
 
     def draw(fraction):
         if shown:
-            sys.stdout.write(f"\r\033[K  {label} {fraction:4.0%}")
+            filled = round(min(max(fraction, 0.0), 1.0) * 24)
+            sys.stdout.write(f"\r\033[K{emoji}\033[4G{label:<{LABEL_WIDTH}} {ui.cyan('█' * filled)}{ui.dim('░' * (24 - filled))} {fraction:4.0%}")
             sys.stdout.flush()
 
     def done():
@@ -341,7 +345,7 @@ def run(args):
         if not _sudo():
             return 1
         gz_path = os.path.join(tmp, os.path.basename(key))
-        draw, done = _progress("⬇️  downloading")
+        draw, done = _progress("⬇️", "downloading")
         got = [0]
         lock = threading.Lock()
 
@@ -366,7 +370,7 @@ def run(args):
         if r.returncode != 0:
             ui.failure(ui.red(f"❌ couldn't unmount {disk.id}: {(r.stderr or r.stdout).strip()}"))
             return 1
-        draw, done = _progress(f"✍️  writing {disk.id}")
+        draw, done = _progress("✍️", f"writing {disk.id}")
         try:
             written, digest = write_image(gz_path, disk.id, draw)
         except FlashError as e:
@@ -378,7 +382,7 @@ def run(args):
         _run(["diskutil", "unmountDisk", disk.id])
         if not _sudo():
             return 1
-        draw, done = _progress(f"🔍 verifying {disk.id}")
+        draw, done = _progress("🔍", f"verifying {disk.id}")
         try:
             verified = verify(disk.id, written, digest, draw)
         except FlashError as e:
