@@ -1039,6 +1039,14 @@ document.getElementById("steps").addEventListener("click", e => {
   e.target.textContent = open ? "Collapse all" : "Expand all";
 });
 
+// The hash holds the device and layout, so section links scroll instead of navigating.
+document.getElementById("toc").addEventListener("click", e => {
+  const a = e.target.closest("a");
+  if (!a) return;
+  e.preventDefault();
+  document.getElementById(a.getAttribute("href").slice(1)).scrollIntoView();
+});
+
 function applyHash() {
   const { device, layout } = readHash();
   const d = DEVICES.find(x => x.id === device) || DEVICES[0];
