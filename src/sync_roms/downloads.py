@@ -4,10 +4,13 @@ import os
 import queue
 import re
 import sys
+import tempfile
 import time
+import unicodedata
+from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
 
-from . import external, inventory, runtime, s3, ui
+from . import cardfs, external, inventory, m3u, runtime, s3, store, ui
 
 STALE_HINT = " (not in storage any more: run sync-roms cache update)"  # a file the cache lists is gone from the storage folder
 
@@ -27,14 +30,16 @@ def is_current(path, size, disc_dir=None):
     """Whether path is already storage's file; a playlist pointing into disc_dir is storage's with that prefix added."""
     if size is None:
         return False
-    try:
-        if os.stat(path).st_size == size:
-            return True
-    except OSError:
+    have = cardfs.size(path)
+    if have is None:
         return False
+    if have == size:
+        return True
     if disc_dir and path.lower().endswith(".m3u"):
-        with open(path, "rb") as f:
-            return len(f.read().replace(disc_dir.encode() + b"/", b"")) == size
+        try:
+            return len(cardfs.read(path).replace(disc_dir.encode() + b"/", b"")) == size
+        except OSError:
+            return False
     return False
 
 
@@ -89,8 +94,23 @@ def hard_exit():
     os._exit(130)
 
 
-def run_downloads(todo, label, icon, base, failures=None):
-    """Download the jobs; returns the number that failed. failures, if given, collects (key, reason) for each."""
+def download_playlist(job, disc_dir, coming, callback=None, wrote=None):
+    """Write a playlist to its path once, its entries already pointing into disc_dir (m3u.prefixed_playlist; coming: the
+    name keys of the paths this sync downloads)."""
+    key, path, size = job
+    with tempfile.TemporaryDirectory() as tmp:
+        temp = os.path.join(tmp, "playlist.m3u")
+        s3.download((key, temp, size), callback, wrote)
+        with open(temp, "rb") as f:
+            data = f.read()
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    store.replace_file(path, m3u.prefixed_playlist(data, os.path.dirname(path), disc_dir, lambda p: name_key(p) in coming))
+
+
+def run_downloads(todo, label, icon, base, failures=None, disc_dirs=None):
+    """Download the jobs; returns the number that failed. failures, if given, collects (key, reason) for each.
+
+    disc_dirs: {ROM folder: its layout's disc folder}; a playlist directly in one is written with its entries pointing there."""
     if not todo:
         print(ui.green(f"{icon} {label}: nothing to download ✨"))
         return 0
@@ -102,9 +122,15 @@ def run_downloads(todo, label, icon, base, failures=None):
     names = [j[0] for j in todo]
     bar = ui.ProgressBar(len(todo), moved.fraction, moved.total, io=moved, active=lambda: moved.active(names))
 
+    coming = {name_key(j[1]) for j in todo} if disc_dirs else ()
+
     def fetch(i, j):
         moved.start(i)
-        s3.download(j, lambda n: moved.add(i, n), moved.wrote)
+        disc_dir = disc_dirs and j[1].lower().endswith(".m3u") and disc_dirs.get(os.path.normpath(os.path.dirname(j[1])))
+        if disc_dir:
+            download_playlist(j, disc_dir, coming, lambda n: moved.add(i, n), moved.wrote)
+        else:
+            s3.download(j, lambda n: moved.add(i, n), moved.wrote)
 
     try:
         finishing = queue.Queue()  # each future queues itself as it ends: a wait() per file would be O(files in flight)
@@ -182,24 +208,33 @@ SYSTEM_DOT_NAMES = {".ds_store", ".localized", ".nomedia", ".appledouble", ".spo
                     ".fseventsd", ".temporaryitems", ".documentrevisions-v100", ".volumeicon.icns"}
 
 
-def walk_roms(dest, keep_dotfiles=False, skip_db=False):
-    """os.walk over dest that yields only real ROM-folder content (no frontend/OS leftovers).
+RENAME_TEMP = ".rename"  # rename_on_card's temporary name ends with it, after a leading dot
+
+
+def rename_temp(name):
+    """Whether name is rename_on_card's temporary name, left behind when a rename was cut short."""
+    return name.startswith(".") and name.endswith(RENAME_TEMP) and len(name) > len(RENAME_TEMP) + 1
+
+
+def walk_roms(dest, keep_dotfiles=False, skip_db=False, rename_temps=False):
+    """A walk over dest that yields only real ROM-folder content (no frontend/OS leftovers).
 
     keep_dotfiles: keep dotfiles that are real content, dropping only OS litter (.DS_Store, ._*, ...) and sync-roms's
     own temp names (.chd-*, .xiso-*, external.own_temp).
     skip_db: drop *.db files (Onion's ROM list caches, named like _cache2.db or cache6.db).
+    rename_temps: keep rename_on_card's temporary names.
     """
     def hidden(name):
         if not name.startswith("."):
             return False
         return not keep_dotfiles or name.lower() in SYSTEM_DOT_NAMES or external.own_temp(name)
 
-    for root, dirs, files in os.walk(dest):
+    for root, dirs, files in cardfs.walk(dest):
         at_root = os.path.normpath(root) == os.path.normpath(dest)
         dirs[:] = [d for d in dirs
                    if not hidden(d) and not (at_root and d.lower() in IGNORED_ROOT_DIRS)]
         files = [f for f in files
-                 if not hidden(f) and f.lower() not in IGNORED_FILES and not (skip_db and f.lower().endswith(".db")) and not TEMP_DOWNLOAD.search(f)
+                 if (rename_temps and rename_temp(f)) or not hidden(f) and f.lower() not in IGNORED_FILES and not (skip_db and f.lower().endswith(".db")) and not TEMP_DOWNLOAD.search(f)
                  and not (at_root and f.lower() in IGNORED_ROOT_FILES)]
         yield root, files
 
@@ -210,25 +245,84 @@ def has_local_files(dest, skip_db=False, ignore=()):
                if not (f in ignore and os.path.normpath(root) == os.path.normpath(dest)))
 
 
-def find_extras(dest, wanted_keys, skip_db=False, disc_dir=None, discs=(), keep=()):
+def name_key(path):
+    """A card path as a case-insensitive card compares names: case and Unicode form left out."""
+    return unicodedata.normalize("NFC", os.path.normpath(path)).casefold()
+
+
+def find_extras(dest, wanted_keys, skip_db=False, disc_dir=None, discs=(), keep=(), renames=None):
     """Local files under dest that aren't in the system's ROM list (frontend files and dotfiles are ignored;
     a .psvita file is kept while its .zip is listed).
 
     disc_dir: the layout's folder for multi-disc games' discs (discs: their keys); its files are checked too.
     keep: paths inside dest that are expected too (BIOS files that go in the ROM folder).
+    renames: if given, gets (path, storage's spelling) for each file that is an expected one spelled differently (case,
+    Unicode form). Such a file is never an extra, unless the expected spelling is on the card too (a case-sensitive card).
     """
     rels = [rom_rel(k, disc_dir, discs) for k in wanted_keys]
     expected = {os.path.normpath(r) for r in rels} | {os.path.normpath(r) for r in keep}
-    extras = []
-    walks = list(walk_roms(dest, skip_db=skip_db))
+    spellings = defaultdict(list)  # {name_key: the expected paths with it}
+    for rel in expected:
+        spellings[name_key(rel)].append(rel)
+    walks = list(walk_roms(dest, skip_db=skip_db, rename_temps=True))
     if disc_dir:  # walk_roms skips dot folders, but the discs live in one
-        walks += walk_roms(os.path.join(dest, disc_dir))
-    for root, files in walks:
-        for f in files:
-            path = os.path.join(root, f)
-            rel = os.path.normpath(os.path.relpath(path, dest))
-            if rel not in expected:
-                if rel.lower().endswith(".psvita") and os.path.splitext(rel)[0] + ".zip" in expected:
-                    continue  # a Vita game's title id file lives and dies with its zip
-                extras.append(path)
+        walks += walk_roms(os.path.join(dest, disc_dir), rename_temps=True)
+    found = [(os.path.join(root, f), os.path.normpath(os.path.relpath(os.path.join(root, f), dest)))
+             for root, files in walks for f in files]
+    on_card = defaultdict(list)  # {name_key: the card's paths with it}
+    for _, rel in found:
+        on_card[name_key(rel)].append(rel)
+    extras = []
+    for path, rel in found:
+        if rename_temp(os.path.basename(rel)):
+            extras.append(path)  # a rename cut short: its file is downloaded again
+            continue
+        if rel in expected:
+            continue
+        key = name_key(rel)
+        if key in spellings:
+            if any(r in expected for r in on_card[key]):
+                extras.append(path)  # a second file beside the expected one
+            elif renames is not None and len(spellings[key]) == 1 and len(on_card[key]) == 1:
+                renames.append((path, os.path.join(dest, spellings[key][0])))
+            continue  # more than one way to match it: kept as it is, never deleted
+        if rel.lower().endswith(".psvita") and name_key(os.path.splitext(rel)[0] + ".zip") in spellings:
+            continue  # a Vita game's title id file lives and dies with its zip
+        extras.append(path)
     return extras
+
+
+def rename_on_card(path, new):
+    """Rename path to new through a temporary name in new's folder: a case-only rename straight to new does nothing on a
+    case-insensitive card."""
+    folder = os.path.dirname(new)
+    os.makedirs(folder, exist_ok=True)
+    temp = os.path.join(folder, f".{os.path.basename(new)}{RENAME_TEMP}")
+    os.replace(path, temp)
+    os.replace(temp, new)
+
+
+def after_renames(todo, renames, disc_dir=None):
+    """todo once renames ((path, new path) pairs) are done: a job for a renamed file writes to its new spelling, and is
+    dropped when the renamed file is already storage's (a case-sensitive card, where the download plan missed it)."""
+    renamed = {name_key(new): (path, new) for path, new in renames}
+    out = []
+    for key, path, size in todo:
+        old, new = renamed.get(name_key(path), (None, path))
+        if old is None or not is_current(old, size, disc_dir):
+            out.append((key, new, size))
+    return out
+
+
+def plan_moves(todo, extra_sizes):
+    """(extra path, job) pairs: a job's file that an unwanted card file can become instead of being downloaded, matched by
+    base name (case and Unicode form left out) and size, never by content. extra_sizes: {extra path: size}. A name and size
+    that more than one extra or more than one job has moves nothing."""
+    extras, jobs = defaultdict(list), defaultdict(list)
+    for path, size in extra_sizes.items():
+        extras[name_key(os.path.basename(path)), size].append(path)
+    for job in todo:
+        if job[2] is not None:
+            jobs[name_key(os.path.basename(job[1])), job[2]].append(job)
+    return [(extras[match][0], found[0]) for match, found in jobs.items()
+            if len(found) == 1 and len(extras.get(match, ())) == 1]

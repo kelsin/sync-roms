@@ -65,14 +65,9 @@ def _keep_backup(path):
     backup(path)
 
 
-def write_text(path, text, *, backup=False, mode=None):
-    """Write text (UTF-8) to path in one atomic step (temp file in the same folder, then a rename).
-
-    backup: keep the file's contents from before this run as <name>.bak first. mode: permission bits for the file
-    (default: those of the existing file, else 0o666 minus the umask). Raises OSError on failure."""
+def _write_atomic(path, data, *, text, encoding, newline, mode, fsync):
+    """Write data to a temp file beside path, then rename it over path; the temp file never outlives a failure."""
     folder = os.path.dirname(path) or "."
-    if backup:
-        _keep_backup(path)
     if mode is None:
         try:
             mode = os.stat(path).st_mode & 0o777
@@ -80,10 +75,11 @@ def write_text(path, text, *, backup=False, mode=None):
             mode = 0o666 & ~_UMASK
     fd, tmp = tempfile.mkstemp(dir=folder, prefix="." + os.path.basename(path) + "-", suffix=".tmp")
     try:
-        with os.fdopen(fd, "w", encoding="utf-8") as f:
-            f.write(text)
-            f.flush()
-            os.fsync(f.fileno())
+        with os.fdopen(fd, "w" if text else "wb", **({"encoding": encoding, "newline": newline} if text else {})) as f:
+            f.write(data)
+            if fsync:
+                f.flush()
+                os.fsync(f.fileno())
         if mode != 0o600 and sys.platform != "win32":  # mkstemp already made the file 600
             os.chmod(tmp, mode)
         os.replace(tmp, path)
@@ -91,6 +87,23 @@ def write_text(path, text, *, backup=False, mode=None):
     finally:
         if tmp and os.path.exists(tmp):
             os.remove(tmp)
+
+
+def write_text(path, text, *, backup=False, mode=None):
+    """Write text (UTF-8) to path in one atomic step (temp file in the same folder, then a rename), synced to disk.
+
+    backup: keep the file's contents from before this run as <name>.bak first. mode: permission bits for the file
+    (default: those of the existing file, else 0o666 minus the umask). Raises OSError on failure."""
+    if backup:
+        _keep_backup(path)
+    _write_atomic(path, text, text=True, encoding="utf-8", newline=None, mode=mode, fsync=True)
+
+
+def replace_file(path, data, *, encoding="utf-8", newline=None):
+    """Write data (str, or bytes) to path in one atomic step (temp file in the same folder, then a rename), so a
+    stopped run never leaves a half-written file. Not synced to disk: for files on a card that is ejected afterwards.
+    encoding and newline are those of open() and apply to str only. Raises OSError on failure."""
+    _write_atomic(path, data, text=isinstance(data, str), encoding=encoding, newline=newline, mode=None, fsync=False)
 
 
 def write_json(path, data, *, backup=False, mode=None, trailing_newline=False, **dump_kw):

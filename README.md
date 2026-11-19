@@ -230,7 +230,7 @@ While typing a filter (or a note, which `w` opens in the game list): `^A` `^E` s
    (`Apps/pico.pak/bin/`) get the extracted `pico8_dyn` and `pico8.dat`. Run the installer once on the device. The
    card's `pico8` field in `cards.json` records the zip, so it is copied once per zip.
 
-   Every sync also creates `.metadata_never_index` in the card root, empties `.fseventsd` and puts a
+   A sync that wrote to the card also creates `.metadata_never_index` in the card root, empties `.fseventsd` and puts a
    `.fseventsd/no_log` file in it (on any OS), so macOS doesn't index or log the card.
 
 ### Commands

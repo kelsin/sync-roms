@@ -8,7 +8,7 @@ import xml.etree.ElementTree as ET
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
 
-from . import downloads, frontend, inventory, runtime, s3, shared, store, ui
+from . import cardfs, downloads, frontend, inventory, runtime, s3, shared, store, ui
 
 
 # --- Scraped data (media, metadata) --------------------------------
@@ -62,7 +62,7 @@ def merge_metadata(remote, local):
 
 def walk_files(root, skip_top=()):
     """(relative path with /, full path) of every non-hidden file under root."""
-    for dp, dns, fns in os.walk(root):
+    for dp, dns, fns in cardfs.walk(root):
         at_root = os.path.normpath(dp) == os.path.normpath(root)
         dns[:] = sorted(d for d in dns if not d.startswith(".") and not (at_root and d in skip_top))
         for f in sorted(fns):
@@ -269,8 +269,7 @@ def update_gamelist(path, entries):
         return False
     ET.indent(root, space="\t")
     os.makedirs(os.path.dirname(path), exist_ok=True)
-    with open(path, "w", encoding="utf-8", newline="") as f:
-        f.write(prefix + ET.tostring(root, encoding="unicode") + "\n")
+    store.replace_file(path, prefix + ET.tostring(root, encoding="unicode") + "\n", newline="")
     return True
 
 
@@ -366,20 +365,23 @@ def describe_scrape_plan(plan):
 
 
 def apply_scrape_plan(plan, base, failures=None):
-    """Download the media, then write the gamelists and text files. Returns failures; failures, if given, collects
-    (key, reason) for each failed download."""
+    """Download the media, then write the gamelists and text files. Returns (failures, whether anything was written
+    to the card at base); failures, if given, collects (key, reason) for each failed download."""
     failed = downloads.run_downloads(plan["jobs"], "Scraped data", "🖼️", base, failures) if plan["jobs"] else 0
+    wrote = failed < len(plan["jobs"])
     for path, entries in plan["gamelists"].items():
         try:
-            update_gamelist(path, entries)
+            # EmuDeck's gamelists are on this computer, not the card
+            if update_gamelist(path, entries) and os.path.realpath(path).startswith(os.path.realpath(base) + os.sep):
+                wrote = True
         except (ET.ParseError, OSError, UnicodeDecodeError) as e:
             failed += 1
             ui.failure(ui.red(f"  ❌ {path}: {e}"))
     for path, text in plan["writes"]:
         os.makedirs(os.path.dirname(path), exist_ok=True)
-        with open(path, "w", encoding="utf-8", newline="") as f:
-            f.write(text)
-    return failed
+        store.replace_file(path, text, newline="")
+        wrote = True
+    return failed, wrote
 
 
 def card_stems(rom_dir, flat, skip_db=False):
@@ -401,7 +403,7 @@ def stale_media(layout_name, systems, roms_dir, es_dir, base=None):
     for s in systems:
         folder = s["folders"].get(layout_name)
         rom_dir = os.path.join(roms_dir, folder) if folder else None
-        if not rom_dir or rom_dir in seen or not os.path.isdir(rom_dir):
+        if not rom_dir or rom_dir in seen or not cardfs.is_dir(rom_dir):
             continue
         seen.add(rom_dir)
         stems = card_stems(rom_dir, layout_name not in frontend.ESDE_LAYOUTS, layout_name in ONION_LAYOUTS)
@@ -409,17 +411,17 @@ def stale_media(layout_name, systems, roms_dir, es_dir, base=None):
             for mtype in sorted(MEDIA_TYPES):
                 media = os.path.join(media_root_of(layout_name, s, base, es_dir), mtype)
                 stale += [full for rel, full in walk_files(media) if os.path.splitext(rel)[0] not in stems] \
-                    if os.path.isdir(media) else []
+                    if cardfs.is_dir(media) else []
             old = s["bucket"]  # an older sync named the folders after the bucket: all of it is stale once the ES-DE one exists
-            if old != esde_name(s, layout_name) and old not in named and os.path.isdir(media_root_of(layout_name, s, base, es_dir)):
+            if old != esde_name(s, layout_name) and old not in named and cardfs.is_dir(media_root_of(layout_name, s, base, es_dir)):
                 stale += [full for _, full in walk_files(media_root_of(layout_name, {"folders": {}, "bucket": old}, base, es_dir))]
                 if es_dir:
                     stale += [path for path in [os.path.join(es_dir, "gamelists", old, GAMELIST_FILES[layout_name])]
-                              if os.path.isfile(path)]
+                              if cardfs.size(path) is not None]
         elif layout_name == "knulli":
             for sub in ("images", "videos", "manuals"):
                 base = os.path.join(rom_dir, sub)
-                for rel, full in walk_files(base) if os.path.isdir(base) else []:
+                for rel, full in walk_files(base) if cardfs.is_dir(base) else []:
                     name = os.path.splitext(os.path.basename(rel))[0]
                     if name not in stems and not any(name.endswith("-" + x) and name[:-len(x) - 1] in stems
                                                      for x in KNULLI_SUFFIXES):
@@ -427,17 +429,17 @@ def stale_media(layout_name, systems, roms_dir, es_dir, base=None):
         elif layout_name in ONION_LAYOUTS:
             base = os.path.join(rom_dir, "Imgs")
             stale += [full for rel, full in walk_files(base) if os.path.splitext(os.path.basename(rel))[0] not in stems] \
-                if os.path.isdir(base) else []
+                if cardfs.is_dir(base) else []
             # the other Onion-family firmware's gamelist, once this layout's own has replaced it
             other = GAMELIST_FILES["allium" if layout_name == "onion" else "onion"]
-            if os.path.exists(os.path.join(rom_dir, GAMELIST_FILES[layout_name])) \
-                    and os.path.exists(os.path.join(rom_dir, other)):
+            if cardfs.exists(os.path.join(rom_dir, GAMELIST_FILES[layout_name])) \
+                    and cardfs.exists(os.path.join(rom_dir, other)):
                 stale.append(os.path.join(rom_dir, other))
             if not stems:  # an empty system: its gamelists and ROM list caches go too, so the firmware doesn't show it
-                stale += [os.path.join(rom_dir, f) for f in sorted(os.listdir(rom_dir))
+                stale += [os.path.join(rom_dir, f) for f in sorted(cardfs.listing(rom_dir))
                           if f in GAMELIST_FILES.values() or f.lower().endswith(".db")]
     if layout_name == "allium":  # Onion OS's lists of recent and favourite games, which Allium doesn't use
-        stale += [path for f in ONION_ONLY_LISTS if os.path.isfile(path := os.path.join(roms_dir, f))]
+        stale += [path for f in ONION_ONLY_LISTS if cardfs.size(path := os.path.join(roms_dir, f)) is not None]
     return list(dict.fromkeys(stale))
 
 
@@ -447,10 +449,10 @@ def prune_empty_systems(layout_name, systems, roms_dir):
     if layout_name not in ONION_LAYOUTS:
         return removed
     for rom_dir in sorted({os.path.join(roms_dir, s["folders"][layout_name]) for s in systems if s["folders"].get(layout_name)}):
-        if not os.path.isdir(rom_dir) or card_stems(rom_dir, False, True):
+        if not cardfs.is_dir(rom_dir) or card_stems(rom_dir, False, True):
             continue
         imgs = os.path.join(rom_dir, "Imgs")
-        for dp, _, _ in sorted(os.walk(imgs), reverse=True):  # deepest first
+        for dp, _, _ in sorted(cardfs.walk(imgs), reverse=True):  # deepest first
             try:
                 os.rmdir(dp)
             except OSError:

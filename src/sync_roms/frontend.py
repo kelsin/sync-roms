@@ -3,7 +3,7 @@ import os
 import re
 from xml.sax import saxutils
 
-from . import downloads, ui
+from . import cardfs, downloads, store, ui
 
 FRONTEND_LAYOUTS = {"esde", "knulli", "emudeck"}
 _LABELS = {"esde": "ES-DE", "knulli": "Knulli", "emudeck": "EmuDeck"}
@@ -92,7 +92,7 @@ def plan_collections(layout_name, base, wanted, owned):
                                     f"that sync-roms didn't write; skipped")
             continue
         text = "\n".join(wanted[name]) + "\n"
-        if _read(path) != text:
+        if not _same(path, text):
             plan["writes"].append((path, text))
         plan["enable"].add(name)
     plan["owned"] = sorted(plan["enable"])
@@ -109,6 +109,14 @@ def plan_collections(layout_name, base, wanted, owned):
     return plan
 
 
+def _same(path, text):
+    """Whether the file at path holds text; only a file of the same size is read."""
+    try:
+        return os.path.getsize(path) == len(text.encode("utf-8")) and _read(path) == text
+    except OSError:
+        return False
+
+
 def _read(path):
     """path's text, or None when it can't be read."""
     try:
@@ -118,17 +126,15 @@ def _read(path):
         return None
 
 
-def read_text(path):
-    """path's text, or "" when it can't be read."""
-    return _read(path) or ""
-
-
 def emudeck_problem(base, roms):
     """None when this computer's ES-DE serves the emudeck card at base (roms: its ROM folder), else why it doesn't."""
     es_dir = esde_dir("emudeck", base)
     if not os.path.isdir(es_dir):
         return f"ES-DE isn't set up on this computer (no {es_dir})"
-    used = get_string(read_text(settings_path("emudeck", base)), "ROMDirectory")
+    try:
+        used = get_string(cardfs.text(settings_path("emudeck", base)), "ROMDirectory")
+    except (OSError, UnicodeDecodeError):
+        used = ""
     if not used or os.path.realpath(used) != os.path.realpath(roms):
         return f"ES-DE on this computer ({es_dir}) doesn't use this card's ROMs (its ROMDirectory isn't {roms})"
     return None
@@ -138,8 +144,7 @@ def apply_collections(plan, layout_name, base):
     """Write and delete plan's collection files and list or unlist them in the settings file; True when that file changed."""
     for path, text in plan["writes"]:
         os.makedirs(os.path.dirname(path), exist_ok=True)
-        with open(path, "w", encoding="utf-8", newline="\n") as f:
-            f.write(text)
+        store.replace_file(path, text, newline="\n")
     for path in plan["deletes"]:
         try:
             os.remove(path)
@@ -148,17 +153,7 @@ def apply_collections(plan, layout_name, base):
     if not (plan["enable"] or plan["disable"]):
         return False
     path = settings_path(layout_name, base)
-    old = ""
-    if os.path.exists(path):
-        with open(path, encoding="utf-8") as f:
-            old = f.read()
-    new = set_enabled(old, layout_name, plan["enable"], plan["disable"])
-    if new != old:
-        os.makedirs(os.path.dirname(path), exist_ok=True)
-        with open(path, "w", encoding="utf-8", newline="\n") as f:
-            f.write(new)
-        return True
-    return False
+    return cardfs.write_text(path, set_enabled(cardfs.text(path), layout_name, plan["enable"], plan["disable"]))
 
 
 def wanted_collections(layout_name, collections, systems, on_card):

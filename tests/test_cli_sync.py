@@ -401,6 +401,168 @@ class SyncSmokeTest(RealDataDirGuard):
         self.run_sync(False, prepare=prepare, patches=patches)
         self.assertEqual([q for q in asked if q.startswith("Delete these")], ["Delete these 1 local file(s) (0 B)?"])
 
+    def card_rom(self, rel, size):
+        """A prepare that puts a file of size bytes at ROMs/rel on the card, keeping the card's path in self.card."""
+        def prepare(card):
+            self.card = card
+            os.makedirs(os.path.join(card, "ROMs", os.path.dirname(rel)), exist_ok=True)
+            with open(os.path.join(card, "ROMs", rel), "wb") as f:
+                f.write(b"x" * size)
+        return prepare
+
+    def sync_card_files(self, rel, size, dry_run=False, args=()):
+        """Sync gba/Game.zip (5 bytes) to a card holding ROMs/rel and an empty vectrex system: (downloaded keys, delete
+        prompts, what --json printed, the card's files after the sync)."""
+        empty = {"name": "GCE Vectrex", "bucket": "vectrex", "folders": {"esde": "vectrex"}, "bios": {"files": []}, "games": []}
+        manifest = {**MANIFEST, "systems": [SYSTEM, empty]}
+        got, asked, emitted, files = [], [], [], []
+
+        def after(*a):
+            files.extend(sorted(os.path.relpath(os.path.join(root, f), os.path.join(self.card, "ROMs"))
+                                for root, _, names in os.walk(os.path.join(self.card, "ROMs")) for f in names))
+            return 0
+        patches = ((store, {"load_manifest": lambda names=(): manifest}),
+                   (cli, {"free_space": lambda path: 10**9}),
+                   (cli.downloads, {"run_downloads": lambda todo, *a: got.extend(k for k, _, _ in todo) or 0}),
+                   (cli.vita, {"add_psvita_files": lambda dests, wrote=None: after() or []}),
+                   (cli.ui, {"choose": lambda q, *a, **k: asked.append(q) or "y", "emit_json": emitted.append}))
+        if dry_run:
+            patches += ((cli.pico8, {"run": lambda *a: after()}),)
+        self.assertEqual(self.run_sync(dry_run, prepare=self.card_rom(rel, size), patches=patches, args=args), 0)
+        return got, [q for q in asked if q.startswith("Delete these")], emitted, files
+
+    def test_a_card_file_in_another_case_is_renamed_not_deleted_or_downloaded(self):
+        got, deletes, _, files = self.sync_card_files(os.path.join("gba", "GAME.zip"), 5)
+        self.assertEqual((got, deletes), ([], []))
+        self.assertEqual(files, [os.path.join("gba", "Game.zip")])
+
+    def test_a_dry_run_reports_the_rename_and_changes_nothing(self):
+        got, _, emitted, files = self.sync_card_files(os.path.join("gba", "GAME.zip"), 5, dry_run=True, args=["--json"])
+        self.assertEqual(files, [os.path.join("gba", "GAME.zip")])
+        roms = os.path.join(self.card, "ROMs", "gba")
+        self.assertEqual(emitted[0]["rename"], [{"from": os.path.join(roms, "GAME.zip"), "to": os.path.join(roms, "Game.zip")}])
+        self.assertEqual((emitted[0]["downloads"], emitted[0]["delete"]), ([], []))
+        self.sync_card_files(os.path.join("gba", "GAME.zip"), 5, dry_run=True)
+        self.assertIn(f"would rename {os.path.join(self.card, 'ROMs', 'gba', 'GAME.zip')}", self.out.getvalue())
+
+    def test_a_file_of_the_same_name_and_size_elsewhere_is_moved_not_downloaded(self):
+        got, deletes, _, files = self.sync_card_files(os.path.join("vectrex", "game.zip"), 5)
+        self.assertEqual((got, deletes), ([], []))
+        self.assertEqual(files, [os.path.join("gba", "Game.zip")])
+
+    def test_a_dry_run_reports_the_move_as_neither_a_download_nor_a_delete(self):
+        _, _, emitted, files = self.sync_card_files(os.path.join("vectrex", "Game.zip"), 5, dry_run=True, args=["--json"])
+        self.assertEqual(files, [os.path.join("vectrex", "Game.zip")])
+        roms = os.path.join(self.card, "ROMs")
+        self.assertEqual(emitted[0]["rename"], [{"from": os.path.join(roms, "vectrex", "Game.zip"),
+                                                 "to": os.path.join(roms, "gba", "Game.zip")}])
+        self.assertEqual((emitted[0]["downloads"], emitted[0]["delete"], emitted[0]["totals"]["files"]), ([], [], 0))
+        self.sync_card_files(os.path.join("vectrex", "Game.zip"), 5, dry_run=True)
+        self.assertIn(f"would move {os.path.join(self.card, 'ROMs', 'vectrex', 'Game.zip')}", self.out.getvalue())
+
+    def test_a_file_of_the_same_name_and_another_size_is_deleted_and_downloaded(self):
+        got, deletes, _, files = self.sync_card_files(os.path.join("vectrex", "Game.zip"), 3)
+        self.assertEqual((got, deletes), (["gba/Game.zip"], ["Delete these 1 local file(s) (3 B)?"]))
+        self.assertEqual(files, [])
+
+    def test_a_move_that_fails_is_downloaded_instead(self):
+        real_replace = os.replace
+
+        def replace(src, dst):
+            if os.path.join("ROMs", "vectrex") in src:
+                raise PermissionError("busy")
+            return real_replace(src, dst)
+        with mock.patch.object(cli.os, "replace", replace):
+            got, _, _, _ = self.sync_card_files(os.path.join("vectrex", "Game.zip"), 5)
+        self.assertEqual(got, ["gba/Game.zip"])
+        self.assertIn("busy", self.out.getvalue())
+
+    def test_a_rename_that_fails_is_a_failure(self):
+        def fail(path, new):
+            raise PermissionError("busy")
+        with mock.patch.object(cli.downloads, "rename_on_card", fail):
+            empty = {"name": "GCE Vectrex", "bucket": "vectrex", "folders": {"esde": "vectrex"}, "bios": {"files": []}, "games": []}
+            patches = ((store, {"load_manifest": lambda names=(): {**MANIFEST, "systems": [SYSTEM, empty]}}),
+                       (cli, {"free_space": lambda path: 10**9}))
+            code = self.run_sync(False, prepare=self.card_rom(os.path.join("gba", "GAME.zip"), 5), patches=patches)
+        self.assertEqual(code, 1)
+        self.assertIn("busy", self.out.getvalue())
+
+    def test_a_dry_run_does_not_delete_loose_discs_the_real_run_tucks_away(self):
+        discs = ["Fahrenheit (USA) (Disc 1) (Sega CD).chd", "Fahrenheit (USA) (Disc 2) (Sega CD).chd"]
+        psx = {"name": "PlayStation", "bucket": "psx", "folders": {"esde": "psx"}, "bios": {"files": []},
+               "games": [{"bucket": "psx/" + d} for d in discs]}
+        layouts = {"esde": {**MANIFEST["layouts"]["esde"], "disc_dir": ".multi-disc"}}
+        manifest = {**MANIFEST, "systems": [psx], "layouts": layouts}
+
+        def prepare(card):
+            for d in discs:
+                self.card_rom(os.path.join("psx", d), 4)(card)
+        emitted = []
+        patches = ((store, {"load_manifest": lambda names=(): manifest}),
+                   (cli.s3, {"list_sizes": lambda prefix, sizes=True: {"psx/" + d: 4 for d in discs} if prefix == "psx/" else {}}),
+                   (cli.ui, {"emit_json": emitted.append}))
+        self.assertEqual(self.run_sync(True, prepare=prepare, patches=patches, args=["--json"]), 0)
+        self.assertEqual((emitted[0]["downloads"], emitted[0]["delete"], emitted[0]["rename"]), ([], [], []))
+
+    def playlist_sync(self, on_card=None):
+        """A real-run ES-DE sync (disc folder .multi-disc) of a two-disc game; returns the playlists written through
+        store.replace_file as {name: text} (a list of names when written twice). on_card: {card file: text} there before the sync."""
+        discs = ["Fahrenheit (USA) (Disc 1) (Sega CD).chd", "Fahrenheit (USA) (Disc 2) (Sega CD).chd"]
+        m3u_name, text = "Fahrenheit (USA) (Sega CD).m3u", "".join(d + "\n" for d in discs)
+        keys = ["psx/" + d for d in discs] + ["psx/" + m3u_name]
+        psx = {"name": "PlayStation", "bucket": "psx", "folders": {"esde": "psx"}, "bios": {"files": []},
+               "games": [{"bucket": k} for k in keys]}
+        layouts = {"esde": {**MANIFEST["layouts"]["esde"], "disc_dir": ".multi-disc"}}
+        manifest = {**MANIFEST, "systems": [psx], "layouts": layouts}
+        sizes = {"psx/" + d: 4 for d in discs}
+        sizes["psx/" + m3u_name] = len(text)
+        writes, card = [], []
+        self.direct = []  # playlists downloaded straight onto the card
+
+        def prepare(root):
+            card.append(root)
+            for rel, content in (on_card or {}).items():
+                os.makedirs(os.path.dirname(os.path.join(root, rel)), exist_ok=True)
+                with open(os.path.join(root, rel), "w") as f:
+                    f.write(content)
+
+        def download(job, *a):
+            if job[1].endswith(".m3u") and job[1].startswith(card[0]):
+                self.direct.append(job[1])
+            os.makedirs(os.path.dirname(job[1]), exist_ok=True)
+            with open(job[1], "w") as f:
+                f.write(text if job[1].endswith(".m3u") else "x" * job[2])
+        real_replace = store.replace_file
+
+        def replace_file(path, data, **kw):
+            writes.append((os.path.basename(path), data.decode()))
+            return real_replace(path, data, **kw)
+        patches = ((store, {"load_manifest": lambda names=(): manifest, "replace_file": replace_file}),
+                   (cli.s3, {"list_sizes": lambda prefix, sizes_=True: sizes if prefix == "psx/" else {}, "download": download}),
+                   (cli, {"free_space": lambda path: 10**9}), (cli.downloads, {"run_downloads": downloads.run_downloads}))
+        self.assertEqual(self.run_sync(False, prepare=prepare, patches=patches), 0)
+        return [w for w in writes if w[0].endswith(".m3u")]
+
+    def test_a_playlist_is_written_once_already_prefixed(self):
+        discs = ["Fahrenheit (USA) (Disc 1) (Sega CD).chd", "Fahrenheit (USA) (Disc 2) (Sega CD).chd"]
+        self.assertEqual(self.playlist_sync(), [("Fahrenheit (USA) (Sega CD).m3u", "".join(f".multi-disc/{d}\n" for d in discs))])
+        self.assertEqual(self.direct, [])
+
+    def test_an_old_unprefixed_playlist_is_still_fixed(self):
+        discs = ["Fahrenheit (USA) (Disc 1) (Sega CD).chd", "Fahrenheit (USA) (Disc 2) (Sega CD).chd"]
+        name = "Fahrenheit (USA) (Sega CD).m3u"
+        card = {f"ROMs/psx/.multi-disc/{d}": "xxxx" for d in discs}
+        card["ROMs/psx/" + name] = "".join(d + "\n" for d in discs)
+        self.assertEqual(self.playlist_sync(card), [(name, "".join(f".multi-disc/{d}\n" for d in discs))])
+
+    def test_an_already_prefixed_playlist_is_left_alone(self):
+        discs = ["Fahrenheit (USA) (Disc 1) (Sega CD).chd", "Fahrenheit (USA) (Disc 2) (Sega CD).chd"]
+        name = "Fahrenheit (USA) (Sega CD).m3u"
+        card = {f"ROMs/psx/.multi-disc/{d}": "xxxx" for d in discs}
+        card["ROMs/psx/" + name] = "".join(f".multi-disc/{d}\n" for d in discs)
+        self.assertEqual(self.playlist_sync(card), [])
+
     def test_declining_the_space_prompt_exits_0(self):
         patches = ((cli, {"free_space": lambda path: 3}),
                    (cli.ui, {"confirm": lambda q, default=True: False, "has_terminal": lambda: True}))
@@ -516,6 +678,64 @@ class SyncSmokeTest(RealDataDirGuard):
         self.assertEqual(sorted(checked[0]), ["covers", "marquees"])
         self.assertEqual(checked[1], ["marquees"])  # the cover found current before the downloads is not looked at again
 
+    def scrape_sync_io(self, dry_run):
+        """An ES-DE sync with scrapes of gba/Game.zip (on the card, with its cover) and gba/New.zip: ({card folder:
+        times listed}, card files given to os.stat, the card's files after the sync)."""
+        manifest = {**MANIFEST, "systems": [{**SYSTEM, "games": SYSTEM["games"] + [{"bucket": "gba/New.zip"}]}]}
+        sizes = {"gba/Game.zip": 5, "gba/New.zip": 5, "scrapes/gba/covers/Game.png": 3, "scrapes/gba/covers/New.png": 3}
+        scans, stats, files, card, walking = {}, [], [], [], []
+        real_scandir, real_stat = os.scandir, os.stat
+
+        def prepare(root):
+            card.append(root)
+            for rel, size in (("ROMs/gba/Game.zip", 5), ("ES-DE/downloaded_media/gba/covers/Game.png", 3)):
+                os.makedirs(os.path.dirname(os.path.join(root, rel)), exist_ok=True)
+                with open(os.path.join(root, rel), "wb") as f:
+                    f.write(b"x" * size)
+
+        def scandir(path="."):
+            if card and str(path).startswith(card[0]) and not walking:
+                rel = os.path.relpath(path, card[0])
+                scans[rel] = scans.get(rel, 0) + 1
+            return real_scandir(path)
+
+        def stat(path, *a, **k):
+            if card and str(path).startswith(card[0]) and os.path.splitext(str(path))[1]:  # a card file, not a folder
+                stats.append(os.path.relpath(path, card[0]))
+            return real_stat(path, *a, **k)
+
+        def download(job, *a):
+            os.makedirs(os.path.dirname(job[1]), exist_ok=True)
+            with open(job[1], "wb") as f:
+                f.write(b"x" * job[2])
+
+        def cards():  # the sync's last step reads the cards too: the files then are the ones it leaves
+            walking.append(True)
+            files[:] = sorted(os.path.relpath(os.path.join(root, f), card[0]) for root, _, names in os.walk(card[0]) for f in names)
+            walking.clear()
+            return {}
+        patches = ((store, {"load_manifest": lambda names=(): manifest, "load_cards": cards}),
+                   (s3, {"list_sizes": lambda prefix, sizes_=True: {k: v for k, v in sizes.items() if k.startswith(prefix)}}),
+                   (cli, {"free_space": lambda path: 10**9, "report_failures": lambda f: None}),
+                   (cli.downloads, {"run_downloads": downloads.run_downloads}), (cli.s3, {"download": download}),
+                   (os, {"scandir": scandir, "stat": stat}))
+        self.assertEqual(self.run_sync(dry_run, prepare=prepare, patches=patches), 0)
+        return scans, stats, files
+
+    def test_a_dry_run_lists_each_card_folder_once_and_stats_no_card_file(self):
+        scans, stats, files = self.scrape_sync_io(True)
+        for folder in ("ROMs/gba", "ES-DE/downloaded_media/gba/covers"):
+            self.assertEqual(scans.get(folder), 1, folder)
+        self.assertEqual(set(scans.values()), {1})
+        self.assertEqual(stats, [])
+        self.assertNotIn(os.path.join("ROMs", "gba", "New.zip"), files)
+
+    def test_a_rom_downloaded_by_the_sync_gets_its_media_and_keeps_it(self):
+        scans, _, files = self.scrape_sync_io(False)
+        self.assertIn(os.path.join("ES-DE", "downloaded_media", "gba", "covers", "New.png"), files)
+        self.assertIn(os.path.join("ROMs", "gba", "New.zip"), files)
+        self.assertLessEqual(max(scans.values()), 3)  # planning, after the downloads, after the scraped data
+
     def test_no_android_line_on_a_card_without_android_files(self):
         layouts = {"onion": {"label": "Onion", "roms_dir": "Roms", "bios_dir": "BIOS"}}
         manifest = {**MANIFEST, "layouts": layouts, "systems": [{**SYSTEM, "folders": {"onion": "GBA"}}]}
@@ -543,12 +763,34 @@ class SyncSmokeTest(RealDataDirGuard):
         self.assertRegex(self.out.getvalue().splitlines()[-1], r"^🎉 Done: downloaded 0 file\(s\) \(0 B\) in \d+m\d\ds$")
 
     def test_a_run_with_failures_ends_with_them_and_what_did_download(self):
-        def run_downloads(todo, label, icon, base, failures=None):
+        def run_downloads(todo, label, icon, base, failures=None, *a):
             failures.extend((j[0], "boom") for j in todo)
             return len(todo)
         patches = ((cli, {"free_space": lambda path: 10**9}), (cli.downloads, {"run_downloads": run_downloads}))
         self.assertEqual(self.run_sync(False, patches=patches), 1)
         self.assertRegex(self.out.getvalue().splitlines()[-1], r"^⚠️  Done with 1 failure\(s\): downloaded 0 file\(s\) \(0 B\) in \d+m\d\ds$")
+
+    def test_a_settings_file_that_cannot_be_written_is_a_failure_and_the_card_is_not_ejected(self):
+        def fail():
+            if not calls:
+                calls.append(1)
+                raise OSError("disk full")  # the end of the sync; the exit of caching() finds nothing left
+        calls = []
+
+        class Settings(dict):
+            asked = []
+
+            def get(self, key, default=None):
+                self.asked.append(key)
+                return default
+        patches = ((cli.cardfs, {"flush": fail}), (usersettings, {"load_settings": Settings}))
+        self.assertEqual(self.run_sync(False, patches=patches), 1)
+        self.assertRegex(self.out.getvalue().splitlines()[-1] + self.err.getvalue(), r"Done with 1 failure")
+        self.assertIn("disk full", self.err.getvalue() + self.out.getvalue())
+        self.assertNotIn("eject", Settings.asked)  # eject is only considered when nothing failed
+        Settings.asked.clear()
+        self.assertEqual(self.run_sync(False, patches=((usersettings, {"load_settings": Settings}),)), 0)
+        self.assertIn("eject", Settings.asked)
 
     def test_vita_game_syncs_its_dlc_and_newest_update_and_drops_the_old_update(self):
         game = "psvita/G [PCSE00349] [USA] [NoNpDRM].zip"
@@ -573,7 +815,7 @@ class SyncSmokeTest(RealDataDirGuard):
         patches = ((store, {"load_manifest": lambda names=(): manifest}),
                    (s3, {"list_sizes": lambda prefix, sizes=True: dict(listing) if prefix == "psvita/" else {}}),
                    (cli.downloads, {"run_downloads": run_downloads}),
-                   (cli.vita, {"add_psvita_files": lambda dests: []}),
+                   (cli.vita, {"add_psvita_files": lambda dests, wrote=None: []}),
                    (cli.ui, {"choose": lambda q, *a, **k: asked.append(q) or "y",
                              "confirm": lambda q, default=True: asked.append(q) or True}))
         self.assertEqual(self.run_sync(False, prepare=prepare, patches=patches), 0)

@@ -10,7 +10,7 @@ from unittest import mock
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 from helpers import touch  # noqa: E402
-from sync_roms import downloads, m3u, ui  # noqa: E402
+from sync_roms import cardfs, downloads, m3u, ui  # noqa: E402
 
 FAH = ["Fahrenheit (USA) (Disc 1) (Key Disc) (Sega CD).chd", "Fahrenheit (USA) (Disc 2) (Sega CD).chd"]
 
@@ -179,6 +179,36 @@ class HiddenDiscsTest(unittest.TestCase):
         self.assertFalse(downloads.is_current(path, size))
         self.assertFalse(downloads.is_current(os.path.join(self.dir, "Gone.m3u"), size, ".multi-disc"))
         self.assertFalse(downloads.is_current(path, None))
+
+    def test_a_playlist_downloads_into_a_folder_that_does_not_exist_yet(self):
+        def fake_download(job, callback=None, wrote=None):
+            with open(job[1], "wb") as f:
+                f.write(b"a.chd\n")
+        path = os.path.join(self.dir, "new system", "G.m3u")
+        with mock.patch.object(downloads.s3, "download", fake_download):
+            downloads.download_playlist(("k", path, 6), ".multi-disc", set())
+        with open(path) as f:
+            self.assertEqual(f.read(), "a.chd\n")
+
+    def test_a_prefixed_playlist_is_read_once_per_run(self):
+        self.touch("G.m3u", text=".multi-disc/a.chd\n")
+        path = os.path.join(self.dir, "G.m3u")
+        with cardfs.caching(), mock.patch("builtins.open", wraps=open) as opened:
+            self.assertTrue(downloads.is_current(path, len("a.chd\n"), ".multi-disc"))
+            self.assertFalse(downloads.is_current(path, 3, ".multi-disc"))
+            self.assertEqual([c for c in opened.call_args_list if c.args[0] == path], [mock.call(path, "rb")])
+
+    def test_prefixing_keeps_comments_and_line_endings_so_the_size_still_matches(self):
+        self.disc_folder()
+        original = "#EXTM3U\r\n" + "".join(f"  {f}\r\n" for f in FAH) + "\r\nlast.chd"
+        self.touch("Fahrenheit.m3u", text="")
+        path = os.path.join(self.dir, "Fahrenheit.m3u")
+        with open(path, "w", newline="") as f:
+            f.write(original)
+        self.assertEqual(m3u.prefix_playlists(self.dir, ".multi-disc"), 1)
+        with open(path, newline="") as f:
+            self.assertEqual(f.read(), "#EXTM3U\r\n" + "".join(f"  .multi-disc/{x}\r\n" for x in FAH) + "\r\nlast.chd")
+        self.assertTrue(downloads.is_current(path, len(original.encode()), ".multi-disc"))
 
     def test_find_extras_looks_in_the_disc_folder(self):
         self.disc_folder()

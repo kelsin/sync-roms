@@ -56,8 +56,10 @@ class VitaTest(unittest.TestCase):
             f.write("old")
         with open(os.path.join(self.dir, "Bad.zip"), "w") as f:
             f.write("not a zip")
-        failures = vita.add_psvita_files([self.dir])
+        wrote = []
+        failures = vita.add_psvita_files([self.dir], wrote)
         self.assertEqual([os.path.basename(p) for p, _ in failures], ["Bad.zip"])
+        self.assertEqual([os.path.basename(p) for p in wrote], ["A.zip"])
         self.assertEqual(self.files(), ["A.psvita", "A.zip", "B.psvita", "B.zip", "Bad.zip"])
         with open(os.path.join(self.dir, "B.psvita")) as f:
             self.assertEqual(f.read(), "old")

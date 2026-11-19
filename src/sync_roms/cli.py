@@ -10,7 +10,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 from botocore.exceptions import BotoCoreError, ClientError, NoCredentialsError
 
-from . import __version__, budget, cardedit, clean, commands, downloads, drivers, edit, external, frontend, inventory, m3u, mirroring, picker, runtime, s3, scrape_plan, store
+from . import __version__, budget, cardedit, cardfs, clean, commands, downloads, drivers, edit, external, frontend, inventory, m3u, mirroring, picker, runtime, s3, scrape_plan, store
 from . import pico8, surprise, themeart, ui, usersettings, vita
 from . import collections as colls
 
@@ -62,12 +62,12 @@ TOPICS = {
 
   --dry-run   show what would be downloaded and deleted, change nothing
   --yes       answer every prompt with its default (a default-no prompt, like deleting files, stays no)
-  --no-clean  skip the end-of-run card tidy (.metadata_never_index, .fseventsd, dot_clean)
+  --no-clean  skip the end-of-run card tidy (.metadata_never_index, .fseventsd, ._ files)
   --no-eject  leave the card mounted (by default a Mac unmounts all of its volumes after a run with no failures;
               "eject": false in settings.json turns that off for every run)
 
-  A finished run (not --dry-run) creates .metadata_never_index in CARD, empties its .fseventsd, and on a Mac runs
-  dot_clean (falling back to sudo mdutil, which asks for your password).
+  A run that wrote to the card (not --dry-run) creates .metadata_never_index in CARD, empties its .fseventsd, and on a Mac deletes
+  its ._ files (and offers sudo mdutil to turn Spotlight off, which asks for your password).
 """,
     "games": """
   sync-roms games edit                        interactive editor (cards, sets, device systems)
@@ -833,6 +833,7 @@ def report_failures(failures):
         ui.failure(ui.dim("   Files already downloaded are skipped, so run the same command again to retry just these."))
 
 
+@cardfs.caching()  # the card's folder listings, kept until sync changes the card
 def sync_card(args):
     store.preload_repo_data()
     base = os.path.abspath(os.path.expanduser(args.base_dir or os.getcwd()))
@@ -984,7 +985,7 @@ def sync_card(args):
         """The names the system's ROM-folder BIOS files have on the card."""
         return {os.path.basename(f) for f in s["bios"].get("rom_files", [])}
 
-    rom_jobs, missing, extras, moved = [], [], [], set()
+    rom_jobs, missing, extras, moved, renames = [], [], [], set(), []
     for s in chosen:
         wanted = available(s)
         if not wanted:
@@ -1018,8 +1019,9 @@ def sync_card(args):
             dest_bios[dest_of(t)].update(rom_bios_names(t))
     pico8_dests = {os.path.join(roms_dir, t["folders"][layout_name]) for t in systems + dropped
                    if t["bucket"] == "pico8" and t["folders"].get(layout_name)}
+    cardfs.clear()  # the discs moved above, and the card editor's previews listed the card a while ago
     for dest in sorted({dest_of(s) for s in systems if s["bucket"] in chosen_ids or not available(s)} | dropped_dests):
-        extras += downloads.find_extras(dest, dest_keys[dest], onion, disc_dir, dest_discs[dest], dest_bios[dest] | (pico8.keep_in(dest, card) if dest in pico8_dests else set()))
+        extras += downloads.find_extras(dest, dest_keys[dest], onion, disc_dir, dest_discs[dest], dest_bios[dest] | (pico8.keep_in(dest, card) if dest in pico8_dests else set()), renames=renames)
 
     # BIOS for every system with ROMs already on the card too, even when this sync doesn't touch that system
     bios_systems = chosen + [s for s in systems if s["bucket"] not in chosen_ids
@@ -1072,10 +1074,19 @@ def sync_card(args):
     apk_todo = downloads.plan_downloads(apk_jobs)
     driver_todo = downloads.plan_downloads(driver_jobs)
     theme_todo = downloads.plan_downloads(theme_jobs)
-    if args.dry_run:  # the real run moves these first, so they are already there
+    if args.dry_run:  # the real run moves these first, so they are already there and not extras
         rom_todo = [j for j in rom_todo if j[1] not in moved]
+        extras = [p for p in extras if not moved or os.path.join(os.path.dirname(p), disc_dir, os.path.basename(p)) not in moved]
     elif moved:
         print(ui.dim(f"  📦 Moved {len(moved)} loose disc file(s) into {disc_dir}/"))
+    # card files spelled differently from storage are renamed, and unwanted ones that match a missing file are moved
+    # there, before the downloads: neither is downloaded or deleted
+    rom_todo, bios_todo = downloads.after_renames(rom_todo, renames, disc_dir), downloads.after_renames(bios_todo, renames)
+    card_moves = downloads.plan_moves(rom_todo + bios_todo, {p: cardfs.size(p) for p in extras})
+    moved_jobs, moved_from = {j for _, j in card_moves}, {p for p, _ in card_moves}
+    bios_moves = moved_jobs.intersection(bios_todo)
+    extras = [p for p in extras if p not in moved_from]
+    rom_todo, bios_todo = [j for j in rom_todo if j not in moved_jobs], [j for j in bios_todo if j not in moved_jobs]
     es_dir = frontend.esde_dir(layout_name, base)
     # EmuDeck's ES-DE is on this computer: the card's gamelists and collections go there only when it uses the card's ROMs
     esde_problem = frontend.emudeck_problem(base, os.path.join(base, layout["roms_dir"])) if layout_name == "emudeck" else None
@@ -1118,6 +1129,8 @@ def sync_card(args):
         scrape_plan.describe_scrape_plan(planned)
     if extras:
         print(f"🗑️  Local ROMs no longer in the selection: {ui.bold(str(len(extras)))}")
+    if renames or card_moves:
+        print(f"📦 Card files to rename or move instead of downloading: {ui.bold(str(len(renames) + len(card_moves)))}")
     todo_all = rom_todo + bios_todo + apk_todo + driver_todo + theme_todo + scrape_todo
     size = (saved or {}).get("size")
 
@@ -1154,7 +1167,7 @@ def sync_card(args):
                   for k in available(s) if k in listings[s["bucket"]]} if dry_run else set()
 
         def on_card(s, rel):
-            return (s["bucket"], rel) in coming or os.path.exists(os.path.join(dest_of(s), rel))
+            return (s["bucket"], rel) in coming or cardfs.exists(os.path.join(dest_of(s), rel))
 
         wanted = frontend.wanted_collections(layout_name, card_colls, systems, on_card)
         plan = frontend.plan_collections(layout_name, base, wanted, owned)
@@ -1188,19 +1201,24 @@ def sync_card(args):
 
     if args.dry_run:
         print(ui.yellow("\n🧪 Dry run — nothing downloaded or deleted"))
-        free = free_space(base) + sum(os.path.getsize(p) for p in extras)  # the real run deletes these first
+        free = free_space(base) + sum(cardfs.size(p) or 0 for p in extras)  # the real run deletes these first
         plan_json = {
             "downloads": [{"kind": kind, "key": key, "path": path, "size": size or 0}
                           for kind, todo in (("rom", rom_todo), ("bios", bios_todo), ("android", apk_todo), ("driver", driver_todo),
                                           ("theme", theme_todo), ("scrape", scrape_todo))
                           for key, path, size in todo],
-            "delete": list(extras), "missing": {"roms": missing, "bios": [k for k in bios_keys if k not in bios_have]},
+            "delete": list(extras), "rename": [{"from": a, "to": b} for a, b in renames + [(p, j[1]) for p, j in card_moves]],
+            "missing": {"roms": missing, "bios": [k for k in bios_keys if k not in bios_have]},
             "free_space": free}
         for key, path, _ in todo_all:
             print(f"  {key} {ui.dim('→')} {path}")
         short = space(free) if todo_all else None
         if short:
             ui.failure(ui.red(f"❌ {short}"))
+        for path, new in renames:
+            print(f"  {ui.yellow('would rename')} {path} {ui.dim('→')} {new}")
+        for path, job in card_moves:
+            print(f"  {ui.yellow('would move')} {path} {ui.dim('→')} {job[1]}")
         for path in extras:
             print(f"  {ui.red('would delete')} {path}")
         for name in drivers.prune(card, drivers_dir, [os.path.basename(p) for _, p, _ in driver_jobs], True):
@@ -1220,8 +1238,27 @@ def sync_card(args):
                       f"delete {len(extras)} local ROM(s) and {stale_count} media file(s); {len(missing)} listed ROM(s) not in storage"))
         return 0
 
+    move_failed = 0
+    for path, new in renames:
+        try:
+            downloads.rename_on_card(path, new)
+        except OSError as e:
+            move_failed += 1
+            ui.failure(ui.red(f"  ❌ {path}: {e}"))
+    for path, job in card_moves:
+        try:
+            os.makedirs(os.path.dirname(job[1]), exist_ok=True)
+            os.replace(path, job[1])
+        except OSError as e:  # downloaded instead
+            ui.failure(ui.red(f"  ❌ {path}: {e}"))
+            (bios_todo if job in bios_moves else rom_todo).append(job)
+            todo_all.append(job)
+    if clean_card and (renames or card_moves):
+        clean._clean_root = base
+
     if extras:  # cleared first so the free space shown below is what the downloads really get
         delete_extras(extras)
+    cardfs.clear()
 
     if todo_all:
         short = space(free_space(base))
@@ -1240,7 +1277,8 @@ def sync_card(args):
         clean._clean_root = base
     started = time.monotonic()
     failures = []
-    failed = downloads.run_downloads(rom_todo, "ROMs", "💿", roms_dir, failures) + downloads.run_downloads(bios_todo, "BIOS", "🧠", bios_dir, failures)
+    disc_dirs = {os.path.normpath(dest_of(s)): disc_dir for s in chosen if available(s)} if disc_dir else None
+    failed = move_failed + downloads.run_downloads(rom_todo, "ROMs", "💿", roms_dir, failures, disc_dirs) + downloads.run_downloads(bios_todo, "BIOS", "🧠", bios_dir, failures)
     if apk_jobs:
         failed += downloads.run_downloads(apk_todo, "Android", "🤖", apk_dir, failures)
     if driver_entries:
@@ -1248,32 +1286,47 @@ def sync_card(args):
     # also when the card gets no drivers now (another device or layout): the ones sync copied before go
     for name in drivers.prune(card, drivers_dir, [os.path.basename(p) for _, p, _ in driver_jobs], False):
         print(ui.green(f"🧹 Removed old driver {name}"))
-    failed += pico8.run(card, layout_name, base, False)
+    pico8_wrote = []
+    failed += pico8.run(card, layout_name, base, False, pico8_wrote)
     if theme_todo:
         failed += downloads.run_downloads(theme_todo, "Themes", "🎨", os.path.join(base, themes_dir), failures)
+    prefixed = 0
     for s in chosen:
         if disc_dir and available(s):
-            m3u.prefix_playlists(dest_of(s), disc_dir)
+            prefixed += m3u.prefix_playlists(dest_of(s), disc_dir, [p for _, p, _ in rom_todo if p.lower().endswith(".m3u")])
+    cardfs.clear()
 
+    psvita_wrote = []
     if layout_name in frontend.ESDE_LAYOUTS:  # ES-DE launches an installed Vita game through its .psvita file
-        for path, error in vita.add_psvita_files({dest_of(s) for s in chosen if s["bucket"] == "psvita"}):
+        for path, error in vita.add_psvita_files({dest_of(s) for s in chosen if s["bucket"] == "psvita"}, psvita_wrote):
             failed += 1
             failures.append((os.path.relpath(path, roms_dir), error))
             ui.failure(ui.red(f"  ❌ {os.path.relpath(path, roms_dir)}: {error}"))
+        cardfs.clear()
+    if clean_card and (pico8_wrote or prefixed or psvita_wrote):
+        clean._clean_root = base
 
     stale = []
     if scrapes:
-        plan = build_plan(os.path.exists, {path for _, path, _ in planned["jobs"]})  # media found current then still are
+        plan = build_plan(cardfs.exists, {path for _, path, _ in planned["jobs"]})  # media found current then still are
         scrape_todo = plan["jobs"]
-        # EmuDeck's gamelists are on this computer, not the card
-        if clean_card and (plan["jobs"] or plan["writes"] or (plan["gamelists"] and layout_name != "emudeck")):
+        scrape_failed, wrote = scrape_plan.apply_scrape_plan(plan, base, failures)
+        failed += scrape_failed
+        if clean_card and wrote:
             clean._clean_root = base
-        failed += scrape_plan.apply_scrape_plan(plan, base, failures)
+        cardfs.clear()
         stale = scrape_plan.stale_media(layout_name, manifest["systems"], roms_dir, stale_es_dir, base)
     remove_stale_media(stale)
+    cardfs.clear()
     for folder in scrape_plan.prune_empty_systems(layout_name, manifest["systems"], roms_dir):
         print(ui.green(f"🧹 Removed empty system folder {os.path.relpath(folder, base)}"))
+    cardfs.clear()
     frontend_step(False)
+    try:
+        cardfs.flush()  # the frontend settings, before the card is reported done
+    except OSError as e:
+        failed += 1
+        failures.append(("frontend settings", str(e)))
     if failures:
         report_failures(failures)
     if not failed and not args.no_eject and usersettings.load_settings().get("eject", True) is not False:

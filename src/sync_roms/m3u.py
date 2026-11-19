@@ -4,7 +4,7 @@ import posixpath
 import re
 from collections import defaultdict
 
-from . import external, ui
+from . import external, store, ui
 
 
 DISC_RE = re.compile(r" \(Disc (\d+|[A-Z]|[IVX]+)\)")  # "Disc 1", "Disc A" or "Disc II"
@@ -75,19 +75,34 @@ def file_groups(keys):
     return out
 
 
-def prefix_playlists(dest, disc_dir):
-    """Point the playlists directly in dest at their discs in dest/disc_dir. Returns how many it rewrote."""
+def prefixed_playlist(data, dest, disc_dir, coming=lambda path: False):
+    """A playlist's bytes with disc_dir/ put before each bare disc name whose file is in dest/disc_dir (or that
+    coming(path) says a sync is about to write); every other byte stays as it is."""
+    out = []
+    for line in data.splitlines(keepends=True):
+        entry = line.decode("utf-8", errors="replace").strip()
+        path = os.path.join(dest, disc_dir, entry)
+        if entry and not entry.startswith("#") and "/" not in entry and (os.path.exists(path) or coming(path)):
+            keep = len(line) - len(line.lstrip())
+            line = line[:keep] + disc_dir.encode() + b"/" + line[keep:]
+        out.append(line)
+    return b"".join(out)
+
+
+def prefix_playlists(dest, disc_dir, skip=()):
+    """Point the playlists directly in dest at their discs in dest/disc_dir, except those in skip (paths written already
+    prefixed). Returns how many it rewrote."""
     rewritten = 0
+    skip = {os.path.normpath(p) for p in skip}
     for name in sorted(os.listdir(dest)):
         path = os.path.join(dest, name)
-        if not name.lower().endswith(".m3u") or not os.path.isfile(path):
+        if not name.lower().endswith(".m3u") or os.path.normpath(path) in skip or not os.path.isfile(path):
             continue
-        entries = m3u_entries(path)
-        fixed = [posixpath.join(disc_dir, e) if "/" not in e and os.path.exists(os.path.join(dest, disc_dir, e)) else e
-                 for e in entries]
-        if fixed != entries:
-            with open(path, "w", encoding="utf-8", newline="\n") as f:
-                f.write("".join(line + "\n" for line in fixed))
+        with open(path, "rb") as f:
+            data = f.read()
+        fixed = prefixed_playlist(data, dest, disc_dir)
+        if fixed != data:
+            store.replace_file(path, fixed)
             rewritten += 1
     return rewritten
 
@@ -161,7 +176,6 @@ def m3u_command(args):
         elif action == "rename":
             os.rename(path, lines)
         else:
-            with open(path, "w", encoding="utf-8", newline="\n") as f:
-                f.write("".join(line + "\n" for line in lines))
+            store.replace_file(path, "".join(line + "\n" for line in lines), newline="\n")
     print(ui.green(f"🎉 Done: {len(plan) - kept} change(s)"))
     return 0

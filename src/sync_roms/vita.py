@@ -4,7 +4,7 @@ import re
 import struct
 import zipfile
 
-from . import chd, downloads
+from . import cardfs, chd, downloads
 
 BUCKET = "psvita"
 TITLE_ID = re.compile(r"\[([A-Z]{4}\d{5})\]")
@@ -91,15 +91,18 @@ def make_psvita(path):
         return str(e)
 
 
-def add_psvita_files(dests):
-    """Write the missing .psvita file beside each zip in the given folders. Returns [(zip, error)] for the failures."""
+def add_psvita_files(dests, wrote=None):
+    """Write the missing .psvita file beside each zip in the given folders. Returns [(zip, error)] for the failures.
+    wrote, a list, gets each zip whose .psvita was written."""
     failures = []
     for dest in dests:
         for root, files in downloads.walk_roms(dest):
             for f in files:
                 path = os.path.join(root, f)
-                if f.lower().endswith(".zip") and kind(f) == "game" and not os.path.lexists(os.path.splitext(path)[0] + ".psvita"):
+                if f.lower().endswith(".zip") and kind(f) == "game" and not cardfs.exists(os.path.splitext(path)[0] + ".psvita"):
                     error = make_psvita(path)
                     if error:
                         failures.append((path, error))
+                    elif wrote is not None:
+                        wrote.append(path)
     return failures
