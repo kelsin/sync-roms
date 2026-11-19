@@ -484,7 +484,7 @@ const powerOf = tier => Object.keys(POWER).find(k => POWER[k].includes(tier));
 
 // Shader picks, one category per kind of picture, one pick per power level.
 //   preset: RetroArch preset under the shaders folder (Quick Menu > Shaders > Load Preset; slang on Vulkan)
-//   knulli: Knulli Shader Set name (Knulli has no per-preset menu; sets are built in)
+//   knulli: Knulli Shader Set name (Knulli has no per-preset menu; sets are built in, see knulli.org/configure/customization/shaders/)
 //   note:   why / what to change
 // Edit these as favourites are picked; systems decides which categories a device shows.
 const SHADER_CATEGORIES = [
@@ -493,9 +493,9 @@ const SHADER_CATEGORIES = [
     systems: ["gb", "gbc", "gba", "gamegear", "ngp", "ngpc", "wonderswan", "wonderswancolor", "atarilynx", "megaduck", "pokemini", "supervision", "nds"],
     picks: {
       low: { preset: "handheld/zfast_lcd", knulli: "Zfast", note: "Cheap LCD grid." },
-      mid: { preset: "handheld/lcd3x", knulli: "Zfast", note: "Classic LCD grid. Append handheld/gbc-color for GBC, handheld/gba-color for GBA." },
-      high: { preset: "handheld/lcd-grid-v2", knulli: "Zfast", note: "Grid plus colour correction: append handheld/gbc-color or handheld/gba-color." },
-      desktop: { preset: "handheld/lcd-grid-v2", knulli: "Zfast", note: "Same as high; use integer scaling. Mega Bezel's handheld bezels are the fancy option." },
+      mid: { preset: "handheld/lcd3x", knulli: "Zfast", note: "Classic LCD grid (Knulli's Zfast uses zfast-lcd on handhelds). Append handheld/gbc-color for GBC, handheld/gba-color for GBA." },
+      high: { preset: "handheld/lcd-grid-v2", knulli: "Scanlines", note: "Grid plus colour correction: append handheld/gbc-color or handheld/gba-color. Knulli's Scanlines set uses lcd-grid-v2 on most handhelds." },
+      desktop: { preset: "handheld/lcd-grid-v2", knulli: "Scanlines", note: "Same as high; use integer scaling. Mega Bezel's handheld bezels are the fancy option." },
     },
   },
   {
@@ -504,9 +504,9 @@ const SHADER_CATEGORIES = [
       "atari7800", "colecovision", "intellivision", "odyssey2", "channelf", "vectrex", "virtualboy", "sg1000", "arcadia", "pc98", "satellaview", "sufami", "sgb"],
     picks: {
       low: { preset: "crt/zfast_crt", knulli: "Zfast", note: "Lightest scanline shader; works at non-integer scales." },
-      mid: { preset: "crt/crt-hyllian", knulli: "Scanlines", note: "Light, good scanlines and mask. crt/crt-easymode is the alternative." },
-      high: { preset: "crt/crt-guest-advanced", knulli: "Curvature", note: "Fully tweakable CRT. Use integer scaling for even scanlines." },
-      desktop: { preset: "bezel/Mega_Bezel/Presets/MBZ__3__STD", knulli: "Curvature", note: "Mega Bezel (guest-advanced inside) with a reflective bezel; needs Vulkan. crt/crt-royale is the heavier non-bezel option." },
+      mid: { preset: "crt/crt-hyllian", knulli: "Scanlines", note: "Light, good scanlines and mask. crt/crt-easymode is the alternative. Knulli's Scanlines set is crt-pi on weak GPUs, crt-easymode otherwise." },
+      high: { preset: "crt/crt-guest-advanced", knulli: "RCG-Integer-Dramatic-LCD-CRT", note: "Fully tweakable CRT. Use integer scaling for even scanlines. Knulli's set is Retro Game Corps' preset and needs integer scaling; where it can't be used, pick RCG-Noninteger-Dramatic-LCD-CRT." },
+      desktop: { preset: "bezel/Mega_Bezel/Presets/MBZ__3__STD", knulli: "RCG-Integer-Dramatic-LCD-CRT", note: "Mega Bezel (guest-advanced inside) with a reflective bezel; needs Vulkan. crt/crt-royale is the heavier non-bezel option." },
     },
   },
   {
@@ -514,9 +514,9 @@ const SHADER_CATEGORIES = [
     systems: ["mame", "fbneo", "neogeo", "neogeocd", "cps1", "cps2", "cps3", "mame-advmame", "stv", "model2", "naomi", "atomiswave"],
     picks: {
       low: { preset: "crt/zfast_crt", knulli: "Zfast", note: "Lightest scanline shader. Skip it on vertical (TATE) games or turn it off per game." },
-      mid: { preset: "crt/crt-hyllian", knulli: "Scanlines", note: "Light and crisp. Vertical games need a rotated screen; save the preset per game." },
-      high: { preset: "crt/crt-guest-advanced", knulli: "Curvature", note: "Handles the 15kHz look well; tune scanline strength." },
-      desktop: { preset: "bezel/Mega_Bezel/Presets/MBZ__3__STD", knulli: "Curvature", note: "Arcade bezel look; Mega Bezel has TATE-friendly presets." },
+      mid: { preset: "crt/crt-hyllian", knulli: "Scanlines", note: "Light and crisp (crt-easymode in Knulli's set). Vertical games need a rotated screen; save the preset per game." },
+      high: { preset: "crt/crt-guest-advanced", knulli: "RCG-Noninteger-Dramatic-LCD-CRT", note: "Handles the 15kHz look well; tune scanline strength. Arcade resolutions rarely scale to integers, hence the non-integer set. Knulli's Enhanced set (2xScaleHQ on arcade) is the non-CRT option." },
+      desktop: { preset: "bezel/Mega_Bezel/Presets/MBZ__3__STD", knulli: "RCG-Noninteger-Dramatic-LCD-CRT", note: "Arcade bezel look; Mega Bezel has TATE-friendly presets." },
     },
   },
   {
@@ -538,6 +538,56 @@ const SHADER_CATEGORIES = [
       high: { preset: "none", knulli: "None", note: "Same: raise internal resolution in the emulator (PPSSPP, Dolphin, ARMSX2, Azahar) instead." },
       desktop: { preset: "none", knulli: "None", note: "Same, or crt/crt-guest-advanced for a CRT look at native resolution." },
     },
+  },
+];
+// Onion (Miyoo Mini): Jeltr0n's built-in video filters and overlays, from OnionUI/Onion discussion #708.
+const ONION_SHADERS = [
+  {
+    title: "Game Boy", systems: ["gb"],
+    note: "Pair the green grid filter with the DMG overlay; GB colorization stays internal.",
+    rows: [
+      ["Quick Menu > Core Options > GB Colorization", "internal", "Palette category Essentials, GB-DMG or GB-Pocket."],
+      ["Settings > Video > Scaling > Integer Scale", "on"],
+      ["Settings > Video > Video Filter", "GB-GBC/Filters for overlays/DMG_GreenGrid", "GBP_GrayGrid for the gray look."],
+      ["Settings > On-Screen Display > On-Screen Overlay > Overlay Preset", "GB-GBC/GBOffset/DMG_GBP", "Opacity 1.00."],
+    ],
+  },
+  {
+    title: "Game Boy Color", systems: ["gbc"],
+    note: "Dark grid reshade filter plus the GBC overlay.",
+    rows: [
+      ["Quick Menu > Core Options > Color Correction", "GBC Only", "Mode Accurate or Fast."],
+      ["Settings > Video > Scaling > Integer Scale", "on"],
+      ["Settings > Video > Video Filter", "GB-GBC/Filters for overlays/GBC_DarkGridReshade"],
+      ["Settings > On-Screen Display > On-Screen Overlay > Overlay Preset", "GB-GBC/GBOffset/GBC", "Opacity 1.00."],
+    ],
+  },
+  {
+    title: "Game Boy Advance", systems: ["gba"],
+    note: "GBA's 3:2 picture doesn't scale to integers, so integer scale is off.",
+    rows: [
+      ["Settings > Video > Scaling > Integer Scale", "off", "Keep Aspect Ratio on."],
+      ["Settings > Video > Video Filter", "GBA/filters for overlays/GBAOffset"],
+      ["Settings > On-Screen Display > On-Screen Overlay > Overlay Preset", "GBA/GBAOffset/GBA_3X_Grid_25", "A grid or scanline preset with the opacity in its name."],
+    ],
+  },
+  {
+    title: "Neo Geo Pocket", systems: ["ngp", "ngpc"],
+    note: "Same filter as GBC with the black NGP overlay.",
+    rows: [
+      ["Settings > Video > Scaling > Integer Scale", "on"],
+      ["Settings > Video > Video Filter", "GB-GBC/Filters for overlays/GBC_DarkGridReshade"],
+      ["Settings > On-Screen Display > On-Screen Overlay > Overlay Preset", "NGP/NGPOffset/NGP_Black", "Opacity 1.00."],
+    ],
+  },
+  {
+    title: "4:3 consoles and arcade (CRT look)",
+    systems: ["nes", "snes", "genesis", "mastersystem", "segacd", "tg16", "mame", "fbneo", "neogeo", "psx", "atari2600"],
+    note: "An overlay, no filter: cheapest on the Mini, and it keeps full speed.",
+    rows: [
+      ["Settings > Video > Scaling > Integer Scale", "off", "Keep Aspect Ratio off to fill the 4:3 screen; on for correct proportions."],
+      ["Settings > On-Screen Display > On-Screen Overlay > Overlay Preset", "CRT/ (an effect of your choice)", "Opacity 1.00. Or Scanlines and Grids/ with the 2px versions for higher-resolution systems."],
+    ],
   },
 ];
 function shaderPickRows(c, ctx) {
@@ -720,14 +770,22 @@ const SECTIONS = [
   {
     id: "shaders",
     title: "Shaders",
-    lede: "Starting picks for this device's power and systems; edit <code>SHADER_CATEGORIES</code> in the page's script as favourites are chosen.",
-    when: { layout: ["esde", "knulli", "emudeck"] },
+    lede: "Starting picks for this device's power and systems; edit <code>SHADER_CATEGORIES</code> (and <code>ONION_SHADERS</code> for Onion) in the page's script as favourites are chosen.",
+    when: { layout: ["esde", "knulli", "emudeck", "onion"] },
     items: [
       {
         title: "How to apply them",
         body: ctx => {
+          if (ctx.layout === "onion") return `<p>Onion's RetroArch uses a <b>Video Filter</b> (CPU-based, so it costs speed) and an <b>On-Screen Overlay</b> instead of shader presets. Jeltr0n's filters and overlays are built into Onion.</p>
+            <ol>
+              <li>Open the RetroArch menu with <span class="path">Menu + Select</span> in a running game.</li>
+              <li>Set the values below, then <span class="path">${path("Quick Menu > Overrides > Save Core Overrides")}</span> (or Save Content Directory Overrides) to keep them.</li>
+              <li>Filters cost speed; test demanding games (Star Fox, Yoshi's Island) and turn the filter off there, keeping the overlay.</li>
+              <li>The 2px scanline and grid overlays suit higher-resolution systems; lower the opacity if the picture gets dark.</li>
+            </ol>`;
           const how = ctx.layout === "knulli"
             ? `<p class="path">${path("Start > Game Settings > Game Rendering & Shaders > Shader Set")}</p>
+               <p><b>Auto</b> (the default) applies no shader except GB colorization. Sets also exist per screen: Retrovibes-480p, -720p, -720p-HMDI and -768p are tuned for those panels (H700/A133 speed). Set both the shader set and the decoration/bezel set to None if they overlap.</p>
                <p>Global. Per system: <span class="path">${path("Select > Advanced System Options > Game Rendering & Shaders")}</span>. Per game: hold the launch button on the game, <span class="path">${path("Advanced Game Options > Game Rendering & Shaders")}</span>. Choose <b>None</b> to let RetroArch's own saved presets win.</p>`
             : `<ol>
                 <li>RetroArch: <span class="path">${path("Settings > Drivers > Video")}</span> <b>vulkan</b> (slang presets need it), then <span class="path">${path("Main Menu > Online Updater > Update Slang Shaders")}</span>.</li>
@@ -739,9 +797,14 @@ const SECTIONS = [
           return `<p>This device counts as <b>${esc(POWER_NAMES[ctx.power] || "unknown")}</b>.</p>${how}`;
         },
       },
+      ...ONION_SHADERS.map(o => ({
+        title: o.title,
+        when: { layout: ["onion"], systems: o.systems },
+        body: ctx => `<p class="note">${esc(o.systems.filter(s => ctx.systems.includes(s)).join(", "))}</p><p>${esc(o.note)}</p>${settingsTable(o.rows)}`,
+      })),
       ...SHADER_CATEGORIES.map(c => ({
         title: c.title,
-        when: { systems: c.systems },
+        when: { layout: ["esde", "knulli", "emudeck"], systems: c.systems },
         body: ctx => {
           const pick = c.picks[ctx.power];
           const names = c.systems.filter(s => ctx.systems.includes(s)).join(", ");
