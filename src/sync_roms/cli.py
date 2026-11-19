@@ -386,16 +386,22 @@ def check_dir(path, label):
 
 
 def prepare_dirs(base, layout, dry_run, ask=True):
-    """Show, validate and (after confirmation, unless ask is False) create the layout's ROM and BIOS folders under base.
+    """Show, validate and (after confirmation, unless ask is False) create the layout's ROM and BIOS folders under base,
+    and its RetroArch saves and states folders when the layout's retroarch says create.
 
     Returns (roms, bios), or None if declined.
     """
     roms = os.path.join(base, layout["roms_dir"])
     bios = os.path.join(base, layout["bios_dir"])
+    folders = [("💿", "ROMs", roms), ("🧠", "BIOS", bios)]
+    ra = layout.get("retroarch") or {}
+    if ra.get("create"):  # the folders above {core}, for RetroArch's Save Files / Save States directories
+        folders += [("💾", name.capitalize(), os.path.join(base, *ra["dir"].split("/"), *ra[name].split("/{core}")[0].split("/")))
+                    for name in ("saves", "states")]
     # check everything before asking anything
-    missing = {path for label, path in (("ROMs folder", roms), ("BIOS folder", bios)) if check_dir(path, label)}
+    missing = {path for _, name, path in folders if check_dir(path, f"{name} folder")}
     print(ui.bold(f"📁 {layout['label']} layout in {base}:"))
-    for icon, name, path in (("💿", "ROMs", roms), ("🧠", "BIOS", bios)):
+    for icon, name, path in folders:
         print(f"  {icon} {name} → {ui.cyan(path)}" + (ui.dim("  (will be created)") if path in missing else ""))
     if ask and not dry_run and not ui.confirm("Continue with these folders?"):
         return None

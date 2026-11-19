@@ -6,7 +6,8 @@
     "retroarch": {
       "dir": "RetroArch",
       "saves": "saves/{core}",
-      "states": "states/{core}"
+      "states": "states/{core}",
+      "create": true
     },
     "note": "System folders use the ES-DE names."
   },

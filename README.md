@@ -727,7 +727,7 @@ one already on the card, a typed name, or none (RetroArch with sort by core off)
 | `emudeck` | `Emulation/saves/retroarch` | `saves` | `states` |
 
 RetroArch on Android keeps its saves in internal storage (`/storage/emulated/0/RetroArch/`), not on the SD card:
-point its save folders at the card's `RetroArch/saves` and `RetroArch/states`, or copy that folder off the device and
+point its save folders at the card's `RetroArch/saves` and `RetroArch/states` (every sync creates them on `esde` cards), or copy that folder off the device and
 pass it with `--retroarch DIR`. EmuDeck's folders are symlinks that only resolve on the Deck; elsewhere pass the real
 folder with `--retroarch`. States only load in the core they were made with (`gpSP` states don't load in `mGBA`);
 `.srm` saves (and `.rtc`) usually work in any core of the system.

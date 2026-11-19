@@ -89,6 +89,22 @@ class PrepareDirsTest(unittest.TestCase):
             self.assertTrue(os.path.isdir(os.path.join(tmp, "Emulation", "roms")))
             self.assertTrue(os.path.isdir(os.path.join(tmp, "Emulation", "bios")))
             self.assertEqual(bios, os.path.join(tmp, "Emulation", "bios"))
+            self.assertFalse(os.path.exists(os.path.join(tmp, "Emulation", "saves")))
+
+    def test_creates_the_esde_retroarch_save_folders(self):
+        layout = repo("layouts.json")["esde"]
+        with tempfile.TemporaryDirectory() as tmp, contextlib.redirect_stdout(io.StringIO()):
+            os.makedirs(os.path.join(tmp, "RetroArch", "states", "mGBA"))
+            cli.prepare_dirs(tmp, layout, False, ask=False)
+            self.assertEqual(sorted(os.listdir(os.path.join(tmp, "RetroArch"))), ["saves", "states"])
+            self.assertEqual(os.listdir(os.path.join(tmp, "RetroArch", "states")), ["mGBA"])
+
+    def test_dry_run_only_says_it_would_create_the_save_folders(self):
+        layout = repo("layouts.json")["esde"]
+        with tempfile.TemporaryDirectory() as tmp, contextlib.redirect_stdout(io.StringIO()) as out:
+            cli.prepare_dirs(tmp, layout, True, ask=False)
+            self.assertEqual(os.listdir(tmp), [])
+        self.assertIn(os.path.join(tmp, "RetroArch", "saves"), out.getvalue())
 
 
 class FindExtrasTest(unittest.TestCase):

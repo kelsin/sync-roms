@@ -299,7 +299,7 @@ class PlanApplyTest(unittest.TestCase):
 class LayoutDataTest(unittest.TestCase):
     def test_every_layout_has_retroarch(self):
         for name, layout in LAYOUTS.items():
-            self.assertEqual(set(layout["retroarch"]), {"dir", "saves", "states"}, name)
+            self.assertEqual(set(layout["retroarch"]) - {"create"}, {"dir", "saves", "states"}, name)
 
 
 CATALOG_SYSTEMS = [
