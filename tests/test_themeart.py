@@ -206,6 +206,27 @@ class Esde(Card):
         for kept in (art, ("my shmups", "theme.xml"), ("surprise", "theme.xml"), (themeart.ESDE_OWNED,)):
             self.assertTrue(os.path.exists(self.copy(*kept)), kept)
 
+    def test_a_file_the_archive_spells_in_other_capitals_is_not_deleted(self):
+        self.settings(themeart.ESDE_THEME)
+        self.store("abc", {"Foo.png": b"x"})
+        self.install()
+        self.store("def", {"foo.png": b"x"})
+        with mock.patch.object(themeart.os, "remove") as remove:
+            self.install()
+        remove.assert_not_called()
+        self.assertIn("foo.png", [n.lower() for n in os.listdir(self.copy())])
+
+    def test_an_archive_failing_midway_deletes_nothing(self):
+        self.settings(themeart.ESDE_THEME)
+        self.store("abc", {"a.xml": b"<a/>", "gone.xml": b"x"})
+        self.install()
+        self.store("def", {"a.xml": b"<A/>", "b.xml": os.urandom(100000)})
+        with open(os.path.join(self.storage, themeart.ESDE_ARCHIVE), "r+b") as f:
+            f.truncate(os.path.getsize(f.name) // 2)
+        self.assertFalse(self.install())
+        self.assertTrue(os.path.exists(self.copy("gone.xml")))
+        self.assertEqual(read(self.copy(themeart.ESDE_MARKER)).strip(), "abc")
+
     def test_a_leftover_disabled_folder_is_removed(self):
         self.settings(themeart.ESDE_THEME)
         write(self.copy("..", themeart.ESDE_COPY + "-disabled", "x"), "x")

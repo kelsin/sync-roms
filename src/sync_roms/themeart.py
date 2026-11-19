@@ -11,7 +11,7 @@ import tempfile
 from xml.sax import saxutils
 import zlib
 
-from . import frontend, github, runtime, s3, store, ui
+from . import downloads, frontend, github, runtime, s3, store, ui
 
 THEME_DATA = os.path.join(store.REPO_DATA, "themes", "art-book-next")
 SURPRISE_ART = "surprise"
@@ -218,7 +218,7 @@ def _extract(archive_path, dest, commit):
             if not member.isfile() or not rel:
                 continue
             path = s3.safe_join(dest, rel)
-            wanted.add(os.path.normcase(os.path.normpath(path)))
+            wanted.add(downloads.name_key(path))
             data = archive.extractfile(member).read()
             try:
                 if os.path.getsize(path) == len(data):
@@ -229,11 +229,11 @@ def _extract(archive_path, dest, commit):
                 pass
             os.makedirs(os.path.dirname(path), exist_ok=True)
             store.replace_file(path, data)
-    kept = {os.path.normcase(os.path.normpath(os.path.join(dest, *k.split("/")))) for k in keep}
+    kept = {downloads.name_key(os.path.join(dest, *k.split("/"))) for k in keep}
     for folder, _, names in os.walk(dest, topdown=False):
         for name in names:
             path = os.path.join(folder, name)
-            if os.path.normcase(os.path.normpath(path)) not in wanted | kept:
+            if downloads.name_key(path) not in wanted | kept:  # cards ignore case
                 os.remove(path)
         if folder != dest and not os.listdir(folder):
             os.rmdir(folder)
