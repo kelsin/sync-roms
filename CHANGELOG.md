@@ -1,5 +1,17 @@
 # Changelog
 
+## [3.14.0](https://github.com/kelsin/sync-roms/compare/v3.13.0...v3.14.0) (2026-11-19)
+
+
+### :video_game: Features
+
+* **flash:** say why verify failed ([#404](https://github.com/kelsin/sync-roms/issues/404)) ([b0c512c](https://github.com/kelsin/sync-roms/commit/b0c512cd93586923ccf37a969da336316d295bbc))
+
+
+### :bug: Bug Fixes
+
+* **flash:** align progress lines and add a progress bar ([#403](https://github.com/kelsin/sync-roms/issues/403)) ([3b637b2](https://github.com/kelsin/sync-roms/commit/3b637b20287bcbed4cb59cf1c83d09b260b3177e))
+
 ## [3.13.0](https://github.com/kelsin/sync-roms/compare/v3.12.0...v3.13.0) (2026-11-19)
 
 
