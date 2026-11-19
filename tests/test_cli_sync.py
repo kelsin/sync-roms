@@ -770,6 +770,28 @@ class SyncSmokeTest(RealDataDirGuard):
         self.assertEqual(self.run_sync(False, patches=patches), 1)
         self.assertRegex(self.out.getvalue().splitlines()[-1], r"^⚠️  Done with 1 failure\(s\): downloaded 0 file\(s\) \(0 B\) in \d+m\d\ds$")
 
+    def test_a_settings_file_that_cannot_be_written_is_a_failure_and_the_card_is_not_ejected(self):
+        def fail():
+            if not calls:
+                calls.append(1)
+                raise OSError("disk full")  # the end of the sync; the exit of caching() finds nothing left
+        calls = []
+
+        class Settings(dict):
+            asked = []
+
+            def get(self, key, default=None):
+                self.asked.append(key)
+                return default
+        patches = ((cli.cardfs, {"flush": fail}), (usersettings, {"load_settings": Settings}))
+        self.assertEqual(self.run_sync(False, patches=patches), 1)
+        self.assertRegex(self.out.getvalue().splitlines()[-1] + self.err.getvalue(), r"Done with 1 failure")
+        self.assertIn("disk full", self.err.getvalue() + self.out.getvalue())
+        self.assertNotIn("eject", Settings.asked)  # eject is only considered when nothing failed
+        Settings.asked.clear()
+        self.assertEqual(self.run_sync(False, patches=((usersettings, {"load_settings": Settings}),)), 0)
+        self.assertIn("eject", Settings.asked)
+
     def test_vita_game_syncs_its_dlc_and_newest_update_and_drops_the_old_update(self):
         game = "psvita/G [PCSE00349] [USA] [NoNpDRM].zip"
         old = "psvita/G [PCSE00349] [USA] [PATCH] [v1.02] [NoNpDRM].zip"

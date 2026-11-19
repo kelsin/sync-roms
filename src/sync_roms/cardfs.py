@@ -17,14 +17,21 @@ def caching():
         yield
     finally:
         try:
-            for path in sorted(_dirty):
-                _put(path, _texts[path])
+            flush()
         finally:
             _cache = _texts = _dirty = None
 
 
 _texts = None  # {path: text} of the settings files while caching(); kept through clear(): it is their latest text
 _dirty = None  # the paths in _texts that differ from the card, written once when caching() ends
+
+
+def flush():
+    """Write the settings edits waiting for the end of caching() now; a file that fails is not tried again."""
+    while _dirty:
+        path = min(_dirty)
+        _dirty.discard(path)
+        _put(path, _texts[path])
 
 
 def clear():

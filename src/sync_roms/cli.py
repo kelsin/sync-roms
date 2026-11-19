@@ -1317,6 +1317,11 @@ def sync_card(args):
         print(ui.green(f"🧹 Removed empty system folder {os.path.relpath(folder, base)}"))
     cardfs.clear()
     frontend_step(False)
+    try:
+        cardfs.flush()  # the frontend settings, before the card is reported done
+    except OSError as e:
+        failed += 1
+        failures.append(("frontend settings", str(e)))
     if failures:
         report_failures(failures)
     if not failed and not args.no_eject and usersettings.load_settings().get("eject", True) is not False:
