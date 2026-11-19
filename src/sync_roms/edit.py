@@ -3,7 +3,7 @@ import os
 import sys
 from collections import defaultdict
 
-from . import names, picker, previews, runtime, s3, store, themeart, ui, vita
+from . import names, picker, previews, runtime, s3, store, surprise, themeart, ui, vita
 
 
 def note(text):
@@ -364,10 +364,11 @@ def edit_manifest():
         t = targets.get(name)
         pending = bool(t and t["setup"])
         setup = t["setup"] if pending else saved_setup(name, cards)
+        gift = f"  🎁 {'on' if surprise.enabled(cards.get(name)) else 'off'}"
         if not setup:
-            return [("  ⚠️  no device set", "red")]
+            return [("  ⚠️  no device set", "red"), (gift, "dim")]
         return [(f"  {setup[0]['name'] if setup[0] else 'Full'} · {manifest['layouts'][setup[1]]['label']}",
-                 "cyan" if pending else "dim")]
+                 "cyan" if pending else "dim"), (gift, "dim")]
 
     def pending_count(key):
         return sum(len(v) for part in target_changes(fresh_target(key)) for v in part.values()) if key in targets else 0

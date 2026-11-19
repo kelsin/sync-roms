@@ -457,7 +457,8 @@ def cards_list(args):
         rows.append({"name": name, "device": (setup[0]["id"] if setup[0] else "full") if setup else None,
                      "layout": setup[1] if setup else None, "size": cards[name].get("size") if isinstance(cards[name], dict) else None,
                      "used": usage.bytes if usage else None, "sized": not usage.partial if usage else None,
-                     "full_systems": len(full) if setup else None, "games": picked, "extras": extras})
+                     "full_systems": len(full) if setup else None, "games": picked, "extras": extras,
+                     "surprise": surprise.enabled(cards[name])})
     if args.json:
         ui.emit_json(rows)
         return 0
@@ -484,7 +485,8 @@ def cards_list(args):
             return ("", f"{r['extras']:>{games_w}} game entries")
         return (plural(r["full_systems"], full_w, "full system"), plural(r["games"], games_w, "game"))
 
-    ui.table([(r["name"], r["device"] or "(no device set)", r["layout"] or "", used(r), *picks(r)) for r in rows])
+    ui.table([(r["name"], r["device"] or "(no device set)", r["layout"] or "", used(r), *picks(r),
+               "🎁 on" if r["surprise"] else "🎁 off") for r in rows])
     if unsized:
         print()
         print(ui.dim("* Not sized: there is no storage cache yet, so full-system folders can't be counted.\n"
