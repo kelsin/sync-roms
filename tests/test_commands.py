@@ -260,10 +260,10 @@ class GamesTest(CardCmd):
         self.assertEqual(self.run_cmd("games", "import", path)[0], 0)
         self.assertNotIn("surprise", self.read("cards.json")["SD"])
 
-    def test_onion_surprise_state_round_trips(self):
-        self.write_json("cards.json", {"SD": {"device": "full", "layout": "onion", "surprise": True}})
+    def test_allium_surprise_state_round_trips(self):
+        self.write_json("cards.json", {"SD": {"device": "full", "layout": "allium", "surprise": True}})
         self.assertEqual(self.run_cmd("games", "export")[1].splitlines(), ["@surprise true"])
-        self.write_json("cards.json", {"SD": {"device": "full", "layout": "onion"}})
+        self.write_json("cards.json", {"SD": {"device": "full", "layout": "allium"}})
         self.assertEqual(self.run_cmd("games", "export")[1].splitlines(), [])
         path = self.path("list.txt")
         with open(path, "w") as f:
