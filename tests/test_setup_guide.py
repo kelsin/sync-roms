@@ -13,6 +13,12 @@ class SetupGuideTest(unittest.TestCase):
         self.assertEqual(update_setup_guide.embedded(html), update_setup_guide.devices_json(),
                          "run tools/update_setup_guide.py")
 
+    def test_device_systems_match_device_systems_json(self):
+        with open(update_setup_guide.GUIDE) as f:
+            html = f.read()
+        self.assertEqual(update_setup_guide.embedded(html, update_setup_guide.SYSTEMS_BLOCK),
+                         update_setup_guide.systems_json(), "run tools/update_setup_guide.py")
+
     def test_guide_command_opens_the_packaged_page(self):
         from unittest import mock
         from sync_roms import commands
