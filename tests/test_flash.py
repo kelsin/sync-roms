@@ -1,6 +1,9 @@
+import contextlib
 import gzip
 import hashlib
+import io
 import os
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -8,7 +11,8 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
-from sync_roms import flash  # noqa: E402
+import helpers  # noqa: E402
+from sync_roms import flash, inventory, picker, store, ui, usersettings  # noqa: E402
 
 KEYS = ["os/knulli-h700-rg35xx-h-scarab-20260511.img.gz", "os/knulli-h700-rg34xx-sp-scarab-20260511.img.gz",
         "os/knulli-h700-rg35xx-h-gladiator-20250101.img.gz", "os/knulli-rk3568-miyoo-flip-scarab-20260510.img.gz"]
@@ -126,3 +130,210 @@ class WriteVerify(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+IMAGE = "os/knulli-h700-rg35xx-h-scarab-20260511.img.gz"
+CARD = flash.Disk("disk4", 64_000_000_000, "SD")
+SUDO = ["sudo", "-v"]
+
+
+class Args:
+    def __init__(self, dry_run=False):
+        self.dry_run = dry_run
+
+
+class Run(helpers.StorageDir):
+    def setUp(self):
+        super().setUp()
+        self.put(IMAGE, gzip.compress(b"img"))
+        inventory.reset()
+        self.addCleanup(inventory.reset)
+        self.calls = []
+        self.answer = "disk4"
+        self.tmps = []
+        real_mkdtemp = tempfile.mkdtemp
+
+        def mkdtemp(**kw):
+            path = real_mkdtemp(dir=self.tmp.name, **kw)
+            self.tmps.append(path)
+            return path
+
+        def run(cmd, **kw):
+            self.calls.append(cmd)
+            return subprocess.CompletedProcess(cmd, 0, "", "")
+
+        def write(gz, disk, progress=None):
+            self.calls.append("<write>")
+            return 3, "abc"
+
+        def check(disk, size, digest, progress=None):
+            self.calls.append("<verify>")
+            return True
+
+        self.filter_list = mock.Mock(return_value=0)
+        self.write_image = mock.Mock(side_effect=write)
+        self.verify = mock.Mock(side_effect=check)
+        self.external_disks = mock.Mock(return_value=[CARD])
+        for p in (mock.patch.object(flash, "_run", side_effect=run),
+                  mock.patch.object(picker, "filter_list", self.filter_list),
+                  mock.patch.object(ui, "ask", lambda prompt: self.answer),
+                  mock.patch.object(flash, "external_disks", self.external_disks),
+                  mock.patch.object(flash, "disks_of", return_value=set()),
+                  mock.patch.object(flash.sys, "platform", "darwin"),
+                  mock.patch.object(usersettings, "ensure_bucket"),
+                  mock.patch.object(flash, "write_image", self.write_image),
+                  mock.patch.object(flash, "verify", self.verify),
+                  mock.patch.object(flash.tempfile, "mkdtemp", mkdtemp),
+                  mock.patch.object(store, "repo_json", return_value=[
+                      {"id": "anbernic-rg35xxh", "name": "Anbernic RG35XX H", "firmwares": ["knulli"]}])):
+            p.start()
+            self.addCleanup(p.stop)
+
+    def flash(self, dry_run=False):
+        with contextlib.redirect_stdout(io.StringIO()) as out, contextlib.redirect_stderr(io.StringIO()):
+            code = flash.run(Args(dry_run))
+        self.out = out.getvalue()
+        return code
+
+    def steps(self):
+        return [c for c in self.calls if isinstance(c, str) or c[0] in ("sudo", "diskutil", "sync")]
+
+    def assert_temp_removed(self):
+        self.assertEqual(len(self.tmps), 1)
+        self.assertFalse(os.path.exists(self.tmps[0]))
+
+    def test_wrong_confirmation_writes_nothing(self):
+        for answer in ("Disk4", "y", ""):
+            self.calls.clear()
+            self.answer = answer
+            self.assertEqual(self.flash(), 1)
+            self.write_image.assert_not_called()
+            self.assertNotIn(SUDO, self.calls)
+            self.assertIn("Not flashed", self.out)
+
+    def test_confirmation_strips_whitespace(self):
+        self.answer = " disk4 \n"
+        self.assertEqual(self.flash(), 0)
+        self.write_image.assert_called_once()
+
+    def test_dry_run_downloads_and_writes_nothing(self):
+        with mock.patch.object(flash.s3, "download") as download:
+            self.assertEqual(self.flash(dry_run=True), 0)
+        download.assert_not_called()
+        self.write_image.assert_not_called()
+        self.assertNotIn(SUDO, self.calls)
+        self.assert_temp_removed()
+
+    def test_success_order(self):
+        self.assertEqual(self.flash(), 0)
+        self.assertEqual(self.steps(), [SUDO, SUDO, ["diskutil", "unmountDisk", "disk4"], "<write>", ["sync"],
+                                        ["diskutil", "unmountDisk", "disk4"], SUDO, "<verify>", ["sync"],
+                                        ["diskutil", "eject", "disk4"]])
+        self.assert_temp_removed()
+        self.assertIn("Flashed and verified", self.out)
+        self.assertTrue(self.write_image.call_args.args[0].endswith(os.path.basename(IMAGE)))
+
+    def test_image_labels_mark_match(self):
+        self.flash()
+        title, labels = self.filter_list.call_args_list[1].args[:2]
+        self.assertEqual(labels, [IMAGE[len("os/"):]])
+        self.assertIn("✓", str(self.filter_list.call_args_list[1].kwargs["extras"]))
+        self.assertEqual(self.filter_list.call_args_list[2].args[1], [f"disk4  {ui.human_size(64_000_000_000)}  SD"])
+
+    def test_unknown_size_label(self):
+        self.external_disks.return_value = [flash.Disk("disk4", None, "SD")]
+        self.flash()
+        self.assertEqual(self.filter_list.call_args_list[2].args[1], ["disk4  ?  SD"])
+
+    def test_esc_on_device_returns_zero(self):
+        self.filter_list.return_value = None
+        self.assertEqual(self.flash(), 0)
+        self.assertEqual(self.calls, [])
+
+    def test_esc_on_card_removes_temp(self):
+        self.filter_list.side_effect = [0, 0, None]
+        self.assertEqual(self.flash(), 0)
+        self.assert_temp_removed()
+        self.assertEqual(self.steps(), [])
+
+    def test_verify_mismatch_fails_and_unmounts(self):
+        self.verify.side_effect = lambda *a, **k: self.calls.append("<verify>") or False
+        self.assertEqual(self.flash(), 1)
+        self.assertEqual(self.steps()[-1], ["diskutil", "unmountDisk", "disk4"])
+        self.assertNotIn(["diskutil", "eject", "disk4"], self.calls)
+        self.assertIn("doesn't match the image", self.out)
+
+    def test_write_error_cleans_up(self):
+        self.write_image.side_effect = flash.FlashError("dd: boom")
+        self.assertEqual(self.flash(), 1)
+        self.assert_temp_removed()
+        self.assertEqual(self.steps()[-1], ["diskutil", "unmountDisk", "disk4"])
+        self.assertNotIn(["diskutil", "eject", "disk4"], self.calls)
+        self.assertIn("dd: boom", self.out)
+
+    def test_ctrl_c_cleans_up(self):
+        self.write_image.side_effect = KeyboardInterrupt
+        with self.assertRaises(KeyboardInterrupt):
+            self.flash()
+        self.assert_temp_removed()
+        self.assertEqual(self.steps()[-1], ["diskutil", "unmountDisk", "disk4"])
+
+    def test_low_space_stops_before_download(self):
+        with mock.patch.object(flash.shutil, "disk_usage", return_value=mock.Mock(free=0)), \
+                mock.patch.object(flash.s3, "download") as download:
+            self.assertEqual(self.flash(), 1)
+        download.assert_not_called()
+        self.assertNotIn(SUDO, self.calls)
+        self.assert_temp_removed()
+
+    def test_sudo_failure_stops_before_write(self):
+        def run(cmd, **kw):
+            self.calls.append(cmd)
+            return subprocess.CompletedProcess(cmd, 1 if cmd == SUDO else 0, "", "")
+        flash._run.side_effect = run
+        self.assertEqual(self.flash(), 1)
+        self.write_image.assert_not_called()
+        self.assert_temp_removed()
+
+    def test_unmount_failure_stops_before_write(self):
+        def run(cmd, **kw):
+            self.calls.append(cmd)
+            busy = cmd[:2] == ["diskutil", "unmountDisk"]
+            return subprocess.CompletedProcess(cmd, 1 if busy else 0, "", "disk busy" if busy else "")
+        flash._run.side_effect = run
+        self.assertEqual(self.flash(), 1)
+        self.write_image.assert_not_called()
+        self.assertIn("disk busy", self.out)
+
+    def test_sudo_uses_terminal(self):
+        self.flash()
+        for call in flash._run.call_args_list:
+            self.assertEqual(call.kwargs.get("capture", True), call.args[0] != SUDO)
+
+    def test_eject_failure_warns(self):
+        def run(cmd, **kw):
+            self.calls.append(cmd)
+            return subprocess.CompletedProcess(cmd, 1 if cmd[:2] == ["diskutil", "eject"] else 0, "", "")
+        flash._run.side_effect = run
+        self.assertEqual(self.flash(), 0)
+        self.assertNotIn("safe to remove", self.out)
+
+    def test_no_cards(self):
+        self.external_disks.return_value = []
+        ask = mock.Mock()
+        with mock.patch.object(ui, "ask", ask):
+            self.assertEqual(self.flash(), 1)
+        ask.assert_not_called()
+        self.assertIn("no SD card found", self.out)
+        self.assert_temp_removed()
+
+    def test_no_images(self):
+        os.remove(os.path.join(self.root, IMAGE))
+        self.assertEqual(self.flash(), 1)
+        self.assertIn("no Knulli images", self.out)
+
+    def test_not_macos(self):
+        with mock.patch.object(flash.sys, "platform", "linux"):
+            self.assertEqual(self.flash(), 1)
+        self.filter_list.assert_not_called()
+        self.assertIn("flash needs macOS", self.out)

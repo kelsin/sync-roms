@@ -6,14 +6,20 @@ import math
 import os
 import plistlib
 import re
+import shutil
 import subprocess
+import sys
+import tempfile
 import zlib
 from xml.parsers.expat import ExpatError
+
+from . import inventory, picker, runtime, s3, store, ui, usersettings
 
 PREFIX = "os/"
 DD = ["sudo", "dd"]
 WRITE_BLOCK = 4 * 1024 * 1024
 READ_BLOCK = 16 * 1024 * 1024
+SPARE = 64 * 1024 * 1024  # free space kept in the temp folder beyond the download
 
 
 class FlashError(Exception):
@@ -207,3 +213,142 @@ def verify(disk, size, digest, progress=None):
         if proc:
             _stop(proc)
         raise
+
+
+def _run(cmd, capture=True):
+    """Every command flash runs; capture=False leaves the terminal to it (sudo -v asks for a password there)."""
+    return subprocess.run(cmd, capture_output=capture, text=True)
+
+
+def _sudo():
+    """Ask for (or refresh) sudo on the terminal; False when it was refused or cancelled."""
+    if _run(["sudo", "-v"], capture=False).returncode != 0:
+        ui.failure(ui.red("❌ sudo was refused or cancelled"))
+        return False
+    return True
+
+
+def _progress(label):
+    """A progress(fraction) callback redrawing one line on a terminal (nothing elsewhere), and a done() ending it."""
+    shown = sys.stdout.isatty()
+
+    def draw(fraction):
+        if shown:
+            sys.stdout.write(f"\r\033[K  {label} {fraction:4.0%}")
+            sys.stdout.flush()
+
+    def done():
+        if shown:
+            sys.stdout.write("\n")
+    return draw, done
+
+
+def _disk_label(disk):
+    return f"{disk.id}  {'?' if disk.size is None else ui.human_size(disk.size)}  {disk.name}"
+
+
+def run(args):
+    """Pick a Knulli device, image and SD card, write the image to the card and read it back. 0 on success, dry-run or
+    Esc; 1 on any failure."""
+    if sys.platform != "darwin":
+        ui.failure(ui.red("❌ flash needs macOS"))
+        return 1
+    usersettings.ensure_bucket()
+    devices = knulli_devices(store.repo_json("devices"))
+    i = picker.filter_list("🎯 Which device?", [d["name"] for d in devices],
+                           hint="/ filter · j/k move · Enter continue · Esc quit")
+    if i is None:
+        return 0
+    device = devices[i]
+    listing = inventory.files(PREFIX)
+    found = sort_images(images(listing), device["id"])
+    if not found:
+        ui.failure(ui.red("❌ no Knulli images in storage's os/"))
+        return 1
+    i = picker.filter_list(f"💾 Which image for {device['name']}?", [k[len(PREFIX):] for k, _ in found],
+                           extras=[[(f"  {ui.human_size(listing[k])}", "dim"), ("  ✓ matches" if m else "", "green")]
+                                   for k, m in found],
+                           hint="/ filter · j/k move · Enter continue · Esc quit")
+    if i is None:
+        return 0
+    key = found[i][0]
+    gz_size = listing[key]
+    tmp = tempfile.mkdtemp(prefix="sync-roms-flash-")
+    disk, touched, verified, ejected = None, False, False, False
+    try:
+        cards = external_disks(disks_of(tmp) | (disks_of(runtime.ROOT) if runtime.ROOT else set()))
+        if not cards:
+            ui.failure(ui.red("❌ no SD card found"))
+            return 1
+        i = picker.filter_list("🃏 Which SD card?", [_disk_label(d) for d in cards],
+                               hint="/ filter · j/k move · Enter continue · Esc quit")
+        if i is None:
+            return 0
+        disk = cards[i]
+        size = "?" if disk.size is None else ui.human_size(disk.size)
+        print(ui.yellow(f"⚠️  Everything on {disk.id} ({size}, {disk.name}) will be erased."))
+        if ui.ask(f"Type {disk.id} to flash it: ").strip() != disk.id:
+            ui.failure(ui.red("❌ Not flashed"))
+            return 1
+        if args.dry_run:
+            print(f"Would download {key} ({ui.human_size(gz_size)}) and write it to {disk.id}")
+            return 0
+        if shutil.disk_usage(tmp).free < gz_size + SPARE:
+            ui.failure(ui.red(f"❌ not enough free space in {tempfile.gettempdir()} for {ui.human_size(gz_size)}"))
+            return 1
+        if not _sudo():
+            return 1
+        gz_path = os.path.join(tmp, os.path.basename(key))
+        draw, done = _progress("⬇️  downloading")
+        got = [0]
+
+        def arrived(n):
+            got[0] += n
+            draw(min(got[0] / gz_size, 1.0) if gz_size else 1.0)
+        try:
+            s3.download((key, gz_path, gz_size), arrived)
+        except OSError as e:
+            done()
+            ui.failure(ui.red(f"❌ download failed: {e}"))
+            return 1
+        done()
+        if not _sudo():
+            return 1
+        touched = True
+        r = _run(["diskutil", "unmountDisk", disk.id])
+        if r.returncode != 0:
+            ui.failure(ui.red(f"❌ couldn't unmount {disk.id}: {(r.stderr or r.stdout).strip()}"))
+            return 1
+        draw, done = _progress(f"✍️  writing {disk.id}")
+        try:
+            written, digest = write_image(gz_path, disk.id, draw)
+        except FlashError as e:
+            done()
+            ui.failure(ui.red(f"❌ flash failed: {e}"))
+            return 1
+        done()
+        _run(["sync"])
+        _run(["diskutil", "unmountDisk", disk.id])
+        if not _sudo():
+            return 1
+        draw, done = _progress(f"🔍 verifying {disk.id}")
+        try:
+            verified = verify(disk.id, written, digest, draw)
+        except FlashError as e:
+            done()
+            ui.failure(ui.red(f"❌ verify failed: {e}"))
+            return 1
+        done()
+        if not verified:
+            ui.failure(ui.red("❌ flash failed: the card doesn't match the image: try again or use another card"))
+            return 1
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+        if touched:
+            _run(["sync"])
+            ejected = _run(["diskutil", "eject" if verified else "unmountDisk", disk.id]).returncode == 0 and verified
+    if not ejected:
+        ui.warn(f"Flashed and verified, but {disk.id} didn't eject: eject it before removing the card")
+        return 0
+    print(ui.green("✅ Flashed and verified — safe to remove the card"))
+    return 0
