@@ -87,37 +87,37 @@ class WriteVerify(unittest.TestCase):
             self.addCleanup(patcher.stop)
 
     def test_write_then_verify_round_trip(self):
-        size, digest = flash.write_image(self.gz, "disk9")
+        size, digest, blocks = flash.write_image(self.gz, "disk9")
         self.assertEqual(size, len(self.data))
         self.assertEqual(digest, hashlib.sha256(self.data).hexdigest())
-        self.assertTrue(flash.verify("disk9", size, digest))
+        self.assertIsNone(flash.verify("disk9", size, digest, blocks))
 
     def test_verify_ignores_bytes_past_image(self):
-        size, digest = flash.write_image(self.gz, "disk9")
+        size, digest, blocks = flash.write_image(self.gz, "disk9")
         with open(self.target, "ab") as f:
             f.write(b"x" * 1000)
-        self.assertTrue(flash.verify("disk9", size, digest))
+        self.assertIsNone(flash.verify("disk9", size, digest, blocks))
 
     def test_verify_detects_corruption(self):
-        size, digest = flash.write_image(self.gz, "disk9")
+        size, digest, blocks = flash.write_image(self.gz, "disk9")
         pos = 3 * 1024 * 1024
         with open(self.target, "r+b") as f:
             f.seek(pos)
             byte = f.read(1)[0]
             f.seek(pos)
             f.write(bytes([byte ^ 0xFF]))
-        self.assertFalse(flash.verify("disk9", size, digest))
+        self.assertEqual(flash.verify("disk9", size, digest, blocks), "data differs from 0 B in")
 
     def test_verify_short_read_is_false(self):
-        size, digest = flash.write_image(self.gz, "disk9")
+        size, digest, blocks = flash.write_image(self.gz, "disk9")
         os.truncate(self.target, size - 10)
-        self.assertFalse(flash.verify("disk9", size, digest))
+        self.assertIn("read back only", flash.verify("disk9", size, digest, blocks))
 
     def test_verify_dd_failure_raises(self):
-        size, digest = flash.write_image(self.gz, "disk9")
+        size, digest, blocks = flash.write_image(self.gz, "disk9")
         with mock.patch.object(flash, "raw", lambda d: "/nonexistent-dir/x"):
             with self.assertRaises(flash.FlashError):
-                flash.verify("disk9", size, digest)
+                flash.verify("disk9", size, digest, blocks)
 
     def test_dd_failure_raises(self):
         with mock.patch.object(flash, "raw", lambda d: "/nonexistent-dir/x"):
@@ -175,11 +175,11 @@ class Run(helpers.StorageDir):
 
         def write(gz, disk, progress=None):
             self.calls.append("<write>")
-            return 3, "abc"
+            return 3, "abc", ["abc"]
 
-        def check(disk, size, digest, progress=None):
+        def check(disk, size, digest, blocks, progress=None):
             self.calls.append("<verify>")
-            return True
+            return None
 
         self.filter_list = mock.Mock(return_value=0)
         self.write_image = mock.Mock(side_effect=write)
@@ -268,7 +268,7 @@ class Run(helpers.StorageDir):
         self.assertEqual(self.steps(), [])
 
     def test_verify_mismatch_fails_and_unmounts(self):
-        self.verify.side_effect = lambda *a, **k: self.calls.append("<verify>") or False
+        self.verify.side_effect = lambda *a, **k: self.calls.append("<verify>") or "data differs"
         self.assertEqual(self.flash(), 1)
         self.assertEqual(self.steps()[-1], ["diskutil", "unmountDisk", "disk4"])
         self.assertNotIn(["diskutil", "eject", "disk4"], self.calls)

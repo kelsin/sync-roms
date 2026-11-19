@@ -166,13 +166,14 @@ def _finish(proc):
 
 
 def write_image(gz_path, disk, progress=None):
-    """Stream a .img.gz to the disk through dd. Returns (bytes written, sha256 hexdigest)."""
+    """Stream a .img.gz to the disk through dd. Returns (bytes written, sha256 hexdigest, sha256 of each WRITE_BLOCK)."""
     proc = None
     try:
         proc = subprocess.Popen(DD + [f"of={raw(disk)}", f"bs={WRITE_BLOCK}", "iflag=fullblock"],
                                 stdin=subprocess.PIPE, stderr=subprocess.PIPE)
         total = os.path.getsize(gz_path)
         digest = hashlib.sha256()
+        blocks = []
         size = 0
         with open(gz_path, "rb") as raw_file, gzip.open(raw_file) as src:
             while True:
@@ -184,6 +185,7 @@ def write_image(gz_path, disk, progress=None):
                 except BrokenPipeError:
                     raise FlashError(_finish(proc) or "dd stopped")
                 digest.update(chunk)
+                blocks.append(hashlib.sha256(chunk).hexdigest())
                 size += len(chunk)
                 if progress:
                     progress(min(raw_file.tell() / total, 1.0) if total else 1.0)
@@ -192,7 +194,7 @@ def write_image(gz_path, disk, progress=None):
             raise FlashError(err or f"dd exited with {proc.returncode}")
         if progress:
             progress(1.0)
-        return size, digest.hexdigest()
+        return size, digest.hexdigest(), blocks
     except (gzip.BadGzipFile, EOFError, zlib.error) as e:
         _stop(proc)
         raise FlashError(f"the image file is damaged: {e}") from e
@@ -208,8 +210,9 @@ def write_image(gz_path, disk, progress=None):
         raise
 
 
-def verify(disk, size, digest, progress=None):
-    """Read size bytes back from the disk; True when their sha256 equals digest."""
+def verify(disk, size, digest, blocks, progress=None):
+    """Read size bytes back from the disk. None when their sha256 equals digest, else why not: a short read or the
+    offset of the first WRITE_BLOCK (per blocks) that differs."""
     count = math.ceil(size / READ_BLOCK)
     proc = None
     try:
@@ -217,11 +220,14 @@ def verify(disk, size, digest, progress=None):
                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         h = hashlib.sha256()
         got = 0
+        bad = None
         while got < size:
             chunk = proc.stdout.read(min(WRITE_BLOCK, size - got))
             if not chunk:
                 break
             h.update(chunk)
+            if bad is None and hashlib.sha256(chunk).hexdigest() != blocks[got // WRITE_BLOCK]:
+                bad = got
             got += len(chunk)
             if progress:
                 progress(got / size)
@@ -231,7 +237,11 @@ def verify(disk, size, digest, progress=None):
             if proc.wait() != 0:
                 raise FlashError(err or f"dd exited with {proc.returncode}")
         _stop(proc)
-        return got == size and h.hexdigest() == digest
+        if got < size:
+            return f"read back only {ui.human_size(got)} of {ui.human_size(size)}"
+        if h.hexdigest() != digest:
+            return f"data differs from {ui.human_size(bad)} in" if bad is not None else "data differs"
+        return None
     except OSError as e:
         if proc:
             _stop(proc)
@@ -368,7 +378,7 @@ def run(args):
             return 1
         draw, done = _progress(f"✍️  writing {disk.id}")
         try:
-            written, digest = write_image(gz_path, disk.id, draw)
+            written, digest, blocks = write_image(gz_path, disk.id, draw)
         except FlashError as e:
             done()
             ui.failure(ui.red(f"❌ flash failed: {e}"))
@@ -380,15 +390,16 @@ def run(args):
             return 1
         draw, done = _progress(f"🔍 verifying {disk.id}")
         try:
-            verified = verify(disk.id, written, digest, draw)
+            problem = verify(disk.id, written, digest, blocks, draw)
         except FlashError as e:
             done()
             ui.failure(ui.red(f"❌ verify failed: {e}"))
             return 1
         done()
-        if not verified:
-            ui.failure(ui.red("❌ flash failed: the card doesn't match the image: try again or use another card"))
+        if problem:
+            ui.failure(ui.red(f"❌ flash failed: the card doesn't match the image ({problem}): try again or use another card"))
             return 1
+        verified = True
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
         if touched:
