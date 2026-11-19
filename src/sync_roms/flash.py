@@ -154,6 +154,17 @@ def _stop(proc):
         proc.stderr.close()
 
 
+def _finish(proc):
+    """Close dd's stdin, wait for it and return its stderr. Not communicate(): it flushes a closed stdin on Linux."""
+    try:
+        proc.stdin.close()
+    except BrokenPipeError:
+        pass
+    err = proc.stderr.read().decode(errors="replace").strip()
+    proc.wait()
+    return err
+
+
 def write_image(gz_path, disk, progress=None):
     """Stream a .img.gz to the disk through dd. Returns (bytes written, sha256 hexdigest)."""
     proc = None
@@ -171,16 +182,12 @@ def write_image(gz_path, disk, progress=None):
                 try:
                     proc.stdin.write(chunk)
                 except BrokenPipeError:
-                    raise FlashError(proc.communicate()[1].decode(errors="replace").strip() or "dd stopped")
+                    raise FlashError(_finish(proc) or "dd stopped")
                 digest.update(chunk)
                 size += len(chunk)
                 if progress:
                     progress(min(raw_file.tell() / total, 1.0) if total else 1.0)
-        try:
-            proc.stdin.close()
-        except BrokenPipeError:
-            pass
-        err = proc.communicate()[1].decode(errors="replace").strip()
+        err = _finish(proc)
         if proc.returncode != 0:
             raise FlashError(err or f"dd exited with {proc.returncode}")
         if progress:
