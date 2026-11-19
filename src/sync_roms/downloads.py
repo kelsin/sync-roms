@@ -103,6 +103,7 @@ def download_playlist(job, disc_dir, coming, callback=None, wrote=None):
         s3.download((key, temp, size), callback, wrote)
         with open(temp, "rb") as f:
             data = f.read()
+    os.makedirs(os.path.dirname(path), exist_ok=True)
     store.replace_file(path, m3u.prefixed_playlist(data, os.path.dirname(path), disc_dir, lambda p: name_key(p) in coming))
 
 

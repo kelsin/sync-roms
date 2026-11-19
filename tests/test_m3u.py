@@ -180,6 +180,16 @@ class HiddenDiscsTest(unittest.TestCase):
         self.assertFalse(downloads.is_current(os.path.join(self.dir, "Gone.m3u"), size, ".multi-disc"))
         self.assertFalse(downloads.is_current(path, None))
 
+    def test_a_playlist_downloads_into_a_folder_that_does_not_exist_yet(self):
+        def fake_download(job, callback=None, wrote=None):
+            with open(job[1], "wb") as f:
+                f.write(b"a.chd\n")
+        path = os.path.join(self.dir, "new system", "G.m3u")
+        with mock.patch.object(downloads.s3, "download", fake_download):
+            downloads.download_playlist(("k", path, 6), ".multi-disc", set())
+        with open(path) as f:
+            self.assertEqual(f.read(), "a.chd\n")
+
     def test_a_prefixed_playlist_is_read_once_per_run(self):
         self.touch("G.m3u", text=".multi-disc/a.chd\n")
         path = os.path.join(self.dir, "G.m3u")

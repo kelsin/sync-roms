@@ -83,6 +83,16 @@ class Pico8(helpers.StorageDir):
         self.assertTrue(os.stat(os.path.join(folder, "pico8_dyn")).st_mode & 0o111)
         self.assertEqual(self.recorded(), NEW)
 
+    def test_wrote_lists_what_was_put_on_the_card(self):
+        self.put(f"os/pico8/{NEW}", zip_bytes())
+        wrote = []
+        with contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(pico8.run("c", "onion", self.card, False, wrote), 0)
+            self.assertEqual(wrote, [self.card_path("RApp", "PICO-8", "bin")])
+            wrote.clear()
+            self.assertEqual(pico8.run("c", "onion", self.card, False, wrote), 0)
+        self.assertEqual(wrote, [])
+
     def test_allium_extracts_two_files(self):
         self.put(f"os/pico8/{NEW}", zip_bytes())
         self.run_setup("allium")

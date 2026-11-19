@@ -424,7 +424,7 @@ class SyncSmokeTest(RealDataDirGuard):
         patches = ((store, {"load_manifest": lambda names=(): manifest}),
                    (cli, {"free_space": lambda path: 10**9}),
                    (cli.downloads, {"run_downloads": lambda todo, *a: got.extend(k for k, _, _ in todo) or 0}),
-                   (cli.vita, {"add_psvita_files": lambda dests: after() or []}),
+                   (cli.vita, {"add_psvita_files": lambda dests, wrote=None: after() or []}),
                    (cli.ui, {"choose": lambda q, *a, **k: asked.append(q) or "y", "emit_json": emitted.append}))
         if dry_run:
             patches += ((cli.pico8, {"run": lambda *a: after()}),)
@@ -815,7 +815,7 @@ class SyncSmokeTest(RealDataDirGuard):
         patches = ((store, {"load_manifest": lambda names=(): manifest}),
                    (s3, {"list_sizes": lambda prefix, sizes=True: dict(listing) if prefix == "psvita/" else {}}),
                    (cli.downloads, {"run_downloads": run_downloads}),
-                   (cli.vita, {"add_psvita_files": lambda dests: []}),
+                   (cli.vita, {"add_psvita_files": lambda dests, wrote=None: []}),
                    (cli.ui, {"choose": lambda q, *a, **k: asked.append(q) or "y",
                              "confirm": lambda q, default=True: asked.append(q) or True}))
         self.assertEqual(self.run_sync(False, prepare=prepare, patches=patches), 0)

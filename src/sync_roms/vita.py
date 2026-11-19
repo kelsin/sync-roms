@@ -91,8 +91,9 @@ def make_psvita(path):
         return str(e)
 
 
-def add_psvita_files(dests):
-    """Write the missing .psvita file beside each zip in the given folders. Returns [(zip, error)] for the failures."""
+def add_psvita_files(dests, wrote=None):
+    """Write the missing .psvita file beside each zip in the given folders. Returns [(zip, error)] for the failures.
+    wrote, a list, gets each zip whose .psvita was written."""
     failures = []
     for dest in dests:
         for root, files in downloads.walk_roms(dest):
@@ -102,4 +103,6 @@ def add_psvita_files(dests):
                     error = make_psvita(path)
                     if error:
                         failures.append((path, error))
+                    elif wrote is not None:
+                        wrote.append(path)
     return failures

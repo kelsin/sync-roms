@@ -42,14 +42,14 @@ def _extract(key, size, folder):
         with zipfile.ZipFile(path) as z:
             for member in EXTRACT:
                 target = os.path.join(folder, os.path.basename(member))
-                with z.open(member) as src, open(target, "wb") as dst:
-                    dst.write(src.read())
+                store.replace_file(target, z.read(member))
                 if member.endswith("pico8_dyn"):
                     os.chmod(target, 0o755)
 
 
-def run(card, layout_name, base, dry_run):
-    """Put the newest PICO-8 zip on the card the way its layout installs it, once per zip. The failure count."""
+def run(card, layout_name, base, dry_run, wrote=None):
+    """Put the newest PICO-8 zip on the card the way its layout installs it, once per zip. The failure count.
+    wrote, a list, gets the card path of what was put there."""
     if layout_name not in TARGETS:
         return 0
     listing = inventory.files(runtime.PICO8_PREFIX)
@@ -83,6 +83,8 @@ def run(card, layout_name, base, dry_run):
         return 1
     if old_path:
         os.remove(old_path)
+    if wrote is not None:
+        wrote.append(target)
     store.update_card(card, pico8=name)
     print(f"🕹️  PICO-8 {ui.green(name)} → {shown}")
     return 0

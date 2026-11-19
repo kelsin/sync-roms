@@ -1286,20 +1286,25 @@ def sync_card(args):
     # also when the card gets no drivers now (another device or layout): the ones sync copied before go
     for name in drivers.prune(card, drivers_dir, [os.path.basename(p) for _, p, _ in driver_jobs], False):
         print(ui.green(f"🧹 Removed old driver {name}"))
-    failed += pico8.run(card, layout_name, base, False)
+    pico8_wrote = []
+    failed += pico8.run(card, layout_name, base, False, pico8_wrote)
     if theme_todo:
         failed += downloads.run_downloads(theme_todo, "Themes", "🎨", os.path.join(base, themes_dir), failures)
+    prefixed = 0
     for s in chosen:
         if disc_dir and available(s):
-            m3u.prefix_playlists(dest_of(s), disc_dir, [p for _, p, _ in rom_todo if p.lower().endswith(".m3u")])
+            prefixed += m3u.prefix_playlists(dest_of(s), disc_dir, [p for _, p, _ in rom_todo if p.lower().endswith(".m3u")])
     cardfs.clear()
 
+    psvita_wrote = []
     if layout_name in frontend.ESDE_LAYOUTS:  # ES-DE launches an installed Vita game through its .psvita file
-        for path, error in vita.add_psvita_files({dest_of(s) for s in chosen if s["bucket"] == "psvita"}):
+        for path, error in vita.add_psvita_files({dest_of(s) for s in chosen if s["bucket"] == "psvita"}, psvita_wrote):
             failed += 1
             failures.append((os.path.relpath(path, roms_dir), error))
             ui.failure(ui.red(f"  ❌ {os.path.relpath(path, roms_dir)}: {error}"))
         cardfs.clear()
+    if clean_card and (pico8_wrote or prefixed or psvita_wrote):
+        clean._clean_root = base
 
     stale = []
     if scrapes:
