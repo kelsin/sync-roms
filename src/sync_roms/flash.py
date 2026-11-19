@@ -1,5 +1,9 @@
 """Knulli OS images in storage's os/ folder, and which of them fit a device."""
+import collections
+import os
+import plistlib
 import re
+import subprocess
 
 PREFIX = "os/"
 
@@ -40,3 +44,39 @@ def sort_images(keys, device_id):
 
 def _neg(date):
     return -int(date) if date else 0
+
+
+Disk = collections.namedtuple("Disk", "id size name")
+
+
+def parse_disks(listing, info, exclude):
+    """The whole disks of a `diskutil list -plist` listing, minus exclude, with size and name read through info(id)."""
+    disks = []
+    for disk in listing.get("WholeDisks", []):
+        if disk in exclude:
+            continue
+        i = info(disk)
+        disks.append(Disk(disk, i.get("TotalSize", i.get("Size")), i.get("MediaName") or i.get("IORegistryEntryName") or ""))
+    return disks
+
+
+def _diskutil(*args):
+    r = subprocess.run(["diskutil", *args], capture_output=True)
+    return plistlib.loads(r.stdout) if r.returncode == 0 else None
+
+
+def disk_of(path):
+    """The whole disk (e.g. disk3) holding path, or None. Unlike clean.card_disk this also answers for the boot disk."""
+    mount = os.path.realpath(path)
+    while not os.path.ismount(mount):
+        mount = os.path.dirname(mount)
+    info = _diskutil("info", "-plist", mount)
+    return (info or {}).get("ParentWholeDisk") or None
+
+
+def external_disks(exclude):
+    """The external physical disks, minus exclude; [] when diskutil fails."""
+    listing = _diskutil("list", "-plist", "external", "physical")
+    if listing is None:
+        return []
+    return parse_disks(listing, lambda d: _diskutil("info", "-plist", d) or {}, exclude)

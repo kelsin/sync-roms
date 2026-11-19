@@ -35,6 +35,16 @@ class Flash(unittest.TestCase):
                 {"id": "c", "firmwares": ["onion", "knulli"]}]
         self.assertEqual([d["id"] for d in flash.knulli_devices(devs)], ["b", "c"])
 
+    def test_parse_disks_skips_excluded_and_reads_info(self):
+        infos = {"disk4": {"TotalSize": 64_000_000_000, "MediaName": "SD Card Reader"},
+                 "disk5": {"Size": 32_000_000_000, "IORegistryEntryName": "Generic"}, "disk6": {}}
+        got = flash.parse_disks({"WholeDisks": ["disk4", "disk5", "disk6"]}, infos.__getitem__, {"disk6"})
+        self.assertEqual(got, [flash.Disk("disk4", 64_000_000_000, "SD Card Reader"),
+                               flash.Disk("disk5", 32_000_000_000, "Generic")])
+
+    def test_parse_disks_empty(self):
+        self.assertEqual(flash.parse_disks({}, lambda d: {}, set()), [])
+
 
 if __name__ == "__main__":
     unittest.main()
