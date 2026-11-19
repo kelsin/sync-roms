@@ -45,14 +45,16 @@ def rom_stems(base, layout_name, layout, systems):
 
 
 def _folders(root, template, systems, layout_name):
-    """[(folder, system id or None, core or None)] of a layout's saves or states path template."""
+    """[(folder, system id or None, core or None)] of a layout's saves or states path template; a {core} parent
+    is listed first as a core-less folder (RetroArch with sort by core off)."""
     if "{core}" in template:
         parent = os.path.join(root, *template.split("{core}")[0].split("/"))
         if not os.path.isdir(parent):
             return []
-        return [(os.path.join(parent, c), None, c) for c in sorted(os.listdir(parent))
-                if os.path.isdir(os.path.join(parent, c))]
+        return [(parent, None, None)] + [(os.path.join(parent, c), None, c) for c in sorted(os.listdir(parent))
+                                         if os.path.isdir(os.path.join(parent, c))]
     if "{system}" in template:
+        # a folder shared by several systems is scanned once, for the first in systems order
         return [(os.path.join(root, *template.format(system=s["folders"][layout_name]).split("/")),
                  s["bucket"], None) for s in systems if s["folders"].get(layout_name)]
     return [(os.path.join(root, *template.split("/")), None, None)]
@@ -64,6 +66,7 @@ def scan(base, layout_name, layout, systems, retroarch_dir=None):
     root = _base(base, layout, retroarch_dir)
     ra = layout["retroarch"]
     stems = rom_stems(base, layout_name, layout, systems)
+    folders = {s["bucket"]: s["folders"].get(layout_name) for s in systems}
     games, skipped, seen = {}, 0, set()
     for template in (ra["saves"], ra["states"]):
         for folder, system, core in _folders(root, template, systems, layout_name):
@@ -77,9 +80,11 @@ def scan(base, layout_name, layout, systems, retroarch_dir=None):
                     continue
                 stem, kind = c
                 found = {system} if system else stems.get(stem, set())
-                if len(found) != 1:
+                if len({folders[b] for b in found}) != 1:
                     skipped += 1
                     continue
+                # systems sharing a ROM folder (WS, NGP) are one candidate: the first in systems order
+                found = {next(s["bucket"] for s in systems if s["bucket"] in found)}
                 st = os.stat(path)
                 games.setdefault((next(iter(found)), stem), []).append(
                     {"path": path, "name": name, "kind": kind, "core": core, "size": st.st_size,

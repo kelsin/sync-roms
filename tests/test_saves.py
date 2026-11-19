@@ -50,7 +50,7 @@ class ScanTest(unittest.TestCase):
         helpers.touch(self.p("Saves/CurrentProfile/saves/gpSP/Game.srm"), "abc")
         helpers.touch(self.p("Saves/CurrentProfile/states/gpSP/Game.state.auto"), "s")
         helpers.touch(self.p("Saves/CurrentProfile/states/gpSP/Game.state.auto.png"), "p")
-        helpers.touch(self.p("Saves/CurrentProfile/saves/gpSP/Other.srm"), "x")
+        helpers.touch(self.p("Saves/CurrentProfile/saves/Other.srm"), "x")
         helpers.touch(self.p("Saves/CurrentProfile/saves/gpSP/notes.txt"), "x")
         games, skipped = saves.scan(self.base, "onion", LAYOUTS["onion"], SYSTEMS)
         self.assertEqual(list(games), [("gba", "Game")])
@@ -62,6 +62,21 @@ class ScanTest(unittest.TestCase):
         self.assertEqual((sav["name"], sav["size"]), ("Game.srm", 3))
         self.assertEqual(sav["path"], self.p("Saves/CurrentProfile/saves/gpSP/Game.srm"))
         self.assertIn("mtime", sav)
+
+    def test_loose_in_core_parent(self):
+        helpers.touch(self.p("Roms", "GBA", "Game.zip"), "r")
+        helpers.touch(self.p("Saves/CurrentProfile/saves/Game.srm"), "s")
+        helpers.touch(self.p("Saves/CurrentProfile/saves/gpSP/Game.srm"), "t")
+        games, skipped = saves.scan(self.base, "onion", LAYOUTS["onion"], SYSTEMS)
+        self.assertEqual(skipped, 0)
+        self.assertEqual(sorted(str(x["core"]) for x in games[("gba", "Game")]), ["None", "gpSP"])
+
+    def test_shared_rom_folder(self):
+        systems = SYSTEMS + [{"bucket": "ngp", "folders": {"onion": "NGP"}}, {"bucket": "ngpc", "folders": {"onion": "NGP"}}]
+        helpers.touch(self.p("Roms", "NGP", "Game.zip"), "r")
+        helpers.touch(self.p("Saves/CurrentProfile/saves/NeoCD/Game.srm"), "s")
+        games, skipped = saves.scan(self.base, "onion", LAYOUTS["onion"], systems)
+        self.assertEqual((list(games), skipped), ([("ngp", "Game")], 0))
 
     def test_knulli(self):
         helpers.touch(self.p("roms", "gba", "Game.zip"), "r")
