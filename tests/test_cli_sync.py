@@ -536,7 +536,7 @@ class SyncSmokeTest(RealDataDirGuard):
         real_replace = store.replace_file
 
         def replace_file(path, data, **kw):
-            writes.append((os.path.basename(path), data))
+            writes.append((os.path.basename(path), data.decode()))
             return real_replace(path, data, **kw)
         patches = ((store, {"load_manifest": lambda names=(): manifest, "replace_file": replace_file}),
                    (cli.s3, {"list_sizes": lambda prefix, sizes_=True: sizes if prefix == "psx/" else {}, "download": download}),

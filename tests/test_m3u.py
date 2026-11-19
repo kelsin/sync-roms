@@ -188,6 +188,18 @@ class HiddenDiscsTest(unittest.TestCase):
             self.assertFalse(downloads.is_current(path, 3, ".multi-disc"))
             self.assertEqual([c for c in opened.call_args_list if c.args[0] == path], [mock.call(path, "rb")])
 
+    def test_prefixing_keeps_comments_and_line_endings_so_the_size_still_matches(self):
+        self.disc_folder()
+        original = "#EXTM3U\r\n" + "".join(f"  {f}\r\n" for f in FAH) + "\r\nlast.chd"
+        self.touch("Fahrenheit.m3u", text="")
+        path = os.path.join(self.dir, "Fahrenheit.m3u")
+        with open(path, "w", newline="") as f:
+            f.write(original)
+        self.assertEqual(m3u.prefix_playlists(self.dir, ".multi-disc"), 1)
+        with open(path, newline="") as f:
+            self.assertEqual(f.read(), "#EXTM3U\r\n" + "".join(f"  .multi-disc/{x}\r\n" for x in FAH) + "\r\nlast.chd")
+        self.assertTrue(downloads.is_current(path, len(original.encode()), ".multi-disc"))
+
     def test_find_extras_looks_in_the_disc_folder(self):
         self.disc_folder()
         self.touch("Fahrenheit.m3u", "Gone.m3u")

@@ -95,15 +95,15 @@ def hard_exit():
 
 
 def download_playlist(job, disc_dir, coming, callback=None, wrote=None):
-    """Write a playlist to its path once, its entries already pointing into disc_dir (m3u.prefixed_entries; coming: the
-    paths this sync downloads)."""
+    """Write a playlist to its path once, its entries already pointing into disc_dir (m3u.prefixed_playlist; coming: the
+    name keys of the paths this sync downloads)."""
     key, path, size = job
     with tempfile.TemporaryDirectory() as tmp:
         temp = os.path.join(tmp, "playlist.m3u")
         s3.download((key, temp, size), callback, wrote)
-        entries = m3u.m3u_entries(temp)
-    fixed = m3u.prefixed_entries(entries, os.path.dirname(path), disc_dir, coming)
-    store.replace_file(path, "".join(line + "\n" for line in fixed), newline="\n")
+        with open(temp, "rb") as f:
+            data = f.read()
+    store.replace_file(path, m3u.prefixed_playlist(data, os.path.dirname(path), disc_dir, lambda p: name_key(p) in coming))
 
 
 def run_downloads(todo, label, icon, base, failures=None, disc_dirs=None):
@@ -121,7 +121,7 @@ def run_downloads(todo, label, icon, base, failures=None, disc_dirs=None):
     names = [j[0] for j in todo]
     bar = ui.ProgressBar(len(todo), moved.fraction, moved.total, io=moved, active=lambda: moved.active(names))
 
-    coming = {os.path.normpath(j[1]) for j in todo} if disc_dirs else ()
+    coming = {name_key(j[1]) for j in todo} if disc_dirs else ()
 
     def fetch(i, j):
         moved.start(i)

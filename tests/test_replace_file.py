@@ -55,14 +55,14 @@ class ReplaceFileTest(unittest.TestCase):
         self.assertEqual(self.read(), before)
         self.assertEqual(os.listdir(self.dir), ["gamelist.xml"])
 
-    def test_playlists_are_written_with_lf(self):
+    def test_playlists_keep_their_line_endings(self):
         path = os.path.join(self.dir, "G.m3u")
         os.makedirs(os.path.join(self.dir, ".d"))
         open(os.path.join(self.dir, ".d", "a.chd"), "w").close()
         with open(path, "w", newline="") as f:
             f.write("a.chd\r\n")
         m3u.prefix_playlists(self.dir, ".d")
-        self.assertEqual(self.read(path), b".d/a.chd\n")
+        self.assertEqual(self.read(path), b".d/a.chd\r\n")
 
     def test_theme_art_put_writes_bytes_once(self):
         path = os.path.join(self.dir, "sub", "a.png")

@@ -75,12 +75,18 @@ def file_groups(keys):
     return out
 
 
-def prefixed_entries(entries, dest, disc_dir, coming=()):
-    """entries with each bare disc name whose file is in dest/disc_dir (or is in coming, paths a sync is about to write)
-    pointed into disc_dir."""
-    return [posixpath.join(disc_dir, e) if "/" not in e and (os.path.exists(os.path.join(dest, disc_dir, e))
-                                                            or os.path.normpath(os.path.join(dest, disc_dir, e)) in coming) else e
-            for e in entries]
+def prefixed_playlist(data, dest, disc_dir, coming=lambda path: False):
+    """A playlist's bytes with disc_dir/ put before each bare disc name whose file is in dest/disc_dir (or that
+    coming(path) says a sync is about to write); every other byte stays as it is."""
+    out = []
+    for line in data.splitlines(keepends=True):
+        entry = line.decode("utf-8", errors="replace").strip()
+        path = os.path.join(dest, disc_dir, entry)
+        if entry and not entry.startswith("#") and "/" not in entry and (os.path.exists(path) or coming(path)):
+            keep = len(line) - len(line.lstrip())
+            line = line[:keep] + disc_dir.encode() + b"/" + line[keep:]
+        out.append(line)
+    return b"".join(out)
 
 
 def prefix_playlists(dest, disc_dir, skip=()):
@@ -92,10 +98,11 @@ def prefix_playlists(dest, disc_dir, skip=()):
         path = os.path.join(dest, name)
         if not name.lower().endswith(".m3u") or os.path.normpath(path) in skip or not os.path.isfile(path):
             continue
-        entries = m3u_entries(path)
-        fixed = prefixed_entries(entries, dest, disc_dir)
-        if fixed != entries:
-            store.replace_file(path, "".join(line + "\n" for line in fixed), newline="\n")
+        with open(path, "rb") as f:
+            data = f.read()
+        fixed = prefixed_playlist(data, dest, disc_dir)
+        if fixed != data:
+            store.replace_file(path, fixed)
             rewritten += 1
     return rewritten
 
