@@ -46,7 +46,7 @@ SUBCOMMANDS = {  # name -> (usage, one-line summary)
 
 TOPICS = {
     "sync": """
-  sync-roms [sync] [CARD] [--dry-run] [--ask] [--yes] [--device ID|full] [--layout NAME] [--no-clean] [--no-eject]
+  sync-roms [sync] [CARD] [--dry-run] [--ask] [--yes] [--device ID|full] [--layout NAME] [--no-delete] [--no-clean] [--no-eject]
 
   CARD is the card or folder root (default: the current directory); the chosen firmware decides the folders inside
   it (ES-DE ROMs/ BIOS/, Knulli roms/ bios/, Onion Roms/ BIOS/). Missing folders are created after you confirm.
@@ -65,6 +65,9 @@ TOPICS = {
 
   --dry-run   show what would be downloaded and deleted, change nothing
   --yes       answer every prompt with its default (a default-no prompt, like deleting files, stays no)
+  --no-delete never delete anything from the card: ROMs no longer in the lists, their media, old drivers and empty
+              system folders are listed as kept and the delete prompt is skipped (for adding games to a card
+              someone set up by hand)
   --no-clean  skip the end-of-run card tidy (.metadata_never_index, .fseventsd, ._ files)
   --no-eject  leave the card mounted (by default a Mac unmounts all of its volumes after a run with no failures;
               "eject": false in settings.json turns that off for every run)
@@ -506,7 +509,7 @@ LEGACY = {
 WORDS = {flags[0]: " ".join(words) for words, flags in LEGACY.items() if flags}  # mode flag -> its command, for messages
 TYPED = None  # (command words, mode flag) of the command translate() last rewrote, for Parser.error
 BOOL_FLAGS = {"-n", "--dry-run", "-y", "--yes", "-a", "--ask"}
-PLAIN_FLAGS = BOOL_FLAGS | {"--replace", "--json", "--no-clean", "--no-eject", "--retry", "--all", "--fill-media", "--set-credentials",
+PLAIN_FLAGS = BOOL_FLAGS | {"--replace", "--json", "--no-clean", "--no-delete", "--no-eject", "--retry", "--all", "--fill-media", "--set-credentials",
                             "--translated"}
 VALUE_FLAGS = {"--system", "--device", "--layout", "--device-id", "--skip-media"}
 
@@ -581,6 +584,7 @@ def build_parser():
     ap.add_argument("--device")
     ap.add_argument("--layout")
     ap.add_argument("--no-clean", action="store_true")
+    ap.add_argument("--no-delete", action="store_true")
     ap.add_argument("--no-eject", action="store_true")
     ap.add_argument("--version", action="store_true")
     ap.add_argument("-h", "--help", action="store_true")
@@ -607,8 +611,8 @@ def check_modes(args):
         ui.fail(f"--dry-run has no effect on `{name}`", 2)
     if args.ask and mode:
         ui.fail(f"--ask only applies to syncing a card, not `{name}`", 2)
-    if (args.device or args.layout or args.no_clean or args.no_eject) and mode:
-        ui.fail(f"--device, --layout, --no-clean and --no-eject only apply to syncing a card, not `{name}`", 2)
+    if (args.device or args.layout or args.no_clean or args.no_delete or args.no_eject) and mode:
+        ui.fail(f"--device, --layout, --no-clean, --no-delete and --no-eject only apply to syncing a card, not `{name}`", 2)
     if args.base_dir and mode == "--clean-scrapes":
         ui.fail(f"`clean scrapes` doesn't take a folder ({args.base_dir!r})", 2)
     if mode == "--scrape" and args.base_dir:  # `scrape gba`, like `scrape missing gba`
@@ -853,6 +857,14 @@ def delete_extras(extras):
         print(ui.green(f"  🧹 Deleted {deleted} file(s)"))
     else:
         print(ui.yellow("  ↩️  Keeping them"))
+
+
+def list_kept(paths, what):
+    """With --no-delete: list the files a sync would have deleted and says they stay."""
+    if paths:
+        print(ui.yellow(f"\n🔒 --no-delete: keeping {len(paths)} {what}"))
+        for path in paths:
+            print(ui.dim(f"     {path}"))
 
 
 def remove_stale_media(stale):
@@ -1140,6 +1152,9 @@ def sync_card(args):
     moved_jobs, moved_from = {j for _, j in card_moves}, {p for p, _ in card_moves}
     bios_moves = moved_jobs.intersection(bios_todo)
     extras = [p for p in extras if p not in moved_from]
+    kept_extras = []  # --no-delete: the ROMs that would have been deleted
+    if args.no_delete:
+        kept_extras, extras = list(dict.fromkeys(extras)), []
     rom_todo, bios_todo = [j for j in rom_todo if j not in moved_jobs], [j for j in bios_todo if j not in moved_jobs]
     es_dir = frontend.esde_dir(layout_name, base)
     # EmuDeck's ES-DE is on this computer: the card's gamelists and collections go there only when it uses the card's ROMs
@@ -1183,6 +1198,7 @@ def sync_card(args):
         scrape_plan.describe_scrape_plan(planned)
     if extras:
         print(f"🗑️  Local ROMs no longer in the selection: {ui.bold(str(len(extras)))}")
+    list_kept(kept_extras, "local ROM(s) no longer in the selection")
     if renames or card_moves:
         print(f"📦 Card files to rename or move instead of downloading: {ui.bold(str(len(renames) + len(card_moves)))}")
     todo_all = rom_todo + bios_todo + apk_todo + driver_todo + theme_todo + scrape_todo
@@ -1261,7 +1277,7 @@ def sync_card(args):
                           for kind, todo in (("rom", rom_todo), ("bios", bios_todo), ("android", apk_todo), ("driver", driver_todo),
                                           ("theme", theme_todo), ("scrape", scrape_todo))
                           for key, path, size in todo],
-            "delete": list(extras), "rename": [{"from": a, "to": b} for a, b in renames + [(p, j[1]) for p, j in card_moves]],
+            "delete": list(extras), "kept": kept_extras, "rename": [{"from": a, "to": b} for a, b in renames + [(p, j[1]) for p, j in card_moves]],
             "missing": {"roms": missing, "bios": [k for k in bios_keys if k not in bios_have]},
             "free_space": free}
         for key, path, _ in todo_all:
@@ -1275,14 +1291,22 @@ def sync_card(args):
             print(f"  {ui.yellow('would move')} {path} {ui.dim('→')} {job[1]}")
         for path in extras:
             print(f"  {ui.red('would delete')} {path}")
-        for name in drivers.prune(card, drivers_dir, [os.path.basename(p) for _, p, _ in driver_jobs], True):
-            print(f"  {ui.red('would delete')} {os.path.join(drivers_dir, name)}")
+        old_drivers = drivers.prune(card, drivers_dir, [os.path.basename(p) for _, p, _ in driver_jobs], True)
+        if args.no_delete:
+            list_kept([os.path.join(drivers_dir, name) for name in old_drivers], "old driver(s)")
+        else:
+            for name in old_drivers:
+                print(f"  {ui.red('would delete')} {os.path.join(drivers_dir, name)}")
         pico8.run(card, layout_name, base, True)
         onion_surprise.install(card, layout_name, base, True)
         stale_count = 0
         if scrapes:
-            stale_count = len(scrape_plan.stale_media(layout_name, manifest['systems'], roms_dir, stale_es_dir, base))
-            print(f"🧹 Media on the card for ROMs it doesn't have: {stale_count} file(s) to remove")
+            stale_files = scrape_plan.stale_media(layout_name, manifest['systems'], roms_dir, stale_es_dir, base)
+            if args.no_delete:
+                list_kept(stale_files, "media file(s) for ROMs that aren't on this card")
+            else:
+                stale_count = len(stale_files)
+                print(f"🧹 Media on the card for ROMs it doesn't have: {stale_count} file(s) to remove")
         frontend_step(True)
         onion_surprise.write_list(card, layout_name, base, roms_dir, systems, True)
         plan_json["stale_media"] = stale_count
@@ -1340,8 +1364,12 @@ def sync_card(args):
     if driver_entries:
         failed += downloads.run_downloads(driver_todo, "Drivers", "🎮", drivers_dir, failures)
     # also when the card gets no drivers now (another device or layout): the ones sync copied before go
-    for name in drivers.prune(card, drivers_dir, [os.path.basename(p) for _, p, _ in driver_jobs], False):
-        print(ui.green(f"🧹 Removed old driver {name}"))
+    old_drivers = drivers.prune(card, drivers_dir, [os.path.basename(p) for _, p, _ in driver_jobs], False, keep=args.no_delete)
+    if args.no_delete:
+        list_kept([os.path.join(drivers_dir, name) for name in old_drivers], "old driver(s)")
+    else:
+        for name in old_drivers:
+            print(ui.green(f"🧹 Removed old driver {name}"))
     pico8_wrote = []
     failed += pico8.run(card, layout_name, base, False, pico8_wrote)
     failed += onion_surprise.install(card, layout_name, base, False)
@@ -1373,9 +1401,12 @@ def sync_card(args):
             clean._clean_root = base
         cardfs.clear()
         stale = scrape_plan.stale_media(layout_name, manifest["systems"], roms_dir, stale_es_dir, base)
-    remove_stale_media(stale)
+    if args.no_delete:
+        list_kept(stale, "media file(s) for ROMs that aren't on this card")
+    else:
+        remove_stale_media(stale)
     cardfs.clear()
-    for folder in scrape_plan.prune_empty_systems(layout_name, manifest["systems"], roms_dir):
+    for folder in [] if args.no_delete else scrape_plan.prune_empty_systems(layout_name, manifest["systems"], roms_dir):
         print(ui.green(f"🧹 Removed empty system folder {os.path.relpath(folder, base)}"))
     cardfs.clear()
     frontend_step(False)

@@ -136,6 +136,24 @@ class SyncSmokeTest(RealDataDirGuard):
         self.assertFalse(os.path.exists(old[0]))
         self.assertFalse(any("Try anyway" in q for q in asked), asked)
 
+    def test_no_delete_lists_unwanted_roms_and_keeps_them(self):
+        old, asked = [], []
+
+        def prepare(card):
+            self.old_rom(100)(card)
+            old.append(os.path.join(card, "ROMs", "gba", "Old.zip"))
+
+        patches = ((cli, {"free_space": lambda path: 1000}),
+                   (cli.ui, {"choose": lambda *a, **k: asked.append(a) or "y"}))
+        self.assertEqual(self.run_sync(False, prepare=prepare, patches=patches, args=["--no-delete"],
+                                       after=lambda card: self.assertTrue(os.path.exists(old[0]))), 0)
+        self.assertEqual(asked, [])
+        self.assertIn("--no-delete: keeping 1 local ROM(s)", self.out.getvalue())
+        self.assertIn("Old.zip", self.out.getvalue())
+
+    def test_no_delete_rejects_other_commands(self):
+        self.assertNotEqual(self.run_sync(False, args=["--no-delete", "--devices"]), 0)
+
     def test_roms_of_systems_with_nothing_to_sync_are_extras(self):
         """A system with no games listed keeps no ROMs on the card."""
         empty = {"name": "GCE Vectrex", "bucket": "vectrex", "folders": {"esde": "vectrex"}, "bios": {"files": []}, "games": []}
@@ -291,7 +309,7 @@ class SyncSmokeTest(RealDataDirGuard):
         self.assertEqual(cards, [])
         self.assertIn(os.path.join("roms", "pico8", self.ZIP), self.out.getvalue())
 
-    def driver_sync(self, layout, writable=True, dry_run=False, gpu="adreno-650", saved=None):
+    def driver_sync(self, layout, writable=True, dry_run=False, gpu="adreno-650", saved=None, args=()):
         """Sync a card with a device with the gpu (an Adreno 650) and the saved drivers list on the card (and in cards.json);
         (copied (key, path) pairs, refresh calls, cards.json updates)."""
         got, refreshed, updates = [], [], []
@@ -319,7 +337,7 @@ class SyncSmokeTest(RealDataDirGuard):
                    (cli.s3, {"list_sizes": lambda prefix, sizes=True: {"os/drivers/a.zip": 5, "os/drivers/a.tag": 3, "os/drivers/b.zip": 7, "os/drivers/b.tag": 3}
                              if prefix == "os/drivers/" else list_sizes(prefix)}),
                    (cli.ui, {"choose": lambda q, *a, **k: "n"}))
-        self.run_sync(dry_run, prepare=prepare, patches=patches)
+        self.run_sync(dry_run, prepare=prepare, patches=patches, args=args)
         return got, refreshed, updates
 
     def test_drivers_are_copied_to_drivers_on_esde_cards(self):
@@ -341,6 +359,13 @@ class SyncSmokeTest(RealDataDirGuard):
     def test_old_drivers_dry_run_removes_nothing(self):
         _, _, updates = self.driver_sync("esde", gpu=None, saved=["a-v1.zip"], dry_run=True)
         self.assertIn("would delete", self.out.getvalue())
+        self.assertNotIn("Removed old driver", self.out.getvalue())
+        self.assertEqual(updates, [])
+
+    def test_no_delete_keeps_old_drivers_listed(self):
+        with mock.patch.object(cli.ui, "dim", lambda t: t):
+            _, _, updates = self.driver_sync("esde", gpu=None, saved=["a-v1.zip"], args=["--no-delete"])
+        self.assertIn("--no-delete: keeping 1 old driver(s)", self.out.getvalue())
         self.assertNotIn("Removed old driver", self.out.getvalue())
         self.assertEqual(updates, [])
 
