@@ -11,7 +11,7 @@ from concurrent.futures import ThreadPoolExecutor
 from botocore.exceptions import BotoCoreError, ClientError, NoCredentialsError
 
 from . import __version__, budget, cardedit, cardfs, clean, commands, downloads, drivers, edit, external, frontend, inventory, m3u, mirroring, picker, runtime, s3, scrape_plan, store
-from . import pico8, surprise, themeart, ui, usersettings, vita
+from . import onion_surprise, pico8, surprise, themeart, ui, usersettings, vita
 from . import collections as colls
 
 
@@ -1025,6 +1025,9 @@ def sync_card(args):
     chosen = [s for s in systems if available(s)]
     if not chosen:
         failed = pico8.run(card, layout_name, base, args.dry_run)
+        failed += onion_surprise.install(card, layout_name, base, args.dry_run)
+        if onion_surprise.write_list(card, layout_name, base, roms_dir, systems, args.dry_run) and clean_card:
+            clean._clean_root = base
         print(ui.yellow(f"👋 {card} has nothing to sync."))
         return failed
     print(ui.bold(f"\n🔎 Checking {len(chosen)} system(s) against storage..."))
@@ -1275,11 +1278,13 @@ def sync_card(args):
         for name in drivers.prune(card, drivers_dir, [os.path.basename(p) for _, p, _ in driver_jobs], True):
             print(f"  {ui.red('would delete')} {os.path.join(drivers_dir, name)}")
         pico8.run(card, layout_name, base, True)
+        onion_surprise.install(card, layout_name, base, True)
         stale_count = 0
         if scrapes:
             stale_count = len(scrape_plan.stale_media(layout_name, manifest['systems'], roms_dir, stale_es_dir, base))
             print(f"🧹 Media on the card for ROMs it doesn't have: {stale_count} file(s) to remove")
         frontend_step(True)
+        onion_surprise.write_list(card, layout_name, base, roms_dir, systems, True)
         plan_json["stale_media"] = stale_count
         plan_json["totals"] = {"files": len(todo_all), "bytes": total_bytes(todo_all), "delete": len(extras),
                                "stale_media": stale_count, "missing": len(missing)}
@@ -1339,6 +1344,7 @@ def sync_card(args):
         print(ui.green(f"🧹 Removed old driver {name}"))
     pico8_wrote = []
     failed += pico8.run(card, layout_name, base, False, pico8_wrote)
+    failed += onion_surprise.install(card, layout_name, base, False)
     if theme_todo:
         failed += downloads.run_downloads(theme_todo, "Themes", "🎨", os.path.join(base, themes_dir), failures)
     prefixed = 0
@@ -1373,6 +1379,8 @@ def sync_card(args):
         print(ui.green(f"🧹 Removed empty system folder {os.path.relpath(folder, base)}"))
     cardfs.clear()
     frontend_step(False)
+    if onion_surprise.write_list(card, layout_name, base, roms_dir, systems, False) and clean_card:
+        clean._clean_root = base
     try:
         cardfs.flush()  # the frontend settings, before the card is reported done
     except OSError as e:

@@ -169,7 +169,9 @@ def write_list(card, layout_name, base, roms_dir, systems, dry_run):
     wanted = []
     if surprise.enabled(entry) and isinstance(entry, dict):
         folder_of = {s["bucket"]: s["folders"]["onion"] for s in systems if s["folders"].get("onion")}
-        wanted = lines(base, roms_dir, entry.get("surprises") or [], folder_of)
+        surprises = [x for x in entry.get("surprises") or () if isinstance(x, dict)
+                     and isinstance(x.get("system"), str) and isinstance(x.get("bucket"), str)]
+        wanted = lines(base, roms_dir, surprises, folder_of)
     path = os.path.join(roms_dir, "surprise.json")
     text = "".join(line + "\n" for line in wanted)
     try:

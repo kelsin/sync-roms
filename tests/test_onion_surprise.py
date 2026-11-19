@@ -259,6 +259,16 @@ class List(helpers.StorageDir):
         self.assertTrue(self.changed)
         self.assertFalse(os.path.exists(path))
 
+    def test_write_list_skips_malformed_surprises(self):
+        self.emu("GBA", "../../Roms/GBA")
+        self.rom("GBA", "Golden Sun (USA).gba")
+        self.rom("GBA", "Imgs", "Golden Sun (USA).png")
+        store.update_card("c", surprises=["x", {"system": "gba", "title": "No bucket"}, {"system": "gba", "bucket": 3},
+                                          {"bucket": "gba/Golden Sun (USA).gba"}, self.surprise()])
+        self.write()
+        with open(os.path.join(self.roms, "surprise.json")) as f:
+            self.assertEqual(f.read(), GOLDEN + "\n")
+
     def test_write_list_non_onion_does_nothing(self):
         self.emu("GBA", "../../Roms/GBA")
         self.rom("GBA", "Golden Sun (USA).gba")

@@ -4,6 +4,7 @@ import os
 import sys
 import tempfile
 import unittest
+import zipfile
 from unittest import mock
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
@@ -33,8 +34,8 @@ class SyncSmokeTest(RealDataDirGuard):
         patch.start()
         self.addCleanup(patch.stop)
 
-    def run_sync(self, dry_run, prepare=None, patches=(), yes=True, args=()):
-        """The exit code; what went to stderr is in self.err."""
+    def run_sync(self, dry_run, prepare=None, patches=(), yes=True, args=(), after=None):
+        """The exit code; what went to stderr is in self.err. after(card) runs before the card folder goes."""
         with tempfile.TemporaryDirectory() as card:
             if prepare:
                 prepare(card)
@@ -55,9 +56,12 @@ class SyncSmokeTest(RealDataDirGuard):
                 self.out = st.enter_context(contextlib.redirect_stdout(io.StringIO()))
                 self.err = st.enter_context(contextlib.redirect_stderr(io.StringIO()))
                 try:
-                    return cli.sync()
+                    code = cli.sync()
                 except SystemExit as e:
-                    return e.code
+                    code = e.code
+            if after:
+                after(card)
+            return code
 
     def test_dry_run_with_a_scrape_layout(self):
         self.assertEqual(self.run_sync(True), 0)
@@ -747,6 +751,45 @@ class SyncSmokeTest(RealDataDirGuard):
         self.assertEqual(self.run_sync(False, patches=patches), 0)
         self.assertNotIn("Android", self.out.getvalue())
         self.assertEqual(self.out.getvalue().count("Scraped data"), 1)
+
+    def test_onion_sync_installs_surprise_app_and_list(self):
+        layouts = {"onion": {"label": "Onion", "roms_dir": "Roms", "bios_dir": "BIOS"}}
+        manifest = {**MANIFEST, "layouts": layouts, "systems": [{**SYSTEM, "folders": {"onion": "GBA"}}]}
+        app = io.BytesIO()
+        with zipfile.ZipFile(app, "w") as z:
+            for name in ("App/Surprise/config.json", "App/Surprise/surprise"):
+                z.writestr(name, b"x")
+        files = inventory.files
+
+        def fake_files(prefix, sizes=True):
+            return {"os/onion/Surprise-v0.1.0.zip": 5} if prefix == "os/onion/" else files(prefix, sizes)
+
+        def download(job, *a):
+            os.makedirs(os.path.dirname(job[1]), exist_ok=True)
+            with open(job[1], "wb") as f:
+                f.write(app.getvalue() if job[0].startswith("os/onion/") else b"x" * 5)
+
+        def prepare(card):
+            os.makedirs(os.path.join(card, "Emu", "GBA"))
+            with open(os.path.join(card, "Emu", "GBA", "config.json"), "w") as f:
+                f.write('{"rompath": "../../Roms/GBA", "launch": "launch.sh"}')
+            store.update_card(os.path.basename(card), surprises=[
+                {"system": "gba", "bucket": "gba/Game.zip", "title": "Game"}, {"system": "gba", "title": "No bucket"}])
+
+        patches = ((store, {"load_manifest": lambda names=(): manifest, "load_cards": REAL_LOAD_CARDS}),
+                   (cli.picker, {"saved_setup": lambda *a: (None, "onion")}),
+                   (cli, {"free_space": lambda path: 10**9}),
+                   (inventory, {"files": fake_files}),
+                   (cli.downloads, {"run_downloads": downloads.run_downloads}),
+                   (cli.s3, {"download": download}))
+        for dry_run in (False, True):
+            with self.subTest(dry_run=dry_run):
+                found = []
+                self.assertEqual(self.run_sync(dry_run, prepare=prepare, patches=patches, after=lambda card: found.extend(
+                    os.path.exists(os.path.join(card, *p.split("/"))) for p in ("App/Surprise/surprise", "Roms/surprise.json"))), 0)
+                self.assertEqual(found, [not dry_run, not dry_run])
+                if not dry_run:
+                    self.assertIn("Surprise-v0.1.0.zip", self.out.getvalue())
 
     def test_a_run_ends_with_what_it_downloaded(self):
         manifest = {**MANIFEST, "systems": [{**SYSTEM, "games": SYSTEM["games"] + [{"bucket": "gba/Gone.zip"}]}]}

@@ -701,6 +701,8 @@ on them are replaced at the next sync.
   `surprise_ttl_days` in `settings.json` (default 183) whenever it is written. It is how a game comes around again only later.
 - **Frontends**: ES-DE, Knulli and EmuDeck cards get the surprises as a custom collection named `Surprise`, written
   like any other [collection](#collections-in-es-de-knulli-and-emudeck); that name is reserved, so a collection can't be called Surprise.
+  Onion cards get the Surprise app: the newest `os/onion/Surprise-v<version>.zip` in storage is installed as `App/Surprise/`,
+  and `Roms/surprise.json` lists the card's surprises for it.
 - **Art Book Next**: Surprise gets a gift-box artwork and logo in the theme's Outline style, like any
   [collection with theme art](#theme-art-for-collections).
 - **Mirror**: picks are made from storage itself, not the mirror, so they can be games the mirror doesn't have yet.
