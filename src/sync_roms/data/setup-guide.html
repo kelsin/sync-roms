@@ -549,6 +549,55 @@ function shaderPickRows(c, ctx) {
 }
 const SECTIONS = [
   {
+    id: "onion-install",
+    title: "Install Onion",
+    lede: "Do these in order: the custom Onion build goes on the card first, then sync-roms adds the ROMs, Surprise app and themes, then the device boots once.",
+    when: { layout: ["onion"] },
+    items: [
+      {
+        title: "1. Put the custom Onion build on the card",
+        body: `
+          <ol>
+            <li>Format the SD card <b>FAT32</b>.</li>
+            <li>Take my custom build from storage's <code>os/</code> folder: the newest <code>Onion-v*-kelsin-*.zip</code>.</li>
+            <li>Extract it into the <b>root</b> of the card (its folders, like <code>.tmp_update/</code> and <code>miyoo/</code>, sit directly on the card, not inside another folder).</li>
+          </ol>
+          <p class="note">Do this before syncing: Onion's installer creates the missing <code>Roms/</code> folders, and the extract must not land on top of what sync writes.</p>`,
+      },
+      {
+        title: "2. Sync the card",
+        body: `
+          <ol>
+            <li>Keep the card in the computer. Run <code>sync-roms sync</code> for this card and pick the <code>onion</code> layout.</li>
+            <li>Sync writes <code>Roms/</code> (with <code>Imgs/</code> and <code>miyoogamelist.xml</code>), <code>BIOS/</code>, and the card's Onion extras:
+              <ul>
+                <li><b>Surprise app</b>: the newest <code>os/onion/Surprise-v*.zip</code> as <code>App/Surprise/</code> (and its icon), plus <code>Roms/surprise.json</code> listing the card's picks. Only when Surprise is on for the card (the default for <code>onion</code>) and the card has picks.</li>
+                <li><b>Themes</b>: everything under <code>os/onion/Themes/</code> into the card's <code>Themes/</code>.</li>
+                <li><b>PICO-8</b> (when the card has it): the binaries under <code>RApp/PICO-8/bin/</code>.</li>
+              </ul>
+            </li>
+            <li>Re-run sync whenever the picks change; it only adds what is missing and updates the Surprise app once per new zip.</li>
+          </ol>`,
+      },
+      {
+        title: "3. First boot",
+        body: `
+          <ol>
+            <li>Eject the card, put it in the device and power on. Onion's installer runs on this first boot: leave it alone until it finishes and the device restarts into Onion.</li>
+            <li>Choose the language and other first-run prompts.</li>
+          </ol>`,
+      },
+      {
+        title: "4. Pick the theme and check Surprise",
+        body: `
+          <ol>
+            <li>Theme: <span class="path">${path("Tweaks > Appearance > Theme")}</span>, pick one of the synced themes.</li>
+            <li>Surprise: open <b>Apps</b> and launch <b>Surprise</b>; it reads <code>Roms/surprise.json</code>. If it is missing, sync again with the card in the computer.</li>
+          </ol>`,
+      },
+    ],
+  },
+  {
     id: "install",
     title: "Install the apps",
     lede: "The card's <code>APKs/</code> folder has everything needed to get going.",
