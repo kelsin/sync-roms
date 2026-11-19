@@ -118,7 +118,7 @@ Checking:
 
 ## Setup guide
 
-`docs/setup-guide.html` is the user's own record of the steps they take by hand to set up a device after sync-roms writes its card: installing apps, the ES-DE, Knulli and RetroArch settings they change, and the standalone emulators they use (where each is installed from and its settings). It is one self-contained page (no external files, scripts or fonts) that works opened straight from disk; picking a device and layout at the top shows only the steps that apply.
+`src/sync_roms/data/setup-guide.html` (`sync-roms guide` opens it in a browser) is the user's own record of the steps they take by hand to set up a device after sync-roms writes its card: installing apps, the ES-DE, Knulli and RetroArch settings they change, and the standalone emulators they use (where each is installed from and its settings). It is one self-contained page (no external files, scripts or fonts) that works opened straight from disk; picking a device and layout at the top shows only the steps that apply.
 
 - Content lives in the `SECTIONS` array in the page's script. Sections, items and emulators take an optional `when: {platform, layout}` filter; platforms come from `platformOf` (an `esde` card is Android, except `windows-pc`).
 - Only write steps and settings the user gave. Leave a section empty rather than guess which apps or settings they use.

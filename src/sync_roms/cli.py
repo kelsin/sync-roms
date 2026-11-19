@@ -37,6 +37,7 @@ SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "mirror": ("[DIR] | use DIR | clear", "make or refresh a local copy of everything your lists reference"),
     "cache": ("[update [--full]]", "show the storage cache every command reads file lists and sizes from, or update it"),
     "config": ("show|path|set NAME VALUE|unset NAME", "show the effective settings and where each comes from, or change one"),
+    "guide": ("", "open the device setup guide (steps to finish a device by hand) in a browser"),
     "doctor": ("", "check the AWS profile, storage access, tools and your data files"),
     "check": ("", "validate cards.json, surprises.json, the device overlay, the sets and your collections"),
     "completion": ("bash|zsh|fish", "print a shell completion script"),
@@ -307,6 +308,12 @@ TOPICS = {
   sync-roms doctor
 
   Checks the AWS profile and storage access, the tools `convert` needs, and that your data files parse.
+""",
+    "guide": """
+  sync-roms guide
+
+  Opens the device setup guide in your browser: the apps to install and the frontend, RetroArch and emulator
+  settings to change after a card is synced. Pick a device and layout at the top of the page.
 """,
     "check": """
   sync-roms check [--bucket-keys]
