@@ -1,0 +1,571 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Device Setup Guide</title>
+<style>
+:root {
+  --bg: #f6f3ee;
+  --panel: #fffdf9;
+  --ink: #1f1c18;
+  --muted: #6d655b;
+  --line: #e4ddd2;
+  --accent: #c2410c;
+  --accent-soft: #fbe6d9;
+  --chip: #efe9df;
+  --code: #f1ece4;
+  --shadow: 0 1px 2px rgba(40, 30, 20, .06), 0 6px 24px rgba(40, 30, 20, .06);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #15130f;
+    --panel: #1d1a16;
+    --ink: #ede7de;
+    --muted: #a39a8e;
+    --line: #322d27;
+    --accent: #fb923c;
+    --accent-soft: #3a2517;
+    --chip: #2a2621;
+    --code: #26221d;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 6px 24px rgba(0, 0, 0, .25);
+  }
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 16px/1.6 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+code, kbd {
+  font: .88em ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  background: var(--code);
+  border-radius: 5px;
+  padding: .1em .4em;
+}
+kbd { border: 1px solid var(--line); border-bottom-width: 2px; }
+a { color: var(--accent); }
+
+header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--line);
+}
+.bar {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 14px 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  align-items: end;
+}
+.brand { flex: 1 1 200px; }
+.brand h1 { margin: 0; font-size: 1.25rem; letter-spacing: -.01em; }
+.brand p { margin: 0; color: var(--muted); font-size: .85rem; }
+label.pick { display: flex; flex-direction: column; gap: 3px; font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+select {
+  font: inherit;
+  font-size: .95rem;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--ink);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 8px 32px 8px 12px;
+  min-width: 13rem;
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+  background-position: calc(100% - 17px) 55%, calc(100% - 12px) 55%;
+  background-size: 5px 5px;
+  background-repeat: no-repeat;
+}
+select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+main { max-width: 860px; margin: 0 auto; padding: 24px 16px 80px; }
+
+.device {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 28px;
+}
+.chip {
+  background: var(--chip);
+  border-radius: 999px;
+  padding: 3px 12px;
+  font-size: .82rem;
+  color: var(--muted);
+}
+.chip b { color: var(--ink); font-weight: 600; }
+
+nav.toc {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: -12px 0 28px;
+}
+nav.toc a {
+  text-decoration: none;
+  font-size: .82rem;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 2px 10px;
+}
+nav.toc a:hover { color: var(--accent); border-color: var(--accent); }
+
+section.step {
+  position: relative;
+  padding-left: 56px;
+  margin-bottom: 36px;
+}
+section.step::before {
+  content: "";
+  position: absolute;
+  left: 17px;
+  top: 40px;
+  bottom: -36px;
+  width: 2px;
+  background: var(--line);
+}
+section.step:last-of-type::before { display: none; }
+.num {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: .95rem;
+  background: var(--accent);
+  color: var(--panel);
+}
+section.ref .num { background: var(--chip); color: var(--muted); }
+section.step h2 { margin: 3px 0 4px; font-size: 1.3rem; letter-spacing: -.01em; }
+.lede { margin: 0 0 14px; color: var(--muted); }
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+  padding: 16px 18px;
+  margin-bottom: 12px;
+}
+.card h3 { margin: 0 0 6px; font-size: 1.02rem; }
+.card p { margin: 6px 0; }
+.card ol, .card ul { margin: 6px 0; padding-left: 1.3em; }
+.card li { margin: 3px 0; }
+.tags { display: inline-flex; gap: 4px; margin-left: 6px; vertical-align: 2px; }
+.tag {
+  font-size: .68rem;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-radius: 5px;
+  padding: 1px 6px;
+  font-weight: 600;
+}
+.path { font-weight: 600; }
+.path .sep { color: var(--muted); font-weight: 400; margin: 0 .25em; }
+
+table.settings { width: 100%; border-collapse: collapse; font-size: .92rem; margin-top: 6px; }
+table.settings td { padding: 7px 0; border-top: 1px solid var(--line); vertical-align: top; }
+table.settings td:last-child { text-align: right; padding-left: 16px; white-space: nowrap; font-weight: 600; }
+table.settings .note { display: block; color: var(--muted); font-size: .85em; }
+
+.empty {
+  border: 1.5px dashed var(--line);
+  border-radius: 14px;
+  padding: 14px 18px;
+  color: var(--muted);
+  font-size: .92rem;
+}
+
+details.emu {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+details.emu summary {
+  cursor: pointer;
+  list-style: none;
+  padding: 13px 18px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+details.emu summary::-webkit-details-marker { display: none; }
+details.emu summary::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-right: 2px solid var(--muted);
+  border-bottom: 2px solid var(--muted);
+  transform: rotate(-45deg);
+  transition: transform .15s;
+  flex: none;
+}
+details.emu[open] summary::before { transform: rotate(45deg); }
+details.emu summary .sys { font-weight: 600; }
+details.emu summary .emu-name { margin-left: auto; color: var(--muted); font-size: .9rem; }
+details.emu .body { padding: 0 18px 14px 35px; }
+details.emu .body .label { font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 10px 0 2px; }
+.toggle-all { background: none; border: 0; color: var(--accent); font: inherit; font-size: .85rem; cursor: pointer; padding: 0; margin: 0 0 10px; }
+
+@media (max-width: 560px) {
+  section.step { padding-left: 0; }
+  section.step::before { display: none; }
+  .num { position: static; margin-bottom: 8px; }
+  select { min-width: 0; width: 100%; }
+  label.pick { flex: 1 1 100%; }
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <div class="brand">
+      <h1>Device Setup Guide</h1>
+      <p>What I do to set up each handheld after <code>sync-roms</code> writes its card.</p>
+    </div>
+    <label class="pick">Device <select id="device"></select></label>
+    <label class="pick">Layout <select id="layout"></select></label>
+  </div>
+</header>
+
+<main>
+  <div class="device" id="facts"></div>
+  <nav class="toc" id="toc"></nav>
+  <div id="steps"></div>
+</main>
+
+<!-- Copied from src/sync_roms/data/devices.json; tests/test_setup_guide.py keeps them in step. -->
+<script type="application/json" id="devices-data">
+[
+{"id": "anbernic-rg-cube", "name": "Anbernic RG Cube", "soc": "UNISOC Tiger T820", "screen": "1:1", "firmwares": ["esde"]},
+{"id": "anbernic-rg-cubexx", "name": "Anbernic RG CubeXX", "soc": "Allwinner H700", "screen": "1:1", "firmwares": ["knulli"]},
+{"id": "anbernic-rg-ds", "name": "Anbernic RG DS", "soc": "Rockchip RK3568", "screen": "4:3", "screen2": "4:3", "firmwares": ["esde"]},
+{"id": "anbernic-rg-ds-plus", "name": "Anbernic RG DS Plus", "soc": "Rockchip RK3568", "screen": "4:3", "screen2": "4:3", "firmwares": ["knulli"]},
+{"id": "anbernic-rg-rotate", "name": "Anbernic RG Rotate", "soc": "UNISOC T618", "screen": "1:1", "firmwares": ["esde"]},
+{"id": "anbernic-rg-sp", "name": "Anbernic RG SP", "soc": "Allwinner H700", "screen": "3:2", "firmwares": ["knulli"]},
+{"id": "anbernic-rg-slide", "name": "Anbernic RG Slide", "soc": "UNISOC Tiger T820", "screen": "4:3", "firmwares": ["esde"]},
+{"id": "anbernic-rg-vita", "name": "Anbernic RG Vita", "soc": "UNISOC T618", "screen": "16:9", "firmwares": ["esde"]},
+{"id": "anbernic-rg-vita-pro", "name": "Anbernic RG Vita Pro", "soc": "Rockchip RK3576", "screen": "16:9", "firmwares": ["knulli"]},
+{"id": "anbernic-rg28xx", "name": "Anbernic RG28XX", "soc": "Allwinner H700", "screen": "4:3", "firmwares": ["knulli"]},
+{"id": "anbernic-rg34xx", "name": "Anbernic RG34XX", "soc": "Allwinner H700", "screen": "3:2", "firmwares": ["knulli"]},
+{"id": "anbernic-rg34xx-sp", "name": "Anbernic RG34XX SP", "soc": "Allwinner H700", "screen": "3:2", "firmwares": ["knulli"]},
+{"id": "anbernic-rg353ps", "name": "Anbernic RG353PS", "soc": "Rockchip RK3566", "screen": "4:3", "firmwares": ["knulli"]},
+{"id": "anbernic-rg353vs", "name": "Anbernic RG353VS", "soc": "Rockchip RK3566", "screen": "4:3", "firmwares": ["knulli"]},
+{"id": "anbernic-rg35xx-2024", "name": "Anbernic RG35XX 2024", "soc": "Allwinner H700", "screen": "4:3", "firmwares": ["knulli"]},
+{"id": "anbernic-rg35xxh", "name": "Anbernic RG35XX H", "soc": "Allwinner H700", "screen": "4:3", "firmwares": ["knulli"]},
+{"id": "anbernic-rg35xx-plus", "name": "Anbernic RG35XX Plus", "soc": "Allwinner H700", "screen": "4:3", "firmwares": ["knulli"]},
+{"id": "anbernic-rg35xx-pro", "name": "Anbernic RG35XX Pro", "soc": "Allwinner H700", "screen": "4:3", "firmwares": ["knulli"]},
+{"id": "anbernic-rg35xx-sp", "name": "Anbernic RG35XX SP", "soc": "Allwinner H700", "screen": "4:3", "firmwares": ["knulli"]},
+{"id": "anbernic-rg405m", "name": "Anbernic RG405M", "soc": "UNISOC T618", "screen": "4:3", "firmwares": ["esde"]},
+{"id": "anbernic-rg405v", "name": "Anbernic RG405V", "soc": "UNISOC T618", "screen": "4:3", "firmwares": ["esde"]},
+{"id": "anbernic-rg406h", "name": "Anbernic RG406H", "soc": "UNISOC Tiger T820", "screen": "4:3", "firmwares": ["esde"]},
+{"id": "anbernic-rg406v", "name": "Anbernic RG406V", "soc": "UNISOC Tiger T820", "screen": "4:3", "firmwares": ["esde"]},
+{"id": "anbernic-rg40xxh", "name": "Anbernic RG40XX H", "soc": "Allwinner H700", "screen": "4:3", "firmwares": ["knulli"]},
+{"id": "anbernic-rg40xxv", "name": "Anbernic RG40XX V", "soc": "Allwinner H700", "screen": "4:3", "firmwares": ["knulli"]},
+{"id": "anbernic-rg476h", "name": "Anbernic RG476H", "soc": "UNISOC Tiger T820", "screen": "4:3", "firmwares": ["esde"]},
+{"id": "anbernic-rg477m", "name": "Anbernic RG477M", "soc": "MediaTek Dimensity 8300", "screen": "4:3", "firmwares": ["esde"]},
+{"id": "anbernic-rg477v", "name": "Anbernic RG477V", "soc": "MediaTek Dimensity 8300", "screen": "4:3", "firmwares": ["esde"]},
+{"id": "anbernic-rg503", "name": "Anbernic RG503", "soc": "Rockchip RK3566", "screen": "16:9", "firmwares": ["knulli"]},
+{"id": "anbernic-rg505", "name": "Anbernic RG505", "soc": "UNISOC T618", "screen": "16:9", "firmwares": ["esde"]},
+{"id": "anbernic-rg556", "name": "Anbernic RG556", "soc": "UNISOC Tiger T820", "screen": "16:9", "firmwares": ["esde"]},
+{"id": "anbernic-rg557", "name": "Anbernic RG557", "soc": "MediaTek Dimensity 8300", "screen": "16:9", "firmwares": ["esde"]},
+{"id": "anbernic-rg55g1", "name": "Anbernic RG55G1", "soc": "Snapdragon G1 Gen 2", "screen": "16:9", "firmwares": ["esde"]},
+{"id": "ayaneo-konkr-pocket-fit", "name": "AYANEO KONKR Pocket Fit", "soc": "Snapdragon G3 Gen 3", "screen": "16:9", "firmwares": ["esde"]},
+{"id": "ayaneo-pocket-ace", "name": "AYANEO Pocket ACE", "soc": "Snapdragon G3x Gen 2", "screen": "3:2", "firmwares": ["esde"]},
+{"id": "ayaneo-pocket-advance", "name": "AYANEO KONKR Pocket Advance", "soc": "MediaTek Helio G90T", "screen": "3:2", "firmwares": ["esde"]},
+{"id": "ayaneo-pocket-air", "name": "AYANEO Pocket Air", "soc": "MediaTek Dimensity 1200", "screen": "16:9", "firmwares": ["esde"]},
+{"id": "ayaneo-pocket-air-mini", "name": "AYANEO Pocket Air Mini", "soc": "MediaTek Helio G90T", "screen": "4:3", "firmwares": ["esde"]},
+{"id": "ayaneo-pocket-dmg", "name": "AYANEO Pocket DMG", "soc": "Snapdragon G3x Gen 2", "screen": "31:27", "firmwares": ["esde"]},
+{"id": "ayaneo-pocket-ds", "name": "AYANEO Pocket DS", "soc": "Snapdragon G3x Gen 2", "screen": "16:9", "screen2": "4:3", "firmwares": ["esde"]},
+{"id": "ayaneo-pocket-evo", "name": "AYANEO Pocket EVO", "soc": "Snapdragon G3x Gen 2", "screen": "16:9", "firmwares": ["esde"]},
+{"id": "ayaneo-pocket-micro", "name": "AYANEO Pocket Micro", "soc": "MediaTek Helio G99", "screen": "3:2", "firmwares": ["esde"]},
+{"id": "ayaneo-pocket-micro-2", "name": "AYANEO Pocket Micro 2", "soc": "Snapdragon 865", "screen": "3:2", "firmwares": ["esde"]},
+{"id": "ayaneo-pocket-micro-classic", "name": "AYANEO Pocket Micro Classic", "soc": "MediaTek Helio G99", "screen": "3:2", "firmwares": ["esde"]},
+{"id": "ayaneo-pocket-s", "name": "AYANEO Pocket S", "soc": "Snapdragon G3x Gen 2", "screen": "16:9", "firmwares": ["esde"]},
+{"id": "ayaneo-pocket-s-mini", "name": "AYANEO Pocket S Mini", "soc": "Snapdragon G3x Gen 2", "screen": "4:3", "firmwares": ["esde"]},
+{"id": "ayaneo-pocket-s2", "name": "AYANEO Pocket S2", "soc": "Snapdragon G3 Gen 3", "screen": "16:9", "firmwares": ["esde"]},
+{"id": "ayaneo-pocket-s2-pro", "name": "AYANEO Pocket S2 Pro", "soc": "Snapdragon G3 Gen 3", "screen": "16:9", "firmwares": ["esde"]},
+{"id": "ayaneo-pocket-vert", "name": "AYANEO Pocket Vert", "soc": "Snapdragon 8+ Gen 1", "screen": "10:9", "firmwares": ["esde"]},
+{"id": "ayn-odin", "name": "AYN Odin", "soc": "Snapdragon 845", "screen": "16:9", "firmwares": ["esde"]},
+{"id": "ayn-odin-2", "name": "AYN Odin 2", "soc": "Snapdragon 8 Gen 2", "screen": "16:9", "firmwares": ["esde"]},
+{"id": "ayn-odin-2-mini", "name": "AYN Odin 2 Mini", "soc": "Snapdragon 8 Gen 2", "screen": "16:9", "firmwares": ["esde"]},
+{"id": "ayn-odin-2-portal", "name": "AYN Odin 2 Portal", "soc": "Snapdragon 8 Gen 2", "screen": "16:9", "firmwares": ["esde"]},
+{"id": "ayn-odin-3", "name": "AYN Odin 3", "soc": "Snapdragon 8 Elite", "screen": "16:9", "firmwares": ["esde"]},
+{"id": "ayn-odin-lite", "name": "AYN Odin Lite", "soc": "MediaTek Dimensity 900", "screen": "16:9", "firmwares": ["esde"]},
+{"id": "ayn-thor-lite", "name": "AYN Thor Lite", "soc": "Snapdragon 865", "screen": "16:9", "screen2": "31:27", "firmwares": ["esde"]},
+{"id": "ayn-thor", "name": "AYN Thor", "soc": "Snapdragon 8 Gen 2", "screen": "16:9", "screen2": "31:27", "firmwares": ["esde"]},
+{"id": "magicx-zero40", "name": "MagicX Zero 40", "soc": "Allwinner A133P", "screen": "3:5", "firmwares": ["esde"]},
+{"id": "miyoo-flip", "name": "Miyoo Flip", "soc": "Rockchip RK3566", "screen": "4:3", "firmwares": ["knulli"]},
+{"id": "miyoo-mini", "name": "Miyoo Mini", "soc": "SigmaStar SSD202D", "screen": "4:3", "firmwares": ["onion", "allium"]},
+{"id": "miyoo-mini-flip", "name": "Miyoo Mini Flip", "soc": "SigmaStar SSD202D", "screen": "4:3", "firmwares": ["onion", "allium"]},
+{"id": "miyoo-mini-plus", "name": "Miyoo Mini Plus", "soc": "SigmaStar SSD202D", "screen": "4:3", "firmwares": ["onion", "allium"]},
+{"id": "retroid-pocket-2s", "name": "Retroid Pocket 2S", "soc": "UNISOC T610", "screen": "4:3", "firmwares": ["esde"]},
+{"id": "retroid-pocket-3", "name": "Retroid Pocket 3", "soc": "UNISOC T310", "screen": "16:9", "firmwares": ["esde"]},
+{"id": "retroid-pocket-3-plus", "name": "Retroid Pocket 3 Plus", "soc": "UNISOC T618", "screen": "16:9", "firmwares": ["esde"]},
+{"id": "retroid-pocket-4", "name": "Retroid Pocket 4", "soc": "MediaTek Dimensity 900", "screen": "16:9", "firmwares": ["esde"]},
+{"id": "retroid-pocket-4-pro", "name": "Retroid Pocket 4 Pro", "soc": "MediaTek Dimensity 1100", "screen": "16:9", "firmwares": ["esde"]},
+{"id": "retroid-pocket-5", "name": "Retroid Pocket 5", "soc": "Snapdragon 865", "screen": "16:9", "firmwares": ["esde"]},
+{"id": "retroid-pocket-6", "name": "Retroid Pocket 6", "soc": "Snapdragon 8 Gen 2", "screen": "16:9", "firmwares": ["esde"]},
+{"id": "retroid-pocket-classic", "name": "Retroid Pocket Classic", "soc": "Snapdragon G1 Gen 2", "screen": "31:27", "firmwares": ["esde"]},
+{"id": "retroid-pocket-duo", "name": "Retroid Pocket Duo", "soc": "Snapdragon 7 Gen 4", "screen": "16:9", "screen2": "4:3", "firmwares": ["esde"]},
+{"id": "retroid-pocket-duo-lite", "name": "Retroid Pocket Duo Lite", "soc": "Snapdragon 665", "screen": "16:9", "screen2": "4:3", "firmwares": ["esde"]},
+{"id": "retroid-pocket-duo-lite-plus", "name": "Retroid Pocket Duo Lite Plus", "soc": "Snapdragon 7 Gen 4", "screen": "16:9", "screen2": "4:3", "firmwares": ["esde"]},
+{"id": "retroid-pocket-flip", "name": "Retroid Pocket Flip", "soc": "UNISOC T618", "screen": "16:9", "firmwares": ["esde"]},
+{"id": "retroid-pocket-flip-2", "name": "Retroid Pocket Flip 2", "soc": "Snapdragon 865", "screen": "16:9", "firmwares": ["esde"]},
+{"id": "retroid-pocket-g2", "name": "Retroid Pocket G2", "soc": "Snapdragon G2 Gen 2", "screen": "16:9", "firmwares": ["esde"]},
+{"id": "retroid-pocket-mini", "name": "Retroid Pocket Mini", "soc": "Snapdragon 865", "screen": "4:3", "firmwares": ["esde"]},
+{"id": "retroid-pocket-mini-v2", "name": "Retroid Pocket Mini V2", "soc": "Snapdragon 865", "screen": "31:27", "firmwares": ["esde"]},
+{"id": "retroid-pocket-nova", "name": "Retroid Pocket Nova", "soc": "Qualcomm QCS8550 (Snapdragon 8 Gen 2)", "screen": "4:3", "firmwares": ["esde"]},
+{"id": "steam-deck", "name": "Steam Deck", "soc": "AMD Custom APU (Van Gogh)", "screen": "16:10", "firmwares": ["emudeck"]},
+{"id": "steam-machine", "name": "Steam Machine", "soc": "AMD Zen 4 + RDNA 3", "firmwares": ["emudeck"]},
+{"id": "windows-pc", "name": "Windows PC (RetroBat)", "soc": "x86-64", "firmwares": ["esde"]}
+]
+</script>
+
+<script>
+const LAYOUTS = {
+  esde: "ES-DE",
+  knulli: "Knulli",
+  onion: "Onion",
+  allium: "Allium",
+  emudeck: "EmuDeck",
+};
+
+// The platform a device runs with a layout: steps can target a platform, a layout or both.
+function platformOf(device, layout) {
+  if (layout === "emudeck") return "steamos";
+  if (layout === "esde") return device.id === "windows-pc" ? "windows" : "android";
+  return "linux";
+}
+const PLATFORMS = { android: "Android", windows: "Windows", steamos: "SteamOS", linux: "Linux" };
+
+/*
+  Guide content. Each section and each item may have a `when`:
+    { platform: ["android", ...], layout: ["esde", ...] }
+  and is only shown when the picked device and layout match every key given.
+  Items:  { title, when?, body?: HTML, settings?: [[menu path, value, note?], ...] }
+  Emulators (in the "emulators" section): { system, emulator, when?, install: HTML, settings?: [...] }
+  Write menu paths with " > " between levels.
+*/
+const SECTIONS = [
+  {
+    id: "install",
+    title: "Install the apps",
+    lede: "The card's <code>APKs/</code> folder has everything needed to get going.",
+    when: { platform: ["android"] },
+    items: [
+      {
+        title: "Install ES-DE, Obtainium and MiXplorer",
+        body: `
+          <ol>
+            <li>Open the device's built-in <b>Files</b> app and go to the SD card's <code>APKs/</code> folder.</li>
+            <li>Tap each APK below. The first time, Android asks to allow installs from Files: tap <b>Settings</b>, turn on <b>Allow from this source</b>, then go back.
+              <ul>
+                <li><b>ES-DE</b>: <code>es-de-*.apk</code></li>
+                <li><b>Obtainium</b>: <code>obtainium.apk</code></li>
+                <li><b>MiXplorer</b>: <code>mixplorer-*.apk</code></li>
+              </ul>
+            </li>
+          </ol>`,
+      },
+      {
+        title: "Install emulators and RAOfflineProxy with Obtainium",
+        body: `
+          <ol>
+            <li>Open <b>Obtainium</b> and go to <span class="path">${path("Import/Export > Obtainium Import")}</span>.</li>
+            <li>Pick the emulation pack from the card's <code>APKs/</code> folder: <code>obtainium-emulation-pack-*.json</code>.</li>
+            <li>In <b>Apps</b>, tap each wanted emulator and <b>RAOfflineProxy</b>, then <b>Install</b>. The first install asks to allow installs from Obtainium: turn on <b>Allow from this source</b>.</li>
+          </ol>`,
+      },
+    ],
+  },
+  {
+    id: "esde",
+    title: "ES-DE settings",
+    lede: "What I change in ES-DE's main menu.",
+    when: { layout: ["esde", "emudeck"] },
+    items: [],
+  },
+  {
+    id: "knulli",
+    title: "Knulli settings",
+    lede: "What I change in Knulli's main menu.",
+    when: { layout: ["knulli"] },
+    items: [],
+  },
+  {
+    id: "retroarch",
+    title: "RetroArch settings",
+    lede: "Shared settings for the cores I use; some apply only on one platform or layout.",
+    items: [],
+  },
+  {
+    id: "emulators",
+    title: "Standalone emulators",
+    lede: "Systems I don't run in RetroArch: where each emulator comes from and how I set it up.",
+    items: [],
+  },
+  {
+    id: "home",
+    title: "Make ES-DE the home app",
+    lede: "Last, so the device boots straight into ES-DE.",
+    when: { platform: ["android"] },
+    items: [
+      {
+        title: "Set the default home app",
+        body: `
+          <p class="path">${path("Settings > Apps > Default apps > Home app")}</p>
+          <p>Pick <b>ES-DE</b>. Press <kbd>Home</kbd> to check it opens ES-DE.</p>
+          <p>If it isn't there, search Settings for <i>Home app</i>.</p>`,
+      },
+    ],
+  },
+];
+
+function path(p) {
+  return p.split(" > ").map(esc).join('<span class="sep">›</span>');
+}
+function esc(s) {
+  return String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+}
+function matches(when, ctx) {
+  if (!when) return true;
+  return Object.entries(when).every(([k, vals]) => vals.includes(ctx[k]));
+}
+function tagsFor(when) {
+  if (!when) return "";
+  const names = [...(when.platform || []).map(p => PLATFORMS[p]), ...(when.layout || []).map(l => LAYOUTS[l])];
+  return names.length ? `<span class="tags">${names.map(n => `<span class="tag">${esc(n)}</span>`).join("")}</span>` : "";
+}
+function settingsTable(rows) {
+  if (!rows || !rows.length) return "";
+  return `<table class="settings">${rows.map(([p, v, note]) =>
+    `<tr><td><span class="path">${path(p)}</span>${note ? `<span class="note">${esc(note)}</span>` : ""}</td><td>${esc(v)}</td></tr>`
+  ).join("")}</table>`;
+}
+
+const DEVICES = JSON.parse(document.getElementById("devices-data").textContent);
+const $device = document.getElementById("device");
+const $layout = document.getElementById("layout");
+
+// Devices grouped by brand (first word of the name), in file order.
+const brands = new Map();
+for (const d of DEVICES) {
+  const brand = d.name.split(" ")[0];
+  if (!brands.has(brand)) brands.set(brand, []);
+  brands.get(brand).push(d);
+}
+for (const [brand, list] of brands) {
+  const g = document.createElement("optgroup");
+  g.label = brand;
+  for (const d of list) g.append(new Option(d.name, d.id));
+  $device.append(g);
+}
+
+function readHash() {
+  const h = new URLSearchParams(location.hash.slice(1));
+  return { device: h.get("device"), layout: h.get("layout") };
+}
+
+function fillLayouts(device, wanted) {
+  $layout.innerHTML = "";
+  for (const id of device.firmwares) $layout.append(new Option(LAYOUTS[id] || id, id));
+  $layout.value = device.firmwares.includes(wanted) ? wanted : device.firmwares[0];
+  $layout.disabled = device.firmwares.length < 2;
+}
+
+function render() {
+  const device = DEVICES.find(d => d.id === $device.value);
+  const ctx = { layout: $layout.value, platform: platformOf(device, $layout.value) };
+  history.replaceState(null, "", `#device=${device.id}&layout=${ctx.layout}`);
+
+  const screen = device.screen ? device.screen + (device.screen2 ? ` + ${device.screen2}` : "") : null;
+  document.getElementById("facts").innerHTML = [
+    ["Platform", PLATFORMS[ctx.platform]],
+    ["Layout", LAYOUTS[ctx.layout]],
+    ["SoC", device.soc],
+    ["Screen", screen],
+  ].filter(([, v]) => v).map(([k, v]) => `<span class="chip">${k} <b>${esc(v)}</b></span>`).join("");
+
+  const shown = SECTIONS.filter(s => matches(s.when, ctx));
+  let n = 0;
+  document.getElementById("toc").innerHTML = shown.map(s => `<a href="#${s.id}">${esc(s.title)}</a>`).join("");
+  document.getElementById("steps").innerHTML = shown.map(s => {
+    const items = s.items.filter(i => matches(i.when, ctx));
+    const ref = s.id !== "install" && s.id !== "home";
+    let body;
+    if (!items.length) {
+      body = `<div class="empty">Nothing here yet for this ${s.id === "emulators" ? "platform" : "setup"}.</div>`;
+    } else if (s.id === "emulators") {
+      body = `<button class="toggle-all" type="button">Expand all</button>` + items.map(e => `
+        <details class="emu">
+          <summary><span class="sys">${esc(e.system)}</span>${tagsFor(e.when)}<span class="emu-name">${esc(e.emulator)}</span></summary>
+          <div class="body">
+            <div class="label">Install from</div><div>${e.install}</div>
+            ${e.settings && e.settings.length ? `<div class="label">Settings</div>${settingsTable(e.settings)}` : ""}
+          </div>
+        </details>`).join("");
+    } else {
+      body = items.map(i => `
+        <div class="card">
+          <h3>${esc(i.title)}${tagsFor(i.when)}</h3>
+          ${i.body || ""}
+          ${settingsTable(i.settings)}
+        </div>`).join("");
+    }
+    return `
+      <section class="step${ref ? " ref" : ""}" id="${s.id}">
+        <div class="num">${++n}</div>
+        <h2>${esc(s.title)}</h2>
+        <p class="lede">${s.lede}</p>
+        ${body}
+      </section>`;
+  }).join("");
+}
+
+document.getElementById("steps").addEventListener("click", e => {
+  if (!e.target.matches(".toggle-all")) return;
+  const all = [...e.target.parentElement.querySelectorAll("details.emu")];
+  const open = !all.every(d => d.open);
+  all.forEach(d => (d.open = open));
+  e.target.textContent = open ? "Collapse all" : "Expand all";
+});
+
+function applyHash() {
+  const { device, layout } = readHash();
+  const d = DEVICES.find(x => x.id === device) || DEVICES[0];
+  $device.value = d.id;
+  fillLayouts(d, layout);
+  render();
+}
+$device.addEventListener("change", () => {
+  fillLayouts(DEVICES.find(d => d.id === $device.value), $layout.value);
+  render();
+});
+$layout.addEventListener("change", render);
+window.addEventListener("hashchange", applyHash);
+applyHash();
+</script>
+</body>
+</html>
