@@ -1,5 +1,12 @@
 # Changelog
 
+## [3.9.1](https://github.com/kelsin/sync-roms/compare/v3.9.0...v3.9.1) (2026-11-19)
+
+
+### :zap: Performance Improvements
+
+* **sync:** minimize sd card reads and writes during sync ([#380](https://github.com/kelsin/sync-roms/issues/380)) ([0d97459](https://github.com/kelsin/sync-roms/commit/0d97459892e269c93f18d6d52f6aa43ed152285f))
+
 ## [3.9.0](https://github.com/kelsin/sync-roms/compare/v3.8.0...v3.9.0) (2026-11-18)
 
 
