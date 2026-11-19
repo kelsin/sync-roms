@@ -1,6 +1,10 @@
+import gzip
+import hashlib
 import os
 import sys
+import tempfile
 import unittest
+from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
@@ -54,6 +58,57 @@ class Flash(unittest.TestCase):
 
     def test_whole_disks_empty(self):
         self.assertEqual(flash.whole_disks({}), set())
+
+
+class WriteVerify(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.target = os.path.join(self.tmp.name, "target")
+        self.data = os.urandom(5 * 1024 * 1024 + 123)
+        self.gz = os.path.join(self.tmp.name, "img.gz")
+        with gzip.open(self.gz, "wb") as f:
+            f.write(self.data)
+        for patcher in (mock.patch.object(flash, "DD", ["dd"]), mock.patch.object(flash, "raw", lambda d: self.target)):
+            patcher.start()
+            self.addCleanup(patcher.stop)
+
+    def test_write_then_verify_round_trip(self):
+        size, digest = flash.write_image(self.gz, "disk9")
+        self.assertEqual(size, len(self.data))
+        self.assertEqual(digest, hashlib.sha256(self.data).hexdigest())
+        self.assertTrue(flash.verify("disk9", size, digest))
+
+    def test_verify_ignores_bytes_past_image(self):
+        size, digest = flash.write_image(self.gz, "disk9")
+        with open(self.target, "ab") as f:
+            f.write(b"x" * 1000)
+        self.assertTrue(flash.verify("disk9", size, digest))
+
+    def test_verify_detects_corruption(self):
+        size, digest = flash.write_image(self.gz, "disk9")
+        pos = 3 * 1024 * 1024
+        with open(self.target, "r+b") as f:
+            f.seek(pos)
+            byte = f.read(1)[0]
+            f.seek(pos)
+            f.write(bytes([byte ^ 0xFF]))
+        self.assertFalse(flash.verify("disk9", size, digest))
+
+    def test_verify_short_read_is_false(self):
+        size, digest = flash.write_image(self.gz, "disk9")
+        os.truncate(self.target, size - 10)
+        self.assertFalse(flash.verify("disk9", size, digest))
+
+    def test_dd_failure_raises(self):
+        with mock.patch.object(flash, "raw", lambda d: "/nonexistent-dir/x"):
+            with self.assertRaises(flash.FlashError):
+                flash.write_image(self.gz, "disk9")
+
+    def test_progress_reaches_one(self):
+        seen = []
+        flash.write_image(self.gz, "disk9", seen.append)
+        self.assertAlmostEqual(seen[-1], 1.0)
 
 
 if __name__ == "__main__":

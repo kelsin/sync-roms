@@ -1,5 +1,8 @@
 """Knulli OS images in storage's os/ folder, and which of them fit a device."""
 import collections
+import gzip
+import hashlib
+import math
 import os
 import plistlib
 import re
@@ -7,6 +10,18 @@ import subprocess
 from xml.parsers.expat import ExpatError
 
 PREFIX = "os/"
+DD = ["sudo", "dd"]
+WRITE_BLOCK = 4 * 1024 * 1024
+READ_BLOCK = 16 * 1024 * 1024
+
+
+class FlashError(Exception):
+    pass
+
+
+def raw(disk):
+    """The raw device node of a disk, which is much faster to write than /dev/diskN."""
+    return f"/dev/r{disk}"
 
 
 def knulli_devices(devices):
@@ -95,3 +110,76 @@ def external_disks(exclude):
     if listing is None:
         return []
     return parse_disks(listing, lambda d: _diskutil("info", "-plist", d) or {}, exclude)
+
+
+def _stop(proc):
+    """Kill the dd child and reap it."""
+    for stream in (proc.stdin, proc.stdout):
+        try:
+            if stream:
+                stream.close()
+        except OSError:
+            pass
+    proc.kill()
+    proc.wait()
+    if proc.stderr:
+        proc.stderr.close()
+
+
+def write_image(gz_path, disk, progress=None):
+    """Stream a .img.gz to the disk through dd. Returns (bytes written, sha256 hexdigest)."""
+    proc = subprocess.Popen(DD + [f"of={raw(disk)}", f"bs={WRITE_BLOCK}"], stdin=subprocess.PIPE,
+                            stderr=subprocess.PIPE)
+    try:
+        total = os.path.getsize(gz_path)
+        digest = hashlib.sha256()
+        size = 0
+        with open(gz_path, "rb") as raw_file, gzip.open(raw_file) as src:
+            while True:
+                chunk = src.read(WRITE_BLOCK)
+                if not chunk:
+                    break
+                try:
+                    proc.stdin.write(chunk)
+                except BrokenPipeError:
+                    raise FlashError(proc.communicate()[1].decode(errors="replace").strip() or "dd stopped")
+                digest.update(chunk)
+                size += len(chunk)
+                if progress:
+                    progress(min(raw_file.tell() / total, 1.0) if total else 1.0)
+        try:
+            proc.stdin.close()
+        except BrokenPipeError:
+            pass
+        err = proc.communicate()[1].decode(errors="replace").strip()
+        if proc.returncode != 0:
+            raise FlashError(err or f"dd exited with {proc.returncode}")
+        if progress:
+            progress(1.0)
+        return size, digest.hexdigest()
+    except BaseException:
+        _stop(proc)
+        raise
+
+
+def verify(disk, size, digest, progress=None):
+    """Read size bytes back from the disk; True when their sha256 equals digest."""
+    count = math.ceil(size / READ_BLOCK)
+    proc = subprocess.Popen(DD + [f"if={raw(disk)}", f"bs={READ_BLOCK}", f"count={count}"],
+                            stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+    try:
+        h = hashlib.sha256()
+        got = 0
+        while got < size:
+            chunk = proc.stdout.read(min(WRITE_BLOCK, size - got))
+            if not chunk:
+                break
+            h.update(chunk)
+            got += len(chunk)
+            if progress:
+                progress(got / size)
+        _stop(proc)
+        return got == size and h.hexdigest() == digest
+    except BaseException:
+        _stop(proc)
+        raise
