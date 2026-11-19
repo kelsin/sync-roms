@@ -11,6 +11,10 @@ folder, never a bucket name. With no terminal to ask on, set `ROMS_BUCKET` or `R
 size) are skipped, so re-running it only fetches what's new or missing. It can also keep a
 [local mirror](#local-mirror---mirror---use-mirror---clear-mirror) of storage and sync from that.
 
+The [device setup guide](docs/setup-guide.html) (open it in a browser) lists the steps to finish a device by hand
+once its card is synced: apps to install and the frontend, RetroArch and emulator settings to change, for the device
+and layout you pick.
+
 ## Install
 
 With Homebrew (macOS and Linux):
