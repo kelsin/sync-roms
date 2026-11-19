@@ -11,7 +11,7 @@ import tempfile
 from xml.sax import saxutils
 import zlib
 
-from . import downloads, frontend, github, runtime, s3, store, ui
+from . import cardfs, downloads, frontend, github, runtime, s3, store, ui
 
 THEME_DATA = os.path.join(store.REPO_DATA, "themes", "art-book-next")
 SURPRISE_ART = "surprise"
@@ -39,18 +39,13 @@ KNULLI_DIR = os.path.join("theme-customizations", "art-book-next")
 
 def _write_settings(path, layout_name, values, only_if_unset=()):
     """Set the <string> entries in a frontend settings file; names in only_if_unset are left alone when present."""
-    old = ""
-    if os.path.exists(path):
-        with open(path, encoding="utf-8") as f:
-            old = f.read()
+    old = cardfs.text(path)
     new = old
     for name, value in values.items():
         if name in only_if_unset and frontend.get_string(new, name):
             continue
         new = frontend.set_string(new, layout_name, name, value)
-    if new != old:
-        os.makedirs(os.path.dirname(path), exist_ok=True)
-        store.replace_file(path, new, newline="\n")
+    cardfs.write_text(path, new)
 
 
 def _read(path):
@@ -128,9 +123,10 @@ def logo_svg(text):
 def _put(path, data):
     """Write data (bytes) to path unless it already holds them. Returns whether it wrote."""
     try:
-        with open(path, "rb") as f:
-            if f.read() == data:
-                return False
+        if os.path.getsize(path) == len(data):
+            with open(path, "rb") as f:
+                if f.read() == data:
+                    return False
     except FileNotFoundError:
         pass
     os.makedirs(os.path.dirname(path), exist_ok=True)
@@ -170,7 +166,7 @@ def usable(layout_name, arts):
 def esde_wanted(layout_name, base):
     """Whether the card's ES-DE uses Art Book Next (the downloaded theme or the card's copy of it) or hasn't picked a
     theme yet, so a new card has the theme before ES-DE is first set up."""
-    theme = frontend.get_string(_read(frontend.settings_path(layout_name, base)), "Theme")
+    theme = frontend.get_string(cardfs.text(frontend.settings_path(layout_name, base)), "Theme")
     return not theme or theme in (ESDE_THEME, ESDE_COPY)
 
 
@@ -367,7 +363,7 @@ def update_storage(dry_run=False):
 
 def knulli_wanted(base):
     """Whether the card's Knulli uses Art Book Next (or hasn't picked a theme yet)."""
-    theme = frontend.get_string(_read(frontend.settings_path("knulli", base)), "ThemeSet")
+    theme = frontend.get_string(cardfs.text(frontend.settings_path("knulli", base)), "ThemeSet")
     return not theme or "art-book-next" in theme
 
 

@@ -1,4 +1,5 @@
 import os
+import shutil
 import sys
 import tempfile
 import unittest
@@ -6,7 +7,7 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
-from sync_roms import frontend  # noqa: E402
+from sync_roms import cardfs, frontend, store, themeart  # noqa: E402
 
 ESDE_SETTINGS = ('<?xml version="1.0"?>\n<bool name="ScrapeRatings" value="true" />\n'
                  '<string name="CollectionSystemsCustom" value="Mine,Old" />\n<string name="Theme" value="x" />\n')
@@ -53,6 +54,64 @@ class Names(unittest.TestCase):
                     with open(path, "w") as f:
                         f.write(frontend.set_string("", "emudeck", "ROMDirectory", used) if used else '<?xml version="1.0"?>\n')
                     self.assertEqual(frontend.emudeck_problem(card, roms), problem, used)
+
+
+class FewerCardIO(unittest.TestCase):
+    def setUp(self):
+        self.dir = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, self.dir)
+
+    def test_collection_file_of_another_size_is_not_read(self):
+        path = os.path.join(self.dir, "custom-x.cfg")
+        with open(path, "w") as f:
+            f.write("old\n")
+        with mock.patch.object(frontend, "_read", side_effect=AssertionError("read")):
+            self.assertFalse(frontend._same(path, "new line\n"))
+            self.assertFalse(frontend._same(path + "x", "a"))  # missing
+        self.assertTrue(frontend._same(path, "old\n"))
+        self.assertFalse(frontend._same(path, "olx\n"))  # same size, other text
+
+    def test_art_file_of_another_size_is_not_read(self):
+        path = os.path.join(self.dir, "a.png")
+        themeart._put(path, b"12345")
+        with mock.patch("builtins.open", side_effect=AssertionError("read")):
+            with mock.patch.object(themeart.store, "replace_file") as replace:
+                self.assertTrue(themeart._put(path, b"123456"))
+        replace.assert_called_once()
+        with mock.patch.object(themeart.store, "replace_file") as replace:
+            self.assertFalse(themeart._put(path, b"12345"))
+        replace.assert_not_called()
+
+    def test_settings_are_read_once_and_written_once_with_both_edits(self):
+        path = frontend.settings_path("esde", self.dir)
+        plan = frontend.plan_collections("esde", self.dir, {"Fav": ["a"]}, [])
+        reads, writes = [], []
+        real_replace = store.replace_file
+        with mock.patch.object(store, "replace_file", side_effect=lambda p, *a, **k: (writes.append(p), real_replace(p, *a, **k))), \
+                mock.patch("builtins.open", side_effect=lambda p, *a, **k: (reads.append(p), open_real(p, *a, **k))[1]):
+            with cardfs.caching():
+                frontend.apply_collections(plan, "esde", self.dir)
+                cardfs.clear()
+                themeart._write_settings(path, "esde", {"Theme": themeart.ESDE_COPY})
+                themeart.esde_wanted("esde", self.dir)
+        self.assertEqual(reads.count(path), 1)
+        self.assertEqual(writes.count(path), 1)
+        with open_real(path) as f:
+            text = f.read()
+        self.assertIn("Fav", text)
+        self.assertIn(themeart.ESDE_COPY, text)
+
+    def test_unchanged_settings_are_not_written(self):
+        path = os.path.join(self.dir, "es_settings.xml")
+        with cardfs.caching():
+            self.assertTrue(cardfs.write_text(path, "<x/>\n"))
+            self.assertFalse(cardfs.write_text(path, "<x/>\n"))
+            self.assertFalse(os.path.exists(path))  # written when the sync ends
+        self.assertTrue(os.path.exists(path))
+        self.assertFalse(cardfs.write_text(path, "<x/>\n"))
+
+
+open_real = open
 
 
 class Enabled(unittest.TestCase):

@@ -3,18 +3,28 @@ import contextlib
 import os
 import unicodedata
 
+from . import store
+
 _cache = None  # {folder: (entries, folded)} while caching(); None: every lookup lists its folder afresh
 
 
 @contextlib.contextmanager
 def caching():
     """Keep the listings until the end (usable as a decorator); whoever changes the card in between calls clear()."""
-    global _cache
-    _cache = {}
+    global _cache, _texts, _dirty
+    _cache, _texts, _dirty = {}, {}, set()
     try:
         yield
     finally:
-        _cache = None
+        try:
+            for path in sorted(_dirty):
+                _put(path, _texts[path])
+        finally:
+            _cache = _texts = _dirty = None
+
+
+_texts = None  # {path: text} of the settings files while caching(); kept through clear(): it is their latest text
+_dirty = None  # the paths in _texts that differ from the card, written once when caching() ends
 
 
 def clear():
@@ -94,6 +104,38 @@ def read(path):
     if _cache is not None:
         _cache[key] = data
     return data
+
+
+def text(path):
+    """path's text ("" when it is missing), read once while caching() keeps it, with write_text's edits."""
+    if _texts is not None and path in _texts:
+        return _texts[path]
+    try:
+        with open(path, encoding="utf-8") as f:
+            data = f.read()
+    except FileNotFoundError:
+        data = ""
+    if _texts is not None:
+        _texts[path] = data
+    return data
+
+
+def _put(path, new):
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    store.replace_file(path, new, newline="\n")
+
+
+def write_text(path, new):
+    """Make path hold new (LF line ends) unless it already does; True when that changes it. While caching() the write
+    waits for the end, so edits from several places make one write."""
+    if new == text(path):
+        return False
+    if _texts is None:
+        _put(path, new)
+    else:
+        _texts[path] = new
+        _dirty.add(path)
+    return True
 
 
 def exists(path):
