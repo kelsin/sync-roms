@@ -1,12 +1,14 @@
 """The Surprise app zip from storage, installed under App/Surprise/ on Onion cards."""
+import json
 import os
+import posixpath
 import re
 import shutil
 import tempfile
 import zipfile
 from pathlib import PurePosixPath
 
-from . import inventory, runtime, s3, store, surprise, ui
+from . import downloads, inventory, runtime, s3, store, surprise, ui
 
 LAYOUT = "onion"
 ROOT = "App/Surprise"
@@ -94,3 +96,100 @@ def install(card, layout_name, base, dry_run):
     store.update_card(card, surprise_app=name)
     print(f"🎁 Surprise app {ui.green(name)} → App/Surprise")
     return 0
+
+
+SD = "/mnt/SDCARD"
+BAD = re.compile(r'["\\:\x00-\x1f]')
+MAX_VALUE = 256
+MAX_LINE = 1024
+
+
+def emu_folders(base):
+    """{ROM folder under Roms/: (Emu folder, launch file)} from the card's Emu/*/config.json files.
+
+    Several Emu folders for one ROM folder: the one named like it, else the first by name.
+    """
+    found = {}
+    emu = os.path.join(base, "Emu")
+    for name in sorted(os.listdir(emu)) if os.path.isdir(emu) else ():
+        try:
+            with open(os.path.join(emu, name, "config.json"), encoding="utf-8") as f:
+                config = json.load(f)
+            rompath, launch = config["rompath"], config["launch"]
+            if not (isinstance(rompath, str) and isinstance(launch, str)):
+                continue
+        except (OSError, ValueError, KeyError, TypeError):
+            continue
+        parts = posixpath.normpath(f"Emu/{name}/{rompath}").split("/")
+        if len(parts) == 2 and parts[0] == "Roms":
+            if parts[1] not in found or name == parts[1]:
+                found[parts[1]] = (name, launch)
+    return found
+
+
+def _label(title):
+    return re.sub(r" {2,}", " ", BAD.sub("", title)).strip()
+
+
+def lines(base, roms_dir, surprises, folder_of):
+    """The surprise.json lines for the surprises whose ROM is on the card and has an Emu folder."""
+    emus = emu_folders(base)
+    out = []
+    for item in surprises:
+        folder = folder_of.get(item.get("system"))
+        if folder not in emus:
+            continue
+        rel = downloads.rom_rel(item["bucket"])
+        if not os.path.isfile(os.path.join(roms_dir, folder, *rel.split("/"))):
+            continue
+        emu, launch = emus[folder]
+        root = f"{SD}/Emu/{emu}/../../Roms/{folder}"
+        entry = {"label": _label(item.get("title", "")), "rompath": f"{root}/{rel}"}
+        stem = os.path.splitext(rel)[0]
+        if "/" not in rel and os.path.isfile(os.path.join(roms_dir, folder, "Imgs", stem + ".png")):
+            entry["imgpath"] = f"{root}/Imgs/{stem}.png"
+        entry["launch"] = f"{SD}/Emu/{emu}/{launch}"
+        values = [v for k, v in entry.items() if k != "label"]
+        if not entry["label"] or any(BAD.search(v) for v in values):
+            continue
+        if any(len(v.encode()) >= MAX_VALUE for v in (*values, entry["label"])):
+            continue
+        entry["type"] = 5
+        line = json.dumps(entry, separators=(",", ":"), ensure_ascii=False)
+        if len(line.encode()) < MAX_LINE:
+            out.append(line)
+    return out
+
+
+def write_list(card, layout_name, base, roms_dir, systems, dry_run):
+    """Write Roms/surprise.json from the card's surprises, or remove it when there are none. Whether the card changed."""
+    if layout_name != LAYOUT:
+        return False
+    entry = store.load_cards().get(card)
+    wanted = []
+    if surprise.enabled(entry) and isinstance(entry, dict):
+        folder_of = {s["bucket"]: s["folders"]["onion"] for s in systems if s["folders"].get("onion")}
+        wanted = lines(base, roms_dir, entry.get("surprises") or [], folder_of)
+    path = os.path.join(roms_dir, "surprise.json")
+    text = "".join(line + "\n" for line in wanted)
+    try:
+        with open(path, encoding="utf-8") as f:
+            current = f.read()
+    except OSError:
+        current = None
+    if (text or None) == current:
+        return False
+    if dry_run:
+        print(ui.dim(f"🧪 Dry run: would {'write' if text else 'remove'} Roms/surprise.json"
+                     + (f" ({len(wanted)} games)" if text else "")))
+        return False
+    try:
+        if text:
+            with open(path, "w", encoding="utf-8") as f:
+                f.write(text)
+        else:
+            os.remove(path)
+    except OSError as e:
+        ui.warn(f"Couldn't update Roms/surprise.json on the card: {e}")
+        return False
+    return True
