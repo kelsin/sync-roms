@@ -128,10 +128,6 @@ class WriteVerify(unittest.TestCase):
         self.assertAlmostEqual(seen[-1], 1.0)
 
 
-if __name__ == "__main__":
-    unittest.main()
-
-
 IMAGE = "os/knulli-h700-rg35xx-h-scarab-20260511.img.gz"
 CARD = flash.Disk("disk4", 64_000_000_000, "SD")
 SUDO = ["sudo", "-v"]
@@ -318,6 +314,26 @@ class Run(helpers.StorageDir):
         self.assertEqual(self.flash(), 0)
         self.assertNotIn("safe to remove", self.out)
 
+    def test_disk_changed_before_write_aborts(self):
+        self.external_disks.side_effect = [[CARD], [flash.Disk("disk4", 128_000_000_000, "SD")]]
+        self.assertEqual(self.flash(), 1)
+        self.write_image.assert_not_called()
+        self.assertFalse([c for c in self.calls if isinstance(c, list) and c[0] == "diskutil" and "disk4" in c])
+        self.assertIn("changed since you picked it", self.out)
+
+    def test_download_storage_error_fails(self):
+        from botocore.exceptions import ClientError
+        error = ClientError({"Error": {"Code": "NoSuchKey", "Message": "gone"}}, "GetObject")
+        with mock.patch.object(flash.s3, "download", side_effect=error):
+            self.assertEqual(self.flash(), 1)
+        self.write_image.assert_not_called()
+        self.assert_temp_removed()
+
+    def test_excludes_temp_and_storage_disks(self):
+        with mock.patch.object(flash, "disks_of", return_value={"disk7"}):
+            self.flash()
+        self.assertIn("disk7", self.external_disks.call_args_list[0].args[0])
+
     def test_no_cards(self):
         self.external_disks.return_value = []
         ask = mock.Mock()
@@ -337,3 +353,7 @@ class Run(helpers.StorageDir):
             self.assertEqual(self.flash(), 1)
         self.filter_list.assert_not_called()
         self.assertIn("flash needs macOS", self.out)
+
+
+if __name__ == "__main__":
+    unittest.main()

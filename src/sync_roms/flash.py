@@ -13,6 +13,8 @@ import tempfile
 import zlib
 from xml.parsers.expat import ExpatError
 
+from botocore.exceptions import BotoCoreError, ClientError
+
 from . import inventory, picker, runtime, s3, store, ui, usersettings
 
 PREFIX = "os/"
@@ -276,7 +278,8 @@ def run(args):
     tmp = tempfile.mkdtemp(prefix="sync-roms-flash-")
     disk, touched, verified, ejected = None, False, False, False
     try:
-        cards = external_disks(disks_of(tmp) | (disks_of(runtime.ROOT) if runtime.ROOT else set()))
+        exclude = disks_of(tmp) | (disks_of(runtime.ROOT) if runtime.ROOT else set())
+        cards = external_disks(exclude)
         if not cards:
             ui.failure(ui.red("❌ no SD card found"))
             return 1
@@ -307,12 +310,15 @@ def run(args):
             draw(min(got[0] / gz_size, 1.0) if gz_size else 1.0)
         try:
             s3.download((key, gz_path, gz_size), arrived)
-        except OSError as e:
+        except (OSError, BotoCoreError, ClientError) as e:
             done()
             ui.failure(ui.red(f"❌ download failed: {e}"))
             return 1
         done()
         if not _sudo():
+            return 1
+        if disk not in external_disks(exclude):  # disk numbers are reused: a card swapped since the pick could be another drive
+            ui.failure(ui.red(f"❌ {disk.id} changed since you picked it: not flashed"))
             return 1
         touched = True
         r = _run(["diskutil", "unmountDisk", disk.id])
