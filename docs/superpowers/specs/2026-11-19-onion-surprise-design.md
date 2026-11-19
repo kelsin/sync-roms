@@ -10,7 +10,8 @@ and launches games the way Onion does. Sync should install that app and write th
 
 - Onion cards (`onion` layout) with Surprise on get the newest Surprise app from storage and a `Roms/surprise.json` of
   the card's current surprises.
-- Installing never damages the card: a bad zip changes nothing, and nothing outside `App/Surprise/` is touched.
+- Installing never damages the card: a bad zip changes nothing, and nothing outside `App/Surprise/` is touched but
+  the app's icon, `Icons/Default/app/surprise.png`.
 
 ## Non-goals
 
@@ -32,9 +33,11 @@ and launches games the way Onion does. Sync should install that app and write th
 - Runs only for `onion` cards where `surprise.enabled(entry)`. The card's `surprise_app` field records the zip name
   installed; nothing happens when it matches and `App/Surprise/config.json` and `App/Surprise/surprise` exist.
 - Safe install: download to a temp file; check every member is under `App/Surprise/` with no absolute or `..` paths
-  (and not a symlink), and `App/Surprise/config.json` and `App/Surprise/surprise` are present. Any failure warns,
+  (and not a symlink), apart from the optional icon `Icons/Default/app/surprise.png` and the directory entries leading
+  to it, and `App/Surprise/config.json` and `App/Surprise/surprise` are present. Any failure warns,
   counts one failure and changes nothing. Then extract to `App/.Surprise.new/`, remove `App/Surprise/` and rename the
-  new folder into place; chmod `surprise` and `launch.sh` to 0755. Then `store.update_card(card, surprise_app=name)`.
+  new folder into place; chmod the top-level `surprise` and `launch.sh` to 0755. Only then write the icon, when the zip
+  has it, to `Icons/Default/app/surprise.png` on the card (parents created; only that file overwritten). Then `store.update_card(card, surprise_app=name)`.
 - Dry run prints what would be installed.
 
 ### surprise.json

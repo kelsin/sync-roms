@@ -791,6 +791,24 @@ class SyncSmokeTest(RealDataDirGuard):
                 if not dry_run:
                     self.assertIn("Surprise-v0.1.0.zip", self.out.getvalue())
 
+    def test_onion_card_with_nothing_to_sync_removes_a_stale_surprise_list(self):
+        layouts = {"onion": {"label": "Onion", "roms_dir": "Roms", "bios_dir": "BIOS"}}
+        manifest = {**MANIFEST, "layouts": layouts, "systems": [{**SYSTEM, "games": [], "folders": {"onion": "GBA"}}]}
+        patches = ((store, {"load_manifest": lambda names=(): manifest, "load_cards": REAL_LOAD_CARDS}),
+                   (cli.picker, {"saved_setup": lambda *a: (None, "onion")}))
+        for fields in ({"surprise": False, "surprises": [{"system": "gba", "bucket": "gba/Game.zip", "title": "G"}]},
+                       {"surprises": []}):
+            with self.subTest(fields=fields):
+                def prepare(card):
+                    os.makedirs(os.path.join(card, "Roms"))
+                    open(os.path.join(card, "Roms", "surprise.json"), "w").close()
+                    store.update_card(os.path.basename(card), **fields)
+                found = []
+                self.assertEqual(self.run_sync(False, prepare=prepare, patches=patches, after=lambda card: found.append(
+                    os.path.exists(os.path.join(card, "Roms", "surprise.json")))), 0)
+                self.assertIn("has nothing to sync", self.out.getvalue())
+                self.assertEqual(found, [False])
+
     def test_a_run_ends_with_what_it_downloaded(self):
         manifest = {**MANIFEST, "systems": [{**SYSTEM, "games": SYSTEM["games"] + [{"bucket": "gba/Gone.zip"}]}]}
         patches = ((store, {"load_manifest": lambda names=(): manifest}), (cli, {"free_space": lambda path: 10**9}))

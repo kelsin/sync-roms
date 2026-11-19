@@ -17,10 +17,21 @@ GOOD = {"App/Surprise/config.json": b"{}", "App/Surprise/surprise": b"bin", "App
         "App/Surprise/res/font.ttf": b"font"}
 
 
+ICON = "Icons/Default/app/surprise.png"
+# the member list of a real release zip from onion-surprise's package.sh, directory entries included
+RELEASE = {"App/Surprise/": None, "App/Surprise/launch.sh": b"#!/bin/sh", "App/Surprise/res/": None,
+           "App/Surprise/res/font-LICENSE.txt": b"ofl", "App/Surprise/res/font.ttf": b"font",
+           "App/Surprise/config.json": b"{}", "App/Surprise/surprise": b"bin", "App/Surprise/surprise.png": b"png",
+           "Icons/": None, "Icons/Default/": None, "Icons/Default/app/": None, ICON: b"icon"}
+
+
 def app_zip(members, symlink=None):
     buf = io.BytesIO()
     with zipfile.ZipFile(buf, "w") as z:
         for name, data in members.items():
+            if data is None:
+                z.mkdir(name.rstrip("/"))
+                continue
             z.writestr(name, data)
         if symlink:
             info = zipfile.ZipInfo(symlink)
@@ -66,6 +77,49 @@ class Install(helpers.StorageDir):
         self.assertEqual(self.recorded(), NAME)
         self.assertFalse(os.path.exists(self.cp("App", ".Surprise.new")))
 
+    def test_release_zip_installs_app_and_icon(self):
+        icons = self.cp("Icons", "Default", "app")
+        os.makedirs(icons)
+        with open(os.path.join(icons, "other.png"), "wb") as f:
+            f.write(b"keep")
+        with open(os.path.join(icons, "surprise.png"), "wb") as f:
+            f.write(b"old")
+        self.put(f"os/onion/{NAME}", app_zip(RELEASE))
+        self.run_install()
+        self.assertEqual(self.failures, 0)
+        self.assertEqual(self.recorded(), NAME)
+        with open(self.cp(*ICON.split("/")), "rb") as f:
+            self.assertEqual(f.read(), b"icon")
+        with open(os.path.join(icons, "other.png"), "rb") as f:
+            self.assertEqual(f.read(), b"keep")
+        self.assertTrue(os.path.isfile(self.cp("App", "Surprise", "res", "font-LICENSE.txt")))
+        self.assertFalse(os.path.exists(self.cp("App", "Surprise", "Icons")))
+
+    def test_icon_creates_its_folders(self):
+        self.put(f"os/onion/{NAME}", app_zip({**GOOD, ICON: b"icon"}))
+        self.run_install()
+        self.assertEqual(self.failures, 0)
+        self.assertTrue(os.path.isfile(self.cp(*ICON.split("/"))))
+
+    def test_only_top_level_scripts_are_executable(self):
+        self.put(f"os/onion/{NAME}", app_zip({**GOOD, "App/Surprise/res/launch.sh": b"x", "App/Surprise/res/surprise": b"x"}))
+        self.run_install()
+        for f in ("launch.sh", "surprise"):
+            self.assertFalse(os.stat(self.cp("App", "Surprise", "res", f)).st_mode & 0o111)
+
+    def test_corrupt_zip_changes_nothing(self):
+        os.makedirs(self.cp("App", "Surprise"))
+        open(self.cp("App", "Surprise", "marker"), "w").close()
+        store.update_card("c", surprise_app="Surprise-v0.0.1.zip")
+        before = self.snapshot()
+        self.put(f"os/onion/{NAME}", b"not a zip")
+        with contextlib.redirect_stderr(io.StringIO()):
+            self.run_install()
+        self.assertEqual(self.failures, 1)
+        self.assertEqual(self.snapshot(), before)
+        self.assertEqual(sorted(os.listdir(self.cp("App"))), ["Surprise"])
+        self.assertEqual(self.recorded(), "Surprise-v0.0.1.zip")
+
     def test_recorded_and_present_skips(self):
         self.put(f"os/onion/{NAME}", app_zip(GOOD))
         self.run_install()
@@ -94,7 +148,10 @@ class Install(helpers.StorageDir):
     def test_unsafe_zip_changes_nothing(self):
         cases = [({**GOOD, "App/Other/x": b"x"}, None), ({**GOOD, "App/Surprise/../../x": b"x"}, None),
                  ({**GOOD, "/abs/x": b"x"}, None), (GOOD, "App/Surprise/link"),
-                 ({"App/Surprise/config.json": b"{}"}, None)]
+                 ({"App/Surprise/config.json": b"{}"}, None), ({**GOOD, "Icons/Default/app/other.png": b"x"}, None),
+                 ({**GOOD, "Icons/x.png": b"x"}, None), ({**GOOD, "Icons/Default/app/surprise.png/": None}, None),
+                 ({**GOOD, ICON: b"icon", "App/Other/x": b"x"}, None), ({**GOOD, ICON: b"icon"}, "App/Surprise/link"),
+                 ({**GOOD, "Icons/Other/": None}, None)]
         os.makedirs(self.cp("App", "Surprise"))
         open(self.cp("App", "Surprise", "marker"), "w").close()
         store.update_card("c", surprise_app="Surprise-v0.0.1.zip")
@@ -282,7 +339,7 @@ class List(helpers.StorageDir):
         self.rom("GBA", "Golden Sun (USA).gba")
         store.update_card("c", surprises=[self.surprise()])
         out = self.write(dry_run=True)
-        self.assertIn("surprise.json", out)
+        self.assertIn("surprise.json (1 game(s) on the card)", out)
         self.assertFalse(os.path.exists(os.path.join(self.roms, "surprise.json")))
 
 

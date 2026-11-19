@@ -14,6 +14,8 @@ LAYOUT = "onion"
 ROOT = "App/Surprise"
 REQUIRED = (f"{ROOT}/config.json", f"{ROOT}/surprise")
 EXECUTABLE = ("surprise", "launch.sh")
+ICON = "Icons/Default/app/surprise.png"  # the app's icon, optional in the zip, written to the same path on the card
+ICON_DIRS = ("Icons/", "Icons/Default/", "Icons/Default/app/")
 
 
 def _natural(name):
@@ -31,11 +33,13 @@ def newest_zip():
 
 
 def _check(z):
-    """Raise ValueError unless every member is a plain file under App/Surprise/ and the required ones exist."""
+    """Raise ValueError unless every member is a plain file under App/Surprise/ (or the icon, or a directory leading to
+    it) and the required ones exist."""
     names = set()
     for info in z.infolist():
         path = PurePosixPath(info.filename)
-        if path.is_absolute() or ".." in path.parts or path.parts[:2] != ("App", "Surprise"):
+        extra = info.filename == ICON or (info.is_dir() and info.filename in ICON_DIRS)
+        if path.is_absolute() or ".." in path.parts or (path.parts[:2] != ("App", "Surprise") and not extra):
             raise ValueError(f"unexpected path {info.filename!r}")
         if (info.external_attr >> 16) & 0o170000 == 0o120000:
             raise ValueError(f"{info.filename!r} is a symlink")
@@ -47,14 +51,14 @@ def _check(z):
 
 def _extract(z, folder):
     for info in z.infolist():
-        if info.is_dir():
+        if info.is_dir() or not info.filename.startswith(ROOT + "/"):
             continue
         rel = PurePosixPath(info.filename).relative_to(ROOT)
         target = os.path.join(folder, *rel.parts)
         os.makedirs(os.path.dirname(target), exist_ok=True)
         with z.open(info) as src, open(target, "wb") as dst:
             shutil.copyfileobj(src, dst)
-        if rel.name in EXECUTABLE:
+        if len(rel.parts) == 1 and rel.name in EXECUTABLE:
             os.chmod(target, 0o755)
 
 
@@ -87,8 +91,14 @@ def install(card, layout_name, base, dry_run):
                 _check(z)
                 shutil.rmtree(new, ignore_errors=True)
                 _extract(z, new)
+                icon = z.read(ICON) if ICON in z.namelist() else None
         shutil.rmtree(app, ignore_errors=True)
         os.replace(new, app)
+        if icon is not None:
+            target = os.path.join(base, *ICON.split("/"))
+            os.makedirs(os.path.dirname(target), exist_ok=True)
+            with open(target, "wb") as f:
+                f.write(icon)
     except (OSError, zipfile.BadZipFile, ValueError, *s3.ERRORS) as e:
         ui.warn(f"Couldn't install the Surprise app {name} on the card: {e}")
         shutil.rmtree(new, ignore_errors=True)
@@ -183,7 +193,7 @@ def write_list(card, layout_name, base, roms_dir, systems, dry_run):
         return False
     if dry_run:
         print(ui.dim(f"🧪 Dry run: would {'write' if text else 'remove'} Roms/surprise.json"
-                     + (f" ({len(wanted)} games)" if text else "")))
+                     + (f" ({len(wanted)} game(s) on the card)" if text else "")))
         return False
     try:
         if text:
