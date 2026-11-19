@@ -247,6 +247,7 @@ Every mode is a command (`sync-roms COMMAND --help` explains one; plain `sync-ro
 | `themes update` | put the latest Art Book Next for ES-DE (for collections' theme art) in storage | |
 | `download pico8` | add the PICO-8 BBS Featured carts storage doesn't have, and newer revisions of those it has (see below) | |
 | `cards list\|new\|set\|rename\|delete\|copy\|export\|import` | manage cards (`list` shows the space each card's picks take: ROMs, scrapes and BIOS, against its size, and how many full systems and games it syncs); `copy SRC DST` merges games, sets, excluded and collections into DST, skipping systems it can't play; `export FILE` flattens surprises and collections into games, `import FILE` keeps size, device, layout, games and excluded and turns Surprise off (`r` renames, `p` prefixes all) | |
+| `saves stash\|apply [CARD]` | copy RetroArch saves and states off a card into `~/.sync-roms/saves/`, or stashed ones onto a card (see below) | |
 | `devices [ID]` | list devices, or one device's systems (`--json`) | `--devices` |
 | `layouts [ID]` | list firmware layouts, or one layout's folders and the devices that run it (`--json`) | |
 | `upload [DIR]` | upload ROMs to storage | `--upload` |
@@ -321,6 +322,7 @@ On `esde` and `emudeck` cards every Vita game zip in `psvita/` gets a `.psvita` 
 | `--translated` | `scrape match`: the ROM is a fan translation: its title becomes `<name> - Translated` and it is marked `"translated": true`; a ROM in `ignored.json` is taken off it first |
 | `--set-credentials` | `scrape`: ask for your ScreenScraper username and password and save them in `settings.json` |
 | `--full` | `cache update`: in a storage folder, list every folder and stat every file, not only the changed folders and the files the cache doesn't have (see Storage cache) |
+| `--retroarch DIR` | `saves stash`, `saves apply`: read or write RetroArch's saves and states in `DIR` instead of the card's RetroArch folder (a copy of Android's internal `RetroArch` folder, or EmuDeck's real folder) |
 | `--count N` | `download pico8`: stop after N carts to add or upgrade |
 | `--bucket-keys` | `check`: also verify with the read-only profile that every game key in your lists and sets exists in storage |
 | `--quiet` | Print only errors (failed files and a sync's failure count included, and `check`'s problems), warnings and `--json` data, all on stderr except the JSON; prompts are asked on stderr |
@@ -694,6 +696,41 @@ renaming the folder makes it a new card. The local mirror (`--mirror`) holds eve
 `excluded` (`{"gba": ["gba/A.zip"]}`) lists set games this card opts out of. Press `e` on a system in the
 picker: games its sets sync show as on and can be switched off (and back on); the choice is saved
 for that card only. In the systems picker, `o` shows only the selected systems.
+
+### Moving saves between cards (`saves`)
+
+```bash
+sync-roms saves stash /Volumes/SHARE     # copy saves and states off the card
+sync-roms saves apply /Volumes/RGSP      # copy stashed ones onto another card
+```
+
+Both take the card's folder (default: the current directory), which must be a card with a layout
+(`sync-roms cards set NAME --layout NAME`), and need a terminal. `stash` lists the card's games that have RetroArch
+saves (`.srm`, and Gambatte's `.rtc` clock files) or states (`.state`, `.stateN`, `.state.auto`, with their `.png` thumbnails), none picked, then the
+picked games' files, all picked, and copies them to `~/.sync-roms/saves/<system>/<game>/<YYYYMMDD-HHMMSS>-<card>/`
+with a `stash.json` saying what they are and where they came from. Each run adds new stashes and never replaces one.
+On layouts sorted by core (and EmuDeck's flat folders) a save whose game's ROM isn't on the card (or is in several
+systems' folders) is skipped and counted; on Knulli the folder gives the system.
+
+`apply` lists the stashes of the systems the card syncs (newest first; one per game can be picked), marking games
+whose ROM isn't on the card, and copies them into the folders the card's firmware reads. Identical files are
+skipped; a different file already there is listed and only overwritten after you confirm (default no). A stash with
+no core (from Knulli or EmuDeck) going to a layout sorted by core asks which core folder to use, once per system:
+one already on the card, a typed name, or none (RetroArch with sort by core off); with `--yes` it is skipped.
+`--dry-run` prints what would be copied.
+
+| Layout | RetroArch folder | Saves | States |
+| --- | --- | --- | --- |
+| `esde` | `RetroArch` | `saves/<core>` | `states/<core>` |
+| `knulli` | `saves` | `<system folder>` | `<system folder>` |
+| `onion`, `allium` | `Saves/CurrentProfile` | `saves/<core>` | `states/<core>` |
+| `emudeck` | `Emulation/saves/retroarch` | `saves` | `states` |
+
+RetroArch on Android keeps its saves in internal storage (`/storage/emulated/0/RetroArch/`), not on the SD card:
+point its save folders at the card's `RetroArch/saves` and `RetroArch/states` (every sync creates them on `esde` cards), or copy that folder off the device and
+pass it with `--retroarch DIR`. EmuDeck's folders are symlinks that only resolve on the Deck; elsewhere pass the real
+folder with `--retroarch`. States only load in the core they were made with (`gpSP` states don't load in `mGBA`);
+`.srm` saves (and `.rtc`) usually work in any core of the system.
 
 ## Converting to CHD and xiso (`--cd`, formerly `--chd`)
 

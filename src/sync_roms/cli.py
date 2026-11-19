@@ -24,6 +24,7 @@ SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "themes": ("update", "copy the latest Art Book Next for ES-DE from GitHub into storage"),
     "download": ("pico8", "add the PICO-8 BBS Featured carts storage doesn't have, and newer revisions of those it has"),
     "cards": ("[edit|list|new|set|rename|delete|copy|export|import]", "list and manage the cards you've synced"),
+    "saves": ("stash|apply [CARD] [--retroarch DIR]", "copy RetroArch saves and states off a card, or onto one"),
     "devices": ("[ID]", "list the supported devices, or one device's systems"),
     "layouts": ("[ID]", "list the firmware card layouts, or one layout's folders and devices"),
     "upload": ("[DIR]", "upload ROMs to the storage folder of a system you pick"),
@@ -140,6 +141,30 @@ TOPICS = {
   sync-roms cards import FILE                 keeps size, device, layout, games and excluded; Surprise off; r renames, p prefixes all
 
   A card is a folder name (the card root's basename) with a remembered device, firmware and games.
+""",
+    "saves": """
+  sync-roms saves stash [CARD] [--retroarch DIR] [--dry-run]    copy picked saves and states off the card
+  sync-roms saves apply [CARD] [--retroarch DIR] [--dry-run]    copy picked stashed ones onto the card
+
+  CARD is the card's folder (default: the current directory); it needs a layout (`sync-roms cards set NAME --layout`).
+  stash lists the card's games that have RetroArch saves (.srm and .rtc) or states (.state, .stateN, .state.auto and their
+  .png), then their files, and copies them to ~/.sync-roms/saves/<system>/<game>/<time>-<card>/ (with stash.json).
+  On layouts sorted by core and flat folders a save whose game isn't on the card is skipped; on Knulli the folder
+  gives the system.
+  apply lists the stashes of systems the card syncs (one per game) and copies them into the card's RetroArch folders.
+  A different file already there is only overwritten after you confirm (default no); identical ones are skipped.
+  A stash without a core going to a layout sorted by core asks which core folder to use (skipped with --yes).
+
+  Layout    RetroArch folder             saves            states
+  esde      RetroArch                    saves/<core>     states/<core>
+  knulli    saves                        <system folder>  <system folder>
+  onion     Saves/CurrentProfile         saves/<core>     states/<core>
+  allium    Saves/CurrentProfile         saves/<core>     states/<core>
+  emudeck   Emulation/saves/retroarch    saves            states
+
+  --retroarch DIR   read or write that folder instead of the card's RetroArch folder: a copy of Android's internal
+                    /storage/emulated/0/RetroArch for ES-DE, or the real folder EmuDeck's symlinks point to.
+  States only load in the core they were made with; .srm (and .rtc) saves usually work in any core of the system.
 """,
     "devices": """
   sync-roms devices [ID] [--json]
@@ -361,16 +386,22 @@ def check_dir(path, label):
 
 
 def prepare_dirs(base, layout, dry_run, ask=True):
-    """Show, validate and (after confirmation, unless ask is False) create the layout's ROM and BIOS folders under base.
+    """Show, validate and (after confirmation, unless ask is False) create the layout's ROM and BIOS folders under base,
+    and its RetroArch saves and states folders when the layout's retroarch says create.
 
     Returns (roms, bios), or None if declined.
     """
     roms = os.path.join(base, layout["roms_dir"])
     bios = os.path.join(base, layout["bios_dir"])
+    folders = [("💿", "ROMs", roms), ("🧠", "BIOS", bios)]
+    ra = layout.get("retroarch") or {}
+    if ra.get("create"):  # the folders above {core}, for RetroArch's Save Files / Save States directories
+        folders += [("💾", name.capitalize(), os.path.join(base, *ra["dir"].split("/"), *ra[name].split("/{core}")[0].split("/")))
+                    for name in ("saves", "states")]
     # check everything before asking anything
-    missing = {path for label, path in (("ROMs folder", roms), ("BIOS folder", bios)) if check_dir(path, label)}
+    missing = {path for _, name, path in folders if check_dir(path, f"{name} folder")}
     print(ui.bold(f"📁 {layout['label']} layout in {base}:"))
-    for icon, name, path in (("💿", "ROMs", roms), ("🧠", "BIOS", bios)):
+    for icon, name, path in folders:
         print(f"  {icon} {name} → {ui.cyan(path)}" + (ui.dim("  (will be created)") if path in missing else ""))
     if ask and not dry_run and not ui.confirm("Continue with these folders?"):
         return None
