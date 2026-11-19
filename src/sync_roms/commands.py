@@ -485,8 +485,10 @@ def cards_list(args):
             return ("", f"{r['extras']:>{games_w}} game entries")
         return (plural(r["full_systems"], full_w, "full system"), plural(r["games"], games_w, "game"))
 
-    ui.table([(r["name"], r["device"] or "(no device set)", r["layout"] or "", used(r), *picks(r),
-               "🎁 on" if r["surprise"] else "🎁 off") for r in rows])
+    # one fixed two-column slot per status emoji (blank when it doesn't apply), so several line up; add new ones here
+    badges = lambda r: "".join(emoji if on else "  " for emoji, on in [("🎁", r["surprise"])])
+    ui.table([(r["name"], r["device"] or "(no device set)", r["layout"] or "", used(r), *picks(r), badges(r))
+              for r in rows])
     if unsized:
         print()
         print(ui.dim("* Not sized: there is no storage cache yet, so full-system folders can't be counted.\n"
