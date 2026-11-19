@@ -1,5 +1,19 @@
 # Changelog
 
+## [3.13.0](https://github.com/kelsin/sync-roms/compare/v3.12.0...v3.13.0) (2026-11-19)
+
+
+### :video_game: Features
+
+* **guide:** add onion install order section ([#399](https://github.com/kelsin/sync-roms/issues/399)) ([b3e9e58](https://github.com/kelsin/sync-roms/commit/b3e9e58d95716f30a5e156af2c9a25c54a3279e4))
+* **guide:** add onion shader steps and match knulli picks to its shader sets ([#402](https://github.com/kelsin/sync-roms/issues/402)) ([242703a](https://github.com/kelsin/sync-roms/commit/242703a937a3a75cbbfaa704df82b1fc25323735))
+* **sync:** add --no-delete to keep everything on the card ([#401](https://github.com/kelsin/sync-roms/issues/401)) ([1d82c7c](https://github.com/kelsin/sync-roms/commit/1d82c7c9a9d40dd5bc58976028a529dc8d03442f))
+
+
+### :bug: Bug Fixes
+
+* **guide:** keep device and layout when clicking section pills ([#398](https://github.com/kelsin/sync-roms/issues/398)) ([c749fec](https://github.com/kelsin/sync-roms/commit/c749fecbc2b365a0c3acafd74357364e45319da6))
+
 ## [3.12.0](https://github.com/kelsin/sync-roms/compare/v3.11.0...v3.12.0) (2026-11-19)
 
 
