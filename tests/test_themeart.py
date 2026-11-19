@@ -181,6 +181,38 @@ class Esde(Card):
         self.assertFalse(os.path.exists(self.copy("gone.xml")))
         self.assertTrue(os.path.exists(self.copy("surprise", "theme.xml")))
 
+    def test_an_update_writes_only_the_changed_file_and_the_marker(self):
+        self.settings(themeart.ESDE_THEME)
+        self.store("abc", {"a.xml": b"<a/>", "b.xml": b"<b/>", "c.xml": b"<c/>"})
+        self.install()
+        self.store("def", {"a.xml": b"<a/>", "b.xml": b"<B/>", "c.xml": b"<c/>"})
+        with mock.patch.object(themeart.store, "replace_file", wraps=themeart.store.replace_file) as put:
+            self.assertTrue(self.install())
+        wrote = {os.path.relpath(c.args[0], self.copy()) for c in put.call_args_list}
+        self.assertEqual(wrote, {"b.xml", themeart.ESDE_MARKER})
+        self.assertEqual(read(self.copy("b.xml")), "<B/>")
+        self.assertEqual(read(self.copy(themeart.ESDE_MARKER)).strip(), "def")
+
+    def test_an_update_deletes_a_removed_file_and_keeps_the_art_sync_roms_wrote(self):
+        self.settings(themeart.ESDE_THEME)
+        self.store("abc", {"theme.xml": b"<t/>", "old/x.xml": b"x"})
+        self.install()
+        art = ("_inc", "systems", "artwork-outline", "my shmups.png")
+        self.assertTrue(os.path.exists(self.copy(*art)))
+        os.makedirs(self.copy("stale-dir.disabled"), exist_ok=True)
+        self.store("def", {"theme.xml": b"<t/>"})
+        self.install()
+        self.assertFalse(os.path.exists(self.copy("old")))
+        for kept in (art, ("my shmups", "theme.xml"), ("surprise", "theme.xml"), (themeart.ESDE_OWNED,)):
+            self.assertTrue(os.path.exists(self.copy(*kept)), kept)
+
+    def test_a_leftover_disabled_folder_is_removed(self):
+        self.settings(themeart.ESDE_THEME)
+        write(self.copy("..", themeart.ESDE_COPY + "-disabled", "x"), "x")
+        self.store("abc", {"theme.xml": b"<t/>"})
+        self.install()
+        self.assertFalse(os.path.exists(self.copy() + "-disabled"))
+
     def test_no_archive_in_storage_warns_and_keeps_the_theme(self):
         self.settings(themeart.ESDE_THEME)
         self.assertFalse(self.install())

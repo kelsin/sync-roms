@@ -195,24 +195,49 @@ def _stored_commit():
         return None
 
 
+def _sync_written(dest):
+    """Paths (relative, with "/") under dest that sync-roms wrote itself and an update keeps: the collection list and,
+    for each collection folder in it (and Surprise), the files `_esde_files` gives it."""
+    keep = {ESDE_MARKER, ESDE_OWNED}
+    for folder in set(_read(os.path.join(dest, ESDE_OWNED)).splitlines()) | {SURPRISE_ART}:
+        keep |= {f"_inc/systems/artwork-outline/{folder}.png", f"_inc/systems/logos/{folder}.svg",
+                 f"_inc/systems/_metadata-global/{folder}.xml", f"{folder}/theme.xml"}
+    return keep
+
+
 def _extract(archive_path, dest, commit):
-    """Replace dest with the archive's files and the commit marker. They are written to a folder ES-DE ignores (its name
-    ends in "disabled") that only replaces dest once complete, so a failed copy never leaves a half theme behind."""
-    part = dest + "-disabled"
-    shutil.rmtree(part, ignore_errors=True)
+    """Bring dest to the archive's files, writing only the ones that are missing or differ (each through a temp name and
+    a rename), deleting the ones the archive lacks except sync-roms's own, and writing the commit marker last, so a
+    stopped sync leaves the old marker and the next one finishes."""
+    shutil.rmtree(dest + "-disabled", ignore_errors=True)  # from the days the copy was staged there
+    keep = _sync_written(dest)
+    wanted = set()
     with tarfile.open(archive_path, mode="r:gz") as archive:
         for member in archive:
             rel = member.name.split("/", 1)[1] if "/" in member.name else ""
             if not member.isfile() or not rel:
                 continue
-            path = s3.safe_join(part, rel)
+            path = s3.safe_join(dest, rel)
+            wanted.add(os.path.normcase(os.path.normpath(path)))
+            data = archive.extractfile(member).read()
+            try:
+                if os.path.getsize(path) == len(data):
+                    with open(path, "rb") as f:
+                        if f.read() == data:
+                            continue
+            except FileNotFoundError:
+                pass
             os.makedirs(os.path.dirname(path), exist_ok=True)
-            with open(path, "wb") as f:
-                shutil.copyfileobj(archive.extractfile(member), f)
-    with open(os.path.join(part, ESDE_MARKER), "w") as f:
-        f.write(commit + "\n")
-    shutil.rmtree(dest, ignore_errors=True)
-    os.rename(part, dest)
+            store.replace_file(path, data)
+    kept = {os.path.normcase(os.path.normpath(os.path.join(dest, *k.split("/")))) for k in keep}
+    for folder, _, names in os.walk(dest, topdown=False):
+        for name in names:
+            path = os.path.join(folder, name)
+            if os.path.normcase(os.path.normpath(path)) not in wanted | kept:
+                os.remove(path)
+        if folder != dest and not os.listdir(folder):
+            os.rmdir(folder)
+    store.replace_file(os.path.join(dest, ESDE_MARKER), commit + "\n")
 
 
 def _metadata(name):
