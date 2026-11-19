@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.11.0](https://github.com/kelsin/sync-roms/compare/v3.10.0...v3.11.0) (2026-11-19)
+
+
+### :video_game: Features
+
+* **onion:** install the surprise app and write its game list ([#390](https://github.com/kelsin/sync-roms/issues/390)) ([5a4fe5b](https://github.com/kelsin/sync-roms/commit/5a4fe5b5ea9c80219e3451a75fb8e68cc0621577))
+* **surprise:** default surprise on for onion cards ([#392](https://github.com/kelsin/sync-roms/issues/392)) ([f05b392](https://github.com/kelsin/sync-roms/commit/f05b392674d3836e4bfbc7216befa697c7588a4e))
+
 ## [3.10.0](https://github.com/kelsin/sync-roms/compare/v3.9.1...v3.10.0) (2026-11-19)
 
 
