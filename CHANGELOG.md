@@ -1,5 +1,22 @@
 # Changelog
 
+## [3.10.0](https://github.com/kelsin/sync-roms/compare/v3.9.1...v3.10.0) (2026-11-19)
+
+
+### :video_game: Features
+
+* **cards:** show surprise on or off in cards list and the card editor ([#386](https://github.com/kelsin/sync-roms/issues/386)) ([0a14555](https://github.com/kelsin/sync-roms/commit/0a14555bc512f091311b900ed06e1ea0962a3a35))
+* **flash:** add flash command to write a knulli image to an sd card ([#389](https://github.com/kelsin/sync-roms/issues/389)) ([51f40e3](https://github.com/kelsin/sync-roms/commit/51f40e38b55fae4328b755788022b2502c68f43e))
+* **guide:** add emulator install and raofflineproxy steps per device ([#388](https://github.com/kelsin/sync-roms/issues/388)) ([287ee12](https://github.com/kelsin/sync-roms/commit/287ee12c43b3f366b6d33db34ce2efe87ade799d))
+* **guide:** add guide command to open the device setup guide ([#387](https://github.com/kelsin/sync-roms/issues/387)) ([9ccd1c4](https://github.com/kelsin/sync-roms/commit/9ccd1c4d4518e5a95d86820b18a3975e111d9c1b))
+* **saves:** add saves stash and apply to move retroarch saves ([#382](https://github.com/kelsin/sync-roms/issues/382)) ([03892a5](https://github.com/kelsin/sync-roms/commit/03892a5a9d242cadf57d643351afd76d5cc15a76))
+
+
+### :book: Documentation
+
+* add a device setup guide with device and layout pickers ([#383](https://github.com/kelsin/sync-roms/issues/383)) ([bef4561](https://github.com/kelsin/sync-roms/commit/bef4561ab9dfbab044dff77051d1965a80530ca0))
+* describe the setup guide and link it from the readme ([#385](https://github.com/kelsin/sync-roms/issues/385)) ([dc82e51](https://github.com/kelsin/sync-roms/commit/dc82e51563c10ed463a40dc1986bfddbec778c12))
+
 ## [3.9.1](https://github.com/kelsin/sync-roms/compare/v3.9.0...v3.9.1) (2026-11-19)
 
 
