@@ -4,7 +4,7 @@ import hashlib
 import os
 from concurrent.futures import ThreadPoolExecutor
 
-from . import downloads, drivers, inventory, runtime, s3, scrape_plan, store, themeart, ui, usersettings
+from . import downloads, drivers, inventory, onion_surprise, runtime, s3, scrape_plan, store, themeart, ui, usersettings
 
 
 MIRROR_PRUNE_ASK = 25  # delete more unreferenced mirror files than this (or over a tenth of it) only after confirming
@@ -12,15 +12,15 @@ MIRROR_PRUNE_ASK = 25  # delete more unreferenced mirror files than this (or ove
 
 def mirror_wanted(manifest):
     """{bucket key: size} of everything the game lists and BIOS requirements reference that is in storage: the ROMs a sync
-    installs, every system's BIOS files, the scraped data of those ROMs, storage's Onion themes, its ES-DE theme archives
-    and its GPU driver zips."""
+    installs, every system's BIOS files, the scraped data of those ROMs, storage's Onion themes, its ES-DE theme archives,
+    its GPU driver zips, its PICO-8 zips and the newest Surprise app zip."""
     systems = manifest["systems"]
     todo = [s for s in systems if s.get("full_system") or store.listed(s)]
     with ThreadPoolExecutor(runtime.WORKERS) as ex:
-        others = [ex.submit(inventory.files, prefix) for prefix in ("BIOS/", runtime.THEMES_PREFIX, runtime.ESDE_THEMES_PREFIX, drivers.PREFIX, runtime.PICO8_PREFIX)]
+        others = [ex.submit(inventory.files, prefix) for prefix in ("BIOS/", runtime.THEMES_PREFIX, runtime.ESDE_THEMES_PREFIX, drivers.PREFIX, runtime.PICO8_PREFIX, runtime.ONION_PREFIX)]
         roms = list(ex.map(store.list_system, todo))
         scrapes = list(ex.map(lambda s: inventory.files(f"{scrape_plan.SCRAPES}/{s['bucket']}/"), todo))
-        bios, themes, esde_themes, driver_zips, pico8_zips = (f.result() for f in others)
+        bios, themes, esde_themes, driver_zips, pico8_zips, onion = (f.result() for f in others)
     wanted = {}
     for s, have, scraped in zip(todo, roms, scrapes):
         keys = [k for k in store.available_keys(s, have) if k in have]
@@ -36,6 +36,9 @@ def mirror_wanted(manifest):
             if "BIOS/" + f in bios:
                 wanted["BIOS/" + f] = bios["BIOS/" + f]
     wanted.update((k, v) for k, v in {**themes, **esde_themes, **driver_zips, **pico8_zips}.items() if not k.endswith("/"))
+    app = onion_surprise._newest(onion)
+    if app:
+        wanted[app] = onion[app]
     return wanted
 
 

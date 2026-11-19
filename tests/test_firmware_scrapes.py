@@ -279,6 +279,15 @@ class EsdeExtrasSyncTest(unittest.TestCase):
                                   "os/onion/Themes/t/a.png": 2, "os/drivers/a.zip": 6, "os/drivers/a.tag": 7})
         self.assertNotIn("scrapes/esde/", [c.args[0] for c in ls.call_args_list])
 
+    def test_mirror_wanted_includes_the_newest_surprise_app_zip(self):
+        listings = {"os/onion/": {"os/onion/Surprise-v0.2.0.zip": 8, "os/onion/Surprise-v0.10.0.zip": 9,
+                                  "os/onion/Surprise-eadef4e.zip": 1, "os/onion/Themes/t/a.png": 2}}
+        manifest = {"systems": []}
+        with mock.patch.object(mirroring.s3, "read_root", return_value=None), \
+                mock.patch.object(mirroring.s3, "list_sizes", side_effect=lambda p, sizes=True: listings.get(p, {})):
+            wanted = mirroring.mirror_wanted(manifest)
+        self.assertEqual(wanted, {"os/onion/Surprise-v0.10.0.zip": 9})
+
 
 if __name__ == "__main__":
     unittest.main()

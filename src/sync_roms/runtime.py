@@ -15,4 +15,5 @@ THEMES_PREFIX = "os/onion/Themes/"  # Onion themes in storage, copied to the car
 ESDE_THEMES_PREFIX = "os/esde/themes/"  # ES-DE theme archives in storage (Art Book Next for the Surprise collection)
 APKS_PREFIX = "os/android/APKs/"  # Android APKs and the Obtainium app list in storage, copied to the card's APKs/
 PICO8_PREFIX = "os/pico8/"  # the official PICO-8 zips in storage; the newest goes where each frontend installs it from
+ONION_PREFIX = "os/onion/"  # the Surprise app zips for Onion cards in storage; the newest is installed under App/Surprise/
 _mirror_root = None  # set once a sync reads from the local mirror instead of storage
