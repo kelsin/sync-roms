@@ -250,6 +250,7 @@ Every mode is a command (`sync-roms COMMAND --help` explains one; plain `sync-ro
 | `collections edit` | edit your collections of favourite games (saved in `~/.sync-roms/collections/`) | |
 | `themes update` | put the latest Art Book Next for ES-DE (for collections' theme art) in storage | |
 | `download pico8` | add the PICO-8 BBS Featured carts storage doesn't have, and newer revisions of those it has (see below) | |
+| `flash` | write a Knulli image from storage's `os/` to an SD card and verify it, macOS only (see below) | |
 | `cards list\|new\|set\|rename\|delete\|copy\|export\|import` | manage cards (`list` shows the space each card's picks take: ROMs, scrapes and BIOS, against its size, and how many full systems and games it syncs); `copy SRC DST` merges games, sets, excluded and collections into DST, skipping systems it can't play; `export FILE` flattens surprises and collections into games, `import FILE` keeps size, device, layout, games and excluded and turns Surprise off (`r` renames, `p` prefixes all) | |
 | `saves stash\|apply [CARD]` | copy RetroArch saves and states off a card into `~/.sync-roms/saves/`, or stashed ones onto a card (see below) | |
 | `devices [ID]` | list devices, or one device's systems (`--json`) | `--devices` |
@@ -390,6 +391,21 @@ storage doesn't have (`new:`) and those the BBS has a newer revision of (`upgrad
   collections at the new file. Sets that name the old file are listed as warnings to change by hand (`sync-roms sets edit`).
 - Carts in `ignored.json` are never downloaded.
 - Requests go one at a time. The first HTTP error stops the run with a warning; carts already added stay.
+
+## Flashing Knulli (`flash`)
+
+`sync-roms flash [--dry-run]` writes a Knulli OS image from storage's `os/knulli-*.img.gz` to an SD card and checks
+the result. macOS only.
+
+- You pick a Knulli device, then an image (the ones matching the device first, newest first), then an external SD card.
+  The disks holding the temp folder or storage are never offered.
+- You confirm by typing the disk id (`disk4`). `--yes` never skips this. `--dry-run` stops here.
+- The image is copied to a local temp folder (free space is checked first). Right before writing, the card must still
+  be the same disk (id, size and name).
+- `sudo dd` writes it decompressed on the fly with 4 MiB blocks; your password is asked before each `dd`.
+- The whole image is then read back and its SHA-256 compared with the image's.
+- The temp folder is removed, writes are flushed and the card is ejected. After a failure the card is unmounted
+  instead, so you can retry.
 
 ## Cleaning scraped data (`--clean-scrapes`)
 

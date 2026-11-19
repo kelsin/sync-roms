@@ -12,6 +12,7 @@ from unittest import mock
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 import helpers  # noqa: E402
+from test_scripting import Isolated  # noqa: E402
 from sync_roms import flash, inventory, picker, store, ui, usersettings  # noqa: E402
 
 KEYS = ["os/knulli-h700-rg35xx-h-scarab-20260511.img.gz", "os/knulli-h700-rg34xx-sp-scarab-20260511.img.gz",
@@ -353,6 +354,15 @@ class Run(helpers.StorageDir):
             self.assertEqual(self.flash(), 1)
         self.filter_list.assert_not_called()
         self.assertIn("flash needs macOS", self.out)
+
+
+class Dispatch(Isolated):
+    def test_cli_dispatches_flash(self):
+        with mock.patch.object(flash, "run", return_value=0) as run:
+            code, _, _ = self.sync(["flash", "--dry-run"], {"bucket": "b"})
+        self.assertEqual(code, 0)
+        run.assert_called_once()
+        self.assertTrue(run.call_args.args[0].dry_run)
 
 
 if __name__ == "__main__":
