@@ -89,7 +89,8 @@
     "screen": "4:3",
     "firmwares": [
       "knulli"
-    ]
+    ],
+    "network": false
   },
   {
     "id": "anbernic-rg34xx",
@@ -134,7 +135,8 @@
     "screen": "4:3",
     "firmwares": [
       "knulli"
-    ]
+    ],
+    "network": false
   },
   {
     "id": "anbernic-rg35xxh",
@@ -561,7 +563,8 @@
     "firmwares": [
       "onion",
       "allium"
-    ]
+    ],
+    "network": false
   },
   {
     "id": "miyoo-mini-flip",
