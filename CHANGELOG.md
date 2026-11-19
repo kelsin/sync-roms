@@ -1,5 +1,15 @@
 # Changelog
 
+## [3.12.0](https://github.com/kelsin/sync-roms/compare/v3.11.0...v3.12.0) (2026-11-19)
+
+
+### :video_game: Features
+
+* **cards:** show surprise as an emoji badge column in cards list ([#396](https://github.com/kelsin/sync-roms/issues/396)) ([31e79d7](https://github.com/kelsin/sync-roms/commit/31e79d78ae001cbc625ff1b81a17e02142013c48))
+* **devices:** flag devices without built-in wifi ([#397](https://github.com/kelsin/sync-roms/issues/397)) ([772239b](https://github.com/kelsin/sync-roms/commit/772239be726f69792b2300773fa147434428a252))
+* **guide:** add raofflineproxy steps for knulli cards ([#393](https://github.com/kelsin/sync-roms/issues/393)) ([1d17546](https://github.com/kelsin/sync-roms/commit/1d17546ee5b2974961794b6392652989923ab5b4))
+* **guide:** add retroachievements, cloud saves and shader sections ([#395](https://github.com/kelsin/sync-roms/issues/395)) ([2aaf26b](https://github.com/kelsin/sync-roms/commit/2aaf26b991220c52010ac397ba2113e59bafd276))
+
 ## [3.11.0](https://github.com/kelsin/sync-roms/compare/v3.10.0...v3.11.0) (2026-11-19)
 
 
