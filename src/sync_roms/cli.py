@@ -125,12 +125,13 @@ TOPICS = {
   sync-roms flash [--dry-run]                 write a Knulli image to an SD card (macOS only)
 
   Pick a Knulli device, then an image from storage's os/knulli-*.img.gz (the ones matching the device first, newest
-  first), then an external SD card; the disks holding the temp folder or storage are never offered. Type the disk id
-  (disk4) to confirm: --yes never skips that. --dry-run stops there. The image is copied to a local temp folder (free
-  space is checked first); right before writing, the card must still be the same disk (id, size and name). Then
-  `sudo dd` writes it, decompressed on the fly, with 4 MiB blocks (your password is asked before each dd), and the
-  whole image is read back and its SHA-256 compared. Last, the temp folder is removed and the card is ejected; after a
-  failure it is unmounted instead, so you can retry.
+  first), then an external SD card (shown with its volume names); the boot disk and the disks holding the temp folder
+  or storage are never offered, and flash stops if it can't tell which disks those are. Type the disk id (disk4) to
+  confirm: --yes never skips that. --dry-run stops there. The image is copied to a local temp folder (free space is
+  checked first); right before writing, the card must still be the same disk (id, size and name). Then `sudo dd`
+  writes it, decompressed on the fly, with 4 MiB blocks (sudo may ask for your password before downloading, writing
+  and verifying), and the whole image is read back and its SHA-256 compared. Last, the temp folder is removed and the
+  card is ejected; after a failure it is unmounted instead, so you can retry.
 """,
     "edit": """
   sync-roms edit                              main menu: Cards, Sets (saved to storage), Collections, Device systems; same as `games edit`

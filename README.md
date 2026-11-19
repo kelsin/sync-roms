@@ -398,11 +398,13 @@ storage doesn't have (`new:`) and those the BBS has a newer revision of (`upgrad
 the result. macOS only.
 
 - You pick a Knulli device, then an image (the ones matching the device first, newest first), then an external SD card.
-  The disks holding the temp folder or storage are never offered.
+  Cards show their volume names. The boot disk and the disks holding the temp folder or storage are never offered,
+  and flash stops if it can't tell which disks those are.
 - You confirm by typing the disk id (`disk4`). `--yes` never skips this. `--dry-run` stops here.
 - The image is copied to a local temp folder (free space is checked first). Right before writing, the card must still
   be the same disk (id, size and name).
-- `sudo dd` writes it decompressed on the fly with 4 MiB blocks; your password is asked before each `dd`.
+- `sudo dd` writes it decompressed on the fly with 4 MiB blocks. sudo may ask for your password before downloading,
+  writing and verifying.
 - The whole image is then read back and its SHA-256 compared with the image's.
 - The temp folder is removed, writes are flushed and the card is ejected. After a failure the card is unmounted
   instead, so you can retry.

@@ -51,6 +51,14 @@ class Flash(unittest.TestCase):
         self.assertEqual(got, [flash.Disk("disk4", 64_000_000_000, "SD Card Reader"),
                                flash.Disk("disk5", 32_000_000_000, "Generic")])
 
+    def test_parse_disks_reads_volume_names(self):
+        listing = {"WholeDisks": ["disk4", "disk6"], "AllDisksAndPartitions": [
+            {"DeviceIdentifier": "disk4", "Partitions": [{"VolumeName": "KNULLI"}, {}, {"VolumeName": "SHARE"}]},
+            {"DeviceIdentifier": "disk6", "Partitions": [{"APFSVolumes": [{"VolumeName": "Backup"}]}]}]}
+        got = flash.parse_disks(listing, lambda d: {"Size": 1, "MediaName": "SD Card Reader"}, set())
+        self.assertEqual(got, [flash.Disk("disk4", 1, "SD Card Reader", ("KNULLI", "SHARE")),
+                               flash.Disk("disk6", 1, "SD Card Reader", ("Backup",))])
+
     def test_parse_disks_empty(self):
         self.assertEqual(flash.parse_disks({}, lambda d: {}, set()), [])
 
@@ -104,6 +112,12 @@ class WriteVerify(unittest.TestCase):
         size, digest = flash.write_image(self.gz, "disk9")
         os.truncate(self.target, size - 10)
         self.assertFalse(flash.verify("disk9", size, digest))
+
+    def test_verify_dd_failure_raises(self):
+        size, digest = flash.write_image(self.gz, "disk9")
+        with mock.patch.object(flash, "raw", lambda d: "/nonexistent-dir/x"):
+            with self.assertRaises(flash.FlashError):
+                flash.verify("disk9", size, digest)
 
     def test_dd_failure_raises(self):
         with mock.patch.object(flash, "raw", lambda d: "/nonexistent-dir/x"):
@@ -175,7 +189,7 @@ class Run(helpers.StorageDir):
                   mock.patch.object(picker, "filter_list", self.filter_list),
                   mock.patch.object(ui, "ask", lambda prompt: self.answer),
                   mock.patch.object(flash, "external_disks", self.external_disks),
-                  mock.patch.object(flash, "disks_of", return_value=set()),
+                  mock.patch.object(flash, "disks_of", return_value={"disk0"}),
                   mock.patch.object(flash.sys, "platform", "darwin"),
                   mock.patch.object(usersettings, "ensure_bucket"),
                   mock.patch.object(flash, "write_image", self.write_image),
@@ -334,6 +348,37 @@ class Run(helpers.StorageDir):
         with mock.patch.object(flash, "disks_of", return_value={"disk7"}):
             self.flash()
         self.assertIn("disk7", self.external_disks.call_args_list[0].args[0])
+
+    def test_disk_lookup_failure_aborts(self):
+        with mock.patch.object(flash, "disks_of", side_effect=lambda p: set() if p == "/" else {"disk0"}), \
+                mock.patch.object(ui, "ask") as ask:
+            self.assertEqual(self.flash(), 1)
+        self.external_disks.assert_not_called()
+        ask.assert_not_called()
+        self.assertEqual(self.filter_list.call_count, 2)
+        self.write_image.assert_not_called()
+        self.assertEqual(self.steps(), [])
+        self.assertIn("couldn't tell which disk holds /", self.out)
+        self.assert_temp_removed()
+
+    def test_temp_disk_lookup_failure_aborts(self):
+        with mock.patch.object(flash, "disks_of", side_effect=lambda p: set() if p != "/" else {"disk0"}):
+            self.assertEqual(self.flash(), 1)
+        self.external_disks.assert_not_called()
+        self.write_image.assert_not_called()
+
+    def test_excludes_root_disk(self):
+        with mock.patch.object(flash, "disks_of", side_effect=lambda p: {"disk1"} if p == "/" else {"disk0"}):
+            self.flash()
+        self.assertIn("disk1", self.external_disks.call_args_list[0].args[0])
+
+    def test_volume_names_shown(self):
+        self.external_disks.return_value = [flash.Disk("disk4", 64_000_000_000, "SD", ("KNULLI", "SHARE"))]
+        self.flash()
+        self.assertEqual(self.filter_list.call_args_list[2].args[1],
+                         [f"disk4  {ui.human_size(64_000_000_000)}  SD  (KNULLI, SHARE)"])
+        self.assertIn("SD: KNULLI, SHARE", self.out)
+        self.write_image.assert_called_once()
 
     def test_no_cards(self):
         self.external_disks.return_value = []

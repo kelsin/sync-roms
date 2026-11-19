@@ -10,6 +10,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import threading
 import zlib
 from xml.parsers.expat import ExpatError
 
@@ -71,17 +72,30 @@ def _neg(date):
     return -int(date) if date else 0
 
 
-Disk = collections.namedtuple("Disk", "id size name")
+Disk = collections.namedtuple("Disk", "id size name volumes", defaults=((),))
+
+
+def _volumes(listing):
+    """{whole disk id: its volume names} from a `diskutil list -plist` listing (partitions and APFS volumes)."""
+    found = {}
+    for entry in listing.get("AllDisksAndPartitions", []):
+        names = [v.get("VolumeName") for part in [entry, *entry.get("Partitions", [])]
+                 for v in [part, *part.get("APFSVolumes", [])]]
+        found[entry.get("DeviceIdentifier")] = tuple(n for n in names if n)
+    return found
 
 
 def parse_disks(listing, info, exclude):
-    """The whole disks of a `diskutil list -plist` listing, minus exclude, with size and name read through info(id)."""
+    """The whole disks of a `diskutil list -plist` listing, minus exclude, with size and name read through info(id) and
+    volume names from the listing."""
+    volumes = _volumes(listing)
     disks = []
     for disk in listing.get("WholeDisks", []):
         if disk in exclude:
             continue
         i = info(disk)
-        disks.append(Disk(disk, i.get("TotalSize", i.get("Size")), i.get("MediaName") or i.get("IORegistryEntryName") or ""))
+        disks.append(Disk(disk, i.get("TotalSize", i.get("Size")), i.get("MediaName") or i.get("IORegistryEntryName") or "",
+                          volumes.get(disk, ())))
     return disks
 
 
@@ -193,7 +207,7 @@ def verify(disk, size, digest, progress=None):
     proc = None
     try:
         proc = subprocess.Popen(DD + [f"if={raw(disk)}", f"bs={READ_BLOCK}", f"count={count}"],
-                                stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         h = hashlib.sha256()
         got = 0
         while got < size:
@@ -205,6 +219,10 @@ def verify(disk, size, digest, progress=None):
             if progress:
                 progress(got / size)
         proc.stdout.close()
+        if got < size:  # stdout hit EOF, so dd is done: its stderr can be read without blocking
+            err = proc.stderr.read().decode(errors="replace").strip()
+            if proc.wait() != 0:
+                raise FlashError(err or f"dd exited with {proc.returncode}")
         _stop(proc)
         return got == size and h.hexdigest() == digest
     except OSError as e:
@@ -246,7 +264,12 @@ def _progress(label):
 
 
 def _disk_label(disk):
-    return f"{disk.id}  {'?' if disk.size is None else ui.human_size(disk.size)}  {disk.name}"
+    label = f"{disk.id}  {'?' if disk.size is None else ui.human_size(disk.size)}  {disk.name}"
+    return f"{label}  ({', '.join(disk.volumes)})" if disk.volumes else label
+
+
+def _same(a, b):
+    return (a.id, a.size, a.name) == (b.id, b.size, b.name)
 
 
 def run(args):
@@ -278,7 +301,15 @@ def run(args):
     tmp = tempfile.mkdtemp(prefix="sync-roms-flash-")
     disk, touched, verified, ejected = None, False, False, False
     try:
-        exclude = disks_of(tmp) | (disks_of(runtime.ROOT) if runtime.ROOT else set())
+        exclude = set()
+        for path in ("/", tmp):  # both sit on a local disk, so finding none means diskutil failed
+            found = disks_of(path)
+            if not found:
+                ui.failure(ui.red(f"❌ couldn't tell which disk holds {path}: not flashing"))
+                return 1
+            exclude |= found
+        if runtime.ROOT:
+            exclude |= disks_of(runtime.ROOT)
         cards = external_disks(exclude)
         if not cards:
             ui.failure(ui.red("❌ no SD card found"))
@@ -289,7 +320,8 @@ def run(args):
             return 0
         disk = cards[i]
         size = "?" if disk.size is None else ui.human_size(disk.size)
-        print(ui.yellow(f"⚠️  Everything on {disk.id} ({size}, {disk.name}) will be erased."))
+        volumes = f": {', '.join(disk.volumes)}" if disk.volumes else ""
+        print(ui.yellow(f"⚠️  Everything on {disk.id} ({size}, {disk.name}{volumes}) will be erased."))
         if ui.ask(f"Type {disk.id} to flash it: ").strip() != disk.id:
             ui.failure(ui.red("❌ Not flashed"))
             return 1
@@ -304,10 +336,12 @@ def run(args):
         gz_path = os.path.join(tmp, os.path.basename(key))
         draw, done = _progress("⬇️  downloading")
         got = [0]
+        lock = threading.Lock()
 
-        def arrived(n):
-            got[0] += n
-            draw(min(got[0] / gz_size, 1.0) if gz_size else 1.0)
+        def arrived(n):  # boto calls this from several threads
+            with lock:
+                got[0] += n
+                draw(min(got[0] / gz_size, 1.0) if gz_size else 1.0)
         try:
             s3.download((key, gz_path, gz_size), arrived)
         except (OSError, BotoCoreError, ClientError) as e:
@@ -317,7 +351,7 @@ def run(args):
         done()
         if not _sudo():
             return 1
-        if disk not in external_disks(exclude):  # disk numbers are reused: a card swapped since the pick could be another drive
+        if not any(_same(disk, d) for d in external_disks(exclude)):  # disk numbers are reused: a card swapped since the pick could be another drive
             ui.failure(ui.red(f"❌ {disk.id} changed since you picked it: not flashed"))
             return 1
         touched = True
