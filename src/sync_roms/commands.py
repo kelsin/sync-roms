@@ -11,7 +11,7 @@ from . import cardshare, external, inventory, m3u, names, picker, runtime, s3, s
 
 
 UNKNOWN_SHOWN = 8  # device ids named in an "unknown device" error
-COMMANDS = {"games", "sets", "collections", "themes", "download", "cards", "layouts", "cache", "config", "doctor", "check", "completion"}
+COMMANDS = {"games", "sets", "collections", "themes", "download", "cards", "saves", "layouts", "cache", "config", "doctor", "check", "completion"}
 
 
 class Parser(argparse.ArgumentParser):
@@ -1134,6 +1134,16 @@ def download_pico8(args):
     return bbs.download_pico8(args)
 
 
+def saves_stash(args):
+    from . import saves
+    return saves.stash_command(args)
+
+
+def saves_apply(args):
+    from . import saves
+    return saves.apply_command(args)
+
+
 def second_words():
     """{command: the words that can follow it} for the commands that have subcommands."""
     from . import cli
@@ -1147,6 +1157,7 @@ def second_words():
     words["themes"] = ["update"]
     words["download"] = ["pico8"]
     words["cards"] = ["edit", "list", "new", "set", "rename", "delete", "copy", "export", "import"]
+    words["saves"] = ["stash", "apply"]
     words["config"] = ["show", "path", "set", "unset"]
     words["cache"] = ["update"]
     words["completion"] = ["bash", "zsh", "fish"]
@@ -1270,6 +1281,12 @@ def build_parser():
     p = csub.add_parser("copy", allow_abbrev=False); common(p, card=False); p.add_argument("src"); p.add_argument("dst"); p.set_defaults(fn=cards_copy)
     p = csub.add_parser("export", allow_abbrev=False); common(p, card=False); p.add_argument("file"); p.set_defaults(fn=cards_export)
     p = csub.add_parser("import", allow_abbrev=False); common(p, card=False); p.add_argument("file"); p.set_defaults(fn=cards_import)
+
+    saves = sub.add_parser("saves", add_help=False, allow_abbrev=False)
+    svsub = saves.add_subparsers(dest="action", required=True)
+    for name, fn in (("stash", saves_stash), ("apply", saves_apply)):
+        p = svsub.add_parser(name, allow_abbrev=False); common(p, card=False); p.add_argument("card", nargs="?")
+        p.add_argument("--retroarch", metavar="DIR"); p.set_defaults(fn=fn)
 
     p = sub.add_parser("layouts", allow_abbrev=False); common(p, card=False); p.add_argument("layout_id", nargs="?"); p.add_argument("--json", action="store_true"); p.set_defaults(fn=layouts_cmd)
     p = sub.add_parser("config", allow_abbrev=False); common(p, card=False); p.add_argument("action", choices=["show", "path", "set", "unset"], nargs="?", default="show")

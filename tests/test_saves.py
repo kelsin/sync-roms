@@ -10,7 +10,7 @@ sys.path.insert(0, os.path.join(ROOT, "src"))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 import helpers  # noqa: E402
-from sync_roms import saves, store  # noqa: E402
+from sync_roms import commands, picker, saves, store, ui  # noqa: E402
 
 LAYOUTS = store.repo_json("layouts")
 SYSTEMS = [{"bucket": "gba", "folders": {"onion": "GBA", "knulli": "gba", "esde": "gba", "allium": "GBA",
@@ -210,6 +210,10 @@ class TargetTest(unittest.TestCase):
                     system=system["folders"][name], core="Core").split("/"))
                 self.assertEqual(got, want)
 
+    def test_empty_core_is_the_parent(self):
+        got = saves.target_dir("/c", "onion", LAYOUTS["onion"], SYSTEMS[0], "save", "")
+        self.assertEqual(got, os.path.join("/c", "Saves", "CurrentProfile", "saves"))
+
     def test_retroarch_dir_override(self):
         got = saves.target_dir("/c", "onion", LAYOUTS["onion"], SYSTEMS[0], "state", "mGBA", retroarch_dir="/x")
         self.assertEqual(got, os.path.join("/x", "states", "mGBA"))
@@ -249,6 +253,327 @@ class LayoutDataTest(unittest.TestCase):
     def test_every_layout_has_retroarch(self):
         for name, layout in LAYOUTS.items():
             self.assertEqual(set(layout["retroarch"]), {"dir", "saves", "states"}, name)
+
+
+CATALOG_SYSTEMS = [
+    {"name": "Game Boy Advance", "bucket": "gba",
+     "folders": {"onion": "GBA", "knulli": "gba", "esde": "gba", "allium": "GBA", "emudeck": "gba"}},
+    {"name": "Neo Geo Pocket", "bucket": "ngp", "folders": {"onion": "NGP", "knulli": "ngp"}},
+    {"name": "Neo Geo Pocket Color", "bucket": "ngpc", "folders": {"onion": "NGP", "knulli": "ngpc"}},
+]
+
+
+class SessionFree:
+    """picker.one_app runs its function in place (no Textual app) while has_terminal is true."""
+    def run(self, fn, args, kwargs):
+        return fn(*args, **kwargs)
+
+
+class CommandTest(helpers.Cmd):
+    def setUp(self):
+        super().setUp()
+        self.cards_dir = tempfile.TemporaryDirectory()
+        self.addCleanup(self.cards_dir.cleanup)
+        catalog = {"layouts": LAYOUTS, "systems": CATALOG_SYSTEMS, "devices": []}
+        for p in (mock.patch.object(store, "load_catalog", lambda: catalog),
+                  mock.patch.object(ui, "has_terminal", lambda: True),
+                  mock.patch.object(picker, "_Session", SessionFree)):
+            p.start()
+            self.addCleanup(p.stop)
+        self.cards = {}
+        self.calls = []
+
+    def card(self, name, layout, device="full"):
+        self.cards[name] = {"device": device, "layout": layout}
+        helpers.write_json(self.path("cards.json"), self.cards)
+        base = os.path.join(self.cards_dir.name, name)
+        os.makedirs(base, exist_ok=True)
+        return base
+
+    def lists(self, *answers):
+        """picker.filter_list answers in turn: a value, or a callable(labels) giving one; calls are kept."""
+        it = iter(answers)
+
+        def fake(title, labels, multi=False, **kw):
+            self.calls.append((title, list(labels), kw))
+            a = next(it)
+            return a(labels) if callable(a) else a
+        p = mock.patch.object(picker, "filter_list", fake)
+        p.start()
+        self.addCleanup(p.stop)
+
+    def read_file(self, *parts):
+        with open(os.path.join(*parts)) as f:
+            return f.read()
+
+    def onion_card(self):
+        base = self.card("SHARE", "onion")
+        helpers.touch(os.path.join(base, "Roms/GBA/Game.zip"), "r")
+        helpers.touch(os.path.join(base, "Roms/GBA/Other.zip"), "r")
+        helpers.touch(os.path.join(base, "Saves/CurrentProfile/saves/gpSP/Game.srm"), "save")
+        helpers.touch(os.path.join(base, "Saves/CurrentProfile/states/gpSP/Game.state.auto"), "state")
+        helpers.touch(os.path.join(base, "Saves/CurrentProfile/states/gpSP/Game.state.auto.png"), "png")
+        helpers.touch(os.path.join(base, "Saves/CurrentProfile/saves/mGBA/Other.srm"), "other")
+        return base
+
+    def stash(self, core="gpSP", game="Game", system="gba", card="SHARE", layout="onion", files=None):
+        tmp = os.path.join(self.cards_dir.name, "src", system, game)
+        entries = []
+        for name, data in (files or {f"{game}.srm": "save", f"{game}.state.auto": "state"}).items():
+            helpers.touch(os.path.join(tmp, name), data)
+            entries.append({"path": os.path.join(tmp, name), "name": name, "kind": saves.classify(name)[1]})
+        return saves.write_stash(card, layout, system, game, core, entries)
+
+
+class StashCommandTest(CommandTest):
+    def test_stash_end_to_end(self):
+        base = self.onion_card()
+        self.lists([True, False], lambda labels: [True] * len(labels))
+        code, out, err = self.run_cmd("saves", "stash", base)
+        self.assertEqual(code, 0, err)
+        title, labels, kw = self.calls[0]
+        self.assertEqual(labels, ["Game", "Other"])
+        self.assertEqual(kw["initial"], [False, False])
+        self.assertEqual([t for t, _ in kw["extras"][0]], ["Game Boy Advance", "1 save · 1 state", "gpSP"])
+        _, files, kw = self.calls[1]
+        self.assertEqual(files, ["Game · Game.srm", "Game · Game.state.auto", "Game · Game.state.auto.png"])
+        self.assertEqual(kw["initial"], [True, True, True])
+        self.assertEqual([t for t, _ in kw["extras"][2]][0], "thumbnail")
+        self.assertEqual(kw["extras"][0][-1][0], "gpSP")
+        [stash] = saves.load_stashes()
+        self.assertEqual((stash["card"], stash["layout"], stash["core"], stash["game"]), ("SHARE", "onion", "gpSP", "Game"))
+        self.assertEqual(sorted(os.listdir(stash["dir"])),
+                         ["Game.srm", "Game.state.auto", "Game.state.auto.png", "stash.json"])
+        self.assertIn(f"Stashed 3 file(s) of 1 game(s) to {saves.stash_root()}", out)
+        self.assertIn("gpSP", out.split("Stashed", 1)[1])
+
+    def test_one_stash_per_core(self):
+        base = self.onion_card()
+        helpers.touch(os.path.join(base, "Saves/CurrentProfile/states/Game.state"), "loose")
+        self.lists([True, False], lambda labels: [True] * len(labels))
+        code, out, err = self.run_cmd("saves", "stash", base)
+        self.assertEqual(code, 0, err)
+        self.assertEqual(sorted(str(s["core"]) for s in saves.load_stashes()), ["None", "gpSP"])
+        self.assertIn("the core they were made with", out)
+
+    def test_nothing_chosen(self):
+        base = self.onion_card()
+        self.lists(None)
+        code, out, _ = self.run_cmd("saves", "stash", base)
+        self.assertEqual(code, 0)
+        self.assertIn("Nothing stashed", out)
+        self.assertFalse(os.path.exists(saves.stash_root()))
+
+    def test_dry_run_writes_nothing(self):
+        base = self.onion_card()
+        self.lists([True, True], lambda labels: [True] * len(labels))
+        code, out, err = self.run_cmd("saves", "stash", base, "--dry-run")
+        self.assertEqual(code, 0, err)
+        self.assertIn("Would stash 4 file(s) of 2 game(s)", out)
+        self.assertFalse(os.path.exists(saves.stash_root()))
+
+    def test_no_saves(self):
+        base = self.card("EMPTY", "onion")
+        code, out, _ = self.run_cmd("saves", "stash", base)
+        self.assertEqual(code, 0)
+        self.assertIn("No RetroArch saves", out)
+
+    def test_unknown_card(self):
+        base = os.path.join(self.cards_dir.name, "NOPE")
+        os.makedirs(base)
+        code, _, err = self.run_cmd("saves", "stash", base)
+        self.assertEqual(code, 2)
+        self.assertIn("NOPE", err)
+
+    def test_card_without_layout(self):
+        self.cards["BARE"] = {"device": "full"}
+        helpers.write_json(self.path("cards.json"), self.cards)
+        os.makedirs(os.path.join(self.cards_dir.name, "BARE"))
+        code, _, err = self.run_cmd("saves", "apply", os.path.join(self.cards_dir.name, "BARE"))
+        self.assertEqual(code, 2)
+        self.assertIn("sync-roms cards set BARE --layout", err)
+
+    def test_needs_terminal(self):
+        base = self.onion_card()
+        with mock.patch.object(ui, "has_terminal", lambda: False):
+            code, _, err = self.run_cmd("saves", "stash", base)
+        self.assertEqual(code, 2)
+        self.assertIn("`saves stash` needs a terminal to pick from", err)
+
+    def test_retroarch_flag(self):
+        base = self.card("PHONE", "esde")
+        helpers.touch(os.path.join(base, "ROMs/gba/Game.zip"), "r")
+        ra = os.path.join(self.cards_dir.name, "copy")
+        helpers.touch(os.path.join(ra, "saves/mGBA/Game.srm"), "s")
+        self.lists([True], [True])
+        code, out, err = self.run_cmd("saves", "stash", base, "--retroarch", ra)
+        self.assertEqual(code, 0, err)
+        self.assertEqual(saves.load_stashes()[0]["core"], "mGBA")
+
+
+class ApplyCommandTest(CommandTest):
+    def test_onto_knulli(self):
+        self.stash()
+        base = self.card("NEW", "knulli")
+        helpers.touch(os.path.join(base, "roms/gba/Game.zip"), "r")
+        self.lists([True])
+        code, out, err = self.run_cmd("saves", "apply", base)
+        self.assertEqual(code, 0, err)
+        _, labels, kw = self.calls[0]
+        self.assertEqual(labels, ["Game"])
+        shown = [t for t, _ in kw["extras"][0]]
+        self.assertEqual(shown[:2], ["Game Boy Advance", "from SHARE"])
+        self.assertEqual(shown[3:], ["1 save · 1 state", "gpSP", ""])
+        self.assertEqual(self.read_file(base, "saves/gba/Game.srm"), "save")
+        self.assertEqual(self.read_file(base, "saves/gba/Game.state.auto"), "state")
+        self.assertIn("Applied 2 file(s) of 1 game(s) to NEW", out)
+        self.assertIn("gpSP", out.split("Applied", 1)[1])
+
+    def test_onto_esde_reuses_core(self):
+        self.stash()
+        base = self.card("PHONE", "esde")
+        self.lists([True])
+        code, out, err = self.run_cmd("saves", "apply", base)
+        self.assertEqual(code, 0, err)
+        self.assertEqual(self.calls[0][2]["extras"][0][-1], ("not on card", "red"))
+        self.assertEqual(self.read_file(base, "RetroArch/states/gpSP/Game.state.auto"), "state")
+        self.assertEqual(self.read_file(base, "RetroArch/saves/gpSP/Game.srm"), "save")
+
+    def test_differing_declined_keeps_old(self):
+        self.stash()
+        base = self.card("PHONE", "esde")
+        helpers.touch(os.path.join(base, "RetroArch/saves/gpSP/Game.srm"), "old")
+        self.lists([True])
+        with mock.patch.object(ui, "confirm", return_value=False) as confirm:
+            code, out, err = self.run_cmd("saves", "apply", base)
+        self.assertEqual(code, 0, err)
+        self.assertEqual(confirm.call_args.kwargs.get("default"), False)
+        self.assertEqual(self.read_file(base, "RetroArch/saves/gpSP/Game.srm"), "old")
+        self.assertEqual(self.read_file(base, "RetroArch/states/gpSP/Game.state.auto"), "state")
+        self.assertIn("Applied 1 file(s) of 1 game(s)", out)
+
+    def test_differing_confirmed_and_same_skipped(self):
+        self.stash()
+        base = self.card("PHONE", "esde")
+        helpers.touch(os.path.join(base, "RetroArch/saves/gpSP/Game.srm"), "old")
+        helpers.touch(os.path.join(base, "RetroArch/states/gpSP/Game.state.auto"), "state")
+        self.lists([True])
+        with mock.patch.object(ui, "confirm", return_value=True):
+            code, out, err = self.run_cmd("saves", "apply", base)
+        self.assertEqual(code, 0, err)
+        self.assertEqual(self.read_file(base, "RetroArch/saves/gpSP/Game.srm"), "save")
+        self.assertIn("Applied 1 file(s) of 1 game(s)", out)
+        self.assertIn("1 identical", out)
+
+    def test_dry_run_writes_nothing(self):
+        self.stash()
+        base = self.card("NEW", "knulli")
+        self.lists([True])
+        with mock.patch.object(ui, "confirm", side_effect=AssertionError("asked")):
+            code, out, err = self.run_cmd("saves", "apply", base, "-n")
+        self.assertEqual(code, 0, err)
+        self.assertFalse(os.path.exists(os.path.join(base, "saves")))
+        self.assertIn("Would apply 2 file(s) of 1 game(s) to NEW", out)
+
+    def test_nothing_chosen(self):
+        self.stash()
+        base = self.card("NEW", "knulli")
+        self.lists(None)
+        code, out, _ = self.run_cmd("saves", "apply", base)
+        self.assertEqual(code, 0)
+        self.assertIn("Nothing applied", out)
+
+    def test_no_stashes_for_card(self):
+        self.stash(system="ngp", game="Pocket")
+        base = self.card("PHONE", "esde")  # esde has no ngp folder in these systems
+        code, out, _ = self.run_cmd("saves", "apply", base)
+        self.assertEqual(code, 0)
+        self.assertIn("No stashed saves", out)
+
+    def test_device_filters_systems(self):
+        self.stash()
+        catalog = {"layouts": LAYOUTS, "systems": CATALOG_SYSTEMS,
+                   "devices": [{"id": "dev", "firmwares": ["knulli"], "systems": ["ngp"]}]}
+        base = self.card("NEW", "knulli", device="dev")
+        with mock.patch.object(store, "load_catalog", lambda: catalog):
+            code, out, _ = self.run_cmd("saves", "apply", base)
+        self.assertEqual(code, 0)
+        self.assertIn("No stashed saves", out)
+
+    def test_shared_rom_folder_resolves_to_target_rom(self):
+        self.stash(system="ngp", game="Pocket", core="RACE")
+        base = self.card("NEW", "knulli")
+        helpers.touch(os.path.join(base, "roms/ngpc/Pocket.zip"), "r")
+        self.lists([True])
+        code, out, err = self.run_cmd("saves", "apply", base)
+        self.assertEqual(code, 0, err)
+        self.assertEqual(self.calls[0][2]["extras"][0][0][0], "Neo Geo Pocket Color")
+        self.assertEqual(self.read_file(base, "saves/ngpc/Pocket.srm"), "save")
+
+    def test_two_stashes_of_one_game_reopens(self):
+        import datetime
+        self.stash()
+        tmp = os.path.join(self.cards_dir.name, "src2", "Game.srm")
+        helpers.touch(tmp, "newer")
+        saves.write_stash("OTHER", "onion", "gba", "Game", "gpSP", [{"path": tmp, "name": "Game.srm", "kind": "save"}],
+                          now=datetime.datetime.now() + datetime.timedelta(minutes=5))
+        base = self.card("NEW", "knulli")
+        self.lists([True, True], [True, False])
+        code, out, err = self.run_cmd("saves", "apply", base)
+        self.assertEqual(code, 0, err)
+        self.assertEqual(len(self.calls), 2)
+        self.assertIn("one stash per game", out)
+        self.assertEqual(self.calls[0][2]["extras"][0][1][0], "from OTHER")  # newest first
+        self.assertEqual(self.read_file(base, "saves/gba/Game.srm"), "newer")
+
+    def test_core_asked_once_per_system(self):
+        self.stash(core=None, card="KN", layout="knulli")
+        self.stash(core=None, game="Other", card="KN", layout="knulli")
+        base = self.card("SHARE", "onion")
+        os.makedirs(os.path.join(base, "Saves/CurrentProfile/states/gpSP"))
+        self.lists([True, True], 0)
+        code, out, err = self.run_cmd("saves", "apply", base)
+        self.assertEqual(code, 0, err)
+        self.assertEqual(len(self.calls), 2)
+        self.assertEqual(self.calls[1][1], ["gpSP", "Type a name…", "No core folder (sort by core off)"])
+        self.assertEqual(self.read_file(base, "Saves/CurrentProfile/saves/gpSP/Other.srm"), "save")
+        self.assertEqual(self.read_file(base, "Saves/CurrentProfile/states/gpSP/Game.state.auto"), "state")
+        self.assertIn("the core they were made with", out)
+
+    def test_core_typed_or_none(self):
+        self.stash(core=None, card="KN", layout="knulli")
+        base = self.card("SHARE", "onion")
+        self.lists([True], 0)  # no core folders yet: Type a name…, No core folder
+        with mock.patch.object(ui, "ask", return_value=" mGBA "):
+            code, out, err = self.run_cmd("saves", "apply", base)
+        self.assertEqual(code, 0, err + out)
+        self.assertTrue(os.path.exists(os.path.join(base, "Saves/CurrentProfile/saves/mGBA/Game.srm")))
+        self.calls.clear()
+        other = self.card("TWO", "onion")
+        self.lists([True], 1)
+        code, out, err = self.run_cmd("saves", "apply", other)
+        self.assertEqual(code, 0, err)
+        self.assertTrue(os.path.exists(os.path.join(other, "Saves/CurrentProfile/saves/Game.srm")))
+
+    def test_core_unknown_with_yes_skips(self):
+        self.stash(core=None, card="KN", layout="knulli")
+        base = self.card("SHARE", "onion")
+        self.lists([True])
+        code, out, err = self.run_cmd("saves", "apply", base, "--yes")
+        self.assertEqual(code, 0, err)
+        self.assertIn("Skipped", err + out)
+        self.assertFalse(os.path.exists(os.path.join(base, "Saves")))
+
+
+class SavesCliTest(unittest.TestCase):
+    def test_completion_and_words(self):
+        self.assertEqual(commands.second_words()["saves"], ["stash", "apply"])
+        self.assertIn("saves", helpers.script_for("bash"))
+        self.assertIn("--retroarch", commands.all_flags())
+        from sync_roms import cli
+        self.assertIn("saves", cli.SUBCOMMANDS)
+        self.assertIn("sync-roms saves stash", cli.TOPICS["saves"])
+        self.assertIn("saves", commands.COMMANDS)
 
 
 if __name__ == "__main__":

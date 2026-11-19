@@ -24,6 +24,7 @@ SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "themes": ("update", "copy the latest Art Book Next for ES-DE from GitHub into storage"),
     "download": ("pico8", "add the PICO-8 BBS Featured carts storage doesn't have, and newer revisions of those it has"),
     "cards": ("[edit|list|new|set|rename|delete|copy|export|import]", "list and manage the cards you've synced"),
+    "saves": ("stash|apply [CARD] [--retroarch DIR]", "copy RetroArch saves and states off a card, or onto one"),
     "devices": ("[ID]", "list the supported devices, or one device's systems"),
     "layouts": ("[ID]", "list the firmware card layouts, or one layout's folders and devices"),
     "upload": ("[DIR]", "upload ROMs to the storage folder of a system you pick"),
@@ -140,6 +141,28 @@ TOPICS = {
   sync-roms cards import FILE                 keeps size, device, layout, games and excluded; Surprise off; r renames, p prefixes all
 
   A card is a folder name (the card root's basename) with a remembered device, firmware and games.
+""",
+    "saves": """
+  sync-roms saves stash [CARD] [--retroarch DIR] [--dry-run]    copy picked saves and states off the card
+  sync-roms saves apply [CARD] [--retroarch DIR] [--dry-run]    copy picked stashed ones onto the card
+
+  CARD is the card's folder (default: the current directory); it needs a layout (`sync-roms cards set NAME --layout`).
+  stash lists the card's games that have RetroArch saves (.srm) or states (.state, .stateN, .state.auto and their
+  .png), then their files, and copies them to ~/.sync-roms/saves/<system>/<game>/<time>-<card>/ (with stash.json).
+  apply lists the stashes of systems the card syncs (one per game) and copies them into the card's RetroArch folders.
+  A different file already there is only overwritten after you confirm (default no); identical ones are skipped.
+  A stash without a core going to a layout sorted by core asks which core folder to use (skipped with --yes).
+
+  Layout    RetroArch folder             saves            states
+  esde      RetroArch                    saves/<core>     states/<core>
+  knulli    saves                        <system folder>  <system folder>
+  onion     Saves/CurrentProfile         saves/<core>     states/<core>
+  allium    Saves/CurrentProfile         saves/<core>     states/<core>
+  emudeck   Emulation/saves/retroarch    saves            states
+
+  --retroarch DIR   read or write that folder instead of the card's RetroArch folder: a copy of Android's internal
+                    /storage/emulated/0/RetroArch for ES-DE, or the real folder EmuDeck's symlinks point to.
+  States only load in the core they were made with; .srm saves usually work in any core of the system.
 """,
     "devices": """
   sync-roms devices [ID] [--json]
