@@ -450,7 +450,7 @@ const PLATFORMS = { android: "Android", windows: "Windows", steamos: "SteamOS", 
 
 /*
   Guide content. Each section and each item may have a `when`:
-    { platform: ["android", ...], layout: ["esde", ...], systems: ["psp", ...], tier: [...], device: [...], dualscreen: [true] }
+    { platform: ["android", ...], layout: ["esde", ...], systems: ["psp", ...], tier: [...], power: ["low", "mid", "high", "desktop"], device: [...], dualscreen: [true] }
   and is only shown when the picked device and layout match every key given. `systems` matches when the
   device supports ANY listed system (tiers in device-systems.json); `dualscreen` is true for devices with a second screen.
   Items:  { title, when?, body?: HTML or (ctx) => HTML, settings?: [[menu path, value, note?], ...] }
@@ -467,6 +467,86 @@ const RA_ROWS = {
   hardcore: "off",
   hardcoreNote: "RAOfflineProxy only does casual achievements.",
 };
+// How much GPU a device has, from its tier in device-systems.json: shader picks differ per level.
+const POWER = {
+  low: ["minimal", "arcade", "nds"],
+  mid: ["psp-n64-dc", "saturn", "gc-ps2"],
+  high: ["wii-3ds", "switch"],
+  desktop: ["steam-deck", "windows"],
+};
+const POWER_NAMES = {
+  low: "low (Allwinner H700 / RK3566 class: only the lightest shaders keep full speed)",
+  mid: "mid (Helio G99 / Snapdragon 665 to 845 class: light CRT shaders work, heavy ones don't)",
+  high: "high (Snapdragon 865 and newer: guest-advanced class CRT shaders run fine)",
+  desktop: "desktop (Steam Deck, PC: anything runs, including Mega Bezel)",
+};
+const powerOf = tier => Object.keys(POWER).find(k => POWER[k].includes(tier));
+
+// Shader picks, one category per kind of picture, one pick per power level.
+//   preset: RetroArch preset under the shaders folder (Quick Menu > Shaders > Load Preset; slang on Vulkan)
+//   knulli: Knulli Shader Set name (Knulli has no per-preset menu; sets are built in)
+//   note:   why / what to change
+// Edit these as favourites are picked; systems decides which categories a device shows.
+const SHADER_CATEGORIES = [
+  {
+    id: "lcd", title: "Handheld LCD systems",
+    systems: ["gb", "gbc", "gba", "gamegear", "ngp", "ngpc", "wonderswan", "wonderswancolor", "atarilynx", "megaduck", "pokemini", "supervision", "nds"],
+    picks: {
+      low: { preset: "handheld/zfast_lcd", knulli: "Zfast", note: "Cheap LCD grid." },
+      mid: { preset: "handheld/lcd3x", knulli: "Zfast", note: "Classic LCD grid. Append handheld/gbc-color for GBC, handheld/gba-color for GBA." },
+      high: { preset: "handheld/lcd-grid-v2", knulli: "Zfast", note: "Grid plus colour correction: append handheld/gbc-color or handheld/gba-color." },
+      desktop: { preset: "handheld/lcd-grid-v2", knulli: "Zfast", note: "Same as high; use integer scaling. Mega Bezel's handheld bezels are the fancy option." },
+    },
+  },
+  {
+    id: "crt2d", title: "2D consoles and computers",
+    systems: ["nes", "fds", "snes", "genesis", "mastersystem", "segacd", "sega32x", "tg16", "tg-cd", "supergrafx", "atari2600", "atari5200",
+      "atari7800", "colecovision", "intellivision", "odyssey2", "channelf", "vectrex", "virtualboy", "sg1000", "arcadia", "pc98", "satellaview", "sufami", "sgb"],
+    picks: {
+      low: { preset: "crt/zfast_crt", knulli: "Zfast", note: "Lightest scanline shader; works at non-integer scales." },
+      mid: { preset: "crt/crt-hyllian", knulli: "Scanlines", note: "Light, good scanlines and mask. crt/crt-easymode is the alternative." },
+      high: { preset: "crt/crt-guest-advanced", knulli: "Curvature", note: "Fully tweakable CRT. Use integer scaling for even scanlines." },
+      desktop: { preset: "bezel/Mega_Bezel/Presets/MBZ__3__STD", knulli: "Curvature", note: "Mega Bezel (guest-advanced inside) with a reflective bezel; needs Vulkan. crt/crt-royale is the heavier non-bezel option." },
+    },
+  },
+  {
+    id: "arcade", title: "Arcade",
+    systems: ["mame", "fbneo", "neogeo", "neogeocd", "cps1", "cps2", "cps3", "mame-advmame", "stv", "model2", "naomi", "atomiswave"],
+    picks: {
+      low: { preset: "crt/zfast_crt", knulli: "Zfast", note: "Lightest scanline shader. Skip it on vertical (TATE) games or turn it off per game." },
+      mid: { preset: "crt/crt-hyllian", knulli: "Scanlines", note: "Light and crisp. Vertical games need a rotated screen; save the preset per game." },
+      high: { preset: "crt/crt-guest-advanced", knulli: "Curvature", note: "Handles the 15kHz look well; tune scanline strength." },
+      desktop: { preset: "bezel/Mega_Bezel/Presets/MBZ__3__STD", knulli: "Curvature", note: "Arcade bezel look; Mega Bezel has TATE-friendly presets." },
+    },
+  },
+  {
+    id: "polygon", title: "Early 3D (PlayStation, N64, Saturn, Dreamcast, 3DO)",
+    systems: ["psx", "n64", "saturn", "dreamcast", "3do", "pcfx", "n64dd"],
+    picks: {
+      low: { preset: "interpolation/sharp-shimmerless", knulli: "Sharp-Shimmerless", note: "No scanlines: 3D cores leave no headroom." },
+      mid: { preset: "interpolation/sharp-shimmerless", knulli: "Sharp-Shimmerless", note: "Standalone emulators (DuckStation, Flycast, M64Plus) have their own filters instead: leave their shaders off." },
+      high: { preset: "crt/crt-hyllian", knulli: "Sharp-Shimmerless-LCD-CRT", note: "Light CRT effect; 3D games look best with softer scanlines." },
+      desktop: { preset: "crt/crt-guest-advanced", knulli: "Sharp-Shimmerless-LCD-CRT", note: "Drop to bezel/Mega_Bezel/Presets/MBZ__5__POTATO if the reflection presets stutter." },
+    },
+  },
+  {
+    id: "modern3d", title: "Later 3D (PSP, GameCube, Wii, PS2, 3DS, Switch, Vita)",
+    systems: ["psp", "gc", "wii", "ps2", "3ds", "n3ds", "switch", "psvita", "wiiu", "ps3", "xbox", "xbox360", "naomi2", "model3"],
+    picks: {
+      low: { preset: "none", knulli: "None", note: "Too heavy for shaders on top." },
+      mid: { preset: "none", knulli: "None", note: "Use the emulator's own upscaling and filter instead of a shader." },
+      high: { preset: "none", knulli: "None", note: "Same: raise internal resolution in the emulator (PPSSPP, Dolphin, ARMSX2, Azahar) instead." },
+      desktop: { preset: "none", knulli: "None", note: "Same, or crt/crt-guest-advanced for a CRT look at native resolution." },
+    },
+  },
+];
+function shaderPickRows(c, ctx) {
+  const pick = c.picks[ctx.power];
+  const rows = [];
+  if (ctx.layout === "knulli") rows.push(["Shader Set", pick.knulli, "Knulli's built-in set"]);
+  else rows.push(["Preset", pick.preset]);
+  return rows;
+}
 const SECTIONS = [
   {
     id: "install",
@@ -518,6 +598,108 @@ const SECTIONS = [
     title: "RetroArch settings",
     lede: "Shared settings for the cores I use; some apply only on one platform or layout.",
     items: [],
+  },
+  {
+    id: "retroachievements",
+    title: "RetroAchievements",
+    lede: "Where I log in to RetroAchievements. Use my own account; never write the password here.",
+    items: [
+      {
+        title: "Knulli",
+        when: { layout: ["knulli"] },
+        body: `
+          <p class="path">${path("Start > Game Settings > RetroAchievement Settings")}</p>
+          <p>Turn on RetroAchievements, enter the username and password. For the API key, copy the <b>full</b> Web API key from retroachievements.org Settings > Keys (the shortened one doesn't work). The key is optional but needed for the achievements summary menu.</p>`,
+        settings: [
+          ["Game Settings > RetroAchievement Settings > Unlock Sound", "on"],
+          ["Game Settings > RetroAchievement Settings > Automatic Screenshot", "on"],
+          ["Game Settings > RetroAchievement Settings > Hardcore Mode", RA_ROWS.hardcore],
+        ],
+      },
+      {
+        title: "RetroArch",
+        when: { layout: ["esde", "emudeck"] },
+        body: `<p>Log in once in RetroArch; the cores share it. Other emulators have their own login (see each one under Standalone emulators).</p>`,
+        settings: [
+          ["Settings > Achievements > Achievements", "on"],
+          ["Settings > Achievements > Username", "my RetroAchievements username"],
+          ["Settings > Achievements > Password", "my RetroAchievements password", "Only used to log in once; RetroArch stores a token."],
+          ["Settings > Achievements > Hardcore Mode", RA_ROWS.hardcore, RA_ROWS.hardcoreNote],
+        ],
+      },
+      {
+        title: "Onion and Allium",
+        when: { layout: ["onion", "allium"] },
+        body: `<p>Nothing set up yet.</p>`,
+      },
+    ],
+  },
+  {
+    id: "cloudsync",
+    title: "Cloud saves (RetroArch Cloud Sync)",
+    lede: "RetroArch's built-in Cloud Sync keeps saves and states in step across devices through my WebDAV server.",
+    when: { layout: ["esde", "knulli", "emudeck"] },
+    items: [
+      {
+        title: "Set it up in RetroArch",
+        body: `
+          <p class="path">${path("RetroArch menu > Settings > Saving > Cloud Sync")}</p>
+          <p>Set up the device with the most progress first, restart RetroArch, and let the first sync finish (status line at the bottom left) before setting up the others. Every device needs identical settings; the four <b>Sort Saves/Save States into Folders by…</b> options must match across devices.</p>`,
+        settings: [
+          ["Cloud Sync > Enable Cloud Sync", "on"],
+          ["Cloud Sync > Cloud Sync Backend", "webdav"],
+          ["Cloud Sync > Cloud Storage URL", "https://cloud-saves.valefor.com/dav/", "Keep the trailing slash."],
+          ["Cloud Sync > Username", "my cloud-saves username"],
+          ["Cloud Sync > Password", "my cloud-saves password"],
+          ["Cloud Sync > Sync Saves", "on", "Save files and save states."],
+          ["Cloud Sync > Sync Configs", "off", "Core options and shader presets differ per device."],
+          ["Cloud Sync > Sync Thumbnails", "off"],
+          ["Cloud Sync > Sync System", "off", "BIOS comes from the card."],
+          ["Cloud Sync > Destructive Cloud Sync", "off", "Replaced files are kept in cloud_backups/."],
+          ["Cloud Sync > Sync Mode", "automatic", "Syncs at start and when a core unloads."],
+        ],
+      },
+      {
+        title: "Notes",
+        body: `<ul>
+          <li><code>retroarch.cfg</code> and playlists are never synced.</li>
+          <li>The status can say <i>finished with failures</i> even though the files arrived; check RetroArch's log for the failing transfer.</li>
+        </ul>`,
+      },
+    ],
+  },
+  {
+    id: "shaders",
+    title: "Shaders",
+    lede: "Starting picks for this device's power and systems; edit <code>SHADER_CATEGORIES</code> in the page's script as favourites are chosen.",
+    when: { layout: ["esde", "knulli", "emudeck"] },
+    items: [
+      {
+        title: "How to apply them",
+        body: ctx => {
+          const how = ctx.layout === "knulli"
+            ? `<p class="path">${path("Start > Game Settings > Game Rendering & Shaders > Shader Set")}</p>
+               <p>Global. Per system: <span class="path">${path("Select > Advanced System Options > Game Rendering & Shaders")}</span>. Per game: hold the launch button on the game, <span class="path">${path("Advanced Game Options > Game Rendering & Shaders")}</span>. Choose <b>None</b> to let RetroArch's own saved presets win.</p>`
+            : `<ol>
+                <li>RetroArch: <span class="path">${path("Settings > Drivers > Video")}</span> <b>vulkan</b> (slang presets need it), then <span class="path">${path("Main Menu > Online Updater > Update Slang Shaders")}</span>.</li>
+                <li>Load a preset in a running game: <span class="path">${path("Quick Menu > Shaders > Load Preset")}</span>, pick the preset below.</li>
+                <li>Keep it: <span class="path">${path("Quick Menu > Shaders > Save > Save Core Preset")}</span> (or Content Directory Preset for one system's folder).</li>
+                <li>Integer scaling: <span class="path">${path("Settings > Video > Scaling > Integer Scaling")}</span> on for the CRT and LCD presets below.</li>
+              </ol>
+              <p>Standalone emulators (DuckStation, PPSSPP, Dolphin, Flycast, …) don't use these presets.</p>`;
+          return `<p>This device counts as <b>${esc(POWER_NAMES[ctx.power] || "unknown")}</b>.</p>${how}`;
+        },
+      },
+      ...SHADER_CATEGORIES.map(c => ({
+        title: c.title,
+        when: { systems: c.systems },
+        body: ctx => {
+          const pick = c.picks[ctx.power];
+          const names = c.systems.filter(s => ctx.systems.includes(s)).join(", ");
+          return `<p class="note">${esc(names)}</p><p>${esc(pick.note)}</p>${settingsTable(shaderPickRows(c, ctx))}`;
+        },
+      })),
+    ],
   },
   {
     id: "emulators",
@@ -717,7 +899,7 @@ function render() {
   const info = DEVICE_SYSTEMS[device.id] || { tier: null, systems: [] };
   const ctx = {
     layout: $layout.value, platform: platformOf(device, $layout.value), device: device.id,
-    tier: info.tier, systems: info.systems, dualscreen: !!device.screen2,
+    tier: info.tier, power: powerOf(info.tier), systems: info.systems, dualscreen: !!device.screen2,
   };
   ctx.emus = SECTIONS.find(s => s.id === "emulators").items.filter(e => matches(e.when, ctx));
   history.replaceState(null, "", `#device=${device.id}&layout=${ctx.layout}`);
