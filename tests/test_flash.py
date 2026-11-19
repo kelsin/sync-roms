@@ -105,6 +105,19 @@ class WriteVerify(unittest.TestCase):
             with self.assertRaises(flash.FlashError):
                 flash.write_image(self.gz, "disk9")
 
+    def test_dd_dying_mid_write_raises(self):
+        with mock.patch.object(flash, "DD", ["sh", "-c", "head -c 1000 >/dev/null; exit 1", "dd"]):
+            with self.assertRaises(flash.FlashError):
+                flash.write_image(self.gz, "disk9")
+
+    def test_bad_gzip_raises(self):
+        with open(self.gz, "rb") as f:
+            raw_bytes = f.read()
+        with open(self.gz, "wb") as f:
+            f.write(raw_bytes[:-8] + b"\xff" * 8)
+        with self.assertRaises(flash.FlashError):
+            flash.write_image(self.gz, "disk9")
+
     def test_progress_reaches_one(self):
         seen = []
         flash.write_image(self.gz, "disk9", seen.append)

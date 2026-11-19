@@ -7,6 +7,7 @@ import os
 import plistlib
 import re
 import subprocess
+import zlib
 from xml.parsers.expat import ExpatError
 
 PREFIX = "os/"
@@ -120,17 +121,23 @@ def _stop(proc):
                 stream.close()
         except OSError:
             pass
-    proc.kill()
-    proc.wait()
+    if proc.poll() is None:
+        proc.terminate()
+        try:
+            proc.wait(timeout=5)
+        except subprocess.TimeoutExpired:
+            proc.kill()
+            proc.wait()
     if proc.stderr:
         proc.stderr.close()
 
 
 def write_image(gz_path, disk, progress=None):
     """Stream a .img.gz to the disk through dd. Returns (bytes written, sha256 hexdigest)."""
-    proc = subprocess.Popen(DD + [f"of={raw(disk)}", f"bs={WRITE_BLOCK}"], stdin=subprocess.PIPE,
-                            stderr=subprocess.PIPE)
+    proc = None
     try:
+        proc = subprocess.Popen(DD + [f"of={raw(disk)}", f"bs={WRITE_BLOCK}", "iflag=fullblock"],
+                                stdin=subprocess.PIPE, stderr=subprocess.PIPE)
         total = os.path.getsize(gz_path)
         digest = hashlib.sha256()
         size = 0
@@ -157,17 +164,28 @@ def write_image(gz_path, disk, progress=None):
         if progress:
             progress(1.0)
         return size, digest.hexdigest()
-    except BaseException:
+    except (gzip.BadGzipFile, EOFError, zlib.error) as e:
         _stop(proc)
+        raise FlashError(f"the image file is damaged: {e}") from e
+    except OSError as e:
+        if proc:
+            _stop(proc)
+        if isinstance(e, BrokenPipeError):
+            raise
+        raise FlashError(str(e)) from e
+    except BaseException:
+        if proc:
+            _stop(proc)
         raise
 
 
 def verify(disk, size, digest, progress=None):
     """Read size bytes back from the disk; True when their sha256 equals digest."""
     count = math.ceil(size / READ_BLOCK)
-    proc = subprocess.Popen(DD + [f"if={raw(disk)}", f"bs={READ_BLOCK}", f"count={count}"],
-                            stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+    proc = None
     try:
+        proc = subprocess.Popen(DD + [f"if={raw(disk)}", f"bs={READ_BLOCK}", f"count={count}"],
+                                stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
         h = hashlib.sha256()
         got = 0
         while got < size:
@@ -178,8 +196,14 @@ def verify(disk, size, digest, progress=None):
             got += len(chunk)
             if progress:
                 progress(got / size)
+        proc.stdout.close()
         _stop(proc)
         return got == size and h.hexdigest() == digest
+    except OSError as e:
+        if proc:
+            _stop(proc)
+        raise FlashError(str(e)) from e
     except BaseException:
-        _stop(proc)
+        if proc:
+            _stop(proc)
         raise
