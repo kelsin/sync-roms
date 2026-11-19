@@ -642,6 +642,40 @@ const SECTIONS = [
     ],
   },
   {
+    id: "raofflineproxy-knulli",
+    title: "RAOfflineProxy",
+    lede: "Earn RetroAchievements without a connection: the proxy caches games while online and queues unlocks until you reconnect. Linux support is alpha, intended for the KNULLI Scarab and Gladiator II releases.",
+    when: { layout: ["knulli"] },
+    items: [
+      {
+        title: "Install it",
+        body: `
+          <ol>
+            <li>In Knulli, enter your RetroAchievements account under <span class="path">${path("Game Settings > Retroachievement settings")}</span>.</li>
+            <li>Download the <b>KNULLI</b> installer from the <a href="https://github.com/misantronic/RAOfflineProxy/releases">RAOfflineProxy GitHub releases</a> and copy it to <code>/userdata/roms/tools</code> on the card.</li>
+            <li>Update gamelists so <b>RAOfflineProxy Install</b> shows in the <b>Tools</b> menu, then launch it.</li>
+          </ol>`,
+      },
+      {
+        title: "Use it",
+        body: `
+          <ol>
+            <li>While online, launch <b>RAOfflineProxy</b> from the <b>Tools</b> menu. It patches RetroArch's config to route RetroAchievements through the proxy.</li>
+            <li>Cache games while online: <b>Cached Games &gt; Add ROM</b>, or launch each game once in RetroArch while the proxy runs.</li>
+            <li>Play offline: start the proxy, then launch a cached game. Achievements queue and sync when you reconnect.</li>
+          </ol>`,
+      },
+      {
+        title: "Limits",
+        body: `
+          <ul>
+            <li>Casual achievements only: no hardcore.</li>
+            <li>It patches RetroArch only (the cores); standalone emulators aren't covered.</li>
+          </ul>`,
+      },
+    ],
+  },
+  {
     id: "home",
     title: "Make ES-DE the home app",
     lede: "Last, so the device boots straight into ES-DE.",
@@ -735,7 +769,7 @@ function render() {
   document.getElementById("toc").innerHTML = shown.map(s => `<a href="#${s.id}">${esc(s.title)}</a>`).join("");
   document.getElementById("steps").innerHTML = shown.map(s => {
     const items = s.items.filter(i => matches(i.when, ctx));
-    const ref = !["install", "home", "raofflineproxy"].includes(s.id);
+    const ref = !["install", "home", "raofflineproxy", "raofflineproxy-knulli"].includes(s.id);
     let body;
     if (!items.length) {
       body = `<div class="empty">Nothing here yet for this ${s.id === "emulators" ? "platform" : "setup"}.</div>`;
