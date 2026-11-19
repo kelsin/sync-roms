@@ -45,6 +45,16 @@ class Flash(unittest.TestCase):
     def test_parse_disks_empty(self):
         self.assertEqual(flash.parse_disks({}, lambda d: {}, set()), [])
 
+    def test_whole_disks_plain(self):
+        self.assertEqual(flash.whole_disks({"ParentWholeDisk": "disk2"}), {"disk2"})
+
+    def test_whole_disks_apfs_includes_physical_disk(self):
+        info = {"ParentWholeDisk": "disk5", "APFSPhysicalStores": [{"APFSPhysicalStore": "disk4s2"}]}
+        self.assertEqual(flash.whole_disks(info), {"disk5", "disk4"})
+
+    def test_whole_disks_empty(self):
+        self.assertEqual(flash.whole_disks({}), set())
+
 
 if __name__ == "__main__":
     unittest.main()

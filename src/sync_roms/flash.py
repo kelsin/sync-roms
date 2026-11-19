@@ -4,6 +4,7 @@ import os
 import plistlib
 import re
 import subprocess
+from xml.parsers.expat import ExpatError
 
 PREFIX = "os/"
 
@@ -62,16 +63,30 @@ def parse_disks(listing, info, exclude):
 
 def _diskutil(*args):
     r = subprocess.run(["diskutil", *args], capture_output=True)
-    return plistlib.loads(r.stdout) if r.returncode == 0 else None
+    if r.returncode != 0:
+        return None
+    try:
+        return plistlib.loads(r.stdout)
+    except (plistlib.InvalidFileException, ExpatError, ValueError):
+        return None
 
 
-def disk_of(path):
-    """The whole disk (e.g. disk3) holding path, or None. Unlike clean.card_disk this also answers for the boot disk."""
+def whole_disks(info):
+    """The whole disks behind a `diskutil info -plist` volume: its parent disk and, for APFS, the physical disks under the container."""
+    disks = {info["ParentWholeDisk"]} if info.get("ParentWholeDisk") else set()
+    for store in info.get("APFSPhysicalStores", []):
+        m = re.fullmatch(r"(disk\d+)(?:s\d+)?", store.get("APFSPhysicalStore", ""))
+        if m:
+            disks.add(m.group(1))
+    return disks
+
+
+def disks_of(path):
+    """The whole disks holding path (an APFS volume's container and its physical disk), or an empty set. Unlike clean.card_disk this also answers for the boot disk."""
     mount = os.path.realpath(path)
     while not os.path.ismount(mount):
         mount = os.path.dirname(mount)
-    info = _diskutil("info", "-plist", mount)
-    return (info or {}).get("ParentWholeDisk") or None
+    return whole_disks(_diskutil("info", "-plist", mount) or {})
 
 
 def external_disks(exclude):
