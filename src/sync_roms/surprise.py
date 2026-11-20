@@ -34,10 +34,10 @@ LABEL = "\U0001F381 Surprise"
 
 
 def default_on(entry):
-    """Surprise's default for a card's cards.json entry: on where the layout shows surprises (frontend collections, or
-    Onion's Surprise app) or isn't known yet."""
+    """Surprise's default for a card's cards.json entry: on where the layout shows surprises (frontend collections, Spruce's
+    collections file, or Onion's Surprise app) or isn't known yet."""
     layout = entry.get("layout") if isinstance(entry, dict) else None
-    return layout is None or layout in frontend.FRONTEND_LAYOUTS or layout in ("onion", "muos")
+    return layout is None or layout in frontend.FRONTEND_LAYOUTS or layout in ("onion", "muos", "spruce")
 
 
 def enabled(entry):
