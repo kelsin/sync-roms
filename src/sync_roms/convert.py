@@ -1,7 +1,7 @@
 """`cards convert`: plan and apply the renames that take a card's files from one layout to another on the same filesystem."""
 import os
 
-from sync_roms import downloads, m3u, saves
+from sync_roms import commands, downloads, m3u, picker, saves, store, ui
 
 PLAYLIST_NOTE = "playlist paths differ between layouts; sync rewrites it"
 
@@ -222,3 +222,82 @@ def apply_moves(moves):
     for src, _ in done:
         _prune(os.path.dirname(src))
     return done, conflicts
+
+
+def _summary(title, moves, skipped, root=None):
+    """Print one plan: its moves counted per top folder under root (or each move, with no root), then what is skipped."""
+    if not (moves or skipped):
+        return
+    print(ui.bold(title))
+    if root:
+        counts = {}
+        for src, _ in moves:
+            folder = os.path.relpath(src, root).split(os.sep)[0]
+            counts[folder] = counts.get(folder, 0) + 1
+        for folder, n in sorted(counts.items()):
+            print(f"  {folder}: {n} to move")
+    else:
+        for src, dst in moves:
+            print(f"  {src} {ui.dim('→')} {dst}")
+    for label, reason in skipped:
+        print(f"  {ui.yellow('skipped')} {label} {ui.dim('(' + reason + ')')}")
+
+
+def _leftovers(base, systems, old_name, old):
+    """Old-layout ROM folders that still hold dot folders (frontend media), which a convert leaves untouched."""
+    found = []
+    for system in systems:
+        folder = system["folders"].get(old_name)
+        path = _exact_dir(base, old["roms_dir"], folder) if folder else None
+        found += [f"{old['roms_dir']}/{folder}/{d}" for d in sorted(_listed(path)) if d.startswith(".")
+                  and os.path.isdir(os.path.join(path, d))] if path else []
+    return list(dict.fromkeys(found))
+
+
+def convert_command(args):
+    """`cards convert [CARD] --layout ID [--dry-run] [--yes]`: move the card's ROMs, BIOS and RetroArch saves and
+    states to the folders of another layout, then save that layout for the card."""
+    base = os.path.abspath(args.card or os.getcwd())
+    name = os.path.basename(base)
+    cards = store.load_cards()
+    if name not in cards:
+        ui.fail(f"No card named {name!r}. Set it up with `sync-roms cards new {name} --device ID|full --layout NAME`", 2)
+    catalog = store.load_catalog()
+    current = picker.saved_setup(cards[name], catalog["devices"], catalog["layouts"], name)
+    if not current:
+        ui.fail(f"{name!r} has no usable layout. Set it with `sync-roms cards set {name} --layout NAME`", 2)
+    if not os.path.isdir(base):
+        ui.fail(f"No folder {base}", 2)
+    _, new_name = commands.setup_from_flags(catalog, current, None, args.layout)
+    old_name = current[1]
+    old, new, systems = catalog["layouts"][old_name], catalog["layouts"][new_name], catalog["systems"]
+    rom_moves, rom_skipped = plan_roms(base, systems, old_name, old, new_name, new)
+    bios_moves, bios_skipped = plan_bios(base, systems, old_name, old, new_name, new)
+    save_moves, save_skipped = plan_saves(base, systems, old_name, old, new_name, new, rom_moves)
+    planned = rom_moves + bios_moves + save_moves
+    print(ui.bold(f"{name}: {old_name} → {new_name}"))
+    _summary("ROMs", rom_moves, rom_skipped, os.path.join(base, old["roms_dir"]))
+    _summary("BIOS", bios_moves, bios_skipped)
+    _summary("Saves and states", save_moves, save_skipped)
+    left = _leftovers(base, systems, old_name, old)
+    if left:
+        print(ui.dim("Left in place (old layout's frontend folders): " + ", ".join(left)))
+    if not planned:
+        print(ui.green("Nothing to move"))
+    if args.dry_run:
+        print(ui.yellow("🧪 Dry run: nothing moved, layout not changed"))
+        return 0
+    if planned:
+        if not args.yes:
+            if not ui.has_terminal():
+                ui.fail("Pass --yes to convert without a terminal to confirm on", 2)
+            if not ui.confirm(f"Move {len(planned)} files?"):
+                return 1
+        for moves in (rom_moves, bios_moves, save_moves):
+            _, conflicts = apply_moves(moves)
+            for src, dst in conflicts:
+                ui.warn(f"{dst} already exists; left {src} in place")
+    if not store.update_card(name, layout=new_name):
+        return 3
+    print(ui.green(f"💾 {name} is now {new_name}") + (ui.dim("  (run a sync to fill in the rest)") if planned else ""))
+    return 0

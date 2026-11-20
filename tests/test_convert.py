@@ -271,3 +271,95 @@ class ConvertTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ConvertCommandTest(unittest.TestCase):
+    def setUp(self):
+        import argparse
+        import contextlib
+        import io
+        import json
+        from sync_roms import store
+        self.argparse, self.json, self.store = argparse, json, store
+        self._tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self._tmp.cleanup)
+        root = os.path.realpath(self._tmp.name)
+        self.data = os.path.join(root, "data")
+        os.makedirs(self.data)
+        patch = mock.patch.object(store, "data_dir", lambda: self.data)
+        patch.start()
+        self.addCleanup(patch.stop)
+        self.base = os.path.join(root, "SD")
+        os.makedirs(self.base)
+        self.set_card({"device": "anbernic-rg-sp", "layout": "knulli"})
+        touch(os.path.join(self.base, "roms", "gba", "Game.zip"))
+        self.out, self.err = io.StringIO(), io.StringIO()
+        self.redirect = contextlib.redirect_stdout
+        self.redirect_err = contextlib.redirect_stderr
+
+    def set_card(self, entry):
+        with open(os.path.join(self.data, "cards.json"), "w") as f:
+            self.json.dump({"SD": entry} if entry is not None else {}, f)
+
+    def layout(self):
+        with open(os.path.join(self.data, "cards.json")) as f:
+            return self.json.load(f)["SD"].get("layout")
+
+    def run_cmd(self, layout="nextui", dry_run=False, yes=True, terminal=False):
+        args = self.argparse.Namespace(card=self.base, layout=layout, dry_run=dry_run, yes=yes)
+        with mock.patch("sync_roms.ui.has_terminal", return_value=terminal), self.redirect(self.out), self.redirect_err(self.err):
+            try:
+                return convert.convert_command(args)
+            except SystemExit as e:
+                return e.code
+
+    def moved(self):
+        return os.path.exists(os.path.join(self.base, "Roms", "Game Boy Advance (GBA)", "Game.zip"))
+
+    def test_dry_run_moves_nothing_and_keeps_layout(self):
+        self.assertEqual(self.run_cmd(dry_run=True, yes=False), 0)
+        self.assertFalse(self.moved())
+        self.assertTrue(os.path.exists(os.path.join(self.base, "roms", "gba", "Game.zip")))
+        self.assertEqual(self.layout(), "knulli")
+        self.assertIn("gba: 1 to move", self.out.getvalue())
+
+    def test_convert_moves_files_and_saves_layout(self):
+        self.assertEqual(self.run_cmd(), 0)
+        self.assertTrue(self.moved())
+        self.assertFalse(os.path.exists(os.path.join(self.base, "roms", "gba", "Game.zip")))
+        self.assertEqual(self.layout(), "nextui")
+
+    def test_save_follows_its_rom(self):
+        touch(os.path.join(self.base, "saves", "gba", "Game.srm"))
+        self.assertEqual(self.run_cmd(), 0)
+        self.assertTrue(os.path.exists(os.path.join(self.base, "Saves", "GBA", "Game.zip.sav")))
+
+    def test_unsupported_layout_fails(self):
+        self.assertEqual(self.run_cmd(layout="windows-pc-nope"), 2)
+        self.assertEqual(self.run_cmd(layout="onion"), 2)
+        self.assertFalse(self.moved())
+        self.assertEqual(self.layout(), "knulli")
+
+    def test_unsaved_card_fails(self):
+        self.set_card({})
+        self.assertEqual(self.run_cmd(), 2)
+        self.assertIn("cards set", self.err.getvalue())
+        self.assertFalse(self.moved())
+
+    def test_conflicts_reported_and_layout_still_saved(self):
+        touch(os.path.join(self.base, "Roms", "Game Boy Advance (GBA)", "Game.zip"), b"other")
+        self.assertEqual(self.run_cmd(), 0)
+        self.assertIn("already exists", self.out.getvalue() + self.err.getvalue())
+        self.assertTrue(os.path.exists(os.path.join(self.base, "roms", "gba", "Game.zip")))
+        self.assertEqual(self.layout(), "nextui")
+
+    def test_rerun_is_noop(self):
+        self.run_cmd()
+        self.out.truncate(0)
+        self.out.seek(0)
+        self.assertEqual(self.run_cmd(layout="nextui"), 0)
+        self.assertIn("Nothing to move", self.out.getvalue())
+
+    def test_no_yes_and_no_terminal_fails(self):
+        self.assertEqual(self.run_cmd(yes=False), 2)
+        self.assertFalse(self.moved())

@@ -24,7 +24,7 @@ SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "themes": ("update", "copy the latest Art Book Next for ES-DE from GitHub into storage"),
     "download": ("pico8", "add the PICO-8 BBS Featured carts storage doesn't have, and newer revisions of those it has"),
     "flash": ("", "write a Knulli or BaseOS image from storage's os/ to an SD card"),
-    "cards": ("[edit|list|new|set|rename|delete|copy|export|import]", "list and manage the cards you've synced"),
+    "cards": ("[edit|list|new|set|rename|convert|delete|copy|export|import]", "list and manage the cards you've synced"),
     "saves": ("stash|apply [CARD] [--retroarch DIR]", "copy RetroArch saves and states off a card, or onto one"),
     "devices": ("[ID]", "list the supported devices, or one device's systems"),
     "layouts": ("[ID]", "list the firmware card layouts, or one layout's folders and devices"),
@@ -151,6 +151,7 @@ TOPICS = {
   sync-roms cards new NAME --device ID|full --layout NAME [--size 512GB]
   sync-roms cards set NAME [--device ID|full] [--layout NAME] [--size 512GB]
   sync-roms cards rename OLD NEW
+  sync-roms cards convert [CARD] --layout NAME [--dry-run] [--yes]   move the card's ROMs, BIOS and saves to another layout's folders
   sync-roms cards delete NAME [--yes]
   sync-roms cards copy SRC DST                merge SRC's games, sets, excluded and collections into DST (not surprises); skips systems DST can't play
   sync-roms cards export FILE                 surprises and collections go into the file as plain games
