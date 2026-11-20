@@ -23,6 +23,8 @@ def _root(base, layout):
 def _files(top):
     """[(core, folder parts under the core, file name)] of every file under top/<core>/."""
     out = []
+    if not os.path.isdir(top):
+        return out
     for core in saves._listdir(top):
         if not os.path.isdir(os.path.join(top, core)):
             continue
@@ -78,6 +80,11 @@ def scan(base, layout, systems):
 def is_pickles(stash):
     """Whether a stash was made from Pickles files (its files record their ROM dir)."""
     return any("rel" in f for f in stash["files"])
+
+
+def stash_rel(stash):
+    """The ROM dir of a Pickles stash (one per stash), None for a RetroArch one."""
+    return next((f["rel"] for f in stash["files"] if "rel" in f), None)
 
 
 def plan_apply(stash, base, layout, system, core):

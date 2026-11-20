@@ -2,13 +2,14 @@ import os
 import sys
 import tempfile
 import unittest
+from unittest import mock
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "src"))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 import helpers  # noqa: E402
-from sync_roms import muos_saves, store  # noqa: E402
+from sync_roms import muos_saves, store, ui  # noqa: E402
 
 LAYOUT = store.repo_json("layouts")["muos"]
 SYSTEMS = [{"bucket": "gba", "folders": {"muos": "gba"}},
@@ -84,7 +85,9 @@ class ScanTest(unittest.TestCase):
         self.assertEqual(games[("gba", "Game")][0]["rel"], "")
 
     def test_scan_missing_pickles(self):
-        self.assertEqual(self.scan(), ({}, 0))
+        with mock.patch.object(ui, "warn") as warn:
+            self.assertEqual(self.scan(), ({}, 0))
+        warn.assert_not_called()
 
 
 class PlanApplyTest(unittest.TestCase):

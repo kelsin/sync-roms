@@ -504,7 +504,8 @@ class ApplyCommandTest(CommandTest):
         self.lists([True], lambda labels: [True] * len(labels))
         code, out, err = self.run_cmd("saves", "stash", old)
         self.assertEqual(code, 0, err)
-        self.assertEqual(self.calls[1][1], ["Game · Game.srm", "Game · slot_1.state", "Game · states.ini"])
+        self.assertEqual(self.calls[1][1], ["Game · GBA/Hacks/Game.srm", "Game · GBA/Hacks/slot_1.state",
+                                            "Game · GBA/Hacks/states.ini"])
         self.assertIn("Stashed 3 file(s) of 1 game(s)", out)
         self.assertIn("skipped 1 file", out)
         [stash] = saves.load_stashes()
@@ -518,7 +519,7 @@ class ApplyCommandTest(CommandTest):
         with mock.patch.object(ui, "confirm", return_value=False) as confirm:
             code, out, err = self.run_cmd("saves", "apply", new)
         self.assertEqual(code, 0, err)
-        self.assertEqual(self.calls[0][1], ["Game"])
+        self.assertEqual(self.calls[0][1], ["Game · GBA/Hacks"])
         self.assertIn("states.ini", confirm.call_args[0][0] + out)
         pk = os.path.join(new, "MUOS", "pickles")
         self.assertEqual(self.read_file(pk, "sram/mGBA/GBA/Hacks/Game.srm"), "save")
@@ -526,6 +527,49 @@ class ApplyCommandTest(CommandTest):
         self.assertEqual(self.read_file(pk, "state/mGBA/GBA/Hacks/Game/states.ini"), "other")
         self.assertIn("Applied 2 file(s) of 1 game(s) to MU2", out)
         self.assertIn("1 different file(s) kept", out)
+
+    def muos_catalog(self):
+        catalog = {"layouts": LAYOUTS, "systems": [dict(s, folders=dict(s["folders"], muos=s["bucket"]))
+                                                   for s in CATALOG_SYSTEMS], "devices": []}
+        p = mock.patch.object(store, "load_catalog", lambda: catalog)
+        p.start()
+        self.addCleanup(p.stop)
+
+    def test_same_stem_in_sibling_rom_dirs_stays_apart(self):
+        self.muos_catalog()
+        old = self.card("MU", "muos")
+        pk = os.path.join(old, "MUOS", "pickles")
+        for rel, data in (("GBA", "orig"), ("GBA/Hacks", "hack")):
+            helpers.touch(os.path.join(pk, "sram/mGBA", rel, "Game.srm"), f"{data}-save")
+            helpers.touch(os.path.join(pk, "state/mGBA", rel, "Game/slot_1.state"), f"{data}-slot")
+            helpers.touch(os.path.join(pk, "state/mGBA", rel, "Game/states.ini"), f"{data}-ini")
+        self.lists([True], lambda labels: [True] * len(labels))
+        code, out, err = self.run_cmd("saves", "stash", old)
+        self.assertEqual(code, 0, err)
+        self.assertEqual(len(set(self.calls[1][1])), 6)
+        self.assertIn("Stashed 6 file(s) of 2 game(s)", out)
+        stashes = saves.load_stashes()
+        self.assertEqual(sorted({f["rel"] for f in s["files"]}.pop() for s in stashes), ["GBA", "GBA/Hacks"])
+        self.assertTrue(all(len({f["rel"] for f in s["files"]}) == 1 for s in stashes))
+        new = self.card("MU2", "muos")
+        self.calls.clear()
+        self.lists(lambda labels: [True] * len(labels))
+        code, out, err = self.run_cmd("saves", "apply", new)
+        self.assertEqual(code, 0, err)
+        self.assertNotIn("one stash per game", out)
+        pk = os.path.join(new, "MUOS", "pickles")
+        for rel, data in (("GBA", "orig"), ("GBA/Hacks", "hack")):
+            self.assertEqual(self.read_file(pk, "sram/mGBA", rel, "Game.srm"), f"{data}-save")
+            self.assertEqual(self.read_file(pk, "state/mGBA", rel, "Game/slot_1.state"), f"{data}-slot")
+            self.assertEqual(self.read_file(pk, "state/mGBA", rel, "Game/states.ini"), f"{data}-ini")
+        self.assertIn("Applied 6 file(s) of 2 game(s) to MU2", out)
+
+    def test_retroarch_flag_warned_on_muos(self):
+        self.muos_catalog()
+        base = self.card("MU", "muos")
+        code, _, err = self.run_cmd("saves", "stash", base, "--retroarch", base)
+        self.assertEqual(code, 0)
+        self.assertIn("--retroarch is ignored on muOS cards", err)
 
     def test_muos_stash_never_goes_onto_a_retroarch_card(self):
         tmp = os.path.join(self.cards_dir.name, "src", "slot_1.state")
