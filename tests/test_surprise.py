@@ -315,7 +315,7 @@ class Step(StorageCase):
         self.card(surprises=current)
         lists, edits = [], []
         with self.patched(filter_list=lambda title, labels, **kw: lists.append((title, labels, kw)) or [True] + [False] * 9,
-                          edit_card=lambda name, setup=None, to_fetch=None: edits.append(name)):
+                          edit_card=lambda name, setup=None, to_fetch=None, card_match=None: edits.append(name)):
             got = self.both(True, False, 1)
         title, labels, kw = lists[0]
         self.assertEqual(title, "Pick the surprises to replace")
@@ -394,7 +394,7 @@ class Step(StorageCase):
         self.card(surprise=False, surprises=[self.surprise("gba", 0)])
         surprise.save_history([{**self.surprise("gba", 0), "card": "SD", "date": "2026-11-01"}], datetime.date(2026, 11, 11))
         edits = []
-        with self.patched(filter_list=self.fail_call, edit_card=lambda name, setup=None, to_fetch=None: edits.append(name)):
+        with self.patched(filter_list=self.fail_call, edit_card=lambda name, setup=None, to_fetch=None, card_match=None: edits.append(name)):
             self.assertEqual(surprise.run_surprise("SD", (None, "esde"), self.chosen(), True, False), [])
         self.assertNotIn("surprises", store.load_cards()["SD"])
         self.assertEqual(len(surprise.load_history()), 1)
@@ -437,7 +437,7 @@ class Step(StorageCase):
             raise SystemExit("offline")
         with mock.patch.object(surprise.s3, "list_folders", down), contextlib.redirect_stderr(io.StringIO()), \
                 self.patched(filter_list=lambda t, labels, **kw: [True] + [False] * (len(labels) - 1),
-                             edit_card=lambda name, setup=None, to_fetch=None: edits.append(name)):
+                             edit_card=lambda name, setup=None, to_fetch=None, card_match=None: edits.append(name)):
             got = self.both(True, False, 9)
         self.assertEqual(got, current[1:])
         self.assertEqual(store.load_cards()["SD"]["surprises"], current[1:])

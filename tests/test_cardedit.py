@@ -943,6 +943,42 @@ class Flow(DataDir):
             cardedit.edit_system("c", GBA, (DEVICE, "esde"), to_fetch)
         self.assertTrue(statuses[1].endswith("⬇️  5 B to download"), statuses)
 
+    def run_keep(self, match, *steps):
+        script = Script(*steps)
+        with mock.patch.object(picker, "filter_list", script), contextlib.redirect_stdout(io.StringIO()):
+            cardedit.edit_card("c", (DEVICE, "esde"), card_match=match)
+        return script.calls
+
+    def test_k_keeps_card_files(self):
+        self.card()
+        notes = []
+
+        def match(system, keys):
+            return ({"gba/Ruby.zip"} if system["bucket"] == "gba" else set()), 1
+        with mock.patch.object(edit, "note", notes.append):
+            calls = self.run_keep(match, returns((cardedit.KEEP_KEY, 0)), returns(None))
+        self.assertIn(cardedit.KEEP_KEY, calls[0][2]["hotkeys"])
+        self.assertIn("k keep", calls[0][2]["hint"])
+        self.assertIn(g("gba/Ruby.zip"), store.card_games("c")["gba"])
+        self.assertEqual(len(notes), 1)
+        self.assertIn("1 card file", notes[0])
+
+    def test_k_skips_full_system(self):
+        self.card(games={"gba": {"full_system": True}})
+        asked = []
+
+        def match(system, keys):
+            asked.append(system["bucket"])
+            return set(), 0
+        self.run_keep(match, returns((cardedit.KEEP_KEY, 0)), returns(None))
+        self.assertNotIn("gba", asked)
+
+    def test_k_hidden_without_callback(self):
+        self.card()
+        calls = self.run_card(returns(None))
+        self.assertNotIn(cardedit.KEEP_KEY, calls[0][2]["hotkeys"])
+        self.assertNotIn("k keep", calls[0][2]["hint"])
+
     def test_collections_screen_toggles_with_enter_in_place(self):
         favs = {"id": "favs", "name": "Favs", "games": []}
         self.card()
