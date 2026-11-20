@@ -43,6 +43,16 @@ def is_current(path, size, disc_dir=None):
     return False
 
 
+def bios_folders(system, layout_name, layout, bios_dir):
+    """The card folders a system's BIOS files go in: the BIOS folder, or for layouts that sort BIOS by tag, its tag folders."""
+    if not layout.get("bios_by_tag"):
+        return [bios_dir]
+    tag = store.folder_tag(system["folders"].get(layout_name))
+    if not tag:
+        return []
+    return [os.path.join(bios_dir, t) for t in [tag, *system.get("nextui_bios_tags", [])]]
+
+
 def with_sizes(jobs):
     """jobs with any size left unread (None, from a folder listing without sizes) read now, in parallel; a file that
     has gone is dropped. Bucket listings carry every size, so for them this changes nothing."""

@@ -1093,7 +1093,8 @@ def sync_card(args):
     bios_systems = chosen + [s for s in systems if s["bucket"] not in chosen_ids
                              and downloads.has_local_files(dest_of(s), onion, rom_bios_names(s))]
     # (bucket key, folder, path in it) of each BIOS file: in the BIOS folder, or in the ROM folder of a system with ROMs to sync
-    bios_dests = {("BIOS/" + f, bios_dir, f) for s in bios_systems for f in s["bios"]["files"]}
+    bios_dests = {("BIOS/" + f, folder, f) for s in bios_systems for folder in downloads.bios_folders(s, layout_name, layout, bios_dir)
+                  for f in s["bios"]["files"]}
     bios_dests |= {("BIOS/" + f, dest_of(s), os.path.basename(f))
                    for s in bios_systems if available(s) for f in s["bios"].get("rom_files", [])}
     bios_keys = sorted({k for k, _, _ in bios_dests})

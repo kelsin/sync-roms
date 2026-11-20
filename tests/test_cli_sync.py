@@ -131,6 +131,31 @@ class SyncSmokeTest(RealDataDirGuard):
         self.assertEqual(sum("1 system(s) have no NextUI folder" in x for x in lines), 1)
         self.assertEqual(synced, [["gba"]])
 
+    def test_nextui_bios_goes_in_per_tag_folders(self):
+        """Each BIOS file lands in Bios/<TAG>/ for the system's tag and its extra tags; subpaths are kept; ROM files stay put."""
+        gba = {**SYSTEM, "folders": {"nextui": "Game Boy Advance (GBA)"}, "nextui_bios_tags": ["MGBA"],
+               "bios": {"files": ["gba_bios.bin"]}}
+        fbn = {"name": "FinalBurn Neo", "bucket": "fbneo", "folders": {"nextui": "Arcade (FBN)"},
+               "bios": {"files": ["fbneo/samples/x.zip"], "rom_files": ["neogeo.zip"]}, "games": [{"bucket": "fbneo/Game.zip"}]}
+        manifest = {"systems": [gba, fbn], "devices": [],
+                    "layouts": {"nextui": {"label": "NextUI", "roms_dir": "Roms", "bios_dir": "Bios", "bios_by_tag": True}}}
+        listing = {"gba/": {"gba/Game.zip": 5}, "fbneo/": {"fbneo/Game.zip": 5},
+                   "BIOS/": {"BIOS/gba_bios.bin": 3, "BIOS/fbneo/samples/x.zip": 4, "BIOS/neogeo.zip": 2}}
+        bios = []
+        patches = ((store, {"load_manifest": lambda names=(): manifest}),
+                   (cli.picker, {"saved_setup": lambda *a: (None, "nextui")}),
+                   (cli, {"free_space": lambda path: 10**9}),
+                   (cli.downloads, {"run_downloads": lambda todo, label, *a: (bios.extend(todo) if label == "BIOS" else None) or 0}),
+                   (cli.s3, {"list_sizes": lambda prefix, sizes=True: listing.get(prefix, {})}),
+                   (cli.ui, {"choose": lambda q, *a, **k: "n"}))
+        self.run_sync(False, patches=patches)
+        got = sorted((k, p.split(os.sep + "Bios" + os.sep)[-1] if os.sep + "Bios" + os.sep in p else "Roms/" + p.split(os.sep + "Roms" + os.sep)[-1])
+                     for k, p, _ in bios)
+        self.assertEqual(got, sorted([
+            ("BIOS/gba_bios.bin", "GBA/gba_bios.bin"), ("BIOS/gba_bios.bin", "MGBA/gba_bios.bin"),
+            ("BIOS/fbneo/samples/x.zip", "FBN/fbneo/samples/x.zip"),
+            ("BIOS/neogeo.zip", "Roms/Arcade (FBN)/neogeo.zip")]))
+
     def old_rom(self, size):
         def prepare(card):
             os.makedirs(os.path.join(card, "ROMs", "gba"))
@@ -923,6 +948,19 @@ class SyncSmokeTest(RealDataDirGuard):
         self.assertEqual(self.run_sync(False, prepare=prepare, patches=patches), 0)
         self.assertEqual(sorted(jobs), sorted([dlc, new]))
         self.assertTrue(any(q.startswith("Delete these 1") for q in asked), asked)
+
+
+class BiosFoldersTest(unittest.TestCase):
+    def test_flat_layout(self):
+        self.assertEqual(downloads.bios_folders({"folders": {"esde": "gba"}}, "esde", {}, "BIOS"), ["BIOS"])
+
+    def test_nextui_tag_and_extra_tags(self):
+        gba = {"folders": {"nextui": "Game Boy Advance (GBA)"}, "nextui_bios_tags": ["MGBA"]}
+        self.assertEqual(downloads.bios_folders(gba, "nextui", {"bios_by_tag": True}, "Bios"),
+                         [os.path.join("Bios", "GBA"), os.path.join("Bios", "MGBA")])
+
+    def test_nextui_system_without_tag(self):
+        self.assertEqual(downloads.bios_folders({"folders": {"nextui": None}}, "nextui", {"bios_by_tag": True}, "Bios"), [])
 
 
 if __name__ == "__main__":
