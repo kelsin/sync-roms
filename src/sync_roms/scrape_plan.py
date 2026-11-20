@@ -89,9 +89,9 @@ KNULLI_MEDIA = (
 KNULLI_SUFFIXES = {"image", "thumb", "marquee", "fanart", "boxback", "titleshot", "bezel", "boxart",
                    "cartridge", "mix", "wheel", "map", "video", "manual", "magazine", "music"}
 GAMELIST_FILES = {"esde": "gamelist.xml", "emudeck": "gamelist.xml", "knulli": "gamelist.xml", "onion": "miyoogamelist.xml",
-                  "allium": "gamelist.xml"}
+                  "allium": "gamelist.xml", "spruce": "miyoogamelist.xml"}
 ONION_ONLY_LISTS = ("recentlist-hidden.json", "favorite.json")  # in the root of Onion's roms folder
-ONION_LAYOUTS = ("onion", "allium")  # both keep box art in a flat Imgs/ folder
+ONION_LAYOUTS = ("onion", "allium", "spruce")  # all keep box art in a flat Imgs/ folder
 # EmuDeck's media goes on the card; its gamelists go in ES-DE's data folder on the computer running the sync
 SCRAPE_LAYOUTS = set(GAMELIST_FILES)
 EMUDECK_MEDIA = os.path.join("Emulation", "tools", "downloaded_media")
@@ -178,8 +178,8 @@ def plan_scrapes(layout_name, rom_rels, listing, meta, media_root, rom_dir, pres
         elif layout_name in ONION_LAYOUTS:
             if "/" in rom:  # Imgs is flat and the gamelist only lists the folder's own files
                 continue
-            # Onion's miyoogamelist.xml takes name and image only; Allium's gamelist.xml also reads the rest
-            keep = ("name",) if layout_name == "onion" else ("name", "developer", "publisher", "genre", "rating", "releasedate")
+            # Onion's and Spruce's miyoogamelist.xml take name and image only; Allium's gamelist.xml also reads the rest
+            keep = ("name",) if layout_name != "allium" else ("name", "developer", "publisher", "genre", "rating", "releasedate")
             tags = {k: v for k, v in tags.items() if k in keep}
             if layout_name == "allium":  # Allium fails to parse the whole list if a <game> has no <name>
                 tags.setdefault("name", base)
@@ -431,7 +431,7 @@ def stale_media(layout_name, systems, roms_dir, es_dir, base=None):
             stale += [full for rel, full in walk_files(base) if os.path.splitext(os.path.basename(rel))[0] not in stems] \
                 if cardfs.is_dir(base) else []
             # the other Onion-family firmware's gamelist, once this layout's own has replaced it
-            other = GAMELIST_FILES["allium" if layout_name == "onion" else "onion"]
+            other = GAMELIST_FILES["onion" if layout_name == "allium" else "allium"]
             if cardfs.exists(os.path.join(rom_dir, GAMELIST_FILES[layout_name])) \
                     and cardfs.exists(os.path.join(rom_dir, other)):
                 stale.append(os.path.join(rom_dir, other))

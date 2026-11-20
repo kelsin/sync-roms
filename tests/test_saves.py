@@ -14,9 +14,9 @@ from sync_roms import commands, picker, saves, store, ui  # noqa: E402
 
 LAYOUTS = store.repo_json("layouts")
 SYSTEMS = [{"bucket": "gba", "folders": {"onion": "GBA", "knulli": "gba", "esde": "gba", "allium": "GBA",
-                                         "emudeck": "gba"}},
+                                         "spruce": "GBA", "emudeck": "gba"}},
            {"bucket": "gb", "folders": {"onion": "GB", "knulli": "gb", "esde": "gb", "allium": "GB",
-                                        "emudeck": "gb"}},
+                                        "spruce": "GB", "emudeck": "gb"}},
            {"bucket": "none", "folders": {"onion": None, "knulli": None}}]
 
 

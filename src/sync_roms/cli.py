@@ -177,6 +177,7 @@ TOPICS = {
   knulli    saves                        <system folder>  <system folder>
   onion     Saves/CurrentProfile         saves/<core>     states/<core>
   allium    Saves/CurrentProfile         saves/<core>     states/<core>
+  spruce    Saves                        saves            states
   emudeck   Emulation/saves/retroarch    saves            states
 
   --retroarch DIR   read or write that folder instead of the card's RetroArch folder: a copy of Android's internal
