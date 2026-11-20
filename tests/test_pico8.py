@@ -64,6 +64,17 @@ class Pico8(helpers.StorageDir):
         self.run_setup("knulli")
         self.assertFalse(os.path.exists(self.card_path("roms", "pico8", NEW)))
 
+    def test_newer_zip_replaces_old(self):
+        self.put(f"os/pico8/{NEW}")
+        old = self.card_path("roms", "pico8", OLD)
+        os.makedirs(os.path.dirname(old))
+        open(old, "wb").close()
+        store.update_card("c", pico8=OLD)
+        self.run_setup("knulli")
+        self.assertFalse(os.path.exists(old))
+        self.assertTrue(os.path.isfile(self.card_path("roms", "pico8", NEW)))
+        self.assertEqual(self.recorded(), NEW)
+
     def test_muos_card_skips_pico8_with_a_warning(self):
         self.put(f"os/pico8/{NEW}", zip_bytes())
         err = io.StringIO()

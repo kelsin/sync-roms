@@ -310,6 +310,9 @@ def run(args):
     usersettings.ensure_bucket()
     listing = inventory.files(PREFIX)
     available = [f for f in FIRMWARES if images(listing, f)]
+    if not available:
+        ui.failure(ui.red("❌ no Knulli or muOS images in storage's os/"))
+        return 1
     if len(available) > 1:
         i = picker.filter_list("🧩 Which firmware?", [FIRMWARES[f] for f in available],
                                hint="/ filter · j/k move · Enter continue · Esc quit")
@@ -317,10 +320,7 @@ def run(args):
             return 0
         firmware = available[i]
     else:
-        firmware = available[0] if available else "knulli"
-    if not available:
-        ui.failure(ui.red(f"❌ no {FIRMWARES[firmware]} images in storage's os/"))
-        return 1
+        firmware = available[0]
     devices = devices_for(store.repo_json("devices"), firmware)
     i = picker.filter_list("🎯 Which device?", [d["name"] for d in devices],
                            hint="/ filter · j/k move · Enter continue · Esc quit")

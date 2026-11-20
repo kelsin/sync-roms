@@ -414,7 +414,7 @@ class Run(helpers.StorageDir):
     def test_no_images(self):
         os.remove(os.path.join(self.root, IMAGE))
         self.assertEqual(self.flash(), 1)
-        self.assertIn("no Knulli images", self.out)
+        self.assertIn("no Knulli or muOS images", self.out)
 
     def test_both_firmwares_ask_which(self):
         self.put("os/muos-banana-20260101.img.gz", gzip.compress(b"img"))

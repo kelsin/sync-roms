@@ -31,7 +31,7 @@ def newest_zip():
 
 def _path(base, layout_name, name):
     kind, template = TARGETS[layout_name]
-    return kind, os.path.join(base, *template.format(name=name, stem=name[:-4] if name.endswith(".zip") else name).split("/"))
+    return kind, os.path.join(base, *template.format(name=name).split("/"))
 
 
 def _extract(key, size, folder):
