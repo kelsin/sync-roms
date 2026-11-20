@@ -257,6 +257,24 @@ class TargetTest(unittest.TestCase):
                     system=system["folders"][name], core="Core").split("/"))
                 self.assertEqual(got, want)
 
+    def test_tag_template(self):
+        layout = {"retroarch": {"dir": "", "saves": "Saves/{tag}", "states": ".userdata/shared/{tag}-{core}"}}
+        system = {"folders": {"nextui": "Game Boy (GB)"}}
+        self.assertEqual(saves.target_dir("/c", "nextui", layout, system, "save", None), "/c/Saves/GB")
+        self.assertEqual(saves.target_dir("/c", "nextui", layout, system, "state", "gambatte"),
+                         "/c/.userdata/shared/GB-gambatte")
+        with self.assertRaises(ValueError):
+            saves.target_dir("/c", "nextui", layout, {"folders": {"nextui": None}}, "save", None)
+        with self.assertRaises(ValueError):
+            saves.target_dir("/c", "nextui", layout, {"folders": {"nextui": "ARCADE"}}, "save", None)
+
+    def test_tag_folders_scanned_once_per_folder(self):
+        systems = [{"bucket": "gb", "folders": {"nextui": "Game Boy (GB)"}},
+                   {"bucket": "gbc", "folders": {"nextui": "Game Boy Color (GBC)"}},
+                   {"bucket": "x", "folders": {"nextui": None}}]
+        got = saves._folders("/c", "Saves/{tag}", systems, "nextui")
+        self.assertEqual(got, [("/c/Saves/GB", "gb", None), ("/c/Saves/GBC", "gbc", None)])
+
     def test_empty_core_is_the_parent(self):
         got = saves.target_dir("/c", "onion", LAYOUTS["onion"], SYSTEMS[0], "save", "")
         self.assertEqual(got, os.path.join("/c", "Saves", "CurrentProfile", "saves"))

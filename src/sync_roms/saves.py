@@ -66,7 +66,7 @@ def _broken_hint(paths):
 
 
 def _base(base, layout, retroarch_dir):
-    return retroarch_dir or os.path.join(base, *layout["retroarch"]["dir"].split("/"))
+    return retroarch_dir or os.path.join(base, *filter(None, layout["retroarch"]["dir"].split("/")))
 
 
 def rom_stems(base, layout_name, layout, systems):
@@ -98,6 +98,9 @@ def _folders(root, template, systems, layout_name):
         # a folder shared by several systems is scanned once, for the first in systems order
         return [(os.path.join(root, *template.format(system=s["folders"][layout_name]).split("/")),
                  s["bucket"], None) for s in systems if s["folders"].get(layout_name)]
+    if "{tag}" in template:
+        return [(os.path.join(root, *template.format(tag=store.folder_tag(s["folders"].get(layout_name))).split("/")),
+                 s["bucket"], None) for s in systems if store.folder_tag(s["folders"].get(layout_name))]
     return [(os.path.join(root, *template.split("/")), None, None)]
 
 
@@ -191,7 +194,10 @@ def target_dir(base, layout_name, layout, system, kind, core, retroarch_dir=None
     folder = system["folders"].get(layout_name)
     if "{system}" in template and not folder:
         raise ValueError("system has no folder in this layout")
-    rel = template.format(system=folder, core=core)  # core "": the {core} parent (sort by core off)
+    tag = store.folder_tag(folder)
+    if "{tag}" in template and not tag:
+        raise ValueError("system has no tag in this layout")
+    rel = template.format(system=folder, core=core, tag=tag)  # core "": the {core} parent (sort by core off)
     return os.path.join(_base(base, layout, retroarch_dir), *[p for p in rel.split("/") if p])
 
 

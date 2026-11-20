@@ -27,6 +27,13 @@ def touch(root, rel, size=1):
     helpers.touch(os.path.join(root, *rel.split("/")), b"x" * size)
 
 
+class FolderTagTest(unittest.TestCase):
+    def test_folder_tag(self):
+        for folder, want in (("Game Boy (GB)", "GB"), ("Arcade (FBN)", "FBN"), ("ARCADE", None), (None, None),
+                             ("Neo Geo (neogeo)", None)):
+            self.assertEqual(store.folder_tag(folder), want, folder)
+
+
 class GuessSystemTest(unittest.TestCase):
     def guess(self, folder):
         i = store.guess_system(SYSTEMS, folder)
