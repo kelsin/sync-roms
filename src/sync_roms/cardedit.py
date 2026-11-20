@@ -12,6 +12,7 @@ CLEAR_KEY = "c"
 CLEAR_ALL_KEY = "D"
 COLLECTIONS_KEY = "l"
 SURPRISE_KEY = "S"
+THEME_KEY = "T"
 KEEP_KEY = "K"
 PAST_SURPRISE_KEY = "p"
 META_KEY = "m"
@@ -29,6 +30,7 @@ LIST_KEYS = [("Enter", "the system's games"), ("f", "full system: every file in 
              ("a", "every game across this card's systems"),
              ("s", "a set's games across this card's systems"), ("l", "collections on this card"),
              ("S", "Surprise menu: turn it on or off, or pick its systems"),
+             ("T", "theme and collections menu: turn the Art Book Next theme or the custom collections on or off"),
              ("D", "clear every pick, full system and set from the card")]
 KEEP_HINT = " · K keep card files"
 KEEP_KEYS = [("K", "pick every card file that matches a storage game")]
@@ -314,7 +316,7 @@ def edit_card(name, setup=None, to_fetch=None, card_match=None):
         on = surprise.enabled(store.load_cards().get(name))
         i = picker.filter_list(f"💳 {name} — its systems (⭐ for the device) · 🎁 Surprise {'on' if on else 'off'}",
                                labels, extras=extras, cursor=pos,
-                               hotkeys=(FULL_KEY, ALL_KEY, SET_KEY, COLLECTIONS_KEY, SURPRISE_KEY, CLEAR_ALL_KEY,
+                               hotkeys=(FULL_KEY, ALL_KEY, SET_KEY, COLLECTIONS_KEY, SURPRISE_KEY, THEME_KEY, CLEAR_ALL_KEY,
                                         *((KEEP_KEY,) if card_match else ())),
                                hint=LIST_HINT + (KEEP_HINT if card_match else ""),
                                key_help=LIST_KEYS + (KEEP_KEYS if card_match else []),
@@ -343,6 +345,9 @@ def edit_card(name, setup=None, to_fetch=None, card_match=None):
                 changed = ALL
             elif key == SURPRISE_KEY:
                 surprise_menu(name, catalog["systems"], playable)
+                changed = ALL
+            elif key == THEME_KEY:
+                theme_menu(name)
                 changed = ALL
             elif key == KEEP_KEY:
                 keep_card_files(name, setup, systems, card_match)
@@ -397,6 +402,28 @@ def surprise_menu(name, systems, playable):
         pick_surprise_systems(systems)
     elif i == 2:
         pick_card_surprise_systems(name, playable)
+
+
+def theme_menu(name):
+    """T in the system list: turn the card's Art Book Next theme (with its art) or its custom collections on or off."""
+    entry = store.load_cards().get(name)
+    rows = [("theme", "🎨 Theme: install Art Book Next, select it in ES-DE and add the collections' art"),
+            ("custom_collections", "💖 Collections: write the card's collections to the frontend")]
+    i = picker.filter_list("🎨 Theme and collections", [f"{label} — {'on' if store.card_flag(entry, field) else 'off'}"
+                                                      for field, label in rows])
+    if i is not None:
+        toggle_flag(name, rows[i][0])
+
+
+def toggle_flag(name, field):
+    """Switch a card's `theme` or `custom_collections` on or off (see store.set_card_flag); returns the new state."""
+    cards = store.load_cards()
+    entry = cards.get(name)
+    if not isinstance(entry, dict):
+        return store.card_flag(entry, field)
+    store.set_card_flag(entry, field, not store.card_flag(entry, field))
+    store.write_cards(cards)
+    return store.card_flag(entry, field)
 
 
 def pick_surprise_systems(systems):

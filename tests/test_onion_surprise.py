@@ -182,6 +182,12 @@ class Install(helpers.StorageDir):
         self.run_install()
         self.assertEqual((self.failures, os.listdir(self.card)), (0, []))
 
+    def test_collections_off_installs_no_app(self):
+        self.put(f"os/onion/{NAME}", app_zip(GOOD))
+        store.update_card("c", custom_collections=False)
+        self.run_install()
+        self.assertEqual((self.failures, os.listdir(self.card)), (0, []))
+
     def test_dry_run(self):
         self.put(f"os/onion/{NAME}", app_zip(GOOD))
         out = self.run_install(dry_run=True)

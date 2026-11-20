@@ -556,14 +556,24 @@ class CardSizeTest(Cmd):
             text = self.run_cmd("cards", "list")[1]
         self.assertEqual(rows, {"SD": (1_500_000_000, True, 1, 2), "SD2": (0, True, 0, 0)})
         self.assertIn("1.5 GB / 512 GB", text)
-        self.assertEqual(text.splitlines(), ["SD   full  esde  1.5 GB / 512 GB  1 full system   2 games  🎁",
-                                             "SD2  full  esde     0 B used      0 full systems  0 games  🎁"])
+        self.assertEqual(text.splitlines(), ["SD   full  esde  1.5 GB / 512 GB  1 full system   2 games  🎁🎨💖",
+                                             "SD2  full  esde     0 B used      0 full systems  0 games  🎁🎨💖"])
         with mock.patch.object(inventory, "cached", lambda p: None):
             lines = self.run_cmd("cards", "list")[1].splitlines()
-        self.assertEqual(lines[0], "SD   full  esde    * / 512 GB  1 full system   2 games  🎁")
-        self.assertEqual(lines[1], "SD2  full  esde  0 B used      0 full systems  0 games  🎁")
+        self.assertEqual(lines[0], "SD   full  esde    * / 512 GB  1 full system   2 games  🎁🎨💖")
+        self.assertEqual(lines[1], "SD2  full  esde  0 B used      0 full systems  0 games  🎁🎨💖")
         self.assertIn("* Not sized", lines[3])
         self.assertIn("sync-roms cache update", lines[4])
+
+    def test_list_shows_theme_and_collections_off(self):
+        self.run_cmd("cards", "new", "SD", "--device", "full", "--layout", "esde")
+        cards = store.load_cards()
+        store.set_card_flag(cards["SD"], "theme", False)
+        store.set_card_flag(cards["SD"], "custom_collections", False)
+        store.write_cards(cards)
+        row = json.loads(self.run_cmd("cards", "list", "--json")[1])[0]
+        self.assertEqual((row["theme"], row["collections"]), (False, False))
+        self.assertTrue(self.run_cmd("cards", "list")[1].rstrip().endswith("🎁"))
 
     def test_bad_size_exits_2(self):
         self.assertEqual(self.run_cmd("cards", "new", "SD", "--device", "full", "--layout", "esde", "--size", "big")[0], 2)

@@ -257,6 +257,15 @@ class Flow(DataDir):
         self.assertFalse(cardedit.toggle_surprise("c"))
         self.assertNotIn("surprises", self.read("cards.json")["c"])
 
+    def test_t_turns_theme_and_collections_off_and_on(self):
+        self.card(size="1 GB")
+        calls = self.run_card(returns((cardedit.THEME_KEY, 0)), returns(0), returns((cardedit.THEME_KEY, 0)),
+                              returns(1), returns((cardedit.THEME_KEY, 0)), returns(0), returns(None))
+        self.assertIn("— on", calls[1][1][0])
+        self.assertIn("— off", calls[3][1][0])  # the theme, turned off by the first menu
+        self.assertIs(self.read("cards.json")["c"]["custom_collections"], False)
+        self.assertNotIn("theme", self.read("cards.json")["c"])  # the last menu turned it back on: on is not stored
+
     def test_a_text_collections_field_is_not_split_into_letters(self):
         self.favs()
         self.card(collections="favs")

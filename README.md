@@ -582,7 +582,7 @@ sync-roms --edit
    red above (or over). Opened from a sync, it also shows how much of the card's ROMs aren't on it yet
    (`⬇️  … to download`). Sizes come from the storage cache (see [Storage cache](#storage-cache)); without one they show
    `…` and the total says "not sized". `/` filters, `Enter` opens a system, `l` adds a collection to the card (each shows how many of its games are playable on the card's device, and `Space`/`Enter` toggles the whole collection), `f` makes it a full system (every file in its folder; `f` again brings the
-   game list back), `S` opens a [Surprise](#surprise) menu: turn it on or off for the card (the title says which), or pick the systems it may use on every card. Opened from a sync, `K` picks, in every system that isn't a full one, the files already on the card that match a storage game (names compared ignoring case), so a sync keeps them. Games save to `cards.json` as you leave a
+   game list back), `S` opens a [Surprise](#surprise) menu: turn it on or off for the card (the title says which), or pick the systems it may use on every card. `T` opens a menu to turn the card's theme (🎨) and custom collections (💖) on or off. Opened from a sync, `K` picks, in every system that isn't a full one, the files already on the card that match a storage game (names compared ignoring case), so a sync keeps them. Games save to `cards.json` as you leave a
    system (the previous file is kept as `cards.json.bak`). `Esc` goes back to the menu.
 2. A system shows every file in its storage folder. `✅` is synced, `⬜` is not; a 📦 next to a game says a set the
    card references syncs it (switching it off excludes it from that set on this card). `/` searches, `Space` (or `Tab`)
@@ -652,6 +652,12 @@ its own in the system carousel with that art and a logo of its name, drawn with 
 Open Font License: `OFL.txt` there). The Surprise collection always gets the gift-box art. A collection named like a
 system or one of the frontend's own collections gets no art, and a name the font can't draw (accents are dropped first)
 gets no logo, so the frontend shows it as text.
+
+Two per-card settings, both on by default and shown as 🎨 and 💖 next to 🎁 in `cards list` (`T` in the card editor
+turns them off). With `"theme": false` in `cards.json` a sync doesn't copy Art Book Next, doesn't select it in ES-DE or
+Knulli and adds no collection art (Surprise's included). With `"custom_collections": false` it writes no collections to the
+frontend, Surprise's included (and, on Onion, no Surprise app), and removes the ones it wrote before; the games
+themselves still sync, Surprise's too.
 
 - **ES-DE** (when `Theme` in `es_settings.xml` is `art-book-next-es-de`): ES-DE on Android keeps downloaded themes off
   the card, so sync copies the theme from a GitHub archive of it kept in storage (`os/esde/themes/`, about 200 MB, and
