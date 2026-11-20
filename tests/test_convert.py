@@ -441,11 +441,11 @@ class ConvertCommandTest(unittest.TestCase):
         touch(os.path.join(self.base, "Roms", "Game Boy Advance (GBA)", "Game.zip"))
         touch(os.path.join(self.base, "Roms", "Game Boy Advance (GBA)", ".media", "Game.png"))
         for f in ("gamelist.xml", "images/a.png", "videos/a.mp4"):
-            touch(os.path.join(self.base, "Roms", "gb", f))
+            touch(os.path.join(self.base, "roms", "gb", f))
         self.assertEqual(self.run_clean(dry_run=True), 0)
-        self.assertTrue(os.path.exists(os.path.join(self.base, "Roms", "gb", "images")))
+        self.assertTrue(os.path.exists(os.path.join(self.base, "roms", "gb", "images")))
         self.assertEqual(self.run_clean(), 0)
-        self.assertFalse(os.path.exists(os.path.join(self.base, "Roms", "gb")))
+        self.assertFalse(os.path.exists(os.path.join(self.base, "roms", "gb")))
         self.assertTrue(os.path.exists(os.path.join(self.base, "Roms", "Game Boy Advance (GBA)", ".media", "Game.png")))
         self.assertTrue(self.moved())
 
