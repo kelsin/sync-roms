@@ -6,10 +6,11 @@ During sync, files already on the card that aren't in the card's picks are offer
 ## Goals
 - `k` on the system list scans every system's ROM folder on the card and picks each file that matches a storage key (path compared as `downloads.find_extras` does: `rom_rel`, case and Unicode form left out).
 - Skips full systems and games already synced (direct pick or set) and excluded ones stay excluded-aware: an excluded match is un-excluded and picked, since the user is asking to keep it.
-- Reports per system how many were added and how many card files matched nothing (those stay deletions).
+- Reports how many card files were picked in how many systems. (An unmatched-files count was dropped: it can't agree with `find_extras`; the delete prompt lists the real extras.)
 - Saves through `CardPicks`; the list recounts sizes (`changed = ALL`).
 
 ## Non-goals
+- Standalone `--edit`: no card path there, so `k` appears only in the editor opened by sync.
 - No change to the delete prompt or `--no-delete`.
 - No new data format.
 
@@ -18,4 +19,4 @@ During sync, files already on the card that aren't in the card's picks are offer
 2. An "add these instead" answer in the delete prompt (declined).
 
 ## Left to the builder
-Where the card's ROM folder paths come from in `edit_card` (it must work when editing from a sync and standalone), multi-disc keys (`disc_dir`), and the hint/help text.
+Multi-disc keys (`disc_dir`), and the hint/help text.
