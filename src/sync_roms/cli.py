@@ -11,7 +11,7 @@ from concurrent.futures import ThreadPoolExecutor
 from botocore.exceptions import BotoCoreError, ClientError, NoCredentialsError
 
 from . import __version__, budget, cardedit, cardfs, clean, commands, downloads, drivers, edit, external, frontend, inventory, m3u, mirroring, picker, runtime, s3, scrape_plan, store
-from . import onion_surprise, pico8, surprise, themeart, ui, usersettings, vita
+from . import muos_collections, onion_surprise, pico8, surprise, themeart, ui, usersettings, vita
 from . import collections as colls
 
 
@@ -82,7 +82,7 @@ TOPICS = {
   sync-roms games remove SYSTEM KEY... --card NAME [-n]
   sync-roms games full SYSTEM on|off --card NAME [-n]
   sync-roms games sets list | add ID | remove ID --card NAME [-n]
-  sync-roms games export --card NAME        one SYSTEM/file per line (full systems as 'SYSTEM/*'), then '@collections ID', '@frontend_collections NAME', '@drivers NAME', '@pico8 ZIP', '@surprise true|false' (only when it differs from the layout's default: on for esde/knulli/emudeck, off for onion/allium) and '@surprises SYSTEM/file' lines
+  sync-roms games export --card NAME        one SYSTEM/file per line (full systems as 'SYSTEM/*'), then '@collections ID', '@frontend_collections NAME', '@drivers NAME', '@pico8 ZIP', '@surprise true|false' (only when it differs from the layout's default: on for esde/knulli/emudeck/muos, off for onion/allium) and '@surprises SYSTEM/file' lines
   sync-roms games import FILE --card NAME [-n]            add the games in such a file; '@' lines replace the card's collections / frontend_collections / drivers / surprises and set pico8, and set Surprise on or off
 
   --card NAME is required: a card's games are saved in ~/.sync-roms/cards.json with the previous version kept as .bak. Removing only drops a game from the list.
@@ -1212,7 +1212,7 @@ def sync_card(args):
 
     def frontend_step(dry_run):
         """Write the card's collections as the frontend's custom collections (ES-DE, Knulli, EmuDeck's ES-DE)."""
-        if layout_name not in frontend.FRONTEND_LAYOUTS:
+        if layout_name not in frontend.FRONTEND_LAYOUTS and layout_name != "muos":
             return
         entry = store.load_cards().get(card)
         entry = entry if isinstance(entry, dict) else {}
@@ -1230,6 +1230,10 @@ def sync_card(args):
         owned = names("frontend_collections")
         if not card_colls and not owned:
             return
+        mount = muos_collections.mount(entry) if layout_name == "muos" else None
+        if layout_name == "muos" and mount is None:
+            ui.warn("muos_storage must be sd1 or sd2: collections skipped")
+            return
         if esde_problem:
             skipped()
             return
@@ -1239,20 +1243,32 @@ def sync_card(args):
         def on_card(s, rel):
             return (s["bucket"], rel) in coming or cardfs.exists(os.path.join(dest_of(s), rel))
 
-        wanted = frontend.wanted_collections(layout_name, card_colls, systems, on_card)
-        plan = frontend.plan_collections(layout_name, base, wanted, owned)
+        if layout_name == "muos":
+            plan = muos_collections.plan(base, muos_collections.wanted(card_colls, systems, on_card, mount), owned)
+        else:
+            wanted = frontend.wanted_collections(layout_name, card_colls, systems, on_card)
+            plan = frontend.plan_collections(layout_name, base, wanted, owned)
         arts = {frontend.safe_name(c["name"]): c["art"] for c in card_colls if c.get("art")}
         if surprise.COLLECTION in plan["enable"]:
             arts[surprise.COLLECTION] = themeart.SURPRISE_ART
         arts = {name: art for name, art in arts.items() if name in plan["enable"]}
+        if layout_name == "muos":  # the art is wired separately
+            arts = {}
         if dry_run:
-            frontend.describe_collections(plan, layout_name)
+            if layout_name == "muos":
+                muos_collections.describe(plan)
+            else:
+                frontend.describe_collections(plan, layout_name)
             if arts:
                 themeart.describe(layout_name, base, arts)
             return
         for warning in plan["warnings"]:
             ui.warn(warning)
-        listed = frontend.apply_collections(plan, layout_name, base)
+        if layout_name == "muos":
+            muos_collections.apply(plan)
+            listed = False
+        else:
+            listed = frontend.apply_collections(plan, layout_name, base)
         if plan["owned"] != owned:
             store.update_card(card, frontend_collections=plan["owned"])
         art = bool(arts) and themeart.install(layout_name, base, arts)

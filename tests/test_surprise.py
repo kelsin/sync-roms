@@ -246,6 +246,9 @@ class Enabled(unittest.TestCase):
         self.assertFalse(surprise.enabled({"layout": "allium"}))
         self.assertTrue(surprise.enabled({}))  # a card not synced yet has no layout
 
+    def test_surprise_defaults_on_for_muos(self):
+        self.assertTrue(surprise.default_on({"layout": "muos"}))
+
     def test_the_field_wins(self):
         self.assertFalse(surprise.enabled({"layout": "esde", "surprise": False}))
         self.assertFalse(surprise.enabled({"layout": "onion", "surprise": False}))
