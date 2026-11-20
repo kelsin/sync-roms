@@ -5,8 +5,8 @@ from xml.sax import saxutils
 
 from . import cardfs, downloads, store, ui
 
-FRONTEND_LAYOUTS = {"esde", "knulli", "emudeck"}
-_LABELS = {"esde": "ES-DE", "knulli": "Knulli", "emudeck": "EmuDeck"}
+FRONTEND_LAYOUTS = {"esde", "knulli", "emudeck", "nextui"}
+_LABELS = {"esde": "ES-DE", "knulli": "Knulli", "emudeck": "EmuDeck", "nextui": "NextUI"}
 ESDE_LAYOUTS = ("esde", "emudeck")  # layouts whose frontend is ES-DE
 _DROPPED = '*",./:;<>\\|\n\t\r'  # characters ES-DE rejects in a collection name
 _UNESCAPE = {"&quot;": '"', "&apos;": "'"}
@@ -32,6 +32,8 @@ def _root(layout_name, base):
 
 
 def collection_path(layout_name, base, name):
+    if layout_name == "nextui":  # one ROM path per line; no settings file lists it
+        return os.path.join(base, "Collections", f"{name}.txt")
     return os.path.join(_root(layout_name, base), "collections", f"custom-{name}.cfg")
 
 
@@ -42,6 +44,8 @@ def settings_path(layout_name, base):
 
 
 def collection_line(layout_name, folder, rel):
+    if layout_name == "nextui":
+        return f"/Roms/{folder}/{rel}"
     return f"%ROMPATH%/{folder}/{rel}" if layout_name in ESDE_LAYOUTS else f"./roms/{folder}/{rel}"
 
 
@@ -150,14 +154,16 @@ def apply_collections(plan, layout_name, base):
             os.remove(path)
         except FileNotFoundError:
             pass
-    if not (plan["enable"] or plan["disable"]):
+    if layout_name == "nextui" or not (plan["enable"] or plan["disable"]):
         return False
     path = settings_path(layout_name, base)
     return cardfs.write_text(path, set_enabled(cardfs.text(path), layout_name, plan["enable"], plan["disable"]))
 
 
-def wanted_collections(layout_name, collections, systems, on_card):
-    """{safe name: lines} of the collections' games that are on the card, on the systems it syncs."""
+def wanted_collections(layout_name, collections, systems, on_card, folders=None):
+    """{safe name: lines} of the collections' games that are on the card, on the systems it syncs.
+
+    folders: {key: its game's folder} (m3u.game_folders), for layouts that keep each disc game in a folder of its own."""
     by_bucket = {s["bucket"]: s for s in systems}
     wanted = {}
     for collection in collections:
@@ -165,9 +171,9 @@ def wanted_collections(layout_name, collections, systems, on_card):
         lines = []
         for game in collection["games"]:
             system = by_bucket.get(game["system"])
-            if not system:
+            if not system or not system["folders"].get(layout_name):
                 continue
-            rel = downloads.rom_rel(game["bucket"])
+            rel = downloads.rom_rel(game["bucket"], folders=folders)
             if on_card(system, rel):
                 lines.append(collection_line(layout_name, system["folders"][layout_name], rel))
         if name and lines:
@@ -182,10 +188,11 @@ def describe_collections(plan, layout_name):
         print(ui.dim(f"💖 would write {os.path.basename(path)} ({text.count(chr(10))} game(s))"))
     for path in plan["deletes"]:
         print(ui.dim(f"💖 would delete {os.path.basename(path)}"))
-    settings = os.path.basename(settings_path(layout_name, ""))
-    if plan["enable"]:
-        print(ui.dim(f"💖 would enable in {settings}: {', '.join(sorted(plan['enable']))}"))
-    if plan["disable"]:
-        print(ui.dim(f"💖 would unlist in {settings}: {', '.join(sorted(plan['disable']))}"))
+    if layout_name != "nextui":
+        settings = os.path.basename(settings_path(layout_name, ""))
+        if plan["enable"]:
+            print(ui.dim(f"💖 would enable in {settings}: {', '.join(sorted(plan['enable']))}"))
+        if plan["disable"]:
+            print(ui.dim(f"💖 would unlist in {settings}: {', '.join(sorted(plan['disable']))}"))
     for warning in plan["warnings"]:
         ui.warn(warning)

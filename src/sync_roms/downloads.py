@@ -15,14 +15,17 @@ from . import cardfs, external, inventory, m3u, runtime, s3, store, ui
 STALE_HINT = " (not in storage any more: run sync-roms cache update)"  # a file the cache lists is gone from the storage folder
 
 
-def rom_rel(key, disc_dir=None, discs=()):
+def rom_rel(key, disc_dir=None, discs=(), folders=None):
     """A ROM's path inside its system folder: the bucket key without its system.
 
     disc_dir: the folder the layout keeps multi-disc games' discs in (those keys are in discs) beside their playlist.
+    folders: {key: its game's folder} (m3u.game_folders) for layouts that keep each disc game in a folder of its own.
     """
     rel = key.split("/", 1)[1]
     if disc_dir and key in discs and "/" not in rel:
         return disc_dir + "/" + rel
+    if folders and key in folders and "/" not in rel:
+        return folders[key] + "/" + rel
     return rel
 
 
@@ -41,6 +44,16 @@ def is_current(path, size, disc_dir=None):
         except OSError:
             return False
     return False
+
+
+def bios_folders(system, layout_name, layout, bios_dir):
+    """The card folders a system's BIOS files go in: the BIOS folder, or for layouts that sort BIOS by tag, its tag folders."""
+    if not layout.get("bios_by_tag"):
+        return [bios_dir]
+    tag = store.folder_tag(system["folders"].get(layout_name))
+    if not tag:
+        return []
+    return [os.path.join(bios_dir, t) for t in [tag, *system.get("nextui_bios_tags", [])]]
 
 
 def with_sizes(jobs):
@@ -250,16 +263,17 @@ def name_key(path):
     return unicodedata.normalize("NFC", os.path.normpath(path)).casefold()
 
 
-def find_extras(dest, wanted_keys, skip_db=False, disc_dir=None, discs=(), keep=(), renames=None):
+def find_extras(dest, wanted_keys, skip_db=False, disc_dir=None, discs=(), keep=(), renames=None, folders=None):
     """Local files under dest that aren't in the system's ROM list (frontend files and dotfiles are ignored;
     a .psvita file is kept while its .zip is listed).
 
     disc_dir: the layout's folder for multi-disc games' discs (discs: their keys); its files are checked too.
+    folders: {key: its game's folder} (m3u.game_folders), for layouts that keep each disc game in a folder of its own.
     keep: paths inside dest that are expected too (BIOS files that go in the ROM folder).
     renames: if given, gets (path, storage's spelling) for each file that is an expected one spelled differently (case,
     Unicode form). Such a file is never an extra, unless the expected spelling is on the card too (a case-sensitive card).
     """
-    rels = [rom_rel(k, disc_dir, discs) for k in wanted_keys]
+    rels = [rom_rel(k, disc_dir, discs, folders) for k in wanted_keys]
     expected = {os.path.normpath(r) for r in rels} | {os.path.normpath(r) for r in keep}
     spellings = defaultdict(list)  # {name_key: the expected paths with it}
     for rel in expected:

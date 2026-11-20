@@ -75,6 +75,31 @@ def file_groups(keys):
     return out
 
 
+def game_folders(keys):
+    """{bucket key: its game's folder name} for layouts that keep each disc game in a folder of its own: a multi-disc
+    game's playlist and discs (and the .bin files of its .cue discs) get the playlist's stem, a .cue with .bin files and
+    no playlist the cue's stem. Every other key is left out."""
+    folders = defaultdict(set)
+    for k in keys:
+        folders[posixpath.dirname(k)].add(posixpath.basename(k))
+    out = {}
+    for d, names in folders.items():
+        bins = [n for n in names if n.lower().endswith(".bin")]
+
+        def with_bins(f):
+            stem = os.path.splitext(f)[0]
+            tracks = [b for b in bins if os.path.splitext(b)[0] == stem or b.startswith(stem + " (Track ")]
+            return [f] + tracks if f.lower().endswith(".cue") else [f]
+        for m3u, discs in disc_groups(names).items():
+            for f in ([m3u] if m3u in names else []) + [x for disc in discs for x in with_bins(disc)]:
+                out[posixpath.join(d, f)] = os.path.splitext(m3u)[0]
+        for f in names:
+            if f.lower().endswith(".cue") and posixpath.join(d, f) not in out and len(with_bins(f)) > 1:
+                for x in with_bins(f):
+                    out[posixpath.join(d, x)] = os.path.splitext(f)[0]
+    return out
+
+
 def prefixed_playlist(data, dest, disc_dir, coming=lambda path: False):
     """A playlist's bytes with disc_dir/ put before each bare disc name whose file is in dest/disc_dir (or that
     coming(path) says a sync is about to write); every other byte stays as it is."""

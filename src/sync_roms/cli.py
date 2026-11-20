@@ -23,7 +23,7 @@ SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "collections": ("edit", "edit your collections of favourite games (saved in ~/.sync-roms/collections/)"),
     "themes": ("update", "copy the latest Art Book Next for ES-DE from GitHub into storage"),
     "download": ("pico8", "add the PICO-8 BBS Featured carts storage doesn't have, and newer revisions of those it has"),
-    "flash": ("", "write a Knulli image from storage's os/ to an SD card and verify it"),
+    "flash": ("", "write a Knulli image from storage's os/ to an SD card"),
     "cards": ("[edit|list|new|set|rename|delete|copy|export|import]", "list and manage the cards you've synced"),
     "saves": ("stash|apply [CARD] [--retroarch DIR]", "copy RetroArch saves and states off a card, or onto one"),
     "devices": ("[ID]", "list the supported devices, or one device's systems"),
@@ -82,7 +82,7 @@ TOPICS = {
   sync-roms games remove SYSTEM KEY... --card NAME [-n]
   sync-roms games full SYSTEM on|off --card NAME [-n]
   sync-roms games sets list | add ID | remove ID --card NAME [-n]
-  sync-roms games export --card NAME        one SYSTEM/file per line (full systems as 'SYSTEM/*'), then '@collections ID', '@frontend_collections NAME', '@drivers NAME', '@pico8 ZIP', '@surprise true|false' (only when it differs from the layout's default: on for esde/knulli/emudeck, off for onion/allium) and '@surprises SYSTEM/file' lines
+  sync-roms games export --card NAME        one SYSTEM/file per line (full systems as 'SYSTEM/*'), then '@collections ID', '@frontend_collections NAME', '@drivers NAME', '@pico8 ZIP', '@surprise true|false' (only when it differs from the layout's default: on for esde/knulli/emudeck/nextui/onion, off for allium) and '@surprises SYSTEM/file' lines
   sync-roms games import FILE --card NAME [-n]            add the games in such a file; '@' lines replace the card's collections / frontend_collections / drivers / surprises and set pico8, and set Surprise on or off
 
   --card NAME is required: a card's games are saved in ~/.sync-roms/cards.json with the previous version kept as .bak. Removing only drops a game from the list.
@@ -132,9 +132,8 @@ TOPICS = {
   or storage are never offered, and flash stops if it can't tell which disks those are. Type the disk id (disk4) to
   confirm: --yes never skips that. --dry-run stops there. The image is copied to a local temp folder (free space is
   checked first); right before writing, the card must still be the same disk (id, size and name). Then `sudo dd`
-  writes it, decompressed on the fly, with 4 MiB blocks (sudo may ask for your password before downloading, writing
-  and verifying), and the whole image is read back and its SHA-256 compared. Last, the temp folder is removed and the
-  card is ejected; after a failure it is unmounted instead, so you can retry.
+  writes it, decompressed on the fly, with 4 MiB blocks (sudo may ask for your password before downloading and
+  writing). Last, the temp folder is removed and the card is ejected; after a failure it is unmounted instead, so you can retry.
 """,
     "edit": """
   sync-roms edit                              main menu: Cards, Sets (saved to storage), Collections, Device systems; same as `games edit`
@@ -179,9 +178,13 @@ TOPICS = {
   allium    Saves/CurrentProfile         saves/<core>     states/<core>
   spruce    Saves                        saves            states
   emudeck   Emulation/saves/retroarch    saves            states
+  nextui    (card root)                  Saves/<TAG>      .userdata/shared/<TAG>-<core>   (MinUI .sav naming)
 
   --retroarch DIR   read or write that folder instead of the card's RetroArch folder: a copy of Android's internal
                     /storage/emulated/0/RetroArch for ES-DE, or the real folder EmuDeck's symlinks point to.
+  nextui: apply renames saves to MinUI's Game.gba.sav (from the card's ROM; PlayStation and saves with no ROM there keep
+  their name), stash turns .sav back into .srm. States are stashed and applied as they are, so NextUI's own state
+  names aren't converted.
   States only load in the core they were made with; .srm (and .rtc) saves usually work in any core of the system.
 """,
     "devices": """
@@ -926,6 +929,7 @@ def sync_card(args):
     device, layout_name, dirs = chosen_setup
     layout = layouts[layout_name]
     disc_dir = layout.get("disc_dir")  # multi-disc games' discs go in this hidden folder, their playlist beside it (Onion)
+    disc_folders = layout.get("disc_folders")  # each disc game goes in a folder of its own (NextUI)
     onion = layout_name in scrape_plan.ONION_LAYOUTS
     roms_dir, bios_dir = dirs
     clean_card = not args.dry_run and not args.no_clean
@@ -951,7 +955,7 @@ def sync_card(args):
 
     print("📏 Reading ROM sizes...")
     listings = {}  # {system id: {key: size}}, kept until the system's games change
-    avail, discs = {}, {}  # per system id: the keys to sync, their multi-disc keys
+    avail, discs, game_dirs = {}, {}, {}  # per system id: the keys to sync, their multi-disc keys, their game folders
 
     sized = not runtime.ROOT or inventory.current() is not None  # sizes are known up front
 
@@ -960,6 +964,9 @@ def sync_card(args):
 
     def discs_of(s):
         return discs[s["bucket"]]
+
+    def folders_of(s):
+        return game_dirs[s["bucket"]]
 
     def listing_of(s):
         """{key: size} of a system's bucket folder. From a root folder with no storage cache, names only (a share is slow
@@ -978,6 +985,7 @@ def sync_card(args):
         for s in systems:
             avail[s["bucket"]] = store.available_keys(s, listings[s["bucket"]])
             discs[s["bucket"]] = m3u.disc_keys(avail[s["bucket"]]) if disc_dir else ()
+            game_dirs[s["bucket"]] = m3u.game_folders(avail[s["bucket"]]) if disc_folders else {}
 
     fetching = {}  # {system id: {key: whether it isn't on the card yet}}: the card's files don't change while editing
 
@@ -989,11 +997,12 @@ def sync_card(args):
         if todo:
             sizes = inventory.cached(f"{bucket}/") or {}
             disc_keys = m3u.disc_keys(keys) if disc_dir else ()
+            folders = m3u.game_folders(keys) if disc_folders else None
             jobs = []
             for k in todo:
                 try:
                     path = s3.safe_join(os.path.join(roms_dir, s["folders"][layout_name]),
-                                        downloads.rom_rel(k, disc_dir, disc_keys))
+                                        downloads.rom_rel(k, disc_dir, disc_keys, folders))
                 except ValueError:
                     seen[k] = False
                     continue
@@ -1001,6 +1010,20 @@ def sync_card(args):
             need = {j[0] for j in downloads.plan_downloads(jobs, disc_dir)}
             seen.update((k, k in need) for k, _, _ in jobs)
         return {k for k in keys if seen[k]}
+
+    def card_match(s, keys):
+        """Which of keys are on the card already, for the card editor's keep key. Names match like the card does:
+        case and Unicode form left out."""
+        folder = s["folders"].get(layout_name)
+        if not folder:
+            return set()
+        dest = os.path.join(roms_dir, folder)
+        walks = list(downloads.walk_roms(dest, rename_temps=True))
+        if disc_dir:
+            walks += downloads.walk_roms(os.path.join(dest, disc_dir), rename_temps=True)
+        names = {downloads.name_key(os.path.relpath(os.path.join(root, f), dest)) for root, files in walks for f in files}
+        disc_keys = m3u.disc_keys(keys) if disc_dir else ()
+        return {k for k in keys if downloads.name_key(downloads.rom_rel(k, disc_dir, disc_keys)) in names}
 
     relist()
     interactive = not (ui.ASSUME_YES or args.json) and ui.has_terminal()
@@ -1029,7 +1052,8 @@ def sync_card(args):
 
     # surprises come in two steps: which ones to replace first (then the card editor, which shows the ones kept), and
     # the empty slots last, right before the sync, from every system the card's device supports, games picked or not
-    surprise.run_surprise(card, (device, layout_name), systems, interactive, args.dry_run, to_fetch=to_fetch)
+    surprise.run_surprise(card, (device, layout_name), systems, interactive, args.dry_run, to_fetch=to_fetch,
+                       card_match=card_match)
     if not args.dry_run:  # the step (and the card editor it opens) may have changed the card's games
         reload_changes()
     surprise.fill_surprises(card, (device, layout_name), systems, args.dry_run)
@@ -1067,7 +1091,7 @@ def sync_card(args):
         for key in wanted:
             if key in have:
                 try:
-                    rom_jobs.append((key, s3.safe_join(dest, downloads.rom_rel(key, disc_dir, disc_keys)), have[key]))
+                    rom_jobs.append((key, s3.safe_join(dest, downloads.rom_rel(key, disc_dir, disc_keys, folders_of(s))), have[key]))
                 except ValueError as e:
                     print(ui.yellow(f"  ⚠️  skipping {e}"))
             else:
@@ -1078,23 +1102,25 @@ def sync_card(args):
     chosen_ids = {s["bucket"] for s in chosen}
     dropped_dests = {os.path.join(roms_dir, s["folders"][layout_name]) for s in dropped if s["folders"].get(layout_name)}
     # a system's rom_files are BIOS files that go in its ROM folder (MAME-style BIOS zips), kept while it has ROMs to sync
-    dest_keys, dest_discs, dest_bios = defaultdict(list), defaultdict(set), defaultdict(set)
+    dest_keys, dest_discs, dest_bios, dest_folders = defaultdict(list), defaultdict(set), defaultdict(set), defaultdict(dict)
     for t in systems:
         dest_keys[dest_of(t)] += available(t)
         dest_discs[dest_of(t)].update(discs_of(t))
+        dest_folders[dest_of(t)].update(folders_of(t))
         if available(t):
             dest_bios[dest_of(t)].update(rom_bios_names(t))
     pico8_dests = {os.path.join(roms_dir, t["folders"][layout_name]) for t in systems + dropped
                    if t["bucket"] == "pico8" and t["folders"].get(layout_name)}
     cardfs.clear()  # the discs moved above, and the card editor's previews listed the card a while ago
     for dest in sorted({dest_of(s) for s in systems if s["bucket"] in chosen_ids or not available(s)} | dropped_dests):
-        extras += downloads.find_extras(dest, dest_keys[dest], onion, disc_dir, dest_discs[dest], dest_bios[dest] | (pico8.keep_in(dest, card) if dest in pico8_dests else set()), renames=renames)
+        extras += downloads.find_extras(dest, dest_keys[dest], onion, disc_dir, dest_discs[dest], dest_bios[dest] | (pico8.keep_in(dest, card) if dest in pico8_dests else set()), renames=renames, folders=dest_folders[dest])
 
     # BIOS for every system with ROMs already on the card too, even when this sync doesn't touch that system
     bios_systems = chosen + [s for s in systems if s["bucket"] not in chosen_ids
                              and downloads.has_local_files(dest_of(s), onion, rom_bios_names(s))]
     # (bucket key, folder, path in it) of each BIOS file: in the BIOS folder, or in the ROM folder of a system with ROMs to sync
-    bios_dests = {("BIOS/" + f, bios_dir, f) for s in bios_systems for f in s["bios"]["files"]}
+    bios_dests = {("BIOS/" + f, folder, f) for s in bios_systems for folder in downloads.bios_folders(s, layout_name, layout, bios_dir)
+                  for f in s["bios"]["files"]}
     bios_dests |= {("BIOS/" + f, dest_of(s), os.path.basename(f))
                    for s in bios_systems if available(s) for f in s["bios"].get("rom_files", [])}
     bios_keys = sorted({k for k, _, _ in bios_dests})
@@ -1178,6 +1204,13 @@ def sync_card(args):
             scraped["data"] = scrape_plan.load_scrape_data(chosen)
             scraped["rels"] = {s["bucket"]: [k.split("/", 1)[1] for k in available(s) if k in listings[s["bucket"]]]
                                for s in chosen}
+        if disc_folders:  # scrapes name a ROM by its storage path; a disc game is in its own folder on the card
+            moved_to = {os.path.join(dest_of(s), k.split("/", 1)[1]): os.path.join(dest_of(s), downloads.rom_rel(k, folders=folders_of(s)))
+                        for s in chosen for k in folders_of(s)}
+            found = present
+
+            def present(path):
+                return found(moved_to.get(path, path))
         plan = scrape_plan.build_scrape_plan(layout_name, chosen, scraped["data"], scraped["rels"], dest_of, es_dir, present, base,
                                              recheck=recheck)
         if esde_problem and plan["gamelists"]:
@@ -1234,13 +1267,14 @@ def sync_card(args):
         if esde_problem:
             skipped()
             return
-        coming = {(s["bucket"], downloads.rom_rel(k)) for s in chosen
+        coming = {(s["bucket"], downloads.rom_rel(k, folders=folders_of(s))) for s in chosen
                   for k in available(s) if k in listings[s["bucket"]]} if dry_run else set()
 
         def on_card(s, rel):
             return (s["bucket"], rel) in coming or cardfs.exists(os.path.join(dest_of(s), rel))
 
-        wanted = frontend.wanted_collections(layout_name, card_colls, systems, on_card)
+        wanted = frontend.wanted_collections(layout_name, card_colls, systems, on_card,
+                                             {k: d for s in systems for k, d in folders_of(s).items()})
         plan = frontend.plan_collections(layout_name, base, wanted, owned)
         arts = {frontend.safe_name(c["name"]): c["art"] for c in card_colls if c.get("art")}
         if surprise.COLLECTION in plan["enable"]:

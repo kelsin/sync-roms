@@ -73,7 +73,7 @@ class Flash(unittest.TestCase):
         self.assertEqual(flash.whole_disks({}), set())
 
 
-class WriteVerify(unittest.TestCase):
+class Write(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)
@@ -86,38 +86,11 @@ class WriteVerify(unittest.TestCase):
             patcher.start()
             self.addCleanup(patcher.stop)
 
-    def test_write_then_verify_round_trip(self):
-        size, digest, blocks = flash.write_image(self.gz, "disk9")
+    def test_write_copies_image(self):
+        size = flash.write_image(self.gz, "disk9")
         self.assertEqual(size, len(self.data))
-        self.assertEqual(digest, hashlib.sha256(self.data).hexdigest())
-        self.assertIsNone(flash.verify("disk9", size, digest, blocks))
-
-    def test_verify_ignores_bytes_past_image(self):
-        size, digest, blocks = flash.write_image(self.gz, "disk9")
-        with open(self.target, "ab") as f:
-            f.write(b"x" * 1000)
-        self.assertIsNone(flash.verify("disk9", size, digest, blocks))
-
-    def test_verify_detects_corruption(self):
-        size, digest, blocks = flash.write_image(self.gz, "disk9")
-        pos = 3 * 1024 * 1024
-        with open(self.target, "r+b") as f:
-            f.seek(pos)
-            byte = f.read(1)[0]
-            f.seek(pos)
-            f.write(bytes([byte ^ 0xFF]))
-        self.assertEqual(flash.verify("disk9", size, digest, blocks), "data differs from 0 B in")
-
-    def test_verify_short_read_is_false(self):
-        size, digest, blocks = flash.write_image(self.gz, "disk9")
-        os.truncate(self.target, size - 10)
-        self.assertIn("read back only", flash.verify("disk9", size, digest, blocks))
-
-    def test_verify_dd_failure_raises(self):
-        size, digest, blocks = flash.write_image(self.gz, "disk9")
-        with mock.patch.object(flash, "raw", lambda d: "/nonexistent-dir/x"):
-            with self.assertRaises(flash.FlashError):
-                flash.verify("disk9", size, digest, blocks)
+        with open(self.target, "rb") as f:
+            self.assertEqual(f.read(), self.data)
 
     def test_dd_failure_raises(self):
         with mock.patch.object(flash, "raw", lambda d: "/nonexistent-dir/x"):
@@ -175,15 +148,10 @@ class Run(helpers.StorageDir):
 
         def write(gz, disk, progress=None):
             self.calls.append("<write>")
-            return 3, "abc", ["abc"]
-
-        def check(disk, size, digest, blocks, progress=None):
-            self.calls.append("<verify>")
-            return None
+            return 3
 
         self.filter_list = mock.Mock(return_value=0)
         self.write_image = mock.Mock(side_effect=write)
-        self.verify = mock.Mock(side_effect=check)
         self.external_disks = mock.Mock(return_value=[CARD])
         for p in (mock.patch.object(flash, "_run", side_effect=run),
                   mock.patch.object(picker, "filter_list", self.filter_list),
@@ -193,7 +161,6 @@ class Run(helpers.StorageDir):
                   mock.patch.object(flash.sys, "platform", "darwin"),
                   mock.patch.object(usersettings, "ensure_bucket"),
                   mock.patch.object(flash, "write_image", self.write_image),
-                  mock.patch.object(flash, "verify", self.verify),
                   mock.patch.object(flash.tempfile, "mkdtemp", mkdtemp),
                   mock.patch.object(store, "repo_json", return_value=[
                       {"id": "anbernic-rg35xxh", "name": "Anbernic RG35XX H", "firmwares": ["knulli"]}])):
@@ -238,10 +205,9 @@ class Run(helpers.StorageDir):
     def test_success_order(self):
         self.assertEqual(self.flash(), 0)
         self.assertEqual(self.steps(), [SUDO, SUDO, ["diskutil", "unmountDisk", "disk4"], "<write>", ["sync"],
-                                        ["diskutil", "unmountDisk", "disk4"], SUDO, "<verify>", ["sync"],
                                         ["diskutil", "eject", "disk4"]])
         self.assert_temp_removed()
-        self.assertIn("Flashed and verified", self.out)
+        self.assertIn("Flashed", self.out)
         self.assertTrue(self.write_image.call_args.args[0].endswith(os.path.basename(IMAGE)))
 
     def test_image_labels_mark_match(self):
@@ -266,13 +232,6 @@ class Run(helpers.StorageDir):
         self.assertEqual(self.flash(), 0)
         self.assert_temp_removed()
         self.assertEqual(self.steps(), [])
-
-    def test_verify_mismatch_fails_and_unmounts(self):
-        self.verify.side_effect = lambda *a, **k: self.calls.append("<verify>") or "data differs"
-        self.assertEqual(self.flash(), 1)
-        self.assertEqual(self.steps()[-1], ["diskutil", "unmountDisk", "disk4"])
-        self.assertNotIn(["diskutil", "eject", "disk4"], self.calls)
-        self.assertIn("doesn't match the image", self.out)
 
     def test_write_error_cleans_up(self):
         self.write_image.side_effect = flash.FlashError("dd: boom")

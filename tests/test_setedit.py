@@ -523,7 +523,7 @@ class Editor(unittest.TestCase):
                 mock.patch.object(store, "folder_keys", lambda bucket: keys.get(bucket, set())), \
                 mock.patch.object(store, "load_sets", return_value=list(sets)), \
                 mock.patch.object(listedit, "stocked", lambda systems: systems), \
-                mock.patch.object(listedit, "file_counts", lambda systems: None), \
+                mock.patch.object(listedit, "file_counts", lambda systems: [[] for _ in systems]), \
                 mock.patch.object(ui, "ask", side_effect=ask) as ask, mock.patch.object(ui, "choose", return_value="s") as choose, \
                 mock.patch("builtins.print"), \
                 mock.patch.object(setedit, "save_sets", lambda before, after, found, from_fallback: saved.update(after=after)), \
@@ -537,7 +537,7 @@ class Editor(unittest.TestCase):
         self.assertEqual([g["bucket"] for g in after["old"]["games"]], ["gba/B.zip", "nes/Odd.zip"])
 
     def test_ctrl_c_keeps_the_add_games_lists_toggles_with_no_category(self):  # Genesis: E on, C off, Ctrl-C
-        reviews, after, ask = self.interrupted([0, 1, 1], [({"E.zip", "C.zip"}, KeyboardInterrupt)])
+        reviews, after, ask = self.interrupted([0, 1, 2], [({"E.zip", "C.zip"}, KeyboardInterrupt)])
         ask.assert_not_called()  # no category question
         self.assertEqual(reviews, 1)
         self.assertEqual(after["old"]["games"], [g for g in games() if g["bucket"] != "gen/C.zip"]
@@ -558,7 +558,7 @@ class Editor(unittest.TestCase):
                                                                   "files": ["gba/D2.zip"]}]}
         e = {"title": "E", "system": "gen", "bucket": "gen/E.zip"}
         d = {"title": "D", "system": "gba", "bucket": "gba/D.zip", "files": ["gba/D2.zip"]}
-        for picks, flip, added in (([0, 1, 1], {"E.zip"}, e), ([0, 2, 0], {"Game Boy Advance — D"}, d)):
+        for picks, flip, added in (([0, 1, 2], {"E.zip"}, e), ([0, 2, 0], {"Game Boy Advance — D"}, d)):
             with self.subTest(picks=picks):  # a game on, Enter, Ctrl-C at the category question
                 reviews, after, ask = self.interrupted(picks, [(flip, None)], sets=[mix], ask=KeyboardInterrupt)
                 ask.assert_called_once()
@@ -567,7 +567,7 @@ class Editor(unittest.TestCase):
 
     def test_ctrl_c_in_a_list_with_nothing_toggled_reviews_nothing(self):
         mix = {"id": "mix", "name": "Mix", "games": [games()[0]]}
-        for picks in ([0, 0], [0, 1, 1], [0, 2, 0]):
+        for picks in ([0, 0], [0, 1, 2], [0, 2, 0]):
             with self.subTest(picks=picks):
                 self.assertEqual(self.interrupted(picks, [(set(), KeyboardInterrupt)], sets=[mix])[:2], (0, None))
 
