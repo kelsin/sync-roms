@@ -76,7 +76,7 @@ def plan(base, wanted, owned):
     result = {"writes": [], "deletes": [], "enable": set(), "disable": set(), "owned": [], "warnings": []}
     for name in sorted(wanted):
         folder = os.path.join(base, COLLECTION_DIR, name)
-        if name not in owned and os.path.isdir(folder):
+        if name not in owned and _cfgs(base, name):
             result["warnings"].append(f"muOS already has a collection folder {name} that sync-roms didn't write; skipped")
             continue
         files = {os.path.join(base, rel): text for rel, text in wanted[name].items()}
@@ -103,6 +103,10 @@ def apply(plan):
         try:
             os.remove(path)
         except FileNotFoundError:
+            pass
+        try:
+            os.rmdir(os.path.dirname(path))  # only when the drop emptied it
+        except OSError:
             pass
 
 

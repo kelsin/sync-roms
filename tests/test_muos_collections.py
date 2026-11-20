@@ -58,7 +58,7 @@ class PlanTests(unittest.TestCase):
         return path
 
     def test_plan_skips_an_unowned_existing_collection_folder(self):
-        self.folder("Fav")
+        open(os.path.join(self.folder("Fav"), "Mine-00000000.cfg"), "w").close()
         wanted = {"Fav": {"MUOS/info/collection/Fav/Game-00000000.cfg": "x"}}
         plan = muos_collections.plan(self.base, wanted, [])
         self.assertEqual(plan["writes"], [])
@@ -71,6 +71,18 @@ class PlanTests(unittest.TestCase):
         plan = muos_collections.plan(self.base, {}, ["Old"])
         self.assertEqual(plan["deletes"], [cfg])
         self.assertEqual(plan["disable"], {"Old"})
+
+    def test_a_dropped_then_wanted_again_collection_is_written_without_a_warning(self):
+        rel = "MUOS/info/collection/Old/Game-00000000.cfg"
+        cfg = os.path.join(self.folder("Old"), "Game-00000000.cfg")
+        open(cfg, "w").close()
+        muos_collections.apply(muos_collections.plan(self.base, {}, ["Old"]))
+        self.assertFalse(os.path.exists(os.path.dirname(cfg)))
+        os.makedirs(os.path.dirname(cfg))  # an empty folder left by hand is free to take too
+        plan = muos_collections.plan(self.base, {"Old": {rel: "a\nb\nc"}}, [])
+        self.assertEqual(plan["warnings"], [])
+        self.assertEqual(plan["owned"], ["Old"])
+        self.assertEqual(len(plan["writes"]), 1)
 
     def test_plan_writes_and_applies_an_owned_collection(self):
         rel = "MUOS/info/collection/Fav/Game-00000000.cfg"
