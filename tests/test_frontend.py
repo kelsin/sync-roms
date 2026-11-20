@@ -280,6 +280,17 @@ class NextUI(unittest.TestCase):
         got = frontend.wanted_collections("nextui", [favs, only_none], [gba, none], lambda s, rel: rel != "Gone.zip")
         self.assertEqual(got, {"Favs": ["/Roms/Game Boy Advance (GBA)/A.zip"]})
 
+    def test_wanted_lists_a_folder_game_by_its_path_in_the_folder(self):
+        psx = {"bucket": "psx", "folders": {"nextui": "PlayStation (PS)", "esde": "psx"}}
+        favs = {"name": "Favs", "games": [{"title": "FF7", "system": "psx", "bucket": "psx/FF7 (USA).m3u"}]}
+        folders = {"psx/FF7 (USA).m3u": "FF7 (USA)"}
+        seen = []
+        got = frontend.wanted_collections("nextui", [favs], [psx], lambda s, rel: seen.append(rel) or True, folders)
+        self.assertEqual(got, {"Favs": ["/Roms/PlayStation (PS)/FF7 (USA)/FF7 (USA).m3u"]})
+        self.assertEqual(seen, ["FF7 (USA)/FF7 (USA).m3u"])
+        self.assertEqual(frontend.wanted_collections("esde", [favs], [psx], lambda s, rel: True),
+                         {"Favs": ["%ROMPATH%/psx/FF7 (USA).m3u"]})
+
     def test_plan_deletes_only_owned_and_apply_touches_no_settings(self):
         mine = frontend.collection_path("nextui", self.base, "Old")
         theirs = frontend.collection_path("nextui", self.base, "Theirs")

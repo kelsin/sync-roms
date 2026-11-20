@@ -929,6 +929,7 @@ def sync_card(args):
     device, layout_name, dirs = chosen_setup
     layout = layouts[layout_name]
     disc_dir = layout.get("disc_dir")  # multi-disc games' discs go in this hidden folder, their playlist beside it (Onion)
+    disc_folders = layout.get("disc_folders")  # each disc game goes in a folder of its own (NextUI)
     onion = layout_name in scrape_plan.ONION_LAYOUTS
     roms_dir, bios_dir = dirs
     clean_card = not args.dry_run and not args.no_clean
@@ -954,7 +955,7 @@ def sync_card(args):
 
     print("📏 Reading ROM sizes...")
     listings = {}  # {system id: {key: size}}, kept until the system's games change
-    avail, discs = {}, {}  # per system id: the keys to sync, their multi-disc keys
+    avail, discs, game_dirs = {}, {}, {}  # per system id: the keys to sync, their multi-disc keys, their game folders
 
     sized = not runtime.ROOT or inventory.current() is not None  # sizes are known up front
 
@@ -963,6 +964,9 @@ def sync_card(args):
 
     def discs_of(s):
         return discs[s["bucket"]]
+
+    def folders_of(s):
+        return game_dirs[s["bucket"]]
 
     def listing_of(s):
         """{key: size} of a system's bucket folder. From a root folder with no storage cache, names only (a share is slow
@@ -981,6 +985,7 @@ def sync_card(args):
         for s in systems:
             avail[s["bucket"]] = store.available_keys(s, listings[s["bucket"]])
             discs[s["bucket"]] = m3u.disc_keys(avail[s["bucket"]]) if disc_dir else ()
+            game_dirs[s["bucket"]] = m3u.game_folders(avail[s["bucket"]]) if disc_folders else {}
 
     fetching = {}  # {system id: {key: whether it isn't on the card yet}}: the card's files don't change while editing
 
@@ -992,11 +997,12 @@ def sync_card(args):
         if todo:
             sizes = inventory.cached(f"{bucket}/") or {}
             disc_keys = m3u.disc_keys(keys) if disc_dir else ()
+            folders = m3u.game_folders(keys) if disc_folders else None
             jobs = []
             for k in todo:
                 try:
                     path = s3.safe_join(os.path.join(roms_dir, s["folders"][layout_name]),
-                                        downloads.rom_rel(k, disc_dir, disc_keys))
+                                        downloads.rom_rel(k, disc_dir, disc_keys, folders))
                 except ValueError:
                     seen[k] = False
                     continue
@@ -1070,7 +1076,7 @@ def sync_card(args):
         for key in wanted:
             if key in have:
                 try:
-                    rom_jobs.append((key, s3.safe_join(dest, downloads.rom_rel(key, disc_dir, disc_keys)), have[key]))
+                    rom_jobs.append((key, s3.safe_join(dest, downloads.rom_rel(key, disc_dir, disc_keys, folders_of(s))), have[key]))
                 except ValueError as e:
                     print(ui.yellow(f"  ⚠️  skipping {e}"))
             else:
@@ -1081,17 +1087,18 @@ def sync_card(args):
     chosen_ids = {s["bucket"] for s in chosen}
     dropped_dests = {os.path.join(roms_dir, s["folders"][layout_name]) for s in dropped if s["folders"].get(layout_name)}
     # a system's rom_files are BIOS files that go in its ROM folder (MAME-style BIOS zips), kept while it has ROMs to sync
-    dest_keys, dest_discs, dest_bios = defaultdict(list), defaultdict(set), defaultdict(set)
+    dest_keys, dest_discs, dest_bios, dest_folders = defaultdict(list), defaultdict(set), defaultdict(set), defaultdict(dict)
     for t in systems:
         dest_keys[dest_of(t)] += available(t)
         dest_discs[dest_of(t)].update(discs_of(t))
+        dest_folders[dest_of(t)].update(folders_of(t))
         if available(t):
             dest_bios[dest_of(t)].update(rom_bios_names(t))
     pico8_dests = {os.path.join(roms_dir, t["folders"][layout_name]) for t in systems + dropped
                    if t["bucket"] == "pico8" and t["folders"].get(layout_name)}
     cardfs.clear()  # the discs moved above, and the card editor's previews listed the card a while ago
     for dest in sorted({dest_of(s) for s in systems if s["bucket"] in chosen_ids or not available(s)} | dropped_dests):
-        extras += downloads.find_extras(dest, dest_keys[dest], onion, disc_dir, dest_discs[dest], dest_bios[dest] | (pico8.keep_in(dest, card) if dest in pico8_dests else set()), renames=renames)
+        extras += downloads.find_extras(dest, dest_keys[dest], onion, disc_dir, dest_discs[dest], dest_bios[dest] | (pico8.keep_in(dest, card) if dest in pico8_dests else set()), renames=renames, folders=dest_folders[dest])
 
     # BIOS for every system with ROMs already on the card too, even when this sync doesn't touch that system
     bios_systems = chosen + [s for s in systems if s["bucket"] not in chosen_ids
@@ -1182,6 +1189,13 @@ def sync_card(args):
             scraped["data"] = scrape_plan.load_scrape_data(chosen)
             scraped["rels"] = {s["bucket"]: [k.split("/", 1)[1] for k in available(s) if k in listings[s["bucket"]]]
                                for s in chosen}
+        if disc_folders:  # scrapes name a ROM by its storage path; a disc game is in its own folder on the card
+            moved_to = {os.path.join(dest_of(s), k.split("/", 1)[1]): os.path.join(dest_of(s), downloads.rom_rel(k, folders=folders_of(s)))
+                        for s in chosen for k in folders_of(s)}
+            found = present
+
+            def present(path):
+                return found(moved_to.get(path, path))
         plan = scrape_plan.build_scrape_plan(layout_name, chosen, scraped["data"], scraped["rels"], dest_of, es_dir, present, base,
                                              recheck=recheck)
         if esde_problem and plan["gamelists"]:
@@ -1238,13 +1252,14 @@ def sync_card(args):
         if esde_problem:
             skipped()
             return
-        coming = {(s["bucket"], downloads.rom_rel(k)) for s in chosen
+        coming = {(s["bucket"], downloads.rom_rel(k, folders=folders_of(s))) for s in chosen
                   for k in available(s) if k in listings[s["bucket"]]} if dry_run else set()
 
         def on_card(s, rel):
             return (s["bucket"], rel) in coming or cardfs.exists(os.path.join(dest_of(s), rel))
 
-        wanted = frontend.wanted_collections(layout_name, card_colls, systems, on_card)
+        wanted = frontend.wanted_collections(layout_name, card_colls, systems, on_card,
+                                             {k: d for s in systems for k, d in folders_of(s).items()})
         plan = frontend.plan_collections(layout_name, base, wanted, owned)
         arts = {frontend.safe_name(c["name"]): c["art"] for c in card_colls if c.get("art")}
         if surprise.COLLECTION in plan["enable"]:

@@ -34,9 +34,10 @@ class SyncSmokeTest(RealDataDirGuard):
         patch.start()
         self.addCleanup(patch.stop)
 
-    def run_sync(self, dry_run, prepare=None, patches=(), yes=True, args=(), after=None):
-        """The exit code; what went to stderr is in self.err. after(card) runs before the card folder goes."""
-        with tempfile.TemporaryDirectory() as card:
+    def run_sync(self, dry_run, prepare=None, patches=(), yes=True, args=(), after=None, card_dir=None):
+        """The exit code; what went to stderr is in self.err. after(card) runs before the card folder goes.
+        card_dir: sync this folder (kept) instead of a fresh one."""
+        with contextlib.nullcontext(card_dir) if card_dir else tempfile.TemporaryDirectory() as card:
             if prepare:
                 prepare(card)
             argv = ["sync-roms", card] + (["--yes"] if yes else []) + (["--dry-run"] if dry_run else []) + list(args)
@@ -155,6 +156,69 @@ class SyncSmokeTest(RealDataDirGuard):
             ("BIOS/gba_bios.bin", "GBA/gba_bios.bin"), ("BIOS/gba_bios.bin", "MGBA/gba_bios.bin"),
             ("BIOS/fbneo/samples/x.zip", "FBN/fbneo/samples/x.zip"),
             ("BIOS/neogeo.zip", "Roms/Arcade (FBN)/neogeo.zip")]))
+
+    def disc_folder_sync(self, layout_name, folder, card):
+        """A real-run sync of a two-disc bin/cue game, a one-disc bin/cue game and a lone .chd onto card; returns the
+        downloaded paths relative to the card and the ROM present() checks the scrape plan made."""
+        names = ["Final Fantasy VII (USA) (Disc 1).cue", "Final Fantasy VII (USA) (Disc 1).bin",
+                 "Final Fantasy VII (USA) (Disc 2).cue", "Final Fantasy VII (USA) (Disc 2).bin",
+                 "Final Fantasy VII (USA).m3u", "Tony Hawk (USA).cue", "Tony Hawk (USA).bin", "Lone (USA).chd"]
+        sizes = {"psx/" + n: 3 + i for i, n in enumerate(names)}
+        psx = {"name": "PlayStation", "bucket": "psx", "folders": {layout_name: folder}, "bios": {"files": []},
+               "games": [{"bucket": k} for k in sizes]}
+        layout = {"label": "X", "roms_dir": "Roms", "bios_dir": "Bios"}
+        if layout_name == "nextui":
+            layout["disc_folders"] = True
+        manifest = {"systems": [psx], "devices": [], "layouts": {layout_name: layout}}
+        got, present = [], []
+
+        def download(job, *a):
+            got.append(os.path.relpath(job[1], card))
+            os.makedirs(os.path.dirname(job[1]), exist_ok=True)
+            with open(job[1], "w") as f:
+                f.write("x" * job[2])
+
+        def build_scrape_plan(layout_name, systems, data, rom_rels, dest_of, es_dir, check, base, recheck=None):
+            present.append(check(os.path.join(dest_of(psx), "Final Fantasy VII (USA).m3u")))
+            return {"jobs": [], "gamelists": {}, "writes": []}
+        patches = ((store, {"load_manifest": lambda names=(): manifest}),
+                   (cli.picker, {"saved_setup": lambda *a: (None, layout_name)}),
+                   (cli.s3, {"list_sizes": lambda prefix, sizes_=True: sizes if prefix == "psx/" else {}, "download": download}),
+                   (cli.scrape_plan, {"load_scrape_data": lambda chosen: {}, "build_scrape_plan": build_scrape_plan}),
+                   (cli, {"free_space": lambda path: 10**9}), (cli.downloads, {"run_downloads": downloads.run_downloads}))
+        self.assertEqual(self.run_sync(False, patches=patches, card_dir=card), 0)
+        return sorted(got), present
+
+    def test_nextui_keeps_each_disc_game_in_its_own_folder(self):
+        with tempfile.TemporaryDirectory() as card:
+            got, present = self.disc_folder_sync("nextui", "PlayStation (PS)", card)
+            ff7 = os.path.join("Roms", "PlayStation (PS)", "Final Fantasy VII (USA)")
+            th = os.path.join("Roms", "PlayStation (PS)", "Tony Hawk (USA)")
+            self.assertEqual(got, sorted([
+                os.path.join(ff7, "Final Fantasy VII (USA).m3u"),
+                os.path.join(ff7, "Final Fantasy VII (USA) (Disc 1).cue"), os.path.join(ff7, "Final Fantasy VII (USA) (Disc 1).bin"),
+                os.path.join(ff7, "Final Fantasy VII (USA) (Disc 2).cue"), os.path.join(ff7, "Final Fantasy VII (USA) (Disc 2).bin"),
+                os.path.join(th, "Tony Hawk (USA).cue"), os.path.join(th, "Tony Hawk (USA).bin"),
+                os.path.join("Roms", "PlayStation (PS)", "Lone (USA).chd")]))
+            self.assertEqual(present[-1], True)  # the scrape plan finds the playlist in its folder
+            again, _ = self.disc_folder_sync("nextui", "PlayStation (PS)", card)
+            self.assertEqual(again, [])
+            self.assertTrue(all(os.path.exists(os.path.join(card, p)) for p in got))
+
+    def test_esde_keeps_disc_games_loose(self):
+        with tempfile.TemporaryDirectory() as card:
+            got, _ = self.disc_folder_sync("esde", "psx", card)
+            self.assertEqual(len(got), 8)
+            self.assertTrue(all(os.path.dirname(p) == os.path.join("Roms", "psx") for p in got))
+
+    def test_loose_discs_from_an_earlier_nextui_sync_move_into_the_game_folder(self):
+        with tempfile.TemporaryDirectory() as card:
+            self.disc_folder_sync("esde", "PlayStation (PS)", card)  # the same files, loose in the system folder
+            got, _ = self.disc_folder_sync("nextui", "PlayStation (PS)", card)
+            self.assertEqual(got, [])
+            ps = os.path.join(card, "Roms", "PlayStation (PS)")
+            self.assertEqual(sorted(os.listdir(ps)), ["Final Fantasy VII (USA)", "Lone (USA).chd", "Tony Hawk (USA)"])
+            self.assertEqual(len(os.listdir(os.path.join(ps, "Final Fantasy VII (USA)"))), 5)
 
     def old_rom(self, size):
         def prepare(card):

@@ -160,8 +160,10 @@ def apply_collections(plan, layout_name, base):
     return cardfs.write_text(path, set_enabled(cardfs.text(path), layout_name, plan["enable"], plan["disable"]))
 
 
-def wanted_collections(layout_name, collections, systems, on_card):
-    """{safe name: lines} of the collections' games that are on the card, on the systems it syncs."""
+def wanted_collections(layout_name, collections, systems, on_card, folders=None):
+    """{safe name: lines} of the collections' games that are on the card, on the systems it syncs.
+
+    folders: {key: its game's folder} (m3u.game_folders), for layouts that keep each disc game in a folder of its own."""
     by_bucket = {s["bucket"]: s for s in systems}
     wanted = {}
     for collection in collections:
@@ -171,7 +173,7 @@ def wanted_collections(layout_name, collections, systems, on_card):
             system = by_bucket.get(game["system"])
             if not system or not system["folders"].get(layout_name):
                 continue
-            rel = downloads.rom_rel(game["bucket"])
+            rel = downloads.rom_rel(game["bucket"], folders=folders)
             if on_card(system, rel):
                 lines.append(collection_line(layout_name, system["folders"][layout_name], rel))
         if name and lines:

@@ -128,6 +128,30 @@ class FileGroupsTest(unittest.TestCase):
         self.assertNotIn("psx/A.m3u", groups)
 
 
+class GameFoldersTest(unittest.TestCase):
+    def test_a_multi_disc_game_and_its_bins_share_the_playlist_s_folder(self):
+        names = ["Final Fantasy VII (USA) (Disc 1).cue", "Final Fantasy VII (USA) (Disc 1).bin",
+                 "Final Fantasy VII (USA) (Disc 2).cue", "Final Fantasy VII (USA) (Disc 2).bin",
+                 "Final Fantasy VII (USA).m3u"]
+        keys = ["psx/" + n for n in names]
+        self.assertEqual(m3u.game_folders(keys), {k: "Final Fantasy VII (USA)" for k in keys})
+
+    def test_a_single_disc_cue_with_its_bins_gets_its_own_folder(self):
+        keys = ["psx/Tony Hawk (USA).cue", "psx/Tony Hawk (USA) (Track 1).bin", "psx/Tony Hawk (USA) (Track 2).bin"]
+        self.assertEqual(m3u.game_folders(keys), {k: "Tony Hawk (USA)" for k in keys})
+
+    def test_lone_files_and_subfolders_keep_their_place(self):
+        keys = ["gba/Game.gba", "psx/Single (USA).chd", "psx/Lone.cue", "psx/x/A (Disc 1).chd", "psx/x/A (Disc 2).chd"]
+        self.assertEqual(m3u.game_folders(keys), {"psx/x/A (Disc 1).chd": "A", "psx/x/A (Disc 2).chd": "A"})
+
+    def test_rom_rel_puts_a_folder_game_in_its_folder(self):
+        folders = {"psx/A (Disc 1).chd": "A", "psx/x/A (Disc 1).chd": "A"}
+        self.assertEqual(downloads.rom_rel("psx/A (Disc 1).chd", folders=folders), "A/A (Disc 1).chd")
+        self.assertEqual(downloads.rom_rel("psx/x/A (Disc 1).chd", folders=folders), "x/A (Disc 1).chd")
+        self.assertEqual(downloads.rom_rel("psx/B.chd", folders=folders), "B.chd")
+        self.assertEqual(downloads.rom_rel("psx/A (Disc 1).chd"), "A (Disc 1).chd")
+
+
 class HiddenDiscsTest(unittest.TestCase):
     def setUp(self):
         self._tmp = tempfile.TemporaryDirectory()
