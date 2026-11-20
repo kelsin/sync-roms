@@ -63,6 +63,7 @@
     "roms_dir": "Roms",
     "bios_dir": "Bios",
     "bios_by_tag": true,
+    "save_naming": "minui",
     "disc_folders": true,
     "retroarch": {
       "dir": "",

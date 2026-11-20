@@ -321,7 +321,9 @@ class LayoutDataTest(unittest.TestCase):
 
 CATALOG_SYSTEMS = [
     {"name": "Game Boy Advance", "bucket": "gba",
-     "folders": {"onion": "GBA", "knulli": "gba", "esde": "gba", "allium": "GBA", "emudeck": "gba"}},
+     "folders": {"onion": "GBA", "knulli": "gba", "esde": "gba", "allium": "GBA", "emudeck": "gba",
+                 "nextui": "Game Boy Advance (GBA)"}},
+    {"name": "PlayStation", "bucket": "psx", "folders": {"nextui": "PlayStation (PS)"}},
     {"name": "Neo Geo Pocket", "bucket": "ngp", "folders": {"onion": "NGP", "knulli": "ngp"}},
     {"name": "Neo Geo Pocket Color", "bucket": "ngpc", "folders": {"onion": "NGP", "knulli": "ngpc"}},
 ]
@@ -389,7 +391,41 @@ class CommandTest(helpers.Cmd):
         return saves.write_stash(card, layout, system, game, core, entries)
 
 
+class NamingTest(unittest.TestCase):
+    def test_minui_name(self):
+        self.assertEqual(saves.minui_name("Game.srm", ["Game.gba", "Other.gba"]), "Game.gba.sav")
+        self.assertIsNone(saves.minui_name("Missing.srm", ["Game.gba"]))
+        self.assertEqual(saves.minui_name("Mr. Driller.srm", ["Mr. Driller.gba"]), "Mr. Driller.gba.sav")
+
+    def test_retroarch_name(self):
+        self.assertEqual(saves.retroarch_name("Game.gba.sav"), "Game.srm")
+        self.assertEqual(saves.retroarch_name("Mr. Driller.gba.sav"), "Mr. Driller.srm")
+        self.assertEqual(saves.retroarch_name("Game.sav"), "Game.srm")
+
+    def test_nextui_state_folders_scanned(self):
+        with tempfile.TemporaryDirectory() as b:
+            helpers.touch(os.path.join(b, ".userdata/shared/GBA-mgba/Game.state"), "s")
+            helpers.touch(os.path.join(b, ".userdata/shared/GBC-x/Other.state"), "s")
+            systems = [{"bucket": "gba", "folders": {"nextui": "Game Boy Advance (GBA)"}}]
+            got = saves._folders(b, ".userdata/shared/{tag}-{core}", systems, "nextui")
+            self.assertEqual(got, [(os.path.join(b, ".userdata/shared/GBA-mgba"), "gba", "mgba")])
+            self.assertEqual(saves.core_folders(b, LAYOUTS["nextui"]), [])
+
+
 class StashCommandTest(CommandTest):
+    def test_nextui_sav_becomes_srm(self):
+        base = self.card("NX", "nextui")
+        helpers.touch(os.path.join(base, "Roms/Game Boy Advance (GBA)/Game.gba"), "r")
+        helpers.touch(os.path.join(base, "Saves/GBA/Game.gba.sav"), "save")
+        helpers.touch(os.path.join(base, ".userdata/shared/GBA-mgba/Game.gba.state"), "st")
+        self.lists([True, True], lambda labels: [True] * len(labels))
+        code, out, err = self.run_cmd("saves", "stash", base)
+        self.assertEqual(code, 0, err)
+        by_core = {s["core"]: s for s in saves.load_stashes()}
+        self.assertEqual(sorted(by_core, key=str), [None, "mgba"])
+        self.assertEqual(self.read_file(by_core[None]["dir"], "Game.srm"), "save")
+        self.assertEqual(by_core[None]["system"], "gba")
+
     def test_stash_end_to_end(self):
         base = self.onion_card()
         self.lists([True, False], lambda labels: [True] * len(labels))
@@ -485,6 +521,54 @@ class StashCommandTest(CommandTest):
 
 
 class ApplyCommandTest(CommandTest):
+    def nextui_card(self, rom="Game.gba", folder="Game Boy Advance (GBA)"):
+        base = self.card("NX", "nextui")
+        if rom:
+            helpers.touch(os.path.join(base, "Roms", folder, rom), "r")
+        return base
+
+    def test_onto_nextui_renames(self):
+        self.stash(files={"Game.srm": "save"})
+        base = self.nextui_card()
+        self.lists([True])
+        code, out, err = self.run_cmd("saves", "apply", base)
+        self.assertEqual(code, 0, err)
+        self.assertEqual(self.read_file(base, "Saves/GBA/Game.gba.sav"), "save")
+        self.assertFalse(os.path.exists(os.path.join(base, "Saves/GBA/Game.srm")))
+
+    def test_onto_nextui_no_rom_keeps_name_and_warns(self):
+        self.stash(files={"Game.srm": "save"})
+        base = self.nextui_card(rom=None)
+        self.lists([True])
+        code, out, err = self.run_cmd("saves", "apply", base)
+        self.assertEqual(code, 0, err)
+        self.assertEqual(self.read_file(base, "Saves/GBA/Game.srm"), "save")
+        self.assertIn("no ROM on the card for Game.srm", err)
+
+    def test_onto_nextui_psx_not_renamed(self):
+        self.stash(system="psx", files={"Game.srm": "save"})
+        base = self.nextui_card(rom="Game.cue", folder="PlayStation (PS)")
+        self.lists([True])
+        code, out, err = self.run_cmd("saves", "apply", base)
+        self.assertEqual(code, 0, err)
+        self.assertEqual(self.read_file(base, "Saves/PS/Game.srm"), "save")
+
+    def test_onto_nextui_save_needs_no_core(self):
+        self.stash(core=None, files={"Game.srm": "save"})
+        base = self.nextui_card()
+        self.lists([True])
+        code, out, err = self.run_cmd("saves", "apply", "--yes", base)
+        self.assertEqual(code, 0, err)
+        self.assertEqual(self.read_file(base, "Saves/GBA/Game.gba.sav"), "save")
+
+    def test_onto_nextui_state_without_core_skipped_not_literal_tag(self):
+        self.stash(core=None, files={"Game.state": "st"})
+        base = self.nextui_card()
+        self.lists([True])
+        code, out, err = self.run_cmd("saves", "apply", "--yes", base)
+        self.assertEqual(code, 0, err)
+        self.assertFalse(os.path.exists(os.path.join(base, ".userdata")))
+
     def test_broken_link_fails_before_copying(self):
         self.stash(files={"Game.srm": "save"})
         base = self.card("DECK", "emudeck")

@@ -85,9 +85,47 @@ def rom_stems(base, layout_name, layout, systems):
     return stems
 
 
+def minui_name(srm_name, rom_names):
+    """MinUI's name for a RetroArch save: the ROM's full file name plus `.sav` ("Game.srm" -> "Game.gba.sav"), for the
+    ROM among rom_names with that stem; None when there is none."""
+    stem = srm_name[:-4] if srm_name.endswith(".srm") else srm_name
+    rom = next((r for r in rom_names if os.path.splitext(r)[0] == stem), None)
+    return f"{rom}.sav" if rom else None
+
+
+def retroarch_name(sav_name):
+    """RetroArch's name for a MinUI save ("Game.gba.sav" -> "Game.srm"): the ROM's extension goes."""
+    stem = sav_name[:-4] if sav_name.endswith(".sav") else sav_name
+    return re.sub(r"\.[A-Za-z0-9]{1,5}$", "", stem) + ".srm"
+
+
+def _minui(layout):
+    return layout.get("save_naming") == "minui"
+
+
+def rom_names(base, layout_name, layout, system):
+    """File names in the card's ROM folder of one system."""
+    folder = system["folders"].get(layout_name)
+    if not folder:
+        return []
+    root = os.path.join(base, *layout["roms_dir"].split("/"), folder)
+    return [f for _, _, files in os.walk(root, followlinks=True) for f in files if not f.startswith("._")]
+
+
 def _folders(root, template, systems, layout_name):
     """[(folder, system id or None, core or None)] of a layout's saves or states path template; a {core} parent
     is listed first as a core-less folder (RetroArch with sort by core off)."""
+    if "{tag}-{core}" in template:
+        # a core folder per system: "<tag>-<core>" next to its siblings
+        parts = template.split("/")
+        parent = os.path.join(root, *parts[:-1])
+        if not os.path.isdir(parent):
+            return []
+        names = _listdir(parent)
+        return [(os.path.join(parent, n), s["bucket"], n[len(tag) + 1:])
+                for s in systems if (tag := store.folder_tag(s["folders"].get(layout_name)))
+                for n in names if n.startswith(f"{tag}-") and len(n) > len(tag) + 1
+                and os.path.isdir(os.path.join(parent, n))]
     if "{core}" in template:
         parent = os.path.join(root, *template.split("{core}")[0].split("/"))
         if not os.path.isdir(parent):
@@ -119,6 +157,8 @@ def scan(base, layout_name, layout, systems, retroarch_dir=None):
             seen.add(folder)
             for name in _listdir(folder):
                 path = os.path.join(folder, name)
+                if _minui(layout) and system != "psx" and name.endswith(".sav"):
+                    name = retroarch_name(name)
                 c = classify(name)
                 if not c or not os.path.isfile(path):
                     continue
@@ -206,7 +246,7 @@ def core_folders(base, layout, retroarch_dir=None):
     root = _base(base, layout, retroarch_dir)
     names = set()
     for template in (layout["retroarch"]["saves"], layout["retroarch"]["states"]):
-        if "{core}" not in template:
+        if "{core}" not in template or "{tag}" in template:
             continue
         parent = os.path.join(root, *template.split("{core}")[0].split("/"))
         if os.path.isdir(parent):
@@ -216,10 +256,18 @@ def core_folders(base, layout, retroarch_dir=None):
 
 def plan_apply(stash, base, layout_name, layout, system, core, retroarch_dir=None):
     """[(src, dst, "new" | "same" | "differs")] for copying a stash's files to the card."""
-    plan = []
+    plan, roms = [], None
     for f in stash["files"]:
         src = os.path.join(stash["dir"], f["name"])
-        dst = os.path.join(target_dir(base, layout_name, layout, system, f["kind"], core, retroarch_dir), f["name"])
+        name = f["name"]
+        if _minui(layout) and f["kind"] == "save" and system["bucket"] != "psx" and name.endswith(".srm"):
+            roms = rom_names(base, layout_name, layout, system) if roms is None else roms
+            renamed = minui_name(name, roms)
+            if renamed:
+                name = renamed
+            else:
+                ui.warn(f"no ROM on the card for {name}; copied under its RetroArch name")
+        dst = os.path.join(target_dir(base, layout_name, layout, system, f["kind"], core, retroarch_dir), name)
         if not os.path.exists(dst):
             state = "new"
         else:
@@ -367,7 +415,9 @@ def _ask_core(base, layout, system, retroarch_dir):
     if ui.ASSUME_YES or not ui.has_terminal():
         return None
     found = core_folders(base, layout, retroarch_dir)
-    i = picker.filter_list(f"📁 Core folder for the {system.get('name', system['bucket'])} saves", found + [TYPE_CORE, NO_CORE],
+    # a "<tag>-<core>" folder always has a core, so there is no sort-by-core-off choice
+    options = [TYPE_CORE] if "{tag}" in layout["retroarch"]["states"] else [TYPE_CORE, NO_CORE]
+    i = picker.filter_list(f"📁 Core folder for the {system.get('name', system['bucket'])} saves", found + options,
                            hint="Enter pick · Esc skip")
     if i is None:
         return None
@@ -404,7 +454,6 @@ def apply_command(args):
     broken = broken_links(base, layout, args.retroarch)
     if broken:
         ui.fail(_broken_hint(broken), 2)
-    needs_core = any("{core}" in layout["retroarch"][k] for k in ("saves", "states"))
     cores, plan = {}, []
     for i in chosen:
         stash, system = rows[i]
@@ -416,6 +465,8 @@ def apply_command(args):
             continue
         stash = dict(stash, files=present)
         core = stash["core"]
+        needs_core = any("{core}" in layout["retroarch"]["saves" if f["kind"] == "save" else "states"]
+                         for f in present)
         if core is None and needs_core:
             if system["bucket"] not in cores:
                 cores[system["bucket"]] = _ask_core(base, layout, system, args.retroarch)

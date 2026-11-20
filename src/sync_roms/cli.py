@@ -178,9 +178,13 @@ TOPICS = {
   onion     Saves/CurrentProfile         saves/<core>     states/<core>
   allium    Saves/CurrentProfile         saves/<core>     states/<core>
   emudeck   Emulation/saves/retroarch    saves            states
+  nextui    (card root)                  Saves/<TAG>      .userdata/shared/<TAG>-<core>   (MinUI .sav naming)
 
   --retroarch DIR   read or write that folder instead of the card's RetroArch folder: a copy of Android's internal
                     /storage/emulated/0/RetroArch for ES-DE, or the real folder EmuDeck's symlinks point to.
+  nextui: apply renames saves to MinUI's Game.gba.sav (from the card's ROM; PlayStation and saves with no ROM there keep
+  their name), stash turns .sav back into .srm. States are stashed and applied as they are, so NextUI's own state
+  names aren't converted.
   States only load in the core they were made with; .srm (and .rtc) saves usually work in any core of the system.
 """,
     "devices": """
