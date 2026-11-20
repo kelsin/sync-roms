@@ -771,6 +771,96 @@ const SECTIONS = [
     ],
   },
   {
+    id: "syncthing",
+    title: "Syncthing",
+    lede: "Syncs saves between the device and my Syncthing server at <code>http://192.168.68.98:8384/</code>, only on the home network. Each device runs its own Syncthing and pairs with the server; the server's web UI is the one place to approve devices and folders.",
+    when: { layout: ["esde", "knulli", "muos", "spruce", "onion", "nextui", "emudeck"] },
+    items: [
+      {
+        title: "Knulli",
+        when: { layout: ["knulli"] },
+        body: `
+          <ol>
+            <li>Turn it on in the services menu (Syncthing comes with Knulli). While it transfers, ES shows a notification.</li>
+            <li>Find the device's IP under <span class="path">${path("Network Settings")}</span> and open <code>http://&lt;device IP&gt;:8384</code> from the computer.</li>
+            <li>Pair it with the server and share the saves folder (see "Pair and share").</li>
+          </ol>
+          <p class="note">A very large folder can freeze the device for minutes on first sync; share saves only.</p>`,
+      },
+      {
+        title: "muOS",
+        when: { layout: ["muos"] },
+        body: `
+          <ol>
+            <li>Turn it on at <span class="path">${path("Configuration > Connectivity > Web Services > Syncthing")}</span>.</li>
+            <li>Open <code>http://muos.local:7070</code> from the computer (the port is 7070, not 8384).</li>
+            <li>Pair it with the server and share the saves folder, <code>/run/muos/storage/save</code> (see "Pair and share").</li>
+          </ol>`,
+      },
+      {
+        title: "spruceOS",
+        when: { layout: ["spruce"] },
+        body: `
+          <ol>
+            <li>Turn it on in the network apps (<span class="path">${path("Advanced Settings")}</span> in recent releases); it needs WiFi on.</li>
+            <li>Open the device's web UI on port 8384 from the computer.</li>
+            <li>Pair it with the server and share the saves folder (see "Pair and share").</li>
+          </ol>
+          <p class="note">spruceOS's Syncthing sync checker makes sure a sync has finished when shutting down, launching a game and resuming.</p>`,
+      },
+      {
+        title: "Onion",
+        when: { layout: ["onion"] },
+        body: `
+          <ol>
+            <li>Install the Syncthing app from Onion's <a href="https://onionui.github.io/docs/community-apps">community apps</a>. It is documented for the Miyoo Mini Plus on the Onion 4.2.0 beta and needs WiFi; the Miyoo Mini has none.</li>
+            <li>Start it, then open the device's web UI on port 8384 from the computer.</li>
+            <li>Pair it with the server and share the saves folder (see "Pair and share").</li>
+          </ol>
+          <p class="note">Not confirmed on the Miyoo Mini Flip.</p>`,
+      },
+      {
+        title: "NextUI",
+        when: { layout: ["nextui"] },
+        body: `
+          <ol>
+            <li>Install josegonzalez's <a href="https://github.com/josegonzalez/minui-syncthing-pak">minui-syncthing.pak</a> (a MinUI pak) into <code>Tools/</code>, e.g. through NextUI's Pak Store.</li>
+            <li>Launch <span class="path">${path("Tools > Syncthing")}</span> and press A to start the server, with WiFi on.</li>
+            <li>Open <code>http://&lt;device IP&gt;:8384</code> from the computer, pair it with the server and share the saves folder (see "Pair and share").</li>
+          </ol>
+          <p class="note">The pak lists MinUI devices (Miyoo Mini Plus, A30, Flip, several RG35XX, Trimui Brick and Smart Pro); not confirmed on NextUI itself.</p>`,
+      },
+      {
+        title: "Android and desktop",
+        when: { layout: ["esde", "emudeck"] },
+        body: `
+          <ol>
+            <li>Android: install <b>Syncthing-Fork</b> from F-Droid (the original Android app is discontinued). Desktop and Steam Deck: install Syncthing normally.</li>
+            <li>Open its web UI on the device (port 8384), pair it with the server and share the saves folders (see "Pair and share").</li>
+          </ol>
+          <p class="note">On a Steam Deck, Flatpak emulators keep saves under <code>~/.var</code>; Syncthing may need access granted to those folders. EmuDeck also has its own cloud save feature.</p>`,
+      },
+      {
+        title: "Pair and share",
+        body: `
+          <ol>
+            <li>On the device's Syncthing web UI: <b>Actions &gt; Show ID</b> and copy the device ID, then <b>Add Remote Device</b> with the server's ID (from <code>http://192.168.68.98:8384/</code> under Actions &gt; Show ID).</li>
+            <li>On the server's web UI, accept the new device when it appears, and give it the saves folder to share.</li>
+            <li>On the device, accept the shared folder and set its path to the device's saves folder.</li>
+            <li>Keep both on the home network: Syncthing here has no relay or cloud, so it only syncs when the device and the server can reach each other.</li>
+          </ol>`,
+      },
+      {
+        title: "Notes",
+        body: `<ul>
+          <li>Sync the in-game saves (<code>.srm</code>) only, not save states: states break across cores and versions.</li>
+          <li>Make an in-game save before switching devices.</li>
+          <li>Syncthing and RetroArch Cloud Sync both touch saves; use one per device, not both.</li>
+        </ul>`,
+      },
+    ],
+  },
+  {
     id: "shaders",
     title: "Shaders",
     lede: "Starting picks for this device's power and systems; edit <code>SHADER_CATEGORIES</code> (and <code>ONION_SHADERS</code> for Onion) in the page's script as favourites are chosen.",
