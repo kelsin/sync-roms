@@ -922,6 +922,44 @@ class SyncFlowTest(unittest.TestCase):
         self.assertIn("gba/a.zip", err.getvalue())
         self.assertNotIn("boom", out)
 
+    def run_muos_sync(self, cards, dry_run=False):
+        manifest = {**MANIFEST, "systems": [{**MANIFEST["systems"][0], "folders": {"muos": "GBA"}}],
+                    "layouts": {"muos": {"label": "muOS", "roms_dir": "ROMS", "bios_dir": "MUOS/bios",
+                                         "pickles": {"dir": "MUOS/pickles"}}}}
+        warned = []
+
+        def tree(card_dir):
+            found = {}
+            for folder, _, names in os.walk(os.path.join(card_dir, "MUOS")):
+                for name in names:
+                    path = os.path.join(folder, name)
+                    found[os.path.relpath(path, card_dir)] = read_from(path)
+            return found
+        result = self.run_sync(cards=cards, colls=[FAVS], manifest=manifest, setup=(None, "muos"), dry_run=dry_run,
+                               files=["ROMS/GBA/Game.zip"], after=tree, extra=[(ui, "warn", warned.append)])
+        return result, warned
+
+    def test_muos_sync_writes_collection_entries(self):
+        (_, out, updates, _, _), warned = self.run_muos_sync({"collections": ["favs"]})
+        entries = [p for p in self.after if p.startswith("MUOS/info/collection/Favs/")]
+        self.assertEqual(len(entries), 1)
+        self.assertRegex(entries[0], r"/Game-[0-9A-F]{8}\.cfg$")
+        self.assertEqual(self.after[entries[0]], "/mnt/mmc/ROMS/GBA/Game.zip\nGBA\nGame")
+        self.assertIn({"frontend_collections": ["Favs"]}, updates)
+        self.assertIn("Wrote 1 collection(s) for muOS", out)
+        self.assertEqual(warned, [])
+
+    def test_muos_unknown_storage_warns_and_writes_nothing(self):
+        (_, _, updates, _, _), warned = self.run_muos_sync({"collections": ["favs"], "muos_storage": "usb"})
+        self.assertTrue(warned)
+        self.assertEqual([p for p in self.after if p.startswith("MUOS/info/collection/")], [])
+        self.assertFalse([u for u in updates if "frontend_collections" in u])
+
+    def test_muos_dry_run_writes_nothing(self):
+        (_, _, updates, _, _), _ = self.run_muos_sync({"collections": ["favs"]}, dry_run=True)
+        self.assertEqual([p for p in self.after if p.startswith("MUOS/info/collection/")], [])
+        self.assertFalse([u for u in updates if "frontend_collections" in u])
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -404,6 +404,11 @@ class DataSafetyTest(Cmd):
                     json.dump({"c": {"device": "full", "layout": "esde", "pico8": bad}}, f)
                 self.assertIn("cards.json: c: 'pico8' must be a file name", commands.check_data())
 
+    def test_check_flags_a_bad_muos_storage(self):
+        with open(self.path("cards.json"), "w") as f:
+            json.dump({"c": {"device": "full", "layout": "muos", "muos_storage": "usb"}}, f)
+        self.assertIn("cards.json: c: 'muos_storage' must be sd1 or sd2", commands.check_data())
+
     def test_overlay_save_replaces_and_drops_entries(self):
         dev = store.repo_json("devices")[0]["id"]
         store.save_overlay({dev: (["gba"], ["nes"])})

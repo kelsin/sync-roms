@@ -11,7 +11,7 @@ from concurrent.futures import ThreadPoolExecutor
 from botocore.exceptions import BotoCoreError, ClientError, NoCredentialsError
 
 from . import __version__, budget, cardedit, cardfs, clean, commands, downloads, drivers, edit, external, frontend, inventory, m3u, mirroring, picker, runtime, s3, scrape_plan, store
-from . import onion_surprise, pico8, surprise, themeart, ui, usersettings, vita
+from . import muos_collections, onion_surprise, pico8, surprise, themeart, ui, usersettings, vita
 from . import collections as colls
 
 
@@ -23,7 +23,7 @@ SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "collections": ("edit", "edit your collections of favourite games (saved in ~/.sync-roms/collections/)"),
     "themes": ("update", "copy the latest Art Book Next for ES-DE from GitHub into storage"),
     "download": ("pico8", "add the PICO-8 BBS Featured carts storage doesn't have, and newer revisions of those it has"),
-    "flash": ("", "write a Knulli or BaseOS image from storage's os/ to an SD card"),
+    "flash": ("", "write a Knulli, BaseOS or muOS image from storage's os/ to an SD card"),
     "cards": ("[edit|list|new|set|rename|delete|copy|export|import]", "list and manage the cards you've synced"),
     "saves": ("stash|apply [CARD] [--retroarch DIR]", "copy RetroArch saves and states off a card, or onto one"),
     "devices": ("[ID]", "list the supported devices, or one device's systems"),
@@ -82,7 +82,7 @@ TOPICS = {
   sync-roms games remove SYSTEM KEY... --card NAME [-n]
   sync-roms games full SYSTEM on|off --card NAME [-n]
   sync-roms games sets list | add ID | remove ID --card NAME [-n]
-  sync-roms games export --card NAME        one SYSTEM/file per line (full systems as 'SYSTEM/*'), then '@collections ID', '@frontend_collections NAME', '@drivers NAME', '@pico8 ZIP', '@surprise true|false' (only when it differs from the layout's default: on for esde/knulli/emudeck/nextui/onion, off for allium) and '@surprises SYSTEM/file' lines
+  sync-roms games export --card NAME        one SYSTEM/file per line (full systems as 'SYSTEM/*'), then '@collections ID', '@frontend_collections NAME', '@drivers NAME', '@pico8 ZIP', '@surprise true|false' (only when it differs from the layout's default: on for esde/knulli/emudeck/muos/nextui/onion, off for allium) and '@surprises SYSTEM/file' lines
   sync-roms games import FILE --card NAME [-n]            add the games in such a file; '@' lines replace the card's collections / frontend_collections / drivers / surprises and set pico8, and set Surprise on or off
 
   --card NAME is required: a card's games are saved in ~/.sync-roms/cards.json with the previous version kept as .bak. Removing only drops a game from the list.
@@ -125,10 +125,12 @@ TOPICS = {
   ignored.json are skipped. Requests go one at a time; the first HTTP error stops it, keeping what was added.
 """,
     "flash": """
-  sync-roms flash [--dry-run]                 write a Knulli or BaseOS image to an SD card (macOS only)
+  sync-roms flash [--dry-run]                 write a Knulli, BaseOS or muOS image to an SD card (macOS only)
 
-  Pick a device, then an image from storage's os/knulli/knulli-*.img.gz or os/baseos/baseos-*.img.zip (the ones matching the device first, newest
-  first), then an external SD card (shown with its volume names); the boot disk and the disks holding the temp folder
+  Pick a firmware (only when storage's os/ has both Knulli or BaseOS images and muOS images), then a device, then an
+  image from storage's os/knulli/knulli-*.img.gz or os/baseos/baseos-*.img.zip (the ones matching the device first,
+  newest first) or os/muos/muos-*.img.gz (muOS image names aren't documented, so they are never matched), then an
+  external SD card (shown with its volume names); the boot disk and the disks holding the temp folder
   or storage are never offered, and flash stops if it can't tell which disks those are. Type the disk id (disk4) to
   confirm: --yes never skips that. --dry-run stops there. The image is copied to a local temp folder (free space is
   checked first); right before writing, the card must still be the same disk (id, size and name). Then `sudo dd`
@@ -1061,7 +1063,7 @@ def sync_card(args):
         reload_changes()
     chosen = [s for s in systems if available(s)]
     if not chosen:
-        failed = pico8.run(card, layout_name, base, args.dry_run)
+        failed = pico8.run(card, layout_name, base, args.dry_run, syncs=False)
         failed += onion_surprise.install(card, layout_name, base, args.dry_run)
         if onion_surprise.write_list(card, layout_name, base, roms_dir, systems, args.dry_run) and clean_card:
             clean._clean_root = base
@@ -1246,7 +1248,7 @@ def sync_card(args):
 
     def frontend_step(dry_run):
         """Write the card's collections as the frontend's custom collections (ES-DE, Knulli, EmuDeck's ES-DE)."""
-        if layout_name not in frontend.FRONTEND_LAYOUTS:
+        if layout_name not in frontend.FRONTEND_LAYOUTS and layout_name != "muos":
             return
         entry = store.load_cards().get(card)
         entry = entry if isinstance(entry, dict) else {}
@@ -1264,6 +1266,10 @@ def sync_card(args):
         owned = names("frontend_collections")
         if not card_colls and not owned:
             return
+        mount = muos_collections.mount(entry) if layout_name == "muos" else None
+        if layout_name == "muos" and mount is None:
+            ui.warn("muos_storage must be sd1 or sd2: collections skipped")
+            return
         if esde_problem:
             skipped()
             return
@@ -1273,29 +1279,40 @@ def sync_card(args):
         def on_card(s, rel):
             return (s["bucket"], rel) in coming or cardfs.exists(os.path.join(dest_of(s), rel))
 
-        wanted = frontend.wanted_collections(layout_name, card_colls, systems, on_card,
-                                             {k: d for s in systems for k, d in folders_of(s).items()})
-        plan = frontend.plan_collections(layout_name, base, wanted, owned)
+        if layout_name == "muos":
+            plan = muos_collections.plan(base, muos_collections.wanted(card_colls, systems, on_card, mount), owned)
+        else:
+            wanted = frontend.wanted_collections(layout_name, card_colls, systems, on_card,
+                                                 {k: d for s in systems for k, d in folders_of(s).items()})
+            plan = frontend.plan_collections(layout_name, base, wanted, owned)
         arts = {frontend.safe_name(c["name"]): c["art"] for c in card_colls if c.get("art")}
         if surprise.COLLECTION in plan["enable"]:
             arts[surprise.COLLECTION] = themeart.SURPRISE_ART
         arts = {name: art for name, art in arts.items() if name in plan["enable"]}
         if dry_run:
-            frontend.describe_collections(plan, layout_name)
+            if layout_name == "muos":
+                muos_collections.describe(plan)
+            else:
+                frontend.describe_collections(plan, layout_name)
             if arts:
                 themeart.describe(layout_name, base, arts)
             return
         for warning in plan["warnings"]:
             ui.warn(warning)
-        listed = frontend.apply_collections(plan, layout_name, base)
+        if layout_name == "muos":
+            muos_collections.apply(plan)
+            listed = False
+        else:
+            listed = frontend.apply_collections(plan, layout_name, base)
         if plan["owned"] != owned:
             store.update_card(card, frontend_collections=plan["owned"])
-        art = bool(arts) and themeart.install(layout_name, base, arts)
+        art = (bool(arts) or layout_name == "muos") and themeart.install(layout_name, base, arts)
         # EmuDeck's ES-DE is on this computer, not the card, so its writes leave the card as it was
         if clean_card and layout_name != "emudeck" and (plan["writes"] or plan["deletes"] or listed or art):
             clean._clean_root = base
         if plan["writes"]:
-            print(ui.green(f"💖 Wrote {len(plan['writes'])} collection(s) for {layout['label']}"))
+            count = len({os.path.dirname(p) for p, _ in plan["writes"]}) if layout_name == "muos" else len(plan["writes"])
+            print(ui.green(f"💖 Wrote {count} collection(s) for {layout['label']}"))
 
     capacity = budget.card_capacity(saved or {}) if surprise.enabled(saved or {}) else None
     if capacity:
@@ -1332,7 +1349,7 @@ def sync_card(args):
         else:
             for name in old_drivers:
                 print(f"  {ui.red('would delete')} {os.path.join(drivers_dir, name)}")
-        pico8.run(card, layout_name, base, True)
+        pico8.run(card, layout_name, base, True, syncs=any(s["bucket"] == "pico8" for s in chosen))
         onion_surprise.install(card, layout_name, base, True)
         stale_count = 0
         if scrapes:
@@ -1406,7 +1423,7 @@ def sync_card(args):
         for name in old_drivers:
             print(ui.green(f"🧹 Removed old driver {name}"))
     pico8_wrote = []
-    failed += pico8.run(card, layout_name, base, False, pico8_wrote)
+    failed += pico8.run(card, layout_name, base, False, pico8_wrote, syncs=any(s["bucket"] == "pico8" for s in chosen))
     failed += onion_surprise.install(card, layout_name, base, False)
     if theme_todo:
         failed += downloads.run_downloads(theme_todo, "Themes", "🎨", os.path.join(base, themes_dir), failures)

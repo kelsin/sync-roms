@@ -11,9 +11,11 @@
       "onion": "ARCADE",
       "allium": "ARCADE",
       "spruce": "ARCADE",
+      "muos": "mame",
       "emudeck": "mame",
       "nextui": null
     },
+    "muos_catalogue": "Arcade",
     "bios": {
       "files": [],
       "note": "MAME-style romsets: BIOS/device zips go in the same folder as the game zips (ES-DE guide). zips."
@@ -31,9 +33,11 @@
       "onion": "ATARI",
       "allium": "ATARI",
       "spruce": "ATARI",
+      "muos": "atari2600",
       "emudeck": "atari2600",
       "nextui": "Atari 2600 (A2600)"
     },
+    "muos_catalogue": "Atari 2600",
     "bios": {
       "files": [],
       "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
@@ -51,9 +55,11 @@
       "onion": "FIFTYTWOHUNDRED",
       "allium": "FIFTYTWOHUNDRED",
       "spruce": "FIFTYTWOHUNDRED",
+      "muos": "atari5200",
       "emudeck": "atari5200",
       "nextui": "Atari 5200 (A5200)"
     },
+    "muos_catalogue": "Atari 5200",
     "bios": {
       "files": [
         "5200.rom"
@@ -75,9 +81,11 @@
       "onion": "SEVENTYEIGHTHUNDRED",
       "allium": "SEVENTYEIGHTHUNDRED",
       "spruce": "SEVENTYEIGHTHUNDRED",
+      "muos": "atari7800",
       "emudeck": "atari7800",
       "nextui": "Atari 7800 (A7800)"
     },
+    "muos_catalogue": "Atari 7800",
     "bios": {
       "files": [
         "7800 BIOS (U).rom"
@@ -99,9 +107,11 @@
       "onion": null,
       "allium": null,
       "spruce": "EIGHTHUNDRED",
+      "muos": "atari800",
       "emudeck": "atari800",
       "nextui": null
     },
+    "muos_catalogue": "Atari 800",
     "bios": {
       "files": [
         "5200.rom",
@@ -127,9 +137,11 @@
       "onion": "LYNX",
       "allium": "LYNX",
       "spruce": "LYNX",
+      "muos": "lynx",
       "emudeck": "atarilynx",
       "nextui": "Atari Lynx (LYNX)"
     },
+    "muos_catalogue": "Atari Lynx",
     "bios": {
       "files": [
         "lynxboot.img"
@@ -151,9 +163,11 @@
       "onion": null,
       "allium": null,
       "spruce": "ATARIST",
+      "muos": "atarist",
       "emudeck": "atarist",
       "nextui": null
     },
+    "muos_catalogue": "Atari ST-STE-TT-Falcon",
     "bios": {
       "files": [
         "tos.img",
@@ -177,9 +191,11 @@
       "onion": "COLECO",
       "allium": "COLECO",
       "spruce": "COLECO",
+      "muos": "colecovision",
       "emudeck": "colecovision",
       "nextui": "ColecoVision (COLECO)"
     },
+    "muos_catalogue": "ColecoVision",
     "bios": {
       "files": [
         "Databases/msxromdb.xml",
@@ -209,12 +225,14 @@
       "onion": "GBA",
       "allium": "GBA",
       "spruce": "GBA",
+      "muos": "gba",
       "emudeck": "gba",
       "nextui": "Game Boy Advance (GBA)"
     },
     "nextui_bios_tags": [
       "MGBA"
     ],
+    "muos_catalogue": "Nintendo Game Boy Advance",
     "bios": {
       "files": [
         "gba_bios.bin",
@@ -239,9 +257,11 @@
       "onion": "GBC",
       "allium": "GBC",
       "spruce": "GBC",
+      "muos": "gbc",
       "emudeck": "gbc",
       "nextui": "Game Boy Color (GBC)"
     },
+    "muos_catalogue": "Nintendo Game Boy Color",
     "bios": {
       "files": [
         "gb_bios.bin",
@@ -268,9 +288,11 @@
       "onion": "GB",
       "allium": "GB",
       "spruce": "GB",
+      "muos": "gb",
       "emudeck": "gb",
       "nextui": "Game Boy (GB)"
     },
+    "muos_catalogue": "Nintendo Game Boy",
     "bios": {
       "files": [
         "gb_bios.bin",
@@ -297,9 +319,11 @@
       "onion": "INTELLIVISION",
       "allium": "INTELLIVISION",
       "spruce": "INTELLIVISION",
+      "muos": "intellivision",
       "emudeck": "intellivision",
       "nextui": null
     },
+    "muos_catalogue": "Mattel Intellivision",
     "bios": {
       "files": [
         "exec.bin",
@@ -325,9 +349,11 @@
       "onion": "NEOGEO",
       "allium": "NEOGEO",
       "spruce": "NEOGEO",
+      "muos": "neogeo",
       "emudeck": "neogeo",
       "nextui": "Neo Geo (FBN)"
     },
+    "muos_catalogue": "SNK Neo Geo",
     "bios": {
       "files": [
         "neogeo.zip",
@@ -372,9 +398,11 @@
       "onion": "FC",
       "allium": "FC",
       "spruce": "FC",
+      "muos": "nes",
       "emudeck": "nes",
       "nextui": "Nintendo Entertainment System (FC)"
     },
+    "muos_catalogue": "Nintendo NES - Famicom",
     "bios": {
       "files": [],
       "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
@@ -392,9 +420,11 @@
       "onion": "FDS",
       "allium": "FDS",
       "spruce": "FDS",
+      "muos": "fds",
       "emudeck": "fds",
       "nextui": "Famicom Disk System (FDS)"
     },
+    "muos_catalogue": "Nintendo Family Computer Disk System",
     "bios": {
       "files": [
         "disksys.rom",
@@ -420,9 +450,11 @@
       "onion": null,
       "allium": null,
       "spruce": "N64",
+      "muos": "n64",
       "emudeck": "n64",
       "nextui": null
     },
+    "muos_catalogue": "Nintendo N64",
     "bios": {
       "files": [],
       "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
@@ -440,9 +472,11 @@
       "onion": "NDS",
       "allium": "NDS",
       "spruce": "NDS",
+      "muos": "nds",
       "emudeck": "nds",
       "nextui": null
     },
+    "muos_catalogue": "Nintendo DS",
     "bios": {
       "files": [
         "firmware.bin",
@@ -472,9 +506,11 @@
       "onion": "ODYSSEY",
       "allium": "ODYSSEY",
       "spruce": "ODYSSEY",
+      "muos": "odyssey2",
       "emudeck": "odyssey2",
       "nextui": null
     },
+    "muos_catalogue": "Magnavox Odyssey - VideoPac",
     "bios": {
       "files": [
         "o2rom.bin",
@@ -500,9 +536,11 @@
       "onion": null,
       "allium": null,
       "spruce": null,
+      "muos": "pcfx",
       "emudeck": "pcfx",
       "nextui": null
     },
+    "muos_catalogue": "NEC PC-FX",
     "bios": {
       "files": [
         "pcfx.rom",
@@ -528,6 +566,7 @@
       "onion": null,
       "allium": null,
       "spruce": "PC98",
+      "muos": null,
       "emudeck": "pc98",
       "nextui": null
     },
@@ -568,9 +607,11 @@
       "onion": "THIRTYTWOX",
       "allium": "THIRTYTWOX",
       "spruce": "THIRTYTWOX",
+      "muos": "sega32x",
       "emudeck": "sega32x",
       "nextui": "Sega 32X (32X)"
     },
+    "muos_catalogue": "Sega 32X",
     "bios": {
       "files": [
         "32X_G_BIOS.BIN",
@@ -597,9 +638,11 @@
       "onion": "SEGACD",
       "allium": "SEGACD",
       "spruce": "SEGACD",
+      "muos": "megacd",
       "emudeck": "segacd",
       "nextui": "Sega CD (SEGACD)"
     },
+    "muos_catalogue": "Sega Mega CD - Sega CD",
     "bios": {
       "files": [
         "bios_MD.bin",
@@ -636,9 +679,11 @@
       "onion": null,
       "allium": null,
       "spruce": "DC",
+      "muos": "dreamcast",
       "emudeck": "dreamcast",
       "nextui": null
     },
+    "muos_catalogue": "Sega Dreamcast",
     "bios": {
       "files": [
         "dc/dc_boot.bin",
@@ -673,9 +718,11 @@
       "onion": "GG",
       "allium": "GG",
       "spruce": "GG",
+      "muos": "gamegear",
       "emudeck": "gamegear",
       "nextui": "Game Gear (GG)"
     },
+    "muos_catalogue": "Sega Game Gear",
     "bios": {
       "files": [
         "bios_MD.bin",
@@ -709,9 +756,11 @@
       "onion": "MD",
       "allium": "MD",
       "spruce": "MD",
+      "muos": "megadrive",
       "emudeck": "genesis",
       "nextui": "Sega Genesis (MD)"
     },
+    "muos_catalogue": "Sega Mega Drive - Genesis",
     "bios": {
       "files": [
         "bios_MD.bin",
@@ -745,9 +794,11 @@
       "onion": "MS",
       "allium": "MS",
       "spruce": "MS",
+      "muos": "mastersystem",
       "emudeck": "mastersystem",
       "nextui": "Sega Master System (SMS)"
     },
+    "muos_catalogue": "Sega Master System",
     "bios": {
       "files": [
         "bios_MD.bin",
@@ -781,9 +832,11 @@
       "onion": null,
       "allium": null,
       "spruce": "SATURN",
+      "muos": "saturn",
       "emudeck": "saturn",
       "nextui": null
     },
+    "muos_catalogue": "Sega Saturn",
     "bios": {
       "files": [
         "sega_101.bin",
@@ -815,12 +868,14 @@
       "onion": "SFC",
       "allium": "SFC",
       "spruce": "SFC",
+      "muos": "snes",
       "emudeck": "snes",
       "nextui": "Super Nintendo (SFC)"
     },
     "nextui_bios_tags": [
       "SUPA"
     ],
+    "muos_catalogue": "Nintendo SNES - SFC",
     "bios": {
       "files": [
         "BS-X.bin",
@@ -861,9 +916,11 @@
       "onion": "PCE",
       "allium": "PCE",
       "spruce": "PCE",
+      "muos": "pcengine",
       "emudeck": "tg16",
       "nextui": "TurboGrafx-16 (PCE)"
     },
+    "muos_catalogue": "NEC PC Engine",
     "bios": {
       "files": [
         "syscard3.pce",
@@ -891,9 +948,11 @@
       "onion": "PCECD",
       "allium": "PCECD",
       "spruce": "PCECD",
+      "muos": "pcenginecd",
       "emudeck": "tg-cd",
       "nextui": "TurboGrafx-CD (PCE)"
     },
+    "muos_catalogue": "NEC PC Engine CD",
     "bios": {
       "files": [
         "syscard3.pce",
@@ -924,9 +983,11 @@
       "onion": "VECTREX",
       "allium": "VECTREX",
       "spruce": "VECTREX",
+      "muos": "vectrex",
       "emudeck": "vectrex",
       "nextui": null
     },
+    "muos_catalogue": "GCE Vectrex",
     "bios": {
       "files": [],
       "libretro_cores": [
@@ -947,9 +1008,11 @@
       "onion": "VB",
       "allium": "VB",
       "spruce": "VB",
+      "muos": "virtualboy",
       "emudeck": "virtualboy",
       "nextui": "Virtual Boy (VB)"
     },
+    "muos_catalogue": "Nintendo Virtual Boy",
     "bios": {
       "files": [],
       "libretro_cores": [
@@ -969,9 +1032,11 @@
       "onion": "WS",
       "allium": "WS",
       "spruce": "WS",
+      "muos": "wonderswan",
       "emudeck": "wonderswan",
       "nextui": null
     },
+    "muos_catalogue": "Bandai WonderSwan Color",
     "bios": {
       "files": [],
       "libretro_cores": [
@@ -991,9 +1056,11 @@
       "onion": "WS",
       "allium": "WS",
       "spruce": "WSC",
+      "muos": "wonderswancolor",
       "emudeck": "wonderswancolor",
       "nextui": null
     },
+    "muos_catalogue": "Bandai WonderSwan Color",
     "bios": {
       "files": [],
       "libretro_cores": [
@@ -1013,6 +1080,7 @@
       "onion": null,
       "allium": null,
       "spruce": null,
+      "muos": null,
       "emudeck": "mame-advmame",
       "nextui": null
     },
@@ -1033,9 +1101,11 @@
       "onion": null,
       "allium": null,
       "spruce": null,
+      "muos": "arcade",
       "emudeck": "arcade",
       "nextui": null
     },
+    "muos_catalogue": "Arcade",
     "bios": {
       "files": [],
       "note": "MAME-style romsets: BIOS/device zips go in the same folder as the game zips (ES-DE guide). zips."
@@ -1053,9 +1123,11 @@
       "onion": null,
       "allium": null,
       "spruce": "ARDUBOY",
+      "muos": "arduboy",
       "emudeck": "arduboy",
       "nextui": null
     },
+    "muos_catalogue": "Arduboy",
     "bios": {
       "files": [],
       "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
@@ -1073,9 +1145,11 @@
       "onion": null,
       "allium": null,
       "spruce": "ATOMISWAVE",
+      "muos": "atomiswave",
       "emudeck": "atomiswave",
       "nextui": null
     },
+    "muos_catalogue": "Sega Atomiswave Naomi",
     "bios": {
       "files": [
         "dc/dc_boot.bin",
@@ -1102,9 +1176,11 @@
       "onion": null,
       "allium": null,
       "spruce": "CHAI",
+      "muos": "chailove",
       "emudeck": "chailove",
       "nextui": null
     },
+    "muos_catalogue": "ChaiLove",
     "bios": {
       "files": [],
       "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
@@ -1122,9 +1198,11 @@
       "onion": "FAIRCHILD",
       "allium": "FAIRCHILD",
       "spruce": "FAIRCHILD",
+      "muos": "channelf",
       "emudeck": "channelf",
       "nextui": null
     },
+    "muos_catalogue": "Fairchild Channel F",
     "bios": {
       "files": [
         "sl31253.bin",
@@ -1147,9 +1225,11 @@
       "onion": "CPS1",
       "allium": "CPS1",
       "spruce": "CPS1",
+      "muos": "cps1",
       "emudeck": "cps1",
       "nextui": "CPS1 (FBN)"
     },
+    "muos_catalogue": "Arcade",
     "bios": {
       "files": [],
       "note": "MAME-style romsets: BIOS/device zips go in the same folder as the game zips (ES-DE guide). zips."
@@ -1166,9 +1246,11 @@
       "onion": "CPS2",
       "allium": "CPS2",
       "spruce": "CPS2",
+      "muos": "cps2",
       "emudeck": "cps2",
       "nextui": "CPS2 (FBN)"
     },
+    "muos_catalogue": "Arcade",
     "bios": {
       "files": [],
       "note": "MAME-style romsets: BIOS/device zips go in the same folder as the game zips (ES-DE guide). zips."
@@ -1185,9 +1267,11 @@
       "onion": "CPS3",
       "allium": "CPS3",
       "spruce": "CPS3",
+      "muos": "cps3",
       "emudeck": "cps3",
       "nextui": "CPS3 (FBN)"
     },
+    "muos_catalogue": "Arcade",
     "bios": {
       "files": [],
       "note": "MAME-style romsets: BIOS/device zips go in the same folder as the game zips (ES-DE guide). zips."
@@ -1205,6 +1289,7 @@
       "onion": null,
       "allium": null,
       "spruce": null,
+      "muos": null,
       "emudeck": "daphne",
       "nextui": null
     },
@@ -1224,9 +1309,11 @@
       "onion": null,
       "allium": null,
       "spruce": "DOOM",
+      "muos": "doom",
       "emudeck": "doom",
       "nextui": "Doom (PRBOOM)"
     },
+    "muos_catalogue": "Doom",
     "bios": {
       "files": [],
       "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
@@ -1243,9 +1330,11 @@
       "onion": null,
       "allium": null,
       "spruce": "EASYRPG",
+      "muos": "easyrpg",
       "emudeck": "easyrpg",
       "nextui": null
     },
+    "muos_catalogue": "RPG Maker 2000 - 2003",
     "bios": {
       "files": [],
       "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
@@ -1263,9 +1352,11 @@
       "onion": "FBNEO",
       "allium": "FBNEO",
       "spruce": "FBNEO",
+      "muos": "fbneo",
       "emudeck": "fbneo",
       "nextui": "Arcade (FBN)"
     },
+    "muos_catalogue": "Arcade",
     "bios": {
       "files": [
         "fbneo/neogeo.zip",
@@ -1315,9 +1406,11 @@
       "onion": null,
       "allium": null,
       "spruce": null,
+      "muos": "lowresnx",
       "emudeck": "lowresnx",
       "nextui": null
     },
+    "muos_catalogue": "LowRes NX",
     "bios": {
       "files": [],
       "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
@@ -1333,6 +1426,7 @@
       "onion": null,
       "allium": null,
       "spruce": null,
+      "muos": null,
       "emudeck": "lutro",
       "nextui": null
     },
@@ -1353,9 +1447,11 @@
       "onion": "MEGADUCK",
       "allium": "MEGADUCK",
       "spruce": "MEGADUCK",
+      "muos": "megaduck",
       "emudeck": "megaduck",
       "nextui": null
     },
+    "muos_catalogue": "Mega Duck - Cougar Boy",
     "bios": {
       "files": [],
       "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
@@ -1372,9 +1468,11 @@
       "onion": null,
       "allium": null,
       "spruce": null,
+      "muos": "n64dd",
       "emudeck": "n64dd",
       "nextui": null
     },
+    "muos_catalogue": "Nintendo N64",
     "bios": {
       "files": [
         "64DD_IPL.bin",
@@ -1398,9 +1496,11 @@
       "onion": null,
       "allium": null,
       "spruce": "NAOMI",
+      "muos": "naomi",
       "emudeck": "naomi",
       "nextui": null
     },
+    "muos_catalogue": "Sega Atomiswave Naomi",
     "bios": {
       "files": [
         "dc/dc_boot.bin",
@@ -1429,9 +1529,11 @@
       "onion": "NEOCD",
       "allium": "NEOCD",
       "spruce": "NEOCD",
+      "muos": "neogeocd",
       "emudeck": "neogeocd",
       "nextui": null
     },
+    "muos_catalogue": "SNK Neo Geo CD",
     "bios": {
       "files": [
         "neocd/neocd_f.rom",
@@ -1467,9 +1569,11 @@
       "onion": "NGP",
       "allium": "NGP",
       "spruce": "NGP",
+      "muos": "ngp",
       "emudeck": "ngp",
       "nextui": "Neo Geo Pocket (NGP)"
     },
+    "muos_catalogue": "SNK Neo Geo Pocket",
     "bios": {
       "files": [],
       "libretro_cores": [
@@ -1489,9 +1593,11 @@
       "onion": "NGP",
       "allium": "NGP",
       "spruce": "NGPC",
+      "muos": "ngpc",
       "emudeck": "ngpc",
       "nextui": "Neo Geo Pocket Color (NGPC)"
     },
+    "muos_catalogue": "SNK Neo Geo Pocket - Color",
     "bios": {
       "files": [],
       "libretro_cores": [
@@ -1510,9 +1616,11 @@
       "onion": null,
       "allium": null,
       "spruce": "OPENBOR",
+      "muos": "openbor",
       "emudeck": "openbor",
       "nextui": null
     },
+    "muos_catalogue": "OpenBOR",
     "bios": {
       "files": [],
       "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
@@ -1530,9 +1638,11 @@
       "onion": null,
       "allium": null,
       "spruce": null,
+      "muos": "3do",
       "emudeck": "3do",
       "nextui": null
     },
+    "muos_catalogue": "The 3DO Company - 3DO",
     "bios": {
       "files": [
         "panafz1.bin",
@@ -1571,9 +1681,11 @@
       "onion": "PICO",
       "allium": "PICO",
       "spruce": "PICO8",
+      "muos": "pico8",
       "emudeck": "pico8",
       "nextui": "PICO-8 (P8)"
     },
+    "muos_catalogue": "PICO-8",
     "bios": {
       "files": [],
       "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
@@ -1591,9 +1703,11 @@
       "onion": "POKE",
       "allium": "POKE",
       "spruce": "POKE",
+      "muos": "pokemini",
       "emudeck": "pokemini",
       "nextui": "Pokemon Mini (PKM)"
     },
+    "muos_catalogue": "Nintendo Pokemon Mini",
     "bios": {
       "files": [],
       "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
@@ -1609,6 +1723,7 @@
       "onion": "PORTS",
       "allium": "PORTS",
       "spruce": "PORTS",
+      "muos": null,
       "emudeck": "ports",
       "nextui": null
     },
@@ -1629,9 +1744,11 @@
       "onion": "PS",
       "allium": "PS",
       "spruce": "PS",
+      "muos": "psx",
       "emudeck": "psx",
       "nextui": "PlayStation (PS)"
     },
+    "muos_catalogue": "Sony PlayStation",
     "bios": {
       "files": [
         "scph5500.bin",
@@ -1676,9 +1793,11 @@
       "onion": null,
       "allium": null,
       "spruce": "PSP",
+      "muos": "psp",
       "emudeck": "psp",
       "nextui": null
     },
+    "muos_catalogue": "Sony PlayStation Portable",
     "bios": {
       "files": [],
       "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
@@ -1703,9 +1822,11 @@
       "onion": "SATELLAVIEW",
       "allium": "SATELLAVIEW",
       "spruce": "SATELLAVIEW",
+      "muos": "satellaview",
       "emudeck": "satellaview",
       "nextui": null
     },
+    "muos_catalogue": "Nintendo SNES - SFC",
     "bios": {
       "files": [
         "BS-X.bin",
@@ -1745,9 +1866,11 @@
       "onion": "SCUMMVM",
       "allium": "SCUMMVM",
       "spruce": "SCUMMVM",
+      "muos": "scummvm",
       "emudeck": "scummvm",
       "nextui": null
     },
+    "muos_catalogue": "ScummVM",
     "bios": {
       "files": [],
       "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
@@ -1765,9 +1888,11 @@
       "onion": "SGFX",
       "allium": "SGFX",
       "spruce": "SGFX",
+      "muos": "supergrafx",
       "emudeck": "supergrafx",
       "nextui": null
     },
+    "muos_catalogue": "NEC PC Engine SuperGrafx",
     "bios": {
       "files": [
         "syscard3.pce",
@@ -1794,6 +1919,7 @@
       "onion": "SGB",
       "allium": "SGB",
       "spruce": "SGB",
+      "muos": null,
       "emudeck": "sgb",
       "nextui": "Super Game Boy (SGB)"
     },
@@ -1846,9 +1972,11 @@
       "onion": "SUFAMI",
       "allium": "SUFAMI",
       "spruce": "SUFAMI",
+      "muos": "sufami",
       "emudeck": "sufami",
       "nextui": null
     },
+    "muos_catalogue": "Nintendo SNES - SFC",
     "bios": {
       "files": [
         "BS-X.bin",
@@ -1889,9 +2017,11 @@
       "onion": "SUPERVISION",
       "allium": "SUPERVISION",
       "spruce": "SUPERVISION",
+      "muos": "supervision",
       "emudeck": "supervision",
       "nextui": null
     },
+    "muos_catalogue": "Watara Supervision",
     "bios": {
       "files": [],
       "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
@@ -1909,9 +2039,11 @@
       "onion": "TIC",
       "allium": "TIC",
       "spruce": "TIC",
+      "muos": "tic80",
       "emudeck": "tic80",
       "nextui": null
     },
+    "muos_catalogue": "TIC-80",
     "bios": {
       "files": [],
       "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
@@ -1928,9 +2060,11 @@
       "onion": null,
       "allium": null,
       "spruce": "QUAKE",
+      "muos": "quake",
       "emudeck": "quake",
       "nextui": null
     },
+    "muos_catalogue": "Quake",
     "bios": {
       "files": [],
       "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
@@ -1947,9 +2081,11 @@
       "onion": null,
       "allium": null,
       "spruce": null,
+      "muos": "uzebox",
       "emudeck": "uzebox",
       "nextui": null
     },
+    "muos_catalogue": "Uzebox",
     "bios": {
       "files": [],
       "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
@@ -1967,9 +2103,11 @@
       "onion": null,
       "allium": null,
       "spruce": "JAGUAR",
+      "muos": "jaguar",
       "emudeck": "atarijaguar",
       "nextui": null
     },
+    "muos_catalogue": "Atari Jaguar",
     "bios": {
       "files": [],
       "note": "Only the MAME alternative needs a BIOS (zip in the ROM folder); Virtual Jaguar and BigPEmu need none"
@@ -1987,6 +2125,7 @@
       "onion": null,
       "allium": null,
       "spruce": null,
+      "muos": null,
       "emudeck": "atarijaguarcd",
       "nextui": null
     },
@@ -2007,9 +2146,11 @@
       "onion": null,
       "allium": null,
       "spruce": null,
+      "muos": "cdi",
       "emudeck": "cdimono1",
       "nextui": null
     },
+    "muos_catalogue": "Philips CDi",
     "bios": {
       "files": [
         "same_cdi/bios/cdimono1.zip",
@@ -2033,6 +2174,7 @@
       "onion": null,
       "allium": null,
       "spruce": null,
+      "muos": null,
       "emudeck": "gc",
       "nextui": null
     },
@@ -2066,6 +2208,7 @@
       "onion": null,
       "allium": null,
       "spruce": null,
+      "muos": null,
       "emudeck": "mark3",
       "nextui": null
     },
@@ -2101,6 +2244,7 @@
       "onion": null,
       "allium": null,
       "spruce": null,
+      "muos": null,
       "emudeck": "model2/roms",
       "nextui": null
     },
@@ -2120,6 +2264,7 @@
       "onion": null,
       "allium": null,
       "spruce": null,
+      "muos": null,
       "emudeck": "model3",
       "nextui": null
     },
@@ -2140,9 +2285,11 @@
       "onion": null,
       "allium": null,
       "spruce": null,
+      "muos": "3ds",
       "emudeck": "n3ds",
       "nextui": null
     },
+    "muos_catalogue": "Nintendo 3DS",
     "bios": {
       "files": [],
       "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
@@ -2160,9 +2307,11 @@
       "onion": null,
       "allium": null,
       "spruce": null,
+      "muos": "3ds",
       "emudeck": "n3ds",
       "nextui": null
     },
+    "muos_catalogue": "Nintendo 3DS",
     "bios": {
       "files": [],
       "note": "Not a libretro-default-core system or no libretro BIOS list; ES-DE column \"esde_needs_bios\" is authoritative"
@@ -2179,6 +2328,7 @@
       "onion": null,
       "allium": null,
       "spruce": null,
+      "muos": null,
       "emudeck": "naomi2",
       "nextui": null
     },
@@ -2209,6 +2359,7 @@
       "onion": null,
       "allium": null,
       "spruce": null,
+      "muos": null,
       "emudeck": "naomigd",
       "nextui": null
     },
@@ -2240,6 +2391,7 @@
       "onion": null,
       "allium": null,
       "spruce": null,
+      "muos": null,
       "emudeck": "ps2",
       "nextui": null
     },
@@ -2272,6 +2424,7 @@
       "onion": null,
       "allium": null,
       "spruce": null,
+      "muos": null,
       "emudeck": "ps3",
       "nextui": null
     },
@@ -2301,6 +2454,7 @@
       "onion": null,
       "allium": null,
       "spruce": null,
+      "muos": null,
       "emudeck": null,
       "nextui": null
     },
@@ -2321,6 +2475,7 @@
       "onion": null,
       "allium": null,
       "spruce": null,
+      "muos": null,
       "emudeck": "psvita",
       "nextui": null
     },
@@ -2340,6 +2495,7 @@
       "onion": null,
       "allium": null,
       "spruce": null,
+      "muos": null,
       "emudeck": "stv",
       "nextui": null
     },
@@ -2360,6 +2516,7 @@
       "onion": null,
       "allium": null,
       "spruce": null,
+      "muos": null,
       "emudeck": "switch",
       "nextui": null
     },
@@ -2382,6 +2539,7 @@
       "onion": null,
       "allium": null,
       "spruce": null,
+      "muos": null,
       "emudeck": "triforce",
       "nextui": null
     },
@@ -2401,6 +2559,7 @@
       "onion": null,
       "allium": null,
       "spruce": null,
+      "muos": null,
       "emudeck": "type-x",
       "nextui": null
     },
@@ -2421,6 +2580,7 @@
       "onion": null,
       "allium": null,
       "spruce": null,
+      "muos": null,
       "emudeck": "wii",
       "nextui": null
     },
@@ -2444,6 +2604,7 @@
       "onion": null,
       "allium": null,
       "spruce": null,
+      "muos": null,
       "emudeck": "wiiu/roms",
       "nextui": null
     },
@@ -2464,6 +2625,7 @@
       "onion": null,
       "allium": null,
       "spruce": null,
+      "muos": null,
       "emudeck": "xbox",
       "nextui": null
     },
@@ -2504,6 +2666,7 @@
       "onion": null,
       "allium": null,
       "spruce": null,
+      "muos": null,
       "emudeck": "xbox360/roms",
       "nextui": null
     },
@@ -2527,6 +2690,7 @@
       "onion": null,
       "allium": null,
       "spruce": null,
+      "muos": null,
       "emudeck": null,
       "nextui": null
     },
@@ -2547,6 +2711,7 @@
       "onion": null,
       "allium": null,
       "spruce": "SEGASGONE",
+      "muos": null,
       "emudeck": "sg-1000",
       "nextui": "Sega SG-1000 (SG1000)"
     },
@@ -2569,6 +2734,7 @@
       "onion": null,
       "allium": null,
       "spruce": "MSX",
+      "muos": null,
       "emudeck": "msx",
       "nextui": "MSX (MSX)"
     },
@@ -2920,6 +3086,7 @@
       "onion": null,
       "allium": null,
       "spruce": "MSX",
+      "muos": null,
       "emudeck": "msx2",
       "nextui": "MSX2 (MSX)"
     },
@@ -3271,6 +3438,7 @@
       "onion": null,
       "allium": null,
       "spruce": null,
+      "muos": null,
       "emudeck": "arcadia",
       "nextui": null
     },
@@ -3293,6 +3461,7 @@
       "onion": null,
       "allium": null,
       "spruce": null,
+      "muos": null,
       "emudeck": "gamate",
       "nextui": null
     },
@@ -3316,6 +3485,7 @@
       "onion": null,
       "allium": null,
       "spruce": null,
+      "muos": null,
       "emudeck": "gamecom",
       "nextui": null
     },
@@ -3339,6 +3509,7 @@
       "onion": null,
       "allium": null,
       "spruce": "COMMODORE",
+      "muos": null,
       "emudeck": "c64",
       "nextui": "Commodore 64 (C64)"
     },

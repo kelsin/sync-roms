@@ -14,7 +14,8 @@
     "soc": "Allwinner H700",
     "screen": "1:1",
     "firmwares": [
-      "knulli"
+      "knulli",
+      "muos"
     ]
   },
   {
@@ -53,7 +54,8 @@
     "screen": "3:2",
     "firmwares": [
       "nextui",
-      "knulli"
+      "knulli",
+      "muos"
     ]
   },
   {
@@ -80,7 +82,8 @@
     "soc": "Rockchip RK3576",
     "screen": "16:9",
     "firmwares": [
-      "knulli"
+      "knulli",
+      "muos"
     ]
   },
   {
@@ -89,7 +92,8 @@
     "soc": "Allwinner H700",
     "screen": "4:3",
     "firmwares": [
-      "knulli"
+      "knulli",
+      "muos"
     ],
     "network": false
   },
@@ -99,7 +103,8 @@
     "soc": "Allwinner H700",
     "screen": "3:2",
     "firmwares": [
-      "knulli"
+      "knulli",
+      "muos"
     ]
   },
   {
@@ -109,7 +114,8 @@
     "screen": "3:2",
     "firmwares": [
       "nextui",
-      "knulli"
+      "knulli",
+      "muos"
     ]
   },
   {
@@ -136,7 +142,8 @@
     "soc": "Allwinner H700",
     "screen": "4:3",
     "firmwares": [
-      "knulli"
+      "knulli",
+      "muos"
     ],
     "network": false
   },
@@ -146,7 +153,8 @@
     "soc": "Allwinner H700",
     "screen": "4:3",
     "firmwares": [
-      "knulli"
+      "knulli",
+      "muos"
     ]
   },
   {
@@ -155,7 +163,8 @@
     "soc": "Allwinner H700",
     "screen": "4:3",
     "firmwares": [
-      "knulli"
+      "knulli",
+      "muos"
     ]
   },
   {
@@ -164,7 +173,8 @@
     "soc": "Allwinner H700",
     "screen": "4:3",
     "firmwares": [
-      "knulli"
+      "knulli",
+      "muos"
     ]
   },
   {
@@ -173,7 +183,8 @@
     "soc": "Allwinner H700",
     "screen": "4:3",
     "firmwares": [
-      "knulli"
+      "knulli",
+      "muos"
     ]
   },
   {
@@ -218,7 +229,8 @@
     "soc": "Allwinner H700",
     "screen": "4:3",
     "firmwares": [
-      "knulli"
+      "knulli",
+      "muos"
     ]
   },
   {
@@ -227,7 +239,8 @@
     "soc": "Allwinner H700",
     "screen": "4:3",
     "firmwares": [
-      "knulli"
+      "knulli",
+      "muos"
     ]
   },
   {

@@ -116,6 +116,7 @@ You pick a device, then the firmware it runs (a device with only one isn't asked
 | --- | --- | --- |
 | `esde` | `ROMs/` `BIOS/` | Android devices with ES-DE |
 | `knulli` | `roms/` `bios/` (SD card SHARE partition, `/userdata`) | Default for the Anbernic H700 (except the RG SP and RG34XX SP, which default to `nextui`), RG Vita Pro and Miyoo Flip handhelds |
+| `muos` | `ROMS/` `MUOS/bios/` | [muOS](https://muos.dev/) on the Anbernic H700 handhelds, RG CubeXX and RG Vita Pro. Folder names are matched ignoring case and separators |
 | `onion` | `Roms/` `BIOS/` | Miyoo Mini, Mini Plus and Mini Flip, on [Onion](https://onionui.github.io/) |
 | `allium` | `Roms/` `BIOS/` | Miyoo Mini, Mini Plus and Mini Flip, on [Allium](https://github.com/goweiwen/Allium). Same folders and `Imgs/` box art as `onion`, but with a full `gamelist.xml` |
 | `spruce` | `Roms/` `BIOS/` | Miyoo Mini, Mini Plus, Mini Flip and Flip, on [Spruce](https://github.com/spruceUI/spruceOS) (spruceOS). Its own upper-case folder names (`SFC`, `MD`, `FC`, `PS`, ...), box art in `Imgs/` and a `miyoogamelist.xml`. RetroArch saves and states are in `Saves/saves` and `Saves/states` |
@@ -193,6 +194,7 @@ While typing a filter (or a note, which `w` opens in the game list): `^A` `^E` s
    | `onion` | `<system>/Imgs/Game.png`, the 250x360 box art made when scraping | `<system>/miyoogamelist.xml` with name and image |
    | `spruce` | same `Imgs/` box art as `onion` | `<system>/miyoogamelist.xml` with name and image |
    | `allium` | same `Imgs/` box art as `onion` | `<system>/gamelist.xml` with name, image, rating, date, developer, publisher and genre |
+   | `muos` | `MUOS/info/catalogue/<system>/box/Game.png` (cover, then 3D box) and `preview/Game.png` (screenshot, then title screen), as uploaded | `text/Game.txt` with the description |
    | `nextui` | `Roms/<folder>/.media/<ROM name>.png` (the picture the theme shows) | none |
    | `emudeck` | `Emulation/tools/downloaded_media/<system>/<type>/…` (every type) | `~/ES-DE/gamelists/<system>/gamelist.xml` on the machine running the sync (see below) |
 
@@ -203,7 +205,7 @@ While typing a filter (or a note, which `w` opens in the game list): `^A` `^E` s
    the media still goes on the card.
 
    For `esde` and `emudeck`, `<system>` is the system's ES-DE folder name (`sg-1000`, `n3ds`): systems that share a
-   ROM folder, like `3ds` and `n3ds`, share its media and gamelist folders. An existing
+   ROM folder, like `3ds` and `n3ds`, share its media and gamelist folders. muOS keeps its media in folders of its own, flat even for ROMs in subfolders. An existing
    `.txt` is rewritten only when the description differs.
 
    Knulli's main image is the miximage, or the screenshot if there is none. Onion's picture is made
@@ -218,7 +220,12 @@ While typing a filter (or a note, which `w` opens in the game list): `^A` `^E` s
 6. Finally, media on the card for ROMs the card doesn't have is removed, with no confirmation. It looks at
    every system in the layout, not only the ones you synced, and leaves systems whose ROM folder doesn't
    exist, and folders that aren't systems in `src/sync_roms/data/systems.json` (like ES-DE's `androidapps`), alone.
-   This assumes the card's art comes from this app: art you add by hand for ROMs that aren't on the card is removed too.
+   This assumes the card's art comes from this app: on muOS it removes `box`, `preview` and `text` files in
+   `MUOS/info/catalogue/<system>/` (names compared ignoring case; systems that share a catalogue folder, like
+   the arcade ones, are judged together; `grid`, `manual`, `overlay` and the other catalogue areas are left
+   alone). A muOS folder whose ROM folders hold no ROMs is skipped, so art isn't
+   wiped from a card whose ROMs are elsewhere (muOS can keep them on SD2). Art you add by hand or install
+   from a `.muxcat` set for ROMs that aren't on the card is removed too.
 7. For the `esde` (Android) layout, everything in storage's `os/android/APKs/` folder (APKs, the Obtainium app list) is
    copied to an `APKs/` folder on the card so the apps can be installed from the device. For the `onion` layout
    (not Allium), everything under storage's `os/onion/Themes/` is copied to the card's `Themes/` the same way,
@@ -240,7 +247,8 @@ While typing a filter (or a note, which `w` opens in the game list): `^A` `^E` s
    Install Pico-8); Onion (`RApp/PICO-8/bin/`) and Allium
    (`Apps/pico.pak/bin/`) get the extracted `pico8_dyn` and `pico8.dat`; Spruce (`BIOS/`) also gets `pico8_64`. Run the installer once on the device. The
    card's `pico8` field in `cards.json` records the zip, so it is copied once per zip. NextUI cards get no zip: they have no
-   installer, and their PICO-8 carts sync as plain ROMs.
+   installer, and their PICO-8 carts sync as plain ROMs. muOS cards are skipped with a warning: where an installable
+   PICO-8 package goes isn't documented.
 
    A sync that wrote to the card also creates `.metadata_never_index` in the card root, empties `.fseventsd` and puts a
    `.fseventsd/no_log` file in it (on any OS), so macOS doesn't index or log the card.
@@ -258,7 +266,7 @@ Every mode is a command (`sync-roms COMMAND --help` explains one; plain `sync-ro
 | `collections edit` | edit your collections of favourite games (saved in `~/.sync-roms/collections/`) | |
 | `themes update` | put the latest Art Book Next for ES-DE (for collections' theme art) in storage | |
 | `download pico8` | add the PICO-8 BBS Featured carts storage doesn't have, and newer revisions of those it has (see below) | |
-| `flash` | write a Knulli or BaseOS image from storage's `os/` to an SD card, macOS only (see below) | |
+| `flash` | write a Knulli, BaseOS or muOS image from storage's `os/` to an SD card, macOS only (see below) | |
 | `cards list\|new\|set\|rename\|delete\|copy\|export\|import` | manage cards (`list` shows the space each card's picks take: ROMs, scrapes and BIOS, against its size, and how many full systems and games it syncs); `copy SRC DST` merges games, sets, excluded and collections into DST, skipping systems it can't play; `export FILE` flattens surprises and collections into games, `import FILE` keeps size, device, layout, games and excluded and turns Surprise off (`r` renames, `p` prefixes all) | |
 | `saves stash\|apply [CARD]` | copy RetroArch saves and states off a card into `~/.sync-roms/saves/`, or stashed ones onto a card (see below) | |
 | `devices [ID]` | list devices, or one device's systems (`--json`) | `--devices` |
@@ -401,11 +409,14 @@ storage doesn't have (`new:`) and those the BBS has a newer revision of (`upgrad
 - Carts in `ignored.json` are never downloaded.
 - Requests go one at a time. The first HTTP error stops the run with a warning; carts already added stay.
 
-## Flashing Knulli and BaseOS (`flash`)
+## Flashing Knulli, BaseOS and muOS (`flash`)
 
-`sync-roms flash [--dry-run]` writes a Knulli image (`os/knulli/knulli-*.img.gz`) or a BaseOS image (`os/baseos/baseos-*.img.zip`) from storage to an SD card. macOS only.
+`sync-roms flash [--dry-run]` writes a Knulli image (`os/knulli/knulli-*.img.gz`), a BaseOS image (`os/baseos/baseos-*.img.zip`) or a muOS image (`os/muos/muos-*.img.gz`) from storage to an SD card. macOS only.
 
-- You pick a device (one that runs Knulli or has a BaseOS image), then an image (the ones matching the device first, newest first), then an external SD card.
+- You pick a firmware (asked only when `os/` holds both Knulli or BaseOS images and muOS images), then a device (for
+  Knulli or BaseOS, one that runs Knulli or has a BaseOS image; for muOS, one that runs muOS), then an image (the ones
+  matching the device first, newest first; muOS image names aren't documented, so none is marked as matching), then an
+  external SD card.
   Cards show their volume names. The boot disk and the disks holding the temp folder or storage are never offered,
   and flash stops if it can't tell which disks those are.
 - You confirm by typing the disk id (`disk4`). `--yes` never skips this. `--dry-run` stops here.
@@ -656,7 +667,9 @@ gets no logo, so the frontend shows it as text.
   uses them (its logo sits a little lower than on the Outline systems). Knulli only shows a custom collection on its own
   when it isn't grouped under Collections, so `UseCustomCollectionsSystemEx` is set to `false` unless you already chose
   a value; that shows your other custom collections on their own too.
-- Art for a collection that is renamed or removed stays in the theme folders; it is unused.
+- **muOS**: the art goes to the catalogue as `MUOS/info/catalogue/Collection/box/<Name>.png` and `grid/<Name>.png` (no
+  logo); sync removes the ones it put there when a collection goes.
+- On ES-DE and Knulli, art for a collection that is renamed or removed stays in the theme folders; it is unused.
 
 ### Full systems
 
@@ -708,6 +721,7 @@ on them are replaced at the next sync.
   `surprise_ttl_days` in `settings.json` (default 183) whenever it is written. It is how a game comes around again only later.
 - **Frontends**: ES-DE, Knulli, EmuDeck and NextUI cards get the surprises as a custom collection named `Surprise`, written
   like any other [collection](#collections-in-es-de-knulli-emudeck-and-nextui); that name is reserved, so a collection can't be called Surprise.
+  muOS cards get it as a muOS collection named `Surprise` (see [muOS](#muos)).
   Onion cards get the Surprise app: the newest `os/onion/Surprise-v<version>.zip` in storage is installed as `App/Surprise/`,
   and `Roms/surprise.json` lists the card's surprises for it.
 - **Art Book Next**: Surprise gets a gift-box artwork and logo in the theme's Outline style, like any
@@ -722,7 +736,8 @@ on them are replaced at the next sync.
 { "RGSP": { "device": "anbernic-rg-sp", "layout": "knulli", "games": { "gba": { "full_system": true } } } }
 ```
 
-`games` maps system ids to games (or `{"full_system": true}`), and may hold `"sets"`. A card is identified by its folder name, so
+`games` maps system ids to games (or `{"full_system": true}`), and may hold `"sets"`. A `muos` card may also hold `"muos_storage": "sd2"`
+(default `sd1`) when its ROMs are on muOS's second SD card; set it by hand in `cards.json` (see [muOS](#muos)). A card is identified by its folder name, so
 renaming the folder makes it a new card. The local mirror (`--mirror`) holds every card's games.
 
 `excluded` (`{"gba": ["gba/A.zip"]}`) lists set games this card opts out of. Press `e` on a system in the
@@ -758,6 +773,7 @@ one already on the card, a typed name, or none (RetroArch with sort by core off)
 | `onion`, `allium` | `Saves/CurrentProfile` | `saves/<core>` | `states/<core>` |
 | `spruce` | `Saves` | `saves` | `states` |
 | `nextui` | card root | `Saves/<TAG>` | `.userdata/shared/<TAG>-<core>` |
+| `muos` | `MUOS/pickles` (Pickles) | `sram/<core>[/<ROM folder>]` | `state/<core>[/<ROM folder>]/<game>/` |
 | `emudeck` | `Emulation/saves/retroarch` | `saves` | `states` |
 
 On `nextui`, `apply` renames a save to MinUI's `Game.gba.sav` (taken from the card's ROM; PlayStation saves and saves with no ROM there keep their name) and `stash` turns it back into `.srm`.
@@ -768,6 +784,9 @@ point its save folders at the card's `RetroArch/saves` and `RetroArch/states` (e
 pass it with `--retroarch DIR`. EmuDeck's folders are symlinks that only resolve on the Deck; elsewhere pass the real
 folder with `--retroarch`. States only load in the core they were made with (`gpSP` states don't load in `mGBA`);
 `.srm` saves (and `.rtc`) usually work in any core of the system.
+
+muOS cards use Pickles' saves and states, copied as they are, not converted from RetroArch's. A stash made on a muOS
+card applies only to muOS cards, and `--retroarch` is ignored there.
 
 ## Converting to CHD and xiso (`--cd`, formerly `--chd`)
 
@@ -883,6 +902,21 @@ sync are left out. `--dry-run` lists what would be written.
   (or `$ESDE_APPDATA_DIR`) on the machine running the sync, laid out as in the ES-DE column. Sync the card on the Steam
   Machine or Steam Deck to get them. Sync skips them with a warning when ES-DE isn't set up there, or when that ES-DE's
   `ROMDirectory` (in `settings/es_settings.xml`) isn't the card's `Emulation/roms`, as EmuDeck sets it.
+
+## muOS
+
+`muos` cards hold ROMs in `ROMS/`, BIOS in `MUOS/bios/` and scraped art in `MUOS/info/catalogue/` (see [Scraping from ScreenScraper](#scraping-from-screenscraper-scrape)).
+
+- **Collections and Surprise**: each [collection](#collections) is a folder `MUOS/info/collection/<Name>/` holding one
+  `<ROM>-<8 hex digits>.cfg` entry per game on the card (the ROM's path on the device, its folder under `ROMS/`, its name).
+  Surprise is one such collection, named `Surprise`. Only folders sync wrote are touched, and `--dry-run` lists
+  what would change. Collection art goes to `MUOS/info/catalogue/Collection/box` and `grid` (see
+  [Theme art](#theme-art-for-collections)).
+- **`muos_storage`**: the card's `cards.json` entry may hold `"muos_storage": "sd1"` (default, mounted at `/mnt/mmc`) or
+  `"sd2"` (`/mnt/sdcard`), the storage muOS reads the ROMs from, which collection entries point at. There is no editor for it.
+- **Saves**: `saves stash` and `saves apply` use Pickles' `MUOS/pickles/sram` and `state` (see [saves](#moving-saves-between-cards-saves)).
+- **Flash**: `sync-roms flash` offers every `muos-*.img.gz` in storage's `os/muos/` (see [Flashing](#flashing-knulli-baseos-and-muos-flash)).
+- **PICO-8** isn't installed on muOS cards (a warning says so).
 
 ## Troubleshooting
 

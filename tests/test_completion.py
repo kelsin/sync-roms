@@ -19,7 +19,7 @@ case "$3" in
   cards) echo "SD One"; echo RGSP;;
   systems) echo gba; echo gbc; echo snes;;
   devices) echo full; echo rg35xx-sp;;
-  layouts) echo knulli; echo onion;;
+  layouts) echo knulli; echo muos;;
 esac
 """
 
@@ -57,7 +57,7 @@ class BashCompletion(unittest.TestCase):
         self.assertEqual(subprocess.run([shutil.which("bash"), "-n", f"{self.dir}/comp.bash"]).returncode, 0)
 
     def test_values(self):
-        self.assertEqual(self.complete("sync-roms", "--layout", "o"), ["onion"])
+        self.assertEqual(self.complete("sync-roms", "--layout", "m"), ["muos"])
         self.assertEqual(self.complete("sync-roms", "--device", "f"), ["full"])
         self.assertIn("RGSP", self.complete("sync-roms", "--card", "R"))
 

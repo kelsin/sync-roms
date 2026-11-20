@@ -950,6 +950,8 @@ def check_data(list_keys=None, repo_systems=None):
             problems.append(f"cards.json: {name}: 'drivers' must be a list of names")
         if "pico8" in entry and not (isinstance(entry["pico8"], str) and entry["pico8"]):
             problems.append(f"cards.json: {name}: 'pico8' must be a file name")
+        if "muos_storage" in entry and entry["muos_storage"] not in ("sd1", "sd2"):
+            problems.append(f"cards.json: {name}: 'muos_storage' must be sd1 or sd2")
         if "surprise" in entry and not isinstance(entry["surprise"], bool):
             problems.append(f"cards.json: {name}: 'surprise' must be true or false")
         picks = entry.get("surprises", [])

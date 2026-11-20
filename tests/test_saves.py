@@ -228,6 +228,15 @@ class StashTest(unittest.TestCase):
         self.assertEqual(out[0]["dir"], d)
         self.assertEqual(out[0]["game"], "Game")
 
+    def test_rel_and_core_kept_when_present(self):
+        e = [dict(x, rel="GBA/Hacks") for x in self.entries()]
+        d = saves.write_stash("MU", "muos", "gba", "Game", "gpSP", e, now=self.now)
+        meta = json.load(open(os.path.join(d, "stash.json")))
+        self.assertEqual(meta["files"], [{"name": "Game.srm", "kind": "save", "rel": "GBA/Hacks", "core": "gpSP"},
+                                         {"name": "Game.state.auto", "kind": "state", "rel": "GBA/Hacks",
+                                          "core": "gpSP"}])
+        self.assertEqual(saves.load_stashes()[0]["files"], meta["files"])
+
     def test_same_second_suffix(self):
         e = self.entries()
         d1 = saves.write_stash("SHARE", "onion", "gba", "Game", "gpSP", e, now=self.now)
@@ -261,7 +270,13 @@ class StashTest(unittest.TestCase):
             good = json.load(f)
         for i, change in enumerate(({"files": [{"name": "../x.srm", "kind": "save"}]},
                                     {"files": [{"name": "a/b.srm", "kind": "save"}]},
-                                    {"game": 5}, {"system": None}, {"stashed": 1})):
+                                    {"game": 5}, {"system": None}, {"stashed": 1},
+                                    {"files": [{"name": "a.srm", "kind": "save", "rel": "../x"}]},
+                                    {"files": [{"name": "a.srm", "kind": "save", "rel": "/x"}]},
+                                    {"files": [{"name": "a.srm", "kind": "save", "rel": 5}]},
+                                    {"core": None, "files": [{"name": "a.srm", "kind": "save", "rel": "x"}]},
+                                    {"core": "../c", "files": [{"name": "a.srm", "kind": "save", "rel": "x"}]},
+                                    {"game": "..", "files": [{"name": "a.srm", "kind": "save", "rel": "x"}]})):
             helpers.touch(os.path.join(saves.stash_root(), "gba", f"bad{i}", "stash.json"),
                           json.dumps({**good, **change}))
         self.assertEqual([s["game"] for s in saves.load_stashes()], ["Good"])
@@ -271,6 +286,8 @@ class TargetTest(unittest.TestCase):
     def test_every_layout(self):
         system = SYSTEMS[0]
         for name, layout in LAYOUTS.items():
+            if "retroarch" not in layout:
+                continue
             ra = layout["retroarch"]
             for kind in ("save", "state", "thumbnail"):
                 if "{core}" in (ra["saves"] if kind == "save" else ra["states"]):
@@ -342,6 +359,9 @@ class PlanApplyTest(unittest.TestCase):
 class LayoutDataTest(unittest.TestCase):
     def test_every_layout_has_retroarch(self):
         for name, layout in LAYOUTS.items():
+            if "pickles" in layout:  # muOS: Pickles saves, not RetroArch
+                self.assertEqual(set(layout["pickles"]), {"dir"}, name)
+                continue
             self.assertEqual(set(layout["retroarch"]) - {"create"}, {"dir", "saves", "states"}, name)
 
 
@@ -560,6 +580,100 @@ class StashCommandTest(CommandTest):
 
 
 class ApplyCommandTest(CommandTest):
+    def test_stash_and_apply_round_trip_on_a_muos_card(self):
+        catalog = {"layouts": LAYOUTS, "systems": [dict(s, folders=dict(s["folders"], muos=s["bucket"]))
+                                                   for s in CATALOG_SYSTEMS], "devices": []}
+        p = mock.patch.object(store, "load_catalog", lambda: catalog)
+        p.start()
+        self.addCleanup(p.stop)
+        old = self.card("MU", "muos")
+        pk = os.path.join(old, "MUOS", "pickles")
+        helpers.touch(os.path.join(old, "ROMS/GBA/Hacks/Game.zip"), "r")
+        helpers.touch(os.path.join(pk, "sram/mGBA/GBA/Hacks/Game.srm"), "save")
+        helpers.touch(os.path.join(pk, "state/mGBA/GBA/Hacks/Game/slot_1.state"), "slot")
+        helpers.touch(os.path.join(pk, "state/mGBA/GBA/Hacks/Game/states.ini"), "ini")
+        helpers.touch(os.path.join(pk, "sram/mGBA/Nope/Lost.srm"), "x")
+        self.lists([True], lambda labels: [True] * len(labels))
+        code, out, err = self.run_cmd("saves", "stash", old)
+        self.assertEqual(code, 0, err)
+        self.assertEqual(self.calls[1][1], ["Game · GBA/Hacks/Game.srm", "Game · GBA/Hacks/slot_1.state",
+                                            "Game · GBA/Hacks/states.ini"])
+        self.assertIn("Stashed 3 file(s) of 1 game(s)", out)
+        self.assertIn("skipped 1 file", out)
+        [stash] = saves.load_stashes()
+        self.assertEqual((stash["layout"], stash["core"]), ("muos", "mGBA"))
+        self.assertEqual({(f["rel"], f["core"]) for f in stash["files"]}, {("GBA/Hacks", "mGBA")})
+        self.stash()  # a RetroArch stash never goes onto a muOS card
+        new = self.card("MU2", "muos")
+        helpers.touch(os.path.join(new, "MUOS/pickles/state/mGBA/GBA/Hacks/Game/states.ini"), "other")
+        self.calls.clear()
+        self.lists([True])
+        with mock.patch.object(ui, "confirm", return_value=False) as confirm:
+            code, out, err = self.run_cmd("saves", "apply", new)
+        self.assertEqual(code, 0, err)
+        self.assertEqual(self.calls[0][1], ["Game · GBA/Hacks"])
+        self.assertIn("states.ini", confirm.call_args[0][0] + out)
+        pk = os.path.join(new, "MUOS", "pickles")
+        self.assertEqual(self.read_file(pk, "sram/mGBA/GBA/Hacks/Game.srm"), "save")
+        self.assertEqual(self.read_file(pk, "state/mGBA/GBA/Hacks/Game/slot_1.state"), "slot")
+        self.assertEqual(self.read_file(pk, "state/mGBA/GBA/Hacks/Game/states.ini"), "other")
+        self.assertIn("Applied 2 file(s) of 1 game(s) to MU2", out)
+        self.assertIn("1 different file(s) kept", out)
+
+    def muos_catalog(self):
+        catalog = {"layouts": LAYOUTS, "systems": [dict(s, folders=dict(s["folders"], muos=s["bucket"]))
+                                                   for s in CATALOG_SYSTEMS], "devices": []}
+        p = mock.patch.object(store, "load_catalog", lambda: catalog)
+        p.start()
+        self.addCleanup(p.stop)
+
+    def test_same_stem_in_sibling_rom_dirs_stays_apart(self):
+        self.muos_catalog()
+        old = self.card("MU", "muos")
+        pk = os.path.join(old, "MUOS", "pickles")
+        for rel, data in (("GBA", "orig"), ("GBA/Hacks", "hack")):
+            helpers.touch(os.path.join(pk, "sram/mGBA", rel, "Game.srm"), f"{data}-save")
+            helpers.touch(os.path.join(pk, "state/mGBA", rel, "Game/slot_1.state"), f"{data}-slot")
+            helpers.touch(os.path.join(pk, "state/mGBA", rel, "Game/states.ini"), f"{data}-ini")
+        self.lists([True], lambda labels: [True] * len(labels))
+        code, out, err = self.run_cmd("saves", "stash", old)
+        self.assertEqual(code, 0, err)
+        self.assertEqual(len(set(self.calls[1][1])), 6)
+        self.assertIn("Stashed 6 file(s) of 2 game(s)", out)
+        stashes = saves.load_stashes()
+        self.assertEqual(sorted({f["rel"] for f in s["files"]}.pop() for s in stashes), ["GBA", "GBA/Hacks"])
+        self.assertTrue(all(len({f["rel"] for f in s["files"]}) == 1 for s in stashes))
+        new = self.card("MU2", "muos")
+        self.calls.clear()
+        self.lists(lambda labels: [True] * len(labels))
+        code, out, err = self.run_cmd("saves", "apply", new)
+        self.assertEqual(code, 0, err)
+        self.assertNotIn("one stash per game", out)
+        pk = os.path.join(new, "MUOS", "pickles")
+        for rel, data in (("GBA", "orig"), ("GBA/Hacks", "hack")):
+            self.assertEqual(self.read_file(pk, "sram/mGBA", rel, "Game.srm"), f"{data}-save")
+            self.assertEqual(self.read_file(pk, "state/mGBA", rel, "Game/slot_1.state"), f"{data}-slot")
+            self.assertEqual(self.read_file(pk, "state/mGBA", rel, "Game/states.ini"), f"{data}-ini")
+        self.assertIn("Applied 6 file(s) of 2 game(s) to MU2", out)
+
+    def test_retroarch_flag_warned_on_muos(self):
+        self.muos_catalog()
+        base = self.card("MU", "muos")
+        code, _, err = self.run_cmd("saves", "stash", base, "--retroarch", base)
+        self.assertEqual(code, 0)
+        self.assertIn("--retroarch is ignored on muOS cards", err)
+
+    def test_muos_stash_never_goes_onto_a_retroarch_card(self):
+        tmp = os.path.join(self.cards_dir.name, "src", "slot_1.state")
+        helpers.touch(tmp, "slot")
+        saves.write_stash("MU", "muos", "gba", "Game", "mGBA",
+                          [{"path": tmp, "name": "slot_1.state", "kind": "state", "core": "mGBA", "rel": "gba"}])
+        base = self.card("NEW", "knulli")
+        self.lists(lambda labels: self.fail(f"offered {labels}"))
+        code, out, _ = self.run_cmd("saves", "apply", base)
+        self.assertEqual(code, 0)
+        self.assertIn("No stashed saves", out)
+
     def nextui_card(self, rom="Game.gba", folder="Game Boy Advance (GBA)"):
         base = self.card("NX", "nextui")
         if rom:

@@ -58,6 +58,15 @@
     },
     "note": "Miyoo Mini family (SigmaStar SSD202D) and Miyoo Flip (RK3566) running spruceOS. Card root is the FAT32 SD card. System folders are the upper-case spruce names (SFC for the SNES, MD for the Genesis, FC for the NES, PS for the PlayStation), and ROMs go straight into them. Spruce reads a miyoogamelist.xml (name, image) in each ROM folder and box art from its Imgs/ folder. BIOS files go in the root BIOS/ folder, keeping the libretro subfolders (dc/, nds/, neocd/, ...). Systems with spruce = null have no spruce folder. Sources: https://github.com/spruceUI/spruceOS/wiki/11.-Adding-Games, https://github.com/spruceUI/spruceOS/wiki/10.-Adding-BIOS"
   },
+  "muos": {
+    "label": "muOS",
+    "roms_dir": "ROMS",
+    "bios_dir": "MUOS/bios",
+    "pickles": {
+      "dir": "MUOS/pickles"
+    },
+    "note": "MustardOS 2606.0 on Anbernic H700 handhelds (and the RG Vita Pro). Card root is the games partition (exFAT or FAT32). muOS matches folder names to systems ignoring case, spaces, hyphens, underscores and plus signs, so the names here are the Knulli ones where muOS knows them. Systems with muos = null have no muOS system. Sources: https://muos.dev/docs/infrastructure/storage, https://muos.dev/installation/catalogue"
+  },
   "emudeck": {
     "label": "EmuDeck",
     "roms_dir": "Emulation/roms",
