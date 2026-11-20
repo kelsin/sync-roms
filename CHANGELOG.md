@@ -1,5 +1,26 @@
 # Changelog
 
+## [3.18.0](https://github.com/kelsin/sync-roms/compare/v3.17.0...v3.18.0) (2026-11-20)
+
+
+### :video_game: Features
+
+* **cards:** install RAOfflineProxy per layout with a card setting ([#426](https://github.com/kelsin/sync-roms/issues/426)) ([27d2065](https://github.com/kelsin/sync-roms/commit/27d2065709a09672a5acf45f9721687070bc0c0f))
+* **cards:** show ❔ in the size slot for cards with no size set ([#425](https://github.com/kelsin/sync-roms/issues/425)) ([9f252a9](https://github.com/kelsin/sync-roms/commit/9f252a9821e2e9c4685125320b1c6fa71b7c596b))
+* **guide:** add hotkeys cheat sheet to setup guide ([#424](https://github.com/kelsin/sync-roms/issues/424)) ([e0f6939](https://github.com/kelsin/sync-roms/commit/e0f6939e0fb50ee88c5262ea8633117aaedba8d0))
+* **guide:** add RetroArch saving settings to setup guide ([#421](https://github.com/kelsin/sync-roms/issues/421)) ([a0a5ffb](https://github.com/kelsin/sync-roms/commit/a0a5ffb42f48370ca1d4ef4c46805e2c3cc2a24e))
+* **spruce:** write collections to Collections/collections.json ([#427](https://github.com/kelsin/sync-roms/issues/427)) ([8555048](https://github.com/kelsin/sync-roms/commit/85550489b1424debca3e24404a9dbac80a859826))
+
+
+### :broom: Chores
+
+* run in a uv-managed venv on latest stable python ([#428](https://github.com/kelsin/sync-roms/issues/428)) ([5d575d8](https://github.com/kelsin/sync-roms/commit/5d575d89f53c94dccbec7f4eb2c84a9a84c900b8))
+
+
+### :book: Documentation
+
+* **guide:** add syncthing setup section per layout ([#423](https://github.com/kelsin/sync-roms/issues/423)) ([17f365b](https://github.com/kelsin/sync-roms/commit/17f365b77d8a79fb7c1b09a57dd87087055a452b))
+
 ## [3.17.0](https://github.com/kelsin/sync-roms/compare/v3.16.0...v3.17.0) (2026-11-20)
 
 
