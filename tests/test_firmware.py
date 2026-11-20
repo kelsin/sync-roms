@@ -217,10 +217,6 @@ class PlanMovesTest(unittest.TestCase):
         self.assertEqual(downloads.plan_moves([(*self.JOB[:2], None)], {"/card/a/Game.zip": 5}), [])
 
 
-if __name__ == "__main__":
-    unittest.main()
-
-
 class NextUIMediaExtrasTest(unittest.TestCase):
     def test_dot_media_is_never_an_extra(self):
         from sync_roms import downloads
@@ -228,3 +224,7 @@ class NextUIMediaExtrasTest(unittest.TestCase):
             touch(os.path.join(dest, "Game.gba"))
             touch(os.path.join(dest, ".media", "Game.png"))
             self.assertEqual(downloads.find_extras(dest, ["gba/Game.gba"]), [])
+
+
+if __name__ == "__main__":
+    unittest.main()
