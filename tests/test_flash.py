@@ -7,6 +7,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+import zipfile
 from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -15,15 +16,30 @@ import helpers  # noqa: E402
 from test_scripting import Isolated  # noqa: E402
 from sync_roms import flash, inventory, picker, store, ui, usersettings  # noqa: E402
 
-KEYS = ["os/knulli-h700-rg35xx-h-scarab-20260511.img.gz", "os/knulli-h700-rg34xx-sp-scarab-20260511.img.gz",
-        "os/knulli-h700-rg35xx-h-gladiator-20250101.img.gz", "os/knulli-rk3568-miyoo-flip-scarab-20260510.img.gz"]
+KEYS = ["os/knulli/knulli-h700-rg35xx-h-scarab-20260511.img.gz", "os/knulli/knulli-h700-rg34xx-sp-scarab-20260511.img.gz",
+        "os/knulli/knulli-h700-rg35xx-h-gladiator-20250101.img.gz", "os/knulli/knulli-rk3568-miyoo-flip-scarab-20260510.img.gz"]
 
 
 class Flash(unittest.TestCase):
-    def test_images_keeps_only_knulli_gz(self):
+    def test_images_keeps_only_knulli_gz_and_baseos_zip(self):
         listing = {k: 1 for k in KEYS} | {"os/Onion-v4.3.1-1.zip": 1, "os/esde/knulli-x-y-z-20260101.img.gz": 1,
-                                          "os/Zero40_32G.img.xz": 1}
-        self.assertEqual(sorted(flash.images(listing)), sorted(KEYS))
+                                          "os/knulli-h700-old-scarab-20260101.img.gz": 1,
+                                          "os/baseos/baseos-rg28xx-1.4.0.bosupd": 1,
+                                          "os/baseos/baseos-rg28xx-1.4.0.img.zip": 1, "os/Zero40_32G.img.xz": 1}
+        self.assertEqual(sorted(flash.images(listing)), sorted(KEYS + ["os/baseos/baseos-rg28xx-1.4.0.img.zip"]))
+
+    def test_baseos_matches_and_sorts_newest_version_first(self):
+        keys = ["os/baseos/baseos-rg35xxsp-1.4.0.img.zip", "os/baseos/baseos-rg35xxsp-1.10.0.img.zip",
+                "os/baseos/baseos-rgsp-1.4.0.img.zip", KEYS[0]]
+        got = flash.sort_images(keys, "anbernic-rg35xx-sp")
+        self.assertEqual(got[:2], [(keys[1], True), (keys[0], True)])
+        self.assertEqual(flash.sort_images(keys, "anbernic-rg-sp")[0], (keys[2], True))
+
+    def test_flashable_devices_adds_baseos_matches(self):
+        devs = [{"id": "anbernic-rg-sp", "firmwares": ["nextui"]}, {"id": "b", "firmwares": ["knulli"]},
+                {"id": "anbernic-rg28xx", "firmwares": ["esde"]}]
+        self.assertEqual([d["id"] for d in flash.flashable_devices(devs, ["os/baseos/baseos-rgsp-1.4.0.img.zip"])],
+                         ["anbernic-rg-sp", "b"])
 
     def test_sort_puts_matches_first_newest_first(self):
         got = flash.sort_images(KEYS, "anbernic-rg35xxh")
@@ -38,11 +54,6 @@ class Flash(unittest.TestCase):
 
     def test_no_match_still_lists_all(self):
         self.assertEqual(len(flash.sort_images(KEYS, "anbernic-rg28xx")), 4)
-
-    def test_knulli_devices(self):
-        devs = [{"id": "a", "firmwares": ["esde"]}, {"id": "b", "firmwares": ["knulli"]},
-                {"id": "c", "firmwares": ["onion", "knulli"]}]
-        self.assertEqual([d["id"] for d in flash.knulli_devices(devs)], ["b", "c"])
 
     def test_parse_disks_skips_excluded_and_reads_info(self):
         infos = {"disk4": {"TotalSize": 64_000_000_000, "MediaName": "SD Card Reader"},
@@ -92,6 +103,23 @@ class Write(unittest.TestCase):
         with open(self.target, "rb") as f:
             self.assertEqual(f.read(), self.data)
 
+    def test_write_copies_zipped_image(self):
+        path = os.path.join(self.tmp.name, "img.img.zip")
+        with zipfile.ZipFile(path, "w") as z:
+            z.writestr("baseos-x.img", self.data)
+        seen = []
+        self.assertEqual(flash.write_image(path, "disk9", seen.append), len(self.data))
+        self.assertAlmostEqual(seen[-1], 1.0)
+        with open(self.target, "rb") as f:
+            self.assertEqual(f.read(), self.data)
+
+    def test_zip_without_one_img_raises(self):
+        path = os.path.join(self.tmp.name, "bad.img.zip")
+        with zipfile.ZipFile(path, "w") as z:
+            z.writestr("readme.txt", "x")
+        with self.assertRaises(flash.FlashError):
+            flash.write_image(path, "disk9")
+
     def test_dd_failure_raises(self):
         with mock.patch.object(flash, "raw", lambda d: "/nonexistent-dir/x"):
             with self.assertRaises(flash.FlashError):
@@ -116,7 +144,7 @@ class Write(unittest.TestCase):
         self.assertAlmostEqual(seen[-1], 1.0)
 
 
-IMAGE = "os/knulli-h700-rg35xx-h-scarab-20260511.img.gz"
+IMAGE = "os/knulli/knulli-h700-rg35xx-h-scarab-20260511.img.gz"
 CARD = flash.Disk("disk4", 64_000_000_000, "SD")
 SUDO = ["sudo", "-v"]
 
@@ -351,7 +379,7 @@ class Run(helpers.StorageDir):
     def test_no_images(self):
         os.remove(os.path.join(self.root, IMAGE))
         self.assertEqual(self.flash(), 1)
-        self.assertIn("no Knulli images", self.out)
+        self.assertIn("no Knulli or BaseOS images", self.out)
 
     def test_not_macos(self):
         with mock.patch.object(flash.sys, "platform", "linux"):
