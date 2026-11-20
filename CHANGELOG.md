@@ -1,5 +1,16 @@
 # Changelog
 
+## [3.16.0](https://github.com/kelsin/sync-roms/compare/v3.15.0...v3.16.0) (2026-11-20)
+
+
+### :video_game: Features
+
+* **cardedit:** move keep card files to K so k can move up ([#413](https://github.com/kelsin/sync-roms/issues/413)) ([bfb7759](https://github.com/kelsin/sync-roms/commit/bfb7759016b3cec0e2f7bb5b0f3696fb7bb2013b))
+* **cards:** add convert to move a card's files to another layout ([#416](https://github.com/kelsin/sync-roms/issues/416)) ([ad4ef83](https://github.com/kelsin/sync-roms/commit/ad4ef83c172533b36610e4f904e7fb4f59770ee6))
+* **cards:** add per-card theme and collections settings ([#418](https://github.com/kelsin/sync-roms/issues/418)) ([5e985a3](https://github.com/kelsin/sync-roms/commit/5e985a3d0d24df21dde62d09dabd1da11528941a))
+* **muos:** add full muOS support ([#414](https://github.com/kelsin/sync-roms/issues/414)) ([051e8a8](https://github.com/kelsin/sync-roms/commit/051e8a8898e430de60217ae33cc4d2b368a8bc73))
+* **surprise:** limit Surprise systems per card and clarify keep/replace picker ([#417](https://github.com/kelsin/sync-roms/issues/417)) ([0e51dc8](https://github.com/kelsin/sync-roms/commit/0e51dc8b6506717b1bd15ddfdc8552aebd7dbd03))
+
 ## [3.15.0](https://github.com/kelsin/sync-roms/compare/v3.14.0...v3.15.0) (2026-11-20)
 
 
