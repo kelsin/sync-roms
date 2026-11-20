@@ -76,6 +76,11 @@ class Picks(Flow):
         self.assertEqual(n, 0)
         self.assertEqual(sp.games, [g("gba/Zelda.zip")])
 
+    def test_keep_ignores_keys_without_a_row(self):
+        self.card()
+        sp, n = self.keep(self.picks(), "gba/Emerald.zip", "gba/NoRow.zip")
+        self.assertEqual((n, sp.games), (1, [g("gba/Emerald.zip")]))
+
     def test_keep_unexcludes(self):
         self.card(games={store.SETS_KEY: ["pk"]}, excluded={"gba": ["gba/Ruby.zip"]})
         sp, n = self.keep(self.picks(), "gba/Ruby.zip")

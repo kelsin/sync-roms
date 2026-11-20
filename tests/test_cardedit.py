@@ -954,14 +954,14 @@ class Flow(DataDir):
         notes = []
 
         def match(system, keys):
-            return ({"gba/Ruby.zip"} if system["bucket"] == "gba" else set()), 1
+            return {"gba/Ruby.zip"} if system["bucket"] == "gba" else set()
         with mock.patch.object(edit, "note", notes.append):
             calls = self.run_keep(match, returns((cardedit.KEEP_KEY, 0)), returns(None))
         self.assertIn(cardedit.KEEP_KEY, calls[0][2]["hotkeys"])
         self.assertIn("k keep", calls[0][2]["hint"])
         self.assertIn(g("gba/Ruby.zip"), store.card_games("c")["gba"])
         self.assertEqual(len(notes), 1)
-        self.assertIn("1 card file", notes[0])
+        self.assertEqual(notes, ["Picked 1 card file(s) in 1 system(s)."])
 
     def test_k_skips_full_system(self):
         self.card(games={"gba": {"full_system": True}})
@@ -969,7 +969,7 @@ class Flow(DataDir):
 
         def match(system, keys):
             asked.append(system["bucket"])
-            return set(), 0
+            return set()
         self.run_keep(match, returns((cardedit.KEEP_KEY, 0)), returns(None))
         self.assertNotIn("gba", asked)
 

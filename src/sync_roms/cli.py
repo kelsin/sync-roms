@@ -1002,19 +1002,18 @@ def sync_card(args):
         return {k for k in keys if seen[k]}
 
     def card_match(s, keys):
-        """(which of keys are on the card already, how many other files the card has in the system's folder), for the
-        card editor's keep key. Names match like the card does: case and Unicode form left out."""
+        """Which of keys are on the card already, for the card editor's keep key. Names match like the card does:
+        case and Unicode form left out."""
         folder = s["folders"].get(layout_name)
         if not folder:
-            return set(), 0
+            return set()
         dest = os.path.join(roms_dir, folder)
         walks = list(downloads.walk_roms(dest, rename_temps=True))
         if disc_dir:
             walks += downloads.walk_roms(os.path.join(dest, disc_dir), rename_temps=True)
         names = {downloads.name_key(os.path.relpath(os.path.join(root, f), dest)) for root, files in walks for f in files}
         disc_keys = m3u.disc_keys(keys) if disc_dir else ()
-        rels = {k: downloads.name_key(downloads.rom_rel(k, disc_dir, disc_keys)) for k in keys}
-        return {k for k, r in rels.items() if r in names}, len(names - set(rels.values()))
+        return {k for k in keys if downloads.name_key(downloads.rom_rel(k, disc_dir, disc_keys)) in names}
 
     relist()
     interactive = not (ui.ASSUME_YES or args.json) and ui.has_terminal()

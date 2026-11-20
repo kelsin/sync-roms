@@ -56,6 +56,7 @@ class SystemPicks:
     def keep(self, keys, notes):
         """Switch each of keys on; how many were off before and are on now."""
         base = self.states(notes)
+        keys = [k for k in keys if k in base]  # a key with no row (a Vita DLC or update) can't be picked here
         before = sum(base[k] for k in keys)
         self.apply(keys, notes, base, [True] * len(keys))
         return sum(self.states(notes)[k] for k in keys) - before

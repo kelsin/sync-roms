@@ -249,8 +249,8 @@ def toggle_full(name, bucket):
 def edit_card(name, setup=None, to_fetch=None, card_match=None):
     """The card's system list. setup: (device or None for Full, layout) to edit with instead of the saved one.
     to_fetch(system, keys): the keys not on the card yet, when editing from a sync; the status then shows how much
-    a sync would download. card_match(system, keys): (the keys of the system's storage files that are on the card, how
-    many other files its card folder holds), when editing from a sync; it enables k."""
+    a sync would download. card_match(system, keys): the keys of the system's storage files that are on the card, when
+    editing from a sync; it enables k."""
     catalog = store.load_catalog()
     cards = store.load_cards()
     setup = setup or picker.saved_setup(cards.get(name), catalog["devices"], catalog["layouts"], name)
@@ -352,7 +352,7 @@ def edit_card(name, setup=None, to_fetch=None, card_match=None):
 def keep_card_files(name, setup, systems, card_match):
     """Pick, in every system that isn't a full one, the files already on the card that match a storage game."""
     picks = cardpicks.CardPicks(name, setup)
-    added = touched = unmatched = 0
+    added = touched = 0
     for system in systems:
         if picks.full(system["bucket"]):
             continue
@@ -361,12 +361,11 @@ def keep_card_files(name, setup, systems, card_match):
         except s3.ERRORS as e:
             edit.note(ui.yellow(f"⚠️  Couldn't list {system['name']} in storage: {e}"))
             continue
-        matched, other = card_match(system, list(sp.in_storage))
+        matched = card_match(system, list(sp.in_storage))
         n = sp.keep(sorted(matched), picks.cover())
-        added, touched, unmatched = added + n, touched + bool(n), unmatched + other
+        added, touched = added + n, touched + bool(n)
     picks.save()
-    edit.note(f"Picked {added} card file(s) in {touched} system(s); {unmatched} card file(s) match nothing in "
-              "storage and still get deleted")
+    edit.note(f"Picked {added} card file(s) in {touched} system(s).")
 
 
 def card_status(name, setup, systems, to_fetch=None):
