@@ -790,6 +790,9 @@
       "emudeck": "snes",
       "nextui": "Super Nintendo (SFC)"
     },
+    "nextui_bios_tags": [
+      "SUPA"
+    ],
     "bios": {
       "files": [
         "BS-X.bin",

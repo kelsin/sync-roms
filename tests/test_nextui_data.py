@@ -38,10 +38,10 @@ class NextUIDataTest(unittest.TestCase):
         for s in store.repo_json("systems"):
             self.assertEqual(list(s["folders"])[-1], "nextui", s["bucket"])
 
-    def test_gba_also_gets_its_bios_under_mgba(self):
+    def test_second_tag_bios(self):
         by_bucket = {s["bucket"]: s for s in store.repo_json("systems")}
-        self.assertEqual(by_bucket["gba"]["nextui_bios_tags"], ["MGBA"])
-        self.assertEqual([b for b, s in by_bucket.items() if "nextui_bios_tags" in s], ["gba"])
+        got = {b: s["nextui_bios_tags"] for b, s in by_bucket.items() if "nextui_bios_tags" in s}
+        self.assertEqual(got, {"gba": ["MGBA"], "snes": ["SUPA"]})
 
     def test_the_sp_devices_default_to_nextui_then_knulli(self):
         devices = {d["id"]: d for d in store.repo_json("devices")}
