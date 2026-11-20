@@ -118,15 +118,33 @@ def plan_bios(base, systems, old_name, old, new_name, new):
     return moves, skipped
 
 
-def plan_saves(base, systems, old_name, old, new_name, new):
+def _new_rom_names(base, system, new_name, new, rom_moves):
+    """File names the system's ROM folder in the new layout has once rom_moves are applied."""
+    names = set(saves.rom_names(base, new_name, new, system))
+    folder = system["folders"].get(new_name)
+    if folder:
+        root = os.path.join(base, *new["roms_dir"].split("/"), folder) + os.sep
+        for _, dst in rom_moves:
+            rel = dst[len(root):].split(os.sep) if dst.startswith(root) else []
+            if rel and not any(part.startswith(".") for part in rel):
+                names.add(rel[-1])
+    return names
+
+
+def plan_saves(base, systems, old_name, old, new_name, new, rom_moves=()):
     """([(src, dst)], [(label, reason)]): the card's RetroArch saves and states moved to the new layout's folders
-    (a MinUI save renamed to or from its ROM's file name). Run after the ROMs moved, since the new layout's ROM
-    folder names the saves. Files whose game isn't on the card are left alone; so are those the new layout can't
-    place (no core, no folder), which are reported."""
+    (a MinUI save renamed to or from its ROM's file name). Plan it before the ROM moves are applied, passing them as
+    rom_moves: the old layout's ROMs say which games are on the card, and the moves give the new layout's ROM file
+    names. Files whose game has no ROM on the card are left alone; so are those the new layout can't place (no core,
+    no folder) or can't name (several ROMs share the name), which are reported."""
     games, _ = saves.scan(base, old_name, old, systems)
+    stems = saves.rom_stems(base, old_name, old, systems)
     by_bucket = {s["bucket"]: s for s in systems}
+    minui = new.get("save_naming") == "minui"
     moves, skipped = [], []
-    for (bucket, _), entries in sorted(games.items()):
+    for (bucket, stem), entries in sorted(games.items()):
+        if bucket not in (stems.get(stem) or stems.get(saves.retroarch_name(stem)[:-4], set())):
+            continue
         system = by_bucket[bucket]
         roms = None
         for e in entries:
@@ -137,12 +155,12 @@ def plan_saves(base, systems, old_name, old, new_name, new):
             except ValueError as err:
                 skipped.append((label, str(err)))
                 continue
-            if saves._minui(new) and kind == "save" and bucket != "psx" and name.endswith(".srm"):
-                roms = saves.rom_names(base, new_name, new, system) if roms is None else roms
+            if minui and kind == "save" and bucket != "psx" and name.endswith(".srm"):
+                roms = _new_rom_names(base, system, new_name, new, rom_moves) if roms is None else roms
                 if not (renamed := saves.minui_name(name, roms)):
                     if any(os.path.splitext(r)[0] == name[:-4] for r in roms):
                         skipped.append((label, "several ROMs share its name in the new layout"))
-                    continue  # no ROM on the card: left alone
+                    continue
                 name = renamed
             dst = os.path.join(folder, name)
             if e["path"] != dst:

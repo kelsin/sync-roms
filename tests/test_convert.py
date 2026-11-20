@@ -180,21 +180,22 @@ class ConvertTest(unittest.TestCase):
         self.assertEqual(len(skipped), 1)
         self.assertIn("another copy", skipped[0][1])
 
-    def saves(self, old=("knulli", K), new=("nextui", N)):
-        return convert.plan_saves(self.base, SYSTEMS, old[0], old[1], new[0], new[1])
+    def saves(self, old=("knulli", K), new=("nextui", N), rom_moves=()):
+        return convert.plan_saves(self.base, SYSTEMS, old[0], old[1], new[0], new[1], rom_moves)
 
     def test_knulli_save_to_nextui_gets_rom_name(self):
         touch(self.p("saves", "gba", "Game.srm"))
-        touch(self.p("Roms", "Game Boy Advance (GBA)", "Game.gba"))
-        moves, skipped = self.saves()
+        touch(self.p("roms", "gba", "Game.gba"))
+        rom_moves = self.roms()[0]
+        moves, skipped = self.saves(rom_moves=rom_moves)
         self.assertEqual(moves, [(self.p("saves", "gba", "Game.srm"), self.p("Saves", "GBA", "Game.gba.sav"))])
         self.assertEqual(skipped, [])
 
     def test_knulli_state_has_no_core_for_nextui(self):
         touch(self.p("saves", "gba", "Game.srm"))
         touch(self.p("saves", "gba", "Game.state"))
-        touch(self.p("Roms", "Game Boy Advance (GBA)", "Game.gba"))
-        moves, skipped = self.saves()
+        touch(self.p("roms", "gba", "Game.gba"))
+        moves, skipped = self.saves(rom_moves=self.roms()[0])
         self.assertEqual(len(moves), 1)
         self.assertEqual(len(skipped), 1)
         self.assertIn("core", skipped[0][1])
@@ -217,6 +218,55 @@ class ConvertTest(unittest.TestCase):
         esde = LAYOUTS["esde"]
         moves, _ = self.saves(("esde", esde), ("esde", esde))
         self.assertEqual(moves, [])
+
+    def test_romless_save_left_alone_for_non_minui_target(self):
+        touch(self.p("saves", "gba", "Game.srm"))
+        self.assertEqual(self.saves(new=("esde", LAYOUTS["esde"])), ([], []))
+
+    def test_esde_to_nextui_plans_with_rom_only_in_old_location(self):
+        touch(self.p("RetroArch", "saves", "mGBA", "Game.srm"))
+        touch(self.p("RetroArch", "states", "mGBA", "Game.state"))
+        touch(self.p("ROMs", "gba", "Game.gba"))
+        esde = LAYOUTS["esde"]
+        rom_moves = self.roms(("esde", esde), ("nextui", N))[0]
+        moves, skipped = self.saves(("esde", esde), ("nextui", N), rom_moves)
+        self.assertEqual(sorted(moves), sorted([
+            (self.p("RetroArch", "saves", "mGBA", "Game.srm"), self.p("Saves", "GBA", "Game.gba.sav")),
+            (self.p("RetroArch", "states", "mGBA", "Game.state"),
+             self.p(".userdata", "shared", "GBA-mGBA", "Game.state"))]))
+        self.assertEqual(skipped, [])
+
+    def test_nextui_to_esde_with_rom_only_in_old_location_needs_core_for_saves(self):
+        touch(self.p("Saves", "GBA", "Game.gba.sav"))
+        touch(self.p(".userdata", "shared", "GBA-mGBA", "Game.state"))
+        touch(self.p("Roms", "Game Boy Advance (GBA)", "Game.gba"))
+        esde = LAYOUTS["esde"]
+        rom_moves = self.roms(("nextui", N), ("esde", esde))[0]
+        moves, skipped = self.saves(("nextui", N), ("esde", esde), rom_moves)
+        self.assertEqual(moves, [(self.p(".userdata", "shared", "GBA-mGBA", "Game.state"),
+                                  self.p("RetroArch", "states", "mGBA", "Game.state"))])
+        self.assertEqual(len(skipped), 1)
+        self.assertIn("needs a core", skipped[0][1])
+
+    def test_psx_save_keeps_srm_name_for_minui(self):
+        touch(self.p("saves", "psx", "Game.srm"))
+        touch(self.p("roms", "psx", "Game.cue"))
+        moves, _ = self.saves(rom_moves=self.roms()[0])
+        self.assertEqual(moves, [(self.p("saves", "psx", "Game.srm"), self.p("Saves", "PS", "Game.srm"))])
+
+    def test_two_roms_sharing_a_stem_are_reported(self):
+        touch(self.p("saves", "gba", "Game.srm"))
+        touch(self.p("roms", "gba", "Game.gba"))
+        touch(self.p("roms", "gba", "Game.zip"))
+        moves, skipped = self.saves(rom_moves=self.roms()[0])
+        self.assertEqual(moves, [])
+        self.assertEqual(len(skipped), 1)
+        self.assertIn("several ROMs", skipped[0][1])
+
+    def test_apple_double_files_not_planned(self):
+        touch(self.p("saves", "gba", "._Game.srm"))
+        touch(self.p("roms", "gba", "Game.gba"))
+        self.assertEqual(self.saves(rom_moves=self.roms()[0]), ([], []))
 
 
 if __name__ == "__main__":
