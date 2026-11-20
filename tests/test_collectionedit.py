@@ -564,10 +564,6 @@ class ArtPicker(unittest.TestCase):
         self.assertEqual(collectionedit.art_label(None), "none")
 
 
-if __name__ == "__main__":
-    unittest.main()
-
-
 class AllRows(unittest.TestCase):
     def rows(self, gba=frozenset({"gba/Ruby.zip"})):
         shown = listedit.view({"games": []}, SYSTEMS)
@@ -598,3 +594,25 @@ class AllRows(unittest.TestCase):
             chosen = listedit.pick_row_set([other, mine], {"gba/Ruby.zip"})
         self.assertIs(chosen, mine)
         self.assertEqual(len(seen), 1)
+
+    def test_toggle_all_narrows_to_a_set_and_clears_it(self):
+        from sync_roms import cardedit
+        _, rows = self.rows()
+        mine = {"name": "Mine", "games": [{"title": "Ruby", "system": "gba", "bucket": "gba/Ruby.zip"}]}
+        script = iter([cardedit.SET_KEY, cardedit.CLEAR_KEY, None])
+        seen = []
+
+        def fake(title, shown, **k):
+            seen.append([r[1] for r in shown])
+            return next(script)
+
+        place = {"session": {"query": "x"}}
+        with mock.patch.object(edit, "toggle_games", fake), mock.patch.object(listedit, "pick_row_set", return_value=mine):
+            listedit.toggle_all("All", rows, [mine], place=place)
+        every = [r[1] for r in rows]
+        self.assertEqual(seen, [every, ["gba/Ruby.zip"], every])
+        self.assertNotIn("query", place["session"])
+
+
+if __name__ == "__main__":
+    unittest.main()
