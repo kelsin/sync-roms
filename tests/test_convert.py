@@ -2,6 +2,7 @@ import os
 import sys
 import tempfile
 import unittest
+from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
@@ -111,6 +112,68 @@ class ConvertTest(unittest.TestCase):
         self.assertEqual(self.roms()[0], [])
         self.assertEqual(self.bios()[0], [])
         self.assertFalse(os.path.exists(self.p("roms", "gba")))
+
+    def test_case_rename_to_missing_spelling_does_not_crash(self):
+        src, dst = self.p("roms", "gba", "Game.zip"), self.p("Roms", "gba", "Game.zip")
+        touch(src)
+        real = os.path.samefile
+
+        def same(a, b):
+            if os.path.isdir(a):
+                raise FileNotFoundError(b)
+            return real(a, b)
+        with mock.patch.object(convert.os.path, "samefile", side_effect=same):
+            done, conflicts = convert.apply_moves([(src, dst)])
+        self.assertEqual((done, conflicts), ([(src, dst)], []))
+        self.assertTrue(os.path.exists(dst))
+
+    def test_source_gone_is_not_a_crash(self):
+        src, dst = self.p("roms", "gba", "Game.zip"), self.p("Roms", "x", "Game.zip")
+        touch(dst)
+        self.assertEqual(convert.apply_moves([(src, dst)]), ([], []))
+
+    def test_real_subfolder_stays_and_game_folder_flattens(self):
+        touch(self.p("Roms", "Game Boy Advance (GBA)", "Foo", "bar.zip"))
+        for n in ("G (Disc 1).cue", "G (Disc 2).cue", "G.m3u"):
+            touch(self.p("Roms", "PlayStation (PS)", "G", n))
+        moves, _ = self.roms(("nextui", N), ("knulli", K))
+        self.assertIn((self.p("Roms", "Game Boy Advance (GBA)", "Foo", "bar.zip"), self.p("roms", "gba", "Foo", "bar.zip")), moves)
+        self.assertIn((self.p("Roms", "PlayStation (PS)", "G", "G.m3u"), self.p("roms", "psx", "G.m3u")), moves)
+
+    def test_bios_with_a_path(self):
+        systems = [{"bucket": "x", "folders": {"knulli": "x", "nextui": "X (X)"}, "bios": {"files": ["fbneo/neogeo.zip"]}}]
+        touch(self.p("bios", "fbneo", "neogeo.zip"))
+        moves, _ = convert.plan_bios(self.base, systems, "knulli", K, "nextui", N)
+        self.assertEqual(moves, [(self.p("bios", "fbneo", "neogeo.zip"), self.p("Bios", "X", "fbneo", "neogeo.zip"))])
+        done, _ = convert.apply_moves(moves)
+        self.assertTrue(os.path.isfile(self.p("Bios", "X", "fbneo", "neogeo.zip")))
+
+    def test_shared_rom_folder_moves_once(self):
+        systems = [{"bucket": "a", "folders": {"knulli": "s", "nextui": "S (S)"}, "bios": {"files": []}},
+                   {"bucket": "b", "folders": {"knulli": "s", "nextui": "S (S)"}, "bios": {"files": []}}]
+        touch(self.p("roms", "s", "g.zip"))
+        moves, _ = convert.plan_roms(self.base, systems, "knulli", K, "nextui", N)
+        self.assertEqual(len(moves), 1)
+
+    def test_shared_bios_tag_moves_once(self):
+        systems = [{"bucket": "a", "folders": {"knulli": "a", "nextui": "A (T)"}, "bios": {"files": ["b.bin"]}},
+                   {"bucket": "b", "folders": {"knulli": "b", "nextui": "B (T)"}, "bios": {"files": ["b.bin"]}}]
+        touch(self.p("bios", "b.bin"))
+        moves, _ = convert.plan_bios(self.base, systems, "knulli", K, "nextui", N)
+        self.assertEqual(len(moves), 1)
+
+    def test_dotfiles_in_game_folders_ignored(self):
+        touch(self.p("Roms", "PlayStation (PS)", "G", "._G.m3u"))
+        touch(self.p("Roms", "PlayStation (PS)", "G", ".DS_Store"))
+        self.assertEqual(self.roms(("nextui", N), ("knulli", K))[0], [])
+
+    def test_extra_old_bios_copies_are_reported(self):
+        touch(self.p("Bios", "GBA", "gba_bios.bin"))
+        touch(self.p("Bios", "MGBA", "gba_bios.bin"))
+        moves, skipped = self.bios(("nextui", N), ("knulli", K))
+        self.assertEqual(moves, [(self.p("Bios", "GBA", "gba_bios.bin"), self.p("bios", "gba_bios.bin"))])
+        self.assertEqual(len(skipped), 1)
+        self.assertIn("another copy", skipped[0][1])
 
 
 if __name__ == "__main__":

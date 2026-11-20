@@ -35,14 +35,23 @@ def _walk(folder, keep_dir=None):
     return out
 
 
-def _flat(rel, layout):
-    """A file's path as the bucket keeps it: without the layout's disc folder or per-game folder."""
+def _flat(files, bucket, layout):
+    """{file's path in the layout: its path as the bucket keeps it}: without the layout's disc folder, and without the
+    per-game folder of a layout with disc_folders (only a folder m3u.game_folders would make; other folders stay)."""
     disc_dir = layout.get("disc_dir")
-    if disc_dir and rel.startswith(disc_dir + "/"):
-        return rel[len(disc_dir) + 1:]
-    if layout.get("disc_folders") and rel.count("/") == 1:
-        return rel.split("/", 1)[1]
-    return rel
+    flat = {}
+    for rel in files:
+        flat[rel] = rel[len(disc_dir) + 1:] if disc_dir and rel.startswith(disc_dir + "/") else rel
+    if layout.get("disc_folders"):
+        inner = {rel: f"{bucket}/{rel.split('/', 1)[1]}" for rel in files if rel.count("/") == 1}
+        by_folder = {}
+        for rel, key in inner.items():
+            by_folder.setdefault(rel.split("/")[0], {})[key] = rel
+        for folder, keys in by_folder.items():
+            for key, folder_of in m3u.game_folders(keys).items():
+                if folder_of == folder:
+                    flat[keys[key]] = key.split("/", 1)[1]
+    return flat
 
 
 def plan_roms(base, systems, old_name, old, new_name, new):
@@ -65,7 +74,7 @@ def plan_roms(base, systems, old_name, old, new_name, new):
         if not new_folder:
             skipped.append((system["bucket"], f"no folder in the {new_name} layout"))
             continue
-        keys = {f"{system['bucket']}/{_flat(f, old)}": f for f in files}
+        keys = {f"{system['bucket']}/{flat}": rel for rel, flat in _flat(files, system["bucket"], old).items()}
         disc_dir = new.get("disc_dir")
         discs = m3u.disc_keys(keys) if disc_dir else ()
         folders = m3u.game_folders(keys) if new.get("disc_folders") else None
@@ -95,15 +104,17 @@ def plan_bios(base, systems, old_name, old, new_name, new):
         for name in system["bios"]["files"]:
             if name.startswith(".") or name in seen:
                 continue
-            for d in old_dirs:
-                folder = _exact_dir(base, *d.split(os.sep))
-                if folder and name in _listed(folder):
-                    seen.add(name)
-                    src, dst = os.path.join(folder, name), os.path.join(base, new_dirs[0], name)
-                    if src != dst:
-                        moves.append((src, dst))
-                    skipped += [(name, "extra tag folder; sync will add it") for _ in new_dirs[1:]]
-                    break
+            parts = name.split("/")
+            folders = [_exact_dir(base, *d.split(os.sep)) for d in old_dirs]
+            have = [os.path.join(f, *parts) for f in folders if f and os.path.lexists(os.path.join(f, *parts))]
+            if not have:
+                continue
+            seen.add(name)
+            dst = os.path.join(base, new_dirs[0], *parts)
+            if have[0] != dst:
+                moves.append((have[0], dst))
+            skipped += [(name, "extra tag folder; sync will add it") for _ in new_dirs[1:]]
+            skipped += [(name, f"another copy in {os.path.dirname(p)}; left in place") for p in have[1:]]
     return moves, skipped
 
 
@@ -127,7 +138,10 @@ def _respell(src, dst):
     while i < len(s) - 1 and i < len(d) - 1 and s[i] != d[i] and s[i].lower() == d[i].lower():
         old = os.sep.join(s[:i + 1])
         new = os.sep.join(s[:i] + [d[i]])
-        if not os.path.isdir(old) or not os.path.samefile(old, new) or d[i] in _listed(os.sep.join(s[:i]) or os.sep):
+        try:
+            if not os.path.isdir(old) or not os.path.samefile(old, new) or d[i] in _listed(os.sep.join(s[:i]) or os.sep):
+                break
+        except OSError:
             break
         os.rename(old, old + ".convert-tmp")
         os.rename(old + ".convert-tmp", new)
@@ -138,10 +152,12 @@ def _respell(src, dst):
 
 def apply_moves(moves):
     """Rename each (src, dst), making dst's folders; (done, conflicts): a dst that is already another file is left
-    alone with its src. A case-only rename goes through a temporary name. Folders emptied by the moves are removed."""
+    alone with its src, and a src that is gone is skipped. A case-only rename goes through a temporary name. Folders emptied by the moves are removed."""
     done, conflicts = [], []
     for src, dst in moves:
-        real = _respell(src, dst) if os.path.lexists(src) else src
+        if not os.path.lexists(src):
+            continue
+        real = _respell(src, dst)
         os.makedirs(os.path.dirname(dst), exist_ok=True)
         if os.path.lexists(dst):
             if not os.path.samefile(real, dst):
