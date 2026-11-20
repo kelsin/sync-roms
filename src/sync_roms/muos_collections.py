@@ -118,3 +118,62 @@ def describe(plan):
         print(ui.dim(f"💖 would delete {os.path.basename(os.path.dirname(path))}/{os.path.basename(path)}"))
     for warning in plan["warnings"]:
         ui.warn(warning)
+
+
+ART_DIR = os.path.join("MUOS", "info", "catalogue", "Collection")
+ART_OWNED = ".sync-roms-art"  # the collection folder names sync-roms gave art, one per line
+ART_KINDS = ("box", "grid")
+
+
+def _art_owned(base):
+    try:
+        with open(os.path.join(base, ART_DIR, ART_OWNED), encoding="utf-8") as f:
+            return [n for n in f.read().splitlines() if n and frontend.safe_name(n) == n]
+    except OSError:
+        return []
+
+
+def install_art(base, arts):
+    """Put the collections' art ({name: art png}) in muOS's catalogue as box and grid pictures, and remove what
+    sync-roms put there for collections no longer in arts. Returns whether files changed."""
+    changed = False
+    for name, png in arts.items():
+        with open(png, "rb") as f:
+            data = f.read()
+        for kind in ART_KINDS:
+            path = os.path.join(base, ART_DIR, kind, f"{name}.png")
+            try:
+                with open(path, "rb") as f:
+                    if f.read() == data:
+                        continue
+            except OSError:
+                pass
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            store.replace_file(path, data)
+            changed = True
+    owned = _art_owned(base)
+    for name in dict.fromkeys(owned):
+        if name not in arts:
+            for kind in ART_KINDS:
+                try:
+                    os.remove(os.path.join(base, ART_DIR, kind, f"{name}.png"))
+                    changed = True
+                except FileNotFoundError:
+                    pass
+    names = sorted(arts)
+    if names != owned:
+        if names:
+            os.makedirs(os.path.join(base, ART_DIR), exist_ok=True)
+            store.replace_file(os.path.join(base, ART_DIR, ART_OWNED), "".join(f"{n}\n" for n in names), newline="\n")
+        else:
+            try:
+                os.remove(os.path.join(base, ART_DIR, ART_OWNED))
+            except FileNotFoundError:
+                pass
+    return changed
+
+
+def describe_art(base, arts):
+    """Print what install_art would do."""
+    if arts:
+        print(ui.dim(f"🎨 would add art for {', '.join(arts)} to {ART_DIR.replace(os.sep, '/')}/"))

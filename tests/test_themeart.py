@@ -378,5 +378,42 @@ class Knulli(Card):
         self.assertNotIn("subset.", read(path))
 
 
+class Muos(Card):
+    def path(self, kind, name):
+        return os.path.join(self.base, "MUOS", "info", "catalogue", "Collection", kind, f"{name}.png")
+
+    def test_install_art_copies_box_and_grid(self):
+        self.assertTrue(themeart.install("muos", self.base, SURPRISE))
+        for kind in ("box", "grid"):
+            with open(self.path(kind, "Surprise"), "rb") as f, open(themeart.art_png("surprise"), "rb") as g:
+                self.assertEqual(f.read(), g.read())
+
+    def test_install_art_second_run_changes_nothing(self):
+        themeart.install("muos", self.base, SURPRISE)
+        self.assertFalse(themeart.install("muos", self.base, SURPRISE))
+
+    def test_install_art_removes_art_of_dropped_collections_it_wrote(self):
+        themeart.install("muos", self.base, {"Surprise": "surprise", "Favs": "rpg"})
+        other = self.path("box", "Mine")
+        os.makedirs(os.path.dirname(other), exist_ok=True)
+        with open(other, "wb") as f:
+            f.write(b"x")
+        marker = os.path.join(self.base, "MUOS", "info", "catalogue", "Collection", ".sync-roms-art")
+        self.assertEqual(sorted(read(marker).splitlines()), ["Favs", "Surprise"])
+        self.assertTrue(themeart.install("muos", self.base, SURPRISE))
+        for kind in ("box", "grid"):
+            self.assertFalse(os.path.exists(self.path(kind, "Favs")))
+            self.assertTrue(os.path.exists(self.path(kind, "Surprise")))
+        self.assertTrue(os.path.exists(other))
+        self.assertEqual(read(marker).splitlines(), ["Surprise"])
+
+    def test_describe_lists_the_names(self):
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            themeart.describe("muos", self.base, SURPRISE)
+        self.assertIn("Surprise", out.getvalue())
+        self.assertFalse(os.path.exists(self.path("box", "Surprise")))
+
+
 if __name__ == "__main__":
     unittest.main()

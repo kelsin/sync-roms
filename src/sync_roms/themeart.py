@@ -11,7 +11,7 @@ import tempfile
 from xml.sax import saxutils
 import zlib
 
-from . import cardfs, downloads, frontend, github, runtime, s3, store, ui
+from . import cardfs, downloads, frontend, github, muos_collections, runtime, s3, store, ui
 
 THEME_DATA = os.path.join(store.REPO_DATA, "themes", "art-book-next")
 SURPRISE_ART = "surprise"
@@ -402,9 +402,13 @@ def install(layout_name, base, arts):
     """Give the custom collections in arts ({name: art id}) their art in the frontend's theme. Returns whether files
     changed."""
     arts = usable(layout_name, arts)
+    if layout_name == "muos":
+        return muos_collections.install_art(base, arts)
     return install_esde(layout_name, base, arts) if layout_name in frontend.ESDE_LAYOUTS else install_knulli(base, arts)
 
 
 def describe(layout_name, base, arts):
     arts = usable(layout_name, arts)
+    if layout_name == "muos":
+        return muos_collections.describe_art(base, arts)
     describe_esde(layout_name, base, arts) if layout_name in frontend.ESDE_LAYOUTS else describe_knulli(base, arts)

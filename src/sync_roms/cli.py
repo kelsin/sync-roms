@@ -1252,8 +1252,6 @@ def sync_card(args):
         if surprise.COLLECTION in plan["enable"]:
             arts[surprise.COLLECTION] = themeart.SURPRISE_ART
         arts = {name: art for name, art in arts.items() if name in plan["enable"]}
-        if layout_name == "muos":  # the art is wired separately
-            arts = {}
         if dry_run:
             if layout_name == "muos":
                 muos_collections.describe(plan)
@@ -1271,7 +1269,7 @@ def sync_card(args):
             listed = frontend.apply_collections(plan, layout_name, base)
         if plan["owned"] != owned:
             store.update_card(card, frontend_collections=plan["owned"])
-        art = bool(arts) and themeart.install(layout_name, base, arts)
+        art = (bool(arts) or layout_name == "muos") and themeart.install(layout_name, base, arts)
         # EmuDeck's ES-DE is on this computer, not the card, so its writes leave the card as it was
         if clean_card and layout_name != "emudeck" and (plan["writes"] or plan["deletes"] or listed or art):
             clean._clean_root = base
