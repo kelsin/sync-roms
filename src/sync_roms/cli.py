@@ -23,7 +23,7 @@ SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "collections": ("edit", "edit your collections of favourite games (saved in ~/.sync-roms/collections/)"),
     "themes": ("update", "copy the latest Art Book Next for ES-DE from GitHub into storage"),
     "download": ("pico8", "add the PICO-8 BBS Featured carts storage doesn't have, and newer revisions of those it has"),
-    "flash": ("", "write a Knulli image from storage's os/ to an SD card"),
+    "flash": ("", "write a Knulli or BaseOS image from storage's os/ to an SD card"),
     "cards": ("[edit|list|new|set|rename|delete|copy|export|import]", "list and manage the cards you've synced"),
     "saves": ("stash|apply [CARD] [--retroarch DIR]", "copy RetroArch saves and states off a card, or onto one"),
     "devices": ("[ID]", "list the supported devices, or one device's systems"),
@@ -125,14 +125,14 @@ TOPICS = {
   ignored.json are skipped. Requests go one at a time; the first HTTP error stops it, keeping what was added.
 """,
     "flash": """
-  sync-roms flash [--dry-run]                 write a Knulli image to an SD card (macOS only)
+  sync-roms flash [--dry-run]                 write a Knulli or BaseOS image to an SD card (macOS only)
 
-  Pick a Knulli device, then an image from storage's os/knulli-*.img.gz (the ones matching the device first, newest
+  Pick a device, then an image from storage's os/knulli/knulli-*.img.gz or os/baseos/baseos-*.img.zip (the ones matching the device first, newest
   first), then an external SD card (shown with its volume names); the boot disk and the disks holding the temp folder
   or storage are never offered, and flash stops if it can't tell which disks those are. Type the disk id (disk4) to
   confirm: --yes never skips that. --dry-run stops there. The image is copied to a local temp folder (free space is
   checked first); right before writing, the card must still be the same disk (id, size and name). Then `sudo dd`
-  writes it, decompressed on the fly, with 4 MiB blocks (sudo may ask for your password before downloading and
+  writes it, decompressed (gz or zip) on the fly, with 4 MiB blocks (sudo may ask for your password before downloading and
   writing). Last, the temp folder is removed and the card is ejected; after a failure it is unmounted instead, so you can retry.
 """,
     "edit": """

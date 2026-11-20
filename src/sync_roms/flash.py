@@ -1,5 +1,6 @@
-"""Knulli OS images in storage's os/ folder, and which of them fit a device."""
+"""Knulli and BaseOS images in storage's os/ folder, and which of them fit a device."""
 import collections
+import contextlib
 import gzip
 import os
 import plistlib
@@ -9,6 +10,7 @@ import subprocess
 import sys
 import tempfile
 import threading
+import zipfile
 import zlib
 from xml.parsers.expat import ExpatError
 
@@ -17,6 +19,8 @@ from botocore.exceptions import BotoCoreError, ClientError
 from . import inventory, picker, runtime, s3, store, ui, usersettings
 
 PREFIX = "os/"
+KNULLI = PREFIX + "knulli/"
+BASEOS = PREFIX + "baseos/"
 DD = ["sudo", "dd"]
 WRITE_BLOCK = 4 * 1024 * 1024
 SPARE = 64 * 1024 * 1024  # free space kept in the temp folder beyond the download
@@ -31,24 +35,17 @@ def raw(disk):
     return f"/dev/r{disk}"
 
 
-def knulli_devices(devices):
-    """The devices that run Knulli, in input order."""
-    return [d for d in devices if "knulli" in d.get("firmwares", [])]
-
-
 def images(listing):
-    """The keys of the knulli-*.img.gz images directly in os/."""
-    return [k for k in listing if re.fullmatch(re.escape(PREFIX) + r"knulli-[^/]*\.img\.gz", k)]
-
-
-def _date(key):
-    found = re.findall(r"(?<!\d)\d{8}(?!\d)", key)
-    return found[-1] if found else ""
+    """The keys of the Knulli images (os/knulli/knulli-*.img.gz) and BaseOS images (os/baseos/baseos-*.img.zip)."""
+    return [k for k in listing if re.fullmatch(re.escape(KNULLI) + r"knulli-[^/]*\.img\.gz", k)
+            or re.fullmatch(re.escape(BASEOS) + r"baseos-[^/]*\.img\.zip", k)]
 
 
 def _model(key):
-    """The device part of an image name, dashes removed: between the chip and -<codename>-<date>."""
-    m = re.fullmatch(r"os/knulli-[^-]+-(.+)-[^-]+-\d{8}\.img\.gz", key)
+    """The device part of an image name, dashes removed: Knulli's between the chip and -<codename>-<date>, BaseOS's
+    before -<version>."""
+    m = (re.fullmatch(re.escape(KNULLI) + r"knulli-[^-]+-(.+)-[^-]+-\d{8}\.img\.gz", key)
+         or re.fullmatch(re.escape(BASEOS) + r"baseos-(.+)-\d+(?:\.\d+)*\.img\.zip", key))
     return m.group(1).replace("-", "") if m else ""
 
 
@@ -59,14 +56,25 @@ def _matches(key, device_id):
     return model in (device_id.split("-", 1)[-1].replace("-", ""), device_id.replace("-", ""))
 
 
+def flashable_devices(devices, keys):
+    """The devices that run Knulli or have a matching BaseOS image, in input order."""
+    base = [k for k in keys if k.startswith(BASEOS)]
+    return [d for d in devices if "knulli" in d.get("firmwares", []) or any(_matches(k, d["id"]) for k in base)]
+
+
+def _newest(key):
+    """Sort key putting the newest image first: Knulli's date, BaseOS's version."""
+    found = re.findall(r"(?<!\d)\d{8}(?!\d)", key)
+    if found and key.startswith(KNULLI):
+        return (-int(found[-1]),)
+    m = re.search(r"-(\d+(?:\.\d+)*)\.img\.zip$", key)
+    return tuple(-int(n) for n in m.group(1).split(".")) if m else (0,)
+
+
 def sort_images(keys, device_id):
-    """(key, matches) pairs: matches first, newest date first within each group, then by name."""
+    """(key, matches) pairs: matches first, newest first within each group, then by name."""
     pairs = [(k, _matches(k, device_id)) for k in keys]
-    return sorted(pairs, key=lambda p: (not p[1], _neg(_date(p[0])), p[0]))
-
-
-def _neg(date):
-    return -int(date) if date else 0
+    return sorted(pairs, key=lambda p: (not p[1], _newest(p[0]), p[0]))
 
 
 Disk = collections.namedtuple("Disk", "id size name volumes", defaults=((),))
@@ -162,15 +170,37 @@ def _finish(proc):
     return err
 
 
-def write_image(gz_path, disk, progress=None):
-    """Stream a .img.gz to the disk through dd. Returns the bytes written."""
+@contextlib.contextmanager
+def _source(path):
+    """(stream, fraction): the decompressed image of a .img.gz or .img.zip, and how far through it the reading is."""
+    with open(path, "rb") as raw_file:
+        if path.endswith(".zip"):
+            with zipfile.ZipFile(raw_file) as z:
+                members = [i for i in z.infolist() if i.filename.endswith(".img")]
+                if len(members) != 1:
+                    raise FlashError("the zip must hold exactly one .img file")
+                total, size = members[0].file_size, [0]
+                with z.open(members[0]) as src:
+                    class Counted:
+                        def read(self, n):
+                            chunk = src.read(n)
+                            size[0] += len(chunk)
+                            return chunk
+                    yield Counted(), lambda: size[0] / total if total else 1.0
+        else:
+            total = os.path.getsize(path)
+            with gzip.open(raw_file) as src:
+                yield src, lambda: raw_file.tell() / total if total else 1.0
+
+
+def write_image(path, disk, progress=None):
+    """Stream a .img.gz or .img.zip to the disk through dd. Returns the bytes written."""
     proc = None
     try:
         proc = subprocess.Popen(DD + [f"of={raw(disk)}", f"bs={WRITE_BLOCK}", "iflag=fullblock"],
                                 stdin=subprocess.PIPE, stderr=subprocess.PIPE)
-        total = os.path.getsize(gz_path)
         size = 0
-        with open(gz_path, "rb") as raw_file, gzip.open(raw_file) as src:
+        with _source(path) as (src, fraction):
             while True:
                 chunk = src.read(WRITE_BLOCK)
                 if not chunk:
@@ -181,14 +211,14 @@ def write_image(gz_path, disk, progress=None):
                     raise FlashError(_finish(proc) or "dd stopped")
                 size += len(chunk)
                 if progress:
-                    progress(min(raw_file.tell() / total, 1.0) if total else 1.0)
+                    progress(min(fraction(), 1.0))
         err = _finish(proc)
         if proc.returncode != 0:
             raise FlashError(err or f"dd exited with {proc.returncode}")
         if progress:
             progress(1.0)
         return size
-    except (gzip.BadGzipFile, EOFError, zlib.error) as e:
+    except (gzip.BadGzipFile, zipfile.BadZipFile, EOFError, zlib.error) as e:
         _stop(proc)
         raise FlashError(f"the image file is damaged: {e}") from e
     except OSError as e:
@@ -245,22 +275,23 @@ def _same(a, b):
 
 
 def run(args):
-    """Pick a Knulli device, image and SD card, write the image to the card. 0 on success, dry-run or
+    """Pick a device, image and SD card, write the image to the card. 0 on success, dry-run or
     Esc; 1 on any failure."""
     if sys.platform != "darwin":
         ui.failure(ui.red("❌ flash needs macOS"))
         return 1
     usersettings.ensure_bucket()
-    devices = knulli_devices(store.repo_json("devices"))
+    listing = inventory.files(PREFIX)
+    keys = images(listing)
+    devices = flashable_devices(store.repo_json("devices"), keys)
     i = picker.filter_list("🎯 Which device?", [d["name"] for d in devices],
                            hint="/ filter · j/k move · Enter continue · Esc quit")
     if i is None:
         return 0
     device = devices[i]
-    listing = inventory.files(PREFIX)
-    found = sort_images(images(listing), device["id"])
+    found = sort_images(keys, device["id"])
     if not found:
-        ui.failure(ui.red("❌ no Knulli images in storage's os/"))
+        ui.failure(ui.red("❌ no Knulli or BaseOS images in storage's os/"))
         return 1
     i = picker.filter_list(f"💾 Which image for {device['name']}?", [k[len(PREFIX):] for k, _ in found],
                            extras=[[(f"  {ui.human_size(listing[k])}", "dim"), ("  ✓ matches" if m else "", "green")]
