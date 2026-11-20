@@ -21,3 +21,9 @@ path = "src/sync_roms/__init__.py"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/sync_roms"]
+
+[dependency-groups]
+dev = ["Pillow"]
+
+[tool.uv]
+python-preference = "only-managed"
