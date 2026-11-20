@@ -1,3 +1,4 @@
+import json
 import os
 import re
 import sys
@@ -29,9 +30,10 @@ class ReadmeOptions(unittest.TestCase):
 
 class ReadmeLayouts(unittest.TestCase):
     def test_layouts_table_and_saves_table_name_every_layout(self):
-        import json
-        text = open(README, encoding="utf-8").read()
-        layouts = json.load(open(os.path.join(os.path.dirname(__file__), "..", "src", "sync_roms", "data", "layouts.json")))
+        with open(README, encoding="utf-8") as f:
+            text = f.read()
+        with open(os.path.join(os.path.dirname(__file__), "..", "src", "sync_roms", "data", "layouts.json")) as f:
+            layouts = json.load(f)
         firmware = text.split("| Firmware | ROMs / BIOS folders", 1)[1].split("\n\n", 1)[0]
         saves = text.split("| Layout | RetroArch folder", 1)[1].split("\n\n", 1)[0]
         scrape = text.split("| Firmware | Media | Metadata", 1)[1].split("\n\n", 1)[0]

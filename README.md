@@ -234,8 +234,9 @@ While typing a filter (or a note, which `w` opens in the game list): `^A` `^E` s
    `pico-8_*_raspi.zip` is used). Each card gets it where its frontend's installer looks, whether or not the card
    syncs pico8 games: ES-DE `PICO-8/` (pico8-android's zip picker), Knulli `roms/pico8/` (Device Settings →
    Install Pico-8); Onion (`RApp/PICO-8/bin/`) and Allium
-   (`Apps/pico.pak/bin/`) get the extracted `pico8_dyn` and `pico8.dat`. NextUI has no installer: its PICO-8 carts sync as plain ROMs (fake08). Run the installer once on the device. The
-   card's `pico8` field in `cards.json` records the zip, so it is copied once per zip.
+   (`Apps/pico.pak/bin/`) get the extracted `pico8_dyn` and `pico8.dat`. Run the installer once on the device. The
+   card's `pico8` field in `cards.json` records the zip, so it is copied once per zip. NextUI cards get no zip: they have no
+   installer, and their PICO-8 carts sync as plain ROMs.
 
    A sync that wrote to the card also creates `.metadata_never_index` in the card root, empties `.fseventsd` and puts a
    `.fseventsd/no_log` file in it (on any OS), so macOS doesn't index or log the card.
