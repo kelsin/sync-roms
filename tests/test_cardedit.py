@@ -949,7 +949,7 @@ class Flow(DataDir):
             cardedit.edit_card("c", (DEVICE, "esde"), card_match=match)
         return script.calls
 
-    def test_k_keeps_card_files(self):
+    def test_K_keeps_card_files(self):
         self.card()
         notes = []
 
@@ -958,7 +958,7 @@ class Flow(DataDir):
         with mock.patch.object(edit, "note", notes.append):
             calls = self.run_keep(match, returns((cardedit.KEEP_KEY, 0)), returns(None))
         self.assertIn(cardedit.KEEP_KEY, calls[0][2]["hotkeys"])
-        self.assertIn("k keep", calls[0][2]["hint"])
+        self.assertIn("K keep", calls[0][2]["hint"])
         self.assertIn(g("gba/Ruby.zip"), store.card_games("c")["gba"])
         self.assertEqual(len(notes), 1)
         self.assertEqual(notes, ["Picked 1 card file(s) in 1 system(s)."])
@@ -977,7 +977,7 @@ class Flow(DataDir):
         self.card()
         calls = self.run_card(returns(None))
         self.assertNotIn(cardedit.KEEP_KEY, calls[0][2]["hotkeys"])
-        self.assertNotIn("k keep", calls[0][2]["hint"])
+        self.assertNotIn("K keep", calls[0][2]["hint"])
 
     def test_collections_screen_toggles_with_enter_in_place(self):
         favs = {"id": "favs", "name": "Favs", "games": []}
