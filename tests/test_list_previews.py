@@ -71,7 +71,7 @@ class ListPreviews(unittest.TestCase):
                     edit_one(thing, SYSTEMS, lambda bucket: set())
                 except StopIteration:
                     pass
-            self.assertEqual(art(calls, 3, 1), ["sys-gba", "sys-psx", None], module.__name__)
+            self.assertEqual(art(calls, 3, 1), [None, "sys-gba", "sys-psx"], module.__name__)
 
 
 class GamePreviews(unittest.TestCase):

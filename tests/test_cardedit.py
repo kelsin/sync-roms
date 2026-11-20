@@ -1685,6 +1685,95 @@ class SetFlow(Flow):
         self.assertEqual(sorted(listed), ["gb/", "gba/"])  # no Pokemon game on PSX
         self.assertEqual(out.getvalue().count("📡 Listing"), 2, out.getvalue())
 
+    def run_all(self, *steps, systems=(GBA, GB)):
+        script = Script(*steps)
+        with mock.patch.object(picker, "filter_list", script), contextlib.redirect_stdout(io.StringIO()):
+            changed = cardedit.edit_all("c", (DEVICE, "esde"), list(systems))
+        return changed, script.calls
+
+    ALL_LABELS = ["Game Boy Advance — Emerald.zip", "Game Boy — Red.gb", "Game Boy Advance — Ruby.sav",
+                  "Game Boy Advance — Ruby.zip", "Game Boy Advance — Zelda.zip"]
+
+    def test_edit_all_lists_every_file_of_every_system_with_system_names(self):
+        self.card()
+        _, calls = self.run_all(lambda labels, kw: kw["session"]["sel"])
+        title, labels, kw = calls[0]
+        self.assertEqual(labels, self.ALL_LABELS)
+        self.assertEqual(title, "🌐 All games on c — ✅ synced, ⬜ not, 📦 from a set")
+        self.assertEqual(kw["hotkeys"], (cardedit.VARIANT_KEY, cardedit.SET_KEY, cardedit.CLEAR_KEY))
+        self.assertIs(kw["select_all"], False)
+
+    def test_edit_all_toggle_saves_picks_on_the_right_system(self):
+        self.card()
+        changed, _ = self.run_all(toggle("Game Boy — Red.gb", "Game Boy Advance — Zelda.zip"))
+        self.assertTrue(changed)
+        games = store.card_games("c")
+        self.assertEqual([x["bucket"] for x in games["gb"]], ["gb/Red.gb"])
+        self.assertEqual([x["bucket"] for x in games["gba"]], ["gba/Zelda.zip"])
+
+    def test_edit_all_lists_a_full_system_locked_on(self):
+        self.card(games={"gb": {"full_system": True}})
+
+        def step(labels, kw):
+            i = labels.index("Game Boy — Red.gb")
+            self.assertTrue(kw["locked"][i])
+            self.assertTrue(kw["initial"][i])
+            self.assertFalse(kw["locked"][labels.index("Game Boy Advance — Zelda.zip")])
+            return kw["session"]["sel"]
+        self.assertFalse(self.run_all(step)[0])
+        self.assertEqual(store.card_games("c"), {"gb": {"full_system": True}})
+
+    def test_edit_all_sorts_by_title_then_system(self):
+        self.files["gb/"]["gb/Zelda.gb"] = 4
+        self.card()
+        _, calls = self.run_all(lambda labels, kw: kw["session"]["sel"])
+        self.assertEqual(calls[0][1], ["Game Boy Advance — Emerald.zip", "Game Boy — Red.gb", "Game Boy Advance — Ruby.sav",
+                                       "Game Boy Advance — Ruby.zip", "Game Boy — Zelda.gb", "Game Boy Advance — Zelda.zip"])
+
+    def test_edit_all_set_key_narrows_to_a_set_then_c_clears(self):
+        self.card()
+        _, calls = self.run_all(returns((cardedit.SET_KEY, None)), returns(0), returns((cardedit.CLEAR_KEY, None)),
+                                lambda labels, kw: kw["session"]["sel"])
+        self.assertEqual(calls[1][1], [f"{themeart.set_emoji(SET)} Pokemon  (3 games)"])  # the set list
+        self.assertEqual(calls[2][1], ["Game Boy — Red.gb", "Game Boy Advance — Ruby.sav", "Game Boy Advance — Ruby.zip"])
+        self.assertEqual(calls[2][2]["filters"], f"{themeart.set_emoji(SET)} Pokemon only (c clear filters)")
+        self.assertEqual(calls[3][1], self.ALL_LABELS)
+        self.assertEqual(calls[3][2]["filters"], "")
+
+    def test_edit_all_notes_a_storage_error_and_changes_nothing(self):
+        self.card()
+        notes = []
+        with mock.patch.object(store, "folder_keys", side_effect=OSError("down")), \
+                mock.patch.object(edit, "note", notes.append):
+            changed, calls = self.run_all()
+        self.assertIs(changed, False)
+        self.assertEqual(calls, [])
+        self.assertEqual(len(notes), 1)
+        self.assertIn("Couldn't list Game Boy Advance in storage: down", notes[0])
+
+    def test_edit_all_lists_each_folder_once(self):
+        self.card(games={"gb": {"full_system": True}})
+        listed = []
+        real = store.folder_keys
+
+        def counting(bucket, say=True):
+            listed.append(bucket)
+            return real(bucket, say)
+        with mock.patch.object(store, "folder_keys", counting):
+            self.run_all(lambda labels, kw: kw["session"]["sel"])
+        self.assertEqual(sorted(listed), ["gb", "gba"])
+
+    def test_edit_card_a_opens_the_all_games_view(self):
+        self.card()
+        with mock.patch.object(cardedit, "edit_all", return_value=False) as opened:
+            calls = self.run_card(returns((cardedit.ALL_KEY, 0)), returns(None))
+        self.assertEqual(len(calls), 2)
+        self.assertIn(cardedit.ALL_KEY, calls[0][2]["hotkeys"])
+        self.assertEqual(opened.call_args[0][:2], ("c", (DEVICE, "esde")))
+        self.assertEqual({s["bucket"] for s in opened.call_args[0][2]}, {"gba", "gb"})
+        self.assertIn(("a", "every game across this card's systems"), cardedit.LIST_KEYS)
+        self.assertIn("a all", cardedit.LIST_HINT)
+
 
 class SetupChange(DataDir):
     def test_changing_the_device_drops_games_it_cannot_play_at_save(self):

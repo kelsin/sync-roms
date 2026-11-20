@@ -23,7 +23,7 @@ SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "collections": ("edit", "edit your collections of favourite games (saved in ~/.sync-roms/collections/)"),
     "themes": ("update", "copy the latest Art Book Next for ES-DE from GitHub into storage"),
     "download": ("pico8", "add the PICO-8 BBS Featured carts storage doesn't have, and newer revisions of those it has"),
-    "flash": ("", "write a Knulli image from storage's os/ to an SD card and verify it"),
+    "flash": ("", "write a Knulli image from storage's os/ to an SD card"),
     "cards": ("[edit|list|new|set|rename|delete|copy|export|import]", "list and manage the cards you've synced"),
     "saves": ("stash|apply [CARD] [--retroarch DIR]", "copy RetroArch saves and states off a card, or onto one"),
     "devices": ("[ID]", "list the supported devices, or one device's systems"),
@@ -132,9 +132,8 @@ TOPICS = {
   or storage are never offered, and flash stops if it can't tell which disks those are. Type the disk id (disk4) to
   confirm: --yes never skips that. --dry-run stops there. The image is copied to a local temp folder (free space is
   checked first); right before writing, the card must still be the same disk (id, size and name). Then `sudo dd`
-  writes it, decompressed on the fly, with 4 MiB blocks (sudo may ask for your password before downloading, writing
-  and verifying), and the whole image is read back and its SHA-256 compared. Last, the temp folder is removed and the
-  card is ejected; after a failure it is unmounted instead, so you can retry.
+  writes it, decompressed on the fly, with 4 MiB blocks (sudo may ask for your password before downloading and
+  writing). Last, the temp folder is removed and the card is ejected; after a failure it is unmounted instead, so you can retry.
 """,
     "edit": """
   sync-roms edit                              main menu: Cards, Sets (saved to storage), Collections, Device systems; same as `games edit`

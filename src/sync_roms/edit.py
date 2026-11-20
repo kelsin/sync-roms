@@ -47,7 +47,7 @@ FULL_SYSTEM_NOTE = "Full system: every file in its folder is synced, so it can't
 
 
 def toggle_games(title, rows, extras=None, covered=None, excluded=None, hotkeys=(), hint=None, place=None, filters="",
-                 key_help=None):
+                 key_help=None, select_all=True):
     """Multi-select over rows of (system, bucket key, game title, label); adds/removes games in each system in place.
 
     extras: {bucket key: [more bucket keys]} added or removed together with that row's key.
@@ -60,6 +60,7 @@ def toggle_games(title, rows, extras=None, covered=None, excluded=None, hotkeys=
     hotkeys/hint/key_help: extra keys the list offers (the hint line to show, and the (keys, what they do) pairs ?
     lists). The toggles made so far are applied, and the key pressed is returned (None on Enter). place: a dict the caller keeps across calls, so a list of the same rows
     opens where the last one was left (picker.carry_place). filters: the caller's filters, for the filter line.
+    select_all: False turns the list's `a` (toggle all shown) off.
     Ctrl-C applies the toggles made so far, then raises KeyboardInterrupt.
     """
     notes = [FULL_SYSTEM_NOTE if s.get("full_system") else covered(s, key) if covered else None
@@ -97,7 +98,7 @@ def toggle_games(title, rows, extras=None, covered=None, excluded=None, hotkeys=
                                    on_note=on_note, hotkeys=hotkeys, session=session, filters=filters,
                                    row_note=lambda i: variant_line(rows[i][1], variants, parents, system_names),
                                    preview=lambda i: previews.game_thumb(rows[i][1]) if i < len(rows) else None,
-                                   preview_width=previews.GAME_WIDTH)
+                                   preview_width=previews.GAME_WIDTH, select_all=select_all)
     except KeyboardInterrupt:  # Ctrl-C: the toggles made so far are applied, then the caller gets the Ctrl-C
         interrupted, state = True, session["sel"]
     pressed = state[0] if isinstance(state, tuple) else None
