@@ -635,9 +635,11 @@ def _row_extras(sp, work, key, notes, state):
     return out
 
 
-def _variant_mark(picks, key):
-    """The row column marking a game one of whose variants is on the card (blank otherwise)."""
-    on = any(picks.on_card(v["bucket"]) for v in picks.variants.get(key, ()))
+def _variant_mark(picks, key, on_card=None):
+    """The row column marking a game one of whose variants is on the card (blank otherwise). on_card: picks.on_card,
+    or a quicker answer from states already worked out."""
+    on_card = on_card or picks.on_card
+    on = any(on_card(v["bucket"]) for v in picks.variants.get(key, ()))
     return ("  🔀 variant", "cyan") if on else ("", "dim")
 
 
@@ -844,7 +846,12 @@ def edit_set(name, game_set, setup, to_fetch=None, card_usages=None, narrow_sets
             links = [[index[m] for m in sp.groups.get(k, ()) if m in index] if sp else [] for k, sp in zip(keys, sp_of)]
             session = {"sel": [base[k] for k in keys]}
             picker.carry_place(place, keys, session)
-            extras = [_row_extras(sp, work, k, notes, st) + [_variant_mark(picks, k)] if sp else []
+
+            def on_card(key):
+                """picks.on_card, from this pass's states where the key's system has them."""
+                b = key.partition("/")[0]
+                return bases[b].get(key, False) if b in bases else picks.on_card(key)
+            extras = [_row_extras(sp, work, k, notes, st) + [_variant_mark(picks, k, on_card)] if sp else []
                       for k, sp, st in zip(keys, sp_of, session["sel"])]
 
             def switched(state):

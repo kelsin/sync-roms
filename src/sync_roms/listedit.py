@@ -368,7 +368,7 @@ def toggle_all(title, rows, sets, place=None):
         pressed = edit.toggle_games(
             title, [r for r in rows if keep is None or r[1] in keep],
             hotkeys=(cardedit.SET_KEY, cardedit.CLEAR_KEY),
-            hint="Space toggle · Enter done · s set · c clear filters", key_help=key_help, place=place,
+            hint="Space toggle · Enter done · s set · c clear filters", key_help=key_help, place=place, select_all=False,
             filters=f"{themeart.set_emoji(chosen)} {chosen['name']} only (c clear filters)" if chosen else "")
         if pressed == cardedit.CLEAR_KEY:
             chosen = None

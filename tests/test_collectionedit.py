@@ -653,6 +653,12 @@ class AllRows(unittest.TestCase):
         self.assertEqual(seen, [every, ["gba/Ruby.zip"], every])
         self.assertNotIn("query", place["session"])
 
+    def test_toggle_all_turns_select_all_off(self):
+        _, rows = self.rows()
+        with mock.patch.object(edit, "toggle_games", return_value=None) as fake:
+            listedit.toggle_all("All", rows, [])
+        self.assertIs(fake.call_args.kwargs["select_all"], False)
+
 
 if __name__ == "__main__":
     unittest.main()
