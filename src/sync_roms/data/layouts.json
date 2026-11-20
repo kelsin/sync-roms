@@ -57,5 +57,18 @@
       "states": "states"
     },
     "note": "EmuDeck on the Steam Deck and Steam Machine (SteamOS). Card root holds Emulation/; emulators install to the internal SSD. System folders use the ES-DE names, except Wii U, Xbox 360 and Model 2, which keep their ROMs in a roms/ subfolder. BIOS files go in Emulation/bios, with subfolders only where an emulator expects one. Source: https://emudeck.github.io/cheat-sheet/"
+  },
+  "nextui": {
+    "label": "NextUI",
+    "roms_dir": "Roms",
+    "bios_dir": "Bios",
+    "bios_by_tag": true,
+    "disc_folders": true,
+    "retroarch": {
+      "dir": "",
+      "saves": "Saves/{tag}",
+      "states": ".userdata/shared/{tag}-{core}"
+    },
+    "note": "MinUI-style card (Anbernic RG SP and similar) running NextUI. Card root is the SD card. System folders are named \"<Name> (TAG)\": the tag in parentheses picks the emulator, and BIOS files go in Bios/<tag>/. Systems beyond the base install need NextUI's Extras zip. Systems with nextui = null have no NextUI tag. Source: https://nextui.loveretro.games/getting-started/roms/"
   }
 }

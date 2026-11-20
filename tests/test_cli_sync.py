@@ -115,6 +115,22 @@ class SyncSmokeTest(RealDataDirGuard):
         self.assertEqual(self.run_sync(False, patches=((cli.ui, {"dim": lambda text: lines.append(text) or text}),)), 0)
         self.assertFalse(any("no games picked" in x for x in lines))
 
+    def test_systems_with_no_nextui_folder_are_skipped_and_the_others_still_sync(self):
+        n64 = {"name": "Nintendo 64", "bucket": "n64", "folders": {"nextui": None}, "bios": {"files": []},
+               "games": [{"bucket": "n64/Game.z64"}]}
+        gba = {**SYSTEM, "folders": {"nextui": "Game Boy Advance (GBA)"}}
+        manifest = {"systems": [gba, n64], "devices": [],
+                    "layouts": {"nextui": {"label": "NextUI", "roms_dir": "Roms", "bios_dir": "Bios"}}}
+        lines, synced = [], []
+        patches = ((store, {"load_manifest": lambda names=(): manifest}),
+                   (cli.picker, {"saved_setup": lambda *a: (None, "nextui")}),
+                   (cli.surprise, {"fill_surprises": lambda card, setup, chosen, dry_run: synced.append(
+                       [s["bucket"] for s in chosen]) or []}),
+                   (cli.ui, {"dim": lambda text: lines.append(text) or text}))
+        self.assertEqual(self.run_sync(False, patches=patches), 0)
+        self.assertEqual(sum("1 system(s) have no NextUI folder" in x for x in lines), 1)
+        self.assertEqual(synced, [["gba"]])
+
     def old_rom(self, size):
         def prepare(card):
             os.makedirs(os.path.join(card, "ROMs", "gba"))

@@ -14,7 +14,7 @@ from sync_roms import commands, picker, saves, store, ui  # noqa: E402
 
 LAYOUTS = store.repo_json("layouts")
 SYSTEMS = [{"bucket": "gba", "folders": {"onion": "GBA", "knulli": "gba", "esde": "gba", "allium": "GBA",
-                                         "emudeck": "gba"}},
+                                         "emudeck": "gba", "nextui": "Game Boy Advance (GBA)"}},
            {"bucket": "gb", "folders": {"onion": "GB", "knulli": "gb", "esde": "gb", "allium": "GB",
                                         "emudeck": "gb"}},
            {"bucket": "none", "folders": {"onion": None, "knulli": None}}]
@@ -246,15 +246,14 @@ class TargetTest(unittest.TestCase):
         system = SYSTEMS[0]
         for name, layout in LAYOUTS.items():
             ra = layout["retroarch"]
-            needs = "{core}" in ra["saves"] or "{core}" in ra["states"]
             for kind in ("save", "state", "thumbnail"):
-                if needs:
+                if "{core}" in (ra["saves"] if kind == "save" else ra["states"]):
                     with self.assertRaises(ValueError):
                         saves.target_dir("/c", name, layout, system, kind, None)
                 got = saves.target_dir("/c", name, layout, system, kind, "Core")
                 tmpl = ra["saves"] if kind == "save" else ra["states"]
                 want = os.path.join("/c", *ra["dir"].split("/"), *tmpl.format(
-                    system=system["folders"][name], core="Core").split("/"))
+                    system=system["folders"][name], core="Core", tag=store.folder_tag(system["folders"][name])).split("/"))
                 self.assertEqual(got, want)
 
     def test_tag_template(self):
