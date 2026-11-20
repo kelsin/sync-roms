@@ -1,8 +1,6 @@
 """Knulli OS images in storage's os/ folder, and which of them fit a device."""
 import collections
 import gzip
-import hashlib
-import math
 import os
 import plistlib
 import re
@@ -21,7 +19,6 @@ from . import inventory, picker, runtime, s3, store, ui, usersettings
 PREFIX = "os/"
 DD = ["sudo", "dd"]
 WRITE_BLOCK = 4 * 1024 * 1024
-READ_BLOCK = 16 * 1024 * 1024
 SPARE = 64 * 1024 * 1024  # free space kept in the temp folder beyond the download
 
 
@@ -166,14 +163,12 @@ def _finish(proc):
 
 
 def write_image(gz_path, disk, progress=None):
-    """Stream a .img.gz to the disk through dd. Returns (bytes written, sha256 hexdigest, sha256 of each WRITE_BLOCK)."""
+    """Stream a .img.gz to the disk through dd. Returns the bytes written."""
     proc = None
     try:
         proc = subprocess.Popen(DD + [f"of={raw(disk)}", f"bs={WRITE_BLOCK}", "iflag=fullblock"],
                                 stdin=subprocess.PIPE, stderr=subprocess.PIPE)
         total = os.path.getsize(gz_path)
-        digest = hashlib.sha256()
-        blocks = []
         size = 0
         with open(gz_path, "rb") as raw_file, gzip.open(raw_file) as src:
             while True:
@@ -184,8 +179,6 @@ def write_image(gz_path, disk, progress=None):
                     proc.stdin.write(chunk)
                 except BrokenPipeError:
                     raise FlashError(_finish(proc) or "dd stopped")
-                digest.update(chunk)
-                blocks.append(hashlib.sha256(chunk).hexdigest())
                 size += len(chunk)
                 if progress:
                     progress(min(raw_file.tell() / total, 1.0) if total else 1.0)
@@ -194,7 +187,7 @@ def write_image(gz_path, disk, progress=None):
             raise FlashError(err or f"dd exited with {proc.returncode}")
         if progress:
             progress(1.0)
-        return size, digest.hexdigest(), blocks
+        return size
     except (gzip.BadGzipFile, EOFError, zlib.error) as e:
         _stop(proc)
         raise FlashError(f"the image file is damaged: {e}") from e
@@ -203,48 +196,6 @@ def write_image(gz_path, disk, progress=None):
             _stop(proc)
         if isinstance(e, BrokenPipeError):
             raise
-        raise FlashError(str(e)) from e
-    except BaseException:
-        if proc:
-            _stop(proc)
-        raise
-
-
-def verify(disk, size, digest, blocks, progress=None):
-    """Read size bytes back from the disk. None when their sha256 equals digest, else why not: a short read or the
-    offset of the first WRITE_BLOCK (per blocks) that differs."""
-    count = math.ceil(size / READ_BLOCK)
-    proc = None
-    try:
-        proc = subprocess.Popen(DD + [f"if={raw(disk)}", f"bs={READ_BLOCK}", f"count={count}"],
-                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        h = hashlib.sha256()
-        got = 0
-        bad = None
-        while got < size:
-            chunk = proc.stdout.read(min(WRITE_BLOCK, size - got))
-            if not chunk:
-                break
-            h.update(chunk)
-            if bad is None and hashlib.sha256(chunk).hexdigest() != blocks[got // WRITE_BLOCK]:
-                bad = got
-            got += len(chunk)
-            if progress:
-                progress(got / size)
-        proc.stdout.close()
-        if got < size:  # stdout hit EOF, so dd is done: its stderr can be read without blocking
-            err = proc.stderr.read().decode(errors="replace").strip()
-            if proc.wait() != 0:
-                raise FlashError(err or f"dd exited with {proc.returncode}")
-        _stop(proc)
-        if got < size:
-            return f"read back only {ui.human_size(got)} of {ui.human_size(size)}"
-        if h.hexdigest() != digest:
-            return f"data differs from {ui.human_size(bad)} in" if bad is not None else "data differs"
-        return None
-    except OSError as e:
-        if proc:
-            _stop(proc)
         raise FlashError(str(e)) from e
     except BaseException:
         if proc:
@@ -265,7 +216,7 @@ def _sudo():
     return True
 
 
-LABEL_WIDTH = 17  # "verifying disk10": every bar starts in the same column
+LABEL_WIDTH = 17  # "writing disk10": every bar starts in the same column
 
 
 def _progress(emoji, label):
@@ -294,7 +245,7 @@ def _same(a, b):
 
 
 def run(args):
-    """Pick a Knulli device, image and SD card, write the image to the card and read it back. 0 on success, dry-run or
+    """Pick a Knulli device, image and SD card, write the image to the card. 0 on success, dry-run or
     Esc; 1 on any failure."""
     if sys.platform != "darwin":
         ui.failure(ui.red("❌ flash needs macOS"))
@@ -320,7 +271,7 @@ def run(args):
     key = found[i][0]
     gz_size = listing[key]
     tmp = tempfile.mkdtemp(prefix="sync-roms-flash-")
-    disk, touched, verified, ejected = None, False, False, False
+    disk, touched, written_ok, ejected = None, False, False, False
     try:
         exclude = set()
         for path in ("/", tmp):  # both sit on a local disk, so finding none means diskutil failed
@@ -382,35 +333,20 @@ def run(args):
             return 1
         draw, done = _progress("✍️", f"writing {disk.id}")
         try:
-            written, digest, blocks = write_image(gz_path, disk.id, draw)
+            write_image(gz_path, disk.id, draw)
         except FlashError as e:
             done()
             ui.failure(ui.red(f"❌ flash failed: {e}"))
             return 1
         done()
-        _run(["sync"])
-        _run(["diskutil", "unmountDisk", disk.id])
-        if not _sudo():
-            return 1
-        draw, done = _progress("🔍", f"verifying {disk.id}")
-        try:
-            problem = verify(disk.id, written, digest, blocks, draw)
-        except FlashError as e:
-            done()
-            ui.failure(ui.red(f"❌ verify failed: {e}"))
-            return 1
-        done()
-        if problem:
-            ui.failure(ui.red(f"❌ flash failed: the card doesn't match the image ({problem}): try again or use another card"))
-            return 1
-        verified = True
+        written_ok = True
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
         if touched:
             _run(["sync"])
-            ejected = _run(["diskutil", "eject" if verified else "unmountDisk", disk.id]).returncode == 0 and verified
+            ejected = _run(["diskutil", "eject" if written_ok else "unmountDisk", disk.id]).returncode == 0 and written_ok
     if not ejected:
-        ui.warn(f"Flashed and verified, but {disk.id} didn't eject: eject it before removing the card")
+        ui.warn(f"Flashed, but {disk.id} didn't eject: eject it before removing the card")
         return 0
-    print(ui.green("✅ Flashed and verified — safe to remove the card"))
+    print(ui.green("✅ Flashed — safe to remove the card"))
     return 0
