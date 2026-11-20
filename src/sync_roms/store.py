@@ -273,6 +273,19 @@ def card_locked_games(entry, collections_by_id):
     return {system: games for system, games in locked.items() if games}
 
 
+def card_flag(entry, field):
+    """A card's on/off setting (`theme`, `custom_collections`): its bool in cards.json, on when absent."""
+    on = entry.get(field) if isinstance(entry, dict) else None
+    return on if isinstance(on, bool) else True
+
+
+def set_card_flag(entry, field, on):
+    """Save a card's on/off setting: on is the default, so it is the field's absence; off is stored as False."""
+    entry.pop(field, None)
+    if not on:
+        entry[field] = False
+
+
 def merge_locked(systems, locked):
     """Append locked games ({system bucket: [game]}) to the systems that list them, skipping keys already listed.
     Unknown systems are skipped; a full system's flag is left alone."""

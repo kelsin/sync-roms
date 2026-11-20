@@ -865,6 +865,30 @@ class SyncFlowTest(unittest.TestCase):
                       dry_run=True, extra=art)
         self.assertEqual((installed, described), (want, want))
 
+    def test_theme_off_installs_no_theme_art_but_still_writes_the_collections(self):
+        saved = [{"system": "gba", "bucket": "gba/Game.zip", "title": "Game"}]
+        installed = []
+        art = ((cli.themeart, "install", lambda *a: installed.append(a)),)
+        self.run_sync(cards={"surprises": saved, "collections": ["favs"], "theme": False}, colls=[{**FAVS, "art": "rpg"}],
+                      files=["ROMs/gba/Game.zip"], plan=[], extra=art,
+                      after=lambda d: (read_from(d, "ES-DE", "collections", "custom-Favs.cfg"),
+                                       read_from(d, "ES-DE", "collections", "custom-Surprise.cfg")))
+        self.assertEqual(installed, [])
+        self.assertEqual(self.after, ("%ROMPATH%/gba/Game.zip\n", "%ROMPATH%/gba/Game.zip\n"))
+
+    def test_collections_off_writes_no_collection_files_and_no_art(self):
+        saved = [{"system": "gba", "bucket": "gba/Game.zip", "title": "Game"}]
+        installed = []
+        art = ((cli.themeart, "install", lambda *a: installed.append(a)),)
+        _, _, updates, _, _ = self.run_sync(
+            cards={"surprises": saved, "collections": ["favs"], "custom_collections": False},
+            colls=[{**FAVS, "art": "rpg"}], files=["ROMs/gba/Game.zip"], plan=[], extra=art,
+            after=lambda d: (read_from(d, "ES-DE", "collections", "custom-Favs.cfg"),
+                             read_from(d, "ES-DE", "collections", "custom-Surprise.cfg")))
+        self.assertEqual(installed, [])
+        self.assertEqual(self.after, (None, None))
+        self.assertFalse([u for u in updates if "frontend_collections" in u])
+
     def test_a_collection_with_art_but_no_games_on_the_card_gets_none(self):
         installed = []
         self.run_sync(cards={"collections": ["favs"], "surprise": False}, colls=[{**FAVS, "art": "rpg"}],

@@ -175,18 +175,18 @@ class Flow(DataDir):
 
     def test_u_toggles_surprise_and_the_title_shows_it(self):
         self.card(size="1 GB")
-        calls = self.run_card(returns((cardedit.SURPRISE_KEY, 0)), returns(0), returns((cardedit.SURPRISE_KEY, 0)),
+        calls = self.run_card(returns((cardedit.SETTINGS_KEY, 0)), returns(0), returns((cardedit.SETTINGS_KEY, 0)),
                               returns(0), returns(None))
         self.assertIn("🎁 Surprise on", calls[0][0])
-        self.assertEqual(calls[1][1][0], "Turn Surprise off for c")
+        self.assertEqual(calls[1][1][0], "🎁 Surprise: on")
         self.assertIn("🎁 Surprise off", calls[2][0])
-        self.assertEqual(calls[3][1][0], "Turn Surprise on for c")
+        self.assertEqual(calls[3][1][0], "🎁 Surprise: off")
         self.assertIn("🎁 Surprise on", calls[4][0])
         self.assertNotIn("surprise", self.read("cards.json")["c"])
 
     def test_u_off_saves_false(self):
         self.card(size="1 GB")
-        self.run_card(returns((cardedit.SURPRISE_KEY, 0)), returns(0), returns(None))
+        self.run_card(returns((cardedit.SETTINGS_KEY, 0)), returns(0), returns(None))
         self.assertIs(self.read("cards.json")["c"]["surprise"], False)
 
     def test_u_on_an_allium_card_saves_true_and_off_drops_it(self):
@@ -198,7 +198,7 @@ class Flow(DataDir):
 
     def test_u_esc_changes_nothing(self):
         self.card(size="1 GB")
-        self.run_card(returns((cardedit.SURPRISE_KEY, 0)), returns(None), returns(None))
+        self.run_card(returns((cardedit.SETTINGS_KEY, 0)), returns(None), returns(None))
         self.assertNotIn("surprise", self.read("cards.json")["c"])
         self.assertIsNone(self.read_settings().get("surprise_excluded_systems"))
 
@@ -206,7 +206,7 @@ class Flow(DataDir):
         self.card(size="1 GB")
         self.write_json("settings.json", {"surprise_excluded_systems": ["gone"], "bucket": "b"})
         names = [s["name"] for s in CATALOG["systems"]]
-        calls = self.run_card(returns((cardedit.SURPRISE_KEY, 0)), returns(1), flip(0), returns(None))
+        calls = self.run_card(returns((cardedit.SETTINGS_KEY, 0)), returns(3), flip(0), returns(None))
         self.assertTrue(calls[2][1] and all(calls[2][1][i] == names[i] for i in range(len(names))))
         self.assertEqual(self.read_settings()["surprise_excluded_systems"], sorted(["gone", CATALOG["systems"][0]["bucket"]]))
         self.assertEqual(self.read_settings()["bucket"], "b")
@@ -216,7 +216,7 @@ class Flow(DataDir):
         self.card(size="1 GB")
         first = CATALOG["systems"][0]
         self.write_json("settings.json", {"surprise_excluded_systems": [first["bucket"]]})
-        self.run_card(returns((cardedit.SURPRISE_KEY, 0)), returns(1), flip(0), returns(None))
+        self.run_card(returns((cardedit.SETTINGS_KEY, 0)), returns(3), flip(0), returns(None))
         self.assertNotIn("surprise_excluded_systems", self.read_settings())
 
     def playable(self):
@@ -225,7 +225,7 @@ class Flow(DataDir):
     def test_u_card_systems_saves_the_unchecked_ones_on_the_card_only(self):
         self.card(size="1 GB", surprise_excluded_systems=["gone"])
         first = self.playable()[0]
-        calls = self.run_card(returns((cardedit.SURPRISE_KEY, 0)), returns(2), flip(0), returns(None))
+        calls = self.run_card(returns((cardedit.SETTINGS_KEY, 0)), returns(4), flip(0), returns(None))
         self.assertEqual(calls[2][1], [s["name"] for s in self.playable()])
         self.assertEqual(self.read("cards.json")["c"]["surprise_excluded_systems"], sorted(["gone", first["bucket"]]))
         self.assertIsNone(self.read_settings().get("surprise_excluded_systems"))
@@ -233,14 +233,14 @@ class Flow(DataDir):
     def test_u_card_systems_all_checked_removes_the_field(self):
         first = self.playable()[0]
         self.card(size="1 GB", surprise_excluded_systems=[first["bucket"]])
-        self.run_card(returns((cardedit.SURPRISE_KEY, 0)), returns(2), flip(0), returns(None))
+        self.run_card(returns((cardedit.SETTINGS_KEY, 0)), returns(4), flip(0), returns(None))
         self.assertNotIn("surprise_excluded_systems", self.read("cards.json")["c"])
 
     def test_u_card_systems_shows_globally_excluded_ones_unchecked_and_keeps_them_global(self):
         first = self.playable()[0]
         self.card(size="1 GB")
         self.write_json("settings.json", {"surprise_excluded_systems": [first["bucket"]]})
-        calls = self.run_card(returns((cardedit.SURPRISE_KEY, 0)), returns(2),
+        calls = self.run_card(returns((cardedit.SETTINGS_KEY, 0)), returns(4),
                               returns([True] * len(self.playable())), returns(None))
         self.assertIn("off on every card", calls[2][1][0])
         self.assertFalse(calls[2][2]["initial"][0])
@@ -256,6 +256,16 @@ class Flow(DataDir):
         self.card(surprises=[{"system": "gba", "bucket": "gba/Zelda.zip", "title": "Zelda"}])
         self.assertFalse(cardedit.toggle_surprise("c"))
         self.assertNotIn("surprises", self.read("cards.json")["c"])
+
+    def test_s_menu_turns_theme_and_collections_off_and_on(self):
+        self.card(size="1 GB")
+        calls = self.run_card(returns((cardedit.SETTINGS_KEY, 0)), returns(1), returns((cardedit.SETTINGS_KEY, 0)),
+                              returns(2), returns((cardedit.SETTINGS_KEY, 0)), returns(1), returns(None))
+        self.assertIn("Theme", calls[1][1][1])
+        self.assertTrue(calls[1][1][1].endswith("on"))
+        self.assertTrue(calls[3][1][1].endswith("off"))  # the theme, turned off by the first menu
+        self.assertIs(self.read("cards.json")["c"]["custom_collections"], False)
+        self.assertNotIn("theme", self.read("cards.json")["c"])  # the last menu turned it back on: on is not stored
 
     def test_a_text_collections_field_is_not_split_into_letters(self):
         self.favs()
@@ -319,11 +329,11 @@ class Flow(DataDir):
     def test_surprise_is_not_on_u_so_u_always_reverts(self):
         self.card()
         kw = self.run_card(returns(None))[0][2]
-        self.assertEqual(cardedit.SURPRISE_KEY, "S")
-        self.assertIn(cardedit.SURPRISE_KEY, kw["hotkeys"])
+        self.assertEqual(cardedit.SETTINGS_KEY, "S")
+        self.assertIn(cardedit.SETTINGS_KEY, kw["hotkeys"])
         self.assertNotIn("u", kw["hotkeys"])
-        self.assertIn("S surprise", cardedit.LIST_HINT)
-        self.assertIn(("S", "Surprise menu: turn it on or off, or pick its systems"), kw["key_help"])
+        self.assertIn("S settings", cardedit.LIST_HINT)
+        self.assertIn(("S", "settings menu: Surprise, theme and collections on or off, and the systems Surprise may use"), kw["key_help"])
 
     def test_surprise_rows_are_locked_in_the_game_list(self):
         self.card(surprises=[{"system": "gba", "bucket": "gba/Zelda.zip", "title": "Zelda"}])
@@ -1178,7 +1188,7 @@ class Flow(DataDir):
                                         [returns((cardedit.COLLECTIONS_KEY, 0)), returns((" ", 0)), returns(None)]),
             "clear all": ({"games": {"gba": [g("gba/Ruby.zip")], "gb": {"full_system": True}, "sets": ["pk"]},
                            "excluded": {"gba": ["gba/Ruby.sav"]}}, [returns((cardedit.CLEAR_ALL_KEY, 0))]),
-            "surprise off": ({"surprises": zelda}, [returns((cardedit.SURPRISE_KEY, 0)), returns(0)]),
+            "surprise off": ({"surprises": zelda}, [returns((cardedit.SETTINGS_KEY, 0)), returns(0)]),
             "exclude a set game": ({"games": {"sets": ["pk"]}}, [returns(1), game_view_is_fresh(toggle("Ruby.zip"))]),
         }
         for case, (entry, steps) in cases.items():

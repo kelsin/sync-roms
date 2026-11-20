@@ -458,7 +458,8 @@ def cards_list(args):
                      "layout": setup[1] if setup else None, "size": cards[name].get("size") if isinstance(cards[name], dict) else None,
                      "used": usage.bytes if usage else None, "sized": not usage.partial if usage else None,
                      "full_systems": len(full) if setup else None, "games": picked, "extras": extras,
-                     "surprise": surprise.enabled(cards[name])})
+                     "surprise": surprise.enabled(cards[name]), "theme": store.card_flag(cards[name], "theme"),
+                     "collections": store.card_flag(cards[name], "custom_collections")})
     if args.json:
         ui.emit_json(rows)
         return 0
@@ -486,7 +487,8 @@ def cards_list(args):
         return (plural(r["full_systems"], full_w, "full system"), plural(r["games"], games_w, "game"))
 
     # one fixed two-column slot per status emoji (blank when it doesn't apply), so several line up; add new ones here
-    badges = lambda r: "".join(emoji if on else "  " for emoji, on in [("🎁", r["surprise"])])
+    badges = lambda r: "".join(emoji if on else "  " for emoji, on in [("🎁", r["surprise"]), ("🎨", r["theme"]),
+                                                                         ("💖", r["collections"])])
     ui.table([(r["name"], r["device"] or "(no device set)", r["layout"] or "", used(r), *picks(r), badges(r))
               for r in rows])
     if unsized:
@@ -959,6 +961,9 @@ def check_data(list_keys=None, repo_systems=None):
             problems.append(f"cards.json: {name}: 'muos_storage' must be sd1 or sd2")
         if "surprise" in entry and not isinstance(entry["surprise"], bool):
             problems.append(f"cards.json: {name}: 'surprise' must be true or false")
+        for flag in ("theme", "custom_collections"):
+            if flag in entry and not isinstance(entry[flag], bool):
+                problems.append(f"cards.json: {name}: '{flag}' must be true or false")
         picks = entry.get("surprises", [])
         if not isinstance(picks, list):
             problems.append(f"cards.json: {name}: 'surprises' must be a list")

@@ -87,7 +87,7 @@ TOPICS = {
 
   --card NAME is required: a card's games are saved in ~/.sync-roms/cards.json with the previous version kept as .bak. Removing only drops a game from the list.
   In the editor: / filters, Space toggles a row, a all/none shown, u reverts the list, o cycles all/on/changed,
-  f toggles a full system, S opens the Surprise menu; in a system's games, s lists its sets and Space there picks
+  f toggles a full system, S opens the settings menu (Surprise, theme, collections); in a system's games, s lists its sets and Space there picks
   (or unpicks) a set's games. ? in any list shows all its keys.
 """,
     "sets": """
@@ -141,7 +141,7 @@ TOPICS = {
   sync-roms edit                              main menu: Cards, Sets (saved to storage), Collections, Device systems; same as `games edit`
 
   ? in any list shows all its keys. In a card's system list: Enter opens a system's games, f makes it a full system,
-  l picks collections, S opens the Surprise menu, D clears the card. After / in any list, Enter keeps the filter and
+  l picks collections, S opens the settings menu (Surprise, theme, collections), D clears the card. After / in any list, Enter keeps the filter and
   goes back to moving; Esc clears it.
   Ctrl-C while an editor is busy between two lists ("Working...") stops it when that step ends, as Ctrl-C in a list
   does; another Ctrl-C a second or more later, with the step still running, quits at once, and unsaved changes in
@@ -1259,10 +1259,11 @@ def sync_card(args):
             values = entry.get(field)
             return [v for v in values if isinstance(v, str)] if isinstance(values, list) else []
         by_id = {c["id"]: c for c in colls.load_collections()}
-        card_colls = [by_id[i] for i in names("collections") if i in by_id]
+        collections_on = store.card_flag(entry, "custom_collections")
+        card_colls = [by_id[i] for i in names("collections") if i in by_id] if collections_on else []
         surprises = [x for x in entry.get("surprises") or () if isinstance(x, dict)
                      and isinstance(x.get("system"), str) and isinstance(x.get("bucket"), str)]
-        if surprise.enabled(entry) and surprises:  # as saved now: the card editor may have changed them
+        if collections_on and surprise.enabled(entry) and surprises:  # as saved now: the card editor may have changed them
             card_colls.append({"name": surprise.COLLECTION, "games": surprises})  # its art is added below
         owned = names("frontend_collections")
         if not card_colls and not owned:
@@ -1290,6 +1291,8 @@ def sync_card(args):
         if surprise.COLLECTION in plan["enable"]:
             arts[surprise.COLLECTION] = themeart.SURPRISE_ART
         arts = {name: art for name, art in arts.items() if name in plan["enable"]}
+        if not store.card_flag(entry, "theme"):  # no Art Book Next copy, no ES-DE theme and no custom art
+            arts = {}
         if dry_run:
             if layout_name == "muos":
                 muos_collections.describe(plan)
@@ -1307,7 +1310,7 @@ def sync_card(args):
             listed = frontend.apply_collections(plan, layout_name, base)
         if plan["owned"] != owned:
             store.update_card(card, frontend_collections=plan["owned"])
-        art = (bool(arts) or layout_name == "muos") and themeart.install(layout_name, base, arts)
+        art = (bool(arts) or layout_name == "muos" and store.card_flag(entry, "theme")) and themeart.install(layout_name, base, arts)
         # EmuDeck's ES-DE is on this computer, not the card, so its writes leave the card as it was
         if clean_card and layout_name != "emudeck" and (plan["writes"] or plan["deletes"] or listed or art):
             clean._clean_root = base

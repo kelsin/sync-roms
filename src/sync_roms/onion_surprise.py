@@ -63,11 +63,11 @@ def _extract(z, folder):
 
 
 def install(card, layout_name, base, dry_run):
-    """Install the newest Surprise app on an Onion card with Surprise on, once per zip. The failure count."""
+    """Install the newest Surprise app on an Onion card with Surprise and collections on, once per zip. The failure count."""
     if layout_name != LAYOUT:
         return 0
     entry = store.load_cards().get(card)
-    if not surprise.enabled(entry):
+    if not surprise.enabled(entry) or not store.card_flag(entry, "custom_collections"):
         return 0
     listing = inventory.files(runtime.ONION_PREFIX)
     key = _newest(listing)
@@ -177,7 +177,7 @@ def write_list(card, layout_name, base, roms_dir, systems, dry_run):
         return False
     entry = store.load_cards().get(card)
     wanted = []
-    if surprise.enabled(entry) and isinstance(entry, dict):
+    if surprise.enabled(entry) and store.card_flag(entry, "custom_collections") and isinstance(entry, dict):
         folder_of = {s["bucket"]: s["folders"]["onion"] for s in systems if s["folders"].get("onion")}
         surprises = [x for x in entry.get("surprises") or () if isinstance(x, dict)
                      and isinstance(x.get("system"), str) and isinstance(x.get("bucket"), str)]
