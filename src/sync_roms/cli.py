@@ -11,7 +11,7 @@ from concurrent.futures import ThreadPoolExecutor
 from botocore.exceptions import BotoCoreError, ClientError, NoCredentialsError
 
 from . import __version__, budget, cardedit, cardfs, clean, commands, downloads, drivers, edit, external, frontend, inventory, m3u, mirroring, picker, runtime, s3, scrape_plan, store
-from . import muos_collections, onion_surprise, pico8, raofflineproxy, surprise, themeart, ui, usersettings, vita
+from . import muos_collections, onion_surprise, pico8, raofflineproxy, spruce_collections, surprise, themeart, ui, usersettings, vita
 from . import collections as colls
 
 
@@ -82,7 +82,7 @@ TOPICS = {
   sync-roms games remove SYSTEM KEY... --card NAME [-n]
   sync-roms games full SYSTEM on|off --card NAME [-n]
   sync-roms games sets list | add ID | remove ID --card NAME [-n]
-  sync-roms games export --card NAME        one SYSTEM/file per line (full systems as 'SYSTEM/*'), then '@collections ID', '@frontend_collections NAME', '@drivers NAME', '@pico8 ZIP', '@surprise true|false' (only when it differs from the layout's default: on for esde/knulli/emudeck/muos/nextui/onion, off for allium) and '@surprises SYSTEM/file' lines
+  sync-roms games export --card NAME        one SYSTEM/file per line (full systems as 'SYSTEM/*'), then '@collections ID', '@frontend_collections NAME', '@drivers NAME', '@pico8 ZIP', '@surprise true|false' (only when it differs from the layout's default: on for esde/knulli/emudeck/muos/nextui/onion/spruce, off for allium) and '@surprises SYSTEM/file' lines
   sync-roms games import FILE --card NAME [-n]            add the games in such a file; '@' lines replace the card's collections / frontend_collections / drivers / surprises and set pico8, and set Surprise on or off
 
   --card NAME is required: a card's games are saved in ~/.sync-roms/cards.json with the previous version kept as .bak. Removing only drops a game from the list.
@@ -1252,7 +1252,7 @@ def sync_card(args):
 
     def frontend_step(dry_run):
         """Write the card's collections as the frontend's custom collections (ES-DE, Knulli, EmuDeck's ES-DE)."""
-        if layout_name not in frontend.FRONTEND_LAYOUTS and layout_name != "muos":
+        if layout_name not in frontend.FRONTEND_LAYOUTS and layout_name not in ("muos", "spruce"):
             return
         entry = store.load_cards().get(card)
         entry = entry if isinstance(entry, dict) else {}
@@ -1286,6 +1286,8 @@ def sync_card(args):
 
         if layout_name == "muos":
             plan = muos_collections.plan(base, muos_collections.wanted(card_colls, systems, on_card, mount), owned)
+        elif layout_name == "spruce":
+            plan = spruce_collections.plan(base, spruce_collections.wanted(card_colls, systems, on_card), owned)
         else:
             wanted = frontend.wanted_collections(layout_name, card_colls, systems, on_card,
                                                  {k: d for s in systems for k, d in folders_of(s).items()})
@@ -1294,11 +1296,13 @@ def sync_card(args):
         if surprise.COLLECTION in plan["enable"]:
             arts[surprise.COLLECTION] = themeart.SURPRISE_ART
         arts = {name: art for name, art in arts.items() if name in plan["enable"]}
-        if not store.card_flag(entry, "theme"):  # no Art Book Next copy, no ES-DE theme and no custom art
+        if layout_name == "spruce" or not store.card_flag(entry, "theme"):  # no Art Book Next copy, no ES-DE theme and no custom art
             arts = {}
         if dry_run:
             if layout_name == "muos":
                 muos_collections.describe(plan)
+            elif layout_name == "spruce":
+                spruce_collections.describe(plan)
             else:
                 frontend.describe_collections(plan, layout_name)
             if arts:
@@ -1309,6 +1313,9 @@ def sync_card(args):
         if layout_name == "muos":
             muos_collections.apply(plan)
             listed = False
+        elif layout_name == "spruce":
+            spruce_collections.apply(plan)
+            listed = False
         else:
             listed = frontend.apply_collections(plan, layout_name, base)
         if plan["owned"] != owned:
@@ -1318,7 +1325,8 @@ def sync_card(args):
         if clean_card and layout_name != "emudeck" and (plan["writes"] or plan["deletes"] or listed or art):
             clean._clean_root = base
         if plan["writes"]:
-            count = len({os.path.dirname(p) for p, _ in plan["writes"]}) if layout_name == "muos" else len(plan["writes"])
+            count = (len({os.path.dirname(p) for p, _ in plan["writes"]}) if layout_name == "muos"
+                     else len(plan["enable"]) if layout_name == "spruce" else len(plan["writes"]))
             print(ui.green(f"💖 Wrote {count} collection(s) for {layout['label']}"))
 
     capacity = budget.card_capacity(saved or {}) if surprise.enabled(saved or {}) else None
