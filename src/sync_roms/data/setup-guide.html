@@ -699,7 +699,25 @@ const SECTIONS = [
     id: "retroarch",
     title: "RetroArch settings",
     lede: "Shared settings for the cores I use; some apply only on one platform or layout.",
-    items: [],
+    when: { systems: RETROARCH_SYSTEMS },
+    items: [
+      {
+        title: "Saving",
+        body: `<p class="path">${path("RetroArch menu > Settings > Saving")}</p>`,
+        settings: [
+          ["Settings > Saving > Sort Saves into Folders by Core Name", "on"],
+          ["Settings > Saving > Sort Save States into Folders by Core Name", "on"],
+          ["Settings > Saving > Sort Saves into Folders by Content Directory", "off"],
+          ["Settings > Saving > Sort Save States into Folders by Content Directory", "off"],
+          ["Settings > Saving > Write Saves to Content Directory", "off"],
+          ["Settings > Saving > Write Save States to Content Directory", "off"],
+          ["Settings > Saving > Auto Save State", "on"],
+          ["Settings > Saving > Auto Load State", "on"],
+          ["Settings > Saving > Increment Save State Index Automatically", "on"],
+          ["Settings > Saving > Max Save State Increments", "10"],
+        ],
+      },
+    ],
   },
   {
     id: "retroachievements",
