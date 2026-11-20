@@ -15,7 +15,8 @@
     "screen": "1:1",
     "firmwares": [
       "knulli",
-      "muos"
+      "muos",
+      "rocknix"
     ]
   },
   {
@@ -25,7 +26,8 @@
     "screen": "4:3",
     "screen2": "4:3",
     "firmwares": [
-      "esde"
+      "esde",
+      "rocknix"
     ]
   },
   {
@@ -35,7 +37,8 @@
     "screen": "4:3",
     "screen2": "4:3",
     "firmwares": [
-      "knulli"
+      "knulli",
+      "rocknix"
     ]
   },
   {
@@ -55,7 +58,8 @@
     "firmwares": [
       "nextui",
       "knulli",
-      "muos"
+      "muos",
+      "rocknix"
     ]
   },
   {
@@ -83,7 +87,8 @@
     "screen": "16:9",
     "firmwares": [
       "knulli",
-      "muos"
+      "muos",
+      "rocknix"
     ]
   },
   {
@@ -93,7 +98,8 @@
     "screen": "4:3",
     "firmwares": [
       "knulli",
-      "muos"
+      "muos",
+      "rocknix"
     ],
     "network": false
   },
@@ -104,7 +110,8 @@
     "screen": "3:2",
     "firmwares": [
       "knulli",
-      "muos"
+      "muos",
+      "rocknix"
     ]
   },
   {
@@ -115,7 +122,8 @@
     "firmwares": [
       "nextui",
       "knulli",
-      "muos"
+      "muos",
+      "rocknix"
     ]
   },
   {
@@ -124,7 +132,8 @@
     "soc": "Rockchip RK3566",
     "screen": "4:3",
     "firmwares": [
-      "knulli"
+      "knulli",
+      "rocknix"
     ]
   },
   {
@@ -133,7 +142,8 @@
     "soc": "Rockchip RK3566",
     "screen": "4:3",
     "firmwares": [
-      "knulli"
+      "knulli",
+      "rocknix"
     ]
   },
   {
@@ -143,7 +153,8 @@
     "screen": "4:3",
     "firmwares": [
       "knulli",
-      "muos"
+      "muos",
+      "rocknix"
     ],
     "network": false
   },
@@ -154,7 +165,8 @@
     "screen": "4:3",
     "firmwares": [
       "knulli",
-      "muos"
+      "muos",
+      "rocknix"
     ]
   },
   {
@@ -164,7 +176,8 @@
     "screen": "4:3",
     "firmwares": [
       "knulli",
-      "muos"
+      "muos",
+      "rocknix"
     ]
   },
   {
@@ -174,7 +187,8 @@
     "screen": "4:3",
     "firmwares": [
       "knulli",
-      "muos"
+      "muos",
+      "rocknix"
     ]
   },
   {
@@ -184,7 +198,8 @@
     "screen": "4:3",
     "firmwares": [
       "knulli",
-      "muos"
+      "muos",
+      "rocknix"
     ]
   },
   {
@@ -230,7 +245,8 @@
     "screen": "4:3",
     "firmwares": [
       "knulli",
-      "muos"
+      "muos",
+      "rocknix"
     ]
   },
   {
@@ -240,7 +256,8 @@
     "screen": "4:3",
     "firmwares": [
       "knulli",
-      "muos"
+      "muos",
+      "rocknix"
     ]
   },
   {
@@ -276,7 +293,8 @@
     "soc": "Rockchip RK3566",
     "screen": "16:9",
     "firmwares": [
-      "knulli"
+      "knulli",
+      "rocknix"
     ]
   },
   {
@@ -313,7 +331,8 @@
     "gpu": "adreno-a12",
     "screen": "16:9",
     "firmwares": [
-      "esde"
+      "esde",
+      "rocknix"
     ]
   },
   {
@@ -323,7 +342,8 @@
     "gpu": "adreno-g3-gen-3",
     "screen": "16:9",
     "firmwares": [
-      "esde"
+      "esde",
+      "rocknix"
     ]
   },
   {
@@ -333,7 +353,8 @@
     "gpu": "adreno-a32",
     "screen": "3:2",
     "firmwares": [
-      "esde"
+      "esde",
+      "rocknix"
     ]
   },
   {
@@ -370,7 +391,8 @@
     "gpu": "adreno-a32",
     "screen": "31:27",
     "firmwares": [
-      "esde"
+      "esde",
+      "rocknix"
     ]
   },
   {
@@ -381,7 +403,8 @@
     "screen": "16:9",
     "screen2": "4:3",
     "firmwares": [
-      "esde"
+      "esde",
+      "rocknix"
     ]
   },
   {
@@ -391,7 +414,8 @@
     "gpu": "adreno-a32",
     "screen": "16:9",
     "firmwares": [
-      "esde"
+      "esde",
+      "rocknix"
     ]
   },
   {
@@ -429,7 +453,8 @@
     "gpu": "adreno-a32",
     "screen": "16:9",
     "firmwares": [
-      "esde"
+      "esde",
+      "rocknix"
     ]
   },
   {
@@ -439,7 +464,8 @@
     "gpu": "adreno-a32",
     "screen": "4:3",
     "firmwares": [
-      "esde"
+      "esde",
+      "rocknix"
     ]
   },
   {
@@ -449,7 +475,8 @@
     "gpu": "adreno-g3-gen-3",
     "screen": "16:9",
     "firmwares": [
-      "esde"
+      "esde",
+      "rocknix"
     ]
   },
   {
@@ -489,7 +516,8 @@
     "gpu": "adreno-740",
     "screen": "16:9",
     "firmwares": [
-      "esde"
+      "esde",
+      "rocknix"
     ]
   },
   {
@@ -499,7 +527,8 @@
     "gpu": "adreno-740",
     "screen": "16:9",
     "firmwares": [
-      "esde"
+      "esde",
+      "rocknix"
     ]
   },
   {
@@ -509,7 +538,8 @@
     "gpu": "adreno-740",
     "screen": "16:9",
     "firmwares": [
-      "esde"
+      "esde",
+      "rocknix"
     ]
   },
   {
@@ -519,7 +549,8 @@
     "gpu": "adreno-830",
     "screen": "16:9",
     "firmwares": [
-      "esde"
+      "esde",
+      "rocknix"
     ]
   },
   {
@@ -538,7 +569,8 @@
     "screen": "16:9",
     "screen2": "31:27",
     "firmwares": [
-      "esde"
+      "esde",
+      "rocknix"
     ]
   },
   {
@@ -549,7 +581,8 @@
     "screen": "16:9",
     "screen2": "31:27",
     "firmwares": [
-      "esde"
+      "esde",
+      "rocknix"
     ]
   },
   {
@@ -657,7 +690,8 @@
     "gpu": "adreno-650",
     "screen": "16:9",
     "firmwares": [
-      "esde"
+      "esde",
+      "rocknix"
     ]
   },
   {
@@ -667,7 +701,8 @@
     "gpu": "adreno-740",
     "screen": "16:9",
     "firmwares": [
-      "esde"
+      "esde",
+      "rocknix"
     ]
   },
   {
@@ -677,7 +712,8 @@
     "gpu": "adreno-a12",
     "screen": "31:27",
     "firmwares": [
-      "esde"
+      "esde",
+      "rocknix"
     ]
   },
   {
@@ -699,7 +735,8 @@
     "screen": "16:9",
     "screen2": "4:3",
     "firmwares": [
-      "esde"
+      "esde",
+      "rocknix"
     ]
   },
   {
@@ -729,7 +766,8 @@
     "gpu": "adreno-650",
     "screen": "16:9",
     "firmwares": [
-      "esde"
+      "esde",
+      "rocknix"
     ]
   },
   {
@@ -749,7 +787,8 @@
     "gpu": "adreno-650",
     "screen": "4:3",
     "firmwares": [
-      "esde"
+      "esde",
+      "rocknix"
     ]
   },
   {
@@ -759,7 +798,8 @@
     "gpu": "adreno-650",
     "screen": "31:27",
     "firmwares": [
-      "esde"
+      "esde",
+      "rocknix"
     ]
   },
   {
@@ -769,7 +809,8 @@
     "gpu": "adreno-740",
     "screen": "4:3",
     "firmwares": [
-      "esde"
+      "esde",
+      "rocknix"
     ]
   },
   {

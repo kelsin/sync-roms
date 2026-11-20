@@ -78,6 +78,17 @@
     },
     "note": "EmuDeck on the Steam Deck and Steam Machine (SteamOS). Card root holds Emulation/; emulators install to the internal SSD. System folders use the ES-DE names, except Wii U, Xbox 360 and Model 2, which keep their ROMs in a roms/ subfolder. BIOS files go in Emulation/bios, with subfolders only where an emulator expects one. Source: https://emudeck.github.io/cheat-sheet/"
   },
+  "rocknix": {
+    "label": "ROCKNIX",
+    "roms_dir": "roms",
+    "bios_dir": "roms/bios",
+    "retroarch": {
+      "dir": "roms",
+      "saves": "{system}",
+      "states": "savestates/{system}"
+    },
+    "note": "ROCKNIX (Linux handheld firmware). Card root is the games partition; ROMs live in roms/<system>/, BIOS files in roms/bios/. RetroArch saves sit next to the ROM and states go in roms/savestates/<system>. Folder names are ROCKNIX's own (e.g. coleco, sgfx, pico-8). Systems with rocknix = null have no ROCKNIX folder on the card. Source: https://github.com/ROCKNIX/distribution"
+  },
   "nextui": {
     "label": "NextUI",
     "roms_dir": "Roms",
