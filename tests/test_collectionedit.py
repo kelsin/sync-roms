@@ -566,3 +566,35 @@ class ArtPicker(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class AllRows(unittest.TestCase):
+    def rows(self, gba=frozenset({"gba/Ruby.zip"})):
+        shown = listedit.view({"games": []}, SYSTEMS)
+        keys = {"gba": set(gba), "psx": DISCS}
+        return shown, listedit.all_rows(shown, SYSTEMS, lambda bucket: keys[bucket])
+
+    def test_all_rows_span_systems_with_system_prefixed_labels(self):
+        shown, rows = self.rows()
+        labels = [r[3] for r in rows]
+        self.assertEqual(labels, ["PlayStation — Crash.chd", "PlayStation — FF7.m3u", "Game Boy Advance — Ruby.zip"])
+        self.assertFalse(any("FF7 (Disc 1).chd" in label for label in labels))
+        self.assertEqual([r[0] for r in rows], [shown["psx"], shown["psx"], shown["gba"]])
+
+    def test_all_rows_skip_a_system_with_no_files(self):
+        _, rows = self.rows(gba=frozenset())
+        self.assertFalse([r for r in rows if r[1].startswith("gba/")])
+
+    def test_pick_row_set_lists_only_sets_with_a_game_among_the_rows(self):
+        mine = {"name": "Mine", "games": [{"title": "Ruby", "system": "gba", "bucket": "gba/Ruby.zip"}]}
+        other = {"name": "Other", "games": [{"title": "X", "system": "gba", "bucket": "gba/X.zip"}]}
+        seen = []
+
+        def fake(title, labels, **k):
+            seen.extend(labels)
+            return 0
+
+        with mock.patch.object(picker, "filter_list", fake):
+            chosen = listedit.pick_row_set([other, mine], {"gba/Ruby.zip"})
+        self.assertIs(chosen, mine)
+        self.assertEqual(len(seen), 1)

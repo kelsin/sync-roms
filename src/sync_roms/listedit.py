@@ -313,3 +313,50 @@ def edit_menu(noun, before, working, state, emoji, art, delete_note, new_item, o
             state["review"] = False
             continue
         return None if state["review"] else 0
+
+
+# --- All systems at once -----------------------------------------------------------------------------
+
+def all_rows(shown, systems, keys_of):
+    """Rows for edit.toggle_games over every system's files, by title then system. Each row's entry is the system's
+    view in shown, so toggles write into it; labels start with the system's name."""
+    rows = []
+    for system in systems:
+        s = shown[system["bucket"]]
+        rows += [(s, key, title, f"{system['name']} — {label}")
+                 for _, key, title, label in system_rows(s, keys_of(system["bucket"]))]
+    names = {s["bucket"]: s["name"].lower() for s in systems}
+    return sorted(rows, key=lambda r: (r[2].lower(), names[r[0]["bucket"]]))
+
+
+def pick_row_set(sets, row_keys, current=None):
+    """A set with a game among row_keys, picked from a list; None when none is picked or no set has one."""
+    shown = [(x, n) for x in sets for n in [sum(g["bucket"] in row_keys for g in store.set_games(x))] if n]
+    if not shown:
+        edit.note(ui.yellow("ℹ️  No set has games among these."))
+        return None
+    i = picker.filter_list("Narrow to a set", [f"{themeart.set_emoji(x)} {x['name']}  ({n} games)" for x, n in shown],
+                           cursor=next((j for j, (x, _) in enumerate(shown) if x["name"] == current), 0))
+    return None if i is None else shown[i][0]
+
+
+def toggle_all(title, rows, sets, place=None):
+    """edit.toggle_games over rows from all_rows, with s narrowing to a set and c clearing that and the / filter."""
+    from . import cardedit  # cardedit imports this module
+    chosen = None
+    place = {} if place is None else place
+    key_help = [(cardedit.SET_KEY, "narrow to a set"), (cardedit.CLEAR_KEY, "clear filters")]
+    while True:
+        keep = {g["bucket"] for g in store.set_games(chosen)} if chosen else None
+        pressed = edit.toggle_games(
+            title, [r for r in rows if keep is None or r[1] in keep],
+            hotkeys=(cardedit.SET_KEY, cardedit.CLEAR_KEY),
+            hint="Space toggle · Enter done · s set · c clear filters", key_help=key_help, place=place,
+            filters=f"{themeart.set_emoji(chosen)} {chosen['name']} only (c clear filters)" if chosen else "")
+        if pressed == cardedit.CLEAR_KEY:
+            chosen = None
+            place.get("session", {}).pop("query", None)
+        elif pressed == cardedit.SET_KEY:
+            chosen = pick_row_set(sets, {r[1] for r in rows}, chosen and chosen["name"]) or chosen
+        else:
+            return
