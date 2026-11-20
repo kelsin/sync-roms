@@ -336,3 +336,72 @@ class Pico8CartImageTest(unittest.TestCase):
         jobs, entries = self.plan("onion", ["a.p8.png", "b.p8.png"], {"scrapes/pico8/onion/a.p8.png": 1}, meta)
         self.assertEqual([k for k, _ in jobs], ["scrapes/pico8/onion/a.p8.png", "pico8/b.p8.png"])
         self.assertEqual(entries["a.p8.png"]["image"], "./Imgs/a.p8.png")
+
+
+class NextUIMediaTest(unittest.TestCase):
+    GBA_NX = {"name": "Game Boy Advance", "bucket": "gba", "folders": {"nextui": "Game Boy Advance (GBA)"}}
+    PICO_NX = {"name": "PICO-8", "bucket": "pico8", "folders": {"nextui": "PICO-8 (P8)"}}
+
+    def plan(self, rels, listing, meta=None, present=lambda rom: True):
+        return scrape_plan.plan_scrapes("nextui", rels, listing, meta or {}, "/media", "/card/Roms/GBA", present)
+
+    def test_art_goes_in_the_system_folders_dot_media(self):
+        jobs, entries, texts = self.plan(["Game.gba"], {"scrapes/gba/onion/Game.png": 5, "scrapes/gba/covers/Game.png": 9},
+                                         {"Game.gba": {"name": "Game"}})
+        self.assertEqual(jobs, [("scrapes/gba/onion/Game.png", os.path.join("/card/Roms/GBA", ".media", "Game.png"), 5)])
+        self.assertEqual((entries, texts), ({}, []))
+
+    def test_a_game_in_a_subfolder_is_named_by_its_playlist_in_the_system_folders_media(self):
+        jobs, entries, _ = self.plan(["Final Fantasy VII/Final Fantasy VII.m3u"],
+                                     {"scrapes/psx/onion/Final Fantasy VII/Final Fantasy VII.png": 3})
+        self.assertEqual([p for _, p, _ in jobs], [os.path.join("/card/Roms/GBA", ".media", "Final Fantasy VII.png")])
+        self.assertEqual(entries, {})
+
+    def test_a_rom_not_on_the_card_gets_no_art(self):
+        jobs, _, _ = self.plan(["Game.gba"], {"scrapes/gba/onion/Game.png": 5}, present=lambda rom: False)
+        self.assertEqual(jobs, [])
+
+    def test_the_layout_has_no_gamelist(self):
+        self.assertIsNone(scrape_plan.GAMELIST_FILES["nextui"])
+        self.assertIn("nextui", scrape_plan.SCRAPE_LAYOUTS)
+
+    def test_scrape_cost_counts_the_art(self):
+        self.assertEqual(scrape_plan.scrape_cost("nextui", "gba", "Game.gba", {"scrapes/gba/onion/Game.png": 5,
+                                                                              "scrapes/gba/covers/Game.png": 9}), 5)
+
+    def build(self, system, rels, listing, base):
+        with mock.patch.object(scrape_plan.downloads.inventory, "stat", return_value={f"{system['bucket']}/{r}": 3 for r in rels}):
+            return scrape_plan.build_scrape_plan(
+                "nextui", [system], {system["bucket"]: (dict(listing), {r: {"name": "N"} for r in rels})}, {system["bucket"]: rels},
+                lambda s: os.path.join(base, "Roms", s["folders"]["nextui"]), os.path.join(base, "ES-DE"), lambda p: True, base)
+
+    def test_a_sync_plans_no_gamelist(self):
+        with tempfile.TemporaryDirectory() as base:
+            plan = self.build(self.GBA_NX, ["Game.gba"], {"scrapes/gba/onion/Game.png": 5}, base)
+            self.assertEqual(plan["gamelists"], {})
+            self.assertEqual([os.path.relpath(p, base) for _, p, _ in plan["jobs"]],
+                             [os.path.join("Roms", "Game Boy Advance (GBA)", ".media", "Game.png")])
+            self.assertEqual(scrape_plan.apply_scrape_plan({**plan, "jobs": []}, base), (0, False))
+
+    def test_a_pico8_cart_with_no_picture_is_its_own_art(self):
+        with tempfile.TemporaryDirectory() as base:
+            plan = self.build(self.PICO_NX, ["a.p8.png", "b.p8.png", "c.p8"], {"scrapes/pico8/onion/b.p8.png": 5}, base)
+            self.assertEqual(sorted((k, os.path.relpath(p, base)) for k, p, _ in plan["jobs"]),
+                             [("pico8/a.p8.png", os.path.join("Roms", "PICO-8 (P8)", ".media", "a.p8.png")),
+                              ("scrapes/pico8/onion/b.p8.png", os.path.join("Roms", "PICO-8 (P8)", ".media", "b.p8.png"))])
+            self.assertEqual(plan["gamelists"], {})
+
+    def stale(self, files, roms=("Game.gba",)):
+        with tempfile.TemporaryDirectory() as base:
+            for rel in [os.path.join("Game Boy Advance (GBA)", r) for r in roms] + \
+                    [os.path.join("Game Boy Advance (GBA)", f) for f in files]:
+                touch(os.path.join(base, "Roms", rel))
+            stale = scrape_plan.stale_media("nextui", [self.GBA_NX], os.path.join(base, "Roms"), None, base)
+            return sorted(os.path.relpath(p, os.path.join(base, "Roms", "Game Boy Advance (GBA)")) for p in stale)
+
+    def test_stale_media_removes_only_orphan_pngs(self):
+        self.assertEqual(self.stale([".media/Old.png", ".media/Game.png", ".media/notes.txt", ".hidden"]),
+                         [os.path.join(".media", "Old.png")])
+
+    def test_stale_media_keeps_art_of_games_in_subfolders(self):
+        self.assertEqual(self.stale([".media/FF.png"], roms=("FF/FF.m3u", "FF/FF (Disc 1).chd")), [])
