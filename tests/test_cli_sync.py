@@ -79,7 +79,7 @@ class SyncSmokeTest(RealDataDirGuard):
             with open(os.path.join(card, "ROMs", "gba", "Game.zip"), "wb") as f:
                 f.write(b"x" * 5)
 
-        def run_surprise(card, setup, chosen, interactive, dry_run, to_fetch=None):
+        def run_surprise(card, setup, chosen, interactive, dry_run, to_fetch=None, card_match=None):
             calls.append(([s["bucket"] for s in chosen], to_fetch(SYSTEM, ["gba/Game.zip", "gba/New.zip"])))
             return []
         patches = ((store, {"load_manifest": lambda names=(): manifest}),
@@ -87,6 +87,23 @@ class SyncSmokeTest(RealDataDirGuard):
                    (cli.inventory, {"cached": lambda prefix: {"gba/Game.zip": 5, "gba/New.zip": 7}}))
         self.assertEqual(self.run_sync(False, prepare=prepare, patches=patches), 0)
         self.assertEqual(calls, [(["gba", "vectrex"], {"gba/New.zip"})])
+
+    def test_the_editor_can_tell_which_storage_games_are_already_on_the_card(self):
+        calls = []
+
+        def prepare(card):
+            os.makedirs(os.path.join(card, "ROMs", "gba"))
+            for name in ("kept.GBA", "Stray.gba"):
+                with open(os.path.join(card, "ROMs", "gba", name), "wb") as f:
+                    f.write(b"x")
+
+        def run_surprise(card, setup, chosen, interactive, dry_run, to_fetch=None, card_match=None):
+            calls.append(card_match(SYSTEM, ["gba/Kept.gba", "gba/Other.gba"]))
+            calls.append(card_match({**SYSTEM, "bucket": "nes", "folders": {}}, ["nes/A.nes"]))
+            return []
+        patches = ((cli.surprise, {"run_surprise": run_surprise}),)
+        self.assertEqual(self.run_sync(False, prepare=prepare, patches=patches), 0)
+        self.assertEqual(calls, [({"gba/Kept.gba"}, 1), (set(), 0)])
 
     def test_surprises_are_filled_from_systems_without_games_too(self):
         empty = {"name": "GCE Vectrex", "bucket": "vectrex", "folders": {"esde": "vectrex"}, "bios": {"files": []}, "games": []}
