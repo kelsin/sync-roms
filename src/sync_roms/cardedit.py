@@ -342,7 +342,7 @@ def edit_card(name, setup=None, to_fetch=None, card_match=None):
                                  lambda: card_status(name, setup, systems, to_fetch))
                 changed = ALL
             elif key == SURPRISE_KEY:
-                surprise_menu(name, catalog["systems"])
+                surprise_menu(name, catalog["systems"], playable)
                 changed = ALL
             elif key == KEEP_KEY:
                 keep_card_files(name, setup, systems, card_match)
@@ -384,15 +384,19 @@ def card_status(name, setup, systems, to_fetch=None):
     return status_of(total, budget.card_capacity(card), fetch)
 
 
-def surprise_menu(name, systems):
-    """S in the system list: turn the card's Surprise on or off, or pick the systems Surprise may use on every card."""
+def surprise_menu(name, systems, playable):
+    """S in the system list: turn the card's Surprise on or off, or pick the systems Surprise may use on every card or
+    on this card (playable: the systems the card can play)."""
     on = surprise.enabled(store.load_cards().get(name))
     i = picker.filter_list("🎁 Surprise", [f"Turn Surprise {'off' if on else 'on'} for {name}",
-                                          "Systems Surprise may use (every card)"])
+                                          "Systems Surprise may use (every card)",
+                                          "Systems Surprise may use (this card)"])
     if i == 0:
         toggle_surprise(name)
     elif i == 1:
         pick_surprise_systems(systems)
+    elif i == 2:
+        pick_card_surprise_systems(name, playable)
 
 
 def pick_surprise_systems(systems):
@@ -406,6 +410,29 @@ def pick_surprise_systems(systems):
     kept = excluded - ids  # ids not in the catalog stay as they are
     off = sorted(kept | {s["bucket"] for s, on in zip(systems, states) if not on})
     usersettings.save_setting("surprise_excluded_systems", off or None)
+
+
+def pick_card_surprise_systems(name, playable):
+    """Check the systems Surprise may pick from on this card; the unchecked ones are saved as the card's
+    surprise_excluded_systems (removed when none). Systems excluded on every card show unchecked."""
+    cards = store.load_cards()
+    entry = cards.get(name)
+    if not isinstance(entry, dict):
+        return
+    excluded = surprise.card_excluded_systems(entry)
+    everywhere = surprise.excluded_systems()
+    states = picker.filter_list(f"🎁 Systems Surprise may use ({name})",
+                                [s["name"] + (" (off on every card)" if s["bucket"] in everywhere else "") for s in playable],
+                                multi=True, initial=[s["bucket"] not in excluded | everywhere for s in playable])
+    if states is None:
+        return
+    shown = {s["bucket"] for s in playable}
+    off = sorted((excluded - shown) | {s["bucket"] for s, on in zip(playable, states) if not on and s["bucket"] not in everywhere})
+    if off:
+        entry["surprise_excluded_systems"] = off
+    else:
+        entry.pop("surprise_excluded_systems", None)
+    store.write_cards(cards)
 
 
 def toggle_surprise(name):

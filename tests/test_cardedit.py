@@ -219,6 +219,33 @@ class Flow(DataDir):
         self.run_card(returns((cardedit.SURPRISE_KEY, 0)), returns(1), flip(0), returns(None))
         self.assertNotIn("surprise_excluded_systems", self.read_settings())
 
+    def playable(self):
+        return cardedit.can_play(CATALOG["systems"], (DEVICE, "esde"))
+
+    def test_u_card_systems_saves_the_unchecked_ones_on_the_card_only(self):
+        self.card(size="1 GB", surprise_excluded_systems=["gone"])
+        first = self.playable()[0]
+        calls = self.run_card(returns((cardedit.SURPRISE_KEY, 0)), returns(2), flip(0), returns(None))
+        self.assertEqual(calls[2][1], [s["name"] for s in self.playable()])
+        self.assertEqual(self.read("cards.json")["c"]["surprise_excluded_systems"], sorted(["gone", first["bucket"]]))
+        self.assertIsNone(self.read_settings().get("surprise_excluded_systems"))
+
+    def test_u_card_systems_all_checked_removes_the_field(self):
+        first = self.playable()[0]
+        self.card(size="1 GB", surprise_excluded_systems=[first["bucket"]])
+        self.run_card(returns((cardedit.SURPRISE_KEY, 0)), returns(2), flip(0), returns(None))
+        self.assertNotIn("surprise_excluded_systems", self.read("cards.json")["c"])
+
+    def test_u_card_systems_shows_globally_excluded_ones_unchecked_and_keeps_them_global(self):
+        first = self.playable()[0]
+        self.card(size="1 GB")
+        self.write_json("settings.json", {"surprise_excluded_systems": [first["bucket"]]})
+        calls = self.run_card(returns((cardedit.SURPRISE_KEY, 0)), returns(2),
+                              returns([True] * len(self.playable())), returns(None))
+        self.assertIn("off on every card", calls[2][1][0])
+        self.assertFalse(calls[2][2]["initial"][0])
+        self.assertNotIn("surprise_excluded_systems", self.read("cards.json")["c"])
+
     def read_settings(self):
         try:
             return self.read("settings.json")
