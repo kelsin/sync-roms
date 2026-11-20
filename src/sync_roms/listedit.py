@@ -143,6 +143,9 @@ def game_label(game, names):
            f" — {game.get('title') or game['bucket']}"
 
 
+ALL_SYSTEMS = "🌐 All systems"
+
+
 def add_from_system(listing, systems, shown, keys_of, label, categories=True, toggle=None):
     """Pick one of systems with files in storage and toggle its games in listing (via shown, a view of it).
     label is listing's name as shown, with its emoji.
@@ -151,29 +154,43 @@ def add_from_system(listing, systems, shown, keys_of, label, categories=True, to
     New games get the category asked for when categories is true (none after Ctrl-C, which keeps the toggles made and
     is then raised again), and the discs of a multi-disc game whose playlist is in storage."""
     options = stocked(systems)
-    j = picker.filter_list("✏️  Add games from which system?", [s["name"] for s in options], extras=file_counts(options),
-                           preview=lambda k: previews.system(options[k]) if k < len(options) else None)
+    j = picker.filter_list("✏️  Add games from which system?", [ALL_SYSTEMS] + [s["name"] for s in options],
+                           extras=[[]] + file_counts(options),
+                           preview=lambda k: previews.system(options[k - 1]) if 0 < k <= len(options) else None)
     if j is None:
         return
-    s = shown[options[j]["bucket"]]
-    rows = system_rows(s, keys_of(s["bucket"]))
-    had = {g["bucket"] for g in s["games"]}
-    title = f"✏️  {s['name']} — ✅ in {label}, ⬜ in storage only"
+    everywhere = j == 0
+    if everywhere:
+        picked = options
+        rows = all_rows(shown, options, keys_of)
+        if not rows:
+            edit.note(ui.yellow("ℹ️  No games in storage."))
+            return
+        title = f"✏️  All systems — ✅ in {label}, ⬜ in storage only"
+    else:
+        s = shown[options[j - 1]["bucket"]]
+        picked = [options[j - 1]]
+        rows = system_rows(s, keys_of(s["bucket"]))
+        title = f"✏️  {s['name']} — ✅ in {label}, ⬜ in storage only"
+    had = {g["bucket"] for p in picked for g in shown[p["bucket"]]["games"]}
     interrupted = False
     try:
-        if toggle:
+        if everywhere:
+            toggle_all(title, rows, store.load_sets())
+        elif toggle:
             toggle(s, title, rows)
         else:
             edit.toggle_games(title, rows)
     except KeyboardInterrupt:  # Ctrl-C in the list or a picker it opens: the toggles made are kept, with no category
         interrupted = True
-    added = {g["bucket"] for g in s["games"]} - had
+    added = {g["bucket"] for p in picked for g in shown[p["bucket"]]["games"]} - had
     try:
         category = ask_category(listing["games"], f"{len(added)} new game(s)") if categories and added and not interrupted else ""
     except KeyboardInterrupt:  # Ctrl-C at the question: no category
         category, interrupted = "", True
     listing["games"] = reconcile(listing["games"], shown, category)
-    fold_discs(listing["games"], keys_of(s["bucket"]))
+    for p in picked:
+        fold_discs(listing["games"], keys_of(p["bucket"]))
     if interrupted:
         raise KeyboardInterrupt
 
