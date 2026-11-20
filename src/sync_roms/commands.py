@@ -459,7 +459,8 @@ def cards_list(args):
                      "used": usage.bytes if usage else None, "sized": not usage.partial if usage else None,
                      "full_systems": len(full) if setup else None, "games": picked, "extras": extras,
                      "surprise": surprise.enabled(cards[name]), "theme": store.card_flag(cards[name], "theme"),
-                     "collections": store.card_flag(cards[name], "custom_collections")})
+                     "collections": store.card_flag(cards[name], "custom_collections"),
+                     "raofflineproxy": store.card_flag(cards[name], "raofflineproxy")})
     if args.json:
         ui.emit_json(rows)
         return 0
@@ -489,7 +490,7 @@ def cards_list(args):
 
     # one fixed two-column slot per status emoji (blank when it doesn't apply), so several line up; add new ones here
     badges = lambda r: "".join(emoji if on else "  " for emoji, on in [("🎁", r["surprise"]), ("🎨", r["theme"]),
-                                                                         ("💖", r["collections"])])
+                                                                         ("💖", r["collections"]), ("🏆", r["raofflineproxy"])])
     ui.table([(r["name"], r["device"] or "(no device set)", r["layout"] or "", used(r), *picks(r), badges(r))
               for r in rows])
     if unsized:
