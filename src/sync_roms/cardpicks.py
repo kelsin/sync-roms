@@ -53,6 +53,13 @@ class SystemPicks:
         if off:
             self.games = [g for g in self.games if g.get("bucket") not in off]
 
+    def keep(self, keys, notes):
+        """Switch each of keys on; how many were off before and are on now."""
+        base = self.states(notes)
+        before = sum(base[k] for k in keys)
+        self.apply(keys, notes, base, [True] * len(keys))
+        return sum(self.states(notes)[k] for k in keys) - before
+
 
 class CardPicks:
     """A card's games as edited so far, over every system: the ones shown (system()) and working copies of the others

@@ -60,6 +60,34 @@ class Picks(Flow):
         p.system(GBA)
         self.assertFalse(p.save())
 
+    def keep(self, p, *keys):
+        sp = p.system(GBA)
+        return sp, sp.keep(list(keys), p.cover())
+
+    def test_keep_picks_unpicked_keys(self):
+        self.card()
+        sp, n = self.keep(self.picks(), "gba/Emerald.zip", "gba/Zelda.zip")
+        self.assertEqual(n, 2)
+        self.assertEqual(sp.games, [g("gba/Emerald.zip"), g("gba/Zelda.zip")])
+
+    def test_keep_skips_picked_and_set_covered(self):
+        self.card(games={"gba": [g("gba/Zelda.zip")], store.SETS_KEY: ["pk"]})
+        sp, n = self.keep(self.picks(), "gba/Zelda.zip", "gba/Ruby.zip")
+        self.assertEqual(n, 0)
+        self.assertEqual(sp.games, [g("gba/Zelda.zip")])
+
+    def test_keep_unexcludes(self):
+        self.card(games={store.SETS_KEY: ["pk"]}, excluded={"gba": ["gba/Ruby.zip"]})
+        sp, n = self.keep(self.picks(), "gba/Ruby.zip")
+        self.assertEqual(n, 1)
+        self.assertEqual((sp.excluded, sp.games), (set(), []))
+
+    def test_keep_skips_locked(self):
+        self.favs()
+        self.card(collections=["favs"])
+        sp, n = self.keep(self.picks(), "gba/Ruby.zip")
+        self.assertEqual((n, sp.games), (0, []))
+
     def test_system_is_built_once_per_bucket(self):
         self.card()
         p = self.picks()
