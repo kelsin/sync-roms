@@ -28,7 +28,7 @@ ALL_GAMES_HINT = "Space toggle · Enter done · w note · v variant · s set · 
 LIST_KEYS = [("Enter", "the system's games"), ("f", "full system: every file in its folder (again to undo)"),
              ("a", "every game across this card's systems"),
              ("s", "a set's games across this card's systems"), ("l", "collections on this card"),
-             ("S", "settings menu: Surprise, theme and collections on or off, and the systems Surprise may use"),
+             ("S", "settings menu: Surprise, theme, collections and RAOfflineProxy on or off, and the systems Surprise may use"),
              ("D", "clear every pick, full system and set from the card")]
 KEEP_HINT = " · K keep card files"
 KEEP_KEYS = [("K", "pick every card file that matches a storage game")]
@@ -385,7 +385,7 @@ def card_status(name, setup, systems, to_fetch=None):
 
 
 def settings_menu(name, systems, playable):
-    """S in the system list: turn the card's Surprise, theme or custom collections on or off, or pick the systems
+    """S in the system list: turn the card's Surprise, theme, custom collections or RAOfflineProxy on or off, or pick the systems
     Surprise may use on every card or on this card (playable: the systems the card can play)."""
     entry = store.load_cards().get(name)
     state = lambda on: "on" if on else "off"
@@ -393,20 +393,21 @@ def settings_menu(name, systems, playable):
         f"🎁 Surprise: {state(surprise.enabled(entry))}",
         f"🎨 Theme (Art Book Next, ES-DE theme, collection art): {state(store.card_flag(entry, 'theme'))}",
         f"💖 Collections (written to the frontend, Surprise's too): {state(store.card_flag(entry, 'custom_collections'))}",
+        f"🏆 RAOfflineProxy (RetroAchievements offline proxy app): {state(store.card_flag(entry, 'raofflineproxy'))}",
         "Systems Surprise may use (every card)",
         "Systems Surprise may use (this card)"])
     if i == 0:
         toggle_surprise(name)
-    elif i in (1, 2):
-        toggle_flag(name, ("theme", "custom_collections")[i - 1])
-    elif i == 3:
-        pick_surprise_systems(systems)
+    elif i in (1, 2, 3):
+        toggle_flag(name, ("theme", "custom_collections", "raofflineproxy")[i - 1])
     elif i == 4:
+        pick_surprise_systems(systems)
+    elif i == 5:
         pick_card_surprise_systems(name, playable)
 
 
 def toggle_flag(name, field):
-    """Switch a card's `theme` or `custom_collections` on or off (see store.set_card_flag); returns the new state."""
+    """Switch a card's `theme`, `custom_collections` or `raofflineproxy` on or off (see store.set_card_flag); returns the new state."""
     cards = store.load_cards()
     entry = cards.get(name)
     if not isinstance(entry, dict):

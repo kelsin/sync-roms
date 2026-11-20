@@ -16,4 +16,7 @@ ESDE_THEMES_PREFIX = "os/esde/themes/"  # ES-DE theme archives in storage (Art B
 APKS_PREFIX = "os/android/APKs/"  # Android APKs and the Obtainium app list in storage, copied to the card's APKs/
 PICO8_PREFIX = "os/pico8/"  # the official PICO-8 zips in storage; the newest goes where each frontend installs it from
 ONION_PREFIX = "os/onion/"  # the Surprise app zips for Onion cards in storage; the newest is installed under App/Surprise/
+ALLIUM_PREFIX = "os/allium/"  # RAOfflineProxy for Allium cards in storage
+MUOS_PREFIX = "os/muOS/"  # RAOfflineProxy for muOS cards in storage
+KNULLI_PREFIX = "os/knulli/"  # RAOfflineProxy's install script for Knulli cards in storage (next to the Knulli images)
 _mirror_root = None  # set once a sync reads from the local mirror instead of storage

@@ -11,7 +11,7 @@ from concurrent.futures import ThreadPoolExecutor
 from botocore.exceptions import BotoCoreError, ClientError, NoCredentialsError
 
 from . import __version__, budget, cardedit, cardfs, clean, commands, downloads, drivers, edit, external, frontend, inventory, m3u, mirroring, picker, runtime, s3, scrape_plan, store
-from . import muos_collections, onion_surprise, pico8, surprise, themeart, ui, usersettings, vita
+from . import muos_collections, onion_surprise, pico8, raofflineproxy, surprise, themeart, ui, usersettings, vita
 from . import collections as colls
 
 
@@ -87,7 +87,7 @@ TOPICS = {
 
   --card NAME is required: a card's games are saved in ~/.sync-roms/cards.json with the previous version kept as .bak. Removing only drops a game from the list.
   In the editor: / filters, Space toggles a row, a all/none shown, u reverts the list, o cycles all/on/changed,
-  f toggles a full system, S opens the settings menu (Surprise, theme, collections); in a system's games, s lists its sets and Space there picks
+  f toggles a full system, S opens the settings menu (Surprise, theme, collections, RAOfflineProxy); in a system's games, s lists its sets and Space there picks
   (or unpicks) a set's games. ? in any list shows all its keys.
 """,
     "sets": """
@@ -141,7 +141,7 @@ TOPICS = {
   sync-roms edit                              main menu: Cards, Sets (saved to storage), Collections, Device systems; same as `games edit`
 
   ? in any list shows all its keys. In a card's system list: Enter opens a system's games, f makes it a full system,
-  l picks collections, S opens the settings menu (Surprise, theme, collections), D clears the card. After / in any list, Enter keeps the filter and
+  l picks collections, S opens the settings menu (Surprise, theme, collections, RAOfflineProxy), D clears the card. After / in any list, Enter keeps the filter and
   goes back to moving; Esc clears it.
   Ctrl-C while an editor is busy between two lists ("Working...") stops it when that step ends, as Ctrl-C in a list
   does; another Ctrl-C a second or more later, with the step still running, quits at once, and unsaved changes in
@@ -1067,6 +1067,7 @@ def sync_card(args):
     if not chosen:
         failed = pico8.run(card, layout_name, base, args.dry_run, syncs=False)
         failed += onion_surprise.install(card, layout_name, base, args.dry_run)
+        failed += raofflineproxy.install(card, layout_name, base, args.dry_run)
         if onion_surprise.write_list(card, layout_name, base, roms_dir, systems, args.dry_run) and clean_card:
             clean._clean_root = base
         print(ui.yellow(f"👋 {card} has nothing to sync."))
@@ -1140,7 +1141,8 @@ def sync_card(args):
     # Android cards also get storage's os/android/APKs/ files (APKs, the Obtainium app list) in an APKs/ folder to install from
     apk_dir = os.path.join(base, "APKs")
     apk_jobs = ([(k, os.path.join(apk_dir, k[len(runtime.APKS_PREFIX):]), size) for k, size in sorted(inventory.files(runtime.APKS_PREFIX, sizes=False).items())
-                 if not k.endswith("/")] if layout_name == "esde" else [])
+                 if not k.endswith("/") and (store.card_flag(store.load_cards().get(card), "raofflineproxy")
+                                             or not re.fullmatch(r"RAOfflineProxy.*\.apk", os.path.basename(k)))] if layout_name == "esde" else [])
     apk_jobs = downloads.with_sizes(apk_jobs)
     # and the suggested GPU drivers for the device's Adreno GPU, kept up to date in storage first, in a Drivers/ folder
     driver_entries = drivers.for_device(device, layout_name)
@@ -1356,6 +1358,7 @@ def sync_card(args):
                 print(f"  {ui.red('would delete')} {os.path.join(drivers_dir, name)}")
         pico8.run(card, layout_name, base, True, syncs=any(s["bucket"] == "pico8" for s in chosen))
         onion_surprise.install(card, layout_name, base, True)
+        raofflineproxy.install(card, layout_name, base, True)
         stale_count = 0
         if scrapes:
             stale_files = scrape_plan.stale_media(layout_name, manifest['systems'], roms_dir, stale_es_dir, base)
@@ -1430,6 +1433,7 @@ def sync_card(args):
     pico8_wrote = []
     failed += pico8.run(card, layout_name, base, False, pico8_wrote, syncs=any(s["bucket"] == "pico8" for s in chosen))
     failed += onion_surprise.install(card, layout_name, base, False)
+    failed += raofflineproxy.install(card, layout_name, base, False)
     if theme_todo:
         failed += downloads.run_downloads(theme_todo, "Themes", "🎨", os.path.join(base, themes_dir), failures)
     prefixed = 0

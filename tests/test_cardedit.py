@@ -206,7 +206,7 @@ class Flow(DataDir):
         self.card(size="1 GB")
         self.write_json("settings.json", {"surprise_excluded_systems": ["gone"], "bucket": "b"})
         names = [s["name"] for s in CATALOG["systems"]]
-        calls = self.run_card(returns((cardedit.SETTINGS_KEY, 0)), returns(3), flip(0), returns(None))
+        calls = self.run_card(returns((cardedit.SETTINGS_KEY, 0)), returns(4), flip(0), returns(None))
         self.assertTrue(calls[2][1] and all(calls[2][1][i] == names[i] for i in range(len(names))))
         self.assertEqual(self.read_settings()["surprise_excluded_systems"], sorted(["gone", CATALOG["systems"][0]["bucket"]]))
         self.assertEqual(self.read_settings()["bucket"], "b")
@@ -216,7 +216,7 @@ class Flow(DataDir):
         self.card(size="1 GB")
         first = CATALOG["systems"][0]
         self.write_json("settings.json", {"surprise_excluded_systems": [first["bucket"]]})
-        self.run_card(returns((cardedit.SETTINGS_KEY, 0)), returns(3), flip(0), returns(None))
+        self.run_card(returns((cardedit.SETTINGS_KEY, 0)), returns(4), flip(0), returns(None))
         self.assertNotIn("surprise_excluded_systems", self.read_settings())
 
     def playable(self):
@@ -225,7 +225,7 @@ class Flow(DataDir):
     def test_u_card_systems_saves_the_unchecked_ones_on_the_card_only(self):
         self.card(size="1 GB", surprise_excluded_systems=["gone"])
         first = self.playable()[0]
-        calls = self.run_card(returns((cardedit.SETTINGS_KEY, 0)), returns(4), flip(0), returns(None))
+        calls = self.run_card(returns((cardedit.SETTINGS_KEY, 0)), returns(5), flip(0), returns(None))
         self.assertEqual(calls[2][1], [s["name"] for s in self.playable()])
         self.assertEqual(self.read("cards.json")["c"]["surprise_excluded_systems"], sorted(["gone", first["bucket"]]))
         self.assertIsNone(self.read_settings().get("surprise_excluded_systems"))
@@ -233,14 +233,14 @@ class Flow(DataDir):
     def test_u_card_systems_all_checked_removes_the_field(self):
         first = self.playable()[0]
         self.card(size="1 GB", surprise_excluded_systems=[first["bucket"]])
-        self.run_card(returns((cardedit.SETTINGS_KEY, 0)), returns(4), flip(0), returns(None))
+        self.run_card(returns((cardedit.SETTINGS_KEY, 0)), returns(5), flip(0), returns(None))
         self.assertNotIn("surprise_excluded_systems", self.read("cards.json")["c"])
 
     def test_u_card_systems_shows_globally_excluded_ones_unchecked_and_keeps_them_global(self):
         first = self.playable()[0]
         self.card(size="1 GB")
         self.write_json("settings.json", {"surprise_excluded_systems": [first["bucket"]]})
-        calls = self.run_card(returns((cardedit.SETTINGS_KEY, 0)), returns(4),
+        calls = self.run_card(returns((cardedit.SETTINGS_KEY, 0)), returns(5),
                               returns([True] * len(self.playable())), returns(None))
         self.assertIn("off on every card", calls[2][1][0])
         self.assertFalse(calls[2][2]["initial"][0])
@@ -333,7 +333,25 @@ class Flow(DataDir):
         self.assertIn(cardedit.SETTINGS_KEY, kw["hotkeys"])
         self.assertNotIn("u", kw["hotkeys"])
         self.assertIn("S settings", cardedit.LIST_HINT)
-        self.assertIn(("S", "settings menu: Surprise, theme and collections on or off, and the systems Surprise may use"), kw["key_help"])
+        self.assertIn(("S", "settings menu: Surprise, theme, collections and RAOfflineProxy on or off, and the systems Surprise may use"), kw["key_help"])
+
+    def test_settings_menu_toggles_raofflineproxy_and_shifts_the_systems_entries(self):
+        self.card()
+        seen = []
+        with mock.patch.object(picker, "filter_list", lambda t, labels, **kw: seen.append(labels) or 3), \
+                mock.patch.object(cardedit, "pick_surprise_systems") as every, \
+                mock.patch.object(cardedit, "pick_card_surprise_systems") as one:
+            cardedit.settings_menu("c", CATALOG["systems"], [])
+            self.assertEqual(seen[0][3], "🏆 RAOfflineProxy (RetroAchievements offline proxy app): on")
+            self.assertIs(self.read("cards.json")["c"]["raofflineproxy"], False)
+            cardedit.settings_menu("c", CATALOG["systems"], [])
+            self.assertNotIn("raofflineproxy", self.read("cards.json")["c"])
+            with mock.patch.object(picker, "filter_list", return_value=4):
+                cardedit.settings_menu("c", CATALOG["systems"], [])
+            with mock.patch.object(picker, "filter_list", return_value=5):
+                cardedit.settings_menu("c", CATALOG["systems"], [])
+        every.assert_called_once()
+        one.assert_called_once()
 
     def test_surprise_rows_are_locked_in_the_game_list(self):
         self.card(surprises=[{"system": "gba", "bucket": "gba/Zelda.zip", "title": "Zelda"}])

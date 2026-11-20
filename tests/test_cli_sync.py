@@ -393,6 +393,19 @@ class SyncSmokeTest(RealDataDirGuard):
         self.assertEqual([k for k, _ in got], ["os/android/APKs/Obtainium.apk"])
         self.assertEqual(os.path.basename(os.path.dirname(got[0][1])), "APKs")
 
+    def test_raofflineproxy_apk_is_left_out_when_the_card_has_it_off(self):
+        for flag, expected in ((True, ["os/android/APKs/Obtainium.apk", "os/android/APKs/RAOfflineProxy-v3.apk"]), (False, ["os/android/APKs/Obtainium.apk"])):
+            got = []
+            apks = {"os/android/APKs/": 0, "os/android/APKs/Obtainium.apk": 5, "os/android/APKs/RAOfflineProxy-v3.apk": 6}
+            patches = ((cli, {"free_space": lambda path: 10**9}),
+                       (store, {"load_cards": lambda: type("AnyCard", (dict,), {"get": lambda self, k, d=None: {"raofflineproxy": flag}})()}),
+                       (cli.downloads, {"run_downloads": lambda todo, label, icon, base, *a: (got.extend(j[0] for j in todo) if label == "Android" else None) or 0}),
+                       (cli.s3, {"list_sizes": lambda prefix, sizes=True: apks if prefix == "os/android/APKs/" else list_sizes(prefix)}),
+                       (cli.ui, {"choose": lambda q, *a, **k: "n"}))
+            with self.subTest(flag):
+                self.run_sync(False, patches=patches)
+                self.assertEqual(got, expected)
+
     ZIP = "pico-8_0.2.7_raspi.zip"
 
     def run_pico8(self, games, copied, dry_run=False, prepare=None, asked=None, device=None, extra_systems=()):
