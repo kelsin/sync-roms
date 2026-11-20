@@ -65,6 +65,12 @@ def excluded_systems():
     return {i for i in ids if isinstance(i, str)} if isinstance(ids, list) else set()
 
 
+def card_excluded_systems(entry):
+    """System ids Surprise never picks from on this card: the card's surprise_excluded_systems."""
+    ids = entry.get("surprise_excluded_systems") if isinstance(entry, dict) else None
+    return {i for i in ids if isinstance(i, str)} if isinstance(ids, list) else set()
+
+
 def _history_path():
     return os.path.join(store.data_dir(), "surprises.json")
 
@@ -242,8 +248,8 @@ def _pools(chosen_systems, taken):
 
 def _current(entry, chosen_systems):
     """(systems' names by bucket, the entry's saved surprises that are on those systems), systems in excluded_systems()
-    left out."""
-    excluded = excluded_systems()
+    and the card's own surprise_excluded_systems left out."""
+    excluded = excluded_systems() | card_excluded_systems(entry)
     names = {s["bucket"]: s["name"] for s in chosen_systems if s["bucket"] not in excluded}
     saved = entry.get("surprises")
     return names, [x for x in (saved if isinstance(saved, list) else ())
@@ -253,7 +259,7 @@ def _current(entry, chosen_systems):
 def run_surprise(card_name, setup, chosen_systems, interactive, dry_run, to_fetch=None, card_match=None):
     """The sync step that comes first: ask which of a card's surprises to replace (all of them when not interactive),
     keep the others and save them (the empty slots are filled later, by fill_surprises, after the card editor), then
-    open the card editor when interactive (with Surprise off too). Systems in excluded_systems() are left out, and
+    open the card editor when interactive (with Surprise off too). Systems in excluded_systems() or the card's own list are left out, and
     their current surprises dropped. A dry run changes nothing. Returns the surprises kept (on a dry run, the saved
     ones). to_fetch, card_match: passed to the card editor."""
     cards = store.load_cards()
@@ -274,12 +280,12 @@ def run_surprise(card_name, setup, chosen_systems, interactive, dry_run, to_fetc
             print("\U0001F381 would ask which surprises to replace" if interactive
                   else f"\U0001F381 would replace all {len(current)} surprises")
     elif interactive and current:
-        states = picker.filter_list("Pick the surprises to replace",
+        states = picker.filter_list("\U0001F381 Surprises: keep ✅ or replace ⬜ (Enter to confirm)",
                                     [f"{x.get('title') or x['bucket']}  ({names[x['system']]})" for x in current],
-                                    multi=True, initial=[False] * len(current),
+                                    multi=True, initial=[True] * len(current), diff_marks=False,
                                     preview=lambda k: previews.game_thumb(current[k]["bucket"]) if k < len(current) else None,
                                     preview_width=previews.GAME_WIDTH)
-        kept = current if states is None else [x for x, replace in zip(current, states) if not replace]
+        kept = current if states is None else [x for x, keep in zip(current, states) if keep]
     else:
         kept = []
     if not dry_run:

@@ -318,12 +318,13 @@ class Step(StorageCase):
         current = [self.surprise("gba", i) for i in range(5)] + [self.surprise("gb", i) for i in range(5)]
         self.card(surprises=current)
         lists, edits = [], []
-        with self.patched(filter_list=lambda title, labels, **kw: lists.append((title, labels, kw)) or [True] + [False] * 9,
+        with self.patched(filter_list=lambda title, labels, **kw: lists.append((title, labels, kw)) or [False] + [True] * 9,
                           edit_card=lambda name, setup=None, to_fetch=None, card_match=None: edits.append(name)):
             got = self.both(True, False, 1)
         title, labels, kw = lists[0]
-        self.assertEqual(title, "Pick the surprises to replace")
-        self.assertEqual(kw["initial"], [False] * 10)
+        self.assertEqual(title, "\U0001F381 Surprises: keep ✅ or replace ⬜ (Enter to confirm)")
+        self.assertEqual(kw["initial"], [True] * 10)
+        self.assertIs(kw["diff_marks"], False)
         self.assertEqual(len(got), 10)
         self.assertNotIn(current[0], got)
         self.assertTrue(all(c in got for c in current[1:]))
@@ -333,7 +334,7 @@ class Step(StorageCase):
 
     def test_surprises_outside_the_run_are_dropped(self):
         self.card(surprises=[self.surprise("gba", 0), self.surprise("psx", 0)])
-        with self.patched(filter_list=lambda t, labels, **kw: [False] * len(labels)):
+        with self.patched(filter_list=lambda t, labels, **kw: [True] * len(labels)):
             got = self.both(True, False, 2)
         self.assertNotIn("psx", {g["system"] for g in got})
         self.assertIn(self.surprise("gba", 0), got)
@@ -344,6 +345,20 @@ class Step(StorageCase):
         got = self.both(False, False, 3)
         self.assertEqual(len(got), 10)
         self.assertEqual({g["system"] for g in got}, {"gba"})
+
+    def test_card_excluded_systems_are_never_picked_and_their_surprises_are_replaced(self):
+        self.card(surprises=[self.surprise("gba", 0), self.surprise("gb", 0)], surprise_excluded_systems=["gb"])
+        got = self.both(False, False, 3)
+        self.assertEqual(len(got), 10)
+        self.assertEqual({g["system"] for g in got}, {"gba"})
+
+    def test_card_and_global_exclusions_both_apply(self):
+        usersettings.save_setting("surprise_excluded_systems", ["gb"])
+        entry = {"surprise_excluded_systems": ["gba", 3]}
+        names, current = surprise._current({**entry, "surprises": [self.surprise("gba", 0)]}, self.chosen())
+        self.assertEqual((names, current), ({}, []))
+        self.assertEqual(surprise.card_excluded_systems({"surprise_excluded_systems": "gba"}), set())
+        self.assertEqual(surprise.card_excluded_systems(None), set())
 
     def test_dry_run_keeps_every_surprise_and_only_previews_the_empty_slots(self):
         self.card(surprises=[self.surprise("gba", 0)])
@@ -413,7 +428,7 @@ class Step(StorageCase):
     def test_twelve_kept_surprises_get_no_new_picks(self):
         current = [self.surprise("gba", i) for i in range(12)]
         self.card(surprises=current)
-        with self.patched(filter_list=lambda t, labels, **kw: [False] * len(labels)):
+        with self.patched(filter_list=lambda t, labels, **kw: [True] * len(labels)):
             got = self.both(True, False, 8)
         self.assertEqual(got, current)
 
@@ -440,7 +455,7 @@ class Step(StorageCase):
         def down(*a, **k):
             raise SystemExit("offline")
         with mock.patch.object(surprise.s3, "list_folders", down), contextlib.redirect_stderr(io.StringIO()), \
-                self.patched(filter_list=lambda t, labels, **kw: [True] + [False] * (len(labels) - 1),
+                self.patched(filter_list=lambda t, labels, **kw: [False] + [True] * (len(labels) - 1),
                              edit_card=lambda name, setup=None, to_fetch=None, card_match=None: edits.append(name)):
             got = self.both(True, False, 9)
         self.assertEqual(got, current[1:])
