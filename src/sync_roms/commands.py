@@ -529,6 +529,11 @@ def cards_save_setup(args, create):
     return 0
 
 
+def cards_clean(args):
+    from . import convert
+    return convert.clean_command(args)
+
+
 def cards_convert(args):
     from . import convert
     return convert.convert_command(args)
@@ -1188,7 +1193,7 @@ def second_words():
     words["collections"] = ["edit"]
     words["themes"] = ["update"]
     words["download"] = ["pico8"]
-    words["cards"] = ["edit", "list", "new", "set", "rename", "convert", "delete", "copy", "export", "import"]
+    words["cards"] = ["edit", "list", "new", "set", "rename", "convert", "clean", "delete", "copy", "export", "import"]
     words["saves"] = ["stash", "apply"]
     words["config"] = ["show", "path", "set", "unset"]
     words["cache"] = ["update"]
@@ -1313,6 +1318,7 @@ def build_parser():
     p = csub.add_parser("rename", allow_abbrev=False); common(p, card=False); p.add_argument("old"); p.add_argument("new"); p.set_defaults(fn=cards_rename)
     p = csub.add_parser("convert", allow_abbrev=False); common(p, card=False); p.add_argument("card", nargs="?")
     p.add_argument("--layout", required=True); p.set_defaults(fn=cards_convert)
+    p = csub.add_parser("clean", allow_abbrev=False); common(p, card=False); p.add_argument("card", nargs="?"); p.set_defaults(fn=cards_clean)
     p = csub.add_parser("delete", allow_abbrev=False); common(p, card=False); p.add_argument("name"); p.set_defaults(fn=cards_delete)
     p = csub.add_parser("copy", allow_abbrev=False); common(p, card=False); p.add_argument("src"); p.add_argument("dst"); p.set_defaults(fn=cards_copy)
     p = csub.add_parser("export", allow_abbrev=False); common(p, card=False); p.add_argument("file"); p.set_defaults(fn=cards_export)

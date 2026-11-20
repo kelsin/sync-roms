@@ -1,7 +1,8 @@
 """`cards convert`: plan and apply the renames that take a card's files from one layout to another on the same filesystem."""
 import os
+import shutil
 
-from sync_roms import commands, downloads, m3u, picker, saves, scrape_plan, store, ui
+from sync_roms import commands, downloads, frontend, m3u, picker, saves, scrape_plan, store, ui
 
 PLAYLIST_NOTE = "playlist paths differ between layouts; sync rewrites it"
 
@@ -288,6 +289,55 @@ def _leftovers(base, systems, old_name, old):
     return list(dict.fromkeys(found))
 
 
+ROM_FOLDER_MEDIA_DIRS = {"knulli": ("images", "videos", "manuals"), "nextui": (".media",),
+                         **{name: ("imgs",) for name in scrape_plan.ONION_LAYOUTS}}
+
+
+def _media_names(layout_name):
+    """Lower-case names a layout's scrapes take inside a system's ROM folder: its gamelist and its media folders."""
+    names = set(ROM_FOLDER_MEDIA_DIRS.get(layout_name, ()))
+    if scrape_plan.GAMELIST_FILES.get(layout_name) and layout_name not in frontend.ESDE_LAYOUTS:
+        names.add(scrape_plan.GAMELIST_FILES[layout_name].lower())
+    return names
+
+
+def plan_media(base, systems, old_name, old, new_name, new):
+    """[path]: the old layout's scraped media in its ROM folders (gamelist and media folders), which the new layout
+    doesn't use, so nothing reads them after the convert; sync scrapes the new layout's own. A name the new layout also
+    uses in the same folder stays."""
+    found, seen = [], set()
+    old_names = _media_names(old_name)
+    same = _media_names(new_name)
+    for system in systems:
+        old_folder, new_folder = system["folders"].get(old_name), system["folders"].get(new_name)
+        if not old_folder or old_folder in seen:
+            continue
+        seen.add(old_folder)
+        folder = _exact_dir(base, *old["roms_dir"].split("/"), *old_folder.split("/"))
+        if not folder:
+            continue
+        shared = same if old["roms_dir"].lower() == new["roms_dir"].lower() and old_folder.lower() == (new_folder or "").lower() else set()
+        found += [os.path.join(folder, n) for n in sorted(_listed(folder)) if n.lower() in old_names - shared]
+    return found
+
+
+def remove_media(paths, base=None):
+    """Delete each file or folder in paths and the ROM folders that are then empty (never base); the (path, error)
+    pairs that could not be removed."""
+    failures = []
+    for path in paths:
+        try:
+            if os.path.isdir(path) and not os.path.islink(path):
+                shutil.rmtree(path)
+            elif os.path.lexists(path):
+                os.remove(path)
+        except OSError as err:
+            failures.append((path, err))
+    for path in paths:
+        _prune(os.path.dirname(path), base)
+    return failures
+
+
 def convert_command(args):
     """`cards convert [CARD] --layout ID [--dry-run] [--yes]`: move the card's ROMs, BIOS and RetroArch saves and
     states to the folders of another layout, then save that layout for the card."""
@@ -309,23 +359,31 @@ def convert_command(args):
     bios_moves, bios_skipped = plan_bios(base, systems, old_name, old, new_name, new)
     save_moves, save_skipped = plan_saves(base, systems, old_name, old, new_name, new, rom_moves)
     planned = rom_moves + bios_moves + save_moves
+    media = plan_media(base, systems, old_name, old, new_name, new)
     print(ui.bold(f"{name}: {old_name} → {new_name}"))
     _summary("ROMs", rom_moves, rom_skipped, os.path.join(base, old["roms_dir"]))
     _summary("BIOS", bios_moves, bios_skipped)
     _summary("Saves and states", save_moves, save_skipped)
-    left = _leftovers(base, systems, old_name, old)
+    if media:
+        print(ui.bold(f"Old {old_name} media (deleted)"))
+        by_folder = {}
+        for path in media:
+            by_folder.setdefault(os.path.relpath(os.path.dirname(path), base), []).append(os.path.basename(path))
+        for folder, names in by_folder.items():
+            print(f"  {folder}: {', '.join(names)}")
+    left = [x for x in _leftovers(base, systems, old_name, old) if os.path.join(base, x) not in media]
     if left:
         print(ui.dim("Left in place (frontend files and folders): " + ", ".join(left)))
-    if not planned:
+    if not planned and not media:
         print(ui.green("Nothing to move"))
     if args.dry_run:
         print(ui.yellow("🧪 Dry run: nothing moved, layout not changed"))
         return 0
-    if planned:
+    if planned or media:
         if not args.yes:
             if not ui.has_terminal():
                 ui.fail("Pass --yes to convert without a terminal to confirm on", 2)
-            if not ui.confirm(f"Move {len(planned)} files?"):
+            if not ui.confirm(f"Move {len(planned)} files" + (f" and delete the old media in {len(by_folder)} folders?" if media else "?")):
                 return 1
         failures = []
         for moves in (save_moves, bios_moves, rom_moves):
@@ -337,7 +395,52 @@ def convert_command(args):
             for src, dst, err in failures:
                 ui.warn(f"could not move {src} → {dst}: {err}")
             ui.fail(f"{len(failures)} move(s) failed; the layout is still {old_name}. Fix the cause and run convert again", 3)
+        for path, err in remove_media(media, base):
+            ui.warn(f"could not delete {path}: {err}")
     if not store.update_card(name, layout=new_name):
         return 3
     print(ui.green(f"💾 {name} is now {new_name}") + (ui.dim("  (run a sync to fill in the rest)") if planned else ""))
     return 0
+
+
+def clean_command(args):
+    """`cards clean [CARD] [--dry-run] [--yes]`: delete the scraped media other layouts left in the card's ROM
+    folders (a convert before this existed, or a card used with another firmware); the card's own layout's stays."""
+    base = os.path.abspath(args.card or os.getcwd())
+    name = os.path.basename(base)
+    cards = store.load_cards()
+    if name not in cards:
+        ui.fail(f"No card named {name!r}. Set it up with `sync-roms cards new {name} --device ID|full --layout NAME`", 2)
+    catalog = store.load_catalog()
+    current = picker.saved_setup(cards[name], catalog["devices"], catalog["layouts"], name)
+    if not current:
+        ui.fail(f"{name!r} has no usable layout. Set it with `sync-roms cards set {name} --layout NAME`", 2)
+    if not os.path.isdir(base):
+        ui.fail(f"No folder {base}", 2)
+    keep_name = current[1]
+    layouts, systems = catalog["layouts"], catalog["systems"]
+    media = list(dict.fromkeys(
+        path for other, layout in layouts.items() if other != keep_name
+        for path in plan_media(base, systems, other, layout, keep_name, layouts[keep_name])))
+    if not media:
+        print(ui.green(f"{name}: no media from other layouts"))
+        return 0
+    print(ui.bold(f"{name} ({keep_name}): media from other layouts (deleted)"))
+    by_folder = {}
+    for path in media:
+        by_folder.setdefault(os.path.relpath(os.path.dirname(path), base), []).append(os.path.basename(path))
+    for folder, names in by_folder.items():
+        print(f"  {folder}: {', '.join(names)}")
+    if args.dry_run:
+        print(ui.yellow("🧪 Dry run: nothing deleted"))
+        return 0
+    if not args.yes:
+        if not ui.has_terminal():
+            ui.fail("Pass --yes to delete without a terminal to confirm on", 2)
+        if not ui.confirm(f"Delete the media in {len(by_folder)} folders?"):
+            return 1
+    failures = remove_media(media, base)
+    for path, err in failures:
+        ui.warn(f"could not delete {path}: {err}")
+    print(ui.green(f"🧹 deleted media in {len(by_folder)} folders") if not failures else ui.red(f"{len(failures)} failed"))
+    return 3 if failures else 0

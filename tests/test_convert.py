@@ -297,6 +297,24 @@ class FixesTest(ConvertTest):
         moves, _ = self.roms(old=("esde", LAYOUTS["esde"]), new=("emudeck", E))
         self.assertIn((self.p("ROMs", "gba", "Other.zip"), self.p("Emulation", "roms", "gba", "Other.zip")), moves)
 
+    def test_old_knulli_media_is_planned_for_deletion(self):
+        for f in ("gamelist.xml", "images/a.png", "videos/a.mp4", "manuals/a.pdf", "Game.zip"):
+            touch(self.p("roms", "gba", f))
+        self.assertEqual(convert.plan_media(self.base, SYSTEMS, "knulli", K, "nextui", N),
+                         [self.p("roms", "gba", n) for n in ("gamelist.xml", "images", "manuals", "videos")])
+
+    def test_media_the_new_layout_also_uses_stays(self):
+        for f in ("miyoogamelist.xml", "Imgs/a.png"):
+            touch(self.p("Roms", "GBA", f))
+        self.assertEqual(convert.plan_media(self.base, SYSTEMS, "onion", O, "onion", O), [])
+
+    def test_remove_media_prunes_emptied_folder(self):
+        for f in ("gamelist.xml", "images/a.png"):
+            touch(self.p("roms", "gba", f))
+        paths = convert.plan_media(self.base, SYSTEMS, "knulli", K, "nextui", N)
+        self.assertEqual(convert.remove_media(paths, self.base), [])
+        self.assertFalse(os.path.exists(self.p("roms", "gba")))
+
     def test_prune_stops_at_base(self):
         os.makedirs(self.p("a", "b"))
         convert._prune(self.p("a", "b"), self.p("a"))
@@ -401,6 +419,35 @@ class ConvertCommandTest(unittest.TestCase):
         self.assertTrue(self.moved())
         self.assertFalse(os.path.exists(os.path.join(self.base, "roms", "gba", "Game.zip")))
         self.assertEqual(self.layout(), "nextui")
+
+    def test_convert_deletes_old_media(self):
+        touch(os.path.join(self.base, "roms", "gba", "gamelist.xml"))
+        touch(os.path.join(self.base, "roms", "gba", "images", "Game-image.png"))
+        touch(os.path.join(self.base, "roms", "psx", "gamelist.xml"))
+        self.assertEqual(self.run_cmd(dry_run=True, yes=False), 0)
+        self.assertTrue(os.path.exists(os.path.join(self.base, "roms", "gba", "images")))
+        self.assertEqual(self.run_cmd(), 0)
+        for rel in (("gba", "gamelist.xml"), ("gba", "images"), ("psx", "gamelist.xml"), ("psx",)):
+            self.assertFalse(os.path.exists(os.path.join(self.base, "roms", *rel)), rel)
+        self.assertTrue(self.moved())
+
+    def run_clean(self, dry_run=False):
+        args = self.argparse.Namespace(card=self.base, dry_run=dry_run, yes=True)
+        with mock.patch("sync_roms.ui.has_terminal", return_value=False), self.redirect(self.out), self.redirect_err(self.err):
+            return convert.clean_command(args)
+
+    def test_clean_deletes_other_layouts_media_only(self):
+        self.set_card({"device": "anbernic-rg-sp", "layout": "nextui"})
+        touch(os.path.join(self.base, "Roms", "Game Boy Advance (GBA)", "Game.zip"))
+        touch(os.path.join(self.base, "Roms", "Game Boy Advance (GBA)", ".media", "Game.png"))
+        for f in ("gamelist.xml", "images/a.png", "videos/a.mp4"):
+            touch(os.path.join(self.base, "roms", "gb", f))
+        self.assertEqual(self.run_clean(dry_run=True), 0)
+        self.assertTrue(os.path.exists(os.path.join(self.base, "roms", "gb", "images")))
+        self.assertEqual(self.run_clean(), 0)
+        self.assertFalse(os.path.exists(os.path.join(self.base, "roms", "gb")))
+        self.assertTrue(os.path.exists(os.path.join(self.base, "Roms", "Game Boy Advance (GBA)", ".media", "Game.png")))
+        self.assertTrue(self.moved())
 
     def test_save_follows_its_rom(self):
         touch(os.path.join(self.base, "saves", "gba", "Game.srm"))
