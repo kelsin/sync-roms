@@ -19,6 +19,14 @@ class SetupGuideTest(unittest.TestCase):
         self.assertEqual(update_setup_guide.embedded(html, update_setup_guide.SYSTEMS_BLOCK),
                          update_setup_guide.systems_json(), "run tools/update_setup_guide.py")
 
+    def test_guide_knows_nextui_layout_on_linux(self):
+        with open(update_setup_guide.GUIDE) as f:
+            html = f.read()
+        self.assertIn('nextui: "NextUI"', html)
+        platform_of = html.split("function platformOf", 1)[1].split("\n}\n", 1)[0]
+        self.assertNotIn("nextui", platform_of)  # falls through to the "linux" default
+        self.assertTrue(platform_of.rstrip().endswith('return "linux";'))
+
     def test_guide_command_opens_the_packaged_page(self):
         from unittest import mock
         from sync_roms import commands

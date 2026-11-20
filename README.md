@@ -118,6 +118,7 @@ You pick a device, then the firmware it runs (a device with only one isn't asked
 | `knulli` | `roms/` `bios/` (SD card SHARE partition, `/userdata`) | Default for the Anbernic H700, RG Vita Pro and Miyoo Flip handhelds |
 | `onion` | `Roms/` `BIOS/` | Miyoo Mini, Mini Plus and Mini Flip, on [Onion](https://onionui.github.io/) |
 | `allium` | `Roms/` `BIOS/` | Miyoo Mini, Mini Plus and Mini Flip, on [Allium](https://github.com/goweiwen/Allium). Same folders and `Imgs/` box art as `onion`, but with a full `gamelist.xml` |
+| `nextui` | `Roms/` `Bios/` | Anbernic RG SP and RG34XX SP, on [NextUI](https://nextui.loveretro.games/) (MinUI style). System folders are named `<Name> (TAG)`, the tag picking the emulator; BIOS files go in `Bios/<TAG>/`. A multi-disc game gets a folder of its own with its discs and `.m3u` |
 | `emudeck` | `Emulation/roms/` `Emulation/bios/` | [EmuDeck](https://emudeck.github.io/) on the Steam Deck and Steam Machine. Wii U, Xbox 360 and Model 2 ROMs go in a `roms/` subfolder of their system folder. Scraped media on the card; gamelists and collections in `~/ES-DE` on the machine running the sync |
 
 Folder names are case-sensitive. Folders that don't exist are shown as
@@ -188,6 +189,7 @@ While typing a filter (or a note, which `w` opens in the game list): `^A` `^E` s
    | `knulli` | `<system>/images`, `videos`, `manuals`, named `Game-image.png`, `-thumb`, `-marquee`, `-fanart`, `-boxback`, `-titleshot`, `-video`, `-manual` | `<system>/gamelist.xml` with name, description, rating, date and the media tags |
    | `onion` | `<system>/Imgs/Game.png`, the 250x360 box art made when scraping | `<system>/miyoogamelist.xml` with name and image |
    | `allium` | same `Imgs/` box art as `onion` | `<system>/gamelist.xml` with name, image, rating, date, developer, publisher and genre |
+   | `nextui` | `Roms/<folder>/.media/<ROM name>.png` (the picture the theme shows) | none |
    | `emudeck` | `Emulation/tools/downloaded_media/<system>/<type>/…` (every type) | `~/ES-DE/gamelists/<system>/gamelist.xml` on the machine running the sync (see below) |
 
    EmuDeck's ES-DE keeps its gamelists on the machine, not the card, so they go into `~/ES-DE/gamelists` (or
@@ -206,7 +208,8 @@ While typing a filter (or a note, which `w` opens in the game list): `^A` `^E` s
    sync just downloads it. Resizing needs Pillow or macOS `sips` on the machine that scrapes. Existing
    gamelists are updated in place: only these tags are set, so favorites, play counts and an
    `<alternativeEmulator>` block stay. Existing files with the same size aren't downloaded again.
-   ROMs in subfolders get no Onion art.
+   ROMs in subfolders get no Onion art. NextUI's `.media` picture is the same kind of file, so ROMs of the same name in
+   different subfolders of one system share it.
 
 6. Finally, media on the card for ROMs the card doesn't have is removed, with no confirmation. It looks at
    every system in the layout, not only the ones you synced, and leaves systems whose ROM folder doesn't
@@ -231,7 +234,7 @@ While typing a filter (or a note, which `w` opens in the game list): `^A` `^E` s
    `pico-8_*_raspi.zip` is used). Each card gets it where its frontend's installer looks, whether or not the card
    syncs pico8 games: ES-DE `PICO-8/` (pico8-android's zip picker), Knulli `roms/pico8/` (Device Settings →
    Install Pico-8); Onion (`RApp/PICO-8/bin/`) and Allium
-   (`Apps/pico.pak/bin/`) get the extracted `pico8_dyn` and `pico8.dat`. Run the installer once on the device. The
+   (`Apps/pico.pak/bin/`) get the extracted `pico8_dyn` and `pico8.dat`. NextUI has no installer: its PICO-8 carts sync as plain ROMs (fake08). Run the installer once on the device. The
    card's `pico8` field in `cards.json` records the zip, so it is copied once per zip.
 
    A sync that wrote to the card also creates `.metadata_never_index` in the card root, empties `.fseventsd` and puts a
@@ -700,7 +703,7 @@ on them are replaced at the next sync.
   game list as 🎁 Surprise and can't be switched off there, like a collection game; it counts in the card's budget and size warning.
 - **History** is kept in `~/.sync-roms/surprises.json` (system, bucket, title, card, ISO date) and pruned past
   `surprise_ttl_days` in `settings.json` (default 183) whenever it is written. It is how a game comes around again only later.
-- **Frontends**: ES-DE, Knulli and EmuDeck cards get the surprises as a custom collection named `Surprise`, written
+- **Frontends**: ES-DE, Knulli, EmuDeck and NextUI cards get the surprises as a custom collection named `Surprise`, written
   like any other [collection](#collections-in-es-de-knulli-and-emudeck); that name is reserved, so a collection can't be called Surprise.
   Onion cards get the Surprise app: the newest `os/onion/Surprise-v<version>.zip` in storage is installed as `App/Surprise/`,
   and `Roms/surprise.json` lists the card's surprises for it.
@@ -750,7 +753,11 @@ one already on the card, a typed name, or none (RetroArch with sort by core off)
 | `esde` | `RetroArch` | `saves/<core>` | `states/<core>` |
 | `knulli` | `saves` | `<system folder>` | `<system folder>` |
 | `onion`, `allium` | `Saves/CurrentProfile` | `saves/<core>` | `states/<core>` |
+| `nextui` | card root | `Saves/<TAG>` | `.userdata/shared/<TAG>-<core>` |
 | `emudeck` | `Emulation/saves/retroarch` | `saves` | `states` |
+
+On `nextui`, `apply` renames a save to MinUI's `Game.gba.sav` (taken from the card's ROM; PlayStation saves and saves with no ROM there keep their name) and `stash` turns it back into `.srm`.
+States are copied as they are, so NextUI's own state names aren't converted, and a stash holding a state with no core is skipped.
 
 RetroArch on Android keeps its saves in internal storage (`/storage/emulated/0/RetroArch/`), not on the SD card:
 point its save folders at the card's `RetroArch/saves` and `RetroArch/states` (every sync creates them on `esde` cards), or copy that folder off the device and
@@ -849,7 +856,7 @@ would change and write nothing until you approve.
 
 ### Collections in ES-DE, Knulli and EmuDeck
 
-Only ES-DE, Knulli and EmuDeck cards get them. Each sync writes the card's collections (see [Collections](#collections)) as the
+Only ES-DE, Knulli, EmuDeck and NextUI cards get them (NextUI: `Collections/<Name>.txt` on the card, one `/Roms/<system folder>/<path on card>` line per game, no theme art; the names written are kept as `frontend_collections` too). Each sync writes the card's collections (see [Collections](#collections)) as the
 frontend's custom collections, listing the collection games that are on the card; games on systems the card doesn't
 sync are left out. `--dry-run` lists what would be written.
 
@@ -867,6 +874,7 @@ sync are left out. `--dry-run` lists what would be written.
   in the frontend with the same name is skipped with a warning. A collection removed from the card, or renamed, has
   its old file deleted and its name unlisted.
 - The files are rewritten each sync, so edits made to them in the frontend are lost.
+- **NextUI multi-disc limits**: a game folder left empty after its game is removed stays; `.gdi` and `.ccd` track files aren't moved into the game folder; a `.bin` is matched to its `.cue` by name only.
 - Close the frontend before syncing: it rewrites its settings file from memory.
 - **EmuDeck**: ES-DE keeps its data on the machine, not the card, so the files (and the theme art) go into `~/ES-DE`
   (or `$ESDE_APPDATA_DIR`) on the machine running the sync, laid out as in the ES-DE column. Sync the card on the Steam
