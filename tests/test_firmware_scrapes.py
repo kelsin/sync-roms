@@ -154,6 +154,17 @@ class StaleMediaTest(unittest.TestCase):
         self.assertEqual(self.run_onion("onion", ["Roms/GBA/gamelist.xml", "Roms/GBA/miyoogamelist.xml"]),
                          ["Roms/GBA/gamelist.xml"])
 
+    def test_spruce_writes_a_miyoogamelist_with_name_and_image_only(self):
+        meta = {"a.zip": {"name": "A", "developer": "Dev", "rating": 0.8}}
+        _, entries, _ = scrape_plan.plan_scrapes("spruce", ["a.zip", "b.zip", "sub/c.zip"], {"scrapes/gba/onion/a.png": 5},
+                                                 meta, "/m", "/r", lambda rom: True)
+        self.assertEqual(entries, {"a.zip": {"name": "A", "image": "./Imgs/a.png"}})
+        self.assertEqual(scrape_plan.GAMELIST_FILES["spruce"], "miyoogamelist.xml")
+
+    def test_spruce_removes_alliums_gamelist_once_its_own_exists(self):
+        self.assertEqual(self.run_onion("spruce", ["Roms/GBA/gamelist.xml", "Roms/GBA/miyoogamelist.xml"]),
+                         ["Roms/GBA/gamelist.xml"])
+
     def run_empty_onion(self, layout):
         with tempfile.TemporaryDirectory() as base:
             files = ["Roms/GBA/gamelist.xml", "Roms/GBA/miyoogamelist.xml", "Roms/GBA/Imgs/Old.png", "Roms/GBA/cache6.db"]

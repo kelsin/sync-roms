@@ -118,6 +118,7 @@ You pick a device, then the firmware it runs (a device with only one isn't asked
 | `knulli` | `roms/` `bios/` (SD card SHARE partition, `/userdata`) | Default for the Anbernic H700 (except the RG SP and RG34XX SP, which default to `nextui`), RG Vita Pro and Miyoo Flip handhelds |
 | `onion` | `Roms/` `BIOS/` | Miyoo Mini, Mini Plus and Mini Flip, on [Onion](https://onionui.github.io/) |
 | `allium` | `Roms/` `BIOS/` | Miyoo Mini, Mini Plus and Mini Flip, on [Allium](https://github.com/goweiwen/Allium). Same folders and `Imgs/` box art as `onion`, but with a full `gamelist.xml` |
+| `spruce` | `Roms/` `BIOS/` | Miyoo Mini, Mini Plus, Mini Flip and Flip, on [Spruce](https://github.com/spruceUI/spruceOS) (spruceOS). Its own upper-case folder names (`SFC`, `MD`, `FC`, `PS`, ...), box art in `Imgs/` and a `miyoogamelist.xml`. RetroArch saves and states are in `Saves/saves` and `Saves/states` |
 | `nextui` | `Roms/` `Bios/` | Anbernic RG SP and RG34XX SP, on [NextUI](https://nextui.loveretro.games/) (MinUI style). System folders are named `<Name> (TAG)`, the tag picking the emulator; BIOS files go in `Bios/<TAG>/`. A multi-disc game gets a folder of its own with its discs and `.m3u` |
 | `emudeck` | `Emulation/roms/` `Emulation/bios/` | [EmuDeck](https://emudeck.github.io/) on the Steam Deck and Steam Machine. Wii U, Xbox 360 and Model 2 ROMs go in a `roms/` subfolder of their system folder. Scraped media on the card; gamelists and collections in `~/ES-DE` on the machine running the sync |
 
@@ -190,6 +191,7 @@ While typing a filter (or a note, which `w` opens in the game list): `^A` `^E` s
    | `esde` | `ES-DE/downloaded_media/<system>/<type>/…` (every type) | `ES-DE/gamelists/<system>/gamelist.xml` |
    | `knulli` | `<system>/images`, `videos`, `manuals`, named `Game-image.png`, `-thumb`, `-marquee`, `-fanart`, `-boxback`, `-titleshot`, `-video`, `-manual` | `<system>/gamelist.xml` with name, description, rating, date and the media tags |
    | `onion` | `<system>/Imgs/Game.png`, the 250x360 box art made when scraping | `<system>/miyoogamelist.xml` with name and image |
+   | `spruce` | same `Imgs/` box art as `onion` | `<system>/miyoogamelist.xml` with name and image |
    | `allium` | same `Imgs/` box art as `onion` | `<system>/gamelist.xml` with name, image, rating, date, developer, publisher and genre |
    | `nextui` | `Roms/<folder>/.media/<ROM name>.png` (the picture the theme shows) | none |
    | `emudeck` | `Emulation/tools/downloaded_media/<system>/<type>/…` (every type) | `~/ES-DE/gamelists/<system>/gamelist.xml` on the machine running the sync (see below) |
@@ -236,7 +238,7 @@ While typing a filter (or a note, which `w` opens in the game list): `^A` `^E` s
    `pico-8_*_raspi.zip` is used). Each card gets it where its frontend's installer looks, whether or not the card
    syncs pico8 games: ES-DE `PICO-8/` (pico8-android's zip picker), Knulli `roms/pico8/` (Device Settings →
    Install Pico-8); Onion (`RApp/PICO-8/bin/`) and Allium
-   (`Apps/pico.pak/bin/`) get the extracted `pico8_dyn` and `pico8.dat`. Run the installer once on the device. The
+   (`Apps/pico.pak/bin/`) get the extracted `pico8_dyn` and `pico8.dat`; Spruce (`BIOS/`) also gets `pico8_64`. Run the installer once on the device. The
    card's `pico8` field in `cards.json` records the zip, so it is copied once per zip. NextUI cards get no zip: they have no
    installer, and their PICO-8 carts sync as plain ROMs.
 
@@ -754,6 +756,7 @@ one already on the card, a typed name, or none (RetroArch with sort by core off)
 | `esde` | `RetroArch` | `saves/<core>` | `states/<core>` |
 | `knulli` | `saves` | `<system folder>` | `<system folder>` |
 | `onion`, `allium` | `Saves/CurrentProfile` | `saves/<core>` | `states/<core>` |
+| `spruce` | `Saves` | `saves` | `states` |
 | `nextui` | card root | `Saves/<TAG>` | `.userdata/shared/<TAG>-<core>` |
 | `emudeck` | `Emulation/saves/retroarch` | `saves` | `states` |
 

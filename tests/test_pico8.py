@@ -98,6 +98,13 @@ class Pico8(helpers.StorageDir):
         self.run_setup("allium")
         self.assertEqual(sorted(os.listdir(self.card_path("Apps", "pico.pak", "bin"))), ["pico8.dat", "pico8_dyn"])
 
+    def test_spruce_extracts_into_bios_with_the_64_bit_binary(self):
+        self.put(f"os/pico8/{NEW}", zip_bytes())
+        self.run_setup("spruce")
+        folder = self.card_path("BIOS")
+        self.assertEqual(sorted(os.listdir(folder)), ["pico8.dat", "pico8_64", "pico8_dyn"])
+        self.assertTrue(os.stat(os.path.join(folder, "pico8_64")).st_mode & 0o111)
+
     def test_onion_reextracts_missing_file(self):
         self.put(f"os/pico8/{NEW}", zip_bytes())
         self.run_setup("onion")

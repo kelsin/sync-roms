@@ -10,6 +10,7 @@
       "knulli": "mame",
       "onion": "ARCADE",
       "allium": "ARCADE",
+      "spruce": "ARCADE",
       "emudeck": "mame",
       "nextui": null
     },
@@ -29,6 +30,7 @@
       "knulli": "atari2600",
       "onion": "ATARI",
       "allium": "ATARI",
+      "spruce": "ATARI",
       "emudeck": "atari2600",
       "nextui": "Atari 2600 (A2600)"
     },
@@ -48,6 +50,7 @@
       "knulli": "atari5200",
       "onion": "FIFTYTWOHUNDRED",
       "allium": "FIFTYTWOHUNDRED",
+      "spruce": "FIFTYTWOHUNDRED",
       "emudeck": "atari5200",
       "nextui": "Atari 5200 (A5200)"
     },
@@ -71,6 +74,7 @@
       "knulli": "atari7800",
       "onion": "SEVENTYEIGHTHUNDRED",
       "allium": "SEVENTYEIGHTHUNDRED",
+      "spruce": "SEVENTYEIGHTHUNDRED",
       "emudeck": "atari7800",
       "nextui": "Atari 7800 (A7800)"
     },
@@ -94,6 +98,7 @@
       "knulli": "atari800",
       "onion": null,
       "allium": null,
+      "spruce": "EIGHTHUNDRED",
       "emudeck": "atari800",
       "nextui": null
     },
@@ -121,6 +126,7 @@
       "knulli": "lynx",
       "onion": "LYNX",
       "allium": "LYNX",
+      "spruce": "LYNX",
       "emudeck": "atarilynx",
       "nextui": "Atari Lynx (LYNX)"
     },
@@ -144,6 +150,7 @@
       "knulli": "atarist",
       "onion": null,
       "allium": null,
+      "spruce": "ATARIST",
       "emudeck": "atarist",
       "nextui": null
     },
@@ -169,6 +176,7 @@
       "knulli": "colecovision",
       "onion": "COLECO",
       "allium": "COLECO",
+      "spruce": "COLECO",
       "emudeck": "colecovision",
       "nextui": "ColecoVision (COLECO)"
     },
@@ -200,6 +208,7 @@
       "knulli": "gba",
       "onion": "GBA",
       "allium": "GBA",
+      "spruce": "GBA",
       "emudeck": "gba",
       "nextui": "Game Boy Advance (GBA)"
     },
@@ -229,6 +238,7 @@
       "knulli": "gbc",
       "onion": "GBC",
       "allium": "GBC",
+      "spruce": "GBC",
       "emudeck": "gbc",
       "nextui": "Game Boy Color (GBC)"
     },
@@ -257,6 +267,7 @@
       "knulli": "gb",
       "onion": "GB",
       "allium": "GB",
+      "spruce": "GB",
       "emudeck": "gb",
       "nextui": "Game Boy (GB)"
     },
@@ -285,6 +296,7 @@
       "knulli": "intellivision",
       "onion": "INTELLIVISION",
       "allium": "INTELLIVISION",
+      "spruce": "INTELLIVISION",
       "emudeck": "intellivision",
       "nextui": null
     },
@@ -312,6 +324,7 @@
       "knulli": "neogeo",
       "onion": "NEOGEO",
       "allium": "NEOGEO",
+      "spruce": "NEOGEO",
       "emudeck": "neogeo",
       "nextui": "Neo Geo (FBN)"
     },
@@ -358,6 +371,7 @@
       "knulli": "nes",
       "onion": "FC",
       "allium": "FC",
+      "spruce": "FC",
       "emudeck": "nes",
       "nextui": "Nintendo Entertainment System (FC)"
     },
@@ -377,6 +391,7 @@
       "knulli": "fds",
       "onion": "FDS",
       "allium": "FDS",
+      "spruce": "FDS",
       "emudeck": "fds",
       "nextui": "Famicom Disk System (FDS)"
     },
@@ -404,6 +419,7 @@
       "knulli": "n64",
       "onion": null,
       "allium": null,
+      "spruce": "N64",
       "emudeck": "n64",
       "nextui": null
     },
@@ -423,6 +439,7 @@
       "knulli": "nds",
       "onion": "NDS",
       "allium": "NDS",
+      "spruce": "NDS",
       "emudeck": "nds",
       "nextui": null
     },
@@ -454,6 +471,7 @@
       "knulli": "odyssey2",
       "onion": "ODYSSEY",
       "allium": "ODYSSEY",
+      "spruce": "ODYSSEY",
       "emudeck": "odyssey2",
       "nextui": null
     },
@@ -481,6 +499,7 @@
       "knulli": "pcfx",
       "onion": null,
       "allium": null,
+      "spruce": null,
       "emudeck": "pcfx",
       "nextui": null
     },
@@ -508,6 +527,7 @@
       "knulli": "pc98",
       "onion": null,
       "allium": null,
+      "spruce": "PC98",
       "emudeck": "pc98",
       "nextui": null
     },
@@ -547,6 +567,7 @@
       "knulli": "sega32x",
       "onion": "THIRTYTWOX",
       "allium": "THIRTYTWOX",
+      "spruce": "THIRTYTWOX",
       "emudeck": "sega32x",
       "nextui": "Sega 32X (32X)"
     },
@@ -575,6 +596,7 @@
       "knulli": "megacd",
       "onion": "SEGACD",
       "allium": "SEGACD",
+      "spruce": "SEGACD",
       "emudeck": "segacd",
       "nextui": "Sega CD (SEGACD)"
     },
@@ -613,6 +635,7 @@
       "knulli": "dreamcast",
       "onion": null,
       "allium": null,
+      "spruce": "DC",
       "emudeck": "dreamcast",
       "nextui": null
     },
@@ -649,6 +672,7 @@
       "knulli": "gamegear",
       "onion": "GG",
       "allium": "GG",
+      "spruce": "GG",
       "emudeck": "gamegear",
       "nextui": "Game Gear (GG)"
     },
@@ -684,6 +708,7 @@
       "knulli": "megadrive",
       "onion": "MD",
       "allium": "MD",
+      "spruce": "MD",
       "emudeck": "genesis",
       "nextui": "Sega Genesis (MD)"
     },
@@ -719,6 +744,7 @@
       "knulli": "mastersystem",
       "onion": "MS",
       "allium": "MS",
+      "spruce": "MS",
       "emudeck": "mastersystem",
       "nextui": "Sega Master System (SMS)"
     },
@@ -754,6 +780,7 @@
       "knulli": "saturn",
       "onion": null,
       "allium": null,
+      "spruce": "SATURN",
       "emudeck": "saturn",
       "nextui": null
     },
@@ -787,6 +814,7 @@
       "knulli": "snes",
       "onion": "SFC",
       "allium": "SFC",
+      "spruce": "SFC",
       "emudeck": "snes",
       "nextui": "Super Nintendo (SFC)"
     },
@@ -832,6 +860,7 @@
       "knulli": "pcengine",
       "onion": "PCE",
       "allium": "PCE",
+      "spruce": "PCE",
       "emudeck": "tg16",
       "nextui": "TurboGrafx-16 (PCE)"
     },
@@ -861,6 +890,7 @@
       "knulli": "pcenginecd",
       "onion": "PCECD",
       "allium": "PCECD",
+      "spruce": "PCECD",
       "emudeck": "tg-cd",
       "nextui": "TurboGrafx-CD (PCE)"
     },
@@ -893,6 +923,7 @@
       "knulli": "vectrex",
       "onion": "VECTREX",
       "allium": "VECTREX",
+      "spruce": "VECTREX",
       "emudeck": "vectrex",
       "nextui": null
     },
@@ -915,6 +946,7 @@
       "knulli": "virtualboy",
       "onion": "VB",
       "allium": "VB",
+      "spruce": "VB",
       "emudeck": "virtualboy",
       "nextui": "Virtual Boy (VB)"
     },
@@ -936,6 +968,7 @@
       "knulli": "wswan",
       "onion": "WS",
       "allium": "WS",
+      "spruce": "WS",
       "emudeck": "wonderswan",
       "nextui": null
     },
@@ -957,6 +990,7 @@
       "knulli": "wswanc",
       "onion": "WS",
       "allium": "WS",
+      "spruce": "WSC",
       "emudeck": "wonderswancolor",
       "nextui": null
     },
@@ -978,6 +1012,7 @@
       "knulli": "advmame",
       "onion": null,
       "allium": null,
+      "spruce": null,
       "emudeck": "mame-advmame",
       "nextui": null
     },
@@ -997,6 +1032,7 @@
       "knulli": null,
       "onion": null,
       "allium": null,
+      "spruce": null,
       "emudeck": "arcade",
       "nextui": null
     },
@@ -1016,6 +1052,7 @@
       "knulli": "arduboy",
       "onion": null,
       "allium": null,
+      "spruce": "ARDUBOY",
       "emudeck": "arduboy",
       "nextui": null
     },
@@ -1035,6 +1072,7 @@
       "knulli": "atomiswave",
       "onion": null,
       "allium": null,
+      "spruce": "ATOMISWAVE",
       "emudeck": "atomiswave",
       "nextui": null
     },
@@ -1063,6 +1101,7 @@
       "knulli": null,
       "onion": null,
       "allium": null,
+      "spruce": "CHAI",
       "emudeck": "chailove",
       "nextui": null
     },
@@ -1082,6 +1121,7 @@
       "knulli": "channelf",
       "onion": "FAIRCHILD",
       "allium": "FAIRCHILD",
+      "spruce": "FAIRCHILD",
       "emudeck": "channelf",
       "nextui": null
     },
@@ -1106,6 +1146,7 @@
       "knulli": "cps1",
       "onion": "CPS1",
       "allium": "CPS1",
+      "spruce": "CPS1",
       "emudeck": "cps1",
       "nextui": "CPS1 (FBN)"
     },
@@ -1124,6 +1165,7 @@
       "knulli": "cps2",
       "onion": "CPS2",
       "allium": "CPS2",
+      "spruce": "CPS2",
       "emudeck": "cps2",
       "nextui": "CPS2 (FBN)"
     },
@@ -1142,6 +1184,7 @@
       "knulli": "cps3",
       "onion": "CPS3",
       "allium": "CPS3",
+      "spruce": "CPS3",
       "emudeck": "cps3",
       "nextui": "CPS3 (FBN)"
     },
@@ -1161,6 +1204,7 @@
       "knulli": "daphne",
       "onion": null,
       "allium": null,
+      "spruce": null,
       "emudeck": "daphne",
       "nextui": null
     },
@@ -1179,6 +1223,7 @@
       "knulli": null,
       "onion": null,
       "allium": null,
+      "spruce": "DOOM",
       "emudeck": "doom",
       "nextui": "Doom (PRBOOM)"
     },
@@ -1197,6 +1242,7 @@
       "knulli": "easyrpg",
       "onion": null,
       "allium": null,
+      "spruce": "EASYRPG",
       "emudeck": "easyrpg",
       "nextui": null
     },
@@ -1216,6 +1262,7 @@
       "knulli": "fbneo",
       "onion": "FBNEO",
       "allium": "FBNEO",
+      "spruce": "FBNEO",
       "emudeck": "fbneo",
       "nextui": "Arcade (FBN)"
     },
@@ -1267,6 +1314,7 @@
       "knulli": "lowresnx",
       "onion": null,
       "allium": null,
+      "spruce": null,
       "emudeck": "lowresnx",
       "nextui": null
     },
@@ -1284,6 +1332,7 @@
       "knulli": "lutro",
       "onion": null,
       "allium": null,
+      "spruce": null,
       "emudeck": "lutro",
       "nextui": null
     },
@@ -1303,6 +1352,7 @@
       "knulli": "megaduck",
       "onion": "MEGADUCK",
       "allium": "MEGADUCK",
+      "spruce": "MEGADUCK",
       "emudeck": "megaduck",
       "nextui": null
     },
@@ -1321,6 +1371,7 @@
       "knulli": "n64dd",
       "onion": null,
       "allium": null,
+      "spruce": null,
       "emudeck": "n64dd",
       "nextui": null
     },
@@ -1346,6 +1397,7 @@
       "knulli": "naomi",
       "onion": null,
       "allium": null,
+      "spruce": "NAOMI",
       "emudeck": "naomi",
       "nextui": null
     },
@@ -1376,6 +1428,7 @@
       "knulli": "neogeocd",
       "onion": "NEOCD",
       "allium": "NEOCD",
+      "spruce": "NEOCD",
       "emudeck": "neogeocd",
       "nextui": null
     },
@@ -1413,6 +1466,7 @@
       "knulli": "ngp",
       "onion": "NGP",
       "allium": "NGP",
+      "spruce": "NGP",
       "emudeck": "ngp",
       "nextui": "Neo Geo Pocket (NGP)"
     },
@@ -1434,6 +1488,7 @@
       "knulli": "ngpc",
       "onion": "NGP",
       "allium": "NGP",
+      "spruce": "NGPC",
       "emudeck": "ngpc",
       "nextui": "Neo Geo Pocket Color (NGPC)"
     },
@@ -1454,6 +1509,7 @@
       "knulli": "openbor",
       "onion": null,
       "allium": null,
+      "spruce": "OPENBOR",
       "emudeck": "openbor",
       "nextui": null
     },
@@ -1473,6 +1529,7 @@
       "knulli": "3do",
       "onion": null,
       "allium": null,
+      "spruce": null,
       "emudeck": "3do",
       "nextui": null
     },
@@ -1513,6 +1570,7 @@
       "knulli": "pico8",
       "onion": "PICO",
       "allium": "PICO",
+      "spruce": "PICO8",
       "emudeck": "pico8",
       "nextui": "PICO-8 (P8)"
     },
@@ -1532,6 +1590,7 @@
       "knulli": "pokemini",
       "onion": "POKE",
       "allium": "POKE",
+      "spruce": "POKE",
       "emudeck": "pokemini",
       "nextui": "Pokemon Mini (PKM)"
     },
@@ -1549,6 +1608,7 @@
       "knulli": "ports",
       "onion": "PORTS",
       "allium": "PORTS",
+      "spruce": "PORTS",
       "emudeck": "ports",
       "nextui": null
     },
@@ -1568,6 +1628,7 @@
       "knulli": "psx",
       "onion": "PS",
       "allium": "PS",
+      "spruce": "PS",
       "emudeck": "psx",
       "nextui": "PlayStation (PS)"
     },
@@ -1614,6 +1675,7 @@
       "knulli": "psp",
       "onion": null,
       "allium": null,
+      "spruce": "PSP",
       "emudeck": "psp",
       "nextui": null
     },
@@ -1640,6 +1702,7 @@
       "knulli": "satellaview",
       "onion": "SATELLAVIEW",
       "allium": "SATELLAVIEW",
+      "spruce": "SATELLAVIEW",
       "emudeck": "satellaview",
       "nextui": null
     },
@@ -1681,6 +1744,7 @@
       "knulli": "scummvm",
       "onion": "SCUMMVM",
       "allium": "SCUMMVM",
+      "spruce": "SCUMMVM",
       "emudeck": "scummvm",
       "nextui": null
     },
@@ -1700,6 +1764,7 @@
       "knulli": "supergrafx",
       "onion": "SGFX",
       "allium": "SGFX",
+      "spruce": "SGFX",
       "emudeck": "supergrafx",
       "nextui": null
     },
@@ -1728,6 +1793,7 @@
       "knulli": "sgb",
       "onion": "SGB",
       "allium": "SGB",
+      "spruce": "SGB",
       "emudeck": "sgb",
       "nextui": "Super Game Boy (SGB)"
     },
@@ -1779,6 +1845,7 @@
       "knulli": "sufami",
       "onion": "SUFAMI",
       "allium": "SUFAMI",
+      "spruce": "SUFAMI",
       "emudeck": "sufami",
       "nextui": null
     },
@@ -1821,6 +1888,7 @@
       "knulli": "supervision",
       "onion": "SUPERVISION",
       "allium": "SUPERVISION",
+      "spruce": "SUPERVISION",
       "emudeck": "supervision",
       "nextui": null
     },
@@ -1840,6 +1908,7 @@
       "knulli": "tic80",
       "onion": "TIC",
       "allium": "TIC",
+      "spruce": "TIC",
       "emudeck": "tic80",
       "nextui": null
     },
@@ -1858,6 +1927,7 @@
       "knulli": "quake",
       "onion": null,
       "allium": null,
+      "spruce": "QUAKE",
       "emudeck": "quake",
       "nextui": null
     },
@@ -1876,6 +1946,7 @@
       "knulli": "uzebox",
       "onion": null,
       "allium": null,
+      "spruce": null,
       "emudeck": "uzebox",
       "nextui": null
     },
@@ -1895,6 +1966,7 @@
       "knulli": "jaguar",
       "onion": null,
       "allium": null,
+      "spruce": "JAGUAR",
       "emudeck": "atarijaguar",
       "nextui": null
     },
@@ -1914,6 +1986,7 @@
       "knulli": "jaguarcd",
       "onion": null,
       "allium": null,
+      "spruce": null,
       "emudeck": "atarijaguarcd",
       "nextui": null
     },
@@ -1933,6 +2006,7 @@
       "knulli": "cdi",
       "onion": null,
       "allium": null,
+      "spruce": null,
       "emudeck": "cdimono1",
       "nextui": null
     },
@@ -1958,6 +2032,7 @@
       "knulli": "gamecube",
       "onion": null,
       "allium": null,
+      "spruce": null,
       "emudeck": "gc",
       "nextui": null
     },
@@ -1990,6 +2065,7 @@
       "knulli": null,
       "onion": null,
       "allium": null,
+      "spruce": null,
       "emudeck": "mark3",
       "nextui": null
     },
@@ -2024,6 +2100,7 @@
       "knulli": "model2",
       "onion": null,
       "allium": null,
+      "spruce": null,
       "emudeck": "model2/roms",
       "nextui": null
     },
@@ -2042,6 +2119,7 @@
       "knulli": "model3",
       "onion": null,
       "allium": null,
+      "spruce": null,
       "emudeck": "model3",
       "nextui": null
     },
@@ -2061,6 +2139,7 @@
       "knulli": "3ds",
       "onion": null,
       "allium": null,
+      "spruce": null,
       "emudeck": "n3ds",
       "nextui": null
     },
@@ -2080,6 +2159,7 @@
       "knulli": "3ds",
       "onion": null,
       "allium": null,
+      "spruce": null,
       "emudeck": "n3ds",
       "nextui": null
     },
@@ -2098,6 +2178,7 @@
       "knulli": "naomi2",
       "onion": null,
       "allium": null,
+      "spruce": null,
       "emudeck": "naomi2",
       "nextui": null
     },
@@ -2127,6 +2208,7 @@
       "knulli": null,
       "onion": null,
       "allium": null,
+      "spruce": null,
       "emudeck": "naomigd",
       "nextui": null
     },
@@ -2157,6 +2239,7 @@
       "knulli": "ps2",
       "onion": null,
       "allium": null,
+      "spruce": null,
       "emudeck": "ps2",
       "nextui": null
     },
@@ -2188,6 +2271,7 @@
       "knulli": "ps3",
       "onion": null,
       "allium": null,
+      "spruce": null,
       "emudeck": "ps3",
       "nextui": null
     },
@@ -2216,6 +2300,7 @@
       "knulli": "ps4",
       "onion": null,
       "allium": null,
+      "spruce": null,
       "emudeck": null,
       "nextui": null
     },
@@ -2235,6 +2320,7 @@
       "knulli": "psvita",
       "onion": null,
       "allium": null,
+      "spruce": null,
       "emudeck": "psvita",
       "nextui": null
     },
@@ -2253,6 +2339,7 @@
       "knulli": null,
       "onion": null,
       "allium": null,
+      "spruce": null,
       "emudeck": "stv",
       "nextui": null
     },
@@ -2272,6 +2359,7 @@
       "knulli": null,
       "onion": null,
       "allium": null,
+      "spruce": null,
       "emudeck": "switch",
       "nextui": null
     },
@@ -2293,6 +2381,7 @@
       "knulli": "triforce",
       "onion": null,
       "allium": null,
+      "spruce": null,
       "emudeck": "triforce",
       "nextui": null
     },
@@ -2311,6 +2400,7 @@
       "knulli": null,
       "onion": null,
       "allium": null,
+      "spruce": null,
       "emudeck": "type-x",
       "nextui": null
     },
@@ -2330,6 +2420,7 @@
       "knulli": "wii",
       "onion": null,
       "allium": null,
+      "spruce": null,
       "emudeck": "wii",
       "nextui": null
     },
@@ -2352,6 +2443,7 @@
       "knulli": "wiiu",
       "onion": null,
       "allium": null,
+      "spruce": null,
       "emudeck": "wiiu/roms",
       "nextui": null
     },
@@ -2371,6 +2463,7 @@
       "knulli": "xbox",
       "onion": null,
       "allium": null,
+      "spruce": null,
       "emudeck": "xbox",
       "nextui": null
     },
@@ -2410,6 +2503,7 @@
       "knulli": "xbox360",
       "onion": null,
       "allium": null,
+      "spruce": null,
       "emudeck": "xbox360/roms",
       "nextui": null
     },
@@ -2432,6 +2526,7 @@
       "knulli": null,
       "onion": null,
       "allium": null,
+      "spruce": null,
       "emudeck": null,
       "nextui": null
     },
@@ -2451,6 +2546,7 @@
       "knulli": "sg1000",
       "onion": null,
       "allium": null,
+      "spruce": "SEGASGONE",
       "emudeck": "sg-1000",
       "nextui": "Sega SG-1000 (SG1000)"
     },
@@ -2472,6 +2568,7 @@
       "knulli": "msx1",
       "onion": null,
       "allium": null,
+      "spruce": "MSX",
       "emudeck": "msx",
       "nextui": "MSX (MSX)"
     },
@@ -2822,6 +2919,7 @@
       "knulli": "msx2",
       "onion": null,
       "allium": null,
+      "spruce": "MSX",
       "emudeck": "msx2",
       "nextui": "MSX2 (MSX)"
     },
@@ -3172,6 +3270,7 @@
       "knulli": "arcadia",
       "onion": null,
       "allium": null,
+      "spruce": null,
       "emudeck": "arcadia",
       "nextui": null
     },
@@ -3193,6 +3292,7 @@
       "knulli": "gamate",
       "onion": null,
       "allium": null,
+      "spruce": null,
       "emudeck": "gamate",
       "nextui": null
     },
@@ -3215,6 +3315,7 @@
       "knulli": "gamecom",
       "onion": null,
       "allium": null,
+      "spruce": null,
       "emudeck": "gamecom",
       "nextui": null
     },
@@ -3237,6 +3338,7 @@
       "knulli": "c64",
       "onion": null,
       "allium": null,
+      "spruce": "COMMODORE",
       "emudeck": "c64",
       "nextui": "Commodore 64 (C64)"
     },

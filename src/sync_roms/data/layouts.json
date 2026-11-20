@@ -47,6 +47,17 @@
     },
     "note": "Miyoo Mini family (SigmaStar SSD202D) running Allium, which uses the Onion card layout and matches systems by file extension first, so the folders are the same as Onion's. Allium reads a gamelist.xml (path, name, image, rating, releasedate, developer, publisher, genre) in each ROM folder and finds box art in Imgs/. Sources: https://github.com/goweiwen/Allium/wiki/2.-Add-your-Games!, https://github.com/goweiwen/Allium"
   },
+  "spruce": {
+    "label": "Spruce",
+    "roms_dir": "Roms",
+    "bios_dir": "BIOS",
+    "retroarch": {
+      "dir": "Saves",
+      "saves": "saves",
+      "states": "states"
+    },
+    "note": "Miyoo Mini family (SigmaStar SSD202D) and Miyoo Flip (RK3566) running spruceOS. Card root is the FAT32 SD card. System folders are the upper-case spruce names (SFC for the SNES, MD for the Genesis, FC for the NES, PS for the PlayStation), and ROMs go straight into them. Spruce reads a miyoogamelist.xml (name, image) in each ROM folder and box art from its Imgs/ folder. BIOS files go in the root BIOS/ folder, keeping the libretro subfolders (dc/, nds/, neocd/, ...). Systems with spruce = null have no spruce folder. Sources: https://github.com/spruceUI/spruceOS/wiki/11.-Adding-Games, https://github.com/spruceUI/spruceOS/wiki/10.-Adding-BIOS"
+  },
   "emudeck": {
     "label": "EmuDeck",
     "roms_dir": "Emulation/roms",

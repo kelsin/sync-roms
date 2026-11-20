@@ -176,6 +176,7 @@ TOPICS = {
   knulli    saves                        <system folder>  <system folder>
   onion     Saves/CurrentProfile         saves/<core>     states/<core>
   allium    Saves/CurrentProfile         saves/<core>     states/<core>
+  spruce    Saves                        saves            states
   emudeck   Emulation/saves/retroarch    saves            states
   nextui    (card root)                  Saves/<TAG>      .userdata/shared/<TAG>-<core>   (MinUI .sav naming)
 
