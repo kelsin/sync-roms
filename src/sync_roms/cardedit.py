@@ -12,6 +12,7 @@ CLEAR_KEY = "c"
 CLEAR_ALL_KEY = "D"
 COLLECTIONS_KEY = "l"
 SURPRISE_KEY = "S"
+KEEP_KEY = "k"
 PAST_SURPRISE_KEY = "p"
 META_KEY = "m"
 VARIANT_KEY = "v"
@@ -29,6 +30,8 @@ LIST_KEYS = [("Enter", "the system's games"), ("f", "full system: every file in 
              ("s", "a set's games across this card's systems"), ("l", "collections on this card"),
              ("S", "Surprise menu: turn it on or off, or pick its systems"),
              ("D", "clear every pick, full system and set from the card")]
+KEEP_HINT = " · k keep card files"
+KEEP_KEYS = [("k", "pick every card file that matches a storage game")]
 GAMES_KEYS = [("s", "sets on this system: narrow to one, or pick its games"),
               ("r", "narrow the set picked with s to one series of games"),
               ("m", "narrow by scraped metadata (developer, genre, year...)"),
@@ -248,10 +251,11 @@ def toggle_full(name, bucket):
 
 
 @picker.one_app
-def edit_card(name, setup=None, to_fetch=None):
+def edit_card(name, setup=None, to_fetch=None, card_match=None):
     """The card's system list. setup: (device or None for Full, layout) to edit with instead of the saved one.
     to_fetch(system, keys): the keys not on the card yet, when editing from a sync; the status then shows how much
-    a sync would download."""
+    a sync would download. card_match(system, keys): the keys of the system's storage files that are on the card, when
+    editing from a sync; it enables k."""
     catalog = store.load_catalog()
     cards = store.load_cards()
     setup = setup or picker.saved_setup(cards.get(name), catalog["devices"], catalog["layouts"], name)
@@ -310,8 +314,10 @@ def edit_card(name, setup=None, to_fetch=None):
         on = surprise.enabled(store.load_cards().get(name))
         i = picker.filter_list(f"💳 {name} — its systems (⭐ for the device) · 🎁 Surprise {'on' if on else 'off'}",
                                labels, extras=extras, cursor=pos,
-                               hotkeys=(FULL_KEY, ALL_KEY, SET_KEY, COLLECTIONS_KEY, SURPRISE_KEY, CLEAR_ALL_KEY),
-                               hint=LIST_HINT, key_help=LIST_KEYS,
+                               hotkeys=(FULL_KEY, ALL_KEY, SET_KEY, COLLECTIONS_KEY, SURPRISE_KEY, CLEAR_ALL_KEY,
+                                        *((KEEP_KEY,) if card_match else ())),
+                               hint=LIST_HINT + (KEEP_HINT if card_match else ""),
+                               key_help=LIST_KEYS + (KEEP_KEYS if card_match else []),
                                status=lambda _state: status_of(view["total"], capacity, view["fetch"]),
                                on_hotkey=on_hotkey, poll=poll,
                                preview=lambda i: previews.system(systems[i]) if i < len(systems) else None)
@@ -338,6 +344,9 @@ def edit_card(name, setup=None, to_fetch=None):
             elif key == SURPRISE_KEY:
                 surprise_menu(name, catalog["systems"])
                 changed = ALL
+            elif key == KEEP_KEY:
+                keep_card_files(name, setup, systems, card_match)
+                changed = ALL
             elif key == CLEAR_ALL_KEY:
                 if ui.confirm(f"🧹 Clear every pick, full system and set from {name}?", default=False):
                     store.update_card(name, games={}, **({"excluded": {}} if store.card_excluded(name) else {}))
@@ -346,6 +355,25 @@ def edit_card(name, setup=None, to_fetch=None):
         pos = i
         if edit_system(name, systems[i], setup, to_fetch, usages):
             changed = systems[i]
+
+
+def keep_card_files(name, setup, systems, card_match):
+    """Pick, in every system that isn't a full one, the files already on the card that match a storage game."""
+    picks = cardpicks.CardPicks(name, setup)
+    added = touched = 0
+    for system in systems:
+        if picks.full(system["bucket"]):
+            continue
+        try:
+            sp = picks.system(system)
+        except s3.ERRORS as e:
+            edit.note(ui.yellow(f"⚠️  Couldn't list {system['name']} in storage: {e}"))
+            continue
+        matched = card_match(system, list(sp.in_storage))
+        n = sp.keep(sorted(matched), picks.cover())
+        added, touched = added + n, touched + bool(n)
+    picks.save()
+    edit.note(f"Picked {added} card file(s) in {touched} system(s).")
 
 
 def card_status(name, setup, systems, to_fetch=None):

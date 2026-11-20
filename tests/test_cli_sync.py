@@ -80,7 +80,7 @@ class SyncSmokeTest(RealDataDirGuard):
             with open(os.path.join(card, "ROMs", "gba", "Game.zip"), "wb") as f:
                 f.write(b"x" * 5)
 
-        def run_surprise(card, setup, chosen, interactive, dry_run, to_fetch=None):
+        def run_surprise(card, setup, chosen, interactive, dry_run, to_fetch=None, card_match=None):
             calls.append(([s["bucket"] for s in chosen], to_fetch(SYSTEM, ["gba/Game.zip", "gba/New.zip"])))
             return []
         patches = ((store, {"load_manifest": lambda names=(): manifest}),
@@ -88,6 +88,58 @@ class SyncSmokeTest(RealDataDirGuard):
                    (cli.inventory, {"cached": lambda prefix: {"gba/Game.zip": 5, "gba/New.zip": 7}}))
         self.assertEqual(self.run_sync(False, prepare=prepare, patches=patches), 0)
         self.assertEqual(calls, [(["gba", "vectrex"], {"gba/New.zip"})])
+
+    def test_the_editor_can_tell_which_storage_games_are_already_on_the_card(self):
+        calls = []
+
+        def prepare(card):
+            os.makedirs(os.path.join(card, "ROMs", "gba"))
+            for name in ("kept.GBA", "Stray.gba"):
+                with open(os.path.join(card, "ROMs", "gba", name), "wb") as f:
+                    f.write(b"x")
+
+        def run_surprise(card, setup, chosen, interactive, dry_run, to_fetch=None, card_match=None):
+            calls.append(card_match(SYSTEM, ["gba/Kept.gba", "gba/Other.gba"]))
+            calls.append(card_match({**SYSTEM, "bucket": "nes", "folders": {}}, ["nes/A.nes"]))
+            return []
+        patches = ((cli.surprise, {"run_surprise": run_surprise}),)
+        self.assertEqual(self.run_sync(False, prepare=prepare, patches=patches), 0)
+        self.assertEqual(calls, [{"gba/Kept.gba"}, set()])
+
+    def card_matches(self, layout, folder, files, keys, system_id="psx"):
+        """What card_match answers for keys, with files (paths under the system folder) on the card."""
+        got = []
+        system = {**SYSTEM, "name": "PS", "bucket": system_id, "folders": {"esde": folder, "onion": folder}}
+
+        def prepare(card):
+            for f in files:
+                path = os.path.join(card, "Roms" if layout == "onion" else "ROMs", folder, f)
+                os.makedirs(os.path.dirname(path), exist_ok=True)
+                with open(path, "wb") as fh:
+                    fh.write(b"x")
+
+        def run_surprise(card, setup, chosen, interactive, dry_run, to_fetch=None, card_match=None):
+            got.append(card_match(system, keys))
+            return []
+        layouts = {layout: {"label": layout, "roms_dir": "Roms" if layout == "onion" else "ROMs", "bios_dir": "BIOS",
+                            **({"disc_dir": ".multi-disc"} if layout == "esde" else {})}}
+        patches = ((store, {"load_manifest": lambda names=(): {**MANIFEST, "systems": [system], "layouts": layouts}}),
+                   (cli.picker, {"saved_setup": lambda *a: (None, layout)}),
+                   (cli.surprise, {"run_surprise": run_surprise}))
+        self.assertEqual(self.run_sync(False, prepare=prepare, patches=patches), 0)
+        return got[0]
+
+    def test_a_disc_in_the_layouts_disc_folder_matches_its_key(self):
+        discs = ["psx/Game (Disc 1).chd", "psx/Game (Disc 2).chd"]
+        keys = discs + ["psx/Game.m3u", "psx/Other.chd"]
+        found = self.card_matches("esde", "psx", [".multi-disc/Game (Disc 1).chd", ".multi-disc/Game (Disc 2).chd",
+                                                  "Game.m3u"], keys)
+        self.assertEqual(found, set(keys[:3]))
+
+    def test_a_name_in_another_unicode_form_matches(self):
+        import unicodedata
+        found = self.card_matches("onion", "PSX", [unicodedata.normalize("NFD", "Pokémon.chd")], ["psx/Pokémon.chd"])
+        self.assertEqual(found, {"psx/Pokémon.chd"})
 
     def test_surprises_are_filled_from_systems_without_games_too(self):
         empty = {"name": "GCE Vectrex", "bucket": "vectrex", "folders": {"esde": "vectrex"}, "bios": {"files": []}, "games": []}

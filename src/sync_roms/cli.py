@@ -1010,6 +1010,20 @@ def sync_card(args):
             seen.update((k, k in need) for k, _, _ in jobs)
         return {k for k in keys if seen[k]}
 
+    def card_match(s, keys):
+        """Which of keys are on the card already, for the card editor's keep key. Names match like the card does:
+        case and Unicode form left out."""
+        folder = s["folders"].get(layout_name)
+        if not folder:
+            return set()
+        dest = os.path.join(roms_dir, folder)
+        walks = list(downloads.walk_roms(dest, rename_temps=True))
+        if disc_dir:
+            walks += downloads.walk_roms(os.path.join(dest, disc_dir), rename_temps=True)
+        names = {downloads.name_key(os.path.relpath(os.path.join(root, f), dest)) for root, files in walks for f in files}
+        disc_keys = m3u.disc_keys(keys) if disc_dir else ()
+        return {k for k in keys if downloads.name_key(downloads.rom_rel(k, disc_dir, disc_keys)) in names}
+
     relist()
     interactive = not (ui.ASSUME_YES or args.json) and ui.has_terminal()
     def reload_changes():
@@ -1037,7 +1051,8 @@ def sync_card(args):
 
     # surprises come in two steps: which ones to replace first (then the card editor, which shows the ones kept), and
     # the empty slots last, right before the sync, from every system the card's device supports, games picked or not
-    surprise.run_surprise(card, (device, layout_name), systems, interactive, args.dry_run, to_fetch=to_fetch)
+    surprise.run_surprise(card, (device, layout_name), systems, interactive, args.dry_run, to_fetch=to_fetch,
+                       card_match=card_match)
     if not args.dry_run:  # the step (and the card editor it opens) may have changed the card's games
         reload_changes()
     surprise.fill_surprises(card, (device, layout_name), systems, args.dry_run)
