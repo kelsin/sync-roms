@@ -86,11 +86,16 @@ def rom_stems(base, layout_name, layout, systems):
 
 
 def minui_name(srm_name, rom_names):
-    """MinUI's name for a RetroArch save: the ROM's full file name plus `.sav` ("Game.srm" -> "Game.gba.sav"), for the
-    ROM among rom_names with that stem; None when there is none."""
+    """MinUI's name for a RetroArch save: the ROM's full file name plus `.sav` ("Game.srm" -> "Game.gba.sav"). Among
+    ROMs with that stem a playlist (.m3u) or cue sheet wins; None when there is none or several remain."""
     stem = srm_name[:-4] if srm_name.endswith(".srm") else srm_name
-    rom = next((r for r in rom_names if os.path.splitext(r)[0] == stem), None)
-    return f"{rom}.sav" if rom else None
+    found = [r for r in rom_names if os.path.splitext(r)[0] == stem]
+    for ext in (".m3u", ".cue"):
+        first = [r for r in found if r.lower().endswith(ext)]
+        if first:
+            found = first
+            break
+    return f"{found[0]}.sav" if len(found) == 1 else None
 
 
 def retroarch_name(sav_name):
@@ -109,7 +114,11 @@ def rom_names(base, layout_name, layout, system):
     if not folder:
         return []
     root = os.path.join(base, *layout["roms_dir"].split("/"), folder)
-    return [f for _, _, files in os.walk(root, followlinks=True) for f in files if not f.startswith("._")]
+    names = []
+    for _, dirs, files in os.walk(root, followlinks=True):
+        dirs[:] = [d for d in dirs if not d.startswith(".")]  # NextUI's .media art
+        names += [f for f in files if not f.startswith(".")]
+    return names
 
 
 def _folders(root, template, systems, layout_name):
@@ -266,7 +275,9 @@ def plan_apply(stash, base, layout_name, layout, system, core, retroarch_dir=Non
             if renamed:
                 name = renamed
             else:
-                ui.warn(f"no ROM on the card for {name}; copied under its RetroArch name")
+                several = sum(os.path.splitext(r)[0] == name[:-4] for r in roms) > 1
+                ui.warn(f"{'several ROMs share the name of' if several else 'no ROM on the card for'} {name}; "
+                        "copied under its RetroArch name")
         dst = os.path.join(target_dir(base, layout_name, layout, system, f["kind"], core, retroarch_dir), name)
         if not os.path.exists(dst):
             state = "new"

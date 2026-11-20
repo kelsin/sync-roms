@@ -397,6 +397,19 @@ class NamingTest(unittest.TestCase):
         self.assertIsNone(saves.minui_name("Missing.srm", ["Game.gba"]))
         self.assertEqual(saves.minui_name("Mr. Driller.srm", ["Mr. Driller.gba"]), "Mr. Driller.gba.sav")
 
+    def test_minui_name_picks_the_right_rom(self):
+        self.assertEqual(saves.minui_name("Game.srm", ["Game.bin", "Game.cue"]), "Game.cue.sav")
+        self.assertEqual(saves.minui_name("Game.srm", ["Game.cue", "Game.bin", "Game.m3u"]), "Game.m3u.sav")
+        self.assertIsNone(saves.minui_name("Game.srm", ["Game.gba", "Game.zip"]))
+
+    def test_rom_names_skip_dot_entries(self):
+        with tempfile.TemporaryDirectory() as b:
+            for n in (".media/Game.png", "Game.gba", ".hidden", "._Game.gba", "sub/Other.gba", "sub/.media/Other.png"):
+                helpers.touch(os.path.join(b, "Roms/GBA", n), "x")
+            layout = {"roms_dir": "Roms"}
+            got = saves.rom_names(b, "n", layout, {"folders": {"n": "GBA"}})
+            self.assertEqual(sorted(got), ["Game.gba", "Other.gba"])
+
     def test_retroarch_name(self):
         self.assertEqual(saves.retroarch_name("Game.gba.sav"), "Game.srm")
         self.assertEqual(saves.retroarch_name("Mr. Driller.gba.sav"), "Mr. Driller.srm")
@@ -544,6 +557,25 @@ class ApplyCommandTest(CommandTest):
         self.assertEqual(code, 0, err)
         self.assertEqual(self.read_file(base, "Saves/GBA/Game.srm"), "save")
         self.assertIn("no ROM on the card for Game.srm", err)
+
+    def test_onto_nextui_media_art_ignored(self):
+        self.stash(files={"Game.srm": "save"})
+        base = self.nextui_card()
+        helpers.touch(os.path.join(base, "Roms/Game Boy Advance (GBA)/.media/Game.png"), "p")
+        self.lists([True])
+        code, out, err = self.run_cmd("saves", "apply", base)
+        self.assertEqual(code, 0, err)
+        self.assertEqual(self.read_file(base, "Saves/GBA/Game.gba.sav"), "save")
+
+    def test_onto_nextui_ambiguous_keeps_srm_and_warns(self):
+        self.stash(files={"Game.srm": "save"})
+        base = self.nextui_card()
+        helpers.touch(os.path.join(base, "Roms/Game Boy Advance (GBA)/Game.zip"), "r")
+        self.lists([True])
+        code, out, err = self.run_cmd("saves", "apply", base)
+        self.assertEqual(code, 0, err)
+        self.assertEqual(self.read_file(base, "Saves/GBA/Game.srm"), "save")
+        self.assertIn("several ROMs share the name of Game.srm", err)
 
     def test_onto_nextui_psx_not_renamed(self):
         self.stash(system="psx", files={"Game.srm": "save"})
