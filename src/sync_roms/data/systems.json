@@ -10,7 +10,8 @@
       "knulli": "mame",
       "onion": "ARCADE",
       "allium": "ARCADE",
-      "emudeck": "mame"
+      "emudeck": "mame",
+      "nextui": null
     },
     "bios": {
       "files": [],
@@ -28,7 +29,8 @@
       "knulli": "atari2600",
       "onion": "ATARI",
       "allium": "ATARI",
-      "emudeck": "atari2600"
+      "emudeck": "atari2600",
+      "nextui": "Atari 2600 (A2600)"
     },
     "bios": {
       "files": [],
@@ -46,7 +48,8 @@
       "knulli": "atari5200",
       "onion": "FIFTYTWOHUNDRED",
       "allium": "FIFTYTWOHUNDRED",
-      "emudeck": "atari5200"
+      "emudeck": "atari5200",
+      "nextui": "Atari 5200 (A5200)"
     },
     "bios": {
       "files": [
@@ -68,7 +71,8 @@
       "knulli": "atari7800",
       "onion": "SEVENTYEIGHTHUNDRED",
       "allium": "SEVENTYEIGHTHUNDRED",
-      "emudeck": "atari7800"
+      "emudeck": "atari7800",
+      "nextui": "Atari 7800 (A7800)"
     },
     "bios": {
       "files": [
@@ -90,7 +94,8 @@
       "knulli": "atari800",
       "onion": null,
       "allium": null,
-      "emudeck": "atari800"
+      "emudeck": "atari800",
+      "nextui": null
     },
     "bios": {
       "files": [
@@ -116,7 +121,8 @@
       "knulli": "lynx",
       "onion": "LYNX",
       "allium": "LYNX",
-      "emudeck": "atarilynx"
+      "emudeck": "atarilynx",
+      "nextui": "Atari Lynx (LYNX)"
     },
     "bios": {
       "files": [
@@ -138,7 +144,8 @@
       "knulli": "atarist",
       "onion": null,
       "allium": null,
-      "emudeck": "atarist"
+      "emudeck": "atarist",
+      "nextui": null
     },
     "bios": {
       "files": [
@@ -162,7 +169,8 @@
       "knulli": "colecovision",
       "onion": "COLECO",
       "allium": "COLECO",
-      "emudeck": "colecovision"
+      "emudeck": "colecovision",
+      "nextui": "ColecoVision (COLECO)"
     },
     "bios": {
       "files": [
@@ -192,8 +200,12 @@
       "knulli": "gba",
       "onion": "GBA",
       "allium": "GBA",
-      "emudeck": "gba"
+      "emudeck": "gba",
+      "nextui": "Game Boy Advance (GBA)"
     },
+    "nextui_bios_tags": [
+      "MGBA"
+    ],
     "bios": {
       "files": [
         "gba_bios.bin",
@@ -217,7 +229,8 @@
       "knulli": "gbc",
       "onion": "GBC",
       "allium": "GBC",
-      "emudeck": "gbc"
+      "emudeck": "gbc",
+      "nextui": "Game Boy Color (GBC)"
     },
     "bios": {
       "files": [
@@ -244,7 +257,8 @@
       "knulli": "gb",
       "onion": "GB",
       "allium": "GB",
-      "emudeck": "gb"
+      "emudeck": "gb",
+      "nextui": "Game Boy (GB)"
     },
     "bios": {
       "files": [
@@ -271,7 +285,8 @@
       "knulli": "intellivision",
       "onion": "INTELLIVISION",
       "allium": "INTELLIVISION",
-      "emudeck": "intellivision"
+      "emudeck": "intellivision",
+      "nextui": null
     },
     "bios": {
       "files": [
@@ -297,7 +312,8 @@
       "knulli": "neogeo",
       "onion": "NEOGEO",
       "allium": "NEOGEO",
-      "emudeck": "neogeo"
+      "emudeck": "neogeo",
+      "nextui": "Neo Geo (FBN)"
     },
     "bios": {
       "files": [
@@ -342,7 +358,8 @@
       "knulli": "nes",
       "onion": "FC",
       "allium": "FC",
-      "emudeck": "nes"
+      "emudeck": "nes",
+      "nextui": "Nintendo Entertainment System (FC)"
     },
     "bios": {
       "files": [],
@@ -360,7 +377,8 @@
       "knulli": "fds",
       "onion": "FDS",
       "allium": "FDS",
-      "emudeck": "fds"
+      "emudeck": "fds",
+      "nextui": "Famicom Disk System (FDS)"
     },
     "bios": {
       "files": [
@@ -386,7 +404,8 @@
       "knulli": "n64",
       "onion": null,
       "allium": null,
-      "emudeck": "n64"
+      "emudeck": "n64",
+      "nextui": null
     },
     "bios": {
       "files": [],
@@ -404,7 +423,8 @@
       "knulli": "nds",
       "onion": "NDS",
       "allium": "NDS",
-      "emudeck": "nds"
+      "emudeck": "nds",
+      "nextui": null
     },
     "bios": {
       "files": [
@@ -434,7 +454,8 @@
       "knulli": "odyssey2",
       "onion": "ODYSSEY",
       "allium": "ODYSSEY",
-      "emudeck": "odyssey2"
+      "emudeck": "odyssey2",
+      "nextui": null
     },
     "bios": {
       "files": [
@@ -460,7 +481,8 @@
       "knulli": "pcfx",
       "onion": null,
       "allium": null,
-      "emudeck": "pcfx"
+      "emudeck": "pcfx",
+      "nextui": null
     },
     "bios": {
       "files": [
@@ -486,7 +508,8 @@
       "knulli": "pc98",
       "onion": null,
       "allium": null,
-      "emudeck": "pc98"
+      "emudeck": "pc98",
+      "nextui": null
     },
     "bios": {
       "files": [
@@ -524,7 +547,8 @@
       "knulli": "sega32x",
       "onion": "THIRTYTWOX",
       "allium": "THIRTYTWOX",
-      "emudeck": "sega32x"
+      "emudeck": "sega32x",
+      "nextui": "Sega 32X (32X)"
     },
     "bios": {
       "files": [
@@ -551,7 +575,8 @@
       "knulli": "megacd",
       "onion": "SEGACD",
       "allium": "SEGACD",
-      "emudeck": "segacd"
+      "emudeck": "segacd",
+      "nextui": "Sega CD (SEGACD)"
     },
     "bios": {
       "files": [
@@ -588,7 +613,8 @@
       "knulli": "dreamcast",
       "onion": null,
       "allium": null,
-      "emudeck": "dreamcast"
+      "emudeck": "dreamcast",
+      "nextui": null
     },
     "bios": {
       "files": [
@@ -623,7 +649,8 @@
       "knulli": "gamegear",
       "onion": "GG",
       "allium": "GG",
-      "emudeck": "gamegear"
+      "emudeck": "gamegear",
+      "nextui": "Game Gear (GG)"
     },
     "bios": {
       "files": [
@@ -657,7 +684,8 @@
       "knulli": "megadrive",
       "onion": "MD",
       "allium": "MD",
-      "emudeck": "genesis"
+      "emudeck": "genesis",
+      "nextui": "Sega Genesis (MD)"
     },
     "bios": {
       "files": [
@@ -691,7 +719,8 @@
       "knulli": "mastersystem",
       "onion": "MS",
       "allium": "MS",
-      "emudeck": "mastersystem"
+      "emudeck": "mastersystem",
+      "nextui": "Sega Master System (SMS)"
     },
     "bios": {
       "files": [
@@ -725,7 +754,8 @@
       "knulli": "saturn",
       "onion": null,
       "allium": null,
-      "emudeck": "saturn"
+      "emudeck": "saturn",
+      "nextui": null
     },
     "bios": {
       "files": [
@@ -757,8 +787,12 @@
       "knulli": "snes",
       "onion": "SFC",
       "allium": "SFC",
-      "emudeck": "snes"
+      "emudeck": "snes",
+      "nextui": "Super Nintendo (SFC)"
     },
+    "nextui_bios_tags": [
+      "SUPA"
+    ],
     "bios": {
       "files": [
         "BS-X.bin",
@@ -798,7 +832,8 @@
       "knulli": "pcengine",
       "onion": "PCE",
       "allium": "PCE",
-      "emudeck": "tg16"
+      "emudeck": "tg16",
+      "nextui": "TurboGrafx-16 (PCE)"
     },
     "bios": {
       "files": [
@@ -826,7 +861,8 @@
       "knulli": "pcenginecd",
       "onion": "PCECD",
       "allium": "PCECD",
-      "emudeck": "tg-cd"
+      "emudeck": "tg-cd",
+      "nextui": "TurboGrafx-CD (PCE)"
     },
     "bios": {
       "files": [
@@ -857,7 +893,8 @@
       "knulli": "vectrex",
       "onion": "VECTREX",
       "allium": "VECTREX",
-      "emudeck": "vectrex"
+      "emudeck": "vectrex",
+      "nextui": null
     },
     "bios": {
       "files": [],
@@ -878,7 +915,8 @@
       "knulli": "virtualboy",
       "onion": "VB",
       "allium": "VB",
-      "emudeck": "virtualboy"
+      "emudeck": "virtualboy",
+      "nextui": "Virtual Boy (VB)"
     },
     "bios": {
       "files": [],
@@ -898,7 +936,8 @@
       "knulli": "wswan",
       "onion": "WS",
       "allium": "WS",
-      "emudeck": "wonderswan"
+      "emudeck": "wonderswan",
+      "nextui": null
     },
     "bios": {
       "files": [],
@@ -918,7 +957,8 @@
       "knulli": "wswanc",
       "onion": "WS",
       "allium": "WS",
-      "emudeck": "wonderswancolor"
+      "emudeck": "wonderswancolor",
+      "nextui": null
     },
     "bios": {
       "files": [],
@@ -938,7 +978,8 @@
       "knulli": "advmame",
       "onion": null,
       "allium": null,
-      "emudeck": "mame-advmame"
+      "emudeck": "mame-advmame",
+      "nextui": null
     },
     "bios": {
       "files": [],
@@ -956,7 +997,8 @@
       "knulli": null,
       "onion": null,
       "allium": null,
-      "emudeck": "arcade"
+      "emudeck": "arcade",
+      "nextui": null
     },
     "bios": {
       "files": [],
@@ -974,7 +1016,8 @@
       "knulli": "arduboy",
       "onion": null,
       "allium": null,
-      "emudeck": "arduboy"
+      "emudeck": "arduboy",
+      "nextui": null
     },
     "bios": {
       "files": [],
@@ -992,7 +1035,8 @@
       "knulli": "atomiswave",
       "onion": null,
       "allium": null,
-      "emudeck": "atomiswave"
+      "emudeck": "atomiswave",
+      "nextui": null
     },
     "bios": {
       "files": [
@@ -1019,7 +1063,8 @@
       "knulli": null,
       "onion": null,
       "allium": null,
-      "emudeck": "chailove"
+      "emudeck": "chailove",
+      "nextui": null
     },
     "bios": {
       "files": [],
@@ -1037,7 +1082,8 @@
       "knulli": "channelf",
       "onion": "FAIRCHILD",
       "allium": "FAIRCHILD",
-      "emudeck": "channelf"
+      "emudeck": "channelf",
+      "nextui": null
     },
     "bios": {
       "files": [
@@ -1060,7 +1106,8 @@
       "knulli": "cps1",
       "onion": "CPS1",
       "allium": "CPS1",
-      "emudeck": "cps1"
+      "emudeck": "cps1",
+      "nextui": "CPS1 (FBN)"
     },
     "bios": {
       "files": [],
@@ -1077,7 +1124,8 @@
       "knulli": "cps2",
       "onion": "CPS2",
       "allium": "CPS2",
-      "emudeck": "cps2"
+      "emudeck": "cps2",
+      "nextui": "CPS2 (FBN)"
     },
     "bios": {
       "files": [],
@@ -1094,7 +1142,8 @@
       "knulli": "cps3",
       "onion": "CPS3",
       "allium": "CPS3",
-      "emudeck": "cps3"
+      "emudeck": "cps3",
+      "nextui": "CPS3 (FBN)"
     },
     "bios": {
       "files": [],
@@ -1112,7 +1161,8 @@
       "knulli": "daphne",
       "onion": null,
       "allium": null,
-      "emudeck": "daphne"
+      "emudeck": "daphne",
+      "nextui": null
     },
     "bios": {
       "files": [],
@@ -1129,7 +1179,8 @@
       "knulli": null,
       "onion": null,
       "allium": null,
-      "emudeck": "doom"
+      "emudeck": "doom",
+      "nextui": "Doom (PRBOOM)"
     },
     "bios": {
       "files": [],
@@ -1146,7 +1197,8 @@
       "knulli": "easyrpg",
       "onion": null,
       "allium": null,
-      "emudeck": "easyrpg"
+      "emudeck": "easyrpg",
+      "nextui": null
     },
     "bios": {
       "files": [],
@@ -1164,7 +1216,8 @@
       "knulli": "fbneo",
       "onion": "FBNEO",
       "allium": "FBNEO",
-      "emudeck": "fbneo"
+      "emudeck": "fbneo",
+      "nextui": "Arcade (FBN)"
     },
     "bios": {
       "files": [
@@ -1214,7 +1267,8 @@
       "knulli": "lowresnx",
       "onion": null,
       "allium": null,
-      "emudeck": "lowresnx"
+      "emudeck": "lowresnx",
+      "nextui": null
     },
     "bios": {
       "files": [],
@@ -1230,7 +1284,8 @@
       "knulli": "lutro",
       "onion": null,
       "allium": null,
-      "emudeck": "lutro"
+      "emudeck": "lutro",
+      "nextui": null
     },
     "bios": {
       "files": [],
@@ -1248,7 +1303,8 @@
       "knulli": "megaduck",
       "onion": "MEGADUCK",
       "allium": "MEGADUCK",
-      "emudeck": "megaduck"
+      "emudeck": "megaduck",
+      "nextui": null
     },
     "bios": {
       "files": [],
@@ -1265,7 +1321,8 @@
       "knulli": "n64dd",
       "onion": null,
       "allium": null,
-      "emudeck": "n64dd"
+      "emudeck": "n64dd",
+      "nextui": null
     },
     "bios": {
       "files": [
@@ -1289,7 +1346,8 @@
       "knulli": "naomi",
       "onion": null,
       "allium": null,
-      "emudeck": "naomi"
+      "emudeck": "naomi",
+      "nextui": null
     },
     "bios": {
       "files": [
@@ -1318,7 +1376,8 @@
       "knulli": "neogeocd",
       "onion": "NEOCD",
       "allium": "NEOCD",
-      "emudeck": "neogeocd"
+      "emudeck": "neogeocd",
+      "nextui": null
     },
     "bios": {
       "files": [
@@ -1354,7 +1413,8 @@
       "knulli": "ngp",
       "onion": "NGP",
       "allium": "NGP",
-      "emudeck": "ngp"
+      "emudeck": "ngp",
+      "nextui": "Neo Geo Pocket (NGP)"
     },
     "bios": {
       "files": [],
@@ -1374,7 +1434,8 @@
       "knulli": "ngpc",
       "onion": "NGP",
       "allium": "NGP",
-      "emudeck": "ngpc"
+      "emudeck": "ngpc",
+      "nextui": "Neo Geo Pocket Color (NGPC)"
     },
     "bios": {
       "files": [],
@@ -1393,7 +1454,8 @@
       "knulli": "openbor",
       "onion": null,
       "allium": null,
-      "emudeck": "openbor"
+      "emudeck": "openbor",
+      "nextui": null
     },
     "bios": {
       "files": [],
@@ -1411,7 +1473,8 @@
       "knulli": "3do",
       "onion": null,
       "allium": null,
-      "emudeck": "3do"
+      "emudeck": "3do",
+      "nextui": null
     },
     "bios": {
       "files": [
@@ -1450,7 +1513,8 @@
       "knulli": "pico8",
       "onion": "PICO",
       "allium": "PICO",
-      "emudeck": "pico8"
+      "emudeck": "pico8",
+      "nextui": "PICO-8 (P8)"
     },
     "bios": {
       "files": [],
@@ -1468,7 +1532,8 @@
       "knulli": "pokemini",
       "onion": "POKE",
       "allium": "POKE",
-      "emudeck": "pokemini"
+      "emudeck": "pokemini",
+      "nextui": "Pokemon Mini (PKM)"
     },
     "bios": {
       "files": [],
@@ -1484,7 +1549,8 @@
       "knulli": "ports",
       "onion": "PORTS",
       "allium": "PORTS",
-      "emudeck": "ports"
+      "emudeck": "ports",
+      "nextui": null
     },
     "bios": {
       "files": [],
@@ -1502,7 +1568,8 @@
       "knulli": "psx",
       "onion": "PS",
       "allium": "PS",
-      "emudeck": "psx"
+      "emudeck": "psx",
+      "nextui": "PlayStation (PS)"
     },
     "bios": {
       "files": [
@@ -1547,7 +1614,8 @@
       "knulli": "psp",
       "onion": null,
       "allium": null,
-      "emudeck": "psp"
+      "emudeck": "psp",
+      "nextui": null
     },
     "bios": {
       "files": [],
@@ -1572,7 +1640,8 @@
       "knulli": "satellaview",
       "onion": "SATELLAVIEW",
       "allium": "SATELLAVIEW",
-      "emudeck": "satellaview"
+      "emudeck": "satellaview",
+      "nextui": null
     },
     "bios": {
       "files": [
@@ -1612,7 +1681,8 @@
       "knulli": "scummvm",
       "onion": "SCUMMVM",
       "allium": "SCUMMVM",
-      "emudeck": "scummvm"
+      "emudeck": "scummvm",
+      "nextui": null
     },
     "bios": {
       "files": [],
@@ -1630,7 +1700,8 @@
       "knulli": "supergrafx",
       "onion": "SGFX",
       "allium": "SGFX",
-      "emudeck": "supergrafx"
+      "emudeck": "supergrafx",
+      "nextui": null
     },
     "bios": {
       "files": [
@@ -1657,7 +1728,8 @@
       "knulli": "sgb",
       "onion": "SGB",
       "allium": "SGB",
-      "emudeck": "sgb"
+      "emudeck": "sgb",
+      "nextui": "Super Game Boy (SGB)"
     },
     "bios": {
       "files": [
@@ -1707,7 +1779,8 @@
       "knulli": "sufami",
       "onion": "SUFAMI",
       "allium": "SUFAMI",
-      "emudeck": "sufami"
+      "emudeck": "sufami",
+      "nextui": null
     },
     "bios": {
       "files": [
@@ -1748,7 +1821,8 @@
       "knulli": "supervision",
       "onion": "SUPERVISION",
       "allium": "SUPERVISION",
-      "emudeck": "supervision"
+      "emudeck": "supervision",
+      "nextui": null
     },
     "bios": {
       "files": [],
@@ -1766,7 +1840,8 @@
       "knulli": "tic80",
       "onion": "TIC",
       "allium": "TIC",
-      "emudeck": "tic80"
+      "emudeck": "tic80",
+      "nextui": null
     },
     "bios": {
       "files": [],
@@ -1783,7 +1858,8 @@
       "knulli": "quake",
       "onion": null,
       "allium": null,
-      "emudeck": "quake"
+      "emudeck": "quake",
+      "nextui": null
     },
     "bios": {
       "files": [],
@@ -1800,7 +1876,8 @@
       "knulli": "uzebox",
       "onion": null,
       "allium": null,
-      "emudeck": "uzebox"
+      "emudeck": "uzebox",
+      "nextui": null
     },
     "bios": {
       "files": [],
@@ -1818,7 +1895,8 @@
       "knulli": "jaguar",
       "onion": null,
       "allium": null,
-      "emudeck": "atarijaguar"
+      "emudeck": "atarijaguar",
+      "nextui": null
     },
     "bios": {
       "files": [],
@@ -1836,7 +1914,8 @@
       "knulli": "jaguarcd",
       "onion": null,
       "allium": null,
-      "emudeck": "atarijaguarcd"
+      "emudeck": "atarijaguarcd",
+      "nextui": null
     },
     "bios": {
       "files": [],
@@ -1854,7 +1933,8 @@
       "knulli": "cdi",
       "onion": null,
       "allium": null,
-      "emudeck": "cdimono1"
+      "emudeck": "cdimono1",
+      "nextui": null
     },
     "bios": {
       "files": [
@@ -1878,7 +1958,8 @@
       "knulli": "gamecube",
       "onion": null,
       "allium": null,
-      "emudeck": "gc"
+      "emudeck": "gc",
+      "nextui": null
     },
     "bios": {
       "files": [
@@ -1909,7 +1990,8 @@
       "knulli": null,
       "onion": null,
       "allium": null,
-      "emudeck": "mark3"
+      "emudeck": "mark3",
+      "nextui": null
     },
     "bios": {
       "files": [
@@ -1942,7 +2024,8 @@
       "knulli": "model2",
       "onion": null,
       "allium": null,
-      "emudeck": "model2/roms"
+      "emudeck": "model2/roms",
+      "nextui": null
     },
     "bios": {
       "files": [],
@@ -1959,7 +2042,8 @@
       "knulli": "model3",
       "onion": null,
       "allium": null,
-      "emudeck": "model3"
+      "emudeck": "model3",
+      "nextui": null
     },
     "bios": {
       "files": [],
@@ -1977,7 +2061,8 @@
       "knulli": "3ds",
       "onion": null,
       "allium": null,
-      "emudeck": "n3ds"
+      "emudeck": "n3ds",
+      "nextui": null
     },
     "bios": {
       "files": [],
@@ -1995,7 +2080,8 @@
       "knulli": "3ds",
       "onion": null,
       "allium": null,
-      "emudeck": "n3ds"
+      "emudeck": "n3ds",
+      "nextui": null
     },
     "bios": {
       "files": [],
@@ -2012,7 +2098,8 @@
       "knulli": "naomi2",
       "onion": null,
       "allium": null,
-      "emudeck": "naomi2"
+      "emudeck": "naomi2",
+      "nextui": null
     },
     "bios": {
       "files": [
@@ -2040,7 +2127,8 @@
       "knulli": null,
       "onion": null,
       "allium": null,
-      "emudeck": "naomigd"
+      "emudeck": "naomigd",
+      "nextui": null
     },
     "bios": {
       "files": [
@@ -2069,7 +2157,8 @@
       "knulli": "ps2",
       "onion": null,
       "allium": null,
-      "emudeck": "ps2"
+      "emudeck": "ps2",
+      "nextui": null
     },
     "bios": {
       "files": [
@@ -2099,7 +2188,8 @@
       "knulli": "ps3",
       "onion": null,
       "allium": null,
-      "emudeck": "ps3"
+      "emudeck": "ps3",
+      "nextui": null
     },
     "bios": {
       "files": [],
@@ -2126,7 +2216,8 @@
       "knulli": "ps4",
       "onion": null,
       "allium": null,
-      "emudeck": null
+      "emudeck": null,
+      "nextui": null
     },
     "bios": {
       "files": [],
@@ -2144,7 +2235,8 @@
       "knulli": "psvita",
       "onion": null,
       "allium": null,
-      "emudeck": "psvita"
+      "emudeck": "psvita",
+      "nextui": null
     },
     "bios": {
       "files": [],
@@ -2161,7 +2253,8 @@
       "knulli": null,
       "onion": null,
       "allium": null,
-      "emudeck": "stv"
+      "emudeck": "stv",
+      "nextui": null
     },
     "bios": {
       "files": [],
@@ -2179,7 +2272,8 @@
       "knulli": null,
       "onion": null,
       "allium": null,
-      "emudeck": "switch"
+      "emudeck": "switch",
+      "nextui": null
     },
     "bios": {
       "files": [
@@ -2199,7 +2293,8 @@
       "knulli": "triforce",
       "onion": null,
       "allium": null,
-      "emudeck": "triforce"
+      "emudeck": "triforce",
+      "nextui": null
     },
     "bios": {
       "files": [],
@@ -2216,7 +2311,8 @@
       "knulli": null,
       "onion": null,
       "allium": null,
-      "emudeck": "type-x"
+      "emudeck": "type-x",
+      "nextui": null
     },
     "bios": {
       "files": [],
@@ -2234,7 +2330,8 @@
       "knulli": "wii",
       "onion": null,
       "allium": null,
-      "emudeck": "wii"
+      "emudeck": "wii",
+      "nextui": null
     },
     "bios": {
       "files": [],
@@ -2255,7 +2352,8 @@
       "knulli": "wiiu",
       "onion": null,
       "allium": null,
-      "emudeck": "wiiu/roms"
+      "emudeck": "wiiu/roms",
+      "nextui": null
     },
     "bios": {
       "files": [],
@@ -2273,7 +2371,8 @@
       "knulli": "xbox",
       "onion": null,
       "allium": null,
-      "emudeck": "xbox"
+      "emudeck": "xbox",
+      "nextui": null
     },
     "bios": {
       "files": [
@@ -2311,7 +2410,8 @@
       "knulli": "xbox360",
       "onion": null,
       "allium": null,
-      "emudeck": "xbox360/roms"
+      "emudeck": "xbox360/roms",
+      "nextui": null
     },
     "bios": {
       "files": [],
@@ -2332,7 +2432,8 @@
       "knulli": null,
       "onion": null,
       "allium": null,
-      "emudeck": null
+      "emudeck": null,
+      "nextui": null
     },
     "bios": {
       "files": [],
@@ -2350,7 +2451,8 @@
       "knulli": "sg1000",
       "onion": null,
       "allium": null,
-      "emudeck": "sg-1000"
+      "emudeck": "sg-1000",
+      "nextui": "Sega SG-1000 (SG1000)"
     },
     "bios": {
       "files": [],
@@ -2370,7 +2472,8 @@
       "knulli": "msx1",
       "onion": null,
       "allium": null,
-      "emudeck": "msx"
+      "emudeck": "msx",
+      "nextui": "MSX (MSX)"
     },
     "bios": {
       "files": [
@@ -2719,7 +2822,8 @@
       "knulli": "msx2",
       "onion": null,
       "allium": null,
-      "emudeck": "msx2"
+      "emudeck": "msx2",
+      "nextui": "MSX2 (MSX)"
     },
     "bios": {
       "files": [
@@ -3068,7 +3172,8 @@
       "knulli": "arcadia",
       "onion": null,
       "allium": null,
-      "emudeck": "arcadia"
+      "emudeck": "arcadia",
+      "nextui": null
     },
     "bios": {
       "files": [],
@@ -3088,7 +3193,8 @@
       "knulli": "gamate",
       "onion": null,
       "allium": null,
-      "emudeck": "gamate"
+      "emudeck": "gamate",
+      "nextui": null
     },
     "bios": {
       "files": [],
@@ -3109,7 +3215,8 @@
       "knulli": "gamecom",
       "onion": null,
       "allium": null,
-      "emudeck": "gamecom"
+      "emudeck": "gamecom",
+      "nextui": null
     },
     "bios": {
       "files": [],
@@ -3130,7 +3237,8 @@
       "knulli": "c64",
       "onion": null,
       "allium": null,
-      "emudeck": "c64"
+      "emudeck": "c64",
+      "nextui": "Commodore 64 (C64)"
     },
     "bios": {
       "files": [],

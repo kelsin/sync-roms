@@ -34,9 +34,10 @@ class SyncSmokeTest(RealDataDirGuard):
         patch.start()
         self.addCleanup(patch.stop)
 
-    def run_sync(self, dry_run, prepare=None, patches=(), yes=True, args=(), after=None):
-        """The exit code; what went to stderr is in self.err. after(card) runs before the card folder goes."""
-        with tempfile.TemporaryDirectory() as card:
+    def run_sync(self, dry_run, prepare=None, patches=(), yes=True, args=(), after=None, card_dir=None):
+        """The exit code; what went to stderr is in self.err. after(card) runs before the card folder goes.
+        card_dir: sync this folder (kept) instead of a fresh one."""
+        with contextlib.nullcontext(card_dir) if card_dir else tempfile.TemporaryDirectory() as card:
             if prepare:
                 prepare(card)
             argv = ["sync-roms", card] + (["--yes"] if yes else []) + (["--dry-run"] if dry_run else []) + list(args)
@@ -114,6 +115,110 @@ class SyncSmokeTest(RealDataDirGuard):
         lines.clear()
         self.assertEqual(self.run_sync(False, patches=((cli.ui, {"dim": lambda text: lines.append(text) or text}),)), 0)
         self.assertFalse(any("no games picked" in x for x in lines))
+
+    def test_systems_with_no_nextui_folder_are_skipped_and_the_others_still_sync(self):
+        n64 = {"name": "Nintendo 64", "bucket": "n64", "folders": {"nextui": None}, "bios": {"files": []},
+               "games": [{"bucket": "n64/Game.z64"}]}
+        gba = {**SYSTEM, "folders": {"nextui": "Game Boy Advance (GBA)"}}
+        manifest = {"systems": [gba, n64], "devices": [],
+                    "layouts": {"nextui": {"label": "NextUI", "roms_dir": "Roms", "bios_dir": "Bios"}}}
+        lines, synced = [], []
+        patches = ((store, {"load_manifest": lambda names=(): manifest}),
+                   (cli.picker, {"saved_setup": lambda *a: (None, "nextui")}),
+                   (cli.surprise, {"fill_surprises": lambda card, setup, chosen, dry_run: synced.append(
+                       [s["bucket"] for s in chosen]) or []}),
+                   (cli.ui, {"dim": lambda text: lines.append(text) or text}))
+        self.assertEqual(self.run_sync(False, patches=patches), 0)
+        self.assertEqual(sum("1 system(s) have no NextUI folder" in x for x in lines), 1)
+        self.assertEqual(synced, [["gba"]])
+
+    def test_nextui_bios_goes_in_per_tag_folders(self):
+        """Each BIOS file lands in Bios/<TAG>/ for the system's tag and its extra tags; subpaths are kept; ROM files stay put."""
+        gba = {**SYSTEM, "folders": {"nextui": "Game Boy Advance (GBA)"}, "nextui_bios_tags": ["MGBA"],
+               "bios": {"files": ["gba_bios.bin"]}}
+        fbn = {"name": "FinalBurn Neo", "bucket": "fbneo", "folders": {"nextui": "Arcade (FBN)"},
+               "bios": {"files": ["fbneo/samples/x.zip"], "rom_files": ["neogeo.zip"]}, "games": [{"bucket": "fbneo/Game.zip"}]}
+        manifest = {"systems": [gba, fbn], "devices": [],
+                    "layouts": {"nextui": {"label": "NextUI", "roms_dir": "Roms", "bios_dir": "Bios", "bios_by_tag": True}}}
+        listing = {"gba/": {"gba/Game.zip": 5}, "fbneo/": {"fbneo/Game.zip": 5},
+                   "BIOS/": {"BIOS/gba_bios.bin": 3, "BIOS/fbneo/samples/x.zip": 4, "BIOS/neogeo.zip": 2}}
+        bios = []
+        patches = ((store, {"load_manifest": lambda names=(): manifest}),
+                   (cli.picker, {"saved_setup": lambda *a: (None, "nextui")}),
+                   (cli, {"free_space": lambda path: 10**9}),
+                   (cli.downloads, {"run_downloads": lambda todo, label, *a: (bios.extend(todo) if label == "BIOS" else None) or 0}),
+                   (cli.s3, {"list_sizes": lambda prefix, sizes=True: listing.get(prefix, {})}),
+                   (cli.ui, {"choose": lambda q, *a, **k: "n"}))
+        self.run_sync(False, patches=patches)
+        got = sorted((k, p.split(os.sep + "Bios" + os.sep)[-1] if os.sep + "Bios" + os.sep in p else "Roms/" + p.split(os.sep + "Roms" + os.sep)[-1])
+                     for k, p, _ in bios)
+        self.assertEqual(got, sorted([
+            ("BIOS/gba_bios.bin", "GBA/gba_bios.bin"), ("BIOS/gba_bios.bin", "MGBA/gba_bios.bin"),
+            ("BIOS/fbneo/samples/x.zip", "FBN/fbneo/samples/x.zip"),
+            ("BIOS/neogeo.zip", "Roms/Arcade (FBN)/neogeo.zip")]))
+
+    def disc_folder_sync(self, layout_name, folder, card):
+        """A real-run sync of a two-disc bin/cue game, a one-disc bin/cue game and a lone .chd onto card; returns the
+        downloaded paths relative to the card and the ROM present() checks the scrape plan made."""
+        names = ["Final Fantasy VII (USA) (Disc 1).cue", "Final Fantasy VII (USA) (Disc 1).bin",
+                 "Final Fantasy VII (USA) (Disc 2).cue", "Final Fantasy VII (USA) (Disc 2).bin",
+                 "Final Fantasy VII (USA).m3u", "Tony Hawk (USA).cue", "Tony Hawk (USA).bin", "Lone (USA).chd"]
+        sizes = {"psx/" + n: 3 + i for i, n in enumerate(names)}
+        psx = {"name": "PlayStation", "bucket": "psx", "folders": {layout_name: folder}, "bios": {"files": []},
+               "games": [{"bucket": k} for k in sizes]}
+        layout = {"label": "X", "roms_dir": "Roms", "bios_dir": "Bios"}
+        if layout_name == "nextui":
+            layout["disc_folders"] = True
+        manifest = {"systems": [psx], "devices": [], "layouts": {layout_name: layout}}
+        got, present = [], []
+
+        def download(job, *a):
+            got.append(os.path.relpath(job[1], card))
+            os.makedirs(os.path.dirname(job[1]), exist_ok=True)
+            with open(job[1], "w") as f:
+                f.write("x" * job[2])
+
+        def build_scrape_plan(layout_name, systems, data, rom_rels, dest_of, es_dir, check, base, recheck=None):
+            present.append(check(os.path.join(dest_of(psx), "Final Fantasy VII (USA).m3u")))
+            return {"jobs": [], "gamelists": {}, "writes": []}
+        patches = ((store, {"load_manifest": lambda names=(): manifest}),
+                   (cli.picker, {"saved_setup": lambda *a: (None, layout_name)}),
+                   (cli.s3, {"list_sizes": lambda prefix, sizes_=True: sizes if prefix == "psx/" else {}, "download": download}),
+                   (cli.scrape_plan, {"load_scrape_data": lambda chosen: {}, "build_scrape_plan": build_scrape_plan}),
+                   (cli, {"free_space": lambda path: 10**9}), (cli.downloads, {"run_downloads": downloads.run_downloads}))
+        self.assertEqual(self.run_sync(False, patches=patches, card_dir=card), 0)
+        return sorted(got), present
+
+    def test_nextui_keeps_each_disc_game_in_its_own_folder(self):
+        with tempfile.TemporaryDirectory() as card:
+            got, present = self.disc_folder_sync("nextui", "PlayStation (PS)", card)
+            ff7 = os.path.join("Roms", "PlayStation (PS)", "Final Fantasy VII (USA)")
+            th = os.path.join("Roms", "PlayStation (PS)", "Tony Hawk (USA)")
+            self.assertEqual(got, sorted([
+                os.path.join(ff7, "Final Fantasy VII (USA).m3u"),
+                os.path.join(ff7, "Final Fantasy VII (USA) (Disc 1).cue"), os.path.join(ff7, "Final Fantasy VII (USA) (Disc 1).bin"),
+                os.path.join(ff7, "Final Fantasy VII (USA) (Disc 2).cue"), os.path.join(ff7, "Final Fantasy VII (USA) (Disc 2).bin"),
+                os.path.join(th, "Tony Hawk (USA).cue"), os.path.join(th, "Tony Hawk (USA).bin"),
+                os.path.join("Roms", "PlayStation (PS)", "Lone (USA).chd")]))
+            self.assertEqual(present[-1], True)  # the scrape plan finds the playlist in its folder
+            again, _ = self.disc_folder_sync("nextui", "PlayStation (PS)", card)
+            self.assertEqual(again, [])
+            self.assertTrue(all(os.path.exists(os.path.join(card, p)) for p in got))
+
+    def test_esde_keeps_disc_games_loose(self):
+        with tempfile.TemporaryDirectory() as card:
+            got, _ = self.disc_folder_sync("esde", "psx", card)
+            self.assertEqual(len(got), 8)
+            self.assertTrue(all(os.path.dirname(p) == os.path.join("Roms", "psx") for p in got))
+
+    def test_loose_discs_from_an_earlier_nextui_sync_move_into_the_game_folder(self):
+        with tempfile.TemporaryDirectory() as card:
+            self.disc_folder_sync("esde", "PlayStation (PS)", card)  # the same files, loose in the system folder
+            got, _ = self.disc_folder_sync("nextui", "PlayStation (PS)", card)
+            self.assertEqual(got, [])
+            ps = os.path.join(card, "Roms", "PlayStation (PS)")
+            self.assertEqual(sorted(os.listdir(ps)), ["Final Fantasy VII (USA)", "Lone (USA).chd", "Tony Hawk (USA)"])
+            self.assertEqual(len(os.listdir(os.path.join(ps, "Final Fantasy VII (USA)"))), 5)
 
     def old_rom(self, size):
         def prepare(card):
@@ -907,6 +1012,19 @@ class SyncSmokeTest(RealDataDirGuard):
         self.assertEqual(self.run_sync(False, prepare=prepare, patches=patches), 0)
         self.assertEqual(sorted(jobs), sorted([dlc, new]))
         self.assertTrue(any(q.startswith("Delete these 1") for q in asked), asked)
+
+
+class BiosFoldersTest(unittest.TestCase):
+    def test_flat_layout(self):
+        self.assertEqual(downloads.bios_folders({"folders": {"esde": "gba"}}, "esde", {}, "BIOS"), ["BIOS"])
+
+    def test_nextui_tag_and_extra_tags(self):
+        gba = {"folders": {"nextui": "Game Boy Advance (GBA)"}, "nextui_bios_tags": ["MGBA"]}
+        self.assertEqual(downloads.bios_folders(gba, "nextui", {"bios_by_tag": True}, "Bios"),
+                         [os.path.join("Bios", "GBA"), os.path.join("Bios", "MGBA")])
+
+    def test_nextui_system_without_tag(self):
+        self.assertEqual(downloads.bios_folders({"folders": {"nextui": None}}, "nextui", {"bios_by_tag": True}, "Bios"), [])
 
 
 if __name__ == "__main__":

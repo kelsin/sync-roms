@@ -52,6 +52,7 @@
     "soc": "Allwinner H700",
     "screen": "3:2",
     "firmwares": [
+      "nextui",
       "knulli"
     ]
   },
@@ -107,6 +108,7 @@
     "soc": "Allwinner H700",
     "screen": "3:2",
     "firmwares": [
+      "nextui",
       "knulli"
     ]
   },

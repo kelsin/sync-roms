@@ -89,13 +89,13 @@ KNULLI_MEDIA = (
 KNULLI_SUFFIXES = {"image", "thumb", "marquee", "fanart", "boxback", "titleshot", "bezel", "boxart",
                    "cartridge", "mix", "wheel", "map", "video", "manual", "magazine", "music"}
 GAMELIST_FILES = {"esde": "gamelist.xml", "emudeck": "gamelist.xml", "knulli": "gamelist.xml", "onion": "miyoogamelist.xml",
-                  "allium": "gamelist.xml"}
+                  "allium": "gamelist.xml", "nextui": None}  # None: no gamelist, the art is found by name in .media/
 ONION_ONLY_LISTS = ("recentlist-hidden.json", "favorite.json")  # in the root of Onion's roms folder
 ONION_LAYOUTS = ("onion", "allium")  # both keep box art in a flat Imgs/ folder
 # EmuDeck's media goes on the card; its gamelists go in ES-DE's data folder on the computer running the sync
 SCRAPE_LAYOUTS = set(GAMELIST_FILES)
 EMUDECK_MEDIA = os.path.join("Emulation", "tools", "downloaded_media")
-CART_LAYOUTS = (*frontend.ESDE_LAYOUTS, "knulli") + ONION_LAYOUTS  # a PICO-8 cart with no scraped picture is its own: these show it as its image
+CART_LAYOUTS = (*frontend.ESDE_LAYOUTS, "knulli", "nextui") + ONION_LAYOUTS  # a PICO-8 cart with no scraped picture is its own: these show it as its image
 
 
 def gamelist_fields(meta):
@@ -187,6 +187,11 @@ def plan_scrapes(layout_name, rom_rels, listing, meta, media_root, rom_dir, pres
                 key, size = found[ONION_TYPE]
                 add(key, rom_dir, f"Imgs/{base}.png", size)
                 tags["image"] = f"./Imgs/{base}.png"
+        elif layout_name == "nextui":  # no gamelist: .media/<ROM name>.png in the system folder, even for a game in a subfolder
+            tags = {}
+            if ONION_TYPE in found:
+                key, size = found[ONION_TYPE]
+                add(key, rom_dir, f".media/{base}.png", size)
         if tags:
             entries[rom] = tags
     return jobs, entries, texts
@@ -331,7 +336,11 @@ def build_scrape_plan(layout_name, systems, data, rom_rels, dest_of, es_dir, pre
                     if "image" not in entries.get(rom, {}):
                         entries.setdefault(rom, {})["image"] = f"./{rom}"
                     continue
-                if layout_name in ONION_LAYOUTS:
+                if layout_name == "nextui":
+                    if ONION_TYPE in found:
+                        continue
+                    root, rel = rom_dir, f".media/{os.path.basename(rom)}"
+                elif layout_name in ONION_LAYOUTS:
                     if "/" in rom or ONION_TYPE in found:  # Imgs is flat
                         continue
                     root, rel = rom_dir, f"Imgs/{rom}"
@@ -350,7 +359,7 @@ def build_scrape_plan(layout_name, systems, data, rom_rels, dest_of, es_dir, pre
         for path, text in texts:  # only the ones that would change
             if not os.path.exists(path) or read_text(path) != text:
                 plan["writes"].append((path, text))
-        if entries:
+        if entries and GAMELIST_FILES[layout_name]:
             gl = (os.path.join(es_dir, "gamelists", esde_name(s, layout_name)) if layout_name in frontend.ESDE_LAYOUTS
                   else rom_dir)
             plan["gamelists"][os.path.join(gl, GAMELIST_FILES[layout_name])].update(entries)
@@ -426,6 +435,10 @@ def stale_media(layout_name, systems, roms_dir, es_dir, base=None):
                     if name not in stems and not any(name.endswith("-" + x) and name[:-len(x) - 1] in stems
                                                      for x in KNULLI_SUFFIXES):
                         stale.append(full)
+        elif layout_name == "nextui":  # only the PNGs in .media/ (a hidden folder walk_files skips) that no ROM names
+            media = os.path.join(rom_dir, ".media")
+            stale += [os.path.join(media, f) for f in sorted(cardfs.listing(media))
+                      if f.lower().endswith(".png") and os.path.splitext(f)[0] not in stems] if cardfs.is_dir(media) else []
         elif layout_name in ONION_LAYOUTS:
             base = os.path.join(rom_dir, "Imgs")
             stale += [full for rel, full in walk_files(base) if os.path.splitext(os.path.basename(rel))[0] not in stems] \
