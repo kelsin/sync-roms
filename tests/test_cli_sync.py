@@ -456,7 +456,7 @@ class SyncSmokeTest(RealDataDirGuard):
                    (cli.vita, {"add_psvita_files": lambda dests, wrote=None: after() or []}),
                    (cli.ui, {"choose": lambda q, *a, **k: asked.append(q) or "y", "emit_json": emitted.append}))
         if dry_run:
-            patches += ((cli.pico8, {"run": lambda *a: after()}),)
+            patches += ((cli.pico8, {"run": lambda *a, **k: after()}),)
         self.assertEqual(self.run_sync(dry_run, prepare=self.card_rom(rel, size), patches=patches, args=args), 0)
         return got, [q for q in asked if q.startswith("Delete these")], emitted, files
 

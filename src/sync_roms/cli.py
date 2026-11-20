@@ -1037,7 +1037,7 @@ def sync_card(args):
         reload_changes()
     chosen = [s for s in systems if available(s)]
     if not chosen:
-        failed = pico8.run(card, layout_name, base, args.dry_run)
+        failed = pico8.run(card, layout_name, base, args.dry_run, syncs=False)
         failed += onion_surprise.install(card, layout_name, base, args.dry_run)
         if onion_surprise.write_list(card, layout_name, base, roms_dir, systems, args.dry_run) and clean_card:
             clean._clean_root = base
@@ -1275,7 +1275,8 @@ def sync_card(args):
         if clean_card and layout_name != "emudeck" and (plan["writes"] or plan["deletes"] or listed or art):
             clean._clean_root = base
         if plan["writes"]:
-            print(ui.green(f"💖 Wrote {len(plan['writes'])} collection(s) for {layout['label']}"))
+            count = len({os.path.dirname(p) for p, _ in plan["writes"]}) if layout_name == "muos" else len(plan["writes"])
+            print(ui.green(f"💖 Wrote {count} collection(s) for {layout['label']}"))
 
     capacity = budget.card_capacity(saved or {}) if surprise.enabled(saved or {}) else None
     if capacity:
@@ -1312,7 +1313,7 @@ def sync_card(args):
         else:
             for name in old_drivers:
                 print(f"  {ui.red('would delete')} {os.path.join(drivers_dir, name)}")
-        pico8.run(card, layout_name, base, True)
+        pico8.run(card, layout_name, base, True, syncs=any(s["bucket"] == "pico8" for s in chosen))
         onion_surprise.install(card, layout_name, base, True)
         stale_count = 0
         if scrapes:
@@ -1386,7 +1387,7 @@ def sync_card(args):
         for name in old_drivers:
             print(ui.green(f"🧹 Removed old driver {name}"))
     pico8_wrote = []
-    failed += pico8.run(card, layout_name, base, False, pico8_wrote)
+    failed += pico8.run(card, layout_name, base, False, pico8_wrote, syncs=any(s["bucket"] == "pico8" for s in chosen))
     failed += onion_surprise.install(card, layout_name, base, False)
     if theme_todo:
         failed += downloads.run_downloads(theme_todo, "Themes", "🎨", os.path.join(base, themes_dir), failures)

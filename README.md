@@ -661,7 +661,7 @@ gets no logo, so the frontend shows it as text.
   a value; that shows your other custom collections on their own too.
 - **muOS**: the art goes to the catalogue as `MUOS/info/catalogue/Collection/box/<Name>.png` and `grid/<Name>.png` (no
   logo); sync removes the ones it put there when a collection goes.
-- Art for a collection that is renamed or removed stays in the theme folders; it is unused.
+- On ES-DE and Knulli, art for a collection that is renamed or removed stays in the theme folders; it is unused.
 
 ### Full systems
 
@@ -895,7 +895,7 @@ sync are left out. `--dry-run` lists what would be written.
 `muos` cards hold ROMs in `ROMS/`, BIOS in `MUOS/bios/` and scraped art in `MUOS/info/catalogue/` (see [Scraping from ScreenScraper](#scraping-from-screenscraper-scrape)).
 
 - **Collections and Surprise**: each [collection](#collections) is a folder `MUOS/info/collection/<Name>/` holding one
-  `<ROM>-<hash>.cfg` entry per game on the card (the ROM's path on the device, its folder under `ROMS/`, its name).
+  `<ROM>-<8 hex digits>.cfg` entry per game on the card (the ROM's path on the device, its folder under `ROMS/`, its name).
   Surprise is one such collection, named `Surprise`. Only folders sync wrote are touched, and `--dry-run` lists
   what would change. Collection art goes to `MUOS/info/catalogue/Collection/box` and `grid` (see
   [Theme art](#theme-art-for-collections)).

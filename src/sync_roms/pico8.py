@@ -47,18 +47,20 @@ def _extract(key, size, folder):
                     os.chmod(target, 0o755)
 
 
-def muos_notice(layout_name):
-    """True, after saying PICO-8 isn't installed, for a muOS card."""
+def muos_notice(layout_name, syncs):
+    """True for a muOS card; says so when the card syncs PICO-8 games, which have nothing to run them."""
     if layout_name != "muos":
         return False
-    ui.warn("PICO-8 isn't installed on muOS: where an installable package must go isn't documented")
+    if syncs:
+        ui.warn("PICO-8 isn't installed on muOS: where an installable package must go isn't documented")
     return True
 
 
-def run(card, layout_name, base, dry_run, wrote=None):
+def run(card, layout_name, base, dry_run, wrote=None, syncs=True):
     """Put the newest PICO-8 zip on the card the way its layout installs it, once per zip. The failure count.
-    wrote, a list, gets the card path of what was put there."""
-    if muos_notice(layout_name) or layout_name not in TARGETS:
+    wrote, a list, gets the card path of what was put there. syncs: whether the card syncs PICO-8 carts (a muOS card is
+    told only then)."""
+    if muos_notice(layout_name, syncs) or layout_name not in TARGETS:
         return 0
     listing = inventory.files(runtime.PICO8_PREFIX)
     key = _newest(listing)

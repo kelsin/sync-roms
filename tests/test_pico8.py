@@ -82,6 +82,15 @@ class Pico8(helpers.StorageDir):
             self.assertEqual(pico8.run("c", "muos", self.card, False), 0)
         self.assertEqual(os.listdir(self.card), [])
         self.assertIn("PICO-8 isn't installed on muOS", err.getvalue())
+        self.assertEqual(err.getvalue().count("PICO-8 isn't installed on muOS"), 1)
+
+    def test_muos_card_without_pico8_games_says_nothing(self):
+        self.put(f"os/pico8/{NEW}", zip_bytes())
+        err = io.StringIO()
+        with contextlib.redirect_stderr(err):
+            self.assertEqual(pico8.run("c", "muos", self.card, False, syncs=False), 0)
+        self.assertEqual(os.listdir(self.card), [])
+        self.assertEqual(err.getvalue(), "")
 
     def test_onion_extracts_two_files(self):
         self.put(f"os/pico8/{NEW}", zip_bytes())
