@@ -245,6 +245,8 @@ class TargetTest(unittest.TestCase):
     def test_every_layout(self):
         system = SYSTEMS[0]
         for name, layout in LAYOUTS.items():
+            if "retroarch" not in layout:
+                continue
             ra = layout["retroarch"]
             needs = "{core}" in ra["saves"] or "{core}" in ra["states"]
             for kind in ("save", "state", "thumbnail"):
@@ -299,6 +301,8 @@ class PlanApplyTest(unittest.TestCase):
 class LayoutDataTest(unittest.TestCase):
     def test_every_layout_has_retroarch(self):
         for name, layout in LAYOUTS.items():
+            if name == "muos":  # saves aren't supported there yet
+                continue
             self.assertEqual(set(layout["retroarch"]) - {"create"}, {"dir", "saves", "states"}, name)
 
 
@@ -468,6 +472,13 @@ class StashCommandTest(CommandTest):
 
 
 class ApplyCommandTest(CommandTest):
+    def test_muos_card_is_not_supported_yet(self):
+        base = self.card("MU", "muos")
+        for sub in ("stash", "apply"):
+            code, _, err = self.run_cmd("saves", sub, base)
+            self.assertEqual(code, 1, sub)
+            self.assertIn("saves aren't supported for muOS yet", err)
+
     def test_broken_link_fails_before_copying(self):
         self.stash(files={"Game.srm": "save"})
         base = self.card("DECK", "emudeck")

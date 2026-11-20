@@ -225,6 +225,7 @@ def plan_apply(stash, base, layout_name, layout, system, core, retroarch_dir=Non
 # --- saves stash / saves apply ------------------------------------------------------------------------
 
 TYPE_CORE = "Type a name…"
+NO_SAVES = "saves aren't supported for muOS yet"  # the muOS layout has no RetroArch folder in it
 NO_CORE = "No core folder (sort by core off)"
 
 
@@ -292,6 +293,9 @@ def pick_stash(games, names):
 def stash_command(args):
     """`saves stash [CARD]`: copy picked RetroArch saves and states off the card into the stash folder."""
     base, card, layout_name, layout, _, catalog = _card(args, "stash")
+    if "retroarch" not in layout:
+        ui.warn(NO_SAVES)
+        return 1
     systems = catalog["systems"]
     games, skipped = scan(base, layout_name, layout, systems, args.retroarch)
     note = ui.dim(f"  skipped {_plural(skipped, 'file')} whose game isn't on the card (no ROM, or in several systems)")
@@ -375,6 +379,9 @@ def _ask_core(base, layout, system, retroarch_dir):
 def apply_command(args):
     """`saves apply [CARD]`: copy picked stashes into the card's RetroArch folders for its layout."""
     base, card, layout_name, layout, device, catalog = _card(args, "apply")
+    if "retroarch" not in layout:
+        ui.warn(NO_SAVES)
+        return 1
     by_id = {s["bucket"]: s for s in catalog["systems"]}
     stems = rom_stems(base, layout_name, layout, catalog["systems"])
     rows = []

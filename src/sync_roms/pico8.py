@@ -31,7 +31,7 @@ def newest_zip():
 
 def _path(base, layout_name, name):
     kind, template = TARGETS[layout_name]
-    return kind, os.path.join(base, *template.format(name=name).split("/"))
+    return kind, os.path.join(base, *template.format(name=name, stem=name[:-4] if name.endswith(".zip") else name).split("/"))
 
 
 def _extract(key, size, folder):
@@ -47,10 +47,18 @@ def _extract(key, size, folder):
                     os.chmod(target, 0o755)
 
 
+def muos_notice(layout_name):
+    """True, after saying PICO-8 isn't installed, for a muOS card."""
+    if layout_name != "muos":
+        return False
+    ui.warn("PICO-8 isn't installed on muOS: where an installable package must go isn't documented")
+    return True
+
+
 def run(card, layout_name, base, dry_run, wrote=None):
     """Put the newest PICO-8 zip on the card the way its layout installs it, once per zip. The failure count.
     wrote, a list, gets the card path of what was put there."""
-    if layout_name not in TARGETS:
+    if muos_notice(layout_name) or layout_name not in TARGETS:
         return 0
     listing = inventory.files(runtime.PICO8_PREFIX)
     key = _newest(listing)
