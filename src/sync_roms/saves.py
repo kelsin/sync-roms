@@ -69,8 +69,9 @@ def _base(base, layout, retroarch_dir):
     return retroarch_dir or os.path.join(base, *filter(None, layout["retroarch"]["dir"].split("/")))
 
 
-def rom_stems(base, layout_name, layout, systems):
-    """{stem: {system ids}} of every file in the card's ROM folders."""
+def rom_stems(base, layout_name, layout, systems, skip_saves=False):
+    """{stem: {system ids}} of every file in the card's ROM folders (skip_saves: not RetroArch saves, states and
+    thumbnails, which sit in the ROM folders on ROCKNIX)."""
     stems = {}
     for s in systems:
         folder = s["folders"].get(layout_name)
@@ -80,7 +81,7 @@ def rom_stems(base, layout_name, layout, systems):
         for dirpath, dirs, files in os.walk(root, followlinks=True):
             dirs[:] = [d for d in dirs if d != ".media"]  # NextUI's art
             for f in files:
-                if f.startswith("._"):
+                if f.startswith("._") or (skip_saves and classify(f)):
                     continue
                 stems.setdefault(os.path.splitext(f)[0], set()).add(s["bucket"])
     return stems
@@ -157,7 +158,8 @@ def scan(base, layout_name, layout, systems, retroarch_dir=None):
     isn't on the card."""
     root = _base(base, layout, retroarch_dir)
     ra = layout["retroarch"]
-    stems = rom_stems(base, layout_name, layout, systems)
+    beside_roms = ra["dir"] == layout["roms_dir"]  # ROCKNIX: saves live in the ROM folders, so a ROM must be there
+    stems = rom_stems(base, layout_name, layout, systems, skip_saves=beside_roms)
     folders = {s["bucket"]: s["folders"].get(layout_name) for s in systems}
     games, skipped, seen = {}, 0, set()
     for template in (ra["saves"], ra["states"]):
@@ -183,6 +185,8 @@ def scan(base, layout_name, layout, systems, retroarch_dir=None):
                     found = (stems.get(stem) or stems.get(retroarch_name(stem)[:-4], set())) & shared
                 else:
                     found = {system} if system else stems.get(stem, set())
+                    if system and beside_roms and system not in stems.get(stem, set()):
+                        found = set()
                 if len({folders[b] for b in found}) != 1:
                     skipped += 1
                     continue
@@ -495,7 +499,8 @@ def apply_command(args):
     if pickles and args.retroarch:
         ui.warn("--retroarch is ignored on muOS cards")
     by_id = {s["bucket"]: s for s in catalog["systems"]}
-    stems = rom_stems(base, layout_name, layout, catalog["systems"])
+    stems = rom_stems(base, layout_name, layout, catalog["systems"],
+                      skip_saves=layout.get("retroarch", {}).get("dir") == layout["roms_dir"])
     rows = []
     for stash in load_stashes():
         if muos_saves.is_pickles(stash) != pickles:

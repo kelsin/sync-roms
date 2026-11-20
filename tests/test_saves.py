@@ -16,7 +16,7 @@ LAYOUTS = store.repo_json("layouts")
 SYSTEMS = [{"bucket": "gba", "folders": {"onion": "GBA", "knulli": "gba", "esde": "gba", "allium": "GBA",
                                          "spruce": "GBA", "emudeck": "gba", "rocknix": "gba", "nextui": "Game Boy Advance (GBA)"}},
            {"bucket": "gb", "folders": {"onion": "GB", "knulli": "gb", "esde": "gb", "allium": "GB",
-                                        "spruce": "GB", "emudeck": "gb"}},
+                                        "spruce": "GB", "emudeck": "gb", "rocknix": "gb"}},
            {"bucket": "none", "folders": {"onion": None, "knulli": None}}]
 
 
@@ -96,6 +96,40 @@ class ScanTest(unittest.TestCase):
         e = games[("gba", "Game")]
         self.assertEqual(len(e), 3)
         self.assertTrue(all(x["core"] is None for x in e))
+
+    def test_rocknix_saves_beside_rom_and_states_in_savestates(self):
+        helpers.touch(self.p("roms", "gba", "Game.zip"), "r")
+        helpers.touch(self.p("roms/gba/Game.srm"), "s")
+        helpers.touch(self.p("roms/savestates/gba/Game.state"), "t")
+        helpers.touch(self.p("roms/savestates/gba/Game.state.png"), "p")
+        helpers.touch(self.p("roms/gba/notes.txt"), "x")
+        games, skipped = saves.scan(self.base, "rocknix", LAYOUTS["rocknix"], SYSTEMS)
+        self.assertEqual(list(games), [("gba", "Game")])
+        self.assertEqual(skipped, 0)
+        self.assertEqual(sorted(x["kind"] for x in games[("gba", "Game")]), ["save", "state", "thumbnail"])
+        self.assertEqual({x["path"] for x in games[("gba", "Game")] if x["kind"] == "save"}, {self.p("roms/gba/Game.srm")})
+
+    def test_rocknix_stem_in_two_systems_goes_by_folder(self):
+        for f in ("gba", "gb"):
+            helpers.touch(self.p("roms", f, "Game.zip"), "r")
+        helpers.touch(self.p("roms/gba/Game.srm"), "a")
+        helpers.touch(self.p("roms/savestates/gb/Game.state"), "b")
+        games, skipped = saves.scan(self.base, "rocknix", LAYOUTS["rocknix"], SYSTEMS)
+        self.assertEqual(sorted(games), [("gb", "Game"), ("gba", "Game")])
+        self.assertEqual(skipped, 0)
+
+    def test_rocknix_save_with_no_rom_skipped(self):
+        helpers.touch(self.p("roms", "gba", "Game.zip"), "r")
+        helpers.touch(self.p("roms/gba/Orphan.srm"), "s")
+        helpers.touch(self.p("roms/savestates/gba/Orphan.state"), "s")
+        games, skipped = saves.scan(self.base, "rocknix", LAYOUTS["rocknix"], SYSTEMS)
+        self.assertEqual((games, skipped), ({}, 2))
+
+    def test_rocknix_roms_folder_is_not_a_broken_link(self):
+        os.makedirs(self.p("roms/gba"))
+        self.assertEqual(saves.broken_links(self.base, LAYOUTS["rocknix"]), [])
+        helpers.touch(self.p("roms/savestates"), "file")
+        self.assertEqual(saves.broken_links(self.base, LAYOUTS["rocknix"]), [self.p("roms/savestates")])
 
     def test_orphan_thumbnail_kept(self):
         helpers.touch(self.p("roms", "gba", "Game.zip"), "r")
@@ -368,7 +402,7 @@ class LayoutDataTest(unittest.TestCase):
 CATALOG_SYSTEMS = [
     {"name": "Game Boy Advance", "bucket": "gba",
      "folders": {"onion": "GBA", "knulli": "gba", "esde": "gba", "allium": "GBA", "emudeck": "gba",
-                 "nextui": "Game Boy Advance (GBA)"}},
+                 "rocknix": "gba", "nextui": "Game Boy Advance (GBA)"}},
     {"name": "PlayStation", "bucket": "psx", "folders": {"nextui": "PlayStation (PS)"}},
     {"name": "Neo Geo Pocket", "bucket": "ngp", "folders": {"onion": "NGP", "knulli": "ngp"}},
     {"name": "Neo Geo Pocket Color", "bucket": "ngpc", "folders": {"onion": "NGP", "knulli": "ngpc"}},
@@ -781,6 +815,26 @@ class ApplyCommandTest(CommandTest):
         self.assertEqual(self.read_file(base, "saves/gba/Game.state.auto"), "state")
         self.assertIn("Applied 2 file(s) of 1 game(s) to NEW", out)
         self.assertIn("gpSP", out.split("Applied", 1)[1])
+
+    def test_rocknix_stash_and_apply_round_trip(self):
+        src = self.card("RX", "rocknix")
+        helpers.touch(os.path.join(src, "roms/gba/Game.zip"), "r")
+        helpers.touch(os.path.join(src, "roms/gba/Game.srm"), "save")
+        helpers.touch(os.path.join(src, "roms/savestates/gba/Game.state"), "state")
+        helpers.touch(os.path.join(src, "roms/gba/Orphan.srm"), "x")
+        all_on = lambda labels: [True] * len(labels)  # noqa: E731
+        self.lists(all_on, all_on)
+        code, out, err = self.run_cmd("saves", "stash", src)
+        self.assertEqual(code, 0, err)
+        self.assertIn("Stashed 2 file(s) of 1 game(s)", out)
+        self.assertIn("skipped 1 file", out)
+        new = self.card("RX2", "rocknix")
+        self.lists([True])
+        code, out, err = self.run_cmd("saves", "apply", new)
+        self.assertEqual(code, 0, err)
+        self.assertEqual(self.read_file(new, "roms/gba/Game.srm"), "save")
+        self.assertEqual(self.read_file(new, "roms/savestates/gba/Game.state"), "state")
+        self.assertFalse(os.path.exists(os.path.join(new, "roms/gba/Game.zip")))
 
     def test_onto_esde_reuses_core(self):
         self.stash()
