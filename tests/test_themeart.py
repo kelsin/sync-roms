@@ -98,6 +98,16 @@ class Usable(unittest.TestCase):
 
 
 class Settings(unittest.TestCase):
+    def test_nextui_has_no_theme_art(self):
+        out = io.StringIO()
+        with tempfile.TemporaryDirectory() as base, mock.patch.object(themeart, "install_knulli") as k, \
+                contextlib.redirect_stdout(out):
+            self.assertFalse(themeart.install("nextui", base, {"Favs": "surprise"}))
+            themeart.describe("nextui", base, {"Favs": "surprise"})
+            k.assert_not_called()
+            self.assertEqual(os.listdir(base), [])
+        self.assertEqual(out.getvalue(), "")
+
     def test_get_and_set_a_string(self):
         text = '<?xml version="1.0"?>\n<string name="Theme" value="a&amp;b" />\n'
         self.assertEqual(frontend.get_string(text, "Theme"), "a&b")

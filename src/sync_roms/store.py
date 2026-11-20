@@ -783,6 +783,12 @@ def guess_system(systems, folder):
     return None
 
 
+def folder_tag(folder):
+    """The uppercase tag in a folder's trailing "(...)" ("Game Boy Advance (GBA)" -> "GBA"), else None."""
+    m = re.search(r"\(([A-Z0-9]+)\)$", folder or "")
+    return m.group(1) if m else None
+
+
 def system_applies(system, device, layout_name):
     """Whether a system is synced for a device (None for Full) and layout: the device runs it and the layout has a folder for it."""
     return bool(system["folders"].get(layout_name)) and (device is None or system["bucket"] in device["systems"])

@@ -250,12 +250,12 @@ def _current(entry, chosen_systems):
                    if isinstance(x, dict) and x.get("system") in names and isinstance(x.get("bucket"), str)]
 
 
-def run_surprise(card_name, setup, chosen_systems, interactive, dry_run, to_fetch=None):
+def run_surprise(card_name, setup, chosen_systems, interactive, dry_run, to_fetch=None, card_match=None):
     """The sync step that comes first: ask which of a card's surprises to replace (all of them when not interactive),
     keep the others and save them (the empty slots are filled later, by fill_surprises, after the card editor), then
     open the card editor when interactive (with Surprise off too). Systems in excluded_systems() are left out, and
     their current surprises dropped. A dry run changes nothing. Returns the surprises kept (on a dry run, the saved
-    ones). to_fetch: passed to the card editor for its download preview."""
+    ones). to_fetch, card_match: passed to the card editor."""
     cards = store.load_cards()
     entry = cards.get(card_name)
     entry = entry if isinstance(entry, dict) else {}
@@ -265,7 +265,7 @@ def run_surprise(card_name, setup, chosen_systems, interactive, dry_run, to_fetc
             store.write_cards(cards)
         if interactive and not dry_run:
             from . import cardedit  # cardedit imports much of the package
-            cardedit.edit_card(card_name, setup, to_fetch)
+            cardedit.edit_card(card_name, setup, to_fetch, card_match)
         return []
     names, current = _current(entry, chosen_systems)
     if dry_run:
@@ -287,7 +287,7 @@ def run_surprise(card_name, setup, chosen_systems, interactive, dry_run, to_fetc
             store.update_card(card_name, surprises=kept)
         if interactive:
             from . import cardedit  # cardedit imports much of the package
-            cardedit.edit_card(card_name, setup, to_fetch)
+            cardedit.edit_card(card_name, setup, to_fetch, card_match)
     return kept
 
 

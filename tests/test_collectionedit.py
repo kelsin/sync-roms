@@ -10,6 +10,7 @@ from sync_roms import cli, collectionedit, commands, collections, edit, inventor
 
 SYSTEMS = [{"name": "Game Boy Advance", "bucket": "gba"}, {"name": "PlayStation", "bucket": "psx"}]
 DISCS = {"psx/FF7.m3u", "psx/FF7 (Disc 1).chd", "psx/FF7 (Disc 2).chd", "psx/Crash.chd"}
+ALL = "🌐 All systems"
 RUBY = {"title": "Ruby", "system": "gba", "bucket": "gba/Ruby.zip"}
 
 
@@ -48,14 +49,14 @@ class Stocked(unittest.TestCase):
         cache = {"gba/": {"Ruby.zip": 1}, "psx/": {}, "gb/": {"Tetris.zip": 1}}
         for module in (collectionedit, setedit):
             # psx is cached as empty, saturn has no folder; gb has a folder and games
-            self.assertEqual(self.offered(module, lambda: {"gba", "psx", "gb"}, cache), ["Game Boy", "Game Boy Advance"])
+            self.assertEqual(self.offered(module, lambda: {"gba", "psx", "gb"}, cache), [ALL, "Game Boy", "Game Boy Advance"])
 
     def test_add_games_shows_each_systems_file_count_from_the_cache(self):
         cache = {"gba/": {"gba/Ruby.zip": 1, "gba/Emerald.zip": 2, "gba/hacks/": 0}, "gb/": {"gb/Tetris.zip": 1}}
         for module in (collectionedit, setedit):
             extras = []
-            self.assertEqual(self.offered(module, lambda: {"gba", "gb"}, cache, extras), ["Game Boy", "Game Boy Advance"])
-            self.assertEqual(extras, [[("  1 file", "dim")], [("  2 files", "dim")]], module.__name__)
+            self.assertEqual(self.offered(module, lambda: {"gba", "gb"}, cache, extras), [ALL, "Game Boy", "Game Boy Advance"])
+            self.assertEqual(extras, [[], [("  1 file", "dim")], [("  2 files", "dim")]], module.__name__)
 
     def test_renaming_a_set_changes_the_next_menu_title(self):
         titles, picks = [], iter([5, None])  # Rename, then back
@@ -73,7 +74,7 @@ class Stocked(unittest.TestCase):
         extras = []
         with mock.patch.object(inventory, "files", side_effect=AssertionError("listed a folder")):
             self.offered(setedit, lambda: {"gba", "psx", "gb", "saturn"}, {}, extras)
-        self.assertEqual(extras, [[], [], [], []])  # every system listed (no cache to tell), none counted
+        self.assertEqual(extras, [[], [], [], [], []])  # every system listed (no cache to tell), none counted
 
     def test_add_games_lists_systems_by_company_then_name_like_the_card_editor(self):
         systems = [{"name": "Game Boy Advance", "bucket": "gba", "company": "Nintendo"},
@@ -83,12 +84,12 @@ class Stocked(unittest.TestCase):
         for module in (collectionedit, setedit):
             with mock.patch.object(self, "SYSTEMS", systems):
                 self.assertEqual(self.offered(module, lambda: {"gba", "psx", "md", "gb"}, {}),
-                                 ["Game Boy", "Game Boy Advance", "Mega Drive", "PlayStation"], module.__name__)
+                                 [ALL, "Game Boy", "Game Boy Advance", "Mega Drive", "PlayStation"], module.__name__)
 
     def test_add_games_goes_by_the_cache_when_storage_cannot_be_reached(self):
         def down():
             raise OSError("down")
-        self.assertEqual(self.offered(collectionedit, down, {"psx/": {}}), ["Game Boy", "Game Boy Advance", "Saturn"])
+        self.assertEqual(self.offered(collectionedit, down, {"psx/": {}}), [ALL, "Game Boy", "Game Boy Advance", "Saturn"])
 
 
 class Discs(unittest.TestCase):
@@ -102,7 +103,7 @@ class Discs(unittest.TestCase):
 
     def test_adding_a_multi_disc_game_from_a_system_stores_its_discs(self):
         collection = {"name": "Favs", "games": []}
-        picks = iter([1, 1, None])  # add from a system, PlayStation, back
+        picks = iter([1, 2, None])  # add from a system, PlayStation (after All systems), back
         rows = []
 
         def toggle(title, shown_rows, **k):  # switch on the FF7 row
@@ -119,7 +120,7 @@ class Discs(unittest.TestCase):
 
     def test_adding_a_multi_disc_game_to_a_set_stores_its_discs(self):
         game_set = {"name": "Favs", "games": []}
-        picks = iter([1, 1, None])  # add from a system, PlayStation, back
+        picks = iter([1, 2, None])  # add from a system, PlayStation (after All systems), back
         rows = []
 
         def toggle(title, shown_rows, **k):  # switch on the FF7 row
@@ -162,7 +163,7 @@ class Discs(unittest.TestCase):
     def test_the_add_games_list_keeps_its_place_when_a_key_lists_the_same_games(self):
         from sync_roms import surprise
         collection = {"name": "Favs", "games": []}
-        picks = iter([1, 0, None])  # add from a system, Game Boy Advance, back
+        picks = iter([1, 1, None])  # add from a system, Game Boy Advance (after All systems), back
         place = {"row": 1, "query": "z", "view_mode": 2, "top": 0}
         seen = []
 
@@ -182,7 +183,7 @@ class Discs(unittest.TestCase):
     def test_p_narrows_the_add_games_list_to_past_surprises(self):
         from sync_roms import surprise
         collection = {"name": "Favs", "games": []}
-        picks = iter([1, 0, None])  # add from a system, Game Boy Advance, back
+        picks = iter([1, 1, None])  # add from a system, Game Boy Advance (after All systems), back
         lists = []
 
         def fake(title, labels, **kw):
@@ -206,7 +207,7 @@ class Discs(unittest.TestCase):
     def test_s_and_m_narrow_the_add_games_list_to_a_set_and_to_metadata(self):
         from sync_roms import cardedit
         collection = {"name": "Favs", "games": []}
-        picks = iter([1, 0, None])
+        picks = iter([1, 1, None])
         lists = []
 
         def fake(title, labels, **kw):
@@ -245,7 +246,7 @@ class AddFromSystem(unittest.TestCase):
     """listedit.add_from_system, shared by the set and collection editors."""
 
     def add(self, listing, toggle_games=None, ask=None, **kw):
-        picks = iter([1])  # PlayStation
+        picks = iter([2])  # PlayStation, after All systems
         shown = listedit.view(listing, SYSTEMS)
         with mock.patch.object(listedit, "stocked", lambda systems: systems), \
                 mock.patch.object(listedit, "file_counts", lambda systems: [[] for _ in systems]), \
@@ -259,6 +260,45 @@ class AddFromSystem(unittest.TestCase):
     def switch_on(rows, i):
         s, key, title, _ = rows[i]
         s["games"].append({"bucket": key, "title": title})
+
+    def add_all(self, listing, toggle_games, ask=None, rows_of=None, **kw):
+        shown = listedit.view(listing, SYSTEMS)
+        labels = []
+
+        def pick(title, options, **k):
+            labels.extend(options)
+            return 0  # All systems
+        keys = {"gba": {"gba/Ruby.zip"}, "psx": DISCS}
+        with mock.patch.object(listedit, "stocked", lambda systems: systems), \
+                mock.patch.object(listedit, "file_counts", lambda systems: [[] for _ in systems]), \
+                mock.patch.object(picker, "filter_list", pick), mock.patch.object(store, "load_sets", return_value=[]), \
+                mock.patch.object(edit, "toggle_games", toggle_games), \
+                mock.patch.object(ui, "ask", side_effect=ask or [""]) as asked, mock.patch("builtins.print"):
+            listedit.add_from_system(listing, SYSTEMS, shown, lambda bucket: keys.get(bucket, set()), "📦 Favs", **kw)
+        return labels, asked
+
+    @staticmethod
+    def switch_on_ruby_and_ff7(title, rows, **k):
+        for r in rows:
+            if r[1] in ("gba/Ruby.zip", "psx/FF7.m3u"):
+                r[0]["games"].append({"bucket": r[1], "title": r[2]})
+
+    def test_all_systems_is_the_first_option_then_the_stocked_systems(self):
+        labels, _ = self.add_all({"name": "Favs", "games": []}, lambda *a, **k: None, ask=AssertionError, categories=False)
+        self.assertEqual(labels, [ALL, "Game Boy Advance", "PlayStation"])
+
+    def test_all_systems_adds_games_of_several_systems_with_discs_and_no_category_prompt(self):
+        listing = {"name": "Favs", "games": []}
+        _, asked = self.add_all(listing, self.switch_on_ruby_and_ff7, categories=False)
+        asked.assert_not_called()
+        self.assertEqual(listing["games"], [RUBY, {"title": "FF7", "system": "psx", "bucket": "psx/FF7.m3u",
+                                                  "files": ["psx/FF7 (Disc 1).chd", "psx/FF7 (Disc 2).chd"]}])
+
+    def test_all_systems_asks_the_category_once(self):
+        listing = {"name": "Favs", "games": []}
+        _, asked = self.add_all(listing, self.switch_on_ruby_and_ff7, ask=["Cave"])
+        asked.assert_called_once()
+        self.assertEqual([g["category"] for g in listing["games"]], ["Cave", "Cave"])
 
     def test_new_games_get_the_category_asked_for(self):
         listing = {"name": "Favs", "games": [{"title": "Ruby", "category": "Cave", "system": "gba", "bucket": "gba/Ruby.zip"}]}
@@ -477,7 +517,7 @@ class Editor(DataDir):
 
     def test_ctrl_c_keeps_the_add_games_lists_toggles(self):
         # PlayStation: switch Crash on and press c, then switch FF7 on and Ctrl-C
-        confirms, ask = self.interrupted([RUBY], [0, 1, 1], [({"Crash.chd"}, "c"), ({"FF7.m3u"}, KeyboardInterrupt)])
+        confirms, ask = self.interrupted([RUBY], [0, 1, 2], [({"Crash.chd"}, "c"), ({"FF7.m3u"}, KeyboardInterrupt)])
         ask.assert_not_called()
         self.assertEqual(len(confirms), 1)
         self.assertEqual(self.read("collections/favs.json")["games"], [
@@ -495,7 +535,7 @@ class Editor(DataDir):
             {"title": "FF7", "system": "psx", "bucket": "psx/FF7.m3u", "files": ["psx/FF7 (Disc 1).chd"]}])
 
     def test_ctrl_c_in_a_list_with_nothing_toggled_asks_nothing(self):
-        for picks in ([0, 0], [0, 1, 1], [0, 2, 0]):
+        for picks in ([0, 0], [0, 1, 2], [0, 2, 0]):
             with self.subTest(picks=picks):
                 game_set = {"id": "mix", "name": "Mix", "games": [dict(RUBY)]}
                 confirms, _ = self.interrupted([RUBY], picks, [(set(), KeyboardInterrupt)], sets=[game_set])
@@ -508,20 +548,20 @@ class Editor(DataDir):
         for key, picker_name in (("s", "pick_set"), ("m", "pick_meta")):
             with self.subTest(key=key), mock.patch.object(collectionedit.cardedit, picker_name, side_effect=KeyboardInterrupt):
                 # PlayStation: Crash on, c; FF7 on, then the key whose picker gets Ctrl-C
-                confirms, ask = self.interrupted([RUBY], [0, 1, 1], [({"Crash.chd"}, "c"), ({"FF7.m3u"}, key)])
+                confirms, ask = self.interrupted([RUBY], [0, 1, 2], [({"Crash.chd"}, "c"), ({"FF7.m3u"}, key)])
                 ask.assert_not_called()
                 self.assertEqual(len(confirms), 1)
                 self.assertEqual(self.read("collections/favs.json")["games"], [RUBY, crash, ff7])
             with self.subTest(key=key, toggled=False), \
                     mock.patch.object(collectionedit.cardedit, picker_name, side_effect=KeyboardInterrupt):
-                confirms, _ = self.interrupted([RUBY], [0, 1, 1], [(set(), key)])
+                confirms, _ = self.interrupted([RUBY], [0, 1, 2], [(set(), key)])
                 self.assertEqual(confirms, [])
                 self.assertEqual(self.read("collections/favs.json")["games"], [RUBY])
 
     def test_adding_games_asks_no_category(self):
         game_set = {"id": "mix", "name": "Mix", "games": [
             dict(RUBY), {"title": "FF7", "system": "psx", "bucket": "psx/FF7.m3u", "files": ["psx/FF7 (Disc 1).chd"]}]}
-        for picks, flip, ff7 in (([0, 1, 1], {"FF7.m3u"}, ["psx/FF7 (Disc 1).chd", "psx/FF7 (Disc 2).chd"]),
+        for picks, flip, ff7 in (([0, 1, 2], {"FF7.m3u"}, ["psx/FF7 (Disc 1).chd", "psx/FF7 (Disc 2).chd"]),
                                  ([0, 2, 0], {"PlayStation — FF7"}, ["psx/FF7 (Disc 1).chd"])):
             with self.subTest(picks=picks):  # FF7 on, Enter, then Ctrl-C at the add menu
                 confirms, ask = self.interrupted([RUBY], picks + [KeyboardInterrupt], [(flip, None)], sets=[game_set])
@@ -562,6 +602,62 @@ class ArtPicker(unittest.TestCase):
         self.assertEqual(self.pick({"name": "Favs", "art": first}, None)["art"], first)  # Esc keeps it
         self.assertEqual(collectionedit.art_label(first), themeart.art_choices()[first])
         self.assertEqual(collectionedit.art_label(None), "none")
+
+
+class AllRows(unittest.TestCase):
+    def rows(self, gba=frozenset({"gba/Ruby.zip"})):
+        shown = listedit.view({"games": []}, SYSTEMS)
+        keys = {"gba": set(gba), "psx": DISCS}
+        return shown, listedit.all_rows(shown, SYSTEMS, lambda bucket: keys[bucket])
+
+    def test_all_rows_span_systems_with_system_prefixed_labels(self):
+        shown, rows = self.rows()
+        labels = [r[3] for r in rows]
+        self.assertEqual(labels, ["PlayStation — Crash.chd", "PlayStation — FF7.m3u", "Game Boy Advance — Ruby.zip"])
+        self.assertFalse(any("FF7 (Disc 1).chd" in label for label in labels))
+        self.assertEqual([r[0] for r in rows], [shown["psx"], shown["psx"], shown["gba"]])
+
+    def test_all_rows_skip_a_system_with_no_files(self):
+        _, rows = self.rows(gba=frozenset())
+        self.assertFalse([r for r in rows if r[1].startswith("gba/")])
+
+    def test_pick_row_set_lists_only_sets_with_a_game_among_the_rows(self):
+        mine = {"name": "Mine", "games": [{"title": "Ruby", "system": "gba", "bucket": "gba/Ruby.zip"}]}
+        other = {"name": "Other", "games": [{"title": "X", "system": "gba", "bucket": "gba/X.zip"}]}
+        seen = []
+
+        def fake(title, labels, **k):
+            seen.extend(labels)
+            return 0
+
+        with mock.patch.object(picker, "filter_list", fake):
+            chosen = listedit.pick_row_set([other, mine], {"gba/Ruby.zip"})
+        self.assertIs(chosen, mine)
+        self.assertEqual(len(seen), 1)
+
+    def test_toggle_all_narrows_to_a_set_and_clears_it(self):
+        from sync_roms import cardedit
+        _, rows = self.rows()
+        mine = {"name": "Mine", "games": [{"title": "Ruby", "system": "gba", "bucket": "gba/Ruby.zip"}]}
+        script = iter([cardedit.SET_KEY, cardedit.CLEAR_KEY, None])
+        seen = []
+
+        def fake(title, shown, **k):
+            seen.append([r[1] for r in shown])
+            return next(script)
+
+        place = {"session": {"query": "x"}}
+        with mock.patch.object(edit, "toggle_games", fake), mock.patch.object(listedit, "pick_row_set", return_value=mine):
+            listedit.toggle_all("All", rows, [mine], place=place)
+        every = [r[1] for r in rows]
+        self.assertEqual(seen, [every, ["gba/Ruby.zip"], every])
+        self.assertNotIn("query", place["session"])
+
+    def test_toggle_all_turns_select_all_off(self):
+        _, rows = self.rows()
+        with mock.patch.object(edit, "toggle_games", return_value=None) as fake:
+            listedit.toggle_all("All", rows, [])
+        self.assertIs(fake.call_args.kwargs["select_all"], False)
 
 
 if __name__ == "__main__":

@@ -53,6 +53,7 @@
     "soc": "Allwinner H700",
     "screen": "3:2",
     "firmwares": [
+      "nextui",
       "knulli",
       "muos"
     ]
@@ -112,6 +113,7 @@
     "soc": "Allwinner H700",
     "screen": "3:2",
     "firmwares": [
+      "nextui",
       "knulli",
       "muos"
     ]
@@ -565,7 +567,8 @@
     "soc": "Rockchip RK3566",
     "screen": "4:3",
     "firmwares": [
-      "knulli"
+      "knulli",
+      "spruce"
     ]
   },
   {
@@ -575,7 +578,8 @@
     "screen": "4:3",
     "firmwares": [
       "onion",
-      "allium"
+      "allium",
+      "spruce"
     ],
     "network": false
   },
@@ -586,7 +590,8 @@
     "screen": "4:3",
     "firmwares": [
       "onion",
-      "allium"
+      "allium",
+      "spruce"
     ]
   },
   {
@@ -596,7 +601,8 @@
     "screen": "4:3",
     "firmwares": [
       "onion",
-      "allium"
+      "allium",
+      "spruce"
     ]
   },
   {

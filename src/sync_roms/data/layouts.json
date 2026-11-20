@@ -47,6 +47,17 @@
     },
     "note": "Miyoo Mini family (SigmaStar SSD202D) running Allium, which uses the Onion card layout and matches systems by file extension first, so the folders are the same as Onion's. Allium reads a gamelist.xml (path, name, image, rating, releasedate, developer, publisher, genre) in each ROM folder and finds box art in Imgs/. Sources: https://github.com/goweiwen/Allium/wiki/2.-Add-your-Games!, https://github.com/goweiwen/Allium"
   },
+  "spruce": {
+    "label": "Spruce",
+    "roms_dir": "Roms",
+    "bios_dir": "BIOS",
+    "retroarch": {
+      "dir": "Saves",
+      "saves": "saves",
+      "states": "states"
+    },
+    "note": "Miyoo Mini family (SigmaStar SSD202D) and Miyoo Flip (RK3566) running spruceOS. Card root is the FAT32 SD card. System folders are the upper-case spruce names (SFC for the SNES, MD for the Genesis, FC for the NES, PS for the PlayStation), and ROMs go straight into them. Spruce reads a miyoogamelist.xml (name, image) in each ROM folder and box art from its Imgs/ folder. BIOS files go in the root BIOS/ folder, keeping the libretro subfolders (dc/, nds/, neocd/, ...). Systems with spruce = null have no spruce folder. Sources: https://github.com/spruceUI/spruceOS/wiki/11.-Adding-Games, https://github.com/spruceUI/spruceOS/wiki/10.-Adding-BIOS"
+  },
   "muos": {
     "label": "muOS",
     "roms_dir": "ROMS",
@@ -66,5 +77,19 @@
       "states": "states"
     },
     "note": "EmuDeck on the Steam Deck and Steam Machine (SteamOS). Card root holds Emulation/; emulators install to the internal SSD. System folders use the ES-DE names, except Wii U, Xbox 360 and Model 2, which keep their ROMs in a roms/ subfolder. BIOS files go in Emulation/bios, with subfolders only where an emulator expects one. Source: https://emudeck.github.io/cheat-sheet/"
+  },
+  "nextui": {
+    "label": "NextUI",
+    "roms_dir": "Roms",
+    "bios_dir": "Bios",
+    "bios_by_tag": true,
+    "save_naming": "minui",
+    "disc_folders": true,
+    "retroarch": {
+      "dir": "",
+      "saves": "Saves/{tag}",
+      "states": ".userdata/shared/{tag}-{core}"
+    },
+    "note": "MinUI-style card (Anbernic RG SP and similar) running NextUI. Card root is the SD card. System folders are named \"<Name> (TAG)\": the tag in parentheses picks the emulator, and BIOS files go in Bios/<tag>/. Systems beyond the base install need NextUI's Extras zip. Systems with nextui = null have no NextUI tag. Source: https://nextui.loveretro.games/getting-started/roms/"
   }
 }

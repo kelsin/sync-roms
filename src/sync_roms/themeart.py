@@ -400,7 +400,9 @@ def describe_knulli(base, arts):
 
 def install(layout_name, base, arts):
     """Give the custom collections in arts ({name: art id}) their art in the frontend's theme. Returns whether files
-    changed."""
+    changed. NextUI has no theme to put it in."""
+    if layout_name == "nextui":
+        return False
     arts = usable(layout_name, arts)
     if layout_name == "muos":
         return muos_collections.install_art(base, arts)
@@ -408,6 +410,8 @@ def install(layout_name, base, arts):
 
 
 def describe(layout_name, base, arts):
+    if layout_name == "nextui":
+        return
     arts = usable(layout_name, arts)
     if layout_name == "muos":
         return muos_collections.describe_art(base, arts)

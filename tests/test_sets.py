@@ -384,6 +384,7 @@ class SetsTest(unittest.TestCase):
             edit.toggle_games("t", rows)
         self.assertEqual(fl.call_args.kwargs["initial"], [True, True, False, False])
         self.assertEqual(fl.call_args.kwargs["locked"], [True, False, False, False])
+        self.assertIs(fl.call_args.kwargs["select_all"], True)  # on unless the caller turns it off
         self.assertEqual(by["ful"]["games"], [])
         self.assertEqual([g["bucket"] for g in by["gba"]["games"]], ["gba/Gone.zip"])
         self.assertEqual([g["bucket"] for g in by["gen"]["games"]], ["gen/Zed.zip"])

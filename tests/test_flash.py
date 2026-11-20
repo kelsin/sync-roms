@@ -7,6 +7,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+import zipfile
 from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -15,15 +16,30 @@ import helpers  # noqa: E402
 from test_scripting import Isolated  # noqa: E402
 from sync_roms import flash, inventory, picker, store, ui, usersettings  # noqa: E402
 
-KEYS = ["os/knulli-h700-rg35xx-h-scarab-20260511.img.gz", "os/knulli-h700-rg34xx-sp-scarab-20260511.img.gz",
-        "os/knulli-h700-rg35xx-h-gladiator-20250101.img.gz", "os/knulli-rk3568-miyoo-flip-scarab-20260510.img.gz"]
+KEYS = ["os/knulli/knulli-h700-rg35xx-h-scarab-20260511.img.gz", "os/knulli/knulli-h700-rg34xx-sp-scarab-20260511.img.gz",
+        "os/knulli/knulli-h700-rg35xx-h-gladiator-20250101.img.gz", "os/knulli/knulli-rk3568-miyoo-flip-scarab-20260510.img.gz"]
 
 
 class Flash(unittest.TestCase):
-    def test_images_keeps_only_knulli_gz(self):
+    def test_images_keeps_only_knulli_gz_and_baseos_zip(self):
         listing = {k: 1 for k in KEYS} | {"os/Onion-v4.3.1-1.zip": 1, "os/esde/knulli-x-y-z-20260101.img.gz": 1,
-                                          "os/Zero40_32G.img.xz": 1}
-        self.assertEqual(sorted(flash.images(listing)), sorted(KEYS))
+                                          "os/knulli-h700-old-scarab-20260101.img.gz": 1,
+                                          "os/baseos/baseos-rg28xx-1.4.0.bosupd": 1,
+                                          "os/baseos/baseos-rg28xx-1.4.0.img.zip": 1, "os/Zero40_32G.img.xz": 1}
+        self.assertEqual(sorted(flash.images(listing)), sorted(KEYS + ["os/baseos/baseos-rg28xx-1.4.0.img.zip"]))
+
+    def test_baseos_matches_and_sorts_newest_version_first(self):
+        keys = ["os/baseos/baseos-rg35xxsp-1.4.0.img.zip", "os/baseos/baseos-rg35xxsp-1.10.0.img.zip",
+                "os/baseos/baseos-rgsp-1.4.0.img.zip", KEYS[0]]
+        got = flash.sort_images(keys, "anbernic-rg35xx-sp")
+        self.assertEqual(got[:2], [(keys[1], True), (keys[0], True)])
+        self.assertEqual(flash.sort_images(keys, "anbernic-rg-sp")[0], (keys[2], True))
+
+    def test_flashable_devices_adds_baseos_matches(self):
+        devs = [{"id": "anbernic-rg-sp", "firmwares": ["nextui"]}, {"id": "b", "firmwares": ["knulli"]},
+                {"id": "anbernic-rg28xx", "firmwares": ["esde"]}]
+        self.assertEqual([d["id"] for d in flash.flashable_devices(devs, ["os/baseos/baseos-rgsp-1.4.0.img.zip"])],
+                         ["anbernic-rg-sp", "b"])
 
     def test_sort_puts_matches_first_newest_first(self):
         got = flash.sort_images(KEYS, "anbernic-rg35xxh")
@@ -38,11 +54,6 @@ class Flash(unittest.TestCase):
 
     def test_no_match_still_lists_all(self):
         self.assertEqual(len(flash.sort_images(KEYS, "anbernic-rg28xx")), 4)
-
-    def test_knulli_devices(self):
-        devs = [{"id": "a", "firmwares": ["esde"]}, {"id": "b", "firmwares": ["knulli"]},
-                {"id": "c", "firmwares": ["onion", "knulli"]}]
-        self.assertEqual([d["id"] for d in flash.knulli_devices(devs)], ["b", "c"])
 
     def test_parse_disks_skips_excluded_and_reads_info(self):
         infos = {"disk4": {"TotalSize": 64_000_000_000, "MediaName": "SD Card Reader"},
@@ -73,7 +84,7 @@ class Flash(unittest.TestCase):
         self.assertEqual(flash.whole_disks({}), set())
 
 
-class WriteVerify(unittest.TestCase):
+class Write(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)
@@ -86,38 +97,28 @@ class WriteVerify(unittest.TestCase):
             patcher.start()
             self.addCleanup(patcher.stop)
 
-    def test_write_then_verify_round_trip(self):
-        size, digest, blocks = flash.write_image(self.gz, "disk9")
+    def test_write_copies_image(self):
+        size = flash.write_image(self.gz, "disk9")
         self.assertEqual(size, len(self.data))
-        self.assertEqual(digest, hashlib.sha256(self.data).hexdigest())
-        self.assertIsNone(flash.verify("disk9", size, digest, blocks))
+        with open(self.target, "rb") as f:
+            self.assertEqual(f.read(), self.data)
 
-    def test_verify_ignores_bytes_past_image(self):
-        size, digest, blocks = flash.write_image(self.gz, "disk9")
-        with open(self.target, "ab") as f:
-            f.write(b"x" * 1000)
-        self.assertIsNone(flash.verify("disk9", size, digest, blocks))
+    def test_write_copies_zipped_image(self):
+        path = os.path.join(self.tmp.name, "img.img.zip")
+        with zipfile.ZipFile(path, "w") as z:
+            z.writestr("baseos-x.img", self.data)
+        seen = []
+        self.assertEqual(flash.write_image(path, "disk9", seen.append), len(self.data))
+        self.assertAlmostEqual(seen[-1], 1.0)
+        with open(self.target, "rb") as f:
+            self.assertEqual(f.read(), self.data)
 
-    def test_verify_detects_corruption(self):
-        size, digest, blocks = flash.write_image(self.gz, "disk9")
-        pos = 3 * 1024 * 1024
-        with open(self.target, "r+b") as f:
-            f.seek(pos)
-            byte = f.read(1)[0]
-            f.seek(pos)
-            f.write(bytes([byte ^ 0xFF]))
-        self.assertEqual(flash.verify("disk9", size, digest, blocks), "data differs from 0 B in")
-
-    def test_verify_short_read_is_false(self):
-        size, digest, blocks = flash.write_image(self.gz, "disk9")
-        os.truncate(self.target, size - 10)
-        self.assertIn("read back only", flash.verify("disk9", size, digest, blocks))
-
-    def test_verify_dd_failure_raises(self):
-        size, digest, blocks = flash.write_image(self.gz, "disk9")
-        with mock.patch.object(flash, "raw", lambda d: "/nonexistent-dir/x"):
-            with self.assertRaises(flash.FlashError):
-                flash.verify("disk9", size, digest, blocks)
+    def test_zip_without_one_img_raises(self):
+        path = os.path.join(self.tmp.name, "bad.img.zip")
+        with zipfile.ZipFile(path, "w") as z:
+            z.writestr("readme.txt", "x")
+        with self.assertRaises(flash.FlashError):
+            flash.write_image(path, "disk9")
 
     def test_dd_failure_raises(self):
         with mock.patch.object(flash, "raw", lambda d: "/nonexistent-dir/x"):
@@ -143,16 +144,16 @@ class WriteVerify(unittest.TestCase):
         self.assertAlmostEqual(seen[-1], 1.0)
 
 
-IMAGE = "os/knulli-h700-rg35xx-h-scarab-20260511.img.gz"
+IMAGE = "os/knulli/knulli-h700-rg35xx-h-scarab-20260511.img.gz"
 CARD = flash.Disk("disk4", 64_000_000_000, "SD")
 SUDO = ["sudo", "-v"]
 
 
 class FlashMuos(unittest.TestCase):
-    MUOS = ["os/muos-pixie-2601.0-rg35xx.img.gz", "os/muos-banana-20260101.img.gz"]
+    MUOS = ["os/muos/muos-pixie-2601.0-rg35xx.img.gz", "os/muos/muos-banana-20260101.img.gz"]
 
     def test_images_lists_muos_images(self):
-        listing = {k: 1 for k in KEYS + self.MUOS} | {"os/muos-x.zip": 1, "os/sub/muos-x.img.gz": 1}
+        listing = {k: 1 for k in KEYS + self.MUOS} | {"os/muos/muos-x.zip": 1, "os/muos-x.img.gz": 1, "os/sub/muos-x.img.gz": 1}
         self.assertEqual(sorted(flash.images(listing, "muos")), sorted(self.MUOS))
 
     def test_images_knulli_default_is_unchanged(self):
@@ -197,15 +198,10 @@ class Run(helpers.StorageDir):
 
         def write(gz, disk, progress=None):
             self.calls.append("<write>")
-            return 3, "abc", ["abc"]
-
-        def check(disk, size, digest, blocks, progress=None):
-            self.calls.append("<verify>")
-            return None
+            return 3
 
         self.filter_list = mock.Mock(return_value=0)
         self.write_image = mock.Mock(side_effect=write)
-        self.verify = mock.Mock(side_effect=check)
         self.external_disks = mock.Mock(return_value=[CARD])
         for p in (mock.patch.object(flash, "_run", side_effect=run),
                   mock.patch.object(picker, "filter_list", self.filter_list),
@@ -215,7 +211,6 @@ class Run(helpers.StorageDir):
                   mock.patch.object(flash.sys, "platform", "darwin"),
                   mock.patch.object(usersettings, "ensure_bucket"),
                   mock.patch.object(flash, "write_image", self.write_image),
-                  mock.patch.object(flash, "verify", self.verify),
                   mock.patch.object(flash.tempfile, "mkdtemp", mkdtemp),
                   mock.patch.object(store, "repo_json", return_value=[
                       {"id": "anbernic-rg35xxh", "name": "Anbernic RG35XX H", "firmwares": ["knulli"]}])):
@@ -260,10 +255,9 @@ class Run(helpers.StorageDir):
     def test_success_order(self):
         self.assertEqual(self.flash(), 0)
         self.assertEqual(self.steps(), [SUDO, SUDO, ["diskutil", "unmountDisk", "disk4"], "<write>", ["sync"],
-                                        ["diskutil", "unmountDisk", "disk4"], SUDO, "<verify>", ["sync"],
                                         ["diskutil", "eject", "disk4"]])
         self.assert_temp_removed()
-        self.assertIn("Flashed and verified", self.out)
+        self.assertIn("Flashed", self.out)
         self.assertTrue(self.write_image.call_args.args[0].endswith(os.path.basename(IMAGE)))
 
     def test_image_labels_mark_match(self):
@@ -288,13 +282,6 @@ class Run(helpers.StorageDir):
         self.assertEqual(self.flash(), 0)
         self.assert_temp_removed()
         self.assertEqual(self.steps(), [])
-
-    def test_verify_mismatch_fails_and_unmounts(self):
-        self.verify.side_effect = lambda *a, **k: self.calls.append("<verify>") or "data differs"
-        self.assertEqual(self.flash(), 1)
-        self.assertEqual(self.steps()[-1], ["diskutil", "unmountDisk", "disk4"])
-        self.assertNotIn(["diskutil", "eject", "disk4"], self.calls)
-        self.assertIn("doesn't match the image", self.out)
 
     def test_write_error_cleans_up(self):
         self.write_image.side_effect = flash.FlashError("dd: boom")
@@ -414,19 +401,19 @@ class Run(helpers.StorageDir):
     def test_no_images(self):
         os.remove(os.path.join(self.root, IMAGE))
         self.assertEqual(self.flash(), 1)
-        self.assertIn("no Knulli or muOS images", self.out)
+        self.assertIn("no Knulli, BaseOS or muOS images", self.out)
 
     def test_both_firmwares_ask_which(self):
-        self.put("os/muos-banana-20260101.img.gz", gzip.compress(b"img"))
+        self.put("os/muos/muos-banana-20260101.img.gz", gzip.compress(b"img"))
         inventory.reset()
         self.filter_list.side_effect = [1, 0, 0, 0]
         with mock.patch.object(store, "repo_json", return_value=[
                 {"id": "k", "name": "K", "firmwares": ["knulli"]}, {"id": "m", "name": "M", "firmwares": ["muos"]}]):
             self.assertEqual(self.flash(), 0)
         calls = self.filter_list.call_args_list
-        self.assertEqual(calls[0].args[1], ["Knulli", "muOS"])
+        self.assertEqual(calls[0].args[1], ["Knulli or BaseOS", "muOS"])
         self.assertEqual(calls[1].args[1], ["M"])
-        self.assertEqual(calls[2].args[1], ["muos-banana-20260101.img.gz"])
+        self.assertEqual(calls[2].args[1], ["muos/muos-banana-20260101.img.gz"])
         self.assertNotIn("✓", str(calls[2].kwargs["extras"]))
 
     def test_one_firmware_skips_question(self):
@@ -435,7 +422,7 @@ class Run(helpers.StorageDir):
 
     def test_only_muos_images(self):
         os.remove(os.path.join(self.root, IMAGE))
-        self.put("os/muos-banana-20260101.img.gz", gzip.compress(b"img"))
+        self.put("os/muos/muos-banana-20260101.img.gz", gzip.compress(b"img"))
         inventory.reset()
         with mock.patch.object(store, "repo_json", return_value=[
                 {"id": "m", "name": "M", "firmwares": ["muos"]}]):

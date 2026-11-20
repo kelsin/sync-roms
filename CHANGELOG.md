@@ -1,5 +1,21 @@
 # Changelog
 
+## [3.15.0](https://github.com/kelsin/sync-roms/compare/v3.14.0...v3.15.0) (2026-11-20)
+
+
+### :video_game: Features
+
+* **cardedit:** add k to keep card files during sync ([#409](https://github.com/kelsin/sync-roms/issues/409)) ([be1e8fa](https://github.com/kelsin/sync-roms/commit/be1e8fac5fe273320ce25d48f3a97f84190c72c8))
+* **edit:** add an all-games view across systems ([#408](https://github.com/kelsin/sync-roms/issues/408)) ([9c029f8](https://github.com/kelsin/sync-roms/commit/9c029f89c9120128e1b01b3c9c90439395d537cf))
+* **flash:** flash BaseOS images and read Knulli images from os/knulli ([#412](https://github.com/kelsin/sync-roms/issues/412)) ([adaf44f](https://github.com/kelsin/sync-roms/commit/adaf44f7f678ba79d71bc37979d5c5a982cfe6cb))
+* **layouts:** add Spruce OS layout and enable it on supported Miyoo devices ([#411](https://github.com/kelsin/sync-roms/issues/411)) ([013c78b](https://github.com/kelsin/sync-roms/commit/013c78b35cf5dc90f9b209d624855ce39bba306b))
+* **nextui:** add NextUI layout ([#410](https://github.com/kelsin/sync-roms/issues/410)) ([755a537](https://github.com/kelsin/sync-roms/commit/755a5376a0079ccee9ba4dc88f3e3bd0fae6b097))
+
+
+### :hammer_and_wrench: Code Refactoring
+
+* **flash:** drop the read-back verification ([#406](https://github.com/kelsin/sync-roms/issues/406)) ([3b88177](https://github.com/kelsin/sync-roms/commit/3b881773a2d6ab196d175c97c5e4b356a81239ce))
+
 ## [3.14.0](https://github.com/kelsin/sync-roms/compare/v3.13.0...v3.14.0) (2026-11-19)
 
 

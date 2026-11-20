@@ -143,6 +143,9 @@ def game_label(game, names):
            f" — {game.get('title') or game['bucket']}"
 
 
+ALL_SYSTEMS = "🌐 All systems"
+
+
 def add_from_system(listing, systems, shown, keys_of, label, categories=True, toggle=None):
     """Pick one of systems with files in storage and toggle its games in listing (via shown, a view of it).
     label is listing's name as shown, with its emoji.
@@ -151,29 +154,43 @@ def add_from_system(listing, systems, shown, keys_of, label, categories=True, to
     New games get the category asked for when categories is true (none after Ctrl-C, which keeps the toggles made and
     is then raised again), and the discs of a multi-disc game whose playlist is in storage."""
     options = stocked(systems)
-    j = picker.filter_list("✏️  Add games from which system?", [s["name"] for s in options], extras=file_counts(options),
-                           preview=lambda k: previews.system(options[k]) if k < len(options) else None)
+    j = picker.filter_list("✏️  Add games from which system?", [ALL_SYSTEMS] + [s["name"] for s in options],
+                           extras=[[]] + file_counts(options),
+                           preview=lambda k: previews.system(options[k - 1]) if 0 < k <= len(options) else None)
     if j is None:
         return
-    s = shown[options[j]["bucket"]]
-    rows = system_rows(s, keys_of(s["bucket"]))
-    had = {g["bucket"] for g in s["games"]}
-    title = f"✏️  {s['name']} — ✅ in {label}, ⬜ in storage only"
+    everywhere = j == 0
+    if everywhere:
+        picked = options
+        rows = all_rows(shown, options, keys_of)
+        if not rows:
+            edit.note(ui.yellow("ℹ️  No games in storage."))
+            return
+        title = f"✏️  All systems — ✅ in {label}, ⬜ in storage only"
+    else:
+        s = shown[options[j - 1]["bucket"]]
+        picked = [options[j - 1]]
+        rows = system_rows(s, keys_of(s["bucket"]))
+        title = f"✏️  {s['name']} — ✅ in {label}, ⬜ in storage only"
+    had = {g["bucket"] for p in picked for g in shown[p["bucket"]]["games"]}
     interrupted = False
     try:
-        if toggle:
+        if everywhere:
+            toggle_all(title, rows, store.load_sets())
+        elif toggle:
             toggle(s, title, rows)
         else:
             edit.toggle_games(title, rows)
     except KeyboardInterrupt:  # Ctrl-C in the list or a picker it opens: the toggles made are kept, with no category
         interrupted = True
-    added = {g["bucket"] for g in s["games"]} - had
+    added = {g["bucket"] for p in picked for g in shown[p["bucket"]]["games"]} - had
     try:
         category = ask_category(listing["games"], f"{len(added)} new game(s)") if categories and added and not interrupted else ""
     except KeyboardInterrupt:  # Ctrl-C at the question: no category
         category, interrupted = "", True
     listing["games"] = reconcile(listing["games"], shown, category)
-    fold_discs(listing["games"], keys_of(s["bucket"]))
+    for p in picked:
+        fold_discs(listing["games"], keys_of(p["bucket"]))
     if interrupted:
         raise KeyboardInterrupt
 
@@ -313,3 +330,50 @@ def edit_menu(noun, before, working, state, emoji, art, delete_note, new_item, o
             state["review"] = False
             continue
         return None if state["review"] else 0
+
+
+# --- All systems at once -----------------------------------------------------------------------------
+
+def all_rows(shown, systems, keys_of):
+    """Rows for edit.toggle_games over every system's files, by title then system. Each row's entry is the system's
+    view in shown, so toggles write into it; labels start with the system's name."""
+    rows = []
+    for system in systems:
+        s = shown[system["bucket"]]
+        rows += [(s, key, title, f"{system['name']} — {label}")
+                 for _, key, title, label in system_rows(s, keys_of(system["bucket"]))]
+    names = {s["bucket"]: s["name"].lower() for s in systems}
+    return sorted(rows, key=lambda r: (r[2].lower(), names[r[0]["bucket"]]))
+
+
+def pick_row_set(sets, row_keys, current=None):
+    """A set with a game among row_keys, picked from a list; None when none is picked or no set has one."""
+    shown = [(x, n) for x in sets for n in [sum(g["bucket"] in row_keys for g in store.set_games(x))] if n]
+    if not shown:
+        edit.note(ui.yellow("ℹ️  No set has games among these."))
+        return None
+    i = picker.filter_list("Narrow to a set", [f"{themeart.set_emoji(x)} {x['name']}  ({n} games)" for x, n in shown],
+                           cursor=next((j for j, (x, _) in enumerate(shown) if x["name"] == current), 0))
+    return None if i is None else shown[i][0]
+
+
+def toggle_all(title, rows, sets, place=None):
+    """edit.toggle_games over rows from all_rows, with s narrowing to a set and c clearing that and the / filter."""
+    from . import cardedit  # cardedit imports this module
+    chosen = None
+    place = {} if place is None else place
+    key_help = [(cardedit.SET_KEY, "narrow to a set"), (cardedit.CLEAR_KEY, "clear filters")]
+    while True:
+        keep = {g["bucket"] for g in store.set_games(chosen)} if chosen else None
+        pressed = edit.toggle_games(
+            title, [r for r in rows if keep is None or r[1] in keep],
+            hotkeys=(cardedit.SET_KEY, cardedit.CLEAR_KEY),
+            hint="Space toggle · Enter done · s set · c clear filters", key_help=key_help, place=place, select_all=False,
+            filters=f"{themeart.set_emoji(chosen)} {chosen['name']} only (c clear filters)" if chosen else "")
+        if pressed == cardedit.CLEAR_KEY:
+            chosen = None
+            place.get("session", {}).pop("query", None)
+        elif pressed == cardedit.SET_KEY:
+            chosen = pick_row_set(sets, {r[1] for r in rows}, chosen and chosen["name"]) or chosen
+        else:
+            return

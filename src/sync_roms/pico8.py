@@ -11,8 +11,14 @@ TARGETS = {
     "knulli": ("zip", "roms/pico8/{name}"),
     "onion": ("extract", "RApp/PICO-8/bin"),
     "allium": ("extract", "Apps/pico.pak/bin"),
+    "spruce": ("extract", "BIOS"),
 }
 EXTRACT = ("pico-8/pico8_dyn", "pico-8/pico8.dat")
+EXTRACT_MORE = {"spruce": ("pico-8/pico8_64",)}  # spruce also wants the 64-bit binary, for its Miyoo Flip
+
+
+def _members(layout_name):
+    return EXTRACT + EXTRACT_MORE.get(layout_name, ())
 
 
 def _natural(name):
@@ -34,16 +40,16 @@ def _path(base, layout_name, name):
     return kind, os.path.join(base, *template.format(name=name).split("/"))
 
 
-def _extract(key, size, folder):
+def _extract(key, size, folder, layout_name):
     with tempfile.TemporaryDirectory() as tmp:
         path = os.path.join(tmp, "pico8.zip")
         s3.download((key, path, size))
         os.makedirs(folder, exist_ok=True)
         with zipfile.ZipFile(path) as z:
-            for member in EXTRACT:
+            for member in _members(layout_name):
                 target = os.path.join(folder, os.path.basename(member))
                 store.replace_file(target, z.read(member))
-                if member.endswith("pico8_dyn"):
+                if member.endswith(("pico8_dyn", "pico8_64")):
                     os.chmod(target, 0o755)
 
 
@@ -72,7 +78,7 @@ def run(card, layout_name, base, dry_run, wrote=None, syncs=True):
     old = entry.get("pico8") if isinstance(entry, dict) else None
     old = old if isinstance(old, str) else None
     if kind == "extract":
-        missing = any(not os.path.isfile(os.path.join(target, os.path.basename(m))) for m in EXTRACT)
+        missing = any(not os.path.isfile(os.path.join(target, os.path.basename(m))) for m in _members(layout_name))
     else:
         missing = False
     if old == name and not missing:
@@ -87,7 +93,7 @@ def run(card, layout_name, base, dry_run, wrote=None, syncs=True):
         if kind == "zip":
             s3.download((key, target, listing[key]))
         else:
-            _extract(key, listing[key], target)
+            _extract(key, listing[key], target, layout_name)
     except (OSError, zipfile.BadZipFile, KeyError, *s3.ERRORS) as e:
         ui.warn(f"Couldn't put PICO-8 {name} on the card: {e}")
         return 1

@@ -1,3 +1,5 @@
+import contextlib
+import io
 import os
 import shutil
 import sys
@@ -252,6 +254,67 @@ class Wanted(unittest.TestCase):
         self.assertEqual(frontend.wanted_collections("esde", [favs, empty], [gba], on_card), {"Favs": ["%ROMPATH%/gba/Sub/A.zip"]})
         self.assertEqual(frontend.wanted_collections("esde", [favs], [gba, psx], on_card),
                          {"Favs": ["%ROMPATH%/gba/Sub/A.zip", "%ROMPATH%/psx/FF7.m3u"]})
+
+
+class NextUI(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.base = self.tmp.name
+
+    def test_path_and_line(self):
+        self.assertEqual(frontend.collection_path("nextui", self.base, "Favs"),
+                         os.path.join(self.base, "Collections", "Favs.txt"))
+        self.assertEqual(frontend.collection_line("nextui", "Game Boy Advance (GBA)", "Sub/A.zip"),
+                         "/Roms/Game Boy Advance (GBA)/Sub/A.zip")
+        self.assertIn("nextui", frontend.FRONTEND_LAYOUTS)
+
+    def test_wanted_drops_games_without_a_folder_or_card_copy_and_empty_collections(self):
+        gba = {"bucket": "gba", "folders": {"nextui": "Game Boy Advance (GBA)"}}
+        none = {"bucket": "ngp", "folders": {"nextui": None}}
+        favs = {"name": "Favs", "games": [
+            {"title": "A", "system": "gba", "bucket": "gba/A.zip"},
+            {"title": "G", "system": "gba", "bucket": "gba/Gone.zip"},
+            {"title": "N", "system": "ngp", "bucket": "ngp/N.zip"}]}
+        only_none = {"name": "None", "games": [{"title": "N", "system": "ngp", "bucket": "ngp/N.zip"}]}
+        got = frontend.wanted_collections("nextui", [favs, only_none], [gba, none], lambda s, rel: rel != "Gone.zip")
+        self.assertEqual(got, {"Favs": ["/Roms/Game Boy Advance (GBA)/A.zip"]})
+
+    def test_wanted_lists_a_folder_game_by_its_path_in_the_folder(self):
+        psx = {"bucket": "psx", "folders": {"nextui": "PlayStation (PS)", "esde": "psx"}}
+        favs = {"name": "Favs", "games": [{"title": "FF7", "system": "psx", "bucket": "psx/FF7 (USA).m3u"}]}
+        folders = {"psx/FF7 (USA).m3u": "FF7 (USA)"}
+        seen = []
+        got = frontend.wanted_collections("nextui", [favs], [psx], lambda s, rel: seen.append(rel) or True, folders)
+        self.assertEqual(got, {"Favs": ["/Roms/PlayStation (PS)/FF7 (USA)/FF7 (USA).m3u"]})
+        self.assertEqual(seen, ["FF7 (USA)/FF7 (USA).m3u"])
+        self.assertEqual(frontend.wanted_collections("esde", [favs], [psx], lambda s, rel: True),
+                         {"Favs": ["%ROMPATH%/psx/FF7 (USA).m3u"]})
+
+    def test_plan_deletes_only_owned_and_apply_touches_no_settings(self):
+        mine = frontend.collection_path("nextui", self.base, "Old")
+        theirs = frontend.collection_path("nextui", self.base, "Theirs")
+        os.makedirs(os.path.dirname(mine))
+        for path in (mine, theirs):
+            with open(path, "w") as f:
+                f.write("/Roms/x/y.zip\n")
+        plan = frontend.plan_collections("nextui", self.base, {"New": ["/Roms/g/a.zip"]}, ["Old"])
+        self.assertEqual(plan["deletes"], [mine])
+        self.assertFalse(frontend.apply_collections(plan, "nextui", self.base))
+        self.assertFalse(os.path.exists(mine))
+        self.assertTrue(os.path.exists(theirs))
+        with open(frontend.collection_path("nextui", self.base, "New")) as f:
+            self.assertEqual(f.read(), "/Roms/g/a.zip\n")
+        self.assertEqual(sorted(os.listdir(self.base)), ["Collections"])
+
+    def test_describe_prints_no_settings_lines(self):
+        plan = frontend.plan_collections("nextui", self.base, {"New": ["/Roms/g/a.zip"]}, [])
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            frontend.describe_collections(plan, "nextui")
+        self.assertIn("would write New.txt", out.getvalue())
+        self.assertNotIn("enable", out.getvalue())
+        self.assertFalse(os.path.exists(os.path.join(self.base, "Collections")))
 
 
 if __name__ == "__main__":

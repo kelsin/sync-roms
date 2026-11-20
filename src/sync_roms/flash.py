@@ -1,8 +1,7 @@
-"""Knulli and muOS images in storage's os/ folder, and which of them fit a device."""
+"""Knulli, BaseOS and muOS images in storage's os/ folder, and which of them fit a device."""
 import collections
+import contextlib
 import gzip
-import hashlib
-import math
 import os
 import plistlib
 import re
@@ -11,6 +10,7 @@ import subprocess
 import sys
 import tempfile
 import threading
+import zipfile
 import zlib
 from xml.parsers.expat import ExpatError
 
@@ -19,9 +19,11 @@ from botocore.exceptions import BotoCoreError, ClientError
 from . import inventory, picker, runtime, s3, store, ui, usersettings
 
 PREFIX = "os/"
+KNULLI = PREFIX + "knulli/"
+BASEOS = PREFIX + "baseos/"
+MUOS = PREFIX + "muos/"
 DD = ["sudo", "dd"]
 WRITE_BLOCK = 4 * 1024 * 1024
-READ_BLOCK = 16 * 1024 * 1024
 SPARE = 64 * 1024 * 1024  # free space kept in the temp folder beyond the download
 
 
@@ -34,7 +36,8 @@ def raw(disk):
     return f"/dev/r{disk}"
 
 
-FIRMWARES = {"knulli": "Knulli", "muos": "muOS"}
+# the kinds of image, asked for when storage has more than one: Knulli and BaseOS images are picked by device
+FIRMWARES = {"knulli": "Knulli or BaseOS", "muos": "muOS"}
 
 
 def devices_for(devices, firmware):
@@ -42,24 +45,20 @@ def devices_for(devices, firmware):
     return [d for d in devices if firmware in d.get("firmwares", [])]
 
 
-def knulli_devices(devices):
-    """The devices that run Knulli, in input order."""
-    return devices_for(devices, "knulli")
-
-
 def images(listing, firmware="knulli"):
-    """The keys of the <firmware>-*.img.gz images directly in os/."""
-    return [k for k in listing if re.fullmatch(re.escape(PREFIX) + re.escape(firmware) + r"-[^/]*\.img\.gz", k)]
-
-
-def _date(key):
-    found = re.findall(r"(?<!\d)\d{8}(?!\d)", key)
-    return found[-1] if found else ""
+    """The keys of the Knulli images (os/knulli/knulli-*.img.gz) and BaseOS images (os/baseos/baseos-*.img.zip), or
+    with firmware "muos" the muOS images (os/muos/muos-*.img.gz)."""
+    if firmware == "muos":
+        return [k for k in listing if re.fullmatch(re.escape(MUOS) + r"muos-[^/]*\.img\.gz", k)]
+    return [k for k in listing if re.fullmatch(re.escape(KNULLI) + r"knulli-[^/]*\.img\.gz", k)
+            or re.fullmatch(re.escape(BASEOS) + r"baseos-[^/]*\.img\.zip", k)]
 
 
 def _model(key):
-    """The device part of an image name, dashes removed: between the chip and -<codename>-<date>."""
-    m = re.fullmatch(r"os/knulli-[^-]+-(.+)-[^-]+-\d{8}\.img\.gz", key)
+    """The device part of an image name, dashes removed: Knulli's between the chip and -<codename>-<date>, BaseOS's
+    before -<version>."""
+    m = (re.fullmatch(re.escape(KNULLI) + r"knulli-[^-]+-(.+)-[^-]+-\d{8}\.img\.gz", key)
+         or re.fullmatch(re.escape(BASEOS) + r"baseos-(.+)-\d+(?:\.\d+)*\.img\.zip", key))
     return m.group(1).replace("-", "") if m else ""
 
 
@@ -70,14 +69,25 @@ def _matches(key, device_id):
     return model in (device_id.split("-", 1)[-1].replace("-", ""), device_id.replace("-", ""))
 
 
+def flashable_devices(devices, keys):
+    """The devices that run Knulli or have a matching BaseOS image, in input order."""
+    base = [k for k in keys if k.startswith(BASEOS)]
+    return [d for d in devices if "knulli" in d.get("firmwares", []) or any(_matches(k, d["id"]) for k in base)]
+
+
+def _newest(key):
+    """Sort key putting the newest image first: Knulli's (or muOS's) date, BaseOS's version."""
+    found = re.findall(r"(?<!\d)\d{8}(?!\d)", key)
+    if found and not key.startswith(BASEOS):
+        return (-int(found[-1]),)
+    m = re.search(r"-(\d+(?:\.\d+)*)\.img\.zip$", key)
+    return tuple(-int(n) for n in m.group(1).split(".")) if m else (0,)
+
+
 def sort_images(keys, device_id):
-    """(key, matches) pairs: matches first, newest date first within each group, then by name."""
+    """(key, matches) pairs: matches first, newest first within each group, then by name."""
     pairs = [(k, _matches(k, device_id)) for k in keys]
-    return sorted(pairs, key=lambda p: (not p[1], _neg(_date(p[0])), p[0]))
-
-
-def _neg(date):
-    return -int(date) if date else 0
+    return sorted(pairs, key=lambda p: (not p[1], _newest(p[0]), p[0]))
 
 
 Disk = collections.namedtuple("Disk", "id size name volumes", defaults=((),))
@@ -173,17 +183,37 @@ def _finish(proc):
     return err
 
 
-def write_image(gz_path, disk, progress=None):
-    """Stream a .img.gz to the disk through dd. Returns (bytes written, sha256 hexdigest, sha256 of each WRITE_BLOCK)."""
+@contextlib.contextmanager
+def _source(path):
+    """(stream, fraction): the decompressed image of a .img.gz or .img.zip, and how far through it the reading is."""
+    with open(path, "rb") as raw_file:
+        if path.endswith(".zip"):
+            with zipfile.ZipFile(raw_file) as z:
+                members = [i for i in z.infolist() if i.filename.endswith(".img")]
+                if len(members) != 1:
+                    raise FlashError("the zip must hold exactly one .img file")
+                total, size = members[0].file_size, [0]
+                with z.open(members[0]) as src:
+                    class Counted:
+                        def read(self, n):
+                            chunk = src.read(n)
+                            size[0] += len(chunk)
+                            return chunk
+                    yield Counted(), lambda: size[0] / total if total else 1.0
+        else:
+            total = os.path.getsize(path)
+            with gzip.open(raw_file) as src:
+                yield src, lambda: raw_file.tell() / total if total else 1.0
+
+
+def write_image(path, disk, progress=None):
+    """Stream a .img.gz or .img.zip to the disk through dd. Returns the bytes written."""
     proc = None
     try:
         proc = subprocess.Popen(DD + [f"of={raw(disk)}", f"bs={WRITE_BLOCK}", "iflag=fullblock"],
                                 stdin=subprocess.PIPE, stderr=subprocess.PIPE)
-        total = os.path.getsize(gz_path)
-        digest = hashlib.sha256()
-        blocks = []
         size = 0
-        with open(gz_path, "rb") as raw_file, gzip.open(raw_file) as src:
+        with _source(path) as (src, fraction):
             while True:
                 chunk = src.read(WRITE_BLOCK)
                 if not chunk:
@@ -192,18 +222,16 @@ def write_image(gz_path, disk, progress=None):
                     proc.stdin.write(chunk)
                 except BrokenPipeError:
                     raise FlashError(_finish(proc) or "dd stopped")
-                digest.update(chunk)
-                blocks.append(hashlib.sha256(chunk).hexdigest())
                 size += len(chunk)
                 if progress:
-                    progress(min(raw_file.tell() / total, 1.0) if total else 1.0)
+                    progress(min(fraction(), 1.0))
         err = _finish(proc)
         if proc.returncode != 0:
             raise FlashError(err or f"dd exited with {proc.returncode}")
         if progress:
             progress(1.0)
-        return size, digest.hexdigest(), blocks
-    except (gzip.BadGzipFile, EOFError, zlib.error) as e:
+        return size
+    except (gzip.BadGzipFile, zipfile.BadZipFile, EOFError, zlib.error) as e:
         _stop(proc)
         raise FlashError(f"the image file is damaged: {e}") from e
     except OSError as e:
@@ -211,48 +239,6 @@ def write_image(gz_path, disk, progress=None):
             _stop(proc)
         if isinstance(e, BrokenPipeError):
             raise
-        raise FlashError(str(e)) from e
-    except BaseException:
-        if proc:
-            _stop(proc)
-        raise
-
-
-def verify(disk, size, digest, blocks, progress=None):
-    """Read size bytes back from the disk. None when their sha256 equals digest, else why not: a short read or the
-    offset of the first WRITE_BLOCK (per blocks) that differs."""
-    count = math.ceil(size / READ_BLOCK)
-    proc = None
-    try:
-        proc = subprocess.Popen(DD + [f"if={raw(disk)}", f"bs={READ_BLOCK}", f"count={count}"],
-                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        h = hashlib.sha256()
-        got = 0
-        bad = None
-        while got < size:
-            chunk = proc.stdout.read(min(WRITE_BLOCK, size - got))
-            if not chunk:
-                break
-            h.update(chunk)
-            if bad is None and hashlib.sha256(chunk).hexdigest() != blocks[got // WRITE_BLOCK]:
-                bad = got
-            got += len(chunk)
-            if progress:
-                progress(got / size)
-        proc.stdout.close()
-        if got < size:  # stdout hit EOF, so dd is done: its stderr can be read without blocking
-            err = proc.stderr.read().decode(errors="replace").strip()
-            if proc.wait() != 0:
-                raise FlashError(err or f"dd exited with {proc.returncode}")
-        _stop(proc)
-        if got < size:
-            return f"read back only {ui.human_size(got)} of {ui.human_size(size)}"
-        if h.hexdigest() != digest:
-            return f"data differs from {ui.human_size(bad)} in" if bad is not None else "data differs"
-        return None
-    except OSError as e:
-        if proc:
-            _stop(proc)
         raise FlashError(str(e)) from e
     except BaseException:
         if proc:
@@ -273,7 +259,7 @@ def _sudo():
     return True
 
 
-LABEL_WIDTH = 17  # "verifying disk10": every bar starts in the same column
+LABEL_WIDTH = 17  # "writing disk10": every bar starts in the same column
 
 
 def _progress(emoji, label):
@@ -302,7 +288,8 @@ def _same(a, b):
 
 
 def run(args):
-    """Pick a firmware (when storage has both), device, image and SD card, write the image to the card and read it back. 0 on success, dry-run or
+    """Pick a firmware (when storage has images of more than one), device, image and SD card, write the image to the
+    card. 0 on success, dry-run or
     Esc; 1 on any failure."""
     if sys.platform != "darwin":
         ui.failure(ui.red("❌ flash needs macOS"))
@@ -311,7 +298,7 @@ def run(args):
     listing = inventory.files(PREFIX)
     available = [f for f in FIRMWARES if images(listing, f)]
     if not available:
-        ui.failure(ui.red("❌ no Knulli or muOS images in storage's os/"))
+        ui.failure(ui.red("❌ no Knulli, BaseOS or muOS images in storage's os/"))
         return 1
     if len(available) > 1:
         i = picker.filter_list("🧩 Which firmware?", [FIRMWARES[f] for f in available],
@@ -321,13 +308,15 @@ def run(args):
         firmware = available[i]
     else:
         firmware = available[0]
-    devices = devices_for(store.repo_json("devices"), firmware)
+    keys = images(listing, firmware)
+    devices = store.repo_json("devices")
+    devices = devices_for(devices, "muos") if firmware == "muos" else flashable_devices(devices, keys)
     i = picker.filter_list("🎯 Which device?", [d["name"] for d in devices],
                            hint="/ filter · j/k move · Enter continue · Esc quit")
     if i is None:
         return 0
     device = devices[i]
-    found = sort_images(images(listing, firmware), device["id"])
+    found = sort_images(keys, device["id"])
     i = picker.filter_list(f"💾 Which image for {device['name']}?", [k[len(PREFIX):] for k, _ in found],
                            extras=[[(f"  {ui.human_size(listing[k])}", "dim"), ("  ✓ matches" if m else "", "green")]
                                    for k, m in found],
@@ -337,7 +326,7 @@ def run(args):
     key = found[i][0]
     gz_size = listing[key]
     tmp = tempfile.mkdtemp(prefix="sync-roms-flash-")
-    disk, touched, verified, ejected = None, False, False, False
+    disk, touched, written_ok, ejected = None, False, False, False
     try:
         exclude = set()
         for path in ("/", tmp):  # both sit on a local disk, so finding none means diskutil failed
@@ -399,35 +388,20 @@ def run(args):
             return 1
         draw, done = _progress("✍️", f"writing {disk.id}")
         try:
-            written, digest, blocks = write_image(gz_path, disk.id, draw)
+            write_image(gz_path, disk.id, draw)
         except FlashError as e:
             done()
             ui.failure(ui.red(f"❌ flash failed: {e}"))
             return 1
         done()
-        _run(["sync"])
-        _run(["diskutil", "unmountDisk", disk.id])
-        if not _sudo():
-            return 1
-        draw, done = _progress("🔍", f"verifying {disk.id}")
-        try:
-            problem = verify(disk.id, written, digest, blocks, draw)
-        except FlashError as e:
-            done()
-            ui.failure(ui.red(f"❌ verify failed: {e}"))
-            return 1
-        done()
-        if problem:
-            ui.failure(ui.red(f"❌ flash failed: the card doesn't match the image ({problem}): try again or use another card"))
-            return 1
-        verified = True
+        written_ok = True
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
         if touched:
             _run(["sync"])
-            ejected = _run(["diskutil", "eject" if verified else "unmountDisk", disk.id]).returncode == 0 and verified
+            ejected = _run(["diskutil", "eject" if written_ok else "unmountDisk", disk.id]).returncode == 0 and written_ok
     if not ejected:
-        ui.warn(f"Flashed and verified, but {disk.id} didn't eject: eject it before removing the card")
+        ui.warn(f"Flashed, but {disk.id} didn't eject: eject it before removing the card")
         return 0
-    print(ui.green("✅ Flashed and verified — safe to remove the card"))
+    print(ui.green("✅ Flashed — safe to remove the card"))
     return 0
