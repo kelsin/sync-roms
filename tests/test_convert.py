@@ -303,6 +303,15 @@ class FixesTest(ConvertTest):
         self.assertEqual(convert.plan_media(self.base, SYSTEMS, "knulli", K, "nextui", N),
                          [self.p("roms", "gba", n) for n in ("gamelist.xml", "images", "manuals", "videos")])
 
+    def test_rocknix_media_folders_are_the_same_as_knulli(self):
+        self.assertEqual(convert._media_names("rocknix"), convert._media_names("knulli"))
+        for f in ("gamelist.xml", "images/a.png", "videos/a.mp4", "manuals/a.pdf"):
+            touch(self.p("roms", "gba", f))
+        systems = [{**SYSTEMS[0], "folders": {**SYSTEMS[0]["folders"], "rocknix": "gba"}}]
+        self.assertEqual(convert.plan_media(self.base, systems, "rocknix", K, "nextui", N),
+                         [self.p("roms", "gba", n) for n in ("gamelist.xml", "images", "manuals", "videos")])
+        self.assertEqual(convert.plan_media(self.base, systems, "knulli", K, "rocknix", K), [])
+
     def test_media_the_new_layout_also_uses_stays(self):
         for f in ("miyoogamelist.xml", "Imgs/a.png"):
             touch(self.p("Roms", "GBA", f))

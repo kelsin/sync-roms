@@ -73,7 +73,7 @@ def walk_files(root, skip_top=()):
 
 # --- Installing scraped data ------------------------------------------------------------------------
 # A sync places storage's scrapes/ data for the chosen systems on the card, converted for the layout:
-# esde keeps ES-DE's media folders and gamelists, knulli gets images/videos/manuals and a gamelist.xml
+# esde keeps ES-DE's media folders and gamelists, knulli and rocknix get images/videos/manuals and a gamelist.xml
 # with explicit media tags, onion gets the box art made for it at upload time in Imgs/ and a miyoogamelist.xml.
 # Knulli: (gamelist tag, folder, file suffix, ES-DE media types to take it from; first one found wins)
 KNULLI_MEDIA = (
@@ -88,7 +88,7 @@ KNULLI_MEDIA = (
 )
 KNULLI_SUFFIXES = {"image", "thumb", "marquee", "fanart", "boxback", "titleshot", "bezel", "boxart",
                    "cartridge", "mix", "wheel", "map", "video", "manual", "magazine", "music"}
-GAMELIST_FILES = {"esde": "gamelist.xml", "emudeck": "gamelist.xml", "knulli": "gamelist.xml", "onion": "miyoogamelist.xml",
+GAMELIST_FILES = {"esde": "gamelist.xml", "emudeck": "gamelist.xml", "knulli": "gamelist.xml", "rocknix": "gamelist.xml", "onion": "miyoogamelist.xml",
                   "allium": "gamelist.xml", "spruce": "miyoogamelist.xml", "nextui": None}  # None: no gamelist, the art is found by name in .media/
 ONION_ONLY_LISTS = ("recentlist-hidden.json", "favorite.json")  # in the root of Onion's roms folder
 ONION_LAYOUTS = ("onion", "allium", "spruce")  # all keep box art in a flat Imgs/ folder
@@ -97,7 +97,7 @@ MUOS_MEDIA = (("box", ("covers", "3dboxes")), ("preview", ("screenshots", "title
 # EmuDeck's media goes on the card; its gamelists go in ES-DE's data folder on the computer running the sync
 SCRAPE_LAYOUTS = set(GAMELIST_FILES) | {"muos"}
 EMUDECK_MEDIA = os.path.join("Emulation", "tools", "downloaded_media")
-CART_LAYOUTS = (*frontend.ESDE_LAYOUTS, "knulli", "nextui") + ONION_LAYOUTS  # a PICO-8 cart with no scraped picture is its own: these show it as its image
+CART_LAYOUTS = (*frontend.ESDE_LAYOUTS, "knulli", "rocknix", "nextui") + ONION_LAYOUTS  # a PICO-8 cart with no scraped picture is its own: these show it as its image
 
 
 def gamelist_fields(meta):
@@ -178,7 +178,7 @@ def plan_scrapes(layout_name, rom_rels, listing, meta, media_root, rom_dir, pres
             for mtype, (key, size) in found.items():
                 if mtype in MEDIA_TYPES:  # not the Onion-only art
                     add(key, media_root, f"{mtype}/{key.split('/', 3)[3]}", size)
-        elif layout_name == "knulli":
+        elif layout_name in ("knulli", "rocknix"):
             for tag, folder, suffix, types in KNULLI_MEDIA:
                 mtype = next((t for t in types if t in found), None)
                 if mtype:
@@ -345,7 +345,7 @@ def build_scrape_plan(layout_name, systems, data, rom_rels, dest_of, es_dir, pre
                 if not rom.endswith(".p8.png") or not present(os.path.join(rom_dir, rom)):
                     continue
                 found = index.get(os.path.splitext(rom)[0], {})
-                if layout_name == "knulli":  # the cart is already in the ROM folder
+                if layout_name in ("knulli", "rocknix"):  # the cart is already in the ROM folder
                     if "image" not in entries.get(rom, {}):
                         entries.setdefault(rom, {})["image"] = f"./{rom}"
                     continue
@@ -469,7 +469,7 @@ def stale_media(layout_name, systems, roms_dir, es_dir, base=None):
                 if es_dir:
                     stale += [path for path in [os.path.join(es_dir, "gamelists", old, GAMELIST_FILES[layout_name])]
                               if cardfs.size(path) is not None]
-        elif layout_name == "knulli":
+        elif layout_name in ("knulli", "rocknix"):
             for sub in ("images", "videos", "manuals"):
                 base = os.path.join(rom_dir, sub)
                 for rel, full in walk_files(base) if cardfs.is_dir(base) else []:

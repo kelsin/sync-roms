@@ -408,7 +408,7 @@ if __name__ == "__main__":
 
 
 class Pico8CartImageTest(unittest.TestCase):
-    PICO = {"name": "PICO-8", "bucket": "pico8", "folders": {l: "pico8" for l in ("esde", "knulli", "onion", "allium")}}
+    PICO = {"name": "PICO-8", "bucket": "pico8", "folders": {l: "pico8" for l in ("esde", "knulli", "rocknix", "onion", "allium")}}
     LISTING = {}
 
     def plan(self, layout, rels, listing=None, meta=None):
@@ -426,6 +426,11 @@ class Pico8CartImageTest(unittest.TestCase):
 
     def test_knulli_points_its_image_at_the_cart(self):
         jobs, entries = self.plan("knulli", ["a.p8.png", "b.p8", "sub/c.p8.png"])
+        self.assertEqual(jobs, [])
+        self.assertEqual(entries, {"a.p8.png": {"image": "./a.p8.png"}, "sub/c.p8.png": {"image": "./sub/c.p8.png"}})
+
+    def test_rocknix_points_its_image_at_the_cart(self):
+        jobs, entries = self.plan("rocknix", ["a.p8.png", "b.p8", "sub/c.p8.png"])
         self.assertEqual(jobs, [])
         self.assertEqual(entries, {"a.p8.png": {"image": "./a.p8.png"}, "sub/c.p8.png": {"image": "./sub/c.p8.png"}})
 
@@ -450,6 +455,33 @@ class Pico8CartImageTest(unittest.TestCase):
         jobs, entries = self.plan("onion", ["a.p8.png", "b.p8.png"], {"scrapes/pico8/onion/a.p8.png": 1}, meta)
         self.assertEqual([k for k, _ in jobs], ["scrapes/pico8/onion/a.p8.png", "pico8/b.p8.png"])
         self.assertEqual(entries["a.p8.png"]["image"], "./Imgs/a.p8.png")
+
+
+class RocknixMediaTest(unittest.TestCase):
+    def test_gamelist_is_gamelist_xml(self):
+        self.assertEqual(scrape_plan.GAMELIST_FILES["rocknix"], "gamelist.xml")
+        self.assertIn("rocknix", scrape_plan.SCRAPE_LAYOUTS)
+
+    def test_media_is_planned_like_knulli(self):
+        listing = {"scrapes/gba/miximages/A.png": 1, "scrapes/gba/covers/A.png": 2, "scrapes/gba/videos/A.mp4": 3}
+        meta = {"A.zip": {"name": "A"}}
+        got = {l: scrape_plan.plan_scrapes(l, ["A.zip"], listing, meta, "/media", "/card/roms/gba", lambda r: True)
+               for l in ("knulli", "rocknix")}
+        self.assertEqual(got["rocknix"], got["knulli"])
+        jobs, entries, _ = got["rocknix"]
+        self.assertEqual(entries["A.zip"]["image"], "./images/A-image.png")
+        self.assertEqual(entries["A.zip"]["video"], "./videos/A-video.mp4")
+        self.assertTrue(any(j[1].endswith(os.path.join("images", "A-thumb.png")) for j in jobs))
+
+    def test_stale_media_is_found_in_the_rom_folder(self):
+        with tempfile.TemporaryDirectory() as base:
+            for rel in ("roms/gba/A.zip", "roms/gba/images/A-image.png", "roms/gba/videos/Gone-video.mp4",
+                        "roms/gba/manuals/Gone.pdf"):
+                touch(os.path.join(base, rel))
+            system = {"bucket": "gba", "folders": {"rocknix": "gba"}}
+            stale = scrape_plan.stale_media("rocknix", [system], os.path.join(base, "roms"), os.path.join(base, "ES-DE"), base)
+            self.assertEqual(sorted(os.path.relpath(p, base) for p in stale),
+                             ["roms/gba/manuals/Gone.pdf", "roms/gba/videos/Gone-video.mp4"])
 
 
 class NextUIMediaTest(unittest.TestCase):
