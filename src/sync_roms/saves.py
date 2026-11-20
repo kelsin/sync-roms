@@ -77,7 +77,8 @@ def rom_stems(base, layout_name, layout, systems):
         if not folder:
             continue
         root = os.path.join(base, *layout["roms_dir"].split("/"), folder)
-        for dirpath, _, files in os.walk(root, followlinks=True):
+        for dirpath, dirs, files in os.walk(root, followlinks=True):
+            dirs[:] = [d for d in dirs if d != ".media"]  # NextUI's art
             for f in files:
                 if f.startswith("._"):
                     continue
@@ -160,10 +161,16 @@ def scan(base, layout_name, layout, systems, retroarch_dir=None):
     folders = {s["bucket"]: s["folders"].get(layout_name) for s in systems}
     games, skipped, seen = {}, 0, set()
     for template in (ra["saves"], ra["states"]):
-        for folder, system, core in _folders(root, template, systems, layout_name):
+        rows = _folders(root, template, systems, layout_name)
+        owners = {}
+        for folder, system, _ in rows:
+            owners.setdefault(folder, set()).add(system)
+        for folder, system, core in rows:
             if folder in seen or not os.path.isdir(folder):
                 continue
             seen.add(folder)
+            # a NextUI tag folder (Saves/FBN) shared by systems with their own ROM folders: the ROM picks the system
+            shared = owners[folder] if len({folders.get(b) for b in owners[folder]}) > 1 else None
             for name in _listdir(folder):
                 path = os.path.join(folder, name)
                 if _minui(layout) and system != "psx" and name.endswith(".sav"):
@@ -172,7 +179,10 @@ def scan(base, layout_name, layout, systems, retroarch_dir=None):
                 if not c or not os.path.isfile(path):
                     continue
                 stem, kind = c
-                found = {system} if system else stems.get(stem, set())
+                if shared:  # a NextUI state keeps the ROM's extension ("Game.zip.state")
+                    found = (stems.get(stem) or stems.get(retroarch_name(stem)[:-4], set())) & shared
+                else:
+                    found = {system} if system else stems.get(stem, set())
                 if len({folders[b] for b in found}) != 1:
                     skipped += 1
                     continue

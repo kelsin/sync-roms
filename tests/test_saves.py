@@ -129,6 +129,32 @@ class ScanTest(unittest.TestCase):
         stems = saves.rom_stems(self.base, "onion", LAYOUTS["onion"], SYSTEMS)
         self.assertEqual(stems, {"Disc": {"gba"}, "A.b": {"gba"}})
 
+    def test_nextui_shared_tag_folder_by_rom(self):
+        systems = [{"bucket": "neogeo", "folders": {"nextui": "Neo Geo (FBN)"}},
+                   {"bucket": "cps2", "folders": {"nextui": "CPS2 (FBN)"}},
+                   {"bucket": "gba", "folders": {"nextui": "Game Boy Advance (GBA)"}}]
+        helpers.touch(self.p("Roms", "CPS2 (FBN)", "sf2.zip"), "r")
+        helpers.touch(self.p("Roms", "Neo Geo (FBN)", "mslug.zip"), "r")
+        helpers.touch(self.p("Roms", "Neo Geo (FBN)", ".media", "art.png"), "r")
+        helpers.touch(self.p("Saves", "FBN", "sf2.zip.sav"), "s")
+        helpers.touch(self.p("Saves", "FBN", "mslug.zip.sav"), "s")
+        helpers.touch(self.p("Saves", "FBN", "art.zip.sav"), "s")
+        helpers.touch(self.p(".userdata", "shared", "FBN-fbneo", "sf2.zip.state"), "s")
+        helpers.touch(self.p("Saves", "GBA", "Game.gba.sav"), "s")
+        games, skipped = saves.scan(self.base, "nextui", LAYOUTS["nextui"], systems)
+        self.assertEqual(sorted(games), [("cps2", "sf2"), ("cps2", "sf2.zip"), ("gba", "Game"), ("neogeo", "mslug")])
+        self.assertEqual([e["kind"] for e in games[("cps2", "sf2.zip")]], ["state"])
+        self.assertEqual(skipped, 1)
+
+    def test_nextui_shared_tag_folder_stem_in_two_systems_skipped(self):
+        systems = [{"bucket": "neogeo", "folders": {"nextui": "Neo Geo (FBN)"}},
+                   {"bucket": "cps2", "folders": {"nextui": "CPS2 (FBN)"}}]
+        helpers.touch(self.p("Roms", "CPS2 (FBN)", "game.zip"), "r")
+        helpers.touch(self.p("Roms", "Neo Geo (FBN)", "game.zip"), "r")
+        helpers.touch(self.p("Saves", "FBN", "game.zip.sav"), "s")
+        games, skipped = saves.scan(self.base, "nextui", LAYOUTS["nextui"], systems)
+        self.assertEqual((games, skipped), ({}, 1))
+
     def test_appledouble_rom_skipped(self):
         helpers.touch(self.p("Roms", "GBA", "._Game.zip"), "r")
         self.assertEqual(saves.rom_stems(self.base, "onion", LAYOUTS["onion"], SYSTEMS), {})
