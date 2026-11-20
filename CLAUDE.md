@@ -2,6 +2,19 @@
 
 Tooling for syncing ROMs to and from the `roms.valefor.com` S3 bucket (region `us-east-1`).
 
+## Python environment
+
+Always use `uv`; never bare `python`, `pip`, `pyenv` shims or a system interpreter (the pyenv `python` shim is broken here). `.python-version` pins the latest stable CPython (uv downloads it), `python-preference = "only-managed"` in `pyproject.toml` keeps uv off system pythons, and `uv.lock` plus the `dev` group (Pillow) cover every dependency the tests need. A SessionStart hook (`.claude/settings.json`) runs `uv sync` so each new session, worktrees included, gets a fresh `.venv`.
+
+```bash
+uv sync                                      # create/update .venv
+uv run python -m unittest discover -s tests  # tests
+uv run sync-roms ...                         # the CLI
+uv run python tools/gen_theme_art.py [id ...]
+```
+
+A "module not found" error means the command skipped `uv run`, not that a package is missing: rerun it with `uv run`. Add dependencies with `uv add` (`uv add --dev` for test-only), never `pip install`. When a new stable Python is out, bump `.python-version`, run `uv sync` and the tests, and commit the result with `uv.lock`.
+
 ## AWS profiles
 
 Always pass `--profile` explicitly.
