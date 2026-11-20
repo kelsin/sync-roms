@@ -1704,6 +1704,29 @@ class SetFlow(Flow):
         self.assertEqual(calls[3][1], self.ALL_LABELS)
         self.assertEqual(calls[3][2]["filters"], "")
 
+    def test_edit_all_notes_a_storage_error_and_changes_nothing(self):
+        self.card()
+        notes = []
+        with mock.patch.object(store, "folder_keys", side_effect=OSError("down")), \
+                mock.patch.object(edit, "note", notes.append):
+            changed, calls = self.run_all()
+        self.assertIs(changed, False)
+        self.assertEqual(calls, [])
+        self.assertEqual(len(notes), 1)
+        self.assertIn("Couldn't list Game Boy Advance in storage: down", notes[0])
+
+    def test_edit_all_lists_each_folder_once(self):
+        self.card(games={"gb": {"full_system": True}})
+        listed = []
+        real = store.folder_keys
+
+        def counting(bucket, say=True):
+            listed.append(bucket)
+            return real(bucket, say)
+        with mock.patch.object(store, "folder_keys", counting):
+            self.run_all(lambda labels, kw: kw["session"]["sel"])
+        self.assertEqual(sorted(listed), ["gb", "gba"])
+
     def test_edit_card_a_opens_the_all_games_view(self):
         self.card()
         with mock.patch.object(cardedit, "edit_all", return_value=False) as opened:

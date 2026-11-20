@@ -775,18 +775,27 @@ def pick_series(game_set, current=None):
 def edit_all(name, setup, systems, to_fetch=None, card_usages=None):
     """Every file of the systems' storage folders (from the storage cache) in one list, by title then system, toggled
     as in edit_set (a full system's on and locked) and narrowed to a set with s. Returns whether anything changed."""
-    games = [{"system": s["bucket"], "bucket": key, "title": title, "label": label}
-             for s in systems for _, key, title, label in listedit.system_rows({**s, "games": []}, store.folder_keys(s["bucket"]))]
-    return edit_set(name, {"name": "All games", "games": games}, setup, to_fetch, card_usages, narrow_sets=True)
+    picks = cardpicks.CardPicks(name, setup)  # handed to edit_set, so each folder is listed once
+    games = []
+    for s in systems:
+        try:
+            in_storage = store.folder_keys(s["bucket"]) if picks.full(s["bucket"]) else picks.system(s).in_storage
+        except s3.ERRORS as e:
+            edit.note(ui.yellow(f"⚠️  Couldn't list {s['name']} in storage: {e}"))
+            return False
+        games += [{"system": s["bucket"], "bucket": key, "title": title, "label": label}
+                  for _, key, title, label in listedit.system_rows({**s, "games": []}, in_storage)]
+    return edit_set(name, {"name": "All games", "games": games}, setup, to_fetch, card_usages, narrow_sets=True, picks=picks)
 
 
-def edit_set(name, game_set, setup, to_fetch=None, card_usages=None, narrow_sets=False):
+def edit_set(name, game_set, setup, to_fetch=None, card_usages=None, narrow_sets=False, picks=None):
     """A card's games of one set over every system it can play, in one list (category, then system and title), toggled
     as in edit_system; games not in storage are left out, a full system's are on and locked. Saves to cards.json when
     left; returns whether anything changed. to_fetch, card_usages: as for edit_system. narrow_sets: edit_all's list
-    (its games carry their row label): by title then system, s narrows it to a set's games, no series."""
+    (its games carry their row label): by title then system, s narrows it to a set's games, no series. picks: the
+    CardPicks to edit, when the caller already made one."""
     cards = store.load_cards()
-    picks = cardpicks.CardPicks(name, setup, cards)
+    picks = picks or cardpicks.CardPicks(name, setup, cards)
     playable = can_play(store.repo_json("systems"), setup)
     found = set_view_keys(game_set, playable)
     sps = {}  # {system bucket: SystemPicks} of the systems with set games, but full ones
