@@ -479,7 +479,8 @@ def cards_list(args):
             return " " * (used_w + 3) + (r["size"] or "").rjust(size_w) if r["size"] else ""
         if r["sized"] is False:
             return "*".rjust(used_w) + (f" / {r['size']:>{size_w}}" if r["size"] else "")
-        return amount(r).rjust(used_w) + (f" / {r['size']:>{size_w}}" if r["size"] else " used")
+        # no size set: a ❔ in the size slot (two columns wide) keeps the rest of the row aligned
+        return amount(r).rjust(used_w) + (f" / {r['size']:>{size_w}}" if r["size"] else " / " + "❔".rjust(size_w - 1))
 
     def picks(r):
         if r["games"] is None:

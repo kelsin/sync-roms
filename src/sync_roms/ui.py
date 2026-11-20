@@ -99,15 +99,20 @@ class PlainOut:
         return getattr(self._stream, name)
 
 
+def _cols(text):
+    """Terminal columns a string takes: wide characters (most emoji) count two."""
+    return sum(2 if unicodedata.east_asian_width(ch) in "WF" else 1 for ch in str(text))
+
+
 def table(rows, header=None):
     """Print rows (tuples of strings) in left-aligned columns sized to the longest cell; the last column isn't padded.
     header, if given, is printed bold."""
     allrows = ([header] if header else []) + [tuple(r) for r in rows]
     if not allrows:
         return
-    widths = [max(len(r[i]) for r in allrows) for i in range(len(allrows[0]))]
+    widths = [max(_cols(r[i]) for r in allrows) for i in range(len(allrows[0]))]
     for n, r in enumerate(allrows):
-        cells = [str(v).ljust(w) for v, w in zip(r, widths)]
+        cells = [str(v) + " " * (w - _cols(v)) for v, w in zip(r, widths)]
         cells[-1] = cells[-1].rstrip()
         line = "  ".join(cells)
         print(bold(line) if header and n == 0 else line)
