@@ -1,7 +1,7 @@
 """`cards convert`: plan and apply the renames that take a card's files from one layout to another on the same filesystem."""
 import os
 
-from sync_roms import downloads, m3u
+from sync_roms import downloads, m3u, saves
 
 PLAYLIST_NOTE = "playlist paths differ between layouts; sync rewrites it"
 
@@ -115,6 +115,38 @@ def plan_bios(base, systems, old_name, old, new_name, new):
                 moves.append((have[0], dst))
             skipped += [(name, "extra tag folder; sync will add it") for _ in new_dirs[1:]]
             skipped += [(name, f"another copy in {os.path.dirname(p)}; left in place") for p in have[1:]]
+    return moves, skipped
+
+
+def plan_saves(base, systems, old_name, old, new_name, new):
+    """([(src, dst)], [(label, reason)]): the card's RetroArch saves and states moved to the new layout's folders
+    (a MinUI save renamed to or from its ROM's file name). Run after the ROMs moved, since the new layout's ROM
+    folder names the saves. Files whose game isn't on the card are left alone; so are those the new layout can't
+    place (no core, no folder), which are reported."""
+    games, _ = saves.scan(base, old_name, old, systems)
+    by_bucket = {s["bucket"]: s for s in systems}
+    moves, skipped = [], []
+    for (bucket, _), entries in sorted(games.items()):
+        system = by_bucket[bucket]
+        roms = None
+        for e in entries:
+            kind, name = ("save" if e["kind"] == "save" else "state"), e["name"]
+            label = f"{bucket}/{name}"
+            try:
+                folder = saves.target_dir(base, new_name, new, system, kind, e["core"])
+            except ValueError as err:
+                skipped.append((label, str(err)))
+                continue
+            if saves._minui(new) and kind == "save" and bucket != "psx" and name.endswith(".srm"):
+                roms = saves.rom_names(base, new_name, new, system) if roms is None else roms
+                if not (renamed := saves.minui_name(name, roms)):
+                    if any(os.path.splitext(r)[0] == name[:-4] for r in roms):
+                        skipped.append((label, "several ROMs share its name in the new layout"))
+                    continue  # no ROM on the card: left alone
+                name = renamed
+            dst = os.path.join(folder, name)
+            if e["path"] != dst:
+                moves.append((e["path"], dst))
     return moves, skipped
 
 

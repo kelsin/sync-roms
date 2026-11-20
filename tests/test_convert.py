@@ -10,12 +10,17 @@ from helpers import touch  # noqa: E402
 from sync_roms import convert  # noqa: E402
 
 LAYOUTS = {
-    "knulli": {"roms_dir": "roms", "bios_dir": "bios"},
-    "nextui": {"roms_dir": "Roms", "bios_dir": "Bios", "bios_by_tag": True, "disc_folders": True},
+    "knulli": {"roms_dir": "roms", "bios_dir": "bios",
+               "retroarch": {"dir": "saves", "saves": "{system}", "states": "{system}"}},
+    "nextui": {"roms_dir": "Roms", "bios_dir": "Bios", "bios_by_tag": True, "disc_folders": True,
+               "save_naming": "minui",
+               "retroarch": {"dir": "", "saves": "Saves/{tag}", "states": ".userdata/shared/{tag}-{core}"}},
     "onion": {"roms_dir": "Roms", "bios_dir": "BIOS", "disc_dir": ".multi-disc"},
+    "esde": {"roms_dir": "ROMs", "bios_dir": "BIOS",
+             "retroarch": {"dir": "RetroArch", "saves": "saves/{core}", "states": "states/{core}"}},
 }
 SYSTEMS = [
-    {"bucket": "gba", "folders": {"knulli": "gba", "nextui": "Game Boy Advance (GBA)", "onion": "GBA"},
+    {"bucket": "gba", "folders": {"knulli": "gba", "nextui": "Game Boy Advance (GBA)", "onion": "GBA", "esde": "gba"},
      "nextui_bios_tags": ["MGBA"], "bios": {"files": ["gba_bios.bin"]}},
     {"bucket": "psx", "folders": {"knulli": "psx", "nextui": "PlayStation (PS)", "onion": "PS"},
      "bios": {"files": []}},
@@ -174,6 +179,44 @@ class ConvertTest(unittest.TestCase):
         self.assertEqual(moves, [(self.p("Bios", "GBA", "gba_bios.bin"), self.p("bios", "gba_bios.bin"))])
         self.assertEqual(len(skipped), 1)
         self.assertIn("another copy", skipped[0][1])
+
+    def saves(self, old=("knulli", K), new=("nextui", N)):
+        return convert.plan_saves(self.base, SYSTEMS, old[0], old[1], new[0], new[1])
+
+    def test_knulli_save_to_nextui_gets_rom_name(self):
+        touch(self.p("saves", "gba", "Game.srm"))
+        touch(self.p("Roms", "Game Boy Advance (GBA)", "Game.gba"))
+        moves, skipped = self.saves()
+        self.assertEqual(moves, [(self.p("saves", "gba", "Game.srm"), self.p("Saves", "GBA", "Game.gba.sav"))])
+        self.assertEqual(skipped, [])
+
+    def test_knulli_state_has_no_core_for_nextui(self):
+        touch(self.p("saves", "gba", "Game.srm"))
+        touch(self.p("saves", "gba", "Game.state"))
+        touch(self.p("Roms", "Game Boy Advance (GBA)", "Game.gba"))
+        moves, skipped = self.saves()
+        self.assertEqual(len(moves), 1)
+        self.assertEqual(len(skipped), 1)
+        self.assertIn("core", skipped[0][1])
+
+    def test_save_without_rom_is_left_alone(self):
+        touch(self.p("saves", "gba", "Game.srm"))
+        self.assertEqual(self.saves(), ([], []))
+
+    def test_nextui_to_esde_save_needs_a_core(self):
+        touch(self.p("Saves", "GBA", "Game.gba.sav"))
+        touch(self.p("Roms", "Game Boy Advance (GBA)", "Game.gba"))
+        moves, skipped = self.saves(("nextui", N), ("esde", LAYOUTS["esde"]))
+        self.assertEqual(moves, [])
+        self.assertEqual(len(skipped), 1)
+        self.assertIn("needs a core", skipped[0][1])
+
+    def test_core_save_keeps_name_between_core_layouts(self):
+        touch(self.p("RetroArch", "saves", "mGBA", "Game.srm"))
+        touch(self.p("ROMs", "gba", "Game.gba"))
+        esde = LAYOUTS["esde"]
+        moves, _ = self.saves(("esde", esde), ("esde", esde))
+        self.assertEqual(moves, [])
 
 
 if __name__ == "__main__":
