@@ -148,6 +148,28 @@ CARD = flash.Disk("disk4", 64_000_000_000, "SD")
 SUDO = ["sudo", "-v"]
 
 
+class FlashMuos(unittest.TestCase):
+    MUOS = ["os/muos-pixie-2601.0-rg35xx.img.gz", "os/muos-banana-20260101.img.gz"]
+
+    def test_images_lists_muos_images(self):
+        listing = {k: 1 for k in KEYS + self.MUOS} | {"os/muos-x.zip": 1, "os/sub/muos-x.img.gz": 1}
+        self.assertEqual(sorted(flash.images(listing, "muos")), sorted(self.MUOS))
+
+    def test_images_knulli_default_is_unchanged(self):
+        listing = {k: 1 for k in KEYS + self.MUOS}
+        self.assertEqual(sorted(flash.images(listing)), sorted(KEYS))
+        self.assertEqual(flash.images(listing), flash.images(listing, "knulli"))
+
+    def test_devices_for_muos_keeps_input_order(self):
+        devs = [{"id": "a", "firmwares": ["knulli"]}, {"id": "b", "firmwares": ["muos"]},
+                {"id": "c", "firmwares": ["knulli", "muos"]}]
+        self.assertEqual([d["id"] for d in flash.devices_for(devs, "muos")], ["b", "c"])
+
+    def test_muos_images_are_never_marked_as_matching(self):
+        self.assertTrue(all(not m for _, m in flash.sort_images(self.MUOS, "anbernic-rg35xxh")))
+        self.assertTrue(all(not m for _, m in flash.sort_images(self.MUOS, "pixie")))
+
+
 class Args:
     def __init__(self, dry_run=False):
         self.dry_run = dry_run
@@ -393,6 +415,32 @@ class Run(helpers.StorageDir):
         os.remove(os.path.join(self.root, IMAGE))
         self.assertEqual(self.flash(), 1)
         self.assertIn("no Knulli images", self.out)
+
+    def test_both_firmwares_ask_which(self):
+        self.put("os/muos-banana-20260101.img.gz", gzip.compress(b"img"))
+        inventory.reset()
+        self.filter_list.side_effect = [1, 0, 0, 0]
+        with mock.patch.object(store, "repo_json", return_value=[
+                {"id": "k", "name": "K", "firmwares": ["knulli"]}, {"id": "m", "name": "M", "firmwares": ["muos"]}]):
+            self.assertEqual(self.flash(), 0)
+        calls = self.filter_list.call_args_list
+        self.assertEqual(calls[0].args[1], ["Knulli", "muOS"])
+        self.assertEqual(calls[1].args[1], ["M"])
+        self.assertEqual(calls[2].args[1], ["muos-banana-20260101.img.gz"])
+        self.assertNotIn("✓", str(calls[2].kwargs["extras"]))
+
+    def test_one_firmware_skips_question(self):
+        self.flash()
+        self.assertEqual(self.filter_list.call_args_list[0].args[0], "🎯 Which device?")
+
+    def test_only_muos_images(self):
+        os.remove(os.path.join(self.root, IMAGE))
+        self.put("os/muos-banana-20260101.img.gz", gzip.compress(b"img"))
+        inventory.reset()
+        with mock.patch.object(store, "repo_json", return_value=[
+                {"id": "m", "name": "M", "firmwares": ["muos"]}]):
+            self.assertEqual(self.flash(), 0)
+        self.assertEqual(self.filter_list.call_args_list[0].args[1], ["M"])
 
     def test_not_macos(self):
         with mock.patch.object(flash.sys, "platform", "linux"):

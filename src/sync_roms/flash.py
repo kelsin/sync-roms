@@ -1,4 +1,4 @@
-"""Knulli OS images in storage's os/ folder, and which of them fit a device."""
+"""Knulli and muOS images in storage's os/ folder, and which of them fit a device."""
 import collections
 import gzip
 import hashlib
@@ -34,14 +34,22 @@ def raw(disk):
     return f"/dev/r{disk}"
 
 
+FIRMWARES = {"knulli": "Knulli", "muos": "muOS"}
+
+
+def devices_for(devices, firmware):
+    """The devices that run the firmware, in input order."""
+    return [d for d in devices if firmware in d.get("firmwares", [])]
+
+
 def knulli_devices(devices):
     """The devices that run Knulli, in input order."""
-    return [d for d in devices if "knulli" in d.get("firmwares", [])]
+    return devices_for(devices, "knulli")
 
 
-def images(listing):
-    """The keys of the knulli-*.img.gz images directly in os/."""
-    return [k for k in listing if re.fullmatch(re.escape(PREFIX) + r"knulli-[^/]*\.img\.gz", k)]
+def images(listing, firmware="knulli"):
+    """The keys of the <firmware>-*.img.gz images directly in os/."""
+    return [k for k in listing if re.fullmatch(re.escape(PREFIX) + re.escape(firmware) + r"-[^/]*\.img\.gz", k)]
 
 
 def _date(key):
@@ -294,23 +302,32 @@ def _same(a, b):
 
 
 def run(args):
-    """Pick a Knulli device, image and SD card, write the image to the card and read it back. 0 on success, dry-run or
+    """Pick a firmware (when storage has both), device, image and SD card, write the image to the card and read it back. 0 on success, dry-run or
     Esc; 1 on any failure."""
     if sys.platform != "darwin":
         ui.failure(ui.red("❌ flash needs macOS"))
         return 1
     usersettings.ensure_bucket()
-    devices = knulli_devices(store.repo_json("devices"))
+    listing = inventory.files(PREFIX)
+    available = [f for f in FIRMWARES if images(listing, f)]
+    if len(available) > 1:
+        i = picker.filter_list("🧩 Which firmware?", [FIRMWARES[f] for f in available],
+                               hint="/ filter · j/k move · Enter continue · Esc quit")
+        if i is None:
+            return 0
+        firmware = available[i]
+    else:
+        firmware = available[0] if available else "knulli"
+    if not available:
+        ui.failure(ui.red(f"❌ no {FIRMWARES[firmware]} images in storage's os/"))
+        return 1
+    devices = devices_for(store.repo_json("devices"), firmware)
     i = picker.filter_list("🎯 Which device?", [d["name"] for d in devices],
                            hint="/ filter · j/k move · Enter continue · Esc quit")
     if i is None:
         return 0
     device = devices[i]
-    listing = inventory.files(PREFIX)
-    found = sort_images(images(listing), device["id"])
-    if not found:
-        ui.failure(ui.red("❌ no Knulli images in storage's os/"))
-        return 1
+    found = sort_images(images(listing, firmware), device["id"])
     i = picker.filter_list(f"💾 Which image for {device['name']}?", [k[len(PREFIX):] for k, _ in found],
                            extras=[[(f"  {ui.human_size(listing[k])}", "dim"), ("  ✓ matches" if m else "", "green")]
                                    for k, m in found],

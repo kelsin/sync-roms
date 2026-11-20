@@ -257,7 +257,7 @@ Every mode is a command (`sync-roms COMMAND --help` explains one; plain `sync-ro
 | `collections edit` | edit your collections of favourite games (saved in `~/.sync-roms/collections/`) | |
 | `themes update` | put the latest Art Book Next for ES-DE (for collections' theme art) in storage | |
 | `download pico8` | add the PICO-8 BBS Featured carts storage doesn't have, and newer revisions of those it has (see below) | |
-| `flash` | write a Knulli image from storage's `os/` to an SD card and verify it, macOS only (see below) | |
+| `flash` | write a Knulli or muOS image from storage's `os/` to an SD card and verify it, macOS only (see below) | |
 | `cards list\|new\|set\|rename\|delete\|copy\|export\|import` | manage cards (`list` shows the space each card's picks take: ROMs, scrapes and BIOS, against its size, and how many full systems and games it syncs); `copy SRC DST` merges games, sets, excluded and collections into DST, skipping systems it can't play; `export FILE` flattens surprises and collections into games, `import FILE` keeps size, device, layout, games and excluded and turns Surprise off (`r` renames, `p` prefixes all) | |
 | `saves stash\|apply [CARD]` | copy RetroArch saves and states off a card into `~/.sync-roms/saves/`, or stashed ones onto a card (see below) | |
 | `devices [ID]` | list devices, or one device's systems (`--json`) | `--devices` |
@@ -400,12 +400,13 @@ storage doesn't have (`new:`) and those the BBS has a newer revision of (`upgrad
 - Carts in `ignored.json` are never downloaded.
 - Requests go one at a time. The first HTTP error stops the run with a warning; carts already added stay.
 
-## Flashing Knulli (`flash`)
+## Flashing Knulli and muOS (`flash`)
 
-`sync-roms flash [--dry-run]` writes a Knulli OS image from storage's `os/knulli-*.img.gz` to an SD card and checks
+`sync-roms flash [--dry-run]` writes a Knulli or muOS image from storage's `os/knulli-*.img.gz` or `os/muos-*.img.gz` to an SD card and checks
 the result. macOS only.
 
-- You pick a Knulli device, then an image (the ones matching the device first, newest first), then an external SD card.
+- You pick a firmware (asked only when `os/` holds both), a device that runs it, then an image (Knulli images matching
+  the device first, newest first; muOS image names aren't documented, so none is marked as matching), then an external SD card.
   Cards show their volume names. The boot disk and the disks holding the temp folder or storage are never offered,
   and flash stops if it can't tell which disks those are.
 - You confirm by typing the disk id (`disk4`). `--yes` never skips this. `--dry-run` stops here.
