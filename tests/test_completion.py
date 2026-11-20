@@ -73,6 +73,7 @@ class BashCompletion(unittest.TestCase):
         self.assertIn("sets", self.complete("sync-roms", "games", ""))
         self.assertEqual(self.complete("sync-roms", "clean", "s"), ["scrapes"])
         self.assertEqual(self.complete("sync-roms", "games", "add", "gb"), ["gba", "gbc"])
+        self.assertIn("convert", self.complete("sync-roms", "cards", "con"))
         self.assertEqual(self.complete("sync-roms", "config", "s"), ["show", "set"])
         self.assertEqual(self.complete("sync-roms", "config", "unset", "surprise_t"), ["surprise_ttl_days"])
 
