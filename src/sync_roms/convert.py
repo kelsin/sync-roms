@@ -1,7 +1,7 @@
 """`cards convert`: plan and apply the renames that take a card's files from one layout to another on the same filesystem."""
 import os
 
-from sync_roms import commands, downloads, m3u, picker, saves, store, ui
+from sync_roms import commands, downloads, m3u, picker, saves, scrape_plan, store, ui
 
 PLAYLIST_NOTE = "playlist paths differ between layouts; sync rewrites it"
 
@@ -15,24 +15,48 @@ def _listed(path):
 
 
 def _exact_dir(base, *parts):
-    """base/parts joined when each part is spelled exactly so on disk (a case-insensitive filesystem would also
-    answer to another spelling); else None."""
+    """base/parts joined as each part is spelled on disk: exactly so, or (a case-only rename may have stopped partway)
+    as its only other-case spelling; else None."""
     path = base
     for part in parts:
-        if part not in _listed(path):
-            return None
+        names = _listed(path)
+        if part not in names:
+            same = [m for m in names if m.lower() == part.lower()]
+            if len(same) != 1:
+                return None
+            part = same[0]
         path = os.path.join(path, part)
     return path if os.path.isdir(path) else None
 
 
-def _walk(folder, keep_dir=None):
-    """Relative paths (with /) of the files under folder, leaving out dotfiles and dot folders except keep_dir."""
-    out = []
-    for root, dirs, files in os.walk(folder):
+def _scan(folder, keep_dir=None, skip_db=False):
+    """(files, ignored): the relative paths (with /) of the ROM files under folder, and of what the frontends put there
+    instead (what downloads.walk_roms leaves out, dot folders included but not dotfiles), which a convert leaves alone.
+    keep_dir (the layout's disc folder) is walked although it is a dot folder."""
+    files, ignored = [], []
+    for root, dirs, names in os.walk(folder):
         rel = os.path.relpath(root, folder)
-        dirs[:] = sorted(d for d in dirs if not d.startswith(".") or (rel == "." and d == keep_dir))
-        out += [(f if rel == "." else rel.replace(os.sep, "/") + "/" + f) for f in sorted(files) if not f.startswith(".")]
-    return out
+        at_root = rel == "."
+        prefix = "" if at_root else rel.replace(os.sep, "/") + "/"
+        keep = []
+        for d in sorted(dirs):
+            if at_root and d == keep_dir:
+                keep.append(d)
+            elif d.startswith(".") or (at_root and d.lower() in downloads.IGNORED_ROOT_DIRS):
+                ignored.append(prefix + d)
+            else:
+                keep.append(d)
+        dirs[:] = keep
+        for f in sorted(names):
+            low = f.lower()
+            if f.startswith("."):
+                continue
+            if low in downloads.IGNORED_FILES or (skip_db and low.endswith(".db")) or downloads.TEMP_DOWNLOAD.search(f) \
+                    or (at_root and low in downloads.IGNORED_ROOT_FILES):
+                ignored.append(prefix + f)
+            else:
+                files.append(prefix + f)
+    return files, ignored
 
 
 def _flat(files, bucket, layout):
@@ -64,11 +88,11 @@ def plan_roms(base, systems, old_name, old, new_name, new):
         old_folder, new_folder = system["folders"].get(old_name), system["folders"].get(new_name)
         if not old_folder or old_folder in planned:
             continue
-        src_dir = _exact_dir(base, old_root, old_folder)
+        src_dir = _exact_dir(base, *old_root.split("/"), *old_folder.split("/"))
         if not src_dir:
             continue
         planned.add(old_folder)
-        files = _walk(src_dir, old.get("disc_dir"))
+        files, _ = _scan(src_dir, old.get("disc_dir"), old_name in scrape_plan.ONION_LAYOUTS)
         if not files:
             continue
         if not new_folder:
@@ -105,7 +129,7 @@ def plan_bios(base, systems, old_name, old, new_name, new):
             if name.startswith(".") or name in seen:
                 continue
             parts = name.split("/")
-            folders = [_exact_dir(base, *d.split(os.sep)) for d in old_dirs]
+            folders = [_exact_dir(base, *d.replace(os.sep, "/").split("/")) for d in old_dirs]
             have = [os.path.join(f, *parts) for f in folders if f and os.path.lexists(os.path.join(f, *parts))]
             if not have:
                 continue
@@ -168,9 +192,11 @@ def plan_saves(base, systems, old_name, old, new_name, new, rom_moves=()):
     return moves, skipped
 
 
-def _prune(folder):
-    """Remove folder and its parents while they are empty."""
+def _prune(folder, base=None):
+    """Remove folder and its parents while they are empty, never base or anything outside it."""
     while True:
+        if base is not None and (folder == base or not folder.startswith(base + os.sep)):
+            return
         try:
             os.rmdir(folder)
         except OSError:
@@ -200,28 +226,34 @@ def _respell(src, dst):
     return os.sep.join(s)
 
 
-def apply_moves(moves):
-    """Rename each (src, dst), making dst's folders; (done, conflicts): a dst that is already another file is left
-    alone with its src, and a src that is gone is skipped. A case-only rename goes through a temporary name. Folders emptied by the moves are removed."""
-    done, conflicts = [], []
+def apply_moves(moves, base=None):
+    """Rename each (src, dst), making dst's folders; (done, conflicts, failures): a dst that is already another file is
+    left alone with its src, a src that is gone is skipped, and a move the filesystem refuses is a (src, dst, error)
+    failure while the rest go on. A case-only rename goes through a temporary name. Folders emptied by the moves are
+    removed (never base)."""
+    done, conflicts, failures = [], [], []
     for src, dst in moves:
         if not os.path.lexists(src):
             continue
-        real = _respell(src, dst)
-        os.makedirs(os.path.dirname(dst), exist_ok=True)
-        if os.path.lexists(dst):
-            if not os.path.samefile(real, dst):
-                conflicts.append((src, dst))
-                continue
-            if real != dst:
-                os.rename(real, real + ".convert-tmp")
-                os.rename(real + ".convert-tmp", dst)
-        else:
-            os.rename(src, dst)
+        try:
+            real = _respell(src, dst)
+            os.makedirs(os.path.dirname(dst), exist_ok=True)
+            if os.path.lexists(dst):
+                if not os.path.samefile(real, dst):
+                    conflicts.append((src, dst))
+                    continue
+                if real != dst:
+                    os.rename(real, real + ".convert-tmp")
+                    os.rename(real + ".convert-tmp", dst)
+            else:
+                os.rename(src, dst)
+        except OSError as err:
+            failures.append((src, dst, err))
+            continue
         done.append((src, dst))
     for src, _ in done:
-        _prune(os.path.dirname(src))
-    return done, conflicts
+        _prune(os.path.dirname(src), base)
+    return done, conflicts, failures
 
 
 def _summary(title, moves, skipped, root=None):
@@ -244,13 +276,15 @@ def _summary(title, moves, skipped, root=None):
 
 
 def _leftovers(base, systems, old_name, old):
-    """Old-layout ROM folders that still hold dot folders (frontend media), which a convert leaves untouched."""
+    """Frontend files and folders (gamelists, media, dot folders) left in the old layout's ROM folders; a convert
+    leaves them untouched."""
     found = []
     for system in systems:
         folder = system["folders"].get(old_name)
-        path = _exact_dir(base, old["roms_dir"], folder) if folder else None
-        found += [f"{old['roms_dir']}/{folder}/{d}" for d in sorted(_listed(path)) if d.startswith(".")
-                  and os.path.isdir(os.path.join(path, d))] if path else []
+        path = _exact_dir(base, *old["roms_dir"].split("/"), *folder.split("/")) if folder else None
+        if path:
+            _, ignored = _scan(path, old.get("disc_dir"), old_name in scrape_plan.ONION_LAYOUTS)
+            found += [os.path.relpath(os.path.join(path, *i.split("/")), base) for i in ignored]
     return list(dict.fromkeys(found))
 
 
@@ -281,7 +315,7 @@ def convert_command(args):
     _summary("Saves and states", save_moves, save_skipped)
     left = _leftovers(base, systems, old_name, old)
     if left:
-        print(ui.dim("Left in place (old layout's frontend folders): " + ", ".join(left)))
+        print(ui.dim("Left in place (frontend files and folders): " + ", ".join(left)))
     if not planned:
         print(ui.green("Nothing to move"))
     if args.dry_run:
@@ -293,10 +327,16 @@ def convert_command(args):
                 ui.fail("Pass --yes to convert without a terminal to confirm on", 2)
             if not ui.confirm(f"Move {len(planned)} files?"):
                 return 1
-        for moves in (rom_moves, bios_moves, save_moves):
-            _, conflicts = apply_moves(moves)
+        failures = []
+        for moves in (save_moves, bios_moves, rom_moves):
+            _, conflicts, failed = apply_moves(moves, base)
+            failures += failed
             for src, dst in conflicts:
                 ui.warn(f"{dst} already exists; left {src} in place")
+        if failures:
+            for src, dst, err in failures:
+                ui.warn(f"could not move {src} → {dst}: {err}")
+            ui.fail(f"{len(failures)} move(s) failed; the layout is still {old_name}. Fix the cause and run convert again", 3)
     if not store.update_card(name, layout=new_name):
         return 3
     print(ui.green(f"💾 {name} is now {new_name}") + (ui.dim("  (run a sync to fill in the rest)") if planned else ""))

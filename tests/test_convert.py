@@ -16,11 +16,12 @@ LAYOUTS = {
                "save_naming": "minui",
                "retroarch": {"dir": "", "saves": "Saves/{tag}", "states": ".userdata/shared/{tag}-{core}"}},
     "onion": {"roms_dir": "Roms", "bios_dir": "BIOS", "disc_dir": ".multi-disc"},
+    "emudeck": {"roms_dir": "Emulation/roms", "bios_dir": "Emulation/bios"},
     "esde": {"roms_dir": "ROMs", "bios_dir": "BIOS",
              "retroarch": {"dir": "RetroArch", "saves": "saves/{core}", "states": "states/{core}"}},
 }
 SYSTEMS = [
-    {"bucket": "gba", "folders": {"knulli": "gba", "nextui": "Game Boy Advance (GBA)", "onion": "GBA", "esde": "gba"},
+    {"bucket": "gba", "folders": {"knulli": "gba", "nextui": "Game Boy Advance (GBA)", "onion": "GBA", "esde": "gba", "emudeck": "gba"},
      "nextui_bios_tags": ["MGBA"], "bios": {"files": ["gba_bios.bin"]}},
     {"bucket": "psx", "folders": {"knulli": "psx", "nextui": "PlayStation (PS)", "onion": "PS"},
      "bios": {"files": []}},
@@ -94,7 +95,7 @@ class ConvertTest(unittest.TestCase):
     def test_case_only_rename_is_a_move(self):
         touch(self.p("roms", "gba", "Game.zip"), b"abc")
         src, dst = self.p("roms", "gba", "Game.zip"), self.p("Roms", "gba", "Game.zip")
-        done, conflicts = convert.apply_moves([(src, dst)])
+        done, conflicts, _ = convert.apply_moves([(src, dst)])
         self.assertEqual((done, conflicts), ([(src, dst)], []))
         self.assertEqual(os.listdir(self.base), ["Roms"])
         self.assertEqual(os.listdir(self.p("Roms")), ["gba"])
@@ -104,7 +105,7 @@ class ConvertTest(unittest.TestCase):
         src, dst = self.p("roms", "gba", "Game.zip"), self.p("Roms", "Game Boy Advance (GBA)", "Game.zip")
         touch(src, b"a")
         touch(dst, b"b")
-        done, conflicts = convert.apply_moves([(src, dst)])
+        done, conflicts, _ = convert.apply_moves([(src, dst)])
         self.assertEqual((done, conflicts), ([], [(src, dst)]))
         with open(src, "rb") as f:
             self.assertEqual(f.read(), b"a")
@@ -112,7 +113,7 @@ class ConvertTest(unittest.TestCase):
     def test_rerun_plans_nothing(self):
         touch(self.p("roms", "gba", "Game.zip"))
         touch(self.p("bios", "gba_bios.bin"))
-        done, conflicts = convert.apply_moves(self.roms()[0] + self.bios()[0])
+        done, conflicts, _ = convert.apply_moves(self.roms()[0] + self.bios()[0])
         self.assertEqual(len(done), 2)
         self.assertEqual(self.roms()[0], [])
         self.assertEqual(self.bios()[0], [])
@@ -128,14 +129,14 @@ class ConvertTest(unittest.TestCase):
                 raise FileNotFoundError(b)
             return real(a, b)
         with mock.patch.object(convert.os.path, "samefile", side_effect=same):
-            done, conflicts = convert.apply_moves([(src, dst)])
+            done, conflicts, _ = convert.apply_moves([(src, dst)])
         self.assertEqual((done, conflicts), ([(src, dst)], []))
         self.assertTrue(os.path.exists(dst))
 
     def test_source_gone_is_not_a_crash(self):
         src, dst = self.p("roms", "gba", "Game.zip"), self.p("Roms", "x", "Game.zip")
         touch(dst)
-        self.assertEqual(convert.apply_moves([(src, dst)]), ([], []))
+        self.assertEqual(convert.apply_moves([(src, dst)]), ([], [], []))
 
     def test_real_subfolder_stays_and_game_folder_flattens(self):
         touch(self.p("Roms", "Game Boy Advance (GBA)", "Foo", "bar.zip"))
@@ -150,7 +151,7 @@ class ConvertTest(unittest.TestCase):
         touch(self.p("bios", "fbneo", "neogeo.zip"))
         moves, _ = convert.plan_bios(self.base, systems, "knulli", K, "nextui", N)
         self.assertEqual(moves, [(self.p("bios", "fbneo", "neogeo.zip"), self.p("Bios", "X", "fbneo", "neogeo.zip"))])
-        done, _ = convert.apply_moves(moves)
+        done, _, _ = convert.apply_moves(moves)
         self.assertTrue(os.path.isfile(self.p("Bios", "X", "fbneo", "neogeo.zip")))
 
     def test_shared_rom_folder_moves_once(self):
@@ -269,8 +270,79 @@ class ConvertTest(unittest.TestCase):
         self.assertEqual(self.saves(rom_moves=self.roms()[0]), ([], []))
 
 
-if __name__ == "__main__":
-    unittest.main()
+
+class FixesTest(ConvertTest):
+    def test_frontend_metadata_is_not_moved_and_is_listed(self):
+        for f in ("Game.zip", "gamelist.xml", "images/a.png", "videos/a.mp4", "Game.zip.part"):
+            touch(self.p("roms", "gba", f))
+        moves, _ = self.roms()
+        self.assertEqual([m[0] for m in moves], [self.p("roms", "gba", "Game.zip")])
+        self.assertEqual(sorted(convert._leftovers(self.base, SYSTEMS, "knulli", K)),
+                         ["roms/gba/Game.zip.part", "roms/gba/gamelist.xml", "roms/gba/images", "roms/gba/videos"])
+
+    def test_onion_metadata_is_not_moved_and_is_listed(self):
+        for f in ("Game.zip", "miyoogamelist.xml", "Imgs/a.png", "cache6.db"):
+            touch(self.p("Roms", "GBA", f))
+        moves, _ = self.roms(old=("onion", O), new=("knulli", K))
+        self.assertEqual([m[0] for m in moves], [self.p("Roms", "GBA", "Game.zip")])
+        self.assertEqual(sorted(convert._leftovers(self.base, SYSTEMS, "onion", O)),
+                         ["Roms/GBA/Imgs", "Roms/GBA/cache6.db", "Roms/GBA/miyoogamelist.xml"])
+
+    def test_emudeck_both_ways(self):
+        E = LAYOUTS["emudeck"]
+        touch(self.p("Emulation", "roms", "gba", "Game.zip"))
+        moves, _ = self.roms(old=("emudeck", E), new=("esde", LAYOUTS["esde"]))
+        self.assertEqual(moves, [(self.p("Emulation", "roms", "gba", "Game.zip"), self.p("ROMs", "gba", "Game.zip"))])
+        touch(self.p("ROMs", "gba", "Other.zip"))
+        moves, _ = self.roms(old=("esde", LAYOUTS["esde"]), new=("emudeck", E))
+        self.assertIn((self.p("ROMs", "gba", "Other.zip"), self.p("Emulation", "roms", "gba", "Other.zip")), moves)
+
+    def test_prune_stops_at_base(self):
+        os.makedirs(self.p("a", "b"))
+        convert._prune(self.p("a", "b"), self.p("a"))
+        self.assertTrue(os.path.isdir(self.p("a")))
+        self.assertFalse(os.path.exists(self.p("a", "b")))
+
+    def test_oserror_is_a_failure_and_the_rest_go_on(self):
+        touch(self.p("a"))
+        touch(self.p("b"))
+        real = os.rename
+        def rename(src, dst):
+            if src.endswith("a"):
+                raise OSError("boom")
+            return real(src, dst)
+        with mock.patch("os.rename", rename):
+            done, conflicts, failures = convert.apply_moves([(self.p("a"), self.p("x", "a")), (self.p("b"), self.p("x", "b"))])
+        self.assertEqual(len(done), 1)
+        self.assertEqual([f[0] for f in failures], [self.p("a")])
+
+    def test_partial_run_can_be_finished(self):
+        for n in ("A.zip", "B.zip"):
+            touch(self.p("roms", "gba", n))
+        touch(self.p("bios", "gba_bios.bin"))
+        touch(self.p("saves", "gba", "A.srm"))
+        rom, _ = self.roms()
+        bios, _ = self.bios()
+        sav, _ = convert.plan_saves(self.base, SYSTEMS, "knulli", K, "nextui", N, rom)
+        convert.apply_moves(sav)
+        convert.apply_moves(bios)
+        convert.apply_moves(rom[:1])  # stopped after the first ROM
+        rom2, _ = self.roms()
+        bios2, _ = self.bios()
+        sav2, _ = convert.plan_saves(self.base, SYSTEMS, "knulli", K, "nextui", N, rom2)
+        self.assertEqual(len(rom2), 1)
+        self.assertEqual((bios2, sav2), ([], []))
+        self.assertTrue(os.path.exists(self.p("Saves", "GBA", "A.zip.sav")))
+        convert.apply_moves(rom2)
+        self.assertEqual(self.roms()[0], [])
+
+    def test_case_only_rename_done_halfway_is_still_found(self):
+        for n in ("A.zip", "B.zip"):
+            touch(self.p("roms", "gba", n))
+        convert.apply_moves(self.roms()[0][:1])  # roms -> Roms renamed
+        self.assertNotIn("roms", os.listdir(self.base))
+        moves, _ = self.roms()
+        self.assertEqual(len(moves), 1)
 
 
 class ConvertCommandTest(unittest.TestCase):
@@ -360,6 +432,21 @@ class ConvertCommandTest(unittest.TestCase):
         self.assertEqual(self.run_cmd(layout="nextui"), 0)
         self.assertIn("Nothing to move", self.out.getvalue())
 
+    def test_failed_move_keeps_layout_and_exits_3(self):
+        real = os.rename
+        def rename(src, dst):
+            if src.endswith("Game.zip"):
+                raise OSError("boom")
+            return real(src, dst)
+        with mock.patch("os.rename", rename):
+            self.assertEqual(self.run_cmd(), 3)
+        self.assertEqual(self.layout(), "knulli")
+        self.assertIn("run convert again", self.err.getvalue())
+
     def test_no_yes_and_no_terminal_fails(self):
         self.assertEqual(self.run_cmd(yes=False), 2)
         self.assertFalse(self.moved())
+
+
+if __name__ == "__main__":
+    unittest.main()
