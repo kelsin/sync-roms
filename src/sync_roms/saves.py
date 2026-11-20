@@ -1,5 +1,5 @@
-"""RetroArch saves and states on a card: reading them, stashing them in the data folder, copying them back
-(`saves stash` and `saves apply`)."""
+"""RetroArch saves and states on a card (muOS: Pickles ones, through muos_saves): reading them, stashing them in the
+data folder, copying them back (`saves stash` and `saves apply`)."""
 import datetime
 import filecmp
 import json
@@ -7,7 +7,7 @@ import os
 import re
 import shutil
 
-from . import picker, store, ui
+from . import muos_saves, picker, store, ui
 
 STATE = re.compile(r"^(?P<stem>.+)\.state(\d+|\.auto)?$")
 STASH_KEYS = ("system", "game", "card", "layout", "core", "stashed", "files")
@@ -215,9 +215,31 @@ def write_stash(card, layout_name, system, stem, core, entries, now=None, dry_ru
         shutil.copy2(e["path"], os.path.join(path, e["name"]))
     store.write_json(os.path.join(path, "stash.json"),
                      {"system": system, "game": stem, "card": card, "layout": layout_name, "core": core,
-                      "stashed": now.isoformat(), "files": [{"name": e["name"], "kind": e["kind"]} for e in entries]},
+                      "stashed": now.isoformat(), "files": [_file(e) for e in entries]},
                      **store.PRETTY)
     return path
+
+
+def _file(entry):
+    """An entry as stash.json lists it; a Pickles one (muOS) also keeps its ROM dir and core."""
+    f = {"name": entry["name"], "kind": entry["kind"]}
+    if "rel" in entry:
+        f.update(rel=entry["rel"], core=entry["core"])
+    return f
+
+
+def _unsafe(name):
+    return name in ("", ".", "..") or any(c and c in name for c in ("/", os.sep, os.altsep))
+
+
+def _bad_pickles(data):
+    """Whether a stash's Pickles paths (each file's `rel`, its core) could leave the card's Pickles folder."""
+    rels = [f["rel"] for f in data["files"] if "rel" in f]
+    if not rels:
+        return False
+    return not isinstance(data["core"], str) or _unsafe(data["core"]) or _unsafe(data["game"]) \
+        or any(not isinstance(r, str) or os.path.isabs(r) or "\\" in r
+               or any(_unsafe(p) for p in r.split("/") if p) for r in rels)
 
 
 def load_stashes(systems=None):
@@ -236,7 +258,8 @@ def load_stashes(systems=None):
         if not all(isinstance(data[k], str) for k in ("game", "system", "stashed")) \
                 or not isinstance(data["files"], list) \
                 or any(not isinstance(f, dict) or not isinstance(f.get("name"), str)
-                       or any(c and c in f["name"] for c in ("/", os.sep, os.altsep)) for f in data["files"]):
+                       or any(c and c in f["name"] for c in ("/", os.sep, os.altsep)) for f in data["files"]) \
+                or _bad_pickles(data):
             continue
         if systems is None or data["system"] in systems:
             out.append({"dir": dirpath, **data})
@@ -341,6 +364,11 @@ def _states_note(cores):
         print(ui.yellow("⚠️  States only load in the core they were made with"))
 
 
+def _rel_prefix(entry):
+    """"<ROM dir>/" of a Pickles entry with one, else ""."""
+    return f"{entry['rel']}/" if entry.get("rel") else ""
+
+
 @picker.one_app
 def pick_stash(games, names):
     """The entries to stash, picked as games (none on) then their files (all on); None on Esc or nothing picked."""
@@ -357,7 +385,7 @@ def pick_stash(games, names):
     extras = [[(e["kind"], "dim"), (ui.human_size(e["size"]), ""),
                (datetime.datetime.fromtimestamp(e["mtime"]).strftime("%Y-%m-%d %H:%M"), "dim"), (e["core"] or "", "cyan")]
               for _, e in rows]
-    state = picker.filter_list("💾 Files to stash", [f"{k[1]} · {e['name']}" for k, e in rows], multi=True,
+    state = picker.filter_list("💾 Files to stash", [f"{k[1]} · {_rel_prefix(e)}{e['name']}" for k, e in rows], multi=True,
                                initial=[True] * len(rows), esc_asks=False, extras=extras,
                                hint="Space toggle · Enter stash")
     picked = [(k, e) for (k, e), on in zip(rows, state or []) if on]
@@ -365,16 +393,25 @@ def pick_stash(games, names):
 
 
 def stash_command(args):
-    """`saves stash [CARD]`: copy picked RetroArch saves and states off the card into the stash folder."""
+    """`saves stash [CARD]`: copy picked RetroArch (muOS: Pickles) saves and states off the card into the stash
+    folder."""
     base, card, layout_name, layout, _, catalog = _card(args, "stash")
     systems = catalog["systems"]
-    games, skipped = scan(base, layout_name, layout, systems, args.retroarch)
-    note = ui.dim(f"  skipped {_plural(skipped, 'file')} whose game isn't on the card (no ROM, or in several systems)")
-    broken = broken_links(base, layout, args.retroarch)
-    if broken:
-        ui.warn(_broken_hint(broken))
+    pickles = "pickles" in layout
+    if pickles:
+        if args.retroarch:
+            ui.warn("--retroarch is ignored on muOS cards")
+        games, skipped = muos_saves.scan(base, layout, systems)
+        note = ui.dim(f"  skipped {_plural(skipped, 'file')} whose game isn't on the card (no system's folder, "
+                      "or no single ROM of its name)")
+    else:
+        games, skipped = scan(base, layout_name, layout, systems, args.retroarch)
+        note = ui.dim(f"  skipped {_plural(skipped, 'file')} whose game isn't on the card (no ROM, or in several systems)")
+        broken = broken_links(base, layout, args.retroarch)
+        if broken:
+            ui.warn(_broken_hint(broken))
     if not games:
-        print(ui.yellow(f"↩️  No RetroArch saves or states on {card}"))
+        print(ui.yellow(f"↩️  No {'Pickles' if pickles else 'RetroArch'} saves or states on {card}"))
         if skipped:
             print(note)
         return 0
@@ -384,19 +421,20 @@ def stash_command(args):
         return 0
     groups = {}
     for (system, stem), e in picked:
-        groups.setdefault((system, stem, e["core"]), []).append(e)
-    for (system, stem, core), entries in groups.items():
+        # a Pickles stash holds one ROM dir: same-named saves of two folders stay apart
+        groups.setdefault((system, stem, e["core"], e.get("rel")), []).append(e)
+    for (system, stem, core, _), entries in groups.items():
         folder = write_stash(card, layout_name, system, stem, core, entries, dry_run=args.dry_run)
         if args.dry_run:
             print(ui.dim(f"  {folder}: {', '.join(e['name'] for e in entries)}"))
-    done = f"{len(picked)} file(s) of {len({k[:2] for k in groups})} game(s)"
+    done = f"{len(picked)} file(s) of {len({(k[0], k[1], k[3]) for k in groups})} game(s)"
     if args.dry_run:
         print(ui.yellow(f"🧪 Would stash {done} to {stash_root()}"))
         return 0
     print(ui.green(f"💾 Stashed {done} to {stash_root()}"))
     if skipped:
         print(note)
-    _states_note({core for (_, _, core), entries in groups.items() if any(e["kind"] == "state" for e in entries)})
+    _states_note({core for (_, _, core, _), entries in groups.items() if any(e["kind"] == "state" for e in entries)})
     return 0
 
 
@@ -450,12 +488,18 @@ def _ask_core(base, layout, system, retroarch_dir):
 
 
 def apply_command(args):
-    """`saves apply [CARD]`: copy picked stashes into the card's RetroArch folders for its layout."""
+    """`saves apply [CARD]`: copy picked stashes into the card's RetroArch folders for its layout (muOS: Pickles
+    folders, at the paths they were stashed from)."""
     base, card, layout_name, layout, device, catalog = _card(args, "apply")
+    pickles = "pickles" in layout  # Pickles and RetroArch states differ: a stash only goes back to its own kind
+    if pickles and args.retroarch:
+        ui.warn("--retroarch is ignored on muOS cards")
     by_id = {s["bucket"]: s for s in catalog["systems"]}
     stems = rom_stems(base, layout_name, layout, catalog["systems"])
     rows = []
     for stash in load_stashes():
+        if muos_saves.is_pickles(stash) != pickles:
+            continue
         system = _target_system(stash, by_id, catalog["layouts"], stems)
         if system and store.system_applies(system, device, layout_name):
             rows.append((stash, system))
@@ -467,12 +511,13 @@ def apply_command(args):
                (stash["core"] or "", "cyan"),
                ("" if system["bucket"] in stems.get(stash["game"], ()) else "not on card", "red")]
               for stash, system in rows]
-    chosen = pick_apply([stash["game"] for stash, _ in rows], extras,
-                        [(system["bucket"], stash["game"]) for stash, system in rows])
+    rels = [muos_saves.stash_rel(stash) for stash, _ in rows]  # None: RetroArch; a game per ROM dir on muOS
+    chosen = pick_apply([stash["game"] + (f" · {rel}" if rel else "") for (stash, _), rel in zip(rows, rels)], extras,
+                        [(system["bucket"], stash["game"], rel) for (stash, system), rel in zip(rows, rels)])
     if not chosen:
         print(ui.yellow("↩️  Nothing applied"))
         return 0
-    broken = broken_links(base, layout, args.retroarch)
+    broken = [] if pickles else broken_links(base, layout, args.retroarch)
     if broken:
         ui.fail(_broken_hint(broken), 2)
     cores, plan = {}, []
@@ -486,8 +531,8 @@ def apply_command(args):
             continue
         stash = dict(stash, files=present)
         core = stash["core"]
-        needs_core = any("{core}" in layout["retroarch"]["saves" if f["kind"] == "save" else "states"]
-                         for f in present)
+        needs_core = not pickles and any("{core}" in layout["retroarch"]["saves" if f["kind"] == "save" else "states"]
+                                         for f in present)
         if core is None and needs_core:
             if system["bucket"] not in cores:
                 cores[system["bucket"]] = _ask_core(base, layout, system, args.retroarch)
@@ -495,7 +540,8 @@ def apply_command(args):
             if core is None:
                 ui.warn(f"Skipped {stash['game']}: no core folder for its saves")
                 continue
-        plan.append((stash, plan_apply(stash, base, layout_name, layout, system, core, args.retroarch)))
+        plan.append((stash, muos_saves.plan_apply(stash, base, layout, system, core) if pickles
+                     else plan_apply(stash, base, layout_name, layout, system, core, args.retroarch)))
     differs = [dst for _, steps in plan for _, dst, state in steps if state == "differs"]
     same = sum(state == "same" for _, steps in plan for _, _, state in steps)
     overwrite = args.dry_run

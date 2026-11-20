@@ -12,7 +12,7 @@ from helpers import touch  # noqa: E402
 from sync_roms import mirroring, scrape_files, scrape_plan, store, ui  # noqa: E402
 
 GBA = {"name": "Game Boy Advance", "bucket": "gba",
-       "folders": {"esde": "gba"}}
+       "folders": {"esde": "gba", "muos": "gba"}, "muos_catalogue": "Nintendo Game Boy Advance"}
 LISTING = {
     "scrapes/gba/covers/A.png": 5, "scrapes/gba/screenshots/A.jpg": 6, "scrapes/gba/3dboxes/A.png": 7,
     "scrapes/gba/covers/hacks/B.png": 9,
@@ -24,11 +24,55 @@ def systems():
     return store.repo_json("systems")
 
 
+class DataTest(unittest.TestCase):
+    def test_muos_systems_name_their_catalogue(self):
+        for s in systems():
+            self.assertEqual(bool(s["folders"]["muos"]), "muos_catalogue" in s, s["bucket"])
+
+
 class ArcadeGamelistTest(unittest.TestCase):
     def test_mame_entries_take_their_name_from_metadata(self):
         meta = {"1942.zip": {"name": "1942", "desc": "d"}}
         _, entries, _ = scrape_plan.plan_scrapes("esde", ["1942.zip", "x.zip"], {}, meta, "/m", "/r", lambda rom: True)
         self.assertEqual(entries, {"1942.zip": {"name": "1942", "desc": "d"}})
+
+
+class MuosPlanTest(unittest.TestCase):
+    def plan(self, rels, root, **kw):
+        return scrape_plan.plan_scrapes("muos", rels, LISTING, kw.get("meta", META), root, "/card/ROMS/gba", lambda rom: True)
+
+    def test_box_preview_and_text_go_in_the_catalogue(self):
+        with tempfile.TemporaryDirectory() as root:
+            jobs, entries, texts = self.plan(["A.zip"], root)
+        self.assertEqual(sorted((k, os.path.relpath(p, root)) for k, p, _ in jobs), [
+            ("scrapes/gba/covers/A.png", os.path.join("box", "A.png")),
+            ("scrapes/gba/screenshots/A.jpg", os.path.join("preview", "A.jpg")),
+        ])
+        self.assertEqual(entries, {})  # muOS has no gamelist
+        self.assertEqual([(os.path.relpath(p, root), t) for p, t in texts], [(os.path.join("text", "A.txt"), "An adventure.\n")])
+
+    def test_rom_in_a_subfolder_gets_flat_catalogue_names(self):
+        with tempfile.TemporaryDirectory() as root:
+            jobs, _, _ = self.plan(["hacks/B.zip"], root)
+        self.assertEqual([os.path.relpath(p, root) for _, p, _ in jobs], [os.path.join("box", "B.png")])
+
+    def test_only_roms_on_the_card_are_planned(self):
+        with tempfile.TemporaryDirectory() as root:
+            jobs, _, texts = scrape_plan.plan_scrapes("muos", ["A.zip"], LISTING, META, root, "/x", lambda rom: False)
+        self.assertEqual((jobs, texts), ([], []))
+
+    def test_build_plan_uses_the_catalogue_folder_and_skips_unchanged_text(self):
+        with tempfile.TemporaryDirectory() as base:
+            data = {"gba": (LISTING, META)}
+            args = ("muos", [GBA], data, {"gba": ["A.zip"]}, lambda s: "/x", os.path.join(base, "ES-DE"),
+                    lambda p: True, base)
+            plan = scrape_plan.build_scrape_plan(*args)
+            catalogue = os.path.join(base, "MUOS", "info", "catalogue", "Nintendo Game Boy Advance")
+            self.assertEqual(sorted(j[1] for j in plan["jobs"]),
+                             sorted([os.path.join(catalogue, "box", "A.png"), os.path.join(catalogue, "preview", "A.jpg")]))
+            self.assertEqual(len(plan["writes"]), 1)
+            scrape_plan.apply_scrape_plan({"jobs": [], "gamelists": {}, "writes": plan["writes"]}, base)
+            self.assertEqual(scrape_plan.build_scrape_plan(*args)["writes"], [])
 
 
 class ApplyFailureTest(unittest.TestCase):
@@ -129,7 +173,20 @@ class EmudeckPlanTest(unittest.TestCase):
                              [os.path.join(media, "sg1000", "covers", "A.png")])
 
 
+def sysdef(bucket, muos=None, catalogue=None):
+    return {"bucket": bucket, "folders": {"muos": muos}, **({"muos_catalogue": catalogue} if catalogue else {})}
+
+
 class StaleMediaTest(unittest.TestCase):
+    def run_stale(self, layout, systems, files, roms):
+        """Paths (relative to the card) stale_media wants removed, given card files and ROM files."""
+        with tempfile.TemporaryDirectory() as base:
+            for rel in files + roms:
+                touch(os.path.join(base, rel))
+            roms_dir = os.path.join(base, "ROMS" if layout == "muos" else "Games")
+            stale = scrape_plan.stale_media(layout, systems, roms_dir, os.path.join(base, "ES-DE"), base)
+            return sorted(os.path.relpath(p, base) for p in stale)
+
     def run_onion(self, layout, files):
         with tempfile.TemporaryDirectory() as base:
             for rel in files + ["Roms/GBA/Game.zip"]:
@@ -192,6 +249,41 @@ class StaleMediaTest(unittest.TestCase):
             system = {"bucket": "gba", "folders": {"allium": "GBA"}}
             self.assertEqual(scrape_plan.prune_empty_systems("allium", [system], os.path.join(base, "Roms")), [])
             self.assertTrue(os.path.exists(os.path.join(base, "Roms/GBA/Game.zip")))
+
+    CAT = os.path.join("MUOS", "info", "catalogue")
+
+    def test_muos_removes_art_for_roms_that_are_gone(self):
+        cat = os.path.join(self.CAT, "Nintendo Game Boy Advance")
+        stale = self.run_stale("muos", [sysdef("gba", "gba", "Nintendo Game Boy Advance")],
+                               [f"{cat}/box/Keep.png", f"{cat}/box/Gone.png", f"{cat}/preview/Gone.jpg", f"{cat}/text/Gone.txt",
+                                f"{cat}/text/Keep.txt"],
+                               ["ROMS/gba/Keep.zip"])
+        self.assertEqual(stale, [f"{cat}/box/Gone.png", f"{cat}/preview/Gone.jpg", f"{cat}/text/Gone.txt"])
+
+    def test_muos_matches_names_ignoring_case(self):
+        cat = os.path.join(self.CAT, "Nintendo Game Boy Advance")
+        self.assertEqual(self.run_stale("muos", [sysdef("gba", "gba", "Nintendo Game Boy Advance")],
+                                        [f"{cat}/box/keep.png"], ["ROMS/gba/KEEP.gba"]), [])
+
+    def test_muos_only_touches_box_preview_and_text(self):
+        cat = os.path.join(self.CAT, "Nintendo Game Boy Advance")
+        files = [f"{cat}/grid/Gone.png", f"{cat}/manual/Gone.txt", f"{cat}/overlay/base/Gone.png",
+                 os.path.join(self.CAT, "Folder", "Gone.png"), os.path.join(self.CAT, "Theme", "Gone.png")]
+        self.assertEqual(self.run_stale("muos", [sysdef("gba", "gba", "Nintendo Game Boy Advance")], files,
+                                        ["ROMS/gba/Keep.gba"]), [])
+
+    def test_muos_systems_sharing_a_catalogue_keep_each_others_art(self):
+        cat = os.path.join(self.CAT, "Arcade")
+        systems = [sysdef("mame", "mame", "Arcade"), sysdef("cps1", "cps1", "Arcade")]
+        stale = self.run_stale("muos", systems, [f"{cat}/box/sf2.png", f"{cat}/box/pacman.png", f"{cat}/box/gone.png"],
+                               ["ROMS/mame/pacman.zip", "ROMS/cps1/sf2.zip"])
+        self.assertEqual(stale, [f"{cat}/box/gone.png"])
+
+    def test_muos_leaves_a_system_with_no_roms_alone(self):
+        cat = os.path.join(self.CAT, "Nintendo Game Boy Advance")
+        self.assertEqual(self.run_stale("muos", [sysdef("gba", "gba", "Nintendo Game Boy Advance")],
+                                        [f"{cat}/box/Other.png"], ["ROMS/gba/.keep"]), [])
+
 
 def system_of(bucket):
     return next(s for s in systems() if s["bucket"] == bucket)

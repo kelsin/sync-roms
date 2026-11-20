@@ -12,7 +12,7 @@ CLEAR_KEY = "c"
 CLEAR_ALL_KEY = "D"
 COLLECTIONS_KEY = "l"
 SURPRISE_KEY = "S"
-KEEP_KEY = "k"
+KEEP_KEY = "K"
 PAST_SURPRISE_KEY = "p"
 META_KEY = "m"
 VARIANT_KEY = "v"
@@ -30,8 +30,8 @@ LIST_KEYS = [("Enter", "the system's games"), ("f", "full system: every file in 
              ("s", "a set's games across this card's systems"), ("l", "collections on this card"),
              ("S", "Surprise menu: turn it on or off, or pick its systems"),
              ("D", "clear every pick, full system and set from the card")]
-KEEP_HINT = " · k keep card files"
-KEEP_KEYS = [("k", "pick every card file that matches a storage game")]
+KEEP_HINT = " · K keep card files"
+KEEP_KEYS = [("K", "pick every card file that matches a storage game")]
 GAMES_KEYS = [("s", "sets on this system: narrow to one, or pick its games"),
               ("r", "narrow the set picked with s to one series of games"),
               ("m", "narrow by scraped metadata (developer, genre, year...)"),
@@ -255,7 +255,7 @@ def edit_card(name, setup=None, to_fetch=None, card_match=None):
     """The card's system list. setup: (device or None for Full, layout) to edit with instead of the saved one.
     to_fetch(system, keys): the keys not on the card yet, when editing from a sync; the status then shows how much
     a sync would download. card_match(system, keys): the keys of the system's storage files that are on the card, when
-    editing from a sync; it enables k."""
+    editing from a sync; it enables K."""
     catalog = store.load_catalog()
     cards = store.load_cards()
     setup = setup or picker.saved_setup(cards.get(name), catalog["devices"], catalog["layouts"], name)

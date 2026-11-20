@@ -37,7 +37,7 @@ def default_on(entry):
     """Surprise's default for a card's cards.json entry: on where the layout shows surprises (frontend collections, or
     Onion's Surprise app) or isn't known yet."""
     layout = entry.get("layout") if isinstance(entry, dict) else None
-    return layout is None or layout in frontend.FRONTEND_LAYOUTS or layout == "onion"
+    return layout is None or layout in frontend.FRONTEND_LAYOUTS or layout in ("onion", "muos")
 
 
 def enabled(entry):
