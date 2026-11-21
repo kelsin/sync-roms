@@ -11,7 +11,7 @@ from concurrent.futures import ThreadPoolExecutor
 from botocore.exceptions import BotoCoreError, ClientError, NoCredentialsError
 
 from . import __version__, budget, cardedit, cardfs, clean, commands, downloads, drivers, edit, external, frontend, inventory, m3u, mirroring, picker, runtime, s3, scrape_plan, store
-from . import muos_collections, onion_surprise, pico8, raofflineproxy, rocknix_collections, saves, spruce_collections, surprise, themeart, ui, usersettings, vita
+from . import muos_collections, onion_surprise, pico8, raofflineproxy, rocknix_collections, saves, spruce_collections, spruce_os, surprise, themeart, ui, usersettings, vita
 from . import collections as colls
 
 
@@ -1072,6 +1072,7 @@ def sync_card(args):
         failed = pico8.run(card, layout_name, base, args.dry_run, syncs=False)
         failed += onion_surprise.install(card, layout_name, base, args.dry_run)
         failed += raofflineproxy.install(card, layout_name, base, args.dry_run)
+        failed += spruce_os.install(card, layout_name, base, args.dry_run)
         if onion_surprise.write_list(card, layout_name, base, roms_dir, systems, args.dry_run) and clean_card:
             clean._clean_root = base
         print(ui.yellow(f"👋 {card} has nothing to sync."))
@@ -1377,6 +1378,7 @@ def sync_card(args):
         pico8.run(card, layout_name, base, True, syncs=any(s["bucket"] == "pico8" for s in chosen))
         onion_surprise.install(card, layout_name, base, True)
         raofflineproxy.install(card, layout_name, base, True)
+        spruce_os.install(card, layout_name, base, True)
         stale_count = 0
         if scrapes:
             stale_files = scrape_plan.stale_media(layout_name, manifest['systems'], roms_dir, stale_es_dir, base)
@@ -1452,6 +1454,7 @@ def sync_card(args):
     failed += pico8.run(card, layout_name, base, False, pico8_wrote, syncs=any(s["bucket"] == "pico8" for s in chosen))
     failed += onion_surprise.install(card, layout_name, base, False)
     failed += raofflineproxy.install(card, layout_name, base, False)
+    failed += spruce_os.install(card, layout_name, base, False)
     if theme_todo:
         failed += downloads.run_downloads(theme_todo, "Themes", "🎨", os.path.join(base, themes_dir), failures)
     prefixed = 0
