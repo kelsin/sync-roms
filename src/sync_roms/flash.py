@@ -1,7 +1,8 @@
-"""Knulli, BaseOS, muOS and ROCKNIX images in storage's os/ folder, and which of them fit a device."""
+"""Knulli, BaseOS, muOS, ROCKNIX and OakMoss images in storage's os/ folder, and which of them fit a device."""
 import collections
 import contextlib
 import gzip
+import lzma
 import os
 import plistlib
 import re
@@ -22,6 +23,7 @@ PREFIX = "os/"
 KNULLI = PREFIX + "knulli/"
 BASEOS = PREFIX + "baseos/"
 MUOS = PREFIX + "muos/"
+OAKMOSS = PREFIX + "oakmoss/"
 ROCKNIX = runtime.ROCKNIX_PREFIX
 DD = ["sudo", "dd"]
 WRITE_BLOCK = 4 * 1024 * 1024
@@ -38,7 +40,7 @@ def raw(disk):
 
 
 # the kinds of image, asked for when storage has more than one: Knulli and BaseOS images are picked by device
-FIRMWARES = {"knulli": "Knulli or BaseOS", "muos": "muOS", "rocknix": "ROCKNIX"}
+FIRMWARES = {"knulli": "Knulli or BaseOS", "muos": "muOS", "rocknix": "ROCKNIX", "oakmoss": "OakMoss"}
 
 
 def devices_for(devices, firmware):
@@ -49,7 +51,10 @@ def devices_for(devices, firmware):
 def images(listing, firmware="knulli"):
     """The keys of the Knulli images (os/knulli/knulli-*.img.gz) and BaseOS images (os/baseos/baseos-*.img.zip), or
     with firmware "muos" the muOS images (os/muos/muos-*.img.gz), with "rocknix" the ROCKNIX images
-    (os/rocknix/ROCKNIX-*.img.gz; not its update .tar files)."""
+    (os/rocknix/ROCKNIX-*.img.gz; not its update .tar files), with "oakmoss" the OakMoss images
+    (os/oakmoss/oakmoss-*.img.xz; not its .omupd update files)."""
+    if firmware == "oakmoss":
+        return [k for k in listing if re.fullmatch(re.escape(OAKMOSS) + r"oakmoss-[^/]*\.img\.xz", k)]
     if firmware == "rocknix":
         return [k for k in listing if re.fullmatch(re.escape(ROCKNIX) + r"ROCKNIX-[^/]*\.img\.gz", k)]
     if firmware == "muos":
@@ -81,6 +86,9 @@ def _matches(key, device_id, rocknix_image=None):
             return False
         soc, _, variant = rocknix_image.partition("-")
         return found[0] == soc and (not variant or found[1] == variant)
+    if key.startswith(OAKMOSS):  # oakmoss-<device>-v<version>[-sd1].img.xz, <device> the id after its brand
+        m = re.fullmatch(re.escape(OAKMOSS) + r"oakmoss-([^-]+)-v.*\.img\.xz", key)
+        return bool(m) and m.group(1) == device_id.split("-", 1)[-1].replace("-", "")
     model = _model(key)
     if not model:
         return False
@@ -95,6 +103,9 @@ def flashable_devices(devices, keys):
 
 def _newest(key):
     """Sort key putting the newest image first: Knulli's (muOS's, ROCKNIX's) date, BaseOS's version."""
+    if key.startswith(OAKMOSS):
+        m = re.search(r"-v(\d+(?:\.\d+)*)", key)
+        return tuple(-int(n) for n in m.group(1).split(".")) if m else (0,)
     found = re.findall(r"(?<!\d)\d{8}(?!\d)", key)
     if found and not key.startswith(BASEOS):
         return (-int(found[-1]),)
@@ -203,7 +214,7 @@ def _finish(proc):
 
 @contextlib.contextmanager
 def _source(path):
-    """(stream, fraction): the decompressed image of a .img.gz or .img.zip, and how far through it the reading is."""
+    """(stream, fraction): the decompressed image of a .img.gz, .img.xz or .img.zip, and how far through it the reading is."""
     with open(path, "rb") as raw_file:
         if path.endswith(".zip"):
             with zipfile.ZipFile(raw_file) as z:
@@ -220,12 +231,12 @@ def _source(path):
                     yield Counted(), lambda: size[0] / total if total else 1.0
         else:
             total = os.path.getsize(path)
-            with gzip.open(raw_file) as src:
+            with (lzma.open(raw_file) if path.endswith(".xz") else gzip.open(raw_file)) as src:
                 yield src, lambda: raw_file.tell() / total if total else 1.0
 
 
 def write_image(path, disk, progress=None):
-    """Stream a .img.gz or .img.zip to the disk through dd. Returns the bytes written."""
+    """Stream a .img.gz, .img.xz or .img.zip to the disk through dd. Returns the bytes written."""
     proc = None
     try:
         proc = subprocess.Popen(DD + [f"of={raw(disk)}", f"bs={WRITE_BLOCK}", "iflag=fullblock"],
@@ -249,7 +260,7 @@ def write_image(path, disk, progress=None):
         if progress:
             progress(1.0)
         return size
-    except (gzip.BadGzipFile, zipfile.BadZipFile, EOFError, zlib.error) as e:
+    except (gzip.BadGzipFile, lzma.LZMAError, zipfile.BadZipFile, EOFError, zlib.error) as e:
         _stop(proc)
         raise FlashError(f"the image file is damaged: {e}") from e
     except OSError as e:
@@ -316,7 +327,7 @@ def run(args):
     listing = inventory.files(PREFIX)
     available = [f for f in FIRMWARES if images(listing, f)]
     if not available:
-        ui.failure(ui.red("❌ no Knulli, BaseOS, muOS or ROCKNIX images in storage's os/"))
+        ui.failure(ui.red("❌ no Knulli, BaseOS, muOS, ROCKNIX or OakMoss images in storage's os/"))
         return 1
     if len(available) > 1:
         i = picker.filter_list("🧩 Which firmware?", [FIRMWARES[f] for f in available],
@@ -328,7 +339,12 @@ def run(args):
         firmware = available[0]
     keys = images(listing, firmware)
     devices = store.repo_json("devices")
-    devices = devices_for(devices, firmware) if firmware in ("muos", "rocknix") else flashable_devices(devices, keys)
+    if firmware == "oakmoss":  # no firmware entry in devices.json: the devices an image's name matches
+        devices = [d for d in devices if any(_matches(k, d["id"]) for k in keys)]
+    elif firmware in ("muos", "rocknix"):
+        devices = devices_for(devices, firmware)
+    else:
+        devices = flashable_devices(devices, keys)
     i = picker.filter_list("🎯 Which device?", [d["name"] for d in devices],
                            hint="/ filter · j/k move · Enter continue · Esc quit")
     if i is None:
