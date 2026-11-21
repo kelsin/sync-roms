@@ -10,7 +10,7 @@ import unicodedata
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
 
-from . import cardfs, external, inventory, m3u, runtime, s3, saves, store, ui
+from . import cardfs, external, inventory, m3u, pico8, rocknix_collections, runtime, s3, saves, store, ui
 
 STALE_HINT = " (not in storage any more: run sync-roms cache update)"  # a file the cache lists is gone from the storage folder
 
@@ -212,7 +212,8 @@ IGNORED_ROOT_FILES = {
     "_info.txt", "gamelist.xml",                                   # Batocera / Knulli
     "miyoogamelist.xml",                                           # Onion
 }
-ROCKNIX_PORTS_FILES = ("Install Collections.sh", "RAOfflineProxy Install.sh")  # sync-roms's scripts, run from ROCKNIX's Ports
+# sync-roms's scripts, run from ROCKNIX's Ports (raofflineproxy's KINDS names the second; it imports downloads, through onion_surprise)
+ROCKNIX_PORTS_FILES = (os.path.basename(rocknix_collections.SCRIPT), "RAOfflineProxy Install.sh")
 
 
 def layout_files(layout_name, system):
@@ -220,7 +221,7 @@ def layout_files(layout_name, system):
     return ROCKNIX_PORTS_FILES if layout_name == "rocknix" and system["bucket"] == "ports" else ()
 
 
-PICO8_FILES = ("pico8_dyn", "pico8_64", "pico8.dat")  # the proprietary PICO-8 runtime that pico8.py extracts into ROCKNIX's pico8 ROM folder
+PICO8_FILES = tuple(os.path.basename(m) for m in pico8.members("rocknix"))  # the PICO-8 runtime pico8.py extracts into ROCKNIX's pico8 ROM folder
 OWN_ROOT_FILES = {"ports": ROCKNIX_PORTS_FILES, "pico8": PICO8_FILES}
 
 

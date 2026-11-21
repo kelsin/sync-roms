@@ -19,7 +19,7 @@ EXTRACT_MORE = {"spruce": ("pico-8/pico8_64",),  # spruce also wants the 64-bit 
                 "rocknix": ("pico-8/pico8_64",)}  # and so does ROCKNIX (aarch64)
 
 
-def _members(layout_name):
+def members(layout_name):
     return EXTRACT + EXTRACT_MORE.get(layout_name, ())
 
 
@@ -48,7 +48,7 @@ def _extract(key, size, folder, layout_name):
         s3.download((key, path, size))
         os.makedirs(folder, exist_ok=True)
         with zipfile.ZipFile(path) as z:
-            for member in _members(layout_name):
+            for member in members(layout_name):
                 target = os.path.join(folder, os.path.basename(member))
                 store.replace_file(target, z.read(member))
                 if member.endswith(("pico8_dyn", "pico8_64")):
@@ -80,7 +80,7 @@ def run(card, layout_name, base, dry_run, wrote=None, syncs=True):
     old = entry.get("pico8") if isinstance(entry, dict) else None
     old = old if isinstance(old, str) else None
     if kind == "extract":
-        missing = any(not os.path.isfile(os.path.join(target, os.path.basename(m))) for m in _members(layout_name))
+        missing = any(not os.path.isfile(os.path.join(target, os.path.basename(m))) for m in members(layout_name))
     else:
         missing = False
     if old == name and not missing:
@@ -115,7 +115,7 @@ def keep_in(dest, card, layout_name=None):
     recorded = entry.get("pico8") if isinstance(entry, dict) else None
     keep = {recorded} if isinstance(recorded, str) else set()
     if layout_name == "rocknix":
-        keep |= {os.path.basename(m) for m in _members(layout_name)}
+        keep |= {os.path.basename(m) for m in members(layout_name)}
     if os.path.isdir(dest):
         keep |= {n for n in os.listdir(dest) if n.lower().startswith("splore") or "with splore" in n.lower()}
     return keep
