@@ -82,7 +82,7 @@ TOPICS = {
   sync-roms games remove SYSTEM KEY... --card NAME [-n]
   sync-roms games full SYSTEM on|off --card NAME [-n]
   sync-roms games sets list | add ID | remove ID --card NAME [-n]
-  sync-roms games export --card NAME        one SYSTEM/file per line (full systems as 'SYSTEM/*'), then '@collections ID', '@frontend_collections NAME', '@drivers NAME', '@pico8 ZIP', '@surprise true|false' (only when it differs from the layout's default: on for esde/knulli/emudeck/muos/nextui/onion/spruce, off for allium) and '@surprises SYSTEM/file' lines
+  sync-roms games export --card NAME        one SYSTEM/file per line (full systems as 'SYSTEM/*'), then '@collections ID', '@frontend_collections NAME', '@drivers NAME', '@pico8 ZIP', '@surprise true|false' (only when it differs from the layout's default: on for esde/knulli/rocknix/emudeck/muos/nextui/onion/spruce, off for allium) and '@surprises SYSTEM/file' lines
   sync-roms games import FILE --card NAME [-n]            add the games in such a file; '@' lines replace the card's collections / frontend_collections / drivers / surprises and set pico8, and set Surprise on or off
 
   --card NAME is required: a card's games are saved in ~/.sync-roms/cards.json with the previous version kept as .bak. Removing only drops a game from the list.
@@ -104,7 +104,7 @@ TOPICS = {
   Your own lists of games (like a set, but personal), saved to ~/.sync-roms/collections/<id>.json after Done or Esc
   shows the changes; Quit discards. No git or gh needed, and nothing goes to storage or the repo. Same keys as the set
   editor. Deleting a collection that cards use asks first, then removes it from them (the file is kept as
-  <id>.json.bak). In a card's system list, l adds a collection to that card. Theme art picks the picture (Action, RPG, ...) the collection gets on ES-DE and Knulli cards
+  <id>.json.bak). In a card's system list, l adds a collection to that card. Theme art picks the picture (Action, RPG, ...) the collection gets on ES-DE, Knulli and ROCKNIX cards
   that use Art Book Next.
 """,
     "themes": """
@@ -171,7 +171,7 @@ TOPICS = {
   CARD is the card's folder (default: the current directory); it needs a layout (`sync-roms cards set NAME --layout`).
   stash lists the card's games that have RetroArch saves (.srm and .rtc) or states (.state, .stateN, .state.auto and their
   .png), then their files, and copies them to ~/.sync-roms/saves/<system>/<game>/<time>-<card>/ (with stash.json).
-  On layouts sorted by core and flat folders a save whose game isn't on the card is skipped; on Knulli the folder
+  On layouts sorted by core and flat folders a save whose game isn't on the card is skipped; on Knulli and ROCKNIX the folder
   gives the system.
   apply lists the stashes of systems the card syncs (one per game) and copies them into the card's RetroArch folders.
   A different file already there is only overwritten after you confirm (default no); identical ones are skipped.
@@ -180,6 +180,7 @@ TOPICS = {
   Layout    RetroArch folder             saves            states
   esde      RetroArch                    saves/<core>     states/<core>
   knulli    saves                        <system folder>  <system folder>
+  rocknix   roms (beside the ROMs)       <system folder>  savestates/<system folder>
   onion     Saves/CurrentProfile         saves/<core>     states/<core>
   allium    Saves/CurrentProfile         saves/<core>     states/<core>
   spruce    Saves                        saves            states
@@ -1257,7 +1258,7 @@ def sync_card(args):
         return f"Not enough space: {ui.human_size(need)} to download, {ui.human_size(free)} free" if need > free else None
 
     def frontend_step(dry_run):
-        """Write the card's collections as the frontend's custom collections (ES-DE, Knulli, EmuDeck's ES-DE)."""
+        """Write the card's collections as the frontend's custom collections (ES-DE, Knulli, ROCKNIX, EmuDeck's ES-DE)."""
         if layout_name not in frontend.FRONTEND_LAYOUTS and layout_name not in ("muos", "spruce"):
             return
         entry = store.load_cards().get(card)

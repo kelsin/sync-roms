@@ -21,7 +21,7 @@ def pick_art(collection):
     choices = themeart.art_choices()
     ids = [None, *choices]
     current = ids.index(collection.get("art")) if collection.get("art") in ids else 0
-    j = picker.filter_list(f"{themeart.art_emoji(collection.get('art'))} {collection['name']}: art in the Art Book Next theme (ES-DE, Knulli)",
+    j = picker.filter_list(f"{themeart.art_emoji(collection.get('art'))} {collection['name']}: art in the Art Book Next theme (ES-DE, Knulli, ROCKNIX)",
                            [f"{themeart.art_emoji(None)} None (the theme's default)",
                             *(f"{themeart.art_emoji(i)} {label}" for i, label in choices.items())], cursor=current,
                            preview=lambda j: themeart.art_png(ids[j]) if ids[j] else None)

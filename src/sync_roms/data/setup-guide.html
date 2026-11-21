@@ -439,6 +439,7 @@ const LAYOUTS = {
   onion: "Onion",
   allium: "Allium",
   spruce: "Spruce",
+  rocknix: "ROCKNIX",
   nextui: "NextUI",
   emudeck: "EmuDeck",
 };
@@ -1233,6 +1234,40 @@ const SECTIONS = [
     ],
   },
   {
+    id: "raofflineproxy-rocknix",
+    title: "RAOfflineProxy",
+    lede: "Earn RetroAchievements without a connection: the proxy caches games while online and queues unlocks until you reconnect.",
+    when: { layout: ["rocknix"] },
+    items: [
+      {
+        title: "Install it",
+        body: `
+          <ol>
+            <li>In ROCKNIX, enter your RetroAchievements account in <span class="path">${path("Game Settings")}</span>.</li>
+            <li>Sync the card. It puts <b>RAOfflineProxy Install</b> in <code>roms/ports</code>.</li>
+            <li>Launch <b>RAOfflineProxy Install</b> once from <b>Ports</b>. The app then shows under <b>Tools</b>.</li>
+          </ol>`,
+      },
+    ],
+  },
+  {
+    id: "rocknix-collections",
+    title: "Collections and Surprise",
+    lede: "ROCKNIX's EmulationStation reads collections only from internal storage, so a sync stages them on the card for an installer to copy.",
+    when: { layout: ["rocknix"] },
+    items: [
+      {
+        title: "Install them",
+        body: `
+          <ol>
+            <li>Sync the card. It puts <b>Install Collections</b> in <code>roms/ports</code> and the collections in <code>roms/.sync-roms-collections</code>.</li>
+            <li>Launch <b>Install Collections</b> once from <b>Ports</b>. It copies and enables them, then restarts EmulationStation. Its messages aren't shown on the device.</li>
+            <li>Run it again after a sync changes the collections.</li>
+          </ol>`,
+      },
+    ],
+  },
+  {
     id: "home",
     title: "Make ES-DE the home app",
     lede: "Last, so the device boots straight into ES-DE.",
@@ -1326,7 +1361,7 @@ function render() {
   document.getElementById("toc").innerHTML = shown.map(s => `<a href="#${s.id}">${esc(s.title)}</a>`).join("");
   document.getElementById("steps").innerHTML = shown.map(s => {
     const items = s.items.filter(i => matches(i.when, ctx));
-    const ref = !["install", "home", "raofflineproxy", "raofflineproxy-knulli"].includes(s.id);
+    const ref = !["install", "home", "raofflineproxy", "raofflineproxy-knulli", "raofflineproxy-rocknix"].includes(s.id);
     let body;
     if (!items.length) {
       body = `<div class="empty">Nothing here yet for this ${s.id === "emulators" ? "platform" : "setup"}.</div>`;
