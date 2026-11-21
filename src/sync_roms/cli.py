@@ -11,7 +11,7 @@ from concurrent.futures import ThreadPoolExecutor
 from botocore.exceptions import BotoCoreError, ClientError, NoCredentialsError
 
 from . import __version__, budget, cardedit, cardfs, clean, commands, downloads, drivers, edit, external, frontend, inventory, m3u, mirroring, picker, runtime, s3, scrape_plan, store
-from . import muos_collections, onion_surprise, pico8, raofflineproxy, spruce_collections, surprise, themeart, ui, usersettings, vita
+from . import muos_collections, onion_surprise, pico8, raofflineproxy, rocknix_collections, spruce_collections, surprise, themeart, ui, usersettings, vita
 from . import collections as colls
 
 
@@ -1328,6 +1328,8 @@ def sync_card(args):
             count = (len({os.path.dirname(p) for p, _ in plan["writes"]}) if layout_name == "muos"
                      else len(plan["enable"]) if layout_name == "spruce" else len(plan["writes"]))
             print(ui.green(f"💖 Wrote {count} collection(s) for {layout['label']}"))
+        if layout_name == "rocknix" and (plan["writes"] or plan["deletes"] or art):
+            print(f"💖 Run {os.path.basename(rocknix_collections.SCRIPT)[:-3]} from Ports on the device to install them")
 
     capacity = budget.card_capacity(saved or {}) if surprise.enabled(saved or {}) else None
     if capacity:

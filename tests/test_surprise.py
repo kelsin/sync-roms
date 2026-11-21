@@ -241,7 +241,7 @@ class History(helpers.DataDir):
 
 class Enabled(unittest.TestCase):
     def test_default_follows_the_layout(self):
-        for layout in ("esde", "knulli", "emudeck", "onion", "nextui"):
+        for layout in ("esde", "knulli", "emudeck", "onion", "nextui", "rocknix"):
             self.assertTrue(surprise.enabled({"layout": layout}))
         self.assertFalse(surprise.enabled({"layout": "allium"}))
         self.assertTrue(surprise.enabled({}))  # a card not synced yet has no layout

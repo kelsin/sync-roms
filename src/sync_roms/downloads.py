@@ -211,6 +211,7 @@ IGNORED_ROOT_FILES = {
     "systeminfo.txt", "systems.txt", "noload.txt", "flatten.txt",  # ES-DE
     "_info.txt", "gamelist.xml",                                   # Batocera / Knulli
     "miyoogamelist.xml",                                           # Onion
+    "install collections.sh",                                      # ROCKNIX ports/: sync-roms's collections installer
 }
 IGNORED_ROOT_DIRS = {"images", "videos", "manuals",                # Batocera / Knulli scraped media
                      "imgs"}                                       # Onion scraped box art

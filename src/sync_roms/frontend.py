@@ -1,12 +1,13 @@
-"""ES-DE/Knulli/EmuDeck custom collection files."""
+"""ES-DE/Knulli/EmuDeck/NextUI/ROCKNIX custom collection files."""
 import os
 import re
 from xml.sax import saxutils
 
-from . import cardfs, downloads, store, ui
+from . import cardfs, downloads, rocknix_collections, store, ui
 
-FRONTEND_LAYOUTS = {"esde", "knulli", "emudeck", "nextui"}
-_LABELS = {"esde": "ES-DE", "knulli": "Knulli", "emudeck": "EmuDeck", "nextui": "NextUI"}
+FRONTEND_LAYOUTS = {"esde", "knulli", "emudeck", "nextui", "rocknix"}
+_LABELS = {"esde": "ES-DE", "knulli": "Knulli", "emudeck": "EmuDeck", "nextui": "NextUI",
+           "rocknix": "ROCKNIX"}
 ESDE_LAYOUTS = ("esde", "emudeck")  # layouts whose frontend is ES-DE
 _DROPPED = '*",./:;<>\\|\n\t\r'  # characters ES-DE rejects in a collection name
 _UNESCAPE = {"&quot;": '"', "&apos;": "'"}
@@ -34,6 +35,8 @@ def _root(layout_name, base):
 def collection_path(layout_name, base, name):
     if layout_name == "nextui":  # one ROM path per line; no settings file lists it
         return os.path.join(base, "Collections", f"{name}.txt")
+    if layout_name == "rocknix":  # staged on the card; its install script copies them to internal storage
+        return os.path.join(base, rocknix_collections.STAGING, f"custom-{name}.cfg")
     return os.path.join(_root(layout_name, base), "collections", f"custom-{name}.cfg")
 
 
@@ -46,6 +49,8 @@ def settings_path(layout_name, base):
 def collection_line(layout_name, folder, rel):
     if layout_name == "nextui":
         return f"/Roms/{folder}/{rel}"
+    if layout_name == "rocknix":  # the card's roms/ is mounted there
+        return f"/storage/roms/{folder}/{rel}"
     return f"%ROMPATH%/{folder}/{rel}" if layout_name in ESDE_LAYOUTS else f"./roms/{folder}/{rel}"
 
 
@@ -145,7 +150,8 @@ def emudeck_problem(base, roms):
 
 
 def apply_collections(plan, layout_name, base):
-    """Write and delete plan's collection files and list or unlist them in the settings file; True when that file changed."""
+    """Write and delete plan's collection files and list or unlist them in the settings file; True when that file changed
+    (for rocknix, which has no settings on the card: when its install script was written or removed)."""
     for path, text in plan["writes"]:
         os.makedirs(os.path.dirname(path), exist_ok=True)
         store.replace_file(path, text, newline="\n")
@@ -154,6 +160,8 @@ def apply_collections(plan, layout_name, base):
             os.remove(path)
         except FileNotFoundError:
             pass
+    if layout_name == "rocknix":
+        return rocknix_collections.write_script(base, bool(plan["owned"] or plan["deletes"]))
     if layout_name == "nextui" or not (plan["enable"] or plan["disable"]):
         return False
     path = settings_path(layout_name, base)
@@ -188,7 +196,10 @@ def describe_collections(plan, layout_name):
         print(ui.dim(f"💖 would write {os.path.basename(path)} ({text.count(chr(10))} game(s))"))
     for path in plan["deletes"]:
         print(ui.dim(f"💖 would delete {os.path.basename(path)}"))
-    if layout_name != "nextui":
+    if layout_name == "rocknix":
+        if plan["writes"] or plan["deletes"]:
+            print(ui.dim(f"💖 then run {os.path.basename(rocknix_collections.SCRIPT)[:-3]} from Ports on the device"))
+    elif layout_name != "nextui":
         settings = os.path.basename(settings_path(layout_name, ""))
         if plan["enable"]:
             print(ui.dim(f"💖 would enable in {settings}: {', '.join(sorted(plan['enable']))}"))
