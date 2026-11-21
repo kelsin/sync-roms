@@ -3,6 +3,7 @@ import contextlib
 import os
 import queue
 import re
+import shutil
 import sys
 import tempfile
 import time
@@ -118,6 +119,12 @@ def download_playlist(job, disc_dir, coming, callback=None, wrote=None):
             data = f.read()
     os.makedirs(os.path.dirname(path), exist_ok=True)
     store.replace_file(path, m3u.prefixed_playlist(data, os.path.dirname(path), disc_dir, lambda p: name_key(p) in coming))
+
+
+def free_space(path):
+    while not os.path.exists(path):
+        path = os.path.dirname(path)
+    return shutil.disk_usage(path).free
 
 
 def run_downloads(todo, label, icon, base, failures=None, disc_dirs=None):
