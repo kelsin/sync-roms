@@ -1,5 +1,6 @@
 import contextlib
 import gzip
+import lzma
 import hashlib
 import io
 import os
@@ -103,6 +104,16 @@ class Write(unittest.TestCase):
         with open(self.target, "rb") as f:
             self.assertEqual(f.read(), self.data)
 
+    def test_write_copies_xz_image(self):
+        path = os.path.join(self.tmp.name, "img.img.xz")
+        with lzma.open(path, "wb") as f:
+            f.write(self.data)
+        seen = []
+        self.assertEqual(flash.write_image(path, "disk9", seen.append), len(self.data))
+        self.assertAlmostEqual(seen[-1], 1.0)
+        with open(self.target, "rb") as f:
+            self.assertEqual(f.read(), self.data)
+
     def test_write_copies_zipped_image(self):
         path = os.path.join(self.tmp.name, "img.img.zip")
         with zipfile.ZipFile(path, "w") as z:
@@ -147,6 +158,20 @@ class Write(unittest.TestCase):
 IMAGE = "os/knulli/knulli-h700-rg35xx-h-scarab-20260511.img.gz"
 CARD = flash.Disk("disk4", 64_000_000_000, "SD")
 SUDO = ["sudo", "-v"]
+
+
+class FlashOakMoss(unittest.TestCase):
+    KEYS = ["os/oakmoss/oakmoss-zero40-v0.7.0-beta.1-sd1.img.xz", "os/oakmoss/oakmoss-zero40-v0.8.0-sd1.img.xz"]
+
+    def test_images_skips_update_files(self):
+        listing = {k: 1 for k in KEYS + self.KEYS} | {"os/oakmoss/oakmoss-zero40-v0.7.0-beta.1.omupd": 1,
+                                                       "os/oakmoss/sub/oakmoss-x.img.xz": 1}
+        self.assertEqual(sorted(flash.images(listing, "oakmoss")), sorted(self.KEYS))
+
+    def test_matches_device_and_newest_first(self):
+        found = flash.sort_images(self.KEYS, "magicx-zero40")
+        self.assertEqual(found, [(self.KEYS[1], True), (self.KEYS[0], True)])
+        self.assertTrue(all(not m for _, m in flash.sort_images(self.KEYS, "miyoo-flip")))
 
 
 class FlashMuos(unittest.TestCase):
@@ -450,7 +475,7 @@ class Run(helpers.StorageDir):
     def test_no_images(self):
         os.remove(os.path.join(self.root, IMAGE))
         self.assertEqual(self.flash(), 1)
-        self.assertIn("no Knulli, BaseOS, muOS or ROCKNIX images", self.out)
+        self.assertIn("no Knulli, BaseOS, muOS, ROCKNIX or OakMoss images", self.out)
 
     def test_both_firmwares_ask_which(self):
         self.put("os/muos/muos-banana-20260101.img.gz", gzip.compress(b"img"))
