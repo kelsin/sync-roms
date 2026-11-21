@@ -12,9 +12,11 @@ TARGETS = {
     "onion": ("extract", "RApp/PICO-8/bin"),
     "allium": ("extract", "Apps/pico.pak/bin"),
     "spruce": ("extract", "BIOS"),
+    "rocknix": ("extract", "roms/pico-8"),
 }
 EXTRACT = ("pico-8/pico8_dyn", "pico-8/pico8.dat")
-EXTRACT_MORE = {"spruce": ("pico-8/pico8_64",)}  # spruce also wants the 64-bit binary, for its Miyoo Flip
+EXTRACT_MORE = {"spruce": ("pico-8/pico8_64",),  # spruce also wants the 64-bit binary, for its Miyoo Flip
+                "rocknix": ("pico-8/pico8_64",)}  # and so does ROCKNIX (aarch64)
 
 
 def _members(layout_name):

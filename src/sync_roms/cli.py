@@ -1116,13 +1116,17 @@ def sync_card(args):
             dest_bios[dest_of(t)].update(rom_bios_names(t))
     pico8_dests = {os.path.join(roms_dir, t["folders"][layout_name]) for t in systems + dropped
                    if t["bucket"] == "pico8" and t["folders"].get(layout_name)}
+    own_files = defaultdict(set)  # sync-roms's own files at the top of a ROM folder (ROCKNIX's Ports scripts)
+    for t in systems + dropped:
+        if t["folders"].get(layout_name):
+            own_files[os.path.join(roms_dir, t["folders"][layout_name])].update(downloads.layout_files(layout_name, t))
     cardfs.clear()  # the discs moved above, and the card editor's previews listed the card a while ago
     for dest in sorted({dest_of(s) for s in systems if s["bucket"] in chosen_ids or not available(s)} | dropped_dests):
-        extras += downloads.find_extras(dest, dest_keys[dest], onion, disc_dir, dest_discs[dest], dest_bios[dest] | (pico8.keep_in(dest, card) if dest in pico8_dests else set()), renames=renames, folders=dest_folders[dest])
+        extras += downloads.find_extras(dest, dest_keys[dest], onion, disc_dir, dest_discs[dest], dest_bios[dest] | own_files[dest] | (pico8.keep_in(dest, card) if dest in pico8_dests else set()), renames=renames, folders=dest_folders[dest])
 
     # BIOS for every system with ROMs already on the card too, even when this sync doesn't touch that system
     bios_systems = chosen + [s for s in systems if s["bucket"] not in chosen_ids
-                             and downloads.has_local_files(dest_of(s), onion, rom_bios_names(s))]
+                             and downloads.has_local_files(dest_of(s), onion, rom_bios_names(s) | own_files[dest_of(s)])]
     # (bucket key, folder, path in it) of each BIOS file: in the BIOS folder, or in the ROM folder of a system with ROMs to sync
     bios_dests = {("BIOS/" + f, folder, f) for s in bios_systems for folder in downloads.bios_folders(s, layout_name, layout, bios_dir)
                   for f in s["bios"]["files"]}

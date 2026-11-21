@@ -211,8 +211,15 @@ IGNORED_ROOT_FILES = {
     "systeminfo.txt", "systems.txt", "noload.txt", "flatten.txt",  # ES-DE
     "_info.txt", "gamelist.xml",                                   # Batocera / Knulli
     "miyoogamelist.xml",                                           # Onion
-    "install collections.sh",                                      # ROCKNIX ports/: sync-roms's collections installer
 }
+ROCKNIX_PORTS_FILES = ("Install Collections.sh", "RAOfflineProxy Install.sh")  # sync-roms's scripts, run from ROCKNIX's Ports
+
+
+def layout_files(layout_name, system):
+    """Names at the top of the system's ROM folder that sync-roms put there for this layout: never offered for deletion."""
+    return ROCKNIX_PORTS_FILES if layout_name == "rocknix" and system["bucket"] == "ports" else ()
+
+
 IGNORED_ROOT_DIRS = {"images", "videos", "manuals",                # Batocera / Knulli scraped media
                      "imgs"}                                       # Onion scraped box art
 IGNORED_FILES = {"thumbs.db", "desktop.ini"}                       # Windows

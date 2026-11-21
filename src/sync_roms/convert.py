@@ -30,7 +30,7 @@ def _exact_dir(base, *parts):
     return path if os.path.isdir(path) else None
 
 
-def _scan(folder, keep_dir=None, skip_db=False):
+def _scan(folder, keep_dir=None, skip_db=False, own=()):
     """(files, ignored): the relative paths (with /) of the ROM files under folder, and of what the frontends put there
     instead (what downloads.walk_roms leaves out, dot folders included but not dotfiles), which a convert leaves alone.
     keep_dir (the layout's disc folder) is walked although it is a dot folder."""
@@ -53,7 +53,7 @@ def _scan(folder, keep_dir=None, skip_db=False):
             if f.startswith("."):
                 continue
             if low in downloads.IGNORED_FILES or (skip_db and low.endswith(".db")) or downloads.TEMP_DOWNLOAD.search(f) \
-                    or (at_root and low in downloads.IGNORED_ROOT_FILES):
+                    or (at_root and (low in downloads.IGNORED_ROOT_FILES or f in own)):
                 ignored.append(prefix + f)
             else:
                 files.append(prefix + f)
@@ -93,7 +93,7 @@ def plan_roms(base, systems, old_name, old, new_name, new):
         if not src_dir:
             continue
         planned.add(old_folder)
-        files, _ = _scan(src_dir, old.get("disc_dir"), old_name in scrape_plan.ONION_LAYOUTS)
+        files, _ = _scan(src_dir, old.get("disc_dir"), old_name in scrape_plan.ONION_LAYOUTS, downloads.layout_files(old_name, system))
         if not files:
             continue
         if not new_folder:
@@ -284,7 +284,7 @@ def _leftovers(base, systems, old_name, old):
         folder = system["folders"].get(old_name)
         path = _exact_dir(base, *old["roms_dir"].split("/"), *folder.split("/")) if folder else None
         if path:
-            _, ignored = _scan(path, old.get("disc_dir"), old_name in scrape_plan.ONION_LAYOUTS)
+            _, ignored = _scan(path, old.get("disc_dir"), old_name in scrape_plan.ONION_LAYOUTS, downloads.layout_files(old_name, system))
             found += [os.path.relpath(os.path.join(path, *i.split("/")), base) for i in ignored]
     return list(dict.fromkeys(found))
 

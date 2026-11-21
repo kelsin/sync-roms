@@ -19,4 +19,5 @@ ONION_PREFIX = "os/onion/"  # the Surprise app zips for Onion cards in storage; 
 ALLIUM_PREFIX = "os/allium/"  # RAOfflineProxy for Allium cards in storage
 MUOS_PREFIX = "os/muOS/"  # RAOfflineProxy for muOS cards in storage
 KNULLI_PREFIX = "os/knulli/"  # RAOfflineProxy's install script for Knulli cards in storage (next to the Knulli images)
+ROCKNIX_PREFIX = "os/rocknix/"  # RAOfflineProxy's install script for ROCKNIX cards in storage
 _mirror_root = None  # set once a sync reads from the local mirror instead of storage

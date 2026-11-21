@@ -378,8 +378,12 @@ class Rocknix(unittest.TestCase):
         self.assertEqual(os.listdir(self.base), ["roms"])  # no ES settings on the card
         self.assertFalse(self.stage({"Favs": ["/storage/roms/snes/A.sfc"]}, ["Favs"])[1])  # nothing new the second time
         ports = os.path.dirname(self.script)  # the Ports system's ROM folder: the script is never a ROM to delete
-        self.assertEqual(downloads.find_extras(ports, []), [])
-        self.assertFalse(downloads.has_local_files(ports))
+        keep = downloads.layout_files("rocknix", {"bucket": "ports"})
+        self.assertEqual(downloads.find_extras(ports, [], keep=keep), [])
+        self.assertFalse(downloads.has_local_files(ports, ignore=keep))
+        self.assertEqual(downloads.layout_files("knulli", {"bucket": "ports"}), ())
+        self.assertEqual(downloads.layout_files("rocknix", {"bucket": "snes"}), ())
+        self.assertEqual(downloads.find_extras(ports, []), [self.script])  # any other folder offers it for deletion
 
     def test_the_script_is_removed_when_the_card_has_no_collections(self):
         self.stage({"Favs": ["/storage/roms/snes/A.sfc"]})

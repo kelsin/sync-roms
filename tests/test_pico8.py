@@ -122,6 +122,13 @@ class Pico8(helpers.StorageDir):
         self.assertEqual(sorted(os.listdir(folder)), ["pico8.dat", "pico8_64", "pico8_dyn"])
         self.assertTrue(os.stat(os.path.join(folder, "pico8_64")).st_mode & 0o111)
 
+    def test_rocknix_extracts_into_pico_8_with_the_64_bit_binary(self):
+        self.put(f"os/pico8/{NEW}", zip_bytes())
+        self.run_setup("rocknix")
+        folder = self.card_path("roms", "pico-8")
+        self.assertEqual(sorted(os.listdir(folder)), ["pico8.dat", "pico8_64", "pico8_dyn"])
+        self.assertTrue(os.stat(os.path.join(folder, "pico8_64")).st_mode & 0o111)
+
     def test_onion_reextracts_missing_file(self):
         self.put(f"os/pico8/{NEW}", zip_bytes())
         self.run_setup("onion")
