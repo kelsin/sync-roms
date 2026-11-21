@@ -15,8 +15,10 @@
     "screen": "1:1",
     "firmwares": [
       "knulli",
-      "muos"
-    ]
+      "muos",
+      "rocknix"
+    ],
+    "rocknix_image": "H700"
   },
   {
     "id": "anbernic-rg-ds",
@@ -25,8 +27,10 @@
     "screen": "4:3",
     "screen2": "4:3",
     "firmwares": [
-      "esde"
-    ]
+      "esde",
+      "rocknix"
+    ],
+    "rocknix_image": "RK3566-Specific"
   },
   {
     "id": "anbernic-rg-ds-plus",
@@ -35,8 +39,10 @@
     "screen": "4:3",
     "screen2": "4:3",
     "firmwares": [
-      "knulli"
-    ]
+      "knulli",
+      "rocknix"
+    ],
+    "rocknix_image": "RK3566-Specific"
   },
   {
     "id": "anbernic-rg-rotate",
@@ -55,8 +61,10 @@
     "firmwares": [
       "nextui",
       "knulli",
-      "muos"
-    ]
+      "muos",
+      "rocknix"
+    ],
+    "rocknix_image": "H700"
   },
   {
     "id": "anbernic-rg-slide",
@@ -83,8 +91,10 @@
     "screen": "16:9",
     "firmwares": [
       "knulli",
-      "muos"
-    ]
+      "muos",
+      "rocknix"
+    ],
+    "rocknix_image": "RK3576"
   },
   {
     "id": "anbernic-rg28xx",
@@ -93,8 +103,10 @@
     "screen": "4:3",
     "firmwares": [
       "knulli",
-      "muos"
+      "muos",
+      "rocknix"
     ],
+    "rocknix_image": "H700",
     "network": false
   },
   {
@@ -104,8 +116,10 @@
     "screen": "3:2",
     "firmwares": [
       "knulli",
-      "muos"
-    ]
+      "muos",
+      "rocknix"
+    ],
+    "rocknix_image": "H700"
   },
   {
     "id": "anbernic-rg34xx-sp",
@@ -115,8 +129,10 @@
     "firmwares": [
       "nextui",
       "knulli",
-      "muos"
-    ]
+      "muos",
+      "rocknix"
+    ],
+    "rocknix_image": "H700"
   },
   {
     "id": "anbernic-rg353ps",
@@ -124,8 +140,10 @@
     "soc": "Rockchip RK3566",
     "screen": "4:3",
     "firmwares": [
-      "knulli"
-    ]
+      "knulli",
+      "rocknix"
+    ],
+    "rocknix_image": "RK3566-Generic"
   },
   {
     "id": "anbernic-rg353vs",
@@ -133,8 +151,10 @@
     "soc": "Rockchip RK3566",
     "screen": "4:3",
     "firmwares": [
-      "knulli"
-    ]
+      "knulli",
+      "rocknix"
+    ],
+    "rocknix_image": "RK3566-Generic"
   },
   {
     "id": "anbernic-rg35xx-2024",
@@ -143,8 +163,10 @@
     "screen": "4:3",
     "firmwares": [
       "knulli",
-      "muos"
+      "muos",
+      "rocknix"
     ],
+    "rocknix_image": "H700",
     "network": false
   },
   {
@@ -154,8 +176,10 @@
     "screen": "4:3",
     "firmwares": [
       "knulli",
-      "muos"
-    ]
+      "muos",
+      "rocknix"
+    ],
+    "rocknix_image": "H700"
   },
   {
     "id": "anbernic-rg35xx-plus",
@@ -164,8 +188,10 @@
     "screen": "4:3",
     "firmwares": [
       "knulli",
-      "muos"
-    ]
+      "muos",
+      "rocknix"
+    ],
+    "rocknix_image": "H700"
   },
   {
     "id": "anbernic-rg35xx-pro",
@@ -174,8 +200,10 @@
     "screen": "4:3",
     "firmwares": [
       "knulli",
-      "muos"
-    ]
+      "muos",
+      "rocknix"
+    ],
+    "rocknix_image": "H700"
   },
   {
     "id": "anbernic-rg35xx-sp",
@@ -184,8 +212,10 @@
     "screen": "4:3",
     "firmwares": [
       "knulli",
-      "muos"
-    ]
+      "muos",
+      "rocknix"
+    ],
+    "rocknix_image": "H700"
   },
   {
     "id": "anbernic-rg405m",
@@ -230,8 +260,10 @@
     "screen": "4:3",
     "firmwares": [
       "knulli",
-      "muos"
-    ]
+      "muos",
+      "rocknix"
+    ],
+    "rocknix_image": "H700"
   },
   {
     "id": "anbernic-rg40xxv",
@@ -240,8 +272,10 @@
     "screen": "4:3",
     "firmwares": [
       "knulli",
-      "muos"
-    ]
+      "muos",
+      "rocknix"
+    ],
+    "rocknix_image": "H700"
   },
   {
     "id": "anbernic-rg476h",
@@ -276,8 +310,10 @@
     "soc": "Rockchip RK3566",
     "screen": "16:9",
     "firmwares": [
-      "knulli"
-    ]
+      "knulli",
+      "rocknix"
+    ],
+    "rocknix_image": "RK3566-Generic"
   },
   {
     "id": "anbernic-rg505",
@@ -313,8 +349,10 @@
     "gpu": "adreno-a12",
     "screen": "16:9",
     "firmwares": [
-      "esde"
-    ]
+      "esde",
+      "rocknix"
+    ],
+    "rocknix_image": "SM4450"
   },
   {
     "id": "ayaneo-konkr-pocket-fit",
@@ -323,8 +361,10 @@
     "gpu": "adreno-g3-gen-3",
     "screen": "16:9",
     "firmwares": [
-      "esde"
-    ]
+      "esde",
+      "rocknix"
+    ],
+    "rocknix_image": "SM8650"
   },
   {
     "id": "ayaneo-pocket-ace",
@@ -333,8 +373,10 @@
     "gpu": "adreno-a32",
     "screen": "3:2",
     "firmwares": [
-      "esde"
-    ]
+      "esde",
+      "rocknix"
+    ],
+    "rocknix_image": "SM8550"
   },
   {
     "id": "ayaneo-pocket-advance",
@@ -370,8 +412,10 @@
     "gpu": "adreno-a32",
     "screen": "31:27",
     "firmwares": [
-      "esde"
-    ]
+      "esde",
+      "rocknix"
+    ],
+    "rocknix_image": "SM8550"
   },
   {
     "id": "ayaneo-pocket-ds",
@@ -381,8 +425,10 @@
     "screen": "16:9",
     "screen2": "4:3",
     "firmwares": [
-      "esde"
-    ]
+      "esde",
+      "rocknix"
+    ],
+    "rocknix_image": "SM8550"
   },
   {
     "id": "ayaneo-pocket-evo",
@@ -391,8 +437,10 @@
     "gpu": "adreno-a32",
     "screen": "16:9",
     "firmwares": [
-      "esde"
-    ]
+      "esde",
+      "rocknix"
+    ],
+    "rocknix_image": "SM8550"
   },
   {
     "id": "ayaneo-pocket-micro",
@@ -429,8 +477,10 @@
     "gpu": "adreno-a32",
     "screen": "16:9",
     "firmwares": [
-      "esde"
-    ]
+      "esde",
+      "rocknix"
+    ],
+    "rocknix_image": "SM8550"
   },
   {
     "id": "ayaneo-pocket-s-mini",
@@ -439,8 +489,10 @@
     "gpu": "adreno-a32",
     "screen": "4:3",
     "firmwares": [
-      "esde"
-    ]
+      "esde",
+      "rocknix"
+    ],
+    "rocknix_image": "SM8550"
   },
   {
     "id": "ayaneo-pocket-s2",
@@ -449,8 +501,10 @@
     "gpu": "adreno-g3-gen-3",
     "screen": "16:9",
     "firmwares": [
-      "esde"
-    ]
+      "esde",
+      "rocknix"
+    ],
+    "rocknix_image": "SM8650"
   },
   {
     "id": "ayaneo-pocket-s2-pro",
@@ -489,8 +543,10 @@
     "gpu": "adreno-740",
     "screen": "16:9",
     "firmwares": [
-      "esde"
-    ]
+      "esde",
+      "rocknix"
+    ],
+    "rocknix_image": "SM8550"
   },
   {
     "id": "ayn-odin-2-mini",
@@ -499,8 +555,10 @@
     "gpu": "adreno-740",
     "screen": "16:9",
     "firmwares": [
-      "esde"
-    ]
+      "esde",
+      "rocknix"
+    ],
+    "rocknix_image": "SM8550"
   },
   {
     "id": "ayn-odin-2-portal",
@@ -509,8 +567,10 @@
     "gpu": "adreno-740",
     "screen": "16:9",
     "firmwares": [
-      "esde"
-    ]
+      "esde",
+      "rocknix"
+    ],
+    "rocknix_image": "SM8550"
   },
   {
     "id": "ayn-odin-3",
@@ -519,8 +579,10 @@
     "gpu": "adreno-830",
     "screen": "16:9",
     "firmwares": [
-      "esde"
-    ]
+      "esde",
+      "rocknix"
+    ],
+    "rocknix_image": "SM8750"
   },
   {
     "id": "ayn-odin-lite",
@@ -538,8 +600,10 @@
     "screen": "16:9",
     "screen2": "31:27",
     "firmwares": [
-      "esde"
-    ]
+      "esde",
+      "rocknix"
+    ],
+    "rocknix_image": "SM8250"
   },
   {
     "id": "ayn-thor",
@@ -549,8 +613,10 @@
     "screen": "16:9",
     "screen2": "31:27",
     "firmwares": [
-      "esde"
-    ]
+      "esde",
+      "rocknix"
+    ],
+    "rocknix_image": "SM8550"
   },
   {
     "id": "magicx-zero40",
@@ -657,8 +723,10 @@
     "gpu": "adreno-650",
     "screen": "16:9",
     "firmwares": [
-      "esde"
-    ]
+      "esde",
+      "rocknix"
+    ],
+    "rocknix_image": "SM8250"
   },
   {
     "id": "retroid-pocket-6",
@@ -667,8 +735,10 @@
     "gpu": "adreno-740",
     "screen": "16:9",
     "firmwares": [
-      "esde"
-    ]
+      "esde",
+      "rocknix"
+    ],
+    "rocknix_image": "SM8550"
   },
   {
     "id": "retroid-pocket-classic",
@@ -677,8 +747,10 @@
     "gpu": "adreno-a12",
     "screen": "31:27",
     "firmwares": [
-      "esde"
-    ]
+      "esde",
+      "rocknix"
+    ],
+    "rocknix_image": "SM4450"
   },
   {
     "id": "retroid-pocket-duo",
@@ -699,8 +771,10 @@
     "screen": "16:9",
     "screen2": "4:3",
     "firmwares": [
-      "esde"
-    ]
+      "esde",
+      "rocknix"
+    ],
+    "rocknix_image": "SM6115"
   },
   {
     "id": "retroid-pocket-duo-lite-plus",
@@ -729,8 +803,10 @@
     "gpu": "adreno-650",
     "screen": "16:9",
     "firmwares": [
-      "esde"
-    ]
+      "esde",
+      "rocknix"
+    ],
+    "rocknix_image": "SM8250"
   },
   {
     "id": "retroid-pocket-g2",
@@ -749,8 +825,10 @@
     "gpu": "adreno-650",
     "screen": "4:3",
     "firmwares": [
-      "esde"
-    ]
+      "esde",
+      "rocknix"
+    ],
+    "rocknix_image": "SM8250"
   },
   {
     "id": "retroid-pocket-mini-v2",
@@ -759,8 +837,10 @@
     "gpu": "adreno-650",
     "screen": "31:27",
     "firmwares": [
-      "esde"
-    ]
+      "esde",
+      "rocknix"
+    ],
+    "rocknix_image": "SM8250"
   },
   {
     "id": "retroid-pocket-nova",
@@ -769,8 +849,10 @@
     "gpu": "adreno-740",
     "screen": "4:3",
     "firmwares": [
-      "esde"
-    ]
+      "esde",
+      "rocknix"
+    ],
+    "rocknix_image": "SM8550"
   },
   {
     "id": "steam-deck",

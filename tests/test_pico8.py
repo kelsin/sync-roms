@@ -3,6 +3,7 @@ import io
 import os
 import sys
 import unittest
+from unittest import mock
 import zipfile
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -122,6 +123,13 @@ class Pico8(helpers.StorageDir):
         self.assertEqual(sorted(os.listdir(folder)), ["pico8.dat", "pico8_64", "pico8_dyn"])
         self.assertTrue(os.stat(os.path.join(folder, "pico8_64")).st_mode & 0o111)
 
+    def test_rocknix_extracts_into_pico_8_with_the_64_bit_binary(self):
+        self.put(f"os/pico8/{NEW}", zip_bytes())
+        self.run_setup("rocknix")
+        folder = self.card_path("roms", "pico-8")
+        self.assertEqual(sorted(os.listdir(folder)), ["pico8.dat", "pico8_64", "pico8_dyn"])
+        self.assertTrue(os.stat(os.path.join(folder, "pico8_64")).st_mode & 0o111)
+
     def test_onion_reextracts_missing_file(self):
         self.put(f"os/pico8/{NEW}", zip_bytes())
         self.run_setup("onion")
@@ -150,6 +158,27 @@ class Pico8(helpers.StorageDir):
             open(os.path.join(dest, name), "wb").close()
         store.update_card("c", pico8=NEW)
         self.assertEqual(pico8.keep_in(dest, "c"), {"Splore.png", "~Run PICO-8 with Splore.png", NEW})
+
+    def test_rocknix_runtime_files_are_kept_in_the_rom_folder(self):
+        from sync_roms import downloads
+        self.put(f"os/pico8/{NEW}", zip_bytes())
+        self.run_setup("rocknix")
+        dest = self.card_path("roms", "pico-8")
+        open(os.path.join(dest, "game.p8.png"), "wb").close()
+        keep = pico8.keep_in(dest, "c", "rocknix")
+        self.assertEqual(downloads.find_extras(dest, [], keep=keep), [os.path.join(dest, "game.p8.png")])
+        self.assertNotIn("pico8_64", pico8.keep_in(dest, "c", "onion"))
+
+    def test_rocknix_zip_without_the_64_bit_binary_warns(self):
+        buf = io.BytesIO()
+        with zipfile.ZipFile(buf, "w") as z:
+            for name in ("pico8_dyn", "pico8.dat"):
+                z.writestr(f"pico-8/{name}", name)
+        self.put(f"os/pico8/{NEW}", buf.getvalue())
+        with mock.patch.object(pico8.ui, "warn") as warn:
+            self.assertEqual(pico8.run("c", "rocknix", self.card, False), 1)
+        self.assertIn("Couldn't put PICO-8", warn.call_args[0][0])
+        self.assertIsNone(self.recorded())
 
 
 if __name__ == "__main__":

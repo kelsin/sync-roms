@@ -11,7 +11,7 @@ from concurrent.futures import ThreadPoolExecutor
 from botocore.exceptions import BotoCoreError, ClientError, NoCredentialsError
 
 from . import __version__, budget, cardedit, cardfs, clean, commands, downloads, drivers, edit, external, frontend, inventory, m3u, mirroring, picker, runtime, s3, scrape_plan, store
-from . import muos_collections, onion_surprise, pico8, raofflineproxy, spruce_collections, surprise, themeart, ui, usersettings, vita
+from . import muos_collections, onion_surprise, pico8, raofflineproxy, rocknix_collections, saves, spruce_collections, surprise, themeart, ui, usersettings, vita
 from . import collections as colls
 
 
@@ -23,7 +23,7 @@ SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "collections": ("edit", "edit your collections of favourite games (saved in ~/.sync-roms/collections/)"),
     "themes": ("update", "copy the latest Art Book Next for ES-DE from GitHub into storage"),
     "download": ("pico8", "add the PICO-8 BBS Featured carts storage doesn't have, and newer revisions of those it has"),
-    "flash": ("", "write a Knulli, BaseOS or muOS image from storage's os/ to an SD card"),
+    "flash": ("", "write a Knulli, BaseOS, muOS or ROCKNIX image from storage's os/ to an SD card"),
     "cards": ("[edit|list|new|set|rename|convert|clean|delete|copy|export|import]", "list and manage the cards you've synced"),
     "saves": ("stash|apply [CARD] [--retroarch DIR]", "copy RetroArch saves and states off a card, or onto one"),
     "devices": ("[ID]", "list the supported devices, or one device's systems"),
@@ -82,7 +82,7 @@ TOPICS = {
   sync-roms games remove SYSTEM KEY... --card NAME [-n]
   sync-roms games full SYSTEM on|off --card NAME [-n]
   sync-roms games sets list | add ID | remove ID --card NAME [-n]
-  sync-roms games export --card NAME        one SYSTEM/file per line (full systems as 'SYSTEM/*'), then '@collections ID', '@frontend_collections NAME', '@drivers NAME', '@pico8 ZIP', '@surprise true|false' (only when it differs from the layout's default: on for esde/knulli/emudeck/muos/nextui/onion/spruce, off for allium) and '@surprises SYSTEM/file' lines
+  sync-roms games export --card NAME        one SYSTEM/file per line (full systems as 'SYSTEM/*'), then '@collections ID', '@frontend_collections NAME', '@drivers NAME', '@pico8 ZIP', '@surprise true|false' (only when it differs from the layout's default: on for esde/knulli/rocknix/emudeck/muos/nextui/onion/spruce, off for allium) and '@surprises SYSTEM/file' lines
   sync-roms games import FILE --card NAME [-n]            add the games in such a file; '@' lines replace the card's collections / frontend_collections / drivers / surprises and set pico8, and set Surprise on or off
 
   --card NAME is required: a card's games are saved in ~/.sync-roms/cards.json with the previous version kept as .bak. Removing only drops a game from the list.
@@ -104,7 +104,7 @@ TOPICS = {
   Your own lists of games (like a set, but personal), saved to ~/.sync-roms/collections/<id>.json after Done or Esc
   shows the changes; Quit discards. No git or gh needed, and nothing goes to storage or the repo. Same keys as the set
   editor. Deleting a collection that cards use asks first, then removes it from them (the file is kept as
-  <id>.json.bak). In a card's system list, l adds a collection to that card. Theme art picks the picture (Action, RPG, ...) the collection gets on ES-DE and Knulli cards
+  <id>.json.bak). In a card's system list, l adds a collection to that card. Theme art picks the picture (Action, RPG, ...) the collection gets on ES-DE, Knulli and ROCKNIX cards
   that use Art Book Next.
 """,
     "themes": """
@@ -125,11 +125,13 @@ TOPICS = {
   ignored.json are skipped. Requests go one at a time; the first HTTP error stops it, keeping what was added.
 """,
     "flash": """
-  sync-roms flash [--dry-run]                 write a Knulli, BaseOS or muOS image to an SD card (macOS only)
+  sync-roms flash [--dry-run]                 write a Knulli, BaseOS, muOS or ROCKNIX image to an SD card (macOS only)
 
-  Pick a firmware (only when storage's os/ has both Knulli or BaseOS images and muOS images), then a device, then an
-  image from storage's os/knulli/knulli-*.img.gz or os/baseos/baseos-*.img.zip (the ones matching the device first,
-  newest first) or os/muos/muos-*.img.gz (muOS image names aren't documented, so they are never matched), then an
+  Pick a firmware (only when storage's os/ has images of more than one: Knulli or BaseOS, muOS, ROCKNIX), then a
+  device, then an image from storage's os/knulli/knulli-*.img.gz or os/baseos/baseos-*.img.zip (the ones matching the
+  device first, newest first), os/muos/muos-*.img.gz (muOS image names aren't documented, so they are never matched)
+  or os/rocknix/ROCKNIX-*.img.gz (not the update .tar files; matched by the device's SoC image, H700 devices matching
+  both DDR3 and DDR4: pick the one for your device's RAM), then an
   external SD card (shown with its volume names); the boot disk and the disks holding the temp folder
   or storage are never offered, and flash stops if it can't tell which disks those are. Type the disk id (disk4) to
   confirm: --yes never skips that. --dry-run stops there. The image is copied to a local temp folder (free space is
@@ -169,7 +171,7 @@ TOPICS = {
   CARD is the card's folder (default: the current directory); it needs a layout (`sync-roms cards set NAME --layout`).
   stash lists the card's games that have RetroArch saves (.srm and .rtc) or states (.state, .stateN, .state.auto and their
   .png), then their files, and copies them to ~/.sync-roms/saves/<system>/<game>/<time>-<card>/ (with stash.json).
-  On layouts sorted by core and flat folders a save whose game isn't on the card is skipped; on Knulli the folder
+  On layouts sorted by core and flat folders a save whose game isn't on the card is skipped; on Knulli and ROCKNIX the folder
   gives the system.
   apply lists the stashes of systems the card syncs (one per game) and copies them into the card's RetroArch folders.
   A different file already there is only overwritten after you confirm (default no); identical ones are skipped.
@@ -178,6 +180,7 @@ TOPICS = {
   Layout    RetroArch folder             saves            states
   esde      RetroArch                    saves/<core>     states/<core>
   knulli    saves                        <system folder>  <system folder>
+  rocknix   roms (beside the ROMs)       <system folder>  savestates/<system folder>
   onion     Saves/CurrentProfile         saves/<core>     states/<core>
   allium    Saves/CurrentProfile         saves/<core>     states/<core>
   spruce    Saves                        saves            states
@@ -1116,13 +1119,17 @@ def sync_card(args):
             dest_bios[dest_of(t)].update(rom_bios_names(t))
     pico8_dests = {os.path.join(roms_dir, t["folders"][layout_name]) for t in systems + dropped
                    if t["bucket"] == "pico8" and t["folders"].get(layout_name)}
+    own_files = defaultdict(set)  # sync-roms's own files at the top of a ROM folder (ROCKNIX's Ports scripts)
+    for t in systems + dropped:
+        if t["folders"].get(layout_name):
+            own_files[os.path.join(roms_dir, t["folders"][layout_name])].update(downloads.layout_files(layout_name, t))
     cardfs.clear()  # the discs moved above, and the card editor's previews listed the card a while ago
     for dest in sorted({dest_of(s) for s in systems if s["bucket"] in chosen_ids or not available(s)} | dropped_dests):
-        extras += downloads.find_extras(dest, dest_keys[dest], onion, disc_dir, dest_discs[dest], dest_bios[dest] | (pico8.keep_in(dest, card) if dest in pico8_dests else set()), renames=renames, folders=dest_folders[dest])
+        extras += downloads.find_extras(dest, dest_keys[dest], onion, disc_dir, dest_discs[dest], dest_bios[dest] | own_files[dest] | (pico8.keep_in(dest, card, layout_name) if dest in pico8_dests else set()), renames=renames, folders=dest_folders[dest], skip_saves=saves.beside_roms(layout))
 
     # BIOS for every system with ROMs already on the card too, even when this sync doesn't touch that system
     bios_systems = chosen + [s for s in systems if s["bucket"] not in chosen_ids
-                             and downloads.has_local_files(dest_of(s), onion, rom_bios_names(s))]
+                             and downloads.has_local_files(dest_of(s), onion, rom_bios_names(s) | own_files[dest_of(s)])]
     # (bucket key, folder, path in it) of each BIOS file: in the BIOS folder, or in the ROM folder of a system with ROMs to sync
     bios_dests = {("BIOS/" + f, folder, f) for s in bios_systems for folder in downloads.bios_folders(s, layout_name, layout, bios_dir)
                   for f in s["bios"]["files"]}
@@ -1251,7 +1258,7 @@ def sync_card(args):
         return f"Not enough space: {ui.human_size(need)} to download, {ui.human_size(free)} free" if need > free else None
 
     def frontend_step(dry_run):
-        """Write the card's collections as the frontend's custom collections (ES-DE, Knulli, EmuDeck's ES-DE)."""
+        """Write the card's collections as the frontend's custom collections (ES-DE, Knulli, ROCKNIX, EmuDeck's ES-DE)."""
         if layout_name not in frontend.FRONTEND_LAYOUTS and layout_name not in ("muos", "spruce"):
             return
         entry = store.load_cards().get(card)
@@ -1328,6 +1335,8 @@ def sync_card(args):
             count = (len({os.path.dirname(p) for p, _ in plan["writes"]}) if layout_name == "muos"
                      else len(plan["enable"]) if layout_name == "spruce" else len(plan["writes"]))
             print(ui.green(f"💖 Wrote {count} collection(s) for {layout['label']}"))
+        if layout_name == "rocknix" and (plan["writes"] or plan["deletes"] or art):
+            print(f"💖 Run {os.path.basename(rocknix_collections.SCRIPT)[:-3]} from Ports on the device to install them")
 
     capacity = budget.card_capacity(saved or {}) if surprise.enabled(saved or {}) else None
     if capacity:

@@ -1,4 +1,4 @@
-"""Knulli, BaseOS and muOS images in storage's os/ folder, and which of them fit a device."""
+"""Knulli, BaseOS, muOS and ROCKNIX images in storage's os/ folder, and which of them fit a device."""
 import collections
 import contextlib
 import gzip
@@ -22,6 +22,7 @@ PREFIX = "os/"
 KNULLI = PREFIX + "knulli/"
 BASEOS = PREFIX + "baseos/"
 MUOS = PREFIX + "muos/"
+ROCKNIX = runtime.ROCKNIX_PREFIX
 DD = ["sudo", "dd"]
 WRITE_BLOCK = 4 * 1024 * 1024
 SPARE = 64 * 1024 * 1024  # free space kept in the temp folder beyond the download
@@ -37,7 +38,7 @@ def raw(disk):
 
 
 # the kinds of image, asked for when storage has more than one: Knulli and BaseOS images are picked by device
-FIRMWARES = {"knulli": "Knulli or BaseOS", "muos": "muOS"}
+FIRMWARES = {"knulli": "Knulli or BaseOS", "muos": "muOS", "rocknix": "ROCKNIX"}
 
 
 def devices_for(devices, firmware):
@@ -47,7 +48,10 @@ def devices_for(devices, firmware):
 
 def images(listing, firmware="knulli"):
     """The keys of the Knulli images (os/knulli/knulli-*.img.gz) and BaseOS images (os/baseos/baseos-*.img.zip), or
-    with firmware "muos" the muOS images (os/muos/muos-*.img.gz)."""
+    with firmware "muos" the muOS images (os/muos/muos-*.img.gz), with "rocknix" the ROCKNIX images
+    (os/rocknix/ROCKNIX-*.img.gz; not its update .tar files)."""
+    if firmware == "rocknix":
+        return [k for k in listing if re.fullmatch(re.escape(ROCKNIX) + r"ROCKNIX-[^/]*\.img\.gz", k)]
     if firmware == "muos":
         return [k for k in listing if re.fullmatch(re.escape(MUOS) + r"muos-[^/]*\.img\.gz", k)]
     return [k for k in listing if re.fullmatch(re.escape(KNULLI) + r"knulli-[^/]*\.img\.gz", k)
@@ -62,7 +66,21 @@ def _model(key):
     return m.group(1).replace("-", "") if m else ""
 
 
-def _matches(key, device_id):
+def _rocknix_image(key):
+    """(SoC, variant) of a ROCKNIX image name, ROCKNIX-<SoC>.aarch64-<date>[-<variant>].img.gz; variant may be ""."""
+    m = re.fullmatch(re.escape(ROCKNIX) + r"ROCKNIX-([^./]+)\.[^-/]+-\d{8}(?:-([^./]+))?\.img\.gz", key)
+    return (m.group(1), m.group(2) or "") if m else None
+
+
+def _matches(key, device_id, rocknix_image=None):
+    """Whether the image fits the device; a ROCKNIX image by the device's rocknix_image (<SoC>[-<variant>], devices.json):
+    the same SoC and, when the device names one, the same variant (H700 names none: DDR3 and DDR4 both fit)."""
+    if key.startswith(ROCKNIX):
+        found = _rocknix_image(key)
+        if not found or not rocknix_image:
+            return False
+        soc, _, variant = rocknix_image.partition("-")
+        return found[0] == soc and (not variant or found[1] == variant)
     model = _model(key)
     if not model:
         return False
@@ -76,7 +94,7 @@ def flashable_devices(devices, keys):
 
 
 def _newest(key):
-    """Sort key putting the newest image first: Knulli's (or muOS's) date, BaseOS's version."""
+    """Sort key putting the newest image first: Knulli's (muOS's, ROCKNIX's) date, BaseOS's version."""
     found = re.findall(r"(?<!\d)\d{8}(?!\d)", key)
     if found and not key.startswith(BASEOS):
         return (-int(found[-1]),)
@@ -84,9 +102,9 @@ def _newest(key):
     return tuple(-int(n) for n in m.group(1).split(".")) if m else (0,)
 
 
-def sort_images(keys, device_id):
+def sort_images(keys, device_id, rocknix_image=None):
     """(key, matches) pairs: matches first, newest first within each group, then by name."""
-    pairs = [(k, _matches(k, device_id)) for k in keys]
+    pairs = [(k, _matches(k, device_id, rocknix_image)) for k in keys]
     return sorted(pairs, key=lambda p: (not p[1], _newest(p[0]), p[0]))
 
 
@@ -298,7 +316,7 @@ def run(args):
     listing = inventory.files(PREFIX)
     available = [f for f in FIRMWARES if images(listing, f)]
     if not available:
-        ui.failure(ui.red("❌ no Knulli, BaseOS or muOS images in storage's os/"))
+        ui.failure(ui.red("❌ no Knulli, BaseOS, muOS or ROCKNIX images in storage's os/"))
         return 1
     if len(available) > 1:
         i = picker.filter_list("🧩 Which firmware?", [FIRMWARES[f] for f in available],
@@ -310,13 +328,16 @@ def run(args):
         firmware = available[0]
     keys = images(listing, firmware)
     devices = store.repo_json("devices")
-    devices = devices_for(devices, "muos") if firmware == "muos" else flashable_devices(devices, keys)
+    devices = devices_for(devices, firmware) if firmware in ("muos", "rocknix") else flashable_devices(devices, keys)
     i = picker.filter_list("🎯 Which device?", [d["name"] for d in devices],
                            hint="/ filter · j/k move · Enter continue · Esc quit")
     if i is None:
         return 0
     device = devices[i]
-    found = sort_images(keys, device["id"])
+    found = sort_images(keys, device["id"], device.get("rocknix_image"))
+    if firmware == "rocknix" and not any(m for _, m in found):  # an image for another SoC does not boot
+        ui.failure(ui.red(f"❌ No ROCKNIX image for {device.get('rocknix_image') or device['name']} in storage's {ROCKNIX}"))
+        return 1
     i = picker.filter_list(f"💾 Which image for {device['name']}?", [k[len(PREFIX):] for k, _ in found],
                            extras=[[(f"  {ui.human_size(listing[k])}", "dim"), ("  ✓ matches" if m else "", "green")]
                                    for k, m in found],

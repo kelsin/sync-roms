@@ -630,6 +630,30 @@ class SyncSmokeTest(RealDataDirGuard):
         self.assertEqual(self.run_sync(dry_run, prepare=self.card_rom(rel, size), patches=patches, args=args), 0)
         return got, [q for q in asked if q.startswith("Delete these")], emitted, files
 
+    def saves_sync_deletes(self, retroarch):
+        """A dry-run --json sync of gba/Game.zip to a card with saves beside it and beside a dropped Old.zip, the
+        layout's RetroArch folders being retroarch: the file names it would delete."""
+        layout = {**MANIFEST["layouts"]["esde"], "retroarch": retroarch}
+        manifest = {**MANIFEST, "layouts": {"esde": layout}}
+        names = ("Game.zip", "Game.srm", "Old.zip", "Old.srm", "Old.state1", "Old.state1.png")
+
+        def prepare(card):
+            for name in names:
+                self.card_rom(os.path.join("gba", name), 5 if name == "Game.zip" else 1)(card)
+        emitted = []
+        patches = ((store, {"load_manifest": lambda names=(): manifest}), (cli.ui, {"emit_json": emitted.append}))
+        self.assertEqual(self.run_sync(True, prepare=prepare, patches=patches, args=["--json"]), 0)
+        return sorted(os.path.basename(d if isinstance(d, str) else d["path"]) for d in emitted[0]["delete"])
+
+    def test_saves_beside_the_roms_are_never_offered_for_deletion(self):
+        """ROCKNIX: RetroArch saves and states sit in the ROM folders, so they are never extras."""
+        self.assertEqual(self.saves_sync_deletes({"dir": "ROMs", "saves": "{system}", "states": "savestates/{system}"}),
+                         ["Old.zip"])
+
+    def test_stray_saves_in_other_layouts_rom_folders_are_still_extras(self):
+        self.assertEqual(self.saves_sync_deletes({"dir": "RetroArch", "saves": "saves", "states": "states"}),
+                         ["Game.srm", "Old.srm", "Old.state1", "Old.state1.png", "Old.zip"])
+
     def test_a_card_file_in_another_case_is_renamed_not_deleted_or_downloaded(self):
         got, deletes, _, files = self.sync_card_files(os.path.join("gba", "GAME.zip"), 5)
         self.assertEqual((got, deletes), ([], []))

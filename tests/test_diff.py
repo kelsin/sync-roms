@@ -347,3 +347,20 @@ class IgnoredDiffTest(unittest.TestCase):
                 diff.diff_command(argparse.Namespace(diff=root, system=None, json=False))
         self.assertIn("a.gba", out.getvalue())
         self.assertNotIn("b.gba", out.getvalue())
+
+
+class SavesDiffTest(unittest.TestCase):
+    def test_retroarch_saves_beside_the_roms_are_not_local_roms(self):
+        """A ROCKNIX ROM folder holds the RetroArch saves and states too: diff sees only its ROMs."""
+        import argparse
+        import tempfile
+        from sync_roms import inventory, store, ui
+        with tempfile.TemporaryDirectory() as root:
+            for name in ("Game.gba", "Game.srm", "Game.state1", "Game.state1.png"):
+                with open(os.path.join(root, name), "wb") as f:
+                    f.write(b"x")
+            emitted = []
+            with mock.patch.object(store, "load_manifest", lambda *a: {"systems": [{"name": "GBA", "bucket": "gba", "folders": {}}]}), \
+                    mock.patch.object(inventory, "etags", lambda prefix: {}), mock.patch.object(ui, "emit_json", emitted.append):
+                diff.diff_command(argparse.Namespace(diff=root, system="gba", json=True))
+        self.assertEqual([p["path"] for p in emitted[0]["only_local"]], ["Game.gba"])

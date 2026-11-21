@@ -13,6 +13,8 @@ KINDS = {
     "allium": (runtime.ALLIUM_PREFIX, r"RAOfflineProxy-Allium-v[^/]+\.zip", "Apps/RAOfflineProxy.pak", "Apps/RAOfflineProxy.pak"),
     "muos": (runtime.MUOS_PREFIX, r"RAOfflineProxy-muOS-v[^/]+\.muxapp", "RAOfflineProxy", "MUOS/application/RAOfflineProxy"),
     "knulli": (runtime.KNULLI_PREFIX, r"RAOfflineProxy-Knulli-v[^/]+-Install\.sh", None, "roms/tools/RAOfflineProxy Install.sh"),
+    # not Tools (on internal storage, out of reach): Ports runs a .sh from the card
+    "rocknix": (runtime.ROCKNIX_PREFIX, r"RAOfflineProxy-Rocknix-v[^/]+-Install\.sh", None, "roms/ports/RAOfflineProxy Install.sh"),
 }
 LAUNCH = "launch.sh"
 

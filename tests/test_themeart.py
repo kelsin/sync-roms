@@ -388,6 +388,37 @@ class Knulli(Card):
         self.assertNotIn("subset.", read(path))
 
 
+class Rocknix(Card):
+    """ROCKNIX's Art Book Next takes its customizations from ~/roms/_userdata/ (the card's roms/_userdata/)."""
+    def path(self, *rel):
+        return os.path.join(self.base, "roms", "_userdata", "theme-customizations", "art-book-next", *rel)
+
+    def test_art_goes_in_the_card_s_customizations_and_no_knulli_code_runs(self):
+        with mock.patch.object(themeart, "install_knulli") as k:
+            self.assertTrue(themeart.install("rocknix", self.base, SURPRISE))
+            k.assert_not_called()
+        with open(self.path("artwork", "Surprise.png"), "rb") as f, open(themeart.art_png("surprise"), "rb") as g:
+            self.assertEqual(f.read(), g.read())
+        self.assertIn("<path ", read(self.path("logos", "Surprise.svg")))
+        self.assertFalse(os.path.exists(os.path.join(self.base, "theme-customizations")))
+        self.assertFalse(os.path.exists(os.path.join(self.base, "system")))  # the settings are the install script's
+        self.assertFalse(themeart.install("rocknix", self.base, SURPRISE))  # nothing new the second time
+
+    def test_a_name_without_a_logo_gets_only_its_artwork(self):
+        themeart.install("rocknix", self.base, {"東方": "shmups"})
+        self.assertTrue(os.path.exists(self.path("artwork", "東方.png")))
+        self.assertFalse(os.path.exists(self.path("logos", "東方.svg")))
+
+    def test_describe(self):
+        out = io.StringIO()
+        with mock.patch.object(themeart, "describe_knulli") as k, contextlib.redirect_stdout(out):
+            themeart.describe("rocknix", self.base, SURPRISE)
+            k.assert_not_called()
+        self.assertIn("would add art for Surprise to roms/_userdata/theme-customizations/art-book-next/",
+                      out.getvalue())
+        self.assertFalse(os.path.exists(self.path()))
+
+
 class Muos(Card):
     def path(self, kind, name):
         return os.path.join(self.base, "MUOS", "info", "catalogue", "Collection", kind, f"{name}.png")

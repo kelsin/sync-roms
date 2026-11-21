@@ -10,7 +10,7 @@ import unicodedata
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
 
-from . import cardfs, external, inventory, m3u, runtime, s3, store, ui
+from . import cardfs, external, inventory, m3u, pico8, rocknix_collections, runtime, s3, saves, store, ui
 
 STALE_HINT = " (not in storage any more: run sync-roms cache update)"  # a file the cache lists is gone from the storage folder
 
@@ -212,6 +212,25 @@ IGNORED_ROOT_FILES = {
     "_info.txt", "gamelist.xml",                                   # Batocera / Knulli
     "miyoogamelist.xml",                                           # Onion
 }
+# sync-roms's scripts, run from ROCKNIX's Ports (raofflineproxy's KINDS names the second; it imports downloads, through onion_surprise)
+ROCKNIX_PORTS_FILES = (os.path.basename(rocknix_collections.SCRIPT), "RAOfflineProxy Install.sh")
+
+
+def layout_files(layout_name, system):
+    """Names at the top of the system's ROM folder that sync-roms put there for this layout: never offered for deletion."""
+    return ROCKNIX_PORTS_FILES if layout_name == "rocknix" and system["bucket"] == "ports" else ()
+
+
+PICO8_FILES = tuple(os.path.basename(m) for m in pico8.members("rocknix"))  # the PICO-8 runtime pico8.py extracts into ROCKNIX's pico8 ROM folder
+OWN_ROOT_FILES = {"ports": ROCKNIX_PORTS_FILES, "pico8": PICO8_FILES}
+
+
+def never_uploaded(bucket, rel):
+    """Whether rel, a path in a local copy of the bucket's folder, is one of sync-roms's own files or a RetroArch save,
+    state or thumbnail (ROCKNIX keeps them beside the ROMs): never a ROM."""
+    return rel in OWN_ROOT_FILES.get(bucket, ()) or bool(saves.classify(rel.rsplit("/", 1)[-1]))
+
+
 IGNORED_ROOT_DIRS = {"images", "videos", "manuals",                # Batocera / Knulli scraped media
                      "imgs"}                                       # Onion scraped box art
 IGNORED_FILES = {"thumbs.db", "desktop.ini"}                       # Windows
@@ -263,7 +282,7 @@ def name_key(path):
     return unicodedata.normalize("NFC", os.path.normpath(path)).casefold()
 
 
-def find_extras(dest, wanted_keys, skip_db=False, disc_dir=None, discs=(), keep=(), renames=None, folders=None):
+def find_extras(dest, wanted_keys, skip_db=False, disc_dir=None, discs=(), keep=(), renames=None, folders=None, skip_saves=False):
     """Local files under dest that aren't in the system's ROM list (frontend files and dotfiles are ignored;
     a .psvita file is kept while its .zip is listed).
 
@@ -272,6 +291,7 @@ def find_extras(dest, wanted_keys, skip_db=False, disc_dir=None, discs=(), keep=
     keep: paths inside dest that are expected too (BIOS files that go in the ROM folder).
     renames: if given, gets (path, storage's spelling) for each file that is an expected one spelled differently (case,
     Unicode form). Such a file is never an extra, unless the expected spelling is on the card too (a case-sensitive card).
+    skip_saves: RetroArch saves, states and their thumbnails are never extras (saves.beside_roms: they sit beside the ROMs).
     """
     rels = [rom_rel(k, disc_dir, discs, folders) for k in wanted_keys]
     expected = {os.path.normpath(r) for r in rels} | {os.path.normpath(r) for r in keep}
@@ -282,7 +302,7 @@ def find_extras(dest, wanted_keys, skip_db=False, disc_dir=None, discs=(), keep=
     if disc_dir:  # walk_roms skips dot folders, but the discs live in one
         walks += walk_roms(os.path.join(dest, disc_dir), rename_temps=True)
     found = [(os.path.join(root, f), os.path.normpath(os.path.relpath(os.path.join(root, f), dest)))
-             for root, files in walks for f in files]
+             for root, files in walks for f in files if not (skip_saves and saves.classify(f))]
     on_card = defaultdict(list)  # {name_key: the card's paths with it}
     for _, rel in found:
         on_card[name_key(rel)].append(rel)

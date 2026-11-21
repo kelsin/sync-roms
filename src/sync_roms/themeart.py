@@ -11,7 +11,7 @@ import tempfile
 from xml.sax import saxutils
 import zlib
 
-from . import cardfs, downloads, frontend, github, muos_collections, runtime, s3, store, ui
+from . import cardfs, downloads, frontend, github, muos_collections, rocknix_collections, runtime, s3, store, ui
 
 THEME_DATA = os.path.join(store.REPO_DATA, "themes", "art-book-next")
 SURPRISE_ART = "surprise"
@@ -398,6 +398,27 @@ def describe_knulli(base, arts):
         print(ui.dim(f"🎨 would add art for {', '.join(arts)} to {KNULLI_DIR.replace(os.sep, '/')}/"))
 
 
+# --- ROCKNIX -------------------------------------------------------------------------------------------------------
+
+def install_rocknix(base, arts):
+    """Put the collections' art ({name: art png}) in Art Book Next's ROCKNIX customizations on the card. Its settings
+    are on internal storage: the collections' install script turns the art on. Returns whether files changed."""
+    root = os.path.join(base, rocknix_collections.ART_DIR)
+    changed = False
+    for name, png in arts.items():
+        with open(png, "rb") as f:
+            changed |= _put(os.path.join(root, "artwork", f"{name}.png"), f.read())
+        logo = logo_svg(name)
+        if logo:
+            changed |= _put(os.path.join(root, "logos", f"{name}.svg"), logo.encode())
+    return changed
+
+
+def describe_rocknix(arts):
+    if arts:
+        print(ui.dim(f"🎨 would add art for {', '.join(arts)} to {rocknix_collections.ART_DIR.replace(os.sep, '/')}/"))
+
+
 def install(layout_name, base, arts):
     """Give the custom collections in arts ({name: art id}) their art in the frontend's theme. Returns whether files
     changed. NextUI has no theme to put it in."""
@@ -406,6 +427,8 @@ def install(layout_name, base, arts):
     arts = usable(layout_name, arts)
     if layout_name == "muos":
         return muos_collections.install_art(base, arts)
+    if layout_name == "rocknix":
+        return install_rocknix(base, arts)
     return install_esde(layout_name, base, arts) if layout_name in frontend.ESDE_LAYOUTS else install_knulli(base, arts)
 
 
@@ -415,4 +438,6 @@ def describe(layout_name, base, arts):
     arts = usable(layout_name, arts)
     if layout_name == "muos":
         return muos_collections.describe_art(base, arts)
+    if layout_name == "rocknix":
+        return describe_rocknix(arts)
     describe_esde(layout_name, base, arts) if layout_name in frontend.ESDE_LAYOUTS else describe_knulli(base, arts)

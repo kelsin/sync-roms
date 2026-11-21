@@ -13,6 +13,7 @@
       "spruce": "ARCADE",
       "muos": "mame",
       "emudeck": "mame",
+      "rocknix": "mame",
       "nextui": null
     },
     "muos_catalogue": "Arcade",
@@ -35,6 +36,7 @@
       "spruce": "ATARI",
       "muos": "atari2600",
       "emudeck": "atari2600",
+      "rocknix": "atari2600",
       "nextui": "Atari 2600 (A2600)"
     },
     "muos_catalogue": "Atari 2600",
@@ -57,6 +59,7 @@
       "spruce": "FIFTYTWOHUNDRED",
       "muos": "atari5200",
       "emudeck": "atari5200",
+      "rocknix": "atari5200",
       "nextui": "Atari 5200 (A5200)"
     },
     "muos_catalogue": "Atari 5200",
@@ -83,6 +86,7 @@
       "spruce": "SEVENTYEIGHTHUNDRED",
       "muos": "atari7800",
       "emudeck": "atari7800",
+      "rocknix": "atari7800",
       "nextui": "Atari 7800 (A7800)"
     },
     "muos_catalogue": "Atari 7800",
@@ -109,6 +113,7 @@
       "spruce": "EIGHTHUNDRED",
       "muos": "atari800",
       "emudeck": "atari800",
+      "rocknix": "atari800",
       "nextui": null
     },
     "muos_catalogue": "Atari 800",
@@ -139,6 +144,7 @@
       "spruce": "LYNX",
       "muos": "lynx",
       "emudeck": "atarilynx",
+      "rocknix": "atarilynx",
       "nextui": "Atari Lynx (LYNX)"
     },
     "muos_catalogue": "Atari Lynx",
@@ -165,6 +171,7 @@
       "spruce": "ATARIST",
       "muos": "atarist",
       "emudeck": "atarist",
+      "rocknix": "atarist",
       "nextui": null
     },
     "muos_catalogue": "Atari ST-STE-TT-Falcon",
@@ -193,6 +200,7 @@
       "spruce": "COLECO",
       "muos": "colecovision",
       "emudeck": "colecovision",
+      "rocknix": "coleco",
       "nextui": "ColecoVision (COLECO)"
     },
     "muos_catalogue": "ColecoVision",
@@ -227,6 +235,7 @@
       "spruce": "GBA",
       "muos": "gba",
       "emudeck": "gba",
+      "rocknix": "gba",
       "nextui": "Game Boy Advance (GBA)"
     },
     "nextui_bios_tags": [
@@ -259,6 +268,7 @@
       "spruce": "GBC",
       "muos": "gbc",
       "emudeck": "gbc",
+      "rocknix": "gbc",
       "nextui": "Game Boy Color (GBC)"
     },
     "muos_catalogue": "Nintendo Game Boy Color",
@@ -290,6 +300,7 @@
       "spruce": "GB",
       "muos": "gb",
       "emudeck": "gb",
+      "rocknix": "gb",
       "nextui": "Game Boy (GB)"
     },
     "muos_catalogue": "Nintendo Game Boy",
@@ -321,6 +332,7 @@
       "spruce": "INTELLIVISION",
       "muos": "intellivision",
       "emudeck": "intellivision",
+      "rocknix": "intellivision",
       "nextui": null
     },
     "muos_catalogue": "Mattel Intellivision",
@@ -351,6 +363,7 @@
       "spruce": "NEOGEO",
       "muos": "neogeo",
       "emudeck": "neogeo",
+      "rocknix": "neogeo",
       "nextui": "Neo Geo (FBN)"
     },
     "muos_catalogue": "SNK Neo Geo",
@@ -400,6 +413,7 @@
       "spruce": "FC",
       "muos": "nes",
       "emudeck": "nes",
+      "rocknix": "nes",
       "nextui": "Nintendo Entertainment System (FC)"
     },
     "muos_catalogue": "Nintendo NES - Famicom",
@@ -422,6 +436,7 @@
       "spruce": "FDS",
       "muos": "fds",
       "emudeck": "fds",
+      "rocknix": "fds",
       "nextui": "Famicom Disk System (FDS)"
     },
     "muos_catalogue": "Nintendo Family Computer Disk System",
@@ -452,6 +467,7 @@
       "spruce": "N64",
       "muos": "n64",
       "emudeck": "n64",
+      "rocknix": "n64",
       "nextui": null
     },
     "muos_catalogue": "Nintendo N64",
@@ -474,6 +490,7 @@
       "spruce": "NDS",
       "muos": "nds",
       "emudeck": "nds",
+      "rocknix": "nds",
       "nextui": null
     },
     "muos_catalogue": "Nintendo DS",
@@ -508,6 +525,7 @@
       "spruce": "ODYSSEY",
       "muos": "odyssey2",
       "emudeck": "odyssey2",
+      "rocknix": "odyssey",
       "nextui": null
     },
     "muos_catalogue": "Magnavox Odyssey - VideoPac",
@@ -538,6 +556,7 @@
       "spruce": null,
       "muos": "pcfx",
       "emudeck": "pcfx",
+      "rocknix": "pcfx",
       "nextui": null
     },
     "muos_catalogue": "NEC PC-FX",
@@ -568,6 +587,7 @@
       "spruce": "PC98",
       "muos": null,
       "emudeck": "pc98",
+      "rocknix": "pc98",
       "nextui": null
     },
     "bios": {
@@ -609,6 +629,7 @@
       "spruce": "THIRTYTWOX",
       "muos": "sega32x",
       "emudeck": "sega32x",
+      "rocknix": "sega32x",
       "nextui": "Sega 32X (32X)"
     },
     "muos_catalogue": "Sega 32X",
@@ -640,6 +661,7 @@
       "spruce": "SEGACD",
       "muos": "megacd",
       "emudeck": "segacd",
+      "rocknix": "megacd",
       "nextui": "Sega CD (SEGACD)"
     },
     "muos_catalogue": "Sega Mega CD - Sega CD",
@@ -681,6 +703,7 @@
       "spruce": "DC",
       "muos": "dreamcast",
       "emudeck": "dreamcast",
+      "rocknix": "dreamcast",
       "nextui": null
     },
     "muos_catalogue": "Sega Dreamcast",
@@ -720,6 +743,7 @@
       "spruce": "GG",
       "muos": "gamegear",
       "emudeck": "gamegear",
+      "rocknix": "gamegear",
       "nextui": "Game Gear (GG)"
     },
     "muos_catalogue": "Sega Game Gear",
@@ -758,6 +782,7 @@
       "spruce": "MD",
       "muos": "megadrive",
       "emudeck": "genesis",
+      "rocknix": "megadrive",
       "nextui": "Sega Genesis (MD)"
     },
     "muos_catalogue": "Sega Mega Drive - Genesis",
@@ -796,6 +821,7 @@
       "spruce": "MS",
       "muos": "mastersystem",
       "emudeck": "mastersystem",
+      "rocknix": "mastersystem",
       "nextui": "Sega Master System (SMS)"
     },
     "muos_catalogue": "Sega Master System",
@@ -834,6 +860,7 @@
       "spruce": "SATURN",
       "muos": "saturn",
       "emudeck": "saturn",
+      "rocknix": "saturn",
       "nextui": null
     },
     "muos_catalogue": "Sega Saturn",
@@ -870,6 +897,7 @@
       "spruce": "SFC",
       "muos": "snes",
       "emudeck": "snes",
+      "rocknix": "snes",
       "nextui": "Super Nintendo (SFC)"
     },
     "nextui_bios_tags": [
@@ -918,6 +946,7 @@
       "spruce": "PCE",
       "muos": "pcengine",
       "emudeck": "tg16",
+      "rocknix": "pcengine",
       "nextui": "TurboGrafx-16 (PCE)"
     },
     "muos_catalogue": "NEC PC Engine",
@@ -950,6 +979,7 @@
       "spruce": "PCECD",
       "muos": "pcenginecd",
       "emudeck": "tg-cd",
+      "rocknix": "pcenginecd",
       "nextui": "TurboGrafx-CD (PCE)"
     },
     "muos_catalogue": "NEC PC Engine CD",
@@ -985,6 +1015,7 @@
       "spruce": "VECTREX",
       "muos": "vectrex",
       "emudeck": "vectrex",
+      "rocknix": "vectrex",
       "nextui": null
     },
     "muos_catalogue": "GCE Vectrex",
@@ -1010,6 +1041,7 @@
       "spruce": "VB",
       "muos": "virtualboy",
       "emudeck": "virtualboy",
+      "rocknix": "virtualboy",
       "nextui": "Virtual Boy (VB)"
     },
     "muos_catalogue": "Nintendo Virtual Boy",
@@ -1034,6 +1066,7 @@
       "spruce": "WS",
       "muos": "wonderswan",
       "emudeck": "wonderswan",
+      "rocknix": "wonderswan",
       "nextui": null
     },
     "muos_catalogue": "Bandai WonderSwan Color",
@@ -1058,6 +1091,7 @@
       "spruce": "WSC",
       "muos": "wonderswancolor",
       "emudeck": "wonderswancolor",
+      "rocknix": "wonderswancolor",
       "nextui": null
     },
     "muos_catalogue": "Bandai WonderSwan Color",
@@ -1082,6 +1116,7 @@
       "spruce": null,
       "muos": null,
       "emudeck": "mame-advmame",
+      "rocknix": null,
       "nextui": null
     },
     "bios": {
@@ -1103,6 +1138,7 @@
       "spruce": null,
       "muos": "arcade",
       "emudeck": "arcade",
+      "rocknix": "arcade",
       "nextui": null
     },
     "muos_catalogue": "Arcade",
@@ -1125,6 +1161,7 @@
       "spruce": "ARDUBOY",
       "muos": "arduboy",
       "emudeck": "arduboy",
+      "rocknix": "arduboy",
       "nextui": null
     },
     "muos_catalogue": "Arduboy",
@@ -1147,6 +1184,7 @@
       "spruce": "ATOMISWAVE",
       "muos": "atomiswave",
       "emudeck": "atomiswave",
+      "rocknix": "atomiswave",
       "nextui": null
     },
     "muos_catalogue": "Sega Atomiswave Naomi",
@@ -1178,6 +1216,7 @@
       "spruce": "CHAI",
       "muos": "chailove",
       "emudeck": "chailove",
+      "rocknix": null,
       "nextui": null
     },
     "muos_catalogue": "ChaiLove",
@@ -1200,6 +1239,7 @@
       "spruce": "FAIRCHILD",
       "muos": "channelf",
       "emudeck": "channelf",
+      "rocknix": "channelf",
       "nextui": null
     },
     "muos_catalogue": "Fairchild Channel F",
@@ -1227,6 +1267,7 @@
       "spruce": "CPS1",
       "muos": "cps1",
       "emudeck": "cps1",
+      "rocknix": "cps1",
       "nextui": "CPS1 (FBN)"
     },
     "muos_catalogue": "Arcade",
@@ -1248,6 +1289,7 @@
       "spruce": "CPS2",
       "muos": "cps2",
       "emudeck": "cps2",
+      "rocknix": "cps2",
       "nextui": "CPS2 (FBN)"
     },
     "muos_catalogue": "Arcade",
@@ -1269,6 +1311,7 @@
       "spruce": "CPS3",
       "muos": "cps3",
       "emudeck": "cps3",
+      "rocknix": "cps3",
       "nextui": "CPS3 (FBN)"
     },
     "muos_catalogue": "Arcade",
@@ -1291,6 +1334,7 @@
       "spruce": null,
       "muos": null,
       "emudeck": "daphne",
+      "rocknix": "daphne",
       "nextui": null
     },
     "bios": {
@@ -1311,6 +1355,7 @@
       "spruce": "DOOM",
       "muos": "doom",
       "emudeck": "doom",
+      "rocknix": "doom",
       "nextui": "Doom (PRBOOM)"
     },
     "muos_catalogue": "Doom",
@@ -1332,6 +1377,7 @@
       "spruce": "EASYRPG",
       "muos": "easyrpg",
       "emudeck": "easyrpg",
+      "rocknix": "easyrpg",
       "nextui": null
     },
     "muos_catalogue": "RPG Maker 2000 - 2003",
@@ -1354,6 +1400,7 @@
       "spruce": "FBNEO",
       "muos": "fbneo",
       "emudeck": "fbneo",
+      "rocknix": "fbneo",
       "nextui": "Arcade (FBN)"
     },
     "muos_catalogue": "Arcade",
@@ -1408,6 +1455,7 @@
       "spruce": null,
       "muos": "lowresnx",
       "emudeck": "lowresnx",
+      "rocknix": null,
       "nextui": null
     },
     "muos_catalogue": "LowRes NX",
@@ -1428,6 +1476,7 @@
       "spruce": null,
       "muos": null,
       "emudeck": "lutro",
+      "rocknix": null,
       "nextui": null
     },
     "bios": {
@@ -1449,6 +1498,7 @@
       "spruce": "MEGADUCK",
       "muos": "megaduck",
       "emudeck": "megaduck",
+      "rocknix": "megaduck",
       "nextui": null
     },
     "muos_catalogue": "Mega Duck - Cougar Boy",
@@ -1470,6 +1520,7 @@
       "spruce": null,
       "muos": "n64dd",
       "emudeck": "n64dd",
+      "rocknix": "n64dd",
       "nextui": null
     },
     "muos_catalogue": "Nintendo N64",
@@ -1498,6 +1549,7 @@
       "spruce": "NAOMI",
       "muos": "naomi",
       "emudeck": "naomi",
+      "rocknix": "naomi",
       "nextui": null
     },
     "muos_catalogue": "Sega Atomiswave Naomi",
@@ -1531,6 +1583,7 @@
       "spruce": "NEOCD",
       "muos": "neogeocd",
       "emudeck": "neogeocd",
+      "rocknix": "neocd",
       "nextui": null
     },
     "muos_catalogue": "SNK Neo Geo CD",
@@ -1571,6 +1624,7 @@
       "spruce": "NGP",
       "muos": "ngp",
       "emudeck": "ngp",
+      "rocknix": "ngp",
       "nextui": "Neo Geo Pocket (NGP)"
     },
     "muos_catalogue": "SNK Neo Geo Pocket",
@@ -1595,6 +1649,7 @@
       "spruce": "NGPC",
       "muos": "ngpc",
       "emudeck": "ngpc",
+      "rocknix": "ngpc",
       "nextui": "Neo Geo Pocket Color (NGPC)"
     },
     "muos_catalogue": "SNK Neo Geo Pocket - Color",
@@ -1618,6 +1673,7 @@
       "spruce": "OPENBOR",
       "muos": "openbor",
       "emudeck": "openbor",
+      "rocknix": "openbor",
       "nextui": null
     },
     "muos_catalogue": "OpenBOR",
@@ -1640,6 +1696,7 @@
       "spruce": null,
       "muos": "3do",
       "emudeck": "3do",
+      "rocknix": "3do",
       "nextui": null
     },
     "muos_catalogue": "The 3DO Company - 3DO",
@@ -1683,6 +1740,7 @@
       "spruce": "PICO8",
       "muos": "pico8",
       "emudeck": "pico8",
+      "rocknix": "pico-8",
       "nextui": "PICO-8 (P8)"
     },
     "muos_catalogue": "PICO-8",
@@ -1705,6 +1763,7 @@
       "spruce": "POKE",
       "muos": "pokemini",
       "emudeck": "pokemini",
+      "rocknix": "pokemini",
       "nextui": "Pokemon Mini (PKM)"
     },
     "muos_catalogue": "Nintendo Pokemon Mini",
@@ -1725,6 +1784,7 @@
       "spruce": "PORTS",
       "muos": null,
       "emudeck": "ports",
+      "rocknix": "ports",
       "nextui": null
     },
     "bios": {
@@ -1746,6 +1806,7 @@
       "spruce": "PS",
       "muos": "psx",
       "emudeck": "psx",
+      "rocknix": "psx",
       "nextui": "PlayStation (PS)"
     },
     "muos_catalogue": "Sony PlayStation",
@@ -1795,6 +1856,7 @@
       "spruce": "PSP",
       "muos": "psp",
       "emudeck": "psp",
+      "rocknix": "psp",
       "nextui": null
     },
     "muos_catalogue": "Sony PlayStation Portable",
@@ -1824,6 +1886,7 @@
       "spruce": "SATELLAVIEW",
       "muos": "satellaview",
       "emudeck": "satellaview",
+      "rocknix": "satellaview",
       "nextui": null
     },
     "muos_catalogue": "Nintendo SNES - SFC",
@@ -1868,6 +1931,7 @@
       "spruce": "SCUMMVM",
       "muos": "scummvm",
       "emudeck": "scummvm",
+      "rocknix": null,
       "nextui": null
     },
     "muos_catalogue": "ScummVM",
@@ -1890,6 +1954,7 @@
       "spruce": "SGFX",
       "muos": "supergrafx",
       "emudeck": "supergrafx",
+      "rocknix": "sgfx",
       "nextui": null
     },
     "muos_catalogue": "NEC PC Engine SuperGrafx",
@@ -1921,6 +1986,7 @@
       "spruce": "SGB",
       "muos": null,
       "emudeck": "sgb",
+      "rocknix": null,
       "nextui": "Super Game Boy (SGB)"
     },
     "bios": {
@@ -1974,6 +2040,7 @@
       "spruce": "SUFAMI",
       "muos": "sufami",
       "emudeck": "sufami",
+      "rocknix": "sufami",
       "nextui": null
     },
     "muos_catalogue": "Nintendo SNES - SFC",
@@ -2019,6 +2086,7 @@
       "spruce": "SUPERVISION",
       "muos": "supervision",
       "emudeck": "supervision",
+      "rocknix": "supervision",
       "nextui": null
     },
     "muos_catalogue": "Watara Supervision",
@@ -2041,6 +2109,7 @@
       "spruce": "TIC",
       "muos": "tic80",
       "emudeck": "tic80",
+      "rocknix": "tic-80",
       "nextui": null
     },
     "muos_catalogue": "TIC-80",
@@ -2062,6 +2131,7 @@
       "spruce": "QUAKE",
       "muos": "quake",
       "emudeck": "quake",
+      "rocknix": null,
       "nextui": null
     },
     "muos_catalogue": "Quake",
@@ -2083,6 +2153,7 @@
       "spruce": null,
       "muos": "uzebox",
       "emudeck": "uzebox",
+      "rocknix": "uzebox",
       "nextui": null
     },
     "muos_catalogue": "Uzebox",
@@ -2105,6 +2176,7 @@
       "spruce": "JAGUAR",
       "muos": "jaguar",
       "emudeck": "atarijaguar",
+      "rocknix": "atarijaguar",
       "nextui": null
     },
     "muos_catalogue": "Atari Jaguar",
@@ -2127,6 +2199,7 @@
       "spruce": null,
       "muos": null,
       "emudeck": "atarijaguarcd",
+      "rocknix": null,
       "nextui": null
     },
     "bios": {
@@ -2148,6 +2221,7 @@
       "spruce": null,
       "muos": "cdi",
       "emudeck": "cdimono1",
+      "rocknix": "cdi",
       "nextui": null
     },
     "muos_catalogue": "Philips CDi",
@@ -2176,6 +2250,7 @@
       "spruce": null,
       "muos": null,
       "emudeck": "gc",
+      "rocknix": "gamecube",
       "nextui": null
     },
     "bios": {
@@ -2210,6 +2285,7 @@
       "spruce": null,
       "muos": null,
       "emudeck": "mark3",
+      "rocknix": null,
       "nextui": null
     },
     "bios": {
@@ -2246,6 +2322,7 @@
       "spruce": null,
       "muos": null,
       "emudeck": "model2/roms",
+      "rocknix": null,
       "nextui": null
     },
     "bios": {
@@ -2266,6 +2343,7 @@
       "spruce": null,
       "muos": null,
       "emudeck": "model3",
+      "rocknix": "segamodel3",
       "nextui": null
     },
     "bios": {
@@ -2287,6 +2365,7 @@
       "spruce": null,
       "muos": "3ds",
       "emudeck": "n3ds",
+      "rocknix": "3ds",
       "nextui": null
     },
     "muos_catalogue": "Nintendo 3DS",
@@ -2309,6 +2388,7 @@
       "spruce": null,
       "muos": "3ds",
       "emudeck": "n3ds",
+      "rocknix": "3ds",
       "nextui": null
     },
     "muos_catalogue": "Nintendo 3DS",
@@ -2330,6 +2410,7 @@
       "spruce": null,
       "muos": null,
       "emudeck": "naomi2",
+      "rocknix": null,
       "nextui": null
     },
     "bios": {
@@ -2361,6 +2442,7 @@
       "spruce": null,
       "muos": null,
       "emudeck": "naomigd",
+      "rocknix": null,
       "nextui": null
     },
     "bios": {
@@ -2393,6 +2475,7 @@
       "spruce": null,
       "muos": null,
       "emudeck": "ps2",
+      "rocknix": "ps2",
       "nextui": null
     },
     "bios": {
@@ -2426,6 +2509,7 @@
       "spruce": null,
       "muos": null,
       "emudeck": "ps3",
+      "rocknix": "ps3",
       "nextui": null
     },
     "bios": {
@@ -2456,6 +2540,7 @@
       "spruce": null,
       "muos": null,
       "emudeck": null,
+      "rocknix": null,
       "nextui": null
     },
     "bios": {
@@ -2477,6 +2562,7 @@
       "spruce": null,
       "muos": null,
       "emudeck": "psvita",
+      "rocknix": "psvita",
       "nextui": null
     },
     "bios": {
@@ -2497,6 +2583,7 @@
       "spruce": null,
       "muos": null,
       "emudeck": "stv",
+      "rocknix": "st-v",
       "nextui": null
     },
     "bios": {
@@ -2518,6 +2605,7 @@
       "spruce": null,
       "muos": null,
       "emudeck": "switch",
+      "rocknix": null,
       "nextui": null
     },
     "bios": {
@@ -2541,6 +2629,7 @@
       "spruce": null,
       "muos": null,
       "emudeck": "triforce",
+      "rocknix": "triforce",
       "nextui": null
     },
     "bios": {
@@ -2561,6 +2650,7 @@
       "spruce": null,
       "muos": null,
       "emudeck": "type-x",
+      "rocknix": null,
       "nextui": null
     },
     "bios": {
@@ -2582,6 +2672,7 @@
       "spruce": null,
       "muos": null,
       "emudeck": "wii",
+      "rocknix": "wii",
       "nextui": null
     },
     "bios": {
@@ -2606,6 +2697,7 @@
       "spruce": null,
       "muos": null,
       "emudeck": "wiiu/roms",
+      "rocknix": "wiiu",
       "nextui": null
     },
     "bios": {
@@ -2627,6 +2719,7 @@
       "spruce": null,
       "muos": null,
       "emudeck": "xbox",
+      "rocknix": "xbox",
       "nextui": null
     },
     "bios": {
@@ -2668,6 +2761,7 @@
       "spruce": null,
       "muos": null,
       "emudeck": "xbox360/roms",
+      "rocknix": null,
       "nextui": null
     },
     "bios": {
@@ -2692,6 +2786,7 @@
       "spruce": null,
       "muos": null,
       "emudeck": null,
+      "rocknix": null,
       "nextui": null
     },
     "bios": {
@@ -2713,6 +2808,7 @@
       "spruce": "SEGASGONE",
       "muos": null,
       "emudeck": "sg-1000",
+      "rocknix": "sg-1000",
       "nextui": "Sega SG-1000 (SG1000)"
     },
     "bios": {
@@ -2736,6 +2832,7 @@
       "spruce": "MSX",
       "muos": null,
       "emudeck": "msx",
+      "rocknix": "msx",
       "nextui": "MSX (MSX)"
     },
     "bios": {
@@ -3088,6 +3185,7 @@
       "spruce": "MSX",
       "muos": null,
       "emudeck": "msx2",
+      "rocknix": "msx2",
       "nextui": "MSX2 (MSX)"
     },
     "bios": {
@@ -3440,6 +3538,7 @@
       "spruce": null,
       "muos": null,
       "emudeck": "arcadia",
+      "rocknix": null,
       "nextui": null
     },
     "bios": {
@@ -3463,6 +3562,7 @@
       "spruce": null,
       "muos": null,
       "emudeck": "gamate",
+      "rocknix": null,
       "nextui": null
     },
     "bios": {
@@ -3487,6 +3587,7 @@
       "spruce": null,
       "muos": null,
       "emudeck": "gamecom",
+      "rocknix": null,
       "nextui": null
     },
     "bios": {
@@ -3511,6 +3612,7 @@
       "spruce": "COMMODORE",
       "muos": null,
       "emudeck": "c64",
+      "rocknix": "c64",
       "nextui": "Commodore 64 (C64)"
     },
     "bios": {

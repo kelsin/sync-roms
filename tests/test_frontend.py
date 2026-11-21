@@ -2,6 +2,7 @@ import contextlib
 import io
 import os
 import shutil
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -9,7 +10,7 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
-from sync_roms import cardfs, frontend, store, themeart  # noqa: E402
+from sync_roms import cardfs, downloads, frontend, store, themeart  # noqa: E402
 
 ESDE_SETTINGS = ('<?xml version="1.0"?>\n<bool name="ScrapeRatings" value="true" />\n'
                  '<string name="CollectionSystemsCustom" value="Mine,Old" />\n<string name="Theme" value="x" />\n')
@@ -315,6 +316,152 @@ class NextUI(unittest.TestCase):
         self.assertIn("would write New.txt", out.getvalue())
         self.assertNotIn("enable", out.getvalue())
         self.assertFalse(os.path.exists(os.path.join(self.base, "Collections")))
+
+
+class Rocknix(unittest.TestCase):
+    """ROCKNIX's EmulationStation reads custom collections from internal storage only: sync stages them in the card's
+    ROM folder, and an install script in Ports copies them there."""
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.base = os.path.join(self.tmp.name, "card")
+        self.es = os.path.join(self.tmp.name, "storage", ".config", "emulationstation")
+        self.script = os.path.join(self.base, "roms", "ports", "Install Collections.sh")
+
+    def stage(self, wanted, owned=()):
+        plan = frontend.plan_collections("rocknix", self.base, wanted, list(owned))
+        return plan, frontend.apply_collections(plan, "rocknix", self.base)
+
+    def run_script(self):
+        """Run the card's install script as ROCKNIX would (bash, from Ports), with ES's folder at self.es."""
+        bin_dir = os.path.join(self.tmp.name, "bin")
+        os.makedirs(bin_dir, exist_ok=True)
+        if not os.path.exists(os.path.join(bin_dir, "python3")):
+            os.symlink(sys.executable, os.path.join(bin_dir, "python3"))
+        env = {"PATH": bin_dir, "SYNC_ROMS_ES_DIR": self.es, "HOME": self.tmp.name}
+        return subprocess.run([shutil.which("bash"), self.script], env=env, capture_output=True, text=True,
+                              check=True).stdout
+
+    def es_file(self, *rel):
+        with open(os.path.join(self.es, *rel), encoding="utf-8") as f:
+            return f.read()
+
+    def write_settings(self, body):
+        os.makedirs(self.es, exist_ok=True)
+        with open(os.path.join(self.es, "es_settings.cfg"), "w", encoding="utf-8") as f:
+            f.write(f'<?xml version="1.0"?>\n<config>\n{body}</config>\n')
+
+    def test_path_and_line(self):
+        self.assertIn("rocknix", frontend.FRONTEND_LAYOUTS)
+        self.assertEqual(frontend.collection_path("rocknix", self.base, "Favs"),
+                         os.path.join(self.base, "roms", ".sync-roms-collections", "custom-Favs.cfg"))
+        self.assertEqual(frontend.collection_line("rocknix", "snes", "Sub/A.sfc"), "/storage/roms/snes/Sub/A.sfc")
+
+    def test_wanted_lines_use_the_roms_mount(self):
+        snes = {"bucket": "snes", "folders": {"rocknix": "snes"}}
+        favs = {"name": "Favs", "games": [{"title": "A", "system": "snes", "bucket": "snes/A.sfc"}]}
+        self.assertEqual(frontend.wanted_collections("rocknix", [favs], [snes], lambda s, rel: True),
+                         {"Favs": ["/storage/roms/snes/A.sfc"]})
+
+    def test_apply_stages_the_files_and_writes_the_install_script_once(self):
+        plan, changed = self.stage({"Favs": ["/storage/roms/snes/A.sfc"]})
+        self.assertTrue(changed)
+        self.assertEqual(plan["owned"], ["Favs"])
+        with open(frontend.collection_path("rocknix", self.base, "Favs")) as f:
+            self.assertEqual(f.read(), "/storage/roms/snes/A.sfc\n")
+        self.assertTrue(os.access(self.script, os.X_OK))
+        with open(self.script) as f:
+            text = f.read()
+        self.assertTrue(text.startswith("#!/bin/bash\n"))
+        self.assertNotIn(self.base, text)
+        self.assertNotIn("games-external", text)
+        self.assertEqual(os.listdir(self.base), ["roms"])  # no ES settings on the card
+        self.assertFalse(self.stage({"Favs": ["/storage/roms/snes/A.sfc"]}, ["Favs"])[1])  # nothing new the second time
+        ports = os.path.dirname(self.script)  # the Ports system's ROM folder: the script is never a ROM to delete
+        keep = downloads.layout_files("rocknix", {"bucket": "ports"})
+        self.assertEqual(downloads.find_extras(ports, [], keep=keep), [])
+        self.assertFalse(downloads.has_local_files(ports, ignore=keep))
+        self.assertEqual(downloads.layout_files("knulli", {"bucket": "ports"}), ())
+        self.assertEqual(downloads.layout_files("rocknix", {"bucket": "snes"}), ())
+        self.assertEqual(downloads.find_extras(ports, []), [self.script])  # any other folder offers it for deletion
+
+    def test_the_script_is_removed_when_the_card_has_no_collections(self):
+        self.stage({"Favs": ["/storage/roms/snes/A.sfc"]})
+        os.remove(frontend.collection_path("rocknix", self.base, "Favs"))
+        self.assertTrue(self.stage({})[1])
+        self.assertFalse(os.path.exists(self.script))
+
+    def test_the_script_stays_while_removed_collections_wait_to_be_uninstalled(self):
+        self.stage({"Old": ["/storage/roms/snes/A.sfc"]})
+        plan, _ = self.stage({}, ["Old"])
+        self.assertEqual(plan["deletes"], [frontend.collection_path("rocknix", self.base, "Old")])
+        self.assertTrue(os.path.exists(self.script))
+
+    def test_describe_says_to_run_the_script(self):
+        plan = frontend.plan_collections("rocknix", self.base, {"Favs": ["/storage/roms/snes/A.sfc"]}, [])
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            frontend.describe_collections(plan, "rocknix")
+        self.assertIn("would write custom-Favs.cfg", out.getvalue())
+        self.assertIn("Install Collections", out.getvalue())
+        self.assertNotIn("es_settings", out.getvalue())
+        self.assertFalse(os.path.exists(self.base))
+
+    def test_the_script_installs_and_enables_the_collections(self):
+        odd = "Rock 'n' Roll & Co"
+        self.stage({"Favs": ["/storage/roms/snes/A.sfc"], odd: ["/storage/roms/gba/B (USA).gba"]})
+        out = self.run_script()
+        self.assertEqual(self.es_file("collections", "custom-Favs.cfg"), "/storage/roms/snes/A.sfc\n")
+        self.assertEqual(self.es_file("collections", f"custom-{odd}.cfg"), "/storage/roms/gba/B (USA).gba\n")
+        settings = self.es_file("es_settings.cfg")
+        self.assertIn('<string name="CollectionSystemsCustom" value="Favs,Rock \'n\' Roll &amp; Co" />', settings)
+        self.assertNotIn("subset.", settings)  # no art on the card
+        self.assertIn("Restart EmulationStation", out)  # no systemd here to restart it
+        self.assertTrue(os.path.exists(self.script))
+
+    def test_the_script_keeps_what_it_did_not_install_and_removes_what_it_did(self):
+        self.stage({"Old": ["/storage/roms/snes/A.sfc"], "Mine": ["/storage/roms/snes/A.sfc"]})
+        os.makedirs(os.path.join(self.es, "collections"))
+        with open(os.path.join(self.es, "collections", "custom-Mine.cfg"), "w") as f:
+            f.write("./roms/nes/x.nes\n")
+        self.write_settings('\t<bool name="X" value="true" />\n\t<string name="CollectionSystemsCustom" value="Mine" />\n')
+        self.assertIn("Mine", self.run_script())  # skipped: EmulationStation's own collection of that name
+        self.assertEqual(self.es_file("collections", "custom-Mine.cfg"), "./roms/nes/x.nes\n")
+        self.assertEqual(frontend.get_string(self.es_file("es_settings.cfg"), "CollectionSystemsCustom"), "Mine,Old")
+        self.stage({}, ["Old", "Mine"])
+        self.run_script()
+        self.assertFalse(os.path.exists(os.path.join(self.es, "collections", "custom-Old.cfg")))
+        self.assertEqual(self.es_file("collections", "custom-Mine.cfg"), "./roms/nes/x.nes\n")
+        settings = self.es_file("es_settings.cfg")
+        self.assertEqual(frontend.get_string(settings, "CollectionSystemsCustom"), "Mine")
+        self.assertIn('<bool name="X" value="true" />', settings)
+        self.assertFalse(os.path.exists(self.script))  # nothing left to install: it removes itself
+
+    def test_the_script_turns_on_the_art_on_the_card_for_art_book_next(self):
+        self.stage({"Favs": ["/storage/roms/snes/A.sfc"], "東方": ["/storage/roms/snes/A.sfc"]})
+        with mock.patch("sync_roms.ui.warn"):
+            self.assertTrue(themeart.install("rocknix", self.base, {"Favs": "surprise", "東方": "shmups"}))
+        self.run_script()
+        settings = self.es_file("es_settings.cfg")
+        for name, value in (("subset.Favs.system-view-artwork", "custom"), ("subset.Favs.system-logos", "custom"),
+                            ("subset.東方.system-view-artwork", "custom"), ("subset.distribution", "rocknix"),
+                            ("UseCustomCollectionsSystemEx", "false")):
+            self.assertEqual(frontend.get_string(settings, name), value, name)
+        self.assertIsNone(frontend.get_string(settings, "subset.東方.system-logos"))  # no logo: the theme shows the name
+
+    def test_the_script_leaves_another_theme_and_choices_already_made_alone(self):
+        self.stage({"Favs": ["/storage/roms/snes/A.sfc"]})
+        themeart.install("rocknix", self.base, {"Favs": "surprise"})
+        self.write_settings('\t<string name="ThemeSet" value="es-theme-carbon" />\n')
+        self.run_script()
+        self.assertNotIn("subset.", self.es_file("es_settings.cfg"))
+        self.write_settings('\t<string name="UseCustomCollectionsSystemEx" value="true" />\n'
+                            '\t<string name="subset.distribution" value="batocera" />\n')
+        self.run_script()
+        settings = self.es_file("es_settings.cfg")
+        self.assertEqual(frontend.get_string(settings, "UseCustomCollectionsSystemEx"), "true")
+        self.assertEqual(frontend.get_string(settings, "subset.distribution"), "batocera")
+        self.assertEqual(frontend.get_string(settings, "subset.Favs.system-view-artwork"), "custom")
 
 
 if __name__ == "__main__":

@@ -41,6 +41,8 @@ LAYOUTS = {
 }
 KNULLI = f"os/knulli/RAOfflineProxy-Knulli-{V}-Install.sh"
 SCRIPT = os.path.join("roms", "tools", "RAOfflineProxy Install.sh")
+ROCKNIX = f"os/rocknix/RAOfflineProxy-Rocknix-{V}-Install.sh"
+PORTS_SCRIPT = os.path.join("roms", "ports", "RAOfflineProxy Install.sh")
 
 
 class Install(helpers.StorageDir):
@@ -94,6 +96,24 @@ class Install(helpers.StorageDir):
         self.put(KNULLI.replace("alpha1", "alpha2"), b"y")
         self.run_install("knulli")
         self.assertTrue(os.path.exists(self.cp(SCRIPT)))
+
+    def test_rocknix_copies_the_install_script_to_ports_once_per_name(self):
+        self.put(ROCKNIX, b"#!/bin/sh\necho hi")
+        self.run_install("rocknix")
+        self.assertEqual(self.failures, 0)
+        with open(self.cp(PORTS_SCRIPT), "rb") as f:
+            self.assertEqual(f.read(), b"#!/bin/sh\necho hi")
+        self.assertTrue(os.stat(self.cp(PORTS_SCRIPT)).st_mode & stat.S_IXUSR)
+        self.assertEqual(self.recorded(), os.path.basename(ROCKNIX))
+        os.remove(self.cp(PORTS_SCRIPT))  # the script deletes itself after running
+        self.run_install("rocknix")
+        self.assertFalse(os.path.exists(self.cp(PORTS_SCRIPT)))
+        self.put(ROCKNIX.replace("alpha1", "alpha2"), b"y")
+        self.run_install("rocknix")
+        self.assertTrue(os.path.exists(self.cp(PORTS_SCRIPT)))
+
+    def test_rocknix_prefix_is_listed(self):
+        self.assertIn("os/rocknix/", raofflineproxy.prefixes())
 
     def test_other_layouts_get_nothing(self):
         self.put(LAYOUTS["onion"][0], make_zip("App/RAOfflineProxy"))

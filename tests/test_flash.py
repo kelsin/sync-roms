@@ -171,6 +171,55 @@ class FlashMuos(unittest.TestCase):
         self.assertTrue(all(not m for _, m in flash.sort_images(self.MUOS, "pixie")))
 
 
+class FlashRocknix(unittest.TestCase):
+    DDR3 = "os/rocknix/ROCKNIX-H700.aarch64-20261101-DDR3.img.gz"
+    DDR4 = "os/rocknix/ROCKNIX-H700.aarch64-20261101-DDR4.img.gz"
+    STORAGE = [DDR3, DDR4, "os/rocknix/ROCKNIX-H700.aarch64-20261101.tar",
+               "os/rocknix/RAOfflineProxy-Rocknix-v3.1.0-alpha1-Install.sh"]
+
+    def test_images_keeps_only_rocknix_img_gz(self):
+        listing = {k: 1 for k in KEYS + self.STORAGE} | {"os/ROCKNIX-H700.aarch64-20261101-DDR3.img.gz": 1}
+        self.assertEqual(sorted(flash.images(listing, "rocknix")), [self.DDR3, self.DDR4])
+        self.assertEqual(sorted(flash.images(listing)), sorted(KEYS))
+
+    def test_h700_device_matches_both_variants_first(self):
+        old = "os/rocknix/ROCKNIX-H700.aarch64-20250101-DDR4.img.gz"
+        other = "os/rocknix/ROCKNIX-RK3566.aarch64-20261102-Generic.img.gz"
+        got = flash.sort_images([other, old, self.DDR3, self.DDR4], "anbernic-rg35xxh", "H700")
+        self.assertEqual(got, [(self.DDR3, True), (self.DDR4, True), (old, True), (other, False)])
+
+    def test_other_soc_never_matches_h700(self):
+        got = flash.sort_images([self.DDR3, self.DDR4], "ayn-odin-2", "SM8550")
+        self.assertTrue(all(not m for _, m in got))
+        self.assertTrue(all(not m for _, m in flash.sort_images([self.DDR3], "anbernic-rg35xxh")))
+
+    def test_variant_device_matches_only_its_variant(self):
+        generic = "os/rocknix/ROCKNIX-RK3566.aarch64-20261101-Generic.img.gz"
+        specific = "os/rocknix/ROCKNIX-RK3566.aarch64-20261101-Specific.img.gz"
+        self.assertEqual(flash.sort_images([generic, specific], "anbernic-rg-ds", "RK3566-Specific"),
+                         [(specific, True), (generic, False)])
+
+    def test_no_variant_image_matches(self):
+        key = "os/rocknix/ROCKNIX-SM8550.aarch64-20261101.img.gz"
+        self.assertEqual(flash.sort_images([key], "ayn-odin-2", "SM8550"), [(key, True)])
+        self.assertEqual(flash.sort_images([key], "ayn-odin-3", "SM8750"), [(key, False)])
+
+    def test_newest_date_first(self):
+        keys = ["os/rocknix/ROCKNIX-SM8550.aarch64-20250101.img.gz", "os/rocknix/ROCKNIX-SM8550.aarch64-20261101.img.gz"]
+        self.assertEqual([k for k, _ in flash.sort_images(keys, "x")], keys[::-1])
+
+    def test_devices_for_rocknix_skips_others(self):
+        devs = [{"id": "a", "firmwares": ["knulli", "rocknix"]}, {"id": "b", "firmwares": ["onion"]}]
+        self.assertEqual([d["id"] for d in flash.devices_for(devs, "rocknix")], ["a"])
+
+    def test_every_rocknix_device_names_its_image(self):
+        for d in store.repo_json("devices"):
+            if "rocknix" in d["firmwares"]:
+                self.assertRegex(d.get("rocknix_image", ""), r"^[A-Z0-9]+(-[A-Za-z0-9]+)?$", d["id"])
+            else:
+                self.assertNotIn("rocknix_image", d, d["id"])
+
+
 class Args:
     def __init__(self, dry_run=False):
         self.dry_run = dry_run
@@ -401,7 +450,7 @@ class Run(helpers.StorageDir):
     def test_no_images(self):
         os.remove(os.path.join(self.root, IMAGE))
         self.assertEqual(self.flash(), 1)
-        self.assertIn("no Knulli, BaseOS or muOS images", self.out)
+        self.assertIn("no Knulli, BaseOS, muOS or ROCKNIX images", self.out)
 
     def test_both_firmwares_ask_which(self):
         self.put("os/muos/muos-banana-20260101.img.gz", gzip.compress(b"img"))
@@ -415,6 +464,50 @@ class Run(helpers.StorageDir):
         self.assertEqual(calls[1].args[1], ["M"])
         self.assertEqual(calls[2].args[1], ["muos/muos-banana-20260101.img.gz"])
         self.assertNotIn("✓", str(calls[2].kwargs["extras"]))
+
+    def test_rocknix_offers_rocknix_devices_and_matches_by_soc(self):
+        ddr3 = "os/rocknix/ROCKNIX-H700.aarch64-20261101-DDR3.img.gz"
+        self.put(ddr3, gzip.compress(b"img"))
+        self.put("os/rocknix/ROCKNIX-H700.aarch64-20261101.tar", b"tar")
+        inventory.reset()
+        self.filter_list.side_effect = [1, 0, 0, 0]
+        with mock.patch.object(store, "repo_json", return_value=[
+                {"id": "k", "name": "K", "firmwares": ["knulli"]},
+                {"id": "r", "name": "R", "firmwares": ["knulli", "rocknix"], "rocknix_image": "H700"}]):
+            self.assertEqual(self.flash(), 0)
+        calls = self.filter_list.call_args_list
+        self.assertEqual(calls[0].args[1], ["Knulli or BaseOS", "ROCKNIX"])
+        self.assertEqual(calls[1].args[1], ["R"])
+        self.assertEqual(calls[2].args[1], ["rocknix/ROCKNIX-H700.aarch64-20261101-DDR3.img.gz"])
+        self.assertIn("✓", str(calls[2].kwargs["extras"]))
+
+    def rocknix_run(self, device):
+        """Flash with only ROCKNIX's H700 images in storage, for device: (exit code, the pickers' titles)."""
+        os.remove(os.path.join(self.root, IMAGE))
+        for variant in ("DDR3", "DDR4"):
+            self.put(f"os/rocknix/ROCKNIX-H700.aarch64-20261101-{variant}.img.gz", gzip.compress(b"img"))
+        inventory.reset()
+        with mock.patch.object(store, "repo_json", return_value=[{"name": "D", "firmwares": ["rocknix"], **device}]):
+            code = self.flash()
+        return code, [c.args[0] for c in self.filter_list.call_args_list]
+
+    def test_rocknix_device_with_no_matching_image_stops(self):
+        code, asked = self.rocknix_run({"id": "ayn-odin-2", "rocknix_image": "SM8550"})
+        self.assertEqual(code, 1)
+        self.assertEqual(asked, ["🎯 Which device?"])  # never offered the H700 images
+        self.assertIn("No ROCKNIX image for SM8550 in storage's os/rocknix/", self.out)
+        self.write_image.assert_not_called()
+
+    def test_rocknix_device_with_no_rocknix_image_stops(self):
+        code, asked = self.rocknix_run({"id": "x"})
+        self.assertEqual(code, 1)
+        self.assertEqual(asked, ["🎯 Which device?"])
+
+    def test_rocknix_h700_device_is_offered_both_variants(self):
+        code, asked = self.rocknix_run({"id": "anbernic-rg35xxh", "rocknix_image": "H700"})
+        self.assertEqual(code, 0)
+        self.assertEqual(self.filter_list.call_args_list[1].args[1],
+                         [f"rocknix/ROCKNIX-H700.aarch64-20261101-{v}.img.gz" for v in ("DDR3", "DDR4")])
 
     def test_one_firmware_skips_question(self):
         self.flash()

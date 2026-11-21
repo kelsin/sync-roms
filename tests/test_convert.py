@@ -271,6 +271,24 @@ class ConvertTest(unittest.TestCase):
 
 
 
+class RocknixSavesTest(ConvertTest):
+    """ROCKNIX keeps RetroArch saves beside the ROMs: they move as saves (or stay), never as ROMs."""
+    R = {"roms_dir": "roms", "bios_dir": "roms/bios",
+         "retroarch": {"dir": "roms", "saves": "{system}", "states": "savestates/{system}"}}
+    SYSTEMS = [{**SYSTEMS[0], "folders": {**SYSTEMS[0]["folders"], "rocknix": "gba"}}]
+
+    def test_saves_beside_roms_are_not_roms(self):
+        for name in ("Game.gba", "Game.srm", "Game.state1", "Game.state1.png", "Old.srm"):
+            touch(self.p("roms", "gba", name))
+        moves, _ = convert.plan_roms(self.base, self.SYSTEMS, "rocknix", self.R, "esde", LAYOUTS["esde"])
+        self.assertEqual(moves, [(self.p("roms", "gba", "Game.gba"), self.p("ROMs", "gba", "Game.gba"))])
+
+    def test_a_stray_save_in_another_layouts_rom_folder_still_moves_with_the_roms(self):
+        touch(self.p("roms", "gba", "Game.srm"))
+        moves, _ = convert.plan_roms(self.base, self.SYSTEMS, "knulli", K, "esde", LAYOUTS["esde"])
+        self.assertEqual(moves, [(self.p("roms", "gba", "Game.srm"), self.p("ROMs", "gba", "Game.srm"))])
+
+
 class FixesTest(ConvertTest):
     def test_frontend_metadata_is_not_moved_and_is_listed(self):
         for f in ("Game.zip", "gamelist.xml", "images/a.png", "videos/a.mp4", "Game.zip.part"):
@@ -302,6 +320,15 @@ class FixesTest(ConvertTest):
             touch(self.p("roms", "gba", f))
         self.assertEqual(convert.plan_media(self.base, SYSTEMS, "knulli", K, "nextui", N),
                          [self.p("roms", "gba", n) for n in ("gamelist.xml", "images", "manuals", "videos")])
+
+    def test_rocknix_media_folders_are_the_same_as_knulli(self):
+        self.assertEqual(convert._media_names("rocknix"), convert._media_names("knulli"))
+        for f in ("gamelist.xml", "images/a.png", "videos/a.mp4", "manuals/a.pdf"):
+            touch(self.p("roms", "gba", f))
+        systems = [{**SYSTEMS[0], "folders": {**SYSTEMS[0]["folders"], "rocknix": "gba"}}]
+        self.assertEqual(convert.plan_media(self.base, systems, "rocknix", K, "nextui", N),
+                         [self.p("roms", "gba", n) for n in ("gamelist.xml", "images", "manuals", "videos")])
+        self.assertEqual(convert.plan_media(self.base, systems, "knulli", K, "rocknix", K), [])
 
     def test_media_the_new_layout_also_uses_stays(self):
         for f in ("miyoogamelist.xml", "Imgs/a.png"):
