@@ -16,7 +16,8 @@ When syncing a `spruce` card, also put the latest spruceOS release from storage'
 - On `spruce` cards only, copy it to the card root unextracted.
 - Once per version: a new card field `spruce_os` (in `cards.json` and its schema) records the 7z name sync last staged. When it equals the newest, sync doesn't copy again, even if EZ Updater has since deleted the file.
 - When a newer one is staged, remove only the previous `spruce_os` file from the card root if still present. Never remove anything else.
-- The copy counts toward the card's size budget like other sync writes, and shows in dry run.
+- Dry run says it would stage the file. The card size budget (`budget.py`) only counts games, so like the PICO-8 and RAOfflineProxy files the 7z is not in it; a copy that fails (card full) warns, counts as a failure and records nothing.
+- The local storage mirror (`mirroring.mirror_wanted`) includes the newest 7z, like the newest Surprise app zip.
 - Docs: CLAUDE.md `os/` notes; the setup guide's spruce section gets an "after sync, run Apps → EZ Updater" step.
 
 ## Non-goals
