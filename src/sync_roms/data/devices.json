@@ -17,7 +17,8 @@
       "knulli",
       "muos",
       "rocknix"
-    ]
+    ],
+    "rocknix_image": "H700"
   },
   {
     "id": "anbernic-rg-ds",
@@ -28,7 +29,8 @@
     "firmwares": [
       "esde",
       "rocknix"
-    ]
+    ],
+    "rocknix_image": "RK3566-Specific"
   },
   {
     "id": "anbernic-rg-ds-plus",
@@ -39,7 +41,8 @@
     "firmwares": [
       "knulli",
       "rocknix"
-    ]
+    ],
+    "rocknix_image": "RK3566-Specific"
   },
   {
     "id": "anbernic-rg-rotate",
@@ -60,7 +63,8 @@
       "knulli",
       "muos",
       "rocknix"
-    ]
+    ],
+    "rocknix_image": "H700"
   },
   {
     "id": "anbernic-rg-slide",
@@ -89,7 +93,8 @@
       "knulli",
       "muos",
       "rocknix"
-    ]
+    ],
+    "rocknix_image": "RK3576"
   },
   {
     "id": "anbernic-rg28xx",
@@ -101,6 +106,7 @@
       "muos",
       "rocknix"
     ],
+    "rocknix_image": "H700",
     "network": false
   },
   {
@@ -112,7 +118,8 @@
       "knulli",
       "muos",
       "rocknix"
-    ]
+    ],
+    "rocknix_image": "H700"
   },
   {
     "id": "anbernic-rg34xx-sp",
@@ -124,7 +131,8 @@
       "knulli",
       "muos",
       "rocknix"
-    ]
+    ],
+    "rocknix_image": "H700"
   },
   {
     "id": "anbernic-rg353ps",
@@ -134,7 +142,8 @@
     "firmwares": [
       "knulli",
       "rocknix"
-    ]
+    ],
+    "rocknix_image": "RK3566-Generic"
   },
   {
     "id": "anbernic-rg353vs",
@@ -144,7 +153,8 @@
     "firmwares": [
       "knulli",
       "rocknix"
-    ]
+    ],
+    "rocknix_image": "RK3566-Generic"
   },
   {
     "id": "anbernic-rg35xx-2024",
@@ -156,6 +166,7 @@
       "muos",
       "rocknix"
     ],
+    "rocknix_image": "H700",
     "network": false
   },
   {
@@ -167,7 +178,8 @@
       "knulli",
       "muos",
       "rocknix"
-    ]
+    ],
+    "rocknix_image": "H700"
   },
   {
     "id": "anbernic-rg35xx-plus",
@@ -178,7 +190,8 @@
       "knulli",
       "muos",
       "rocknix"
-    ]
+    ],
+    "rocknix_image": "H700"
   },
   {
     "id": "anbernic-rg35xx-pro",
@@ -189,7 +202,8 @@
       "knulli",
       "muos",
       "rocknix"
-    ]
+    ],
+    "rocknix_image": "H700"
   },
   {
     "id": "anbernic-rg35xx-sp",
@@ -200,7 +214,8 @@
       "knulli",
       "muos",
       "rocknix"
-    ]
+    ],
+    "rocknix_image": "H700"
   },
   {
     "id": "anbernic-rg405m",
@@ -247,7 +262,8 @@
       "knulli",
       "muos",
       "rocknix"
-    ]
+    ],
+    "rocknix_image": "H700"
   },
   {
     "id": "anbernic-rg40xxv",
@@ -258,7 +274,8 @@
       "knulli",
       "muos",
       "rocknix"
-    ]
+    ],
+    "rocknix_image": "H700"
   },
   {
     "id": "anbernic-rg476h",
@@ -295,7 +312,8 @@
     "firmwares": [
       "knulli",
       "rocknix"
-    ]
+    ],
+    "rocknix_image": "RK3566-Generic"
   },
   {
     "id": "anbernic-rg505",
@@ -333,7 +351,8 @@
     "firmwares": [
       "esde",
       "rocknix"
-    ]
+    ],
+    "rocknix_image": "SM4450"
   },
   {
     "id": "ayaneo-konkr-pocket-fit",
@@ -344,7 +363,8 @@
     "firmwares": [
       "esde",
       "rocknix"
-    ]
+    ],
+    "rocknix_image": "SM8650"
   },
   {
     "id": "ayaneo-pocket-ace",
@@ -355,7 +375,8 @@
     "firmwares": [
       "esde",
       "rocknix"
-    ]
+    ],
+    "rocknix_image": "SM8550"
   },
   {
     "id": "ayaneo-pocket-advance",
@@ -393,7 +414,8 @@
     "firmwares": [
       "esde",
       "rocknix"
-    ]
+    ],
+    "rocknix_image": "SM8550"
   },
   {
     "id": "ayaneo-pocket-ds",
@@ -405,7 +427,8 @@
     "firmwares": [
       "esde",
       "rocknix"
-    ]
+    ],
+    "rocknix_image": "SM8550"
   },
   {
     "id": "ayaneo-pocket-evo",
@@ -416,7 +439,8 @@
     "firmwares": [
       "esde",
       "rocknix"
-    ]
+    ],
+    "rocknix_image": "SM8550"
   },
   {
     "id": "ayaneo-pocket-micro",
@@ -455,7 +479,8 @@
     "firmwares": [
       "esde",
       "rocknix"
-    ]
+    ],
+    "rocknix_image": "SM8550"
   },
   {
     "id": "ayaneo-pocket-s-mini",
@@ -466,7 +491,8 @@
     "firmwares": [
       "esde",
       "rocknix"
-    ]
+    ],
+    "rocknix_image": "SM8550"
   },
   {
     "id": "ayaneo-pocket-s2",
@@ -477,7 +503,8 @@
     "firmwares": [
       "esde",
       "rocknix"
-    ]
+    ],
+    "rocknix_image": "SM8650"
   },
   {
     "id": "ayaneo-pocket-s2-pro",
@@ -518,7 +545,8 @@
     "firmwares": [
       "esde",
       "rocknix"
-    ]
+    ],
+    "rocknix_image": "SM8550"
   },
   {
     "id": "ayn-odin-2-mini",
@@ -529,7 +557,8 @@
     "firmwares": [
       "esde",
       "rocknix"
-    ]
+    ],
+    "rocknix_image": "SM8550"
   },
   {
     "id": "ayn-odin-2-portal",
@@ -540,7 +569,8 @@
     "firmwares": [
       "esde",
       "rocknix"
-    ]
+    ],
+    "rocknix_image": "SM8550"
   },
   {
     "id": "ayn-odin-3",
@@ -551,7 +581,8 @@
     "firmwares": [
       "esde",
       "rocknix"
-    ]
+    ],
+    "rocknix_image": "SM8750"
   },
   {
     "id": "ayn-odin-lite",
@@ -571,7 +602,8 @@
     "firmwares": [
       "esde",
       "rocknix"
-    ]
+    ],
+    "rocknix_image": "SM8250"
   },
   {
     "id": "ayn-thor",
@@ -583,7 +615,8 @@
     "firmwares": [
       "esde",
       "rocknix"
-    ]
+    ],
+    "rocknix_image": "SM8550"
   },
   {
     "id": "magicx-zero40",
@@ -692,7 +725,8 @@
     "firmwares": [
       "esde",
       "rocknix"
-    ]
+    ],
+    "rocknix_image": "SM8250"
   },
   {
     "id": "retroid-pocket-6",
@@ -703,7 +737,8 @@
     "firmwares": [
       "esde",
       "rocknix"
-    ]
+    ],
+    "rocknix_image": "SM8550"
   },
   {
     "id": "retroid-pocket-classic",
@@ -714,7 +749,8 @@
     "firmwares": [
       "esde",
       "rocknix"
-    ]
+    ],
+    "rocknix_image": "SM4450"
   },
   {
     "id": "retroid-pocket-duo",
@@ -737,7 +773,8 @@
     "firmwares": [
       "esde",
       "rocknix"
-    ]
+    ],
+    "rocknix_image": "SM6115"
   },
   {
     "id": "retroid-pocket-duo-lite-plus",
@@ -768,7 +805,8 @@
     "firmwares": [
       "esde",
       "rocknix"
-    ]
+    ],
+    "rocknix_image": "SM8250"
   },
   {
     "id": "retroid-pocket-g2",
@@ -789,7 +827,8 @@
     "firmwares": [
       "esde",
       "rocknix"
-    ]
+    ],
+    "rocknix_image": "SM8250"
   },
   {
     "id": "retroid-pocket-mini-v2",
@@ -800,7 +839,8 @@
     "firmwares": [
       "esde",
       "rocknix"
-    ]
+    ],
+    "rocknix_image": "SM8250"
   },
   {
     "id": "retroid-pocket-nova",
@@ -811,7 +851,8 @@
     "firmwares": [
       "esde",
       "rocknix"
-    ]
+    ],
+    "rocknix_image": "SM8550"
   },
   {
     "id": "steam-deck",

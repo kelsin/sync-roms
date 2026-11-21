@@ -23,7 +23,7 @@ SUBCOMMANDS = {  # name -> (usage, one-line summary)
     "collections": ("edit", "edit your collections of favourite games (saved in ~/.sync-roms/collections/)"),
     "themes": ("update", "copy the latest Art Book Next for ES-DE from GitHub into storage"),
     "download": ("pico8", "add the PICO-8 BBS Featured carts storage doesn't have, and newer revisions of those it has"),
-    "flash": ("", "write a Knulli, BaseOS or muOS image from storage's os/ to an SD card"),
+    "flash": ("", "write a Knulli, BaseOS, muOS or ROCKNIX image from storage's os/ to an SD card"),
     "cards": ("[edit|list|new|set|rename|convert|clean|delete|copy|export|import]", "list and manage the cards you've synced"),
     "saves": ("stash|apply [CARD] [--retroarch DIR]", "copy RetroArch saves and states off a card, or onto one"),
     "devices": ("[ID]", "list the supported devices, or one device's systems"),
@@ -125,11 +125,13 @@ TOPICS = {
   ignored.json are skipped. Requests go one at a time; the first HTTP error stops it, keeping what was added.
 """,
     "flash": """
-  sync-roms flash [--dry-run]                 write a Knulli, BaseOS or muOS image to an SD card (macOS only)
+  sync-roms flash [--dry-run]                 write a Knulli, BaseOS, muOS or ROCKNIX image to an SD card (macOS only)
 
-  Pick a firmware (only when storage's os/ has both Knulli or BaseOS images and muOS images), then a device, then an
-  image from storage's os/knulli/knulli-*.img.gz or os/baseos/baseos-*.img.zip (the ones matching the device first,
-  newest first) or os/muos/muos-*.img.gz (muOS image names aren't documented, so they are never matched), then an
+  Pick a firmware (only when storage's os/ has images of more than one: Knulli or BaseOS, muOS, ROCKNIX), then a
+  device, then an image from storage's os/knulli/knulli-*.img.gz or os/baseos/baseos-*.img.zip (the ones matching the
+  device first, newest first), os/muos/muos-*.img.gz (muOS image names aren't documented, so they are never matched)
+  or os/rocknix/ROCKNIX-*.img.gz (not the update .tar files; matched by the device's SoC image, H700 devices matching
+  both DDR3 and DDR4: pick the one for your device's RAM), then an
   external SD card (shown with its volume names); the boot disk and the disks holding the temp folder
   or storage are never offered, and flash stops if it can't tell which disks those are. Type the disk id (disk4) to
   confirm: --yes never skips that. --dry-run stops there. The image is copied to a local temp folder (free space is
