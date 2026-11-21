@@ -399,6 +399,31 @@ class LayoutDataTest(unittest.TestCase):
             self.assertEqual(set(layout["retroarch"]) - {"create"}, {"dir", "saves", "states"}, name)
 
 
+class BesideRomsTest(unittest.TestCase):
+    """ROCKNIX keeps RetroArch saves beside the ROMs: sync never offers them for deletion."""
+    NAMES = ("Game.gba", "Game.srm", "Old.gba", "Old.srm", "Old.state1", "Old.state1.png", "Old.rtc")
+
+    def setUp(self):
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        self.dest = tmp.name
+        for name in self.NAMES:
+            helpers.touch(os.path.join(self.dest, name))
+
+    def test_only_rocknix_keeps_saves_beside_the_roms(self):
+        self.assertEqual([n for n, layout in LAYOUTS.items() if saves.beside_roms(layout)], ["rocknix"])
+
+    def test_saves_beside_kept_and_removed_roms_are_never_extras(self):
+        from sync_roms import downloads
+        self.assertEqual(downloads.find_extras(self.dest, ["gba/Game.gba"], skip_saves=True),
+                         [os.path.join(self.dest, "Old.gba")])
+
+    def test_other_layouts_still_offer_stray_saves(self):
+        from sync_roms import downloads
+        self.assertEqual(sorted(os.path.basename(p) for p in downloads.find_extras(self.dest, ["gba/Game.gba"])),
+                         sorted(n for n in self.NAMES if n != "Game.gba"))
+
+
 CATALOG_SYSTEMS = [
     {"name": "Game Boy Advance", "bucket": "gba",
      "folders": {"onion": "GBA", "knulli": "gba", "esde": "gba", "allium": "GBA", "emudeck": "gba",

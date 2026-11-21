@@ -86,6 +86,15 @@ class OwnFilesTest(unittest.TestCase):
             self.assertFalse(downloads.never_uploaded("gba", "pico8_64"))
 
 
+class SavesTest(unittest.TestCase):
+    def test_retroarch_saves_beside_the_roms_are_never_uploaded_or_compared(self):
+        """A ROCKNIX ROM folder holds the RetroArch saves and states too: only its ROMs go to storage."""
+        with tempfile.TemporaryDirectory() as root:
+            for name in ("Game.gba", "Game.srm", "Game.rtc", "Game.state1", "Game.state1.png", "Game.state.auto"):
+                touch(root, name)
+            self.assertEqual([k for k, _, _ in upload.plan_rom_upload(root, "gba", {})[0]], ["gba/Game.gba"])
+
+
 class IgnoredUploadTest(unittest.TestCase):
     def setUp(self):
         p = mock.patch.object(ignore, "_keys", frozenset({"gba/b.gba"}))

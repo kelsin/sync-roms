@@ -10,7 +10,7 @@ import unicodedata
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
 
-from . import cardfs, external, inventory, m3u, runtime, s3, store, ui
+from . import cardfs, external, inventory, m3u, runtime, s3, saves, store, ui
 
 STALE_HINT = " (not in storage any more: run sync-roms cache update)"  # a file the cache lists is gone from the storage folder
 
@@ -225,8 +225,9 @@ OWN_ROOT_FILES = {"ports": ROCKNIX_PORTS_FILES, "pico8": PICO8_FILES}
 
 
 def never_uploaded(bucket, rel):
-    """Whether rel, a path in a local copy of the bucket's folder, is one of sync-roms's own files (never a ROM)."""
-    return rel in OWN_ROOT_FILES.get(bucket, ())
+    """Whether rel, a path in a local copy of the bucket's folder, is one of sync-roms's own files or a RetroArch save,
+    state or thumbnail (ROCKNIX keeps them beside the ROMs): never a ROM."""
+    return rel in OWN_ROOT_FILES.get(bucket, ()) or bool(saves.classify(rel.rsplit("/", 1)[-1]))
 
 
 IGNORED_ROOT_DIRS = {"images", "videos", "manuals",                # Batocera / Knulli scraped media
@@ -280,7 +281,7 @@ def name_key(path):
     return unicodedata.normalize("NFC", os.path.normpath(path)).casefold()
 
 
-def find_extras(dest, wanted_keys, skip_db=False, disc_dir=None, discs=(), keep=(), renames=None, folders=None):
+def find_extras(dest, wanted_keys, skip_db=False, disc_dir=None, discs=(), keep=(), renames=None, folders=None, skip_saves=False):
     """Local files under dest that aren't in the system's ROM list (frontend files and dotfiles are ignored;
     a .psvita file is kept while its .zip is listed).
 
@@ -289,6 +290,7 @@ def find_extras(dest, wanted_keys, skip_db=False, disc_dir=None, discs=(), keep=
     keep: paths inside dest that are expected too (BIOS files that go in the ROM folder).
     renames: if given, gets (path, storage's spelling) for each file that is an expected one spelled differently (case,
     Unicode form). Such a file is never an extra, unless the expected spelling is on the card too (a case-sensitive card).
+    skip_saves: RetroArch saves, states and their thumbnails are never extras (saves.beside_roms: they sit beside the ROMs).
     """
     rels = [rom_rel(k, disc_dir, discs, folders) for k in wanted_keys]
     expected = {os.path.normpath(r) for r in rels} | {os.path.normpath(r) for r in keep}
@@ -299,7 +301,7 @@ def find_extras(dest, wanted_keys, skip_db=False, disc_dir=None, discs=(), keep=
     if disc_dir:  # walk_roms skips dot folders, but the discs live in one
         walks += walk_roms(os.path.join(dest, disc_dir), rename_temps=True)
     found = [(os.path.join(root, f), os.path.normpath(os.path.relpath(os.path.join(root, f), dest)))
-             for root, files in walks for f in files]
+             for root, files in walks for f in files if not (skip_saves and saves.classify(f))]
     on_card = defaultdict(list)  # {name_key: the card's paths with it}
     for _, rel in found:
         on_card[name_key(rel)].append(rel)

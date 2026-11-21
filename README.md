@@ -939,7 +939,7 @@ sync are left out. `--dry-run` lists what would be written.
 
 ## ROCKNIX
 
-`rocknix` cards hold ROMs in `roms/<system>`, BIOS flat in `roms/bios` and scraped media in the ROM folders like Knulli (`gamelist.xml`, `images/`, `videos/`, `manuals/`). RetroArch saves sit beside the ROMs and states in `roms/savestates/<system>` (see [saves](#moving-saves-between-cards-saves)); saves of standalone emulators aren't covered.
+`rocknix` cards hold ROMs in `roms/<system>`, BIOS flat in `roms/bios` and scraped media in the ROM folders like Knulli (`gamelist.xml`, `images/`, `videos/`, `manuals/`). RetroArch saves sit beside the ROMs and states in `roms/savestates/<system>` (see [saves](#moving-saves-between-cards-saves)); saves of standalone emulators aren't covered. A sync never offers the saves, states and their thumbnails in ROM folders for deletion, `upload` and `diff` leave them out (anywhere), and `cards convert` moves them as saves.
 
 - **Collections and Surprise**: ES reads collections only from the device's internal `/storage/.config/emulationstation/collections`,
   so a sync can't write them to the card. It stages them in `roms/.sync-roms-collections/` and writes `roms/ports/Install Collections.sh`.
@@ -950,7 +950,7 @@ sync are left out. `--dry-run` lists what would be written.
 - **RAOfflineProxy**: the newest `RAOfflineProxy-Rocknix-v*-Install.sh` in storage's `os/rocknix/` is copied to
   `roms/ports/RAOfflineProxy Install.sh`. Enter your RetroAchievements account in ES Game Settings first, then run it once
   from Ports; the app then appears under Tools.
-- **Flash**: `sync-roms flash` offers the `ROCKNIX-*.img.gz` images in storage's `os/rocknix/` (see [Flashing](#flashing-knulli-baseos-muos-and-rocknix-flash)).
+- **Flash**: `sync-roms flash` offers the `ROCKNIX-*.img.gz` images in storage's `os/rocknix/`, and stops when none matches the device (see [Flashing](#flashing-knulli-baseos-muos-and-rocknix-flash)).
 - No GPU drivers (`esde` only) and no Onion Surprise app.
 
 ## Troubleshooting

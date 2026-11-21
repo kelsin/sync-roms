@@ -335,6 +335,9 @@ def run(args):
         return 0
     device = devices[i]
     found = sort_images(keys, device["id"], device.get("rocknix_image"))
+    if firmware == "rocknix" and not any(m for _, m in found):  # an image for another SoC does not boot
+        ui.failure(ui.red(f"❌ No ROCKNIX image for {device.get('rocknix_image') or device['name']} in storage's {ROCKNIX}"))
+        return 1
     i = picker.filter_list(f"💾 Which image for {device['name']}?", [k[len(PREFIX):] for k, _ in found],
                            extras=[[(f"  {ui.human_size(listing[k])}", "dim"), ("  ✓ matches" if m else "", "green")]
                                    for k, m in found],

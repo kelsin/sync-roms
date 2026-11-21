@@ -30,10 +30,11 @@ def _exact_dir(base, *parts):
     return path if os.path.isdir(path) else None
 
 
-def _scan(folder, keep_dir=None, skip_db=False, own=()):
+def _scan(folder, keep_dir=None, skip_db=False, own=(), skip_saves=False):
     """(files, ignored): the relative paths (with /) of the ROM files under folder, and of what the frontends put there
     instead (what downloads.walk_roms leaves out, dot folders included but not dotfiles), which a convert leaves alone.
-    keep_dir (the layout's disc folder) is walked although it is a dot folder."""
+    keep_dir (the layout's disc folder) is walked although it is a dot folder. skip_saves: RetroArch saves and states
+    (ROCKNIX keeps them beside the ROMs) are in neither list: plan_saves moves them."""
     files, ignored = [], []
     for root, dirs, names in os.walk(folder):
         rel = os.path.relpath(root, folder)
@@ -50,7 +51,7 @@ def _scan(folder, keep_dir=None, skip_db=False, own=()):
         dirs[:] = keep
         for f in sorted(names):
             low = f.lower()
-            if f.startswith("."):
+            if f.startswith(".") or (skip_saves and saves.classify(f)):
                 continue
             if low in downloads.IGNORED_FILES or (skip_db and low.endswith(".db")) or downloads.TEMP_DOWNLOAD.search(f) \
                     or (at_root and (low in downloads.IGNORED_ROOT_FILES or f in own)):
@@ -93,7 +94,8 @@ def plan_roms(base, systems, old_name, old, new_name, new):
         if not src_dir:
             continue
         planned.add(old_folder)
-        files, _ = _scan(src_dir, old.get("disc_dir"), old_name in scrape_plan.ONION_LAYOUTS, downloads.layout_files(old_name, system))
+        files, _ = _scan(src_dir, old.get("disc_dir"), old_name in scrape_plan.ONION_LAYOUTS, downloads.layout_files(old_name, system),
+                         saves.beside_roms(old))
         if not files:
             continue
         if not new_folder:
@@ -284,7 +286,8 @@ def _leftovers(base, systems, old_name, old):
         folder = system["folders"].get(old_name)
         path = _exact_dir(base, *old["roms_dir"].split("/"), *folder.split("/")) if folder else None
         if path:
-            _, ignored = _scan(path, old.get("disc_dir"), old_name in scrape_plan.ONION_LAYOUTS, downloads.layout_files(old_name, system))
+            _, ignored = _scan(path, old.get("disc_dir"), old_name in scrape_plan.ONION_LAYOUTS, downloads.layout_files(old_name, system),
+                               saves.beside_roms(old))
             found += [os.path.relpath(os.path.join(path, *i.split("/")), base) for i in ignored]
     return list(dict.fromkeys(found))
 

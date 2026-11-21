@@ -481,6 +481,34 @@ class Run(helpers.StorageDir):
         self.assertEqual(calls[2].args[1], ["rocknix/ROCKNIX-H700.aarch64-20261101-DDR3.img.gz"])
         self.assertIn("✓", str(calls[2].kwargs["extras"]))
 
+    def rocknix_run(self, device):
+        """Flash with only ROCKNIX's H700 images in storage, for device: (exit code, the pickers' titles)."""
+        os.remove(os.path.join(self.root, IMAGE))
+        for variant in ("DDR3", "DDR4"):
+            self.put(f"os/rocknix/ROCKNIX-H700.aarch64-20261101-{variant}.img.gz", gzip.compress(b"img"))
+        inventory.reset()
+        with mock.patch.object(store, "repo_json", return_value=[{"name": "D", "firmwares": ["rocknix"], **device}]):
+            code = self.flash()
+        return code, [c.args[0] for c in self.filter_list.call_args_list]
+
+    def test_rocknix_device_with_no_matching_image_stops(self):
+        code, asked = self.rocknix_run({"id": "ayn-odin-2", "rocknix_image": "SM8550"})
+        self.assertEqual(code, 1)
+        self.assertEqual(asked, ["🎯 Which device?"])  # never offered the H700 images
+        self.assertIn("No ROCKNIX image for SM8550 in storage's os/rocknix/", self.out)
+        self.write_image.assert_not_called()
+
+    def test_rocknix_device_with_no_rocknix_image_stops(self):
+        code, asked = self.rocknix_run({"id": "x"})
+        self.assertEqual(code, 1)
+        self.assertEqual(asked, ["🎯 Which device?"])
+
+    def test_rocknix_h700_device_is_offered_both_variants(self):
+        code, asked = self.rocknix_run({"id": "anbernic-rg35xxh", "rocknix_image": "H700"})
+        self.assertEqual(code, 0)
+        self.assertEqual(self.filter_list.call_args_list[1].args[1],
+                         [f"rocknix/ROCKNIX-H700.aarch64-20261101-{v}.img.gz" for v in ("DDR3", "DDR4")])
+
     def test_one_firmware_skips_question(self):
         self.flash()
         self.assertEqual(self.filter_list.call_args_list[0].args[0], "🎯 Which device?")
