@@ -1,5 +1,13 @@
 # Changelog
 
+## [3.19.0](https://github.com/kelsin/sync-roms/compare/v3.18.0...v3.19.0) (2026-11-21)
+
+
+### :video_game: Features
+
+* **flash:** offer OakMoss .img.xz images ([#431](https://github.com/kelsin/sync-roms/issues/431)) ([55acc53](https://github.com/kelsin/sync-roms/commit/55acc5310fc13aa0f7c0a4c6e3468287903859ef))
+* **rocknix:** add ROCKNIX layout ([#429](https://github.com/kelsin/sync-roms/issues/429)) ([40e743c](https://github.com/kelsin/sync-roms/commit/40e743c7f8387033114ecca4d08efddd47f81657))
+
 ## [3.18.0](https://github.com/kelsin/sync-roms/compare/v3.17.0...v3.18.0) (2026-11-20)
 
 
