@@ -1122,7 +1122,7 @@ def sync_card(args):
             own_files[os.path.join(roms_dir, t["folders"][layout_name])].update(downloads.layout_files(layout_name, t))
     cardfs.clear()  # the discs moved above, and the card editor's previews listed the card a while ago
     for dest in sorted({dest_of(s) for s in systems if s["bucket"] in chosen_ids or not available(s)} | dropped_dests):
-        extras += downloads.find_extras(dest, dest_keys[dest], onion, disc_dir, dest_discs[dest], dest_bios[dest] | own_files[dest] | (pico8.keep_in(dest, card) if dest in pico8_dests else set()), renames=renames, folders=dest_folders[dest])
+        extras += downloads.find_extras(dest, dest_keys[dest], onion, disc_dir, dest_discs[dest], dest_bios[dest] | own_files[dest] | (pico8.keep_in(dest, card, layout_name) if dest in pico8_dests else set()), renames=renames, folders=dest_folders[dest])
 
     # BIOS for every system with ROMs already on the card too, even when this sync doesn't touch that system
     bios_systems = chosen + [s for s in systems if s["bucket"] not in chosen_ids

@@ -108,11 +108,14 @@ def run(card, layout_name, base, dry_run, wrote=None, syncs=True):
     return 0
 
 
-def keep_in(dest, card):
-    """Names in a pico8 ROM folder that the extras check must keep: the card's recorded zip and the Splore files."""
+def keep_in(dest, card, layout_name=None):
+    """Names in a pico8 ROM folder that the extras check must keep: the card's recorded zip, the Splore files, and the
+    extracted runtime when the layout installs it into this folder (ROCKNIX)."""
     entry = store.load_cards().get(card)
     recorded = entry.get("pico8") if isinstance(entry, dict) else None
     keep = {recorded} if isinstance(recorded, str) else set()
+    if layout_name == "rocknix":
+        keep |= {os.path.basename(m) for m in _members(layout_name)}
     if os.path.isdir(dest):
         keep |= {n for n in os.listdir(dest) if n.lower().startswith("splore") or "with splore" in n.lower()}
     return keep

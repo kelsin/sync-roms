@@ -73,6 +73,19 @@ class PlanRomUploadTest(unittest.TestCase):
         self.assertEqual([(k, s) for k, _, s in same], [("gba/b.gba", 20)])
 
 
+class OwnFilesTest(unittest.TestCase):
+    def test_runtime_and_scripts_are_never_uploaded_or_compared(self):
+        from sync_roms import diff
+        with tempfile.TemporaryDirectory() as root:
+            for name in ("pico8_64", "pico8_dyn", "pico8.dat", "game.p8.png"):
+                touch(root, name)
+            self.assertEqual([k for k, _, _ in upload.plan_rom_upload(root, "pico8", {})[0]], ["pico8/game.p8.png"])
+            self.assertEqual(len(upload.plan_rom_upload(root, "gba", {})[0]), 4)
+            self.assertTrue(downloads.never_uploaded("ports", "Install Collections.sh"))
+            self.assertFalse(downloads.never_uploaded("ports", "sub/Install Collections.sh"))
+            self.assertFalse(downloads.never_uploaded("gba", "pico8_64"))
+
+
 class IgnoredUploadTest(unittest.TestCase):
     def setUp(self):
         p = mock.patch.object(ignore, "_keys", frozenset({"gba/b.gba"}))

@@ -220,6 +220,15 @@ def layout_files(layout_name, system):
     return ROCKNIX_PORTS_FILES if layout_name == "rocknix" and system["bucket"] == "ports" else ()
 
 
+PICO8_FILES = ("pico8_dyn", "pico8_64", "pico8.dat")  # the proprietary PICO-8 runtime that pico8.py extracts into ROCKNIX's pico8 ROM folder
+OWN_ROOT_FILES = {"ports": ROCKNIX_PORTS_FILES, "pico8": PICO8_FILES}
+
+
+def never_uploaded(bucket, rel):
+    """Whether rel, a path in a local copy of the bucket's folder, is one of sync-roms's own files (never a ROM)."""
+    return rel in OWN_ROOT_FILES.get(bucket, ())
+
+
 IGNORED_ROOT_DIRS = {"images", "videos", "manuals",                # Batocera / Knulli scraped media
                      "imgs"}                                       # Onion scraped box art
 IGNORED_FILES = {"thumbs.db", "desktop.ini"}                       # Windows

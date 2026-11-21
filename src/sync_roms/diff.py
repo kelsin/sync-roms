@@ -238,7 +238,7 @@ def diff_command(args):
         return 0
     bucket = systems[i]["bucket"]
     print(ui.bold(f"🔍 Compare {systems[i]['name']}") + ui.dim(f"  {folder} ↔ {s3.location()}/{bucket}/"))
-    local = {p: n for p, n in local_sizes(folder).items() if not ignore.is_ignored(f"{bucket}/{p}")}
+    local = {p: n for p, n in local_sizes(folder).items() if not ignore.is_ignored(f"{bucket}/{p}") and not downloads.never_uploaded(bucket, p)}
     try:
         remote = inventory.etags(bucket + "/")
         only_local, only_bucket = plan_diff(
