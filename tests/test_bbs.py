@@ -216,8 +216,7 @@ class Download(helpers.StorageDir):
         return found
 
     def meta(self):
-        with open(os.path.join(self.root, META)) as f:
-            return json.load(f)
+        return self.read_json(META)
 
     def test_reads_every_page_until_an_empty_one(self):
         code, out, _, fetched = self.run_download([PAGE1, PAGE2, EMPTY], dry_run=True)

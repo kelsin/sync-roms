@@ -11,6 +11,7 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import helpers  # noqa: E402
+from helpers import VITA_DLC as DLC, VITA_GAME as G, VITA_UPDATE as NEW  # noqa: E402
 from sync_roms import commands, ignore, inventory, runtime, s3, store, ui, usersettings  # noqa: E402
 
 
@@ -621,9 +622,6 @@ class StoreUsesTheCacheTest(helpers.StorageFolder):
             self.assertEqual(store.list_system({"bucket": "gba", "games": [{"bucket": "gba/a.zip"}]}), {"gba/a.zip": 1})
 
 
-G = "psvita/G [PCSE00349] [USA] [NoNpDRM].zip"
-NEW = "psvita/G [PCSE00349] [USA] [PATCH] [v1.11] [NoNpDRM].zip"
-DLC = "psvita/D [PCSE00349] [USA] [DLC-X].zip"
 VITA = {"bucket": "psvita", "games": [{"bucket": G}]}
 
 

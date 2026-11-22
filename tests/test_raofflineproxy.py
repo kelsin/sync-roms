@@ -45,27 +45,18 @@ ROCKNIX = f"os/rocknix/RAOfflineProxy-Rocknix-{V}-Install.sh"
 PORTS_SCRIPT = os.path.join("roms", "ports", "RAOfflineProxy Install.sh")
 
 
-class Install(helpers.StorageDir):
+class Install(helpers.CardDir):
+    FIELD = "raofflineproxy_app"
+
     def setUp(self):
         super().setUp()
-        self.card = os.path.join(self.tmp.name, "card")
-        os.makedirs(self.card)
         store.update_card("c", layout="onion")
-
-    def cp(self, *parts):
-        return os.path.join(self.card, *parts)
 
     def run_install(self, layout, dry_run=False):
         out = io.StringIO()
         with contextlib.redirect_stdout(out):
             self.failures = raofflineproxy.install("c", layout, self.card, dry_run)
         return out.getvalue()
-
-    def recorded(self):
-        return (store.load_cards().get("c") or {}).get("raofflineproxy_app")
-
-    def snapshot(self):
-        return sorted(os.path.join(d, f) for d, _, fs in os.walk(self.card) for f in fs)
 
     def test_each_zip_layout_installs_at_its_folder(self):
         for layout, (key, root, dest) in LAYOUTS.items():

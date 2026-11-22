@@ -12,6 +12,7 @@ from unittest import mock
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import helpers  # noqa: E402
 import isolate  # noqa: E402,F401
+from helpers import VITA_DLC as DLC, VITA_GAME as G, VITA_UPDATE as NEW  # noqa: E402
 from sync_roms import cardedit, mirroring, picker, runtime, store, surprise, usersettings  # noqa: E402
 
 GBA = {"bucket": "gba", "bios": {"files": ["gba_bios.bin"]}}
@@ -27,12 +28,6 @@ OUT = ["Mother 3 (Japan).zip", "Rhythm Tengoku (Japan).zip", "Densetsu no Stafy 
        "gba_bios.bin", "Kirby's Adventure (USA) (Virtual Console).zip", "Super Mario Bros. 3 (USA) (Switch Online).zip",
        "Castlevania (USA) (Castlevania Anniversary Collection).zip", "Mega Man 2 (USA) (Capcom Classics Mini Mix).zip",
        "Contra (USA) (Classic Mini).zip"]
-
-
-G = "psvita/G [PCSE00349] [USA] [NoNpDRM].zip"
-DLC = "psvita/D [PCSE00349] [USA] [DLC-X].zip"
-NEW = "psvita/G [PCSE00349] [USA] [PATCH] [v1.11] [NoNpDRM].zip"
-H = "psvita/H [PCSE00001] [USA] [NoNpDRM].zip"
 
 
 class SurpriseRulesTest(unittest.TestCase):

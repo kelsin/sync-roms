@@ -10,9 +10,9 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
-from helpers import StorageDir, load_script, storage_sets  # noqa: E402
+from helpers import ScriptDir, load_script, storage_sets  # noqa: E402
 
-from sync_roms import inventory, runtime, scrape_plan, shared, store, usersettings  # noqa: E402
+from sync_roms import inventory, runtime, scrape_plan, shared, store  # noqa: E402
 
 SCRIPTS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".claude", "skills", "update-variants", "scripts")
 
@@ -21,13 +21,7 @@ find_candidates = load_script(os.path.join(SCRIPTS, "find_candidates.py"))
 apply_variants = load_script(os.path.join(SCRIPTS, "apply_variants.py"))
 
 
-class CheckedInStorage(StorageDir):
-    def setUp(self):
-        super().setUp()
-        p = mock.patch.object(usersettings, "apply_settings")
-        p.start()
-        self.addCleanup(p.stop)
-
+class CheckedInStorage(ScriptDir):
     def checked(self):
         with open(os.path.join(self.root, "variants-checked.json")) as f:
             text = f.read()

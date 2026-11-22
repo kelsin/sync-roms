@@ -26,32 +26,19 @@ class Newest(unittest.TestCase):
         self.assertEqual(inventory.newest(listing, P, spruce_os.PATTERN), P + V46)
 
 
-class Install(helpers.StorageDir):
+class Install(helpers.CardDir):
+    FIELD = "spruce_os"
+    touch = staticmethod(helpers.touch)
+
     def setUp(self):
         super().setUp()
-        self.card = os.path.join(self.tmp.name, "card")
-        os.makedirs(self.card)
         store.update_card("c", layout="spruce")
-
-    def cp(self, *parts):
-        return os.path.join(self.card, *parts)
 
     def run_install(self, layout="spruce", dry_run=False, **kw):
         out, self.err = io.StringIO(), io.StringIO()
         with contextlib.redirect_stdout(out), contextlib.redirect_stderr(self.err):
             self.failures = spruce_os.install("c", layout, self.card, dry_run, **kw)
         return out.getvalue()
-
-    def recorded(self):
-        return (store.load_cards().get("c") or {}).get("spruce_os")
-
-    def snapshot(self):
-        return sorted(os.path.join(d, f) for d, _, fs in os.walk(self.card) for f in fs)
-
-    def touch(self, path, data=b"x"):
-        os.makedirs(os.path.dirname(path), exist_ok=True)
-        with open(path, "wb") as f:
-            f.write(data)
 
     def test_other_layouts_get_nothing(self):
         self.put(P + V46, b"new")

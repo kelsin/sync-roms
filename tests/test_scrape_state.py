@@ -24,8 +24,7 @@ class ScrapeStateTest(StorageDir):
     def stored(self, key):
         """The storage file's JSON, or None when it isn't there."""
         try:
-            with open(os.path.join(self.root, key)) as f:
-                return json.load(f)
+            return self.read_json(key)
         except FileNotFoundError:
             return None
 
@@ -394,8 +393,7 @@ class CleanStaleCacheTest(StorageDir):
         with mock.patch.object(scrape_files.store, "load_manifest", return_value={"systems": [{"bucket": "gba"}]}), \
                 mock.patch.object(scrape_files.ui, "confirm", return_value=True), contextlib.redirect_stdout(out):
             self.assertEqual(scrape_files.clean_scrapes(mock.Mock(dry_run=False)), 0)
-        with open(os.path.join(self.root, self.META)) as f:
-            return out.getvalue(), sorted(json.load(f))
+        return out.getvalue(), sorted(self.read_json(self.META))
 
     def test_clean_keeps_the_entry_of_a_rom_the_cache_lacks(self):
         said, entries = self.clean()

@@ -9,6 +9,7 @@ from unittest import mock
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 from helpers import DataDir, feed_list, pilot_list, screen_lines  # noqa: E402
+from helpers import VITA_DLC as DLC, VITA_GAME as G, VITA_OTHER as H, VITA_UPDATE as NEW  # noqa: E402
 from sync_roms import budget, cardedit, collections, edit, inventory, picker, previews, s3, store, surprise, themeart, ui  # noqa: E402
 
 U = budget.Usage
@@ -1376,11 +1377,6 @@ class Flow(DataDir):
         self.assertEqual(store.card_games("c"), {"gba": [g("gba/Zelda.zip")], "gb": [g("gb/Red.gb")]})
         self.assertEqual(seen, [self.fresh(count=False)[0]])  # the games list counted Red and the Game Boy BIOS too
 
-
-G = "psvita/G [PCSE00349] [USA] [NoNpDRM].zip"
-DLC = "psvita/D [PCSE00349] [USA] [DLC-X].zip"
-NEW = "psvita/G [PCSE00349] [USA] [PATCH] [v1.11] [NoNpDRM].zip"
-H = "psvita/H [PCSE00001] [USA] [NoNpDRM].zip"
 
 DISCS = ["psx/A (USA).m3u", "psx/A (USA) (Disc 1).chd", "psx/A (USA) (Disc 2).chd", "psx/A (USA) (Disc 3).chd"]
 

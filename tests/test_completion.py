@@ -5,12 +5,12 @@ import subprocess
 import sys
 import tempfile
 import unittest
-from unittest import mock
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 
+from helpers import script_for  # noqa: E402
 from sync_roms import commands  # noqa: E402
 
 STUB = """#!/bin/sh
@@ -22,13 +22,6 @@ case "$3" in
   layouts) echo knulli; echo muos;;
 esac
 """
-
-
-def script_for(shell):
-    out = mock.MagicMock()
-    with mock.patch("builtins.print", out):
-        commands.completion_cmd(mock.Mock(shell=shell, what=None))
-    return "".join(c.args[0] if c.args else "\n" for c in out.call_args_list)
 
 
 @unittest.skipUnless(shutil.which("bash"), "bash not installed")

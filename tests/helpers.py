@@ -18,6 +18,11 @@ SYSTEM = {"name": "Game Boy Advance", "bucket": "gba", "folders": {"esde": "gba"
           "games": [{"bucket": "gba/Game.zip"}]}
 MANIFEST = {"systems": [SYSTEM], "devices": [], "layouts": {"esde": {"label": "ES-DE", "roms_dir": "ROMs", "bios_dir": "BIOS"}}}
 ENV = ("ROMS_BUCKET", "ROMS_ENDPOINT", "ROMS_PROFILE", "ROMS_WRITE_PROFILE")
+# A Vita game with its DLC and newest update (vita.py tells them apart by these tags), and another game
+VITA_GAME = "psvita/G [PCSE00349] [USA] [NoNpDRM].zip"
+VITA_DLC = "psvita/D [PCSE00349] [USA] [DLC-X].zip"
+VITA_UPDATE = "psvita/G [PCSE00349] [USA] [PATCH] [v1.11] [NoNpDRM].zip"
+VITA_OTHER = "psvita/H [PCSE00001] [USA] [NoNpDRM].zip"
 
 
 def list_sizes(prefix, sizes=True):
@@ -182,6 +187,46 @@ class StorageDir(RealDataDirGuard):
         with open(path, "wb") as f:
             f.write(data)
         return path
+
+    def read_json(self, key):
+        with open(os.path.join(self.root, key)) as f:
+            return json.load(f)
+
+
+class CardDir(StorageDir):
+    """A StorageDir with an empty card folder (self.card), for the installers that put something on card "c" and
+    record it in that card's FIELD (set by the subclass)."""
+
+    def setUp(self):
+        super().setUp()
+        self.card = os.path.join(self.tmp.name, "card")
+        os.makedirs(self.card)
+
+    def cp(self, *parts):
+        return os.path.join(self.card, *parts)
+
+    def recorded(self):
+        return (store.load_cards().get("c") or {}).get(self.FIELD)
+
+    def snapshot(self):
+        return sorted(os.path.join(d, f) for d, _, fs in os.walk(self.card) for f in fs)
+
+
+class ScriptDir(StorageDir):
+    """A StorageDir for a script's main(): usersettings.apply_settings does nothing, so storage stays this folder."""
+
+    def setUp(self):
+        super().setUp()
+        p = mock.patch.object(usersettings, "apply_settings")
+        p.start()
+        self.addCleanup(p.stop)
+
+    def run_script(self, main, *args):
+        """main(*args) with its output captured: (what it returned, what it printed)."""
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            code = main(*args)
+        return code, out.getvalue()
 
 
 def storage_sets(test, sets, root=None):

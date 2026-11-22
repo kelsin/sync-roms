@@ -11,29 +11,13 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
 
-from realdir_guard import RealDataDirGuard  # noqa: E402
+from helpers import MANIFEST, SYSTEM, DataDir, list_sizes  # noqa: E402
 from sync_roms import cli, downloads, inventory, s3, scrape_plan, store, usersettings  # noqa: E402
 
 REAL_LOAD_CARDS = store.load_cards
 
-SYSTEM = {"name": "Game Boy Advance", "bucket": "gba", "folders": {"esde": "gba"}, "bios": {"files": []},
-          "games": [{"bucket": "gba/Game.zip"}]}
-MANIFEST = {"systems": [SYSTEM], "devices": [], "layouts": {"esde": {"label": "ES-DE", "roms_dir": "ROMs", "bios_dir": "BIOS"}}}
 
-
-def list_sizes(prefix, sizes=True):
-    return {"gba/Game.zip": 5} if prefix == "gba/" else {}
-
-
-class SyncSmokeTest(RealDataDirGuard):
-    def setUp(self):
-        super().setUp()
-        tmp = tempfile.TemporaryDirectory()
-        self.addCleanup(tmp.cleanup)
-        patch = mock.patch.object(store, "data_dir", lambda: tmp.name)
-        patch.start()
-        self.addCleanup(patch.stop)
-
+class SyncSmokeTest(DataDir):
     def run_sync(self, dry_run, prepare=None, patches=(), yes=True, args=(), after=None, card_dir=None):
         """The exit code; what went to stderr is in self.err. after(card) runs before the card folder goes.
         card_dir: sync this folder (kept) instead of a fresh one."""
