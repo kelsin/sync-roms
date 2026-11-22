@@ -15,8 +15,10 @@ KINDS = {
     "knulli": (runtime.KNULLI_PREFIX, r"RAOfflineProxy-Knulli-v[^/]+-Install\.sh", None, "roms/tools/RAOfflineProxy Install.sh"),
     # not Tools (on internal storage, out of reach): Ports runs a .sh from the card
     "rocknix": (runtime.ROCKNIX_PREFIX, r"RAOfflineProxy-Rocknix-v[^/]+-Install\.sh", None, "roms/ports/RAOfflineProxy Install.sh"),
+    "spruce": (runtime.SPRUCE_PREFIX, r"RAOfflineProxy-Spruce-v[^/]+\.zip", "App/RAOfflineProxy", "App/RAOfflineProxy"),
 }
 LAUNCH = "launch.sh"
+MARKERS = {"spruce": "common.sh"}  # the file that shows the app is installed, when not launch.sh (spruceOS starts the app itself)
 
 
 def prefixes():
@@ -30,8 +32,8 @@ def newest(layout, listing):
     return max(keys, key=lambda k: onion_surprise._natural(k[len(prefix):]), default=None)
 
 
-def _check(z, root):
-    """Raise ValueError unless every member is a plain file or folder under root (or a folder leading to it) and launch.sh exists."""
+def _check(z, root, marker):
+    """Raise ValueError unless every member is a plain file or folder under root (or a folder leading to it) and the marker exists."""
     parts = PurePosixPath(root).parts
     names = set()
     for info in z.infolist():
@@ -42,8 +44,8 @@ def _check(z, root):
         if (info.external_attr >> 16) & 0o170000 == 0o120000:
             raise ValueError(f"{info.filename!r} is a symlink")
         names.add(info.filename)
-    if f"{root}/{LAUNCH}" not in names:
-        raise ValueError(f"{root}/{LAUNCH} is missing")
+    if f"{root}/{marker}" not in names:
+        raise ValueError(f"{root}/{marker} is missing")
 
 
 def _write(target, data, executable):
@@ -70,6 +72,7 @@ def install(card, layout_name, base, dry_run):
     if not store.card_flag(entry, "raofflineproxy"):
         return 0
     prefix, _, root, dest = KINDS[layout_name]
+    marker = MARKERS.get(layout_name, LAUNCH)
     listing = inventory.files(prefix)
     key = newest(layout_name, listing)
     if not key:
@@ -77,7 +80,7 @@ def install(card, layout_name, base, dry_run):
     name = key[len(prefix):]
     target = os.path.join(base, *dest.split("/"))
     old = entry.get("raofflineproxy_app") if isinstance(entry, dict) else None
-    if old == name and (root is None or os.path.isfile(os.path.join(target, LAUNCH))):
+    if old == name and (root is None or os.path.isfile(os.path.join(target, marker))):
         return 0
     if dry_run:
         print(ui.dim(f"🧪 Dry run: would install RAOfflineProxy {name} at {dest}"))
@@ -91,7 +94,7 @@ def install(card, layout_name, base, dry_run):
                     _write(target, f.read(), True)
             else:
                 with zipfile.ZipFile(path) as z:
-                    _check(z, root)
+                    _check(z, root, marker)
                     _extract(z, root, target)
     except (OSError, zipfile.BadZipFile, ValueError, *s3.ERRORS) as e:
         ui.warn(f"Couldn't install RAOfflineProxy {name} on the card: {e}")
