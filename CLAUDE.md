@@ -14,11 +14,11 @@ uv run sync-roms ...                         # the CLI
 
 A "module not found" error means the command skipped `uv run`, not that a package is missing: rerun it with `uv run`. Add dependencies with `uv add` (`uv add --dev` for test-only), never `pip install`. When a new stable Python is out, bump `.python-version`, run `uv sync` and the tests, and commit the result with `uv.lock`.
 
-CI (`.github/workflows/test.yml`) tests on Python 3.12 to 3.15 (`requires-python`), so code must run on 3.12 too.
+CI tests on Python 3.12 to 3.15 (`requires-python`), so code must run on 3.12 too.
 
 ## Tests
 
-- Every test module that imports `sync_roms` imports `isolate` first, directly or through `helpers`: it points HOME, XDG and the AWS settings at a throwaway folder and fails any test that touches the real data folder or `~/.aws`.
+- A test module that imports `sync_roms` must import `isolate` first, directly or through `helpers`: it redirects HOME, XDG and the AWS settings to a throwaway folder and fails any test touching the real data folder or `~/.aws`.
 - Tests start with no sets, ignore list or scraped names. Sets come from `helpers.storage_sets`.
 
 ## Storage access
@@ -37,7 +37,7 @@ Releases belong to release-please: never hand-edit `__version__`, `CHANGELOG.md`
 
 ## CLI
 
-- A command is listed in `cli.SUBCOMMANDS` (help and completion) with its help text in `cli.TOPICS`. Those in `commands.COMMANDS` are parsed by `commands.build_parser`, their second words listed in `commands.second_words`. The others are rewritten to a flag by `cli.LEGACY` and parsed by `cli.build_parser`; a flag they take also goes in `cli.PLAIN_FLAGS` or `cli.VALUE_FLAGS`.
+- A command is listed in `cli.SUBCOMMANDS` (help and completion) with its help in `cli.TOPICS`. Those in `commands.COMMANDS` are parsed by `commands.build_parser`, their second words listed in `commands.second_words`. The others are rewritten to a flag by `cli.LEGACY` and parsed by `cli.build_parser`; a flag they take also goes in `cli.PLAIN_FLAGS` or `cli.VALUE_FLAGS`.
 - `tests/test_readme.py` compares the README's Options table, layout tables and Settings section with the parsers, `layouts.json` and `commands.CONFIG_KINDS`.
 
 ## Data files
@@ -51,21 +51,20 @@ Only one storage layout is supported; don't add support for others. Repo data an
 | `<system>/` | ROMs, one lowercase folder per system (`gba/`, `mame/`, ...): the system's `bucket` | `upload`, `download pico8` |
 | `BIOS/` | BIOS files, always `BIOS/<file>`: the path is derived, never stored, and whether a file exists comes from listing `BIOS/` | by hand |
 | `scrapes/` | Per system, `<system>/metadata.json`, media, and scrape state by ROM path: `matches.json` (manual matches, `{ROM path: ScreenScraper game id}`), `unknown.json` (ROMs ScreenScraper didn't know), `nomedia.json` (media types it didn't offer), `hashes.json` (file hashes). `notgames.json`: non-game scrape results waiting for review, and the ROMs the review kept for later, keyed `system/rom` | `scrape`, `scrape review`, `clean scrapes`, `download pico8`, the `match-translations` and `dedup-names` skills |
-| `sets/<id>.json` | Game sets (the id is the file name) | `sets edit`, the `update-variants` skill |
-| `ignored.json` | `{system folder: [ROM paths]}`: ROMs sync-roms never shows, syncs, uploads or scrapes | `scrape review` |
-| `variants-checked.json` | ROMs the `update-variants` skill already judged | that skill |
+| `sets/<id>.json`, `variants-checked.json` | Game sets (the id is the file name); the ROMs the `update-variants` skill already judged | `sets edit`, that skill |
+| `ignored.json` | `{system folder: [ROM paths]}`: ROMs sync-roms never shows, syncs, uploads or scrapes | `scrape review` (`scrape match --translated` takes ROMs off) |
 | `os/` | Firmware images, apps, themes, drivers, PICO-8 zips | by hand; `os/drivers/` by sync only, `os/esde/themes/` by `themes update` |
 
 ### Reading and writing storage
 
 - Storage code must work for a bucket and for a folder (`runtime.ROOT`): go through `s3.py`, `inventory.py` and `shared.py`, catch `s3.ERRORS`, and call `s3.check_root()` before treating a missing file as absent (an unmounted share must never read as empty storage).
-- Ask only `inventory.py` what storage holds (keys, sizes, a bucket's ETags); never call `s3.list_sizes`/`stat_sizes`/`list_with_etags`/`list_folders` from elsewhere. It answers from `cache/storage-cache.json` (built by `sync-roms cache update`, patched by sync-roms's own writes in `s3.py`) and, without a cache of the storage in use, lists storage itself. `inventory.tag` (a file's ETag, or `<mtime_ns>-<size>` in a folder) and file contents are always read live.
+- Ask only `inventory.py` what storage holds (keys, sizes, a bucket's ETags); never call `s3.list_sizes`/`stat_sizes`/`list_with_etags`/`list_folders` from elsewhere. It answers from `cache/storage-cache.json` (built by `sync-roms cache update`, patched by sync-roms's own writes in `s3.py`) and, without a cache of the storage in use, lists storage itself. `inventory.tag` (a file's ETag, or `<mtime_ns>-<size>` in a folder) and `shared.read` always read storage itself; other file contents come from the local mirror during a sync that uses one (`s3.read_root`).
 - Before shared state is removed for a file the cache doesn't list (`scrape review`, `clean scrapes`), `inventory.uncached` checks storage itself, so a file another machine added since the cache was built isn't taken for gone.
-- `inventory.py`'s reads and `store.listed` leave ignored ROMs out, so nothing above them sees them. ROM files are never deleted.
+- `inventory.py`'s reads and `store.listed` leave ignored ROMs out, so nothing above them sees them. Ignoring a ROM never deletes its file.
 - The shared JSON files (`ignored.json`, the scrape state in `scrape_state.py`, `variants-checked.json`, `sets/`) go through `shared.py`: downloaded only when the storage tag differs from the local copy's (the ignore list once per run), and written by re-reading the storage file and applying only the write's own changes, so machines merge.
 - "Mirror" means two things: the shared-file mirror, `~/.sync-roms/storage/` (those files at their storage path, their tags in `.tags.json`), and the local mirror, the `mirror` command's copy of what the cards reference (`mirroring.py`).
 - `store.py`, `inventory.py` and `s3.py` import some modules inside functions because those modules import them back: a top-level import there is a circular import.
-- Personal files are written with `store.write_json` (atomic): `cards.json` only through `store.write_cards` or `store.update_card`, and like `settings.json` and the overlay with `backup=True`. Text files on a card are written with `store.replace_file`.
+- Personal files are written with `store.write_json` (atomic): `cards.json` only through `store.write_cards` or `store.update_card`, and like `settings.json` and the overlay with `backup=True`. Write text files on a card with `cardfs.write_text` or `store.replace_file`.
 
 ### Repo data
 
@@ -78,6 +77,7 @@ Only one storage layout is supported; don't add support for others. Repo data an
 - `ratio-systems.json`: per-ratio overrides and a `dual_screen` list. A device's highlighted systems are those matching its `screen` ratio (exact string), the overrides and, with `screen2`, the dual-screen list, limited to what it can play. The personal overlay never changes them.
 - `drivers.json`: suggested Adreno GPU drivers, refreshed with the `refresh-drivers` skill. `drivers` (each used by a GPU): `id`, `name`, GitHub `repo`, `asset` regex that must match exactly one asset of the chosen release, optional pinned `tag` (without it the newest non-draft release, prereleases as fallback). `gpus`: gpu id to `name` and driver ids.
 - `series.json`: the series names for a set game's `series`.
+- `cards.schema.json`, `games.schema.json`, `collections.schema.json`: JSON schemas.
 
 BIOS lists cover every emulator a system can use (default and alternate libretro cores, standalone emulators), not just the default one. The files are small, so users get all of them all the time. Don't trim a list down to the default emulator's needs. Redundant extras that no emulator needs (e.g. a dozen regional dumps of one PS1 BIOS) are not kept.
 
@@ -85,11 +85,12 @@ The tests check these shapes.
 
 ### Personal data
 
-The data folder is `store.data_dir()`: `$XDG_DATA_HOME/sync-roms`, `%APPDATA%\sync-roms`, by default `~/.sync-roms` (the name used here).
+The data folder is `store.data_dir()`: `$XDG_DATA_HOME/sync-roms`, `%APPDATA%\sync-roms`, by default `~/.sync-roms` (used here).
 
 - `settings.json` (kept mode 600): the storage settings, `mirror`, `eject`, `storage_cache_declined`, `surprise_ttl_days`, `surprise_excluded_systems`, `screenscraper_user`, `screenscraper_password`.
 - `surprises.json`: history of Surprise picks: system, bucket, title, card, ISO date. Pruned past `surprise_ttl_days` (default 183) on write.
 - `device-systems.json`: optional overlay, `{device id: {"add": [...], "remove": [...]}}` of system ids, applied to the repo defaults. Notes always come from the defaults.
+- `collections/<id>.json`: one per collection (`collections.py`); never in the repo or storage.
 - `saves/`: RetroArch saves and states, `<system>/<stem>/<stamp>-<card>/` with `stash.json`, written by `saves stash`, read by `saves apply`.
 - `cache/`: what can be rebuilt: `storage-cache.json`, `preview-cache/` (the editors' 300 px WebP game pictures, `<image key without extension>.<ETag or s<size>>.webp`), `previews/`, `theme-art/`, `names.json`.
 
@@ -103,7 +104,7 @@ Old personal sets in `sets/` are left on disk and never read; a sync reads an ol
 |---|---|---|
 | `device`, `layout` | setup prompt, `cards` commands | Device id (or `full`) and layout. |
 | `size` | `cards new`/`set` | Readable card size (`512 GB`). |
-| `games` | the editors (`--edit`), `games` commands | Games per system, with their notes. A system's entry may be `{"full_system": true}` (its earlier list kept inside as `games`) to sync its whole storage folder (no card uses it by default). `"sets": [set ids]` syncs whole sets (live references). |
+| `games` | the editors (`--edit`), `games` commands | Games per system, with their notes. A system's entry may be `{"full_system": true}` (its earlier list kept inside as `games`) to sync its whole storage folder. `"sets": [set ids]` syncs whole sets (live references). |
 | `excluded` | card editor | `{system: [keys]}` dropped from what the card's sets bring. Never applies to collections. |
 | `collections` | card editor | Collection ids synced whole. |
 | `surprise` | card editor's S menu | Stored only when it differs from `surprise.default_on`: on for a card with no layout yet, `frontend.FRONTEND_LAYOUTS`, `onion`, `muos` and `spruce`; off for `allium`. |
@@ -121,7 +122,7 @@ Sets come only from storage, through `store.load_sets` (`inventory.files` for th
 
 A set file is `{"name", "description"?, "art"?, "games"}`. Games have `title`, `system`, `bucket` and optional `files`, `category`, `series` and `variants`. `art` is an `art.json` id; without it a set uses the art under its own id.
 
-A collection file (`collections/<id>.json`) has the same top-level keys (its games may carry a `note`) but its own loader and schema and no categories.
+A collection file (see Personal data) has the same top-level keys (its games may carry a `note`) but its own loader and schema and no categories.
 
 Rules for sets:
 
@@ -142,19 +143,16 @@ Rules for sets:
 
 "ES-DE's folder" is on the card for `esde` and, for `emudeck`, on the machine running the sync (`$ESDE_APPDATA_DIR` or `~/ES-DE`).
 
-| Layout | Collections, Surprise among them | PICO-8 runtime | RAOfflineProxy |
+| Layout | Collections, Surprise among them | PICO-8 runtime (newest `os/pico8/pico-8_*_raspi.zip`, no version in code) | RAOfflineProxy |
 |---|---|---|---|
-| `esde` | ES-DE's folder | zip to `PICO-8/` | its APK in `os/android/APKs/`, by the APK step |
-| `emudeck` | ES-DE's folder | | |
+| `esde`, `emudeck` | ES-DE's folder | `esde`: zip to `PICO-8/` | `esde`: its APK in `os/android/APKs/`, by the APK step |
 | `knulli` | its ES `collections/` | zip to `roms/pico8/` | install script to `roms/tools/RAOfflineProxy Install.sh` (it deletes itself when run, so the copy is only recorded) |
 | `rocknix` | staged, see below | `pico8_dyn`, `pico8_64`, `pico8.dat` to `roms/pico-8/` | `-Install.sh` to `roms/ports/RAOfflineProxy Install.sh`, run once from Ports (the official page says `/storage/.config/modules`, which is internal storage) |
-| `onion` | the Surprise app only | `pico8_dyn`, `pico8.dat` to `RApp/PICO-8/bin/` | zip to `App/RAOfflineProxy/` |
-| `allium` | | same, to `Apps/pico.pak/bin/` | zip to `Apps/RAOfflineProxy.pak/` |
+| `onion`, `allium` | Onion: the Surprise app only | `pico8_dyn`, `pico8.dat` to `RApp/PICO-8/bin/` (Allium: `Apps/pico.pak/bin/`) | zip to `App/RAOfflineProxy/` (Allium: `Apps/RAOfflineProxy.pak/`) |
 | `spruce` | the one `Collections/collections.json`; collections made on the device are kept as they are | as `rocknix`, to `BIOS/` | none: spruceOS 4.5.0+ ships it built in |
 | `muos` | `MUOS/info/collection/<name>/<ROM>-<hash>.cfg` (`muos_collections.py`) | only `pico8_64`, `pico8.dat` to `MUOS/bios/pico8/`, where muOS's standalone launcher looks (the PICO-8 folder's core is switched to it on the device) | `.muxapp` zip to `MUOS/application/RAOfflineProxy/` |
 | `nextui` | `Collections/*.txt` | none: carts are plain ROMs | |
 
-- The PICO-8 runtime (`pico8.py`) is the newest `os/pico8/pico-8_*_raspi.zip` (no version in code).
 - A `.p8.png` cart with no scraped picture is its own picture: copied from storage's `pico8/` into `downloaded_media/pico8/miximages/` (`esde`, `emudeck`), `Imgs/` (`onion`, `allium`, `spruce`; top-level carts only) or `.media/` in the cart's own folder (`nextui`); on `knulli` and `rocknix` the gamelist's `image` points at the cart in the ROM folder.
 - muOS takes scraped art in `MUOS/info/catalogue/<the system's muos_catalogue>/box|preview|text`.
 - ROCKNIX's ES reads collections only from internal storage, so `rocknix_collections.py` stages them in `roms/.sync-roms-collections/` and writes `roms/ports/Install Collections.sh`, which the user launches from Ports (again after a sync changes collections; its messages aren't visible on the device).
@@ -168,15 +166,15 @@ Rules for sets:
 
 `src/sync_roms/data/themes/art-book-next/` holds:
 
-- `art.json`: the art ids a collection or set picks with `"art"`, one per set among them (`surprise` has art too).
+- `art.json`: the art ids, one per set among them (`surprise` has art too).
 - `art/<id>.png`, drawn by `tools/gen_theme_art.py`, with a generated `art/README.md` gallery for GitHub that sync never copies.
 - `art-spruce/<id>.png`: the same pictures as 300x300 transparent squares for SpruceOS. `tools/gen_spruce_art.py` makes them from `art/`: run it after `gen_theme_art.py` and commit both.
 - `emoji.json`: each art id's own emoji, for the editors.
 - `logo-font.json`: the logo font's outlines (OFL).
 
-With the card's `theme` on, sync copies the art into the card's copy of the theme (ES-DE, and EmuDeck's ES-DE folder on the machine; the theme itself is a GitHub archive in `os/esde/themes/`, refreshed by `sync-roms themes update`), the theme customizations (Knulli, ROCKNIX), `MUOS/info/catalogue/Collection/box|grid` (muOS) or `Collections/Imgs/<name>.png` (Spruce: PyUI shows it by exact name, PNG only; the theme plays no part).
+With the card's `theme` on, sync copies the art into the copy of the theme in ES-DE's folder (the theme itself is a GitHub archive in `os/esde/themes/`, refreshed by `sync-roms themes update`), the theme customizations (Knulli, ROCKNIX), `MUOS/info/catalogue/Collection/box|grid` (muOS) or `Collections/Imgs/<name>.png` (Spruce: PyUI shows it by exact name, PNG only; the theme plays no part).
 
-The names sync gave art are listed in the theme copy's `.sync-roms-collections` (ES-DE) or in `.sync-roms-art` (Knulli, ROCKNIX, muOS), and only those lose their art (on Knulli their `subset.<name>.*` settings too) when the collection or its art goes; on Spruce, only the collections sync owns do. With no art left to add, the theme isn't copied for that. A theme update that ships metadata for a listed name takes it off the ES-DE list (the theme's from then on, never removed).
+The names sync gave art are listed in the theme copy's `.sync-roms-collections` (ES-DE; not ROCKNIX's staging folder of that name) or in `.sync-roms-art` (Knulli, ROCKNIX, muOS), and only those lose their art (on Knulli their `subset.<name>.*` settings too) when the collection or its art goes; on Spruce, only the collections sync owns do. With no art left to add, the theme isn't copied for that. A theme update that ships metadata for a listed name takes it off the ES-DE list (the theme's from then on, never removed).
 
 ## Theme art
 
