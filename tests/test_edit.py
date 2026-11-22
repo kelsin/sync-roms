@@ -31,14 +31,6 @@ class Helpers(unittest.TestCase):
         self.assertIsNotNone(edit.valid_card_name("RG SP", {"RG SP"}))
         self.assertIsNone(edit.valid_card_name("RG SP", {"other"}))
 
-    def test_dump_list_shapes(self):
-        systems = [{"bucket": "gba", "full_system": True, "games": [{"bucket": "gba/A.zip"}]},
-                   {"bucket": "ps2", "full_system": False, "games": [{"bucket": "ps2/B.iso"}]},
-                   {"bucket": "nes", "full_system": False, "games": []}]
-        self.assertEqual(store.dump_list(systems, ["s"]),
-                         {"gba": {"full_system": True}, "ps2": [{"bucket": "ps2/B.iso"}], "sets": ["s"]})
-        self.assertEqual(store.dump_list(systems[2:], []), {})
-
     def test_system_rows_hide_vita_extras_unless_listed(self):
         s = {"bucket": "psvita", "games": [{"bucket": DLC}]}
         self.assertEqual([r[1] for r in edit.system_rows(s, {G, DLC, NEW})], [DLC, G])
@@ -150,6 +142,26 @@ class MenuActions(EditBase):
     def test_done_with_no_changes_saves_nothing(self):
         self.assertEqual(self.run_menu([4]), 0)
         self.assertFalse(os.path.exists(self.path("cards.json")))
+
+    def change_device(self, games):
+        """Save a card with these games, then give it a device that only plays gba; returns the games saved."""
+        self.write_json("cards.json", {"c": {"layout": "esde", "device": "full", "games": games}})
+        device = {**store.load_manifest()["devices"][0], "systems": ["gba"]}
+        with mock.patch.object(picker, "choose_setup", return_value=(device, "esde")):
+            self.assertEqual(self.run_menu([0, (edit.SETUP_KEY, 0), None, 4]), 0)  # Cards, v on the card, back, Done
+        entry = self.read("cards.json")["c"]
+        self.assertEqual(entry["device"], device["id"])
+        return entry["games"]
+
+    def test_changing_the_device_keeps_a_full_systems_saved_game_list(self):
+        stash = {"full_system": True, "games": [{"bucket": "gba/A.zip"}]}
+        saved = self.change_device({"gba": stash, "gb": [{"bucket": "gb/B.gb"}]})
+        self.assertEqual(saved, {"gba": stash})  # gb goes: the device can't play it
+
+    def test_changing_the_device_keeps_entries_of_unknown_systems(self):
+        unknown = [{"bucket": "nosuchsystem/X.zip"}]
+        saved = self.change_device({"gb": [{"bucket": "gb/B.gb"}], "nosuchsystem": unknown})
+        self.assertEqual(saved, {"nosuchsystem": unknown})
 
     def device_case(self):
         dev = store.load_manifest()["devices"][0]
