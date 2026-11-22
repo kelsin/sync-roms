@@ -333,6 +333,13 @@ class List(helpers.StorageDir):
         with open(os.path.join(self.roms, "surprise.json")) as f:
             self.assertEqual(f.read(), GOLDEN + "\n")
 
+    def test_write_list_of_a_malformed_card_entry_is_empty(self):
+        store.write_cards({"c": ["junk"]})
+        self.emu("GBA", "../../Roms/GBA")
+        self.write()
+        self.assertFalse(self.changed)
+        self.assertFalse(os.path.exists(os.path.join(self.roms, "surprise.json")))
+
     def test_write_list_non_onion_does_nothing(self):
         self.emu("GBA", "../../Roms/GBA")
         self.rom("GBA", "Golden Sun (USA).gba")

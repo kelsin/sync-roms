@@ -419,6 +419,14 @@ class Step(StorageCase):
         self.assertEqual(len(surprise.load_history()), 1)
         self.assertEqual(edits, ["SD"])  # the card editor still opens
 
+    def test_saved_card_is_the_entry_itself_or_an_empty_dict(self):
+        cards = {"SD": {"layout": "esde"}, "bad": ["junk"]}
+        self.assertIs(store.saved_card("SD", cards), cards["SD"])  # run_surprise edits it in place, then writes cards
+        self.assertEqual((store.saved_card("bad", cards), store.saved_card("none", cards)), ({}, {}))
+        self.write_cards(cards)
+        self.assertEqual((store.saved_card("SD"), store.saved_card("bad")), ({"layout": "esde"}, {}))
+        self.assertEqual(store.load_cards()["bad"], ["junk"])  # still loaded, so the next write keeps it
+
     def test_off_unattended_or_dry_run_opens_no_editor(self):
         self.card(surprise=False)
         with self.patched(filter_list=self.fail_call, edit_card=self.fail_call):

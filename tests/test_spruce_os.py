@@ -65,6 +65,12 @@ class Install(helpers.StorageDir):
         self.assertEqual(self.failures, 0)
         self.assertEqual(os.listdir(self.card), [])
 
+    def test_malformed_card_entry_is_read_as_no_entry(self):
+        store.write_cards({"c": ["junk"]})
+        self.put(P + V46, b"new")
+        self.run_install()
+        self.assertEqual((self.failures, self.recorded()), (0, V46))
+
     def test_stages_the_newest_7z_at_the_card_root(self):
         self.put(P + V46, b"new")
         wrote = []

@@ -19,8 +19,7 @@ def install(card, layout_name, base, dry_run, wrote=None, keep=False):
     if not key:
         return 0
     name, size = key[len(runtime.SPRUCE_PREFIX):], listing[key]
-    entry = store.load_cards().get(card)
-    old = entry.get("spruce_os") if isinstance(entry, dict) else None
+    old = store.saved_card(card).get("spruce_os")
     if old == name:
         return 0
     previous = os.path.join(base, old) if isinstance(old, str) and re.fullmatch(PATTERN, old) else None

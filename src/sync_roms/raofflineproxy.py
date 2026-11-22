@@ -58,7 +58,7 @@ def install(card, layout_name, base, dry_run):
     """Put the newest RAOfflineProxy file on a card with the setting on, once per file name. The failure count."""
     if layout_name not in KINDS:
         return 0
-    entry = store.load_cards().get(card)
+    entry = store.saved_card(card)
     if not store.card_flag(entry, "raofflineproxy"):
         return 0
     prefix, pattern, root, dest = KINDS[layout_name]
@@ -68,7 +68,7 @@ def install(card, layout_name, base, dry_run):
         return 0
     name = key[len(prefix):]
     target = os.path.join(base, *dest.split("/"))
-    old = entry.get("raofflineproxy_app") if isinstance(entry, dict) else None
+    old = entry.get("raofflineproxy_app")
     if old == name and (root is None or os.path.isfile(os.path.join(target, LAUNCH))):
         return 0
     if dry_run:

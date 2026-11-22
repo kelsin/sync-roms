@@ -53,7 +53,7 @@ def install(card, layout_name, base, dry_run):
     """Install the newest Surprise app on an Onion card with Surprise and collections on, once per zip. The failure count."""
     if layout_name != LAYOUT:
         return 0
-    entry = store.load_cards().get(card)
+    entry = store.saved_card(card)
     if not surprise.enabled(entry) or not store.card_flag(entry, "custom_collections"):
         return 0
     listing = inventory.files(runtime.ONION_PREFIX)
@@ -62,7 +62,7 @@ def install(card, layout_name, base, dry_run):
         return 0
     name = key[len(runtime.ONION_PREFIX):]
     app = os.path.join(base, "App", "Surprise")
-    old = entry.get("surprise_app") if isinstance(entry, dict) else None
+    old = entry.get("surprise_app")
     present = all(os.path.isfile(os.path.join(app, f)) for f in ("config.json", "surprise"))
     if old == name and present:
         return 0
@@ -162,9 +162,9 @@ def write_list(card, layout_name, base, roms_dir, systems, dry_run):
     """Write Roms/surprise.json from the card's surprises, or remove it when there are none. Whether the card changed."""
     if layout_name != LAYOUT:
         return False
-    entry = store.load_cards().get(card)
+    entry = store.saved_card(card)
     wanted = []
-    if surprise.enabled(entry) and store.card_flag(entry, "custom_collections") and isinstance(entry, dict):
+    if surprise.enabled(entry) and store.card_flag(entry, "custom_collections"):
         folder_of = {s["bucket"]: s["folders"]["onion"] for s in systems if s["folders"].get("onion")}
         surprises = [x for x in entry.get("surprises") or () if isinstance(x, dict)
                      and isinstance(x.get("system"), str) and isinstance(x.get("bucket"), str)]
