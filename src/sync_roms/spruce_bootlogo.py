@@ -24,12 +24,11 @@ def _wanted(resolution):
 def install(card, layout_name, device, base, dry_run, wrote=None, keep=False):
     """Copy the user's boot logos for the card's screen resolution into a spruce card's App/BootLogo/Imgs, and clean
     up the ones sync copied earlier that are gone from the data folder. The failure count. wrote, a list, gets the
-    card paths copied. keep (--no-delete): leave stale ones. Imgs/ is never created and only recorded names are
+    card paths copied. device: the card's device dict (None for Full). keep (--no-delete): leave stale ones. Imgs/ is never created and only recorded names are
     overwritten or removed (flashing is the user's step in Apps -> Boot Logo)."""
-    if layout_name != "spruce" or device in UNSUPPORTED:
-        return 0
-    resolution = next((d.get("resolution") for d in store.repo_json("devices") if d["id"] == device), None)
-    if not resolution:
+    device = device or {}  # None for a Full card
+    resolution = device.get("resolution")
+    if layout_name != "spruce" or not resolution or device.get("id") in UNSUPPORTED:
         return 0
     wanted = _wanted(resolution)
     recorded = store.saved_card(card).get("boot_logos")

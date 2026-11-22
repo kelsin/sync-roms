@@ -1147,6 +1147,20 @@ class SyncSmokeTest(DataDir):
                     if games and not dry_run:  # staged after the card's other writes
                         self.assertGreater(order.index("os/spruceos/spruceV4.6.0.7z"), order.index("flush"))
 
+    def test_spruce_sync_stages_boot_logos_for_the_cards_device(self):
+        layouts = {"spruce": {"label": "Spruce", "roms_dir": "Roms", "bios_dir": "BIOS"}}
+        device = {**next(d for d in store.repo_json("devices") if d["id"] == "miyoo-a30"), "systems": [SYSTEM["bucket"]], "note": ""}
+        manifest = {**MANIFEST, "layouts": layouts, "devices": [device],
+                    "systems": [{**SYSTEM, "folders": {"spruce": "GBA"}}]}
+        touch(os.path.join(store.data_dir(), "bootlogos", "640x480", "K.png"), b"k")
+        patches = ((store, {"load_manifest": lambda names=(), m=manifest: m, "load_cards": REAL_LOAD_CARDS}),
+                   (cli.picker, {"saved_setup": lambda *a: (device, "spruce")}))
+        found = []
+        code = self.run_sync(False, patches=patches,
+                             prepare=lambda card: os.makedirs(os.path.join(card, "App", "BootLogo", "Imgs")),
+                             after=lambda card: found.append(os.path.isfile(os.path.join(card, "App", "BootLogo", "Imgs", "K.png"))))
+        self.assertEqual((code, found), (0, [True]))
+
     def test_spruce_sync_hides_fbneo_bios_zips_and_clears_the_old_folder(self):
         layouts = {"spruce": {"label": "Spruce", "roms_dir": "Roms", "bios_dir": "BIOS"}}
         fbneo = {**SYSTEM, "name": "FinalBurn Neo", "bucket": "fbneo", "folders": {"spruce": "ARCADE"},

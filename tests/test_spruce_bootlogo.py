@@ -11,7 +11,8 @@ import isolate  # noqa: E402,F401
 import helpers  # noqa: E402
 from sync_roms import spruce_bootlogo, store  # noqa: E402
 
-DEVICE = "miyoo-a30"  # 640x480
+DEVICES = {d["id"]: d for d in store.repo_json("devices")}
+DEVICE = DEVICES["miyoo-a30"]  # 640x480
 
 
 class Install(helpers.CardDir):
@@ -77,8 +78,9 @@ class Install(helpers.CardDir):
         self.assertEqual(os.listdir(self.imgs), [])
 
     def test_not_spruce_full_unknown_unsupported_are_silent_noops(self):
-        for layout, device in (("onion", DEVICE), ("spruce", "full"), ("spruce", "nope"), ("spruce", "magicx-zero40")):
-            with self.subTest(layout=layout, device=device):
+        for layout, device in (("onion", DEVICE), ("spruce", None), ("spruce", {"id": "nope"}),
+                               ("spruce", DEVICES["magicx-zero40"])):
+            with self.subTest(layout=layout, device=(device or {}).get("id")):
                 store.update_card("c", boot_logos=["K.png"])
                 helpers.touch(self.img("K.png"))
                 out = self.run_install(layout, device)
