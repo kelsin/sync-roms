@@ -771,6 +771,46 @@ class SpruceQoiTest(unittest.TestCase):
             self.assertFalse(os.path.exists(os.path.join(base, "Roms", "GBA")))
 
 
+class NoSpruceArtHintTest(unittest.TestCase):
+    LISTING = {"scrapes/gba/spruce/a.qoi": 1, "scrapes/gba/onion/a.png": 1, "scrapes/gba/onion/b.png": 1,
+               "scrapes/gba/covers/c.png": 1, "scrapes/gba/miximages/d.png": 1, "scrapes/gba/screenshots/e.png": 1}
+    RELS = ["a.zip", "b.zip", "c.zip", "d.zip", "e.zip", "f.zip", "sub/b.zip"]
+
+    def build(self, layout, listing=None, rels=None):
+        system = {"name": "GBA", "bucket": "gba", "folders": {layout: "GBA"}}
+        rels = self.RELS if rels is None else rels
+        listing = self.LISTING if listing is None else listing
+        with tempfile.TemporaryDirectory() as base, \
+                mock.patch.object(scrape_plan.downloads.inventory, "stat", return_value={}):
+            return scrape_plan.build_scrape_plan(layout, [system], {"gba": (dict(listing), {})}, {"gba": rels},
+                                                 lambda s: os.path.join(base, "Roms", "GBA"), os.path.join(base, "ES-DE"),
+                                                 lambda p: True, base)
+
+    def test_counts_roms_with_a_source_picture_and_no_spruce_art(self):
+        self.assertEqual(self.build("spruce")["no_spruce_art"], 3)  # b, c, d; not a (has art), e (no picture), sub/b
+
+    def test_no_count_when_every_rom_has_spruce_art(self):
+        plan = self.build("spruce", {"scrapes/gba/spruce/a.qoi": 1, "scrapes/gba/onion/a.png": 1}, ["a.zip"])
+        self.assertEqual(plan["no_spruce_art"], 0)
+
+    def test_other_layouts_have_no_count(self):
+        for layout in ("onion", "allium", "nextui"):
+            self.assertEqual(self.build(layout).get("no_spruce_art"), None, layout)
+
+    def test_describe_prints_the_command(self):
+        plan = {"jobs": [], "gamelists": {}, "writes": [], "no_spruce_art": 3}
+        with mock.patch("builtins.print") as pr:
+            scrape_plan.describe_scrape_plan(plan)
+        out = "\n".join(str(c.args[0]) for c in pr.call_args_list)
+        self.assertIn("3 ROM(s) have no Spruce art in storage", out)
+        self.assertIn("sync-roms scrape art --for spruce", out)
+
+    def test_describe_is_quiet_without_a_count(self):
+        with mock.patch("builtins.print") as pr:
+            scrape_plan.describe_scrape_plan({"jobs": [], "gamelists": {}, "writes": []})
+        self.assertNotIn("Spruce art", "\n".join(str(c.args[0]) for c in pr.call_args_list))
+
+
 class SprucePico8Test(Pico8CartImageTest):
     PICO = {"name": "PICO-8", "bucket": "pico8", "folders": {"spruce": "pico8", "onion": "pico8"}}
 

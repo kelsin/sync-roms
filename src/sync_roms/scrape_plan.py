@@ -408,6 +408,13 @@ def build_scrape_plan(layout_name, systems, data, rom_rels, dest_of, es_dir, pre
         carts = s["bucket"] == "pico8" and layout_name in CART_LAYOUTS
         jobs, entries, texts = plan_scrapes(layout_name, rom_rels.get(s["bucket"], ()), listing, meta,
                                             media_root, rom_dir, lambda rom, d=rom_dir: present(os.path.join(d, rom)))
+        if layout_name == "spruce":  # old PNGs are removed, so say when storage has the sources but no QOI
+            index = scrape_index(listing)
+            plan["no_spruce_art"] = plan.get("no_spruce_art", 0) + sum(
+                1 for rom in rom_rels.get(s["bucket"], ())
+                if "/" not in rom and present(os.path.join(rom_dir, rom))
+                and (found := index.get(os.path.splitext(rom)[0], {}))
+                and SPRUCE_TYPES[0] not in found and {ONION_TYPE, "covers", "miximages"} & set(found))
         if carts:  # a cart without a scraped picture is its own picture
             index = scrape_index(listing)
             for rom in sorted(rom_rels.get(s["bucket"], ())):
@@ -455,6 +462,9 @@ def describe_scrape_plan(plan):
     print(f"🖼️  Scraped data: {ui.bold(str(len(jobs)))} file(s) to download "
           f"({ui.human_size(sum(j[2] or 0 for j in jobs))}), {len(plan['gamelists'])} gamelist file(s) to update"
           + (f", {len(plan['writes'])} text file(s)" if plan["writes"] else ""))
+    if plan.get("no_spruce_art"):
+        print(ui.yellow(f"   {plan['no_spruce_art']} ROM(s) have no Spruce art in storage: "
+                        "run `sync-roms scrape art --for spruce`"))
 
 
 def apply_scrape_plan(plan, base, failures=None):
