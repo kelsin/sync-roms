@@ -248,11 +248,16 @@ class StashTest(unittest.TestCase):
         return [{"path": a, "name": "Game.srm", "kind": "save", "core": "gpSP", "size": 4, "mtime": 0},
                 {"path": b, "name": "Game.state.auto", "kind": "state", "core": "gpSP", "size": 5, "mtime": 0}]
 
+    def meta(self, d):
+        with open(os.path.join(d, "stash.json")) as f:
+            return json.load(f)
+
     def test_round_trip(self):
         d = saves.write_stash("SHARE", "onion", "gba", "Game", "gpSP", self.entries(), now=self.now)
         self.assertEqual(d, os.path.join(saves.stash_root(), "gba", "Game", "20261118-100203-SHARE"))
-        self.assertEqual(open(os.path.join(d, "Game.srm")).read(), "save")
-        meta = json.load(open(os.path.join(d, "stash.json")))
+        with open(os.path.join(d, "Game.srm")) as f:
+            self.assertEqual(f.read(), "save")
+        meta = self.meta(d)
         self.assertEqual(meta, {"system": "gba", "game": "Game", "card": "SHARE", "layout": "onion",
                                 "core": "gpSP", "stashed": "2026-11-18T10:02:03",
                                 "files": [{"name": "Game.srm", "kind": "save"},
@@ -265,7 +270,7 @@ class StashTest(unittest.TestCase):
     def test_rel_and_core_kept_when_present(self):
         e = [dict(x, rel="GBA/Hacks") for x in self.entries()]
         d = saves.write_stash("MU", "muos", "gba", "Game", "gpSP", e, now=self.now)
-        meta = json.load(open(os.path.join(d, "stash.json")))
+        meta = self.meta(d)
         self.assertEqual(meta["files"], [{"name": "Game.srm", "kind": "save", "rel": "GBA/Hacks", "core": "gpSP"},
                                          {"name": "Game.state.auto", "kind": "state", "rel": "GBA/Hacks",
                                           "core": "gpSP"}])

@@ -350,7 +350,7 @@ class FolderMtimeTest(helpers.StorageFolder):
 
     def test_own_writes_into_trusted_folders_keep_them_trusted(self):
         self.update()
-        s3.write_file("gba/c.zip", lambda tmp: open(tmp, "wb").write(b"1234"))
+        s3.write_file("gba/c.zip", lambda tmp: helpers.touch(tmp, b"1234"))
         quiet(s3.move_keys, [("gba/a.zip", "gba/m.zip")])
         quiet(s3.delete_keys, ["BIOS/x.bin"])
         self.assertEqual(inventory.current().dirs["gba"], self.mtime("gba"))
@@ -361,13 +361,13 @@ class FolderMtimeTest(helpers.StorageFolder):
 
     def test_a_trusted_folder_written_within_five_minutes_is_listed(self):
         self.update()
-        s3.write_file("gba/c.zip", lambda tmp: open(tmp, "wb").write(b"1234"))
+        s3.write_file("gba/c.zip", lambda tmp: helpers.touch(tmp, b"1234"))
         self.assertEqual(self.update(), ((0, 0, 0), ["gba"]))
 
     def test_a_folder_another_machine_changed_before_our_write_is_listed(self):
         self.update()
         self.put("gba/other.zip", 7)  # another machine: gba's mtime is no longer the cached one
-        s3.write_file("gba/c.zip", lambda tmp: open(tmp, "wb").write(b"1234"))
+        s3.write_file("gba/c.zip", lambda tmp: helpers.touch(tmp, b"1234"))
         self.assertIsNone(inventory.current().dirs["gba"])
         self.later()
         self.assertEqual(self.update(), ((1, 0, 0), ["gba"]))
@@ -375,7 +375,7 @@ class FolderMtimeTest(helpers.StorageFolder):
 
     def test_a_write_into_a_new_subfolder_keeps_the_parent_untrusted(self):
         self.update()
-        s3.write_file("gba/new/z.zip", lambda tmp: open(tmp, "wb").write(b"1"))
+        s3.write_file("gba/new/z.zip", lambda tmp: helpers.touch(tmp, b"1"))
         quiet(s3.move_keys, [("BIOS/x.bin", "BIOS/sub/x.bin")])
         self.assertIsNone(inventory.current().dirs["gba"])
         self.assertIsNone(inventory.current().dirs["BIOS"])
@@ -386,8 +386,8 @@ class FolderMtimeTest(helpers.StorageFolder):
         self.update()
 
         def fill(tmp):  # a parallel upload creates gba/new while this write is under way
-            s3.write_file("gba/new/z.zip", lambda t: open(t, "wb").write(b"1"))
-            open(tmp, "wb").write(b"1234")
+            s3.write_file("gba/new/z.zip", lambda t: helpers.touch(t, b"1"))
+            helpers.touch(tmp, b"1234")
         s3.write_file("gba/c.zip", fill)
         self.assertIsNone(inventory.current().dirs["gba"])
         self.later()
@@ -420,7 +420,7 @@ class FolderMtimeTest(helpers.StorageFolder):
         self.age()
         self.update()
         self.assertIn(nfd, os.listdir(self.root.name))  # stored decomposed, whichever spelling finds it
-        s3.write_file(f"{nfc}/b.zip", lambda tmp: open(tmp, "wb").write(b"1234"))
+        s3.write_file(f"{nfc}/b.zip", lambda tmp: helpers.touch(tmp, b"1234"))
         self.assertEqual(self.disk()[f"{nfd}/b.zip"], 4)
         self.assertEqual(inventory.current().files, self.disk())
         self.assertIsNone(inventory.current().dirs[nfd])  # storage that keeps both spellings may have made a second folder
@@ -475,7 +475,7 @@ class FolderMtimeTest(helpers.StorageFolder):
     def test_a_key_the_cache_cannot_match_leaves_its_folder_untrusted(self):
         nfc = unicodedata.normalize("NFC", "Pokémon")
         self.update()
-        s3.write_file(f"gba/{nfc}.zip", lambda tmp: open(tmp, "wb").write(b"1234"))  # a share may list it decomposed
+        s3.write_file(f"gba/{nfc}.zip", lambda tmp: helpers.touch(tmp, b"1234"))  # a share may list it decomposed
         self.put("BIOS/y.bin", 5)
         self.age()  # another machine's write, in the same mtime tick as the cached one
         quiet(s3.delete_keys, ["BIOS/y.bin"])
@@ -515,7 +515,7 @@ class FolderMtimeTest(helpers.StorageFolder):
 class PatchTest(helpers.StorageFolder):
     def test_writes_moves_and_deletes_patch_the_cache_and_flush_saves_them(self):
         self.build()
-        s3.write_file("gba/new.zip", lambda tmp: open(tmp, "wb").write(b"12345"))
+        s3.write_file("gba/new.zip", lambda tmp: helpers.touch(tmp, b"12345"))
         quiet(s3.move_keys, [("gba/a.zip", "gba/moved.zip")])
         quiet(s3.delete_keys, ["gba/b.zip"])
         want = {"gba/new.zip": 5, "gba/moved.zip": 1}

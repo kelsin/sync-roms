@@ -13,6 +13,7 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
+import helpers  # noqa: E402
 from sync_roms import screenscraper as ss  # noqa: E402
 
 FIX = Path(__file__).parent / "fixtures" / "screenscraper"
@@ -32,8 +33,8 @@ def fixture(name):
     return Resp((FIX / name).read_bytes())
 
 
-def http_error(code):
-    return urllib.error.HTTPError("https://x.example/?sspassword=" + PASSWORD, code, "boom", {}, io.BytesIO(b"x"))
+def http_error(test, code):
+    return helpers.http_error(test, "https://x.example/?sspassword=" + PASSWORD, code, "boom", io.BytesIO(b"x"))
 
 
 def client(opener):
@@ -198,13 +199,13 @@ class TextTests(unittest.TestCase):
 class ClientTests(unittest.TestCase):
     def test_http_431_is_its_own_quota_condition(self):
         def opener(req, timeout=None):
-            raise http_error(431)
+            raise http_error(self, 431)
         with self.assertRaises(ss.TooManyUnrecognized) as cm:
             client(opener).lookup(12, "g.gba", 1)
         self.assertIsInstance(cm.exception, ss.QuotaExceeded)
 
         def opener430(req, timeout=None):
-            raise http_error(430)
+            raise http_error(self, 430)
         with self.assertRaises(ss.QuotaExceeded) as cm:
             client(opener430).lookup(12, "g.gba", 1)
         self.assertNotIsInstance(cm.exception, ss.TooManyUnrecognized)
@@ -307,7 +308,7 @@ class ClientTests(unittest.TestCase):
 
     def test_lookup_not_found_raises(self):
         def http404(req, timeout=None):
-            raise http_error(404)
+            raise http_error(self, 404)
         with self.assertRaises(ss.NotFound):
             client(http404).lookup(12, "g.gba", 1)
         with self.assertRaises(ss.NotFound):
@@ -316,13 +317,13 @@ class ClientTests(unittest.TestCase):
     def test_lookup_quota_raises_quota_exceeded(self):
         for code in (430, 431):
             def opener(req, timeout=None, code=code):
-                raise http_error(code)
+                raise http_error(self, code)
             with self.assertRaises(ss.QuotaExceeded):
                 client(opener).lookup(12, "g.gba", 1)
 
     def test_rate_limit_raises_rate_limited_api_error(self):
         def opener(req, timeout=None):
-            raise http_error(429)
+            raise http_error(self, 429)
         with self.assertRaises(ss.RateLimited) as cm:
             client(opener).lookup(12, "g.gba", 1)
         self.assertIsInstance(cm.exception, ss.ApiError)
@@ -338,14 +339,14 @@ class ClientTests(unittest.TestCase):
                 def read(self, n=-1):
                     raise ConnectionResetError()
             return Cut(b"")
-        for opener in (raising(http_error(500)), raising(http_error(502)), raising(http_error(503)),
+        for opener in (raising(http_error(self, 500)), raising(http_error(self, 502)), raising(http_error(self, 503)),
                        raising(urllib.error.URLError("down")), raising(TimeoutError()), raising(ConnectionResetError()), cut):
             with self.subTest(opener=opener), self.assertRaises(ss.Transient) as cm:
                 client(opener).lookup(12, "g.gba", 1)
             self.assertIsInstance(cm.exception, ss.ApiError)
         with tempfile.TemporaryDirectory() as d, self.assertRaises(ss.Transient):
             client(cut).download("https://neoclone.screenscraper.fr/a.png", os.path.join(d, "a.png"))
-        for opener in (raising(http_error(400)), raising(http.client.InvalidURL("bad"))):
+        for opener in (raising(http_error(self, 400)), raising(http.client.InvalidURL("bad"))):
             with self.subTest(opener=opener), self.assertRaises(ss.ApiError) as cm:
                 client(opener).lookup(12, "g.gba", 1)
             self.assertNotIsInstance(cm.exception, (ss.Transient, ss.Refused))
@@ -368,7 +369,7 @@ class ClientTests(unittest.TestCase):
         says = {401: ("later", "--set-credentials"), 403: ("login", "--set-credentials"), 423: ("later",), 426: ("update sync-roms",)}
         for code, words in says.items():
             def opener(req, timeout=None, code=code):
-                raise http_error(code)
+                raise http_error(self, code)
             with self.subTest(code=code), self.assertRaises(ss.Refused) as cm:
                 client(opener).lookup(12, "g.gba", 1)
             self.assertIsInstance(cm.exception, ss.ApiError)
@@ -383,7 +384,7 @@ class ClientTests(unittest.TestCase):
     def test_password_never_in_error_text(self):
         for code in (429, 500, 403):
             def opener(req, timeout=None, code=code):
-                raise http_error(code)
+                raise http_error(self, code)
             with self.assertRaises(ss.ApiError) as cm:
                 client(opener).lookup(12, "g.gba", 1)
             self.assertNotIn(PASSWORD, str(cm.exception))
@@ -582,6 +583,7 @@ class KeepAliveTests(unittest.TestCase):
     def test_error_statuses_raise_http_errors_without_the_url(self):
         with self.assertRaises(urllib.error.HTTPError) as cm:
             self.open(FakeNet(FakeResp(status=404)))
+        self.addCleanup(cm.exception.close)
         self.assertEqual(cm.exception.code, 404)
         self.assertNotIn(PASSWORD, str(cm.exception))
 
@@ -592,15 +594,17 @@ class KeepAliveTests(unittest.TestCase):
         for url in ("http://neoclone.screenscraper.fr/b.png", "https://evil.example/b.png"):
             with self.subTest(url=url), self.assertRaises(urllib.error.HTTPError) as cm:
                 self.open(FakeNet(FakeResp(302, headers={"Location": url})))
+            self.addCleanup(cm.exception.close)
             self.assertEqual(cm.exception.msg, ss.REDIRECT_REFUSED)
             self.assertNotIn("evil", str(cm.exception))
             self.assertNotIn(PASSWORD, str(cm.exception))
-        with self.assertRaises(urllib.error.HTTPError):
+        with self.assertRaises(urllib.error.HTTPError) as cm:
             self.open(FakeNet(*[FakeResp(302, headers={"Location": "/c.png"}) for _ in range(ss.REDIRECTS + 1)]))
+        self.addCleanup(cm.exception.close)
 
     def test_a_refused_redirect_is_media_refused(self):
         def refused(r, timeout=None):
-            raise urllib.error.HTTPError("", 302, ss.REDIRECT_REFUSED, {}, None)
+            raise helpers.http_error(self, "", 302, ss.REDIRECT_REFUSED)
         with tempfile.TemporaryDirectory() as d, self.assertRaises(ss.MediaRefused):
             client(refused).download("https://neoclone.screenscraper.fr/a.png", os.path.join(d, "a.png"))
 

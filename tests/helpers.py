@@ -7,6 +7,7 @@ import json
 import os
 import sys
 import tempfile
+import urllib.error
 from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -39,6 +40,14 @@ def touch(path, data=b"x"):
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, "wb" if isinstance(data, bytes) else "w") as f:
         f.write(data)
+
+
+def http_error(test, url, code, msg, fp=None):
+    """A urllib HTTPError that is closed when the test ends. One left open warns (ResourceWarning) when the garbage
+    collector gets to it, which can be while a later test is capturing stderr."""
+    err = urllib.error.HTTPError(url, code, msg, {}, fp)
+    test.addCleanup(err.close)
+    return err
 
 
 def load_script(path):

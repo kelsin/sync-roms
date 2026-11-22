@@ -204,6 +204,7 @@ def _finish(proc):
         pass
     err = proc.stderr.read().decode(errors="replace").strip()
     proc.wait()
+    proc.stderr.close()
     return err
 
 

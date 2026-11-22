@@ -4,12 +4,11 @@ import os
 import sys
 import tempfile
 import unittest
-import urllib.error
 from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import isolate  # noqa: E402,F401
-from helpers import touch  # noqa: E402
+from helpers import http_error, touch  # noqa: E402
 from sync_roms import drivers, github, runtime, s3, store, ui  # noqa: E402
 
 
@@ -174,7 +173,7 @@ class Refresh(unittest.TestCase):
     def test_rate_limit_midway_keeps_earlier_updates(self):
         for i in "abc":
             self.releases[f"o/{i}"] = [release("v2", "x.zip")]
-        self.releases["o/b"] = urllib.error.HTTPError("u", 403, "rate limited", {}, None)
+        self.releases["o/b"] = http_error(self, "u", 403, "rate limited")
         self.run_refresh([entry(i) for i in "abc"])
         self.assertEqual(self.read("os/drivers/a.tag", mode="r"), "v2\n")
         self.assertEqual(self.read("os/drivers/c.tag", mode="r"), "v2\n")

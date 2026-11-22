@@ -11,9 +11,16 @@ import isolate  # noqa: E402,F401
 from sync_roms import commands  # noqa: E402
 
 README = os.path.join(os.path.dirname(__file__), "..", "README.md")
+
+
+def readme():
+    with open(README, encoding="utf-8") as f:
+        return f.read()
+
+
 def readme_flags():
     """The flags in the first column of the Options table."""
-    text = open(README, encoding="utf-8").read()
+    text = readme()
     table = text.split("### Options", 1)[1].split("| Environment variable", 1)[0]
     found = set()
     for row in re.findall(r"^\| (.+?) \|", table, re.M):
@@ -47,7 +54,7 @@ class ReadmeLayouts(unittest.TestCase):
 class ReadmeSettings(unittest.TestCase):
     def test_config_set_names_every_setting(self):
         from sync_roms import cli
-        text = open(README, encoding="utf-8").read()
+        text = readme()
         section = text.split("### Settings (`config`)", 1)[1].split("\n## ", 1)[0]
         for name in commands.CONFIG_KINDS:
             with self.subTest(name=name):

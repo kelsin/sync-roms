@@ -6,7 +6,6 @@ import os
 import shutil
 import sys
 import unittest
-import urllib.error
 from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -191,7 +190,7 @@ class Download(helpers.StorageDir):
         def fetch(url):
             fetched.append(url)
             if url in errors:
-                raise urllib.error.HTTPError(url, 503, "busy", None, None)
+                raise helpers.http_error(self, url, 503, "busy")
             if url.startswith(bbs.LISTING):
                 return listing.pop(0)
             return (carts or {}).get(url.rsplit("/", 1)[-1], PNG)
