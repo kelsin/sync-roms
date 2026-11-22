@@ -62,8 +62,20 @@ class Pico8(helpers.StorageDir):
     def test_recorded_name_skips_copy(self):
         self.put(f"os/pico8/{NEW}")
         store.update_card("c", pico8=NEW)
-        self.run_setup("knulli")
-        self.assertFalse(os.path.exists(self.card_path("roms", "pico8", NEW)))
+        zip_path = self.card_path("roms", "pico8", NEW)
+        os.makedirs(os.path.dirname(zip_path))
+        open(zip_path, "wb").close()
+        self.assertEqual(self.run_setup("knulli"), "")
+        self.assertEqual(os.path.getsize(zip_path), 0)
+
+    def test_recorded_zip_missing_from_the_card_is_copied_again(self):
+        self.put(f"os/pico8/{NEW}")
+        self.run_setup("esde")
+        self.assertTrue(os.path.isfile(self.card_path("PICO-8", NEW)))
+        self.run_setup("knulli")  # the card's layout changed: its pico8 field still names the zip
+        self.assertTrue(os.path.isfile(self.card_path("roms", "pico8", NEW)))
+        self.assertTrue(os.path.isfile(self.card_path("PICO-8", NEW)))
+        self.assertEqual(self.recorded(), NEW)
 
     def test_newer_zip_replaces_old(self):
         self.put(f"os/pico8/{NEW}")

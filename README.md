@@ -248,7 +248,7 @@ While typing a filter (or a note, which `w` opens in the game list): `^A` `^E` s
    syncs pico8 games: ES-DE `PICO-8/` (pico8-android's zip picker), Knulli `roms/pico8/` (Device Settings →
    Install Pico-8); ROCKNIX gets the extracted `pico8_64`, `pico8_dyn` and `pico8.dat` in `roms/pico-8/`; Onion (`RApp/PICO-8/bin/`) and Allium
    (`Apps/pico.pak/bin/`) get the extracted `pico8_dyn` and `pico8.dat`; Spruce (`BIOS/`) also gets `pico8_64`. Run the installer once on the device. The
-   card's `pico8` field in `cards.json` records the zip, so it is copied once per zip. NextUI cards get no zip: they have no
+   card's `pico8` field in `cards.json` records the zip, so it is copied once per zip (and again when it is missing from the card). NextUI cards get no zip: they have no
    installer, and their PICO-8 carts sync as plain ROMs. muOS cards are skipped with a warning: where an installable
    PICO-8 package goes isn't documented.
 
